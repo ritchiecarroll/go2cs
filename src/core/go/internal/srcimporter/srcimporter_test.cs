@@ -35,16 +35,12 @@ internal static ж<global::go.go.@internal.srcimporter_package.Importer> importe
 
 internal static void doImport(ж<testing.T> t, @string path, @string srcDir) {
     var t0 = time.Now();
-    {
-        var (_, err) = importer.ImportFrom(path, srcDir, 0); if (err != nil) {
-            // don't report an error if there's no buildable Go files
-            {
-                var (_, nogo) = err._<ж<build.NoGoError>>(ᐧ); if (!nogo) {
-                    t.Errorf("import %q failed (%v)", path, err);
-                }
-            }
-            return;
+    var (_, err) = importer.ImportFrom(path, srcDir, 0); if (err != nil) {
+        // don't report an error if there's no buildable Go files
+        var (_, nogo) = err._<ж<build.NoGoError>>(ᐧ); if (!nogo) {
+            t.Errorf("import %q failed (%v)", path, err);
         }
+        return;
     }
     t.Logf("import %q: %v", path, time.Since(t0));
 }
@@ -78,7 +74,7 @@ internal static (nint, bool) walkDir(ж<testing.T> t, @string path, time.Time en
 
     nint nimports = 0;
     var hasGoFiles = false;
-    foreach (var (_, f) in list) {
+    foreach (var (_, f) in range(list)) {
         if (f.IsDir()) {
             var (n, abort) = walkDir(t, filepath.Join(path, f.Name()), endTime);
             nimports += n;
@@ -116,7 +112,7 @@ partial struct importedObjectTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal @string want;
 }
-internal static slice<importedObjectTestsᴛ1> importedObjectTests = slice<importedObjectTestsᴛ1>([
+internal static slice<importedObjectTestsᴛ1> importedObjectTests = [
     new("flag.Bool", "func Bool(name string, value bool, usage string) *bool"),
     new("io.Reader", "type Reader interface{Read(p []byte) (n int, err error)}"),
     new("io.ReadWriter", "type ReadWriter interface{Reader; Writer}"), // go/types.gcCompatibilityMode is off => interface not flattened
@@ -124,7 +120,7 @@ internal static slice<importedObjectTestsᴛ1> importedObjectTests = slice<impor
     new("math.Sin", "func Sin(x float64) float64"),
     new("math/big.Int", "type Int struct{neg bool; abs nat}"),
     new("golang.org/x/text/unicode/norm.MaxSegmentSize", "const MaxSegmentSize untyped int")
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object invalidTestDataFormatˢ = (@string)"invalid test data format"u8;
@@ -132,7 +128,7 @@ internal static readonly object invalidTestDataFormatˢ = (@string)"invalid test
 public static void TestImportedTypes(ж<testing.T> t) {
     testenv.MustHaveSource(new srcimporter_internal_test_package.testing_TжTB(t));
 
-    foreach (var (_, test) in importedObjectTests) {
+    foreach (var (_, test) in range(importedObjectTests)) {
         nint i = strings.LastIndex(test.name, ".");
         if (i < 0) {
             t.Fatal(invalidTestDataFormatˢ);
@@ -157,10 +153,8 @@ public static void TestImportedTypes(ж<testing.T> t) {
             t.Errorf("%s: got %q; want %q", test.name, got, test.want);
         }
 
-        {
-            var (named, _) = obj.Type()._<ж<types.Named>>(ᐧ); if (named != nil) {
-                verifyInterfaceMethodRecvs(t, named, 0);
-            }
+        var (named, _) = obj.Type()._<ж<types.Named>>(ᐧ); if (named != nil) {
+            verifyInterfaceMethodRecvs(t, named, 0);
         }
     }
 }

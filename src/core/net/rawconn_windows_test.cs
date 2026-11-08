@@ -87,10 +87,8 @@ internal static error controlRawConn(syscall.RawConn c, global::go.net_package.Î
             break;
         }}
     };
-    {
-        var err = c.Control(fn); if (err != nil) {
-            return err;
-        }
+    var err = c.Control(fn); if (err != nil) {
+        return err;
     }
     return operr;
 }
@@ -129,10 +127,8 @@ internal static error controlOnConnSetup(@string network, @string address, sysca
         }}
         break;
     }}
-    {
-        var err = c.Control(fn); if (err != nil) {
-            return err;
-        }
+    var err = c.Control(fn); if (err != nil) {
+        return err;
     }
     return operr;
 }

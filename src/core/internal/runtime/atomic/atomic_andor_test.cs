@@ -8,8 +8,6 @@ namespace go.@internal.runtime;
 
 using atomic = go.@internal.runtime.atomic_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.@internal.runtime;
 
 partial class atomic_test_package {
@@ -20,16 +18,14 @@ public static partial void TestAnd32(ж<testing.T> t) {
     for (var i = (uint32)0; i < 32; i++) {
         var old = x;
         var v = atomic.And32(Ꮡx, ~(((uint32)1).Lsh((uint64)(i))));
-        {
-            var r = ((uint32)0xffffffffU).Lsh((uint64)(i + 1)); if (x != r || v != old) {
-                t.Fatalf("clearing bit %#x: want %#x, got new %#x and old %#v", (uint32)(((uint32)1).Lsh((uint64)(i))), r, x, v);
-            }
+        var r = ((uint32)0xffffffffU).Lsh((uint64)(i + 1)); if (x != r || v != old) {
+            t.Fatalf("clearing bit %#x: want %#x, got new %#x and old %#v", (uint32)(((uint32)1).Lsh((uint64)(i))), r, x, v);
         }
     }
 
     // Set every bit in array to 1.
     var a = new slice<uint32>((1 << 12));
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         a[i] = 0xffffffffU;
     }
 
@@ -40,7 +36,7 @@ public static partial void TestAnd32(ж<testing.T> t) {
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
-            foreach (var iΔ1 in range(aʗ1)) {
+            foreach (var iΔ1 in range(len(aʗ1))) {
                 atomic.And(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
@@ -51,7 +47,7 @@ public static partial void TestAnd32(ж<testing.T> t) {
     }
 
     // Check that the array has been totally cleared.
-    foreach (var (i, v) in a) {
+    foreach (var (i, v) in range(a)) {
         if (v != 0) {
             t.Fatalf("a[%v] not cleared: want %#x, got %#x", i, (uint32)0, v);
         }
@@ -65,16 +61,14 @@ public static partial void TestAnd64(ж<testing.T> t) {
     for (var i = (uint64)0; i < 64; i++) {
         var old = x;
         var v = atomic.And64(Ꮡx, ~(((uint64)1).Lsh(i)));
-        {
-            var r = ((uint64)0xffffffffffffffffUL).Lsh((i + 1)); if (x != r || v != old) {
-                t.Fatalf("clearing bit %#x: want %#x, got new %#x and old %#v", (uint64)(((uint64)1).Lsh(i)), r, x, v);
-            }
+        var r = ((uint64)0xffffffffffffffffUL).Lsh((i + 1)); if (x != r || v != old) {
+            t.Fatalf("clearing bit %#x: want %#x, got new %#x and old %#v", (uint64)(((uint64)1).Lsh(i)), r, x, v);
         }
     }
 
     // Set every bit in array to 1.
     var a = new slice<uint64>((1 << 12));
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         a[i] = 0xffffffffffffffffUL;
     }
 
@@ -85,7 +79,7 @@ public static partial void TestAnd64(ж<testing.T> t) {
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
-            foreach (var iΔ1 in range(aʗ1)) {
+            foreach (var iΔ1 in range(len(aʗ1))) {
                 atomic.And64(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
@@ -96,7 +90,7 @@ public static partial void TestAnd64(ж<testing.T> t) {
     }
 
     // Check that the array has been totally cleared.
-    foreach (var (i, v) in a) {
+    foreach (var (i, v) in range(a)) {
         if (v != 0) {
             t.Fatalf("a[%v] not cleared: want %#x, got %#x", i, (uint64)0, v);
         }
@@ -109,10 +103,8 @@ public static partial void TestOr32(ж<testing.T> t) {
     for (var i = (uint32)0; i < 32; i++) {
         var old = x;
         var v = atomic.Or32(Ꮡx, ((uint32)1).Lsh((uint64)(i)));
-        {
-            var r = (((uint32)1).Lsh((uint64)(i + 1))) - 1; if (x != r || v != old) {
-                t.Fatalf("setting bit %#x: want %#x, got new %#x and old %#v", (uint32)(((uint32)1).Lsh((uint64)(i))), r, x, v);
-            }
+        var r = (((uint32)1).Lsh((uint64)(i + 1))) - 1; if (x != r || v != old) {
+            t.Fatalf("setting bit %#x: want %#x, got new %#x and old %#v", (uint32)(((uint32)1).Lsh((uint64)(i))), r, x, v);
         }
     }
 
@@ -126,7 +118,7 @@ public static partial void TestOr32(ж<testing.T> t) {
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
-            foreach (var iΔ1 in range(aʗ1)) {
+            foreach (var iΔ1 in range(len(aʗ1))) {
                 atomic.Or32(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
@@ -137,7 +129,7 @@ public static partial void TestOr32(ж<testing.T> t) {
     }
 
     // Check that the array has been totally set.
-    foreach (var (i, v) in a) {
+    foreach (var (i, v) in range(a)) {
         if (v != 0xffffffffU) {
             t.Fatalf("a[%v] not fully set: want %#x, got %#x", i, (uint32)0xffffffffU, v);
         }
@@ -151,10 +143,8 @@ public static partial void TestOr64(ж<testing.T> t) {
     for (var i = (uint64)0; i < 64; i++) {
         var old = x;
         var v = atomic.Or64(Ꮡx, ((uint64)1).Lsh(i));
-        {
-            var r = (((uint64)1).Lsh((i + 1))) - 1; if (x != r || v != old) {
-                t.Fatalf("setting bit %#x: want %#x, got new %#x and old %#v", (uint64)(((uint64)1).Lsh(i)), r, x, v);
-            }
+        var r = (((uint64)1).Lsh((i + 1))) - 1; if (x != r || v != old) {
+            t.Fatalf("setting bit %#x: want %#x, got new %#x and old %#v", (uint64)(((uint64)1).Lsh(i)), r, x, v);
         }
     }
 
@@ -168,7 +158,7 @@ public static partial void TestOr64(ж<testing.T> t) {
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
-            foreach (var iΔ1 in range(aʗ1)) {
+            foreach (var iΔ1 in range(len(aʗ1))) {
                 atomic.Or64(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
@@ -179,7 +169,7 @@ public static partial void TestOr64(ж<testing.T> t) {
     }
 
     // Check that the array has been totally set.
-    foreach (var (i, v) in a) {
+    foreach (var (i, v) in range(a)) {
         if (v != 0xffffffffffffffffUL) {
             t.Fatalf("a[%v] not fully set: want %#x, got %#x", i, (uint64)0xffffffffffffffffUL, v);
         }

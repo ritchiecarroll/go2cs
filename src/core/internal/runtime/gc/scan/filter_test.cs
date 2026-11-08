@@ -45,46 +45,46 @@ private static readonly @string multiˢᵇ = "Multi"u8;
 
 internal static void runTestFilterNil(ж<testing.T> t, Func<ж<uintptr>, int32, int32> filterNil) {
     t.Run(emptyˢ, (ж<testing.T> tΔ1) => {
-        testFilterNil(tΔ1, slice<uintptr>([]), slice<uintptr>([]), filterNil);
+        testFilterNil(tΔ1, [], [], filterNil);
     });
     t.Run(oneˢ, (ж<testing.T> tΔ2) => {
-        testFilterNil(tΔ2, slice<uintptr>([4]), slice<uintptr>([4]), filterNil);
+        testFilterNil(tΔ2, [4], [4], filterNil);
     });
     t.Run(elimOneˢ, (ж<testing.T> tΔ3) => {
-        testFilterNil(tΔ3, slice<uintptr>([0]), slice<uintptr>([]), filterNil);
+        testFilterNil(tΔ3, [0], [], filterNil);
     });
     t.Run(oneElimBeginˢ, (ж<testing.T> tΔ4) => {
-        testFilterNil(tΔ4, slice<uintptr>([0, 4]), slice<uintptr>([4]), filterNil);
+        testFilterNil(tΔ4, [0, 4], [4], filterNil);
     });
     t.Run(oneElimEndˢ, (ж<testing.T> tΔ5) => {
-        testFilterNil(tΔ5, slice<uintptr>([4, 0]), slice<uintptr>([4]), filterNil);
+        testFilterNil(tΔ5, [4, 0], [4], filterNil);
     });
     t.Run(oneElimMultiBeginˢ, (ж<testing.T> tΔ6) => {
-        testFilterNil(tΔ6, slice<uintptr>([0, 0, 0, 4]), slice<uintptr>([4]), filterNil);
+        testFilterNil(tΔ6, [0, 0, 0, 4], [4], filterNil);
     });
     t.Run(oneElimMultiEndˢ, (ж<testing.T> tΔ7) => {
-        testFilterNil(tΔ7, slice<uintptr>([4, 0, 0, 0]), slice<uintptr>([4]), filterNil);
+        testFilterNil(tΔ7, [4, 0, 0, 0], [4], filterNil);
     });
     t.Run(oneElimMultiˢ, (ж<testing.T> tΔ8) => {
-        testFilterNil(tΔ8, slice<uintptr>([0, 0, 0, 4, 0]), slice<uintptr>([4]), filterNil);
+        testFilterNil(tΔ8, [0, 0, 0, 4, 0], [4], filterNil);
     });
     t.Run(twoˢ, (ж<testing.T> tΔ9) => {
-        testFilterNil(tΔ9, slice<uintptr>([5, 12]), slice<uintptr>([5, 12]), filterNil);
+        testFilterNil(tΔ9, [5, 12], [5, 12], filterNil);
     });
     t.Run(twoElimBeginˢ, (ж<testing.T> tΔ10) => {
-        testFilterNil(tΔ10, slice<uintptr>([0, 5, 12]), slice<uintptr>([5, 12]), filterNil);
+        testFilterNil(tΔ10, [0, 5, 12], [5, 12], filterNil);
     });
     t.Run(twoElimMidˢ, (ж<testing.T> tΔ11) => {
-        testFilterNil(tΔ11, slice<uintptr>([5, 0, 12]), slice<uintptr>([5, 12]), filterNil);
+        testFilterNil(tΔ11, [5, 0, 12], [5, 12], filterNil);
     });
     t.Run(twoElimEndˢ, (ж<testing.T> tΔ12) => {
-        testFilterNil(tΔ12, slice<uintptr>([5, 12, 0]), slice<uintptr>([5, 12]), filterNil);
+        testFilterNil(tΔ12, [5, 12, 0], [5, 12], filterNil);
     });
     t.Run(twoElimMultiˢ, (ж<testing.T> tΔ13) => {
-        testFilterNil(tΔ13, slice<uintptr>([0, 5, 0, 12, 0]), slice<uintptr>([5, 12]), filterNil);
+        testFilterNil(tΔ13, [0, 5, 0, 12, 0], [5, 12], filterNil);
     });
     t.Run(multiˢ, (ж<testing.T> tΔ14) => {
-        testFilterNil(tΔ14, slice<uintptr>([1, 5, 5, 0, 0, 0, 12, 0, 121, 5, 0]), slice<uintptr>([1, 5, 5, 12, 121, 5]), filterNil);
+        testFilterNil(tΔ14, [1, 5, 5, 0, 0, 0, 12, 0, 121, 5, 0], [1, 5, 5, 12, 121, 5], filterNil);
     });
 }
 
@@ -105,26 +105,22 @@ internal static void testFilterNil(ж<testing.T> t, slice<uintptr> buf, slice<ui
 
     var wantMap = new map<uintptr, nint>();
     var gotMap = new map<uintptr, nint>();
-    foreach (var (_, p) in want) {
+    foreach (var (_, p) in range(want)) {
         wantMap[p]++;
     }
-    foreach (var (_, p) in buf) {
+    foreach (var (_, p) in range(buf)) {
         gotMap[p]++;
     }
     foreach (var (p, nWant) in wantMap) {
-        {
-            var (nGot, ok) = gotMap[p, ꟷ]; if (!ok) {
-                t.Errorf("want %d, but missing from output", p);
-            } else if (nGot != nWant) {
-                t.Errorf("want %d copies of %d, but got %d", nWant, p, nGot);
-            }
+        var (nGot, ok) = gotMap[p, ꟷ]; if (!ok) {
+            t.Errorf("want %d, but missing from output", p);
+        } else if (nGot != nWant) {
+            t.Errorf("want %d copies of %d, but got %d", nWant, p, nGot);
         }
     }
     foreach (var (p, _) in gotMap) {
-        {
-            var (_, ok) = wantMap[p, ꟷ]; if (!ok) {
-                t.Errorf("got %d, but didn't want it", p);
-            }
+        var (_, ok) = wantMap[p, ꟷ]; if (!ok) {
+            t.Errorf("got %d, but didn't want it", p);
         }
     }
     t.Logf("got:  %v", buf);

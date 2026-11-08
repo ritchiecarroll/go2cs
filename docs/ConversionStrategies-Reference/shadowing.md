@@ -1095,9 +1095,10 @@ struct with a zero-size field is laid out at Go's offsets with `[StructLayout]` 
 (`System.Runtime.InteropServices`). Where a file reaches Go names bare through a `using static`, the
 namespace is **not** imported; the file gets one alias directive per type the emission names instead:
 
-<!-- source: src/core/go/types/stdlib_test.cs:25-27 -->
+<!-- source: src/core/go/types/api_test.cs:19, 21-22 -->
 ```csharp
 using static global::go.go.types_package;
+…
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 ```

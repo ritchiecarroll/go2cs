@@ -9,10 +9,10 @@ using static global::go.runtime_internal_test_package;
 partial class runtime_test_package {
 
 public static void TestIssue48807(ж<testing.T> t) {
-    foreach (var (_, i) in slice<uint64>([
+    foreach (var (_, i) in range(slice<uint64>([
         0x8234508000000001UL, // from issue48807
         (uint64)(72057598332895232L + 1)
-    ])) {
+    ]))) {
         var got = (float32)i;
         var dontwant = (float32)(float64)i;
         if (got == dontwant) {

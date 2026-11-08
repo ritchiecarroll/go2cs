@@ -44,7 +44,7 @@ public static void TestBasicEncoderDecoder(ж<testing.T> t) {
         slice<byte>("hello"u8),
         (@string)"hello"u8
     ]);
-    foreach (var (_, value) in values) {
+    foreach (var (_, value) in range(values)) {
         var b = @new<bytes.Buffer>();
         var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
         var err = enc.Encode(value);
@@ -304,7 +304,7 @@ internal static slice<any> unsupportedValues = slice<any>([
 public static void TestUnsupported(ж<testing.T> t) {
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(Ꮡb));
-    foreach (var (_, v) in unsupportedValues) {
+    foreach (var (_, v) in range(unsupportedValues)) {
         var err = enc.Encode(v);
         if (err == nil) {
             t.Errorf("expected error for %T; got none", v);
@@ -335,10 +335,8 @@ internal partial struct TestTypeToPtrType_Type0 /*dyn*/ {
 public static void TestTypeToPtrType(ж<testing.T> t) {
     var t0 = new TestTypeToPtrType_Type0(7);
     var t0p = @new<TestTypeToPtrType_Type0>();
-    {
-        var err = encAndDec(t0, t0p.OrTypedNil()); if (err != nil) {
-            t.Error(err);
-        }
+    var err = encAndDec(t0, t0p.OrTypedNil()); if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -350,10 +348,8 @@ internal partial struct TestPtrTypeToType_Type1 /*dyn*/ {
 public static void TestPtrTypeToType(ж<testing.T> t) {
     var t1p = Ꮡ(new TestPtrTypeToType_Type1(17));
     TestPtrTypeToType_Type1 t1 = default;
-    {
-        var err = encAndDec(t1, t1p.OrTypedNil()); if (err != nil) {
-            t.Error(err);
-        }
+    var err = encAndDec(t1, t1p.OrTypedNil()); if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -369,10 +365,8 @@ public static void TestTypeToPtrPtrPtrPtrType(ж<testing.T> t) {
     ((t2.A.ValueSlot).ValueSlot).ValueSlot = @new<float64>();
     (((t2.A.ValueSlot).ValueSlot).ValueSlot).Value = 27.4D;
     var t2pppp = @new<ж<ж<ж<TestTypeToPtrPtrPtrPtrType_Type2>>>>();
-    {
-        var err = encAndDec(t2, t2pppp.OrTypedNil()); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = encAndDec(t2, t2pppp.OrTypedNil()); if (err != nil) {
+        t.Fatal(err);
     }
     if ((((((((t2pppp.ValueSlot).ValueSlot).ValueSlot).Value).A.ValueSlot).ValueSlot).ValueSlot).Value != (((t2.A.ValueSlot).ValueSlot).ValueSlot).Value) {
         t.Errorf("wrong value after decode: %g not %g", (((((((t2pppp.ValueSlot).ValueSlot).ValueSlot).Value).A.ValueSlot).ValueSlot).ValueSlot).Value, (((t2.A.ValueSlot).ValueSlot).ValueSlot).Value);
@@ -384,12 +378,10 @@ internal partial struct TestSlice_Type3 /*dyn*/ {
 }
 
 public static void TestSlice(ж<testing.T> t) {
-    var t3p = Ꮡ(new TestSlice_Type3(slice<@string>(["hello", "world"])));
+    var t3p = Ꮡ(new TestSlice_Type3(["hello", "world"]));
     TestSlice_Type3 t3 = default;
-    {
-        var err = encAndDec(t3, t3p.OrTypedNil()); if (err != nil) {
-            t.Error(err);
-        }
+    var err = encAndDec(t3, t3p.OrTypedNil()); if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -406,10 +398,8 @@ internal partial struct TestValueError_Type4 /*dyn*/ {
 public static void TestValueError(ж<testing.T> t) {
     var t4p = Ꮡ(new TestValueError_Type4(3));
     TestValueError_Type4 t4 = default; // note: not a pointer.
-    {
-        var err = encAndDec(t4p.OrTypedNil(), t4); if (err == nil || !strings.Contains(err.Error(), pointerˢ)) {
-            t.Error(expectedErrorAboutˢ, err);
-        }
+    var err = encAndDec(t4p.OrTypedNil(), t4); if (err == nil || !strings.Contains(err.Error(), pointerˢ)) {
+        t.Error(expectedErrorAboutˢ, err);
     }
 }
 
@@ -446,10 +436,8 @@ internal partial struct TestRecursiveMapType_recursiveMap /*map[@string, TestRec
 public static void TestRecursiveMapType(ж<testing.T> t) {
     var r1 = new TestRecursiveMapType_recursiveMap(new map<@string, TestRecursiveMapType_recursiveMap>{["A"] = new TestRecursiveMapType_recursiveMap(new map<@string, TestRecursiveMapType_recursiveMap>{["B"] = default, ["C"] = default}), ["D"] = default});
     ref var r2 = ref heap<TestRecursiveMapType_recursiveMap>(new TestRecursiveMapType_recursiveMap(0), out var Ꮡr2);
-    {
-        var err = encAndDec(r1, Ꮡr2); if (err != nil) {
-            t.Error(err);
-        }
+    var err = encAndDec(r1, Ꮡr2); if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -458,10 +446,8 @@ internal partial struct TestRecursiveSliceType_recursiveSlice /*[]TestRecursiveS
 public static void TestRecursiveSliceType(ж<testing.T> t) {
     var r1 = new TestRecursiveSliceType_recursiveSlice(new array<TestRecursiveSliceType_recursiveSlice>(2){[0] = new TestRecursiveSliceType_recursiveSlice(new array<TestRecursiveSliceType_recursiveSlice>(1){[0] = default}), [1] = default});
     ref var r2 = ref heap<TestRecursiveSliceType_recursiveSlice>(new TestRecursiveSliceType_recursiveSlice(0), out var Ꮡr2);
-    {
-        var err = encAndDec(r1, Ꮡr2); if (err != nil) {
-            t.Error(err);
-        }
+    var err = encAndDec(r1, Ꮡr2); if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -475,34 +461,27 @@ internal partial struct TestDefaultsInArray_Type7 /*dyn*/ {
 // Regression test for bug: must send zero values inside arrays
 public static void TestDefaultsInArray(ж<testing.T> t) {
     var t7 = new TestDefaultsInArray_Type7(
-        slice<bool>([false, false, true]),
-        slice<nint>([0, 0, 1]),
-        slice<@string>(["hi", "", "there"]),
-        slice<float64>([0D, 0D, 1D])
+        [false, false, true],
+        [0, 0, 1],
+        ["hi", "", "there"],
+        [0D, 0D, 1D]
     );
     ref var t7p = ref heap(new TestDefaultsInArray_Type7(), out var Ꮡt7p);
-    {
-        var err = encAndDec(t7, Ꮡt7p); if (err != nil) {
-            t.Error(err);
-        }
+    var err = encAndDec(t7, Ꮡt7p); if (err != nil) {
+        t.Error(err);
     }
 }
 
 internal static readonly ж<nint> ᏑtestInt = new StaticBox<nint>(default(nint));
 internal static ref nint testInt => ref ((StaticBox<nint>)ᏑtestInt).ValueSlot;
-
 internal static readonly ж<float32> ᏑtestFloat32 = new StaticBox<float32>(default(float32));
 internal static ref float32 testFloat32 => ref ((StaticBox<float32>)ᏑtestFloat32).ValueSlot;
-
 internal static readonly ж<@string> ᏑtestString = new StaticBox<@string>(default(@string));
 internal static ref @string testString => ref ((StaticBox<@string>)ᏑtestString).ValueSlot;
-
 internal static readonly ж<slice<@string>> ᏑtestSlice = new StaticBox<slice<@string>>(default(slice<@string>));
 internal static ref slice<@string> testSlice => ref ((StaticBox<slice<@string>>)ᏑtestSlice).ValueSlot;
-
 internal static readonly ж<map<@string, nint>> ᏑtestMap = new StaticBox<map<@string, nint>>(default(map<@string, nint>));
 internal static ref map<@string, nint> testMap => ref ((StaticBox<map<@string, nint>>)ᏑtestMap).ValueSlot;
-
 internal static readonly ж<array<nint>> ᏑtestArray = new StaticBox<array<nint>>(new array<nint>(7));
 internal static ref array<nint> testArray => ref ((StaticBox<array<nint>>)ᏑtestArray).ValueSlot;
 
@@ -512,7 +491,7 @@ public partial struct SingleTest {
     internal @string err;
 }
 
-internal static slice<SingleTest> singleTests = slice<SingleTest>([
+internal static slice<SingleTest> singleTests = [
     new((nint)17, ᏑtestInt, ""),
     new((float32)17.5F, ᏑtestFloat32, ""),
     new((@string)"bike shed", ᏑtestString, ""),
@@ -523,13 +502,13 @@ internal static slice<SingleTest> singleTests = slice<SingleTest>([
 
     // Decode errors
     new((nint)172, ᏑtestFloat32, "type")
-]);
+];
 
 public static void TestSingletons(ж<testing.T> t) {
     var b = @new<bytes.Buffer>();
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
-    foreach (var (_, test) in singleTests) {
+    foreach (var (_, test) in range(singleTests)) {
         b.Reset();
         var err = enc.Encode(test.@in);
         if (err != nil) {
@@ -664,7 +643,7 @@ internal partial struct ignoreTest {
     partial struct Δtype /*dyn*/ {
         public nint A;
     }
-internal static slice<ignoreTest> ignoreTests = slice<ignoreTest>([
+internal static slice<ignoreTest> ignoreTests = [
     // Decode normal struct into an empty struct
     new(Ꮡ(new Δtype(23)), Ꮡ(new EmptyStruct())),
     // Decode normal struct into a nil.
@@ -677,11 +656,11 @@ internal static slice<ignoreTest> ignoreTests = slice<ignoreTest>([
     new(Ꮡ(new Struct0(Ꮡ(new NewType0("value0")))), default),
     // Decode singleton slice of interfaces into a nil.
     new(slice<any>([(@string)"hi", Ꮡ(new NewType0("value1")), (nint)23]), default)
-]);
+];
 
 public static void TestDecodeIntoNothing(ж<testing.T> t) {
     Register(@new<NewType0>());
-    foreach (var (i, test) in ignoreTests) {
+    foreach (var (i, test) in range(ignoreTests)) {
         var b = @new<bytes.Buffer>();
         var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
         var err = enc.Encode(test.@in);
@@ -910,12 +889,10 @@ internal static readonly object expectedBadCountErrorGotˢ = (@string)"expected 
 // Used to crash: negative count in recvMessage.
 public static void TestBadCount(ж<testing.T> t) {
     var b = slice<byte>([0xfb, 0xa5, 0x82, 0x2f, 0xca, 0x1]);
-    {
-        var err = NewDecoder(new gob_test_package.bytes_ReaderжReader(bytes.NewReader(b))).Decode(default); if (err == nil) {
-            t.Error(expectedErrorFromBadˢ);
-        } else if (err.Error() != errBadCount.Error()) {
-            t.Error(expectedBadCountErrorGotˢ, err);
-        }
+    var err = NewDecoder(new gob_test_package.bytes_ReaderжReader(bytes.NewReader(b))).Decode(default); if (err == nil) {
+        t.Error(expectedErrorFromBadˢ);
+    } else if (err.Error() != errBadCount.Error()) {
+        t.Error(expectedBadCountErrorGotˢ, err);
     }
 }
 
@@ -931,19 +908,15 @@ public static void TestSequentialDecoder(ж<testing.T> t) {
     const nint count = 10;
     for (nint i = 0; i < count; i++) {
         @string s = fmt.Sprintf("%d"u8, i);
-        {
-            var err = enc.Encode(s); if (err != nil) {
-                t.Error(encoderFailˢ, err);
-            }
+        var err = enc.Encode(s); if (err != nil) {
+            t.Error(encoderFailˢ, err);
         }
     }
     for (nint i = 0; i < count; i++) {
         var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
         ref var s = ref heap(new @string(), out var Ꮡs);
-        {
-            var err = dec.Decode(Ꮡs); if (err != nil) {
-                t.Fatal(decoderFailˢ, err);
-            }
+        var err = dec.Decode(Ꮡs); if (err != nil) {
+            t.Fatal(decoderFailˢ, err);
         }
         if (s != fmt.Sprintf("%d"u8, i)) {
             t.Fatalf("decode expected %d got %s", i, s);
@@ -972,10 +945,8 @@ public static void TestChanFuncIgnored(ж<testing.T> t) {
     var b0 = new Bug2(23, c, Ꮡc, f, Ꮡfp);
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(Ꮡbuf));
-    {
-        var errΔ1 = enc.Encode(b0); if (errΔ1 != nil) {
-            t.Fatal(errorEncodingˢ, errΔ1);
-        }
+    var errΔ1 = enc.Encode(b0); if (errΔ1 != nil) {
+        t.Fatal(errorEncodingˢ, errΔ1);
     }
     ref var b1 = ref heap(new Bug2(), out var Ꮡb1);
     var err = NewDecoder(new gob_test_package.bytes_BufferжReader(Ꮡbuf)).Decode(Ꮡb1);
@@ -996,10 +967,8 @@ internal static readonly object expectedCompatibilityˢ = (@string)"expected com
 public static void TestSliceIncompatibility(ж<testing.T> t) {
     slice<byte> @in = slice<byte>([1, 2, 3]);
     ref var @out = ref heap<slice<nint>>(out var Ꮡout);
-    {
-        var err = encAndDec(@in, Ꮡout); if (err == nil) {
-            t.Error(expectedCompatibilityˢ);
-        }
+    var err = encAndDec(@in, Ꮡout); if (err == nil) {
+        t.Error(expectedCompatibilityˢ);
     }
 }
 
@@ -1162,7 +1131,7 @@ public static void TestNilPointerPanics(ж<testing.T> t) {
         new(nilBoolChannelPtr.OrTypedNil(), true)
     ]);
 
-    foreach (var (_, tt) in testCases) {
+    foreach (var (_, tt) in range(testCases)) {
         var (_, panicErr) = encodeAndRecover(tt.value);
         if (tt.mustPanic) {
             if (panicErr == nil) {
@@ -1251,7 +1220,7 @@ public partial struct Z {
 public static void Test29ElementSlice(ж<testing.T> t) {
     Register(new Z());
     var src = new slice<any>(100); // Size needs to be bigger than size of type definition.
-    foreach (var i in range(src)) {
+    foreach (var i in range(len(src))) {
         src[i] = new Z();
     }
     var buf = @new<bytes.Buffer>();
@@ -1319,7 +1288,7 @@ internal static slice<badDataTest> badDataTests = slice<badDataTest>([
 // TestBadData tests that various problems caused by malformed input
 // are caught as errors and do not cause panics.
 public static void TestBadData(ж<testing.T> t) {
-    foreach (var (i, test) in badDataTests) {
+    foreach (var (i, test) in range(badDataTests)) {
         var (data, err) = hex.DecodeString(test.input);
         if (err != nil) {
             t.Fatalf("#%d: hex error: %s", i, err);
@@ -1427,8 +1396,8 @@ internal partial struct TestDecodePartial_T /*dyn*/ {
 
 public static void TestDecodePartial(ж<testing.T> t) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    ref var t1 = ref heap<TestDecodePartial_T>(new TestDecodePartial_T(X: slice<nint>([1, 2, 3]), Y: "foo"), out var Ꮡt1);
-    ref var t2 = ref heap<TestDecodePartial_T>(new TestDecodePartial_T(X: slice<nint>([4, 5, 6]), Y: "bar"), out var Ꮡt2);
+    ref var t1 = ref heap<TestDecodePartial_T>(new TestDecodePartial_T(X: [1, 2, 3], Y: "foo"), out var Ꮡt1);
+    ref var t2 = ref heap<TestDecodePartial_T>(new TestDecodePartial_T(X: [4, 5, 6], Y: "bar"), out var Ꮡt2);
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(Ꮡbuf));
 
     nint t1start = 0;
@@ -1495,10 +1464,10 @@ public static void TestDecodePartial(ж<testing.T> t) {
 
 public static void TestDecoderOverflow(ж<testing.T> t) {
     // Issue 55337.
-    var dec = NewDecoder(new gob_test_package.bytes_ReaderжReader(bytes.NewReader(slice<byte>([
+    var dec = NewDecoder(new gob_test_package.bytes_ReaderжReader(bytes.NewReader([
         0x12, 0xff, 0xff, 0x2, 0x2, 0x20, 0x0, 0xf8, 0x7f, 0xff, 0xff, 0xff,
         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x20, 0x20, 0x20, 0x20, 0x20
-    ]))));
+    ])));
     any r = default;
     var err = dec.Decode(r);
     if (err == nil) {

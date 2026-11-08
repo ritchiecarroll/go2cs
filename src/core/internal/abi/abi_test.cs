@@ -91,7 +91,7 @@ public static void TestFuncPCCompileError(ж<testing.T> t) {
     if (got[len(got) - 1] == "") {
         got = got.slice(0, len(got) - 1); // remove last empty line
     }
-    foreach (var (i, s) in got) {
+    foreach (var (i, s) in range(got)) {
         if (!strings.Contains(s, want[i])) {
             t.Errorf("did not error on line %s", want[i]);
         }

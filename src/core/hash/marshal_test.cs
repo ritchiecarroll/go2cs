@@ -59,14 +59,14 @@ internal static slice<marshalTestsᴛ1> marshalTests = slice<marshalTestsᴛ1>([
 ]);
 
 public static void TestMarshalHash(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in marshalTests) {
+    foreach (var (_, vᴛ1) in range(marshalTests)) {
         ref var tt = ref heap(new marshalTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.name, (ж<testing.T> tΔ1) => {
             var buf = new slice<byte>(256);
-            foreach (var i in range(buf)) {
+            foreach (var i in range(len(buf))) {
                 buf[i] = (byte)i;
             }
 
@@ -95,10 +95,8 @@ public static void TestMarshalHash(ж<testing.T> t) {
             if (!ok) {
                 tΔ1.Fatalf("Hash does not implement UnmarshalBinary");
             }
-            {
-                var errΔ1 = h3u.UnmarshalBinary(enc); if (errΔ1 != nil) {
-                    tΔ1.Fatalf("UnmarshalBinary: %v", errΔ1);
-                }
+            var errΔ1 = h3u.UnmarshalBinary(enc); if (errΔ1 != nil) {
+                tΔ1.Fatalf("UnmarshalBinary: %v", errΔ1);
             }
             h2.Write(buf[(int)(split)..]);
             h3.Write(buf[(int)(split)..]);

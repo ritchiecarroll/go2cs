@@ -28,7 +28,7 @@ using static go.hash.crc32_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("hash/crc32/crc32_test.go", "crc32_test.cs", "ABUmyIKCpoIACRQAI0yigoCC3qKCgILe2LiCgoKCgoKCzJKCmIIACAqCgoKClJSCgoKmgoKClJSCgqaCgqaAgoK2gpSCuIKCgoKUlIKCgqaCgoKUlIKCpoKCpoCCgraClILcgoKUgoKmgILKkoKYgqqCgpaCluiCgpSCguqCgpSCgrqCuJKCgoKClIKCuIKCppKCgsqSkoKCgpSCggAMCoKCgqaCgoKCgpSCkoIABxCigoKCgpSmgoKUlIKCgoKC", "29-29:1;120-122:1;125-127:2;131-173:1;174-217:2;237-239:1;242-244:2;249-251:3;253-255:4;266-268:1;277-279:1;288-297:1;305-309:2;314-323:3;334-348:1;340-346:1.1;342-344:1.1.1", "", "43=Repeat/1/2/32,Repeat/2/2/33", "28:15")]
+[assembly: GoPositionMap("hash/crc32/crc32_test.go", "crc32_test.cs", "ABMmyIKCpoIACRQAI0yigoLOooKCzti4goKCgoKCgsySgpiCAAgKgoKCgpSUgoKCpoKCgpSUgoKmgoKmgoKmgpSCuIKCgoKUlIKCgqaCgoKUlIKCpoKCpoKCpoKUgtyCgpSCgqaCupKCmIKqgoKWgpbogoKUgoLqgoKUgoK6griSgoKCgpSCgriCgqaSgoLKkpKCgoKUgoIADAqCgoKmgoKCgoKUgpKCAAcQooKCgoKUpoKClJSCgoKCgg==", "29-29:1;120-122:1;125-127:2;131-173:1;174-217:2;237-239:1;242-244:2;249-251:3;253-255:4;266-268:1;277-279:1;288-297:1;305-309:2;314-323:3;334-348:1;340-346:1.1;342-344:1.1.1", "", "41=Repeat/1/2/32,Repeat/2/2/33", "26:15")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;

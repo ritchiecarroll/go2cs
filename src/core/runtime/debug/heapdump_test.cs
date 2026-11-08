@@ -7,8 +7,6 @@ using os = os_package;
 using runtime = runtime_package;
 using static go.runtime.debug_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = go.io.fs_package;
 using go.io;
 
@@ -37,10 +35,8 @@ public static void TestWriteHeapDumpNonempty(ж<testing.T> t) {
             t.Fatalf("Stat failed: %v", err);
         }
         UntypedInt minSize = 1;
-        {
-            var size = fi.Size(); if (size < minSize) {
-                t.Fatalf("Heap dump size %d bytes, expected at least %d bytes", size, (nint)(minSize));
-            }
+        var size = fi.Size(); if (size < minSize) {
+            t.Fatalf("Heap dump size %d bytes, expected at least %d bytes", size, (nint)(minSize));
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -91,17 +87,14 @@ public static void TestWriteHeapDumpFinalizers(ж<testing.T> t) {
 
 partial struct G<T> {
 }
-
 partial interface I {
     void M();
 }
 
 //go:noinline
-public static partial void M<T>(this G<T> g) {
-}
+public static partial void M<T>(this G<T> g) { }
 
 internal static I dummy = new G<nint>();
-
 internal static I dummy2 = new G<G<nint>>();
 
 public static void TestWriteHeapDumpTypeName(ж<testing.T> t) {

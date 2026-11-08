@@ -9,7 +9,6 @@ partial class chacha8rand_internal_test_package {
 
 public static readonly ж<Action<ж<array<uint64>>, ж<array<uint64>>, uint32>> ᏑBlock = new StaticBox<Action<ж<array<uint64>>, ж<array<uint64>>, uint32>>(block);
 public static ref Action<ж<array<uint64>>, ж<array<uint64>>, uint32> Block => ref ((StaticBox<Action<ж<array<uint64>>, ж<array<uint64>>, uint32>>)ᏑBlock).ValueSlot;
-
 public static readonly ж<Action<ж<array<uint64>>, ж<array<uint64>>, uint32>> ᏑBlock_generic = new StaticBox<Action<ж<array<uint64>>, ж<array<uint64>>, uint32>>(block_generic);
 public static ref Action<ж<array<uint64>>, ж<array<uint64>>, uint32> Block_generic => ref ((StaticBox<Action<ж<array<uint64>>, ж<array<uint64>>, uint32>>)ᏑBlock_generic).ValueSlot;
 

@@ -62,10 +62,8 @@ public static void TestDash(ж<testing.T> t) {
     var m = new MapFS(new map<@string, ж<global::go.testing.fstest_package.MapFile>>{
         ["a-b/a"] = Ꮡ(new global::go.testing.fstest_package.MapFile(Data: slice<byte>("a-b/a"u8)))
     });
-    {
-        var err = TestFS(new fstest_internal_test_package.fstest_MapFSᴠFS(m), aBAˢ); if (err != nil) {
-            t.Error(err);
-        }
+    var err = TestFS(new fstest_internal_test_package.fstest_MapFSᴠFS(m), aBAˢ); if (err != nil) {
+        t.Error(err);
     }
 }
 
@@ -108,10 +106,8 @@ public static void TestShuffledFS(ж<testing.T> t) {
         ["tmp/two"] = Ꮡ(new global::go.testing.fstest_package.MapFile(Data: slice<byte>("2"u8))),
         ["tmp/three"] = Ꮡ(new global::go.testing.fstest_package.MapFile(Data: slice<byte>("3"u8)))
     });
-    {
-        var err = TestFS(fsys, tmpOneˢ, tmpTwoˢ, tmpThreeˢ); if (err != nil) {
-            t.Error(err);
-        }
+    var err = TestFS(fsys, tmpOneˢ, tmpTwoˢ, tmpThreeˢ); if (err != nil) {
+        t.Error(err);
     }
 }
 

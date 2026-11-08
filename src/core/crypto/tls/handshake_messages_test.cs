@@ -21,10 +21,10 @@ using static go.crypto.tls_package;
 
 partial class tls_internal_test_package {
 
-internal static slice<global::go.crypto.tls_package.handshakeMessage> tests = slice<global::go.crypto.tls_package.handshakeMessage>([new global::go.crypto.tls_package.clientHelloMsgжhandshakeMessage(Ꮡ(new clientHelloMsg())), new global::go.crypto.tls_package.serverHelloMsgжhandshakeMessage(Ꮡ(new serverHelloMsg())), new global::go.crypto.tls_package.finishedMsgжhandshakeMessage(Ꮡ(new finishedMsg())), new global::go.crypto.tls_package.certificateMsgжhandshakeMessage(Ꮡ(new certificateMsg())), new global::go.crypto.tls_package.certificateRequestMsgжhandshakeMessage(Ꮡ(new certificateRequestMsg())), new global::go.crypto.tls_package.certificateVerifyMsgжhandshakeMessage(Ꮡ(new certificateVerifyMsg(
+internal static slice<global::go.crypto.tls_package.handshakeMessage> tests = [new global::go.crypto.tls_package.clientHelloMsgжhandshakeMessage(Ꮡ(new clientHelloMsg())), new global::go.crypto.tls_package.serverHelloMsgжhandshakeMessage(Ꮡ(new serverHelloMsg())), new global::go.crypto.tls_package.finishedMsgжhandshakeMessage(Ꮡ(new finishedMsg())), new global::go.crypto.tls_package.certificateMsgжhandshakeMessage(Ꮡ(new certificateMsg())), new global::go.crypto.tls_package.certificateRequestMsgжhandshakeMessage(Ꮡ(new certificateRequestMsg())), new global::go.crypto.tls_package.certificateVerifyMsgжhandshakeMessage(Ꮡ(new certificateVerifyMsg(
     hasSignatureAlgorithm: true
 ))), new global::go.crypto.tls_package.certificateStatusMsgжhandshakeMessage(Ꮡ(new certificateStatusMsg())), new global::go.crypto.tls_package.clientKeyExchangeMsgжhandshakeMessage(Ꮡ(new clientKeyExchangeMsg())), new global::go.crypto.tls_package.newSessionTicketMsgжhandshakeMessage(Ꮡ(new newSessionTicketMsg())), new global::go.crypto.tls_package.encryptedExtensionsMsgжhandshakeMessage(Ꮡ(new encryptedExtensionsMsg())), new global::go.crypto.tls_package.endOfEarlyDataMsgжhandshakeMessage(Ꮡ(new endOfEarlyDataMsg())), new global::go.crypto.tls_package.keyUpdateMsgжhandshakeMessage(Ꮡ(new keyUpdateMsg())), new global::go.crypto.tls_package.newSessionTicketMsgTLS13жhandshakeMessage(Ꮡ(new newSessionTicketMsgTLS13())), new global::go.crypto.tls_package.certificateRequestMsgTLS13жhandshakeMessage(Ꮡ(new certificateRequestMsgTLS13())), new global::go.crypto.tls_package.certificateMsgTLS13жhandshakeMessage(Ꮡ(new certificateMsgTLS13())), new tls_test_package.tls_SessionStateжhandshakeMessage(Ꮡ(new SessionState()))
-]);
+];
 
 internal static slice<byte> mustMarshal(ж<testing.T> t, global::go.crypto.tls_package.handshakeMessage msg) {
     t.Helper();
@@ -38,7 +38,7 @@ internal static slice<byte> mustMarshal(ж<testing.T> t, global::go.crypto.tls_p
 public static void TestMarshalUnmarshal(ж<testing.T> t) {
     var randΔ1 = go.math.rand_package.New(go.math.rand_package.NewSource(time_package.Now().UnixNano()));
 
-    foreach (var (i, m) in tests) {
+    foreach (var (i, m) in range(tests)) {
         var ty = reflect.ValueOf(m).Type();
         var mʗ1 = m;
         var randʗ1 = randΔ1;
@@ -62,18 +62,16 @@ public static void TestMarshalUnmarshal(ж<testing.T> t) {
                     break;
                 }
 
-                {
-                    var (ch, okΔ1) = mʗ1._<ж<global::go.crypto.tls_package.clientHelloMsg>>(ᐧ); if (okΔ1) {
-                        // extensions is special cased, as it is only populated by the
-                        // server-side of a handshake and is not expected to roundtrip
-                        // through marshal + unmarshal.  m ends up with the list of
-                        // extensions necessary to serialize the other fields of
-                        // clientHelloMsg, so check that it is non-empty, then clear it.
-                        if (len(ch.extensions) == 0) {
-                            tΔ1.Errorf("expected ch.extensions to be populated on unmarshal");
-                        }
-                        ch.extensions = default;
+                var (ch, okΔ1) = mʗ1._<ж<global::go.crypto.tls_package.clientHelloMsg>>(ᐧ); if (okΔ1) {
+                    // extensions is special cased, as it is only populated by the
+                    // server-side of a handshake and is not expected to roundtrip
+                    // through marshal + unmarshal.  m ends up with the list of
+                    // extensions necessary to serialize the other fields of
+                    // clientHelloMsg, so check that it is non-empty, then clear it.
+                    if (len(ch.extensions) == 0) {
+                        tΔ1.Errorf("expected ch.extensions to be populated on unmarshal");
                     }
+                    ch.extensions = default;
                 }
 
                 // clientHelloMsg and serverHelloMsg, when unmarshalled, store
@@ -116,7 +114,7 @@ public static void TestMarshalUnmarshal(ж<testing.T> t) {
 
 public static void TestFuzz(ж<testing.T> t) {
     var randΔ1 = go.math.rand_package.New(go.math.rand_package.NewSource(0));
-    foreach (var (_, m) in tests) {
+    foreach (var (_, m) in range(tests)) {
         for (nint j = 0; j < 1000; j++) {
             nint len = randΔ1.Intn(1000);
             var bytes = randomBytes(len, randΔ1);
@@ -128,10 +126,8 @@ public static void TestFuzz(ж<testing.T> t) {
 
 internal static slice<byte> randomBytes(nint n, ж<rand.Rand> randΔ1) {
     var r = new slice<byte>(n);
-    {
-        var (_, err) = randΔ1.Read(r); if (err != nil) {
-            throw panic("rand.Read failed: " + err.Error());
-        }
+    var (_, err) = randΔ1.Read(r); if (err != nil) {
+        throw panic("rand.Read failed: " + err.Error());
     }
     return r;
 }
@@ -166,7 +162,7 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     m.ocspStapling = randΔ1.Intn(10) > 5;
     m.supportedPoints = randomBytes(randΔ1.Intn(5) + 1, Ꮡrand);
     m.supportedCurves = new slice<global::go.crypto.tls_package.CurveID>(randΔ1.Intn(5) + 1);
-    foreach (var i in range(m.supportedCurves)) {
+    foreach (var i in range(len(m.supportedCurves))) {
         m.supportedCurves[i] = (global::go.crypto.tls_package.CurveID)(uint16)(randΔ1.Intn(30000) + 1);
     }
     if (randΔ1.Intn(10) > 5) {
@@ -210,11 +206,11 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     }
     switch (randΔ1.Intn(3)) {
     case 1: {
-        m.pskModes = slice<uint8>([pskModeDHE]);
+        m.pskModes = [pskModeDHE];
         break;
     }
     case 2: {
-        m.pskModes = slice<uint8>([pskModeDHE, pskModePlain]);
+        m.pskModes = [pskModeDHE, pskModePlain];
         break;
     }}
     // clientHelloMsg.marshal uses echInner == false. If m.encryptedClientHello > 0 and
@@ -225,7 +221,7 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
         m.encryptedClientHello = randomBytes(randΔ1.Intn(50) + 1, Ꮡrand);
     } else {
         if (randΔ1.Intn(10) > 5) {
-            m.encryptedClientHello = slice<byte>([(byte)innerECHExt]);
+            m.encryptedClientHello = [(byte)innerECHExt];
         }
         global::go.crypto.tls_package.pskIdentity psk = default;
         psk.obfuscatedTicketAge = (uint32)randΔ1.Intn(500000);
@@ -457,10 +453,7 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     return reflect.ValueOf(s.OrTypedNil());
 }
 
-internal static (slice<byte>, error) marshal(this ж<global::go.crypto.tls_package.SessionState> Ꮡs) {
-    return Ꮡs.Bytes();
-}
-
+internal static (slice<byte>, error) marshal(this ж<global::go.crypto.tls_package.SessionState> Ꮡs) { return Ꮡs.Bytes(); }
 internal static bool unmarshal(this ref global::go.crypto.tls_package.SessionState s, slice<byte> b) {
     var (ss, err) = ParseSessionState(b);
     if (err != nil) {
@@ -557,7 +550,7 @@ public static void TestRejectEmptySCTList(ж<testing.T> t) {
     var serverHello = Ꮡ(new serverHelloMsg(
         vers: VersionTLS12,
         random: random[..],
-        scts: slice<slice<byte>>([sct])
+        scts: [sct]
     ));
     var serverHelloBytes = mustMarshal(t, new global::go.crypto.tls_package.serverHelloMsgжhandshakeMessage(serverHello));
 
@@ -603,7 +596,7 @@ public static void TestRejectEmptySCT(ж<testing.T> t) {
     var serverHello = Ꮡ(new serverHelloMsg(
         vers: VersionTLS12,
         random: random[..],
-        scts: slice<slice<byte>>([default])
+        scts: [default]
     ));
     var serverHelloBytes = mustMarshal(t, new global::go.crypto.tls_package.serverHelloMsgжhandshakeMessage(serverHello));
 
@@ -654,7 +647,7 @@ internal partial struct TestECHRemoveOuterPSK_type /*dyn*/ {
 public static void TestECHRemoveOuterPSK(ж<testing.T> t) {
     var r = go.math.rand_package.New(go.math.rand_package.NewSource(0));
 
-    foreach (var (_, vᴛ1) in slice<TestECHRemoveOuterPSK_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestECHRemoveOuterPSK_type>([
         new(
             name: "echInner true",
             echInner: true,
@@ -668,13 +661,13 @@ public static void TestECHRemoveOuterPSK(ж<testing.T> t) {
         new(
             name: "echInner true, ech ext present",
             echInner: true,
-            echExt: slice<byte>([254]),
+            echExt: [254],
             expectRemoved: false
         ),
         new(
             name: "echInner true, ech ext present, inner ech sentinel",
             echInner: true,
-            echExt: slice<byte>([(byte)innerECHExt]),
+            echExt: [(byte)innerECHExt],
             expectRemoved: false
         ),
         new(
@@ -685,16 +678,16 @@ public static void TestECHRemoveOuterPSK(ж<testing.T> t) {
         new(
             name: "echInner false, ech ext present",
             echInner: false,
-            echExt: slice<byte>([254]),
+            echExt: [254],
             expectRemoved: true
         ),
         new(
             name: "echInner false, ech ext present, inner ech sentinel",
             echInner: false,
-            echExt: slice<byte>([(byte)innerECHExt]),
+            echExt: [(byte)innerECHExt],
             expectRemoved: false
         )
-    ])) {
+    ]))) {
         ref var tc = ref heap(new TestECHRemoveOuterPSK_type(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -703,8 +696,8 @@ public static void TestECHRemoveOuterPSK(ж<testing.T> t) {
         t.Run(tc.name, (ж<testing.T> tΔ1) => {
             var ch = (Ꮡ(new clientHelloMsg())).Generate(rʗ1, 0).Interface()._<ж<global::go.crypto.tls_package.clientHelloMsg>>();
 
-            ch.pskBinders = slice<slice<byte>>([slice<byte>("test"u8)]);
-            ch.pskIdentities = slice<global::go.crypto.tls_package.pskIdentity>([new(label: slice<byte>("test"u8))]);
+            ch.pskBinders = [slice<byte>("test"u8)];
+            ch.pskIdentities = [new(label: slice<byte>("test"u8))];
             ch.encryptedClientHello = tcʗ1.echExt;
 
             var (b, err) = ch.marshalMsg(tcʗ1.echInner);

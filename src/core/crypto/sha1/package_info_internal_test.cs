@@ -28,7 +28,7 @@ using static go.crypto.sha1_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/sha1/sha1_test.go", "sha1_test.cs", "ABk0ACZGgqSCgoKCgpSCgoKUgrSCgoK0gpSCgoKkgoKUyoKkgoKCgoKUlIKCgqaCgoKUlIKCpoKCpoCCgraClICC2oKCgILIgoKAggARIgAMGsKCgILI5oKkgoKCgIKCtoKCgqaCyoKCgoKCooKClIK4goIADQiCgriigJKkppL0goKSgoKCgoKmgoKCgsqCpoKmgqaC", "191-195:1;228-232:1;239-241:1;262-270:1;271-277:2")]
+[assembly: GoPositionMap("crypto/sha1/sha1_test.go", "sha1_test.cs", "ABk0ACZGgpSCgoKCgpSCgoKUgrSCgoK0gpSCgoKkgoKUyoKUgoKCgoKUlIKCgqaCgoKUlIKCpoKCpoKCpoKUgsqCgoK4goKCABAiAAwawoKCuOaClIKCgoKCpoKCgqaCyoKCgoKCooKClIK4goIADQiCgriikpSmgvSCgpKCgoKCgqaCgoKCyoKmgqaCpoI=", "191-195:1;228-232:1;239-241:1;262-270:1;271-277:2", "", "", "", "204:21,205:13")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

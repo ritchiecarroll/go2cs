@@ -194,7 +194,7 @@ public static void TestCopyNWriteTo(ж<testing.T> t) {
 public static void BenchmarkCopyNSmall(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var bs = bytes.Repeat(slice<byte>([0]), 512 + 1);
+    var bs = bytes.Repeat([0], 512 + 1);
     var rd = bytes.NewReader(bs);
     var buf = @new<Buffer>();
     b.ResetTimer();
@@ -208,7 +208,7 @@ public static void BenchmarkCopyNSmall(ж<testing.B> Ꮡb) {
 public static void BenchmarkCopyNLarge(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var bs = bytes.Repeat(slice<byte>([0]), (32 * 1024) + 1);
+    var bs = bytes.Repeat([0], (32 * 1024) + 1);
     var rd = bytes.NewReader(bs);
     var buf = @new<Buffer>();
     b.ResetTimer();
@@ -348,10 +348,8 @@ internal static void testReadAtLeast(ж<testing.T> t, Δio.ReadWriter rb) {
     rb.Write(slice<byte>("4"u8));
     (n, err) = ReadAtLeast(rb, buf, 2);
     var want = ErrUnexpectedEOF;
-    {
-        var (rbΔ1, ok) = rb._<ж<dataAndErrorBuffer>>(ᐧ); if (ok && !AreEqual(rbΔ1.err, EOF)) {
-            want = rbΔ1.err;
-        }
+    var (rbΔ1, ok) = rb._<ж<dataAndErrorBuffer>>(ᐧ); if (ok && !AreEqual(rbΔ1.err, EOF)) {
+        want = rbΔ1.err;
     }
     if (!AreEqual(err, want)) {
         t.Errorf("expected %v, got %v", want, err);
@@ -424,7 +422,7 @@ public static void TestSectionReader_ReadAt(ж<testing.T> t) {
         new(data: dat, off: 0, n: 0, bufLen: 0, at: -1, exp: "", err: EOF),
         new(data: dat, off: 0, n: 0, bufLen: 0, at: 1, exp: "", err: EOF)
     ]);
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         var r = strings.NewReader(tt.data);
         var s = NewSectionReader(new io_test_package.strings_ReaderжReaderAt(r), (int64)tt.off, (int64)tt.n);
         var buf = new slice<byte>(tt.bufLen);
@@ -446,7 +444,7 @@ public static void TestSectionReader_Seek(ж<testing.T> t) {
     var br = bytes.NewReader(slice<byte>("foo"u8));
     var sr = NewSectionReader(new io_test_package.bytes_ReaderжReaderAt(br), 0, (int64)len("foo"));
 
-    foreach (var (_, whence) in slice<nint>([SeekStart, SeekCurrent, SeekEnd])) {
+    foreach (var (_, whence) in range(slice<nint>([SeekStart, SeekCurrent, SeekEnd]))) {
         for (var offset = (int64)(-3); offset <= 4; offset++) {
             var (brOff, brErr) = br.Seek(offset, whence);
             var (srOff, srErr) = sr.Seek(offset, whence);
@@ -480,13 +478,11 @@ public static void TestSectionReader_Size(ж<testing.T> t) {
         new("", 0)
     ]);
 
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var r = strings.NewReader(tt.data);
         var sr = NewSectionReader(new io_test_package.strings_ReaderжReaderAt(r), 0, (int64)len(tt.data));
-        {
-            var got = sr.Size(); if (got != tt.want) {
-                t.Errorf("Size = %v; want %v", got, tt.want);
-            }
+        var got = sr.Size(); if (got != tt.want) {
+            t.Errorf("Size = %v; want %v", got, tt.want);
         }
     }
 }
@@ -507,10 +503,8 @@ public static void TestSectionReader_Max(ж<testing.T> t) {
     if (n != 0 || !AreEqual(err, EOF)) {
         t.Errorf("Read = %v, %v, want 0, EOF", n, err);
     }
-    {
-        var (_r, off, nΔ1) = sr.Outer(); if (!AreEqual(_r, r) || off != 3 || nΔ1 != maxint64) {
-            t.Fatalf("Outer = %v, %d, %d; expected %v, %d, %d", _r, off, nΔ1, r.OrTypedNil(), (nint)3, (int64)maxint64);
-        }
+    var (_r, off, nΔ1) = sr.Outer(); if (!AreEqual(_r, r) || off != 3 || nΔ1 != maxint64) {
+        t.Fatalf("Outer = %v, %d, %d; expected %v, %d, %d", _r, off, nΔ1, r.OrTypedNil(), (nint)3, (int64)maxint64);
     }
 }
 
@@ -561,10 +555,10 @@ internal partial struct TestNopCloserWriterToForwarding_typeᴛ1 /*dyn*/ {
 }
 
 public static void TestNopCloserWriterToForwarding(ж<testing.T> t) {
-    foreach (var (_, tc) in new TestNopCloserWriterToForwarding_type[]{
+    foreach (var (_, tc) in range(new TestNopCloserWriterToForwarding_type[]{
         new("not a WriterTo", (Δio.Reader)default),
         new("a WriterTo", new TestNopCloserWriterToForwarding_typeᴛ1())
-    }.array()) {
+    }.array())) {
         var nc = NopCloser(tc.r);
 
         var (_, expected) = tc.r._<WriterTo>(ᐧ);
@@ -606,7 +600,7 @@ public static void TestOffsetWriter_Seek(ж<testing.T> t) {
         // Should throw error errWhence if whence is not valid
         var wʗ1 = w;
         t.Run(errWhenceˢ, (ж<testing.T> tΔ1) => {
-            foreach (var (_, whence) in slice<nint>([-3, -2, -1, 3, 4, 5])) {
+            foreach (var (_, whence) in range(slice<nint>([-3, -2, -1, 3, 4, 5]))) {
                 int64 offset = 0;
                 var (gotOff, gotErr) = wʗ1.Seek(offset, whence);
                 if (gotOff != 0 || !AreEqual(gotErr, io_internal_test_package.ErrWhence)) {
@@ -619,7 +613,7 @@ public static void TestOffsetWriter_Seek(ж<testing.T> t) {
         // Should throw error errOffset if offset is negative
         var wʗ2 = w;
         t.Run(errOffsetˢ, (ж<testing.T> tΔ2) => {
-            foreach (var (_, whence) in slice<nint>([SeekStart, SeekCurrent])) {
+            foreach (var (_, whence) in range(slice<nint>([SeekStart, SeekCurrent]))) {
                 for (var offset = (int64)(-3); offset < 0; offset++) {
                     var (gotOff, gotErr) = wʗ2.Seek(offset, whence);
                     if (gotOff != 0 || !AreEqual(gotErr, io_internal_test_package.ErrOffset)) {
@@ -642,7 +636,7 @@ public static void TestOffsetWriter_Seek(ж<testing.T> t) {
                 new(whence: SeekCurrent, offset: 2, returnOff: 6),
                 new(whence: SeekCurrent, offset: 3, returnOff: 9)
             ]);
-            foreach (var (idx, tt) in tests) {
+            foreach (var (idx, tt) in range(tests)) {
                 var (gotOff, gotErr) = wʗ3.Seek(tt.offset, tt.whence);
                 if (gotOff != tt.returnOff || gotErr != nil) {
                     tΔ3.Errorf("%d:: For whence %d, offset %d, OffsetWriter.Seek got: (%d, %v), want: (%d, <nil>)",
@@ -678,7 +672,7 @@ public static void TestOffsetWriter_WriteAt(ж<testing.T> t) {
             ref var writeN = ref heap(new int64(), out var ᏑwriteN);
             ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
             // Concurrent writes, one byte at a time
-            foreach (var (step, value) in slice<byte>(content)) {
+            foreach (var (step, value) in range(slice<byte>(content))) {
                 Ꮡwg.Add(1);
                 goǃ((ж<Δsync.WaitGroup> wgΔ1, ж<os.File> tmpfileΔ1, byte valueΔ1, int64 offΔ1, int64 atΔ1, nint stepΔ1) => {
                     GoFrame ᒐ = default;
@@ -686,7 +680,7 @@ public static void TestOffsetWriter_WriteAt(ж<testing.T> t) {
                         defer(wgΔ1.Done, ref ᒐ);
 
                         var w = NewOffsetWriter(new io_test_package.os_FileжWriterAt(tmpfileΔ1), offΔ1);
-                        var (n, e) = w.WriteAt(slice<byte>([valueΔ1]), atΔ1 + (int64)stepΔ1);
+                        var (n, e) = w.WriteAt([valueΔ1], atΔ1 + (int64)stepΔ1);
                         if (e != nil) {
                             t.Errorf("WriteAt failed. off: %d, at: %d, step: %d\n error: %v", offΔ1, atΔ1, stepΔ1, e);
                         }
@@ -801,8 +795,8 @@ public static void TestOffsetWriter_Write(ж<testing.T> t) {
             var (w, f) = makeOffsetWriterʗ1(name);
             var fʗ1 = f;
             defer(() => fʗ1.Close(), ref ᒐ);
-            foreach (var (_, value) in slice<byte>(content)) {
-                var (n, err) = w.Write(slice<byte>([value]));
+            foreach (var (_, value) in range(slice<byte>(content))) {
+                var (n, err) = w.Write([value]);
                 if (err != nil) {
                     tΔ1.Fatalf("Write failed, n: %d, err: %v", n, err);
                 }

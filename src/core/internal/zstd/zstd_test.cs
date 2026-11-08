@@ -31,7 +31,7 @@ partial class zstd_internal_test_package {
 partial struct testsᴛ1 /*dyn*/ {
     internal @string name, uncompressed, compressed;
 }
-internal static slice<testsᴛ1> tests = slice<testsᴛ1>([
+internal static slice<testsᴛ1> tests = [
     new(
         "hello",
         "hello, world\n",
@@ -64,10 +64,10 @@ internal static slice<testsᴛ1> tests = slice<testsᴛ1>([
         "",
         "\x50\x2a\x4d\x18\x00\x00\x00\x00"u8 + "\x50\x2a\x4d\x18\x00\x00\x00\x00"u8
     )
-]);
+];
 
 public static void TestSamples(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new testsᴛ1(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -89,7 +89,7 @@ public static void TestSamples(ж<testing.T> t) {
 public static void TestReset(ж<testing.T> t) {
     var input = strings.NewReader(""u8);
     var r = NewReader(new zstd_internal_test_package.strings_ReaderжReader(input));
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new testsᴛ1(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -163,11 +163,9 @@ internal static slice<byte> zstdBigData(testing.TB t) {
         ref var compressed = ref heap(new bytes.Buffer(), out var Ꮡcompressed);
         cmd.Stdout = new zstd_internal_test_package.bytes_BufferжWriter(Ꮡcompressed);
         cmd.Stderr = new os.FileжWriter(os.Stderr);
-        {
-            var err = cmd.Run(); if (err != nil) {
-                zstdBigErr = fmt.Errorf("running zstd failed: %v"u8, err);
-                return;
-            }
+        var err = cmd.Run(); if (err != nil) {
+            zstdBigErr = fmt.Errorf("running zstd failed: %v"u8, err);
+            return;
         }
 
         zstdBigBytes = compressed.Bytes();
@@ -211,7 +209,7 @@ internal static void showDiffs(ж<testing.T> t, slice<byte> got, slice<byte> wan
         t.Errorf("got data length %d, want %d", builtin.len(got), builtin.len(want));
     }
     nint diffs = 0;
-    foreach (var (i, b) in got) {
+    foreach (var (i, b) in range(got)) {
         if (i >= builtin.len(want)) {
             break;
         }
@@ -262,7 +260,7 @@ public static void TestFileSamples(ж<testing.T> t) {
         t.Fatal(err);
     }
 
-    foreach (var (_, sample) in samples) {
+    foreach (var (_, sample) in range(samples)) {
         @string name = sample.Name();
         if (!strings.HasSuffix(name, zstˢ)) {
             continue;
@@ -276,10 +274,8 @@ public static void TestFileSamples(ж<testing.T> t) {
 
             var r = NewReader(new zstd_internal_test_package.os_FileжReader(f));
             var h = sha256.New();
-            {
-                var (_, errΔ2) = io.Copy(h, new zstd_internal_test_package.zstd_ReaderжReader(r)); if (errΔ2 != nil) {
-                    tΔ1.Fatal(errΔ2);
-                }
+            var (_, errΔ2) = io.Copy(h, new zstd_internal_test_package.zstd_ReaderжReader(r)); if (errΔ2 != nil) {
+                tΔ1.Fatal(errΔ2);
             }
             @string got = fmt.Sprintf("%x"u8, h.Sum(default))[..8];
 
@@ -295,7 +291,7 @@ public static void TestFileSamples(ж<testing.T> t) {
 internal static readonly object expectedErrorˢ = (@string)"expected error"u8;
 
 public static void TestReaderBad(ж<testing.T> t) {
-    foreach (var (i, s) in badStrings) {
+    foreach (var (i, s) in range(badStrings)) {
         t.Run(fmt.Sprintf("badStrings#%d"u8, i), (ж<testing.T> tΔ1) => {
             var (_, err) = io.Copy(io.Discard, new zstd_internal_test_package.zstd_ReaderжReader(NewReader(new zstd_internal_test_package.strings_ReaderжReader(strings.NewReader(s)))));
             if (err == nil) {

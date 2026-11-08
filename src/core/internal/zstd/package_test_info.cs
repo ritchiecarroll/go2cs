@@ -50,10 +50,10 @@ using static global::go.@internal.zstd_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/zstd/fse_test.go", "fse_test.cs", "AA0cAAcQ7gAOFsIAFjqykoKCgIK2goCCtoI=", "71-86:1")]
-[assembly: GoPositionMap("internal/zstd/fuzz_test.go", "fuzz_test.cs", "ABAgAA4gsoKUgpSCggADEOKUgriCgoKUgpSCgoKCgoKAgraCgoKUgv7ilIK4goCkgoKUgoKCgoKClIKCAAwagoKUgoKCgoKC2A==", "39-42:1;65-83:1;97-97:1;99-139:2")]
+[assembly: GoPositionMap("internal/zstd/fuzz_test.go", "fuzz_test.cs", "ABAgAA4gsoKUgpSCggADEOKUgriCgoKUgpSCgoKCgoKCpoKCgpSC/uKUgriCgKSCgpSCgoKCgoKUgoIADBqCgpSCgoKCgoLY", "39-42:1;65-83:1;97-97:1;99-139:2", "", "", "", "109:21,110:13")]
 [assembly: GoPositionMap("internal/zstd/window_test.go", "window_test.cs", "AAwaooKUpoKSgoKCgoKUsgAHFKKClIKClIKCgpSCpoKmkoKCgpSC", "29-31:1")]
-[assembly: GoPositionMap("internal/zstd/xxhash_test.go", "xxhash_test.cs", "ABQeAAocgoKCgoKAggAKCoKCpoKCpoKCgpSCgpSCpoKCggAICIKCgpTmopSClIKCgpSClIKCgoKCgIKkgoKCpoKCgpSC", "92-114:1")]
-[assembly: GoPositionMap("internal/zstd/zstd_test.go", "zstd_test.cs", "ACEuACK0AYKykoKCgpSCgtyCgoKysoKCgoKUgoIAChqSgoKCpoKU9oKCgpQABxiylJSSgoKCgoKAgoK2lIKUqqKCpoKUlIKCgqaC6pKCgpSCgoKUgoKClPqCgoKmgoKCsoKClIIACQiCgoKmgoKCpoKCgqaCgoCCpJSCggAIDIKCgoKC3KKClJSUgpSCgoKC", "115-125:1;133-144:1;156-161:1;190-202:1;262-266:1;284-301:1;307-312:1")]
+[assembly: GoPositionMap("internal/zstd/xxhash_test.go", "xxhash_test.cs", "ABQeAAocgoKCgoKCAAkKgoKmgoKmgoKClIKClIKmgoKCAAgIgoKClOailIKUgoKClIKUgoKCgoKClIKCgqaCgoKUgg==", "92-114:1")]
+[assembly: GoPositionMap("internal/zstd/zstd_test.go", "zstd_test.cs", "ACEuACK0AYKykoKCgpSCgtyCgoKysoKCgoKUgoIAChqSgoKCpoKU9oKCgpQABxiylJSSgoKCgoKCgqaUgpSqooKmgpSUgoKCpoLqkoKClIKCgpSCgoKU+oKCgqaCgoKygoKUggAJCIKCgqaCgoKmgoKCpoKCgpSUgoIACAyCgoKCgtyigpSUlIKUgoKCgg==", "115-125:1;133-144:1;156-161:1;190-202:1;262-266:1;284-301:1;307-312:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

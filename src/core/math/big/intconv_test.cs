@@ -20,7 +20,7 @@ partial struct stringTestsᴛ1 /*dyn*/ {
     internal int64 val;
     internal bool ok;
 }
-internal static slice<stringTestsᴛ1> stringTests = slice<stringTestsᴛ1>([
+internal static slice<stringTestsᴛ1> stringTests = [
     // invalid inputs
     new(@in: ""),
     new(@in: "a"),
@@ -88,11 +88,11 @@ internal static slice<stringTestsᴛ1> stringTests = slice<stringTestsᴛ1>([
     new("0b_1010", "10", 0, 10, true),
     new("+0o_660", "432", 0, 432, true),
     new("-0xF00D_1E", "-15731998", 0, -0xf00d1e, true)
-]);
+];
 
 public static void TestIntText(ж<testing.T> t) {
     var z = @new<global::go.math.big_package.ΔInt>();
-    foreach (var (_, test) in stringTests) {
+    foreach (var (_, test) in range(stringTests)) {
         if (!test.ok) {
             continue;
         }
@@ -108,10 +108,8 @@ public static void TestIntText(ж<testing.T> t) {
             @base = 10;
         }
 
-        {
-            @string got = z.Text(@base); if (got != test.@out) {
-                t.Errorf("%v: got %s; want %s", test, got, test.@out);
-            }
+        @string got = z.Text(@base); if (got != test.@out) {
+            t.Errorf("%v: got %s; want %s", test, got, test.@out);
         }
     }
 }
@@ -119,7 +117,7 @@ public static void TestIntText(ж<testing.T> t) {
 public static void TestAppendText(ж<testing.T> t) {
     var z = @new<global::go.math.big_package.ΔInt>();
     slice<byte> buf = default;
-    foreach (var (_, test) in stringTests) {
+    foreach (var (_, test) in range(stringTests)) {
         if (!test.ok) {
             continue;
         }
@@ -137,10 +135,8 @@ public static void TestAppendText(ж<testing.T> t) {
 
         nint i = len(buf);
         buf = z.Append(buf, @base);
-        {
-            @string got = (@string)(buf.slice(i)); if (got != test.@out) {
-                t.Errorf("%v: got %s; want %s", test, got, test.@out);
-            }
+        @string got = (@string)(buf.slice(i)); if (got != test.@out) {
+            t.Errorf("%v: got %s; want %s", test, got, test.@out);
         }
     }
 }
@@ -161,17 +157,15 @@ internal static @string format(nint @base) {
 
 public static void TestGetString(ж<testing.T> t) {
     var z = @new<global::go.math.big_package.ΔInt>();
-    foreach (var (i, test) in stringTests) {
+    foreach (var (i, test) in range(stringTests)) {
         if (!test.ok) {
             continue;
         }
         z.SetInt64(test.val);
 
         if (test.@base == 10) {
-            {
-                @string gotΔ1 = z.String(); if (gotΔ1 != test.@out) {
-                    t.Errorf("#%da got %s; want %s", i, gotΔ1, test.@out);
-                }
+            @string gotΔ1 = z.String(); if (gotΔ1 != test.@out) {
+                t.Errorf("#%da got %s; want %s", i, gotΔ1, test.@out);
             }
         }
 
@@ -191,7 +185,7 @@ public static void TestGetString(ж<testing.T> t) {
 
 public static void TestSetString(ж<testing.T> t) {
     var tmp = @new<global::go.math.big_package.ΔInt>();
-    foreach (var (i, test) in stringTests) {
+    foreach (var (i, test) in range(stringTests)) {
         // initialize to a non-zero value so that issues with parsing
         // 0 are detected
         tmp.SetInt64(1234567890);
@@ -236,7 +230,7 @@ partial struct formatTestsᴛ1 /*dyn*/ {
     internal @string format;
     internal @string output;
 }
-internal static slice<formatTestsᴛ1> formatTests = slice<formatTestsᴛ1>([
+internal static slice<formatTestsᴛ1> formatTests = [
     new("<nil>", "%x", "<nil>"),
     new("<nil>", "%#x", "<nil>"),
     new("<nil>", "%#y", "%!y(big.Int=<nil>)"),
@@ -383,10 +377,10 @@ internal static slice<formatTestsᴛ1> formatTests = slice<formatTestsᴛ1>([
     new("0", "%.d", ""),
     new("0", "%.0d", ""),
     new("0", "%3.d", "")
-]);
+];
 
 public static void TestFormat(ж<testing.T> t) {
-    foreach (var (i, test) in formatTests) {
+    foreach (var (i, test) in range(formatTests)) {
         ж<global::go.math.big_package.ΔInt> x = default;
         if (test.input != "<nil>"u8) {
             bool ok = default;
@@ -409,7 +403,7 @@ internal partial struct scanTest {
     internal nint remaining;
 }
 
-internal static slice<scanTest> scanTests = slice<scanTest>([
+internal static slice<scanTest> scanTests = [
     new("1010", "%b", "10", 0),
     new("0b1010", "%v", "10", 0),
     new("12", "%o", "10", 0),
@@ -431,12 +425,12 @@ internal static slice<scanTest> scanTests = slice<scanTest>([
     new("5c0d52f451aec609b15da8e5e5626c4eaa88723bdeac9d25ca9b961269400410ca208a16af9c2fb07d7a11c7772cba02c22f9711078d51a3797eb18e691295293284d988e349fa6deba46b25a4ecd9f715", "%x", "419981998319789881681348172155240145539175961318447822049735313481433836043208347786919222066492311384432264836938599791362288343314139526391998172436831830624710446410781662672086936222288181013", 0),
     new("92fcad4b5c0d52f451aec609b15da8e5e5626c4eaa88723bdeac9d25ca9b961269400410ca208a16af9c2fb07d799c32fe2f3cc5422f9711078d51a3797eb18e691295293284d8f5e69caf6decddfe1df6", "%x", "670619546945481998414061201992255225716434798957375727890607516800039934374391281275121813279544891602026798031004764406015624866771554937391445093144221697436880587924204655403711377861305572854", 0),
     new("10000000000000000000000200000000000000000000003000000000000000000000040000000000000000000000500000000000000000000006", "%d", "10000000000000000000000200000000000000000000003000000000000000000000040000000000000000000000500000000000000000000006", 0)
-]);
+];
 
 [GoInit] internal static void init() {
     foreach (var i in range(200)) {
         var d = new slice<byte>(i + 1);
-        foreach (var j in range(d)) {
+        foreach (var j in range(len(d))) {
             d[j] = (byte)('0' + Δrand.N((byte)10));
         }
         if (d[0] == '0') {
@@ -448,14 +442,12 @@ internal static slice<scanTest> scanTests = slice<scanTest>([
 
 public static void TestScan(ж<testing.T> t) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    foreach (var (i, test) in scanTests) {
+    foreach (var (i, test) in range(scanTests)) {
         var x = @new<global::go.math.big_package.ΔInt>();
         buf.Reset();
         buf.WriteString(test.input);
-        {
-            var (_, err) = fmt.Fscanf(new big_test_package.bytes_BufferжReader(Ꮡbuf), test.format, x.OrTypedNil()); if (err != nil) {
-                t.Errorf("#%d error: %s", i, err);
-            }
+        var (_, err) = fmt.Fscanf(new big_test_package.bytes_BufferжReader(Ꮡbuf), test.format, x.OrTypedNil()); if (err != nil) {
+            t.Errorf("#%d error: %s", i, err);
         }
         if (x.String() != test.output) {
             t.Errorf("#%d got %s; want %s", i, x.String(), test.output);

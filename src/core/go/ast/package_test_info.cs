@@ -48,11 +48,11 @@ using static global::go.go.ast_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/ast/commentmap_test.go", "commentmap_test.cs", "AE+YAQATKIKCgpSmgoKCgpSmgoKCgoLKgIK6ooKCgpSCgsqCgoKClKaCgIKCgtqCgoKCgoI=")]
-[assembly: GoPositionMap("go/ast/filter_test.go", "filter_test.cs", "AD9ylIKCgriCgoK4lpKAgqSUgg==")]
+[assembly: GoPositionMap("go/ast/commentmap_test.go", "commentmap_test.cs", "AE+YAQATKIKCgpSmgoKCgpSmgoKCgoLKgIK6ooKCgpSCgsqCgoKClKaCgoKCyoKCgoKCgg==")]
+[assembly: GoPositionMap("go/ast/filter_test.go", "filter_test.cs", "AD9ylIKCgriCgoK4lpKClJSC")]
 [assembly: GoPositionMap("go/ast/import_test.go", "import_test.cs", "ADUcgoIAARCCgoKmpoKCuIK4ggABHoKCgqamgoKCyoIADgqCioKCgpQADQaCnoKCgpSCgriClII=", "15-42:1;44-80:2")]
 [assembly: GoPositionMap("go/ast/issues_test.go", "issues_test.cs", "AA4cgtyCgoKokoKClJSClIIACQySAGOiAYKCgqaCgg==", "29-32:1")]
-[assembly: GoPositionMap("go/ast/walk_test.go", "walk_test.cs", "ABYi3JSCgoKmgoCCABkKggAAEoKUmIKCkoKAgqSAgoK2uO6CuIKC", "51-53:1;57-68:2")]
+[assembly: GoPositionMap("go/ast/walk_test.go", "walk_test.cs", "ABYi3JSCgoKmgoIAGAqCAAASgpSYgoKSgoCCpICCgra47oK4goI=", "51-53:1;57-68:2")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

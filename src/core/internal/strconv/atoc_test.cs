@@ -184,7 +184,7 @@ public static void TestParseComplex(ж<testing.T> t) {
         new("1e+4294967296+1e+4294967296i", infpp, ErrRange),
         new("1e+4294967296-1e+4294967296i", infpm, ErrRange)
     ]);
-    foreach (var i in range(tests)) {
+    foreach (var i in range(len(tests))) {
         var test = Ꮡ(tests, i);
         var (c, e) = ParseComplex(test.@in, 128);
         if (!sameComplex(c, test.@out) || !AreEqual(e, test.err)) {
@@ -213,7 +213,7 @@ public static void TestParseComplexIncorrectBitSize(ж<testing.T> t) {
     @string s = sᶜ;
     complex128 want = /* 1.5e308 + 1.0e307i */ 1.5e+308D + 1e+307D.i();
 
-    foreach (var (_, bitSize) in slice<nint>([0, 10, 100, 256])) {
+    foreach (var (_, bitSize) in range(slice<nint>([0, 10, 100, 256]))) {
         var (c, err) = ParseComplex(s, bitSize);
         if (err != nil) {
             t.Fatalf("ParseComplex(%q, %d) gave error %s", s, bitSize, err);

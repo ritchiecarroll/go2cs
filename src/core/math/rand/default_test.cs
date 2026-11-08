@@ -13,8 +13,6 @@ using strconv = strconv_package;
 using sync = sync_package;
 using testing = testing_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using exec = go.os.exec_package;
 using go.os;
 using static go.math.rand_internal_test_package;
@@ -40,11 +38,9 @@ public static void TestDefaultRace(ж<testing.T> t) {
     }
 
     @string env = envᶜ;
-    {
-        @string v = os.Getenv(env); if (v != ""u8) {
-            doDefaultTest(t, v);
-            return;
-        }
+    @string v = os.Getenv(env); if (v != ""u8) {
+        doDefaultTest(t, v);
+        return;
     }
 
     t.Parallel();

@@ -71,10 +71,8 @@ public static void TestWriteFile(ж<Δtesting.T> t) {
 
         @string msg = "Programming today is a race between software engineers striving to "u8 + "build bigger and better idiot-proof programs, and the Universe trying "u8 + "to produce bigger and better idiots. So far, the Universe is winning."u8;
 
-        {
-            var errΔ1 = WriteFile(f.Name(), slice<byte>(msg), 420); if (errΔ1 != nil) {
-                t.Fatalf("WriteFile %s: %v", f.Name(), errΔ1);
-            }
+        var errΔ1 = WriteFile(f.Name(), slice<byte>(msg), 420); if (errΔ1 != nil) {
+            t.Fatalf("WriteFile %s: %v", f.Name(), errΔ1);
         }
 
         (var data, err) = ReadFile(f.Name());
@@ -129,10 +127,8 @@ public static void TestReadDir(ж<Δtesting.T> t) {
     t.Parallel();
 
     @string dirname = rumpelstilzchenˢ;
-    {
-        var (_, errΔ1) = ReadDir(dirname); if (errΔ1 == nil) {
-            t.Fatalf("ReadDir %s: error expected, none found", dirname);
-        }
+    var (_, errΔ1) = ReadDir(dirname); if (errΔ1 == nil) {
+        t.Fatalf("ReadDir %s: error expected, none found", dirname);
     }
 
     @string filename = filepath.Join(t.TempDir(), fooˢ);
@@ -141,10 +137,8 @@ public static void TestReadDir(ж<Δtesting.T> t) {
         t.Fatal(err);
     }
     f.Close();
-    {
-        var (listΔ1, errΔ2) = ReadDir(filename); if (listΔ1 != nil || !errors.Is(errΔ2, syscall.ENOTDIR)) {
-            t.Fatalf("ReadDir %s: (nil, ENOTDIR) expected, got (%v, %v)", filename, listΔ1, errΔ2);
-        }
+    var (listΔ1, errΔ2) = ReadDir(filename); if (listΔ1 != nil || !errors.Is(errΔ2, syscall.ENOTDIR)) {
+        t.Fatalf("ReadDir %s: (nil, ENOTDIR) expected, got (%v, %v)", filename, listΔ1, errΔ2);
     }
 
     dirname = ".";
@@ -155,7 +149,7 @@ public static void TestReadDir(ж<Δtesting.T> t) {
 
     var foundFile = false;
     var foundSubDir = false;
-    foreach (var (_, dir) in list) {
+    foreach (var (_, dir) in range(list)) {
         switch (ᐧ) {
         case {} when !dir.IsDir() && dir.Name() == "read_test.go"u8: {
             foundFile = true;

@@ -19,45 +19,45 @@ partial struct lookupStaticHostTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal slice<staticHostEntry> ents;
 }
-internal static slice<lookupStaticHostTestsᴛ1> lookupStaticHostTests = slice<lookupStaticHostTestsᴛ1>([
+internal static slice<lookupStaticHostTestsᴛ1> lookupStaticHostTests = [
     new(
         "testdata/hosts",
-        slice<staticHostEntry>([
-            new("odin", slice<@string>(["127.0.0.2", "127.0.0.3", "::2"])),
-            new("thor", slice<@string>(["127.1.1.1"])),
-            new("ullr", slice<@string>(["127.1.1.2"])),
-            new("ullrhost", slice<@string>(["127.1.1.2"])),
-            new("localhost", slice<@string>(["fe80::1%lo0"]))
-        ])
+        [
+            new("odin", ["127.0.0.2", "127.0.0.3", "::2"]),
+            new("thor", ["127.1.1.1"]),
+            new("ullr", ["127.1.1.2"]),
+            new("ullrhost", ["127.1.1.2"]),
+            new("localhost", ["fe80::1%lo0"])
+        ]
     ),
     new(
         "testdata/singleline-hosts", // see golang.org/issue/6646
-        slice<staticHostEntry>([
-            new("odin", slice<@string>(["127.0.0.2"]))
-        ])
+        [
+            new("odin", ["127.0.0.2"])
+        ]
     ),
     new(
         "testdata/ipv4-hosts",
-        slice<staticHostEntry>([
-            new("localhost", slice<@string>(["127.0.0.1", "127.0.0.2", "127.0.0.3"])),
-            new("localhost.localdomain", slice<@string>(["127.0.0.3"]))
-        ])
+        [
+            new("localhost", ["127.0.0.1", "127.0.0.2", "127.0.0.3"]),
+            new("localhost.localdomain", ["127.0.0.3"])
+        ]
     ),
     new(
         "testdata/ipv6-hosts", // see golang.org/issue/8996
-        slice<staticHostEntry>([
-            new("localhost", slice<@string>(["::1", "fe80::1", "fe80::2%lo0", "fe80::3%lo0"])),
-            new("localhost.localdomain", slice<@string>(["fe80::3%lo0"]))
-        ])
+        [
+            new("localhost", ["::1", "fe80::1", "fe80::2%lo0", "fe80::3%lo0"]),
+            new("localhost.localdomain", ["fe80::3%lo0"])
+        ]
     ),
     new(
         "testdata/case-hosts", // see golang.org/issue/12806
-        slice<staticHostEntry>([
-            new("PreserveMe", slice<@string>(["127.0.0.1", "::1"])),
-            new("PreserveMe.local", slice<@string>(["127.0.0.1", "::1"]))
-        ])
+        [
+            new("PreserveMe", ["127.0.0.1", "::1"]),
+            new("PreserveMe.local", ["127.0.0.1", "::1"])
+        ]
     )
-]);
+];
 
 public static void TestLookupStaticHost(ж<testing.T> t) {
     GoFrame ᒐ = default;
@@ -66,9 +66,9 @@ public static void TestLookupStaticHost(ж<testing.T> t) {
             hostsFilePath = orig;
         }, hostsFilePath, ref ᒐ);
 
-        foreach (var (_, tt) in lookupStaticHostTests) {
+        foreach (var (_, tt) in range(lookupStaticHostTests)) {
             hostsFilePath = tt.name;
-            foreach (var (_, ent) in tt.ents) {
+            foreach (var (_, ent) in range(tt.ents)) {
                 testStaticHost(t, tt.name, ent);
             }
         }
@@ -79,7 +79,7 @@ public static void TestLookupStaticHost(ж<testing.T> t) {
 
 internal static void testStaticHost(ж<testing.T> t, @string hostsPath, staticHostEntry ent) {
     var ins = slice<@string>([ent.@in, absDomainName(ent.@in), strings.ToLower(ent.@in), strings.ToUpper(ent.@in)]);
-    foreach (var (_, @in) in ins) {
+    foreach (var (_, @in) in range(ins)) {
         var (addrs, _) = lookupStaticHost(@in);
         if (!slices.Equal<slice<@string>, @string>(addrs, ent.@out)) {
             t.Errorf("%s, lookupStaticHost(%s) = %v; want %v", hostsPath, @in, addrs, ent.@out);
@@ -87,50 +87,50 @@ internal static void testStaticHost(ж<testing.T> t, @string hostsPath, staticHo
     }
 }
 
-internal static slice<lookupStaticHostTestsᴛ1> lookupStaticAddrTests = slice<lookupStaticHostTestsᴛ1>([
+internal static slice<lookupStaticHostTestsᴛ1> lookupStaticAddrTests = [
     new(
         "testdata/hosts",
-        slice<staticHostEntry>([
-            new("255.255.255.255", slice<@string>(["broadcasthost"])),
-            new("127.0.0.2", slice<@string>(["odin"])),
-            new("127.0.0.3", slice<@string>(["odin"])),
-            new("::2", slice<@string>(["odin"])),
-            new("127.1.1.1", slice<@string>(["thor"])),
-            new("127.1.1.2", slice<@string>(["ullr", "ullrhost"])),
-            new("fe80::1%lo0", slice<@string>(["localhost"]))
-        ])
+        [
+            new("255.255.255.255", ["broadcasthost"]),
+            new("127.0.0.2", ["odin"]),
+            new("127.0.0.3", ["odin"]),
+            new("::2", ["odin"]),
+            new("127.1.1.1", ["thor"]),
+            new("127.1.1.2", ["ullr", "ullrhost"]),
+            new("fe80::1%lo0", ["localhost"])
+        ]
     ),
     new(
         "testdata/singleline-hosts", // see golang.org/issue/6646
-        slice<staticHostEntry>([
-            new("127.0.0.2", slice<@string>(["odin"]))
-        ])
+        [
+            new("127.0.0.2", ["odin"])
+        ]
     ),
     new(
         "testdata/ipv4-hosts",
-        slice<staticHostEntry>([
-            new("127.0.0.1", slice<@string>(["localhost"])),
-            new("127.0.0.2", slice<@string>(["localhost"])),
-            new("127.0.0.3", slice<@string>(["localhost", "localhost.localdomain"]))
-        ])
+        [
+            new("127.0.0.1", ["localhost"]),
+            new("127.0.0.2", ["localhost"]),
+            new("127.0.0.3", ["localhost", "localhost.localdomain"])
+        ]
     ),
     new(
         "testdata/ipv6-hosts", // see golang.org/issue/8996
-        slice<staticHostEntry>([
-            new("::1", slice<@string>(["localhost"])),
-            new("fe80::1", slice<@string>(["localhost"])),
-            new("fe80::2%lo0", slice<@string>(["localhost"])),
-            new("fe80::3%lo0", slice<@string>(["localhost", "localhost.localdomain"]))
-        ])
+        [
+            new("::1", ["localhost"]),
+            new("fe80::1", ["localhost"]),
+            new("fe80::2%lo0", ["localhost"]),
+            new("fe80::3%lo0", ["localhost", "localhost.localdomain"])
+        ]
     ),
     new(
         "testdata/case-hosts", // see golang.org/issue/12806
-        slice<staticHostEntry>([
-            new("127.0.0.1", slice<@string>(["PreserveMe", "PreserveMe.local"])),
-            new("::1", slice<@string>(["PreserveMe", "PreserveMe.local"]))
-        ])
+        [
+            new("127.0.0.1", ["PreserveMe", "PreserveMe.local"]),
+            new("::1", ["PreserveMe", "PreserveMe.local"])
+        ]
     )
-]);
+];
 
 public static void TestLookupStaticAddr(ж<testing.T> t) {
     GoFrame ᒐ = default;
@@ -139,9 +139,9 @@ public static void TestLookupStaticAddr(ж<testing.T> t) {
             hostsFilePath = orig;
         }, hostsFilePath, ref ᒐ);
 
-        foreach (var (_, tt) in lookupStaticAddrTests) {
+        foreach (var (_, tt) in range(lookupStaticAddrTests)) {
             hostsFilePath = tt.name;
-            foreach (var (_, ent) in tt.ents) {
+            foreach (var (_, ent) in range(tt.ents)) {
                 testStaticAddr(t, tt.name, ent);
             }
         }
@@ -152,7 +152,7 @@ public static void TestLookupStaticAddr(ж<testing.T> t) {
 
 internal static void testStaticAddr(ж<testing.T> t, @string hostsPath, staticHostEntry ent) {
     var hosts = lookupStaticAddr(ent.@in);
-    foreach (var i in range(ent.@out)) {
+    foreach (var i in range(len(ent.@out))) {
         ent.@out[i] = absDomainName(ent.@out[i]);
     }
     if (!slices.Equal<slice<@string>, @string>(hosts, ent.@out)) {
@@ -176,21 +176,21 @@ public static void TestHostCacheModification(ж<testing.T> t) {
         }, hostsFilePath, ref ᒐ);
 
         hostsFilePath = testdataIpv4Hostsˢ;
-        var ent = new staticHostEntry("localhost", slice<@string>(["127.0.0.1", "127.0.0.2", "127.0.0.3"]));
+        var ent = new staticHostEntry("localhost", ["127.0.0.1", "127.0.0.2", "127.0.0.3"]);
         testStaticHost(t, hostsFilePath, ent);
         // Modify the addresses return by lookupStaticHost.
         var (addrs, _) = lookupStaticHost(ent.@in);
-        foreach (var i in range(addrs)) {
+        foreach (var i in range(len(addrs))) {
             addrs[i] += "junk"u8;
         }
         testStaticHost(t, hostsFilePath, ent);
 
         hostsFilePath = testdataIpv6Hostsˢ;
-        ent = new staticHostEntry("::1", slice<@string>(["localhost"]));
+        ent = new staticHostEntry("::1", ["localhost"]);
         testStaticAddr(t, hostsFilePath, ent);
         // Modify the hosts return by lookupStaticAddr.
         var hosts = lookupStaticAddr(ent.@in);
-        foreach (var i in range(hosts)) {
+        foreach (var i in range(len(hosts))) {
             hosts[i] += "junk"u8;
         }
         testStaticAddr(t, hostsFilePath, ent);
@@ -202,7 +202,7 @@ public static void TestHostCacheModification(ж<testing.T> t) {
 partial struct lookupStaticHostAliasesTestᴛ1 /*dyn*/ {
     internal @string lookup, res;
 }
-internal static slice<lookupStaticHostAliasesTestᴛ1> lookupStaticHostAliasesTest = slice<lookupStaticHostAliasesTestᴛ1>([
+internal static slice<lookupStaticHostAliasesTestᴛ1> lookupStaticHostAliasesTest = [
     // 127.0.0.1
     new("test", "test"),
     // 127.0.0.2
@@ -218,7 +218,7 @@ internal static slice<lookupStaticHostAliasesTestᴛ1> lookupStaticHostAliasesTe
     new("5.test", "test4.example.com"),
     new("4.test", "test4.example.com"),
     new("test4.example.com", "test4.example.com")
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testdataAliasesˢ => ref testdataAliasesˢᵇ;
@@ -232,7 +232,7 @@ public static void TestLookupStaticHostAliases(ж<testing.T> t) {
         }, hostsFilePath, ref ᒐ);
 
         hostsFilePath = testdataAliasesˢ;
-        foreach (var (_, ent) in lookupStaticHostAliasesTest) {
+        foreach (var (_, ent) in range(lookupStaticHostAliasesTest)) {
             testLookupStaticHostAliases(t, ent.lookup, absDomainName(ent.res));
         }
     }
@@ -242,7 +242,7 @@ public static void TestLookupStaticHostAliases(ж<testing.T> t) {
 
 internal static void testLookupStaticHostAliases(ж<testing.T> t, @string lookup, @string lookupRes) {
     var ins = slice<@string>([lookup, absDomainName(lookup), strings.ToLower(lookup), strings.ToUpper(lookup)]);
-    foreach (var (_, @in) in ins) {
+    foreach (var (_, @in) in range(ins)) {
         var (_, res) = lookupStaticHost(@in);
         if (res != lookupRes) {
             t.Errorf("lookupStaticHost(%v): got %v, want %v", @in, res, lookupRes);

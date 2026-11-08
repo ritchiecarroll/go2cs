@@ -73,341 +73,341 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = slice<nameCons
         name: "certificate generation process",
         roots: new slice<constraintsSpec>(1),
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"])
+            sans: ["dns:example.com"]
         )
     ),
     new(
         name: "single level of intermediate",
         roots: new slice<constraintsSpec>(1),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"])
+            sans: ["dns:example.com"]
         )
     ),
     new(
         name: "two levels of intermediates",
         roots: new slice<constraintsSpec>(1),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()]),
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        intermediates: [
+            [
+                new()],
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"])
+            sans: ["dns:example.com"]
         )
     ),
     new(
         name: "matching DNS constraint in root",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:example.com"])
+                ok: ["dns:example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"])
+            sans: ["dns:example.com"]
         )
     ),
     new(
         name: "matching DNS constraint in intermediate",
         roots: new slice<constraintsSpec>(1),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        intermediates: [
+            [
                 new(
-                    ok: slice<@string>(["dns:example.com"])
-                )])
-        ]),
+                    ok: ["dns:example.com"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"])
+            sans: ["dns:example.com"]
         )
     ),
     new(
         name: "leading period only matches subdomains",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:.example.com"])
+                ok: ["dns:.example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"])
+            sans: ["dns:example.com"]
         ),
         expectedError: "\"example.com\" is not permitted"
     ),
     new(
         name: "leading period matches subdomains",
         roots: new slice<constraintsSpec>(1),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        intermediates: [
+            [
                 new(
-                    ok: slice<@string>(["dns:.example.com"])
-                )])
-        ]),
+                    ok: ["dns:.example.com"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:foo.example.com"])
+            sans: ["dns:foo.example.com"]
         )
     ),
     new(
         name: "leading period matches multiple levels of subdomains",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:.example.com"])
+                ok: ["dns:.example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:foo.bar.example.com"])
+            sans: ["dns:foo.bar.example.com"]
         )
     ),
     new(
         name: "specifying a permitted list of names does not exclude other name types",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:.example.com"])
+                ok: ["dns:.example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["ip:10.1.1.1"])
+            sans: ["ip:10.1.1.1"]
         )
     ),
     new(
         name: "specifying a permitted list of names does not exclude other name types",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["ip:10.0.0.0/8"])
+                ok: ["ip:10.0.0.0/8"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"])
+            sans: ["dns:example.com"]
         )
     ),
     new(
         name: "intermediates can try to permit other names, which isn't forbidden if the leaf doesn't mention them",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:example.com"])
+                ok: ["dns:example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        ],
+        intermediates: [
+            [
                 new(
-                    ok: slice<@string>(["dns:example.com", "dns:foo.com"])
-                )])
-        ]),
+                    ok: ["dns:example.com", "dns:foo.com"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"])
+            sans: ["dns:example.com"]
         )
     ),
     new(
         name: "intermediates cannot add permitted names that the root doesn't grant them",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:example.com"])
+                ok: ["dns:example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        ],
+        intermediates: [
+            [
                 new(
-                    ok: slice<@string>(["dns:foo.example.com", "dns:foo.com"])
-                )])
-        ]),
+                    ok: ["dns:foo.example.com", "dns:foo.com"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:foo.com"])
+            sans: ["dns:foo.com"]
         ),
         expectedError: "\"foo.com\" is not permitted"
     ),
     new(
         name: "intermediates can further limit their scope if they wish",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:.example.com"])
+                ok: ["dns:.example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        ],
+        intermediates: [
+            [
                 new(
-                    ok: slice<@string>(["dns:.bar.example.com"])
-                )])
-        ]),
+                    ok: ["dns:.bar.example.com"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:foo.bar.example.com"])
+            sans: ["dns:foo.bar.example.com"]
         )
     ),
     new(
         name: "intermediates can further limit their scope and that limitation is effective",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:.example.com"])
+                ok: ["dns:.example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        ],
+        intermediates: [
+            [
                 new(
-                    ok: slice<@string>(["dns:.bar.example.com"])
-                )])
-        ]),
+                    ok: ["dns:.bar.example.com"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:foo.notbar.example.com"])
+            sans: ["dns:foo.notbar.example.com"]
         ),
         expectedError: "\"foo.notbar.example.com\" is not permitted"
     ),
     new(
         name: "roots can exclude subtrees and that doesn't affect other names",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["dns:.example.com"])
+                bad: ["dns:.example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:foo.com"])
+            sans: ["dns:foo.com"]
         )
     ),
     new(
         name: "roots exclusions are effective",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["dns:.example.com"])
+                bad: ["dns:.example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:foo.example.com"])
+            sans: ["dns:foo.example.com"]
         ),
         expectedError: "\"foo.example.com\" is excluded"
     ),
     new(
         name: "intermediates can also exclude names and that doesn't affect other names",
         roots: new slice<constraintsSpec>(1),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        intermediates: [
+            [
                 new(
-                    bad: slice<@string>(["dns:.example.com"])
-                )])
-        ]),
+                    bad: ["dns:.example.com"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:foo.com"])
+            sans: ["dns:foo.com"]
         )
     ),
     new(
         name: "intermediate exclusions are effective",
         roots: new slice<constraintsSpec>(1),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        intermediates: [
+            [
                 new(
-                    bad: slice<@string>(["dns:.example.com"])
-                )])
-        ]),
+                    bad: ["dns:.example.com"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:foo.example.com"])
+            sans: ["dns:foo.example.com"]
         ),
         expectedError: "\"foo.example.com\" is excluded"
     ),
     new(
         name: "having an exclusion doesn't prohibit other types of names",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["dns:.example.com"])
+                bad: ["dns:.example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:foo.com", "ip:10.1.1.1"])
+            sans: ["dns:foo.com", "ip:10.1.1.1"]
         )
     ),
     new(
         name: "IP-based exclusions are permitted and don't affect unrelated IP addresses",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["ip:10.0.0.0/8"])
+                bad: ["ip:10.0.0.0/8"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["ip:192.168.1.1"])
+            sans: ["ip:192.168.1.1"]
         )
     ),
     new(
         name: "IP-based exclusions are effective",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["ip:10.0.0.0/8"])
+                bad: ["ip:10.0.0.0/8"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["ip:10.0.0.1"])
+            sans: ["ip:10.0.0.1"]
         ),
         expectedError: "\"10.0.0.1\" is excluded"
     ),
     new(
         name: "intermediates can further constrain IP ranges",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["ip:0.0.0.0/1"])
+                bad: ["ip:0.0.0.0/1"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        ],
+        intermediates: [
+            [
                 new(
-                    bad: slice<@string>(["ip:11.0.0.0/8"])
-                )])
-        ]),
+                    bad: ["ip:11.0.0.0/8"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["ip:11.0.0.1"])
+            sans: ["ip:11.0.0.1"]
         ),
         expectedError: "\"11.0.0.1\" is excluded"
     ),
     new(
         name: "multiple intermediates with incompatible constraints",
         roots: new slice<constraintsSpec>(1),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        intermediates: [
+            [
                 new(
-                    ok: slice<@string>(["dns:.foo.com"])
+                    ok: ["dns:.foo.com"]
                 ),
                 new(
-                    ok: slice<@string>(["dns:.example.com"])
-                )])
-        ]),
+                    ok: ["dns:.example.com"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:foo.example.com"])
+            sans: ["dns:foo.example.com"]
         ),
         noOpenSSL: true // OpenSSL's chain building is not informed by constraints.
 
@@ -415,874 +415,874 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = slice<nameCons
     new(
         name: "multiple intermediates with incompatible constraints swapped",
         roots: new slice<constraintsSpec>(1),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        intermediates: [
+            [
                 new(
-                    ok: slice<@string>(["dns:.example.com"])
+                    ok: ["dns:.example.com"]
                 ),
                 new(
-                    ok: slice<@string>(["dns:.foo.com"])
-                )])
-        ]),
+                    ok: ["dns:.foo.com"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:foo.example.com"])
+            sans: ["dns:foo.example.com"]
         ),
         noOpenSSL: true // OpenSSL's chain building is not informed by constraints.
 
     ),
     new(
         name: "multiple roots with incompatible constraints",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(),
             new(
-                ok: slice<@string>(["dns:foo.com"])
+                ok: ["dns:foo.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"])
+            sans: ["dns:example.com"]
         ),
         noOpenSSL: true // OpenSSL's chain building is not informed by constraints.
 
     ),
     new(
         name: "multiple roots with incompatible constraints swapped",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:foo.com"])
+                ok: ["dns:foo.com"]
             ),
             new()
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"])
+            sans: ["dns:example.com"]
         ),
         noOpenSSL: true // OpenSSL's chain building is not informed by constraints.
 
     ),
     new(
         name: "chain building with multiple intermediates and roots",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:foo.com"])
+                ok: ["dns:foo.com"]
             ),
             new(
-                ok: slice<@string>(["dns:example.com"])
+                ok: ["dns:example.com"]
             ),
             new()
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        ],
+        intermediates: [
+            [
                 new(),
                 new(
-                    ok: slice<@string>(["dns:foo.com"])
-                )]),
-            slice<constraintsSpec>([
+                    ok: ["dns:foo.com"]
+                )],
+            [
                 new(),
                 new(
-                    ok: slice<@string>(["dns:foo.com"])
-                )])
-        ]),
+                    ok: ["dns:foo.com"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:bar.com"])
+            sans: ["dns:bar.com"]
         ),
         noOpenSSL: true // OpenSSL's chain building is not informed by constraints.
 
     ),
     new(
         name: "chain building fails with no valid path",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:foo.com"])
+                ok: ["dns:foo.com"]
             ),
             new(
-                ok: slice<@string>(["dns:example.com"])
+                ok: ["dns:example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        ],
+        intermediates: [
+            [
                 new(),
                 new(
-                    ok: slice<@string>(["dns:foo.com"])
-                )]),
-            slice<constraintsSpec>([
+                    ok: ["dns:foo.com"]
+                )],
+            [
                 new(
-                    ok: slice<@string>(["dns:bar.com"])
+                    ok: ["dns:bar.com"]
                 ),
                 new(
-                    ok: slice<@string>(["dns:foo.com"])
-                )])
-        ]),
+                    ok: ["dns:foo.com"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:bar.com"])
+            sans: ["dns:bar.com"]
         ),
         expectedError: "\"bar.com\" is not permitted"
     ),
     new(
         name: "unknown name types are unconstrained",
         roots: new slice<constraintsSpec>(1),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["unknown:"])
+            sans: ["unknown:"]
         )
     ),
     new(
         name: "unknown name types allowed in constrained chain",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:foo.com", "dns:.foo.com"])
+                ok: ["dns:foo.com", "dns:.foo.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["unknown:"])
+            sans: ["unknown:"]
         )
     ),
     new(
         name: "CN is ignored in constrained chain",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:foo.com", "dns:.foo.com"])
+                ok: ["dns:foo.com", "dns:.foo.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>([]),
+            sans: [],
             cn: "foo.com"
         )
     ),
     new(
         name: "IPv6 permitted constraint",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["ip:2000:abcd::/32"])
+                ok: ["ip:2000:abcd::/32"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["ip:2000:abcd:1234::"])
+            sans: ["ip:2000:abcd:1234::"]
         )
     ),
     new(
         name: "IPv6 permitted constraint is effective",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["ip:2000:abcd::/32"])
+                ok: ["ip:2000:abcd::/32"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["ip:2000:1234:abcd::"])
+            sans: ["ip:2000:1234:abcd::"]
         ),
         expectedError: "\"2000:1234:abcd::\" is not permitted"
     ),
     new(
         name: "IPv6 permitted constraint does not affect DNS",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["ip:2000:abcd::/32"])
+                ok: ["ip:2000:abcd::/32"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["ip:2000:abcd::", "dns:foo.com"])
+            sans: ["ip:2000:abcd::", "dns:foo.com"]
         )
     ),
     new(
         name: "IPv6 excluded constraint",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["ip:2000:abcd::/32"])
+                bad: ["ip:2000:abcd::/32"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["ip:2000:1234::"])
+            sans: ["ip:2000:1234::"]
         )
     ),
     new(
         name: "IPv6 excluded constraint is effective",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["ip:2000:abcd::/32"])
+                bad: ["ip:2000:abcd::/32"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["ip:2000:abcd::"])
+            sans: ["ip:2000:abcd::"]
         ),
         expectedError: "\"2000:abcd::\" is excluded"
     ),
     new(
         name: "IPv6 constraint does not permit IPv4",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["ip:2000:abcd::/32"])
+                ok: ["ip:2000:abcd::/32"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["ip:10.0.0.1"])
+            sans: ["ip:10.0.0.1"]
         ),
         expectedError: "\"10.0.0.1\" is not permitted"
     ),
     new(
         name: "IPv4 constraint does not permit IPv6",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["ip:10.0.0.0/8"])
+                ok: ["ip:10.0.0.0/8"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["ip:2000:abcd::"])
+            sans: ["ip:2000:abcd::"]
         ),
         expectedError: "\"2000:abcd::\" is not permitted"
     ),
     new(
         name: "unknown excluded constraint does not affect other names",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["unknown:"])
+                bad: ["unknown:"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"])
+            sans: ["dns:example.com"]
         )
     ),
     new(
         name: "unknown permitted constraint does not affect other names",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["unknown:"])
+                ok: ["unknown:"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"])
+            sans: ["dns:example.com"]
         )
     ),
     new(
         name: "exact email constraint",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["email:foo@example.com"])
+                ok: ["email:foo@example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["email:foo@example.com"])
+            sans: ["email:foo@example.com"]
         )
     ),
     new(
         name: "exact email constraint is effective",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["email:foo@example.com"])
+                ok: ["email:foo@example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["email:bar@example.com"])
+            sans: ["email:bar@example.com"]
         ),
         expectedError: "\"bar@example.com\" is not permitted"
     ),
     new(
         name: "email canonicalization",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["email:foo@example.com"])
+                ok: ["email:foo@example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["email:\"\\f\\o\\o\"@example.com"])
+            sans: ["email:\"\\f\\o\\o\"@example.com"]
         ),
         noOpenSSL: true // OpenSSL doesn't canonicalise email addresses before matching
 
     ),
     new(
         name: "email host constraint",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["email:example.com"])
+                ok: ["email:example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["email:foo@example.com"])
+            sans: ["email:foo@example.com"]
         )
     ),
     new(
         name: "email subdomain constraint",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["email:.example.com"])
+                ok: ["email:.example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["email:foo@sub.example.com"])
+            sans: ["email:foo@sub.example.com"]
         )
     ),
     new(
         name: "email subdomain constraint does not match parent",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["email:.example.com"])
+                ok: ["email:.example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["email:foo@example.com"])
+            sans: ["email:foo@example.com"]
         ),
         expectedError: "\"foo@example.com\" is not permitted"
     ),
     new(
         name: "email subdomain constraint matches deeper subdomains",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["email:.example.com"])
+                ok: ["email:.example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["email:foo@sub.sub.example.com"])
+            sans: ["email:foo@sub.sub.example.com"]
         )
     ),
     new(
         name: "email local part is case-sensitive",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["email:foo@example.com"])
+                ok: ["email:foo@example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["email:Foo@example.com"])
+            sans: ["email:Foo@example.com"]
         ),
         expectedError: "\"Foo@example.com\" is not permitted"
     ),
     new(
         name: "email domain part is case-insensitive",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["email:foo@EXAMPLE.com"])
+                ok: ["email:foo@EXAMPLE.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["email:foo@example.com"])
+            sans: ["email:foo@example.com"]
         )
     ),
     new(
         name: "DNS domain is case-insensitive",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:EXAMPLE.com"])
+                ok: ["dns:EXAMPLE.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"])
+            sans: ["dns:example.com"]
         )
     ),
     new(
         name: "URI constraint covers host",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["uri:example.com"])
+                ok: ["uri:example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>([
+            sans: [
                 "uri:http://example.com/bar",
                 "uri:http://example.com:8080/",
                 "uri:https://example.com/wibble#bar"
-            ])
+            ]
         )
     ),
     new(
         name: "URI with IP is rejected",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["uri:example.com"])
+                ok: ["uri:example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["uri:http://1.2.3.4/"])
+            sans: ["uri:http://1.2.3.4/"]
         ),
         expectedError: "URI with IP"
     ),
     new(
         name: "URI with IP and port is rejected",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["uri:example.com"])
+                ok: ["uri:example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["uri:http://1.2.3.4:43/"])
+            sans: ["uri:http://1.2.3.4:43/"]
         ),
         expectedError: "URI with IP"
     ),
     new(
         name: "URI with IPv6 is rejected",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["uri:example.com"])
+                ok: ["uri:example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["uri:http://[2006:abcd::1]/"])
+            sans: ["uri:http://[2006:abcd::1]/"]
         ),
         expectedError: "URI with IP"
     ),
     new(
         name: "URI with IPv6 and port is rejected",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["uri:example.com"])
+                ok: ["uri:example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["uri:http://[2006:abcd::1]:16/"])
+            sans: ["uri:http://[2006:abcd::1]:16/"]
         ),
         expectedError: "URI with IP"
     ),
     new(
         name: "URI permitted constraint is effective",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["uri:example.com"])
+                ok: ["uri:example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["uri:http://bar.com/"])
+            sans: ["uri:http://bar.com/"]
         ),
         expectedError: "\"http://bar.com/\" is not permitted"
     ),
     new(
         name: "URI excluded constraint is effective",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["uri:foo.com"])
+                bad: ["uri:foo.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["uri:http://foo.com/"])
+            sans: ["uri:http://foo.com/"]
         ),
         expectedError: "\"http://foo.com/\" is excluded"
     ),
     new(
         name: "URI subdomain constraint",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["uri:.foo.com"])
+                ok: ["uri:.foo.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["uri:http://www.foo.com/"])
+            sans: ["uri:http://www.foo.com/"]
         )
     ),
     new(
         name: "IPv4-mapped-IPv6 exclusion does not affect IPv4",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["ip:::ffff:1.2.3.4/128"])
+                bad: ["ip:::ffff:1.2.3.4/128"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["ip:1.2.3.4"])
+            sans: ["ip:1.2.3.4"]
         )
     ),
     new(
         name: "URI constraint not matched by URN",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["uri:example.com"])
+                ok: ["uri:example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["uri:urn:example"])
+            sans: ["uri:urn:example"]
         ),
         expectedError: "URI with empty host"
     ),
     new(
         name: "IPv6 exclusion does not exclude all IPv4",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["ip:1.2.3.0/24"]),
-                bad: slice<@string>(["ip:::0/0"])
+                ok: ["ip:1.2.3.0/24"],
+                bad: ["ip:::0/0"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["ip:1.2.3.4"])
+            sans: ["ip:1.2.3.4"]
         )
     ),
     new(
         name: "empty EKU in CA means any is ok",
         roots: new slice<constraintsSpec>(1),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"]),
-            ekus: slice<@string>(["serverAuth", "other"])
+            sans: ["dns:example.com"],
+            ekus: ["serverAuth", "other"]
         )
     ),
     new(
         name: "any EKU means any is ok",
         roots: new slice<constraintsSpec>(1),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        intermediates: [
+            [
                 new(
-                    ekus: slice<@string>(["any"])
-                )])
-        ]),
+                    ekus: ["any"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"]),
-            ekus: slice<@string>(["serverAuth", "other"])
+            sans: ["dns:example.com"],
+            ekus: ["serverAuth", "other"]
         )
     ),
     // default.)
     new(
         name: "intermediate with enumerated EKUs",
         roots: new slice<constraintsSpec>(1),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        intermediates: [
+            [
                 new(
-                    ekus: slice<@string>(["email"])
-                )])
-        ]),
+                    ekus: ["email"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"]),
-            ekus: slice<@string>(["serverAuth"])
+            sans: ["dns:example.com"],
+            ekus: ["serverAuth"]
         ),
         expectedError: "incompatible key usage"
     ),
     new(
         name: "unknown EKU in leaf",
         roots: new slice<constraintsSpec>(1),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        intermediates: [
+            [
                 new(
-                    ekus: slice<@string>(["email"])
-                )])
-        ]),
+                    ekus: ["email"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"]),
-            ekus: slice<@string>(["other"])
+            sans: ["dns:example.com"],
+            ekus: ["other"]
         ),
-        requestedEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageAny])
+        requestedEKUs: [ExtKeyUsageAny]
     ),
     // certificate doesn't use them.
     new(
         name: "intermediate cannot add EKUs not in root if leaf uses them",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ekus: slice<@string>(["serverAuth"])
+                ekus: ["serverAuth"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        ],
+        intermediates: [
+            [
                 new(
-                    ekus: slice<@string>(["serverAuth", "email"])
-                )])
-        ]),
+                    ekus: ["serverAuth", "email"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"]),
-            ekus: slice<@string>(["serverAuth"])
+            sans: ["dns:example.com"],
+            ekus: ["serverAuth"]
         )
     ),
     new(
         name: "EKUs in root are effective",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ekus: slice<@string>(["email"])
+                ekus: ["email"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        ],
+        intermediates: [
+            [
                 new(
-                    ekus: slice<@string>(["serverAuth"])
-                )])
-        ]),
+                    ekus: ["serverAuth"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"]),
-            ekus: slice<@string>(["serverAuth"])
+            sans: ["dns:example.com"],
+            ekus: ["serverAuth"]
         ),
         expectedError: "incompatible key usage"
     ),
     new(
         name: "netscapeSGC EKU does not permit server/client auth",
-        roots: slice<constraintsSpec>([
+        roots: [
             new()
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        ],
+        intermediates: [
+            [
                 new(
-                    ekus: slice<@string>(["netscapeSGC"])
-                )])
-        ]),
+                    ekus: ["netscapeSGC"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"]),
-            ekus: slice<@string>(["serverAuth", "clientAuth"])
+            sans: ["dns:example.com"],
+            ekus: ["serverAuth", "clientAuth"]
         ),
         expectedError: "incompatible key usage"
     ),
     new(
         name: "msSGC EKU does not permit server/client auth",
         roots: new slice<constraintsSpec>(1),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        intermediates: [
+            [
                 new(
-                    ekus: slice<@string>(["msSGC"])
-                )])
-        ]),
+                    ekus: ["msSGC"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"]),
-            ekus: slice<@string>(["serverAuth", "clientAuth"])
+            sans: ["dns:example.com"],
+            ekus: ["serverAuth", "clientAuth"]
         ),
         expectedError: "incompatible key usage"
     ),
     new(
         name: "empty DNS permitted constraint allows anything",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:"])
+                ok: ["dns:"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"])
+            sans: ["dns:example.com"]
         )
     ),
     new(
         name: "empty DNS excluded constraint rejects everything",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["dns:"])
+                bad: ["dns:"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"])
+            sans: ["dns:example.com"]
         ),
         expectedError: "\"example.com\" is excluded"
     ),
     new(
         name: "empty email permitted constraint allows anything",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["email:"])
+                ok: ["email:"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["email:foo@example.com"])
+            sans: ["email:foo@example.com"]
         )
     ),
     new(
         name: "empty email excluded constraint rejects everything",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["email:"])
+                bad: ["email:"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["email:foo@example.com"])
+            sans: ["email:foo@example.com"]
         ),
         expectedError: "\"foo@example.com\" is excluded"
     ),
     new(
         name: "empty URI permitted constraint allows anything",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["uri:"])
+                ok: ["uri:"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["uri:https://example.com/test"])
+            sans: ["uri:https://example.com/test"]
         )
     ),
     new(
         name: "empty URI excluded constraint rejects everything",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["uri:"])
+                bad: ["uri:"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["uri:https://example.com/test"])
+            sans: ["uri:https://example.com/test"]
         ),
         expectedError: "\"https://example.com/test\" is excluded"
     ),
     new(
         name: "serverAuth EKU does not permit clientAuth",
         roots: new slice<constraintsSpec>(1),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"]),
-            ekus: slice<@string>(["serverAuth"])
+            sans: ["dns:example.com"],
+            ekus: ["serverAuth"]
         ),
-        requestedEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageClientAuth]),
+        requestedEKUs: [ExtKeyUsageClientAuth],
         expectedError: "incompatible key usage"
     ),
     new(
         name: "msSGC EKU does not permit serverAuth",
         roots: new slice<constraintsSpec>(1),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"]),
-            ekus: slice<@string>(["msSGC"])
+            sans: ["dns:example.com"],
+            ekus: ["msSGC"]
         ),
-        requestedEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth]),
+        requestedEKUs: [ExtKeyUsageServerAuth],
         expectedError: "incompatible key usage"
     ),
     new(
@@ -1291,308 +1291,308 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = slice<nameCons
         // See https://github.com/golang/go/issues/23995
         name: "invalid SANs are ignored with no constraints",
         roots: new slice<constraintsSpec>(1),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:this is invalid", "email:this @ is invalid"])
+            sans: ["dns:this is invalid", "email:this @ is invalid"]
         )
     ),
     new(
         name: "invalid DNS SAN detected with constraints",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["uri:"])
+                bad: ["uri:"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:this is invalid"])
+            sans: ["dns:this is invalid"]
         ),
         expectedError: "cannot parse dnsName"
     ),
     new(
         name: "invalid email SAN detected with constraints",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["uri:"])
+                bad: ["uri:"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["email:this @ is invalid"])
+            sans: ["email:this @ is invalid"]
         ),
         expectedError: "cannot parse rfc822Name"
     ),
     new(
         name: "any requested EKU is sufficient",
         roots: new slice<constraintsSpec>(1),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"]),
-            ekus: slice<@string>(["email"])
+            sans: ["dns:example.com"],
+            ekus: ["email"]
         ),
-        requestedEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageClientAuth, ExtKeyUsageEmailProtection])
+        requestedEKUs: [ExtKeyUsageClientAuth, ExtKeyUsageEmailProtection]
     ),
     new(
         name: "unrequested EKUs not required to be nested",
         roots: new slice<constraintsSpec>(1),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        intermediates: [
+            [
                 new(
-                    ekus: slice<@string>(["serverAuth"])
-                )])
-        ]),
+                    ekus: ["serverAuth"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:example.com"]),
+            sans: ["dns:example.com"],
             // There's no email EKU in the intermediate. This would be rejected if
             // full nesting was required.
-            ekus: slice<@string>(["email", "serverAuth"])
+            ekus: ["email", "serverAuth"]
         )
     ),
     new(
         name: "empty leaf is accepted in constrained chain",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:foo.com", "dns:.foo.com"])
+                ok: ["dns:foo.com", "dns:.foo.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>([])
+            sans: []
         )
     ),
     new(
         name: "no SANs and non-hostname CN is accepted in constrained chain",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:foo.com", "dns:.foo.com"])
+                ok: ["dns:foo.com", "dns:.foo.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>([]),
+            sans: [],
             cn: "foo.bar"
         )
     ),
     new(
         name: "constraints don't apply to CN",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:foo.com", "dns:.foo.com"])
+                ok: ["dns:foo.com", "dns:.foo.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:foo.com"]),
+            sans: ["dns:foo.com"],
             cn: "foo.bar"
         )
     ),
     new(
         name: "DNS SAN cannot use leading period form",
-        roots: slice<constraintsSpec>([new(ok: slice<@string>(["dns:example.com"]))]),
-        leaf: new leafSpec(sans: slice<@string>(["dns:.example.com"])),
+        roots: [new(ok: ["dns:example.com"])],
+        leaf: new leafSpec(sans: ["dns:.example.com"]),
         expectedError: "cannot parse dnsName \".example.com\""
     ),
     new(
         name: "URI with IPv6 and zone is rejected",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["uri:example.com"])
+                ok: ["uri:example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["uri:http://[2006:abcd::1%25.example.com]:16/"])
+            sans: ["uri:http://[2006:abcd::1%25.example.com]:16/"]
         ),
         expectedError: "URI with IP"
     ),
     new(
         name: "intermediate can narrow permitted dns scope",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:"])
+                ok: ["dns:"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        ],
+        intermediates: [
+            [
                 new(
-                    ok: slice<@string>(["dns:example.com"])
-                )])
-        ]),
+                    ok: ["dns:example.com"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:test.com"])
+            sans: ["dns:test.com"]
         ),
         expectedError: "\"test.com\" is not permitted"
     ),
     new(
         name: "intermediate cannot narrow excluded dns scope",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["dns:"])
+                bad: ["dns:"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        ],
+        intermediates: [
+            [
                 new(
-                    bad: slice<@string>(["dns:example.com"])
-                )])
-        ]),
+                    bad: ["dns:example.com"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:test.com"])
+            sans: ["dns:test.com"]
         ),
         expectedError: "\"test.com\" is excluded by constraint \"\""
     ),
     new(
         name: "intermediate can narrow excluded dns scope",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["dns:example.com"])
+                bad: ["dns:example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
+        ],
+        intermediates: [
+            [
                 new(
-                    bad: slice<@string>(["dns:"])
-                )])
-        ]),
+                    bad: ["dns:"]
+                )]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:test.com"])
+            sans: ["dns:test.com"]
         ),
         expectedError: "\"test.com\" is excluded by constraint \"\""
     ),
     new(
         name: "permitted dns constraint is not a prefix match",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:example.com"])
+                ok: ["dns:example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:testexample.com"])
+            sans: ["dns:testexample.com"]
         ),
         expectedError: "\"testexample.com\" is not permitted"
     ),
     new(
         name: "subdomain constraint does not allow wildcard",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["dns:a.com", "dns:foo.example.com", "dns:z.com"])
+                ok: ["dns:a.com", "dns:foo.example.com", "dns:z.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:*.example.com"])
+            sans: ["dns:*.example.com"]
         ),
         expectedError: "\"*.example.com\" is not permitted"
     ),
     new(
         name: "excluded dns constraint is not a prefix match",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["dns:example.com"])
+                bad: ["dns:example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:testexample.com"])
+            sans: ["dns:testexample.com"]
         )
     ),
     new(
         name: "excluded email constraint, multiple email with matching local portion",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["email:a@example.com", "email:a@test.com"])
+                bad: ["email:a@example.com", "email:a@test.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["email:a@example.com"])
+            sans: ["email:a@example.com"]
         ),
         expectedError: "\"a@example.com\" is excluded by constraint \"a@example.com\""
     ),
     new(
         name: "email_case_check",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                ok: slice<@string>(["email:a@example.com"])
+                ok: ["email:a@example.com"]
             )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([
-            slice<constraintsSpec>([
-                new()])
-        ]),
+        ],
+        intermediates: [
+            [
+                new()]
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["email:a@ExAmple.com"])
+            sans: ["email:a@ExAmple.com"]
         )
     ),
     new(
         name: "excluded constraint, empty DNS san",
-        roots: slice<constraintsSpec>([
+        roots: [
             new(
-                bad: slice<@string>(["dns:example.com"])
+                bad: ["dns:example.com"]
             )
-        ]),
+        ],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:"])
+            sans: ["dns:"]
         )
     ),
     new(
         name: "subdomain exclusion blocks uppercase wildcard",
-        roots: slice<constraintsSpec>([new(
-            bad: slice<@string>(["dns:sub.example.com"])
+        roots: [new(
+            bad: ["dns:sub.example.com"]
         )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([slice<constraintsSpec>([new()])]),
+        ],
+        intermediates: [[new()]],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:*.EXAMPLE.COM"])
+            sans: ["dns:*.EXAMPLE.COM"]
         ),
         expectedError: "\"*.EXAMPLE.COM\" is excluded by constraint \"sub.example.com\""
     ),
     new(
         name: "uppercase subdomain exclusion blocks lowercase wildcard",
-        roots: slice<constraintsSpec>([new(
-            bad: slice<@string>(["dns:SUB.EXAMPLE.COM"])
+        roots: [new(
+            bad: ["dns:SUB.EXAMPLE.COM"]
         )
-        ]),
-        intermediates: slice<slice<constraintsSpec>>([slice<constraintsSpec>([new()])]),
+        ],
+        intermediates: [[new()]],
         leaf: new leafSpec(
-            sans: slice<@string>(["dns:*.example.com"])
+            sans: ["dns:*.example.com"]
         ),
         expectedError: "\"*.example.com\" is excluded by constraint \"sub.example.com\""
     )
@@ -1616,10 +1616,8 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeCons
         IsCA: true
     ));
 
-    {
-        var errΔ1 = addConstraintsToTemplate(constraints, template); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var errΔ1 = addConstraintsToTemplate(constraints, template); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
 
     if (Ꮡparent == nil) {
@@ -1659,7 +1657,7 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeCons
     var template = Ꮡ(new Certificate(
         SerialNumber: @new<bigꓸInt>().SetBytes(serialBytes[..]),
         Subject: new pkix.Name(
-            OrganizationalUnit: slice<@string>(["Leaf"]),
+            OrganizationalUnit: ["Leaf"],
             CommonName: leaf.cn
         ),
         NotBefore: time.Unix(1000, 0),
@@ -1669,7 +1667,7 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeCons
         IsCA: false
     ));
 
-    foreach (var (_, name) in leaf.sans) {
+    foreach (var (_, name) in range(leaf.sans)) {
         switch (ᐧ) {
         case {} when strings.HasPrefix(name, dnsˢ): {
             template.DNSNames = append(template.DNSNames, name[4..]);
@@ -1713,13 +1711,13 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeCons
 
             template.ExtraExtensions = append(template.ExtraExtensions, new pkix.Extension(
                 Id: slice<nint>([2, 5, 29, 17]),
-                Value: slice<byte>([
+                Value: [
                     0x30, // SEQUENCE
                     3,    // three bytes
                     9,    // undefined GeneralName type 9
                     1,
                     1
-                ])
+                ]
             ));
             break;
         }
@@ -1729,10 +1727,8 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeCons
     }
 
     error err = default;
-    {
-        (template.ExtKeyUsage, template.UnknownExtKeyUsage, err) = parseEKUs(leaf.ekus); if (err != nil) {
-            return (default, err);
-        }
+    (template.ExtKeyUsage, template.UnknownExtKeyUsage, err) = parseEKUs(leaf.ekus); if (err != nil) {
+        return (default, err);
     }
 
     if (Ꮡparent == nil) {
@@ -1786,7 +1782,7 @@ internal static error addConstraintsToTemplate(constraintsSpec constraints, ж<g
         slice<@string> emailAddrs = default;
         slice<@string> uriDomains = default;
         error errΔ1 = default;
-        foreach (var (_, constraint) in constraintsΔ1) {
+        foreach (var (_, constraint) in range(constraintsΔ1)) {
             switch (ᐧ) {
             case {} when strings.HasPrefix(constraint, dnsˢ): {
                 dnsNames = append(dnsNames, constraint[4..]);
@@ -1819,7 +1815,7 @@ internal static error addConstraintsToTemplate(constraintsSpec constraints, ж<g
     bool handleSpecialConstraint(@string constraint, bool isExcluded) {
         switch (ᐧ) {
         case {} when constraint == "unknown:"u8: {
-            Ꮡtemplate.Value.ExtraExtensions = append(Ꮡtemplate.Value.ExtraExtensions, customConstraintsExtension(9, /* undefined GeneralName type */ slice<byte>([1]), isExcluded));
+            Ꮡtemplate.Value.ExtraExtensions = append(Ꮡtemplate.Value.ExtraExtensions, customConstraintsExtension(9, /* undefined GeneralName type */ [1], isExcluded));
             break;
         }
         default: {
@@ -1852,10 +1848,8 @@ internal static error addConstraintsToTemplate(constraintsSpec constraints, ж<g
         return err;
     }
 
-    {
-        (template.ExtKeyUsage, template.UnknownExtKeyUsage, err) = parseEKUs(constraints.ekus); if (err != nil) {
-            return err;
-        }
+    (template.ExtKeyUsage, template.UnknownExtKeyUsage, err) = parseEKUs(constraints.ekus); if (err != nil) {
+        return err;
     }
 
     return default;
@@ -1867,7 +1861,7 @@ internal static (slice<global::go.crypto.x509_package.ExtKeyUsage> ekus, slice<a
     error err = default;
     var unknownsᴷ = new stackAppend<asn1.ObjectIdentifier>(moves: true);
 
-    foreach (var (_, s) in ekuStrs) {
+    foreach (var (_, s) in range(ekuStrs)) {
         var exprᴛ1 = s;
         switch (ᐧ) {
         case {} when exprᴛ1 == "serverAuth"u8: {
@@ -1922,7 +1916,7 @@ public static void TestConstraintCases(ж<testing.T> t) {
         }
     ), out var ᏑprivateKeys);
 
-    foreach (var (i, vᴛ1) in nameConstraintsTests) {
+    foreach (var (i, vᴛ1) in range(nameConstraintsTests)) {
         ref var test = ref heap(new nameConstraintsTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -1946,7 +1940,7 @@ public static void TestConstraintCases(ж<testing.T> t) {
             ж<global::go.crypto.x509_package.Certificate> parent = default;
             var parentKey = rootKey;
 
-            foreach (var (_, root) in testʗ1.roots) {
+            foreach (var (_, root) in range(testʗ1.roots)) {
                 var (rootCert, errΔ1) = makeConstraintsCACert(root, rootName, rootKey, nil, rootKey);
                 if (errΔ1 != nil) {
                     tΔ1.Fatalf("failed to create root: %s", errΔ1);
@@ -1958,13 +1952,13 @@ public static void TestConstraintCases(ж<testing.T> t) {
 
             var intermediatePool = NewCertPool();
 
-            foreach (var (level, intermediates) in testʗ1.intermediates) {
+            foreach (var (level, intermediates) in range(testʗ1.intermediates)) {
                 var levelKey = ᏑprivateKeys.Get()._<ж<ecdsa.PrivateKey>>();
                 keys = append(keysᴷ, keys, levelKey);
                 @string levelName = "Intermediate level "u8 + strconv.Itoa(level);
                 ж<global::go.crypto.x509_package.Certificate> last = default;
 
-                foreach (var (_, intermediate) in intermediates) {
+                foreach (var (_, intermediate) in range(intermediates)) {
                     var (caCert, errΔ2) = makeConstraintsCACert(intermediate, levelName, levelKey, parent, parentKey);
                     if (errΔ2 != nil) {
                         tΔ1.Fatalf("failed to create %q: %s", levelName, errΔ2);
@@ -1998,14 +1992,12 @@ public static void TestConstraintCases(ж<testing.T> t) {
                 }
 
                 if (errΔ1 != nil) {
-                    {
-                        var (_, ok) = errΔ1._<ж<exec.ExitError>>(ᐧ); if (!ok) {
-                            tΔ1.Errorf("OpenSSL failed to run: %s", errΔ1);
-                        } else if (builtin.len(testʗ1.expectedError) == 0) {
-                            tΔ1.Errorf("OpenSSL unexpectedly failed: %v", output);
-                            if (debugOpenSSLFailure) {
-                                return;
-                            }
+                    var (_, ok) = errΔ1._<ж<exec.ExitError>>(ᐧ); if (!ok) {
+                        tΔ1.Errorf("OpenSSL failed to run: %s", errΔ1);
+                    } else if (builtin.len(testʗ1.expectedError) == 0) {
+                        tΔ1.Errorf("OpenSSL unexpectedly failed: %v", output);
+                        if (debugOpenSSLFailure) {
+                            return;
                         }
                     }
                 }
@@ -2043,17 +2035,15 @@ public static void TestConstraintCases(ж<testing.T> t) {
                     return Ꮡbuf.String();
                 }
                 tΔ1.Errorf("root:\n%s", certAsPEM(rootPool.mustCert(tΔ1, 0)));
-                {
-                    var intermediates = allCerts(tΔ1, intermediatePool); if (builtin.len(intermediates) > 0) {
-                        foreach (var (ii, intermediate) in intermediates) {
-                            tΔ1.Errorf("intermediate %d:\n%s", ii, certAsPEM(intermediate));
-                        }
+                var intermediates = allCerts(tΔ1, intermediatePool); if (builtin.len(intermediates) > 0) {
+                    foreach (var (ii, intermediate) in range(intermediates)) {
+                        tΔ1.Errorf("intermediate %d:\n%s", ii, certAsPEM(intermediate));
                     }
                 }
                 tΔ1.Errorf("leaf:\n%s", certAsPEM(leafCert));
             }
 
-            foreach (var (_, key) in keys) {
+            foreach (var (_, key) in range(keys)) {
                 ᏑprivateKeys.Put(key.OrTypedNil());
             }
         });
@@ -2071,7 +2061,7 @@ internal static ж<os.File> writePEMsToTempFile(slice<ж<global::go.crypto.x509_
     }
 
     var pemBlock = Ꮡ(new pem.Block(Type: "CERTIFICATE"));
-    foreach (var (_, cert) in certs) {
+    foreach (var (_, cert) in range(certs)) {
         pemBlock.Bytes = cert.Raw;
         pem.Encode(new os.FileжWriter(@file), pemBlock);
     }
@@ -2104,7 +2094,7 @@ internal static (@string, error) testChainAgainstOpenSSL(ж<testing.T> t, ж<glo
             args = append(args, (@string)"-untrusted", intermediatesFile.Name());
         }
 
-        var leafFile = writePEMsToTempFile(slice<ж<global::go.crypto.x509_package.Certificate>>([leaf]));
+        var leafFile = writePEMsToTempFile([leaf]);
         if (debugOpenSSLFailure) {
             println((@string)"leaf file:", leafFile.Name());
         } else {
@@ -2124,7 +2114,7 @@ partial struct rfc2821Testsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string localPart, domain;
 }
-internal static slice<rfc2821Testsᴛ1> rfc2821Tests = slice<rfc2821Testsᴛ1>([
+internal static slice<rfc2821Testsᴛ1> rfc2821Tests = [
     new("foo@example.com", "foo", "example.com"),
     new("@example.com", "", ""),
     new("\"@example.com", "", ""),
@@ -2147,10 +2137,10 @@ internal static slice<rfc2821Testsᴛ1> rfc2821Tests = slice<rfc2821Testsᴛ1>([
     new("$A12345@example.com", "$A12345", "example.com"),
     new("!def!xyz%abc@example.com", "!def!xyz%abc", "example.com"),
     new("_somename@example.com", "_somename", "example.com")
-]);
+];
 
 public static void TestRFC2821Parsing(ж<testing.T> t) {
-    foreach (var (i, test) in rfc2821Tests) {
+    foreach (var (i, test) in range(rfc2821Tests)) {
         var (mailbox, ok) = parseRFC2821Mailbox(test.@in);
         var expectedFailure = builtin.len(test.localPart) == 0 && builtin.len(test.domain) == 0;
 
@@ -2213,9 +2203,9 @@ public static void TestBadNamesInConstraints(ж<testing.T> t) {
         throw panic(err);
     }
 
-    foreach (var (_, test) in badNames) {
+    foreach (var (_, test) in range(badNames)) {
         var (_, errΔ3) = makeConstraintsCACert(new constraintsSpec(
-            ok: slice<@string>([test.name])
+            ok: [test.name]
         ), "TestAbsoluteNamesInConstraints", priv, nil, priv);
 
         if (errΔ3 == nil) {
@@ -2248,18 +2238,16 @@ public static void TestBadNamesInSANs(ж<testing.T> t) {
         throw panic(err);
     }
 
-    foreach (var (_, badName) in badNames) {
-        var (_, errΔ1) = makeConstraintsLeafCert(new leafSpec(sans: slice<@string>([badName])), priv, nil, priv);
+    foreach (var (_, badName) in range(badNames)) {
+        var (_, errΔ1) = makeConstraintsLeafCert(new leafSpec(sans: [badName]), priv, nil, priv);
 
         if (errΔ1 == nil) {
             t.Errorf("bad name %q unexpectedly accepted in SAN", badName);
             continue;
         }
 
-        {
-            @string str = errΔ1.Error(); if (!strings.Contains(str, cannotParseˢ)) {
-                t.Errorf("bad name %q triggered unrecognised error: %s", badName, str);
-            }
+        @string str = errΔ1.Error(); if (!strings.Contains(str, cannotParseˢ)) {
+            t.Errorf("bad name %q triggered unrecognised error: %s", badName, str);
         }
     }
 }

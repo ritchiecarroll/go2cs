@@ -41,8 +41,7 @@ public static any /*i*/ ToInterface(global::go.@internal.reflectlite_package.Val
 public partial struct EmbedWithUnexpMeth {
 }
 
-internal static void f(this EmbedWithUnexpMeth _) {
-}
+internal static void f(this EmbedWithUnexpMeth _) { }
 
 internal partial interface pinUnexpMeth {
     void f();

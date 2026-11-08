@@ -81,7 +81,7 @@ internal static @string makefs(ж<Δtesting.T> t, slice<@string> fs) {
             t.Fatal(err);
         }
     }
-    foreach (var (_, vᴛ1) in fs) {
+    foreach (var (_, vᴛ1) in range(fs)) {
         var ent = vᴛ1;
 
         ent = strings.ReplaceAll(ent, absˢ, root);
@@ -101,22 +101,16 @@ internal static @string makefs(ж<Δtesting.T> t, slice<@string> fs) {
             }
         }
         if (isLink) {
-            {
-                var err = Δos.Symlink(link, Δpath.Join(root, @base)); if (err != nil) {
-                    t.Fatal(err);
-                }
+            var err = Δos.Symlink(link, Δpath.Join(root, @base)); if (err != nil) {
+                t.Fatal(err);
             }
         } else if (strings.HasSuffix(ent, "/")) {
-            {
-                var err = Δos.MkdirAll(Δpath.Join(root, ent), 511); if (err != nil) {
-                    t.Fatal(err);
-                }
+            var err = Δos.MkdirAll(Δpath.Join(root, ent), 511); if (err != nil) {
+                t.Fatal(err);
             }
         } else {
-            {
-                var err = Δos.WriteFile(Δpath.Join(root, ent), slice<byte>(ent), 438); if (err != nil) {
-                    t.Fatal(err);
-                }
+            var err = Δos.WriteFile(Δpath.Join(root, ent), slice<byte>(ent), 438); if (err != nil) {
+                t.Fatal(err);
             }
         }
     }
@@ -205,116 +199,116 @@ internal static bool errEndsTest(ж<Δtesting.T> t, error err, bool wantError, @
 
 internal static slice<rootTest> rootTestCases = slice<rootTest>([new(
     name: "plain path",
-    fs: slice<@string>([]),
+    fs: [],
     open: "target",
     target: "target"
 ), new(
     name: "path in directory",
-    fs: slice<@string>([
+    fs: [
         "a/b/c/"
-    ]),
+    ],
     open: "a/b/c/target",
     target: "a/b/c/target"
 ), new(
     name: "symlink",
-    fs: slice<@string>([
+    fs: [
         "link => target"
-    ]),
+    ],
     open: "link",
     target: "target",
     ltarget: "link"
 ), new(
     name: "symlink dotdot slash",
-    fs: slice<@string>([
+    fs: [
         "link => ../"
-    ]),
+    ],
     open: "link",
     ltarget: "link",
     wantError: true
 ), new(
     name: "symlink ending in slash",
-    fs: slice<@string>([
+    fs: [
         "dir/",
         "link => dir/"
-    ]),
+    ],
     open: "link/target",
     target: "dir/target"
 ), new(
     name: "slash after symlink to file",
-    fs: slice<@string>([
+    fs: [
         "link => ../ROOT/target"
-    ]),
+    ],
     open: "link/",
     target: "target",
     wantError: true
 ), new(
     name: "slash after symlink to dir",
-    fs: slice<@string>([
+    fs: [
         "link => ../ROOT/target",
         "target/"
-    ]),
+    ],
     open: "link/",
     wantError: true
 ), new(
     name: "symlink dotdot dotdot slash",
-    fs: slice<@string>([
+    fs: [
         "dir/link => ../../"
-    ]),
+    ],
     open: "dir/link",
     ltarget: "dir/link",
     wantError: true
 ), new(
     name: "symlink chain",
-    fs: slice<@string>([
+    fs: [
         "link => a/b/c/target",
         "a/b => e",
         "a/e => ../f",
         "f => g/h/i",
         "g/h/i => ..",
         "g/c/"
-    ]),
+    ],
     open: "link",
     target: "g/c/target",
     ltarget: "link"
 ), new(
     name: "path with dot",
-    fs: slice<@string>([
+    fs: [
         "a/b/"
-    ]),
+    ],
     open: "./a/./b/./target",
     target: "a/b/target"
 ), new(
     name: "path with dotdot",
-    fs: slice<@string>([
+    fs: [
         "a/b/"
-    ]),
+    ],
     open: "a/../a/b/../../a/b/../b/target",
     target: "a/b/target"
 ), new(
     name: "path with dotdot slash",
-    fs: slice<@string>([]),
+    fs: [],
     open: "../",
     wantError: true
 ), new(
     name: "path with dotdot dotdot slash",
-    fs: slice<@string>([
+    fs: [
         "a/"
-    ]),
+    ],
     open: "a/../../",
     wantError: true
 ), new(
     name: "dotdot no symlink",
-    fs: slice<@string>([
+    fs: [
         "a/"
-    ]),
+    ],
     open: "a/../target",
     target: "target"
 ), new(
     name: "dotdot after symlink",
-    fs: slice<@string>([
+    fs: [
         "a => b/c",
         "b/c/"
-    ]),
+    ],
     open: "a/../target",
     target: func(@string () => {
         if (Δruntime.GOOS == "windows"u8) {
@@ -325,81 +319,81 @@ internal static slice<rootTest> rootTestCases = slice<rootTest>([new(
     })()
 ), new(
     name: "dotdot before symlink",
-    fs: slice<@string>([
+    fs: [
         "a => b/c",
         "b/c/"
-    ]),
+    ],
     open: "b/../a/target",
     target: "b/c/target"
 ), new(
     name: "symlink ends in dot",
-    fs: slice<@string>([
+    fs: [
         "a => b/.",
         "b/"
-    ]),
+    ],
     open: "a/target",
     target: "b/target"
 ), new(
     name: "directory does not exist",
-    fs: slice<@string>([]),
+    fs: [],
     open: "a/file",
     wantError: true,
     alwaysFails: true
 ), new(
     name: "empty path",
-    fs: slice<@string>([]),
+    fs: [],
     open: "",
     wantError: true,
     alwaysFails: true
 ), new(
     name: "symlink cycle",
-    fs: slice<@string>([
+    fs: [
         "a => a"
-    ]),
+    ],
     open: "a",
     ltarget: "a",
     wantError: true,
     alwaysFails: true
 ), new(
     name: "path escapes",
-    fs: slice<@string>([]),
+    fs: [],
     open: "../ROOT/target",
     target: "target",
     wantError: true
 ), new(
     name: "long path escapes",
-    fs: slice<@string>([
+    fs: [
         "a/"
-    ]),
+    ],
     open: "a/../../ROOT/target",
     target: "target",
     wantError: true
 ), new(
     name: "absolute symlink",
-    fs: slice<@string>([
+    fs: [
         "link => $ABS/target"
-    ]),
+    ],
     open: "link",
     ltarget: "link",
     target: "target",
     wantError: true
 ), new(
     name: "relative symlink",
-    fs: slice<@string>([
+    fs: [
         "link => ../ROOT/target"
-    ]),
+    ],
     open: "link",
     target: "target",
     ltarget: "link",
     wantError: true
 ), new(
     name: "symlink chain escapes",
-    fs: slice<@string>([
+    fs: [
         "link => a/b/c/target",
         "a/b => e",
         "a/e => ../../ROOT",
         "c/"
-    ]),
+    ],
     open: "link",
     target: "c/target",
     ltarget: "link",
@@ -413,7 +407,7 @@ private static readonly @string rootOpenQˢᵇ = "root.Open(%q)"u8;
 
 public static void TestRootOpen_File(ж<Δtesting.T> t) {
     var want = slice<byte>("target"u8);
-    foreach (var (_, vᴛ1) in rootTestCases) {
+    foreach (var (_, vᴛ1) in range(rootTestCases)) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -423,10 +417,8 @@ public static void TestRootOpen_File(ж<Δtesting.T> t) {
             GoFrame ᒐ = default;
             try {
                 if (target != ""u8) {
-                    {
-                        var errΔ1 = Δos.WriteFile(target, wantʗ1, 438); if (errΔ1 != nil) {
-                            tΔ1.Fatal(errΔ1);
-                        }
+                    var errΔ1 = Δos.WriteFile(target, wantʗ1, 438); if (errΔ1 != nil) {
+                        tΔ1.Fatal(errΔ1);
                     }
                 }
                 var (f, err) = root.Open(testʗ1.open);
@@ -447,7 +439,7 @@ public static void TestRootOpen_File(ж<Δtesting.T> t) {
 }
 
 public static void TestRootOpen_Directory(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in rootTestCases) {
+    foreach (var (_, vᴛ1) in range(rootTestCases)) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -456,15 +448,11 @@ public static void TestRootOpen_Directory(ж<Δtesting.T> t) {
             GoFrame ᒐ = default;
             try {
                 if (target != ""u8) {
-                    {
-                        var errΔ1 = Δos.Mkdir(target, 511); if (errΔ1 != nil) {
-                            tΔ1.Fatal(errΔ1);
-                        }
+                    var errΔ1 = Δos.Mkdir(target, 511); if (errΔ1 != nil) {
+                        tΔ1.Fatal(errΔ1);
                     }
-                    {
-                        var errΔ2 = Δos.WriteFile(target + "/found"u8, default, 438); if (errΔ2 != nil) {
-                            tΔ1.Fatal(errΔ2);
-                        }
+                    var errΔ2 = Δos.WriteFile(target + "/found"u8, default, 438); if (errΔ2 != nil) {
+                        tΔ1.Fatal(errΔ2);
                     }
                 }
                 var (f, err) = root.Open(testʗ1.open);
@@ -477,10 +465,8 @@ public static void TestRootOpen_Directory(ж<Δtesting.T> t) {
                 if (err != nil) {
                     tΔ1.Errorf(@"Dir.Open(%q).Readdirnames: %v", testʗ1.open, err);
                 }
-                {
-                    var want = slice<@string>(["found"]); if (!slices.Equal<slice<@string>, @string>(got, want)) {
-                        tΔ1.Errorf(@"Dir.Open(%q).Readdirnames: %q, want %q", testʗ1.open, got, want);
-                    }
+                var want = slice<@string>(["found"]); if (!slices.Equal<slice<@string>, @string>(got, want)) {
+                    tΔ1.Errorf(@"Dir.Open(%q).Readdirnames: %q, want %q", testʗ1.open, got, want);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -495,7 +481,7 @@ private static readonly @string rootCreateQˢᵇ = "root.Create(%q)"u8;
 
 public static void TestRootCreate(ж<Δtesting.T> t) {
     var want = slice<byte>("target"u8);
-    foreach (var (_, vᴛ1) in rootTestCases) {
+    foreach (var (_, vᴛ1) in range(rootTestCases)) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -506,10 +492,8 @@ public static void TestRootCreate(ж<Δtesting.T> t) {
             if (errEndsTest(tΔ1, err, testʗ1.wantError, rootCreateQˢ, testʗ1.open)) {
                 return;
             }
-            {
-                var (_, errΔ1) = f.Write(wantʗ1); if (errΔ1 != nil) {
-                    tΔ1.Fatal(errΔ1);
-                }
+            var (_, errΔ1) = f.Write(wantʗ1); if (errΔ1 != nil) {
+                tΔ1.Fatal(errΔ1);
             }
             f.Close();
             (var got, err) = Δos.ReadFile(target);
@@ -532,7 +516,7 @@ public static void TestRootChmod(ж<Δtesting.T> t) {
     if (Δruntime.GOOS == "wasip1"u8) {
         t.Skip("Chmod not supported on " + Δruntime.GOOS);
     }
-    foreach (var (_, vᴛ1) in rootTestCases) {
+    foreach (var (_, vᴛ1) in range(rootTestCases)) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -541,10 +525,8 @@ public static void TestRootChmod(ж<Δtesting.T> t) {
             if (target != ""u8) {
                 // Create a file with no read/write permissions,
                 // to ensure we can use Chmod on an inaccessible file.
-                {
-                    var errΔ1 = Δos.WriteFile(target, default, 0); if (errΔ1 != nil) {
-                        tΔ1.Fatal(errΔ1);
-                    }
+                var errΔ1 = Δos.WriteFile(target, default, 0); if (errΔ1 != nil) {
+                    tΔ1.Fatal(errΔ1);
                 }
             }
             if (Δruntime.GOOS == "windows"u8) {
@@ -564,10 +546,8 @@ public static void TestRootChmod(ж<Δtesting.T> t) {
             if (err != nil) {
                 tΔ1.Fatalf("os.Stat(%q) = %v", target, err);
             }
-            {
-                var got = st.Mode(); if (got != want) {
-                    tΔ1.Errorf("after root.Chmod(%q, %v): file mode = %v, want %v", testʗ1.open, want, got, want);
-                }
+            var got = st.Mode(); if (got != want) {
+                tΔ1.Errorf("after root.Chmod(%q, %v): file mode = %v, want %v", testʗ1.open, want, got, want);
             }
         });
     }
@@ -585,20 +565,18 @@ public static void TestRootChtimes(ж<Δtesting.T> t) {
     // Don't check atimes if the fs is mounted noatime,
     // or on Plan 9 which does not permit changing atimes to arbitrary values.
     var checkAtimes = !hasNoatime() && Δruntime.GOOS != "plan9"u8;
-    foreach (var (_, vᴛ1) in rootTestCases) {
+    foreach (var (_, vᴛ1) in range(rootTestCases)) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
         Ꮡtest.run(t, (ж<Δtesting.T> tΔ1, @string target, ж<Δos.Root> root) => {
             if (target != ""u8) {
-                {
-                    var err = Δos.WriteFile(target, default, 438); if (err != nil) {
-                        tΔ1.Fatal(err);
-                    }
+                var err = Δos.WriteFile(target, default, 438); if (err != nil) {
+                    tΔ1.Fatal(err);
                 }
             }
-            foreach (var (_, vᴛ2) in slice<TestRootChtimes_type>([new(
+            foreach (var (_, vᴛ2) in range(slice<TestRootChtimes_type>([new(
                 atime: time.Now().Add((time.Duration)(-60000000000L)),
                 mtime: time.Now().Add((time.Duration)(-60000000000L))
             ), new(
@@ -611,7 +589,7 @@ public static void TestRootChtimes(ж<Δtesting.T> t) {
                 atime: time.Now(),
                 mtime: new time.Time()
             )
-            ])) {
+            ]))) {
                 var times = vᴛ2;
 
                 var exprᴛ1 = Δruntime.GOOS;
@@ -641,10 +619,8 @@ public static void TestRootChtimes(ж<Δtesting.T> t) {
                     }
                 }
                 if (checkAtimes) {
-                    {
-                        var got = os_internal_test_package.Atime(st); if (!times.atime.IsZero() && !got.Equal(times.atime)) {
-                            tΔ1.Errorf("after root.Chtimes(%q, %v, %v): got atime=%v, want %v", testʗ1.open, times.atime, times.mtime, got, times.atime);
-                        }
+                    var got = os_internal_test_package.Atime(st); if (!times.atime.IsZero() && !got.Equal(times.atime)) {
+                        tΔ1.Errorf("after root.Chtimes(%q, %v, %v): got atime=%v, want %v", testʗ1.open, times.atime, times.mtime, got, times.atime);
                     }
                 }
             }
@@ -653,7 +629,7 @@ public static void TestRootChtimes(ж<Δtesting.T> t) {
 }
 
 public static void TestRootMkdir(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in rootTestCases) {
+    foreach (var (_, vᴛ1) in range(rootTestCases)) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -677,13 +653,11 @@ public static void TestRootMkdir(ж<Δtesting.T> t) {
             if (!fi.IsDir()) {
                 tΔ1.Fatalf(@"stat file created with Root.Mkdir(%q): not a directory", testʗ1.open);
             }
-            {
-                var mode = fi.Mode(); if ((fs.FileMode)(mode & 511) == 0) {
-                    // Issue #73559: We're not going to worry about the exact
-                    // mode bits (which will have been modified by umask),
-                    // but there should be mode bits.
-                    tΔ1.Fatalf(@"stat file created with Root.Mkdir(%q): mode=%v, want non-zero", testʗ1.open, mode);
-                }
+            var mode = fi.Mode(); if ((fs.FileMode)(mode & 511) == 0) {
+                // Issue #73559: We're not going to worry about the exact
+                // mode bits (which will have been modified by umask),
+                // but there should be mode bits.
+                tΔ1.Fatalf(@"stat file created with Root.Mkdir(%q): mode=%v, want non-zero", testʗ1.open, mode);
             }
         });
     }
@@ -694,7 +668,7 @@ internal static ref readonly @string rootMkdirAllQˢ => ref rootMkdirAllQˢᵇ;
 private static readonly @string rootMkdirAllQˢᵇ = "root.MkdirAll(%q)"u8;
 
 public static void TestRootMkdirAll(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in rootTestCases) {
+    foreach (var (_, vᴛ1) in range(rootTestCases)) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -723,13 +697,11 @@ public static void TestRootMkdirAll(ж<Δtesting.T> t) {
             if (!fi.IsDir()) {
                 tΔ1.Fatalf(@"stat file created with Root.MkdirAll(%q): not a directory", testʗ1.open);
             }
-            {
-                var mode = fi.Mode(); if ((fs.FileMode)(mode & 511) == 0) {
-                    // Issue #73559: We're not going to worry about the exact
-                    // mode bits (which will have been modified by umask),
-                    // but there should be mode bits.
-                    tΔ1.Fatalf(@"stat file created with Root.MkdirAll(%q): mode=%v, want non-zero", testʗ1.open, mode);
-                }
+            var mode = fi.Mode(); if ((fs.FileMode)(mode & 511) == 0) {
+                // Issue #73559: We're not going to worry about the exact
+                // mode bits (which will have been modified by umask),
+                // but there should be mode bits.
+                tΔ1.Fatalf(@"stat file created with Root.MkdirAll(%q): mode=%v, want non-zero", testʗ1.open, mode);
             }
         });
     }
@@ -740,7 +712,7 @@ internal static ref readonly @string rootOpenRootQˢ => ref rootOpenRootQˢᵇ;
 private static readonly @string rootOpenRootQˢᵇ = "root.OpenRoot(%q)"u8;
 
 public static void TestRootOpenRoot(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in rootTestCases) {
+    foreach (var (_, vᴛ1) in range(rootTestCases)) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -749,15 +721,11 @@ public static void TestRootOpenRoot(ж<Δtesting.T> t) {
             GoFrame ᒐ = default;
             try {
                 if (target != ""u8) {
-                    {
-                        var errΔ1 = Δos.Mkdir(target, 511); if (errΔ1 != nil) {
-                            tΔ1.Fatal(errΔ1);
-                        }
+                    var errΔ1 = Δos.Mkdir(target, 511); if (errΔ1 != nil) {
+                        tΔ1.Fatal(errΔ1);
                     }
-                    {
-                        var errΔ2 = Δos.WriteFile(target + "/f"u8, default, 438); if (errΔ2 != nil) {
-                            tΔ1.Fatal(errΔ2);
-                        }
+                    var errΔ2 = Δos.WriteFile(target + "/f"u8, default, 438); if (errΔ2 != nil) {
+                        tΔ1.Fatal(errΔ2);
                     }
                 }
                 var (rr, err) = root.OpenRoot(testʗ1.open);
@@ -783,7 +751,7 @@ internal static ref readonly @string rootRemoveQˢ => ref rootRemoveQˢᵇ;
 private static readonly @string rootRemoveQˢᵇ = "root.Remove(%q)"u8;
 
 public static void TestRootRemoveFile(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in rootTestCases) {
+    foreach (var (_, vᴛ1) in range(rootTestCases)) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -796,10 +764,8 @@ public static void TestRootRemoveFile(ж<Δtesting.T> t) {
                 wantError = false;
                 target = filepath.Join(root.Name(), testʗ1.ltarget);
             } else if (target != ""u8) {
-                {
-                    var errΔ1 = Δos.WriteFile(target, default, 438); if (errΔ1 != nil) {
-                        tΔ1.Fatal(errΔ1);
-                    }
+                var errΔ1 = Δos.WriteFile(target, default, 438); if (errΔ1 != nil) {
+                    tΔ1.Fatal(errΔ1);
                 }
             }
 
@@ -816,7 +782,7 @@ public static void TestRootRemoveFile(ж<Δtesting.T> t) {
 }
 
 public static void TestRootRemoveDirectory(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in rootTestCases) {
+    foreach (var (_, vᴛ1) in range(rootTestCases)) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -829,10 +795,8 @@ public static void TestRootRemoveDirectory(ж<Δtesting.T> t) {
                 wantError = false;
                 target = filepath.Join(root.Name(), testʗ1.ltarget);
             } else if (target != ""u8) {
-                {
-                    var errΔ1 = Δos.Mkdir(target, 511); if (errΔ1 != nil) {
-                        tΔ1.Fatal(errΔ1);
-                    }
+                var errΔ1 = Δos.Mkdir(target, 511); if (errΔ1 != nil) {
+                    tΔ1.Fatal(errΔ1);
                 }
             }
 
@@ -853,7 +817,7 @@ internal static ref readonly @string rootRemoveAllQˢ => ref rootRemoveAllQˢᵇ
 private static readonly @string rootRemoveAllQˢᵇ = "root.RemoveAll(%q)"u8;
 
 public static void TestRootRemoveAll(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in rootTestCases) {
+    foreach (var (_, vᴛ1) in range(rootTestCases)) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -864,10 +828,8 @@ public static void TestRootRemoveAll(ж<Δtesting.T> t) {
                 // RemoveAll ignores trailing /s
                 // If the file is a symlink, it will remove the symlink.
                 @string fullname = filepath.Join(root.Name(), testʗ1.open);
-                {
-                    var (st, errΔ1) = Δos.Lstat(fullname); if (errΔ1 == nil && st.Mode().Type() == fs.ModeSymlink) {
-                        testʗ1.ltarget = testʗ1.open;
-                    }
+                var (st, errΔ1) = Δos.Lstat(fullname); if (errΔ1 == nil && st.Mode().Type() == fs.ModeSymlink) {
+                    testʗ1.ltarget = testʗ1.open;
                 }
             }
             var wantError = testʗ1.wantError;
@@ -877,25 +839,19 @@ public static void TestRootRemoveAll(ж<Δtesting.T> t) {
                 wantError = false;
                 target = filepath.Join(root.Name(), testʗ1.ltarget);
             } else if (target != ""u8) {
-                {
-                    var errΔ2 = Δos.Mkdir(target, 511); if (errΔ2 != nil) {
-                        tΔ1.Fatal(errΔ2);
-                    }
+                var errΔ2 = Δos.Mkdir(target, 511); if (errΔ2 != nil) {
+                    tΔ1.Fatal(errΔ2);
                 }
-                {
-                    var errΔ3 = Δos.WriteFile(filepath.Join(target, fileˢ2), default, 438); if (errΔ3 != nil) {
-                        tΔ1.Fatal(errΔ3);
-                    }
+                var errΔ3 = Δos.WriteFile(filepath.Join(target, fileˢ2), default, 438); if (errΔ3 != nil) {
+                    tΔ1.Fatal(errΔ3);
                 }
             }
             var targetExists = true;
-            {
-                var (_, errΔ4) = root.Lstat(testʗ1.open); if (errors.Is(errΔ4, Δos.ErrNotExist)) {
-                    // If the target doesn't exist, RemoveAll succeeds rather
-                    // than returning ErrNotExist.
-                    targetExists = false;
-                    wantError = false;
-                }
+            var (_, errΔ4) = root.Lstat(testʗ1.open); if (errors.Is(errΔ4, Δos.ErrNotExist)) {
+                // If the target doesn't exist, RemoveAll succeeds rather
+                // than returning ErrNotExist.
+                targetExists = false;
+                wantError = false;
             }
 
             var err = root.RemoveAll(testʗ1.open);
@@ -922,10 +878,8 @@ public static void TestRootOpenFileAsRoot(ж<Δtesting.T> t) {
     try {
         @string dir = t.TempDir();
         @string target = filepath.Join(dir, targetˢ);
-        {
-            var errΔ1 = Δos.WriteFile(target, default, 438); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = Δos.WriteFile(target, default, 438); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         var (r, err) = Δos.OpenRoot(target);
         if (err == nil) {
@@ -957,7 +911,7 @@ internal static ref readonly @string contentᶜ => ref contentᶜᵇ;
 private static readonly @string contentᶜᵇ = "content"u8;
 
 public static void TestRootStat(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in rootTestCases) {
+    foreach (var (_, vᴛ1) in range(rootTestCases)) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -965,10 +919,8 @@ public static void TestRootStat(ж<Δtesting.T> t) {
         Ꮡtest.run(t, (ж<Δtesting.T> tΔ1, @string target, ж<Δos.Root> root) => {
             @string content = contentᶜ;
             if (target != ""u8) {
-                {
-                    var errΔ1 = Δos.WriteFile(target, slice<byte>(content), 438); if (errΔ1 != nil) {
-                        tΔ1.Fatal(errΔ1);
-                    }
+                var errΔ1 = Δos.WriteFile(target, slice<byte>(content), 438); if (errΔ1 != nil) {
+                    tΔ1.Fatal(errΔ1);
                 }
             }
 
@@ -996,7 +948,7 @@ internal static ref readonly @string contentᶜ1 => ref contentᶜ1ᵇ;
 private static readonly @string contentᶜ1ᵇ = "content"u8;
 
 public static void TestRootLstat(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in rootTestCases) {
+    foreach (var (_, vᴛ1) in range(rootTestCases)) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -1008,10 +960,8 @@ public static void TestRootLstat(ж<Δtesting.T> t) {
                 // Lstat will stat the final link, rather than following it.
                 wantError = false;
             } else if (target != ""u8) {
-                {
-                    var errΔ1 = Δos.WriteFile(target, slice<byte>(content), 438); if (errΔ1 != nil) {
-                        tΔ1.Fatal(errΔ1);
-                    }
+                var errΔ1 = Δos.WriteFile(target, slice<byte>(content), 438); if (errΔ1 != nil) {
+                    tΔ1.Fatal(errΔ1);
                 }
             }
 
@@ -1037,10 +987,8 @@ public static void TestRootLstat(ж<Δtesting.T> t) {
                     }
                 }
             } else {
-                {
-                    var got = fi.Mode(); if ((fs.FileMode)(got & Δos.ModeSymlink) == 0) {
-                        tΔ1.Errorf("root.Stat(%q).Mode() = %v, want symlink", testʗ1.open, got);
-                    }
+                var got = fi.Mode(); if ((fs.FileMode)(got & Δos.ModeSymlink) == 0) {
+                    tΔ1.Errorf("root.Stat(%q).Mode() = %v, want symlink", testʗ1.open, got);
                 }
             }
         });
@@ -1056,7 +1004,7 @@ internal static ref readonly @string contentᶜ2 => ref contentᶜ2ᵇ;
 private static readonly @string contentᶜ2ᵇ = "content"u8;
 
 public static void TestRootReadlink(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in rootTestCases) {
+    foreach (var (_, vᴛ1) in range(rootTestCases)) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -1113,7 +1061,7 @@ private static readonly @string dstPathᶜᵇ = "destination"u8;
 
 internal static void testRootMoveFrom(ж<Δtesting.T> t, bool rename) {
     var want = slice<byte>("target"u8);
-    foreach (var (_, vᴛ1) in rootTestCases) {
+    foreach (var (_, vᴛ1) in range(rootTestCases)) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -1121,10 +1069,8 @@ internal static void testRootMoveFrom(ж<Δtesting.T> t, bool rename) {
         var wantʗ1 = want;
         Ꮡtest.run(t, (ж<Δtesting.T> tΔ1, @string target, ж<Δos.Root> root) => {
             if (target != ""u8) {
-                {
-                    var errΔ1 = Δos.WriteFile(target, wantʗ1, 438); if (errΔ1 != nil) {
-                        tΔ1.Fatal(errΔ1);
-                    }
+                var errΔ1 = Δos.WriteFile(target, wantʗ1, 438); if (errΔ1 != nil) {
+                    tΔ1.Fatal(errΔ1);
                 }
             }
             var wantError = testʗ1.wantError;
@@ -1231,7 +1177,7 @@ private static readonly @string srcPathᶜᵇ = "source"u8;
 
 internal static void testRootMoveTo(ж<Δtesting.T> t, bool rename) {
     var want = slice<byte>("target"u8);
-    foreach (var (_, vᴛ1) in rootTestCases) {
+    foreach (var (_, vᴛ1) in range(rootTestCases)) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -1239,10 +1185,8 @@ internal static void testRootMoveTo(ж<Δtesting.T> t, bool rename) {
         var wantʗ1 = want;
         Ꮡtest.run(t, (ж<Δtesting.T> tΔ1, @string target, ж<Δos.Root> root) => {
             @string srcPath = srcPathᶜ;
-            {
-                var errΔ1 = Δos.WriteFile(filepath.Join(root.Name(), srcPath), wantʗ1, 438); if (errΔ1 != nil) {
-                    tΔ1.Fatal(errΔ1);
-                }
+            var errΔ1 = Δos.WriteFile(filepath.Join(root.Name(), srcPath), wantʗ1, 438); if (errΔ1 != nil) {
+                tΔ1.Fatal(errΔ1);
             }
 
             if (Δruntime.GOOS == "windows"u8 && strings.HasSuffix(testʗ1.open, "/")) {
@@ -1309,7 +1253,7 @@ private static readonly @string wantTargetᶜᵇ = "linktarget"u8;
 
 public static void TestRootSymlink(ж<Δtesting.T> t) {
     testenv.MustHaveSymlink(new os_test_package.testing_TжTB(t));
-    foreach (var (_, vᴛ1) in rootTestCases) {
+    foreach (var (_, vᴛ1) in range(rootTestCases)) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -1356,27 +1300,27 @@ partial struct rootConsistencyTest {
 
 internal static slice<rootConsistencyTest> rootConsistencyTestCases = slice<rootConsistencyTest>([new(
     name: "file",
-    fs: slice<@string>([
+    fs: [
         "target"
-    ]),
+    ],
     open: "target"
 ), new(
     name: "dir slash dot",
-    fs: slice<@string>([
+    fs: [
         "target/file"
-    ]),
+    ],
     open: "target/."
 ), new(
     name: "dot",
-    fs: slice<@string>([
+    fs: [
         "file"
-    ]),
+    ],
     open: "."
 ), new(
     name: "file slash dot",
-    fs: slice<@string>([
+    fs: [
         "target"
-    ]),
+    ],
     open: "target/.",
     detailedErrorMismatch: (ж<Δtesting.T> t) => {
         // FreeBSD returns EPERM in the non-Root case.
@@ -1384,21 +1328,21 @@ internal static slice<rootConsistencyTest> rootConsistencyTestCases = slice<root
     }
 ), new(
     name: "dir slash",
-    fs: slice<@string>([
+    fs: [
         "target/file"
-    ]),
+    ],
     open: "target/"
 ), new(
     name: "dot slash",
-    fs: slice<@string>([
+    fs: [
         "file"
-    ]),
+    ],
     open: "./"
 ), new(
     name: "file slash",
-    fs: slice<@string>([
+    fs: [
         "target"
-    ]),
+    ],
     open: "target/",
     detailedErrorMismatch: (ж<Δtesting.T> t) => {
         // os.Create returns ENOTDIR or EISDIR depending on the platform.
@@ -1406,9 +1350,9 @@ internal static slice<rootConsistencyTest> rootConsistencyTestCases = slice<root
     }
 ), new(
     name: "file in path",
-    fs: slice<@string>([
+    fs: [
         "file"
-    ]),
+    ],
     open: "file/target"
 ), new(
     name: "directory in path missing",
@@ -1418,10 +1362,10 @@ internal static slice<rootConsistencyTest> rootConsistencyTestCases = slice<root
     open: "target"
 ), new(
     name: "symlink slash",
-    fs: slice<@string>([
+    fs: [
         "target/file",
         "link => target"
-    ]),
+    ],
     open: "link/",
     check: (ж<Δtesting.T> t) => {
         if (Δruntime.GOOS == "linux"u8 && strings.HasPrefix(t.Name(), "TestRootConsistencyRename/")) {
@@ -1435,54 +1379,54 @@ internal static slice<rootConsistencyTest> rootConsistencyTestCases = slice<root
     }
 ), new(
     name: "symlink slash dot",
-    fs: slice<@string>([
+    fs: [
         "target/file",
         "link => target"
-    ]),
+    ],
     open: "link/."
 ), new(
     name: "unresolved symlink",
-    fs: slice<@string>([
+    fs: [
         "link => target"
-    ]),
+    ],
     open: "link"
 ), new(
     name: "resolved symlink",
-    fs: slice<@string>([
+    fs: [
         "link => target",
         "target"
-    ]),
+    ],
     open: "link"
 ), new(
     name: "dotdot in path after symlink",
-    fs: slice<@string>([
+    fs: [
         "a => b/c",
         "b/c/",
         "b/target"
-    ]),
+    ],
     open: "a/../target"
 ), new(
     name: "symlink to dir ends in slash",
-    fs: slice<@string>([
+    fs: [
         "dir/",
         "link => dir/"
-    ]),
+    ],
     open: "link"
 ), new(
     name: "symlink to file ends in slash",
-    fs: slice<@string>([
+    fs: [
         "file",
         "link => file/"
-    ]),
+    ],
     open: "link"
 ), new(
     name: "long file name",
     open: strings.Repeat("a", 500)
 ), new(
     name: "unreadable directory",
-    fs: slice<@string>([
+    fs: [
         "dir/target"
-    ]),
+    ],
     fsFunc: (ж<Δtesting.T> t, @string dir) => {
         Δos.Chmod(filepath.Join(dir, "dir"), 0);
         t.Cleanup(() => {
@@ -1539,10 +1483,8 @@ internal static @string tempDirWithUnixSocket(ж<Δtesting.T> t, @string name) {
         t.Fatal(err);
     }
     t.Cleanup(() => {
-        {
-            var errΔ1 = Δos.RemoveAll(dir); if (errΔ1 != nil) {
-                t.Error(errΔ1);
-            }
+        var errΔ1 = Δos.RemoveAll(dir); if (errΔ1 != nil) {
+            t.Error(errΔ1);
         }
     });
     (var addr, err) = Δnet.ResolveUnixAddr("unix", filepath.Join(dir, name));
@@ -1628,10 +1570,8 @@ internal static void run(this rootConsistencyTest test, ж<Δtesting.T> t, Func<
                 var e1 = underlyingError(withRootˢ, err1);
                 var e2 = underlyingError(withoutRootˢ, err1);
                 var detailedErrorMismatch = false;
-                {
-                    var fΔ1 = testʗ1.detailedErrorMismatch; if (fΔ1 != nil) {
-                        detailedErrorMismatch = fΔ1(tΔ1);
-                    }
+                var fΔ1 = testʗ1.detailedErrorMismatch; if (fΔ1 != nil) {
+                    detailedErrorMismatch = fΔ1(tΔ1);
                 }
                 if (Δruntime.GOOS == "plan9"u8) {
                     // Plan9 syscall errors aren't comparable.
@@ -1650,7 +1590,7 @@ internal static void run(this rootConsistencyTest test, ж<Δtesting.T> t, Func<
 }
 
 public static void TestRootConsistencyOpen(ж<Δtesting.T> t) {
-    foreach (var (_, test) in rootConsistencyTestCases) {
+    foreach (var (_, test) in range(rootConsistencyTestCases)) {
         test.run(t, (ж<Δtesting.T> tΔ1, @string path, ж<Δos.Root> r) => {
             GoFrame ᒐ = default;
             try {
@@ -1683,7 +1623,7 @@ public static void TestRootConsistencyOpen(ж<Δtesting.T> t) {
 }
 
 public static void TestRootConsistencyCreate(ж<Δtesting.T> t) {
-    foreach (var (_, test) in rootConsistencyTestCases) {
+    foreach (var (_, test) in range(rootConsistencyTestCases)) {
         test.run(t, (ж<Δtesting.T> tΔ1, @string path, ж<Δos.Root> r) => {
             ж<Δos.File> f = default;
             error err = default;
@@ -1711,7 +1651,7 @@ public static void TestRootConsistencyChmod(ж<Δtesting.T> t) {
     if (Δruntime.GOOS == "wasip1"u8) {
         t.Skip("Chmod not supported on " + Δruntime.GOOS);
     }
-    foreach (var (_, test) in rootConsistencyTestCases) {
+    foreach (var (_, test) in range(rootConsistencyTestCases)) {
         test.run(t, (ж<Δtesting.T> tΔ1, @string path, ж<Δos.Root> r) => {
             Func<@string, fs.FileMode, error> chmod = Δos.Chmod;
             Func<@string, (fs.FileInfo, error)> lstat = Δos.Lstat;
@@ -1722,19 +1662,15 @@ public static void TestRootConsistencyChmod(ж<Δtesting.T> t) {
 
             fs.FileMode m1 = default;
             fs.FileMode m2 = default;
-            {
-                var errΔ1 = chmod(path, 365); if (errΔ1 != nil) {
-                    return (chmod0o555ˢ, errΔ1);
-                }
+            var errΔ1 = chmod(path, 365); if (errΔ1 != nil) {
+                return (chmod0o555ˢ, errΔ1);
             }
             var (fi, err) = lstat(path);
             if (err == nil) {
                 m1 = fi.Mode();
             }
-            {
-                err = chmod(path, 511); if (err != nil) {
-                    return (chmod0o777ˢ, err);
-                }
+            err = chmod(path, 511); if (err != nil) {
+                return (chmod0o777ˢ, err);
             }
             (fi, err) = lstat(path);
             if (err == nil) {
@@ -1746,7 +1682,7 @@ public static void TestRootConsistencyChmod(ж<Δtesting.T> t) {
 }
 
 public static void TestRootConsistencyMkdir(ж<Δtesting.T> t) {
-    foreach (var (_, test) in rootConsistencyTestCases) {
+    foreach (var (_, test) in range(rootConsistencyTestCases)) {
         test.run(t, (ж<Δtesting.T> tΔ1, @string path, ж<Δos.Root> r) => {
             error err = default;
             if (r == nil) {
@@ -1760,7 +1696,7 @@ public static void TestRootConsistencyMkdir(ж<Δtesting.T> t) {
 }
 
 public static void TestRootConsistencyMkdirAll(ж<Δtesting.T> t) {
-    foreach (var (_, test) in rootConsistencyTestCases) {
+    foreach (var (_, test) in range(rootConsistencyTestCases)) {
         test.run(t, (ж<Δtesting.T> tΔ1, @string path, ж<Δos.Root> r) => {
             error err = default;
             if (r == nil) {
@@ -1774,7 +1710,7 @@ public static void TestRootConsistencyMkdirAll(ж<Δtesting.T> t) {
 }
 
 public static void TestRootConsistencyRemove(ж<Δtesting.T> t) {
-    foreach (var (_, test) in rootConsistencyTestCases) {
+    foreach (var (_, test) in range(rootConsistencyTestCases)) {
         if (test.open == "."u8 || test.open == "./"u8) {
             continue; // can't remove the root itself
         }
@@ -1791,7 +1727,7 @@ public static void TestRootConsistencyRemove(ж<Δtesting.T> t) {
 }
 
 public static void TestRootConsistencyRemoveAll(ж<Δtesting.T> t) {
-    foreach (var (_, test) in rootConsistencyTestCases) {
+    foreach (var (_, test) in range(rootConsistencyTestCases)) {
         if (test.open == "."u8 || test.open == "./"u8) {
             continue; // can't remove the root itself
         }
@@ -1808,7 +1744,7 @@ public static void TestRootConsistencyRemoveAll(ж<Δtesting.T> t) {
 }
 
 public static void TestRootConsistencyStat(ж<Δtesting.T> t) {
-    foreach (var (_, test) in rootConsistencyTestCases) {
+    foreach (var (_, test) in range(rootConsistencyTestCases)) {
         test.run(t, (ж<Δtesting.T> tΔ1, @string path, ж<Δos.Root> r) => {
             fs.FileInfo fi = default;
             error err = default;
@@ -1826,7 +1762,7 @@ public static void TestRootConsistencyStat(ж<Δtesting.T> t) {
 }
 
 public static void TestRootConsistencyLstat(ж<Δtesting.T> t) {
-    foreach (var (_, test) in rootConsistencyTestCases) {
+    foreach (var (_, test) in range(rootConsistencyTestCases)) {
         test.run(t, (ж<Δtesting.T> tΔ1, @string path, ж<Δos.Root> r) => {
             fs.FileInfo fi = default;
             error err = default;
@@ -1844,7 +1780,7 @@ public static void TestRootConsistencyLstat(ж<Δtesting.T> t) {
 }
 
 public static void TestRootConsistencyReadlink(ж<Δtesting.T> t) {
-    foreach (var (_, test) in rootConsistencyTestCases) {
+    foreach (var (_, test) in range(rootConsistencyTestCases)) {
         test.run(t, (ж<Δtesting.T> tΔ1, @string path, ж<Δos.Root> r) => {
             if (r == nil) {
                 return Δos.Readlink(path);
@@ -1879,9 +1815,9 @@ internal static void testRootConsistencyMove(ж<Δtesting.T> t, bool rename) {
     // Run this test in two directions:
     // Renaming the test path to a known-good path (from),
     // and renaming a known-good path to the test path (to).
-    foreach (var (_, name) in slice<@string>(["from", "to"])) {
+    foreach (var (_, name) in range(slice<@string>(["from", "to"]))) {
         t.Run(name, (ж<Δtesting.T> tΔ1) => {
-            foreach (var (_, test) in rootConsistencyTestCases) {
+            foreach (var (_, test) in range(rootConsistencyTestCases)) {
                 if (Δruntime.GOOS == "windows"u8) {
                     // On Windows, Rename("/path/to/.", x) succeeds,
                     // because Windows cleans the path to just "/path/to".
@@ -1945,10 +1881,8 @@ internal static void testRootConsistencyMove(ж<Δtesting.T> t, bool rename) {
                         }
                     }
 
-                    {
-                        var errΔ2 = move(srcPath, dstPath); if (errΔ2 != nil) {
-                            return ("", errΔ2);
-                        }
+                    var errΔ2 = move(srcPath, dstPath); if (errΔ2 != nil) {
+                        return ("", errΔ2);
                     }
                     var (fi, err) = lstat(dstPath);
                     if (err != nil) {
@@ -1968,7 +1902,7 @@ private static readonly @string targetᶜ1ᵇ = "linktarget"u8;
 
 public static void TestRootConsistencySymlink(ж<Δtesting.T> t) {
     testenv.MustHaveSymlink(new os_test_package.testing_TжTB(t));
-    foreach (var (_, test) in rootConsistencyTestCases) {
+    foreach (var (_, test) in range(rootConsistencyTestCases)) {
         test.run(t, (ж<Δtesting.T> tΔ1, @string path, ж<Δos.Root> r) => {
             @string target = targetᶜ1;
             error err = default;
@@ -2013,10 +1947,8 @@ public static void TestRootRenameAfterOpen(ж<Δtesting.T> t) {
         @string dir = t.TempDir();
 
         // Create directory "a" and open it.
-        {
-            var errΔ1 = Δos.Mkdir(filepath.Join(dir, "a"), 511); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = Δos.Mkdir(filepath.Join(dir, "a"), 511); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         var (dirf, err) = Δos.OpenRoot(filepath.Join(dir, "a"));
         if (err != nil) {
@@ -2026,15 +1958,11 @@ public static void TestRootRenameAfterOpen(ж<Δtesting.T> t) {
         defer(() => dirfʗ1.Close(), ref ᒐ);
 
         // Rename "a" => "b", and create "b/f".
-        {
-            var errΔ2 = Δos.Rename(filepath.Join(dir, "a"), filepath.Join(dir, "b")); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = Δos.Rename(filepath.Join(dir, "a"), filepath.Join(dir, "b")); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
-        {
-            var errΔ3 = Δos.WriteFile(filepath.Join(dir, "b/f"), slice<byte>("hello"u8), 438); if (errΔ3 != nil) {
-                t.Fatal(errΔ3);
-            }
+        var errΔ3 = Δos.WriteFile(filepath.Join(dir, "b/f"), slice<byte>("hello"u8), 438); if (errΔ3 != nil) {
+            t.Fatal(errΔ3);
         }
 
         // Open "f", and confirm that we see it.
@@ -2076,15 +2004,11 @@ public static void TestRootNonPermissionMode(ж<Δtesting.T> t) {
         }
         var rʗ1 = r;
         defer(() => rʗ1.Close(), ref ᒐ);
-        {
-            var (_, errΔ1) = r.OpenFile(fileˢ2, (nint)(Δos.O_RDWR | Δos.O_CREATE), 1023); if (errΔ1 == nil) {
-                t.Errorf("r.OpenFile(file, O_RDWR|O_CREATE, 0o1777) succeeded; want error");
-            }
+        var (_, errΔ1) = r.OpenFile(fileˢ2, (nint)(Δos.O_RDWR | Δos.O_CREATE), 1023); if (errΔ1 == nil) {
+            t.Errorf("r.OpenFile(file, O_RDWR|O_CREATE, 0o1777) succeeded; want error");
         }
-        {
-            var errΔ2 = r.Mkdir(fileˢ2, 1023); if (errΔ2 == nil) {
-                t.Errorf("r.Mkdir(file, 0o1777) succeeded; want error");
-            }
+        var errΔ2 = r.Mkdir(fileˢ2, 1023); if (errΔ2 == nil) {
+            t.Errorf("r.Mkdir(file, 0o1777) succeeded; want error");
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2102,7 +2026,7 @@ public static void TestRootUseAfterClose(ж<Δtesting.T> t) {
         t.Fatal(err);
     }
     r.Close();
-    foreach (var (_, test) in slice<TestRootUseAfterClose_type>([new(
+    foreach (var (_, test) in range(slice<TestRootUseAfterClose_type>([new(
         name: "Open",
         f: (ж<Δos.Root> rΔ1, @string filename) => {
             var (_, errΔ1) = rΔ1.Open(filename);
@@ -2130,7 +2054,7 @@ public static void TestRootUseAfterClose(ж<Δtesting.T> t) {
         name: "Mkdir",
         f: (ж<Δos.Root> rΔ5, @string filename) => rΔ5.Mkdir(filename, 511)
     )
-    ])) {
+    ]))) {
         var errΔ5 = test.f(r, targetˢ);
         var (pe, ok) = errΔ5._<ж<osꓸPathError>>(ᐧ);
         if (!ok || pe.Path != "target"u8 || !AreEqual(pe.Err, Δos.ErrClosed)) {
@@ -2172,16 +2096,12 @@ public static partial void TestRootConcurrentClose(ж<Δtesting.T> t) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
-    {
-        var errΔ2 = ᐸꟷ(ch); if (errΔ2 != nil) {
-            t.Errorf("OpenFile: %v, want success", errΔ2);
-        }
+    var errΔ2 = ᐸꟷ(ch); if (errΔ2 != nil) {
+        t.Errorf("OpenFile: %v, want success", errΔ2);
     }
     r.Close();
-    {
-        var errΔ3 = ᐸꟷ(ch); if (!errors.Is(errΔ3, Δos.ErrClosed)) {
-            t.Errorf("OpenFile: %v, want ErrClosed", errΔ3);
-        }
+    var errΔ3 = ᐸꟷ(ch); if (!errors.Is(errΔ3, Δos.ErrClosed)) {
+        t.Errorf("OpenFile: %v, want ErrClosed", errΔ3);
     }
 }
 
@@ -2265,20 +2185,18 @@ public static partial void TestRootRaceRenameDir(ж<Δtesting.T> t) {
             // Wait for the open operation to partially complete,
             // and then rename a directory near the root.
             time.Sleep(avg / 4);
-            {
-                var errΔ3 = Δos.Rename(dir + "/base/a"u8, dir + "/b"u8); if (errΔ3 != nil) {
-                    // Windows and Plan9 won't let us rename a directory if we have
-                    // an open handle for it, so an error here is expected.
-                    var exprᴛ1 = Δruntime.GOOS;
-                    switch (ᐧ) {
-                    case {} when exprᴛ1 == "windows"u8 || exprᴛ1 == "plan9"u8: {
-                        break;
-                    }
-                    default: {
-                        t.Fatal(errΔ3);
-                        break;
-                    }}
+            var errΔ3 = Δos.Rename(dir + "/base/a"u8, dir + "/b"u8); if (errΔ3 != nil) {
+                // Windows and Plan9 won't let us rename a directory if we have
+                // an open handle for it, so an error here is expected.
+                var exprᴛ1 = Δruntime.GOOS;
+                switch (ᐧ) {
+                case {} when exprᴛ1 == "windows"u8 || exprᴛ1 == "plan9"u8: {
+                    break;
                 }
+                default: {
+                    t.Fatal(errΔ3);
+                    break;
+                }}
             }
 
             var got = ᐸꟷ(gotc);
@@ -2299,19 +2217,17 @@ private static readonly @string dDNewˢᵇ = "d/d/new"u8;
 public static void TestRootSymlinkToRoot(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
-        @string dir = makefs(t, slice<@string>([
+        @string dir = makefs(t, [
             "d/d => .."
-        ]));
+        ]);
         var (root, err) = Δos.OpenRoot(dir);
         if (err != nil) {
             t.Fatal(err);
         }
         var rootʗ1 = root;
         defer(() => rootʗ1.Close(), ref ᒐ);
-        {
-            var errΔ1 = root.Mkdir(dDNewˢ, 511); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = root.Mkdir(dDNewˢ, 511); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         (var f, err) = root.Open("d/d");
         if (err != nil) {
@@ -2324,10 +2240,8 @@ public static void TestRootSymlinkToRoot(ж<Δtesting.T> t) {
             t.Fatal(err);
         }
         slices.Sort<slice<@string>, @string>(names);
-        {
-            var (got, want) = (names, slice<@string>(["d", "new"])); if (!slices.Equal<slice<@string>, @string>(got, want)) {
-                t.Errorf("root contains: %q, want %q", got, want);
-            }
+        var (got, want) = (names, slice<@string>(["d", "new"])); if (!slices.Equal<slice<@string>, @string>(got, want)) {
+            t.Errorf("root contains: %q, want %q", got, want);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2335,20 +2249,20 @@ public static void TestRootSymlinkToRoot(ж<Δtesting.T> t) {
 }
 
 public static void TestOpenInRoot(ж<Δtesting.T> t) {
-    @string dir = makefs(t, slice<@string>([
+    @string dir = makefs(t, [
         "file",
         "link => ../ROOT/file"
-    ]));
+    ]);
     var (f, err) = Δos.OpenInRoot(dir, fileˢ2);
     if (err != nil) {
         t.Fatalf("OpenInRoot(`file`) = %v, want success", err);
     }
     f.Close();
-    foreach (var (_, name) in slice<@string>([
+    foreach (var (_, name) in range(slice<@string>([
         "link",
         "../ROOT/file",
         dir + "/file"u8
-    ])) {
+    ]))) {
         var (fΔ1, errΔ1) = Δos.OpenInRoot(dir, name);
         if (errΔ1 == nil) {
             fΔ1.Close();
@@ -2370,20 +2284,14 @@ public static void TestRootRemoveDot(ж<Δtesting.T> t) {
         }
         var rootʗ1 = root;
         defer(() => rootʗ1.Close(), ref ᒐ);
-        {
-            var errΔ1 = root.Remove("."); if (errΔ1 == nil) {
-                t.Errorf(@"root.Remove(""."") = %v, want error", errΔ1);
-            }
+        var errΔ1 = root.Remove("."); if (errΔ1 == nil) {
+            t.Errorf(@"root.Remove(""."") = %v, want error", errΔ1);
         }
-        {
-            var errΔ2 = root.RemoveAll("."); if (errΔ2 == nil) {
-                t.Errorf(@"root.RemoveAll(""."") = %v, want error", errΔ2);
-            }
+        var errΔ2 = root.RemoveAll("."); if (errΔ2 == nil) {
+            t.Errorf(@"root.RemoveAll(""."") = %v, want error", errΔ2);
         }
-        {
-            var (_, errΔ3) = Δos.Stat(dir); if (errΔ3 != nil) {
-                t.Error(rootRemoveAllRemovedTheˢ);
-            }
+        var (_, errΔ3) = Δos.Stat(dir); if (errΔ3 != nil) {
+            t.Error(rootRemoveAllRemovedTheˢ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2407,10 +2315,8 @@ public static void TestRootWriteReadFile(ж<Δtesting.T> t) {
 
         @string name = filenameˢ;
         var want = slice<byte>("file contents"u8);
-        {
-            var errΔ1 = root.WriteFile(name, want, 438); if (errΔ1 != nil) {
-                t.Fatalf("root.WriteFile(%q, %q, 0o666) = %v; want nil", name, want, errΔ1);
-            }
+        var errΔ1 = root.WriteFile(name, want, 438); if (errΔ1 != nil) {
+            t.Fatalf("root.WriteFile(%q, %q, 0o666) = %v; want nil", name, want, errΔ1);
         }
 
         (var got, err) = root.ReadFile(name);
@@ -2452,10 +2358,8 @@ public static void TestRootName(ж<Δtesting.T> t) {
             }
         }
 
-        {
-            var errΔ1 = root.Mkdir(dirˢ, 511); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = root.Mkdir(dirˢ, 511); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         (var subroot, err) = root.OpenRoot(dirˢ);
         if (err != nil) {
@@ -2492,15 +2396,13 @@ public static void TestRootNoLstat(ж<Δtesting.T> t) {
             t.Skip(wasmLacksFstatatˢ);
         }
 
-        @string dir = makefs(t, slice<@string>([
+        @string dir = makefs(t, [
             "subdir/"
-        ]));
+        ]);
         UntypedInt size = 42;
         @string contents = strings.Repeat("x", size);
-        {
-            var errΔ1 = Δos.WriteFile(dir + "/subdir/file"u8, slice<byte>(contents), 438); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = Δos.WriteFile(dir + "/subdir/file"u8, slice<byte>(contents), 438); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         var (root, err) = Δos.OpenRoot(dir);
         if (err != nil) {
@@ -2608,10 +2510,8 @@ public static void TestRootNoLstat(ж<Δtesting.T> t) {
             if (errΔ7 != nil) {
                 tΔ7.Fatal(errΔ7);
             }
-            {
-                var (got, want) = (names, slice<@string>(["file"])); if (!slices.Equal<slice<@string>, @string>(got, want)) {
-                    tΔ7.Fatalf(@"Open(""subdir"").Readdirnames(-1) = %q, want %q", got, want);
-                }
+            var (got, want) = (names, slice<@string>(["file"])); if (!slices.Equal<slice<@string>, @string>(got, want)) {
+                tΔ7.Fatalf(@"Open(""subdir"").Readdirnames(-1) = %q, want %q", got, want);
             }
         });
     }
@@ -2760,7 +2660,7 @@ internal static void runRootMultiTestDescs(ж<Δtesting.T> t, testFileDesc sourc
     t.Cleanup(() => {
         if (t.Failed()) {
             t.Log(initialDirectoryContentsˢ);
-            foreach (var (_, line) in initialContentʗ1) {
+            foreach (var (_, line) in range(initialContentʗ1)) {
                 t.Logf("  %v", line);
             }
         }
@@ -2812,19 +2712,19 @@ internal static void runRootMultiTestDescs(ж<Δtesting.T> t, testFileDesc sourc
         var rootContentΔ1 = dirTreeContents(t, rootTestʗ1.dir);
         var osContentΔ1 = dirTreeContents(t, osTestʗ1.dir);
         t.Log(initialDirectoryContentsˢ);
-        foreach (var (_, line) in initialContentʗ2) {
+        foreach (var (_, line) in range(initialContentʗ2)) {
             t.Logf("  %v", line);
         }
         t.Logf("%v:", rootTestʗ1.op);
         t.Logf("  result: %v", rootResult);
         t.Logf("  error: %v", rootErrʗ1);
-        foreach (var (_, line) in rootContentΔ1) {
+        foreach (var (_, line) in range(rootContentΔ1)) {
             t.Logf("  %v", line);
         }
         t.Logf("%v:", osTestʗ1.op);
         t.Logf("  result: %v", osResult);
         t.Logf("  error: %v", osErrʗ1);
-        foreach (var (_, line) in osContentΔ1) {
+        foreach (var (_, line) in range(osContentΔ1)) {
             t.Logf("  %v", line);
         }
     });
@@ -2862,11 +2762,11 @@ internal static void runRootMultiTestDescs(ж<Δtesting.T> t, testFileDesc sourc
     if (!slices.Equal<slice<@string>, @string>(rootContent, osContent)) {
         t.Errorf("inconsistent filesystem after running in/out of root");
         t.Errorf("%v:", rootTest.op);
-        foreach (var (_, line) in rootContent) {
+        foreach (var (_, line) in range(rootContent)) {
             t.Errorf("  %v", line);
         }
         t.Errorf("%v:", osTest.op);
-        foreach (var (_, line) in osContent) {
+        foreach (var (_, line) in range(osContent)) {
             t.Errorf("  %v", line);
         }
     }
@@ -2877,9 +2777,9 @@ internal static ref readonly @string sourceˢ => ref sourceˢᵇ;
 private static readonly @string sourceˢᵇ = "source"u8;
 
 internal static ж<rootMultiTest> newRootTest(ж<Δtesting.T> t, testFileDesc source, testFileDesc target, bool inRoot) {
-    ref var dir = ref heap<@string>(makefs(t, slice<@string>([
+    ref var dir = ref heap<@string>(makefs(t, [
         "DIR/"
-    ])), out var Ꮡdir);
+    ]), out var Ꮡdir);
     ж<Δos.Root> root = default;
     if (inRoot) {
         error err = default;
@@ -2994,7 +2894,7 @@ partial struct testFileRef {
     internal bool escapes;
 }
 
-internal static slice<testFileRef> testFileRefs = slice<testFileRef>([
+internal static slice<testFileRef> testFileRefs = [
     new(escapes: false, name: "b", template: "BASE"),
     new(escapes: false, name: "bs", template: "BASE/"),
     new(escapes: false, name: "dpb", template: "DIR/../BASE"),
@@ -3003,7 +2903,7 @@ internal static slice<testFileRef> testFileRefs = slice<testFileRef>([
     new(escapes: true, name: "prbs", template: "../ROOT/BASE/"),
     new(escapes: true, name: "srb", template: "/ROOT/BASE"),
     new(escapes: true, name: "srbs", template: "/ROOT/BASE/")
-]);
+];
 
 // testFileLimitedRefs is a smaller set of references which do not exercise path escapes
 // (see allTestFileDescs).
@@ -3022,10 +2922,8 @@ private static readonly @string rootˢ3ᵇ = "/ROOT"u8;
 internal static @string path(this testFileRef @ref, @string dir, @string @base) {
     @string p = @ref.template;
     p = strings.ReplaceAll(p, baseˢ, @base);
-    {
-        var (trim, ok) = strings.CutPrefix(p, rootˢ3); if (ok) {
-            p = dir + trim;
-        }
+    var (trim, ok) = strings.CutPrefix(p, rootˢ3); if (ok) {
+        p = dir + trim;
     }
     return p;
 }
@@ -3083,7 +2981,7 @@ internal static iter.Seq<testFileDesc> allTestFileDescs() {
 
     return (Func<testFileDesc, bool> yield) => {
         // Every type of reference to every type of file, except symlink.
-        foreach (var (_, @ref) in testFileRefs) {
+        foreach (var (_, @ref) in range(testFileRefs)) {
             foreach (var kind in range(testFileMax)) {
                 if (kind == testFileUnused || kind.isLink()) {
                     continue;
@@ -3103,11 +3001,11 @@ internal static iter.Seq<testFileDesc> allTestFileDescs() {
         if (!rootComprehensive.Value) {
             refs = testFileLimitedRefs;
         }
-        foreach (var (_, kind) in slice<testFileKind>([testFileSymlink, testFileJunction])) {
+        foreach (var (_, kind) in range(slice<testFileKind>([testFileSymlink, testFileJunction]))) {
             if (kind == testFileJunction && Δruntime.GOOS != "windows"u8) {
                 continue;
             }
-            foreach (var (_, @ref) in refs) {
+            foreach (var (_, @ref) in range(refs)) {
                 foreach (var iᴛ1 in range(testFileMax)) {
                     ref var linkKind = ref heap(new testFileKind(), out var ᏑlinkKind);
                     linkKind = iᴛ1;
@@ -3120,7 +3018,7 @@ internal static iter.Seq<testFileDesc> allTestFileDescs() {
                     if (!rootComprehensive.Value && linkKind != testFileFile && linkKind != testFileDir) {
                         linkRefs = testFileLimitedRefs;
                     }
-                    foreach (var (_, vᴛ1) in linkRefs) {
+                    foreach (var (_, vᴛ1) in range(linkRefs)) {
                         ref var linkRef = ref heap(new testFileRef(), out var ᏑlinkRef);
                         linkRef = vᴛ1;
 
@@ -3156,7 +3054,7 @@ internal static iter.Seq<testFileDesc> allTestFileDescs() {
 internal static @string String(this testFileDesc desc) {
     @string s = desc.@ref.name + strings.ToUpper(desc.kind.String()[..1]);
     if (desc.kind.isLink()) {
-        s += (~desc.target).String();
+        s += desc.target.String();
     }
     return s;
 }
@@ -3168,7 +3066,7 @@ internal static bool escapes(this testFileDesc desc) {
         return true;
     }
     if (desc.kind == testFileSymlink) {
-        return (~desc.target).escapes();
+        return desc.target.escapes();
     }
     if (desc.kind == testFileJunction) {
         return true;
@@ -3187,7 +3085,7 @@ internal static bool lescapes(this testFileDesc desc) {
         return false;
     }
     if (desc.@ref.hasSlashSuffix() && desc.kind.isLink()) {
-        return (~desc.target).escapes();
+        return desc.target.escapes();
     }
     return false;
 }
@@ -3195,7 +3093,7 @@ internal static bool lescapes(this testFileDesc desc) {
 // finalKind reports the kind of the file after following all symlinks.
 internal static testFileKind finalKind(this testFileDesc desc) {
     if (desc.kind.isLink()) {
-        return (~desc.target).finalKind();
+        return desc.target.finalKind();
     }
     return desc.kind;
 }
@@ -3211,7 +3109,7 @@ internal static testFileKind lfinalKind(this testFileDesc desc) {
     }
     default: {
         if (desc.@ref.hasSlashSuffix() && desc.kind.isLink()) {
-            return (~desc.target).finalKind();
+            return desc.target.finalKind();
         }
         break;
     }}
@@ -3280,7 +3178,7 @@ internal static bool anySlashSuffix(this testFileDesc desc) {
         return true;
     }
     if (desc.kind.isLink()) {
-        return (~desc.target).anySlashSuffix();
+        return desc.target.anySlashSuffix();
     }
     return false;
 }
@@ -3342,7 +3240,7 @@ internal static fs.FileInfo /*fi*/ create(this testFileDesc desc, ж<Δtesting.T
         if (Δruntime.GOOS == "wasip1"u8 && filepath.IsAbs(linktarget)) {
             t.Skip("absolute link targets not supported on " + Δruntime.GOOS);
         }
-        fi = (~desc.target).create(t, dir, "s_"u8 + @base, token);
+        fi = desc.target.create(t, dir, "s_"u8 + @base, token);
         {
             var err = Δos.Symlink(linktarget, path); if (err != nil) {
                 t.Fatal(err);
@@ -3356,7 +3254,7 @@ internal static fs.FileInfo /*fi*/ create(this testFileDesc desc, ж<Δtesting.T
             t.Skip("junctions not supported on " + Δruntime.GOOS);
         }
         @string linktarget = desc.target.@ref.path(dir, "s_"u8 + @base);
-        fi = (~desc.target).create(t, dir, "s_"u8 + @base, token);
+        fi = desc.target.create(t, dir, "s_"u8 + @base, token);
         createJunction(t, path, linktarget);
         break;
     }
@@ -3540,10 +3438,8 @@ public static void TestRootMultiOpen(ж<Δtesting.T> t) {
             default: {
                 // We should have successfully opened the file.
                 test.wantError(tΔ1, gotErr, default);
-                {
-                    @string want = targetˢ; if (got != want) {
-                        tΔ1.Fatalf("opened file %q, want %q", got, want);
-                    }
+                @string want = targetˢ; if (got != want) {
+                    tΔ1.Fatalf("opened file %q, want %q", got, want);
                 }
                 break;
             }}
@@ -4089,10 +3985,8 @@ public static void TestRootMultiReadFile(ж<Δtesting.T> t) {
         }
         default: {
             test.wantError(tΔ1, gotErr, default);
-            {
-                @string want = targetˢ; if (got != want) {
-                    tΔ1.Fatalf("read file content %q, want %q", got, want);
-                }
+            @string want = targetˢ; if (got != want) {
+                tΔ1.Fatalf("read file content %q, want %q", got, want);
             }
             break;
         }}
@@ -4276,11 +4170,9 @@ public static void TestRootMultiReadlink(ж<Δtesting.T> t) {
 
         test.setOp(readlinkQˢ, test.targetPath);
         var (got, gotErr) = readlink(test.targetPath);
-        {
-            var (suffix, ok) = strings.CutPrefix(got, test.dir); if (ok) {
-                // Replace absolute path prefix with /.../
-                got = "/..."u8 + suffix;
-            }
+        var (suffix, ok) = strings.CutPrefix(got, test.dir); if (ok) {
+            // Replace absolute path prefix with /.../
+            got = "/..."u8 + suffix;
         }
 
         switch (ᐧ) {
@@ -4387,10 +4279,8 @@ public static void TestRootMultiOpenFile(ж<Δtesting.T> t) {
             }
             default: {
                 test.wantError(tΔ1, gotErr, default);
-                {
-                    @string want = targetˢ; if (got != want) {
-                        tΔ1.Fatalf("opened file %q, want %q", got, want);
-                    }
+                @string want = targetˢ; if (got != want) {
+                    tΔ1.Fatalf("opened file %q, want %q", got, want);
                 }
                 break;
             }}

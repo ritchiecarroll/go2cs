@@ -45,7 +45,7 @@ public static void TestPrefixValid(ж<testing.T> t) {
         new(PrefixFrom(new ΔAddr(), 32), false),
         new(PrefixFrom(new ΔAddr(), 128), false)
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var got = tt.ipp.IsValid();
         if (got != tt.want) {
             t.Errorf("(%v).IsValid() = %v want %v", tt.ipp, got, tt.want);
@@ -81,10 +81,10 @@ internal static void initᴛnextPrevTests() { nextPrevTests = slice<nextPrevTest
 public static void TestIPNextPrev(ж<testing.T> t) {
     doNextPrev(new testing_TжTB(t));
 
-    foreach (var (_, ip) in slice<ΔAddr>([
+    foreach (var (_, ip) in range(slice<ΔAddr>([
         mustIP("0.0.0.0"),
         mustIP("::")
-    ])) {
+    ]))) {
         var got = ip.Prev();
         if (!got.isZero()) {
             t.Errorf("IP(%v).Prev = %v; want zero", ip, got);
@@ -92,14 +92,14 @@ public static void TestIPNextPrev(ж<testing.T> t) {
     }
 
     array<byte> allFF = new(16);
-    foreach (var i in range(allFF)) {
+    foreach (var i in range(len(allFF))) {
         allFF[i] = 0xff;
     }
 
-    foreach (var (_, ip) in slice<ΔAddr>([
+    foreach (var (_, ip) in range(slice<ΔAddr>([
         mustIP("255.255.255.255"),
         AddrFrom16(allFF)
-    ])) {
+    ]))) {
         var got = ip.Next();
         if (!got.isZero()) {
             t.Errorf("IP(%v).Next = %v; want zero", ip, got);
@@ -116,7 +116,7 @@ public static void BenchmarkIPNextPrev(ж<testing.B> Ꮡb) {
 }
 
 internal static void doNextPrev(testing.TB t) {
-    foreach (var (_, tt) in nextPrevTests) {
+    foreach (var (_, tt) in range(nextPrevTests)) {
         var (gnext, gprev) = (tt.ip.Next(), tt.ip.Prev());
         if (gnext != tt.next) {
             t.Errorf("IP(%v).Next = %v; want %v", tt.ip, gnext, tt.next);
@@ -153,7 +153,7 @@ public static void TestIPBitLen(ж<testing.T> t) {
         new(mustIP(fed01ˢ), 128),
         new(mustIP(ffff10001ˢ), 128)
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         nint got = tt.ip.BitLen();
         if (got != tt.want) {
             t.Errorf("BitLen(%v) = %d; want %d", tt.ip, got, tt.want);
@@ -198,7 +198,7 @@ public static void TestPrefixContains(ж<testing.T> t) {
         new(mustPrefix("::1/0"), mustIP("1.2.3.4"), false),
         new(mustPrefix("1.2.3.4/0"), mustIP("::1"), false)
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var got = tt.ipp.Contains(tt.ip);
         if (got != tt.want) {
             t.Errorf("(%v).Contains(%v) = %v want %v", tt.ipp, tt.ip, got, tt.want);
@@ -238,7 +238,7 @@ public static void TestParseIPError(ж<testing.T> t) {
             errstr: "missing IPv6 address"
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestParseIPError_tests(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -248,18 +248,14 @@ public static void TestParseIPError(ж<testing.T> t) {
             if (err == nil) {
                 tΔ1.Fatal(noErrorˢ);
             }
-            {
-                var (_, ok) = err._<parseAddrError>(ᐧ); if (!ok) {
-                    tΔ1.Errorf("error type is %T, want parseIPError", err);
-                }
+            var (_, ok) = err._<parseAddrError>(ᐧ); if (!ok) {
+                tΔ1.Errorf("error type is %T, want parseIPError", err);
             }
             if (testʗ1.errstr == ""u8) {
                 testʗ1.errstr = unableToParseIpˢ;
             }
-            {
-                @string got = err.Error(); if (!strings.Contains(got, testʗ1.errstr)) {
-                    tΔ1.Errorf("error is missing substring %q: %s", testʗ1.errstr, got);
-                }
+            @string got = err.Error(); if (!strings.Contains(got, testʗ1.errstr)) {
+                tΔ1.Errorf("error is missing substring %q: %s", testʗ1.errstr, got);
             }
         });
     }
@@ -281,7 +277,7 @@ public static void TestParseAddrPort(ж<testing.T> t) {
         new(@in: "fe80::1:1234", wantErr: true),
         new(@in: ":0", wantErr: true) // if we need to parse this form, there should be a separate function that explicitly allows it
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestParseAddrPort_tests(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -348,7 +344,7 @@ public static void TestAddrPortMarshalUnmarshal(ж<testing.T> t) {
         new("", new AddrPort())
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestAddrPortMarshalUnmarshal_tests(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -357,10 +353,8 @@ public static void TestAddrPortMarshalUnmarshal(ж<testing.T> t) {
             @string orig = @""""u8 + testʗ1.@in + @""""u8;
 
             ref var ipp = ref heap(new AddrPort(), out var Ꮡipp);
-            {
-                var errΔ1 = json.Unmarshal(slice<byte>(orig), Ꮡipp); if (errΔ1 != nil) {
-                    tΔ1.Fatalf("failed to unmarshal: %v", errΔ1);
-                }
+            var errΔ1 = json.Unmarshal(slice<byte>(orig), Ꮡipp); if (errΔ1 != nil) {
+                tΔ1.Fatalf("failed to unmarshal: %v", errΔ1);
             }
 
             var (ippb, err) = json.Marshal(ipp);
@@ -401,15 +395,13 @@ internal static void testAppendToMarshal(ж<testing.T> t, appendMarshaler x) {
 
 public static void TestIPv6Accessor(ж<testing.T> t) {
     array<byte> a = new(16);
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         a[i] = (byte)((uint8)i + 1);
     }
     var ip = AddrFrom16(a);
-    foreach (var i in range(a)) {
-        {
-            var (got, want) = (ip.v6((uint8)i), (uint8)((uint8)i + 1)); if (got != want) {
-                t.Errorf("v6(%v) = %v; want %v", i, got, want);
-            }
+    foreach (var i in range(len(a))) {
+        var (got, want) = (ip.v6((uint8)i), (uint8)((uint8)i + 1)); if (got != want) {
+            t.Errorf("v6(%v) = %v; want %v", i, got, want);
         }
     }
 }

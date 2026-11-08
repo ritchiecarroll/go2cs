@@ -70,13 +70,13 @@ using static global::go.io.fs_test_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("io/fs/format_test.go", "format_test.cs", "ABcugqaCpoKmgqaCpoKmgqaC9gAuZoKygoLKgrKCgg==", "", "", "61=Date/1/4/10,Date/2/4/21,Date/3/4/32,Date/4/4/43")]
 [assembly: GoPositionMap("io/fs/fs_test.go", "fs_test.cs", "AA4YABo8goKCgg==")]
-[assembly: GoPositionMap("io/fs/glob_test.go", "glob_test.cs", "ABUgAAcWgoKCgoKUgqaCgoKClILKgoKCgoLKpoKC/IAACgSCgoKCyoKmgg==", "74-79:1", "", "22=DirFS/1/5/4,DirFS/2/5/5,DirFS/3/5/6,DirFS/4/5/7,DirFS/5/5/8")]
-[assembly: GoPositionMap("io/fs/readdir_test.go", "readdir_test.cs", "ABckgOSCgoKCgoKUyoKmgqaCgpSCAAgGggAMHgAEErKigoKmgoCCpICSpICC7IKCgpQACgaCgoKCgJI=", "21-30:1;75-91:1", "", "68=Now/1/2/4,Now/2/2/10")]
-[assembly: GoPositionMap("io/fs/readfile_test.go", "readfile_test.cs", "ABAeABMmgAALCJSCgriCgriCgpSCgriCgoKCgJI=", "", "", "17=Now/1/2/4,Now/2/2/10")]
-[assembly: GoPositionMap("io/fs/readlink_test.go", "readlink_test.cs", "ACQaggASMIKCgoK4goKmgoKmgqaCABIwgoKCgoKUgriCpoKClA==", "38-44:1;85-95:1")]
-[assembly: GoPositionMap("io/fs/stat_test.go", "stat_test.cs", "ABMegAAIBIKCgoKCgpTKgqaC", "18-27:1")]
-[assembly: GoPositionMap("io/fs/sub_test.go", "sub_test.cs", "ABEegAAOBIKCgoKClIKCpoKCgoKUyoKmgpSCgpSCgpSCpoKC", "18-37:1")]
-[assembly: GoPositionMap("io/fs/walk_test.go", "walk_test.cs", "ABkuABc0ooKCuIKCkoKUpqzSgoKCpoKCgpSUpoKUgoKCmIKClIKUgoKUuILu7oKigoCCgoCCtIKUuIKClIKAggALCqKCgoCCtoKAgqSCgoKClIKUlIKUgoK0", "58-64:1;73-77:1;94-96:1;105-110:2;129-140:1;167-175:1")]
+[assembly: GoPositionMap("io/fs/glob_test.go", "glob_test.cs", "ABMgAAcWgoKCgoKUgqaCgoKClILKgoKCgoLKpoKC/AAJBIKCgoLKgqaC", "74-79:1", "", "20=DirFS/1/5/4,DirFS/2/5/5,DirFS/3/5/6,DirFS/4/5/7,DirFS/5/5/8")]
+[assembly: GoPositionMap("io/fs/readdir_test.go", "readdir_test.cs", "ABUk1IKCgoKCgpTKgqaCpoKClIIACAaCAAweAAQSsqKCgqaCgIKkgJKkgILsgoKClAAKBoKCgoKS", "21-30:1;75-91:1", "", "64=Now/1/2/4,Now/2/2/10")]
+[assembly: GoPositionMap("io/fs/readfile_test.go", "readfile_test.cs", "ABAeABMmAAoIlIKCuIKCuIKClIKCuIKCgoKS", "", "", "17=Now/1/2/4,Now/2/2/10")]
+[assembly: GoPositionMap("io/fs/readlink_test.go", "readlink_test.cs", "ACIaggASMIKCgoK4goKmgoKmgqaCABIwgoKCgoKUgriCpoKClA==", "38-44:1;85-95:1")]
+[assembly: GoPositionMap("io/fs/stat_test.go", "stat_test.cs", "ABEe9IKCgoKCgpTKgqaC", "18-27:1")]
+[assembly: GoPositionMap("io/fs/sub_test.go", "sub_test.cs", "ABEeAA0EgoKCgoKUgoKmgoKCgpTKgqaClIKClIKClIKmgoI=", "18-37:1")]
+[assembly: GoPositionMap("io/fs/walk_test.go", "walk_test.cs", "ABkuABc0ooKCuIKCkoKUpqzSgoKCpoKCgpSUpoKUgoKCmIKClIKUgoKUuILu7oKigoKCgpSClLiCgpSCggAKCqKCgoKmgoKUgoKCgpSClJSClIKCtA==", "58-64:1;73-77:1;94-96:1;105-110:2;129-140:1;167-175:1")]
 // </GoSourcePositionMaps>
 
 namespace go.io;

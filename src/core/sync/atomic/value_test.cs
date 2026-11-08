@@ -10,8 +10,6 @@ using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using static go.sync.atomic_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.sync;
 using math;
 
@@ -122,9 +120,9 @@ public static void TestValuePanic(ж<testing.T> t) {
 
 public static partial void TestValueConcurrent(ж<testing.T> t) {
     var tests = slice<slice<any>>([
-        slice<any>([(uint16)0, unchecked((uint16)(~(uint16)0)), (uint16)(1 + (2 << 8)), (uint16)(3 + (4 << 8))]),
-        slice<any>([(uint32)0, ~(uint32)0, (uint32)(1 + (2 << 16)), (uint32)(3 + (4 << 16))]),
-        slice<any>([(uint64)0, ~(uint64)0, (uint64)(1 + 8589934592L), (uint64)(3 + 17179869184L)]),
+        [(uint16)0, unchecked((uint16)(~(uint16)0)), (uint16)(1 + (2 << 8)), (uint16)(3 + (4 << 8))],
+        [(uint32)0, ~(uint32)0, (uint32)(1 + (2 << 16)), (uint32)(3 + (4 << 16))],
+        [(uint64)0, ~(uint64)0, (uint64)(1 + 8589934592L), (uint64)(3 + 17179869184L)],
         slice<any>([complex(0D, 0D), complex(1D, 2D), complex(3D, 4D), complex(5D, 6D)])
     ]);
     nint p = 4 * runtime.GOMAXPROCS(0);
@@ -133,7 +131,7 @@ public static partial void TestValueConcurrent(ж<testing.T> t) {
         p /= 2;
         N = 1000;
     }
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         ref var v = ref heap(new atomic.Value(), out var Ꮡv);
         var done = new channel<bool>(p);
         for (nint i = 0; i < p; i++) {
@@ -147,7 +145,7 @@ loop:
                     var x = testʗ1[r.Intn(len(testʗ1))];
                     Ꮡv.Store(x);
                     x = Ꮡv.Load();
-                    foreach (var (_, x1) in testʗ1) {
+                    foreach (var (_, x1) in range(testʗ1)) {
                         if (AreEqual(x, x1)) {
                             goto continue_loop;
                         }
@@ -188,16 +186,16 @@ partial struct Value_SwapTestsᴛ1 /*dyn*/ {
     internal any want;
     internal any err;
 }
-public static readonly ж<slice<Value_SwapTestsᴛ1>> ᏑValue_SwapTests = new StaticBox<slice<Value_SwapTestsᴛ1>>(slice<Value_SwapTestsᴛ1>([
+public static readonly ж<slice<Value_SwapTestsᴛ1>> ᏑValue_SwapTests = new StaticBox<slice<Value_SwapTestsᴛ1>>([
     new(init: default, @new: default, err: (@string)"sync/atomic: swap of nil value into Value"),
     new(init: default, @new: true, want: default, err: default),
     new(init: true, @new: (@string)""u8, err: (@string)"sync/atomic: swap of inconsistently typed value into Value"),
     new(init: true, @new: false, want: true, err: default)
-]));
+]);
 public static ref slice<Value_SwapTestsᴛ1> Value_SwapTests => ref ((StaticBox<slice<Value_SwapTestsᴛ1>>)ᏑValue_SwapTests).ValueSlot;
 
 public static void TestValue_Swap(ж<testing.T> t) {
-    foreach (var (i, vᴛ1) in Value_SwapTests) {
+    foreach (var (i, vᴛ1) in range(Value_SwapTests)) {
         ref var tt = ref heap(new Value_SwapTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -255,10 +253,8 @@ public static partial void TestValueSwapConcurrent(ж<testing.T> t) {
         goǃ(() => {
             uint64 c = default;
             for (var @new = i; @new < i + n; @new++) {
-                {
-                    var old = Ꮡv.Swap(@new); if (old != nil) {
-                        c += old._<uint64>();
-                    }
+                var old = Ꮡv.Swap(@new); if (old != nil) {
+                    c += old._<uint64>();
                 }
             }
             atomic.AddUint64(Ꮡcount, c);
@@ -266,10 +262,8 @@ public static partial void TestValueSwapConcurrent(ж<testing.T> t) {
         });
     }
     Ꮡg.Wait();
-    {
-        var (want, got) = ((m * n - 1) * (m * n) / 2, count + Ꮡv.Load()._<uint64>()); if (got != want) {
-            t.Errorf("sum from 0 to %d was %d, want %v", m * n - 1, got, want);
-        }
+    var (want, got) = ((m * n - 1) * (m * n) / 2, count + Ꮡv.Load()._<uint64>()); if (got != want) {
+        t.Errorf("sum from 0 to %d was %d, want %v", m * n - 1, got, want);
     }
 }
 
@@ -286,7 +280,7 @@ partial struct Value_CompareAndSwapTestsᴛ1 /*dyn*/ {
     internal bool want;
     internal any err;
 }
-public static readonly ж<slice<Value_CompareAndSwapTestsᴛ1>> ᏑValue_CompareAndSwapTests = new StaticBox<slice<Value_CompareAndSwapTestsᴛ1>>(slice<Value_CompareAndSwapTestsᴛ1>([
+public static readonly ж<slice<Value_CompareAndSwapTestsᴛ1>> ᏑValue_CompareAndSwapTests = new StaticBox<slice<Value_CompareAndSwapTestsᴛ1>>([
     new(init: default, @new: default, old: default, err: (@string)"sync/atomic: compare and swap of nil value into Value"),
     new(init: default, @new: true, old: (@string)""u8, err: (@string)"sync/atomic: compare and swap of inconsistently typed values into Value"),
     new(init: default, @new: true, old: true, want: false, err: default),
@@ -295,11 +289,11 @@ public static readonly ж<slice<Value_CompareAndSwapTestsᴛ1>> ᏑValue_Compare
     new(init: true, @new: true, old: false, want: false, err: default),
     new(init: true, @new: true, old: true, want: true, err: default),
     new(init: heapA, @new: new heapAᴛ1(1), old: heapB, want: true, err: default)
-]));
+]);
 public static ref slice<Value_CompareAndSwapTestsᴛ1> Value_CompareAndSwapTests => ref ((StaticBox<slice<Value_CompareAndSwapTestsᴛ1>>)ᏑValue_CompareAndSwapTests).ValueSlot;
 
 public static void TestValue_CompareAndSwap(ж<testing.T> t) {
-    foreach (var (i, vᴛ1) in Value_CompareAndSwapTests) {
+    foreach (var (i, vᴛ1) in range(Value_CompareAndSwapTests)) {
         ref var tt = ref heap(new Value_CompareAndSwapTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -324,10 +318,8 @@ public static void TestValue_CompareAndSwap(ж<testing.T> t) {
                         break;
                     }}
                 }, ref ᒐ);
-                {
-                    var got = Ꮡv.CompareAndSwap(ttʗ1.old, ttʗ1.@new); if (got != ttʗ1.want) {
-                        tΔ1.Errorf("got %v, want %v", got, ttʗ1.want);
-                    }
+                var got = Ꮡv.CompareAndSwap(ttʗ1.old, ttʗ1.@new); if (got != ttʗ1.want) {
+                    tΔ1.Errorf("got %v, want %v", got, ttʗ1.want);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -359,10 +351,8 @@ public static partial void TestValueCompareAndSwapConcurrent(ж<testing.T> t) {
         });
     }
     Ꮡw.Wait();
-    {
-        nint stop = Ꮡv.Load()._<nint>(); if (stop != m * n) {
-            t.Errorf("did not get to %v, stopped at %v", m * n, stop);
-        }
+    nint stop = Ꮡv.Load()._<nint>(); if (stop != m * n) {
+        t.Errorf("did not get to %v, stopped at %v", m * n, stop);
     }
 }
 

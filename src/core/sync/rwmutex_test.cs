@@ -9,8 +9,6 @@ using Δruntime = runtime_package;
 using static sync_package;
 using atomic = go.sync.atomic_package;
 using Δtesting = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.sync;
 using static go.sync_internal_test_package;
 using Δsync = sync_package;

@@ -190,7 +190,7 @@ internal static void initᴛaddrListTests() { addrListTests = slice<addrListTest
     new(default, default, testInetaddr, default, default, default, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(errNoSuitableAddress.Error(), "ADDR")))),
 
     new(ipv4only, default, testInetaddr, default, default, default, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(errNoSuitableAddress.Error(), "ADDR")))),
-    new(ipv4only, slice<global::go.net_package.IPAddr>([new(IP: IPv6loopback)]), testInetaddr, default, default, default, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(errNoSuitableAddress.Error(), "ADDR")))),
+    new(ipv4only, [new(IP: IPv6loopback)], testInetaddr, default, default, default, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(errNoSuitableAddress.Error(), "ADDR")))),
 
     new(ipv6only, default, testInetaddr, default, default, default, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(errNoSuitableAddress.Error(), "ADDR")))),
     new(ipv6only, slice<global::go.net_package.IPAddr>([new(IP: IPv4(127, 0, 0, 1))]), testInetaddr, default, default, default, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(errNoSuitableAddress.Error(), "ADDR"))))
@@ -205,7 +205,7 @@ public static void TestAddrList(ж<testing.T> t) {
         t.Skip(bothIPv4AndIPv6Areˢ);
     }
 
-    foreach (var (i, tt) in addrListTests) {
+    foreach (var (i, tt) in range(addrListTests)) {
         var (addrs, err) = filterAddrList(tt.filter, tt.ips, tt.inetaddr, addrˢ);
         if (!reflect.DeepEqual(err, tt.err)) {
             t.Errorf("#%v: got %v; want %v", i, err, tt.err);
@@ -257,12 +257,12 @@ public static void TestAddrListPartition(ж<testing.T> t) {
         new(2, new addrList(new global::go.net_package.ΔAddr[]{addrs[0], addrs[1]}.slice()), new addrList(new global::go.net_package.ΔAddr[]{addrs[2]}.slice())),
         new(3, new addrList(new global::go.net_package.ΔAddr[]{addrs[0], addrs[1], addrs[2]}.slice()), default)
     ]);
-    foreach (var (i, vᴛ1) in cases) {
+    foreach (var (i, vᴛ1) in range(cases)) {
         ref var tt = ref heap(new TestAddrListPartition_cases(), out var Ꮡtt);
         tt = vᴛ1;
 
         // Inverting the function's output should not affect the outcome.
-        foreach (var (_, invert) in slice<bool>([false, true])) {
+        foreach (var (_, invert) in range(slice<bool>([false, true]))) {
             var ttʗ1 = tt;
             var (primaries, fallbacks) = addrs.partition((global::go.net_package.ΔAddr a) => {
                 var ip = a._<ж<global::go.net_package.IPAddr>>().IP;

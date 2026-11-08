@@ -13,7 +13,7 @@ partial struct oldHeadingTestsᴛ1 /*dyn*/ {
     internal @string line;
     internal bool ok;
 }
-internal static slice<oldHeadingTestsᴛ1> oldHeadingTests = slice<oldHeadingTestsᴛ1>([
+internal static slice<oldHeadingTestsᴛ1> oldHeadingTests = [
     new("Section", true),
     new("A typical usage", true),
     new("ΔΛΞ is Greek", true),
@@ -31,11 +31,11 @@ internal static slice<oldHeadingTestsᴛ1> oldHeadingTests = slice<oldHeadingTes
     new("Use n+m", false),
     new("Scanning:", false),
     new("N:M", false)
-]);
+];
 
 public static void TestIsOldHeading(ж<testing.T> t) {
-    foreach (var (_, tt) in oldHeadingTests) {
-        if (isOldHeading(tt.line, slice<@string>(["Text.", "", tt.line, "", "Text."]), 2) != tt.ok) {
+    foreach (var (_, tt) in range(oldHeadingTests)) {
+        if (isOldHeading(tt.line, ["Text.", "", tt.line, "", "Text."], 2) != tt.ok) {
             t.Errorf("isOldHeading(%q) = %v, want %v", tt.line, !tt.ok, tt.ok);
         }
     }
@@ -44,7 +44,7 @@ public static void TestIsOldHeading(ж<testing.T> t) {
 partial struct autoURLTestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
 }
-internal static slice<autoURLTestsᴛ1> autoURLTests = slice<autoURLTestsᴛ1>([
+internal static slice<autoURLTestsᴛ1> autoURLTests = [
     new("", ""),
     new("http://[::1]:8080/foo.txt", "http://[::1]:8080/foo.txt"),
     new("https://www.google.com) after", "https://www.google.com"),
@@ -71,10 +71,10 @@ internal static slice<autoURLTestsᴛ1> autoURLTests = slice<autoURLTestsᴛ1>([
     new("http://git.qemu.org/?p=qemu.git;a=blob;f=qapi-schema.json;hb=HEAD", "http://git.qemu.org/?p=qemu.git;a=blob;f=qapi-schema.json;hb=HEAD"),
     new("https://foo.bar/bal/x(])", "https://foo.bar/bal/x"), // inner ] causes (]) to be cut off from URL
     new("http://bar(])", "http://bar")                        // same
-]);
+];
 
 public static void TestAutoURL(ж<testing.T> t) {
-    foreach (var (_, tt) in autoURLTests) {
+    foreach (var (_, tt) in range(autoURLTests)) {
         var (url, ok) = autoURL(tt.@in);
         if (url != tt.@out || ok != (tt.@out != ""u8)) {
             t.Errorf("autoURL(%q) = %q, %v, want %q, %v", tt.@in, url, ok, tt.@out, tt.@out != ""u8);

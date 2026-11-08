@@ -10,7 +10,7 @@ partial class net_internal_test_package {
 
 internal static void checkDistribution(ж<testing.T> t, slice<ж<global::go.net_package.SRV>> data, float64 margin) {
     nint sum = 0;
-    foreach (var (_, srv) in data) {
+    foreach (var (_, srv) in range(data)) {
         sum += (nint)srv.Weight;
     }
 

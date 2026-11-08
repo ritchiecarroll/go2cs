@@ -37,7 +37,7 @@ public static void TestCgroupGOMAXPROCSDontUpdate(ж<testing.T> t) {
 
     // Two ways to disable updates: explicit GOMAXPROCS or GODEBUG for
     // update feature.
-    foreach (var (_, v) in slice<@string>(["GOMAXPROCS=4", "GODEBUG=updatemaxprocs=0"])) {
+    foreach (var (_, v) in range(slice<@string>(["GOMAXPROCS=4", "GODEBUG=updatemaxprocs=0"]))) {
         t.Run(v, (ж<testing.T> tΔ1) => {
             @string got = runTestProg(tΔ1, testprogˢ, "WindowsDontUpdateGOMAXPROCS", v);
             if (strings.Contains(got, skipˢ)) {

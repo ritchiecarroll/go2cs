@@ -12,13 +12,10 @@ partial class os_internal_test_package {
 // Export for testing.
 public static readonly ж<Func<fs.FileInfo, time.Time>> ᏑAtime = new StaticBox<Func<fs.FileInfo, time.Time>>(atime);
 public static ref Func<fs.FileInfo, time.Time> Atime => ref ((StaticBox<Func<fs.FileInfo, time.Time>>)ᏑAtime).ValueSlot;
-
 public static error ErrWriteAtInAppendMode;
 internal static void initᴛErrWriteAtInAppendMode() { ErrWriteAtInAppendMode = errWriteAtInAppendMode; }
-
 public static error ErrPatternHasSeparator;
 internal static void initᴛErrPatternHasSeparator() { ErrPatternHasSeparator = errPatternHasSeparator; }
-
 public static error ErrPathEscapes;
 internal static void initᴛErrPathEscapes() { ErrPathEscapes = errPathEscapes; }
 

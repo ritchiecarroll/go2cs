@@ -19,9 +19,7 @@ partial struct ftoaTest {
     internal @string s;
 }
 
-internal static float64 fdiv(float64 a, float64 b) {
-    return a / b;
-}
+internal static float64 fdiv(float64 a, float64 b) { return a / b; }
 
 internal static ref readonly GoBigConst below1e23 => ref below1e23ᵇ;
 private static readonly GoBigConst below1e23ᵇ = /* 99999999999999974834176 */
@@ -269,19 +267,15 @@ public static void TestFtoaPowersOfTwo(ж<testing.T> t) {
         var f = math.Ldexp(1D, exp);
         if (!math.IsInf(f, 0)) {
             @string s = FormatFloat(f, (byte)'e', -1, 64);
-            {
-                var (x, _) = ParseFloat(s, 64); if (x != f) {
-                    t.Errorf("failed roundtrip %v => %s => %v", f, s, x);
-                }
+            var (x, _) = ParseFloat(s, 64); if (x != f) {
+                t.Errorf("failed roundtrip %v => %s => %v", f, s, x);
             }
         }
         var f32 = (float32)f;
         if (!math.IsInf((float64)f32, 0)) {
             @string s = FormatFloat((float64)f32, (byte)'e', -1, 32);
-            {
-                var (x, _) = ParseFloat(s, 32); if ((float32)x != f32) {
-                    t.Errorf("failed roundtrip %v => %s => %v", f32, s, (float32)x);
-                }
+            var (x, _) = ParseFloat(s, 32); if ((float32)x != f32) {
+                t.Errorf("failed roundtrip %v => %s => %v", f32, s, (float32)x);
             }
         }
     }
@@ -320,10 +314,8 @@ public static void TestFormatFloatInvalidBitSize(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r == nil) {
-                    t.Fatalf("expected panic due to invalid bitSize");
-                }
+            var r = recover(); if (r == nil) {
+                t.Fatalf("expected panic due to invalid bitSize");
             }
         }, ref ᒐ);
         _ = FormatFloat(3.14D, (byte)'g', -1, 100);
@@ -391,7 +383,7 @@ internal static slice<ftoaBenchesᴛ1> ftoaBenches = slice<ftoaBenchesᴛ1>([
 ]);
 
 public static void BenchmarkFormatFloat(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in ftoaBenches) {
+    foreach (var (_, vᴛ1) in range(ftoaBenches)) {
         ref var c = ref heap(new ftoaBenchesᴛ1(), out var Ꮡc);
         c = vᴛ1;
 
@@ -406,7 +398,7 @@ public static void BenchmarkFormatFloat(ж<testing.B> b) {
 
 public static void BenchmarkAppendFloat(ж<testing.B> b) {
     var dst = new slice<byte>(30);
-    foreach (var (_, vᴛ1) in ftoaBenches) {
+    foreach (var (_, vᴛ1) in range(ftoaBenches)) {
         ref var c = ref heap(new ftoaBenchesᴛ1(), out var Ꮡc);
         c = vᴛ1;
 

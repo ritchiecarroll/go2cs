@@ -31,7 +31,7 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
     if (err != nil) {
         Ꮡf.Fatalf("failed to read testdata directory: %s", err);
     }
-    foreach (var (_, de) in testdata) {
+    foreach (var (_, de) in range(testdata)) {
         if (de.IsDir()) {
             continue;
         }
@@ -50,7 +50,7 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
         }
         var files = slice<FuzzReader_file>([]);
 
-        foreach (var (_, fΔ1) in r.File) {
+        foreach (var (_, fΔ1) in range(r.File)) {
             var (fr, errΔ3) = fΔ1.Open();
             if (errΔ3 != nil) {
                 continue;
@@ -60,10 +60,8 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
                 continue;
             }
             files = append(filesᴷ, files, new FuzzReader_file(header: fΔ1.ᏑFileHeader, content: content));
-            {
-                var (_, errΔ4) = r.Open(fΔ1.Name); if (errΔ4 != nil) {
-                    continue;
-                }
+            var (_, errΔ4) = r.Open(fΔ1.Name); if (errΔ4 != nil) {
+                continue;
             }
         }
 
@@ -75,22 +73,18 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
 
         var w = NewWriter(io.Discard);
         files = move2heap(filesᴷ, files);
-        foreach (var (_, fΔ2) in files) {
+        foreach (var (_, fΔ2) in range(files)) {
             var (ww, errΔ5) = w.CreateHeader(fΔ2.header);
             if (errΔ5 != nil) {
                 t.Fatalf("unable to write previously parsed header: %s", errΔ5);
             }
-            {
-                var (_, errΔ6) = ww.Write(fΔ2.content); if (errΔ6 != nil) {
-                    t.Fatalf("unable to write previously parsed content: %s", errΔ6);
-                }
+            var (_, errΔ6) = ww.Write(fΔ2.content); if (errΔ6 != nil) {
+                t.Fatalf("unable to write previously parsed content: %s", errΔ6);
             }
         }
 
-        {
-            var errΔ7 = w.Close(); if (errΔ7 != nil) {
-                t.Fatalf("Unable to write archive: %s", errΔ7);
-            }
+        var errΔ7 = w.Close(); if (errΔ7 != nil) {
+            t.Fatalf("Unable to write archive: %s", errΔ7);
         }
 
         // TODO: We may want to check if the archive roundtrips.

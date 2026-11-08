@@ -210,7 +210,7 @@ internal static void bogoShim() {
 
         // Test with both the default and insecure cipher suites.
         slice<uint16> ciphersuites = default;
-        foreach (var (_, s) in appendꓸꓸꓸ(CipherSuites(), InsecureCipherSuites())) {
+        foreach (var (_, s) in range(appendꓸꓸꓸ(CipherSuites(), InsecureCipherSuites()))) {
             ciphersuites = append(ciphersuites, s.ID);
         }
 
@@ -280,14 +280,14 @@ internal static void bogoShim() {
         }
 
         if (rejectALPN.Value) {
-            cfg.NextProtos = slice<@string>(["unnegotiableprotocol"]);
+            cfg.NextProtos = ["unnegotiableprotocol"];
         }
 
         if (declineALPN.Value) {
-            cfg.NextProtos = slice<@string>([]);
+            cfg.NextProtos = [];
         }
         if (selectALPN.Value != ""u8) {
-            cfg.NextProtos = slice<@string>([selectALPN.Value]);
+            cfg.NextProtos = [selectALPN.Value];
         }
 
         if (hostName.Value != ""u8) {
@@ -300,7 +300,7 @@ internal static void bogoShim() {
             if (err != nil) {
                 log.Fatalf("load key-file err: %s", err);
             }
-            foreach (var (_, id) in signingPrefs.ValueSlot) {
+            foreach (var (_, id) in range<int64>(signingPrefs.ValueSlot)) {
                 pair.SupportedSignatureAlgorithms = append(pair.SupportedSignatureAlgorithms, (global::go.crypto.tls_package.SignatureScheme)(uint16)id);
             }
             pair.OCSPStaple = ocspResponse.ValueSlot;
@@ -312,7 +312,7 @@ internal static void bogoShim() {
                     if (len(chi.SignatureSchemes) != len(expectedPeerSigAlg.ValueSlot)) {
                         return (default, fmt.Errorf("unexpected signature algorithms: got %s, want %v"u8, chi.SignatureSchemes, expectedPeerSigAlg.ValueSlot));
                     }
-                    foreach (var i in range(expectedPeerSigAlg.ValueSlot)) {
+                    foreach (var i in range(len(expectedPeerSigAlg.ValueSlot))) {
                         if (chi.SignatureSchemes[i] != ((global::go.crypto.tls_package.SignatureScheme)(uint16)(expectedPeerSigAlg.ValueSlot)[i])) {
                             return (default, fmt.Errorf("unexpected signature algorithms: got %s, want %v"u8, chi.SignatureSchemes, expectedPeerSigAlg.ValueSlot));
                         }
@@ -325,7 +325,7 @@ internal static void bogoShim() {
                     if (len(cri.SignatureSchemes) != len(expectedPeerSigAlg.ValueSlot)) {
                         return (default, fmt.Errorf("unexpected signature algorithms: got %s, want %v"u8, cri.SignatureSchemes, expectedPeerSigAlg.ValueSlot));
                     }
-                    foreach (var i in range(expectedPeerSigAlg.ValueSlot)) {
+                    foreach (var i in range(len(expectedPeerSigAlg.ValueSlot))) {
                         if (cri.SignatureSchemes[i] != ((global::go.crypto.tls_package.SignatureScheme)(uint16)(expectedPeerSigAlg.ValueSlot)[i])) {
                             return (default, fmt.Errorf("unexpected signature algorithms: got %s, want %v"u8, cri.SignatureSchemes, expectedPeerSigAlg.ValueSlot));
                         }
@@ -362,13 +362,13 @@ internal static void bogoShim() {
         }
 
         if (curves.ValueSlot != nil) {
-            foreach (var (_, id) in curves.ValueSlot) {
+            foreach (var (_, id) in range<int64>(curves.ValueSlot)) {
                 cfg.CurvePreferences = append(cfg.CurvePreferences, (global::go.crypto.tls_package.CurveID)(uint16)id);
             }
         }
 
         if (verifyPrefs.ValueSlot != nil) {
-            foreach (var (_, id) in verifyPrefs.ValueSlot) {
+            foreach (var (_, id) in range<int64>(verifyPrefs.ValueSlot)) {
                 testingOnlySupportedSignatureAlgorithms = append(testingOnlySupportedSignatureAlgorithms, (global::go.crypto.tls_package.SignatureScheme)(uint16)id);
             }
         }
@@ -378,7 +378,7 @@ internal static void bogoShim() {
                 log.Fatal(echServerConfigEchServerˢ);
             }
 
-            foreach (var (i, c) in echServerConfig.ValueSlot) {
+            foreach (var (i, c) in range<@string>(echServerConfig.ValueSlot)) {
                 var (configBytes, err) = base64.StdEncoding.DecodeString(c);
                 if (err != nil) {
                     log.Fatalf("parse ech-server-config err: %s", err);
@@ -411,10 +411,8 @@ internal static void bogoShim() {
             // Write the shim ID we were passed as a little endian uint64
             var shimIDBytes = new slice<byte>(8);
             byteorder.LEPutUint64(shimIDBytes, shimID.Value);
-            {
-                var (_, errΔ1) = conn.Write(shimIDBytes); if (errΔ1 != nil) {
-                    log.Fatalf("failed to write shim id: %s", errΔ1);
-                }
+            var (_, errΔ1) = conn.Write(shimIDBytes); if (errΔ1 != nil) {
+                log.Fatalf("failed to write shim id: %s", errΔ1);
             }
 
             ж<global::go.crypto.tls_package.Conn> tlsConn = default;
@@ -425,10 +423,8 @@ internal static void bogoShim() {
             }
 
             if (i == 0 && shimWritesFirst.Value) {
-                {
-                    var (_, errΔ2) = tlsConn.Write(slice<byte>("hello"u8)); if (errΔ2 != nil) {
-                        log.Fatalf("write err: %s", errΔ2);
-                    }
+                var (_, errΔ2) = tlsConn.Write(slice<byte>("hello"u8)); if (errΔ2 != nil) {
+                    log.Fatalf("write err: %s", errΔ2);
                 }
             }
 
@@ -446,13 +442,11 @@ internal static void bogoShim() {
                     break;
                 }
                 buf = buf.slice(0, n);
-                foreach (var iΔ1 in range(buf)) {
+                foreach (var iΔ1 in range(len(buf))) {
                     buf[iΔ1] ^= (byte)(0xff);
                 }
-                {
-                    (_, err) = tlsConn.Write(buf); if (err != nil) {
-                        break;
-                    }
+                (_, err) = tlsConn.Write(buf); if (err != nil) {
+                    break;
                 }
             }
             if (!AreEqual(err, io.EOF)) {
@@ -604,10 +598,8 @@ public static void TestBogoSuite(ж<testing.T> t) {
     // bogo_config.json file, so that the Go testing hooks know that it is
     // important for this test and will invalidate a cached test result if the
     // file changes.
-    {
-        var (_, errΔ1) = os.Stat(bogoConfigJsonˢ); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var (_, errΔ1) = os.Stat(bogoConfigJsonˢ); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
 
     @string bogoDir = default;
@@ -657,17 +649,13 @@ public static void TestBogoSuite(ж<testing.T> t) {
     }
 
     ref var results = ref heap(new bogoResults(), out var Ꮡresults);
-    {
-        var errΔ2 = json.Unmarshal(resultsJSON, Ꮡresults); if (errΔ2 != nil) {
-            t.Fatalf("failed to parse results JSON: %s", errΔ2);
-        }
+    var errΔ2 = json.Unmarshal(resultsJSON, Ꮡresults); if (errΔ2 != nil) {
+        t.Fatalf("failed to parse results JSON: %s", errΔ2);
     }
 
     if (bogoReport.Value != ""u8) {
-        {
-            var errΔ3 = generateReport(results, bogoReport.Value); if (errΔ3 != nil) {
-                t.Fatalf("failed to generate report: %v", errΔ3);
-            }
+        var errΔ3 = generateReport(results, bogoReport.Value); if (errΔ3 != nil) {
+            t.Fatalf("failed to generate report: %v", errΔ3);
         }
     }
 
@@ -706,10 +694,8 @@ public static void TestBogoSuite(ж<testing.T> t) {
             if (resultʗ1.Error != ""u8) {
                 tΔ1.Log(resultʗ1.Error);
             }
-            {
-                var (exp, ok) = assertResultsʗ1[name, ꟷ]; if (ok && exp != resultʗ1.Actual) {
-                    tΔ1.Errorf("unexpected result: got %s, want %s", resultʗ1.Actual, exp);
-                }
+            var (exp, ok) = assertResultsʗ1[name, ꟷ]; if (ok && exp != resultʗ1.Actual) {
+                tΔ1.Errorf("unexpected result: got %s, want %s", resultʗ1.Actual, exp);
             }
             delete(assertResultsʗ1, name);
             if (resultʗ1.Actual == "SKIP"u8) {

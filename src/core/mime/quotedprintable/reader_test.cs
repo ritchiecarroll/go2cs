@@ -82,7 +82,7 @@ public static void TestReader(ж<testing.T> t) {
         new(@in: "foo= \r\nbar", want: "foobar"),
         new(@in: "foo=\t \r\nbar", want: "foobar")
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         var (_, err) = io.Copy(new quotedprintable_test_package.strings_BuilderжWriter(Ꮡbuf), new quotedprintable_test_package.quotedprintable_ReaderжReader(NewReader(new quotedprintable_test_package.strings_ReaderжReader(strings.NewReader(tt.@in)))));
         {
@@ -98,10 +98,8 @@ public static void TestReader(ж<testing.T> t) {
             break;
         }
         case @string verr: {
-            {
-                @string got = fmt.Sprint(err); if (got != verr) {
-                    t.Errorf("for %q, got error %q; want %q", tt.@in, got, verr);
-                }
+            @string got = fmt.Sprint(err); if (got != verr) {
+                t.Errorf("for %q, got error %q; want %q", tt.@in, got, verr);
             }
             break;
         }
@@ -239,14 +237,12 @@ public static void TestExhaustive(ж<testing.T> t) {
             var selᴛ2 = time.After((time.Duration)(5000000000L));
             switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
             case 0 when selᴛ1.ꟷᐳ(out var gotΔ1): {
-                {
-                    var (wantΔ2, ok) = gotΔ1._<slice<byte>>(ᐧ); if (ok) {
-                        if (((@string)wantΔ2) != Ꮡbuf.Value.String()) {
-                            t.Errorf("go decode(%q) = %q; qprint = %q", s, wantΔ2, Ꮡbuf.Value.String());
-                        }
-                    } else {
-                        t.Logf("qprint -d(%q) = %v", s, gotΔ1);
+                var (wantΔ2, ok) = gotΔ1._<slice<byte>>(ᐧ); if (ok) {
+                    if (((@string)wantΔ2) != Ꮡbuf.Value.String()) {
+                        t.Errorf("go decode(%q) = %q; qprint = %q", s, wantΔ2, Ꮡbuf.Value.String());
                     }
+                } else {
+                    t.Logf("qprint -d(%q) = %v", s, gotΔ1);
                 }
                 break;
             }

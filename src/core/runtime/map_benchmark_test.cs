@@ -13,8 +13,6 @@ using strconv = strconv_package;
 using strings = strings_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using global::go.math;
 using static global::go.runtime_internal_test_package;
@@ -64,7 +62,7 @@ public static void BenchmarkHashBytesSpeed(ж<testing.B> Ꮡb) {
     }
     // put into a map
     var m = new map<chunk, nint>(size);
-    foreach (var (i, vᴛ1) in chunks.ΔRangeSnapshot()) {
+    foreach (var (i, vᴛ1) in range(chunks.ΔRangeSnapshot())) {
         var c = vᴛ1.Clone();
 
         m[c] = i;
@@ -127,7 +125,6 @@ public static void BenchmarkHashInt64Speed(ж<testing.B> Ꮡb) {
         }
     }
 }
-
 public static void BenchmarkHashStringArraySpeed(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -228,29 +225,12 @@ public static void BenchmarkSmallStrMap(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkMapStringKeysEight_16(ж<testing.B> b) {
-    benchmarkMapStringKeysEight(b, 16);
-}
-
-public static void BenchmarkMapStringKeysEight_32(ж<testing.B> b) {
-    benchmarkMapStringKeysEight(b, 32);
-}
-
-public static void BenchmarkMapStringKeysEight_64(ж<testing.B> b) {
-    benchmarkMapStringKeysEight(b, 64);
-}
-
-public static void BenchmarkMapStringKeysEight_128(ж<testing.B> b) {
-    benchmarkMapStringKeysEight(b, 128);
-}
-
-public static void BenchmarkMapStringKeysEight_256(ж<testing.B> b) {
-    benchmarkMapStringKeysEight(b, 256);
-}
-
-public static void BenchmarkMapStringKeysEight_1M(ж<testing.B> b) {
-    benchmarkMapStringKeysEight(b, 1 << 20);
-}
+public static void BenchmarkMapStringKeysEight_16(ж<testing.B> b) { benchmarkMapStringKeysEight(b, 16); }
+public static void BenchmarkMapStringKeysEight_32(ж<testing.B> b) { benchmarkMapStringKeysEight(b, 32); }
+public static void BenchmarkMapStringKeysEight_64(ж<testing.B> b) { benchmarkMapStringKeysEight(b, 64); }
+public static void BenchmarkMapStringKeysEight_128(ж<testing.B> b) { benchmarkMapStringKeysEight(b, 128); }
+public static void BenchmarkMapStringKeysEight_256(ж<testing.B> b) { benchmarkMapStringKeysEight(b, 256); }
+public static void BenchmarkMapStringKeysEight_1M(ж<testing.B> b) { benchmarkMapStringKeysEight(b, 1 << 20); }
 
 internal static void benchmarkMapStringKeysEight(ж<testing.B> Ꮡb, nint keySize) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -281,7 +261,6 @@ public static void BenchmarkMapFirst(ж<testing.B> b) {
         });
     }
 }
-
 public static void BenchmarkMapMid(ж<testing.B> b) {
     for (nint nᴛ1 = 1; nᴛ1 <= 16; nᴛ1++) {
         var n = nᴛ1;
@@ -297,7 +276,6 @@ public static void BenchmarkMapMid(ж<testing.B> b) {
         });
     }
 }
-
 public static void BenchmarkMapLast(ж<testing.B> b) {
     for (nint nᴛ1 = 1; nᴛ1 <= 16; nᴛ1++) {
         var n = nᴛ1;
@@ -384,13 +362,8 @@ internal static void benchmarkRepeatedLookup(ж<testing.B> Ꮡb, nint lookupKeyS
     }
 }
 
-public static void BenchmarkRepeatedLookupStrMapKey32(ж<testing.B> b) {
-    benchmarkRepeatedLookup(b, 32);
-}
-
-public static void BenchmarkRepeatedLookupStrMapKey1M(ж<testing.B> b) {
-    benchmarkRepeatedLookup(b, 1 << 20);
-}
+public static void BenchmarkRepeatedLookupStrMapKey32(ж<testing.B> b) { benchmarkRepeatedLookup(b, 32); }
+public static void BenchmarkRepeatedLookupStrMapKey1M(ж<testing.B> b) { benchmarkRepeatedLookup(b, 1 << 20); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string byteByteˢ => ref byteByteˢᵇ;
@@ -545,7 +518,7 @@ internal partial struct BenchmarkMapStringConversion_stringstruct /*dyn*/ {
 internal partial struct BenchmarkMapStringConversion_stringarray /*[1]@string*/;
 
 public static void BenchmarkMapStringConversion(ж<testing.B> b) {
-    foreach (var (_, length) in slice<nint>([32, 64])) {
+    foreach (var (_, length) in range(slice<nint>([32, 64]))) {
         b.Run(strconv.Itoa(length), (ж<testing.B> bΔ1) => {
             var bytes = new slice<byte>(length);
             var bytesʗ1 = bytes;
@@ -597,7 +570,6 @@ public static void BenchmarkMapInterfaceString(ж<testing.B> Ꮡb) {
         BoolSink = m[key];
     }
 }
-
 public static void BenchmarkMapInterfacePtr(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -677,7 +649,7 @@ internal static Action<ж<testing.B>> benchSizes(Action<ж<testing.B>, nint> f) 
     var byDefaultʗ1 = byDefault;
     var casesʗ1 = cases;
     return (ж<testing.B> b) => {
-        foreach (var (_, n) in casesʗ1) {
+        foreach (var (_, n) in range(casesʗ1)) {
             var byDefaultʗ2 = byDefaultʗ1;
             b.Run("len="u8 + strconv.Itoa(n), (ж<testing.B> bΔ1) => {
                 if (!mapbench.Value && !byDefaultʗ2[n]) {
@@ -689,7 +661,6 @@ internal static Action<ж<testing.B>> benchSizes(Action<ж<testing.B>, nint> f) 
         }
     };
 }
-
 internal static Action<ж<testing.B>> smallBenchSizes(Action<ж<testing.B>, nint> f) {
     return (ж<testing.B> b) => {
         for (nint nᴛ1 = 1; nᴛ1 <= 8; nᴛ1++) {
@@ -834,7 +805,7 @@ internal static partial ж<T> newSink<T>() {
 // Return a new maps filled with keys and elems. Both slices must be the same length.
 internal static map<K, E> fillMap<K, E>(slice<K> keys, slice<E> elems) {
     var m = new map<K, E>(len(keys));
-    foreach (var i in range(keys)) {
+    foreach (var i in range(len(keys))) {
         m[keys[i]] = elems[i];
     }
     return m;
@@ -928,7 +899,7 @@ internal static partial void benchmarkMapIterLowLoad<K, E>(ж<testing.B> Ꮡb, n
     var e = genValues<E>(0, 1);
 
     var m = new map<K, E>(n);
-    foreach (var i in range(k)) {
+    foreach (var i in range(len(k))) {
         m[k[i]] = e[i];
     }
 
@@ -1333,7 +1304,7 @@ internal static void benchmarkMapDelete<K, E>(ж<testing.B> Ꮡb, nint n) {
             // We'd like to StopTimer while refilling the map, but
             // it is way too expensive and thus makes the benchmark
             // take a long time. See https://go.dev/issue/20875.
-            foreach (var j in range(k)) {
+            foreach (var j in range(len(k))) {
                 m[k[j]] = e[j];
             }
         }
@@ -1373,7 +1344,7 @@ internal static void benchmarkMapPop<K, E>(ж<testing.B> Ꮡb, nint n) {
             // We'd like to StopTimer while refilling the map, but
             // it is way too expensive and thus makes the benchmark
             // take a long time. See https://go.dev/issue/20875.
-            foreach (var j in range(k)) {
+            foreach (var j in range(len(k))) {
                 m[k[j]] = e[j];
             }
         }
@@ -1458,7 +1429,7 @@ internal static void mapAccessEmptyBenchmark<K>(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var m = new map<K, uint64>();
-    foreach (var (i, v) in genValues<K>(0, 1000)) {
+    foreach (var (i, v) in range(genValues<K>(0, 1000))) {
         m[v] = (uint64)i;
     }
     builtin.clear(m);

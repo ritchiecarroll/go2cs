@@ -37,7 +37,7 @@ using static global::go.hash.fnv_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("hash/fnv/fnv_test.go", "fnv_test.cs", "ABcigo6GAAcQspIAChbu7u7u7u6CpoKmgqaCpoKmgqaCgoKCgpSClICCAAsKggAHGLKSgoKUlIKCgqaCgoKUlIKCpoKCpoCCgraClICC/oKmgqaCpoKkgqaCpoKCgpSAgraAgraCgoCCtoKCgoCCtpSCgsaCggAJDoKmgqaCpoKmgqaCpqKCgoKUlIKCgoI=", "22-24:1;23-23:1.1;25-27:2;26-26:2.1;37-39:3;137-137:1;138-138:2;139-139:3;140-140:4;141-141:5;142-142:6;145-187:7", "", "27=Invoke/1/4/1,Invoke/2/4/2,Invoke/3/4/3,Invoke/4/4/4")]
+[assembly: GoPositionMap("hash/fnv/fnv_test.go", "fnv_test.cs", "ABcigo6GAAcQspIAChbu7u7u7u6CpoKmgqaCpoKmgqaCgoKCgpSClIIACgqCAAcYspKCgpSUgoKCpoKCgpSUgoKmgoKmgoKmgpSC7oKmgqaCpoKUgqaCpoKCgpSCpoCCtoKCgIK2goKCgIK2lIKCxoKCAAkOgqaCpoKmgqaCpoKmooKCgpSUgoKCgg==", "22-24:1;23-23:1.1;25-27:2;26-26:2.1;37-39:3;137-137:1;138-138:2;139-139:3;140-140:4;141-141:5;142-142:6;145-187:7", "", "27=Invoke/1/4/1,Invoke/2/4/2,Invoke/3/4/3,Invoke/4/4/4")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;

@@ -21,7 +21,7 @@ internal static testpair bigtest = new testpair(
     "9jqo^BlbD-BleB1DJ+*+F(f,q/0JhKF<GL>Cj@.4Gp$d7F!,L7@<6@)/0JDEF<G%<+EV:2F!,\n"u8 + "O<DJ+*.@<*K0@<6L(Df-\\0Ec5e;DffZ(EZee.Bl.9pF\"AGXBPCsi+DGm>@3BB/F*&OCAfu2/AKY\n"u8 + "i(DIb:@FD,*)+C]U=@3BN#EcYf8ATD3s@q?d$AftVqCh[NqF<G:8+EV:.+Cf>-FD5W8ARlolDIa\n"u8 + "l(DId<j@<?3r@:F%a+D58'ATD4$Bl@l3De:,-DJs`8ARoFb/0JMK@qB4^F!,R<AKZ&-DfTqBG%G\n"u8 + ">uD.RTpAKYo'+CT/5+Cei#DII?(E,9)oF*2M7/c\n"u8
 );
 
-internal static slice<testpair> pairs = slice<testpair>([
+internal static slice<testpair> pairs = [
     // Encode returns 0 when len(src) is 0
     new(
         "",
@@ -34,7 +34,7 @@ internal static slice<testpair> pairs = slice<testpair>([
         "\u0000\u0000\u0000\u0000",
         "z"
     )
-]);
+];
 
 internal static bool testEqual(ж<testing.T> t, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
@@ -65,7 +65,7 @@ internal static ref readonly @string encodeQQWantQˢ => ref encodeQQWantQˢᵇ;
 private static readonly @string encodeQQWantQˢᵇ = "Encode(%q) = %q, want %q"u8;
 
 public static void TestEncode(ж<testing.T> t) {
-    foreach (var (_, p) in pairs) {
+    foreach (var (_, p) in range(pairs)) {
         var buf = new slice<byte>(MaxEncodedLen(len(p.decoded)));
         nint n = Encode(buf, slice<byte>(p.decoded));
         buf = buf.slice(0, n);
@@ -74,7 +74,7 @@ public static void TestEncode(ж<testing.T> t) {
 }
 
 public static void TestEncoder(ж<testing.T> t) {
-    foreach (var (_, p) in pairs) {
+    foreach (var (_, p) in range(pairs)) {
         var bb = Ꮡ(new strings.Builder());
         var encoder = NewEncoder(new ascii85_internal_test_package.strings_BuilderжWriter(bb));
         encoder.Write(slice<byte>(p.decoded));
@@ -124,7 +124,7 @@ internal static ref readonly @string decodeQQWantQˢ => ref decodeQQWantQˢᵇ;
 private static readonly @string decodeQQWantQˢᵇ = "Decode(%q) = %q, want %q"u8;
 
 public static void TestDecode(ж<testing.T> t) {
-    foreach (var (_, p) in pairs) {
+    foreach (var (_, p) in range(pairs)) {
         var dbuf = new slice<byte>(4 * len(p.encoded));
         var (ndst, nsrc, err) = Decode(dbuf, slice<byte>(p.encoded), true);
         testEqual(t, decodeQErrorVWantVˢ, p.encoded, err, (error)default);
@@ -144,7 +144,7 @@ internal static ref readonly @string readFromQVWantVˢ => ref readFromQVWantVˢ�
 private static readonly @string readFromQVWantVˢᵇ = "Read from %q = %v, want %v"u8;
 
 public static void TestDecoder(ж<testing.T> t) {
-    foreach (var (_, p) in pairs) {
+    foreach (var (_, p) in range(pairs)) {
         var decoder = NewDecoder(new ascii85_internal_test_package.strings_ReaderжReader(strings.NewReader(p.encoded)));
         var (dbuf, err) = io.ReadAll(decoder);
         if (err != nil) {
@@ -196,7 +196,7 @@ public static void TestDecodeCorrupt(ж<testing.T> t) {
         new("!z!!!!!!!!!", 1)
     ]);
 
-    foreach (var (_, e) in examples) {
+    foreach (var (_, e) in range(examples)) {
         var dbuf = new slice<byte>(4 * len(e.e));
         var (_, _, err) = Decode(dbuf, slice<byte>(e.e), true);
         switch (err.type()) {
@@ -255,10 +255,8 @@ public static void TestDecoderInternalWhitespace(ж<testing.T> t) {
     if (err != nil) {
         t.Errorf("Decode gave error %v", err);
     }
-    {
-        var want = slice<byte>("\u0000\u0000\u0000\u0000"u8); if (!bytes.Equal(want, decoded)) {
-            t.Errorf("Decode failed: got %v, want %v", decoded, want);
-        }
+    var want = slice<byte>("\u0000\u0000\u0000\u0000"u8); if (!bytes.Equal(want, decoded)) {
+        t.Errorf("Decode failed: got %v, want %v", decoded, want);
     }
 }
 

@@ -483,7 +483,7 @@ public static void TestGoroutineLeakProfile(ж<testing.T> t) {
     // Some tests have false negatives under mayMoreStackPreempt and mayMoreStackMove.
     // This may be a test-only issue in that they're just sensitive to scheduling, but it
     // needs more investigation.
-    foreach (var (_, cfg) in slice<@string>(["mayMoreStackPreempt", "mayMoreStackMove"])) {
+    foreach (var (_, cfg) in range(slice<@string>(["mayMoreStackPreempt", "mayMoreStackMove"]))) {
         if (strings.Contains(Δos.Getenv(goflagsˢ), cfg)) {
             testenv.SkipFlaky(new runtime_test_package.testing_TжTB(t), 75729);
         }
@@ -502,7 +502,7 @@ public static void TestGoroutineLeakProfile(ж<testing.T> t) {
             repetitions: (repetitions | 1)
         );
 
-        foreach (var (_, leak) in leaks) {
+        foreach (var (_, leak) in range(leaks)) {
             if (!flaky) {
                 tc.expectedLeaks[Δregexp.MustCompile(leak)] = false;
             } else {
@@ -560,7 +560,7 @@ public static void TestGoroutineLeakProfile(ж<testing.T> t) {
         var leaksᴷ = new stackAppend<@string>(moves: true);
         var stacks = strings.Split(output, goroutineˢ);
         slice<@string> leaks = default;
-        foreach (var (_, stack) in stacks) {
+        foreach (var (_, stack) in range(stacks)) {
             var lines = strings.Split(stack, "\n");
             if (len(lines) < 5) {
                 // Expecting at least the following lines (where n=len(lines)-1):
@@ -869,7 +869,7 @@ public static void TestGoroutineLeakProfile(ж<testing.T> t) {
             t.Fatal(fmt.Sprintf("building testgoroutineleakprofile failed: %v"u8, err));
         }
 
-        foreach (var (_, vᴛ1) in testCasesΔ1) {
+        foreach (var (_, vᴛ1) in range(testCasesΔ1)) {
             ref var tcase = ref heap(new TestGoroutineLeakProfile_testCase(), out var Ꮡtcase);
             tcase = vᴛ1;
 
@@ -921,7 +921,7 @@ public static void TestGoroutineLeakProfile(ж<testing.T> t) {
 
                 // Parse every leak and check if it is expected (maybe as a flaky leak).
 leaks:
-                foreach (var (_, leak) in foundLeaks) {
+                foreach (var (_, leak) in range(foundLeaks)) {
                     // Check if the leak is expected.
                     // If it is, check whether it has been encountered before.
                     bool foundNew = default;

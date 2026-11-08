@@ -34,7 +34,6 @@ private static readonly @string testPSLˢᵇ = "testPSL"u8;
 internal static @string String(this testPSL _) {
     return testPSLˢ;
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string coUkˢ => ref coUkˢᵇ;
 private static readonly @string coUkˢᵇ = ".co.uk"u8;
@@ -131,7 +130,7 @@ internal static array<hasDotSuffixTestsᴛ1> hasDotSuffixTests = new hasDotSuffi
 }.array();
 
 public static void TestHasDotSuffix(ж<testing.T> t) {
-    foreach (var (_, tc) in hasDotSuffixTests.ΔRangeSnapshot()) {
+    foreach (var (_, tc) in range(hasDotSuffixTests.ΔRangeSnapshot())) {
         var got = hasDotSuffix(tc.s, tc.suffix);
         var want = strings.HasSuffix(tc.s, "."u8 + tc.suffix);
         if (got != want) {
@@ -196,10 +195,8 @@ internal static map<@string, bool> hasPortTests = new map<@string, bool>{
 
 public static void TestHasPort(ж<testing.T> t) {
     foreach (var (host, want) in hasPortTests) {
-        {
-            var got = hasPort(host); if (got != want) {
-                t.Errorf("%q: got %t, want %t", host, got, want);
-            }
+        var got = hasPort(host); if (got != want) {
+            t.Errorf("%q: got %t, want %t", host, got, want);
         }
     }
 }
@@ -230,10 +227,8 @@ internal static map<@string, @string> jarKeyTests = new map<@string, @string>{
 
 public static void TestJarKey(ж<testing.T> t) {
     foreach (var (host, want) in jarKeyTests) {
-        {
-            @string got = jarKey(host, new testPSL()); if (got != want) {
-                t.Errorf("%q: got %q, want %q", host, got, want);
-            }
+        @string got = jarKey(host, new testPSL()); if (got != want) {
+            t.Errorf("%q: got %q, want %q", host, got, want);
         }
     }
 }
@@ -262,10 +257,8 @@ internal static map<@string, @string> jarKeyNilPSLTests = new map<@string, @stri
 
 public static void TestJarKeyNilPSL(ж<testing.T> t) {
     foreach (var (host, want) in jarKeyNilPSLTests) {
-        {
-            @string got = jarKey(host, default); if (got != want) {
-                t.Errorf("%q: got %q, want %q", host, got, want);
-            }
+        @string got = jarKey(host, default); if (got != want) {
+            t.Errorf("%q: got %q, want %q", host, got, want);
         }
     }
 }
@@ -283,10 +276,8 @@ internal static map<@string, bool> isIPTests = new map<@string, bool>{
 
 public static void TestIsIP(ж<testing.T> t) {
     foreach (var (host, want) in isIPTests) {
-        {
-            var got = isIP(host); if (got != want) {
-                t.Errorf("%q: got %t, want %t", host, got, want);
-            }
+        var got = isIP(host); if (got != want) {
+            t.Errorf("%q: got %t, want %t", host, got, want);
         }
     }
 }
@@ -308,10 +299,8 @@ internal static map<@string, @string> defaultPathTests = new map<@string, @strin
 
 public static void TestDefaultPath(ж<testing.T> t) {
     foreach (var (path, want) in defaultPathTests) {
-        {
-            @string got = defaultPath(path); if (got != want) {
-                t.Errorf("%q: got %q, want %q", path, got, want);
-            }
+        @string got = defaultPath(path); if (got != want) {
+            t.Errorf("%q: got %q, want %q", path, got, want);
         }
     }
 }
@@ -354,7 +343,7 @@ internal static void initᴛdomainAndTypeTests() { domainAndTypeTests = new doma
 
 public static void TestDomainAndType(ж<testing.T> t) {
     var jar = newTestJar();
-    foreach (var (_, tc) in domainAndTypeTests.ΔRangeSnapshot()) {
+    foreach (var (_, tc) in range(domainAndTypeTests.ΔRangeSnapshot())) {
         var (domain, hostOnly, err) = jar.domainAndType(tc.host, tc.domain);
         if (!AreEqual(err, tc.wantErr)) {
             t.Errorf("%q/%q: got %q error, want %v",
@@ -419,8 +408,8 @@ internal static void run(this jarTest test, ж<testing.T> t, ж<global::go.net.h
 
     // Populate jar with cookies.
     var setCookies = new slice<ж<httpꓸCookie>>(len(test.setCookies));
-    foreach (var (i, csΔ1) in test.setCookies) {
-        var cookies = (Ꮡ(new http.Response(Header: new httpꓸHeader(new map<@string, slice<@string>>{["Set-Cookie"] = slice<@string>([csΔ1])})))).Cookies();
+    foreach (var (i, csΔ1) in range(test.setCookies)) {
+        var cookies = (Ꮡ(new http.Response(Header: new httpꓸHeader(new map<@string, slice<@string>>{["Set-Cookie"] = [csΔ1]})))).Cookies();
         if (len(cookies) != 1) {
             throw panic(fmt.Sprintf("Wrong cookie line %q: %#v"u8, csΔ1, cookies));
         }
@@ -454,16 +443,14 @@ internal static void run(this jarTest test, ж<testing.T> t, ж<global::go.net.h
     }
 
     // Test different calls to Cookies.
-    foreach (var (i, query) in test.queries) {
+    foreach (var (i, query) in range(test.queries)) {
         now = now.Add(1001 * time.Millisecond);
         slice<@string> s = default;
-        foreach (var (_, c) in Ꮡjar.cookies(mustParseURL(query.toURL), now)) {
+        foreach (var (_, c) in range(Ꮡjar.cookies(mustParseURL(query.toURL), now))) {
             s = append(sᴷ, s, c.String());
         }
-        {
-            @string gotΔ1 = strings.Join(s, " "); if (gotΔ1 != query.want) {
-                t.Errorf("Test %q #%d\ngot  %q\nwant %q", test.description, i, gotΔ1, query.want);
-            }
+        @string gotΔ1 = strings.Join(s, " "); if (gotΔ1 != query.want) {
+            t.Errorf("Test %q #%d\ngot  %q\nwant %q", test.description, i, gotΔ1, query.want);
         }
     }
 }
@@ -474,9 +461,9 @@ internal static array<jarTest> basicsTests = new jarTest[]{
     new(
         "Retrieval of a plain host cookie.",
         "http://www.host.test/",
-        slice<@string>(["A=a"]),
+        ["A=a"],
         "A=a",
-        slice<query>([
+        [
             new("http://www.host.test", "A=a"),
             new("http://www.host.test/", "A=a"),
             new("http://www.host.test/some/path", "A=a"),
@@ -489,84 +476,84 @@ internal static array<jarTest> basicsTests = new jarTest[]{
             new("http://www.other.org", ""),
             new("http://sibling.host.test", ""),
             new("http://deep.www.host.test", "")
-        ])
+        ]
     ),
     new(
         "Secure cookies are not returned to http.",
         "http://www.host.test/",
-        slice<@string>(["A=a; secure"]),
+        ["A=a; secure"],
         "A=a",
-        slice<query>([
+        [
             new("http://www.host.test", ""),
             new("http://www.host.test/", ""),
             new("http://www.host.test/some/path", ""),
             new("https://www.host.test", "A=a"),
             new("https://www.host.test/", "A=a"),
             new("https://www.host.test/some/path", "A=a")
-        ])
+        ]
     ),
     new(
         "Secure cookies are sent for localhost",
         "http://localhost:8910/",
-        slice<@string>(["A=a; secure"]),
+        ["A=a; secure"],
         "A=a",
-        slice<query>([
+        [
             new("http://localhost:8910", "A=a"),
             new("http://localhost:8910/", "A=a"),
             new("http://localhost:8910/some/path", "A=a"),
             new("https://localhost:8910", "A=a"),
             new("https://localhost:8910/", "A=a"),
             new("https://localhost:8910/some/path", "A=a")
-        ])
+        ]
     ),
     new(
         "Secure cookies are sent for localhost (tld)",
         "http://example.LOCALHOST:8910/",
-        slice<@string>(["A=a; secure"]),
+        ["A=a; secure"],
         "A=a",
-        slice<query>([
+        [
             new("http://example.LOCALHOST:8910", "A=a"),
             new("http://example.LOCALHOST:8910/", "A=a"),
             new("http://example.LOCALHOST:8910/some/path", "A=a"),
             new("https://example.LOCALHOST:8910", "A=a"),
             new("https://example.LOCALHOST:8910/", "A=a"),
             new("https://example.LOCALHOST:8910/some/path", "A=a")
-        ])
+        ]
     ),
     new(
         "Secure cookies are sent for localhost (ipv6)",
         "http://[::1]:8910/",
-        slice<@string>(["A=a; secure"]),
+        ["A=a; secure"],
         "A=a",
-        slice<query>([
+        [
             new("http://[::1]:8910", "A=a"),
             new("http://[::1]:8910/", "A=a"),
             new("http://[::1]:8910/some/path", "A=a"),
             new("https://[::1]:8910", "A=a"),
             new("https://[::1]:8910/", "A=a"),
             new("https://[::1]:8910/some/path", "A=a")
-        ])
+        ]
     ),
     new(
         "Localhost only if it's a segment",
         "http://notlocalhost/",
-        slice<@string>(["A=a; secure"]),
+        ["A=a; secure"],
         "A=a",
-        slice<query>([
+        [
             new("http://notlocalhost", ""),
             new("http://notlocalhost/", ""),
             new("http://notlocalhost/some/path", ""),
             new("https://notlocalhost", "A=a"),
             new("https://notlocalhost/", "A=a"),
             new("https://notlocalhost/some/path", "A=a")
-        ])
+        ]
     ),
     new(
         "Explicit path.",
         "http://www.host.test/",
-        slice<@string>(["A=a; path=/some/path"]),
+        ["A=a; path=/some/path"],
         "A=a",
-        slice<query>([
+        [
             new("http://www.host.test", ""),
             new("http://www.host.test/", ""),
             new("http://www.host.test/some", ""),
@@ -575,14 +562,14 @@ internal static array<jarTest> basicsTests = new jarTest[]{
             new("http://www.host.test/some/paths", ""),
             new("http://www.host.test/some/path/foo", "A=a"),
             new("http://www.host.test/some/path/foo/", "A=a")
-        ])
+        ]
     ),
     new(
         "Implicit path #1: path is a directory.",
         "http://www.host.test/some/path/",
-        slice<@string>(["A=a"]),
+        ["A=a"],
         "A=a",
-        slice<query>([
+        [
             new("http://www.host.test", ""),
             new("http://www.host.test/", ""),
             new("http://www.host.test/some", ""),
@@ -591,14 +578,14 @@ internal static array<jarTest> basicsTests = new jarTest[]{
             new("http://www.host.test/some/paths", ""),
             new("http://www.host.test/some/path/foo", "A=a"),
             new("http://www.host.test/some/path/foo/", "A=a")
-        ])
+        ]
     ),
     new(
         "Implicit path #2: path is not a directory.",
         "http://www.host.test/some/path/index.html",
-        slice<@string>(["A=a"]),
+        ["A=a"],
         "A=a",
-        slice<query>([
+        [
             new("http://www.host.test", ""),
             new("http://www.host.test/", ""),
             new("http://www.host.test/some", ""),
@@ -607,38 +594,38 @@ internal static array<jarTest> basicsTests = new jarTest[]{
             new("http://www.host.test/some/paths", ""),
             new("http://www.host.test/some/path/foo", "A=a"),
             new("http://www.host.test/some/path/foo/", "A=a")
-        ])
+        ]
     ),
     new(
         "Implicit path #3: no path in URL at all.",
         "http://www.host.test",
-        slice<@string>(["A=a"]),
+        ["A=a"],
         "A=a",
-        slice<query>([
+        [
             new("http://www.host.test", "A=a"),
             new("http://www.host.test/", "A=a"),
             new("http://www.host.test/some/path", "A=a")
-        ])
+        ]
     ),
     new(
         "Cookies are sorted by path length.",
         "http://www.host.test/",
-        slice<@string>([
+        [
             "A=a; path=/foo/bar",
             "B=b; path=/foo/bar/baz/qux",
             "C=c; path=/foo/bar/baz",
-            "D=d; path=/foo"]),
+            "D=d; path=/foo"],
         "A=a B=b C=c D=d",
-        slice<query>([
+        [
             new("http://www.host.test/foo/bar/baz/qux", "B=b C=c A=a D=d"),
             new("http://www.host.test/foo/bar/baz/", "C=c A=a D=d"),
             new("http://www.host.test/foo/bar", "A=a D=d")
-        ])
+        ]
     ),
     new(
         "Creation time determines sorting on same length paths.",
         "http://www.host.test/",
-        slice<@string>([
+        [
             "A=a; path=/foo/bar",
             "X=x; path=/foo/bar",
             "Y=y; path=/foo/bar/baz/qux",
@@ -646,18 +633,18 @@ internal static array<jarTest> basicsTests = new jarTest[]{
             "C=c; path=/foo/bar/baz",
             "W=w; path=/foo/bar/baz",
             "Z=z; path=/foo",
-            "D=d; path=/foo"]),
+            "D=d; path=/foo"],
         "A=a B=b C=c D=d W=w X=x Y=y Z=z",
-        slice<query>([
+        [
             new("http://www.host.test/foo/bar/baz/qux", "Y=y B=b C=c W=w A=a X=x Z=z D=d"),
             new("http://www.host.test/foo/bar/baz/", "C=c W=w A=a X=x Z=z D=d"),
             new("http://www.host.test/foo/bar", "A=a X=x Z=z D=d")
-        ])
+        ]
     ),
     new(
         "Sorting of same-name cookies.",
         "http://www.host.test/",
-        slice<@string>([
+        [
             "A=1; path=/",
             "A=2; path=/path",
             "A=3; path=/quux",
@@ -665,96 +652,96 @@ internal static array<jarTest> basicsTests = new jarTest[]{
             "A=5; domain=.host.test; path=/path",
             "A=6; domain=.host.test; path=/quux",
             "A=7; domain=.host.test; path=/path/foo"
-        ]),
+        ],
         "A=1 A=2 A=3 A=4 A=5 A=6 A=7",
-        slice<query>([
+        [
             new("http://www.host.test/path", "A=2 A=5 A=1"),
             new("http://www.host.test/path/foo", "A=4 A=7 A=2 A=5 A=1")
-        ])
+        ]
     ),
     new(
         "Disallow domain cookie on public suffix.",
         "http://www.bbc.co.uk",
-        slice<@string>([
+        [
             "a=1",
             "b=2; domain=co.uk"
-        ]),
+        ],
         "a=1",
-        slice<query>([new("http://www.bbc.co.uk", "a=1")])
+        [new("http://www.bbc.co.uk", "a=1")]
     ),
     new(
         "Host cookie on IP.",
         "http://192.168.0.10",
-        slice<@string>(["a=1"]),
+        ["a=1"],
         "a=1",
-        slice<query>([new("http://192.168.0.10", "a=1")])
+        [new("http://192.168.0.10", "a=1")]
     ),
     new(
         "Domain cookies on IP.",
         "http://192.168.0.10",
-        slice<@string>([
+        [
             "a=1; domain=192.168.0.10", // allowed
             "b=2; domain=172.31.9.9",   // rejected, can't set cookie for other IP
             "c=3; domain=.192.168.0.10" // rejected like in most browsers
-        ]),
+        ],
         "a=1",
-        slice<query>([
+        [
             new("http://192.168.0.10", "a=1"),
             new("http://172.31.9.9", ""),
             new("http://www.fancy.192.168.0.10", "")
-        ])
+        ]
     ),
     new(
         "Port is ignored #1.",
         "http://www.host.test/",
-        slice<@string>(["a=1"]),
+        ["a=1"],
         "a=1",
-        slice<query>([
+        [
             new("http://www.host.test", "a=1"),
             new("http://www.host.test:8080/", "a=1")
-        ])
+        ]
     ),
     new(
         "Port is ignored #2.",
         "http://www.host.test:8080/",
-        slice<@string>(["a=1"]),
+        ["a=1"],
         "a=1",
-        slice<query>([
+        [
             new("http://www.host.test", "a=1"),
             new("http://www.host.test:8080/", "a=1"),
             new("http://www.host.test:1234/", "a=1")
-        ])
+        ]
     ),
     new(
         "IPv6 zone is not treated as a host.",
         "https://example.com/",
-        slice<@string>(["a=1"]),
+        ["a=1"],
         "a=1",
-        slice<query>([
+        [
             new("https://[::1%25.example.com]:80/", "")
-        ])
+        ]
     ),
     new(
         "Retrieval of cookies with quoted values", // issue #46443
         "http://www.host.test/",
-        slice<@string>([
+        [
             @"cookie-1=""quoted""",
             @"cookie-2=""quoted with spaces""",
             @"cookie-3=""quoted,with,commas""",
             @"cookie-4= ,"
-        ]),
+        ],
         @"cookie-1=""quoted"" cookie-2=""quoted with spaces"" cookie-3=""quoted,with,commas"" cookie-4="" ,""",
-        slice<query>([
+        [
             new(
                 "http://www.host.test",
                 @"cookie-1=""quoted"" cookie-2=""quoted with spaces"" cookie-3=""quoted,with,commas"" cookie-4="" ,"""
             )
-        ])
+        ]
     )
 }.array();
 
 public static void TestBasics(ж<testing.T> t) {
-    foreach (var (_, test) in basicsTests.ΔRangeSnapshot()) {
+    foreach (var (_, test) in range(basicsTests.ΔRangeSnapshot())) {
         var jar = newTestJar();
         test.run(t, jar);
     }
@@ -766,39 +753,39 @@ internal static array<jarTest> updateAndDeleteTests = new jarTest[]{
     new(
         "Set initial cookies.",
         "http://www.host.test",
-        slice<@string>([
+        [
             "a=1",
             "b=2; secure",
             "c=3; httponly",
-            "d=4; secure; httponly"]),
+            "d=4; secure; httponly"],
         "a=1 b=2 c=3 d=4",
-        slice<query>([
+        [
             new("http://www.host.test", "a=1 c=3"),
             new("https://www.host.test", "a=1 b=2 c=3 d=4")
-        ])
+        ]
     ),
     new(
         "Update value via http.",
         "http://www.host.test",
-        slice<@string>([
+        [
             "a=w",
             "b=x; secure",
             "c=y; httponly",
-            "d=z; secure; httponly"]),
+            "d=z; secure; httponly"],
         "a=w b=x c=y d=z",
-        slice<query>([
+        [
             new("http://www.host.test", "a=w c=y"),
             new("https://www.host.test", "a=w b=x c=y d=z")
-        ])
+        ]
     ),
     new(
         "Clear Secure flag from an http.",
         "http://www.host.test/",
-        slice<@string>([
+        [
             "b=xx",
-            "d=zz; httponly"]),
+            "d=zz; httponly"],
         "a=w b=xx c=y d=zz",
-        slice<query>([new("http://www.host.test", "a=w b=xx c=y d=zz")])
+        [new("http://www.host.test", "a=w b=xx c=y d=zz")]
     ),
     new(
         "Delete all.",
@@ -809,102 +796,102 @@ internal static array<jarTest> updateAndDeleteTests = new jarTest[]{
             "c=2; max-age=-1; "u8 + expiresIn(-10),  // delete via both
             "d=4; max-age=-1; "u8 + expiresIn(10)]), // MaxAge takes precedence
         "",
-        slice<query>([new("http://www.host.test", "")])
+        [new("http://www.host.test", "")]
     ),
     new(
         "Refill #1.",
         "http://www.host.test",
-        slice<@string>([
+        [
             "A=1",
             "A=2; path=/foo",
             "A=3; domain=.host.test",
-            "A=4; path=/foo; domain=.host.test"]),
+            "A=4; path=/foo; domain=.host.test"],
         "A=1 A=2 A=3 A=4",
-        slice<query>([new("http://www.host.test/foo", "A=2 A=4 A=1 A=3")])
+        [new("http://www.host.test/foo", "A=2 A=4 A=1 A=3")]
     ),
     new(
         "Refill #2.",
         "http://www.google.com",
-        slice<@string>([
+        [
             "A=6",
             "A=7; path=/foo",
             "A=8; domain=.google.com",
-            "A=9; path=/foo; domain=.google.com"]),
+            "A=9; path=/foo; domain=.google.com"],
         "A=1 A=2 A=3 A=4 A=6 A=7 A=8 A=9",
-        slice<query>([
+        [
             new("http://www.host.test/foo", "A=2 A=4 A=1 A=3"),
             new("http://www.google.com/foo", "A=7 A=9 A=6 A=8")
-        ])
+        ]
     ),
     new(
         "Delete A7.",
         "http://www.google.com",
-        slice<@string>(["A=; path=/foo; max-age=-1"]),
+        ["A=; path=/foo; max-age=-1"],
         "A=1 A=2 A=3 A=4 A=6 A=8 A=9",
-        slice<query>([
+        [
             new("http://www.host.test/foo", "A=2 A=4 A=1 A=3"),
             new("http://www.google.com/foo", "A=9 A=6 A=8")
-        ])
+        ]
     ),
     new(
         "Delete A4.",
         "http://www.host.test",
-        slice<@string>(["A=; path=/foo; domain=host.test; max-age=-1"]),
+        ["A=; path=/foo; domain=host.test; max-age=-1"],
         "A=1 A=2 A=3 A=6 A=8 A=9",
-        slice<query>([
+        [
             new("http://www.host.test/foo", "A=2 A=1 A=3"),
             new("http://www.google.com/foo", "A=9 A=6 A=8")
-        ])
+        ]
     ),
     new(
         "Delete A6.",
         "http://www.google.com",
-        slice<@string>(["A=; max-age=-1"]),
+        ["A=; max-age=-1"],
         "A=1 A=2 A=3 A=8 A=9",
-        slice<query>([
+        [
             new("http://www.host.test/foo", "A=2 A=1 A=3"),
             new("http://www.google.com/foo", "A=9 A=8")
-        ])
+        ]
     ),
     new(
         "Delete A3.",
         "http://www.host.test",
-        slice<@string>(["A=; domain=host.test; max-age=-1"]),
+        ["A=; domain=host.test; max-age=-1"],
         "A=1 A=2 A=8 A=9",
-        slice<query>([
+        [
             new("http://www.host.test/foo", "A=2 A=1"),
             new("http://www.google.com/foo", "A=9 A=8")
-        ])
+        ]
     ),
     new(
         "No cross-domain delete.",
         "http://www.host.test",
-        slice<@string>([
+        [
             "A=; domain=google.com; max-age=-1",
-            "A=; path=/foo; domain=google.com; max-age=-1"]),
+            "A=; path=/foo; domain=google.com; max-age=-1"],
         "A=1 A=2 A=8 A=9",
-        slice<query>([
+        [
             new("http://www.host.test/foo", "A=2 A=1"),
             new("http://www.google.com/foo", "A=9 A=8")
-        ])
+        ]
     ),
     new(
         "Delete A8 and A9.",
         "http://www.google.com",
-        slice<@string>([
+        [
             "A=; domain=google.com; max-age=-1",
-            "A=; path=/foo; domain=google.com; max-age=-1"]),
+            "A=; path=/foo; domain=google.com; max-age=-1"],
         "A=1 A=2",
-        slice<query>([
+        [
             new("http://www.host.test/foo", "A=2 A=1"),
             new("http://www.google.com/foo", "")
-        ])
+        ]
     )
 }.array();
 
 public static void TestUpdateAndDelete(ж<testing.T> t) {
     var jar = newTestJar();
-    foreach (var (_, test) in updateAndDeleteTests.ΔRangeSnapshot()) {
+    foreach (var (_, test) in range(updateAndDeleteTests.ΔRangeSnapshot())) {
         test.run(t, jar);
     }
 }
@@ -923,13 +910,13 @@ public static void TestExpiration(ж<testing.T> t) {
             "f=6; max-age=100"
         ]),
         "a=1 b=2 c=3 d=4 e=5 f=6", // executed at t0 + 1001 ms
-        slice<query>([
+        [
             new("http://www.host.test", "a=1 b=2 c=3 d=4 e=5 f=6"), // t0 + 2002 ms
             new("http://www.host.test", "a=1 d=4 e=5 f=6"),         // t0 + 3003 ms
             new("http://www.host.test", "a=1 d=4 e=5 f=6"),         // t0 + 4004 ms
             new("http://www.host.test", "a=1 f=6"),                 // t0 + 5005 ms
             new("http://www.host.test", "a=1 f=6")                  // t0 + 6006 ms
-        ])
+        ]
     ).run(t, jar);
 }
 
@@ -947,50 +934,50 @@ internal static array<jarTest> chromiumBasicsTests = new jarTest[]{
     new(
         "DomainWithTrailingDotTest.",
         "http://www.google.com/",
-        slice<@string>([
+        [
             "a=1; domain=.www.google.com.",
-            "b=2; domain=.www.google.com.."]),
+            "b=2; domain=.www.google.com.."],
         "",
-        slice<query>([
+        [
             new("http://www.google.com", "")
-        ])
+        ]
     ),
     new(
         "ValidSubdomainTest #1.",
         "http://a.b.c.d.com",
-        slice<@string>([
+        [
             "a=1; domain=.a.b.c.d.com",
             "b=2; domain=.b.c.d.com",
             "c=3; domain=.c.d.com",
-            "d=4; domain=.d.com"]),
+            "d=4; domain=.d.com"],
         "a=1 b=2 c=3 d=4",
-        slice<query>([
+        [
             new("http://a.b.c.d.com", "a=1 b=2 c=3 d=4"),
             new("http://b.c.d.com", "b=2 c=3 d=4"),
             new("http://c.d.com", "c=3 d=4"),
             new("http://d.com", "d=4")
-        ])
+        ]
     ),
     new(
         "ValidSubdomainTest #2.",
         "http://a.b.c.d.com",
-        slice<@string>([
+        [
             "a=1; domain=.a.b.c.d.com",
             "b=2; domain=.b.c.d.com",
             "c=3; domain=.c.d.com",
             "d=4; domain=.d.com",
             "X=bcd; domain=.b.c.d.com",
-            "X=cd; domain=.c.d.com"]),
+            "X=cd; domain=.c.d.com"],
         "X=bcd X=cd a=1 b=2 c=3 d=4",
-        slice<query>([
+        [
             new("http://b.c.d.com", "b=2 c=3 d=4 X=bcd X=cd"),
             new("http://c.d.com", "c=3 d=4 X=cd")
-        ])
+        ]
     ),
     new(
         "InvalidDomainTest #1.",
         "http://foo.bar.com",
-        slice<@string>([
+        [
             "a=1; domain=.yo.foo.bar.com",
             "b=2; domain=.foo.com",
             "c=3; domain=.bar.foo.com",
@@ -1006,142 +993,142 @@ internal static array<jarTest> chromiumBasicsTests = new jarTest[]{
             "m=12; domain=.foo.bar.com:80",
             "n=14; domain=.foo.bar.com:",
             "o=15; domain=.foo.bar.com#sup"
-        ]),
+        ],
         "", // Jar is empty.
-        slice<query>([new("http://foo.bar.com", "")])
+        [new("http://foo.bar.com", "")]
     ),
     new(
         "InvalidDomainTest #2.",
         "http://foo.com.com",
-        slice<@string>(["a=1; domain=.foo.com.com.com"]),
+        ["a=1; domain=.foo.com.com.com"],
         "",
-        slice<query>([new("http://foo.bar.com", "")])
+        [new("http://foo.bar.com", "")]
     ),
     new(
         "DomainWithoutLeadingDotTest #1.",
         "http://manage.hosted.filefront.com",
-        slice<@string>(["a=1; domain=filefront.com"]),
+        ["a=1; domain=filefront.com"],
         "a=1",
-        slice<query>([new("http://www.filefront.com", "a=1")])
+        [new("http://www.filefront.com", "a=1")]
     ),
     new(
         "DomainWithoutLeadingDotTest #2.",
         "http://www.google.com",
-        slice<@string>(["a=1; domain=www.google.com"]),
+        ["a=1; domain=www.google.com"],
         "a=1",
-        slice<query>([
+        [
             new("http://www.google.com", "a=1"),
             new("http://sub.www.google.com", "a=1"),
             new("http://something-else.com", "")
-        ])
+        ]
     ),
     new(
         "CaseInsensitiveDomainTest.",
         "http://www.google.com",
-        slice<@string>([
+        [
             "a=1; domain=.GOOGLE.COM",
-            "b=2; domain=.www.gOOgLE.coM"]),
+            "b=2; domain=.www.gOOgLE.coM"],
         "a=1 b=2",
-        slice<query>([new("http://www.google.com", "a=1 b=2")])
+        [new("http://www.google.com", "a=1 b=2")]
     ),
     new(
         "TestIpAddress #1.",
         "http://1.2.3.4/foo",
-        slice<@string>(["a=1; path=/"]),
+        ["a=1; path=/"],
         "a=1",
-        slice<query>([new("http://1.2.3.4/foo", "a=1")])
+        [new("http://1.2.3.4/foo", "a=1")]
     ),
     new(
         "TestIpAddress #2.",
         "http://1.2.3.4/foo",
-        slice<@string>([
+        [
             "a=1; domain=.1.2.3.4",
-            "b=2; domain=.3.4"]),
+            "b=2; domain=.3.4"],
         "",
-        slice<query>([new("http://1.2.3.4/foo", "")])
+        [new("http://1.2.3.4/foo", "")]
     ),
     new(
         "TestIpAddress #3.",
         "http://1.2.3.4/foo",
-        slice<@string>(["a=1; domain=1.2.3.3"]),
+        ["a=1; domain=1.2.3.3"],
         "",
-        slice<query>([new("http://1.2.3.4/foo", "")])
+        [new("http://1.2.3.4/foo", "")]
     ),
     new(
         "TestIpAddress #4.",
         "http://1.2.3.4/foo",
-        slice<@string>(["a=1; domain=1.2.3.4"]),
+        ["a=1; domain=1.2.3.4"],
         "a=1",
-        slice<query>([new("http://1.2.3.4/foo", "a=1")])
+        [new("http://1.2.3.4/foo", "a=1")]
     ),
     new(
         "TestNonDottedAndTLD #2.",
         "http://com./index.html",
-        slice<@string>(["a=1"]),
+        ["a=1"],
         "a=1",
-        slice<query>([
+        [
             new("http://com./index.html", "a=1"),
             new("http://no-cookies.com./index.html", "")
-        ])
+        ]
     ),
     new(
         "TestNonDottedAndTLD #3.",
         "http://a.b",
-        slice<@string>([
+        [
             "a=1; domain=.b",
-            "b=2; domain=b"]),
+            "b=2; domain=b"],
         "",
-        slice<query>([new("http://bar.foo", "")])
+        [new("http://bar.foo", "")]
     ),
     new(
         "TestNonDottedAndTLD #4.",
         "http://google.com",
-        slice<@string>([
+        [
             "a=1; domain=.com",
-            "b=2; domain=com"]),
+            "b=2; domain=com"],
         "",
-        slice<query>([new("http://google.com", "")])
+        [new("http://google.com", "")]
     ),
     new(
         "TestNonDottedAndTLD #5.",
         "http://google.co.uk",
-        slice<@string>([
+        [
             "a=1; domain=.co.uk",
-            "b=2; domain=.uk"]),
+            "b=2; domain=.uk"],
         "",
-        slice<query>([
+        [
             new("http://google.co.uk", ""),
             new("http://else.co.com", ""),
             new("http://else.uk", "")
-        ])
+        ]
     ),
     new(
         "TestHostEndsWithDot.",
         "http://www.google.com",
-        slice<@string>([
+        [
             "a=1",
-            "b=2; domain=.www.google.com."]),
+            "b=2; domain=.www.google.com."],
         "a=1",
-        slice<query>([new("http://www.google.com", "a=1")])
+        [new("http://www.google.com", "a=1")]
     ),
     new(
         "PathTest",
         "http://www.google.izzle",
-        slice<@string>(["a=1; path=/wee"]),
+        ["a=1; path=/wee"],
         "a=1",
-        slice<query>([
+        [
             new("http://www.google.izzle/wee", "a=1"),
             new("http://www.google.izzle/wee/", "a=1"),
             new("http://www.google.izzle/wee/war", "a=1"),
             new("http://www.google.izzle/wee/war/more/more", "a=1"),
             new("http://www.google.izzle/weehee", ""),
             new("http://www.google.izzle/", "")
-        ])
+        ]
     )
 }.array();
 
 public static void TestChromiumBasics(ж<testing.T> t) {
-    foreach (var (_, test) in chromiumBasicsTests.ΔRangeSnapshot()) {
+    foreach (var (_, test) in range(chromiumBasicsTests.ΔRangeSnapshot())) {
         var jar = newTestJar();
         test.run(t, jar);
     }
@@ -1153,57 +1140,57 @@ internal static array<jarTest> chromiumDomainTests = new jarTest[]{
     new(
         "Fill #1.",
         "http://www.google.izzle",
-        slice<@string>(["A=B"]),
+        ["A=B"],
         "A=B",
-        slice<query>([new("http://www.google.izzle", "A=B")])
+        [new("http://www.google.izzle", "A=B")]
     ),
     new(
         "Fill #2.",
         "http://www.google.izzle",
-        slice<@string>(["C=D; domain=.google.izzle"]),
+        ["C=D; domain=.google.izzle"],
         "A=B C=D",
-        slice<query>([new("http://www.google.izzle", "A=B C=D")])
+        [new("http://www.google.izzle", "A=B C=D")]
     ),
     new(
         "Verify A is a host cookie and not accessible from subdomain.",
         "http://unused.nil",
-        slice<@string>([]),
+        [],
         "A=B C=D",
-        slice<query>([new("http://foo.www.google.izzle", "C=D")])
+        [new("http://foo.www.google.izzle", "C=D")]
     ),
     new(
         "Verify domain cookies are found on proper domain.",
         "http://www.google.izzle",
-        slice<@string>(["E=F; domain=.www.google.izzle"]),
+        ["E=F; domain=.www.google.izzle"],
         "A=B C=D E=F",
-        slice<query>([new("http://www.google.izzle", "A=B C=D E=F")])
+        [new("http://www.google.izzle", "A=B C=D E=F")]
     ),
     new(
         "Leading dots in domain attributes are optional.",
         "http://www.google.izzle",
-        slice<@string>(["G=H; domain=www.google.izzle"]),
+        ["G=H; domain=www.google.izzle"],
         "A=B C=D E=F G=H",
-        slice<query>([new("http://www.google.izzle", "A=B C=D E=F G=H")])
+        [new("http://www.google.izzle", "A=B C=D E=F G=H")]
     ),
     new(
         "Verify domain enforcement works #1.",
         "http://www.google.izzle",
-        slice<@string>(["K=L; domain=.bar.www.google.izzle"]),
+        ["K=L; domain=.bar.www.google.izzle"],
         "A=B C=D E=F G=H",
-        slice<query>([new("http://bar.www.google.izzle", "C=D E=F G=H")])
+        [new("http://bar.www.google.izzle", "C=D E=F G=H")]
     ),
     new(
         "Verify domain enforcement works #2.",
         "http://unused.nil",
-        slice<@string>([]),
+        [],
         "A=B C=D E=F G=H",
-        slice<query>([new("http://www.google.izzle", "A=B C=D E=F G=H")])
+        [new("http://www.google.izzle", "A=B C=D E=F G=H")]
     )
 }.array();
 
 public static void TestChromiumDomain(ж<testing.T> t) {
     var jar = newTestJar();
-    foreach (var (_, test) in chromiumDomainTests.ΔRangeSnapshot()) {
+    foreach (var (_, test) in range(chromiumDomainTests.ΔRangeSnapshot())) {
         test.run(t, jar);
     }
 }
@@ -1213,64 +1200,64 @@ internal static array<jarTest> chromiumDeletionTests = new jarTest[]{
     new(
         "Create session cookie a1.",
         "http://www.google.com",
-        slice<@string>(["a=1"]),
+        ["a=1"],
         "a=1",
-        slice<query>([new("http://www.google.com", "a=1")])
+        [new("http://www.google.com", "a=1")]
     ),
     new(
         "Delete sc a1 via MaxAge.",
         "http://www.google.com",
-        slice<@string>(["a=1; max-age=-1"]),
+        ["a=1; max-age=-1"],
         "",
-        slice<query>([new("http://www.google.com", "")])
+        [new("http://www.google.com", "")]
     ),
     new(
         "Create session cookie b2.",
         "http://www.google.com",
-        slice<@string>(["b=2"]),
+        ["b=2"],
         "b=2",
-        slice<query>([new("http://www.google.com", "b=2")])
+        [new("http://www.google.com", "b=2")]
     ),
     new(
         "Delete sc b2 via Expires.",
         "http://www.google.com",
         slice<@string>(["b=2; "u8 + expiresIn(-10)]),
         "",
-        slice<query>([new("http://www.google.com", "")])
+        [new("http://www.google.com", "")]
     ),
     new(
         "Create persistent cookie c3.",
         "http://www.google.com",
-        slice<@string>(["c=3; max-age=3600"]),
+        ["c=3; max-age=3600"],
         "c=3",
-        slice<query>([new("http://www.google.com", "c=3")])
+        [new("http://www.google.com", "c=3")]
     ),
     new(
         "Delete pc c3 via MaxAge.",
         "http://www.google.com",
-        slice<@string>(["c=3; max-age=-1"]),
+        ["c=3; max-age=-1"],
         "",
-        slice<query>([new("http://www.google.com", "")])
+        [new("http://www.google.com", "")]
     ),
     new(
         "Create persistent cookie d4.",
         "http://www.google.com",
-        slice<@string>(["d=4; max-age=3600"]),
+        ["d=4; max-age=3600"],
         "d=4",
-        slice<query>([new("http://www.google.com", "d=4")])
+        [new("http://www.google.com", "d=4")]
     ),
     new(
         "Delete pc d4 via Expires.",
         "http://www.google.com",
         slice<@string>(["d=4; "u8 + expiresIn(-10)]),
         "",
-        slice<query>([new("http://www.google.com", "")])
+        [new("http://www.google.com", "")]
     )
 }.array();
 
 public static void TestChromiumDeletion(ж<testing.T> t) {
     var jar = newTestJar();
-    foreach (var (_, test) in chromiumDeletionTests.ΔRangeSnapshot()) {
+    foreach (var (_, test) in range(chromiumDeletionTests.ΔRangeSnapshot())) {
         test.run(t, jar);
     }
 }
@@ -1281,51 +1268,51 @@ internal static array<jarTest> domainHandlingTests = new jarTest[]{
     new(
         "Host cookie",
         "http://www.host.test",
-        slice<@string>(["a=1"]),
+        ["a=1"],
         "a=1",
-        slice<query>([
+        [
             new("http://www.host.test", "a=1"),
             new("http://host.test", ""),
             new("http://bar.host.test", ""),
             new("http://foo.www.host.test", ""),
             new("http://other.test", ""),
             new("http://test", "")
-        ])
+        ]
     ),
     new(
         "Domain cookie #1",
         "http://www.host.test",
-        slice<@string>(["a=1; domain=host.test"]),
+        ["a=1; domain=host.test"],
         "a=1",
-        slice<query>([
+        [
             new("http://www.host.test", "a=1"),
             new("http://host.test", "a=1"),
             new("http://bar.host.test", "a=1"),
             new("http://foo.www.host.test", "a=1"),
             new("http://other.test", ""),
             new("http://test", "")
-        ])
+        ]
     ),
     new(
         "Domain cookie #2",
         "http://www.host.test",
-        slice<@string>(["a=1; domain=.host.test"]),
+        ["a=1; domain=.host.test"],
         "a=1",
-        slice<query>([
+        [
             new("http://www.host.test", "a=1"),
             new("http://host.test", "a=1"),
             new("http://bar.host.test", "a=1"),
             new("http://foo.www.host.test", "a=1"),
             new("http://other.test", ""),
             new("http://test", "")
-        ])
+        ]
     ),
     new(
         "Host cookie on IDNA domain #1",
         "http://www.bücher.test",
-        slice<@string>(["a=1"]),
+        ["a=1"],
         "a=1",
-        slice<query>([
+        [
             new("http://www.bücher.test", "a=1"),
             new("http://www.xn--bcher-kva.test", "a=1"),
             new("http://bücher.test", ""),
@@ -1336,14 +1323,14 @@ internal static array<jarTest> domainHandlingTests = new jarTest[]{
             new("http://foo.www.xn--bcher-kva.test", ""),
             new("http://other.test", ""),
             new("http://test", "")
-        ])
+        ]
     ),
     new(
         "Host cookie on IDNA domain #2",
         "http://www.xn--bcher-kva.test",
-        slice<@string>(["a=1"]),
+        ["a=1"],
         "a=1",
-        slice<query>([
+        [
             new("http://www.bücher.test", "a=1"),
             new("http://www.xn--bcher-kva.test", "a=1"),
             new("http://bücher.test", ""),
@@ -1354,14 +1341,14 @@ internal static array<jarTest> domainHandlingTests = new jarTest[]{
             new("http://foo.www.xn--bcher-kva.test", ""),
             new("http://other.test", ""),
             new("http://test", "")
-        ])
+        ]
     ),
     new(
         "Domain cookie on IDNA domain #1",
         "http://www.bücher.test",
-        slice<@string>(["a=1; domain=xn--bcher-kva.test"]),
+        ["a=1; domain=xn--bcher-kva.test"],
         "a=1",
-        slice<query>([
+        [
             new("http://www.bücher.test", "a=1"),
             new("http://www.xn--bcher-kva.test", "a=1"),
             new("http://bücher.test", "a=1"),
@@ -1372,14 +1359,14 @@ internal static array<jarTest> domainHandlingTests = new jarTest[]{
             new("http://foo.www.xn--bcher-kva.test", "a=1"),
             new("http://other.test", ""),
             new("http://test", "")
-        ])
+        ]
     ),
     new(
         "Domain cookie on IDNA domain #2",
         "http://www.xn--bcher-kva.test",
-        slice<@string>(["a=1; domain=xn--bcher-kva.test"]),
+        ["a=1; domain=xn--bcher-kva.test"],
         "a=1",
-        slice<query>([
+        [
             new("http://www.bücher.test", "a=1"),
             new("http://www.xn--bcher-kva.test", "a=1"),
             new("http://bücher.test", "a=1"),
@@ -1390,60 +1377,60 @@ internal static array<jarTest> domainHandlingTests = new jarTest[]{
             new("http://foo.www.xn--bcher-kva.test", "a=1"),
             new("http://other.test", ""),
             new("http://test", "")
-        ])
+        ]
     ),
     new(
         "Host cookie on TLD.",
         "http://com",
-        slice<@string>(["a=1"]),
+        ["a=1"],
         "a=1",
-        slice<query>([
+        [
             new("http://com", "a=1"),
             new("http://any.com", ""),
             new("http://any.test", "")
-        ])
+        ]
     ),
     new(
         "Domain cookie on TLD becomes a host cookie.",
         "http://com",
-        slice<@string>(["a=1; domain=com"]),
+        ["a=1; domain=com"],
         "a=1",
-        slice<query>([
+        [
             new("http://com", "a=1"),
             new("http://any.com", ""),
             new("http://any.test", "")
-        ])
+        ]
     ),
     new(
         "Host cookie on public suffix.",
         "http://co.uk",
-        slice<@string>(["a=1"]),
+        ["a=1"],
         "a=1",
-        slice<query>([
+        [
             new("http://co.uk", "a=1"),
             new("http://uk", ""),
             new("http://some.co.uk", ""),
             new("http://foo.some.co.uk", ""),
             new("http://any.uk", "")
-        ])
+        ]
     ),
     new(
         "Domain cookie on public suffix is ignored.",
         "http://some.co.uk",
-        slice<@string>(["a=1; domain=co.uk"]),
+        ["a=1; domain=co.uk"],
         "",
-        slice<query>([
+        [
             new("http://co.uk", ""),
             new("http://uk", ""),
             new("http://some.co.uk", ""),
             new("http://foo.some.co.uk", ""),
             new("http://any.uk", "")
-        ])
+        ]
     )
 }.array();
 
 public static void TestDomainHandling(ж<testing.T> t) {
-    foreach (var (_, test) in domainHandlingTests.ΔRangeSnapshot()) {
+    foreach (var (_, test) in range(domainHandlingTests.ΔRangeSnapshot())) {
         var jar = newTestJar();
         test.run(t, jar);
     }
@@ -1451,7 +1438,7 @@ public static void TestDomainHandling(ж<testing.T> t) {
 
 public static void TestIssue19384(ж<testing.T> t) {
     var cookies = slice<ж<httpꓸCookie>>([Ꮡ(new httpꓸCookie(Name: "name", Value: "value"))]);
-    foreach (var (_, vᴛ1) in slice<@string>(["", ".", "..", "..."])) {
+    foreach (var (_, vᴛ1) in range(slice<@string>(["", ".", "..", "..."]))) {
         ref var host = ref heap(new @string(), out var Ꮡhost);
         host = vᴛ1;
 

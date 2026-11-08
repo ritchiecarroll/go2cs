@@ -14,7 +14,7 @@ using Δunicode = unicode_package;
 
 partial class unicode_test_package {
 
-internal static slice<rune> upperTest = slice<rune>([
+internal static slice<rune> upperTest = [
     0x41,
     0xc0,
     0xd8,
@@ -37,9 +37,9 @@ internal static slice<rune> upperTest = slice<rune>([
     0x10400,
     0x1d400,
     0x1d7ca
-]);
+];
 
-internal static slice<rune> notupperTest = slice<rune>([
+internal static slice<rune> notupperTest = [
     0x40,
     0x5b,
     0x61,
@@ -51,9 +51,9 @@ internal static slice<rune> notupperTest = slice<rune>([
     0xab7d,
     0xffff,
     0x10000
-]);
+];
 
-internal static slice<rune> letterTest = slice<rune>([
+internal static slice<rune> letterTest = [
     0x41,
     0x61,
     0xaa,
@@ -86,9 +86,9 @@ internal static slice<rune> letterTest = slice<rune>([
     0x20000,
     0x2f800,
     0x2fa1d
-]);
+];
 
-internal static slice<rune> notletterTest = slice<rune>([
+internal static slice<rune> notletterTest = [
     0x20,
     0x35,
     0x375,
@@ -98,10 +98,10 @@ internal static slice<rune> notletterTest = slice<rune>([
     0xfffe,
     0x1ffff,
     0x10ffff
-]);
+];
 
 // Contains all the special cased Latin-1 chars.
-internal static slice<rune> spaceTest = slice<rune>([
+internal static slice<rune> spaceTest = [
     0x09,
     0x0a,
     0x0b,
@@ -112,14 +112,14 @@ internal static slice<rune> spaceTest = slice<rune>([
     0xA0,
     0x2000,
     0x3000
-]);
+];
 
 partial struct caseT {
     internal nint cas;
     internal rune @in, @out;
 }
 
-internal static slice<caseT> caseTest = slice<caseT>([
+internal static slice<caseT> caseTest = [
     // errors
     new(-1, '\n', 0xFFFD),
     new(UpperCase, -1, -1),
@@ -233,20 +233,20 @@ internal static slice<caseT> caseTest = slice<caseT>([
     // Non-letters with case.
     new(LowerCase, 0x2161, 0x2171),
     new(UpperCase, 0x0345, 0x0399)
-]);
+];
 
 public static void TestIsLetter(ж<testing.T> t) {
-    foreach (var (_, r) in upperTest) {
+    foreach (var (_, r) in range(upperTest)) {
         if (!IsLetter(r)) {
             t.Errorf("IsLetter(U+%04X) = false, want true", r);
         }
     }
-    foreach (var (_, r) in letterTest) {
+    foreach (var (_, r) in range(letterTest)) {
         if (!IsLetter(r)) {
             t.Errorf("IsLetter(U+%04X) = false, want true", r);
         }
     }
-    foreach (var (_, r) in notletterTest) {
+    foreach (var (_, r) in range(notletterTest)) {
         if (IsLetter(r)) {
             t.Errorf("IsLetter(U+%04X) = true, want false", r);
         }
@@ -254,17 +254,17 @@ public static void TestIsLetter(ж<testing.T> t) {
 }
 
 public static void TestIsUpper(ж<testing.T> t) {
-    foreach (var (_, r) in upperTest) {
+    foreach (var (_, r) in range(upperTest)) {
         if (!IsUpper(r)) {
             t.Errorf("IsUpper(U+%04X) = false, want true", r);
         }
     }
-    foreach (var (_, r) in notupperTest) {
+    foreach (var (_, r) in range(notupperTest)) {
         if (IsUpper(r)) {
             t.Errorf("IsUpper(U+%04X) = true, want false", r);
         }
     }
-    foreach (var (_, r) in notletterTest) {
+    foreach (var (_, r) in range(notletterTest)) {
         if (IsUpper(r)) {
             t.Errorf("IsUpper(U+%04X) = true, want false", r);
         }
@@ -296,7 +296,7 @@ internal static @string caseString(nint c) {
 }
 
 public static void TestTo(ж<testing.T> t) {
-    foreach (var (_, c) in caseTest) {
+    foreach (var (_, c) in range(caseTest)) {
         var r = To(c.cas, c.@in);
         if (c.@out != r) {
             t.Errorf("To(U+%04X, %s) = U+%04X want U+%04X", c.@in, caseString(c.cas), r, c.@out);
@@ -305,7 +305,7 @@ public static void TestTo(ж<testing.T> t) {
 }
 
 public static void TestToUpperCase(ж<testing.T> t) {
-    foreach (var (_, c) in caseTest) {
+    foreach (var (_, c) in range(caseTest)) {
         if (c.cas != UpperCase) {
             continue;
         }
@@ -317,7 +317,7 @@ public static void TestToUpperCase(ж<testing.T> t) {
 }
 
 public static void TestToLowerCase(ж<testing.T> t) {
-    foreach (var (_, c) in caseTest) {
+    foreach (var (_, c) in range(caseTest)) {
         if (c.cas != LowerCase) {
             continue;
         }
@@ -329,7 +329,7 @@ public static void TestToLowerCase(ж<testing.T> t) {
 }
 
 public static void TestToTitleCase(ж<testing.T> t) {
-    foreach (var (_, c) in caseTest) {
+    foreach (var (_, c) in range(caseTest)) {
         if (c.cas != TitleCase) {
             continue;
         }
@@ -341,12 +341,12 @@ public static void TestToTitleCase(ж<testing.T> t) {
 }
 
 public static void TestIsSpace(ж<testing.T> t) {
-    foreach (var (_, c) in spaceTest) {
+    foreach (var (_, c) in range(spaceTest)) {
         if (!IsSpace(c)) {
             t.Errorf("IsSpace(U+%04X) = false; want true", c);
         }
     }
-    foreach (var (_, c) in letterTest) {
+    foreach (var (_, c) in range(letterTest)) {
         if (IsSpace(c)) {
             t.Errorf("IsSpace(U+%04X) = true; want false", c);
         }
@@ -387,7 +387,7 @@ public static void TestLetterOptimizations(ж<testing.T> t) {
 public static void TestTurkishCase(ж<testing.T> t) {
     var lower = slice<rune>((@string)"abcçdefgğhıijklmnoöprsştuüvyz");
     var upper = slice<rune>((@string)"ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ");
-    foreach (var (i, l) in lower) {
+    foreach (var (i, l) in range(lower)) {
         var u = upper[i];
         if (TurkishCase.ToLower(l) != l) {
             t.Errorf("lower(U+%04X) is U+%04X not U+%04X", l, TurkishCase.ToLower(l), l);
@@ -410,7 +410,7 @@ public static void TestTurkishCase(ж<testing.T> t) {
     }
 }
 
-internal static slice<@string> simpleFoldTests = slice<@string>([
+internal static slice<@string> simpleFoldTests = [
     // SimpleFold(x) returns the next equivalent rune > x or wraps
     // around to smaller values.
 
@@ -432,17 +432,15 @@ internal static slice<@string> simpleFoldTests = slice<@string>([
 
     // Upper comes before lower (Cherokee).
     "\u13b0\uab80"
-]);
+];
 
 public static void TestSimpleFold(ж<testing.T> t) {
-    foreach (var (_, tt) in simpleFoldTests) {
+    foreach (var (_, tt) in range(simpleFoldTests)) {
         var cycle = slice<rune>(tt);
         var r = cycle[len(cycle) - 1];
-        foreach (var (_, @out) in cycle) {
-            {
-                var rΔ1 = SimpleFold(r); if (rΔ1 != @out) {
-                    t.Errorf("SimpleFold(%#U) = %#U, want %#U", rΔ1, rΔ1, @out);
-                }
+        foreach (var (_, @out) in range(cycle)) {
+            var rΔ1 = SimpleFold(r); if (rΔ1 != @out) {
+                t.Errorf("SimpleFold(%#U) = %#U, want %#U", rΔ1, rΔ1, @out);
             }
             r = @out;
         }
@@ -518,7 +516,7 @@ internal static slice<Δunicode.Range16> fakeTable(nint n) {
 }
 
 internal static bool linear(slice<Δunicode.Range16> ranges, uint16 r) {
-    foreach (var i in range(ranges)) {
+    foreach (var i in range(len(ranges))) {
         var range_ = Ꮡ(ranges, i);
         if (r < range_.Lo) {
             return false;
@@ -557,7 +555,7 @@ public static void TestLatinOffset(ж<testing.T> t) {
         Properties,
         Scripts
     ]);
-    foreach (var (_, m) in maps) {
+    foreach (var (_, m) in range(maps)) {
         foreach (var (name, tab) in m) {
             nint i = 0;
             while (i < len(tab.R16) && tab.R16[i].Hi <= MaxLatin1) {

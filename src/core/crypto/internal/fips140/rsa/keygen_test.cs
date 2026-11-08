@@ -103,10 +103,8 @@ public static void TestMillerRabin(ж<testing.T> t) {
             break;
         }}
     }
-    {
-        var errΔ3 = scanner.Err(); if (errΔ3 != nil) {
-            t.Fatal(errΔ3);
-        }
+    var errΔ3 = scanner.Err(); if (errΔ3 != nil) {
+        t.Fatal(errΔ3);
     }
 }
 
@@ -170,10 +168,8 @@ public static void TestTotient(ж<testing.T> t) {
                 var (gcd, errΔ2) = bigmod.NewNat().GCDVarTime(a, b);
                 // GCD doesn't work if a and b are both even, but LCM handles it.
                 if (errΔ2 == nil) {
-                    {
-                        @string got = strings.TrimLeft(hex.EncodeToString(gcd.Bytes(p)), "0"); if (got != GCD) {
-                            tΔ2.Fatalf("unexpected GCD: got %s, want %s", got, GCD);
-                        }
+                    @string got = strings.TrimLeft(hex.EncodeToString(gcd.Bytes(p)), "0"); if (got != GCD) {
+                        tΔ2.Fatalf("unexpected GCD: got %s, want %s", got, GCD);
                     }
                 }
 
@@ -200,10 +196,8 @@ public static void TestTotient(ж<testing.T> t) {
             break;
         }}
     }
-    {
-        var errΔ3 = scanner.Err(); if (errΔ3 != nil) {
-            t.Fatal(errΔ3);
-        }
+    var errΔ3 = scanner.Err(); if (errΔ3 != nil) {
+        t.Fatal(errΔ3);
     }
 }
 

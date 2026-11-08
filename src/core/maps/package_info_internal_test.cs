@@ -29,7 +29,7 @@ using static go.maps_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("maps/iter_test.go", "iter_test.cs", "AAwYgoKCgpSCgoKClJSCyoKCgoKCgqaCgpSCgsqCgoKCgoKmgoKUgoLKgriCgoLKuO6mgriC7oKC", "77-83:1")]
-[assembly: GoPositionMap("maps/maps_test.go", "maps_test.cs", "AAwaksSCgpSClIKUgpSAgsiCgrqSqJKCqJLWgoKUgpSClIKUgILIgoKmgqaCuIKCgpSCgriCgoKC+IKCgoKUgoKClqqCgoKClIKCgtyigoKUgoK4goKClIKUgoKUgoLKgoKCgpSCgpSCggAJCoSIlJSCgoKUAAgOggAKEoLapoKCgqaygpSC", "47-47:1;126-126:1;130-130:2")]
+[assembly: GoPositionMap("maps/maps_test.go", "maps_test.cs", "AAwagsSCgpSClIKUgpSCuIKCupKokoKoktaCgpSClIKUgpSCuIKCpoKmgriCgoKUgoK4goKCgviCgoKClIKCgpaqgoKCgpSCgoLcooKClIKCuIKCgpSClIKClIKCyoKCgoKUgoKUgoIACQqEiJSUgoKClAAIDoIAChKC2qaCgoKmsoKUgg==", "47-47:1;126-126:1;130-130:2")]
 // </GoSourcePositionMaps>
 
 namespace go;

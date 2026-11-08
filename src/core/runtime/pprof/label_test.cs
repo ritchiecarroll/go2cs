@@ -71,7 +71,7 @@ public static void TestContextLabels(ж<testing.T> t) {
         t.Errorf(@"Label(ctx, ""key2""): got %v, %v; want ""value2"", ok", v, ok);
     }
     gotLabels = labelsSorted(ctx);
-    wantLabels = slice<label.Label>([new(Key: "key", Value: "value"), new(Key: "key2", Value: "value2")]);
+    wantLabels = [new(Key: "key", Value: "value"), new(Key: "key2", Value: "value2")];
     if (!reflect.DeepEqual(gotLabels, wantLabels)) {
         t.Errorf("(sorted) labels on context: got %v, want %v", gotLabels, wantLabels);
     }
@@ -83,7 +83,7 @@ public static void TestContextLabels(ж<testing.T> t) {
         t.Errorf(@"Label(ctx, ""key3""): got %v, %v; want ""value3"", ok", v, ok);
     }
     gotLabels = labelsSorted(ctx);
-    wantLabels = slice<label.Label>([new(Key: "key", Value: "value3"), new(Key: "key2", Value: "value2")]);
+    wantLabels = [new(Key: "key", Value: "value3"), new(Key: "key2", Value: "value2")];
     if (!reflect.DeepEqual(gotLabels, wantLabels)) {
         t.Errorf("(sorted) labels on context: got %v, want %v", gotLabels, wantLabels);
     }
@@ -95,7 +95,7 @@ public static void TestContextLabels(ж<testing.T> t) {
         t.Errorf(@"Label(ctx, ""key4""): got %v, %v; want ""value4b"", ok", v, ok);
     }
     gotLabels = labelsSorted(ctx);
-    wantLabels = slice<label.Label>([new(Key: "key", Value: "value3"), new(Key: "key2", Value: "value2"), new(Key: "key4", Value: "value4b")]);
+    wantLabels = [new(Key: "key", Value: "value3"), new(Key: "key2", Value: "value2"), new(Key: "key4", Value: "value4b")];
     if (!reflect.DeepEqual(gotLabels, wantLabels)) {
         t.Errorf("(sorted) labels on context: got %v, want %v", gotLabels, wantLabels);
     }
@@ -123,7 +123,7 @@ internal partial struct TestLabelMapStringer_type /*dyn*/ {
 }
 
 public static void TestLabelMapStringer(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestLabelMapStringer_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestLabelMapStringer_type>([
         new(
             m: new labelMap(
                 // empty map
@@ -145,14 +145,12 @@ public static void TestLabelMapStringer(ж<testing.T> t) {
         ),
         expected: @"{""foo"":""bar"", ""key1"":""value1"", ""key2"":""value2"", ""key3"":""value3"", ""key4WithNewline"":""\nvalue4""}"
     )
-    ])) {
+    ]))) {
         ref var tbl = ref heap(new TestLabelMapStringer_type(), out var Ꮡtbl);
         tbl = vᴛ1;
 
-        {
-            @string got = Ꮡtbl.of(TestLabelMapStringer_type.Ꮡm).String(); if (tbl.expected != got) {
-                t.Errorf("%#v.String() = %q; want %q", tbl.m, got, tbl.expected);
-            }
+        @string got = Ꮡtbl.of(TestLabelMapStringer_type.Ꮡm).String(); if (tbl.expected != got) {
+            t.Errorf("%#v.String() = %q; want %q", tbl.m, got, tbl.expected);
         }
     }
 }
@@ -207,7 +205,7 @@ public static void BenchmarkLabels(ж<testing.B> b) {
         }
     });
 
-    foreach (var (_, scenario) in slice<@string>(["ordered", "unordered"])) {
+    foreach (var (_, scenario) in range(slice<@string>(["ordered", "unordered"]))) {
         ref var labels = ref heap<slice<@string>>(out var Ꮡlabels);
         for (nint i = 0; i < 10; i++) {
             labels = append(labels, fmt.Sprintf("key%03d"u8, i), fmt.Sprintf("value%03d"u8, i));

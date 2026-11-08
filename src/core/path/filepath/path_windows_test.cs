@@ -35,7 +35,7 @@ public static void TestWinSplitListTestsAreValid(ж<testing.T> t) {
         t.Fatal(comSpecMustBeSetˢ);
     }
 
-    foreach (var (ti, tt) in winsplitlisttests) {
+    foreach (var (ti, tt) in range(winsplitlisttests)) {
         testWinSplitListTestIsValid(t, ti, tt, comspec);
     }
 }
@@ -53,15 +53,13 @@ internal static void testWinSplitListTestIsValid(ж<testing.T> t, nint ti, Split
     fs.FileMode perm = /* 0700 */ 448;
 
     ref var tmp = ref heap<@string>(t.TempDir(), out var Ꮡtmp);
-    foreach (var (i, d) in tt.result) {
+    foreach (var (i, d) in range(tt.result)) {
         if (d == ""u8) {
             continue;
         }
-        {
-            @string cd = filepath.Clean(d); if (filepath.VolumeName(cd) != ""u8 || cd[0] == '\\' || cd == ".."u8 || (len(cd) >= 3 && cd[0..3] == @"..\")) {
-                t.Errorf("%d,%d: %#q refers outside working directory", ti, i, d);
-                return;
-            }
+        @string cd = filepath.Clean(d); if (filepath.VolumeName(cd) != ""u8 || cd[0] == '\\' || cd == ".."u8 || (len(cd) >= 3 && cd[0..3] == @"..\")) {
+            t.Errorf("%d,%d: %#q refers outside working directory", ti, i, d);
+            return;
         }
         @string dd = filepath.Join(tmp, d);
         {
@@ -89,15 +87,15 @@ internal static void testWinSplitListTestIsValid(ж<testing.T> t, nint ti, Split
     // on some systems, SystemRoot is required for cmd to work
     @string systemRoot = os.Getenv(systemRootˢ);
 
-    foreach (var (i, d) in tt.result) {
+    foreach (var (i, d) in range(tt.result)) {
         if (d == ""u8) {
             continue;
         }
         var exp = slice<byte>(d + "\r\n");
         var cmd = Ꮡ(new exec.Cmd(
             Path: comspec,
-            Args: slice<@string>([@"/c", cmdfile]),
-            Env: slice<@string>([@"Path="u8 + systemRoot + "/System32;"u8 + tt.list, @"SystemRoot="u8 + systemRoot]),
+            Args: [@"/c", cmdfile],
+            Env: [@"Path="u8 + systemRoot + "/System32;"u8 + tt.list, @"SystemRoot="u8 + systemRoot],
             Dir: tmp
         ));
         var (@out, err) = cmd.CombinedOutput();
@@ -136,7 +134,7 @@ public static void TestWindowsEvalSymlinks(ж<testing.T> t) {
 
     // Create the symlink farm using relative paths.
     var testdirs = append(EvalSymlinksTestDirs, test);
-    foreach (var (_, d) in testdirs) {
+    foreach (var (_, d) in range(testdirs)) {
         error err = default;
         @string pathΔ1 = simpleJoin(tmpDir, d.path);
         if (d.dest == ""u8) {
@@ -179,7 +177,7 @@ public static void TestEvalSymlinksCanonicalNames(ж<testing.T> t) {
         "TEST2"
     ]);
 
-    foreach (var (_, d) in dirs) {
+    foreach (var (_, d) in range(dirs)) {
         @string dir = filepath.Join(ctmp, d);
         var err = os.Mkdir(dir, 493);
         if (err != nil) {
@@ -417,7 +415,7 @@ public static void TestToNorm(ж<testing.T> t) {
         new("C:/ふー/バー", @"C:\ふー\バー")
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         @string path = default;
         if (test.arg != ""u8) {
             path = filepath.Clean(test.arg);
@@ -466,10 +464,8 @@ public static void TestToNorm(ж<testing.T> t) {
     ]);
 
     @string ctmp = tempDirCanonical(t);
-    {
-        var errΔ2 = os.MkdirAll(strings.ReplaceAll(testPath, tmpˢ, ctmp), 511); if (errΔ2 != nil) {
-            t.Fatal(errΔ2);
-        }
+    var errΔ2 = os.MkdirAll(strings.ReplaceAll(testPath, tmpˢ, ctmp), 511); if (errΔ2 != nil) {
+        t.Fatal(errΔ2);
     }
 
     var (cwd, err) = os.Getwd();
@@ -487,7 +483,7 @@ public static void TestToNorm(ж<testing.T> t) {
 
     var replacer = strings.NewReplacer(tmpˢ, ctmp, tmpvolˢ, tmpVol, tmpnovolˢ, tmpNoVol);
 
-    foreach (var (_, test) in testsDir) {
+    foreach (var (_, test) in range(testsDir)) {
         @string wd = replacer.Replace(test.wd);
         @string arg = replacer.Replace(test.arg);
         @string want = replacer.Replace(test.want);
@@ -615,7 +611,6 @@ internal static slice<byte> createMountPartition(ж<testing.T> t, @string vhd, @
 }
 
 internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink");
-
 internal static ж<godebug.Setting> winreadlinkvolume = godebug.New("winreadlinkvolume");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -784,7 +779,7 @@ public static void TestIssue52476(ж<testing.T> t) {
         new(@"\", @"C:", @"\C:")
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         @string got = filepath.Join(test.lhs, test.rhs);
         if (got != test.want) {
             t.Errorf(@"Join(%q, %q): got %q, want %q", test.lhs, test.rhs, got, test.want);
@@ -798,7 +793,7 @@ internal partial struct TestAbsWindows_type /*dyn*/ {
 }
 
 public static void TestAbsWindows(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestAbsWindows_type>([
+    foreach (var (_, test) in range(slice<TestAbsWindows_type>([
         new(@"C:\foo", @"C:\foo"),
         new(@"\\host\share\foo", @"\\host\share\foo"),
         new(@"\\host", @"\\host"),
@@ -806,7 +801,7 @@ public static void TestAbsWindows(ж<testing.T> t) {
         new(@"NUL", @"\\.\NUL"),
         new(@"COM1", @"\\.\COM1"),
         new(@"a/NUL", @"\\.\NUL")
-    ])) {
+    ]))) {
         var (got, err) = filepath.Abs(test.path);
         if (err != nil || got != test.want) {
             t.Errorf("Abs(%q) = %q, %v; want %q, nil", test.path, got, err, test.want);

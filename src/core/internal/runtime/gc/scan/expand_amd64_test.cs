@@ -6,8 +6,6 @@ namespace go.@internal.runtime.gc;
 
 using scan = go.@internal.runtime.gc.scan_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using gc = go.@internal.runtime.gc_package;
 using go.@internal.runtime.gc;
 

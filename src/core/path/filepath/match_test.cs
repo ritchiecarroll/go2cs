@@ -12,8 +12,6 @@ using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = io.fs_package;
 using static go.path.filepath_internal_test_package;
 
@@ -25,7 +23,7 @@ partial struct MatchTest {
     internal error err;
 }
 
-internal static slice<MatchTest> matchTests = slice<MatchTest>([
+internal static slice<MatchTest> matchTests = [
     new("abc", "abc", true, default),
     new("*", "abc", true, default),
     new("*c", "abc", true, default),
@@ -82,7 +80,7 @@ internal static slice<MatchTest> matchTests = slice<MatchTest>([
     new("a[", "x", false, ErrBadPattern),
     new("a/b[", "x", false, ErrBadPattern),
     new("*x", "xxx", true, default)
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilˢ => ref nilˢᵇ;
@@ -96,7 +94,7 @@ internal static @string errp(error e) {
 }
 
 public static void TestMatch(ж<testing.T> t) {
-    foreach (var (_, tt) in matchTests) {
+    foreach (var (_, tt) in range(matchTests)) {
         @string pattern = tt.pattern;
         @string s = tt.s;
         if (runtime.GOOS == "windows"u8) {
@@ -115,7 +113,7 @@ public static void TestMatch(ж<testing.T> t) {
 }
 
 public static void BenchmarkMatch(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in matchTests) {
+    foreach (var (_, vᴛ1) in range(matchTests)) {
         ref var tt = ref heap(new MatchTest(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -136,15 +134,15 @@ internal static error errSink;
 partial struct globTestsᴛ1 /*dyn*/ {
     internal @string pattern, result;
 }
-internal static slice<globTestsᴛ1> globTests = slice<globTestsᴛ1>([
+internal static slice<globTestsᴛ1> globTests = [
     new("match.go", "match.go"),
     new("mat?h.go", "match.go"),
     new("*", "match.go"),
     new("../*/match.go", "../filepath/match.go")
-]);
+];
 
 public static void TestGlob(ж<testing.T> t) {
-    foreach (var (_, tt) in globTests) {
+    foreach (var (_, tt) in range(globTests)) {
         @string pattern = tt.pattern;
         @string result = tt.result;
         if (runtime.GOOS == "windows"u8) {
@@ -160,7 +158,7 @@ public static void TestGlob(ж<testing.T> t) {
             t.Errorf("Glob(%#q) = %#v want %v", pattern, matches, result);
         }
     }
-    foreach (var (_, pattern) in slice<@string>(["no_match", "../*/no_match"])) {
+    foreach (var (_, pattern) in range(slice<@string>(["no_match", "../*/no_match"]))) {
         var (matches, err) = Glob(pattern);
         if (err != nil) {
             t.Errorf("Glob error for %q: %s", pattern, err);
@@ -184,11 +182,9 @@ public static partial void TestCVE202230632(ж<testing.T> t) {
 
 public static void TestGlobError(ж<testing.T> t) {
     var bad = slice<@string>([@"[]", @"nonexist/[]"]);
-    foreach (var (_, pattern) in bad) {
-        {
-            var (_, err) = Glob(pattern); if (!AreEqual(err, ErrBadPattern)) {
-                t.Errorf("Glob(%#q) returned err=%v, want ErrBadPattern", pattern, err);
-            }
+    foreach (var (_, pattern) in range(bad)) {
+        var (_, err) = Glob(pattern); if (!AreEqual(err, ErrBadPattern)) {
+            t.Errorf("Glob(%#q) returned err=%v, want ErrBadPattern", pattern, err);
         }
     }
 }
@@ -203,26 +199,24 @@ partial struct globSymlinkTestsᴛ1 /*dyn*/ {
     internal @string path, dest;
     internal bool brokenLink;
 }
-internal static slice<globSymlinkTestsᴛ1> globSymlinkTests = slice<globSymlinkTestsᴛ1>([
+internal static slice<globSymlinkTestsᴛ1> globSymlinkTests = [
     new("test1", "link1", false),
     new("test2", "link2", true)
-]);
+];
 
 public static void TestGlobSymlink(ж<testing.T> t) {
     testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(t));
 
     @string tmpDir = t.TempDir();
-    foreach (var (_, tt) in globSymlinkTests) {
+    foreach (var (_, tt) in range(globSymlinkTests)) {
         @string path = Join(tmpDir, tt.path);
         @string dest = Join(tmpDir, tt.dest);
         var (f, err) = os.Create(path);
         if (err != nil) {
             t.Fatal(err);
         }
-        {
-            var errΔ1 = f.Close(); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = f.Close(); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         err = os.Symlink(path, dest);
         if (err != nil) {
@@ -249,7 +243,7 @@ partial struct globTest {
 
 internal static slice<@string> buildWant(this ref globTest test, @string root) {
     var want = new slice<@string>(0);
-    foreach (var (_, m) in test.matches) {
+    foreach (var (_, m) in range(test.matches)) {
         want = append(want, root + FromSlash(m));
     }
     slices.Sort<slice<@string>, @string>(want);
@@ -310,13 +304,13 @@ public static void TestWindowsGlob(ж<testing.T> t) {
     var files = slice<@string>([
         "dir/d/bin/git.exe"
     ]);
-    foreach (var (_, dir) in dirs) {
+    foreach (var (_, dir) in range(dirs)) {
         var err = os.MkdirAll(Join(tmpDir, dir), 511);
         if (err != nil) {
             t.Fatal(err);
         }
     }
-    foreach (var (_, @file) in files) {
+    foreach (var (_, @file) in range(files)) {
         var err = os.WriteFile(Join(tmpDir, @file), default, 438);
         if (err != nil) {
             t.Fatal(err);
@@ -324,20 +318,20 @@ public static void TestWindowsGlob(ж<testing.T> t) {
     }
 
     var tests = slice<globTest>([
-        new("a", slice<@string>(["a"])),
-        new("b", slice<@string>(["b"])),
-        new("c", slice<@string>([])),
-        new("*", slice<@string>(["a", "b", "dir"])),
-        new("d*", slice<@string>(["dir"])),
-        new("*i*", slice<@string>(["dir"])),
-        new("*r", slice<@string>(["dir"])),
-        new("?ir", slice<@string>(["dir"])),
-        new("?r", slice<@string>([])),
-        new("d*/*/bin/git.exe", slice<@string>(["dir/d/bin/git.exe"]))
+        new("a", ["a"]),
+        new("b", ["b"]),
+        new("c", []),
+        new("*", ["a", "b", "dir"]),
+        new("d*", ["dir"]),
+        new("*i*", ["dir"]),
+        new("*r", ["dir"]),
+        new("?ir", ["dir"]),
+        new("?r", []),
+        new("d*/*/bin/git.exe", ["dir/d/bin/git.exe"])
     ]);
 
     // test absolute paths
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         var test = vᴛ1;
 
         @string p = default;
@@ -368,7 +362,7 @@ public static void TestWindowsGlob(ж<testing.T> t) {
 
     // test relative paths
     t.Chdir(tmpDir);
-    foreach (var (_, vᴛ2) in tests) {
+    foreach (var (_, vᴛ2) in range(tests)) {
         var test = vᴛ2;
 
         var err = test.globRel(""u8);

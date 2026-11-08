@@ -38,8 +38,8 @@ using static global::go.compress.lzw_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("compress/lzw/reader_test.go", "reader_test.cs", "ABk0ADp2ooKCgoKktLSkgoKSgoKCgoKUpoKmlILGpKKCgoKCpLS0pIKCkoKCgoKClKaCpqaCgoKCgoKUgsbYgoKmgoKCgoKCgIK2gpQABxDmAAcUkoKClIKUggAdPIKUgoKCuIIACAiCgoKUgqaCgoKCgpSUgqaCgqKCgoKCgoKmooKCgoKCgoKCgg==", "274-285:1;289-298:2;299-311:3", "", "", "109:25,159:25")]
-[assembly: GoPositionMap("compress/lzw/writer_test.go", "writer_test.cs", "ABQkAAUQ1IKCgpS2goKCpoKSwpKSgpKCgoKCgpSCgoKUgsaSgraCgoKClIKClIKClIKCgsakgoKUgoKUpoLKgoKCkoKCgpSUgoKAgraAgraClJSAgraAgqSUggAHEIKCgoLogoKAgqSAgsgABxCCgoKClIKUgoKmgsqCgoKUgqaCgoKCgoKUlIKCkoKCgoKmkoKCgoKC", "44-65:1;111-149:1;113-147:1.1;220-227:1;228-236:2", "", "", "39:21,50:21,57:29,59:29,62:29,85:21")]
+[assembly: GoPositionMap("compress/lzw/reader_test.go", "reader_test.cs", "ABk0ADp2ooKCgoKktLSkgoKSgoKCgoKUpoKmlILGpKKCgoKCpLS0pIKCkoKCgoKClKaCpqaCgoKCgoKUgsbYgoKmgoKCgoKCgqaClAAHEOYABxSSgoKUgpSCAB08gpSCgoK4ggAICIKCgpSCpoKCgoKClJSCpoKCooKCgoKCgqaigoKCgoKCgoKC", "274-285:1;289-298:2;299-311:3", "", "", "109:25,159:25")]
+[assembly: GoPositionMap("compress/lzw/writer_test.go", "writer_test.cs", "ABIkAAUQ1IKCgpS2goKCpoKSwpKSgpKCgoKCgpSCgoKUgsaSgraCgoKClIKClIKClIKCgsakgoKUgoKUpoLKgoKCkoKCgpSUgoKAgraAgraClJSAgraAgqSUggAHEIKCgoLogoKAgqSAgsgABxCCgoKClIKUgoKmgsqCgoKUgqaCgoKCgoKUlIKCkoKCgoKmkoKCgoKC", "44-65:1;111-149:1;113-147:1.1;220-227:1;228-236:2", "", "", "37:21,48:21,55:29,57:29,60:29,83:21")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;

@@ -9,18 +9,14 @@ using testing = testing_package;
 using time = time_package;
 using @unsafe = unsafe_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
 partial class Tintptr /*ж<nint>*/; // assignable to *int
-
 partial struct Tint /*num:nint*/;  // *Tint implements Tinter, interface{}
 
-internal static void m(this ref Tint t) {
-}
+internal static void m(this ref Tint t) { }
 
 partial interface Tinter {
     void m();
@@ -94,7 +90,7 @@ public static partial void TestFinalizerType(ж<testing.T> t) {
         })
     ]);
 
-    foreach (var (_, vᴛ1) in finalizerTests) {
+    foreach (var (_, vᴛ1) in range(finalizerTests)) {
         ref var tt = ref heap(new TestFinalizerType_type(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -204,7 +200,7 @@ internal static (ж<objtype>, ж<objtype>) adjChunks() {
 
     for (;;) {
         var c = @new<objtype>();
-        foreach (var (_, d) in s) {
+        foreach (var (_, d) in range(s)) {
             if ((uintptr)c + /* unsafe.Sizeof(*c) */ (uintptr)320 == (uintptr)d) {
                 return (c, d);
             }

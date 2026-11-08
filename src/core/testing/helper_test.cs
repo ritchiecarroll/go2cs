@@ -98,10 +98,8 @@ public static void TestTBHelperParallel(ж<testing.T> t) {
         t.Fatalf("parallelTestHelper gave %d lines of output; want %d", len(lines), (nint)(wantLines));
     }
     @string want = helperfuncsTestGo24ˢ;
-    {
-        @string got = strings.TrimSpace(lines[1]); if (got != want) {
-            t.Errorf("got second output line %q; want %q", got, want);
-        }
+    @string got = strings.TrimSpace(lines[1]); if (got != want) {
+        t.Errorf("got second output line %q; want %q", got, want);
     }
 }
 

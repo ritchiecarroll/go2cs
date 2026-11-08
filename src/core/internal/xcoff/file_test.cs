@@ -17,11 +17,11 @@ internal partial struct fileTest {
     internal slice<@string> needed;
 }
 
-internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>>(slice<fileTest>([
+internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>>([
     new(
         "testdata/gcc-ppc32-aix-dwarf2-exec",
         new FileHeader(U802TOCMAGIC),
-        slice<ж<global::go.@internal.xcoff_package.SectionHeader>>([
+        [
             Ꮡ(new global::go.@internal.xcoff_package.SectionHeader(".text", 0x10000290, 0x00000bbd, STYP_TEXT, 0x7ae6, 0x36)),
             Ꮡ(new global::go.@internal.xcoff_package.SectionHeader(".data", 0x20000e4d, 0x00000437, STYP_DATA, 0x7d02, 0x2b)),
             Ꮡ(new global::go.@internal.xcoff_package.SectionHeader(".bss", 0x20001284, 0x0000021c, STYP_BSS, 0, 0)),
@@ -32,13 +32,13 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             Ꮡ(new global::go.@internal.xcoff_package.SectionHeader(".dwarnge", 0x00000000, 0x00000020, (uint32)((uint32)STYP_DWARF | (uint32)SSUBTYP_DWARNGE), 0x7f5a, 0x2)),
             Ꮡ(new global::go.@internal.xcoff_package.SectionHeader(".dwloc", 0x00000000, 0x00000074, (uint32)((uint32)STYP_DWARF | (uint32)SSUBTYP_DWLOC), 0, 0)),
             Ꮡ(new global::go.@internal.xcoff_package.SectionHeader(".debug", 0x00000000, 0x00005e4f, STYP_DEBUG, 0, 0))
-        ]),
-        slice<@string>(["libc.a/shr.o"])
+        ],
+        ["libc.a/shr.o"]
     ),
     new(
         "testdata/gcc-ppc64-aix-dwarf2-exec",
         new FileHeader(U64_TOCMAGIC),
-        slice<ж<global::go.@internal.xcoff_package.SectionHeader>>([
+        [
             Ꮡ(new global::go.@internal.xcoff_package.SectionHeader(".text", 0x10000480, 0x00000afd, STYP_TEXT, 0x8322, 0x34)),
             Ꮡ(new global::go.@internal.xcoff_package.SectionHeader(".data", 0x20000f7d, 0x000002f3, STYP_DATA, 0x85fa, 0x25)),
             Ꮡ(new global::go.@internal.xcoff_package.SectionHeader(".bss", 0x20001270, 0x00000428, STYP_BSS, 0, 0)),
@@ -49,14 +49,14 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             Ꮡ(new global::go.@internal.xcoff_package.SectionHeader(".dwarnge", 0x00000000, 0x00000040, (uint32)((uint32)STYP_DWARF | (uint32)SSUBTYP_DWARNGE), 0x889a, 0x2)),
             Ꮡ(new global::go.@internal.xcoff_package.SectionHeader(".dwloc", 0x00000000, 0x00000062, (uint32)((uint32)STYP_DWARF | (uint32)SSUBTYP_DWLOC), 0, 0)),
             Ꮡ(new global::go.@internal.xcoff_package.SectionHeader(".debug", 0x00000000, 0x00006605, STYP_DEBUG, 0, 0))
-        ]),
-        slice<@string>(["libc.a/shr_64.o"])
+        ],
+        ["libc.a/shr_64.o"]
     )
-]));
+]);
 internal static ref slice<fileTest> fileTests => ref ((StaticBox<slice<fileTest>>)ᏑfileTests).ValueSlot;
 
 public static void TestOpen(ж<testing.T> t) {
-    foreach (var i in range(fileTests)) {
+    foreach (var i in range(len(fileTests))) {
         var tt = Ꮡ(fileTests, i);
 
         var (f, err) = Open(tt.@file);
@@ -69,7 +69,7 @@ public static void TestOpen(ж<testing.T> t) {
             continue;
         }
 
-        foreach (var (iΔ1, sh) in f.Sections) {
+        foreach (var (iΔ1, sh) in range(f.Sections)) {
             if (iΔ1 >= len(tt.sections)) {
                 break;
             }

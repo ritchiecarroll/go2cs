@@ -63,16 +63,14 @@ public static void TestNumberIsValid(ж<testing.T> t) {
         "-0e-34"
     ]);
 
-    foreach (var (_, test) in validTests) {
+    foreach (var (_, test) in range(validTests)) {
         if (!isValidNumber(test)) {
             t.Errorf("%s should be valid", test);
         }
 
         ref var f = ref heap(new float64(), out var Ꮡf);
-        {
-            var err = Unmarshal(slice<byte>(test), Ꮡf); if (err != nil) {
-                t.Errorf("%s should be valid but Unmarshal failed: %v", test, err);
-            }
+        var err = Unmarshal(slice<byte>(test), Ꮡf); if (err != nil) {
+            t.Errorf("%s should be valid but Unmarshal failed: %v", test, err);
         }
 
         if (!jsonNumberRegexp.MatchString(test)) {
@@ -104,16 +102,14 @@ public static void TestNumberIsValid(ж<testing.T> t) {
         "1.e1"
     ]);
 
-    foreach (var (_, test) in invalidTests) {
+    foreach (var (_, test) in range(invalidTests)) {
         if (isValidNumber(test)) {
             t.Errorf("%s should be invalid", test);
         }
 
         ref var f = ref heap(new float64(), out var Ꮡf);
-        {
-            var err = Unmarshal(slice<byte>(test), Ꮡf); if (err == nil) {
-                t.Errorf("%s should be invalid but unmarshal wrote %v", test, f);
-            }
+        var err = Unmarshal(slice<byte>(test), Ꮡf); if (err == nil) {
+            t.Errorf("%s should be invalid but unmarshal wrote %v", test, f);
         }
 
         if (jsonNumberRegexp.MatchString(test)) {

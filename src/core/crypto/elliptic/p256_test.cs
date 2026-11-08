@@ -16,7 +16,7 @@ internal partial struct scalarMultTest {
     internal @string xOut, yOut;
 }
 
-internal static slice<scalarMultTest> p256MultTests = slice<scalarMultTest>([
+internal static slice<scalarMultTest> p256MultTests = [
     new(
         "2a265f8bcbdcaf94d58519141e578124cb40d64a501fba9c11847b28965bc737",
         "023819813ac969847059028ea88a1f30dfbcde03fc791d3a252c6b41211882ea",
@@ -31,7 +31,7 @@ internal static slice<scalarMultTest> p256MultTests = slice<scalarMultTest>([
         "831c3f6b5f762d2f461901577af41354ac5f228c2591f84f8a6e51e2e3f17991",
         "93f90934cd0ef2c698cc471c60a93524e87ab31ca2412252337f364513e43684"
     )
-]);
+];
 
 public static void TestP256BaseMult(ж<testing.T> t) {
     var scalarsᴷ = new stackAppend<ж<bigꓸInt>>();
@@ -40,7 +40,7 @@ public static void TestP256BaseMult(ж<testing.T> t) {
     var p256Generic = genericParamsForCurve(p256);
 
     var scalars = new slice<ж<bigꓸInt>>(0, len(p224BaseMultTests) + 1);
-    foreach (var (_, e) in p224BaseMultTests) {
+    foreach (var (_, e) in range(p224BaseMultTests)) {
         var (kΔ1, _) = @new<bigꓸInt>().SetString(e.k, 10);
         scalars = append(scalarsᴷ, scalars, kΔ1);
     }
@@ -48,7 +48,7 @@ public static void TestP256BaseMult(ж<testing.T> t) {
     k.Lsh(k, 500);
     scalars = append(scalars, k);
 
-    foreach (var (i, kΔ2) in scalars) {
+    foreach (var (i, kΔ2) in range(scalars)) {
         var (x, y) = p256.ScalarBaseMult(kΔ2.Bytes());
         var (x2, y2) = p256Generic.ScalarBaseMult(kΔ2.Bytes());
         if (x.Cmp(x2) != 0 || y.Cmp(y2) != 0) {
@@ -63,7 +63,7 @@ public static void TestP256BaseMult(ж<testing.T> t) {
 
 public static void TestP256Mult(ж<testing.T> t) {
     var p256 = P256();
-    foreach (var (i, e) in p256MultTests) {
+    foreach (var (i, e) in range(p256MultTests)) {
         var (x, _) = @new<bigꓸInt>().SetString(e.xIn, 16);
         var (y, _) = @new<bigꓸInt>().SetString(e.yIn, 16);
         var (k, _) = @new<bigꓸInt>().SetString(e.k, 16);

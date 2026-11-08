@@ -72,10 +72,8 @@ public static void TestSliceReader(ж<testing.T> t) {
         if (gs2 != s2) {
             t.Fatalf("readStr got %s want %s", gs2, s2);
         }
-        {
-            var (_, err) = slr.Seek(4, io.SeekStart); if (err != nil) {
-                t.Fatal(err);
-            }
+        var (_, err) = slr.Seek(4, io.SeekStart); if (err != nil) {
+            t.Fatal(err);
         }
         var off = slr.Offset();
         if (off != 4) {

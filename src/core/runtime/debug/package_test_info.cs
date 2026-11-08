@@ -44,11 +44,11 @@ using static global::go.runtime.debug_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("runtime/debug/example_monitor_test.go", "example_monitor_test.cs", "AA8mwgAOIJKmggAOEuKClIKUgoKUlLiCgpSAgqSAgqTKgoKUuIKCgoKClIKAgg==")]
-[assembly: GoPositionMap("runtime/debug/garbage_test.go", "garbage_test.cs", "ABAgopSCgsiCgqaClIKUgpSClIKClIKUgoKCgpSCgpSUuIKCgqaCgsqClIKCgoKUtMjKgqaUgrgACRSUgsqCAAoWgoKClJSUggAGEqKmgoKCuIKClIKEkoKCgoKCgpaSgIK2gpSUgoKAgsiClJSCgpSCgoKCtKSCgpSmAAgSgg==", "169-172:1")]
-[assembly: GoPositionMap("runtime/debug/heapdump_test.go", "heapdump_test.cs", "ABQcooKUgoKUgpKCgoKUgoCCxOy4ooKUgoKUgraCgoKCpoKmgoKiAAkQtJKUooKUgoKUgpKCgqI=", "", "", "", "33:21,70:21,119:21")]
+[assembly: GoPositionMap("runtime/debug/example_monitor_test.go", "example_monitor_test.cs", "AA8mwgAOIJKmggAOEuKClIKUgoKUlLiCgpSClIKUyoKClLiCgoKCgpSCgg==")]
+[assembly: GoPositionMap("runtime/debug/garbage_test.go", "garbage_test.cs", "ABAgopSCgsiCgqaClIKUgpSClIKClIKUgoKCgpSCgpSUuIKCgqaCgsqClIKCgoKUtMjKgqaUgrgACRSUgsqCAAoWgoKClJSUggAGEqKmgoKCuIKClIKEkoKCgoKCgpaSgIK2gpSUgoKAgsiClJSCgpSCgoKCtKSCgpSmAAgSgg==", "169-172:1", "", "", "", "176:21,177:13")]
+[assembly: GoPositionMap("runtime/debug/heapdump_test.go", "heapdump_test.cs", "ABIcooKUgoKUgpKCgoKUgoK07LiigpSCgpSCtoKCgoKmgqaCgqIACBCkgpSigpSCgpSCkoKCog==", "", "", "", "31:21,66:21,112:21")]
 [assembly: GoPositionMap("runtime/debug/mod_test.go", "mod_test.cs", "AA0ekoKClAAlBrSspgACEK6cgoKUgsqCgoKmgg==", "55-74:1")]
-[assembly: GoPositionMap("runtime/debug/stack_test.go", "stack_test.cs", "ACAsgqSCtoKClICCpILIyoKkggAVKgASAoKCgu6CgNyCgoKCgpS4pIKCpoKSlIKClJSUgoKUlJSCgoKCAAgGgpSCgoKCgoKUAAsYgoKUgoKmyoKUgsqCgpSC", "108-124:1")]
+[assembly: GoPositionMap("runtime/debug/stack_test.go", "stack_test.cs", "AB4sgqSCtoKClIKUgsjKgpSCABUqABICgoKC7oLcgoKCgoKUuJSCgqaCkpSCgpSUlIKClJSUgoKCggAIBoKUgoKCgoKClAALGIKClIKCpsqClILKgoKUgg==", "108-124:1")]
 // </GoSourcePositionMaps>
 
 namespace go.runtime;

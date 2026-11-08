@@ -9,8 +9,6 @@ using maps = maps_package;
 using strings = strings_package;
 using testing = testing_package;
 using slices = slices_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using iter = iter_package;
 using static global::go.net.http_package;
 using ꓸꓸꓸstring = Span<@string>;
@@ -23,13 +21,13 @@ internal partial struct TestRoutingFirstSegment_type /*dyn*/ {
 }
 
 public static void TestRoutingFirstSegment(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestRoutingFirstSegment_type>([
-        new("/a/b/c", slice<@string>(["a", "b", "c"])),
-        new("/a/b/", slice<@string>(["a", "b", "/"])),
-        new("/", slice<@string>(["/"])),
-        new("/a/%62/c", slice<@string>(["a", "b", "c"])),
-        new("/a%2Fb%2fc", slice<@string>(["a/b/c"]))
-    ])) {
+    foreach (var (_, test) in range(slice<TestRoutingFirstSegment_type>([
+        new("/a/b/c", ["a", "b", "c"]),
+        new("/a/b/", ["a", "b", "/"]),
+        new("/", ["/"]),
+        new("/a/%62/c", ["a", "b", "c"]),
+        new("/a%2Fb%2fc", ["a/b/c"])
+    ]))) {
         slice<@string> got = default;
         @string rest = test.@in;
         while (builtin.len(rest) > 0) {
@@ -69,7 +67,7 @@ internal static ж<global::go.net.http_package.routingNode> buildTree(params ꓸ
     var pats = patsʗp.sslice();
 
     var root = Ꮡ(new routingNode());
-    foreach (var (_, p) in pats) {
+    foreach (var (_, p) in range(pats)) {
         var (pat, err) = parsePattern(p);
         if (err != nil) {
             throw panic(err);
@@ -154,7 +152,7 @@ private static readonly @string aBWˢ2ᵇ = "/a/b/{w...}"u8;
 public static partial void TestRoutingNodeMatch(ж<testing.T> t) {
     void test(ж<global::go.net.http_package.routingNode> treeΔ1, slice<testCase> tests) {
         t.Helper();
-        foreach (var (_, testΔ1) in tests) {
+        foreach (var (_, testΔ1) in range(tests)) {
             var (gotNode, gotMatches) = treeΔ1.match(testΔ1.host, testΔ1.method, testΔ1.path);
             @string got = ""u8;
             if (gotNode != nil) {
@@ -169,17 +167,17 @@ public static partial void TestRoutingNodeMatch(ж<testing.T> t) {
         }
     }
 
-    test(getTestTree(), slice<testCase>([
+    test(getTestTree(), [
         new("GET", "", "/a", "/a", default),
         new("Get", "", "/b", "", default),
         new("Get", "", "/a/b", "/a/b", default),
-        new("Get", "", "/a/c", "/a/{x}", slice<@string>(["c"])),
+        new("Get", "", "/a/c", "/a/{x}", ["c"]),
         new("Get", "", "/a/b/", "/a/b/{$}", default),
-        new("Get", "", "/a/b/c", "/a/b/{y}", slice<@string>(["c"])),
-        new("Get", "", "/a/b/c/d", "/a/b/{x...}", slice<@string>(["c/d"])),
+        new("Get", "", "/a/b/c", "/a/b/{y}", ["c"]),
+        new("Get", "", "/a/b/c/d", "/a/b/{x...}", ["c/d"]),
         new("Get", "", "/g/h/i", "/g/h/i", default),
-        new("Get", "", "/g/h/j", "/g/{x}/j", slice<@string>(["h"]))
-    ]));
+        new("Get", "", "/g/h/j", "/g/{x}/j", ["h"])
+    ]);
 
     var tree = buildTree(
         itemˢ,
@@ -194,27 +192,27 @@ public static partial void TestRoutingNodeMatch(ж<testing.T> t) {
         headHeadwinsˢ,
         pathPˢ);
 
-    test(tree, slice<testCase>([
+    test(tree, [
         new("GET", "", "/item/jba",
-            "GET /item/{user}", slice<@string>(["jba"])),
+            "GET /item/{user}", ["jba"]),
         new("POST", "", "/item/jba",
-            "POST /item/{user}", slice<@string>(["jba"])),
+            "POST /item/{user}", ["jba"]),
         new("HEAD", "", "/item/jba",
-            "GET /item/{user}", slice<@string>(["jba"])),
+            "GET /item/{user}", ["jba"]),
         new("get", "", "/item/jba",
-            "/item/{user}", slice<@string>(["jba"])), // method matches are case-sensitive
+            "/item/{user}", ["jba"]), // method matches are case-sensitive
         new("POST", "", "/item/jba/17",
-            "/item/{user}/{id}", slice<@string>(["jba", "17"])),
+            "/item/{user}/{id}", ["jba", "17"]),
         new("GET", "", "/item/jba/new",
-            "/item/{user}/new", slice<@string>(["jba"])),
+            "/item/{user}/new", ["jba"]),
         new("GET", "", "/item/",
-            "/item/{$}", slice<@string>([])),
+            "/item/{$}", []),
         new("GET", "", "/item/jba/17/line2",
             "/item/", default),
         new("POST", "alt.com", "/item/jba",
-            "POST alt.com/item/{user}", slice<@string>(["jba"])),
+            "POST alt.com/item/{user}", ["jba"]),
         new("GET", "alt.com", "/item/jba",
-            "GET /item/{user}", slice<@string>(["jba"])),
+            "GET /item/{user}", ["jba"]),
         new("GET", "", "/item",
             "", default), // does not match
         new("GET", "", "/headwins",
@@ -222,45 +220,45 @@ public static partial void TestRoutingNodeMatch(ж<testing.T> t) {
         new("HEAD", "", "/headwins", // HEAD is more specific than GET
             "HEAD /headwins", default),
         new("GET", "", "/path/to/file",
-            "/path/{p...}", slice<@string>(["to/file"])),
+            "/path/{p...}", ["to/file"]),
         new("GET", "", "/path/*",
-            "/path/{p...}", slice<@string>(["*"]))
-    ]));
+            "/path/{p...}", ["*"])
+    ]);
 
     // A pattern ending in {$} should only match URLS with a trailing slash.
     @string pat1 = "/a/b/{$}";
-    test(buildTree(pat1), slice<testCase>([
+    test(buildTree(pat1), [
         new("GET", "", "/a/b", "", default),
         new("GET", "", "/a/b/", pat1, default),
         new("GET", "", "/a/b/c", "", default),
         new("GET", "", "/a/b/c/d", "", default)
-    ]));
+    ]);
 
     // A pattern ending in a single wildcard should not match a trailing slash URL.
     @string pat2 = aBWˢ;
-    test(buildTree(pat2), slice<testCase>([
+    test(buildTree(pat2), [
         new("GET", "", "/a/b", "", default),
         new("GET", "", "/a/b/", "", default),
-        new("GET", "", "/a/b/c", pat2, slice<@string>(["c"])),
+        new("GET", "", "/a/b/c", pat2, ["c"]),
         new("GET", "", "/a/b/c/d", "", default)
-    ]));
+    ]);
 
     // A pattern ending in a multi wildcard should match both URLs.
     @string pat3 = aBWˢ2;
-    test(buildTree(pat3), slice<testCase>([
+    test(buildTree(pat3), [
         new("GET", "", "/a/b", "", default),
-        new("GET", "", "/a/b/", pat3, slice<@string>([""])),
-        new("GET", "", "/a/b/c", pat3, slice<@string>(["c"])),
-        new("GET", "", "/a/b/c/d", pat3, slice<@string>(["c/d"]))
-    ]));
+        new("GET", "", "/a/b/", pat3, [""]),
+        new("GET", "", "/a/b/c", pat3, ["c"]),
+        new("GET", "", "/a/b/c/d", pat3, ["c/d"])
+    ]);
 
     // All three of the above should work together.
-    test(buildTree(pat1, pat2, pat3), slice<testCase>([
+    test(buildTree(pat1, pat2, pat3), [
         new("GET", "", "/a/b", "", default),
         new("GET", "", "/a/b/", pat1, default),
-        new("GET", "", "/a/b/c", pat2, slice<@string>(["c"])),
-        new("GET", "", "/a/b/c/d", pat3, slice<@string>(["c/d"]))
-    ]));
+        new("GET", "", "/a/b/c", pat2, ["c"]),
+        new("GET", "", "/a/b/c/d", pat3, ["c/d"])
+    ]);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -284,7 +282,7 @@ internal partial struct TestMatchingMethods_type /*dyn*/ {
 
 public static void TestMatchingMethods(ж<testing.T> t) {
     var hostTree = buildTree(getAComˢ, putBComˢ, postFooXˢ);
-    foreach (var (_, vᴛ1) in slice<TestMatchingMethods_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestMatchingMethods_type>([
         new(
             "post",
             buildTree(postˢ2), "", "/foo",
@@ -322,7 +320,7 @@ public static void TestMatchingMethods(ж<testing.T> t) {
             buildTree("/"), "", "/",
             ""
         )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestMatchingMethods_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -357,7 +355,7 @@ internal static void print(this ж<global::go.net.http_package.routingNode> Ꮡn
     });
     slices.Sort<slice<@string>, @string>(keys);
 
-    foreach (var (_, k) in keys) {
+    foreach (var (_, k) in range(keys)) {
         fmt.Fprintf(w, "%s%q:\n"u8, indent, k);
         var (nΔ1, _) = Ꮡn.Ꮡchildren.find(k);
         nΔ1.print(w, level + 1);

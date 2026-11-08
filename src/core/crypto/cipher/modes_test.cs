@@ -33,10 +33,8 @@ internal static cipher.Stream ΔNewCTR(this block _, slice<byte> iv) {
 public static void TestCTRAble(ж<testing.T> t) {
     var b = new block();
     var s = NewCTR(b, new slice<byte>(16));
-    {
-        var (_, ok) = s._<specialCTR>(ᐧ); if (!ok) {
-            t.Errorf("NewCTR did not return specialCTR");
-        }
+    var (_, ok) = s._<specialCTR>(ᐧ); if (!ok) {
+        t.Errorf("NewCTR did not return specialCTR");
     }
 }
 
@@ -55,16 +53,12 @@ internal static cipher.BlockMode ΔNewCBCDecrypter(this block _, slice<byte> iv)
 public static void TestCBCAble(ж<testing.T> t) {
     var b = new block();
     var s = NewCBCEncrypter(b, new slice<byte>(16));
-    {
-        var (_, ok) = s._<specialCBC>(ᐧ); if (!ok) {
-            t.Errorf("NewCBCEncrypter did not return specialCBC");
-        }
+    if (!s._<specialCBC>(out _)) {
+        t.Errorf("NewCBCEncrypter did not return specialCBC");
     }
     s = NewCBCDecrypter(b, new slice<byte>(16));
-    {
-        var (_, ok) = s._<specialCBC>(ᐧ); if (!ok) {
-            t.Errorf("NewCBCDecrypter did not return specialCBC");
-        }
+    if (!s._<specialCBC>(out _)) {
+        t.Errorf("NewCBCDecrypter did not return specialCBC");
     }
 }
 
@@ -82,10 +76,8 @@ public static void TestGCM(ж<testing.T> t) {
     if (err != nil) {
         t.Errorf("NewGCM failed: %v", err);
     }
-    {
-        var (_, ok) = s._<specialGCM>(ᐧ); if (!ok) {
-            t.Errorf("NewGCM did not return specialGCM");
-        }
+    var (_, ok) = s._<specialGCM>(ᐧ); if (!ok) {
+        t.Errorf("NewGCM did not return specialGCM");
     }
 }
 

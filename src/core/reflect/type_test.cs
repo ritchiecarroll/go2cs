@@ -27,7 +27,7 @@ public static void TestTypeFor(ж<Δtesting.T> t) {
         new(@new<any>(), Δreflect.TypeFor<any>()),
         new(@new<TestTypeFor_myiface>(), Δreflect.TypeFor<TestTypeFor_myiface>())
     ]);
-    foreach (var (_, tc) in testcases) {
+    foreach (var (_, tc) in range(testcases)) {
         var want = Δreflect.ValueOf(tc.wantFrom).Elem().Type();
         if (!AreEqual(want, tc.got)) {
             t.Errorf("unexpected reflect.Type: got %v; want %v", tc.got, want);
@@ -125,16 +125,14 @@ public static void TestIsRegularMemory(ж<Δtesting.T> Ꮡt) {
         ), false),
         new("struct {_ int32 }", new TestIsRegularMemory_args(Δreflect.TypeOf(new TestIsRegularMemory_iᴛ5())), false)
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestIsRegularMemory_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         Ꮡt.Run(tt.name, (ж<Δtesting.T> tΔ1) => {
-            {
-                var got = reflect_internal_test_package.IsRegularMemory(ttʗ1.args.t); if (got != ttʗ1.want) {
-                    tΔ1.Errorf("isRegularMemory() = %v, want %v", got, ttʗ1.want);
-                }
+            var got = reflect_internal_test_package.IsRegularMemory(ttʗ1.args.t); if (got != ttʗ1.want) {
+                tΔ1.Errorf("isRegularMemory() = %v, want %v", got, ttʗ1.want);
             }
         });
     }
@@ -184,16 +182,14 @@ public static void TestType_CanSeq(ж<Δtesting.T> t) {
         new("string", Δreflect.TypeOf((@string)""u8), true),
         new("[]int", Δreflect.TypeOf(slice<nint>([])), true)
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestType_CanSeq_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.name, (ж<Δtesting.T> tΔ1) => {
-            {
-                var got = ttʗ1.tr.CanSeq(); if (got != ttʗ1.want) {
-                    tΔ1.Errorf("Type.CanSeq() = %v, want %v", got, ttʗ1.want);
-                }
+            var got = ttʗ1.tr.CanSeq(); if (got != ttʗ1.want) {
+                tΔ1.Errorf("Type.CanSeq() = %v, want %v", got, ttʗ1.want);
             }
         });
     }
@@ -225,16 +221,14 @@ public static void TestType_CanSeq2(ж<Δtesting.T> t) {
         new("string", Δreflect.TypeOf((@string)""u8), true),
         new("[]int", Δreflect.TypeOf(slice<nint>([])), true)
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestType_CanSeq2_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.name, (ж<Δtesting.T> tΔ1) => {
-            {
-                var got = ttʗ1.tr.CanSeq2(); if (got != ttʗ1.want) {
-                    tΔ1.Errorf("Type.CanSeq2() = %v, want %v", got, ttʗ1.want);
-                }
+            var got = ttʗ1.tr.CanSeq2(); if (got != ttʗ1.want) {
+                tΔ1.Errorf("Type.CanSeq2() = %v, want %v", got, ttʗ1.want);
             }
         });
     }

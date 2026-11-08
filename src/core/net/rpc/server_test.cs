@@ -16,8 +16,6 @@ using sync = sync_package;
 using atomic = global::go.sync.atomic_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.net.http;
 using global::go.sync;
 using static global::go.net.rpc_package;
@@ -615,13 +613,9 @@ internal static void testServeRequest(ж<testing.T> t, ж<global::go.net.rpc_pac
 }
 
 public partial struct ΔReplyNotPointer /*num:nint*/;
-
 public partial struct ΔArgNotPublic /*num:nint*/;
-
 public partial struct ΔReplyNotPublic /*num:nint*/;
-
 public partial struct ΔNeedsPtrType /*num:nint*/;
-
 public partial struct local {
 }
 

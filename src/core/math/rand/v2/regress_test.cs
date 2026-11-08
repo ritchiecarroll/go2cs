@@ -19,8 +19,6 @@ using os = os_package;
 using reflect = reflect_package;
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = global::go.io.fs_package;
 using global::go.go;
 using global::go.math.rand;
@@ -214,7 +212,7 @@ public static partial void TestUpdateExample(ж<testing.T> t) {
 
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         fmt.Fprintf(new rand_test_package.bytes_BufferжWriter(Ꮡbuf), "\t// Output:\n"u8);
-        foreach (var (_, line) in strings.Split((@string)@out, "\n")) {
+        foreach (var (_, line) in range(strings.Split((@string)@out, "\n"))) {
             if (line != ""u8) {
                 fmt.Fprintf(new rand_test_package.bytes_BufferжWriter(Ꮡbuf), "\t// %s\n"u8, line);
             }
@@ -260,14 +258,12 @@ internal static void replace(ж<testing.T> t, @string @file, slice<byte> @new) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var errΔ1 = os.WriteFile(@file, data, 438); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = os.WriteFile(@file, data, 438); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
 }
 
-internal static slice<any> regressGolden = slice<any>([
+internal static slice<any> regressGolden = [
     (float64)0.5931317151369719D,   // ExpFloat64()
     (float64)0.0680034588807843D,   // ExpFloat64()
     (float64)0.036496967459790364D, // ExpFloat64()
@@ -624,6 +620,6 @@ internal static slice<any> regressGolden = slice<any>([
     (uint64)2,                     // UintN(32)
     (uint64)312633,                // UintN(1048576)
     (uint64)346376                 // UintN(1048577)
-]);
+];
 
 } // end rand_test_package

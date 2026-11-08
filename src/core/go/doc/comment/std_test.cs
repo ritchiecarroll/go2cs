@@ -36,7 +36,7 @@ public static void TestStd(ж<testing.T> t) {
     }
 
     slice<@string> list = default;
-    foreach (var (_, pkg) in strings.Fields((@string)@out)) {
+    foreach (var (_, pkg) in range(strings.Fields((@string)@out))) {
         if (!strings.Contains(pkg, "/")) {
             list = append(listᴷ, list, pkg);
         }

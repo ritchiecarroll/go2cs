@@ -69,7 +69,7 @@ internal static readonly ж<Struct> Ꮡs = new StaticBox<Struct>(new Struct(
 ));
 internal static ref Struct s => ref ((StaticBox<Struct>)Ꮡs).ValueSlot;
 
-internal static slice<byte> big = slice<byte>([
+internal static slice<byte> big = [
     1,
     2, 3,
     4, 5, 6, 7,
@@ -88,9 +88,9 @@ internal static slice<byte> big = slice<byte>([
 
     1,
     1, 0, 1, 0
-]);
+];
 
-internal static slice<byte> little = slice<byte>([
+internal static slice<byte> little = [
     1,
     3, 2,
     7, 6, 5, 4,
@@ -109,13 +109,11 @@ internal static slice<byte> little = slice<byte>([
 
     1,
     1, 0, 1, 0
-]);
+];
 
-internal static slice<byte> src = slice<byte>([1, 2, 3, 4, 5, 6, 7, 8]);
-
-internal static slice<int32> res = slice<int32>([0x01020304, 0x05060708]);
-
-internal static slice<byte> putbuf = slice<byte>([0, 0, 0, 0, 0, 0, 0, 0]);
+internal static slice<byte> src = [1, 2, 3, 4, 5, 6, 7, 8];
+internal static slice<int32> res = [0x01020304, 0x05060708];
+internal static slice<byte> putbuf = [0, 0, 0, 0, 0, 0, 0, 0];
 
 internal static void checkResult(ж<testing.T> t, @string dir, global::go.encoding.binary_package.ByteOrder order, error err, any have, any want) {
     t.Helper();
@@ -133,7 +131,7 @@ partial struct encodersᴛ1 /*dyn*/ {
     internal Func<global::go.encoding.binary_package.ByteOrder, any, (slice<byte>, error)> fn;
 }
 internal static slice<encodersᴛ1> encoders;
-internal static void initᴛencoders() { encoders = slice<encodersᴛ1>([
+internal static void initᴛencoders() { encoders = [
     new(
         "Write",
         (global::go.encoding.binary_package.ByteOrder order, any data) => {
@@ -162,14 +160,14 @@ internal static void initᴛencoders() { encoders = slice<encodersᴛ1>([
     "Append",
     (global::go.encoding.binary_package.ByteOrder order, any data) => Append(default, order, data)
 )
-]); }
+]; }
 
 partial struct decodersᴛ1 /*dyn*/ {
     internal @string name;
     internal Func<global::go.encoding.binary_package.ByteOrder, any, slice<byte>, error> fn;
 }
 internal static slice<decodersᴛ1> decoders;
-internal static void initᴛdecoders() { decoders = slice<decodersᴛ1>([
+internal static void initᴛdecoders() { decoders = [
     new(
         "Read",
         (global::go.encoding.binary_package.ByteOrder order, any data, slice<byte> buf) => go.encoding.binary_package.Read(new binary_test_package.bytes_ReaderжReader(bytes.NewReader(buf)), order, data)
@@ -184,11 +182,11 @@ internal static void initᴛdecoders() { decoders = slice<decodersᴛ1>([
             return err;
         }
     )
-]); }
+]; }
 
 internal static void testRead(ж<testing.T> t, global::go.encoding.binary_package.ByteOrder order, slice<byte> b, any s1) {
     t.Helper();
-    foreach (var (_, vᴛ1) in decoders) {
+    foreach (var (_, vᴛ1) in range(decoders)) {
         ref var dec = ref heap(new decodersᴛ1(), out var Ꮡdec);
         dec = vᴛ1;
 
@@ -204,7 +202,7 @@ internal static void testRead(ж<testing.T> t, global::go.encoding.binary_packag
 
 internal static void testWrite(ж<testing.T> t, global::go.encoding.binary_package.ByteOrder order, slice<byte> b, any s1) {
     t.Helper();
-    foreach (var (_, vᴛ1) in encoders) {
+    foreach (var (_, vᴛ1) in range(encoders)) {
         ref var enc = ref heap(new encodersᴛ1(), out var Ꮡenc);
         enc = vᴛ1;
 
@@ -217,29 +215,13 @@ internal static void testWrite(ж<testing.T> t, global::go.encoding.binary_packa
     }
 }
 
-public static void TestLittleEndianRead(ж<testing.T> t) {
-    testRead(t, LittleEndian, little, s);
-}
+public static void TestLittleEndianRead(ж<testing.T> t) { testRead(t, LittleEndian, little, s); }
+public static void TestLittleEndianWrite(ж<testing.T> t) { testWrite(t, LittleEndian, little, s); }
+public static void TestLittleEndianPtrWrite(ж<testing.T> t) { testWrite(t, LittleEndian, little, Ꮡs); }
 
-public static void TestLittleEndianWrite(ж<testing.T> t) {
-    testWrite(t, LittleEndian, little, s);
-}
-
-public static void TestLittleEndianPtrWrite(ж<testing.T> t) {
-    testWrite(t, LittleEndian, little, Ꮡs);
-}
-
-public static void TestBigEndianRead(ж<testing.T> t) {
-    testRead(t, BigEndian, big, s);
-}
-
-public static void TestBigEndianWrite(ж<testing.T> t) {
-    testWrite(t, BigEndian, big, s);
-}
-
-public static void TestBigEndianPtrWrite(ж<testing.T> t) {
-    testWrite(t, BigEndian, big, Ꮡs);
-}
+public static void TestBigEndianRead(ж<testing.T> t) { testRead(t, BigEndian, big, s); }
+public static void TestBigEndianWrite(ж<testing.T> t) { testWrite(t, BigEndian, big, s); }
+public static void TestBigEndianPtrWrite(ж<testing.T> t) { testWrite(t, BigEndian, big, Ꮡs); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string readˢ => ref readˢᵇ;
@@ -268,7 +250,7 @@ public static void TestWriteSlice(ж<testing.T> t) {
 }
 
 public static void TestReadBool(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in decoders) {
+    foreach (var (_, vᴛ1) in range(decoders)) {
         ref var dec = ref heap(new decodersᴛ1(), out var Ꮡdec);
         dec = vᴛ1;
 
@@ -276,34 +258,34 @@ public static void TestReadBool(ж<testing.T> t) {
         t.Run(dec.name, (ж<testing.T> tΔ1) => {
             ref var res = ref heap(new bool(), out var Ꮡres);
             error err = default;
-            err = decʗ1.fn(BigEndian, Ꮡres, slice<byte>([0]));
+            err = decʗ1.fn(BigEndian, Ꮡres, [0]);
             checkResult(tΔ1, decʗ1.name, BigEndian, err, res, false);
             res = false;
-            err = decʗ1.fn(BigEndian, Ꮡres, slice<byte>([1]));
+            err = decʗ1.fn(BigEndian, Ꮡres, [1]);
             checkResult(tΔ1, decʗ1.name, BigEndian, err, res, true);
             res = false;
-            err = decʗ1.fn(BigEndian, Ꮡres, slice<byte>([2]));
+            err = decʗ1.fn(BigEndian, Ꮡres, [2]);
             checkResult(tΔ1, decʗ1.name, BigEndian, err, res, true);
         });
     }
 }
 
 public static void TestReadBoolSlice(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in decoders) {
+    foreach (var (_, vᴛ1) in range(decoders)) {
         ref var dec = ref heap(new decodersᴛ1(), out var Ꮡdec);
         dec = vᴛ1;
 
         var decʗ1 = dec;
         t.Run(dec.name, (ж<testing.T> tΔ1) => {
             var Δslice = new slice<bool>(4);
-            var err = decʗ1.fn(BigEndian, Δslice, slice<byte>([0, 1, 2, 255]));
+            var err = decʗ1.fn(BigEndian, Δslice, [0, 1, 2, 255]);
             checkResult(tΔ1, decʗ1.name, BigEndian, err, Δslice, slice<bool>([false, true, true, true]));
         });
     }
 }
 
 // Addresses of arrays are easier to manipulate with reflection than are slices.
-internal static slice<any> intArrays = slice<any>([
+internal static slice<any> intArrays = [
     Ꮡ(new int8[]{}.array(100)),
     Ꮡ(new int16[]{}.array(100)),
     Ꮡ(new int32[]{}.array(100)),
@@ -312,21 +294,21 @@ internal static slice<any> intArrays = slice<any>([
     Ꮡ(new uint16[]{}.array(100)),
     Ꮡ(new uint32[]{}.array(100)),
     Ꮡ(new uint64[]{}.array(100))
-]);
+];
 
 public static void TestSliceRoundTrip(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in encoders) {
+    foreach (var (_, vᴛ1) in range(encoders)) {
         ref var enc = ref heap(new encodersᴛ1(), out var Ꮡenc);
         enc = vᴛ1;
 
-        foreach (var (_, vᴛ2) in decoders) {
+        foreach (var (_, vᴛ2) in range(decoders)) {
             ref var dec = ref heap(new decodersᴛ1(), out var Ꮡdec);
             dec = vᴛ2;
 
             var decʗ1 = dec;
             var encʗ1 = enc;
             t.Run(fmt.Sprintf("%s,%s"u8, enc.name, dec.name), (ж<testing.T> tΔ1) => {
-                foreach (var (_, Δarray) in intArrays) {
+                foreach (var (_, Δarray) in range(intArrays)) {
                     ref var src = ref heap<reflectꓸValue>(reflect.ValueOf(Δarray).Elem(), out var Ꮡsrc);
                     var decʗ2 = decʗ1;
                     var encʗ2 = encʗ1;
@@ -372,7 +354,7 @@ internal static ref readonly @string intˢ => ref intˢᵇ;
 private static readonly @string intˢᵇ = "int"u8;
 
 public static void TestWriteT(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in encoders) {
+    foreach (var (_, vᴛ1) in range(encoders)) {
         ref var enc = ref heap(new encodersᴛ1(), out var Ꮡenc);
         enc = vᴛ1;
 
@@ -391,12 +373,10 @@ public static void TestWriteT(ж<testing.T> t) {
                 if (typ == "[4]int"u8) {
                     typ = intˢ; // the problem is int, not the [4]
                 }
-                {
-                    var (_, err) = encʗ1.fn(BigEndian, tv.Field(i).Interface()); if (err == nil) {
-                        tΔ1.Errorf("WriteT.%v: have err == nil, want non-nil", tv.Field(i).Type());
-                    } else if (!strings.Contains(err.Error(), typ)) {
-                        tΔ1.Errorf("WriteT: have err == %q, want it to mention %s", err, typ);
-                    }
+                var (_, err) = encʗ1.fn(BigEndian, tv.Field(i).Interface()); if (err == nil) {
+                    tΔ1.Errorf("WriteT.%v: have err == nil, want non-nil", tv.Field(i).Type());
+                } else if (!strings.Contains(err.Error(), typ)) {
+                    tΔ1.Errorf("WriteT: have err == %q, want it to mention %s", err, typ);
                 }
             }
         });
@@ -432,7 +412,7 @@ public partial struct BlankFieldsProbe {
 }
 
 public static void TestBlankFields(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in encoders) {
+    foreach (var (_, vᴛ1) in range(encoders)) {
         ref var enc = ref heap(new encodersᴛ1(), out var Ꮡenc);
         enc = vᴛ1;
 
@@ -446,10 +426,8 @@ public static void TestBlankFields(ж<testing.T> t) {
 
             // zero values must have been written for blank fields
             ref var p = ref heap(new BlankFieldsProbe(), out var Ꮡp);
-            {
-                var errΔ1 = go.encoding.binary_package.Read(new binary_test_package.bytes_ReaderжReader(bytes.NewReader(buf)), LittleEndian, Ꮡp); if (errΔ1 != nil) {
-                    tΔ1.Error(errΔ1);
-                }
+            var errΔ1 = go.encoding.binary_package.Read(new binary_test_package.bytes_ReaderжReader(bytes.NewReader(buf)), LittleEndian, Ꮡp); if (errΔ1 != nil) {
+                tΔ1.Error(errΔ1);
             }
 
             // quick test: only check first value of slices
@@ -465,10 +443,8 @@ public static void TestBlankFields(ж<testing.T> t) {
 
             // read should ignore blank fields in b2
             ref var b2 = ref heap(new BlankFields(), out var Ꮡb2);
-            {
-                var errΔ2 = go.encoding.binary_package.Read(new binary_test_package.bytes_ReaderжReader(bytes.NewReader(buf)), LittleEndian, Ꮡb2); if (errΔ2 != nil) {
-                    tΔ1.Error(errΔ2);
-                }
+            var errΔ2 = go.encoding.binary_package.Read(new binary_test_package.bytes_ReaderжReader(bytes.NewReader(buf)), LittleEndian, Ꮡb2); if (errΔ2 != nil) {
+                tΔ1.Error(errΔ2);
             }
             if (b1.A != b2.A || b1.B != b2.B || b1.C != b2.C) {
                 tΔ1.Errorf("%#v != %#v", b1, b2);
@@ -529,15 +505,13 @@ public static void TestSizeStructCache(ж<testing.T> t) {
         new(new slice<TestSizeStructCache_type>(1, () => new()), 0)
     ]);
 
-    foreach (var (_, tc) in testcases) {
+    foreach (var (_, tc) in range(testcases)) {
         if (Size(tc.val) == -1) {
             t.Fatalf("Can't get the size of %T", tc.val);
         }
 
-        {
-            nint n = added(); if (n != tc.want) {
-                t.Errorf("Sizing %T added %d entries to the cache, want %d", tc.val, n, tc.want);
-            }
+        nint n = added(); if (n != tc.want) {
+            t.Errorf("Sizing %T added %d entries to the cache, want %d", tc.val, n, tc.want);
         }
     }
 }
@@ -567,11 +541,9 @@ public static void TestSizeInvalid(ж<testing.T> t) {
         (ж<complex64>)nil,
         (ж<complex128>)nil
     ]);
-    foreach (var (_, tc) in testcases) {
-        {
-            nint got = Size(tc); if (got != -1) {
-                t.Errorf("Size(%T) = %d, want -1", tc, got);
-            }
+    foreach (var (_, tc) in range(testcases)) {
+        nint got = Size(tc); if (got != -1) {
+            t.Errorf("Size(%T) = %d, want -1", tc, got);
         }
     }
 }
@@ -589,13 +561,11 @@ internal static readonly object didNotPanicˢ = (@string)"did not panic"u8;
 public static void TestUnexportedRead(ж<testing.T> t) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     ref var u1 = ref heap<Unexported>(new Unexported(a: 1), out var Ꮡu1);
-    {
-        var err = Write(new binary_test_package.bytes_BufferжWriter(Ꮡbuf), LittleEndian, Ꮡu1); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = Write(new binary_test_package.bytes_BufferжWriter(Ꮡbuf), LittleEndian, Ꮡu1); if (err != nil) {
+        t.Fatal(err);
     }
 
-    foreach (var (_, vᴛ1) in decoders) {
+    foreach (var (_, vᴛ1) in range(decoders)) {
         ref var dec = ref heap(new decodersᴛ1(), out var Ꮡdec);
         dec = vᴛ1;
 
@@ -618,7 +588,7 @@ public static void TestUnexportedRead(ж<testing.T> t) {
 }
 
 public static void TestReadErrorMsg(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in decoders) {
+    foreach (var (_, vᴛ1) in range(decoders)) {
         ref var dec = ref heap(new decodersᴛ1(), out var Ꮡdec);
         dec = vᴛ1;
 
@@ -632,10 +602,8 @@ public static void TestReadErrorMsg(ж<testing.T> t) {
                     tΔ1.Errorf("%T: got no error; want %q", data, want);
                     return;
                 }
-                {
-                    @string got = err.Error(); if (got != want) {
-                        tΔ1.Errorf("%T: got %q; want %q", data, got, want);
-                    }
+                @string got = err.Error(); if (got != want) {
+                    tΔ1.Errorf("%T: got %q; want %q", data, got, want);
                 }
             }
             read((nint)0);
@@ -734,9 +702,9 @@ internal partial interface TestByteOrder_byteOrder /*dyn*/ :
 
 public static void TestByteOrder(ж<testing.T> t) {
     var buf = new slice<byte>(8);
-    foreach (var (_, order) in slice<TestByteOrder_byteOrder>([new binary_internal_test_package.binary_littleEndianᴠTestByteOrder_byteOrder(LittleEndian), new binary_internal_test_package.binary_bigEndianᴠTestByteOrder_byteOrder(BigEndian)])) {
+    foreach (var (_, order) in range(slice<TestByteOrder_byteOrder>([new binary_internal_test_package.binary_littleEndianᴠTestByteOrder_byteOrder(LittleEndian), new binary_internal_test_package.binary_bigEndianᴠTestByteOrder_byteOrder(BigEndian)]))) {
         UntypedInt offset = 3;
-        foreach (var (_, value) in slice<uint64>([
+        foreach (var (_, value) in range(slice<uint64>([
             0x0000000000000000,
             0x0123456789abcdefUL,
             0xfedcba9876543210UL,
@@ -744,7 +712,7 @@ public static void TestByteOrder(ж<testing.T> t) {
             0xaaaaaaaaaaaaaaaaUL,
             math.Float64bits(math.Pi),
             math.Float64bits(math.E)
-        ])) {
+        ]))) {
             var want16 = (uint16)value;
             order.PutUint16(buf[..2], want16);
             {
@@ -828,8 +796,8 @@ internal static void testReadInvalidDestination(ж<testing.T> t, global::go.enco
         (bool)false
     ]);
 
-    foreach (var (_, dst) in destinations) {
-        var err = go.encoding.binary_package.Read(new binary_test_package.bytes_ReaderжReader(bytes.NewReader(slice<byte>([1, 2, 3, 4, 5, 6, 7, 8]))), order, dst);
+    foreach (var (_, dst) in range(destinations)) {
+        var err = go.encoding.binary_package.Read(new binary_test_package.bytes_ReaderжReader(bytes.NewReader([1, 2, 3, 4, 5, 6, 7, 8])), order, dst);
         @string want = fmt.Sprintf("binary.Read: invalid type %T"u8, dst);
         if (err == nil || err.Error() != want) {
             t.Fatalf("for type %T: got %q; want %q", dst, err, want);
@@ -850,7 +818,7 @@ public static void TestNoFixedSize(ж<testing.T> t) {
         Height: 177.8D
     ), out var Ꮡperson);
 
-    foreach (var (_, vᴛ1) in encoders) {
+    foreach (var (_, vᴛ1) in range(encoders)) {
         ref var enc = ref heap(new encodersᴛ1(), out var Ꮡenc);
         enc = vᴛ1;
 
@@ -890,7 +858,7 @@ public static void TestAppendAllocs(ж<testing.T> t) {
     }
 }
 
-internal static slice<any> sizableTypes = slice<any>([
+internal static slice<any> sizableTypes = [
     (bool)false,
     (int8)0,
     (int16)0,
@@ -909,13 +877,13 @@ internal static slice<any> sizableTypes = slice<any>([
     slice<Struct>([]),
     (slice<Struct>)(default),
     new Struct[]{}.array(1, () => new())
-]);
+];
 
 public static void TestSizeAllocs(ж<testing.T> t) {
     if (asan.Enabled) {
         t.Skip(testAllocatesMoreWithˢ);
     }
-    foreach (var (_, data) in sizableTypes) {
+    foreach (var (_, data) in range(sizableTypes)) {
         var dataʗ1 = data;
         t.Run(fmt.Sprintf("%T"u8, data), (ж<testing.T> tΔ1) => {
             // Size uses a sync.Map behind the scenes. The slow lookup path of
@@ -1364,7 +1332,7 @@ public static void BenchmarkWriteSlice1000Uint8s(ж<testing.B> Ꮡb) {
 }
 
 public static void BenchmarkSize(ж<testing.B> b) {
-    foreach (var (_, data) in sizableTypes) {
+    foreach (var (_, data) in range(sizableTypes)) {
         var dataʗ1 = data;
         b.Run(fmt.Sprintf("%T"u8, data), (ж<testing.B> bΔ1) => {
             foreach (var _ᴛ1 in range((~bΔ1).N)) {
@@ -1378,10 +1346,8 @@ public static void TestNativeEndian(ж<testing.T> t) {
     UntypedInt val = 0x12345678;
     ref var i = ref heap<uint32>((uint32)val, out var Ꮡi);
     var s = @unsafe.Slice(Ꮡi.Reinterpret<uint32, byte>(), /* unsafe.Sizeof(i) */ (uintptr)4);
-    {
-        var v = NativeEndian.Uint32(s); if (v != val) {
-            t.Errorf("NativeEndian.Uint32 returned %#x, expected %#x", v, (nint)(val));
-        }
+    var v = NativeEndian.Uint32(s); if (v != val) {
+        t.Errorf("NativeEndian.Uint32 returned %#x, expected %#x", v, (nint)(val));
     }
 }
 

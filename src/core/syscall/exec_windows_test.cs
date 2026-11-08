@@ -49,11 +49,9 @@ public static void TestEscapeArg(ж<testing.T> t) {
         new(@"\\server\share\file", @"\\server\share\file"),
         new(@"\\newserver\tempshare\really.txt", @"\\newserver\tempshare\really.txt")
     ]);
-    foreach (var (_, test) in tests) {
-        {
-            @string got = syscall.EscapeArg(test.input); if (got != test.output) {
-                t.Errorf("EscapeArg(%#q) = %#q, want %#q", test.input, got, test.output);
-            }
+    foreach (var (_, test) in range(tests)) {
+        @string got = syscall.EscapeArg(test.input); if (got != test.output) {
+            t.Errorf("EscapeArg(%#q) = %#q, want %#q", test.input, got, test.output);
         }
     }
 }
@@ -67,23 +65,23 @@ public static void TestEnvBlockSorted(ж<testing.T> t) {
     var tests = slice<TestEnvBlockSorted_tests>([
         new(),
         new(
-            env: slice<@string>(["A=1"]),
-            want: slice<@string>(["A=1"])
+            env: ["A=1"],
+            want: ["A=1"]
         ),
         new(
-            env: slice<@string>(["A=1", "B=2", "C=3"]),
-            want: slice<@string>(["A=1", "B=2", "C=3"])
+            env: ["A=1", "B=2", "C=3"],
+            want: ["A=1", "B=2", "C=3"]
         ),
         new(
-            env: slice<@string>(["C=3", "B=2", "A=1"]),
-            want: slice<@string>(["A=1", "B=2", "C=3"])
+            env: ["C=3", "B=2", "A=1"],
+            want: ["A=1", "B=2", "C=3"]
         ),
         new(
-            env: slice<@string>(["c=3", "B=2", "a=1"]),
-            want: slice<@string>(["a=1", "B=2", "c=3"])
+            env: ["c=3", "B=2", "a=1"],
+            want: ["a=1", "B=2", "c=3"]
         )
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var got = syscall_internal_test_package.EnvSorted(tt.env);
         if (!slices.Equal<slice<@string>, @string>(got, tt.want)) {
             t.Errorf("EnvSorted(%q) = %q, want %q", tt.env, got, tt.want);
@@ -167,11 +165,9 @@ public static void TestChangingProcessParent(ж<testing.T> t) {
         if (err != nil) {
             t.Fatalf("reading child output failed: %v", err);
         }
-        {
-            @string got = (@string)childOutput;
-            @string want = fmt.Sprintf("%d"u8, parent.Process.Pid); if (got != want) {
-                t.Fatalf("child output: want %q, got %q", want, got);
-            }
+        @string got = (@string)childOutput;
+        @string want = fmt.Sprintf("%d"u8, parent.Process.Pid); if (got != want) {
+            t.Fatalf("child output: want %q, got %q", want, got);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

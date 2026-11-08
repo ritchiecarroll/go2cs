@@ -26,10 +26,10 @@ internal partial struct TestSlogtest_type /*dyn*/ {
 }
 
 public static void TestSlogtest(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestSlogtest_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestSlogtest_type>([
         new("JSON", (io.Writer w) => new Δslog.JSONHandlerжΔHandler(Δslog.NewJSONHandler(w, nil)), parseJSON),
         new("Text", (io.Writer w) => new Δslog.TextHandlerжΔHandler(Δslog.NewTextHandler(w, nil)), parseText)
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestSlogtest_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -56,7 +56,7 @@ public static void TestSlogtest(ж<testing.T> t) {
 
 internal static (slice<map<@string, any>>, error) parseLines(slice<byte> src, Func<slice<byte>, (map<@string, any>, error)> parse) {
     slice<map<@string, any>> records = default;
-    foreach (var line in range<slice<byte>>(bytes.SplitSeq(src, slice<byte>([(byte)'\n'])).Invoke)) {
+    foreach (var line in range<slice<byte>>(bytes.SplitSeq(src, [(byte)'\n']).Invoke)) {
         if (len(line) == 0) {
             continue;
         }
@@ -71,10 +71,8 @@ internal static (slice<map<@string, any>>, error) parseLines(slice<byte> src, Fu
 
 internal static (map<@string, any>, error) parseJSON(slice<byte> bs) {
     ref var m = ref heap<map<@string, any>>(out var Ꮡm);
-    {
-        var err = json.Unmarshal(bs, Ꮡm); if (err != nil) {
-            return (default, err);
-        }
+    var err = json.Unmarshal(bs, Ꮡm); if (err != nil) {
+        return (default, err);
     }
     return (m, default);
 }
@@ -97,7 +95,7 @@ internal static (map<@string, any>, error) parseText(slice<byte> bs) {
         var keys = strings.Split(k, ".");
         // Populate a tree of maps for a dotted path such as "a.b.c=x".
         var m = top;
-        foreach (var (_, key) in keys.slice(0, len(keys) - 1)) {
+        foreach (var (_, key) in range(keys.slice(0, len(keys) - 1))) {
             var (x, ok) = m[key, ꟷ];
             map<@string, any> m2 = default;
             if (!ok) {

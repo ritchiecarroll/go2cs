@@ -116,10 +116,10 @@ internal static command cmdMlDsaSigVerAft(Func<slice<byte>, (ж<mldsaꓸPublicKe
             }
 
             if (err != nil) {
-                return (slice<slice<byte>>([slice<byte>([0])]), default);
+                return (slice<slice<byte>>([[0]]), default);
             }
 
-            return (slice<slice<byte>>([slice<byte>([1])]), default);
+            return (slice<slice<byte>>([[1]]), default);
         }
     );
 }

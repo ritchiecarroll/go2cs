@@ -122,11 +122,9 @@ public static void TestReverseProxy(ж<testing.T> t) {
                     t.Errorf("handler got Proxy-Connection header value %q", c);
                 }
             }
-            {
-                @string g = r.Host;
-                @string e = someNameˢ; if (g != e) {
-                    t.Errorf("backend got Host header %q, want %q", g, e);
-                }
+            @string g = r.Host;
+            @string e = someNameˢ; if (g != e) {
+                t.Errorf("backend got Host header %q, want %q", g, e);
             }
             w.Header().Set(trailersˢ2, notASpecialHeaderFieldˢ);
             w.Header().Set(trailerˢ, xTrailerˢ);
@@ -206,10 +204,8 @@ public static void TestReverseProxy(ж<testing.T> t) {
                 t.Errorf("before reading body, Trailer = %#v; want %#v", g, e);
             }
         }
-        {
-            var cookie = res.Cookies()[0]; if (cookie.Name != "flavor"u8) {
-                t.Errorf("unexpected cookie %q", cookie.Name);
-            }
+        var cookie = res.Cookies()[0]; if (cookie.Name != "flavor"u8) {
+            t.Errorf("unexpected cookie %q", cookie.Name);
         }
         var (bodyBytes, _) = io.ReadAll(res.Body);
         {
@@ -305,25 +301,19 @@ public static void TestReverseProxyStripHeadersPresentInConnection(ж<testing.T>
         var proxyHandlerʗ1 = proxyHandler;
         var frontend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             proxyHandlerʗ1.ServeHTTP(w, r);
-            {
-                @string cΔ1 = r.Header.Get(someConnHeader); if (cΔ1 != "should be deleted"u8) {
-                    t.Errorf("handler modified header %q = %q; want %q", someConnHeader, cΔ1, shouldBeDeletedˢ);
-                }
+            @string cΔ1 = r.Header.Get(someConnHeader); if (cΔ1 != "should be deleted"u8) {
+                t.Errorf("handler modified header %q = %q; want %q", someConnHeader, cΔ1, shouldBeDeletedˢ);
             }
-            {
-                @string cΔ2 = r.Header.Get(fakeConnectionToken); if (cΔ2 != "should be deleted"u8) {
-                    t.Errorf("handler modified header %q = %q; want %q", fakeConnectionToken, cΔ2, shouldBeDeletedˢ);
-                }
+            @string cΔ2 = r.Header.Get(fakeConnectionToken); if (cΔ2 != "should be deleted"u8) {
+                t.Errorf("handler modified header %q = %q; want %q", fakeConnectionToken, cΔ2, shouldBeDeletedˢ);
             }
             var c = r.Header[connectionˢ];
             slice<@string> cf = default;
-            foreach (var (_, f) in c) {
+            foreach (var (_, f) in range(c)) {
                 foreach (var iᴛ1 in range<@string>(strings.SplitSeq(f, ",").Invoke)) {
                     var sf = iᴛ1;
-                    {
-                        sf = strings.TrimSpace(sf); if (sf != ""u8) {
-                            cf = append(cf, sf);
-                        }
+                    sf = strings.TrimSpace(sf); if (sf != ""u8) {
+                        cf = append(cf, sf);
                     }
                 }
             }
@@ -352,11 +342,9 @@ public static void TestReverseProxyStripHeadersPresentInConnection(ж<testing.T>
         if (err != nil) {
             t.Fatalf("reading body: %v", err);
         }
-        {
-            @string got = (@string)bodyBytes;
-            @string want = backendResponse; if (got != want) {
-                t.Errorf("got body %q; want %q", got, want);
-            }
+        @string got = (@string)bodyBytes;
+        @string want = backendResponse; if (got != want) {
+            t.Errorf("got body %q; want %q", got, want);
         }
         {
             @string c = res.Header.Get(connectionˢ); if (c != ""u8) {
@@ -422,10 +410,8 @@ public static void TestReverseProxyStripEmptyConnection(ж<testing.T> t) {
         var proxyHandlerʗ1 = proxyHandler;
         var frontend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             proxyHandlerʗ1.ServeHTTP(w, r);
-            {
-                @string c = r.Header.Get(someConnHeader); if (c != "should be deleted"u8) {
-                    t.Errorf("handler modified header %q = %q; want %q", someConnHeader, c, shouldBeDeletedˢ);
-                }
+            @string c = r.Header.Get(someConnHeader); if (c != "should be deleted"u8) {
+                t.Errorf("handler modified header %q = %q; want %q", someConnHeader, c, shouldBeDeletedˢ);
             }
         })));
         var frontendʗ1 = frontend;
@@ -445,11 +431,9 @@ public static void TestReverseProxyStripEmptyConnection(ж<testing.T> t) {
         if (err != nil) {
             t.Fatalf("reading body: %v", err);
         }
-        {
-            @string got = (@string)bodyBytes;
-            @string want = backendResponse; if (got != want) {
-                t.Errorf("got body %q; want %q", got, want);
-            }
+        @string got = (@string)bodyBytes;
+        @string want = backendResponse; if (got != want) {
+            t.Errorf("got body %q; want %q", got, want);
         }
         {
             @string c = res.Header.Get(connectionˢ); if (c != ""u8) {
@@ -538,10 +522,8 @@ public static void TestXForwardedFor_Omit(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
-            {
-                @string v = r.Header.Get(xForwardedForˢ); if (v != ""u8) {
-                    t.Errorf("got X-Forwarded-For header: %q", v);
-                }
+            @string v = r.Header.Get(xForwardedForˢ); if (v != ""u8) {
+                t.Errorf("got X-Forwarded-For header: %q", v);
             }
             w.Write(slice<byte>("hi"u8));
         })));
@@ -587,11 +569,9 @@ public static void TestReverseProxyRewriteStripsForwarded(ж<testing.T> t) {
         ]);
         var headersʗ1 = headers;
         var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
-            foreach (var (_, h) in headersʗ1) {
-                {
-                    @string v = r.Header.Get(h); if (v != ""u8) {
-                        t.Errorf("got %v header: %q", h, v);
-                    }
+            foreach (var (_, h) in range(headersʗ1)) {
+                @string v = r.Header.Get(h); if (v != ""u8) {
+                    t.Errorf("got %v header: %q", h, v);
                 }
             }
         })));
@@ -614,7 +594,7 @@ public static void TestReverseProxyRewriteStripsForwarded(ж<testing.T> t) {
         var (getReq, _) = http.NewRequest(getˢ, frontend.URL, default);
         getReq.Host = someNameˢ;
         getReq.Close = true;
-        foreach (var (_, h) in headers) {
+        foreach (var (_, h) in range(headers)) {
             getReq.Header.Set(h, "x");
         }
         (var res, err) = frontend.Client().Do(getReq);
@@ -632,12 +612,12 @@ partial struct proxyQueryTestsᴛ1 /*dyn*/ {
     internal @string reqSuffix;  // suffix to add to frontend's request URL
     internal @string want;       // what backend should see for final request URL (without ?)
 }
-internal static slice<proxyQueryTestsᴛ1> proxyQueryTests = slice<proxyQueryTestsᴛ1>([
+internal static slice<proxyQueryTestsᴛ1> proxyQueryTests = [
     new("", "", ""),
     new("?sta=tic", "?us=er", "sta=tic&us=er"),
     new("", "?us=er", "us=er"),
     new("?sta=tic", "", "sta=tic")
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string xGotQueryˢ => ref xGotQueryˢᵇ;
@@ -653,7 +633,7 @@ public static void TestReverseProxyQuery(ж<testing.T> t) {
         var backendʗ1 = backend;
         defer(backendʗ1.Close, ref ᒐ);
 
-        foreach (var (i, tt) in proxyQueryTests) {
+        foreach (var (i, tt) in range(proxyQueryTests)) {
             var (backendURL, err) = url.Parse(backend.URL + tt.baseSuffix);
             if (err != nil) {
                 t.Fatal(err);
@@ -665,11 +645,9 @@ public static void TestReverseProxyQuery(ж<testing.T> t) {
             if (err != nil) {
                 t.Fatalf("%d. Get: %v", i, err);
             }
-            {
-                @string g = res.Header.Get(xGotQueryˢ);
-                @string e = tt.want; if (g != e) {
-                    t.Errorf("%d. got query %q; expected %q", i, g, e);
-                }
+            @string g = res.Header.Get(xGotQueryˢ);
+            @string e = tt.want; if (g != e) {
+                t.Errorf("%d. got query %q; expected %q", i, g, e);
             }
             res.Body.Close();
             frontend.Close();
@@ -713,10 +691,8 @@ public static void TestReverseProxyFlushInterval(ж<testing.T> t) {
         }
         var resʗ1 = res;
         defer(ᴛ0 => ᴛ0.Close(), resʗ1.Body, ref ᒐ);
-        {
-            var (bodyBytes, _) = io.ReadAll(res.Body); if (((sstring)bodyBytes) != expected) {
-                t.Errorf("got body %q; expected %q", bodyBytes, expected);
-            }
+        var (bodyBytes, _) = io.ReadAll(res.Body); if (((sstring)bodyBytes) != expected) {
+            t.Errorf("got body %q; expected %q", bodyBytes, expected);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -782,10 +758,8 @@ public static void TestReverseProxyResponseControllerFlushInterval(ж<testing.T>
         }
         var resʗ1 = res;
         defer(ᴛ0 => ᴛ0.Close(), resʗ1.Body, ref ᒐ);
-        {
-            var (bodyBytes, _) = io.ReadAll(res.Body); if (((sstring)bodyBytes) != expected) {
-                t.Errorf("got body %q; expected %q", bodyBytes, expected);
-            }
+        var (bodyBytes, _) = io.ReadAll(res.Body); if (((sstring)bodyBytes) != expected) {
+            t.Errorf("got body %q; expected %q", bodyBytes, expected);
         }
         if (!mf.flushed) {
             t.Errorf("response writer was not flushed");
@@ -1010,7 +984,7 @@ public static void TestUserAgentHeader(ж<testing.T> t) {
         defer(frontendʗ1.Close, ref ᒐ);
         var frontendClient = frontend.Client();
 
-        foreach (var (_, sentUA) in slice<@string>(["explicit UA", ""])) {
+        foreach (var (_, sentUA) in range(slice<@string>(["explicit UA", ""]))) {
             var (getReq, _) = http.NewRequest(getˢ, frontend.URL, default);
             getReq.Header.Set(userAgentˢ, sentUA);
             getReq.Close = true;
@@ -1019,11 +993,9 @@ public static void TestUserAgentHeader(ж<testing.T> t) {
                 t.Fatalf("Get: %v", errΔ1);
             }
             res.Body.Close();
-            {
-                @string got = gotUA;
-                @string want = sentUA; if (got != want) {
-                    t.Errorf("got forwarded User-Agent %q, want %q", got, want);
-                }
+            @string got = gotUA;
+            @string want = sentUA; if (got != want) {
+                t.Errorf("got forwarded User-Agent %q, want %q", got, want);
             }
         }
     }
@@ -1036,13 +1008,8 @@ internal partial struct bufferPool {
     internal Action<slice<byte>> put;
 }
 
-internal static slice<byte> Get(this bufferPool bp) {
-    return bp.get();
-}
-
-internal static void Put(this bufferPool bp, slice<byte> v) {
-    bp.put(v);
-}
+internal static slice<byte> Get(this bufferPool bp) { return bp.get(); }
+internal static void Put(this bufferPool bp, slice<byte> v) { bp.put(v); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string getBufˢ => ref getBufˢᵇ;
@@ -1294,16 +1261,14 @@ public static void TestReverseProxyModifyResponse(ж<testing.T> t) {
             new(frontendProxy.URL + "/schedule"u8, http.StatusBadGateway)
         ]);
 
-        foreach (var (i, tt) in tests) {
+        foreach (var (i, tt) in range(tests)) {
             var (resp, err) = http.Get(tt.url);
             if (err != nil) {
                 t.Fatalf("failed to reach proxy: %v", err);
             }
-            {
-                nint g = resp.StatusCode;
-                nint e = tt.wantCode; if (g != e) {
-                    t.Errorf("#%d: got res.StatusCode %d; expected %d", i, g, e);
-                }
+            nint g = resp.StatusCode;
+            nint e = tt.wantCode; if (g != e) {
+                t.Errorf("#%d: got res.StatusCode %d; expected %d", i, g, e);
             }
             resp.Body.Close();
         }
@@ -1386,7 +1351,7 @@ public static void TestReverseProxyErrorHandler(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestReverseProxyErrorHandler_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -1417,11 +1382,9 @@ public static void TestReverseProxyErrorHandler(ж<testing.T> t) {
                 if (err != nil) {
                     tΔ1.Fatalf("failed to reach proxy: %v", err);
                 }
-                {
-                    nint g = resp.StatusCode;
-                    nint e = ttʗ1.wantCode; if (g != e) {
-                        tΔ1.Errorf("got res.StatusCode %d; expected %d", g, e);
-                    }
+                nint g = resp.StatusCode;
+                nint e = ttʗ1.wantCode; if (g != e) {
+                    tΔ1.Errorf("got res.StatusCode %d; expected %d", g, e);
                 }
                 resp.Body.Close();
             }
@@ -1476,10 +1439,8 @@ public static void TestReverseProxy_CopyBuffer(ж<testing.T> t) {
         var frontendProxyʗ1 = frontendProxy;
         defer(frontendProxyʗ1.Close, ref ᒐ);
 
-        {
-            (_, err) = frontendProxy.Client().Get(frontendProxy.URL); if (err == nil) {
-                t.Fatalf("want non-nil error");
-            }
+        (_, err) = frontendProxy.Client().Get(frontendProxy.URL); if (err == nil) {
+            t.Fatalf("want non-nil error");
         }
         // The race detector complains about the proxyLog usage in logf in copyBuffer
         // and our usage below with proxyLog.Bytes() so we're explicitly using a
@@ -1491,7 +1452,7 @@ public static void TestReverseProxy_CopyBuffer(ж<testing.T> t) {
             "EOF",
             "read"
         ]);
-        foreach (var (_, phrase) in expected) {
+        foreach (var (_, phrase) in range(expected)) {
             if (!bytes.Contains(proxyLog.Bytes(), slice<byte>(phrase))) {
                 t.Errorf("expected log to contain phrase %q", phrase);
             }
@@ -1598,20 +1559,18 @@ public static void TestClonesRequestHeaders(ж<testing.T> t) {
                 reqΔ1.Header.Set(fromDirectorˢ, "1");
             },
             Transport: new httputil_internal_test_package.roundTripperFuncᴠRoundTripper(new roundTripperFunc((ж<http.Request> reqΔ2) => {
-                {
-                    @string v = reqΔ2.Header.Get(fromDirectorˢ); if (v != "1"u8) {
-                        t.Errorf("From-Directory value = %q; want 1", v);
-                    }
+                @string v = reqΔ2.Header.Get(fromDirectorˢ); if (v != "1"u8) {
+                    t.Errorf("From-Directory value = %q; want 1", v);
                 }
                 return (default, io.EOF);
             }))
         ));
         rp.ServeHTTP(new httputil_test_package.httptest_ResponseRecorderжResponseWriter(httptest.NewRecorder()), req);
 
-        foreach (var (_, h) in slice<@string>([
+        foreach (var (_, h) in range(slice<@string>([
             "From-Director",
             "X-Forwarded-For"
-        ])) {
+        ]))) {
             if (req.Header.Get(h) != ""u8) {
                 t.Errorf("%v header mutation modified caller's request", h);
             }
@@ -1798,7 +1757,7 @@ public static void TestSelectFlushInterval(ж<testing.T> t) {
             name: "server-sent events overrides non-zero",
             res: Ꮡ(new http.Response(
                 Header: new httpꓸHeader(new map<@string, slice<@string>>{
-                    ["Content-Type"] = slice<@string>(["text/event-stream"])
+                    ["Content-Type"] = ["text/event-stream"]
                 })
             )),
             p: Ꮡ(new ReverseProxy(FlushInterval: 123)),
@@ -1808,7 +1767,7 @@ public static void TestSelectFlushInterval(ж<testing.T> t) {
             name: "server-sent events overrides zero",
             res: Ꮡ(new http.Response(
                 Header: new httpꓸHeader(new map<@string, slice<@string>>{
-                    ["Content-Type"] = slice<@string>(["text/event-stream"])
+                    ["Content-Type"] = ["text/event-stream"]
                 })
             )),
             p: Ꮡ(new ReverseProxy(FlushInterval: 0)),
@@ -1818,7 +1777,7 @@ public static void TestSelectFlushInterval(ж<testing.T> t) {
             name: "server-sent events with media-type parameters overrides non-zero",
             res: Ꮡ(new http.Response(
                 Header: new httpꓸHeader(new map<@string, slice<@string>>{
-                    ["Content-Type"] = slice<@string>(["text/event-stream;charset=utf-8"])
+                    ["Content-Type"] = ["text/event-stream;charset=utf-8"]
                 })
             )),
             p: Ꮡ(new ReverseProxy(FlushInterval: 123)),
@@ -1828,7 +1787,7 @@ public static void TestSelectFlushInterval(ж<testing.T> t) {
             name: "server-sent events with media-type parameters overrides zero",
             res: Ꮡ(new http.Response(
                 Header: new httpꓸHeader(new map<@string, slice<@string>>{
-                    ["Content-Type"] = slice<@string>(["text/event-stream;charset=utf-8"])
+                    ["Content-Type"] = ["text/event-stream;charset=utf-8"]
                 })
             )),
             p: Ꮡ(new ReverseProxy(FlushInterval: 0)),
@@ -1851,7 +1810,7 @@ public static void TestSelectFlushInterval(ж<testing.T> t) {
             want: -1
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestSelectFlushInterval_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -1930,11 +1889,9 @@ public static void TestReverseProxyWebSocket(ж<testing.T> t) {
         var handler = new http.HandlerFunc((http.ResponseWriter rw, ж<http.Request> reqΔ1) => {
             rw.Header().Set(xHeaderˢ, xValueˢ);
             rproxyʗ1.ServeHTTP(rw, reqΔ1);
-            {
-                @string gotΔ1 = rw.Header().Get(xModifiedˢ);
-                @string wantΔ1 = trueˢ; if (gotΔ1 != wantΔ1) {
-                    t.Errorf("response writer X-Modified header = %q; want %q", gotΔ1, wantΔ1);
-                }
+            @string gotΔ1 = rw.Header().Get(xModifiedˢ);
+            @string wantΔ1 = trueˢ; if (gotΔ1 != wantΔ1) {
+                t.Errorf("response writer X-Modified header = %q; want %q", gotΔ1, wantΔ1);
             }
         });
 
@@ -1971,11 +1928,9 @@ public static void TestReverseProxyWebSocket(ж<testing.T> t) {
         var rwcʗ1 = rwc;
         defer(() => rwcʗ1.Close(), ref ᒐ);
 
-        {
-            @string gotΔ2 = res.Header.Get(xModifiedˢ);
-            @string wantΔ2 = trueˢ; if (gotΔ2 != wantΔ2) {
-                t.Errorf("response X-Modified header = %q; want %q", gotΔ2, wantΔ2);
-            }
+        @string gotΔ2 = res.Header.Get(xModifiedˢ);
+        @string wantΔ2 = trueˢ; if (gotΔ2 != wantΔ2) {
+            t.Errorf("response X-Modified header = %q; want %q", gotΔ2, wantΔ2);
         }
 
         io.WriteString(rwc, helloˢ);
@@ -2012,13 +1967,11 @@ public static void TestReverseProxyWebSocketCancellation(ж<testing.T> t) {
         var cst = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             GoFrame ᒐ = default;
             try {
-                {
-                    @string g = upgradeType(r.Header);
-                    @string ws = websocketˢ; if (g != ws) {
-                        t.Errorf("Unexpected upgrade type %q, want %q", g, ws);
-                        http.Error(w, unexpectedRequestˢ2, 400);
-                        return;
-                    }
+                @string g = upgradeType(r.Header);
+                @string ws = websocketˢ; if (g != ws) {
+                    t.Errorf("Unexpected upgrade type %q, want %q", g, ws);
+                    http.Error(w, unexpectedRequestˢ2, 400);
+                    return;
                 }
                 var (conn, bufrw, errΔ1) = w._<http.Hijacker>().Hijack();
                 if (errΔ1 != nil) {
@@ -2029,17 +1982,13 @@ public static void TestReverseProxyWebSocketCancellation(ж<testing.T> t) {
                 defer(() => connʗ1.Close(), ref ᒐ);
 
                 @string upgradeMsg = http11101Switchingˢ;
-                {
-                    var (_, errΔ2) = io.WriteString(new httputil_test_package.net_ConnᴠWriter(conn), upgradeMsg); if (errΔ2 != nil) {
-                        t.Error(errΔ2);
-                        return;
-                    }
+                var (_, errΔ2) = io.WriteString(new httputil_test_package.net_ConnᴠWriter(conn), upgradeMsg); if (errΔ2 != nil) {
+                    t.Error(errΔ2);
+                    return;
                 }
-                {
-                    var (_, _, errΔ3) = bufrw.Value.Reader.Value.ReadLine(); if (errΔ3 != nil) {
-                        t.Errorf("Failed to read line from client: %v", errΔ3);
-                        return;
-                    }
+                var (_, _, errΔ3) = bufrw.Value.Reader.Value.ReadLine(); if (errΔ3 != nil) {
+                    t.Errorf("Failed to read line from client: %v", errΔ3);
+                    return;
                 }
 
                 for (nint i = 0; i < n; i++) {
@@ -2143,17 +2092,13 @@ public static void TestReverseProxyWebSocketCancellation(ж<testing.T> t) {
             t.Fatalf("Response body type mismatch, got %T, want io.ReadWriteCloser", res.Body);
         }
 
-        {
-            @string got = res.Header.Get(xModifiedˢ);
-            @string want = trueˢ; if (got != want) {
-                t.Errorf("response X-Modified header = %q; want %q", got, want);
-            }
+        @string got = res.Header.Get(xModifiedˢ);
+        @string want = trueˢ; if (got != want) {
+            t.Errorf("response X-Modified header = %q; want %q", got, want);
         }
 
-        {
-            var (_, errΔ6) = io.WriteString(rwc, helloˢ); if (errΔ6 != nil) {
-                t.Fatalf("Failed to write first message: %v", errΔ6);
-            }
+        var (_, errΔ6) = io.WriteString(rwc, helloˢ); if (errΔ6 != nil) {
+            t.Fatalf("Failed to write first message: %v", errΔ6);
         }
 
         // Read loop.
@@ -2210,50 +2155,38 @@ public static void TestReverseProxyWebSocketHalfTCP(ж<testing.T> t) {
 
     void mustRead(ж<testing.T> tΔ1, ж<net.TCPConn> conn, @string msg) {
         var b = new slice<byte>(len(msg));
-        {
-            var (_, err) = conn.Read(b); if (err != nil) {
-                tΔ1.Errorf("failed to read: %v", err);
-            }
+        var (_, err) = conn.Read(b); if (err != nil) {
+            tΔ1.Errorf("failed to read: %v", err);
         }
 
-        {
-            @string got = (@string)b;
-            @string want = msg; if (got != want) {
-                tΔ1.Errorf("got %#q, want %#q", got, want);
-            }
+        @string got = (@string)b;
+        @string want = msg; if (got != want) {
+            tΔ1.Errorf("got %#q, want %#q", got, want);
         }
     }
 
     void mustReadError(ж<testing.T> tΔ2, ж<net.TCPConn> conn, error e) {
         var b = new slice<byte>(1);
-        {
-            var (_, err) = conn.Read(b); if (!errors.Is(err, e)) {
-                tΔ2.Errorf("failed to read error: %v", err);
-            }
+        var (_, err) = conn.Read(b); if (!errors.Is(err, e)) {
+            tΔ2.Errorf("failed to read error: %v", err);
         }
     }
 
     void mustWrite(ж<testing.T> tΔ3, ж<net.TCPConn> conn, @string msg) {
-        {
-            var (_, err) = conn.Write(slice<byte>(msg)); if (err != nil) {
-                tΔ3.Errorf("failed to write: %v", err);
-            }
+        var (_, err) = conn.Write(slice<byte>(msg)); if (err != nil) {
+            tΔ3.Errorf("failed to write: %v", err);
         }
     }
 
     void mustCloseRead(ж<testing.T> tΔ4, ж<net.TCPConn> conn) {
-        {
-            var err = conn.CloseRead(); if (err != nil) {
-                tΔ4.Errorf("failed to CloseRead: %v", err);
-            }
+        var err = conn.CloseRead(); if (err != nil) {
+            tΔ4.Errorf("failed to CloseRead: %v", err);
         }
     }
 
     void mustCloseWrite(ж<testing.T> tΔ5, ж<net.TCPConn> conn) {
-        {
-            var err = conn.CloseWrite(); if (err != nil) {
-                tΔ5.Errorf("failed to CloseWrite: %v", err);
-            }
+        var err = conn.CloseWrite(); if (err != nil) {
+            tΔ5.Errorf("failed to CloseWrite: %v", err);
         }
     }
 
@@ -2307,11 +2240,9 @@ public static void TestReverseProxyWebSocketHalfTCP(ж<testing.T> t) {
                 ref var srv = ref heap<ж<net.TCPConn>>(out var Ꮡsrv);
 
                 var backendServer = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
-                    {
-                        @string g = upgradeType(r.Header);
-                        @string ws = websocketˢ; if (g != ws) {
-                            tΔ10.Fatalf("Unexpected upgrade type %q, want %q", g, ws);
-                        }
+                    @string g = upgradeType(r.Header);
+                    @string ws = websocketˢ; if (g != ws) {
+                        tΔ10.Fatalf("Unexpected upgrade type %q, want %q", g, ws);
                     }
 
                     var (conn, _, errΔ1) = w._<http.Hijacker>().Hijack();
@@ -2321,19 +2252,15 @@ public static void TestReverseProxyWebSocketHalfTCP(ж<testing.T> t) {
                     }
 
                     bool ok = default;
-                    {
-                        (Ꮡsrv.ValueSlot, ok) = conn._<ж<net.TCPConn>>(ᐧ); if (!ok) {
-                            conn.Close();
-                            tΔ10.Fatal(connIsNotATCPConnˢ);
-                        }
+                    (Ꮡsrv.ValueSlot, ok) = conn._<ж<net.TCPConn>>(ᐧ); if (!ok) {
+                        conn.Close();
+                        tΔ10.Fatal(connIsNotATCPConnˢ);
                     }
 
                     @string upgradeMsg = http11101Switchingˢ;
-                    {
-                        var (_, errΔ2) = io.WriteString(new httputil_test_package.net_TCPConnжWriter(Ꮡsrv.ValueSlot), upgradeMsg); if (errΔ2 != nil) {
-                            Ꮡsrv.ValueSlot.Close();
-                            tΔ10.Fatalf("backend upgrade failed: %v", errΔ2);
-                        }
+                    var (_, errΔ2) = io.WriteString(new httputil_test_package.net_TCPConnжWriter(Ꮡsrv.ValueSlot), upgradeMsg); if (errΔ2 != nil) {
+                        Ꮡsrv.ValueSlot.Close();
+                        tΔ10.Fatalf("backend upgrade failed: %v", errΔ2);
                     }
                 })));
                 var backendServerʗ1 = backendServer;
@@ -2525,11 +2452,9 @@ public static void TestSetURL(ж<testing.T> t) {
             t.Fatalf("Reading body: %v", err);
         }
 
-        {
-            @string got = (@string)body;
-            @string want = backendURL.Host; if (got != want) {
-                t.Errorf("backend got Host %q, want %q", got, want);
-            }
+        @string got = (@string)body;
+        @string want = backendURL.Host; if (got != want) {
+            t.Errorf("backend got Host %q, want %q", got, want);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2550,15 +2475,13 @@ public static void TestSingleJoinSlash(ж<testing.T> t) {
         new("https://www.google.com", "", "https://www.google.com/"),
         new("", "favicon.ico", "/favicon.ico")
     ]);
-    foreach (var (_, tt) in tests) {
-        {
-            @string got = singleJoiningSlash(tt.slasha, tt.slashb); if (got != tt.expected) {
-                t.Errorf("singleJoiningSlash(%q,%q) want %q got %q",
-                    tt.slasha,
-                    tt.slashb,
-                    tt.expected,
-                    got);
-            }
+    foreach (var (_, tt) in range(tests)) {
+        @string got = singleJoiningSlash(tt.slasha, tt.slashb); if (got != tt.expected) {
+            t.Errorf("singleJoiningSlash(%q,%q) want %q got %q",
+                tt.slasha,
+                tt.slashb,
+                tt.expected,
+                got);
         }
     }
 }
@@ -2580,7 +2503,7 @@ public static void TestJoinURLPath(ж<testing.T> t) {
         new(Ꮡ(new url.URL(Path: "/a/b/", RawPath: "/a%2Fb/")), Ꮡ(new url.URL(Path: "/c/d", RawPath: "/c%2Fd")), "/a/b/c/d", "/a%2Fb/c%2Fd")
     ]);
 
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var (p, rp) = joinURLPath(tt.a, tt.b);
         if (p != tt.wantPath || rp != tt.wantRaw) {
             t.Errorf("joinURLPath(URL(%q,%q),URL(%q,%q)) want (%q,%q) got (%q,%q)",
@@ -2622,11 +2545,9 @@ public static void TestReverseProxyRewriteReplacesOut(ж<testing.T> t) {
         var resʗ1 = res;
         defer(ᴛ0 => ᴛ0.Close(), resʗ1.Body, ref ᒐ);
         var (body, _) = io.ReadAll(res.Body);
-        {
-            @string got = (@string)body;
-            @string want = content; if (got != want) {
-                t.Errorf("got response %q, want %q", got, want);
-            }
+        @string got = (@string)body;
+        @string want = content; if (got != want) {
+            t.Errorf("got response %q, want %q", got, want);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2738,7 +2659,7 @@ public static void Test1xxResponses(ж<testing.T> t) {
                 tΔ1.Errorf("Expected %d link headers; got %d", len(expected), len(got));
             }
 
-            foreach (var i in range(expected)) {
+            foreach (var i in range(len(expected))) {
                 if (i >= len(got)) {
                     tΔ1.Errorf("Expected %q link header; got nothing", expected[i]);
 
@@ -2757,11 +2678,11 @@ public static void Test1xxResponses(ж<testing.T> t) {
             Got1xxResponse: (nint code, textproto.MIMEHeader header) => {
                 switch (code) {
                 case var ᴛ when ᴛ == http.StatusEarlyHints: {
-                    checkLinkHeadersʗ1(t, slice<@string>(["</style.css>; rel=preload; as=style", "</script.js>; rel=preload; as=script"]), header[linkˢ]);
+                    checkLinkHeadersʗ1(t, ["</style.css>; rel=preload; as=style", "</script.js>; rel=preload; as=script"], header[linkˢ]);
                     break;
                 }
                 case var ᴛ when ᴛ == http.StatusProcessing: {
-                    checkLinkHeadersʗ1(t, slice<@string>(["</style.css>; rel=preload; as=style", "</script.js>; rel=preload; as=script", "</foo.js>; rel=preload; as=script"]), header[linkˢ]);
+                    checkLinkHeadersʗ1(t, ["</style.css>; rel=preload; as=style", "</script.js>; rel=preload; as=script", "</foo.js>; rel=preload; as=script"], header[linkˢ]);
                     break;
                 }
                 default: {
@@ -2787,7 +2708,7 @@ public static void Test1xxResponses(ж<testing.T> t) {
         if (respCounter != 2) {
             t.Errorf("Expected 2 1xx responses; got %d", respCounter);
         }
-        checkLinkHeaders(t, slice<@string>(["</style.css>; rel=preload; as=style", "</script.js>; rel=preload; as=script", "</foo.js>; rel=preload; as=script"]), res.Header[linkˢ]);
+        checkLinkHeaders(t, ["</style.css>; rel=preload; as=style", "</script.js>; rel=preload; as=script", "</foo.js>; rel=preload; as=script"], res.Header[linkˢ]);
 
         var (body, _) = io.ReadAll(res.Body);
         if (((sstring)body) != "Hello"u8) {
@@ -2876,7 +2797,7 @@ internal static void testReverseProxyQueryParameterSmuggling(ж<testing.T> t, bo
         backend.Config.ErrorLog = log.New(io.Discard, ""u8, 0);
         frontend.Config.ErrorLog = log.New(io.Discard, ""u8, 0);
 
-        foreach (var (_, test) in slice<testReverseProxyQueryParameterSmuggling_type>([new(
+        foreach (var (_, test) in range(slice<testReverseProxyQueryParameterSmuggling_type>([new(
             rawQuery: "a=1&a=2;b=3",
             cleanQuery: "a=1"
         ), new(
@@ -2889,7 +2810,7 @@ internal static void testReverseProxyQueryParameterSmuggling(ж<testing.T> t, bo
             rawQuery: strings.Repeat("a=1&", 10000) + "a=1"u8,
             cleanQuery: ""
         )
-        ])) {
+        ]))) {
             var (res, errΔ1) = frontend.Client().Get(frontend.URL + "?"u8 + test.rawQuery);
             if (errΔ1 != nil) {
                 t.Fatalf("Get: %v", errΔ1);
@@ -2901,11 +2822,9 @@ internal static void testReverseProxyQueryParameterSmuggling(ж<testing.T> t, bo
             if (wantCleanQuery) {
                 wantQuery = test.cleanQuery;
             }
-            {
-                @string got = (@string)body;
-                @string want = wantQuery; if (got != want) {
-                    t.Errorf("proxy forwarded raw query %q as %q, want %q", test.rawQuery, got, want);
-                }
+            @string got = (@string)body;
+            @string want = wantQuery; if (got != want) {
+                t.Errorf("proxy forwarded raw query %q as %q, want %q", test.rawQuery, got, want);
             }
         }
     }
@@ -3007,16 +2926,12 @@ public static void TestReverseProxyInvalidUpstream100ContinueDoNotHang(ж<testin
         @string requestBody = testDataˢ;
         @string initialRequest = fmt.Sprintf("POST %s/test-expect HTTP/1.1\r\n"u8 + "Host: %s\r\n"u8 + "Content-Type: application/json\r\n"u8 + "Content-Length: %d\r\n"u8 + "Expect: 100-continue\r\n"u8 + "\r\n"u8, upstreamServer.URL, upstreamServer.Listener.Addr().String(), len(requestBody));
 
-        {
-            var (_, errΔ1) = conn.Write(slice<byte>(initialRequest)); if (errΔ1 != nil) {
-                log.Fatal(errΔ1);
-            }
+        var (_, errΔ1) = conn.Write(slice<byte>(initialRequest)); if (errΔ1 != nil) {
+            log.Fatal(errΔ1);
         }
         var buff = new slice<byte>(1024);
-        {
-            var (_, errΔ2) = conn.Read(buff); if (errΔ2 != nil) {
-                log.Fatal(errΔ2);
-            }
+        var (_, errΔ2) = conn.Read(buff); if (errΔ2 != nil) {
+            log.Fatal(errΔ2);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -3113,11 +3028,9 @@ public static void TestReverseProxyCONNECT(ж<testing.T> t) {
         var respʗ1 = resp;
         defer(ᴛ0 => ᴛ0.Close(), respʗ1.Body, ref ᒐ);
 
-        {
-            nint got = resp.StatusCode;
-            nint want = http.StatusMethodNotAllowed; if (got != want) {
-                t.Errorf("on response to CONNECT: got status %v, want %v", got, want);
-            }
+        nint got = resp.StatusCode;
+        nint want = http.StatusMethodNotAllowed; if (got != want) {
+            t.Errorf("on response to CONNECT: got status %v, want %v", got, want);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

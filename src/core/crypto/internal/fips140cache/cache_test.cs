@@ -9,8 +9,6 @@ using runtime = runtime_package;
 using sync = sync_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.crypto.@internal.fips140cache_package;
 using ꓸꓸꓸжvalue = Span<ж<fips140cache_internal_test_package.value>>;
 
@@ -92,7 +90,7 @@ public static partial void TestCache(ж<testing.T> t) {
     // When two goroutines race, the returned value may be the new or old one,
     // but the map must shrink to 0.
     var keys = new slice<ж<key>>(100);
-    foreach (var i in range(keys)) {
+    foreach (var i in range(len(keys))) {
         keys[i] = newKey();
         var (v1Δ1, v2Δ1) = (Ꮡ(new value()), Ꮡ(new value()));
         var start = new channel<EmptyStruct>(0);
@@ -131,7 +129,7 @@ public static partial void TestCache(ж<testing.T> t) {
         var (vΔ3, errΔ3) = c.Get(keys[i], () => (v3ʗ1, default), checkTrue);
         expectValue(t, vΔ3, errΔ3, v1Δ1, v2Δ1);
     }
-    foreach (var i in range(keys)) {
+    foreach (var i in range(len(keys))) {
         waitUnreachable(t, Ꮡ(keys, i));
     }
     expectMapSize(t, c, 0);
@@ -159,7 +157,7 @@ internal static void expectValue(ж<testing.T> t, ж<value> v, error err, params
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (_, w) in want) {
+    foreach (var (_, w) in range(want)) {
         if (v == w) {
             return;
         }

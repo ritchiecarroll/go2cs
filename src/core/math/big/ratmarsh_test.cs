@@ -18,7 +18,7 @@ public static void TestRatGobEncoding(ж<testing.T> t) {
     ref var medium = ref heap(new bytes.Buffer(), out var Ꮡmedium);
     var enc = gob.NewEncoder(new big_test_package.bytes_BufferжWriter(Ꮡmedium));
     var dec = gob.NewDecoder(new big_test_package.bytes_BufferжReader(Ꮡmedium));
-    foreach (var (_, test) in encodingTests) {
+    foreach (var (_, test) in range(encodingTests)) {
         medium.Reset(); // empty buffer for each test case (in case of failures)
         ref var tx = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡtx);
         Ꮡtx.SetString(test + ".14159265"u8);
@@ -69,7 +69,7 @@ public static void TestGobEncodingNilRatInSlice(ж<testing.T> t) {
     }
 }
 
-internal static slice<@string> ratNums = slice<@string>([
+internal static slice<@string> ratNums = [
     "-141592653589793238462643383279502884197169399375105820974944592307816406286",
     "-1415926535897932384626433832795028841971",
     "-141592653589793",
@@ -79,18 +79,18 @@ internal static slice<@string> ratNums = slice<@string>([
     "141592653589793",
     "1415926535897932384626433832795028841971",
     "141592653589793238462643383279502884197169399375105820974944592307816406286"
-]);
+];
 
-internal static slice<@string> ratDenoms = slice<@string>([
+internal static slice<@string> ratDenoms = [
     "1",
     "718281828459045",
     "7182818284590452353602874713526624977572",
     "718281828459045235360287471352662497757247093699959574966967627724076630353"
-]);
+];
 
 public static void TestRatJSONEncoding(ж<testing.T> t) {
-    foreach (var (_, num) in ratNums) {
-        foreach (var (_, denom) in ratDenoms) {
+    foreach (var (_, num) in range(ratNums)) {
+        foreach (var (_, denom) in range(ratDenoms)) {
             ref var tx = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡtx);
             Ꮡtx.SetString(num + "/"u8 + denom);
             var (b, err) = json.Marshal(Ꮡtx);
@@ -99,11 +99,9 @@ public static void TestRatJSONEncoding(ж<testing.T> t) {
                 continue;
             }
             ref var rx = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡrx);
-            {
-                var errΔ1 = json.Unmarshal(b, Ꮡrx); if (errΔ1 != nil) {
-                    t.Errorf("unmarshaling of %s failed: %s", Ꮡtx, errΔ1);
-                    continue;
-                }
+            var errΔ1 = json.Unmarshal(b, Ꮡrx); if (errΔ1 != nil) {
+                t.Errorf("unmarshaling of %s failed: %s", Ꮡtx, errΔ1);
+                continue;
             }
             if (Ꮡrx.Cmp(Ꮡtx) != 0) {
                 t.Errorf("JSON encoding of %s failed: got %s want %s", Ꮡtx, Ꮡrx, Ꮡtx);
@@ -113,8 +111,8 @@ public static void TestRatJSONEncoding(ж<testing.T> t) {
 }
 
 public static void TestRatXMLEncoding(ж<testing.T> t) {
-    foreach (var (_, num) in ratNums) {
-        foreach (var (_, denom) in ratDenoms) {
+    foreach (var (_, num) in range(ratNums)) {
+        foreach (var (_, denom) in range(ratDenoms)) {
             ref var tx = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡtx);
             Ꮡtx.SetString(num + "/"u8 + denom);
             var (b, err) = xml.Marshal(Ꮡtx);
@@ -123,11 +121,9 @@ public static void TestRatXMLEncoding(ж<testing.T> t) {
                 continue;
             }
             ref var rx = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡrx);
-            {
-                var errΔ1 = xml.Unmarshal(b, Ꮡrx); if (errΔ1 != nil) {
-                    t.Errorf("unmarshaling of %s failed: %s", Ꮡtx, errΔ1);
-                    continue;
-                }
+            var errΔ1 = xml.Unmarshal(b, Ꮡrx); if (errΔ1 != nil) {
+                t.Errorf("unmarshaling of %s failed: %s", Ꮡtx, errΔ1);
+                continue;
             }
             if (Ꮡrx.Cmp(Ꮡtx) != 0) {
                 t.Errorf("XML encoding of %s failed: got %s want %s", Ꮡtx, Ꮡrx, Ꮡtx);
@@ -137,11 +133,11 @@ public static void TestRatXMLEncoding(ж<testing.T> t) {
 }
 
 public static void TestRatGobDecodeShortBuffer(ж<testing.T> t) {
-    foreach (var (_, tc) in slice<slice<byte>>([
-        slice<byte>([0x2]),
-        slice<byte>([0x2, 0x0, 0x0, 0x0, 0xff]),
-        slice<byte>([0x2, 0xff, 0xff, 0xff, 0xff])
-    ])) {
+    foreach (var (_, tc) in range(slice<slice<byte>>([
+        [0x2],
+        [0x2, 0x0, 0x0, 0x0, 0xff],
+        [0x2, 0xff, 0xff, 0xff, 0xff]
+    ]))) {
         var err = NewRat(1, 2).GobDecode(tc);
         if (err == nil) {
             t.Error(expectedGobDecodeToˢ);
@@ -150,8 +146,8 @@ public static void TestRatGobDecodeShortBuffer(ж<testing.T> t) {
 }
 
 public static void TestRatAppendText(ж<testing.T> t) {
-    foreach (var (_, num) in ratNums) {
-        foreach (var (_, denom) in ratDenoms) {
+    foreach (var (_, num) in range(ratNums)) {
+        foreach (var (_, denom) in range(ratDenoms)) {
             ref var tx = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡtx);
             Ꮡtx.SetString(num + "/"u8 + denom);
             var buf = new slice<byte>(4, 32);
@@ -161,11 +157,9 @@ public static void TestRatAppendText(ж<testing.T> t) {
                 continue;
             }
             ref var rx = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡrx);
-            {
-                var errΔ1 = Ꮡrx.UnmarshalText(b[4..]); if (errΔ1 != nil) {
-                    t.Errorf("unmarshaling of %s failed: %s", Ꮡtx, errΔ1);
-                    continue;
-                }
+            var errΔ1 = Ꮡrx.UnmarshalText(b[4..]); if (errΔ1 != nil) {
+                t.Errorf("unmarshaling of %s failed: %s", Ꮡtx, errΔ1);
+                continue;
             }
             if (Ꮡrx.Cmp(Ꮡtx) != 0) {
                 t.Errorf("AppendText of %s failed: got %s want %s", Ꮡtx, Ꮡrx, Ꮡtx);

@@ -12,8 +12,6 @@ using Δruntime = runtime_package;
 using Δtesting = testing_package;
 using quick = global::go.testing.quick_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
 using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
 using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
@@ -194,7 +192,7 @@ public static void TestReflectCallABI(ж<Δtesting.T> t) {
         // to return values. The purpose is to test the call boundary
         // and make sure it works.
         var r = rand.New(rand.NewSource(genValueRandSeed));
-        foreach (var (_, fn) in abiCallTestCases) {
+        foreach (var (_, fn) in range(abiCallTestCases)) {
             ref var fnΔ1 = ref heap<reflectꓸValue>(Δreflect.ValueOf(fn), out var ᏑfnΔ1);
             var fnʗ1 = fnΔ1;
             var rʗ1 = r;
@@ -211,7 +209,7 @@ public static void TestReflectCallABI(ж<Δtesting.T> t) {
                     args = append(args, genValue(tΔ1, arg, rʗ1));
                 }
                 var results = fnʗ1.Call(args);
-                foreach (var i in range(results)) {
+                foreach (var i in range(len(results))) {
                     var (x, y) = (args[i].Interface(), results[i].Interface());
                     if (Δreflect.DeepEqual(x, y)) {
                         continue;
@@ -248,7 +246,7 @@ public static void TestReflectMakeFuncCallABI(ж<Δtesting.T> t) {
             }
             return args.slice(0, len(args) - 1); // The last Value is an empty magic value.
         };
-        foreach (var (_, callFn) in abiMakeFuncTestCases) {
+        foreach (var (_, callFn) in range(abiMakeFuncTestCases)) {
             var fnTyp = Δreflect.TypeOf(callFn).In(0);
             ref var fn = ref heap<reflectꓸValue>(Δreflect.MakeFunc(fnTyp, makeFuncHandler), out var Ꮡfn);
             ref var callFnΔ1 = ref heap<reflectꓸValue>(Δreflect.ValueOf(callFn), out var ᏑcallFnΔ1);
@@ -264,7 +262,7 @@ public static void TestReflectMakeFuncCallABI(ж<Δtesting.T> t) {
                     args = append(argsᴷ, args, genValue(tΔ1, fnTypʗ1.In(i), rʗ1));
                 }
                 var results = callFnʗ1.Call(args);
-                foreach (var i in range(results)) {
+                foreach (var i in range(len(results))) {
                     var (x, y) = (args[i + 1].Interface(), results[i].Interface());
                     if (Δreflect.DeepEqual(x, y)) {
                         continue;
@@ -306,7 +304,7 @@ public static void TestReflectMakeFuncCallABI(ж<Δtesting.T> t) {
     finally { ᒐ.Run(); }
 }
 
-internal static slice<any> abiCallTestCases = slice<any>([
+internal static slice<any> abiCallTestCases = [
     passNone,
     passInt,
     passInt8,
@@ -351,14 +349,13 @@ internal static slice<any> abiCallTestCases = slice<any>([
     pass2Struct1,
     passEmptyStruct,
     passStruct10AndSmall
-]);
+];
 
 // Functions for testing reflect function call functionality.
 
 //go:registerparams
 //go:noinline
-internal static partial void passNone() {
-}
+internal static partial void passNone() { }
 
 //go:registerparams
 //go:noinline
@@ -617,7 +614,7 @@ internal static partial (Struct10, byte, nuint) passStruct10AndSmall(Struct10 a,
     return (a, b, c);
 }
 
-internal static slice<any> abiMakeFuncTestCases = slice<any>([
+internal static slice<any> abiMakeFuncTestCases = [
     callArgsNone,
     callArgsInt,
     callArgsInt8,
@@ -661,7 +658,7 @@ internal static slice<any> abiMakeFuncTestCases = slice<any>([
     callArgsStruct15,
     callArgs2Struct1,
     callArgsEmptyStruct
-]);
+];
 
 //go:registerparams
 //go:noinline

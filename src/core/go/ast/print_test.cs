@@ -98,7 +98,7 @@ internal static slice<testsᴛ1> tests = slice<testsᴛ1>([
 internal static @string trim(@string s) {
     var lines = strings.Split(s, "\n");
     nint i = 0;
-    foreach (var (_, vᴛ1) in lines) {
+    foreach (var (_, vᴛ1) in range(lines)) {
         var line = vᴛ1;
 
         line = strings.TrimSpace(line);
@@ -112,18 +112,14 @@ internal static @string trim(@string s) {
 
 public static void TestPrint(ж<testing.T> t) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         buf.Reset();
-        {
-            var err = Fprint(new ast_test_package.strings_BuilderжWriter(Ꮡbuf), nil, test.x, default); if (err != nil) {
-                t.Errorf("Fprint failed: %s", err);
-            }
+        var err = Fprint(new ast_test_package.strings_BuilderжWriter(Ꮡbuf), nil, test.x, default); if (err != nil) {
+            t.Errorf("Fprint failed: %s", err);
         }
-        {
-            @string s = trim(buf.String());
-            @string ts = trim(test.s); if (s != ts) {
-                t.Errorf("got:\n%s\nexpected:\n%s\n", s, ts);
-            }
+        @string s = trim(buf.String());
+        @string ts = trim(test.s); if (s != ts) {
+            t.Errorf("got:\n%s\nexpected:\n%s\n", s, ts);
         }
     }
 }

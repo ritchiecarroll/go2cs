@@ -16,11 +16,11 @@ private static ref readonly @string packageIdˢ => ref packageIdˢᵇ;
 private static readonly @string packageIdˢᵇ = "package_id"u8;
 
 public static void TestRoundTrip(ж<testing.T> t) {
-    foreach (var (_, version) in slice<pkgbitsꓸVersion>([
+    foreach (var (_, version) in range(slice<pkgbitsꓸVersion>([
         pkgbits.V0,
         pkgbits.V1,
         pkgbits.V2
-    ])) {
+    ]))) {
         ref var pw = ref heap<pkgbits.PkgEncoder>(pkgbits.NewPkgEncoder(version, -1), out var Ꮡpw);
         var w = Ꮡpw.NewEncoder(pkgbits.SectionMeta, pkgbits.SyncPublic);
         w.Flush();
@@ -40,7 +40,6 @@ public static void TestRoundTrip(ж<testing.T> t) {
 
 // Type checker to enforce that know V* have the constant values they must have.
 internal static array<bool> _ᴛ1ʗ = new bool[]{}.array();
-
 internal static array<bool> _ᴛ2ʗ = new bool[]{}.array(1);
 
 internal partial struct TestVersions_vfpair /*dyn*/ {
@@ -50,7 +49,7 @@ internal partial struct TestVersions_vfpair /*dyn*/ {
 
 public static void TestVersions(ж<testing.T> t) {
     // has field tests
-    foreach (var (_, c) in slice<TestVersions_vfpair>([
+    foreach (var (_, c) in range(slice<TestVersions_vfpair>([
         new(pkgbits.V1, pkgbits.Flags),
         new(pkgbits.V2, pkgbits.Flags),
         new(pkgbits.V0, pkgbits.HasInit),
@@ -60,21 +59,21 @@ public static void TestVersions(ж<testing.T> t) {
         new(pkgbits.V0, pkgbits.DerivedInfoNeeded),
         new(pkgbits.V1, pkgbits.DerivedInfoNeeded),
         new(pkgbits.V2, pkgbits.AliasTypeParamNames)
-    ])) {
+    ]))) {
         if (!c.v.Has(c.f)) {
             t.Errorf("Expected version %v to have field %v", c.v, c.f);
         }
     }
 
     // does not have field tests
-    foreach (var (_, c) in slice<TestVersions_vfpair>([
+    foreach (var (_, c) in range(slice<TestVersions_vfpair>([
         new(pkgbits.V0, pkgbits.Flags),
         new(pkgbits.V2, pkgbits.HasInit),
         new(pkgbits.V2, pkgbits.DerivedFuncInstance),
         new(pkgbits.V2, pkgbits.DerivedInfoNeeded),
         new(pkgbits.V0, pkgbits.AliasTypeParamNames),
         new(pkgbits.V1, pkgbits.AliasTypeParamNames)
-    ])) {
+    ]))) {
         if (c.v.Has(c.f)) {
             t.Errorf("Expected version %v to not have field %v", c.v, c.f);
         }

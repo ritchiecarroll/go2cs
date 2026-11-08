@@ -13,8 +13,6 @@ using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
 using @unsafe = unsafe_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.math;
 using io = io_package;
 using static go.encoding.gob_package;
@@ -30,22 +28,22 @@ public partial struct EncodeT {
     internal slice<byte> b;
 }
 
-internal static slice<EncodeT> encodeT = slice<EncodeT>([
-    new(0x00, slice<byte>([0x00])),
-    new(0x0F, slice<byte>([0x0F])),
-    new(0xFF, slice<byte>([0xFF, 0xFF])),
-    new(0xFFFF, slice<byte>([0xFE, 0xFF, 0xFF])),
-    new(0xFFFFFF, slice<byte>([0xFD, 0xFF, 0xFF, 0xFF])),
-    new(0xFFFFFFFFU, slice<byte>([0xFC, 0xFF, 0xFF, 0xFF, 0xFF])),
-    new(0xFFFFFFFFFFUL, slice<byte>([0xFB, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF])),
-    new(0xFFFFFFFFFFFFUL, slice<byte>([0xFA, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF])),
-    new(0xFFFFFFFFFFFFFFUL, slice<byte>([0xF9, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF])),
-    new(0xFFFFFFFFFFFFFFFFUL, slice<byte>([0xF8, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF])),
-    new(0x1111, slice<byte>([0xFE, 0x11, 0x11])),
-    new(0x1111111111111111UL, slice<byte>([0xF8, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11])),
-    new(0x8888888888888888UL, slice<byte>([0xF8, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88])),
-    new((uint64)1 << 63, slice<byte>([0xF8, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]))
-]);
+internal static slice<EncodeT> encodeT = [
+    new(0x00, [0x00]),
+    new(0x0F, [0x0F]),
+    new(0xFF, [0xFF, 0xFF]),
+    new(0xFFFF, [0xFE, 0xFF, 0xFF]),
+    new(0xFFFFFF, [0xFD, 0xFF, 0xFF, 0xFF]),
+    new(0xFFFFFFFFU, [0xFC, 0xFF, 0xFF, 0xFF, 0xFF]),
+    new(0xFFFFFFFFFFUL, [0xFB, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]),
+    new(0xFFFFFFFFFFFFUL, [0xFA, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]),
+    new(0xFFFFFFFFFFFFFFUL, [0xF9, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]),
+    new(0xFFFFFFFFFFFFFFFFUL, [0xF8, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]),
+    new(0x1111, [0xFE, 0x11, 0x11]),
+    new(0x1111111111111111UL, [0xF8, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11]),
+    new(0x8888888888888888UL, [0xF8, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88]),
+    new((uint64)1 << 63, [0xF8, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
+];
 
 // testError is meant to be used as a deferred function to turn a panic(gobError) into a
 // plain test.Error call.
@@ -54,10 +52,8 @@ internal static partial void testError(ж<testing.T> t) {
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
 
-        {
-            var e = recover(calledByDefer); if (e != nil) {
-                t.Error(e._<gobError>().err); // Will re-panic if not one of our errors, such as a runtime error.
-            }
+        var e = recover(calledByDefer); if (e != nil) {
+            t.Error(e._<gobError>().err); // Will re-panic if not one of our errors, such as a runtime error.
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -77,7 +73,7 @@ public static void TestUintCodec(ж<testing.T> t) {
         defer(testError, t, ref ᒐ, recovers: true);
         var b = @new<global::go.encoding.gob_package.encBuffer>();
         var encState = newEncoderState(b);
-        foreach (var (_, tt) in encodeT) {
+        foreach (var (_, tt) in range(encodeT)) {
             b.Reset();
             encState.encodeUint(tt.x);
             if (!bytes.Equal(tt.b, b.Bytes())) {
@@ -134,20 +130,18 @@ public static void TestIntCodec(ж<testing.T> t) {
 }
 
 // The result of encoding a true boolean with field number 7
-internal static slice<byte> boolResult = slice<byte>([0x07, 0x01]);
+internal static slice<byte> boolResult = [0x07, 0x01];
 
 // The result of encoding a number 17 with field number 7
-internal static slice<byte> signedResult = slice<byte>([0x07, (byte)(2 * 17)]);
-
-internal static slice<byte> unsignedResult = slice<byte>([0x07, 17]);
-
-internal static slice<byte> floatResult = slice<byte>([0x07, 0xFE, 0x31, 0x40]);
+internal static slice<byte> signedResult = [0x07, (byte)(2 * 17)];
+internal static slice<byte> unsignedResult = [0x07, 17];
+internal static slice<byte> floatResult = [0x07, 0xFE, 0x31, 0x40];
 
 // The result of encoding a number 17+19i with field number 7
-internal static slice<byte> complexResult = slice<byte>([0x07, 0xFE, 0x31, 0x40, 0xFE, 0x33, 0x40]);
+internal static slice<byte> complexResult = [0x07, 0xFE, 0x31, 0x40, 0xFE, 0x33, 0x40];
 
 // The result of encoding "hello" with field number 7
-internal static slice<byte> bytesResult = slice<byte>([0x07, 0x05, (byte)'h', (byte)'e', (byte)'l', (byte)'l', (byte)'o']);
+internal static slice<byte> bytesResult = [0x07, 0x05, (byte)'h', (byte)'e', (byte)'l', (byte)'l', (byte)'o'];
 
 internal static ж<global::go.encoding.gob_package.decoderState> newDecodeState(ж<global::go.encoding.gob_package.decBuffer> buf) {
     var d = @new<global::go.encoding.gob_package.decoderState>();
@@ -917,14 +911,12 @@ public partial struct T0 {
     public nint C;
     public nint D;
 }
-
 public partial struct T1 {
     public nint A;
     public ж<nint> B;
     public ж<ж<nint>> C;
     public ж<ж<ж<nint>>> D;
 }
-
 public partial struct T2 {
     public ж<ж<ж<nint>>> A;
     public ж<ж<nint>> B;
@@ -1012,7 +1004,6 @@ public partial struct RT0 {
     public @string B;
     public float64 C;
 }
-
 public partial struct RT1 {
     public float64 C;
     public @string B;
@@ -1066,7 +1057,7 @@ public static void TestIgnoredFields(ж<testing.T> t) {
     it0.A = 17;
     it0.B = helloˢ;
     it0.C = 3.14159D;
-    it0.Ignore_d = slice<nint>([1, 2, 3]);
+    it0.Ignore_d = [1, 2, 3];
     it0.Ignore_e[0] = 1.0D;
     it0.Ignore_e[1] = 2.0D;
     it0.Ignore_e[2] = 3.0D;
@@ -1146,7 +1137,7 @@ public static void TestIndirectSliceMapArray(ж<testing.T> t) {
     i.S = @new<ж<ж<slice<nint>>>>();
     i.S.ValueSlot = @new<ж<slice<nint>>>();
     (i.S.ValueSlot).ValueSlot = @new<slice<nint>>();
-    ((i.S.ValueSlot).ValueSlot).ValueSlot = slice<nint>([4, 5, 6]);
+    ((i.S.ValueSlot).ValueSlot).ValueSlot = [4, 5, 6];
     i.M = @new<ж<ж<ж<map<@string, nint>>>>>();
     i.M.ValueSlot = @new<ж<ж<map<@string, nint>>>>();
     (i.M.ValueSlot).ValueSlot = @new<ж<map<@string, nint>>>();
@@ -1171,7 +1162,7 @@ public static void TestIndirectSliceMapArray(ж<testing.T> t) {
     }
     // Marshal direct, unmarshal to indirect.
     d.A = new nint[]{11, 22, 33}.array();
-    d.S = slice<nint>([44, 55, 66]);
+    d.S = [44, 55, 66];
     d.M = new map<@string, nint>{["four"] = 4, ["five"] = 5, ["six"] = 6};
     i = @new<Indirect>();
     b.Reset();
@@ -1213,7 +1204,7 @@ public partial struct Vector /*[]nint*/;
 
 public static nint Square(this Vector v) {
     nint sum = 0;
-    foreach (var (_, x) in v) {
+    foreach (var (_, x) in range<nint>(v)) {
         sum += x * x;
     }
     return sum;
@@ -1256,7 +1247,7 @@ public static void TestInterface(ж<testing.T> t) {
     // receiving the value for item2.
     var vVal = new Vector(new nint[]{1, 2, 3}.slice());
     var b = @new<bytes.Buffer>();
-    var item1 = Ꮡ(new InterfaceItem(1, iVal, fVal, vVal, 11.5D, slice<Squarer>([iVal, fVal, default, vVal])));
+    var item1 = Ꮡ(new InterfaceItem(1, iVal, fVal, vVal, 11.5D, [iVal, fVal, default, vVal]));
     // Register the types.
     Register((Int)0);
     Register((Float)0D);
@@ -1290,7 +1281,7 @@ public static void TestInterface(ж<testing.T> t) {
     if (len(item1.Sq) != len(item2.Sq)) {
         t.Fatalf("[]Squarer length wrong: got %d; expected %d", len(item2.Sq), len(item1.Sq));
     }
-    foreach (var (i, v1) in item1.Sq) {
+    foreach (var (i, v1) in range(item1.Sq)) {
         var v2 = item2.Sq[i];
         if (v1 == nil || v2 == nil) {
             if (v1 != nil || v2 != nil) {
@@ -1464,7 +1455,7 @@ public static void TestUnexportedFields(ж<testing.T> t) {
     }
 }
 
-internal static slice<any> singletons = slice<any>([
+internal static slice<any> singletons = [
     true,
     (nint)7,
     (nuint)10,
@@ -1473,7 +1464,7 @@ internal static slice<any> singletons = slice<any>([
     new nint[]{11, 22, 33}.array(),
     slice<float32>([0.5F, 0.25F, 0.125F]),
     new map<@string, nint>{["one"] = 1, ["two"] = 2}
-]);
+];
 
 public static void TestDebugSingleton(ж<testing.T> t) {
     if (debugFunc == nil) {
@@ -1481,7 +1472,7 @@ public static void TestDebugSingleton(ж<testing.T> t) {
     }
     var b = @new<bytes.Buffer>();
     // Accumulate a number of values and print them out all at once.
-    foreach (var (_, x) in singletons) {
+    foreach (var (_, x) in range(singletons)) {
         var err = NewEncoder(new gob_test_package.bytes_BufferжWriter(b)).Encode(x);
         if (err != nil) {
             t.Fatal(encodeˢ, err);
@@ -1518,7 +1509,7 @@ internal static DT newDT() {
     dt.I_nil = default;
     dt.M = new map<@string, nint>{["one"] = 1, ["two"] = 2};
     dt.T = new nint[]{11, 22, 33}.array();
-    dt.S = slice<@string>(["hi", "joe"]);
+    dt.S = ["hi", "joe"];
     return dt.ΔClone();
 }
 
@@ -1555,7 +1546,7 @@ internal static error encFuzzDec(ж<rand.Rand> Ꮡrng, any @inʗp) {
     }
 
     var b = buf.Bytes();
-    foreach (var (i, bi) in b) {
+    foreach (var (i, bi) in range(b)) {
         if (rng.Intn(10) < 3) {
             b[i] = (byte)(bi + (uint8)rng.Intn(256));
         }
@@ -1606,7 +1597,7 @@ public static void TestFuzzRegressions(ж<testing.T> t) {
 internal static void testFuzz(ж<testing.T> t, int64 seed, nint n, params ꓸꓸꓸany inputʗp) {
     var input = inputʗp.sslice();
 
-    foreach (var (_, e) in input) {
+    foreach (var (_, e) in range(input)) {
         t.Logf("seed=%d n=%d e=%T", seed, n, e);
         var rng = rand.New(rand.NewSource(seed));
         for (nint i = 0; i < n; i++) {
@@ -1650,9 +1641,9 @@ public static void TestFuzzOneByte(ж<testing.T> t) {
         indices = append(indicesᴷ, indices, i);
     }
     if (testing.Short()) {
-        indices = slice<nint>([1, 111, 178]); // known fixed panics
+        indices = [1, 111, 178]; // known fixed panics
     }
-    foreach (var (_, i) in indices) {
+    foreach (var (_, i) in range(indices)) {
         for (nint jᴛ1 = 0; jᴛ1 < 256; jᴛ1 += 3) {
             var j = jᴛ1;
             var b = slice<byte>(s);
@@ -1663,11 +1654,9 @@ public static void TestFuzzOneByte(ж<testing.T> t) {
                 GoFrame ᒐ = default;
                 try {
                     defer(() => {
-                        {
-                            var p = recover(); if (p != nil) {
-                                t.Errorf("crash for b[%d] ^= 0x%x", i, j);
-                                throw panic(p);
-                            }
+                        var p = recover(); if (p != nil) {
+                            t.Errorf("crash for b[%d] ^= 0x%x", i, j);
+                            throw panic(p);
                         }
                     }, ref ᒐ);
                     var err = NewDecoder(new gob_test_package.bytes_ReaderжReader(bytes.NewReader(bʗ1))).Decode(Ꮡe);
@@ -1751,7 +1740,7 @@ public static void TestLargeSlice(ж<testing.T> t) {
             tΔ1.Parallel(); // Only run in parallel in a large address space
         }
         var s = new slice<byte>((10 << 21));
-        foreach (var i in range(s)) {
+        foreach (var i in range(len(s))) {
             s[i] = (byte)i;
         }
         var st = Ꮡ(new LargeSliceByte(S: s));
@@ -1763,7 +1752,7 @@ public static void TestLargeSlice(ж<testing.T> t) {
             tΔ2.Parallel();
         }
         var s = new slice<int8>((10 << 21));
-        foreach (var i in range(s)) {
+        foreach (var i in range(len(s))) {
             s[i] = (int8)i;
         }
         var st = Ꮡ(new LargeSliceInt8(S: s));
@@ -1775,7 +1764,7 @@ public static void TestLargeSlice(ж<testing.T> t) {
             tΔ3.Parallel();
         }
         var s = new slice<StringPair>((1 << 21));
-        foreach (var i in range(s)) {
+        foreach (var i in range(len(s))) {
             s[i].A = (@string)(rune)i;
             s[i].B = s[i].A;
         }
@@ -1788,7 +1777,7 @@ public static void TestLargeSlice(ж<testing.T> t) {
             tΔ4.Parallel();
         }
         var s = new slice<@string>((1 << 21));
-        foreach (var i in range(s)) {
+        foreach (var i in range(len(s))) {
             s[i] = (@string)(rune)i;
         }
         var st = Ꮡ(new LargeSliceString(S: s));

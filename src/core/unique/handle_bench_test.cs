@@ -11,7 +11,7 @@ using static go.unique_package;
 partial class unique_internal_test_package {
 
 public static void BenchmarkMake(ж<testing.B> b) {
-    benchmarkMake(b, slice<@string>(["foo"]));
+    benchmarkMake(b, ["foo"]);
 }
 
 public static void BenchmarkMakeMany(ж<testing.B> b) {
@@ -27,7 +27,7 @@ internal static void benchmarkMake(ж<testing.B> Ꮡb, slice<@string> testData) 
     var handlesᴷ = new stackAppend<global::go.unique_package.Handle<@string>>();
 
     var handles = new slice<global::go.unique_package.Handle<@string>>(0, len(testData));
-    foreach (var i in range(testData)) {
+    foreach (var i in range(len(testData))) {
         handles = append(handlesᴷ, handles, Make<@string>(testData[i]));
     }
 
@@ -56,10 +56,10 @@ internal static array<@string> testData = new(128);
 internal static array<@string> testDataLarge = new(131072);
 
 [GoInit] internal static void init() {
-    foreach (var i in range(testData)) {
+    foreach (var i in range(len(testData))) {
         testData[i] = fmt.Sprintf("%b"u8, i);
     }
-    foreach (var i in range(testDataLarge)) {
+    foreach (var i in range(len(testDataLarge))) {
         testDataLarge[i] = fmt.Sprintf("%b"u8, i);
     }
 }

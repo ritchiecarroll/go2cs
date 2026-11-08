@@ -18,7 +18,7 @@ public static void TestIndex(ж<testing.T> t) {
     // by exhaustive comparison.
     var patterns = generatePatterns();
     ref var idx = ref heap(new global::go.net.http_package.routingIndex(), out var Ꮡidx);
-    foreach (var (i, pat) in patterns) {
+    foreach (var (i, pat) in range(patterns)) {
         var got = indexConflicts(pat, Ꮡidx);
         var want = trueConflicts(pat, patterns.slice(0, i));
         if (!slices.Equal<slice<@string>, @string>(got, want)) {
@@ -32,7 +32,7 @@ internal static slice<@string> trueConflicts(ж<global::go.net.http_package.patt
     ref var pat = ref Ꮡpat.DerefOrNull();
 
     slice<@string> s = default;
-    foreach (var (_, p) in pats) {
+    foreach (var (_, p) in range(pats)) {
         if (pat.conflictsWith(p)) {
             s = append(s, p.String());
         }
@@ -111,7 +111,7 @@ internal static Action<Action<@string>> genConst(@string s) {
 internal static Action<Action<@string>> genChoice(slice<@string> choices) {
     var choicesʗ1 = choices;
     return (Action<@string> collect) => {
-        foreach (var (_, c) in choicesʗ1) {
+        foreach (var (_, c) in range(choicesʗ1)) {
             collect(c);
         }
     };
@@ -170,7 +170,7 @@ public static void BenchmarkMultiConflicts(ж<testing.B> Ꮡb) {
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         ref var idx = ref heap(new global::go.net.http_package.routingIndex(), out var Ꮡidx);
-        foreach (var (_, p) in pats) {
+        foreach (var (_, p) in range(pats)) {
             var got = indexConflicts(p, Ꮡidx);
             if (builtin.len(got) != 0) {
                 Ꮡb.Fatalf("got %d conflicts, want 0", builtin.len(got));
@@ -179,11 +179,9 @@ public static void BenchmarkMultiConflicts(ж<testing.B> Ꮡb) {
         }
         if (i == 0) {
             // Confirm that all the multis ended up where they belong.
-            {
-                nint g = builtin.len(idx.multis);
-                nint w = nMultis; if (g != w) {
-                    Ꮡb.Fatalf("got %d multis, want %d", g, w);
-                }
+            nint g = builtin.len(idx.multis);
+            nint w = nMultis; if (g != w) {
+                Ꮡb.Fatalf("got %d multis, want %d", g, w);
             }
         }
     }

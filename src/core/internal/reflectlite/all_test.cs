@@ -15,8 +15,6 @@ using reflect = reflect_package;
 using Δruntime = runtime_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using global::go.@internal;
 using reflectlite = global::go.@internal.reflectlite_package;
@@ -34,7 +32,6 @@ public static @string TypeString(reflectliteꓸType t) {
 }
 
 partial struct integer /*num:nint*/;
-
 partial struct T {
     internal nint a;
     internal float64 b;
@@ -205,7 +202,7 @@ internal static partial void assert(ж<testing.T> t, @string s, @string want) {
     partial struct Δtypeᴛ29 /*dyn*/ {
         internal typeᴛ29_x x;
     }
-internal static slice<pair> typeTests = slice<pair>([
+internal static slice<pair> typeTests = [
     new(new Δtype(), "int"),
     new(new Δtypeᴛ1(), "int8"),
     new(new Δtypeᴛ2(), "int16"),
@@ -267,7 +264,7 @@ internal static slice<pair> typeTests = slice<pair>([
     new(new Δtypeᴛ29(),
         "struct { int32; int64 }"
     )
-]);
+];
 
 internal static slice<pair> valueTests = slice<pair>([
     new(@new<nint>(), "132"),
@@ -322,7 +319,7 @@ internal static partial void testReflectType(ж<testing.T> t, nint i, reflectlit
 }
 
 public static void TestTypes(ж<testing.T> t) {
-    foreach (var (i, tt) in typeTests) {
+    foreach (var (i, tt) in range(typeTests)) {
         testReflectType(t, i, reflectlite_internal_test_package.Field(ValueOf(tt.i), 0).Type(), tt.s);
     }
 }
@@ -331,7 +328,7 @@ public static void TestTypes(ж<testing.T> t) {
 internal static readonly object stringyCheeseˢ = (@string)"stringy cheese"u8;
 
 public static void TestSetValue(ж<testing.T> t) {
-    foreach (var (i, tt) in valueTests) {
+    foreach (var (i, tt) in range(valueTests)) {
         var v = ValueOf(tt.i).Elem();
         switch (v.Kind()) {
         case var ᴛ when ᴛ == abi.Int: {
@@ -452,61 +449,59 @@ internal partial struct TestCanSetField_tests /*dyn*/ {
 public static void TestCanSetField(ж<testing.T> t) {
     var tests = slice<TestCanSetField_tests>([new(
         val: ValueOf(Ꮡ(new TestCanSetField_S1())),
-        cases: slice<TestCanSetField_testCase>([
-            new(slice<nint>([0]), false),
-            new(slice<nint>([0, 0]), false),
-            new(slice<nint>([0, 1]), true),
-            new(slice<nint>([1]), false),
-            new(slice<nint>([2]), true)
-        ])
+        cases: [
+            new([0], false),
+            new([0, 0], false),
+            new([0, 1], true),
+            new([1], false),
+            new([2], true)
+        ]
     ), new(
         val: ValueOf(Ꮡ(new TestCanSetField_S2(embed: Ꮡ(new TestCanSetField_embed())))),
-        cases: slice<TestCanSetField_testCase>([
-            new(slice<nint>([0]), false),
-            new(slice<nint>([0, 0]), false),
-            new(slice<nint>([0, 1]), true),
-            new(slice<nint>([1]), false),
-            new(slice<nint>([2]), true)
-        ])
+        cases: [
+            new([0], false),
+            new([0, 0], false),
+            new([0, 1], true),
+            new([1], false),
+            new([2], true)
+        ]
     ), new(
         val: ValueOf(Ꮡ(new TestCanSetField_S3())),
-        cases: slice<TestCanSetField_testCase>([
-            new(slice<nint>([0]), true),
-            new(slice<nint>([0, 0]), false),
-            new(slice<nint>([0, 1]), true),
-            new(slice<nint>([1]), false),
-            new(slice<nint>([2]), true)
-        ])
+        cases: [
+            new([0], true),
+            new([0, 0], false),
+            new([0, 1], true),
+            new([1], false),
+            new([2], true)
+        ]
     ), new(
         val: ValueOf(Ꮡ(new TestCanSetField_S4(Embed: Ꮡ(new TestCanSetField_Embed())))),
-        cases: slice<TestCanSetField_testCase>([
-            new(slice<nint>([0]), true),
-            new(slice<nint>([0, 0]), false),
-            new(slice<nint>([0, 1]), true),
-            new(slice<nint>([1]), false),
-            new(slice<nint>([2]), true)
-        ])
+        cases: [
+            new([0], true),
+            new([0, 0], false),
+            new([0, 1], true),
+            new([1], false),
+            new([2], true)
+        ]
     )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestCanSetField_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.val.Type().Name(), (ж<testing.T> tΔ1) => {
-            foreach (var (_, tc) in ttʗ1.cases) {
+            foreach (var (_, tc) in range(ttʗ1.cases)) {
                 var f = ttʗ1.val;
-                foreach (var (_, i) in tc.index) {
+                foreach (var (_, i) in range(tc.index)) {
                     if (f.Kind() == Ptr) {
                         f = f.Elem();
                     }
                     f = reflectlite_internal_test_package.Field(f, i);
                 }
-                {
-                    var got = f.CanSet(); if (got != tc.canSet) {
-                        tΔ1.Errorf("CanSet() = %v, want %v", got, tc.canSet);
-                    }
+                var got = f.CanSet(); if (got != tc.canSet) {
+                    tΔ1.Errorf("CanSet() = %v, want %v", got, tc.canSet);
                 }
             }
         });
@@ -530,7 +525,7 @@ internal static slice<pair> valueToStringTests = slice<pair>([
 ]);
 
 public static void TestValueToString(ж<testing.T> t) {
-    foreach (var (i, test) in valueToStringTests) {
+    foreach (var (i, test) in range(valueToStringTests)) {
         @string s = valueToString(ValueOf(test.i));
         if (s != test.s) {
             t.Errorf("#%d: have %#q, want %#q", i, s, test.s);
@@ -595,10 +590,8 @@ public static void TestInterfaceValue(ж<testing.T> t) {
     assert(t, TypeString(v3.Type()), float64ˢ);
 
     var i3 = reflectlite_internal_test_package.ToInterface(v2);
-    {
-        var (_, ok) = i3._<float64>(ᐧ); if (!ok) {
-            t.Error(v2InterfaceDidNotReturnˢ, TypeOf(i3));
-        }
+    var (_, ok) = i3._<float64>(ᐧ); if (!ok) {
+        t.Error(v2InterfaceDidNotReturnˢ, TypeOf(i3));
     }
 }
 
@@ -620,15 +613,15 @@ partial struct appendTestsᴛ1 /*dyn*/ {
     internal slice<nint> orig, extra;
 }
 internal static slice<appendTestsᴛ1> appendTests = slice<appendTestsᴛ1>([
-    new(new slice<nint>(2, 4), slice<nint>([22])),
-    new(new slice<nint>(2, 4), slice<nint>([22, 33, 44]))
+    new(new slice<nint>(2, 4), [22]),
+    new(new slice<nint>(2, 4), [22, 33, 44])
 ]);
 
 internal static bool sameInts(slice<nint> x, slice<nint> y) {
     if (len(x) != len(y)) {
         return false;
     }
-    foreach (var (i, xx) in x) {
+    foreach (var (i, xx) in range(x)) {
         if (xx != y[i]) {
             return false;
         }
@@ -690,7 +683,6 @@ internal static readonly ж<Loop> Ꮡloop1 = new StaticBox<Loop>(default(Loop));
 internal static ref Loop loop1 => ref ((StaticBox<Loop>)Ꮡloop1).ValueSlot;
 internal static readonly ж<Loop> Ꮡloop2 = new StaticBox<Loop>(default(Loop));
 internal static ref Loop loop2 => ref ((StaticBox<Loop>)Ꮡloop2).ValueSlot;
-
 internal static readonly ж<Loopy> Ꮡloopy1 = new StaticBox<Loopy>(default(Loopy));
 internal static ref Loopy loopy1 => ref ((StaticBox<Loopy>)Ꮡloopy1).ValueSlot;
 internal static readonly ж<Loopy> Ꮡloopy2 = new StaticBox<Loopy>(default(Loopy));
@@ -737,7 +729,7 @@ internal static slice<DeepEqualTest> typeOfTests = slice<DeepEqualTest>([
     new((nint)1, default, false),
     new((fn1).OrTypedNilFunc(), (fn3).OrTypedNilFunc(), false),
     new((fn3).OrTypedNilFunc(), (fn3).OrTypedNilFunc(), false),
-    new(slice<slice<nint>>([slice<nint>([1])]), slice<slice<nint>>([slice<nint>([2])]), false),
+    new(slice<slice<nint>>([[1]]), slice<slice<nint>>([[2]]), false),
     new(math.NaN(), math.NaN(), false),
     new(Ꮡ(new float64[]{math.NaN()}.array()), Ꮡ(new float64[]{math.NaN()}.array()), false),
     new(Ꮡ(new float64[]{math.NaN()}.array()), new self(), true),
@@ -777,7 +769,7 @@ public static void TestTypeOf(ж<testing.T> t) {
             t.Errorf("expected nil type for nil value; got %v", typ);
         }
     }
-    foreach (var (_, test) in typeOfTests) {
+    foreach (var (_, test) in range(typeOfTests)) {
         var v = ValueOf(test.a);
         if (!v.IsValid()) {
             continue;
@@ -855,7 +847,7 @@ public static void TestIsNil(ж<testing.T> t) {
         new TestIsNil_doNilᴛ5(),
         new TestIsNil_doNilᴛ6()
     ]);
-    foreach (var (_, ts) in doNil) {
+    foreach (var (_, ts) in range(doNil)) {
         var ty = reflectlite_internal_test_package.TField(TypeOf(ts), 0);
         var v = reflectlite_internal_test_package.Zero(ty);
         v.IsNil(); // panics if not okay to call
@@ -908,10 +900,8 @@ internal static readonly object valueOfIntNilElemIsValidˢ = (@string)"ValueOf((
 
 public static void TestNilPtrValueSub(ж<testing.T> t) {
     ж<nint> pi = default;
-    {
-        var pv = ValueOf(pi.OrTypedNil()); if (pv.Elem().IsValid()) {
-            t.Error(valueOfIntNilElemIsValidˢ);
-        }
+    var pv = ValueOf(pi.OrTypedNil()); if (pv.Elem().IsValid()) {
+        t.Error(valueOfIntNilElemIsValidˢ);
     }
 }
 
@@ -946,7 +936,7 @@ public static nint TotalDist(this Point p, params ꓸꓸꓸPoint pointsʗp) {
     var points = pointsʗp.sslice();
 
     nint tot = 0;
-    foreach (var (_, q) in points) {
+    foreach (var (_, q) in range(points)) {
         nint dx = q.x - p.x;
         nint dy = q.y - p.y;
         tot += dx * dx + dy * dy; // Should call Sqrt, but it's just a test.
@@ -957,7 +947,6 @@ public static nint TotalDist(this Point p, params ꓸꓸꓸPoint pointsʗp) {
 partial struct D1 {
     internal nint d;
 }
-
 partial struct D2 {
     internal nint d;
 }
@@ -1001,11 +990,9 @@ public static void TestImportPath(ж<testing.T> Ꮡt) {
         new(TypeOf((ж<Point>)nil), ""),
         new(TypeOf((ж<Point>)nil).Elem(), "internal/reflectlite_test")
     ]);
-    foreach (var (_, test) in tests) {
-        {
-            @string path = test.t.PkgPath(); if (path != test.path) {
-                Ꮡt.Errorf("%v.PkgPath() = %q, want %q", test.t, path, test.path);
-            }
+    foreach (var (_, test) in range(tests)) {
+        @string path = test.t.PkgPath(); if (path != test.path) {
+            Ꮡt.Errorf("%v.PkgPath() = %q, want %q", test.t, path, test.path);
         }
     }
 }
@@ -1349,7 +1336,6 @@ partial struct nameTest {
 
 partial struct A {
 }
-
 partial struct B<T> {
 }
 
@@ -1357,7 +1343,7 @@ partial struct B<T> {
         partial interface Δtypeᴛ30 /*dyn*/ {
             void F();
         }
-internal static slice<nameTest> nameTests = slice<nameTest>([
+internal static slice<nameTest> nameTests = [
     new((ж<int32>)nil, "int32"),
     new((ж<D1>)nil, "D1"),
     new((ж<slice<D1>>)nil, ""),
@@ -1370,15 +1356,13 @@ internal static slice<nameTest> nameTests = slice<nameTest>([
     new((ж<TheNameOfThisTypeIsExactly255BytesLongSoWhenTheCompilerPrependsTheReflectTestPackageNameAndExtraStarTheLinkerRuntimeAndReflectPackagesWillHaveToCorrectlyDecodeTheSecondLengthByte0123456789_0123456789_0123456789_0123456789_0123456789_012345678>)nil, "TheNameOfThisTypeIsExactly255BytesLongSoWhenTheCompilerPrependsTheReflectTestPackageNameAndExtraStarTheLinkerRuntimeAndReflectPackagesWillHaveToCorrectlyDecodeTheSecondLengthByte0123456789_0123456789_0123456789_0123456789_0123456789_012345678"),
     new((ж<B<A>>)nil, "B[internal/reflectlite_test.A]"),
     new((ж<B<B<A>>>)nil, "B[internal/reflectlite_test.B[internal/reflectlite_test.A]]")
-]);
+];
 
 public static void TestNames(ж<testing.T> t) {
-    foreach (var (_, test) in nameTests) {
+    foreach (var (_, test) in range(nameTests)) {
         var typ = TypeOf(test.v).Elem();
-        {
-            @string got = typ.Name(); if (got != test.want) {
-                t.Errorf("%v Name()=%q, want %q", typ, got, test.want);
-            }
+        @string got = typ.Name(); if (got != test.want) {
+            t.Errorf("%v Name()=%q, want %q", typ, got, test.want);
         }
     }
 }

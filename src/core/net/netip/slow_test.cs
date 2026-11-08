@@ -15,7 +15,7 @@ partial class netip_test_package {
 // zeros is a slice of eight stringified zeros. It's used in
 // parseIPSlow to construct slices of specific amounts of zero fields,
 // from 1 to 8.
-internal static slice<@string> zeros = slice<@string>(["0", "0", "0", "0", "0", "0", "0", "0"]);
+internal static slice<@string> zeros = ["0", "0", "0", "0", "0", "0", "0", "0"];
 
 // parseIPSlow is like ParseIP, but aims for readability above
 // speed. It's the reference implementation for correctness checking
@@ -79,7 +79,7 @@ internal static (netipꓸAddr, error) parseIPSlow(@string s) {
         return (new netipꓸAddr(), fmt.Errorf("netaddr.ParseIP(%q): wrong size address"u8, s));
     }
     array<byte> ret = new(16);
-    foreach (var (i, f) in fs) {
+    foreach (var (i, f) in range(fs)) {
         var (a, b, errΔ1) = parseWord(f);
         if (errΔ1 != nil) {
             return (new netipꓸAddr(), errΔ1);
@@ -181,7 +181,7 @@ internal static (netipꓸAddr, error) parseIPv4Slow(@string s) {
         return (new netipꓸAddr(), fmt.Errorf("netaddr.ParseIP(%q): invalid IP address"u8, s));
     }
     array<byte> ret = new(4);
-    foreach (var i in range(ret)) {
+    foreach (var i in range(len(ret))) {
         var (val, err) = strconv.ParseUint(fs[i], 10, 8);
         if (err != nil) {
             return (new netipꓸAddr(), err);

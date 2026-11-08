@@ -26,10 +26,8 @@ public static void TestDwarf5Ranges(ж<testing.T> t) {
 
     var d = Ꮡ(new Data());
     d.order = binary.LittleEndian;
-    {
-        var errΔ1 = d.AddSection(debugRnglistsˢ, rngLists); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = d.AddSection(debugRnglistsˢ, rngLists); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     var u = Ꮡ(new unit(
         asize: 8,

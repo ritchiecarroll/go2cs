@@ -90,15 +90,15 @@ public static void TestBasics(ж<testing.T> t) {
         mku(99, 100, 1)
     ]);
     fm.SetPackage(myPack1ˢ);
-    foreach (var (k, u) in fn1units) {
+    foreach (var (k, u) in range(fn1units)) {
         fm.AddUnit(pGoˢ, "f1", false, u, (uint32)k);
     }
-    foreach (var (k, u) in fn2units) {
+    foreach (var (k, u) in range(fn2units)) {
         fm.AddUnit(qGoˢ, "f2", false, u, 0);
         fm.AddUnit(qGoˢ, "f2", false, u, (uint32)k);
     }
     fm.SetPackage(myPack2ˢ);
-    foreach (var (_, u) in fn3units) {
+    foreach (var (_, u) in range(fn3units)) {
         fm.AddUnit(litGoˢ, "f3", true, u, 0);
     }
 
@@ -179,10 +179,8 @@ public static void TestBasics(ж<testing.T> t) {
     {
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
         var selpkgs = slice<@string>(["foo/bar", "my/pack1"]);
-        {
-            var err = fm.EmitPercent(new strings_BuilderжWriter(Ꮡb), selpkgs, noCoverPkg, false, false); if (err != nil) {
-                t.Fatalf("EmitPercent returned %v", err);
-            }
+        var err = fm.EmitPercent(new strings_BuilderжWriter(Ꮡb), selpkgs, noCoverPkg, false, false); if (err != nil) {
+            t.Fatalf("EmitPercent returned %v", err);
         }
         var wantPercentΔ1 = strings.Fields(myPack1Coverage667Ofˢ2);
         var gotPercentΔ1 = strings.Fields(b.String());
@@ -217,10 +215,8 @@ public static void TestEmptyPackages(ж<testing.T> t) {
     {
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
         @string noCoverPkg = ""u8;
-        {
-            var err = fm.EmitPercent(new strings_BuilderжWriter(Ꮡb), default, noCoverPkg, true, false); if (err != nil) {
-                t.Fatalf("EmitPercent returned %v", err);
-            }
+        var err = fm.EmitPercent(new strings_BuilderжWriter(Ꮡb), default, noCoverPkg, true, false); if (err != nil) {
+            t.Fatalf("EmitPercent returned %v", err);
         }
         var wantPercent = strings.Fields(myPack1CoverageNoˢ);
         var gotPercent = strings.Fields(b.String());
@@ -234,10 +230,8 @@ public static void TestEmptyPackages(ж<testing.T> t) {
     {
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
         @string noCoverPkg = ""u8;
-        {
-            var err = fm.EmitPercent(new strings_BuilderжWriter(Ꮡb), default, noCoverPkg, true, true); if (err != nil) {
-                t.Fatalf("EmitPercent returned %v", err);
-            }
+        var err = fm.EmitPercent(new strings_BuilderжWriter(Ꮡb), default, noCoverPkg, true, true); if (err != nil) {
+            t.Fatalf("EmitPercent returned %v", err);
         }
         var wantPercent = strings.Fields(coverageNoStatementsˢ);
         var gotPercent = strings.Fields(b.String());

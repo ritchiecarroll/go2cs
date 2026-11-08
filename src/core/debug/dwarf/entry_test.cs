@@ -39,10 +39,8 @@ public static void TestSplit(ж<testing.T> t) {
     // field, even if we can't figure out its DWARF class.
     dwarf.Attr AttrGNUAddrBase = 0x2133;
     var f = e.AttrField(AttrGNUAddrBase);
-    {
-        var (_, ok) = f.Val._<int64>(ᐧ); if (!ok) {
-            t.Fatalf("bad attribute value type: have %T, want int64", f.Val);
-        }
+    var (_, ok) = f.Val._<int64>(ᐧ); if (!ok) {
+        t.Fatalf("bad attribute value type: have %T, want int64", f.Val);
     }
     if (f.Class != ClassUnknown) {
         t.Fatalf("bad class: have %s, want %s", f.Class, ClassUnknown);
@@ -77,24 +75,24 @@ public static void TestReaderSeek(ж<testing.T> t) {
     ]);
     testRanges(t, testdataLineGccElfˢ, want);
 
-    want = slice<wantRange>([
+    want = [
         new(0x401122, GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x401122, 0x401166}.array()}.slice(), 2)),
         new(0x401165, GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x401122, 0x401166}.array()}.slice(), 2)),
         new(0x401166, GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x401166, 0x401179}.array()}.slice(), 2))
-    ]);
+    ];
     testRanges(t, testdataLineGccDwarf5Elfˢ, want);
 
-    want = slice<wantRange>([
+    want = [
         new(0x401130, GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x401130, 0x40117e}.array()}.slice(), 2)),
         new(0x40117d, GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x401130, 0x40117e}.array()}.slice(), 2)),
         new(0x40117e, default)
-    ]);
+    ];
     testRanges(t, testdataLineClangDwarf5ˢ, want);
 
-    want = slice<wantRange>([
+    want = [
         new(0x401126, GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x401126, 0x40116a}.array()}.slice(), 2)),
         new(0x40116a, GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x40116a, 0x401180}.array()}.slice(), 2))
-    ]);
+    ];
     testRanges(t, testdataLineGccZstdElfˢ, want);
 }
 
@@ -135,7 +133,7 @@ public static void TestRangesRnglistx(ж<testing.T> t) {
 internal static void testRanges(ж<testing.T> t, @string name, slice<wantRange> want) {
     var d = elfData(t, name);
     var r = d.Reader();
-    foreach (var (_, w) in want) {
+    foreach (var (_, w) in range(want)) {
         var (entry, err) = r.SeekPC(w.pc);
         if (err != nil) {
             if (w.ranges != nil) {
@@ -207,7 +205,7 @@ public static void TestReaderRanges(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var d = elfData(t, test.filename);
         var subprograms = test.subprograms;
 
@@ -222,10 +220,8 @@ public static void TestReaderRanges(ж<testing.T> t) {
                 t.Fatalf("%s: too many subprograms (expected at most %d)", test.filename, i);
             }
 
-            {
-                @string got = entry.Val(AttrName)._<@string>(); if (got != subprograms[i].name) {
-                    t.Errorf("%s: subprogram %d name is %s, expected %s", test.filename, i, got, subprograms[i].name);
-                }
+            @string got = entry.Val(AttrName)._<@string>(); if (got != subprograms[i].name) {
+                t.Errorf("%s: subprogram %d name is %s, expected %s", test.filename, i, got, subprograms[i].name);
             }
             var (ranges, errΔ1) = d.Ranges(entry);
             if (errΔ1 != nil) {
@@ -258,7 +254,7 @@ public static void Test64Bit(ж<testing.T> t) {
     var tests = slice<Test64Bit_tests>([
         new(
             "32-bit little",
-            slice<byte>([0x30, 0, 0, 0, // comp unit length
+            [0x30, 0, 0, 0, // comp unit length
                 4, 0, // DWARF version 4
                 0, 0, 0, 0, // abbrev offset
                 8, // address size
@@ -268,12 +264,12 @@ public static void Test64Bit(ж<testing.T> t) {
                 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0
-            ]),
+            ],
             8, binary.LittleEndian
         ),
         new(
             "64-bit little",
-            slice<byte>([0xff, 0xff, 0xff, 0xff, // 64-bit DWARF
+            [0xff, 0xff, 0xff, 0xff, // 64-bit DWARF
                 0x30, 0, 0, 0, 0, 0, 0, 0, // comp unit length
                 4, 0, // DWARF version 4
                 0, 0, 0, 0, 0, 0, 0, 0, // abbrev offset
@@ -283,12 +279,12 @@ public static void Test64Bit(ж<testing.T> t) {
                 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0
-            ]),
+            ],
             8, binary.LittleEndian
         ),
         new(
             "64-bit big",
-            slice<byte>([0xff, 0xff, 0xff, 0xff, // 64-bit DWARF
+            [0xff, 0xff, 0xff, 0xff, // 64-bit DWARF
                 0, 0, 0, 0, 0, 0, 0, 0x30, // comp unit length
                 0, 4, // DWARF version 4
                 0, 0, 0, 0, 0, 0, 0, 0, // abbrev offset
@@ -298,12 +294,12 @@ public static void Test64Bit(ж<testing.T> t) {
                 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0
-            ]),
+            ],
             8, binary.BigEndian
         )
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var (data, err) = New(default, default, default, test.info, default, default, default, default);
         if (err != nil) {
             t.Errorf("%s: %v", test.name, err);
@@ -334,11 +330,11 @@ public static void TestUnitIteration(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (_, @file) in files) {
+    foreach (var (_, @file) in range(files)) {
         t.Run(@file, (ж<testing.T> tΔ1) => {
             var d = elfData(tΔ1, @file);
             array<slice<any>> units = new(2);
-            foreach (var method in range(units)) {
+            foreach (var method in range(len(units))) {
                 for (var r = d.Reader(); ; ) {
                     var (ent, errΔ1) = r.Next();
                     if (errΔ1 != nil) {
@@ -542,15 +538,11 @@ public static void TestIssue57046(ж<testing.T> t) {
         }
         @string name = default;
         uint64 lopc = default;
-        {
-            var (n, ok) = eΔ1.Val(AttrName)._<@string>(ᐧ); if (ok) {
-                name = n;
-            }
+        if (eΔ1.Val(AttrName)._<@string>(out var n)) {
+            name = n;
         }
-        {
-            var (lo, ok) = eΔ1.Val(AttrLowpc)._<uint64>(ᐧ); if (ok) {
-                lopc = lo;
-            }
+        if (eΔ1.Val(AttrLowpc)._<uint64>(out var lo)) {
+            lopc = lo;
         }
         if (name == ""u8 || lopc == 0) {
             continue;

@@ -15,34 +15,34 @@ internal partial struct fileTest {
     internal slice<ж<global::go.debug.plan9obj_package.SectionHeader>> sections;
 }
 
-internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>>(slice<fileTest>([
+internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>>([
     new(
         "testdata/386-plan9-exec",
         new FileHeader(Magic386, 0x324, 0x14, 4, 0x1000, 32),
-        slice<ж<global::go.debug.plan9obj_package.SectionHeader>>([
+        [
             Ꮡ(new global::go.debug.plan9obj_package.SectionHeader("text", 0x4c5f, 0x20)),
             Ꮡ(new global::go.debug.plan9obj_package.SectionHeader("data", 0x94c, 0x4c7f)),
             Ꮡ(new global::go.debug.plan9obj_package.SectionHeader("syms", 0x2c2b, 0x55cb)),
             Ꮡ(new global::go.debug.plan9obj_package.SectionHeader("spsz", 0x0, 0x81f6)),
             Ꮡ(new global::go.debug.plan9obj_package.SectionHeader("pcsz", 0xf7a, 0x81f6))
-        ])
+        ]
     ),
     new(
         "testdata/amd64-plan9-exec",
         new FileHeader(MagicAMD64, 0x618, 0x13, 8, 0x200000, 40),
-        slice<ж<global::go.debug.plan9obj_package.SectionHeader>>([
+        [
             Ꮡ(new global::go.debug.plan9obj_package.SectionHeader("text", 0x4213, 0x28)),
             Ꮡ(new global::go.debug.plan9obj_package.SectionHeader("data", 0xa80, 0x423b)),
             Ꮡ(new global::go.debug.plan9obj_package.SectionHeader("syms", 0x2c8c, 0x4cbb)),
             Ꮡ(new global::go.debug.plan9obj_package.SectionHeader("spsz", 0x0, 0x7947)),
             Ꮡ(new global::go.debug.plan9obj_package.SectionHeader("pcsz", 0xca0, 0x7947))
-        ])
+        ]
     )
-]));
+]);
 internal static ref slice<fileTest> fileTests => ref ((StaticBox<slice<fileTest>>)ᏑfileTests).ValueSlot;
 
 public static void TestOpen(ж<testing.T> t) {
-    foreach (var i in range(fileTests)) {
+    foreach (var i in range(len(fileTests))) {
         var tt = Ꮡ(fileTests, i);
 
         var (f, err) = Open(tt.@file);
@@ -55,7 +55,7 @@ public static void TestOpen(ж<testing.T> t) {
             continue;
         }
 
-        foreach (var (iΔ1, sh) in f.Sections) {
+        foreach (var (iΔ1, sh) in range(f.Sections)) {
             if (iΔ1 >= len(tt.sections)) {
                 break;
             }

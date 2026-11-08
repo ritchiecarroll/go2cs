@@ -14,7 +14,7 @@ partial struct T {
     internal @string script;
 }
 
-internal static slice<T> inCategoryTest = slice<T>([
+internal static slice<T> inCategoryTest = [
     new(0x0081, "Cc"),
     new(0x200B, "Cf"),
     new(0xf0000, "Co"),
@@ -56,9 +56,9 @@ internal static slice<T> inCategoryTest = slice<T>([
     // Unassigned
     new(0x0378, "Cn"),
     new(0x0378, "C")
-]);
+];
 
-internal static slice<T> inPropTest = slice<T>([
+internal static slice<T> inPropTest = [
     new(0x0046, "ASCII_Hex_Digit"),
     new(0x200F, "Bidi_Control"),
     new(0x2212, "Dash"),
@@ -94,7 +94,7 @@ internal static slice<T> inPropTest = slice<T>([
     new(0x9FC3, "Unified_Ideograph"),
     new(0xFE0F, "Variation_Selector"),
     new(0x0020, "White_Space")
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object notAKnownCategoryˢ = (@string)"not a known category"u8;
@@ -105,11 +105,9 @@ public static void TestCategories(ж<testing.T> t) {
     foreach (var (k, _) in Categories) {
         notTested[k] = true;
     }
-    foreach (var (_, test) in inCategoryTest) {
-        {
-            var (_, ok) = Categories[test.script, ꟷ]; if (!ok) {
-                t.Fatal(test.script, notAKnownCategoryˢ);
-            }
+    foreach (var (_, test) in range(inCategoryTest)) {
+        var (_, ok) = Categories[test.script, ꟷ]; if (!ok) {
+            t.Fatal(test.script, notAKnownCategoryˢ);
         }
         if (!Is(Categories[test.script], test.rune)) {
             t.Errorf("IsCategory(%U, %s) = false, want true", test.rune, test.script);
@@ -130,11 +128,9 @@ public static void TestProperties(ж<testing.T> t) {
     foreach (var (k, _) in Properties) {
         notTested[k] = true;
     }
-    foreach (var (_, test) in inPropTest) {
-        {
-            var (_, ok) = Properties[test.script, ꟷ]; if (!ok) {
-                t.Fatal(test.script, notAKnownPropˢ);
-            }
+    foreach (var (_, test) in range(inPropTest)) {
+        var (_, ok) = Properties[test.script, ꟷ]; if (!ok) {
+            t.Fatal(test.script, notAKnownPropˢ);
         }
         if (!Is(Properties[test.script], test.rune)) {
             t.Errorf("IsCategory(%U, %s) = false, want true", test.rune, test.script);

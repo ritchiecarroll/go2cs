@@ -16,7 +16,7 @@ partial struct mulUintptrTest {
     internal bool overflow;
 }
 
-internal static slice<mulUintptrTest> mulUintptrTests = slice<mulUintptrTest>([
+internal static slice<mulUintptrTest> mulUintptrTests = [
     new(0, 0, false),
     new(1000, 1000, false),
     new(MaxUintptr, 0, false),
@@ -31,10 +31,10 @@ internal static slice<mulUintptrTest> mulUintptrTests = slice<mulUintptrTest>([
     new((uintptr)1 << (int)(UintptrSize / 2), (uintptr)1 << (int)(UintptrSize / 2), true),
     new(MaxUintptr >> 32, MaxUintptr >> 32, false),
     new(MaxUintptr, MaxUintptr, true)
-]);
+];
 
 public static void TestMulUintptr(ж<testing.T> t) {
-    foreach (var (_, test) in mulUintptrTests) {
+    foreach (var (_, test) in range(mulUintptrTests)) {
         var (a, b) = (test.a, test.b);
         for (nint i = 0; i < 2; i++) {
             var (mul, overflow) = MulUintptr(a, b);
@@ -49,7 +49,6 @@ public static void TestMulUintptr(ж<testing.T> t) {
 
 public static readonly ж<uintptr> ᏑSinkUintptr = new StaticBox<uintptr>(default(uintptr));
 public static ref uintptr SinkUintptr => ref ((StaticBox<uintptr>)ᏑSinkUintptr).ValueSlot;
-
 public static readonly ж<bool> ᏑSinkBool = new StaticBox<bool>(default(bool));
 public static ref bool SinkBool => ref ((StaticBox<bool>)ᏑSinkBool).ValueSlot;
 

@@ -322,7 +322,7 @@ public static void BenchmarkAppendGrowString(ж<testing.B> Ꮡb) {
 internal static readonly object bytesˢ = (@string)"Bytes"u8;
 
 public static void BenchmarkAppendSlice(ж<testing.B> b) {
-    foreach (var (_, length) in slice<nint>([1, 4, 7, 8, 15, 16, 32])) {
+    foreach (var (_, length) in range(slice<nint>([1, 4, 7, 8, 15, 16, 32]))) {
         b.Run(fmt.Sprint(length, bytesˢ), (ж<testing.B> bΔ1) => {
             var x = new slice<byte>(0, N);
             var y = new slice<byte>(length);
@@ -337,7 +337,7 @@ public static void BenchmarkAppendSlice(ж<testing.B> b) {
 internal static slice<byte> blackhole;
 
 public static void BenchmarkAppendSliceLarge(ж<testing.B> b) {
-    foreach (var (_, length) in slice<nint>([1 << 10, 4 << 10, 16 << 10, 64 << 10, 256 << 10, 1024 << 10])) {
+    foreach (var (_, length) in range(slice<nint>([1 << 10, 4 << 10, 16 << 10, 64 << 10, 256 << 10, 1024 << 10]))) {
         var y = new slice<byte>(length);
         var yʗ1 = y;
         b.Run(fmt.Sprint(length, bytesˢ), (ж<testing.B> bΔ1) => {
@@ -350,13 +350,13 @@ public static void BenchmarkAppendSliceLarge(ж<testing.B> b) {
 }
 
 public static void BenchmarkAppendStr(ж<testing.B> b) {
-    foreach (var (_, str) in slice<@string>([
+    foreach (var (_, str) in range(slice<@string>([
         "1",
         "1234",
         "12345678",
         "1234567890123456",
         "12345678901234567890123456789012"
-    ])) {
+    ]))) {
         b.Run(fmt.Sprint(len(str), bytesˢ), (ж<testing.B> bΔ1) => {
             var x = new slice<byte>(0, N);
             for (nint i = 0; i < (~bΔ1).N; i++) {
@@ -419,7 +419,7 @@ public static void TestAppendOverlap(ж<testing.T> t) {
 internal static readonly object stringˢ = (@string)"String"u8;
 
 public static void BenchmarkCopy(ж<testing.B> b) {
-    foreach (var (_, l) in slice<nint>([1, 2, 4, 8, 12, 16, 32, 128, 1024])) {
+    foreach (var (_, l) in range(slice<nint>([1, 2, 4, 8, 12, 16, 32, 128, 1024]))) {
         var buf = new slice<byte>(4096);
         var bufʗ1 = buf;
         b.Run(fmt.Sprint(l, byteˢ), (ж<testing.B> bΔ1) => {
@@ -582,7 +582,6 @@ internal static partial slice<byte> byteSlice(nint n) {
     r = move2heap(rᴷ, r);
     return r;
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInSanitizerModeˢ = (@string)"skipping in sanitizer mode"u8;
 
@@ -594,7 +593,7 @@ public static void TestAppendByteInLoop(ж<testing.T> t) {
     if (asan.Enabled || msan.Enabled) {
         t.Skip(skippingInSanitizerModeˢ);
     }
-    foreach (var (_, vᴛ1) in GoReflect.WithElemDims(new array<nint>[]{
+    foreach (var (_, vᴛ1) in range(GoReflect.WithElemDims(new array<nint>[]{
         new nint[]{0, 0, 0}.array(),
         new nint[]{1, 1, 8}.array(),
         new nint[]{2, 1, 8}.array(),
@@ -610,7 +609,7 @@ public static void TestAppendByteInLoop(ж<testing.T> t) {
         new nint[]{49, 1, 64}.array(),
         new nint[]{64, 1, 64}.array(),
         new nint[]{65, 2, 128}.array()
-    }.slice(), 3)) {
+    }.slice(), 3))) {
         var test = vᴛ1.Clone();
 
         nint n = test[0];
@@ -653,7 +652,6 @@ internal static partial void ptrSlice(nint n, ж<slice<ж<byte>>> Ꮡp) {
     r = move2heap(rᴷ, r);
     p = r;
 }
-
 public static void TestAppendPtrInLoop(ж<testing.T> t) {
     testenv.SkipIfOptimizationOff(new runtime_test_package.testing_TжTB(t));
     if (race.Enabled) {
@@ -698,7 +696,7 @@ public static void TestAppendPtrInLoop(ж<testing.T> t) {
             new nint[]{17, 2, 32}.array()
         }.slice(), 3);
     }
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         var test = vᴛ1.Clone();
 
         nint n = test[0];
@@ -728,7 +726,6 @@ internal static partial (slice<byte>, nint) byteCapSlice(nint n) {
     r = move2heap(rᴷ, r);
     return (r, cap(r));
 }
-
 public static void TestAppendByteCapInLoop(ж<testing.T> t) {
     testenv.SkipIfOptimizationOff(new runtime_test_package.testing_TжTB(t));
     if (race.Enabled) {
@@ -737,7 +734,7 @@ public static void TestAppendByteCapInLoop(ж<testing.T> t) {
     if (asan.Enabled || msan.Enabled) {
         t.Skip(skippingInSanitizerModeˢ);
     }
-    foreach (var (_, vᴛ1) in GoReflect.WithElemDims(new array<nint>[]{
+    foreach (var (_, vᴛ1) in range(GoReflect.WithElemDims(new array<nint>[]{
         new nint[]{0, 0, 0}.array(),
         new nint[]{1, 1, 8}.array(),
         new nint[]{2, 1, 8}.array(),
@@ -753,7 +750,7 @@ public static void TestAppendByteCapInLoop(ж<testing.T> t) {
         new nint[]{49, 1, 64}.array(),
         new nint[]{64, 1, 64}.array(),
         new nint[]{65, 2, 128}.array()
-    }.slice(), 3)) {
+    }.slice(), 3))) {
         var test = vᴛ1.Clone();
 
         nint n = test[0];
@@ -800,7 +797,7 @@ internal static partial slice<E> testAppendGeneric<E>(nint n) {
 internal static slice<byte> appendSomeBytes(slice<byte> r, slice<byte> s) {
     var rᴷ = new stackAppend<byte>(moves: true);
 
-    foreach (var (_, b) in s) {
+    foreach (var (_, b) in range(s)) {
         r = append(rᴷ, r, b);
     }
     r = move2heap(rᴷ, r);
@@ -812,16 +809,16 @@ public static void TestAppendOfArg(ж<testing.T> t) {
     for (nint i = 0; i < 24; i++) {
         r[i] = (byte)i;
     }
-    appendSomeBytes(r, slice<byte>([25, 26, 27]));
+    appendSomeBytes(r, [25, 26, 27]);
     // Do the same thing, trying to overwrite any
     // stack-allocated buffers used above.
     var s = new slice<byte>(24);
     for (nint i = 0; i < 24; i++) {
         s[i] = 99;
     }
-    appendSomeBytes(s, slice<byte>([99, 99, 99]));
+    appendSomeBytes(s, [99, 99, 99]);
     // Check that we still have the right data.
-    foreach (var (i, b) in r) {
+    foreach (var (i, b) in range(r)) {
         if (b != (byte)i) {
             t.Errorf("r[%d]=%d, want %d", i, b, (byte)i);
         }
@@ -829,7 +826,7 @@ public static void TestAppendOfArg(ж<testing.T> t) {
 }
 
 public static void BenchmarkAppendInLoop(ж<testing.B> b) {
-    foreach (var (_, size) in slice<nint>([0, 1, 8, 16, 32, 64, 128])) {
+    foreach (var (_, size) in range(slice<nint>([0, 1, 8, 16, 32, 64, 128]))) {
         b.Run(fmt.Sprintf("%d"u8, size),
             (ж<testing.B> bΔ1) => {
                 bΔ1.ReportAllocs();
@@ -891,7 +888,6 @@ public static void TestMoveToHeapClosure1(ж<testing.T> t) {
     }
     sinkSlice = r;
 }
-
 public static void TestMoveToHeapClosure2(ж<testing.T> t) {
     nint c = default;
     var r = func(slice<byte> () => {
@@ -918,7 +914,7 @@ internal static partial (slice<byte>, Action) buildClosure(ж<testing.T> t) {
     }
     var sʗ1 = s;
     var c = () => {
-        foreach (var (i, b) in sʗ1) {
+        foreach (var (i, b) in range(sʗ1)) {
             if (b != (byte)i) {
                 t.Errorf("s[%d]=%d, want %d", i, b, i);
             }
@@ -936,7 +932,7 @@ public static void TestMoveToHeapClosure3(ж<testing.T> t) {
 //go:noinline
 internal static partial uint64 overwriteStack(nint n) {
     array<uint64> x = new(100);
-    foreach (var i in range(x)) {
+    foreach (var i in range(len(x))) {
         x[i] = 0xabcdabcdabcdabcdUL;
     }
     return x[n];

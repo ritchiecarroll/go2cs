@@ -29,20 +29,16 @@ internal partial struct TestIsAlias_type /*dyn*/ {
 
 public static void TestIsAlias(ж<testing.T> t) {
     void check(ж<types.TypeName> obj, bool want) {
-        {
-            var got = obj.IsAlias(); if (got != want) {
-                t.Errorf("%v: got IsAlias = %v; want %v", obj.OrTypedNil(), got, want);
-            }
+        var got = obj.IsAlias(); if (got != want) {
+            t.Errorf("%v: got IsAlias = %v; want %v", obj.OrTypedNil(), got, want);
         }
     }
 
     // predeclared types
     check(Unsafe.Scope().Lookup(pointerˢ)._<ж<types.TypeName>>(), false);
-    foreach (var (_, name) in Universe.Names()) {
-        {
-            var (obj, _) = Universe.Lookup(name)._<ж<types.TypeName>>(ᐧ); if (obj != nil) {
-                check(obj, name == "any"u8 || name == "byte"u8 || name == "rune"u8);
-            }
+    foreach (var (_, name) in range(Universe.Names())) {
+        var (obj, _) = Universe.Lookup(name)._<ж<types.TypeName>>(ᐧ); if (obj != nil) {
+            check(obj, name == "any"u8 || name == "byte"u8 || name == "rune"u8);
         }
     }
 
@@ -52,7 +48,7 @@ public static void TestIsAlias(ж<testing.T> t) {
     var n1 = NewNamed(t1, new types.StructжΔType(@new<types.Struct>()), default);
     var t5 = NewTypeName(nopos, pkg, "t5", default);
     NewTypeParam(t5, default);
-    foreach (var (_, test) in slice<TestIsAlias_type>([
+    foreach (var (_, test) in range(slice<TestIsAlias_type>([
         new(NewTypeName(nopos, nil, "t0", default), false), // no type yet
         new(NewTypeName(nopos, pkg, "t0", default), false), // no type yet
         new(t1, false), // type name refers to named type and vice versa
@@ -63,7 +59,7 @@ public static void TestIsAlias(ж<testing.T> t) {
         new(NewTypeName(nopos, pkg, int32ˢ, new types.BasicжΔType(Typ[Int32])), true),                           // type name is declared in user-defined package (outside Universe)
         new(NewTypeName(nopos, nil, runeˢ, new types.BasicжΔType(Typ[Rune])), true),                             // type name refers to basic type rune which is an alias already
         new(t5, false) // type name refers to type parameter and vice versa
-    ])) {
+    ]))) {
         check(test.name, test.alias);
     }
 }
@@ -104,7 +100,7 @@ partial struct testObjectsᴛ1 /*dyn*/ {
     internal @string want;
     internal bool alias; // needs materialized (and possibly generic) aliases
 }
-internal static slice<testObjectsᴛ1> testObjects = slice<testObjectsᴛ1>([
+internal static slice<testObjectsᴛ1> testObjects = [
     new("import \"io\"; var r io.Reader", "r", "var p.r io.Reader", false),
 
     new("const c = 1.2", "c", "const p.c untyped float", false),
@@ -126,12 +122,12 @@ internal static slice<testObjectsᴛ1> testObjects = slice<testObjectsᴛ1>([
     new("func g[P any](x P){}", "g", "func p.g[P any](x P)", false),
     new("func g[P interface{~int}](x P){}", "g.P", "type parameter P interface{~int}", false),
     new("", "any", "type any = interface{}", false)
-]);
+];
 
 public static void TestObjectString(ж<testing.T> t) {
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(t));
 
-    foreach (var (i, vᴛ1) in testObjects) {
+    foreach (var (i, vᴛ1) in range(testObjects)) {
         ref var test = ref heap(new testObjectsᴛ1(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -161,22 +157,18 @@ public static void TestObjectString(ж<testing.T> t) {
             }
 
             if (len(names) == 2) {
-                {
-                    var (typ, ok) = obj.Type()._<TestInstanceInfo_typeᴛ1>(ᐧ); if (ok) {
-                        obj = lookupTypeParamObj(typ.TypeParams(), names[1]);
-                        if (obj == nil) {
-                            tΔ1.Fatalf("%s: %s not found", testʗ1.src, testʗ1.obj);
-                        }
-                    } else {
-                        tΔ1.Fatalf("%s: %s has no type parameters", testʗ1.src, names[0]);
+                var (typ, ok) = obj.Type()._<TestInstanceInfo_typeᴛ1>(ᐧ); if (ok) {
+                    obj = lookupTypeParamObj(typ.TypeParams(), names[1]);
+                    if (obj == nil) {
+                        tΔ1.Fatalf("%s: %s not found", testʗ1.src, testʗ1.obj);
                     }
+                } else {
+                    tΔ1.Fatalf("%s: %s has no type parameters", testʗ1.src, names[0]);
                 }
             }
 
-            {
-                @string got = obj.String(); if (got != testʗ1.want) {
-                    tΔ1.Errorf("%s: got %s, want %s", testʗ1.src, got, testʗ1.want);
-                }
+            @string got = obj.String(); if (got != testʗ1.want) {
+                tΔ1.Errorf("%s: got %s, want %s", testʗ1.src, got, testʗ1.want);
             }
         });
     }

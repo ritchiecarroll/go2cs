@@ -53,7 +53,7 @@ public static void TestReadCOFFSymbolAuxInfo(ж<testing.T> t) {
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
-        foreach (var k in range(f.COFFSymbols)) {
+        foreach (var k in range(len(f.COFFSymbols))) {
             var (tp, ok) = testpoints[k, ꟷ];
             if (!ok) {
                 continue;

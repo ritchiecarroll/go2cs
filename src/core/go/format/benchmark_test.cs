@@ -56,10 +56,10 @@ partial struct testsᴛ1 /*dyn*/ {
     internal Action<ж<bytes.Buffer>, nint> gen;
     internal nint n;
 }
-internal static slice<testsᴛ1> tests = slice<testsᴛ1>([
+internal static slice<testsᴛ1> tests = [
     new("array1", array1, 10000)
     // add new test cases here as needed
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string packagePˢ => ref packagePˢᵇ;
@@ -67,7 +67,7 @@ private static readonly @string packagePˢᵇ = "package p\n"u8;
 
 public static void BenchmarkFormat(ж<testing.B> b) {
     ref var src = ref heap(new bytes.Buffer(), out var Ꮡsrc);
-    foreach (var (_, t) in tests) {
+    foreach (var (_, t) in range(tests)) {
         src.Reset();
         src.WriteString(packagePˢ);
         t.gen(Ꮡsrc, t.n);

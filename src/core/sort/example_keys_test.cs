@@ -11,7 +11,6 @@ partial class sort_test_package {
 
 // A couple of type definitions to make the units clear.
 partial struct earthMass /*num:float64*/;
-
 partial struct au /*num:float64*/;
 
 // A Planet defines the properties of a solar system object.
@@ -54,12 +53,12 @@ internal static bool Less(this ref planetSorter s, nint i, nint j) {
     return s.by(Ꮡ(s.planets, i), Ꮡ(s.planets, j));
 }
 
-internal static slice<Planet> planets = slice<Planet>([
+internal static slice<Planet> planets = [
     new("Mercury", 0.055D, 0.4D),
     new("Venus", 0.815D, 0.7D),
     new("Earth", 1.0D, 1.0D),
     new("Mars", 0.107D, 1.5D)
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object byNameˢ = (@string)"By name:"u8;

@@ -39,7 +39,7 @@ public static void TestDecodeProgressive(ж<testing.T> t) {
         "../testdata/video-005.gray.q50.2x2",
         "../testdata/video-001.separate.dc.progression"
     ]);
-    foreach (var (_, tc) in testCases) {
+    foreach (var (_, tc) in range(testCases)) {
         var (m0, err) = decodeFile(tc + ".jpeg"u8);
         if (err != nil) {
             t.Errorf("%s: %v", tc + ".jpeg", err);
@@ -63,33 +63,25 @@ public static void TestDecodeProgressive(ж<testing.T> t) {
         switch (m0.type()) {
         case ж<image.YCbCr> m0Δ1: {
             var m1Δ1 = m1._<ж<image.YCbCr>>();
-            {
-                var errΔ1 = check(m0Δ1.Bounds(), m0Δ1.Y, m1Δ1.Y, m0Δ1.YStride, m1Δ1.YStride); if (errΔ1 != nil) {
-                    t.Errorf("%s (Y): %v", tc, errΔ1);
-                    continue;
-                }
+            var errΔ1 = check(m0Δ1.Bounds(), m0Δ1.Y, m1Δ1.Y, m0Δ1.YStride, m1Δ1.YStride); if (errΔ1 != nil) {
+                t.Errorf("%s (Y): %v", tc, errΔ1);
+                continue;
             }
-            {
-                var errΔ2 = check(m0Δ1.Bounds(), m0Δ1.Cb, m1Δ1.Cb, m0Δ1.CStride, m1Δ1.CStride); if (errΔ2 != nil) {
-                    t.Errorf("%s (Cb): %v", tc, errΔ2);
-                    continue;
-                }
+            var errΔ2 = check(m0Δ1.Bounds(), m0Δ1.Cb, m1Δ1.Cb, m0Δ1.CStride, m1Δ1.CStride); if (errΔ2 != nil) {
+                t.Errorf("%s (Cb): %v", tc, errΔ2);
+                continue;
             }
-            {
-                var errΔ3 = check(m0Δ1.Bounds(), m0Δ1.Cr, m1Δ1.Cr, m0Δ1.CStride, m1Δ1.CStride); if (errΔ3 != nil) {
-                    t.Errorf("%s (Cr): %v", tc, errΔ3);
-                    continue;
-                }
+            var errΔ3 = check(m0Δ1.Bounds(), m0Δ1.Cr, m1Δ1.Cr, m0Δ1.CStride, m1Δ1.CStride); if (errΔ3 != nil) {
+                t.Errorf("%s (Cr): %v", tc, errΔ3);
+                continue;
             }
             break;
         }
         case ж<image.Gray> m0Δ1: {
             var m1Δ2 = m1._<ж<image.Gray>>();
-            {
-                var errΔ4 = check(m0Δ1.Bounds(), m0Δ1.Pix, m1Δ2.Pix, m0Δ1.Stride, m1Δ2.Stride); if (errΔ4 != nil) {
-                    t.Errorf("%s: %v", tc, errΔ4);
-                    continue;
-                }
+            var errΔ4 = check(m0Δ1.Bounds(), m0Δ1.Pix, m1Δ2.Pix, m0Δ1.Stride, m1Δ2.Stride); if (errΔ4 != nil) {
+                t.Errorf("%s: %v", tc, errΔ4);
+                continue;
             }
             break;
         }
@@ -448,10 +440,8 @@ public static void TestPaddedRSTMarker(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("base64 DecodeString: %v", err);
     }
-    {
-        (_, err) = Decode(new jpeg_internal_test_package.bytes_ReaderжReader(bytes.NewReader(data))); if (err != nil) {
-            t.Fatalf("Decode: %v", err);
-        }
+    (_, err) = Decode(new jpeg_internal_test_package.bytes_ReaderжReader(bytes.NewReader(data))); if (err != nil) {
+        t.Fatalf("Decode: %v", err);
     }
 }
 
@@ -478,10 +468,8 @@ public static void TestExtraneousData(ж<testing.T> t) {
             t.Fatalf("encoded JPEG ends with %q, want %q", got, want);
         }
     }
-    {
-        @string s = enc.slice(len(enc) - 64); if (!strings.Contains(s, ((@string)(new byte[]{0xff, 0xda})))) {
-            t.Fatalf("encoded JPEG does not contain a SOS marker (ff da) near the end: % x", s);
-        }
+    @string s = enc.slice(len(enc) - 64); if (!strings.Contains(s, ((@string)(new byte[]{0xff, 0xda})))) {
+        t.Fatalf("encoded JPEG does not contain a SOS marker (ff da) near the end: % x", s);
     }
     // Test that adding some random junk between the SOS marker and the
     // EOI marker does not affect the decoding.
@@ -492,13 +480,11 @@ public static void TestExtraneousData(ж<testing.T> t) {
         buf.WriteString(enc.slice(0, len(enc) - 2));
         // Write some random extraneous data.
         for (nint n = rnd.Intn(10); n > 0; n--) {
-            {
-                var x = (byte)rnd.Intn(256); if (x != 0xff) {
-                    buf.WriteByte(x);
-                } else {
-                    // The JPEG format escapes a SOS 0xff data byte as "\xff\x00".
-                    buf.WriteString(((@string)(new byte[]{0xff, 0x00})));
-                }
+            var x = (byte)rnd.Intn(256); if (x != 0xff) {
+                buf.WriteByte(x);
+            } else {
+                // The JPEG format escapes a SOS 0xff data byte as "\xff\x00".
+                buf.WriteString(((@string)(new byte[]{0xff, 0x00})));
             }
         }
         // Write the "\xff\xd9" EOI marker.
@@ -569,7 +555,7 @@ public static void TestBadRestartMarker(ж<testing.T> t) {
         ((@string)(new byte[]{0x46, 0x41, 0x49, 0x4c, 0x3a, 0xff, 0xff, 0xd5}))
     ]);
 
-    foreach (var (_, tc) in testCases) {
+    foreach (var (_, tc) in range(testCases)) {
         var want = tc[..5] == "PASS:";
         @string infix = tc[5..];
 

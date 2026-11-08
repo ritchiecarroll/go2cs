@@ -402,10 +402,8 @@ public static void ExampleURL_Parse() {
     }
     fmt.Println(rel.OrTypedNil());
     (_, err) = u.Parse(fooˢ2);
-    {
-        var (_, ok) = err._<ж<urlꓸError>>(ᐧ); if (!ok) {
-            log.Fatal(err);
-        }
+    var (_, ok) = err._<ж<urlꓸError>>(ᐧ); if (!ok) {
+        log.Fatal(err);
     }
     // Output:
     // https://example.org/foo

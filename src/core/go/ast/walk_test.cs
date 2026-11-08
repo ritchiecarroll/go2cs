@@ -35,10 +35,8 @@ public static void TestPreorder_Break(ж<testing.T> t) {
     }
 
     foreach (var n in range<ast.Node>(ast.Preorder(new ast.FileжNode(f)).Invoke)) {
-        {
-            var (id, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok && id.Name == "F"u8) {
-                break;
-            }
+        var (id, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok && id.Name == "F"u8) {
+            break;
         }
     }
 }
@@ -82,7 +80,7 @@ public static void TestPreorderStack(ж<testing.T> t) {
         }
         {
             var (lit, ok) = n._<ж<ast.BasicLit>>(ᐧ); if (ok && (~lit).Value == @"""oops"""u8) {
-                foreach (var (_, nΔ1) in stack) {
+                foreach (var (_, nΔ1) in range(stack)) {
                     ᏑgotStack.ValueSlot = append(ᏑgotStack.ValueSlot, strʗ1(nΔ1));
                 }
             }

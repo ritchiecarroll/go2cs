@@ -10,8 +10,6 @@ using os = os_package;
 using filepath = path.filepath_package;
 using runtime = runtime_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.log;
 using io = io_package;
 using path;

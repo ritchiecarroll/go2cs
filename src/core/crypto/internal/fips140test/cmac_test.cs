@@ -43,7 +43,7 @@ public static void TestCMAC(ж<testing.T> t) {
         t.Fatal(err);
     }
     var c = gcm.NewCMAC(b);
-    foreach (var (i, test) in tests) {
+    foreach (var (i, test) in range(tests)) {
         var @in = decodeHex(t, test.@in);
         var @out = decodeHex(t, test.@out);
         var got = c.MAC(@in);

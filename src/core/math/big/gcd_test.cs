@@ -57,64 +57,20 @@ internal static void runGCDExt(ж<testing.B> Ꮡb, nuint aSize, nuint bSize, boo
     }
 }
 
-public static void BenchmarkGCD10x10(ж<testing.B> b) {
-    runGCD(b, 10, 10);
-}
-
-public static void BenchmarkGCD10x100(ж<testing.B> b) {
-    runGCD(b, 10, 100);
-}
-
-public static void BenchmarkGCD10x1000(ж<testing.B> b) {
-    runGCD(b, 10, 1000);
-}
-
-public static void BenchmarkGCD10x10000(ж<testing.B> b) {
-    runGCD(b, 10, 10000);
-}
-
-public static void BenchmarkGCD10x100000(ж<testing.B> b) {
-    runGCD(b, 10, 100000);
-}
-
-public static void BenchmarkGCD100x100(ж<testing.B> b) {
-    runGCD(b, 100, 100);
-}
-
-public static void BenchmarkGCD100x1000(ж<testing.B> b) {
-    runGCD(b, 100, 1000);
-}
-
-public static void BenchmarkGCD100x10000(ж<testing.B> b) {
-    runGCD(b, 100, 10000);
-}
-
-public static void BenchmarkGCD100x100000(ж<testing.B> b) {
-    runGCD(b, 100, 100000);
-}
-
-public static void BenchmarkGCD1000x1000(ж<testing.B> b) {
-    runGCD(b, 1000, 1000);
-}
-
-public static void BenchmarkGCD1000x10000(ж<testing.B> b) {
-    runGCD(b, 1000, 10000);
-}
-
-public static void BenchmarkGCD1000x100000(ж<testing.B> b) {
-    runGCD(b, 1000, 100000);
-}
-
-public static void BenchmarkGCD10000x10000(ж<testing.B> b) {
-    runGCD(b, 10000, 10000);
-}
-
-public static void BenchmarkGCD10000x100000(ж<testing.B> b) {
-    runGCD(b, 10000, 100000);
-}
-
-public static void BenchmarkGCD100000x100000(ж<testing.B> b) {
-    runGCD(b, 100000, 100000);
-}
+public static void BenchmarkGCD10x10(ж<testing.B> b) { runGCD(b, 10, 10); }
+public static void BenchmarkGCD10x100(ж<testing.B> b) { runGCD(b, 10, 100); }
+public static void BenchmarkGCD10x1000(ж<testing.B> b) { runGCD(b, 10, 1000); }
+public static void BenchmarkGCD10x10000(ж<testing.B> b) { runGCD(b, 10, 10000); }
+public static void BenchmarkGCD10x100000(ж<testing.B> b) { runGCD(b, 10, 100000); }
+public static void BenchmarkGCD100x100(ж<testing.B> b) { runGCD(b, 100, 100); }
+public static void BenchmarkGCD100x1000(ж<testing.B> b) { runGCD(b, 100, 1000); }
+public static void BenchmarkGCD100x10000(ж<testing.B> b) { runGCD(b, 100, 10000); }
+public static void BenchmarkGCD100x100000(ж<testing.B> b) { runGCD(b, 100, 100000); }
+public static void BenchmarkGCD1000x1000(ж<testing.B> b) { runGCD(b, 1000, 1000); }
+public static void BenchmarkGCD1000x10000(ж<testing.B> b) { runGCD(b, 1000, 10000); }
+public static void BenchmarkGCD1000x100000(ж<testing.B> b) { runGCD(b, 1000, 100000); }
+public static void BenchmarkGCD10000x10000(ж<testing.B> b) { runGCD(b, 10000, 10000); }
+public static void BenchmarkGCD10000x100000(ж<testing.B> b) { runGCD(b, 10000, 100000); }
+public static void BenchmarkGCD100000x100000(ж<testing.B> b) { runGCD(b, 100000, 100000); }
 
 } // end big_internal_test_package

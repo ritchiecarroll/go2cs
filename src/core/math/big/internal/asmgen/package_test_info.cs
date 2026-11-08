@@ -45,7 +45,7 @@ using static global::go.math.big.@internal.asmgen_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("math/big/internal/asmgen/main_test.go", "main_test.cs", "ABAe1IKCkoKCgpSCgIKklIKU", "19-35:1")]
+[assembly: GoPositionMap("math/big/internal/asmgen/main_test.go", "main_test.cs", "ABAe1IKCkoKCgpSCgpSUgpQ=", "19-35:1")]
 // </GoSourcePositionMaps>
 
 namespace go.math.big.@internal;

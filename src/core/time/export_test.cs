@@ -153,19 +153,15 @@ internal static void initᴛQuote() { Quote = quote; }
 
 public static readonly ж<Func<slice<byte>, nint, nint, slice<byte>>> ᏑAppendInt = new StaticBox<Func<slice<byte>, nint, nint, slice<byte>>>(appendInt);
 public static ref Func<slice<byte>, nint, nint, slice<byte>> AppendInt => ref ((StaticBox<Func<slice<byte>, nint, nint, slice<byte>>>)ᏑAppendInt).ValueSlot;
-
 public static readonly ж<Func<global::go.time_package.Time, slice<byte>, @string, slice<byte>>> ᏑAppendFormatAny = new StaticBox<Func<global::go.time_package.Time, slice<byte>, @string, slice<byte>>>(default(Func<global::go.time_package.Time, slice<byte>, @string, slice<byte>>));
 public static ref Func<global::go.time_package.Time, slice<byte>, @string, slice<byte>> AppendFormatAny => ref ((StaticBox<Func<global::go.time_package.Time, slice<byte>, @string, slice<byte>>>)ᏑAppendFormatAny).ValueSlot;
 internal static void initᴛAppendFormatAny() { AppendFormatAny = ((Func<global::go.time_package.Time, slice<byte>, @string, slice<byte>>)(global::go.time_package.appendFormat)); }
-
 public static readonly ж<Func<global::go.time_package.Time, slice<byte>, bool, slice<byte>>> ᏑAppendFormatRFC3339 = new StaticBox<Func<global::go.time_package.Time, slice<byte>, bool, slice<byte>>>(default(Func<global::go.time_package.Time, slice<byte>, bool, slice<byte>>));
 public static ref Func<global::go.time_package.Time, slice<byte>, bool, slice<byte>> AppendFormatRFC3339 => ref ((StaticBox<Func<global::go.time_package.Time, slice<byte>, bool, slice<byte>>>)ᏑAppendFormatRFC3339).ValueSlot;
 internal static void initᴛAppendFormatRFC3339() { AppendFormatRFC3339 = ((Func<global::go.time_package.Time, slice<byte>, bool, slice<byte>>)(global::go.time_package.appendFormatRFC3339)); }
-
 public static readonly ж<Func<@string, @string, ж<global::go.time_package.ΔLocation>, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, error)>> ᏑParseAny = new StaticBox<Func<@string, @string, ж<global::go.time_package.ΔLocation>, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, error)>>(default(Func<@string, @string, ж<global::go.time_package.ΔLocation>, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, error)>));
 public static ref Func<@string, @string, ж<global::go.time_package.ΔLocation>, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, error)> ParseAny => ref ((StaticBox<Func<@string, @string, ж<global::go.time_package.ΔLocation>, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, error)>>)ᏑParseAny).ValueSlot;
 internal static void initᴛParseAny() { ParseAny = parse; }
-
 public static readonly ж<Func<@string, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, bool)>> ᏑParseRFC3339 = new StaticBox<Func<@string, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, bool)>>(default(Func<@string, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, bool)>));
 public static ref Func<@string, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, bool)> ParseRFC3339 => ref ((StaticBox<Func<@string, ж<global::go.time_package.ΔLocation>, (global::go.time_package.Time, bool)>>)ᏑParseRFC3339).ValueSlot;
 internal static void initᴛParseRFC3339() { ParseRFC3339 = parseRFC3339<@string>; }

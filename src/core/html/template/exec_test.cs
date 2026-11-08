@@ -14,8 +14,6 @@ using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
 using template = text.template_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using parse = text.template.parse_package;
 using static go.html.template_package;
 using text;
@@ -154,10 +152,10 @@ internal static ж<T> tVal = Ꮡ(new T(
     V1: Ꮡ(new V(7777)), // leave V2 as nil
     W0: new W(888),
     W1: Ꮡ(new W(999)), // leave W2 as nil
-    SI: slice<nint>([3, 4, 5]),
+    SI: [3, 4, 5],
     SICap: new slice<nint>(5, 10),
     AI: new nint[]{3, 4, 5}.array(),
-    SB: slice<bool>([true, false]),
+    SB: [true, false],
     MSI: new map<@string, nint>{["one"] = 1, ["two"] = 2, ["three"] = 3},
     MSIone: new map<@string, nint>{["one"] = 1},
     MXI: new map<any, nint>{[(@string)"one"] = 1},
@@ -168,10 +166,10 @@ internal static ж<T> tVal = Ꮡ(new T(
     MUI64S: new map<uint64, @string>{[2] = "ui642", [3] = "ui643"},
     MI8S: new map<int8, @string>{[2] = "i82", [3] = "i83"},
     MUI8S: new map<uint8, @string>{[2] = "u82", [3] = "u83"},
-    SMSI: slice<map<@string, nint>>([
+    SMSI: [
         new map<@string, nint>{["one"] = 1, ["two"] = 2},
         new map<@string, nint>{["eleven"] = 11, ["twelve"] = 12}
-    ]),
+    ],
     Empty1: (nint)3,
     Empty2: (@string)"empty2",
     Empty3: slice<nint>([7, 8]),
@@ -201,7 +199,7 @@ internal static ж<T> tVal = Ꮡ(new T(
     Tmpl: Must(tupleᴛ1ʗ.Item1, tupleᴛ1ʗ.Item2) // "x" is the value of .X
 ));
 
-internal static slice<ж<T>> tSliceOfNil = slice<ж<T>>([default]);
+internal static slice<ж<T>> tSliceOfNil = [default];
 
 // A non-empty interface.
 public partial interface I {
@@ -258,7 +256,7 @@ public static ж<T> Copy(this ref T t) {
 
 public static slice<nint> MAdd(this ref T t, nint a, slice<nint> b) {
     var v = new slice<nint>(len(b));
-    foreach (var (i, x) in b) {
+    foreach (var (i, x) in range(b)) {
         v[i] = x + a;
     }
     return v;
@@ -790,7 +788,7 @@ internal static nint add(params ꓸꓸꓸnint argsʗp) {
     var args = argsʗp.sslice();
 
     nint sum = 0;
-    foreach (var (_, x) in args) {
+    foreach (var (_, x) in range(args)) {
         sum += x;
     }
     return sum;
@@ -839,7 +837,7 @@ internal static void testExecute(slice<execTest> execTests, ж<global::go.html.t
         ["vfunc"] = vfunc,
         ["zeroArgs"] = zeroArgs
     });
-    foreach (var (_, test) in execTests) {
+    foreach (var (_, test) in range(execTests)) {
         ж<global::go.html.template_package.Template> tmpl = default;
         error err = default;
         if (template == nil) {
@@ -887,12 +885,12 @@ public static void TestExecute(ж<testing.T> t) {
     testExecute(execTests, nil, t);
 }
 
-internal static slice<@string> delimPairs = slice<@string>([
+internal static slice<@string> delimPairs = [
     "", "", // default
     "{{", "}}", // same as default
     "|", "|", // same
     "(日)", "(本)" // peculiar
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string strˢ => ref strˢᵇ;
@@ -1022,7 +1020,7 @@ public static void TestJSEscaping(ж<testing.T> t) {
         new(@"no = in attributes", @"no \u003D in attributes"),
         new(@"&#x27; does not become HTML entity", @"\u0026#x27; does not become HTML entity")
     ]);
-    foreach (var (_, tc) in testCases) {
+    foreach (var (_, tc) in range(testCases)) {
         @string s = JSEscapeString(tc.@in);
         if (s != tc.exp) {
             t.Errorf("JS escaping [%s] got [%s] want [%s]", tc.@in, s, tc.exp);
@@ -1214,7 +1212,7 @@ internal partial struct cmpTest {
     internal bool ok;
 }
 
-internal static slice<cmpTest> cmpTests = slice<cmpTest>([
+internal static slice<cmpTest> cmpTests = [
     new("eq true true", "true", true),
     new("eq true false", "false", true),
     new("eq 1+2i 1+2i", "true", true),
@@ -1331,7 +1329,7 @@ internal static slice<cmpTest> cmpTests = slice<cmpTest>([
     new("eq .Ptr .NegOne", "", false),         // Incompatible types.
     new("eq .Map .V1", "", false),             // Uncomparable types.
     new("eq .NonNilMap .NonNilMap", "", false) // Uncomparable types.
-]);
+];
 
 internal partial struct TestComparison_type /*dyn*/ {
     public nuint Uthree, Ufour;
@@ -1356,7 +1354,7 @@ public static void TestComparison(ж<testing.T> t) {
         NonNilMap: new map<nint, nint>(),
         Iface1: new template_test_package.strings_BuilderжStringer(b)
     );
-    foreach (var (_, test) in cmpTests) {
+    foreach (var (_, test) in range(cmpTests)) {
         @string text = fmt.Sprintf("{{if %s}}true{{else}}false{{end}}"u8, test.expr);
         var (tmpl, err) = New(emptyˢ).Parse(text);
         if (err != nil) {
@@ -1525,7 +1523,7 @@ public static void TestGoodFuncNames(ж<testing.T> t) {
         "a1",
         "Ӵ"
     ]);
-    foreach (var (_, name) in names) {
+    foreach (var (_, name) in range(names)) {
         var tmpl = New("X").Funcs(
             new FuncMap(new map<@string, any>{
                 [name] = funcNameTestFunc
@@ -1542,7 +1540,7 @@ public static void TestBadFuncNames(ж<testing.T> t) {
         "2",
         "a-b"
     ]);
-    foreach (var (_, name) in names) {
+    foreach (var (_, name) in range(names)) {
         testBadFuncName(name, t);
     }
 }
@@ -1601,10 +1599,8 @@ public static void TestBlock(ж<testing.T> t) {
     }
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    {
-        var errΔ1 = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), helloˢ); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), helloˢ); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     {
         @string got = buf.String(); if (got != want) {
@@ -1613,10 +1609,8 @@ public static void TestBlock(ж<testing.T> t) {
     }
 
     buf.Reset();
-    {
-        var errΔ2 = tmpl2.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), goodbyeˢ); if (errΔ2 != nil) {
-            t.Fatal(errΔ2);
-        }
+    var errΔ2 = tmpl2.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), goodbyeˢ); if (errΔ2 != nil) {
+        t.Fatal(errΔ2);
     }
     {
         @string got = buf.String(); if (got != want2) {
@@ -1679,7 +1673,7 @@ public static void TestEvalFieldErrors(ж<testing.T> t) {
             "<nil>"
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tc = ref heap(new TestEvalFieldErrors_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -1738,7 +1732,7 @@ public static void TestAddrOfIndex(ж<testing.T> t) {
         @"{{range .}}{{.String}}{{end}}",
         @"{{with index . 0}}{{.String}}{{end}}"
     ]);
-    foreach (var (_, text) in texts) {
+    foreach (var (_, text) in range(texts)) {
         var (ᴛ7, ᴛ8) = New(tmplˢ).Parse(text);
         var tmpl = Must(ᴛ7, ᴛ8);
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
@@ -1801,7 +1795,7 @@ public static void TestInterfaceValues(ж<testing.T> t) {
         new(@"{{lt (index .Slice 1) .Zero}}", "false")
     ]);
 
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var (ᴛ9, ᴛ10) = New(tmplˢ).Parse(tt.text);
         var tmpl = Must(ᴛ9, ᴛ10);
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
@@ -1876,7 +1870,7 @@ public static void TestExecutePanicDuringCall(ж<testing.T> t) {
             @"template: t:1:23: executing ""t"" at <.NonEmptyInterfaceNil.Method0>: nil pointer evaluating template.I.Method0"
         )
     ]);
-    foreach (var (_, tc) in tests) {
+    foreach (var (_, tc) in range(tests)) {
         var b = @new<bytes.Buffer>();
         var (tmpl, err) = New("t").Funcs(funcs).Parse(tc.input);
         if (err != nil) {
@@ -1991,10 +1985,8 @@ public static partial void TestEscapeRace(ж<testing.T> t) {
                 defer(Ꮡwg.Done, ref ᒐ);
                 for (nint j = 0; j < count; j++) {
                     var sub = tmplʗ1.Lookup(fmt.Sprintf("x%d.html"u8, j));
-                    {
-                        var errΔ2 = sub.Execute(io.Discard, default); if (errΔ2 != nil) {
-                            t.Error(errΔ2);
-                        }
+                    var errΔ2 = sub.Execute(io.Discard, default); if (errΔ2 != nil) {
+                        t.Error(errΔ2);
                     }
                 }
             }
@@ -2021,10 +2013,8 @@ public static void TestRecursiveExecute(ж<testing.T> t) {
     var tmplʗ1 = tmpl;
     var recur = (global::go.html.template_package.HTML, error) () => {
         ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
-        {
-            var errΔ1 = tmplʗ1.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡsb), subroutineˢ, default); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = tmplʗ1.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡsb), subroutineˢ, default); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         return ((global::go.html.template_package.HTML)sb.String(), default);
     };
@@ -2041,10 +2031,8 @@ public static void TestRecursiveExecute(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var errΔ2 = top.Execute(io.Discard, default); if (errΔ2 != nil) {
-            t.Fatal(errΔ2);
-        }
+    var errΔ2 = top.Execute(io.Discard, default); if (errΔ2 != nil) {
+        t.Fatal(errΔ2);
     }
 }
 
@@ -2056,10 +2044,8 @@ internal partial struct recursiveInvoker {
 
 internal static (@string, error) Recur(this ref recursiveInvoker r) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
-    {
-        var err = r.tmpl.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡsb), subroutineˢ, default); if (err != nil) {
-            r.t.Fatal(err);
-        }
+    var err = r.tmpl.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡsb), subroutineˢ, default); if (err != nil) {
+        r.t.Fatal(err);
     }
     return (sb.String(), default);
 }
@@ -2082,10 +2068,8 @@ public static void TestRecursiveExecuteViaMethod(ж<testing.T> t) {
         t: t,
         tmpl: tmpl
     ));
-    {
-        var errΔ1 = top.Execute(io.Discard, r.OrTypedNil()); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = top.Execute(io.Discard, r.OrTypedNil()); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
 }
 
@@ -2108,15 +2092,11 @@ public static void TestTemplateFuncsAfterClone(ж<testing.T> t) {
     var (ᴛ13, ᴛ14) = Must(ᴛ11, ᴛ12).Parse(s);
     var overviewTmpl = Must(ᴛ13, ᴛ14);
     ref var @out = ref heap(new strings.Builder(), out var Ꮡout);
-    {
-        var err = overviewTmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡout), want); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = overviewTmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡout), want); if (err != nil) {
+        t.Fatal(err);
     }
-    {
-        @string got = @out.String(); if (got != want) {
-            t.Fatalf("got %q; want %q", got, want);
-        }
+    @string got = @out.String(); if (got != want) {
+        t.Fatalf("got %q; want %q", got, want);
     }
 }
 

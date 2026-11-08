@@ -7,8 +7,6 @@ using Δruntime = runtime_package;
 using strings = strings_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
@@ -71,12 +69,10 @@ internal static partial nint lineNumber() {
 
 // Do not add/remove lines in this block without updating the line numbers.
 internal static nint firstLine = lineNumber(); // 0
-
 // 1
 internal static nint lineVar1 = lineNumber();  // 2
 internal static nint lineVar2a = lineNumber(); // 3
 internal static nint lineVar2b = lineNumber();
-
 // 4
 // 19
 partial struct compLitᴛ1 /*dyn*/ {
@@ -99,28 +95,23 @@ internal static slice<compLitᴛ1> compLit = slice<compLitᴛ1>([ // 7
 
     ) // 18
 ]);
-
 internal static array<nint> arrayLit = new nint[]{lineNumber(), // 20
     lineNumber(), lineNumber(), // 21
     lineNumber() // 22
 }.array();                                                        // 23
-
 internal static slice<nint> sliceLit = slice<nint>([lineNumber(), // 24
     lineNumber(), lineNumber(), // 25
     lineNumber() // 26
 ]);                                                           // 27
-
 internal static map<nint, nint> mapLit = new map<nint, nint>{ // 28
     [29] = lineNumber(), // 29
     [30] = lineNumber(), // 30
     [lineNumber()] = 31, // 31
     [lineNumber()] = 32  // 32
 };                                           // 33
-
 internal static nint intLit = lineNumber() + // 34
     lineNumber() + // 35
     lineNumber(); // 36
-
 internal static void trythis() {
     // 37
     recordLines(lineNumber(), // 38
@@ -147,7 +138,7 @@ internal partial struct TestLineNumber_type /*dyn*/ {
 
 public static void TestLineNumber(ж<testing.T> t) {
     trythis();
-    foreach (var (_, test) in slice<TestLineNumber_type>([
+    foreach (var (_, test) in range(slice<TestLineNumber_type>([
         new("firstLine", firstLine, 0),
         new("lineVar1", lineVar1, 2),
         new("lineVar2a", lineVar2a, 3),
@@ -179,12 +170,10 @@ public static void TestLineNumber(ж<testing.T> t) {
         new("l38", l38, 38),
         new("l39", l39, 39),
         new("l40", l40, 40)
-    ])) {
-        {
-            nint got = test.val - firstLine; if (got != test.want) {
-                t.Errorf("%s on firstLine+%d want firstLine+%d (firstLine=%d, val=%d)",
-                    test.name, got, test.want, firstLine, test.val);
-            }
+    ]))) {
+        nint got = test.val - firstLine; if (got != test.want) {
+            t.Errorf("%s on firstLine+%d want firstLine+%d (firstLine=%d, val=%d)",
+                test.name, got, test.want, firstLine, test.val);
         }
     }
 }
@@ -193,16 +182,12 @@ public static void TestNilName(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var ex = recover(); if (ex != nil) {
-                    t.Fatalf("expected no nil panic, got=%v", ex);
-                }
+            var ex = recover(); if (ex != nil) {
+                t.Fatalf("expected no nil panic, got=%v", ex);
             }
         }, ref ᒐ);
-        {
-            @string got = (((ж<Δruntime.Func>)nil)).Name(); if (got != ""u8) {
-                t.Errorf("Name() = %q, want %q", got, (@string)""u8);
-            }
+        @string got = (((ж<Δruntime.Func>)nil)).Name(); if (got != ""u8) {
+            t.Errorf("Name() = %q, want %q", got, (@string)""u8);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -290,7 +275,7 @@ public static void TestFunctionAlignmentTraceback(ж<testing.T> t) {
 
     // Finally ensure that Frames.Next doesn't crash when processing this
     // PC.
-    var frames = Δruntime.CallersFrames(slice<uintptr>([pc]));
+    var frames = Δruntime.CallersFrames([pc]);
     var (frame, _) = frames.Next();
     if (frame.Func != f) {
         t.Errorf("frames.Next() got %+v want %+v", frame.Func.OrTypedNil(), f.OrTypedNil());

@@ -11,13 +11,10 @@ partial class sync_internal_test_package {
 // Export for testing.
 public static readonly ж<Action<ж<uint32>>> ᏑRuntime_Semacquire = new StaticBox<Action<ж<uint32>>>(runtime_Semacquire);
 public static ref Action<ж<uint32>> Runtime_Semacquire => ref ((StaticBox<Action<ж<uint32>>>)ᏑRuntime_Semacquire).ValueSlot;
-
 public static readonly ж<Action<ж<uint32>, bool, nint>> ᏑRuntime_Semrelease = new StaticBox<Action<ж<uint32>, bool, nint>>(runtime_Semrelease);
 public static ref Action<ж<uint32>, bool, nint> Runtime_Semrelease => ref ((StaticBox<Action<ж<uint32>, bool, nint>>)ᏑRuntime_Semrelease).ValueSlot;
-
 public static readonly ж<Func<nint>> ᏑRuntime_procPin = new StaticBox<Func<nint>>(runtime_procPin);
 public static ref Func<nint> Runtime_procPin => ref ((StaticBox<Func<nint>>)ᏑRuntime_procPin).ValueSlot;
-
 public static readonly ж<Action> ᏑRuntime_procUnpin = new StaticBox<Action>(runtime_procUnpin);
 public static ref Action Runtime_procUnpin => ref ((StaticBox<Action>)ᏑRuntime_procUnpin).ValueSlot;
 

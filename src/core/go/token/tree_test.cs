@@ -22,7 +22,7 @@ public static void TestTree(ж<testing.T> t) {
     // Create a number of Files of arbitrary size.
     var files = new slice<ж<global::go.go.token_package.ΔFile>>(500);
     ref var @base = ref heap(new nint(), out var Ꮡbase);
-    foreach (var i in range(files)) {
+    foreach (var i in range(len(files))) {
         @base++;
         ref var size = ref heap<nint>(1000, out var Ꮡsize);
         files[i] = Ꮡ(new ΔFile(@base: @base, size: size));
@@ -34,7 +34,7 @@ public static void TestTree(ж<testing.T> t) {
     {
         var files2 = slices.Clone<slice<ж<global::go.go.token_package.ΔFile>>, ж<global::go.go.token_package.ΔFile>>(files);
         Shuffle(rng, files2);
-        foreach (var (_, f) in files2) {
+        foreach (var (_, f) in range(files2)) {
             Ꮡtr.add(f);
         }
     }
@@ -56,15 +56,15 @@ public static void TestTree(ж<testing.T> t) {
     }
 
     // Check some position lookups within each file.
-    foreach (var (_, @file) in files) {
+    foreach (var (_, @file) in range(files)) {
         if (@file == nil) {
             continue; // deleted
         }
-        foreach (var (_, pos) in slice<nint>([
+        foreach (var (_, pos) in range(slice<nint>([
             @file.@base,                  // start
             @file.@base + @file.size / 2, // midpoint
             @file.@base + @file.size      // end
-        ])) {
+        ]))) {
             var (pn, _) = Ꮡtr.locate(new Δkey(pos, pos));
             if ((pn.ValueSlot).@file != @file) {
                 t.Fatalf("lookup %s@%d returned wrong file %s",

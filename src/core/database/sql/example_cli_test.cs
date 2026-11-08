@@ -10,8 +10,6 @@ using log = log_package;
 using os = os_package;
 using signal = go.os.signal_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.database;
 using go.os;
 using static go.database.sql_internal_test_package;
@@ -94,10 +92,8 @@ public static void Ping(context.Context ctx) {
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
 
-        {
-            var err = pool.PingContext(ctx); if (err != nil) {
-                log.Fatalf("unable to connect to database: %v", err);
-            }
+        var err = pool.PingContext(ctx); if (err != nil) {
+            log.Fatalf("unable to connect to database: %v", err);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

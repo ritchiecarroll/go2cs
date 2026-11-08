@@ -67,7 +67,7 @@ public static void TestUnsafePoint(ж<testing.T> t) {
     bool doneWB = default;
     nint instructionCount = 0;
     nint unsafeCount = 0;
-    foreach (var (_, vᴛ1) in lines) {
+    foreach (var (_, vᴛ1) in range(lines)) {
         var line = vᴛ1;
 
         line = strings.TrimSpace(line);

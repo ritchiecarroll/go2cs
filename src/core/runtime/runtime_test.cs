@@ -86,7 +86,6 @@ public static void BenchmarkIfaceCmpNil100(ж<testing.B> Ꮡb) {
 }
 
 internal static any efaceCmp1;
-
 internal static any efaceCmp2;
 
 public static void BenchmarkEfaceCmpDiff(ж<testing.B> Ꮡb) {
@@ -219,7 +218,7 @@ public static void TestStopCPUProfilingWithProfilerOff(ж<testing.T> t) {
 // addresses that normally an OS would reserve for itself, or malformed
 // addresses. Even so, we might have to remove one or two on different
 // systems. We will see.
-internal static slice<uint64> faultAddrs = slice<uint64>([
+internal static slice<uint64> faultAddrs = [
     // low addresses
     0,
     1,
@@ -241,7 +240,7 @@ internal static slice<uint64> faultAddrs = slice<uint64>([
     0xff00000000000001UL,
     0xf000000000000001UL,
     0x8000000000000001UL
-]);
+];
 
 public static void TestSetPanicOnFault(ж<testing.T> t) {
     GoFrame ᒐ = default;
@@ -250,7 +249,7 @@ public static void TestSetPanicOnFault(ж<testing.T> t) {
         defer(Δdebug.SetPanicOnFault, old, ref ᒐ);
 
         ref var nfault = ref heap<nint>(0, out var Ꮡnfault);
-        foreach (var (_, addr) in faultAddrs) {
+        foreach (var (_, addr) in range(faultAddrs)) {
             testSetPanicOnFault(t, (uintptr)addr, Ꮡnfault);
         }
         if (nfault == 0) {
@@ -274,10 +273,8 @@ internal static void testSetPanicOnFault(ж<testing.T> t, uintptr addr, ж<nint>
         }
 
         defer(() => {
-            {
-                var err = recover(); if (err != nil) {
-                    nfault.Value++;
-                }
+            var err = recover(); if (err != nil) {
+                nfault.Value++;
             }
         }, ref ᒐ);
 
@@ -319,8 +316,8 @@ public static void TestEqString(ж<testing.T> t) {
         "cccc"u8[..3], // same contents, different string
         "1234567890"
     ]);
-    foreach (var (_, s1) in s) {
-        foreach (var (_, s2) in s) {
+    foreach (var (_, s1) in range(s)) {
+        foreach (var (_, s2) in range(s)) {
             var x = s1 == s2;
             var y = eqstring_generic(s1, s2);
             if (x != y) {
@@ -426,7 +423,7 @@ public static void TestAppendGrowthStack(ж<testing.T> t) {
     }
 }
 
-public static readonly ж<slice<int64>> ᏑOne = new StaticBox<slice<int64>>(slice<int64>([1]));
+public static readonly ж<slice<int64>> ᏑOne = new StaticBox<slice<int64>>([1]);
 public static ref slice<int64> One => ref ((StaticBox<slice<int64>>)ᏑOne).ValueSlot;
 
 public static void TestAppendSliceGrowth(ж<testing.T> t) {
@@ -747,8 +744,8 @@ public static partial void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
     array<array<nint>> histogram = new(2, () => new(65));
     foreach (var _ᴛ2 in range(procs)) {
         var h = ᐸꟷ(histograms);
-        foreach (var i in range(h)) {
-            foreach (var j in range(h[i])) {
+        foreach (var i in range(len(h))) {
+            foreach (var j in range(len(h[i]))) {
                 histogram[i][j] += h[i][j];
             }
         }
@@ -757,7 +754,7 @@ public static partial void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
     nint percentile([GoArrayDims(65)] array<nint> h, float64 p) {
         h = h.Clone();
         nint sum = 0;
-        foreach (var (i, v) in h.ΔRangeSnapshot()) {
+        foreach (var (i, v) in range(h.ΔRangeSnapshot())) {
             var bound = ((uint64)((uint64)1 << 63)).Rsh((int64)(i));
             sum += (nint)bound * v;
         }
@@ -767,7 +764,7 @@ public static partial void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
         // [lower] "bound" value.) Continue those splits until we meet the
         // percentile target.
         nint part = 0;
-        foreach (var (i, v) in h.ΔRangeSnapshot()) {
+        foreach (var (i, v) in range(h.ΔRangeSnapshot())) {
             var bound = ((uint64)((uint64)1 << 63)).Rsh((int64)(i));
             part += (nint)bound * v;
             // have we trimmed off enough at the head to dip below the percentile goal
@@ -804,10 +801,8 @@ internal partial struct BenchmarkMutexHandoff_state /*dyn*/ {
 
 public static void BenchmarkMutexHandoff(ж<testing.B> b) {
     Action<ж<testing.B>> testcase(Action<ж<Mutex>> delay) => [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
-            {
-                nint workers = 2; if (GOMAXPROCS(0) < workers) {
-                    bΔ1.Skipf("requires GOMAXPROCS >= %d", workers);
-                }
+            nint workers = 2; if (GOMAXPROCS(0) < workers) {
+                bΔ1.Skipf("requires GOMAXPROCS >= %d", workers);
             }
 
             // Measure latency of mutex handoff between threads.

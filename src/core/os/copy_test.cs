@@ -14,8 +14,6 @@ using Δruntime = runtime_package;
 using Δsync = sync_package;
 using Δtesting = testing_package;
 using nettest = vendor.golang.org.x.net.nettest_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using math.rand;
 using static go.os_internal_test_package;
 using time = time_package;
@@ -42,15 +40,11 @@ public static partial void TestLargeCopyViaNetwork(ж<Δtesting.T> t) {
         }
         var srcʗ1 = src;
         defer(() => srcʗ1.Close(), ref ᒐ);
-        {
-            var (_, errΔ1) = Δio.CopyN(new Δos.FileжWriter(src), new os_test_package.randReaderжReader(newRandReader()), size); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var (_, errΔ1) = Δio.CopyN(new Δos.FileжWriter(src), new os_test_package.randReaderжReader(newRandReader()), size); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
-        {
-            var (_, errΔ2) = src.Seek(0, 0); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var (_, errΔ2) = src.Seek(0, 0); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
 
         (var dst, err) = Δos.Create(dir + "/dst"u8);
@@ -69,10 +63,8 @@ public static partial void TestLargeCopyViaNetwork(ж<Δtesting.T> t) {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
-                {
-                    var (n, errΔ3) = Δio.Copy(new Δos.FileжWriter(dstʗ2), new os_test_package.net_ConnᴠReader(serverʗ1)); if (n != size || errΔ3 != nil) {
-                        t.Errorf("copy to destination = %v, %v; want %v, nil", n, errΔ3, (nint)(size));
-                    }
+                var (n, errΔ3) = Δio.Copy(new Δos.FileжWriter(dstʗ2), new os_test_package.net_ConnᴠReader(serverʗ1)); if (n != size || errΔ3 != nil) {
+                    t.Errorf("copy to destination = %v, %v; want %v, nil", n, errΔ3, (nint)(size));
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -86,10 +78,8 @@ public static partial void TestLargeCopyViaNetwork(ж<Δtesting.T> t) {
                 defer(Ꮡwg.Done, ref ᒐ);
                 var clientʗ2 = clientʗ1;
                 defer(() => clientʗ2.Close(), ref ᒐ);
-                {
-                    var (n, errΔ4) = Δio.Copy(new os_test_package.net_ConnᴠWriter(clientʗ1), new os_test_package.os_FileжReader(srcʗ2)); if (n != size || errΔ4 != nil) {
-                        t.Errorf("copy from source = %v, %v; want %v, nil", n, errΔ4, (nint)(size));
-                    }
+                var (n, errΔ4) = Δio.Copy(new os_test_package.net_ConnᴠWriter(clientʗ1), new os_test_package.os_FileжReader(srcʗ2)); if (n != size || errΔ4 != nil) {
+                    t.Errorf("copy from source = %v, %v; want %v, nil", n, errΔ4, (nint)(size));
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -97,15 +87,11 @@ public static partial void TestLargeCopyViaNetwork(ж<Δtesting.T> t) {
         });
         Ꮡwg.Wait();
 
-        {
-            var (_, errΔ5) = dst.Seek(0, 0); if (errΔ5 != nil) {
-                t.Fatal(errΔ5);
-            }
+        var (_, errΔ5) = dst.Seek(0, 0); if (errΔ5 != nil) {
+            t.Fatal(errΔ5);
         }
-        {
-            var errΔ6 = compareReaders(new os_test_package.os_FileжReader(dst), Δio.LimitReader(new os_test_package.randReaderжReader(newRandReader()), size)); if (errΔ6 != nil) {
-                t.Fatal(errΔ6);
-            }
+        var errΔ6 = compareReaders(new os_test_package.os_FileжReader(dst), Δio.LimitReader(new os_test_package.randReaderжReader(newRandReader()), size)); if (errΔ6 != nil) {
+            t.Fatal(errΔ6);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -128,15 +114,11 @@ public static void TestCopyFileToFile(ж<Δtesting.T> t) {
         }
         var srcʗ1 = src;
         defer(() => srcʗ1.Close(), ref ᒐ);
-        {
-            var (_, errΔ1) = Δio.CopyN(new Δos.FileжWriter(src), new os_test_package.randReaderжReader(newRandReader()), size); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var (_, errΔ1) = Δio.CopyN(new Δos.FileжWriter(src), new os_test_package.randReaderжReader(newRandReader()), size); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
-        {
-            var (_, errΔ2) = src.Seek(0, 0); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var (_, errΔ2) = src.Seek(0, 0); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
 
         int64 mustSeek(ж<Δos.File> f, int64 offset, nint whence) {
@@ -147,10 +129,10 @@ public static void TestCopyFileToFile(ж<Δtesting.T> t) {
             return ret;
         }
 
-        foreach (var (_, srcStart) in slice<int64>([0, 100, size])) {
+        foreach (var (_, srcStart) in range(slice<int64>([0, 100, size]))) {
             var remaining = (int64)size - srcStart;
-            foreach (var (_, dstStart) in slice<int64>([0, 200])) {
-                foreach (var (_, limit) in slice<int64>([remaining, remaining - 100, size * 2, 0])) {
+            foreach (var (_, dstStart) in range(slice<int64>([0, 200]))) {
+                foreach (var (_, limit) in range(slice<int64>([remaining, remaining - 100, size * 2, 0]))) {
                     if (limit < 0) {
                         continue;
                     }
@@ -169,10 +151,8 @@ public static void TestCopyFileToFile(ж<Δtesting.T> t) {
                             defer(Δos.Remove, dst.Name(), ref ᒐ);
 
                             mustSeekʗ1(srcʗ2, srcStart, Δio.SeekStart);
-                            {
-                                var (_, errΔ5) = Δio.CopyN(new Δos.FileжWriter(dst), new zeroReader(), dstStart); if (errΔ5 != nil) {
-                                    tΔ1.Fatal(errΔ5);
-                                }
+                            var (_, errΔ5) = Δio.CopyN(new Δos.FileжWriter(dst), new zeroReader(), dstStart); if (errΔ5 != nil) {
+                                tΔ1.Fatal(errΔ5);
                             }
 
                             int64 copied = default;
@@ -217,10 +197,8 @@ public static void TestCopyFileToFile(ж<Δtesting.T> t) {
                             var wantReader = Δio.MultiReader(
                                 Δio.LimitReader(new zeroReader(), dstStart),
                                 Δio.LimitReader(new os_test_package.randReaderжReader(rr), wantCopied));
-                            {
-                                var errΔ6 = compareReaders(new os_test_package.os_FileжReader(dst), wantReader); if (errΔ6 != nil) {
-                                    tΔ1.Fatal(errΔ6);
-                                }
+                            var errΔ6 = compareReaders(new os_test_package.os_FileжReader(dst), wantReader); if (errΔ6 != nil) {
+                                tΔ1.Fatal(errΔ6);
                             }
                         }
                         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -279,7 +257,7 @@ internal static ж<randReader> newRandReader() {
 }
 
 internal static (nint, error) Read(this ref randReader r, slice<byte> p) {
-    foreach (var i in range(p)) {
+    foreach (var i in range(len(p))) {
         p[i] = (byte)(r.rand.Uint32() & 0xff);
     }
     return (len(p), default);

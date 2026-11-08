@@ -210,7 +210,7 @@ internal static partial void benchmark(ж<Δtesting.B> Ꮡb, Action<ж<Δtesting
     // the benchmark.
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     var garbageAll = new slice<slice<ж<Δtime.Timer>>>(Δruntime.GOMAXPROCS(0));
-    foreach (var i in range(garbageAll)) {
+    foreach (var i in range(len(garbageAll))) {
         Ꮡwg.Add(1);
         var garbageAllʗ1 = garbageAll;
         goǃ((nint iΔ1) => {
@@ -218,7 +218,7 @@ internal static partial void benchmark(ж<Δtesting.B> Ꮡb, Action<ж<Δtesting
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
                 var garbage = new slice<ж<Δtime.Timer>>((1 << 15));
-                foreach (var j in range(garbage)) {
+                foreach (var j in range(len(garbage))) {
                     garbage[j] = AfterFunc(ΔHour, default);
                 }
                 garbageAllʗ1[iΔ1] = garbage;
@@ -233,8 +233,8 @@ internal static partial void benchmark(ж<Δtesting.B> Ꮡb, Action<ж<Δtesting
     Ꮡb.RunParallel(bench);
     b.StopTimer();
 
-    foreach (var (_, garbage) in garbageAll) {
-        foreach (var (_, t) in garbage) {
+    foreach (var (_, garbage) in range(garbageAll)) {
+        foreach (var (_, t) in range(garbage)) {
             t.Stop();
         }
     }
@@ -311,11 +311,11 @@ public static void BenchmarkStartStop1000(ж<Δtesting.B> b) {
         while (pb.Next()) {
             const nint N = 1000;
             var timers = new slice<ж<Δtime.Timer>>(N);
-            foreach (var i in range(timers)) {
+            foreach (var i in range(len(timers))) {
                 timers[i] = AfterFunc(ΔHour, default);
             }
 
-            foreach (var i in range(timers)) {
+            foreach (var i in range(len(timers))) {
                 timers[i].Stop();
             }
         }
@@ -365,15 +365,11 @@ public static void TestAfter(ж<Δtesting.T> t) {
     var start = Now();
     var end = ᐸꟷ(After(delay));
     var delayadj = adjustDelay(t, delay);
-    {
-        var duration = Since(start); if (duration < delayadj) {
-            t.Fatalf("After(%s) slept for only %d ns", delay, duration);
-        }
+    var duration = Since(start); if (duration < delayadj) {
+        t.Fatalf("After(%s) slept for only %d ns", delay, duration);
     }
-    {
-        var min = start.Add(delayadj); if (end.Before(min)) {
-            t.Fatalf("After(%s) expect >= %s, got %s", delay, min, end);
-        }
+    var min = start.Add(delayadj); if (end.Before(min)) {
+        t.Fatalf("After(%s) expect >= %s, got %s", delay, min, end);
     }
 }
 
@@ -419,7 +415,7 @@ internal static void testAfterStop(ж<Δtesting.T> t, Func<Δtime.Duration, ж<�
 
     ref var errs = ref heap<slice<@string>>(out var Ꮡerrs);
     void logErrs() {
-        foreach (var (_, e) in Ꮡerrs.ValueSlot) {
+        foreach (var (_, e) in range(Ꮡerrs.ValueSlot)) {
             t.Log(e);
         }
     }
@@ -497,10 +493,8 @@ internal static void testAfterQueuing(ж<Δtesting.T> t, Func<Δtime.Duration, /
     var err = errors.New(nilˢ);
     for (nint i = 0; i < attempts && err != nil; i++) {
         var delta = ((Δtime.Duration)(int64)(20 + i * 50)) * Millisecond;
-        {
-            err = testAfterQueuing1(delta, after); if (err != nil) {
-                t.Logf("attempt %v failed: %v", i, err);
-            }
+        err = testAfterQueuing1(delta, after); if (err != nil) {
+            t.Logf("attempt %v failed: %v", i, err);
         }
     }
     if (err != nil) {
@@ -508,7 +502,7 @@ internal static void testAfterQueuing(ж<Δtesting.T> t, Func<Δtime.Duration, /
     }
 }
 
-internal static slice<nint> slots = slice<nint>([5, 3, 6, 6, 6, 1, 1, 2, 7, 9, 4, 8, 0]);
+internal static slice<nint> slots = [5, 3, 6, 6, 6, 1, 1, 2, 7, 9, 4, 8, 0];
 
 partial struct afterResult {
     internal nint slot;
@@ -528,23 +522,23 @@ internal static partial error testAfterQueuing1(Δtime.Duration delta, Func<Δti
     var result = new channel<afterResult>(len(slots));
 
     var t0 = Now();
-    foreach (var (_, slot) in slots) {
+    foreach (var (_, slot) in range(slots)) {
         goǃ(await, slot, result.AsSendOnly(), After(((Δtime.Duration)(int64)slot) * delta));
     }
     slice<nint> order = default;
     slice<Δtime.Time> times = default;
-    foreach (var _ᴛ1 in range(slots)) {
+    foreach (var _ᴛ1 in range(len(slots))) {
         var r = ᐸꟷ(result);
         order = append(order, r.slot);
         times = append(timesᴷ, times, r.t);
     }
-    foreach (var i in range(order)) {
+    foreach (var i in range(len(order))) {
         if (i > 0 && order[i] < order[i - 1]) {
             return fmt.Errorf("After calls returned out of order: %v"u8, order);
         }
     }
     times = move2heap(timesᴷ, times);
-    foreach (var (i, t) in times) {
+    foreach (var (i, t) in range(times)) {
         var dt = t.Sub(t0);
         var target = ((Δtime.Duration)(int64)order[i]) * delta;
         if (dt < target - delta / 2 || dt > target + delta * 10) {
@@ -719,10 +713,8 @@ public static void TestIssue5745(ж<Δtesting.T> t) {
             // lock taken before the segfault.
             tickerʗ1.Stop();
 
-            {
-                var r = recover(); if (r == nil) {
-                    t.Error(expectedPanicButNoneˢ);
-                }
+            var r = recover(); if (r == nil) {
+                t.Error(expectedPanicButNoneˢ);
             }
         }, ref ᒐ);
 
@@ -752,10 +744,8 @@ internal static void checkZeroPanicString(ж<Δtesting.T> t) {
 
         var e = recover(calledByDefer);
         var (s, _) = e._<@string>(ᐧ);
-        {
-            @string want = calledOnUninitializedˢ; if (!strings.Contains(s, want)) {
-                t.Errorf("panic = %v; want substring %q", e, want);
-            }
+        @string want = calledOnUninitializedˢ; if (!strings.Contains(s, want)) {
+            t.Errorf("panic = %v; want substring %q", e, want);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -818,10 +808,8 @@ internal static void testZeroTimer(ж<Δtesting.T> t, Func<Δtime.Duration, ж<�
         var s = Now();
         var ti = newTimer(0);
         ᐸꟷ(ti.C);
-        {
-            var diff = Since(s); if (diff > 2 * ΔSecond) {
-                t.Errorf("Expected time to get value from Timer channel in less than 2 sec, took %v", diff);
-            }
+        var diff = Since(s); if (diff > 2 * ΔSecond) {
+            t.Errorf("Expected time to get value from Timer channel in less than 2 sec, took %v", diff);
         }
     }
 }
@@ -858,11 +846,9 @@ public static void TestTimerModifiedEarlier(ж<Δtesting.T> t) {
             var selᴛ14 = deadline.C;
             switch (select(ᐸꟷ(selᴛ13, ꓸꓸꓸ), ᐸꟷ(selᴛ14, ꓸꓸꓸ))) {
             case 0 when selᴛ13.ꟷᐳ(out _): {
-                {
-                    var since = Since(now); if (since > (Δtime.Duration)(8000000000L)) {
-                        t.Errorf("timer took too long (%v)", since);
-                        fail++;
-                    }
+                var since = Since(now); if (since > (Δtime.Duration)(8000000000L)) {
+                    t.Errorf("timer took too long (%v)", since);
+                    fail++;
                 }
                 break;
             }
@@ -974,7 +960,7 @@ public static void TestResetResult(ж<Δtesting.T> t) {
 // consistently indicates whether a value can be read from the channel.
 // Issue #69312.
 internal static void testStopResetResult(ж<Δtesting.T> t, bool testStop) {
-    foreach (var (_, name) in slice<@string>(["0", "1", "2"])) {
+    foreach (var (_, name) in range(slice<@string>(["0", "1", "2"]))) {
         t.Run("asynctimerchan="u8 + name, [MethodImpl(MethodImplOptions.NoInlining)] (ж<Δtesting.T> tΔ1) => {
             testStopResetResultGODEBUG(tΔ1, testStop, name);
         });
@@ -1198,7 +1184,7 @@ public static void BenchmarkParallelTimerLatency(ж<Δtesting.B> Ꮡb) {
     float64 total = default;
     float64 samples = default;
     var maximum = (Δtime.Duration)0;
-    foreach (var (_, s) in stats) {
+    foreach (var (_, s) in range(stats)) {
         maximum = max(maximum, s.max);
         total += s.sum;
         samples += (float64)s.count;
@@ -1218,7 +1204,7 @@ public static void BenchmarkStaggeredTickerLatency(ж<Δtesting.B> b) {
 
     Δtime.Duration delay = /* 3 * Millisecond */ 3000000;
 
-    foreach (var (_, dur) in slice<Δtime.Duration>([300 * Microsecond, 2 * Millisecond])) {
+    foreach (var (_, dur) in range(slice<Δtime.Duration>([300 * Microsecond, 2 * Millisecond]))) {
         b.Run(fmt.Sprintf("work-dur=%s"u8, dur), (ж<Δtesting.B> bΔ1) => {
             for (nint tickersPerP = 1; tickersPerP < (nint)(delay / dur) + 1; tickersPerP++) {
                 nint tickerCount = gmp * tickersPerP;
@@ -1270,7 +1256,7 @@ public static void BenchmarkStaggeredTickerLatency(ж<Δtesting.B> b) {
                     float64 total = default;
                     float64 samples = default;
                     var max = (Δtime.Duration)0;
-                    foreach (var (_, s) in stats) {
+                    foreach (var (_, s) in range(stats)) {
                         if (s.max > max) {
                             max = s.max;
                         }
@@ -1326,7 +1312,7 @@ public static void BenchmarkAdjustTimers10000(ж<Δtesting.B> b) {
             }
             timers[n - 1].Reset(ΔNanosecond);
             Sleep(Microsecond);
-            foreach (var (_, t) in timers) {
+            foreach (var (_, t) in range(timers)) {
                 t.Stop();
             }
         }

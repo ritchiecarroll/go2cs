@@ -158,7 +158,7 @@ public static void TestClip(ж<testing.T> t) {
     var dst0 = image.NewRGBA(image.Rect(0, 0, 100, 100));
     var src0 = image.NewRGBA(image.Rect(0, 0, 100, 100));
     var mask0 = image.NewRGBA(image.Rect(0, 0, 100, 100));
-    foreach (var (_, c) in clipTests) {
+    foreach (var (_, c) in range(clipTests)) {
         var dst = dst0.SubImage(c.dr)._<ж<imageꓸRGBA>>();
         var src = src0.SubImage(c.sr)._<ж<imageꓸRGBA>>();
         ref var r = ref heap<image.Rectangle>(out var Ꮡr);

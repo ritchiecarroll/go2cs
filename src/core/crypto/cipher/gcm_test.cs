@@ -37,17 +37,9 @@ partial struct wrapper {
     internal cipher.Block block;
 }
 
-internal static nint BlockSize(this ref wrapper w) {
-    return w.block.BlockSize();
-}
-
-internal static void Encrypt(this ref wrapper w, slice<byte> dst, slice<byte> src) {
-    w.block.Encrypt(dst, src);
-}
-
-internal static void Decrypt(this ref wrapper w, slice<byte> dst, slice<byte> src) {
-    w.block.Decrypt(dst, src);
-}
+internal static nint BlockSize(this ref wrapper w) { return w.block.BlockSize(); }
+internal static void Encrypt(this ref wrapper w, slice<byte> dst, slice<byte> src) { w.block.Encrypt(dst, src); }
+internal static void Decrypt(this ref wrapper w, slice<byte> dst, slice<byte> src) { w.block.Decrypt(dst, src); }
 
 // wrap wraps the Block so that it does not type-asserts to *aes.Block.
 internal static cipher.Block wrap(cipher.Block b) {
@@ -84,7 +76,7 @@ internal static void testAllImplementations(ж<testing.T> t, Action<ж<testing.T
 partial struct aesGCMTestsᴛ1 /*dyn*/ {
     internal @string key, nonce, plaintext, ad, result;
 }
-internal static slice<aesGCMTestsᴛ1> aesGCMTests = slice<aesGCMTestsᴛ1>([
+internal static slice<aesGCMTestsᴛ1> aesGCMTests = [
     new( // key=16, plaintext=null
         "11754cd72aec309bf52f7687212e8957",
         "3c819d9a9bed087615030b65",
@@ -435,7 +427,7 @@ internal static slice<aesGCMTestsᴛ1> aesGCMTests = slice<aesGCMTestsᴛ1>([
         "",
         "250327c674aaf477aef2675748cf6971"
     )
-]);
+];
 
 public static void TestAESGCM(ж<testing.T> t) {
     testAllImplementations(t, testAESGCM);
@@ -445,7 +437,7 @@ public static void TestAESGCM(ж<testing.T> t) {
 private static readonly object expectedErrorForZeroˢ = (@string)"expected error for zero nonce size"u8;
 
 internal static void testAESGCM(ж<testing.T> t, Func<slice<byte>, cipher.Block> newCipher) {
-    foreach (var (i, test) in aesGCMTests) {
+    foreach (var (i, test) in range(aesGCMTests)) {
         var (key, _) = hex.DecodeString(test.key);
         var aes = newCipher(key);
 
@@ -491,11 +483,9 @@ internal static void testAESGCM(ж<testing.T> t, Func<slice<byte>, cipher.Block>
         }}
 
         var ct = aesgcm.Seal(default, nonce, plaintext, ad);
-        {
-            @string ctHex = hex.EncodeToString(ct); if (ctHex != test.result) {
-                t.Errorf("#%d: got %s, want %s", i, ctHex, test.result);
-                continue;
-            }
+        @string ctHex = hex.EncodeToString(ct); if (ctHex != test.result) {
+            t.Errorf("#%d: got %s, want %s", i, ctHex, test.result);
+            continue;
         }
 
         (var plaintext2, err) = aesgcm.Open(default, nonce, ct, ad);
@@ -511,27 +501,21 @@ internal static void testAESGCM(ж<testing.T> t, Func<slice<byte>, cipher.Block>
 
         if (len(ad) > 0) {
             ad[0] ^= (byte)(0x80);
-            {
-                var (_, errΔ1) = aesgcm.Open(default, nonce, ct, ad); if (errΔ1 == nil) {
-                    t.Errorf("#%d: Open was successful after altering additional data", i);
-                }
+            var (_, errΔ1) = aesgcm.Open(default, nonce, ct, ad); if (errΔ1 == nil) {
+                t.Errorf("#%d: Open was successful after altering additional data", i);
             }
             ad[0] ^= (byte)(0x80);
         }
 
         nonce[0] ^= (byte)(0x80);
-        {
-            var (_, errΔ2) = aesgcm.Open(default, nonce, ct, ad); if (errΔ2 == nil) {
-                t.Errorf("#%d: Open was successful after altering nonce", i);
-            }
+        var (_, errΔ2) = aesgcm.Open(default, nonce, ct, ad); if (errΔ2 == nil) {
+            t.Errorf("#%d: Open was successful after altering nonce", i);
         }
         nonce[0] ^= (byte)(0x80);
 
         ct[0] ^= (byte)(0x80);
-        {
-            var (_, errΔ3) = aesgcm.Open(default, nonce, ct, ad); if (errΔ3 == nil) {
-                t.Errorf("#%d: Open was successful after altering ciphertext", i);
-            }
+        var (_, errΔ3) = aesgcm.Open(default, nonce, ct, ad); if (errΔ3 == nil) {
+            t.Errorf("#%d: Open was successful after altering ciphertext", i);
         }
         ct[0] ^= (byte)(0x80);
     }
@@ -545,7 +529,7 @@ internal static void testGCMInvalidTagSize(ж<testing.T> t, Func<slice<byte>, ci
     var (key, _) = hex.DecodeString("ab72c77b97cb5fe9a382d9fe81ffdbed");
     var aes = newCipher(key);
 
-    foreach (var (_, tagSize) in slice<nint>([0, 1, aes.BlockSize() + 1])) {
+    foreach (var (_, tagSize) in range(slice<nint>([0, 1, aes.BlockSize() + 1]))) {
         var (aesgcm, err) = cipher.NewGCMWithTagSize(aes, tagSize);
         if (aesgcm != nil || err == nil) {
             t.Fatalf("NewGCMWithTagSize was successful with an invalid %d-byte tag size", tagSize);
@@ -576,7 +560,7 @@ internal static void testTagFailureOverwrite(ж<testing.T> t, Func<slice<byte>, 
     var (aesgcm, _) = cipher.NewGCM(aes);
 
     var dst = new slice<byte>(len(ciphertext) - 16);
-    foreach (var i in range(dst)) {
+    foreach (var i in range(len(dst))) {
         dst[i] = 42;
     }
 
@@ -589,7 +573,7 @@ internal static void testTagFailureOverwrite(ж<testing.T> t, Func<slice<byte>, 
         t.Fatal(failedOpenReturnedNonNilˢ);
     }
 
-    foreach (var i in range(dst)) {
+    foreach (var i in range(len(dst))) {
         if (dst[i] != 0) {
             t.Fatal(failedOpenDidnTZeroDstˢ);
         }
@@ -617,7 +601,7 @@ internal static void testGCMCounterWrap(ж<testing.T> t, Func<slice<byte>, ciphe
     ]);
     var key = newCipher(new slice<byte>(16));
     var plaintext = new slice<byte>(16 * 17 + 1);
-    foreach (var (i, test) in tests) {
+    foreach (var (i, test) in range(tests)) {
         var (nonce, _) = hex.DecodeString(test.nonce);
         var (want, _) = hex.DecodeString(test.tag);
         var (aead, err) = cipher.NewGCMWithNonceSize(key, len(nonce));
@@ -685,12 +669,12 @@ public static void TestGCMAsm(ж<testing.T> t) {
     var keySizes = slice<nint>([16, 24, 32]);
     var alignments = slice<nint>([0, 1, 2, 3]);
     if (testing.Short()) {
-        keySizes = slice<nint>([16]);
-        alignments = slice<nint>([1]);
+        keySizes = [16];
+        alignments = [1];
     }
     var perms = new slice<TestGCMAsm_pair>(0);
-    foreach (var (_, l) in lengths) {
-        foreach (var (_, a) in alignments) {
+    foreach (var (_, l) in range(lengths)) {
+        foreach (var (_, a) in range(alignments)) {
             if (a != 0 && l == 0) {
                 continue;
             }
@@ -702,30 +686,22 @@ public static void TestGCMAsm(ж<testing.T> t) {
     var newAESGCMʗ1 = newAESGCM;
     error test(nint ks, slice<byte> pt, slice<byte> ad) {
         var keyΔ2 = new slice<byte>(ks);
-        {
-            var (_, errΔ2) = io.ReadFull(rand.Reader, keyΔ2); if (errΔ2 != nil) {
-                return errΔ2;
-            }
+        var (_, errΔ2) = io.ReadFull(rand.Reader, keyΔ2); if (errΔ2 != nil) {
+            return errΔ2;
         }
         var (asmΔ2, genericΔ2, errΔ3) = newAESGCMʗ1(keyΔ2);
         if (errΔ3 != nil) {
             return errΔ3;
         }
-        {
-            var (_, errΔ4) = io.ReadFull(rand.Reader, pt); if (errΔ4 != nil) {
-                return errΔ4;
-            }
+        var (_, errΔ4) = io.ReadFull(rand.Reader, pt); if (errΔ4 != nil) {
+            return errΔ4;
         }
-        {
-            var (_, errΔ5) = io.ReadFull(rand.Reader, ad); if (errΔ5 != nil) {
-                return errΔ5;
-            }
+        var (_, errΔ5) = io.ReadFull(rand.Reader, ad); if (errΔ5 != nil) {
+            return errΔ5;
         }
         var nonce = new slice<byte>(12);
-        {
-            var (_, errΔ6) = io.ReadFull(rand.Reader, nonce); if (errΔ6 != nil) {
-                return errΔ6;
-            }
+        var (_, errΔ6) = io.ReadFull(rand.Reader, nonce); if (errΔ6 != nil) {
+            return errΔ6;
         }
         var want = genericΔ2.Seal(default, nonce, pt, ad);
         var got = asmΔ2.Seal(default, nonce, pt, ad);
@@ -741,22 +717,20 @@ public static void TestGCMAsm(ж<testing.T> t) {
         }
         return default;
     }
-    foreach (var (_, a) in perms) {
+    foreach (var (_, a) in range(perms)) {
         var ad = new slice<byte>(a.align + a.length);
         ad = ad.slice(a.align);
-        foreach (var (_, p) in perms) {
+        foreach (var (_, p) in range(perms)) {
             var pt = new slice<byte>(p.align + p.length);
             pt = pt.slice(p.align);
-            foreach (var (_, ks) in keySizes) {
-                {
-                    var errΔ7 = test(ks, pt, ad); if (errΔ7 != nil) {
-                        t.Error(errΔ7);
-                        t.Errorf("	key size: %v", ks);
-                        t.Errorf("	plaintext alignment: %v", p.align);
-                        t.Errorf("	plaintext length: %v", p.length);
-                        t.Errorf("	additionalData alignment: %v", a.align);
-                        t.Fatalf("	additionalData length: %v", a.length);
-                    }
+            foreach (var (_, ks) in range(keySizes)) {
+                var errΔ7 = test(ks, pt, ad); if (errΔ7 != nil) {
+                    t.Error(errΔ7);
+                    t.Errorf("	key size: %v", ks);
+                    t.Errorf("	plaintext alignment: %v", p.align);
+                    t.Errorf("	plaintext length: %v", p.length);
+                    t.Errorf("	additionalData alignment: %v", a.align);
+                    t.Fatalf("	additionalData length: %v", a.length);
                 }
             }
         }
@@ -778,7 +752,7 @@ private static readonly object newGCMWithRandomNonceˢ = (@string)"NewGCMWithRan
 internal static void testGCMAEAD(ж<testing.T> t, Func<slice<byte>, cipher.Block> newCipher) {
     nint minTagSize = 12;
 
-    foreach (var (_, keySize) in slice<nint>([128, 192, 256])) {
+    foreach (var (_, keySize) in range(slice<nint>([128, 192, 256]))) {
         // Use AES as underlying block cipher at different key sizes for GCM.
         t.Run(fmt.Sprintf("AES-%d"u8, keySize), (ж<testing.T> tΔ1) => {
             var rng = newRandReader(tΔ1);
@@ -801,7 +775,7 @@ internal static void testGCMAEAD(ж<testing.T> t, Func<slice<byte>, cipher.Block
             });
 
             // Test non-standard nonce sizes.
-            foreach (var (_, nonceSize) in slice<nint>([1, 16, 100])) {
+            foreach (var (_, nonceSize) in range(slice<nint>([1, 16, 100]))) {
                 var blockʗ4 = block;
                 tΔ1.Run(fmt.Sprintf("NonceSize-%d"u8, nonceSize), (ж<testing.T> tΔ3) => {
                     var blockʗ5 = blockʗ4;
@@ -812,10 +786,8 @@ internal static void testGCMAEAD(ж<testing.T> t, Func<slice<byte>, cipher.Block
             // Test NewGCMWithRandomNonce.
             var blockʗ6 = block;
             tΔ1.Run(gcmWithRandomNonceˢ, (ж<testing.T> tΔ4) => {
-                {
-                    var (_, ok) = blockʗ6._<ж<wrapper>>(ᐧ); if (ok || boring.Enabled) {
-                        tΔ4.Skip(newGCMWithRandomNonceˢ);
-                    }
+                var (_, ok) = blockʗ6._<ж<wrapper>>(ᐧ); if (ok || boring.Enabled) {
+                    tΔ4.Skip(newGCMWithRandomNonceˢ);
                 }
                 var blockʗ7 = blockʗ6;
                 cryptotest.TestAEAD(tΔ4, () => cipher.NewGCMWithRandomNonce(blockʗ7));
@@ -853,10 +825,8 @@ public static void TestGCMExtraMethods(ж<testing.T> t) {
         });
         tΔ1.Run(newGCMWithRandomNonceˢ2, (ж<testing.T> tΔ5) => {
             var block = newCipher(new slice<byte>(16));
-            {
-                var (_, ok) = block._<ж<wrapper>>(ᐧ); if (ok || boring.Enabled) {
-                    tΔ5.Skip(newGCMWithRandomNonceˢ);
-                }
+            var (_, ok) = block._<ж<wrapper>>(ᐧ); if (ok || boring.Enabled) {
+                tΔ5.Skip(newGCMWithRandomNonceˢ);
             }
             ref var a = ref heap<cipher.AEAD>(out var Ꮡa);
             (a, _) = cipher.NewGCMWithRandomNonce(block);
@@ -927,43 +897,43 @@ public static void TestGCMNoncesFIPSV1(ж<testing.T> t) {
         }
 
         var g = newGCM();
-        expectOKʗ1(tΔ3, g, slice<byte>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
-        expectOKʗ1(tΔ3, g, slice<byte>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]));
-        expectOKʗ1(tΔ3, g, slice<byte>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100]));
-        expectOKʗ1(tΔ3, g, slice<byte>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]));
-        expectOKʗ1(tΔ3, g, slice<byte>([0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]));
-        expectOKʗ1(tΔ3, g, slice<byte>([0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]));
-        expectOKʗ1(tΔ3, g, slice<byte>([0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0]));
-        expectOKʗ1(tΔ3, g, slice<byte>([0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]));
-        expectOKʗ1(tΔ3, g, slice<byte>([0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]));
-        expectOKʗ1(tΔ3, g, slice<byte>([0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]));
+        expectOKʗ1(tΔ3, g, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+        expectOKʗ1(tΔ3, g, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]);
+        expectOKʗ1(tΔ3, g, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100]);
+        expectOKʗ1(tΔ3, g, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]);
+        expectOKʗ1(tΔ3, g, [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]);
+        expectOKʗ1(tΔ3, g, [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]);
+        expectOKʗ1(tΔ3, g, [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0]);
+        expectOKʗ1(tΔ3, g, [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]);
+        expectOKʗ1(tΔ3, g, [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]);
+        expectOKʗ1(tΔ3, g, [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]);
         // Changed name.
-        expectPanicʗ1(tΔ3, g, slice<byte>([0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]));
+        expectPanicʗ1(tΔ3, g, [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]);
 
         g = newGCM();
-        expectOKʗ1(tΔ3, g, slice<byte>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]));
+        expectOKʗ1(tΔ3, g, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]);
         // Went down.
-        expectPanicʗ1(tΔ3, g, slice<byte>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
+        expectPanicʗ1(tΔ3, g, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
         g = newGCM();
-        expectOKʗ1(tΔ3, g, slice<byte>([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]));
-        expectOKʗ1(tΔ3, g, slice<byte>([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13]));
+        expectOKʗ1(tΔ3, g, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+        expectOKʗ1(tΔ3, g, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13]);
         // Did not increment.
-        expectPanicʗ1(tΔ3, g, slice<byte>([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13]));
+        expectPanicʗ1(tΔ3, g, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13]);
 
         g = newGCM();
-        expectOKʗ1(tΔ3, g, slice<byte>([1, 2, 3, 4, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00]));
-        expectOKʗ1(tΔ3, g, slice<byte>([1, 2, 3, 4, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]));
+        expectOKʗ1(tΔ3, g, [1, 2, 3, 4, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00]);
+        expectOKʗ1(tΔ3, g, [1, 2, 3, 4, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]);
         // Wrap is ok as long as we don't run out of values.
-        expectOKʗ1(tΔ3, g, slice<byte>([1, 2, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0]));
-        expectOKʗ1(tΔ3, g, slice<byte>([1, 2, 3, 4, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0xfe]));
+        expectOKʗ1(tΔ3, g, [1, 2, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0]);
+        expectOKʗ1(tΔ3, g, [1, 2, 3, 4, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0xfe]);
         // Run out of counters.
-        expectPanicʗ1(tΔ3, g, slice<byte>([1, 2, 3, 4, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0xff]));
+        expectPanicʗ1(tΔ3, g, [1, 2, 3, 4, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0xff]);
 
         g = newGCM();
-        expectOKʗ1(tΔ3, g, slice<byte>([1, 2, 3, 4, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]));
+        expectOKʗ1(tΔ3, g, [1, 2, 3, 4, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]);
         // Wrap with overflow.
-        expectPanicʗ1(tΔ3, g, slice<byte>([1, 2, 3, 5, 0, 0, 0, 0, 0, 0, 0, 0]));
+        expectPanicʗ1(tΔ3, g, [1, 2, 3, 5, 0, 0, 0, 0, 0, 0, 0, 0]);
     });
 
     var expectOKʗ2 = expectOK;

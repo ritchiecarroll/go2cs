@@ -15,8 +15,6 @@ using strconv = strconv_package;
 using Δsync = sync_package;
 using atomic = go.sync.atomic_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using crypto;
 using encoding;
 using go.net.http;
@@ -34,7 +32,7 @@ public static void RemoveAll() {
     try {
         Ꮡvars.ᏑkeysMu.Lock();
         defer(Ꮡvars.ᏑkeysMu.Unlock, ref ᒐ);
-        foreach (var (_, k) in vars.keys) {
+        foreach (var (_, k) in range(vars.keys)) {
             Ꮡvars.Ꮡm.Delete(k);
         }
         vars.keys = default;
@@ -79,10 +77,8 @@ public static void TestInt(ж<testing.T> t) {
         }
     }
 
-    {
-        @string s = reqs.String(); if (s != "4"u8) {
-            t.Errorf("reqs.String() = %q, want \"4\"", s);
-        }
+    @string s = reqs.String(); if (s != "4"u8) {
+        t.Errorf("reqs.String() = %q, want \"4\"", s);
     }
 
     reqs.Set(-2);
@@ -135,10 +131,8 @@ public static void TestFloat(ж<testing.T> t) {
         }
     }
 
-    {
-        @string s = reqs.String(); if (s != "2.75"u8) {
-            t.Errorf("reqs.String() = %q, want \"4.64\"", s);
-        }
+    @string s = reqs.String(); if (s != "2.75"u8) {
+        t.Errorf("reqs.String() = %q, want \"4.64\"", s);
     }
 
     reqs.Add(-2D);
@@ -333,20 +327,14 @@ public static void TestMapCounter(ж<testing.T> t) {
     colors.Add(redˢ, 2);
     colors.Add(blueˢ, 4);
     colors.AddFloat(greenMidoriˢ, 4.125D);
-    {
-        var xΔ1 = colors.Get(redˢ)._<ж<global::go.expvar_package.Int>>().Value(); if (xΔ1 != 3) {
-            t.Errorf("colors.m[\"red\"] = %v, want 3", xΔ1);
-        }
+    var xΔ1 = colors.Get(redˢ)._<ж<global::go.expvar_package.Int>>().Value(); if (xΔ1 != 3) {
+        t.Errorf("colors.m[\"red\"] = %v, want 3", xΔ1);
     }
-    {
-        var xΔ2 = colors.Get(blueˢ)._<ж<global::go.expvar_package.Int>>().Value(); if (xΔ2 != 4) {
-            t.Errorf("colors.m[\"blue\"] = %v, want 4", xΔ2);
-        }
+    var xΔ2 = colors.Get(blueˢ)._<ж<global::go.expvar_package.Int>>().Value(); if (xΔ2 != 4) {
+        t.Errorf("colors.m[\"blue\"] = %v, want 4", xΔ2);
     }
-    {
-        var xΔ3 = colors.Get(greenMidoriˢ)._<ж<global::go.expvar_package.Float>>().Value(); if (xΔ3 != 4.125D) {
-            t.Errorf("colors.m[`green \"midori\"] = %v, want 4.125", xΔ3);
-        }
+    var xΔ3 = colors.Get(greenMidoriˢ)._<ж<global::go.expvar_package.Float>>().Value(); if (xΔ3 != 4.125D) {
+        t.Errorf("colors.m[`green \"midori\"] = %v, want 4.125", xΔ3);
     }
 
     // colors.String() should be '{"red":3, "blue":4}',
@@ -386,10 +374,8 @@ public static void TestMapNil(ж<testing.T> t) {
     m.Set(key, default);
     @string s = m.String();
     ref var j = ref heap<any>(out var Ꮡj);
-    {
-        var err = json.Unmarshal(slice<byte>(s), Ꮡj); if (err != nil) {
-            t.Fatalf("m.String() == %q isn't valid JSON: %v", s, err);
-        }
+    var err = json.Unmarshal(slice<byte>(s), Ꮡj); if (err != nil) {
+        t.Fatalf("m.String() == %q isn't valid JSON: %v", s, err);
     }
     var (m2, ok) = j._<map<@string, any>>(ᐧ);
     if (!ok) {
@@ -422,9 +408,9 @@ public static void BenchmarkMapSetDifferent(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var procKeys = new slice<slice<@string>>(Δruntime.GOMAXPROCS(0));
-    foreach (var i in range(procKeys)) {
+    foreach (var i in range(len(procKeys))) {
         var keys = new slice<@string>(4);
-        foreach (var j in range(keys)) {
+        foreach (var j in range(len(keys))) {
             keys[j] = fmt.Sprint(i, j);
         }
         procKeys[i] = keys;
@@ -443,7 +429,7 @@ public static void BenchmarkMapSetDifferent(ж<testing.B> Ꮡb) {
         var keys = procKeysʗ1[i];
 
         while (pb.Next()) {
-            foreach (var (_, k) in keys) {
+            foreach (var (_, k) in range(keys)) {
                 mʗ1.Set(k, new global::go.expvar_package.IntжVar(vʗ1));
             }
         }
@@ -457,7 +443,7 @@ public static void BenchmarkMapSetDifferentRandom(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var keys = new slice<@string>(100);
-    foreach (var i in range(keys)) {
+    foreach (var i in range(len(keys))) {
         keys[i] = fmt.Sprintf("%x"u8, sha1.Sum(slice<byte>(fmt.Sprint(i))));
     }
 
@@ -466,7 +452,7 @@ public static void BenchmarkMapSetDifferentRandom(ж<testing.B> Ꮡb) {
 
     for (nint i = 0; i < b.N; i++) {
         var m = @new<global::go.expvar_package.Map>().Init();
-        foreach (var (_, k) in keys) {
+        foreach (var (_, k) in range(keys)) {
             m.Set(k, new global::go.expvar_package.IntжVar(v));
         }
     }
@@ -507,9 +493,9 @@ public static void BenchmarkMapAddDifferent(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var procKeys = new slice<slice<@string>>(Δruntime.GOMAXPROCS(0));
-    foreach (var i in range(procKeys)) {
+    foreach (var i in range(len(procKeys))) {
         var keys = new slice<@string>(4);
-        foreach (var j in range(keys)) {
+        foreach (var j in range(len(keys))) {
             keys[j] = fmt.Sprint(i, j);
         }
         procKeys[i] = keys;
@@ -525,7 +511,7 @@ public static void BenchmarkMapAddDifferent(ж<testing.B> Ꮡb) {
 
         while (pb.Next()) {
             var m = @new<global::go.expvar_package.Map>().Init();
-            foreach (var (_, k) in keys) {
+            foreach (var (_, k) in range(keys)) {
                 m.Add(k, 1);
             }
         }
@@ -539,7 +525,7 @@ public static void BenchmarkMapAddDifferentRandom(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var keys = new slice<@string>(100);
-    foreach (var i in range(keys)) {
+    foreach (var i in range(len(keys))) {
         keys[i] = fmt.Sprintf("%x"u8, sha1.Sum(slice<byte>(fmt.Sprint(i))));
     }
 
@@ -547,7 +533,7 @@ public static void BenchmarkMapAddDifferentRandom(ж<testing.B> Ꮡb) {
 
     for (nint i = 0; i < b.N; i++) {
         var m = @new<global::go.expvar_package.Map>().Init();
-        foreach (var (_, k) in keys) {
+        foreach (var (_, k) in range(keys)) {
             m.Add(k, 1);
         }
     }
@@ -567,9 +553,9 @@ public static void BenchmarkMapAddDifferentSteadyState(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var procKeys = new slice<slice<@string>>(Δruntime.GOMAXPROCS(0));
-    foreach (var i in range(procKeys)) {
+    foreach (var i in range(len(procKeys))) {
         var keys = new slice<@string>(4);
-        foreach (var j in range(keys)) {
+        foreach (var j in range(len(keys))) {
             keys[j] = fmt.Sprint(i, j);
         }
         procKeys[i] = keys;
@@ -586,7 +572,7 @@ public static void BenchmarkMapAddDifferentSteadyState(ж<testing.B> Ꮡb) {
         var keys = procKeysʗ1[i];
 
         while (pb.Next()) {
-            foreach (var (_, k) in keys) {
+            foreach (var (_, k) in range(keys)) {
                 mʗ1.Add(k, 1);
             }
         }
@@ -605,10 +591,8 @@ public static void TestFunc(ж<testing.T> t) {
             t.Errorf(@"f.String() = %q, want %q", s, exp);
         }
     }
-    {
-        var v = f.Value(); if (!reflect.DeepEqual(v, x)) {
-            t.Errorf(@"f.Value() = %q, want %q", v, x);
-        }
+    var v = f.Value(); if (!reflect.DeepEqual(v, x)) {
+        t.Errorf(@"f.Value() = %q, want %q", v, x);
     }
 
     x = (nint)17;
@@ -647,10 +631,8 @@ public static void TestHandler(ж<testing.T> t) {
     rr.Body = @new<bytes.Buffer>();
     expvarHandler(new expvar_internal_test_package.httptest_ResponseRecorderжResponseWriter(rr), nil);
     @string want = map1A1Z2Map2001122334455ˢ;
-    {
-        @string got = rr.Body.String(); if (got != want) {
-            t.Errorf("HTTP handler wrote:\n%s\nWant:\n%s", got, want);
-        }
+    @string got = rr.Body.String(); if (got != want) {
+        t.Errorf("HTTP handler wrote:\n%s\nWant:\n%s", got, want);
     }
 }
 

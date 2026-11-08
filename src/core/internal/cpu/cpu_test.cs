@@ -66,12 +66,10 @@ public static void TestAllCapabilitiesDisabled(ж<testing.T> t) {
         t.Skipf("skipping test: GODEBUG=cpu.all=off not set");
     }
 
-    foreach (var (_, o) in cpu_internal_test_package.Options) {
+    foreach (var (_, o) in range(cpu_internal_test_package.Options)) {
         var want = false;
-        {
-            var got = o.Feature.Value; if (got != want) {
-                t.Errorf("%v: expected %v, got %v", o.Name, want, got);
-            }
+        var got = o.Feature.Value; if (got != want) {
+            t.Errorf("%v: expected %v, got %v", o.Name, want, got);
         }
     }
 }

@@ -42,7 +42,7 @@ using static global::go.text.template_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("text/template/examplefiles_test.go", "examplefiles_test.cs", "ABoqooKClIKCgpSSgoKmAAkI6AAIEqbKpIKC2AAOCgAICO6muKSCgqaCgriCgpSCguoADwj47qa47IKCpoKCyoKCpoKCyoKClIKC/A==", "", "", "", "40:25")]
-[assembly: GoPositionMap("text/template/link_test.go", "link_test.cs", "ADUkooKUggAAJpSAgqSCgoCCpIKClII=")]
+[assembly: GoPositionMap("text/template/link_test.go", "link_test.cs", "ADUkooKUggAAJpSClIKCgpSCgpSC")]
 // </GoSourcePositionMaps>
 
 namespace go.text;

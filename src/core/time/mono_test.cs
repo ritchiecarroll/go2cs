@@ -313,7 +313,7 @@ partial struct monotonicStringTestsᴛ1 /*dyn*/ {
     internal int64 mono;
     internal @string want;
 }
-internal static slice<monotonicStringTestsᴛ1> monotonicStringTests = slice<monotonicStringTestsᴛ1>([
+internal static slice<monotonicStringTestsᴛ1> monotonicStringTests = [
     new(0, "m=+0.000000000"),
     new(123456789, "m=+0.123456789"),
     new(-123456789, "m=-0.123456789"),
@@ -322,13 +322,13 @@ internal static slice<monotonicStringTestsᴛ1> monotonicStringTests = slice<mon
     new(9000000000000000000, "m=+9000000000.000000000"),
     new(-9000000000000000000, "m=-9000000000.000000000"),
     new(-9223372036854775808L, "m=-9223372036.854775808")
-]);
+];
 
 public static void TestMonotonicString(ж<Δtesting.T> t) {
     var t1 = Now();
     t.Logf("Now() = %v", t1);
 
-    foreach (var (_, tt) in monotonicStringTests) {
+    foreach (var (_, tt) in range(monotonicStringTests)) {
         ref var t1Δ1 = ref heap<Δtime.Time>(Now(), out var Ꮡt1Δ1);
         time_internal_test_package.SetMono(Ꮡt1Δ1, tt.mono);
         @string s = t1Δ1.String();

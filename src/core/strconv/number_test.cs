@@ -13,8 +13,6 @@ using cmplx = go.math.cmplx_package;
 using reflect = reflect_package;
 using static strconv_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.math;
 using static go.strconv_internal_test_package;
 using strconv = strconv_package;
@@ -27,16 +25,16 @@ partial struct atobTest {
     internal error err;
 }
 
-internal static slice<atobTest> atobtests = slice<atobTest>([
+internal static slice<atobTest> atobtests = [
     new("", false, ErrSyntax),
     new("asdf", false, ErrSyntax),
     new("0", false, default),
     new("false", false, default),
     new("true", true, default)
-]);
+];
 
 public static void TestParseBool(ж<testing.T> t) {
-    foreach (var (_, test) in atobtests) {
+    foreach (var (_, test) in range(atobtests)) {
         var (b, e) = ParseBool(test.@in);
         if (test.err != nil) {
             // expect an error
@@ -66,10 +64,8 @@ internal static map<bool, @string> boolString = new map<bool, @string>{
 
 public static void TestFormatBool(ж<testing.T> t) {
     foreach (var (b, s) in boolString) {
-        {
-            @string f = FormatBool(b); if (f != s) {
-                t.Errorf("FormatBool(%v) = %q; want %q", b, f, s);
-            }
+        @string f = FormatBool(b); if (f != s) {
+            t.Errorf("FormatBool(%v) = %q; want %q", b, f, s);
         }
     }
 }
@@ -80,13 +76,13 @@ partial struct appendBoolTest {
     internal slice<byte> @out;
 }
 
-internal static slice<appendBoolTest> appendBoolTests = slice<appendBoolTest>([
+internal static slice<appendBoolTest> appendBoolTests = [
     new(true, slice<byte>("foo "u8), slice<byte>("foo true"u8)),
     new(false, slice<byte>("foo "u8), slice<byte>("foo false"u8))
-]);
+];
 
 public static void TestAppendBool(ж<testing.T> t) {
-    foreach (var (_, test) in appendBoolTests) {
+    foreach (var (_, test) in range(appendBoolTests)) {
         var b = AppendBool(test.@in, test.b);
         if (!bytes.Equal(b, test.@out)) {
             t.Errorf("AppendBool(%q, %v) = %q; want %q", test.@in, test.b, b, test.@out);
@@ -266,7 +262,7 @@ public static void TestParseComplex(ж<testing.T> t) {
         new("1e+4294967296+1e+4294967296i", infpp, ErrRange),
         new("1e+4294967296-1e+4294967296i", infpm, ErrRange)
     ]);
-    foreach (var i in range(tests)) {
+    foreach (var i in range(len(tests))) {
         var test = Ꮡ(tests, i);
         if (test.err != nil) {
             test.err = new strconv.NumErrorжerror(Ꮡ(new NumError(Func: "ParseComplex", Num: test.@in, Err: test.err)));
@@ -301,7 +297,7 @@ public static void TestParseComplexIncorrectBitSize(ж<testing.T> t) {
     @string s = sᶜ;
     complex128 want = /* 1.5e308 + 1.0e307i */ 1.5e+308D + 1e+307D.i();
 
-    foreach (var (_, bitSize) in slice<nint>([0, 10, 100, 256])) {
+    foreach (var (_, bitSize) in range(slice<nint>([0, 10, 100, 256]))) {
         var (c, err) = ParseComplex(s, bitSize);
         if (err != nil) {
             t.Fatalf("ParseComplex(%q, %d) gave error %s", s, bitSize, err);
@@ -318,7 +314,7 @@ partial struct atofTest {
     internal error err;
 }
 
-internal static readonly ж<slice<atofTest>> Ꮡatoftests = new StaticBox<slice<atofTest>>(slice<atofTest>([
+internal static readonly ж<slice<atofTest>> Ꮡatoftests = new StaticBox<slice<atofTest>>([
     new("", "0", ErrSyntax),
     new("1.25", "1.25", default),
     new("+1", "1", default),
@@ -339,13 +335,13 @@ internal static readonly ж<slice<atofTest>> Ꮡatoftests = new StaticBox<slice<
     new("-0x1.fffffffffffff7fffp1023", "-1.7976931348623157e+308", default),
     new("1.797693134862315808e308", "+Inf", ErrRange),
     new("-1.797693134862315808e308", "-Inf", ErrRange)
-]));
+]);
 internal static ref slice<atofTest> atoftests => ref ((StaticBox<slice<atofTest>>)Ꮡatoftests).ValueSlot;
 
 [GoInit] internal static void init() {
     // The atof routines return NumErrors wrapping
     // the error and the string. Convert the table above.
-    foreach (var i in range(atoftests)) {
+    foreach (var i in range(len(atoftests))) {
         var test = Ꮡ(atoftests, i);
         if (test.err != nil) {
             test.err = new strconv.NumErrorжerror(Ꮡ(new NumError("ParseFloat", test.@in, test.err)));
@@ -385,7 +381,7 @@ partial struct parseUint64Test {
     internal error err;
 }
 
-internal static readonly ж<slice<parseUint64Test>> ᏑparseUint64Tests = new StaticBox<slice<parseUint64Test>>(slice<parseUint64Test>([
+internal static readonly ж<slice<parseUint64Test>> ᏑparseUint64Tests = new StaticBox<slice<parseUint64Test>>([
     new("", 0, ErrSyntax),
     new("0", 0, default),
     new("1", 1, default),
@@ -393,7 +389,7 @@ internal static readonly ж<slice<parseUint64Test>> ᏑparseUint64Tests = new St
     new("012345", 12345, default),
     new("18446744073709551616", 18446744073709551615UL, ErrRange),
     new("-1", 0, ErrSyntax)
-]));
+]);
 internal static ref slice<parseUint64Test> parseUint64Tests => ref ((StaticBox<slice<parseUint64Test>>)ᏑparseUint64Tests).ValueSlot;
 
 partial struct parseUint64BaseTest {
@@ -403,7 +399,7 @@ partial struct parseUint64BaseTest {
     internal error err;
 }
 
-internal static readonly ж<slice<parseUint64BaseTest>> ᏑparseUint64BaseTests = new StaticBox<slice<parseUint64BaseTest>>(slice<parseUint64BaseTest>([
+internal static readonly ж<slice<parseUint64BaseTest>> ᏑparseUint64BaseTests = new StaticBox<slice<parseUint64BaseTest>>([
     new("", 0, 0, ErrSyntax),
     new("0", 0, 0, default),
     new("1", 0, 1, default),
@@ -414,7 +410,7 @@ internal static readonly ж<slice<parseUint64BaseTest>> ᏑparseUint64BaseTests 
     new("0b", 0, 0, ErrSyntax),
     new("101", 2, 5, default),
     new("101_", 2, 0, ErrSyntax)
-]));
+]);
 internal static ref slice<parseUint64BaseTest> parseUint64BaseTests => ref ((StaticBox<slice<parseUint64BaseTest>>)ᏑparseUint64BaseTests).ValueSlot;
 
 partial struct parseInt64Test {
@@ -423,7 +419,7 @@ partial struct parseInt64Test {
     internal error err;
 }
 
-internal static readonly ж<slice<parseInt64Test>> ᏑparseInt64Tests = new StaticBox<slice<parseInt64Test>>(slice<parseInt64Test>([
+internal static readonly ж<slice<parseInt64Test>> ᏑparseInt64Tests = new StaticBox<slice<parseInt64Test>>([
     new("", 0, ErrSyntax),
     new("0", 0, default),
     new("1", 1, default),
@@ -431,7 +427,7 @@ internal static readonly ж<slice<parseInt64Test>> ᏑparseInt64Tests = new Stat
     new("12345", 12345, default),
     new("9223372036854775808", 9223372036854775807L, ErrRange),
     new("123%45", 0, ErrSyntax)
-]));
+]);
 internal static ref slice<parseInt64Test> parseInt64Tests => ref ((StaticBox<slice<parseInt64Test>>)ᏑparseInt64Tests).ValueSlot;
 
 partial struct parseInt64BaseTest {
@@ -441,7 +437,7 @@ partial struct parseInt64BaseTest {
     internal error err;
 }
 
-internal static readonly ж<slice<parseInt64BaseTest>> ᏑparseInt64BaseTests = new StaticBox<slice<parseInt64BaseTest>>(slice<parseInt64BaseTest>([
+internal static readonly ж<slice<parseInt64BaseTest>> ᏑparseInt64BaseTests = new StaticBox<slice<parseInt64BaseTest>>([
     new("", 0, 0, ErrSyntax),
     new("0", 0, 0, default),
     new("1", 0, 1, default),
@@ -453,7 +449,7 @@ internal static readonly ж<slice<parseInt64BaseTest>> ᏑparseInt64BaseTests = 
     new("0b", 0, 0, ErrSyntax),
     new("101", 2, 5, default),
     new("101_", 2, 0, ErrSyntax)
-]));
+]);
 internal static ref slice<parseInt64BaseTest> parseInt64BaseTests => ref ((StaticBox<slice<parseInt64BaseTest>>)ᏑparseInt64BaseTests).ValueSlot;
 
 partial struct parseUint32Test {
@@ -462,7 +458,7 @@ partial struct parseUint32Test {
     internal error err;
 }
 
-internal static readonly ж<slice<parseUint32Test>> ᏑparseUint32Tests = new StaticBox<slice<parseUint32Test>>(slice<parseUint32Test>([
+internal static readonly ж<slice<parseUint32Test>> ᏑparseUint32Tests = new StaticBox<slice<parseUint32Test>>([
     new("", 0, ErrSyntax),
     new("0", 0, default),
     new("1", 1, default),
@@ -472,7 +468,7 @@ internal static readonly ж<slice<parseUint32Test>> ᏑparseUint32Tests = new St
     new("4294967296", unchecked((uint32)(4294967295UL)), ErrRange),
     new("1_2_3_4_5", 0, ErrSyntax), // base=10 so no underscores allowed
     new("12345_", 0, ErrSyntax)
-]));
+]);
 internal static ref slice<parseUint32Test> parseUint32Tests => ref ((StaticBox<slice<parseUint32Test>>)ᏑparseUint32Tests).ValueSlot;
 
 partial struct parseInt32Test {
@@ -481,7 +477,7 @@ partial struct parseInt32Test {
     internal error err;
 }
 
-internal static readonly ж<slice<parseInt32Test>> ᏑparseInt32Tests = new StaticBox<slice<parseInt32Test>>(slice<parseInt32Test>([
+internal static readonly ж<slice<parseInt32Test>> ᏑparseInt32Tests = new StaticBox<slice<parseInt32Test>>([
     new("", 0, ErrSyntax),
     new("0", 0, default),
     new("-0", 0, default),
@@ -491,53 +487,53 @@ internal static readonly ж<slice<parseInt32Test>> ᏑparseInt32Tests = new Stat
     new("-12345", -12345, default),
     new("2147483648", (int32)(2147483648L - 1), ErrRange),
     new("12345_", 0, ErrSyntax)
-]));
+]);
 internal static ref slice<parseInt32Test> parseInt32Tests => ref ((StaticBox<slice<parseInt32Test>>)ᏑparseInt32Tests).ValueSlot;
 
 partial struct numErrorTest {
     internal @string num, want;
 }
 
-internal static slice<numErrorTest> numErrorTests = slice<numErrorTest>([
+internal static slice<numErrorTest> numErrorTests = [
     new("0", @"strconv.ParseFloat: parsing ""0"": failed"),
     new("`", "strconv.ParseFloat: parsing \"`\": failed"),
     new("1\x00.2", @"strconv.ParseFloat: parsing ""1\x00.2"": failed")
-]);
+];
 
 [GoInit] internal static void initΔ1() {
     // The parse routines return NumErrors wrapping
     // the error and the string. Convert the tables above.
-    foreach (var i in range(parseUint64Tests)) {
+    foreach (var i in range(len(parseUint64Tests))) {
         var test = Ꮡ(parseUint64Tests, i);
         if (test.err != nil) {
             test.err = new strconv.NumErrorжerror(Ꮡ(new NumError("ParseUint", test.@in, test.err)));
         }
     }
-    foreach (var i in range(parseUint64BaseTests)) {
+    foreach (var i in range(len(parseUint64BaseTests))) {
         var test = Ꮡ(parseUint64BaseTests, i);
         if (test.err != nil) {
             test.err = new strconv.NumErrorжerror(Ꮡ(new NumError("ParseUint", test.@in, test.err)));
         }
     }
-    foreach (var i in range(parseInt64Tests)) {
+    foreach (var i in range(len(parseInt64Tests))) {
         var test = Ꮡ(parseInt64Tests, i);
         if (test.err != nil) {
             test.err = new strconv.NumErrorжerror(Ꮡ(new NumError("ParseInt", test.@in, test.err)));
         }
     }
-    foreach (var i in range(parseInt64BaseTests)) {
+    foreach (var i in range(len(parseInt64BaseTests))) {
         var test = Ꮡ(parseInt64BaseTests, i);
         if (test.err != nil) {
             test.err = new strconv.NumErrorжerror(Ꮡ(new NumError("ParseInt", test.@in, test.err)));
         }
     }
-    foreach (var i in range(parseUint32Tests)) {
+    foreach (var i in range(len(parseUint32Tests))) {
         var test = Ꮡ(parseUint32Tests, i);
         if (test.err != nil) {
             test.err = new strconv.NumErrorжerror(Ꮡ(new NumError("ParseUint", test.@in, test.err)));
         }
     }
-    foreach (var i in range(parseInt32Tests)) {
+    foreach (var i in range(len(parseInt32Tests))) {
         var test = Ꮡ(parseInt32Tests, i);
         if (test.err != nil) {
             test.err = new strconv.NumErrorжerror(Ꮡ(new NumError("ParseInt", test.@in, test.err)));
@@ -546,7 +542,7 @@ internal static slice<numErrorTest> numErrorTests = slice<numErrorTest>([
 }
 
 public static void TestParseUint32(ж<testing.T> t) {
-    foreach (var i in range(parseUint32Tests)) {
+    foreach (var i in range(len(parseUint32Tests))) {
         var test = Ꮡ(parseUint32Tests, i);
         var (@out, err) = ParseUint(test.@in, 10, 32);
         if ((uint64)test.@out != @out || !reflect.DeepEqual(test.err, err)) {
@@ -557,7 +553,7 @@ public static void TestParseUint32(ж<testing.T> t) {
 }
 
 public static void TestParseUint64(ж<testing.T> t) {
-    foreach (var i in range(parseUint64Tests)) {
+    foreach (var i in range(len(parseUint64Tests))) {
         var test = Ꮡ(parseUint64Tests, i);
         var (@out, err) = ParseUint(test.@in, 10, 64);
         if (test.@out != @out || !reflect.DeepEqual(test.err, err)) {
@@ -568,7 +564,7 @@ public static void TestParseUint64(ж<testing.T> t) {
 }
 
 public static void TestParseUint64Base(ж<testing.T> t) {
-    foreach (var i in range(parseUint64BaseTests)) {
+    foreach (var i in range(len(parseUint64BaseTests))) {
         var test = Ꮡ(parseUint64BaseTests, i);
         var (@out, err) = ParseUint(test.@in, test.@base, 64);
         if (test.@out != @out || !reflect.DeepEqual(test.err, err)) {
@@ -579,7 +575,7 @@ public static void TestParseUint64Base(ж<testing.T> t) {
 }
 
 public static void TestParseInt32(ж<testing.T> t) {
-    foreach (var i in range(parseInt32Tests)) {
+    foreach (var i in range(len(parseInt32Tests))) {
         var test = Ꮡ(parseInt32Tests, i);
         var (@out, err) = ParseInt(test.@in, 10, 32);
         if ((int64)test.@out != @out || !reflect.DeepEqual(test.err, err)) {
@@ -590,7 +586,7 @@ public static void TestParseInt32(ж<testing.T> t) {
 }
 
 public static void TestParseInt64(ж<testing.T> t) {
-    foreach (var i in range(parseInt64Tests)) {
+    foreach (var i in range(len(parseInt64Tests))) {
         var test = Ꮡ(parseInt64Tests, i);
         var (@out, err) = ParseInt(test.@in, 10, 64);
         if (test.@out != @out || !reflect.DeepEqual(test.err, err)) {
@@ -601,7 +597,7 @@ public static void TestParseInt64(ж<testing.T> t) {
 }
 
 public static void TestParseInt64Base(ж<testing.T> t) {
-    foreach (var i in range(parseInt64BaseTests)) {
+    foreach (var i in range(len(parseInt64BaseTests))) {
         var test = Ꮡ(parseInt64BaseTests, i);
         var (@out, err) = ParseInt(test.@in, test.@base, 64);
         if (test.@out != @out || !reflect.DeepEqual(test.err, err)) {
@@ -614,7 +610,7 @@ public static void TestParseInt64Base(ж<testing.T> t) {
 public static void TestParseUint(ж<testing.T> t) {
     switch (IntSize) {
     case var ᴛ when ᴛ == 32: {
-        foreach (var i in range(parseUint32Tests)) {
+        foreach (var i in range(len(parseUint32Tests))) {
             var test = Ꮡ(parseUint32Tests, i);
             var (@out, err) = ParseUint(test.@in, 10, 0);
             if ((uint64)test.@out != @out || !reflect.DeepEqual(test.err, err)) {
@@ -625,7 +621,7 @@ public static void TestParseUint(ж<testing.T> t) {
         break;
     }
     case var ᴛ when ᴛ == 64: {
-        foreach (var i in range(parseUint64Tests)) {
+        foreach (var i in range(len(parseUint64Tests))) {
             var test = Ꮡ(parseUint64Tests, i);
             var (@out, err) = ParseUint(test.@in, 10, 0);
             if (test.@out != @out || !reflect.DeepEqual(test.err, err)) {
@@ -640,7 +636,7 @@ public static void TestParseUint(ж<testing.T> t) {
 public static void TestParseInt(ж<testing.T> t) {
     switch (IntSize) {
     case var ᴛ when ᴛ == 32: {
-        foreach (var i in range(parseInt32Tests)) {
+        foreach (var i in range(len(parseInt32Tests))) {
             var test = Ꮡ(parseInt32Tests, i);
             var (@out, err) = ParseInt(test.@in, 10, 0);
             if ((int64)test.@out != @out || !reflect.DeepEqual(test.err, err)) {
@@ -651,7 +647,7 @@ public static void TestParseInt(ж<testing.T> t) {
         break;
     }
     case var ᴛ when ᴛ == 64: {
-        foreach (var i in range(parseInt64Tests)) {
+        foreach (var i in range(len(parseInt64Tests))) {
             var test = Ꮡ(parseInt64Tests, i);
             var (@out, err) = ParseInt(test.@in, 10, 0);
             if (test.@out != @out || !reflect.DeepEqual(test.err, err)) {
@@ -666,7 +662,7 @@ public static void TestParseInt(ж<testing.T> t) {
 public static void TestAtoi(ж<testing.T> t) {
     switch (IntSize) {
     case var ᴛ when ᴛ == 32: {
-        foreach (var i in range(parseInt32Tests)) {
+        foreach (var i in range(len(parseInt32Tests))) {
             var test = Ꮡ(parseInt32Tests, i);
             var (@out, err) = Atoi(test.@in);
             error testErr = default;
@@ -681,7 +677,7 @@ public static void TestAtoi(ж<testing.T> t) {
         break;
     }
     case var ᴛ when ᴛ == 64: {
-        foreach (var i in range(parseInt64Tests)) {
+        foreach (var i in range(len(parseInt64Tests))) {
             var test = Ꮡ(parseInt64Tests, i);
             var (@out, err) = Atoi(test.@in);
             error testErr = default;
@@ -716,23 +712,23 @@ partial struct parseErrorTest {
 
 internal static readonly ж<slice<parseErrorTest>> ᏑparseBitSizeTests = new StaticBox<slice<parseErrorTest>>(default(slice<parseErrorTest>));
 internal static ref slice<parseErrorTest> parseBitSizeTests => ref ((StaticBox<slice<parseErrorTest>>)ᏑparseBitSizeTests).ValueSlot;
-internal static void initᴛparseBitSizeTests() { parseBitSizeTests = slice<parseErrorTest>([
+internal static void initᴛparseBitSizeTests() { parseBitSizeTests = [
     new(-1, bitSizeErrStub),
     new(0, noErrStub),
     new(64, noErrStub),
     new(65, bitSizeErrStub)
-]); }
+]; }
 
 internal static readonly ж<slice<parseErrorTest>> ᏑparseBaseTests = new StaticBox<slice<parseErrorTest>>(default(slice<parseErrorTest>));
 internal static ref slice<parseErrorTest> parseBaseTests => ref ((StaticBox<slice<parseErrorTest>>)ᏑparseBaseTests).ValueSlot;
-internal static void initᴛparseBaseTests() { parseBaseTests = slice<parseErrorTest>([
+internal static void initᴛparseBaseTests() { parseBaseTests = [
     new(-1, baseErrStub),
     new(0, noErrStub),
     new(1, baseErrStub),
     new(2, noErrStub),
     new(36, noErrStub),
     new(37, baseErrStub)
-]); }
+]; }
 
 internal static bool equalError(error a, error b) {
     if (a == nil) {
@@ -749,7 +745,7 @@ internal static ref readonly @string parseIntˢ => ref parseIntˢᵇ;
 private static readonly @string parseIntˢᵇ = "ParseInt"u8;
 
 public static void TestParseIntBitSize(ж<testing.T> t) {
-    foreach (var i in range(parseBitSizeTests)) {
+    foreach (var i in range(len(parseBitSizeTests))) {
         var test = Ꮡ(parseBitSizeTests, i);
         var testErr = test.errStub(parseIntˢ, test.arg);
         var (_, err) = ParseInt("0", 0, test.arg);
@@ -765,7 +761,7 @@ internal static ref readonly @string parseUintˢ => ref parseUintˢᵇ;
 private static readonly @string parseUintˢᵇ = "ParseUint"u8;
 
 public static void TestParseUintBitSize(ж<testing.T> t) {
-    foreach (var i in range(parseBitSizeTests)) {
+    foreach (var i in range(len(parseBitSizeTests))) {
         var test = Ꮡ(parseBitSizeTests, i);
         var testErr = test.errStub(parseUintˢ, test.arg);
         var (_, err) = ParseUint("0", 0, test.arg);
@@ -777,7 +773,7 @@ public static void TestParseUintBitSize(ж<testing.T> t) {
 }
 
 public static void TestParseIntBase(ж<testing.T> t) {
-    foreach (var i in range(parseBaseTests)) {
+    foreach (var i in range(len(parseBaseTests))) {
         var test = Ꮡ(parseBaseTests, i);
         var testErr = test.errStub(parseIntˢ, test.arg);
         var (_, err) = ParseInt("0", test.arg, 0);
@@ -789,7 +785,7 @@ public static void TestParseIntBase(ж<testing.T> t) {
 }
 
 public static void TestParseUintBase(ж<testing.T> t) {
-    foreach (var i in range(parseBaseTests)) {
+    foreach (var i in range(len(parseBaseTests))) {
         var test = Ꮡ(parseBaseTests, i);
         var testErr = test.errStub(parseUintˢ, test.arg);
         var (_, err) = ParseUint("0", test.arg, 0);
@@ -805,16 +801,14 @@ internal static ref readonly @string failedˢ => ref failedˢᵇ;
 private static readonly @string failedˢᵇ = "failed"u8;
 
 public static void TestNumError(ж<testing.T> t) {
-    foreach (var (_, test) in numErrorTests) {
+    foreach (var (_, test) in range(numErrorTests)) {
         var err = Ꮡ(new NumError(
             Func: "ParseFloat",
             Num: test.num,
             Err: errors.New(failedˢ)
         ));
-        {
-            @string got = err.Error(); if (got != test.want) {
-                t.Errorf(@"(&NumError{""ParseFloat"", %q, ""failed""}).Error() = %v, want %v", test.num, got, test.want);
-            }
+        @string got = err.Error(); if (got != test.want) {
+            t.Errorf(@"(&NumError{""ParseFloat"", %q, ""failed""}).Error() = %v, want %v", test.num, got, test.want);
         }
     }
 }
@@ -856,7 +850,7 @@ public static void TestFormatComplex(ж<testing.T> t) {
 
         // other cases are handled by FormatFloat tests
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         @string @out = FormatComplex(test.c, test.fmt, test.prec, test.bitSize);
         if (@out != test.@out) {
             t.Fatalf("FormatComplex(%v, %q, %d, %d) = %q; want %q",
@@ -869,10 +863,8 @@ public static void TestFormatComplexInvalidBitSize(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r == nil) {
-                    t.Fatalf("expected panic due to invalid bitSize");
-                }
+            var r = recover(); if (r == nil) {
+                t.Fatalf("expected panic due to invalid bitSize");
             }
         }, ref ᒐ);
         _ = FormatComplex(1D + 2D.i(), (byte)'g', -1, 100);
@@ -887,7 +879,7 @@ partial struct itob64Test {
     internal @string @out;
 }
 
-internal static slice<itob64Test> itob64tests = slice<itob64Test>([
+internal static slice<itob64Test> itob64tests = [
     new(0, 10, "0"),
     new(1, 10, "1"),
     new(-1, 10, "-1"),
@@ -896,7 +888,7 @@ internal static slice<itob64Test> itob64tests = slice<itob64Test>([
     new(16, 17, "g"),
     new(25, 25, "10"),
     new(38493362624L, 36, "holycow")
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object abcˢ = (@string)"abc"u8;
@@ -904,7 +896,7 @@ internal static readonly object abcˢ = (@string)"abc"u8;
 public static void TestItoa(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        foreach (var (_, test) in itob64tests) {
+        foreach (var (_, test) in range(itob64tests)) {
             @string s = FormatInt(test.@in, test.@base);
             if (s != test.@out) {
                 t.Errorf("FormatInt(%v, %v) = %v want %v",
@@ -940,10 +932,8 @@ public static void TestItoa(ж<testing.T> t) {
 
         // Override when base is illegal
         defer(() => {
-            {
-                var r = recover(); if (r == nil) {
-                    t.Fatalf("expected panic due to illegal base");
-                }
+            var r = recover(); if (r == nil) {
+                t.Fatalf("expected panic due to illegal base");
             }
         }, ref ᒐ);
         FormatUint(12345678, 1);
@@ -958,17 +948,17 @@ partial struct uitob64Test {
     internal @string @out;
 }
 
-internal static slice<uitob64Test> uitob64tests = slice<uitob64Test>([
+internal static slice<uitob64Test> uitob64tests = [
     new(9223372036854775807UL, 10, "9223372036854775807"),
     new((uint64)1 << 63, 10, "9223372036854775808"),
     new(9223372036854775809UL, 10, "9223372036854775809"),
     new(18446744073709551614UL, 10, "18446744073709551614"),
     new(18446744073709551615UL, 10, "18446744073709551615"),
     new(18446744073709551615UL, 2, "1111111111111111111111111111111111111111111111111111111111111111")
-]);
+];
 
 public static void TestUitoa(ж<testing.T> t) {
-    foreach (var (_, test) in uitob64tests) {
+    foreach (var (_, test) in range(uitob64tests)) {
         @string s = FormatUint(test.@in, test.@base);
         if (s != test.@out) {
             t.Errorf("FormatUint(%v, %v) = %v want %v",
@@ -986,7 +976,7 @@ partial struct varlenUintsᴛ1 /*dyn*/ {
     internal uint64 @in;
     internal @string @out;
 }
-internal static slice<varlenUintsᴛ1> varlenUints = slice<varlenUintsᴛ1>([
+internal static slice<varlenUintsᴛ1> varlenUints = [
     new(1, "1"),
     new(12, "12"),
     new(123, "123"),
@@ -1007,10 +997,10 @@ internal static slice<varlenUintsᴛ1> varlenUints = slice<varlenUintsᴛ1>([
     new(123456789012345678UL, "123456789012345678"),
     new(1234567890123456789UL, "1234567890123456789"),
     new(12345678901234567890UL, "12345678901234567890")
-]);
+];
 
 public static void TestFormatUintVarlen(ж<testing.T> t) {
-    foreach (var (_, test) in varlenUints) {
+    foreach (var (_, test) in range(varlenUints)) {
         @string s = FormatUint(test.@in, 10);
         if (s != test.@out) {
             t.Errorf("FormatUint(%v, 10) = %v want %v", test.@in, s, test.@out);

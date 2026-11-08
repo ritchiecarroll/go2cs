@@ -54,7 +54,7 @@ public static void TestFileTransport(ж<testing.T> t) {
         var c = Ꮡ(new Client(Transport: new global::go.net.http_package.TransportжRoundTripper(tr)));
 
         var fooURLs = slice<@string>(["file:///foo.txt", "file://../foo.txt"]);
-        foreach (var (_, urlstr) in fooURLs) {
+        foreach (var (_, urlstr) in range(fooURLs)) {
             var (resΔ1, errΔ1) = c.Get(urlstr);
             check("Get "u8 + urlstr, errΔ1);
             if (resΔ1.StatusCode != 200) {
@@ -72,10 +72,8 @@ public static void TestFileTransport(ж<testing.T> t) {
             if (((sstring)slurp) != "Bar"u8) {
                 t.Errorf("for %s, got content %q, want %q", urlstr, (@string)slurp, barˢ);
             }
-            {
-                @string got = resΔ1.Request.URL.String(); if (got != urlstr) {
-                    t.Errorf("for %s, Response.Request.URL = %s, want = %s", urlstr, got, urlstr);
-                }
+            @string got = resΔ1.Request.URL.String(); if (got != urlstr) {
+                t.Errorf("for %s, Response.Request.URL = %s, want = %s", urlstr, got, urlstr);
             }
         }
 

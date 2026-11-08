@@ -44,7 +44,7 @@ public static void TestNames(ж<testing.T> t) {
     // Note that this regexp is promised in the package docs for Description. Do not change.
     var r = regexp.MustCompile(pNamePUnitˢ);
     var all = metrics.All();
-    foreach (var (i, d) in all) {
+    foreach (var (i, d) in range(all)) {
         if (!r.MatchString(d.Name)) {
             t.Errorf("name %q does not match regexp %#q", d.Name, r.OrTypedNil());
         }
@@ -56,12 +56,12 @@ public static void TestNames(ж<testing.T> t) {
     var names = runtime_readMetricNames();
     slices.Sort<slice<@string>, @string>(names);
     var samples = new slice<metrics.Sample>(len(names));
-    foreach (var (i, name) in names) {
+    foreach (var (i, name) in range(names)) {
         samples[i].Name = name;
     }
     metrics.Read(samples);
 
-    foreach (var (_, d) in all) {
+    foreach (var (_, d) in range(all)) {
         while (len(samples) > 0 && samples[0].Name < d.Name) {
             t.Errorf("%s: reported by runtime but not listed in All", samples[0].Name);
             samples = samples[1..];
@@ -78,14 +78,14 @@ public static void TestNames(ж<testing.T> t) {
 }
 
 internal static @string wrap(@string prefix, @string text, nint width) {
-    var doc = Ꮡ(new comment.Doc(Content: slice<comment.Block>([new comment.ParagraphжBlock(Ꮡ(new comment.Paragraph(Text: slice<commentꓸText>([((comment.Plain)text)]))))])));
+    var doc = Ꮡ(new comment.Doc(Content: [new comment.ParagraphжBlock(Ꮡ(new comment.Paragraph(Text: [((comment.Plain)text)])))]));
     var pr = Ꮡ(new comment.Printer(TextPrefix: prefix, TextWidth: width));
     return (@string)pr.Text(doc);
 }
 
 internal static @string formatDesc(ж<testing.T> t) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
-    foreach (var (i, d) in metrics.All()) {
+    foreach (var (i, d) in range(metrics.All())) {
         if (i > 0) {
             fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), "\n"u8);
         }
@@ -127,7 +127,7 @@ public static void TestDocs(ж<testing.T> t) {
     if (fdoc == nil) {
         t.Fatal(noDocCommentInDocGoˢ);
     }
-    (var pkg, err) = doc.NewFromFiles(fset, slice<ж<ast.File>>([f]), runtimeMetricsˢ);
+    (var pkg, err) = doc.NewFromFiles(fset, [f], runtimeMetricsˢ);
     if (err != nil) {
         t.Fatal(err);
     }
@@ -138,7 +138,7 @@ public static void TestDocs(ж<testing.T> t) {
     var expectCode = false;
     var foundCode = false;
     var updated = false;
-    foreach (var (_, block) in docΔ1.Content) {
+    foreach (var (_, block) in range(docΔ1.Content)) {
         switch (block.type()) {
         case ж<comment.Heading> b: {
             expectCode = false;
@@ -177,10 +177,8 @@ public static void TestDocs(ж<testing.T> t) {
         if (errΔ1 != nil) {
             t.Fatal(errΔ1);
         }
-        {
-            var errΔ2 = os.WriteFile(docGoˢ, srcΔ1, 438); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = os.WriteFile(docGoˢ, srcΔ1, 438); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     } else if (generate.Value) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "go test -generate: doc.go already up-to-date\n"u8);

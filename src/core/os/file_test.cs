@@ -50,10 +50,8 @@ public static void TestDirFSReadLink(ж<Δtesting.T> t) {
         [filepath.Join(subdir, parentLinkˢ)] = filepath.Join("..", fooˢ)
     };
     foreach (var (newname, oldname) in links) {
-        {
-            var err = Symlink(oldname, newname); if (err != nil) {
-                t.Fatal(err);
-            }
+        var err = Symlink(oldname, newname); if (err != nil) {
+            t.Fatal(err);
         }
     }
 
@@ -150,14 +148,10 @@ public static void TestDirFSWalkDir(ж<Δtesting.T> t) {
         var wantTypesʗ1 = wantTypes;
         var err = fs.WalkDir(fsysʗ1, linkˢ, (@string path, fs.DirEntry entry, error errΔ1) => {
             marksʗ1[path]++;
-            {
-                var (want, ok) = wantTypesʗ1[path, ꟷ]; if (!ok) {
-                    tΔ1.Errorf("Unexpected path %q in walk", path);
-                } else {
-                    var got = entry.Type(); if (got != want) {
-                        tΔ1.Errorf("%s entry type = %v; want %v", path, got, want);
-                    }
-                }
+            var (want, ok) = wantTypesʗ1[path, ꟷ]; if (!ok) {
+                tΔ1.Errorf("Unexpected path %q in walk", path);
+            } else if (entry.Type() is var got && got != want) {
+                tΔ1.Errorf("%s entry type = %v; want %v", path, got, want);
             }
             if (errΔ1 != nil) {
                 tΔ1.Errorf("%s: %v", path, errΔ1);
@@ -168,10 +162,8 @@ public static void TestDirFSWalkDir(ж<Δtesting.T> t) {
             tΔ1.Fatal(err);
         }
         foreach (var (path, _) in wantTypes) {
-            {
-                nint got = marks[path]; if (got != 1) {
-                    tΔ1.Errorf("%s visited %d times; expected 1", path, got);
-                }
+            nint got = marks[path]; if (got != 1) {
+                tΔ1.Errorf("%s visited %d times; expected 1", path, got);
             }
         }
     });
@@ -189,14 +181,10 @@ public static void TestDirFSWalkDir(ж<Δtesting.T> t) {
         var wantTypesʗ2 = wantTypes;
         var err = fs.WalkDir(fsysʗ2, ".", (@string path, fs.DirEntry entry, error errΔ1) => {
             marksʗ2[path]++;
-            {
-                var (want, ok) = wantTypesʗ2[path, ꟷ]; if (!ok) {
-                    tΔ2.Errorf("Unexpected path %q in walk", path);
-                } else {
-                    var got = entry.Type(); if (got != want) {
-                        tΔ2.Errorf("%s entry type = %v; want %v", path, got, want);
-                    }
-                }
+            var (want, ok) = wantTypesʗ2[path, ꟷ]; if (!ok) {
+                tΔ2.Errorf("Unexpected path %q in walk", path);
+            } else if (entry.Type() is var got && got != want) {
+                tΔ2.Errorf("%s entry type = %v; want %v", path, got, want);
             }
             if (errΔ1 != nil) {
                 tΔ2.Errorf("%s: %v", path, errΔ1);
@@ -207,10 +195,8 @@ public static void TestDirFSWalkDir(ж<Δtesting.T> t) {
             tΔ2.Fatal(err);
         }
         foreach (var (path, _) in wantTypes) {
-            {
-                nint got = marks[path]; if (got != 1) {
-                    tΔ2.Errorf("%s visited %d times; expected 1", path, got);
-                }
+            nint got = marks[path]; if (got != 1) {
+                tΔ2.Errorf("%s visited %d times; expected 1", path, got);
             }
         }
     });

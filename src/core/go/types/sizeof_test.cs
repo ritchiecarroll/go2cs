@@ -51,7 +51,7 @@ public static void TestSizeof(ж<testing.T> t) {
         new(new Package(), 44, 88),
         new(new _TypeSet(), 28, 56)
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var got = reflect.TypeOf(test.val).Size();
         var want = test._32bit;
         if (_64bit) {

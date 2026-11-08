@@ -26,8 +26,6 @@ using sync = sync_package;
 using atomic = global::go.sync.atomic_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using crypto;
 using encoding;
 using global::go.@internal;
@@ -71,10 +69,7 @@ internal static (slice<byte> b, error err) pedanticReadAll(io.Reader r) {
     }
 }
 
-public static void TestClient(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClient(Δp0, Δp1));
-}
-
+public static void TestClient(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClient(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string userAgentˢ => ref userAgentˢᵇ;
 private static readonly @string userAgentˢᵇ = "User-agent:"u8;
@@ -98,10 +93,7 @@ internal static void testClient(ж<testing.T> t, testMode mode) {
     }
 }
 
-public static void TestClientHead(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClientHead(Δp0, Δp1));
-}
-
+public static void TestClientHead(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientHead(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string lastModifiedˢ => ref lastModifiedˢᵇ;
 private static readonly @string lastModifiedˢᵇ = "Last-Modified"u8;
@@ -113,10 +105,8 @@ internal static void testClientHead(ж<testing.T> t, testMode mode) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        var (_, ok) = r.Header[lastModifiedˢ, ꟷ]; if (!ok) {
-            t.Error(lastModifiedHeaderNotˢ);
-        }
+    var (_, ok) = r.Header[lastModifiedˢ, ꟷ]; if (!ok) {
+        t.Error(lastModifiedHeaderNotˢ);
     }
 }
 
@@ -195,10 +185,8 @@ public static void TestPostRequestFormat(ж<testing.T> t) {
         if (tr.req.Close) {
             t.Error(gotCloseTrueWantFalseˢ);
         }
-        {
-            var (g, e) = (tr.req.ContentLength, (int64)len(json)); if (g != e) {
-                t.Errorf("got ContentLength %d, want %d", g, e);
-            }
+        var (g, e) = (tr.req.ContentLength, (int64)len(json)); if (g != e) {
+            t.Errorf("got ContentLength %d, want %d", g, e);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -277,10 +265,7 @@ public static void TestPostFormRequestFormat(ж<testing.T> t) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestClientRedirects(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClientRedirects(Δp0, Δp1));
-}
-
+public static void TestClientRedirects(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientRedirects(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string getN10StoppedAfter10ˢ => ref getN10StoppedAfter10ˢᵇ;
 private static readonly @string getN10StoppedAfter10ˢᵇ = @"Get ""/?n=10"": stopped after 10 redirects"u8;
@@ -304,11 +289,9 @@ internal static void testClientRedirects(ж<testing.T> t, testMode mode) {
         var (n, _) = strconv.Atoi(r.FormValue("n"));
         // Test Referer header. (7 is arbitrary position to test at)
         if (n == 7) {
-            {
-                @string g = r.Referer();
-                @string e = Ꮡts.ValueSlot.URL + "/?n=6"u8; if (e != g) {
-                    t.Errorf("on request ?n=7, expected referer of %q; got %q", e, g);
-                }
+            @string g = r.Referer();
+            @string e = Ꮡts.ValueSlot.URL + "/?n=6"u8; if (e != g) {
+                t.Errorf("on request ?n=7, expected referer of %q; got %q", e, g);
             }
         }
         if (n < 15) {
@@ -390,10 +373,8 @@ internal static void testClientRedirects(ж<testing.T> t, testMode mode) {
     var (creq, _) = NewRequest(headˢ, ts.URL, default);
     var cancel = new channel<EmptyStruct>(0);
     creq.Cancel = cancel.AsRecvOnly();
-    {
-        var (_, errΔ1) = c.Do(creq); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var (_, errΔ1) = c.Do(creq); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     if (lastReq == nil) {
         t.Fatal(didnTSeeRedirectˢ);
@@ -404,10 +385,8 @@ internal static void testClientRedirects(ж<testing.T> t, testMode mode) {
 
     checkErr = errors.New(noRedirectsAllowedˢ);
     (res, err) = c.Get(ts.URL);
-    {
-        var (urlError, ok) = err._<ж<urlꓸError>>(ᐧ); if (!ok || !AreEqual(urlError.Err, checkErr)) {
-            t.Errorf("with redirects forbidden, expected a *url.Error with our 'no redirects allowed' error inside; got %#v (%q)", err, err);
-        }
+    var (urlError, ok) = err._<ж<urlꓸError>>(ᐧ); if (!ok || !AreEqual(urlError.Err, checkErr)) {
+        t.Errorf("with redirects forbidden, expected a *url.Error with our 'no redirects allowed' error inside; got %#v (%q)", err, err);
     }
     if (res == nil) {
         t.Fatalf("Expected a non-nil Response on CheckRedirect failure (https://golang.org/issue/3795)");
@@ -419,10 +398,7 @@ internal static void testClientRedirects(ж<testing.T> t, testMode mode) {
 }
 
 // Tests that Client redirects' contexts are derived from the original request's context.
-public static void TestClientRedirectsContext(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClientRedirectsContext(Δp0, Δp1));
-}
-
+public static void TestClientRedirectsContext(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientRedirectsContext(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string redirectedRequestSˢ => ref redirectedRequestSˢᵇ;
 private static readonly @string redirectedRequestSˢᵇ = "redirected request's context never expired after root request canceled"u8;
@@ -575,37 +551,31 @@ internal static void testRedirectsByMethod(ж<testing.T> t, testMode mode, @stri
         Ꮡlog.of(testRedirectsByMethod_log.ᏑMutex).Lock();
         var (slurp, _) = io.ReadAll(new http_test_package.io_ReadCloserᴠReader(r.Body));
         fmt.Fprintf(new http_test_package.bytes_BufferжWriter(Ꮡlog.of(testRedirectsByMethod_log.ᏑBuffer)), "%s %s %q"u8, r.Method, r.RequestURI, slurp);
-        {
-            @string cl = r.Header.Get(contentLengthˢ); if (r.Method == "GET"u8 && len(slurp) == 0 && (r.ContentLength != 0 || cl != ""u8)) {
-                fmt.Fprintf(new http_test_package.bytes_BufferжWriter(Ꮡlog.of(testRedirectsByMethod_log.ᏑBuffer)), " (but with body=%T, content-length = %v, %q)"u8, r.Body, r.ContentLength, cl);
-            }
+        @string cl = r.Header.Get(contentLengthˢ); if (r.Method == "GET"u8 && len(slurp) == 0 && (r.ContentLength != 0 || cl != ""u8)) {
+            fmt.Fprintf(new http_test_package.bytes_BufferжWriter(Ꮡlog.of(testRedirectsByMethod_log.ᏑBuffer)), " (but with body=%T, content-length = %v, %q)"u8, r.Body, r.ContentLength, cl);
         }
         Ꮡlog.of(testRedirectsByMethod_log.ᏑBuffer).WriteByte((byte)'\n');
         Ꮡlog.of(testRedirectsByMethod_log.ᏑMutex).Unlock();
         var urlQuery = r.URL.Query();
-        {
-            @string v = urlQuery.Get(codeˢ); if (v != ""u8) {
-                @string location = Ꮡts.ValueSlot.URL;
-                {
-                    @string final = urlQuery.Get(nextˢ); if (final != ""u8) {
-                        var (first, rest, _) = strings.Cut(final, ",");
-                        location = fmt.Sprintf("%s?code=%s"u8, location, first);
-                        if (rest != ""u8) {
-                            location = fmt.Sprintf("%s&next=%s"u8, location, rest);
-                        }
-                    }
+        @string v = urlQuery.Get(codeˢ); if (v != ""u8) {
+            @string location = Ꮡts.ValueSlot.URL;
+            @string final = urlQuery.Get(nextˢ); if (final != ""u8) {
+                var (first, rest, _) = strings.Cut(final, ",");
+                location = fmt.Sprintf("%s?code=%s"u8, location, first);
+                if (rest != ""u8) {
+                    location = fmt.Sprintf("%s&next=%s"u8, location, rest);
                 }
-                var (code, _) = strconv.Atoi(v);
-                if (code / 100 == 3) {
-                    w.Header().Set(locationˢ, location);
-                }
-                w.WriteHeader(code);
             }
+            var (code, _) = strconv.Atoi(v);
+            if (code / 100 == 3) {
+                w.Header().Set(locationˢ, location);
+            }
+            w.WriteHeader(code);
         }
     }))).ts;
 
     var c = ts.Client();
-    foreach (var (_, tt) in table) {
+    foreach (var (_, tt) in range(table)) {
         @string content = tt.redirectBody;
         var (req, _) = NewRequest(method, ts.URL + tt.suffix, new http_test_package.strings_ReaderжReader(strings.NewReader(content)));
         req.GetBody = (io.ReadCloser, error) () => (io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(content))), default);
@@ -649,10 +619,7 @@ internal static (@string asuffix, @string bsuffix, nint commonLines) removeCommo
     }
 }
 
-public static void TestClientRedirectUseResponse(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClientRedirectUseResponse(Δp0, Δp1));
-}
-
+public static void TestClientRedirectUseResponse(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientRedirectUseResponse(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string otherˢ => ref otherˢᵇ;
 private static readonly @string otherˢᵇ = "/other"u8;
@@ -709,10 +676,7 @@ internal static void testClientRedirectUseResponse(ж<testing.T> t, testMode mod
 
 // Issues 17773 and 49281: don't follow a 3xx if the response doesn't
 // have a Location header.
-public static void TestClientRedirectNoLocation(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClientRedirectNoLocation(Δp0, Δp1));
-}
-
+public static void TestClientRedirectNoLocation(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientRedirectNoLocation(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fooˢ2 => ref fooˢ2ᵇ;
 private static readonly @string fooˢ2ᵇ = "Foo"u8;
@@ -720,7 +684,7 @@ internal static ref readonly @string barˢ2 => ref barˢ2ᵇ;
 private static readonly @string barˢ2ᵇ = "Bar"u8;
 
 internal static void testClientRedirectNoLocation(ж<testing.T> t, testMode mode) {
-    foreach (var (_, code) in slice<nint>([301, 308])) {
+    foreach (var (_, code) in range(slice<nint>([301, 308]))) {
         t.Run(fmt.Sprint(code), (ж<testing.T> tΔ1) => {
             setParallel(tΔ1);
             var cst = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
@@ -735,20 +699,15 @@ internal static void testClientRedirectNoLocation(ж<testing.T> t, testMode mode
             if (res.StatusCode != code) {
                 tΔ1.Errorf("status = %d; want %d", res.StatusCode, code);
             }
-            {
-                @string got = res.Header.Get(fooˢ2); if (got != "Bar"u8) {
-                    tΔ1.Errorf("Foo header = %q; want Bar", got);
-                }
+            @string got = res.Header.Get(fooˢ2); if (got != "Bar"u8) {
+                tΔ1.Errorf("Foo header = %q; want Bar", got);
             }
         });
     }
 }
 
 // Don't follow a 307/308 if we can't resent the request body.
-public static void TestClientRedirect308NoGetBody(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClientRedirect308NoGetBody(Δp0, Δp1));
-}
-
+public static void TestClientRedirect308NoGetBody(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientRedirect308NoGetBody(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string someBodyˢ => ref someBodyˢᵇ;
 private static readonly @string someBodyˢᵇ = "some body"u8;
@@ -777,21 +736,19 @@ internal static void testClientRedirect308NoGetBody(ж<testing.T> t, testMode mo
     if (res.StatusCode != 308) {
         t.Errorf("status = %d; want %d", res.StatusCode, (nint)308);
     }
-    {
-        @string got = res.Header.Get(locationˢ); if (got != fakeURL) {
-            t.Errorf("Location header = %q; want %q", got, fakeURL);
-        }
+    @string got = res.Header.Get(locationˢ); if (got != fakeURL) {
+        t.Errorf("Location header = %q; want %q", got, fakeURL);
     }
 }
 
-internal static slice<ж<httpꓸCookie>> expectedCookies = slice<ж<httpꓸCookie>>([
+internal static slice<ж<httpꓸCookie>> expectedCookies = [
     Ꮡ(new httpꓸCookie(Name: "ChocolateChip", Value: "tasty")),
     Ꮡ(new httpꓸCookie(Name: "First", Value: "Hit")),
     Ꮡ(new httpꓸCookie(Name: "Second", Value: "Hit"))
-]);
+];
 
 internal static Δhttp.HandlerFunc echoCookiesRedirectHandler = new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
-    foreach (var (_, cookie) in r.Cookies()) {
+    foreach (var (_, cookie) in range(r.Cookies())) {
         SetCookie(w, cookie);
     }
     if (r.URL.Path == "/"u8) {
@@ -803,10 +760,7 @@ internal static Δhttp.HandlerFunc echoCookiesRedirectHandler = new Δhttp.Handl
     }
 });
 
-public static void TestHostMismatchCookies(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testHostMismatchCookies(Δp0, Δp1));
-}
-
+public static void TestHostMismatchCookies(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testHostMismatchCookies(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string setOnServerˢ => ref setOnServerˢᵇ;
 private static readonly @string setOnServerˢᵇ = "SetOnServer"u8;
@@ -815,7 +769,7 @@ private static readonly @string cookiesExampleComˢᵇ = "cookies.example.com"u8
 
 internal static void testHostMismatchCookies(ж<testing.T> t, testMode mode) {
     var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
-        foreach (var (_, cΔ1) in r.Cookies()) {
+        foreach (var (_, cΔ1) in range(r.Cookies())) {
             cΔ1.Value.Value = setOnServerˢ;
             SetCookie(w, cΔ1);
         }
@@ -827,8 +781,8 @@ internal static void testHostMismatchCookies(ж<testing.T> t, testMode mode) {
 
     var c = ts.Client();
     c.Jar = new http_test_package.TestJarжCookieJar(@new<TestJar>());
-    c.Jar.SetCookies(reqURL, slice<ж<httpꓸCookie>>([Ꮡ(new httpꓸCookie(Name: "First", Value: "SetOnClient"))]));
-    c.Jar.SetCookies(ᏑhostURL, slice<ж<httpꓸCookie>>([Ꮡ(new httpꓸCookie(Name: "Second", Value: "SetOnClient"))]));
+    c.Jar.SetCookies(reqURL, [Ꮡ(new httpꓸCookie(Name: "First", Value: "SetOnClient"))]);
+    c.Jar.SetCookies(ᏑhostURL, [Ꮡ(new httpꓸCookie(Name: "Second", Value: "SetOnClient"))]);
 
     var (req, _) = NewRequest(getˢ2, ts.URL, new http_test_package.http_noBodyᴠReader(NoBody));
     req.Host = hostURL.Host;
@@ -838,8 +792,8 @@ internal static void testHostMismatchCookies(ж<testing.T> t, testMode mode) {
     }
     resp.Body.Close();
 
-    matchReturnedCookies(t, slice<ж<httpꓸCookie>>([Ꮡ(new httpꓸCookie(Name: "First", Value: "SetOnClient"))]), c.Jar.Cookies(reqURL));
-    matchReturnedCookies(t, slice<ж<httpꓸCookie>>([Ꮡ(new httpꓸCookie(Name: "Second", Value: "SetOnServer"))]), c.Jar.Cookies(ᏑhostURL));
+    matchReturnedCookies(t, [Ꮡ(new httpꓸCookie(Name: "First", Value: "SetOnClient"))], c.Jar.Cookies(reqURL));
+    matchReturnedCookies(t, [Ꮡ(new httpꓸCookie(Name: "Second", Value: "SetOnServer"))], c.Jar.Cookies(ᏑhostURL));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -923,17 +877,14 @@ public static slice<ж<httpꓸCookie>> Cookies(this ж<TestJar> Ꮡj, ж<url.URL
     finally { if (ᒐd1) Ꮡj.DerefOrNull().m.Unlock(); ᒐ.Run(); }
 }
 
-public static void TestRedirectCookiesJar(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testRedirectCookiesJar(Δp0, Δp1));
-}
-
+public static void TestRedirectCookiesJar(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testRedirectCookiesJar(Δp0, Δp1)); }
 internal static void testRedirectCookiesJar(ж<testing.T> t, testMode mode) {
     ж<httptest.Server> ts = default;
     ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(echoCookiesRedirectHandler)).ts;
     var c = ts.Client();
     c.Jar = new http_test_package.TestJarжCookieJar(@new<TestJar>());
     var (u, _) = url.Parse(ts.URL);
-    c.Jar.SetCookies(u, slice<ж<httpꓸCookie>>([expectedCookies[0]]));
+    c.Jar.SetCookies(u, [expectedCookies[0]]);
     var (resp, err) = c.Get(ts.URL);
     if (err != nil) {
         t.Fatalf("Get: %v", err);
@@ -947,9 +898,9 @@ internal static void matchReturnedCookies(ж<testing.T> t, slice<ж<httpꓸCooki
         t.Logf("Received cookies: %v", given);
         t.Errorf("Expected %d cookies, got %d", len(expected), len(given));
     }
-    foreach (var (_, ec) in expected) {
+    foreach (var (_, ec) in range(expected)) {
         var foundC = false;
-        foreach (var (_, c) in given) {
+        foreach (var (_, c) in range(given)) {
             if (ec.Name == c.Name && (~ec).Value == (~c).Value) {
                 foundC = true;
                 break;
@@ -961,10 +912,7 @@ internal static void matchReturnedCookies(ж<testing.T> t, slice<ж<httpꓸCooki
     }
 }
 
-public static void TestJarCalls(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testJarCalls(Δp0, Δp1), slice<testMode>([http1Mode]));
-}
-
+public static void TestJarCalls(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testJarCalls(Δp0, Δp1), slice<testMode>([http1Mode])); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpSecondhostFakeˢ => ref httpSecondhostFakeˢᵇ;
 private static readonly @string httpSecondhostFakeˢᵇ = "http://secondhost.fake/secondpath"u8;
@@ -1044,10 +992,7 @@ internal static void logf(this ж<RecordingJar> Ꮡj, @string format, params ꓸ
     finally { if (ᒐd1) Ꮡj.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-public static void TestStreamingGet(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testStreamingGet(Δp0, Δp1));
-}
-
+public static void TestStreamingGet(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testStreamingGet(Δp0, Δp1)); }
 internal static void testStreamingGet(ж<testing.T> t, testMode mode) {
     var say = new channel<@string>(0);
     var sayʗ1 = say;
@@ -1065,7 +1010,7 @@ internal static void testStreamingGet(ж<testing.T> t, testMode mode) {
         t.Fatal(err);
     }
     array<byte> buf = new(10);
-    foreach (var (_, str) in slice<@string>(["i", "am", "also", "known", "as", "comet"])) {
+    foreach (var (_, str) in range(slice<@string>(["i", "am", "also", "known", "as", "comet"]))) {
         say.ᐸꟷ(str);
         var (n, errΔ1) = io.ReadFull(res.Body, buf.slice(0, len(str)));
         if (errΔ1 != nil) {
@@ -1126,10 +1071,7 @@ internal static (nint, error) Write(this ref writeCountingConn c, slice<byte> p)
 
 // TestClientWrites verifies that client requests are buffered and we
 // don't send a TCP packet per line of the http request + body.
-public static void TestClientWrites(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClientWrites(Δp0, Δp1), slice<testMode>([http1Mode]));
-}
-
+public static void TestClientWrites(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientWrites(Δp0, Δp1), slice<testMode>([http1Mode])); }
 internal static void testClientWrites(ж<testing.T> t, testMode mode) {
     var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
     }))).ts;
@@ -1154,7 +1096,7 @@ internal static void testClientWrites(ж<testing.T> t, testMode mode) {
     }
 
     writes = 0;
-    (_, err) = c.PostForm(ts.URL, new url.Values(new map<@string, slice<@string>>{["foo"] = slice<@string>(["bar"])}));
+    (_, err) = c.PostForm(ts.URL, new url.Values(new map<@string, slice<@string>>{["foo"] = ["bar"]}));
     if (err != nil) {
         t.Fatal(err);
     }
@@ -1166,7 +1108,6 @@ internal static void testClientWrites(ж<testing.T> t, testMode mode) {
 public static void TestClientInsecureTransport(ж<testing.T> t) {
     run<TжTBRun>(t, (Δp0, Δp1) => testClientInsecureTransport(Δp0, Δp1), slice<testMode>([https1Mode, http2Mode]));
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string connectionˢ => ref connectionˢᵇ;
 private static readonly @string connectionˢᵇ = "Connection"u8;
@@ -1187,7 +1128,7 @@ internal static void testClientInsecureTransport(ж<testing.T> t, testMode mode)
     // would require a new cert for testing, and probably
     // redundant with these tests.
     var c = ts.Client();
-    foreach (var (_, vᴛ1) in slice<bool>([true, false])) {
+    foreach (var (_, vᴛ1) in range(slice<bool>([true, false]))) {
         ref var insecure = ref heap(new bool(), out var Ꮡinsecure);
         insecure = vᴛ1;
 
@@ -1241,7 +1182,6 @@ public static void TestClientErrorWithRequestURI(ж<testing.T> t) {
 public static void TestClientWithCorrectTLSServerName(ж<testing.T> t) {
     run<TжTBRun>(t, (Δp0, Δp1) => testClientWithCorrectTLSServerName(Δp0, Δp1), slice<testMode>([https1Mode, http2Mode]));
 }
-
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string serverNameᶜ => ref serverNameᶜᵇ;
 private static readonly @string serverNameᶜᵇ = "example.com"u8;
@@ -1256,17 +1196,14 @@ internal static void testClientWithCorrectTLSServerName(ж<testing.T> t, testMod
 
     var c = ts.Client();
     c.Transport._<ж<Δhttp.Transport>>().TLSClientConfig.ServerName = serverName;
-    {
-        var (_, err) = c.Get(ts.URL); if (err != nil) {
-            t.Fatalf("expected successful TLS connection, got error: %v", err);
-        }
+    var (_, err) = c.Get(ts.URL); if (err != nil) {
+        t.Fatalf("expected successful TLS connection, got error: %v", err);
     }
 }
 
 public static void TestClientWithIncorrectTLSServerName(ж<testing.T> t) {
     run<TжTBRun>(t, (Δp0, Δp1) => testClientWithIncorrectTLSServerName(Δp0, Δp1), slice<testMode>([https1Mode, http2Mode]));
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string badserverˢ => ref badserverˢᵇ;
 private static readonly @string badserverˢᵇ = "badserver"u8;
@@ -1306,7 +1243,6 @@ internal static void testClientWithIncorrectTLSServerName(ж<testing.T> t, testM
 public static void TestTransportUsesTLSConfigServerName(ж<testing.T> t) {
     run<TжTBRun>(t, (Δp0, Δp1) => testTransportUsesTLSConfigServerName(Δp0, Δp1), slice<testMode>([https1Mode, http2Mode]));
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string exampleComˢ => ref exampleComˢᵇ;
 private static readonly @string exampleComˢᵇ = "example.com"u8;
@@ -1333,7 +1269,6 @@ internal static void testTransportUsesTLSConfigServerName(ж<testing.T> t, testM
 public static void TestResponseSetsTLSConnectionState(ж<testing.T> t) {
     run<TжTBRun>(t, (Δp0, Δp1) => testResponseSetsTLSConnectionState(Δp0, Δp1), slice<testMode>([https1Mode]));
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpsExampleComˢ => ref httpsExampleComˢᵇ;
 private static readonly @string httpsExampleComˢᵇ = "https://example.com/"u8;
@@ -1348,7 +1283,7 @@ internal static void testResponseSetsTLSConnectionState(ж<testing.T> t, testMod
 
         var c = ts.Client();
         var tr = c.Transport._<ж<Δhttp.Transport>>();
-        tr.TLSClientConfig.CipherSuites = slice<uint16>([tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256]);
+        tr.TLSClientConfig.CipherSuites = [tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256];
         tr.TLSClientConfig.MaxVersion = tls.VersionTLS12; // to get to pick the cipher suite
         var tsʗ1 = ts;
         tr.Dial = (@string netw, @string addr) => net.Dial(netw, tsʗ1.Listener.Addr().String());
@@ -1361,10 +1296,8 @@ internal static void testResponseSetsTLSConnectionState(ж<testing.T> t, testMod
         if (res.TLS == nil) {
             t.Fatal(responseDidnTSetTlsˢ);
         }
-        {
-            var (got, want) = (res.TLS.CipherSuite, tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); if (got != want) {
-                t.Errorf("TLS Cipher Suite = %d; want %d", got, want);
-            }
+        var (got, want) = (res.TLS.CipherSuite, tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); if (got != want) {
+            t.Errorf("TLS Cipher Suite = %d; want %d", got, want);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1377,7 +1310,6 @@ internal static void testResponseSetsTLSConnectionState(ж<testing.T> t, testMod
 public static void TestHTTPSClientDetectsHTTPServer(ж<testing.T> t) {
     run<TжTBRun>(t, (Δp0, Δp1) => testHTTPSClientDetectsHTTPServer(Δp0, Δp1), slice<testMode>([http1Mode]));
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpˢ => ref httpˢᵇ;
 private static readonly @string httpˢᵇ = "http"u8;
@@ -1392,18 +1324,13 @@ internal static void testHTTPSClientDetectsHTTPServer(ж<testing.T> t, testMode 
     ts.Config.ErrorLog = quietLog;
 
     var (_, err) = Get(strings.Replace(ts.URL, httpˢ, httpsˢ, 1));
-    {
-        @string got = err.Error(); if (!strings.Contains(got, httpResponseToHttpsˢ)) {
-            t.Fatalf("error = %q; want error indicating HTTP response to HTTPS request", got);
-        }
+    @string got = err.Error(); if (!strings.Contains(got, httpResponseToHttpsˢ)) {
+        t.Fatalf("error = %q; want error indicating HTTP response to HTTPS request", got);
     }
 }
 
 // Verify Response.ContentLength is populated. https://golang.org/issue/4126
-public static void TestClientHeadContentLength(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClientHeadContentLength(Δp0, Δp1));
-}
-
+public static void TestClientHeadContentLength(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientHeadContentLength(Δp0, Δp1)); }
 internal partial struct testClientHeadContentLength_tests /*dyn*/ {
     internal @string suffix;
     internal int64 want;
@@ -1411,10 +1338,8 @@ internal partial struct testClientHeadContentLength_tests /*dyn*/ {
 
 internal static void testClientHeadContentLength(ж<testing.T> t, testMode mode) {
     var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
-        {
-            @string v = r.FormValue("cl"); if (v != ""u8) {
-                w.Header().Set(contentLengthˢ, v);
-            }
+        @string v = r.FormValue("cl"); if (v != ""u8) {
+            w.Header().Set(contentLengthˢ, v);
         }
     })));
     var tests = slice<testClientHeadContentLength_tests>([
@@ -1422,7 +1347,7 @@ internal static void testClientHeadContentLength(ж<testing.T> t, testMode mode)
         new("/?cl=0", 0),
         new("", -1)
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var (req, _) = NewRequest(headˢ, cst.ts.URL + tt.suffix, default);
         var (res, err) = cst.c.Do(req);
         if (err != nil) {
@@ -1441,10 +1366,7 @@ internal static void testClientHeadContentLength(ж<testing.T> t, testMode mode)
     }
 }
 
-public static void TestEmptyPasswordAuth(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testEmptyPasswordAuth(Δp0, Δp1));
-}
-
+public static void TestEmptyPasswordAuth(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testEmptyPasswordAuth(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string gopherˢ => ref gopherˢᵇ;
 private static readonly @string gopherˢᵇ = "gopher"u8;
@@ -1621,7 +1543,7 @@ public static void TestStripPasswordFromError(ж<testing.T> t) {
             @out: @"Get ""http://user:***@dummy.faketld/"": dummy impl"
         )
     ]);
-    foreach (var (_, vᴛ1) in testCases) {
+    foreach (var (_, vᴛ1) in range(testCases)) {
         ref var tC = ref heap(new TestStripPasswordFromError_testCases(), out var ᏑtC);
         tC = vᴛ1;
 
@@ -1637,10 +1559,7 @@ public static void TestStripPasswordFromError(ж<testing.T> t) {
     }
 }
 
-public static void TestClientTimeout(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClientTimeout(Δp0, Δp1));
-}
-
+public static void TestClientTimeout(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientTimeout(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nonceˢ => ref nonceˢᵇ;
 private static readonly @string nonceˢᵇ = "nonce"u8;
@@ -1693,10 +1612,8 @@ internal static void testClientTimeout(ж<testing.T> Ꮡt, testMode mode) {
             // the request fails without actually waiting for the timeout to occur.
             Ꮡt.Fatalf("timeout overflow");
         }
-        {
-            var (deadline, okΔ1) = t.Deadline(); if (okΔ1 && !time.Now().Add(timeout).Before(deadline)) {
-                Ꮡt.Fatalf("failed to produce expected timeout before test deadline");
-            }
+        var (deadline, okΔ1) = t.Deadline(); if (okΔ1 && !time.Now().Add(timeout).Before(deadline)) {
+            Ꮡt.Fatalf("failed to produce expected timeout before test deadline");
         }
         Ꮡt.Logf("attempting test with timeout %v", timeout);
         cst.c.Timeout = timeout;
@@ -1741,13 +1658,11 @@ internal static void testClientTimeout(ж<testing.T> Ꮡt, testMode mode) {
         if (!errors.Is(err, context_package.DeadlineExceeded)) {
             Ꮡt.Errorf("ReadAll error = %q; expected some context.DeadlineExceeded", err);
         }
-        {
-            @string got = ne.Error(); if (!strings.Contains(got, clientTimeoutˢ2)) {
-                if (runtime.GOOS == "windows"u8 && runtime.GOARCH == "arm64"u8) {
-                    testenv.SkipFlaky(new http_test_package.testing_TжTB(Ꮡt), 43120);
-                }
-                Ꮡt.Errorf("error string = %q; missing timeout substring", got);
+        @string got = ne.Error(); if (!strings.Contains(got, clientTimeoutˢ2)) {
+            if (runtime.GOOS == "windows"u8 && runtime.GOARCH == "arm64"u8) {
+                testenv.SkipFlaky(new http_test_package.testing_TжTB(Ꮡt), 43120);
             }
+            Ꮡt.Errorf("error string = %q; missing timeout substring", got);
         }
 
         break;
@@ -1755,10 +1670,7 @@ internal static void testClientTimeout(ж<testing.T> Ꮡt, testMode mode) {
 }
 
 // Client.Timeout firing before getting to the body
-public static void TestClientTimeout_Headers(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClientTimeout_Headers(Δp0, Δp1));
-}
-
+public static void TestClientTimeout_Headers(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientTimeout_Headers(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object gotResponseFromGetˢ = (@string)"got response from Get; expected error"u8;
 internal static readonly object netErrorTimeoutFalseWantˢ = (@string)"net.Error.Timeout = false; want true"u8;
@@ -1791,10 +1703,8 @@ internal static void testClientTimeout_Headers(ж<testing.T> t, testMode mode) {
             res.Body.Close();
             t.Fatal(gotResponseFromGetˢ);
         }
-        {
-            var (_, okΔ1) = err._<ж<urlꓸError>>(ᐧ); if (!okΔ1) {
-                t.Fatalf("Got error of type %T; want *url.Error", err);
-            }
+        var (_, okΔ1) = err._<ж<urlꓸError>>(ᐧ); if (!okΔ1) {
+            t.Fatalf("Got error of type %T; want *url.Error", err);
         }
         var (ne, ok) = err._<netꓸError>(ᐧ);
         if (!ok) {
@@ -1806,13 +1716,11 @@ internal static void testClientTimeout_Headers(ж<testing.T> t, testMode mode) {
         if (!errors.Is(err, context_package.DeadlineExceeded)) {
             t.Errorf("ReadAll error = %q; expected some context.DeadlineExceeded", err);
         }
-        {
-            @string got = ne.Error(); if (!strings.Contains(got, clientTimeoutExceededˢ)) {
-                if (runtime.GOOS == "windows"u8 && runtime.GOARCH == "arm64"u8) {
-                    testenv.SkipFlaky(new http_test_package.testing_TжTB(t), 43120);
-                }
-                t.Errorf("error string = %q; missing timeout substring", got);
+        @string got = ne.Error(); if (!strings.Contains(got, clientTimeoutExceededˢ)) {
+            if (runtime.GOOS == "windows"u8 && runtime.GOARCH == "arm64"u8) {
+                testenv.SkipFlaky(new http_test_package.testing_TжTB(t), 43120);
             }
+            t.Errorf("error string = %q; missing timeout substring", got);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1821,10 +1729,7 @@ internal static void testClientTimeout_Headers(ж<testing.T> t, testMode mode) {
 
 // Issue 16094: if Client.Timeout is set but not hit, a Timeout error shouldn't be
 // returned.
-public static void TestClientTimeoutCancel(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClientTimeoutCancel(Δp0, Δp1));
-}
-
+public static void TestClientTimeoutCancel(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientTimeoutCancel(Δp0, Δp1)); }
 internal static void testClientTimeoutCancel(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
@@ -1856,10 +1761,7 @@ internal static void testClientTimeoutCancel(ж<testing.T> t, testMode mode) {
 }
 
 // Issue 49366: if Client.Timeout is set but not hit, no error should be returned.
-public static void TestClientTimeoutDoesNotExpire(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClientTimeoutDoesNotExpire(Δp0, Δp1));
-}
-
+public static void TestClientTimeoutDoesNotExpire(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientTimeoutDoesNotExpire(Δp0, Δp1)); }
 internal static void testClientTimeoutDoesNotExpire(ж<testing.T> t, testMode mode) {
     var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Write(slice<byte>("body"u8));
@@ -1871,22 +1773,15 @@ internal static void testClientTimeoutDoesNotExpire(ж<testing.T> t, testMode mo
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        (_, err) = io.Copy(io.Discard, res.Body); if (err != nil) {
-            t.Fatalf("io.Copy(io.Discard, res.Body) = %v, want nil", err);
-        }
+    (_, err) = io.Copy(io.Discard, res.Body); if (err != nil) {
+        t.Fatalf("io.Copy(io.Discard, res.Body) = %v, want nil", err);
     }
-    {
-        err = res.Body.Close(); if (err != nil) {
-            t.Fatalf("res.Body.Close() = %v, want nil", err);
-        }
+    err = res.Body.Close(); if (err != nil) {
+        t.Fatalf("res.Body.Close() = %v, want nil", err);
     }
 }
 
-public static void TestClientRedirectEatsBody_h1(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClientRedirectEatsBody(Δp0, Δp1));
-}
-
+public static void TestClientRedirectEatsBody_h1(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientRedirectEatsBody(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fooˢ3 => ref fooˢ3ᵇ;
 private static readonly @string fooˢ3ᵇ = "/foo"u8;
@@ -1980,7 +1875,7 @@ public static void TestReferer(ж<testing.T> t) {
         new(lastReq: "https://test.com", newReq: "https://link.com", explicitRef: "https://foo.com", want: "https://foo.com"),
         new(lastReq: "https://gopher:go@test.com", newReq: "https://link.com", explicitRef: "https://foo.com", want: "https://foo.com")
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var (l, err) = url.Parse(tt.lastReq);
         if (err != nil) {
             t.Fatal(err);
@@ -2004,7 +1899,7 @@ partial struct issue15577Tripper {
 internal static (ж<Δhttp.Response>, error) RoundTrip(this issue15577Tripper _Δp0, ж<Δhttp.Request> _Δp1) {
     var resp = Ꮡ(new Response(
         StatusCode: 303,
-        Header: new map<@string, slice<@string>>{["Location"] = slice<@string>(["http://www.example.com/"])},
+        Header: new map<@string, slice<@string>>{["Location"] = ["http://www.example.com/"]},
         Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(""u8)))
     ));
     return (resp, default);
@@ -2028,10 +1923,7 @@ public static void TestClientRedirectResponseWithoutRequest(ж<testing.T> t) {
 // Issue 35104: Since both URLs have the same host (localhost)
 // but different ports, sensitive headers like Cookie and Authorization
 // are preserved.
-public static void TestClientCopyHeadersOnRedirect(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClientCopyHeadersOnRedirect(Δp0, Δp1));
-}
-
+public static void TestClientCopyHeadersOnRedirect(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientCopyHeadersOnRedirect(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string resultˢ => ref resultˢᵇ;
 private static readonly @string resultˢᵇ = "Result"u8;
@@ -2064,12 +1956,12 @@ internal static void testClientCopyHeadersOnRedirect(ж<testing.T> t, testMode m
         @string ts2URL = default;
         var ts1 = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var want = new httpꓸHeader(new map<@string, slice<@string>>{
-                ["User-Agent"] = slice<@string>([ua]),
-                ["X-Foo"] = slice<@string>([xfoo]),
-                ["Referer"] = slice<@string>([ts2URL]),
-                ["Accept-Encoding"] = slice<@string>(["gzip"]),
-                ["Cookie"] = slice<@string>(["foo=bar"]),
-                ["Authorization"] = slice<@string>(["secretpassword"])
+                ["User-Agent"] = [ua],
+                ["X-Foo"] = [xfoo],
+                ["Referer"] = [ts2URL],
+                ["Accept-Encoding"] = ["gzip"],
+                ["Cookie"] = ["foo=bar"],
+                ["Authorization"] = ["secretpassword"]
             });
             if (!reflect.DeepEqual(r.Header, want)) {
                 t.Errorf("Request.Header = %#v; want %#v", r.Header, want);
@@ -2089,11 +1981,11 @@ internal static void testClientCopyHeadersOnRedirect(ж<testing.T> t, testMode m
         var c = ts1.Client();
         c.CheckRedirect = error (ж<Δhttp.Request> r, slice<ж<Δhttp.Request>> via) => {
             var want = new httpꓸHeader(new map<@string, slice<@string>>{
-                ["User-Agent"] = slice<@string>([ua]),
-                ["X-Foo"] = slice<@string>([xfoo]),
-                ["Referer"] = slice<@string>([ts2URL]),
-                ["Cookie"] = slice<@string>(["foo=bar"]),
-                ["Authorization"] = slice<@string>(["secretpassword"])
+                ["User-Agent"] = [ua],
+                ["X-Foo"] = [xfoo],
+                ["Referer"] = [ts2URL],
+                ["Cookie"] = ["foo=bar"],
+                ["Authorization"] = ["secretpassword"]
             });
             if (!reflect.DeepEqual(r.Header, want)) {
                 t.Errorf("CheckRedirect Request.Header = %#v; want %#v", r.Header, want);
@@ -2115,10 +2007,8 @@ internal static void testClientCopyHeadersOnRedirect(ж<testing.T> t, testMode m
         if (res.StatusCode != 200) {
             t.Fatal(res.Status);
         }
-        {
-            @string got = res.Header.Get(resultˢ); if (got != "ok"u8) {
-                t.Errorf("result = %q; want ok", got);
-            }
+        @string got = res.Header.Get(resultˢ); if (got != "ok"u8) {
+            t.Errorf("result = %q; want ok", got);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2130,7 +2020,6 @@ internal static void testClientCopyHeadersOnRedirect(ж<testing.T> t, testMode m
 public static void TestClientStripHeadersOnRepeatedRedirect(ж<testing.T> t) {
     run<TжTBRun>(t, (Δp0, Δp1) => testClientStripHeadersOnRepeatedRedirect(Δp0, Δp1));
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string proxyAuthorizationˢ => ref proxyAuthorizationˢᵇ;
 private static readonly @string proxyAuthorizationˢᵇ = "Proxy-Authorization"u8;
@@ -2145,13 +2034,11 @@ internal static void testClientStripHeadersOnRepeatedRedirect(ж<testing.T> t, t
         @string proto = default;
         var ts = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             if (r.Host + r.URL.Path != "a.example.com/"u8) {
-                {
-                    @string h = r.Header.Get(authorizationˢ); if (h != ""u8) {
-                        t.Errorf("on request to %v%v, Authorization=%q, want no header", r.Host, r.URL.Path, h);
-                    } else {
-                        @string hΔ1 = r.Header.Get(proxyAuthorizationˢ); if (hΔ1 != ""u8) {
-                            t.Errorf("on request to %v%v, Proxy-Authorization=%q, want no header", r.Host, r.URL.Path, hΔ1);
-                        }
+                @string h = r.Header.Get(authorizationˢ); if (h != ""u8) {
+                    t.Errorf("on request to %v%v, Authorization=%q, want no header", r.Host, r.URL.Path, h);
+                } else {
+                    @string hΔ1 = r.Header.Get(proxyAuthorizationˢ); if (hΔ1 != ""u8) {
+                        t.Errorf("on request to %v%v, Proxy-Authorization=%q, want no header", r.Host, r.URL.Path, hΔ1);
                     }
                 }
             }
@@ -2208,7 +2095,6 @@ internal static void testClientStripHeadersOnRepeatedRedirect(ж<testing.T> t, t
 public static void TestClientStripHeadersOnPostToGetRedirect(ж<testing.T> t) {
     run<TжTBRun>(t, (Δp0, Δp1) => testClientStripHeadersOnPostToGetRedirect(Δp0, Δp1));
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string redirectedˢ => ref redirectedˢᵇ;
 private static readonly @string redirectedˢᵇ = "/redirected"u8;
@@ -2258,10 +2144,7 @@ internal static void testClientStripHeadersOnPostToGetRedirect(ж<testing.T> t, 
 }
 
 // Issue 22233: copy host when Client follows a relative redirect.
-public static void TestClientCopyHostOnRedirect(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClientCopyHostOnRedirect(Δp0, Δp1));
-}
-
+public static void TestClientCopyHostOnRedirect(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientCopyHostOnRedirect(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string shouldNotSeeThisResponseˢ => ref shouldNotSeeThisResponseˢᵇ;
 private static readonly @string shouldNotSeeThisResponseˢᵇ = "should not see this response"u8;
@@ -2353,10 +2236,8 @@ internal static void testClientCopyHostOnRedirect(ж<testing.T> t, testMode mode
         if (resp.StatusCode != 200) {
             t.Fatal(resp.Status);
         }
-        {
-            var (got, errΔ1) = io.ReadAll(resp.Body); if (errΔ1 != nil || ((sstring)got) != wantBody) {
-                t.Errorf("body = %q; want %q", got, wantBody);
-            }
+        var (got, errΔ1) = io.ReadAll(resp.Body); if (errΔ1 != nil || ((sstring)got) != wantBody) {
+            t.Errorf("body = %q; want %q", got, wantBody);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2364,10 +2245,7 @@ internal static void testClientCopyHostOnRedirect(ж<testing.T> t, testMode mode
 }
 
 // Issue 17494: cookies should be altered when Client follows redirects.
-public static void TestClientAltersCookiesOnRedirect(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClientAltersCookiesOnRedirect(Δp0, Δp1));
-}
-
+public static void TestClientAltersCookiesOnRedirect(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientAltersCookiesOnRedirect(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cycleˢ => ref cycleˢᵇ;
 private static readonly @string cycleˢᵇ = "Cycle"u8;
@@ -2377,7 +2255,7 @@ internal static void testClientAltersCookiesOnRedirect(ж<testing.T> t, testMode
     try {
         map<@string, slice<@string>> cookieMap(slice<ж<httpꓸCookie>> cs) {
             var m = new map<@string, slice<@string>>();
-            foreach (var (_, cΔ1) in cs) {
+            foreach (var (_, cΔ1) in range(cs)) {
                 m[cΔ1.Name] = append(m[cΔ1.Name], (~cΔ1).Value);
             }
             return m;
@@ -2393,11 +2271,11 @@ internal static void testClientAltersCookiesOnRedirect(ж<testing.T> t, testMode
             switch (ᐧ) {
             case {} when exprᴛ1 == "0"u8: {
                 want = new map<@string, slice<@string>>{
-                    ["Cookie1"] = slice<@string>(["OldValue1a", "OldValue1b"]),
-                    ["Cookie2"] = slice<@string>(["OldValue2"]),
-                    ["Cookie3"] = slice<@string>(["OldValue3a", "OldValue3b"]),
-                    ["Cookie4"] = slice<@string>(["OldValue4"]),
-                    ["Cycle"] = slice<@string>(["0"])
+                    ["Cookie1"] = ["OldValue1a", "OldValue1b"],
+                    ["Cookie2"] = ["OldValue2"],
+                    ["Cookie3"] = ["OldValue3a", "OldValue3b"],
+                    ["Cookie4"] = ["OldValue4"],
+                    ["Cycle"] = ["0"]
                 };
                 SetCookie(w, Ꮡ(new httpꓸCookie(Name: "Cycle", Value: "1", Path: "/")));
                 SetCookie(w, Ꮡ(new httpꓸCookie(Name: "Cookie2", Path: "/", MaxAge: -1))); // Delete cookie from Header
@@ -2406,10 +2284,10 @@ internal static void testClientAltersCookiesOnRedirect(ж<testing.T> t, testMode
             }
             case {} when exprᴛ1 == "1"u8: {
                 want = new map<@string, slice<@string>>{
-                    ["Cookie1"] = slice<@string>(["OldValue1a", "OldValue1b"]),
-                    ["Cookie3"] = slice<@string>(["OldValue3a", "OldValue3b"]),
-                    ["Cookie4"] = slice<@string>(["OldValue4"]),
-                    ["Cycle"] = slice<@string>(["1"])
+                    ["Cookie1"] = ["OldValue1a", "OldValue1b"],
+                    ["Cookie3"] = ["OldValue3a", "OldValue3b"],
+                    ["Cookie4"] = ["OldValue4"],
+                    ["Cycle"] = ["1"]
                 };
                 SetCookie(w, Ꮡ(new httpꓸCookie(Name: "Cycle", Value: "2", Path: "/")));
                 SetCookie(w, Ꮡ(new httpꓸCookie(Name: "Cookie3", Value: "NewValue3", Path: "/"))); // Modify cookie in Header
@@ -2419,10 +2297,10 @@ internal static void testClientAltersCookiesOnRedirect(ж<testing.T> t, testMode
             }
             case {} when exprᴛ1 == "2"u8: {
                 want = new map<@string, slice<@string>>{
-                    ["Cookie1"] = slice<@string>(["OldValue1a", "OldValue1b"]),
-                    ["Cookie3"] = slice<@string>(["NewValue3"]),
-                    ["Cookie4"] = slice<@string>(["NewValue4"]),
-                    ["Cycle"] = slice<@string>(["2"])
+                    ["Cookie1"] = ["OldValue1a", "OldValue1b"],
+                    ["Cookie3"] = ["NewValue3"],
+                    ["Cookie4"] = ["NewValue4"],
+                    ["Cycle"] = ["2"]
                 };
                 SetCookie(w, Ꮡ(new httpꓸCookie(Name: "Cycle", Value: "3", Path: "/")));
                 SetCookie(w, Ꮡ(new httpꓸCookie(Name: "Cookie5", Value: "NewValue5", Path: "/"))); // Insert cookie into Jar
@@ -2431,11 +2309,11 @@ internal static void testClientAltersCookiesOnRedirect(ж<testing.T> t, testMode
             }
             case {} when exprᴛ1 == "3"u8: {
                 want = new map<@string, slice<@string>>{
-                    ["Cookie1"] = slice<@string>(["OldValue1a", "OldValue1b"]),
-                    ["Cookie3"] = slice<@string>(["NewValue3"]),
-                    ["Cookie4"] = slice<@string>(["NewValue4"]),
-                    ["Cookie5"] = slice<@string>(["NewValue5"]),
-                    ["Cycle"] = slice<@string>(["3"])
+                    ["Cookie1"] = ["OldValue1a", "OldValue1b"],
+                    ["Cookie3"] = ["NewValue3"],
+                    ["Cookie4"] = ["NewValue4"],
+                    ["Cookie5"] = ["NewValue5"],
+                    ["Cycle"] = ["3"]
                 };
                 // Don't redirect to ensure the loop ends.
                 break;
@@ -2461,8 +2339,8 @@ internal static void testClientAltersCookiesOnRedirect(ж<testing.T> t, testMode
         req.AddCookie(Ꮡ(new httpꓸCookie(Name: "Cookie2", Value: "OldValue2")));
         req.AddCookie(Ꮡ(new httpꓸCookie(Name: "Cookie3", Value: "OldValue3a")));
         req.AddCookie(Ꮡ(new httpꓸCookie(Name: "Cookie3", Value: "OldValue3b")));
-        jar.SetCookies(u, slice<ж<httpꓸCookie>>([Ꮡ(new httpꓸCookie(Name: "Cookie4", Value: "OldValue4", Path: "/"))]));
-        jar.SetCookies(u, slice<ж<httpꓸCookie>>([Ꮡ(new httpꓸCookie(Name: "Cycle", Value: "0", Path: "/"))]));
+        jar.SetCookies(u, [Ꮡ(new httpꓸCookie(Name: "Cookie4", Value: "OldValue4", Path: "/"))]);
+        jar.SetCookies(u, [Ꮡ(new httpꓸCookie(Name: "Cycle", Value: "0", Path: "/"))]);
         var (res, err) = c.Do(req);
         if (err != nil) {
             t.Fatal(err);
@@ -2516,7 +2394,7 @@ public static void TestShouldCopyHeaderOnRedirect(ж<testing.T> t) {
         new("http://foo.com:443/", "https://sub.foo.com/", true),
         new("http://foo.com:1234/", "http://foo.com/", true)
     ]);
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         var (u0, err) = url.Parse(tt.initialURL);
         if (err != nil) {
             t.Errorf("%d. initial URL %q parse error: %v", i, tt.initialURL, err);
@@ -2535,10 +2413,7 @@ public static void TestShouldCopyHeaderOnRedirect(ж<testing.T> t) {
     }
 }
 
-public static void TestClientRedirectTypes(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClientRedirectTypes(Δp0, Δp1));
-}
-
+public static void TestClientRedirectTypes(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientRedirectTypes(Δp0, Δp1)); }
 internal partial struct testClientRedirectTypes_tests /*dyn*/ {
     internal @string method;
     internal nint serverStatus;
@@ -2593,7 +2468,7 @@ internal static void testClientRedirectTypes(ж<testing.T> t, testMode mode) {
     }))).ts;
 
     var c = ts.Client();
-    foreach (var (i, vᴛ1) in tests.ΔRangeSnapshot()) {
+    foreach (var (i, vᴛ1) in range(tests.ΔRangeSnapshot())) {
         ref var tt = ref heap(new testClientRedirectTypes_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -2613,11 +2488,9 @@ internal static void testClientRedirectTypes(ж<testing.T> t, testMode mode) {
         var handlercʗ2 = handlerc;
         var ttʗ2 = tt;
         c.CheckRedirect = error (ж<Δhttp.Request> reqΔ1, slice<ж<Δhttp.Request>> via) => {
-            {
-                @string got = reqΔ1.Method;
-                @string want = ttʗ2.wantMethod; if (got != want) {
-                    return fmt.Errorf("#%d: got next method %q; want %q"u8, i, got, want);
-                }
+            @string got = reqΔ1.Method;
+            @string want = ttʗ2.wantMethod; if (got != want) {
+                return fmt.Errorf("#%d: got next method %q; want %q"u8, i, got, want);
             }
             handlercʗ2.ᐸꟷ((Δhttp.ResponseWriter rw, ж<Δhttp.Request> reqΔ2) => {
                 // TODO: Check that the body is valid when we do 307 and 308 support
@@ -2656,10 +2529,7 @@ internal static error Close(this issue18239Body b) {
 
 // Issue 18239: make sure the Transport doesn't retry requests with bodies
 // if Request.GetBody is not defined.
-public static void TestTransportBodyReadError(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testTransportBodyReadError(Δp0, Δp1));
-}
-
+public static void TestTransportBodyReadError(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testTransportBodyReadError(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string xBodyReadˢ => ref xBodyReadˢᵇ;
 private static readonly @string xBodyReadˢᵇ = "X-Body-Read"u8;
@@ -2716,9 +2586,7 @@ internal static void testTransportBodyReadError(ж<testing.T> t, testMode mode) 
 }
 
 // Make sure the retries copies the GetBody in the request.
-public static void TestRedirectGetBody(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testRedirectGetBody(Δp0, Δp1));
-}
+public static void TestRedirectGetBody(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testRedirectGetBody(Δp0, Δp1)); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string secondˢ => ref secondˢᵇ;
@@ -2732,15 +2600,11 @@ internal static void testRedirectGetBody(ж<testing.T> t, testMode mode) {
         if (errΔ1 != nil) {
             t.Error(errΔ1);
         }
-        {
-            errΔ1 = r.Body.Close(); if (errΔ1 != nil) {
-                t.Error(errΔ1);
-            }
+        errΔ1 = r.Body.Close(); if (errΔ1 != nil) {
+            t.Error(errΔ1);
         }
-        {
-            @string s = (@string)bΔ1; if (s != "hello"u8) {
-                t.Errorf("expected hello, got %s", s);
-            }
+        @string s = (@string)bΔ1; if (s != "hello"u8) {
+            t.Errorf("expected hello, got %s", s);
         }
         if (r.URL.Path == "/first"u8) {
             Redirect(w, r, secondˢ, StatusTemporaryRedirect);
@@ -2762,10 +2626,8 @@ internal static void testRedirectGetBody(ж<testing.T> t, testMode mode) {
     if (err != nil) {
         t.Fatal(err);
     }
-    {
-        err = res.Body.Close(); if (err != nil) {
-            t.Fatal(err);
-        }
+    err = res.Body.Close(); if (err != nil) {
+        t.Fatal(err);
     }
     {
         @string s = (@string)b; if (s != "world"u8) {
@@ -2794,19 +2656,12 @@ internal static partial (ж<Δhttp.Response>, error) RoundTrip(this ref roundTri
 partial struct roundTripperWithoutCloseIdle {
 }
 
-internal static (ж<Δhttp.Response>, error) RoundTrip(this roundTripperWithoutCloseIdle _Δp0, ж<Δhttp.Request> _Δp1) {
-    throw panic("unused");
-}
+internal static (ж<Δhttp.Response>, error) RoundTrip(this roundTripperWithoutCloseIdle _Δp0, ж<Δhttp.Request> _Δp1) { throw panic("unused"); }
 
 internal delegate void roundTripperWithCloseIdle();
 
-internal static (ж<Δhttp.Response>, error) RoundTrip(this roundTripperWithCloseIdle _Δp0, ж<Δhttp.Request> _Δp1) {
-    throw panic("unused");
-}
-
-internal static partial void CloseIdleConnections(this roundTripperWithCloseIdle f) {
-    f();
-}
+internal static (ж<Δhttp.Response>, error) RoundTrip(this roundTripperWithCloseIdle _Δp0, ж<Δhttp.Request> _Δp1) { throw panic("unused"); }
+internal static partial void CloseIdleConnections(this roundTripperWithCloseIdle f) { f(); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object notClosedˢ = (@string)"not closed"u8;
@@ -2858,10 +2713,7 @@ public static void TestClientPropagatesTimeoutToContext(ж<testing.T> t) {
 
 // Issue 33545: lock-in the behavior promised by Client.Do's
 // docs about request cancellation vs timing out.
-public static void TestClientDoCanceledVsTimeout(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClientDoCanceledVsTimeout(Δp0, Δp1));
-}
-
+public static void TestClientDoCanceledVsTimeout(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientDoCanceledVsTimeout(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object unexpectedlyGotANilErrorˢ = (@string)"Unexpectedly got a nil error"u8;
 
@@ -2872,7 +2724,7 @@ internal static void testClientDoCanceledVsTimeout(ж<testing.T> t, testMode mod
 
     var cases = slice<@string>(["timeout", "canceled"]);
 
-    foreach (var (_, name) in cases) {
+    foreach (var (_, name) in range(cases)) {
         var cstʗ1 = cst;
         t.Run(name, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
@@ -2912,10 +2764,8 @@ internal static void testClientDoCanceledVsTimeout(ж<testing.T> t, testMode mod
                         tΔ1.Errorf("url.Error.Err = %v; want %v", g, w);
                     }
                 }
-                {
-                    var got = errors.Is(err, context_package.DeadlineExceeded); if (got != wantIsTimeout) {
-                        tΔ1.Errorf("errors.Is(err, context.DeadlineExceeded) = %v, want %v", got, wantIsTimeout);
-                    }
+                var got = errors.Is(err, context_package.DeadlineExceeded); if (got != wantIsTimeout) {
+                    tΔ1.Errorf("errors.Is(err, context.DeadlineExceeded) = %v, want %v", got, wantIsTimeout);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2955,19 +2805,15 @@ public static void TestClientPopulatesNilResponseBody(ж<testing.T> t) {
         }
         var respʗ1 = resp;
         defer(() => {
-            {
-                var errΔ1 = respʗ1.Body.Close(); if (errΔ1 != nil) {
-                    t.Fatalf("error from Close on substitute Response.Body: %v", errΔ1);
-                }
+            var errΔ1 = respʗ1.Body.Close(); if (errΔ1 != nil) {
+                t.Fatalf("error from Close on substitute Response.Body: %v", errΔ1);
             }
         }, ref ᒐ);
 
-        {
-            var (b, errΔ2) = io.ReadAll(resp.Body); if (errΔ2 != nil) {
-                t.Errorf("read error from substitute Response.Body: %v", errΔ2);
-            } else if (len(b) != 0) {
-                t.Errorf("substitute Response.Body was unexpectedly non-empty: %q", b);
-            }
+        var (b, errΔ2) = io.ReadAll(resp.Body); if (errΔ2 != nil) {
+            t.Errorf("read error from substitute Response.Body: %v", errΔ2);
+        } else if (len(b) != 0) {
+            t.Errorf("substitute Response.Body was unexpectedly non-empty: %q", b);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2975,10 +2821,7 @@ public static void TestClientPopulatesNilResponseBody(ж<testing.T> t) {
 }
 
 // Issue 40382: Client calls Close multiple times on Request.Body.
-public static void TestClientCallsCloseOnlyOnce(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testClientCallsCloseOnlyOnce(Δp0, Δp1));
-}
-
+public static void TestClientCallsCloseOnlyOnce(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testClientCallsCloseOnlyOnce(Δp0, Δp1)); }
 internal static void testClientCallsCloseOnlyOnce(ж<testing.T> t, testMode mode) {
     var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.WriteHeader(StatusNoContent);
@@ -3019,7 +2862,7 @@ internal static (nint, error) Read(this ref issue40382Body b, slice<byte> p) {
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1) { /* default: */
-        foreach (var i in range(p)) {
+        foreach (var i in range(len(p))) {
             p[i] = (byte)'x';
         }
         b.n -= len(p);
@@ -3040,10 +2883,7 @@ internal static partial error Close(this ж<issue40382Body> Ꮡb) {
     return default;
 }
 
-public static void TestProbeZeroLengthBody(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testProbeZeroLengthBody(Δp0, Δp1));
-}
-
+public static void TestProbeZeroLengthBody(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testProbeZeroLengthBody(Δp0, Δp1)); }
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string contentᶜ => ref contentᶜᵇ;
 private static readonly @string contentᶜᵇ = "body"u8;
@@ -3053,10 +2893,8 @@ internal static partial void testProbeZeroLengthBody(ж<testing.T> t, testMode m
     var reqcʗ1 = reqc;
     var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         builtin.close(reqcʗ1);
-        {
-            var (_, err) = io.Copy(new http_test_package.http_ResponseWriterᴠWriter(w), r.Body); if (err != nil) {
-                t.Errorf("error copying request body: %v", err);
-            }
+        var (_, err) = io.Copy(new http_test_package.http_ResponseWriterᴠWriter(w), r.Body); if (err != nil) {
+            t.Errorf("error copying request body: %v", err);
         }
     })));
 

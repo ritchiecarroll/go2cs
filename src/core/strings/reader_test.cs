@@ -9,8 +9,6 @@ using Δio = io_package;
 using strings = strings_package;
 using Δsync = sync_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.strings_internal_test_package;
 
 partial class strings_test_package {
@@ -39,7 +37,7 @@ public static void TestReader(ж<testing.T> t) {
         new(seek: Δio.SeekEnd, off: -1, n: 1, wantpos: 9, want: "9")
     ]);
 
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         var (pos, err) = r.Seek(tt.off, tt.seek);
         if (err == nil && tt.seekerr != ""u8) {
             t.Errorf("%d. want seek error %q", i, tt.seekerr);
@@ -99,7 +97,7 @@ public static void TestReaderAt(ж<testing.T> t) {
         new(0, 0, "", default),
         new(-1, 0, "", stringsReaderReadAtˢ)
     ]);
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         var b = new slice<byte>(tt.n);
         var (rn, err) = r.ReadAt(b, tt.off);
         @string got = (@string)(b.slice(0, rn));
@@ -178,10 +176,8 @@ public static void TestWriteTo(ж<testing.T> t) {
         var r = strings.NewReader(s);
         ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
         var (n, err) = r.WriteTo(new strings_test_package.bytes_BufferжWriter(Ꮡb));
-        {
-            var expect = (int64)len(s); if (n != expect) {
-                t.Errorf("got %v; want %v", n, expect);
-            }
+        var expect = (int64)len(s); if (n != expect) {
+            t.Errorf("got %v; want %v", n, expect);
         }
         if (err != nil) {
             t.Errorf("for length %d: got error = %v; want nil", len(s), err);
@@ -217,35 +213,27 @@ private static readonly @string wantᶜᵇ = "abcdef"u8;
 
 public static void TestReaderReset(ж<testing.T> t) {
     var r = strings.NewReader("世界");
-    {
-        var (_, _, errΔ1) = r.ReadRune(); if (errΔ1 != nil) {
-            t.Errorf("ReadRune: unexpected error: %v", errΔ1);
-        }
+    var (_, _, errΔ1) = r.ReadRune(); if (errΔ1 != nil) {
+        t.Errorf("ReadRune: unexpected error: %v", errΔ1);
     }
 
     @string want = wantᶜ;
     r.Reset(want);
-    {
-        var errΔ2 = r.UnreadRune(); if (errΔ2 == nil) {
-            t.Errorf("UnreadRune: expected error, got nil");
-        }
+    var errΔ2 = r.UnreadRune(); if (errΔ2 == nil) {
+        t.Errorf("UnreadRune: expected error, got nil");
     }
     var (buf, err) = Δio.ReadAll(new strings_test_package.strings_ReaderжReader(r));
     if (err != nil) {
         t.Errorf("ReadAll: unexpected error: %v", err);
     }
-    {
-        @string got = (@string)buf; if (got != want) {
-            t.Errorf("ReadAll: got %q, want %q", got, want);
-        }
+    @string got = (@string)buf; if (got != want) {
+        t.Errorf("ReadAll: got %q, want %q", got, want);
     }
 }
 
 public static void TestReaderZero(ж<testing.T> t) {
-    {
-        nint l = (Ꮡ(new strings.Reader())).Len(); if (l != 0) {
-            t.Errorf("Len: got %d, want 0", l);
-        }
+    nint l = (Ꮡ(new strings.Reader())).Len(); if (l != 0) {
+        t.Errorf("Len: got %d, want 0", l);
     }
 
     {
@@ -278,10 +266,8 @@ public static void TestReaderZero(ж<testing.T> t) {
         }
     }
 
-    {
-        var s = (Ꮡ(new strings.Reader())).Size(); if (s != 0) {
-            t.Errorf("Size: got %d, want 0", s);
-        }
+    var s = (Ꮡ(new strings.Reader())).Size(); if (s != 0) {
+        t.Errorf("Size: got %d, want 0", s);
     }
 
     if ((Ꮡ(new strings.Reader())).UnreadByte() == nil) {

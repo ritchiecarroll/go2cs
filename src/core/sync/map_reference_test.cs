@@ -176,7 +176,7 @@ public static void Range(this ж<RWMutexMap> Ꮡm, Func<any, any, bool> f) {
     }
     Ꮡm.Ꮡmu.RUnlock();
 
-    foreach (var (_, k) in keys) {
+    foreach (var (_, k) in range(keys)) {
         var (v, ok) = Ꮡm.Load(k);
         if (!ok) {
             continue;
@@ -299,10 +299,8 @@ public static bool /*swapped*/ CompareAndSwap(this ж<DeepCopyMap> Ꮡm, any key
         ref var m = ref Ꮡm.DerefOrNull();
 
         var (clean, _) = Ꮡm.Ꮡclean.Load()._<map<any, any>>(ᐧ);
-        {
-            var (previous, ok) = clean[key, ꟷ]; if (!ok || !AreEqual(previous, old)) {
-                swapped = false; goto ᒐdone;
-            }
+        var (previous, ok) = clean[key, ꟷ]; if (!ok || !AreEqual(previous, old)) {
+            swapped = false; goto ᒐdone;
         }
 
         m.mu.Lock();
@@ -328,10 +326,8 @@ public static bool /*deleted*/ CompareAndDelete(this ж<DeepCopyMap> Ꮡm, any k
         ref var m = ref Ꮡm.DerefOrNull();
 
         var (clean, _) = Ꮡm.Ꮡclean.Load()._<map<any, any>>(ᐧ);
-        {
-            var (previous, ok) = clean[key, ꟷ]; if (!ok || !AreEqual(previous, old)) {
-                deleted = false; goto ᒐdone;
-            }
+        var (previous, ok) = clean[key, ꟷ]; if (!ok || !AreEqual(previous, old)) {
+            deleted = false; goto ᒐdone;
         }
 
         m.mu.Lock();

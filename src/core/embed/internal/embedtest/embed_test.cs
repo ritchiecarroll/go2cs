@@ -9,8 +9,6 @@ using reflect = reflect_package;
 using slices = slices_package;
 using testing = testing_package;
 using fstest = go.testing.fstest_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = go.io.fs_package;
 using go.io;
 using go.testing;
@@ -57,7 +55,7 @@ internal static void testDir(ж<testing.T> t, embed.FS f, @string name, params �
         return;
     }
     slice<@string> names = default;
-    foreach (var (_, d) in dirs) {
+    foreach (var (_, d) in range(dirs)) {
         @string nameΔ1 = d.Name();
         if (d.IsDir()) {
             nameΔ1 += "/"u8;
@@ -71,9 +69,7 @@ internal static void testDir(ж<testing.T> t, embed.FS f, @string name, params �
 
 // Tests for issue 49514.
 internal static rune _ᴛ1ʗ = (rune)'"';
-
 internal static rune _ᴛ2ʗ = (rune)'\'';
-
 internal static rune _ᴛ3ʗ = (rune)0x1F986;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -99,10 +95,8 @@ public static void TestGlobal(ж<testing.T> t) {
     testFiles(t, global, testdataHelloTxtˢ, helloWorldˢ);
     testFiles(t, global, testdataGlassTxtˢ, iCanEatGlassAndItDoesnTˢ);
 
-    {
-        var err = fstest.TestFS(new embedtest_test_package.embed_FSᴠFS(global), concurrencyTxtˢ, testdataHelloTxtˢ); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = fstest.TestFS(new embedtest_test_package.embed_FSᴠFS(global), concurrencyTxtˢ, testdataHelloTxtˢ); if (err != nil) {
+        t.Fatal(err);
     }
 
     testString(t, concurrency, concurrencyˢ, concurrencyIsNotˢ);
@@ -234,11 +228,8 @@ internal static EmbedBytes helloBytes = (EmbedBytes)(go.embed_package.ΔEmbedByt
 internal static EmbedString helloString = (EmbedString)(go.embed_package.ΔEmbedString(typeof(embedtest_internal_test_package).Assembly, "go.embed/embed/internal/embedtest_test/", "testdata/hello.txt"));
 
 public partial struct T /*num:byte*/;
-
 public partial struct EmbedUint8 /*num:uint8*/;
-
 public partial struct EmbedBytes /*[]byte*/;
-
 public partial struct EmbedString /*@string*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

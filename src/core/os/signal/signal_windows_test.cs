@@ -11,8 +11,6 @@ using syscall = syscall_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using exec = go.os.exec_package;
 using go.os;
 using path;

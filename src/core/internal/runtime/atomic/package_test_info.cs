@@ -29,14 +29,14 @@ using static global::go.@internal.runtime.atomic_test_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("atomic_andor_test.cs", 42, 9, 0)]
-[assembly: GoBoundedGoroutine("atomic_andor_test.cs", 87, 9, 1)]
-[assembly: GoBoundedGoroutine("atomic_andor_test.cs", 128, 9, 2)]
-[assembly: GoBoundedGoroutine("atomic_andor_test.cs", 170, 9, 3)]
-[assembly: GoBoundedGoroutine("atomic_test.cs", 196, 9, 1)]
-[assembly: GoBoundedGoroutine("atomic_test.cs", 239, 9, 2)]
-[assembly: GoBoundedGoroutine("atomic_test.cs", 279, 9, 3)]
-[assembly: GoBoundedGoroutine("atomic_test.cs", 319, 9, 4)]
+[assembly: GoBoundedGoroutine("atomic_andor_test.cs", 38, 9, 0)]
+[assembly: GoBoundedGoroutine("atomic_andor_test.cs", 81, 9, 1)]
+[assembly: GoBoundedGoroutine("atomic_andor_test.cs", 120, 9, 2)]
+[assembly: GoBoundedGoroutine("atomic_andor_test.cs", 160, 9, 3)]
+[assembly: GoBoundedGoroutine("atomic_test.cs", 188, 9, 1)]
+[assembly: GoBoundedGoroutine("atomic_test.cs", 229, 9, 2)]
+[assembly: GoBoundedGoroutine("atomic_test.cs", 267, 9, 3)]
+[assembly: GoBoundedGoroutine("atomic_test.cs", 305, 9, 4)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -46,9 +46,9 @@ using static global::go.@internal.runtime.atomic_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/runtime/atomic/atomic_andor_test.go", "atomic_andor_test.cs", "ABAclIKCgoKAgtqCgriCgoKigpSmgriCgsqUgoKCgoKAgtqCgriCgoKigpSmgriCgsqUgoKCgoCC2qaCgoKigpSmgriCgsqUgoKCgoKAgtqmgoKCooKUpoK4goLKooKCgriCgoKCgoKCyqKCgoK4goKCgoKCgsqigoKCuIKCgoKCgoLKooKCgriCgoKCgoKC", "35-40:1;76-81:1;113-118:1;151-156:1;181-187:1;201-207:1;221-227:1;241-247:1")]
-[assembly: GoPositionMap("internal/runtime/atomic/atomic_test.go", "atomic_test.cs", "ABEeooKCgpKClKaCtKSCgoKCgpSCgoKUgIKkgoKClILsosqUgoKCgviilJSCgoKCgIK2ogARBtqCpoKUgpSQkpCSkJKQkpCSkLaUgoKCgILagoK4goKCooKUpoK4goLKlIKCgoCC2oKCuIKCgqKClKaCuIKCypSCgoKAgtqmgoKCooKUpoK4goLKlIKCgoCC2qaCgoKigpSmgriCgsqUpoKCuIKCgqKCgoKClIKCuKaCuIKCypSmgoK4goKCooKCgoKUgoK4poK4goIADAqCggABEIKCgoKCgoKmgqaC+oKCgpSC", "19-24:1;40-42:1;47-50:2;75-86:1;106-106:1;107-107:2;108-108:3;109-109:4;110-110:5;111-111:6;134-139:1;173-178:1;209-214:1;245-250:1;278-292:1;320-334:1")]
-[assembly: GoPositionMap("internal/runtime/atomic/bench_test.go", "bench_test.cs", "AA0cooKCgriigoKCuKKCgoK4ooKCgriigoKCuKKCgoK4ooKCgriigoKCuIKCgoKCgoLKgoKCgoKCgsqigoKCuKKCgoK4goKCgoKCgsqCgoKCgoKCyoKCgpKCyoKCgpKCyoKCgoKSgoLKgoKCgpKCgsiCgoKCkoKCgoLKgoKCgpKCgoKC", "81-87:1;93-99:1;121-127:1;133-139:1;145-149:1;155-159:1;166-171:1;178-183:1;189-196:1;203-210:1")]
+[assembly: GoPositionMap("internal/runtime/atomic/atomic_andor_test.go", "atomic_andor_test.cs", "AA4clIKCgoKCyoKCuIKCgqKClKaCuIKCypSCgoKCgoLKgoK4goKCooKUpoK4goLKlIKCgoKCyqaCgoKigpSmgriCgsqUgoKCgoKCyqaCgoKigpSmgriCgsqigoKCuIKCgoKCgoLKooKCgriCgoKCgoKCyqKCgoK4goKCgoKCgsqigoKCuIKCgoKCgoI=", "35-40:1;76-81:1;113-118:1;151-156:1;181-187:1;201-207:1;221-227:1;241-247:1")]
+[assembly: GoPositionMap("internal/runtime/atomic/atomic_test.go", "atomic_test.cs", "AA8eooKCgpKClKaCtKSCgoKCgpSCgoKUgpSCgoKUguyiypSCgoKC+KKUlIKCgoKCpqIAEQbagqaClIKUkJKQkpCSkJKQkpC2lIKCgoLKgoK4goKCooKUpoK4goLKlIKCgoLKgoK4goKCooKUpoK4goLKlIKCgoLKpoKCgqKClKaCuIKCypSCgoKCyqaCgoKigpSmgriCgsqUpoKCuIKCgqKCgoKClIKCuKaCuIKCypSmgoK4goKCooKCgoKUgoK4poK4goIADAqCggABEIKCgoKCgoKmgqaC+oKCgpSC", "19-24:1;40-42:1;47-50:2;75-86:1;106-106:1;107-107:2;108-108:3;109-109:4;110-110:5;111-111:6;134-139:1;173-178:1;209-214:1;245-250:1;278-292:1;320-334:1", "", "", "", "91:21,93:13")]
+[assembly: GoPositionMap("internal/runtime/atomic/bench_test.go", "bench_test.cs", "AA0cooKCgriigoKCuKKCgoK4ooKCgriigoKCuKKCgoK4ooKCgriigoKCuIKCgoKCgoLKgoKCgoKCgsqigoKCuKKCgoK4goKCgoKCgsqCgoKCgoKCyoKCgpKCyoKCgpKCyoKCgoKSgoLKgoKCgpKCgriCgoKCkoKCgoLKgoKCgpKCgoKC", "81-87:1;93-99:1;121-127:1;133-139:1;145-149:1;155-159:1;166-171:1;178-183:1;189-196:1;203-210:1")]
 [assembly: GoPositionMap("internal/runtime/atomic/xchg8_test.go", "xchg8_test.cs", "AAsYgoKCgpS4goKCgoKClIKUgsqigoKCuIKCgoKCgoI=", "50-56:1")]
 // </GoSourcePositionMaps>
 

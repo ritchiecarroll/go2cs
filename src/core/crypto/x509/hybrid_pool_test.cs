@@ -118,7 +118,7 @@ public static void TestHybridPool(ж<testing.T> t) {
         SerialNumber: big.NewInt(1),
         NotBefore: time.Now().Add(-time.ΔHour),
         NotAfter: time.Now().Add((time.Duration)(36000000000000L)),
-        DNSNames: slice<@string>(["example.com"])
+        DNSNames: ["example.com"]
     ));
     (var certDER, err) = Δx509.CreateCertificate(rand.Reader, certTmpl, rootTmpl, k.Public(), k.OrTypedNil());
     if (err != nil) {

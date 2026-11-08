@@ -10,8 +10,6 @@ using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
 using @unsafe = unsafe_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.@internal;
 using static go.log.slog_package;
 
@@ -22,11 +20,9 @@ internal static ref readonly @string groupˢ => ref groupˢᵇ;
 private static readonly @string groupˢᵇ = "Group"u8;
 
 public static partial void TestKindString(ж<testing.T> t) {
-    {
-        @string got = KindGroup.String();
-        @string want = groupˢ; if (got != want) {
-            t.Errorf("got %q, want %q", got, want);
-        }
+    @string got = KindGroup.String();
+    @string want = groupˢ; if (got != want) {
+        t.Errorf("got %q, want %q", got, want);
     }
 }
 
@@ -60,8 +56,8 @@ public static void TestValueEqual(ж<testing.T> t) {
         StringValue(fooˢ),
         StringValue(fuuˢ)
     ]);
-    foreach (var (i, v1) in vals) {
-        foreach (var (j, v2) in vals) {
+    foreach (var (i, v1) in range(vals)) {
+        foreach (var (j, v2) in range(vals)) {
             var got = v1.Equal(v2);
             var want = i == j;
             if (got != want) {
@@ -76,10 +72,8 @@ internal static bool /*b*/ panics(Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var x = recover(); if (x != nil) {
-                    b = true;
-                }
+            var x = recover(); if (x != nil) {
+                b = true;
             }
         }, ref ᒐ);
         f();
@@ -96,7 +90,7 @@ internal partial struct TestValueString_type /*dyn*/ {
 }
 
 public static void TestValueString(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestValueString_type>([
+    foreach (var (_, test) in range(slice<TestValueString_type>([
         new(Int64Value(-3), "-3"),
         new(Uint64Value(1), "1"),
         new(Float64Value(.15D), "0.15"),
@@ -105,11 +99,9 @@ public static void TestValueString(ж<testing.T> t) {
         new(TimeValue(testTime), "2000-01-02 03:04:05 +0000 UTC"),
         new(AnyValue((time.Duration)(3000000000L)), "3s"),
         new(GroupValue(Int("a", 1), go.log.slog_package.Bool("b", true)), "[a=1 b=true]")
-    ])) {
-        {
-            @string got = test.v.String(); if (got != test.want) {
-                t.Errorf("%#v:\ngot  %q\nwant %q", test.v, got, test.want);
-            }
+    ]))) {
+        @string got = test.v.String(); if (got != test.want) {
+            t.Errorf("%#v:\ngot  %q\nwant %q", test.v, got, test.want);
         }
     }
 }
@@ -171,7 +163,7 @@ internal partial struct TestAnyValue_type /*dyn*/ {
 }
 
 public static void TestAnyValue(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestAnyValue_type>([
+    foreach (var (_, test) in range(slice<TestAnyValue_type>([
         new((nint)1, IntValue(1)),
         new(1.5D, Float64Value(1.5D)),
         new((float32)2.5F, Float64Value(2.5D)),
@@ -191,7 +183,7 @@ public static void TestAnyValue(ж<testing.T> t) {
         new((int16)9, Int64Value(9)),
         new((int32)10, Int64Value(10)),
         new((int64)11, Int64Value(11))
-    ])) {
+    ]))) {
         var got = AnyValue(test.@in);
         if (!got.Equal(test.want)) {
             t.Errorf("%v (%[1]T): got %v (kind %s), want %v (kind %s)",
@@ -201,7 +193,7 @@ public static void TestAnyValue(ж<testing.T> t) {
 }
 
 public static void TestValueAny(ж<testing.T> t) {
-    foreach (var (_, want) in slice<any>([
+    foreach (var (_, want) in range(slice<any>([
         default,
         LevelDebug + 100,
         time_package.ΔUTC.OrTypedNil(), // time.Locations treated specially...
@@ -214,7 +206,7 @@ public static void TestValueAny(ж<testing.T> t) {
         new time_package.Time(),
         3.14D,
         fooˢ
-    ])) {
+    ]))) {
         var v = AnyValue(want);
         var got = v.Any();
         if (!reflect.DeepEqual(got, want)) {
@@ -233,11 +225,9 @@ public static void TestLogValue(ж<testing.T> t) {
     @string want = replacedˢ;
     var r = Ꮡ(new replace(StringValue(want)));
     var v = AnyValue(r.OrTypedNil());
-    {
-        global::go.log.slog_package.ΔKind g = v.Kind();
-        global::go.log.slog_package.ΔKind w = KindLogValuer; if (g != w) {
-            t.Errorf("got %s, want %s", g, w);
-        }
+    global::go.log.slog_package.ΔKind g = v.Kind();
+    global::go.log.slog_package.ΔKind w = KindLogValuer; if (g != w) {
+        t.Errorf("got %s, want %s", g, w);
     }
     var got = v.LogValuer().LogValue().Any();
     if (!AreEqual(got, want)) {
@@ -253,10 +243,8 @@ public static void TestLogValue(ж<testing.T> t) {
     // Test Resolve max iteration.
     r.v = AnyValue(r.OrTypedNil()); // create a cycle
     got = AnyValue(r.OrTypedNil()).Resolve().Any();
-    {
-        var (_, okΔ1) = got._<error>(ᐧ); if (!okΔ1) {
-            t.Errorf("expected error, got %T", got);
-        }
+    var (_, okΔ1) = got._<error>(ᐧ); if (!okΔ1) {
+        t.Errorf("expected error, got %T", got);
     }
 
     // Groups are not recursively resolved.
@@ -277,29 +265,25 @@ public static void TestLogValue(ж<testing.T> t) {
     }
     // The error should provide some context information.
     // We'll just check that this function name appears in it.
-    {
-        @string gotΔ1 = gotErr.Error();
-        @string wantΔ1 = testLogValueˢ; if (!strings.Contains(gotΔ1, wantΔ1)) {
-            t.Errorf("got %q, want substring %q", gotΔ1, wantΔ1);
-        }
+    @string gotΔ1 = gotErr.Error();
+    @string wantΔ1 = testLogValueˢ; if (!strings.Contains(gotΔ1, wantΔ1)) {
+        t.Errorf("got %q, want substring %q", gotΔ1, wantΔ1);
     }
 }
 
 public static void TestValueTime(ж<testing.T> t) {
     // Validate that all representations of times work correctly.
-    foreach (var (_, tm) in slice<time.Time>([
+    foreach (var (_, tm) in range(slice<time.Time>([
         new time_package.Time(),
         time_package.Unix(0, 1000000000000000), // UnixNanos is defined
         time_package.Date(2300, 1, 1, 0, 0, 0, 0, time_package.ΔUTC) // overflows UnixNanos
-    ])) {
+    ]))) {
         var got = TimeValue(tm).Time();
         if (!got.Equal(tm)) {
             t.Errorf("got %s (%#[1]v), want %s (%#[2]v)", got, tm);
         }
-        {
-            var (g, w) = (got.Location(), tm.Location()); if (g != w) {
-                t.Errorf("%s: location: got %v, want %v", tm, g.OrTypedNil(), w.OrTypedNil());
-            }
+        var (g, w) = (got.Location(), tm.Location()); if (g != w) {
+            t.Errorf("%s: location: got %v, want %v", tm, g.OrTypedNil(), w.OrTypedNil());
         }
     }
 }
@@ -320,16 +304,12 @@ internal partial struct replace {
     internal global::go.log.slog_package.Value v;
 }
 
-internal static global::go.log.slog_package.Value LogValue(this ref replace r) {
-    return r.v;
-}
+internal static global::go.log.slog_package.Value LogValue(this ref replace r) { return r.v; }
 
 internal partial struct panickingLogValue {
 }
 
-internal static global::go.log.slog_package.Value LogValue(this panickingLogValue _) {
-    throw panic("bad");
-}
+internal static global::go.log.slog_package.Value LogValue(this panickingLogValue _) { throw panic("bad"); }
 
 // A Value with "unsafe" strings is significantly faster:
 // safe:  1785 ns/op, 0 allocs
@@ -343,14 +323,14 @@ public static void BenchmarkUnsafeStrings(ж<testing.B> Ꮡb) {
     var dst = new slice<global::go.log.slog_package.Value>(100);
     var src = new slice<global::go.log.slog_package.Value>(len(dst));
     Ꮡb.Logf("Value size = %d", /* unsafe.Sizeof(Value{}) */ (uintptr)24);
-    foreach (var i in range(src)) {
+    foreach (var i in range(len(src))) {
         src[i] = StringValue(fmt.Sprintf("string#%d"u8, i));
     }
     b.ResetTimer();
     @string d = default;
     for (nint i = 0; i < b.N; i++) {
         copy(dst, src);
-        foreach (var (_, a) in dst) {
+        foreach (var (_, a) in range(dst)) {
             d = a.String();
         }
     }

@@ -6,8 +6,6 @@ namespace go;
 using Δruntime = runtime_package;
 using static sync_package;
 using Δtesting = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.sync_internal_test_package;
 
 partial class sync_test_package {

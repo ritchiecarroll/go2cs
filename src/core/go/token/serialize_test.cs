@@ -44,7 +44,7 @@ internal static error equal(ж<global::go.go.token_package.FileSet> Ꮡp, ж<glo
             return fmt.Errorf("different number of files: %d != %d"u8, len(pfiles), len(qfiles));
         }
 
-        foreach (var (i, f) in pfiles) {
+        foreach (var (i, f) in range(pfiles)) {
             var g = qfiles[i];
             if (f.name != g.name) {
                 return fmt.Errorf("different filenames: %q != %q"u8, f.name, g.name);
@@ -55,13 +55,13 @@ internal static error equal(ж<global::go.go.token_package.FileSet> Ꮡp, ж<glo
             if (f.size != g.size) {
                 return fmt.Errorf("different size for %q: %d != %d"u8, f.name, f.size, g.size);
             }
-            foreach (var (j, l) in f.lines) {
+            foreach (var (j, l) in range(f.lines)) {
                 nint m = g.lines[j];
                 if (l != m) {
                     return fmt.Errorf("different offsets for %q"u8, f.name);
                 }
             }
-            foreach (var (j, l) in f.infos) {
+            foreach (var (j, l) in range(f.infos)) {
                 var m = g.infos[j];
                 if (l.Offset != m.Offset || l.Filename != m.Filename || l.Line != m.Line) {
                     return fmt.Errorf("different infos for %q"u8, f.name);

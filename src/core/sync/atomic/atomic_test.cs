@@ -11,8 +11,6 @@ using strings = strings_package;
 using static go.sync.atomic_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using atomic = go.sync.atomic_package;
 using go.runtime;
 using go.sync;
@@ -301,7 +299,7 @@ public static void TestSwapPointer(ж<testing.T> t) {
     x.after = magicptr;
     @unsafe.Pointer j = default;
 
-    foreach (var (_, p) in testPointers()) {
+    foreach (var (_, p) in range(testPointers())) {
         @unsafe.Pointer k = (uintptr)SwapPointer(Ꮡx.of(TestSwapPointer_x.Ꮡi), p);
         if (x.i != p || k != j) {
             t.Fatalf("p=%p i=%p j=%p k=%p", @unsafe.Pointer.OrTypedNil(p), @unsafe.Pointer.OrTypedNil(x.i), @unsafe.Pointer.OrTypedNil(j), @unsafe.Pointer.OrTypedNil(k));
@@ -326,7 +324,7 @@ public static void TestSwapPointerMethod(ж<testing.T> t) {
     x.before = magicptr;
     x.after = magicptr;
     ж<byte> j = default;
-    foreach (var (_, p) in testPointers()) {
+    foreach (var (_, p) in range(testPointers())) {
         var pΔ1 = (ж<byte>)(uintptr)(p);
         var k = Ꮡx.of(TestSwapPointerMethod_x.Ꮡi).Swap(pΔ1);
         if (Ꮡx.of(TestSwapPointerMethod_x.Ꮡi).Load() != pΔ1 || k != j) {
@@ -1418,7 +1416,7 @@ public static void TestCompareAndSwapPointer(ж<testing.T> t) {
     x.before = magicptr;
     x.after = magicptr;
     @unsafe.Pointer q = @unsafe.Pointer.FromPinnedBox(@new<byte>());
-    foreach (var (_, p) in testPointers()) {
+    foreach (var (_, p) in range(testPointers())) {
         x.i = p;
         if (!CompareAndSwapPointer(Ꮡx.of(TestCompareAndSwapPointer_x.Ꮡi), p, q)) {
             t.Fatalf("should have swapped %p %p", @unsafe.Pointer.OrTypedNil(p), @unsafe.Pointer.OrTypedNil(q));
@@ -1451,7 +1449,7 @@ public static void TestCompareAndSwapPointerMethod(ж<testing.T> t) {
     x.before = magicptr;
     x.after = magicptr;
     var q = @new<byte>();
-    foreach (var (_, p) in testPointers()) {
+    foreach (var (_, p) in range(testPointers())) {
         var pΔ1 = (ж<byte>)(uintptr)(p);
         Ꮡx.of(TestCompareAndSwapPointerMethod_x.Ꮡi).Store(pΔ1);
         if (!Ꮡx.of(TestCompareAndSwapPointerMethod_x.Ꮡi).CompareAndSwap(pΔ1, q)) {
@@ -1722,7 +1720,7 @@ public static void TestLoadPointer(ж<testing.T> t) {
     var magicptr = (uintptr)m;
     x.before = magicptr;
     x.after = magicptr;
-    foreach (var (_, p) in testPointers()) {
+    foreach (var (_, p) in range(testPointers())) {
         x.i = p;
         @unsafe.Pointer k = (uintptr)LoadPointer(Ꮡx.of(TestLoadPointer_x.Ꮡi));
         if (k != p) {
@@ -1746,7 +1744,7 @@ public static void TestLoadPointerMethod(ж<testing.T> t) {
     var magicptr = (uintptr)m;
     x.before = magicptr;
     x.after = magicptr;
-    foreach (var (_, p) in testPointers()) {
+    foreach (var (_, p) in range(testPointers())) {
         var pΔ1 = (ж<byte>)(uintptr)(p);
         Ꮡx.of(TestLoadPointerMethod_x.Ꮡi).Store(pΔ1);
         var k = Ꮡx.of(TestLoadPointerMethod_x.Ꮡi).Load();
@@ -2009,7 +2007,7 @@ public static void TestStorePointer(ж<testing.T> t) {
     var magicptr = (uintptr)m;
     x.before = magicptr;
     x.after = magicptr;
-    foreach (var (_, p) in testPointers()) {
+    foreach (var (_, p) in range(testPointers())) {
         StorePointer(Ꮡx.of(TestStorePointer_x.Ꮡi), p);
         if (x.i != p) {
             t.Fatalf("x.i=%p p=%p", @unsafe.Pointer.OrTypedNil(x.i), @unsafe.Pointer.OrTypedNil(p));
@@ -2032,7 +2030,7 @@ public static void TestStorePointerMethod(ж<testing.T> t) {
     var magicptr = (uintptr)m;
     x.before = magicptr;
     x.after = magicptr;
-    foreach (var (_, p) in testPointers()) {
+    foreach (var (_, p) in range(testPointers())) {
         var pΔ1 = (ж<byte>)(uintptr)(p);
         Ꮡx.of(TestStorePointerMethod_x.Ꮡi).Store(pΔ1);
         if (Ꮡx.of(TestStorePointerMethod_x.Ꮡi).Load() != pΔ1) {
@@ -2322,10 +2320,8 @@ public static partial void TestHammer32(ж<testing.T> t) {
                     try {
                         var cʗ2 = cʗ1;
                         defer(() => {
-                            {
-                                var err = recover(); if (err != nil) {
-                                    t.Error(err._<@string>());
-                                }
+                            var err = recover(); if (err != nil) {
+                                t.Error(err._<@string>());
                             }
                             cʗ2.ᐸꟷ(1);
                         }, ref ᒐ);
@@ -2616,10 +2612,8 @@ public static partial void TestHammer64(ж<testing.T> t) {
                     try {
                         var cʗ2 = cʗ1;
                         defer(() => {
-                            {
-                                var err = recover(); if (err != nil) {
-                                    t.Error(err._<@string>());
-                                }
+                            var err = recover(); if (err != nil) {
+                                t.Error(err._<@string>());
                             }
                             cʗ2.ᐸꟷ(1);
                         }, ref ᒐ);
@@ -2884,7 +2878,7 @@ public static partial void TestHammerStoreLoad(ж<testing.T> t) {
         defer(debug.SetGCPercent, debug.SetGCPercent(-1), ref ᒐ);
         // Ensure any in-progress GC is finished.
         runtime.GC();
-        foreach (var (_, tt) in tests) {
+        foreach (var (_, tt) in range(tests)) {
             var c = new channel<nint>(0);
             ref var val = ref heap(new uint64(), out var Ꮡval);
             for (nint p = 0; p < procs; p++) {
@@ -3123,10 +3117,8 @@ internal static void shouldPanic(ж<testing.T> t, @string name, Action f) {
             @string want = unaligned64BitAtomicˢ;
             if (err == nil) {
                 t.Errorf("%s did not panic", name);
-            } else {
-                var (s, _) = err._<@string>(ᐧ); if (s != want) {
-                    t.Errorf("%s: wanted panic %q, got %q", name, want, err);
-                }
+            } else if (err._<@string>(ᐧ) is var (s, _) && s != want) {
+                t.Errorf("%s: wanted panic %q, got %q", name, want, err);
             }
         }, ref ᒐ);
         f();
@@ -3410,7 +3402,7 @@ public static void TestNilDeref(ж<testing.T> t) {
             (((ж<atomic.Pointer<byte>>)nil)).Store(nil);
         }
     }.array();
-    foreach (var (_, f) in funcs.ΔRangeSnapshot()) {
+    foreach (var (_, f) in range(funcs.ΔRangeSnapshot())) {
         var fʗ1 = f;
         func(() => {
             GoFrame ᒐ = default;

@@ -50,7 +50,7 @@ internal static void testAllCurves(ж<testing.T> t, Action<ж<testing.T>, ellipt
     if (testing.Short()) {
         tests = tests[..1];
     }
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new testAllCurves_tests(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -171,9 +171,7 @@ internal static void testNonceSafety(ж<testing.T> t, elliptic.Curve c) {
 
 internal delegate (nint, error) readerFunc(slice<byte> _Δp0);
 
-internal static (nint, error) Read(this readerFunc f, slice<byte> b) {
-    return f(b);
-}
+internal static (nint, error) Read(this readerFunc f, slice<byte> b) { return f(b); }
 
 internal static readerFunc zeroReader = new readerFunc((slice<byte> b) => {
     clear(b);
@@ -337,10 +335,8 @@ internal static void testVectors(ж<testing.T> t) {
 
         switch (ᐧ) {
         case {} when strings.HasPrefix(line, msgˢ): {
-            {
-                (msg, errΔ1) = hex.DecodeString(line[6..]); if (errΔ1 != nil) {
-                    t.Fatalf("failed to decode message on line %d: %s", lineNo, errΔ1);
-                }
+            (msg, errΔ1) = hex.DecodeString(line[6..]); if (errΔ1 != nil) {
+                t.Fatalf("failed to decode message on line %d: %s", lineNo, errΔ1);
             }
             break;
         }
@@ -757,10 +753,8 @@ internal static void testInvalidPublicKeys(ж<testing.T> t, elliptic.Curve curve
     t.Run(compressedˢ, (ж<testing.T> tΔ3) => {
         var (k, _) = GenerateKey(curve, rand.Reader);
         var b = elliptic.MarshalCompressed(curve, k.X, k.Y);
-        {
-            var (_, err) = ParseUncompressedPublicKey(curve, b); if (err == nil) {
-                tΔ3.Errorf("ParseUncompressedPublicKey accepted compressed key");
-            }
+        var (_, err) = ParseUncompressedPublicKey(curve, b); if (err == nil) {
+            tΔ3.Errorf("ParseUncompressedPublicKey accepted compressed key");
         }
     });
 }
@@ -840,7 +834,7 @@ internal static void benchmarkAllCurves(ж<testing.B> b, Action<ж<testing.B>, e
         new("P384", elliptic.P384()),
         new("P521", elliptic.P521())
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var curve = test.curve;
         var curveʗ1 = curve;
         b.Run(test.name, (ж<testing.B> bΔ1) => {
@@ -903,10 +897,8 @@ public static void BenchmarkGenerateKey(ж<testing.B> b) {
         bΔ1.ReportAllocs();
         bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {
-            {
-                var (_, err) = GenerateKey(curve, new ecdsa_test_package.bufio_ReaderжReader(r)); if (err != nil) {
-                    bΔ1.Fatal(err);
-                }
+            var (_, err) = GenerateKey(curve, new ecdsa_test_package.bufio_ReaderжReader(r)); if (err != nil) {
+                bΔ1.Fatal(err);
             }
         }
     });

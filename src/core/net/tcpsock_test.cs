@@ -409,7 +409,7 @@ public static void TestResolveTCPAddr(ж<testing.T> t) {
         }, ref ᒐ);
         testHookLookupIP = lookupLocalhost;
 
-        foreach (var (_, tt) in resolveTCPAddrTests) {
+        foreach (var (_, tt) in range(resolveTCPAddrTests)) {
             var (addr, err) = ResolveTCPAddr(tt.network, tt.litAddrOrName);
             if (!reflect.DeepEqual(addr.OrTypedNil(), tt.addr.OrTypedNil()) || !reflect.DeepEqual(err, tt.err)) {
                 t.Errorf("ResolveTCPAddr(%q, %q) = %#v, %v, want %#v, %v", tt.network, tt.litAddrOrName, addr.OrTypedNil(), err, tt.addr.OrTypedNil(), tt.err);
@@ -443,7 +443,7 @@ public static void TestTCPListenerName(ж<testing.T> t) {
     try {
         testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(t));
 
-        foreach (var (_, tt) in tcpListenerNameTests) {
+        foreach (var (_, tt) in range(tcpListenerNameTests)) {
             var (ln, err) = ListenTCP(tt.net, tt.laddr);
             if (err != nil) {
                 t.Fatal(err);
@@ -451,10 +451,8 @@ public static void TestTCPListenerName(ж<testing.T> t) {
             var lnʗ1 = ln;
             defer(() => lnʗ1.Close(), ref ᒐ);
             var la = ln.Addr();
-            {
-                var (a, ok) = la._<ж<global::go.net_package.TCPAddr>>(ᐧ); if (!ok || a.Port == 0) {
-                    t.Fatalf("got %v; expected a proper address with non-zero port number", la);
-                }
+            var (a, ok) = la._<ж<global::go.net_package.TCPAddr>>(ᐧ); if (!ok || a.Port == 0) {
+                t.Fatalf("got %v; expected a proper address with non-zero port number", la);
             }
         }
     }
@@ -471,7 +469,7 @@ public static void TestIPv6LinkLocalUnicastTCP(ж<testing.T> t) {
             t.Skip(iPv6IsNotSupportedˢ);
         }
 
-        foreach (var (i, tt) in ipv6LinkLocalUnicastTCPTests) {
+        foreach (var (i, tt) in range(ipv6LinkLocalUnicastTCPTests)) {
             var (ln, err) = Listen(tt.network, tt.address);
             if (err != nil) {
                 // It might return "LookupHost returned no
@@ -487,10 +485,8 @@ public static void TestIPv6LinkLocalUnicastTCP(ж<testing.T> t) {
             var handler = (ж<localServer> lsΔ1, global::go.net_package.Listener lnΔ1) => {
                 lsΔ1.transponder(lnΔ1, chʗ1.AsSendOnly());
             };
-            {
-                var errΔ1 = ls.buildup(handler); if (errΔ1 != nil) {
-                    t.Fatal(errΔ1);
-                }
+            var errΔ1 = ls.buildup(handler); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
             {
                 var (la, ok) = ln.Addr()._<ж<global::go.net_package.TCPAddr>>(ᐧ); if (!ok || !tt.nameLookup && la.Zone == ""u8) {
@@ -515,16 +511,12 @@ public static void TestIPv6LinkLocalUnicastTCP(ж<testing.T> t) {
                 }
             }
 
-            {
-                var (_, errΔ2) = c.Write(slice<byte>("TCP OVER IPV6 LINKLOCAL TEST"u8)); if (errΔ2 != nil) {
-                    t.Fatal(errΔ2);
-                }
+            var (_, errΔ2) = c.Write(slice<byte>("TCP OVER IPV6 LINKLOCAL TEST"u8)); if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
             var b = new slice<byte>(32);
-            {
-                var (_, errΔ3) = c.Read(b); if (errΔ3 != nil) {
-                    t.Fatal(errΔ3);
-                }
+            var (_, errΔ3) = c.Read(b); if (errΔ3 != nil) {
+                t.Fatal(errΔ3);
             }
 
             foreach (var errΔ4 in ch) {
@@ -622,10 +614,8 @@ public static partial void TestTCPReadWriteAllocs(ж<testing.T> t) {
         }
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
-        {
-            var errΔ2 = ᐸꟷ(errc); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = ᐸꟷ(errc); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
         defer(() => Ꮡserver.ValueSlot.Close(), ref ᒐ);
 
@@ -664,15 +654,11 @@ public static partial void TestTCPReadWriteAllocs(ж<testing.T> t) {
         var errcʗ3 = errc;
         allocs = testing.AllocsPerRun(1000, () => {
             chʗ2.ᐸꟷ(true);
-            {
-                (_, Ꮡerr.ValueSlot) = Δio.ReadFull(new net_test_package.net_ConnᴠReader(clientʗ3), bufʗ2[..]); if (Ꮡerr.ValueSlot != nil) {
-                    t.Fatal(Ꮡerr.ValueSlot);
-                }
+            (_, Ꮡerr.ValueSlot) = Δio.ReadFull(new net_test_package.net_ConnᴠReader(clientʗ3), bufʗ2[..]); if (Ꮡerr.ValueSlot != nil) {
+                t.Fatal(Ꮡerr.ValueSlot);
             }
-            {
-                var errΔ5 = ᐸꟷ(errcʗ3); if (errΔ5 != nil) {
-                    t.Fatal(errΔ5);
-                }
+            var errΔ5 = ᐸꟷ(errcʗ3); if (errΔ5 != nil) {
+                t.Fatal(errΔ5);
             }
         });
         if (allocs > 0D) {
@@ -803,7 +789,7 @@ public static void TestTCPBig(ж<testing.T> t) {
         t.Skip(testDisabledUseTcpbigToˢ);
     }
 
-    foreach (var (_, writev) in slice<bool>([false, true])) {
+    foreach (var (_, writev) in range(slice<bool>([false, true]))) {
         t.Run(fmt.Sprintf("writev=%v"u8, writev), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
@@ -878,10 +864,8 @@ public static partial void TestCopyPipeIntoTCP(ж<testing.T> t) {
         var errc = new channel<error>(1);
         var errcʗ1 = errc;
         defer(() => {
-            {
-                var errΔ1 = ᐸꟷ(errcʗ1); if (errΔ1 != nil) {
-                    t.Error(errΔ1);
-                }
+            var errΔ1 = ᐸꟷ(errcʗ1); if (errΔ1 != nil) {
+                t.Error(errΔ1);
             }
         }, ref ᒐ);
         var errcʗ2 = errc;
@@ -927,10 +911,8 @@ public static partial void TestCopyPipeIntoTCP(ж<testing.T> t) {
         var errc2 = new channel<error>(1);
         var errc2ʗ1 = errc2;
         defer(() => {
-            {
-                var errΔ3 = ᐸꟷ(errc2ʗ1); if (errΔ3 != nil) {
-                    t.Error(errΔ3);
-                }
+            var errΔ3 = ᐸꟷ(errc2ʗ1); if (errΔ3 != nil) {
+                t.Error(errΔ3);
             }
         }, ref ᒐ);
 
@@ -985,10 +967,8 @@ public static partial void BenchmarkSetReadDeadline(ж<testing.B> Ꮡb) {
         }
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
-        {
-            var errΔ2 = ᐸꟷ(done); if (errΔ2 != nil) {
-                Ꮡb.Fatal(errΔ2);
-            }
+        var errΔ2 = ᐸꟷ(done); if (errΔ2 != nil) {
+            Ꮡb.Fatal(errΔ2);
         }
         defer(() => Ꮡserv.ValueSlot.Close(), ref ᒐ);
         c.SetWriteDeadline(time.Now().Add((time.Duration)(7200000000000L)));

@@ -32,11 +32,9 @@ public static void TestOneByteReader_nonEmptyReader(ж<testing.T> t) {
         if (err != nil) {
             break;
         }
-        {
-            nint g = n;
-            nint w = 1; if (g != w) {
-                t.Errorf("Iteration #%d read %d bytes, want %d", i, g, w);
-            }
+        nint g = n;
+        nint w = 1; if (g != w) {
+            t.Errorf("Iteration #%d read %d bytes, want %d", i, g, w);
         }
         got.Write(b.slice(0, n));
     }
@@ -58,10 +56,8 @@ public static void TestOneByteReader_emptyReader(ж<testing.T> t) {
 
     var obr = OneByteReader(new iotest_test_package.bytes_BufferжReader(r));
     slice<byte> b = default;
-    {
-        var (nΔ1, errΔ1) = obr.Read(b); if (errΔ1 != nil || nΔ1 != 0) {
-            t.Errorf("Empty buffer read returned n=%d err=%v", nΔ1, errΔ1);
-        }
+    var (nΔ1, errΔ1) = obr.Read(b); if (errΔ1 != nil || nΔ1 != 0) {
+        t.Errorf("Empty buffer read returned n=%d err=%v", nΔ1, errΔ1);
     }
 
     b = new slice<byte>(5);
@@ -98,11 +94,9 @@ public static void TestHalfReader_nonEmptyReader(ж<testing.T> t) {
         if (err != nil) {
             break;
         }
-        {
-            nint g = n;
-            nint w = 1; if (g != w) {
-                t.Errorf("Iteration #%d read %d bytes, want %d", i, g, w);
-            }
+        nint g = n;
+        nint w = 1; if (g != w) {
+            t.Errorf("Iteration #%d read %d bytes, want %d", i, g, w);
         }
         got.Write(b.slice(0, n));
     }
@@ -124,10 +118,8 @@ public static void TestHalfReader_emptyReader(ж<testing.T> t) {
 
     var hr = HalfReader(new iotest_test_package.bytes_BufferжReader(r));
     slice<byte> b = default;
-    {
-        var (nΔ1, errΔ1) = hr.Read(b); if (errΔ1 != nil || nΔ1 != 0) {
-            t.Errorf("Empty buffer read returned n=%d err=%v", nΔ1, errΔ1);
-        }
+    var (nΔ1, errΔ1) = hr.Read(b); if (errΔ1 != nil || nΔ1 != 0) {
+        t.Errorf("Empty buffer read returned n=%d err=%v", nΔ1, errΔ1);
     }
 
     b = new slice<byte>(5);
@@ -172,10 +164,8 @@ public static void TestTimeOutReader_nonEmptyReader(ж<testing.T> t) {
     // non empty read buffer
     var tor2 = TimeoutReader(new iotest_test_package.bytes_BufferжReader(buf));
     b = new slice<byte>(3);
-    {
-        var (nΔ1, errΔ1) = tor2.Read(b); if (errΔ1 != nil || nΔ1 == 0) {
-            t.Errorf("Empty buffer read returned n=%d err=%v", nΔ1, errΔ1);
-        }
+    var (nΔ1, errΔ1) = tor2.Read(b); if (errΔ1 != nil || nΔ1 == 0) {
+        t.Errorf("Empty buffer read returned n=%d err=%v", nΔ1, errΔ1);
     }
     // Second call should timeout
     (n, err) = tor2.Read(b);
@@ -197,10 +187,8 @@ public static void TestTimeOutReader_emptyReader(ж<testing.T> t) {
     // empty read buffer
     var tor = TimeoutReader(new iotest_test_package.bytes_BufferжReader(r));
     slice<byte> b = default;
-    {
-        var (nΔ1, errΔ1) = tor.Read(b); if (errΔ1 != nil || nΔ1 != 0) {
-            t.Errorf("Empty buffer read returned n=%d err=%v", nΔ1, errΔ1);
-        }
+    var (nΔ1, errΔ1) = tor.Read(b); if (errΔ1 != nil || nΔ1 != 0) {
+        t.Errorf("Empty buffer read returned n=%d err=%v", nΔ1, errΔ1);
     }
     // Second call should timeout
     var (n, err) = tor.Read(b);
@@ -218,10 +206,8 @@ public static void TestTimeOutReader_emptyReader(ж<testing.T> t) {
     // non empty read buffer
     var tor2 = TimeoutReader(new iotest_test_package.bytes_BufferжReader(r));
     b = new slice<byte>(5);
-    {
-        var (nΔ2, errΔ2) = tor2.Read(b); if (!AreEqual(errΔ2, io.EOF) || nΔ2 != 0) {
-            t.Errorf("Empty buffer read returned n=%d err=%v", nΔ2, errΔ2);
-        }
+    var (nΔ2, errΔ2) = tor2.Read(b); if (!AreEqual(errΔ2, io.EOF) || nΔ2 != 0) {
+        t.Errorf("Empty buffer read returned n=%d err=%v", nΔ2, errΔ2);
     }
     // Second call should timeout
     (n, err) = tor2.Read(b);
@@ -259,11 +245,9 @@ public static void TestDataErrReader_nonEmptyReader(ж<testing.T> t) {
     if (!AreEqual(err, io.EOF) || n == 0) {
         t.Errorf("Last Read returned n=%d err=%v", n, err);
     }
-    {
-        @string g = got.String();
-        @string w = helloWorldˢ; if (g != w) {
-            t.Errorf("Read mismatch\n\tGot:  %q\n\tWant: %q", g, w);
-        }
+    @string g = got.String();
+    @string w = helloWorldˢ; if (g != w) {
+        t.Errorf("Read mismatch\n\tGot:  %q\n\tWant: %q", g, w);
     }
 }
 
@@ -272,10 +256,8 @@ public static void TestDataErrReader_emptyReader(ж<testing.T> t) {
 
     var der = DataErrReader(new iotest_test_package.bytes_BufferжReader(r));
     slice<byte> b = default;
-    {
-        var (nΔ1, errΔ1) = der.Read(b); if (!AreEqual(errΔ1, io.EOF) || nΔ1 != 0) {
-            t.Errorf("Empty buffer read returned n=%d err=%v", nΔ1, errΔ1);
-        }
+    var (nΔ1, errΔ1) = der.Read(b); if (!AreEqual(errΔ1, io.EOF) || nΔ1 != 0) {
+        t.Errorf("Empty buffer read returned n=%d err=%v", nΔ1, errΔ1);
     }
 
     b = new slice<byte>(5);
@@ -330,10 +312,8 @@ public static void TestStringsReader(ж<testing.T> t) {
     @string msg = msgᶜ;
 
     var r = strings.NewReader(msg);
-    {
-        var err = TestReader(new iotest_test_package.strings_ReaderжReader(r), slice<byte>(msg)); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = TestReader(new iotest_test_package.strings_ReaderжReader(r), slice<byte>(msg)); if (err != nil) {
+        t.Fatal(err);
     }
 }
 

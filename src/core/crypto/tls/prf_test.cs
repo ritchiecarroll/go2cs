@@ -14,16 +14,16 @@ internal partial struct testSplitPreMasterSecretTest {
     internal @string @in, out1, out2;
 }
 
-internal static slice<testSplitPreMasterSecretTest> testSplitPreMasterSecretTests = slice<testSplitPreMasterSecretTest>([
+internal static slice<testSplitPreMasterSecretTest> testSplitPreMasterSecretTests = [
     new("", "", ""),
     new("00", "00", "00"),
     new("0011", "00", "11"),
     new("001122", "0011", "1122"),
     new("00112233", "0011", "2233")
-]);
+];
 
 public static void TestSplitPreMasterSecret(ж<testing.T> t) {
-    foreach (var (i, test) in testSplitPreMasterSecretTests) {
+    foreach (var (i, test) in range(testSplitPreMasterSecretTests)) {
         var (@in, _) = hex.DecodeString(test.@in);
         var (out1, out2) = splitPreMasterSecret(@in);
         @string s1 = hex.EncodeToString(out1);
@@ -51,17 +51,15 @@ internal static ref readonly @string labelˢ => ref labelˢᵇ;
 private static readonly @string labelˢᵇ = "label"u8;
 
 public static void TestKeysFromPreMasterSecret(ж<testing.T> t) {
-    foreach (var (i, test) in testKeysFromTests) {
+    foreach (var (i, test) in range(testKeysFromTests)) {
         var (@in, _) = hex.DecodeString(test.preMasterSecret);
         var (clientRandom, _) = hex.DecodeString(test.clientRandom);
         var (serverRandom, _) = hex.DecodeString(test.serverRandom);
 
         var masterSecret = masterFromPreMasterSecret(test.version, ref (test.suite).DerefOrNull(), @in, clientRandom, serverRandom);
-        {
-            @string s = hex.EncodeToString(masterSecret); if (s != test.masterSecret) {
-                t.Errorf("#%d: bad master secret %s, want %s", i, s, test.masterSecret);
-                continue;
-            }
+        @string s = hex.EncodeToString(masterSecret); if (s != test.masterSecret) {
+            t.Errorf("#%d: bad master secret %s, want %s", i, s, test.masterSecret);
+            continue;
         }
 
         var (clientMAC, serverMAC, clientKey, serverKey, _, _) = keysFromMasterSecret(test.version, ref (test.suite).DerefOrNull(), masterSecret, clientRandom, serverRandom, test.macLen, test.keyLen, 0);

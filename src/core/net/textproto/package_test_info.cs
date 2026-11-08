@@ -45,9 +45,9 @@ using static global::go.net.textproto_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/textproto/header_test.go", "header_test.cs", "AA4aABYugoKAggAJDJKmgoKC")]
-[assembly: GoPositionMap("net/textproto/reader_test.go", "reader_test.cs", "ABUoguaCgoKClIKClIKCuIKCgoKClIL4goKCgpSCgpSCgpSCgviCgoKClIKClIKClICCpIKC+IKCgoKCpoKCgviCgoKCgqaCgoL4goKCuIL4goKCgoIACAyiABYygoKCAAgKgoKCgoL4goKClIKCgoKUgoK8tIqC7oK4ggANHIKCgILagoKCgoKUtLS0xrSkgoKmgoKCgpS0tLSkgoLMyJ6CgpTKgrqSgoKCgpKCgoKUgriAggAIEICklMqClKaCggAKFgAZOpKCgoKCgpSClIIACAySnJyUgoKUgpSClIL4goKCgqaCgpKAgraC6NyCyoKklKaUgrgADhoAEhiigu6SgoKUgoKAggAODqKCgoKCgoKCgpSAgg==", "359-364:1;465-469:1;488-491:1;536-547:1", "", "414=NewReader/1/3/2,MultiReader/1/1/1")]
-[assembly: GoPositionMap("net/textproto/writer_test.go", "writer_test.cs", "ABEagoKCgoCCAAgIgoKCgoKClIKCgILIgoKCgoKClIKCgILIgoKCgoKCgII=")]
+[assembly: GoPositionMap("net/textproto/header_test.go", "header_test.cs", "AA4aABYugoKCAAgMkqaCgoI=")]
+[assembly: GoPositionMap("net/textproto/reader_test.go", "reader_test.cs", "ABMoguaCgoKClIKClIKCuIKCgoKClIL4goKCgpSCgpSCgpSCgviCgoKClIKClIKClIKUgoL4goKCgoKmgoKC+IKCgoKCpoKCgviCgoK4gviCgoKCggAIDKIAFjKCgoIACAqCgoKCgviCgoKUgoKCgpSCgry0ioLugriCAA0cgoKCyoKCgoKClLS0tMa0pIKCpoKCgoKUtLS0pIKCzMiegoKUyoK6koKCgoKSgoKClIK4ggAHEJSUyoKUpoKCAAoWABk6koKCgoKClIKUggAIDJKcnJSCgpSClIKUgviCgoKCpoKCkoKmgujcgsqCpJSmlIK4AA4aABIYooLukoKClIKCggANDqKCgoKCgoKCgpSC", "359-364:1;465-469:1;488-491:1;536-547:1", "", "404=NewReader/1/3/2,MultiReader/1/1/1")]
+[assembly: GoPositionMap("net/textproto/writer_test.go", "writer_test.cs", "ABEagoKCgoL4goKCgoKClIKCgriCgoKCgoKUgoKCuIKCgoKCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

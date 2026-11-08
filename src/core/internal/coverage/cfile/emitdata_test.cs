@@ -139,10 +139,8 @@ internal static void upmergeCoverData(ж<testing.T> t, @string gocoverdir, @stri
     t.Logf("up-merge of covdata from %s to %s", gocoverdir, testGoCoverDir);
     t.Logf("executing: go %+v", args);
     var cmd = exec.Command(testenv.GoToolPath(new cfile_internal_test_package.testing_TжTB(t)), args.ꓸꓸꓸ);
-    {
-        var (b, err) = cmd.CombinedOutput(); if (err != nil) {
-            t.Fatalf("covdata merge failed (%v): %s", err, b);
-        }
+    var (b, err) = cmd.CombinedOutput(); if (err != nil) {
+        t.Fatalf("covdata merge failed (%v): %s", err, b);
     }
 }
 
@@ -165,20 +163,16 @@ internal static @string buildHarness(ж<testing.T> t, @string dir, slice<@string
     args = append(argsᴷ, args, harnessSrc);
     //t.Logf("harness build: go %+v\n", args)
     var cmd = exec.Command(testenv.GoToolPath(new cfile_internal_test_package.testing_TжTB(t)), args.ꓸꓸꓸ);
-    {
-        var (b, err) = cmd.CombinedOutput(); if (err != nil) {
-            t.Fatalf("build failed (%v): %s", err, b);
-        }
+    var (b, err) = cmd.CombinedOutput(); if (err != nil) {
+        t.Fatalf("build failed (%v): %s", err, b);
     }
     return harnessPath;
 }
 
 internal static @string mkdir(ж<testing.T> t, @string d) {
     t.Helper();
-    {
-        var err = os.Mkdir(d, 511); if (err != nil) {
-            t.Fatalf("mkdir failed: %v", err);
-        }
+    var err = os.Mkdir(d, 511); if (err != nil) {
+        t.Fatalf("mkdir failed: %v", err);
     }
     return d;
 }
@@ -193,7 +187,7 @@ private static readonly @string gocoverdirˢ2ᵇ = "GOCOVERDIR="u8;
 internal static slice<@string> updateGoCoverDir(slice<@string> env, @string gcd, bool setGoCoverDir) {
     var rv = slice<@string>([]);
     var found = false;
-    foreach (var (_, vᴛ1) in env) {
+    foreach (var (_, vᴛ1) in range(env)) {
         var v = vᴛ1;
 
         if (strings.HasPrefix(v, gocoverdirˢ2)) {
@@ -232,14 +226,14 @@ internal static @string testForSpecificFunctions(ж<testing.T> t, @string dir, s
     }
     @string output = (@string)b;
     @string rval = ""u8;
-    foreach (var (_, f) in want) {
+    foreach (var (_, f) in range(want)) {
         @string wf = "Func: "u8 + f + "\n"u8;
         if (strings.Contains(output, wf)) {
             continue;
         }
         rval += fmt.Sprintf("error: output should contain %q but does not\n"u8, wf);
     }
-    foreach (var (_, f) in avoid) {
+    foreach (var (_, f) in range(avoid)) {
         @string wf = "Func: "u8 + f + "\n"u8;
         if (strings.Contains(output, wf)) {
             rval += fmt.Sprintf("error: output should not contain %q but does\n"u8, wf);
@@ -295,7 +289,7 @@ internal static void testEmitToDir(ж<testing.T> t, @string harnessPath, @string
         }
         nint mfc = 0;
         nint cdc = 0;
-        foreach (var (_, e) in dents) {
+        foreach (var (_, e) in range(dents)) {
             if (e.IsDir()) {
                 continue;
             }
@@ -329,10 +323,8 @@ internal static void testEmitToWriter(ж<testing.T> t, @string harnessPath, @str
         }
         var want = slice<@string>(["main", tp]);
         var avoid = slice<@string>(["final"]);
-        {
-            @string msg = testForSpecificFunctions(t, edir, want, avoid); if (msg != ""u8) {
-                t.Errorf("coverage data from %q output match failed: %s", tp, msg);
-            }
+        @string msg = testForSpecificFunctions(t, edir, want, avoid); if (msg != ""u8) {
+            t.Errorf("coverage data from %q output match failed: %s", tp, msg);
         }
         upmergeCoverData(t, edir, atomicˢ);
         upmergeCoverData(t, rdir, atomicˢ);
@@ -365,10 +357,8 @@ internal static void testEmitToUnwritableDir(ж<testing.T> t, @string harnessPat
             var (rdir, edir) = mktestdirs(t, tag, tp, dir);
 
             // Make edir unwritable.
-            {
-                var errΔ1 = os.Chmod(edir, 365); if (errΔ1 != nil) {
-                    t.Fatalf("chmod failed: %v", errΔ1);
-                }
+            var errΔ1 = os.Chmod(edir, 365); if (errΔ1 != nil) {
+                t.Fatalf("chmod failed: %v", errΔ1);
             }
             defer(os.Chmod, edir, (fs.FileMode)511, ref ᒐ);
 
@@ -425,11 +415,9 @@ internal static void testEmitWithCounterClear(ж<testing.T> t, @string harnessPa
         }
         var want = slice<@string>([tp, "postClear"]);
         var avoid = slice<@string>(["preClear", "main", "final"]);
-        {
-            @string msg = testForSpecificFunctions(t, edir, want, avoid); if (msg != ""u8) {
-                t.Logf("%s", output);
-                t.Errorf("coverage data from %q output match failed: %s", tp, msg);
-            }
+        @string msg = testForSpecificFunctions(t, edir, want, avoid); if (msg != ""u8) {
+            t.Logf("%s", output);
+            t.Errorf("coverage data from %q output match failed: %s", tp, msg);
         }
         upmergeCoverData(t, edir, atomicˢ);
         upmergeCoverData(t, rdir, atomicˢ);
@@ -591,7 +579,7 @@ public static void TestIssue56006EmitDataRaceCoverRunningGoroutine(ж<testing.T>
 
     // Don't want to see any data races in output.
     var avoid = slice<@string>(["DATA RACE"]);
-    foreach (var (_, no) in avoid) {
+    foreach (var (_, no) in range(avoid)) {
         if (strings.Contains((@string)b, no)) {
             t.Logf("%s\n", (@string)b);
             t.Fatalf("found %s in test output, not permitted", no);
@@ -640,7 +628,7 @@ public static void TestIssue59563TruncatedCoverPkgAll(ж<testing.T> t) {
     var lines = strings.Split((@string)b, "\n");
     nint nfound = 0;
     var bad = false;
-    foreach (var (_, line) in lines) {
+    foreach (var (_, line) in range(lines)) {
         var f = strings.Fields(line);
         if (len(f) == 0) {
             continue;

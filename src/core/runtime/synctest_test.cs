@@ -7,8 +7,6 @@ using synctest = @internal.synctest_package;
 using Δruntime = runtime_package;
 using testing = testing_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {

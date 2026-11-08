@@ -28,7 +28,7 @@ using static go.debug.dwarf_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("debug/dwarf/dwarf5ranges_test.go", "dwarf5ranges_test.cs", "ABQcgoKCpoKCgIKkyoKClJSUgg==")]
+[assembly: GoPositionMap("debug/dwarf/dwarf5ranges_test.go", "dwarf5ranges_test.cs", "ABQcgoKCpoKCgpTKgoKUlJSC")]
 [assembly: GoPositionMap("debug/dwarf/export_test.go", "export_test.cs", "AAkO")]
 // </GoSourcePositionMaps>
 

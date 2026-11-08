@@ -81,10 +81,8 @@ public static void TestFilterDuplicates(ж<testing.T> t) {
 
     // pretty-print
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    {
-        var errΔ1 = format.Node(new ast_test_package.strings_BuilderжWriter(Ꮡbuf), fset, merged.OrTypedNil()); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = format.Node(new ast_test_package.strings_BuilderжWriter(Ꮡbuf), fset, merged.OrTypedNil()); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     @string output = buf.String();
 

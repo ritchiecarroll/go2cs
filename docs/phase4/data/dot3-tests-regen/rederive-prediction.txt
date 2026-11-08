@@ -1,0 +1,5 @@
+PREDICTION written 2026-11-08T08:55:16Z, before reading any run3 output (run3 started ~09:00Z on merge 726c39eefb = 1fba598958 + cf0408ed4d).
+1. 0 production files move; 0 .tests.csproj.
+2. Batch 254: exactly the two per-call payloads lost in the first regen come back -- fips140test entropy_test.go Run/1/1/2 and net/http serve_test.go Repeat/1/1/1 -- in those two test package_info files; calls_census HEAD..WORK: lost 0, gained 2.
+3. Batches 250-252 (TS C13 unsafe alias, C2 anon-struct type argument, C7 type named Value, C14 receiver named like an import): a small test-only footprint, only where test code has those shapes; I cannot size it without the run (the seats' footprints were production-measured), so the falsifier is any changed file NOT attributable to one of the five.
+4. Second pass at the new commit: 0 files (the same two .cs.auto siblings only).

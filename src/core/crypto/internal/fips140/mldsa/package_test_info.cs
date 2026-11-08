@@ -37,8 +37,8 @@ using static global::go.crypto.@internal.fips140.mldsa_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140/mldsa/field_test.go", "field_test.cs", "ABEosoKUggAKFoKUpqaCgoKClIKClIKCyoKCgoKCgoLcgoKCgoKCgtyCgoKCgoKCgtyCgoKCgoKUlILKgoKCgoKCgtyUAAkUgoCC2oKCgoKCgoLugoKCgoKCgoIABxCCgoKCgoKCgoKCpoKCgpSmgoKClKaCgoKCuIKCgoKCyoKCgoKCgpSCyoKClIKUgpSCpoKUgpSClIKUgpSCuIKCgoKUgoKUgILagoKClIKCgoKClIKUgviCgpSCuIKCgoK4goKCpoKClIKCxoKCxqSClILKgoKClIKCgg==", "312-314:1;315-317:2", "", "40=fieldFromMontgomery/1/1/1")]
-[assembly: GoPositionMap("crypto/internal/fips140/mldsa/mldsa_test.go", "mldsa_test.cs", "ACEosgDgAdQDsrKCgoKmlJSClJKClIKUkoKC3IKCgpSCpoKClIKUgsqCgoKCgoKCgoKCpoKUgqaAgqSCgILEyIKCkoKUgqaAgraCgsrclIKEgoKCgoKUgoKUgoKUgpSAgsjKgoSCgoKCgpSCgpSCgpSClICC7IKCgpQ=", "256-335:1;270-273:1.1;274-276:1.2;277-283:1.3;341-344:1;345-347:2;366-393:1;394-424:2")]
+[assembly: GoPositionMap("crypto/internal/fips140/mldsa/field_test.go", "field_test.cs", "ABEosoKUggAKFoKUpqaCgoKClIKClIKCyoKCgoKCgoLcgoKCgoKCgtyCgoKCgoKCgtyCgoKCgoKUlILKgoKCgoKCgtyUAAkUgoLKgoKCgoKCgu6CgoKCgoKCggAHEIKCgoKCgoKCgoKmgoKClKaCgoKUpoKCgoK4goKCgoLKgoKCgoKClILKgoKUgpSClIKmgpSClIKUgpSClIK4goKCgpSCgpSCyoKCgpSCgoKCgpSClIL4goKUgriCgoKCuIKCgqaCgpSCgsaCgsakgpSCyoKCgpSCgoI=", "312-314:1;315-317:2", "", "40=fieldFromMontgomery/1/1/1")]
+[assembly: GoPositionMap("crypto/internal/fips140/mldsa/mldsa_test.go", "mldsa_test.cs", "ACEosgDgAdQDsrKCgoKmlJSClJKClIKUkoKC3IKCgpSCpoKClIKUgsqCgoKCgoKCgoKCpoKUgqaClIKCtMiCgpKClIKmgqaCgsrclIKEgoKCgoKUgoKUgoKUgpSCuMqChIKCgoKClIKClIKClIKUgtyCgoKU", "256-335:1;270-273:1.1;274-276:1.2;277-283:1.3;341-344:1;345-347:2;366-393:1;394-424:2", "", "", "", "293:33,294:25")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

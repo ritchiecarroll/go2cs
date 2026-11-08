@@ -77,11 +77,9 @@ public static void TestRawConnReadWrite(ж<testing.T> t) {
                         tΔ1.Error(errΔ1);
                         return;
                     }
-                    {
-                        var (_, errΔ2) = cΔ1.Write(bΔ1.slice(0, nΔ1)); if (errΔ2 != nil) {
-                            tΔ1.Error(errΔ2);
-                            return;
-                        }
+                    var (_, errΔ2) = cΔ1.Write(bΔ1.slice(0, nΔ1)); if (errΔ2 != nil) {
+                        tΔ1.Error(errΔ2);
+                        return;
                     }
                 }
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -90,10 +88,8 @@ public static void TestRawConnReadWrite(ж<testing.T> t) {
             var ls = newLocalServer(new net_test_package.testing_TжTB(tΔ1), tcpˢ);
             var lsʗ1 = ls;
             defer(() => lsʗ1.teardown(), ref ᒐ);
-            {
-                var errΔ3 = ls.buildup(handler); if (errΔ3 != nil) {
-                    tΔ1.Fatal(errΔ3);
-                }
+            var errΔ3 = ls.buildup(handler); if (errΔ3 != nil) {
+                tΔ1.Fatal(errΔ3);
             }
 
             var (c, err) = Dial(ls.Listener.Addr().Network(), ls.Listener.Addr().String());
@@ -153,15 +149,11 @@ public static void TestRawConnReadWrite(ж<testing.T> t) {
             array<byte> b = new(1);
 
             c.SetDeadline(noDeadline);
-            {
-                var errΔ1 = c.SetDeadline(time.Now().Add(-1)); if (errΔ1 != nil) {
-                    tΔ2.Fatal(errΔ1);
-                }
+            var errΔ1 = c.SetDeadline(time.Now().Add(-1)); if (errΔ1 != nil) {
+                tΔ2.Fatal(errΔ1);
             }
-            {
-                err = writeRawConn(cc, b[..]); if (err == nil) {
-                    tΔ2.Fatal(writeShouldFailˢ);
-                }
+            err = writeRawConn(cc, b[..]); if (err == nil) {
+                tΔ2.Fatal(writeShouldFailˢ);
             }
             {
                 var perr = parseWriteError(err); if (perr != nil) {
@@ -171,10 +163,8 @@ public static void TestRawConnReadWrite(ж<testing.T> t) {
             if (!isDeadlineExceeded(err)) {
                 tΔ2.Errorf("got %v; want timeout", err);
             }
-            {
-                (_, err) = readRawConn(cc, b[..]); if (err == nil) {
-                    tΔ2.Fatal(readShouldFailˢ);
-                }
+            (_, err) = readRawConn(cc, b[..]); if (err == nil) {
+                tΔ2.Fatal(readShouldFailˢ);
             }
             {
                 var perr = parseReadError(err); if (perr != nil) {
@@ -186,15 +176,11 @@ public static void TestRawConnReadWrite(ж<testing.T> t) {
             }
 
             c.SetReadDeadline(noDeadline);
-            {
-                var errΔ2 = c.SetReadDeadline(time.Now().Add(-1)); if (errΔ2 != nil) {
-                    tΔ2.Fatal(errΔ2);
-                }
+            var errΔ2 = c.SetReadDeadline(time.Now().Add(-1)); if (errΔ2 != nil) {
+                tΔ2.Fatal(errΔ2);
             }
-            {
-                (_, err) = readRawConn(cc, b[..]); if (err == nil) {
-                    tΔ2.Fatal(readShouldFailˢ);
-                }
+            (_, err) = readRawConn(cc, b[..]); if (err == nil) {
+                tΔ2.Fatal(readShouldFailˢ);
             }
             {
                 var perr = parseReadError(err); if (perr != nil) {
@@ -206,15 +192,11 @@ public static void TestRawConnReadWrite(ж<testing.T> t) {
             }
 
             c.SetWriteDeadline(noDeadline);
-            {
-                var errΔ3 = c.SetWriteDeadline(time.Now().Add(-1)); if (errΔ3 != nil) {
-                    tΔ2.Fatal(errΔ3);
-                }
+            var errΔ3 = c.SetWriteDeadline(time.Now().Add(-1)); if (errΔ3 != nil) {
+                tΔ2.Fatal(errΔ3);
             }
-            {
-                err = writeRawConn(cc, b[..]); if (err == nil) {
-                    tΔ2.Fatal(writeShouldFailˢ);
-                }
+            err = writeRawConn(cc, b[..]); if (err == nil) {
+                tΔ2.Fatal(writeShouldFailˢ);
             }
             {
                 var perr = parseWriteError(err); if (perr != nil) {
@@ -252,10 +234,8 @@ public static void TestRawConnControl(ж<testing.T> t) {
             if (err != nil) {
                 tΔ1.Fatal(err);
             }
-            {
-                var errΔ1 = controlRawConn(cc1, ln.Addr()); if (errΔ1 != nil) {
-                    tΔ1.Fatal(errΔ1);
-                }
+            var errΔ1 = controlRawConn(cc1, ln.Addr()); if (errΔ1 != nil) {
+                tΔ1.Fatal(errΔ1);
             }
 
             (var c, err) = Dial(ln.Addr().Network(), ln.Addr().String());
@@ -269,23 +249,17 @@ public static void TestRawConnControl(ж<testing.T> t) {
             if (err != nil) {
                 tΔ1.Fatal(err);
             }
-            {
-                var errΔ2 = controlRawConn(cc2, c.LocalAddr()); if (errΔ2 != nil) {
-                    tΔ1.Fatal(errΔ2);
-                }
+            var errΔ2 = controlRawConn(cc2, c.LocalAddr()); if (errΔ2 != nil) {
+                tΔ1.Fatal(errΔ2);
             }
 
             ln.Close();
-            {
-                var errΔ3 = controlRawConn(cc1, ln.Addr()); if (errΔ3 == nil) {
-                    tΔ1.Fatal(controlAfterCloseShouldˢ);
-                }
+            var errΔ3 = controlRawConn(cc1, ln.Addr()); if (errΔ3 == nil) {
+                tΔ1.Fatal(controlAfterCloseShouldˢ);
             }
             c.Close();
-            {
-                var errΔ4 = controlRawConn(cc2, c.LocalAddr()); if (errΔ4 == nil) {
-                    tΔ1.Fatal(controlAfterCloseShouldˢ);
-                }
+            var errΔ4 = controlRawConn(cc2, c.LocalAddr()); if (errΔ4 == nil) {
+                tΔ1.Fatal(controlAfterCloseShouldˢ);
             }
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

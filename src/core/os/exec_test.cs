@@ -36,10 +36,8 @@ public static void TestProcessLiteral(ж<Δtesting.T> t) {
         defer(signal.Stop, c.AsSendOnly(), ref ᒐ);
 
         var p = Ꮡ(new Δos.Process(Pid: Δos.Getpid()));
-        {
-            var err = p.Signal(Δos.Interrupt); if (err != nil) {
-                t.Fatalf("Signal got err %v, want nil", err);
-            }
+        var err = p.Signal(Δos.Interrupt); if (err != nil) {
+            t.Fatalf("Signal got err %v, want nil", err);
         }
 
         // Verify we actually received the signal.
@@ -74,18 +72,16 @@ public static void TestProcessReleaseTwice(ж<Δtesting.T> t) {
         var wʗ1 = w;
         defer(() => wʗ1.Close(), ref ᒐ);
 
-        (var p, err) = Δos.StartProcess(testenv.GoToolPath(new os_test_package.testing_TжTB(t)), slice<@string>(["go"]), Ꮡ(new Δos.ProcAttr(
+        (var p, err) = Δos.StartProcess(testenv.GoToolPath(new os_test_package.testing_TжTB(t)), ["go"], Ꮡ(new Δos.ProcAttr(
             // N.B. On Windows, StartProcess requires exactly 3 Files. Pass
             // in a dummy pipe to avoid irrelevant output on the test stdout.
-            Files: slice<ж<Δos.File>>([r, w, w])
+            Files: [r, w, w]
         )));
         if (err != nil) {
             t.Fatalf("starting test process: %v", err);
         }
-        {
-            var errΔ1 = p.Release(); if (errΔ1 != nil) {
-                t.Fatalf("first Release: got err %v, want nil", errΔ1);
-            }
+        var errΔ1 = p.Release(); if (errΔ1 != nil) {
+            t.Fatalf("first Release: got err %v, want nil", errΔ1);
         }
 
         err = p.Release();

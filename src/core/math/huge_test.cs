@@ -10,7 +10,7 @@ using static go.math_internal_test_package;
 partial class math_test_package {
 
 // Inputs to test trig_reduce
-internal static slice<float64> trigHuge = slice<float64>([
+internal static slice<float64> trigHuge = [
     1 << 28,
     1 << 29,
     1 << 30,
@@ -21,13 +21,13 @@ internal static slice<float64> trigHuge = slice<float64>([
     1891969788213177603238151163393619335935685080427297832880571827617792D,
     2514859209672213815954130451185339640703892284324672462185344991442198389642370554817310158862574988296192D,
     MaxFloat64
-]);
+];
 
 // Results for trigHuge[i] calculated with https://github.com/robpike/ivy
 // using 4096 bits of working precision.   Values requiring less than
 // 102 decimal digits (1 << 120, 1 << 240, 1 << 480, 1234567891234567 << 180)
 // were confirmed via https://keisan.casio.com/
-internal static slice<float64> cosHuge = slice<float64>([
+internal static slice<float64> cosHuge = [
     -0.16556897949057876D,
     -0.94517382606089662D,
     0.78670712294118812D,
@@ -38,9 +38,9 @@ internal static slice<float64> cosHuge = slice<float64>([
     -0.14616431394103619D,
     -0.79456058210671406D,
     -0.99998768942655994D
-]);
+];
 
-internal static slice<float64> sinHuge = slice<float64>([
+internal static slice<float64> sinHuge = [
     -0.98619821183697566D,
     0.32656766301856334D,
     -0.61732641504604217D,
@@ -51,9 +51,9 @@ internal static slice<float64> sinHuge = slice<float64>([
     0.98926032637023618D,
     -0.60718488235646949D,
     0.00496195478918406D
-]);
+];
 
-internal static slice<float64> tanHuge = slice<float64>([
+internal static slice<float64> tanHuge = [
     5.95641897939639421D,
     -0.34551069233430392D,
     -0.78469661331920043D,
@@ -64,7 +64,7 @@ internal static slice<float64> tanHuge = slice<float64>([
     -6.76813854009065030D,
     0.76417695016604922D,
     -0.00496201587444489D
-]);
+];
 
 // Check that trig values of huge angles return accurate results.
 // This confirms that argument reduction works for very large values

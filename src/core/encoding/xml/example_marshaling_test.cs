@@ -22,10 +22,8 @@ public static error UnmarshalXML(this ref Animal a, ж<xml.Decoder> d, xml.Start
     ref var start = ref heap(startʗp, out var Ꮡstart);
 
     ref var s = ref heap(new @string(), out var Ꮡs);
-    {
-        var err = d.DecodeElement(Ꮡs, Ꮡstart); if (err != nil) {
-            return err;
-        }
+    var err = d.DecodeElement(Ꮡs, Ꮡstart); if (err != nil) {
+        return err;
     }
     var exprᴛ1 = strings.ToLower(s);
     switch (ᐧ) {
@@ -94,14 +92,12 @@ internal partial struct Example_customMarshalXML_zoo /*dyn*/ {
 public static void Example_customMarshalXML() {
     @string blob = animalsAnimalGopherˢ;
     ref var zoo = ref heap(new Example_customMarshalXML_zoo(), out var Ꮡzoo);
-    {
-        var err = xml.Unmarshal(slice<byte>(blob), Ꮡzoo); if (err != nil) {
-            log.Fatal(err);
-        }
+    var err = xml.Unmarshal(slice<byte>(blob), Ꮡzoo); if (err != nil) {
+        log.Fatal(err);
     }
 
     var census = new map<Animal, nint>();
-    foreach (var (_, animal) in zoo.Animals) {
+    foreach (var (_, animal) in range(zoo.Animals)) {
         census[animal] += 1;
     }
 

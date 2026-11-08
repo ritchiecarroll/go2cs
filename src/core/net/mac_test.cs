@@ -15,7 +15,7 @@ partial struct parseMACTestsᴛ1 /*dyn*/ {
     internal global::go.net_package.HardwareAddr @out;
     internal @string err;
 }
-internal static slice<parseMACTestsᴛ1> parseMACTests = slice<parseMACTestsᴛ1>([
+internal static slice<parseMACTestsᴛ1> parseMACTests = [
     // See RFC 7042, Section 2.1.1.
     new("00:00:5e:00:53:01", new HardwareAddr(new byte[]{0x00, 0x00, 0x5e, 0x00, 0x53, 0x01}.slice()), ""),
     new("00-00-5e-00-53-01", new HardwareAddr(new byte[]{0x00, 0x00, 0x5e, 0x00, 0x53, 0x01}.slice()), ""),
@@ -91,7 +91,7 @@ internal static slice<parseMACTestsᴛ1> parseMACTests = slice<parseMACTestsᴛ1
     new("0123:4567:89AF", default, "invalid MAC address"),
     new("0123-4567-89AF", default, "invalid MAC address"),
     new("0123456789AF0", default, "invalid MAC address")
-]);
+];
 
 public static void TestParseMAC(ж<testing.T> t) {
     bool match(error err, @string s) {
@@ -101,7 +101,7 @@ public static void TestParseMAC(ж<testing.T> t) {
         return err != nil && strings.Contains(err.Error(), s);
     }
 
-    foreach (var (i, tt) in parseMACTests) {
+    foreach (var (i, tt) in range(parseMACTests)) {
         var (@out, err) = ParseMAC(tt.@in);
         if (!reflect.DeepEqual(@out, tt.@out) || !match(err, tt.err)) {
             t.Errorf("ParseMAC(%q) = %v, %v, want %v, %v", tt.@in, @out, err, tt.@out, tt.err);

@@ -68,33 +68,33 @@ public static void TestBasic(ж<testing.T> t) {
         new(
             cmode: coverage.CtrModeSet,
             cgran: coverage.CtrGranularityPerBlock,
-            src: slice<uint32>([1, 0, 1]),
-            dst: slice<uint32>([1, 1, 0]),
-            res: slice<uint32>([1, 1, 1]),
+            src: [1, 0, 1],
+            dst: [1, 1, 0],
+            res: [1, 1, 1],
             iters: 2,
             overflow: false
         ),
         new(
             cmode: coverage.CtrModeCount,
             cgran: coverage.CtrGranularityPerBlock,
-            src: slice<uint32>([1, 0, 3]),
-            dst: slice<uint32>([5, 7, 0]),
-            res: slice<uint32>([6, 7, 3]),
+            src: [1, 0, 3],
+            dst: [5, 7, 0],
+            res: [6, 7, 3],
             iters: 1,
             overflow: false
         ),
         new(
             cmode: coverage.CtrModeCount,
             cgran: coverage.CtrGranularityPerBlock,
-            src: slice<uint32>([4294967200U, 0, 3]),
-            dst: slice<uint32>([4294967001U, 7, 0]),
-            res: slice<uint32>([4294967295U, 7, 3]),
+            src: [4294967200U, 0, 3],
+            dst: [4294967001U, 7, 0],
+            res: [4294967295U, 7, 3],
             iters: 1,
             overflow: true
         )
     ]);
 
-    foreach (var (k, scenario) in scenarios) {
+    foreach (var (k, scenario) in range(scenarios)) {
         error err = default;
         bool ovf = default;
         var m = Ꮡ(new cmerge.Merger());
@@ -114,7 +114,7 @@ public static void TestBasic(ж<testing.T> t) {
             if (scenario.merr && err == nil) {
                 t.Fatalf("case %d expected err, not received", k);
             }
-            foreach (var iΔ1 in range(scenario.dst)) {
+            foreach (var iΔ1 in range(len(scenario.dst))) {
                 if (scenario.dst[iΔ1] != scenario.res[iΔ1]) {
                     t.Fatalf("case %d: bad merge at %d got %d want %d",
                         k, iΔ1, scenario.dst[iΔ1], scenario.res[iΔ1]);

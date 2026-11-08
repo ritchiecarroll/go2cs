@@ -23,8 +23,6 @@ using sync = sync_package;
 using testing = testing_package;
 using time = time_package;
 using static global::go.go.types_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = io.fs_package;
 using global::go.@internal;
 using global::go.go;
@@ -260,25 +258,21 @@ internal static void testTestDir(ж<testing.T> t, @string path, params ꓸꓸꓸ
         // cmd/distpack deletes GOROOT/test, so skip the test if it isn't present.
         // cmd/distpack also requires GOROOT/VERSION to exist, so use that to
         // suppress false-positive skips.
-        {
-            var (_, errΔ1) = os.Stat(filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(t)), testˢ)); if (os.IsNotExist(errΔ1)) {
-                {
-                    var (_, errΔ2) = os.Stat(filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(t)), versionˢ)); if (errΔ2 == nil) {
-                        t.Skipf("skipping: GOROOT/test not present");
-                    }
-                }
+        var (_, errΔ1) = os.Stat(filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(t)), testˢ)); if (os.IsNotExist(errΔ1)) {
+            var (_, errΔ2) = os.Stat(filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(t)), versionˢ)); if (errΔ2 == nil) {
+                t.Skipf("skipping: GOROOT/test not present");
             }
         }
         t.Fatal(err);
     }
 
     var excluded = new map<@string, bool>();
-    foreach (var (_, filename) in ignore) {
+    foreach (var (_, filename) in range(ignore)) {
         excluded[filename] = true;
     }
 
     var fset = token.NewFileSet();
-    foreach (var (_, f) in files) {
+    foreach (var (_, f) in range(files)) {
         // filter directory contents
         if (f.IsDir() || !strings.HasSuffix(f.Name(), ".go") || excluded[f.Name()]) {
             continue;
@@ -288,37 +282,35 @@ internal static void testTestDir(ж<testing.T> t, @string path, params ꓸꓸꓸ
         var expectErrors = false;
         @string filename = filepath.Join(path, f.Name());
         @string goVersion = ""u8;
-        {
-            @string comment = firstComment(filename); if (comment != ""u8) {
-                if (strings.Contains(comment, goexperimentˢ2)) {
-                    continue; // ignore this file
-                }
-                var fields = strings.Fields(comment);
-                var exprᴛ1 = fields[0];
-                switch (ᐧ) {
-                case {} when exprᴛ1 == "skip"u8 || exprᴛ1 == "compiledir"u8: {
-                    continue; // ignore this file
-                    break;
-                }
-                case {} when exprᴛ1 == "errorcheck"u8: {
-                    expectErrors = true;
-                    foreach (var (_, arg) in fields[1..]) {
-                        if (arg == "-0"u8 || arg == "-+"u8 || arg == "-std"u8) {
-                            // Marked explicitly as not expecting errors (-0),
-                            // or marked as compiling runtime/stdlib, which is only done
-                            // to trigger runtime/stdlib-only error output.
-                            // In both cases, the code should typecheck.
-                            expectErrors = false;
-                            break;
-                        }
-                        @string prefix = prefixᶜ3;
-                        if (strings.HasPrefix(arg, prefix)) {
-                            goVersion = arg[(int)(len(prefix))..];
-                        }
-                    }
-                    break;
-                }}
+        @string comment = firstComment(filename); if (comment != ""u8) {
+            if (strings.Contains(comment, goexperimentˢ2)) {
+                continue; // ignore this file
             }
+            var fields = strings.Fields(comment);
+            var exprᴛ1 = fields[0];
+            switch (ᐧ) {
+            case {} when exprᴛ1 == "skip"u8 || exprᴛ1 == "compiledir"u8: {
+                continue; // ignore this file
+                break;
+            }
+            case {} when exprᴛ1 == "errorcheck"u8: {
+                expectErrors = true;
+                foreach (var (_, arg) in range(fields[1..])) {
+                    if (arg == "-0"u8 || arg == "-+"u8 || arg == "-std"u8) {
+                        // Marked explicitly as not expecting errors (-0),
+                        // or marked as compiling runtime/stdlib, which is only done
+                        // to trigger runtime/stdlib-only error output.
+                        // In both cases, the code should typecheck.
+                        expectErrors = false;
+                        break;
+                    }
+                    @string prefix = prefixᶜ3;
+                    if (strings.HasPrefix(arg, prefix)) {
+                        goVersion = arg[(int)(len(prefix))..];
+                    }
+                }
+                break;
+            }}
         }
 
         // parse and type-check file
@@ -328,7 +320,7 @@ internal static void testTestDir(ж<testing.T> t, @string path, params ꓸꓸꓸ
                 GoVersion: goVersion,
                 Importer: stdLibImporter
             ), out var Ꮡconf);
-            (_, errΔ3) = Ꮡconf.Check(filename, fset, slice<ж<ast.File>>([@file]), nil);
+            (_, errΔ3) = Ꮡconf.Check(filename, fset, [@file], nil);
         }
 
         if (expectErrors) {
@@ -538,7 +530,7 @@ internal static (ж<types.Package>, error) typecheckFiles(@string path, slice<@s
 
     // Parse package files.
     slice<ж<ast.File>> files = default;
-    foreach (var (_, filename) in filenames) {
+    foreach (var (_, filename) in range(filenames)) {
         var (@file, errΔ1) = parser.ParseFile(fset, filename, default, parser.AllErrors);
         if (errΔ1 != nil) {
             return (default, errΔ1);
@@ -550,7 +542,7 @@ internal static (ж<types.Package>, error) typecheckFiles(@string path, slice<@s
     if (testing.Verbose()) {
         ᏑprintPackageMu.Lock();
         fmt.Println(packageˢ, files[0].Name.Name);
-        foreach (var (_, filename) in filenames) {
+        foreach (var (_, filename) in range(filenames)) {
             fmt.Println("\t", filename);
         }
         ᏑprintPackageMu.Unlock();
@@ -600,10 +592,8 @@ internal static (slice<@string>, error) pkgFilenames(@string dir, bool includeTe
     ctxt.CgoEnabled = false;
     var (pkg, err) = Ꮡctxt.ImportDir(dir, 0);
     if (err != nil) {
-        {
-            var (_, nogo) = err._<ж<Δbuild.NoGoError>>(ᐧ); if (nogo) {
-                return (default, default); // no *.go files, not an error
-            }
+        var (_, nogo) = err._<ж<Δbuild.NoGoError>>(ᐧ); if (nogo) {
+            return (default, default); // no *.go files, not an error
         }
         return (default, err);
     }
@@ -616,11 +606,11 @@ internal static (slice<@string>, error) pkgFilenames(@string dir, bool includeTe
         return (default, default);
     }
     slice<@string> filenames = default;
-    foreach (var (_, name) in pkg.GoFiles) {
+    foreach (var (_, name) in range(pkg.GoFiles)) {
         filenames = append(filenames, filepath.Join(pkg.Dir, name));
     }
     if (includeTest) {
-        foreach (var (_, name) in pkg.TestGoFiles) {
+        foreach (var (_, name) in range(pkg.TestGoFiles)) {
             filenames = append(filenames, filepath.Join(pkg.Dir, name));
         }
     }
@@ -657,7 +647,7 @@ internal static void walk(this ref walker w, @string dir) {
     }
 
     // traverse subdirectories, but don't walk into testdata
-    foreach (var (_, f) in files) {
+    foreach (var (_, f) in range(files)) {
         if (f.IsDir() && f.Name() != "testdata"u8) {
             w.walk(filepath.Join(dir, f.Name()));
         }

@@ -7,8 +7,6 @@ namespace go.go;
 
 using token = global::go.go.token_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.go;
 using static global::go.go.types_package;
 

@@ -444,10 +444,8 @@ internal static (nint n, error err) read(this ж<fakeNetConnHalf> Ꮡh, slice<by
     try {
         ref var h = ref Ꮡh.DerefOrNull();
 
-        {
-            var errΔ1 = Ꮡh.waitAndLockForRead(); if (errΔ1 != nil) {
-                (n, err) = (0, errΔ1); goto ᒐdone;
-            }
+        var errΔ1 = Ꮡh.waitAndLockForRead(); if (errΔ1 != nil) {
+            (n, err) = (0, errΔ1); goto ᒐdone;
         }
         defer(Ꮡh.unlock, ref ᒐ);
         if (h.buf.Len() == 0 && h.readErr != nil) {
@@ -494,10 +492,8 @@ internal static (nint n, error err) writePartial(this ж<fakeNetConnHalf> Ꮡh, 
     try {
         ref var h = ref Ꮡh.DerefOrNull();
 
-        {
-            var errΔ1 = Ꮡh.waitAndLockForWrite(); if (errΔ1 != nil) {
-                (n, err) = (0, errΔ1); goto ᒐdone;
-            }
+        var errΔ1 = Ꮡh.waitAndLockForWrite(); if (errΔ1 != nil) {
+            (n, err) = (0, errΔ1); goto ᒐdone;
         }
         defer(Ꮡh.unlock, ref ᒐ);
         if (h.writeErr != nil) {

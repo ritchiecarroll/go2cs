@@ -33,10 +33,8 @@ partial class os_test_package {
         ref var rd = ref heap(new reparseData(), out var Ꮡrd);
         rd.addSubstituteName(@"\??\"u8 + target);
         rd.addPrintName(target);
-        {
-            var errΔ1 = createMountPoint(link, Ꮡrd); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = createMountPoint(link, Ꮡrd); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     };
 }
@@ -93,11 +91,9 @@ public static void TestRootWindowsDeviceNames(ж<Δtesting.T> t) {
         }
         var rʗ1 = r;
         defer(() => rʗ1.Close(), ref ᒐ);
-        {
-            var (f, errΔ1) = r.Open(nulˢ4); if (errΔ1 == nil) {
-                t.Errorf(@"r.Open(""NUL"") succeeded; want error""");
-                f.Close();
-            }
+        var (f, errΔ1) = r.Open(nulˢ4); if (errΔ1 == nil) {
+            t.Errorf(@"r.Open(""NUL"") succeeded; want error""");
+            f.Close();
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -115,10 +111,8 @@ public static void TestRootWindowsCaseInsensitivity(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         @string dir = t.TempDir();
-        {
-            var errΔ1 = Δos.WriteFile(filepath.Join(dir, fileˢ2), default, 438); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = Δos.WriteFile(filepath.Join(dir, fileˢ2), default, 438); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         var (r, err) = Δos.OpenRoot(dir);
         if (err != nil) {
@@ -131,15 +125,11 @@ public static void TestRootWindowsCaseInsensitivity(ж<Δtesting.T> t) {
             t.Fatal(err);
         }
         f.Close();
-        {
-            var errΔ2 = r.Remove(fileˢ3); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = r.Remove(fileˢ3); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
-        {
-            var (_, errΔ3) = Δos.Stat(filepath.Join(dir, fileˢ2)); if (!errors.Is(errΔ3, Δos.ErrNotExist)) {
-                t.Fatalf("os.Stat(file) after deletion: %v, want ErrNotFound", errΔ3);
-            }
+        var (_, errΔ3) = Δos.Stat(filepath.Join(dir, fileˢ2)); if (!errors.Is(errΔ3, Δos.ErrNotExist)) {
+            t.Fatalf("os.Stat(file) after deletion: %v, want ErrNotFound", errΔ3);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -164,7 +154,7 @@ public static void TestRootSymlinkRelativity(ж<Δtesting.T> t) {
         var rootʗ1 = root;
         defer(() => rootʗ1.Close(), ref ᒐ);
 
-        foreach (var (i, vᴛ1) in slice<TestRootSymlinkRelativity_type>([new(
+        foreach (var (i, vᴛ1) in range(slice<TestRootSymlinkRelativity_type>([new(
             name: "relative",
             target: @"foo"
         ), new(
@@ -184,7 +174,7 @@ public static void TestRootSymlinkRelativity(ж<Δtesting.T> t) {
             target: @"a\..\b" // could be cleaned (but isn't)
 
         )
-        ])) {
+        ]))) {
             ref var test = ref heap(new TestRootSymlinkRelativity_type(), out var Ꮡtest);
             test = vᴛ1;
 
@@ -192,15 +182,11 @@ public static void TestRootSymlinkRelativity(ж<Δtesting.T> t) {
             var testʗ1 = test;
             t.Run(test.name, (ж<Δtesting.T> tΔ1) => {
                 @string name = fmt.Sprintf("symlink_%v"u8, i);
-                {
-                    var errΔ1 = Δos.Symlink(testʗ1.target, filepath.Join(dir, name)); if (errΔ1 != nil) {
-                        tΔ1.Fatal(errΔ1);
-                    }
+                var errΔ1 = Δos.Symlink(testʗ1.target, filepath.Join(dir, name)); if (errΔ1 != nil) {
+                    tΔ1.Fatal(errΔ1);
                 }
-                {
-                    var errΔ2 = rootʗ2.Symlink(testʗ1.target, name + "_at"u8); if (errΔ2 != nil) {
-                        tΔ1.Fatal(errΔ2);
-                    }
+                var errΔ2 = rootʗ2.Symlink(testʗ1.target, name + "_at"u8); if (errΔ2 != nil) {
+                    tΔ1.Fatal(errΔ2);
                 }
 
                 var (osRDB, errΔ3) = readSymlinkReparseData(filepath.Join(dir, name));
@@ -290,20 +276,16 @@ public static void TestRootSymlinkToDirectory(ж<Δtesting.T> t) {
         var rootʗ1 = root;
         defer(() => rootʗ1.Close(), ref ᒐ);
 
-        {
-            var errΔ1 = Δos.Mkdir(filepath.Join(dir, dirˢ), 511); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = Δos.Mkdir(filepath.Join(dir, dirˢ), 511); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
-        {
-            var errΔ2 = Δos.WriteFile(filepath.Join(dir, fileˢ2), default, 438); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = Δos.WriteFile(filepath.Join(dir, fileˢ2), default, 438); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
 
         @string dir2 = t.TempDir();
 
-        foreach (var (i, vᴛ1) in slice<TestRootSymlinkToDirectory_type>([new(
+        foreach (var (i, vᴛ1) in range(slice<TestRootSymlinkToDirectory_type>([new(
             name: "directory outside root",
             target: dir2,
             wantDir: false
@@ -320,7 +302,7 @@ public static void TestRootSymlinkToDirectory(ж<Δtesting.T> t) {
             target: "nonexistent",
             wantDir: false
         )
-        ])) {
+        ]))) {
             ref var test = ref heap(new TestRootSymlinkToDirectory_type(), out var Ꮡtest);
             test = vᴛ1;
 
@@ -330,10 +312,8 @@ public static void TestRootSymlinkToDirectory(ж<Δtesting.T> t) {
                 GoFrame ᒐ = default;
                 try {
                     @string name = fmt.Sprintf("symlink_%v"u8, i);
-                    {
-                        var errΔ3 = rootʗ2.Symlink(testʗ1.target, name); if (errΔ3 != nil) {
-                            tΔ1.Fatal(errΔ3);
-                        }
+                    var errΔ3 = rootʗ2.Symlink(testʗ1.target, name); if (errΔ3 != nil) {
+                        tΔ1.Fatal(errΔ3);
                     }
 
                     // Lstat strips the directory mode bit from reparse points,
@@ -350,17 +330,13 @@ public static void TestRootSymlinkToDirectory(ж<Δtesting.T> t) {
                     }
                     defer(syscall.CloseHandle, h, ref ᒐ);
                     ref var fi = ref heap(new syscall.ByHandleFileInformation(), out var Ꮡfi);
-                    {
-                        var errΔ5 = syscall.GetFileInformationByHandle(h, Ꮡfi); if (errΔ5 != nil) {
-                            tΔ1.Fatal(errΔ5);
-                        }
+                    var errΔ5 = syscall.GetFileInformationByHandle(h, Ꮡfi); if (errΔ5 != nil) {
+                        tΔ1.Fatal(errΔ5);
                     }
                     var gotDir = (fi.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0;
 
-                    {
-                        var (got, want) = (gotDir, testʗ1.wantDir); if (got != want) {
-                            tΔ1.Errorf("link target %q: isDir = %v, want %v", testʗ1.target, got, want);
-                        }
+                    var (got, want) = (gotDir, testʗ1.wantDir); if (got != want) {
+                        tΔ1.Errorf("link target %q: isDir = %v, want %v", testʗ1.target, got, want);
                     }
                 }
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -430,7 +406,7 @@ public static void TestRootOpenFileFlags(ж<Δtesting.T> t) {
             new(windows.O_FILE_FLAG_SEQUENTIAL_SCAN, (uint32)((uint32)windows.FILE_SEQUENTIAL_ONLY | (uint32)windows.FILE_SYNCHRONOUS_IO_NONALERT)),
             new(windows.O_FILE_FLAG_WRITE_THROUGH, (uint32)((uint32)windows.FILE_WRITE_THROUGH | (uint32)windows.FILE_SYNCHRONOUS_IO_NONALERT))
         ]);
-        foreach (var (i, vᴛ1) in tests) {
+        foreach (var (i, vᴛ1) in range(tests)) {
             ref var tt = ref heap(new TestRootOpenFileFlags_tests(), out var Ꮡtt);
             tt = vᴛ1;
 
@@ -446,11 +422,9 @@ public static void TestRootOpenFileFlags(ж<Δtesting.T> t) {
                     var fʗ1 = f;
                     defer(() => fʗ1.Close(), ref ᒐ);
                     ref var info = ref heap(new windows.FILE_MODE_INFORMATION(), out var Ꮡinfo);
-                    {
-                        var errΔ2 = windows.NtQueryInformationFile((syscallꓸHandle)f.Fd(), Ꮡ(new windows.IO_STATUS_BLOCK()),
-                            @unsafe.Pointer.FromPinnedBox(Ꮡinfo), (uint32)/* unsafe.Sizeof(info) */ (uintptr)4, windows.FileModeInformation); if (errΔ2 != nil) {
-                            tΔ1.Fatal(errΔ2);
-                        }
+                    var errΔ2 = windows.NtQueryInformationFile((syscallꓸHandle)f.Fd(), Ꮡ(new windows.IO_STATUS_BLOCK()),
+                        @unsafe.Pointer.FromPinnedBox(Ꮡinfo), (uint32)/* unsafe.Sizeof(info) */ (uintptr)4, windows.FileModeInformation); if (errΔ2 != nil) {
+                        tΔ1.Fatal(errΔ2);
                     }
                     if (info.Mode != ttʗ1.wantMode) {
                         tΔ1.Errorf("file mode = 0x%x; want 0x%x", info.Mode, ttʗ1.wantMode);
@@ -489,16 +463,12 @@ internal static void testRootOpenFileDeleteOnClose(ж<Δtesting.T> t) {
         if (err != nil) {
             t.Fatal(err);
         }
-        {
-            var errΔ1 = f.Close(); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = f.Close(); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         // The file should be deleted after closing.
-        {
-            var (_, errΔ2) = Δos.Stat(filepath.Join(dir, name)); if (!errors.Is(errΔ2, Δos.ErrNotExist)) {
-                t.Errorf("expected file to be deleted, got %v", errΔ2);
-            }
+        var (_, errΔ2) = Δos.Stat(filepath.Join(dir, name)); if (!errors.Is(errΔ2, Δos.ErrNotExist)) {
+            t.Errorf("expected file to be deleted, got %v", errΔ2);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

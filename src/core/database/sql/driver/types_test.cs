@@ -19,7 +19,6 @@ internal partial struct valueConverterTest {
 
 internal static readonly ж<time.Time> Ꮡnow = new StaticBox<time.Time>(time.Now());
 internal static ref time.Time now => ref ((StaticBox<time.Time>)Ꮡnow).ValueSlot;
-
 internal static readonly ж<int64> Ꮡanswer = new StaticBox<int64>(42);
 internal static ref int64 answer => ref ((StaticBox<int64>)Ꮡanswer).ValueSlot;
 
@@ -38,7 +37,7 @@ internal partial struct t /*global::go.time_package.Time*/;
 internal partial struct @is /*[]nint*/;
 
 internal static slice<valueConverterTest> valueConverterTests;
-internal static void initᴛvalueConverterTests() { valueConverterTests = slice<valueConverterTest>([
+internal static void initᴛvalueConverterTests() { valueConverterTests = [
     new(Bool, (@string)"true", true, ""),
     new(Bool, (@string)"True", true, ""),
     new(Bool, slice<byte>("t"u8), true, ""),
@@ -67,10 +66,10 @@ internal static void initᴛvalueConverterTests() { valueConverterTests = slice<
     new(DefaultParameterConverter, (t)now, default, "unsupported type driver.t, a struct"),
     new(DefaultParameterConverter, new @is(new nint[]{1}.slice()), default, "unsupported type driver.is, a slice of int"),
     new(DefaultParameterConverter, new dec(exponent: -6), new dec(exponent: -6), "")
-]); }
+]; }
 
 public static void TestValueConverters(ж<testing.T> t) {
-    foreach (var (i, tt) in valueConverterTests) {
+    foreach (var (i, tt) in range(valueConverterTests)) {
         var (@out, err) = tt.c.ConvertValue(tt.@in);
         @string goterr = ""u8;
         if (err != nil) {

@@ -17,8 +17,6 @@ using sync = sync_package;
 using testing = testing_package;
 using synctest = go.testing.synctest_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.runtime;
 using go.testing;
 using io = io_package;
@@ -78,10 +76,8 @@ public static void TestOmitEmpty(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("MarshalIndent error: %v", err);
     }
-    {
-        @string gotΔ1 = (@string)got; if (gotΔ1 != want) {
-            t.Errorf("MarshalIndent:\n\tgot:  %s\n\twant: %s\n", indentNewlines(gotΔ1), indentNewlines(want));
-        }
+    @string gotΔ1 = (@string)got; if (gotΔ1 != want) {
+        t.Errorf("MarshalIndent:\n\tgot:  %s\n\twant: %s\n", indentNewlines(gotΔ1), indentNewlines(want));
     }
 }
 
@@ -177,10 +173,8 @@ public static void TestOmitZero(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("MarshalIndent error: %v", err);
     }
-    {
-        @string gotΔ1 = (@string)got; if (gotΔ1 != want) {
-            t.Errorf("MarshalIndent:\n\tgot:  %s\n\twant: %s\n", indentNewlines(gotΔ1), indentNewlines(want));
-        }
+    @string gotΔ1 = (@string)got; if (gotΔ1 != want) {
+        t.Errorf("MarshalIndent:\n\tgot:  %s\n\twant: %s\n", indentNewlines(gotΔ1), indentNewlines(want));
     }
 }
 
@@ -210,11 +204,9 @@ public static void TestOmitZeroMap(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("MarshalIndent error: %v", err);
     }
-    {
-        @string gotΔ1 = (@string)got; if (gotΔ1 != want) {
-            fmt.Println(gotΔ1);
-            t.Errorf("MarshalIndent:\n\tgot:  %s\n\twant: %s\n", indentNewlines(gotΔ1), indentNewlines(want));
-        }
+    @string gotΔ1 = (@string)got; if (gotΔ1 != want) {
+        fmt.Println(gotΔ1);
+        t.Errorf("MarshalIndent:\n\tgot:  %s\n\twant: %s\n", indentNewlines(gotΔ1), indentNewlines(want));
     }
 }
 
@@ -267,10 +259,8 @@ public static void TestOmitEmptyZero(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("MarshalIndent error: %v", err);
     }
-    {
-        @string gotΔ1 = (@string)got; if (gotΔ1 != want) {
-            t.Errorf("MarshalIndent:\n\tgot:  %s\n\twant: %s\n", indentNewlines(gotΔ1), indentNewlines(want));
-        }
+    @string gotΔ1 = (@string)got; if (gotΔ1 != want) {
+        t.Errorf("MarshalIndent:\n\tgot:  %s\n\twant: %s\n", indentNewlines(gotΔ1), indentNewlines(want));
     }
 }
 
@@ -331,7 +321,7 @@ public static void TestRoundtripStringTag(ж<testing.T> t) {
 """u8.Raw()
     )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestRoundtripStringTag_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -340,18 +330,14 @@ public static void TestRoundtripStringTag(ж<testing.T> t) {
             if (err != nil) {
                 tΔ1.Fatalf("%s: MarshalIndent error: %v", Ꮡtt.Value.Where, err);
             }
-            {
-                @string gotΔ1 = (@string)got; if (gotΔ1 != Ꮡtt.Value.want) {
-                    tΔ1.Fatalf("%s: MarshalIndent:\n\tgot:  %s\n\twant: %s", Ꮡtt.Value.Where, stripWhitespace(gotΔ1), stripWhitespace(Ꮡtt.Value.want));
-                }
+            @string gotΔ1 = (@string)got; if (gotΔ1 != Ꮡtt.Value.want) {
+                tΔ1.Fatalf("%s: MarshalIndent:\n\tgot:  %s\n\twant: %s", Ꮡtt.Value.Where, stripWhitespace(gotΔ1), stripWhitespace(Ꮡtt.Value.want));
             }
 
             // Verify that it round-trips.
             ref var s2 = ref heap(new StringTag(), out var Ꮡs2);
-            {
-                var errΔ1 = Unmarshal(got, Ꮡs2); if (errΔ1 != nil) {
-                    tΔ1.Fatalf("%s: Decode error: %v", Ꮡtt.Value.Where, errΔ1);
-                }
+            var errΔ1 = Unmarshal(got, Ꮡs2); if (errΔ1 != nil) {
+                tΔ1.Fatalf("%s: Decode error: %v", Ꮡtt.Value.Where, errΔ1);
             }
             if (!reflect.DeepEqual(s2, Ꮡtt.Value.@in)) {
                 tΔ1.Fatalf("%s: Decode:\n\tinput: %s\n\tgot:  %#v\n\twant: %#v", Ꮡtt.Value.Where, indentNewlines((@string)got), s2, Ꮡtt.Value.@in);
@@ -362,9 +348,7 @@ public static void TestRoundtripStringTag(ж<testing.T> t) {
 
 // byte slices are special even if they're renamed types.
 internal partial struct renamedByte /*num:byte*/;
-
 internal partial struct renamedByteSlice /*[]byte*/;
-
 internal partial struct renamedRenamedByteSlice /*[]renamedByte*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -411,9 +395,9 @@ public partial struct RecursiveSlice /*[]RecursiveSlice*/;
 
 internal static ж<PointerCycleIndirect> pointerCycleIndirect = Ꮡ(new PointerCycleIndirect());
 internal static map<@string, any> mapCycle = new map<@string, any>();
-internal static slice<any> sliceCycle = slice<any>([default]);
-internal static slice<any> sliceNoCycle = slice<any>([default, default]);
-internal static slice<RecursiveSlice> recursiveSliceCycle = slice<RecursiveSlice>([default]);
+internal static slice<any> sliceCycle = [default];
+internal static slice<any> sliceNoCycle = [default, default];
+internal static slice<RecursiveSlice> recursiveSliceCycle = [default];
 
 [GoInit] internal static void init() {
     var ptr = Ꮡ(new SamePointerNoCycle());
@@ -421,30 +405,26 @@ internal static slice<RecursiveSlice> recursiveSliceCycle = slice<RecursiveSlice
     samePointerNoCycle.Ptr2 = ptr;
 
     pointerCycle.Ptr = pointerCycle;
-    pointerCycleIndirect.Ptrs = slice<any>([pointerCycleIndirect.OrTypedNil()]);
+    pointerCycleIndirect.Ptrs = [pointerCycleIndirect.OrTypedNil()];
 
     mapCycle["x"] = mapCycle;
     sliceCycle[0] = sliceCycle;
     sliceNoCycle[1] = sliceNoCycle[..1];
     for (nint i = startDetectingCyclesAfter; i > 0; i--) {
-        sliceNoCycle = slice<any>([sliceNoCycle]);
+        sliceNoCycle = [sliceNoCycle];
     }
     recursiveSliceCycle[0] = recursiveSliceCycle;
 }
 
 public static partial void TestSamePointerNoCycle(ж<testing.T> t) {
-    {
-        var (_, err) = Marshal(samePointerNoCycle.OrTypedNil()); if (err != nil) {
-            t.Fatalf("Marshal error: %v", err);
-        }
+    var (_, err) = Marshal(samePointerNoCycle.OrTypedNil()); if (err != nil) {
+        t.Fatalf("Marshal error: %v", err);
     }
 }
 
 public static partial void TestSliceNoCycle(ж<testing.T> t) {
-    {
-        var (_, err) = Marshal(sliceNoCycle); if (err != nil) {
-            t.Fatalf("Marshal error: %v", err);
-        }
+    var (_, err) = Marshal(sliceNoCycle); if (err != nil) {
+        t.Fatalf("Marshal error: %v", err);
     }
 }
 
@@ -464,22 +444,18 @@ public static void TestUnsupportedValues(ж<testing.T> t) {
         new(Name(""u8), sliceCycle),
         new(Name(""u8), recursiveSliceCycle)
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestUnsupportedValues_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
-            {
-                var (_, err) = Marshal(ttʗ1.@in); if (err != nil) {
-                    {
-                        var (_, ok) = err._<ж<global::go.encoding.json_package.UnsupportedValueError>>(ᐧ); if (!ok) {
-                            tΔ1.Errorf("%s: Marshal error:\n\tgot:  %T\n\twant: %T", ttʗ1.Where, err, @new<global::go.encoding.json_package.UnsupportedValueError>());
-                        }
-                    }
-                } else {
-                    tΔ1.Errorf("%s: Marshal error: got nil, want non-nil", ttʗ1.Where);
+            var (_, err) = Marshal(ttʗ1.@in); if (err != nil) {
+                var (_, ok) = err._<ж<global::go.encoding.json_package.UnsupportedValueError>>(ᐧ); if (!ok) {
+                    tΔ1.Errorf("%s: Marshal error:\n\tgot:  %T\n\twant: %T", ttʗ1.Where, err, @new<global::go.encoding.json_package.UnsupportedValueError>());
                 }
+            } else {
+                tΔ1.Errorf("%s: Marshal error: got nil, want non-nil", ttʗ1.Where);
             }
         });
     }
@@ -576,10 +552,8 @@ public static void TestRefValMarshal(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("Marshal error: %v", err);
     }
-    {
-        @string got = (@string)b; if (got != want) {
-            t.Errorf("Marshal:\n\tgot:  %s\n\twant: %s", got, want);
-        }
+    @string got = (@string)b; if (got != want) {
+        t.Errorf("Marshal:\n\tgot:  %s\n\twant: %s", got, want);
     }
 }
 
@@ -857,7 +831,7 @@ public static void TestAnonymousFields(ж<testing.T> t) {
     )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestAnonymousFields_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -961,24 +935,22 @@ public static void TestNilMarshal(ж<testing.T> t) {
         new(Name(""u8), new TestNilMarshal_typeᴛ3(new json_internal_test_package.nilTextMarshalerжTextMarshaler(((ж<nilTextMarshaler>)nil))), @"{""M"":""0zenil0""}"),
         new(Name(""u8), new TestNilMarshal_typeᴛ2((ж<nilTextMarshaler>)nil), @"{""M"":null}")
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestNilMarshal_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
-            {
-                var (got, err) = Marshal(ttʗ1.@in);
-                switch (ᐧ) {
-                case {} when err != nil: {
-                    tΔ1.Fatalf("%s: Marshal error: %v", ttʗ1.Where, err);
-                    break;
-                }
-                case {} when ((sstring)got) != ttʗ1.want: {
-                    tΔ1.Fatalf("%s: Marshal:\n\tgot:  %s\n\twant: %s", ttʗ1.Where, got, ttʗ1.want);
-                    break;
-                }}
+            var (got, err) = Marshal(ttʗ1.@in);
+            switch (ᐧ) {
+            case {} when err != nil: {
+                tΔ1.Fatalf("%s: Marshal error: %v", ttʗ1.Where, err);
+                break;
             }
+            case {} when ((sstring)got) != ttʗ1.want: {
+                tΔ1.Fatalf("%s: Marshal:\n\tgot:  %s\n\twant: %s", ttʗ1.Where, got, ttʗ1.want);
+                break;
+            }}
         });
     }
 }
@@ -1088,10 +1060,8 @@ internal partial struct TestIssue10281_Foo /*dyn*/ {
 public static void TestIssue10281(ж<testing.T> t) {
     ref var x = ref heap<TestIssue10281_Foo>(new TestIssue10281_Foo((global::go.encoding.json_package.Number)(@string)invalidˢ), out var Ꮡx);
 
-    {
-        var (_, err) = Marshal(Ꮡx); if (err == nil) {
-            t.Fatalf("Marshal error: got nil, want non-nil");
-        }
+    var (_, err) = Marshal(Ꮡx); if (err == nil) {
+        t.Fatalf("Marshal error: got nil, want non-nil");
     }
 }
 
@@ -1114,10 +1084,8 @@ public static void TestMarshalErrorAndReuseEncodeState(ж<testing.T> t) {
         defer(debug.SetGCPercent, percent, ref ᒐ);
         ref var dummy = ref heap<TestMarshalErrorAndReuseEncodeState_Dummy>(new TestMarshalErrorAndReuseEncodeState_Dummy(Name: "Dummy"), out var Ꮡdummy);
         dummy.Next = Ꮡdummy;
-        {
-            var (_, errΔ1) = Marshal(dummy); if (errΔ1 == nil) {
-                t.Errorf("Marshal error: got nil, want non-nil");
-            }
+        var (_, errΔ1) = Marshal(dummy); if (errΔ1 == nil) {
+            t.Errorf("Marshal error: got nil, want non-nil");
         }
         var want = new TestMarshalErrorAndReuseEncodeState_Data(A: "a", I: 1);
         var (b, err) = Marshal(want);
@@ -1126,10 +1094,8 @@ public static void TestMarshalErrorAndReuseEncodeState(ж<testing.T> t) {
         }
 
         ref var got = ref heap(new TestMarshalErrorAndReuseEncodeState_Data(), out var Ꮡgot);
-        {
-            var errΔ2 = Unmarshal(b, Ꮡgot); if (errΔ2 != nil) {
-                t.Errorf("Unmarshal error: %v", errΔ2);
-            }
+        var errΔ2 = Unmarshal(b, Ꮡgot); if (errΔ2 != nil) {
+            t.Errorf("Unmarshal error: %v", errΔ2);
         }
         if (got != want) {
             t.Errorf("Unmarshal:\n\tgot:  %v\n\twant: %v", got, want);
@@ -1166,36 +1132,32 @@ public static void TestEncodePointerString(ж<testing.T> t) {
     if (err != nil) {
         t.Fatalf("Marshal error: %v", err);
     }
-    {
-        @string got = (@string)b;
-        @string want = n42ˢ; if (got != want) {
-            t.Fatalf("Marshal:\n\tgot:  %s\n\twant: %s", got, want);
-        }
+    @string got = (@string)b;
+    @string want = n42ˢ; if (got != want) {
+        t.Fatalf("Marshal:\n\tgot:  %s\n\twant: %s", got, want);
     }
     ref var back = ref heap(new TestEncodePointerString_stringPointer(), out var Ꮡback);
-    {
-        err = Unmarshal(b, Ꮡback);
-        switch (ᐧ) {
-        case {} when err != nil: {
-            t.Fatalf("Unmarshal error: %v", err);
-            break;
-        }
-        case {} when back.N == nil: {
-            t.Fatalf("Unmarshal: back.N = nil, want non-nil");
-            break;
-        }
-        case {} when back.N.Value is not 42: {
-            t.Fatalf("Unmarshal: *back.N = %d, want 42", back.N.Value);
-            break;
-        }}
+    err = Unmarshal(b, Ꮡback);
+    switch (ᐧ) {
+    case {} when err != nil: {
+        t.Fatalf("Unmarshal error: %v", err);
+        break;
     }
+    case {} when back.N == nil: {
+        t.Fatalf("Unmarshal: back.N = nil, want non-nil");
+        break;
+    }
+    case {} when back.N.Value is not 42: {
+        t.Fatalf("Unmarshal: *back.N = %d, want 42", back.N.Value);
+        break;
+    }}
 }
 
 partial struct encodeStringTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string @out;
 }
-internal static slice<encodeStringTestsᴛ1> encodeStringTests = slice<encodeStringTestsᴛ1>([
+internal static slice<encodeStringTestsᴛ1> encodeStringTests = [
     new("\x00", @"""\u0000"""),
     new("\x01", @"""\u0001"""),
     new("\x02", @"""\u0002"""),
@@ -1228,10 +1190,10 @@ internal static slice<encodeStringTestsᴛ1> encodeStringTests = slice<encodeStr
     new("\x1d", @"""\u001d"""),
     new("\x1e", @"""\u001e"""),
     new("\x1f", @"""\u001f""")
-]);
+];
 
 public static void TestEncodeString(ж<testing.T> t) {
-    foreach (var (_, tt) in encodeStringTests) {
+    foreach (var (_, tt) in range(encodeStringTests)) {
         var (b, err) = Marshal(tt.@in);
         if (err != nil) {
             t.Errorf("Marshal(%q) error: %v", tt.@in, err);
@@ -1250,9 +1212,7 @@ internal partial struct jsonbyte /*num:byte*/;
 internal static ref readonly @string jbDˢ => ref jbDˢᵇ;
 private static readonly @string jbDˢᵇ = @"{""JB"":%d}"u8;
 
-internal static (slice<byte>, error) MarshalJSON(this jsonbyte b) {
-    return tenc(jbDˢ, b);
-}
+internal static (slice<byte>, error) MarshalJSON(this jsonbyte b) { return tenc(jbDˢ, b); }
 
 internal partial struct textbyte /*num:byte*/;
 
@@ -1260,9 +1220,7 @@ internal partial struct textbyte /*num:byte*/;
 internal static ref readonly @string tbDˢ => ref tbDˢᵇ;
 private static readonly @string tbDˢᵇ = @"TB:%d"u8;
 
-internal static (slice<byte>, error) MarshalText(this textbyte b) {
-    return tenc(tbDˢ, b);
-}
+internal static (slice<byte>, error) MarshalText(this textbyte b) { return tenc(tbDˢ, b); }
 
 internal partial struct jsonint /*num:nint*/;
 
@@ -1270,9 +1228,7 @@ internal partial struct jsonint /*num:nint*/;
 internal static ref readonly @string jiDˢ => ref jiDˢᵇ;
 private static readonly @string jiDˢᵇ = @"{""JI"":%d}"u8;
 
-internal static (slice<byte>, error) MarshalJSON(this jsonint i) {
-    return tenc(jiDˢ, i);
-}
+internal static (slice<byte>, error) MarshalJSON(this jsonint i) { return tenc(jiDˢ, i); }
 
 internal partial struct textint /*num:nint*/;
 
@@ -1280,9 +1236,7 @@ internal partial struct textint /*num:nint*/;
 internal static ref readonly @string tiDˢ => ref tiDˢᵇ;
 private static readonly @string tiDˢᵇ = @"TI:%d"u8;
 
-internal static (slice<byte>, error) MarshalText(this textint i) {
-    return tenc(tiDˢ, i);
-}
+internal static (slice<byte>, error) MarshalText(this textint i) { return tenc(tiDˢ, i); }
 
 internal static (slice<byte>, error) tenc(@string format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.sslice();
@@ -1298,9 +1252,7 @@ internal partial struct textfloat /*num:float64*/;
 internal static ref readonly @string tf02fˢ => ref tf02fˢᵇ;
 private static readonly @string tf02fˢᵇ = @"TF:%0.2f"u8;
 
-internal static (slice<byte>, error) MarshalText(this textfloat f) {
-    return tenc(tf02fˢ, f);
-}
+internal static (slice<byte>, error) MarshalText(this textfloat f) { return tenc(tf02fˢ, f); }
 
 internal partial struct TestEncodeBytekind_tests /*dyn*/ {
     /*embed*/ public CaseName CaseName;
@@ -1318,14 +1270,14 @@ public static void TestEncodeBytekind(ж<testing.T> t) {
         new(Name(""u8), (textint)1, @"""TI:1"""),
         new(Name(""u8), slice<byte>([0, 1]), @"""AAE="""),
         new(Name(""u8), slice<jsonbyte>([0, 1]), @"[{""JB"":0},{""JB"":1}]"),
-        new(Name(""u8), slice<slice<jsonbyte>>([slice<jsonbyte>([0, 1]), slice<jsonbyte>([3])]), @"[[{""JB"":0},{""JB"":1}],[{""JB"":3}]]"),
+        new(Name(""u8), slice<slice<jsonbyte>>([[0, 1], [3]]), @"[[{""JB"":0},{""JB"":1}],[{""JB"":3}]]"),
         new(Name(""u8), slice<textbyte>([2, 3]), @"[""TB:2"",""TB:3""]"),
         new(Name(""u8), slice<jsonint>([5, 4]), @"[{""JI"":5},{""JI"":4}]"),
         new(Name(""u8), slice<textint>([9, 3]), @"[""TI:9"",""TI:3""]"),
         new(Name(""u8), slice<nint>([9, 3]), @"[9,3]"),
         new(Name(""u8), slice<textfloat>([12D, 3D]), @"[""TF:12.00"",""TF:3.00""]")
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestEncodeBytekind_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -1441,7 +1393,7 @@ public static void TestMarshalFloat(ж<testing.T> t) {
         if (bits == 64) {
             bad = bad.slice(0, len(bad) - 2);
         }
-        foreach (var (_, re) in bad) {
+        foreach (var (_, re) in range(bad)) {
             if (re.MatchString(@out)) {
                 t.Errorf("Marshal(%T(%g)) = %q; must not match /%s/", vf, vf, @out, re.OrTypedNil());
                 nfail++;
@@ -1594,26 +1546,22 @@ public static void TestMarshalRawMessageValue(ж<testing.T> t) {
         new(Name(""u8), Ꮡ(new TestMarshalRawMessageValue_T2(ᏑrawText)), @"{""M"":""foo""}", true)
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestMarshalRawMessageValue_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.Name, (ж<testing.T> tΔ1) => {
             var (b, err) = Marshal(ttʗ1.@in);
-            {
-                var ok = (err == nil); if (ok != ttʗ1.ok) {
-                    if (err != nil) {
-                        tΔ1.Errorf("%s: Marshal error: %v", ttʗ1.Where, err);
-                    } else {
-                        tΔ1.Errorf("%s: Marshal error: got nil, want non-nil", ttʗ1.Where);
-                    }
+            var ok = (err == nil); if (ok != ttʗ1.ok) {
+                if (err != nil) {
+                    tΔ1.Errorf("%s: Marshal error: %v", ttʗ1.Where, err);
+                } else {
+                    tΔ1.Errorf("%s: Marshal error: got nil, want non-nil", ttʗ1.Where);
                 }
             }
-            {
-                @string got = (@string)b; if (got != ttʗ1.want) {
-                    tΔ1.Errorf("%s: Marshal:\n\tinput: %#v\n\tgot:  %s\n\twant: %s", ttʗ1.Where, ttʗ1.@in, got, ttʗ1.want);
-                }
+            @string got = (@string)b; if (got != ttʗ1.want) {
+                tΔ1.Errorf("%s: Marshal:\n\tinput: %#v\n\tgot:  %s\n\twant: %s", ttʗ1.Where, ttʗ1.@in, got, ttʗ1.want);
             }
         });
     }
@@ -1622,9 +1570,7 @@ public static void TestMarshalRawMessageValue(ж<testing.T> t) {
 internal partial struct marshalPanic {
 }
 
-internal static (slice<byte>, error) MarshalJSON(this marshalPanic _) {
-    throw panic((nint)0xdead);
-}
+internal static (slice<byte>, error) MarshalJSON(this marshalPanic _) { throw panic((nint)0xdead); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object marshalShouldHaveˢ = (@string)"Marshal should have panicked"u8;
@@ -1633,10 +1579,8 @@ public static void TestMarshalPanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var got = recover(); if (!reflect.DeepEqual(got, (nint)0xdead)) {
-                    t.Errorf("panic() = (%T)(%v), want 0xdead", got, got);
-                }
+            var got = recover(); if (!reflect.DeepEqual(got, (nint)0xdead)) {
+                t.Errorf("panic() = (%T)(%v), want 0xdead", got, got);
             }
         }, ref ᒐ);
         Marshal(Ꮡ(new marshalPanic()));
@@ -1697,7 +1641,7 @@ public static void TestMarshalerError(ж<testing.T> t) {
     )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestMarshalerError_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -1718,7 +1662,7 @@ internal static (slice<byte>, error) MarshalJSON(this marshaledValue v) {
 }
 
 public static void TestIssue63379(ж<testing.T> t) {
-    foreach (var (_, v) in slice<@string>([
+    foreach (var (_, v) in range(slice<@string>([
         "[]<",
         "[]>",
         "[]&",
@@ -1729,7 +1673,7 @@ public static void TestIssue63379(ж<testing.T> t) {
         "{}&",
         "{}\u2028",
         "{}\u2029"
-    ])) {
+    ]))) {
         var (_, err) = Marshal((marshaledValue)v);
         if (err == nil) {
             t.Errorf("expected error for %q", v);

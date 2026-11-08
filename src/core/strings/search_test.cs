@@ -34,7 +34,7 @@ public static void TestFinderNext(ж<testing.T> t) {
         new("at that", "which finally halts.  at that point", 22)
     ]);
 
-    foreach (var (_, tc) in testCases) {
+    foreach (var (_, tc) in range(testCases)) {
         nint got = strings_internal_test_package.StringFind(tc.pat, tc.text);
         nint want = tc.index;
         if (got != want) {
@@ -54,32 +54,32 @@ public static void TestFinderCreation(ж<testing.T> t) {
         new(
             "abc",
             new array<nint>(256){['a'] = 2, ['b'] = 1, ['c'] = 3},
-            slice<nint>([5, 4, 1])
+            [5, 4, 1]
         ),
         new(
             "mississi",
             new array<nint>(256){['i'] = 3, ['m'] = 7, ['s'] = 1},
-            slice<nint>([15, 14, 13, 7, 11, 10, 7, 1])
+            [15, 14, 13, 7, 11, 10, 7, 1]
         ),
         // From https://www.cs.utexas.edu/~moore/publications/fstrpos.pdf
         new(
             "abcxxxabc",
             new array<nint>(256){['a'] = 2, ['b'] = 1, ['c'] = 6, ['x'] = 3},
-            slice<nint>([14, 13, 12, 11, 10, 9, 11, 10, 1])
+            [14, 13, 12, 11, 10, 9, 11, 10, 1]
         ),
         new(
             "abyxcdeyx",
             new array<nint>(256){['a'] = 8, ['b'] = 7, ['c'] = 4, ['d'] = 3, ['e'] = 2, ['y'] = 1, ['x'] = 5},
-            slice<nint>([17, 16, 15, 14, 13, 12, 7, 10, 1])
+            [17, 16, 15, 14, 13, 12, 7, 10, 1]
         )
     ]);
 
-    foreach (var (_, vᴛ1) in testCases) {
+    foreach (var (_, vᴛ1) in range(testCases)) {
         var tc = vᴛ1.ΔClone();
 
         var (bad, good) = strings_internal_test_package.DumpTables(tc.pattern);
 
-        foreach (var (i, got) in bad) {
+        foreach (var (i, got) in range(bad)) {
             nint want = tc.bad[i];
             if (want == 0) {
                 want = len(tc.pattern);

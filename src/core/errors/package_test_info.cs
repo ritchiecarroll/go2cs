@@ -56,10 +56,10 @@ using static global::go.errors_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("errors/errors_test.go", "errors_test.cs", "ABQYlIKUgriCgriCgoI=")]
-[assembly: GoPositionMap("errors/example_test.go", "example_test.cs", "ABQqgqaC3IKAggAJCoKCggAICoKmlILssoKCgpSCgoKCAA0YopKCggAQCoKCgoKCgpSClAANEoKAgoKUAAwYgqSC6qKCggAJDoKAgoKClAAIEIKAgoCClAAMFoKkgoKClMr6ooKClIKCggAIFqKCgpSCggAMEoKCgoI=", "", "", "26=Date/1/1/1;238=New/1/1/3")]
+[assembly: GoPositionMap("errors/errors_test.go", "errors_test.cs", "ABIYlIKUgriCgriCgoI=")]
+[assembly: GoPositionMap("errors/example_test.go", "example_test.cs", "ABQqgqaC3IKCAAgKgoKCAAgKgqaUguyygoKClIKCgoIADRiikoKCABAKgoKCgoKClIKUAA0SgoKClAALGIKUguqigoIACQ6CgoKClAAHEIKCgpQAChaClIKCgpTK+qKCgpSCgoIACBaigoKUgoIADBKCgoKC", "", "", "26=Date/1/1/1;226=New/1/1/3")]
 [assembly: GoPositionMap("errors/join_test.go", "join_test.cs", "AAsagoCCpICCpICCAA0IgoKCggANIIKClIIACQqCgoIAChqCgg==")]
-[assembly: GoPositionMap("errors/wrap_test.go", "wrap_test.cs", "ABUggoKClJTIAB9IspKAggALFpSAooCigpS0tMSUABEGgoKCgoKClABbwAGylIKCooKClIKUgIIACgyCgtyCgsKClIKClKIACgiCgoKKlLq6urq6urq6uri6urq6urq6AAoYgoKCgoKC+qKClIKC+qKCgoKC+qKCgoCCAAoKgoKUAAYUgoCCAAkOgP6AooAACAiAooAACgyCpoKC", "23-25:1;64-68:2;204-215:1;229-238:1;230-232:1.1;351-356:1", "", "34=New/1/1/27;140=New/1/4/46,New/2/4/66,New/3/4/71,New/4/4/81;337=New/1/1/1;353=New/1/1/1;357=New/1/1/1;365=New/1/1/1")]
+[assembly: GoPositionMap("errors/wrap_test.go", "wrap_test.cs", "ABUggoKClJTIAB9IspKCAAoWlIKCgpS0tMSUABEGgoKCgoKClABbwAGylIKCooKClIKUggAJDIKC3IKCwoKUgoKUogAKCIKCgoqUurq6urq6urq6uLq6urq6uroAChiCgoKCgoL6ooKUgoL6ooKCgoL6ooKCggAJCoKClAAGFIKCAAgO7oL4ggAJDIKmgoI=", "23-25:1;64-68:2;204-215:1;229-238:1;230-232:1.1;351-356:1", "", "34=New/1/1/27;132=New/1/4/46,New/2/4/66,New/3/4/71,New/4/4/81;327=New/1/1/1;343=New/1/1/1;347=New/1/1/1;355=New/1/1/1", "", "268:29,269:21")]
 // </GoSourcePositionMaps>
 
 namespace go;

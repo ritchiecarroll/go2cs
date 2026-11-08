@@ -13,12 +13,12 @@ using static global::go.go.ast_internal_test_package;
 partial class ast_test_package {
 
 public static void TestIssue33649(ж<testing.T> t) {
-    foreach (var (_, src) in slice<@string>([
+    foreach (var (_, src) in range(slice<@string>([
         @"package p; func _()",
         @"package p; func _() {",
         @"package p; func _() { _ = 0",
         @"package p; func _() { _ = 0 }"
-    ])) {
+    ]))) {
         var fset = token.NewFileSet();
         var (f, _) = parser.ParseFile(fset, ""u8, src, parser.AllErrors);
         if (f == nil) {
@@ -49,7 +49,7 @@ internal partial struct TestIssue28089_type /*dyn*/ {
 
 // TestIssue28089 exercises the IsGenerated function.
 public static void TestIssue28089(ж<testing.T> t) {
-    foreach (var (i, test) in slice<TestIssue28089_type>([
+    foreach (var (i, test) in range(slice<TestIssue28089_type>([
         // No file comments.
         new(@"package p", false),
         // Irrelevant file comments.
@@ -148,7 +148,7 @@ package p
 // Does match even though it's inside general comment (/*-style).
 
 """u8.Raw(), true)
-    ])) {
+    ]))) {
         var fset = token.NewFileSet();
         var (f, err) = parser.ParseFile(fset, ""u8, test.src, (parser.Mode)(parser.PackageClauseOnly | parser.ParseComments));
         if (f == nil) {

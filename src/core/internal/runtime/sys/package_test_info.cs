@@ -35,7 +35,7 @@ using static global::go.@internal.runtime.sys_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/runtime/sys/intrinsics_test.go", "intrinsics_test.cs", "AAsYgoKCgILYgoKCgILagoKCgraCgoKC")]
+[assembly: GoPositionMap("internal/runtime/sys/intrinsics_test.go", "intrinsics_test.cs", "AAsYgoKCgriCgoKCyoKCgoKmgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;

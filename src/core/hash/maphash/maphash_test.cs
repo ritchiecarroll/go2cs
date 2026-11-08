@@ -14,8 +14,6 @@ using strings = strings_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.hash.maphash_package;
 
 partial class maphash_internal_test_package {
@@ -47,10 +45,10 @@ public static void TestSeededHash(ж<testing.T> t) {
 public static void TestHashGrouping(ж<testing.T> t) {
     var b = bytes.Repeat(slice<byte>("foo"u8), 100);
     var hh = new slice<ж<global::go.hash.maphash_package.Hash>>(7);
-    foreach (var i in range(hh)) {
+    foreach (var i in range(len(hh))) {
         hh[i] = @new<global::go.hash.maphash_package.Hash>();
     }
-    foreach (var (_, h) in hh[1..]) {
+    foreach (var (_, h) in range(hh[1..])) {
         h.SetSeed(hh[0].Seed());
     }
     hh[0].Write(b);
@@ -63,7 +61,7 @@ public static void TestHashGrouping(ж<testing.T> t) {
         }
     }
     void writeSingleByte(ж<global::go.hash.maphash_package.Hash> h, byte bΔ2) {
-        var (_, err) = h.Write(slice<byte>([bΔ2]));
+        var (_, err) = h.Write([bΔ2]);
         if (err != nil) {
             t.Fatalf("Write single byte: %v", err);
         }
@@ -75,7 +73,7 @@ public static void TestHashGrouping(ж<testing.T> t) {
         }
     }
 
-    foreach (var (i, x) in b) {
+    foreach (var (i, x) in range(b)) {
         writeByte(hh[2], x);
         writeSingleByte(hh[3], x);
         if (i == 0) {
@@ -92,7 +90,7 @@ public static void TestHashGrouping(ж<testing.T> t) {
     }
 
     var sum = hh[0].Sum64();
-    foreach (var (i, h) in hh) {
+    foreach (var (i, h) in range(hh)) {
         if (sum != h.Sum64()) {
             t.Errorf("hash %d not identical to a single Write", i);
         }
@@ -449,10 +447,8 @@ public static void TestComparableShouldPanic(ж<testing.T> t) {
                 t.Fatalf("Comaparable(any([]byte)) should panic");
             }
             @string want = hashOfUnhashableTypeˢ;
-            {
-                @string sΔ1 = err.Error(); if (!strings.Contains(sΔ1, want)) {
-                    t.Fatalf("want %s, got %s", want, sΔ1);
-                }
+            @string sΔ1 = err.Error(); if (!strings.Contains(sΔ1, want)) {
+                t.Fatalf("want %s, got %s", want, sΔ1);
             }
         }, ref ᒐ);
         Comparable(MakeSeed(), a);
@@ -520,7 +516,6 @@ public static void TestComparableAllocations(ж<testing.T> t) {
 
 // Make sure a Hash implements the hash.Hash and hash.Hash64 interfaces.
 internal static hash.Hash _ᴛ1ʗ = new maphash_test_package.maphash_HashжHash(Ꮡ(new Hash()));
-
 internal static hash.Hash64 _ᴛ2ʗ = new maphash_test_package.maphash_HashжHash64(Ꮡ(new Hash()));
 
 public static void TestHashInterface(ж<testing.T> t) {
@@ -573,7 +568,7 @@ internal static void benchmarkSize(ж<testing.B> b, nint size) {
 
 public static void BenchmarkHash(ж<testing.B> b) {
     var sizes = slice<nint>([4, 8, 16, 32, 64, 256, 320, 1024, 4096, 16384]);
-    foreach (var (_, size) in sizes) {
+    foreach (var (_, size) in range(sizes)) {
         b.Run(fmt.Sprint("n=", size), (ж<testing.B> bΔ1) => {
             benchmarkSize(bΔ1, size);
         });

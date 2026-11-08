@@ -9,7 +9,7 @@ using Δunicode = unicode_package;
 
 partial class unicode_test_package {
 
-internal static slice<rune> testDigit = slice<rune>([
+internal static slice<rune> testDigit = [
     0x0030,
     0x0039,
     0x0661,
@@ -66,9 +66,9 @@ internal static slice<rune> testDigit = slice<rune>([
     0xFF19,
     0x104A1,
     0x1D7CE
-]);
+];
 
-internal static slice<rune> testLetter = slice<rune>([
+internal static slice<rune> testLetter = [
     0x0041,
     0x0061,
     0x00AA,
@@ -101,15 +101,15 @@ internal static slice<rune> testLetter = slice<rune>([
     0x20000,
     0x2F800,
     0x2FA1D
-]);
+];
 
 public static void TestDigit(ж<testing.T> t) {
-    foreach (var (_, r) in testDigit) {
+    foreach (var (_, r) in range(testDigit)) {
         if (!IsDigit(r)) {
             t.Errorf("IsDigit(U+%04X) = false, want true", r);
         }
     }
-    foreach (var (_, r) in testLetter) {
+    foreach (var (_, r) in range(testLetter)) {
         if (IsDigit(r)) {
             t.Errorf("IsDigit(U+%04X) = true, want false", r);
         }

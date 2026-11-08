@@ -5,8 +5,6 @@ namespace go.crypto.@internal.fips140test;
 
 using fips140 = go.crypto.@internal.fips140_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.crypto.@internal;
 
 partial class fipstest_internal_test_package {

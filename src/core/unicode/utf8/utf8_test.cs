@@ -26,7 +26,7 @@ partial struct Utf8Map {
     internal @string str;
 }
 
-internal static slice<Utf8Map> utf8map = slice<Utf8Map>([
+internal static slice<Utf8Map> utf8map = [
     new(0x0000, "\x00"),
     new(0x0001, "\x01"),
     new(0x007e, "\x7e"),
@@ -59,24 +59,24 @@ internal static slice<Utf8Map> utf8map = slice<Utf8Map>([
     new(0x10fffe, ((@string)(new byte[]{0xf4, 0x8f, 0xbf, 0xbe}))),
     new(0x10ffff, ((@string)(new byte[]{0xf4, 0x8f, 0xbf, 0xbf}))),
     new(0xFFFD, ((@string)(new byte[]{0xef, 0xbf, 0xbd})))
-]);
+];
 
-internal static slice<Utf8Map> surrogateMap = slice<Utf8Map>([
+internal static slice<Utf8Map> surrogateMap = [
     new(0xd800, ((@string)(new byte[]{0xed, 0xa0, 0x80}))), // surrogate min decodes to (RuneError, 1)
     new(0xdfff, ((@string)(new byte[]{0xed, 0xbf, 0xbf})))  // surrogate max decodes to (RuneError, 1)
-]);
+];
 
-internal static slice<@string> testStrings = slice<@string>([
+internal static slice<@string> testStrings = [
     "",
     "abcd",
     "☺☻☹",
     "日a本b語ç日ð本Ê語þ日¥本¼語i日©",
     "日a本b語ç日ð本Ê語þ日¥本¼語i日©日a本b語ç日ð本Ê語þ日¥本¼語i日©日a本b語ç日ð本Ê語þ日¥本¼語i日©",
     ((@string)(new byte[]{0x80, 0x80, 0x80, 0x80}))
-]);
+];
 
 public static void TestFullRune(ж<testing.T> t) {
-    foreach (var (_, m) in utf8map) {
+    foreach (var (_, m) in range(utf8map)) {
         var b = slice<byte>(m.str);
         if (!FullRune(b)) {
             t.Errorf("FullRune(%q) (%U) = false, want true", b, m.r);
@@ -94,7 +94,7 @@ public static void TestFullRune(ж<testing.T> t) {
             t.Errorf("FullRune(%q) = true, want false", s1);
         }
     }
-    foreach (var (_, s) in slice<@string>([((@string)(new byte[]{0xc0})), ((@string)(new byte[]{0xc1}))])) {
+    foreach (var (_, s) in range(slice<@string>([((@string)(new byte[]{0xc0})), ((@string)(new byte[]{0xc1}))]))) {
         var b = slice<byte>(s);
         if (!FullRune(b)) {
             t.Errorf("FullRune(%q) = false, want true", s);
@@ -106,7 +106,7 @@ public static void TestFullRune(ж<testing.T> t) {
 }
 
 public static void TestEncodeRune(ж<testing.T> t) {
-    foreach (var (_, m) in utf8map) {
+    foreach (var (_, m) in range(utf8map)) {
         var b = slice<byte>(m.str);
         array<byte> buf = new(10);
         nint n = EncodeRune(buf[0..], m.r);
@@ -118,7 +118,7 @@ public static void TestEncodeRune(ж<testing.T> t) {
 }
 
 public static void TestAppendRune(ж<testing.T> t) {
-    foreach (var (_, m) in utf8map) {
+    foreach (var (_, m) in range(utf8map)) {
         {
             var buf = AppendRune(default, m.r); if (((sstring)buf) != m.str) {
                 t.Errorf("AppendRune(nil, %#04x) = %s, want %s", m.r, buf, m.str);
@@ -133,7 +133,7 @@ public static void TestAppendRune(ж<testing.T> t) {
 }
 
 public static void TestDecodeRune(ж<testing.T> t) {
-    foreach (var (_, m) in utf8map) {
+    foreach (var (_, m) in range(utf8map)) {
         var b = slice<byte>(m.str);
         var (r, size) = DecodeRune(b);
         if (r != m.r || size != len(b)) {
@@ -190,7 +190,7 @@ public static void TestDecodeRune(ж<testing.T> t) {
 }
 
 public static void TestDecodeSurrogateRune(ж<testing.T> t) {
-    foreach (var (_, m) in surrogateMap) {
+    foreach (var (_, m) in range(surrogateMap)) {
         var b = slice<byte>(m.str);
         var (r, size) = DecodeRune(b);
         if (r != RuneError || size != 1) {
@@ -207,9 +207,9 @@ public static void TestDecodeSurrogateRune(ж<testing.T> t) {
 // Check that DecodeRune and DecodeLastRune correspond to
 // the equivalent range loop.
 public static void TestSequencing(ж<testing.T> t) {
-    foreach (var (_, ts) in testStrings) {
-        foreach (var (_, m) in utf8map) {
-            foreach (var (_, s) in slice<@string>([ts + m.str, m.str + ts, ts + m.str + ts])) {
+    foreach (var (_, ts) in range(testStrings)) {
+        foreach (var (_, m) in range(utf8map)) {
+            foreach (var (_, s) in range(slice<@string>([ts + m.str, m.str + ts, ts + m.str + ts]))) {
                 testSequence(t, s);
             }
         }
@@ -225,7 +225,7 @@ internal static nint runtimeRuneCount(@string s) {
 // Not really a test of this package, but the assumption is used here and
 // it's good to verify.
 public static void TestRuntimeConversion(ж<testing.T> t) {
-    foreach (var (_, ts) in testStrings) {
+    foreach (var (_, ts) in range(testStrings)) {
         nint count = RuneCountInString(ts);
         {
             nint n = runtimeRuneCount(ts); if (n != count) {
@@ -251,7 +251,7 @@ public static void TestRuntimeConversion(ж<testing.T> t) {
     }
 }
 
-internal static slice<@string> invalidSequenceTests = slice<@string>([
+internal static slice<@string> invalidSequenceTests = [
     ((@string)(new byte[]{0xed, 0xa0, 0x80, 0x80})), // surrogate min
     ((@string)(new byte[]{0xed, 0xbf, 0xbf, 0x80})), // surrogate max
 
@@ -305,7 +305,7 @@ internal static slice<@string> invalidSequenceTests = slice<@string>([
     ((@string)(new byte[]{0xf4, 0x8f, 0xbf, 0xc0})),
     ((@string)(new byte[]{0xf4, 0x8f, 0xc0, 0x80})),
     ((@string)(new byte[]{0xf4, 0x90, 0x80, 0x80}))
-]);
+];
 
 internal static rune runtimeDecodeRune(@string s) {
     foreach (var (_, r) in s) {
@@ -315,7 +315,7 @@ internal static rune runtimeDecodeRune(@string s) {
 }
 
 public static void TestDecodeInvalidSequence(ж<testing.T> t) {
-    foreach (var (_, s) in invalidSequenceTests) {
+    foreach (var (_, s) in range(invalidSequenceTests)) {
         var (r1, _) = DecodeRune(slice<byte>(s));
         {
             rune want = RuneError; if (r1 != want) {
@@ -419,17 +419,17 @@ partial struct RuneCountTest {
     internal nint @out;
 }
 
-internal static slice<RuneCountTest> runecounttests = slice<RuneCountTest>([
+internal static slice<RuneCountTest> runecounttests = [
     new("abcd", 4),
     new("☺☻☹", 3),
     new("1,2,3,4", 7),
     new(((@string)(new byte[]{0xe2, 0x00})), 2),
     new(((@string)(new byte[]{0xe2, 0x80})), 2),
     new(((@string)(new byte[]{0x61, 0xe2, 0x80})), 3)
-]);
+];
 
 public static void TestRuneCount(ж<testing.T> t) {
-    foreach (var (_, tt) in runecounttests) {
+    foreach (var (_, tt) in range(runecounttests)) {
         {
             nint @out = RuneCountInString(tt.@in); if (@out != tt.@out) {
                 t.Errorf("RuneCountInString(%q) = %d, want %d", tt.@in, @out, tt.@out);
@@ -459,7 +459,7 @@ partial struct RuneLenTest {
     internal nint size;
 }
 
-internal static slice<RuneLenTest> runelentests = slice<RuneLenTest>([
+internal static slice<RuneLenTest> runelentests = [
     new(0, 1),
     new('e', 1),
     new('é', 2),
@@ -470,14 +470,12 @@ internal static slice<RuneLenTest> runelentests = slice<RuneLenTest>([
     new(0xDFFF, -1),
     new(MaxRune + 1, -1),
     new(-1, -1)
-]);
+];
 
 public static void TestRuneLen(ж<testing.T> t) {
-    foreach (var (_, tt) in runelentests) {
-        {
-            nint size = RuneLen(tt.r); if (size != tt.size) {
-                t.Errorf("RuneLen(%#U) = %d, want %d", tt.r, size, tt.size);
-            }
+    foreach (var (_, tt) in range(runelentests)) {
+        nint size = RuneLen(tt.r); if (size != tt.size) {
+            t.Errorf("RuneLen(%#U) = %d, want %d", tt.r, size, tt.size);
         }
     }
 }
@@ -487,7 +485,7 @@ partial struct ValidTest {
     internal bool @out;
 }
 
-internal static slice<ValidTest> validTests = slice<ValidTest>([
+internal static slice<ValidTest> validTests = [
     new("", true),
     new("a", true),
     new("abc", true),
@@ -506,7 +504,7 @@ internal static slice<ValidTest> validTests = slice<ValidTest>([
     new((@string)((@string)(new byte[]{0xc0, 0x80})), false),                   // U+0000 encoded in two bytes: incorrect
     new((@string)((@string)(new byte[]{0xed, 0xa0, 0x80})), false),             // U+D800 high surrogate (sic)
     new((@string)((@string)(new byte[]{0xed, 0xbf, 0xbf})), false)              // U+DFFF low surrogate (sic)
-]);
+];
 
 [GoInit] internal static void init() {
     foreach (var i in range(100)) {
@@ -519,7 +517,7 @@ internal static slice<ValidTest> validTests = slice<ValidTest>([
 }
 
 public static void TestValid(ж<testing.T> t) {
-    foreach (var (_, tt) in validTests) {
+    foreach (var (_, tt) in range(validTests)) {
         if (Valid(slice<byte>(tt.@in)) != tt.@out) {
             t.Errorf("Valid(%q) = %v; want %v", tt.@in, !tt.@out, tt.@out);
         }
@@ -534,7 +532,7 @@ partial struct ValidRuneTest {
     internal bool ok;
 }
 
-internal static slice<ValidRuneTest> validrunetests = slice<ValidRuneTest>([
+internal static slice<ValidRuneTest> validrunetests = [
     new(0, true),
     new('e', true),
     new('é', true),
@@ -547,14 +545,12 @@ internal static slice<ValidRuneTest> validrunetests = slice<ValidRuneTest>([
     new(0xE000, true),
     new(MaxRune + 1, false),
     new(-1, false)
-]);
+];
 
 public static void TestValidRune(ж<testing.T> t) {
-    foreach (var (_, tt) in validrunetests) {
-        {
-            var ok = ValidRune(tt.r); if (ok != tt.ok) {
-                t.Errorf("ValidRune(%#U) = %t, want %t", tt.r, ok, tt.ok);
-            }
+    foreach (var (_, tt) in range(validrunetests)) {
+        var ok = ValidRune(tt.r); if (ok != tt.ok) {
+            t.Errorf("ValidRune(%#U) = %t, want %t", tt.r, ok, tt.ok);
         }
     }
 }
@@ -621,7 +617,6 @@ public static void BenchmarkValidTenJapaneseChars(ж<testing.B> Ꮡb) {
         Valid(s);
     }
 }
-
 public static void BenchmarkValidLongMostlyASCII(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -681,7 +676,6 @@ public static void BenchmarkValidStringLongJapanese(ж<testing.B> Ꮡb) {
 }
 
 internal static @string longStringMostlyASCII; // ~100KB, ~97% ASCII
-
 internal static @string longStringJapanese;    // ~100KB, non-ASCII
 
 [GoInit] internal static void initΔ1() {
@@ -878,7 +872,7 @@ public static void BenchmarkFullRune(ж<testing.B> b) {
         new("Incomplete", slice<byte>(((@string)(new byte[]{0xf0, 0x90, 0x80})))),
         new("Japanese", slice<byte>("本"u8))
     ]);
-    foreach (var (_, vᴛ1) in benchmarks) {
+    foreach (var (_, vᴛ1) in range(benchmarks)) {
         ref var bm = ref heap(new BenchmarkFullRune_benchmarks(), out var Ꮡbm);
         bm = vᴛ1;
 

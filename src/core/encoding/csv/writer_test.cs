@@ -20,40 +20,40 @@ partial struct writeTestsᴛ1 /*dyn*/ {
     public rune Comma;
 }
 internal static slice<writeTestsᴛ1> writeTests;
-internal static void initᴛwriteTests() { writeTests = slice<writeTestsᴛ1>([
-    new(Input: slice<slice<@string>>([slice<@string>(["abc"])]), Output: "abc\n"),
-    new(Input: slice<slice<@string>>([slice<@string>(["abc"])]), Output: "abc\r\n", UseCRLF: true),
-    new(Input: slice<slice<@string>>([slice<@string>([@"""abc"""])]), Output: @"""""""abc"""""""u8 + "\n"u8),
-    new(Input: slice<slice<@string>>([slice<@string>([@"a""b"])]), Output: @"""a""""b"""u8 + "\n"u8),
-    new(Input: slice<slice<@string>>([slice<@string>([@"""a""b"""])]), Output: @"""""""a""""b"""""""u8 + "\n"u8),
-    new(Input: slice<slice<@string>>([slice<@string>([" abc"])]), Output: @""" abc"""u8 + "\n"u8),
-    new(Input: slice<slice<@string>>([slice<@string>(["abc,def"])]), Output: @"""abc,def"""u8 + "\n"u8),
-    new(Input: slice<slice<@string>>([slice<@string>(["abc", "def"])]), Output: "abc,def\n"),
-    new(Input: slice<slice<@string>>([slice<@string>(["abc"]), slice<@string>(["def"])]), Output: "abc\ndef\n"),
-    new(Input: slice<slice<@string>>([slice<@string>(["abc\ndef"])]), Output: "\"abc\ndef\"\n"),
-    new(Input: slice<slice<@string>>([slice<@string>(["abc\ndef"])]), Output: "\"abc\r\ndef\"\r\n", UseCRLF: true),
-    new(Input: slice<slice<@string>>([slice<@string>(["abc\rdef"])]), Output: "\"abcdef\"\r\n", UseCRLF: true),
-    new(Input: slice<slice<@string>>([slice<@string>(["abc\rdef"])]), Output: "\"abc\rdef\"\n", UseCRLF: false),
-    new(Input: slice<slice<@string>>([slice<@string>([""])]), Output: "\n"),
-    new(Input: slice<slice<@string>>([slice<@string>(["", ""])]), Output: ",\n"),
-    new(Input: slice<slice<@string>>([slice<@string>(["", "", ""])]), Output: ",,\n"),
-    new(Input: slice<slice<@string>>([slice<@string>(["", "", "a"])]), Output: ",,a\n"),
-    new(Input: slice<slice<@string>>([slice<@string>(["", "a", ""])]), Output: ",a,\n"),
-    new(Input: slice<slice<@string>>([slice<@string>(["", "a", "a"])]), Output: ",a,a\n"),
-    new(Input: slice<slice<@string>>([slice<@string>(["a", "", ""])]), Output: "a,,\n"),
-    new(Input: slice<slice<@string>>([slice<@string>(["a", "", "a"])]), Output: "a,,a\n"),
-    new(Input: slice<slice<@string>>([slice<@string>(["a", "a", ""])]), Output: "a,a,\n"),
-    new(Input: slice<slice<@string>>([slice<@string>(["a", "a", "a"])]), Output: "a,a,a\n"),
-    new(Input: slice<slice<@string>>([slice<@string>([@"\."])]), Output: "\"\\.\"\n"),
-    new(Input: slice<slice<@string>>([slice<@string>([((@string)(new byte[]{0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c})), "aktau"])]), Output: ((@string)(new byte[]{0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c, 0x2c, 0x61, 0x6b, 0x74, 0x61, 0x75, 0x0a}))),
-    new(Input: slice<slice<@string>>([slice<@string>([((@string)(new byte[]{0x2c, 0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c})), "aktau"])]), Output: ((@string)(new byte[]{0x22, 0x2c, 0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c, 0x22, 0x2c, 0x61, 0x6b, 0x74, 0x61, 0x75, 0x0a}))),
-    new(Input: slice<slice<@string>>([slice<@string>(["a", "a", ""])]), Output: "a|a|\n", Comma: '|'),
-    new(Input: slice<slice<@string>>([slice<@string>([",", ",", ""])]), Output: ",|,|\n", Comma: '|'),
-    new(Input: slice<slice<@string>>([slice<@string>(["foo"])]), Comma: '"', Error: errInvalidDelim)
-]); }
+internal static void initᴛwriteTests() { writeTests = [
+    new(Input: [["abc"]], Output: "abc\n"),
+    new(Input: [["abc"]], Output: "abc\r\n", UseCRLF: true),
+    new(Input: [[@"""abc"""]], Output: @"""""""abc"""""""u8 + "\n"u8),
+    new(Input: [[@"a""b"]], Output: @"""a""""b"""u8 + "\n"u8),
+    new(Input: [[@"""a""b"""]], Output: @"""""""a""""b"""""""u8 + "\n"u8),
+    new(Input: [[" abc"]], Output: @""" abc"""u8 + "\n"u8),
+    new(Input: [["abc,def"]], Output: @"""abc,def"""u8 + "\n"u8),
+    new(Input: [["abc", "def"]], Output: "abc,def\n"),
+    new(Input: [["abc"], ["def"]], Output: "abc\ndef\n"),
+    new(Input: [["abc\ndef"]], Output: "\"abc\ndef\"\n"),
+    new(Input: [["abc\ndef"]], Output: "\"abc\r\ndef\"\r\n", UseCRLF: true),
+    new(Input: [["abc\rdef"]], Output: "\"abcdef\"\r\n", UseCRLF: true),
+    new(Input: [["abc\rdef"]], Output: "\"abc\rdef\"\n", UseCRLF: false),
+    new(Input: [[""]], Output: "\n"),
+    new(Input: [["", ""]], Output: ",\n"),
+    new(Input: [["", "", ""]], Output: ",,\n"),
+    new(Input: [["", "", "a"]], Output: ",,a\n"),
+    new(Input: [["", "a", ""]], Output: ",a,\n"),
+    new(Input: [["", "a", "a"]], Output: ",a,a\n"),
+    new(Input: [["a", "", ""]], Output: "a,,\n"),
+    new(Input: [["a", "", "a"]], Output: "a,,a\n"),
+    new(Input: [["a", "a", ""]], Output: "a,a,\n"),
+    new(Input: [["a", "a", "a"]], Output: "a,a,a\n"),
+    new(Input: [[@"\."]], Output: "\"\\.\"\n"),
+    new(Input: [[((@string)(new byte[]{0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c})), "aktau"]], Output: ((@string)(new byte[]{0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c, 0x2c, 0x61, 0x6b, 0x74, 0x61, 0x75, 0x0a}))),
+    new(Input: [[((@string)(new byte[]{0x2c, 0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c})), "aktau"]], Output: ((@string)(new byte[]{0x22, 0x2c, 0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c, 0x22, 0x2c, 0x61, 0x6b, 0x74, 0x61, 0x75, 0x0a}))),
+    new(Input: [["a", "a", ""]], Output: "a|a|\n", Comma: '|'),
+    new(Input: [[",", ",", ""]], Output: ",|,|\n", Comma: '|'),
+    new(Input: [["foo"]], Comma: '"', Error: errInvalidDelim)
+]; }
 
 public static void TestWrite(ж<testing.T> t) {
-    foreach (var (n, tt) in writeTests) {
+    foreach (var (n, tt) in range(writeTests)) {
         var b = Ꮡ(new strings.Builder());
         var f = NewWriter(new csv_test_package.strings_BuilderжWriter(b));
         f.UseCRLF = tt.UseCRLF;
@@ -88,7 +88,7 @@ internal static readonly object errorShouldNotBeNilˢ = (@string)"Error should n
 public static void TestError(ж<testing.T> t) {
     var b = Ꮡ(new bytes.Buffer());
     var f = NewWriter(new csv_test_package.bytes_BufferжWriter(b));
-    f.Write(slice<@string>(["abc"]));
+    f.Write(["abc"]);
     f.Flush();
     var err = f.Error();
 
@@ -97,7 +97,7 @@ public static void TestError(ж<testing.T> t) {
     }
 
     f = NewWriter(new errorWriter());
-    f.Write(slice<@string>(["abc"]));
+    f.Write(["abc"]);
     f.Flush();
     err = f.Error();
 
@@ -106,11 +106,11 @@ public static void TestError(ж<testing.T> t) {
     }
 }
 
-internal static slice<slice<@string>> benchmarkWriteData = slice<slice<@string>>([
-    slice<@string>(["abc", "def", "12356", "1234567890987654311234432141542132"]),
-    slice<@string>(["abc", "def", "12356", "1234567890987654311234432141542132"]),
-    slice<@string>(["abc", "def", "12356", "1234567890987654311234432141542132"])
-]);
+internal static slice<slice<@string>> benchmarkWriteData = [
+    ["abc", "def", "12356", "1234567890987654311234432141542132"],
+    ["abc", "def", "12356", "1234567890987654311234432141542132"],
+    ["abc", "def", "12356", "1234567890987654311234432141542132"]
+];
 
 public static void BenchmarkWrite(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();

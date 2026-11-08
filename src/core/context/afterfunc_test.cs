@@ -7,8 +7,6 @@ using context = context_package;
 using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.context_internal_test_package;
 
 partial class context_test_package {

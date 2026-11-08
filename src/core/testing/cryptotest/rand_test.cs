@@ -113,7 +113,7 @@ public static void TestSetGlobalRandom(ж<testing.T> t) {
         tΔ4.Cleanup(() => {
             rand.Reader = oldReaderʗ1;
         });
-        rand.Reader = new cryptotest_internal_test_package.bytes_ReaderжReader(bytes.NewReader(bytes.Repeat(slice<byte>([5]), 64)));
+        rand.Reader = new cryptotest_internal_test_package.bytes_ReaderжReader(bytes.NewReader(bytes.Repeat([5], 64)));
 
         var bufʗ4 = buf;
         var seed1ʗ6 = seed1ʗ4;
@@ -126,7 +126,7 @@ public static void TestSetGlobalRandom(ж<testing.T> t) {
         });
 
         rand.Reader.Read(buf);
-        if (!bytes.Equal(buf, bytes.Repeat(slice<byte>([5]), 64))) {
+        if (!bytes.Equal(buf, bytes.Repeat([5], 64))) {
             tΔ4.Errorf("rand.Reader not restored");
         }
     });
@@ -145,10 +145,8 @@ public static void TestSetGlobalRandom(ж<testing.T> t) {
             tΔ7.Fatalf("mlkem.GenerateKey768: %v", err);
         }
 
-        {
-            var gotBytes = got.Bytes(); if (!bytes.Equal(gotBytes, exp.Bytes())) {
-                tΔ7.Errorf("mlkem.GenerateKey768 with seed 1 = %x; want %x", gotBytes, exp.Bytes());
-            }
+        var gotBytes = got.Bytes(); if (!bytes.Equal(gotBytes, exp.Bytes())) {
+            tΔ7.Errorf("mlkem.GenerateKey768 with seed 1 = %x; want %x", gotBytes, exp.Bytes());
         }
     });
 

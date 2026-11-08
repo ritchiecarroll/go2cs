@@ -49,34 +49,32 @@ private static readonly @string coreˢᵇ = "core"u8;
 internal static readonly object runtimeTestSomeTestLeftAˢ = (@string)"runtime.test: some test left a core file behind"u8;
 
 public static void TestMain(ж<testing.M> m) {
-    {
-        @string entrypoint = Δos.Getenv(entrypointVar);
-        var exprᴛ1 = entrypoint;
-        switch (ᐧ) {
-        case {} when exprᴛ1 == "panic"u8: {
-            crashViaPanic();
-            throw panic("unreachable");
-            break;
-        }
-        case {} when exprᴛ1 == "trap"u8: {
-            crashViaTrap();
-            throw panic("unreachable");
-            break;
-        }
-        default: {
-            Δlog.Fatalf("invalid %s: %q", entrypointVar, entrypoint);
-            break;
-        }
-        case {} when exprᴛ1 == ""u8: {
-            // fall through to normal behavior
-            break;
-        }}
+    @string entrypoint = Δos.Getenv(entrypointVar);
+    var exprᴛ1 = entrypoint;
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "panic"u8: {
+        crashViaPanic();
+        throw panic("unreachable");
+        break;
     }
+    case {} when exprᴛ1 == "trap"u8: {
+        crashViaTrap();
+        throw panic("unreachable");
+        break;
+    }
+    default: {
+        Δlog.Fatalf("invalid %s: %q", entrypointVar, entrypoint);
+        break;
+    }
+    case {} when exprᴛ1 == ""u8: {
+        // fall through to normal behavior
+        break;
+    }}
 
     var (_, coreErrBefore) = Δos.Stat(coreˢ);
 
     nint status = m.Run();
-    foreach (var (_, @file) in toRemove) {
+    foreach (var (_, @file) in range(toRemove)) {
         Δos.RemoveAll(@file);
     }
 
@@ -155,14 +153,12 @@ internal static (@string, error) runBuiltTestProgErr(ж<testing.T> t, @string ex
     if (err == nil) {
         t.Logf("%v (%v): ok", cmd.OrTypedNil(), time.Since(start));
     } else {
-        {
-            var (_, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok) {
-                t.Logf("%v: %v", cmd.OrTypedNil(), err);
-            } else if (errors.Is(err, exec.ErrWaitDelay)) {
-                t.Fatalf("%v: %v", cmd.OrTypedNil(), err);
-            } else {
-                t.Fatalf("%v failed to start: %v", cmd.OrTypedNil(), err);
-            }
+        var (_, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok) {
+            t.Logf("%v: %v", cmd.OrTypedNil(), err);
+        } else if (errors.Is(err, exec.ErrWaitDelay)) {
+            t.Fatalf("%v: %v", cmd.OrTypedNil(), err);
+        } else {
+            t.Fatalf("%v failed to start: %v", cmd.OrTypedNil(), err);
         }
     }
     return ((@string)@out, err);
@@ -251,14 +247,12 @@ internal static (@string, error) buildTestProg(ж<testing.T> t, @string binary, 
             //
             // TODO(vsaioc): Remove `goroutineleakprofile` once the feature is no longer experimental.
             var edited = false;
-            foreach (var i in range(cmd.Env)) {
+            foreach (var i in range(len(cmd.Env))) {
                 @string e = cmd.Env[i];
-                {
-                    var (_, vars, okΔ1) = strings.Cut(e, goexperimentˢ); if (okΔ1) {
-                        cmd.Env[i] = "GOEXPERIMENT="u8 + vars + ",goroutineleakprofile"u8;
-                        edited = true;
-                        _ = vars;
-                    }
+                var (_, vars, okΔ1) = strings.Cut(e, goexperimentˢ); if (okΔ1) {
+                    cmd.Env[i] = "GOEXPERIMENT="u8 + vars + ",goroutineleakprofile"u8;
+                    edited = true;
+                    _ = vars;
                 }
             }
             if (!edited) {
@@ -414,7 +408,7 @@ public static void TestStackOverflow(ж<testing.T> t) {
     if (!strings.HasPrefix(output, want[0])) {
         t.Errorf("output does not start with %q", want[0]);
     }
-    foreach (var (_, s) in want[1..]) {
+    foreach (var (_, s) in range(want[1..])) {
         if (!strings.Contains(output, s)) {
             t.Errorf("output does not contain %q", s);
         }
@@ -748,12 +742,10 @@ public static void TestRuntimePanicWithRuntimeError(ж<testing.T> t) {
         }
     };
 
-    foreach (var (i, fn) in testCases.ΔRangeSnapshot()) {
+    foreach (var (i, fn) in range(testCases.ΔRangeSnapshot())) {
         var got = panicValue(fn);
-        {
-            var (_, ok) = got._<runtimeꓸError>(ᐧ); if (!ok) {
-                t.Errorf("test #%d: recovered value %v(type %T) does not implement runtime.Error", i, got, got);
-            }
+        var (_, ok) = got._<runtimeꓸError>(ᐧ); if (!ok) {
+            t.Errorf("test #%d: recovered value %v(type %T) does not implement runtime.Error", i, got, got);
         }
     }
 }
@@ -855,7 +847,7 @@ public static void TestPanicTraceback(ж<testing.T> t) {
 
     // Check functions in the traceback.
     var fns = slice<@string>(["main.pt1.func1", "panic", "main.pt2.func1", "panic", "main.pt2", "main.pt1"]);
-    foreach (var (_, fn) in fns) {
+    foreach (var (_, fn) in range(fns)) {
         var re = Δregexp.MustCompile(@"(?m)^"u8 + Δregexp.QuoteMeta(fn) + @"\(.*\n"u8);
         var idx = re.FindStringIndex(output);
         if (idx == nil) {
@@ -901,10 +893,8 @@ private static readonly @string panicWhilePrintingPanicˢᵇ = "panic while prin
 
 public static void TestPanicLoop(ж<testing.T> t) {
     @string output = runTestProg(t, testprogˢ, panicLoopˢ);
-    {
-        @string want = panicWhilePrintingPanicˢ; if (!strings.Contains(output, want)) {
-            t.Errorf("output does not contain %q:\n%s", want, output);
-        }
+    @string want = panicWhilePrintingPanicˢ; if (!strings.Contains(output, want)) {
+        t.Errorf("output does not contain %q:\n%s", want, output);
     }
 }
 
@@ -949,7 +939,7 @@ public static void TestMemPprof(ж<testing.T> t) {
                 cmd.Args = append(cmd.Args, fn);
             }
             var found = false;
-            foreach (var (i, e) in cmd.Env) {
+            foreach (var (i, e) in range(cmd.Env)) {
                 if (strings.HasPrefix(e, pprofTmpdirˢ)) {
                     cmd.Env[i] = "PPROF_TMPDIR="u8 + Δos.TempDir();
                     found = true;
@@ -1002,7 +992,6 @@ public static void TestConcurrentMapWrites(ж<testing.T> t) {
         t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string concurrentMapReadWriteˢ => ref concurrentMapReadWriteˢᵇ;
 private static readonly @string concurrentMapReadWriteˢᵇ = "concurrentMapReadWrite"u8;
@@ -1026,7 +1015,6 @@ public static void TestConcurrentMapReadWrite(ж<testing.T> t) {
         t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fatalErrorConcurrentMapˢ3 => ref fatalErrorConcurrentMapˢ3ᵇ;
 private static readonly @string fatalErrorConcurrentMapˢ3ᵇ = "fatal error: concurrent map iteration and map write\n"u8;
@@ -1149,7 +1137,7 @@ retry:
             "PanicRace",
             "created by "
         ]);
-        foreach (var (_, want) in wants) {
+        foreach (var (_, want) in range(wants)) {
             if (!bytes.Contains(got, slice<byte>(want))) {
                 t.Logf("did not find expected string %q", want);
                 goto continue_retry;
@@ -1174,12 +1162,12 @@ public static void TestBadTraceback(ж<testing.T> t) {
         t.Skip(skippedTestCheckptrModeˢ);
     }
     @string output = runTestProg(t, testprogˢ, badTracebackˢ);
-    foreach (var (_, want) in slice<@string>([
+    foreach (var (_, want) in range(slice<@string>([
         "unexpected return pc",
         "called from 0xbad",
         "00000bad",   // Smashed LR in hex dump
         "<main.badLR" // Symbolization in hex dump (badLR1 or badLR2)
-    ])) {
+    ]))) {
         if (!strings.Contains(output, want)) {
             t.Errorf("output does not contain %q:\n%s", want, output);
         }
@@ -1251,10 +1239,8 @@ private static readonly @string sigtrapˢᵇ = "SIGTRAP"u8;
 public static void TestAbort(ж<testing.T> t) {
     // Pass GOTRACEBACK to ensure we get runtime frames.
     @string output = runTestProg(t, testprogˢ, abortˢ, gotracebackSystemˢ);
-    {
-        @string wantΔ1 = runtimeAbortˢ; if (!strings.Contains(output, wantΔ1)) {
-            t.Errorf("output does not contain %q:\n%s", wantΔ1, output);
-        }
+    @string wantΔ1 = runtimeAbortˢ; if (!strings.Contains(output, wantΔ1)) {
+        t.Errorf("output does not contain %q:\n%s", wantΔ1, output);
     }
     if (strings.Contains(output, badˢ)) {
         t.Errorf("output contains BAD:\n%s", output);
@@ -1293,12 +1279,10 @@ public static void TestAbort(ж<testing.T> t) {
     try {
         if (Δos.Getenv("GO_TEST_RUNTIME_PANIC") == "1"u8) {
             defer(() => {
-                {
-                    var r = recover(); if (r != nil) {
-                        // We expect to crash, so exit 0
-                        // to indicate failure.
-                        Δos.Exit(0);
-                    }
+                var r = recover(); if (r != nil) {
+                    // We expect to crash, so exit 0
+                    // to indicate failure.
+                    Δos.Exit(0);
                 }
             }, ref ᒐ);
             runtime_internal_test_package.PanicForTesting(default, 1);
@@ -1410,19 +1394,15 @@ public static void TestG0StackOverflow(ж<testing.T> t) {
         if (runtime_internal_test_package.CrashStackImplemented) {
             // check for a stack trace
             @string want = runtimeStackOverflowˢ;
-            {
-                nint n = strings.Count((@string)@out, want); if (n < 5) {
-                    t.Errorf("output does not contain %q at least 5 times:\n%s", want, @out);
-                }
+            nint n = strings.Count((@string)@out, want); if (n < 5) {
+                t.Errorf("output does not contain %q at least 5 times:\n%s", want, @out);
             }
             return; // it's not a signal-style traceback
         }
         // Check that it's a signal-style traceback.
         if (Δruntime.GOOS != "windows"u8) {
-            {
-                @string want = "PC="; if (!strings.Contains((@string)@out, want)) {
-                    t.Errorf("output does not contain %q:\n%s", want, @out);
-                }
+            @string want = "PC="; if (!strings.Contains((@string)@out, want)) {
+                t.Errorf("output does not contain %q:\n%s", want, @out);
             }
         }
         return;
@@ -1455,10 +1435,8 @@ public static void TestCrashWhileTracing(ж<testing.T> t) {
     ref var errOut = ref heap(new bytes.Buffer(), out var ᏑerrOut);
     cmd.Stderr = new runtime_test_package.bytes_BufferжWriter(ᏑerrOut);
 
-    {
-        var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
-            t.Fatalf("could not start subprocess: %v", errΔ1);
-        }
+    var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+        t.Fatalf("could not start subprocess: %v", errΔ1);
     }
     (var r, err) = traceparse.NewReader(stdOut);
     if (err != nil) {
@@ -1496,10 +1474,8 @@ loop:
 continue_loop:;
     }
 break_loop:;
-    {
-        var errΔ3 = cmd.Wait(); if (errΔ3 == nil) {
-            t.Error(theProcessShouldHaveˢ);
-        }
+    var errΔ3 = cmd.Wait(); if (errΔ3 == nil) {
+        t.Error(theProcessShouldHaveˢ);
     }
     if (nSync <= 1) {
         t.Errorf("expected at least one full generation to have been emitted before the trace was considered broken");
@@ -1509,10 +1485,8 @@ break_loop:;
     }
     t.Logf("stderr output:\n%s", ᏑerrOut.String());
     @string needle = yzzyxˢ;
-    {
-        nint n = strings.Count(ᏑerrOut.String(), needle); if (n != 1) {
-            t.Fatalf("did not find expected panic message %q\n(exit status %v)", needle, err);
-        }
+    nint n = strings.Count(ᏑerrOut.String(), needle); if (n != 1) {
+        t.Fatalf("did not find expected panic message %q\n(exit status %v)", needle, err);
     }
 }
 
@@ -1527,7 +1501,7 @@ private static readonly @string godebugClobberfree1ˢᵇ = "GODEBUG=clobberfree=
 public static void TestDoublePanic(ж<testing.T> t) {
     @string output = runTestProg(t, testprogˢ, doublePanicˢ, godebugClobberfree1ˢ);
     var wants = slice<@string>(["panic: XXX", "panic: YYY"]);
-    foreach (var (_, want) in wants) {
+    foreach (var (_, want) in range(wants)) {
         if (!strings.Contains(output, want)) {
             t.Errorf("output:\n%s\n\nwant output containing: %s", output, want);
         }
@@ -1572,7 +1546,7 @@ public static void TestPanicWhilePanicking(ж<testing.T> t) {
             "NilPanic"
         )
     ]);
-    foreach (var (_, x) in tests) {
+    foreach (var (_, x) in range(tests)) {
         @string output = runTestProg(t, testprogˢ, x.Func);
         if (!strings.Contains(output, x.Want)) {
             t.Errorf("output does not contain %q:\n%s", x.Want, output);
@@ -1640,7 +1614,7 @@ private static readonly @string goTestFinalizerDeadlockˢ5ᵇ = "GO_TEST_FINALIZ
 public static void TestFinalizerOrCleanupDeadlock(ж<testing.T> t) {
     t.Parallel();
 
-    foreach (var (_, useCleanup) in slice<bool>([false, true])) {
+    foreach (var (_, useCleanup) in range(slice<bool>([false, true]))) {
         @string progName = finalizerˢ;
         @string want = runtimeRunFinalizersˢ;
         if (useCleanup) {
@@ -1683,9 +1657,9 @@ public static void TestFinalizerOrCleanupDeadlock(ж<testing.T> t) {
                     tΔ4.Logf("Output: %s", output);
                     tΔ4.Fatalf("Error parsing proto output: %v", err);
                 }
-                foreach (var (_, s) in p.Sample) {
-                    foreach (var (_, loc) in s.Location) {
-                        foreach (var (_, line) in loc.Line) {
+                foreach (var (_, s) in range(p.Sample)) {
+                    foreach (var (_, loc) in range(s.Location)) {
+                        foreach (var (_, line) in range(loc.Line)) {
                             if (line.Function.Name == want) {
                                 // Done!
                                 return;
@@ -1726,12 +1700,12 @@ internal static ref readonly @string fatalErrorSemaphoreWakeˢ => ref fatalError
 private static readonly @string fatalErrorSemaphoreWakeˢᵇ = "fatal error: semaphore wake of synctest goroutine from outside bubble"u8;
 
 public static void TestSynctestCondSignalFromNoBubble(ж<testing.T> t) {
-    foreach (var (_, test) in slice<@string>([
+    foreach (var (_, test) in range(slice<@string>([
         "SynctestCond/signal/no_bubble",
         "SynctestCond/broadcast/no_bubble",
         "SynctestCond/signal/other_bubble",
         "SynctestCond/broadcast/other_bubble"
-    ])) {
+    ]))) {
         t.Run(test, (ж<testing.T> tΔ1) => {
             @string output = runTestProg(tΔ1, testprogˢ, test);
             @string want = fatalErrorSemaphoreWakeˢ;

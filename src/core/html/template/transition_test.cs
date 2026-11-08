@@ -35,11 +35,9 @@ public static void TestFindEndTag(ж<testing.T> t) {
         new("<</script >", "script", 1),
         new("</script>", "textarea", -1)
     ]);
-    foreach (var (_, test) in tests) {
-        {
-            nint got = indexTagEnd(slice<byte>(test.s), slice<byte>(test.tag)); if (test.want != got) {
-                t.Errorf("%q/%q: want\n\t%d\nbut got\n\t%d", test.s, test.tag, test.want, got);
-            }
+    foreach (var (_, test) in range(tests)) {
+        nint got = indexTagEnd(slice<byte>(test.s), slice<byte>(test.tag)); if (test.want != got) {
+            t.Errorf("%q/%q: want\n\t%d\nbut got\n\t%d", test.s, test.tag, test.want, got);
         }
     }
 }
@@ -67,10 +65,8 @@ public static void BenchmarkTemplateSpecialTags(ж<testing.B> Ꮡb) {
     for (nint i = 0; i < b.N; i++) {
         var (ᴛ1, ᴛ2) = New(fooˢ2).Parse(html);
         var tmpl = Must(ᴛ1, ᴛ2);
-        {
-            var err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡbuf), r); if (err != nil) {
-                Ꮡb.Fatal(err);
-            }
+        var err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡbuf), r); if (err != nil) {
+            Ꮡb.Fatal(err);
         }
         buf.Reset();
     }

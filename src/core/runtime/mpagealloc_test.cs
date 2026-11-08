@@ -58,40 +58,40 @@ public static void TestPageAllocGrow(ж<testing.T> t) {
     }
     var tests = new map<@string, TestPageAllocGrow_test>{
         ["One"] = new(
-            chunks: slice<global::go.runtime_internal_test_package.ChunkIdx>([
+            chunks: [
                 runtime_internal_test_package.BaseChunkIdx
-            ]),
+            ],
             inUse: slice<global::go.runtime_internal_test_package.AddrRange>([
                 runtime_internal_test_package.MakeAddrRange(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 1, 0))
             ])
         ),
         ["Contiguous2"] = new(
-            chunks: slice<global::go.runtime_internal_test_package.ChunkIdx>([
+            chunks: [
                 runtime_internal_test_package.BaseChunkIdx,
                 runtime_internal_test_package.BaseChunkIdx + 1
-            ]),
+            ],
             inUse: slice<global::go.runtime_internal_test_package.AddrRange>([
                 runtime_internal_test_package.MakeAddrRange(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 2, 0))
             ])
         ),
         ["Contiguous5"] = new(
-            chunks: slice<global::go.runtime_internal_test_package.ChunkIdx>([
+            chunks: [
                 runtime_internal_test_package.BaseChunkIdx,
                 runtime_internal_test_package.BaseChunkIdx + 1,
                 runtime_internal_test_package.BaseChunkIdx + 2,
                 runtime_internal_test_package.BaseChunkIdx + 3,
                 runtime_internal_test_package.BaseChunkIdx + 4
-            ]),
+            ],
             inUse: slice<global::go.runtime_internal_test_package.AddrRange>([
                 runtime_internal_test_package.MakeAddrRange(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 5, 0))
             ])
         ),
         ["Discontiguous"] = new(
-            chunks: slice<global::go.runtime_internal_test_package.ChunkIdx>([
+            chunks: [
                 runtime_internal_test_package.BaseChunkIdx,
                 runtime_internal_test_package.BaseChunkIdx + 2,
                 runtime_internal_test_package.BaseChunkIdx + 4
-            ]),
+            ],
             inUse: slice<global::go.runtime_internal_test_package.AddrRange>([
                 runtime_internal_test_package.MakeAddrRange(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 1, 0)),
                 runtime_internal_test_package.MakeAddrRange(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 2, 0), runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 3, 0)),
@@ -99,24 +99,24 @@ public static void TestPageAllocGrow(ж<testing.T> t) {
             ])
         ),
         ["Mixed"] = new(
-            chunks: slice<global::go.runtime_internal_test_package.ChunkIdx>([
+            chunks: [
                 runtime_internal_test_package.BaseChunkIdx,
                 runtime_internal_test_package.BaseChunkIdx + 1,
                 runtime_internal_test_package.BaseChunkIdx + 2,
                 runtime_internal_test_package.BaseChunkIdx + 4
-            ]),
+            ],
             inUse: slice<global::go.runtime_internal_test_package.AddrRange>([
                 runtime_internal_test_package.MakeAddrRange(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 3, 0)),
                 runtime_internal_test_package.MakeAddrRange(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 4, 0), runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 5, 0))
             ])
         ),
         ["WildlyDiscontiguous"] = new(
-            chunks: slice<global::go.runtime_internal_test_package.ChunkIdx>([
+            chunks: [
                 runtime_internal_test_package.BaseChunkIdx,
                 runtime_internal_test_package.BaseChunkIdx + 1,
                 runtime_internal_test_package.BaseChunkIdx + 0x10,
                 runtime_internal_test_package.BaseChunkIdx + 0x21
-            ]),
+            ],
             inUse: slice<global::go.runtime_internal_test_package.AddrRange>([
                 runtime_internal_test_package.MakeAddrRange(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 2, 0)),
                 runtime_internal_test_package.MakeAddrRange(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 0x10, 0), runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 0x11, 0)),
@@ -125,7 +125,7 @@ public static void TestPageAllocGrow(ж<testing.T> t) {
         ),
         ["ManyDiscontiguous"] = new(
             // The initial cap is 16. Test 33 ranges, to exercise the growth path (twice).
-            chunks: slice<global::go.runtime_internal_test_package.ChunkIdx>([
+            chunks: [
                 runtime_internal_test_package.BaseChunkIdx, runtime_internal_test_package.BaseChunkIdx + 2, runtime_internal_test_package.BaseChunkIdx + 4, runtime_internal_test_package.BaseChunkIdx + 6,
                 runtime_internal_test_package.BaseChunkIdx + 8, runtime_internal_test_package.BaseChunkIdx + 10, runtime_internal_test_package.BaseChunkIdx + 12, runtime_internal_test_package.BaseChunkIdx + 14,
                 runtime_internal_test_package.BaseChunkIdx + 16, runtime_internal_test_package.BaseChunkIdx + 18, runtime_internal_test_package.BaseChunkIdx + 20, runtime_internal_test_package.BaseChunkIdx + 22,
@@ -135,7 +135,7 @@ public static void TestPageAllocGrow(ж<testing.T> t) {
                 runtime_internal_test_package.BaseChunkIdx + 48, runtime_internal_test_package.BaseChunkIdx + 50, runtime_internal_test_package.BaseChunkIdx + 52, runtime_internal_test_package.BaseChunkIdx + 54,
                 runtime_internal_test_package.BaseChunkIdx + 56, runtime_internal_test_package.BaseChunkIdx + 58, runtime_internal_test_package.BaseChunkIdx + 60, runtime_internal_test_package.BaseChunkIdx + 62,
                 runtime_internal_test_package.BaseChunkIdx + 64
-            ]),
+            ],
             inUse: slice<global::go.runtime_internal_test_package.AddrRange>([
                 runtime_internal_test_package.MakeAddrRange(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 1, 0)),
                 runtime_internal_test_package.MakeAddrRange(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 2, 0), runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 3, 0)),
@@ -177,10 +177,10 @@ public static void TestPageAllocGrow(ж<testing.T> t) {
     // See #46860.
     if (runtime_internal_test_package.PageAlloc64Bit != 0 && goos.IsIos == 0) {
         tests[extremelyDiscontiguousˢ] = new TestPageAllocGrow_test(
-            chunks: slice<global::go.runtime_internal_test_package.ChunkIdx>([
+            chunks: [
                 runtime_internal_test_package.BaseChunkIdx,
                 runtime_internal_test_package.BaseChunkIdx + 0x100000 // constant translates to O(TiB)
-            ]),
+            ],
             inUse: slice<global::go.runtime_internal_test_package.AddrRange>([
                 runtime_internal_test_package.MakeAddrRange(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 1, 0)),
                 runtime_internal_test_package.MakeAddrRange(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 0x100000, 0), runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 0x100001, 0))
@@ -198,8 +198,8 @@ public static void TestPageAllocGrow(ж<testing.T> t) {
                 // By creating a new pageAlloc, we will
                 // grow it for each chunk defined in x.
                 var x = new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>();
-                foreach (var (_, c) in vʗ1.chunks) {
-                    x[c] = slice<global::go.runtime_internal_test_package.BitRange>([]);
+                foreach (var (_, c) in range(vʗ1.chunks)) {
+                    x[c] = [];
                 }
                 var b = runtime_internal_test_package.NewPageAlloc(x, default);
                 defer(runtime_internal_test_package.FreePageAlloc, b, ref ᒐ);
@@ -211,7 +211,7 @@ public static void TestPageAllocGrow(ж<testing.T> t) {
                 if (len(got) != len(want)) {
                     tΔ1.Fail();
                 } else {
-                    foreach (var i in range(want)) {
+                    foreach (var i in range(len(want))) {
                         if (!want[i].ΔEquals(got[i])) {
                             tΔ1.Fail();
                             break;
@@ -221,11 +221,11 @@ public static void TestPageAllocGrow(ж<testing.T> t) {
                 if (tΔ1.Failed()) {
                     tΔ1.Logf("found inUse mismatch");
                     tΔ1.Logf("got:");
-                    foreach (var (i, r) in got) {
+                    foreach (var (i, r) in range(got)) {
                         tΔ1.Logf("\t#%d [0x%x, 0x%x)", i, r.Base(), r.Limit());
                     }
                     tΔ1.Logf("want:");
-                    foreach (var (i, r) in want) {
+                    foreach (var (i, r) in range(want)) {
                         tΔ1.Logf("\t#%d [0x%x, 0x%x)", i, r.Base(), r.Limit());
                     }
                 }
@@ -266,10 +266,10 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
     var tests = new map<@string, TestPageAllocAlloc_test>{
         ["AllFree1"] = new(
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx] = []
             },
             scav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, 1), new(2, 2)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, 1), new(2, 2)]
             },
             hits: slice<TestPageAllocAlloc_hit>([
                 new(1, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), runtime_internal_test_package.PageSize),
@@ -279,52 +279,52 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
                 new(1, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 4), 0)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, 5)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, 5)]
             }
         ),
         ["ManyArena1"] = new(
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 2] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages - 1)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 2] = [new(0, runtime_internal_test_package.PallocChunkPages - 1)]
             },
             scav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 2] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 2] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             },
             hits: slice<TestPageAllocAlloc_hit>([
                 new(1, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 2, runtime_internal_test_package.PallocChunkPages - 1), runtime_internal_test_package.PageSize)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 2] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 2] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             }
         ),
         ["NotContiguous1"] = new(
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 0xff] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, 0)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 0xff] = [new(0, 0)]
             },
             scav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 0xff] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 0xff] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             },
             hits: slice<TestPageAllocAlloc_hit>([
                 new(1, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 0xff, 0), runtime_internal_test_package.PageSize)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 0xff] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, 1)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 0xff] = [new(0, 1)]
             }
         ),
         ["AllFree2"] = new(
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx] = []
             },
             scav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, 3), new(7, 1)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, 3), new(7, 1)]
             },
             hits: slice<TestPageAllocAlloc_hit>([
                 new(2, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), 2 * runtime_internal_test_package.PageSize),
@@ -334,32 +334,32 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
                 new(2, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 8), 0)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, 10)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, 10)]
             }
         ),
         ["Straddle2"] = new(
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages - 1)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(1, runtime_internal_test_package.PallocChunkPages - 1)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages - 1)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(1, runtime_internal_test_package.PallocChunkPages - 1)]
             },
             scav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(runtime_internal_test_package.PallocChunkPages - 1, 1)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(runtime_internal_test_package.PallocChunkPages - 1, 1)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = []
             },
             hits: slice<TestPageAllocAlloc_hit>([
                 new(2, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, runtime_internal_test_package.PallocChunkPages - 1), runtime_internal_test_package.PageSize)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             }
         ),
         ["AllFree5"] = new(
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx] = []
             },
             scav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, 8), new(9, 1), new(17, 5)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, 8), new(9, 1), new(17, 5)]
             },
             hits: slice<TestPageAllocAlloc_hit>([
                 new(5, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), 5 * runtime_internal_test_package.PageSize),
@@ -369,15 +369,15 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
                 new(5, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 20), 2 * runtime_internal_test_package.PageSize)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, 25)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, 25)]
             }
         ),
         ["ExhaustPallocChunkPages-3"] = new(
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx] = []
             },
             scav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(10, 1)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(10, 1)]
             },
             hits: slice<TestPageAllocAlloc_hit>([
                 new(runtime_internal_test_package.PallocChunkPages - 3, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), runtime_internal_test_package.PageSize),
@@ -388,15 +388,15 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
                 new(runtime_internal_test_package.PallocChunkPages - 3, 0, 0)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             }
         ),
         ["AllFreePallocChunkPages"] = new(
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx] = []
             },
             scav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, 1), new(runtime_internal_test_package.PallocChunkPages - 1, 1)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, 1), new(runtime_internal_test_package.PallocChunkPages - 1, 1)]
             },
             hits: slice<TestPageAllocAlloc_hit>([
                 new(runtime_internal_test_package.PallocChunkPages, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), 2 * runtime_internal_test_package.PageSize),
@@ -404,17 +404,17 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
                 new(1, 0, 0)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             }
         ),
         ["StraddlePallocChunkPages+1"] = new(
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages / 2)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages / 2)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = []
             },
             scav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             },
             hits: slice<TestPageAllocAlloc_hit>([
                 new(runtime_internal_test_package.PallocChunkPages + 1, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, runtime_internal_test_package.PallocChunkPages / 2), (runtime_internal_test_package.PallocChunkPages + 1) * runtime_internal_test_package.PageSize),
@@ -422,18 +422,18 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
                 new(1, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 1, runtime_internal_test_package.PallocChunkPages / 2 + 1), runtime_internal_test_package.PageSize)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages / 2 + 2)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(0, runtime_internal_test_package.PallocChunkPages / 2 + 2)]
             }
         ),
         ["AllFreePallocChunkPages*2"] = new(
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = []
             },
             scav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = []
             },
             hits: slice<TestPageAllocAlloc_hit>([
                 new(runtime_internal_test_package.PallocChunkPages * 2, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), 0),
@@ -441,20 +441,20 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
                 new(1, 0, 0)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             }
         ),
         ["NotContiguousPallocChunkPages*2"] = new(
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 0x40] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 0x41] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 0x40] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 0x41] = []
             },
             scav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 0x40] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 0x41] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 0x40] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 0x41] = []
             },
             hits: slice<TestPageAllocAlloc_hit>([
                 new(runtime_internal_test_package.PallocChunkPages * 2, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 0x40, 0), 0),
@@ -462,23 +462,23 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
                 new(1, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 21), runtime_internal_test_package.PageSize)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, 22)]),
-                [runtime_internal_test_package.BaseChunkIdx + 0x40] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 0x41] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, 22)],
+                [runtime_internal_test_package.BaseChunkIdx + 0x40] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 0x41] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             }
         ),
         ["StraddlePallocChunkPages*5/4"] = new(
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages * 3 / 4)]),
-                [runtime_internal_test_package.BaseChunkIdx + 2] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages * 3 / 4)]),
-                [runtime_internal_test_package.BaseChunkIdx + 3] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, 0)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(0, runtime_internal_test_package.PallocChunkPages * 3 / 4)],
+                [runtime_internal_test_package.BaseChunkIdx + 2] = [new(0, runtime_internal_test_package.PallocChunkPages * 3 / 4)],
+                [runtime_internal_test_package.BaseChunkIdx + 3] = [new(0, 0)]
             },
             scav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(runtime_internal_test_package.PallocChunkPages / 2, runtime_internal_test_package.PallocChunkPages / 4 + 1)]),
-                [runtime_internal_test_package.BaseChunkIdx + 2] = slice<global::go.runtime_internal_test_package.BitRange>([new(runtime_internal_test_package.PallocChunkPages / 3, 1)]),
-                [runtime_internal_test_package.BaseChunkIdx + 3] = slice<global::go.runtime_internal_test_package.BitRange>([new(runtime_internal_test_package.PallocChunkPages * 2 / 3, 1)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(runtime_internal_test_package.PallocChunkPages / 2, runtime_internal_test_package.PallocChunkPages / 4 + 1)],
+                [runtime_internal_test_package.BaseChunkIdx + 2] = [new(runtime_internal_test_package.PallocChunkPages / 3, 1)],
+                [runtime_internal_test_package.BaseChunkIdx + 3] = [new(runtime_internal_test_package.PallocChunkPages * 2 / 3, 1)]
             },
             hits: slice<TestPageAllocAlloc_hit>([
                 new(runtime_internal_test_package.PallocChunkPages * 5 / 4, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 2, runtime_internal_test_package.PallocChunkPages * 3 / 4), runtime_internal_test_package.PageSize),
@@ -486,20 +486,20 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
                 new(1, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 1, runtime_internal_test_package.PallocChunkPages * 3 / 4), runtime_internal_test_package.PageSize)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages * 3 / 4 + 1)]),
-                [runtime_internal_test_package.BaseChunkIdx + 2] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 3] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(0, runtime_internal_test_package.PallocChunkPages * 3 / 4 + 1)],
+                [runtime_internal_test_package.BaseChunkIdx + 2] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 3] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             }
         )
     };
     if (runtime_internal_test_package.PallocChunkPages >= 512) {
         tests[allFree64ˢ] = new TestPageAllocAlloc_test(
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx] = []
             },
             scav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(21, 1), new(63, 65)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(21, 1), new(63, 65)]
             },
             hits: slice<TestPageAllocAlloc_hit>([
                 new(64, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), 2 * runtime_internal_test_package.PageSize),
@@ -507,15 +507,15 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
                 new(64, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 128), 0)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, 192)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, 192)]
             }
         );
         tests[allFree65ˢ] = new TestPageAllocAlloc_test(
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx] = []
             },
             scav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(129, 1)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(129, 1)]
             },
             hits: slice<TestPageAllocAlloc_hit>([
                 new(65, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), 0),
@@ -523,17 +523,17 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
                 new(65, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 130), 0)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, 195)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, 195)]
             }
         );
         tests[straddlePallocChunkPagesˢ] = new TestPageAllocAlloc_test(
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages / 2)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(runtime_internal_test_package.PallocChunkPages / 2, runtime_internal_test_package.PallocChunkPages / 2)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages / 2)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(runtime_internal_test_package.PallocChunkPages / 2, runtime_internal_test_package.PallocChunkPages / 2)]
             },
             scav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(3, 100)])
+                [runtime_internal_test_package.BaseChunkIdx] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(3, 100)]
             },
             hits: slice<TestPageAllocAlloc_hit>([
                 new(runtime_internal_test_package.PallocChunkPages, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, runtime_internal_test_package.PallocChunkPages / 2), 100 * runtime_internal_test_package.PageSize),
@@ -541,30 +541,30 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
                 new(1, 0, 0)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             }
         );
         tests[allFreePallocChunkPages7ˢ] = new TestPageAllocAlloc_test(
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 2] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 3] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 4] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 5] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 6] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 7] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 2] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 3] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 4] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 5] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 6] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 7] = []
             },
             scav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(50, 1)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(31, 1)]),
-                [runtime_internal_test_package.BaseChunkIdx + 2] = slice<global::go.runtime_internal_test_package.BitRange>([new(7, 1)]),
-                [runtime_internal_test_package.BaseChunkIdx + 3] = slice<global::go.runtime_internal_test_package.BitRange>([new(200, 1)]),
-                [runtime_internal_test_package.BaseChunkIdx + 4] = slice<global::go.runtime_internal_test_package.BitRange>([new(3, 1)]),
-                [runtime_internal_test_package.BaseChunkIdx + 5] = slice<global::go.runtime_internal_test_package.BitRange>([new(51, 1)]),
-                [runtime_internal_test_package.BaseChunkIdx + 6] = slice<global::go.runtime_internal_test_package.BitRange>([new(20, 1)]),
-                [runtime_internal_test_package.BaseChunkIdx + 7] = slice<global::go.runtime_internal_test_package.BitRange>([new(1, 1)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(50, 1)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(31, 1)],
+                [runtime_internal_test_package.BaseChunkIdx + 2] = [new(7, 1)],
+                [runtime_internal_test_package.BaseChunkIdx + 3] = [new(200, 1)],
+                [runtime_internal_test_package.BaseChunkIdx + 4] = [new(3, 1)],
+                [runtime_internal_test_package.BaseChunkIdx + 5] = [new(51, 1)],
+                [runtime_internal_test_package.BaseChunkIdx + 6] = [new(20, 1)],
+                [runtime_internal_test_package.BaseChunkIdx + 7] = [new(1, 1)]
             },
             hits: slice<TestPageAllocAlloc_hit>([
                 new(runtime_internal_test_package.PallocChunkPages * 7 + 5, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0), 8 * runtime_internal_test_package.PageSize),
@@ -572,26 +572,26 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
                 new(1, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 7, 5), 0)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 2] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 3] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 4] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 5] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 6] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 7] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, 6)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 2] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 3] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 4] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 5] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 6] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 7] = [new(0, 6)]
             }
         );
         tests[straddlePallocChunkPagesˢ2] = new TestPageAllocAlloc_test(
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages / 2)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 2] = slice<global::go.runtime_internal_test_package.BitRange>([new(runtime_internal_test_package.PallocChunkPages / 2, runtime_internal_test_package.PallocChunkPages / 2)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages / 2)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 2] = [new(runtime_internal_test_package.PallocChunkPages / 2, runtime_internal_test_package.PallocChunkPages / 2)]
             },
             scav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, 7)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(3, 5), new(121, 10)]),
-                [runtime_internal_test_package.BaseChunkIdx + 2] = slice<global::go.runtime_internal_test_package.BitRange>([new(runtime_internal_test_package.PallocChunkPages / 2 + 12, 2)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, 7)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(3, 5), new(121, 10)],
+                [runtime_internal_test_package.BaseChunkIdx + 2] = [new(runtime_internal_test_package.PallocChunkPages / 2 + 12, 2)]
             },
             hits: slice<TestPageAllocAlloc_hit>([
                 new(runtime_internal_test_package.PallocChunkPages * 2, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, runtime_internal_test_package.PallocChunkPages / 2), 15 * runtime_internal_test_package.PageSize),
@@ -599,9 +599,9 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
                 new(1, 0, 0)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 2] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 2] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             }
         );
     }
@@ -629,12 +629,12 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
         global::go.runtime_internal_test_package.ChunkIdx baseChunkIdx = (global::go.runtime_internal_test_package.ChunkIdx)(runtime_internal_test_package.BaseChunkIdx & ~(sumsPerPhysPage - 1));
         tests["DiscontiguousMappedSumBoundary"] = new TestPageAllocAlloc_test(
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [baseChunkIdx + sumsPerPhysPage - 1] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [baseChunkIdx + (nuint)chunkIdxBigJump] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [baseChunkIdx + sumsPerPhysPage - 1] = [],
+                [baseChunkIdx + (nuint)chunkIdxBigJump] = []
             },
             scav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [baseChunkIdx + sumsPerPhysPage - 1] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [baseChunkIdx + (nuint)chunkIdxBigJump] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [baseChunkIdx + sumsPerPhysPage - 1] = [],
+                [baseChunkIdx + (nuint)chunkIdxBigJump] = []
             },
             hits: slice<TestPageAllocAlloc_hit>([
                 new(runtime_internal_test_package.PallocChunkPages - 1, runtime_internal_test_package.PageBase(baseChunkIdx + sumsPerPhysPage - 1, 0), 0),
@@ -644,8 +644,8 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
                 new(1, 0, 0)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [baseChunkIdx + sumsPerPhysPage - 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [baseChunkIdx + (nuint)chunkIdxBigJump] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [baseChunkIdx + sumsPerPhysPage - 1] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [baseChunkIdx + (nuint)chunkIdxBigJump] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             }
         );
 
@@ -668,16 +668,16 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
                 // path in the page allocator will check if the searchAddr even gives us
                 // enough space to place the allocation in a chunk before accessing the
                 // summary.
-                [runtime_internal_test_package.BaseChunkIdx + (nuint)(chunkIdxBigJump * 0)] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages - 1)]),
-                [runtime_internal_test_package.BaseChunkIdx + (nuint)(chunkIdxBigJump * 1) + (nuint)chunkIdxSmallOffset] = slice<global::go.runtime_internal_test_package.BitRange>([
+                [runtime_internal_test_package.BaseChunkIdx + (nuint)(chunkIdxBigJump * 0)] = [new(0, runtime_internal_test_package.PallocChunkPages - 1)],
+                [runtime_internal_test_package.BaseChunkIdx + (nuint)(chunkIdxBigJump * 1) + (nuint)chunkIdxSmallOffset] = [
                     new(0, runtime_internal_test_package.PallocChunkPages - 10),
-                    new(runtime_internal_test_package.PallocChunkPages - 1, 1)]),
-                [runtime_internal_test_package.BaseChunkIdx + (nuint)(chunkIdxBigJump * 2)] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                    new(runtime_internal_test_package.PallocChunkPages - 1, 1)],
+                [runtime_internal_test_package.BaseChunkIdx + (nuint)(chunkIdxBigJump * 2)] = []
             },
             scav: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx + (nuint)(chunkIdxBigJump * 0)] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + (nuint)(chunkIdxBigJump * 1) + (nuint)chunkIdxSmallOffset] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + (nuint)(chunkIdxBigJump * 2)] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx + (nuint)(chunkIdxBigJump * 0)] = [],
+                [runtime_internal_test_package.BaseChunkIdx + (nuint)(chunkIdxBigJump * 1) + (nuint)chunkIdxSmallOffset] = [],
+                [runtime_internal_test_package.BaseChunkIdx + (nuint)(chunkIdxBigJump * 2)] = []
             },
             hits: slice<TestPageAllocAlloc_hit>([
                 // We first allocate into A to set the page allocator's searchAddr to the
@@ -699,9 +699,9 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
                 new(9, runtime_internal_test_package.PageBase(baseChunkIdx + (nuint)(chunkIdxBigJump * 1) + (nuint)chunkIdxSmallOffset, runtime_internal_test_package.PallocChunkPages - 10), 0)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx + (nuint)(chunkIdxBigJump * 0)] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + (nuint)(chunkIdxBigJump * 1) + (nuint)chunkIdxSmallOffset] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + (nuint)(chunkIdxBigJump * 2)] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, 100)])
+                [runtime_internal_test_package.BaseChunkIdx + (nuint)(chunkIdxBigJump * 0)] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + (nuint)(chunkIdxBigJump * 1) + (nuint)chunkIdxSmallOffset] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + (nuint)(chunkIdxBigJump * 2)] = [new(0, 100)]
             }
         );
     }
@@ -716,7 +716,7 @@ public static void TestPageAllocAlloc(ж<testing.T> t) {
                 var b = runtime_internal_test_package.NewPageAlloc(vʗ1.before, vʗ1.scav);
                 defer(runtime_internal_test_package.FreePageAlloc, b, ref ᒐ);
 
-                foreach (var (iter, i) in vʗ1.hits) {
+                foreach (var (iter, i) in range(vʗ1.hits)) {
                     var (a, s) = b.Alloc(i.npages);
                     if (a != i.@base) {
                         tΔ1.Fatalf("bad alloc #%d: want base 0x%x, got 0x%x", iter + 1, i.@base, a);
@@ -740,14 +740,14 @@ public static void TestPageAllocExhaust(ж<testing.T> t) {
     if (GOOS == "openbsd"u8 && testing.Short()) {
         t.Skip(skippingBecauseVirtualˢ);
     }
-    foreach (var (_, npages) in slice<uintptr>([1, 2, 3, 4, 5, 8, 16, 64, 1024, 1025, 2048, 2049])) {
+    foreach (var (_, npages) in range(slice<uintptr>([1, 2, 3, 4, 5, 8, 16, 64, 1024, 1025, 2048, 2049]))) {
         t.Run(fmt.Sprintf("%d"u8, npages), (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 // Construct b.
                 var bDesc = new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>();
                 for (global::go.runtime_internal_test_package.ChunkIdx i = (global::go.runtime_internal_test_package.ChunkIdx)0; i < 4; i++) {
-                    bDesc[runtime_internal_test_package.BaseChunkIdx + i] = slice<global::go.runtime_internal_test_package.BitRange>([]);
+                    bDesc[runtime_internal_test_package.BaseChunkIdx + i] = [];
                 }
                 var b = runtime_internal_test_package.NewPageAlloc(bDesc, default);
                 defer(runtime_internal_test_package.FreePageAlloc, b, ref ᒐ);
@@ -756,10 +756,8 @@ public static void TestPageAllocExhaust(ж<testing.T> t) {
                 nint nAlloc = (nint)(runtime_internal_test_package.PallocChunkPages * 4) / (nint)npages;
                 for (nint i = 0; i < nAlloc; i++) {
                     var addr = runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, (nuint)i * (nuint)npages);
-                    {
-                        var (a, _) = b.Alloc(npages); if (a != addr) {
-                            tΔ1.Fatalf("bad alloc #%d: want 0x%x, got 0x%x", i + 1, addr, a);
-                        }
+                    var (a, _) = b.Alloc(npages); if (a != addr) {
+                        tΔ1.Fatalf("bad alloc #%d: want 0x%x, got 0x%x", i + 1, addr, a);
                     }
                 }
 
@@ -775,13 +773,13 @@ public static void TestPageAllocExhaust(ж<testing.T> t) {
                 var wantDesc = new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>();
                 for (global::go.runtime_internal_test_package.ChunkIdx i = (global::go.runtime_internal_test_package.ChunkIdx)0; i < 4; i++) {
                     if (allocPages >= runtime_internal_test_package.PallocChunkPages) {
-                        wantDesc[runtime_internal_test_package.BaseChunkIdx + i] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]);
+                        wantDesc[runtime_internal_test_package.BaseChunkIdx + i] = [new(0, runtime_internal_test_package.PallocChunkPages)];
                         allocPages -= runtime_internal_test_package.PallocChunkPages;
                     } else if (allocPages > 0) {
-                        wantDesc[runtime_internal_test_package.BaseChunkIdx + i] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, (nuint)allocPages)]);
+                        wantDesc[runtime_internal_test_package.BaseChunkIdx + i] = [new(0, (nuint)allocPages)];
                         allocPages = 0;
                     } else {
-                        wantDesc[runtime_internal_test_package.BaseChunkIdx + i] = slice<global::go.runtime_internal_test_package.BitRange>([]);
+                        wantDesc[runtime_internal_test_package.BaseChunkIdx + i] = [];
                     }
                 }
                 var want = runtime_internal_test_package.NewPageAlloc(wantDesc, default);
@@ -817,7 +815,7 @@ public static void TestPageAllocFree(ж<testing.T> t) {
         ["Free1"] = new(
             npages: 1,
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             },
             frees: slice<uintptr>([
                 runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0),
@@ -827,15 +825,15 @@ public static void TestPageAllocFree(ж<testing.T> t) {
                 runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 4)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(5, runtime_internal_test_package.PallocChunkPages - 5)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(5, runtime_internal_test_package.PallocChunkPages - 5)]
             }
         ),
         ["ManyArena1"] = new(
             npages: 1,
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 2] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 2] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             },
             frees: slice<uintptr>([
                 runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, runtime_internal_test_package.PallocChunkPages / 2),
@@ -843,15 +841,15 @@ public static void TestPageAllocFree(ж<testing.T> t) {
                 runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx + 2, runtime_internal_test_package.PallocChunkPages - 1)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages / 2), new(runtime_internal_test_package.PallocChunkPages / 2 + 1, runtime_internal_test_package.PallocChunkPages / 2 - 1)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(1, runtime_internal_test_package.PallocChunkPages - 1)]),
-                [runtime_internal_test_package.BaseChunkIdx + 2] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages - 1)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages / 2), new(runtime_internal_test_package.PallocChunkPages / 2 + 1, runtime_internal_test_package.PallocChunkPages / 2 - 1)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(1, runtime_internal_test_package.PallocChunkPages - 1)],
+                [runtime_internal_test_package.BaseChunkIdx + 2] = [new(0, runtime_internal_test_package.PallocChunkPages - 1)]
             }
         ),
         ["Free2"] = new(
             npages: 2,
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             },
             frees: slice<uintptr>([
                 runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0),
@@ -861,27 +859,27 @@ public static void TestPageAllocFree(ж<testing.T> t) {
                 runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 8)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(10, runtime_internal_test_package.PallocChunkPages - 10)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(10, runtime_internal_test_package.PallocChunkPages - 10)]
             }
         ),
         ["Straddle2"] = new(
             npages: 2,
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(runtime_internal_test_package.PallocChunkPages - 1, 1)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, 1)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(runtime_internal_test_package.PallocChunkPages - 1, 1)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(0, 1)]
             },
             frees: slice<uintptr>([
                 runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, runtime_internal_test_package.PallocChunkPages - 1)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = []
             }
         ),
         ["Free5"] = new(
             npages: 5,
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             },
             frees: slice<uintptr>([
                 runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0),
@@ -891,103 +889,103 @@ public static void TestPageAllocFree(ж<testing.T> t) {
                 runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 20)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(25, runtime_internal_test_package.PallocChunkPages - 25)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(25, runtime_internal_test_package.PallocChunkPages - 25)]
             }
         ),
         ["FreePallocChunkPages"] = new(
             npages: runtime_internal_test_package.PallocChunkPages,
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             },
             frees: slice<uintptr>([
                 runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx] = []
             }
         ),
         ["StraddlePallocChunkPages"] = new(
             npages: runtime_internal_test_package.PallocChunkPages,
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(runtime_internal_test_package.PallocChunkPages / 2, runtime_internal_test_package.PallocChunkPages / 2)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages / 2)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(runtime_internal_test_package.PallocChunkPages / 2, runtime_internal_test_package.PallocChunkPages / 2)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(0, runtime_internal_test_package.PallocChunkPages / 2)]
             },
             frees: slice<uintptr>([
                 runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, runtime_internal_test_package.PallocChunkPages / 2)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = []
             }
         ),
         ["StraddlePallocChunkPages+1"] = new(
             npages: runtime_internal_test_package.PallocChunkPages + 1,
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             },
             frees: slice<uintptr>([
                 runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, runtime_internal_test_package.PallocChunkPages / 2)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages / 2)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(runtime_internal_test_package.PallocChunkPages / 2 + 1, runtime_internal_test_package.PallocChunkPages / 2 - 1)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages / 2)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(runtime_internal_test_package.PallocChunkPages / 2 + 1, runtime_internal_test_package.PallocChunkPages / 2 - 1)]
             }
         ),
         ["FreePallocChunkPages*2"] = new(
             npages: runtime_internal_test_package.PallocChunkPages * 2,
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             },
             frees: slice<uintptr>([
                 runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = []
             }
         ),
         ["StraddlePallocChunkPages*2"] = new(
             npages: runtime_internal_test_package.PallocChunkPages * 2,
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 2] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 2] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             },
             frees: slice<uintptr>([
                 runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, runtime_internal_test_package.PallocChunkPages / 2)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages / 2)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 2] = slice<global::go.runtime_internal_test_package.BitRange>([new(runtime_internal_test_package.PallocChunkPages / 2, runtime_internal_test_package.PallocChunkPages / 2)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages / 2)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 2] = [new(runtime_internal_test_package.PallocChunkPages / 2, runtime_internal_test_package.PallocChunkPages / 2)]
             }
         ),
         ["AllFreePallocChunkPages*7+5"] = new(
             npages: runtime_internal_test_package.PallocChunkPages * 7 + 5,
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 2] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 3] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 4] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 5] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 6] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
-                [runtime_internal_test_package.BaseChunkIdx + 7] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 2] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 3] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 4] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 5] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 6] = [new(0, runtime_internal_test_package.PallocChunkPages)],
+                [runtime_internal_test_package.BaseChunkIdx + 7] = [new(0, runtime_internal_test_package.PallocChunkPages)]
             },
             frees: slice<uintptr>([
                 runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 2] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 3] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 4] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 5] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 6] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 7] = slice<global::go.runtime_internal_test_package.BitRange>([new(5, runtime_internal_test_package.PallocChunkPages - 5)])
+                [runtime_internal_test_package.BaseChunkIdx] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 2] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 3] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 4] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 5] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 6] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 7] = [new(5, runtime_internal_test_package.PallocChunkPages - 5)]
             }
         )
     };
@@ -997,7 +995,7 @@ public static void TestPageAllocFree(ж<testing.T> t) {
         tests[free64ˢ] = new TestPageAllocFree_test(
             npages: 64,
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, PallocChunkPages)]
             },
             frees: slice<uintptr>([
                 runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0),
@@ -1005,13 +1003,13 @@ public static void TestPageAllocFree(ж<testing.T> t) {
                 runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 128)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(192, PallocChunkPages - 192)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(192, PallocChunkPages - 192)]
             }
         );
         tests[free65ˢ] = new TestPageAllocFree_test(
             npages: 65,
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(0, PallocChunkPages)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(0, PallocChunkPages)]
             },
             frees: slice<uintptr>([
                 runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0),
@@ -1019,7 +1017,7 @@ public static void TestPageAllocFree(ж<testing.T> t) {
                 runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 130)
             ]),
             after: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([new(195, PallocChunkPages - 195)])
+                [runtime_internal_test_package.BaseChunkIdx] = [new(195, PallocChunkPages - 195)]
             }
         );
     }
@@ -1034,7 +1032,7 @@ public static void TestPageAllocFree(ж<testing.T> t) {
                 var b = runtime_internal_test_package.NewPageAlloc(vʗ1.before, default);
                 defer(runtime_internal_test_package.FreePageAlloc, b, ref ᒐ);
 
-                foreach (var (_, addr) in vʗ1.frees) {
+                foreach (var (_, addr) in range(vʗ1.frees)) {
                     b.Free(addr, vʗ1.npages);
                 }
                 var want = runtime_internal_test_package.NewPageAlloc(vʗ1.after, default);
@@ -1067,14 +1065,14 @@ public static void TestPageAllocAllocAndFree(ж<testing.T> t) {
         // TODO(mknyszek): Write more tests here.
         ["Chunks8"] = new(
             init: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
-                [runtime_internal_test_package.BaseChunkIdx] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 1] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 2] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 3] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 4] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 5] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 6] = slice<global::go.runtime_internal_test_package.BitRange>([]),
-                [runtime_internal_test_package.BaseChunkIdx + 7] = slice<global::go.runtime_internal_test_package.BitRange>([])
+                [runtime_internal_test_package.BaseChunkIdx] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 1] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 2] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 3] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 4] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 5] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 6] = [],
+                [runtime_internal_test_package.BaseChunkIdx + 7] = []
             },
             hits: slice<TestPageAllocAllocAndFree_hit>([
                 new(true, runtime_internal_test_package.PallocChunkPages * 8, runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, 0)),
@@ -1100,12 +1098,10 @@ public static void TestPageAllocAllocAndFree(ж<testing.T> t) {
                 var b = runtime_internal_test_package.NewPageAlloc(vʗ1.init, default);
                 defer(runtime_internal_test_package.FreePageAlloc, b, ref ᒐ);
 
-                foreach (var (iter, i) in vʗ1.hits) {
+                foreach (var (iter, i) in range(vʗ1.hits)) {
                     if (i.alloc) {
-                        {
-                            var (a, _) = b.Alloc(i.npages); if (a != i.@base) {
-                                tΔ1.Fatalf("bad alloc #%d: want 0x%x, got 0x%x", iter + 1, i.@base, a);
-                            }
+                        var (a, _) = b.Alloc(i.npages); if (a != i.@base) {
+                            tΔ1.Fatalf("bad alloc #%d: want 0x%x, got 0x%x", iter + 1, i.@base, a);
                         }
                     } else {
                         b.Free(i.@base, i.npages);

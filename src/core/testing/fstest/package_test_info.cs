@@ -44,8 +44,8 @@ using static global::go.testing.fstest_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("testing/fstest/mapfs_test.go", "mapfs_test.cs", "ABkcgriAgsiCuIKSgoKUgpTqgoIACQiCpoKCgoIADwiCgtyAgraCgpSCgIKkgoKUgJKkgIK2goKUgJKkgIK2goKUgJKkgIK2goKUgJKkgII=", "30-37:1")]
-[assembly: GoPositionMap("testing/fstest/testfs_test.go", "testfs_test.cs", "ABokgpSClICCtoCCpICCtoCCAAgIgqaAguyCgoKU6oLchgAKBoLKgIIACA6CgpQADQaCgoKUlIKaioKUpoI=", "68-70:1")]
+[assembly: GoPositionMap("testing/fstest/mapfs_test.go", "mapfs_test.cs", "ABkcgriCuIK4gpKCgpSClOqCggAJCIKmgoKCggAPCIKC3IKmgoKUgoCCpIKClICSpICCtoKClICSpICCtoKClICSpICCtoKClICSpICC", "30-37:1")]
+[assembly: GoPositionMap("testing/fstest/testfs_test.go", "testfs_test.cs", "ABokgpSClICCtoCCpICCtoCCAAgIgqaC3IKCgpTqgtyGAAoGgsqC/oKClAANBoKCgpSUgpqKgpSmgg==", "68-70:1")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;

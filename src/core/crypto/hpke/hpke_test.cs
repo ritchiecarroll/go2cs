@@ -102,7 +102,7 @@ public static void TestRoundTrip(ж<testing.T> t) {
     var aeads = slice<global::go.crypto.hpke_package.AEAD>([AES128GCM(), AES256GCM(), ChaCha20Poly1305()
     ]);
 
-    foreach (var (_, kem) in kems) {
+    foreach (var (_, kem) in range(kems)) {
         var aeadsʗ1 = aeads;
         var kdfsʗ1 = kdfs;
         var kemʗ1 = kem;
@@ -136,14 +136,14 @@ public static void TestRoundTrip(ж<testing.T> t) {
                 }
             }
 
-            foreach (var (_, kdf) in kdfsʗ1) {
+            foreach (var (_, kdf) in range(kdfsʗ1)) {
                 var aeadsʗ2 = aeadsʗ1;
                 var kʗ1 = k;
                 var kdfʗ1 = kdf;
                 var kkʗ1 = kk;
                 var pkʗ1 = pk;
                 tΔ1.Run(fmt.Sprintf("KDF_%04x"u8, kdf.ID()), (ж<testing.T> tΔ2) => {
-                    foreach (var (_, Δaead) in aeadsʗ2) {
+                    foreach (var (_, Δaead) in range(aeadsʗ2)) {
                         var aeadʗ1 = Δaead;
                         var kʗ2 = kʗ1;
                         var kdfʗ2 = kdfʗ1;
@@ -340,13 +340,11 @@ internal static void testVectors(ж<testing.T> t, @string name) {
         t.Fatal(err);
     }
     ref var vectors = ref heap<slice<testVectors_vectors>>(out var Ꮡvectors);
-    {
-        var errΔ1 = json.Unmarshal(vectorsJSON, Ꮡvectors); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = json.Unmarshal(vectorsJSON, Ꮡvectors); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
 
-    foreach (var (_, vᴛ1) in vectors) {
+    foreach (var (_, vᴛ1) in range(vectors)) {
         ref var vector = ref heap(new testVectors_vectors(), out var Ꮡvector);
         vector = vᴛ1;
 
@@ -501,7 +499,7 @@ internal static void testVectors(ж<testing.T> t, @string name) {
                     tΔ1.Errorf("unexpected accumulated encryptions, got: %x, want %x", encryptions, expectedEncryptions);
                 }
             } else if (!AreEqual(Δaead, ExportOnly())) {
-                foreach (var (_, enc) in vectorʗ1.Encryptions) {
+                foreach (var (_, enc) in range(vectorʗ1.Encryptions)) {
                     var aad = mustDecodeHex(tΔ1, enc.Aad);
                     var plaintext = mustDecodeHex(tΔ1, enc.Pt);
                     var expectedCiphertext = mustDecodeHex(tΔ1, enc.Ct);
@@ -523,15 +521,11 @@ internal static void testVectors(ж<testing.T> t, @string name) {
                     }
                 }
             } else {
-                {
-                    var (_, errΔ6) = sender.Seal(default, default); if (errΔ6 == nil) {
-                        tΔ1.Error(expectedErrorFromSealˢ);
-                    }
+                var (_, errΔ6) = sender.Seal(default, default); if (errΔ6 == nil) {
+                    tΔ1.Error(expectedErrorFromSealˢ);
                 }
-                {
-                    var (_, errΔ7) = recipient.Open(default, default); if (errΔ7 == nil) {
-                        tΔ1.Error(expectedErrorFromOpenˢ);
-                    }
+                var (_, errΔ7) = recipient.Open(default, default); if (errΔ7 == nil) {
+                    tΔ1.Error(expectedErrorFromOpenˢ);
                 }
             }
 
@@ -559,7 +553,7 @@ internal static void testVectors(ж<testing.T> t, @string name) {
                     tΔ1.Errorf("unexpected accumulated exports, got: %x, want %x", exports, expectedExports);
                 }
             } else {
-                foreach (var (_, exp) in vectorʗ1.Exports) {
+                foreach (var (_, exp) in range(vectorʗ1.Exports)) {
                     @string context = (@string)mustDecodeHex(tΔ1, exp.Context);
                     var expectedValue = mustDecodeHex(tΔ1, exp.Value);
 

@@ -260,10 +260,8 @@ internal static (driver.Conn, error) Open(this ж<fakeDriver> Ꮡd, @string dsn)
     var fn = hookOpenErr.fn;
     ᏑhookOpenErr.of(hookOpenErrᴛ1.ᏑMutex).Unlock();
     if (fn != nil) {
-        {
-            var err = fn(); if (err != nil) {
-                return (default, err);
-            }
+        var err = fn(); if (err != nil) {
+            return (default, err);
         }
     }
     var parts = strings.Split(dsn, ";");
@@ -338,10 +336,8 @@ internal static error createTable(this ж<fakeDB> Ꮡdb, @string name, slice<@st
         if (db.tables == nil) {
             db.tables = new map<@string, ж<Δtable>>();
         }
-        {
-            var (_, exist) = db.tables[name, ꟷ]; if (exist) {
-                return fmt.Errorf("fakedb: table %q already exists"u8, name);
-            }
+        var (_, exist) = db.tables[name, ꟷ]; if (exist) {
+            return fmt.Errorf("fakedb: table %q already exists"u8, name);
         }
         if (len(columnNames) != len(columnTypes)) {
             return fmt.Errorf("fakedb: create table of %q len(names) != len(types): %d vs %d"u8,
@@ -376,10 +372,8 @@ internal static (@string typ, bool ok) columnType(this ж<fakeDB> Ꮡdb, @string
         if (!ok) {
             goto ᒐdone;
         }
-        {
-            nint i = slices.Index(t.colname, column); if (i != -1) {
-                (typ, ok) = (t.coltype[i], true); goto ᒐdone;
-            }
+        nint i = slices.Index(t.colname, column); if (i != -1) {
+            (typ, ok) = (t.coltype[i], true); goto ᒐdone;
         }
         (typ, ok) = ("", false);
     }
@@ -528,7 +522,7 @@ internal static error /*err*/ Close(this ж<fakeConn> Ꮡc) {
 }
 
 internal static error checkSubsetTypes(bool allowAny, slice<driver.NamedValue> args) {
-    foreach (var (_, arg) in args) {
+    foreach (var (_, arg) in range(args)) {
         switch (arg.Value.type()) {
         case int64 _:
         case float64 _:
@@ -602,7 +596,7 @@ internal static (ж<fakeStmt>, error) prepareSelect(this ref fakeConn c, ж<fake
     stmt.table = parts[0];
 
     stmt.colName = strings.Split(parts[1], ",");
-    foreach (var (n, colspec) in strings.Split(parts[2], ",")) {
+    foreach (var (n, colspec) in range(strings.Split(parts[2], ","))) {
         if (colspec == ""u8) {
             continue;
         }
@@ -638,7 +632,7 @@ internal static (ж<fakeStmt>, error) prepareCreate(this ref fakeConn c, ж<fake
         return (default, errf("invalid CREATE syntax with %d parts; want 2", len(parts)));
     }
     stmt.table = parts[0];
-    foreach (var (n, colspec) in strings.Split(parts[1], ",")) {
+    foreach (var (n, colspec) in range(strings.Split(parts[1], ","))) {
         var nameType = strings.Split(colspec, "=");
         if (len(nameType) != 2) {
             stmt.Close();
@@ -660,7 +654,7 @@ internal static (ж<fakeStmt>, error) prepareInsert(this ж<fakeConn> Ꮡc, cont
         return (default, errf("invalid INSERT syntax with %d parts; want 2", len(parts)));
     }
     stmt.table = parts[0];
-    foreach (var (n, colspec) in strings.Split(parts[1], ",")) {
+    foreach (var (n, colspec) in range(strings.Split(parts[1], ","))) {
         var nameVal = strings.Split(colspec, "=");
         if (len(nameVal) != 2) {
             stmt.Close();
@@ -705,7 +699,7 @@ internal static (ж<fakeStmt>, error) prepareInsert(this ж<fakeConn> Ꮡc, cont
                 if (err != nil) {
                     return (default, err);
                 }
-                (var cursor, err) = (substmt._<driver.StmtQueryContext>()).QueryContext(ctx, slice<driver.NamedValue>([]));
+                (var cursor, err) = (substmt._<driver.StmtQueryContext>()).QueryContext(ctx, []);
                 substmt.Close();
                 if (err != nil) {
                     return (default, err);
@@ -750,7 +744,7 @@ internal static (driver.Stmt, error) PrepareContext(this ж<fakeConn> Ꮡc, cont
     c.touchMem();
     ж<fakeStmt> firstStmt = default;
     ж<fakeStmt> prev = default;
-    foreach (var (_, vᴛ1) in strings.Split(query, ";")) {
+    foreach (var (_, vᴛ1) in range(strings.Split(query, ";"))) {
         ref var queryΔ1 = ref heap(new @string(), out var ᏑqueryΔ1);
         queryΔ1 = vᴛ1;
 
@@ -786,10 +780,8 @@ internal static (driver.Stmt, error) PrepareContext(this ж<fakeConn> Ꮡc, cont
 
         if (c.waiter != nil) {
             c.waiter(ctx);
-            {
-                var errΔ3 = ctx.Err(); if (errΔ3 != nil) {
-                    return (default, errΔ3);
-                }
+            var errΔ3 = ctx.Err(); if (errΔ3 != nil) {
+                return (default, errΔ3);
             }
         }
 
@@ -935,10 +927,8 @@ internal static (driver.Result, error) ExecContext(this ж<fakeStmt> Ꮡs, conte
         return (driver.ResultNoRows, default);
     }
     case {} when exprᴛ1 == "CREATE"u8: {
-        {
-            var errΔ2 = db.createTable(s.table, s.colName, s.colType); if (errΔ2 != nil) {
-                return (default, errΔ2);
-            }
+        var errΔ2 = db.createTable(s.table, s.colName, s.colType); if (errΔ2 != nil) {
+            return (default, errΔ2);
         }
         return (driver.ResultNoRows, default);
     }
@@ -954,7 +944,7 @@ internal static (driver.Result, error) ExecContext(this ж<fakeStmt> Ꮡs, conte
 }
 
 internal static driverꓸValue valueFromPlaceholderName(slice<driver.NamedValue> args, @string name) {
-    foreach (var i in range(args)) {
+    foreach (var i in range(len(args))) {
         if (args[i].Name == name) {
             return args[i].Value;
         }
@@ -990,28 +980,24 @@ internal static (driver.Result, error) execInsert(this ж<fakeStmt> Ꮡs, slice<
             cols = new slice<any>(len(t.colname));
         }
         nint argPos = 0;
-        foreach (var (n, colname) in s.colName) {
+        foreach (var (n, colname) in range(s.colName)) {
             nint colidx = t.columnIndex(colname);
             if (colidx == -1) {
                 return (default, fmt.Errorf("fakedb: column %q doesn't exist or dropped since prepared statement was created"u8, colname));
             }
             any val = default;
-            {
-                var (strvalue, okΔ1) = s.colValue[n]._<@string>(ᐧ); if (okΔ1 && strings.HasPrefix(strvalue, "?")) {
-                    if (strvalue == "?"u8) {
-                        val = args[argPos].Value;
-                    } else {
-                        // Assign value from argument placeholder name.
-                        {
-                            var v = valueFromPlaceholderName(args, strvalue[1..]); if (v != nil) {
-                                val = v;
-                            }
-                        }
-                    }
-                    argPos++;
+            var (strvalue, okΔ1) = s.colValue[n]._<@string>(ᐧ); if (okΔ1 && strings.HasPrefix(strvalue, "?")) {
+                if (strvalue == "?"u8) {
+                    val = args[argPos].Value;
                 } else {
-                    val = s.colValue[n];
+                    // Assign value from argument placeholder name.
+                    var v = valueFromPlaceholderName(args, strvalue[1..]); if (v != nil) {
+                        val = v;
+                    }
                 }
+                argPos++;
+            } else {
+                val = s.colValue[n];
             }
             if (doInsert) {
                 cols[colidx] = val;
@@ -1097,21 +1083,21 @@ internal static (driver.Rows, error) QueryContext(this ж<fakeStmt> Ꮡs, contex
                 db: s.c.db,
                 parentMem: new sql_internal_test_package.fakeConnжmemToucher(s.c),
                 posRow: -1,
-                rows: slice<slice<ж<row>>>([
-                    slice<ж<row>>([
+                rows: [
+                    [
                         Ꮡ(new row(
                             cols: slice<any>([
                                 txStatus
-                            ])))])
-                ]),
-                cols: slice<slice<@string>>([
-                    slice<@string>([
-                        "tx_status"])
-                ]),
-                colType: slice<slice<@string>>([
-                    slice<@string>([
-                        "string"])
-                ]),
+                            ])))]
+                ],
+                cols: [
+                    [
+                        "tx_status"]
+                ],
+                colType: [
+                    [
+                        "string"]
+                ],
                 errPos: -1
             ));
             return (new sql_internal_test_package.rowsCursorжRows(cursorΔ1), default);
@@ -1120,7 +1106,7 @@ internal static (driver.Rows, error) QueryContext(this ж<fakeStmt> Ꮡs, contex
         t.Ꮡmu.Lock();
 
         var colIdx = new map<@string, nint>(); // select column name -> column index in table
-        foreach (var (_, name) in s.colName) {
+        foreach (var (_, name) in range(s.colName)) {
             nint idx = t.columnIndex(name);
             if (idx == -1) {
                 t.Ꮡmu.Unlock();
@@ -1131,31 +1117,27 @@ internal static (driver.Rows, error) QueryContext(this ж<fakeStmt> Ꮡs, contex
 
         var mrows = slice<ж<row>>([]);
 rows:
-        foreach (var (_, trow) in t.rows) {
+        foreach (var (_, trow) in range(t.rows)) {
             // Process the where clause, skipping non-match rows. This is lazy
             // and just uses fmt.Sprintf("%v") to test equality. Good enough
             // for test code.
-            foreach (var (_, wcol) in s.whereCol) {
+            foreach (var (_, wcol) in range(s.whereCol)) {
                 nint idx = t.columnIndex(wcol.Column);
                 if (idx == -1) {
                     t.Ꮡmu.Unlock();
                     return (default, fmt.Errorf("fakedb: invalid where clause column %v"u8, wcol));
                 }
                 var tcol = trow.cols[idx];
-                {
-                    var (bs, okΔ1) = tcol._<slice<byte>>(ᐧ); if (okΔ1) {
-                        // lazy hack to avoid sprintf %v on a []byte
-                        tcol = (@string)bs;
-                    }
+                var (bs, okΔ1) = tcol._<slice<byte>>(ᐧ); if (okΔ1) {
+                    // lazy hack to avoid sprintf %v on a []byte
+                    tcol = (@string)bs;
                 }
                 any argValue = default;
                 if (wcol.Placeholder == "?"u8) {
                     argValue = args[wcol.Ordinal - 1].Value;
                 } else {
-                    {
-                        var v = valueFromPlaceholderName(args, wcol.Placeholder[1..]); if (v != nil) {
-                            argValue = v;
-                        }
+                    var v = valueFromPlaceholderName(args, wcol.Placeholder[1..]); if (v != nil) {
+                        argValue = v;
                     }
                 }
                 if (fmt.Sprintf("%v"u8, tcol) != fmt.Sprintf("%v"u8, argValue)) {
@@ -1163,7 +1145,7 @@ rows:
                 }
             }
             var mrow = Ꮡ(new row(cols: new slice<any>(len(s.colName))));
-            foreach (var (seli, name) in s.colName) {
+            foreach (var (seli, name) in range(s.colName)) {
                 mrow.cols[seli] = trow.cols[colIdx[name]];
             }
             mrows = append(mrows, mrow);
@@ -1172,7 +1154,7 @@ continue_rows:;
 break_rows:;
 
         slice<@string> colType = default;
-        foreach (var (_, column) in s.colName) {
+        foreach (var (_, column) in range(s.colName)) {
             colType = append(colType, t.coltype[t.columnIndex(column)]);
         }
 
@@ -1263,8 +1245,8 @@ internal static void touchMem(this ref rowsCursor rc) {
 }
 
 internal static void invalidateDriverOwnedMemory(this ref rowsCursor rc) {
-    foreach (var (_, buf) in rc.driverOwnedMemory) {
-        foreach (var i in range(buf)) {
+    foreach (var (_, buf) in range(rc.driverOwnedMemory)) {
+        foreach (var i in range(len(buf))) {
             buf[i] = (byte)'x';
         }
     }
@@ -1311,7 +1293,7 @@ internal static error Next(this ref rowsCursor rc, slice<driverꓸValue> dest) {
     }
     // Corrupt any previously returned bytes.
     rc.invalidateDriverOwnedMemory();
-    foreach (var (i, vᴛ1) in rc.rows[rc.posSet][rc.posRow].cols) {
+    foreach (var (i, vᴛ1) in range(rc.rows[rc.posSet][rc.posRow].cols)) {
         var v = vᴛ1;
 
         // TODO(bradfitz): convert to subset types? naah, I
@@ -1320,13 +1302,11 @@ internal static error Next(this ref rowsCursor rc, slice<driverꓸValue> dest) {
         // a wider range of types coming out of drivers. all
         // for ease of drivers, and to prevent drivers from
         // messing up conversions or doing them differently.
-        {
-            var (bs, ok) = v._<slice<byte>>(ᐧ); if (ok) {
-                // Clone []bytes and stash for later invalidation.
-                bs = bytes.Clone(bs);
-                rc.driverOwnedMemory = append(rc.driverOwnedMemory, bs);
-                v = bs;
-            }
+        var (bs, ok) = v._<slice<byte>>(ᐧ); if (ok) {
+            // Clone []bytes and stash for later invalidation.
+            bs = bytes.Clone(bs);
+            rc.driverOwnedMemory = append(rc.driverOwnedMemory, bs);
+            v = bs;
         }
         dest[i] = v;
     }

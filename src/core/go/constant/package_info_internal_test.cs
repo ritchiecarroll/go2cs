@@ -30,7 +30,7 @@ using static go.go.constant_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/constant/value_test.go", "value_test.cs", "ABEgAC1cADRqABEkgoKCgoKmgoKClICCgoKUpIK4goKCgqaCpoLOooKCpgCIAZICgoKClJLqgrSCtoKCppSCgoKCpoKCpoKCyoKCgoKUzOYALmKCgoKAgqSAggAFEKKCpqSkpKaAlIKCtoKApIK0tLSC2KYAGDLS6LTExKTSlIKmlKSCpAAJDgALGIKCyoKCgoLK7oKCgqaCpoCCtoCC2oKCAAIUgoKCgpSAgqSAgqSAguyCggALGIKCuIKCyoKCgoIACRSA1IIADBqCgoLcgpKCgoKCgoKClJSCAAkMAAkagoKAgg==", "695-709:1", "", "658=MakeBool/1/1/2,MakeString/1/1/3,MakeInt64/1/1/4,MakeFromLiteral/1/2/5,MakeFromLiteral/2/2/6,MakeFloat64/1/2/7,MakeFloat64/2/2/8,MakeImag/1/1/8;751=Kind/1/1/1")]
+[assembly: GoPositionMap("go/constant/value_test.go", "value_test.cs", "ABEgAC1cADRqABEkgoKCgoKmgoKClIKCgpSUgriCgoKCpoKmgs6igoKmAIgBkgKCgoKUkuqCtIK2goKmlIKCgoKmgoKmgoLKgoKCgpTM1gAuYoKCgoCCpICCAAUQooKmpKSkppSCgqaCpIK0tLSCyKYAGDLS6LTExKTSlIKmlKSCpAAJDgALGIKCyoKCgoLK7oKCgqaCpoKmgsqCggACFIKCgoKUgIKkgIKkgILsgoIACxiCgriCgsqCgoKCAAkUxIIADBqCgoLcgpKCgoKCgoKClJSCAAkMAAkagoKC", "695-709:1", "", "647=MakeBool/1/1/2,MakeString/1/1/3,MakeInt64/1/1/4,MakeFromLiteral/1/2/5,MakeFromLiteral/2/2/6,MakeFloat64/1/2/7,MakeFloat64/2/2/8,MakeImag/1/1/8;738=Kind/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

@@ -14,7 +14,7 @@ partial class rand_test_package {
 public static void TestText(ж<testing.T> t) {
     var set = new map<@string, EmptyStruct>(); // hold every string produced
     array<map<rune, nint>> indexSet = new(26); // hold every char produced at every position
-    foreach (var i in range(indexSet)) {
+    foreach (var i in range(len(indexSet))) {
         indexSet[i] = new map<rune, nint>();
     }
 
@@ -33,10 +33,8 @@ public static void TestText(ж<testing.T> t) {
                 t.Errorf("Text()[%d] = %v, outside of base32 alphabet", i, r);
             }
         }
-        {
-            var (_, ok) = set[s, ꟷ]; if (ok) {
-                t.Errorf("Text() = %s, duplicate of previously produced string", s);
-            }
+        var (_, ok) = set[s, ꟷ]; if (ok) {
+            t.Errorf("Text() = %s, duplicate of previously produced string", s);
         }
         set[s] = new EmptyStruct();
 
@@ -66,7 +64,7 @@ internal static void indexSetTable(ж<testing.T> t, /*[26]*/ array<map<rune, nin
         line += fmt.Sprintf(" %3s"u8, (@string)r);
     }
     t.Log(line);
-    foreach (var (i, set) in indexSet.ΔRangeSnapshot()) {
+    foreach (var (i, set) in range(indexSet.ΔRangeSnapshot())) {
         line = fmt.Sprintf("%2d:"u8, i);
         foreach (var (_, r) in alphabet) {
             line += fmt.Sprintf(" %3d"u8, set[r]);

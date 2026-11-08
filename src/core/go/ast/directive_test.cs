@@ -13,7 +13,7 @@ using static global::go.go.ast_package;
 partial class ast_internal_test_package {
 
 public static void TestParseDirectiveMatchesIsDirective(ж<testing.T> t) {
-    foreach (var (_, tt) in isDirectiveTests) {
+    foreach (var (_, tt) in range(isDirectiveTests)) {
         var want = tt.ok;
         if (strings.HasPrefix(tt.@in, externˢ) || strings.HasPrefix(tt.@in, exportˢ)) {
             // ParseDirective does NOT support extern or export, unlike
@@ -21,10 +21,8 @@ public static void TestParseDirectiveMatchesIsDirective(ж<testing.T> t) {
             want = false;
         }
 
-        {
-            var (_, ok) = ParseDirective(0, "//"u8 + tt.@in); if (ok != want) {
-                t.Errorf("ParseDirective(0, %q) = %v, want %v", "// " + tt.@in, ok, want);
-            }
+        var (_, ok) = ParseDirective(0, "//"u8 + tt.@in); if (ok != want) {
+            t.Errorf("ParseDirective(0, %q) = %v, want %v", "// " + tt.@in, ok, want);
         }
     }
 }
@@ -38,7 +36,7 @@ internal partial struct TestParseDirective_type /*dyn*/ {
 }
 
 public static void TestParseDirective(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestParseDirective_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestParseDirective_type>([
         new(
             name: "valid",
             @in: "//go:generate stringer -type Op -trimprefix Op",
@@ -127,7 +125,7 @@ public static void TestParseDirective(ж<testing.T> t) {
             ),
             wantOK: true
         )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestParseDirective_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -152,7 +150,7 @@ internal partial struct TestParseArgs_type /*dyn*/ {
 }
 
 public static void TestParseArgs(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in slice<TestParseArgs_type>([
+    foreach (var (_, vᴛ1) in range(slice<TestParseArgs_type>([
         new(
             name: "simple",
             @in: new Directive(
@@ -214,7 +212,7 @@ public static void TestParseArgs(ж<testing.T> t) {
                 Args: "",
                 ArgsPos: 10
             ),
-            want: slice<global::go.go.ast_package.DirectiveArg>([])
+            want: []
         ),
         new(
             name: "spaces",
@@ -247,7 +245,7 @@ public static void TestParseArgs(ж<testing.T> t) {
             ),
             wantErr: true
         )
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestParseArgs_type(), out var Ꮡtest);
         test = vᴛ1;
 

@@ -35,19 +35,15 @@ public static void TestSqDiff(ж<testing.T> t) {
         0xfffffffeU,
         0xffffffffU
     ]);
-    foreach (var (_, x) in testCases) {
-        foreach (var (_, y) in testCases) {
-            {
-                var (got, want) = (sqDiff(x, y), orig(x, y)); if (got != want) {
-                    t.Fatalf("sqDiff(%#x, %#x): got %d, want %d", x, y, got, want);
-                }
+    foreach (var (_, x) in range(testCases)) {
+        foreach (var (_, y) in range(testCases)) {
+            var (got, want) = (sqDiff(x, y), orig(x, y)); if (got != want) {
+                t.Fatalf("sqDiff(%#x, %#x): got %d, want %d", x, y, got, want);
             }
         }
     }
-    {
-        var err = quick.CheckEqual((orig).OrTypedNilFunc(), sqDiff, Ꮡ(new quick.Config(MaxCountScale: 10D))); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = quick.CheckEqual((orig).OrTypedNilFunc(), sqDiff, Ꮡ(new quick.Config(MaxCountScale: 10D))); if (err != nil) {
+        t.Fatal(err);
     }
 }
 

@@ -107,7 +107,7 @@ A conversion **between two named slice types** sharing an identical underlying (
 ```go
 f, err := MapFS(fsys).Open(name)          // fsys is shuffledFS
 ```
-<!-- source: src/core/testing/fstest/testfs_test.cs:75 -->
+<!-- source: src/core/testing/fstest/testfs_test.cs:73 -->
 ```csharp
 var (f, err) = ((global::go.testing.fstest_package.MapFS)fsys).Open(name);
 ```

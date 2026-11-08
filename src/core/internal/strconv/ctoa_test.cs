@@ -36,7 +36,7 @@ public static void TestFormatComplex(ж<testing.T> t) {
 
         // other cases are handled by FormatFloat tests
     ]);
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         @string @out = FormatComplex(test.c, test.fmt, test.prec, test.bitSize);
         if (@out != test.@out) {
             t.Fatalf("FormatComplex(%v, %q, %d, %d) = %q; want %q",
@@ -49,10 +49,8 @@ public static void TestFormatComplexInvalidBitSize(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r == nil) {
-                    t.Fatalf("expected panic due to invalid bitSize");
-                }
+            var r = recover(); if (r == nil) {
+                t.Fatalf("expected panic due to invalid bitSize");
             }
         }, ref ᒐ);
         _ = FormatComplex(1D + 2D.i(), (byte)'g', -1, 100);

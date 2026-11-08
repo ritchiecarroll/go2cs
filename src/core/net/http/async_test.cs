@@ -5,8 +5,6 @@ namespace go.net;
 
 using errors = errors_package;
 using synctest = global::go.@internal.synctest_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.@internal;
 using static global::go.net.http_internal_test_package;
 

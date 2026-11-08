@@ -42,14 +42,14 @@ partial class tls_internal_test_package {
 
 internal static slice<uint16> allCipherSuitesIncludingTLS13() {
     var s = allCipherSuites();
-    foreach (var (_, suite) in cipherSuitesTLS13) {
+    foreach (var (_, suite) in range(cipherSuitesTLS13)) {
         s = append(s, suite.id);
     }
     return s;
 }
 
 internal static bool isTLS13CipherSuite(uint16 id) {
-    foreach (var (_, suite) in cipherSuitesTLS13) {
+    foreach (var (_, suite) in range(cipherSuitesTLS13)) {
         if (id == suite.id) {
             return true;
         }
@@ -75,10 +75,8 @@ private static readonly @string testVˢᵇ = "-test.v"u8;
 
 internal static void rerunWithFIPS140Enforced(ж<testing.T> t) {
     t.Helper();
-    {
-        var errΔ1 = ifips140.Supported(); if (errΔ1 != nil) {
-            t.Skipf("test requires FIPS 140 mode: %v", errΔ1);
-        }
+    var errΔ1 = ifips140.Supported(); if (errΔ1 != nil) {
+        t.Skipf("test requires FIPS 140 mode: %v", errΔ1);
     }
     @string nameRegex = "^"u8 + regexp.QuoteMeta(t.Name()) + "$"u8;
     var cmd = testenv.Command(new tls_test_package.testing_TжTB(t), testenv.Executable(new tls_test_package.testing_TжTB(t)), "-test.run="u8 + nameRegex, testVˢ);
@@ -219,7 +217,7 @@ internal static bool isFIPSCurve(global::go.crypto.tls_package.CurveID id) {
 }
 
 internal static bool isECDSA(uint16 id) {
-    foreach (var (_, suite) in ΔcipherSuites) {
+    foreach (var (_, suite) in range(ΔcipherSuites)) {
         if (suite.id == id) {
             return (suite.flags & (nint)suiteECSign) == suiteECSign;
         }
@@ -253,12 +251,12 @@ public static void TestFIPSServerCipherSuites(ж<testing.T> t) {
     var serverConfig = testConfigFIPS140.Clone();
     serverConfig.Certificates = new slice<global::go.crypto.tls_package.Certificate>(1);
 
-    foreach (var (_, id) in allCipherSuitesIncludingTLS13()) {
+    foreach (var (_, id) in range(allCipherSuitesIncludingTLS13())) {
         if (isECDSA(id)) {
-            serverConfig.Certificates[0].ΔCertificate = slice<slice<byte>>([testECDSACertificate]);
+            serverConfig.Certificates[0].ΔCertificate = [testECDSACertificate];
             serverConfig.Certificates[0].PrivateKey = testECDSAPrivateKey.OrTypedNil();
         } else {
-            serverConfig.Certificates[0].ΔCertificate = slice<slice<byte>>([testRSACertificate]);
+            serverConfig.Certificates[0].ΔCertificate = [testRSACertificate];
             serverConfig.Certificates[0].PrivateKey = testRSAPrivateKey.OrTypedNil();
         }
         serverConfig.BuildNameToCertificate();
@@ -267,16 +265,16 @@ public static void TestFIPSServerCipherSuites(ж<testing.T> t) {
             var clientHello = Ꮡ(new clientHelloMsg(
                 vers: VersionTLS12,
                 random: new slice<byte>(32),
-                cipherSuites: slice<uint16>([id]),
-                compressionMethods: slice<uint8>([compressionNone]),
+                cipherSuites: [id],
+                compressionMethods: [compressionNone],
                 supportedCurves: defaultCurvePreferences(),
                 keyShares: slice<global::go.crypto.tls_package.keyShare>([generateKeyShare(CurveP256)]),
-                supportedPoints: slice<uint8>([pointFormatUncompressed]),
-                supportedVersions: slice<uint16>([VersionTLS12]),
+                supportedPoints: [pointFormatUncompressed],
+                supportedVersions: [VersionTLS12],
                 supportedSignatureAlgorithms: allowedSignatureAlgorithmsFIPS
             ));
             if (isTLS13CipherSuite(id)) {
-                clientHello.supportedVersions = slice<uint16>([VersionTLS13]);
+                clientHello.supportedVersions = [VersionTLS13];
             }
 
             var clientHelloʗ1 = clientHello;
@@ -307,19 +305,17 @@ public static void TestFIPSServerCurves(ж<testing.T> t) {
     serverConfig.CurvePreferences = default;
     serverConfig.BuildNameToCertificate();
 
-    foreach (var (_, curveid) in defaultCurvePreferences()) {
+    foreach (var (_, curveid) in range(defaultCurvePreferences())) {
         var serverConfigʗ1 = serverConfig;
         t.Run(fmt.Sprintf("curve=%v"u8, curveid), (ж<testing.T> tΔ1) => {
             var clientConfig = testConfigFIPS140.Clone();
-            clientConfig.CurvePreferences = slice<global::go.crypto.tls_package.CurveID>([curveid]);
+            clientConfig.CurvePreferences = [curveid];
 
             var clientConfigʗ1 = clientConfig;
             var serverConfigʗ2 = serverConfigʗ1;
             runWithFIPSDisabled(tΔ1, (ж<testing.T> tΔ2) => {
-                {
-                    var (_, _, err) = testHandshake(tΔ2, clientConfigʗ1, serverConfigʗ2); if (err != nil) {
-                        tΔ2.Fatalf("got error: %v, expected success", err);
-                    }
+                var (_, _, err) = testHandshake(tΔ2, clientConfigʗ1, serverConfigʗ2); if (err != nil) {
+                    tΔ2.Fatalf("got error: %v, expected success", err);
                 }
             });
 
@@ -378,30 +374,30 @@ public static void TestFIPSServerSignatureAndHash(ж<testing.T> t) {
         }, os.Getenv(godebugˢ), ref ᒐ);
         os.Setenv(godebugˢ, tlssha11ˢ);
 
-        foreach (var (_, sigHash) in defaultSupportedSignatureAlgorithms()) {
+        foreach (var (_, sigHash) in range(defaultSupportedSignatureAlgorithms())) {
             t.Run(fmt.Sprintf("%v"u8, sigHash), (ж<testing.T> tΔ1) => {
                 var serverConfig = testConfigFIPS140.Clone();
                 serverConfig.Certificates = new slice<global::go.crypto.tls_package.Certificate>(1);
 
-                testingOnlySupportedSignatureAlgorithms = slice<global::go.crypto.tls_package.SignatureScheme>([sigHash]);
+                testingOnlySupportedSignatureAlgorithms = [sigHash];
 
                 var (sigType, _, _) = typeAndHashFromSignatureScheme(sigHash);
                 switch (sigType) {
                 case signaturePKCS1v15 or signatureRSAPSS: {
-                    serverConfig.CipherSuites = slice<uint16>([TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256]);
-                    serverConfig.Certificates[0].ΔCertificate = slice<slice<byte>>([testRSAPSS2048Certificate]);
+                    serverConfig.CipherSuites = [TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256];
+                    serverConfig.Certificates[0].ΔCertificate = [testRSAPSS2048Certificate];
                     serverConfig.Certificates[0].PrivateKey = testRSAPSS2048PrivateKey.OrTypedNil();
                     break;
                 }
                 case signatureEd25519: {
-                    serverConfig.CipherSuites = slice<uint16>([TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]);
-                    serverConfig.Certificates[0].ΔCertificate = slice<slice<byte>>([testEd25519Certificate]);
+                    serverConfig.CipherSuites = [TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256];
+                    serverConfig.Certificates[0].ΔCertificate = [testEd25519Certificate];
                     serverConfig.Certificates[0].PrivateKey = testEd25519PrivateKey;
                     break;
                 }
                 case signatureECDSA: {
-                    serverConfig.CipherSuites = slice<uint16>([TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]);
-                    serverConfig.Certificates[0].ΔCertificate = slice<slice<byte>>([testECDSACertificate]);
+                    serverConfig.CipherSuites = [TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256];
+                    serverConfig.Certificates[0].ΔCertificate = [testECDSACertificate];
                     serverConfig.Certificates[0].PrivateKey = testECDSAPrivateKey.OrTypedNil();
                     break;
                 }}
@@ -482,22 +478,22 @@ internal static partial void testFIPSClientHello(ж<testing.T> t) {
         if (!isFIPSVersion(hello.vers)) {
             t.Errorf("client vers=%#x", hello.vers);
         }
-        foreach (var (_, v) in hello.supportedVersions) {
+        foreach (var (_, v) in range(hello.supportedVersions)) {
             if (!isFIPSVersion(v)) {
                 t.Errorf("client offered disallowed version %#x", v);
             }
         }
-        foreach (var (_, id) in hello.cipherSuites) {
+        foreach (var (_, id) in range(hello.cipherSuites)) {
             if (!isFIPSCipherSuite(id)) {
                 t.Errorf("client offered disallowed suite %v", CipherSuiteName(id));
             }
         }
-        foreach (var (_, id) in hello.supportedCurves) {
+        foreach (var (_, id) in range(hello.supportedCurves)) {
             if (!isFIPSCurve(id)) {
                 t.Errorf("client offered disallowed curve %v", id);
             }
         }
-        foreach (var (_, sigHash) in hello.supportedSignatureAlgorithms) {
+        foreach (var (_, sigHash) in range(hello.supportedSignatureAlgorithms)) {
             if (!isFIPSSignatureScheme(sigHash)) {
                 t.Errorf("client offered disallowed signature-and-hash %v", sigHash);
             }
@@ -571,7 +567,7 @@ public static void TestFIPSCertAlgs(ж<testing.T> t) {
         clientConfig.ServerName = exampleComˢ;
 
         var serverConfig = testConfigFIPS140.Clone();
-        serverConfig.Certificates = slice<global::go.crypto.tls_package.Certificate>([new(ΔCertificate: list, PrivateKey: key)]);
+        serverConfig.Certificates = [new(ΔCertificate: list, PrivateKey: key)];
         serverConfig.BuildNameToCertificate();
 
         var (clientErr, _) = fipsHandshake(tΔ1, clientConfig, serverConfig);
@@ -595,7 +591,7 @@ public static void TestFIPSCertAlgs(ж<testing.T> t) {
     void testClientCert(ж<testing.T> tΔ2, @string desc, ж<Δx509.CertPool> pool, any key, slice<slice<byte>> list, bool ok) {
         var clientConfig = testConfigFIPS140.Clone();
         clientConfig.ServerName = exampleComˢ;
-        clientConfig.Certificates = slice<global::go.crypto.tls_package.Certificate>([new(ΔCertificate: list, PrivateKey: key)]);
+        clientConfig.Certificates = [new(ΔCertificate: list, PrivateKey: key)];
 
         var serverConfig = testConfigFIPS140.Clone();
         serverConfig.ClientCAs = pool;
@@ -629,8 +625,8 @@ public static void TestFIPSCertAlgs(ж<testing.T> t) {
     var testClientCertʗ1 = testClientCert;
     var testServerCertʗ1 = testServerCert;
     runWithFIPSDisabled(t, (ж<testing.T> tΔ3) => {
-        testServerCertʗ1(tΔ3, basicˢ, r1poolʗ1, L2_Iʗ1.key, slice<slice<byte>>([L2_Iʗ1.der, I_R1ʗ1.der]), true);
-        testClientCertʗ1(tΔ3, basicClientCertˢ, r1poolʗ1, L2_Iʗ1.key, slice<slice<byte>>([L2_Iʗ1.der, I_R1ʗ1.der]), true);
+        testServerCertʗ1(tΔ3, basicˢ, r1poolʗ1, L2_Iʗ1.key, [L2_Iʗ1.der, I_R1ʗ1.der], true);
+        testClientCertʗ1(tΔ3, basicClientCertˢ, r1poolʗ1, L2_Iʗ1.key, [L2_Iʗ1.der, I_R1ʗ1.der], true);
     });
 
     var I_R1ʗ2 = I_R1;
@@ -639,8 +635,8 @@ public static void TestFIPSCertAlgs(ж<testing.T> t) {
     var testClientCertʗ2 = testClientCert;
     var testServerCertʗ2 = testServerCert;
     runWithFIPSEnabled(t, (ж<testing.T> tΔ4) => {
-        testServerCertʗ2(tΔ4, basicFipsˢ, r1poolʗ2, L2_Iʗ2.key, slice<slice<byte>>([L2_Iʗ2.der, I_R1ʗ2.der]), false);
-        testClientCertʗ2(tΔ4, basicFipsClientCertˢ, r1poolʗ2, L2_Iʗ2.key, slice<slice<byte>>([L2_Iʗ2.der, I_R1ʗ2.der]), false);
+        testServerCertʗ2(tΔ4, basicFipsˢ, r1poolʗ2, L2_Iʗ2.key, [L2_Iʗ2.der, I_R1ʗ2.der], false);
+        testClientCertʗ2(tΔ4, basicFipsClientCertˢ, r1poolʗ2, L2_Iʗ2.key, [L2_Iʗ2.der, I_R1ʗ2.der], false);
     });
 
     if (t.Failed()) {
@@ -762,26 +758,24 @@ internal static ж<fipsCertificate> fipsCert(ж<testing.T> t, @string name, any 
 
     ref var org = ref heap<@string>(name, out var Ꮡorg);
     ref var parentOrg = ref heap<@string>(""u8, out var ᏑparentOrg);
-    {
-        nint i = strings.Index(org, "_"); if (i >= 0) {
-            org = org.slice(0, i);
-            parentOrg = name.slice(i + 1);
-        }
+    nint i = strings.Index(org, "_"); if (i >= 0) {
+        org = org.slice(0, i);
+        parentOrg = name.slice(i + 1);
     }
     var tmpl = Ꮡ(new Δx509.Certificate(
         SerialNumber: big.NewInt(1),
         Subject: new pkix.Name(
-            Organization: slice<@string>([org])
+            Organization: [org]
         ),
         NotBefore: time_package.Unix(0, 0),
         NotAfter: time_package.Unix(0, 0),
 
         KeyUsage: (Δx509.KeyUsage)(Δx509.KeyUsageKeyEncipherment | Δx509.KeyUsageDigitalSignature),
-        ExtKeyUsage: slice<Δx509.ExtKeyUsage>([Δx509.ExtKeyUsageServerAuth, Δx509.ExtKeyUsageClientAuth]),
+        ExtKeyUsage: [Δx509.ExtKeyUsageServerAuth, Δx509.ExtKeyUsageClientAuth],
         BasicConstraintsValid: true
     ));
     if ((nint)(mode & ~(nint)(nint)fipsCertFIPSOK) == fipsCertLeaf) {
-        tmpl.DNSNames = slice<@string>(["example.com"]);
+        tmpl.DNSNames = ["example.com"];
     } else {
         tmpl.IsCA = true;
         tmpl.KeyUsage |= (Δx509.KeyUsage)(Δx509.KeyUsageCertSign);

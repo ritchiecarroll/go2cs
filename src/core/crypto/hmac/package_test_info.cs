@@ -37,7 +37,7 @@ using static global::go.crypto.hmac_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/hmac/hmac_test.go", "hmac_test.cs", "AB46AIEElAiCsoKAgqSAgqSCgoKCuIKCgsq4ggAJDIKCgIKkgoKC+KKClIKCgoKmsgANDoKCgpSClIKUgpSCuIKCgpSi6oKCpqKAkqSmooKCgoKCgoKCuKKCgoKCgoKCgriigoKCgoKC", "581-581:1;588-588:1;604-609:1;610-610:2;642-644:1;643-643:1.1")]
+[assembly: GoPositionMap("crypto/hmac/hmac_test.go", "hmac_test.cs", "AB46AIEElAiCsoKClIKUgoKCgriCgoLKuIIACQyCgoKUgoKC+KKClIKCgoKmsgANDoKCgpSClIKUgpSCuIKCgpSi6oKCpqKSlKaigoKCgoKCgoK4ooKCgoKCgoKCuKKCgoKCgoI=", "581-581:1;588-588:1;604-609:1;610-610:2;642-644:1;643-643:1.1", "", "", "", "611:21,612:13")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

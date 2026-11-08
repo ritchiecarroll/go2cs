@@ -84,7 +84,7 @@ private static readonly @string acvpWrapperˢᵇ = "ACVP_WRAPPER"u8;
 
 public static void TestMain(ж<testing.M> m) {
     if (noPAAPAI) {
-        foreach (var (_, p) in impl.Packages()) {
+        foreach (var (_, p) in range(impl.Packages())) {
             impl.Select(p, ""u8);
         }
     }
@@ -103,11 +103,9 @@ internal static void wrapperMain() {
         fmt.Fprintln(new os.FileжWriter(os.Stderr), acvpWrapperMustBeRunWithˢ);
         os.Exit(2);
     }
-    {
-        var err = processingLoop(new fipstest_internal_test_package.bufio_ReaderжReader(bufio.NewReader(new fipstest_internal_test_package.os_FileжReader(os.Stdin))), new os.FileжWriter(os.Stdout)); if (err != nil) {
-            fmt.Fprintf(new os.FileжWriter(os.Stderr), "processing error: %v\n"u8, err);
-            os.Exit(1);
-        }
+    var err = processingLoop(new fipstest_internal_test_package.bufio_ReaderжReader(bufio.NewReader(new fipstest_internal_test_package.os_FileжReader(os.Stdin))), new os.FileжWriter(os.Stdout)); if (err != nil) {
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "processing error: %v\n"u8, err);
+        os.Exit(1);
     }
 }
 
@@ -370,10 +368,8 @@ internal static error processingLoop(io.Reader reader, io.Writer writer) {
             return fmt.Errorf("unknown command: %q"u8, req.name);
         }
 
-        {
-            nint gotArgs = len(req.args); if (gotArgs != cmd.requiredArgs) {
-                return fmt.Errorf("command %q expected %d args, got %d"u8, req.name, cmd.requiredArgs, gotArgs);
-            }
+        nint gotArgs = len(req.args); if (gotArgs != cmd.requiredArgs) {
+            return fmt.Errorf("command %q expected %d args, got %d"u8, req.name, cmd.requiredArgs, gotArgs);
         }
 
         (var response, err) = cmd.handler(req.args);
@@ -381,10 +377,8 @@ internal static error processingLoop(io.Reader reader, io.Writer writer) {
             return fmt.Errorf("command %q failed: %w"u8, req.name, err);
         }
 
-        {
-            err = writeResponse(writer, response); if (err != nil) {
-                return fmt.Errorf("command %q response failed: %w"u8, req.name, err);
-            }
+        err = writeResponse(writer, response); if (err != nil) {
+            return fmt.Errorf("command %q response failed: %w"u8, req.name, err);
         }
     }
 
@@ -403,10 +397,8 @@ internal static (ж<request>, error) readRequest(io.Reader reader) {
     //   string. All numbers are 32-bit little-endian and values are
     //   concatenated in the order specified.
     ref var numArgs = ref heap(new uint32(), out var ᏑnumArgs);
-    {
-        var errΔ1 = binary.Read(reader, binary.LittleEndian, ᏑnumArgs); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var errΔ1 = binary.Read(reader, binary.LittleEndian, ᏑnumArgs); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     if (numArgs == 0) {
         return (default, errors.New(invalidRequestZeroArgsˢ));
@@ -427,20 +419,16 @@ internal static (slice<slice<byte>>, error) readArgs(io.Reader reader, uint32 re
     var argLengths = new slice<uint32>((nint)(requiredArgs));
     var args = new slice<slice<byte>>((nint)(requiredArgs));
 
-    foreach (var i in range(argLengths)) {
-        {
-            var err = binary.Read(reader, binary.LittleEndian, Ꮡ(argLengths, i)); if (err != nil) {
-                return (default, fmt.Errorf("invalid request: failed to read %d-th arg len: %w"u8, i, err));
-            }
+    foreach (var i in range(len(argLengths))) {
+        var err = binary.Read(reader, binary.LittleEndian, Ꮡ(argLengths, i)); if (err != nil) {
+            return (default, fmt.Errorf("invalid request: failed to read %d-th arg len: %w"u8, i, err));
         }
     }
 
-    foreach (var (i, length) in argLengths) {
+    foreach (var (i, length) in range(argLengths)) {
         var buf = new slice<byte>((nint)(length));
-        {
-            var (_, err) = io.ReadFull(reader, buf); if (err != nil) {
-                return (default, fmt.Errorf("invalid request: failed to read %d-th arg data: %w"u8, i, err));
-            }
+        var (_, err) = io.ReadFull(reader, buf); if (err != nil) {
+            return (default, fmt.Errorf("invalid request: failed to read %d-th arg data: %w"u8, i, err));
         }
         args[i] = buf;
     }
@@ -459,19 +447,15 @@ internal static error writeResponse(io.Writer writer, slice<slice<byte>> args) {
         }
     }
 
-    foreach (var (i, arg) in args) {
-        {
-            var err = binary.Write(writer, binary.LittleEndian, (uint32)len(arg)); if (err != nil) {
-                return fmt.Errorf("writing %d-th arg length: %w"u8, i, err);
-            }
+    foreach (var (i, arg) in range(args)) {
+        var err = binary.Write(writer, binary.LittleEndian, (uint32)len(arg)); if (err != nil) {
+            return fmt.Errorf("writing %d-th arg length: %w"u8, i, err);
         }
     }
 
-    foreach (var (i, b) in args) {
-        {
-            var (_, err) = writer.Write(b); if (err != nil) {
-                return fmt.Errorf("writing %d-th arg data: %w"u8, i, err);
-            }
+    foreach (var (i, b) in range(args)) {
+        var (_, err) = writer.Write(b); if (err != nil) {
+            return fmt.Errorf("writing %d-th arg data: %w"u8, i, err);
         }
     }
 
@@ -486,7 +470,7 @@ internal static command cmdGetConfig() {
     // instead of capabilitiesJson.
     var capabilities = slice<slice<byte>>([capabilitiesJson]);
     if (entropyTesting) {
-        capabilities = slice<slice<byte>>([entropyCapabilitiesJson]);
+        capabilities = [entropyCapabilitiesJson];
     }
 
         var capabilitiesʗ1 = capabilities;
@@ -537,10 +521,8 @@ internal static command cmdHashMct(hash.Hash h) {
             nint hSize = h.Size();
             var seed = args[0];
 
-            {
-                nint seedLen = len(seed); if (seedLen != hSize) {
-                    return (default, fmt.Errorf("invalid seed size: expected %d got %d"u8, hSize, seedLen));
-                }
+            nint seedLen = len(seed); if (seedLen != hSize) {
+                return (default, fmt.Errorf("invalid seed size: expected %d got %d"u8, hSize, seedLen));
             }
 
             var digest = new slice<byte>(0, hSize);
@@ -770,7 +752,7 @@ internal static command cmdCShakeMct(Func<slice<byte>, slice<byte>, ж<sha3.SHAK
                 // Customization = BitsToString(InnerMsg || Rightmost_Output_bits);
                 var msgWithBits = appendꓸꓸꓸ(innerMsg, rightmostOutput);
                 customization = new slice<byte>(len(msgWithBits));
-                foreach (var (iΔ1, b) in msgWithBits) {
+                foreach (var (iΔ1, b) in range(msgWithBits)) {
                     customization[iΔ1] = (byte)((b % 26) + 65);
                 }
             }
@@ -899,13 +881,11 @@ internal static command cmdEddsaKeyVerAft() {
             // Verify the point is on the curve. The higher-level ed25519 API does
             // this at signature verification time so we have to use the lower-level
             // edwards25519 package to do it here in absence of a signature to verify.
-            {
-                var (_, err) = @new<edwards25519.Point>().SetBytes(args[1]); if (err != nil) {
-                    return (slice<slice<byte>>([slice<byte>([0])]), default);
-                }
+            var (_, err) = @new<edwards25519.Point>().SetBytes(args[1]); if (err != nil) {
+                return (slice<slice<byte>>([[0]]), default);
             }
 
-            return (slice<slice<byte>>([slice<byte>([1])]), default);
+            return (slice<slice<byte>>([[1]]), default);
         }
     );
 }
@@ -975,10 +955,10 @@ internal static command cmdEddsaSigVerAft() {
             }
 
             if (err != nil) {
-                return (slice<slice<byte>>([slice<byte>([0])]), default);
+                return (slice<slice<byte>>([[0]]), default);
             }
 
-            return (slice<slice<byte>>([slice<byte>([1])]), default);
+            return (slice<slice<byte>>([[1]]), default);
         }
     );
 }
@@ -1043,10 +1023,10 @@ internal static command cmdEcdsaKeyVerAft() {
             var y = @new<bigꓸInt>().SetBytes(args[2]);
 
             if (curve.IsOnCurve(x, y)) {
-                return (slice<slice<byte>>([slice<byte>([1])]), default);
+                return (slice<slice<byte>>([[1]]), default);
             }
 
-            return (slice<slice<byte>>([slice<byte>([0])]), default);
+            return (slice<slice<byte>>([[0]]), default);
         }
     );
 }
@@ -1210,10 +1190,10 @@ internal static command cmdEcdsaSigVerAft() {
             }}
 
             if (err == nil) {
-                return (slice<slice<byte>>([slice<byte>([1])]), default);
+                return (slice<slice<byte>>([[1]]), default);
             }
 
-            return (slice<slice<byte>>([slice<byte>([0])]), default);
+            return (slice<slice<byte>>([[0]]), default);
         }
     );
 }
@@ -1597,10 +1577,10 @@ internal static command cmdAesGcmOpen(bool randNonce) {
 
             (var pt, err) = aesGCM.Open(default, nonce, ciphertext, additionalData);
             if (err != nil) {
-                return (slice<slice<byte>>([slice<byte>([0]), default]), default);
+                return (slice<slice<byte>>([[0], default]), default);
             }
 
-            return (slice<slice<byte>>([slice<byte>([1]), pt]), default);
+            return (slice<slice<byte>>([[1], pt]), default);
         }
     );
 }
@@ -1648,10 +1628,10 @@ internal static command cmdCmacAesVerifyAft() {
             var tag = cmac.MAC(message);
 
             if (subtle.ConstantTimeCompare(tag.slice(0, len(claimedMAC)), claimedMAC) != 1) {
-                return (slice<slice<byte>>([slice<byte>([0])]), default);
+                return (slice<slice<byte>>([[0]]), default);
             }
 
-            return (slice<slice<byte>>([slice<byte>([1])]), default);
+            return (slice<slice<byte>>([[1]]), default);
         }
     );
 }
@@ -1854,15 +1834,11 @@ internal static (slice<slice<byte>>, error) process(this acvpCtrDrbg args) {
     ж<array<byte>> reseedEntropy = default;
     if (withReseed) {
         // Ditto RE: entropy and additional data lengths for reseeding.
-        {
-            (reseedAd, err) = require48Bytes(args.reseedAd); if (err != nil) {
-                return (default, fmt.Errorf("reseed AD: %w"u8, err));
-            }
+        (reseedAd, err) = require48Bytes(args.reseedAd); if (err != nil) {
+            return (default, fmt.Errorf("reseed AD: %w"u8, err));
         }
-        {
-            (reseedEntropy, err) = require48Bytes(args.reseedEntropy); if (err != nil) {
-                return (default, fmt.Errorf("reseed entropy: %w"u8, err));
-            }
+        (reseedEntropy, err) = require48Bytes(args.reseedEntropy); if (err != nil) {
+            return (default, fmt.Errorf("reseed entropy: %w"u8, err));
         }
     }
 
@@ -1888,10 +1864,8 @@ internal static (slice<slice<byte>>, error) process(this acvpCtrDrbg args) {
 // Verify input is 48 byte slice, and cast it to a pointer to a fixed-size array
 // of 48 bytes, or return an error.
 internal static (ж<array<byte>>, error) require48Bytes(slice<byte> input) {
-    {
-        nint inputLen = len(input); if (inputLen != 48) {
-            return (ж<array<byte>>.NilBoxOfDims(48L), fmt.Errorf("invalid length: %d"u8, inputLen));
-        }
+    nint inputLen = len(input); if (inputLen != 48) {
+        return (ж<array<byte>>.NilBoxOfDims(48L), fmt.Errorf("invalid length: %d"u8, inputLen));
     }
     return (Ꮡ(array<byte>.Alias(input, 48)), default);
 }
@@ -2090,10 +2064,10 @@ internal static command cmdRsaSigVerAft(Func<hash.Hash> hashFunc, @string hashNa
                 err = rsa.VerifyPSS(pub, hashFunc(), digest, sig);
             }
             if (err != nil) {
-                return (slice<slice<byte>>([slice<byte>([0])]), default);
+                return (slice<slice<byte>>([[0]]), default);
             }
 
-            return (slice<slice<byte>>([slice<byte>([1])]), default);
+            return (slice<slice<byte>>([[1]]), default);
         }
     );
 }
@@ -2104,10 +2078,8 @@ internal static map<nint, ж<rsa.PrivateKey>> rsaKeyCache = new map<nint, ж<rsa
 // getRSAKey returns a cached RSA private key with the specified modulus bit-size
 // or generates one if necessary.
 internal static (ж<rsa.PrivateKey>, error) getRSAKey(nint bits) {
-    {
-        var (keyΔ1, exists) = rsaKeyCache[bits, ꟷ]; if (exists) {
-            return (keyΔ1, default);
-        }
+    var (keyΔ1, exists) = rsaKeyCache[bits, ꟷ]; if (exists) {
+        return (keyΔ1, default);
     }
 
     var (key, err) = rsa.GenerateKey(rand.Reader, bits);
@@ -2173,10 +2145,8 @@ internal static command cmdKtsIfcInitiatorAft(Func<hash.Hash> h) {
             ));
 
             var dkm = new slice<byte>((nint)(outputBytes));
-            {
-                var (_, errΔ1) = rand.Read(dkm); if (errΔ1 != nil) {
-                    return (default, fmt.Errorf("failed to generate random DKM: %v"u8, errΔ1));
-                }
+            var (_, errΔ1) = rand.Read(dkm); if (errΔ1 != nil) {
+                return (default, fmt.Errorf("failed to generate random DKM: %v"u8, errΔ1));
             }
 
             (var iutC, err) = rsa.EncryptOAEP(h(), h(), rand.Reader, pub, dkm, default);
@@ -2264,10 +2234,8 @@ public static void TestACVP(ж<testing.T> t) {
 
     // Stat the acvp test config file so the test will be re-run if it changes, invalidating cached results
     // from the old config.
-    {
-        var (_, errΔ1) = os.Stat(testConfigFile); if (errΔ1 != nil) {
-            t.Fatalf("failed to stat config file: %s", errΔ1);
-        }
+    var (_, errΔ1) = os.Stat(testConfigFile); if (errΔ1 != nil) {
+        t.Fatalf("failed to stat config file: %s", errΔ1);
     }
 
     // Fetch the BSSL module and use the JSON output to find the absolute path to the dir.
@@ -2282,10 +2250,8 @@ public static void TestACVP(ж<testing.T> t) {
         "-o", toolPath,
         utilFipstoolsAcvpˢ);
     cmd.Dir = bsslDir;
-    {
-        var (outΔ1, errΔ2) = cmd.CombinedOutput(); if (errΔ2 != nil) {
-            t.Fatalf("failed to build acvptool: %s\n%s", errΔ2, outΔ1);
-        }
+    var (outΔ1, errΔ2) = cmd.CombinedOutput(); if (errΔ2 != nil) {
+        t.Fatalf("failed to build acvptool: %s\n%s", errΔ2, outΔ1);
     }
 
     // Similarly, fetch the ACVP data module that has vectors/expected answers.
@@ -2333,10 +2299,8 @@ public static void TestTooFewArgs(ж<testing.T> t) {
     commands[testˢ] = new command(
         requiredArgs: 1,
         handler: (slice<slice<byte>> args) => {
-            {
-                nint gotArgs = len(args); if (gotArgs != 1) {
-                    return (default, fmt.Errorf("expected 1 args, got %d"u8, gotArgs));
-                }
+            nint gotArgs = len(args); if (gotArgs != 1) {
+                return (default, fmt.Errorf("expected 1 args, got %d"u8, gotArgs));
             }
             return (default, default);
         }
@@ -2361,10 +2325,8 @@ public static void TestTooManyArgs(ж<testing.T> t) {
     commands[testˢ] = new command(
         requiredArgs: 1,
         handler: (slice<slice<byte>> args) => {
-            {
-                nint gotArgs = len(args); if (gotArgs != 1) {
-                    return (default, fmt.Errorf("expected 1 args, got %d"u8, gotArgs));
-                }
+            nint gotArgs = len(args); if (gotArgs != 1) {
+                return (default, fmt.Errorf("expected 1 args, got %d"u8, gotArgs));
             }
             return (default, default);
         }
@@ -2372,7 +2334,7 @@ public static void TestTooManyArgs(ж<testing.T> t) {
 
     ref var output = ref heap(new bytes.Buffer(), out var Ꮡoutput);
     var err = processingLoop(mockRequest(
-        t, testˢ, slice<slice<byte>>([slice<byte>("one"u8), slice<byte>("two"u8)])), new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡoutput));
+        t, testˢ, [slice<byte>("one"u8), slice<byte>("two"u8)]), new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡoutput));
     if (err == nil) {
         t.Fatalf("expected error, got nil");
     }
@@ -2415,7 +2377,7 @@ public static void TestSha2256(ж<testing.T> t) {
     ]);
 
     ref var output = ref heap(new bytes.Buffer(), out var Ꮡoutput);
-    var err = processingLoop(mockRequest(t, sha2256ˢ, slice<slice<byte>>([testMessage])), new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡoutput));
+    var err = processingLoop(mockRequest(t, sha2256ˢ, [testMessage]), new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡoutput));
     if (err != nil) {
         t.Errorf("unexpected error: %v", err);
     }
@@ -2436,10 +2398,8 @@ internal static io.Reader mockRequest(ж<testing.T> t, @string cmd, slice<slice<
     var msgData = appendꓸꓸꓸ(slice<slice<byte>>([slice<byte>(cmd)]), args);
 
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    {
-        var err = writeResponse(new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡbuf), msgData); if (err != nil) {
-            t.Fatalf("writeResponse error: %v", err);
-        }
+    var err = writeResponse(new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡbuf), msgData); if (err != nil) {
+        t.Fatalf("writeResponse error: %v", err);
     }
 
     return new fipstest_internal_test_package.bytes_BufferжReader(Ꮡbuf);
@@ -2447,10 +2407,8 @@ internal static io.Reader mockRequest(ж<testing.T> t, @string cmd, slice<slice<
 
 internal static slice<slice<byte>> readResponse(ж<testing.T> t, io.Reader reader) {
     ref var numArgs = ref heap(new uint32(), out var ᏑnumArgs);
-    {
-        var errΔ1 = binary.Read(reader, binary.LittleEndian, ᏑnumArgs); if (errΔ1 != nil) {
-            t.Fatalf("failed to read response args count: %v", errΔ1);
-        }
+    var errΔ1 = binary.Read(reader, binary.LittleEndian, ᏑnumArgs); if (errΔ1 != nil) {
+        t.Fatalf("failed to read response args count: %v", errΔ1);
     }
 
     var (args, err) = readArgs(reader, numArgs);

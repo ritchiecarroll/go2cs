@@ -51,7 +51,7 @@ public static void TestPacketConn(ж<testing.T> t) {
             }}
         }
 
-        foreach (var (_, vᴛ1) in packetConnTests) {
+        foreach (var (_, vᴛ1) in range(packetConnTests)) {
             ref var tt = ref heap(new TestPacketConn_type(), out var Ꮡtt);
             tt = vᴛ1;
 
@@ -78,26 +78,18 @@ public static void TestPacketConn(ж<testing.T> t) {
             c2.LocalAddr();
             var rb2 = new slice<byte>(128);
 
-            {
-                var (_, errΔ1) = c1.WriteTo(wb, c2.LocalAddr()); if (errΔ1 != nil) {
-                    t.Fatal(errΔ1);
-                }
+            var (_, errΔ1) = c1.WriteTo(wb, c2.LocalAddr()); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
-            {
-                var (_, _, errΔ2) = c2.ReadFrom(rb2); if (errΔ2 != nil) {
-                    t.Fatal(errΔ2);
-                }
+            var (_, _, errΔ2) = c2.ReadFrom(rb2); if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
-            {
-                var (_, errΔ3) = c2.WriteTo(wb, c1.LocalAddr()); if (errΔ3 != nil) {
-                    t.Fatal(errΔ3);
-                }
+            var (_, errΔ3) = c2.WriteTo(wb, c1.LocalAddr()); if (errΔ3 != nil) {
+                t.Fatal(errΔ3);
             }
             var rb1 = new slice<byte>(128);
-            {
-                var (_, _, errΔ4) = c1.ReadFrom(rb1); if (errΔ4 != nil) {
-                    t.Fatal(errΔ4);
-                }
+            var (_, _, errΔ4) = c1.ReadFrom(rb1); if (errΔ4 != nil) {
+                t.Fatal(errΔ4);
             }
         }
     }
@@ -130,7 +122,7 @@ public static void TestConnAndPacketConn(ж<testing.T> t) {
             }}
         }
 
-        foreach (var (_, vᴛ1) in packetConnTests) {
+        foreach (var (_, vᴛ1) in range(packetConnTests)) {
             ref var tt = ref heap(new TestConnAndPacketConn_type(), out var Ꮡtt);
             tt = vᴛ1;
 
@@ -158,16 +150,12 @@ public static void TestConnAndPacketConn(ж<testing.T> t) {
             c2.LocalAddr();
             c2.RemoteAddr();
 
-            {
-                var (_, errΔ1) = c2.Write(wb); if (errΔ1 != nil) {
-                    t.Fatal(errΔ1);
-                }
+            var (_, errΔ1) = c2.Write(wb); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
             var rb1 = new slice<byte>(128);
-            {
-                var (_, _, errΔ2) = c1.ReadFrom(rb1); if (errΔ2 != nil) {
-                    t.Fatal(errΔ2);
-                }
+            var (_, _, errΔ2) = c1.ReadFrom(rb1); if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
             global::go.net_package.ΔAddr dst = default;
             var exprᴛ2 = tt.net;
@@ -180,16 +168,12 @@ public static void TestConnAndPacketConn(ж<testing.T> t) {
                 dst = c2.LocalAddr();
                 break;
             }}
-            {
-                var (_, errΔ3) = c1.WriteTo(wb, dst); if (errΔ3 != nil) {
-                    t.Fatal(errΔ3);
-                }
+            var (_, errΔ3) = c1.WriteTo(wb, dst); if (errΔ3 != nil) {
+                t.Fatal(errΔ3);
             }
             var rb2 = new slice<byte>(128);
-            {
-                var (_, errΔ4) = c2.Read(rb2); if (errΔ4 != nil) {
-                    t.Fatal(errΔ4);
-                }
+            var (_, errΔ4) = c2.Read(rb2); if (errΔ4 != nil) {
+                t.Fatal(errΔ4);
             }
         }
     }

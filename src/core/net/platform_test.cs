@@ -79,18 +79,16 @@ internal static bool testableNetwork(@string network) {
 // testableAddress reports whether address of network is testable on
 // the current platform configuration.
 internal static bool testableAddress(@string network, @string address) {
-    {
-        var (net, _, _) = strings.Cut(network, ":");
-        var exprᴛ1 = net;
-        switch (ᐧ) {
-        case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8: {
-            // Abstract unix domain sockets, a Linux-ism.
-            if (address[0] == '@' && Δruntime.GOOS != "linux"u8) {
-                return false;
-            }
-            break;
-        }}
-    }
+    var (net, _, _) = strings.Cut(network, ":");
+    var exprᴛ1 = net;
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8: {
+        // Abstract unix domain sockets, a Linux-ism.
+        if (address[0] == '@' && Δruntime.GOOS != "linux"u8) {
+            return false;
+        }
+        break;
+    }}
     return true;
 }
 
@@ -103,29 +101,27 @@ internal static bool testableListenArgs(@string network, @string address, @strin
 
     error err = default;
     global::go.net_package.ΔAddr addr = default;
-    {
-        var (net, _, _) = strings.Cut(network, ":");
-        var exprᴛ1 = net;
-        switch (ᐧ) {
-        case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
-            var (ᴛ1, ᴛ2) = ResolveTCPAddr(tcpˢ, address);
-            (addr, err) = (new global::go.net_package.TCPAddrжΔAddr(ᴛ1), ᴛ2);
-            break;
-        }
-        case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
-            var (ᴛ1, ᴛ2) = ResolveUDPAddr(udpˢ, address);
-            (addr, err) = (new global::go.net_package.UDPAddrжΔAddr(ᴛ1), ᴛ2);
-            break;
-        }
-        case {} when exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8: {
-            var (ᴛ1, ᴛ2) = ResolveIPAddr("ip", address);
-            (addr, err) = (new global::go.net_package.IPAddrжΔAddr(ᴛ1), ᴛ2);
-            break;
-        }
-        default: {
-            return true;
-        }}
+    var (net, _, _) = strings.Cut(network, ":");
+    var exprᴛ1 = net;
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8: {
+        var (ᴛ1, ᴛ2) = ResolveTCPAddr(tcpˢ, address);
+        (addr, err) = (new global::go.net_package.TCPAddrжΔAddr(ᴛ1), ᴛ2);
+        break;
     }
+    case {} when exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
+        var (ᴛ1, ᴛ2) = ResolveUDPAddr(udpˢ, address);
+        (addr, err) = (new global::go.net_package.UDPAddrжΔAddr(ᴛ1), ᴛ2);
+        break;
+    }
+    case {} when exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8: {
+        var (ᴛ1, ᴛ2) = ResolveIPAddr("ip", address);
+        (addr, err) = (new global::go.net_package.IPAddrжΔAddr(ᴛ1), ᴛ2);
+        break;
+    }
+    default: {
+        return true;
+    }}
     if (err != nil) {
         return false;
     }

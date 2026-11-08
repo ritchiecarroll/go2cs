@@ -50,9 +50,9 @@ using static global::go.debug.dwarf_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("debug/dwarf/entry_test.go", "entry_test.cs", "ABcgyoKCgoKUgpiigoCCpIIAFBaCAAcQlMqUypS45oIACBLmggAIEqaCgoKCgoKClIKUpoKCgpSCABAKggAjVoKClIKCgoKmgqaAgqSCgoKUgpSmggALCrgAL2qCgoKmgoKUggALCriCgpSCgoKCgoKCgpSClIKUgoKUuIKCgtyCAGDCAYKCAAcQgoKCgpSC3ILiuIKClIL4soKClIKCpoKCgoKCgpSClIKUgoKAgqSAgqSClILKgoKCgpSCuIKC", "294-322:1")]
-[assembly: GoPositionMap("debug/dwarf/line_test.go", "line_test.cs", "AA8egoKW7gASJpSm3IKCpgASJsoACgbcgoKCgpSCgqYAEiaU5twAECKUppSCAA4elAAOBoKmgoKUgoKokoKCgpSCgoKUlLiCgIKCgsiCgoKCgpSCgoLKgIKkgoKAgqSmgoKAgoKCAA4MhJKCgoKCgoKmgoLcgqaCgoKCpoKCgoKClKaClLiCgoKCgoKUyoKCgoKCuIKClIKClIKUlOaCgoKClLiCgoKCpoK4gpSCgpSCgoKCpqaCggAIEgAgQoKCgoLKiPKmlIKCgpSCgoKUgoKUgg==", "95-100:1")]
-[assembly: GoPositionMap("debug/dwarf/type_test.go", "type_test.cs", "ABIiABgyyoKCgqaCgpSmgoKCpoKClKaCgoKmgoKUAAgGggAIBoLmguaCgoKCgoKUgpSCgoKUgoKAgpS2gIKClIKCyIK4goIACAoACA6CgoKCgoKUgpSU2pKCgoLKAAkMyoKCgoKCgpSClIKCgoKCgpSCgoKUgoKUhKaCgoKCpoKCysrKgoKmgoLmgoKmgoLmgoKmgoKCgoKUgqaCgoKmlIKCgpSClKaUgpSCgoK4gsoABxoACQKC", "290-299:1", "", "255=Size/1/1/1,FormatInt/1/1/1")]
+[assembly: GoPositionMap("debug/dwarf/entry_test.go", "entry_test.cs", "ABcgyoKCgoKUgpiigoKUggAUFoIABxCUypTKlLjmggAIEuaCAAgSpoKCgoKCgoKUgpSmgoKClIIAEAqCACNWgoKUgoKCgqaCpoKUgoKClIKUpoIACwq4AC9qgoKCpoKClIIACwq4goKUgoKCgoKCgoKUgpSClIKClLiCgoLcggBgwgGCggAHEIKCgoKUgtyC4riCgpSC+LKCgpSCgqaCgoKCgoKUgpSClIKCgpSClIKUgsqCgoKClIK4goI=", "294-322:1")]
+[assembly: GoPositionMap("debug/dwarf/line_test.go", "line_test.cs", "AA8egoKW7gASJpSm3IKCpgASJsoACgbcgoKCgpSCgqYAEiaU5twAECKUppSCAA4elAAOBoKmgoKUgoKokoKCgpSCgoKUlLiCgoKCuIKCgoKClIKCgsqClIKCgpSmgoKCgoIADQyEkoKCgoKCgqaCgtyCpoKCgoKmgoKCgoKUpoKUuIKCgoKCgpTKgoKCgoK4goKUgoKUgpSU5oKCgoKUuIKCgoKmgriClIKClIKCgoKmpoKCAAgSACBCgoKCgsqI8qaUgoKClIKCgpSCgpSC", "95-100:1")]
+[assembly: GoPositionMap("debug/dwarf/type_test.go", "type_test.cs", "ABIiABgyyoKCgqaCgpSmgoKCpoKClKaCgoKmgoKUAAgGggAIBoLmguaCgoKCgoKUgpSCgoKUgoKClKaCgpSCgriCuIKCAAgKAAgOgoKCgoKClIKUlNqSgoKCygAJDMqCgoKCgoKUgpSCgoKCgoKUgoKClIKClISmgoKCgqaCgsrKyoKCpoKC5oKCpoKC5oKCpoKCgoKClIKmgoKCppSCgoKUgpSmlIKUgoKCuILKAAcaAAkCgg==", "290-299:1", "", "251=Size/1/1/1,FormatInt/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;

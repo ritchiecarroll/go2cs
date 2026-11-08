@@ -39,8 +39,8 @@ using static global::go.go.@internal.gccgoimporter_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("go/internal/gccgoimporter/gccgoinstallation_test.go", "gccgoinstallation_test.cs", "ABIiAIcBigKUgoKmgoKClLiCgoKCuIKCgsoAChA=")]
-[assembly: GoPositionMap("go/internal/gccgoimporter/importer_test.go", "importer_test.cs", "AB4wooKCgqaCgoKCpoKCpoKCgsqCgpSCgoK4ggAMGgAZNIKCgpSyAAkOsoKClICCpAAIBpSCgqaCgoKUgoKUgoKUgoKUlIKClIKClLKUgqaCgIKkgpSCgoKCppSCgpSCgoKCppSAgqSAgg==")]
-[assembly: GoPositionMap("go/internal/gccgoimporter/parser_test.go", "parser_test.cs", "ABQeABUogoKCgoKCgoKUgriAgraCgqaCgoK4goKCgpSCgg==")]
+[assembly: GoPositionMap("go/internal/gccgoimporter/importer_test.go", "importer_test.cs", "AB4wooKCgqaCgoKCpoKCpoKCgsqCgpSCgoK4ggAMGgAZNIKCgpSyAAkOsoKClIKUAAgGlIKCpoKCgpSCgpSCgpSCgpSUgoKUgoKUspSCpoKClIKUgoKCgqaUgoKUgoKCgqaUgpSC")]
+[assembly: GoPositionMap("go/internal/gccgoimporter/parser_test.go", "parser_test.cs", "ABQeABUogoKCgoKCgoKUgriCpoKCpoKCgriCgoKClIKC")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;

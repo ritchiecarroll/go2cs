@@ -5,8 +5,6 @@
 namespace go.@internal.runtime.gc;
 
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 
 partial class scan_test_package {
 

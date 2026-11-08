@@ -6,8 +6,6 @@ namespace go.math;
 using static go.math.rand_package;
 using sync = sync_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.math.rand_internal_test_package;
 
 partial class rand_test_package {
@@ -39,11 +37,11 @@ public static partial void TestConcurrent(ж<testing.T> t) {
                         seed += (int64)NormFloat64();
                         seed += (int64)Uint32();
                         seed += (int64)Uint64();
-                        foreach (var (_, p) in Perm(10)) {
+                        foreach (var (_, p) in range(Perm(10))) {
                             seed += (int64)p;
                         }
                         Read(buf);
-                        foreach (var (_, b) in buf) {
+                        foreach (var (_, b) in range(buf)) {
                             seed += (int64)b;
                         }
                         Seed((int64)(iΔ1 * j) * seed);

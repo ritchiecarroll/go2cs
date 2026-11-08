@@ -12,8 +12,6 @@ using io = io_package;
 using rand = go.math.rand_package;
 using testing = testing_package;
 using time = time_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.crypto;
 using go.crypto.@internal;
 using go.math;
@@ -27,7 +25,7 @@ private static readonly @string desˢᵇ = "DES"u8;
 // Test CBC Blockmode against the general cipher.BlockMode interface tester
 public static void TestCBCBlockMode(ж<testing.T> t) {
     cryptotest.TestAllImplementations(t, aesˢ, (ж<testing.T> tΔ1) => {
-        foreach (var (_, keylen) in slice<nint>([128, 192, 256])) {
+        foreach (var (_, keylen) in range(slice<nint>([128, 192, 256]))) {
             tΔ1.Run(fmt.Sprintf("AES-%d"u8, keylen), (ж<testing.T> tΔ2) => {
                 var rng = newRandReader(tΔ2);
 

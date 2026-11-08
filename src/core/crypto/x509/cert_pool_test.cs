@@ -16,8 +16,8 @@ internal partial struct TestCertPoolEqual_tests /*dyn*/ {
 }
 
 public static void TestCertPoolEqual(ж<testing.T> t) {
-    var tc = Ꮡ(new Certificate(Raw: slice<byte>([1, 2, 3]), RawSubject: slice<byte>([2])));
-    var otherTC = Ꮡ(new Certificate(Raw: slice<byte>([9, 8, 7]), RawSubject: slice<byte>([8])));
+    var tc = Ꮡ(new Certificate(Raw: [1, 2, 3], RawSubject: [2]));
+    var otherTC = Ꮡ(new Certificate(Raw: [9, 8, 7], RawSubject: [8]));
 
     var emptyPool = NewCertPool();
     var nonSystemPopulated = NewCertPool();
@@ -101,7 +101,7 @@ public static void TestCertPoolEqual(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tcΔ1 = ref heap(new TestCertPoolEqual_tests(), out var ᏑtcΔ1);
         tcΔ1 = vᴛ1;
 

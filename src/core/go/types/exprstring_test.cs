@@ -120,16 +120,14 @@ internal static slice<testEntry> testExprs = slice<testEntry>([
 ]);
 
 public static void TestExprString(ж<testing.T> t) {
-    foreach (var (_, test) in testExprs) {
+    foreach (var (_, test) in range(testExprs)) {
         var (x, err) = parser.ParseExpr(test.src);
         if (err != nil) {
             t.Errorf("%s: %s", test.src, err);
             continue;
         }
-        {
-            @string got = ExprString(x); if (got != test.str) {
-                t.Errorf("%s: got %s, want %s", test.src, got, test.str);
-            }
+        @string got = ExprString(x); if (got != test.str) {
+            t.Errorf("%s: got %s, want %s", test.src, got, test.str);
         }
     }
 }

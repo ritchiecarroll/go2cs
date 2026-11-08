@@ -190,10 +190,8 @@ internal static void testTempDir(ж<testing.T> t) {
     }
 
     @string glob = filepath.Join(dir, txtˢ);
-    {
-        var (_, errΔ2) = filepath.Glob(glob); if (errΔ2 != nil) {
-            t.Error(errΔ2);
-        }
+    var (_, errΔ2) = filepath.Glob(glob); if (errΔ2 != nil) {
+        t.Error(errΔ2);
     }
 }
 
@@ -213,10 +211,8 @@ public static void TestTempDirGOTMPDIR(ж<testing.T> t) {
         // set GOTMPDIR to that directory,
         // and then verify that t.TempDir creates a directory in GOTMPDIR.
         @string customTmpDir = filepath.Join(Δos.TempDir(), customGotmpdirTestˢ);
-        {
-            var errΔ1 = Δos.MkdirAll(customTmpDir, 511); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = Δos.MkdirAll(customTmpDir, 511); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         defer(Δos.RemoveAll, customTmpDir, ref ᒐ);
 
@@ -281,10 +277,8 @@ public static void TestSetenv(ж<testing.T> t) {
         test = vᴛ1;
 
         if (test.initialValueExists) {
-            {
-                var err = Δos.Setenv(test.key, test.initialValue); if (err != nil) {
-                    t.Fatalf("unable to set env: got %v", err);
-                }
+            var err = Δos.Setenv(test.key, test.initialValue); if (err != nil) {
+                t.Fatalf("unable to set env: got %v", err);
             }
         } else {
             Δos.Unsetenv(test.key);
@@ -314,10 +308,8 @@ internal static void expectParallelConflict(ж<testing.T> t) {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
 
         @string want = testing.ParallelConflict;
-        {
-            var got = recover(calledByDefer); if (!AreEqual(got, want)) {
-                t.Fatalf("expected panic; got %#v want %q", got, want);
-            }
+        var got = recover(calledByDefer); if (!AreEqual(got, want)) {
+            t.Fatalf("expected panic; got %#v want %q", got, want);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -519,10 +511,8 @@ public static void TestChdir(ж<testing.T> t) {
                     break;
                 }
                 default: {
-                    {
-                        @string pwd = Δos.Getenv(pwdˢ); if (pwd != tcʗ1.pwd) {
-                            tΔ1.Fatalf("PWD: got %q, want %q", pwd, tcʗ1.pwd);
-                        }
+                    @string pwd = Δos.Getenv(pwdˢ); if (pwd != tcʗ1.pwd) {
+                        tΔ1.Fatalf("PWD: got %q, want %q", pwd, tcʗ1.pwd);
                     }
                     break;
                 }}
@@ -598,10 +588,8 @@ public static void TestTesting(ж<testing.T> t) {
     testenv.MustHaveGoRun(new testing_TжTB(t));
 
     @string fn = filepath.Join(t.TempDir(), xGoˢ);
-    {
-        var errΔ1 = Δos.WriteFile(fn, slice<byte>(testingProg), 420); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = Δos.WriteFile(fn, slice<byte>(testingProg), 420); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
 
     var cmd = testenv.Command(new testing_TжTB(t), testenv.GoToolPath(new testing_TжTB(t)), runˢ, fn);
@@ -1073,10 +1061,8 @@ public static void TestRunningTests(ж<testing.T> t) {
         cmd.Env = append(cmd.Environ(), (@string)"GO_WANT_HELPER_PROCESS=1");
         var (@out, err) = cmd.CombinedOutput();
         t.Logf("%v:\n%s", cmd.OrTypedNil(), @out);
-        {
-            var (_, okΔ1) = err._<ж<exec.ExitError>>(ᐧ); if (!okΔ1) {
-                t.Fatal(err);
-            }
+        var (_, okΔ1) = err._<ж<exec.ExitError>>(ᐧ); if (!okΔ1) {
+            t.Fatal(err);
         }
 
         // Because the outer subtests (and TestRunningTests itself) are marked as
@@ -1134,10 +1120,8 @@ public static void TestRunningTestsInCleanup(ж<testing.T> t) {
         cmd.Env = append(cmd.Environ(), (@string)"GO_WANT_HELPER_PROCESS=1");
         var (@out, err) = cmd.CombinedOutput();
         t.Logf("%v:\n%s", cmd.OrTypedNil(), @out);
-        {
-            var (_, okΔ1) = err._<ж<exec.ExitError>>(ᐧ); if (!okΔ1) {
-                t.Fatal(err);
-            }
+        var (_, okΔ1) = err._<ж<exec.ExitError>>(ᐧ); if (!okΔ1) {
+            t.Fatal(err);
         }
 
         // TestRunningTestsInCleanup is blocked in the call to t.Run,
@@ -1171,14 +1155,10 @@ internal static (slice<@string> runningTests, bool ok) parseRunningTests(slice<b
     foreach (var line in range<@string>(strings.SplitSeq((@string)@out, "\n").Invoke)) {
         if (inRunningTests) {
             // Package testing adds one tab, the panic printer adds another.
-            {
-                var (trimmed, okΔ1) = strings.CutPrefix(line, "\t\t"); if (okΔ1) {
-                    {
-                        var (name, _, okΔ2) = strings.Cut(trimmed, " "); if (okΔ2) {
-                            runningTests = append(runningTests, name);
-                            continue;
-                        }
-                    }
+            var (trimmed, okΔ1) = strings.CutPrefix(line, "\t\t"); if (okΔ1) {
+                var (name, _, okΔ2) = strings.Cut(trimmed, " "); if (okΔ2) {
+                    runningTests = append(runningTests, name);
+                    continue;
                 }
             }
 
@@ -1255,10 +1235,8 @@ public static void TestContext(ж<testing.T> t) {
     ref var innerCtx = ref heap<context.Context>(out var ᏑinnerCtx);
     t.Run(innerˢ, (ж<testing.T> tΔ1) => {
         ᏑinnerCtx.ValueSlot = tΔ1.Context();
-        {
-            var err = ᏑinnerCtx.ValueSlot.Err(); if (err != nil) {
-                tΔ1.Fatalf("expected inner test to not inherit canceled context, got %v", err);
-            }
+        var err = ᏑinnerCtx.ValueSlot.Err(); if (err != nil) {
+            tΔ1.Fatalf("expected inner test to not inherit canceled context, got %v", err);
         }
     });
     t.Run(inner2ˢ, (ж<testing.T> tΔ2) => {

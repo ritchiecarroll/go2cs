@@ -48,7 +48,7 @@ public static void TestTCPConnKeepAliveConfigDialer(ж<testing.T> t) {
             }
         }
 
-        foreach (var (_, vᴛ1) in testConfigs) {
+        foreach (var (_, vᴛ1) in range(testConfigs)) {
             ref var cfg = ref heap(new global::go.net_package.KeepAliveConfig(), out var Ꮡcfg);
             cfg = vᴛ1;
 
@@ -108,7 +108,7 @@ public static void TestTCPConnKeepAliveConfigListener(ж<testing.T> t) {
             }
             chʗ1.ᐸꟷ(c);
         };
-        foreach (var (_, vᴛ1) in testConfigs) {
+        foreach (var (_, vᴛ1) in range(testConfigs)) {
             ref var cfg = ref heap(new global::go.net_package.KeepAliveConfig(), out var Ꮡcfg);
             cfg = vᴛ1;
 
@@ -177,7 +177,7 @@ public static void TestTCPConnKeepAliveConfig(ж<testing.T> t) {
                 t.Fatal(err);
             }
         }
-        foreach (var (_, vᴛ1) in testConfigs) {
+        foreach (var (_, vᴛ1) in range(testConfigs)) {
             ref var cfg = ref heap(new global::go.net_package.KeepAliveConfig(), out var Ꮡcfg);
             cfg = vᴛ1;
 

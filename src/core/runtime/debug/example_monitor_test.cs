@@ -81,15 +81,11 @@ internal static void monitor() {
         if (errΔ1 != nil) {
             log.Fatal(errΔ1);
         }
-        {
-            var (_, errΔ2) = f.Write(crash); if (errΔ2 != nil) {
-                log.Fatal(errΔ2);
-            }
+        var (_, errΔ2) = f.Write(crash); if (errΔ2 != nil) {
+            log.Fatal(errΔ2);
         }
-        {
-            var errΔ3 = f.Close(); if (errΔ3 != nil) {
-                log.Fatal(errΔ3);
-            }
+        var errΔ3 = f.Close(); if (errΔ3 != nil) {
+            log.Fatal(errΔ3);
         }
         log.Fatalf("saved crash report at %s", f.Name());
     }
@@ -104,7 +100,7 @@ internal static void monitor() {
     // Be selective in which variables we allow the child to inherit.
     // Depending on the application, some may be necessary,
     // while others (e.g. GOGC, GOMEMLIMIT) may be harmful; see #73490.
-    cmd.Env = slice<@string>([monitorVar + "=1"]);
+    cmd.Env = [monitorVar + "=1"];
     cmd.Stderr = new os.FileжWriter(os.Stderr);
     cmd.Stdout = new os.FileжWriter(os.Stderr);
     (var pipe, err) = cmd.StdinPipe();
@@ -112,10 +108,8 @@ internal static void monitor() {
         log.Fatalf("StdinPipe: %v", err);
     }
     debug.SetCrashOutput(pipe._<ж<os.File>>(), new debug.CrashOptions()); // (this conversion is safe)
-    {
-        var errΔ4 = cmd.Start(); if (errΔ4 != nil) {
-            log.Fatalf("can't start monitor: %v", errΔ4);
-        }
+    var errΔ4 = cmd.Start(); if (errΔ4 != nil) {
+        log.Fatalf("can't start monitor: %v", errΔ4);
     }
     // Now return and start the application proper...
 }

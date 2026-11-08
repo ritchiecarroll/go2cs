@@ -36,7 +36,7 @@ using static global::go.embed.@internal.embedtest_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("embed/internal/embedtest/embedx_test.go", "embedx_test.cs", "AA8ckpKSkgAQJIKCgoKClIK4goKCAB0IgoKCgoKUgoKUgoKClILKgoKClLiCgoKU")]
+[assembly: GoPositionMap("embed/internal/embedtest/embedx_test.go", "embedx_test.cs", "AA0ckpKSkgAQJIKCgoKClIK4goKCAB0IgoKCgoKUgoKUgoKClILKgoKClLiCgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.embed.@internal;

@@ -3,8 +3,6 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal;
 
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.@internal.abi_package;
 
 partial class abi_internal_test_package {

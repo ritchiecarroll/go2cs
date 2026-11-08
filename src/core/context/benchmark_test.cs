@@ -76,7 +76,7 @@ internal static partial void benchmarkWithTimeout(ж<testing.B> Ꮡb, nint concu
     // Generate concurrent contexts.
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     var ccf = new slice<slice<Action>>(gomaxprocs);
-    foreach (var i in range(ccf)) {
+    foreach (var i in range(len(ccf))) {
         Ꮡwg.Add(1);
         var ccfʗ1 = ccf;
         var rootʗ1 = root;
@@ -85,7 +85,7 @@ internal static partial void benchmarkWithTimeout(ж<testing.B> Ꮡb, nint concu
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
                 var cf = new slice<Action>(perPContexts);
-                foreach (var j in range(cf)) {
+                foreach (var j in range(len(cf))) {
                     (_, cf[j]) = WithTimeout(rootʗ1, time.ΔHour);
                 }
                 ccfʗ1[iΔ1] = cf;
@@ -101,18 +101,18 @@ internal static partial void benchmarkWithTimeout(ж<testing.B> Ꮡb, nint concu
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         var wcf = new slice<Action>(10);
         while (pb.Next()) {
-            foreach (var i in range(wcf)) {
+            foreach (var i in range(len(wcf))) {
                 (_, wcf[i]) = WithTimeout(rootʗ2, time.ΔHour);
             }
-            foreach (var (_, f) in wcf) {
+            foreach (var (_, f) in range(wcf)) {
                 f();
             }
         }
     });
     b.StopTimer();
 
-    foreach (var (_, cf) in ccf) {
-        foreach (var (_, f) in cf) {
+    foreach (var (_, cf) in range(ccf)) {
+        foreach (var (_, f) in range(cf)) {
             f();
         }
     }
@@ -128,7 +128,7 @@ private static readonly @string rootClosedCancelerˢᵇ = "Root=ClosedCanceler"u
 
 public static void BenchmarkCancelTree(ж<testing.B> b) {
     var depths = slice<nint>([1, 10, 100, 1000]);
-    foreach (var (_, d) in depths) {
+    foreach (var (_, d) in range(depths)) {
         b.Run(fmt.Sprintf("depth=%d"u8, d), (ж<testing.B> bΔ1) => {
             bΔ1.Run(rootBackgroundˢ, (ж<testing.B> bΔ2) => {
                 for (nint i = 0; i < (~bΔ2).N; i++) {
@@ -215,7 +215,7 @@ public static void BenchmarkContextCancelDone(ж<testing.B> b) {
 }
 
 public static void BenchmarkDeepValueNewGoRoutine(ж<testing.B> b) {
-    foreach (var (_, depth) in slice<nint>([10, 20, 30, 50, 100])) {
+    foreach (var (_, depth) in range(slice<nint>([10, 20, 30, 50, 100]))) {
         ref var ctx = ref heap<context.Context>(Background(), out var Ꮡctx);
         for (nint i = 0; i < depth; i++) {
             ctx = WithValue(ctx, i, i);
@@ -241,7 +241,7 @@ public static void BenchmarkDeepValueNewGoRoutine(ж<testing.B> b) {
 }
 
 public static void BenchmarkDeepValueSameGoRoutine(ж<testing.B> b) {
-    foreach (var (_, depth) in slice<nint>([10, 20, 30, 50, 100])) {
+    foreach (var (_, depth) in range(slice<nint>([10, 20, 30, 50, 100]))) {
         ref var ctx = ref heap<context.Context>(Background(), out var Ꮡctx);
         for (nint i = 0; i < depth; i++) {
             ctx = WithValue(ctx, i, i);
@@ -262,10 +262,8 @@ public static void BenchmarkErrOK(ж<testing.B> b) {
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
         while (b.Loop()) {
-            {
-                var err = ctx.Err(); if (err != nil) {
-                    b.Fatalf("ctx.Err() = %v", err);
-                }
+            var err = ctx.Err(); if (err != nil) {
+                b.Fatalf("ctx.Err() = %v", err);
             }
         }
     }
@@ -277,10 +275,8 @@ public static void BenchmarkErrCanceled(ж<testing.B> b) {
     var (ctx, cancel) = WithCancel(Background());
     cancel();
     while (b.Loop()) {
-        {
-            var err = ctx.Err(); if (err == nil) {
-                b.Fatalf("ctx.Err() = %v", err);
-            }
+        var err = ctx.Err(); if (err == nil) {
+            b.Fatalf("ctx.Err() = %v", err);
         }
     }
 }

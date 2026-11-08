@@ -30,10 +30,8 @@ public static void TestHandlers(ж<testing.T> t) {
     t.Run(textˢ, (ж<testing.T> tΔ1) => {
         ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
         var h = newFastTextHandler(new benchmarks_internal_test_package.bytes_BufferжWriter(Ꮡb));
-        {
-            var err = h.Handle(ctxʗ1, rʗ1); if (err != nil) {
-                tΔ1.Fatal(err);
-            }
+        var err = h.Handle(ctxʗ1, rʗ1); if (err != nil) {
+            tΔ1.Fatal(err);
         }
         @string got = Ꮡb.String();
         if (got != wantText) {
@@ -44,10 +42,8 @@ public static void TestHandlers(ж<testing.T> t) {
     var rʗ2 = r;
     t.Run(asyncˢ, (ж<testing.T> tΔ2) => {
         var h = newAsyncHandler();
-        {
-            var err = h.Handle(ctxʗ2, rʗ2); if (err != nil) {
-                tΔ2.Fatal(err);
-            }
+        var err = h.Handle(ctxʗ2, rʗ2); if (err != nil) {
+            tΔ2.Fatal(err);
         }
         var got = h.ringBuffer[0].ΔClone();
         if (!got.Time.Equal(rʗ2.Time) || !slices.EqualFunc<slice<slog.Attr>, slice<slog.Attr>, slog.Attr, slog.Attr>(attrSlice(got), attrSlice(rʗ2), ((Func<slog.Attr, slog.Attr, bool>)(slog.Equal)))) {

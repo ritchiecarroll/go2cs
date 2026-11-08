@@ -127,86 +127,86 @@ internal partial struct TestSparseEntries_vectors /*dyn*/ {
 
 public static void TestSparseEntries(ж<testing.T> t) {
     var vectors = slice<TestSparseEntries_vectors>([new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([]), size: 0,
+        @in: [], size: 0,
         wantValid: true,
-        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(0, 0)])
+        wantInverted: [new(0, 0)]
     ), new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([]), size: 5000,
+        @in: [], size: 5000,
         wantValid: true,
-        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(0, 5000)])
+        wantInverted: [new(0, 5000)]
     ), new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([new(0, 5000)]), size: 5000,
+        @in: [new(0, 5000)], size: 5000,
         wantValid: true,
-        wantAligned: slice<global::go.archive.tar_package.sparseEntry>([new(0, 5000)]),
-        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(5000, 0)])
+        wantAligned: [new(0, 5000)],
+        wantInverted: [new(5000, 0)]
     ), new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([new(1000, 4000)]), size: 5000,
+        @in: [new(1000, 4000)], size: 5000,
         wantValid: true,
-        wantAligned: slice<global::go.archive.tar_package.sparseEntry>([new(1024, 3976)]),
-        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(0, 1000), new(5000, 0)])
+        wantAligned: [new(1024, 3976)],
+        wantInverted: [new(0, 1000), new(5000, 0)]
     ), new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([new(0, 3000)]), size: 5000,
+        @in: [new(0, 3000)], size: 5000,
         wantValid: true,
-        wantAligned: slice<global::go.archive.tar_package.sparseEntry>([new(0, 2560)]),
-        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(3000, 2000)])
+        wantAligned: [new(0, 2560)],
+        wantInverted: [new(3000, 2000)]
     ), new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([new(3000, 2000)]), size: 5000,
+        @in: [new(3000, 2000)], size: 5000,
         wantValid: true,
-        wantAligned: slice<global::go.archive.tar_package.sparseEntry>([new(3072, 1928)]),
-        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(0, 3000), new(5000, 0)])
+        wantAligned: [new(3072, 1928)],
+        wantInverted: [new(0, 3000), new(5000, 0)]
     ), new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([new(2000, 2000)]), size: 5000,
+        @in: [new(2000, 2000)], size: 5000,
         wantValid: true,
-        wantAligned: slice<global::go.archive.tar_package.sparseEntry>([new(2048, 1536)]),
-        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(0, 2000), new(4000, 1000)])
+        wantAligned: [new(2048, 1536)],
+        wantInverted: [new(0, 2000), new(4000, 1000)]
     ), new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([new(0, 2000), new(8000, 2000)]), size: 10000,
+        @in: [new(0, 2000), new(8000, 2000)], size: 10000,
         wantValid: true,
-        wantAligned: slice<global::go.archive.tar_package.sparseEntry>([new(0, 1536), new(8192, 1808)]),
-        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(2000, 6000), new(10000, 0)])
+        wantAligned: [new(0, 1536), new(8192, 1808)],
+        wantInverted: [new(2000, 6000), new(10000, 0)]
     ), new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([new(0, 2000), new(2000, 2000), new(4000, 0), new(4000, 3000), new(7000, 1000), new(8000, 0), new(8000, 2000)]), size: 10000,
+        @in: [new(0, 2000), new(2000, 2000), new(4000, 0), new(4000, 3000), new(7000, 1000), new(8000, 0), new(8000, 2000)], size: 10000,
         wantValid: true,
-        wantAligned: slice<global::go.archive.tar_package.sparseEntry>([new(0, 1536), new(2048, 1536), new(4096, 2560), new(7168, 512), new(8192, 1808)]),
-        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(10000, 0)])
+        wantAligned: [new(0, 1536), new(2048, 1536), new(4096, 2560), new(7168, 512), new(8192, 1808)],
+        wantInverted: [new(10000, 0)]
     ), new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([new(0, 0), new(1000, 0), new(2000, 0), new(3000, 0), new(4000, 0), new(5000, 0)]), size: 5000,
+        @in: [new(0, 0), new(1000, 0), new(2000, 0), new(3000, 0), new(4000, 0), new(5000, 0)], size: 5000,
         wantValid: true,
-        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(0, 5000)])
+        wantInverted: [new(0, 5000)]
     ), new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([new(1, 0)]), size: 0,
+        @in: [new(1, 0)], size: 0,
         wantValid: false
     ), new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([new(-1, 0)]), size: 100,
+        @in: [new(-1, 0)], size: 100,
         wantValid: false
     ), new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([new(0, -1)]), size: 100,
+        @in: [new(0, -1)], size: 100,
         wantValid: false
     ), new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([new(0, 0)]), size: -100,
+        @in: [new(0, 0)], size: -100,
         wantValid: false
     ), new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([new(math.MaxInt64, 3), new(6, -5)]), size: 35,
+        @in: [new(math.MaxInt64, 3), new(6, -5)], size: 35,
         wantValid: false
     ), new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([new(1, 3), new(6, -5)]), size: 35,
+        @in: [new(1, 3), new(6, -5)], size: 35,
         wantValid: false
     ), new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([new(math.MaxInt64, math.MaxInt64)]), size: math.MaxInt64,
+        @in: [new(math.MaxInt64, math.MaxInt64)], size: math.MaxInt64,
         wantValid: false
     ), new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([new(3, 3)]), size: 5,
+        @in: [new(3, 3)], size: 5,
         wantValid: false
     ), new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([new(2, 0), new(1, 0), new(0, 0)]), size: 3,
+        @in: [new(2, 0), new(1, 0), new(0, 0)], size: 3,
         wantValid: false
     ), new(
-        @in: slice<global::go.archive.tar_package.sparseEntry>([new(1, 3), new(2, 2)]), size: 10,
+        @in: [new(1, 3), new(2, 2)], size: 10,
         wantValid: false
     )
     ]);
 
-    foreach (var (i, v) in vectors) {
+    foreach (var (i, v) in range(vectors)) {
         var gotValid = validateSparseEntries(v.@in, v.size);
         if (gotValid != v.wantValid) {
             t.Errorf("test %d, validateSparseEntries() = %v, want %v", i, gotValid, v.wantValid);
@@ -262,10 +262,8 @@ public static void TestFileInfoHeader(ж<testing.T> t) {
         }
     }
     // FileInfoHeader should error when passing nil FileInfo
-    {
-        var (_, errΔ1) = FileInfoHeader(default, ""u8); if (errΔ1 == nil) {
-            t.Fatalf("Expected error when passing nil to FileInfoHeader");
-        }
+    var (_, errΔ1) = FileInfoHeader(default, ""u8); if (errΔ1 == nil) {
+        t.Fatalf("Expected error when passing nil to FileInfoHeader");
     }
 }
 
@@ -319,10 +317,8 @@ public static void TestFileInfoHeaderSymlink(ж<testing.T> t) {
 
     @string link = filepath.Join(tmpdir, linkˢ);
     @string target = tmpdir;
-    {
-        var errΔ1 = os.Symlink(target, link); if (errΔ1 != nil) {
-            t.Fatal(errΔ1);
-        }
+    var errΔ1 = os.Symlink(target, link); if (errΔ1 != nil) {
+        t.Fatal(errΔ1);
     }
     var (fi, err) = os.Lstat(link);
     if (err != nil) {
@@ -366,20 +362,14 @@ public static void TestRoundTrip(ж<testing.T> t) {
         Format: FormatPAX,
         Typeflag: TypeReg
     ));
-    {
-        var errΔ1 = tw.WriteHeader(hdr); if (errΔ1 != nil) {
-            t.Fatalf("tw.WriteHeader: %v", errΔ1);
-        }
+    var errΔ1 = tw.WriteHeader(hdr); if (errΔ1 != nil) {
+        t.Fatalf("tw.WriteHeader: %v", errΔ1);
     }
-    {
-        var (_, errΔ2) = tw.Write(data); if (errΔ2 != nil) {
-            t.Fatalf("tw.Write: %v", errΔ2);
-        }
+    var (_, errΔ2) = tw.Write(data); if (errΔ2 != nil) {
+        t.Fatalf("tw.Write: %v", errΔ2);
     }
-    {
-        var errΔ3 = tw.Close(); if (errΔ3 != nil) {
-            t.Fatalf("tw.Close: %v", errΔ3);
-        }
+    var errΔ3 = tw.Close(); if (errΔ3 != nil) {
+        t.Fatalf("tw.Close: %v", errΔ3);
     }
 
     // Read it back.
@@ -524,7 +514,7 @@ public static void TestHeaderRoundTrip(ж<testing.T> t) {
     )
     ]);
 
-    foreach (var (i, v) in vectors) {
+    foreach (var (i, v) in range(vectors)) {
         var fi = v.h.FileInfo();
         var (h2, err) = FileInfoHeader(fi, ""u8);
         if (err != nil) {
@@ -610,10 +600,8 @@ public static void TestHeaderRoundTrip(ж<testing.T> t) {
                 t.Errorf("i=%d: ModTime: got %v, want %v", i, got, want);
             }
         }
-        {
-            var (sysh, ok) = fi.Sys()._<ж<global::go.archive.tar_package.Header>>(ᐧ); if (!ok || sysh != v.h) {
-                t.Errorf("i=%d: Sys didn't return original *Header", i);
-            }
+        var (sysh, ok) = fi.Sys()._<ж<global::go.archive.tar_package.Header>>(ᐧ); if (!ok || sysh != v.h) {
+            t.Errorf("i=%d: Sys didn't return original *Header", i);
         }
     }
 }
@@ -846,8 +834,8 @@ public static void TestHeaderAllowedFormats(ж<testing.T> t) {
     )
     ]);
 
-    foreach (var (i, v) in vectors) {
-        var (formats, paxHdrs, err) = (~v.header).allowedFormats();
+    foreach (var (i, v) in range(vectors)) {
+        var (formats, paxHdrs, err) = v.header.allowedFormats();
         if (formats != v.formats) {
             t.Errorf("test %d, allowedFormats(): got %v, want %v", i, formats, v.formats);
         }
@@ -882,40 +870,40 @@ internal partial struct Benchmark_vectors /*dyn*/ {
 public static void Benchmark(ж<testing.B> b) {
     var vectors = slice<Benchmark_vectors>([new(
         "USTAR",
-        slice<Benchmark_file>([new(
+        [new(
             Ꮡ(new Header(Name: "bar", Mode: 416, Size: (int64)3)),
             slice<byte>("foo"u8)
         ), new(
             Ꮡ(new Header(Name: "world", Mode: 416, Size: (int64)5)),
             slice<byte>("hello"u8)
         )
-        ])
+        ]
     ), new(
         "GNU",
-        slice<Benchmark_file>([new(
+        [new(
             Ꮡ(new Header(Name: "bar", Mode: 416, Size: (int64)3, Devmajor: -1)),
             slice<byte>("foo"u8)
         ), new(
             Ꮡ(new Header(Name: "world", Mode: 416, Size: (int64)5, Devmajor: -1)),
             slice<byte>("hello"u8)
         )
-        ])
+        ]
     ), new(
         "PAX",
-        slice<Benchmark_file>([new(
+        [new(
             Ꮡ(new Header(Name: "bar", Mode: 416, Size: (int64)3, Xattrs: new map<@string, @string>{["foo"] = "bar"})),
             slice<byte>("foo"u8)
         ), new(
             Ꮡ(new Header(Name: "world", Mode: 416, Size: (int64)5, Xattrs: new map<@string, @string>{["foo"] = "bar"})),
             slice<byte>("hello"u8)
         )
-        ])
+        ]
     )
     ]);
 
     var vectorsʗ1 = vectors;
     b.Run(writerˢ, (ж<testing.B> bΔ1) => {
-        foreach (var (_, vᴛ1) in vectorsʗ1) {
+        foreach (var (_, vᴛ1) in range(vectorsʗ1)) {
             ref var v = ref heap(new Benchmark_vectors(), out var Ꮡv);
             v = vᴛ1;
 
@@ -926,7 +914,7 @@ public static void Benchmark(ж<testing.B> b) {
                     // Writing to io.Discard because we want to
                     // test purely the writer code and not bring in disk performance into this.
                     var tw = NewWriter(io.Discard);
-                    foreach (var (_, @file) in vʗ1.files) {
+                    foreach (var (_, @file) in range(vʗ1.files)) {
                         {
                             var err = tw.WriteHeader(@file.hdr); if (err != nil) {
                                 bΔ2.Errorf("unexpected WriteHeader error: %v", err);
@@ -950,13 +938,13 @@ public static void Benchmark(ж<testing.B> b) {
 
     var vectorsʗ2 = vectors;
     b.Run(readerˢ, (ж<testing.B> bΔ3) => {
-        foreach (var (_, v) in vectorsʗ2) {
+        foreach (var (_, v) in range(vectorsʗ2)) {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             ref var r = ref heap(new bytes.Reader(), out var Ꮡr);
 
             // Write the archive to a byte buffer.
             var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuf));
-            foreach (var (_, @file) in v.files) {
+            foreach (var (_, @file) in range(v.files)) {
                 tw.WriteHeader(@file.hdr);
                 tw.Write(@file.body);
             }

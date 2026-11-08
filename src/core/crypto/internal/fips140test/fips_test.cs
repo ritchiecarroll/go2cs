@@ -38,8 +38,6 @@ using hex = encoding.hex_package;
 using debug = go.runtime.debug_package;
 using strings = strings_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using go.crypto;
 using go.crypto.@internal;
@@ -91,7 +89,7 @@ public static void TestVersion(ж<testing.T> t) {
     if (!ok) {
         t.Skip(noBuildInfoˢ);
     }
-    foreach (var (_, setting) in bi.Settings) {
+    foreach (var (_, setting) in range(bi.Settings)) {
         if (setting.Key != "GOFIPS140"u8) {
             continue;
         }
@@ -99,10 +97,8 @@ public static void TestVersion(ж<testing.T> t) {
         // Remove the -hash suffix, if any.
         // The version from fips140.Version omits it.
         (exp, _, _) = strings.Cut(exp, "-");
-        {
-            @string v = fips140.Version(); if (v != exp) {
-                t.Errorf("Version is %q, expected %q", v, exp);
-            }
+        @string v = fips140.Version(); if (v != exp) {
+            t.Errorf("Version is %q, expected %q", v, exp);
         }
         return;
     }

@@ -30,14 +30,14 @@ public static void TestInstantiateEquality(ж<testing.T> t) {
     var tests = slice<TestInstantiateEquality_tests>([
         new(
             "package basictype; type T[P any] int",
-            "T", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
-            "T", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
+            "T", [new types.BasicжΔType(Typ[Int])],
+            "T", [new types.BasicжΔType(Typ[Int])],
             true
         ),
         new(
             "package differenttypeargs; type T[P any] int",
-            "T", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
-            "T", slice<typesꓸType>([new types.BasicжΔType(Typ[ΔString])]),
+            "T", [new types.BasicжΔType(Typ[Int])],
+            "T", [new types.BasicжΔType(Typ[ΔString])],
             false
         ),
         new(
@@ -71,8 +71,8 @@ public static void TestInstantiateEquality(ж<testing.T> t) {
         ),
         new(
             "package basicfunc; func F[P any]() {}",
-            "F", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
-            "F", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
+            "F", [new types.BasicжΔType(Typ[Int])],
+            "F", [new types.BasicжΔType(Typ[Int])],
             true
         ),
         new(
@@ -83,31 +83,31 @@ public static void TestInstantiateEquality(ж<testing.T> t) {
         ),
         new(
             "package funcwithparams; func F[P any](x string) float64 { return 0 }",
-            "F", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
-            "F", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
+            "F", [new types.BasicжΔType(Typ[Int])],
+            "F", [new types.BasicжΔType(Typ[Int])],
             true
         ),
         new(
             "package differentfuncargs; func F[P any](x string) float64 { return 0 }",
-            "F", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
-            "F", slice<typesꓸType>([new types.BasicжΔType(Typ[ΔString])]),
+            "F", [new types.BasicжΔType(Typ[Int])],
+            "F", [new types.BasicжΔType(Typ[ΔString])],
             false
         ),
         new(
             "package funcequality; func F1[P any](x int) {}; func F2[Q any](x int) {}",
-            "F1", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
-            "F2", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
+            "F1", [new types.BasicжΔType(Typ[Int])],
+            "F2", [new types.BasicжΔType(Typ[Int])],
             false
         ),
         new(
             "package funcsymmetry; func F1[P any](x P) {}; func F2[Q any](x Q) {}",
-            "F1", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
-            "F2", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]),
+            "F1", [new types.BasicжΔType(Typ[Int])],
+            "F2", [new types.BasicжΔType(Typ[Int])],
             false
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestInstantiateEquality_tests(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -130,10 +130,8 @@ public static void TestInstantiateEquality(ж<testing.T> t) {
                 tΔ1.Fatal(err);
             }
 
-            {
-                var gotEqual = AreEqual(res1, res2); if (gotEqual != testʗ1.wantEqual) {
-                    tΔ1.Errorf("%s == %s: %t, want %t", res1, res2, gotEqual, testʗ1.wantEqual);
-                }
+            var gotEqual = AreEqual(res1, res2); if (gotEqual != testʗ1.wantEqual) {
+                tΔ1.Errorf("%s == %s: %t, want %t", res1, res2, gotEqual, testʗ1.wantEqual);
             }
         });
     }
@@ -152,11 +150,11 @@ public static void TestInstantiateNonEquality(ж<testing.T> t) {
     var T1 = pkg1.Scope().Lookup("T").Type()._<ж<types.Named>>();
     var T2 = pkg2.Scope().Lookup("T").Type()._<ж<types.Named>>();
     var ctxt = NewContext();
-    var (res1, err) = Instantiate(ctxt, new types.NamedжΔType(T1), slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]), false);
+    var (res1, err) = Instantiate(ctxt, new types.NamedжΔType(T1), [new types.BasicжΔType(Typ[Int])], false);
     if (err != nil) {
         t.Fatal(err);
     }
-    (var res2, err) = Instantiate(ctxt, new types.NamedжΔType(T2), slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]), false);
+    (var res2, err) = Instantiate(ctxt, new types.NamedжΔType(T2), [new types.BasicжΔType(Typ[Int])], false);
     if (err != nil) {
         t.Fatal(err);
     }
@@ -197,7 +195,7 @@ public static void TestMethodInstantiation(ж<testing.T> t) {
         new("func (r T[P]) m(T[P], T[string], T[int])", "func (T[int]).m(T[int], T[string], T[int])")
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         @string src = prefix + test.decl;
         var pkg = mustTypecheck(src, nil, nil);
         var typ = NewPointer(pkg.Scope().Lookup("X").Type());
@@ -205,10 +203,8 @@ public static void TestMethodInstantiation(ж<testing.T> t) {
         if (!ok) {
             t.Fatalf(@"LookupSelection(%s, ""m"") failed, want func m", typ.OrTypedNil());
         }
-        {
-            @string got = ObjectString(sel.Obj(), RelativeTo(pkg)); if (got != test.want) {
-                t.Errorf("instantiated %q, want %q", got, test.want);
-            }
+        @string got = ObjectString(sel.Obj(), RelativeTo(pkg)); if (got != test.want) {
+            t.Errorf("instantiated %q, want %q", got, test.want);
         }
     }
 }
@@ -242,10 +238,8 @@ public static void TestImmutableSignatures(ж<testing.T> t) {
     // Verify that the original method is not mutated by instantiating T (this
     // bug manifested when subst did not return a new signature).
     @string want = funcTPMˢ;
-    {
-        @string got = stripAnnotations(ObjectString(sel.Obj(), RelativeTo(pkg))); if (got != want) {
-            t.Errorf("instantiated %q, want %q", got, want);
-        }
+    @string got = stripAnnotations(ObjectString(sel.Obj(), RelativeTo(pkg))); if (got != want) {
+        t.Errorf("instantiated %q, want %q", got, want);
     }
 }
 

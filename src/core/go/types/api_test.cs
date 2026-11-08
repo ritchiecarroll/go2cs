@@ -57,7 +57,7 @@ internal static (ж<types.Package>, error) typecheck(@string src, ж<types.Confi
             Importer: defaultImporter(fset)
         )); conf = ref Ꮡconf.DerefOrNull();
     }
-    return Ꮡconf.Check(f.Name.Name, fset, slice<ж<ast.File>>([f]), info);
+    return Ꮡconf.Check(f.Name.Name, fset, [f], info);
 }
 
 internal static ж<types.Package> mustTypecheck(@string src, ж<types.Config> conf, ж<typesꓸInfo> info) {
@@ -75,17 +75,13 @@ private static readonly @string kwᶜᵇ = "package "u8;
 // pkgName extracts the package name from src, which must contain a package header.
 internal static @string pkgName(@string src) {
     @string kw = kwᶜ;
-    {
-        nint i = strings.Index(src, kw); if (i >= 0) {
-            @string after = src.slice(i + len(kw));
-            nint n = len(after);
-            {
-                nint iΔ1 = strings.IndexAny(after, "\n\t ;/"); if (iΔ1 >= 0) {
-                    n = iΔ1;
-                }
-            }
-            return after.slice(0, n);
+    nint i = strings.Index(src, kw); if (i >= 0) {
+        @string after = src.slice(i + len(kw));
+        nint n = len(after);
+        nint iΔ1 = strings.IndexAny(after, "\n\t ;/"); if (iΔ1 >= 0) {
+            n = iΔ1;
         }
+        return after.slice(0, n);
     }
     throw panic("missing package header: " + src);
 }
@@ -171,7 +167,7 @@ public static void TestValuesInfo(ж<testing.T> t) {
         new(@"package g1; var(j int32; s int; n = 1.0<<s == j)", @"1.0", @"int32", @"1")         // go.dev/issue/48422
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(
             Types: new map<ast.Expr, types.TypeAndValue>()
         ), out var Ꮡinfo);
@@ -201,10 +197,8 @@ public static void TestValuesInfo(ж<testing.T> t) {
 
         // if we have a constant, check that value is correct
         if (tv.Value != nil) {
-            {
-                @string got = tv.Value.ExactString(); if (got != test.val) {
-                    t.Errorf("package %s: got value %s; want %s", name, got, test.val);
-                }
+            @string got = tv.Value.ExactString(); if (got != test.val) {
+                t.Errorf("package %s: got value %s; want %s", name, got, test.val);
             }
         } else {
             if (test.val != ""u8) {
@@ -561,7 +555,7 @@ public static void TestTypesInfo(ж<testing.T> t) {
         new(@"package t3; type T[_, _ any] int; func (T[P, Q]) _() {}", @"Q", @"Q")
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(Types: new map<ast.Expr, types.TypeAndValue>()), out var Ꮡinfo);
         @string name = default;
         if (strings.HasPrefix(test.src, broken)) {
@@ -591,10 +585,8 @@ public static void TestTypesInfo(ж<testing.T> t) {
         }
 
         // check that type is correct
-        {
-            @string got = typ.String(); if (got != test.typ) {
-                t.Errorf("package %s: expr = %s: got %s; want %s", name, test.expr, got, test.typ);
-            }
+        @string got = typ.String(); if (got != test.typ) {
+            t.Errorf("package %s: expr = %s: got %s; want %s", name, test.expr, got, test.typ);
         }
     }
 }
@@ -630,164 +622,164 @@ public static void TestInstanceInfo(ж<testing.T> t) {
 
     slice<TestInstanceInfo_type> tests = slice<TestInstanceInfo_type>([
         new(@"package p0; func f[T any](T) {}; func _() { f(42) }",
-            slice<TestInstanceInfo_testInst>([new(@"f", slice<@string>([@"int"]), @"func(int)")])
+            [new(@"f", [@"int"], @"func(int)")]
         ),
         new(@"package p1; func f[T any](T) T { panic(0) }; func _() { f('@') }",
-            slice<TestInstanceInfo_testInst>([new(@"f", slice<@string>([@"rune"]), @"func(rune) rune")])
+            [new(@"f", [@"rune"], @"func(rune) rune")]
         ),
         new(@"package p2; func f[T any](...T) T { panic(0) }; func _() { f(0i) }",
-            slice<TestInstanceInfo_testInst>([new(@"f", slice<@string>([@"complex128"]), @"func(...complex128) complex128")])
+            [new(@"f", [@"complex128"], @"func(...complex128) complex128")]
         ),
         new(@"package p3; func f[A, B, C any](A, *B, []C) {}; func _() { f(1.2, new(string), []byte{}) }",
-            slice<TestInstanceInfo_testInst>([new(@"f", slice<@string>([@"float64", @"string", @"byte"]), @"func(float64, *string, []byte)")])
+            [new(@"f", [@"float64", @"string", @"byte"], @"func(float64, *string, []byte)")]
         ),
         new(@"package p4; func f[A, B any](A, *B, ...[]B) {}; func _() { f(1.2, new(byte)) }",
-            slice<TestInstanceInfo_testInst>([new(@"f", slice<@string>([@"float64", @"byte"]), @"func(float64, *byte, ...[]byte)")])
+            [new(@"f", [@"float64", @"byte"], @"func(float64, *byte, ...[]byte)")]
         ),
 
         new(@"package s1; func f[T any, P interface{*T}](x T) {}; func _(x string) { f(x) }",
-            slice<TestInstanceInfo_testInst>([new(@"f", slice<@string>([@"string", @"*string"]), @"func(x string)")])
+            [new(@"f", [@"string", @"*string"], @"func(x string)")]
         ),
         new(@"package s2; func f[T any, P interface{*T}](x []T) {}; func _(x []int) { f(x) }",
-            slice<TestInstanceInfo_testInst>([new(@"f", slice<@string>([@"int", @"*int"]), @"func(x []int)")])
+            [new(@"f", [@"int", @"*int"], @"func(x []int)")]
         ),
         new(@"package s3; type C[T any] interface{chan<- T}; func f[T any, P C[T]](x []T) {}; func _(x []int) { f(x) }",
-            slice<TestInstanceInfo_testInst>([
-                new(@"C", slice<@string>([@"T"]), @"interface{chan<- T}"),
-                new(@"f", slice<@string>([@"int", @"chan<- int"]), @"func(x []int)")
-            ])
+            [
+                new(@"C", [@"T"], @"interface{chan<- T}"),
+                new(@"f", [@"int", @"chan<- int"], @"func(x []int)")
+            ]
         ),
         new(@"package s4; type C[T any] interface{chan<- T}; func f[T any, P C[T], Q C[[]*P]](x []T) {}; func _(x []int) { f(x) }",
-            slice<TestInstanceInfo_testInst>([
-                new(@"C", slice<@string>([@"T"]), @"interface{chan<- T}"),
-                new(@"C", slice<@string>([@"[]*P"]), @"interface{chan<- []*P}"),
-                new(@"f", slice<@string>([@"int", @"chan<- int", @"chan<- []*chan<- int"]), @"func(x []int)")
-            ])
+            [
+                new(@"C", [@"T"], @"interface{chan<- T}"),
+                new(@"C", [@"[]*P"], @"interface{chan<- []*P}"),
+                new(@"f", [@"int", @"chan<- int", @"chan<- []*chan<- int"], @"func(x []int)")
+            ]
         ),
 
         new(@"package t1; func f[T any, P interface{*T}]() T { panic(0) }; func _() { _ = f[string] }",
-            slice<TestInstanceInfo_testInst>([new(@"f", slice<@string>([@"string", @"*string"]), @"func() string")])
+            [new(@"f", [@"string", @"*string"], @"func() string")]
         ),
         new(@"package t2; func f[T any, P interface{*T}]() T { panic(0) }; func _() { _ = (f[string]) }",
-            slice<TestInstanceInfo_testInst>([new(@"f", slice<@string>([@"string", @"*string"]), @"func() string")])
+            [new(@"f", [@"string", @"*string"], @"func() string")]
         ),
         new(@"package t3; type C[T any] interface{chan<- T}; func f[T any, P C[T], Q C[[]*P]]() []T { return nil }; func _() { _ = f[int] }",
-            slice<TestInstanceInfo_testInst>([
-                new(@"C", slice<@string>([@"T"]), @"interface{chan<- T}"),
-                new(@"C", slice<@string>([@"[]*P"]), @"interface{chan<- []*P}"),
-                new(@"f", slice<@string>([@"int", @"chan<- int", @"chan<- []*chan<- int"]), @"func() []int")
-            ])
+            [
+                new(@"C", [@"T"], @"interface{chan<- T}"),
+                new(@"C", [@"[]*P"], @"interface{chan<- []*P}"),
+                new(@"f", [@"int", @"chan<- int", @"chan<- []*chan<- int"], @"func() []int")
+            ]
         ),
         new(@"package t4; type C[T any] interface{chan<- T}; func f[T any, P C[T], Q C[[]*P]]() []T { return nil }; func _() { _ = (f[int]) }",
-            slice<TestInstanceInfo_testInst>([
-                new(@"C", slice<@string>([@"T"]), @"interface{chan<- T}"),
-                new(@"C", slice<@string>([@"[]*P"]), @"interface{chan<- []*P}"),
-                new(@"f", slice<@string>([@"int", @"chan<- int", @"chan<- []*chan<- int"]), @"func() []int")
-            ])
+            [
+                new(@"C", [@"T"], @"interface{chan<- T}"),
+                new(@"C", [@"[]*P"], @"interface{chan<- []*P}"),
+                new(@"f", [@"int", @"chan<- int", @"chan<- []*chan<- int"], @"func() []int")
+            ]
         ),
         new(@"package i0; import ""lib""; func _() { lib.F(42) }",
-            slice<TestInstanceInfo_testInst>([new(@"F", slice<@string>([@"int"]), @"func(int)")])
+            [new(@"F", [@"int"], @"func(int)")]
         ),
 
         new(@"package duplfunc0; func f[T any](T) {}; func _() { f(42); f(""foo""); f[int](3) }",
-            slice<TestInstanceInfo_testInst>([
-                new(@"f", slice<@string>([@"int"]), @"func(int)"),
-                new(@"f", slice<@string>([@"string"]), @"func(string)"),
-                new(@"f", slice<@string>([@"int"]), @"func(int)")
-            ])
+            [
+                new(@"f", [@"int"], @"func(int)"),
+                new(@"f", [@"string"], @"func(string)"),
+                new(@"f", [@"int"], @"func(int)")
+            ]
         ),
         new(@"package duplfunc1; import ""lib""; func _() { lib.F(42); lib.F(""foo""); lib.F(3) }",
-            slice<TestInstanceInfo_testInst>([
-                new(@"F", slice<@string>([@"int"]), @"func(int)"),
-                new(@"F", slice<@string>([@"string"]), @"func(string)"),
-                new(@"F", slice<@string>([@"int"]), @"func(int)")
-            ])
+            [
+                new(@"F", [@"int"], @"func(int)"),
+                new(@"F", [@"string"], @"func(string)"),
+                new(@"F", [@"int"], @"func(int)")
+            ]
         ),
 
         new(@"package type0; type T[P interface{~int}] struct{ x P }; var _ T[int]",
-            slice<TestInstanceInfo_testInst>([new(@"T", slice<@string>([@"int"]), @"struct{x int}")])
+            [new(@"T", [@"int"], @"struct{x int}")]
         ),
         new(@"package type1; type T[P interface{~int}] struct{ x P }; var _ (T[int])",
-            slice<TestInstanceInfo_testInst>([new(@"T", slice<@string>([@"int"]), @"struct{x int}")])
+            [new(@"T", [@"int"], @"struct{x int}")]
         ),
         new(@"package type2; type T[P interface{~int}] struct{ x P }; var _ T[(int)]",
-            slice<TestInstanceInfo_testInst>([new(@"T", slice<@string>([@"int"]), @"struct{x int}")])
+            [new(@"T", [@"int"], @"struct{x int}")]
         ),
         new(@"package type3; type T[P1 interface{~[]P2}, P2 any] struct{ x P1; y P2 }; var _ T[[]int, int]",
-            slice<TestInstanceInfo_testInst>([new(@"T", slice<@string>([@"[]int", @"int"]), @"struct{x []int; y int}")])
+            [new(@"T", [@"[]int", @"int"], @"struct{x []int; y int}")]
         ),
         new(@"package type4; import ""lib""; var _ lib.T[int]",
-            slice<TestInstanceInfo_testInst>([new(@"T", slice<@string>([@"int"]), @"[]int")])
+            [new(@"T", [@"int"], @"[]int")]
         ),
 
         new(@"package dupltype0; type T[P interface{~int}] struct{ x P }; var x T[int]; var y T[int]",
-            slice<TestInstanceInfo_testInst>([
-                new(@"T", slice<@string>([@"int"]), @"struct{x int}"),
-                new(@"T", slice<@string>([@"int"]), @"struct{x int}")
-            ])
+            [
+                new(@"T", [@"int"], @"struct{x int}"),
+                new(@"T", [@"int"], @"struct{x int}")
+            ]
         ),
         new(@"package dupltype1; type T[P ~int] struct{ x P }; func (r *T[Q]) add(z T[Q]) { r.x += z.x }",
-            slice<TestInstanceInfo_testInst>([
-                new(@"T", slice<@string>([@"Q"]), @"struct{x Q}"),
-                new(@"T", slice<@string>([@"Q"]), @"struct{x Q}")
-            ])
+            [
+                new(@"T", [@"Q"], @"struct{x Q}"),
+                new(@"T", [@"Q"], @"struct{x Q}")
+            ]
         ),
         new(@"package dupltype1; import ""lib""; var x lib.T[int]; var y lib.T[int]; var z lib.T[string]",
-            slice<TestInstanceInfo_testInst>([
-                new(@"T", slice<@string>([@"int"]), @"[]int"),
-                new(@"T", slice<@string>([@"int"]), @"[]int"),
-                new(@"T", slice<@string>([@"string"]), @"[]string")
-            ])
+            [
+                new(@"T", [@"int"], @"[]int"),
+                new(@"T", [@"int"], @"[]int"),
+                new(@"T", [@"string"], @"[]string")
+            ]
         ),
         new(@"package issue51803; func foo[T any](T) {}; func _() { foo[int]( /* leave arg away on purpose */ ) }",
-            slice<TestInstanceInfo_testInst>([new(@"foo", slice<@string>([@"int"]), @"func(int)")])
+            [new(@"foo", [@"int"], @"func(int)")]
         ),
 
         // reverse type inference
         new(@"package reverse1a; var f func(int) = g; func g[P any](P) {}",
-            slice<TestInstanceInfo_testInst>([new(@"g", slice<@string>([@"int"]), @"func(int)")])
+            [new(@"g", [@"int"], @"func(int)")]
         ),
         new(@"package reverse1b; func f(func(int)) {}; func g[P any](P) {}; func _() { f(g) }",
-            slice<TestInstanceInfo_testInst>([new(@"g", slice<@string>([@"int"]), @"func(int)")])
+            [new(@"g", [@"int"], @"func(int)")]
         ),
         new(@"package reverse2a; var f func(int, string) = g; func g[P, Q any](P, Q) {}",
-            slice<TestInstanceInfo_testInst>([new(@"g", slice<@string>([@"int", @"string"]), @"func(int, string)")])
+            [new(@"g", [@"int", @"string"], @"func(int, string)")]
         ),
         new(@"package reverse2b; func f(func(int, string)) {}; func g[P, Q any](P, Q) {}; func _() { f(g) }",
-            slice<TestInstanceInfo_testInst>([new(@"g", slice<@string>([@"int", @"string"]), @"func(int, string)")])
+            [new(@"g", [@"int", @"string"], @"func(int, string)")]
         ),
         new(@"package reverse2c; func f(func(int, string)) {}; func g[P, Q any](P, Q) {}; func _() { f(g[int]) }",
-            slice<TestInstanceInfo_testInst>([new(@"g", slice<@string>([@"int", @"string"]), @"func(int, string)")])
+            [new(@"g", [@"int", @"string"], @"func(int, string)")]
         ),
         // reverse3a not possible (cannot assign to generic function outside of argument passing)
         new(@"package reverse3b; func f[R any](func(int) R) {}; func g[P any](P) string { return """" }; func _() { f(g) }",
-            slice<TestInstanceInfo_testInst>([
-                new(@"f", slice<@string>([@"string"]), @"func(func(int) string)"),
-                new(@"g", slice<@string>([@"int"]), @"func(int) string")
-            ])
+            [
+                new(@"f", [@"string"], @"func(func(int) string)"),
+                new(@"g", [@"int"], @"func(int) string")
+            ]
         ),
         new(@"package reverse4a; var _, _ func([]int, *float32) = g, h; func g[P, Q any]([]P, *Q) {}; func h[R any]([]R, *float32) {}",
-            slice<TestInstanceInfo_testInst>([
-                new(@"g", slice<@string>([@"int", @"float32"]), @"func([]int, *float32)"),
-                new(@"h", slice<@string>([@"int"]), @"func([]int, *float32)")
-            ])
+            [
+                new(@"g", [@"int", @"float32"], @"func([]int, *float32)"),
+                new(@"h", [@"int"], @"func([]int, *float32)")
+            ]
         ),
         new(@"package reverse4b; func f(_, _ func([]int, *float32)) {}; func g[P, Q any]([]P, *Q) {}; func h[R any]([]R, *float32) {}; func _() { f(g, h) }",
-            slice<TestInstanceInfo_testInst>([
-                new(@"g", slice<@string>([@"int", @"float32"]), @"func([]int, *float32)"),
-                new(@"h", slice<@string>([@"int"]), @"func([]int, *float32)")
-            ])
+            [
+                new(@"g", [@"int", @"float32"], @"func([]int, *float32)"),
+                new(@"h", [@"int"], @"func([]int, *float32)")
+            ]
         ),
         new(@"package issue59956; func f(func(int), func(string), func(bool)) {}; func g[P any](P) {}; func _() { f(g, g, g) }",
-            slice<TestInstanceInfo_testInst>([
-                new(@"g", slice<@string>([@"int"]), @"func(int)"),
-                new(@"g", slice<@string>([@"string"]), @"func(string)"),
-                new(@"g", slice<@string>([@"bool"]), @"func(bool)")
-            ])
+            [
+                new(@"g", [@"int"], @"func(int)"),
+                new(@"g", [@"string"], @"func(string)"),
+                new(@"g", [@"bool"], @"func(bool)")
+            ]
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestInstanceInfo_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -825,7 +817,7 @@ public static void TestInstanceInfo(ж<testing.T> t) {
             }
 
             // Pairwise compare with the expected instances.
-            foreach (var (ii, inst) in instances) {
+            foreach (var (ii, inst) in range(instances)) {
                 slice<typesꓸType> targs = default;
                 for (nint i = 0; i < inst.Inst.TypeArgs.Len(); i++) {
                     targs = append(targs, inst.Inst.TypeArgs.At(i));
@@ -841,11 +833,9 @@ public static void TestInstanceInfo(ж<testing.T> t) {
                 if (len(targs) != len(testInst.targs)) {
                     tΔ1.Fatalf("got %d type arguments; want %d", len(targs), len(testInst.targs));
                 }
-                foreach (var (i, targ) in targs) {
-                    {
-                        @string got = targ.String(); if (got != testInst.targs[i]) {
-                            tΔ1.Errorf("type argument %d: got %s; want %s", i, got, testInst.targs[i]);
-                        }
+                foreach (var (i, targ) in range(targs)) {
+                    @string got = targ.String(); if (got != testInst.targs[i]) {
+                        tΔ1.Errorf("type argument %d: got %s; want %s", i, got, testInst.targs[i]);
                     }
                 }
                 {
@@ -914,7 +904,7 @@ public static void TestDefsInfo(ж<testing.T> t) {
         new(@"package r2; type T[_, _ any] int; func (T[P, Q]) _() {}", @"Q", @"type parameter Q any")
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(
             Defs: new map<ж<ast.Ident>, types.Object>()
         ), out var Ꮡinfo);
@@ -933,10 +923,8 @@ public static void TestDefsInfo(ж<testing.T> t) {
             continue;
         }
 
-        {
-            @string got = def.String(); if (got != test.want) {
-                t.Errorf("package %s: got %s; want %s", name, got, test.want);
-            }
+        @string got = def.String(); if (got != test.want) {
+            t.Errorf("package %s: got %s; want %s", name, got, test.want);
         }
     }
 }
@@ -991,7 +979,7 @@ public static void TestUsesInfo(ж<testing.T> t) {
         new(@"package r2; type T[_, _ any] int; func (T[P, Q]) _() {}", @"Q", @"type parameter Q any")
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(
             Uses: new map<ж<ast.Ident>, types.Object>()
         ), out var Ꮡinfo);
@@ -1012,10 +1000,8 @@ public static void TestUsesInfo(ж<testing.T> t) {
             continue;
         }
 
-        {
-            @string got = use.String(); if (got != test.want) {
-                t.Errorf("package %s: got %s; want %s", name, got, test.want);
-            }
+        @string got = use.String(); if (got != test.want) {
+            t.Errorf("package %s: got %s; want %s", name, got, test.want);
         }
     }
 }
@@ -1043,7 +1029,7 @@ public static void TestGenericMethodInfo(ж<testing.T> t) {
         Selections: new map<ж<ast.SelectorExpr>, ж<types.Selection>>()
     ), out var Ꮡinfo);
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
-    var (pkg, err) = Ꮡconf.Check("p", fset, slice<ж<ast.File>>([f]), Ꮡinfo);
+    var (pkg, err) = Ꮡconf.Check("p", fset, [f], Ꮡinfo);
     if (err != nil) {
         t.Fatal(err);
     }
@@ -1061,7 +1047,7 @@ public static void TestGenericMethodInfo(ж<testing.T> t) {
     ж<types.Func> dn = default;
     ref var dmm = ref heap<ж<types.Func>>(out var Ꮡdmm); // the methods used in the body of m
     ref var dmn = ref heap<ж<types.Func>>(out var Ꮡdmn);
-    foreach (var (_, decl) in f.Decls) {
+    foreach (var (_, decl) in range(f.Decls)) {
         var (fdecl, ok) = decl._<ж<ast.FuncDecl>>(ᐧ);
         if (!ok) {
             continue;
@@ -1072,28 +1058,26 @@ public static void TestGenericMethodInfo(ж<testing.T> t) {
         case {} when exprᴛ1 == "m"u8: {
             dm = def;
             ast.Inspect(new ast.BlockStmtжNode(fdecl.Body), (ast.Node n) => {
-                {
-                    var (call, okΔ2) = n._<ж<ast.CallExpr>>(ᐧ); if (okΔ2) {
-                        var sel = call.Fun._<ж<ast.SelectorExpr>>();
-                        var use = Ꮡinfo.Value.Uses[sel.Sel]._<ж<types.Func>>();
-                        var selection = Ꮡinfo.Value.Selections[sel];
-                        if (selection.Kind() != MethodVal) {
-                            t.Errorf("Selection kind = %v, want %v", selection.Kind(), MethodVal);
-                        }
-                        if (!AreEqual(selection.Obj(), use)) {
-                            t.Errorf("info.Selections contains %v, want %v", selection.Obj(), use.OrTypedNil());
-                        }
-                        var exprᴛ2 = sel.Sel.Name;
-                        switch (ᐧ) {
-                        case {} when exprᴛ2 == "m"u8: {
-                            Ꮡdmm.ValueSlot = use;
-                            break;
-                        }
-                        case {} when exprᴛ2 == "n"u8: {
-                            Ꮡdmn.ValueSlot = use;
-                            break;
-                        }}
+                var (call, okΔ2) = n._<ж<ast.CallExpr>>(ᐧ); if (okΔ2) {
+                    var sel = call.Fun._<ж<ast.SelectorExpr>>();
+                    var use = Ꮡinfo.Value.Uses[sel.Sel]._<ж<types.Func>>();
+                    var selection = Ꮡinfo.Value.Selections[sel];
+                    if (selection.Kind() != MethodVal) {
+                        t.Errorf("Selection kind = %v, want %v", selection.Kind(), MethodVal);
                     }
+                    if (!AreEqual(selection.Obj(), use)) {
+                        t.Errorf("info.Selections contains %v, want %v", selection.Obj(), use.OrTypedNil());
+                    }
+                    var exprᴛ2 = sel.Sel.Name;
+                    switch (ᐧ) {
+                    case {} when exprᴛ2 == "m"u8: {
+                        Ꮡdmm.ValueSlot = use;
+                        break;
+                    }
+                    case {} when exprᴛ2 == "n"u8: {
+                        Ꮡdmn.ValueSlot = use;
+                        break;
+                    }}
                 }
                 return true;
             });
@@ -1162,7 +1146,7 @@ public static void TestImplicitsInfo(ж<testing.T> t) {
         new(@"package t3; func _[P any](x interface{}) { switch t := x.(type) { case P: _ = t } }", "caseClause: var t P")
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(
             Implicits: new map<ast.Node, types.Object>()
         ), out var Ꮡinfo);
@@ -1255,22 +1239,20 @@ public static void TestPkgNameOf(ж<testing.T> t) {
     ), out var Ꮡinfo);
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
     conf.Importer = defaultImporter(fset);
-    var (_, err) = Ꮡconf.Check("p", fset, slice<ж<ast.File>>([f]), Ꮡinfo);
+    var (_, err) = Ꮡconf.Check("p", fset, [f], Ꮡinfo);
     if (err != nil) {
         t.Fatal(err);
     }
 
     // map import paths to importDecl
     var imports = new map<@string, ж<ast.ImportSpec>>();
-    foreach (var (_, s) in f.Decls[0]._<ж<ast.GenDecl>>().Specs) {
-        {
-            var (imp, _) = s._<ж<ast.ImportSpec>>(ᐧ); if (imp != nil) {
-                imports[(~imp.Path).Value] = imp;
-            }
+    foreach (var (_, s) in range(f.Decls[0]._<ж<ast.GenDecl>>().Specs)) {
+        var (imp, _) = s._<ж<ast.ImportSpec>>(ᐧ); if (imp != nil) {
+            imports[(~imp.Path).Value] = imp;
         }
     }
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var imp = imports[test.path];
         if (imp == nil) {
             t.Fatalf("invalid test case: import path %s not found", test.path);
@@ -1415,7 +1397,7 @@ public static void TestPredicatesInfo(ж<testing.T> t) {
         new(@"package m6; type T int; func (x T) _() {}", @"x", @"<missing>")
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(Types: new map<ast.Expr, types.TypeAndValue>()), out var Ꮡinfo);
         @string name = mustTypecheck(test.src, nil, Ꮡinfo).Name();
 
@@ -1466,72 +1448,72 @@ public static void TestScopesInfo(ж<testing.T> t) {
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(t));
 
     slice<TestScopesInfo_type> tests = slice<TestScopesInfo_type>([
-        new(@"package p0", slice<@string>([
+        new(@"package p0", [
             "file:"
-        ])),
-        new(@"package p1; import ( ""fmt""; m ""math""; _ ""os"" ); var ( _ = fmt.Println; _ = m.Pi )", slice<@string>([
+        ]),
+        new(@"package p1; import ( ""fmt""; m ""math""; _ ""os"" ); var ( _ = fmt.Println; _ = m.Pi )", [
             "file:fmt m"
-        ])),
-        new(@"package p2; func _() {}", slice<@string>([
+        ]),
+        new(@"package p2; func _() {}", [
             "file:", "func:"
-        ])),
-        new(@"package p3; func _(x, y int) {}", slice<@string>([
+        ]),
+        new(@"package p3; func _(x, y int) {}", [
             "file:", "func:x y"
-        ])),
-        new(@"package p4; func _(x, y int) { x, z := 1, 2; _ = z }", slice<@string>([
+        ]),
+        new(@"package p4; func _(x, y int) { x, z := 1, 2; _ = z }", [
             "file:", "func:x y z" // redeclaration of x
-        ])),
-        new(@"package p5; func _(x, y int) (u, _ int) { return }", slice<@string>([
+        ]),
+        new(@"package p5; func _(x, y int) (u, _ int) { return }", [
             "file:", "func:u x y"
-        ])),
-        new(@"package p6; func _() { { var x int; _ = x } }", slice<@string>([
+        ]),
+        new(@"package p6; func _() { { var x int; _ = x } }", [
             "file:", "func:", "block:x"
-        ])),
-        new(@"package p7; func _() { if true {} }", slice<@string>([
+        ]),
+        new(@"package p7; func _() { if true {} }", [
             "file:", "func:", "if:", "block:"
-        ])),
-        new(@"package p8; func _() { if x := 0; x < 0 { y := x; _ = y } }", slice<@string>([
+        ]),
+        new(@"package p8; func _() { if x := 0; x < 0 { y := x; _ = y } }", [
             "file:", "func:", "if:x", "block:y"
-        ])),
-        new(@"package p9; func _() { switch x := 0; x {} }", slice<@string>([
+        ]),
+        new(@"package p9; func _() { switch x := 0; x {} }", [
             "file:", "func:", "switch:x"
-        ])),
-        new(@"package p10; func _() { switch x := 0; x { case 1: y := x; _ = y; default: }}", slice<@string>([
+        ]),
+        new(@"package p10; func _() { switch x := 0; x { case 1: y := x; _ = y; default: }}", [
             "file:", "func:", "switch:x", "case:y", "case:"
-        ])),
-        new(@"package p11; func _(t interface{}) { switch t.(type) {} }", slice<@string>([
+        ]),
+        new(@"package p11; func _(t interface{}) { switch t.(type) {} }", [
             "file:", "func:t", "type switch:"
-        ])),
-        new(@"package p12; func _(t interface{}) { switch t := t; t.(type) {} }", slice<@string>([
+        ]),
+        new(@"package p12; func _(t interface{}) { switch t := t; t.(type) {} }", [
             "file:", "func:t", "type switch:t"
-        ])),
-        new(@"package p13; func _(t interface{}) { switch x := t.(type) { case int: _ = x } }", slice<@string>([
+        ]),
+        new(@"package p13; func _(t interface{}) { switch x := t.(type) { case int: _ = x } }", [
             "file:", "func:t", "type switch:", "case:x" // x implicitly declared
-        ])),
-        new(@"package p14; func _() { select{} }", slice<@string>([
+        ]),
+        new(@"package p14; func _() { select{} }", [
             "file:", "func:"
-        ])),
-        new(@"package p15; func _(c chan int) { select{ case <-c: } }", slice<@string>([
+        ]),
+        new(@"package p15; func _(c chan int) { select{ case <-c: } }", [
             "file:", "func:c", "comm:"
-        ])),
-        new(@"package p16; func _(c chan int) { select{ case i := <-c: x := i; _ = x} }", slice<@string>([
+        ]),
+        new(@"package p16; func _(c chan int) { select{ case i := <-c: x := i; _ = x} }", [
             "file:", "func:c", "comm:i x"
-        ])),
-        new(@"package p17; func _() { for{} }", slice<@string>([
+        ]),
+        new(@"package p17; func _() { for{} }", [
             "file:", "func:", "for:", "block:"
-        ])),
-        new(@"package p18; func _(n int) { for i := 0; i < n; i++ { _ = i } }", slice<@string>([
+        ]),
+        new(@"package p18; func _(n int) { for i := 0; i < n; i++ { _ = i } }", [
             "file:", "func:n", "for:i", "block:"
-        ])),
-        new(@"package p19; func _(a []int) { for i := range a { _ = i} }", slice<@string>([
+        ]),
+        new(@"package p19; func _(a []int) { for i := range a { _ = i} }", [
             "file:", "func:a", "range:i", "block:"
-        ])),
-        new(@"package p20; var s int; func _(a []int) { for i, x := range a { s += x; _ = i } }", slice<@string>([
+        ]),
+        new(@"package p20; var s int; func _(a []int) { for i, x := range a { s += x; _ = i } }", [
             "file:", "func:a", "range:i x", "block:"
-        ]))
+        ])
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(Scopes: new map<ast.Node, ж<typesꓸScope>>()), out var Ꮡinfo);
         @string name = mustTypecheck(test.src, nil, Ꮡinfo).Name();
 
@@ -1601,47 +1583,47 @@ internal partial struct TestInitOrderInfo_type /*dyn*/ {
 
 public static void TestInitOrderInfo(ж<testing.T> t) {
     slice<TestInitOrderInfo_type> tests = slice<TestInitOrderInfo_type>([
-        new(@"package p0; var (x = 1; y = x)", slice<@string>([
+        new(@"package p0; var (x = 1; y = x)", [
             "x = 1", "y = x"
-        ])),
-        new(@"package p1; var (a = 1; b = 2; c = 3)", slice<@string>([
+        ]),
+        new(@"package p1; var (a = 1; b = 2; c = 3)", [
             "a = 1", "b = 2", "c = 3"
-        ])),
-        new(@"package p2; var (a, b, c = 1, 2, 3)", slice<@string>([
+        ]),
+        new(@"package p2; var (a, b, c = 1, 2, 3)", [
             "a = 1", "b = 2", "c = 3"
-        ])),
-        new(@"package p3; var _ = f(); func f() int { return 1 }", slice<@string>([
+        ]),
+        new(@"package p3; var _ = f(); func f() int { return 1 }", [
             "_ = f()" // blank var
-        ])),
-        new(@"package p4; var (a = 0; x = y; y = z; z = 0)", slice<@string>([
+        ]),
+        new(@"package p4; var (a = 0; x = y; y = z; z = 0)", [
             "a = 0", "z = 0", "y = z", "x = y"
-        ])),
-        new(@"package p5; var (a, _ = m[0]; m map[int]string)", slice<@string>([
+        ]),
+        new(@"package p5; var (a, _ = m[0]; m map[int]string)", [
             "a, _ = m[0]" // blank var
-        ])),
-        new(@"package p6; var a, b = f(); func f() (_, _ int) { return z, z }; var z = 0", slice<@string>([
+        ]),
+        new(@"package p6; var a, b = f(); func f() (_, _ int) { return z, z }; var z = 0", [
             "z = 0", "a, b = f()"
-        ])),
-        new(@"package p7; var (a = func() int { return b }(); b = 1)", slice<@string>([
+        ]),
+        new(@"package p7; var (a = func() int { return b }(); b = 1)", [
             "b = 1", "a = (func() int literal)()"
-        ])),
-        new(@"package p8; var (a, b = func() (_, _ int) { return c, c }(); c = 1)", slice<@string>([
+        ]),
+        new(@"package p8; var (a, b = func() (_, _ int) { return c, c }(); c = 1)", [
             "c = 1", "a, b = (func() (_, _ int) literal)()"
-        ])),
-        new(@"package p9; type T struct{}; func (T) m() int { _ = y; return 0 }; var x, y = T.m, 1", slice<@string>([
+        ]),
+        new(@"package p9; type T struct{}; func (T) m() int { _ = y; return 0 }; var x, y = T.m, 1", [
             "y = 1", "x = T.m"
-        ])),
-        new(@"package p10; var (d = c + b; a = 0; b = 0; c = 0)", slice<@string>([
+        ]),
+        new(@"package p10; var (d = c + b; a = 0; b = 0; c = 0)", [
             "a = 0", "b = 0", "c = 0", "d = c + b"
-        ])),
-        new(@"package p11; var (a = e + c; b = d + c; c = 0; d = 0; e = 0)", slice<@string>([
+        ]),
+        new(@"package p11; var (a = e + c; b = d + c; c = 0; d = 0; e = 0)", [
             "c = 0", "d = 0", "b = d + c", "e = 0", "a = e + c"
-        ])),
+        ]),
         // emit an initializer for n:1 initializations only once (not for each node
         // on the lhs which may appear in different order in the dependency graph)
-        new(@"package p12; var (a = x; b = 0; x, y = m[0]; m map[int]int)", slice<@string>([
+        new(@"package p12; var (a = x; b = 0; x, y = m[0]; m map[int]int)", [
             "b = 0", "x, y = m[0]", "a = x"
-        ])),
+        ]),
         // test case from spec section on package initialization
         new("""
 package p12
@@ -1657,9 +1639,9 @@ package p12
 			d++
 			return d
 		}
-"""u8.Raw(), slice<@string>([
+"""u8.Raw(), [
             "d = 3", "b = f()", "c = f()", "a = c + b"
-        ])),
+        ]),
         // test case for go.dev/issue/7131
         new("""
 package main
@@ -1674,9 +1656,9 @@ package main
 		var b, c    = next(), next()
 		var d, e, f = next(), next(), next()
 		
-"""u8.Raw(), slice<@string>([
+"""u8.Raw(), [
             "a = next()", "b = next()", "c = next()", "d = next()", "e = next()", "f = next()", "_ = makeOrder()"
-        ])),
+        ]),
         // test case for go.dev/issue/10709
         new("""
 package p13
@@ -1696,9 +1678,9 @@ package p13
 		    }
 		    return T{}
 		}
-"""u8.Raw(), slice<@string>([
+"""u8.Raw(), [
             "t = makeT(0)", "v = t.m()"
-        ])),
+        ]),
         // test case for go.dev/issue/10709: same as test before, but variable decls swapped
         new("""
 package p14
@@ -1718,9 +1700,9 @@ package p14
 		    }
 		    return T{}
 		}
-"""u8.Raw(), slice<@string>([
+"""u8.Raw(), [
             "t = makeT(0)", "v = t.m()"
-        ])),
+        ]),
         // another candidate possibly causing problems with go.dev/issue/10709
         new("""
 package p15
@@ -1738,12 +1720,12 @@ package p15
 		func g2() int { return x2 }
 
 		var x2 = 0
-"""u8.Raw(), slice<@string>([
+"""u8.Raw(), [
             "x1 = 0", "y1 = f1()", "x2 = 0", "y2 = f2()"
-        ]))
+        ])
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(), out var Ꮡinfo);
         @string name = mustTypecheck(test.src, nil, Ꮡinfo).Name();
 
@@ -1754,7 +1736,7 @@ package p15
         }
 
         // initializers must match
-        foreach (var (i, want) in test.inits) {
+        foreach (var (i, want) in range(test.inits)) {
             @string got = info.InitOrder[i].String();
             if (got != want) {
                 t.Errorf("package %s, init %d: got %s; want %s", name, i, got, want);
@@ -1785,20 +1767,16 @@ public static void TestMultiFileInitOrder(ж<testing.T> t) {
     // The initialization order must not depend on the parse
     // order of the files, only on the presentation order to
     // the type-checker.
-    foreach (var (_, test) in slice<TestMultiFileInitOrder_type>([
-        new(slice<ж<ast.File>>([fileA, fileB]), "[a = 1 b = 2]"),
-        new(slice<ж<ast.File>>([fileB, fileA]), "[b = 2 a = 1]")
-    ])) {
+    foreach (var (_, test) in range(slice<TestMultiFileInitOrder_type>([
+        new([fileA, fileB], "[a = 1 b = 2]"),
+        new([fileB, fileA], "[b = 2 a = 1]")
+    ]))) {
         ref var info = ref heap(new typesꓸInfo(), out var Ꮡinfo);
-        {
-            var (_, err) = @new<types.Config>().Check(mainˢ, fset, test.files, Ꮡinfo); if (err != nil) {
-                t.Fatal(err);
-            }
+        var (_, err) = @new<types.Config>().Check(mainˢ, fset, test.files, Ꮡinfo); if (err != nil) {
+            t.Fatal(err);
         }
-        {
-            @string got = fmt.Sprint(info.InitOrder); if (got != test.want) {
-                t.Fatalf("got %s; want %s", got, test.want);
-            }
+        @string got = fmt.Sprint(info.InitOrder); if (got != test.want) {
+            t.Fatalf("got %s; want %s", got, test.want);
         }
     }
 }
@@ -1817,36 +1795,30 @@ public static void TestFiles(ж<testing.T> t) {
     ref var info = ref heap(new typesꓸInfo(), out var Ꮡinfo);
     var check = NewChecker(Ꮡconf, fset, pkg, Ꮡinfo);
 
-    foreach (var (_, src) in sources) {
-        {
-            var err = check.Files(slice<ж<ast.File>>([mustParse(fset, src)])); if (err != nil) {
-                t.Error(err);
-            }
+    foreach (var (_, src) in range(sources)) {
+        var err = check.Files(slice<ж<ast.File>>([mustParse(fset, src)])); if (err != nil) {
+            t.Error(err);
         }
     }
 
     // check InitOrder is [x y]
     slice<@string> vars = default;
-    foreach (var (_, init) in info.InitOrder) {
-        foreach (var (_, v) in init.Lhs) {
+    foreach (var (_, init) in range(info.InitOrder)) {
+        foreach (var (_, v) in range(init.Lhs)) {
             vars = append(vars, v.Name());
         }
     }
-    {
-        @string got = fmt.Sprint(vars);
-        @string want = "[x y]"; if (got != want) {
-            t.Errorf("InitOrder == %s, want %s", got, want);
-        }
+    @string got = fmt.Sprint(vars);
+    @string want = "[x y]"; if (got != want) {
+        t.Errorf("InitOrder == %s, want %s", got, want);
     }
 }
 
 partial struct testImporter /*map[@string, ж<types.Package>]*/;
 
 internal static (ж<types.Package>, error) Import(this testImporter m, @string path) {
-    {
-        var pkg = m[path]; if (pkg != nil) {
-            return (pkg, default);
-        }
+    var pkg = m[path]; if (pkg != nil) {
+        return (pkg, default);
     }
     return (default, fmt.Errorf("package %q not found"u8, path));
 }
@@ -2146,10 +2118,8 @@ public static void TestLookupFieldOrMethodOnNil(ж<testing.T> t) {
         defer(() => {
             @string want = wantᶜ;
             var p = recover();
-            {
-                var (s, ok) = p._<@string>(ᐧ); if (!ok || s != want) {
-                    t.Fatalf("got %v, want %s", p, want);
-                }
+            var (s, ok) = p._<@string>(ᐧ); if (!ok || s != want) {
+                t.Fatalf("got %v, want %s", p, want);
             }
         }, ref ᒐ);
         LookupFieldOrMethod(default, false, nil, ""u8);
@@ -2174,33 +2144,33 @@ public static void TestLookupFieldOrMethod(ж<testing.T> t) {
     slice<TestLookupFieldOrMethod_type> tests = slice<TestLookupFieldOrMethod_type>([
         // field lookups
         new("var x T; type T struct{}", false, default, false),
-        new("var x T; type T struct{ f int }", true, slice<nint>([0]), false),
-        new("var x T; type T struct{ a, b, f, c int }", true, slice<nint>([2]), false),
+        new("var x T; type T struct{ f int }", true, [0], false),
+        new("var x T; type T struct{ a, b, f, c int }", true, [2], false),
 
         // field lookups on a generic type
         new("var x T[int]; type T[P any] struct{}", false, default, false),
-        new("var x T[int]; type T[P any] struct{ f P }", true, slice<nint>([0]), false),
-        new("var x T[int]; type T[P any] struct{ a, b, f, c P }", true, slice<nint>([2]), false),
+        new("var x T[int]; type T[P any] struct{ f P }", true, [0], false),
+        new("var x T[int]; type T[P any] struct{ a, b, f, c P }", true, [2], false),
 
         // method lookups
-        new("var a T; type T struct{}; func (T) f() {}", true, slice<nint>([0]), false),
-        new("var a *T; type T struct{}; func (T) f() {}", true, slice<nint>([0]), true),
-        new("var a T; type T struct{}; func (*T) f() {}", true, slice<nint>([0]), false),
-        new("var a *T; type T struct{}; func (*T) f() {}", true, slice<nint>([0]), true), // TODO(gri) should this report indirect = false?
+        new("var a T; type T struct{}; func (T) f() {}", true, [0], false),
+        new("var a *T; type T struct{}; func (T) f() {}", true, [0], true),
+        new("var a T; type T struct{}; func (*T) f() {}", true, [0], false),
+        new("var a *T; type T struct{}; func (*T) f() {}", true, [0], true), // TODO(gri) should this report indirect = false?
 
         // method lookups on a generic type
-        new("var a T[int]; type T[P any] struct{}; func (T[P]) f() {}", true, slice<nint>([0]), false),
-        new("var a *T[int]; type T[P any] struct{}; func (T[P]) f() {}", true, slice<nint>([0]), true),
-        new("var a T[int]; type T[P any] struct{}; func (*T[P]) f() {}", true, slice<nint>([0]), false),
-        new("var a *T[int]; type T[P any] struct{}; func (*T[P]) f() {}", true, slice<nint>([0]), true), // TODO(gri) should this report indirect = false?
+        new("var a T[int]; type T[P any] struct{}; func (T[P]) f() {}", true, [0], false),
+        new("var a *T[int]; type T[P any] struct{}; func (T[P]) f() {}", true, [0], true),
+        new("var a T[int]; type T[P any] struct{}; func (*T[P]) f() {}", true, [0], false),
+        new("var a *T[int]; type T[P any] struct{}; func (*T[P]) f() {}", true, [0], true), // TODO(gri) should this report indirect = false?
 
         // collisions
-        new("type ( E1 struct{ f int }; E2 struct{ f int }; x struct{ E1; *E2 })", false, slice<nint>([1, 0]), false),
-        new("type ( E1 struct{ f int }; E2 struct{}; x struct{ E1; *E2 }); func (E2) f() {}", false, slice<nint>([1, 0]), false),
+        new("type ( E1 struct{ f int }; E2 struct{ f int }; x struct{ E1; *E2 })", false, [1, 0], false),
+        new("type ( E1 struct{ f int }; E2 struct{}; x struct{ E1; *E2 }); func (E2) f() {}", false, [1, 0], false),
 
         // collisions on a generic type
-        new("type ( E1[P any] struct{ f P }; E2[P any] struct{ f P }; x struct{ E1[int]; *E2[int] })", false, slice<nint>([1, 0]), false),
-        new("type ( E1[P any] struct{ f P }; E2[P any] struct{}; x struct{ E1[int]; *E2[int] }); func (E2[P]) f() {}", false, slice<nint>([1, 0]), false),
+        new("type ( E1[P any] struct{ f P }; E2[P any] struct{ f P }; x struct{ E1[int]; *E2[int] })", false, [1, 0], false),
+        new("type ( E1[P any] struct{ f P }; E2[P any] struct{}; x struct{ E1[int]; *E2[int] }); func (E2[P]) f() {}", false, [1, 0], false),
 
         // outside methodset
         // (*T).f method exists, but value of type T is not addressable
@@ -2210,20 +2180,18 @@ public static void TestLookupFieldOrMethod(ж<testing.T> t) {
         new("var x T[int]; type T[P any] struct{}; func (*T[P]) f() {}", false, default, true),
 
         // recursive generic types; see go.dev/issue/52715
-        new("var a T[int]; type ( T[P any] struct { *N[P] }; N[P any] struct { *T[P] } ); func (N[P]) f() {}", true, slice<nint>([0, 0]), true),
-        new("var a T[int]; type ( T[P any] struct { *N[P] }; N[P any] struct { *T[P] } ); func (T[P]) f() {}", true, slice<nint>([0]), false)
+        new("var a T[int]; type ( T[P any] struct { *N[P] }; N[P any] struct { *T[P] } ); func (N[P]) f() {}", true, [0, 0], true),
+        new("var a T[int]; type ( T[P any] struct { *N[P] }; N[P any] struct { *T[P] } ); func (T[P]) f() {}", true, [0], false)
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var pkg = mustTypecheck("package p;"u8 + test.src, nil, nil);
 
         var obj = pkg.Scope().Lookup("a");
         if (obj == nil) {
-            {
-                obj = pkg.Scope().Lookup("x"); if (obj == nil) {
-                    t.Errorf("%s: incorrect test case - no object a or x", test.src);
-                    continue;
-                }
+            obj = pkg.Scope().Lookup("x"); if (obj == nil) {
+                t.Errorf("%s: incorrect test case - no object a or x", test.src);
+                continue;
             }
         }
 
@@ -2277,10 +2245,8 @@ public static void TestLookupFieldOrMethod_RecursiveGeneric(ж<testing.T> t) {
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);
     var pkg = NewPackage(pkgˢ, f.Name.Name);
-    {
-        var err = NewChecker(nil, fset, pkg, nil).Files(slice<ж<ast.File>>([f])); if (err != nil) {
-            throw panic(err);
-        }
+    var err = NewChecker(nil, fset, pkg, nil).Files([f]); if (err != nil) {
+        throw panic(err);
     }
 
     var T = pkg.Scope().Lookup(instanceˢ).Type();
@@ -2302,7 +2268,7 @@ internal partial struct TestConvertibleTo_type /*dyn*/ {
 public static void TestConvertibleTo(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    foreach (var (_, test) in slice<TestConvertibleTo_type>([
+    foreach (var (_, test) in range(slice<TestConvertibleTo_type>([
         new(new types.BasicжΔType(Typ[Int]), new types.BasicжΔType(Typ[Int]), true),
         new(new types.BasicжΔType(Typ[Int]), new types.BasicжΔType(Typ[Float32]), true),
         new(new types.BasicжΔType(Typ[Int]), new types.BasicжΔType(Typ[ΔString]), true),
@@ -2316,11 +2282,9 @@ public static void TestConvertibleTo(ж<testing.T> Ꮡt) {
         new(new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int]))), new types.PointerжΔType(NewPointer(new types.ArrayжΔType(NewArray(new types.BasicжΔType(Typ[Uint]), 10)))), false),
         // Untyped string values are not permitted by the spec, so the behavior below is undefined.
         new(new types.BasicжΔType(Typ[UntypedString]), new types.BasicжΔType(Typ[ΔString]), true)
-    ])) {
-        {
-            var got = ConvertibleTo(test.v, test.t); if (got != test.want) {
-                Ꮡt.Errorf("ConvertibleTo(%v, %v) = %t, want %t", test.v, test.t, got, test.want);
-            }
+    ]))) {
+        var got = ConvertibleTo(test.v, test.t); if (got != test.want) {
+            Ꮡt.Errorf("ConvertibleTo(%v, %v) = %t, want %t", test.v, test.t, got, test.want);
         }
     }
 }
@@ -2333,7 +2297,7 @@ internal partial struct TestAssignableTo_type /*dyn*/ {
 public static void TestAssignableTo(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    foreach (var (_, test) in slice<TestAssignableTo_type>([
+    foreach (var (_, test) in range(slice<TestAssignableTo_type>([
         new(new types.BasicжΔType(Typ[Int]), new types.BasicжΔType(Typ[Int]), true),
         new(new types.BasicжΔType(Typ[Int]), new types.BasicжΔType(Typ[Float32]), false),
         new(new types.NamedжΔType(newDefined(new types.BasicжΔType(Typ[Int]))), new types.BasicжΔType(Typ[Int]), false),
@@ -2345,11 +2309,9 @@ public static void TestAssignableTo(ж<testing.T> Ꮡt) {
         // the spec.
         new(new types.BasicжΔType(Typ[UntypedString]), new types.BasicжΔType(Typ[ΔString]), true),
         new(new types.BasicжΔType(Typ[ΔUntypedInt]), new types.BasicжΔType(Typ[Int]), true)
-    ])) {
-        {
-            var got = AssignableTo(test.v, test.t); if (got != test.want) {
-                Ꮡt.Errorf("AssignableTo(%v, %v) = %t, want %t", test.v, test.t, got, test.want);
-            }
+    ]))) {
+        var got = AssignableTo(test.v, test.t); if (got != test.want) {
+            Ꮡt.Errorf("AssignableTo(%v, %v) = %t, want %t", test.v, test.t, got, test.want);
         }
     }
 }
@@ -2392,17 +2354,15 @@ public static void TestIdentical(ж<testing.T> t) {
         new(@"func X[P ~int]([]P){}; func Y[Q ~int]([]Q) {}", true)
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         var pkg = mustTypecheck("package p;"u8 + test.src, nil, nil);
         var X = pkg.Scope().Lookup("X");
         var Y = pkg.Scope().Lookup("Y");
         if (X == nil || Y == nil) {
             t.Fatal(testMustDeclareBothXAndYˢ);
         }
-        {
-            var got = Identical(X.Type(), Y.Type()); if (got != test.want) {
-                t.Errorf("Identical(%s, %s) = %t, want %t", X.Type(), Y.Type(), got, test.want);
-            }
+        var got = Identical(X.Type(), Y.Type()); if (got != test.want) {
+            t.Errorf("Identical(%s, %s) = %t, want %t", X.Type(), Y.Type(), got, test.want);
         }
     }
 }
@@ -2414,16 +2374,14 @@ internal partial struct TestIdentical_issue15173_type /*dyn*/ {
 
 public static void TestIdentical_issue15173(ж<testing.T> t) {
     // Identical should allow nil arguments and be symmetric.
-    foreach (var (_, test) in slice<TestIdentical_issue15173_type>([
+    foreach (var (_, test) in range(slice<TestIdentical_issue15173_type>([
         new(new types.BasicжΔType(Typ[Int]), new types.BasicжΔType(Typ[Int]), true),
         new(new types.BasicжΔType(Typ[Int]), default, false),
         new(default, new types.BasicжΔType(Typ[Int]), false),
         new(default, default, true)
-    ])) {
-        {
-            var got = Identical(test.x, test.y); if (got != test.want) {
-                t.Errorf("Identical(%v, %v) = %t", test.x, test.y, got);
-            }
+    ]))) {
+        var got = Identical(test.x, test.y); if (got != test.want) {
+            t.Errorf("Identical(%v, %v) = %t", test.x, test.y, got);
         }
     }
 }
@@ -2451,7 +2409,7 @@ public static void TestIdenticalUnions(ж<testing.T> t) {
     ж<types.Union> makeUnion(@string s) {
         var parts = strings.Split(s, "|");
         slice<ж<typesꓸTerm>> terms = default;
-        foreach (var (_, p) in parts) {
+        foreach (var (_, p) in range(parts)) {
             var term = tmapʗ1[p];
             if (term == nil) {
                 t.Fatalf("missing term %q", p);
@@ -2460,7 +2418,7 @@ public static void TestIdenticalUnions(ж<testing.T> t) {
         }
         return NewUnion(terms);
     }
-    foreach (var (_, test) in slice<TestIdenticalUnions_type>([
+    foreach (var (_, test) in range(slice<TestIdenticalUnions_type>([
         // These tests are just sanity checks. The tests for type sets and
         // interfaces provide much more test coverage.
         new("int|~int", "~int", true),
@@ -2468,13 +2426,11 @@ public static void TestIdenticalUnions(ж<testing.T> t) {
         new("int|string", "string|int", true),
         new("int|int|string", "string|int", true),
         new("myInt|string", "int|string", false)
-    ])) {
+    ]))) {
         var x = makeUnion(test.x);
         var y = makeUnion(test.y);
-        {
-            var got = Identical(new types.UnionжΔType(x), new types.UnionжΔType(y)); if (got != test.want) {
-                t.Errorf("Identical(%v, %v) = %t", test.x, test.y, got);
-            }
+        var got = Identical(new types.UnionжΔType(x), new types.UnionжΔType(y)); if (got != test.want) {
+            t.Errorf("Identical(%v, %v) = %t", test.x, test.y, got);
         }
     }
 }
@@ -2498,7 +2454,7 @@ public static void TestIssue61737(ж<testing.T> t) {
         NewFunc(nopos, nil, "M", sig2)
     ]);
     var embedded = NewInterfaceType(embeddedMethods, default);
-    var iface = NewInterfaceType(methods, slice<typesꓸType>([new types.InterfaceжΔType(embedded)]));
+    var iface = NewInterfaceType(methods, [new types.InterfaceжΔType(embedded)]);
     iface.Complete();
 }
 
@@ -2523,15 +2479,13 @@ public static void TestIssue15305(ж<testing.T> t) {
     var info = Ꮡ(new typesꓸInfo(
         Types: new map<ast.Expr, types.TypeAndValue>()
     ));
-    Ꮡconf.Check("p", fset, slice<ж<ast.File>>([f]), info); // ignore result
+    Ꮡconf.Check("p", fset, [f], info); // ignore result
     foreach (var (e, tv) in info.Types) {
-        {
-            var (_, ok) = e._<ж<ast.CallExpr>>(ᐧ); if (ok) {
-                if (!AreEqual(tv.Type, Typ[Int16])) {
-                    t.Errorf("CallExpr has type %v, want int16", tv.Type);
-                }
-                return;
+        var (_, ok) = e._<ж<ast.CallExpr>>(ᐧ); if (ok) {
+            if (!AreEqual(tv.Type, Typ[Int16])) {
+                t.Errorf("CallExpr has type %v, want int16", tv.Type);
             }
+            return;
         }
     }
     t.Errorf("CallExpr has no type");
@@ -2545,7 +2499,7 @@ internal partial struct TestCompositeLitTypes_type /*dyn*/ {
 // types for composite literal expressions and composite literal type
 // expressions.
 public static void TestCompositeLitTypes(ж<testing.T> t) {
-    foreach (var (i, vᴛ1) in slice<TestCompositeLitTypes_type>([
+    foreach (var (i, vᴛ1) in range(slice<TestCompositeLitTypes_type>([
         new(@"[16]byte{}", @"[16]byte"),
         new(@"[...]byte{}", @"[0]byte"),                // test for go.dev/issue/14092
         new(@"[...]int{1, 2, 3}", @"[3]int"),           // test for go.dev/issue/14092
@@ -2554,17 +2508,15 @@ public static void TestCompositeLitTypes(ж<testing.T> t) {
         new(@"map[string]bool{""foo"": true}", @"map[string]bool"),
         new(@"struct{}{}", @"struct{}"),
         new(@"struct{x, y int; z complex128}{}", @"struct{x int; y int; z complex128}")
-    ])) {
+    ]))) {
         ref var test = ref heap(new TestCompositeLitTypes_type(), out var Ꮡtest);
         test = vᴛ1;
 
         var fset = token.NewFileSet();
         var f = mustParse(fset, fmt.Sprintf("package p%d; var _ = %s"u8, i, test.lit));
         var types = new map<ast.Expr, types.TypeAndValue>();
-        {
-            var (_, err) = @new<types.Config>().Check("p", fset, slice<ж<ast.File>>([f]), Ꮡ(new typesꓸInfo(Types: types))); if (err != nil) {
-                t.Fatalf("%s: %v", test.lit, err);
-            }
+        var (_, err) = @new<types.Config>().Check("p", fset, [f], Ꮡ(new typesꓸInfo(Types: types))); if (err != nil) {
+            t.Fatalf("%s: %v", test.lit, err);
         }
 
         var testʗ1 = test;
@@ -2579,10 +2531,8 @@ public static void TestCompositeLitTypes(ж<testing.T> t) {
                 t.Errorf("%s: type is nil", testʗ1.lit);
                 return;
             }
-            {
-                @string got = tv.Type.String(); if (got != want) {
-                    t.Errorf("%s: got %v, want %s", testʗ1.lit, got, want);
-                }
+            @string got = tv.Type.String(); if (got != want) {
+                t.Errorf("%s: got %v, want %s", testʗ1.lit, got, want);
             }
         }
 
@@ -2631,10 +2581,8 @@ public static void TestObjectParents(ж<testing.T> t) {
     var info = Ꮡ(new typesꓸInfo(
         Defs: new map<ж<ast.Ident>, types.Object>()
     ));
-    {
-        var (_, err) = @new<types.Config>().Check("p", fset, slice<ж<ast.File>>([f]), info); if (err != nil) {
-            t.Fatal(err);
-        }
+    var (_, err) = @new<types.Config>().Check("p", fset, [f], info); if (err != nil) {
+        t.Fatal(err);
     }
 
     foreach (var (ident, obj) in info.Defs) {
@@ -2707,7 +2655,7 @@ public static void TestFailedImport(ж<testing.T> t) {
     var files = slice<ж<ast.File>>([f]);
 
     // type-check using all possible importers
-    foreach (var (_, compiler) in slice<@string>(["gc", "gccgo", "source"])) {
+    foreach (var (_, compiler) in range(slice<@string>(["gc", "gccgo", "source"]))) {
         nint errcount = 0;
         ref var conf = ref heap<types.Config>(new Config(
             Error: (error err) => {
@@ -2743,14 +2691,12 @@ public static void TestFailedImport(ж<testing.T> t) {
         // verify that all uses of foo refer to the imported package foo (imp)
         foreach (var (ident, obj) in info.Uses) {
             if (ident.Name == "foo"u8) {
-                {
-                    var (objΔ1, ok) = obj._<ж<types.PkgName>>(ᐧ); if (ok) {
-                        if (objΔ1.Imported() != imp) {
-                            t.Errorf("%s resolved to %v; want %v", ident.OrTypedNil(), objΔ1.Imported().OrTypedNil(), imp.OrTypedNil());
-                        }
-                    } else {
-                        t.Errorf("%s resolved to %v; want package name", ident.OrTypedNil(), objΔ1.OrTypedNil());
+                var (objΔ1, ok) = obj._<ж<types.PkgName>>(ᐧ); if (ok) {
+                    if (objΔ1.Imported() != imp) {
+                        t.Errorf("%s resolved to %v; want %v", ident.OrTypedNil(), objΔ1.Imported().OrTypedNil(), imp.OrTypedNil());
                     }
+                } else {
+                    t.Errorf("%s resolved to %v; want package name", ident.OrTypedNil(), objΔ1.OrTypedNil());
                 }
             }
         }
@@ -2768,24 +2714,20 @@ public static void TestInstantiate(ж<testing.T> t) {
 
     // type T should have one type parameter
     var T = pkg.Scope().Lookup("T").Type()._<ж<types.Named>>();
-    {
-        nint n = T.TypeParams().Len(); if (n != 1) {
-            t.Fatalf("expected 1 type parameter; found %d", n);
-        }
+    nint n = T.TypeParams().Len(); if (n != 1) {
+        t.Fatalf("expected 1 type parameter; found %d", n);
     }
 
     // instantiation should succeed (no endless recursion)
     // even with a nil *Checker
-    var (res, err) = Instantiate(nil, new types.NamedжΔType(T), slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]), false);
+    var (res, err) = Instantiate(nil, new types.NamedжΔType(T), [new types.BasicжΔType(Typ[Int])], false);
     if (err != nil) {
         t.Fatal(err);
     }
 
     // instantiated type should point to itself
-    {
-        var p = res.Underlying()._<ж<types.Pointer>>().Elem(); if (!AreEqual(p, res)) {
-            t.Fatalf("unexpected result type: %s points to %s", res, p);
-        }
+    var p = res.Underlying()._<ж<types.Pointer>>().Elem(); if (!AreEqual(p, res)) {
+        t.Fatalf("unexpected result type: %s points to %s", res, p);
     }
 }
 
@@ -2817,7 +2759,7 @@ public static partial void TestInstantiateConcurrent(ж<testing.T> t) {
     ]);
 
     // Use the interface instances concurrently.
-    foreach (var (_, inst) in insts) {
+    foreach (var (_, inst) in range(insts)) {
         ref var counts = ref heap(new array<nint>(2), out var Ꮡcounts);             // method counts
         ref var methods = ref heap(new array<slice<@string>>(2), out var Ꮡmethods); // method strings
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
@@ -2846,11 +2788,9 @@ public static partial void TestInstantiateConcurrent(ж<testing.T> t) {
             continue;
         }
         for (nint i = 0; i < counts[0]; i++) {
-            {
-                @string m0 = methods[0][i];
-                @string m1 = methods[1][i]; if (m0 != m1) {
-                    t.Errorf("mismatching methods for %s: %s vs %s", inst.OrTypedNil(), m0, m1);
-                }
+            @string m0 = methods[0][i];
+            @string m1 = methods[1][i]; if (m0 != m1) {
+                t.Errorf("mismatching methods for %s: %s vs %s", inst.OrTypedNil(), m0, m1);
             }
         }
     }
@@ -2864,13 +2804,13 @@ internal partial struct TestInstantiateErrors_tests /*dyn*/ {
 
 public static void TestInstantiateErrors(ж<testing.T> t) {
     var tests = slice<TestInstantiateErrors_tests>([
-        new("type T[P interface{~string}] int", slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]), 0),
-        new("type T[P1 interface{int}, P2 interface{~string}] int", slice<typesꓸType>([new types.BasicжΔType(Typ[Int]), new types.BasicжΔType(Typ[Int])]), 1),
+        new("type T[P interface{~string}] int", [new types.BasicжΔType(Typ[Int])], 0),
+        new("type T[P1 interface{int}, P2 interface{~string}] int", [new types.BasicжΔType(Typ[Int]), new types.BasicжΔType(Typ[Int])], 1),
         new("type T[P1 any, P2 interface{~[]P1}] int", slice<typesꓸType>([new types.BasicжΔType(Typ[Int]), new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[ΔString])))]), 1),
         new("type T[P1 interface{~[]P2}, P2 any] int", slice<typesꓸType>([new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[ΔString]))), new types.BasicжΔType(Typ[Int])]), 0)
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         @string src = "package p; "u8 + test.src;
         var pkg = mustTypecheck(src, nil, nil);
 
@@ -2926,7 +2866,7 @@ public static void TestInstanceIdentity(ж<testing.T> t) {
         var fset = token.NewFileSet();
         var f = mustParse(fset, src);
         @string name = f.Name.Name;
-        var (pkg, err) = Ꮡconf.Check(name, fset, slice<ж<ast.File>>([f]), nil);
+        var (pkg, err) = Ꮡconf.Check(name, fset, [f], nil);
         if (err != nil) {
             t.Fatal(err);
         }
@@ -2994,7 +2934,7 @@ public static void TestInstantiatedObjects(ж<testing.T> t) {
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);
     ref var conf = ref heap<types.Config>(new Config(), out var Ꮡconf);
-    var (pkg, err) = Ꮡconf.Check(f.Name.Name, fset, slice<ж<ast.File>>([f]), info);
+    var (pkg, err) = Ꮡconf.Check(f.Name.Name, fset, [f], info);
     if (err != nil) {
         t.Fatal(err);
     }
@@ -3030,15 +2970,13 @@ public static void TestInstantiatedObjects(ж<testing.T> t) {
     var idents = new map<@string, slice<ж<ast.Ident>>>();
     var identsʗ1 = idents;
     ast.Inspect(new ast.FileжNode(f), (ast.Node n) => {
-        {
-            var (id, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok) {
-                identsʗ1[id.Name] = append(identsʗ1[id.Name], id);
-            }
+        var (id, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok) {
+            identsʗ1[id.Name] = append(identsʗ1[id.Name], id);
         }
         return true;
     });
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestInstantiatedObjects_tests(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -3046,20 +2984,16 @@ public static void TestInstantiatedObjects(ж<testing.T> t) {
         var infoʗ1 = info;
         var testʗ1 = test;
         t.Run(test.name, (ж<testing.T> tΔ1) => {
-            {
-                nint got = len(identsʗ2[testʗ1.name]); if (got != 1) {
-                    tΔ1.Fatalf("found %d identifiers named %s, want 1", got, testʗ1.name);
-                }
+            nint got = len(identsʗ2[testʗ1.name]); if (got != 1) {
+                tΔ1.Fatalf("found %d identifiers named %s, want 1", got, testʗ1.name);
             }
             var ident = identsʗ2[testʗ1.name][0];
             var def = infoʗ1.Defs[ident];
             if (AreEqual(def, testʗ1.obj)) {
                 tΔ1.Fatalf("info.Defs[%s] contains the test object", testʗ1.name);
             }
-            {
-                var orig = originObject(testʗ1.obj); if (!AreEqual(def, orig)) {
-                    tΔ1.Errorf("info.Defs[%s] does not match obj.Origin()", testʗ1.name);
-                }
+            var orig = originObject(testʗ1.obj); if (!AreEqual(def, orig)) {
+                tΔ1.Errorf("info.Defs[%s] does not match obj.Origin()", testʗ1.name);
             }
             if (def.Pkg() != testʗ1.obj.Pkg()) {
                 tΔ1.Errorf("Pkg() = %v, want %v", def.Pkg().OrTypedNil(), testʗ1.obj.Pkg().OrTypedNil());
@@ -3160,7 +3094,7 @@ public static void TestImplements(ж<testing.T> t) {
     var f = mustParse(fset, src);
     ref var conf = ref heap<types.Config>(new Config(Error: (error _Δp0) => {
     }), out var Ꮡconf);
-    var (pkg, _) = Ꮡconf.Check(f.Name.Name, fset, slice<ж<ast.File>>([f]), nil);
+    var (pkg, _) = Ꮡconf.Check(f.Name.Name, fset, [f], nil);
 
     var pkgʗ1 = pkg;
     typesꓸType lookup(@string tname) => pkgʗ1.Scope().Lookup(tname).Type();
@@ -3207,7 +3141,7 @@ public static void TestImplements(ж<testing.T> t) {
         new(Bad, EmptyIface, true)
     ]);
 
-    foreach (var (_, test) in tests) {
+    foreach (var (_, test) in range(tests)) {
         {
             var got = Implements(test.V, test.T); if (got != test.want) {
                 t.Errorf("Implements(%s, %s) = %t, want %t", test.V, test.T.OrTypedNil(), got, test.want);
@@ -3219,10 +3153,8 @@ public static void TestImplements(ж<testing.T> t) {
         var V = test.T;
         var T = test.V;
         var want = false;
-        {
-            var (_, ok) = T.Underlying()._<ж<types.Interface>>(ᐧ); if ((ok || Implements(T, V)) && !AreEqual(T, Bad)) {
-                want = true;
-            }
+        var (_, ok) = T.Underlying()._<ж<types.Interface>>(ᐧ); if ((ok || Implements(T, V)) && !AreEqual(T, Bad)) {
+            want = true;
         }
         {
             var got = AssertableTo(V, T); if (got != want) {
@@ -3349,12 +3281,12 @@ private static readonly @string packagePˢᵇ = "package p"u8;
 public static void TestModuleVersion(ж<testing.T> t) {
     // version go1.dd must be able to typecheck go1.dd.0, go1.dd.1, etc.
     @string goversionΔ1 = fmt.Sprintf("go1.%d"u8, (nint)(goversion.Version));
-    foreach (var (_, v) in slice<@string>([
+    foreach (var (_, v) in range(slice<@string>([
         goversionΔ1,
         goversionΔ1 + ".0"u8,
         goversionΔ1 + ".1"u8,
         goversionΔ1 + ".rc"u8
-    ])) {
+    ]))) {
         ref var conf = ref heap<types.Config>(new Config(GoVersion: v), out var Ꮡconf);
         var pkg = mustTypecheck(packagePˢ, Ꮡconf, nil);
         if (pkg.GoVersion() != conf.GoVersion) {
@@ -3370,7 +3302,7 @@ internal partial struct TestFileVersions_type /*dyn*/ {
 }
 
 public static void TestFileVersions(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestFileVersions_type>([
+    foreach (var (_, test) in range(slice<TestFileVersions_type>([
         new("", "", ""),                    // no versions specified
         new("go1.19", "", "go1.19"),        // module version specified
         new("", "go1.20", "go1.21"),        // file version specified below minimum of 1.21
@@ -3413,7 +3345,7 @@ public static void TestFileVersions(ж<testing.T> t) {
         new("go1.21.1", "go1.21.1", "go1.21.1"), // invalid file version
         new("go1.22.1", "go1.19.1", "go1.22.1"), // invalid file version
         new("go1.22.1", "go1.21.1", "go1.22.1")  // invalid file version
-    ])) {
+    ]))) {
         @string src = default;
         if (test.fileVersion != ""u8) {
             src = "//go:build "u8 + test.fileVersion + "\n"u8;
@@ -3457,12 +3389,12 @@ internal partial struct TestTooNew_type /*dyn*/ {
 // TestTooNew ensures that "too new" errors are emitted when the file
 // or module is tagged with a newer version of Go than this go/types.
 public static void TestTooNew(ж<testing.T> t) {
-    foreach (var (_, test) in slice<TestTooNew_type>([
+    foreach (var (_, test) in range(slice<TestTooNew_type>([
         new("go1.98", "", "package requires newer Go version go1.98"),
         new("", "go1.99", "p:2:9: file requires newer Go version go1.99"),
         new("go1.98", "go1.99", "package requires newer Go version go1.98"), // (two
         new("go1.98", "go1.99", "file requires newer Go version go1.99")     // errors)
-    ])) {
+    ]))) {
         @string src = default;
         if (test.fileVersion != ""u8) {
             src = "//go:build "u8 + test.fileVersion + "\n"u8;
@@ -3563,7 +3495,7 @@ private static readonly @string packagePVarXAnyˢᵇ = "package p; var x any"u8;
 // Test the hijacking described of "any" described in golang/go#66921, for type
 // checking.
 public static void TestAnyHijacking_Check(ж<testing.T> t) {
-    foreach (var (_, enableAlias) in slice<bool>([false, true])) {
+    foreach (var (_, enableAlias) in range(slice<bool>([false, true]))) {
         t.Run(fmt.Sprintf("EnableAlias=%t"u8, enableAlias), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             setGotypesalias(tΔ1, enableAlias);
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
@@ -3575,10 +3507,8 @@ public static void TestAnyHijacking_Check(ж<testing.T> t) {
                         defer(Ꮡwg.Done, ref ᒐ);
                         var pkg = mustTypecheck(packagePVarXAnyˢ, nil, nil);
                         var x = pkg.Scope().Lookup("x");
-                        {
-                            var (_, gotAlias) = x.Type()._<ж<types.Alias>>(ᐧ); if (gotAlias != enableAlias) {
-                                tΔ1.Errorf(@"Lookup(""x"").Type() is %T: got Alias: %t, want %t", x.Type(), gotAlias, enableAlias);
-                            }
+                        var (_, gotAlias) = x.Type()._<ж<types.Alias>>(ᐧ); if (gotAlias != enableAlias) {
+                            tΔ1.Errorf(@"Lookup(""x"").Type() is %T: got Alias: %t, want %t", x.Type(), gotAlias, enableAlias);
                         }
                     }
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -3597,14 +3527,12 @@ private static readonly @string anyˢᵇ = "any"u8;
 // Test the hijacking described of "any" described in golang/go#66921, for
 // Scope.Lookup outside of type checking.
 public static void TestAnyHijacking_Lookup(ж<testing.T> t) {
-    foreach (var (_, enableAlias) in slice<bool>([false, true])) {
+    foreach (var (_, enableAlias) in range(slice<bool>([false, true]))) {
         t.Run(fmt.Sprintf("EnableAlias=%t"u8, enableAlias), (ж<testing.T> tΔ1) => {
             setGotypesalias(tΔ1, enableAlias);
             var a = Universe.Lookup(anyˢ);
-            {
-                var (_, gotAlias) = a.Type()._<ж<types.Alias>>(ᐧ); if (gotAlias != enableAlias) {
-                    tΔ1.Errorf(@"Lookup(""x"").Type() is %T: got Alias: %t, want %t", a.Type(), gotAlias, enableAlias);
-                }
+            var (_, gotAlias) = a.Type()._<ж<types.Alias>>(ᐧ); if (gotAlias != enableAlias) {
+                tΔ1.Errorf(@"Lookup(""x"").Type() is %T: got Alias: %t, want %t", a.Type(), gotAlias, enableAlias);
             }
         });
     }
@@ -3636,10 +3564,8 @@ public static void TestVersionIssue69477(ж<testing.T> t) {
 
     // Set an invalid Pos on the BasicLit.
     ast.Inspect(new ast.FileжNode(f), (ast.Node n) => {
-        {
-            var (lit, ok) = n._<ж<ast.BasicLit>>(ᐧ); if (ok) {
-                lit.ValuePos = 99999;
-            }
+        var (lit, ok) = n._<ж<ast.BasicLit>>(ᐧ); if (ok) {
+            lit.ValuePos = 99999;
         }
         return true;
     });
@@ -3648,10 +3574,8 @@ public static void TestVersionIssue69477(ж<testing.T> t) {
     // version for the BasicLit 123. This used to panic.
     var pkg = NewPackage("p", "p");
     var check = NewChecker(Ꮡ(new Config()), fset, pkg, nil);
-    {
-        var err = check.Files(slice<ж<ast.File>>([f])); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = check.Files([f]); if (err != nil) {
+        t.Fatal(err);
     }
 }
 
@@ -3684,7 +3608,7 @@ public static void TestVersionWithoutPos(ж<testing.T> t) {
     // (Previously, no error was reported.)
     var pkg = NewPackage("p", "p");
     var check = NewChecker(Ꮡ(new Config()), fset, pkg, nil);
-    var err = check.Files(slice<ж<ast.File>>([f]));
+    var err = check.Files([f]);
     @string got = fmt.Sprint(err);
     @string want = rangeOverSVariableOfTypeˢ;
     if (!strings.Contains(got, want)) {
@@ -3719,17 +3643,13 @@ public static void TestVarKind(ж<testing.T> t) {
     var pkg = NewPackage("p", "p");
     var info = Ꮡ(new typesꓸInfo(Defs: new map<ж<ast.Ident>, types.Object>()));
     var check = NewChecker(Ꮡ(new Config()), fset, pkg, info);
-    {
-        var err = check.Files(slice<ж<ast.File>>([f])); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = check.Files([f]); if (err != nil) {
+        t.Fatal(err);
     }
     slice<@string> got = default;
     foreach (var (_, obj) in info.Defs) {
-        {
-            var (v, ok) = obj._<ж<types.Var>>(ᐧ); if (ok) {
-                got = append(got, fmt.Sprintf("%s: %v"u8, v.Name(), v.Kind()));
-            }
+        var (v, ok) = obj._<ж<types.Var>>(ᐧ); if (ok) {
+            got = append(got, fmt.Sprintf("%s: %v"u8, v.Name(), v.Kind()));
         }
     }
     sort.Strings(got);
@@ -3773,10 +3693,8 @@ public static void TestIssue73871(ж<testing.T> t) {
     var pkg = NewPackage("p", "p");
     var info = Ꮡ(new typesꓸInfo(Types: new map<ast.Expr, types.TypeAndValue>()));
     var check = NewChecker(Ꮡ(new Config()), fset, pkg, info);
-    {
-        var err = check.Files(slice<ж<ast.File>>([f])); if (err != nil) {
-            t.Fatal(err);
-        }
+    var err = check.Files([f]); if (err != nil) {
+        t.Fatal(err);
     }
 
     // Check type inferred for 'append'.

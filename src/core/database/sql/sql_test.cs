@@ -112,10 +112,8 @@ internal static ж<global::go.database.sql_package.DB> newTestDBConnector(testin
 
     fc.name = fakeDBName;
     var db = OpenDB(new sql_internal_test_package.fakeConnectorжConnector(Ꮡfc));
-    {
-        var (_, err) = db.Exec(wipeˢ); if (err != nil) {
-            t.Fatalf("exec wipe: %v", err);
-        }
+    var (_, err) = db.Exec(wipeˢ); if (err != nil) {
+        t.Fatalf("exec wipe: %v", err);
     }
     if (name == "people"u8) {
         exec(t, db, createPeopleNameStringˢ);
@@ -250,11 +248,9 @@ internal static void closeDB(testing.TB t, ж<global::go.database.sql_package.DB
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
         ref var db = ref Ꮡdb.DerefOrNull();
 
-        {
-            var e = recover(calledByDefer); if (e != nil) {
-                fmt.Printf("Panic: %v\n"u8, e);
-                throw panic(e);
-            }
+        var e = recover(calledByDefer); if (e != nil) {
+            fmt.Printf("Panic: %v\n"u8, e);
+            throw panic(e);
         }
         defer(setHookpostCloseConn, (Action<ж<fakeConn>, error>)(default), ref ᒐ);
         setHookpostCloseConn((ж<fakeConn> _, error errΔ1) => {
@@ -263,16 +259,14 @@ internal static void closeDB(testing.TB t, ж<global::go.database.sql_package.DB
             }
         });
         db.mu.Lock();
-        foreach (var (i, dc) in db.freeConn) {
-            {
-                nint n = len(dc.openStmt); if (n > 0) {
-                    // Just a sanity check. This is legal in
-                    // general, but if we make the tests clean up
-                    // their statements first, then we can safely
-                    // verify this is always zero here, and any
-                    // other value is a leak.
-                    t.Errorf("while closing db, freeConn %d/%d had %d open stmts; want 0", i, len(db.freeConn), n);
-                }
+        foreach (var (i, dc) in range(db.freeConn)) {
+            nint n = len(dc.openStmt); if (n > 0) {
+                // Just a sanity check. This is legal in
+                // general, but if we make the tests clean up
+                // their statements first, then we can safely
+                // verify this is always zero here, and any
+                // other value is a leak.
+                t.Errorf("while closing db, freeConn %d/%d had %d open stmts; want 0", i, len(db.freeConn), n);
             }
         }
         db.mu.Unlock();
@@ -299,10 +293,8 @@ internal static void closeDB(testing.TB t, ж<global::go.database.sql_package.DB
 internal static nint numPrepares(ж<testing.T> t, ж<global::go.database.sql_package.DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
-    {
-        nint n = len(db.freeConn); if (n != 1) {
-            t.Fatalf("free conns = %d; want 1", n);
-        }
+    nint n = len(db.freeConn); if (n != 1) {
+        t.Fatalf("free conns = %d; want 1", n);
     }
     return db.freeConn[0].ci._<ж<fakeConn>>().numPrepare;
 }
@@ -366,18 +358,14 @@ internal static void clearAllConns(this ж<global::go.database.sql_package.DB> �
 
     Ꮡdb.SetMaxIdleConns(0);
 
-    {
-        nint g = Ꮡdb.numFreeConns();
-        nint w = 0; if (g != w) {
-            t.Errorf("free conns = %d; want %d", g, w);
-        }
+    nint g = Ꮡdb.numFreeConns();
+    nint w = 0; if (g != w) {
+        t.Errorf("free conns = %d; want %d", g, w);
     }
 
-    {
-        nint n = Ꮡdb.numDepsPoll(t, 0); if (n > 0) {
-            t.Errorf("number of dependencies = %d; expected 0", n);
-            db.dumpDeps(t);
-        }
+    nint n = Ꮡdb.numDepsPoll(t, 0); if (n > 0) {
+        t.Errorf("number of dependencies = %d; expected 0", n);
+        db.dumpDeps(t);
     }
 }
 
@@ -393,11 +381,9 @@ internal static void dumpDep(this ref global::go.database.sql_package.DB db, ж<
     var ds = db.dep[dep];
     foreach (var (k, _) in ds) {
         t.Logf("%s%T (%p) waiting for -> %T (%p)", indent, dep, dep, k, k);
-        {
-            var (fc, ok) = k._<finalCloser>(ᐧ); if (ok) {
-                if (!seen[fc]) {
-                    db.dumpDep(t, depth + 1, fc, seen);
-                }
+        var (fc, ok) = k._<finalCloser>(ᐧ); if (ok) {
+            if (!seen[fc]) {
+                db.dumpDep(t, depth + 1, fc, seen);
             }
         }
     }
@@ -450,15 +436,11 @@ public static void TestQuery(ж<testing.T> t) {
 
         // And verify that the final rows.Next() call, which hit EOF,
         // also closed the rows connection.
-        {
-            nint n = db.numFreeConns(); if (n != 1) {
-                t.Fatalf("free conns after query hitting EOF = %d; want 1", n);
-            }
+        nint n = db.numFreeConns(); if (n != 1) {
+            t.Fatalf("free conns after query hitting EOF = %d; want 1", n);
         }
-        {
-            nint prepares = numPrepares(t, db) - prepares0; if (prepares != 1) {
-                t.Errorf("executed %d Prepare statements; want 1", prepares);
-            }
+        nint prepares = numPrepares(t, db) - prepares0; if (prepares != 1) {
+            t.Errorf("executed %d Prepare statements; want 1", prepares);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -510,10 +492,8 @@ public static void TestQueryContext(ж<testing.T> t) {
         var selᴛ4 = ctx.Done();
         switch (trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
         case 0 when selᴛ4.ꟷᐳ(out _): {
-            {
-                var errΔ1 = ctx.Err(); if (!AreEqual(errΔ1, context.Canceled)) {
-                    t.Fatalf("context err = %v; want context.Canceled", errΔ1);
-                }
+            var errΔ1 = ctx.Err(); if (!AreEqual(errΔ1, context.Canceled)) {
+                t.Fatalf("context err = %v; want context.Canceled", errΔ1);
             }
             break;
         }
@@ -533,10 +513,8 @@ public static void TestQueryContext(ж<testing.T> t) {
         // also closed the rows connection.
         waitForRowsClose(t, rows);
         waitForFree(t, db, 1);
-        {
-            nint prepares = numPrepares(t, db) - prepares0; if (prepares != 1) {
-                t.Errorf("executed %d Prepare statements; want 1", prepares);
-            }
+        nint prepares = numPrepares(t, db) - prepares0; if (prepares != 1) {
+            t.Errorf("executed %d Prepare statements; want 1", prepares);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -549,14 +527,10 @@ internal partial interface waitCondition_deadliner /*dyn*/ {
 
 internal static bool waitCondition(testing.TB t, Func<bool> fn) {
     var timeout = (time.Duration)(5000000000L);
-    {
-        var (td, ok) = t._<waitCondition_deadliner>(ᐧ); if (ok) {
-            {
-                var (deadlineΔ1, okΔ1) = td.Deadline(); if (okΔ1) {
-                    timeout = time.Until(deadlineΔ1);
-                    timeout = timeout * 19 / 20; // Give 5% headroom for cleanup and error-reporting.
-                }
-            }
+    var (td, ok) = t._<waitCondition_deadliner>(ᐧ); if (ok) {
+        var (deadlineΔ1, okΔ1) = td.Deadline(); if (okΔ1) {
+            timeout = time.Until(deadlineΔ1);
+            timeout = timeout * 19 / 20; // Give 5% headroom for cleanup and error-reporting.
         }
     }
 
@@ -637,10 +611,8 @@ public static void TestQueryContextWait(ж<testing.T> t) {
 
         // Verify closed rows connection after error condition.
         waitForFree(t, db, 1);
-        {
-            nint prepares = numPrepares(t, db) - prepares0; if (prepares != 1) {
-                t.Fatalf("executed %d Prepare statements; want 1", prepares);
-            }
+        nint prepares = numPrepares(t, db) - prepares0; if (prepares != 1) {
+            t.Fatalf("executed %d Prepare statements; want 1", prepares);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -796,10 +768,8 @@ public static void TestMultiResultSetQuery(ж<testing.T> t) {
         // And verify that the final rows.Next() call, which hit EOF,
         // also closed the rows connection.
         waitForFree(t, db, 1);
-        {
-            nint prepares = numPrepares(t, db) - prepares0; if (prepares != 1) {
-                t.Errorf("executed %d Prepare statements; want 1", prepares);
-            }
+        nint prepares = numPrepares(t, db) - prepares0; if (prepares != 1) {
+            t.Errorf("executed %d Prepare statements; want 1", prepares);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -856,15 +826,11 @@ public static void TestQueryNamedArg(ж<testing.T> t) {
 
         // And verify that the final rows.Next() call, which hit EOF,
         // also closed the rows connection.
-        {
-            nint n = db.numFreeConns(); if (n != 1) {
-                t.Fatalf("free conns after query hitting EOF = %d; want 1", n);
-            }
+        nint n = db.numFreeConns(); if (n != 1) {
+            t.Fatalf("free conns after query hitting EOF = %d; want 1", n);
         }
-        {
-            nint prepares = numPrepares(t, db) - prepares0; if (prepares != 1) {
-                t.Errorf("executed %d Prepare statements; want 1", prepares);
-            }
+        nint prepares = numPrepares(t, db) - prepares0; if (prepares != 1) {
+            t.Errorf("executed %d Prepare statements; want 1", prepares);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -997,10 +963,8 @@ public static void TestRowsColumns(ж<testing.T> t) {
         if (!slices.Equal<slice<@string>, @string>(cols, want)) {
             t.Errorf("got %#v; want %#v", cols, want);
         }
-        {
-            var errΔ1 = rows.Close(); if (errΔ1 != nil) {
-                t.Errorf("error closing rows: %s", errΔ1);
-            }
+        var errΔ1 = rows.Close(); if (errΔ1 != nil) {
+            t.Errorf("error closing rows: %s", errΔ1);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1022,7 +986,7 @@ public static void TestRowsColumnTypes(ж<testing.T> t) {
         }
 
         var types = new slice<reflectꓸType>(len(tt));
-        foreach (var (i, tp) in tt) {
+        foreach (var (i, tp) in range(tt)) {
             var st = tp.ScanType();
             if (st == nil) {
                 t.Errorf("scantype is null for column %q", tp.Name());
@@ -1031,7 +995,7 @@ public static void TestRowsColumnTypes(ж<testing.T> t) {
             types[i] = st;
         }
         var values = new slice<any>(len(tt));
-        foreach (var i in range(values)) {
+        foreach (var i in range(len(values))) {
             values[i] = reflect.New(types[i]).Interface();
         }
         nint ct = 0;
@@ -1041,15 +1005,11 @@ public static void TestRowsColumnTypes(ж<testing.T> t) {
                 t.Fatalf("failed to scan values in %v", err);
             }
             if (ct == 1) {
-                {
-                    var age = values[0]._<ж<int32>>().Value; if (age != 2) {
-                        t.Errorf("Expected 2, got %v", age);
-                    }
+                var age = values[0]._<ж<int32>>().Value; if (age != 2) {
+                    t.Errorf("Expected 2, got %v", age);
                 }
-                {
-                    @string name = values[1]._<ж<@string>>().Value; if (name != "Bob"u8) {
-                        t.Errorf("Expected Bob, got %v", name);
-                    }
+                @string name = values[1]._<ж<@string>>().Value; if (name != "Bob"u8) {
+                    t.Errorf("Expected Bob, got %v", name);
                 }
             }
             ct++;
@@ -1058,10 +1018,8 @@ public static void TestRowsColumnTypes(ж<testing.T> t) {
             t.Errorf("expected 3 rows, got %d", ct);
         }
 
-        {
-            var errΔ1 = rows.Close(); if (errΔ1 != nil) {
-                t.Errorf("error closing rows: %s", errΔ1);
-            }
+        var errΔ1 = rows.Close(); if (errΔ1 != nil) {
+            t.Errorf("error closing rows: %s", errΔ1);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1239,17 +1197,15 @@ public static void TestStatementQueryRow(ж<testing.T> t) {
         var stmtʗ1 = stmt;
         defer(() => stmtʗ1.Close(), ref ᒐ);
         ref var age = ref heap(new nint(), out var Ꮡage);
-        foreach (var (n, tt) in slice<TestStatementQueryRow_type>([
+        foreach (var (n, tt) in range(slice<TestStatementQueryRow_type>([
             new("Alice", 1),
             new("Bob", 2),
             new("Chris", 3)
-        ])) {
-            {
-                var errΔ1 = stmt.QueryRow(tt.name).Scan(Ꮡage); if (errΔ1 != nil) {
-                    t.Errorf("%d: on %q, QueryRow/Scan: %v", n, tt.name, errΔ1);
-                } else if (age != tt.want) {
-                    t.Errorf("%d: age=%d, want %d", n, age, tt.want);
-                }
+        ]))) {
+            var errΔ1 = stmt.QueryRow(tt.name).Scan(Ꮡage); if (errΔ1 != nil) {
+                t.Errorf("%d: on %q, QueryRow/Scan: %v", n, tt.name, errΔ1);
+            } else if (age != tt.want) {
+                t.Errorf("%d: age=%d, want %d", n, age, tt.want);
             }
         }
     }
@@ -1294,11 +1250,9 @@ public static void TestStatementClose(ж<testing.T> t) {
         new(Ꮡ(new ΔStmt(stickyErr: want)), "stickyErr not propagated"),
         new(Ꮡ(new ΔStmt(cg: new global::go.database.sql_package.TxжstmtConnGrabber(Ꮡ(new Tx())), cgds: Ꮡ(new driverStmt(Locker: new sync.MutexжLocker(Ꮡ(new sync.Mutex())), si: new stubDriverStmt(want))))), "driverStmt.Close() error not propagated")
     ]);
-    foreach (var (_, test) in tests) {
-        {
-            var err = test.stmt.Close(); if (!AreEqual(err, want)) {
-                t.Errorf("%s. Got stmt.Close() = %v, want = %v", test.msg, err, want);
-            }
+    foreach (var (_, test) in range(tests)) {
+        var err = test.stmt.Close(); if (!AreEqual(err, want)) {
+            t.Errorf("%s. Got stmt.Close() = %v, want = %v", test.msg, err, want);
         }
     }
 }
@@ -1331,10 +1285,8 @@ public static partial void TestStatementQueryRowConcurrent(ж<testing.T> t) {
             });
         }
         for (nint i = 0; i < n; i++) {
-            {
-                var errΔ2 = ᐸꟷ(ch); if (errΔ2 != nil) {
-                    t.Error(errΔ2);
-                }
+            var errΔ2 = ᐸꟷ(ch); if (errΔ2 != nil) {
+                t.Error(errΔ2);
             }
         }
     }
@@ -1392,20 +1344,20 @@ public static void TestExec(ж<testing.T> t) {
         defer(() => stmtʗ1.Close(), ref ᒐ);
         var execTests = slice<TestExec_execTest>([
             // Okay:
-            new(slice<any>([bradˢ, (nint)31]), ""),
-            new(slice<any>([bradˢ, (int64)31]), ""),
-            new(slice<any>([bobˢ, (@string)"32"]), ""),
-            new(slice<any>([(nint)7, (nint)9]), ""),
+            new([bradˢ, (nint)31], ""),
+            new([bradˢ, (int64)31], ""),
+            new([bobˢ, (@string)"32"], ""),
+            new([(nint)7, (nint)9], ""),
 
             // Invalid conversions:
-            new(slice<any>([bradˢ, (int64)0xFFFFFFFFL]), "sql: converting argument $2 type: sql/driver: value 4294967295 overflows int32"),
-            new(slice<any>([bradˢ, strconvFailˢ]), @"sql: converting argument $2 type: sql/driver: value ""strconv fail"" can't be converted to int32"),
+            new([bradˢ, (int64)0xFFFFFFFFL], "sql: converting argument $2 type: sql/driver: value 4294967295 overflows int32"),
+            new([bradˢ, strconvFailˢ], @"sql: converting argument $2 type: sql/driver: value ""strconv fail"" can't be converted to int32"),
 
             // Wrong number of args:
-            new(slice<any>([]), "sql: expected 2 arguments, got 0"),
-            new(slice<any>([(nint)1, (nint)2, (nint)3]), "sql: expected 2 arguments, got 3")
+            new([], "sql: expected 2 arguments, got 0"),
+            new([(nint)1, (nint)2, (nint)3], "sql: expected 2 arguments, got 3")
         ]);
-        foreach (var (n, et) in execTests) {
+        foreach (var (n, et) in range(execTests)) {
             var (_, errΔ1) = stmt.Exec(et.args.ꓸꓸꓸ);
             @string errStr = ""u8;
             if (errΔ1 != nil) {
@@ -1541,10 +1493,8 @@ public static void TestTxStmtPreparedOnce(ж<testing.T> t) {
             t.Fatalf("Commit = %v", err);
         }
 
-        {
-            nint prepares = numPrepares(t, db) - prepares0; if (prepares != 1) {
-                t.Errorf("executed %d Prepare statements; want 1", prepares);
-            }
+        nint prepares = numPrepares(t, db) - prepares0; if (prepares != 1) {
+            t.Errorf("executed %d Prepare statements; want 1", prepares);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1597,10 +1547,8 @@ public static void TestTxStmtClosedRePrepares(ж<testing.T> t) {
 
         tx.Rollback();
 
-        {
-            nint prepares = numPrepares(t, db) - prepares0; if (prepares != 2) {
-                t.Errorf("executed %d Prepare statements; want 2", prepares);
-            }
+        nint prepares = numPrepares(t, db) - prepares0; if (prepares != 2) {
+            t.Errorf("executed %d Prepare statements; want 2", prepares);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1657,10 +1605,8 @@ public static void TestParentStmtOutlivesTxStmt(ж<testing.T> t) {
             t.Fatalf("stmt.Exec() = %v", err);
         }
 
-        {
-            nint prepares = numPrepares(t, db) - prepares0; if (prepares != 1) {
-                t.Errorf("executed %d Prepare statements; want 1", prepares);
-            }
+        nint prepares = numPrepares(t, db) - prepares0; if (prepares != 1) {
+            t.Errorf("executed %d Prepare statements; want 1", prepares);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1718,10 +1664,8 @@ public static void TestTxStmtFromTxStmtRePrepares(ж<testing.T> t) {
             t.Fatalf("tx.Rollback = %v", err);
         }
 
-        {
-            nint prepares = numPrepares(t, db) - prepares0; if (prepares != 2) {
-                t.Errorf("executed %d Prepare statements; want 2", prepares);
-            }
+        nint prepares = numPrepares(t, db) - prepares0; if (prepares != 2) {
+            t.Errorf("executed %d Prepare statements; want 2", prepares);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1811,10 +1755,8 @@ public static void TestTxErrBadConn(ж<testing.T> t) {
         if (err != nil) {
             t.Fatalf("Open: %v", err);
         }
-        {
-            var (_, errΔ1) = db.Exec(wipeˢ); if (errΔ1 != nil) {
-                t.Fatalf("exec wipe: %v", errΔ1);
-            }
+        var (_, errΔ1) = db.Exec(wipeˢ); if (errΔ1 != nil) {
+            t.Fatalf("exec wipe: %v", errΔ1);
         }
         defer(closeDB, new sql_test_package.testing_TжTB(t), db, ref ᒐ, recovers: true);
         exec(new sql_test_package.testing_TжTB(t), db, createT1NameStringAgeˢ);
@@ -1906,10 +1848,8 @@ public static void TestConnRaw(ж<testing.T> t) {
         var sawFunc = false;
         err = conn.Raw(error (any dc) => {
             sawFunc = true;
-            {
-                var (_, ok) = dc._<ж<fakeConn>>(ᐧ); if (!ok) {
-                    return fmt.Errorf("got %T want *fakeConn"u8, dc);
-                }
+            var (_, ok) = dc._<ж<fakeConn>>(ᐧ); if (!ok) {
+                return fmt.Errorf("got %T want *fakeConn"u8, dc);
             }
             return default;
         });
@@ -2039,7 +1979,7 @@ public static void TestInvalidNilValues(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestInvalidNilValues_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -2313,11 +2253,9 @@ public static void TestQueryRowClosingStmt(ж<testing.T> t) {
             t.Fatalf("expected 1 free conn");
         }
         var fakeConn = db.freeConn[0].ci._<ж<fakeConn>>();
-        {
-            nint made = fakeConn.stmtsMade;
-            nint closed = fakeConn.stmtsClosed; if (made != closed) {
-                t.Errorf("statement close mismatch: made %d, closed %d", made, closed);
-            }
+        nint made = fakeConn.stmtsMade;
+        nint closed = fakeConn.stmtsClosed; if (made != closed) {
+            t.Errorf("statement close mismatch: made %d, closed %d", made, closed);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2552,28 +2490,20 @@ internal static void nullTestRun(ж<testing.T> t, nullTestSpec spec) {
         }
         var stmtʗ1 = stmt;
         defer(() => stmtʗ1.Close(), ref ᒐ);
-        {
-            var (_, errΔ1) = stmt.Exec((nint)3, chrisˢ, spec.rows[2].nullParam, spec.rows[2].notNullParam); if (errΔ1 != nil) {
-                t.Errorf("exec insert chris: %v", errΔ1);
-            }
+        var (_, errΔ1) = stmt.Exec((nint)3, chrisˢ, spec.rows[2].nullParam, spec.rows[2].notNullParam); if (errΔ1 != nil) {
+            t.Errorf("exec insert chris: %v", errΔ1);
         }
-        {
-            var (_, errΔ2) = stmt.Exec((nint)4, daveˢ, spec.rows[3].nullParam, spec.rows[3].notNullParam); if (errΔ2 != nil) {
-                t.Errorf("exec insert dave: %v", errΔ2);
-            }
+        var (_, errΔ2) = stmt.Exec((nint)4, daveˢ, spec.rows[3].nullParam, spec.rows[3].notNullParam); if (errΔ2 != nil) {
+            t.Errorf("exec insert dave: %v", errΔ2);
         }
-        {
-            var (_, errΔ3) = stmt.Exec((nint)5, eleanorˢ, spec.rows[4].nullParam, spec.rows[4].notNullParam); if (errΔ3 != nil) {
-                t.Errorf("exec insert eleanor: %v", errΔ3);
-            }
+        var (_, errΔ3) = stmt.Exec((nint)5, eleanorˢ, spec.rows[4].nullParam, spec.rows[4].notNullParam); if (errΔ3 != nil) {
+            t.Errorf("exec insert eleanor: %v", errΔ3);
         }
 
         // Can't put null val into non-null col
         var row5 = spec.rows[5];
-        {
-            var (_, errΔ4) = stmt.Exec((nint)6, bobˢ2, row5.nullParam, row5.notNullParam); if (errΔ4 == nil) {
-                t.Errorf("expected error inserting nil val with prepared statement Exec: NULL=%#v, NOT-NULL=%#v", row5.nullParam, row5.notNullParam);
-            }
+        var (_, errΔ4) = stmt.Exec((nint)6, bobˢ2, row5.nullParam, row5.notNullParam); if (errΔ4 == nil) {
+            t.Errorf("expected error inserting nil val with prepared statement Exec: NULL=%#v, NOT-NULL=%#v", row5.nullParam, row5.notNullParam);
         }
 
         (_, err) = db.Exec(insertTIdNameNullfˢ2, (nint)999, (any)(default), (any)(default));
@@ -2591,10 +2521,8 @@ internal static void nullTestRun(ж<testing.T> t, nullTestSpec spec) {
 
         for (nint i = 0; i < 5; i++) {
             nint id = i + 1;
-            {
-                var errΔ5 = db.QueryRow(selectTNullfIdˢ, id).Scan(bindVal); if (errΔ5 != nil) {
-                    t.Errorf("id=%d Scan: %v", id, errΔ5);
-                }
+            var errΔ5 = db.QueryRow(selectTNullfIdˢ, id).Scan(bindVal); if (errΔ5 != nil) {
+                t.Errorf("id=%d Scan: %v", id, errΔ5);
             }
             var bindValDeref = reflect.ValueOf(bindVal).Elem().Interface();
             if (!reflect.DeepEqual(bindValDeref, spec.rows[i].scanNullVal)) {
@@ -2791,10 +2719,8 @@ public static partial void TestMaxOpenConns(ж<testing.T> t) {
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
                         ref var op = ref heap(new @string(), out var Ꮡop);
-                        {
-                            var errΔ2 = stmtʗ1.QueryRow(sleepˢ, (nint)(sleepMillis)).Scan(Ꮡop); if (errΔ2 != nil && !AreEqual(errΔ2, ErrNoRows)) {
-                                t.Error(errΔ2);
-                            }
+                        var errΔ2 = stmtʗ1.QueryRow(sleepˢ, (nint)(sleepMillis)).Scan(Ꮡop); if (errΔ2 != nil && !AreEqual(errΔ2, ErrNoRows)) {
+                            t.Error(errΔ2);
                         }
                     }
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2831,10 +2757,8 @@ public static partial void TestMaxOpenConns(ж<testing.T> t) {
             db.dumpDeps(t);
         }
 
-        {
-            var errΔ3 = stmt.Close(); if (errΔ3 != nil) {
-                t.Fatal(errΔ3);
-            }
+        var errΔ3 = stmt.Close(); if (errΔ3 != nil) {
+            t.Fatal(errΔ3);
         }
 
         {
@@ -3030,10 +2954,8 @@ public static partial void TestPendingConnsAfterErr(ж<testing.T> t) {
             var selᴛ8 = to.C;
             switch (select(ᐸꟷ(selᴛ7, ꓸꓸꓸ), ᐸꟷ(selᴛ8, ꓸꓸꓸ))) {
             case 0 when selᴛ7.ꟷᐳ(out var errΔ2): {
-                {
-                    var (got, want) = (errΔ2, errOffline); if (!AreEqual(got, want)) {
-                        t.Errorf("unexpected err: got %v, want %v", got, want);
-                    }
+                var (got, want) = (errΔ2, errOffline); if (!AreEqual(got, want)) {
+                    t.Errorf("unexpected err: got %v, want %v", got, want);
                 }
                 break;
             }
@@ -3082,20 +3004,16 @@ public static void TestSingleOpenConn(ж<testing.T> t) {
         if (err != nil) {
             t.Fatal(err);
         }
-        {
-            err = rows.Close(); if (err != nil) {
-                t.Fatal(err);
-            }
+        err = rows.Close(); if (err != nil) {
+            t.Fatal(err);
         }
         // shouldn't deadlock
         (rows, err) = db.Query(selectPeopleNameˢ);
         if (err != nil) {
             t.Fatal(err);
         }
-        {
-            err = rows.Close(); if (err != nil) {
-                t.Fatal(err);
-            }
+        err = rows.Close(); if (err != nil) {
+            t.Fatal(err);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -3180,11 +3098,9 @@ public static void TestConnMaxLifetime(ж<testing.T> t) {
         if (closes != 0) {
             t.Errorf("closes = %d; want 0", closes);
         }
-        {
-            nint g = db.numFreeConns();
-            nint w = 2; if (g != w) {
-                t.Errorf("free conns = %d; want %d", g, w);
-            }
+        nint g = db.numFreeConns();
+        nint w = 2; if (g != w) {
+            t.Errorf("free conns = %d; want %d", g, w);
         }
 
         // Expire first conn
@@ -3220,10 +3136,8 @@ public static void TestConnMaxLifetime(ж<testing.T> t) {
             t.Errorf("closes = %d; want 1", closes);
         }
 
-        {
-            var s = db.Stats(); if (s.MaxLifetimeClosed != 1) {
-                t.Errorf("MaxLifetimeClosed = %d; want 1 %#v", s.MaxLifetimeClosed, s);
-            }
+        var s = db.Stats(); if (s.MaxLifetimeClosed != 1) {
+            t.Errorf("MaxLifetimeClosed = %d; want 1 %#v", s.MaxLifetimeClosed, s);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -3274,10 +3188,8 @@ public static partial void TestStmtCloseDeps(ж<testing.T> t) {
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
                         ref var op = ref heap(new @string(), out var Ꮡop);
-                        {
-                            var errΔ2 = stmtʗ1.QueryRow(sleepˢ, (nint)(sleepMillis)).Scan(Ꮡop); if (errΔ2 != nil && !AreEqual(errΔ2, ErrNoRows)) {
-                                t.Error(errΔ2);
-                            }
+                        var errΔ2 = stmtʗ1.QueryRow(sleepˢ, (nint)(sleepMillis)).Scan(Ꮡop); if (errΔ2 != nil && !AreEqual(errΔ2, ErrNoRows)) {
+                            t.Error(errΔ2);
                         }
                     }
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -3321,10 +3233,8 @@ public static partial void TestStmtCloseDeps(ж<testing.T> t) {
             t.Errorf("len(stmt.css) = %d; want <= %d", len(stmt.css), (nint)(nquery));
         }
 
-        {
-            var errΔ3 = stmt.Close(); if (errΔ3 != nil) {
-                t.Fatal(errΔ3);
-            }
+        var errΔ3 = stmt.Close(); if (errΔ3 != nil) {
+            t.Fatal(errΔ3);
         }
 
         {
@@ -3463,10 +3373,8 @@ public static void TestRowsImplicitClose(ж<testing.T> t) {
         if (got != want) {
             t.Errorf("got %d rows, want %d", got, want);
         }
-        {
-            var errΔ1 = rows.Err(); if (!AreEqual(errΔ1, fail)) {
-                t.Errorf("got error %v, want %v", errΔ1, fail);
-            }
+        var errΔ1 = rows.Err(); if (!AreEqual(errΔ1, fail)) {
+            t.Errorf("got error %v, want %v", errΔ1, fail);
         }
         if (!r.closed) {
             t.Errorf("r.closed is false, want true");
@@ -3562,7 +3470,7 @@ public static void TestManyErrBadConn(ж<testing.T> t) {
                 var first = firstʗp.sslice();
                 var dbΔ1 = newTestDB(new sql_test_package.testing_TжTB(t), peopleˢ);
 
-                foreach (var (_, f) in first) {
+                foreach (var (_, f) in range(first)) {
                     f(dbΔ1);
                 }
 
@@ -3595,7 +3503,7 @@ public static void TestManyErrBadConn(ж<testing.T> t) {
                 } else if (len(dbΔ1.freeConn) != nconn) {
                     t.Fatalf("unexpected len(db.freeConn) %d (was expecting %d)", len(dbΔ1.freeConn), nconn);
                 }
-                foreach (var (_, connΔ1) in dbΔ1.freeConn) {
+                foreach (var (_, connΔ1) in range(dbΔ1.freeConn)) {
                     connΔ1.of(global::go.database.sql_package.driverConn.ᏑMutex).Lock();
                     connΔ1.ci._<ж<fakeConn>>().stickyBad = true;
                     connΔ1.of(global::go.database.sql_package.driverConn.ᏑMutex).Unlock();
@@ -3614,10 +3522,8 @@ public static void TestManyErrBadConn(ж<testing.T> t) {
         if (err != nil) {
             t.Fatal(err);
         }
-        {
-            err = rows.Close(); if (err != nil) {
-                t.Fatal(err);
-            }
+        err = rows.Close(); if (err != nil) {
+            t.Fatal(err);
         }
 
         // Exec
@@ -3635,10 +3541,8 @@ public static void TestManyErrBadConn(ж<testing.T> t) {
         if (err != nil) {
             t.Fatal(err);
         }
-        {
-            err = tx.Rollback(); if (err != nil) {
-                t.Fatal(err);
-            }
+        err = tx.Rollback(); if (err != nil) {
+            t.Fatal(err);
         }
 
         // Prepare
@@ -3649,10 +3553,8 @@ public static void TestManyErrBadConn(ж<testing.T> t) {
         if (err != nil) {
             t.Fatal(err);
         }
-        {
-            err = stmt.Close(); if (err != nil) {
-                t.Fatal(err);
-            }
+        err = stmt.Close(); if (err != nil) {
+            t.Fatal(err);
         }
 
         // Stmt.Exec
@@ -3667,10 +3569,8 @@ public static void TestManyErrBadConn(ж<testing.T> t) {
         if (err != nil) {
             t.Fatal(err);
         }
-        {
-            err = stmt.Close(); if (err != nil) {
-                t.Fatal(err);
-            }
+        err = stmt.Close(); if (err != nil) {
+            t.Fatal(err);
         }
 
         // Stmt.Query
@@ -3685,15 +3585,11 @@ public static void TestManyErrBadConn(ж<testing.T> t) {
         if (err != nil) {
             t.Fatal(err);
         }
-        {
-            err = rows.Close(); if (err != nil) {
-                t.Fatal(err);
-            }
+        err = rows.Close(); if (err != nil) {
+            t.Fatal(err);
         }
-        {
-            err = stmt.Close(); if (err != nil) {
-                t.Fatal(err);
-            }
+        err = stmt.Close(); if (err != nil) {
+            t.Fatal(err);
         }
 
         // Conn
@@ -3897,7 +3793,7 @@ public static void TestConnExpiresFreshOutOfPool(ж<testing.T> t) {
 
         db.SetMaxOpenConns(1);
 
-        foreach (var (_, vᴛ1) in execCases) {
+        foreach (var (_, vᴛ1) in range(execCases)) {
             ref var ec = ref heap(new TestConnExpiresFreshOutOfPool_execCases(), out var Ꮡec);
             ec = vᴛ1;
 
@@ -4058,10 +3954,8 @@ public static void TestIssue20622(ж<testing.T> t) {
             count++;
             ref var age = ref heap(new nint(), out var Ꮡage);
             ref var name = ref heap(new @string(), out var Ꮡname);
-            {
-                var errΔ1 = rows.Scan(Ꮡage, Ꮡname); if (errΔ1 != nil) {
-                    t.Fatal(scanFailedˢ, errΔ1);
-                }
+            var errΔ1 = rows.Scan(Ꮡage, Ꮡname); if (errΔ1 != nil) {
+                t.Fatal(scanFailedˢ, errΔ1);
             }
 
             if (count == 1) {
@@ -4124,11 +4018,9 @@ public static void TestErrBadConnReconnect(ж<testing.T> t) {
                 return false;
             };
 
-            {
-                var errΔ1 = op(); if (errΔ1 != nil) {
-                    t.Errorf(name + ": %v"u8, errΔ1);
-                    return;
-                }
+            var errΔ1 = op(); if (errΔ1 != nil) {
+                t.Errorf(name + ": %v"u8, errΔ1);
+                return;
             }
 
             if (!broken || !retried) {
@@ -4254,11 +4146,9 @@ public static void TestTxEndBadConn(ж<testing.T> t) {
                 return broken;
             };
 
-            {
-                var err = op(); if (!errors.Is(err, driver.ErrBadConn)) {
-                    t.Errorf(name + ": %v"u8, err);
-                    return;
-                }
+            var err = op(); if (!errors.Is(err, driver.ErrBadConn)) {
+                t.Errorf(name + ": %v"u8, err);
+                return;
             }
 
             if (!broken) {
@@ -4616,13 +4506,13 @@ internal partial struct concurrentRandomTest {
 internal static void init(this ref concurrentRandomTest c, testing.TB t, ж<global::go.database.sql_package.DB> db) {
     c.tests = slice<concurrentTest>([new sql_internal_test_package.concurrentDBQueryTestжconcurrentTest(@new<concurrentDBQueryTest>()), new sql_internal_test_package.concurrentDBExecTestжconcurrentTest(@new<concurrentDBExecTest>()), new sql_internal_test_package.concurrentStmtQueryTestжconcurrentTest(@new<concurrentStmtQueryTest>()), new sql_internal_test_package.concurrentStmtExecTestжconcurrentTest(@new<concurrentStmtExecTest>()), new sql_internal_test_package.concurrentTxQueryTestжconcurrentTest(@new<concurrentTxQueryTest>()), new sql_internal_test_package.concurrentTxExecTestжconcurrentTest(@new<concurrentTxExecTest>()), new sql_internal_test_package.concurrentTxStmtQueryTestжconcurrentTest(@new<concurrentTxStmtQueryTest>()), new sql_internal_test_package.concurrentTxStmtExecTestжconcurrentTest(@new<concurrentTxStmtExecTest>())
     ]);
-    foreach (var (_, ct) in c.tests) {
+    foreach (var (_, ct) in range(c.tests)) {
         ct.init(t, db);
     }
 }
 
 internal static void finish(this ref concurrentRandomTest c, testing.TB t) {
-    foreach (var (_, ct) in c.tests) {
+    foreach (var (_, ct) in range(c.tests)) {
         ct.finish(t);
     }
 }
@@ -4981,7 +4871,7 @@ public static void TestConcurrency(ж<testing.T> t) {
         new("TxStmtExec", new sql_internal_test_package.concurrentTxStmtExecTestжconcurrentTest(@new<concurrentTxStmtExecTest>())),
         new("Random", new sql_internal_test_package.concurrentRandomTestжconcurrentTest(@new<concurrentRandomTest>()))
     ]);
-    foreach (var (_, vᴛ1) in list) {
+    foreach (var (_, vᴛ1) in range(list)) {
         ref var item = ref heap(new TestConcurrency_list(), out var Ꮡitem);
         item = vᴛ1;
 
@@ -5003,16 +4893,14 @@ public static partial void TestConnectionLeak(ж<testing.T> t) {
         // a new connection and we can fill the idle queue with the released
         // connections.
         db.SetMaxOpenConns(len(rows) + 1);
-        foreach (var ii in range(rows)) {
+        foreach (var ii in range(len(rows))) {
             var (r, err) = db.Query(selectPeopleNameˢ);
             if (err != nil) {
                 t.Fatal(err);
             }
             r.Next();
-            {
-                var errΔ1 = r.Err(); if (errΔ1 != nil) {
-                    t.Fatal(errΔ1);
-                }
+            var errΔ1 = r.Err(); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
             rows[ii] = r;
         }
@@ -5038,7 +4926,7 @@ public static partial void TestConnectionLeak(ж<testing.T> t) {
         ᐸꟷ(drv.waitingCh);
         // Now close the busy connections. This provides a connection for
         // the blocked goroutine and then fills up the idle queue.
-        foreach (var (_, v) in rows) {
+        foreach (var (_, v) in range(rows)) {
             v.Close();
         }
         // At this point we give the new connection to DB. This connection is
@@ -5122,7 +5010,7 @@ public static void TestStatsMaxIdleClosedTen(ж<testing.T> t) {
 internal static time.Time testUseConns(ж<testing.T> t, nint count, time.Time tm, ж<global::go.database.sql_package.DB> db) {
     var conns = new slice<ж<global::go.database.sql_package.ΔConn>>(count);
     var ctx = context.Background();
-    foreach (var i in range(conns)) {
+    foreach (var i in range(len(conns))) {
         tm = tm.Add(time.ΔNanosecond);
         nowFunc = () => tm;
         var (c, err) = db.Conn(ctx);
@@ -5135,10 +5023,8 @@ internal static time.Time testUseConns(ж<testing.T> t, nint count, time.Time tm
     for (nint i = len(conns) - 1; i >= 0; i--) {
         tm = tm.Add(time.ΔNanosecond);
         nowFunc = () => tm;
-        {
-            var err = conns[i].Close(); if (err != nil) {
-                t.Error(err);
-            }
+        var err = conns[i].Close(); if (err != nil) {
+            t.Error(err);
         }
     }
 
@@ -5201,7 +5087,7 @@ public static void TestMaxIdleTime(ж<testing.T> t) {
         defer(() => {
             nowFunc = time.Now;
         }, ref ᒐ);
-        foreach (var (_, vᴛ1) in list) {
+        foreach (var (_, vᴛ1) in range(list)) {
             ref var item = ref heap(new TestMaxIdleTime_list(), out var Ꮡitem);
             item = vᴛ1;
 
@@ -5242,7 +5128,7 @@ public static void TestMaxIdleTime(ж<testing.T> t) {
 
                     // Validate freeConn order.
                     time.Time last = default;
-                    foreach (var (_, c) in db.freeConn) {
+                    foreach (var (_, c) in range(db.freeConn)) {
                         if (last.After(c.returnedAt)) {
                             tΔ1.Error(freeConnIsNotOrderedByˢ);
                             break;
@@ -5251,7 +5137,7 @@ public static void TestMaxIdleTime(ж<testing.T> t) {
                     }
 
                     db.Ꮡmu.Unlock();
-                    foreach (var (_, c) in closing) {
+                    foreach (var (_, c) in range(closing)) {
                         c.Close();
                     }
                     {
@@ -5407,7 +5293,7 @@ public static void TestNamedValueChecker(ж<testing.T> t) {
             new(arr1, slice<int64>([42, 128, 707]))
         ]);
 
-        foreach (var (index, item) in list) {
+        foreach (var (index, item) in range(list)) {
             if (!reflect.DeepEqual(item.got, item.want)) {
                 t.Errorf("got %#v wanted %#v for index %d", item.got, item.want, index);
             }
@@ -5478,10 +5364,8 @@ public static void TestOpenConnector(ж<testing.T> t) {
             t.Fatal(notUsingFakeConnectorˢ);
         }
 
-        {
-            var errΔ1 = db.Close(); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = db.Close(); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
 
         if (!c.closed) {
@@ -5566,15 +5450,11 @@ public static void TestQueryExecContextOnly(ж<testing.T> t) {
     try {
         // Ensure connection does not implement non-context interfaces.
         driver.Conn connType = new sql_internal_test_package.ctxOnlyConnжConn(Ꮡ(new ctxOnlyConn()));
-        {
-            var (_, ok) = connType._<driver.Execer>(ᐧ); if (ok) {
-                t.Fatalf("%T must not implement driver.Execer", connType);
-            }
+        if (connType._<driver.Execer>(out _)) {
+            t.Fatalf("%T must not implement driver.Execer", connType);
         }
-        {
-            var (_, ok) = connType._<driver.Queryer>(ᐧ); if (ok) {
-                t.Fatalf("%T must not implement driver.Queryer", connType);
-            }
+        if (connType._<driver.Queryer>(out _)) {
+            t.Fatalf("%T must not implement driver.Queryer", connType);
         }
 
         Register(contextOnlyˢ, new sql_internal_test_package.ctxOnlyDriverжDriver(Ꮡ(new ctxOnlyDriver())));
@@ -5744,7 +5624,7 @@ public static void TestDriverArgsWrapsErrors(ж<testing.T> t) {
 }
 
 public static void TestContextCancelDuringRawBytesScan(ж<testing.T> t) {
-    foreach (var (_, mode) in slice<@string>(["nocancel", "top", "bottom", "go"])) {
+    foreach (var (_, mode) in range(slice<@string>(["nocancel", "top", "bottom", "go"]))) {
         t.Run(mode, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             testContextCancelDuringRawBytesScan(tΔ1, mode);
         });
@@ -5806,7 +5686,7 @@ internal static partial void testContextCancelDuringRawBytesScan(ж<testing.T> t
                 var cancelʗ2 = cancel;
                 goǃ(() => cancelʗ2());
             }
-            foreach (var (_, b) in s) { // some operation reading from the raw memory
+            foreach (var (_, b) in range<byte>(s)) { // some operation reading from the raw memory
                 sink += b;
             }
         }
@@ -5822,10 +5702,8 @@ internal static partial void testContextCancelDuringRawBytesScan(ж<testing.T> t
             break;
         }
         case 2: {
-            {
-                var errΔ2 = r.Err(); if (!AreEqual(errΔ2, context.Canceled)) {
-                    t.Errorf("unexpected error: %v (%T)", errΔ2, errΔ2);
-                }
+            var errΔ2 = r.Err(); if (!AreEqual(errΔ2, context.Canceled)) {
+                t.Errorf("unexpected error: %v (%T)", errΔ2, errΔ2);
             }
             break;
         }
@@ -5834,10 +5712,8 @@ internal static partial void testContextCancelDuringRawBytesScan(ж<testing.T> t
             break;
         }}
 
-        {
-            var errΔ3 = r.Close(); if (errΔ3 != nil) {
-                t.Fatal(errΔ3);
-            }
+        var errΔ3 = r.Close(); if (errΔ3 != nil) {
+            t.Fatal(errΔ3);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -5861,10 +5737,8 @@ public static void TestContextCancelBetweenNextAndErr(ж<testing.T> t) {
         }
         cancel();                          // wake up the awaitDone goroutine
         time.Sleep(10 * time.Millisecond); // increase odds of seeing failure
-        {
-            var errΔ1 = r.Err(); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = r.Err(); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -5875,9 +5749,7 @@ internal partial struct testScanner {
     internal Func<any, error> scanf;
 }
 
-internal static error Scan(this testScanner ts, any src) {
-    return ts.scanf(src);
-}
+internal static error Scan(this testScanner ts, any src) { return ts.scanf(src); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string selectPeopleNameNameˢ => ref selectPeopleNameNameˢᵇ;
@@ -5960,17 +5832,13 @@ public static void TestNilErrorAfterClose(ж<testing.T> t) {
             t.Fatal(err);
         }
 
-        {
-            var errΔ1 = r.Close(); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = r.Close(); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
 
         time.Sleep(10 * time.Millisecond); // increase odds of seeing failure
-        {
-            var errΔ2 = r.Err(); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = r.Err(); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -6080,15 +5948,11 @@ public static void TestBadDriver(ж<testing.T> t) {
             t.Fatal(err);
         }
         defer(() => {
-            {
-                var r = recover(); if (r == nil) {
-                    t.Error(expectedPanicˢ);
-                } else {
-                    {
-                        @string want = badConnExecˢ; if (r._<@string>() != want) {
-                            t.Errorf("panic was %v, expected %v", r, want);
-                        }
-                    }
+            var r = recover(); if (r == nil) {
+                t.Error(expectedPanicˢ);
+            } else {
+                @string want = badConnExecˢ; if (r._<@string>() != want) {
+                    t.Errorf("panic was %v, expected %v", r, want);
                 }
             }
         }, ref ᒐ);
@@ -6137,18 +6001,14 @@ public static void TestPing(ж<testing.T> t) {
         t.Fatal(err);
     }
 
-    {
-        var errΔ1 = db.Ping(); if (errΔ1 != nil) {
-            t.Errorf("err was %#v, expected nil", errΔ1);
-            return;
-        }
+    var errΔ1 = db.Ping(); if (errΔ1 != nil) {
+        t.Errorf("err was %#v, expected nil", errΔ1);
+        return;
     }
 
     driver.fails = true;
-    {
-        var errΔ2 = db.Ping(); if (!AreEqual(errΔ2, pingError)) {
-            t.Errorf("err was %#v, expected pingError", errΔ2);
-        }
+    var errΔ2 = db.Ping(); if (!AreEqual(errΔ2, pingError)) {
+        t.Errorf("err was %#v, expected pingError", errΔ2);
     }
 }
 
@@ -6353,16 +6213,12 @@ public static void TestConnRequestSet(ж<testing.T> t) {
     ref var s = ref heap(new global::go.database.sql_package.connRequestSet(), out var Ꮡs);
     void wantLen(nint want) {
         t.Helper();
-        {
-            nint got = Ꮡs.Value.Len(); if (got != want) {
-                t.Errorf("Len = %d; want %d", got, want);
-            }
+        nint got = Ꮡs.Value.Len(); if (got != want) {
+            t.Errorf("Len = %d; want %d", got, want);
         }
         if (want == 0 && !t.Failed()) {
-            {
-                var (_, ok) = Ꮡs.Value.TakeRandom(); if (ok) {
-                    t.Fatalf("TakeRandom returned result when empty");
-                }
+            var (_, ok) = Ꮡs.Value.TakeRandom(); if (ok) {
+                t.Fatalf("TakeRandom returned result when empty");
             }
         }
     }
@@ -6393,10 +6249,8 @@ public static void TestConnRequestSet(ж<testing.T> t) {
         var ch1 = new channel<global::go.database.sql_package.connRequest>(0);
         var dh = Ꮡs.Value.Add(ch1);
         wantLenʗ2(1);
-        {
-            var (got, ok) = Ꮡs.Value.TakeRandom(); if (!ok || got != ch1) {
-                tΔ2.Fatalf("wrong take; ok=%v", ok);
-            }
+        var (got, ok) = Ꮡs.Value.TakeRandom(); if (!ok || got != ch1) {
+            tΔ2.Fatalf("wrong take; ok=%v", ok);
         }
         wantLenʗ2(0);
         if (Ꮡs.Value.Delete(dh)) {
@@ -6467,20 +6321,16 @@ public static void BenchmarkConnRequestSet(ж<testing.B> Ꮡb) {
             s.Add(default);
         }
         foreach (var _ᴛ3 in range(8)) {
-            {
-                var (_, ok) = s.TakeRandom(); if (!ok) {
-                    Ꮡb.Fatal(wantOkˢ);
-                }
+            var (_, ok) = s.TakeRandom(); if (!ok) {
+                Ꮡb.Fatal(wantOkˢ);
             }
         }
         foreach (var _ᴛ4 in range(8)) {
             s.Add(default);
         }
         foreach (var _ᴛ5 in range(16)) {
-            {
-                var (_, ok) = s.TakeRandom(); if (!ok) {
-                    Ꮡb.Fatal(wantOkˢ);
-                }
+            var (_, ok) = s.TakeRandom(); if (!ok) {
+                Ꮡb.Fatal(wantOkˢ);
             }
         }
         {
@@ -6498,12 +6348,10 @@ public static void TestIssue69837(ж<testing.T> t) {
         t.Errorf("ConvertValue() error = %v, want nil", err);
     }
 
-    {
-        var (v, ok) = val._<int64>(ᐧ); if (!ok) {
-            t.Errorf("val.(type): got %T, expected int64", val);
-        } else if (v != 1) {
-            t.Errorf("val: got %d, expected 1", v);
-        }
+    var (v, ok) = val._<int64>(ᐧ); if (!ok) {
+        t.Errorf("val.(type): got %T, expected int64", val);
+    } else if (v != 1) {
+        t.Errorf("val: got %d, expected 1", v);
     }
 }
 
@@ -6563,49 +6411,27 @@ internal static (driver.Conn, error) Connect(this unknownInputsConnector _Δp0, 
     return (new unknownInputsConn(), default);
 }
 
-internal static driver.Driver Driver(this unknownInputsConnector _) {
-    return default;
-}
+internal static driver.Driver Driver(this unknownInputsConnector _) { return default; }
 
 internal partial struct unknownInputsConn {
 }
 
-internal static (driver.Stmt, error) Prepare(this unknownInputsConn _Δp0, @string _Δp1) {
-    return (new unknownInputsStmt(), default);
-}
-
-internal static error Close(this unknownInputsConn _) {
-    return default;
-}
-
-internal static (driver.Tx, error) Begin(this unknownInputsConn _) {
-    return (default, default);
-}
+internal static (driver.Stmt, error) Prepare(this unknownInputsConn _Δp0, @string _Δp1) { return (new unknownInputsStmt(), default); }
+internal static error Close(this unknownInputsConn _) { return default; }
+internal static (driver.Tx, error) Begin(this unknownInputsConn _) { return (default, default); }
 
 internal partial struct unknownInputsStmt {
 }
 
-internal static error Close(this unknownInputsStmt _) {
-    return default;
-}
-
-internal static nint NumInput(this unknownInputsStmt _) {
-    return -1;
-}
-
+internal static error Close(this unknownInputsStmt _) { return default; }
+internal static nint NumInput(this unknownInputsStmt _) { return -1; }
 internal static (driver.Result, error) Exec(this unknownInputsStmt _Δp0, slice<driverꓸValue> args) {
-    {
-        var (_, ok) = args[0]._<@string>(ᐧ); if (!ok) {
-            return (default, fmt.Errorf("Expected string, got %T"u8, args[0]));
-        }
+    var (_, ok) = args[0]._<@string>(ᐧ); if (!ok) {
+        return (default, fmt.Errorf("Expected string, got %T"u8, args[0]));
     }
     return (default, default);
 }
-
-internal static (driver.Rows, error) Query(this unknownInputsStmt _Δp0, slice<driverꓸValue> _Δp1) {
-    return (default, default);
-}
-
+internal static (driver.Rows, error) Query(this unknownInputsStmt _Δp0, slice<driverꓸValue> _Δp1) { return (default, default); }
 internal static driver.ValueConverter ColumnConverter(this unknownInputsStmt _, nint idx) {
     return new unknownInputsValueConverter();
 }

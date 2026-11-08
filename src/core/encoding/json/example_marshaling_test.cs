@@ -21,10 +21,8 @@ public static Animal Zebra => 2;
 
 public static error UnmarshalJSON(this ref Animal a, slice<byte> b) {
     ref var s = ref heap(new @string(), out var Ꮡs);
-    {
-        var err = json.Unmarshal(b, Ꮡs); if (err != nil) {
-            return err;
-        }
+    var err = json.Unmarshal(b, Ꮡs); if (err != nil) {
+        return err;
     }
     var exprᴛ1 = strings.ToLower(s);
     switch (ᐧ) {
@@ -78,14 +76,12 @@ private static readonly @string gopherArmadilloZebraˢᵇ = @"[""gopher"",""arma
 public static void Example_customMarshalJSON() {
     @string blob = gopherArmadilloZebraˢ;
     ref var zoo = ref heap<slice<Animal>>(out var Ꮡzoo);
-    {
-        var err = json.Unmarshal(slice<byte>(blob), Ꮡzoo); if (err != nil) {
-            log.Fatal(err);
-        }
+    var err = json.Unmarshal(slice<byte>(blob), Ꮡzoo); if (err != nil) {
+        log.Fatal(err);
     }
 
     var census = new map<Animal, nint>();
-    foreach (var (_, animal) in zoo) {
+    foreach (var (_, animal) in range(zoo)) {
         census[animal] += 1;
     }
 

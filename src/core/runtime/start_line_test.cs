@@ -108,7 +108,7 @@ public static void TestStartLine(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in testCases) {
+    foreach (var (_, vᴛ1) in range(testCases)) {
         ref var tc = ref heap(new TestStartLine_testCases(), out var Ꮡtc);
         tc = vᴛ1;
 

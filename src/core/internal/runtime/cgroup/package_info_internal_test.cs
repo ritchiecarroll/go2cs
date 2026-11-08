@@ -29,7 +29,7 @@ using static go.@internal.runtime.cgroup_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/runtime/cgroup/export_test.go", "export_test.cs", "AAsSgqaCpoK4kpKWxLK0srQ=")]
+[assembly: GoPositionMap("internal/runtime/cgroup/export_test.go", "export_test.cs", "AAsSgqaCpoK4kpKWxKK0orQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;

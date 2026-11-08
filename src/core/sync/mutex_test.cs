@@ -88,10 +88,8 @@ public static void HammerMutex(ж<Δsync.Mutex> m, nint loops, channel<bool> cdo
 public static partial void TestMutex(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
-        {
-            nint n = Δruntime.SetMutexProfileFraction(1); if (n != 0) {
-                t.Logf("got mutexrate %d expected 0", n);
-            }
+        nint n = Δruntime.SetMutexProfileFraction(1); if (n != 0) {
+            t.Logf("got mutexrate %d expected 0", n);
         }
         defer(Δruntime.SetMutexProfileFraction, (nint)0, ref ᒐ);
 
@@ -123,7 +121,7 @@ partial struct misuseTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal Action f;
 }
-internal static slice<misuseTestsᴛ1> misuseTests = slice<misuseTestsᴛ1>([
+internal static slice<misuseTestsᴛ1> misuseTests = [
     new(
         "Mutex.Unlock",
         () => {
@@ -188,11 +186,11 @@ internal static slice<misuseTestsᴛ1> misuseTests = slice<misuseTestsᴛ1>([
             Ꮡmu.RUnlock();
         }
     )
-]);
+];
 
 [GoInit] internal static void init() {
     if (len(Δos.Args) == 3 && Δos.Args[1] == "TESTMISUSE") {
-        foreach (var (_, vᴛ1) in misuseTests) {
+        foreach (var (_, vᴛ1) in range(misuseTests)) {
             ref var test = ref heap(new misuseTestsᴛ1(), out var Ꮡtest);
             test = vᴛ1;
 
@@ -225,7 +223,7 @@ internal static ref readonly @string unlockedˢ => ref unlockedˢᵇ;
 private static readonly @string unlockedˢᵇ = "unlocked"u8;
 
 public static void TestMutexMisuse(ж<Δtesting.T> t) {
-    foreach (var (_, test) in misuseTests) {
+    foreach (var (_, test) in range(misuseTests)) {
         var (@out, err) = exec.Command(testenv.Executable(new sync_test_package.testing_TжTB(t)), testmisuseˢ, test.name).CombinedOutput();
         if (err == nil || !strings.Contains((@string)@out, unlockedˢ)) {
             t.Errorf("%s: did not find failure with message about unlocked lock: %s\n%s\n", test.name, err, @out);

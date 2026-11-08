@@ -105,11 +105,9 @@ public static void XTestParentFinishesChild(testingT t) {
         pc.Ꮡmu.Lock();
         ж<global::go.context_package.afterFuncCtx> ac = default;
         foreach (var (c, _) in pc.children) {
-            {
-                var (a, ok) = c._<ж<global::go.context_package.afterFuncCtx>>(ᐧ); if (ok) {
-                    ac = a;
-                    break;
-                }
+            var (a, ok) = c._<ж<global::go.context_package.afterFuncCtx>>(ᐧ); if (ok) {
+                ac = a;
+                break;
             }
         }
         if (len(pc.children) != 3 || !contains(pc.children, new global::go.context_package.cancelCtxжcanceler(cc)) || !contains(pc.children, new global::go.context_package.timerCtxжcanceler(tc)) || ac == nil) {
@@ -153,10 +151,8 @@ public static void XTestParentFinishesChild(testingT t) {
                 t.Errorf("<-%s.Done() blocked, but shouldn't have", name);
                 break;
             }}
-            {
-                var e = ctx.Err(); if (!AreEqual(e, Canceled)) {
-                    t.Errorf("%s.Err() == %v want %v", name, e, Canceled);
-                }
+            var e = ctx.Err(); if (!AreEqual(e, Canceled)) {
+                t.Errorf("%s.Err() == %v want %v", name, e, Canceled);
             }
         }
         check(parent, parentˢ);
@@ -191,7 +187,7 @@ public static void XTestChildFinishesFirst(testingT t) {
         var (cancelable, stop) = WithCancel(Background());
         var stopʗ1 = stop;
         defer(() => stopʗ1(), ref ᒐ);
-        foreach (var (_, parent) in slice<global::go.context_package.Context>([Background(), cancelable])) {
+        foreach (var (_, parent) in range(slice<global::go.context_package.Context>([Background(), cancelable]))) {
             var (child, cancel) = WithCancel(parent);
 
             var selᴛ7 = parent.Done();
@@ -211,10 +207,8 @@ public static void XTestChildFinishesFirst(testingT t) {
 
             var cc = child._<ж<global::go.context_package.cancelCtx>>();
             var (pc, pcok) = parent._<ж<global::go.context_package.cancelCtx>>(ᐧ); // pcok == false when parent == Background()
-            {
-                var (p, ok) = parentCancelCtx(cc.Context); if (ok != pcok || (ok && pc != p)) {
-                    t.Errorf("bad linkage: parentCancelCtx(cc.Context) = %v, %v want %v, %v", p.OrTypedNil(), ok, pc.OrTypedNil(), pcok);
-                }
+            var (p, ok) = parentCancelCtx(cc.Context); if (ok != pcok || (ok && pc != p)) {
+                t.Errorf("bad linkage: parentCancelCtx(cc.Context) = %v, %v want %v, %v", p.OrTypedNil(), ok, pc.OrTypedNil(), pcok);
             }
 
             if (pcok) {
@@ -290,10 +284,8 @@ private static readonly @string afterStoppingAfterFuncˢᵇ = "after stopping Af
 
 public static void XTestCancelRemoves(testingT t) {
     void checkChildren(@string when, global::go.context_package.Context ctxΔ1, nint want) {
-        {
-            nint got = len(ctxΔ1._<ж<global::go.context_package.cancelCtx>>().children); if (got != want) {
-                t.Errorf("%s: context has %d children, want %d", when, got, want);
-            }
+        nint got = len(ctxΔ1._<ж<global::go.context_package.cancelCtx>>().children); if (got != want) {
+            t.Errorf("%s: context has %d children, want %d", when, got, want);
         }
     }
 
@@ -344,7 +336,6 @@ internal static /*<-*/channel<EmptyStruct> Done(this ref myDoneCtx d) {
     var c = new channel<EmptyStruct>(0);
     return c.AsRecvOnly();
 }
-
 public static void XTestCustomContextGoroutines(testingT t) {
     GoFrame ᒐ = default;
     try {

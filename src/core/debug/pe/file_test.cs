@@ -35,11 +35,11 @@ internal partial struct fileTest {
     internal bool hasNoDwarfInfo;
 }
 
-internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>>(slice<fileTest>([
+internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>>([
     new(
         @file: "testdata/gcc-386-mingw-obj",
         hdr: new FileHeader(0x014c, 0x000c, 0x0, 0x64a, 0x1e, 0x0, 0x104),
-        sections: slice<ж<global::go.debug.pe_package.SectionHeader>>([
+        sections: [
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".text", 0, 0, 36, 500, 1440, 0, 3, 0, 0x60300020)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".data", 0, 0, 0, 0, 0, 0, 0, 0, 3224371264U)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".bss", 0, 0, 0, 0, 0, 0, 0, 0, 3224371328U)),
@@ -52,8 +52,8 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".debug_pubnames", 0, 0, 27, 1343, 1570, 0, 1, 0, 1108344832)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".debug_pubtypes", 0, 0, 38, 1370, 1580, 0, 1, 0, 1108344832)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".debug_aranges", 0, 0, 32, 1408, 1590, 0, 2, 0, 1108344832))
-        ]),
-        symbols: slice<ж<global::go.debug.pe_package.Symbol>>([
+        ],
+        symbols: [
             Ꮡ(new global::go.debug.pe_package.Symbol(".file", 0x0, -2, 0x0, 0x67)),
             Ꮡ(new global::go.debug.pe_package.Symbol("_main", 0x0, 1, 0x20, 0x2)),
             Ꮡ(new global::go.debug.pe_package.Symbol(".text", 0x0, 1, 0x0, 0x3)),
@@ -70,7 +70,7 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             Ꮡ(new global::go.debug.pe_package.Symbol(".debug_aranges", 0x0, 12, 0x0, 0x3)),
             Ꮡ(new global::go.debug.pe_package.Symbol("___main", 0x0, 0, 0x20, 0x2)),
             Ꮡ(new global::go.debug.pe_package.Symbol("_puts", 0x0, 0, 0x20, 0x2))
-        ])
+        ]
     ),
     new(
         @file: "testdata/gcc-386-mingw-exec",
@@ -96,7 +96,7 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
                 new(0x0, 0x0)
             }.array()
         )),
-        sections: slice<ж<global::go.debug.pe_package.SectionHeader>>([
+        sections: [
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".text", 0xcd8, 0x1000, 0xe00, 0x400, 0x0, 0x0, 0x0, 0x0, 0x60500060)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".data", 0x10, 0x2000, 0x200, 0x1200, 0x0, 0x0, 0x0, 0x0, 0xc0300040U)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".rdata", 0x120, 0x3000, 0x200, 0x1400, 0x0, 0x0, 0x0, 0x0, 0x40300040)),
@@ -112,7 +112,7 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".debug_line", 0x144, 0xd000, 0x200, 0x3600, 0x0, 0x0, 0x0, 0x0, 0x42100000)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".debug_frame", 0x34, 0xe000, 0x200, 0x3800, 0x0, 0x0, 0x0, 0x0, 0x42300000)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".debug_loc", 0x38, 0xf000, 0x200, 0x3a00, 0x0, 0x0, 0x0, 0x0, 0x42100000))
-        ])
+        ]
     ),
     new(
         @file: "testdata/gcc-386-mingw-no-symbols-exec",
@@ -137,7 +137,7 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
                 new(0x0, 0x0)
             }.array()
         )),
-        sections: slice<ж<global::go.debug.pe_package.SectionHeader>>([
+        sections: [
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".text", 0xc64, 0x1000, 0xe00, 0x400, 0x0, 0x0, 0x0, 0x0, 0x60500060)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".data", 0x10, 0x2000, 0x200, 0x1200, 0x0, 0x0, 0x0, 0x0, 0xc0300040U)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".rdata", 0x134, 0x3000, 0x200, 0x1400, 0x0, 0x0, 0x0, 0x0, 0x40300040)),
@@ -146,21 +146,21 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".idata", 0x378, 0x6000, 0x400, 0x1a00, 0x0, 0x0, 0x0, 0x0, 0xc0300040U)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".CRT", 0x18, 0x7000, 0x200, 0x1e00, 0x0, 0x0, 0x0, 0x0, 0xc0300040U)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".tls", 0x20, 0x8000, 0x200, 0x2000, 0x0, 0x0, 0x0, 0x0, 0xc0300040U))
-        ]),
+        ],
         hasNoDwarfInfo: true
     ),
     new(
         @file: "testdata/gcc-amd64-mingw-obj",
         hdr: new FileHeader(0x8664, 0x6, 0x0, 0x198, 0x12, 0x0, 0x4),
-        sections: slice<ж<global::go.debug.pe_package.SectionHeader>>([
+        sections: [
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".text", 0x0, 0x0, 0x30, 0x104, 0x15c, 0x0, 0x3, 0x0, 0x60500020)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".data", 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xc0500040U)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".bss", 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xc0500080U)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".rdata", 0x0, 0x0, 0x10, 0x134, 0x0, 0x0, 0x0, 0x0, 0x40500040)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".xdata", 0x0, 0x0, 0xc, 0x144, 0x0, 0x0, 0x0, 0x0, 0x40300040)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".pdata", 0x0, 0x0, 0xc, 0x150, 0x17a, 0x0, 0x3, 0x0, 0x40300040))
-        ]),
-        symbols: slice<ж<global::go.debug.pe_package.Symbol>>([
+        ],
+        symbols: [
             Ꮡ(new global::go.debug.pe_package.Symbol(".file", 0x0, -2, 0x0, 0x67)),
             Ꮡ(new global::go.debug.pe_package.Symbol("main", 0x0, 1, 0x20, 0x2)),
             Ꮡ(new global::go.debug.pe_package.Symbol(".text", 0x0, 1, 0x0, 0x3)),
@@ -171,7 +171,7 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             Ꮡ(new global::go.debug.pe_package.Symbol(".pdata", 0x0, 6, 0x0, 0x3)),
             Ꮡ(new global::go.debug.pe_package.Symbol("__main", 0x0, 0, 0x20, 0x2)),
             Ꮡ(new global::go.debug.pe_package.Symbol("puts", 0x0, 0, 0x20, 0x2))
-        ]),
+        ],
         hasNoDwarfInfo: true
     ),
     new(
@@ -198,7 +198,7 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
                 new(0x0, 0x0)
             }.array()
         )),
-        sections: slice<ж<global::go.debug.pe_package.SectionHeader>>([
+        sections: [
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".text", 0x6860, 0x1000, 0x6a00, 0x600, 0x0, 0x0, 0x0, 0x0, 0x60500020)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".data", 0xe0, 0x8000, 0x200, 0x7000, 0x0, 0x0, 0x0, 0x0, 0xc0500040U)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".rdata", 0x6b0, 0x9000, 0x800, 0x7200, 0x0, 0x0, 0x0, 0x0, 0x40600040)),
@@ -216,7 +216,7 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".debug_str", 0x396, 0x2f000, 0x400, 0x25200, 0x0, 0x0, 0x0, 0x0, 0x42100040)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".debug_loc", 0x13240, 0x30000, 0x13400, 0x25600, 0x0, 0x0, 0x0, 0x0, 0x42100040)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".debug_ranges", 0xa70, 0x44000, 0xc00, 0x38a00, 0x0, 0x0, 0x0, 0x0, 0x42100040))
-        ])
+        ]
     ),
     new(
         // testdata/vmlinuz-4.15.0-47-generic is a trimmed down version of Linux Kernel image.
@@ -249,15 +249,15 @@ internal static readonly ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<
                 new(0x0, 0x0)
             }.array()
         )),
-        sections: slice<ж<global::go.debug.pe_package.SectionHeader>>([
+        sections: [
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".setup", 0x41e0, 0x200, 0x41e0, 0x200, 0x0, 0x0, 0x0, 0x0, 0x60500020)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".reloc", 0x20, 0x43e0, 0x20, 0x43e0, 0x0, 0x0, 0x0, 0x0, 0x42100040)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".text", 0x7bc390, 0x4400, 0x7bc390, 0x4400, 0x0, 0x0, 0x0, 0x0, 0x60500020)),
             Ꮡ(new global::go.debug.pe_package.SectionHeader(".bss", 0x168f870, 0x7c0790, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xc8000080U))
-        ]),
+        ],
         hasNoDwarfInfo: true
     )
-]));
+]);
 internal static ref slice<fileTest> fileTests => ref ((StaticBox<slice<fileTest>>)ᏑfileTests).ValueSlot;
 
 internal static bool isOptHdrEq(any a, any b) {
@@ -283,7 +283,7 @@ internal static bool isOptHdrEq(any a, any b) {
 }
 
 public static void TestOpen(ж<testing.T> t) {
-    foreach (var i in range(fileTests)) {
+    foreach (var i in range(len(fileTests))) {
         var tt = Ꮡ(fileTests, i);
 
         var (f, err) = Open(tt.@file);
@@ -300,7 +300,7 @@ public static void TestOpen(ж<testing.T> t) {
             continue;
         }
 
-        foreach (var (iΔ1, sh) in f.Sections) {
+        foreach (var (iΔ1, sh) in range(f.Sections)) {
             if (iΔ1 >= len(tt.sections)) {
                 break;
             }
@@ -315,7 +315,7 @@ public static void TestOpen(ж<testing.T> t) {
         if (tn != fn) {
             t.Errorf("open %s: len(Sections) = %d, want %d", tt.@file, fn, tn);
         }
-        foreach (var (iΔ2, have) in f.Symbols) {
+        foreach (var (iΔ2, have) in range(f.Symbols)) {
             if (iΔ2 >= len(tt.symbols)) {
                 break;
             }
@@ -402,17 +402,13 @@ internal static void testDWARF(ж<testing.T> t, nint linktype) {
         var (ᴛ1, ᴛ2) = template.New(mainˢ).Parse(testprog);
         err = template.Must(ᴛ1, ᴛ2).Execute(new os.FileжWriter(@file), linktype != linkNoCgo);
         if (err != nil) {
-            {
-                var errΔ1 = @file.Close(); if (errΔ1 != nil) {
-                    t.Error(errΔ1);
-                }
+            var errΔ1 = @file.Close(); if (errΔ1 != nil) {
+                t.Error(errΔ1);
             }
             t.Fatal(err);
         }
-        {
-            var errΔ2 = @file.Close(); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = @file.Close(); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
 
         @string exe = filepath.Join(tmpdir, aExeˢ);
@@ -466,7 +462,7 @@ internal static void testDWARF(ж<testing.T> t, nint linktype) {
         var imageBase = getImageBase(f);
 
         bool foundDebugGDBScriptsSection = default;
-        foreach (var (_, sect) in f.Sections) {
+        foreach (var (_, sect) in range(f.Sections)) {
             if (sect.Name == ".debug_gdb_scripts"u8 || sect.Name == ".zdebug_gdb_scripts"u8) {
                 foundDebugGDBScriptsSection = true;
             }
@@ -573,7 +569,7 @@ public static void TestBSSHasZeros(ж<testing.T> t) {
         defer(() => fʗ1.Close(), ref ᒐ);
 
         ж<global::go.debug.pe_package.ΔSection> bss = default;
-        foreach (var (_, sect) in f.Sections) {
+        foreach (var (_, sect) in range(f.Sections)) {
             if (sect.Name == ".bss"u8) {
                 bss = sect;
                 break;
@@ -583,10 +579,8 @@ public static void TestBSSHasZeros(ж<testing.T> t) {
             t.Fatal(couldNotFindBssSectionˢ);
         }
         // We expect an error from bss.Data, as there are no contents.
-        {
-            var (_, errΔ1) = bss.Data(); if (errΔ1 == nil) {
-                t.Error(bssDataSucceededExpectedˢ);
-            }
+        var (_, errΔ1) = bss.Data(); if (errΔ1 == nil) {
+            t.Error(bssDataSucceededExpectedˢ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -672,10 +666,8 @@ public static void TestBuildingWindowsGUI(ж<testing.T> t) {
         @string tmpdir = t.TempDir();
 
         @string src = filepath.Join(tmpdir, aGoˢ);
-        {
-            var errΔ1 = os.WriteFile(src, slice<byte>(@"package main; func main() {}"u8), 420); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = os.WriteFile(src, slice<byte>(@"package main; func main() {}"u8), 420); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         @string exe = filepath.Join(tmpdir, aExeˢ);
         var cmd = exec.Command(testenv.GoToolPath(new pe_internal_test_package.testing_TжTB(t)), buildˢ, ldflagsˢ, hWindowsguiˢ, "-o", exe, src);

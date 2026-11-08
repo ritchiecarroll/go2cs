@@ -25,7 +25,7 @@ partial class cipher_test_package {
 partial struct cfbTestsᴛ1 /*dyn*/ {
     internal @string key, iv, plaintext, ciphertext;
 }
-internal static slice<cfbTestsᴛ1> cfbTests = slice<cfbTestsᴛ1>([
+internal static slice<cfbTestsᴛ1> cfbTests = [
     new(
         "2b7e151628aed2a6abf7158809cf4f3c",
         "000102030405060708090a0b0c0d0e0f",
@@ -50,10 +50,10 @@ internal static slice<cfbTestsᴛ1> cfbTests = slice<cfbTestsᴛ1>([
         "f69f2445df4f9b17ad2b417be66c3710",
         "c04b05357c5d1c0eeac4c66f9ff7f2e6"
     )
-]);
+];
 
 public static void TestCFBVectors(ж<testing.T> t) {
-    foreach (var (i, test) in cfbTests) {
+    foreach (var (i, test) in range(cfbTests)) {
         var (key, err) = hex.DecodeString(test.key);
         if (err != nil) {
             t.Fatal(err);
@@ -126,7 +126,7 @@ private static ref readonly @string decrypterˢ => ref decrypterˢᵇ;
 private static readonly @string decrypterˢᵇ = "Decrypter"u8;
 
 public static void TestCFBStream(ж<testing.T> t) {
-    foreach (var (_, keylen) in slice<nint>([128, 192, 256])) {
+    foreach (var (_, keylen) in range(slice<nint>([128, 192, 256]))) {
         t.Run(fmt.Sprintf("AES-%d"u8, keylen), (ж<testing.T> tΔ1) => {
             var rng = newRandReader(tΔ1);
 

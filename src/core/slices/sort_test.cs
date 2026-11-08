@@ -16,9 +16,7 @@ using go.math;
 partial class slices_test_package {
 
 internal static array<nint> ints = new nint[]{74, 59, 238, -784, 9845, 959, 905, 0, 0, 42, 7586, -5467984, 7586}.array();
-
 internal static array<float64> float64s = new float64[]{74.3D, 59.0D, Δmath.Inf(1), 238.2D, -784.0D, 2.3D, Δmath.Inf(-1), 9845.768D, -959.7485D, 905D, 7.8D, 7.8D, 74.3D, 59.0D, Δmath.Inf(1), 238.2D, -784.0D, 2.3D}.array();
-
 internal static array<@string> strs = new @string[]{"", "Hello", "foo", "bar", "foo", "f00", "%*&^*&^&", "***"}.array();
 
 public static void TestSortIntSlice(ж<testing.T> t) {
@@ -88,7 +86,7 @@ internal static nint intPairCmp(intPair x, intPair y) {
 
 // Record initial order in B.
 internal static void initB(this intPairs d) {
-    foreach (var i in range(d)) {
+    foreach (var i in range(len(d))) {
         d[i].b = i;
     }
 }
@@ -185,17 +183,17 @@ public static void TestMinMax(ж<testing.T> t) {
     var intCmp = (nint a, nint b) => a - b;
 
     var tests = slice<TestMinMax_tests>([
-        new(slice<nint>([7]), 7, 7),
-        new(slice<nint>([1, 2]), 1, 2),
-        new(slice<nint>([2, 1]), 1, 2),
-        new(slice<nint>([1, 2, 3]), 1, 3),
-        new(slice<nint>([3, 2, 1]), 1, 3),
-        new(slice<nint>([2, 1, 3]), 1, 3),
-        new(slice<nint>([2, 2, 3]), 2, 3),
-        new(slice<nint>([3, 2, 3]), 2, 3),
-        new(slice<nint>([0, 2, -9]), -9, 2)
+        new([7], 7, 7),
+        new([1, 2], 1, 2),
+        new([2, 1], 1, 2),
+        new([1, 2, 3], 1, 3),
+        new([3, 2, 1], 1, 3),
+        new([2, 1, 3], 1, 3),
+        new([2, 2, 3], 2, 3),
+        new([3, 2, 3], 2, 3),
+        new([0, 2, -9], -9, 2)
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestMinMax_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -326,8 +324,8 @@ public static void TestBinarySearch(ж<testing.T> t) {
     var strSame = slice<@string>(["xx", "xx", "xx"]);
 
     var tests = slice<TestBinarySearch_tests>([
-        new(slice<@string>([]), "foo", 0, false),
-        new(slice<@string>([]), "", 0, false),
+        new([], "foo", 0, false),
+        new([], "", 0, false),
 
         new(str1, "foo", 0, true),
         new(str1, "bar", 0, false),
@@ -367,7 +365,7 @@ public static void TestBinarySearch(ж<testing.T> t) {
         new(strSame, "ab", 0, false),
         new(strSame, "zz", 3, false)
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestBinarySearch_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -404,7 +402,7 @@ public static void TestBinarySearchInts(ж<testing.T> t) {
         new(43, 3, false),
         new(80, 6, true)
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestBinarySearchInts_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -445,7 +443,7 @@ public static void TestBinarySearchFloats(ж<testing.T> t) {
         new(1.4D, 3, true),
         new(1.5D, 4, false)
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestBinarySearchFloats_tests(), out var Ꮡtt);
         tt = vᴛ1;
 

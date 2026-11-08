@@ -17,7 +17,7 @@ partial struct tcpServerTestsᴛ1 /*dyn*/ {
     internal @string snet, saddr; // server endpoint
     internal @string tnet, taddr; // target endpoint for client
 }
-internal static slice<tcpServerTestsᴛ1> tcpServerTests = slice<tcpServerTestsᴛ1>([
+internal static slice<tcpServerTestsᴛ1> tcpServerTests = [
     new(snet: "tcp", saddr: ":0", tnet: "tcp", taddr: "127.0.0.1"),
     new(snet: "tcp", saddr: "0.0.0.0:0", tnet: "tcp", taddr: "127.0.0.1"),
     new(snet: "tcp", saddr: "[::ffff:0.0.0.0]:0", tnet: "tcp", taddr: "127.0.0.1"),
@@ -52,7 +52,7 @@ internal static slice<tcpServerTestsᴛ1> tcpServerTests = slice<tcpServerTests�
     new(snet: "tcp6", saddr: "[::]:0", tnet: "tcp6", taddr: "::1"),
 
     new(snet: "tcp6", saddr: "[::1]:0", tnet: "tcp6", taddr: "::1")
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object notTestableˢ = (@string)"not testable"u8;
@@ -61,7 +61,7 @@ internal static readonly object notTestableˢ = (@string)"not testable"u8;
 public static void TestTCPServer(ж<testing.T> t) {
     const nint N = 3;
 
-    foreach (var (i, vᴛ1) in tcpServerTests) {
+    foreach (var (i, vᴛ1) in range(tcpServerTests)) {
         ref var tt = ref heap(new tcpServerTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -77,10 +77,8 @@ public static void TestTCPServer(ж<testing.T> t) {
 
                 var (ln, err) = Listen(ttʗ1.snet, ttʗ1.saddr);
                 if (err != nil) {
-                    {
-                        var perr = parseDialError(err); if (perr != nil) {
-                            tΔ1.Error(perr);
-                        }
+                    var perr = parseDialError(err); if (perr != nil) {
+                        tΔ1.Error(perr);
                     }
                     tΔ1.Fatal(err);
                 }
@@ -88,7 +86,7 @@ public static void TestTCPServer(ж<testing.T> t) {
                 ref var lss = ref heap<slice<ж<localServer>>>(out var Ꮡlss);
                 slice<channel<error>> tpchs = default;
                 defer(() => {
-                    foreach (var (_, ls) in Ꮡlss.ValueSlot) {
+                    foreach (var (_, ls) in range(Ꮡlss.ValueSlot)) {
                         ls.teardown();
                     }
                 }, ref ᒐ);
@@ -103,10 +101,8 @@ public static void TestTCPServer(ж<testing.T> t) {
                     var handler = (ж<localServer> ls, global::go.net_package.Listener lnΔ1) => {
                         ls.transponder(lnΔ1, chʗ1.AsSendOnly());
                     };
-                    {
-                        var errΔ1 = Ꮡlss.ValueSlot[iΔ2].buildup(handler); if (errΔ1 != nil) {
-                            tΔ1.Fatal(errΔ1);
-                        }
+                    var errΔ1 = Ꮡlss.ValueSlot[iΔ2].buildup(handler); if (errΔ1 != nil) {
+                        tΔ1.Fatal(errΔ1);
                     }
                 }
 
@@ -119,10 +115,8 @@ public static void TestTCPServer(ж<testing.T> t) {
                     ref var d = ref heap<global::go.net_package.Dialer>(new Dialer(Timeout: someTimeout), out var Ꮡd);
                     (var c, errΔ2) = Ꮡd.Dial(ttʗ1.tnet, JoinHostPort(ttʗ1.taddr, port));
                     if (errΔ2 != nil) {
-                        {
-                            var perr = parseDialError(errΔ2); if (perr != nil) {
-                                tΔ1.Error(perr);
-                            }
+                        var perr = parseDialError(errΔ2); if (perr != nil) {
+                            tΔ1.Error(perr);
                         }
                         tΔ1.Fatal(errΔ2);
                     }
@@ -133,13 +127,13 @@ public static void TestTCPServer(ж<testing.T> t) {
                 }
 
                 trchs = move2heap(trchsᴷ, trchs);
-                foreach (var (_, ch) in trchs) {
+                foreach (var (_, ch) in range(trchs)) {
                     foreach (var errΔ3 in ch) {
                         tΔ1.Errorf("#%d: %v", i, errΔ3);
                     }
                 }
                 tpchs = move2heap(tpchsᴷ, tpchs);
-                foreach (var (_, ch) in tpchs) {
+                foreach (var (_, ch) in range(tpchs)) {
                     foreach (var errΔ4 in ch) {
                         tΔ1.Errorf("#%d: %v", i, errΔ4);
                     }
@@ -169,7 +163,7 @@ public static partial void TestUnixAndUnixpacketServer(ж<testing.T> t) {
 
         const nint N = 3;
 
-        foreach (var (i, tt) in unixAndUnixpacketServerTests) {
+        foreach (var (i, tt) in range(unixAndUnixpacketServerTests)) {
             if (!testableListenArgs(tt.network, tt.address, ""u8)) {
                 t.Logf("skipping %s test", tt.network + " " + tt.address);
                 continue;
@@ -177,10 +171,8 @@ public static partial void TestUnixAndUnixpacketServer(ж<testing.T> t) {
 
             var (ln, err) = Listen(tt.network, tt.address);
             if (err != nil) {
-                {
-                    var perr = parseDialError(err); if (perr != nil) {
-                        t.Error(perr);
-                    }
+                var perr = parseDialError(err); if (perr != nil) {
+                    t.Error(perr);
                 }
                 t.Fatal(err);
             }
@@ -188,7 +180,7 @@ public static partial void TestUnixAndUnixpacketServer(ж<testing.T> t) {
             ref var lss = ref heap<slice<ж<localServer>>>(out var Ꮡlss);
             slice<channel<error>> tpchs = default;
             defer(() => {
-                foreach (var (_, ls) in Ꮡlss.ValueSlot) {
+                foreach (var (_, ls) in range(Ꮡlss.ValueSlot)) {
                     ls.teardown();
                 }
             }, ref ᒐ);
@@ -203,10 +195,8 @@ public static partial void TestUnixAndUnixpacketServer(ж<testing.T> t) {
                 var handler = (ж<localServer> ls, global::go.net_package.Listener lnΔ1) => {
                     ls.transponder(lnΔ1, chʗ1.AsSendOnly());
                 };
-                {
-                    var errΔ1 = lss[iΔ2].buildup(handler); if (errΔ1 != nil) {
-                        t.Fatal(errΔ1);
-                    }
+                var errΔ1 = lss[iΔ2].buildup(handler); if (errΔ1 != nil) {
+                    t.Fatal(errΔ1);
                 }
             }
 
@@ -215,18 +205,14 @@ public static partial void TestUnixAndUnixpacketServer(ж<testing.T> t) {
                 ref var d = ref heap<global::go.net_package.Dialer>(new Dialer(Timeout: someTimeout), out var Ꮡd);
                 var (c, errΔ2) = Ꮡd.Dial(lss[iΔ3].Listener.Addr().Network(), lss[iΔ3].Listener.Addr().String());
                 if (errΔ2 != nil) {
-                    {
-                        var perr = parseDialError(errΔ2); if (perr != nil) {
-                            t.Error(perr);
-                        }
+                    var perr = parseDialError(errΔ2); if (perr != nil) {
+                        t.Error(perr);
                     }
                     t.Fatal(errΔ2);
                 }
 
-                {
-                    var addr = c.LocalAddr(); if (addr != nil) {
-                        t.Logf("connected %s->%s", addr, lss[iΔ3].Listener.Addr());
-                    }
+                var addr = c.LocalAddr(); if (addr != nil) {
+                    t.Logf("connected %s->%s", addr, lss[iΔ3].Listener.Addr());
                 }
 
                 var cʗ1 = c;
@@ -236,13 +222,13 @@ public static partial void TestUnixAndUnixpacketServer(ж<testing.T> t) {
             }
 
             trchs = move2heap(trchsᴷ, trchs);
-            foreach (var (_, ch) in trchs) {
+            foreach (var (_, ch) in range(trchs)) {
                 foreach (var errΔ3 in ch) {
                     t.Errorf("#%d: %v", i, errΔ3);
                 }
             }
             tpchs = move2heap(tpchsᴷ, tpchs);
-            foreach (var (_, ch) in tpchs) {
+            foreach (var (_, ch) in range(tpchs)) {
                 foreach (var errΔ4 in ch) {
                     t.Errorf("#%d: %v", i, errΔ4);
                 }
@@ -258,7 +244,7 @@ partial struct udpServerTestsᴛ1 /*dyn*/ {
     internal @string tnet, taddr; // target endpoint for client
     internal bool dial;           // test with Dial
 }
-internal static slice<udpServerTestsᴛ1> udpServerTests = slice<udpServerTestsᴛ1>([
+internal static slice<udpServerTestsᴛ1> udpServerTests = [
     new(snet: "udp", saddr: ":0", tnet: "udp", taddr: "127.0.0.1"),
     new(snet: "udp", saddr: "0.0.0.0:0", tnet: "udp", taddr: "127.0.0.1"),
     new(snet: "udp", saddr: "[::ffff:0.0.0.0]:0", tnet: "udp", taddr: "127.0.0.1"),
@@ -297,10 +283,10 @@ internal static slice<udpServerTestsᴛ1> udpServerTests = slice<udpServerTests�
     new(snet: "udp", saddr: "127.0.0.1:0", tnet: "udp", taddr: "127.0.0.1", dial: true),
 
     new(snet: "udp", saddr: "[::1]:0", tnet: "udp", taddr: "::1", dial: true)
-]);
+];
 
 public static void TestUDPServer(ж<testing.T> t) {
-    foreach (var (i, vᴛ1) in udpServerTests) {
+    foreach (var (i, vᴛ1) in range(udpServerTests)) {
         ref var tt = ref heap(new udpServerTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -315,10 +301,8 @@ public static void TestUDPServer(ж<testing.T> t) {
 
                 var (c1, err) = ListenPacket(ttʗ1.snet, ttʗ1.saddr);
                 if (err != nil) {
-                    {
-                        var perr = parseDialError(err); if (perr != nil) {
-                            tΔ1.Error(perr);
-                        }
+                    var perr = parseDialError(err); if (perr != nil) {
+                        tΔ1.Error(perr);
                     }
                     tΔ1.Fatal(err);
                 }
@@ -330,10 +314,8 @@ public static void TestUDPServer(ж<testing.T> t) {
                 var handler = (ж<localPacketServer> lsΔ1, global::go.net_package.PacketConn c) => {
                     packetTransponder(c, Ꮡtpch.ValueSlot.AsSendOnly());
                 };
-                {
-                    var errΔ1 = ls.buildup(handler); if (errΔ1 != nil) {
-                        tΔ1.Fatal(errΔ1);
-                    }
+                var errΔ1 = ls.buildup(handler); if (errΔ1 != nil) {
+                    tΔ1.Fatal(errΔ1);
                 }
 
                 var trch = new channel<error>(1);
@@ -345,10 +327,8 @@ public static void TestUDPServer(ж<testing.T> t) {
                     ref var d = ref heap<global::go.net_package.Dialer>(new Dialer(Timeout: someTimeout), out var Ꮡd);
                     var (c2, errΔ2) = Ꮡd.Dial(ttʗ1.tnet, JoinHostPort(ttʗ1.taddr, port));
                     if (errΔ2 != nil) {
-                        {
-                            var perr = parseDialError(errΔ2); if (perr != nil) {
-                                tΔ1.Error(perr);
-                            }
+                        var perr = parseDialError(errΔ2); if (perr != nil) {
+                            tΔ1.Error(perr);
                         }
                         tΔ1.Fatal(errΔ2);
                     }
@@ -358,10 +338,8 @@ public static void TestUDPServer(ж<testing.T> t) {
                 } else {
                     var (c2, errΔ3) = ListenPacket(ttʗ1.tnet, JoinHostPort(ttʗ1.taddr, "0"));
                     if (errΔ3 != nil) {
-                        {
-                            var perr = parseDialError(errΔ3); if (perr != nil) {
-                                tΔ1.Error(perr);
-                            }
+                        var perr = parseDialError(errΔ3); if (perr != nil) {
+                            tΔ1.Error(perr);
                         }
                         tΔ1.Fatal(errΔ3);
                     }
@@ -418,7 +396,7 @@ public static void TestUnixgramServer(ж<testing.T> t) {
         new(saddr: "@nettest/go/unixgram/server", caddr: "@nettest/go/unixgram/client")
     ]);
 
-    foreach (var (i, vᴛ1) in unixgramServerTests) {
+    foreach (var (i, vᴛ1) in range(unixgramServerTests)) {
         ref var tt = ref heap(new TestUnixgramServer_type(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -433,10 +411,8 @@ public static void TestUnixgramServer(ж<testing.T> t) {
 
                 var (c1, err) = ListenPacket(unixgramˢ, ttʗ1.saddr);
                 if (err != nil) {
-                    {
-                        var perr = parseDialError(err); if (perr != nil) {
-                            tΔ1.Error(perr);
-                        }
+                    var perr = parseDialError(err); if (perr != nil) {
+                        tΔ1.Error(perr);
                     }
                     tΔ1.Fatal(err);
                 }
@@ -448,10 +424,8 @@ public static void TestUnixgramServer(ж<testing.T> t) {
                 var handler = (ж<localPacketServer> lsΔ1, global::go.net_package.PacketConn c) => {
                     packetTransponder(c, Ꮡtpch.ValueSlot.AsSendOnly());
                 };
-                {
-                    var errΔ1 = ls.buildup(handler); if (errΔ1 != nil) {
-                        tΔ1.Fatal(errΔ1);
-                    }
+                var errΔ1 = ls.buildup(handler); if (errΔ1 != nil) {
+                    tΔ1.Fatal(errΔ1);
                 }
 
                 var trch = new channel<error>(1);
@@ -459,10 +433,8 @@ public static void TestUnixgramServer(ж<testing.T> t) {
                     ref var d = ref heap<global::go.net_package.Dialer>(new Dialer(Timeout: someTimeout, LocalAddr: new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr(Net: "unixgram", Name: ttʗ1.caddr)))), out var Ꮡd);
                     var (c2, errΔ2) = Ꮡd.Dial(unixgramˢ, ls.PacketConn.LocalAddr().String());
                     if (errΔ2 != nil) {
-                        {
-                            var perr = parseDialError(errΔ2); if (perr != nil) {
-                                tΔ1.Error(perr);
-                            }
+                        var perr = parseDialError(errΔ2); if (perr != nil) {
+                            tΔ1.Error(perr);
                         }
                         tΔ1.Fatal(errΔ2);
                     }
@@ -473,10 +445,8 @@ public static void TestUnixgramServer(ж<testing.T> t) {
                 } else {
                     var (c2, errΔ3) = ListenPacket(unixgramˢ, ttʗ1.caddr);
                     if (errΔ3 != nil) {
-                        {
-                            var perr = parseDialError(errΔ3); if (perr != nil) {
-                                tΔ1.Error(perr);
-                            }
+                        var perr = parseDialError(errΔ3); if (perr != nil) {
+                            tΔ1.Error(perr);
                         }
                         tΔ1.Fatal(errΔ3);
                     }

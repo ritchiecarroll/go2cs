@@ -16,7 +16,7 @@ partial struct itob64Test {
     internal @string @out;
 }
 
-internal static slice<itob64Test> itob64tests = slice<itob64Test>([
+internal static slice<itob64Test> itob64tests = [
     new(0, 10, "0"),
     new(1, 10, "1"),
     new(-1, 10, "-1"),
@@ -58,7 +58,7 @@ internal static slice<itob64Test> itob64tests = slice<itob64Test>([
     new(25, 25, "10"),
     new(32544027072L, 35, "holycow"),
     new(38493362624L, 36, "holycow")
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object abcˢ = (@string)"abc"u8;
@@ -66,7 +66,7 @@ internal static readonly object abcˢ = (@string)"abc"u8;
 public static void TestItoa(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        foreach (var (_, test) in itob64tests) {
+        foreach (var (_, test) in range(itob64tests)) {
             @string s = FormatInt(test.@in, test.@base);
             if (s != test.@out) {
                 t.Errorf("FormatInt(%v, %v) = %v want %v",
@@ -102,10 +102,8 @@ public static void TestItoa(ж<testing.T> t) {
 
         // Override when base is illegal
         defer(() => {
-            {
-                var r = recover(); if (r == nil) {
-                    t.Fatalf("expected panic due to illegal base");
-                }
+            var r = recover(); if (r == nil) {
+                t.Fatalf("expected panic due to illegal base");
             }
         }, ref ᒐ);
         FormatUint(12345678, 1);
@@ -120,17 +118,17 @@ partial struct uitob64Test {
     internal @string @out;
 }
 
-internal static slice<uitob64Test> uitob64tests = slice<uitob64Test>([
+internal static slice<uitob64Test> uitob64tests = [
     new(9223372036854775807UL, 10, "9223372036854775807"),
     new((uint64)1 << 63, 10, "9223372036854775808"),
     new(9223372036854775809UL, 10, "9223372036854775809"),
     new(18446744073709551614UL, 10, "18446744073709551614"),
     new(18446744073709551615UL, 10, "18446744073709551615"),
     new(18446744073709551615UL, 2, "1111111111111111111111111111111111111111111111111111111111111111")
-]);
+];
 
 public static void TestUitoa(ж<testing.T> t) {
-    foreach (var (_, test) in uitob64tests) {
+    foreach (var (_, test) in range(uitob64tests)) {
         @string s = FormatUint(test.@in, test.@base);
         if (s != test.@out) {
             t.Errorf("FormatUint(%v, %v) = %v want %v",
@@ -148,7 +146,7 @@ partial struct varlenUintsᴛ1 /*dyn*/ {
     internal uint64 @in;
     internal @string @out;
 }
-internal static slice<varlenUintsᴛ1> varlenUints = slice<varlenUintsᴛ1>([
+internal static slice<varlenUintsᴛ1> varlenUints = [
     new(1, "1"),
     new(12, "12"),
     new(123, "123"),
@@ -169,10 +167,10 @@ internal static slice<varlenUintsᴛ1> varlenUints = slice<varlenUintsᴛ1>([
     new(123456789012345678UL, "123456789012345678"),
     new(1234567890123456789UL, "1234567890123456789"),
     new(12345678901234567890UL, "12345678901234567890")
-]);
+];
 
 public static void TestFormatUintVarlen(ж<testing.T> t) {
-    foreach (var (_, test) in varlenUints) {
+    foreach (var (_, test) in range(varlenUints)) {
         @string s = FormatUint(test.@in, 10);
         if (s != test.@out) {
             t.Errorf("FormatUint(%v, 10) = %v want %v", test.@in, s, test.@out);
@@ -184,7 +182,7 @@ public static void BenchmarkFormatInt(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (_, test) in itob64tests) {
+        foreach (var (_, test) in range(itob64tests)) {
             @string s = FormatInt(test.@in, test.@base);
             BenchSink += len(s);
         }
@@ -196,7 +194,7 @@ public static void BenchmarkAppendInt(ж<testing.B> Ꮡb) {
 
     var dst = new slice<byte>(0, 30);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (_, test) in itob64tests) {
+        foreach (var (_, test) in range(itob64tests)) {
             dst = AppendInt(dst[..0], test.@in, test.@base);
             BenchSink += len(dst);
         }
@@ -207,7 +205,7 @@ public static void BenchmarkFormatUint(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (_, test) in uitob64tests) {
+        foreach (var (_, test) in range(uitob64tests)) {
             @string s = FormatUint(test.@in, test.@base);
             BenchSink += len(s);
         }
@@ -219,7 +217,7 @@ public static void BenchmarkAppendUint(ж<testing.B> Ꮡb) {
 
     var dst = new slice<byte>(0, 30);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (_, test) in uitob64tests) {
+        foreach (var (_, test) in range(uitob64tests)) {
             dst = AppendUint(dst[..0], test.@in, test.@base);
             BenchSink += len(dst);
         }
@@ -228,7 +226,7 @@ public static void BenchmarkAppendUint(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkFormatIntSmall(ж<testing.B> b) {
     var smallInts = slice<int64>([7, 42]);
-    foreach (var (_, smallInt) in smallInts) {
+    foreach (var (_, smallInt) in range(smallInts)) {
         b.Run(Itoa((nint)smallInt), (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 @string s = FormatInt(smallInt, 10);
@@ -253,7 +251,7 @@ public static void BenchmarkAppendIntSmall(ж<testing.B> Ꮡb) {
 internal static readonly object digitsˢ = (@string)"digits="u8;
 
 public static void BenchmarkAppendUintVarlen(ж<testing.B> b) {
-    foreach (var (_, vᴛ1) in varlenUints) {
+    foreach (var (_, vᴛ1) in range(varlenUints)) {
         ref var test = ref heap(new varlenUintsᴛ1(), out var Ꮡtest);
         test = vᴛ1;
 

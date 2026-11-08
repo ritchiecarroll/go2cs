@@ -17,8 +17,6 @@ using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = go.io.fs_package;
 using go.io;
 using static go.archive.zip_package;
@@ -44,20 +42,16 @@ public static void TestOver65kFiles(ж<testing.T> t) {
             t.Fatalf("creating file %d: %v", i, errΔ1);
         }
     }
-    {
-        var errΔ2 = w.Close(); if (errΔ2 != nil) {
-            t.Fatalf("Writer.Close: %v", errΔ2);
-        }
+    var errΔ2 = w.Close(); if (errΔ2 != nil) {
+        t.Fatalf("Writer.Close: %v", errΔ2);
     }
     @string s = buf.String();
     var (zr, err) = NewReader(new zip_test_package.strings_ReaderжReaderAt(strings.NewReader(s)), (int64)len(s));
     if (err != nil) {
         t.Fatalf("NewReader: %v", err);
     }
-    {
-        nint got = len(zr.File); if (got != nFiles) {
-            t.Fatalf("File contains %d files, want %d", got, (nint)(nFiles));
-        }
+    nint got = len(zr.File); if (got != nFiles) {
+        t.Fatalf("File contains %d files, want %d", got, (nint)(nFiles));
     }
     for (nint i = 0; i < nFiles; i++) {
         @string want = fmt.Sprintf("%d.dat"u8, i);
@@ -112,10 +106,8 @@ internal static void testHeaderRoundTrip(ж<global::go.archive.zip_package.FileH
         }
     }
 
-    {
-        var (sysfh, ok) = fi.Sys()._<ж<global::go.archive.zip_package.FileHeader>>(ᐧ); if (!ok && sysfh != Ꮡfh) {
-            t.Errorf("Sys didn't return original *FileHeader");
-        }
+    var (sysfh, ok) = fi.Sys()._<ж<global::go.archive.zip_package.FileHeader>>(ᐧ); if (!ok && sysfh != Ꮡfh) {
+        t.Errorf("Sys didn't return original *FileHeader");
     }
 }
 
@@ -214,17 +206,15 @@ internal static (nint n, error err) Write(this ref rleBuffer r, slice<byte> p) {
     if (len(r.buf) > 0) {
         rp = Ꮡ(r.buf, len(r.buf) - 1);
         // Fast path, if p is entirely the same byte repeated.
-        {
-            var lastByte = rp.b; if (len(p) > 0 && p[0] == lastByte) {
-                if (bytes.Count(p, slice<byte>([lastByte])) == len(p)) {
-                    rp.n += (int64)len(p);
-                    return (len(p), default);
-                }
+        var lastByte = rp.b; if (len(p) > 0 && p[0] == lastByte) {
+            if (bytes.Count(p, [lastByte]) == len(p)) {
+                rp.n += (int64)len(p);
+                return (len(p), default);
             }
         }
     }
 
-    foreach (var (_, b) in p) {
+    foreach (var (_, b) in range(p)) {
         if (rp == nil || rp.b != b) {
             r.buf = append(r.buf, new repeatedByte(r.Size(), b, 1));
             rp = Ꮡ(r.buf, len(r.buf) - 1);
@@ -258,7 +248,7 @@ internal static (nint n, error err) ReadAt(this ref rleBuffer r, slice<byte> p, 
     var parts = r.buf.slice(skipParts);
     if (len(parts) > 0) {
         var skipBytes = off - parts[0].off;
-        foreach (var (_, part) in parts) {
+        foreach (var (_, part) in range(parts)) {
             nint repeat = (nint)min(part.n - skipBytes, (int64)(len(p) - n));
             memset(p.slice(n, n + repeat), part.b);
             n += repeat;
@@ -279,7 +269,7 @@ public static void TestRLEBuffer(ж<testing.T> t) {
     var b = @new<rleBuffer>();
     slice<byte> all = default;
     var writes = slice<@string>(["abcdeee", "eeeeeee", "eeeefghaaiii"]);
-    foreach (var (_, w) in writes) {
+    foreach (var (_, w) in range(writes)) {
         b.Write(slice<byte>(w));
         all = append(all, w.ꓸꓸꓸ);
     }
@@ -306,13 +296,8 @@ internal partial struct fakeHash32 {
     /*embed*/ public hash_package.Hash32 Hash32;
 }
 
-internal static (nint, error) Write(this fakeHash32 _, slice<byte> p) {
-    return (len(p), default);
-}
-
-internal static uint32 Sum32(this fakeHash32 _) {
-    return 0;
-}
+internal static (nint, error) Write(this fakeHash32 _, slice<byte> p) { return (len(p), default); }
+internal static uint32 Sum32(this fakeHash32 _) { return 0; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object slowTestSkippingˢ = (@string)"slow test; skipping"u8;
@@ -377,15 +362,11 @@ public static void TestZip64DirectoryOffset(ж<testing.T> t) {
             }
             f._<ж<global::go.archive.zip_package.fileWriter>>().crc32 = new fakeHash32();
             var size = wantOff - (uint64)fileHeaderLen - (uint64)len(filename) - (uint64)dataDescriptorLen;
-            {
-                var (_, errΔ1) = io.CopyN(f, new zeros(), (int64)size); if (errΔ1 != nil) {
-                    t.Fatal(errΔ1);
-                }
+            var (_, errΔ1) = io.CopyN(f, new zeros(), (int64)size); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
-            {
-                var errΔ2 = w.Close(); if (errΔ2 != nil) {
-                    t.Fatal(errΔ2);
-                }
+            var errΔ2 = w.Close(); if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
         };
     var genʗ1 = gen;
@@ -460,9 +441,7 @@ internal partial struct suffixSaver {
     internal int64 size;
 }
 
-internal static int64 Size(this ref suffixSaver ss) {
-    return ss.size;
-}
+internal static int64 Size(this ref suffixSaver ss) { return ss.size; }
 
 internal static error errDiscardedBytes = errors.New("ReadAt of discarded bytes");
 
@@ -535,10 +514,8 @@ internal partial interface sizedReaderAt :
 
 internal static bool suffixIsZip64(ж<testing.T> t, sizedReaderAt zip) {
     var d = new slice<byte>(1024);
-    {
-        var (_, errΔ1) = zip.ReadAt(d, zip.Size() - (int64)len(d)); if (errΔ1 != nil) {
-            t.Fatalf("ReadAt: %v", errΔ1);
-        }
+    var (_, errΔ1) = zip.ReadAt(d, zip.Size() - (int64)len(d)); if (errΔ1 != nil) {
+        t.Fatalf("ReadAt: %v", errΔ1);
     }
 
     nint sigOff = findSignatureInBlock(d);
@@ -556,17 +533,13 @@ internal static bool suffixIsZip64(ж<testing.T> t, sizedReaderAt zip) {
     }
 
     d = new slice<byte>(directory64EndLen);
-    {
-        var (_, errΔ2) = zip.ReadAt(d, dirOff); if (errΔ2 != nil) {
-            t.Fatalf("ReadAt(off=%d): %v", dirOff, errΔ2);
-        }
+    var (_, errΔ2) = zip.ReadAt(d, dirOff); if (errΔ2 != nil) {
+        t.Fatalf("ReadAt(off=%d): %v", dirOff, errΔ2);
     }
 
     var b = (global::go.archive.zip_package.readBuf)d;
-    {
-        var sig = b.uint32(); if (sig != directory64EndSignature) {
-            return false;
-        }
+    var sig = b.uint32(); if (sig != directory64EndSignature) {
+        return false;
     }
 
     var size = b.uint64();
@@ -667,7 +640,7 @@ internal static ж<rleBuffer> testZip64(testing.TB t, int64 size) {
     }
     f._<ж<global::go.archive.zip_package.fileWriter>>().crc32 = new fakeHash32();
     var chunk = new slice<byte>(chunkSize);
-    foreach (var i in range(chunk)) {
+    foreach (var i in range(len(chunk))) {
         chunk[i] = (byte)'.';
     }
     for (nint i = 0; i < chunks; i++) {
@@ -689,10 +662,8 @@ internal static ж<rleBuffer> testZip64(testing.TB t, int64 size) {
     if (err != nil) {
         t.Fatal(writeEndˢ, err);
     }
-    {
-        var errΔ3 = w.Close(); if (errΔ3 != nil) {
-            t.Fatal(errΔ3);
-        }
+    var errΔ3 = w.Close(); if (errΔ3 != nil) {
+        t.Fatal(errΔ3);
     }
 
     // read back zip file and check that we get to the end of it
@@ -732,10 +703,8 @@ internal static ж<rleBuffer> testZip64(testing.TB t, int64 size) {
         t.Fatal(closingˢ, err);
     }
     if (size + (int64)len("END\n") >= 4294967295L) {
-        {
-            var (got, want) = (f0.UncompressedSize, (uint32)uint32max); if (got != want) {
-                t.Errorf("UncompressedSize %#x, want %#x", got, want);
-            }
+        var (got, want) = (f0.UncompressedSize, (uint32)uint32max); if (got != want) {
+            t.Errorf("UncompressedSize %#x, want %#x", got, want);
         }
     }
 
@@ -768,15 +737,11 @@ internal static void testValidHeader(ж<global::go.archive.zip_package.FileHeade
     if (err != nil) {
         t.Fatalf("error creating header: %v", err);
     }
-    {
-        var (_, errΔ1) = f.Write(slice<byte>("hi"u8)); if (errΔ1 != nil) {
-            t.Fatalf("error writing content: %v", errΔ1);
-        }
+    var (_, errΔ1) = f.Write(slice<byte>("hi"u8)); if (errΔ1 != nil) {
+        t.Fatalf("error writing content: %v", errΔ1);
     }
-    {
-        var errΔ2 = z.Close(); if (errΔ2 != nil) {
-            t.Fatalf("error closing zip writer: %v", errΔ2);
-        }
+    var errΔ2 = z.Close(); if (errΔ2 != nil) {
+        t.Fatalf("error closing zip writer: %v", errΔ2);
     }
 
     var b = buf.Bytes();
@@ -815,7 +780,7 @@ public static void TestHeaderTooShort(ж<testing.T> t) {
     ref var h = ref heap<global::go.archive.zip_package.FileHeader>(new FileHeader(
         Name: "foo.txt",
         Method: Deflate,
-        Extra: slice<byte>([zip64ExtraID]) // missing size and second half of tag, but Extra is best-effort parsing
+        Extra: [zip64ExtraID] // missing size and second half of tag, but Extra is best-effort parsing
     ), out var Ꮡh);
     testValidHeader(Ꮡh, t);
 }
@@ -830,12 +795,12 @@ public static void TestHeaderTooLongErr(ж<testing.T> t) {
     slice<TestHeaderTooLongErr_type> headerTests = slice<TestHeaderTooLongErr_type>([
         new(
             name: strings.Repeat("x", 1 << 16),
-            extra: slice<byte>([]),
+            extra: [],
             wanterr: errLongName
         ),
         new(
             name: "long_extra",
-            extra: bytes.Repeat(slice<byte>([0xff]), 1 << 16),
+            extra: bytes.Repeat([0xff], 1 << 16),
             wanterr: errLongExtra
         )
     ]);
@@ -844,7 +809,7 @@ public static void TestHeaderTooLongErr(ж<testing.T> t) {
     var buf = @new<bytes.Buffer>();
     var w = NewWriter(new zip_test_package.bytes_BufferжWriter(buf));
 
-    foreach (var (_, test) in headerTests) {
+    foreach (var (_, test) in range(headerTests)) {
         var h = Ꮡ(new FileHeader(
             Name: test.name,
             Extra: test.extra
@@ -866,7 +831,7 @@ public static void TestHeaderIgnoredSize(ж<testing.T> t) {
     ref var h = ref heap<global::go.archive.zip_package.FileHeader>(new FileHeader(
         Name: "foo.txt",
         Method: Deflate,
-        Extra: slice<byte>([(byte)((byte)zip64ExtraID & 0xFF), (byte)(((byte)zip64ExtraID).Rsh((uint64)8)), 24, 0, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]) // bad size but shouldn't be consulted
+        Extra: [(byte)((byte)zip64ExtraID & 0xFF), (byte)(((byte)zip64ExtraID).Rsh((uint64)8)), 24, 0, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8] // bad size but shouldn't be consulted
     ), out var Ꮡh);
     testValidHeader(Ꮡh, t);
 }
@@ -877,10 +842,10 @@ public static void TestZeroLengthHeader(ж<testing.T> t) {
     ref var h = ref heap<global::go.archive.zip_package.FileHeader>(new FileHeader(
         Name: "extadata.txt",
         Method: Deflate,
-        Extra: slice<byte>([
+        Extra: [
             85, 84, 5, 0, 3, 154, 144, 195, 77, // tag 21589 size 5
             85, 120, 0, 0 // tag 30805 size 0
-        ])
+        ]
     ), out var Ꮡh);
     testValidHeader(Ꮡh, t);
 }
@@ -896,7 +861,7 @@ public static void BenchmarkZip64Test(ж<testing.B> Ꮡb) {
 }
 
 public static void BenchmarkZip64TestSizes(ж<testing.B> b) {
-    foreach (var (_, size) in slice<int64>([(int64)1 << 12, (int64)1 << 20, (int64)1 << 26])) {
+    foreach (var (_, size) in range(slice<int64>([(int64)1 << 12, (int64)1 << 20, (int64)1 << 26]))) {
         b.Run(fmt.Sprint(size), (ж<testing.B> bΔ1) => {
             bΔ1.RunParallel((ж<testing.PB> pb) => {
                 while (pb.Next()) {

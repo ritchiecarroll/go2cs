@@ -28,17 +28,13 @@ public static void Example() {
         }
         var fʗ1 = f;
         defer(() => {
-            {
-                var errΔ1 = fʗ1.Close(); if (errΔ1 != nil) {
-                    log.Fatalf("failed to close trace file: %v", errΔ1);
-                }
+            var errΔ1 = fʗ1.Close(); if (errΔ1 != nil) {
+                log.Fatalf("failed to close trace file: %v", errΔ1);
             }
         }, ref ᒐ);
 
-        {
-            var errΔ2 = trace.Start(new os.FileжWriter(f)); if (errΔ2 != nil) {
-                log.Fatalf("failed to start trace: %v", errΔ2);
-            }
+        var errΔ2 = trace.Start(new os.FileжWriter(f)); if (errΔ2 != nil) {
+            log.Fatalf("failed to start trace: %v", errΔ2);
         }
         defer(trace.Stop, ref ᒐ);
 

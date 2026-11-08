@@ -454,27 +454,27 @@ internal static void initAtofOnce() {
     } else {
         atofRandomTests = new slice<atofSimpleTest>(10000);
     }
-    foreach (var i in range(atofRandomTests)) {
+    foreach (var i in range(len(atofRandomTests))) {
         var n = (uint64)rand.Uint32() << 32 | (uint64)rand.Uint32();
         var x = math.Float64frombits(n);
         @string s = FormatFloat(x, (byte)'g', -1, 64);
         atofRandomTests[i] = new atofSimpleTest(x, s);
     }
 
-    foreach (var i in range(benchmarksRandomBits)) {
+    foreach (var i in range(len(benchmarksRandomBits))) {
         var bits = (uint64)rand.Uint32() << 32 | (uint64)rand.Uint32();
         var x = math.Float64frombits(bits);
         benchmarksRandomBits[i] = FormatFloat(x, (byte)'g', -1, 64);
     }
 
-    foreach (var i in range(benchmarksRandomNormal)) {
+    foreach (var i in range(len(benchmarksRandomNormal))) {
         var x = rand.NormFloat64();
         benchmarksRandomNormal[i] = FormatFloat(x, (byte)'g', -1, 64);
     }
 }
 
 public static void TestParseFloatPrefix(ж<testing.T> t) {
-    foreach (var i in range(atoftests)) {
+    foreach (var i in range(len(atoftests))) {
         var test = Ꮡ(atoftests, i);
         if (test.err != nil) {
             continue;
@@ -482,7 +482,7 @@ public static void TestParseFloatPrefix(ж<testing.T> t) {
         // Adding characters that do not extend a number should not invalidate it.
         // Test a few. The "i" and "init" cases test that we accept "infi", "infinit"
         // correctly as "inf" with suffix.
-        foreach (var (_, suffix) in slice<@string>([" ", "q", "+", "-", "<", "=", ">", "(", ")", "i", "init"])) {
+        foreach (var (_, suffix) in range(slice<@string>([" ", "q", "+", "-", "<", "=", ">", "(", ")", "i", "init"]))) {
             @string @in = test.@in + suffix;
             var (_, n, err) = parseFloatPrefix(@in, 64);
             if (err != nil) {
@@ -521,7 +521,7 @@ internal static void testAtof(ж<testing.T> t, bool opt) {
             }
         }
     }
-    foreach (var (_, test) in atof32tests) {
+    foreach (var (_, test) in range(atof32tests)) {
         var (@out, err) = ParseFloat(test.@in, 32);
         var out32 = (float32)@out;
         if ((float64)out32 != @out) {
@@ -537,17 +537,13 @@ internal static void testAtof(ж<testing.T> t, bool opt) {
     strconv_internal_test_package.SetOptimize(oldopt);
 }
 
-public static void TestAtof(ж<testing.T> t) {
-    testAtof(t, true);
-}
+public static void TestAtof(ж<testing.T> t) { testAtof(t, true); }
 
-public static void TestAtofSlow(ж<testing.T> t) {
-    testAtof(t, false);
-}
+public static void TestAtofSlow(ж<testing.T> t) { testAtof(t, false); }
 
 public static void TestAtofRandom(ж<testing.T> t) {
     initAtof();
-    foreach (var (_, test) in atofRandomTests) {
+    foreach (var (_, test) in range(atofRandomTests)) {
         var (x, _) = ParseFloat(test.s, 64);
         switch (ᐧ) {
         default: {
@@ -568,7 +564,7 @@ partial struct roundTripCasesᴛ1 /*dyn*/ {
     internal float64 f;
     internal @string s;
 }
-internal static slice<roundTripCasesᴛ1> roundTripCases = slice<roundTripCasesᴛ1>([
+internal static slice<roundTripCasesᴛ1> roundTripCases = [
     // Issue 2917.
     // This test will break the optimized conversion if the
     // FPU is using 80-bit registers instead of 64-bit registers,
@@ -577,10 +573,10 @@ internal static slice<roundTripCasesᴛ1> roundTripCases = slice<roundTripCases�
     // fix the FP control word.
     new(4874021953463889725235396608D, "4.87402195346389e+27"),
     new(4874021953463890274991210496D, "4.8740219534638903e+27")
-]);
+];
 
 public static void TestRoundTrip(ж<testing.T> t) {
-    foreach (var (_, tt) in roundTripCases) {
+    foreach (var (_, tt) in range(roundTripCases)) {
         var old = strconv_internal_test_package.SetOptimize(false);
         @string s = FormatFloat(tt.f, (byte)'g', -1, 64);
         if (s != tt.s) {
@@ -647,7 +643,7 @@ public static void TestParseFloatIncorrectBitSize(ж<testing.T> t) {
     @string s = sᶜ1;
     const float64 want = 1.5e308;
 
-    foreach (var (_, bitSize) in slice<nint>([0, 10, 100, 128])) {
+    foreach (var (_, bitSize) in range(slice<nint>([0, 10, 100, 128]))) {
         var (f, err) = ParseFloat(s, bitSize);
         if (err != nil) {
             t.Fatalf("ParseFloat(%q, %d) gave error %s", s, bitSize, err);
@@ -715,7 +711,7 @@ public static void BenchmarkAtof64RandomLongFloats(ж<testing.B> Ꮡb) {
 
     initAtof();
     var samples = new slice<@string>(len(atofRandomTests));
-    foreach (var (i, t) in atofRandomTests) {
+    foreach (var (i, t) in range(atofRandomTests)) {
         samples[i] = FormatFloat(t.x, (byte)'g', 20, 64);
     }
     b.ResetTimer();
@@ -758,7 +754,7 @@ public static void BenchmarkAtof32Random(ж<testing.B> Ꮡb) {
 
     var n = (uint32)997;
     array<@string> float32strings = new(4096);
-    foreach (var i in range(float32strings)) {
+    foreach (var i in range(len(float32strings))) {
         n = (99991 * n + 42) % ((uint32)0xff << 23);
         float32strings[i] = FormatFloat((float64)math.Float32frombits(n), (byte)'g', -1, 32);
     }
@@ -773,7 +769,7 @@ public static void BenchmarkAtof32RandomLong(ж<testing.B> Ꮡb) {
 
     var n = (uint32)997;
     array<@string> float32strings = new(4096);
-    foreach (var i in range(float32strings)) {
+    foreach (var i in range(len(float32strings))) {
         n = (99991 * n + 42) % ((uint32)0xff << 23);
         float32strings[i] = FormatFloat((float64)math.Float32frombits(n), (byte)'g', 20, 32);
     }

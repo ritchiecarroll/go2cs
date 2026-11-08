@@ -29,11 +29,9 @@ internal static void validateMapLabels(ж<testing.T> t, slice<@string> labels) {
         ["page summary"] = false,
         ["scavenge index"] = false
     };
-    foreach (var (_, label) in labels) {
-        {
-            var (_, ok) = regions[label, ꟷ]; if (!ok) {
-                t.Logf("unexpected region label found: \"%s\"", label);
-            }
+    foreach (var (_, label) in range(labels)) {
+        var (_, ok) = regions[label, ꟷ]; if (!ok) {
+            t.Logf("unexpected region label found: \"%s\"", label);
         }
         regions[label] = true;
     }
@@ -59,16 +57,14 @@ public static void TestDecorateMappings(ж<testing.T> t) {
     }
 
     slice<@string> labels = default;
-    {
-        var (rawMaps, err) = Δos.ReadFile(procSelfMapsˢ); if (err != nil) {
-            t.Fatalf("failed to read /proc/self/maps: %v", err);
-        } else {
-            t.Logf("maps:%s\n", (@string)rawMaps);
-            var matches = Δregexp.MustCompile(anonGoˢ).FindAllSubmatch(rawMaps, -1);
-            foreach (var (_, match_pair) in matches) {
-                // match_pair consists of the matching substring and the parenthesized group
-                labels = append(labels, (@string)match_pair[1]);
-            }
+    var (rawMaps, err) = Δos.ReadFile(procSelfMapsˢ); if (err != nil) {
+        t.Fatalf("failed to read /proc/self/maps: %v", err);
+    } else {
+        t.Logf("maps:%s\n", (@string)rawMaps);
+        var matches = Δregexp.MustCompile(anonGoˢ).FindAllSubmatch(rawMaps, -1);
+        foreach (var (_, match_pair) in range(matches)) {
+            // match_pair consists of the matching substring and the parenthesized group
+            labels = append(labels, (@string)match_pair[1]);
         }
     }
     t.Logf("DebugDecorateMappings: %v", runtime_internal_test_package.DebugDecorateMappings.Value);

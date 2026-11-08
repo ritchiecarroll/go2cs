@@ -35,7 +35,7 @@ using static global::go.crypto.@internal.boring_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/boring/boring_test.go", "boring_test.cs", "AAwa5rKCgoCCtoCCyKKmkg==", "17-27:1")]
+[assembly: GoPositionMap("crypto/internal/boring/boring_test.go", "boring_test.cs", "AAwa1rKCgoKmgriippI=", "17-27:1", "", "", "", "23:21,24:13")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;

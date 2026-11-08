@@ -124,53 +124,41 @@ internal static void testBadLengths<E, D>(ж<testing.T> t, Func<(D, error)> gene
     var (_, c) = ek.Encapsulate();
 
     for (nint i = 0; i < len(dkBytes) - 1; i++) {
-        {
-            var (_, errΔ1) = newDecapsulationKey(dkBytes.slice(0, i)); if (errΔ1 == nil) {
-                t.Errorf("expected error for dk length %d", i);
-            }
+        var (_, errΔ1) = newDecapsulationKey(dkBytes.slice(0, i)); if (errΔ1 == nil) {
+            t.Errorf("expected error for dk length %d", i);
         }
     }
     var dkLong = dkBytes;
     for (nint i = 0; i < 100; i++) {
         dkLong = append(dkLong, (byte)0);
-        {
-            var (_, errΔ2) = newDecapsulationKey(dkLong); if (errΔ2 == nil) {
-                t.Errorf("expected error for dk length %d", len(dkLong));
-            }
+        var (_, errΔ2) = newDecapsulationKey(dkLong); if (errΔ2 == nil) {
+            t.Errorf("expected error for dk length %d", len(dkLong));
         }
     }
 
     for (nint i = 0; i < len(ekBytes) - 1; i++) {
-        {
-            var (_, errΔ3) = newEncapsulationKey(ekBytes.slice(0, i)); if (errΔ3 == nil) {
-                t.Errorf("expected error for ek length %d", i);
-            }
+        var (_, errΔ3) = newEncapsulationKey(ekBytes.slice(0, i)); if (errΔ3 == nil) {
+            t.Errorf("expected error for ek length %d", i);
         }
     }
     var ekLong = ekBytes;
     for (nint i = 0; i < 100; i++) {
         ekLong = append(ekLong, (byte)0);
-        {
-            var (_, errΔ4) = newEncapsulationKey(ekLong); if (errΔ4 == nil) {
-                t.Errorf("expected error for ek length %d", len(ekLong));
-            }
+        var (_, errΔ4) = newEncapsulationKey(ekLong); if (errΔ4 == nil) {
+            t.Errorf("expected error for ek length %d", len(ekLong));
         }
     }
 
     for (nint i = 0; i < len(c) - 1; i++) {
-        {
-            var (_, errΔ5) = dk.Decapsulate(c.slice(0, i)); if (errΔ5 == nil) {
-                t.Errorf("expected error for c length %d", i);
-            }
+        var (_, errΔ5) = dk.Decapsulate(c.slice(0, i)); if (errΔ5 == nil) {
+            t.Errorf("expected error for c length %d", i);
         }
     }
     var cLong = c;
     for (nint i = 0; i < 100; i++) {
         cLong = append(cLong, (byte)0);
-        {
-            var (_, errΔ6) = dk.Decapsulate(cLong); if (errΔ6 == nil) {
-                t.Errorf("expected error for c length %d", len(cLong));
-            }
+        var (_, errΔ6) = dk.Decapsulate(cLong); if (errΔ6 == nil) {
+            t.Errorf("expected error for c length %d", len(cLong));
         }
     }
 }

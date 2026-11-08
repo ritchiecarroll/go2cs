@@ -23,10 +23,10 @@ partial struct sniffTestsᴛ1 /*dyn*/ {
     internal slice<byte> data;
     internal @string contentType;
 }
-internal static slice<sniffTestsᴛ1> sniffTests = slice<sniffTestsᴛ1>([
+internal static slice<sniffTestsᴛ1> sniffTests = [
     // Some nonsense.
-    new("Empty", slice<byte>([]), "text/plain; charset=utf-8"),
-    new("Binary", slice<byte>([1, 2, 3]), "application/octet-stream"),
+    new("Empty", [], "text/plain; charset=utf-8"),
+    new("Binary", [1, 2, 3], "application/octet-stream"),
 
     new("HTML document #1", slice<byte>(@"<HtMl><bOdY>blah blah blah</body></html>"u8), "text/html; charset=utf-8"),
     new("HTML document #2", slice<byte>(@"<HTML></HTML>"u8), "text/html; charset=utf-8"),
@@ -80,10 +80,10 @@ internal static slice<sniffTestsᴛ1> sniffTests = slice<sniffTestsᴛ1>([
     new("RAR v5+", slice<byte>("Rar!\x1A\x07\x01\x00"u8), "application/x-rar-compressed"),
     new("Incorrect RAR v1.5-v4.0", slice<byte>("Rar \x1A\x07\x00"u8), "application/octet-stream"),
     new("Incorrect RAR v5+", slice<byte>("Rar \x1A\x07\x01\x00"u8), "application/octet-stream")
-]);
+];
 
 public static void TestDetectContentType(ж<testing.T> t) {
-    foreach (var (_, tt) in sniffTests) {
+    foreach (var (_, tt) in range(sniffTests)) {
         @string ct = DetectContentType(tt.data);
         if (ct != tt.contentType) {
             t.Errorf("%v: DetectContentType = %q, want %q", tt.desc, ct, tt.contentType);
@@ -91,10 +91,7 @@ public static void TestDetectContentType(ж<testing.T> t) {
     }
 }
 
-public static void TestServerContentTypeSniff(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testServerContentTypeSniff(Δp0, Δp1));
-}
-
+public static void TestServerContentTypeSniff(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testServerContentTypeSniff(Δp0, Δp1)); }
 internal static void testServerContentTypeSniff(ж<testing.T> t, testMode mode) {
     GoFrame ᒐ = default;
     try {
@@ -109,7 +106,7 @@ internal static void testServerContentTypeSniff(ж<testing.T> t, testMode mode) 
         var cstʗ1 = cst;
         defer(cstʗ1.close, ref ᒐ);
 
-        foreach (var (i, tt) in sniffTests) {
+        foreach (var (i, tt) in range(sniffTests)) {
             var (resp, err) = cst.c.Get(cst.ts.URL + "/?i="u8 + strconv.Itoa(i));
             if (err != nil) {
                 t.Errorf("%v: %v", tt.desc, err);
@@ -124,10 +121,8 @@ internal static void testServerContentTypeSniff(ж<testing.T> t, testMode mode) 
             if (len(tt.data) == 0) {
                 wantContentType = ""u8;
             }
-            {
-                @string ct = resp.Header.Get(contentTypeˢ); if (ct != wantContentType) {
-                    t.Errorf("%v: Content-Type = %q, want %q", tt.desc, ct, wantContentType);
-                }
+            @string ct = resp.Header.Get(contentTypeˢ); if (ct != wantContentType) {
+                t.Errorf("%v: Content-Type = %q, want %q", tt.desc, ct, wantContentType);
             }
             (var data, err) = io.ReadAll(resp.Body);
             if (err != nil) {
@@ -144,13 +139,10 @@ internal static void testServerContentTypeSniff(ж<testing.T> t, testMode mode) 
 
 // Issue 5953: shouldn't sniff if the handler set a Content-Type header,
 // even if it's the empty string.
-public static void TestServerIssue5953(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testServerIssue5953(Δp0, Δp1));
-}
-
+public static void TestServerIssue5953(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testServerIssue5953(Δp0, Δp1)); }
 internal static void testServerIssue5953(ж<testing.T> t, testMode mode) {
     var cst = newClientServerTest(new http_test_package.testing_TжTB(t), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
-        w.Header()[contentTypeˢ] = slice<@string>([""]);
+        w.Header()[contentTypeˢ] = [""];
         fmt.Fprintf(new http_test_package.http_ResponseWriterᴠWriter(w), "<html><head></head><body>hi</body></html>"u8);
     })));
 
@@ -183,10 +175,7 @@ internal static (nint n, error err) Read(this ref byteAtATimeReader b, slice<byt
     return (1, default);
 }
 
-public static void TestContentTypeWithVariousSources(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testContentTypeWithVariousSources(Δp0, Δp1));
-}
-
+public static void TestContentTypeWithVariousSources(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testContentTypeWithVariousSources(Δp0, Δp1)); }
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string inputᶜ => ref inputᶜᵇ;
 private static readonly @string inputᶜᵇ = "\n<html>\n\t<head>\n"u8;
@@ -209,7 +198,7 @@ internal static void testContentTypeWithVariousSources(ж<testing.T> t, testMode
     @string input = inputᶜ;
     @string expected = expectedᶜ;
 
-    foreach (var (_, vᴛ1) in slice<testContentTypeWithVariousSources_type>([new(
+    foreach (var (_, vᴛ1) in range(slice<testContentTypeWithVariousSources_type>([new(
         name: "write",
         handler: (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             // Write the whole input at once.
@@ -223,7 +212,7 @@ internal static void testContentTypeWithVariousSources(ж<testing.T> t, testMode
         handler: (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             // Write the input one byte at a time.
             var buf = slice<byte>(input);
-            foreach (var i in range(buf)) {
+            foreach (var i in range(len(buf))) {
                 var (n, err) = w.Write(buf.slice(i, i + 1));
                 if (n != 1 || err != nil) {
                     t.Errorf("w.Write(%q) = %v, %v want 1, nil", input, n, err);
@@ -259,7 +248,7 @@ internal static void testContentTypeWithVariousSources(ж<testing.T> t, testMode
             }
         }
     )
-    ])) {
+    ]))) {
         ref var test = ref heap(new testContentTypeWithVariousSources_type(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -271,16 +260,12 @@ internal static void testContentTypeWithVariousSources(ж<testing.T> t, testMode
             if (err != nil) {
                 tΔ1.Fatalf("Get: %v", err);
             }
-            {
-                @string ct = resp.Header.Get(contentTypeˢ); if (ct != expected) {
-                    tΔ1.Errorf("Content-Type = %q, want %q", ct, expected);
-                }
+            @string ct = resp.Header.Get(contentTypeˢ); if (ct != expected) {
+                tΔ1.Errorf("Content-Type = %q, want %q", ct, expected);
             }
-            {
-                @string want = resp.Header.Get(contentLengthˢ);
-                @string got = fmt.Sprint(len(input)); if (want != got) {
-                    tΔ1.Errorf("Content-Length = %q, want %q", want, got);
-                }
+            @string want = resp.Header.Get(contentLengthˢ);
+            @string got = fmt.Sprint(len(input)); if (want != got) {
+                tΔ1.Errorf("Content-Length = %q, want %q", want, got);
             }
             (var data, err) = io.ReadAll(resp.Body);
             if (err != nil) {
@@ -293,10 +278,7 @@ internal static void testContentTypeWithVariousSources(ж<testing.T> t, testMode
     }
 }
 
-public static void TestSniffWriteSize(ж<testing.T> t) {
-    run<TжTBRun>(t, (Δp0, Δp1) => testSniffWriteSize(Δp0, Δp1));
-}
-
+public static void TestSniffWriteSize(ж<testing.T> t) { run<TжTBRun>(t, (Δp0, Δp1) => testSniffWriteSize(Δp0, Δp1)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sizeˢ => ref sizeˢᵇ;
 private static readonly @string sizeˢᵇ = "size"u8;
@@ -313,20 +295,16 @@ internal static void testSniffWriteSize(ж<testing.T> t, testMode mode) {
             t.Errorf("write of %d bytes wrote %d bytes", size, written);
         }
     })));
-    foreach (var (_, size) in slice<nint>([0, 1, 200, 600, 999, 1000, 1023, 1024, 512 << 10, 1 << 20])) {
+    foreach (var (_, size) in range(slice<nint>([0, 1, 200, 600, 999, 1000, 1023, 1024, 512 << 10, 1 << 20]))) {
         var (res, err) = cst.c.Get(fmt.Sprintf("%s/?size=%d"u8, cst.ts.URL, size));
         if (err != nil) {
             t.Fatalf("size %d: %v", size, err);
         }
-        {
-            var (_, errΔ1) = io.Copy(io.Discard, res.Body); if (errΔ1 != nil) {
-                t.Fatalf("size %d: io.Copy of body = %v", size, errΔ1);
-            }
+        var (_, errΔ1) = io.Copy(io.Discard, res.Body); if (errΔ1 != nil) {
+            t.Fatalf("size %d: io.Copy of body = %v", size, errΔ1);
         }
-        {
-            var errΔ2 = res.Body.Close(); if (errΔ2 != nil) {
-                t.Fatalf("size %d: body Close = %v", size, errΔ2);
-            }
+        var errΔ2 = res.Body.Close(); if (errΔ2 != nil) {
+            t.Fatalf("size %d: body Close = %v", size, errΔ2);
         }
     }
 }

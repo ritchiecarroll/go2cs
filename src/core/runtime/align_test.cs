@@ -52,25 +52,25 @@ public static void TestAtomicAlignment(ж<testing.T> t) {
     var fieldDesc = new map<nint, @string>{};
     var r = Δregexp.MustCompile(unsafeOffsetofWWˢ);
     var matches = r.FindAllStringSubmatch((@string)x, -1);
-    foreach (var (i, vΔ1) in matches) {
+    foreach (var (i, vΔ1) in range(matches)) {
         @checked["field runtime." + vΔ1[1] + "." + vΔ1[2]] = true;
         fieldDesc[i] = vΔ1[1] + "." + vΔ1[2];
     }
     var varDesc = new map<nint, @string>{};
     r = Δregexp.MustCompile(unsafePointerWˢ);
     matches = r.FindAllStringSubmatch((@string)x, -1);
-    foreach (var (i, vΔ2) in matches) {
+    foreach (var (i, vΔ2) in range(matches)) {
         @checked["var " + vΔ2[1]] = true;
         varDesc[i] = vΔ2[1];
     }
 
     // Check all of our alignments. This is the actual core of the test.
-    foreach (var (i, d) in runtime_internal_test_package.AtomicFields) {
+    foreach (var (i, d) in range(runtime_internal_test_package.AtomicFields)) {
         if (d % 8 != 0) {
             t.Errorf("field alignment of %s failed: offset is %d", fieldDesc[i], d);
         }
     }
-    foreach (var (i, p) in runtime_internal_test_package.AtomicVariables) {
+    foreach (var (i, p) in range(runtime_internal_test_package.AtomicVariables)) {
         if ((uintptr)p % 8 != 0) {
             t.Errorf("variable alignment of %s failed: address is %x", varDesc[i], @unsafe.Pointer.OrTypedNil(p));
         }
@@ -90,7 +90,7 @@ public static void TestAtomicAlignment(ж<testing.T> t) {
 
     // Filter files by those for the current architecture/os being tested.
     var fileMap = new map<@string, bool>{};
-    foreach (var (_, f) in buildableFiles(t, ".")) {
+    foreach (var (_, f) in range(buildableFiles(t, "."))) {
         fileMap[f] = true;
     }
     slice<ж<ast.File>> files = default;
@@ -149,11 +149,9 @@ public static ast.Visitor Visit(this ж<Visitor> Ꮡv, ast.Node n) {
     // XXX = one of Load, Store, Cas, etc.
     // The arg we care about the alignment of is always the first one.
 
-    {
-        var (u, okΔ1) = a._<ж<ast.UnaryExpr>>(ᐧ); if (okΔ1 && u.Op == token.AND) {
-            v.checkAddr(u.X);
-            return new runtime_test_package.VisitorжVisitor(Ꮡv);
-        }
+    var (u, okΔ1) = a._<ж<ast.UnaryExpr>>(ᐧ); if (okΔ1 && u.Op == token.AND) {
+        v.checkAddr(u.X);
+        return new runtime_test_package.VisitorжVisitor(Ꮡv);
     }
 
     // Other cases there's nothing we can check. Assume we're ok.
@@ -184,14 +182,12 @@ internal static void checkAddr(this ref Visitor v, ast.Node n) {
             // type the selector arg on some platforms.
             return;
         }
-        {
-            var (p, ok) = t._<ж<types.Pointer>>(ᐧ); if (ok) {
-                // Note: we assume here that the pointer p in p.foo is properly
-                // aligned. We just check that foo is at a properly aligned offset.
-                t = p.Elem();
-            } else {
-                v.checkAddr(nΔ1.X);
-            }
+        var (p, ok) = t._<ж<types.Pointer>>(ᐧ); if (ok) {
+            // Note: we assume here that the pointer p in p.foo is properly
+            // aligned. We just check that foo is at a properly aligned offset.
+            t = p.Elem();
+        } else {
+            v.checkAddr(nΔ1.X);
         }
         if (AreEqual(t.Underlying(), t)) {
             v.t.Errorf("analysis can't handle unnamed type %s %v", v.fset.Position(nΔ1.Pos()), t);

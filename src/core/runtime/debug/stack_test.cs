@@ -16,8 +16,6 @@ using static go.runtime.debug_package;
 using strings = strings_package;
 using testing = testing_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.os;
 using go.runtime;
 using path;
@@ -43,10 +41,8 @@ public static void TestMain(ж<testing.M> m) {
         if (err != nil) {
             log.Fatal(err);
         }
-        {
-            var errΔ1 = SetCrashOutput(f, new debug.CrashOptions()); if (errΔ1 != nil) {
-                log.Fatal(errΔ1); // e.g. EMFILE
-            }
+        var errΔ1 = SetCrashOutput(f, new debug.CrashOptions()); if (errΔ1 != nil) {
+            log.Fatal(errΔ1); // e.g. EMFILE
         }
         println((@string)"hello");
         throw panic("oops");
@@ -62,7 +58,6 @@ partial struct T /*num:nint*/;
 internal static partial slice<byte> ptrmethod(this ref T t) {
     return Stack();
 }
-
 internal static partial slice<byte> method(this T t) {
     return t.ptrmethod();
 }
@@ -116,26 +111,24 @@ public static partial void TestStack(ж<testing.T> t) {
     // (for whatever value of GOROOT is baked into the binary, not the one
     // that may be set in the environment).
     @string fileGoroot = ""u8;
-    {
-        @string envGoroot = os.Getenv(gorootˢ); if (envGoroot != ""u8) {
-            // Since GOROOT is set explicitly in the environment, we can't be certain
-            // that it is the same GOROOT value baked into the binary, and we can't
-            // change the value in-process because runtime.GOROOT uses the value from
-            // initial (not current) environment. Spawn a subprocess to determine the
-            // real baked-in GOROOT.
-            t.Logf("found GOROOT %q from environment; checking embedded GOROOT value", envGoroot);
-            var cmd = exec.Command(testenv.Executable(new testing_TжTB(t)));
-            cmd.Env = append(os.Environ(), (@string)"GOROOT=", (@string)"GO_RUNTIME_DEBUG_TEST_ENTRYPOINT=dumpgoroot");
-            var (@out, err) = cmd.Output();
-            if (err != nil) {
-                t.Fatal(err);
-            }
-            fileGoroot = (@string)bytes.TrimSpace(@out);
-        } else {
-            // Since GOROOT is not set in the environment, its value (if any) must come
-            // from the path embedded in the binary.
-            fileGoroot = runtime.GOROOT();
+    @string envGoroot = os.Getenv(gorootˢ); if (envGoroot != ""u8) {
+        // Since GOROOT is set explicitly in the environment, we can't be certain
+        // that it is the same GOROOT value baked into the binary, and we can't
+        // change the value in-process because runtime.GOROOT uses the value from
+        // initial (not current) environment. Spawn a subprocess to determine the
+        // real baked-in GOROOT.
+        t.Logf("found GOROOT %q from environment; checking embedded GOROOT value", envGoroot);
+        var cmd = exec.Command(testenv.Executable(new testing_TжTB(t)));
+        cmd.Env = append(os.Environ(), (@string)"GOROOT=", (@string)"GO_RUNTIME_DEBUG_TEST_ENTRYPOINT=dumpgoroot");
+        var (@out, err) = cmd.Output();
+        if (err != nil) {
+            t.Fatal(err);
         }
+        fileGoroot = (@string)bytes.TrimSpace(@out);
+    } else {
+        // Since GOROOT is not set in the environment, its value (if any) must come
+        // from the path embedded in the binary.
+        fileGoroot = runtime.GOROOT();
     }
     @string filePrefix = ""u8;
     if (fileGoroot != ""u8) {
@@ -208,11 +201,11 @@ public static void TestSetCrashOutput(ж<testing.T> t) {
     t.Logf("stderr = <<%s>>", stderr);
 
     // Check that the crash file and the stderr both contain the panic and stack trace.
-    foreach (var (_, want) in slice<@string>([
+    foreach (var (_, want) in range(slice<@string>([
         "panic: oops",
         "goroutine 1",
         "debug_test.TestMain"
-    ])) {
+    ]))) {
         if (!strings.Contains(crash, want)) {
             t.Errorf("crash output does not contain %q", want);
         }

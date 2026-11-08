@@ -36,7 +36,7 @@ public static void TestFitsInBase256(ж<testing.T> t) {
         new(math.MinInt64, 12, true)
     ]);
 
-    foreach (var (_, v) in vectors) {
+    foreach (var (_, v) in range(vectors)) {
         var ok = fitsInBase256(v.width, v.@in);
         if (ok != v.ok) {
             t.Errorf("fitsInBase256(%d, %d): got %v, want %v", v.@in, v.width, ok, v.ok);
@@ -91,7 +91,7 @@ public static void TestParseNumeric(ж<testing.T> t) {
         new(((@string)(new byte[]{0x30, 0x31, 0x32, 0x33, 0x7e, 0x5f, 0x26, 0x34, 0x31, 0x32, 0x33})), 0, false)
     ]);
 
-    foreach (var (_, v) in vectors) {
+    foreach (var (_, v) in range(vectors)) {
         global::go.archive.tar_package.parser p = default;
         var got = p.parseNumeric(slice<byte>(v.@in));
         var ok = (p.err == nil);
@@ -162,7 +162,7 @@ public static void TestFormatNumeric(ж<testing.T> t) {
         new(math.MinInt64, ((@string)(new byte[]{0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})), true)
     ]);
 
-    foreach (var (_, v) in vectors) {
+    foreach (var (_, v) in range(vectors)) {
         global::go.archive.tar_package.formatter f = default;
         var got = new slice<byte>(len(v.want));
         f.formatNumeric(got, v.@in);
@@ -213,7 +213,7 @@ public static void TestFitsInOctal(ж<testing.T> t) {
         new(-1564164, 30, false)
     ]);
 
-    foreach (var (_, v) in vectors) {
+    foreach (var (_, v) in range(vectors)) {
         var ok = fitsInOctal(v.width, v.input);
         if (ok != v.ok) {
             t.Errorf("checkOctal(%d, %d): got %v, want %v", v.input, v.width, ok, v.ok);
@@ -287,7 +287,7 @@ public static void TestParsePAXTime(ж<testing.T> t) {
         new("98765﹒43210", new time.Time(), false)  // Unicode period (U+FE52)
     ]);
 
-    foreach (var (_, v) in vectors) {
+    foreach (var (_, v) in range(vectors)) {
         var (ts, err) = parsePAXTime(v.@in);
         var ok = (err == nil);
         if (v.ok != ok) {
@@ -342,7 +342,7 @@ public static void TestFormatPAXTime(ж<testing.T> t) {
         new(-1350244992, -23960108, "-1350244992.023960108")
     ]);
 
-    foreach (var (_, v) in vectors) {
+    foreach (var (_, v) in range(vectors)) {
         @string got = formatPAXTime(time.Unix(v.sec, v.nsec));
         if (got != v.want) {
             t.Errorf("formatPAXTime(%ds, %dns): got %q, want %q",
@@ -391,7 +391,7 @@ public static void TestParsePAXRecord(ж<testing.T> t) {
         new("+0000005 x=\n", "+0000005 x=\n", "", "", false)
     ]);
 
-    foreach (var (_, v) in vectors) {
+    foreach (var (_, v) in range(vectors)) {
         var (key, val, res, err) = parsePAXRecord(v.@in);
         var ok = (err == nil);
         if (ok != v.ok) {
@@ -439,7 +439,7 @@ public static void TestFormatPAXRecord(ж<testing.T> t) {
         new(paxSchilyXattr + "key", "null\x00", "26 SCHILY.xattr.key=null\x00\n", true)
     ]);
 
-    foreach (var (_, v) in vectors) {
+    foreach (var (_, v) in range(vectors)) {
         var (got, err) = formatPAXRecord(v.inKey, v.inVal);
         var ok = (err == nil);
         if (ok != v.ok) {
@@ -505,7 +505,7 @@ public static void BenchmarkParsePAXTime(ж<testing.B> b) {
             ok: false
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new BenchmarkParsePAXTime_tests(), out var Ꮡtt);
         tt = vᴛ1;
 

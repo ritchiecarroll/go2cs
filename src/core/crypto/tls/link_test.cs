@@ -50,11 +50,11 @@ import _ "crypto/tls"
 func main() {}
 
 """u8.Raw(),
-            bad: slice<@string>([
+            bad: [
                 "tls.(*Conn)",
                 "type:crypto/tls.clientHandshakeState",
                 "type:crypto/tls.serverHandshakeState"
-            ])
+            ]
         ),
         new(
             name: "client_and_server",
@@ -67,10 +67,10 @@ func main() {
 }
 
 """u8.Raw(),
-            want: slice<@string>([
+            want: [
                 "crypto/tls.(*Conn).clientHandshake",
                 "crypto/tls.(*Conn).serverHandshake"
-            ])
+            ]
         ),
         new(
             name: "only_client",
@@ -80,12 +80,12 @@ import "crypto/tls"
 func main() { tls.Dial("", "", nil) }
 
 """u8.Raw(),
-            want: slice<@string>([
+            want: [
                 "crypto/tls.(*Conn).clientHandshake"
-            ]),
-            bad: slice<@string>([
+            ],
+            bad: [
                 "crypto/tls.(*Conn).serverHandshake"
-            ])
+            ]
         )
         // TODO: add only_server like func main() { tls.Server(nil, nil) }
         // That currently brings in the client via Conn.handleRenegotiation.
@@ -93,24 +93,20 @@ func main() { tls.Dial("", "", nil) }
     @string tmpDir = t.TempDir();
     @string goFile = filepath.Join(tmpDir, xGoˢ);
     @string exeFile = filepath.Join(tmpDir, xExeˢ);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestLinkerGC_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
         t.Run(tt.name, (ж<testing.T> tΔ1) => {
-            {
-                var errΔ1 = os.WriteFile(goFile, slice<byte>(ttʗ1.program), 420); if (errΔ1 != nil) {
-                    tΔ1.Fatal(errΔ1);
-                }
+            var errΔ1 = os.WriteFile(goFile, slice<byte>(ttʗ1.program), 420); if (errΔ1 != nil) {
+                tΔ1.Fatal(errΔ1);
             }
             os.Remove(exeFile);
             var cmd = testenv.Command(new tls_test_package.testing_TжTB(tΔ1), testenv.GoToolPath(new tls_test_package.testing_TжTB(tΔ1)), buildˢ, "-o", xExeˢ, xGoˢ);
             cmd.Dir = tmpDir;
-            {
-                var (@out, errΔ2) = cmd.CombinedOutput(); if (errΔ2 != nil) {
-                    tΔ1.Fatalf("compile: %v\n%s", errΔ2, @out);
-                }
+            var (@out, errΔ2) = cmd.CombinedOutput(); if (errΔ2 != nil) {
+                tΔ1.Fatalf("compile: %v\n%s", errΔ2, @out);
             }
 
             cmd = testenv.Command(new tls_test_package.testing_TжTB(tΔ1), testenv.GoToolPath(new tls_test_package.testing_TжTB(tΔ1)), toolˢ, "nm", xExeˢ);
@@ -119,12 +115,12 @@ func main() { tls.Dial("", "", nil) }
             if (err != nil) {
                 tΔ1.Fatalf("nm: %v\n%s", err, nm);
             }
-            foreach (var (_, sym) in ttʗ1.want) {
+            foreach (var (_, sym) in range(ttʗ1.want)) {
                 if (!bytes.Contains(nm, slice<byte>(sym))) {
                     tΔ1.Errorf("expected symbol %q not found", sym);
                 }
             }
-            foreach (var (_, sym) in ttʗ1.bad) {
+            foreach (var (_, sym) in range(ttʗ1.bad)) {
                 if (bytes.Contains(nm, slice<byte>(sym))) {
                     tΔ1.Errorf("unexpected symbol %q found", sym);
                 }

@@ -12,8 +12,6 @@ using strings = strings_package;
 using syscall = syscall_package;
 using testing = testing_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = io.fs_package;
 using go.os;
 using path;
@@ -50,7 +48,7 @@ public static void TestOpen(ж<testing.T> t) {
         new(dir, syscall.O_WRONLY, syscall.EISDIR),
         new(dir, syscall.O_RDWR, syscall.EISDIR)
     ]);
-    foreach (var (i, tt) in tests) {
+    foreach (var (i, tt) in range(tests)) {
         var (h, errΔ1) = syscall.Open(tt.path, tt.flag, 432);
         if (errΔ1 == nil) {
             syscall.CloseHandle(h);
@@ -312,10 +310,8 @@ public static void TestSyscallAllocations(ж<testing.T> t) {
         void testAllocs(ж<testing.T> tΔ1, @string name, Func<error> fn) {
             tΔ1.Run(name, (ж<testing.T> tΔ2) => {
                 nint n = (nint)testing.AllocsPerRun(10, () => {
-                    {
-                        var errΔ1 = fn(); if (errΔ1 != nil) {
-                            tΔ2.Fatalf("%s: %v", name, errΔ1);
-                        }
+                    var errΔ1 = fn(); if (errΔ1 != nil) {
+                        tΔ2.Fatalf("%s: %v", name, errΔ1);
                     }
                 });
                 if (n > 0) {

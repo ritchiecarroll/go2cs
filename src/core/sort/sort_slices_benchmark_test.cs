@@ -161,17 +161,9 @@ partial struct myStruct {
 
 partial struct myStructs /*[]ж<myStruct>*/;
 
-internal static nint Len(this myStructs s) {
-    return len(s);
-}
-
-internal static bool Less(this myStructs s, nint i, nint j) {
-    return s[i].n < s[j].n;
-}
-
-internal static void Swap(this myStructs s, nint i, nint j) {
-    (s[i], s[j]) = (s[j], s[i]);
-}
+internal static nint Len(this myStructs s) { return len(s); }
+internal static bool Less(this myStructs s, nint i, nint j) { return s[i].n < s[j].n; }
+internal static void Swap(this myStructs s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
 
 internal static myStructs makeRandomStructs(nint n) {
     var r = rand.New(new rand.PCGжSource(rand.NewPCG(42, 0)));
@@ -185,14 +177,14 @@ internal static myStructs makeRandomStructs(nint n) {
 public static void TestStructSorts(ж<testing.T> t) {
     var ss = makeRandomStructs(200);
     var ss2 = new slice<ж<myStruct>>(len(ss));
-    foreach (var i in range(ss)) {
+    foreach (var i in range(len(ss))) {
         ss2[i] = Ꮡ(new myStruct(n: ss[i].n));
     }
 
     Sort(ss);
     slices.SortFunc(ss2, (ж<myStruct> a, ж<myStruct> b) => a.n - b.n);
 
-    foreach (var i in range(ss)) {
+    foreach (var i in range(len(ss))) {
         if (ss[i].Value != ss2[i].Value) {
             t.Fatalf("ints2 mismatch at %d; %v != %v", i, ss[i].Value, ss2[i].Value);
         }

@@ -16,8 +16,6 @@ using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using exec = go.os.exec_package;
 using go.os;
 using path;
@@ -39,10 +37,8 @@ internal static @string testUnixAddr(testing.TB t) {
         t.Fatal(err);
     }
     t.Cleanup(() => {
-        {
-            var errΔ1 = Δos.RemoveAll(d); if (errΔ1 != nil) {
-                t.Error(errΔ1);
-            }
+        var errΔ1 = Δos.RemoveAll(d); if (errΔ1 != nil) {
+            t.Error(errΔ1);
         }
     });
     return filepath.Join(d, sockˢ);
@@ -129,7 +125,7 @@ internal static (slice<ж<global::go.net_package.TCPListener>> lns, error err) n
     for (nint i = 0; i < 64; i++) {
         nint port = default;
         slice<ж<global::go.net_package.TCPListener>> lnsΔ1 = default;
-        foreach (var (_, vᴛ1) in args) {
+        foreach (var (_, vᴛ1) in range(args)) {
             ref var arg = ref heap(new newDualStackListener_type(), out var Ꮡarg);
             arg = vᴛ1;
 
@@ -142,7 +138,7 @@ internal static (slice<ж<global::go.net_package.TCPListener>> lns, error err) n
             lnsΔ1 = append(lnsΔ1, ln);
         }
         if (len(lnsΔ1) != len(args)) {
-            foreach (var (_, ln) in lnsΔ1) {
+            foreach (var (_, ln) in range(lnsΔ1)) {
                 ln.Close();
             }
             continue;
@@ -179,11 +175,9 @@ internal static error teardown(this ж<localServer> Ꮡls) {
             @string network = ls.Listener.Addr().Network();
             @string address = ls.Listener.Addr().String();
             ls.Listener.Close();
-            foreach (var (_, c) in ls.cl) {
-                {
-                    var err = c.Close(); if (err != nil) {
-                        return err;
-                    }
+            foreach (var (_, c) in range(ls.cl)) {
+                var err = c.Close(); if (err != nil) {
+                    return err;
                 }
             }
             ᐸꟷ(ls.done);
@@ -228,7 +222,7 @@ internal partial struct dualStackServer {
 internal static partial error buildup(this ж<dualStackServer> Ꮡdss, Action<ж<dualStackServer>, global::go.net_package.Listener> handler) {
     ref var dss = ref Ꮡdss.DerefOrNull();
 
-    foreach (var i in range(dss.lns)) {
+    foreach (var i in range(len(dss.lns))) {
         goǃ((nint iΔ1) => {
             handler(Ꮡdss, Ꮡdss.Value.lns[iΔ1].Listener);
             builtin.close(Ꮡdss.Value.lns[iΔ1].done);
@@ -241,7 +235,7 @@ internal static error teardownNetwork(this ж<dualStackServer> Ꮡdss, @string n
     ref var dss = ref Ꮡdss.DerefOrNull();
 
     Ꮡdss.Ꮡlnmu.Lock();
-    foreach (var i in range(dss.lns)) {
+    foreach (var i in range(len(dss.lns))) {
         if (network == dss.lns[i].network && dss.lns[i].Listener != nil) {
             dss.lns[i].Listener.Close();
             ᐸꟷ(dss.lns[i].done);
@@ -256,7 +250,7 @@ internal static error teardown(this ж<dualStackServer> Ꮡdss) {
     ref var dss = ref Ꮡdss.DerefOrNull();
 
     Ꮡdss.Ꮡlnmu.Lock();
-    foreach (var i in range(dss.lns)) {
+    foreach (var i in range(len(dss.lns))) {
         if (dss.lns[i].Listener != nil) {
             dss.lns[i].Listener.Close();
             ᐸꟷ(dss.lns[i].done);
@@ -265,7 +259,7 @@ internal static error teardown(this ж<dualStackServer> Ꮡdss) {
     dss.lns = dss.lns[..0];
     Ꮡdss.Ꮡlnmu.Unlock();
     Ꮡdss.Ꮡcmu.Lock();
-    foreach (var (_, c) in dss.cs) {
+    foreach (var (_, c) in range(dss.cs)) {
         c.Close();
     }
     dss.cs = dss.cs[..0];
@@ -312,10 +306,8 @@ internal static void transponder(this ж<localServer> Ꮡls, global::go.net_pack
         }}
         var (c, err) = ln.Accept();
         if (err != nil) {
-            {
-                var perr = parseAcceptError(err); if (perr != nil) {
-                    ch.ᐸꟷ(perr);
-                }
+            var perr = parseAcceptError(err); if (perr != nil) {
+                ch.ᐸꟷ(perr);
             }
             ch.ᐸꟷ(err);
             return;
@@ -334,24 +326,18 @@ internal static void transponder(this ж<localServer> Ꮡls, global::go.net_pack
         var b = new slice<byte>(256);
         (var n, err) = c.Read(b);
         if (err != nil) {
-            {
-                var perr = parseReadError(err); if (perr != nil) {
-                    ch.ᐸꟷ(perr);
-                }
+            var perr = parseReadError(err); if (perr != nil) {
+                ch.ᐸꟷ(perr);
             }
             ch.ᐸꟷ(err);
             return;
         }
-        {
-            var (_, errΔ1) = c.Write(b.slice(0, n)); if (errΔ1 != nil) {
-                {
-                    var perr = parseWriteError(errΔ1); if (perr != nil) {
-                        ch.ᐸꟷ(perr);
-                    }
-                }
-                ch.ᐸꟷ(errΔ1);
-                return;
+        var (_, errΔ1) = c.Write(b.slice(0, n)); if (errΔ1 != nil) {
+            var perr = parseWriteError(errΔ1); if (perr != nil) {
+                ch.ᐸꟷ(perr);
             }
+            ch.ᐸꟷ(errΔ1);
+            return;
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -369,10 +355,8 @@ internal static void transceiver(global::go.net_package.Conn c, slice<byte> wb, 
 
         var (n, err) = c.Write(wb);
         if (err != nil) {
-            {
-                var perr = parseWriteError(err); if (perr != nil) {
-                    ch.ᐸꟷ(perr);
-                }
+            var perr = parseWriteError(err); if (perr != nil) {
+                ch.ᐸꟷ(perr);
             }
             ch.ᐸꟷ(err);
             return;
@@ -383,10 +367,8 @@ internal static void transceiver(global::go.net_package.Conn c, slice<byte> wb, 
         var rb = new slice<byte>(len(wb));
         (n, err) = c.Read(rb);
         if (err != nil) {
-            {
-                var perr = parseReadError(err); if (perr != nil) {
-                    ch.ᐸꟷ(perr);
-                }
+            var perr = parseReadError(err); if (perr != nil) {
+                ch.ᐸꟷ(perr);
             }
             ch.ᐸꟷ(err);
             return;
@@ -479,7 +461,7 @@ internal static (slice<ж<global::go.net_package.UDPConn>> cs, error err) newDua
     for (nint i = 0; i < 64; i++) {
         nint port = default;
         slice<ж<global::go.net_package.UDPConn>> csΔ1 = default;
-        foreach (var (_, vᴛ1) in args) {
+        foreach (var (_, vᴛ1) in range(args)) {
             ref var arg = ref heap(new newDualStackPacketListener_type(), out var Ꮡarg);
             arg = vᴛ1;
 
@@ -492,7 +474,7 @@ internal static (slice<ж<global::go.net_package.UDPConn>> cs, error err) newDua
             csΔ1 = append(csΔ1, c);
         }
         if (len(csΔ1) != len(args)) {
-            foreach (var (_, c) in csΔ1) {
+            foreach (var (_, c) in range(csΔ1)) {
                 c.of(global::go.net_package.UDPConn.Ꮡconn).Close();
             }
             continue;
@@ -563,10 +545,8 @@ internal static void packetTransponder(global::go.net_package.PacketConn c, chan
         var b = new slice<byte>(256);
         var (n, peer, err) = c.ReadFrom(b);
         if (err != nil) {
-            {
-                var perr = parseReadError(err); if (perr != nil) {
-                    ch.ᐸꟷ(perr);
-                }
+            var perr = parseReadError(err); if (perr != nil) {
+                ch.ᐸꟷ(perr);
             }
             ch.ᐸꟷ(err);
             return;
@@ -589,16 +569,12 @@ internal static void packetTransponder(global::go.net_package.PacketConn c, chan
                 return;
             }
         }
-        {
-            var (_, errΔ1) = c.WriteTo(b.slice(0, n), peer); if (errΔ1 != nil) {
-                {
-                    var perr = parseWriteError(errΔ1); if (perr != nil) {
-                        ch.ᐸꟷ(perr);
-                    }
-                }
-                ch.ᐸꟷ(errΔ1);
-                return;
+        var (_, errΔ1) = c.WriteTo(b.slice(0, n), peer); if (errΔ1 != nil) {
+            var perr = parseWriteError(errΔ1); if (perr != nil) {
+                ch.ᐸꟷ(perr);
             }
+            ch.ᐸꟷ(errΔ1);
+            return;
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -616,10 +592,8 @@ internal static void packetTransceiver(global::go.net_package.PacketConn c, slic
 
         var (n, err) = c.WriteTo(wb, dst);
         if (err != nil) {
-            {
-                var perr = parseWriteError(err); if (perr != nil) {
-                    ch.ᐸꟷ(perr);
-                }
+            var perr = parseWriteError(err); if (perr != nil) {
+                ch.ᐸꟷ(perr);
             }
             ch.ᐸꟷ(err);
             return;
@@ -630,10 +604,8 @@ internal static void packetTransceiver(global::go.net_package.PacketConn c, slic
         var rb = new slice<byte>(len(wb));
         (n, _, err) = c.ReadFrom(rb);
         if (err != nil) {
-            {
-                var perr = parseReadError(err); if (perr != nil) {
-                    ch.ᐸꟷ(perr);
-                }
+            var perr = parseReadError(err); if (perr != nil) {
+                ch.ᐸꟷ(perr);
             }
             ch.ᐸꟷ(err);
             return;
@@ -723,10 +695,8 @@ internal static partial (Action<testing.TB>, error) startTestSocketPeer(testing.
     cmd.Stdout = new Δos.FileжWriter(Δos.Stdout);
     cmd.Stderr = new Δos.FileжWriter(Δos.Stderr);
 
-    {
-        var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
 
     var cmdCh = new channel<error>(1);
@@ -777,18 +747,14 @@ internal static partial (Action<testing.TB>, error) startTestSocketPeer(testing.
         }
 
         nint chunkSize = default;
-        {
-            (chunkSize, err) = strconv.Atoi(Δos.Getenv("GO_NET_TEST_TRANSFER_CHUNK_SIZE")); if (err != nil) {
-                Δlog.Fatal(err);
-            }
+        (chunkSize, err) = strconv.Atoi(Δos.Getenv("GO_NET_TEST_TRANSFER_CHUNK_SIZE")); if (err != nil) {
+            Δlog.Fatal(err);
         }
         var buf = new slice<byte>(chunkSize);
 
         nint totalSize = default;
-        {
-            (totalSize, err) = strconv.Atoi(Δos.Getenv("GO_NET_TEST_TRANSFER_TOTAL_SIZE")); if (err != nil) {
-                Δlog.Fatal(err);
-            }
+        (totalSize, err) = strconv.Atoi(Δos.Getenv("GO_NET_TEST_TRANSFER_TOTAL_SIZE")); if (err != nil) {
+            Δlog.Fatal(err);
         }
 
         Func<slice<byte>, (nint, error)> fn = default;
@@ -822,10 +788,8 @@ internal static partial (Action<testing.TB>, error) startTestSocketPeer(testing.
             }
 
             error errΔ2 = default;
-            {
-                (n, errΔ2) = fn(buf); if (errΔ2 != nil) {
-                    return;
-                }
+            (n, errΔ2) = fn(buf); if (errΔ2 != nil) {
+                return;
             }
         }
     }

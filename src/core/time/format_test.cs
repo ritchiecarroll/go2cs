@@ -17,14 +17,14 @@ using Δtime = time_package;
 
 partial class time_test_package {
 
-internal static slice<@string> nextStdChunkTests = slice<@string>([
+internal static slice<@string> nextStdChunkTests = [
     "(2006)-(01)-(02)T(15):(04):(05)(Z07:00)",
     "(2006)-(01)-(02) (002) (15):(04):(05)",
     "(2006)-(01) (002) (15):(04):(05)",
     "(2006)-(002) (15):(04):(05)",
     "(2006)(002)(01) (15):(04):(05)",
     "(2006)(002)(04) (15):(04):(05)"
-]);
+];
 
 public static void TestNextStdChunk(ж<Δtesting.T> t) {
     // Most bugs in Parse or Format boil down to problems with
@@ -59,7 +59,7 @@ public static void TestNextStdChunk(ж<Δtesting.T> t) {
         return r;
     };
 
-    foreach (var (_, marked) in nextStdChunkTests) {
+    foreach (var (_, marked) in range(nextStdChunkTests)) {
         // marked is an expected output from markChunks.
         // If we delete the parens and pass it through markChunks,
         // we should get the original back.
@@ -86,7 +86,7 @@ internal static slice<TimeFormatTest> rfc3339Formats = slice<TimeFormatTest>([
 internal static readonly object rfc3339ˢ = (@string)"RFC3339:"u8;
 
 public static void TestRFC3339Conversion(ж<Δtesting.T> t) {
-    foreach (var (_, f) in rfc3339Formats) {
+    foreach (var (_, f) in range(rfc3339Formats)) {
         if (f.time.Format(RFC3339) != f.formattedValue) {
             t.Error(rfc3339ˢ);
             t.Errorf("  want=%+v", f.formattedValue);
@@ -134,7 +134,7 @@ public static void TestAppendInt(ж<Δtesting.T> t) {
         new(123456789, 9, "123456789")
     ]);
     slice<byte> got = default;
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         got = time_internal_test_package.AppendInt(got[..0], tt.@in, tt.width);
         if (((sstring)got) != tt.want) {
             t.Errorf("appendInt(%d, %d) = %s, want %s", tt.@in, tt.width, got, tt.want);
@@ -148,7 +148,7 @@ partial struct FormatTest {
     internal @string result;
 }
 
-internal static slice<FormatTest> formatTests = slice<FormatTest>([
+internal static slice<FormatTest> formatTests = [
     new("ANSIC", ANSIC, "Wed Feb  4 21:00:57 2009"),
     new("UnixDate", UnixDate, "Wed Feb  4 21:00:57 PST 2009"),
     new("RubyDate", RubyDate, "Wed Feb 04 21:00:57 -0800 2009"),
@@ -180,12 +180,12 @@ internal static slice<FormatTest> formatTests = slice<FormatTest>([
     new("Hour", "15 3 03 _3", "21 9 09 _9"),
     new("Minute", "4 04 _4", "0 00 _0"),
     new("Second", "5 05 _5", "57 57 _57")
-]);
+];
 
 public static void TestFormat(ж<Δtesting.T> t) {
     // The numeric time represents Thu Feb  4 21:00:57.012345600 PST 2009
     var time = Unix(0, 1233810057012345600L);
-    foreach (var (_, test) in formatTests) {
+    foreach (var (_, test) in range(formatTests)) {
         @string result = time.Format(test.format);
         if (result != test.result) {
             t.Errorf("%s expected %q got %q", test.name, test.result, result);
@@ -212,7 +212,7 @@ internal static slice<goStringTestsᴛ1> goStringTests = slice<goStringTestsᴛ1
 
 public static void TestGoString(ж<Δtesting.T> t) {
     // The numeric time represents Thu Feb  4 21:00:57.012345600 PST 2009
-    foreach (var (_, tt) in goStringTests) {
+    foreach (var (_, tt) in range(goStringTests)) {
         if (tt.@in.GoString() != tt.want) {
             t.Errorf("GoString (%q): got %q want %q", tt.@in, tt.@in.GoString(), tt.want);
         }
@@ -244,7 +244,7 @@ public static void TestFormatShortYear(ж<Δtesting.T> t) {
         99999, 100000, 100001
     ]);
 
-    foreach (var (_, y) in years) {
+    foreach (var (_, y) in range(years)) {
         var time = Date(y, January, 1, 0, 0, 0, 0, ΔUTC);
         @string result = time.Format("2006.01.02");
         @string want = default;
@@ -271,7 +271,7 @@ partial struct ParseTest {
     internal nint fracDigits; // number of digits of fractional second
 }
 
-internal static slice<ParseTest> parseTests = slice<ParseTest>([
+internal static slice<ParseTest> parseTests = [
     new("ANSIC", ANSIC, "Thu Feb  4 21:00:57 2010", false, true, 1, 0),
     new("UnixDate", UnixDate, "Thu Feb  4 21:00:57 PST 2010", true, true, 1, 0),
     new("RubyDate", RubyDate, "Thu Feb 04 21:00:57 -0800 2010", true, true, 1, 0),
@@ -361,10 +361,10 @@ internal static slice<ParseTest> parseTests = slice<ParseTest>([
     new("", "2006-01-02T15:04:05Z07:00:00", "2010-02-04T21:00:57Z", false, false, 1, 0),
     new("", "2006-01-02T15:04:05Z07:00:00", "2010-02-04T21:00:57+08:00:00", false, false, 1, 0),
     new("", "2006-01-02T15:04:05Z07:00:00", "2010-02-04T21:00:57-08:00:00", true, false, 1, 0)
-]);
+];
 
 public static void TestParse(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in parseTests) {
+    foreach (var (_, vᴛ1) in range(parseTests)) {
         ref var test = ref heap(new ParseTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -382,7 +382,7 @@ partial struct dayOutOfRangeTestsᴛ1 /*dyn*/ {
     internal @string date;
     internal bool ok;
 }
-internal static slice<dayOutOfRangeTestsᴛ1> dayOutOfRangeTests = slice<dayOutOfRangeTestsᴛ1>([
+internal static slice<dayOutOfRangeTestsᴛ1> dayOutOfRangeTests = [
     new("Thu Jan 99 21:00:57 2010", false),
     new("Thu Jan 31 21:00:57 2010", true),
     new("Thu Jan 32 21:00:57 2010", false),
@@ -410,14 +410,14 @@ internal static slice<dayOutOfRangeTestsᴛ1> dayOutOfRangeTests = slice<dayOutO
     new("Thu Dec 31 21:00:57 2010", true),
     new("Thu Dec 32 21:00:57 2010", false),
     new("Thu Dec 00 21:00:57 2010", false)
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string dayOutOfRangeˢ => ref dayOutOfRangeˢᵇ;
 private static readonly @string dayOutOfRangeˢᵇ = "day out of range"u8;
 
 public static void TestParseDayOutOfRange(ж<Δtesting.T> t) {
-    foreach (var (_, test) in dayOutOfRangeTests) {
+    foreach (var (_, test) in range(dayOutOfRangeTests)) {
         var (_, err) = Parse(ANSIC, test.date);
         switch (ᐧ) {
         case {} when test.ok && err == nil: {
@@ -534,17 +534,17 @@ public static void TestLoadLocationZipFile(ж<Δtesting.T> t) {
     finally { ᒐ.Run(); }
 }
 
-internal static slice<ParseTest> rubyTests = slice<ParseTest>([
+internal static slice<ParseTest> rubyTests = [
     new("RubyDate", RubyDate, "Thu Feb 04 21:00:57 -0800 2010", true, true, 1, 0),
     // Ignore the time zone in the test. If it parses, it'll be OK.
     new("RubyDate", RubyDate, "Thu Feb 04 21:00:57 -0000 2010", false, true, 1, 0),
     new("RubyDate", RubyDate, "Thu Feb 04 21:00:57 +0000 2010", false, true, 1, 0),
     new("RubyDate", RubyDate, "Thu Feb 04 21:00:57 +1130 2010", false, true, 1, 0)
-]);
+];
 
 // Problematic time zone format needs special tests.
 public static void TestRubyParse(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in rubyTests) {
+    foreach (var (_, vᴛ1) in range(rubyTests)) {
         ref var test = ref heap(new ParseTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -642,7 +642,7 @@ partial struct ParseTimeZoneTest {
     internal bool ok;
 }
 
-internal static slice<ParseTimeZoneTest> parseTimeZoneTests = slice<ParseTimeZoneTest>([
+internal static slice<ParseTimeZoneTest> parseTimeZoneTests = [
     new("gmt hi there", 0, false),
     new("GMT hi there", 3, true),
     new("GMT+12 hi there", 6, true),
@@ -674,10 +674,10 @@ internal static slice<ParseTimeZoneTest> parseTimeZoneTests = slice<ParseTimeZon
     new("+14", 3, true),
     new("+23", 3, true),
     new("+24", 0, false)
-]);
+];
 
 public static void TestParseTimeZone(ж<Δtesting.T> t) {
-    foreach (var (_, test) in parseTimeZoneTests) {
+    foreach (var (_, test) in range(parseTimeZoneTests)) {
         var (length, ok) = time_internal_test_package.ParseTimeZone(test.value);
         if (ok != test.ok) {
             t.Errorf("expected %t for %q got %t", test.ok, test.value, ok);
@@ -693,7 +693,7 @@ partial struct ParseErrorTest {
     internal @string expect; // must appear within the error
 }
 
-internal static slice<ParseErrorTest> parseErrorTests = slice<ParseErrorTest>([
+internal static slice<ParseErrorTest> parseErrorTests = [
     new(ANSIC, "Feb  4 21:00:60 2010", @"cannot parse ""Feb  4 21:00:60 2010"" as ""Mon"""),
     new(ANSIC, "Thu Feb  4 21:00:57 @2010", @"cannot parse ""@2010"" as ""2006"""),
     new(ANSIC, "Thu Feb  4 21:00:60 2010", "second out of range"),
@@ -745,10 +745,10 @@ internal static slice<ParseErrorTest> parseErrorTests = slice<ParseErrorTest>([
     new("Z07:00", "+25:00", "time zone offset hour out of range"),
     new("Z07:00", "-23:61", "time zone offset minute out of range"),
     new("Z07:00:00", "+23:59:61", "time zone offset second out of range")
-]);
+];
 
 public static void TestParseErrors(ж<Δtesting.T> t) {
-    foreach (var (_, test) in parseErrorTests) {
+    foreach (var (_, test) in range(parseErrorTests)) {
         var (_, err) = Parse(test.format, test.value);
         if (err == nil) {
             t.Errorf("expected error for %q %q", test.format, test.value);
@@ -867,7 +867,7 @@ partial struct SecondsTimeZoneOffsetTest {
     internal nint expectedoffset;
 }
 
-internal static slice<SecondsTimeZoneOffsetTest> secondsTimeZoneOffsetTests = slice<SecondsTimeZoneOffsetTest>([
+internal static slice<SecondsTimeZoneOffsetTest> secondsTimeZoneOffsetTests = [
     new("2006-01-02T15:04:05-070000", "1871-01-01T05:33:02-003408", -(34 * 60 + 8)),
     new("2006-01-02T15:04:05-07:00:00", "1871-01-01T05:33:02-00:34:08", -(34 * 60 + 8)),
     new("2006-01-02T15:04:05-070000", "1871-01-01T05:33:02+003408", 34 * 60 + 8),
@@ -877,11 +877,11 @@ internal static slice<SecondsTimeZoneOffsetTest> secondsTimeZoneOffsetTests = sl
     new("2006-01-02T15:04:05-07", "1871-01-01T05:33:02+01", 1 * 60 * 60),
     new("2006-01-02T15:04:05-07", "1871-01-01T05:33:02-02", -2 * 60 * 60),
     new("2006-01-02T15:04:05Z07", "1871-01-01T05:33:02-02", -2 * 60 * 60)
-]);
+];
 
 public static void TestParseSecondsInTimeZone(ж<Δtesting.T> t) {
     // should accept timezone offsets with seconds like: Zone America/New_York   -4:56:02 -      LMT     1883 Nov 18 12:03:58
-    foreach (var (_, test) in secondsTimeZoneOffsetTests) {
+    foreach (var (_, test) in range(secondsTimeZoneOffsetTests)) {
         var (time, err) = Parse(test.format, test.value);
         if (err != nil) {
             t.Fatal(errorParsingDateˢ, err);
@@ -898,7 +898,7 @@ internal static ref readonly @string lmtˢ => ref lmtˢᵇ;
 private static readonly @string lmtˢᵇ = "LMT"u8;
 
 public static void TestFormatSecondsInTimeZone(ж<Δtesting.T> t) {
-    foreach (var (_, test) in secondsTimeZoneOffsetTests) {
+    foreach (var (_, test) in range(secondsTimeZoneOffsetTests)) {
         var d = Date(1871, 1, 1, 5, 33, 2, 0, FixedZone(lmtˢ, test.expectedoffset));
         @string timestr = d.Format(test.format);
         if (timestr != test.value) {
@@ -920,10 +920,8 @@ public static void TestUnderscoreTwoThousand(ж<Δtesting.T> t) {
             t.Errorf("Incorrect y/m/d, got %d/%d/%d", y, m, d);
         }
     }
-    {
-        nint h = time.Hour(); if (h != 14) {
-            t.Errorf("Incorrect hour, got %d", h);
-        }
+    nint h = time.Hour(); if (h != 14) {
+        t.Errorf("Incorrect hour, got %d", h);
     }
     {
         nint m = time.Minute(); if (m != 38) {
@@ -947,16 +945,14 @@ public static void TestStd0xParseError(ж<Δtesting.T> t) {
         new("01 MST", "1 MST", "1"),
         new(RFC850, "Thursday, 04-Feb-1 21:00:57 PST", "1")
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var (_, err) = Parse(tt.format, tt.value);
         if (err == nil) {
             t.Errorf("Parse(%q, %q) did not fail as expected", tt.format, tt.value);
-        } else {
-            var (perr, ok) = err._<ж<Δtime.ParseError>>(ᐧ); if (!ok) {
-                t.Errorf("Parse(%q, %q) returned error type %T, expected ParseError", tt.format, tt.value, perr.OrTypedNil());
-            } else if (!strings.Contains(perr.Error(), cannotParseˢ) || !strings.HasPrefix(perr.ValueElem, tt.valueElemPrefix)) {
-                t.Errorf("Parse(%q, %q) returned wrong parsing error message: %v", tt.format, tt.value, perr.OrTypedNil());
-            }
+        } else if (!err._<ж<Δtime.ParseError>>(out var perr)) {
+            t.Errorf("Parse(%q, %q) returned error type %T, expected ParseError", tt.format, tt.value, perr.OrTypedNil());
+        } else if (!strings.Contains(perr.Error(), cannotParseˢ) || !strings.HasPrefix(perr.ValueElem, tt.valueElemPrefix)) {
+            t.Errorf("Parse(%q, %q) returned wrong parsing error message: %v", tt.format, tt.value, perr.OrTypedNil());
         }
     }
 }
@@ -965,18 +961,18 @@ partial struct monthOutOfRangeTestsᴛ1 /*dyn*/ {
     internal @string value;
     internal bool ok;
 }
-internal static slice<monthOutOfRangeTestsᴛ1> monthOutOfRangeTests = slice<monthOutOfRangeTestsᴛ1>([
+internal static slice<monthOutOfRangeTestsᴛ1> monthOutOfRangeTests = [
     new("00-01", false),
     new("13-01", false),
     new("01-01", true)
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string monthOutOfRangeˢ => ref monthOutOfRangeˢᵇ;
 private static readonly @string monthOutOfRangeˢᵇ = "month out of range"u8;
 
 public static void TestParseMonthOutOfRange(ж<Δtesting.T> t) {
-    foreach (var (_, test) in monthOutOfRangeTests) {
+    foreach (var (_, test) in range(monthOutOfRangeTests)) {
         var (_, err) = Parse("01-02", test.value);
         switch (ᐧ) {
         case {} when !test.ok && err != nil: {
@@ -1025,11 +1021,9 @@ public static void TestQuote(ж<Δtesting.T> t) {
         new(@"☺ hello ☺ hello", @"""\xe2\x98\xba hello \xe2\x98\xba hello"""),
         new("\x04", @"""\x04""")
     ]);
-    foreach (var (_, tt) in tests) {
-        {
-            @string q = time_internal_test_package.Quote(tt.s); if (q != tt.want) {
-                t.Errorf("Quote(%q) = got %q, want %q", tt.s, q, tt.want);
-            }
+    foreach (var (_, tt) in range(tests)) {
+        @string q = time_internal_test_package.Quote(tt.s); if (q != tt.want) {
+            t.Errorf("Quote(%q) = got %q, want %q", tt.s, q, tt.want);
         }
     }
 }
@@ -1049,11 +1043,9 @@ public static void TestFormatFractionalSecondSeparators(ж<Δtesting.T> t) {
 
     // The numeric time represents Thu Feb  4 21:00:57.012345600 PST 2009
     var time = Unix(0, 1233810057012345600L);
-    foreach (var (_, tt) in tests) {
-        {
-            @string q = time.Format(tt.s); if (q != tt.want) {
-                t.Errorf("Format(%q) = got %q, want %q", tt.s, q, tt.want);
-            }
+    foreach (var (_, tt) in range(tests)) {
+        @string q = time.Format(tt.s); if (q != tt.want) {
+            t.Errorf("Format(%q) = got %q, want %q", tt.s, q, tt.want);
         }
     }
 }
@@ -1062,7 +1054,7 @@ partial struct longFractionalDigitsTestsᴛ1 /*dyn*/ {
     internal @string value;
     internal nint want;
 }
-internal static slice<longFractionalDigitsTestsᴛ1> longFractionalDigitsTests = slice<longFractionalDigitsTestsᴛ1>([
+internal static slice<longFractionalDigitsTestsᴛ1> longFractionalDigitsTests = [
     // 9 digits
     new("2021-09-29T16:04:33.000000000Z", 0),
     new("2021-09-29T16:04:33.000000001Z", 1),
@@ -1084,21 +1076,19 @@ internal static slice<longFractionalDigitsTestsᴛ1> longFractionalDigitsTests =
     new("2021-09-29T16:04:33.000123456789Z", 123_456),
     // 15 digits, truncates
     new("2021-09-29T16:04:33.9999999999999999Z", 999_999_999)
-]);
+];
 
 // Issue 48685 and 54567.
 public static void TestParseFractionalSecondsLongerThanNineDigits(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in longFractionalDigitsTests) {
-        foreach (var (_, format) in slice<@string>([RFC3339, RFC3339Nano])) {
+    foreach (var (_, tt) in range(longFractionalDigitsTests)) {
+        foreach (var (_, format) in range(slice<@string>([RFC3339, RFC3339Nano]))) {
             var (tm, err) = Parse(format, tt.value);
             if (err != nil) {
                 t.Errorf("Parse(%q, %q) error: %v", format, tt.value, err);
                 continue;
             }
-            {
-                nint got = tm.Nanosecond(); if (got != tt.want) {
-                    t.Errorf("Parse(%q, %q) = got %d, want %d", format, tt.value, got, tt.want);
-                }
+            nint got = tm.Nanosecond(); if (got != tt.want) {
+                t.Errorf("Parse(%q, %q) = got %d, want %d", format, tt.value, got, tt.want);
             }
         }
     }
@@ -1107,18 +1097,18 @@ public static void TestParseFractionalSecondsLongerThanNineDigits(ж<Δtesting.T
 public static void FuzzFormatRFC3339(ж<Δtesting.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    foreach (var (_, vᴛ1) in GoReflect.WithElemDims(new array<int64>[]{
+    foreach (var (_, vᴛ1) in range(GoReflect.WithElemDims(new array<int64>[]{
         new int64[]{Δmath.MinInt64, Δmath.MinInt64}.array(), // 292277026304-08-26T15:42:51Z
         new int64[]{-62167219200L, 0}.array(),               // 0000-01-01T00:00:00Z
         new int64[]{1661201140, 676836973}.array(),          // 2022-08-22T20:45:40.676836973Z
         new int64[]{253402300799L, 999999999}.array(),       // 9999-12-31T23:59:59.999999999Z
         new int64[]{Δmath.MaxInt64, Δmath.MaxInt64}.array()  // -292277022365-05-08T08:17:07Z
-    }.slice(), 2)) {
+    }.slice(), 2))) {
         var ts = vᴛ1.Clone();
 
         f.Add(ts[0], ts[1], true, false, (nint)0);
         f.Add(ts[0], ts[1], false, true, (nint)0);
-        foreach (var (_, offset) in slice<nint>([0, 60, 60 * 60, 99 * 60 * 60 + 99 * 60, 123456789])) {
+        foreach (var (_, offset) in range(slice<nint>([0, 60, 60 * 60, 99 * 60 * 60 + 99 * 60, 123456789]))) {
             f.Add(ts[0], ts[1], false, false, -offset);
             f.Add(ts[0], ts[1], false, false, +offset);
         }
@@ -1158,16 +1148,16 @@ public static void FuzzFormatRFC3339(ж<Δtesting.F> Ꮡf) {
 public static void FuzzParseRFC3339(ж<Δtesting.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    foreach (var (_, tt) in formatTests) {
+    foreach (var (_, tt) in range(formatTests)) {
         f.Add(tt.result);
     }
-    foreach (var (_, tt) in parseTests) {
+    foreach (var (_, tt) in range(parseTests)) {
         f.Add(tt.value);
     }
-    foreach (var (_, tt) in parseErrorTests) {
+    foreach (var (_, tt) in range(parseErrorTests)) {
         f.Add(tt.value);
     }
-    foreach (var (_, tt) in longFractionalDigitsTests) {
+    foreach (var (_, tt) in range(longFractionalDigitsTests)) {
         f.Add(tt.value);
     }
 
@@ -1179,7 +1169,7 @@ public static void FuzzParseRFC3339(ж<Δtesting.F> Ꮡf) {
             return t1.Equal(t2) && name1 == name2 && offset1 == offset2;
         }
 
-        foreach (var (_, tz) in slice<ж<timeꓸLocation>>([ΔUTC, ΔLocal])) {
+        foreach (var (_, tz) in range(slice<ж<timeꓸLocation>>([ΔUTC, ΔLocal]))) {
             // Parsing as RFC3339 or RFC3339Nano should be identical.
             var (t1, err1) = time_internal_test_package.ParseAny(RFC3339, s, ΔUTC, tz);
             var (t2, err2) = time_internal_test_package.ParseAny(RFC3339Nano, s, ΔUTC, tz);
@@ -1213,18 +1203,16 @@ public static void FuzzParseRFC3339(ж<Δtesting.F> Ꮡf) {
             }
 
             // Customized parser should be identical to general parser.
-            {
-                var (got, ok) = time_internal_test_package.ParseRFC3339(s, tz);
-                switch (ᐧ) {
-                case {} when ok != (err1 == nil): {
-                    t.Fatalf("ParseRFC3339(%q) error mismatch:\n\tgot:  %v\n\twant: %v", s, ok, err1 == nil);
-                    break;
-                }
-                case {} when !equalTime(got, t1): {
-                    t.Fatalf("ParseRFC3339(%q) value mismatch:\n\tgot:  %v\n\twant: %v", s, got, t2);
-                    break;
-                }}
+            var (got, ok) = time_internal_test_package.ParseRFC3339(s, tz);
+            switch (ᐧ) {
+            case {} when ok != (err1 == nil): {
+                t.Fatalf("ParseRFC3339(%q) error mismatch:\n\tgot:  %v\n\twant: %v", s, ok, err1 == nil);
+                break;
             }
+            case {} when !equalTime(got, t1): {
+                t.Fatalf("ParseRFC3339(%q) value mismatch:\n\tgot:  %v\n\twant: %v", s, got, t2);
+                break;
+            }}
         }
     });
 }

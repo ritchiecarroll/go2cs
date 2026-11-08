@@ -20,7 +20,7 @@ internal static float64 nan = Δmath.NaN();
 partial struct testsᴛ1 /*dyn*/ {
     internal float64 min, max;
 }
-internal static slice<testsᴛ1> tests = slice<testsᴛ1>([
+internal static slice<testsᴛ1> tests = [
     new(1D, 2D),
     new(-2D, 1D),
     new(negZero, zero),
@@ -29,16 +29,16 @@ internal static slice<testsᴛ1> tests = slice<testsᴛ1>([
     new(negInf, inf),
     new(1D, inf),
     new(negInf, 1D)
-]);
+];
 
-internal static slice<float64> all = slice<float64>([1D, 2D, -1D, -2D, zero, negZero, inf, negInf, nan]);
+internal static slice<float64> all = [1D, 2D, -1D, -2D, zero, negZero, inf, negInf, nan];
 
 internal static bool eq(float64 x, float64 y) {
     return x == y && Δmath.Signbit(x) == Δmath.Signbit(y);
 }
 
 public static void TestMinFloat(ж<testing.T> t) {
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         {
             var z = builtin.min(tt.min, tt.max); if (!eq(z, tt.min)) {
                 t.Errorf("min(%v, %v) = %v, want %v", tt.min, tt.max, z, tt.min);
@@ -50,7 +50,7 @@ public static void TestMinFloat(ж<testing.T> t) {
             }
         }
     }
-    foreach (var (_, x) in all) {
+    foreach (var (_, x) in range(all)) {
         {
             var z = builtin.min(nan, x); if (!Δmath.IsNaN(z)) {
                 t.Errorf("min(%v, %v) = %v, want %v", nan, x, z, nan);
@@ -65,7 +65,7 @@ public static void TestMinFloat(ж<testing.T> t) {
 }
 
 public static void TestMaxFloat(ж<testing.T> t) {
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         {
             var z = builtin.max(tt.min, tt.max); if (!eq(z, tt.max)) {
                 t.Errorf("max(%v, %v) = %v, want %v", tt.min, tt.max, z, tt.max);
@@ -77,7 +77,7 @@ public static void TestMaxFloat(ж<testing.T> t) {
             }
         }
     }
-    foreach (var (_, x) in all) {
+    foreach (var (_, x) in range(all)) {
         {
             var z = builtin.max(nan, x); if (!Δmath.IsNaN(z)) {
                 t.Errorf("max(%v, %v) = %v, want %v", nan, x, z, nan);
@@ -100,8 +100,8 @@ internal static void testMinMax<T>(ж<testing.T> t, params Span<T> valsʗp)
 {
     var vals = valsʗp.slice();
 
-    foreach (var (i, x) in vals) {
-        foreach (var (_, y) in vals.slice(i + 1)) {
+    foreach (var (i, x) in range(vals)) {
+        foreach (var (_, y) in range(vals.slice(i + 1))) {
             if (!(x < y)) {
                 t.Fatalf("values out of order: !(%v < %v)", x, y);
             }
@@ -131,17 +131,9 @@ internal static void testMinMax<T>(ж<testing.T> t, params Span<T> valsʗp)
     }
 }
 
-public static void TestMinMaxInt(ж<testing.T> t) {
-    testMinMax<nint>(t, -7, 0, 9);
-}
-
-public static void TestMinMaxUint8(ж<testing.T> t) {
-    testMinMax<uint8>(t, 0, 1, 2, 4, 7);
-}
-
-public static void TestMinMaxString(ж<testing.T> t) {
-    testMinMax<@string>(t, (@string)"a", (@string)"b", (@string)"c");
-}
+public static void TestMinMaxInt(ж<testing.T> t) { testMinMax<nint>(t, -7, 0, 9); }
+public static void TestMinMaxUint8(ж<testing.T> t) { testMinMax<uint8>(t, 0, 1, 2, 4, 7); }
+public static void TestMinMaxString(ж<testing.T> t) { testMinMax<@string>(t, (@string)"a", (@string)"b", (@string)"c"); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string xxxˢ => ref xxxˢᵇ;
@@ -179,7 +171,7 @@ public static void BenchmarkMinFloat(ж<testing.B> Ꮡb) {
 
     float64 m = 0D;
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (_, f) in all) {
+        foreach (var (_, f) in range(all)) {
             m = builtin.min(m, f);
         }
     }
@@ -190,7 +182,7 @@ public static void BenchmarkMaxFloat(ж<testing.B> Ꮡb) {
 
     float64 m = 0D;
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (_, f) in all) {
+        foreach (var (_, f) in range(all)) {
             m = builtin.max(m, f);
         }
     }

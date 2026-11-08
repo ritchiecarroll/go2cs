@@ -57,7 +57,7 @@ using static global::go.net.rpc.jsonrpc_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/rpc/jsonrpc/all_test.go", "all_test.cs", "ACZGsoKmsoLmsoKUgqaC2qKCpqKCpqKCpoKCpqKCkoKUgoKAgqSCtKSigpKClIKCgIKkgrSkooKSgqaCgoKCgpSClIKUgsYADATGgpSCtoKCgoKUgqaCgoKClIK4goKCgpSCgpSCpoKClIK4goKUgoKCtAAKBKKClIK2goKCgpSCuIKCgpSAgsiCgoKUgILEpIKCktaigpKUgqSCgoKCtAAUBIKCAAQSgoCCpIKCyoKUgpSC+IKCkqiSgpQADRSCpoKmgoKCgpSmgqaC5oKmgqaC", "", "", "374=NewReader/1/1/5,NopCloser/1/1/7", "108:21,132:21,156:21,203:21,280:21,324:15,336:19,337:19,341:21,410:21")]
+[assembly: GoPositionMap("net/rpc/jsonrpc/all_test.go", "all_test.cs", "ACRGsoKmsoLmsoKUgqaC2qKCpqKCpqKCpoKCpqKCkoKUgoKClIK0pKKCkoKUgoKClIK0pKKCkoKmgoKCgoKUgpSClILGAAwExoKUgraCgoKClIKmgoKCgpSCuIKCgoKUgoKUgqaCgpSCuIKClIKCgrQACgSigpSCtoKCgoKUgriCgoKUgILIgoKClICCxKSCgpLWooKSlIKkgoKCgrQAFASCggAEEoKClIKCyoKUgpSC+IKCkqiSgpQADRSCpoKmgoKCgpSmgqaC5oKmgqaC", "", "", "368=NewReader/1/1/5,NopCloser/1/1/7", "106:21,128:21,150:21,197:21,274:21,318:15,330:19,331:19,335:21,402:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.rpc;

@@ -35,7 +35,7 @@ public static void FuzzDecode(ж<testing.F> Ꮡf) {
     if (err != nil) {
         Ꮡf.Fatalf("failed to read testdata directory: %s", err);
     }
-    foreach (var (_, de) in testdata) {
+    foreach (var (_, de) in range(testdata)) {
         if (de.IsDir() || !strings.HasSuffix(de.Name(), pngˢ)) {
             continue;
         }
@@ -64,7 +64,7 @@ public static void FuzzDecode(ж<testing.F> Ꮡf) {
             BestSpeed,
             BestCompression
         ]);
-        foreach (var (_, vᴛ1) in levels) {
+        foreach (var (_, vᴛ1) in range(levels)) {
             ref var l = ref heap(new global::go.image.png_package.CompressionLevel(), out var Ꮡl);
             l = vᴛ1;
 

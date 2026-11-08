@@ -151,11 +151,9 @@ public static void TestChildOnlyHeaders(ж<testing.T> t) {
         ["_body"] = ""
     };
     var replay = runCgiTest(t, h, getTestGoNoBody1Http10ˢ, expectedMap);
-    {
-        @string expected = xTestValueˢ;
-        @string got = replay.Header().Get(xTestHeaderˢ); if (got != expected) {
-            t.Errorf("got a X-Test-Header of %q; expected %q", got, expected);
-        }
+    @string expected = xTestValueˢ;
+    @string got = replay.Header().Get(xTestHeaderˢ); if (got != expected) {
+        t.Errorf("got a X-Test-Header of %q; expected %q", got, expected);
     }
 }
 
@@ -215,7 +213,7 @@ public static void TestChildContentType(ж<testing.T> t) {
             wantCT: "image/jpeg"
         )
     ]);
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestChildContentType_type(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -225,10 +223,8 @@ public static void TestChildContentType(ж<testing.T> t) {
             var expectedMap = new map<@string, @string>{["_body"] = ttʗ1.body};
             @string req = fmt.Sprintf("GET /test.go?exact-body=%s HTTP/1.0\nHost: example.com\n\n"u8, url.QueryEscape(ttʗ1.body));
             var replay = runCgiTest(tΔ1, hʗ1, req, expectedMap);
-            {
-                @string got = replay.Header().Get(contentTypeˢ2); if (got != ttʗ1.wantCT) {
-                    tΔ1.Errorf("got a Content-Type of %q; expected it to start with %q", got, ttʗ1.wantCT);
-                }
+            @string got = replay.Header().Get(contentTypeˢ2); if (got != ttʗ1.wantCT) {
+                tΔ1.Errorf("got a Content-Type of %q; expected it to start with %q", got, ttʗ1.wantCT);
             }
         });
     }
@@ -239,25 +235,17 @@ internal static ref readonly @string immediateDisconnectˢ => ref immediateDisco
 private static readonly @string immediateDisconnectˢᵇ = "/immediate-disconnect"u8;
 
 // golang.org/issue/7198
-public static void Test500WithNoHeaders(ж<testing.T> t) {
-    want500Test(t, immediateDisconnectˢ);
-}
-
+public static void Test500WithNoHeaders(ж<testing.T> t) { want500Test(t, immediateDisconnectˢ); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string noContentTypeˢ => ref noContentTypeˢᵇ;
 private static readonly @string noContentTypeˢᵇ = "/no-content-type"u8;
 
-public static void Test500WithNoContentType(ж<testing.T> t) {
-    want500Test(t, noContentTypeˢ);
-}
-
+public static void Test500WithNoContentType(ж<testing.T> t) { want500Test(t, noContentTypeˢ); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string emptyHeadersˢ => ref emptyHeadersˢᵇ;
 private static readonly @string emptyHeadersˢᵇ = "/empty-headers"u8;
 
-public static void Test500WithEmptyHeaders(ж<testing.T> t) {
-    want500Test(t, emptyHeadersˢ);
-}
+public static void Test500WithEmptyHeaders(ж<testing.T> t) { want500Test(t, emptyHeadersˢ); }
 
 internal static void want500Test(ж<testing.T> t, @string path) {
     var h = Ꮡ(new Handler(

@@ -9,8 +9,6 @@ using fs = go.io.fs_package;
 using Δos = os_package;
 using filepath = go.path.filepath_package;
 using Δtesting = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.io;
 using go.path;
 using static go.os_internal_test_package;
@@ -43,10 +41,8 @@ public static void TestErrIsExist(ж<Δtesting.T> t) {
             f2.Close();
             t.Fatal(openShouldHaveFailedˢ);
         }
-        {
-            @string s = checkErrorPredicate(osIsExistˢ, Δos.IsExist, err, fs.ErrExist); if (s != ""u8) {
-                t.Fatal(s);
-            }
+        @string s = checkErrorPredicate(osIsExistˢ, Δos.IsExist, err, fs.ErrExist); if (s != ""u8) {
+            t.Fatal(s);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -78,10 +74,8 @@ internal static @string testErrNotExist(ж<Δtesting.T> t, @string name) {
 
     err = Δos.Chdir(name);
     if (err == nil) {
-        {
-            var errΔ1 = Δos.Chdir(originalWD); if (errΔ1 != nil) {
-                t.Fatalf("Chdir should have failed, failed to restore original working directory: %v", errΔ1);
-            }
+        var errΔ1 = Δos.Chdir(originalWD); if (errΔ1 != nil) {
+            t.Fatalf("Chdir should have failed, failed to restore original working directory: %v", errΔ1);
         }
         return chdirShouldHaveFailedˢ;
     }
@@ -132,7 +126,7 @@ partial struct isExistTest {
     internal bool isnot;
 }
 
-internal static slice<isExistTest> isExistTests = slice<isExistTest>([
+internal static slice<isExistTest> isExistTests = [
     new(new fs.PathErrorжerror(Ꮡ(new fs.PathError(Err: fs.ErrInvalid))), false, false),
     new(new fs.PathErrorжerror(Ꮡ(new fs.PathError(Err: fs.ErrPermission))), false, false),
     new(new fs.PathErrorжerror(Ꮡ(new fs.PathError(Err: fs.ErrExist))), true, false),
@@ -146,10 +140,10 @@ internal static slice<isExistTest> isExistTests = slice<isExistTest>([
     new(new Δos.SyscallErrorжerror(Ꮡ(new Δos.SyscallError(Err: fs.ErrNotExist))), false, true),
     new(new Δos.SyscallErrorжerror(Ꮡ(new Δos.SyscallError(Err: fs.ErrExist))), true, false),
     new(default, false, false)
-]);
+];
 
 public static void TestIsExist(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in isExistTests) {
+    foreach (var (_, tt) in range(isExistTests)) {
         {
             var @is = Δos.IsExist(tt.err); if (@is != tt.@is) {
                 t.Errorf("os.IsExist(%T %v) = %v, want %v", tt.err, tt.err, @is, tt.@is);
@@ -178,14 +172,14 @@ partial struct isPermissionTest {
     internal bool want;
 }
 
-internal static slice<isPermissionTest> isPermissionTests = slice<isPermissionTest>([
+internal static slice<isPermissionTest> isPermissionTests = [
     new(default, false),
     new(new fs.PathErrorжerror(Ꮡ(new fs.PathError(Err: fs.ErrPermission))), true),
     new(new Δos.SyscallErrorжerror(Ꮡ(new Δos.SyscallError(Err: fs.ErrPermission))), true)
-]);
+];
 
 public static void TestIsPermission(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in isPermissionTests) {
+    foreach (var (_, tt) in range(isPermissionTests)) {
         {
             var got = Δos.IsPermission(tt.err); if (got != tt.want) {
                 t.Errorf("os.IsPermission(%#v) = %v; want %v", tt.err, got, tt.want);
@@ -252,9 +246,7 @@ partial struct myErrorIs {
     /*embed*/ internal error error;
 }
 
-internal static bool Is(this myErrorIs e, error target) {
-    return AreEqual(target, e.error);
-}
+internal static bool Is(this myErrorIs e, error target) { return AreEqual(target, e.error); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object osIsPermissionErrTrueˢ = (@string)"os.IsPermission(err) = true when err.Is(fs.ErrPermission), wanted false"u8;

@@ -77,7 +77,7 @@ internal static void testUvarint(ж<testing.T> t, uint64 x) {
     }
 }
 
-internal static slice<int64> tests = slice<int64>([
+internal static slice<int64> tests = [
     -9223372036854775808L,
     -9223372036854775807L,
     -1,
@@ -96,10 +96,10 @@ internal static slice<int64> tests = slice<int64>([
     256,
     257,
     9223372036854775807L
-]);
+];
 
 public static void TestVarint(ж<testing.T> t) {
-    foreach (var (_, x) in tests) {
+    foreach (var (_, x) in range(tests)) {
         testVarint(t, x);
         testVarint(t, -x);
     }
@@ -110,7 +110,7 @@ public static void TestVarint(ж<testing.T> t) {
 }
 
 public static void TestUvarint(ж<testing.T> t) {
-    foreach (var (_, x) in tests) {
+    foreach (var (_, x) in range(tests)) {
         testUvarint(t, (uint64)x);
     }
     for (var x = (uint64)0x7; x != 0; x <<= 1) {
@@ -153,7 +153,7 @@ public static void TestBufferTooBigWithOverflow(ж<testing.T> t) {
             name: "invalid: 1000 bytes",
             @in: func(slice<byte> () => {
                 var b = new slice<byte>(1000);
-                foreach (var i in range(b)) {
+                foreach (var i in range(len(b))) {
                     b[i] = 0xff;
                 }
                 b[999] = 0;
@@ -164,25 +164,25 @@ public static void TestBufferTooBigWithOverflow(ж<testing.T> t) {
         ),
         new(
             name: "valid: math.MaxUint64-40",
-            @in: slice<byte>([0xd7, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01]),
+            @in: [0xd7, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01],
             wantValue: math.MaxUint64 - 40,
             wantN: 10
         ),
         new(
             name: "invalid: with more than MaxVarintLen64 bytes",
-            @in: slice<byte>([0xd7, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01]),
+            @in: [0xd7, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01],
             wantN: -11,
             wantValue: 0
         ),
         new(
             name: "invalid: 10th byte",
-            @in: slice<byte>([0xd7, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f]),
+            @in: [0xd7, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f],
             wantN: -10,
             wantValue: 0
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestBufferTooBigWithOverflow_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -216,17 +216,15 @@ internal static void testOverflow(ж<testing.T> t, slice<byte> buf, uint64 x0, n
     if (x != x0 || !AreEqual(err, err0)) {
         t.Errorf("ReadUvarint(%v): got x = %d, err = %s; want %d, %s", buf, x, err, x0, err0);
     }
-    {
-        nint read = len - r.Len(); if (read > MaxVarintLen64) {
-            t.Errorf("ReadUvarint(%v): read more than MaxVarintLen64 bytes, got %d", buf, read);
-        }
+    nint read = len - r.Len(); if (read > MaxVarintLen64) {
+        t.Errorf("ReadUvarint(%v): read more than MaxVarintLen64 bytes, got %d", buf, read);
     }
 }
 
 public static void TestOverflow(ж<testing.T> t) {
-    testOverflow(t, slice<byte>([0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x2]), 0, -10, errOverflow);
-    testOverflow(t, slice<byte>([0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x1, 0, 0]), 0, -11, errOverflow);
-    testOverflow(t, slice<byte>([0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]), 18446744073709551615UL, -11, errOverflow); // 11 bytes, should overflow
+    testOverflow(t, [0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x2], 0, -10, errOverflow);
+    testOverflow(t, [0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x1, 0, 0], 0, -11, errOverflow);
+    testOverflow(t, [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF], 18446744073709551615UL, -11, errOverflow); // 11 bytes, should overflow
 }
 
 public static void TestNonCanonicalZero(ж<testing.T> t) {

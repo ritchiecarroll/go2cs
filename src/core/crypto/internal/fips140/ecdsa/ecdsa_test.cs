@@ -62,7 +62,7 @@ internal static void testRandomPoint<P>(ж<testing.T> t, ж<global::go.crypto.@i
 
     // A sequence of all ones will generate 2^N-1, which should be rejected.
     // (Unless, for example, we are masking too many bits.)
-    ref var r = ref heap<io.Reader>(io.MultiReader(new ecdsa_internal_test_package.bytes_ReaderжReader(bytes.NewReader(bytes.Repeat(slice<byte>([0xff]), 100))), rand.Reader), out var Ꮡr);
+    ref var r = ref heap<io.Reader>(io.MultiReader(new ecdsa_internal_test_package.bytes_ReaderжReader(bytes.NewReader(bytes.Repeat([0xff], 100))), rand.Reader), out var Ꮡr);
     {
         var (k, p, err) = randomPoint(ref (Ꮡc).DerefOrNull(), (slice<byte> b) => {
             var (_, errΔ1) = Ꮡr.ValueSlot.Read(b);
@@ -81,7 +81,7 @@ internal static void testRandomPoint<P>(ж<testing.T> t, ж<global::go.crypto.@i
     loopCount = 0;
 
     // A sequence of all zeroes will generate zero, which should be rejected.
-    r = io.MultiReader(new ecdsa_internal_test_package.bytes_ReaderжReader(bytes.NewReader(bytes.Repeat(slice<byte>([0]), 100))), rand.Reader);
+    r = io.MultiReader(new ecdsa_internal_test_package.bytes_ReaderжReader(bytes.NewReader(bytes.Repeat([0], 100))), rand.Reader);
     {
         var (k, p, err) = randomPoint(ref (Ꮡc).DerefOrNull(), (slice<byte> b) => {
             var (_, errΔ1) = Ꮡr.ValueSlot.Read(b);
@@ -142,7 +142,7 @@ internal static void testHashToNat<P>(ж<testing.T> t, ж<global::go.crypto.@int
     where P : global::go.crypto.@internal.fips140.ecdsa_package.Point<P>
 {
     for (nint l = 0; l < 600; l++) {
-        var h = bytes.Repeat(slice<byte>([0xff]), l);
+        var h = bytes.Repeat([0xff], l);
         hashToNat(ref (c).DerefOrNull(), bigmod.NewNat(), h);
     }
 }

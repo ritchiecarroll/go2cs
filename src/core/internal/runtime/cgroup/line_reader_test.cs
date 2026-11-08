@@ -20,7 +20,6 @@ partial struct nextLine {
 internal static nextLine complete(@string s) {
     return new nextLine(line: s);
 }
-
 internal static nextLine incomplete(@string s) {
     return new nextLine(line: s, incomplete: true);
 }
@@ -136,7 +135,7 @@ internal static slice<readerTestsᴛ1> readerTests = slice<readerTestsᴛ1>([
 ]);
 
 public static void TestLineReader(ж<testing.T> t) {
-    foreach (var (_, vᴛ1) in readerTests) {
+    foreach (var (_, vᴛ1) in range(readerTests)) {
         ref var tc = ref heap(new readerTestsᴛ1(), out var Ꮡtc);
         tc = vᴛ1;
 
@@ -165,7 +164,7 @@ public static void TestLineReader(ж<testing.T> t) {
                 tΔ1.Fatalf("lineReader got %d lines, want %d", len(got), len(tcʗ1.want));
             }
 
-            foreach (var i in range(got)) {
+            foreach (var i in range(len(got))) {
                 if (got[i].line != tcʗ1.want[i].line) {
                     tΔ1.Errorf("line %d got %q want %q", i, got[i].line, tcʗ1.want[i].line);
                 }
@@ -180,7 +179,7 @@ public static void TestLineReader(ж<testing.T> t) {
 public static void FuzzLineReader(ж<testing.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    foreach (var (_, tc) in readerTests) {
+    foreach (var (_, tc) in range(readerTests)) {
         f.Add(tc.contents);
     }
     Ꮡf.Fuzz((ж<testing.T> t, @string input) => {

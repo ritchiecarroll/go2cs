@@ -128,9 +128,7 @@ internal static ж<global::go.container.ring_package.Ring> makeN(nint n) {
     return r;
 }
 
-internal static nint sumN(nint n) {
-    return (n * n + n) / 2;
-}
+internal static nint sumN(nint n) { return (n * n + n) / 2; }
 
 public static void TestNew(ж<testing.T> t) {
     for (nint i = 0; i < 10; i++) {

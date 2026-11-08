@@ -59,7 +59,6 @@ internal static uint64 bytesHash(slice<byte> b) {
     h.Write(b);
     return h.Sum64();
 }
-
 internal static uint64 stringHash(@string s) {
     global::go.hash.maphash_package.Hash h = new();
     h.SetSeed(fixedSeed);
@@ -81,26 +80,21 @@ internal partial struct hashSet {
 internal static ж<hashSet> newHashSet() {
     return Ꮡ(new hashSet(list: new slice<uint64>(0, 1024)));
 }
-
 internal static void add(this ref hashSet s, uint64 h) {
     s.list = append(s.list, h);
 }
-
 internal static void addS(this ref hashSet s, @string x) {
     s.add(stringHash(x));
 }
-
 internal static void addB(this ref hashSet s, slice<byte> x) {
     s.add(bytesHash(x));
 }
-
 internal static void addS_seed(this ref hashSet s, @string x, global::go.hash.maphash_package.ΔSeed seed) {
     global::go.hash.maphash_package.Hash h = new();
     h.SetSeed(seed);
     h.WriteString(x);
     s.add(h.Sum64());
 }
-
 internal static void check(this ref hashSet s, ж<testing.T> t) {
     t.Helper();
     var list = s.list;
@@ -192,7 +186,6 @@ public static void TestSmhasherTwoNonzero(ж<testing.T> t) {
     }
     h.check(t);
 }
-
 internal static void twoNonZero(ж<hashSet> Ꮡh, nint n) {
     ref var h = ref Ꮡh.DerefOrNull();
 
@@ -272,7 +265,6 @@ public static void TestSmhasherSparse(ж<testing.T> t) {
     sparse(t, h, 256, 3);
     sparse(t, h, 2048, 2);
 }
-
 internal static void sparse(ж<testing.T> t, ж<hashSet> Ꮡh, nint n, nint k) {
     ref var h = ref Ꮡh.DerefOrNull();
 
@@ -308,13 +300,12 @@ public static void TestSmhasherPermutation(ж<testing.T> t) {
     }
     testenv.ParallelOn64Bit(t);
     var h = newHashSet();
-    permutation(t, h, slice<uint32>([0, 1, 2, 3, 4, 5, 6, 7]), 8);
-    permutation(t, h, slice<uint32>([0, (uint32)1 << 29, (uint32)2 << 29, (uint32)3 << 29, (uint32)4 << 29, (uint32)5 << 29, (uint32)6 << 29, (uint32)7 << 29]), 8);
-    permutation(t, h, slice<uint32>([0, 1]), 20);
-    permutation(t, h, slice<uint32>([0, (uint32)1 << 31]), 20);
-    permutation(t, h, slice<uint32>([0, 1, 2, 3, 4, 5, 6, 7, (uint32)1 << 29, (uint32)2 << 29, (uint32)3 << 29, (uint32)4 << 29, (uint32)5 << 29, (uint32)6 << 29, (uint32)7 << 29]), 6);
+    permutation(t, h, [0, 1, 2, 3, 4, 5, 6, 7], 8);
+    permutation(t, h, [0, (uint32)1 << 29, (uint32)2 << 29, (uint32)3 << 29, (uint32)4 << 29, (uint32)5 << 29, (uint32)6 << 29, (uint32)7 << 29], 8);
+    permutation(t, h, [0, 1], 20);
+    permutation(t, h, [0, (uint32)1 << 31], 20);
+    permutation(t, h, [0, 1, 2, 3, 4, 5, 6, 7, (uint32)1 << 29, (uint32)2 << 29, (uint32)3 << 29, (uint32)4 << 29, (uint32)5 << 29, (uint32)6 << 29, (uint32)7 << 29], 6);
 }
-
 internal static void permutation(ж<testing.T> t, ж<hashSet> Ꮡh, slice<uint32> s, nint n) {
     ref var h = ref Ꮡh.DerefOrNull();
 
@@ -323,7 +314,6 @@ internal static void permutation(ж<testing.T> t, ж<hashSet> Ꮡh, slice<uint32
     genPerm(Ꮡh, b, s, 0);
     h.check(t);
 }
-
 internal static void genPerm(ж<hashSet> Ꮡh, slice<byte> b, slice<uint32> s, nint n) {
     ref var h = ref Ꮡh.DerefOrNull();
 
@@ -331,7 +321,7 @@ internal static void genPerm(ж<hashSet> Ꮡh, slice<byte> b, slice<uint32> s, n
     if (n == len(b)) {
         return;
     }
-    foreach (var (_, v) in s) {
+    foreach (var (_, v) in range(s)) {
         b[n] = (byte)v;
         b[n + 1] = (byte)(v >> 8);
         b[n + 2] = (byte)(v >> 16);
@@ -356,23 +346,18 @@ internal partial struct bytesKey {
 internal static void clear(this ref bytesKey k) {
     builtin.clear(k.b);
 }
-
 internal static void random(this ref bytesKey k, ж<rand.Rand> r) {
     randBytes(r, k.b);
 }
-
 internal static nint bits(this ref bytesKey k) {
     return len(k.b) * 8;
 }
-
 internal static void flipBit(this ref bytesKey k, nint i) {
     k.b[(i >> 3)] ^= (byte)((byte)(((byte)1).Lsh((nuint)(i & 7))));
 }
-
 internal static uint64 hash(this ref bytesKey k) {
     return bytesHash(k.b);
 }
-
 internal static @string name(this ref bytesKey k) {
     return fmt.Sprintf("bytes%d"u8, len(k.b));
 }
@@ -393,7 +378,6 @@ public static void TestSmhasherAvalanche(ж<testing.T> t) {
     avalancheTest1(t, new maphash_internal_test_package.bytesKeyжkey(Ꮡ(new bytesKey(new slice<byte>(32)))));
     avalancheTest1(t, new maphash_internal_test_package.bytesKeyжkey(Ꮡ(new bytesKey(new slice<byte>(200)))));
 }
-
 internal static void avalancheTest1(ж<testing.T> t, key k) {
     t.Helper();
     UntypedInt REP = 100000;
@@ -454,7 +438,6 @@ public static void TestSmhasherWindowed(ж<testing.T> t) {
     t.Parallel();
     windowed(t, new maphash_internal_test_package.bytesKeyжkey(Ꮡ(new bytesKey(new slice<byte>(128)))));
 }
-
 internal static void windowed(ж<testing.T> t, key k) {
     if (runtime.GOARCH == "wasm"u8) {
         t.Skip(tooSlowOnWasmˢ);
@@ -498,7 +481,6 @@ public static void TestSmhasherText(ж<testing.T> t) {
     text(t, h, fooBarˢ, ""u8);
     text(t, h, ""u8, fooBarˢ);
 }
-
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string Sᶜ => ref Sᶜᵇ;
 private static readonly @string Sᶜᵇ = "ABCDEFGHIJKLMNOPQRSTabcdefghijklmnopqrst0123456789"u8;

@@ -5,8 +5,6 @@ namespace go;
 
 using Δsync = sync_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 
 partial class testing_test_package {
 
@@ -129,10 +127,8 @@ internal static void recoverHelper(ж<testing.T> t, @string msg) {
         t.Helper();
         defer(() => {
             t.Helper();
-            {
-                var err = recover(); if (err != nil) {
-                    t.Errorf("recover %s", err);
-                }
+            var err = recover(); if (err != nil) {
+                t.Errorf("recover %s", err);
             }
         }, ref ᒐ);
         doPanic(t, msg);

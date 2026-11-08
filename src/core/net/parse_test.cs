@@ -49,10 +49,8 @@ public static void TestReadLine(ж<testing.T> t) {
         nint byteno = 0;
         for (;;) {
             var (bline, berr) = br.ReadString((byte)'\n');
-            {
-                nint n = len(bline); if (n > 0) {
-                    bline = bline.slice(0, n - 1);
-                }
+            nint n = len(bline); if (n > 0) {
+                bline = bline.slice(0, n - 1);
             }
             var (line, ok) = Δfile.readLine();
             if ((berr != nil) != !ok || bline != line) {
@@ -77,14 +75,14 @@ internal partial struct TestDtoi_type /*dyn*/ {
 }
 
 public static void TestDtoi(ж<testing.T> t) {
-    foreach (var (_, tt) in slice<TestDtoi_type>([
+    foreach (var (_, tt) in range(slice<TestDtoi_type>([
         new("", 0, 0, false),
         new("0", 0, 1, true),
         new("65536", 65536, 5, true),
         new("123456789", big, 8, false),
         new("-0", 0, 0, false),
         new("-1234", 0, 0, false)
-    ])) {
+    ]))) {
         var (n, i, ok) = dtoi(tt.@in);
         if (n != tt.@out || i != tt.off || ok != tt.ok) {
             t.Errorf("got %d, %d, %v; want %d, %d, %v", n, i, ok, tt.@out, tt.off, tt.ok);

@@ -227,7 +227,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   src/core/unicode/utf8/utf8.cs:20#83c559 + src/core/archive/zip/struct.cs:33#d3abd8 ·
   src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:17#ee46fb + src/core/internal/strconv/atoi.cs:135#4606f0 ·
   src/core/golib/uintptr.cs:39#d446ed · src/core/bufio/bufio.csproj:170#07f377 (from src/go2cs/csproj-template.xml:155#07f377) ·
-  src/core/encoding/gob/codec_test.cs:1206#1265b9 ·
+  src/core/encoding/gob/codec_test.cs:1197#1265b9 ·
   src/core/golib/NilType.cs + src/tests/Behavioral/LambdaFunctions/LambdaFunctions.cs.target:52#dd67ea ·
   src/tests/Behavioral/SliceAliasing/main.cs.target:12#ee5567 + src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:22#385172 · src/tests/Behavioral/MapCommaOk/MapCommaOk.csproj:143#9a82dc ·
   src/tests/Behavioral/NamedReturnDefer/main.cs.target:41#f6bf33 · src/tests/Behavioral/ShadowedCompoundAssign/main.cs.target:10#434a84 ·
@@ -1466,7 +1466,7 @@ func TestExt(t *testing.T) {
 	}
 }
 ```
-<!-- source: src/core/path/path_test.cs:4-277 -->
+<!-- source: src/core/path/path_test.cs:4-265 -->
 ```csharp
 namespace go;
 
@@ -1481,20 +1481,18 @@ partial struct ExtTest {
     internal @string path, ext;
 }
 
-internal static slice<ExtTest> exttests = slice<ExtTest>([
+internal static slice<ExtTest> exttests = [
     new("path.go", ".go"),
     new("path.pb.go", ".go"),
     new("a.dir/b", ""),
     new("a.dir/b.go", ".go"),
     new("a.dir/", "")
-]);
+];
 
 public static void TestExt(ж<testing.T> t) {
-    foreach (var (_, test) in exttests) {
-        {
-            @string x = Ext(test.path); if (x != test.ext) {
-                t.Errorf("Ext(%q) = %q, want %q", test.path, x, test.ext);
-            }
+    foreach (var (_, test) in range(exttests)) {
+        @string x = Ext(test.path); if (x != test.ext) {
+            t.Errorf("Ext(%q) = %q, want %q", test.path, x, test.ext);
         }
     }
 }
@@ -1512,10 +1510,13 @@ How to read the C#:
 - A Go struct is `partial` so a [source generator](#source-generators) can add Go
   members to it, such as the constructor that each table entry calls, `new("path.go"u8, ".go"u8)`
   ([Struct Types](#struct-types)).
-- `.slice()` turns the C# array into a Go slice ([Slices and Arrays](#slices-and-arrays)).
-- `range` becomes `foreach`. A slice enumerates as `(index, value)` pairs, so `for _, test := range` becomes
-  `var (_, test)`, with `_` discarding the index as in Go ([Loops, Range and Labels](#loops-range-and-labels)).
-- The init clause of `if x := Ext(test.path); …` gets its own braces, so `x` stays scoped to the `if`. The
+- The table is a bare collection expression, `[ … ]`, which C# turns into the Go slice the declared type names
+  ([Slices and Arrays](#slices-and-arrays)).
+- `range` becomes `foreach` over `range(exttests)`. A slice enumerates as `(index, value)` pairs, so
+  `for _, test := range` becomes `var (_, test)`, with `_` discarding the index as in Go
+  ([Loops, Range and Labels](#loops-range-and-labels)).
+- The init clause of `if x := Ext(test.path); …` becomes a statement of the loop body, `@string x = …; if (…)`,
+  because nothing else in that block names `x`; where something does, the init keeps a block of its own. The
   declaration and the `if` share one line on purpose, to mirror Go's layout.
 - `t.Errorf` becomes `Ꮡt.Errorf`. Go methods become C# extension methods, and `Errorf` has one whose `this`
   is `ж<testing.T>`. So the method is called through the box, as Go calls it through the pointer

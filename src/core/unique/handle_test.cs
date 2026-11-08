@@ -20,8 +20,6 @@ using testing = testing_package;
 using time = time_package;
 using @unsafe = unsafe_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using math.rand;
 using static go.unique_package;
 using ꓸꓸꓸany = Span<any>;
@@ -31,27 +29,21 @@ partial class unique_internal_test_package {
 // Set up special types. Because the internal maps are sharded by type,
 // this will ensure that we're not overlapping with other tests.
 internal partial struct testString /*@string*/;
-
 internal partial struct testIntArray /*[4]nint*/;
 
 internal partial struct testStringArray /*[3]@string*/;
-
 internal partial struct testStringStruct {
     internal @string a;
 }
-
 internal partial struct testStringStructArrayStruct {
     internal array<testStringStruct> s = new(2);
 }
-
 internal partial struct testStruct {
     internal float64 z;
     internal @string b;
 }
-
 internal partial struct testZeroSize {
 }
-
 internal partial struct testNestedHandle {
     internal global::go.unique_package.Handle<testNestedHandle> next;
     internal array<nint> arr = new(6);
@@ -175,7 +167,7 @@ public static void TestHandleUnsafeString(ж<testing.T> t) {
     }
     slice<byte> buf = default;
     slice<global::go.unique_package.Handle<@string>> handles = default;
-    foreach (var (_, s) in testData) {
+    foreach (var (_, s) in range(testData)) {
         if (len(buf) < len(s)) {
             buf = new slice<byte>(len(s) * 2);
         }
@@ -183,7 +175,7 @@ public static void TestHandleUnsafeString(ж<testing.T> t) {
         @string sbuf = @unsafe.String(Ꮡ(buf, 0), len(s));
         handles = append(handlesᴷ, handles, Make<@string>(sbuf));
     }
-    foreach (var (i, s) in testData) {
+    foreach (var (i, s) in range(testData)) {
         var h = Make<@string>(s);
         if (handles[i].Value() != h.Value()) {
             t.Fatal(unsafeStringImproperlyˢ);
@@ -324,7 +316,7 @@ public static void TestMakeAllocs(ж<testing.T> t) {
         })
     ]);
 
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var allocs = testing.AllocsPerRun(100, tt.f);
         if (allocs != (float64)tt.allocs) {
             errorf("%s: got %v allocs, want %v", tt.name, allocs, tt.allocs);
@@ -336,7 +328,7 @@ public static void TestMakeAllocs(ж<testing.T> t) {
 internal static partial slice<byte> newHeapBytes() {
     const nint N = 100;
     var b = new slice<byte>(N);
-    foreach (var i in range(b)) {
+    foreach (var i in range(len(b))) {
         b[i] = (byte)i;
     }
     return b;

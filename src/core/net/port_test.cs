@@ -13,7 +13,7 @@ partial struct parsePortTestsᴛ1 /*dyn*/ {
     internal nint port;
     internal bool needsLookup;
 }
-internal static slice<parsePortTestsᴛ1> parsePortTests = slice<parsePortTestsᴛ1>([
+internal static slice<parsePortTestsᴛ1> parsePortTests = [
     new("", 0, false),
 
     // Decimal number literals
@@ -43,15 +43,13 @@ internal static slice<parsePortTestsᴛ1> parsePortTests = slice<parsePortTests�
     new("123456789badport", 0, true),
     new("-2147483649badport", 0, true),
     new("2147483649badport", 0, true)
-]);
+];
 
 public static void TestParsePort(ж<testing.T> t) {
     // The following test cases are cribbed from the strconv
-    foreach (var (_, tt) in parsePortTests) {
-        {
-            var (port, needsLookup) = parsePort(tt.service); if (port != tt.port || needsLookup != tt.needsLookup) {
-                t.Errorf("parsePort(%q) = %d, %t; want %d, %t", tt.service, port, needsLookup, tt.port, tt.needsLookup);
-            }
+    foreach (var (_, tt) in range(parsePortTests)) {
+        var (port, needsLookup) = parsePort(tt.service); if (port != tt.port || needsLookup != tt.needsLookup) {
+            t.Errorf("parsePort(%q) = %d, %t; want %d, %t", tt.service, port, needsLookup, tt.port, tt.needsLookup);
         }
     }
 }

@@ -26,7 +26,6 @@ using static go.math.big_package;
 partial class big_internal_test_package {
 
 internal static ж<bool> calibrate = flag.Bool("calibrate", false, "run calibration test");
-
 internal static sync.Once calibrateOnce;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -180,9 +179,9 @@ internal static void computeThreshold(ж<testing.T> t, @string name, Action<nint
 
         // Track minimum time observed for each size, threshold pair.
         var times = new slice<slice<float64>>(len(sizes));
-        foreach (var i in range(sizes)) {
+        foreach (var i in range(len(sizes))) {
             times[i] = new slice<float64>(len(thresholds));
-            foreach (var j in range(thresholds)) {
+            foreach (var j in range(len(thresholds))) {
                 times[i][j] = math.Inf(+1);
             }
         }
@@ -196,12 +195,12 @@ internal static void computeThreshold(ж<testing.T> t, @string name, Action<nint
         const nint Stable = 20;
         const nint Converged = 200;
 
-        foreach (var (i, size) in sizes) {
+        foreach (var (i, size) in range(sizes)) {
             var b = bench(size);
             nint same = 0;
             foreach (var _ᴛ1 in range(MaxRounds)) {
                 var better = false;
-                foreach (var (j, threshold) in thresholds) {
+                foreach (var (j, threshold) in range(thresholds)) {
                     // No point if threshold is far beyond size
                     if (false && threshold > size + 2 * sizeStep) {
                         continue;
@@ -237,10 +236,8 @@ internal static void computeThreshold(ж<testing.T> t, @string name, Action<nint
                     times[i][j] = tmin;
                 }
                 if (!better) {
-                    {
-                        same++; if (same >= Converged) {
-                            break;
-                        }
+                    same++; if (same >= Converged) {
+                        break;
                     }
                 }
             }
@@ -251,10 +248,10 @@ internal static void computeThreshold(ж<testing.T> t, @string name, Action<nint
         // For each size, normalize timings by the minimum achieved for that size.
         fmt.Printf("%s\n"u8, csv(sizeThresholdˢ, thresholds));
         var norms = new slice<slice<float64>>(len(sizes));
-        foreach (var (i, timesΔ1) in times) {
+        foreach (var (i, timesΔ1) in range(times)) {
             var m = min(1e100D, slices.Min<slice<float64>, float64>(timesΔ1)); // make finite so divide preserves inf values
             norms[i] = new slice<float64>(len(timesΔ1));
-            foreach (var (j, d) in timesΔ1) {
+            foreach (var (j, d) in range(timesΔ1)) {
                 norms[i][j] = d / m;
             }
             fmt.Printf("%s\n"u8, csv(fmt.Sprint(sizes[i]), norms[i]));
@@ -262,15 +259,13 @@ internal static void computeThreshold(ж<testing.T> t, @string name, Action<nint
 
         // For each threshold, compute geomean of normalized timings across all sizes.
         var geomeans = new slice<float64>(len(thresholds));
-        foreach (var j in range(thresholds)) {
+        foreach (var j in range(len(thresholds))) {
             var p = 1.0D;
             nint n = 0;
-            foreach (var i in range(sizes)) {
-                {
-                    var v = norms[i][j]; if (!math.IsInf(v, +1)) {
-                        p *= v;
-                        n++;
-                    }
+            foreach (var i in range(len(sizes))) {
+                var v = norms[i][j]; if (!math.IsInf(v, +1)) {
+                    p *= v;
+                    n++;
                 }
             }
             if (n == 0) {
@@ -287,7 +282,7 @@ internal static void computeThreshold(ж<testing.T> t, @string name, Action<nint
         nint best = default;
         nint hi5 = default;
         nint hi10 = default;
-        foreach (var (i, g) in geomeans) {
+        foreach (var (i, g) in range(geomeans)) {
             if (g < geomeans[best]) {
                 best = i;
             }
@@ -328,7 +323,7 @@ internal static @string csv<T>(@string name, slice<T> values)
     var lineᴷ = new stackAppend<@string>();
 
     var line = slice<@string>([name]);
-    foreach (var (_, v) in values) {
+    foreach (var (_, v) in range(values)) {
         if (math.IsInf(ConvertToFloat64<T>(v), +1)) {
             line = append(lineᴷ, line, ""u8);
         } else {

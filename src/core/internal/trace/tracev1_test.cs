@@ -30,7 +30,7 @@ public static void TestTraceV1(ж<testing.T> t) {
         t.Fatalf("failed to glob for tests: %s", err);
     }
     bool testedUserRegions = default;
-    foreach (var (_, p) in traces) {
+    foreach (var (_, p) in range(traces)) {
         var (testName, errΔ1) = filepath.Rel(internalTracev1Testdataˢ2, p);
         if (errΔ1 != nil) {
             t.Fatalf("failed to relativize testdata path: %s", errΔ1);
@@ -60,10 +60,8 @@ public static void TestTraceV1(ж<testing.T> t) {
                         }
                         tΔ1.Fatalf("couldn't read converted event: %s", errΔ3);
                     }
-                    {
-                        var errΔ4 = v.Event(ev); if (errΔ4 != nil) {
-                            tΔ1.Fatalf("converted event did not validate; event: \n%s\nerror: %s", ev, errΔ4);
-                        }
+                    var errΔ4 = v.Event(ev); if (errΔ4 != nil) {
+                        tΔ1.Fatalf("converted event did not validate; event: \n%s\nerror: %s", ev, errΔ4);
                     }
 
                     if (testName == "user_task_region_1_21_good"u8) {
@@ -81,10 +79,8 @@ public static void TestTraceV1(ж<testing.T> t) {
                         // strings.
                         switch (ev.Kind()) {
                         case var ᴛ when ᴛ == Δtrace.EventRegionBegin || ᴛ == Δtrace.EventRegionEnd: {
-                            {
-                                var (_, ok) = validRegions[ev.Region().Type, ꟷ]; if (!ok) {
-                                    tΔ1.Fatalf("converted event has unexpected region type:\n%s", ev);
-                                }
+                            var (_, ok) = validRegions[ev.Region().Type, ꟷ]; if (!ok) {
+                                tΔ1.Fatalf("converted event has unexpected region type:\n%s", ev);
                             }
                             break;
                         }

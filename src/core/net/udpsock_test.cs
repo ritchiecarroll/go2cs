@@ -58,15 +58,11 @@ public static void BenchmarkUDP6LinkLocalUnicast(ж<testing.B> Ꮡb) {
 
         array<byte> buf = new(1);
         for (nint i = 0; i < b.N; i++) {
-            {
-                var (_, errΔ1) = c1.WriteTo(buf[..], c2.LocalAddr()); if (errΔ1 != nil) {
-                    Ꮡb.Fatal(errΔ1);
-                }
+            var (_, errΔ1) = c1.WriteTo(buf[..], c2.LocalAddr()); if (errΔ1 != nil) {
+                Ꮡb.Fatal(errΔ1);
             }
-            {
-                var (_, _, errΔ2) = c2.ReadFrom(buf[..]); if (errΔ2 != nil) {
-                    Ꮡb.Fatal(errΔ2);
-                }
+            var (_, _, errΔ2) = c2.ReadFrom(buf[..]); if (errΔ2 != nil) {
+                Ꮡb.Fatal(errΔ2);
             }
         }
     }
@@ -121,7 +117,7 @@ public static void TestResolveUDPAddr(ж<testing.T> t) {
         }, ref ᒐ);
         testHookLookupIP = lookupLocalhost;
 
-        foreach (var (_, tt) in resolveUDPAddrTests) {
+        foreach (var (_, tt) in range(resolveUDPAddrTests)) {
             var (addr, err) = ResolveUDPAddr(tt.network, tt.litAddrOrName);
             if (!reflect.DeepEqual(addr.OrTypedNil(), tt.addr.OrTypedNil()) || !reflect.DeepEqual(err, tt.err)) {
                 t.Errorf("ResolveUDPAddr(%q, %q) = %#v, %v, want %#v, %v", tt.network, tt.litAddrOrName, addr.OrTypedNil(), err, tt.addr.OrTypedNil(), tt.err);
@@ -185,10 +181,8 @@ internal static void testWriteToConn(ж<testing.T> t, @string raddr) {
 
         void assertErrWriteToConnected(ж<testing.T> tΔ1, error errΔ1) {
             tΔ1.Helper();
-            {
-                var (e, ok) = errΔ1._<ж<global::go.net_package.OpError>>(ᐧ); if (!ok || !AreEqual(e.Err, ErrWriteToConnected)) {
-                    tΔ1.Errorf("got %v; want ErrWriteToConnected", errΔ1);
-                }
+            var (e, ok) = errΔ1._<ж<global::go.net_package.OpError>>(ᐧ); if (!ok || !AreEqual(e.Err, ErrWriteToConnected)) {
+                tΔ1.Errorf("got %v; want ErrWriteToConnected", errΔ1);
             }
         }
 
@@ -278,7 +272,7 @@ internal static void initᴛudpConnLocalNameTests() { udpConnLocalNameTests = sl
 public static void TestUDPConnLocalName(ж<testing.T> t) {
     testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(t));
 
-    foreach (var (_, vᴛ1) in udpConnLocalNameTests) {
+    foreach (var (_, vᴛ1) in range(udpConnLocalNameTests)) {
         ref var tt = ref heap(new udpConnLocalNameTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -297,10 +291,8 @@ public static void TestUDPConnLocalName(ж<testing.T> t) {
                 var cʗ1 = c;
                 defer(() => cʗ1.of(global::go.net_package.UDPConn.Ꮡconn).Close(), ref ᒐ);
                 var la = c.of(global::go.net_package.UDPConn.Ꮡconn).LocalAddr();
-                {
-                    var (a, ok) = la._<ж<global::go.net_package.UDPAddr>>(ᐧ); if (!ok || a.Port == 0) {
-                        tΔ1.Fatalf("got %v; expected a proper address with non-zero port number", la);
-                    }
+                var (a, ok) = la._<ж<global::go.net_package.UDPAddr>>(ᐧ); if (!ok || a.Port == 0) {
+                    tΔ1.Fatalf("got %v; expected a proper address with non-zero port number", la);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -321,7 +313,7 @@ public static void TestUDPConnLocalAndRemoteNames(ж<testing.T> t) {
             t.Skipf("skipping: udp not available");
         }
 
-        foreach (var (_, laddr) in slice<@string>(["", "127.0.0.1:0"])) {
+        foreach (var (_, laddr) in range(slice<@string>(["", "127.0.0.1:0"]))) {
             var (c1, err) = ListenPacket(udpˢ, "127.0.0.1:0");
             if (err != nil) {
                 t.Fatal(err);
@@ -332,10 +324,8 @@ public static void TestUDPConnLocalAndRemoteNames(ж<testing.T> t) {
             ж<global::go.net_package.UDPAddr> la = default;
             if (laddr != ""u8) {
                 error errΔ1 = default;
-                {
-                    (la, errΔ1) = ResolveUDPAddr(udpˢ, laddr); if (errΔ1 != nil) {
-                        t.Fatal(errΔ1);
-                    }
+                (la, errΔ1) = ResolveUDPAddr(udpˢ, laddr); if (errΔ1 != nil) {
+                    t.Fatal(errΔ1);
                 }
             }
             (var c2, err) = DialUDP(udpˢ, la, c1.LocalAddr()._<ж<global::go.net_package.UDPAddr>>());
@@ -351,11 +341,9 @@ public static void TestUDPConnLocalAndRemoteNames(ж<testing.T> t) {
                 new(c2.of(global::go.net_package.UDPConn.Ꮡconn).LocalAddr(), true),
                 new(c2.of(global::go.net_package.UDPConn.Ꮡconn).RemoteAddr(), true)
             }.array();
-            foreach (var (_, ca) in connAddrs.ΔRangeSnapshot()) {
-                {
-                    var (a, ok) = ca.got._<ж<global::go.net_package.UDPAddr>>(ᐧ); if (ok != ca.ok || ok && a.Port == 0) {
-                        t.Fatalf("got %v; expected a proper address with non-zero port number", ca.got);
-                    }
+            foreach (var (_, ca) in range(connAddrs.ΔRangeSnapshot())) {
+                var (a, ok) = ca.got._<ж<global::go.net_package.UDPAddr>>(ᐧ); if (ok != ca.ok || ok && a.Port == 0) {
+                    t.Fatalf("got %v; expected a proper address with non-zero port number", ca.got);
                 }
             }
         }
@@ -373,7 +361,7 @@ public static void TestIPv6LinkLocalUnicastUDP(ж<testing.T> t) {
             t.Skip(iPv6IsNotSupportedˢ);
         }
 
-        foreach (var (i, tt) in ipv6LinkLocalUnicastUDPTests) {
+        foreach (var (i, tt) in range(ipv6LinkLocalUnicastUDPTests)) {
             var (c1, err) = ListenPacket(tt.network, tt.address);
             if (err != nil) {
                 // It might return "LookupHost returned no
@@ -389,10 +377,8 @@ public static void TestIPv6LinkLocalUnicastUDP(ж<testing.T> t) {
             var handler = (ж<localPacketServer> lsΔ1, global::go.net_package.PacketConn c) => {
                 packetTransponder(c, chʗ1.AsSendOnly());
             };
-            {
-                var errΔ1 = ls.buildup(handler); if (errΔ1 != nil) {
-                    t.Fatal(errΔ1);
-                }
+            var errΔ1 = ls.buildup(handler); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
             {
                 var (la, ok) = c1.LocalAddr()._<ж<global::go.net_package.UDPAddr>>(ᐧ); if (!ok || !tt.nameLookup && la.Zone == ""u8) {
@@ -417,16 +403,12 @@ public static void TestIPv6LinkLocalUnicastUDP(ж<testing.T> t) {
                 }
             }
 
-            {
-                var (_, errΔ2) = c2.Write(slice<byte>("UDP OVER IPV6 LINKLOCAL TEST"u8)); if (errΔ2 != nil) {
-                    t.Fatal(errΔ2);
-                }
+            var (_, errΔ2) = c2.Write(slice<byte>("UDP OVER IPV6 LINKLOCAL TEST"u8)); if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
             var b = new slice<byte>(32);
-            {
-                var (_, errΔ3) = c2.Read(b); if (errΔ3 != nil) {
-                    t.Fatal(errΔ3);
-                }
+            var (_, errΔ3) = c2.Read(b); if (errΔ3 != nil) {
+                t.Fatal(errΔ3);
             }
 
             foreach (var errΔ4 in ch) {
@@ -465,7 +447,7 @@ public static void TestUDPZeroBytePayload(ж<testing.T> t) {
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
 
-        foreach (var (_, genericRead) in slice<bool>([false, true])) {
+        foreach (var (_, genericRead) in range(slice<bool>([false, true]))) {
             var (n, err) = c.WriteTo(default, c.LocalAddr());
             if (err != nil) {
                 t.Fatal(err);
@@ -510,7 +492,7 @@ public static void TestUDPZeroByteBuffer(ж<testing.T> t) {
         defer(() => cʗ1.Close(), ref ᒐ);
 
         var b = slice<byte>("UDP ZERO BYTE BUFFER TEST"u8);
-        foreach (var (_, genericRead) in slice<bool>([false, true])) {
+        foreach (var (_, genericRead) in range(slice<bool>([false, true]))) {
             var (n, err) = c.WriteTo(b, c.LocalAddr());
             if (err != nil) {
                 t.Fatal(err);
@@ -529,10 +511,8 @@ public static void TestUDPZeroByteBuffer(ж<testing.T> t) {
                 break;
             }
             default: { // Read may timeout, it depends on the platform
-                {
-                    var (nerr, ok) = err._<ΔError>(ᐧ); if ((!ok || !nerr.Timeout()) && Δruntime.GOOS != "windows"u8) { // Windows returns WSAEMSGSIZE
-                        t.Fatal(err);
-                    }
+                var (nerr, ok) = err._<ΔError>(ᐧ); if ((!ok || !nerr.Timeout()) && Δruntime.GOOS != "windows"u8) { // Windows returns WSAEMSGSIZE
+                    t.Fatal(err);
                 }
                 break;
             }}
@@ -567,7 +547,7 @@ public static void TestUDPReadSizeError(ж<testing.T> t) {
         defer(() => c2ʗ1.Close(), ref ᒐ);
 
         var b1 = slice<byte>("READ SIZE ERROR TEST"u8);
-        foreach (var (_, genericRead) in slice<bool>([false, true])) {
+        foreach (var (_, genericRead) in range(slice<bool>([false, true]))) {
             var (n, errΔ1) = c2.Write(b1);
             if (errΔ1 != nil) {
                 t.Fatal(errΔ1);
@@ -963,22 +943,16 @@ public static void TestIPv4WriteMsgUDPAddrPortTargetAddrIPVersion(ж<testing.T> 
         var daddr6 = netip.AddrPortFrom(netip.MustParseAddr("::1"), 12345);
         var buf = new slice<byte>(8);
 
-        {
-            (_, _, err) = conn.WriteMsgUDPAddrPort(buf, default, daddr4); if (err != nil) {
-                t.Errorf("conn.WriteMsgUDPAddrPort(buf, nil, daddr4) failed: %v", err);
-            }
+        (_, _, err) = conn.WriteMsgUDPAddrPort(buf, default, daddr4); if (err != nil) {
+            t.Errorf("conn.WriteMsgUDPAddrPort(buf, nil, daddr4) failed: %v", err);
         }
 
-        {
-            (_, _, err) = conn.WriteMsgUDPAddrPort(buf, default, daddr4in6); if (err != nil) {
-                t.Errorf("conn.WriteMsgUDPAddrPort(buf, nil, daddr4in6) failed: %v", err);
-            }
+        (_, _, err) = conn.WriteMsgUDPAddrPort(buf, default, daddr4in6); if (err != nil) {
+            t.Errorf("conn.WriteMsgUDPAddrPort(buf, nil, daddr4in6) failed: %v", err);
         }
 
-        {
-            (_, _, err) = conn.WriteMsgUDPAddrPort(buf, default, daddr6); if (err == nil) {
-                t.Errorf("conn.WriteMsgUDPAddrPort(buf, nil, daddr6) should have failed, but got no error");
-            }
+        (_, _, err) = conn.WriteMsgUDPAddrPort(buf, default, daddr6); if (err == nil) {
+            t.Errorf("conn.WriteMsgUDPAddrPort(buf, nil, daddr6) should have failed, but got no error");
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

@@ -9,8 +9,6 @@ using maps = go.@internal.runtime.maps_package;
 using math = go.math_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go;
 using go.@internal;
 using go.@internal.runtime;
@@ -533,10 +531,8 @@ internal static void testTableIterationGrowDuplicate(ж<testing.T> t, nint grow)
         if (elemΔ1 != 256 + (uint64)keyΔ1) {
             t.Errorf("iteration got key %d elem %d want elem %d", keyΔ1, elemΔ1, 256 + (uint64)keyΔ1);
         }
-        {
-            var (_, ok) = got[keyΔ1, ꟷ]; if (ok) {
-                t.Errorf("iteration got key %d more than once", keyΔ1);
-            }
+        var (_, ok) = got[keyΔ1, ꟷ]; if (ok) {
+            t.Errorf("iteration got key %d more than once", keyΔ1);
         }
         got[keyΔ1] = elemΔ1;
 
@@ -614,7 +610,7 @@ public static void TestAlignUpPow2(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, tc) in tests) {
+    foreach (var (_, tc) in range(tests)) {
         var (got, overflow) = maps_internal_test_package.AlignUpPow2(tc.@in);
         if (got != tc.want) {
             t.Errorf("alignUpPow2(%d) got %d, want %d", tc.@in, got, tc.want);
@@ -729,7 +725,6 @@ public static void TestMapDeleteClear(ж<testing.T> t) {
 }
 
 internal static bool alwaysFalse;
-
 internal static any escapeSink;
 
 internal static T escape<T>(T x) {
@@ -897,7 +892,7 @@ public static void TestTableGroupCount(ж<testing.T> t) {
     var testCasesʗ1 = testCases;
     var testMapʗ1 = testMap;
     t.Run(mapliteralˢ, (ж<testing.T> tΔ2) => {
-        foreach (var (_, vᴛ1) in testCasesʗ1) {
+        foreach (var (_, vᴛ1) in range(testCasesʗ1)) {
             ref var tc = ref heap(new TestTableGroupCount_type(), out var Ꮡtc);
             tc = vᴛ1;
 
@@ -916,7 +911,7 @@ public static void TestTableGroupCount(ж<testing.T> t) {
     var testCasesʗ2 = testCases;
     var testMapʗ4 = testMap;
     t.Run(nohintˢ, (ж<testing.T> tΔ5) => {
-        foreach (var (_, vᴛ2) in testCasesʗ2) {
+        foreach (var (_, vᴛ2) in range(testCasesʗ2)) {
             ref var tc = ref heap(new TestTableGroupCount_type(), out var Ꮡtc);
             tc = vᴛ2;
 
@@ -935,7 +930,7 @@ public static void TestTableGroupCount(ж<testing.T> t) {
     var testCasesʗ3 = testCases;
     var testMapʗ7 = testMap;
     t.Run(makemapˢ, (ж<testing.T> tΔ8) => {
-        foreach (var (_, vᴛ3) in testCasesʗ3) {
+        foreach (var (_, vᴛ3) in range(testCasesʗ3)) {
             ref var tc = ref heap(new TestTableGroupCount_type(), out var Ꮡtc);
             tc = vᴛ3;
 
@@ -954,7 +949,7 @@ public static void TestTableGroupCount(ж<testing.T> t) {
     var testCasesʗ4 = testCases;
     var testMapʗ10 = testMap;
     t.Run(makemap64ˢ, (ж<testing.T> tΔ11) => {
-        foreach (var (_, vᴛ4) in testCasesʗ4) {
+        foreach (var (_, vᴛ4) in range(testCasesʗ4)) {
             ref var tc = ref heap(new TestTableGroupCount_type(), out var Ꮡtc);
             tc = vᴛ4;
 
@@ -977,8 +972,8 @@ internal static readonly object lenMShouldRemainConstantˢ = (@string)"len(m) sh
 
 public static void TestTombstoneGrow(ж<testing.T> t) {
     var tableSizes = slice<nint>([16, 32, 64, 128, 256]);
-    foreach (var (_, tableSize) in tableSizes) {
-        foreach (var (_, load) in slice<@string>(["low", "mid", "high"])) {
+    foreach (var (_, tableSize) in range(tableSizes)) {
+        foreach (var (_, load) in range(slice<@string>(["low", "mid", "high"]))) {
             nint capacity = tableSize * 7 / 8;
             nint initialElems = default;
             var exprᴛ1 = load;

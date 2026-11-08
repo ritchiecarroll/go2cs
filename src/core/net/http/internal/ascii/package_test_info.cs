@@ -35,7 +35,7 @@ using static global::go.net.http.@internal.ascii_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/internal/ascii/print_test.go", "print_test.cs", "ABASggAXOLKSgIIADAyCACNQspKAgg==", "39-43:1;89-93:1")]
+[assembly: GoPositionMap("net/http/internal/ascii/print_test.go", "print_test.cs", "ABASggAXOLKSggALDIIAI1CykoI=", "39-43:1;89-93:1")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http.@internal;

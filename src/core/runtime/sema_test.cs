@@ -8,8 +8,6 @@ using static runtime_package;
 using Δsync = sync_package;
 using atomic = global::go.sync.atomic_package;
 using testing = testing_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.sync;
 using static global::go.runtime_internal_test_package;
 using Δruntime = runtime_package;
@@ -146,7 +144,7 @@ internal static partial bool testSemaHandoff() {
 internal static readonly object failedToDequeueˢ = (@string)"failed to dequeue"u8;
 
 public static void BenchmarkSemTable(ж<testing.B> b) {
-    foreach (var (_, n) in slice<nint>([1000, 2000, 4000, 8000])) {
+    foreach (var (_, n) in range(slice<nint>([1000, 2000, 4000, 8000]))) {
         b.Run(fmt.Sprintf("OneAddrCollision/n=%d"u8, n), (ж<testing.B> bΔ1) => {
             var tab = runtime_internal_test_package.Escape(@new<global::go.runtime_internal_test_package.SemTable>());
             var u = new slice<uint32>(runtime_internal_test_package.SemTableSize + 1);

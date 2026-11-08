@@ -50,10 +50,8 @@ public static void TestWriteLogger(ж<testing.T> t) {
 
         var lw = @new<strings.Builder>();
         var wl = NewWriteLogger(writeˢ, new iotest_test_package.strings_BuilderжWriter(lw));
-        {
-            var (_, err) = wl.Write(slice<byte>("Hello, World!"u8)); if (err != nil) {
-                t.Fatalf("Unexpectedly failed to write: %v", err);
-            }
+        var (_, err) = wl.Write(slice<byte>("Hello, World!"u8)); if (err != nil) {
+            t.Fatalf("Unexpectedly failed to write: %v", err);
         }
 
         {
@@ -100,18 +98,14 @@ public static void TestWriteLogger_errorOnWrite(ж<testing.T> t) {
 
         var lw = new errWriter(err: errors.New(writeErrorˢ));
         var wl = NewWriteLogger(writeˢ, lw);
-        {
-            var (_, err) = wl.Write(slice<byte>("Hello, World!"u8)); if (err == nil) {
-                t.Fatalf("Unexpectedly succeeded to write: %v", err);
-            }
+        var (_, err) = wl.Write(slice<byte>("Hello, World!"u8)); if (err == nil) {
+            t.Fatalf("Unexpectedly succeeded to write: %v", err);
         }
 
         @string wantLogWithHex = fmt.Sprintf("lw: write: %x: %v\n"u8, (@string)""u8, writeErrorˢ);
-        {
-            @string g = lOut.String();
-            @string w = wantLogWithHex; if (g != w) {
-                t.Errorf("WriteLogger mismatch\n\tgot:  %q\n\twant: %q", g, w);
-            }
+        @string g = lOut.String();
+        @string w = wantLogWithHex; if (g != w) {
+            t.Errorf("WriteLogger mismatch\n\tgot:  %q\n\twant: %q", g, w);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -207,11 +201,9 @@ public static void TestReadLogger_errorOnRead(ж<testing.T> t) {
         }
 
         @string wantLogWithHex = fmt.Sprintf("lr: read %x: io failure\n"u8, p.slice(0, n));
-        {
-            @string g = lOut.String();
-            @string w = wantLogWithHex; if (g != w) {
-                t.Errorf("ReadLogger mismatch\n\tgot:  %q\n\twant: %q", g, w);
-            }
+        @string g = lOut.String();
+        @string w = wantLogWithHex; if (g != w) {
+            t.Errorf("ReadLogger mismatch\n\tgot:  %q\n\twant: %q", g, w);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

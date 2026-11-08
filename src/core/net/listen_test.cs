@@ -12,8 +12,6 @@ using syscall = syscall_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.net_package;
 
 partial class net_internal_test_package {
@@ -34,7 +32,7 @@ internal static @string port(this ж<global::go.net_package.UDPConn> Ꮡc) {
     return port;
 }
 
-internal static slice<prohibitionaryDialArgTestsᴛ1> tcpListenerTests = slice<prohibitionaryDialArgTestsᴛ1>([
+internal static slice<prohibitionaryDialArgTestsᴛ1> tcpListenerTests = [
     new("tcp", ""),
     new("tcp", "0.0.0.0"),
     new("tcp", "::ffff:0.0.0.0"),
@@ -55,7 +53,7 @@ internal static slice<prohibitionaryDialArgTestsᴛ1> tcpListenerTests = slice<p
     new("tcp6", "::"),
 
     new("tcp6", "::1")
-]);
+];
 
 // TestTCPListener tests both single and double listen to a test
 // listener with same address family, same listening address and
@@ -68,7 +66,7 @@ public static void TestTCPListener(ж<testing.T> t) {
         break;
     }}
 
-    foreach (var (_, tt) in tcpListenerTests) {
+    foreach (var (_, tt) in range(tcpListenerTests)) {
         if (!testableListenArgs(tt.network, JoinHostPort(tt.address, "0"), ""u8)) {
             t.Logf("skipping %s test", tt.network + " " + tt.address);
             continue;
@@ -78,27 +76,23 @@ public static void TestTCPListener(ж<testing.T> t) {
         if (err != nil) {
             t.Fatal(err);
         }
-        {
-            var errΔ1 = checkFirstListener(tt.network, ln1); if (errΔ1 != nil) {
-                ln1.Close();
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = checkFirstListener(tt.network, ln1); if (errΔ1 != nil) {
+            ln1.Close();
+            t.Fatal(errΔ1);
         }
         (var ln2, err) = Listen(tt.network, JoinHostPort(tt.address, ln1._<ж<global::go.net_package.TCPListener>>().port()));
         if (err == nil) {
             ln2.Close();
         }
-        {
-            var errΔ2 = checkSecondListener(tt.network, tt.address, err); if (errΔ2 != nil) {
-                ln1.Close();
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = checkSecondListener(tt.network, tt.address, err); if (errΔ2 != nil) {
+            ln1.Close();
+            t.Fatal(errΔ2);
         }
         ln1.Close();
     }
 }
 
-internal static slice<prohibitionaryDialArgTestsᴛ1> udpListenerTests = slice<prohibitionaryDialArgTestsᴛ1>([
+internal static slice<prohibitionaryDialArgTestsᴛ1> udpListenerTests = [
     new("udp", ""),
     new("udp", "0.0.0.0"),
     new("udp", "::ffff:0.0.0.0"),
@@ -119,7 +113,7 @@ internal static slice<prohibitionaryDialArgTestsᴛ1> udpListenerTests = slice<p
     new("udp6", "::"),
 
     new("udp6", "::1")
-]);
+];
 
 // TestUDPListener tests both single and double listen to a test
 // listener with same address family, same listening address and
@@ -132,7 +126,7 @@ public static void TestUDPListener(ж<testing.T> t) {
         break;
     }}
 
-    foreach (var (_, tt) in udpListenerTests) {
+    foreach (var (_, tt) in range(udpListenerTests)) {
         if (!testableListenArgs(tt.network, JoinHostPort(tt.address, "0"), ""u8)) {
             t.Logf("skipping %s test", tt.network + " " + tt.address);
             continue;
@@ -142,21 +136,17 @@ public static void TestUDPListener(ж<testing.T> t) {
         if (err != nil) {
             t.Fatal(err);
         }
-        {
-            var errΔ1 = checkFirstListener(tt.network, c1); if (errΔ1 != nil) {
-                c1.Close();
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = checkFirstListener(tt.network, c1); if (errΔ1 != nil) {
+            c1.Close();
+            t.Fatal(errΔ1);
         }
         (var c2, err) = ListenPacket(tt.network, JoinHostPort(tt.address, c1._<ж<global::go.net_package.UDPConn>>().port()));
         if (err == nil) {
             c2.Close();
         }
-        {
-            var errΔ2 = checkSecondListener(tt.network, tt.address, err); if (errΔ2 != nil) {
-                c1.Close();
-                t.Fatal(errΔ2);
-            }
+        var errΔ2 = checkSecondListener(tt.network, tt.address, err); if (errΔ2 != nil) {
+            c1.Close();
+            t.Fatal(errΔ2);
         }
         c1.Close();
     }
@@ -167,7 +157,7 @@ partial struct dualStackTCPListenerTestsᴛ1 /*dyn*/ {
     internal @string network2, address2; // second listener
     internal error xerr;                 // expected error value, nil or other
 }
-internal static slice<dualStackTCPListenerTestsᴛ1> dualStackTCPListenerTests = slice<dualStackTCPListenerTestsᴛ1>([
+internal static slice<dualStackTCPListenerTestsᴛ1> dualStackTCPListenerTests = [
     // Test cases and expected results for the attempting 2nd listen on the same port
     // 1st listen                2nd listen                 darwin  freebsd  linux  openbsd
     // ------------------------------------------------------------------------------------
@@ -221,7 +211,7 @@ internal static slice<dualStackTCPListenerTestsᴛ1> dualStackTCPListenerTests =
     new("tcp", "::1", "tcp", "127.0.0.1", default),
     new("tcp4", "127.0.0.1", "tcp6", "::1", default),
     new("tcp6", "::1", "tcp4", "127.0.0.1", default)
-]);
+];
 
 // TestDualStackTCPListener tests both single and double listen
 // to a test listener with various address families, different
@@ -240,7 +230,7 @@ public static void TestDualStackTCPListener(ж<testing.T> t) {
         t.Skip(bothIPv4AndIPv6Areˢ);
     }
 
-    foreach (var (_, vᴛ1) in dualStackTCPListenerTests) {
+    foreach (var (_, vᴛ1) in range(dualStackTCPListenerTests)) {
         var tt = vᴛ1;
 
         if (!testableListenArgs(tt.network1, JoinHostPort(tt.address1, "0"), ""u8)) {
@@ -259,7 +249,7 @@ public static void TestDualStackTCPListener(ж<testing.T> t) {
                 t.Fatal(err);
             }
             @string port = lns[0].port();
-            foreach (var (_, ln) in lns) {
+            foreach (var (_, ln) in range(lns)) {
                 ln.Close();
             }
             global::go.net_package.Listener ln1 = default;
@@ -267,21 +257,17 @@ public static void TestDualStackTCPListener(ж<testing.T> t) {
             if (firstErr != nil) {
                 continue;
             }
-            {
-                var errΔ1 = checkFirstListener(tt.network1, ln1); if (errΔ1 != nil) {
-                    ln1.Close();
-                    t.Fatal(errΔ1);
-                }
+            var errΔ1 = checkFirstListener(tt.network1, ln1); if (errΔ1 != nil) {
+                ln1.Close();
+                t.Fatal(errΔ1);
             }
             (var ln2, err) = Listen(tt.network2, JoinHostPort(tt.address2, ln1._<ж<global::go.net_package.TCPListener>>().port()));
             if (err == nil) {
                 ln2.Close();
             }
-            {
-                secondErr = checkDualStackSecondListener(tt.network2, tt.address2, err, tt.xerr); if (secondErr != nil) {
-                    ln1.Close();
-                    continue;
-                }
+            secondErr = checkDualStackSecondListener(tt.network2, tt.address2, err, tt.xerr); if (secondErr != nil) {
+                ln1.Close();
+                continue;
             }
             ln1.Close();
             break;
@@ -295,7 +281,7 @@ public static void TestDualStackTCPListener(ж<testing.T> t) {
     }
 }
 
-internal static slice<dualStackTCPListenerTestsᴛ1> dualStackUDPListenerTests = slice<dualStackTCPListenerTestsᴛ1>([
+internal static slice<dualStackTCPListenerTestsᴛ1> dualStackUDPListenerTests = [
     new("udp", "", "udp", "", syscall.EADDRINUSE),
     new("udp", "", "udp", "0.0.0.0", syscall.EADDRINUSE),
     new("udp", "0.0.0.0", "udp", "", syscall.EADDRINUSE),
@@ -316,7 +302,7 @@ internal static slice<dualStackTCPListenerTestsᴛ1> dualStackUDPListenerTests =
     new("udp", "::1", "udp", "127.0.0.1", default),
     new("udp4", "127.0.0.1", "udp6", "::1", default),
     new("udp6", "::1", "udp4", "127.0.0.1", default)
-]);
+];
 
 // TestDualStackUDPListener tests both single and double listen
 // to a test listener with various address families, different
@@ -335,7 +321,7 @@ public static void TestDualStackUDPListener(ж<testing.T> t) {
         t.Skip(bothIPv4AndIPv6Areˢ);
     }
 
-    foreach (var (_, vᴛ1) in dualStackUDPListenerTests) {
+    foreach (var (_, vᴛ1) in range(dualStackUDPListenerTests)) {
         var tt = vᴛ1;
 
         if (!testableListenArgs(tt.network1, JoinHostPort(tt.address1, "0"), ""u8)) {
@@ -354,7 +340,7 @@ public static void TestDualStackUDPListener(ж<testing.T> t) {
                 t.Fatal(err);
             }
             @string port = cs[0].port();
-            foreach (var (_, c) in cs) {
+            foreach (var (_, c) in range(cs)) {
                 c.of(global::go.net_package.UDPConn.Ꮡconn).Close();
             }
             global::go.net_package.PacketConn c1 = default;
@@ -362,21 +348,17 @@ public static void TestDualStackUDPListener(ж<testing.T> t) {
             if (firstErr != nil) {
                 continue;
             }
-            {
-                var errΔ1 = checkFirstListener(tt.network1, c1); if (errΔ1 != nil) {
-                    c1.Close();
-                    t.Fatal(errΔ1);
-                }
+            var errΔ1 = checkFirstListener(tt.network1, c1); if (errΔ1 != nil) {
+                c1.Close();
+                t.Fatal(errΔ1);
             }
             (var c2, err) = ListenPacket(tt.network2, JoinHostPort(tt.address2, c1._<ж<global::go.net_package.UDPConn>>().port()));
             if (err == nil) {
                 c2.Close();
             }
-            {
-                secondErr = checkDualStackSecondListener(tt.network2, tt.address2, err, tt.xerr); if (secondErr != nil) {
-                    c1.Close();
-                    continue;
-                }
+            secondErr = checkDualStackSecondListener(tt.network2, tt.address2, err, tt.xerr); if (secondErr != nil) {
+                c1.Close();
+                continue;
             }
             c1.Close();
             break;
@@ -557,10 +539,8 @@ public static void TestWildWildcardListener(ж<testing.T> t) {
         }}
 
         defer(() => {
-            {
-                var p = recover(); if (p != nil) {
-                    t.Fatalf("panicked: %v", p);
-                }
+            var p = recover(); if (p != nil) {
+                t.Fatalf("panicked: %v", p);
             }
         }, ref ᒐ);
 
@@ -625,14 +605,14 @@ public static void TestIPv4MulticastListener(ж<testing.T> t) {
     }
 
     void closer(slice<ж<global::go.net_package.UDPConn>> cs) {
-        foreach (var (_, c) in cs) {
+        foreach (var (_, c) in range(cs)) {
             if (c != nil) {
                 c.of(global::go.net_package.UDPConn.Ꮡconn).Close();
             }
         }
     }
 
-    foreach (var (_, ifi) in slice<ж<global::go.net_package.Interface>>([loopbackInterface(), default])) {
+    foreach (var (_, ifi) in range(slice<ж<global::go.net_package.Interface>>([loopbackInterface(), default]))) {
         // Note that multicast interface assignment by system
         // is not recommended because it usually relies on
         // routing stuff for finding out an appropriate
@@ -641,31 +621,23 @@ public static void TestIPv4MulticastListener(ж<testing.T> t) {
         if (ifi == nil || !testIPv4.Value) {
             continue;
         }
-        foreach (var (_, tt) in ipv4MulticastListenerTests) {
+        foreach (var (_, tt) in range(ipv4MulticastListenerTests)) {
             error err = default;
             var cs = new slice<ж<global::go.net_package.UDPConn>>(2);
-            {
-                (cs[0], err) = ListenMulticastUDP(tt.net, ifi, tt.gaddr); if (err != nil) {
-                    t.Fatal(err);
-                }
+            (cs[0], err) = ListenMulticastUDP(tt.net, ifi, tt.gaddr); if (err != nil) {
+                t.Fatal(err);
             }
-            {
-                var errΔ1 = checkMulticastListener(cs[0], tt.gaddr.IP); if (errΔ1 != nil) {
-                    closer(cs);
-                    t.Fatal(errΔ1);
-                }
+            var errΔ1 = checkMulticastListener(cs[0], tt.gaddr.IP); if (errΔ1 != nil) {
+                closer(cs);
+                t.Fatal(errΔ1);
             }
-            {
-                (cs[1], err) = ListenMulticastUDP(tt.net, ifi, tt.gaddr); if (err != nil) {
-                    closer(cs);
-                    t.Fatal(err);
-                }
+            (cs[1], err) = ListenMulticastUDP(tt.net, ifi, tt.gaddr); if (err != nil) {
+                closer(cs);
+                t.Fatal(err);
             }
-            {
-                var errΔ2 = checkMulticastListener(cs[1], tt.gaddr.IP); if (errΔ2 != nil) {
-                    closer(cs);
-                    t.Fatal(errΔ2);
-                }
+            var errΔ2 = checkMulticastListener(cs[1], tt.gaddr.IP); if (errΔ2 != nil) {
+                closer(cs);
+                t.Fatal(errΔ2);
             }
             closer(cs);
         }
@@ -713,14 +685,14 @@ public static void TestIPv6MulticastListener(ж<testing.T> t) {
     }
 
     void closer(slice<ж<global::go.net_package.UDPConn>> cs) {
-        foreach (var (_, c) in cs) {
+        foreach (var (_, c) in range(cs)) {
             if (c != nil) {
                 c.of(global::go.net_package.UDPConn.Ꮡconn).Close();
             }
         }
     }
 
-    foreach (var (_, ifi) in slice<ж<global::go.net_package.Interface>>([loopbackInterface(), default])) {
+    foreach (var (_, ifi) in range(slice<ж<global::go.net_package.Interface>>([loopbackInterface(), default]))) {
         // Note that multicast interface assignment by system
         // is not recommended because it usually relies on
         // routing stuff for finding out an appropriate
@@ -729,31 +701,23 @@ public static void TestIPv6MulticastListener(ж<testing.T> t) {
         if (ifi == nil && !testIPv6.Value) {
             continue;
         }
-        foreach (var (_, tt) in ipv6MulticastListenerTests) {
+        foreach (var (_, tt) in range(ipv6MulticastListenerTests)) {
             error err = default;
             var cs = new slice<ж<global::go.net_package.UDPConn>>(2);
-            {
-                (cs[0], err) = ListenMulticastUDP(tt.net, ifi, tt.gaddr); if (err != nil) {
-                    t.Fatal(err);
-                }
+            (cs[0], err) = ListenMulticastUDP(tt.net, ifi, tt.gaddr); if (err != nil) {
+                t.Fatal(err);
             }
-            {
-                var errΔ1 = checkMulticastListener(cs[0], tt.gaddr.IP); if (errΔ1 != nil) {
-                    closer(cs);
-                    t.Fatal(errΔ1);
-                }
+            var errΔ1 = checkMulticastListener(cs[0], tt.gaddr.IP); if (errΔ1 != nil) {
+                closer(cs);
+                t.Fatal(errΔ1);
             }
-            {
-                (cs[1], err) = ListenMulticastUDP(tt.net, ifi, tt.gaddr); if (err != nil) {
-                    closer(cs);
-                    t.Fatal(err);
-                }
+            (cs[1], err) = ListenMulticastUDP(tt.net, ifi, tt.gaddr); if (err != nil) {
+                closer(cs);
+                t.Fatal(err);
             }
-            {
-                var errΔ2 = checkMulticastListener(cs[1], tt.gaddr.IP); if (errΔ2 != nil) {
-                    closer(cs);
-                    t.Fatal(errΔ2);
-                }
+            var errΔ2 = checkMulticastListener(cs[1], tt.gaddr.IP); if (errΔ2 != nil) {
+                closer(cs);
+                t.Fatal(errΔ2);
             }
             closer(cs);
         }
@@ -793,7 +757,7 @@ internal static (bool, error) multicastRIBContains(global::go.net_package.IP ip)
     if (err != nil) {
         return (false, err);
     }
-    foreach (var (_, vᴛ1) in ift) {
+    foreach (var (_, vᴛ1) in range(ift)) {
         ref var ifi = ref heap(new global::go.net_package.Interface(), out var Ꮡifi);
         ifi = vᴛ1;
 
@@ -801,7 +765,7 @@ internal static (bool, error) multicastRIBContains(global::go.net_package.IP ip)
         if (errΔ1 != nil) {
             return (false, errΔ1);
         }
-        foreach (var (_, ifma) in ifmat) {
+        foreach (var (_, ifma) in range(ifmat)) {
             if (ifma._<ж<global::go.net_package.IPAddr>>().IP.Equal(ip)) {
                 return (true, default);
             }
@@ -855,7 +819,7 @@ public static void TestListenConfigControl(ж<testing.T> t) {
     }}
 
     t.Run(streamListenˢ, (ж<testing.T> tΔ1) => {
-        foreach (var (_, network) in slice<@string>(["tcp", "tcp4", "tcp6", "unix", "unixpacket"])) {
+        foreach (var (_, network) in range(slice<@string>(["tcp", "tcp4", "tcp6", "unix", "unixpacket"]))) {
             if (!testableNetwork(network)) {
                 continue;
             }
@@ -864,7 +828,7 @@ public static void TestListenConfigControl(ж<testing.T> t) {
         }
     });
     t.Run(packetListenˢ, (ж<testing.T> tΔ2) => {
-        foreach (var (_, network) in slice<@string>(["udp", "udp4", "udp6", "unixgram"])) {
+        foreach (var (_, network) in range(slice<@string>(["udp", "udp4", "udp6", "unixgram"]))) {
             if (!testableNetwork(network)) {
                 continue;
             }

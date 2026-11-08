@@ -79,10 +79,8 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
         t.Fatalf("failed to parse test key: %s", err);
     }
 
-    {
-        var (_, errΔ1) = testRoot.Verify(new VerifyOptions()); if (errΔ1 != nil) {
-            t.Skipf("test root is not in trust store, skipping (err: %q)", errΔ1);
-        }
+    var (_, errΔ1) = testRoot.Verify(new VerifyOptions()); if (errΔ1 != nil) {
+        t.Skipf("test root is not in trust store, skipping (err: %q)", errΔ1);
     }
 
     var now = time.Now();
@@ -92,20 +90,20 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
             name: "valid",
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
+                DNSNames: ["valid.testing.golang.invalid"],
                 NotBefore: now.Add(-time.ΔHour),
                 NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
+                ExtKeyUsage: [ExtKeyUsageServerAuth]
             ))
         ),
         new(
             name: "valid (with name)",
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
+                DNSNames: ["valid.testing.golang.invalid"],
                 NotBefore: now.Add(-time.ΔHour),
                 NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
+                ExtKeyUsage: [ExtKeyUsageServerAuth]
             )),
             dnsName: "valid.testing.golang.invalid"
         ),
@@ -113,10 +111,10 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
             name: "valid (with time)",
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
+                DNSNames: ["valid.testing.golang.invalid"],
                 NotBefore: now.Add(-time.ΔHour),
                 NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
+                ExtKeyUsage: [ExtKeyUsageServerAuth]
             )),
             time: now.Add((time.Duration)(1800000000000L))
         ),
@@ -124,21 +122,21 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
             name: "valid (with eku)",
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
+                DNSNames: ["valid.testing.golang.invalid"],
                 NotBefore: now.Add(-time.ΔHour),
                 NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
+                ExtKeyUsage: [ExtKeyUsageServerAuth]
             )),
-            eku: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
+            eku: [ExtKeyUsageServerAuth]
         ),
         new(
             name: "wrong name",
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
+                DNSNames: ["valid.testing.golang.invalid"],
                 NotBefore: now.Add(-time.ΔHour),
                 NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
+                ExtKeyUsage: [ExtKeyUsageServerAuth]
             )),
             dnsName: "invalid.testing.golang.invalid",
             expectedErr: "x509: certificate is valid for valid.testing.golang.invalid, not invalid.testing.golang.invalid"
@@ -147,10 +145,10 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
             name: "expired (future)",
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
+                DNSNames: ["valid.testing.golang.invalid"],
                 NotBefore: now.Add(-time.ΔHour),
                 NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
+                ExtKeyUsage: [ExtKeyUsageServerAuth]
             )),
             time: now.Add((time.Duration)(7200000000000L)),
             expectedErr: "x509: certificate has expired or is not yet valid"
@@ -159,10 +157,10 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
             name: "expired (past)",
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
+                DNSNames: ["valid.testing.golang.invalid"],
                 NotBefore: now.Add(-time.ΔHour),
                 NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
+                ExtKeyUsage: [ExtKeyUsageServerAuth]
             )),
             time: now.Add((time.Duration)(7200000000000L)),
             expectedErr: "x509: certificate has expired or is not yet valid"
@@ -171,10 +169,10 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
             name: "self-signed",
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
+                DNSNames: ["valid.testing.golang.invalid"],
                 NotBefore: now.Add(-time.ΔHour),
                 NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
+                ExtKeyUsage: [ExtKeyUsageServerAuth]
             )),
             selfSigned: true,
             macosErr: "x509: “valid.testing.golang.invalid” certificate is not trusted",
@@ -184,22 +182,22 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
             name: "non-specified KU",
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
+                DNSNames: ["valid.testing.golang.invalid"],
                 NotBefore: now.Add(-time.ΔHour),
                 NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
+                ExtKeyUsage: [ExtKeyUsageServerAuth]
             )),
-            eku: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageEmailProtection]),
+            eku: [ExtKeyUsageEmailProtection],
             expectedErr: "x509: certificate specifies an incompatible key usage"
         ),
         new(
             name: "non-nested KU",
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
+                DNSNames: ["valid.testing.golang.invalid"],
                 NotBefore: now.Add(-time.ΔHour),
                 NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageEmailProtection])
+                ExtKeyUsage: [ExtKeyUsageEmailProtection]
             )),
             macosErr: "x509: “valid.testing.golang.invalid” certificate is not permitted for this usage",
             windowsErr: "x509: certificate specifies an incompatible key usage"
@@ -211,7 +209,7 @@ public static void TestPlatformVerifier(ж<testing.T> t) {
         t.Fatalf("ecdsa.GenerateKey failed: %s", err);
     }
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var tc = ref heap(new TestPlatformVerifier_tests(), out var Ꮡtc);
         tc = vᴛ1;
 

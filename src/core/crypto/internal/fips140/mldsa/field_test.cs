@@ -20,10 +20,10 @@ internal partial struct interestingValue {
 // values on the other side.
 internal static slice<interestingValue> interestingValues() {
     if (testing.Short()) {
-        return slice<interestingValue>([new(v: q - 1, m: minusOne)]);
+        return [new(v: q - 1, m: minusOne)];
     }
     slice<interestingValue> values = default;
-    foreach (var (_, v) in slice<uint32>([
+    foreach (var (_, v) in range(slice<uint32>([
         0,
         1,
         2,
@@ -33,7 +33,7 @@ internal static slice<interestingValue> interestingValues() {
         q - 1,
         q / 2,
         (q + 1) / 2
-    ])) {
+    ]))) {
         var (m, _) = fieldToMontgomery(v);
         values = append(values, new interestingValue(v: v, m: m));
         // Also test values that have an interesting Montgomery representation.
@@ -62,7 +62,7 @@ public static void TestToFromMontgomery(ж<testing.T> t) {
 
 public static void TestFieldAdd(ж<testing.T> t) {
     t.Parallel();
-    foreach (var (_, a) in interestingValues()) {
+    foreach (var (_, a) in range(interestingValues())) {
         foreach (var b in range<global::go.crypto.@internal.fips140.mldsa_package.fieldElement>(((global::go.crypto.@internal.fips140.mldsa_package.fieldElement)q))) {
             var got = fieldAdd(a.m, b);
             var exp = (a.m + b) % (uint32)q;
@@ -75,7 +75,7 @@ public static void TestFieldAdd(ж<testing.T> t) {
 
 public static void TestFieldSub(ж<testing.T> t) {
     t.Parallel();
-    foreach (var (_, a) in interestingValues()) {
+    foreach (var (_, a) in range(interestingValues())) {
         foreach (var b in range<global::go.crypto.@internal.fips140.mldsa_package.fieldElement>(((global::go.crypto.@internal.fips140.mldsa_package.fieldElement)q))) {
             var got = fieldSub(a.m, b);
             var exp = (a.m + (uint32)q - b) % (uint32)q;
@@ -88,7 +88,7 @@ public static void TestFieldSub(ж<testing.T> t) {
 
 public static void TestFieldSubToMontgomery(ж<testing.T> t) {
     t.Parallel();
-    foreach (var (_, a) in interestingValues()) {
+    foreach (var (_, a) in range(interestingValues())) {
         foreach (var b in range<uint32>((uint32)q)) {
             var got = fieldSubToMontgomery(a.v, b);
             var diff = (a.v + (uint32)q - b) % (uint32)q;
@@ -118,7 +118,7 @@ public static void TestFieldReduceOnce(ж<testing.T> t) {
 
 public static void TestFieldMul(ж<testing.T> t) {
     t.Parallel();
-    foreach (var (_, a) in interestingValues()) {
+    foreach (var (_, a) in range(interestingValues())) {
         foreach (var b in range<global::go.crypto.@internal.fips140.mldsa_package.fieldElement>(((global::go.crypto.@internal.fips140.mldsa_package.fieldElement)q))) {
             var got = fieldFromMontgomery(fieldMontgomeryMul(a.m, b));
             var exp = (uint32)(((uint64)a.v * (uint64)fieldFromMontgomery(b)) % (uint64)q);
@@ -141,19 +141,17 @@ public static void TestFieldToMontgomeryOverflow(ж<testing.T> t) {
         (uint32)(q + 2147483648L),
         ~(uint32)0
     ]);
-    foreach (var (_, @in) in inputs) {
-        {
-            var (_, err) = fieldToMontgomery(@in); if (err == nil) {
-                t.Fatalf("fieldToMontgomery(%d) did not return an error", @in);
-            }
+    foreach (var (_, @in) in range(inputs)) {
+        var (_, err) = fieldToMontgomery(@in); if (err == nil) {
+            t.Fatalf("fieldToMontgomery(%d) did not return an error", @in);
         }
     }
 }
 
 public static void TestFieldMulSub(ж<testing.T> t) {
-    foreach (var (_, a) in interestingValues()) {
-        foreach (var (_, b) in interestingValues()) {
-            foreach (var (_, c) in interestingValues()) {
+    foreach (var (_, a) in range(interestingValues())) {
+        foreach (var (_, b) in range(interestingValues())) {
+            foreach (var (_, c) in range(interestingValues())) {
                 var got = fieldFromMontgomery(fieldMontgomeryMulSub(a.m, b.m, c.m));
                 var exp = (uint32)(((uint64)a.v * ((uint64)b.v + (uint64)q - (uint64)c.v)) % (uint64)q);
                 if (got != exp) {
@@ -165,10 +163,10 @@ public static void TestFieldMulSub(ж<testing.T> t) {
 }
 
 public static void TestFieldAddMul(ж<testing.T> t) {
-    foreach (var (_, a) in interestingValues()) {
-        foreach (var (_, b) in interestingValues()) {
-            foreach (var (_, c) in interestingValues()) {
-                foreach (var (_, d) in interestingValues()) {
+    foreach (var (_, a) in range(interestingValues())) {
+        foreach (var (_, b) in range(interestingValues())) {
+            foreach (var (_, c) in range(interestingValues())) {
+                foreach (var (_, d) in range(interestingValues())) {
                     var got = fieldFromMontgomery(fieldMontgomeryAddMul(a.m, b.m, c.m, d.m));
                     var exp = (uint32)(((uint64)a.v * (uint64)b.v + (uint64)c.v * (uint64)d.v) % (uint64)q);
                     if (got != exp) {
@@ -285,10 +283,8 @@ public static void TestPower2Round(ж<testing.T> t) {
         if (err != nil) {
             t.Fatalf("power2Round(%d): failed to convert high part to Montgomery: %v", x, err);
         }
-        {
-            var r = fieldFromMontgomery(fieldAdd(hi, t0)); if (r != x) {
-                t.Fatalf("power2Round(%d) = (%d, %d), which reconstructs to %d, expected %d", x, t1, t0, r, x);
-            }
+        var r = fieldFromMontgomery(fieldAdd(hi, t0)); if (r != x) {
+            t.Fatalf("power2Round(%d) = (%d, %d), which reconstructs to %d, expected %d", x, t1, t0, r, x);
         }
     }
 }
@@ -373,7 +369,7 @@ internal static void testDecompose(ж<testing.T> t, global::go.crypto.@internal.
 public static void TestZetas(ж<testing.T> t) {
     var ζ = big.NewInt(1753);
     var q = big.NewInt(mldsa_package.q);
-    foreach (var (k, zeta) in zetas.ΔRangeSnapshot()) {
+    foreach (var (k, zeta) in range(zetas.ΔRangeSnapshot())) {
         // ζ^BitRev₈(k) mod q
         var exp = @new<bigꓸInt>().Exp(ζ, big.NewInt((int64)BitRev8((uint8)k)), q);
         var got = fieldFromMontgomery(zeta);

@@ -22,21 +22,10 @@ internal static Func<float64, float64, float64> fop(Func<uint64, uint64, uint64>
     };
 }
 
-internal static float64 add(float64 x, float64 y) {
-    return x + y;
-}
-
-internal static float64 sub(float64 x, float64 y) {
-    return x - y;
-}
-
-internal static float64 mul(float64 x, float64 y) {
-    return x * y;
-}
-
-internal static float64 div(float64 x, float64 y) {
-    return x / y;
-}
+internal static float64 add(float64 x, float64 y) { return x + y; }
+internal static float64 sub(float64 x, float64 y) { return x - y; }
+internal static float64 mul(float64 x, float64 y) { return x * y; }
+internal static float64 div(float64 x, float64 y) { return x / y; }
 
 public static void TestFloat64(ж<testing.T> t) {
     var @base = slice<float64>([
@@ -152,10 +141,8 @@ internal static void err(ж<testing.T> t, @string format, params ꓸꓸꓸany ar
     // otherwise we spend all our time
     // allocating memory to hold the
     // formatted output.
-    {
-        runtime_test_package.nerr++; if (runtime_test_package.nerr >= 10) {
-            t.Fatal(tooManyErrorsˢ);
-        }
+    runtime_test_package.nerr++; if (runtime_test_package.nerr >= 10) {
+        t.Fatal(tooManyErrorsˢ);
     }
 }
 
@@ -172,8 +159,8 @@ internal static ref readonly @string fromint64ˢ => ref fromint64ˢᵇ;
 private static readonly @string fromint64ˢᵇ = "fromint64"u8;
 
 internal static void test(ж<testing.T> t, @string op, Func<float64, float64, float64> hw, Func<float64, float64, float64> sw, slice<float64> all) {
-    foreach (var (_, f) in all) {
-        foreach (var (_, g) in all) {
+    foreach (var (_, f) in range(all)) {
+        foreach (var (_, g) in range(all)) {
             var h = hw(f, g);
             var s = sw(f, g);
             if (!same(h, s)) {

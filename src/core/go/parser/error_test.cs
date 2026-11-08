@@ -59,10 +59,8 @@ internal static ж<tokenꓸFile> /*file*/ getFile(ж<token.FileSet> fset, @strin
 }
 
 internal static tokenꓸPos getPos(ж<token.FileSet> fset, @string filename, nint offset) {
-    {
-        var f = getFile(fset, filename); if (f != nil) {
-            return f.Pos(offset);
-        }
+    var f = getFile(fset, filename); if (f != nil) {
+        return f.Pos(offset);
     }
     return token.NoPos;
 }
@@ -134,33 +132,29 @@ internal static map<tokenꓸPos, @string> expectedErrors(ж<token.FileSet> fset,
 // of found errors and reports discrepancies.
 internal static void compareErrors(ж<testing.T> t, ж<token.FileSet> fset, map<tokenꓸPos, @string> expected, scanner.ErrorList found) {
     t.Helper();
-    foreach (var (_, error) in found) {
+    foreach (var (_, error) in range<ж<scannerꓸError>>(found)) {
         // error.Pos is a token.Position, but we want
         // a token.Pos so we can do a map lookup
         tokenꓸPos pos = getPos(fset, error.Pos.Filename, error.Pos.Offset);
-        {
-            var (msg, foundΔ1) = expected[pos, ꟷ]; if (foundΔ1) {
-                // we expect a message at pos; check if it matches
-                var (rx, err) = regexp.Compile(msg);
-                if (err != nil) {
-                    t.Errorf("%s: %v", error.Pos, err);
-                    continue;
-                }
-                {
-                    var match = rx.MatchString(error.Msg); if (!match) {
-                        t.Errorf("%s: %q does not match %q", error.Pos, error.Msg, msg);
-                        continue;
-                    }
-                }
-                // we have a match - eliminate this error
-                delete(expected, pos);
-            } else {
-                // To keep in mind when analyzing failed test output:
-                // If the same error position occurs multiple times in errors,
-                // this message will be triggered (because the first error at
-                // the position removes this position from the expected errors).
-                t.Errorf("%s: unexpected error: %s", error.Pos, error.Msg);
+        var (msg, foundΔ1) = expected[pos, ꟷ]; if (foundΔ1) {
+            // we expect a message at pos; check if it matches
+            var (rx, err) = regexp.Compile(msg);
+            if (err != nil) {
+                t.Errorf("%s: %v", error.Pos, err);
+                continue;
             }
+            var match = rx.MatchString(error.Msg); if (!match) {
+                t.Errorf("%s: %q does not match %q", error.Pos, error.Msg, msg);
+                continue;
+            }
+            // we have a match - eliminate this error
+            delete(expected, pos);
+        } else {
+            // To keep in mind when analyzing failed test output:
+            // If the same error position occurs multiple times in errors,
+            // this message will be triggered (because the first error at
+            // the position removes this position from the expected errors).
+            t.Errorf("%s: unexpected error: %s", error.Pos, error.Msg);
         }
     }
 
@@ -213,7 +207,7 @@ public static void TestErrors(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (_, d) in list) {
+    foreach (var (_, d) in range(list)) {
         @string name = d.Name();
         var dʗ1 = d;
         t.Run(name, (ж<testing.T> tΔ1) => {

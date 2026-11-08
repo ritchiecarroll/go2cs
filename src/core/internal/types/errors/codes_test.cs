@@ -41,10 +41,8 @@ public static void TestErrorCodeExamples(ж<testing.T> t) {
                 if (!ok) {
                     tΔ1.Fatalf("not a types.Error: %v", err);
                 }
-                {
-                    nint got = readCode(typerr); if (got != value) {
-                        tΔ1.Errorf("%s: example #%d returned code %d (%s), want %d", name, i, got, err, value);
-                    }
+                nint got = readCode(typerr); if (got != value) {
+                    tΔ1.Errorf("%s: example #%d returned code %d (%s), want %d", name, i, got, err, value);
                 }
             }
         });
@@ -70,30 +68,28 @@ internal static void walkCodes(ж<testing.T> t, Action<@string, nint, ж<ast.Val
         Defs: new map<ж<ast.Ident>, types.Object>(),
         Uses: new map<ж<ast.Ident>, types.Object>()
     ));
-    (_, err) = Ꮡconf.Check(typesˢ, fset, slice<ж<ast.File>>([@file]), info);
+    (_, err) = Ꮡconf.Check(typesˢ, fset, [@file], info);
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (_, decl) in @file.Decls) {
+    foreach (var (_, decl) in range(@file.Decls)) {
         var (declΔ1, ok) = decl._<ж<ast.GenDecl>>(ᐧ);
         if (!ok || declΔ1.Tok != token.CONST) {
             continue;
         }
-        foreach (var (_, spec) in declΔ1.Specs) {
+        foreach (var (_, spec) in range(declΔ1.Specs)) {
             var (specΔ1, okΔ1) = spec._<ж<ast.ValueSpec>>(ᐧ);
             if (!okΔ1 || len(specΔ1.Names) == 0) {
                 continue;
             }
             var obj = info.ObjectOf(specΔ1.Names[0]);
-            {
-                var (named, okΔ2) = obj.Type()._<ж<types.Named>>(ᐧ); if (okΔ2 && named.Obj().Name() == "Code"u8) {
-                    if (len(specΔ1.Names) != 1) {
-                        t.Fatalf("bad Code declaration for %q: got %d names, want exactly 1", specΔ1.Names[0].Name, len(specΔ1.Names));
-                    }
-                    @string codename = specΔ1.Names[0].Name;
-                    nint value = (nint)(constant.Val(obj._<ж<types.Const>>().Val())._<int64>());
-                    f(codename, value, specΔ1);
+            var (named, okΔ2) = obj.Type()._<ж<types.Named>>(ᐧ); if (okΔ2 && named.Obj().Name() == "Code"u8) {
+                if (len(specΔ1.Names) != 1) {
+                    t.Fatalf("bad Code declaration for %q: got %d names, want exactly 1", specΔ1.Names[0].Name, len(specΔ1.Names));
                 }
+                @string codename = specΔ1.Names[0].Name;
+                nint value = (nint)(constant.Val(obj._<ж<types.Const>>().Val())._<int64>());
+                f(codename, value, specΔ1);
             }
         }
     }
@@ -130,7 +126,7 @@ internal static error checkExample(ж<testing.T> t, @string example) {
         FakeImportC: true,
         Importer: importer.Default()
     ), out var Ꮡconf);
-    (_, err) = Ꮡconf.Check(exampleˢ2, fset, slice<ж<ast.File>>([@file]), nil);
+    (_, err) = Ꮡconf.Check(exampleˢ2, fset, [@file], nil);
     return err;
 }
 
@@ -193,7 +189,7 @@ public static void TestErrorCodeStyle(ж<testing.T> t) {
             t.Errorf("%q is not exported", name);
         }
         @string lower = strings.ToLower(name);
-        foreach (var (_, bad) in forbiddenInIdentʗ1) {
+        foreach (var (_, bad) in range(forbiddenInIdentʗ1)) {
             if (strings.Contains(lower, bad)) {
                 t.Errorf("%q contains forbidden word %q", name, bad);
             }
@@ -205,7 +201,7 @@ public static void TestErrorCodeStyle(ж<testing.T> t) {
             t.Errorf("doc for %q does not start with the error code name", name);
         }
         @string lowerComment = strings.ToLower(strings.TrimPrefix(doc, name));
-        foreach (var (_, bad) in forbiddenInCommentʗ1) {
+        foreach (var (_, bad) in range(forbiddenInCommentʗ1)) {
             if (strings.Contains(lowerComment, bad)) {
                 t.Errorf("doc for %q contains forbidden word %q", name, bad);
             }

@@ -13,8 +13,6 @@ using syscall = syscall_package;
 using Δtesting = testing_package;
 using time = time_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using context = context_package;
 using exec = go.os.exec_package;
 using go.os;
@@ -56,10 +54,8 @@ public static partial void TestRemoveAllWithExecutedProcess(ж<Δtesting.T> t) {
         // First create n executables.
         for (nint i = 0; i < n; i++) {
             // Rewind r.
-            {
-                var (_, errΔ1) = r.Seek(0, Δio.SeekStart); if (errΔ1 != nil) {
-                    t.Fatal(errΔ1);
-                }
+            var (_, errΔ1) = r.Seek(0, Δio.SeekStart); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
             @string nameΔ1 = filepath.Join(t.TempDir(), testExeˢ);
             execs[i] = nameΔ1;
@@ -67,22 +63,16 @@ public static partial void TestRemoveAllWithExecutedProcess(ж<Δtesting.T> t) {
             if (errΔ2 != nil) {
                 t.Fatal(errΔ2);
             }
-            {
-                (_, errΔ2) = Δio.Copy(new Δos.FileжWriter(w), new os_test_package.os_FileжReader(r)); if (errΔ2 != nil) {
-                    w.Close();
-                    t.Fatal(errΔ2);
-                }
+            (_, errΔ2) = Δio.Copy(new Δos.FileжWriter(w), new os_test_package.os_FileжReader(r)); if (errΔ2 != nil) {
+                w.Close();
+                t.Fatal(errΔ2);
             }
-            {
-                var errΔ3 = w.Sync(); if (errΔ3 != nil) {
-                    w.Close();
-                    t.Fatal(errΔ3);
-                }
+            var errΔ3 = w.Sync(); if (errΔ3 != nil) {
+                w.Close();
+                t.Fatal(errΔ3);
             }
-            {
-                errΔ2 = w.Close(); if (errΔ2 != nil) {
-                    t.Fatal(errΔ2);
-                }
+            errΔ2 = w.Close(); if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
         }
         // Then run each executable and remove its directory.
@@ -100,10 +90,8 @@ public static partial void TestRemoveAllWithExecutedProcess(ж<Δtesting.T> t) {
                     @string dir = filepath.Dir(nameΔ2);
                     // Run test.exe without executing any test, just to make it do something.
                     var cmd = testenv.Command(new os_test_package.testing_TжTB(t), nameΔ2, testRunˢ);
-                    {
-                        var errΔ4 = cmd.Run(); if (errΔ4 != nil) {
-                            t.Errorf("exec failed: %v", errΔ4);
-                        }
+                    var errΔ4 = cmd.Run(); if (errΔ4 != nil) {
+                        t.Errorf("exec failed: %v", errΔ4);
                     }
                     // Remove dir and check that it doesn't return `ERROR_ACCESS_DENIED`.
                     Ꮡerr.ValueSlot = RemoveAll(dir);
@@ -142,10 +130,8 @@ public static void TestProcessWithHandleWindows(ж<Δtesting.T> t) {
         var cmd = testenv.CommandContext(new os_test_package.testing_TжTB(t), t.Context(), testenv.Executable(new os_test_package.testing_TжTB(t)), "-test.run=^"u8 + t.Name() + "$"u8);
         cmd = testenv.CleanCmdEnv(cmd);
         cmd.Env = append(cmd.Env, envVar + "=1");
-        {
-            var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
-                t.Fatal(errΔ1);
-            }
+        var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         var cmdʗ1 = cmd;
         defer(() => {

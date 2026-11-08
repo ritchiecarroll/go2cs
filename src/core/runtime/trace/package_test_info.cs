@@ -37,10 +37,10 @@ using static global::go.runtime.trace_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("runtime/trace/example_test.go", "example_test.cs", "ABIi0oKClJKAgsiAgqSmoqSC", "22-26:1")]
-[assembly: GoPositionMap("runtime/trace/flightrecorder_test.go", "flightrecorder_test.cs", "ABkqgoKAgqSAgqT2gpSClICCpIKUgoK4gpSCgIKkgIKkgoCC+IKCgIIAAxDSgoKCgrKUlIKClJSClJSClIK0pKamgriCgoKUuIKCuIKCgoIACgqCgoK4goK4goKCgpSClIKCpoIACQiCgpSCuIKCqJKCgoKClIKUgpSUgoKmgoCCyJKClJKCAAgMooK4gIK4koKCgoKUgpSCyqa4poLmooKCgIKklIKCgoKClIKAgqSUgIK2gIKkgriCkoCCpIKCgoKCgpSC", "82-104:1;127-129:1;135-137:1;142-145:1;174-213:1;175-179:1.1;214-217:2;218-221:3;238-250:1")]
-[assembly: GoPositionMap("runtime/trace/subscribe_test.go", "subscribe_test.cs", "ACMkgrKCkoLKgoKCppSClpKCgoKClIKClICCgqSClJSCgoCC6KSSgpSCgoCCpJSCgIK2goCCpJSClPKClIKCgpKCgoKCopLygpSCgoKCgpKCgqKS8oKUgoKCkoKCgoKikvKClIKCgpKCgoKCopLygpSCgoKSgoKCgqI=", "19-67:1;21-25:1.1;69-72:2;73-79:3;80-84:4;85-90:5;91-93:6;94-107:7;108-121:8;122-135:9;136-149:10;150-163:11")]
-[assembly: GoPositionMap("runtime/trace/trace_test.go", "trace_test.cs", "AA4ezLKClIKAgqSCgoKUgoK4goKUgoKAgqSAgqSC")]
+[assembly: GoPositionMap("runtime/trace/example_test.go", "example_test.cs", "ABIi0oKClJKCuIKUpqKkgg==", "22-26:1", "", "", "", "30:21,31:13")]
+[assembly: GoPositionMap("runtime/trace/flightrecorder_test.go", "flightrecorder_test.cs", "ABcqgoKAgqSAgqT2gpSClIKUgpSCgriClIKAgqSAgqSCgIL4goKAggADENKCgoKCspSUgoKUlIKUlIKUgrSkpqaCuIKCgpS4goK4goKCggAKCoKCgriCgriCgoKClIKUgoKmggAJCIKClIK4goKokoKCgoKUgpSClJSCgqaCgriSgpSSggAIDKKCuICCuJKCgoKClIKUgsqmuKaC5qKCgoKUlIKCgoKClIKClJSCpoKUgriCkoKUgoKCgoKClII=", "82-104:1;127-129:1;135-137:1;142-145:1;174-213:1;175-179:1.1;214-217:2;218-221:3;238-250:1")]
+[assembly: GoPositionMap("runtime/trace/subscribe_test.go", "subscribe_test.cs", "ACMkgrKCkoLKgoKCppSClpKCgoKClIKClIKClIKUlIKCgtikkoKUgoKClJSCgqaCgpSUgpTygpSCgoKSgoKCgqKS8oKUgoKCgoKSgoKikvKClIKCgpKCgoKCopLygpSCgoKSgoKCgqKS8oKUgoKCkoKCgoKi", "19-67:1;21-25:1.1;69-72:2;73-79:3;80-84:4;85-90:5;91-93:6;94-107:7;108-121:8;122-135:9;136-149:10;150-163:11", "", "", "", "43:25,44:17")]
+[assembly: GoPositionMap("runtime/trace/trace_test.go", "trace_test.cs", "AA4ezLKClIKClIKCgpSCgriCgpSCgoCCpICCpII=")]
 // </GoSourcePositionMaps>
 
 namespace go.runtime;

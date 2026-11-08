@@ -61,7 +61,7 @@ internal static void runImporterTest(ж<testing.T> t, Func<map<@string, ж<types
         var initdata = initmap[pkg];
         var found = false;
         // Check that the package's own init function has the package's priority
-        foreach (var (_, pkginit) in initdata.Inits) {
+        foreach (var (_, pkginit) in range(initdata.Inits)) {
             if (pkginit.InitFunc == test.wantinits[0]) {
                 found = true;
                 break;
@@ -93,7 +93,7 @@ internal static array<importerTest> importerTests = new importerTest[]{
     new(pkgpath: "time", name: "Nanosecond", want: "const Nanosecond Duration", wantval: "1"),
     new(pkgpath: "unicode", name: "IsUpper", want: "func IsUpper(r rune) bool"),
     new(pkgpath: "unicode", name: "MaxRune", want: "const MaxRune untyped rune", wantval: "1114111"),
-    new(pkgpath: "imports", wantinits: slice<@string>(["imports..import", "fmt..import"])),
+    new(pkgpath: "imports", wantinits: ["imports..import", "fmt..import"]),
     new(pkgpath: "importsar", name: "Hello", want: "var Hello string"),
     new(pkgpath: "aliases", name: "A14", gccgoVersion: 7, want: "type A14 = func(int, T0) chan T2"),
     new(pkgpath: "aliases", name: "C0", gccgoVersion: 7, want: "type C0 struct{f1 C1; f2 C1}"),
@@ -111,9 +111,9 @@ internal static array<importerTest> importerTests = new importerTest[]{
 public static void TestGoxImporter(ж<testing.T> t) {
     testenv.MustHaveExec(new gccgoimporter_internal_test_package.testing_TжTB(t));
     var initmap = new map<ж<types.Package>, global::go.go.@internal.gccgoimporter_package.InitData>();
-    var imp = GetImporter(slice<@string>(["testdata"]), initmap);
+    var imp = GetImporter(["testdata"], initmap);
 
-    foreach (var (_, vᴛ1) in importerTests.ΔRangeSnapshot()) {
+    foreach (var (_, vᴛ1) in range(importerTests.ΔRangeSnapshot())) {
         ref var test = ref heap(new importerTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -135,10 +135,8 @@ internal static @string gccgoPath() {
     if (gccgoname == ""u8) {
         gccgoname = gccgoˢ2;
     }
-    {
-        var (gpath, gerr) = exec.LookPath(gccgoname); if (gerr == nil) {
-            return gpath;
-        }
+    var (gpath, gerr) = exec.LookPath(gccgoname); if (gerr == nil) {
+        return gpath;
     }
     return ""u8;
 }
@@ -177,13 +175,13 @@ public static void TestObjImporter(ж<testing.T> t) {
 
     @string tmpdir = t.TempDir();
     var initmap = new map<ж<types.Package>, global::go.go.@internal.gccgoimporter_package.InitData>();
-    var imp = GetImporter(slice<@string>([tmpdir]), initmap);
+    var imp = GetImporter([tmpdir], initmap);
 
     @string artmpdir = t.TempDir();
     var arinitmap = new map<ж<types.Package>, global::go.go.@internal.gccgoimporter_package.InitData>();
-    var arimp = GetImporter(slice<@string>([artmpdir]), arinitmap);
+    var arimp = GetImporter([artmpdir], arinitmap);
 
-    foreach (var (_, vᴛ1) in importerTests.ΔRangeSnapshot()) {
+    foreach (var (_, vᴛ1) in range(importerTests.ΔRangeSnapshot())) {
         ref var test = ref heap(new importerTest(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -194,10 +192,8 @@ public static void TestObjImporter(ж<testing.T> t) {
         }
 
         @string gofile = filepath.Join(testdataˢ, test.pkgpath + ".go");
-        {
-            var (_, errΔ1) = os.Stat(gofile); if (os.IsNotExist(errΔ1)) {
-                continue;
-            }
+        var (_, errΔ1) = os.Stat(gofile); if (os.IsNotExist(errΔ1)) {
+            continue;
         }
         @string ofile = filepath.Join(tmpdir, test.pkgpath + ".o");
         @string afile = filepath.Join(artmpdir, "lib" + test.pkgpath + ".a");
@@ -224,15 +220,11 @@ public static void TestObjImporter(ж<testing.T> t) {
 
         runImporterTest(t, arimp, arinitmap, Ꮡtest);
 
-        {
-            errΔ2 = os.Remove(ofile); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        errΔ2 = os.Remove(ofile); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
-        {
-            errΔ2 = os.Remove(afile); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        errΔ2 = os.Remove(afile); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
 }

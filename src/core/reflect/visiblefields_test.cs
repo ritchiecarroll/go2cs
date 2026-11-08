@@ -56,183 +56,183 @@ partial struct fieldsTestsᴛ1 /*dyn*/ {
     partial struct Δtypeᴛ44 /*dyn*/ {
         /*embed*/ public ΔM M;
     }
-internal static slice<fieldsTestsᴛ1> fieldsTests = slice<fieldsTestsᴛ1>([new(
+internal static slice<fieldsTestsᴛ1> fieldsTests = [new(
     testName: "SimpleStruct",
     val: new Δtypeᴛ37(),
-    expect: slice<structField>([new(
+    expect: [new(
         name: "A",
-        index: slice<nint>([0])
+        index: [0]
     ), new(
         name: "B",
-        index: slice<nint>([1])
+        index: [1]
     ), new(
         name: "C",
-        index: slice<nint>([2])
+        index: [2]
     )
-    ])
+    ]
 ), new(
     testName: "NonEmbeddedStructMember",
     val: new Δtypeᴛ38(),
-    expect: slice<structField>([new(
+    expect: [new(
         name: "A",
-        index: slice<nint>([0])
+        index: [0]
     )
-    ])
+    ]
 ), new(
     testName: "EmbeddedExportedStruct",
     val: new Δtypeᴛ39(),
-    expect: slice<structField>([new(
+    expect: [new(
         name: "SFG",
-        index: slice<nint>([0])
+        index: [0]
     ), new(
         name: "F",
-        index: slice<nint>([0, 0])
+        index: [0, 0]
     ), new(
         name: "G",
-        index: slice<nint>([0, 1])
+        index: [0, 1]
     )
-    ])
+    ]
 ), new(
     testName: "EmbeddedUnexportedStruct",
     val: new Δtypeᴛ40(),
-    expect: slice<structField>([new(
+    expect: [new(
         name: "sFG",
-        index: slice<nint>([0])
+        index: [0]
     ), new(
         name: "F",
-        index: slice<nint>([0, 0])
+        index: [0, 0]
     ), new(
         name: "G",
-        index: slice<nint>([0, 1])
+        index: [0, 1]
     )
-    ])
+    ]
 ), new(
     testName: "TwoEmbeddedStructsWithCancelingMembers",
     val: new Δtypeᴛ41(),
-    expect: slice<structField>([new(
+    expect: [new(
         name: "SFG",
-        index: slice<nint>([0])
+        index: [0]
     ), new(
         name: "G",
-        index: slice<nint>([0, 1])
+        index: [0, 1]
     ), new(
         name: "SF",
-        index: slice<nint>([1])
+        index: [1]
     )
-    ])
+    ]
 ), new(
     testName: "EmbeddedStructsWithSameFieldsAtDifferentDepths",
     val: new Δtypeᴛ42(),
-    expect: slice<structField>([new(
+    expect: [new(
         name: "SFGH3",
-        index: slice<nint>([0])
+        index: [0]
     ), new(
         name: "SFGH2",
-        index: slice<nint>([0, 0])
+        index: [0, 0]
     ), new(
         name: "SFGH1",
-        index: slice<nint>([0, 0, 0])
+        index: [0, 0, 0]
     ), new(
         name: "SFGH",
-        index: slice<nint>([0, 0, 0, 0])
+        index: [0, 0, 0, 0]
     ), new(
         name: "H",
-        index: slice<nint>([0, 0, 0, 0, 2])
+        index: [0, 0, 0, 0, 2]
     ), new(
         name: "SG1",
-        index: slice<nint>([1])
+        index: [1]
     ), new(
         name: "SG",
-        index: slice<nint>([1, 0])
+        index: [1, 0]
     ), new(
         name: "G",
-        index: slice<nint>([1, 0, 0])
+        index: [1, 0, 0]
     ), new(
         name: "SFG2",
-        index: slice<nint>([2])
+        index: [2]
     ), new(
         name: "SFG1",
-        index: slice<nint>([2, 0])
+        index: [2, 0]
     ), new(
         name: "SFG",
-        index: slice<nint>([2, 0, 0])
+        index: [2, 0, 0]
     ), new(
         name: "SF2",
-        index: slice<nint>([3])
+        index: [3]
     ), new(
         name: "SF1",
-        index: slice<nint>([3, 0])
+        index: [3, 0]
     ), new(
         name: "SF",
-        index: slice<nint>([3, 0, 0])
+        index: [3, 0, 0]
     ), new(
         name: "L",
-        index: slice<nint>([4])
+        index: [4]
     )
-    ])
+    ]
 ), new(
     testName: "EmbeddedPointerStruct",
     val: new Δtypeᴛ43(),
-    expect: slice<structField>([new(
+    expect: [new(
         name: "SF",
-        index: slice<nint>([0])
+        index: [0]
     ), new(
         name: "F",
-        index: slice<nint>([0, 0])
+        index: [0, 0]
     )
-    ])
+    ]
 ), new(
     testName: "EmbeddedNotAPointer",
     val: new Δtypeᴛ44(),
-    expect: slice<structField>([new(
+    expect: [new(
         name: "M",
-        index: slice<nint>([0])
+        index: [0]
     )
-    ])
+    ]
 ), new(
     testName: "RecursiveEmbedding",
     val: new Rec1(),
-    expect: slice<structField>([new(
+    expect: [new(
         name: "Rec2",
-        index: slice<nint>([0])
+        index: [0]
     ), new(
         name: "F",
-        index: slice<nint>([0, 0])
+        index: [0, 0]
     ), new(
         name: "Rec1",
-        index: slice<nint>([0, 1])
+        index: [0, 1]
     )
-    ])
+    ]
 ), new(
     testName: "RecursiveEmbedding2",
     val: new Rec2(),
-    expect: slice<structField>([new(
+    expect: [new(
         name: "F",
-        index: slice<nint>([0])
+        index: [0]
     ), new(
         name: "Rec1",
-        index: slice<nint>([1])
+        index: [1]
     ), new(
         name: "Rec2",
-        index: slice<nint>([1, 0])
+        index: [1, 0]
     )
-    ])
+    ]
 ), new(
     testName: "RecursiveEmbedding3",
     val: new RS3(),
-    expect: slice<structField>([new(
+    expect: [new(
         name: "RS2",
-        index: slice<nint>([0])
+        index: [0]
     ), new(
         name: "RS1",
-        index: slice<nint>([1])
+        index: [1]
     ), new(
         name: "i",
-        index: slice<nint>([1, 0])
+        index: [1, 0]
     )
-    ])
+    ]
 )
-]);
+];
 
 partial struct SFG {
     public nint F;
@@ -315,7 +315,7 @@ partial struct Rec2 {
 }
 
 public static void TestFields(ж<Δtesting.T> t) {
-    foreach (var (_, vᴛ1) in fieldsTests) {
+    foreach (var (_, vᴛ1) in range(fieldsTests)) {
         ref var test = ref heap(new fieldsTestsᴛ1(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -323,14 +323,12 @@ public static void TestFields(ж<Δtesting.T> t) {
         t.Run(test.testName, (ж<Δtesting.T> tΔ1) => {
             var typ = TypeOf(testʗ1.val);
             var fields = VisibleFields(typ);
-            {
-                nint got = len(fields);
-                nint want = len(testʗ1.expect); if (got != want) {
-                    tΔ1.Fatalf("unexpected field count; got %d want %d", got, want);
-                }
+            nint got = len(fields);
+            nint want = len(testʗ1.expect); if (got != want) {
+                tΔ1.Fatalf("unexpected field count; got %d want %d", got, want);
             }
 
-            foreach (var (j, field) in fields) {
+            foreach (var (j, field) in range(fields)) {
                 var expect = testʗ1.expect[j];
                 tΔ1.Logf("field %d: %s", j, expect.name);
                 var gotField = typ.FieldByIndex(field.Index);
@@ -376,7 +374,7 @@ internal partial struct TestFieldByIndexErr_B /*dyn*/ {
 // Must not panic with nil embedded pointer.
 public static void TestFieldByIndexErr(ж<Δtesting.T> t) {
     var v = ValueOf(new TestFieldByIndexErr_B());
-    var (_, err) = v.FieldByIndexErr(slice<nint>([0, 0]));
+    var (_, err) = v.FieldByIndexErr([0, 0]);
     if (err == nil) {
         t.Fatal(expectedErrorˢ);
     }

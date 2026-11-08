@@ -14,8 +14,6 @@ using Δtesting = testing_package;
 using time = time_package;
 using Δunicode = unicode_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fmt = fmt_package;
 using static go.fmt_internal_test_package;
 using ꓸꓸꓸany = Span<any>;
@@ -93,9 +91,7 @@ partial struct A {
 
 partial struct I /*num:nint*/;
 
-public static @string String(this I i) {
-    return Sprintf("<%d>"u8, (nint)i);
-}
+public static @string String(this I i) { return Sprintf("<%d>"u8, (nint)i); }
 
 partial struct B {
     public I I;
@@ -145,9 +141,7 @@ public static @string String(this ref P p) {
 // Fn is a function type with a String method.
 public delegate nint Fn();
 
-public static @string String(this Fn fn) {
-    return "String(fn)";
-}
+public static @string String(this Fn fn) { return "String(fn)"; }
 
 internal static Fn fnValue;
 
@@ -159,7 +153,6 @@ partial struct U {
 
 internal static readonly ж<array<renamedUint8>> Ꮡbarray = new StaticBox<array<renamedUint8>>(new renamedUint8[]{1, 2, 3, 4, 5}.array());
 internal static ref array<renamedUint8> barray => ref ((StaticBox<array<renamedUint8>>)Ꮡbarray).ValueSlot;
-
 internal static readonly ж<slice<renamedUint8>> Ꮡbslice = new StaticBox<slice<renamedUint8>>(barray[..]);
 internal static ref slice<renamedUint8> bslice => ref ((StaticBox<slice<renamedUint8>>)Ꮡbslice).ValueSlot;
 
@@ -169,7 +162,7 @@ internal static @string String(this byteStringer _) {
     return "X";
 }
 
-internal static slice<byteStringer> byteStringerSlice = slice<byteStringer>([(rune)'h', (rune)'e', (rune)'l', (rune)'l', (rune)'o']);
+internal static slice<byteStringer> byteStringerSlice = [(rune)'h', (rune)'e', (rune)'l', (rune)'l', (rune)'o'];
 
 partial struct byteFormatter /*num:byte*/;
 
@@ -177,15 +170,13 @@ internal static void Format(this byteFormatter _Δp0, fmt.State f, rune _Δp2) {
     Fprint(new fmt_test_package.fmt_StateᴠWriter(f), "X");
 }
 
-internal static slice<byteFormatter> byteFormatterSlice = slice<byteFormatter>([(rune)'h', (rune)'e', (rune)'l', (rune)'l', (rune)'o']);
+internal static slice<byteFormatter> byteFormatterSlice = [(rune)'h', (rune)'e', (rune)'l', (rune)'l', (rune)'o'];
 
 partial struct writeStringFormatter /*@string*/;
 
 internal static void Format(this writeStringFormatter sf, fmt.State f, rune c) {
-    {
-        var (sw, ok) = f._<Δio.StringWriter>(ᐧ); if (ok) {
-            sw.WriteString("***"u8 + ((@string)sf) + "***"u8);
-        }
+    var (sw, ok) = f._<Δio.StringWriter>(ᐧ); if (ok) {
+        sw.WriteString("***"u8 + ((@string)sf) + "***"u8);
     }
 }
 
@@ -744,8 +735,8 @@ internal static slice<fmtTestsᴛ1> fmtTests = slice<fmtTestsᴛ1>([
     new("%v", (complex64)(1F + 2F.i()), "(1+2i)"),
 
     // structs
-    new("%v", new A(1, 2, "a", slice<nint>([1, 2])), @"{1 2 a [1 2]}"),
-    new("%+v", new A(1, 2, "a", slice<nint>([1, 2])), @"{i:1 j:2 s:a x:[1 2]}"),
+    new("%v", new A(1, 2, "a", [1, 2]), @"{1 2 a [1 2]}"),
+    new("%+v", new A(1, 2, "a", [1, 2]), @"{i:1 j:2 s:a x:[1 2]}"),
 
     // +v on structs with Stringable items
     new("%+v", new B(1, 2), @"{I:<1> j:2}"),
@@ -763,7 +754,7 @@ internal static slice<fmtTestsᴛ1> fmtTests = slice<fmtTestsᴛ1>([
     new("%s", reflect.ValueOf((I)23), @"<23>"),
 
     // go syntax
-    new("%#v", new A(1, 2, "a", slice<nint>([1, 2])), @"fmt_test.A{i:1, j:0x2, s:""a"", x:[]int{1, 2}}"),
+    new("%#v", new A(1, 2, "a", [1, 2]), @"fmt_test.A{i:1, j:0x2, s:""a"", x:[]int{1, 2}}"),
     new("%#v", @new<byte>(), "(*uint8)(0xPTR)"),
     new("%#v", new channel<nint>(0), "(chan int)(0xPTR)"),
     new("%#v", (uint64)(18446744073709551615UL), "0xffffffffffffffff"),
@@ -1205,7 +1196,7 @@ internal static ref readonly @string ptrXˢ2 => ref ptrXˢ2ᵇ;
 private static readonly @string ptrXˢ2ᵇ = "PTR_X"u8;
 
 public static void TestSprintf(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in fmtTests) {
+    foreach (var (_, tt) in range(fmtTests)) {
         @string s = Sprintf(tt.fmt, tt.val);
         nint i = strings.Index(tt.@out, ptrˢ);
         if (i >= 0 && i < len(s)) {
@@ -1252,14 +1243,12 @@ public static void TestSprintf(ж<Δtesting.T> t) {
             s = p;
         }
         if (s != tt.@out) {
-            {
-                var (_, ok) = tt.val._<@string>(ᐧ); if (ok) {
-                    // Don't requote the already-quoted strings.
-                    // It's too confusing to read the errors.
-                    t.Errorf("Sprintf(%q, %q) = <%s> want <%s>", tt.fmt, tt.val, s, tt.@out);
-                } else {
-                    t.Errorf("Sprintf(%q, %v) = %q want %q", tt.fmt, tt.val, s, tt.@out);
-                }
+            var (_, ok) = tt.val._<@string>(ᐧ); if (ok) {
+                // Don't requote the already-quoted strings.
+                // It's too confusing to read the errors.
+                t.Errorf("Sprintf(%q, %q) = <%s> want <%s>", tt.fmt, tt.val, s, tt.@out);
+            } else {
+                t.Errorf("Sprintf(%q, %v) = %q want %q", tt.fmt, tt.val, s, tt.@out);
             }
         }
     }
@@ -1270,9 +1259,9 @@ public static void TestSprintf(ж<Δtesting.T> t) {
 public static void TestComplexFormatting(ж<Δtesting.T> t) {
     slice<bool> yesNo = slice<bool>([true, false]);
     slice<float64> values = slice<float64>([1D, 0D, -1D, posInf, negInf, NaN]);
-    foreach (var (_, plus) in yesNo) {
-        foreach (var (_, zero) in yesNo) {
-            foreach (var (_, space) in yesNo) {
+    foreach (var (_, plus) in range(yesNo)) {
+        foreach (var (_, zero) in range(yesNo)) {
+            foreach (var (_, space) in range(yesNo)) {
                 foreach (var (_, @char) in (@string)"fFeEgG") {
                     @string realFmt = "%";
                     if (zero) {
@@ -1294,8 +1283,8 @@ public static void TestComplexFormatting(ж<Δtesting.T> t) {
                     imagFmt += "+"u8;
                     imagFmt += "10.2"u8;
                     imagFmt += ((@string)@char);
-                    foreach (var (_, realValue) in values) {
-                        foreach (var (_, imagValue) in values) {
+                    foreach (var (_, realValue) in range(values)) {
+                        foreach (var (_, imagValue) in range(values)) {
                             @string one = Sprintf(realFmt, complex(realValue, imagValue));
                             @string two = Sprintf("("u8 + realFmt + imagFmt + "i)"u8, realValue, imagValue);
                             if (one != two) {
@@ -1316,7 +1305,7 @@ partial struct reorderTestsᴛ1 /*dyn*/ {
     internal SE val;
     internal @string @out;
 }
-internal static slice<reorderTestsᴛ1> reorderTests = slice<reorderTestsᴛ1>([
+internal static slice<reorderTestsᴛ1> reorderTests = [
     new("%[1]d", new SE(new any[]{(nint)1}.slice()), "1"),
     new("%[2]d", new SE(new any[]{(nint)2, (nint)1}.slice()), "1"),
     new("%[2]d %[1]d", new SE(new any[]{(nint)1, (nint)2}.slice()), "2 1"),
@@ -1352,10 +1341,10 @@ internal static slice<reorderTestsᴛ1> reorderTests = slice<reorderTestsᴛ1>([
     new("%2147483648d", new SE(new any[]{(nint)42}.slice()), "%!(NOVERB)%!(EXTRA int=42)"),
     new("%-2147483648d", new SE(new any[]{(nint)42}.slice()), "%!(NOVERB)%!(EXTRA int=42)"),
     new("%.2147483648d", new SE(new any[]{(nint)42}.slice()), "%!(NOVERB)%!(EXTRA int=42)")
-]);
+];
 
 public static void TestReorder(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in reorderTests) {
+    foreach (var (_, tt) in range(reorderTests)) {
         @string s = Sprintf(tt.fmt, tt.val.ꓸꓸꓸ);
         if (s != tt.@out) {
             t.Errorf("Sprintf(%q, %v) = <%s> want <%s>", tt.fmt, tt.val, s, tt.@out);
@@ -1566,9 +1555,7 @@ public static void BenchmarkFprintIntNoAlloc(ж<Δtesting.B> Ꮡb) {
 
 internal static readonly ж<bytes.Buffer> ᏑmallocBuf = new StaticBox<bytes.Buffer>(default(bytes.Buffer));
 internal static ref bytes.Buffer mallocBuf => ref ((StaticBox<bytes.Buffer>)ᏑmallocBuf).ValueSlot;
-
 internal static ж<nint> mallocPointer; // A pointer so we know the interface value won't allocate.
-
 internal static any sink;
 
 partial struct mallocTestᴛ1 /*dyn*/ {
@@ -1584,7 +1571,7 @@ internal partial struct mallocTest_P /*dyn*/ {
 internal partial struct mallocTest_Pᴛ1 /*dyn*/ {
     internal nint x, y;
 }
-internal static slice<mallocTestᴛ1> mallocTest = slice<mallocTestᴛ1>([
+internal static slice<mallocTestᴛ1> mallocTest = [
     new(0, @"Sprintf("""")", () => {
         _ = Sprintf(""u8);
     }),
@@ -1675,7 +1662,7 @@ internal static slice<mallocTestᴛ1> mallocTest = slice<mallocTestᴛ1>([
     new(2, @"sink = Errorf(""hello: %x"")", () => {
         sink = Errorf("hello: %x"u8, mallocPointer.OrTypedNil());
     })
-]);
+];
 
 internal static bytes.Buffer _ᴛ1ʗ;
 
@@ -1693,12 +1680,10 @@ public static void TestCountMallocs(ж<Δtesting.T> t) {
         t.Skip(skippingMallocCountUnderˢ);
         break;
     }}
-    foreach (var (_, mt) in mallocTest) {
+    foreach (var (_, mt) in range(mallocTest)) {
         var mallocs = Δtesting.AllocsPerRun(100, mt.fn);
-        {
-            var (got, max) = (mallocs, (float64)mt.count); if (got != max) {
-                t.Errorf("%s: got %v allocs, want %v", mt.desc, got, max);
-            }
+        var (got, max) = (mallocs, (float64)mt.count); if (got != max) {
+            t.Errorf("%s: got %v allocs, want %v", mt.desc, got, max);
         }
     }
 }
@@ -1731,7 +1716,7 @@ partial struct flagtestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string @out;
 }
-internal static slice<flagtestsᴛ1> flagtests = slice<flagtestsᴛ1>([
+internal static slice<flagtestsᴛ1> flagtests = [
     new("%a", "[%a]"),
     new("%-a", "[%-a]"),
     new("%+a", "[%+a]"),
@@ -1745,11 +1730,11 @@ internal static slice<flagtestsᴛ1> flagtests = slice<flagtestsᴛ1>([
     new("%-+1.2abc", "[%+-1.2a]bc"),
     new("%-1.2abc", "[%-1.2a]bc"),
     new("%-0abc", "[%-0a]bc")
-]);
+];
 
 public static void TestFlagParser(ж<Δtesting.T> t) {
     ref var flagprinter = ref heap(new flagPrinter(), out var Ꮡflagprinter);
-    foreach (var (_, tt) in flagtests) {
+    foreach (var (_, tt) in range(flagtests)) {
         @string s = Sprintf(tt.@in, Ꮡflagprinter);
         if (s != tt.@out) {
             t.Errorf("Sprintf(%q, &flagprinter) => %q, want %q", tt.@in, s, tt.@out);
@@ -1784,7 +1769,7 @@ public static void TestStructPrinter(ж<Δtesting.T> t) {
         new("%+v", "{a:abc b:def c:123}"),
         new("%#v", @"fmt_test.T{a:""abc"", b:""def"", c:123}")
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         @string @out = Sprintf(tt.fmt, s);
         if (@out != tt.@out) {
             t.Errorf("Sprintf(%q, s) = %#q, want %#q", tt.fmt, @out, tt.@out);
@@ -1803,7 +1788,7 @@ public static void TestSlicePrinter(ж<Δtesting.T> t) {
     if (s != "[]"u8) {
         t.Errorf("empty slice printed as %q not %q", s, (@string)"[]");
     }
-    Δslice = slice<nint>([1, 2, 3]);
+    Δslice = [1, 2, 3];
     s = Sprint(Δslice);
     if (s != "[1 2 3]"u8) {
         t.Errorf("slice: got %q expected %q", s, (@string)"[1 2 3]");
@@ -1952,7 +1937,7 @@ internal static slice<startestsᴛ1> startests = slice<startestsᴛ1>([
 ]);
 
 public static void TestWidthAndPrecision(ж<Δtesting.T> t) {
-    foreach (var (i, tt) in startests) {
+    foreach (var (i, tt) in range(startests)) {
         @string s = Sprintf(tt.fmt, tt.@in.ꓸꓸꓸ);
         if (s != tt.@out) {
             t.Errorf("#%d: %q: got %q expected %q", i, tt.fmt, s, tt.@out);
@@ -1995,7 +1980,7 @@ partial struct panictestsᴛ1 /*dyn*/ {
     internal any @in;
     internal @string @out;
 }
-internal static slice<panictestsᴛ1> panictests = slice<panictestsᴛ1>([
+internal static slice<panictestsᴛ1> panictests = [
     // String
     new("%s", (ж<PanicS>)nil, "<nil>"), // nil pointer special case
     new("%s", new PanicS(Δio.ErrUnexpectedEOF), "%!s(PANIC=String method: unexpected EOF)"),
@@ -2010,10 +1995,10 @@ internal static slice<panictestsᴛ1> panictests = slice<panictestsᴛ1>([
     new("%s", (ж<PanicF>)nil, "<nil>"), // nil pointer special case
     new("%s", new PanicF(Δio.ErrUnexpectedEOF), "%!s(PANIC=Format method: unexpected EOF)"),
     new("%s", new PanicF((nint)3), "%!s(PANIC=Format method: 3)")
-]);
+];
 
 public static void TestPanics(ж<Δtesting.T> t) {
-    foreach (var (i, tt) in panictests) {
+    foreach (var (i, tt) in range(panictests)) {
         @string s = Sprintf(tt.fmt, tt.@in);
         if (s != tt.@out) {
             t.Errorf("%d: %q: got %q expected %q", i, tt.fmt, s, tt.@out);
@@ -2036,11 +2021,9 @@ private static readonly @string failˢᵇ = "FAIL"u8;
 public static @string String(this ж<Recur> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    {
-        fmt_test_package.recurCount++; if (fmt_test_package.recurCount > 10) {
-            r.failed.Value = true;
-            return failˢ;
-        }
+    fmt_test_package.recurCount++; if (fmt_test_package.recurCount > 10) {
+        r.failed.Value = true;
+        return failˢ;
     }
     // This will call badVerb. Before the fix, that would cause us to recur into
     // this routine to print %!p(value). Now we don't call the user's method
@@ -2077,9 +2060,7 @@ public static void TestIsSpace(ж<Δtesting.T> t) {
     }
 }
 
-internal static @string hideFromVet(@string s) {
-    return s;
-}
+internal static @string hideFromVet(@string s) { return s; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sSSSSˢ => ref sSSSSˢᵇ;
@@ -2110,7 +2091,7 @@ partial struct formatterFlagTestsᴛ1 /*dyn*/ {
     internal any val;
     internal @string @out;
 }
-internal static slice<formatterFlagTestsᴛ1> formatterFlagTests = slice<formatterFlagTestsᴛ1>([
+internal static slice<formatterFlagTestsᴛ1> formatterFlagTests = [
     // scalar values with the (unused by fmt) 'a' verb.
     new("%a", new flagPrinter(), "[%a]"),
     new("%-a", new flagPrinter(), "[%-a]"),
@@ -2170,10 +2151,10 @@ internal static slice<formatterFlagTestsᴛ1> formatterFlagTests = slice<formatt
     new("%-+1.2vbc", new flagPrinter[]{}.array(1), "[[%+-1.2v]]bc"),
     new("%-1.2vbc", new flagPrinter[]{}.array(1), "[[%-1.2v]]bc"),
     new("%-0vbc", new flagPrinter[]{}.array(1), "[[%-0v]]bc")
-]);
+];
 
 public static void TestFormatterFlags(ж<Δtesting.T> t) {
-    foreach (var (_, tt) in formatterFlagTests) {
+    foreach (var (_, tt) in range(formatterFlagTests)) {
         @string s = Sprintf(tt.@in, tt.val);
         if (s != tt.@out) {
             t.Errorf("Sprintf(%q, %T) = %q, want %q", tt.@in, tt.val, s, tt.@out);
@@ -2198,7 +2179,7 @@ public static void TestParsenum(ж<Δtesting.T> t) {
         new("1234", 0, 4, 1234, true, 4),
         new("1a234", 1, 3, 0, false, 1)
     ]);
-    foreach (var (_, tt) in testCases) {
+    foreach (var (_, tt) in range(testCases)) {
         var (num, isnum, newi) = fmt_internal_test_package.Parsenum(tt.s, tt.start, tt.end);
         if (num != tt.num || isnum != tt.isnum || newi != tt.newi) {
             t.Errorf("parsenum(%q, %d, %d) = %d, %v, %d, want %d, %v, %d", tt.s, tt.start, tt.end, num, isnum, newi, tt.num, tt.isnum, tt.newi);

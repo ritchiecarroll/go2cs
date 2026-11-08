@@ -57,16 +57,16 @@ private static readonly @string noinfoˢᵇ = "noinfo"u8;
 public static void BenchmarkCheck(ж<testing.B> b) {
     testenv.MustHaveGoBuild(new types_test_package.testing_BжTB(b)); // The Go command is needed for the importer to determine the locations of stdlib .a files.
 
-    foreach (var (_, p) in slice<@string>([
+    foreach (var (_, p) in range(slice<@string>([
         "net/http",
         "go/parser",
         "go/constant",
         "runtime",
         filepath.Join("go", internalˢ, gcimporterˢ)
-    ])) {
+    ]))) {
         b.Run(path.Base(p), (ж<testing.B> bΔ1) => {
             @string pathΔ1 = filepath.Join("..", "..", p);
-            foreach (var (_, ignoreFuncBodies) in slice<bool>([false, true])) {
+            foreach (var (_, ignoreFuncBodies) in range(slice<bool>([false, true]))) {
                 @string name = funcbodiesˢ;
                 if (ignoreFuncBodies) {
                     name = nofuncbodiesˢ;
@@ -121,10 +121,8 @@ internal static void runbench(ж<testing.B> Ꮡb, @string path, bool ignoreFuncB
                 Scopes: new map<ast.Node, ж<typesꓸScope>>()
             ));
         }
-        {
-            var (_, errΔ1) = Ꮡconf.Check(path, fset, files, info); if (errΔ1 != nil) {
-                Ꮡb.Fatal(errΔ1);
-            }
+        var (_, errΔ1) = Ꮡconf.Check(path, fset, files, info); if (errΔ1 != nil) {
+            Ꮡb.Fatal(errΔ1);
         }
     }
     b.StopTimer();
@@ -140,7 +138,7 @@ internal static (slice<ж<ast.File>>, error) pkgFiles(ж<token.FileSet> fset, @s
     }
 
     slice<ж<ast.File>> files = default;
-    foreach (var (_, filename) in filenames) {
+    foreach (var (_, filename) in range(filenames)) {
         var (@file, errΔ1) = parser.ParseFile(fset, filename, default, 0);
         if (errΔ1 != nil) {
             return (default, errΔ1);

@@ -95,7 +95,7 @@ public static void TestWriteError(ж<testing.T> t) {
             if (err == nil) {
                 t.Fatalf("Level %d: Expected an error, writer was %#v", l, ew.OrTypedNil());
             }
-            (var n2, err) = w.Write(slice<byte>([1, 2, 2, 3, 4, 5]));
+            (var n2, err) = w.Write([1, 2, 2, 3, 4, 5]);
             if (n2 != 0) {
                 t.Fatal(levelˢ, l, expected0LengthWriteGotˢ, nΔ1);
             }
@@ -112,7 +112,7 @@ public static void TestWriteError(ж<testing.T> t) {
             }
 
             w.Reset(io.Discard);
-            (n2, err) = w.Write(slice<byte>([1, 2, 3, 4, 5, 6]));
+            (n2, err) = w.Write([1, 2, 3, 4, 5, 6]);
             if (err != nil) {
                 t.Fatal(levelˢ, l, gotUnexpectedErrorAfterˢ, err);
             }
@@ -157,7 +157,7 @@ internal static void testDeterministic(nint i, ж<testing.T> t) {
     // Create a random, but compressible stream.
     var rng = rand.New(rand.NewSource(1));
     var t1 = new slice<byte>(length);
-    foreach (var iΔ1 in range(t1)) {
+    foreach (var iΔ1 in range(len(t1))) {
         t1[iΔ1] = (byte)(rng.Int63() & 7);
     }
 

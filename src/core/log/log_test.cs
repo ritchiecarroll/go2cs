@@ -45,7 +45,7 @@ internal partial struct tester {
     internal @string pattern; // regexp that log output must match; we add ^ and expected_text$ always
 }
 
-internal static slice<tester> tests = slice<tester>([
+internal static slice<tester> tests = [
     // individual pieces:
     new(0, "", ""),
     new(0, "XXX", "XXX"),
@@ -62,7 +62,7 @@ internal static slice<tester> tests = slice<tester>([
     new((nint)((nint)(UntypedInt)((UntypedInt)(Ldate | Ltime) | Lmicroseconds) | (nint)Lshortfile), "XXX", "XXX" + Rdate + " " + Rtime + Rmicroseconds + " " + Rshortfile + " "),
     new((nint)((nint)(UntypedInt)((UntypedInt)((UntypedInt)(Ldate | Ltime) | Lmicroseconds) | Llongfile) | (nint)Lmsgprefix), "XXX", Rdate + " " + Rtime + Rmicroseconds + " " + Rlongfile + " XXX"),
     new((nint)((nint)(UntypedInt)((UntypedInt)((UntypedInt)(Ldate | Ltime) | Lmicroseconds) | Lshortfile) | (nint)Lmsgprefix), "XXX", Rdate + " " + Rtime + Rmicroseconds + " " + Rshortfile + " XXX")
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object helloˢ = (@string)"hello"u8;
@@ -94,15 +94,13 @@ internal static void testPrint(ж<testing.T> t, nint flag, @string prefix, @stri
 }
 
 public static partial void TestDefault(ж<testing.T> t) {
-    {
-        var got = Default(); if (got != std) {
-            t.Errorf("Default [%p] should be std [%p]", got.OrTypedNil(), std.OrTypedNil());
-        }
+    var got = Default(); if (got != std) {
+        t.Errorf("Default [%p] should be std [%p]", got.OrTypedNil(), std.OrTypedNil());
     }
 }
 
 public static void TestAll(ж<testing.T> t) {
-    foreach (var (_, testcase) in tests) {
+    foreach (var (_, testcase) in range(tests)) {
         testPrint(t, testcase.flag, testcase.prefix, testcase.pattern, false);
         testPrint(t, testcase.flag, testcase.prefix, testcase.pattern, true);
     }
@@ -117,10 +115,8 @@ public static void TestOutput(ж<testing.T> t) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     var l = New(new log_test_package.strings_BuilderжWriter(Ꮡb), ""u8, 0);
     l.Println(testString);
-    {
-        @string expect = testString + "\n"; if (b.String() != expect) {
-            t.Errorf("log output should match %q is %q", expect, b.String());
-        }
+    @string expect = testString + "\n"; if (b.String() != expect) {
+        t.Errorf("log output should match %q is %q", expect, b.String());
     }
 }
 
@@ -195,10 +191,8 @@ public static void TestFlagAndPrefixSetting(ж<testing.T> t) {
     l.SetFlags(0);
     l.SetPrefix("\n");
     l.Output(0, ""u8);
-    {
-        @string got = Ꮡb.String(); if (got != "\n"u8) {
-            t.Errorf("message mismatch:\ngot  %q\nwant %q", got, (@string)"\n");
-        }
+    @string got = Ꮡb.String(); if (got != "\n"u8) {
+        t.Errorf("message mismatch:\ngot  %q\nwant %q", got, (@string)"\n");
     }
 }
 
@@ -352,7 +346,7 @@ public static partial void TestCallDepth(ж<testing.T> t) {
     }
     line -= len(tests) + 3;
 
-    foreach (var (i, vᴛ1) in tests) {
+    foreach (var (i, vᴛ1) in range(tests)) {
         ref var tt = ref heap(new TestCallDepth_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -373,10 +367,8 @@ public static partial void TestCallDepth(ж<testing.T> t) {
             cmd.Env = append(cmd.Environ(), envVar + "=1");
 
             var (@out, errΔ1) = cmd.CombinedOutput();
-            {
-                var (_, okΔ1) = errors.AsType<ж<exec.ExitError>>(errΔ1); if (!okΔ1) {
-                    tΔ1.Fatalf("expected exec.ExitError: %v", errΔ1);
-                }
+            var (_, okΔ1) = errors.AsType<ж<exec.ExitError>>(errΔ1); if (!okΔ1) {
+                tΔ1.Fatalf("expected exec.ExitError: %v", errΔ1);
             }
 
             (_, var firstLine, errΔ1) = bufio.ScanLines(@out, true);

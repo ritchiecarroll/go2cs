@@ -17,8 +17,6 @@ using iotest = go.testing.iotest_package;
 using time = time_package;
 using utf8 = go.unicode.utf8_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using bufio = bufio_package;
 using go.testing;
 using go.unicode;
@@ -98,13 +96,13 @@ partial struct readMaker {
     internal Func<Δio.Reader, Δio.Reader> fn;
 }
 
-internal static slice<readMaker> readMakers = slice<readMaker>([
+internal static slice<readMaker> readMakers = [
     new("full", (Δio.Reader r) => r),
     new("byte", iotest.OneByteReader),
     new("half", iotest.HalfReader),
     new("data+err", iotest.DataErrReader),
     new("timeout", iotest.TimeoutReader)
-]);
+];
 
 // Call ReadString (which ends up calling everything else)
 // to accumulate the text of a file.
@@ -146,7 +144,7 @@ partial struct bufReader {
     internal Func<ж<bufio.Reader>, @string> fn;
 }
 
-internal static slice<bufReader> bufreaders = slice<bufReader>([
+internal static slice<bufReader> bufreaders = [
     new("1", (ж<bufio.Reader> b) => reads(b, 1)),
     new("2", (ж<bufio.Reader> b) => reads(b, 2)),
     new("3", (ж<bufio.Reader> b) => reads(b, 3)),
@@ -155,13 +153,13 @@ internal static slice<bufReader> bufreaders = slice<bufReader>([
     new("7", (ж<bufio.Reader> b) => reads(b, 7)),
     new("bytes", readBytes),
     new("lines", readLines)
-]);
+];
 
 internal static UntypedInt minReadBufferSize => 16;
 
-internal static slice<nint> bufsizes = slice<nint>([
+internal static slice<nint> bufsizes = [
     0, minReadBufferSize, 23, 32, 46, 64, 93, 128, 1024, 4096
-]);
+];
 
 public static void TestReader(ж<Δtesting.T> t) {
     array<@string> texts = new(31);
@@ -275,19 +273,19 @@ internal static void readRuneSegments(ж<Δtesting.T> t, slice<@string> segments
     }
 }
 
-internal static slice<slice<@string>> segmentList = slice<slice<@string>>([
-    slice<@string>([]),
-    slice<@string>([""]),
-    slice<@string>(["日", "本語"]),
-    slice<@string>(["\u65e5", "\u672c", "\u8a9e"]),
-    slice<@string>(["\U000065e5", "\U0000672c", "\U00008a9e"]),
-    slice<@string>([((@string)(new byte[]{0xe6})), ((@string)(new byte[]{0x97, 0xa5, 0xe6})), ((@string)(new byte[]{0x9c, 0xac, 0xe8, 0xaa, 0x9e}))]),
-    slice<@string>(["Hello", ", ", "World", "!"]),
-    slice<@string>(["Hello", ", ", "", "World", "!"])
-]);
+internal static slice<slice<@string>> segmentList = [
+    [],
+    [""],
+    ["日", "本語"],
+    ["\u65e5", "\u672c", "\u8a9e"],
+    ["\U000065e5", "\U0000672c", "\U00008a9e"],
+    [((@string)(new byte[]{0xe6})), ((@string)(new byte[]{0x97, 0xa5, 0xe6})), ((@string)(new byte[]{0x9c, 0xac, 0xe8, 0xaa, 0x9e}))],
+    ["Hello", ", ", "World", "!"],
+    ["Hello", ", ", "", "World", "!"]
+];
 
 public static void TestReadRune(ж<Δtesting.T> t) {
-    foreach (var (_, s) in segmentList) {
+    foreach (var (_, s) in range(segmentList)) {
         readRuneSegments(t, s);
     }
 }
@@ -313,10 +311,8 @@ public static void TestUnreadRune(ж<Δtesting.T> t) {
         }
         got += ((@string)r1);
         // Put it back and read it again.
-        {
-            err = r.UnreadRune(); if (err != nil) {
-                t.Fatal(unexpectedErrorOnˢ2, err);
-            }
+        err = r.UnreadRune(); if (err != nil) {
+            t.Fatal(unexpectedErrorOnˢ2, err);
         }
         (var r2, _, err) = r.ReadRune();
         if (err != nil) {
@@ -340,10 +336,8 @@ public static void TestNoUnreadRuneAfterPeek(ж<Δtesting.T> t) {
     var br = NewReader(new bufio_test_package.strings_ReaderжReader(strings.NewReader(exampleˢ)));
     br.ReadRune();
     br.Peek(1);
-    {
-        var err = br.UnreadRune(); if (err == nil) {
-            t.Error(unreadRuneDidnTFailAfterˢ);
-        }
+    var err = br.UnreadRune(); if (err == nil) {
+        t.Error(unreadRuneDidnTFailAfterˢ);
     }
 }
 
@@ -354,10 +348,8 @@ public static void TestNoUnreadByteAfterPeek(ж<Δtesting.T> t) {
     var br = NewReader(new bufio_test_package.strings_ReaderжReader(strings.NewReader(exampleˢ)));
     br.ReadByte();
     br.Peek(1);
-    {
-        var err = br.UnreadByte(); if (err == nil) {
-            t.Error(unreadByteDidnTFailAfterˢ);
-        }
+    var err = br.UnreadByte(); if (err == nil) {
+        t.Error(unreadByteDidnTFailAfterˢ);
     }
 }
 
@@ -368,10 +360,8 @@ public static void TestNoUnreadRuneAfterDiscard(ж<Δtesting.T> t) {
     var br = NewReader(new bufio_test_package.strings_ReaderжReader(strings.NewReader(exampleˢ)));
     br.ReadRune();
     br.Discard(1);
-    {
-        var err = br.UnreadRune(); if (err == nil) {
-            t.Error(unreadRuneDidnTFailAfterˢ2);
-        }
+    var err = br.UnreadRune(); if (err == nil) {
+        t.Error(unreadRuneDidnTFailAfterˢ2);
     }
 }
 
@@ -382,10 +372,8 @@ public static void TestNoUnreadByteAfterDiscard(ж<Δtesting.T> t) {
     var br = NewReader(new bufio_test_package.strings_ReaderжReader(strings.NewReader(exampleˢ)));
     br.ReadByte();
     br.Discard(1);
-    {
-        var err = br.UnreadByte(); if (err == nil) {
-            t.Error(unreadByteDidnTFailAfterˢ2);
-        }
+    var err = br.UnreadByte(); if (err == nil) {
+        t.Error(unreadByteDidnTFailAfterˢ2);
     }
 }
 
@@ -395,10 +383,8 @@ internal static readonly object unreadRuneDidnTFailAfterˢ3 = (@string)"UnreadRu
 public static void TestNoUnreadRuneAfterWriteTo(ж<Δtesting.T> t) {
     var br = NewReader(new bufio_test_package.strings_ReaderжReader(strings.NewReader(exampleˢ)));
     br.WriteTo(Δio.Discard);
-    {
-        var err = br.UnreadRune(); if (err == nil) {
-            t.Error(unreadRuneDidnTFailAfterˢ3);
-        }
+    var err = br.UnreadRune(); if (err == nil) {
+        t.Error(unreadRuneDidnTFailAfterˢ3);
     }
 }
 
@@ -408,10 +394,8 @@ internal static readonly object unreadByteDidnTFailAfterˢ3 = (@string)"UnreadBy
 public static void TestNoUnreadByteAfterWriteTo(ж<Δtesting.T> t) {
     var br = NewReader(new bufio_test_package.strings_ReaderжReader(strings.NewReader(exampleˢ)));
     br.WriteTo(Δio.Discard);
-    {
-        var err = br.UnreadByte(); if (err == nil) {
-            t.Error(unreadByteDidnTFailAfterˢ3);
-        }
+    var err = br.UnreadByte(); if (err == nil) {
+        t.Error(unreadByteDidnTFailAfterˢ3);
     }
 }
 
@@ -435,10 +419,8 @@ public static void TestUnreadByte(ж<Δtesting.T> t) {
         }
         got += ((@string)b1);
         // Put it back and read it again.
-        {
-            err = r.UnreadByte(); if (err != nil) {
-                t.Fatal(unexpectedErrorOnˢ4, err);
-            }
+        err = r.UnreadByte(); if (err != nil) {
+            t.Fatal(unexpectedErrorOnˢ4, err);
         }
         (var b2, err) = r.ReadByte();
         if (err != nil) {
@@ -470,10 +452,8 @@ public static void TestUnreadByteMultiple(ж<Δtesting.T> t) {
         }
         // Unread one byte if there is one.
         if (n > 0) {
-            {
-                var err = r.UnreadByte(); if (err != nil) {
-                    t.Errorf("n = %d: unexpected error on UnreadByte: %v", n, err);
-                }
+            var err = r.UnreadByte(); if (err != nil) {
+                t.Errorf("n = %d: unexpected error on UnreadByte: %v", n, err);
             }
         }
         // Test that we cannot unread any further.
@@ -510,7 +490,7 @@ public static void TestUnreadByteOthers(ж<Δtesting.T> t) {
     ]);
 
     // Try all readers with UnreadByte.
-    foreach (var (rno, read) in readers) {
+    foreach (var (rno, read) in range(readers)) {
         // Some input data that is longer than the minimum reader buffer size.
         const nint n = 10;
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
@@ -526,10 +506,8 @@ public static void TestUnreadByteOthers(ж<Δtesting.T> t) {
             if (errΔ1 != nil) {
                 t.Fatalf("#%d: unexpected error reading to %c: %v", rno, delim, errΔ1);
             }
-            {
-                @string got = (@string)data; if (got != want) {
-                    t.Fatalf("#%d: got %q, want %q", rno, got, want);
-                }
+            @string got = (@string)data; if (got != want) {
+                t.Fatalf("#%d: got %q, want %q", rno, got, want);
             }
         }
 
@@ -537,10 +515,8 @@ public static void TestUnreadByteOthers(ж<Δtesting.T> t) {
         for (nint i = 0; i < n; i++) {
             readTo((byte)'d', abcdˢ);
             for (nint j = 0; j < 3; j++) {
-                {
-                    var errΔ2 = r.UnreadByte(); if (errΔ2 != nil) {
-                        t.Fatalf("#%d: unexpected error on UnreadByte: %v", rno, errΔ2);
-                    }
+                var errΔ2 = r.UnreadByte(); if (errΔ2 != nil) {
+                    t.Fatalf("#%d: unexpected error on UnreadByte: %v", rno, errΔ2);
                 }
                 readTo((byte)'d', "d");
             }
@@ -576,7 +552,7 @@ internal static readonly object expectedErrorAfterˢ4 = (@string)"expected error
 // Test that UnreadRune fails if the preceding operation was not a ReadRune.
 public static void TestUnreadRuneError(ж<Δtesting.T> t) {
     var buf = new slice<byte>(3); // All runes in this test are 3 bytes long
-    var r = NewReader(new bufio_test_package.StringReaderжReader(Ꮡ(new StringReader(data: slice<@string>(["日本語日本語日本語"])))));
+    var r = NewReader(new bufio_test_package.StringReaderжReader(Ꮡ(new StringReader(data: ["日本語日本語日本語"]))));
     if (r.UnreadRune() == nil) {
         t.Error(expectedErrorOnˢ);
     }
@@ -584,10 +560,8 @@ public static void TestUnreadRuneError(ж<Δtesting.T> t) {
     if (err != nil) {
         t.Error(unexpectedErrorOnˢ5, err);
     }
-    {
-        err = r.UnreadRune(); if (err != nil) {
-            t.Error(unexpectedErrorOnˢ6, err);
-        }
+    err = r.UnreadRune(); if (err != nil) {
+        t.Error(unexpectedErrorOnˢ6, err);
     }
     if (r.UnreadRune() == nil) {
         t.Error(expectedErrorAfterˢ);
@@ -609,7 +583,7 @@ public static void TestUnreadRuneError(ж<Δtesting.T> t) {
     if (err != nil) {
         t.Error(unexpectedErrorOnˢ7, err);
     }
-    foreach (var _ᴛ1 in range(buf)) {
+    foreach (var _ᴛ1 in range(len(buf))) {
         (_, err) = r.ReadByte();
         if (err != nil) {
             t.Error(unexpectedErrorOnˢ8, err);
@@ -698,15 +672,13 @@ public static void TestReadWriteRune(ж<Δtesting.T> t) {
 public static void TestWriteInvalidRune(ж<Δtesting.T> t) {
     // Invalid runes, including negative ones, should be written as the
     // replacement character.
-    foreach (var (_, r) in slice<rune>([-1, utf8.MaxRune + 1])) {
+    foreach (var (_, r) in range(slice<rune>([-1, utf8.MaxRune + 1]))) {
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         var w = NewWriter(new bufio_test_package.strings_BuilderжWriter(Ꮡbuf));
         w.WriteRune(r);
         w.Flush();
-        {
-            @string s = buf.String(); if (s != "\uFFFD"u8) {
-                t.Errorf("WriteRune(%d) wrote %q, not replacement character", r, s);
-            }
+        @string s = buf.String(); if (s != "\uFFFD"u8) {
+            t.Errorf("WriteRune(%d) wrote %q, not replacement character", r, s);
         }
     }
 }
@@ -762,10 +734,8 @@ public static void TestWriter(ж<Δtesting.T> t) {
                 t.Errorf("%s: buf.Write %d = %d, %v", context, nwrite, n, e1);
                 continue;
             }
-            {
-                var e = buf.Flush(); if (e != nil) {
-                    t.Errorf("%s: buf.Flush = %v", context, e);
-                }
+            var e = buf.Flush(); if (e != nil) {
+                t.Errorf("%s: buf.Flush = %v", context, e);
             }
 
             var written = w.Bytes();
@@ -825,17 +795,17 @@ internal static (nint, error) Write(this errorWriterTest w, slice<byte> p) {
     return (quo(len(p) * w.n, w.m), w.err);
 }
 
-internal static slice<errorWriterTest> errorWriterTests = slice<errorWriterTest>([
+internal static slice<errorWriterTest> errorWriterTests = [
     new(0, 1, default, Δio.ErrShortWrite),
     new(1, 2, default, Δio.ErrShortWrite),
     new(1, 1, default, default),
     new(0, 1, Δio.ErrClosedPipe, Δio.ErrClosedPipe),
     new(1, 2, Δio.ErrClosedPipe, Δio.ErrClosedPipe),
     new(1, 1, Δio.ErrClosedPipe, Δio.ErrClosedPipe)
-]);
+];
 
 public static void TestWriteErrors(ж<Δtesting.T> t) {
-    foreach (var (_, w) in errorWriterTests) {
+    foreach (var (_, w) in range(errorWriterTests)) {
         var buf = NewWriter(w);
         var (_, e) = buf.Write(slice<byte>("hello world"u8));
         if (e != nil) {
@@ -902,10 +872,8 @@ public static void TestWriteString(ж<Δtesting.T> t) {
     b.WriteString("7890");                      // easy after flush
     b.WriteString("abcdefghijklmnopqrstuvwxy"); // hard
     b.WriteString("z");
-    {
-        var err = b.Flush(); if (err != nil) {
-            t.Error(writeStringˢ, err);
-        }
+    var err = b.Flush(); if (err != nil) {
+        t.Error(writeStringˢ, err);
     }
     @string s = "01234567890abcdefghijklmnopqrstuvwxyz";
     if (buf.String() != s) {
@@ -1110,9 +1078,7 @@ public static void TestPeekThenUnreadRune(ж<Δtesting.T> t) {
 }
 
 internal static slice<byte> testOutput = slice<byte>("0123456789abcdefghijklmnopqrstuvwxy"u8);
-
 internal static slice<byte> testInput = slice<byte>("012\n345\n678\n9ab\ncde\nfgh\nijk\nlmn\nopq\nrst\nuvw\nxy"u8);
-
 internal static slice<byte> testInputrn = slice<byte>("012\r\n345\r\n678\r\n9ab\r\ncde\r\nfgh\r\nijk\r\nlmn\r\nopq\r\nrst\r\nuvw\r\nxy\r\n\n\r\n"u8);
 
 // TestReader wraps a []byte and returns reads of a specific length.
@@ -1159,10 +1125,8 @@ internal static void testReadLine(ж<Δtesting.T> t, slice<byte> input) {
                 }
                 break;
             }
-            {
-                var want = testOutput.slice(done, done + len(line)); if (!bytes.Equal(want, line)) {
-                    t.Errorf("Bad line at stride %d: want: %x got: %x", stride, want, line);
-                }
+            var want = testOutput.slice(done, done + len(line)); if (!bytes.Equal(want, line)) {
+                t.Errorf("Bad line at stride %d: want: %x got: %x", stride, want, line);
             }
             done += len(line);
         }
@@ -1277,31 +1241,31 @@ partial struct readLineNewlinesTestsᴛ1 /*dyn*/ {
     internal @string input;
     internal slice<readLineResult> expect;
 }
-internal static slice<readLineNewlinesTestsᴛ1> readLineNewlinesTests = slice<readLineNewlinesTestsᴛ1>([
-    new("012345678901234\r\n012345678901234\r\n", slice<readLineResult>([
+internal static slice<readLineNewlinesTestsᴛ1> readLineNewlinesTests = [
+    new("012345678901234\r\n012345678901234\r\n", [
         new(slice<byte>("012345678901234"u8), true, default),
         new(default, false, default),
         new(slice<byte>("012345678901234"u8), true, default),
         new(default, false, default),
         new(default, false, Δio.EOF)
-    ])),
-    new("0123456789012345\r012345678901234\r", slice<readLineResult>([
+    ]),
+    new("0123456789012345\r012345678901234\r", [
         new(slice<byte>("0123456789012345"u8), true, default),
         new(slice<byte>("\r012345678901234"u8), true, default),
         new(slice<byte>("\r"u8), false, default),
         new(default, false, Δio.EOF)
-    ]))
-]);
+    ])
+];
 
 public static void TestReadLineNewlines(ж<Δtesting.T> t) {
-    foreach (var (_, e) in readLineNewlinesTests) {
+    foreach (var (_, e) in range(readLineNewlinesTests)) {
         testReadLineNewlines(t, e.input, e.expect);
     }
 }
 
 internal static void testReadLineNewlines(ж<Δtesting.T> t, @string input, slice<readLineResult> expect) {
     var b = NewReaderSize(new bufio_test_package.strings_ReaderжReader(strings.NewReader(input)), minReadBufferSize);
-    foreach (var (i, e) in expect) {
+    foreach (var (i, e) in range(expect)) {
         var (line, isPrefix, err) = b.ReadLine();
         if (!bytes.Equal(line, e.line)) {
             t.Errorf("%q call %d, line == %q, want %q", input, i, line, e.line);
@@ -1320,7 +1284,7 @@ internal static void testReadLineNewlines(ж<Δtesting.T> t, @string input, slic
 
 internal static slice<byte> createTestInput(nint n) {
     var input = new slice<byte>(n);
-    foreach (var i in range(input)) {
+    foreach (var i in range(len(input))) {
         // 101 and 251 are arbitrary prime numbers.
         // The idea is to create an input sequence
         // which doesn't repeat too frequently.
@@ -1336,13 +1300,11 @@ public static void TestReaderWriteTo(ж<Δtesting.T> t) {
     var input = createTestInput(8192);
     var r = NewReader(new onlyReader(new bufio_test_package.bytes_ReaderжReader(bytes.NewReader(input))));
     var w = @new<bytes.Buffer>();
-    {
-        var (n, err) = r.WriteTo(new bufio_test_package.bytes_BufferжWriter(w)); if (err != nil || n != (int64)len(input)) {
-            t.Fatalf("r.WriteTo(w) = %d, %v, want %d, nil", n, err, len(input));
-        }
+    var (n, err) = r.WriteTo(new bufio_test_package.bytes_BufferжWriter(w)); if (err != nil || n != (int64)len(input)) {
+        t.Fatalf("r.WriteTo(w) = %d, %v, want %d, nil", n, err, len(input));
     }
 
-    foreach (var (i, val) in w.Bytes()) {
+    foreach (var (i, val) in range(w.Bytes())) {
         if (val != input[i]) {
             t.Errorf("after write: out[%d] = %#x, want %#x", i, val, input[i]);
         }
@@ -1363,20 +1325,18 @@ internal static (nint, error) Write(this errorWriterToTest w, slice<byte> p) {
     return (len(p) * w.wn, w.werr);
 }
 
-internal static slice<errorWriterToTest> errorWriterToTests = slice<errorWriterToTest>([
+internal static slice<errorWriterToTest> errorWriterToTests = [
     new(1, 0, default, Δio.ErrClosedPipe, Δio.ErrClosedPipe),
     new(0, 1, Δio.ErrClosedPipe, default, Δio.ErrClosedPipe),
     new(0, 0, Δio.ErrUnexpectedEOF, Δio.ErrClosedPipe, Δio.ErrUnexpectedEOF),
     new(0, 1, Δio.EOF, default, default)
-]);
+];
 
 public static void TestReaderWriteToErrors(ж<Δtesting.T> t) {
-    foreach (var (i, rw) in errorWriterToTests) {
+    foreach (var (i, rw) in range(errorWriterToTests)) {
         var r = NewReader(rw);
-        {
-            var (_, err) = r.WriteTo(rw); if (!AreEqual(err, rw.expected)) {
-                t.Errorf("r.WriteTo(errorWriterToTests[%d]) = _, %v, want _,%v", i, err, rw.expected);
-            }
+        var (_, err) = r.WriteTo(rw); if (!AreEqual(err, rw.expected)) {
+            t.Errorf("r.WriteTo(errorWriterToTests[%d]) = _, %v, want _,%v", i, err, rw.expected);
         }
     }
 }
@@ -1392,8 +1352,8 @@ public static void TestWriterReadFrom(ж<Δtesting.T> t) {
         (Δio.Reader r) => r
     ]);
 
-    foreach (var (ri, rfunc) in rs) {
-        foreach (var (wi, wfunc) in ws) {
+    foreach (var (ri, rfunc) in range(rs)) {
+        foreach (var (wi, wfunc) in range(ws)) {
             var input = createTestInput(8192);
             var b = @new<strings.Builder>();
             var w = NewWriter(wfunc(new bufio_test_package.strings_BuilderжWriter(b)));
@@ -1410,11 +1370,9 @@ public static void TestWriterReadFrom(ж<Δtesting.T> t) {
                     continue;
                 }
             }
-            {
-                @string got = b.String();
-                @string want = (@string)input; if (got != want) {
-                    t.Errorf("ws[%d], rs[%d]:\ngot  %q\nwant %q\n", wi, ri, got, want);
-                }
+            @string got = b.String();
+            @string want = (@string)input; if (got != want) {
+                t.Errorf("ws[%d], rs[%d]:\ngot  %q\nwant %q\n", wi, ri, got, want);
             }
         }
     }
@@ -1434,21 +1392,19 @@ internal static (nint, error) Write(this errorReaderFromTest w, slice<byte> p) {
     return (len(p) * w.wn, w.werr);
 }
 
-internal static slice<errorReaderFromTest> errorReaderFromTests = slice<errorReaderFromTest>([
+internal static slice<errorReaderFromTest> errorReaderFromTests = [
     new(0, 1, Δio.EOF, default, default),
     new(1, 1, Δio.EOF, default, default),
     new(0, 1, Δio.ErrClosedPipe, default, Δio.ErrClosedPipe),
     new(0, 0, Δio.ErrClosedPipe, Δio.ErrShortWrite, Δio.ErrClosedPipe),
     new(1, 0, default, Δio.ErrShortWrite, Δio.ErrShortWrite)
-]);
+];
 
 public static void TestWriterReadFromErrors(ж<Δtesting.T> t) {
-    foreach (var (i, rw) in errorReaderFromTests) {
+    foreach (var (i, rw) in range(errorReaderFromTests)) {
         var w = NewWriter(rw);
-        {
-            var (_, err) = w.ReadFrom(rw); if (!AreEqual(err, rw.expected)) {
-                t.Errorf("w.ReadFrom(errorReaderFromTests[%d]) = _, %v, want _,%v", i, err, rw.expected);
-            }
+        var (_, err) = w.ReadFrom(rw); if (!AreEqual(err, rw.expected)) {
+            t.Errorf("w.ReadFrom(errorReaderFromTests[%d]) = _, %v, want _,%v", i, err, rw.expected);
         }
     }
 }
@@ -1513,9 +1469,7 @@ internal static (nint, error) Write(this ref writeCountingDiscard w, slice<byte>
 
 partial struct negativeReader /*num:nint*/;
 
-internal static (nint, error) Read(this ref negativeReader r, slice<byte> _) {
-    return (-1, default);
-}
+internal static (nint, error) Read(this ref negativeReader r, slice<byte> _) { return (-1, default); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object readDidNotPanicˢ = (@string)"read did not panic"u8;
@@ -1651,11 +1605,9 @@ public static void TestWriterReadFromUntilEOF(ж<Δtesting.T> t) {
         t.Fatalf("ReadFrom returned (%v, %v), want (4, nil)", n2, err);
     }
     w.Flush();
-    {
-        @string got = buf.String();
-        @string want = "0123abcd"; if (got != want) {
-            t.Fatalf("buf.Bytes() returned %q, want %q", got, want);
-        }
+    @string got = buf.String();
+    @string want = "0123abcd"; if (got != want) {
+        t.Fatalf("buf.Bytes() returned %q, want %q", got, want);
     }
 }
 
@@ -1706,21 +1658,15 @@ public static void TestWriterReadFromWithBufferedData(ж<Δtesting.T> t) {
     var w = NewWriterSize(new bufio_test_package.readFromWriterжWriter(rfw), bufsize);
 
     const nint writeSize = 8;
-    {
-        var (nΔ1, errΔ1) = w.Write(input[..(int)(writeSize)]); if (nΔ1 != writeSize || errΔ1 != nil) {
-            t.Errorf("w.Write(%v bytes) = %v, %v; want %v, nil", (nint)(writeSize), nΔ1, errΔ1, (nint)(writeSize));
-        }
+    var (nΔ1, errΔ1) = w.Write(input[..(int)(writeSize)]); if (nΔ1 != writeSize || errΔ1 != nil) {
+        t.Errorf("w.Write(%v bytes) = %v, %v; want %v, nil", (nint)(writeSize), nΔ1, errΔ1, (nint)(writeSize));
     }
     var (n, err) = w.ReadFrom(new bufio_test_package.bytes_ReaderжReader(bytes.NewReader(input[(int)(writeSize)..])));
-    {
-        nint wantn = len(input[(int)(writeSize)..]); if ((nint)n != wantn || err != nil) {
-            t.Errorf("io.Copy(w, %v bytes) = %v, %v; want %v, nil", wantn, n, err, wantn);
-        }
+    nint wantn = len(input[(int)(writeSize)..]); if ((nint)n != wantn || err != nil) {
+        t.Errorf("io.Copy(w, %v bytes) = %v, %v; want %v, nil", wantn, n, err, wantn);
     }
-    {
-        var errΔ2 = w.Flush(); if (errΔ2 != nil) {
-            t.Errorf("w.Flush() = %v, want nil", errΔ2);
-        }
+    var errΔ2 = w.Flush(); if (errΔ2 != nil) {
+        t.Errorf("w.Flush() = %v, want nil", errΔ2);
     }
 
     {
@@ -1738,7 +1684,7 @@ public static void TestWriterReadFromWithBufferedData(ж<Δtesting.T> t) {
 }
 
 public static void TestReadZero(ж<Δtesting.T> t) {
-    foreach (var (_, size) in slice<nint>([100, 2])) {
+    foreach (var (_, size) in range(slice<nint>([100, 2]))) {
         t.Run(fmt.Sprintf("bufsize=%d"u8, size), (ж<Δtesting.T> tΔ1) => {
             var r = Δio.MultiReader(new bufio_test_package.strings_ReaderжReader(strings.NewReader(abcˢ)), new bufio_test_package.emptyThenNonEmptyReaderжReader(Ꮡ(new emptyThenNonEmptyReader(r: new bufio_test_package.strings_ReaderжReader(strings.NewReader(defˢ)), n: 1))));
             var br = NewReaderSize(r, size);
@@ -1964,7 +1910,7 @@ public static void TestReaderDiscard(ж<Δtesting.T> t) {
             wantBuffered: 0
         )
     ]);
-    foreach (var (_, tt) in tests) {
+    foreach (var (_, tt) in range(tests)) {
         var br = NewReaderSize(tt.r, tt.bufSize);
         if (tt.peekSize > 0) {
             var (peekBuf, errΔ1) = br.Peek(tt.peekSize);
@@ -1978,17 +1924,13 @@ public static void TestReaderDiscard(ж<Δtesting.T> t) {
             }
         }
         var (discarded, err) = br.Discard(tt.n);
-        {
-            @string ge = fmt.Sprint(err);
-            @string we = fmt.Sprint(tt.wantErr); if (discarded != tt.want || ge != we) {
-                t.Errorf("%s: Discard(%d) = (%v, %v); want (%v, %v)", tt.name, tt.n, discarded, ge, tt.want, we);
-                continue;
-            }
+        @string ge = fmt.Sprint(err);
+        @string we = fmt.Sprint(tt.wantErr); if (discarded != tt.want || ge != we) {
+            t.Errorf("%s: Discard(%d) = (%v, %v); want (%v, %v)", tt.name, tt.n, discarded, ge, tt.want, we);
+            continue;
         }
-        {
-            nint bn = br.Buffered(); if (bn != tt.wantBuffered) {
-                t.Errorf("%s: after Discard, Buffered = %d; want %d", tt.name, bn, tt.wantBuffered);
-            }
+        nint bn = br.Buffered(); if (bn != tt.wantBuffered) {
+            t.Errorf("%s: after Discard, Buffered = %d; want %d", tt.name, bn, tt.wantBuffered);
         }
     }
 }
@@ -2103,7 +2045,7 @@ public static void TestPartialReadEOF(ж<Δtesting.T> t) {
     }
 
     // This is the second read of 0 bytes.
-    (read, err) = r.Read(slice<byte>([]));
+    (read, err) = r.Read([]);
     if (err != nil) {
         t.Fatalf("unexpected error: %v", err);
     }
@@ -2185,10 +2127,8 @@ public static void TestWriterReadFromMustReturnUnderlyingError(ж<Δtesting.T> t
             t.Fatal(expectedErrorGotNilˢ);
         }
     }
-    {
-        nint buffered = wr.Buffered(); if (buffered != wantBuffered) {
-            t.Fatalf("Buffered = %v; want %v", buffered, wantBuffered);
-        }
+    nint buffered = wr.Buffered(); if (buffered != wantBuffered) {
+        t.Fatalf("Buffered = %v; want %v", buffered, wantBuffered);
     }
 }
 
@@ -2250,10 +2190,8 @@ public static void BenchmarkReaderWriteToOptimal(ж<Δtesting.B> Ꮡb) {
     var buf = new slice<byte>(bufSize);
     var r = bytes.NewReader(buf);
     var srcReader = NewReaderSize(new onlyReader(new bufio_test_package.bytes_ReaderжReader(r)), 1 << 10);
-    {
-        var (_, ok) = Δio.Discard._<Δio.ReaderFrom>(ᐧ); if (!ok) {
-            Ꮡb.Fatal(ioDiscardDoesnTSupportˢ);
-        }
+    var (_, ok) = Δio.Discard._<Δio.ReaderFrom>(ᐧ); if (!ok) {
+        Ꮡb.Fatal(ioDiscardDoesnTSupportˢ);
     }
     for (nint i = 0; i < b.N; i++) {
         r.Seek(0, Δio.SeekStart);

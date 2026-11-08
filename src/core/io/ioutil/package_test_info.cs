@@ -39,8 +39,8 @@ using static global::go.io.ioutil_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("io/ioutil/ioutil_test.go", "ioutil_test.cs", "ABEggoKClIIACQiCgoKCpoKCgqbmgoKClIKYgIK2goKmgriC9qKClIK4goKUgpSCgoKClIKClIKClIK0pIKCgoKmgoKCpoKCgpS0toKUgg==")]
-[assembly: GoPositionMap("io/ioutil/tempfile_test.go", "tempfile_test.cs", "ABkiooKClJSCgoK05KLKgoKCgpSCgoKC2AAPCqKCgpSUggAIGLKygpKCpoKCgoKUgrTEAA0EgoKCpgAFEpSigoKUlIKCtKSyooIACRSSggAJDMKCgpSUgoKAgsQACwSigoKUlIIACBiykoKCgoKClILY", "77-93:1;79-83:1.1;114-125:1;128-131:2;140-143:3;183-194:1")]
+[assembly: GoPositionMap("io/ioutil/ioutil_test.go", "ioutil_test.cs", "ABEggoKClIIACQiCgoKCpoKCgqbmgoKClIKYgqaCgqaCuIL2ooKUgriCgpSClIKCgoKUgoKUgoKUgrSkgoKCgqaCgoKmgoKClLS2gpSC")]
+[assembly: GoPositionMap("io/ioutil/tempfile_test.go", "tempfile_test.cs", "ABkiooKClJSCgoK05KLKgoKCgpSCgoKC2AAPCqKCgpSUggAIGLKygpKCpoKCgoKUgrTEAA0EgoKCpgAFEpSigoKUlIKCtKSyooIACRSSggAJDMKCgpSUgoKCtAALBKKCgpSUggAIGLKSgoKCgoKUgtg=", "77-93:1;79-83:1.1;114-125:1;128-131:2;140-143:3;183-194:1", "", "", "", "118:33,119:25")]
 // </GoSourcePositionMaps>
 
 namespace go.io;

@@ -23,8 +23,6 @@ using time = time_package;
 using @unsafe = unsafe_package;
 using weak = weak_package;
 using @internal;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.math;
 using global::go.runtime;
 using global::go.sync;
@@ -297,10 +295,8 @@ internal static partial bool moveStackCheck(ж<testing.T> t, ж<nint> @new, uint
     t.Logf("old stack pointer %x, new stack pointer %x", old, new2);
     if (new2 == old) {
         // Check that we didn't screw up the test's escape analysis.
-        {
-            @string cls = runtime_internal_test_package.GCTestPointerClass(@unsafe.Pointer.FromPinnedBox(@new)); if (cls != "stack"u8) {
-                t.Fatalf("test bug: new (%#x) should be a stack pointer, not %s", new2, cls);
-            }
+        @string cls = runtime_internal_test_package.GCTestPointerClass(@unsafe.Pointer.FromPinnedBox(@new)); if (cls != "stack"u8) {
+            t.Fatalf("test bug: new (%#x) should be a stack pointer, not %s", new2, cls);
         }
         // This was a real failure.
         return false;
@@ -361,7 +357,6 @@ public static void TestGCTestIsReachable(ж<testing.T> t) {
 
 internal static readonly ж<ж<nint>> ᏑpointerClassBSS = new StaticBox<ж<nint>>(default(ж<nint>));
 internal static ref ж<nint> pointerClassBSS => ref ((StaticBox<ж<nint>>)ᏑpointerClassBSS).ValueSlot;
-
 internal static readonly ж<nint> ᏑpointerClassData = new StaticBox<nint>(42);
 internal static ref nint pointerClassData => ref ((StaticBox<nint>)ᏑpointerClassData).ValueSlot;
 
@@ -489,10 +484,8 @@ internal static error testTypeSwitch(any x) {
 }
 
 internal static error testAssert(any x) {
-    {
-        var (y, ok) = x._<error>(ᐧ); if (ok) {
-            return y;
-        }
+    var (y, ok) = x._<error>(ᐧ); if (ok) {
+        return y;
     }
     return default;
 }
@@ -521,7 +514,7 @@ public static void TestPageAccounting(ж<testing.T> t) {
     // mismatch (golang.org/issue/15022).
     UntypedInt blockSize = /* 64 << 10 */ 65536;
     var blocks = new slice<ж<array<byte>>>((64 << 20) / blockSize);
-    foreach (var i in range(blocks)) {
+    foreach (var i in range(len(blocks))) {
         blocks[i] = Ꮡ(new array<byte>(65536));
     }
 
@@ -591,7 +584,7 @@ public static void BenchmarkReadMemStats(ж<testing.B> Ꮡb) {
     ref var ms = ref heap(new Δruntime.MemStats(), out var Ꮡms);
     UntypedInt heapSize = /* 100 << 20 */ 104857600;
     var x = new slice<ж<array<byte>>>(heapSize / 1024);
-    foreach (var i in range(x)) {
+    foreach (var i in range(len(x))) {
         x[i] = Ꮡ(new array<byte>(1024));
     }
 
@@ -624,7 +617,7 @@ internal static partial Action applyGCLoad(ж<testing.B> b) {
     buildTree = (nint depth) => {
         var tree = @new<applyGCLoad_node>();
         if (depth != 0) {
-            foreach (var i in range(tree.children)) {
+            foreach (var i in range(len(tree.children))) {
                 tree.children[i] = ᏑbuildTree.ValueSlot(depth - 1);
             }
         }
@@ -858,7 +851,7 @@ public static void BenchmarkBulkWriteBarrier(ж<testing.B> b) {
     // Construct a large set of objects we can copy around.
     UntypedInt heapSize = /* 64 << 20 */ 67108864;
     var ptrs = new slice<ж<BenchmarkBulkWriteBarrier_obj>>((nint)((uintptr)heapSize / /* unsafe.Sizeof(obj{}) */ (uintptr)128));
-    foreach (var i in range(ptrs)) {
+    foreach (var i in range(len(ptrs))) {
         ptrs[i] = @new<BenchmarkBulkWriteBarrier_obj>();
     }
 
@@ -919,7 +912,7 @@ public static void BenchmarkMSpanCountAlloc(ж<testing.B> b) {
         // n is the number of bytes to benchmark against.
         // n must always be a multiple of 8, since gcBits is
         // always rounded up 8 bytes.
-        foreach (var (_, n) in slice<nint>([8, 16, 32, 64, 128])) {
+        foreach (var (_, n) in range(slice<nint>([8, 16, 32, 64, 128]))) {
             var sʗ1 = s;
             b.Run(fmt.Sprintf("bits=%d"u8, n * 8), (ж<testing.B> bΔ1) => {
                 // Initialize a new byte slice with pseudo-random data.
@@ -1008,7 +1001,7 @@ public static partial void TestWeakToStrongMarkTermination(ж<testing.T> t) {
         Δruntime.GC();
 
         // Create many objects with a weak pointers to them.
-        foreach (var i in range(w)) {
+        foreach (var i in range(len(w))) {
             var x = @new<TestWeakToStrongMarkTermination_T>();
             x.a = @new<nint>();
             w[i] = weak.Make<TestWeakToStrongMarkTermination_T>(x);
@@ -1044,7 +1037,7 @@ public static partial void TestWeakToStrongMarkTermination(ж<testing.T> t) {
 
         // Perform many weak->strong conversions in the critical window.
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
-        foreach (var (_, vᴛ1) in w) {
+        foreach (var (_, vᴛ1) in range(w)) {
             ref var wp = ref heap(new weak.Pointer<TestWeakToStrongMarkTermination_T>(), out var Ꮡwp);
             wp = vᴛ1;
 

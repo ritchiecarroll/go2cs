@@ -23,12 +23,10 @@ public static @string ΔString(this URLValue v) {
 }
 
 public static error ΔSet(this URLValue v, @string s) {
-    {
-        var (u, err) = url.Parse(s); if (err != nil) {
-            return err;
-        } else {
-            v.URL.Value = u.Value;
-        }
+    var (u, err) = url.Parse(s); if (err != nil) {
+        return err;
+    } else {
+        v.URL.Value = u.Value;
     }
     return default;
 }
@@ -47,7 +45,7 @@ public static void ExampleValue() {
     var fs = flag.NewFlagSet(exampleValueˢ, flag.ExitOnError);
     fs.Var(new flag_test_package.URLValueжValue(Ꮡ(new URLValue(u))), urlˢ, urlToParseˢ);
 
-    fs.Parse(slice<@string>(["-url", "https://golang.org/pkg/flag/"]));
+    fs.Parse(["-url", "https://golang.org/pkg/flag/"]);
     fmt.Printf(@"{scheme: %q, host: %q, path: %q}"u8, u.Scheme, u.Host, u.Path);
 
     // Output:

@@ -42,7 +42,7 @@ internal static @string makePATH(@string root, slice<@string> dirs) {
     var pathsᴷ = new stackAppend<@string>();
 
     var paths = new slice<@string>(0, len(dirs));
-    foreach (var (_, d) in dirs) {
+    foreach (var (_, d) in range(dirs)) {
         switch (ᐧ) {
         case {} when d == ""u8: {
             paths = append(pathsᴷ, paths, ""u8);
@@ -67,14 +67,12 @@ private static readonly @string batˢᵇ = ".bat"u8;
 // installProgs creates executable files (or symlinks to executable files) at
 // multiple destination paths. It uses root as prefix for all destination files.
 internal static void installProgs(ж<testing.T> t, @string root, slice<@string> files) {
-    foreach (var (_, f) in files) {
+    foreach (var (_, f) in range(files)) {
         @string dstPath = filepath.Join(root, f);
 
         @string dir = filepath.Dir(dstPath);
-        {
-            var err = os.MkdirAll(dir, 493); if (err != nil) {
-                t.Fatal(err);
-            }
+        var err = os.MkdirAll(dir, 493); if (err != nil) {
+            t.Fatal(err);
         }
 
         if (os.IsPathSeparator(f[len(f) - 1])) {
@@ -109,10 +107,8 @@ internal static void installExe(ж<testing.T> t, @string dstPath) {
         }
         var dstʗ1 = dst;
         defer(() => {
-            {
-                var errΔ1 = dstʗ1.Close(); if (errΔ1 != nil) {
-                    t.Fatal(errΔ1);
-                }
+            var errΔ1 = dstʗ1.Close(); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
         }, ref ᒐ);
 
@@ -136,17 +132,13 @@ internal static void installBat(ж<testing.T> t, @string dstPath) {
         }
         var dstʗ1 = dst;
         defer(() => {
-            {
-                var errΔ1 = dstʗ1.Close(); if (errΔ1 != nil) {
-                    t.Fatal(errΔ1);
-                }
+            var errΔ1 = dstʗ1.Close(); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
         }, ref ᒐ);
 
-        {
-            var (_, errΔ2) = fmt.Fprintf(new os.FileжWriter(dst), "@echo %s\r\n"u8, dstPath); if (errΔ2 != nil) {
-                t.Fatal(errΔ2);
-            }
+        var (_, errΔ2) = fmt.Fprintf(new os.FileжWriter(dst), "@echo %s\r\n"u8, dstPath); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -164,123 +156,123 @@ partial struct lookPathTest {
     internal bool skipCmdExeCheck; // if true, do not check want against the behavior of cmd.exe
 }
 
-internal static slice<lookPathTest> lookPathTests = slice<lookPathTest>([
+internal static slice<lookPathTest> lookPathTests = [
     new(
         name: "first match",
-        files: slice<@string>([@"p1\a.exe", @"p2\a.exe", @"p2\a"]),
+        files: [@"p1\a.exe", @"p2\a.exe", @"p2\a"],
         searchFor: @"a",
         want: @"p1\a.exe"
     ),
     new(
         name: "dirs with extensions",
-        files: slice<@string>([@"p1.dir\a", @"p2.dir\a.exe"]),
+        files: [@"p1.dir\a", @"p2.dir\a.exe"],
         searchFor: @"a",
         want: @"p2.dir\a.exe"
     ),
     new(
         name: "first with extension",
-        files: slice<@string>([@"p1\a.exe", @"p2\a.exe"]),
+        files: [@"p1\a.exe", @"p2\a.exe"],
         searchFor: @"a.exe",
         want: @"p1\a.exe"
     ),
     new(
         name: "specific name",
-        files: slice<@string>([@"p1\a.exe", @"p2\b.exe"]),
+        files: [@"p1\a.exe", @"p2\b.exe"],
         searchFor: @"b",
         want: @"p2\b.exe"
     ),
     new(
         name: "no extension",
-        files: slice<@string>([@"p1\b", @"p2\a"]),
+        files: [@"p1\b", @"p2\a"],
         searchFor: @"a",
         wantErr: Δexec.ErrNotFound
     ),
     new(
         name: "directory, no extension",
-        files: slice<@string>([@"p1\a.exe", @"p2\a.exe"]),
+        files: [@"p1\a.exe", @"p2\a.exe"],
         searchFor: @"p2\a",
         want: @"p2\a.exe"
     ),
     new(
         name: "no match",
-        files: slice<@string>([@"p1\a.exe", @"p2\a.exe"]),
+        files: [@"p1\a.exe", @"p2\a.exe"],
         searchFor: @"b",
         wantErr: Δexec.ErrNotFound
     ),
     new(
         name: "no match with dir",
-        files: slice<@string>([@"p1\b.exe", @"p2\a.exe"]),
+        files: [@"p1\b.exe", @"p2\a.exe"],
         searchFor: @"p2\b",
         wantErr: Δexec.ErrNotFound
     ),
     new(
         name: "extensionless file in CWD ignored",
-        files: slice<@string>([@"a", @"p1\a.exe", @"p2\a.exe"]),
+        files: [@"a", @"p1\a.exe", @"p2\a.exe"],
         searchFor: @"a",
         want: @"p1\a.exe"
     ),
     new(
         name: "extensionless file in PATH ignored",
-        files: slice<@string>([@"p1\a", @"p2\a.exe"]),
+        files: [@"p1\a", @"p2\a.exe"],
         searchFor: @"a",
         want: @"p2\a.exe"
     ),
     new(
         name: "specific extension",
-        files: slice<@string>([@"p1\a.exe", @"p2\a.bat"]),
+        files: [@"p1\a.exe", @"p2\a.bat"],
         searchFor: @"a.bat",
         want: @"p2\a.bat"
     ),
     new(
         name: "mismatched extension",
-        files: slice<@string>([@"p1\a.exe", @"p2\a.exe"]),
+        files: [@"p1\a.exe", @"p2\a.exe"],
         searchFor: @"a.com",
         wantErr: Δexec.ErrNotFound
     ),
     new(
         name: "doubled extension",
-        files: slice<@string>([@"p1\a.exe.exe"]),
+        files: [@"p1\a.exe.exe"],
         searchFor: @"a.exe",
         want: @"p1\a.exe.exe"
     ),
     new(
         name: "extension not in PATHEXT",
         PATHEXT: @".COM;.BAT",
-        files: slice<@string>([@"p1\a.exe", @"p2\a.exe"]),
+        files: [@"p1\a.exe", @"p2\a.exe"],
         searchFor: @"a.exe",
         want: @"p1\a.exe"
     ),
     new(
         name: "first allowed by PATHEXT",
         PATHEXT: @".COM;.EXE",
-        files: slice<@string>([@"p1\a.bat", @"p2\a.exe"]),
+        files: [@"p1\a.bat", @"p2\a.exe"],
         searchFor: @"a",
         want: @"p2\a.exe"
     ),
     new(
         name: "first directory containing a PATHEXT match",
         PATHEXT: @".COM;.EXE;.BAT",
-        files: slice<@string>([@"p1\a.bat", @"p2\a.exe"]),
+        files: [@"p1\a.bat", @"p2\a.exe"],
         searchFor: @"a",
         want: @"p1\a.bat"
     ),
     new(
         name: "first PATHEXT entry",
         PATHEXT: @".COM;.EXE;.BAT",
-        files: slice<@string>([@"p1\a.bat", @"p1\a.exe", @"p2\a.bat", @"p2\a.exe"]),
+        files: [@"p1\a.bat", @"p1\a.exe", @"p2\a.bat", @"p2\a.exe"],
         searchFor: @"a",
         want: @"p1\a.exe"
     ),
     new(
         name: "ignore dir with PATHEXT extension",
-        files: slice<@string>([@"a.exe\"]),
+        files: [@"a.exe\"],
         searchFor: @"a",
         wantErr: Δexec.ErrNotFound
     ),
     new(
         name: "ignore empty PATH entry",
-        files: slice<@string>([@"a.bat", @"p\a.bat"]),
-        PATH: slice<@string>([@"p"]),
+        files: [@"a.bat", @"p\a.bat"],
+        PATH: [@"p"],
         searchFor: @"a",
         want: @"p\a.bat",
         // If cmd.exe is too old it might not respect NoDefaultCurrentDirectoryInExePath,
@@ -289,20 +281,20 @@ internal static slice<lookPathTest> lookPathTests = slice<lookPathTest>([
     ),
     new(
         name: "return ErrDot if found by a different absolute path",
-        files: slice<@string>([@"p1\a.bat", @"p2\a.bat"]),
-        PATH: slice<@string>([@".\p1", @"p2"]),
+        files: [@"p1\a.bat", @"p2\a.bat"],
+        PATH: [@".\p1", @"p2"],
         searchFor: @"a",
         want: @"p1\a.bat",
         wantErr: Δexec.ErrDot
     ),
     new(
         name: "suppress ErrDot if also found in absolute path",
-        files: slice<@string>([@"p1\a.bat", @"p2\a.bat"]),
-        PATH: slice<@string>([@".\p1", @"p1", @"p2"]),
+        files: [@"p1\a.bat", @"p2\a.bat"],
+        PATH: [@".\p1", @"p1", @"p2"],
         searchFor: @"a",
         want: @"p1\a.bat"
     )
-]);
+];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string printpathˢ => ref printpathˢᵇ;
@@ -326,7 +318,7 @@ public static void TestLookPathWindows(ж<testing.T> t) {
         t.Fatal(err);
     }
 
-    foreach (var (_, vᴛ1) in lookPathTests) {
+    foreach (var (_, vᴛ1) in range(lookPathTests)) {
         ref var tt = ref heap(new lookPathTest(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -348,7 +340,7 @@ public static void TestLookPathWindows(ж<testing.T> t) {
             @string pathVar = default;
             if (ttʗ1.PATH == nil) {
                 var paths = new slice<@string>(0, len(ttʗ1.files));
-                foreach (var (_, f) in ttʗ1.files) {
+                foreach (var (_, f) in range(ttʗ1.files)) {
                     @string dir = filepath.Join(root, filepath.Dir(f));
                     if (!slices.Contains(paths, dir)) {
                         paths = append(pathsᴷ, paths, dir);
@@ -379,10 +371,8 @@ public static void TestLookPathWindows(ж<testing.T> t) {
                         tΔ1.Fatalf("%v\n\tresolved to %s\n\twant %s", cmd.OrTypedNil(), gotAbs, wantAbs);
                     }
                 } else if (ttʗ1.wantErr == nil) {
-                    {
-                        var (ee, ok) = errΔ1._<ж<Δexec.ExitError>>(ᐧ); if (ok && len(ee.Stderr) > 0) {
-                            tΔ1.Fatalf("%v: %v\n%s", cmd.OrTypedNil(), errΔ1, ee.Stderr);
-                        }
+                    var (ee, ok) = errΔ1._<ж<Δexec.ExitError>>(ᐧ); if (ok && len(ee.Stderr) > 0) {
+                        tΔ1.Fatalf("%v: %v\n%s", cmd.OrTypedNil(), errΔ1, ee.Stderr);
                     }
                     tΔ1.Fatalf("%v: %v", cmd.OrTypedNil(), errΔ1);
                 }
@@ -417,28 +407,28 @@ partial struct commandTest {
     internal error wantRunErr;
 }
 
-internal static slice<commandTest> commandTests = slice<commandTest>([
+internal static slice<commandTest> commandTests = [
     // testing commands with no slash, like `a.exe`
     new(
         name: "current directory",
-        files: slice<@string>([@"a.exe"]),
-        PATH: slice<@string>(["."]),
+        files: [@"a.exe"],
+        PATH: ["."],
         arg0: @"a.exe",
         want: @"a.exe",
         wantErrDot: true
     ),
     new(
         name: "with extra PATH",
-        files: slice<@string>([@"a.exe", @"p\a.exe", @"p2\a.exe"]),
-        PATH: slice<@string>([".", "p2", "p"]),
+        files: [@"a.exe", @"p\a.exe", @"p2\a.exe"],
+        PATH: [".", "p2", "p"],
         arg0: @"a.exe",
         want: @"a.exe",
         wantErrDot: true
     ),
     new(
         name: "with extra PATH and no extension",
-        files: slice<@string>([@"a.exe", @"p\a.exe", @"p2\a.exe"]),
-        PATH: slice<@string>([".", "p2", "p"]),
+        files: [@"a.exe", @"p\a.exe", @"p2\a.exe"],
+        PATH: [".", "p2", "p"],
         arg0: @"a",
         want: @"a.exe",
         wantErrDot: true
@@ -446,29 +436,29 @@ internal static slice<commandTest> commandTests = slice<commandTest>([
     // testing commands with slash, like `.\a.exe`
     new(
         name: "with dir",
-        files: slice<@string>([@"p\a.exe"]),
-        PATH: slice<@string>(["."]),
+        files: [@"p\a.exe"],
+        PATH: ["."],
         arg0: @"p\a.exe",
         want: @"p\a.exe"
     ),
     new(
         name: "with explicit dot",
-        files: slice<@string>([@"p\a.exe"]),
-        PATH: slice<@string>(["."]),
+        files: [@"p\a.exe"],
+        PATH: ["."],
         arg0: @".\p\a.exe",
         want: @"p\a.exe"
     ),
     new(
         name: "with irrelevant PATH",
-        files: slice<@string>([@"p\a.exe", @"p2\a.exe"]),
-        PATH: slice<@string>([".", "p2"]),
+        files: [@"p\a.exe", @"p2\a.exe"],
+        PATH: [".", "p2"],
         arg0: @"p\a.exe",
         want: @"p\a.exe"
     ),
     new(
         name: "with slash and no extension",
-        files: slice<@string>([@"p\a.exe", @"p2\a.exe"]),
-        PATH: slice<@string>([".", "p2"]),
+        files: [@"p\a.exe", @"p2\a.exe"],
+        PATH: [".", "p2"],
         arg0: @"p\a",
         want: @"p\a.exe"
     ),
@@ -477,8 +467,8 @@ internal static slice<commandTest> commandTests = slice<commandTest>([
         // should not find a.exe in p, because LookPath(`a.exe`) will fail when
         // called by Command (before Dir is set), and that error is sticky.
         name: "not found before Dir",
-        files: slice<@string>([@"p\a.exe"]),
-        PATH: slice<@string>(["."]),
+        files: [@"p\a.exe"],
+        PATH: ["."],
         dir: @"p",
         arg0: @"a.exe",
         want: @"p\a.exe",
@@ -488,8 +478,8 @@ internal static slice<commandTest> commandTests = slice<commandTest>([
         // LookPath(`a.exe`) will resolve to `.\a.exe`, but prefixing that with
         // dir `p\a.exe` will refer to a non-existent file
         name: "resolved before Dir",
-        files: slice<@string>([@"a.exe", @"p\not_important_file"]),
-        PATH: slice<@string>(["."]),
+        files: [@"a.exe", @"p\not_important_file"],
+        PATH: ["."],
         dir: @"p",
         arg0: @"a.exe",
         want: @"a.exe",
@@ -501,8 +491,8 @@ internal static slice<commandTest> commandTests = slice<commandTest>([
         // in referred destination (so LookPath(`a.exe`) will still
         // find `.\a.exe`, but we successfully execute `p\a.exe`)
         name: "relative to Dir",
-        files: slice<@string>([@"a.exe", @"p\a.exe"]),
-        PATH: slice<@string>(["."]),
+        files: [@"a.exe", @"p\a.exe"],
+        PATH: ["."],
         dir: @"p",
         arg0: @"a.exe",
         want: @"p\a.exe",
@@ -511,8 +501,8 @@ internal static slice<commandTest> commandTests = slice<commandTest>([
     new(
         // like above, but add PATH in attempt to break the test
         name: "relative to Dir with extra PATH",
-        files: slice<@string>([@"a.exe", @"p\a.exe", @"p2\a.exe"]),
-        PATH: slice<@string>([".", "p2", "p"]),
+        files: [@"a.exe", @"p\a.exe", @"p2\a.exe"],
+        PATH: [".", "p2", "p"],
         dir: @"p",
         arg0: @"a.exe",
         want: @"p\a.exe",
@@ -521,8 +511,8 @@ internal static slice<commandTest> commandTests = slice<commandTest>([
     new(
         // like above, but use "a" instead of "a.exe" for command
         name: "relative to Dir with extra PATH and no extension",
-        files: slice<@string>([@"a.exe", @"p\a.exe", @"p2\a.exe"]),
-        PATH: slice<@string>([".", "p2", "p"]),
+        files: [@"a.exe", @"p\a.exe", @"p2\a.exe"],
+        PATH: [".", "p2", "p"],
         dir: @"p",
         arg0: @"a",
         want: @"p\a.exe",
@@ -532,8 +522,8 @@ internal static slice<commandTest> commandTests = slice<commandTest>([
         // finds `a.exe` in the PATH regardless of Dir because Command resolves the
         // full path (using LookPath) before Dir is set.
         name: "from PATH with no match in Dir",
-        files: slice<@string>([@"p\a.exe", @"p2\a.exe"]),
-        PATH: slice<@string>([".", "p2", "p"]),
+        files: [@"p\a.exe", @"p2\a.exe"],
+        PATH: [".", "p2", "p"],
         dir: @"p",
         arg0: @"a.exe",
         want: @"p2\a.exe"
@@ -542,8 +532,8 @@ internal static slice<commandTest> commandTests = slice<commandTest>([
     new(
         // should use dir when command is path, like ".\a.exe"
         name: "relative to Dir with explicit dot",
-        files: slice<@string>([@"p\a.exe"]),
-        PATH: slice<@string>(["."]),
+        files: [@"p\a.exe"],
+        PATH: ["."],
         dir: @"p",
         arg0: @".\a.exe",
         want: @"p\a.exe"
@@ -551,8 +541,8 @@ internal static slice<commandTest> commandTests = slice<commandTest>([
     new(
         // like above, but with PATH added in attempt to break it
         name: "relative to Dir with dot and extra PATH",
-        files: slice<@string>([@"p\a.exe", @"p2\a.exe"]),
-        PATH: slice<@string>([".", "p2"]),
+        files: [@"p\a.exe", @"p2\a.exe"],
+        PATH: [".", "p2"],
         dir: @"p",
         arg0: @".\a.exe",
         want: @"p\a.exe"
@@ -560,8 +550,8 @@ internal static slice<commandTest> commandTests = slice<commandTest>([
     new(
         // LookPath(".\a") will fail before Dir is set, and that error is sticky.
         name: "relative to Dir with dot and extra PATH and no extension",
-        files: slice<@string>([@"p\a.exe", @"p2\a.exe"]),
-        PATH: slice<@string>([".", "p2"]),
+        files: [@"p\a.exe", @"p2\a.exe"],
+        PATH: [".", "p2"],
         dir: @"p",
         arg0: @".\a",
         want: @"p\a.exe"
@@ -569,13 +559,13 @@ internal static slice<commandTest> commandTests = slice<commandTest>([
     new(
         // LookPath(".\a") will fail before Dir is set, and that error is sticky.
         name: "relative to Dir with different extension",
-        files: slice<@string>([@"a.exe", @"p\a.bat"]),
-        PATH: slice<@string>(["."]),
+        files: [@"a.exe", @"p\a.bat"],
+        PATH: ["."],
         dir: @"p",
         arg0: @".\a",
         want: @"p\a.bat"
     )
-]);
+];
 
 public static void TestCommand(ж<testing.T> t) {
     // Not parallel: uses Chdir and Setenv.
@@ -585,7 +575,7 @@ public static void TestCommand(ж<testing.T> t) {
     // That may cause it to appear to be unused.
     maySkipHelperCommand(printpathˢ);
 
-    foreach (var (_, vᴛ1) in commandTests) {
+    foreach (var (_, vᴛ1) in range(commandTests)) {
         ref var tt = ref heap(new commandTest(), out var Ꮡtt);
         tt = vᴛ1;
 
@@ -616,12 +606,10 @@ public static void TestCommand(ж<testing.T> t) {
 
             var (@out, err) = cmd.Output();
             if (err != nil) {
-                {
-                    var (ee, ok) = err._<ж<Δexec.ExitError>>(ᐧ); if (ok && len(ee.Stderr) > 0) {
-                        tΔ1.Logf("%v: %v\n%s", cmd.OrTypedNil(), err, ee.Stderr);
-                    } else {
-                        tΔ1.Logf("%v: %v", cmd.OrTypedNil(), err);
-                    }
+                var (ee, ok) = err._<ж<Δexec.ExitError>>(ᐧ); if (ok && len(ee.Stderr) > 0) {
+                    tΔ1.Logf("%v: %v\n%s", cmd.OrTypedNil(), err, ee.Stderr);
+                } else {
+                    tΔ1.Logf("%v: %v", cmd.OrTypedNil(), err);
                 }
                 if (!errors.Is(err, ttʗ1.wantRunErr)) {
                     tΔ1.Errorf("want %v", ttʗ1.wantRunErr);

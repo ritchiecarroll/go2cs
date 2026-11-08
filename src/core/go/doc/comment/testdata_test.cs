@@ -58,7 +58,7 @@ public static void TestTestdata(ж<testing.T> t) {
         // in case editors remove trailing spaces.
         return bytes.ReplaceAll(b, slice<byte>("$\n"u8), slice<byte>("\n"u8));
     }
-    foreach (var (_, @file) in files) {
+    foreach (var (_, @file) in range(files)) {
         var stripDollarsʗ1 = stripDollars;
         t.Run(filepath.Base(@file), (ж<testing.T> tΔ1) => {
             ref var pr = ref heap(new global::go.go.doc.comment_package.Printer(), out var Ꮡpr);
@@ -76,7 +76,7 @@ public static void TestTestdata(ж<testing.T> t) {
                 tΔ1.Fatalf("first file is not %q", inputˢ);
             }
             var d = Ꮡp.Parse((@string)stripDollarsʗ1(a.Files[0].Data));
-            foreach (var (_, f) in a.Files[1..]) {
+            foreach (var (_, f) in range(a.Files[1..])) {
                 var want = stripDollarsʗ1(f.Data);
                 while (len(want) >= 2 && want[len(want) - 1] == '\n' && want[len(want) - 2] == '\n') {
                     want = want.slice(0, len(want) - 1);
@@ -141,7 +141,7 @@ internal static void dumpTo(ж<bytes.Buffer> @out, nint indent, any x) {
         break;
     }
     case slice<ж<global::go.go.doc.comment_package.LinkDef>> xΔ1: {
-        foreach (var (_, def) in xΔ1) {
+        foreach (var (_, def) in range(xΔ1)) {
             dumpNL(@out, indent);
             dumpTo(@out, indent, def.OrTypedNil());
         }
@@ -152,7 +152,7 @@ internal static void dumpTo(ж<bytes.Buffer> @out, nint indent, any x) {
         break;
     }
     case slice<global::go.go.doc.comment_package.Block> xΔ1: {
-        foreach (var (_, blk) in xΔ1) {
+        foreach (var (_, blk) in range(xΔ1)) {
             dumpNL(@out, indent);
             dumpTo(@out, indent, blk);
         }
@@ -169,7 +169,7 @@ internal static void dumpTo(ж<bytes.Buffer> @out, nint indent, any x) {
         break;
     }
     case slice<ж<global::go.go.doc.comment_package.ListItem>> xΔ1: {
-        foreach (var (_, item) in xΔ1) {
+        foreach (var (_, item) in range(xΔ1)) {
             dumpNL(@out, indent);
             dumpTo(@out, indent, item.OrTypedNil());
         }
@@ -191,7 +191,7 @@ internal static void dumpTo(ж<bytes.Buffer> @out, nint indent, any x) {
         break;
     }
     case slice<global::go.go.doc.comment_package.ΔText> xΔ1: {
-        foreach (var (_, t) in xΔ1) {
+        foreach (var (_, t) in range(xΔ1)) {
             dumpNL(@out, indent);
             dumpTo(@out, indent, t);
         }
@@ -216,7 +216,7 @@ internal static void dumpTo(ж<bytes.Buffer> @out, nint indent, any x) {
         break;
     }
     case @string xΔ1: {
-        foreach (var (_, line) in strings.SplitAfter(xΔ1, "\n")) {
+        foreach (var (_, line) in range(strings.SplitAfter(xΔ1, "\n"))) {
             if (line != ""u8) {
                 dumpNL(@out, indent);
                 fmt.Fprintf(new comment_internal_test_package.bytes_BufferжWriter(@out), "%q"u8, line);
