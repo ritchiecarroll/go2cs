@@ -2012,6 +2012,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckReflectUnexportedFieldFlags() => CheckTarget("ReflectUnexportedFieldFlags");
 
     [TestMethod]
+    public void CheckReflectUnsafeAddrDeref() => CheckTarget("ReflectUnsafeAddrDeref");
+
+    [TestMethod]
     public void CheckReflectValueMapKeyIdentity() => CheckTarget("ReflectValueMapKeyIdentity");
 
     [TestMethod]

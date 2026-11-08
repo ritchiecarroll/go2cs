@@ -2074,6 +2074,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckReflectUnexportedFieldFlags() => CheckTarget("ReflectUnexportedFieldFlags");
 
     [TestMethod]
+    public void CheckReflectUnsafeAddrDeref() => CheckTarget("ReflectUnsafeAddrDeref");
+
+    [TestMethod]
     public void CheckReflectValueMapKeyIdentity() => CheckTarget("ReflectValueMapKeyIdentity");
 
     [TestMethod]
