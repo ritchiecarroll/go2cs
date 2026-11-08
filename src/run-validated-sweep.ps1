@@ -917,10 +917,10 @@ function Get-HostConditionalDisclosureVerdict {
 # banks the privileged ceiling (1105, d81a14bbe8); an unprivileged host reads 1103 (d120e99eb7's page,
 # and the i9 2026-09-26). The root stays matched, so the expected shortfall is BlockSize - 1 = 2 --
 # the rule keys it on the collapsed verdict. Capability is printed on the PASS line when present.
-$capabilityConditionalBlocks = @{
-    'crypto/tls' = @{ Test = 'TestBogoSuite'; BlockSize = 3419 }
-    'os'         = @{ Test = 'TestOpenFileCreateExclDanglingSymlink'; BlockSize = 3; Capability = 'the symbolic-link creation privilege (SeCreateSymbolicLinkPrivilege)' }
-}
+# The table itself, $capabilityConditionalBlocks, has lived in _roster.ps1 (dot-sourced above) since
+# 2026-11-07, beside Test-CapabilityBlockAtCeiling. check-roster-format.ps1 holds each BlockSize to its
+# committed proof page, so re-deriving the size is now enforced by a guard. go1.26.10 grew TestBogoSuite's
+# block from 3,419 to 3,527 while this table still read 3,419.
 
 # Test-CapabilityAbsentDelta -- the pure decision rule -- lives in _roster.ps1 beside
 # Get-SweepRowClassification, so check-roster-format.ps1 can fixture-test it the same way; this

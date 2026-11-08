@@ -2703,6 +2703,102 @@ foreach ($line in (Get-ExclusionLedgerSectionLines -Lines $lines)) {
     Assert-Equal "ledger row renders five columns: $rowPackage" 6 $pipes
 }
 
+# ---- 4. every capability-conditional block is banked at its ceiling, at its registered size ---------
+# The two shortfall rules (1b2, 1b2a) read $capabilityConditionalBlocks (_roster.ps1) and the committed
+# proof page together, but only once a host has lost the block, so nothing held the size to the page in
+# between. go1.26.10 grew crypto/tls's TestBogoSuite from 3,419 to 3,527 verdicts, the table kept 3,419,
+# and the go1.26.10.2 windows bank was taken with the block collapsed (1393 + 2). The first host to
+# complete the matrix (G-LAPTOP, 2026-11-07) read 4920 matched and failed as "shortfall -3527". This
+# section holds every registration to its page on every run.
+#
+# The fixtures are crypto/tls at go1.26.10's real size, synthetic names and real counts: 1,394 verdicts
+# outside the block and 3,527 under it (the root plus 3,526 cases). Banked at the ceiling that is 4920
+# matched + 1 disclosed (TestWeakCertCache); the third host state reads 1393 matched + 2 disclosed.
+$ceilingBlock = [PSCustomObject]@{ Test = 'TestBogoSuite'; BlockSize = 3527 }
+$staleBlock = [PSCustomObject]@{ Test = 'TestBogoSuite'; BlockSize = 3419 }
+$ceilingOutside = @('TestWeakCertCache') + @(1..1393 | ForEach-Object { 'TestOutside{0:D4}' -f $_ })
+$ceilingCases = @(1..3526 | ForEach-Object { 'TestBogoSuite/Case{0:D4}' -f $_ })
+$ceilingPage = @($ceilingOutside) + @('TestBogoSuite') + @($ceilingCases)
+$collapsedPage = @($ceilingOutside) + @('TestBogoSuite')
+
+Assert-Equal 'ceiling fixture: 4921 page names, the go1.26.10 full-matrix page' 4921 $ceilingPage.Count
+Assert-Equal 'ceiling: the full-matrix page at the registered 3527 is accepted' $true `
+    (Test-CapabilityBlockAtCeiling -Block $ceilingBlock -PageNames $ceilingPage).Accepted
+$staleResult = Test-CapabilityBlockAtCeiling -Block $staleBlock -PageNames $ceilingPage
+Assert-Equal 'ceiling: the OLD 3419 against the go1.26.10 full-matrix page is refused' $false $staleResult.Accepted
+Assert-Equal 'ceiling: the stale-size refusal says to re-derive, naming the page count' $true `
+    ("$($staleResult.Reason)" -match 'names 3527 verdicts under TestBogoSuite, not the registered 3419 -- the case matrix moved')
+$collapsedResult = Test-CapabilityBlockAtCeiling -Block $ceilingBlock -PageNames $collapsedPage
+Assert-Equal 'ceiling: a page holding the block collapsed to its root (the go1.26.10.2 bank) is refused' $false $collapsedResult.Accepted
+Assert-Equal 'ceiling: the collapsed-bank refusal names the state, not a size' $true ("$($collapsedResult.Reason)" -match 'COLLAPSED to its root')
+Assert-Equal 'ceiling: a page with no verdict under the block is refused' $false `
+    (Test-CapabilityBlockAtCeiling -Block $ceilingBlock -PageNames $ceilingOutside).Accepted
+Assert-Equal 'ceiling: a sibling sharing the prefix without the slash is not in the block' $false `
+    (Test-CapabilityBlockAtCeiling -Block $ceilingBlock -PageNames (@($ceilingPage | Where-Object { $_ -ne 'TestBogoSuite/Case0001' }) + @('TestBogoSuiteX'))).Accepted
+
+# The parse the check is fed, against page-shaped text: only the Verdicts section's backticked names.
+$pageFixture = @('# crypto/tls', '', '## Verdicts', '', '| Test | Go | go2cs |', '|---|---|---|',
+    '| `TestA` | pass | pass |', '| `TestBogoSuite/Case1` | skip | skip |', '', '## Disclosed divergences', '',
+    '| `TestB` | `host-limit` | reason |')
+Assert-Equal 'page parse: the Verdicts names and nothing from the disclosure table' 'TestA,TestBogoSuite/Case1' `
+    ((Get-ProofPageVerdictNames -Lines $pageFixture) -join ',')
+
+# The sweep's side at the same real size. With the ceiling banked, every host's reading is judged by
+# the rules that already exist, each under its own negative control. A host that completes the block
+# reads the bank exactly ('pass', no rule consulted). A slower host's third-state shortfall is the
+# block, accepted at 3527 and refused at the old 3419. A capability-less host's collapse is likewise
+# refused at 3419. And a loss of one case, or a surplus over a collapsed bank, is refused by both rules.
+$ceilingPin = [PSCustomObject]@{ Class = 'host-limit'; Signature = 'bogo failed: exit status 1' }
+$thirdStateGo = @{}; $thirdStateCs = @{}
+foreach ($name in $ceilingOutside) { $thirdStateGo[$name] = 'pass'; $thirdStateCs[$name] = 'pass' }
+$thirdStateCs['TestWeakCertCache'] = 'fail'
+$thirdStateGo['TestBogoSuite'] = 'pass'; $thirdStateCs['TestBogoSuite'] = 'fail'
+$thirdState = [PSCustomObject]@{
+    go = New-VerdictMap $thirdStateGo
+    csharp = New-VerdictMap $thirdStateCs
+    withdrawn = $ceilingCases
+    disclosed = @('TestWeakCertCache (codegen-liveness): x', 'TestBogoSuite (host-limit): the converted shims miss the 600 s wall')
+}
+Assert-Equal 'ceiling, sweep side: the go1.26.10 third state (1393 + 2 against 4920 + 1) is host-limit at 3527' $true `
+    (Test-HostLimitDelta -Expected 4920 -Disclosed 1 -Block $ceilingBlock -Got 1393 -Comparison $thirdState `
+        -BankedNames $ceilingPage -Pin $ceilingPin).Accepted
+Assert-Equal 'ceiling, sweep side: the same run is refused at the OLD 3419' $false `
+    (Test-HostLimitDelta -Expected 4920 -Disclosed 1 -Block $staleBlock -Got 1393 -Comparison $thirdState `
+        -BankedNames $ceilingPage -Pin $ceilingPin).Accepted
+Assert-Equal 'ceiling, sweep side: a capability-less collapse at go1.26.10 is refused at the OLD 3419' $false `
+    (Test-CapabilityAbsentDelta -Expected 4920 -Disclosed 1 -Block $staleBlock -Got 1393 -Comparison $thirdState `
+        -BankedNames $ceilingPage).Accepted
+Assert-Equal 'ceiling, sweep side (negative control, fast host): one lost case under the ceiling bank is refused as host-limit' $false `
+    (Test-HostLimitDelta -Expected 4920 -Disclosed 1 -Block $ceilingBlock -Got 4919 -Comparison $thirdState `
+        -BankedNames $ceilingPage -Pin $ceilingPin).Accepted
+Assert-Equal 'ceiling, sweep side (negative control, fast host): one lost case under the ceiling bank is refused as capability-absent' $false `
+    (Test-CapabilityAbsentDelta -Expected 4920 -Disclosed 1 -Block $ceilingBlock -Got 4919 -Comparison $thirdState `
+        -BankedNames $ceilingPage).Accepted
+Assert-Equal 'ceiling, sweep side (negative control, collapsed bank): the completed block surplus is never absorbed as host-limit' $false `
+    (Test-HostLimitDelta -Expected 1393 -Disclosed 2 -Block $ceilingBlock -Got 4920 -Comparison $thirdState `
+        -BankedNames $collapsedPage -Pin $ceilingPin).Accepted
+Assert-Equal 'ceiling, sweep side (negative control, collapsed bank): the completed block surplus is never absorbed as capability-absent' $false `
+    (Test-CapabilityAbsentDelta -Expected 1393 -Disclosed 2 -Block $ceilingBlock -Got 4920 -Comparison $thirdState `
+        -BankedNames $collapsedPage).Accepted
+Assert-Equal 'ceiling, sweep side: a completed block reads the ceiling bank exactly, a plain pass' 'pass' `
+    (Get-SweepRowClassification -Expectation ([PSCustomObject]@{ Source = 'columns'; Expected = 4920; Disclosed = 1 }) -Got 4920 -GotDisclosed 1 -TargetGoos 'windows')
+
+# The live half: every registration against its committed page, as the working tree has it.
+foreach ($blockPackage in ($capabilityConditionalBlocks.Keys | Sort-Object)) {
+    $registered = [PSCustomObject]$capabilityConditionalBlocks[$blockPackage]
+    $blockPage = Join-Path $repo ('docs/validation/current/' + ($blockPackage -replace '/', '.') + '.md')
+    if (-not (Test-Path -LiteralPath $blockPage)) {
+        Assert-Equal "ceiling: $blockPackage's registered block has a committed proof page" $true $false
+        continue
+    }
+
+    $atCeiling = Test-CapabilityBlockAtCeiling -Block $registered -PageNames (Get-ProofPageVerdictNames -Lines (Get-Content -LiteralPath $blockPage))
+    $script:checks++
+    if (-not $atCeiling.Accepted) {
+        [void]$failures.Add("ceiling: $blockPackage $($registered.Test) (registered $($registered.BlockSize)) -- $($atCeiling.Reason)")
+    }
+}
+
 if ($List) {
     Write-Host ''
     Write-Host 'per-OS annotations in the roster:' -ForegroundColor Cyan

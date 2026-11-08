@@ -2763,3 +2763,86 @@ function Copy-KeptPublishBinlog {
     Copy-Item -LiteralPath $kept -Destination $copy -Force
     return $copy
 }
+
+# ---- the capability-conditional block registration, and the ceiling it is held to ----------------
+# The table run-validated-sweep.ps1's two shortfall rules key on (Test-CapabilityAbsentDelta and
+# Test-HostLimitDelta above). It lived in the sweep until 2026-11-07 and moved here so
+# check-roster-format.ps1 can read it: the sweep's comment over its readers still explains the
+# registration and the os entry's derivation.
+#
+# BlockSize is the full-capability verdict count for Test -- the top-level test plus every Go subtest
+# under it -- and both rules are only as good as that number. Neither could notice it going stale: each
+# compares it to the committed proof page only after a shortfall, so a bank taken with the block
+# collapsed hides a stale size from both. That is how go1.26.10 got through. TestBogoSuite's matrix grew
+# from 3,419 to 3,527 verdicts, the table kept 3,419, and the go1.26.10.2 windows bank was taken in the
+# third host state (1393 + 2), whose page carries the root alone. On the first host that completed the
+# matrix (G-LAPTOP, 2026-11-07, class G canary at f58605e59a) the row read 4920 matched against that
+# 1393 and failed with "shortfall -3527 does not match ... 3419". Test-CapabilityBlockAtCeiling now
+# holds every registered size against its committed page on every guard run, with no shortfall needed.
+#
+# crypto/tls 3527: read 2026-11-07 from that run's regenerated crypto.tls.md (blob 636bc6a412, 4920
+# matched + 1 disclosed, 4921 Verdicts names). 3,527 of the names sit under TestBogoSuite: the root plus
+# 3,526 cases, Go 1,319 pass and 2,207 skip. That matches the 3,527 shim launches the roster row records
+# at go1.26.10. os 3: the root plus InRoot and NoRoot, unchanged at go1.26.10 (the committed os page
+# names all three).
+$capabilityConditionalBlocks = @{
+    'crypto/tls' = @{ Test = 'TestBogoSuite'; BlockSize = 3527 }
+    'os'         = @{ Test = 'TestOpenFileCreateExclDanglingSymlink'; BlockSize = 3; Capability = 'the symbolic-link creation privilege (SeCreateSymbolicLinkPrivilege)' }
+}
+
+# The verdict names a proof page banks: the backticked first cell of every row under its "## Verdicts"
+# heading, in the same parse Get-CapabilityAbsentVerdict and Get-HostLimitVerdict apply to the committed
+# page.
+function Get-ProofPageVerdictNames {
+    param([string[]] $Lines)
+
+    $names = New-Object System.Collections.Generic.List[string]
+    $inVerdicts = $false
+    foreach ($line in @($Lines)) {
+        if ($line -match '^##\s') { $inVerdicts = [bool]($line -match '^##\s+Verdicts\b'); continue }
+        if ($inVerdicts -and $line -match '^\|\s*`([^`]+)`\s*\|') { [void]$names.Add($Matches[1]) }
+    }
+    return , $names.ToArray()
+}
+
+# THE CEILING, held without a shortfall. Both shortfall rules assume what the roster's row text promises:
+# the committed page banks the block's FULL matrix, and its size is BlockSize. This is that assumption
+# as a pure check, so check-roster-format.ps1 can hold every registration to its committed page on every
+# guard run instead of waiting for a host to lose the block.
+#
+# It refuses two things, each by name:
+#   - a page that holds the block COLLAPSED (the root alone). The row is banked below its ceiling. A
+#     host that completes the block then reads a surplus no rule absorbs, and a slower host's withdrawals
+#     have no banked names to be matched against. Re-bank on a host that completes the block.
+#   - a page that fans the block out to any other size. The case matrix moved and BlockSize did not, so
+#     every shortfall either rule judges is measured against the wrong number. Re-derive it from the page.
+# There is deliberately no surplus arm in the sweep to absorb a completed block over a collapsed bank.
+# The ceiling bank this check holds makes that surplus unreachable from a committed state, and an arm
+# absorbing it would accept exactly the stale-bank state this check exists to refuse (COORD's F1/F2
+# ruling, 2026-11-07: bank crypto/tls at the full count where BoGo completes).
+function Test-CapabilityBlockAtCeiling {
+    param(
+        [PSCustomObject] $Block,   # @{ Test = <top-level name>; BlockSize = <int> }
+        [string[]] $PageNames      # the committed proof page's Verdicts names (Get-ProofPageVerdictNames)
+    )
+
+    $prefix = "$($Block.Test)/"
+    $blockNames = @(@($PageNames) | Where-Object { $_ -eq $Block.Test -or $_.StartsWith($prefix) })
+    $count = $blockNames.Count
+
+    if ($count -eq $Block.BlockSize) { return [PSCustomObject]@{ Accepted = $true; Count = $count; Reason = $null } }
+
+    $reason = if ($count -eq 0) {
+        "the committed proof page names no verdict under $($Block.Test) -- a registered block must be banked"
+    }
+    elseif ($count -eq 1 -and $blockNames[0] -eq $Block.Test) {
+        "the committed proof page holds $($Block.Test) COLLAPSED to its root, against a registered block of $($Block.BlockSize) -- " +
+            "the row is banked below its ceiling, so a host that completes the block reads a surplus no rule absorbs; " +
+            "re-bank on a host that completes it"
+    }
+    else {
+        "the committed proof page names $count verdicts under $($Block.Test), not the registered $($Block.BlockSize) -- " +
+            "the case matrix moved; re-derive BlockSize from this page"
+    }
+    return [PSCustomObject]@{ Accepted = $false; Count = $count; Reason = $reason }
+}
