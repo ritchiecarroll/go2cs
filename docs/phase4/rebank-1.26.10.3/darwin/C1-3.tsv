@@ -37,5 +37,5 @@ C1-3	database/sql	osx-arm64	143	141	2	2	0	validated	yes	141	2	141/2/True	no	4247
 C1-3	database/sql	osx-x64	143	141	2	2	0	validated	yes	141	2	141/2/True	no	42477307357	105	implied
 C1-3	database/sql/driver	osx-arm64	1	1	0	0	0	validated	yes	1	0	1/0/True	no	42477307357	21	implied
 C1-3	database/sql/driver	osx-x64	1	1	0	0	0	validated	yes	1	0	1/0/True	no	42477307357	33	implied
-C1-3	debug/buildinfo	osx-arm64	211	relay	0	18	34	failing	no	211	0	211/0/True	no	42477307357	70	read
+C1-3	debug/buildinfo	osx-arm64	211	193	0	18	34	failing	no	211	0	211/0/True	no	42477307357	70	read
 C1-3	debug/buildinfo	osx-x64	211	211	0	0	0	validated	no	211	0	211/0/True	no	42477307357	155	implied

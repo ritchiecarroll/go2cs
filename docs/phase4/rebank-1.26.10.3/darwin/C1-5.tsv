@@ -21,7 +21,7 @@ C1-5	go/importer	osx-arm64	3	3	0	0	0	validated	yes	3	0	3/0/True	no	42481111673	1
 C1-5	go/importer	osx-x64	3	3	0	0	0	validated	yes	3	0	3/0/True	no	42481111673	123	implied
 C1-5	go/internal/gccgoimporter	osx-arm64	4	4	0	0	0	validated	yes	4	0	4/0/True	no	42481111673	45	implied
 C1-5	go/internal/gccgoimporter	osx-x64	4	4	0	0	0	validated	yes	4	0	4/0/True	no	42481111673	48	implied
-C1-5	go/internal/gcimporter	osx-arm64	relay	relay	relay	relay	relay	FAIL	no	638	0	636/0/True	yes	42481111673	193	read
+C1-5	go/internal/gcimporter	osx-arm64	relay	634	relay	relay	relay	FAIL	no	638	0	636/0/True	yes	42481111673	193	read
 C1-5	go/internal/gcimporter	osx-x64	636	636	0	0	0	validated	no	638	0	636/0/True	yes	42481111673	254	implied
 C1-5	go/internal/srcimporter	osx-arm64	7	7	0	0	0	validated	yes	7	0	7/0/True	no	42481111673	42	implied
 C1-5	go/internal/srcimporter	osx-x64	7	7	0	0	0	validated	yes	7	0	7/0/True	no	42481111673	63	implied
