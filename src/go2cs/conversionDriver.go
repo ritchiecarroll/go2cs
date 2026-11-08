@@ -290,12 +290,18 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// converted faithfully, and a refused conversion should leave the output tree untouched.
 		paired, skippedGenerated := syntaxSourceFiles(pkg)
 
-		if err := refuseSelectedCgoSources(pkg, paired); err != nil {
+		err := refuseSelectedCgoSources(pkg, paired)
+
+		if err == nil {
+			err = refuseCgoOnlyPackage(pkg, options.targetPlatform, options.buildTags, cfg.Dir, options.goRoot)
+		}
+
+		if err != nil {
 			var refusal *cgoSourceRefusal
 
 			if errors.As(err, &refusal) {
 				for _, position := range refusal.imports {
-					reportDiagnostic(position.String(), diagnosticCgoRefused, fmt.Sprintf("package %s selects this cgo source (import \"C\") for this build, and cgo has no C# conversion yet; convert with CGO_ENABLED=0 or exclude the file from the build", pkg.PkgPath))
+					reportDiagnostic(position.String(), diagnosticCgoRefused, refusal.diagnostic())
 				}
 			}
 
@@ -878,21 +884,38 @@ func packageInfoPath(packageOutputPath string, isDir bool, options Options) stri
 // the cases that must stay quiet do so structurally: a test-only file is not part of the package
 // build, a platform-deselected file (build tags, GOOS/GOARCH suffix) is in IgnoredFiles, and at
 // CGO_ENABLED=0 -- how the corpus is converted -- no file imports C into the build at all. A
-// selected file counts as cgo only if it has no paired syntax tree AND imports "C"; a file that
-// merely failed to parse is a different fault with its own reporting.
+// selected file counts as cgo if it has no paired syntax tree AND imports "C", or if it is paired with
+// its OWN tree and that tree imports "C"; a file that merely failed to parse is a different fault with
+// its own reporting.
+//
+// The second form is the no-compiler route: with CGO_ENABLED=1 and no C compiler, go list never runs
+// cgo, so the RAW `import "C"` source is compiled-listed and parsed as itself. Measured at 30ad20e17e
+// (PLAN-cgo-interop.md, the 2026-11-08 re-ground, arm P3): S3 stayed quiet there, and visitImportSpec's
+// gate refused only mid-visit, after a sibling's .cs had already been written.
 func refuseSelectedCgoSources(pkg *packages.Package, paired []syntaxSourceFile) error {
-	parsed := make(map[string]bool, len(paired))
+	parsed := make(map[string]*ast.File, len(paired))
 
 	for _, pair := range paired {
-		parsed[filepath.Clean(pair.path)] = true
+		parsed[filepath.Clean(pair.path)] = pair.file
 	}
 
 	refusal := &cgoSourceRefusal{pkgPath: pkg.PkgPath}
 
 	for _, path := range pkg.GoFiles {
-		if !parsed[filepath.Clean(path)] {
+		file, ok := parsed[filepath.Clean(path)]
+
+		if !ok {
 			if position, ok := importCPosition(path); ok {
 				refusal.imports = append(refusal.imports, position)
+			}
+
+			continue
+		}
+
+		for _, spec := range file.Imports {
+			if spec.Path != nil && spec.Path.Value == `"C"` {
+				refusal.imports = append(refusal.imports, pkg.Fset.PositionFor(spec.Pos(), false))
+				break
 			}
 		}
 	}
@@ -904,11 +927,71 @@ func refuseSelectedCgoSources(pkg *packages.Package, paired []syntaxSourceFile) 
 	return refusal
 }
 
-// cgoSourceRefusal is refuseSelectedCgoSources' error: the package, and the `import "C"` of each
-// selected cgo source, which the driver reports as a canonical diagnostic before refusing.
+// refuseCgoOnlyPackage refuses a package that is cgo-only on this target: the build selects none of
+// its files, and an excluded file imports "C" and would be selected with cgo on. Converting it emits
+// nothing a build can use, and the loader's soft "build constraints exclude all Go files" error is
+// reported without changing the exit status -- measured at 30ad20e17e as an `error GO2CS1001` line
+// beside exit 0 (PLAN-cgo-interop.md, the 2026-11-08 re-ground, arm P1).
+//
+// "Would be selected with cgo on" is what keeps a PLATFORM-deselected package quiet: internal/testpty
+// on windows excludes every file and one of them imports "C", but it is excluded for its GOOS and is
+// no cgo package there. The re-check is the converter's own constraint evaluator with the cgo tag set,
+// the evaluator every selected file already passes through (CheckBuildConstraints).
+//
+// A GOROOT package is never refused: the standard library is converted at CGO_ENABLED=0 by ruling
+// (.claude/rules/corpus.md), so a std package that is cgo-only on a target converts to nothing as the
+// corpus's ruled state, not as a false green. Censused at go1.26.10 over std, windows/linux/darwin x
+// amd64/arm64: the population that selects no file and ignores a non-test `import "C"` file is
+// net/internal/cgotest (resstate.go, `!netgo && cgo && darwin`) on every target, and the cgo re-check
+// alone would refuse it on darwin -- a corpus package with a converted test project -- and abort a
+// darwin -stdlib run.
+func refuseCgoOnlyPackage(pkg *packages.Package, targetPlatform string, buildTags []string, loaderDir, goRoot string) error {
+	if len(pkg.GoFiles) > 0 || (goRoot != "" && isPathUnder(pkg.Dir, filepath.Join(goRoot, "src"))) {
+		return nil
+	}
+
+	refusal := &cgoSourceRefusal{pkgPath: pkg.PkgPath, excluded: true}
+	cgoTags := append(append([]string{}, buildTags...), "cgo")
+
+	for _, path := range pkg.IgnoredFiles {
+		if !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") {
+			continue
+		}
+
+		position, ok := importCPosition(path)
+
+		if !ok {
+			continue
+		}
+
+		if match, err := CheckBuildConstraints(path, targetPlatform, cgoTags, loaderDir); err == nil && match {
+			refusal.imports = append(refusal.imports, position)
+		}
+	}
+
+	if len(refusal.imports) == 0 {
+		return nil
+	}
+
+	return refusal
+}
+
+// cgoSourceRefusal is the error of refuseSelectedCgoSources and refuseCgoOnlyPackage: the package,
+// and the `import "C"` of each cgo source, which the driver reports as a canonical diagnostic before
+// refusing. excluded marks refuseCgoOnlyPackage's case, where the sources are excluded, not selected.
 type cgoSourceRefusal struct {
-	pkgPath string
-	imports []token.Position
+	pkgPath  string
+	imports  []token.Position
+	excluded bool
+}
+
+// diagnostic is the text of the canonical diagnostic reported at each source's `import "C"`.
+func (refusal *cgoSourceRefusal) diagnostic() string {
+	if refusal.excluded {
+		return fmt.Sprintf("package %s is cgo-only for this build: every file is excluded, and this cgo source (import \"C\") is excluded only because cgo is off, so the conversion would emit nothing; cgo has no C# conversion yet", refusal.pkgPath)
+	}
+
+	return fmt.Sprintf("package %s selects this cgo source (import \"C\") for this build, and cgo has no C# conversion yet; convert with CGO_ENABLED=0 or exclude the file from the build", refusal.pkgPath)
 }
 
 func (refusal *cgoSourceRefusal) Error() string {
@@ -916,6 +999,11 @@ func (refusal *cgoSourceRefusal) Error() string {
 
 	for i, position := range refusal.imports {
 		sources[i] = filepath.Base(position.Filename)
+	}
+
+	if refusal.excluded {
+		return fmt.Sprintf("package %s is cgo-only for this build: every Go file is excluded, and %s (import \"C\") would be selected only with cgo on, so the conversion would emit nothing; cgo has no C# conversion yet",
+			refusal.pkgPath, strings.Join(sources, ", "))
 	}
 
 	return fmt.Sprintf("package %s selects cgo source %s (import \"C\") for this build, and cgo has no C# conversion yet, so the converted package would silently lack that code; convert with CGO_ENABLED=0 (the corpus convention) or exclude the file from the build",

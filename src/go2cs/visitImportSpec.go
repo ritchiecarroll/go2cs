@@ -267,7 +267,12 @@ func qualifyAmbiguousTestTypeRefs(name string, anchorPrefix string) string {
 func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGroup) {
 	v.currentImportPath = strings.Trim(importSpec.Path.Value, "\"")
 
-	if !v.options.parseCgoTargets && v.currentImportPath == "C" {
+	// The backstop behind the driver's refusals (refuseSelectedCgoSources), which reject every route
+	// that reaches here before any file is written. It fires whatever -cgo says: until a phase gives
+	// the flag something typed to emit, an `import "C"` source has no conversion, and the flag used to
+	// turn this exit 1 into an exit-0 emission naming a C_package that does not exist (PLAN-cgo-interop
+	// OQ-5; the 2026-11-08 re-ground, arm P3').
+	if v.currentImportPath == "C" {
 		position := v.fset.Position(importSpec.Pos())
 		reportDiagnostic(position.String(), diagnosticCgoRefused, `cgo target parsing is not supported (import "C")`)
 		log.Fatalf("cgo target parsing is not supported: file \"%s\"", position.Filename)

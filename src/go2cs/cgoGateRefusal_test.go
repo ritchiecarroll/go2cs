@@ -192,6 +192,29 @@ func TestARawCgoSourceIsRefusedBeforeAnyOutputWhateverTheFlag(t *testing.T) {
 	}
 }
 
+// The darwin net/internal/cgotest shape, at unit level: no file selected, the ignored file imports "C"
+// and its constraint needs only cgo. Outside GOROOT it is refused; inside GOROOT the stdlib's ruled
+// CGO_ENABLED=0 convert keeps it a quiet skip.
+func TestACgoOnlyPackageIsRefusedOutsideGorootOnly(t *testing.T) {
+	goRoot := t.TempDir()
+	dir := filepath.Join(goRoot, "src", "net", "internal", "cgotest")
+
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	ignored := writeCgoFixture(t, dir, "resstate.go", "//go:build cgo\n\n"+cgoImportSource)
+	pkg := &packages.Package{PkgPath: "net/internal/cgotest", Dir: dir, IgnoredFiles: []string{ignored}}
+
+	if err := refuseCgoOnlyPackage(pkg, "linux/amd64", nil, dir, ""); err == nil || !strings.Contains(err.Error(), "resstate.go") {
+		t.Errorf("outside GOROOT a cgo-only package must be refused by name, got %v", err)
+	}
+
+	if err := refuseCgoOnlyPackage(pkg, "linux/amd64", nil, dir, goRoot); err != nil {
+		t.Errorf("a GOROOT package converts at the stdlib's ruled CGO_ENABLED=0 and must stay quiet, got %v", err)
+	}
+}
+
 // The same route at unit level, host-independent: the selected file IS paired, with its own tree, and
 // that tree imports "C".
 func TestARawCgoSourcePairedWithItsOwnTreeIsRefusedByName(t *testing.T) {
