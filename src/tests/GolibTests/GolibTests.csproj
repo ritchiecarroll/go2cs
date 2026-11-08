@@ -121,6 +121,8 @@
          native invoke); its end-to-end arm gates on the running host and reports Inconclusive.
          Same reasoning, and same '!= \'\' and != windows' form, as the line above. -->
     <Compile Remove="TokenDoorWiredTests.cs" />
+    <!-- The trampoline's transition (DESIGN-native-call-seam F-2) is read through SyscallN, so the same holds. -->
+    <Compile Remove="WindowsSyscallTransitionTests.cs" />
 
     <!-- runtime's managed Windows usleep (and its GoUsleep seam) live in runtime's windows/ folder. -->
     <Compile Remove="RuntimeUsleepWindowsTests.cs" />
