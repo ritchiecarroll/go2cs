@@ -12,6 +12,9 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"path/filepath"
+	"sort"
+	"strings"
 )
 
 // Phase 1 of docs/PLAN-cgo-interop.md (§6, read through §11): recognition and file mapping for a cgo package,
@@ -67,22 +70,66 @@ type cgoDeclaration struct {
 // The C types cmd/cgo declares on the way to the ones a source names (a struct field's `uchar`, `intgo`'s chain to
 // `long`) are reported too: a converted struct needs its fields' types.
 func cgoDeclarations(pkg *types.Package) []cgoDeclaration {
-	return nil
+	var declarations []cgoDeclaration
+
+	scope := pkg.Scope()
+
+	for _, name := range scope.Names() {
+		declaration, ok := classifyCgoName(name)
+
+		if !ok {
+			continue
+		}
+
+		declaration.object = scope.Lookup(name)
+		declarations = append(declarations, declaration)
+	}
+
+	sort.SliceStable(declarations, func(i, j int) bool {
+		return declarations[i].cName < declarations[j].cName
+	})
+
+	return declarations
 }
 
 // classifyCgoName reads one scope name. ok is false for any name that is not a recognized cgo declaration.
 func classifyCgoName(name string) (declaration cgoDeclaration, ok bool) {
+	for _, entry := range cgoKindPrefixes {
+		cName, found := strings.CutPrefix(name, entry.prefix)
+
+		if !found || cName == "" || reservedCName(cName) {
+			continue
+		}
+
+		kind := entry.kind
+
+		if kind == cgoType {
+			kind = cgoTypeKind(cName)
+		}
+
+		return cgoDeclaration{cName: cName, kind: kind}, true
+	}
+
 	return cgoDeclaration{}, false
 }
 
 // reservedCName reports whether cName is reserved for the C implementation: an underscore and a capital letter.
 func reservedCName(cName string) bool {
-	return false
+	return len(cName) > 1 && cName[0] == '_' && cName[1] >= 'A' && cName[1] <= 'Z'
 }
 
 // cgoTypeKind splits a _Ctype_ name by the C tag Go spells into it: C.struct_x, C.union_x and C.enum_x.
 func cgoTypeKind(cName string) cgoDeclKind {
-	return cgoType
+	switch {
+	case strings.HasPrefix(cName, "struct_"):
+		return cgoStruct
+	case strings.HasPrefix(cName, "union_"):
+		return cgoUnion
+	case strings.HasPrefix(cName, "enum_"):
+		return cgoEnum
+	default:
+		return cgoType
+	}
 }
 
 // cgoSourceFile maps one syntax tree of a cgo package to the source it came from. generated is the path the parser
@@ -102,5 +149,20 @@ type cgoSourceFile struct {
 // go list writes that //line path absolute; `go tool cgo -trimpath` writes it relative, and go/scanner resolves a
 // relative one against the directory of the file that carries it. Either way the adjusted path names the source.
 func cgoSourceFiles(fset *token.FileSet, files []*ast.File) []cgoSourceFile {
-	return nil
+	mapped := make([]cgoSourceFile, 0, len(files))
+
+	for _, file := range files {
+		generated := fset.PositionFor(file.Package, false).Filename
+		named := fset.PositionFor(file.Package, true).Filename
+
+		entry := cgoSourceFile{file: file, generated: generated}
+
+		if named != generated {
+			entry.source = filepath.Clean(named)
+		}
+
+		mapped = append(mapped, entry)
+	}
+
+	return mapped
 }
