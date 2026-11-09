@@ -254,16 +254,27 @@ public class AsyncChannelTests
 
     // A cancellation that races deliveries must never lose or duplicate a value: every send either
     // completes and its value is received exactly once, or is canceled and its value never appears.
+    //
+    // The first assert is the property. The second only proves the race ran, and it is the part that
+    // used to fail: a Task.Run receiver on a pool still busy with earlier tests' work could start after
+    // all 2000 rounds had canceled ("0 delivered, 2000 canceled", 2 runs in 10 of the whole assembly).
+    // So the receiver has its own thread and has started before the first round, and the rounds go on,
+    // within a bounded budget and with a widening window, until each outcome has occurred often.
     [TestMethod]
     public async Task CancellationRacingDeliveryNeverLosesAValue()
     {
-        const int Rounds = 2000;
+        const int MinRounds = 2000;
+        const int MaxRounds = 200_000;
+        const int MinEachOutcome = 50;
         channel<int> ch = new(0);
         int delivered = 0;
         int received = 0;
+        using ManualResetEventSlim receiverStarted = new();
 
-        Task receiver = Task.Run(() =>
+        Thread receiver = new(() =>
         {
+            receiverStarted.Set();
+
             while (true)
             {
                 (int value, bool ok) = ch.Receive(true);
@@ -273,17 +284,22 @@ public class AsyncChannelTests
 
                 received += value;
             }
-        });
+        }) { IsBackground = true, Name = "CancellationRacingDelivery receiver" };
+
+        receiver.Start();
+        Assert.IsTrue(receiverStarted.Wait(TimeoutMs), "the receiver thread did not start");
 
         int canceled = 0;
+        int rounds = 0;
 
-        for (int i = 0; i < Rounds; i++)
+        for (; rounds < MaxRounds && (rounds < MinRounds || delivered < MinEachOutcome || canceled < MinEachOutcome); rounds++)
         {
             using CancellationTokenSource cts = new();
             Task sent = ch.SendAsync(1, cts.Token);
 
-            // A varying head start for the receiver, so each claimant wins some rounds.
-            Thread.SpinWait(i % 64 * 8);
+            // A varying head start for the receiver, so each claimant wins some rounds; the window widens
+            // with every MinRounds rounds, so a slow receiver still wins some.
+            Thread.SpinWait(rounds % 64 * 8 * (1 + rounds / MinRounds));
             cts.Cancel();
 
             try
@@ -299,10 +315,10 @@ public class AsyncChannelTests
         }
 
         ch.Close();
-        await Within(receiver);
+        Assert.IsTrue(receiver.Join(TimeoutMs), "the receiver did not see the channel close");
 
         Assert.AreEqual(delivered, received, $"a value was lost or duplicated by a racing cancellation ({delivered} delivered, {canceled} canceled)");
-        Assert.IsTrue(delivered > 0 && canceled > 0, $"the race was not exercised: {delivered} delivered, {canceled} canceled");
+        Assert.IsTrue(delivered >= MinEachOutcome && canceled >= MinEachOutcome, $"the race was not exercised: {delivered} delivered, {canceled} canceled in {rounds} rounds");
     }
 
     [TestMethod]
