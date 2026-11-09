@@ -287,7 +287,7 @@ The converted app lands under `<gopath>/src/go2cs/src/<import-path>` and its con
 dependencies under `<gopath>/src/go2cs/pkg/<import-path>`, with the standard library referenced at
 `<gopath>/src/go2cs/core/`. No solution is generated for this kind of conversion: build or publish the
 **project**, in its folder or by naming its `.csproj`, and do not build it through a solution, because the core
-projects a solution does not list build Debug (see [Known issues](KnownIssues.md#a-program-converted-with-local-standard-library-references-runs-its-standard-library-built-debug)).
+projects a solution does not list build Debug (see [Known issues](KnownIssues.md#with-go2cs-126102-or-earlier-a-program-converted-with-local-standard-library-references-runs-its-standard-library-built-debug)).
 In Visual Studio, open the `.csproj`. Build and run it from the project's folder:
 
 ```shell
