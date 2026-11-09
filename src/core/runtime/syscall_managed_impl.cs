@@ -94,10 +94,10 @@ partial class runtime_package
     // ReturnToNative. Under M:N the goroutine is implicitly locked to its thread for the whole callback, because a
     // native frame is below it (§12.1's M7); under today's 1:1 model it always is.
     //
-    // The crossing is INERT where there is no native call to come back from: a thread with no goroutine identity (a
-    // callback on a thread a C library created), or a callback pointer invoked outside any bracketed call. Go throws
-    // in that case. Here a throw would escape into native code and abort the process, so the crossing does nothing
-    // and the callback runs as plain Go code. The returned flags tell the exit what the entry did: 1, the seam was
+    // The crossing is INERT where no native call is open, and the callback runs as plain Go code (§6.3's dated block).
+    // A pointer invoked outside any bracketed call: Go throws there (exitsyscall, "syscall frame is no longer valid");
+    // go2cs deliberately does not, since a throw would unwind into native code. A thread a C library created, with no
+    // goroutine identity: Go attaches an extra M; here that is an open gap. The returned flags: 1, the seam was
     // re-entered; 2, the status moved. The status moves only where it is _Gsyscall, so a crossing opened by
     // GoNativeCall alone (no runtime family below it) re-enters the seam and leaves the status as it found it.
     public static int syscallCallbackEnter()
