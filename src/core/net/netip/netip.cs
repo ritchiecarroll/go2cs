@@ -371,14 +371,18 @@ internal static uint8 v4(this ΔAddr ip, uint8 i) {
 
 // v6 returns the i'th byte of ip. If ip is an IPv4 address, this
 // accesses the IPv4-mapped IPv6 address form of the IP.
-internal static uint8 v6(this ΔAddr ip, uint8 i) {
-    return (uint8)(((Ꮡ(ip).Ꮡaddr.halves()[(i / 8) % 2]).Value).Rsh((uint64)((uint8)((7 - i % 8) * 8))));
+internal static uint8 v6(this ΔAddr ipʗp, uint8 i) {
+    ref var ip = ref heap(ipʗp, out var Ꮡip);
+
+    return (uint8)(((Ꮡip.Ꮡaddr.halves()[(i / 8) % 2]).Value).Rsh((uint64)((uint8)((7 - i % 8) * 8))));
 }
 
 // v6u16 returns the i'th 16-bit word of ip. If ip is an IPv4 address,
 // this accesses the IPv4-mapped IPv6 address form of the IP.
-internal static uint16 v6u16(this ΔAddr ip, uint8 i) {
-    return (uint16)(((Ꮡ(ip).Ꮡaddr.halves()[(i / 4) % 2]).Value).Rsh((uint64)((uint8)((3 - i % 4) * 16))));
+internal static uint16 v6u16(this ΔAddr ipʗp, uint8 i) {
+    ref var ip = ref heap(ipʗp, out var Ꮡip);
+
+    return (uint16)(((Ꮡip.Ꮡaddr.halves()[(i / 4) % 2]).Value).Rsh((uint64)((uint8)((3 - i % 4) * 16))));
 }
 
 // isZero reports whether ip is the zero value of the IP type.

@@ -1773,22 +1773,25 @@ func (v *Visitor) paramBoxReasonHolds(ident *ast.Ident, param types.Object, body
 
 // recvBoxReasonHolds reports whether the entry-time heap box a method's VALUE RECEIVER was marked
 // for is warranted against the given body: an EXPLICIT address-of on the receiver's own storage
-// (`&r`, `&r.field…`, `&r[i]` — paramAddressTakenNeedsBox). It is the emission-side twin of
+// (`&r`, `&r.field…`, `&r[i]` — paramAddressTakenNeedsBox), a capture-mode pointer-receiver CALL on
+// it, or a pointer-receiver METHOD VALUE of it (the implicit `(&r).M`). It is the emission-side twin of
 // markAddressTakenBoxedReceiver and must stay identical to it, exactly as paramBoxReasonHolds must
 // to markCaptureModeBoxedParams: a reason recorded by analysis but missing here leaves body uses
 // referencing a box (`Ꮡr`) that was never declared (CS0103), and the reverse declares a box nothing
 // references. paramNeedsHeapBox reads it for the receiver, which drives the `ʗp` signature rename
 // and the entry-time preamble.
 //
-// The receiver set is deliberately NARROWER than the parameter set: a capture-mode (direct-ж)
-// receiver is served by packageDirectBoxReceiverMethods (which emits the box AS the receiver rather
-// than renaming it), and a receiver the capture analysis routed to box-ref storage must not take the
-// `ʗp` form at all — so neither bodyCallsCaptureModeMethodOn nor isLambdaBoxRefVar joins here.
+// The receiver set is NARROWER than the parameter set in one way: a receiver the capture analysis
+// routed to box-ref storage must not take the `ʗp` form at all, so isLambdaBoxRefVar does not join
+// here.
 //
 // A receiver ж-box A2 reverted (every address use feeds a ref-lowered position) has no box reason,
 // as markAddressTakenBoxedReceiver decides.
 func (v *Visitor) recvBoxReasonHolds(recv types.Object, body ast.Node) bool {
-	return !refLoweringLocalReverts(recv) && v.paramAddressTakenNeedsBox(recv, body)
+	return !refLoweringLocalReverts(recv) &&
+		(v.paramAddressTakenNeedsBox(recv, body) ||
+			v.bodyCallsCaptureModeMethodOnObject(recv, body) ||
+			v.pointerMethodValueAddressTaken(recv, body))
 }
 
 // bodyCallsCaptureModeMethodOn reports whether the body calls a capture-mode method with
@@ -1856,6 +1859,12 @@ func (v *Visitor) bodyCallsCaptureModeMethodOnObject(target types.Object, body a
 			} else if _, isPointer := recvType.Underlying().(*types.Pointer); isPointer {
 				return true
 			}
+		}
+
+		// A method promoted through an embedded POINTER (`t.M()` where t's type embeds `*U`) is
+		// called on that pointer's value, so no address of the target is taken either.
+		if selection := v.info.Selections[selectorExpr]; selection != nil && selection.Indirect() {
+			return true
 		}
 
 		if v.isCaptureModeMethod(selectorExpr) {
