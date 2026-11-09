@@ -2399,6 +2399,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckTwoLevelDefinedStruct() => CheckTarget("TwoLevelDefinedStruct");
 
     [TestMethod]
+    public void CheckTwoLevelPointerEmbedBoxPromotion() => CheckTarget("TwoLevelPointerEmbedBoxPromotion");
+
+    [TestMethod]
     public void CheckTypeAssert() => CheckTarget("TypeAssert");
 
     [TestMethod]

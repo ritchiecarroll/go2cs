@@ -13,6 +13,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"log"
 	"regexp"
 	"strings"
 
@@ -464,6 +465,17 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 		}
 	case *ast.StructType:
 		v.visitStructType(typeSpecType, v.info.Defs[typeSpec.Name].Type(), name, doc, v.inFunction, nil)
+	case *ast.IndexExpr, *ast.IndexListExpr:
+		// A defined type written over an INSTANTIATED generic type, `type Q pair[int]` or `type P[T any]
+		// pair[T]`, has no conversion yet. It is refused by name rather than left to the panic below: the
+		// driver's per-file recover would drop the whole file and the run would still exit zero, the
+		// missing types surfacing later as a build error in some other file (GO2CS2004; TS readiness
+		// census, BOARD 2026-11-09). An alias of the instantiation, or a defined type over an instantiated
+		// INTERFACE, takes the alias route above and still converts.
+		position := v.fset.Position(typeSpec.Pos())
+		declaration := "type " + v.getPrintedNode(typeSpec)
+		reportDiagnostic(position.String(), diagnosticGenericInstantiationRefused, fmt.Sprintf("a defined type over an instantiated generic type is not supported yet (%s)", declaration))
+		log.Fatalf("Refusing to convert: %s declares `%s`, a defined type over an instantiated generic type, which go2cs does not support yet\n", position, declaration)
 	default:
 		panic(fmt.Sprintf("@visitTypeSpec - Unexpected TypeSpec type: %#v", v.getPrintedNode(typeSpecType)))
 	}

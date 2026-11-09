@@ -787,25 +787,23 @@ internal class StructTypeTemplate : TemplateBase
         if (structDecl is not null)
             structMethodNames.UnionWith(structDecl.GetBoxReceiverMethodNames(compilation!));
 
-        // POINTER-embedded types (`*state` → the `ж<state>` hop property): their BOX-receiver primaries
-        // (`state.Write(this ж<state>)`) promote too — the embed hop `target.<embed>` is already a ж<T>,
-        // so `target.<embed>.M()` binds the box receiver directly. GetExtensionMethods harvests only
-        // value-receiver forms, so those box primaries are collected separately below. Keyed by embedded
-        // TYPE name (matches promotedStructType). Gated to POINTER embeds: a VALUE embed's `target.<embed>`
-        // is a value that cannot bind a ж-receiver (sha3's cshakeState embeds *state — CS1929 without this).
-        // Keyed by the embed's SIMPLE type name (dropping any collision prefix) — promotedStructType
-        // arrives as the qualified box form `global::go.ж<…Inner>`, which the loops below reduce with
-        // the same GetSimpleName call the forwarder emission uses, so both sides normalize to `Inner`.
-        HashSet<string> pointerEmbedTypeNames = structDecl is null
-            ? new(StringComparer.Ordinal)
-            : new(structDecl.GetEmbeddedPointerHopNames(compilation!).Select(hop => GetSimpleName(hop.TypeName, dropCollisionPrefix: true)), StringComparer.Ordinal);
-
-        // promotedStructType arrives as the qualified BOX form, so its GetSimpleName carries a trailing
-        // `.Value` (the pointer deref) the embed keys above do not — strip it before the membership test.
-        static string embedKey(string typeName) =>
-            GetSimpleName(typeName, dropCollisionPrefix: true) is var n && n.EndsWith(".Value", StringComparison.Ordinal)
-                ? n[..^".Value".Length]
-                : n;
+        // A type reached through a POINTER embed anywhere on the path (`*state` → the `ж<state>` hop
+        // property) promotes its BOX-receiver primaries (`state.Write(this ж<state>)`) too: GetExtensionMethods
+        // harvests only value-receiver forms, so the two method walks below collect them separately, gated on
+        // the path's pointer state (pathHasPointer), as the cross-package arm is. At depth 1 the hop
+        // `target.<embed>` is already a ж<T> that binds the box receiver (sha3's cshakeState embeds *state —
+        // CS1929 without this); deeper, the forwarder binds the embed's own promoted forwarder, which exists
+        // because the same rule held one level down. A VALUE-only path cannot bind a ж-receiver and takes only
+        // the direct embed's descent shim (IsValueEmbedBoxRecv).
+        //
+        // ⚠ The gate was once the enclosing struct's DIRECT pointer embeds, keyed by simple type name. That
+        // missed two shapes, both measured (TS readiness C17, guarded by TwoLevelPointerEmbedBoxPromotion):
+        // a pointer embed TWO levels down — go-winio's win32MessageBytePipe → win32Pipe → *win32File, whose
+        // generated net.Conn implementation called Close/SetReadDeadline/SetWriteDeadline on the outer box
+        // with no forwarder there (CS1929 x3); and a keyword-escaped direct embed, whose `@file` never
+        // matched `file` (os.File, which lacked a promoted `close`). In std the corrected gate adds 28
+        // forwarders, the same on every target: those three in os, 26 on net's tcpConnWithoutReadFrom and
+        // tcpConnWithoutWriteTo, and archive/zip's fileWriter.FileInfo — each a method Go's method set has.
 
         // Go's AMBIGUITY rule: a method name promoted from TWO OR MORE embeds at the same depth
         // is not promoted at all — bufio ReadWriter's Reader.Size vs Writer.Size (Go requires the
@@ -829,11 +827,11 @@ internal class StructTypeTemplate : TemplateBase
             // cross-embed ambiguity rule so two such embeds carrying the same method name drop (as
             // Go's ambiguity rule requires) rather than emitting a duplicate forwarder. A plain
             // value embed's type name never carries '<' — both the pointer-box embed form (`ж<…>`) and a
-            // generic embed do — which is a more robust discriminator than the pointerEmbedTypeNames
-            // membership test (whose `@`-keyword-escaped names, e.g. os.File's `ж<@file>`, mismatch).
+            // generic embed do — which is a more robust discriminator than a membership test on embed
+            // names (whose `@`-keyword-escaped names, e.g. os.File's `ж<@file>`, mismatch).
             bool directEmbedIsValue = !promotedStructType.Contains("<");
 
-            countPromotedMethods(promotedStructType, [], 1);
+            countPromotedMethods(promotedStructType, [], 1, IsPointerHop(promotedStructType));
 
             // Go's rule INSIDE the embed, the same one promotes() applies to fields: a name is a member of
             // the embed iff it occurs exactly once at its MINIMUM depth. Occurring twice there means the
@@ -855,7 +853,7 @@ internal class StructTypeTemplate : TemplateBase
             // and the measurement (increment E2c). A shared set counts a method reached through two SIBLING
             // embeds once, so Go's same-depth annihilation never fires and an enclosing type promotes what the
             // embed itself does not have.
-            void countPromotedMethods(string typeName, HashSet<string> seenTypes, int depth)
+            void countPromotedMethods(string typeName, HashSet<string> seenTypes, int depth, bool pathHasPointer)
             {
                 if (!seenTypes.Add(typeName))
                     return;
@@ -876,7 +874,7 @@ internal class StructTypeTemplate : TemplateBase
                     foreach (MethodInfo m in metadataValueMethods.Where(m => !m.IsCrossPackage))
                         embedMethodOccurrences.Add((m.Name, depth));
 
-                    if (pointerEmbedTypeNames.Contains(embedKey(typeName)) || (typeName == promotedStructType && directEmbedIsValue))
+                    if (pathHasPointer || (typeName == promotedStructType && directEmbedIsValue))
                     {
                         foreach (MethodInfo m in metadataBoxMethods.Where(m => !m.IsCrossPackage))
                             embedMethodOccurrences.Add((m.Name, depth));
@@ -888,10 +886,10 @@ internal class StructTypeTemplate : TemplateBase
                 foreach (MethodInfo m in decl.GetExtensionMethods(comp!) ?? [])
                     embedMethodOccurrences.Add((m.Name, depth));
 
-                // A POINTER embed's box-receiver primaries promote too (see below) — count them for
-                // the same cross-embed ambiguity rule. A direct VALUE embed likewise promotes its
-                // box-receiver primaries via the descent shim.
-                if (pointerEmbedTypeNames.Contains(embedKey(typeName)) || (typeName == promotedStructType && directEmbedIsValue))
+                // Box-receiver primaries reached through a pointer anywhere on the path promote too (see
+                // below) — count them for the same cross-embed ambiguity rule. A direct VALUE embed likewise
+                // promotes its box-receiver primaries via the descent shim.
+                if (pathHasPointer || (typeName == promotedStructType && directEmbedIsValue))
                 {
                     foreach (MethodInfo m in decl.GetBoxReceiverExtensionMethods(comp!))
                         embedMethodOccurrences.Add((m.Name, depth));
@@ -900,7 +898,7 @@ internal class StructTypeTemplate : TemplateBase
                 foreach ((string memberType, _, _, bool isEmbedded, _) in decl.GetStructMembers(comp!, true))
                 {
                     if (isEmbedded)
-                        countPromotedMethods(memberType, [.. seenTypes], depth + 1);
+                        countPromotedMethods(memberType, [.. seenTypes], depth + 1, pathHasPointer || IsPointerHop(memberType));
                 }
             }
         }
@@ -994,7 +992,7 @@ internal class StructTypeTemplate : TemplateBase
 
                     bool metadataValueEmbedBoxRecv = typeName == promotedStructType && directEmbedIsValue;
 
-                    if (pointerEmbedTypeNames.Contains(embedKey(typeName)) || metadataValueEmbedBoxRecv)
+                    if (pathHasPointer || metadataValueEmbedBoxRecv)
                     {
                         foreach (MethodInfo m in metadataBoxMethods.Where(m => !m.IsCrossPackage))
                         {
@@ -1012,10 +1010,12 @@ internal class StructTypeTemplate : TemplateBase
                         promotedStructMethods.Add(m with { PathHasPointer = pathHasPointer });
                 }
 
-                // A POINTER embed's BOX-receiver primaries (`this ж<T>`) promote unchanged — the hop
-                // `target.<embed>` is a ж<T>, so the value/pointer forwarders below (`target.<embed>.M(…)`)
-                // bind the box receiver directly. GetExtensionMethods above harvests only value-receiver
-                // forms, so collect the box primaries here (sha3's cshakeState←*state.Write, CS1929).
+                // BOX-receiver primaries (`this ж<T>`) reached through a pointer anywhere on the path promote
+                // unchanged — at depth 1 the hop `target.<embed>` is a ж<T>, so the value/pointer forwarders
+                // below (`target.<embed>.M(…)`) bind the box receiver directly, and deeper they bind the
+                // embed's own promoted forwarder (see pathHasPointer above). GetExtensionMethods above
+                // harvests only value-receiver forms, so collect the box primaries here (sha3's
+                // cshakeState←*state.Write, CS1929).
                 // A direct VALUE embed also promotes its box-receiver primaries, but through the
                 // box-field descent shim (IsValueEmbedBoxRecv) — its hop `target.<embed>` is a value,
                 // not a ж<T>, so the plain forwarder body would be CS1929. Only the direct embed is taken
@@ -1031,7 +1031,7 @@ internal class StructTypeTemplate : TemplateBase
                 // package's forty tests.
                 bool valueEmbedBoxRecv = typeName == promotedStructType && directEmbedIsValue;
 
-                if (pointerEmbedTypeNames.Contains(embedKey(typeName)) || valueEmbedBoxRecv)
+                if (pathHasPointer || valueEmbedBoxRecv)
                 {
                     foreach (MethodInfo m in decl.GetBoxReceiverExtensionMethods(comp!))
                     {
