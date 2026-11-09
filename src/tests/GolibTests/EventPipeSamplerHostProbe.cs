@@ -43,12 +43,19 @@ public class EventPipeSamplerHostProbe
         int leafHog = 0;
         uintptr hogPC = GoSyntheticPC.Of(typeof(cpusamplerprobe_package).GetMethod(nameof(cpusamplerprobe_package.cpuHog1))!);
 
+        var leaves = new Dictionary<string, int>();
+
         void Collect(int64 nanotime, slice<uintptr> stack, unsafe_package.Pointer tag)
         {
             written++;
 
             if (stack.Length > 0 && stack[0] == hogPC)
                 leafHog++;
+
+            // Which Go function each written sample has as its leaf: on the macs the hog leaf reads 0-10 of about 200
+            // (run 42609377638), so where the hog's CPU lands instead is the reading.
+            string leaf = stack.Length > 0 ? GoSyntheticPC.NameOf(stack[0]) ?? $"pc {(ulong)stack[0]:x}" : "(empty)";
+            leaves[leaf] = leaves.GetValueOrDefault(leaf) + 1;
         }
 
         using Process self = Process.GetCurrentProcess();
@@ -103,6 +110,8 @@ public class EventPipeSamplerHostProbe
             lines.Add($"hog {i}: native id {ids[i]} (as int {key}), own CPU {ownCpu[i].TotalMilliseconds:F0} ms; sampler CPU reading {cpu}, written {samples}");
         }
 
+        lines.Add($"leaf frames of the written samples: " +
+            string.Join(", ", leaves.OrderByDescending(pair => pair.Value).Take(6).Select(pair => $"{pair.Key}={pair.Value}")));
         lines.Add($"CPU readings: {sampler.LastCpuByThread.Count} threads, sum {sampler.LastCpuByThread.Values.Sum(t => t.TotalMilliseconds):F0} ms; largest " +
             string.Join(", ", sampler.LastCpuByThread.OrderByDescending(pair => pair.Value).Take(6).Select(pair => $"{pair.Key}={pair.Value.TotalMilliseconds:F0}ms")));
         lines.Add($"written by thread: {sampler.LastWrittenByThread.Count} threads, sum {sampler.LastWrittenByThread.Values.Sum()}; largest " +
