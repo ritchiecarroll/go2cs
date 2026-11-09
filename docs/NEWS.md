@@ -17,7 +17,8 @@ their full text.
      publish is marked PENDING with the publish as its trigger. -->
 
 **NuGet 1.26.10.3.** The second fix release on the Go 1.26 line. The converted standard library is still built from
-Go 1.26.10, and converting a module still needs a Go 1.26 toolchain and the .NET 10 SDK. One change below breaks both
+Go 1.26.10. Converting a module uses a Go 1.26 toolchain, which the go2cs dotnet tool downloads on first use, and
+the .NET 10 SDK. One change below breaks both
 C# source that uses the packages and assemblies already compiled against 1.26.10.2; it is first under *Upgrading from
 1.26.10.2*.
 <!-- The compiled-C# break, VERIFIED at the tree (G finding, COORD ruling 2026-11-07): at the nuget-1.26.10.2 tag golib's
@@ -78,8 +79,9 @@ The JIT and ReadyToRun times did not move.
 Two earlier changes in this release make the same programs faster under Native AOT. A slice element read no
 longer asks whether its element type takes no storage, so matrix-multiply, sieve and sort benchmarks take 13% to
 18% less time. A 64-bit multiply with a 128-bit result now inlines, which together with the first change makes a TLS
-handshake take about 14% less time. Both hold at the default x64 instruction set. Building a converted program for
-`x86-64-v3` (`<IlcInstructionSet>x86-64-v3</IlcInstructionSet>`) gives no gain across the benchmark suite, and an
+handshake take about 14% less time. Both are measured on `win-x64`, on one development machine, at the default x64
+instruction set. Building a converted program for `x86-64-v3` (`<IlcInstructionSet>x86-64-v3</IlcInstructionSet>`)
+gives no gain across the benchmark suite on the same machine, and an
 image built that way refuses to start on a processor without AVX2, BMI1, BMI2, F16C, FMA or LZCNT.
 <!-- source: DATA-hop126-perf.md §11.7 (option A: MatMul 0.823, Sieve 0.865, Sort 0.867; with the Mul inline,
      TlsHandshake 0.856; win-x64, default instruction set) and §11.6 (x86-64-v3 suite geomean 1.000; the cited
@@ -108,7 +110,8 @@ start. On `win-x64`, on one development machine, a small converted program start
 `-recurse=module` against a local go2cs source tree (`-go2cspath`) no longer gets a solution file beside its project.
 So `dotnet build -c Release` in the program's folder builds the standard library in Release, and
 `dotnet publish -c Release -r <rid>` there succeeds. With 1.26.10.2, that build compiled the standard library in
-Debug, about 21 times slower on a TLS handshake under the JIT, and the publish failed. A solution file an earlier
+Debug, about 21 times slower on a TLS handshake under the JIT (on `win-x64`, on one development machine), and the
+publish failed. A solution file an earlier
 converter wrote is removed only when it is exactly the one that converter wrote. A program converted against the
 published packages (`-recurse=nuget`) keeps its solution and was never affected. To build any converted program, name
 its project file: `dotnet build MyProgram.csproj -c Release`.

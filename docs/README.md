@@ -15,7 +15,8 @@ ordinary managed code. Go's slices, maps, channels, goroutines, `defer`, multipl
 embedding and interfaces come from a small runtime library and compile-time source generators, so that
 machinery stays out of the converted files. Behavior comes first: a goroutine runs on its own thread
 and is not rewritten into `async`. The converted Go standard library passes Go's own tests, package by
-package, on Windows and Linux, and the same validation is in progress on macOS.
+package, on Windows and Linux. On macOS, a package is validated when its row on the
+[roster](ValidatedTestPackages.md) carries a macOS count.
 
 ## 📰 NEWS — Faster Native AOT, and a Release standard library from source
 
@@ -24,8 +25,8 @@ package, on Windows and Linux, and the same validation is in progress on macOS.
      (the nugetgo wave); drop it if gojq misses the wave. This block quotes no roster figure (check-roster-format 2e). -->
 **November 8, 2026, NuGet 1.26.10.3.** The second fix release on the Go 1.26 line, still built from Go 1.26.10.
 Native AOT now inlines a slice read as the JIT does, so the same programs run faster there, and the P-256, P-384 and
-P-521 curves are faster under ReadyToRun. A program converted against local standard-library sources builds and
-publishes in Release, and a plain single-file publish starts fast. A slice's `foreach` now gives its values, so an
+P-521 curves are faster under ReadyToRun (both measured on `win-x64`). A program converted against local standard-library sources builds and
+publishes in Release, and a plain single-file publish starts fast (measured on `win-x64`). A slice's `foreach` now gives its values, so an
 assembly built against 1.26.10.2 must be rebuilt; from this release, revisions within one Go release stay
 compatible except for a break the notes announce. **PENDING (the publish):** gojq, a jq implementation in Go, ships
 as a NuGet package.
@@ -104,8 +105,8 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
   library packages are converted from, and validated on, Go 1.26.10, and the
   [Roadmap](Roadmap.md#go-releases) says which Go releases come next.
 - **Windows or Linux on x64**, where the converted standard library is validated against Go's own
-  tests. macOS, on Intel and Apple silicon, has packages and is being validated package by package
-  ([Platforms](Roadmap.md#platforms)).
+  tests. macOS, on Intel and Apple silicon, has packages; a package validated there shows a macOS
+  count on the [roster](ValidatedTestPackages.md) ([Platforms](Roadmap.md#platforms)).
   A minimal Linux, such as a container or a fresh server, also needs `git` and `curl`, and .NET's
   native dependencies ICU and OpenSSL
   ([Microsoft's list](https://learn.microsoft.com/dotnet/core/install/linux-scripted-manual#dependencies)).
@@ -146,7 +147,7 @@ go2cs [options] <input_dir> [output_dir]
 ```shell
 go2cs -recurse=nuget module_dir out      # a module and its dependencies; the standard library comes from NuGet
 go2cs -recurse=module,nuget module_dir out   # only the module's own packages
-go2cs package_dir out                    # one package
+go2cs package_dir out                    # one package; it builds against a go2cs clone: dotnet build -p:go2csPath=<go2cs>/src/
 go2cs -platforms linux/amd64 -recurse=nuget module_dir out-linux    # convert for another operating system
 go2cs -tests -recurse -go2cspath <go2cs>/src -test-action all module_dir out   # convert a module, run its tests, compare with go test
 go2cs -version                           # which release this converter belongs to
