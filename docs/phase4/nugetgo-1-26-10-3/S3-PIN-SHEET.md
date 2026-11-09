@@ -1,11 +1,9 @@
 # PIN session S3: sign and push timefmt-go, a new nugetgo package built on go.* 1.26.10.3 (runbook section 4)
 
-> **TEMPLATE (C2, 2026-11-08), for the nugetgo wave against go.* 1.26.10.3
-> ([`PLAN-rebank-1-26-10-3.md`](../../PLAN-rebank-1-26-10-3.md), section 8).** It is not pasted as it stands. On
-> release day C2 fills its one placeholder, `<<SIGNER_SHA>>` in block 1: the full SHA of the master commit whose
-> `src/sign-nupkgs.ps1` signs and whose `src/_nugetpush.ps1` pushes. C2 then re-runs `Test-SheetPaste.ps1` on the
-> filled copy and posts it to COORD. Block 1 refuses while any `<<...>>` placeholder is left.
-> Paste it only when COORD says so (below).
+> **FILLED (C2, 2026-11-09), for the nugetgo wave against go.* 1.26.10.3
+> ([`PLAN-rebank-1-26-10-3.md`](../../PLAN-rebank-1-26-10-3.md), section 8).** The signer is master `0904811dcf`,
+> whose `src/sign-nupkgs.ps1` signs and whose `src/_nugetpush.ps1` pushes. The kits: on `claude/c2-nugetgo-1261003-timefmt`: `2f696ccdcc`.
+> `Test-SheetPaste.ps1` reads this copy clean. Paste it only when COORD says so (below).
 
 It is one owner sheet for one `dotnet nuget sign` process (one PIN) over one package. Nothing is edited at the table.
 It follows the S1 sheet block for block, with one package. What differs: the package is a NEW ID on nuget.org, so
@@ -88,7 +86,7 @@ This block uses only Windows PowerShell 5.1 syntax, so it runs (and refuses) in 
     if ((dotnet --version) -notlike '10.*') { throw 'dotnet is not .NET 10: check DOTNET_ROOT' }
 
     $Release = '1.26.10.3'
-    $Signer  = '<<SIGNER_SHA>>'
+    $Signer  = '0904811dcfe3f9ac92750881eecf4fb432a0d9c5'
     if ($Signer -like '*<<*' -or $Signer -notmatch '^[0-9a-f]{40}$') { throw 'this sheet is the TEMPLATE: the signer SHA is not filled in. Ask COORD for the filled copy.' }
     $Org     = 'https://api.nuget.org/v3/index.json'
     $Pub     = Join-Path ([IO.Path]::GetTempPath()) 'nugetgo-1261003-s3'

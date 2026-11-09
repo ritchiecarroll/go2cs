@@ -110,10 +110,23 @@ partial class syscall_package
     // produces an error.
     public static unsafe (uint32 rc, error err) GetTimeZoneInformation(ж<Timezoneinformation> Ꮡtzi) {
         NativeTimeZoneInformation native;
-        uint32 rc = win32GetTimeZoneInformation(&native);
+        uint32 rc;
+        int lastError;
+
+        // Each native call in this file is a system call, as the generated wrapper's Syscall makes it: entersyscall
+        // around it, and the last error read inside the window (DESIGN-native-call-seam §12.2, §4.3).
+        runtime_package.syscallEntersyscall();
+
+        try {
+            rc = win32GetTimeZoneInformation(&native);
+            lastError = Marshal.GetLastSystemError();
+        }
+        finally {
+            runtime_package.syscallExitsyscall();
+        }
 
         if (rc == 0xffffffffU) {
-            return (rc, errnoErr((Errno)(uint32)Marshal.GetLastSystemError()));
+            return (rc, errnoErr((Errno)(uint32)lastError));
         }
 
         ref var tzi = ref Ꮡtzi.Value;
@@ -213,14 +226,24 @@ partial class syscall_package
         // dll_windows.cs). Pinning it HERE keeps it fixed for the whole call instead — `Value` on an
         // element box resolves to a ref INTO the caller's backing array, so `fixed` pins that array
         // and every rune of the name stays contiguous behind the pointer for the whole call.
+        int lastError;
+
         fixed (uint16* name = &Ꮡname.Value) {
-            raw = win32FindFirstFileW(name, &native);
+            runtime_package.syscallEntersyscall();
+
+            try {
+                raw = win32FindFirstFileW(name, &native);
+                lastError = Marshal.GetLastSystemError();
+            }
+            finally {
+                runtime_package.syscallExitsyscall();
+            }
         }
 
         ΔHandle handle = (ΔHandle)(uintptr)raw;
 
         if (handle == InvalidHandle) {
-            return (handle, errnoErr((Errno)(uint32)Marshal.GetLastSystemError()));
+            return (handle, errnoErr((Errno)(uint32)lastError));
         }
 
         copyNativeFindData(&native, Ꮡdata);
@@ -233,9 +256,21 @@ partial class syscall_package
     // against, so the last error has to be reported faithfully rather than flattened.
     internal static unsafe error /*err*/ findNextFile1(ΔHandle handle, ж<win32finddata1> Ꮡdata) {
         NativeWin32FindDataW native;
+        int ok;
+        int lastError;
 
-        if (win32FindNextFileW((nint)(nuint)(uintptr)handle, &native) == 0) {
-            return errnoErr((Errno)(uint32)Marshal.GetLastSystemError());
+        runtime_package.syscallEntersyscall();
+
+        try {
+            ok = win32FindNextFileW((nint)(nuint)(uintptr)handle, &native);
+            lastError = Marshal.GetLastSystemError();
+        }
+        finally {
+            runtime_package.syscallExitsyscall();
+        }
+
+        if (ok == 0) {
+            return errnoErr((Errno)(uint32)lastError);
         }
 
         copyNativeFindData(&native, Ꮡdata);
@@ -309,8 +344,21 @@ partial class syscall_package
         // the MANAGED size — so the native layout owns this field, here, where the layout is stated.
         native.Size = (uint32)sizeof(NativeProcessEntry32);
 
-        if (win32Process32First((nint)(nuint)(uintptr)snapshot, &native) == 0) {
-            return errnoErr((Errno)(uint32)Marshal.GetLastSystemError());
+        int32 ok;
+        int lastError;
+
+        runtime_package.syscallEntersyscall();
+
+        try {
+            ok = win32Process32First((nint)(nuint)(uintptr)snapshot, &native);
+            lastError = Marshal.GetLastSystemError();
+        }
+        finally {
+            runtime_package.syscallExitsyscall();
+        }
+
+        if (ok == 0) {
+            return errnoErr((Errno)(uint32)lastError);
         }
 
         copyNativeProcessEntry(&native, ᏑprocEntry);
@@ -326,8 +374,21 @@ partial class syscall_package
 
         native.Size = (uint32)sizeof(NativeProcessEntry32);
 
-        if (win32Process32Next((nint)(nuint)(uintptr)snapshot, &native) == 0) {
-            return errnoErr((Errno)(uint32)Marshal.GetLastSystemError());
+        int32 ok;
+        int lastError;
+
+        runtime_package.syscallEntersyscall();
+
+        try {
+            ok = win32Process32Next((nint)(nuint)(uintptr)snapshot, &native);
+            lastError = Marshal.GetLastSystemError();
+        }
+        finally {
+            runtime_package.syscallExitsyscall();
+        }
+
+        if (ok == 0) {
+            return errnoErr((Errno)(uint32)lastError);
         }
 
         copyNativeProcessEntry(&native, ᏑprocEntry);
