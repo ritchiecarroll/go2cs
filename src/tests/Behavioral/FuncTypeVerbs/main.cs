@@ -21,7 +21,7 @@ internal static void Main() {
         }
         return (true, default);
     };
-    var sum = (params ꓸꓸꓸnint xsʗp) => {
+    Funcꓸꓸꓸ<nint, nint> sum = (params ꓸꓸꓸnint xsʗp) => {
         var xs = xsʗp.sslice();
         nint total = 0;
         foreach (var (_, x) in range(xs)) {
@@ -29,7 +29,7 @@ internal static void Main() {
         }
         return total;
     };
-    var format = @string (@string f, params ꓸꓸꓸany argsʗp) => {
+    Funcꓸꓸꓸ<@string, any, @string> format = @string (@string f, params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp.sslice();
         return fmt.Sprintf(f, args.ꓸꓸꓸ);
     };

@@ -22,7 +22,7 @@ internal static nint sum(Funcꓸꓸꓸ<nint, nint> add) { return add(1, 2, 3); }
 
 internal static void Main() {
     @string @out = "";
-    var writeFormat = (@string format, params ꓸꓸꓸany argsʗp) => {
+    Actionꓸꓸꓸ<@string, any> writeFormat = (@string format, params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp.sslice();
         @out += fmt.Sprintf(format, args.ꓸꓸꓸ) + ";"u8;
     };
@@ -34,7 +34,7 @@ internal static void Main() {
     fmt.Println(@out);
 
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
-    var emit = (@string format, params ꓸꓸꓸany argsʗp) => {
+    Actionꓸꓸꓸ<@string, any> emit = (@string format, params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp.sslice();
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), "["u8 + format + "]"u8, args.ꓸꓸꓸ);
     };
@@ -47,7 +47,7 @@ internal static void Main() {
     fmt.Println(b.String());
 
     nint total = 0;
-    var add = (params ꓸꓸꓸnint xsʗp) => {
+    Funcꓸꓸꓸ<nint, nint> add = (params ꓸꓸꓸnint xsʗp) => {
         var xs = xsʗp.sslice();
         foreach (var (_, x) in range(xs)) {
             total += x;
