@@ -197,13 +197,16 @@ try {
     Check 'a new package has no baseline' ($null -eq (Get-GoApiCompatBaselineVersion @() '1.26.10.3')) 'a baseline from nothing'
     Check 'a module revision takes its own module version''s previous revision' ((Get-GoApiCompatBaselineVersion @('1.0.300', '1.0.300.1', '1.0.300.2', '1.0.301') '1.0.300.3') -ceq '1.0.300.2') "$(Get-GoApiCompatBaselineVersion @('1.0.300', '1.0.300.1', '1.0.300.2', '1.0.301') '1.0.300.3')"
 
-    Write-Host 'golib carries B3''s announced break, and nothing unannounced'
+    # The 1.26.10.4 release compares with 1.26.10.3, which already carries B3's break, so its entries match nothing
+    # there and the guard refuses them: they are deleted on that release day (REVIEW-go-break-floor.md, item 4). Until
+    # then the file holds at most B3's 12, and cites B3 while it holds any.
+    Write-Host 'golib carries at most B3''s announced break, and nothing unannounced'
     $golib = Join-Path $repoRoot 'src/core/golib/CompatibilitySuppressions.xml'
     $entries = @(Read-GoApiCompatSuppressions $golib)
-    Check 'golib''s suppression file carries the 12 B3 entries' ($entries.Count -eq 12) "$($entries.Count) entries"
+    Check 'golib''s suppression file carries at most the 12 B3 entries' ($entries.Count -le 12) "$($entries.Count) entries"
     Check 'every entry names golib''s lib/ asset' (@($entries | Where-Object { $_.Asset -cne 'lib/net10.0/golib.dll' }).Count -eq 0) 'an entry names another asset'
     $text = [System.IO.File]::ReadAllText($golib)
-    Check 'the file cites B3 and batch 231' ($text.Contains('B3') -and $text.Contains('batch 231')) 'no citation'
+    Check 'the file cites B3 and batch 231 while it carries any entry' ($entries.Count -eq 0 -or ($text.Contains('B3') -and $text.Contains('batch 231'))) 'no citation'
 
     # A package id cannot be turned back into its directory: go.vendor.golang.org.x.crypto.cryptobyte lives in
     # vendor/golang.org/x/crypto/cryptobyte, and the reverse mapping looked in vendor/golang/org/... (the whole-surface
@@ -222,15 +225,17 @@ try {
     $real = Get-GoApiCompatSuppressionMap (Join-Path $repoRoot 'src/core')
     Check 'the tree''s own files map to golib and vendored cryptobyte' (
         $real.ContainsKey('go.lib') -and $real.ContainsKey('go.vendor.golang.org.x.crypto.cryptobyte')) "keys: $(@($real.Keys | Sort-Object) -join ', ')"
+    # Emptied on the 1.26.10.4 release day too, as golib's is above.
     $cb = @(Read-GoApiCompatSuppressions $real['go.vendor.golang.org.x.crypto.cryptobyte'])
-    Check 'vendored cryptobyte carries batch 235''s 5 entries' ($cb.Count -eq 5 -and [System.IO.File]::ReadAllText($real['go.vendor.golang.org.x.crypto.cryptobyte']).Contains('batch 235')) "$($cb.Count) entries"
+    Check 'vendored cryptobyte carries at most batch 235''s 5 entries, and cites the batch while it carries any' (
+        $cb.Count -le 5 -and ($cb.Count -eq 0 -or [System.IO.File]::ReadAllText($real['go.vendor.golang.org.x.crypto.cryptobyte']).Contains('batch 235'))) "$($cb.Count) entries"
 
     # The break floor (DESIGN-go-break-floor.md section 4): go.lib's targets fail a consumer's build for a package built
     # below $(GoBreakFloor), and push-nuget refuses a release whose floor disagrees with its suppression files. Once the
     # guard is green every suppression entry left is a break against the baseline, so a reachable one means this
     # release breaks.
     Write-Host 'the break floor moves with a reachable break and only then'
-    $floorCmds = @('Test-GoBreakFloor', 'Test-GoBreakFloorReachable', 'Get-GoBreakFloor')
+    $floorCmds = @('Test-GoBreakFloor', 'Test-GoBreakFloorShape', 'Test-GoBreakFloorReachable', 'Get-GoBreakFloor', 'Get-GoBreakFloorFromPackage')
     $missing = @($floorCmds | Where-Object { -not (Get-Command $_ -ErrorAction SilentlyContinue) })
     Check 'the module exports the break-floor functions' ($missing.Count -eq 0) "missing: $($missing -join ', ')"
     if ($missing.Count -eq 0) {
@@ -260,6 +265,33 @@ try {
         Check 'a targets text without one reads as none' ($null -eq (Get-GoBreakFloor '<Project />')) 'a floor from nothing'
         $treeFloor = Get-GoBreakFloor ([System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/core/golib/buildTransitive/go.lib.targets')))
         Check 'the tree''s go.lib.targets states a floor' ($treeFloor -match '^\d+\.\d+\.\d+\.\d+$') "$treeFloor"
+
+        # What holds in every one of the four cases needs no baseline: the floor parses, sits on the release's Go line
+        # and is at most the release. -VerifyOnly packs nothing and compares with nothing, so this is the part it runs.
+        Write-Host 'the floor''s baseline-free cases'
+        function ShapeFailures([string]$R, [string]$F) { @(Test-GoBreakFloorShape -ReleaseVersion $R -Floor $F) }
+        Check 'a floor at the release reads green' ((ShapeFailures '1.26.10.4' '1.26.10.4').Count -eq 0) ((ShapeFailures '1.26.10.4' '1.26.10.4') -join '; ')
+        Check 'a floor below the release on its line reads green' ((ShapeFailures '1.26.10.4' '1.26.10.3').Count -eq 0) ((ShapeFailures '1.26.10.4' '1.26.10.3') -join '; ')
+        Check 'a rehearsal takes its numeric version' ((ShapeFailures '1.26.10.4-ci.3' '1.26.10.4').Count -eq 0) ((ShapeFailures '1.26.10.4-ci.3' '1.26.10.4') -join '; ')
+        $f = @(ShapeFailures '1.26.10.4' '1.26.10.5')
+        Check 'a floor above the release reads red, naming both' ($f.Count -eq 1 -and $f[0].Contains('1.26.10.5') -and $f[0].Contains('1.26.10.4')) ($f -join '; ')
+        $f = @(ShapeFailures '1.27.0.1' '1.26.10.3')
+        Check 'a floor on another Go line reads red, naming both' ($f.Count -eq 1 -and $f[0].Contains('1.26.10.3') -and $f[0].Contains('1.27.0.1')) ($f -join '; ')
+        Check 'a missing floor reads red' ((ShapeFailures '1.26.10.4' '').Count -eq 1) ((ShapeFailures '1.26.10.4' '') -join '; ')
+        Check 'a three-part floor reads red' ((ShapeFailures '1.26.10.4' '1.26.10').Count -eq 1) ((ShapeFailures '1.26.10.4' '1.26.10') -join '; ')
+        Check 'the full check refuses a floor above the release too' ((FloorFailures '1.26.10.4' '1.26.10.5' '1.26.10.3' '1.26.10.3' @()).Count -eq 1) ((FloorFailures '1.26.10.4' '1.26.10.5' '1.26.10.3' '1.26.10.3' @()) -join '; ')
+
+        # push-nuget reads the floor from the go.lib it packed, which is what ships.
+        Write-Host 'the floor is read from a packed go.lib'
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
+        $nupkg = Join-Path $work 'go.lib.9.9.9.9.nupkg'
+        $zip = [System.IO.Compression.ZipFile]::Open($nupkg, 'Create')
+        try {
+            $writer = New-Object System.IO.StreamWriter($zip.CreateEntry('buildTransitive/go.lib.targets').Open())
+            try { $writer.Write('<Project><PropertyGroup><GoBreakFloor>9.9.9.8</GoBreakFloor></PropertyGroup></Project>') } finally { $writer.Dispose() }
+        }
+        finally { $zip.Dispose() }
+        Check 'a packed go.lib states its floor' ((Get-GoBreakFloorFromPackage $nupkg) -ceq '9.9.9.8') "$(Get-GoBreakFloorFromPackage $nupkg)"
     }
 
     Write-Host 'the release path runs it'
@@ -268,7 +300,11 @@ try {
     Check 'push-nuget.ps1 runs the guard over the merged packages' ($push.Contains('Invoke-GoApiCompatGuard')) 'no guard call'
     Check 'push-nuget.ps1 finds suppression files through the directory map' ($push.Contains('Get-GoApiCompatSuppressionMap')) 'no map call'
     Check 'push-nuget.ps1 refuses a suppression file that names no packed package' ($push.Contains('names no packed package')) 'no orphan check'
-    Check 'push-nuget.ps1 checks the break floor after the guard' ($push.Contains('Test-GoBreakFloor')) 'no floor check'
+    Check 'push-nuget.ps1 checks the break floor after the guard' ($push.Contains('Test-GoBreakFloor ')) 'no floor check'
+    $shapeAt = $push.IndexOf('Test-GoBreakFloorShape')
+    $verifyExitAt = $push.IndexOf('if ($VerifyOnly) {')
+    Check 'push-nuget.ps1 checks the floor''s baseline-free cases before -VerifyOnly exits' ($shapeAt -ge 0 -and $verifyExitAt -ge 0 -and $shapeAt -lt $verifyExitAt) "shape check at $shapeAt, -VerifyOnly exit at $verifyExitAt"
+    Check 'push-nuget.ps1 reads the floor from the packed go.lib' ($push -match '\$breakFloor = Get-GoBreakFloorFromPackage') 'the floor is not read from the packed go.lib'
     Check 'push-nuget.ps1 compares a pack-only run with what its release would follow' ($push -match '-ReleaseVersion \$guardReleaseVersion' -and $push -match '\$guardReleaseVersion = if \(\$dryRun\) \{ \$wouldBeVersion \} else \{ \$fullVersion \}') 'the guard is not given the would-be version'
     $pack = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/tools/nugetgo/nugetgo-pack.ps1'))
     Check 'nugetgo-pack.ps1 compares a module with its previous revision' ($pack.Contains('Invoke-GoApiCompatGuard')) 'no guard call'
