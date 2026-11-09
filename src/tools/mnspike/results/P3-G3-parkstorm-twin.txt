@@ -1,0 +1,10 @@
+# G3 on the ParkStorm twin (parkstorm-twin, the P2 scheduler) and native Go (parkstorm/), same harness and host, 2026-11-09T09:57Z
+RESULT G3-twin n=100000 verdict=PARKED wall=3.7s snapshot=[] peak-private=66 MB peak-threads=22 last=[RELEASED 100000 in 0.04s] exit=0
+RESULT G3-twin n=1000000 verdict=PARKED wall=4.7s snapshot=[] peak-private=501 MB peak-threads=31 last=[RELEASED 1000000 in 0.34s] exit=0
+RESULT G3-twin n=1000000 verdict=PARKED wall=4.7s snapshot=[] peak-private=503 MB peak-threads=29 last=[RELEASED 1000000 in 0.34s] exit=0
+RESULT G3-twin n=1000000 verdict=PARKED wall=4.7s snapshot=[] peak-private=503 MB peak-threads=25 last=[RELEASED 1000000 in 0.36s] exit=0
+RESULT G3-go n=100000 verdict=PARKED wall=3.7s snapshot=[] peak-private=868 MB peak-threads=15 last=[RELEASED 100000 in 0.01s] exit=0
+RESULT G3-go n=1000000 verdict=PARKED wall=7.3s snapshot=[] peak-private=8553 MB peak-threads=14 last=[RELEASED 1000000 in 0.16s] exit=0
+RESULT G3-go n=1000000 verdict=PARKED wall=7.3s snapshot=[] peak-private=8551 MB peak-threads=15 last=[RELEASED 1000000 in 0.17s] exit=0
+RESULT G3-go n=1000000 verdict=PARKED wall=7.3s snapshot=[] peak-private=8552 MB peak-threads=15 last=[RELEASED 1000000 in 0.17s] exit=0
+# O0 (today's converted ParkStorm) at 10^6: see G3-red-O0.txt

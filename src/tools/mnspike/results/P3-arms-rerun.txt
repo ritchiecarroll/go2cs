@@ -1,0 +1,17 @@
+# P2 arms re-run after P3's Go() change (one awaiting root frame per goroutine, no ContinueWith), 2026-11-09T09:58Z
+$ mnsched a1 --no-injection --no-handoff
+ARM a1 FAIL (injection=off handoff=off) injections=0 carriers=1 wall=10.01s
+$ mnsched a1 --no-handoff
+ARM a1 PASS (injection=on handoff=off) injections=1 carriers=2 wall=0.03s
+$ mnsched a2 --no-injection --no-handoff
+ARM a2 FAIL (injection=off handoff=off) got=0 handoffs=0 carriers=1 wall=10.01s
+$ mnsched a2 --no-injection
+ARM a2 PASS (injection=off handoff=on) got=42 handoffs=1 carriers=2 wall=0.01s
+$ mnsched a4 --no-injection --no-handoff
+ARM a4 FAIL (injection=off handoff=off) hits=201/100000 handoffs=0 carriers=2 wall=60.01s
+$ mnsched a4
+ARM a4 PASS (injection=on handoff=on) hits=100000/100000 handoffs=116808 carriers=594 wall=2.58s
+$ mnsched a3 --n 1000000
+ARM a3 PASS (injection=on handoff=on) n=1000000 parked-in=0.94s private=508MB threads-while-parked=29 carriers-at-end=19 carriers-settled=12 procs=12 injections=7 gc-pause=485ms sum-ok=True wall=1.80s
+$ mnsched a3 --n 1000000
+ARM a3 PASS (injection=on handoff=on) n=1000000 parked-in=0.99s private=506MB threads-while-parked=29 carriers-at-end=19 carriers-settled=12 procs=12 injections=7 gc-pause=496ms sum-ok=True wall=1.95s

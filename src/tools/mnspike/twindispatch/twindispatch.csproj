@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- G4, the M:N spike's delegate-table cost (the spike's P3). It compiles mnsched's scheduler and channel sources
+       directly for the park/resume round trip, so it carries no project reference. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TieredPGO>true</TieredPGO>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../mnsched/Scheduler.cs" Link="mnsched/Scheduler.cs" />
+    <Compile Include="../mnsched/Chan.cs" Link="mnsched/Chan.cs" />
+  </ItemGroup>
+
+</Project>

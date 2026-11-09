@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- ParkStorm's twin on the P2 scheduler (the M:N spike's P3, for gates G3 and G2). It compiles mnsched's scheduler
+       and channel sources directly, so it carries no project reference and nothing outside the spike. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>parkstorm-twin</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../mnsched/Scheduler.cs" Link="mnsched/Scheduler.cs" />
+    <Compile Include="../mnsched/Chan.cs" Link="mnsched/Chan.cs" />
+  </ItemGroup>
+
+</Project>

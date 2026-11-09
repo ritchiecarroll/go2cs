@@ -60,15 +60,25 @@ public sealed class Scheduler
 
     public static bool OnCarrier => t_carrier is not null;
 
+    private long m_live;
+
+    // runtime.NumGoroutine's count of goroutines started on this scheduler and not yet returned.
+    public long Live => Interlocked.Read(ref m_live);
+
     // `go f()`: f is an async twin. It starts on a carrier; it parks by awaiting a park awaitable.
-    public void Go(Func<ValueTask> twin) => Ready(() =>
+    public void Go(Func<ValueTask> twin)
     {
-        ValueTask task;
-        try { task = twin(); }
-        catch (Exception ex) { Fatal(ex); return; }
-        if (!task.IsCompleted) task.AsTask().ContinueWith(t => { if (t.IsFaulted) Fatal(t.Exception!); }, TaskContinuationOptions.ExecuteSynchronously);
-        else if (task.IsFaulted) Fatal(task.AsTask().Exception!);
-    });
+        Interlocked.Increment(ref m_live);
+        Ready(() => _ = RunGoroutine(twin));
+    }
+
+    // The goroutine's root frame: a panic that escapes it is fatal, as in Go.
+    private async ValueTask RunGoroutine(Func<ValueTask> twin)
+    {
+        try { await twin(); }
+        catch (Exception ex) { Fatal(ex); }
+        finally { Interlocked.Decrement(ref m_live); }
+    }
 
     // goready: queue a parked goroutine's continuation (or a new goroutine's start).
     public void Ready(Action item)

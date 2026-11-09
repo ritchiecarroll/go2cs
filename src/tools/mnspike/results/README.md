@@ -79,3 +79,50 @@ Two findings, both kept:
     budget must come back.
 
 O0 for comparison (P0's G3): 10^6 never parked; the run stopped at 20 GB and 617 s.
+
+## P3, the hand twins
+
+### ParkStorm's twin (`../parkstorm-twin`, on the P2 scheduler): G3, measured (`P3-G3-parkstorm-twin.txt`)
+
+The twin follows `../parkstorm/main.go` line for line, as go2cs-gen would emit it: the goroutine's `<-release` becomes
+`await release.RecvAsync()`, and main's waits stay synchronous. Same harness, same host:
+
+| Program | 10^5 parked | 10^6 parked |
+|---|---|---|
+| O0, today's converted ParkStorm | (sizing note: ~6 GB, minutes) | NEVER PARKED: 20 GB at 617 s, 300,000 started (`G3-red-O0.txt`) |
+| the twin on the P2 scheduler | 0.11 s, 66 MB, 22 threads | 0.95-1.04 s, 498-519 MB, 25-31 threads (6 runs) |
+| native Go, go1.26.10 | 0.37 s, 868 MB, 15 threads | 3.77 s, 8,551 MB, 14-15 threads |
+
+G3 (10^6 under 20 GB) reads GREEN on the twin. The twin is about 16x lighter than Go here only because ParkStorm's
+goroutine body is trivial: a twin's state machine holds just the locals live across its park. A real goroutine's twin
+is as heavy as its live locals, against Go's 2 KB starting stack.
+
+### The delegate path and G4 (`../twindispatch`, `P3-G4-dispatch.txt`), floors over 5 processes, ns per op
+
+| Arm | Floor | Read |
+|---|---|---|
+| A0, a plain synchronous delegate call | 2.59 | the baseline |
+| T2, ConditionalWeakTable by delegate INSTANCE, lookup and twin call | 16.03 | +13.4 over A0, the cheapest lookup |
+| T1, Dictionary by MethodInfo | 25.14 | +22.6 |
+| T3, per-delegate-type cache by method handle | 40.24 | +37.7: `Delegate.Method` dominates |
+| C+, T3 with a calibrated ~20 ns spin (positive control) | 51.82 | the instrument reads the injected cost |
+| R0, make a func literal | 13.12 | R2's baseline |
+| R2, make a func literal AND register its twin in T2 | 621.96 | **+609 per registration** |
+| RT, one park/resume round trip on the P2 scheduler | 952.22 | what a lookup is read against |
+
+Read against the census's dynamic sites (windows upper):
+- the 974 can-park INTERFACE sites need no table: their twin is a member of the partial interface, one more virtual call;
+- the 639 can-park FUNC-VALUE sites (360 more unresolved) take a lookup: +13 to +38 ns against a ~950 ns park/resume
+  round trip.
+
+**The cost that matters is R2.** Only T2 serves func LITERALS, because a closure's compiler-generated class cannot carry
+a twin method. Registering a literal's twin costs about 0.6 us, close to a whole park/resume round trip, at every
+creation of a can-park literal (P1: 681 of 1,481 closures can park, upper bound). Named functions and method values
+use T1 or T3 at no creation cost. This is O6's "func values" constraint, quantified. It is a cost, not a showstopper.
+A cheaper literal path would need the converter's cooperation at the literal site, which is a P5 question.
+
+### The P2 arms after P3's `Go()` change (`P3-arms-rerun.txt`)
+
+The change gives each goroutine one awaiting root frame and drops the per-goroutine `ContinueWith`. Every arm reads as
+in P2: a1, a2 and a4 FAIL with their mechanism off and PASS with it on. a3 at 10^6 parks in 0.94-0.99 s with 7
+injections.
