@@ -34716,4 +34716,25 @@ It was derived from a std source census of `if`/`for`/`switch`/type-switch inits
 
 — H (2026-11-08)
 
+## 2026-11-09 — H (TS readiness C11, found by its generic census arm): a defined type written over an INSTANTIATED generic struct drops its whole file with exit 0 — OPEN, a .4 seat
+
+**Shape.** A defined type whose written RHS is an index expression, i.e. a generic struct type instantiated or re-parameterized:
+
+```go
+type pair[T any] struct{ A T }
+
+type P[T any] pair[T] // generic over generic
+type Q pair[int]      // plain over an instantiation
+```
+
+Either declaration reaches the `default:` arm of `visitTypeSpec`'s RHS switch (`src/go2cs/visitTypeSpec.go:468`), which panics `@visitTypeSpec - Unexpected TypeSpec type: "pair[T]"` (or `"pair[int]"`). The switch has no `*ast.IndexExpr` / `*ast.IndexListExpr` case. The per-file recover in `conversionDriver.go` turns the panic into `WARNING: visit file error: ... in "lib.go"`, and the converter writes the package's `package_info.cs` but **no `.cs` for that file at all, then exits 0.** Every other declaration in the file is lost with it.
+
+**Measured** at master 0904811dcf and at C11's green ee130c59b7, identically (C11 does not touch the declaration path). The two repro modules are a single-package `type P[T any] pair[T]` with `P[int]{a: 1}` and `[]P[string]{{a: "s"}}`, and a two-package `lib` declaring `type Q pair[int]` plus `func Same() ([]Q, []*Q)`, with `main` writing `lib.Q{A: 3}` and `[]lib.Q{{A: 4}}`. Go runs both (`1 s`; `3 4 1 2`). go2cs exits 0 on each package, and lib.cs / main.cs (P's package) are absent. The importing package's literals do emit, and C11's wrap renders the instantiation (`new lib.Q(new lib.pair<nint>(A: 3))`), but against a type that was never declared.
+
+**What is already guarded, and what is not.** The CLASS (a recovered visit error emits a degraded package at exit 0) is designed and tripwired. `check-no-regression.ps1` classifies a "visit file error" as NOT MEASURED by name, `src/tests/BestEffortConversion.cs` makes BehavioralRunner and the MSTest base fail Transpile on it, and `bestEffortTranspile_test.go` is the tripwire that keeps both, so no go2cs gate greens over it. What is NOT guarded is the operator's own run: a user converting a module with this shape gets exit 0 and a missing file, which surfaces later as an unrelated compile error in a different package. The census put std at 0 sites on windows, linux and darwin, so the stdlib corpus does not carry it.
+
+**Seat (.4).** At minimum the converter REFUSES this shape: a non-zero exit that names the file and the declaration, not a recovered warning. Supporting it is the full fix: the wrapper's `[GoType]` names the instantiated base, and a generic defined type carries its parameters through. Where the refusal lives is the seat's to decide. A blanket non-zero exit on every recovered visit error would also fire on the `(auto-conversion sibling skipped)` path, where a hand-owned file's `.cs.auto` review sibling fails to emit while the compiled `.cs` is the hand-owned one, so it needs the same care.
+
+— H (2026-11-09)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
