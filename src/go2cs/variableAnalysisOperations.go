@@ -2750,7 +2750,9 @@ func (v *Visitor) varIsDerefdPointerParam(varObj types.Object) bool {
 		return false
 	}
 
-	if _, isPtr := varObj.Type().Underlying().(*types.Pointer); !isPtr {
+	// The declaration's own test (paramPointerType): a named pointer type's parameter is the
+	// generated wrapper, declared with no box and no alias.
+	if _, isPtr := v.paramPointerType(varObj.Type()); !isPtr {
 		return false
 	}
 

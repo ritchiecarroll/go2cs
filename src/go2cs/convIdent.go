@@ -150,8 +150,11 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		// A NAMED pointer type (`type itemPtr *item`) is already a pointer value too: its UNDERLYING
 		// is the pointer, so `ip == itemPtr(pi)` compares the two pointers as written. Testing the
 		// type itself rendered `Ꮡip`, the box of a value local, which does not exist (CS0103).
+		// The same holds for a PARAMETER of a named pointer type (`f Features` under
+		// `type Features *flagSet`): it is declared as the wrapper itself with no box, so only a
+		// deref-aliased pointer parameter renders its box (isDerefdPointerParamIdent).
 		if !isCurrentRefReceiver {
-			if _, ok := types.Unalias(identType).Underlying().(*types.Pointer); !ok || v.identIsParameter(ident) || (identEscapesHeap && !isInherentlyHeapAllocatedType(identType)) {
+			if _, ok := types.Unalias(identType).Underlying().(*types.Pointer); !ok || v.isDerefdPointerParamIdent(ident) || (identEscapesHeap && !isInherentlyHeapAllocatedType(identType)) {
 				return AddressPrefix + v.boxBaseName(ident)
 			}
 		}

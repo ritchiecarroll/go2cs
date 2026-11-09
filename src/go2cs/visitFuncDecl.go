@@ -1719,19 +1719,12 @@ func (v *Visitor) isDerefdPointerParamIdent(ident *ast.Ident) bool {
 		return false
 	}
 
-	if _, isPtr := identType.Underlying().(*types.Pointer); isPtr {
-		return true
-	}
-
-	// An ERASED pointer-core type parameter (`p P` under `[P *T]`) is a deref-aliased pointer
-	// parameter too — its box drives `==`/`!=` comparisons and the nil-safe accessor gate the
-	// same way a plain `*T` parameter's does.
-	if typeParam, ok := types.Unalias(identType).(*types.TypeParam); ok {
-		_, erased := v.typeParamErased(typeParam)
-		return erased
-	}
-
-	return false
+	// The same test the declaration applies (paramPointerType): a plain `*T` parameter, or an
+	// ERASED pointer-core type parameter (`p P` under `[P *T]`), whose box drives `==`/`!=`
+	// comparisons and the nil-safe accessor gate. A NAMED pointer type (`type Features *flagSet`)
+	// is not one: its parameter is the generated wrapper itself, declared without a box or alias.
+	_, isPtr := v.paramPointerType(identType)
+	return isPtr
 }
 
 // bodyReferencesIdentAsValue reports whether name appears in the CONVERTED body text as a
