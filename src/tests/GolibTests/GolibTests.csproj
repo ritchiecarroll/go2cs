@@ -86,6 +86,7 @@
        has no bridge to measure. -->
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux' and '$(GoTargetOS)' != 'darwin'">
     <Compile Remove="InheritedIgnoredSignalTests.cs" />
+    <Compile Remove="RecvfromUnspecifiedSourceTests.cs" />
   </ItemGroup>
 
   <!-- The netapi32 ptrout gate is the mirror image: it drives windows-flavor-only syscall surface
