@@ -1,0 +1,228 @@
+Recursively converting module at H:\go2cs-ts-exp\TypeScript\tsc
+Closure: 289 packages discovered ΓÇö converting 104 app + 35 third-party, referencing 149 stdlib (1 skipped)
+Converting 139 packages in dependency order...
+[1/139] Converting github.com/Microsoft/go-winio/internal/stringbuffer
+[2/139] Converting github.com/go-json-experiment/json/internal
+[3/139] Converting github.com/google/go-cmp/cmp/internal/flags
+[4/139] Converting github.com/google/go-cmp/cmp/internal/function
+[5/139] Converting github.com/google/go-cmp/cmp/internal/value
+[6/139] Converting github.com/klauspost/cpuid/v2
+[7/139] Converting github.com/mackerelio/go-osstat/memory
+[8/139] Converting github.com/microsoft/TypeScript/tsc/internal/debug
+WARNING: Package license is unspecified for H:\go2cs-ts-exp\out\recurse-r2\src\github.com\microsoft\TypeScript\tsc\internal\debug\github.com.microsoft.TypeScript.tsc.internal.debug.csproj (reported once per module); the module root's LICENSE is not referenced by the project. nugetgo-pack.ps1 packs it as the package's license file when it packs this module; for a plain dotnet pack, place it beside the project or pass -license with an SPDX expression.
+[9/139] Converting github.com/microsoft/TypeScript/tsc/internal/fourslash/tests
+INFO: Skipping conversion: no target Go source files found for conversion in input path "H:\go2cs-ts-exp\TypeScript\tsc\internal\fourslash\tests"
+[10/139] Converting github.com/microsoft/TypeScript/tsc/internal/glob
+[11/139] Converting github.com/microsoft/TypeScript/tsc/internal/osutil
+[12/139] Converting github.com/microsoft/TypeScript/tsc/internal/pprof
+[13/139] Converting github.com/microsoft/TypeScript/tsc/internal/project/background
+[14/139] Converting github.com/microsoft/TypeScript/tsc/internal/project/logging
+[15/139] Converting github.com/microsoft/TypeScript/tsc/internal/repo
+[16/139] Converting github.com/microsoft/TypeScript/tsc/internal/semver
+[17/139] Converting github.com/microsoft/TypeScript/tsc/internal/stringutil
+[18/139] Converting github.com/microsoft/TypeScript/tsc/internal/testutil/filefixture
+[19/139] Converting github.com/microsoft/TypeScript/tsc/internal/testutil/race
+[20/139] Converting github.com/peter-evans/patience
+WARNING: Go moves elements to the heap at patience.go:47:2 (move2heap), not emitted: the targets or an inlined copy disagree on its appends
+WARNING: Go moves indices to the heap at patience.go:47:2 (move2heap), not emitted: the targets or an inlined copy disagree on its appends
+[21/139] Converting golang.org/x/sync/errgroup
+[22/139] Converting golang.org/x/sys/windows
+WARNING: Go const converted to C# using 'unsafe.Sizeof' may not match run-time value - verify usage: const min = int(unsafe.Sizeof(SECURITY_DESCRIPTOR{})) in "security_windows.go"
+WARNING: Go const converted to C# using 'unsafe.Sizeof' may not match run-time value - verify usage: const psize = int(unsafe.Sizeof(uintptr(0))) in "security_windows.go"
+WARNING: Go const converted to C# using 'unsafe.Sizeof' may not match run-time value - verify usage: const SizeofModuleEntry32 = unsafe.Sizeof(ModuleEntry32{}) in "types_windows.go"
+[23/139] Converting golang.org/x/text/internal/tag
+[24/139] Converting golang.org/x/text/transform
+[25/139] Converting gotest.tools/v3/internal/difflib
+WARNING: Go moves nonAdjacent to the heap at difflib.go:329:19 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves groups to the heap at difflib.go:426:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+[26/139] Converting gotest.tools/v3/internal/source
+[27/139] Converting github.com/Microsoft/go-winio/internal/fs
+[28/139] Converting github.com/Microsoft/go-winio/pkg/guid
+[29/139] Converting github.com/Microsoft/go-winio/internal/socket
+[30/139] Converting github.com/Microsoft/go-winio
+WARNING: Go const converted to C# using 'unsafe.Sizeof' may not match run-time value - verify usage: const addrlen = uint32(16 + unsafe.Sizeof(rawHvsockAddr{})) in "hvsock.go"
+[31/139] Converting github.com/go-json-experiment/json/internal/jsonflags
+[32/139] Converting github.com/go-json-experiment/json/internal/jsonopts
+[33/139] Converting github.com/go-json-experiment/json/internal/jsonwire
+[34/139] Converting github.com/go-json-experiment/json/jsontext
+[35/139] Converting github.com/go-json-experiment/json
+[36/139] Converting github.com/google/go-cmp/cmp/internal/diff
+[37/139] Converting github.com/google/go-cmp/cmp
+WARNING: Go moves b to the heap at report_text.go:60:2 (move2heap), not emitted: the targets or an inlined copy disagree on its appends
+[38/139] Converting github.com/microsoft/TypeScript/tsc/internal/json
+[39/139] Converting github.com/microsoft/TypeScript/tsc/internal/collections
+[40/139] Converting github.com/microsoft/TypeScript/tsc/internal/tspath
+[41/139] Converting github.com/microsoft/TypeScript/tsc/internal/core
+[42/139] Converting golang.org/x/text/internal/language
+[43/139] Converting golang.org/x/text/internal/language/compact
+[44/139] Converting golang.org/x/text/language
+[45/139] Converting github.com/microsoft/TypeScript/tsc/internal/locale
+[46/139] Converting github.com/microsoft/TypeScript/tsc/internal/diagnostics
+[47/139] Converting github.com/microsoft/TypeScript/tsc/internal/spanmap
+[48/139] Converting github.com/zeebo/xxh3
+[49/139] Converting github.com/microsoft/TypeScript/tsc/internal/ast
+WARNING: Go moves result to the heap at utilities.go:3338:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+[50/139] Converting github.com/microsoft/TypeScript/tsc/internal/api/encoder
+[51/139] Converting github.com/microsoft/TypeScript/tsc/internal/vfs
+[52/139] Converting github.com/microsoft/TypeScript/tsc/internal/bundled
+[53/139] Converting github.com/microsoft/TypeScript/tsc/internal/jsnum
+[54/139] Converting github.com/microsoft/TypeScript/tsc/internal/scanner
+[55/139] Converting github.com/microsoft/TypeScript/tsc/internal/diagnosticwriter
+[56/139] Converting github.com/microsoft/TypeScript/tsc/internal/jsonrpc
+[57/139] Converting github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto
+[58/139] Converting github.com/microsoft/TypeScript/tsc/internal/ls/lsconv
+[59/139] Converting github.com/microsoft/TypeScript/tsc/internal/binder
+[60/139] Converting github.com/microsoft/TypeScript/tsc/internal/astnav
+[61/139] Converting github.com/microsoft/TypeScript/tsc/internal/evaluator
+[62/139] Converting github.com/microsoft/TypeScript/tsc/internal/packagejson
+[63/139] Converting github.com/microsoft/TypeScript/tsc/internal/vfs/vfsmatch
+[64/139] Converting github.com/microsoft/TypeScript/tsc/internal/module
+WARNING: Go moves candidateDirectories to the heap at resolver.go:975:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves result to the heap at resolver.go:2222:3 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves result to the heap at types.go:136:2 (move2heap), not emitted: the targets or an inlined copy disagree on its appends
+[65/139] Converting github.com/microsoft/TypeScript/tsc/internal/outputpaths
+[66/139] Converting github.com/microsoft/TypeScript/tsc/internal/symlinks
+[67/139] Converting github.com/microsoft/TypeScript/tsc/internal/ipc
+[68/139] Converting github.com/microsoft/TypeScript/tsc/internal/parser
+[69/139] Converting github.com/microsoft/TypeScript/tsc/internal/contentmapper
+[70/139] Converting github.com/microsoft/TypeScript/tsc/internal/tsoptions
+WARNING: Go moves errors to the heap at tsconfigparsing.go:399:3 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves errors to the heap at tsconfigparsing.go:661:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves errors to the heap at tsconfigparsing.go:788:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+[71/139] Converting github.com/microsoft/TypeScript/tsc/internal/modulespecifiers
+WARNING: Go moves relativeSpecifiers to the heap at specifiers.go:487:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+[72/139] Converting github.com/microsoft/TypeScript/tsc/internal/nodebuilder
+[73/139] Converting github.com/microsoft/TypeScript/tsc/internal/sourcemap
+WARNING: Go moves possibleMapLocations to the heap at source_mapper.go:248:21 (move2heap), not emitted: it appends at more than one site without observing its capacity
+[74/139] Converting github.com/microsoft/TypeScript/tsc/internal/printer
+WARNING: Go moves comments to the heap at printer.go:5644:20 (move2heap), not emitted: the targets or an inlined copy disagree on its appends
+[75/139] Converting github.com/microsoft/TypeScript/tsc/internal/pseudochecker
+WARNING: Go moves errorNodes to the heap at lookup.go:435:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+[76/139] Converting github.com/microsoft/TypeScript/tsc/internal/tracing
+[77/139] Converting github.com/microsoft/TypeScript/tsc/internal/checker
+WARNING: Go moves result to the heap at emitresolver.go:1148:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves childTypes to the heap at jsx.go:893:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves results to the heap at nodebuilder_hover.go:48:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves heritageClauses to the heap at nodebuilder_hover.go:294:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves duplicates to the heap at nodebuilderimpl.go:2000:17 (move2heap), not emitted: the targets or an inlined copy disagree on its appends
+WARNING: Go moves result to the heap at printer.go:285:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves result to the heap at relater.go:1077:2 (move2heap), not emitted: the targets or an inlined copy disagree on its appends
+WARNING: Go moves result to the heap at services.go:621:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves res to the heap at symbolaccessibility.go:165:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves result to the heap at utilities.go:1686:2 (move2heap), not emitted: the targets or an inlined copy disagree on its appends
+[78/139] Converting github.com/microsoft/TypeScript/tsc/internal/transformers
+[79/139] Converting github.com/microsoft/TypeScript/tsc/internal/transformers/declarations
+WARNING: Go moves result to the heap at transform.go:532:2 (move2heap), not emitted: the targets or an inlined copy disagree on its appends
+WARNING: Go moves result to the heap at transform.go:548:2 (move2heap), not emitted: the targets or an inlined copy disagree on its appends
+[80/139] Converting github.com/microsoft/TypeScript/tsc/internal/transformers/estransforms
+WARNING: Go moves stmts to the heap at esdecorator.go:1011:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves statementsOut to the heap at esdecorator.go:1181:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves results to the heap at objectrestspread.go:375:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+[81/139] Converting github.com/microsoft/TypeScript/tsc/internal/transformers/inliners
+[82/139] Converting github.com/microsoft/TypeScript/tsc/internal/transformers/jsxtransforms
+[83/139] Converting github.com/microsoft/TypeScript/tsc/internal/transformers/moduletransforms
+[84/139] Converting github.com/microsoft/TypeScript/tsc/internal/transformers/tstransforms
+WARNING: Go moves decorators to the heap at metadata.go:286:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+[85/139] Converting github.com/microsoft/TypeScript/tsc/internal/vfs/cachedvfs
+[86/139] Converting github.com/microsoft/TypeScript/tsc/internal/compiler
+WARNING: Go moves tx to the heap at emitter.go:178:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+[87/139] Converting golang.org/x/text/unicode/norm
+[88/139] Converting github.com/microsoft/TypeScript/tsc/internal/ls/lsutil
+[89/139] Converting github.com/microsoft/TypeScript/tsc/internal/format
+[90/139] Converting github.com/microsoft/TypeScript/tsc/internal/ls/change
+[91/139] Converting github.com/microsoft/TypeScript/tsc/internal/project/dirty
+[92/139] Converting github.com/microsoft/TypeScript/tsc/internal/vfs/wrapvfs
+[93/139] Converting github.com/microsoft/TypeScript/tsc/internal/ls/autoimport
+WARNING: Go moves statements to the heap at fix.go:412:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves indices to the heap at util.go:85:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+[94/139] Converting github.com/microsoft/TypeScript/tsc/internal/ls
+WARNING: Go moves declarations to the heap at callhierarchy.go:1136:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves result to the heap at codeactions_importfixes.go:401:4 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves orderedAccessors to the heap at codeactions_missingmemberfixer.go:95:22 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves highlights to the heap at documenthighlights.go:336:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves keywords to the heap at documenthighlights.go:379:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves keywords to the heap at documenthighlights.go:532:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves keywords to the heap at documenthighlights.go:559:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves keywords to the heap at documenthighlights.go:659:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves documentChanges to the heap at file_rename.go:86:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves implicitImports to the heap at importTracker.go:114:15 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves groups to the heap at organizeimports.go:407:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves result to the heap at organizeimports.go:720:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves coalescedExports to the heap at organizeimports.go:926:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves result to the heap at selectionranges.go:132:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves tokens to the heap at signaturehelp.go:1397:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves modes to the heap at sourcedefinition.go:425:17 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves names to the heap at sourcedefinition.go:565:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves result to the heap at string_completions.go:1207:2 (move2heap), not emitted: the targets or an inlined copy disagree on its appends
+WARNING: Go moves children to the heap at utilities.go:1257:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+[95/139] Converting github.com/microsoft/TypeScript/tsc/internal/project/ata
+[96/139] Converting github.com/microsoft/TypeScript/tsc/internal/project
+WARNING: Go moves projects to the heap at projectcollection.go:146:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+[97/139] Converting github.com/microsoft/TypeScript/tsc/internal/api/requestfilesystem
+[98/139] Converting github.com/microsoft/TypeScript/tsc/internal/transpile
+[99/139] Converting github.com/microsoft/TypeScript/tsc/internal/nativepath
+[100/139] Converting github.com/microsoft/TypeScript/tsc/internal/vfs/internal
+[101/139] Converting github.com/microsoft/TypeScript/tsc/internal/vfs/osvfs
+[102/139] Converting github.com/microsoft/TypeScript/tsc/internal/api
+[103/139] Converting github.com/microsoft/TypeScript/tsc/internal/execute/incremental
+[104/139] Converting github.com/microsoft/TypeScript/tsc/internal/execute/tsc
+WARNING: Go moves text to the heap at help.go:292:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+[105/139] Converting github.com/microsoft/TypeScript/tsc/internal/fswatch
+[106/139] Converting github.com/microsoft/TypeScript/tsc/internal/execute/watchmanager
+[107/139] Converting github.com/microsoft/TypeScript/tsc/internal/execute/build
+WARNING: Go moves dirs to the heap at orchestrator.go:602:16 (move2heap), not emitted: it appends at more than one site without observing its capacity
+[108/139] Converting github.com/microsoft/TypeScript/tsc/internal/vfs/trackingvfs
+[109/139] Converting github.com/microsoft/TypeScript/tsc/internal/execute
+[110/139] Converting github.com/microsoft/TypeScript/tsc/internal/lsp/lspwatcher
+[111/139] Converting github.com/microsoft/TypeScript/tsc/internal/lsp
+[112/139] Converting golang.org/x/term
+[113/139] Converting github.com/microsoft/TypeScript/tsc/cmd/tsc
+[114/139] Converting github.com/microsoft/TypeScript/tsc/internal/testutil/baseline
+[115/139] Converting github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest
+[116/139] Converting github.com/microsoft/TypeScript/tsc/internal/vfs/iovfs
+[117/139] Converting github.com/microsoft/TypeScript/tsc/internal/vfs/vfstest
+[118/139] Converting github.com/microsoft/TypeScript/tsc/internal/testutil/fsbaselineutil
+[119/139] Converting gotest.tools/v3/internal/format
+[120/139] Converting gotest.tools/v3/assert/cmp
+[121/139] Converting gotest.tools/v3/internal/assert
+[122/139] Converting gotest.tools/v3/assert
+[123/139] Converting github.com/microsoft/TypeScript/tsc/internal/testutil
+[124/139] Converting github.com/microsoft/TypeScript/tsc/internal/testutil/harnessutil
+WARNING: Go moves configurations to the heap at harnessutil.go:1073:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves excludes to the heap at harnessutil.go:1134:20 (move2heap), not emitted: the targets or an inlined copy disagree on its appends
+WARNING: Go moves includes to the heap at harnessutil.go:1115:20 (move2heap), not emitted: the targets or an inlined copy disagree on its appends
+[125/139] Converting github.com/microsoft/TypeScript/tsc/internal/testutil/stringtestutil
+[126/139] Converting github.com/microsoft/TypeScript/tsc/internal/execute/tsctests
+[127/139] Converting github.com/microsoft/TypeScript/tsc/internal/testutil/tsbaseline
+WARNING: Go moves result to the heap at error_baseline.go:269:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves dtsFiles to the heap at js_emit_baseline.go:236:3 (move2heap), not emitted: it appends at more than one site without observing its capacity
+[128/139] Converting github.com/microsoft/TypeScript/tsc/internal/tsoptions/tsoptionstest
+[129/139] Converting github.com/microsoft/TypeScript/tsc/internal/testrunner
+[130/139] Converting github.com/microsoft/TypeScript/tsc/internal/testutil/lsptestutil
+[131/139] Converting github.com/microsoft/TypeScript/tsc/internal/fourslash
+WARNING: Go moves lines to the heap at fourslash.go:3050:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+WARNING: Go moves result to the heap at fourslash.go:3057:2 (move2heap), not emitted: it appends at more than one site without observing its capacity
+[132/139] Converting github.com/microsoft/TypeScript/tsc/internal/fourslash/tests/util
+[133/139] Converting github.com/microsoft/TypeScript/tsc/internal/testutil/projecttestutil
+[134/139] Converting github.com/microsoft/TypeScript/tsc/internal/testutil/autoimporttestutil
+[135/139] Converting github.com/microsoft/TypeScript/tsc/internal/testutil/parsetestutil
+[136/139] Converting github.com/microsoft/TypeScript/tsc/internal/testutil/emittestutil
+[137/139] Converting github.com/microsoft/TypeScript/tsc/internal/testutil/fixtures
+[138/139] Converting github.com/microsoft/TypeScript/tsc/internal/testutil/jstest
+[139/139] Converting github.com/microsoft/TypeScript/tsc/internal/vfs/vfsmock
+
+Recursive conversion complete in 5m 52s: 139/139 packages converted
+
+Slowest 10 of 139 packages:
+     18.2s  github.com/microsoft/TypeScript/tsc/internal/checker
+     8.21s  github.com/microsoft/TypeScript/tsc/internal/ast
+     7.92s  github.com/microsoft/TypeScript/tsc/internal/ls
+      6.3s  github.com/microsoft/TypeScript/tsc/internal/fourslash
+     6.19s  github.com/microsoft/TypeScript/tsc/internal/project
+     6.19s  github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto
+     5.74s  github.com/microsoft/TypeScript/tsc/internal/execute/tsc
+     5.36s  github.com/microsoft/TypeScript/tsc/internal/compiler
+     5.09s  github.com/microsoft/TypeScript/tsc/internal/execute/tsctests
+     5.05s  github.com/microsoft/TypeScript/tsc/internal/testrunner
+Build file generated: H:\go2cs-ts-exp\out\recurse-r2\Directory.Build.props
+Build file generated: H:\go2cs-ts-exp\out\recurse-r2\Directory.Build.targets

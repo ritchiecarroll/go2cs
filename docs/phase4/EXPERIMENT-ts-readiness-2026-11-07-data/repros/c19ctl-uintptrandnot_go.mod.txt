@@ -1,0 +1,3 @@
+module repro/c19ctl-uintptrandnot
+
+go 1.26

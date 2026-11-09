@@ -284,3 +284,263 @@ C3 (variadic promoted `Trace` forwarders), C4 (non-erased union pointer constrai
 - A 1.27-first plan would re-measure into the same C5/C6/C7 walls.
 
 **Box-sharing note for the fleet.** Pinning to 0xFC0 kept CPU apart but not disk or memory bandwidth. Heavy work on both halves slowed COORD's timing-sensitive step about 10×. Schedule heavy experiment work around timing gates, not beside them.
+
+---
+
+## Amendment 2026-11-09 (i7): re-run at the same TypeScript commit, against go2cs `f09e762659`
+
+> **Dated amendment.** The record above is unchanged. This block adds a second measurement and does not rewrite the first.
+> Requested by the owner on 2026-11-09. COORD coordinated the box and held its i7 batteries while the heavy stages ran, so this run's wall times are uncontended; the first run's were not.
+> Measurement only: no go2cs source was edited. Hand-patches touch only a COPY of the emitted tree, each one names its catalogue id, and none is applied for a row already on master.
+
+### What was measured
+
+| Item | Value |
+|---|---|
+| TypeScript | **`ba29a562991ceb942481e2a00810b4e5e4062e52`**, the same commit, unmodified, built with `GOWORK=off` on `tsc` |
+| go2cs | **`f09e762659`**: batch 277's gate tip, which landed by fast-forward. It is in master's history; master at the time of writing is `0c553534df`, whose batch 278 adds docs only. |
+| Rows landed since the first run | C1, C2, C3, C4, C5, C6+C12 (plus addendum B: a named-string index or slice compared with a literal), C7, C8, C9, C10, C11, C13, C14, C15, C17 (including the GO2CS2004 refusal), C18 (named pointer locals and fields) |
+| Rows still open | C16 (named `[]byte` vs `~[]byte \| ~string`), and GO2CS2004's other half (a defined type over an instantiated generic struct) |
+| Toolchain | Unchanged: go1.26.10 windows/amd64, `GOTOOLCHAIN=local`, dotnet SDK 10.0.400 |
+| Dependencies | Unchanged: `proxy.golang.org` with `GOSUMDB=sum.golang.org`. `go mod download` + `go mod verify`: all 23 modules verified. |
+
+### Stage table
+
+| Stage | rc | Wall | Result |
+|---|---|---|---|
+| 1. converted stdlib build (`src\go2cs-stdlib.slnx`, Debug, local) | 0 | 1,210 s | 363/363 projects, 0 errors, the same 1 warning (CS9113 `testing\TestReporter.cs:98`) |
+| 2. `go2cs -recurse` over `tsc` | **0** | 355 s | 139/139 packages → 138 csproj; 0 refusals. **The end-of-run guard now passes** (the first run ended rc=1 on 8 unresolved dynamic types). The emitted file set is identical to the first run's (827 `.cs` files). 69 WARNING lines: 64 move2heap, 4 `unsafe.Sizeof` consts, 1 license. Gone since the first run: C1/C2's 8 unresolved types, C3's 2 `Trace` notices, C4's `relater.go` notice, and the 2 slow-package notices. |
+| 3A. `dotnet build` over the 138 csproj, emitted tree **as-is** | 1 | 241 s | **54 built / 3 failed / 81 blocked**, 13 unique errors. For comparison: the first run's 3A was 36 / 7 / 95, and its best hand-patched pass (3C, C1-C11 patched) was 46 / 7 / 85. The three failures are C16 (open), and the new C19, C20 and C21. |
+| 3B. + C16, C19, C20, C21 | 1 | 260 s | 59 / 1 / 78. 184 errors, all in `go-json-experiment/json`: the GO2CS2004 shape, reached through two aliases (see *Open rows*). |
+| 3C. + GO2CS2004: name the underlying generic in the declaration | 1 | 244 s | 59 / 1 / 78. 4 errors: GO2CS2004's other half (the generated wrapper keeps the type parameter `Coder` in its forwarded field types). |
+| 3D. B + GO2CS2004 hand-owned wrapper | 1 | 315 s | **64 / 3 / 71**. 775 errors: C22 (774) and C23 (1). `go-json-experiment/json` builds, and so does every third-party package. An intermediate D build (59 / 1 / 78, 9 errors) showed that the generic struct has no `ΔClone`, and that C16 has 3 more sites in `json`; both are folded into D. |
+| 3E. + C22, C23 | 1 | 331 s | **70 / 3 / 65**. 81 errors, all in tsc's own packages: C23 (70 more sites), C24, C25, C26, C27. tsc's `collections` builds. |
+| 3F. + the rest of C23, C24, C25, C26, C27 | 1 | 395 s | **78 / 2 / 58**. 5 errors: 3 are fallout of my own C27 hand-own (no converter defect), and 2 are C28. **tsc's `core` builds.** |
+| 3G. + the C27 follow-up, C28 | 1 | 1,121 s | **79 / 1 / 58**. 533 errors, all in tsc's `ast`: C29. **The run stops here.** |
+
+**Frontier.**
+- 79 of 138 projects compile: all 35 third-party projects, and 44 of tsc's own (`bundled collections core debug diagnostics execute/watchmanager fswatch glob ipc jsnum json jsonrpc locale lsp/lsproto nativepath osutil packagejson pprof project/background project/dirty project/logging repo semver spanmap stringutil tspath vfs`, all ten `vfs/*` and all ten `testutil/*`).
+- 58 projects are blocked behind `ast`, among them `scanner`, `binder`, `checker`, `compiler`, `ls` and `execute`. Those hold most of tsc's reflect, iter and generics weight, and they are still unmeasured.
+- **Stages 4 and 5 were not reached**: no test host or tool sits above `ast`.
+
+The hand-patch footprint over the emitted tree is 108 files, +1,494 / -1,208 lines; ~1,100 of them are C22's renames. The patch scripts (`rerun-r2*_patch.py.txt`) are the reproducible definition: each one asserts its match counts and names its catalogue id. The per-file footprint is `rerun-handpatch-summary.txt`. The full diff stays on the i7 box (SHA-256 `5365adb8…3c84`), because it is mostly converted TypeScript.
+
+### Scoring the landed rows: did each first cause disappear at its REAL site?
+
+| Row | Real site (first run) | Re-run | Small form (repro) |
+|---|---|---|---|
+| C1 | 7 `debug.FailBadSyntaxKind` call sites (ast, scanner, ls, …) | **Fixed at conversion.** No raw Go is emitted; the call sites use the declaring package's lift (`new ast.NodeжFailBadSyntaxKind_node(Ꮡnode)`), and `debug` builds. The 7 call sites themselves sit in packages behind C29, so they are not yet compiled. | compiles, prints Go's `fail:x` |
+| C2 | `ls/symbols.go:29` | **Fixed at conversion** (`collections.Set<ProvideDocumentSymbols_seen>`). `ls` is behind C29. The same line also needs C22 (`collections.Set` is Δ-renamed). | compiles, matches Go (3 repros) |
+| C3 | `execute` `Trace` forwarders | **Fixed at conversion**: the warning is gone and the forwarders are emitted (`execute/watcher.cs:70`). `execute` is behind C29. | — |
+| C4 | `checker/relater.go` | **Fixed at conversion**: the warning is gone. `checker` is behind C29. | — |
+| C5 | `x/text/unicode/norm` | **Fixed: builds.** | matches (`abc`) |
+| C6 + C12 | `tspath/path.go:1234` `slices.Sort`; jsontext `type Pointer string` | **Fixed: `tspath` builds**, from the unpatched `slices.Sort<slice<Path>, Path>`. jsontext's 8 `Pointer` errors are gone. | matches (`a b c`; `/a/b 2`) |
+| addendum B | named-string index or slice vs a literal | No error of this shape in any of the 79 built projects. I did not map its TS sites, so this is "not seen failing", not a site score. | — |
+| C7 | jsontext `type Value []byte` | **Fixed.** CS0542 is gone; jsontext builds with only the C16 and C21 patches, and no rename is needed. | matches (`3 abc`) |
+| C8 | `x/text/internal/language` (1), `x/text/language` (14) | **Fixed: both build.** | matches (4 repros) |
+| C9 | `gotest.tools/v3/internal/format` | **Fixed: builds.** | matches (`n=2 x`) |
+| C10 | `klauspost/cpuid/v2` | **Fixed: builds.** | matches (`true false`) |
+| C11 | go-winio `internal/socket` and `hvsock.go` (5 sites) | **Fixed: both build.** | matches |
+| C13 | `zeebo/xxh3/utils.go` (`type ptr = unsafe.Pointer`) | **Fixed.** The CS0234 cascade (64 errors) is gone; xxh3 now fails only on the new C19. | matches (`42`) |
+| C14 | `vfs/internal` (6), `bundled` (2) | **Fixed.** `bundled` builds; `vfs/internal`'s CS0103 is gone, and it then fails only on the new C20. | matches (`/r/x`) |
+| C15 | `gotest.tools/v3/assert/cmp` | **Fixed: builds.** | matches |
+| C17 | go-winio `pipe.go` (`net.Conn` through two embeds) | **Fixed: builds.** | matches (`1`) |
+| C18 | named pointer locals and fields | No error of this shape in any of the 79 built projects. | — |
+
+**Headline.**
+- Every landed row's first cause is gone at its real site, wherever the build reaches that site.
+- Four rows (C1, C2, C3, C4) are clean at conversion, but their sites sit behind the new `ast` wall, so they are not yet compiled.
+- No row was found whose small form is fixed while its real site still fails.
+- Apart from the two open rows, no catalogue row from the first run produces an error anywhere in the 79 compiled projects.
+
+### Open rows, measured
+
+- **C16** (open): it reproduces at the real site, and in more places than the first run saw: jsontext `encode.go` ×5 and `value.go` ×1, plus 3 more in `json/arshal_default.go` (`AppendUnquote`, `len64` ×2). The `json` sites were hidden behind jsontext in the first run. The patch passes the named slice as its underlying `slice<byte>`, as Go's instantiation `Bytes = Value` means. Downstream: 79.
+- **GO2CS2004 — FINDING: the refusal is bypassed through aliases.**
+  - The site is `go-json-experiment/json` `options.go:266`, `type marshalersOption Marshalers` (likewise `unmarshalersOption`). Here `Marshalers = typedMarshalers` and `typedMarshalers = typedArshalers[jsontext.Encoder]`.
+  - That is a defined type over an instantiated generic struct, reached through two ALIASES. go2cs neither refuses it nor drops the file: it emits the declaration with the raw Go struct text as its underlying type, which gives 184 errors.
+  - Once the underlying type is named, the other half shows: the generated wrapper forwards the generic's fields with the type parameter unsubstituted (`slice<typedArshaler<Coder>>`), and the generic struct carries no `ΔClone`.
+  - Repro `go2cs2004alias` (conversion rc=0; the build reproduces the TS site's CS0501/CS0102 on the raw struct text), against the direct control `go2cs2004direct` (refused: `error GO2CS2004: a defined type over an instantiated generic type is not supported yet (type D G[int])`).
+  - **For P1's fix:** the shape test must see through aliases (`types.Unalias` on the underlying). My own first-run census missed this site for the same reason: its regex read only the syntax.
+  - Downstream: 78.
+
+### New catalogue (C19+)
+
+Each row is tagged **GENERAL** (an everyday Go idiom that most modules of any size contain, so any `-recurse` user meets it) or **SHAPE** (only modules with the pattern). The downstream count is the number of projects blocked transitively behind the failing project, at the pass where the row was first seen. Repro modules are saved under `-data/repros/` and quoted in short form below. "Repro" gives this re-run's verdict at `f09e762659`.
+
+#### C19: `&^` with an untyped constant on a `uintptr` ALIAS (converter, S) — SHAPE
+
+- **Mechanism:** `top := ui(l) &^ 15`, with `type ui = uintptr`, emits `(ui)(((ui)l) & ~15)`. The untyped constant stays `int`, and golib's `uintptr` has no `&` with `int` (CS0019). The same expression written with `uintptr` instead of the alias converts and runs correctly (control `c19ctl-uintptrandnot`: `32 16`), so the alias is the ingredient.
+- **TS site:** `zeebo/xxh3` `hash64.go:90`, `hash64_seed.go:92`, `hash128.go:188`, `hash128_seed.go:190` (4 errors). This is the C13 package's next wall.
+- **Repro** (`c19uintptraliasandnot`): `type ui = uintptr; func top(l int) ui { return ui(l) &^ 15 }`. Go prints `32 16`; the build reproduces CS0019.
+- **Downstream:** 59 (xxh3, through tsc's hashing).
+
+#### C20: a `switch` over an ARRAY value with composite-literal cases (converter, S) — SHAPE
+
+- **Mechanism:** `switch bom { case [2]byte{0xFF, 0xFE}: ... }` emits a C# `switch (bom)` with `case new byte[]{0xFF, 0xFE}.array():`. A case label must be a constant, so CS9135. Go arrays are comparable, so the cases need a value comparison (`case var _ when bom == ...`, or an if-chain).
+- **TS site:** `internal/vfs/internal/internal.go:161` `decodeBytes` (a byte-order-mark switch; 2 errors). This is the C14 package's next wall.
+- **Repro** (`c20arrayswitch`). Go prints `le be none`; the build reproduces CS9135 ×2.
+- **Downstream:** 17 (the vfs layer).
+
+#### C21: a Go method named `Clone` on a named slice is shadowed by the wrapper's own `object Clone()` (go2cs-gen TypeGenerator, S) — GENERAL
+
+- **Mechanism:**
+  - Every generated named-slice wrapper implements `ICloneable` with an instance `public object Clone()`. A Go method `func (v Value) Clone() Value` is emitted as an EXTENSION method, and C# binds an instance member before an extension.
+  - So `v.Clone()` returns `object`, and the generated pointer forwarder (`return v.Clone();` typed `Value`) fails with CS0266. Every package that defines such a method fails to compile.
+  - Because it fails in the generated forwarder, no silent wrong answer can come from it. Repro `c21namedsliceclone-any` passes the result as `any` and still fails at that same generated line.
+- **Reach:** GENERAL. `Clone()` on a named collection type is an everyday Go idiom. The named-map wrapper probably has the same shape; that was not measured.
+- **TS sites:** `go-json-experiment/json/jsontext` `value.go:69` (`func (v Value) Clone() Value`) and its caller `json/errors.go` (2 sites).
+- **Repro** (`c21namedsliceclone`): `type V []byte; func (v V) Clone() V {...}`. Go prints `ab!`; the build reproduces CS0266 in the generated forwarder.
+- **Downstream:** 79 (it fails in jsontext together with C16).
+
+#### C22: a type Δ-renamed for a method-name clash keeps its Go name in a consumer's PACKAGE-QUALIFIED reference (converter, S-M) — GENERAL
+
+- **Mechanism:**
+  - Go lets a package declare a type and a method of the same name (`type Kind` beside `func (t Token) Kind() Kind`). C# cannot hold a nested type and a same-named extension method in one package class, so the package Δ-renames the type and records `[assembly: GoTypeAlias("Kind", "ΔKind")]`.
+  - Consumers that use the imported-alias form are right (`astꓸSymbol`, 1,456 uses).
+  - A consumer's package-qualified form keeps the Go name, so CS0426. The failing forms are `ж<jsontext.Decoder>` in a signature, a conversion `(jsontext.Kind)(…)`, and above all a generic type, which has no alias form (`collections.Set<T>`).
+- **Reach:** GENERAL. A type named after a method of the same package is everyday Go (`Kind`/`Kind()`, `Encoder` beside an `Encoder()` accessor, `Set` beside `OrderedMap.Set`).
+- **TS sites:** 1,141 qualified references:
+
+  | Package | Type | References |
+  |---|---|---|
+  | jsontext | `Decoder` | 516 |
+  | jsontext | `Kind` | 203 |
+  | jsontext | `Encoder` | 123 |
+  | `collections` | `Set` | 280 |
+  | `project/dirty` | `Value` | 19 |
+
+  21 packages in the closure record 42 Δ renames between them, so more of these follow behind `ast`.
+- **Repro:**
+  - `c22b-genericset` reproduces it: a generic `coll.Set[T]` beside `OrderedMap.Set`, used as a field type in another package. Go prints `1`; the build gives CS0426 `Set<>`.
+  - The non-generic small form (`c22renamedtypequalified`: `lib.Kind`, `*lib.Encoder` in one module) compiles and runs correctly. The jsontext route's extra ingredient is probably the module boundary (jsontext is a third-party module), not yet isolated.
+- **Downstream:** `collections` 71 and `lsproto` 19. `collections` sits under nearly all of tsc.
+
+#### C23: a named `[]byte` from ANOTHER MODULE, converted from a string constant, emits a u8 span with no conversion (converter / go2cs-gen, S; small form not isolated) — reach pending isolation
+
+- **Mechanism:** `result = jsontext.Value("null")` emits `(jsontext.Value)"null"u8`. The named-slice wrapper converts from `slice<byte>`, not from `ReadOnlySpan<byte>`, so CS0030.
+- **Repro status:** the same-package form (`c23namedbytesfromconst`) and the same-module cross-package form (`c23b-crosspkgbytes`) both compile and print Go's `null 4`, so the converter takes another route there. `encoding/json.RawMessage("null")` from std: also compiles and prints `null 4`. Its emission, `(json.RawMessage)slice<byte>((@string)"null"u8)`, shows the general path is right, so the TS site's extra ingredient is the third-party module boundary or the jsontext package itself. Not yet isolated (probe `c23c-rawmessage`).
+- **TS sites:** `internal/ipc/protocol_jsonrpc.go` (1) and `lsp/lsproto`'s generated code (70, written as verbatim u8 strings: `(jsontext.Value)@"""id"""u8`).
+- **Downstream:** `ipc` 40 and `lsproto` 19.
+
+#### C24: a type parameter constrained `~map[K]V` returned as `map[K]V` (converter, S) — SHAPE
+
+- **Mechanism:** `func CopyMapInto[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dst M1, src M2) map[K]V { ...; return dst }`. C# has no conversion from the type parameter (an `IMap<K, V>`) to `map<K, V>`, so CS0029 ×2 (`return dst`, and `return maps.Clone(src)`, which is typed `M2`).
+- **TS site:** `internal/core/core.go:805`. `core` is tsc's root package.
+- **Repro** (`c24mapcoreparamreturn`). Go prints `2 2`; the build reproduces CS0029 ×2.
+- **Downstream:** 65.
+
+#### C25: a generic type's pointer converted to a generic interface INSIDE a generic body: the adapter is never generated (converter / go2cs-gen ImplementGenerator, M) — SHAPE
+
+- **Mechanism:**
+  - `func (b *Box[T]) Locked(fn func(Value[T])) { fn(b) }` emits `fn(new BoxжΔValue<T>(Ꮡb))`.
+  - Implementations are registered as `[assembly: GoImplement<…>]` only for CLOSED instantiations, and an attribute cannot name the open `Box<T>`. With no closed use anywhere, the adapter class is never generated, so CS0246.
+- **TS sites:** `internal/project/dirty` `box.go`, `map.go`, `syncmap.go` ×2 (3 adapter types).
+- **Repro** (`c25opengenericiface`). Go prints `7`; the build reproduces CS0246 `BoxжΔValue<>`.
+- **Downstream:** 12 (the `project` layer).
+
+#### C26: a pointer receiver in its `ref` form escapes as a value into an interface field (converter, S-M) — SHAPE
+
+- **Mechanism:**
+  - `func (r *RequestMessage) Message() *Message { ...; return &Message{Kind: kind, msg: r} }`, where `msg` is `any`.
+  - The receiver is emitted `this ref RequestMessage r`, because the body only reads through it. The escape `msg: r` then emits `r.OrTypedNil()`, which needs an `ж<T>` that a `ref` receiver does not have (CS0411).
+  - Go stores the same pointer. Taking the receiver's address into an interface needs the boxed receiver form.
+- **TS site:** `internal/lsp/lsproto/jsonrpc.go:87` and `:125` (`RequestMessage`, `ResponseMessage`).
+- **Repro** (`c26refrecvescape`). Go prints `2 true`; the build reproduces CS0411.
+- **Downstream:** 19.
+
+#### C27: go2cs-gen constructs a MAP field as if it were a struct, because its type text names a struct that needs construction (go2cs-gen TypeGenerator, S) — SHAPE
+
+- **Mechanism:**
+  - In `type Map[K, V] struct { base map[K]V; dirty map[K]*MapEntry[K, V] }`, `MapEntry` embeds a struct, so it "needs construction".
+  - The zero-value initializer (`AppendZeroValueInitializers`, `StructTypeNeedsConstruction`) classifies the FIELD `dirty` by that inner type name and emits `this.dirty = new map<K, ж<MapEntry<K, V>>>(nil)`.
+  - `map<K, V>` has no `NilType` constructor, so the `(nint size)` overload fails with CS1503 ×3. A map field's zero is nil and needs no construction.
+- **TS site:** `internal/project/dirty/map.go:52`.
+- **Repro** (`c27mapfieldctor`). Go prints `true 1`; the build reproduces CS1503 in the generated wrapper.
+- **Downstream:** 12 (the same project as C25).
+
+#### C28: a pointer PARAMETER held as a deref'd `ref` local and reassigned in a `for` INIT: the init's two statements are run together (converter, S) — SHAPE
+
+- **Mechanism:**
+  - `for node = node.Parent; node != nil; node = node.Parent` emits `for (Ꮡnode = node.Parent node = ref Ꮡnode.DerefOrNull();; Ꮡnode != nil; ...)`.
+  - That is two statements with no separator, plus a stray `;` (CS1003 ×2). The init must re-derive the ref local after the pointer assignment, as the post statement already does.
+- **TS site:** `internal/ast/utilities.go:1865` `GetSuperContainer` (1 site in tsc; the tree-walker idiom `for n = n.Parent; n != nil; n = n.Parent`).
+- **Repro** (`c28ptrparamforinit`). Go prints `true true`; the build reproduces CS1003 ×2.
+- **Downstream:** 58 (`ast`).
+
+#### C29: a method shadowed across embed depths is not promoted, so the generated forwarders and interface adapters fail (go2cs-gen, M-L; small form does not reproduce) — SHAPE, but it gates all of tsc above `ast`
+
+- **Mechanism:**
+  - tsc's node model is `type NodeDefault struct{ Node }`, which REDECLARES ~20 of `Node`'s methods. Then `type NodeBase struct{ NodeDefault }`, and every concrete node embeds `NodeBase` through `ExpressionBase`/`StatementBase`/`TypeNodeBase`/…, often beside sibling embeds (`DeclarationBase`, `FlowNodeBase`, `ModifiersBase`, …) at the same depth.
+  - Go selects the SHALLOWEST method (`NodeDefault`'s).
+  - The generated code calls `NodeBase.VisitEachChild`, `StatementBase.FlowNodeData`, `ж<ArrowFunction>.AsNode`, … and no such promoted member exists. 533 errors over **429 distinct (type, method) pairs**, all CS1929, in TypeGenerator forwarders and ImplementGenerator adapters.
+  - The failing receivers include `TypeNodeBase` (48), `StatementBase` (30), `AccessorDeclarationBase` (16), `NodeBase` (14), and the boxed concrete nodes.
+- **Repro status:** the small form (`c29embedshadowdepth`: `Node` → `NodeDefault` redeclaring `Name()` → `NodeBase` → `ExpressionBase` → `Arrow`, through an interface) compiles AND runs correctly (`default default 3`). The real ingredient is not isolated. Candidates:
+  - (a) the interface `nodeData` has UNEXPORTED methods (`subtreeFactsWorker`, `setModifiers`, `computeSubtreeFacts`, which together are 137 of the errors);
+  - (b) sibling embeds at equal depth that also declare some of the names (`FlowNodeBase`, `DeclarationBase`);
+  - (c) the scale of the method set.
+- **Not hand-patchable** in this run: 429 pairs in generated code.
+- **Downstream:** 58, including `scanner`, `binder`, `checker`, `compiler`, `ls` and `execute`.
+
+
+### Catalogue summary (re-run)
+
+| Id | Mechanism | Class | Size | Reach | Repro | First seen | Downstream |
+|---|---|---|---|---|---|---|---|
+| C16 (open) | named `[]byte` vs `~[]byte \| ~string` | gen / golib | S-M | SHAPE | yes (CS0315) | 1st run 3C | 79 |
+| GO2CS2004 (open) | defined type over an instantiated generic, **through aliases**; then unsubstituted forwarded field types | converter / gen | M | SHAPE | yes (alias route) | 3B / 3C | 78 |
+| **C19** | `&^` constant on a `uintptr` alias | converter | S | SHAPE | yes | 3A | 59 |
+| **C20** | `switch` over an array value with composite-literal cases | converter | S | SHAPE | yes | 3A | 17 |
+| **C21** | Go `Clone()` on a named slice shadowed by the wrapper's `object Clone()` | go2cs-gen | S | **GENERAL** | yes | 3A | 79 (with C16) |
+| **C22** | Δ-renamed type keeps its Go name in a consumer's package-qualified reference | converter | S-M | **GENERAL** | yes (generic route) | 3D | 71 + 19 |
+| **C23** | cross-module named `[]byte` from a string constant: u8 span, no conversion | converter / gen | S | SHAPE (pending isolation) | not yet | 3D, 3E | 40 + 19 |
+| **C24** | `~map[K]V` type parameter returned as `map[K]V` | converter | S | SHAPE | yes | 3E | 65 |
+| **C25** | open-generic pointer → generic interface in a generic body: no adapter | converter / gen | M | SHAPE | yes | 3E | 12 |
+| **C26** | `ref`-form pointer receiver escaping into an interface field | converter | S-M | SHAPE | yes | 3E | 19 |
+| **C27** | map field constructed as a struct (`new map<…>(nil)`) | go2cs-gen | S | SHAPE | yes | 3E | 12 |
+| **C28** | `for` init reassigning a deref'd pointer parameter: statements run together | converter | S | SHAPE | yes | 3F | 58 |
+| **C29** | method shadowed across embed depths: not promoted (429 pairs) | go2cs-gen | M-L | SHAPE (gates all of tsc above `ast`) | not yet | 3G | 58 |
+
+**No wrong-answer class was found in the re-run either.**
+- Every new row is a compile-time failure.
+- Every landed row's small form compiles and prints Go's output: 18 repros.
+- The four new repros that compile run correct: C22's non-generic form, C23's same-module forms, and C29's small form.
+- C21 looked like a silent-misbinding candidate (`v.Clone()` binding to `ICloneable.Clone`). It cannot reach run time, because the generated pointer forwarder fails to compile first.
+- Nothing measured here touches .3's shipped bits. The stdlib corpus does not exercise these shapes: stage 1 is 363/363 at the same tip.
+
+
+### Closing planning read (re-run)
+
+**Headline: .4's TS rows delivered.**
+- Every landed row's first cause is gone at its real site, wherever the build reaches it.
+- With no hand-patch at all, the compile frontier moved from 36 to 54 projects. That is more than the first run's best hand-patched pass reached (46).
+- With hand-patches for only the two open rows and the new ones, it reaches 79 of 138. That includes tsc's root packages `core`, `collections`, `tspath`, `diagnostics`, `json` and the whole vfs layer, measured here for the first time.
+- The first run's closing read predicted "at least one more layer of comparable size". **Scored: RIGHT.** The layer holds 11 new first causes (C19–C29) against the first run's 17 rows, and another layer is certainly behind `ast`.
+
+**What gates now.**
+- **C29 is the single wall in front of the rest of tsc** (`scanner`, `binder`, `checker`, `compiler`, `ls`, `execute`: 58 projects). Its small form compiles and runs correctly, so isolating it is the first job. The likeliest ingredient is an interface with UNEXPORTED methods satisfied through the shadowing embed chain, because 137 of its errors are the unexported `subtreeFactsWorker`/`computeSubtreeFacts`/`setModifiers`. It cannot be hand-patched (429 pairs in generated code). tsc's node model is built entirely on this embed-and-override pattern, and so are many Go ASTs and UI trees.
+- **C22 is the largest GENERAL row.** It has 1,141 references in this closure, and 42 recorded Δ renames across 21 packages, so it recurs throughout the packages behind `ast`. It is a converter fix at a single seam: qualified references must consult the producing package's `GoTypeAlias` map, as the alias form already does.
+- **C21 is a cheap GENERAL row** at one go2cs-gen site: the wrapper's `ICloneable.Clone` must not take the Go name `Clone`, for example by implementing it explicitly. It blocks any module whose named slice has a `Clone` method.
+- **GO2CS2004 is not finished.** The refusal must see through aliases (`types.Unalias`), and the real fix (substituted forwarded field types, a `ΔClone` for a generic struct) is what lets `go-json-experiment/json` and every json-v2 user through. With C16, it gates 79.
+
+**What a .5 needs, in order.**
+1. The GENERAL rows and the two open rows: C21, C22, C16, GO2CS2004 (alias-aware refusal, then the real fix), and C23 once its ingredient is isolated. Each one is a red-first behavioral project built from the repros here.
+2. **Isolate C29, then fix it.** It is the gate to tsc's checker, the package that holds most of tsc's reflect, iter and generics weight.
+3. The SHAPE rows with ready repros: C19, C20, C24, C25, C26, C27, C28. Each is S to M, at one converter or go2cs-gen site.
+4. **Re-run this experiment a third time at the same TS commit.** The next layer is `scanner`/`binder`/`checker`/`compiler`, and stage 4 (tests) needs `testutil` + `ast` + `checker` at least. Expect one more layer of first causes before any tsc test host runs. With C29 fixed and the GENERAL rows in, a stage-4 attempt on the `ast`-level packages' own tests (`ast`, `scanner`, `tspath`, `core`, `collections`) becomes realistic in that run.
+
+**For or against 1.27 first.** The first run's argument still holds. Every wall in this layer is on the 1.26 commit and would persist on a 1.27 base, and C29/C22 sit in tsc's own packages, which a 1.27 hop would only make larger, through generic methods. Fixing on the current line comes first.
+
+**Box-sharing datum, confirmed.** With COORD holding its batteries, stage 2 took 355 s, against 2,429 s beside COORD's batteries in the first run (about 7×). The stdlib build took 1,210 s against 1,404 s. The bandwidth note in the first record stands: schedule heavy experiment work in a held window.
+
+### Data (re-run)
+
+All under `EXPERIMENT-ts-readiness-2026-11-07-data/`:
+- `rerun-stage2-convert-log.txt`: the stage-2 conversion log.
+- `rerun-stage3-A-errors.txt`: the as-is build's error histogram.
+- `rerun-stage3-G-errors.txt`: the final pass's histogram, with C29's (type, member) tallies.
+- `rerun-stage3-passes-status.txt`: built / failed / blocked for every pass, with downstream counts per failing project.
+- `rerun-r2{b,c,d,e,f,g}_patch.py.txt` and `rerun-handpatch-summary.txt`: the hand-patches, their order and their footprint.
+- `rerun-repro.sh.txt` and `rerun-repro-results.txt`: every repro module run end to end: Go oracle → convert → build → run → compare.
+- `rerun-projstatus.py.txt`: the built / failed / blocked classifier. It reproduces the first run's recorded pass-C count, 46 built / 7 failed, as its control.
+- New repro modules under `repros/`: `c19*`, `c2*`, `go2cs2004alias`, `go2cs2004direct`. They use their own numbering, which matches the catalogue ids above.

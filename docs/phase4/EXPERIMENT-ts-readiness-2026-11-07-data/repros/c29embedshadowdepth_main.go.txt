@@ -1,0 +1,31 @@
+package main
+
+// TS site: internal/ast ast.go:1209 NodeDefault embeds Node and redeclares its methods; NodeBase embeds NodeDefault;
+// every concrete node (ArrowFunction, ...) embeds NodeBase through ExpressionBase/StatementBase/...
+// Go selects the SHALLOWEST method: NodeDefault's shadows Node's.
+type Node struct{ k int }
+
+func (n *Node) Name() string { return "node" }
+func (n *Node) Kind() int    { return n.k }
+
+type NodeDefault struct{ Node }
+
+func (n *NodeDefault) Name() string { return "default" }
+
+type NodeBase struct{ NodeDefault }
+
+type ExpressionBase struct{ NodeBase }
+
+type Arrow struct{ ExpressionBase }
+
+type named interface {
+	Name() string
+	Kind() int
+}
+
+func main() {
+	a := &Arrow{}
+	a.k = 3
+	var x named = a
+	println(a.Name(), x.Name(), x.Kind()) // Go: default default 3
+}

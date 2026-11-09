@@ -1,0 +1,30 @@
+# r2g_patch.py <tree> : re-run pass G = pass F + (a) pass F's own fallout and (b) the NEW first cause it found in ast.
+import os, re, sys
+sys.stdout.reconfigure(encoding="utf-8")
+
+ROOT = sys.argv[1]
+TS = os.path.join(ROOT, r"src\github.com\microsoft\TypeScript\tsc\internal")
+log = []
+u = lambda s: s.encode("utf-8")
+
+def sub(path, pattern, repl, count, cid, regex=False):
+    b = open(path, "rb").read()
+    n = len(re.findall(pattern, b)) if regex else b.count(pattern)
+    if count is not None and n != count:
+        sys.exit(f"{cid}: expected {count} match(es) in {path}, found {n}")
+    open(path, "wb").write(re.sub(pattern, repl, b) if regex else b.replace(pattern, repl))
+    log.append(f"{cid}: {n} x {os.path.relpath(path, ROOT)}")
+
+# C27 follow-up (fallout of pass F's hand-own, NOT a converter defect): with Map<K, V> no longer a generated Go type,
+# go2cs-gen's FieldAccessGenerator no longer gives ж<Map<K, V>> its `.dirty` accessor; reach the field through the
+# box's ref Value instead.
+sub(os.path.join(TS, r"project\dirty\map.cs"), u("e.m.dirty[e.key] = Ꮡe;"), u("e.m.Value.dirty[e.key] = Ꮡe;"), 3, "C27 follow-up")
+
+# C28: a pointer PARAMETER held in its deref'd ref-local form (`ref var node = ref Ꮡnode.DerefOrNull();`) and
+# reassigned in a for statement's INIT (`for node = node.Parent; node != nil; node = node.Parent`): the init's two
+# statements are emitted run together, `for (Ꮡnode = node.Parent node = ref Ꮡnode.DerefOrNull();; ...)` (CS1003).
+# Patch: hoist the init before the loop (the body already re-derefs at the top of each iteration).
+sub(os.path.join(TS, r"ast\utilities.cs"),
+    u("for (Ꮡnode = node.Parent node = ref Ꮡnode.DerefOrNull();; Ꮡnode != nil; Ꮡnode = node.Parent) {"),
+    u("Ꮡnode = node.Parent; node = ref Ꮡnode.DerefOrNull();\r\n    for (; Ꮡnode != nil; Ꮡnode = node.Parent) {"), 1, "C28")
+print("\n".join(log))

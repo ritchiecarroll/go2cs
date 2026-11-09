@@ -1,0 +1,62 @@
+# r2e_patch.py <tree> : re-run pass E = pass D + the two NEW first causes pass D found in tsc's own packages.
+#
+# C22: a package Δ-renames an exported type whose name collides with a method name in the same package (Go allows
+# `type Kind` beside `func (t Token) Kind() Kind`; C# cannot hold a nested type and an extension method of one name in
+# the package class). The package records the rename (`[assembly: GoTypeAlias("Kind", "ΔKind")]`), and consumers that
+# go through the imported-alias form (`astꓸSymbol`) are right, but a PACKAGE-QUALIFIED reference in a consumer
+# (`jsontext.Kind`, `ж<jsontext.Decoder>`, the generic `collections.Set<T>`) keeps the Go name: CS0426.
+# Patch: for every package's recorded Δ renames, rewrite `<alias>.<Name>` to `<alias>.Δ<Name>` in every source file
+# whose `using <alias> = <that package class>;` names that package. Generated files are not touched (they follow).
+#
+# C23: a conversion of an untyped string constant to a named []byte type (`jsontext.Value("null")`) emits
+# `(jsontext.Value)"null"u8`, and the named-slice wrapper has no conversion from ReadOnlySpan<byte>: CS0030.
+# Patch: route the u8 literal through slice<byte> (`(jsontext.Value)(slice<byte>)"null"u8`).
+import os, re, sys, collections
+sys.stdout.reconfigure(encoding="utf-8")
+
+ROOT = sys.argv[1]
+log = collections.Counter()
+
+def sources():
+    for top in ("src", "pkg"):
+        for d, ds, fs in os.walk(os.path.join(ROOT, top)):
+            ds[:] = [x for x in ds if not x.startswith(".")]
+            for f in fs:
+                if f.endswith(".cs"):
+                    yield os.path.join(d, f)
+
+# 1. Every package's recorded renames, keyed by the package class's full name.
+renames = {}
+for p in sources():
+    if os.path.basename(p) != "package_info.cs":
+        continue
+    t = open(p, encoding="utf-8-sig").read()
+    ns = re.search(r"^namespace ([\w.@]+);", t, re.M)
+    cl = re.search(r"^public static partial class (\w+_package)", t, re.M)
+    names = re.findall(r'^\[assembly: GoTypeAlias\("(\w+)", "Δ\1"\)\]', t, re.M)
+    if ns and cl and names:
+        renames[ns[1] + "." + cl[1]] = names
+print("packages with recorded Δ renames:", len(renames), " names:", sum(len(v) for v in renames.values()))
+
+# 2. Rewrite package-qualified references in consumers.
+for p in sources():
+    b = open(p, "rb").read()
+    t = b.decode("utf-8-sig") if b.startswith(b"\xef\xbb\xbf") else b.decode("utf-8")
+    bom = b.startswith(b"\xef\xbb\xbf")
+    nt = t
+    for alias, cls in re.findall(r"^using (\w+) = ([\w.@]+_package);", t, re.M):
+        cls = cls[len("global::"):] if cls.startswith("global::") else cls
+        for name in renames.get(cls, ()):
+            pat = re.compile(r'(?<![\wꓸ."])' + re.escape(alias) + r"\." + name + r"(?![\wꓸ])")
+            nt, n = pat.subn(alias + ".Δ" + name, nt)
+            if n:
+                log[f"C22 {cls.rsplit('.', 1)[1]}.{name}"] += n
+    # C23
+    nt, n = re.subn(r'\((\w+\.Value)\)("(?:[^"\\]|\\.)*"u8)', r"(\1)(slice<byte>)\2", nt)
+    if n:
+        log["C23 (named []byte)(\"…\"u8)"] += n
+    if nt != t:
+        open(p, "wb").write((b"\xef\xbb\xbf" if bom else b"") + nt.encode("utf-8"))
+
+for k, v in sorted(log.items()):
+    print(f"{v:6} {k}")

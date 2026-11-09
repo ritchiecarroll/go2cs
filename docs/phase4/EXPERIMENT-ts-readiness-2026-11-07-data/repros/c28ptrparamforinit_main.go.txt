@@ -1,0 +1,22 @@
+package main
+
+// TS site: internal/ast/utilities.go:1865 GetSuperContainer.
+type Node struct {
+	Kind   int
+	Parent *Node
+}
+
+func super(node *Node) *Node {
+	for node = node.Parent; node != nil; node = node.Parent {
+		if node.Kind == 2 {
+			return node
+		}
+	}
+	return nil
+}
+
+func main() {
+	root := &Node{Kind: 2}
+	leaf := &Node{Kind: 0, Parent: &Node{Kind: 1, Parent: root}}
+	println(super(leaf) == root, super(root) == nil) // Go: true true
+}

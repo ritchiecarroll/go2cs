@@ -1,0 +1,3 @@
+module repro/c26refrecvescape
+
+go 1.26

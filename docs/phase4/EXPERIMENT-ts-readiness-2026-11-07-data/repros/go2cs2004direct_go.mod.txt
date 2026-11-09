@@ -1,0 +1,3 @@
+module repro/go2cs2004direct
+
+go 1.26

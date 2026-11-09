@@ -1,0 +1,14 @@
+package main
+
+import "repro/c22b-genericset/coll"
+
+type holder struct{ seen coll.Set[string] }
+
+func main() {
+	var h holder
+	h.seen.Add("a")
+	h.seen.Add("a")
+	var o coll.OrderedMap[string, int]
+	o.Set("x", 1)
+	println(h.seen.Len()) // Go: 1
+}

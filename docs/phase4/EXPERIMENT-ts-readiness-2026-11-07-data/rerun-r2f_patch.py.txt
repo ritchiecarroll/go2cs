@@ -1,0 +1,119 @@
+# r2f_patch.py <tree> <r2E tree> : re-run pass F = pass E + the NEW first causes pass E found in tsc's own packages
+# (core, project/dirty, lsp/lsproto), plus the rest of C23's sites. Byte-exact; every replacement asserts its count.
+import os, re, sys
+sys.stdout.reconfigure(encoding="utf-8")
+
+ROOT, PASSE = sys.argv[1], sys.argv[2]
+TS = os.path.join(ROOT, r"src\github.com\microsoft\TypeScript\tsc\internal")
+log = []
+u = lambda s: s.encode("utf-8")
+
+def sub(path, pattern, repl, count, cid, regex=False):
+    b = open(path, "rb").read()
+    n = len(re.findall(pattern, b)) if regex else b.count(pattern)
+    if count is not None and n != count:
+        sys.exit(f"{cid}: expected {count} match(es) in {path}, found {n}")
+    if n == 0:
+        sys.exit(f"{cid}: no match in {path}")
+    open(path, "wb").write(re.sub(pattern, repl, b) if regex else b.replace(pattern, repl))
+    log.append(f"{cid}: {n} x {os.path.relpath(path, ROOT)}")
+
+# C23 (rest): the same named-[]byte conversion from a string constant, where the literal is a VERBATIM u8 string
+# (`(jsontext.Value)@"""id"""u8`, lsproto's generated LSP code).
+LG = os.path.join(TS, r"lsp\lsproto\lsp_generated.cs")
+sub(LG, rb'\((\w+\.Value)\)(@"(?:[^"]|"")*"u8)', rb"(\1)(slice<byte>)\2", 70, "C23", regex=True)
+
+# C24: a type parameter constrained `~map[K]V` returned as `map[K]V` (core.CopyMapInto: `return dst`, and
+# `return maps.Clone(src)` typed M2). C# has no conversion from the type parameter to map<K,V>; route it through
+# object (exact for the unnamed map instantiations at every TS call site; a named map type would need a real fix).
+CORE = os.path.join(TS, r"core\core.cs")
+sub(CORE, u("return maps.Clone<M2, K, V>(src);"), u("return (map<K, V>)(object)maps.Clone<M2, K, V>(src);"), 1, "C24")
+sub(CORE, rb"(maps\.Copy<M1, M2, K, V>\(dst, src\);\r?\n    )return dst;", rb"\1return (map<K, V>)(object)dst;", 1, "C24", regex=True)
+
+# C25: a generic type's pointer converted to a generic interface INSIDE a generic body (`fn(b)` with b *Box[T] and
+# fn func(Value[T])) emits `new BoxжΔValue<T>(Ꮡb)`, but only closed instantiations are registered with
+# [assembly: GoImplement<...>], so no adapter is generated (CS0246). Patch: the adapters by hand, in the shape
+# go2cs-gen's ImplementGenerator emits for a closed instantiation (sealed, IжAdapter, nil box, identity equality).
+DIRTY = os.path.join(TS, r"project\dirty")
+ADAPT = """// TS readiness re-run, pass F, C25: hand-written adapters for open-generic pointer -> interface conversions.
+namespace go.github.com.microsoft.TypeScript.tsc.@internal.project;
+
+partial class dirty_package {
+{classes}
+}
+"""
+CLS = """
+{vis} sealed class {name}жΔValue<{tp}> : ΔValue<V>, global::go.IжAdapter where V : Cloneable<V>
+{{
+    private readonly ж<{name}<{tp}>> m_box;
+    public {name}жΔValue(ж<{name}<{tp}>> box) => m_box = box ?? ж<{name}<{tp}>>.NilBox;
+    public object? Box => m_box;
+    V ΔValue<V>.Value() => m_box.Value();
+    V ΔValue<V>.Original() => m_box.Original();
+    bool ΔValue<V>.Dirty() => m_box.Dirty();
+    void ΔValue<V>.Change(Action<V> apply) => m_box.Change(apply);
+    bool ΔValue<V>.ChangeIf(Func<V, bool> cond, Action<V> apply) => m_box.ChangeIf(cond, apply);
+    void ΔValue<V>.Delete() => m_box.Delete();
+    void ΔValue<V>.Locked(Action<ΔValue<V>> fn) => m_box.Locked(fn);
+    public override bool Equals(object? obj) => obj switch
+    {{
+        global::go.IжAdapter adapter => ReferenceEquals(adapter.Box, m_box),
+        ж<{name}<{tp}>> box => ReferenceEquals(box, m_box),
+        _ => ReferenceEquals(obj, this)
+    }};
+    public override int GetHashCode() => m_box?.GetHashCode() ?? 0;
+    public override string? ToString() => m_box?.ToString();
+}}
+"""
+classes = "".join(CLS.format(vis=v, name=n, tp=tp) for v, n, tp in
+                  (("public", "Box", "V"), ("public", "MapEntry", "K, V"), ("internal", "lockedEntry", "K, V")))
+open(os.path.join(DIRTY, "r2f_C25_adapters.cs"), "wb").write(u(ADAPT.replace("{classes}", classes).replace("\n", "\r\n")))
+log.append("C25: 3 adapters x src\\...\\project\\dirty\\r2f_C25_adapters.cs (new file)")
+
+# C26: a POINTER receiver emitted in its `ref` form escapes as a value (`return &Message{msg: r}`, msg any): it emits
+# `msg: r.OrTypedNil()`, which needs a ж<T> the ref receiver does not have (CS0411). Patch: box a copy at the escape.
+# (Go stores the same pointer; the copy loses aliasing, which matters only if the message is mutated through msg.)
+JR = os.path.join(TS, r"lsp\lsproto\jsonrpc.cs")
+b = open(JR, "rb").read()
+n = b.count(u("msg: r.OrTypedNil()"))
+if n != 2:
+    sys.exit(f"C26: expected 2 escaping receivers in {JR}, found {n}")
+parts = b.split(u("msg: r.OrTypedNil()"))
+out = parts[0]
+for p in parts[1:]:
+    i = out.rfind(u("return Ꮡ(new ΔMessage("))
+    if i < 0:
+        sys.exit("C26: no `return Ꮡ(new ΔMessage(` before an escaping receiver")
+    eol = b"\r\n" if b"\r\n" in out[max(0, i - 200):i] else b"\n"
+    out = out[:i] + u("heap(r, out var Ꮡrʗbox);") + eol + b"    " + out[i:] + u("msg: Ꮡrʗbox") + p
+open(JR, "wb").write(out)
+log.append(f"C26: {n} x {os.path.relpath(JR, ROOT)}")
+
+# C27: go2cs-gen's zero-value initializer classifies the FIELD `dirty map[K]*MapEntry[K, V]` as a struct that needs
+# construction (its type text names MapEntry, which does) and emits `this.dirty = new map<...>(nil)`: map<K,V> has no
+# NilType constructor, so the (nint size) overload fails (CS1503). A generated file cannot be patched: hand-own the
+# Map<K, V> wrapper (taken from pass E's generated output) with the map field left at its nil zero, declared in
+# package_info.cs (outside go2cs-gen's converted-Go-type rule); the converted declaration in map.cs is moved there.
+gen = [os.path.join(d, f) for d, _, fs in os.walk(os.path.join(PASSE, ".artifacts", "gen")) for f in fs
+       if f == "go.github.com.microsoft.TypeScript.tsc.internal.project.dirty_package.Map_K, V_.g.cs"]
+if len(gen) != 1:
+    sys.exit(f"C27: expected one generated dirty Map wrapper under {PASSE}, found {len(gen)}")
+t = open(gen[0], encoding="utf-8-sig").read().replace("\r\n", "\n")
+body = t[t.index("    public partial struct Map<K, V> :"):t.rindex("\n}")].rstrip() + "\n"
+MAPNIL = "new global::go.map<K, global::go.ж<global::go.github.com.microsoft.TypeScript.tsc.@internal.project.dirty_package.MapEntry<K, V>>>(nil)"
+if body.count(MAPNIL) != 3:
+    sys.exit(f"C27: expected 3 map(nil) constructions in the generated wrapper, found {body.count(MAPNIL)}")
+body = body.replace(MAPNIL, "default!")
+MAPCS = os.path.join(DIRTY, "map.cs")
+decl = re.search(rb"partial struct Map<K, V>\r?\n    where V : Cloneable<V>\r?\n\{\r?\n    internal map<K, V> @base;\r?\n    internal map<K, \xd0\xb6<MapEntry<K, V>>> dirty;\r?\n\}\r?\n", open(MAPCS, "rb").read())
+if not decl:
+    sys.exit("C27: converted Map<K, V> declaration not found in map.cs")
+sub(MAPCS, decl[0], u("// C27 hand-own: Map<K, V> is declared in package_info.cs\n"), 1, "C27")
+PI = os.path.join(DIRTY, "package_info.cs")
+eol = b"\r\n" if b"\r\n" in open(PI, "rb").read() else b"\n"
+own = ("    // C27 hand-own (TS readiness re-run): the converted declaration plus go2cs-gen's wrapper, map field at nil\n"
+       "    public partial struct Map<K, V>\n        where V : Cloneable<V>\n    {\n"
+       "        internal map<K, V> @base;\n        internal map<K, ж<MapEntry<K, V>>> dirty;\n    }\n" + body)
+sub(PI, u("    public partial struct Map<K, V> {}"), u(own).replace(b"\n", eol).rstrip(eol), 1, "C27")
+
+print("\n".join(log))

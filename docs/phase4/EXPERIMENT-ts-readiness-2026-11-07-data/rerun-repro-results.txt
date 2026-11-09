@@ -1,0 +1,289 @@
+# Re-run 2026-11-09: every repro module end to end (scripts: rerun-repro.sh.txt). Converter binary built at f09e762659 throughout;
+# a 'go2cs=' tip of 0c553534df means the clone's checkout had moved to master (docs only on top of f09e762659), not the binary.
+
+repro anoniface  go2cs=f09e762659
+GO   rc=0: fail:x
+CONV rc=0  WARNING: Package license is unspecified for H:\go2cs-ts-exp\out\repro-r2-anoniface\src\repro\anoniface\dbg\repro.anoniface.dbg.csproj (reported once per module); add a LICENSE beside the project or pa|
+BUILD rc=0  
+RUN  rc=0: fail:x
+MATCH YES
+
+repro anoniface-local  go2cs=f09e762659
+GO   rc=0: fail:x
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: fail:x
+MATCH YES
+
+repro anonstructarg  go2cs=f09e762659
+GO   rc=0: true
+true
+false
+CONV rc=0  WARNING: Package license is unspecified for H:\go2cs-ts-exp\out\repro-r2-anonstructarg\src\repro\anonstructarg\coll\repro.anonstructarg.coll.csproj (reported once per module); add a LICENSE beside the|
+BUILD rc=0  
+RUN  rc=0: true
+true
+false
+MATCH YES
+
+repro anonstructarg-builtin  go2cs=f09e762659
+GO   rc=0: true
+true
+false
+CONV rc=0  WARNING: Package license is unspecified for H:\go2cs-ts-exp\out\repro-r2-anonstructarg-builtin\src\repro\anonstructargbuiltin\coll\repro.anonstructargbuiltin.coll.csproj (reported once per module); ad|
+BUILD rc=0  
+RUN  rc=0: true
+true
+false
+MATCH YES
+
+repro anonstructarg-local  go2cs=f09e762659
+GO   rc=0: true
+true
+false
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: true
+true
+false
+MATCH YES
+
+repro c10namedpointertype  go2cs=f09e762659
+GO   rc=0: true false
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: true false
+MATCH YES
+
+repro c11namedforeignstruct  go2cs=f09e762659
+GO   rc=0: 631375801 56819 233
+CONV rc=0  WARNING: Package license is unspecified for H:\go2cs-ts-exp\out\repro-r2-c11namedforeignstruct\src\repro\c11namedforeignstruct\win\repro.c11namedforeignstruct.win.csproj (reported once per module); ad|
+BUILD rc=0  
+RUN  rc=0: 631375801 56819 233
+MATCH YES
+
+repro c12namedstringbytesrange  go2cs=f09e762659
+GO   rc=0: /a/b 2
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: /a/b 2
+MATCH YES
+
+repro c13aliasunsafeptr  go2cs=f09e762659
+GO   rc=0: 42
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: 42
+MATCH YES
+
+repro c15recvshadowsimport  go2cs=f09e762659
+GO   rc=0: /r/x
+CONV rc=0  WARNING: Package license is unspecified for H:\go2cs-ts-exp\out\repro-r2-c15recvshadowsimport\src\repro\c15recvshadowsimport\vfs\repro.c15recvshadowsimport.vfs.csproj (reported once per module); add a|
+BUILD rc=0  
+RUN  rc=0: /r/x
+MATCH YES
+
+repro c16typeswitchbinding  go2cs=f09e762659
+GO   rc=0: func:true type:int nil other
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: func:true type:int nil other
+MATCH YES
+
+repro c17namedbytesconstraint  go2cs=f09e762659
+GO   rc=0: bc x
+CONV rc=0  
+BUILD rc=1  main.cs(16,13) CS0315: The type 'go.repro.main_package.Val' cannot be used as type parameter 'Bytes' in the generic type or method 'main_package.prefix<Bytes>(Bytes, nint)'. There is no boxing conversion from 'go.repro.m|
+RUN  rc=-1: 
+MATCH NO
+
+repro c18twolevelpromotion  go2cs=f09e762659
+GO   rc=0: 1
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: 1
+MATCH YES
+
+repro c19ctl-uintptrandnot  go2cs=f09e762659
+GO   rc=0: 32 16
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: 32 16
+MATCH YES
+
+repro c19uintptraliasandnot  go2cs=f09e762659
+GO   rc=0: 32 16
+CONV rc=0  
+BUILD rc=1  main.cs(7,46) CS0019: Operator '&' cannot be applied to operands of type 'uintptr' and 'int'|
+RUN  rc=-1: 
+MATCH NO
+
+repro c20arrayswitch  go2cs=f09e762659
+GO   rc=0: le be none
+CONV rc=0  
+BUILD rc=1  main.cs(10,14) CS9135: A constant value of type 'array<byte>' is expected|main.cs(13,14) CS9135: A constant value of type 'array<byte>' is expected|
+RUN  rc=-1: 
+MATCH NO
+
+repro c21namedsliceclone  go2cs=f09e762659
+GO   rc=0: ab!
+CONV rc=0  
+BUILD rc=1  go.repro.main_package.Clone.global__go.repro.main_package.V.value.g.cs(25,16) CS0266: Cannot implicitly convert type 'object' to 'go.repro.main_package.V'. An explicit conversion exists (are you missing a cast?)|
+RUN  rc=-1: 
+MATCH NO
+
+repro c21namedsliceclone-any  go2cs=f09e762659
+GO   rc=0: main.V ab!
+[97 98 33]
+CONV rc=0  
+BUILD rc=1  go.repro.main_package.Clone.global__go.repro.main_package.V.value.g.cs(25,16) CS0266: Cannot implicitly convert type 'object' to 'go.repro.main_package.V'. An explicit conversion exists (are you missing a cast?)|
+RUN  rc=-1: 
+MATCH NO
+
+repro c22b-genericset  go2cs=f09e762659
+GO   rc=0: 1
+CONV rc=0  WARNING: Package license is unspecified for H:\go2cs-ts-exp\out\repro-r2-c22b-genericset\src\repro\c22b-genericset\coll\repro.c22b-genericset.coll.csproj (reported once per module); add a LICENSE besi|
+BUILD rc=1  go.repro.main_package.holder.g.cs(29,75) CS0426: The type name 'Set<>' does not exist in the type 'coll_package'|go.repro.main_package.holder.g.cs(33,116) CS0426: The type name 'Set<>' does not exist in the type 'coll_package'|go.repro.main_package.holder.g.cs(45,71) CS0426: The type name 'Set<>' does not exist in the type 'coll_package'|main.cs(9,19) CS0426: The type name 'Set<>' does not exist in the type 'coll_package'|
+RUN  rc=-1: 
+MATCH NO
+
+repro c22renamedtypequalified  go2cs=f09e762659
+GO   rc=0: true 1
+CONV rc=0  WARNING: Package license is unspecified for H:\go2cs-ts-exp\out\repro-r2-c22renamedtypequalified\src\repro\c22renamedtypequalified\lib\repro.c22renamedtypequalified.lib.csproj (reported once per modul|
+BUILD rc=0  
+RUN  rc=0: true 1
+MATCH YES
+
+repro c23b-crosspkgbytes  go2cs=f09e762659
+GO   rc=0: null 4
+CONV rc=0  WARNING: Package license is unspecified for H:\go2cs-ts-exp\out\repro-r2-c23b-crosspkgbytes\src\repro\c23b-crosspkgbytes\lib\repro.c23b-crosspkgbytes.lib.csproj (reported once per module); add a LICEN|
+BUILD rc=0  
+RUN  rc=0: null 4
+MATCH YES
+
+repro c23c-rawmessage  go2cs=0c553534df
+GO   rc=0: null 4
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: null 4
+MATCH YES
+
+repro c23namedbytesfromconst  go2cs=f09e762659
+GO   rc=0: null 4
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: null 4
+MATCH YES
+
+repro c24mapcoreparamreturn  go2cs=f09e762659
+GO   rc=0: 2 2
+CONV rc=0  
+BUILD rc=1  main.cs(12,16) CS0029: Cannot implicitly convert type 'M2' to 'go.map<K, V>'|main.cs(15,12) CS0029: Cannot implicitly convert type 'M1' to 'go.map<K, V>'|
+RUN  rc=-1: 
+MATCH NO
+
+repro c25opengenericiface  go2cs=f09e762659
+GO   rc=0: 7
+CONV rc=0  
+BUILD rc=1  main.cs(15,80) CS0246: The type or namespace name 'BoxжΔValue<>' could not be found (are you missing a using directive or an assembly reference?)|
+RUN  rc=-1: 
+MATCH NO
+
+repro c26refrecvescape  go2cs=f09e762659
+GO   rc=0: 2 true
+CONV rc=0  
+BUILD rc=1  main.cs(21,41) CS0411: The type arguments for method 'PointerExtensions.OrTypedNil<T>(ж<T>?)' cannot be inferred from the usage. Try specifying the type arguments explicitly.|
+RUN  rc=-1: 
+MATCH NO
+
+repro c27mapfieldctor  go2cs=f09e762659
+GO   rc=0: true 1
+CONV rc=0  
+BUILD rc=1  go.repro.main_package.Map_K, V_.g.cs(40,108) CS1503: Argument 1: cannot convert from 'go.NilType' to 'nint'|go.repro.main_package.Map_K, V_.g.cs(45,108) CS1503: Argument 1: cannot convert from 'go.NilType' to 'nint'|go.repro.main_package.Map_K, V_.g.cs(51,117) CS1503: Argument 1: cannot convert from 'go.NilType' to 'nint'|
+RUN  rc=-1: 
+MATCH NO
+
+repro c28ptrparamforinit  go2cs=f09e762659
+GO   rc=0: true true
+CONV rc=0  
+BUILD rc=1  main.cs(13,30) CS1003: Syntax error, ',' expected|main.cs(13,75) CS1003: Syntax error, ',' expected|
+RUN  rc=-1: 
+MATCH NO
+
+repro c29embedshadowdepth  go2cs=f09e762659
+GO   rc=0: default default 3
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: default default 3
+MATCH YES
+
+repro c5vendoredpath  go2cs=f09e762659
+GO   rc=0: abc
+CONV rc=0  WARNING: Package license is unspecified for H:\go2cs-ts-exp\out\repro-r2-c5vendoredpath\src\repro\c5vendoredpath\lib\repro.c5vendoredpath.lib.csproj (reported once per module); add a LICENSE beside th|
+BUILD rc=0  
+RUN  rc=0: abc
+MATCH YES
+
+repro c6namedstringsort  go2cs=f09e762659
+GO   rc=0: a b c
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: a b c
+MATCH YES
+
+repro c7typenamedvalue  go2cs=f09e762659
+GO   rc=0: 3 abc
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: 3 abc
+MATCH YES
+
+repro c8b  go2cs=f09e762659
+GO   rc=0: core! 4
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: core! 4
+MATCH YES
+
+repro c8c  go2cs=f09e762659
+GO   rc=0: core! 4
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: core! 4
+MATCH YES
+
+repro c8d  go2cs=f09e762659
+GO   rc=0: core! 4
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: core! 4
+MATCH YES
+
+repro c8valuerecvptrcall  go2cs=f09e762659
+GO   rc=0: a+!
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: a+!
+MATCH YES
+
+repro c9variadicclosurearg  go2cs=f09e762659
+GO   rc=0: n=2 x
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: n=2 x
+MATCH YES
+
+repro go2cs2004alias  go2cs=f09e762659
+GO   rc=0: 9 7
+CONV rc=0  
+BUILD rc=1  go.repro.main_package.D.g.cs(27,16) CS0501: 'main_package.D.D()' must declare a body because it is not marked abstract, extern, or partial|go.repro.main_package.D.g.cs(27,24) CS0102: The type 'main_package.D' already contains a definition for ''|go.repro.main_package.D.g.cs(31,22) CS0102: The type 'main_package.D' already contains a definition for ''|go.repro.main_package.D.g.cs(31,37) CS0246: The type or namespace name 'Value' could not be found (are you missing a using directive or an assembly reference?)|
+RUN  rc=-1: 
+MATCH NO
+
+repro go2cs2004direct  go2cs=f09e762659
+GO   rc=0: 9
+CONV rc=1  H:\go2cs-ts-exp\repros\go2cs2004direct\main.go(9,6): error GO2CS2004: a defined type over an instantiated generic type is not supported yet (type D G[int])|
+BUILD rc=-1  
+RUN  rc=-1: 
+MATCH NO
+
