@@ -137,6 +137,47 @@ var manualConversionVars = map[string]map[string]goosScope{
 	},
 }
 
+// manualConversionConsts is manualConversionVars' twin for a package-level CONST whose value the converted
+// program must compute at run time, where Go's toolchain fixes it per build. The hand-owned *_impl.cs
+// declares the member every reference reads; the converter emits a placeholder instead of the const. Go's
+// own const contexts are unaffected: go/types folds them at conversion, so a folded constant keeps the
+// converted target's value (the census of record names them category D).
+//
+// runtime.GOARCH, darwin only (R3 of docs/phase4/DESIGN-comparator-arms.md, layer 2): the darwin flavour
+// is converted ONCE, for darwin/amd64, and runs under both mac RIDs, so the converted constant read
+// "amd64" on Apple silicon where Go's binary reads "arm64" (BOARD 2026-11-05). The darwin hand-own reads
+// the process architecture. internal/goarch, the file selection and every folded constant stay amd64;
+// the census found each runtime site that branches on GOARCH inert, improving, equivalent or
+// unreachable at arm64. linux and windows keep the converted const until a census per flavour.
+var manualConversionConsts = map[string]map[string]goosScope{
+	"runtime": {
+		"GOARCH": goosDarwin,
+	},
+	// Go's `const defaultGOARCH = runtime.GOARCH` (zbootstrap.go): folded, it would keep "amd64" beside a run-time
+	// runtime.GOARCH, and go/build's default context would compare the two and disagree.
+	"internal/buildcfg": {
+		"defaultGOARCH": goosDarwin,
+	},
+}
+
+// isManualConst reports whether the package-level const is displaced by manualConversionConsts for this
+// conversion's target.
+func (v *Visitor) isManualConst(goName string) bool {
+	return isManualConstInPackage(v.pkg.Path(), goosOfTarget(v.options.targetPlatform), goName)
+}
+
+func isManualConstInPackage(pkgPath string, goos string, goName string) bool {
+	constScopes, ok := manualConversionConsts[resolveGorootVendoredPath(pkgPath)]
+
+	if !ok {
+		return false
+	}
+
+	scope, listed := constScopes[goName]
+
+	return listed && scope.includes(goos)
+}
+
 // isManualVar reports whether the package-level var is displaced by manualConversionVars for this
 // conversion's target.
 func (v *Visitor) isManualVar(goName string) bool {

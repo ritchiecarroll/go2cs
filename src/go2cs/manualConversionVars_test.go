@@ -26,6 +26,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -137,6 +138,196 @@ func TestManualConversionVarsAreDisplacedAndDeclared(t *testing.T) {
 
 			if addressed != 0 && !boxFound {
 				t.Errorf("%s.%s: Go takes its address %d times, and no hand-owned *_impl.cs under %s declares its Ꮡ%s box", pkg, name, addressed, packageDir, name)
+			}
+		}
+	}
+}
+
+// ---- manualConversionConsts: a package-level const displaced per target ------------------------------
+
+const manualConstFixture = `package mcc
+
+const ARCH string = "amd64"
+
+func IsArm() bool { return ARCH == "arm64" }
+`
+
+// convertManualConstFixture converts the fixture module for one target and returns its emission.
+func convertManualConstFixture(t *testing.T, target string) string {
+	t.Helper()
+	isolateConverterPathGlobals(t)
+
+	root := t.TempDir()
+	appDir := filepath.Join(root, "app")
+
+	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/mcc\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(appDir, "mcc.go"), manualConstFixture)
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{
+		goRoot:              goRoot,
+		goPath:              build.Default.GOPATH,
+		go2csPath:           filepath.Join(root, "out"),
+		recurse:             true,
+		targetPlatform:      target,
+		indentSpaces:        4,
+		preferVarDecl:       true,
+		useChannelOperators: true,
+	}
+
+	build.Default.GOROOT = options.goRoot
+	build.Default.GOPATH = options.goPath
+
+	if err := NewModuleConverter(options).ConvertModule(appDir); err != nil {
+		t.Fatalf("ConvertModule (%s): %v", target, err)
+	}
+
+	return readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "mcc", "mcc.cs"))
+}
+
+// TestAManualConstIsDisplacedOnlyOnItsTarget drives the real emission: a const registered for darwin
+// emits the placeholder there, and the ordinary declaration on every other target. The reference in the
+// function body is emitted either way, so the hand-owned member is what it reads.
+func TestAManualConstIsDisplacedOnlyOnItsTarget(t *testing.T) {
+	// Copy-on-write: the test installs its own registry and restores the original reference, so no
+	// other test can see the fixture entry or lose a real one.
+	original := manualConversionConsts
+	patched := make(map[string]map[string]goosScope, len(original)+1)
+
+	for pkg, names := range original {
+		patched[pkg] = names
+	}
+
+	patched["example.com/mcc"] = map[string]goosScope{"ARCH": goosDarwin}
+	manualConversionConsts = patched
+	t.Cleanup(func() { manualConversionConsts = original })
+
+	// The declaration's `=>` or `=`, never the first half of an `==` in a one-line body that reads it.
+	member := regexp.MustCompile(`(?m)^[ \t]*[^/\s][^\n]*\bstatic\b[^\n]*\bARCH\s*(=>|=[^=])`)
+
+	for _, c := range []struct {
+		target    string
+		displaced bool
+	}{
+		{"darwin/amd64", true},
+		{"linux/amd64", false},
+		{"windows/amd64", false},
+	} {
+		emitted := convertManualConstFixture(t, c.target)
+		placeholder := strings.Contains(emitted, "placeholder — const ARCH is hand-converted")
+		declared := member.MatchString(emitted)
+
+		if c.displaced && (!placeholder || declared) {
+			t.Errorf("%s: the registered const must be displaced (placeholder %v, member declared %v):\n%s", c.target, placeholder, declared, emitted)
+		}
+
+		if !c.displaced && (placeholder || !declared) {
+			t.Errorf("%s: outside its scope the const must be emitted as converted (placeholder %v, member declared %v):\n%s", c.target, placeholder, declared, emitted)
+		}
+
+		if !strings.Contains(emitted, `ARCH == "arm64"u8`) {
+			t.Errorf("%s: the body must still read the const by name:\n%s", c.target, emitted)
+		}
+	}
+}
+
+// TestManualConversionConstsAreDisplacedAndDeclared is the committed corpus's half: every registered
+// const is declared exactly once, alone, at package level in Go's source, and a hand-owned *_impl.cs in
+// each scoped flavour's folder declares the member that replaces it.
+func TestManualConversionConstsAreDisplacedAndDeclared(t *testing.T) {
+	if len(manualConversionConsts) == 0 {
+		t.Fatal("manualConversionConsts is empty: the guard is vacuous")
+	}
+
+	coreDir := filepath.Join("..", "core")
+
+	if _, err := os.Stat(coreDir); err != nil {
+		t.Skipf("corpus not present at %s: %v", coreDir, err)
+	}
+
+	for pkg, names := range manualConversionConsts {
+		goPkg, err := build.Default.Import(pkg, "", build.FindOnly)
+
+		if err != nil {
+			t.Fatalf("%s: cannot locate Go's source: %v", pkg, err)
+		}
+
+		fset := token.NewFileSet()
+		pkgs, err := parser.ParseDir(fset, goPkg.Dir, func(info os.FileInfo) bool {
+			return !strings.HasSuffix(info.Name(), "_test.go")
+		}, 0)
+
+		if err != nil {
+			t.Fatalf("%s: cannot parse Go's source: %v", pkg, err)
+		}
+
+		for name, scope := range names {
+			declared, alone := 0, true
+
+			for _, astPkg := range pkgs {
+				for _, file := range astPkg.Files {
+					for _, decl := range file.Decls {
+						gen, ok := decl.(*ast.GenDecl)
+
+						if !ok || gen.Tok != token.CONST {
+							continue
+						}
+
+						for _, spec := range gen.Specs {
+							valueSpec := spec.(*ast.ValueSpec)
+
+							for _, ident := range valueSpec.Names {
+								if ident.Name == name {
+									declared++
+									alone = alone && len(valueSpec.Names) == 1
+								}
+							}
+						}
+					}
+				}
+			}
+
+			if declared != 1 {
+				t.Errorf("%s.%s: Go's source declares the const %d times at package level, want exactly 1", pkg, name, declared)
+			}
+
+			if !alone {
+				t.Errorf("%s.%s: shares its const spec with other names; visitValueSpec refuses to split a spec", pkg, name)
+			}
+
+			if len(scope) == 0 {
+				t.Errorf("%s.%s: a displaced const needs a flavour scope, so the guard knows which folder supplies it", pkg, name)
+				continue
+			}
+
+			member := regexp.MustCompile(`(?m)^[ \t]*[^/\s][^\n]*\bstatic\b[^\n]*\b` + regexp.QuoteMeta(name) + `\s*(=>|\{|=|;)`)
+
+			for _, goos := range scope {
+				flavourDir := filepath.Join(coreDir, filepath.FromSlash(pkg), goos)
+				found := false
+
+				_ = filepath.WalkDir(flavourDir, func(path string, entry os.DirEntry, err error) error {
+					if err != nil || entry.IsDir() || !strings.HasSuffix(path, "_impl.cs") {
+						return nil
+					}
+
+					content, readErr := os.ReadFile(path)
+
+					if readErr == nil && strings.Contains(string(content), "GoManualConversion") {
+						found = found || member.Match(content)
+					}
+
+					return nil
+				})
+
+				if !found {
+					t.Errorf("%s.%s (%s): no hand-owned *_impl.cs under %s declares it; the displaced const has no destination", pkg, name, goos, flavourDir)
+				}
 			}
 		}
 	}

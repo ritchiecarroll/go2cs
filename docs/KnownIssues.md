@@ -12,34 +12,45 @@ variable declared with a two-argument `//go:linkname`.
 [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) describes the cases and the
 workarounds.
 
-## On Apple silicon, `runtime.GOARCH` reports `amd64`
+## On Apple silicon, the standard library is the `amd64` build {#on-apple-silicon-runtimegoarch-reports-amd64}
 
 The packages ship for four platforms: `win-x64`, `linux-x64`, `osx-x64` and `osx-arm64`. The converted standard library
 for macOS is built once, for `darwin/amd64`, and the same packages serve Intel and Apple-silicon Macs. On an
-Apple-silicon Mac a converted program runs as a native arm64 .NET process, but it reports the architecture it was
-converted for:
-- `runtime.GOARCH` reads `amd64`, where Go's own program on the same Mac reads `arm64`, and so does the `GOARCH`
-  setting that `debug.ReadBuildInfo` returns;
-- anything Go decides by architecture at build time follows `amd64` too. Go's `_arm64.go` files are not in the
-  packages, and a branch on `runtime.GOARCH == "arm64"` is never taken.
+Apple-silicon Mac a converted program runs as a native arm64 .NET process:
+- `runtime.GOARCH` reads `arm64`, as Go's own program on the same Mac does. It is read from the process when the
+  program starts, and the `GOARCH` setting that `debug.ReadBuildInfo` returns and `go/build`'s default context
+  follow it;
+- everything Go decides by architecture at build time still follows `amd64`. Go's `_arm64.go` files are not in the
+  packages, `internal/goarch` reports `amd64`, and a constant Go computes from the architecture keeps its `amd64`
+  value.
 
-The processor features that the standard library reads at run time come from the real processor, so `crypto/tls`, for
-one, prefers AES-GCM on Apple silicon as Go does there. On the other three platforms the report is correct.
+So the converted runtime reads `runtime.GOARCH` as `arm64` beside `goarch.GOARCH` as `amd64` on the same Mac. That
+asymmetry is deliberate: each runtime branch on `GOARCH` was checked and reads correctly on Apple silicon. The
+processor features that the standard library reads at run time come from the real processor, so `crypto/tls`, for
+one, prefers AES-GCM on Apple silicon as Go does there.
 
-**To avoid it**, do not use `runtime.GOARCH` to learn the machine's architecture on macOS. From C#,
-`System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture` reports `Arm64` on Apple silicon.
+**To avoid it**, rely on `runtime.GOARCH` for the machine's architecture, never on the presence of an
+architecture-specific path in the standard library.
 <!-- Source: BOARD 2026-11-05 (C1, master reds seat), "runtime.GOARCH reads amd64 on Apple silicon", with its two
      2026-11-06 amendments. Measured on the GitHub-hosted osx-arm64 runner: master's darwin osx-arm64 behavioral red
      (run 41964964302, BuildInfoSettings, stdout mismatch C# vs Go); osx-x64, linux and windows agree because their host
      is amd64. Constants, read at master 72043c1a66 on 2026-11-08, the same in all three flavours:
      src/core/runtime/windows/extern.cs:375 (`GOARCHᵇ = "amd64";`), src/core/runtime/linux/extern.cs:375
-     (`GOARCHᵇ = "amd64";`) and src/core/runtime/darwin/extern.cs:375 (`GOARCHᵇ = "amd64";`);
+     (`GOARCHᵇ = "amd64";`) and, until the run-time GOARCH seat of 2026-11-09, darwin's extern.cs at the same line;
      src/core/internal/goarch/zgoarch_amd64.cs (GOARCH "amd64", IsAmd64 1, IsArm64 0) is the only zgoarch file; and no
      *_arm64.cs file exists anywhere under src/core. debug.ReadBuildInfo's GOARCH setting is composed from runtime.GOARCH
      (src/core/runtime/debug/stubs_impl.cs:199 (`GoModInfoAttribute.Compose(…runtime_package.GOARCH.ToString()`)). The run-time feature read is batch 216
      (C1, claude/c1-aes-arm64): internal/cpu's ARM64 flags are filled on an arm64 process, so crypto/tls's
      hasGCMAsmARM64 holds. Open and owned after 1.26.10.3: the BOARD row's fix shapes (a run-time GOARCH for the shared
      darwin flavour, with its census of compile-time GOARCH branches, or a per-architecture darwin build). -->
+<!-- Amended 2026-11-09 (G, the run-time GOARCH seat, claude/g-goarch-runtime): the first fix shape landed, for darwin
+     only. The heading was "On Apple silicon, `runtime.GOARCH` reports `amd64`"; its old id is kept explicitly, because
+     NEWS.md (1.26.10.3) links it. runtime.GOARCH and internal/buildcfg's defaultGOARCH are displaced for darwin
+     (src/go2cs/manualTypeOperations.go manualConversionConsts) and read the process architecture
+     (src/core/runtime/darwin/goarch_darwin_impl.cs, src/core/internal/buildcfg/darwin/zbootstrap_darwin_impl.cs).
+     The census of record: docs/phase4/DESIGN-comparator-arms.md §5, layer 2, plus census E (consts folded from
+     runtime.GOARCH: defaultGOARCH incoherent, 4 inert or equivalent). The linux and windows flavours still read amd64 on an
+     arm64 host (BOARD 2026-11-09), and no package ships for those. -->
 
 ## On macOS, a `go` statement past the system's thread limit ends the program
 

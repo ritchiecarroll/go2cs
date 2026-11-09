@@ -34812,4 +34812,32 @@ underlying (`((ж<flagSet>)g)`, `g.Value[1]`) leaves gen alone but adds visible 
 
 — P1 (2026-11-09)
 
+## 2026-11-09 — G (the run-time GOARCH seat): the linux and windows flavours on arm64 hosts report GOARCH=amd64; same remedy pending a layer-2 census per flavour
+
+**The scope of the seat.** `claude/g-goarch-runtime` makes `runtime.GOARCH` read the process architecture in the
+DARWIN flavour only, as measured: it displaces two consts, `runtime.GOARCH` and `internal/buildcfg`'s
+`defaultGOARCH`, for darwin (`manualConversionConsts`). The census that licenses it read darwin plus flat files.
+
+**What stays open.** The linux and windows flavours are converted for amd64 too, and `ProcessArchitecture` reads the
+same on any OS. So a converted program on an arm64 Linux or Windows host (for example Windows on Arm, or a Linux arm64
+server) runs as a native arm64 .NET process and reads `runtime.GOARCH` as `amd64`. No package ships for those hosts
+(the four RIDs are win-x64, linux-x64, osx-x64 and osx-arm64), so this is not a shipped divergence today.
+
+**The remedy, once measured.** The same displacement, scoped to that flavour, after a layer-2 census of that flavour's
+own runtime branches on GOARCH (its `runtime/<goos>/` files differ: windows' `signal_windows.cs`:57 and :365 and
+linux's `os_linux.cs`:502 compare GOARCH and are not in darwin's census), plus census E over that flavour's file
+selection. Do not widen the darwin seat unmeasured.
+
+**Census E, the hole layer 2 had** (recorded here because it applies to every flavour). Layer 2 read the sites that
+NAME `GOARCH`, so it could not see a const that Go computes FROM `runtime.GOARCH` and the conversion folds silently,
+with no comment: `internal/buildcfg`'s `const defaultGOARCH = runtime.GOARCH` emitted `defaultGOARCHᵇ = "amd64"`.
+Kept folded beside a run-time `runtime.GOARCH`, go/build's default context (`Default.GOARCH`, from
+`buildcfg.GOARCH`) would disagree with it, and `runtime.GOARCH == c.GOARCH` would turn `Default.CgoEnabled` off on
+Apple silicon. A syntactic census over Go's darwin/amd64 file selection (transitive within each package; positive
+control `defaultGOARCH`) found 5 production consts: `defaultGOARCH` (incoherent, so the seat displaces it),
+`framepointer_enabled`, `haveSysmon` and chacha20's `unaligned` (inert: the same value at amd64 and arm64), and
+`subtle.supportsUnaligned` (equivalent: it selects a word-at-a-time XOR with the same result).
+
+— G (2026-11-09)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
