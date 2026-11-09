@@ -34490,6 +34490,24 @@ near 0.15 to 0.30 us under both arms, from the P-384 body's 0.54 to 0.69 us scal
 
 — H (2026-11-07)
 
+**Amended 2026-11-08 — the sub-finding is CUT as COORD ruling (A), on claude/h-certchain-keepalive: the five holds land, with no GolibTests arm.** The red arm the shape above called for cannot be built safely, because crypt32 rejects every context it did not allocate, and Go does too. Measured on H, Windows:
+
+| Input to CertAddCertificateContextToStore | Converted (Release) | Go 1.26.10 |
+|---|---|---|
+| The context crypt32 issued (CertCreateCertificateContext) | OK | OK |
+| Caller-built `CertContext`, `CertInfo` nil, ADD_ALWAYS | 0xC0000005 returned as the error | the same error |
+| Caller-built, `CertInfo` borrowed from the issued context | 0xC0000005 | the same error |
+| Caller-built, borrowed `CertInfo`, ADD_REPLACE_EXISTING | 0xC0000005 | not run |
+| Caller-built, `CertInfo` nil, ADD_REPLACE_EXISTING, Debug | the test host crashed (once) | not run |
+
+The deep copy is right: the DER field encodes to the managed array's pinned address, and `CertInfo` to the native address it was given. crypt32 refuses the struct because it did not allocate it. So the fallback is reachable only by inputs crypt32 rejects under Go too, and no valid program reaches it. The one difference the missing hold made was a GC-timed panic ("no longer resolves to a live value") where Go returns crypt32's error. The holds make that Go-faithful. A red arm would have to feed crypt32 thousands of invalid contexts under a GC hammer, and one shape already crashed the Debug host, so none is built.
+
+**Not double-fixed with C2's class.** None of the five calls sits in a file C2's converter fix reaches: the converter never regenerates a `*_impl.cs`, and `src/syscall-keepalive-census.ps1`'s converted-emission arm skips `*_impl.cs`.
+
+**FOLLOW-UP for C2's census (not widened here):** its hand-owned arm lists four files by name and matches `(uintptr)Ꮡx`, so it cannot see this file's `nativeIdentityOf(Ꮡx)` shape. Widening the pattern, and listing `syscall\windows\zsyscall_windows_certchain_impl.cs`, would make these five holds re-checkable.
+
+— H (2026-11-08)
+
 ## 2026-11-07 — P2 (claude/p2-gojq-constraint-typeset): a named string or []byte type argument cannot satisfy IByteSeq — KNOWN LIMIT
 
 A type parameter whose type set is the unnamed `string` and `[]byte`, with or without `~` and written inline or

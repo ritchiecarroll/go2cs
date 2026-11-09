@@ -273,6 +273,14 @@ partial class syscall_package
     // built answers from the table; anything else -- CertCreateCertificateContext's native box, or a
     // nil pointer -- answers with its own address exactly as the generated wrapper would, which is
     // what keeps the un-hand-owned producers working.
+    //
+    // Every caller holds the box across its crypt32 call (GC.KeepAlive after the call), the emitted
+    // funnel sites' own contract (dll_windows.cs). A box that is neither a view nor native -- a
+    // CertContext or CertChainContext the caller built itself -- is reference-bearing, so the fallback
+    // answers a weakly registered order TOKEN, and a collection between this mint and CallDeep's
+    // resolve would lose it: a GC-timed panic where Go returns crypt32's error. crypt32 rejects such a
+    // context under Go too (0xC0000005, measured on Windows 2026-11-08), so the hold buys fidelity
+    // for an invalid input, never a working path.
     private static uintptr nativeIdentityOf<T>(ж<T> box) {
         if (box is not null && s_nativeIdentity.TryGetValue(box, out object? remembered)) {
             return (uintptr)(nuint)remembered;
@@ -346,6 +354,7 @@ partial class syscall_package
             }
 
             var (r1, _, e1) = Syscall9(procCertGetCertificateChain.Addr(), 8, (uintptr)engine, nativeIdentityOf(Ꮡleaf), (uintptr)(void*)timePtr, (uintptr)additionalStore, (uintptr)(void*)paraPtr, (uintptr)flags, (uintptr)reserved, cellAddr, 0);
+            GC.KeepAlive(Ꮡleaf);
 
             if (r1 == 0) {
                 return errnoErr(e1);
@@ -385,6 +394,7 @@ partial class syscall_package
         uintptr cellAddr = ᏑstoreContext == nil ? 0 : (uintptr)(void*)(&cell);
 
         var (r1, _, e1) = Syscall6(procCertAddCertificateContextToStore.Addr(), 4, (uintptr)store, nativeIdentityOf(ᏑcertContext), (uintptr)addDisposition, cellAddr, 0, 0);
+        GC.KeepAlive(ᏑcertContext);
 
         if (r1 == 0) {
             return errnoErr(e1);
@@ -409,6 +419,7 @@ partial class syscall_package
     // point on, which is exactly the lifetime Go gives the pointer it just released.
     public static error /*err*/ CertFreeCertificateContext(ж<CertContext> Ꮡctx) {
         var (r1, _, e1) = Syscall(procCertFreeCertificateContext.Addr(), 1, nativeIdentityOf(Ꮡctx), 0, 0);
+        GC.KeepAlive(Ꮡctx);
 
         if (r1 == 0) {
             return errnoErr(e1);
@@ -419,6 +430,7 @@ partial class syscall_package
 
     public static void CertFreeCertificateChain(ж<CertChainContext> Ꮡctx) {
         Syscall(procCertFreeCertificateChain.Addr(), 1, nativeIdentityOf(Ꮡctx), 0, 0);
+        GC.KeepAlive(Ꮡctx);
     }
 
     // CertVerifyCertificateChainPolicy(policyOID, chainContext, para, &status). All three concerns
@@ -482,6 +494,7 @@ partial class syscall_package
             }
 
             var (r1, _, e1) = Syscall6(procCertVerifyCertificateChainPolicy.Addr(), 4, policyOID, nativeIdentityOf(Ꮡchain), (uintptr)(void*)paraPtr, (uintptr)(void*)statusPtr, 0, 0);
+            GC.KeepAlive(Ꮡchain);
 
             if (r1 == 0) {
                 return errnoErr(e1);
