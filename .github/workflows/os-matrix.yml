@@ -62,7 +62,7 @@ on:
           - golib-tests
           - stack-probe
       filter:
-        description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s). Options on any other stage are refused.'
+        description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s), sweep-shard ROWS;dnscap=on (darwin only, never banks: a tcpdump of UDP port 53 for the whole sweep, summarized as DNSCAP lines). Options on any other stage are refused.'
         type: string
         required: false
         default: ''
@@ -160,6 +160,7 @@ jobs:
       probe-test: ${{ steps.derive.outputs.probe-test }}
       probe-at: ${{ steps.derive.outputs.probe-at }}
       jit-disasm: ${{ steps.derive.outputs.jit-disasm }}
+      dns-capture: ${{ steps.derive.outputs.dns-capture }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -208,8 +209,8 @@ jobs:
           # dispatch form's input count is guarded (Test-NugetgoBehaviorProof.ps1), and these are options OF those two
           # stages. golib-tests: jit=PATTERN. stack-probe: test=REGEX (required), at=S,S. An unknown or repeated key, an
           # empty value, or any option on any other stage FAILS the plan by name rather than being ignored.
-          $probeTest = ''; $probeAt = ''; $jitDisasm = ''
-          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } })
+          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsCapture = ''
+          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dnscap' } })
           if ($optionKeys.Count) {
               $parts = @($filter -split ';')
               $filter = $parts[0].Trim()
@@ -232,8 +233,16 @@ jobs:
                   Write-Host "stack-probe: row $filter, -TestFilter $probeTest, dumps at $probeAt s"
               }
               if ($jitDisasm) { Write-Host "golib-tests: JIT listing for '$jitDisasm' (tiering off)" }
+              # sweep-shard dnscap=on (darwin only, never banks): tcpdump records every UDP port-53 packet while the rows
+              # sweep, and .github/dns-capture-summary.ps1 matches each query to its answer (net's NXDOMAIN keys).
+              if ($seen.ContainsKey('dnscap')) {
+                  if ($seen['dnscap'] -ne 'on') { throw "sweep-shard filter option dnscap= takes only 'on'; got '$($seen['dnscap'])'." }
+                  if ($goos -ne 'darwin') { throw "sweep-shard filter option dnscap=on is darwin's (tcpdump through sudo on the mac runners); got goos '$goos'." }
+                  $dnsCapture = 'on'
+                  Write-Host "sweep-shard: DNS capture on (udp port 53, the whole sweep)"
+              }
           }
-          elseif ($filter -match '(^|;)\s*(jit|test|at)\s*=') { throw "filter options (;key=value) apply to stages golib-tests and stack-probe only; got stage '$stage' and filter '$filter'." }
+          elseif ($filter -match '(^|;)\s*(jit|test|at|dnscap)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe and sweep-shard only; got stage '$stage' and filter '$filter'." }
 
           # The behavioral stages' per-program run budget. A schedule has no inputs and keeps 120, as
           # does a blank dispatch. A value that is not a whole number of seconds in 1..1800 FAILS the
@@ -441,6 +450,7 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "probe-test=$probeTest" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "probe-at=$probeAt" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "jit-disasm=$jitDisasm" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "dns-capture=$dnsCapture" -Encoding utf8
 
   # ---------------------------------------------------------------------------------------------
   # pack — release-smoke only: the release's own pack, as a rehearsal, on a hosted Windows runner.
@@ -1511,6 +1521,31 @@ jobs:
       # -------------------------------------------------------------------------------------
       # sweep-shard — a filtered validated sweep against `go test -json` on this platform.
       # -------------------------------------------------------------------------------------
+      # dnscap=on (darwin): a tcpdump of UDP port 53 for the whole sweep, read by the summary step after it. A control
+      # query made here, after the capture starts, proves the instrument: the summary says whether it holds it. The
+      # capture runs under sudo (passwordless on the hosted mac runners) and is stopped by the PID recorded here.
+      - name: DNS capture — start (dnscap=on)
+        if: needs.plan.outputs.stage == 'sweep-shard' && needs.plan.outputs.dns-capture == 'on' && runner.os == 'macOS'
+        shell: bash
+        run: |
+          cap="$RUNNER_TEMP/dnscap"
+          mkdir -p "$cap"
+          # pktap with -k NP stamps each packet with its process; a tcpdump that refuses it falls back to the default
+          # interface without process names.
+          sudo -n tcpdump -i pktap,all -k NP -n -tt -l 'udp port 53' > "$cap/capture.txt" 2> "$cap/tcpdump.err" &
+          echo $! > "$cap/pid"
+          sleep 3
+          if ! kill -0 "$(cat "$cap/pid")" 2>/dev/null; then
+            echo "DNSCAP pktap capture did not start: $(tr '\n' ' ' < "$cap/tcpdump.err")"
+            sudo -n tcpdump -n -tt -l 'udp port 53' > "$cap/capture.txt" 2> "$cap/tcpdump.err" &
+            echo $! > "$cap/pid"
+            sleep 3
+          fi
+          echo "DNSCAP tcpdump: $(head -c 300 "$cap/tcpdump.err" | tr '\n' ' ')"
+          scutil --dns | grep -E '^resolver|nameserver' | head -12 | sed 's/^/DNSCAP scutil: /'
+          dig +time=3 +tries=1 MX go2cs-dnscap-control.invalid > /dev/null 2>&1 || true
+          sleep 1
+
       - name: Sweep shard — filtered validated sweep
         if: needs.plan.outputs.stage == 'sweep-shard'
         shell: pwsh
@@ -1742,6 +1777,31 @@ jobs:
           & ./.github/annotate-summary.ps1 -Title "sweep $goos/$rid" -Lines $summary
 
           exit $sweepExit
+
+      # dnscap=on: stop the capture by the PID its start step recorded, summarize it (DNSCAP lines, in the log and as
+      # annotations), and keep the raw capture with the leg's artifacts. Runs whatever the sweep's verdict.
+      - name: DNS capture — stop and summarize (dnscap=on)
+        if: always() && needs.plan.outputs.stage == 'sweep-shard' && needs.plan.outputs.dns-capture == 'on' && runner.os == 'macOS'
+        shell: pwsh
+        run: |
+          $cap = Join-Path $env:RUNNER_TEMP 'dnscap'
+          $pidFile = Join-Path $cap 'pid'
+
+          if (Test-Path -LiteralPath $pidFile) {
+              $capturePid = (Get-Content -LiteralPath $pidFile -Raw).Trim()
+              & sudo -n kill -INT $capturePid
+              Start-Sleep -Seconds 3
+          }
+
+          $lines = @(& ./.github/dns-capture-summary.ps1 -Path (Join-Path $cap 'capture.txt') -ControlName 'go2cs-dnscap-control.invalid')
+          $lines | ForEach-Object { Write-Host $_ }
+
+          $art = Join-Path $PWD 'artifacts/dnscap'
+          New-Item -ItemType Directory -Force -Path $art | Out-Null
+          Copy-Item -Path (Join-Path $cap '*') -Destination $art -Force -ErrorAction SilentlyContinue
+          Set-Content -LiteralPath (Join-Path $art 'summary.txt') -Value $lines -Encoding utf8
+
+          & ./.github/annotate-summary.ps1 -Title "dnscap $($env:GOOS_TARGET)/$($env:RID)" -Lines $lines
 
       # -------------------------------------------------------------------------------------
       # release-smoke — consume the pack job's feed the way a user does, on this leg's host.
