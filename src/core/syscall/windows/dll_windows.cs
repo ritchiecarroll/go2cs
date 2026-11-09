@@ -227,16 +227,17 @@ private static unsafe (nuint r, int lastError) callNative(nuint fn, ReadOnlySpan
     nuint r;
     int lastError;
 
-    // A system call, as Go's cgocall enters one: a returning main reads this goroutine as not runnable while it is
-    // inside (golib Goroutine's main-return marks). Every SyscallN arity, and NativeStructMarshal.CallDeep, come
-    // through here.
+    // A system call, entered as Go's syscall_SyscallN -> cgocall enters one: the runtime's entersyscall family moves
+    // the g status to _Gsyscall and enters golib's transition seam, GoNativeCall (docs/phase4/DESIGN-native-call-seam.md
+    // §12.2; COORD's Q2 ruling: one path per transition). Every SyscallN arity, and NativeStructMarshal.CallDeep,
+    // come through here.
     if (a.Length > MaxSyscallArgs) {
         throw new ArgumentOutOfRangeException(nameof(a), "too many syscall arguments");
     }
 
     Marshal.SetLastSystemError(0);
 
-    global::go.golib.Goroutine.EnterBlocked();
+    runtime_package.syscallEntersyscall();
 
     try {
         switch (a.Length) {
@@ -266,7 +267,7 @@ private static unsafe (nuint r, int lastError) callNative(nuint fn, ReadOnlySpan
         lastError = Marshal.GetLastSystemError();
     }
     finally {
-        global::go.golib.Goroutine.ExitBlocked();
+        runtime_package.syscallExitsyscall();
     }
 
     return (r, lastError);
@@ -287,21 +288,47 @@ public static unsafe (uintptr handle, Errno err) loadsystemlibrary(ж<uint16> fi
 }
 
 private static unsafe (uintptr handle, Errno err) loadLibraryImpl(ж<uint16> filename, uint flags) {
-    IntPtr h = win32LoadLibraryEx(new string((char*)(void*)filename), IntPtr.Zero, flags);
+    string name = new string((char*)(void*)filename);
+    IntPtr h;
+    int lastError;
+
+    // Go's syscall_loadlibrary reaches the loader through cgocall, so it is a system call: entersyscall around it,
+    // and the last error read inside the window (DESIGN-native-call-seam §4.3).
+    runtime_package.syscallEntersyscall();
+
+    try {
+        h = win32LoadLibraryEx(name, IntPtr.Zero, flags);
+        lastError = Marshal.GetLastSystemError();
+    }
+    finally {
+        runtime_package.syscallExitsyscall();
+    }
 
     if (h == IntPtr.Zero) {
-        return (0, (Errno)(uint32)Marshal.GetLastSystemError());
+        return (0, (Errno)(uint32)lastError);
     }
 
     return ((uintptr)(nuint)h, 0);
 }
 
 public static unsafe (uintptr proc, Errno err) getprocaddress(uintptr handle, ж<uint8> procname) {
-    // Go's own argument, unchanged: the caller's NUL-terminated byte buffer, passed through.
-    IntPtr p = win32GetProcAddress((IntPtr)(nint)(nuint)handle.Value, (byte*)(void*)procname);
+    // Go's own argument, unchanged: the caller's NUL-terminated byte buffer, passed through. A system call, as
+    // loadLibraryImpl's is.
+    IntPtr p;
+    int lastError;
+
+    runtime_package.syscallEntersyscall();
+
+    try {
+        p = win32GetProcAddress((IntPtr)(nint)(nuint)handle.Value, (byte*)(void*)procname);
+        lastError = Marshal.GetLastSystemError();
+    }
+    finally {
+        runtime_package.syscallExitsyscall();
+    }
 
     if (p == IntPtr.Zero) {
-        return (0, (Errno)(uint32)Marshal.GetLastSystemError());
+        return (0, (Errno)(uint32)lastError);
     }
 
     return ((uintptr)(nuint)p, 0);
