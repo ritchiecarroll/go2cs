@@ -48,6 +48,7 @@
     <Compile Remove="LinuxSigpipeTests.cs" />
     <Compile Remove="LinuxSyscallClockTests.cs" />
     <Compile Remove="LinuxSyscallTransitionTests.cs" />
+    <Compile Remove="LinuxCgocallerTransitionTests.cs" />
     <Compile Remove="LibcCallDispatchTests.cs" />
     <Compile Remove="DarwinSigmaskContractTests.cs" />
     <Compile Remove="DarwinSigactionContractTests.cs" />
