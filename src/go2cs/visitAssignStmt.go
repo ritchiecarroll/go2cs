@@ -2186,6 +2186,20 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 							}
 						}
 
+						// A VARIADIC func literal (`writeFormat := func(format string, args ...any)
+						// {…}`) declares with golib's variadic delegate family for the same reason: its
+						// lambda's `params ꓸꓸꓸT` tail gives `var` an anonymous natural delegate type that
+						// converts to no Actionꓸꓸꓸ / Funcꓸꓸꓸ parameter, field or later reassignment
+						// (CS1503, gotest.tools' format.UnifiedDiff). A literal that is only ever called
+						// is a local function (localFunctionDefine) and never reaches here.
+						if methodGroupDelegateType == "" && !isDiscarded && !v.isReassignment(ident) {
+							if _, isFuncLit := ast.Unparen(rhs).(*ast.FuncLit); isFuncLit {
+								if sig, ok := v.getExprType(rhs).(*types.Signature); ok && sig.Variadic() && sig.Params().Len() > 0 {
+									methodGroupDelegateType = v.iifeDelegateType(sig)
+								}
+							}
+						}
+
 						// A string-underlying LHS always declares with its EXPLICIT type: `var`
 						// would infer ReadOnlySpan<byte> from a u8 literal, and the explicit form
 						// preserves a NAMED string type (`goVersion fileVersion = asGoVersion(…)`,
