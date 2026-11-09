@@ -1513,6 +1513,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedStringDefine() => CheckTarget("NamedStringDefine");
 
     [TestMethod]
+    public void CheckNamedStringIndexCompare() => CheckTarget("NamedStringIndexCompare");
+
+    [TestMethod]
     public void CheckNamedStringOps() => CheckTarget("NamedStringOps");
 
     [TestMethod]

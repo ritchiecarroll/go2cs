@@ -823,6 +823,7 @@
     <Project Path="tests/Behavioral/NamedStringConversion/NamedStringConversion.csproj" />
     <Project Path="tests/Behavioral/NamedStringConsts/NamedStringConsts.csproj" />
     <Project Path="tests/Behavioral/NamedStringDefine/NamedStringDefine.csproj" />
+    <Project Path="tests/Behavioral/NamedStringIndexCompare/NamedStringIndexCompare.csproj" />
     <Project Path="tests/Behavioral/NamedStringOps/NamedStringOps.csproj" />
     <Project Path="tests/Behavioral/NamedStringSliceConcatBoxing/NamedStringSliceConcatBoxing.csproj" />
     <Project Path="tests/Behavioral/NamedStringZeroValue/NamedStringZeroValue.csproj" />
