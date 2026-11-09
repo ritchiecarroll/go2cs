@@ -1447,6 +1447,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedPointerFieldAddress() => CheckTarget("NamedPointerFieldAddress");
 
     [TestMethod]
+    public void CheckNamedPointerParamArgument() => CheckTarget("NamedPointerParamArgument");
+
+    [TestMethod]
     public void CheckNamedPointerReflectElem() => CheckTarget("NamedPointerReflectElem");
 
     [TestMethod]

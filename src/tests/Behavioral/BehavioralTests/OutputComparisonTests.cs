@@ -1397,6 +1397,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedPointerFieldAddress() => CheckTarget("NamedPointerFieldAddress");
 
     [TestMethod]
+    public void CheckNamedPointerParamArgument() => CheckTarget("NamedPointerParamArgument");
+
+    [TestMethod]
     public void CheckNamedPointerReflectElem() => CheckTarget("NamedPointerReflectElem");
 
     [TestMethod]
