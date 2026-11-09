@@ -1,0 +1,33 @@
+canpark std goos=windows exclude-runtime=true long-only=true static-only=true
+FUNCTIONS 15702 can-park 597 share 3.8% (direct parkers 117)
+DIRECT BY LEAF map[chan-recv:61 chan-send:57 netpoll-wait:2 select:61 sync-cond:1 sync-wait:1 time-sleep:6]
+CLOSURES 1481 can-park 114
+GO STATEMENTS 118 can-park 66 unresolved 0
+INTERFACE CALLS 3944 can-park 260 unresolved 508
+FUNC-VALUE CALLS 2200 can-park 51 unresolved 360
+PACKAGES 310; top 25 by can-park:
+  net                                         185 /    582   31.8%
+  net/http                                    125 /   1144   10.9%
+  crypto/tls                                   44 /    384   11.5%
+  internal/poll                                29 /    110   26.4%
+  testing                                      25 /    179   14.0%
+  internal/fuzz                                21 /    136   15.4%
+  database/sql                                 19 /    180   10.6%
+  net/smtp                                     17 /     29   58.6%
+  vendor/golang.org/x/net/nettest              13 /     33   39.4%
+  net/http/httputil                            12 /     60   20.0%
+  os                                           12 /    323    3.7%
+  crypto/internal/cryptotest                   11 /     22   50.0%
+  net/http/httptest                             9 /     30   30.0%
+  net/rpc                                       9 /     52   17.3%
+  os/exec                                       7 /     43   16.3%
+  net/http/pprof                                6 /     15   40.0%
+  go/build                                      5 /     62    8.1%
+  go/importer                                   5 /      7   71.4%
+  net/textproto                                 5 /     56    8.9%
+  go/internal/srcimporter                       4 /      8   50.0%
+  io                                            4 /     52    7.7%
+  internal/trace/traceviewer                    3 /     53    5.7%
+  go/internal/gccgoimporter                     2 /     65    3.1%
+  internal/singleflight                         2 /      4   50.0%
+  internal/testenv                              2 /     40    5.0%

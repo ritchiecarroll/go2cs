@@ -1,0 +1,33 @@
+canpark std goos=windows exclude-runtime=true long-only=true static-only=false
+FUNCTIONS 15702 can-park 5223 share 33.3% (direct parkers 117)
+DIRECT BY LEAF map[chan-recv:61 chan-send:57 netpoll-wait:2 select:61 sync-cond:1 sync-wait:1 time-sleep:6]
+CLOSURES 1481 can-park 681
+GO STATEMENTS 118 can-park 105 unresolved 0
+INTERFACE CALLS 3944 can-park 974 unresolved 508
+FUNC-VALUE CALLS 2200 can-park 639 unresolved 360
+PACKAGES 310; top 25 by can-park:
+  net/http                                    582 /   1144   50.9%
+  go/types                                    442 /    795   55.6%
+  net                                         241 /    582   41.4%
+  crypto/tls                                  209 /    384   54.4%
+  os                                          126 /    323   39.0%
+  encoding/gob                                121 /    240   50.4%
+  go/parser                                   111 /    119   93.3%
+  database/sql                                106 /    180   58.9%
+  testing                                      96 /    179   53.6%
+  internal/trace                               91 /    192   47.4%
+  crypto/x509                                  90 /    197   45.7%
+  math/big/internal/asmgen                     81 /    111   73.0%
+  math/big                                     79 /    298   26.5%
+  html/template                                78 /    148   52.7%
+  fmt                                          68 /    131   51.9%
+  text/template                                68 /    116   58.6%
+  log/slog                                     67 /    161   41.6%
+  text/template/parse                          66 /    208   31.7%
+  go/internal/gccgoimporter                    61 /     65   93.8%
+  flag                                         57 /    122   46.7%
+  time                                         56 /    198   28.3%
+  go/printer                                   55 /     94   58.5%
+  internal/pkgbits                             53 /     77   68.8%
+  encoding/xml                                 50 /     98   51.0%
+  internal/fuzz                                46 /    136   33.8%

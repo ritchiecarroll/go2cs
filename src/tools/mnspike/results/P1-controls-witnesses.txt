@@ -1,0 +1,22 @@
+# controls, upper bound (VTA), windows, long-only
+WHY strings.ToUpper: CANNOT PARK
+WHY strconv.Itoa: CANNOT PARK
+WHY sort.Ints: CANNOT PARK
+WHY (*sync.WaitGroup).Wait: CAN PARK via [sync-wait]; path: (*sync.WaitGroup).Wait
+WHY (*net/http.conn).serve: CAN PARK via [time-sleep]; path: (*net/http.conn).serve -[static]-> (*net/http.conn).closeWriteAndWait
+WHY (*os.File).Read: CAN PARK via [netpoll-wait]; path: (*os.File).Read -[static]-> (*os.File).read -[static]-> (*internal/poll.FD).Read -[static]-> (*internal/poll.FD).execIO -[static]-> (*internal/poll.FD).waitIO -[static]-> (*internal/poll.pollDesc).wait
+WHY fmt.Sprintf: CAN PARK via [select chan-recv]; path: fmt.Sprintf -[static]-> (*fmt.pp).doPrintf -[static]-> (*fmt.pp).printArg -[static]-> (*fmt.pp).handleMethods -[interface]-> (*internal/trace/internal/tracev1.Event).String -[static]-> fmt.Fprintf -[interface]-> (*io.PipeWriter).Write -[static]-> (*io.pipe).write
+WHY go/parser.ParseFile: CAN PARK via [chan-recv]; path: go/parser.ParseFile -[static]-> go/parser.readSource -[static]-> io.ReadAll -[interface]-> (*io.multiReader).Read -[interface]-> (net/http.finishAsyncByteRead).Read
+WHY io.Copy: CAN PARK via [chan-recv]; path: io.Copy -[static]-> io.copyBuffer -[interface]-> (net/http.finishAsyncByteRead).Read
+WHY io.ReadAll: CAN PARK via [chan-recv]; path: io.ReadAll -[interface]-> (*io.multiReader).Read -[interface]-> (net/http.finishAsyncByteRead).Read
+# controls, lower bound (static-only), windows, long-only
+WHY strings.ToUpper: CANNOT PARK
+WHY strconv.Itoa: CANNOT PARK
+WHY sort.Ints: CANNOT PARK
+WHY (*sync.WaitGroup).Wait: CAN PARK via [sync-wait]; path: (*sync.WaitGroup).Wait
+WHY (*net/http.conn).serve: CAN PARK via [time-sleep]; path: (*net/http.conn).serve -[static]-> (*net/http.conn).closeWriteAndWait
+WHY (*os.File).Read: CAN PARK via [netpoll-wait]; path: (*os.File).Read -[static]-> (*os.File).read -[static]-> (*internal/poll.FD).Read -[static]-> (*internal/poll.FD).execIO -[static]-> (*internal/poll.FD).waitIO -[static]-> (*internal/poll.pollDesc).wait
+WHY fmt.Sprintf: CANNOT PARK
+WHY go/parser.ParseFile: CANNOT PARK
+WHY io.Copy: CANNOT PARK
+WHY io.ReadAll: CANNOT PARK

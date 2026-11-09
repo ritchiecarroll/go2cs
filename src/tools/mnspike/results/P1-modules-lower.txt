@@ -1,0 +1,33 @@
+canpark github.com/itchyny/gojq github.com/itchyny/timefmt-go goos=windows exclude-runtime=true long-only=true static-only=true
+FUNCTIONS 4396 can-park 48 share 1.1% (direct parkers 7)
+DIRECT BY LEAF map[chan-recv:2 chan-send:1 netpoll-wait:2 select:3 sync-cond:1 sync-wait:1]
+CLOSURES 333 can-park 1
+GO STATEMENTS 4 can-park 1 unresolved 2
+INTERFACE CALLS 613 can-park 15 unresolved 124
+FUNC-VALUE CALLS 448 can-park 1 unresolved 140
+PACKAGES 65; top 25 by can-park:
+  internal/poll                                29 /    110   26.4%
+  os                                           12 /    323    3.7%
+  io                                            4 /     52    7.7%
+  sync                                          2 /     58    3.4%
+  context                                       1 /     45    2.2%
+  bytes                                         0 /    116    0.0%
+  cmp                                           0 /      4    0.0%
+  encoding/base64                               0 /     22    0.0%
+  encoding/json                                 0 /    157    0.0%
+  errors                                        0 /     12    0.0%
+  fmt                                           0 /    131    0.0%
+  github.com/itchyny/gojq                       0 /    425    0.0%
+  github.com/itchyny/timefmt-go                 0 /     21    0.0%
+  internal/abi                                  0 /     67    0.0%
+  internal/asan                                 0 /      2    0.0%
+  internal/bisect                               0 /     24    0.0%
+  internal/bytealg                              0 /     12    0.0%
+  internal/byteorder                            0 /     18    0.0%
+  internal/chacha8rand                          0 /     11    0.0%
+  internal/coverage/rtcov                       0 /      1    0.0%
+  internal/cpu                                  0 /     12    0.0%
+  internal/filepathlite                         0 /     30    0.0%
+  internal/fmtsort                              0 /      3    0.0%
+  internal/godebug                              0 /     13    0.0%
+  internal/godebugs                             0 /      1    0.0%

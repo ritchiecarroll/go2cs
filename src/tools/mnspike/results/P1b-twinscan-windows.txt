@@ -1,0 +1,36 @@
+== CAN-PARK SET (canpark's upper bound)
+  functions 5223: matched to emitted C# 4966, unmatched 257
+  TRANSFORMS: boxed-ref-local 1992, defer-frame 479, span-param 204, ref-param 1323
+  HARD (no twin, the fallback): 8 of 4966 (0.2%) by reason unsafe 7, stackalloc 2, other-ref-local 1
+    unmatched: (*crypto/internal/fips140/tls13.ExporterMasterSecret).Exporter
+    unmatched: (*crypto/internal/fips140/tls13.HandshakeSecret).ClientHandshakeTrafficSecret
+    unmatched: (*crypto/internal/fips140/tls13.HandshakeSecret).MasterSecret
+    unmatched: (*crypto/internal/fips140/tls13.HandshakeSecret).ServerHandshakeTrafficSecret
+    unmatched: (*crypto/internal/fips140/tls13.MasterSecret).ClientApplicationTrafficSecret
+    unmatched: (*crypto/internal/fips140/tls13.MasterSecret).ExporterMasterSecret
+    unmatched: (*crypto/internal/fips140/tls13.MasterSecret).ResumptionMasterSecret
+    unmatched: (*crypto/internal/fips140/tls13.MasterSecret).ServerApplicationTrafficSecret
+    unmatched: (*crypto/tls.ConnectionState).ExportKeyingMaterial
+    unmatched: (*crypto/x509.OID).unmarshalOIDText
+    unmatched: (*crypto/x509.OID).UnmarshalText
+    unmatched: (*database/sql.Conn).BeginTx
+== DIRECT PARKERS (the common park paths: chan, select, sync, sleep, netpoll)
+  functions 117: matched to emitted C# 110, unmatched 7
+  TRANSFORMS: boxed-ref-local 69, defer-frame 37, span-param 0, ref-param 28
+  HARD (no twin, the fallback): 0 of 110 (0.0%) by reason 
+    unmatched: (*testing.B).doBench
+    unmatched: (*testing.B).run1
+    unmatched: (*testing.testState).release
+    unmatched: (*testing.testState).waitParallel
+    unmatched: testing.removeAll
+    unmatched: testing.runFuzzing
+    unmatched: testing.runFuzzTests
+== OTHER REF-LOCAL SHAPES (every scanned method, not only the can-park set), by count
+       7  ref MemoryMarshal.GetReference(x.ToSpan())   e.g. ref MemoryMarshal.GetReference(p.ToSpan())
+       3  ref x.Value.x   e.g. ref box.Value.raw
+       2  ref x[x]   e.g. ref tables[t]
+       2  ref x.x[x]   e.g. ref d.vals[index]
+       1  ref x ? ref x.x : ref x.x   e.g. ref read ? ref mu.rgate : ref mu.wgate
+       1  ref x.x[(x)((x)(x & (x)(x(x.x) - 1)))]   e.g. ref d.vals[(nint)((uint32)(head & (uint32)(len(d.vals) - 1)))]
+       1  ref x.x<B>(x ?<B> x)   e.g. ref builtin.heap<B>(out ?<B> box)
+       1  ref x.CacheResync.Value   e.g. ref managedPara.CacheResync.Value

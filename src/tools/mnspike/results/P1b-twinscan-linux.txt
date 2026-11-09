@@ -1,0 +1,27 @@
+== CAN-PARK SET (canpark's upper bound)
+  functions 5266: matched to emitted C# 5007, unmatched 259
+  TRANSFORMS: boxed-ref-local 1986, defer-frame 483, span-param 205, ref-param 1323
+  HARD (no twin, the fallback): 1 of 5007 (0.0%) by reason other-ref-local 1
+    unmatched: (*crypto/internal/fips140/tls13.ExporterMasterSecret).Exporter
+    unmatched: (*crypto/internal/fips140/tls13.HandshakeSecret).ClientHandshakeTrafficSecret
+    unmatched: (*crypto/internal/fips140/tls13.HandshakeSecret).MasterSecret
+    unmatched: (*crypto/internal/fips140/tls13.HandshakeSecret).ServerHandshakeTrafficSecret
+    unmatched: (*crypto/internal/fips140/tls13.MasterSecret).ClientApplicationTrafficSecret
+    unmatched: (*crypto/internal/fips140/tls13.MasterSecret).ExporterMasterSecret
+    unmatched: (*crypto/internal/fips140/tls13.MasterSecret).ResumptionMasterSecret
+    unmatched: (*crypto/internal/fips140/tls13.MasterSecret).ServerApplicationTrafficSecret
+    unmatched: (*crypto/tls.ConnectionState).ExportKeyingMaterial
+    unmatched: (*crypto/x509.OID).unmarshalOIDText
+    unmatched: (*crypto/x509.OID).UnmarshalText
+    unmatched: (*database/sql.Conn).BeginTx
+== DIRECT PARKERS (the common park paths: chan, select, sync, sleep, netpoll)
+  functions 115: matched to emitted C# 108, unmatched 7
+  TRANSFORMS: boxed-ref-local 67, defer-frame 35, span-param 0, ref-param 28
+  HARD (no twin, the fallback): 0 of 108 (0.0%) by reason 
+    unmatched: (*testing.B).doBench
+    unmatched: (*testing.B).run1
+    unmatched: (*testing.testState).release
+    unmatched: (*testing.testState).waitParallel
+    unmatched: testing.removeAll
+    unmatched: testing.runFuzzing
+    unmatched: testing.runFuzzTests

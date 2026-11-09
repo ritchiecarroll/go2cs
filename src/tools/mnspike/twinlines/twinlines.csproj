@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The M:N spike's G5 probe (docs/phase4/DESIGN-mn-scheduler.md §8 item 5). Standalone: it references no go2cs
+       project. Build twice, without and with -p:TwinLine=true, and run each: Twin.cs (no #line, the red) or
+       TwinLined.cs (#line to Visible.cs, the green). -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <DebugType>portable</DebugType>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TwinLine)' == 'true'">
+    <Compile Remove="Twin.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TwinLine)' != 'true'">
+    <Compile Remove="TwinLined.cs" />
+  </ItemGroup>
+
+</Project>

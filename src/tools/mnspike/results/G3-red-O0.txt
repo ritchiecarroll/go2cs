@@ -1,0 +1,4 @@
+  [617s] STARTED 100000 of 1000000 in 37.68s
+  [617s] STARTED 200000 of 1000000 in 131.64s
+  [617s] STARTED 300000 of 1000000 in 323.92s
+RESULT G3-red-O0 n=1000000 verdict=STOPPED-MEMORY wall=617.1s snapshot=[] peak-private=20480 MB peak-threads=360269 last=[STARTED 300000 of 1000000 in 323.92s] exit=-1

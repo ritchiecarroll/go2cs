@@ -1,0 +1,4 @@
+VISIBLE C:\go2cs\abw\g-spike\src\tools\mnspike\twinlines\Visible.cs breakpoint lines 8,9,10,11
+TWIN    C:\go2cs\abw\g-spike\src\tools\mnspike\twinlines\Visible.cs:8, C:\go2cs\abw\g-spike\src\tools\mnspike\twinlines\Visible.cs:9, C:\go2cs\abw\g-spike\src\tools\mnspike\twinlines\Visible.cs:10, C:\go2cs\abw\g-spike\src\tools\mnspike\twinlines\Visible.cs:11
+VERDICT BINDS: all 4 breakpoint-able visible lines have a twin sequence point in the visible document
+rc=0

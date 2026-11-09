@@ -1,0 +1,33 @@
+canpark std goos=linux exclude-runtime=true long-only=true static-only=true
+FUNCTIONS 15609 can-park 716 share 4.6% (direct parkers 115)
+DIRECT BY LEAF map[chan-recv:60 chan-send:55 netpoll-wait:2 select:59 sync-cond:1 sync-wait:1 time-sleep:6]
+CLOSURES 1478 can-park 124
+GO STATEMENTS 116 can-park 64 unresolved 0
+INTERFACE CALLS 3957 can-park 258 unresolved 508
+FUNC-VALUE CALLS 2203 can-park 67 unresolved 363
+PACKAGES 309; top 25 by can-park:
+  net                                         181 /    592   30.6%
+  net/http                                    127 /   1144   11.1%
+  crypto/tls                                   44 /    384   11.5%
+  internal/poll                                29 /    112   25.9%
+  testing                                      28 /    178   15.7%
+  os                                           24 /    321    7.5%
+  internal/fuzz                                22 /    136   16.2%
+  database/sql                                 19 /    180   10.6%
+  net/smtp                                     17 /     29   58.6%
+  log/syslog                                   15 /     19   78.9%
+  vendor/golang.org/x/net/nettest              13 /     33   39.4%
+  crypto/internal/fips140/mlkem                12 /     79   15.2%
+  net/http/httputil                            12 /     60   20.0%
+  crypto/internal/cryptotest                   11 /     22   50.0%
+  path/filepath                                11 /     39   28.2%
+  net/http/httptest                             9 /     30   30.0%
+  net/rpc                                       9 /     52   17.3%
+  os/exec                                       9 /     39   23.1%
+  crypto/rsa                                    7 /     41   17.1%
+  go/build                                      7 /     62   11.3%
+  crypto/internal/fips140/mldsa                 6 /     93    6.5%
+  net/http/pprof                                6 /     15   40.0%
+  crypto/internal/fips140/rsa                   5 /     39   12.8%
+  go/importer                                   5 /      7   71.4%
+  go/internal/srcimporter                       5 /      8   62.5%
