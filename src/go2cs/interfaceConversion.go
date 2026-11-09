@@ -178,7 +178,15 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 		// lifted and the test compilation never re-lifts. Left a marker, the pair's record was
 		// dropped and the adapter named on the production class, which never generates it
 		// (CS0426 defaultReporterжReporter_r); resolved, the cast takes the named-interface path.
+		//
+		// An interface ANOTHER package declared (`dbg.Fail(&node{})` with `func Fail(n interface{
+		// K() string })`) takes that package's published lift ahead of the shared registry: the
+		// registry is keyed by Go text, so a same-text lift of this package's own (a different C#
+		// interface) would answer for it (CS1503). Where the production seed already answers (a
+		// `-tests` conversion), its answer stands.
 		if name, ok := v.liftedTypeMap[interfaceType]; ok {
+			interfaceTypeName = name
+		} else if name := v.importedDynamicInterfaceName(iface); name != "" && lookupProductionDynamicTypeName(interfaceType.String()) == "" {
 			interfaceTypeName = name
 		} else if name := lookupDynamicTypeName(interfaceType.String()); name != "" {
 			interfaceTypeName = name

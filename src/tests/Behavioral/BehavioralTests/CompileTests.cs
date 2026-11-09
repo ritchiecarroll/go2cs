@@ -52,6 +52,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckAnonIfaceMethodSetWidening() => CheckTarget("AnonIfaceMethodSetWidening");
 
     [TestMethod]
+    public void CheckAnonIfaceParamCrossPackage() => CheckTarget("AnonIfaceParamCrossPackage");
+
+    [TestMethod]
     public void CheckAnonIfaceThroughPointerAdapter() => CheckTarget("AnonIfaceThroughPointerAdapter");
 
     [TestMethod]

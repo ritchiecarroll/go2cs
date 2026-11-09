@@ -509,6 +509,14 @@ var packageLock = sync.Mutex{}
 // concurrent file-visit barrier, bridges that gap. Guarded by packageLock.
 var packageDynamicTypeNames map[string]string
 
+// importedDynamicTypeNames is packageDynamicTypeNames' cross-PACKAGE sibling: each IMPORTED package's
+// published GoDynamicTypeLift records (signature -> lifted C# name), keyed by that package's cleaned
+// source directory. An importer passing a value to another package's anonymous-interface parameter
+// (`func Fail(n interface{ K() string })`) needs the interface the DECLARING package lifted; its own
+// registries never hold it. Loaded beside the package's exported aliases (loadImportedTypeAliases);
+// guarded by packageLock; reset per package by resetPackageState.
+var importedDynamicTypeNames map[string]map[string]string
+
 // packageConstraintLiftNames maps a generic type's inline-constraint DECLARATION (constraintLiftKey)
 // to its lift, for the methods whose receiver copy of the constraint no signature key may name.
 var packageConstraintLiftNames = map[string]string{}

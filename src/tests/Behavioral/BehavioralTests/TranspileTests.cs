@@ -52,6 +52,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAnonIfaceMethodSetWidening() => CheckTarget("AnonIfaceMethodSetWidening");
 
     [TestMethod]
+    public void CheckAnonIfaceParamCrossPackage() => CheckTarget("AnonIfaceParamCrossPackage");
+
+    [TestMethod]
     public void CheckAnonIfaceThroughPointerAdapter() => CheckTarget("AnonIfaceThroughPointerAdapter");
 
     [TestMethod]
