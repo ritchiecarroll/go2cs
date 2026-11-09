@@ -27,7 +27,7 @@ public static uint32 Sum(this Outer o) {
 }
 
 public static (slice<Outer>, slice<ж<Outer>>) Pair() {
-    return (slice<Outer>([new(A: 1), new(B: new byte[]{2}.array(2))]), slice<ж<Outer>>([Ꮡ(new Outer(A: 3))]));
+    return (slice<Outer>([new(new inner(A: 1)), new(new inner(B: new byte[]{2}.array(2)))]), slice<ж<Outer>>([Ꮡ(new Outer(new inner(A: 3)))]));
 }
 
 public static (Outer, slice<Outer>, slice<ж<Outer>>) Zeros() {

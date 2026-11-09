@@ -1486,6 +1486,17 @@ Nine coupled rules, each first needed by one of those packages:
   `TypeSwitch` (`marker.tag`).
 - **Defined-over-named-struct composites wrap the underlying** (`decoder{order: o}` →
   `new decoder(new coder(order: o))`, CS1739). Guarded by `NamedPointerReinterpret` (`view{}`).
+  The same wrap holds for a literal **outside the declaring package**, which reads the
+  declaration from that package's loaded syntax (`foreignTypeSpecRHS`): go-winio's
+  `guid.GUID{Data1: …}`, where pkg/guid declares `type GUID windows.GUID`, reads
+  `new guid.GUID(new win.GUID(Data1: …))`, and the base's package gains its `using` alias.
+  It also holds for both **elided** spellings: `[]T{{A: 1}}` → `new(new inner(A: 1))` and
+  `[]*T{{A: 1}}` → `Ꮡ(new T(new inner(A: 1)))`. All three wrap through one answer
+  (`namedStructWrapBase`), so the spellings cannot drift. A type whose declaration the loader holds
+  no syntax for keeps the bare keyed ctor, and an EMPTY literal outside the declaring package or
+  elided keeps `new pkg.T()` / `new()`: the parameterless ctor already builds the zero value.
+  Guarded by `KeyedLiteralNamedForeignStruct` (a foreign base and an unexported same-package base,
+  typed, partial, pointer and elided, the empty forms pinned, values vs Go).
 - **Labeled switches declare their break target** (`break_BigSwitch:;` after the switch —
   both switch visitors mirror visitForStmt, CS0159). Guarded by `SwitchBreakInCase`
   (`pick`).

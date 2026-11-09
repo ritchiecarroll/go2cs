@@ -120,6 +120,54 @@ func (v *Visitor) recordStructFieldInterfaceCasts(compositeLit *ast.CompositeLit
 	}
 }
 
+// namedStructWrapBase returns the named struct a DEFINED type over a NAMED STRUCT type (`type decoder
+// coder`) must construct, or nil. Such a type is emitted as a WRAPPER whose only ctor takes the
+// underlying (`decoder(coder value)`), so its composite literal constructs the UNDERLYING and wraps:
+// `new decoder(new coder(order: …))` (encoding/binary, CS1739 ×5). A type written directly over a
+// struct LITERAL keeps its own keyed ctor. The declaration is read from the declaring package's
+// syntax when the literal sits OUTSIDE it: go-winio internal/socket's `guid.GUID{Data1: …}`, where
+// pkg/guid declares `type GUID windows.GUID` (CS1739). The typed literal and both ELIDED arms (`[]T{{…}}`,
+// `[]*T{{…}}`) wrap through this one answer, so the spellings cannot drift. An EMPTY literal outside the
+// declaring package, or elided, keeps its bare `new pkg.T()` / `new()`: the wrapper's parameterless ctor
+// already builds that zero value, so only a literal with elements needs the wrap.
+func namedStructWrapBase(t *types.Named) *types.Named {
+	rhs, ok := writtenTypeSpecRHS(t.Obj())
+
+	if !ok || rhs == nil {
+		return nil
+	}
+
+	base, ok := types.Unalias(rhs).(*types.Named)
+
+	if !ok {
+		return nil
+	}
+
+	if _, isStruct := base.Underlying().(*types.Struct); !isStruct {
+		return nil
+	}
+
+	// A defined type over another DEFINED type (`type Tally Counts`, `type Counts counts`) wraps the
+	// INNERMOST named struct, the only one with a keyed ctor: `new Tally(new counts(n: …))`, which the
+	// wrappers' implicit conversions carry up the chain. One level stops at once (its RHS spec is a
+	// struct literal).
+	for {
+		next, okNext := writtenTypeSpecRHS(base.Obj())
+
+		if !okNext || next == nil {
+			return base
+		}
+
+		nextNamed, okNamed := types.Unalias(next).(*types.Named)
+
+		if !okNamed {
+			return base
+		}
+
+		base = nextNamed
+	}
+}
+
 func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyValueContext) string {
 	return v.convCompositeLitAs(compositeLit, nil, context)
 }
@@ -309,7 +357,16 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 
 					v.withValueCloneArgs(compositeLit.Elts, ptrElidedContext)
 
-					return fmt.Sprintf("%s(new %s(%s))", AddressPrefix, structName, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, ptrElidedContext))
+					elements := v.convExprList(compositeLit.Elts, compositeLit.Lbrace, ptrElidedContext)
+
+					// A defined type over a named struct wraps the underlying's keyed ctor, as above.
+					if named, ok := types.Unalias(u.Elem()).(*types.Named); ok && len(compositeLit.Elts) > 0 {
+						if base := namedStructWrapBase(named); base != nil {
+							elements = fmt.Sprintf("new %s(%s)", convertToCSTypeName(v.getAliasQualifiedTypeName(base, false)), elements)
+						}
+					}
+
+					return fmt.Sprintf("%s(new %s(%s))", AddressPrefix, structName, elements)
 				}
 			case *types.Map:
 				// A MAP element type — the inner `{"domain": 53}` of a
@@ -367,9 +424,19 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 
 		v.withValueCloneArgs(compositeLit.Elts, elidedContext)
 
-		result.WriteString(fmt.Sprintf("new(%s", v.convExprList(compositeLit.Elts, compositeLit.Lbrace, elidedContext)))
+		// A defined type over a named struct takes the underlying's keyed ctor inside its own
+		// (`new(new inner(A: …))`), as its typed literal does.
+		wrapOpen, wrapClose := "", ""
+
+		if named, ok := types.Unalias(elidedContext.keyValueCompositeType).(*types.Named); ok && len(compositeLit.Elts) > 0 {
+			if base := namedStructWrapBase(named); base != nil {
+				wrapOpen, wrapClose = fmt.Sprintf("new %s(", convertToCSTypeName(v.getAliasQualifiedTypeName(base, false))), ")"
+			}
+		}
+
+		result.WriteString(fmt.Sprintf("new(%s%s", wrapOpen, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, elidedContext)))
 		v.writeStandAloneCommentString(result, compositeLit.Rbrace, nil, " ")
-		result.WriteString(fmt.Sprintf("%s)", rparenSuffix))
+		result.WriteString(fmt.Sprintf("%s%s)", rparenSuffix, wrapClose))
 
 		return result.String()
 	}
@@ -632,37 +699,13 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 		if structType, ok := t.Underlying().(*types.Struct); ok {
 			checkStructFields(structType)
 
-			// A DEFINED type over a NAMED STRUCT type (`type decoder coder`) is emitted as
-			// a WRAPPER whose only ctor takes the underlying (`decoder(coder value)`) — its
-			// composite literal constructs the UNDERLYING and wraps:
-			// `new decoder(new coder(order: …))` (encoding/binary, CS1739 ×5). A type
-			// written directly over a struct LITERAL keeps its own keyed ctor (unchanged).
-			if rhs, okRHS := packageTypeSpecRHS[t.Obj()]; okRHS && rhs != nil {
-				if rhsNamed, ok := types.Unalias(rhs).(*types.Named); ok {
-					if _, isStruct := rhsNamed.Underlying().(*types.Struct); isStruct {
-						// A defined type over another DEFINED type (`type Tally Counts`, `type Counts
-						// counts`) wraps the INNERMOST named struct, the only one with a keyed ctor:
-						// `new Tally(new counts(n: …))`, which the wrappers' implicit conversions carry
-						// up the chain. One level stops at once (its RHS spec is a struct literal).
-						for {
-							next, okNext := packageTypeSpecRHS[rhsNamed.Obj()]
+			// A DEFINED type over a NAMED STRUCT type constructs that struct and wraps it
+			// (namedStructWrapBase). The declaring package also wraps its EMPTY literal
+			// (`new A(new B())`), as it always has; another package's keeps `new pkg.T()`.
+			_, declaredHere := packageTypeSpecRHS[t.Obj()]
 
-							if !okNext || next == nil {
-								break
-							}
-
-							nextNamed, okNamed := types.Unalias(next).(*types.Named)
-
-							if !okNamed {
-								break
-							}
-
-							rhsNamed = nextNamed
-						}
-
-						namedStructWrapRender = convertToCSTypeName(v.getAliasQualifiedTypeName(rhsNamed, false))
-					}
-				}
+			if base := namedStructWrapBase(t); base != nil && (len(compositeLit.Elts) > 0 || declaredHere) {
+				namedStructWrapRender = convertToCSTypeName(v.getAliasQualifiedTypeName(base, false))
 			}
 		} else if arrayType, ok := t.Underlying().(*types.Array); ok {
 			// A named array type (e.g. `type d [3]rune`) lowers to a struct wrapping

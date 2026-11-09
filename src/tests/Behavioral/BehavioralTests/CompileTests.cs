@@ -1093,6 +1093,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckKeyedLiteralIfaceAssign() => CheckTarget("KeyedLiteralIfaceAssign");
 
     [TestMethod]
+    public void CheckKeyedLiteralNamedForeignStruct() => CheckTarget("KeyedLiteralNamedForeignStruct");
+
+    [TestMethod]
     public void CheckKeywordNamedTypes() => CheckTarget("KeywordNamedTypes");
 
     [TestMethod]

@@ -1046,6 +1046,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckKeyedLiteralIfaceAssign() => CheckTarget("KeyedLiteralIfaceAssign");
 
     [TestMethod]
+    public void CheckKeyedLiteralNamedForeignStruct() => CheckTarget("KeyedLiteralNamedForeignStruct");
+
+    [TestMethod]
     public void CheckKeywordNamedTypes() => CheckTarget("KeywordNamedTypes");
 
     [TestMethod]
