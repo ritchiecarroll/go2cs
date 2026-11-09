@@ -11064,6 +11064,10 @@ func runCommandWithTimeout(timeout time.Duration, workingDir string, options Opt
 // — a property of ONE specific child invocation (the converted host's own run), never the whole
 // pipeline's environment, so it does not belong in childEnvWithGo2CSPath's shared construction.
 func runCommandWithTimeoutEnv(timeout time.Duration, workingDir string, options Options, extraEnv []string, name string, args ...string) (string, error) {
+	// cmd/go's StartSigHandlers, once, before the first child: every child then starts SIGINT and SIGQUIT at the
+	// default, as `go test`'s binary does, and an interrupt kills the running children's groups (testSignals.go).
+	startTestSigHandlers()
+
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, name, args...)
@@ -11162,13 +11166,16 @@ func runCommandWithTimeoutEnv(timeout time.Duration, workingDir string, options 
 	cmd.Stdout = &combined
 	cmd.Stderr = &combined
 
-	err := cmd.Start()
+	// Started under the interrupt's lock (testSignals.go), so an interrupt either finds this child and kills its group,
+	// or arrives first and the child never starts.
+	untrack, err := startTrackedChild(cmd, group)
 	if err == nil {
 		if attachErr := group.attach(cmd); attachErr != nil {
 			warnProcessGroupDegradedOnce(attachErr)
 		}
 		err = cmd.Wait()
 	}
+	untrack()
 	output := combined.Bytes()
 
 	if ctx.Err() == context.DeadlineExceeded {
