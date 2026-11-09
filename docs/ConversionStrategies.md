@@ -1650,9 +1650,10 @@ without such an entry counts as a mismatch. A third-party module keeps its manif
 `src/tests/ModuleDisclosures/<module path>@<version>/<package dir>/`, read when the run passes
 `-module-disclosures src/tests/ModuleDisclosures`. A manifest there applies only to that exact module
 version, and a manifest in the package's own output directory still takes precedence. A manifest can also
-carry `notes`, which the package's proof page prints above the verdicts, for a caveat that is not a
-divergence: google/uuid v1.6.0's manifest lists no disclosures and notes an upstream test race that Go
-itself reproduces.
+carry `notes`, for a caveat that is not a divergence. The package's proof page, its test report that
+[Validated Test Packages](ValidatedTestPackages.md) or [Validated Modules](ValidatedModules.md) links, prints
+them above the verdicts. For example, google/uuid v1.6.0's manifest lists no disclosures and notes an
+upstream test race that Go itself reproduces.
 
 **Full detail:** [Reference → Test suites reference the production project](ConversionStrategies-Reference/shadowing.md#test-suites-reference-the-production-project-instead-of-recompiling-it) — the test-project models and when each applies, the internal bridge class and its metadata files, test-side name collisions, and exactly which test files get no `.cs`.
 
@@ -8644,11 +8645,12 @@ return waits for its report and exits 2 with it (golib's `MainExit`; see
 **A goroutine that cannot recurse starts on a smaller stack.** A Go goroutine's stack grows as it needs, while a
 .NET thread's stack is a fixed reservation that ends the process when it overflows. So golib reserves a Go-scale
 256 MiB stack for each goroutine by default (`GO2CS_GOROUTINE_STACK` changes it). That reservation is address
-space rather than memory, but it is what makes a hundred thousand goroutines parked at once slow to start. The
-converter proves, for each `go` statement, whether its goroutine can recurse: every call it can make must resolve
-to a function the converter can see, and no chain of calls may return to a function already on it. golib runs a
-goroutine it proves cannot recurse on a 16 MiB stack (`GO2CS_GOROUTINE_BOUNDED_STACK` changes it). Here `produce`
-only computes and sends on a channel, and its `go` statement reads as any other:
+space rather than memory, but it is what makes a hundred thousand goroutines parked at once slow to start
+(measured on win-x64). The converter proves, for each `go` statement, whether its goroutine can recurse: every
+call it can make must resolve to a function the converter can see, and no chain of calls may return to a
+function already on it. golib runs a goroutine it proves cannot recurse on a 16 MiB stack
+(`GO2CS_GOROUTINE_BOUNDED_STACK` changes it). Here `produce` only computes and sends on a channel, and its `go`
+statement reads as any other:
 
 <!-- source: src/tests/Behavioral/GoroutineStackReserve/main.go:47 -->
 ```go
@@ -8673,8 +8675,8 @@ line off, on a neighbouring `goǃ` call, which the position alone cannot tell fr
 
 Anything the proof cannot follow keeps the full stack, unrecorded. That includes a call through an interface or a
 func value, a range-over-func loop, and a goroutine that reaches either through the standard library, so a
-goroutine that does I/O, formats with `fmt` or serves a connection keeps today's reservation. A mistaken mark would
-crash where Go grows the stack, so the proof gives up rather than guess.
+goroutine that does I/O, formats with `fmt` or serves a connection keeps the default 256 MiB
+reservation. A mistaken mark would crash where Go grows the stack, so the proof gives up rather than guess.
 <!-- The proof: src/go2cs/goroutineStackAnalysis.go; the mark: src/go2cs/visitGoStmt.go:247
      `recorded := bounded && v.boundedGoRecordable()`, recorded by src/go2cs/goroutineStackRecords.go:136
      `func applyBoundedGoRecords(packageInfoLines []string, packageInfoFileName string, mergeExisting bool) []string {`;
@@ -8693,7 +8695,7 @@ crash where Go grows the stack, so the proof gives up rather than guess.
 thread, so each goroutine needs a thread of its own. `goǃ` does not use the .NET thread pool, because
 a blocked goroutine would hold a shared pool thread and starve the others. golib cannot run many
 goroutines on fewer threads either, because .NET cannot move a running call to another stack. That is
-a property of today's .NET rather than of the conversion: goroutines are started in one place in golib,
+a property of .NET 10 rather than of the conversion: goroutines are started in one place in golib,
 so if .NET gains threads its runtime can park cheaply, golib can adopt them and converted code stays as
 it is.
 
@@ -12171,7 +12173,7 @@ keeps an address in an integer and compares it later, as `sync.Cond`'s copy chec
 number, so that code is written by hand.
 The hand-written C# keeps Go's observable behavior and drops Go's mechanism. A few hot functions, such as
 `math/bits`' `Mul`, are hand-owned for speed instead: Go's compiler replaces each call with a few machine
-instructions, and the converted body is slower.
+instructions, and a converted body cannot match that.
 
 Hand ownership comes in two sizes: a whole file, or a single declaration.
 

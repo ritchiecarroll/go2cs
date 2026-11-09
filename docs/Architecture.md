@@ -18,7 +18,8 @@ selection, implicit conversions, constant folding, unsigned detection) are seman
 
 - **Entry point:** `main.go` — flag parsing, GOROOT/GOPATH resolution, and dispatch: a single file or
   package (`conversionDriver.go`), the standard library (`-stdlib`), a module (`-recurse`), or a
-  package's tests (`-tests`).
+  package's tests (`-tests`), and the `go2cs toolchain` subcommand (`toolchainCommand.go`,
+  `toolchainProvision.go`).
 - **Symbol constants:** `symbols.go` — the cross-language naming/marker constants (`RootNamespace`,
   `PackageSuffix`, `PointerPrefix` `ж`, `AddressPrefix` `Ꮡ`, …). Generated — together with its C# twin
   `src/core/go2cs/Symbols.cs` (class `go2cs.Symbols`, shared into golib and the `go2cs-gen` analyzer via
@@ -110,6 +111,8 @@ Compile-time emission so converted C# stays visually close to Go. Referenced as 
 | `EscapeRegistryGenerator` | a closed golib container converted to an interface | A per-package registration of that container's operations, so reflect can reach them. |
 | `NativeArrayOpenerGenerator` | a native array spelled with a pointer element (`*[N]*E` and native struct array fields) | A per-package registration of an opener for each such element. |
 | `RuntimeInitHookGenerator` | an executable that references the converted `runtime` package | A module initializer that lets golib initialize `runtime` lazily, so an unrecovered panic prints Go's traceback. |
+| `BoundedGoroutineInterceptorGenerator` | `[assembly: GoBoundedGoroutine(...)]` records (in `package_info.cs`), each naming a `goǃ` call the converter proved cannot recurse | An interceptor of that `goǃ` call that starts the goroutine on golib's smaller stack reservation; a record that lands on no such call fails the build (`GO2CS0010`). |
+| `ExtensionHostListGenerator` | every converted project | `[assembly: GoExtensionHostList]` and one `[assembly: GoExtensionHost(typeof(X))]` per top-level static class, which golib's extension-method scan reads in place of `Assembly.GetTypes()` under Native AOT. |
 
 Two analyzers ship beside them: `StringLiteralBindingAnalyzer` fails the build when a C# string literal in
 converted code binds a C# type where Go has a `string`, and `StackAppendBufferAnalyzer` fails it when a

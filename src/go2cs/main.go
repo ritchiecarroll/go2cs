@@ -254,6 +254,8 @@ func main() {
 	go2csPath = resolveGo2CSPathDefault(goPath)
 
 	// Define command line flags for options
+	defaultStdLibTagList := strings.Join(defaultStdLibBuildTags, ",")
+
 	commandLine := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
 	commandLine.SetOutput(io.Discard)
 
@@ -261,9 +263,9 @@ func main() {
 	goRootCmd := commandLine.String("goroot", goRoot, "Path to Go root directory")
 	goPathCmd := commandLine.String("gopath", goPath, "Path to Go path directory")
 	go2csPathCmd := commandLine.String("go2cspath", go2csPath, "Path to C# converted code")
-	convertStdLibCmd := commandLine.Bool("stdlib", false, "Convert Go standard library (implies -tags purego by default; pass an explicit -tags to override)")
+	convertStdLibCmd := commandLine.Bool("stdlib", false, "Convert Go standard library (implies -tags "+defaultStdLibTagList+" by default; pass an explicit -tags to override)")
 	convertTimeoutCmd := commandLine.Duration("convert-timeout", defaultConvertTimeout, "Per-package cap the -stdlib driver applies to ONE package's conversion; Go duration syntax, must be greater than zero. It is a safety net against a hung conversion, never a performance assumption -- a slow host under concurrent load can legitimately need far more than the default, and a package that hits it stops the run (exit 1), and failed_packages.txt lists it with every package not yet converted, for a resume")
-	convertTestsCmd := commandLine.Bool("tests", false, "Convert eligible Go package tests and emit a runnable test host project")
+	convertTestsCmd := commandLine.Bool("tests", false, "Convert eligible Go package tests and emit a runnable test host project (implies -tags "+defaultStdLibTagList+" by default, as -stdlib does)")
 	testActionCmd := commandLine.String("test-action", "convert", "Converted-test action: convert, build, run, compare, or all")
 	testTimeoutCmd := commandLine.Duration("test-timeout", 2*time.Minute, "Timeout for each converted-test child process (build/run/compare); the test host's dotnet publish gets at least 30m")
 	testDeadlineCmd := commandLine.Duration("test-deadline", defaultTestDeadline, "Per-test deadline for the CONVERTED host under -test-action run/compare/all: a top-level test still running this long after it started is reported failed and ABANDONED (labelled so in the comparison), and the run goes on to the next test. Without it a hung test held the host to -test-timeout and every later test went unmeasured. 0 disables it. The Go side is unbounded, as `go test` is. A row whose own legitimate test outlasts the default takes a per-row floor (run-validated-sweep.ps1 $testDeadlineFloors)")
@@ -289,7 +291,7 @@ func main() {
 	platformCensusCmd := commandLine.String("platform-census", "", "With -stdlib and two or more -platforms targets: convert once per target into an isolated seeded staging root under this directory, classify the emissions (shared/variant/partial/exclusive) and write platform-manifest.json there. Emits NO corpus output")
 	refCensusCmd := commandLine.String("ref-census", "", "With -stdlib: run the ж-box A1 ref-lowering classification census (analysis only, never emits) over the standard library — once per -platforms target — and write the JSON report to this path. See docs/phase4/DESIGN-zh-box-reduction.md §9 stage A1")
 	platformStageCmd := commandLine.String("platform-stage", "", "Directory a multi-platform -stdlib EMISSION stages its per-target conversions in (kept afterwards for inspection); when omitted, the run stages in .go2cs-platform-stage under the output root, reclaims anything an earlier run left there, and removes it at the end")
-	buildTagsCmd := commandLine.String("tags", "", "Comma-separated build tags applied when loading packages, e.g. -tags purego to select the portable Go implementations over assembly ones (with -stdlib, purego is applied by default and any explicit -tags value replaces it)")
+	buildTagsCmd := commandLine.String("tags", "", "Comma-separated build tags applied when loading packages, e.g. -tags purego to select the portable Go implementations over assembly ones (with -stdlib or -tests, "+defaultStdLibTagList+" is applied by default and any explicit -tags value replaces it)")
 	indentSpacesCmd := commandLine.Int("indent", 4, "Number of spaces for indentation")
 	preferVarDeclCmd := commandLine.Bool("var", true, "Prefer \"var\" declarations")
 	hoistLiteralsCmd := commandLine.Bool("hoist-literals", false, "Hoist mode, the standard library's: each string literal in a value slot with a readable name becomes one `static readonly` field (`F(helloˢ)`), and every other literal takes the default plain mode's cached form (`F(\"hello\")`, converted once and shared by golib). The standard library always hoists; this opts any other package in")
@@ -391,7 +393,7 @@ Examples:
   go2cs package_dir
   go2cs -tests package_dir                  # Convert production sources and package tests
   go2cs -tests -test-action all package_dir # Convert, build, run, and compare with go test
-  go2cs -stdlib                           # Convert the entire Go standard library (applies -tags purego by default)
+  go2cs -stdlib                           # Convert the entire Go standard library (applies the default -tags)
   go2cs -stdlib fmt io/ioutil strings     # Convert specific standard library packages
   go2cs -recurse module_dir               # Convert a module + its third-party deps (references stdlib)
   go2cs -recurse module_dir output_root   # Same, with generated src/pkg trees isolated under output_root
@@ -407,8 +409,9 @@ Examples:
                                           # Use mine.txt only; nugetgo.net is never fetched
   go2cs -stdlib -allow-stale-converter    # Proceed on a DELIBERATELY pinned binary (an A/B against a preserved go2cs);
                                           # without it, -stdlib and -tests refuse to run a binary older than their sources
-  go2cs -stdlib -comments -tags purego    # Explicit form of the default: the portable Go crypto over the assembly ones
-  go2cs -stdlib -tags=                    # Opt OUT of the purego default (reproduce the asm-backed default build)
+  go2cs -stdlib -comments -tags purego,math_big_pure_go
+                                          # Explicit form of the default: the portable Go implementations over the assembly ones
+  go2cs -stdlib -tags=                    # Opt OUT of the default tags (reproduce the asm-backed default build)
   go2cs -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64 -platform-census out
                                           # Emission census: convert once per target into out\<goos>-<goarch>,
                                           # write out\platform-manifest.json; no corpus output

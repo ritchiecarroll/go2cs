@@ -1,23 +1,25 @@
 # Converted code, before and after the face lift
 
-go2cs converts Go into C# that a Go developer can read. Until release 1.24.13.5 the converted code carried a
-set of attributes that told the build what Go's own syntax already says: that a method has a pointer
-receiver, that a type came from Go, that a field is embedded. They were accurate, and they were noise.
-The face lift removes them from converted code.
+go2cs converts Go into C# that a Go developer can read. Some facts that Go's own syntax already says must
+also reach the build: that a method has a pointer receiver, that a type came from Go, that a field is
+embedded. In the **attribute form**, each fact is an attribute on the declaration. It is accurate, and it is
+noise. In the **marker form**, which the converter writes, each fact is in the signature or in a short marker
+comment. Converted packages before release 1.24.13.5 use the attribute form; the move from one form to the
+other is the face lift this page is named for.
 
-Nothing is lost. Each fact now sits where a Go reader already looks: in the signature, or in a short
-comment written the way Go writes it. The go2cs source generators read the signature or the comment at
+The marker form loses nothing. Each fact sits where a Go reader already looks: in the signature, or in a
+short comment written the way Go writes it. The go2cs source generators read the signature or the comment at
 build time and write the attribute into generated code, where the runtime finds it. The converted file is
 left with the code.
 
-Every example on this page is a real line of the converted Go standard library. "Before" is the file as
-it stood before the face lift, "after" is the same file today, and the Go line is the one both
-were converted from. The marks that remain, and why, are listed in
+Every example on this page is a real line of the converted Go standard library. "Before" is the file in the
+attribute form, as an earlier converter wrote it; "after" is the same file in the marker form, as the
+converter writes it; and the Go line is the one both are converted from. The marks that remain, and why, are listed in
 [Marker comments: what converted code carries instead of an attribute](ConversionStrategies-Reference/source-generators.md#marker-comments-what-converted-code-carries-instead-of-an-attribute).
 
 ## A pointer receiver is just `this ref`
 
-`strings.Builder.Len` has a pointer receiver. The C# receiver was already `this ref Builder b`, and that `ref` is the whole fact; the attribute repeated it on more than five thousand methods of the standard library.
+`strings.Builder.Len` has a pointer receiver. The C# receiver is `this ref Builder b`, and that `ref` is the whole fact; the attribute form repeats it on every pointer-receiver method of the standard library.
 
 Go, `strings/builder.go`:
 
@@ -41,7 +43,7 @@ After, the same file:
 public static nint Len(this ref Builder b) { return len(b.buf); }
 ```
 
-From the `this ref` receiver a source generator writes the overload that takes a pointer, as it did from the attribute.
+From the `this ref` receiver a source generator writes the overload that takes a pointer, as it does from the attribute.
 
 ## A Go type needs no mark
 
@@ -78,11 +80,11 @@ partial struct List {
 }
 ```
 
-The generator completes the `partial struct` (its constructors, equality and `ToString`) exactly as before.
+The generator completes the `partial struct` (its constructors, equality and `ToString`) the same way in both forms.
 
 ## A defined type states its underlying type after its name
 
-`time.Duration` is defined over `int64`. C# has no such declaration, so the converter writes an empty struct and says what it wraps. That used to be an attribute's argument in front of the declaration; it is now a comment behind the name, where Go puts the underlying type.
+`time.Duration` is defined over `int64`. C# has no such declaration, so the converter writes an empty struct and says what it wraps. In the attribute form that is an attribute's argument in front of the declaration; in the marker form it is a comment behind the name, where Go puts the underlying type.
 
 Go, `time/time.go`:
 
@@ -178,7 +180,7 @@ Method promotion, and `reflect`'s `Anonymous`, follow from the comment.
 
 ## A struct tag keeps Go's spelling
 
-`net/rpc/jsonrpc`'s `clientRequest` carries JSON tags. Each tag sat on its own line above the field, as a C# verbatim string with doubled quotes. It now follows the field, backquotes and all, where Go puts it.
+`net/rpc/jsonrpc`'s `clientRequest` carries JSON tags. In the attribute form each tag sits on its own line above the field, as a C# verbatim string with doubled quotes. In the marker form it follows the field, backquotes and all, where Go puts it.
 
 Go, `net/rpc/jsonrpc/client.go`:
 
@@ -249,7 +251,7 @@ internal static nint format(this Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) {
 
 ## A string twin is the function that takes an `sstring`
 
-`utf8.DecodeRuneInString` is one of the functions go2cs emits twice, so that a string literal passed to it is viewed and not copied. The attribute marked the member that carries the Go body; its `sstring` parameter already says which one that is.
+`utf8.DecodeRuneInString` is one of the functions go2cs emits twice, so that a string literal passed to it is viewed and not copied. The attribute marks the member that carries the Go body; its `sstring` parameter already says which one that is.
 
 Go, `unicode/utf8/utf8.go`:
 
@@ -277,7 +279,7 @@ A generator writes the `@string` overload from it.
 
 ## A linkname forwarder says `/*linkname*/`
 
-`time/tzdata` declares a function whose body lives in package `time`, by `//go:linkname`. The converter writes a forwarder. It used to carry a fully qualified .NET attribute to stay out of stack traces; it now carries one word, and the generator writes the attribute on the method's generated half.
+`time/tzdata` declares a function whose body lives in package `time`, by `//go:linkname`. The converter writes a forwarder. In the attribute form it carries a fully qualified .NET attribute to stay out of stack traces; in the marker form it carries one word, and the generator writes the attribute on the method's generated half.
 
 Go, `time/tzdata/tzdata.go`:
 
@@ -307,12 +309,17 @@ After, the same file:
 }
 ```
 
-Go's own `//go:linkname` comment was carried into the C# before and still is.
+Go's own `//go:linkname` comment is carried into the C# in both forms.
 
-## What did not change
+## What the two forms share
 
-- **What the code does.** The face lift changes how converted code is written, not what it compiles to.
-  The standard library's own test suites validate at the same counts before and after.
+<!-- Read 2026-11-09 from docs/validation/1.24.13.4/ and 1.24.13.5/ValidatedTestPackages.md: the header lines and
+     every row's Windows Tests/Disclosed cells and linux: annotation are identical between the two snapshots. -->
+
+- **What the code does.** The two forms differ in how converted code is written, not in what it compiles to.
+  The [1.24.13.4 roster](validation/1.24.13.4/ValidatedTestPackages.md), in the attribute form, and the
+  [1.24.13.5 roster](validation/1.24.13.5/ValidatedTestPackages.md), in the marker form, give every validated
+  package the same verdict counts on Windows and on Linux.
 - **Hand-written C#.** A file written by hand keeps the attributes, and the generators and the runtime
   read either spelling, so nothing written against an earlier release has to change.
 - **The few attributes that must stay.** `[GoInit]` on a package's `init` functions, the layout

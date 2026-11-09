@@ -34,7 +34,7 @@ the [Roadmap](Roadmap.md).
 > operationally-validated packages made it unnecessary. The converted standard library now lives at
 > **`src/core`** and the hand-finished stub baseline is retired (commit `2e8066da6`). Everything below
 > that spells `src/go-src-converted` is a period-accurate record of where the tree stood at the time —
-> read it as history, not as instructions. See [`/CLAUDE.md`](../CLAUDE.md) *One tree*.
+> read it as history, not as instructions. See [Project layout](BuildingGo2cs.md#project-layout).
 >
 > **⚠ Where the road goes after Phase 4 — release migrations.** Beyond the phases below, the project
 > moves by **release migrations**: the Go release the corpus converts from, and the .NET runtime it
@@ -81,9 +81,9 @@ High level timeline of the project's major turning points; the tags carry the de
 
 ## Phase 0 — Documentation ✅ done
 
-Orientation docs so any task starts informed: [`/CLAUDE.md`](../CLAUDE.md),
-[`Architecture.md`](Architecture.md), [`Baseline-vs-FullConversion.md`](../src/archived/Baseline-vs-FullConversion.md),
-this file; plus a refresh of `README.md`.
+Orientation docs so any task starts informed: [`Architecture.md`](Architecture.md),
+[`Baseline-vs-FullConversion.md`](../src/archived/Baseline-vs-FullConversion.md), this file and the repository's
+`CLAUDE.md`; plus a refresh of `README.md`.
 
 ## Phase 1 — Restore the separation (repo surgery) ✅ done
 
@@ -149,7 +149,7 @@ more). So "green the loop" means **green `fmt`'s closure**, bottom-up.
 
 - **Converter-improvement loop (proven end-to-end):** edit `src/go2cs/*.go` → `go build` (Go 1.24.13) →
   re-transpile → `dotnet build`. (For behavioral tests the harness runs this loop itself — see
-  [`/CLAUDE.md`](../CLAUDE.md) "Test-harness mechanics".)
+  [Run the converter's own tests](BuildingGo2cs.md#run-the-converters-own-tests).)
 - **Retarget detail:** the stdlib converter writes to **`<go2cspath>/core/<pkg>`** (hardcoded `core` subdir).
   To regenerate cleanly into `src/go-src-converted`, point `-go2cspath` accordingly or convert to a temp dir
   and move. Batch several converter fixes, then do one wholesale reconvert + re-measure.
@@ -689,11 +689,11 @@ test *binary* that the converted host's current deployment shape structurally la
 relocatable single-file executable that Go's static linking provides and a framework-dependent .NET
 apphost (a native stub bound to a same-basename managed assembly beside it) does not. These are not
 permanent exclusions, and the roadmap carries a proposed resolution: **publish the test host
-self-contained and single-file**, evaluated with the .NET toolchain hop, where publish shapes are
+self-contained and single-file**, evaluated with the next .NET release migration, where publish shapes are
 re-priced anyway (the performance suite already proves converted code runs Native AOT, so the
 capability is a packaging decision, not a porting question). The disclosure machinery is built to
-force that revisit rather than allow drift: disclosed tests keep running in every sweep, so the day
-the host becomes relocatable they begin passing, the sweep's disclosure arithmetic breaks loudly, and
+force that revisit rather than allow drift: disclosed tests keep running in every validation run, so the day
+the host becomes relocatable they begin passing, the run's disclosure totals stop adding up, and
 the entries must be removed. Proof pages that carry a `host-limit` disclosure point back to this
 section as the standing answer to "why not just make the host single-file today."
 

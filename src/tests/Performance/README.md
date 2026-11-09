@@ -98,8 +98,8 @@ separately by the Startup row.
 - **The AOT column's numbers are runtime numbers; producing them is expensive, and we say so.**
   Each Native AOT publish compiles the entire converted-stdlib closure whole-program, which is also
   exactly what buys the column's lean images and runtime memory wins. For the current table each
-  publish took about 9 to 10 minutes on the machine that compiled it, with the compiler peaking at 12.4 to
-  13.5 GB, and TlsHandshake's took about 26 minutes at a 24 GB peak. The
+  publish took about 9 to 10 minutes on the second machine that compiled the images (Windows, `win-x64` target),
+  with the compiler peaking at 12.4 to 13.5 GB, and TlsHandshake's took about 26 minutes at a 24 GB peak. The
   full disclosure, the reasoning, and the compile-farm mitigation live in the suite README's
   ["What the AOT column costs to produce"](https://github.com/ritchiecarroll/go2cs/blob/master/src/tests/Performance/README.md#what-the-aot-column-costs-to-produce--the-honesty-footnote)
   section.
@@ -191,20 +191,17 @@ window, and the Native AOT ratio to the same Go binaries timed again in the Nati
 - **The package version floats.** A converted project asks for the newest matching release (`GoStdLibVersion`
   `1.26.*`), so this table's builds resolved `go.*` 1.26.10.2, the newest on the day. To reproduce it after a later
   1.26 release publishes, pin the version on every build and publish: `-p:GoStdLibVersion=1.26.10.2`.
-- **The ReadyToRun column's shape is this release's.** From `go.*` 1.26.10.2 on, a converted program publishes its own
-  code IL-only and golib and the packages ReadyToRun. Under 1.24.13.7 the program's own code was ReadyToRun too.
+- **The ReadyToRun column's shape.** A converted program publishes its own code IL-only and golib and the packages
+  ReadyToRun.
 - **Calls are counted from the start.** The converted project sets a call-counting delay of 0
   (`GoCallCountingDelayMs`), so under the JIT and ReadyToRun the runtime starts optimizing hot methods at once. That
   buys a faster steady state at the cost of a slightly longer ReadyToRun start, measured at about 30 ms on this
   machine. `<GoCallCountingDelayMs>runtime</GoCallCountingDelayMs>` restores .NET's own default
   ([Tuning converted code](https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md#net-runtime-settings)).
   Native AOT has no tiers, so the setting does not reach it.
-- **TlsHandshake's Native AOT cell is its first reading.** Under `go.*` 1.24.13.7 that program's Native AOT publish
-  cannot link (`LNK1183`, an object file past the COFF format's 4 GiB limit), so the History table reads n/a there.
-- **Two rows are slower under full optimization than with 1.24.13.7.** IfaceShellChurn and StringMatch take longer
-  under Native AOT than they did with the 1.24.13.7 packages, while both are faster under the JIT and ReadyToRun. Both causes are
-  identified: StringMatch pays a per-use conversion of its string literals, and IfaceShellChurn pays its
-  interface-shell cache on every miss. A program that hits StringMatch's case can convert with `-hoist-literals`
+- **StringMatch and IfaceShellChurn under Native AOT.** Under Native AOT, StringMatch pays a per-use conversion of
+  its string literals, and IfaceShellChurn pays its interface-shell cache on every miss. A program that hits
+  StringMatch's case can convert with `-hoist-literals`
   ([string literals](https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md#string-literals)).
 
 <!-- Sources, all docs/phase4/DATA-hop126-perf.md: the table, section 3 (ratios as that section states them, which
@@ -251,7 +248,7 @@ window, and the Native AOT ratio to the same Go binaries timed again in the Nati
   `@string` (see the [strings reference](https://github.com/ritchiecarroll/go2cs/blob/master/docs/ConversionStrategies-Reference/strings.md#a-non-escaping-stringbyte-local-emits-the-stack-string-sstring)).
   The converter hoists one `sstring` view per call rather than re-materializing it per comparison,
   since the JIT won't lift a `ref struct` view out of a loop on its own. **Runs at about 2× Go in
-  every C# column, fastest under Native AOT** — and the number to watch as the eligibility surface widens.
+  every C# column, fastest under Native AOT.**
   <!-- Design detail: [DESIGN-string-literal-allocation.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DESIGN-string-literal-allocation.md)
        (an internal record; visible link removed 2026-10-26, OQ-1). -->
 - **StringMatch:** literal-heavy hot paths — switch-on-string dispatch, `strings.HasPrefix` against
@@ -266,10 +263,9 @@ window, and the Native AOT ratio to the same Go binaries timed again in the Nati
 - **Sort:** the runtime's `sort.Interface` shim (`Interface<T>`) binds `Len`/`Less`/`Swap` via
   reflection-created delegates — cached, but a delegate hop per comparison.
 - **Channel:** `channel<T>` + goroutine emulation over managed threading vs Go's runtime scheduler —
-  real unbuffered rendezvous, single-fire select, operand-once hoisting. Currently about 2× to 2.6× on
+  real unbuffered rendezvous, single-fire select, operand-once hoisting. About 2× to 2.6× Go on
   this producer→consumer churn: the rendezvous rides managed synchronization primitives where Go's
-  scheduler hands off directly, a cost that planned cooperative-scheduler work addresses. Notably
-  machine-sensitive — measure on your own hardware before drawing conclusions.
+  scheduler hands off directly. Notably machine-sensitive — measure on your own hardware before drawing conclusions.
   <!-- Pre-2026-10-26 wording: "a cost the cooperative-scheduler arc
        ([DESIGN-cooperative-scheduler.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DESIGN-cooperative-scheduler.md))
        owns" (an internal record; visible link removed under OQ-1). -->
@@ -292,8 +288,7 @@ window, and the Native AOT ratio to the same Go binaries timed again in the Nati
   <!-- Optimization directions: [DESIGN-iface-shell-caching.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DESIGN-iface-shell-caching.md)
        (an internal record; visible link removed 2026-10-26, OQ-1). -->
 - **RefLower:** the ж-bound hot path — pointer parameters feeding pointer parameters, address-taken
-  locals, field addresses — after the converter's ref-lowering replaced its heap boxes with native `ref`
-  (before that work this shape ran about 25× Go; the lowering brought the JIT within 3×). Native AOT
+  locals, field addresses — after the converter's ref-lowering replaced its heap boxes with native `ref`. Native AOT
   trails the JIT here by about a quarter.
   <!-- Pre-2026-10-26 wording: "after the ref-lowering arc ... before that arc ... a priced open question for the
        arc's next phase ([DESIGN-zh-box-reduction.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DESIGN-zh-box-reduction.md))"
@@ -320,29 +315,21 @@ The table above shows what a Native AOT binary does at **run time**. It does not
 binary costs to **build**, and the cost is large enough that omitting it would mislead:
 
 - **Build time.** Each benchmark is its own self-contained publish, and ILC compiles the **entire
-  converted-stdlib closure** (~three hundred packages) into it, largely single-threaded (~1.1–1.3
-  effective cores regardless of machine). Measured at the move to .NET 10: **hours per publish** on
-  laptop-class hardware — roughly an order of magnitude over the .NET 9 era on identical input —
-  so a full AOT re-baseline was days serial, overnight when publishes ran concurrently on a
-  high-memory machine.
+  converted-stdlib closure** (~three hundred packages) into it, largely single-threaded. For the current table,
+  each publish took about 9 to 10 minutes on the second machine that compiled the images (Windows, `win-x64`
+  target), and TlsHandshake's took about 26 minutes. A program that references fewer packages publishes faster: a
+  31-package consumer publishes in under four minutes on a hosted Linux runner
+  ([Known issues](https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)).
   <!-- Measured figures and the run series: [DATA-hopN-perf.md](https://github.com/ritchiecarroll/go2cs/blob/master/docs/phase4/DATA-hopN-perf.md)
        (an internal record; visible link removed 2026-10-26, OQ-1). -->
-- **Build memory.** A publish peaked at roughly **15–18 GB working set**, and at 22.2 GB when
-  re-measured on 2026-10-13 (re-measure at each Go or .NET release move — the floor moves with the
-  corpus). A 16 GB machine swaps; concurrent publishes need that much *each*. The produced images
-  are ~300 MB self-contained, sized by the closure rather than the benchmark — while the same
-  binaries **run** in tens of megabytes.
-- **Since 2026-10-14.** The build time and memory above were measured before golib's generic-cycle
-  fix of that day. The fix cut a 31-package consumer's publish from about an hour to under four
-  minutes on a hosted Linux runner
-  ([Known issues](https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)).
-  For the current table, built after the fix, each of this suite's publishes, which compile the
-  whole converted standard library, took about 9 to 10 minutes on a second, higher-memory machine at a 12.4 to
-  13.5 GB compiler peak, for an image of about 182 to 184 MB; TlsHandshake's took about 26 minutes
-  at a 24 GB peak, for a 324 MB image.
+- **Build memory.** On the same machine, the compiler peaked at **12.4 to 13.5 GB working set** per publish,
+  and at 24 GB for TlsHandshake; concurrent publishes need that much *each*. The produced images are about
+  182 to 184 MB self-contained (324 MB for TlsHandshake), sized by the closure rather than the benchmark, while
+  the same binaries **run** in tens of megabytes.
   <!-- Source: docs/phase4/DATA-hop126-perf/aot-manifest-i9-1262.tsv, the 17 go1.26.10.2 lines (the template-default
        drop): wall_s 541-572 (TlsHandshake 1,534), peak_ws_gb (ilc.exe) 12.40-13.48 (TlsHandshake 23.97), size
-       181,559,296-183,959,552 bytes (TlsHandshake 323,766,784). Build host -m:4, affinity 0xF, serial. -->- **Why it is this way.** ILC is a **whole-program** compiler: reachability, the generic
+       181,559,296-183,959,552 bytes (TlsHandshake 323,766,784). Build host -m:4, affinity 0xF, serial. -->
+- **Why it is this way.** ILC is a **whole-program** compiler: reachability, the generic
   instantiation closure, cross-assembly inlining and tree-shaking are all computed per-application
   from that application's roots. Nothing is reusable between applications and there is no
   incremental mode — which is also precisely what pays for the AOT column's wins (the dead-code-free
@@ -412,6 +399,19 @@ How this table differs from the current one:
      carries no GoCallCountingDelayMs, and src/go2cs/hoistedLiteralOperations.go hoists with no opt-in flag (main.go
      has no -hoist-literals). The 1.24.13.7 leg's Go column (go1.24.13) is in w1-runner-report.txt for window 1;
      section 3 does not carry it, so the page does not either. -->
+
+### Native AOT build cost before golib's generic-cycle fix
+
+Before golib's generic-cycle fix of 2026-10-14, a Native AOT publish of one benchmark for `win-x64` took hours. On
+2026-08-24, with Go 1.23.1 and .NET 10, one publish took 11,862 s (about 3.3 hours) on the machine that timed the
+tables, about ten times the 894 to 953 s the .NET 9 compiler took on the same input. The compiler's peak working set
+read 14.9 GB on that machine, and 17.7 GB and 22.2 GB on the second, Windows machine on 2026-08-25 and 2026-10-13.
+
+<!-- Source: docs/phase4/DATA-hopN-perf.md, "RESOLVED 2026-08-24, branch two" riders table: first completed 10-ILC
+     publish 11,862 s wall on the perf-canon host against the 9-era 894-953 s; peak working set 14.9 GB; the i9 farm
+     probe's 17.662 GB (2026-08-25); the i9's PerfIfaceShell publish at 22.2 GB working set (2026-10-13). Moved here
+     2026-11-09 from the honesty footnote's Build time and Build memory bullets, which now carry the current table's
+     figures. -->
 
 ### Go 1.23.1, .NET 10 (SDK 10.0.400) — 2026-08-25
 
@@ -551,11 +551,10 @@ following it down; the AOT column's time cells are broadly flat outside Startup.
 
 ## Performance-floor exploration
 
-A floor exploration compared stock-SDK trim profiles with bflat and found that the floor is a
-trim-rooting question, not a toolchain question.
+A floor exploration on `win-x64` in August 2026 compared stock-SDK trim profiles with bflat and found that the
+Native AOT image-size floor is set by which assemblies the trim roots whole, not by the toolchain.
 <!-- Concluded 2026-08-16. The exploration and its results section:
      [`docs/PLAN-bflat-perf-exploration.md`](https://github.com/ritchiecarroll/go2cs/blob/master/docs/PLAN-bflat-perf-exploration.md)
      (an internal record; visible link removed 2026-10-26, OQ-1). -->
 [`run-performance-floor.ps1`](https://github.com/ritchiecarroll/go2cs/blob/master/src/tests/Performance/run-performance-floor.ps1)
-is its measurement harness and is not part of the canonical suite above. (Links are absolute
-because this file mirrors verbatim to `docs/Performance.md` after each canonical run.)
+is its measurement harness and is not part of the canonical suite above.
