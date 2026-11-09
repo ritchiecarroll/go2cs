@@ -33,6 +33,17 @@
 > [`phase4/DESIGN-pointer-provenance.md`](phase4/DESIGN-pointer-provenance.md) (RATIFIED) and
 > [`phase4/DESIGN-native-backed-slice.md`](phase4/DESIGN-native-backed-slice.md) (RATIFIED, LANDED) —
 > the pointer/slice foundations Phase 3 builds on.
+>
+> **AMENDED 2026-11-08 (lane H) — re-grounded at master `30ad20e17e` (Go 1.26.10, x/tools v0.52.0).** The
+> owner opened cgo foundation work for the `.4` queue. §11 carries the whole re-ground: every cite re-resolved,
+> §2 re-measured with its predictions scored, §4 re-checked against what landed since 2026-08-29, and §5.3 marked
+> **STALE-BY-DESIGN** against the scheduled M:N scheduler. Read §2, §4, §5.3, Phase 1 and Phase 6 **through §11**.
+> Two premises it falsifies: §2 Finding 3's "the `-cgo` flag is inert" (it was a bypass) and Phase 6's "`-tests`
+> and `-recurse` cannot be combined" (they can). Phase 1 step 1 is **landed** (`948b9e8998`, 2026-08-29), so its
+> "severable" exception is spent. The native-call transition seam §5.3 now needs is designed in
+> [`phase4/DESIGN-native-call-seam.md`](phase4/DESIGN-native-call-seam.md). ⟨OQ-1⟩ is **answered YES**, measured
+> by lane P1 on a cgo-capable host (§11.7): go/packages delivers typed declarations for all five kinds, so Phase 1
+> needs no C parser. It is recommended RESOLVED.
 
 ---
 
@@ -584,3 +595,184 @@ than applied as a set.
   strategy plan "fixes a ruled frame — which targets, in which order — and holds its OQ rulings; it
   stays live until its ladder completes," which is exactly this document's shape, and it supplies no
   procedure (that stays in the runbooks). Question closed.
+
+## 11. Amendment 2026-11-08 — the re-ground at master `30ad20e17e` (lane H)
+
+*A dated block, not a rewrite. The sections above stand as written at `be58eb4aa`/`6fcf4be7b`; where this block
+contradicts them, this block is the reading at `30ad20e17e`. Campaign context: the owner opened cgo foundation work
+for the `.4` work queue, explicitly "laying the foundation … so that when the 1.27 hop happens, this is an item
+that can be well accommodated for common use cases", and named M:N as an interacting arc. Step 0 of that campaign
+is this block; step 1 is [`phase4/DESIGN-native-call-seam.md`](phase4/DESIGN-native-call-seam.md); step 2 is §11.3's
+cut.*
+
+### 11.1 §2 re-measured
+
+**Instrument.** The same shape as §2: two fixtures (`fixonly`, one `import "C"` file with a `static int add_ints`
+preamble; `fixmixed`, that file plus one plain `.go` file), a `packages.Load(LoadAllSyntax)` probe on x/tools
+v0.52.0, and go2cs built from `30ad20e17e`, eight arms, each into its own output directory. The host is H, Windows,
+`go version go1.26.10 windows/amd64`, with no gcc, clang or cl on `PATH` and `go env CGO_ENABLED` = `0`: §2
+Finding 1, unchanged. **Predictions were written before any arm ran**, and are scored here as worded.
+
+| Arm | Predicted | Measured | Score |
+|---|---|---|---|
+| P1 `fixonly`, `CGO_ENABLED` unset (go2cs pins 0) | `GoFiles=[]`, soft "build constraints exclude all Go files", WARNING + "Skipping conversion", exit 0; `-cgo=true` identical | exactly that, plus a NEW canonical line `go2cs: error GO2CS1001: build constraints exclude all Go files …`; emits only `go2cs.ico` | **MET.** An ERROR diagnostic beside exit 0: Finding 3's false green **still lives** on this route |
+| P2 `fixmixed`, unset | the cgo file in `IgnoredFiles`, `plain.cs` converts, exit 0, nothing names the dropped file | exactly that | **MET** (S3's ruled "deselected stays quiet" case) |
+| P3 `fixonly`/`fixmixed`, `CGO_ENABLED=1`, no compiler | S3 refuses by name, exit 1, nothing written | go list does **not** run cgo without a compiler: `CompiledGoFiles` is the RAW `add.go`, `Syntax` carries it, plus `could not import C (no metadata for C)` (GO2CS1003). The file IS paired, so S3 stays quiet, and **the visitImportSpec gate Finding 3 called dead code fires**: GO2CS2001, `log.Fatalf`, exit 1, in `fixmixed` **after `plain.cs` is written** | **MISSED on mechanism** (right exit, wrong door, and output written) |
+| P3′ the same, `-cgo=true` | exit 1 too: the driver's refusal does not read the flag | **exit 0**. It emits `add.cs` + csproj + `package_info.cs`, and `add.cs` reads `using C = C_package;` / `C.add_ints(C.@int(a), C.@int(b))`: a package that does not exist, with the preamble dropped | **FALSIFIED.** "The flag is inert" (Finding 3, OQ-5) was false: `-cgo` was a **bypass** turning the gate's exit 1 into an exit-0 untyped emission |
+
+**Finding 4: FIXED at master.** `948b9e8998` (2026-08-29, red-first in `conversionDriver_test.go`) replaced the
+`pkg.GoFiles[i]` walk with `syntaxSourceFiles` (`conversionDriver.go:782-830`), which derives each tree's path
+from its own UNADJUSTED token position and filters by `GoFiles` membership. It removes index pairing rather than
+bounds-patching it. The one residual index pairing is `testFileEntries` (`testConversion.go:2055-2066`), against
+`CompiledGoFiles` and bounds-guarded. That pairing is correct by the API's own contract, and is exposed only to the
+nil-drop caveat (`packages.go:524-525`), for which no red is constructible. It is recorded and not proposed.
+
+**Phase 1 step 2 ("fail loudly"): half landed.** S3 (`80ea656006`, 2026-09-30; owner ruling 578 item 7) refuses a
+SELECTED cgo source by name before any output (`refuseSelectedCgoSources`, `conversionDriver.go:870-905`,
+GO2CS2001). `d3071b1fe7` (2026-11-05) pins every go/packages load to `CGO_ENABLED=0` unless the environment SETS
+it (`loaderEnvironment.go`). **That falsifies Phase 1's "No go2cs `packages.Config` call site overrides
+`CGO_ENABLED`".** A cgo-capable probe through go2cs must set `CGO_ENABLED=1` explicitly, or it silently measures
+cgo off. Relayed to P1's OQ-1 run.
+
+**Finding 5 HOLDS:** no tracked `.go` file imports `"C"` (count 0 at `30ad20e17e`). **Finding 6 is now eight
+accommodations, not three:** the gate (`visitImportSpec.go:270-274`), `classSkip` (`moduleConverter.go:318-319`),
+the preload skip (`importOperations.go:1317-1318`), `noInitPseudoPackages` (`visitImportSpec.go:396`), S3, the
+loader pin, `cgoDynamicImports.go` (`//go:cgo_import_dynamic` binding for darwin trampolines, golib
+`GoCgoDynamicImports`), and `cgoUnsafeArgsLift.go` (Q56's `//go:cgo_unsafe_args` block lift). The last two are
+**bindings**, not avoidance: the first time anything in the tree consumes a cgo directive rather than skipping it.
+
+### 11.2 Every cite, re-resolved (old → `30ad20e17e`)
+
+Content was verified at each new site. "GONE" means the cited code no longer exists.
+
+| Cite in the text above | At `30ad20e17e` |
+|---|---|
+| `conversionDriver.go:89` LoadAllSyntax · `moduleConverter.go:156` · `stdLibConverter.go` | `:113` · `:247-251` · `stdLibLoadConfig` `:282` |
+| `visitImportSpec.go:212-214` | `:270-274` (now also emits GO2CS2001 before `Fatalf`) |
+| `conversionDriver.go:227-228` (the zip) · `:244-246` (marker probe) | **GONE** (`948b9e8998`, §11.1) · `:349-366` |
+| x/tools v0.36.0 `packages.go` `:512` / `:518-519` / `:447-451` | v0.52.0 `:518` / `:524-525` / `:453-456`, text unchanged |
+| `testConversion.go:1183-1187` | `testFileEntries`, `:2055-2066` |
+| `moduleConverter.go:226` · `importOperations.go:1027` | `:318-319` · `:1317-1318` |
+| `Roadmap.md:770-784` | the 5A/5B text is `Roadmap.md:402/421`; the completed half moved to `RoadmapHistory.md:307` |
+| `ToDo.md` item 48 · `ToDo.md:49-51` | `ToDo.md:63` (an `xx)` line pointing here) · `:64` |
+| `ж.NativeBox.cs:31/47/79` · `core/unsafe/unsafe.cs:368-380` | `:31/47/63` (+ `RetainedSource` `:202`) · `:361-367`, `FromBox<T>` `:500` |
+| `slice.cs:430-431` | `:660-661`, the same throw text |
+| `internal/runtime/syscall/linux/syscall_linux_impl.cs:105-119` | **moved under layout L3** to `internal/runtime/syscall/linux/linux/syscall_linux_impl.cs:116-124`; it now cites the converter's own funnel hold (`convSyscallFunnelCall`, `syscallKeepAliveAnalysis.go`) |
+| `PinnedBuffer.Clone` (`1d01200a9`) | `golib/runtime/PinnedBuffer.cs:174` |
+| `Goroutine.cs:202-209` `new Thread(…)` | **GONE**: `Start` (`:1126-1172`) hands off to `GoroutineThreadPool` (`ded04dbdca`, 2026-10-23: threads REUSED, thread-statics reset per body under the `GoroutineThreadState` census, never multiplexed) |
+| `Goroutine.cs:26` · `:83-84` · `:138` · `:176` · `:68` | `:38` · `t_current` `:122` · `OnGoroutine` `:465` · `Enter()` `:516` · `DefaultStackReserve` `:85` (plus `BoundedStackReserve`, 16 MiB, `b8587f92c5`) |
+| `sync/runtime_impl.cs:273` `t_procId` | `:250` |
+| `test-csproj-template.xml:81-85` | `:101-103`, plus a `TEST_READY_TO_RUN` marker. NEW: the production `csproj-template.xml:58-59` sets `PublishReadyToRun` **and `PublishTrimmed=True`** |
+| `main.go:344`: `-tests` with `-recurse` is a hard `log.Fatalln` | **FALSE now**: `main.go:636-641`. `-tests -recurse` is the whole-module driver (`moduleTestsDriver.go`), plain `-recurse` only |
+| `interface_windows_impl.cs` · `structclass_linux_impl.cs` · `signal_posix_impl.cs` | `net/windows/` (L3) · unchanged · unchanged path, now with a darwin flavour (`DESIGN-signal-posix-bridge-darwin.md`) and batch 257's inherited-`SIG_IGN` fix |
+| `security.go` `-fplugin=` · `cmd/cgo/doc.go:324-329` · TIR §2 principle 8 | `:6` · `:339` · `TestingInfrastructureRequirements.md:40` |
+| SHAs `4f06d78ae` `6fcf4be7b` `3174009a8` `a7c964d80` `1d01200a9` `9b4699ff1` `87465f5f5` `0b8287f07` | all resolve |
+
+### 11.3 Phase 1 step 1 is spent, and the replacement cut (ruled)
+
+Step 1 landed (`948b9e8998`), so §1's "one deliberate exception is severable" now names nothing. The re-measure
+supplies three severable correctness bugs in its place, **ruled by COORD as one red-first seat landing after the
+`.3` publish** on branch `claude/h-cgo-gate`:
+
+- **(a)** a package whose every file is excluded, and whose excluded file imports `"C"` and would be selected with
+  cgo on, **exits non-zero naming the cause**. This closes P1's false green. A GOROOT package is exempt: the stdlib
+  converts at `CGO_ENABLED=0` by ruling. Census over std at go1.26.10, three GOOS × two GOARCH: the population is
+  exactly `net/internal/cgotest` (`resstate.go`, `!netgo && cgo && darwin`) on every target, and without the
+  exemption darwin would refuse it and abort a darwin `-stdlib` run;
+- **(b)** a selected file paired with its OWN tree that imports `"C"` (P3's no-compiler route) is refused with S3,
+  **before any file is written**;
+- **(c)** the visitImportSpec gate fires **whatever `-cgo` says**. That honours OQ-5's "keep opt-in" literally: the
+  flag goes back to being inert until a phase gives it something typed to emit. Retiring it stays OQ-5's later
+  ruling, at Phase 6 exit.
+
+### 11.4 §4 re-checked against what has landed since 2026-08-29
+
+- **Layout L3: LANDED and load-bearing.** Flavour folders exist; the keystone file itself moved. §5.2 item 1
+  **STANDS**: L3 models per-GOOS variance and still has no per-libc or per-SDK slot.
+- **Native-backed slice: LANDED, and the family grew** (`DESIGN-native-array-view.md` RATIFIED; Q58's native-backed
+  array pointer designed). The C→Go half is stronger than §4 says.
+- **Pin / lifetime: now doctrine.** `.claude/rules/golib-gen.md` §"The native boundary, class 1: LAYOUT" and
+  "class 2: LIFETIME", plus its pointer-identity / ordering-token section. New since the fork:
+  - the converter's syscall-funnel KeepAlive (`syscallKeepAliveAnalysis.go`: Go's `//go:uintptrkeepalive` set plus
+    two members the moving CLR heap adds);
+  - order TOKENS for reference-bearing boxes (Q44, `ж.PointerTokens.cs`);
+  - `runtime.Pinner` over the CLR heap (Q45, `a38e638fe`);
+  - the native field-view door.
+
+  §4's "Linux syscalls have one funnel to fix; **cgo has none**" is now the problem statement of
+  `DESIGN-native-call-seam.md`: the tree has **four** native-call funnels, and generated cgo wrappers would be a
+  fifth producer into them.
+- **Single-file / R2R: the placement question STANDS and widens.** The test host is self-contained, single-file,
+  RID-pinned and R2R by marker. The production template is R2R **and trimmed**, so Phase 6's native artifact must
+  also keep a generated `[LibraryImport]` / resolver reachable under trimming.
+- **The golib signal bridge: LANDED on linux and darwin** (`PosixSignalRegistration`), with batch 257 on top. §7's
+  signal-coexistence bullet is now a two-flavour interaction.
+- **Landed and load-bearing, but absent from §4:**
+  - the darwin `libcCall` dispatcher (golib `GoLibcCall.cs` + `runtime/darwin/libccall_impl.cs`, a native-call
+    funnel through function pointers);
+  - the cgocaller keystone (`DESIGN-cgocaller-keystone.md`, `syscall/linux/cgocaller_linux_impl.cs`,
+    `[UnmanagedCallersOnly]` shims);
+  - a **managed `syscall.NewCallback`** (`DESIGN-managed-newcallback.md`, `syscall_windows_callback_impl.cs`). That
+    is native→managed re-entry that exists today, so Phase 5's thunk has a working precedent.
+
+### 11.5 §5.3: STALE-BY-DESIGN
+
+§5.3's premise, "one dedicated thread per goroutine, so a blocking cgo call starves nothing", is **still true at
+`30ad20e17e`**: the pool reuses threads and never multiplexes. **But it is now scheduled to become false.** The
+owner has scheduled M:N after `.3`, and lane R's [`DESIGN-mn-scheduler-sizing.md`](DESIGN-mn-scheduler-sizing.md)
+(PROPOSED) names native calls as its §3.7: "a goroutine in a blocking native call holds its worker", syscall handoff
+is in its S3 scope, and its §4.E observes that "a physical thread blocked in a native call still counts against
+`MaxThreadCount`, and nothing starts a replacement". That is Go's `entersyscall` / P-detach problem.
+
+So §5.3 item 1 ("the zero-work default") expires with M:N, as does §8's non-goal "reopening goroutine scheduling".
+Items 2 and 3 **survive and tighten**:
+
+- under M:N a goroutine may resume on a different worker after any park, so errno must be captured on the calling
+  thread **inside** the transition, before exit-native can hand control anywhere;
+- thread-affine C state needs `LockOSThread`, exactly as in Go;
+- a `[SuppressGCTransition]` call must never take the transition's slow path.
+
+All three are designed in `DESIGN-native-call-seam.md` §7. OQ-3's recommendation ("ship nothing") stands for
+thread-hopping and does not extend to the transition seam, which M:N owes regardless.
+
+### 11.6 Phase 6 and OQ-2, re-opened
+
+`-tests -recurse` is now the whole-module driver (§11.2), so a third-party cgo library can be converted **and**
+test-validated in one command, plain `-recurse` only. Phase 6's "two-step flow" fork is therefore no longer forced.
+OQ-2's choice of target is reopened on that basis; Phase 4's static-link gap still binds the obvious third-party
+candidates.
+
+### 11.7 ⟨OQ-1⟩
+
+**ANSWERED 2026-11-08 by lane P1: YES, measured; recommended RESOLVED, Phase 1 needs no C parser.** Host: a linux
+container, go1.26.10, gcc 13.3.0, x/tools v0.52.0, at `30ad20e17e`, with `CGO_ENABLED` set explicitly per arm (the
+§11.1 loader pin would otherwise force it off). Fixture and probe: scratch ref `claude/p1-cgo-oq1-probe` @
+`3d4df404b8`, `docs/phase4/data/cgo-oq1-probe/` (evidence, not for merge).
+
+- **`CGO_ENABLED=1`** (both a `Need*` mode and `LoadAllSyntax`): `GoFiles` is `[fixture.go]`, and `CompiledGoFiles`
+  is three build-cache files: `_cgo_gotypes.go`, `fixture.cgo1.go` (whose `//line` directives point back to
+  `fixture.go`), and `_cgo_import.go`. No compiled file keeps `import "C"`, and every `C.x` is rewritten to a `_C`
+  name. Typed declarations arrive for all five kinds:
+  - a function: `C.add` becomes `_Cfunc_add func(_Ctype_int, _Ctype_int) _Ctype_int`, and `CString`, `free` and
+    `GoString` are typed too;
+  - a struct: `_Ctype_struct_x` with Go-typed fields, a self pointer included, and C base types as named Go types;
+  - a `#define`: `_Ciconst_`, `_Cfconst_` or `_Csconst_`, as an untyped constant;
+  - an enum: `_Ciconst_` values, with `_Ctype_enum_color = uint32`;
+  - a typedef: `_Ctype_xptr = *_Ctype_struct_x`.
+- **`CGO_ENABLED=0`**: the empty package with "build constraints exclude all Go files". §2 Finding 2 is reproduced.
+
+**Routing caveats Phase 1's design inherits** (P1's, recorded as constraints):
+
+- recognize by the `_C` name prefix together with the `//line` positions;
+- FILTER cgo's plumbing rather than convert it: `_cgo_<hash>_Cfunc_*`, `__cgofn_*`, `_Cgo_use`/`_ptr`/`_keepalive`,
+  `_cgoCheckPointer`, `_cgo_runtime_cgocall`, `runtime_throw`;
+- a cgo package's syntax pairs with `CompiledGoFiles` (one `GoFiles` entry against three `Syntax` trees). Today
+  `syntaxSourceFiles` deliberately skips those intermediates by UNADJUSTED path and S3 refuses the package. Phase 1
+  step 3's source mapping is exactly the `//line`-ADJUSTED position that function declines to pair on, now used on
+  purpose;
+- `/*line*/` comments and `//go:cgo_*` directives would leak into a `-comments` emission;
+- the declarations are sized to the TARGET ABI, per GOOS/GOARCH, which is the same axis as layout L3 (and §5.2
+  item 1's per-libc variance still has no slot);
+- a `static` C body arrives only as a typed `_Cfunc_` declaration, so its code still needs Phase 4's native
+  side-build;
+- the converting host needs `CGO_ENABLED=1` plus a C compiler. §2 Finding 1 stands.

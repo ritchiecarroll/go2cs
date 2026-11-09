@@ -34716,4 +34716,56 @@ It was derived from a std source census of `if`/`for`/`switch`/type-switch inits
 
 — H (2026-11-08)
 
+## 2026-11-08 — H (cgo foundation step 1, DESIGN-native-call-seam §9 F-1): linux's Go syscall bracket never reaches the runtime's entersyscall family — OPEN, red-first seat after `.3`, order ruled after G's read
+
+**The class.** Go's `syscall.Syscall` on linux brackets its trap with `runtime_entersyscall()` /
+`runtime_exitsyscall()`, which Go linknames to `runtime.entersyscall` / `exitsyscall`. The converted bracket
+calls `syscall/linux/syscall_linux_impl.cs:72-78`, which bodies both as **empty** ("the CLR's thread model
+already provides what this exists to provide"). So no linux syscall reaches the hand-owned family
+(`runtime/syscall_managed_impl.cs`).
+
+**Two consequences, both read from the code at `30ad20e17e` and not yet measured:**
+- a linux goroutine blocked in `read(2)` through `syscall.Syscall` never reads `_Gsyscall` (`readgstatus`, the
+  goroutine profile);
+- `MainExit`'s returning-main sample does not count it as blocked.
+
+Darwin does both, because its bracket is the converted runtime's own `entersyscall()`. Windows does the second only
+(F-2, below). Under M:N this is the funnel that would never release its P.
+
+**The fix** is two forwarding bodies. **The red needs a linux host** (P1 or G-WSL): a goroutine parked in a
+blocking `syscall.Syscall` read, whose `runtime.GoCurrentGStatus()` should read `_Gsyscall`.
+
+— H (2026-11-08)
+
+## 2026-11-08 — H (cgo foundation step 1, DESIGN-native-call-seam §9 F-2): the windows syscall trampoline moves golib's blocked mark but not the goroutine's `g` status — OPEN, red-first seat after `.3`, order ruled after G's read
+
+**The class.** `syscall/windows/dll_windows.cs` `callNative` brackets every `SyscallN` arity and
+`NativeStructMarshal.CallDeep` with `Goroutine.EnterBlocked()` / `ExitBlocked()` (:239/:269), and reads
+`GetLastError` inside the window (:266). It never calls the runtime's entersyscall family, so the goroutine's `g`
+stays `_Grunning` during a windows syscall. Go's path is `syscall_SyscallN` → `cgocall` → `entersyscall`, so
+a goroutine profile taken during the call reads "syscall" in Go and "running" here.
+
+**The fix** has two shapes, still to be ruled (DESIGN-native-call-seam §11 Q2): call the runtime family across
+the assembly (Go's shape), or have the runtime register its status move with the proposed golib `GoNativeCall`
+once at init. The red is constructible on H: a goroutine blocked in a windows `SyscallN` wait, whose status should
+read `_Gsyscall`.
+
+— H (2026-11-08)
+
+## 2026-11-08 — H (cgo foundation step 1, DESIGN-native-call-seam §9 F-3): a `syscall.NewCallback` callback runs Go code with the goroutine's blocked depth still raised — OPEN, red-first seat after `.3`, order ruled after G's read
+
+**The class.** `syscall_windows_callback_impl.cs` re-enters managed code on the calling thread, through
+`Marshal.GetFunctionPointerForDelegate`, while the trampoline's `EnterBlocked` is still in force. Go's
+`cgocallbackg` runs `exitsyscall` on the way in and `reentersyscall` on the way out. Ours does neither, so a
+goroutine counted in `runningPanicDefers` that runs Go code inside a callback (an `EnumWindows` enumerator, say)
+reads as **blocked** to a returning `main`.
+
+Today the effect is confined to `MainExit`'s sample: it only moves for counted goroutines. Under M:N the same gap
+is a callback running Go code without a P (DESIGN-native-call-seam M7).
+
+**The fix** is the seam's `ReenterManaged` / `ReturnToNative` pair in the callback thunk. Its red is constructible
+on H, the windows lane.
+
+— H (2026-11-08)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
