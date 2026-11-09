@@ -164,6 +164,11 @@ internal static partial uintptr cgocaller(@unsafe.Pointer _Δp0, params ꓸꓸ�
     }
 }
 
+// TEST SEAM (GolibTests is not in syscall's InternalsVisibleTo grant): one arity-1 cgocaller call, so an
+// [UnmanagedCallersOnly] probe can stand in for a cgo_libc_* shim and read the transition from inside it
+// (DESIGN-native-call-seam §13.2, S-b's shape).
+public static uintptr GoCgocaller(uintptr fn, uintptr a1) => cgocaller(fn, a1);
+
 // ---- making the nine pointers non-nil ---------------------------------------------------------------
 // A module initializer, so the fields are populated before any code in this assembly can read them —
 // the same shape runtime uses for goenvs/goargs. It stores managed shim addresses only; no libc
