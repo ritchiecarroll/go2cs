@@ -10362,7 +10362,7 @@ The carrier is uninhabited: no value ever has its type.
 The other two fields need no carrier. `realIface` is a real C# interface with its own name.
 `aliasIface` is a true Go alias (`=`), and Go itself reports the target's name, `Stringer`
 ([Type Aliasing](#type-aliasing)).
-<!-- where no accessibility record is written (a hand-owned file, the -tests bridge unit) the carrier stays in the converted file under the comment "Descriptor carrier for `X` — uninhabited; see GoDescriptorTypeAttribute.": src/go2cs/visitTypeSpec.go:238#bb3d7b -->
+<!-- where no accessibility record is written (a hand-owned file, the -tests bridge unit) the carrier stays in the converted file under the comment "Descriptor carrier for `X` — uninhabited; see GoDescriptorTypeAttribute.": src/go2cs/visitTypeSpec.go:237#bb3d7b -->
 
 **A generic function that passes its type parameter to `reflect.TypeFor` gains a companion, marked `ᴺ`.**
 A generic type argument cannot carry an attribute, and `eface` and `any` are both `object` to the CLR. So
