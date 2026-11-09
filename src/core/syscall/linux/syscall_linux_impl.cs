@@ -67,13 +67,21 @@ namespace go;
 
 partial class syscall_package {
 
-// Releases the P around a blocking kernel call. See the file header: the CLR's thread model
-// already provides what this exists to provide, and the function returns nothing.
+// AMENDED 2026-11-09 (F-1, DESIGN-native-call-seam §9 and §13.2): the pair now FORWARDS, as Go's
+// linkname does. The header's "WHY NOT FORWARD" held for the converted runtime.entersyscall, whose
+// frame intrinsics have no managed realization. It no longer applies: the runtime's hand-owned
+// family (runtime/syscall_managed_impl.cs, S-b) is a managed entersyscall that moves the goroutine
+// to _Gsyscall and opens the transition seam (GoNativeCall), and windows' trampoline already
+// reaches it through these same public forwarders. With the bodies empty, a linux goroutine
+// blocked in read(2) read _Grunning, opened no transition, and a returning main did not count it
+// as blocked (GolibTests' LinuxSyscallTransitionTests, red first on G-WSL).
 internal static partial void runtime_entersyscall() {
+    runtime_package.syscallEntersyscall();
 }
 
-// Reacquires one afterwards. Same reasoning, same shape.
+// Reacquires one afterwards: the status moves back to _Grunning and the transition closes.
 internal static partial void runtime_exitsyscall() {
+    runtime_package.syscallExitsyscall();
 }
 
 // rawSyscallNoError: asm_linux_amd64.s's `SYSCALL; MOVQ AX, r1; MOVQ DX, r2` — the keystone

@@ -158,6 +158,7 @@ jobs:
       nugetgo-feed: ${{ steps.derive.outputs.nugetgo-feed }}
       nugetgo-feed-sha256: ${{ steps.derive.outputs.nugetgo-feed-sha256 }}
       probe-test: ${{ steps.derive.outputs.probe-test }}
+      dns-servers: ${{ steps.derive.outputs.dns-servers }}
       probe-at: ${{ steps.derive.outputs.probe-at }}
       jit-disasm: ${{ steps.derive.outputs.jit-disasm }}
     steps:
@@ -206,10 +207,12 @@ jobs:
 
           # The diagnostic stages' options ride in `filter`, after the stage's own filter, as ;key=value pairs: the
           # dispatch form's input count is guarded (Test-NugetgoBehaviorProof.ps1), and these are options OF those two
-          # stages. golib-tests: jit=PATTERN. stack-probe: test=REGEX (required), at=S,S. An unknown or repeated key, an
-          # empty value, or any option on any other stage FAILS the plan by name rather than being ignored.
-          $probeTest = ''; $probeAt = ''; $jitDisasm = ''
-          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } })
+          # stages. golib-tests: jit=PATTERN. stack-probe: test=REGEX (required), at=S,S. sweep-shard (darwin only):
+          # dns=IP[,IP], the job's resolver (an opt-in for net's NXDOMAIN keys, which the hosted mac resolver answers late;
+          # C1, 2026-11-08). An unknown or repeated key, an empty value, or any option on any other stage FAILS the plan
+          # by name rather than being ignored.
+          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''
+          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns' } })
           if ($optionKeys.Count) {
               $parts = @($filter -split ';')
               $filter = $parts[0].Trim()
@@ -232,8 +235,14 @@ jobs:
                   Write-Host "stack-probe: row $filter, -TestFilter $probeTest, dumps at $probeAt s"
               }
               if ($jitDisasm) { Write-Host "golib-tests: JIT listing for '$jitDisasm' (tiering off)" }
+              if ($seen.ContainsKey('dns')) {
+                  if ($goos -ne 'darwin') { throw "sweep-shard filter option dns= sets a mac runner's resolver and applies to goos darwin only; got goos '$goos'." }
+                  $dnsServers = $seen['dns'] -replace '\s', ''
+                  if ($dnsServers -notmatch '^\d{1,3}(\.\d{1,3}){3}(,\d{1,3}(\.\d{1,3}){3})*$') { throw "sweep-shard filter option dns= must be a comma-separated IPv4 list; got '$dnsServers'." }
+                  Write-Host "sweep-shard: the job's resolver is set to $dnsServers before the sweep (opt-in; the effective resolver is logged)"
+              }
           }
-          elseif ($filter -match '(^|;)\s*(jit|test|at)\s*=') { throw "filter options (;key=value) apply to stages golib-tests and stack-probe only; got stage '$stage' and filter '$filter'." }
+          elseif ($filter -match '(^|;)\s*(jit|test|at|dns)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe and sweep-shard only; got stage '$stage' and filter '$filter'." }
 
           # The behavioral stages' per-program run budget. A schedule has no inputs and keeps 120, as
           # does a blank dispatch. A value that is not a whole number of seconds in 1..1800 FAILS the
@@ -441,6 +450,7 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "probe-test=$probeTest" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "probe-at=$probeAt" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "jit-disasm=$jitDisasm" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "dns-servers=$dnsServers" -Encoding utf8
 
   # ---------------------------------------------------------------------------------------------
   # pack — release-smoke only: the release's own pack, as a rehearsal, on a hosted Windows runner.
@@ -1507,6 +1517,85 @@ jobs:
           }
 
           exit $exit
+
+      # -------------------------------------------------------------------------------------
+      # sweep-shard's opt-in resolver (C1, 2026-11-08): net's TestLookupNoSuchHost NXDOMAIN keys fail on the hosted mac
+      # runners because the image's resolver answers an invalid name late or not as NXDOMAIN. With filter option
+      # dns=IP[,IP] this step times NXDOMAIN for invalid.invalid through Go's resolvers (default, netdns=go,
+      # netdns=cgo), sets the job's DNS servers on every enabled network service, flushes the caches, logs the effective
+      # resolver, and times the lookups again. Every line starts DNSPROBE. It never fails the job: the sweep's verdict is
+      # read as usual, with the resolver in the log.
+      # -------------------------------------------------------------------------------------
+      - name: Sweep shard — the job's resolver (opt-in, darwin)
+        if: needs.plan.outputs.stage == 'sweep-shard' && needs.plan.outputs.dns-servers != ''
+        shell: bash
+        env:
+          DNS_SERVERS: ${{ needs.plan.outputs.dns-servers }}
+        run: |
+          probe_dir="$RUNNER_TEMP/dnsprobe"
+          mkdir -p "$probe_dir"
+          cat > "$probe_dir/main.go" <<'GO'
+          package main
+
+          import (
+          	"context"
+          	"errors"
+          	"fmt"
+          	"net"
+          	"os"
+          	"time"
+          )
+
+          func main() {
+          	label := os.Args[1]
+          	for _, kind := range []string{"MX", "NS", "TXT", "HOST"} {
+          		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+          		started := time.Now()
+          		var err error
+          		switch kind {
+          		case "MX":
+          			_, err = net.DefaultResolver.LookupMX(ctx, "invalid.invalid")
+          		case "NS":
+          			_, err = net.DefaultResolver.LookupNS(ctx, "invalid.invalid")
+          		case "TXT":
+          			_, err = net.DefaultResolver.LookupTXT(ctx, "invalid.invalid")
+          		case "HOST":
+          			_, err = net.DefaultResolver.LookupHost(ctx, "invalid.invalid")
+          		}
+          		elapsed := time.Since(started)
+          		cancel()
+          		var dnsErr *net.DNSError
+          		notFound, timeout, server := false, false, ""
+          		if errors.As(err, &dnsErr) {
+          			notFound, timeout, server = dnsErr.IsNotFound, dnsErr.IsTimeout, dnsErr.Server
+          		}
+          		fmt.Printf("DNSPROBE %s kind=%s ms=%d notfound=%v timeout=%v server=%q err=%v\n",
+          			label, kind, elapsed.Milliseconds(), notFound, timeout, server, err)
+          	}
+          }
+          GO
+          probe() {
+            for mode in default go cgo; do
+              if [ "$mode" = default ]; then godebug=""; else godebug="netdns=$mode"; fi
+              (cd "$probe_dir" && GODEBUG="$godebug" go run main.go "phase=$1 resolver=$mode") || echo "DNSPROBE phase=$1 resolver=$mode probe-exit=$?"
+            done
+          }
+          resolvers() {
+            echo "DNSPROBE phase=$1 resolv.conf: $(grep -E '^nameserver' /etc/resolv.conf | tr '\n' ' ')"
+            echo "DNSPROBE phase=$1 scutil: $(scutil --dns | grep -E 'nameserver\[' | sort -u | tr -s ' ' | tr '\n' ' ')"
+          }
+          resolvers before
+          probe before
+          servers="${DNS_SERVERS//,/ }"
+          networksetup -listallnetworkservices | tail -n +2 | grep -v '^\*' | while IFS= read -r svc; do
+            sudo networksetup -setdnsservers "$svc" $servers && echo "DNSPROBE set: '$svc' -> $servers"
+          done
+          sudo dscacheutil -flushcache
+          sudo killall -HUP mDNSResponder || true
+          sleep 2
+          resolvers after
+          probe after
+          exit 0
 
       # -------------------------------------------------------------------------------------
       # sweep-shard — a filtered validated sweep against `go test -json` on this platform.
