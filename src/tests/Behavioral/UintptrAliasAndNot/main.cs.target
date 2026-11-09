@@ -17,9 +17,9 @@ partial struct n64 /*num:uint64*/;
 
 internal static UntypedInt shift => 4;
 
-internal static ui top(nint l) { return (ui)(((ui)l) & ~15); }
+internal static ui top(nint l) { return (ui)(((ui)l) & ~(ui)15); }
 
-internal static np topNamed(nint l) { return (np)(((np)(uintptr)l) & ~15); }
+internal static np topNamed(nint l) { return (np)(((np)(uintptr)l) & ~(np)15); }
 
 internal static void Main() {
     fmt.Println(top(37), top(16), top(0));
@@ -29,26 +29,26 @@ internal static void Main() {
     fmt.Println(a);
 
     var b = (ui)0xFFFF;
-    fmt.Println((ui)(b & ~(uintptr)((1 << (int)(shift)) - 1)), (ui)(b & (uintptr)((1 << (int)(shift)) - 1)), (ui)(b | (ui)((uintptr)1 << (int)(shift))));
+    fmt.Println((ui)(b & ~(ui)((1 << (int)(shift)) - 1)), (ui)(b & (ui)((1 << (int)(shift)) - 1)), (ui)(b | (ui)((uintptr)1 << (int)(shift))));
 
     ni n = -37;
-    fmt.Println((ni)(n & ~15), (ni)(n & ~-16));
+    fmt.Println((ni)(n & ~(ni)15), (ni)(n & ~(ni)(-16)));
 
     nu u = 0xABCD;
-    fmt.Println((nu)(u & ~0xFF), (nu)(u & ~(nuint)((1 << (int)(shift)) - 1)));
+    fmt.Println((nu)(u & ~(nu)0xFF), (nu)(u & ~(nu)((1 << (int)(shift)) - 1)));
 
     u64 w = ~((u64)0);
-    fmt.Println((u64)(w & ~1), (u64)(w & ~((u64)((uint64)1 << 63))));
+    fmt.Println((u64)(w & ~(u64)1), (u64)(w & ~((uint64)1 << 63)));
     w &= unchecked((u64)~(u64)(0xF0));
     fmt.Println(w);
 
     fmt.Println(topNamed(37), topNamed(16));
 
     nw x = (nw)0xABCD;
-    fmt.Println((nw)(x & ~0xFF), (nw)(x & ~1));
+    fmt.Println((nw)(x & ~(nuint)0xFF), (nw)(x & ~(nuint)1));
 
     var y = ~((n64)((n64)0));
-    fmt.Println((n64)(y & ~1), (n64)(y & ~0xFFFF));
+    fmt.Println((n64)(y & ~(uint64)1), (n64)(y & ~(uint64)0xFFFF));
 }
 
 } // end main_package
