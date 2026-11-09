@@ -88,6 +88,48 @@ partial class runtime_package
 
     public static void syscallExitsyscall() => exitsyscall();
 
+    // A native-to-Go callback (syscall.NewCallback's shim) crosses as Go's cgocallbackg does: exitsyscall on the way
+    // in, reentersyscall on the way out (DESIGN-native-call-seam §6.3, F-3). In order: the seam's ReenterManaged first
+    // (the P reacquired, under M:N), then _Gsyscall -> _Grunning; on the way out, the status back first, then
+    // ReturnToNative. Under M:N the goroutine is implicitly locked to its thread for the whole callback, because a
+    // native frame is below it (§12.1's M7); under today's 1:1 model it always is.
+    //
+    // The crossing is INERT where there is no native call to come back from: a thread with no goroutine identity (a
+    // callback on a thread a C library created), or a callback pointer invoked outside any bracketed call. Go throws
+    // in that case. Here a throw would escape into native code and abort the process, so the crossing does nothing
+    // and the callback runs as plain Go code. The returned flags tell the exit what the entry did: 1, the seam was
+    // re-entered; 2, the status moved. The status moves only where it is _Gsyscall, so a crossing opened by
+    // GoNativeCall alone (no runtime family below it) re-enters the seam and leaves the status as it found it.
+    public static int syscallCallbackEnter()
+    {
+        int depth = GoNativeCall.TransitionDepth;
+
+        if (depth <= 0 || (depth & 1) == 0)
+            return 0;
+
+        GoNativeCall.ReenterManaged();
+
+        ж<g> gp = getg();
+
+        return gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Gsyscall, (uint32)_Grunning) ? 3 : 1;
+    }
+
+    public static void syscallCallbackExit(int entered)
+    {
+        if (entered == 0)
+            return;
+
+        if ((entered & 2) != 0)
+        {
+            ж<g> gp = getg();
+
+            if (!gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Grunning, (uint32)_Gsyscall))
+                throw new PanicException($"runtime: a callback returns to native code on goroutine {gp.Value.goid} whose status is {readgstatus(gp)}, not _Grunning ({(uint32)_Grunning})");
+        }
+
+        GoNativeCall.ReturnToNative();
+    }
+
     // TEST SEAMS (pinner_impl.cs's pattern; GolibTests is not in the InternalsVisibleTo grant).
     public static void GoEntersyscall() => entersyscall();
 

@@ -132,6 +132,10 @@ partial class syscall_package
     // `Delegate.CreateDelegate` retargets whatever converted delegate shape the caller passed onto a
     // `Func<…>` of the same signature, which is what makes the forward TYPED. The lambda then does
     // the reinterprets. The returned shim is non-generic and therefore marshallable.
+    //
+    // Each shim crosses back into Go as cgocallbackg does, through the runtime's callback pair
+    // (syscallCallbackEnter / syscallCallbackExit; DESIGN-native-call-seam §6.3, F-3): the Go function runs
+    // _Grunning, one transition level inside the native call that called it back.
 
     private static class GoCallbackBinder0<TR>
     {
@@ -139,7 +143,13 @@ partial class syscall_package
         {
             goCallbackCheckResult<TR>();
             var f = (Func<TR>)Delegate.CreateDelegate(typeof(Func<TR>), d.Target, d.Method);
-            return new GoCallbackShim0(() => goCallbackToWord(f()));
+            return new GoCallbackShim0(() =>
+            {
+                int entered = runtime_package.syscallCallbackEnter();
+
+                try { return goCallbackToWord(f()); }
+                finally { runtime_package.syscallCallbackExit(entered); }
+            });
         }
     }
 
@@ -150,7 +160,13 @@ partial class syscall_package
             goCallbackCheckArg<T1>();
             goCallbackCheckResult<TR>();
             var f = (Func<T1, TR>)Delegate.CreateDelegate(typeof(Func<T1, TR>), d.Target, d.Method);
-            return new GoCallbackShim1(a1 => goCallbackToWord(f(goCallbackFromWord<T1>(a1))));
+            return new GoCallbackShim1(a1 =>
+            {
+                int entered = runtime_package.syscallCallbackEnter();
+
+                try { return goCallbackToWord(f(goCallbackFromWord<T1>(a1))); }
+                finally { runtime_package.syscallCallbackExit(entered); }
+            });
         }
     }
 
@@ -161,8 +177,13 @@ partial class syscall_package
             goCallbackCheckArg<T1>(); goCallbackCheckArg<T2>();
             goCallbackCheckResult<TR>();
             var f = (Func<T1, T2, TR>)Delegate.CreateDelegate(typeof(Func<T1, T2, TR>), d.Target, d.Method);
-            return new GoCallbackShim2((a1, a2) => goCallbackToWord(
-                f(goCallbackFromWord<T1>(a1), goCallbackFromWord<T2>(a2))));
+            return new GoCallbackShim2((a1, a2) =>
+            {
+                int entered = runtime_package.syscallCallbackEnter();
+
+                try { return goCallbackToWord(f(goCallbackFromWord<T1>(a1), goCallbackFromWord<T2>(a2))); }
+                finally { runtime_package.syscallCallbackExit(entered); }
+            });
         }
     }
 
@@ -175,9 +196,17 @@ partial class syscall_package
             goCallbackCheckResult<TR>();
             var f = (Func<T1, T2, T3, T4, TR>)Delegate.CreateDelegate(
                 typeof(Func<T1, T2, T3, T4, TR>), d.Target, d.Method);
-            return new GoCallbackShim4((a1, a2, a3, a4) => goCallbackToWord(
-                f(goCallbackFromWord<T1>(a1), goCallbackFromWord<T2>(a2),
-                  goCallbackFromWord<T3>(a3), goCallbackFromWord<T4>(a4))));
+            return new GoCallbackShim4((a1, a2, a3, a4) =>
+            {
+                int entered = runtime_package.syscallCallbackEnter();
+
+                try
+                {
+                    return goCallbackToWord(f(goCallbackFromWord<T1>(a1), goCallbackFromWord<T2>(a2),
+                                              goCallbackFromWord<T3>(a3), goCallbackFromWord<T4>(a4)));
+                }
+                finally { runtime_package.syscallCallbackExit(entered); }
+            });
         }
     }
 
