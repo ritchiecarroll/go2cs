@@ -5192,12 +5192,15 @@ healthy run look hung — and, in the other direction, what lets a hung one look
     in the ledger header. Bits: 0x1 HUP, 0x2 INT, 0x4 QUIT. Measured on a linux container: foreground 0x0; `cmd &`
     from a shell with job control on (`$-` contains `m`, e.g. a terminal) leaves INT default; `cmd &` from a script or
     `bash -c` (no job control) 0x6; a subshell `( cmd & )` 0x6 even under job control; `nohup` adds 0x1; `setsid`
-    changes no disposition; `env --default-signal=INT` clears 0x2. The .2 leg ran `setsid nohup ... & disown` with job
-    control (0x1), and the .3 legs ran `( setsid nohup ... & )` (0x7). The bank reads in the DEFAULT shape (INT
-    clear), the shape cmd/go gives Go's test binary. The ignored shape is the signal bridge's regression arm, read
-    whenever golib's signal code changes; a row that differs between the two shapes is posted, never banked from the
-    ignored one. A launch that gives the DEFAULT shape:
-    `( env --default-signal=INT setsid nohup ./run.sh > out 2>&1 < /dev/null & )`. The ledger states the bits it read.
+    changes no disposition; `env --default-signal=INT` clears 0x2, and `env --default-signal=INT,QUIT` clears 0x6. The .2
+    leg ran `setsid nohup ... & disown` with job control (0x1), and the .3 legs ran `( setsid nohup ... & )` (0x7). The
+    bank reads in the DEFAULT shape (INT and QUIT clear), the shape cmd/go gives Go's test binary: on unix `go test`
+    Notifies both before it execs the binary (`cmd/go/internal/base/signal_unix.go:14`, `signalsToIgnore =
+    []os.Signal{os.Interrupt, syscall.SIGQUIT}`), so a converted host left with QUIT ignored reads Go's SIGQUIT tests
+    against a binary that never was. The ignored shape is the signal bridge's regression arm, read whenever golib's
+    signal code changes; a row that differs between the two shapes is posted, never banked from the ignored one. A
+    launch that gives the DEFAULT shape:
+    `( env --default-signal=INT,QUIT setsid nohup ./run.sh > out 2>&1 < /dev/null & )`. The ledger states the bits it read.
     Why: at 72043c1a66 linux `os` and `os/signal` DIVERGED in the ignored shape (an inherited SIG_IGN on SIGINT plus
     signal.Notify killed the converted host), fixed by batch 257, and the signal census banked from G-WSL's
     DEFAULT-shape re-read at 30ad20e17e. **Step text:** the linux leg's act, AMENDED 2026-11-08.
@@ -5205,7 +5208,13 @@ healthy run look hung — and, in the other direction, what lets a hung one look
          runbook-sigign-paragraph.md), text as written except its sentence on the bank's shape, which is COORD's ruled
          text verbatim (brief 2026-11-08 18:31Z); the example launch line and the ledger sentence are P1's. The 'Why'
          line is the bank's own record: COORD rulings 07:36 (the linux SIGINT root, G), 08:16 (the SIGINT seat
-         accepted), 10:01 (batch 257 landed) and the 1.26.10.3 bank assembly's linux fold (rereads/GWSL-RR-dfl.tsv). -->
+         accepted), 10:01 (batch 257 landed) and the 1.26.10.3 bank assembly's linux fold (rereads/GWSL-RR-dfl.tsv).
+         AMENDED 2026-11-08 (G's review of the bank assembly, finding F1, COORD ruling): the DEFAULT shape was "INT
+         clear" and the example launch reset INT alone, but cmd/go clears an inherited ignore on BOTH SIGINT and SIGQUIT
+         on unix (signal_unix.go:14; signal_notunix.go:13 has os.Interrupt alone), so the default shape is INT and QUIT
+         clear and the example resets both. The bank's own census read was not affected: G-WSL's DEFAULT column reset
+         both, and its converter read SigIgn 0x0. -->
+
 
 <!-- SEED COVERAGE (owner order 2026-09-23; ledger 2026-09-23 14:52 · OWNER ORDER · c9e15c73a0), each verified against the cited source:
   1 hosts before the hop: DNS (relay NXDOMAIN->SERVFAIL, per-box public IPv4, IPv6 unbound) .......... 42 (+ the Readiness Host bullet)

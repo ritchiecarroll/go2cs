@@ -290,7 +290,9 @@ else {
     }
 }
 
-$x = [xml](Get-Content -Raw (Join-Path $SrcRoot 'version.props'))
+# ReadAllText, not Get-Content: Windows PowerShell 5.1 reads BOM-less UTF-8 (version.props' comments carry em dashes)
+# as the ANSI code page (the binary-compatibility guard's suppression files, 2026-11-08).
+$x = [xml][System.IO.File]::ReadAllText((Join-Path $SrcRoot 'version.props'))
 $p = $x.Project.PropertyGroup
 $ver = "$($p.GoStdLibVersion).$($p.GoBuildNumber)".Trim()
 Write-Host "  version          : $ver"

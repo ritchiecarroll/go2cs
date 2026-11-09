@@ -1,0 +1,5 @@
+windows-amd64: staged-written 1949 compared, 1949 identical to committed, 0 differ, 0 without a committed counterpart
+linux-amd64: staged-written 2024 compared, 2024 identical to committed, 0 differ, 0 without a committed counterpart
+darwin-amd64: staged-written 2021 compared, 2021 identical to committed, 0 differ, 0 without a committed counterpart
+
+[exited with code 0]

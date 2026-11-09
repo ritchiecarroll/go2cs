@@ -1,0 +1,16 @@
+package main
+
+type flagSet [2]uint8
+
+type Features *flagSet // TS dep: klauspost/cpuid/v2
+
+func (s *flagSet) hasSetP(o *flagSet) bool { return s[0]&o[0] == o[0] }
+
+type CPU struct{ fs flagSet }
+
+func (c *CPU) HasAll(f Features) bool { return c.fs.hasSetP(f) }
+
+func main() {
+	c := &CPU{fs: flagSet{3, 0}}
+	println(c.HasAll(&flagSet{1, 0}), c.HasAll(&flagSet{4, 0}))
+}

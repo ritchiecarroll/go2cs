@@ -1,0 +1,12 @@
+package main
+
+import (
+	"repro/c5vendoredpath/lib"
+
+	"golang.org/x/text/transform"
+)
+
+func main() {
+	s, _, _ := transform.String(lib.Nop(), "abc")
+	println(s)
+}

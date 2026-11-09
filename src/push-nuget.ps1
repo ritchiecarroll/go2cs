@@ -2146,9 +2146,13 @@ Write-Step "Pack paths: CLEAN -- no absolute path in any assembly or symbol file
 # ran: the assets it compared must equal the baselines' assets. docs\phase4\DESIGN-binary-compat-guard.md.
 . (Join-Path $PSScriptRoot '_nugetpush.ps1')
 $apiCompatWork = Join-Path ([System.IO.Path]::GetTempPath()) ('go2cs-apicompat-' + [guid]::NewGuid().ToString('N'))
+# The release this run stands for. A pack-only run (a dry run or a -VersionSuffix rehearsal) packs at version.props'
+# build, which is the LAST-PUBLISHED one, so its own version's baseline is a revision the release does not follow;
+# it is compared with what the would-be release follows instead (GoApiCompat.psm1, Invoke-GoApiCompatGuard).
+$guardReleaseVersion = if ($dryRun) { $wouldBeVersion } else { $fullVersion }
 try {
     $apiCompat = Invoke-GoApiCompatGuard -Packages $pkgs -RepoRoot $repoRoot -WorkDir $apiCompatWork `
-        -FlatContainer $ApiCompatFlatContainer `
+        -FlatContainer $ApiCompatFlatContainer -ReleaseVersion $guardReleaseVersion `
         -Identity { param($path) Get-GoNuGetPackageIdentity $path } `
         -SuppressionFor { param($id) $suppressionMap[$id] }
 }
@@ -2169,7 +2173,7 @@ if ($apiCompatFailures.Count -gt 0) {
            "announced in the release notes, and ships with the nugetgo rebuild wave (DESIGN-binary-compat-guard.md section 6)")
 }
 Write-Step ("Binary compatibility: CLEAN -- $($apiCompat.Compared) asset(s) of $($apiCompat.Packages) package(s) compared " +
-            "with their baselines by apicompat $apiCompatVersion; $($apiCompat.NoBaseline.Count) package(s) with no " +
+            "with the revisions before $guardReleaseVersion by apicompat $apiCompatVersion; $($apiCompat.NoBaseline.Count) package(s) with no " +
             "published version on this line (reported, not gated)")
 if ($apiCompat.NoBaseline.Count -gt 0) { Write-Host "  no baseline: $($apiCompat.NoBaseline -join ', ')" }
 if ($apiCompat.NoSurface.Count -gt 0) { Write-Host "  no lib/ or runtimes/ asset to compare (an analyzer): $($apiCompat.NoSurface -join ', ')" }

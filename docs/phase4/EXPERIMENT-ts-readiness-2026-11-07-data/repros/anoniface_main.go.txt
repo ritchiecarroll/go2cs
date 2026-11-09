@@ -1,0 +1,12 @@
+package main
+
+import "repro/anoniface/dbg"
+
+type N struct{ k string }
+
+func (n *N) K() string { return n.k }
+
+func main() {
+	// Implicit conversion of *N to another package's anonymous interface parameter type.
+	println(dbg.Fail(&N{k: "x"}))
+}

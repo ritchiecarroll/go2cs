@@ -1,0 +1,11 @@
+package main
+
+import "unsafe"
+
+type ptr = unsafe.Pointer // TS dep: zeebo/xxh3 utils.go
+
+func main() {
+	x := uint64(42)
+	var p ptr = unsafe.Pointer(&x)
+	println(*(*uint64)(p))
+}

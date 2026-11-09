@@ -1,0 +1,3 @@
+package vfs
+
+type FileInfo struct{ Name string }

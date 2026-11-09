@@ -1,0 +1,198 @@
+diff -ru recurse/src/github.com/microsoft/TypeScript/tsc/internal/ast/package_info.cs recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ast/package_info.cs
+--- recurse/src/github.com/microsoft/TypeScript/tsc/internal/ast/package_info.cs	2026-11-07 16:37:03.038788000 -0600
++++ recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ast/package_info.cs	2026-11-07 17:38:49.042580900 -0600
+@@ -17,6 +17,7 @@
+ 
+ using go;
+ using static go.github.com.microsoft.TypeScript.tsc.@internal.ast_package;
++[assembly: GoImplement<Node, go.github.com.microsoft.TypeScript.tsc.@internal.debug_package.FailBadSyntaxKind_node>(Pointer = true)]
+ 
+ // For encountered type alias declarations, e.g., `type Table = map[string]int`,
+ // go2cs code converter will generate a `global using` statement for the alias in
+diff -ru recurse/src/github.com/microsoft/TypeScript/tsc/internal/ast/utilities.cs recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ast/utilities.cs
+--- recurse/src/github.com/microsoft/TypeScript/tsc/internal/ast/utilities.cs	2026-11-07 16:37:03.063855200 -0600
++++ recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ast/utilities.cs	2026-11-07 17:38:49.042580900 -0600
+@@ -4405,7 +4405,7 @@
+     var result = TryGetImportFromModuleSpecifier(Ꮡnode); if (result != nil) {
+         return result;
+     }
+-    debug.FailBadSyntaxKind(new Nodeжinterface{KindString() string}(node.Parent));
++    debug.FailBadSyntaxKind(new NodeжFailBadSyntaxKind_node(node.Parent));
+     return default;
+ }
+ 
+diff -ru recurse/src/github.com/microsoft/TypeScript/tsc/internal/ls/importTracker.cs recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ls/importTracker.cs
+--- recurse/src/github.com/microsoft/TypeScript/tsc/internal/ls/importTracker.cs	2026-11-07 16:58:36.108708300 -0600
++++ recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ls/importTracker.cs	2026-11-07 17:38:49.042580900 -0600
+@@ -310,7 +310,7 @@
+                 break;
+             }
+             default: {
+-                debug.FailBadSyntaxKind(new ast_Nodeжinterface{KindString() string}(direct), "Unexpected import kind.");
++                debug.FailBadSyntaxKind(new ast_NodeжFailBadSyntaxKind_node(direct), "Unexpected import kind.");
+                 break;
+             }}
+ 
+diff -ru recurse/src/github.com/microsoft/TypeScript/tsc/internal/ls/inlay_hints.cs recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ls/inlay_hints.cs
+--- recurse/src/github.com/microsoft/TypeScript/tsc/internal/ls/inlay_hints.cs	2026-11-07 16:58:36.208062100 -0600
++++ recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ls/inlay_hints.cs	2026-11-07 17:38:49.043580200 -0600
+@@ -862,7 +862,7 @@
+             break;
+         }
+         default: {
+-            debug.FailBadSyntaxKind(new ast_Nodeжinterface{KindString() string}(nodeΔ1));
++            debug.FailBadSyntaxKind(new ast_NodeжFailBadSyntaxKind_node(nodeΔ1));
+             break;
+         }}
+ 
+diff -ru recurse/src/github.com/microsoft/TypeScript/tsc/internal/ls/package_info.cs recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ls/package_info.cs
+--- recurse/src/github.com/microsoft/TypeScript/tsc/internal/ls/package_info.cs	2026-11-07 16:58:36.204510500 -0600
++++ recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ls/package_info.cs	2026-11-07 17:38:49.045579000 -0600
+@@ -144,6 +144,7 @@
+ 
+ using go;
+ using static go.github.com.microsoft.TypeScript.tsc.@internal.ls_package;
++[assembly: GoImplement<go.github.com.microsoft.TypeScript.tsc.@internal.ast_package.Node, go.github.com.microsoft.TypeScript.tsc.@internal.debug_package.FailBadSyntaxKind_node>(Pointer = true)]
+ 
+ // For encountered type alias declarations, e.g., `type Table = map[string]int`,
+ // go2cs code converter will generate a `global using` statement for the alias in
+diff -ru recurse/src/github.com/microsoft/TypeScript/tsc/internal/ls/symbols.cs recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ls/symbols.cs
+--- recurse/src/github.com/microsoft/TypeScript/tsc/internal/ls/symbols.cs	2026-11-07 16:58:36.210174100 -0600
++++ recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ls/symbols.cs	2026-11-07 17:38:49.046579200 -0600
+@@ -37,7 +37,7 @@
+     var (_, @file) = l.getProgramAndFile(documentURI);
+     var projections = appendꓸꓸꓸ(slice<ж<ast.SourceFile>>([@file]), @file.SupplementalSourceFiles());
+     ref var symbols = ref heap<slice<ж<lsproto.DocumentSymbol>>>(out var Ꮡsymbols);
+-    ref var seen = ref heap(new collections.Set<struct{name string; kind github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.SymbolKind; rng github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto.Range}>(), out var Ꮡseen);
++    ref var seen = ref heap(new collections.Set<ProvideDocumentSymbols_key>(), out var Ꮡseen);
+     foreach (var (_, projection) in range(projections)) {
+         foreach (var (_, symbol) in range(Ꮡl.getDocumentSymbolsForChildren(ctx, projection.of(ast.SourceFile.ᏑNodeBase).of(ast.NodeBase.ᏑNodeDefault).AsNode(), projection))) {
+             var key = new ProvideDocumentSymbols_key(symbol.Name, symbol.Kind, symbol.Range);
+diff -ru recurse/src/github.com/microsoft/TypeScript/tsc/internal/pseudochecker/lookup.cs recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/pseudochecker/lookup.cs
+--- recurse/src/github.com/microsoft/TypeScript/tsc/internal/pseudochecker/lookup.cs	2026-11-07 16:45:43.904805900 -0600
++++ recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/pseudochecker/lookup.cs	2026-11-07 17:38:49.043580200 -0600
+@@ -19,7 +19,7 @@
+         return ch.createReturnFromSignature(ᏑsignatureNode);
+     }
+     default: {
+-        debug.FailBadSyntaxKind(new ast_Nodeжinterface{KindString() string}(ᏑsignatureNode), "Node needs to be an inferrable node");
++        debug.FailBadSyntaxKind(new ast_NodeжFailBadSyntaxKind_node(ᏑsignatureNode), "Node needs to be an inferrable node");
+         return default;
+     }}
+ 
+@@ -74,7 +74,7 @@
+         return NewPseudoTypeNoResult(Ꮡnode);
+     }
+     default: {
+-        debug.FailBadSyntaxKind(new ast_Nodeжinterface{KindString() string}(Ꮡnode), "node needs to be an inferrable node");
++        debug.FailBadSyntaxKind(new ast_NodeжFailBadSyntaxKind_node(Ꮡnode), "node needs to be an inferrable node");
+         return default;
+     }}
+ 
+@@ -528,7 +528,7 @@
+     if (inner.Kind == ast.KindNumericLiteral) {
+         return NewPseudoTypeMaybeConstLocation(Ꮡnode.of(ast.PrefixUnaryExpression.ᏑUpdateExpressionBase).of(ast.UpdateExpressionBase.ᏑUnaryExpressionBase).of(ast.UnaryExpressionBase.ᏑExpressionBase).of(ast.ExpressionBase.ᏑNodeBase).of(ast.NodeBase.ᏑNodeDefault).AsNode(), NewPseudoTypeNumericLiteral(expr.AsNode()), PseudoTypeNumber);
+     }
+-    debug.FailBadSyntaxKind(new ast_Nodeжinterface{KindString() string}(inner));
++    debug.FailBadSyntaxKind(new ast_NodeжFailBadSyntaxKind_node(inner));
+     return default;
+ }
+ 
+diff -ru recurse/src/github.com/microsoft/TypeScript/tsc/internal/pseudochecker/package_info.cs recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/pseudochecker/package_info.cs
+--- recurse/src/github.com/microsoft/TypeScript/tsc/internal/pseudochecker/package_info.cs	2026-11-07 16:45:43.978802100 -0600
++++ recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/pseudochecker/package_info.cs	2026-11-07 17:38:49.045579000 -0600
+@@ -23,6 +23,7 @@
+ 
+ using go;
+ using static go.github.com.microsoft.TypeScript.tsc.@internal.pseudochecker_package;
++[assembly: GoImplement<go.github.com.microsoft.TypeScript.tsc.@internal.ast_package.Node, go.github.com.microsoft.TypeScript.tsc.@internal.debug_package.FailBadSyntaxKind_node>(Pointer = true)]
+ 
+ // For encountered type alias declarations, e.g., `type Table = map[string]int`,
+ // go2cs code converter will generate a `global using` statement for the alias in
+diff -ru recurse/src/github.com/microsoft/TypeScript/tsc/internal/scanner/package_info.cs recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/scanner/package_info.cs
+--- recurse/src/github.com/microsoft/TypeScript/tsc/internal/scanner/package_info.cs	2026-11-07 16:38:48.034375200 -0600
++++ recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/scanner/package_info.cs	2026-11-07 17:38:49.045579000 -0600
+@@ -15,6 +15,7 @@
+ 
+ using go;
+ using static go.github.com.microsoft.TypeScript.tsc.@internal.scanner_package;
++[assembly: GoImplement<go.github.com.microsoft.TypeScript.tsc.@internal.ast_package.Node, go.github.com.microsoft.TypeScript.tsc.@internal.debug_package.FailBadSyntaxKind_node>(Pointer = true)]
+ 
+ // For encountered type alias declarations, e.g., `type Table = map[string]int`,
+ // go2cs code converter will generate a `global using` statement for the alias in
+diff -ru recurse/src/github.com/microsoft/TypeScript/tsc/internal/scanner/utilities.cs recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/scanner/utilities.cs
+--- recurse/src/github.com/microsoft/TypeScript/tsc/internal/scanner/utilities.cs	2026-11-07 16:38:47.963034300 -0600
++++ recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/scanner/utilities.cs	2026-11-07 17:38:49.043580200 -0600
+@@ -99,7 +99,7 @@
+         } else if (ast.IsIdentifier(Ꮡnode)) {
+             return node.Text();
+         }
+-        debug.FailBadSyntaxKind(new ast_Nodeжinterface{KindString() string}(Ꮡnode), "Unexpected reparser-transformed node kind");
++        debug.FailBadSyntaxKind(new ast_NodeжFailBadSyntaxKind_node(Ꮡnode), "Unexpected reparser-transformed node kind");
+     }
+     return text;
+ }
+diff -ru recurse/src/github.com/microsoft/TypeScript/tsc/internal/transformers/estransforms/classfields.cs recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/transformers/estransforms/classfields.cs
+--- recurse/src/github.com/microsoft/TypeScript/tsc/internal/transformers/estransforms/classfields.cs	2026-11-07 16:51:30.332696400 -0600
++++ recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/transformers/estransforms/classfields.cs	2026-11-07 17:38:49.044580600 -0600
+@@ -454,7 +454,7 @@
+         return Ꮡtx.visitClassElement(Ꮡnode);
+     }
+     default: {
+-        debug.FailBadSyntaxKind(new ast_Nodeжinterface{KindString() string}(Ꮡnode), "Expected node to either be a PropertyDeclaration, GetAccessorDeclaration, or SetAccessorDeclaration");
++        debug.FailBadSyntaxKind(new ast_NodeжFailBadSyntaxKind_node(Ꮡnode), "Expected node to either be a PropertyDeclaration, GetAccessorDeclaration, or SetAccessorDeclaration");
+         return default;
+     }}
+ 
+diff -ru recurse/src/github.com/microsoft/TypeScript/tsc/internal/transformers/estransforms/package_info.cs recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/transformers/estransforms/package_info.cs
+--- recurse/src/github.com/microsoft/TypeScript/tsc/internal/transformers/estransforms/package_info.cs	2026-11-07 16:51:30.331185700 -0600
++++ recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/transformers/estransforms/package_info.cs	2026-11-07 17:38:49.045579000 -0600
+@@ -72,6 +72,7 @@
+ 
+ using go;
+ using static go.github.com.microsoft.TypeScript.tsc.@internal.transformers.estransforms_package;
++[assembly: GoImplement<go.github.com.microsoft.TypeScript.tsc.@internal.ast_package.Node, go.github.com.microsoft.TypeScript.tsc.@internal.debug_package.FailBadSyntaxKind_node>(Pointer = true)]
+ 
+ // For encountered type alias declarations, e.g., `type Table = map[string]int`,
+ // go2cs code converter will generate a `global using` statement for the alias in
+diff -ru recurse/src/github.com/microsoft/TypeScript/tsc/internal/transformers/tstransforms/package_info.cs recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/transformers/tstransforms/package_info.cs
+--- recurse/src/github.com/microsoft/TypeScript/tsc/internal/transformers/tstransforms/package_info.cs	2026-11-07 16:53:09.653786800 -0600
++++ recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/transformers/tstransforms/package_info.cs	2026-11-07 17:38:49.046579200 -0600
+@@ -75,6 +75,7 @@
+ 
+ using go;
+ using static go.github.com.microsoft.TypeScript.tsc.@internal.transformers.tstransforms_package;
++[assembly: GoImplement<go.github.com.microsoft.TypeScript.tsc.@internal.ast_package.Node, go.github.com.microsoft.TypeScript.tsc.@internal.debug_package.FailBadSyntaxKind_node>(Pointer = true)]
+ 
+ // For encountered type alias declarations, e.g., `type Table = map[string]int`,
+ // go2cs code converter will generate a `global using` statement for the alias in
+diff -ru recurse/src/github.com/microsoft/TypeScript/tsc/internal/transformers/tstransforms/typeserializer.cs recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/transformers/tstransforms/typeserializer.cs
+--- recurse/src/github.com/microsoft/TypeScript/tsc/internal/transformers/tstransforms/typeserializer.cs	2026-11-07 16:53:09.655142900 -0600
++++ recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/transformers/tstransforms/typeserializer.cs	2026-11-07 17:38:49.044580600 -0600
+@@ -266,7 +266,7 @@
+             return Ꮡs.serializeTypeNode(node.Type());
+         }
+         default: {
+-            debug.FailBadSyntaxKind(new ast_Nodeжinterface{KindString() string}(Ꮡnode));
++            debug.FailBadSyntaxKind(new ast_NodeжFailBadSyntaxKind_node(Ꮡnode));
+             return default;
+         }}
+ 
+@@ -340,7 +340,7 @@
+             return s.serializeLiteralOfLiteralTypeNode(operand);
+         }
+         default: {
+-            debug.FailBadSyntaxKind(new ast_Nodeжinterface{KindString() string}(operand));
++            debug.FailBadSyntaxKind(new ast_NodeжFailBadSyntaxKind_node(operand));
+             break;
+         }}
+ 
+@@ -359,7 +359,7 @@
+         return s.f.NewVoidZeroExpression();
+     }
+     default: {
+-        debug.FailBadSyntaxKind(new ast_Nodeжinterface{KindString() string}(Ꮡnode));
++        debug.FailBadSyntaxKind(new ast_NodeжFailBadSyntaxKind_node(Ꮡnode));
+         return default;
+     }}
+ 

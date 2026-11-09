@@ -1,0 +1,1780 @@
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/api/package_info.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/api/package_info.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/api/package_info.cs	2026-11-07 17:38:48.596229600 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/api/package_info.cs	2026-11-07 18:19:57.849023500 -0600
+@@ -26,7 +26,7 @@
+ global using ipcꓸMessage = go.github.com.microsoft.TypeScript.tsc.@internal.jsonrpc_package.Message;
+ global using jsonꓸMarshalerTo = go.github.com.go_json_experiment.json_package.MarshalerTo;
+ global using jsonꓸUnmarshalerFrom = go.github.com.go_json_experiment.json_package.UnmarshalerFrom;
+-global using jsonꓸValue = go.github.com.go_json_experiment.json.jsontext_package.Value;
++global using jsonꓸValue = go.github.com.go_json_experiment.json.jsontext_package.ΔValue;
+ global using projectꓸSnapshot = go.github.com.microsoft.TypeScript.tsc.@internal.project_package.ΔSnapshot;
+ using ast = go.github.com.microsoft.TypeScript.tsc.@internal.ast_package;
+ using checker = go.github.com.microsoft.TypeScript.tsc.@internal.checker_package;
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/api/proto.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/api/proto.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/api/proto.cs	2026-11-07 17:38:48.594231600 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/api/proto.cs	2026-11-07 18:19:57.850023700 -0600
+@@ -615,13 +615,13 @@
+ 
+ partial struct BatchRequest {
+     public Method Method; /*`json:"method"`*/
+-    public jsontext.Value Params; /*`json:"params,omitempty"`*/
++    public jsontext.ΔValue Params; /*`json:"params,omitempty"`*/
+ }
+ 
+ partial struct BatchRequestsResponse {
+     public slice<BatchResponse> Responses; /*`json:"responses" nonnil:"true"`*/
+     public @string ContinuationToken; /*`json:"continuationToken,omitempty"`*/
+-    internal slice<jsontext.Value> encodedResponses;
++    internal slice<jsontext.ΔValue> encodedResponses;
+ }
+ 
+ internal static jsonꓸMarshalerTo _ᴛ2ʗ = new BatchRequestsResponseжMarshalerTo(((ж<BatchRequestsResponse>)nil));
+@@ -633,7 +633,7 @@
+         }
+     }
+     {
+-        var err = enc.WriteValue((jsontext.Value)@"""responses"""u8); if (err != nil) {
++        var err = enc.WriteValue((jsontext.ΔValue)@"""responses"""u8); if (err != nil) {
+             return err;
+         }
+     }
+@@ -662,7 +662,7 @@
+     }
+     if (r.ContinuationToken != ""u8) {
+         {
+-            var err = enc.WriteValue((jsontext.Value)@"""continuationToken"""u8); if (err != nil) {
++            var err = enc.WriteValue((jsontext.ΔValue)@"""continuationToken"""u8); if (err != nil) {
+                 return err;
+             }
+         }
+@@ -1709,7 +1709,7 @@
+     return result;
+ }
+ 
+-internal static (any, error) unmarshalPayload(@string method, jsontext.Value payload) {
++internal static (any, error) unmarshalPayload(@string method, jsontext.ΔValue payload) {
+     var (unmarshaler, ok) = unmarshalers[((Method)method), ꟷ];
+     if (!ok) {
+         return (default, fmt.Errorf("unknown API method %q"u8, method));
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/api/session.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/api/session.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/api/session.cs	2026-11-07 17:38:48.595228400 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/api/session.cs	2026-11-07 18:19:57.851530300 -0600
+@@ -418,7 +418,7 @@
+ }
+ 
+ partial struct batchResponsePage {
+-    internal slice<jsontext.Value> encodedResponses;
++    internal slice<jsontext.ΔValue> encodedResponses;
+ }
+ 
+ internal static ipc.Handler _ᴛ4ʗ = new SessionжHandler(((ж<Session>)nil));
+@@ -721,7 +721,7 @@
+ // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+ internal static readonly object pongˢ = (@string)"pong"u8;
+ 
+-public static (any, error) HandleRequest(this ж<Session> Ꮡs, context.Context ctx, @string method, jsontext.Value @params) {
++public static (any, error) HandleRequest(this ж<Session> Ꮡs, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     ref var s = ref Ꮡs.DerefOrNull();
+ 
+     if (Ꮡs != nil && s.withLocale != nil) {
+@@ -1392,7 +1392,7 @@
+ }
+ 
+ internal static (batchResponsePage, error) newBatchResponsePage(slice<BatchResponse> responses) {
+-    var encodedResponses = new slice<jsontext.Value>(len(responses));
++    var encodedResponses = new slice<jsontext.ΔValue>(len(responses));
+     foreach (var i in range(len(responses))) {
+         var (encoded, err) = json.Marshal(Ꮡ(responses, i));
+         if (err != nil) {
+@@ -1511,7 +1511,7 @@
+     return (Ꮡ(new ProfileResult(File: filePath)), default);
+ }
+ 
+-public static error HandleNotification(this ref Session s, context.Context ctx, @string method, jsontext.Value @params) {
++public static error HandleNotification(this ref Session s, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     return default;
+ }
+ 
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/contentmapper/contentmapper.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/contentmapper/contentmapper.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/contentmapper/contentmapper.cs	2026-11-07 17:38:48.769331000 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/contentmapper/contentmapper.cs	2026-11-07 18:19:57.864536800 -0600
+@@ -20,7 +20,7 @@
+ partial struct Definition {
+     public @string Package; /*`json:"package"`*/
+     public slice<@string> Extensions; /*`json:"extensions"`*/
+-    public jsontext.Value Options; /*`json:"options,omitempty"`*/
++    public jsontext.ΔValue Options; /*`json:"options,omitempty"`*/
+ }
+ 
+ partial struct Manifest {
+@@ -94,8 +94,8 @@
+     return xxh3.Hash128(buf);
+ }
+ 
+-public static (ж<collections.OrderedMap<@string, jsontext.Value>>, error) MarshalDeclaredOptions(this ref Mapper m, ж<core.CompilerOptions> options) {
+-    var @out = collections.NewOrderedMapWithSizeHint<@string, jsontext.Value>(len(m.CompilerOptions));
++public static (ж<collections.OrderedMap<@string, jsontext.ΔValue>>, error) MarshalDeclaredOptions(this ref Mapper m, ж<core.CompilerOptions> options) {
++    var @out = collections.NewOrderedMapWithSizeHint<@string, jsontext.ΔValue>(len(m.CompilerOptions));
+     if (options == nil || len(m.CompilerOptions) == 0) {
+         return (@out, default);
+     }
+@@ -114,7 +114,7 @@
+         if (err != nil) {
+             return (default, err);
+         }
+-        @out.Set(name, (jsontext.Value)raw);
++        @out.Set(name, (jsontext.ΔValue)raw);
+     }
+     return (@out, default);
+ }
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/contentmapper/hostimpl.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/contentmapper/hostimpl.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/contentmapper/hostimpl.cs	2026-11-07 17:38:48.770329500 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/contentmapper/hostimpl.cs	2026-11-07 18:19:57.865537400 -0600
+@@ -57,8 +57,8 @@
+ partial struct OpenProjectParams {
+     public @string ConfigFileName; /*`json:"configFileName"`*/
+     public @string ProjectHandle; /*`json:"projectHandle"`*/
+-    public jsontext.Value Options; /*`json:"options,omitempty"`*/
+-    public jsontext.Value CompilerOptions; /*`json:"compilerOptions"`*/
++    public jsontext.ΔValue Options; /*`json:"options,omitempty"`*/
++    public jsontext.ΔValue CompilerOptions; /*`json:"compilerOptions"`*/
+ }
+ 
+ partial struct OpenProjectResult {
+@@ -68,7 +68,7 @@
+ }
+ 
+ partial struct OptionDiagnosticResult {
+-    public slice<jsontext.Value> Path; /*`json:"path"`*/
++    public slice<jsontext.ΔValue> Path; /*`json:"path"`*/
+     public @string MessageText; /*`json:"messageText"`*/
+     public int32 Code; /*`json:"code"`*/
+ }
+@@ -91,7 +91,7 @@
+ partial struct MappedOutput {
+     public @string Text; /*`json:"text"`*/
+     public @string Extension; /*`json:"extension"`*/
+-    public jsontext.Value Mappings; /*`json:"mappings,omitempty"`*/
++    public jsontext.ΔValue Mappings; /*`json:"mappings,omitempty"`*/
+     public ж<DiagnosticDirectives> DiagnosticDirectives; /*`json:"diagnosticDirectives,omitempty"`*/
+ }
+ 
+@@ -133,7 +133,7 @@
+ public static error UnmarshalJSONFrom(this ж<MappedDiagnosticDirective> Ꮡd, ж<jsontext.Decoder> dec) {
+     ref var d = ref Ꮡd.DerefOrNull();
+ 
+-    ref var tuple = ref heap<slice<jsontext.Value>>(out var Ꮡtuple);
++    ref var tuple = ref heap<slice<jsontext.ΔValue>>(out var Ꮡtuple);
+     {
+         var err = json.UnmarshalDecode(dec, Ꮡtuple); if (err != nil) {
+             return err;
+@@ -1235,7 +1235,7 @@
+     return (res.PositionEncoding, res.DiagnosticSource, default);
+ }
+ 
+-internal static (Result, error) decodeTransformResult(jsontext.Value raw, @string originalText, PositionEncoding positionEncoding, @string diagnosticSource) {
++internal static (Result, error) decodeTransformResult(jsontext.ΔValue raw, @string originalText, PositionEncoding positionEncoding, @string diagnosticSource) {
+     ref var res = ref heap(new TransformResult(), out var Ꮡres);
+     var errΔ1 = json.Unmarshal(raw, Ꮡres); if (errΔ1 != nil) {
+         return (new Result(), errΔ1);
+@@ -1499,11 +1499,11 @@
+ partial struct rejectHandler {
+ }
+ 
+-internal static (any, error) HandleRequest(this rejectHandler _, context.Context ctx, @string method, jsontext.Value @params) {
++internal static (any, error) HandleRequest(this rejectHandler _, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     return (default, fmt.Errorf("content mapper sent an unexpected request: %s"u8, method));
+ }
+ 
+-internal static error HandleNotification(this rejectHandler _, context.Context ctx, @string method, jsontext.Value @params) {
++internal static error HandleNotification(this rejectHandler _, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     return default;
+ }
+ 
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/contentmapper/package_info.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/contentmapper/package_info.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/contentmapper/package_info.cs	2026-11-07 17:38:48.771329300 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/contentmapper/package_info.cs	2026-11-07 18:19:57.865537400 -0600
+@@ -13,7 +13,7 @@
+ global using diagnosticsꓸCategory = go.github.com.microsoft.TypeScript.tsc.@internal.diagnostics_package.ΔCategory;
+ global using jsonꓸMarshalerTo = go.github.com.go_json_experiment.json_package.MarshalerTo;
+ global using jsonꓸUnmarshalerFrom = go.github.com.go_json_experiment.json_package.UnmarshalerFrom;
+-global using jsonꓸValue = go.github.com.go_json_experiment.json.jsontext_package.Value;
++global using jsonꓸValue = go.github.com.go_json_experiment.json.jsontext_package.ΔValue;
+ // </ImportedTypeAliases>
+ 
+ using go;
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/execute/incremental/buildInfo.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/execute/incremental/buildInfo.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/execute/incremental/buildInfo.cs	2026-11-07 17:38:48.875200800 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/execute/incremental/buildInfo.cs	2026-11-07 18:19:57.872539700 -0600
+@@ -229,7 +229,7 @@
+ }
+ 
+ public static error UnmarshalJSON(this ref BuildInfoDiagnosticsOfFile b, slice<byte> data) {
+-    ref var fileIdAndDiagnostics = ref heap<slice<jsontext.Value>>(out var ᏑfileIdAndDiagnostics);
++    ref var fileIdAndDiagnostics = ref heap<slice<jsontext.ΔValue>>(out var ᏑfileIdAndDiagnostics);
+     {
+         var err = json.Unmarshal(data, ᏑfileIdAndDiagnostics); if (err != nil) {
+             return fmt.Errorf("invalid BuildInfoDiagnosticsOfFile: %s"u8, data);
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ipc/conn.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/ipc/conn.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ipc/conn.cs	2026-11-07 17:38:48.759440900 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/ipc/conn.cs	2026-11-07 18:19:57.878539600 -0600
+@@ -13,17 +13,17 @@
+ public static error ErrRequestTimeout = errors.New("ipc: request timeout");
+ 
+ partial interface Handler {
+-    (any, error) HandleRequest(context.Context ctx, @string method, jsontext.Value @params);
+-    error HandleNotification(context.Context ctx, @string method, jsontext.Value @params);
++    (any, error) HandleRequest(context.Context ctx, @string method, jsontext.ΔValue @params);
++    error HandleNotification(context.Context ctx, @string method, jsontext.ΔValue @params);
+ }
+ 
+ partial interface Conn {
+     error Run(context.Context ctx);
+-    (jsontext.Value, error) Call(context.Context ctx, @string method, any @params);
++    (jsontext.ΔValue, error) Call(context.Context ctx, @string method, any @params);
+     error Notify(context.Context ctx, @string method, any @params);
+ }
+ 
+-public static (ж<T>, error) UnmarshalParams<T>(jsontext.Value @params) {
++public static (ж<T>, error) UnmarshalParams<T>(jsontext.ΔValue @params) {
+     if (len(@params) == 0) {
+         return (default, default);
+     }
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ipc/conn_async.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/ipc/conn_async.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ipc/conn_async.cs	2026-11-07 17:38:48.759440900 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/ipc/conn_async.cs	2026-11-07 18:19:57.879539500 -0600
+@@ -285,7 +285,7 @@
+     _ = c.handler.HandleNotification(ctx, msg.Method, msg.Params);
+ }
+ 
+-public static (jsontext.Value, error) Call(this ж<AsyncConn> Ꮡc, context.Context ctx, @string method, any @params) {
++public static (jsontext.ΔValue, error) Call(this ж<AsyncConn> Ꮡc, context.Context ctx, @string method, any @params) {
+     GoFrame ᒐ = default;
+     try {
+         ref var c = ref Ꮡc.DerefOrNull();
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ipc/conn_sync.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/ipc/conn_sync.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ipc/conn_sync.cs	2026-11-07 17:38:48.760442600 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/ipc/conn_sync.cs	2026-11-07 18:19:57.879539500 -0600
+@@ -163,7 +163,7 @@
+     _ = c.handler.HandleNotification(ctx, msg.Method, msg.Params);
+ }
+ 
+-public static (jsontext.Value, error) Call(this ж<SyncConn> Ꮡc, context.Context ctx, @string method, any @params) {
++public static (jsontext.ΔValue, error) Call(this ж<SyncConn> Ꮡc, context.Context ctx, @string method, any @params) {
+     GoFrame ᒐ = default;
+     bool ᒐd1 = false;
+     try {
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ipc/protocol_jsonrpc.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/ipc/protocol_jsonrpc.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/ipc/protocol_jsonrpc.cs	2026-11-07 17:38:48.760442600 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/ipc/protocol_jsonrpc.cs	2026-11-07 18:19:57.880539600 -0600
+@@ -64,7 +64,7 @@
+ 
+ public static error WriteResponse(this ref JSONRPCProtocol p, ж<jsonrpc.ID> id, any result) {
+     if (result == nil) {
+-        result = (jsontext.Value)"null"u8;
++        result = (jsontext.ΔValue)"null"u8;
+     }
+     var msg = new jsonrpc.ResponseMessage(
+         ID: id,
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/json/json.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/json/json.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/json/json.cs	2026-11-07 17:38:48.535137800 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/json/json.cs	2026-11-07 18:19:57.881541700 -0600
+@@ -1,4 +1,4 @@
+-global using Value = go.github.com.go_json_experiment.json.jsontext_package.Value;
++global using Value = go.github.com.go_json_experiment.json.jsontext_package.ΔValue;
+ global using Kind = go.github.com.go_json_experiment.json.jsontext_package.ΔKind;
+ global using UnmarshalerFrom = go.github.com.go_json_experiment.json_package.UnmarshalerFrom;
+ global using MarshalerTo = go.github.com.go_json_experiment.json_package.MarshalerTo;
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/json/package_info.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/json/package_info.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/json/package_info.cs	2026-11-07 17:38:48.536648600 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/json/package_info.cs	2026-11-07 18:19:57.881541700 -0600
+@@ -34,7 +34,7 @@
+ [assembly: GoTypeAlias("Kind", "go.github.com.go_json_experiment.json.jsontext_package.ΔKind")]
+ [assembly: GoTypeAlias("MarshalerTo", "go.github.com.go_json_experiment.json_package.MarshalerTo")]
+ [assembly: GoTypeAlias("UnmarshalerFrom", "go.github.com.go_json_experiment.json_package.UnmarshalerFrom")]
+-[assembly: GoTypeAlias("Value", "go.github.com.go_json_experiment.json.jsontext_package.Value")]
++[assembly: GoTypeAlias("Value", "go.github.com.go_json_experiment.json.jsontext_package.ΔValue")]
+ // </ExportedTypeAliases>
+ 
+ // As types are cast to interfaces in Go source code, the go2cs code converter
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/jsonrpc/jsonrpc.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/jsonrpc/jsonrpc.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/jsonrpc/jsonrpc.cs	2026-11-07 17:38:48.681363300 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/jsonrpc/jsonrpc.cs	2026-11-07 18:19:57.882541700 -0600
+@@ -132,8 +132,8 @@
+     public JSONRPCVersion JSONRPC; /*`json:"jsonrpc"`*/
+     public ж<ID> ID; /*`json:"id,omitzero"`*/
+     public @string Method; /*`json:"method,omitzero"`*/
+-    public jsontext.Value Params; /*`json:"params,omitzero"`*/
+-    public jsontext.Value Result; /*`json:"result,omitzero"`*/
++    public jsontext.ΔValue Params; /*`json:"params,omitzero"`*/
++    public jsontext.ΔValue Result; /*`json:"result,omitzero"`*/
+     public ж<ResponseError> Error; /*`json:"error,omitzero"`*/
+ }
+ 
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/jsonrpc/package_info.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/jsonrpc/package_info.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/jsonrpc/package_info.cs	2026-11-07 17:38:48.683362900 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/jsonrpc/package_info.cs	2026-11-07 18:19:57.882541700 -0600
+@@ -10,7 +10,7 @@
+ // importing type aliases at a namespace level.
+ 
+ // <ImportedTypeAliases>
+-global using jsonꓸValue = go.github.com.go_json_experiment.json.jsontext_package.Value;
++global using jsonꓸValue = go.github.com.go_json_experiment.json.jsontext_package.ΔValue;
+ // </ImportedTypeAliases>
+ 
+ using go;
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto/jsonrpc.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto/jsonrpc.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto/jsonrpc.cs	2026-11-07 17:38:48.685363100 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto/jsonrpc.cs	2026-11-07 18:19:57.891638800 -0600
+@@ -33,8 +33,8 @@
+     public jsonrpc.JSONRPCVersion JSONRPC; /*`json:"jsonrpc"`*/
+     public Method Method; /*`json:"method"`*/
+     public ж<jsonrpc.ID> ID; /*`json:"id,omitzero"`*/
+-    public jsontext.Value Params; /*`json:"params"`*/
+-    public jsontext.Value Result; /*`json:"result,omitzero"`*/
++    public jsontext.ΔValue Params; /*`json:"params"`*/
++    public jsontext.ΔValue Result; /*`json:"result,omitzero"`*/
+     public ж<jsonrpc.ResponseError> Error; /*`json:"error,omitzero"`*/
+ }
+ 
+@@ -99,7 +99,7 @@
+     public jsonrpc.JSONRPCVersion JSONRPC; /*`json:"jsonrpc"`*/
+     public ж<jsonrpc.ID> ID; /*`json:"id"`*/
+     public Method Method; /*`json:"method"`*/
+-    public jsontext.Value Params; /*`json:"params"`*/
++    public jsontext.ΔValue Params; /*`json:"params"`*/
+ }
+ 
+ public static error UnmarshalJSON(this ref RequestMessage r, slice<byte> data) {
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto/lsp.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto/lsp.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto/lsp.cs	2026-11-07 17:38:48.685363100 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto/lsp.cs	2026-11-07 18:19:57.892638800 -0600
+@@ -128,7 +128,7 @@
+     return len(name) == len(key) + 2 && name[0] == '"' && ((sstring)(name.slice(1, len(name) - 1))) == key;
+ }
+ 
+-internal static jsontext.Value jsonObjectRawField(slice<byte> data, @string field) {
++internal static jsontext.ΔValue jsonObjectRawField(slice<byte> data, @string field) {
+     var dec = json.NewDecoder(new bytes_BufferжReader(bytes.NewBuffer(data)));
+     if (dec.PeekKind() != (rune)'{') {
+         return default;
+@@ -229,7 +229,7 @@
+     ref var req = ref Ꮡreq.DerefOrNull();
+ 
+     ref var @params = ref heap<T>(out var Ꮡparams);
+-    jsontext.Value raw = default;
++    jsontext.ΔValue raw = default;
+     if (req.Params != nil) {
+         var (v, ok) = req.Params._<jsonꓸValue>(ᐧ);
+         if (!ok) {
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto/lsp_generated.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto/lsp_generated.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto/lsp_generated.cs	2026-11-07 17:38:48.686362000 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto/lsp_generated.cs	2026-11-07 18:19:57.894638900 -0600
+@@ -2849,7 +2849,7 @@
+         }
+     }
+     {
+-        var err = enc.WriteValue((jsontext.Value)@"""id"""u8); if (err != nil) {
++        var err = enc.WriteValue((jsontext.ΔValue)@"""id"""u8); if (err != nil) {
+             return err;
+         }
+     }
+@@ -2859,250 +2859,250 @@
+         }
+     }
+     {
+-        var err = enc.WriteValue((jsontext.Value)@"""method"""u8); if (err != nil) {
++        var err = enc.WriteValue((jsontext.ΔValue)@"""method"""u8); if (err != nil) {
+             return err;
+         }
+     }
+-    jsontext.Value method = default;
++    jsontext.ΔValue method = default;
+     any opts = default;
+     switch (ᐧ) {
+     case {} when s.RegisterOptions.TextDocumentImplementation != nil: {
+-        method = (jsontext.Value)@"""textDocument/implementation"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/implementation"""u8;
+         opts = s.RegisterOptions.TextDocumentImplementation.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentTypeDefinition != nil: {
+-        method = (jsontext.Value)@"""textDocument/typeDefinition"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/typeDefinition"""u8;
+         opts = s.RegisterOptions.TextDocumentTypeDefinition.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentDocumentColor != nil: {
+-        method = (jsontext.Value)@"""textDocument/documentColor"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/documentColor"""u8;
+         opts = s.RegisterOptions.TextDocumentDocumentColor.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentColorPresentation != nil: {
+-        method = (jsontext.Value)@"""textDocument/colorPresentation"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/colorPresentation"""u8;
+         opts = s.RegisterOptions.TextDocumentColorPresentation.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentFoldingRange != nil: {
+-        method = (jsontext.Value)@"""textDocument/foldingRange"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/foldingRange"""u8;
+         opts = s.RegisterOptions.TextDocumentFoldingRange.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentDeclaration != nil: {
+-        method = (jsontext.Value)@"""textDocument/declaration"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/declaration"""u8;
+         opts = s.RegisterOptions.TextDocumentDeclaration.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentSelectionRange != nil: {
+-        method = (jsontext.Value)@"""textDocument/selectionRange"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/selectionRange"""u8;
+         opts = s.RegisterOptions.TextDocumentSelectionRange.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentPrepareCallHierarchy != nil: {
+-        method = (jsontext.Value)@"""textDocument/prepareCallHierarchy"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/prepareCallHierarchy"""u8;
+         opts = s.RegisterOptions.TextDocumentPrepareCallHierarchy.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentSemanticTokens != nil: {
+-        method = (jsontext.Value)@"""textDocument/semanticTokens"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/semanticTokens"""u8;
+         opts = s.RegisterOptions.TextDocumentSemanticTokens.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentLinkedEditingRange != nil: {
+-        method = (jsontext.Value)@"""textDocument/linkedEditingRange"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/linkedEditingRange"""u8;
+         opts = s.RegisterOptions.TextDocumentLinkedEditingRange.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.WorkspaceWillCreateFiles != nil: {
+-        method = (jsontext.Value)@"""workspace/willCreateFiles"""u8;
++        method = (jsontext.ΔValue)@"""workspace/willCreateFiles"""u8;
+         opts = s.RegisterOptions.WorkspaceWillCreateFiles.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.WorkspaceWillRenameFiles != nil: {
+-        method = (jsontext.Value)@"""workspace/willRenameFiles"""u8;
++        method = (jsontext.ΔValue)@"""workspace/willRenameFiles"""u8;
+         opts = s.RegisterOptions.WorkspaceWillRenameFiles.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.WorkspaceWillDeleteFiles != nil: {
+-        method = (jsontext.Value)@"""workspace/willDeleteFiles"""u8;
++        method = (jsontext.ΔValue)@"""workspace/willDeleteFiles"""u8;
+         opts = s.RegisterOptions.WorkspaceWillDeleteFiles.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentMoniker != nil: {
+-        method = (jsontext.Value)@"""textDocument/moniker"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/moniker"""u8;
+         opts = s.RegisterOptions.TextDocumentMoniker.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentPrepareTypeHierarchy != nil: {
+-        method = (jsontext.Value)@"""textDocument/prepareTypeHierarchy"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/prepareTypeHierarchy"""u8;
+         opts = s.RegisterOptions.TextDocumentPrepareTypeHierarchy.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentInlineValue != nil: {
+-        method = (jsontext.Value)@"""textDocument/inlineValue"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/inlineValue"""u8;
+         opts = s.RegisterOptions.TextDocumentInlineValue.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentInlayHint != nil: {
+-        method = (jsontext.Value)@"""textDocument/inlayHint"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/inlayHint"""u8;
+         opts = s.RegisterOptions.TextDocumentInlayHint.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentDiagnostic != nil: {
+-        method = (jsontext.Value)@"""textDocument/diagnostic"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/diagnostic"""u8;
+         opts = s.RegisterOptions.TextDocumentDiagnostic.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentInlineCompletion != nil: {
+-        method = (jsontext.Value)@"""textDocument/inlineCompletion"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/inlineCompletion"""u8;
+         opts = s.RegisterOptions.TextDocumentInlineCompletion.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.WorkspaceTextDocumentContent != nil: {
+-        method = (jsontext.Value)@"""workspace/textDocumentContent"""u8;
++        method = (jsontext.ΔValue)@"""workspace/textDocumentContent"""u8;
+         opts = s.RegisterOptions.WorkspaceTextDocumentContent.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentWillSaveWaitUntil != nil: {
+-        method = (jsontext.Value)@"""textDocument/willSaveWaitUntil"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/willSaveWaitUntil"""u8;
+         opts = s.RegisterOptions.TextDocumentWillSaveWaitUntil.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentCompletion != nil: {
+-        method = (jsontext.Value)@"""textDocument/completion"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/completion"""u8;
+         opts = s.RegisterOptions.TextDocumentCompletion.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentHover != nil: {
+-        method = (jsontext.Value)@"""textDocument/hover"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/hover"""u8;
+         opts = s.RegisterOptions.TextDocumentHover.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentSignatureHelp != nil: {
+-        method = (jsontext.Value)@"""textDocument/signatureHelp"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/signatureHelp"""u8;
+         opts = s.RegisterOptions.TextDocumentSignatureHelp.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentDefinition != nil: {
+-        method = (jsontext.Value)@"""textDocument/definition"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/definition"""u8;
+         opts = s.RegisterOptions.TextDocumentDefinition.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentReferences != nil: {
+-        method = (jsontext.Value)@"""textDocument/references"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/references"""u8;
+         opts = s.RegisterOptions.TextDocumentReferences.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentDocumentHighlight != nil: {
+-        method = (jsontext.Value)@"""textDocument/documentHighlight"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/documentHighlight"""u8;
+         opts = s.RegisterOptions.TextDocumentDocumentHighlight.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentDocumentSymbol != nil: {
+-        method = (jsontext.Value)@"""textDocument/documentSymbol"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/documentSymbol"""u8;
+         opts = s.RegisterOptions.TextDocumentDocumentSymbol.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentCodeAction != nil: {
+-        method = (jsontext.Value)@"""textDocument/codeAction"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/codeAction"""u8;
+         opts = s.RegisterOptions.TextDocumentCodeAction.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.WorkspaceSymbol != nil: {
+-        method = (jsontext.Value)@"""workspace/symbol"""u8;
++        method = (jsontext.ΔValue)@"""workspace/symbol"""u8;
+         opts = s.RegisterOptions.WorkspaceSymbol.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentCodeLens != nil: {
+-        method = (jsontext.Value)@"""textDocument/codeLens"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/codeLens"""u8;
+         opts = s.RegisterOptions.TextDocumentCodeLens.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentDocumentLink != nil: {
+-        method = (jsontext.Value)@"""textDocument/documentLink"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/documentLink"""u8;
+         opts = s.RegisterOptions.TextDocumentDocumentLink.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentFormatting != nil: {
+-        method = (jsontext.Value)@"""textDocument/formatting"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/formatting"""u8;
+         opts = s.RegisterOptions.TextDocumentFormatting.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentRangeFormatting != nil: {
+-        method = (jsontext.Value)@"""textDocument/rangeFormatting"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/rangeFormatting"""u8;
+         opts = s.RegisterOptions.TextDocumentRangeFormatting.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentRangesFormatting != nil: {
+-        method = (jsontext.Value)@"""textDocument/rangesFormatting"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/rangesFormatting"""u8;
+         opts = s.RegisterOptions.TextDocumentRangesFormatting.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentOnTypeFormatting != nil: {
+-        method = (jsontext.Value)@"""textDocument/onTypeFormatting"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/onTypeFormatting"""u8;
+         opts = s.RegisterOptions.TextDocumentOnTypeFormatting.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentRename != nil: {
+-        method = (jsontext.Value)@"""textDocument/rename"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/rename"""u8;
+         opts = s.RegisterOptions.TextDocumentRename.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.WorkspaceExecuteCommand != nil: {
+-        method = (jsontext.Value)@"""workspace/executeCommand"""u8;
++        method = (jsontext.ΔValue)@"""workspace/executeCommand"""u8;
+         opts = s.RegisterOptions.WorkspaceExecuteCommand.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.WorkspaceDidCreateFiles != nil: {
+-        method = (jsontext.Value)@"""workspace/didCreateFiles"""u8;
++        method = (jsontext.ΔValue)@"""workspace/didCreateFiles"""u8;
+         opts = s.RegisterOptions.WorkspaceDidCreateFiles.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.WorkspaceDidRenameFiles != nil: {
+-        method = (jsontext.Value)@"""workspace/didRenameFiles"""u8;
++        method = (jsontext.ΔValue)@"""workspace/didRenameFiles"""u8;
+         opts = s.RegisterOptions.WorkspaceDidRenameFiles.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.WorkspaceDidDeleteFiles != nil: {
+-        method = (jsontext.Value)@"""workspace/didDeleteFiles"""u8;
++        method = (jsontext.ΔValue)@"""workspace/didDeleteFiles"""u8;
+         opts = s.RegisterOptions.WorkspaceDidDeleteFiles.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.WorkspaceDidChangeConfiguration != nil: {
+-        method = (jsontext.Value)@"""workspace/didChangeConfiguration"""u8;
++        method = (jsontext.ΔValue)@"""workspace/didChangeConfiguration"""u8;
+         opts = s.RegisterOptions.WorkspaceDidChangeConfiguration.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentDidOpen != nil: {
+-        method = (jsontext.Value)@"""textDocument/didOpen"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/didOpen"""u8;
+         opts = s.RegisterOptions.TextDocumentDidOpen.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentDidChange != nil: {
+-        method = (jsontext.Value)@"""textDocument/didChange"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/didChange"""u8;
+         opts = s.RegisterOptions.TextDocumentDidChange.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentDidClose != nil: {
+-        method = (jsontext.Value)@"""textDocument/didClose"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/didClose"""u8;
+         opts = s.RegisterOptions.TextDocumentDidClose.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentDidSave != nil: {
+-        method = (jsontext.Value)@"""textDocument/didSave"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/didSave"""u8;
+         opts = s.RegisterOptions.TextDocumentDidSave.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.TextDocumentWillSave != nil: {
+-        method = (jsontext.Value)@"""textDocument/willSave"""u8;
++        method = (jsontext.ΔValue)@"""textDocument/willSave"""u8;
+         opts = s.RegisterOptions.TextDocumentWillSave.OrTypedNil();
+         break;
+     }
+     case {} when s.RegisterOptions.WorkspaceDidChangeWatchedFiles != nil: {
+-        method = (jsontext.Value)@"""workspace/didChangeWatchedFiles"""u8;
++        method = (jsontext.ΔValue)@"""workspace/didChangeWatchedFiles"""u8;
+         opts = s.RegisterOptions.WorkspaceDidChangeWatchedFiles.OrTypedNil();
+         break;
+     }}
+@@ -3113,7 +3113,7 @@
+         }
+     }
+     {
+-        var err = enc.WriteValue((jsontext.Value)@"""registerOptions"""u8); if (err != nil) {
++        var err = enc.WriteValue((jsontext.ΔValue)@"""registerOptions"""u8); if (err != nil) {
+             return err;
+         }
+     }
+@@ -3147,7 +3147,7 @@
+     }
+ 
+     ref var method = ref heap(new @string(), out var Ꮡmethod);
+-    jsontext.Value rawRegisterOptions = default;
++    jsontext.ΔValue rawRegisterOptions = default;
+ 
+     while (dec.PeekKind() != (rune)'}') {
+         var (name, err) = dec.ReadValue();
+@@ -10721,7 +10721,7 @@
+ internal static jsonꓸMarshalerTo _ᴛ587ʗ = new StringLiteralBegin();
+ 
+ public static error MarshalJSONTo(this StringLiteralBegin o, ж<jsontext.Encoder> enc) {
+-    return enc.WriteValue((jsontext.Value)@"""begin"""u8);
++    return enc.WriteValue((jsontext.ΔValue)@"""begin"""u8);
+ }
+ 
+ internal static jsonꓸUnmarshalerFrom _ᴛ588ʗ = new StringLiteralBeginжUnmarshalerFrom(Ꮡ(new StringLiteralBegin()));
+@@ -10743,7 +10743,7 @@
+ internal static jsonꓸMarshalerTo _ᴛ589ʗ = new StringLiteralReport();
+ 
+ public static error MarshalJSONTo(this StringLiteralReport o, ж<jsontext.Encoder> enc) {
+-    return enc.WriteValue((jsontext.Value)@"""report"""u8);
++    return enc.WriteValue((jsontext.ΔValue)@"""report"""u8);
+ }
+ 
+ internal static jsonꓸUnmarshalerFrom _ᴛ590ʗ = new StringLiteralReportжUnmarshalerFrom(Ꮡ(new StringLiteralReport()));
+@@ -10765,7 +10765,7 @@
+ internal static jsonꓸMarshalerTo _ᴛ591ʗ = new StringLiteralEnd();
+ 
+ public static error MarshalJSONTo(this StringLiteralEnd o, ж<jsontext.Encoder> enc) {
+-    return enc.WriteValue((jsontext.Value)@"""end"""u8);
++    return enc.WriteValue((jsontext.ΔValue)@"""end"""u8);
+ }
+ 
+ internal static jsonꓸUnmarshalerFrom _ᴛ592ʗ = new StringLiteralEndжUnmarshalerFrom(Ꮡ(new StringLiteralEnd()));
+@@ -10787,7 +10787,7 @@
+ internal static jsonꓸMarshalerTo _ᴛ593ʗ = new StringLiteralCreate();
+ 
+ public static error MarshalJSONTo(this StringLiteralCreate o, ж<jsontext.Encoder> enc) {
+-    return enc.WriteValue((jsontext.Value)@"""create"""u8);
++    return enc.WriteValue((jsontext.ΔValue)@"""create"""u8);
+ }
+ 
+ internal static jsonꓸUnmarshalerFrom _ᴛ594ʗ = new StringLiteralCreateжUnmarshalerFrom(Ꮡ(new StringLiteralCreate()));
+@@ -10809,7 +10809,7 @@
+ internal static jsonꓸMarshalerTo _ᴛ595ʗ = new StringLiteralRename();
+ 
+ public static error MarshalJSONTo(this StringLiteralRename o, ж<jsontext.Encoder> enc) {
+-    return enc.WriteValue((jsontext.Value)@"""rename"""u8);
++    return enc.WriteValue((jsontext.ΔValue)@"""rename"""u8);
+ }
+ 
+ internal static jsonꓸUnmarshalerFrom _ᴛ596ʗ = new StringLiteralRenameжUnmarshalerFrom(Ꮡ(new StringLiteralRename()));
+@@ -10831,7 +10831,7 @@
+ internal static jsonꓸMarshalerTo _ᴛ597ʗ = new StringLiteralDelete();
+ 
+ public static error MarshalJSONTo(this StringLiteralDelete o, ж<jsontext.Encoder> enc) {
+-    return enc.WriteValue((jsontext.Value)@"""delete"""u8);
++    return enc.WriteValue((jsontext.ΔValue)@"""delete"""u8);
+ }
+ 
+ internal static jsonꓸUnmarshalerFrom _ᴛ598ʗ = new StringLiteralDeleteжUnmarshalerFrom(Ꮡ(new StringLiteralDelete()));
+@@ -10853,7 +10853,7 @@
+ internal static jsonꓸMarshalerTo _ᴛ599ʗ = new StringLiteralFull();
+ 
+ public static error MarshalJSONTo(this StringLiteralFull o, ж<jsontext.Encoder> enc) {
+-    return enc.WriteValue((jsontext.Value)@"""full"""u8);
++    return enc.WriteValue((jsontext.ΔValue)@"""full"""u8);
+ }
+ 
+ internal static jsonꓸUnmarshalerFrom _ᴛ600ʗ = new StringLiteralFullжUnmarshalerFrom(Ꮡ(new StringLiteralFull()));
+@@ -10875,7 +10875,7 @@
+ internal static jsonꓸMarshalerTo _ᴛ601ʗ = new StringLiteralUnchanged();
+ 
+ public static error MarshalJSONTo(this StringLiteralUnchanged o, ж<jsontext.Encoder> enc) {
+-    return enc.WriteValue((jsontext.Value)@"""unchanged"""u8);
++    return enc.WriteValue((jsontext.ΔValue)@"""unchanged"""u8);
+ }
+ 
+ internal static jsonꓸUnmarshalerFrom _ᴛ602ʗ = new StringLiteralUnchangedжUnmarshalerFrom(Ꮡ(new StringLiteralUnchanged()));
+@@ -10897,7 +10897,7 @@
+ internal static jsonꓸMarshalerTo _ᴛ603ʗ = new StringLiteralSnippet();
+ 
+ public static error MarshalJSONTo(this StringLiteralSnippet o, ж<jsontext.Encoder> enc) {
+-    return enc.WriteValue((jsontext.Value)@"""snippet"""u8);
++    return enc.WriteValue((jsontext.ΔValue)@"""snippet"""u8);
+ }
+ 
+ internal static jsonꓸUnmarshalerFrom _ᴛ604ʗ = new StringLiteralSnippetжUnmarshalerFrom(Ꮡ(new StringLiteralSnippet()));
+@@ -10919,7 +10919,7 @@
+ internal static jsonꓸMarshalerTo _ᴛ605ʗ = new StringLiteralLanguageServerErrorResponse();
+ 
+ public static error MarshalJSONTo(this StringLiteralLanguageServerErrorResponse o, ж<jsontext.Encoder> enc) {
+-    return enc.WriteValue((jsontext.Value)@"""languageServer.errorResponse"""u8);
++    return enc.WriteValue((jsontext.ΔValue)@"""languageServer.errorResponse"""u8);
+ }
+ 
+ internal static jsonꓸUnmarshalerFrom _ᴛ606ʗ = new StringLiteralLanguageServerErrorResponseжUnmarshalerFrom(Ꮡ(new StringLiteralLanguageServerErrorResponse()));
+@@ -10941,7 +10941,7 @@
+ internal static jsonꓸMarshalerTo _ᴛ607ʗ = new StringLiteralError();
+ 
+ public static error MarshalJSONTo(this StringLiteralError o, ж<jsontext.Encoder> enc) {
+-    return enc.WriteValue((jsontext.Value)@"""error"""u8);
++    return enc.WriteValue((jsontext.ΔValue)@"""error"""u8);
+ }
+ 
+ internal static jsonꓸUnmarshalerFrom _ᴛ608ʗ = new StringLiteralErrorжUnmarshalerFrom(Ꮡ(new StringLiteralError()));
+@@ -10963,7 +10963,7 @@
+ internal static jsonꓸMarshalerTo _ᴛ609ʗ = new StringLiteralLanguageServerPerformanceStats();
+ 
+ public static error MarshalJSONTo(this StringLiteralLanguageServerPerformanceStats o, ж<jsontext.Encoder> enc) {
+-    return enc.WriteValue((jsontext.Value)@"""languageServer.performanceStats"""u8);
++    return enc.WriteValue((jsontext.ΔValue)@"""languageServer.performanceStats"""u8);
+ }
+ 
+ internal static jsonꓸUnmarshalerFrom _ᴛ610ʗ = new StringLiteralLanguageServerPerformanceStatsжUnmarshalerFrom(Ꮡ(new StringLiteralLanguageServerPerformanceStats()));
+@@ -10985,7 +10985,7 @@
+ internal static jsonꓸMarshalerTo _ᴛ611ʗ = new StringLiteralUsage();
+ 
+ public static error MarshalJSONTo(this StringLiteralUsage o, ж<jsontext.Encoder> enc) {
+-    return enc.WriteValue((jsontext.Value)@"""usage"""u8);
++    return enc.WriteValue((jsontext.ΔValue)@"""usage"""u8);
+ }
+ 
+ internal static jsonꓸUnmarshalerFrom _ᴛ612ʗ = new StringLiteralUsageжUnmarshalerFrom(Ꮡ(new StringLiteralUsage()));
+@@ -11007,7 +11007,7 @@
+ internal static jsonꓸMarshalerTo _ᴛ613ʗ = new StringLiteralLanguageServerProjectInfo();
+ 
+ public static error MarshalJSONTo(this StringLiteralLanguageServerProjectInfo o, ж<jsontext.Encoder> enc) {
+-    return enc.WriteValue((jsontext.Value)@"""languageServer.projectInfo"""u8);
++    return enc.WriteValue((jsontext.ΔValue)@"""languageServer.projectInfo"""u8);
+ }
+ 
+ internal static jsonꓸUnmarshalerFrom _ᴛ614ʗ = new StringLiteralLanguageServerProjectInfoжUnmarshalerFrom(Ꮡ(new StringLiteralLanguageServerProjectInfo()));
+@@ -11029,7 +11029,7 @@
+ internal static jsonꓸMarshalerTo _ᴛ615ʗ = new StringLiteralClassifiedTextRun();
+ 
+ public static error MarshalJSONTo(this StringLiteralClassifiedTextRun o, ж<jsontext.Encoder> enc) {
+-    return enc.WriteValue((jsontext.Value)@"""ClassifiedTextRun"""u8);
++    return enc.WriteValue((jsontext.ΔValue)@"""ClassifiedTextRun"""u8);
+ }
+ 
+ internal static jsonꓸUnmarshalerFrom _ᴛ616ʗ = new StringLiteralClassifiedTextRunжUnmarshalerFrom(Ꮡ(new StringLiteralClassifiedTextRun()));
+@@ -11051,7 +11051,7 @@
+ internal static jsonꓸMarshalerTo _ᴛ617ʗ = new StringLiteralClassifiedTextElement();
+ 
+ public static error MarshalJSONTo(this StringLiteralClassifiedTextElement o, ж<jsontext.Encoder> enc) {
+-    return enc.WriteValue((jsontext.Value)@"""ClassifiedTextElement"""u8);
++    return enc.WriteValue((jsontext.ΔValue)@"""ClassifiedTextElement"""u8);
+ }
+ 
+ internal static jsonꓸUnmarshalerFrom _ᴛ618ʗ = new StringLiteralClassifiedTextElementжUnmarshalerFrom(Ꮡ(new StringLiteralClassifiedTextElement()));
+@@ -11073,7 +11073,7 @@
+ internal static jsonꓸMarshalerTo _ᴛ619ʗ = new StringLiteralImageId();
+ 
+ public static error MarshalJSONTo(this StringLiteralImageId o, ж<jsontext.Encoder> enc) {
+-    return enc.WriteValue((jsontext.Value)@"""ImageId"""u8);
++    return enc.WriteValue((jsontext.ΔValue)@"""ImageId"""u8);
+ }
+ 
+ internal static jsonꓸUnmarshalerFrom _ᴛ620ʗ = new StringLiteralImageIdжUnmarshalerFrom(Ꮡ(new StringLiteralImageId()));
+@@ -11095,7 +11095,7 @@
+ internal static jsonꓸMarshalerTo _ᴛ621ʗ = new StringLiteralImageElement();
+ 
+ public static error MarshalJSONTo(this StringLiteralImageElement o, ж<jsontext.Encoder> enc) {
+-    return enc.WriteValue((jsontext.Value)@"""ImageElement"""u8);
++    return enc.WriteValue((jsontext.ΔValue)@"""ImageElement"""u8);
+ }
+ 
+ internal static jsonꓸUnmarshalerFrom _ᴛ622ʗ = new StringLiteralImageElementжUnmarshalerFrom(Ꮡ(new StringLiteralImageElement()));
+@@ -11117,7 +11117,7 @@
+ internal static jsonꓸMarshalerTo _ᴛ623ʗ = new StringLiteralContainerElement();
+ 
+ public static error MarshalJSONTo(this StringLiteralContainerElement o, ж<jsontext.Encoder> enc) {
+-    return enc.WriteValue((jsontext.Value)@"""ContainerElement"""u8);
++    return enc.WriteValue((jsontext.ΔValue)@"""ContainerElement"""u8);
+ }
+ 
+ internal static jsonꓸUnmarshalerFrom _ᴛ624ʗ = new StringLiteralContainerElementжUnmarshalerFrom(Ꮡ(new StringLiteralContainerElement()));
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto/package_info.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto/package_info.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto/package_info.cs	2026-11-07 17:38:48.688361400 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/lsp/lsproto/package_info.cs	2026-11-07 18:19:57.895638800 -0600
+@@ -12,7 +12,7 @@
+ // <ImportedTypeAliases>
+ global using jsonꓸMarshalerTo = go.github.com.go_json_experiment.json_package.MarshalerTo;
+ global using jsonꓸUnmarshalerFrom = go.github.com.go_json_experiment.json_package.UnmarshalerFrom;
+-global using jsonꓸValue = go.github.com.go_json_experiment.json.jsontext_package.Value;
++global using jsonꓸValue = go.github.com.go_json_experiment.json.jsontext_package.ΔValue;
+ global using reflectꓸType = go.reflect_package.ΔType;
+ global using reflectꓸValue = go.reflect_package.ΔValue;
+ // </ImportedTypeAliases>
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/component.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/component.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/component.cs	2026-11-07 17:38:48.493099300 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/component.cs	2026-11-07 18:19:57.913151100 -0600
+@@ -18,7 +18,7 @@
+     /*embed*/ internal noNotifications noNotifications;
+ }
+ 
+-internal static (any, error) HandleRequest(this componentHandler _, context.Context ctx, @string method, jsontext.Value @params) {
++internal static (any, error) HandleRequest(this componentHandler _, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     var exprᴛ1 = method;
+     switch (ᐧ) {
+     case {} when exprᴛ1 == contentmapper.MethodInitialize: {
+@@ -41,7 +41,7 @@
+ 
+ }
+ 
+-internal static (@string, jsontext.Value, error) transformComponent(@string content) {
++internal static (@string, jsontext.ΔValue, error) transformComponent(@string content) {
+     ref var @virtual = ref heap(new strings.Builder(), out var Ꮡvirtual);
+     ref var segments = ref heap<slice<spanmap.Segment>>(out var Ꮡsegments);
+ 
+@@ -129,7 +129,7 @@
+     if (err != nil) {
+         return ("", default, err);
+     }
+-    return (@virtual.String(), (jsontext.Value)mappings, default);
++    return (@virtual.String(), (jsontext.ΔValue)mappings, default);
+ }
+ 
+ internal static (nint start, nint end, bool ok) componentNameRange(@string content) {
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/diagnostic_code_collision.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/diagnostic_code_collision.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/diagnostic_code_collision.cs	2026-11-07 17:38:48.493099300 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/diagnostic_code_collision.cs	2026-11-07 18:19:57.913659100 -0600
+@@ -16,7 +16,7 @@
+     /*embed*/ internal noNotifications noNotifications;
+ }
+ 
+-internal static (any, error) HandleRequest(this diagnosticCodeCollisionHandler _, context.Context ctx, @string method, jsontext.Value @params) {
++internal static (any, error) HandleRequest(this diagnosticCodeCollisionHandler _, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     var exprᴛ1 = method;
+     switch (ᐧ) {
+     case {} when exprᴛ1 == contentmapper.MethodInitialize: {
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/duplicate.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/duplicate.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/duplicate.cs	2026-11-07 17:38:48.494099200 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/duplicate.cs	2026-11-07 18:19:57.913659100 -0600
+@@ -17,7 +17,7 @@
+     /*embed*/ internal noNotifications noNotifications;
+ }
+ 
+-internal static (any, error) HandleRequest(this duplicateHandler _, context.Context ctx, @string method, jsontext.Value @params) {
++internal static (any, error) HandleRequest(this duplicateHandler _, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     var exprᴛ1 = method;
+     switch (ᐧ) {
+     case {} when exprᴛ1 == contentmapper.MethodInitialize: {
+@@ -39,7 +39,7 @@
+             if (errΔ2 != nil) {
+                 return (default, errΔ2);
+             }
+-            return (new contentmapper.TransformResult(MappedOutput: new contentmapper.MappedOutput(Text: virtualΔ1, Extension: ".ts", Mappings: ((jsontext.Value)mappingsΔ1))), default);
++            return (new contentmapper.TransformResult(MappedOutput: new contentmapper.MappedOutput(Text: virtualΔ1, Extension: ".ts", Mappings: ((jsontext.ΔValue)mappingsΔ1))), default);
+         }
+         if (strings.Contains(p.FileName, "hover-concat")) {
+             @string virtualΔ2 = "namespace A { export const "u8 + p.Content + " = 1; }\nnamespace B { export const "u8 + p.Content + " = \"text\"; }\n"u8;
+@@ -52,7 +52,7 @@
+             if (errΔ3 != nil) {
+                 return (default, errΔ3);
+             }
+-            return (new contentmapper.TransformResult(MappedOutput: new contentmapper.MappedOutput(Text: virtualΔ2, Extension: ".ts", Mappings: ((jsontext.Value)mappingsΔ2))), default);
++            return (new contentmapper.TransformResult(MappedOutput: new contentmapper.MappedOutput(Text: virtualΔ2, Extension: ".ts", Mappings: ((jsontext.ΔValue)mappingsΔ2))), default);
+         }
+         if (strings.Contains(p.FileName, "signature-fallback")) {
+             @string virtualΔ3 = "// "u8 + p.Content + "\nfunction use(value: number): void {}\n"u8 + p.Content + ";\n"u8;
+@@ -65,7 +65,7 @@
+             if (errΔ4 != nil) {
+                 return (default, errΔ4);
+             }
+-            return (new contentmapper.TransformResult(MappedOutput: new contentmapper.MappedOutput(Text: virtualΔ3, Extension: ".ts", Mappings: ((jsontext.Value)mappingsΔ3))), default);
++            return (new contentmapper.TransformResult(MappedOutput: new contentmapper.MappedOutput(Text: virtualΔ3, Extension: ".ts", Mappings: ((jsontext.ΔValue)mappingsΔ3))), default);
+         }
+         if (strings.Contains(p.FileName, "rename-conflict")) {
+             @string virtualΔ4 = "export const "u8 + p.Content + " = 1;\nconst object = { "u8 + p.Content + " };\n"u8 + p.Content + ";\n"u8;
+@@ -80,7 +80,7 @@
+             if (errΔ5 != nil) {
+                 return (default, errΔ5);
+             }
+-            return (new contentmapper.TransformResult(MappedOutput: new contentmapper.MappedOutput(Text: virtualΔ4, Extension: ".ts", Mappings: ((jsontext.Value)mappingsΔ4))), default);
++            return (new contentmapper.TransformResult(MappedOutput: new contentmapper.MappedOutput(Text: virtualΔ4, Extension: ".ts", Mappings: ((jsontext.ΔValue)mappingsΔ4))), default);
+         }
+         @string @virtual = "export const "u8 + p.Content + " = 1;\n"u8 + p.Content + ";\n"u8;
+         nint first = len("export const ");
+@@ -99,7 +99,7 @@
+         if (err != nil) {
+             return (default, err);
+         }
+-        return (new contentmapper.TransformResult(MappedOutput: new contentmapper.MappedOutput(Text: @virtual, Extension: ".ts", Mappings: ((jsontext.Value)mappings))), default);
++        return (new contentmapper.TransformResult(MappedOutput: new contentmapper.MappedOutput(Text: @virtual, Extension: ".ts", Mappings: ((jsontext.ΔValue)mappings))), default);
+     }
+     default: {
+         return (default, fmt.Errorf("contentmappertest: unexpected method %q"u8, method));
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/duplicate_projection.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/duplicate_projection.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/duplicate_projection.cs	2026-11-07 17:38:48.494099200 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/duplicate_projection.cs	2026-11-07 18:19:57.913659100 -0600
+@@ -14,7 +14,7 @@
+     /*embed*/ internal noNotifications noNotifications;
+ }
+ 
+-internal static (any, error) HandleRequest(this duplicateProjectionHandler _, context.Context ctx, @string method, jsontext.Value @params) {
++internal static (any, error) HandleRequest(this duplicateProjectionHandler _, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     var exprᴛ1 = method;
+     switch (ᐧ) {
+     case {} when exprᴛ1 == contentmapper.MethodInitialize: {
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/dynamic_verbatim.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/dynamic_verbatim.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/dynamic_verbatim.cs	2026-11-07 17:38:48.494099200 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/dynamic_verbatim.cs	2026-11-07 18:19:57.914664200 -0600
+@@ -23,7 +23,7 @@
+     internal ж<ProjectLifecycle> lifecycle;
+ }
+ 
+-internal static (any, error) HandleRequest(this dynamicVerbatimHandler h, context.Context ctx, @string method, jsontext.Value @params) {
++internal static (any, error) HandleRequest(this dynamicVerbatimHandler h, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     var exprᴛ1 = method;
+     switch (ᐧ) {
+     case {} when exprᴛ1 == contentmapper.MethodOpenProject: {
+@@ -40,7 +40,7 @@
+         slice<contentmapper.OptionDiagnosticResult> diagnostics = default;
+         if (((@string)(slice<byte>)p.Options) == @"{""plugins"":[{""name"":1}]}"u8) {
+             diagnostics = [new(
+-                Path: [(jsontext.Value)@"""plugins"""u8, (jsontext.Value)@"0"u8, (jsontext.Value)@"""name"""u8],
++                Path: [(jsontext.ΔValue)@"""plugins"""u8, (jsontext.ΔValue)@"0"u8, (jsontext.ΔValue)@"""name"""u8],
+                 MessageText: "Option 'name' requires a string.",
+                 Code: 123
+             )
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/editing.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/editing.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/editing.cs	2026-11-07 17:38:48.495099400 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/editing.cs	2026-11-07 18:19:57.914664200 -0600
+@@ -18,7 +18,7 @@
+     /*embed*/ internal noNotifications noNotifications;
+ }
+ 
+-internal static (any, error) HandleRequest(this prefixedSupplementalHandler _, context.Context ctx, @string method, jsontext.Value @params) {
++internal static (any, error) HandleRequest(this prefixedSupplementalHandler _, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     var exprᴛ1 = method;
+     switch (ᐧ) {
+     case {} when exprᴛ1 == contentmapper.MethodInitialize: {
+@@ -105,11 +105,11 @@
+                 return (default, errΔ3);
+             }
+             return (new contentmapper.TransformResult(
+-                MappedOutput: new contentmapper.MappedOutput(Text: p.Content.slice(0, thirdStart), Extension: ".ts", Mappings: ((jsontext.Value)canonicalMappings)),
++                MappedOutput: new contentmapper.MappedOutput(Text: p.Content.slice(0, thirdStart), Extension: ".ts", Mappings: ((jsontext.ΔValue)canonicalMappings)),
+                 Supplemental: [new(MappedOutput: new contentmapper.MappedOutput(
+                     Text: supplementalText,
+                     Extension: ".ts",
+-                    Mappings: ((jsontext.Value)mappingsΔ1)
++                    Mappings: ((jsontext.ΔValue)mappingsΔ1)
+                 ))
+                 ]
+             ), default);
+@@ -132,14 +132,14 @@
+             if (errΔ1 != nil) {
+                 return (default, errΔ1);
+             }
+-            canonical = new contentmapper.MappedOutput(Text: p.Content, Extension: ".ts", Mappings: ((jsontext.Value)canonicalMappings));
++            canonical = new contentmapper.MappedOutput(Text: p.Content, Extension: ".ts", Mappings: ((jsontext.ΔValue)canonicalMappings));
+         }
+         return (new contentmapper.TransformResult(
+             MappedOutput: canonical,
+             Supplemental: [new(MappedOutput: new contentmapper.MappedOutput(
+                 Text: supplementalText,
+                 Extension: ".ts",
+-                Mappings: ((jsontext.Value)mappings)
++                Mappings: ((jsontext.ΔValue)mappings)
+             ))
+             ]
+         ), default);
+@@ -154,7 +154,7 @@
+     /*embed*/ internal noNotifications noNotifications;
+ }
+ 
+-internal static (any, error) HandleRequest(this unmappedFoldingHandler _, context.Context ctx, @string method, jsontext.Value @params) {
++internal static (any, error) HandleRequest(this unmappedFoldingHandler _, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     var exprᴛ1 = method;
+     switch (ᐧ) {
+     case {} when exprᴛ1 == contentmapper.MethodInitialize: {
+@@ -175,7 +175,7 @@
+ export {};
+ """u8.Raw(),
+             Extension: ".ts",
+-            Mappings: ((jsontext.Value)mappings)
++            Mappings: ((jsontext.ΔValue)mappings)
+         )
+         ), default);
+     }
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/failing.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/failing.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/failing.cs	2026-11-07 17:38:48.495099400 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/failing.cs	2026-11-07 18:19:57.914664200 -0600
+@@ -14,7 +14,7 @@
+     /*embed*/ internal noNotifications noNotifications;
+ }
+ 
+-internal static (any, error) HandleRequest(this failingHandler _, context.Context ctx, @string method, jsontext.Value @params) {
++internal static (any, error) HandleRequest(this failingHandler _, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     var exprᴛ1 = method;
+     switch (ᐧ) {
+     case {} when exprᴛ1 == contentmapper.MethodInitialize: {
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/hoisting.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/hoisting.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/hoisting.cs	2026-11-07 17:38:48.495099400 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/hoisting.cs	2026-11-07 18:19:57.916263800 -0600
+@@ -18,7 +18,7 @@
+     /*embed*/ internal noNotifications noNotifications;
+ }
+ 
+-internal static (any, error) HandleRequest(this hoistingHandler _, context.Context ctx, @string method, jsontext.Value @params) {
++internal static (any, error) HandleRequest(this hoistingHandler _, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     var exprᴛ1 = method;
+     switch (ᐧ) {
+     case {} when exprᴛ1 == contentmapper.MethodInitialize: {
+@@ -41,7 +41,7 @@
+ 
+ }
+ 
+-internal static (@string, jsontext.Value, error) transformHoisting(@string content) {
++internal static (@string, jsontext.ΔValue, error) transformHoisting(@string content) {
+     ref var @virtual = ref heap(new strings.Builder(), out var Ꮡvirtual);
+     ref var segments = ref heap<slice<spanmap.Segment>>(out var Ꮡsegments);
+ 
+@@ -75,7 +75,7 @@
+     if (err != nil) {
+         return ("", default, err);
+     }
+-    return (@virtual.String(), (jsontext.Value)mappings, default);
++    return (@virtual.String(), (jsontext.ΔValue)mappings, default);
+ }
+ 
+ internal static (nint start, nint end, error err) scriptRange(@string content) {
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/lisp.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/lisp.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/lisp.cs	2026-11-07 17:38:48.496100000 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/lisp.cs	2026-11-07 18:19:57.916263800 -0600
+@@ -16,7 +16,7 @@
+     /*embed*/ internal noNotifications noNotifications;
+ }
+ 
+-internal static (any, error) HandleRequest(this lispHandler _, context.Context ctx, @string method, jsontext.Value @params) {
++internal static (any, error) HandleRequest(this lispHandler _, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     var exprᴛ1 = method;
+     switch (ᐧ) {
+     case {} when exprᴛ1 == contentmapper.MethodInitialize: {
+@@ -42,7 +42,7 @@
+         return (new contentmapper.TransformResult(MappedOutput: new contentmapper.MappedOutput(
+             Text: @"add(1, 2, ""oops"");",
+             Extension: ".ts",
+-            Mappings: ((jsontext.Value)mappings)
++            Mappings: ((jsontext.ΔValue)mappings)
+         )
+         ), default);
+     }
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/protocol.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/protocol.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/protocol.cs	2026-11-07 17:38:48.496100000 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/protocol.cs	2026-11-07 18:19:57.916263800 -0600
+@@ -15,7 +15,7 @@
+ partial struct noNotifications {
+ }
+ 
+-internal static error HandleNotification(this noNotifications _, context.Context ctx, @string method, jsontext.Value @params) {
++internal static error HandleNotification(this noNotifications _, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     return default;
+ }
+ 
+@@ -37,7 +37,7 @@
+     if (err != nil) {
+         return (new contentmapper.MappedOutput(), err);
+     }
+-    return (new contentmapper.MappedOutput(Text: content, Extension: ".ts", Mappings: ((jsontext.Value)mappings)), default);
++    return (new contentmapper.MappedOutput(Text: content, Extension: ".ts", Mappings: ((jsontext.ΔValue)mappings)), default);
+ }
+ 
+ partial struct staticProjectHandler {
+@@ -49,7 +49,7 @@
+     void CloseProject(contentmapper.CloseProjectParams @params);
+ }
+ 
+-internal static (any, error) HandleRequest(this staticProjectHandler h, context.Context ctx, @string method, jsontext.Value @params) {
++internal static (any, error) HandleRequest(this staticProjectHandler h, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     var exprᴛ1 = method;
+     switch (ᐧ) {
+     case {} when exprᴛ1 == contentmapper.MethodOpenProject: {
+@@ -69,7 +69,7 @@
+         slice<contentmapper.OptionDiagnosticResult> diagnostics = default;
+         if (((@string)(slice<byte>)p.Options) == @"{""plugins"":[{""name"":1}]}"u8) {
+             diagnostics = [new(
+-                Path: [(jsontext.Value)@"""plugins"""u8, (jsontext.Value)@"0"u8, (jsontext.Value)@"""name"""u8],
++                Path: [(jsontext.ΔValue)@"""plugins"""u8, (jsontext.ΔValue)@"0"u8, (jsontext.ΔValue)@"""name"""u8],
+                 MessageText: "Option 'name' requires a string.",
+                 Code: 123
+             )
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/supplemental.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/supplemental.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/supplemental.cs	2026-11-07 17:38:48.497099400 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/supplemental.cs	2026-11-07 18:19:57.917270500 -0600
+@@ -14,7 +14,7 @@
+     /*embed*/ internal noNotifications noNotifications;
+ }
+ 
+-internal static (any, error) HandleRequest(this supplementalHandler _, context.Context ctx, @string method, jsontext.Value @params) {
++internal static (any, error) HandleRequest(this supplementalHandler _, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     var exprᴛ1 = method;
+     switch (ᐧ) {
+     case {} when exprᴛ1 == contentmapper.MethodInitialize: {
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/supplemental_diagnostics.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/supplemental_diagnostics.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/supplemental_diagnostics.cs	2026-11-07 17:38:48.497099400 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/supplemental_diagnostics.cs	2026-11-07 18:19:57.917270500 -0600
+@@ -16,7 +16,7 @@
+     /*embed*/ internal noNotifications noNotifications;
+ }
+ 
+-internal static (any, error) HandleRequest(this supplementalDiagnosticsHandler _, context.Context ctx, @string method, jsontext.Value @params) {
++internal static (any, error) HandleRequest(this supplementalDiagnosticsHandler _, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     var exprᴛ1 = method;
+     switch (ᐧ) {
+     case {} when exprᴛ1 == contentmapper.MethodInitialize: {
+@@ -41,7 +41,7 @@
+         }
+         return (new contentmapper.TransformResult(
+             MappedOutput: new contentmapper.MappedOutput(Text: "export {};", Extension: ".ts"),
+-            Supplemental: [new(MappedOutput: new contentmapper.MappedOutput(Text: prefix + p.Content, Extension: ".ts", Mappings: ((jsontext.Value)mappings)))]
++            Supplemental: [new(MappedOutput: new contentmapper.MappedOutput(Text: prefix + p.Content, Extension: ".ts", Mappings: ((jsontext.ΔValue)mappings)))]
+         ), default);
+     }
+     default: {
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/supplemental_globals.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/supplemental_globals.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/supplemental_globals.cs	2026-11-07 17:38:48.497099400 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/supplemental_globals.cs	2026-11-07 18:19:57.918269900 -0600
+@@ -15,7 +15,7 @@
+     /*embed*/ internal noNotifications noNotifications;
+ }
+ 
+-internal static (any, error) HandleRequest(this supplementalGlobalsHandler _, context.Context ctx, @string method, jsontext.Value @params) {
++internal static (any, error) HandleRequest(this supplementalGlobalsHandler _, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     var exprᴛ1 = method;
+     switch (ᐧ) {
+     case {} when exprᴛ1 == contentmapper.MethodInitialize: {
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/supplemental_module.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/supplemental_module.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/supplemental_module.cs	2026-11-07 17:38:48.498606500 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/supplemental_module.cs	2026-11-07 18:19:57.918269900 -0600
+@@ -14,7 +14,7 @@
+     /*embed*/ internal noNotifications noNotifications;
+ }
+ 
+-internal static (any, error) HandleRequest(this supplementalModuleHandler _, context.Context ctx, @string method, jsontext.Value @params) {
++internal static (any, error) HandleRequest(this supplementalModuleHandler _, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     var exprᴛ1 = method;
+     switch (ᐧ) {
+     case {} when exprᴛ1 == contentmapper.MethodInitialize: {
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/synthesizing.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/synthesizing.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/synthesizing.cs	2026-11-07 17:38:48.498606500 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/synthesizing.cs	2026-11-07 18:19:57.918269900 -0600
+@@ -17,7 +17,7 @@
+     /*embed*/ internal noNotifications noNotifications;
+ }
+ 
+-internal static (any, error) HandleRequest(this synthesizingHandler _, context.Context ctx, @string method, jsontext.Value @params) {
++internal static (any, error) HandleRequest(this synthesizingHandler _, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     var exprᴛ1 = method;
+     switch (ᐧ) {
+     case {} when exprᴛ1 == contentmapper.MethodInitialize: {
+@@ -35,7 +35,7 @@
+         return (new contentmapper.TransformResult(MappedOutput: new contentmapper.MappedOutput(
+             Text: synthesizedOutput,
+             Extension: ".ts",
+-            Mappings: ((jsontext.Value)mappings)
++            Mappings: ((jsontext.ΔValue)mappings)
+         )
+         ), default);
+     }
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/transforming.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/transforming.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/transforming.cs	2026-11-07 17:38:48.499616900 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/transforming.cs	2026-11-07 18:19:57.919270300 -0600
+@@ -28,7 +28,7 @@
+ partial struct Handler {
+     /*embed*/ internal noNotifications noNotifications;
+     internal sync.Mutex mu;
+-    internal map<@string, ж<collections.OrderedMap<@string, jsontext.Value>>> compilerOptions;
++    internal map<@string, ж<collections.OrderedMap<@string, jsontext.ΔValue>>> compilerOptions;
+ }
+ 
+ internal static ipc.Handler _ᴛ1ʗ = new HandlerжHandler(((ж<Handler>)nil));
+@@ -39,14 +39,14 @@
+     try {
+         ref var h = ref Ꮡh.DerefOrNull();
+ 
+-        ref var options = ref heap<ж<collections.OrderedMap<@string, jsontext.Value>>>(out var Ꮡoptions);
++        ref var options = ref heap<ж<collections.OrderedMap<@string, jsontext.ΔValue>>>(out var Ꮡoptions);
+         var err = json.Unmarshal(p.CompilerOptions, Ꮡoptions); if (err != nil) {
+             return err;
+         }
+         h.mu.Lock();
+         ᒐd1 = true;
+         if (h.compilerOptions == nil) {
+-            h.compilerOptions = new map<@string, ж<collections.OrderedMap<@string, jsontext.Value>>>();
++            h.compilerOptions = new map<@string, ж<collections.OrderedMap<@string, jsontext.ΔValue>>>();
+         }
+         h.compilerOptions[p.ProjectHandle] = options;
+         return default;
+@@ -69,7 +69,7 @@
+     finally { if (ᒐd1) Ꮡh.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
+ }
+ 
+-public static (any, error) HandleRequest(this ж<Handler> Ꮡh, context.Context ctx, @string method, jsontext.Value @params) {
++public static (any, error) HandleRequest(this ж<Handler> Ꮡh, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     ref var h = ref Ꮡh.DerefOrNull();
+ 
+     var exprᴛ1 = method;
+@@ -111,7 +111,7 @@
+     return ".ts";
+ }
+ 
+-internal static (@string, jsontext.Value, slice<contentmapper.Diagnostic>, ж<contentmapper.DiagnosticDirectives>, error) transform(@string content, ж<collections.OrderedMap<@string, jsontext.Value>> options) {
++internal static (@string, jsontext.ΔValue, slice<contentmapper.Diagnostic>, ж<contentmapper.DiagnosticDirectives>, error) transform(@string content, ж<collections.OrderedMap<@string, jsontext.ΔValue>> options) {
+     ref var @virtual = ref heap(new strings.Builder(), out var Ꮡvirtual);
+     ref var segments = ref heap<slice<spanmap.Segment>>(out var Ꮡsegments);
+     slice<contentmapper.Diagnostic> diagnostics = default;
+@@ -186,7 +186,7 @@
+     if (err != nil) {
+         return ("", default, default, default, err);
+     }
+-    return (@virtual.String(), (jsontext.Value)mappings, diagnostics, diagnosticDirectives(content, spanMap), default);
++    return (@virtual.String(), (jsontext.ΔValue)mappings, diagnostics, diagnosticDirectives(content, spanMap), default);
+ }
+ 
+ internal static ж<contentmapper.DiagnosticDirectives> diagnosticDirectives(@string content, ж<spanmap.SpanMap> mappings) {
+@@ -300,7 +300,7 @@
+     return wrap(result, unusedDiagnostics.ꓸꓸꓸ);
+ }
+ 
+-internal static @string renderOption(ж<collections.OrderedMap<@string, jsontext.Value>> Ꮡoptions, @string name) {
++internal static @string renderOption(ж<collections.OrderedMap<@string, jsontext.ΔValue>> Ꮡoptions, @string name) {
+     ref var options = ref Ꮡoptions.DerefOrNull();
+ 
+     if (Ꮡoptions != nil) {
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/verbatim.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/verbatim.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/verbatim.cs	2026-11-07 17:38:48.499616900 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/testutil/contentmappertest/verbatim.cs	2026-11-07 18:19:57.919270300 -0600
+@@ -18,7 +18,7 @@
+     /*embed*/ internal noNotifications noNotifications;
+ }
+ 
+-internal static (any, error) HandleRequest(this verbatimHandler _, context.Context ctx, @string method, jsontext.Value @params) {
++internal static (any, error) HandleRequest(this verbatimHandler _, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     var exprᴛ1 = method;
+     switch (ᐧ) {
+     case {} when exprᴛ1 == contentmapper.MethodInitialize: {
+@@ -41,7 +41,7 @@
+ 
+ }
+ 
+-internal static (any, error) HandleRequest(this moduleVerbatimHandler _, context.Context ctx, @string method, jsontext.Value @params) {
++internal static (any, error) HandleRequest(this moduleVerbatimHandler _, context.Context ctx, @string method, jsontext.ΔValue @params) {
+     var exprᴛ1 = method;
+     switch (ᐧ) {
+     case {} when exprᴛ1 == contentmapper.MethodInitialize: {
+diff -ru recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/tspath/path.cs recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/tspath/path.cs
+--- recurse-passB/src/github.com/microsoft/TypeScript/tsc/internal/tspath/path.cs	2026-11-07 17:38:48.543175800 -0600
++++ recurse-passC/src/github.com/microsoft/TypeScript/tsc/internal/tspath/path.cs	2026-11-07 18:19:57.811802100 -0600
+@@ -1023,7 +1023,7 @@
+                             tails: append(newGroups[key].tails, g.slice(lastCommonIndex + 1))
+                         );
+                     }
+-                    slices.Sort<slice<Path>, Path>(orderedGroups);
++                    slices.SortFunc<slice<Path>, Path>(orderedGroups, (Path a, Path b) => strings.Compare(a, b));
+                     var result = new slice<slice<@string>>(0, len(newGroups));
+                     foreach (var (_, key) in range(orderedGroups)) {
+                         var group = newGroups[key];
+diff -ru recurse-passB/pkg/github.com/Microsoft/go-winio/internal/socket/socket.cs recurse-passC/pkg/github.com/Microsoft/go-winio/internal/socket/socket.cs
+--- recurse-passB/pkg/github.com/Microsoft/go-winio/internal/socket/socket.cs	2026-11-07 17:38:48.271071300 -0600
++++ recurse-passC/pkg/github.com/Microsoft/go-winio/internal/socket/socket.cs	2026-11-07 18:19:57.938275000 -0600
+@@ -88,12 +88,12 @@
+     return f.err;
+ }
+ 
+-[GoLazy] partial class lazyᴛWSAID_CONNECTEX { public static readonly ж<guid.GUID> ᏑWSAID_CONNECTEX = new StaticBox<guid.GUID>(new guid.GUID(
++[GoLazy] partial class lazyᴛWSAID_CONNECTEX { public static readonly ж<guid.GUID> ᏑWSAID_CONNECTEX = new StaticBox<guid.GUID>(new guid.GUID(new windows.GUID(
+     Data1: 0x25a207b9,
+     Data2: 0xddf3,
+     Data3: 0x4660,
+     Data4: new byte[]{0x8e, 0xe9, 0x76, 0xe5, 0x8c, 0x74, 0x06, 0x3e}.array()
+-)); }
++))); }
+ public static ref guid.GUID WSAID_CONNECTEX => ref ((StaticBox<guid.GUID>)ᏑWSAID_CONNECTEX).ValueSlot;
+ internal static readonly ж<runtimeFunc> ᏑconnectExFunc = new StaticBox<runtimeFunc>(new runtimeFunc(id: WSAID_CONNECTEX.ΔClone()));
+ internal static ref runtimeFunc connectExFunc => ref ((StaticBox<runtimeFunc>)ᏑconnectExFunc).ValueSlot;
+diff -ru recurse-passB/pkg/github.com/go-json-experiment/json/arshal_embedded.cs recurse-passC/pkg/github.com/go-json-experiment/json/arshal_embedded.cs
+--- recurse-passB/pkg/github.com/go-json-experiment/json/arshal_embedded.cs	2026-11-07 17:38:48.307676600 -0600
++++ recurse-passC/pkg/github.com/go-json-experiment/json/arshal_embedded.cs	2026-11-07 18:19:57.823013000 -0600
+@@ -20,7 +20,7 @@
+ 
+ internal static error errRawEmbedNotObject = errors.New("embedded raw value must be a JSON object");
+ 
+-internal static reflectꓸType jsontextValueType = reflect.TypeFor<jsontext.Value>();
++internal static reflectꓸType jsontextValueType = reflect.TypeFor<jsontext.ΔValue>();
+ 
+ internal static error marshalEmbeddedFallbackAll(ж<jsontextꓸEncoder> Ꮡenc, addressableValue va, ж<jsonopts.Struct> Ꮡmo, ref structField f, Func<slice<byte>, bool> insertUnquotedName) {
+     GoFrame ᒐ = default;
+@@ -41,7 +41,7 @@
+         }
+ 
+         if (AreEqual(v.Value.Type(), jsontextValueType)) {
+-            var (b, _) = reflect.TypeAssert<jsontext.Value>(v.Value);
++            var (b, _) = reflect.TypeAssert<jsontext.ΔValue>(v.Value);
+             if (len(b) == 0) {
+                 return default;
+             }
+@@ -174,7 +174,7 @@
+     v = v.indirect(true);
+ 
+     if (AreEqual(v.Value.Type(), jsontextValueType)) {
+-        var (b, _) = reflect.TypeAssert<ж<jsontext.Value>>(v.Value.Addr());
++        var (b, _) = reflect.TypeAssert<ж<jsontext.ΔValue>>(v.Value.Addr());
+         if (len(b.ValueSlot) == 0) {
+             b.ValueSlot = append(b.ValueSlot, (byte)'{');
+         } else {
+diff -ru recurse-passB/pkg/github.com/go-json-experiment/json/errors.cs recurse-passC/pkg/github.com/go-json-experiment/json/errors.cs
+--- recurse-passB/pkg/github.com/go-json-experiment/json/errors.cs	2026-11-07 17:38:48.309185100 -0600
++++ recurse-passC/pkg/github.com/go-json-experiment/json/errors.cs	2026-11-07 18:19:57.824020300 -0600
+@@ -48,7 +48,7 @@
+     public int64 ByteOffset;
+     public jsontext.Pointer JSONPointer;
+     public jsontextꓸKind JSONKind;
+-    public jsontext.Value JSONValue;
++    public jsontext.ΔValue JSONValue;
+     public reflectꓸType ΔGoType;
+     public error Err;
+ }
+@@ -109,7 +109,7 @@
+     var tokOrVal = export.Decoder(Ꮡd).PreviousTokenOrValue();
+     ref var byteOffset = ref heap<int64>(d.InputOffset() - (int64)len(tokOrVal), out var ᏑbyteOffset);
+     if (export.Decoder(Ꮡd).Flags.Get(jsonflags.ReportErrorsWithLegacySemantics)) {
+-        var k = ((jsontext.Value)tokOrVal).Kind(); if (k == (rune)'[' || k == (rune)'{') {
++        var k = ((jsontext.ΔValue)tokOrVal).Kind(); if (k == (rune)'[' || k == (rune)'{') {
+             byteOffset++;
+         } else {
+             byteOffset += (int64)len(tokOrVal);
+@@ -118,13 +118,13 @@
+     return new SemanticErrorжerror(Ꮡ(new SemanticError(action: "unmarshal", ΔGoType: t, Err: toUnexpectedEOF(err),
+         ByteOffset: byteOffset,
+         JSONPointer: ((jsontext.Pointer)export.Decoder(Ꮡd).AppendStackPointer(default, -1)),
+-        JSONKind: ((jsontext.Value)tokOrVal).Kind())));
++        JSONKind: ((jsontext.ΔValue)tokOrVal).Kind())));
+ }
+ 
+ internal static error newUnmarshalErrorAfterWithValue(ж<jsontextꓸDecoder> d, reflectꓸType t, error err) {
+     var serr = newUnmarshalErrorAfter(d, t, err)._<ж<SemanticError>>();
+     if (serr.JSONKind == (rune)'"' || serr.JSONKind == (rune)'0') {
+-        serr.JSONValue = ((jsontext.Value)export.Decoder(d).PreviousTokenOrValue()).Clone();
++        serr.JSONValue = ((jsontext.ΔValue)export.Decoder(d).PreviousTokenOrValue()).Clone();
+     }
+     return new SemanticErrorжerror(serr);
+ }
+diff -ru recurse-passB/pkg/github.com/go-json-experiment/json/fields.cs recurse-passC/pkg/github.com/go-json-experiment/json/fields.cs
+--- recurse-passB/pkg/github.com/go-json-experiment/json/fields.cs	2026-11-07 17:38:48.310196700 -0600
++++ recurse-passC/pkg/github.com/go-json-experiment/json/fields.cs	2026-11-07 18:19:57.824020300 -0600
+@@ -172,13 +172,13 @@
+                     break;
+                 }
+                 default: {
+-                    serr = orErrorfʗ1(serr, tʗ1, "embedded Go struct field %s of type %s must be a Go struct, Go map of string key, or jsontext.Value", sfʗ1.Name, tf);
++                    serr = orErrorfʗ1(serr, tʗ1, "embedded Go struct field %s of type %s must be a Go struct, Go map of string key, or jsontext.ΔValue", sfʗ1.Name, tf);
+                     ᏑhandleField.ValueSlot();
+                     return;
+                 }}
+ 
+                 if (embeddedFallbackIndex >= 0) {
+-                    serr = orErrorfʗ1(serr, tʗ1, "embedded Go struct fields %s and %s cannot both be a Go map or jsontext.Value", tʗ1.Field(embeddedFallbackIndex).Name, sfʗ1.Name);
++                    serr = orErrorfʗ1(serr, tʗ1, "embedded Go struct fields %s and %s cannot both be a Go map or jsontext.ΔValue", tʗ1.Field(embeddedFallbackIndex).Name, sfʗ1.Name);
+                 }
+                 embeddedFallbackIndex = i;
+ 
+diff -ru recurse-passB/pkg/github.com/go-json-experiment/json/jsontext/decode.cs recurse-passC/pkg/github.com/go-json-experiment/json/jsontext/decode.cs
+--- recurse-passB/pkg/github.com/go-json-experiment/json/jsontext/decode.cs	2026-11-07 17:38:48.300119400 -0600
++++ recurse-passC/pkg/github.com/go-json-experiment/json/jsontext/decode.cs	2026-11-07 18:19:57.814805300 -0600
+@@ -531,11 +531,11 @@
+ 
+ }
+ 
+-public static (Value, error) ReadValue(this ж<ΔDecoder> Ꮡd) {
++public static (ΔValue, error) ReadValue(this ж<ΔDecoder> Ꮡd) {
+     ref var flags = ref heap(new jsonwire.ValueFlags(), out var Ꮡflags);
+     return Ꮡd.Ꮡs.ReadValue(Ꮡflags);
+ }
+-public static (Value, error) ReadValue(this ж<decoderState> Ꮡd, ж<jsonwire.ValueFlags> flags) {
++public static (ΔValue, error) ReadValue(this ж<decoderState> Ꮡd, ж<jsonwire.ValueFlags> flags) {
+     ref var d = ref Ꮡd.DerefOrNull();
+ 
+     error err = default;
+diff -ru recurse-passB/pkg/github.com/go-json-experiment/json/jsontext/encode.cs recurse-passC/pkg/github.com/go-json-experiment/json/jsontext/encode.cs
+--- recurse-passB/pkg/github.com/go-json-experiment/json/jsontext/encode.cs	2026-11-07 17:38:48.300119400 -0600
++++ recurse-passC/pkg/github.com/go-json-experiment/json/jsontext/encode.cs	2026-11-07 18:19:57.816807500 -0600
+@@ -423,10 +423,10 @@
+     return default;
+ }
+ 
+-public static error WriteValue(this ж<ΔEncoder> Ꮡe, Value v) {
++public static error WriteValue(this ж<ΔEncoder> Ꮡe, ΔValue v) {
+     return Ꮡe.Ꮡs.WriteValue(v);
+ }
+-public static error WriteValue(this ж<encoderState> Ꮡe, Value v) {
++public static error WriteValue(this ж<encoderState> Ꮡe, ΔValue v) {
+     ref var e = ref Ꮡe.DerefOrNull();
+ 
+     e.maxValue |= (nint)(len(v));
+@@ -568,7 +568,7 @@
+     return b;
+ }
+ 
+-internal static (slice<byte>, nint, error) reformatValue(this ж<encoderState> Ꮡe, slice<byte> dst, Value src, nint depth) {
++internal static (slice<byte>, nint, error) reformatValue(this ж<encoderState> Ꮡe, slice<byte> dst, ΔValue src, nint depth) {
+     ref var e = ref Ꮡe.DerefOrNull();
+ 
+     if (len(src) == 0) {
+@@ -627,7 +627,7 @@
+ 
+ }
+ 
+-internal static (slice<byte>, nint, error) reformatObject(this ж<encoderState> Ꮡe, slice<byte> dst, Value src, nint depth) {
++internal static (slice<byte>, nint, error) reformatObject(this ж<encoderState> Ꮡe, slice<byte> dst, ΔValue src, nint depth) {
+     GoFrame ᒐ = default;
+     bool ᒐd1 = false;
+     try {
+@@ -740,7 +740,7 @@
+     finally { if (ᒐd1) Ꮡe.DerefOrNull().Namespaces.pop(); ᒐ.Run(); }
+ }
+ 
+-internal static (slice<byte>, nint, error) reformatArray(this ж<encoderState> Ꮡe, slice<byte> dst, Value src, nint depth) {
++internal static (slice<byte>, nint, error) reformatArray(this ж<encoderState> Ꮡe, slice<byte> dst, ΔValue src, nint depth) {
+     ref var e = ref Ꮡe.DerefOrNull();
+ 
+     if (len(src) == 0 || src[0] != '[') {
+diff -ru recurse-passB/pkg/github.com/go-json-experiment/json/jsontext/package_info.cs recurse-passC/pkg/github.com/go-json-experiment/json/jsontext/package_info.cs
+--- recurse-passB/pkg/github.com/go-json-experiment/json/jsontext/package_info.cs	2026-11-07 17:38:48.305157200 -0600
++++ recurse-passC/pkg/github.com/go-json-experiment/json/jsontext/package_info.cs	2026-11-07 18:19:57.818806800 -0600
+@@ -113,7 +113,7 @@
+     public partial struct Pointer {}
+     public partial struct SyntacticError {}
+     public partial struct Token {}
+-    public partial struct Value {}
++    public partial struct ΔValue {}
+     public partial struct decoderState {}
+     public partial struct encoderState {}
+     public partial struct export {}
+diff -ru recurse-passB/pkg/github.com/go-json-experiment/json/jsontext/value.cs recurse-passC/pkg/github.com/go-json-experiment/json/jsontext/value.cs
+--- recurse-passB/pkg/github.com/go-json-experiment/json/jsontext/value.cs	2026-11-07 17:38:48.304146700 -0600
++++ recurse-passC/pkg/github.com/go-json-experiment/json/jsontext/value.cs	2026-11-07 18:19:57.821506300 -0600
+@@ -35,7 +35,7 @@
+         var e = getBufferedEncoder(opts.ꓸꓸꓸ);
+         defer(putBufferedEncoder, e, ref ᒐ);
+         e.Ꮡs.of(encoderState.ᏑFlags).Set((jsonflags.Bools)(jsonflags.OmitTopLevelNewline | 1));
+-        var err = e.Ꮡs.WriteValue((Value)src); if (err != nil) {
++        var err = e.Ꮡs.WriteValue((ΔValue)src); if (err != nil) {
+             return (append(dst, src.ꓸꓸꓸ), err);
+         }
+         return (appendꓸꓸꓸ(dst, e.s.Buf), default);
+@@ -44,20 +44,20 @@
+     finally { ᒐ.Run(); }
+ }
+ 
+-partial struct Value /*[]byte*/;
++partial struct ΔValue /*[]byte*/;
+ 
+-public static Value Clone(this Value v) {
++public static ΔValue Clone(this ΔValue v) {
+     return bytes.Clone(v);
+ }
+ 
+-public static @string String(this Value v) {
++public static @string String(this ΔValue v) {
+     if (v == nil) {
+         return "null";
+     }
+     return (@string)(slice<byte>)v;
+ }
+ 
+-public static bool IsValid(this Value v, params ꓸꓸꓸOptions optsʗp) {
++public static bool IsValid(this ΔValue v, params ꓸꓸꓸOptions optsʗp) {
+     GoFrame ᒐ = default;
+     try {
+         var opts = optsʗp.sslice();
+@@ -72,13 +72,13 @@
+     finally { ᒐ.Run(); }
+ }
+ 
+-public static error Format(this ж<Value> Ꮡv, params ꓸꓸꓸOptions optsʗp) {
++public static error Format(this ж<ΔValue> Ꮡv, params ꓸꓸꓸOptions optsʗp) {
+     var opts = optsʗp.slice();
+ 
+     return Ꮡv.format(opts, default);
+ }
+ 
+-internal static error format(this ж<Value> Ꮡv, slice<Options> opts1, slice<Options> opts2) {
++internal static error format(this ж<ΔValue> Ꮡv, slice<Options> opts1, slice<Options> opts2) {
+     GoFrame ᒐ = default;
+     try {
+         ref var v = ref Ꮡv.DerefOrNull();
+@@ -99,35 +99,35 @@
+     finally { ᒐ.Run(); }
+ }
+ 
+-public static error Compact(this ж<Value> Ꮡv, params ꓸꓸꓸOptions optsʗp) {
++public static error Compact(this ж<ΔValue> Ꮡv, params ꓸꓸꓸOptions optsʗp) {
+     var opts = optsʗp.slice();
+ 
+     return Ꮡv.format(slice<Options>([AllowDuplicateNames(true), AllowInvalidUTF8(true), PreserveRawStrings(true)
+     ]), opts);
+ }
+ 
+-public static error Indent(this ж<Value> Ꮡv, params ꓸꓸꓸOptions optsʗp) {
++public static error Indent(this ж<ΔValue> Ꮡv, params ꓸꓸꓸOptions optsʗp) {
+     var opts = optsʗp.slice();
+ 
+     return Ꮡv.format(slice<Options>([AllowDuplicateNames(true), AllowInvalidUTF8(true), PreserveRawStrings(true), Multiline(true)
+     ]), opts);
+ }
+ 
+-public static error Canonicalize(this ж<Value> Ꮡv, params ꓸꓸꓸOptions optsʗp) {
++public static error Canonicalize(this ж<ΔValue> Ꮡv, params ꓸꓸꓸOptions optsʗp) {
+     var opts = optsʗp.slice();
+ 
+     return Ꮡv.format(slice<Options>([CanonicalizeRawInts(true), CanonicalizeRawFloats(true), ReorderRawObjects(true)
+     ]), opts);
+ }
+ 
+-public static (slice<byte>, error) MarshalJSON(this Value v) {
++public static (slice<byte>, error) MarshalJSON(this ΔValue v) {
+     if (v == nil) {
+         return (slice<byte>("null"u8), default);
+     }
+     return (v, default);
+ }
+ 
+-public static error UnmarshalJSON(this ж<Value> Ꮡv, slice<byte> b) {
++public static error UnmarshalJSON(this ж<ΔValue> Ꮡv, slice<byte> b) {
+     ref var v = ref Ꮡv.DerefOrNull();
+ 
+     if (Ꮡv == nil) {
+@@ -137,7 +137,7 @@
+     return default;
+ }
+ 
+-public static ΔKind Kind(this Value v) {
++public static ΔKind Kind(this ΔValue v) {
+     var vΔ1 = v.slice(jsonwire.ConsumeWhitespace(v)); if (len(vΔ1) > 0) {
+         return ((ΔKind)vΔ1[0]).normalize();
+     }
+diff -ru recurse-passB/pkg/github.com/klauspost/cpuid/v2/cpuid.cs recurse-passC/pkg/github.com/klauspost/cpuid/v2/cpuid.cs
+--- recurse-passB/pkg/github.com/klauspost/cpuid/v2/cpuid.cs	2026-11-07 17:38:48.335886600 -0600
++++ recurse-passC/pkg/github.com/klauspost/cpuid/v2/cpuid.cs	2026-11-07 18:19:57.937275300 -0600
+@@ -407,7 +407,7 @@
+ }
+ 
+ public static bool HasAll(this ref CPUInfo c, Features f) {
+-    return c.featureSet.hasSetP(Ꮡf);
++    return c.featureSet.hasSetP((ж<flagSet>)f);
+ }
+ 
+ internal static Features oneOfLevel = CombineFeatures(SYSEE, SYSCALL);
+diff -ru recurse-passB/pkg/golang.org/x/text/internal/language/match.cs recurse-passC/pkg/golang.org/x/text/internal/language/match.cs
+--- recurse-passB/pkg/golang.org/x/text/internal/language/match.cs	2026-11-07 17:38:48.379455700 -0600
++++ recurse-passC/pkg/golang.org/x/text/internal/language/match.cs	2026-11-07 18:19:57.936275300 -0600
+@@ -176,7 +176,7 @@
+     if (err != nil) {
+         return (t, err);
+     }
+-    Ꮡt.RemakeString();
++    { ref var tʗh = ref heap(t, out var Ꮡt); Ꮡt.RemakeString(); t = tʗh; }
+     return (t, default);
+ }
+ 
+diff -ru recurse-passB/pkg/golang.org/x/text/unicode/norm/normalize.cs recurse-passC/pkg/golang.org/x/text/unicode/norm/normalize.cs
+--- recurse-passB/pkg/golang.org/x/text/unicode/norm/normalize.cs	2026-11-07 17:38:48.393973900 -0600
++++ recurse-passC/pkg/golang.org/x/text/unicode/norm/normalize.cs	2026-11-07 18:19:57.810226500 -0600
+@@ -5,9 +5,9 @@
+ namespace go.golang.org.x.text.unicode;
+ 
+ using utf8 = go.unicode.utf8_package;
+-using transform = vendor.golang.org.x.text.transform_package;
++using transform = go.golang.org.x.text.transform_package;
+ using go.unicode;
+-using vendor.golang.org.x.text;
++using go.golang.org.x.text;
+ using ꓸꓸꓸbyte = Span<byte>;
+ 
+ partial class norm_package {
+@@ -249,9 +249,9 @@
+     (n, var ok) = formTable[f].quickSpan(inputBytes(b), 0, len(b), atEOF);
+     if (n < len(b)) {
+         if (!ok) {
+-            err = vendor.golang.org.x.text.transform_package.ErrEndOfSpan;
++            err = go.golang.org.x.text.transform_package.ErrEndOfSpan;
+         } else {
+-            err = vendor.golang.org.x.text.transform_package.ErrShortSrc;
++            err = go.golang.org.x.text.transform_package.ErrShortSrc;
+         }
+     }
+     return (n, err);
+@@ -264,9 +264,9 @@
+     (n, var ok) = formTable[f].quickSpan(inputString(s), 0, len(s), atEOF);
+     if (n < len(s)) {
+         if (!ok) {
+-            err = vendor.golang.org.x.text.transform_package.ErrEndOfSpan;
++            err = go.golang.org.x.text.transform_package.ErrEndOfSpan;
+         } else {
+-            err = vendor.golang.org.x.text.transform_package.ErrShortSrc;
++            err = go.golang.org.x.text.transform_package.ErrShortSrc;
+         }
+     }
+     return (n, err);
+diff -ru recurse-passB/pkg/golang.org/x/text/unicode/norm/package_info.cs recurse-passC/pkg/golang.org/x/text/unicode/norm/package_info.cs
+--- recurse-passB/pkg/golang.org/x/text/unicode/norm/package_info.cs	2026-11-07 17:38:48.395971700 -0600
++++ recurse-passC/pkg/golang.org/x/text/unicode/norm/package_info.cs	2026-11-07 18:19:57.811228100 -0600
+@@ -110,7 +110,7 @@
+     // <ImportInitializers>
+     [GoInit] internal static void initᴛᴛimportꓸencodingꓸbinary() => builtin.initPackage(typeof(encoding.binary_package));
+     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+-    [GoInit] internal static void initᴛᴛimportꓸgolang_orgꓸxꓸtextꓸtransform() => builtin.initPackage(typeof(vendor.golang.org.x.text.transform_package));
++    [GoInit] internal static void initᴛᴛimportꓸgolang_orgꓸxꓸtextꓸtransform() => builtin.initPackage(typeof(go.golang.org.x.text.transform_package));
+     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
+     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
+     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(go.unicode.utf8_package));
+diff -ru recurse-passB/pkg/golang.org/x/text/unicode/norm/transform.cs recurse-passC/pkg/golang.org/x/text/unicode/norm/transform.cs
+--- recurse-passB/pkg/golang.org/x/text/unicode/norm/transform.cs	2026-11-07 17:38:48.394974200 -0600
++++ recurse-passC/pkg/golang.org/x/text/unicode/norm/transform.cs	2026-11-07 18:19:57.810226500 -0600
+@@ -5,9 +5,9 @@
+ namespace go.golang.org.x.text.unicode;
+ 
+ using utf8 = go.unicode.utf8_package;
+-using transform = vendor.golang.org.x.text.transform_package;
++using transform = go.golang.org.x.text.transform_package;
+ using go.unicode;
+-using vendor.golang.org.x.text;
++using go.golang.org.x.text;
+ 
+ partial class norm_package {
+ 
+@@ -21,7 +21,7 @@
+     var b = src;
+     var eof = atEOF;
+     nint ns = len(dst); if (ns < len(b)) {
+-        err = vendor.golang.org.x.text.transform_package.ErrShortDst;
++        err = go.golang.org.x.text.transform_package.ErrShortDst;
+         eof = false;
+         b = b.slice(0, ns);
+     }
+@@ -33,7 +33,7 @@
+     }
+ 
+     if (err == nil && n < len(src)) {
+-        err = vendor.golang.org.x.text.transform_package.ErrShortSrc;
++        err = go.golang.org.x.text.transform_package.ErrShortSrc;
+     }
+     return (n, n, err);
+ }
+@@ -48,7 +48,7 @@
+     return true;
+ }
+ 
+-internal static slice<error> errs = [default, vendor.golang.org.x.text.transform_package.ErrShortDst, vendor.golang.org.x.text.transform_package.ErrShortSrc];
++internal static slice<error> errs = [default, go.golang.org.x.text.transform_package.ErrShortDst, go.golang.org.x.text.transform_package.ErrShortSrc];
+ 
+ internal static (nint nDst, nint nSrc, error err) transform(this Form f, slice<byte> dst, slice<byte> src, bool atEOF) {
+     nint nDst = default;
+@@ -69,7 +69,7 @@
+         end = rb.nsrc;
+         var eof = atEOF;
+         nint nΔ1 = nSrc + len(dst) - nDst; if (nΔ1 < end) {
+-            errΔ1 = vendor.golang.org.x.text.transform_package.ErrShortDst;
++            errΔ1 = go.golang.org.x.text.transform_package.ErrShortDst;
+             end = nΔ1;
+             eof = false;
+         }
+@@ -79,7 +79,7 @@
+         nDst += n;
+         if (ok) {
+             if (errΔ1 == nil && nSrc < rb.nsrc) {
+-                errΔ1 = vendor.golang.org.x.text.transform_package.ErrShortSrc;
++                errΔ1 = go.golang.org.x.text.transform_package.ErrShortSrc;
+             }
+             return (nDst, nSrc, errΔ1);
+         }
+diff -ru recurse-passB/pkg/gotest.tools/v3/internal/format/diff.cs recurse-passC/pkg/gotest.tools/v3/internal/format/diff.cs
+--- recurse-passB/pkg/gotest.tools/v3/internal/format/diff.cs	2026-11-07 17:38:48.409982700 -0600
++++ recurse-passC/pkg/gotest.tools/v3/internal/format/diff.cs	2026-11-07 18:19:57.936275300 -0600
+@@ -29,7 +29,7 @@
+ 
+     var buf = @new<bytes.Buffer>();
+     var bufʗ1 = buf;
+-    var writeFormat = (@string format, params ꓸꓸꓸany argsʗp) => {
++    Actionꓸꓸꓸ<@string, object> writeFormat = (@string format, params ꓸꓸꓸany argsʗp) => {
+         var args = argsʗp.sslice();
+         bufʗ1.WriteString(fmt.Sprintf(format, args.ꓸꓸꓸ));
+     };

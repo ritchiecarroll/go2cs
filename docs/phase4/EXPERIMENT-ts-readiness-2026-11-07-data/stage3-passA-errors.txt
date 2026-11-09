@@ -1,0 +1,89 @@
+UNIQUE ERRORS 36  projects with errors 7  non-CS error lines 0
+
+-- by project
+    27 golang.org/x/text/unicode/norm
+     3 github.com/microsoft/TypeScript/tsc/internal/tspath
+     2 gotest.tools/v3/internal/format
+     1 github.com/go-json-experiment/json/jsontext
+     1 golang.org/x/text/internal/language
+     1 github.com/klauspost/cpuid/v2
+     1 github.com/Microsoft/go-winio/internal/socket
+
+-- by code
+    27 CS0246
+     3 CS0315
+     2 CS0103
+     2 CS1503
+     1 CS0542
+     1 CS1739
+
+-- by file (top 40)
+     3 github.com/microsoft/TypeScript/tsc/internal/tspath/path.cs
+     2 golang.org/x/text/unicode/norm/normalize.cs
+     2 golang.org/x/text/unicode/norm/transform.cs
+     2 gotest.tools/v3/internal/format/diff.cs
+     1 .artifacts/gen/3c3cc68b9996/go2cs-gen/go2cs.TypeGenerator/go.github.com.go_json_experiment.json.jsontext_package.Value.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.quickSpan.global__go.golang.org.x.text.unicode.norm_package.formInfo.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.Bytes.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.String.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.IsNormal.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.IsNormalString.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.Append.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.doAppend.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.AppendString.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.QuickSpan.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.Span.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.SpanString.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.QuickSpanString.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.FirstBoundary.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.firstBoundary.global__go.golang.org.x.text.unicode.norm_package.Form.value.1.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.FirstBoundaryInString.global__go.golang.org.x.text.unicode.norm_-8dcab83797f86dff.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.NextBoundary.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.NextBoundaryInString.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.nextBoundary.global__go.golang.org.x.text.unicode.norm_package.Form.value.1.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.LastBoundary.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.Reset.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.Transform.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.transform.global__go.golang.org.x.text.unicode.norm_package.Form.value.1.g.cs
+     1 .artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.TypeGenerator/go.golang.org.x.text.unicode.norm_package.Form.g.cs
+     1 golang.org/x/text/internal/language/match.cs
+     1 github.com/klauspost/cpuid/v2/cpuid.cs
+     1 github.com/Microsoft/go-winio/internal/socket/socket.cs
+
+-- all errors (file:line code msg), first 400
+github.com/microsoft/TypeScript/tsc/internal/tspath/path.cs:1026 CS0315 The type 'go.github.com.microsoft.TypeScript.tsc.@internal.tspath_package.Path' cannot be used as type parameter 'E' in the generic type or method 'slices_package.Sort<S, E>(S)'. There is no boxing conversion from 'go.github.com.microsoft.T
+github.com/microsoft/TypeScript/tsc/internal/tspath/path.cs:1026 CS0315 The type 'go.github.com.microsoft.TypeScript.tsc.@internal.tspath_package.Path' cannot be used as type parameter 'E' in the generic type or method 'slices_package.Sort<S, E>(S)'. There is no boxing conversion from 'go.github.com.microsoft.T
+github.com/microsoft/TypeScript/tsc/internal/tspath/path.cs:1026 CS0315 The type 'go.github.com.microsoft.TypeScript.tsc.@internal.tspath_package.Path' cannot be used as type parameter 'E' in the generic type or method 'slices_package.Sort<S, E>(S)'. There is no boxing conversion from 'go.github.com.microsoft.T
+.artifacts/gen/3c3cc68b9996/go2cs-gen/go2cs.TypeGenerator/go.github.com.go_json_experiment.json.jsontext_package.Value.g.cs:125 CS0542 'Value': member names cannot be the same as their enclosing type
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.quickSpan.global__go.golang.org.x.text.unicode.norm_package.formInfo.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.Bytes.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.String.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.IsNormal.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.IsNormalString.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.Append.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.doAppend.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.AppendString.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.QuickSpan.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.Span.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.SpanString.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.QuickSpanString.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.FirstBoundary.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.firstBoundary.global__go.golang.org.x.text.unicode.norm_package.Form.value.1.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.FirstBoundaryInString.global__go.golang.org.x.text.unicode.norm_-8dcab83797f86dff.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.NextBoundary.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.NextBoundaryInString.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.nextBoundary.global__go.golang.org.x.text.unicode.norm_package.Form.value.1.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.LastBoundary.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.Reset.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.Transform.global__go.golang.org.x.text.unicode.norm_package.Form.value.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.RecvGenerator/go.golang.org.x.text.unicode.norm_package.transform.global__go.golang.org.x.text.unicode.norm_package.Form.value.1.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+.artifacts/gen/a2e0edd0454a/go2cs-gen/go2cs.TypeGenerator/go.golang.org.x.text.unicode.norm_package.Form.g.cs:15 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+golang.org/x/text/unicode/norm/normalize.cs:8 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+golang.org/x/text/unicode/norm/normalize.cs:10 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+golang.org/x/text/unicode/norm/transform.cs:8 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+golang.org/x/text/unicode/norm/transform.cs:10 CS0246 The type or namespace name 'vendor' could not be found (are you missing a using directive or an assembly reference?)
+golang.org/x/text/internal/language/match.cs:179 CS0103 The name 'Ꮡt' does not exist in the current context
+gotest.tools/v3/internal/format/diff.cs:43 CS1503 Argument 1: cannot convert from '<anonymous delegate>' to 'go.Actionꓸꓸꓸ<go.@string, object>'
+gotest.tools/v3/internal/format/diff.cs:45 CS1503 Argument 1: cannot convert from '<anonymous delegate>' to 'go.Actionꓸꓸꓸ<go.@string, object>'
+github.com/klauspost/cpuid/v2/cpuid.cs:410 CS0103 The name 'Ꮡf' does not exist in the current context
+github.com/Microsoft/go-winio/internal/socket/socket.cs:92 CS1739 The best overload for 'GUID' does not have a parameter named 'Data1'

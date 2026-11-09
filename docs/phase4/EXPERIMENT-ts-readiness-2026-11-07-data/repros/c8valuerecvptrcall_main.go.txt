@@ -1,0 +1,23 @@
+package main
+
+type Tag struct{ s string }
+
+func (t *Tag) Remake() { t.s += "!" }
+
+func next(t Tag) (Tag, error) { t.s += "+"; return t, nil }
+
+// TS dep: x/text/internal/language Tag.minimize: the value receiver is redeclared by := and then
+// used as the receiver of a pointer method (implicit &t).
+func (t Tag) minimize() (Tag, error) {
+	t, err := next(t)
+	if err != nil {
+		return t, err
+	}
+	t.Remake()
+	return t, nil
+}
+
+func main() {
+	t, _ := Tag{"a"}.minimize()
+	println(t.s)
+}

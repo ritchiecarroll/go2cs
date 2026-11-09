@@ -1,0 +1,3 @@
+module repro/c11namedforeignstruct
+
+go 1.26

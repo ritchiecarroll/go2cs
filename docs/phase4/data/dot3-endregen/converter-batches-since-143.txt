@@ -1,0 +1,32 @@
+a0fba9b08a batch 245: merge claude/r-p256-field (c6e50bcbf5) -- R: P-256's field arithmetic as a hand-owned file (fiat/p256_field_impl.cs), the P-384 
+d577344c85 batch 244: merge claude/p1-named-string-untyped-box (7e859fc970) -- gojq seats F and H (P1): a non-constant concatenation whose type is a n
+3095b225ae batch 243: merge claude/c2-open-generic-implement (1f77c25a0f) -- gojq seat C (C2): a local generic converted at its own type parameters to
+2e2b0bae6e batch 242: merge claude/p1-defer-capture-line-directive (dba7a1ad45) -- gojq seats B and D (P1): a func literal inside a defer or go callee
+c52e13ed34 batch 241: merge claude/p2-gojq-constraint-typeset (da5c55099c) -- gojq seat A (P2): a string-or-bytes constraint maps to IByteSeq by its T
+31dc1870cb batch 238: merge claude/r-p384-field (8a4aaba56f) -- R: P-384's field arithmetic as a hand-owned file, re-derived on B3's tip (G APPROVED):
+b971670158 batch 235: merge claude/c2-thisref-box (13715e9df6) -- C2: a pointer method that calls a value method on its own receiver is emitted over t
+9315b44ca2 batch 233: merge claude/i9-census-package (760a39cb44) -- the i9: the comment census refuses _package only on a line that declares a packag
+6c71dfa1ad merge master 80aed2b086 (batch 231, B3) into batch 232
+1c21616ad4 batch 227: merge claude/h-slnx-release-core (6aaebf4009) -- H: a local-reference conversion (plain -recurse or -recurse=module) no longer w
+f09d7eacba batch 222: merge claude/p2-class-k (23327b4686) -- P2 class K: blank lines Go does not have drop and a short function collapses to a one-li
+7fbb8fabfa batch 221: merge claude/c2-nilparam-box-twin (bce9ec742d) -- C2: a value method called on a deref-aliased parameter or a box receiver is wr
+7447aa5b64 batch 220: merge claude/i9-commentcensus-attr (3f50c87e79) -- the i9: the comment census skips a file only when it carries the hand-own att
+ecafe61f1e batch 218: merge claude/h-p521-table (e28ac95a2d) -- H, BoGo start-up lever 2: a hand-owned constant-time p521Mul/p521Square (a nine-limb M
+8eaaf45ab9 batch 217: merge claude/r-b1-deferred-closure-marker-r2 (7b2a02ef17) -- R B1: the converter marks deferred Go closures, so a closure-raised
+14c62f1096 batch 211: merge claude/c2-bounded-ordinal (20164d92d4) -- C2 guard B: every GoBoundedGoroutine record carries the goǃ call ordinal, so gu
+e8888b95d5 batch 208: merge claude/c1-oracle-arch (f1b9fe14f3) -- C1 (A): the -tests oracle can run at an explicit GOARCH (a converter flag plus the s
+642621b43f batch 204: merge claude/h-init-scope (4a5a6193e1) -- H: the init-scope seat; corpus re-emitted on three targets (drift 0); CNR no regressio
+bd148cb87a batch 195: merge claude/c2-defer-recv-copy (7e030d68e6) -- C2: fixes a batch-189 defect; a deferred or spawned value-method call on a point
+586cf44726 batch 189: merge claude/c2-value-recv-box-twins (ecee569443) -- C2: Go's p.M() on a pointer to a value-receiver method now reads p.M() inst
+fd63f0da6b batch 186: merge claude/p1-compound-cast-residual (f5cfe7fc91) -- P1: a constant literal shift count on a compound named, type-parameter or
+a148d5e19d batch 185: merge claude/p2-convert-timeout-overlap (d785e93d2d) -- P2: a -stdlib package that hits -convert-timeout now stops the run (opti
+670222e3ae batch 184: merge claude/c1-flatfile-drift (887ee3b23b) -- C1 S5: a flat hand-own's review sibling (runtime2.cs.auto) splits per GOOS when i
+8ae147d458 batch 182: merge claude/r-bounded-mark-interceptor (fd33ef0c1b) -- R: the bounded goroutine-stack mark (GoStack.Bounded) leaves every visib
+1302e830b2 batch 179: merge claude/p2-stall-warning (bc6869cac4) -- .3 D2 (P2), converter diagnostics only: a conversion that runs long warns at 2m, 4
+73d005cdba batch 175: merge claude/c2-s3-nugetmap-source (fb0fce9fcc) -- .3 S3 (C2), converter console output only: the NuGet-mappings provenance repo
+4cf63cca6f batch 174: merge claude/p1-typeparam-untyped-shift (b31ff80006) -- P1: an untyped constant Go types as an integer type parameter is materia
+03a48d40a3 batch 173: merge claude/c2-fieldaccess-fieldtypes (e87d94ab7f) -- converter, -tests only (C2): a white-box test project references the prod
+c88887a527 batch 168: merge claude/c1-master-reds (675a12726a) -- C1 fixes both master reds: (1) every go/packages load pins CGO_ENABLED=0 unless the 
+ee168da222 batch 166: merge claude/p1-unused-compilerservices-using (6499cc6ae5) -- parity seat B (P1), the owner's ask: a file imports System.Runtime
+952d8b5bda batch 164: merge claude/p1-map-index-shift (b8a96681cf) -- BOARD a1d87ef3ba (P1): a compound shift on a map element or a type-parameter tar
+a97100170e batch 153: merge claude/c2-nugetgo-revision-rehearsal (0c0b58bae1) -- -nuget-map-feed admits a rebuild's rehearsal (core.N-label, and a pre
