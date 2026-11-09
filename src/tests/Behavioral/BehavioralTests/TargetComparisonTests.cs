@@ -2695,6 +2695,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckValueReceiverArgumentOrder() => CheckTarget("ValueReceiverArgumentOrder");
 
     [TestMethod]
+    public void CheckValueReceiverPointerMethodCall() => CheckTarget("ValueReceiverPointerMethodCall");
+
+    [TestMethod]
     public void CheckVarNamedAsType() => CheckTarget("VarNamedAsType");
 
     [TestMethod]

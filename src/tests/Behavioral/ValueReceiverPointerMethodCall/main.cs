@@ -33,12 +33,16 @@ internal static (Tag, error) next(Tag t) {
     return (t, default);
 }
 
-internal static (Tag, error) minimize(this Tag t) {
-    t.RemakeString();
+internal static (Tag, error) minimize(this Tag tʗp) {
+    ref var t = ref heap(tʗp, out var Ꮡt);
+
+    Ꮡt.RemakeString();
     return (t, default);
 }
 
-internal static (Tag, error) minimizeDefine(this Tag t) {
+internal static (Tag, error) minimizeDefine(this Tag tʗp) {
+    ref var t = ref heap(tʗp, out var Ꮡt);
+
     (t, var err) = next(t);
     if (err != nil) {
         return (t, err);
@@ -47,18 +51,22 @@ internal static (Tag, error) minimizeDefine(this Tag t) {
     return (t, default);
 }
 
-internal static (Tag, error) minimizeAssign(this Tag t) {
+internal static (Tag, error) minimizeAssign(this Tag tʗp) {
+    ref var t = ref heap(tʗp, out var Ꮡt);
+
     error err = default;
     (t, err) = next(t);
     if (err != nil) {
         return (t, err);
     }
-    t.RemakeString();
+    Ꮡt.RemakeString();
     return (t, default);
 }
 
-internal static Tag minimizeMethodValue(this Tag t) {
-    var remake = Ꮡ(t).RemakeString;
+internal static Tag minimizeMethodValue(this Tag tʗp) {
+    ref var t = ref heap(tʗp, out var Ꮡt);
+
+    var remake = Ꮡt.RemakeString;
     remake();
     return t;
 }
@@ -68,8 +76,10 @@ partial struct wrapper {
     internal nint n;
 }
 
-internal static wrapper remakeField(this wrapper w) {
-    Ꮡ(w).Ꮡtag.RemakeString();
+internal static wrapper remakeField(this wrapper wʗp) {
+    ref var w = ref heap(wʗp, out var Ꮡw);
+
+    Ꮡw.Ꮡtag.RemakeString();
     w.n++;
     return w;
 }
@@ -85,11 +95,7 @@ internal static void remakeMethodValue(this handle h) {
     remake();
 }
 
-internal static void remakeHandleParam(handle hʗp) {
-    ref var h = ref heap(hʗp, out var Ꮡh);
-
-    Ꮡh.RemakeString();
-}
+internal static void remakeHandleParam(handle h) { h.RemakeString(); }
 
 internal static Tag remakeParam(Tag tʗp) {
     ref var t = ref heap(tʗp, out var Ꮡt);
@@ -136,12 +142,9 @@ internal static void Main() {
     fmt.Println(p1.str, p1.pExt, p2.str, p2.pExt, p3.str, p3.pExt);
 
     var (p4, p5) = (Ꮡ(new Tag(str: "p4")), Ꮡ(new Tag(str: "p5")));
-    ref var h4 = ref heap<handle>(out var Ꮡh4);
-    h4 = new handle(p4);
-    ref var h5 = ref heap<handle>(out var Ꮡh5);
-    h5 = new handle(p5);
-    Ꮡh4.RemakeString();
-    var remake = Ꮡh5.RemakeString;
+    var (h4, h5) = (new handle(p4), new handle(p5));
+    h4.RemakeString();
+    var remake = Ꮡ(h5).RemakeString;
     remake();
     fmt.Println(p4.str, p4.pExt, p5.str, p5.pExt);
 
