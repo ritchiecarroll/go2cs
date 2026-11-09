@@ -243,6 +243,7 @@
     <None Include="$(MSBuildThisFileDirectory)goDeferConstArgs_test.go" />
     <None Include="$(MSBuildThisFileDirectory)goDeferThunkSites_test.go" />
     <None Include="$(MSBuildThisFileDirectory)goFrameOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)goImageCopyView.go" />
     <None Include="$(MSBuildThisFileDirectory)goroutineStackAnalysis.go" />
     <None Include="$(MSBuildThisFileDirectory)goroutineStackAnalysis_test.go" />
     <None Include="$(MSBuildThisFileDirectory)goroutineStackRecords.go" />

@@ -306,6 +306,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	v.callParens = append(v.callParens, [3]token.Pos{callExpr.Lparen, callExpr.Rparen, firstArg})
 	defer func() { v.callParens = v.callParens[:len(v.callParens)-1] }()
 
+	// A slice of a byte view over a reference-bearing struct, as a direct argument of copy, takes the Go-image view
+	// (goImageCopyView.go); marked before the arguments are converted.
+	v.markGoImageCopyArgs(callExpr)
+
 	// The //go:cgo_unsafe_args block lift (cgoUnsafeArgsLift.go): the ONE `unsafe.Pointer(&first)` the
 	// current declaration's lift consumes renders as the synthesized block's pinned box. Intercepted
 	// ahead of every arm because the conversion reaches two of them -- the type-conversion arm for a

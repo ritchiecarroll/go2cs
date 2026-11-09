@@ -618,6 +618,7 @@
     <Project Path="tests/Behavioral/GlobalTupleVarDecl/GlobalTupleVarDecl.csproj" />
     <Project Path="tests/Behavioral/GoCallVariations/GoCallVariations.csproj" />
     <Project Path="tests/Behavioral/GoDeferConstArgs/GoDeferConstArgs.csproj" />
+    <Project Path="tests/Behavioral/GoImageCopyThroughView/GoImageCopyThroughView.csproj" />
     <Project Path="tests/Behavioral/GoexitDefers/GoexitDefers.csproj" />
     <Project Path="tests/Behavioral/GoexitFromMain/GoexitFromMain.csproj" />
     <Project Path="tests/Behavioral/GoHostModuleShadow/GoHostModuleShadow.csproj" />

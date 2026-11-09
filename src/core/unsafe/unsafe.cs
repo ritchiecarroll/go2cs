@@ -1266,4 +1266,11 @@ public static class ArrayPointer<T> {
         builtin.NativeFieldArrayPointer<T>(field, length) ?? (ж<array<T>>)(uintptr)Pointer.FromPinnedBox(field);
 }
 
+// Go's `(*[unsafe.Sizeof(s)]byte)(unsafe.Pointer(&s))[lo:hi]` as a direct argument of copy, where s's struct is
+// REFERENCE-BEARING (a fixed array inside it is a managed array<T>), so it has no address to view: the converter
+// emits `copy(@unsafe.GoImage(Ꮡs).slice(lo, hi), data)`, keeping copy at the site, and golib's GoImage<S> copies
+// through the struct's Go-layout image (docs/phase4/DESIGN-reinterpret-seam.md). Any other use of such a view keeps
+// the order-token refusal by name.
+public static global::go.GoImage<S> GoImage<S>(ж<S> p) => global::go.GoImage<S>.Of(p);
+
 } // end unsafe_package
