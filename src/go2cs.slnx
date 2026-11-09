@@ -1235,6 +1235,7 @@
     <Project Path="tests/Behavioral/DeferGoPointerValueReceiver/DeferGoPointerValueReceiver.csproj" />
     <Project Path="tests/Behavioral/VarNamedAsType/VarNamedAsType.csproj" />
     <Project Path="tests/Behavioral/VariadicBoxReceiver/VariadicBoxReceiver.csproj" />
+    <Project Path="tests/Behavioral/VariadicClosureArgument/VariadicClosureArgument.csproj" />
     <Project Path="tests/Behavioral/VariadicClosureSpread/VariadicClosureSpread.csproj" />
     <Project Path="tests/Behavioral/VariadicFuncFields/VariadicFuncFields.csproj" />
     <Project Path="tests/Behavioral/VariadicFuncTypeAssert/VariadicFuncTypeAssert.csproj" />
