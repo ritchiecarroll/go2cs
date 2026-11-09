@@ -2370,6 +2370,48 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				}
 			}
 
+			// The STRING twin of the numeric rule above (TS readiness C6+C12, COORD ruling A): an untyped string
+			// LITERAL bound to a TYPE-PARAMETER parameter of an INFERRED generic call, where go/types recorded a NAMED
+			// string type for it. `slices.Index(ps, "c")` with `ps []Path` (`type Path string`) emitted
+			// `slices.Index(ps, (@string)"c")` -- the literal pre-pass's cached cast -- so C# inferred E = @string
+			// where Go infers Path, and the call failed CS0315 on S. Named NUMERICS never had the gap (the rule above
+			// casts `(N)3`); a string literal renders through the cast path, which drops the recorded named type.
+			// The cast to the instantiated type composes with whatever the literal renders as (`(Path)(@string)"c"`,
+			// the form an explicit `Path("c")` already takes, or `(Path)cˢ` for a hoisted field). NARROWED as the
+			// ruling requires: a string literal, a type-parameter parameter, and a NAMED string instantiation only;
+			// a plain `string` instantiation keeps today's emission, and every other slot is untouched.
+			if paramHasArg {
+				if _, isTypeParam := paramType.(*types.TypeParam); isTypeParam {
+					lastArg := i
+
+					if funcSignature.Variadic() && i == params.Len()-1 {
+						lastArg = len(callExpr.Args) - 1
+					}
+
+					for j := i; j <= lastArg; j++ {
+						lit, isLit := ast.Unparen(callExpr.Args[j]).(*ast.BasicLit)
+
+						if !isLit || lit.Kind != token.STRING {
+							continue
+						}
+
+						instParam := v.instantiatedParamType(callExpr, j)
+
+						if instParam == nil || !isNamedStringType(instParam) {
+							continue
+						}
+
+						if callExprContext.castArgToType == nil {
+							callExprContext.castArgToType = make(map[int]string)
+						}
+
+						if _, exists := callExprContext.castArgToType[j]; !exists {
+							callExprContext.castArgToType[j] = convertToCSTypeName(v.getAliasQualifiedTypeName(instParam, false))
+						}
+					}
+				}
+			}
+
 			// A narrow-integer parameter (int8/uint8/int16/uint16) receiving a binary/unary arithmetic
 			// argument: Go evaluates `a+b`/`^a` at the operand's narrow width (with overflow wrapping),
 			// but C# promotes sub-int integer arithmetic to `int`, so the result needs an explicit cast

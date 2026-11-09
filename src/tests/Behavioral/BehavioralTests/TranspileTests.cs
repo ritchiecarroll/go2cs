@@ -1513,6 +1513,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedStringDefine() => CheckTarget("NamedStringDefine");
 
     [TestMethod]
+    public void CheckNamedStringOps() => CheckTarget("NamedStringOps");
+
+    [TestMethod]
     public void CheckNamedStringSliceConcatBoxing() => CheckTarget("NamedStringSliceConcatBoxing");
 
     [TestMethod]
