@@ -304,8 +304,8 @@ func main() {
 	csprojFileCmd := commandLine.String("csproj", "", "Path to custom .csproj template file")
 	debugModeCmd := commandLine.Bool("debug", false, "Enable debug mode")
 	allowStaleConverterCmd := commandLine.Bool("allow-stale-converter", false, "Proceed with a -stdlib or -tests run even when this binary is OLDER than the converter sources beside it. Those two drivers otherwise refuse, because their output is banked or measured and a stale run emits the previous converter's C# while exiting 0. Pass this for the one deliberate case: an A/B against a PRESERVED binary, where the pinned binary IS the measurement (see converterStaleness.go)")
-	dualRecvCmd := commandLine.Bool("dual-recv", false, "B′ S0: eligible pointer-receiver methods emit the ref-receiver PRIMARY beside the ж twin (flag-gated; scratch-root regens only until S2's rebank ride)")
-	dualRecvParamsCmd := commandLine.Bool("dual-recv-params", false, "B′ S1 (requires -dual-recv): primaries lower their pointer params, the call-site selection table lands, and the X3 method-call veto relaxes for directly-selectable methods (kept separate so -dual-recv alone still emits the S0 floor)")
+	dualRecvCmd := commandLine.Bool("dual-recv", false, "Experimental, for converter development: eligible pointer-receiver methods also emit a form that takes the receiver by reference, beside the default form. Off by default; output made with it is not validated")
+	dualRecvParamsCmd := commandLine.Bool("dual-recv-params", false, "Experimental, requires -dual-recv: those forms also lower their pointer parameters, and call sites choose between the two forms. Off by default")
 
 	var positionals []string
 	positionals, err = parseArgsInterspersed(commandLine, os.Args[1:])
@@ -620,7 +620,7 @@ Examples:
 	// once those primaries exist. Rejecting the lone form keeps the S0-floor state (`-dual-recv`
 	// alone) unambiguous — the measurability condition the flag split exists for.
 	if options.dualRecvParams && !options.dualRecv {
-		log.Fatalln("-dual-recv-params (B′ S1) requires -dual-recv (B′ S0): the parameter half emits into S0's primaries")
+		log.Fatalln("-dual-recv-params requires -dual-recv: it lowers the parameters of the by-reference forms that -dual-recv emits")
 	}
 
 	// The capture-mode pass runs across four drivers with no options in reach; the flag mirrors
