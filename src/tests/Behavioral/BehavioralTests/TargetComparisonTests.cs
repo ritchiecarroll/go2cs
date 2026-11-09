@@ -511,6 +511,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDefinedTypeOverForeignStruct() => CheckTarget("DefinedTypeOverForeignStruct");
 
     [TestMethod]
+    public void CheckDefinedTypeOverInstantiation() => CheckTarget("DefinedTypeOverInstantiation");
+
+    [TestMethod]
     public void CheckDefinedTypeOverInterface() => CheckTarget("DefinedTypeOverInterface");
 
     [TestMethod]
