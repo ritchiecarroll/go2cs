@@ -377,46 +377,69 @@ public class SyncMutexProfileTests
         Assert.IsTrue(dt >= 7 * unit / 2 && dt < 7 * unit / 2 + unit / 10, $"charged {dt} ticks; Go's formula reads 3.5 units ({7 * unit / 2})");
     }
 
-    // The Wait(0) half's guard: many short episodes of two workers started together, each worker
-    // re-locking right after its own Unlock. Every episode contends, so every episode must record at
-    // least one mutex event. A contention test that reads the gate's count before waiting misses the
-    // start race and every re-lock-after-unlock, and whole episodes went unrecorded (runtime/pprof
-    // TestMutexBlockFullAggregation read 3/20 solo with the restart alone); the try is linearizable, so
-    // a Lock that blocks has always stamped.
+    // The Wait(0) half's guard, by what the code guarantees rather than by what a scheduler does. The try
+    // is linearizable, so a Lock that BLOCKS has always stamped, and the Unlock that releases a stamped
+    // waiter records a mutex event (runtime/pprof TestMutexBlockFullAggregation read 3/20 solo before the
+    // try). Each episode makes one such block deterministically:
+    // - this thread locks a fresh mutex, so the gate exists and is held for the whole episode;
+    // - the gate's stamp record is created up front (PrecreateStamps), so the waiter's Lock never takes
+    //   the side table's add path, whose lock another thread can hold;
+    // - a waiter thread calls Lock, and this thread waits until the waiter is parked: its in-Lock flag set
+    //   and its thread in WaitSleepJoin. The waiter is a plain thread, so Lock's park scope is inert. With
+    //   the gate held and touched by no one else, its try has failed and gate.Wait() is the only place in
+    //   Lock where it can wait;
+    // - the Unlock that releases it must record an event.
+    // This replaced two free-running workers whose every episode was ASSUMED to contend. On a loaded
+    // runner one worker could finish its ten short holds before the other's first Lock: an episode with no
+    // contention and so, correctly, no event (osx-x64: "1 of 30 contended episodes recorded no mutex event").
     [TestMethod]
-    public void EveryEpisodeOfTwoAlternatingWorkersRecordsItsContention()
+    public void EveryParkedLockIsChargedByTheUnlockThatReleasesIt()
     {
-        const int episodes = 30, iterations = 10;
+        const int episodes = 30;
         WithRates(1, 1, () =>
         {
-            var silent = new System.Collections.Generic.List<int>();
+            var missed = new System.Collections.Generic.List<int>();
             for (int episode = 0; episode < episodes; episode++)
             {
-                int64 before = Total(mutex: true);
                 var shared = new Shared();
-                using var start = new ManualResetEventSlim();
-                Thread[] workers = new Thread[2];
-                for (int w = 0; w < workers.Length; w++)
+                shared.M.Lock();
+                PrecreateStamps(shared);
+                int inLock = 0;
+                var waiter = new Thread(() =>
                 {
-                    workers[w] = new Thread(() =>
-                    {
-                        start.Wait();
-                        for (int i = 0; i < iterations; i++)
-                        {
-                            shared.M.Lock();
-                            Thread.Sleep(1);
-                            shared.M.Unlock();
-                        }
-                    });
-                    workers[w].Start();
+                    Volatile.Write(ref inLock, 1);
+                    shared.M.Lock();
+                    Volatile.Write(ref inLock, 0);
+                    shared.M.Unlock();
+                }) { IsBackground = true };
+                waiter.Start();
+                var waited = System.Diagnostics.Stopwatch.StartNew();
+                while (!(Volatile.Read(ref inLock) == 1 && (waiter.ThreadState & ThreadState.WaitSleepJoin) != 0))
+                {
+                    Assert.IsTrue(waited.Elapsed < TimeSpan.FromMinutes(1), $"episode {episode}: the waiter never parked in Lock");
+                    Thread.Yield();
                 }
-                start.Set();
-                foreach (Thread worker in workers)
-                    worker.Join();
+                int64 before = Total(mutex: true);
+                shared.M.Unlock();
                 if (Total(mutex: true) == before)
-                    silent.Add(episode);
+                    missed.Add(episode);
+                Assert.IsTrue(waiter.Join(TimeSpan.FromMinutes(1)), $"episode {episode}: the waiter did not finish");
             }
-            Assert.AreEqual(0, silent.Count, $"{silent.Count} of {episodes} contended episodes recorded no mutex event: {string.Join(", ", silent)}");
+            Assert.AreEqual(0, missed.Count, $"{missed.Count} of {episodes} Unlocks released a parked waiter and recorded no mutex event: {string.Join(", ", missed)}");
         });
+    }
+
+    // The gate's stamp record, created before any waiter needs it, so Lock's GetValue finds it without the
+    // ConditionalWeakTable's add path and its lock.
+    private static void PrecreateStamps(Shared shared)
+    {
+        FieldInfo? gateField = typeof(sync_package.Mutex).GetField("gate", BindingFlags.NonPublic | BindingFlags.Instance);
+        FieldInfo? tableField = typeof(sync_package).GetField("s_waitStamps", BindingFlags.NonPublic | BindingFlags.Static);
+        Assert.IsNotNull(gateField, "the hand-own's Mutex.gate field");
+        Assert.IsNotNull(tableField, "the hand-own's s_waitStamps table");
+        object? gate = gateField.GetValue(shared.M);
+        Assert.IsNotNull(gate, "a locked mutex has its gate");
+        object table = tableField.GetValue(null)!;
+        table.GetType().GetMethod("GetOrCreateValue")!.Invoke(table, [gate]);
     }
 }
