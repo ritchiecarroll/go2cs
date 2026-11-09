@@ -328,6 +328,19 @@ public class TypeGenerator : ISourceGenerator
 
                         (StructDeclarationSyntax? underlyingStruct, Compilation? underlyingCompilation) = context.GetStructDeclaration(typeDefinition);
 
+                        // A defined type over an INSTANTIATED generic struct (`type Q pair[int]`, definition
+                        // `pair<nint>`) forwards the struct's fields at the instantiation's types: each
+                        // member's type, written in the struct's own type parameters, takes the argument the
+                        // definition gives that parameter (`ref nint A`, never an unbound `ref T A`). A generic
+                        // wrapper (`type P[T any] pair[T]`) passes its own parameters through the same way.
+                        string[] typeArguments = TypeArgumentSubstitution.TypeArguments(typeDefinition);
+
+                        List<(string typeName, string memberName, bool isReferenceType, bool isProperty, bool isPublic)> Instantiated(
+                            List<(string typeName, string memberName, bool isReferenceType, bool isProperty, bool isPublic)> members, string[] typeParameters) =>
+                            typeParameters.Length == 0 ? members : members
+                                .Select(member => (TypeArgumentSubstitution.Substitute(member.typeName, typeParameters, typeArguments), member.memberName, member.isReferenceType, member.isProperty, member.isPublic))
+                                .ToList();
+
                         // A defined type over another DEFINED type (`type Tally Counts`, `type Counts counts`)
                         // resolves by name to the intermediate wrapper's `[GoType("counts")]` declaration,
                         // which declares no members (the InheritedType template generates them), so follow
@@ -344,6 +357,11 @@ public class TypeGenerator : ISourceGenerator
                             if (nextStruct is null)
                                 break;
 
+                            // The next definition is written in THIS wrapper's own type parameters
+                            // (`type A[T any] B[T]`), so its arguments are read with this hop's in their place.
+                            typeArguments = TypeArgumentSubstitution.TypeArguments(
+                                TypeArgumentSubstitution.Substitute(nextDefinition, TypeArgumentSubstitution.TypeParameters(underlyingStruct), typeArguments));
+
                             (underlyingStruct, underlyingCompilation) = (nextStruct, nextCompilation);
                         }
 
@@ -355,7 +373,8 @@ public class TypeGenerator : ISourceGenerator
 
                         if (underlyingStruct is not null && underlyingCompilation is not null)
                         {
-                            List<(string typeName, string memberName, bool isReferenceType, bool isProperty, bool isPublic)> members = underlyingStruct.GetStructMembers(underlyingCompilation, false);
+                            List<(string typeName, string memberName, bool isReferenceType, bool isProperty, bool isPublic)> members =
+                                Instantiated(underlyingStruct.GetStructMembers(underlyingCompilation, false), TypeArgumentSubstitution.TypeParameters(underlyingStruct));
 
                             // Only forward + go mutable when the underlying actually contributes fields.
                             // An empty result (e.g. a named type over an array-typed named struct whose
@@ -397,7 +416,7 @@ public class TypeGenerator : ISourceGenerator
                             // does (`type index Index` in a white-box _test.go reading `x.sa`;
                             // `type P otherpkg.Point` reading `p.X`), so it needs the same forwarding.
                             List<(string typeName, string memberName, bool isReferenceType, bool isProperty, bool isPublic)> members =
-                                StructDeclarationSyntaxExtensions.GetForeignStructMembers(underlyingSymbol, context.Compilation);
+                                Instantiated(StructDeclarationSyntaxExtensions.GetForeignStructMembers(underlyingSymbol, context.Compilation), TypeArgumentSubstitution.TypeParameters(underlyingSymbol));
 
                             if (members.Count > 0)
                             {

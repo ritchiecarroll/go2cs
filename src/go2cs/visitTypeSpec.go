@@ -13,7 +13,6 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
-	"log"
 	"regexp"
 	"strings"
 
@@ -368,12 +367,17 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 		v.visitMapType(typeSpecType, identType, name)
 	case *ast.ParenExpr:
 		v.outputBuilder.WriteString(v.convParenExpr(typeSpecType, DefaultLambdaContext(), DefaultBasicLitContext()))
-	case *ast.SelectorExpr:
+	case *ast.SelectorExpr, *ast.IndexExpr, *ast.IndexListExpr:
 		// A DEFINED type over a cross-package named type (`type stdFunction unsafe.Pointer`,
 		// `type goroutineProfileStateHolder atomic.Uint32`). Emit an inherited `[GoType]` wrapper of
 		// the NAMED type (go2cs-gen's InheritedTypeTemplate wraps a plain type-name definition);
 		// writing the bare selector text alone is an orphan type reference (CS1585). Use the named
 		// type, not its underlying (which may expose unexported cross-package fields → CS0246).
+		//
+		// A defined type over an INSTANTIATED generic type, `type Q pair[int]`, `type M lib.Pair[string]`
+		// or `type P[T any] pair[T]`, takes the same wrapper: the instantiation is a named type too, and
+		// the wrapper forwards its fields, substituted (go2cs-gen), and none of its methods, which is
+		// Go's rule for a defined type. GO2CS2004 refused this shape until it converted.
 		if rhsType := v.info.TypeOf(typeSpecType); rhsType != nil {
 			csName := convertToCSTypeName(v.getFullyQualifiedTypeName(rhsType, false))
 
@@ -407,15 +411,19 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 			// Cross-package twin of visitIdent's stamp: a defined type over a struct carrying
 			// fixed-size ARRAY fields needs the forwarded `Clone()` (see wrapperValueCloneAttr).
 			localName, localNameRecord := v.recordedLocalName(identType, getSanitizedIdentifier(name))
-			inlineAttrs := v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), "", access, localNameRecord+wrapperValueCloneAttr(rhsType))
+			// A GENERIC defined type over an instantiation (`type P[T any] pair[T]`) declares its own type
+			// parameters and constraints, as every other generic defined kind does (visitArrayType,
+			// visitMapType); the GoType string names the instantiation in those parameters' terms.
+			typeParams, constraints := v.getGenericDefinition(identType)
+			inlineAttrs := v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), typeParams, access, localNameRecord+wrapperValueCloneAttr(rhsType))
 
 			goTypeAttr, goTypeComment := goTypeMarker(rootGoTypeDescriptor(csName))
-			v.writeString(target, "%s%s%s%spartial struct %s%s;", localName, goTypeAttr, inlineAttrs, access, getSanitizedIdentifier(name), goTypeComment)
+			v.writeString(target, "%s%s%s%spartial struct %s%s%s%s;", localName, goTypeAttr, inlineAttrs, access, getSanitizedIdentifier(name), typeParams, goTypeComment, constraints)
 			v.writePendingTypeComment(target, identType)
 			target.WriteString(v.newline)
 			finish()
 		} else {
-			v.outputBuilder.WriteString(v.convSelectorExpr(typeSpecType, DefaultLambdaContext()))
+			v.outputBuilder.WriteString(v.convExpr(typeSpecType, nil))
 		}
 	case *ast.StarExpr:
 		{
@@ -465,17 +473,6 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 		}
 	case *ast.StructType:
 		v.visitStructType(typeSpecType, v.info.Defs[typeSpec.Name].Type(), name, doc, v.inFunction, nil)
-	case *ast.IndexExpr, *ast.IndexListExpr:
-		// A defined type written over an INSTANTIATED generic type, `type Q pair[int]` or `type P[T any]
-		// pair[T]`, has no conversion yet. It is refused by name rather than left to the panic below: the
-		// driver's per-file recover would drop the whole file and the run would still exit zero, the
-		// missing types surfacing later as a build error in some other file (GO2CS2004; TS readiness
-		// census, BOARD 2026-11-09). An alias of the instantiation, or a defined type over an instantiated
-		// INTERFACE, takes the alias route above and still converts.
-		position := v.fset.Position(typeSpec.Pos())
-		declaration := "type " + v.getPrintedNode(typeSpec)
-		reportDiagnostic(position.String(), diagnosticGenericInstantiationRefused, fmt.Sprintf("a defined type over an instantiated generic type is not supported yet (%s)", declaration))
-		log.Fatalf("Refusing to convert: %s declares `%s`, a defined type over an instantiated generic type, which go2cs does not support yet\n", position, declaration)
 	default:
 		panic(fmt.Sprintf("@visitTypeSpec - Unexpected TypeSpec type: %#v", v.getPrintedNode(typeSpecType)))
 	}

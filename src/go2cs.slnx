@@ -470,6 +470,8 @@
     <Project Path="tests/Behavioral/DefinedStructConversionCopy/DefinedStructConversionCopy.csproj" />
     <Project Path="tests/Behavioral/DefinedTypeOverForeignStruct/DefinedTypeOverForeignStruct.csproj" />
     <Project Path="tests/Behavioral/DefinedTypeOverForeignStruct/ptlike/DefinedTypeOverForeignStruct.ptlike.csproj" />
+    <Project Path="tests/Behavioral/DefinedTypeOverInstantiation/DefinedTypeOverInstantiation.csproj" />
+    <Project Path="tests/Behavioral/DefinedTypeOverInstantiation/instlib/go.instlib.csproj" />
     <Project Path="tests/Behavioral/DefinedTypeOverInterface/DefinedTypeOverInterface.csproj" />
     <Project Path="tests/Behavioral/DefinedTypeOverPkgType/DefinedTypeOverPkgType.csproj" />
     <Project Path="tests/Behavioral/DerefPointerToField/DerefPointerToField.csproj" />

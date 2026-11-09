@@ -485,6 +485,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckDefinedTypeOverForeignStruct() => CheckTarget("DefinedTypeOverForeignStruct");
 
     [TestMethod]
+    public void CheckDefinedTypeOverInstantiation() => CheckTarget("DefinedTypeOverInstantiation");
+
+    [TestMethod]
     public void CheckDefinedTypeOverInterface() => CheckTarget("DefinedTypeOverInterface");
 
     [TestMethod]

@@ -4252,14 +4252,16 @@ func (v *Visitor) applyImplicitConversion(funcType types.Type, arg ast.Expr, tar
 				// CS0030 with the record skipped here; go-cmp's teststructs).
 				wrapperConversion := false
 
+				// A GENERIC defined type's RHS is written in its own type parameters, so it is read with the
+				// instance's type arguments: C[string], declared `type C[V any] P[V]`, wraps P[string].
 				if named, ok := funcType.(*types.Named); ok {
-					if rhs, has := packageTypeSpecRHS[named.Obj()]; has && rhs != nil && !isUnnamedStruct(rhs) && types.Identical(rhs, argType) {
+					if rhs, has := packageTypeSpecRHS[named.Obj()]; has && rhs != nil && !isUnnamedStruct(rhs) && types.Identical(instantiatedTypeSpecRHS(named, rhs), argType) {
 						wrapperConversion = true
 					}
 				}
 
 				if named, ok := argType.(*types.Named); ok {
-					if rhs, has := packageTypeSpecRHS[named.Obj()]; has && rhs != nil && !isUnnamedStruct(rhs) && types.Identical(rhs, funcType) {
+					if rhs, has := packageTypeSpecRHS[named.Obj()]; has && rhs != nil && !isUnnamedStruct(rhs) && types.Identical(instantiatedTypeSpecRHS(named, rhs), funcType) {
 						wrapperConversion = true
 					}
 				}
@@ -4330,13 +4332,13 @@ func (v *Visitor) applyImplicitConversion(funcType types.Type, arg ast.Expr, tar
 			// recording it again makes ImplicitConvGenerator emit the identical operator into the
 			// same type (CS0557 — internal/syscall/windows/registry's Key, gating os/fmt).
 			if named, ok := funcType.(*types.Named); ok {
-				if rhs, okRHS := packageTypeSpecRHS[named.Obj()]; okRHS && rhs != nil && types.Identical(rhs, argType) {
+				if rhs, okRHS := packageTypeSpecRHS[named.Obj()]; okRHS && rhs != nil && types.Identical(instantiatedTypeSpecRHS(named, rhs), argType) {
 					return expr
 				}
 			}
 
 			if named, ok := argType.(*types.Named); ok {
-				if rhs, okRHS := packageTypeSpecRHS[named.Obj()]; okRHS && rhs != nil && types.Identical(rhs, funcType) {
+				if rhs, okRHS := packageTypeSpecRHS[named.Obj()]; okRHS && rhs != nil && types.Identical(instantiatedTypeSpecRHS(named, rhs), funcType) {
 					return expr
 				}
 			}

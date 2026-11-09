@@ -508,6 +508,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDefinedTypeOverForeignStruct() => CheckTarget("DefinedTypeOverForeignStruct");
 
     [TestMethod]
+    public void CheckDefinedTypeOverInstantiation() => CheckTarget("DefinedTypeOverInstantiation");
+
+    [TestMethod]
     public void CheckDefinedTypeOverInterface() => CheckTarget("DefinedTypeOverInterface");
 
     [TestMethod]
