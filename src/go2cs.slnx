@@ -1163,6 +1163,7 @@
     <Project Path="tests/Behavioral/TupleMixedDeclareReassign/TupleMixedDeclareReassign.csproj" />
     <Project Path="tests/Behavioral/TupleSpreadIntoCall/TupleSpreadIntoCall.csproj" />
     <Project Path="tests/Behavioral/TwoLevelDefinedStruct/TwoLevelDefinedStruct.csproj" />
+    <Project Path="tests/Behavioral/TwoLevelPointerEmbedBoxPromotion/TwoLevelPointerEmbedBoxPromotion.csproj" />
     <Project Path="tests/Behavioral/TypeAssert/TypeAssert.csproj" />
     <Project Path="tests/Behavioral/TypeAssertionPanic/TypeAssertionPanic.csproj" />
     <Project Path="tests/Behavioral/TypeAssertionSource/TypeAssertionSource.csproj" />

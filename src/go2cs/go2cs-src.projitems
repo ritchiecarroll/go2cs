@@ -228,6 +228,7 @@
     <None Include="$(MSBuildThisFileDirectory)funcResultProjection_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericDefinedMapChan_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericFuncInstantiationArg_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)genericInstantiationRefusal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericLiftedInterfaceField_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericTypeAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)globalAddressOperations.go" />
