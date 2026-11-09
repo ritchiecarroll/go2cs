@@ -164,6 +164,13 @@ partial class runtime_package
 
     public static uint GoCurrentGStatus() => readgstatus(getg());
 
+    // The calling goroutine's g as an opaque handle, and a g's status read through one. A goroutine blocked in a
+    // native call cannot read its own status, so F-1's linux red reads it from the test's thread
+    // (DESIGN-native-call-seam §13.2: "a new test seam reading a goroutine's status").
+    public static object GoCurrentGHandle() => getg();
+
+    public static uint GoGStatusOf(object handle) => readgstatus((ж<g>)handle);
+
     public static (nuint pc, nuint sp, nuint bp) GoCurrentSyscallFrame()
     {
         ж<g> gp = getg();
