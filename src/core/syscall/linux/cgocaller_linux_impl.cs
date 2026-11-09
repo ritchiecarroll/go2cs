@@ -146,20 +146,32 @@ private static unsafe nuint ShimSetgroups(nuint size, nuint list) => SetRetval(l
 // than guessing a signature, which would corrupt the stack.
 // NOT declared `unsafe`: the generated declaration in syscall_linux.cs is not, and CS0764 requires
 // both parts to agree. The pointer work goes in an unsafe block instead.
+//
+// THE SYSCALL BRACKET (2026-11-09, S-b2, DESIGN-native-call-seam §13.2). Go's cgocaller is runtime.syscall_cgocaller,
+// which calls cgocall, and cgocall's entersyscall brackets the call to the C shim (runtime/cgocall.go:110-114 and
+// :167, go1.26.10): for the length of the credential call the goroutine reads _Gsyscall and its P is released. This
+// is that bracket, through the runtime's public forwarders, as windows' trampoline and F-1's runtime_entersyscall
+// reach it. The shim reads errno inside it (SetRetval), so the errno rule holds. The arity is checked BEFORE entering,
+// so a refusal never leaves a transition open.
 internal static partial uintptr cgocaller(@unsafe.Pointer _Δp0, params ꓸꓸꓸuintptr ʗp) {
+    if (ʗp.Length is < 1 or > 3) {
+        throw new System.NotSupportedException(
+            $"syscall: cgocaller has no arity-{ʗp.Length} form; §2 uses 1-3 and a guessed signature would corrupt the stack");
+    }
+
     unsafe {
         void* fn = (void*)_Δp0;
 
-        switch (ʗp.Length) {
-            case 1:
-                return (uintptr)((delegate* unmanaged<nuint, nuint>)fn)(ʗp[0]);
-            case 2:
-                return (uintptr)((delegate* unmanaged<nuint, nuint, nuint>)fn)(ʗp[0], ʗp[1]);
-            case 3:
-                return (uintptr)((delegate* unmanaged<nuint, nuint, nuint, nuint>)fn)(ʗp[0], ʗp[1], ʗp[2]);
-            default:
-                throw new System.NotSupportedException(
-                    $"syscall: cgocaller has no arity-{ʗp.Length} form; §2 uses 1-3 and a guessed signature would corrupt the stack");
+        runtime_package.syscallEntersyscall();
+
+        try {
+            return ʗp.Length switch {
+                1 => (uintptr)((delegate* unmanaged<nuint, nuint>)fn)(ʗp[0]),
+                2 => (uintptr)((delegate* unmanaged<nuint, nuint, nuint>)fn)(ʗp[0], ʗp[1]),
+                _ => (uintptr)((delegate* unmanaged<nuint, nuint, nuint, nuint>)fn)(ʗp[0], ʗp[1], ʗp[2]),
+            };
+        } finally {
+            runtime_package.syscallExitsyscall();
         }
     }
 }
@@ -193,12 +205,14 @@ internal static unsafe void InitCgoLibcPointers() {
 // branch is unconditional here because the module initializer above makes cgo_libc_setgroups
 // non-nil for the life of the process — the nil test Go writes has exactly one answer in this
 // corpus, and writing the dead branch would be writing a branch no run can take.
+// Both calls go through cgocaller, as Go's do (syscall_linux.go), so the setgroups call takes the same syscall bracket
+// as the other eight (2026-11-09, S-b2). Before that they called the shim's pointer directly and took no bracket.
 public static unsafe error /*err*/ Setgroups(slice<nint> gids) {
     nuint n = (nuint)len(gids);
 
     if (n == 0) {
-        nuint zret = ((delegate* unmanaged<nuint, nuint, nuint>)(void*)cgo_libc_setgroups)(0, 0);
-        return zret != 0 ? errnoErr(((Errno)(uintptr)zret)) : default!;
+        uintptr zret = cgocaller(cgo_libc_setgroups, 0, 0);
+        return zret != 0 ? errnoErr(((Errno)zret)) : default!;
     }
 
     uint* list = (uint*)NativeMemory.Alloc(n, sizeof(uint));
@@ -208,8 +222,8 @@ public static unsafe error /*err*/ Setgroups(slice<nint> gids) {
             list[i] = (uint)gids[i];
         }
 
-        nuint ret = ((delegate* unmanaged<nuint, nuint, nuint>)(void*)cgo_libc_setgroups)(n, (nuint)list);
-        return ret != 0 ? errnoErr(((Errno)(uintptr)ret)) : default!;
+        uintptr ret = cgocaller(cgo_libc_setgroups, (uintptr)n, (uintptr)(nuint)list);
+        return ret != 0 ? errnoErr(((Errno)ret)) : default!;
     } finally {
         NativeMemory.Free(list);
     }
