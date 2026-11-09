@@ -14,6 +14,9 @@
 >
 > **AMENDED 2026-11-08 (§13): S-a's cost reading is scored, and §5.2's absolute bounds are withdrawn in favour of the
 > ratio to A0 (the lesson). §13.2 is the S-b2 brief for the linux and darwin rows.**
+>
+> **AMENDED 2026-11-08 (§6.3, dated block): S-c's inert callback arm is two cases, not one. The direct invoke is a
+> deliberate divergence from Go, which throws there. The foreign thread is a gap: Go does not throw there.**
 
 ## 1. What this is, and why now
 
@@ -212,6 +215,36 @@ with the saved hint. On a thread with no goroutine identity, `ReenterManaged` fi
 existing attach scope, PLAN-cgo-interop Phase 5) and then acquires a P. `ReturnToNative` releases both. A panic
 crossing `ReturnToNative` is caught by the entry thunk before it (Phase 5's panic boundary). The seam never sees an
 exception escape into native.
+
+**Amendment 2026-11-08 — S-c's inert arm: one deliberate divergence, and one gap** *(a dated block, not a rewrite;
+COORD's record item on S-c, `claude/h-native-seam-sc` `7e13ee7c8b`).*
+
+S-c wires this pair into the `NewCallback` shims through the runtime's `syscallCallbackEnter` /
+`syscallCallbackExit`. Both are **inert** wherever the goroutine's transition depth is not odd: no native call is
+open to come back from. The callback then runs as plain Go code with nothing moved. That one predicate covers two
+cases, and Go treats them differently. S-c's announce said "Go throws there" of both. That holds for the first
+only.
+
+1. **Direct invoke: a goroutine is present, but no native call is open** (a callback pointer called from managed
+   code, as the control arm of `WindowsCallbackReentryTests` does). Go's `cgocallbackg` assumes a syscall is open:
+   it calls `exitsyscall()` "coming out of cgo call" (`runtime/cgocall.go:350`, go1.26.10). `exitsyscall` throws
+   `"exitsyscall: syscall frame is no longer valid"` when the caller's SP is above the saved syscall SP
+   (`runtime/proc.go:4887-4889`), which it is when nothing entered. **go2cs does not throw. This is a deliberate
+   divergence, not an oversight.** Two reasons, both H's reading:
+   - Go's `throw` is a fatal error, not a recoverable panic. The shim is a marshalled delegate
+     (`Marshal.GetFunctionPointerForDelegate`), entered from native code. An exception thrown there must unwind
+     through native frames that never expected one. .NET supports that unwind only on Windows. Matching Go here
+     buys, at best, a crash with a worse report than Go's.
+   - Bracket coverage is partial until S-b2 and F-1 land. Any native caller not yet bracketed reaches the shim
+     exactly this way, so a Go-faithful throw would turn every callback under it into a process abort. Inert
+     keeps those callbacks working, at Go's status semantics for the unbracketed span: `_Grunning`
+     throughout, which is what the goroutine already reads there.
+2. **Foreign thread: no goroutine identity** (a callback on a thread a C library created). **Go does not throw.**
+   `cgocallback` finds no `g` and takes an extra M through `needAndBindM`, then runs the callback as a goroutine on
+   it (`runtime/asm_amd64.s:1057-1097`, go1.26.10: the `loadg` path to the `needm` label). go2cs's inert arm runs
+   the callback as plain managed code with no goroutine identity. **That is a gap, not a divergence.** This
+   section's second sentence already names the fix: open `Goroutine.Enter()` (the existing attach scope) for the
+   callback's duration. S-c does not wire it. It is routed as a ruling question beside S-d, not folded into S-c.
 
 ### 6.4 What M:N must not change about the contract
 
