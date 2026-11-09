@@ -39,7 +39,7 @@ public class RuntimeCallerPCSpanTests
 
         Assert.AreEqual("runtime.GoCallerSitesProbe", (string)FuncForPC(pc).Name());
         Assert.AreEqual("runtime.GoCallerSitesProbe", (string)FuncForPC(pc - 1).Name(), "pc - 1 must stay inside the call site's span");
-        Assert.AreEqual(FuncForPC(pc).Entry(), FuncForPC(pc - 1).Entry(), "pc and pc - 1 must share one entry");
+        Assert.AreEqual(GoCallerSpanEntry(pc), GoCallerSpanEntry(pc - 1), "pc and pc - 1 must share one span");
     }
 
     [TestMethod]
@@ -59,11 +59,12 @@ public class RuntimeCallerPCSpanTests
 
         Assert.AreNotEqual(first, second, "two call sites must answer two PCs");
 
-        // Near each site's PC, each resolves to ITS OWN entry and never to the other's.
-        Assert.AreEqual(FuncForPC(first).Entry(), FuncForPC(first + 1).Entry(), "first + 1 must stay in the first site's span");
-        Assert.AreEqual(FuncForPC(second).Entry(), FuncForPC(second - 1).Entry(), "second - 1 must stay in the second site's span");
-        Assert.AreNotEqual(FuncForPC(first).Entry(), FuncForPC(second).Entry(), "two sites must own two spans");
-        Assert.AreNotEqual(FuncForPC(second).Entry(), FuncForPC(first + 1).Entry(), "first + 1 must never land in the second site's span");
+        // Near each site's PC, each resolves to ITS OWN span and never to the other's. The span is frameEntry's
+        // (GoCallerSpanEntry), not a *Func's Entry(): both sites are one Go function, and so one *Func with one entry.
+        Assert.AreEqual(GoCallerSpanEntry(first), GoCallerSpanEntry(first + 1), "first + 1 must stay in the first site's span");
+        Assert.AreEqual(GoCallerSpanEntry(second), GoCallerSpanEntry(second - 1), "second - 1 must stay in the second site's span");
+        Assert.AreNotEqual(GoCallerSpanEntry(first), GoCallerSpanEntry(second), "two sites must own two spans");
+        Assert.AreNotEqual(GoCallerSpanEntry(second), GoCallerSpanEntry(first + 1), "first + 1 must never land in the second site's span");
     }
 
     // THE BAND'S NEIGHBOURS. A caller PC must never equal a value of another space: identity tokens
