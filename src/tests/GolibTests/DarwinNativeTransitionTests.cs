@@ -27,7 +27,7 @@ namespace GolibTests;
 // shape. It re-enters no Go code, so nothing in it is owed a ReenterManaged.
 //
 // The last test drives the real kill path end to end: a Foreground spawn whose Ctty is /dev/null makes the parent's
-// TIOCSPGRP fail with ENOTTY, and the seam then kills and reaps the child and returns that errno.
+// TIOCSPGRP fail (macOS answers ENODEV), and the seam then kills and reaps the child and returns that errno.
 //
 // Darwin-only by nature: the three seams are declared by the darwin flavour (GolibTests.csproj removes this file
 // for any other).
@@ -139,10 +139,11 @@ public unsafe class DarwinNativeTransitionTests
 
     // The real kill path, end to end. Go's child makes TIOCSPGRP on Ctty and the spawn fails with its errno; the
     // seam makes it from the parent after posix_spawn returns, so a failure there must kill and reap the child it
-    // already started and return that errno. /dev/null is not a terminal, so the ioctl answers ENOTTY. (A pipe will
-    // not do: a BSD pipe ACCEPTS TIOCSPGRP, which sets its SIGIO owner, so the transfer succeeds and the child runs.)
+    // already started and return that errno. /dev/null is not a terminal: macOS's null device answers TIOCSPGRP with
+    // ENODEV, read on both osx-x64 and osx-arm64. (A pipe will not do: a BSD pipe ACCEPTS TIOCSPGRP, which sets its
+    // SIGIO owner, so the transfer succeeds and the child runs.)
     [TestMethod]
-    public void AForegroundSpawnOnANonTerminalCttyKillsTheChildAndReturnsENOTTY()
+    public void AForegroundSpawnOnANonTerminalCttyKillsTheChildAndReturnsTheIoctlErrno()
     {
         if (!OperatingSystem.IsMacOS())
         {
@@ -174,7 +175,7 @@ public unsafe class DarwinNativeTransitionTests
 
             Assert.AreEqual((nint)0, pid, "a failed Foreground transfer must not report a pid");
             Assert.IsNotNull(err, "the Foreground transfer onto /dev/null must fail");
-            Assert.IsTrue(errors.Is(err, syscall.ENOTTY), $"the seam must return the ioctl's ENOTTY, got {err.Error()}");
+            Assert.IsTrue(errors.Is(err, syscall.ENODEV), $"the seam must return the ioctl's own errno, ENODEV for /dev/null, got {err.Error()}");
         }
         finally
         {

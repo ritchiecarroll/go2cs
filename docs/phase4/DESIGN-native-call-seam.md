@@ -545,8 +545,12 @@ At the red commit `8b9559c91d` (run 42651065436), all three failed on both osx-x
 `_Gsyscall` assertion (expected 3, actual 2), after its premise held.
 
 A fourth test drives the real `kill` path end to end: a Foreground spawn whose `Ctty` is `/dev/null` makes the parent's
-`TIOCSPGRP` fail with `ENOTTY`, and the seam must kill and reap the child and return `ENOTTY`.
+`TIOCSPGRP` fail, and the seam must kill and reap the child and return the `ioctl`'s own errno: `ENODEV`, which macOS's
+null device answers, read on both RIDs.
 
 Its first form used a pipe for `Ctty`, and on both RIDs it read a pid where `ENOTTY` was predicted. A BSD pipe
 **accepts** `TIOCSPGRP`, which sets its SIGIO owner, so the transfer succeeded and the child ran. That was a defect in
-the test's premise, not in the seam, and the test now uses `/dev/null`.
+the test's premise, not in the seam, and the test now uses `/dev/null`. Its second form expected `ENOTTY` and read
+`ENODEV` on both RIDs at the green `b0a022eb2f` (run 42662788234), with the child killed and no pid returned. That was
+the same kind of premise miss, so the test now pins the measured `ENODEV`. The three window tests passed on both RIDs
+in that run.
