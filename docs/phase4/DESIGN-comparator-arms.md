@@ -8,7 +8,7 @@
 >   host-DATA predicate the converted side legitimately does not share. It reads as a disclosure, never a match.
 > - Go=FAIL / C#=pass is NEVER admitted.
 >
-> Amended by dated blocks, never rewritten.
+> Amended by dated blocks, never rewritten. **Amended 2026-11-09 (§5): the mechanism is built; the first entry is held, its premise falsified by the 1.26.10.3 darwin read.**
 
 ## 1. What the comparator admits today
 
@@ -150,3 +150,41 @@ Each is one decision, with the recommended answer first.
   darwin-unbanked under class (s) meanwhile. **Recommended: yes**, with (b-2) held as the alternative.
 - **R3.** If R2 is yes, the (b-3) census goes before choosing between a run-time GOARCH and an osx-arm64 flavour.
   **Recommended: yes.**
+
+## 5. Amendment, 2026-11-09 (lane G, at the arm (a) seat): the mechanism is built; the entry is held
+
+R1-R3 were ruled yes. The seat for arm (a) is `claude/g-comparator-goskip`. Three facts it found that §2 did not have:
+
+**The first member's premise is falsified.** §2 described D-W1 as one-sided: osx-x64 Go=skip / C#=pass, and osx-arm64
+pass/pass. The 1.26.10.3 darwin read (`docs/phase4/rebank-1.26.10.3/darwin/README.md`, run 42485762191) shows the
+`pprofSamples == 0` predicate firing on BOTH sides and on BOTH RIDs:
+
+| RID | `TestTraceCPUProfile/Default` | `TestTraceCPUProfile/AsyncPreemptOff` |
+|---|---|---|
+| osx-arm64 | Go=skip / C#=pass | Go=skip / C#=pass |
+| osx-x64 | Go=pass / **C#=skip** | Go=skip / C#=pass |
+
+The converted side's sampler DOES starve sometimes (osx-x64 `Default`, the reverse shape). So the claim that the
+converted side "does not share" the host's sample starvation holds on some runs and not others, and the drafted entry
+cannot make the row stable: the reverse shape stays a mismatch, and admitting it would tolerate a converted-side
+timing skip, which no disclosure class may do. The entry is HELD, and `internal/trace` stays darwin-unbanked.
+
+**Two holes the design did not name, both closed at the seat:**
+- **An empty signature matched every failure.** Guard 5 lets the C# `signature` be empty beside a `goSkipSignature`.
+  `signatureMatches` was `strings.Contains(out, signature)`, which is true for an empty signature, so a Go=pass / C#=fail
+  on such an entry would have been DISCLOSED as pinned (proven red at the seat). An empty signature now matches
+  nothing.
+- **The orphan report and the proof page.** The orphan predicate is a converted-side pass, which is this shape's LIVE
+  reading. A Go-skip entry whose Go side skipped is no longer reported orphaned. The proof page's sentence ("the managed
+  CLR *provably cannot* satisfy") is false of a row the converted side passes, so a page with a Go-side skip states the
+  claim every class shares, and the row gets a note in words. Pages without one are byte-identical.
+
+**The R3 census, layer 1** (Go's own file selection for the darwin flavour, `go list std`, CGO_ENABLED=0, tags
+`purego,math_big_pure_go`, go1.26.10; control amd64 vs amd64 identical):
+- 14 production packages select different files at darwin/arm64, among them `runtime`, `syscall` (its z-tables),
+  `internal/goarch`, `internal/cpu`, `internal/abi` and `math`;
+- 2 packages exist only at amd64, `runtime/race/internal/amd64v1` and `internal/runtime/startlinetest`: exactly
+  gcimporter's two C#-only subtests in the 1.26.10.3 read, so the census reproduces that row's root.
+
+An osx-arm64 flavour is therefore a full second darwin conversion. Layer 2 (whether a run-time `runtime.GOARCH` stays
+coherent over the amd64 file selection) decides between the two, and is not yet measured.
