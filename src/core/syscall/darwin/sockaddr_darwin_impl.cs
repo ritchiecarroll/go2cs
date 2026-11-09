@@ -674,40 +674,36 @@ partial class syscall_package
     public static unsafe (_Socklen len, error err) GoWriteNativeSockaddrInet6(ж<SockaddrInet6> sa, byte* buffer) =>
         writeNativeSockaddr(new SockaddrInet6жSockaddr(sa), buffer);
 
-    // OUT direction (recvfrom/recvmsg): native image -> the caller's OWN box, filled by assignment.
-    // Go's recvfromInet4 assigns Port and Addr into the caller's struct and leaves everything else
-    // alone; these do the same. A datagram that decodes to another family is a kernel contract
-    // violation on an AF_INET socket, and is reported rather than silently ignored.
+    // Go's recvfromInet4 / recvfromInet6 (syscall_unix.go:331 and :344) reinterpret the raw sockaddr as the
+    // caller's family and copy Port, Addr (and ZoneId) with NO family check, so a source the kernel did not write
+    // (AF_UNSPEC: on darwin a zero-length recvfrom can return at once with no address) reads as zeros, not an error.
+    // These do the same: they read the native image at the family's offsets and assign into the caller's OWN box,
+    // leaving everything else alone, and never fail. The buffer is the caller's zeroed or kernel-written
+    // sockaddr_storage image, so every offset read is inside it whatever the kernel wrote.
     public static unsafe error GoReadNativeSockaddrInet4(byte* buffer, _Socklen len, ж<SockaddrInet4> into) {
-        var (sa, err) = readNativeSockaddr(buffer, len, (nint)(uint32)len);
+        NativeSockaddrInet4* native = (NativeSockaddrInet4*)buffer;
+        var addr = new array<byte>(4);
 
-        if (err != default!) {
-            return err;
+        for (nint i = 0; i < 4; i++) {
+            addr[i] = native->Addr[i];
         }
 
-        if ((sa as IжAdapter)?.Box is not ж<SockaddrInet4> box) {
-            return EAFNOSUPPORT;
-        }
-
-        into.Value.Port = box.Value.Port;
-        into.Value.Addr = box.Value.Addr;
+        into.Value.Port = (nint)swapBytes(native->Port);
+        into.Value.Addr = addr;
         return default!;
     }
 
     public static unsafe error GoReadNativeSockaddrInet6(byte* buffer, _Socklen len, ж<SockaddrInet6> into) {
-        var (sa, err) = readNativeSockaddr(buffer, len, (nint)(uint32)len);
+        NativeSockaddrInet6* native = (NativeSockaddrInet6*)buffer;
+        var addr = new array<byte>(16);
 
-        if (err != default!) {
-            return err;
+        for (nint i = 0; i < 16; i++) {
+            addr[i] = native->Addr[i];
         }
 
-        if ((sa as IжAdapter)?.Box is not ж<SockaddrInet6> box) {
-            return EAFNOSUPPORT;
-        }
-
-        into.Value.Port = box.Value.Port;
-        into.Value.ZoneId = box.Value.ZoneId;
-        into.Value.Addr = box.Value.Addr;
+        into.Value.Port = (nint)swapBytes(native->Port);
+        into.Value.ZoneId = native->Scope_id;
+        into.Value.Addr = addr;
         return default!;
     }
 
