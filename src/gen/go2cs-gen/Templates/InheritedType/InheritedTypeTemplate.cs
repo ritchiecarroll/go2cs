@@ -825,6 +825,9 @@ internal class InheritedTypeTemplate : TemplateBase
     private string GoEquatablePart =>
         $"\r\n\r\n    partial {ObjectKind} {ObjectName} : global::go.IGoEquatable\r\n    {{\r\n        bool global::go.IGoEquatable.GoEquals(object? other) => other is {ObjectName} value && this == value;\r\n    }}";
 
+    // A named pointer's deref alias, an extension method of the package class (PointerTypeTemplate.DerefAlias).
+    private string PointerDerefAlias => TypeClass == "Pointer" ? PointerTypeTemplate.DerefAlias(MemberScope, ObjectName, TargetTypeName) : "";
+
     public override string TemplateBody =>
         $$"""
             {{GoTypeAttributePrefix}}[{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
@@ -857,6 +860,6 @@ internal class InheritedTypeTemplate : TemplateBase
                 public static bool operator !=(NilType nil, {{ObjectName}} value) => value != nil;
         
                 public static implicit operator {{ObjectName}}(NilType nil) => {{NilConversionExpression}};
-            }{{GoEquatablePart}}
+            }{{GoEquatablePart}}{{PointerDerefAlias}}
         """;
 }

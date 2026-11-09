@@ -566,22 +566,48 @@ func (v *Visitor) fieldAccessSelector(selectorExpr *ast.SelectorExpr, pointee ty
 // fieldPropertySelector renders a field selection `p.f` through a pointer to pointee as the generated property
 // serves it, recording the struct type in the package's records; ok is false for a selection that keeps today's spelling.
 func (v *Visitor) fieldPropertySelector(selectorExpr *ast.SelectorExpr, pointee types.Type, xContexts []ExprContext) (string, bool) {
-	if selectorExpr == v.zeroSizeStorePlain || !fieldPropertyServesType(pointee) {
+	if !v.fieldPropertyServesSelection(selectorExpr, pointee) {
 		return "", false
+	}
+
+	v.recordFieldAccessType(pointee)
+
+	return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, xContexts), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))), true
+}
+
+// fieldPropertyServesSelection reports whether go2cs-gen's field property for pointee serves the field selection
+// selectorExpr as Go spells it, `p.f` (see the list above fieldPropertySelector).
+func (v *Visitor) fieldPropertyServesSelection(selectorExpr *ast.SelectorExpr, pointee types.Type) bool {
+	if selectorExpr == v.zeroSizeStorePlain || !fieldPropertyServesType(pointee) {
+		return false
 	}
 
 	selection := v.info.Selections[selectorExpr]
 
 	if selection == nil || selection.Kind() != types.FieldVal {
+		return false
+	}
+
+	return !fieldAccessCollisions[removeLeadingSanitizationMarker(getCoreSanitizedIdentifier(selectorExpr.Sel.Name))] &&
+		!shadowsPromotedMethod(pointee, selectorExpr.Sel.Name) && v.promotedFieldWalkable(pointee, selection.Index())
+}
+
+// namedPointerFieldSelector renders a field selection `p.f` through a NAMED pointer type, `type PP *point`, as Go
+// spells it, the same as through the unnamed `*point` (TS row C18). The named pointer is go2cs-gen's wrapper class
+// over the box, so the site records the WRAPPER, and FieldAccessGenerator gives the wrapper the pointee's field
+// properties, each forwarding to the box's own body. ok is false where no property serves the selection (the list
+// above fieldPropertySelector, a wrapper hand-owned or never emitted, and a field named like the wrapper's own static
+// NilInstance): the caller then reads the field through the wrapper's Value.
+func (v *Visitor) namedPointerFieldSelector(selectorExpr *ast.SelectorExpr, wrapper *types.Named, pointee types.Type, xContexts []ExprContext) (string, bool) {
+	pkg := wrapper.Obj().Pkg()
+
+	if pkg == nil || isHandOwnedType(wrapper) || slices.Contains(nonConvertedStdLibPackages, pkg.Path()) ||
+		removeLeadingSanitizationMarker(getCoreSanitizedIdentifier(selectorExpr.Sel.Name)) == "NilInstance" ||
+		!v.fieldPropertyServesSelection(selectorExpr, pointee) {
 		return "", false
 	}
 
-	if fieldAccessCollisions[removeLeadingSanitizationMarker(getCoreSanitizedIdentifier(selectorExpr.Sel.Name))] ||
-		shadowsPromotedMethod(pointee, selectorExpr.Sel.Name) || !v.promotedFieldWalkable(pointee, selection.Index()) {
-		return "", false
-	}
-
-	v.recordFieldAccessType(pointee)
+	v.recordFieldAccessType(wrapper)
 
 	return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, xContexts), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))), true
 }

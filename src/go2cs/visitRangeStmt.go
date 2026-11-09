@@ -211,7 +211,8 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 	// again for a pointer PARAMETER, which the implicit-deref local has already dereferenced).
 	rangedThroughPointer := false
 
-	if ptrType, ok := rangeType.(*types.Pointer); ok {
+	// A NAMED pointer type (`type Features *flagSet`) ranges through its wrapper's Value the same way.
+	if ptrType, ok := rangeType.Underlying().(*types.Pointer); ok {
 		rangedThroughPointer = true
 		rangeType = types.Unalias(ptrType.Elem())
 		ptrDeref = ".Value"
@@ -225,7 +226,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 		// A pointer parameter is implicitly dereferenced to a value local in the body
 		// (`ref var p = ref Ꮡp.Value`), so `p` already denotes the pointed-to value — ranging over
 		// it must not add a second `.Value` (which would be applied to the value type, CS1061).
-		if ident, ok := rangeStmt.X.(*ast.Ident); ok && v.identIsParameter(ident) {
+		if ident, ok := rangeStmt.X.(*ast.Ident); ok && v.isDerefdPointerParamIdent(ident) {
 			ptrDeref = ""
 		}
 

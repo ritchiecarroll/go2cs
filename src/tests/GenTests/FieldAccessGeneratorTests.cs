@@ -153,6 +153,73 @@ public class FieldAccessGeneratorTests
     private static string Header(string fieldType, string name, string type) =>
         $"public {fieldType} {name} {{ {Getter} get => ʗp.field({type}.Ꮡ{name}); {Getter} set {{ ʗp.field({type}.Ꮡ{name}) = value; ʗp.OnHeaderStore(); }} }}";
 
+    // TS row C18: a named pointer type, `type PP *point`, is go2cs-gen's wrapper class over the box, declared by the
+    // converter with its definition as a comment. The converter records the WRAPPER for a field selected through it.
+    private const string NamedPointer = """
+        namespace go;
+
+        [GoFieldAccess(typeof(main_package.PP))]
+        partial class main_package
+        {
+            public partial struct point { public long x, y; public int NilInstance; }
+
+            partial class PP /*ж<point>*/;
+        }
+        """;
+
+    private const string Point = "global::go.main_package.point";
+
+    // The box a wrapper property reads: the wrapper converted to the box it holds.
+    private const string PointBox = $"((global::go.ж<{Point}>)ʗp)";
+
+    [TestMethod]
+    public void ANamedPointerWrapperGetsItsPointeesPropertiesOverTheBoxItHolds()
+    {
+        string generated = Generate(NamedPointer);
+
+        StringAssert.Contains(generated, "extension(global::go.main_package.PP ʗp)");
+        StringAssert.Contains(generated, Ref("long", "x", Point).Replace("ʗp", PointBox));
+        StringAssert.Contains(generated, Ref("long", "y", Point).Replace("ʗp", PointBox));
+        StringAssert.Contains(generated, Address("long", "x", Point).Replace("ʗp", PointBox));
+        Assert.IsFalse(generated.Contains($"extension(global::go.ж<{Point}>"), "the pointee no record lists gets no block of its own");
+        Assert.IsFalse(generated.Contains(" NilInstance { "), "a field named like the wrapper's static NilInstance would bind the static member");
+    }
+
+    // A wrapper read from a referenced assembly's metadata implements IPointer<T>, which names its pointee.
+    [TestMethod]
+    public void AForeignNamedPointerWrapperIsReadThroughItsPointerInterface()
+    {
+        const string foreign = """
+            namespace go;
+
+            public interface IPointer<T> { }
+
+            public static partial class syscall_package
+            {
+                public partial struct Sockaddr
+                {
+                    public ushort Family;
+
+                    public static ref ushort ᏑFamily(ref Sockaddr instance) => ref instance.Family;
+                }
+
+                public partial class SockaddrPtr : IPointer<Sockaddr> { }
+            }
+            """;
+
+        const string sockaddr = "global::go.syscall_package.Sockaddr";
+
+        string generated = Generate("""
+            namespace go;
+
+            [GoFieldAccess(typeof(syscall_package.SockaddrPtr))]
+            partial class user_package { }
+            """, ForeignReference(foreign));
+
+        StringAssert.Contains(generated, "extension(global::go.syscall_package.SockaddrPtr ʗp)");
+        StringAssert.Contains(generated, Ref("ushort", "Family", sockaddr).Replace("ʗp", $"((global::go.ж<{sockaddr}>)ʗp)"));
+    }
+
     [TestMethod]
     public void ARecordedStructGetsARefPropertyPerField()
     {

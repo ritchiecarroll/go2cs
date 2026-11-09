@@ -4,12 +4,29 @@
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
 
+using static go2cs.Common;
 using static go2cs.Symbols;
 
 namespace go2cs.Templates.InheritedType;
 
 internal static class PointerTypeTemplate
 {
+    // The box's deref alias (PointerExtensions.DerefOrNull) for a NAMED pointer, as an extension method of the package
+    // class beside the wrapper: a ref to the pointee, or a null ref for a nil pointer, which faults where Go's
+    // dereference panics. A *T parameter the converter lowers to `ref T` takes `ref p.DerefOrNull()` at the call
+    // site, and a named pointer argument is this wrapper rather than the box, whose extension is not found through
+    // the wrapper's conversion operator (TS row C18). An extension and not an instance member, because the zero
+    // value of a named pointer is a null reference: Go's `f(p)` with a nil p enters f and panics at its first
+    // dereference, after any side effect f performs first, and an instance call would fault at the call site.
+    public static string DerefAlias(string scope, string className, string targetTypeName) =>
+        $$"""
+
+
+            [{{GeneratedCodeAttribute}}, global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+            {{scope}} static ref {{targetTypeName}} DerefOrNull(this {{className}}? ʗp) =>
+                ref ʗp is null ? ref global::System.Runtime.CompilerServices.Unsafe.NullRef<{{targetTypeName}}>() : ref (({{PointerPrefix}}<{{targetTypeName}}>)ʗp).DerefOrNull();
+        """;
+
     public static string Generate(string className, string targetTypeName) =>
         $$"""
 
