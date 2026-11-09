@@ -225,12 +225,50 @@ try {
     $cb = @(Read-GoApiCompatSuppressions $real['go.vendor.golang.org.x.crypto.cryptobyte'])
     Check 'vendored cryptobyte carries batch 235''s 5 entries' ($cb.Count -eq 5 -and [System.IO.File]::ReadAllText($real['go.vendor.golang.org.x.crypto.cryptobyte']).Contains('batch 235')) "$($cb.Count) entries"
 
+    # The break floor (DESIGN-go-break-floor.md section 4): go.lib's targets fail a consumer's build for a package built
+    # below $(GoBreakFloor), and push-nuget refuses a release whose floor disagrees with its suppression files. Once the
+    # guard is green every suppression entry left is a break against the baseline, so a reachable one means this
+    # release breaks.
+    Write-Host 'the break floor moves with a reachable break and only then'
+    $floorCmds = @('Test-GoBreakFloor', 'Test-GoBreakFloorReachable', 'Get-GoBreakFloor')
+    $missing = @($floorCmds | Where-Object { -not (Get-Command $_ -ErrorAction SilentlyContinue) })
+    Check 'the module exports the break-floor functions' ($missing.Count -eq 0) "missing: $($missing -join ', ')"
+    if ($missing.Count -eq 0) {
+        function FloorFailures([string]$R, [string]$F, [string]$BV, [string]$BF, [string[]]$Breaks) {
+            @(Test-GoBreakFloor -ReleaseVersion $R -Floor $F -BaselineVersion $BV -BaselineFloor $BF -ReachableBreaks $Breaks)
+        }
+        Check 'a reachable break with the floor at the release reads green' ((FloorFailures '1.26.10.5' '1.26.10.5' '1.26.10.4' '1.26.10.3' @('go.lib')).Count -eq 0) ((FloorFailures '1.26.10.5' '1.26.10.5' '1.26.10.4' '1.26.10.3' @('go.lib')) -join '; ')
+        $f = FloorFailures '1.26.10.5' '1.26.10.3' '1.26.10.4' '1.26.10.3' @('go.lib')
+        Check 'a reachable break that leaves the floor behind reads red, naming the package and both versions' (
+            $f.Count -eq 1 -and $f[0].Contains('go.lib') -and $f[0].Contains('1.26.10.3') -and $f[0].Contains('1.26.10.5')) ($f -join '; ')
+        Check 'a rehearsal of a breaking release takes its numeric version' ((FloorFailures '1.26.10.5-ci.7' '1.26.10.5' '1.26.10.4' '1.26.10.3' @('go.lib')).Count -eq 0) ((FloorFailures '1.26.10.5-ci.7' '1.26.10.5' '1.26.10.4' '1.26.10.3' @('go.lib')) -join '; ')
+        Check 'no break keeps the baseline''s floor: green' ((FloorFailures '1.26.10.5' '1.26.10.3' '1.26.10.4' '1.26.10.3' @()).Count -eq 0) ((FloorFailures '1.26.10.5' '1.26.10.3' '1.26.10.4' '1.26.10.3' @()) -join '; ')
+        $f = FloorFailures '1.26.10.5' '1.26.10.5' '1.26.10.4' '1.26.10.3' @()
+        Check 'no break, and the floor moved anyway: red (it would force a rebuild wave for nothing)' ($f.Count -eq 1 -and $f[0].Contains('1.26.10.3')) ($f -join '; ')
+        Check 'the first release with the floor may name a published release' ((FloorFailures '1.26.10.4' '1.26.10.3' '1.26.10.3' '' @()).Count -eq 0) ((FloorFailures '1.26.10.4' '1.26.10.3' '1.26.10.3' '' @()) -join '; ')
+        Check 'and not one above its baseline' ((FloorFailures '1.26.10.4' '1.26.10.4' '1.26.10.3' '' @()).Count -eq 1) ((FloorFailures '1.26.10.4' '1.26.10.4' '1.26.10.3' '' @()) -join '; ')
+        Check 'nor one on another Go line' ((FloorFailures '1.26.10.4' '1.24.13.3' '1.26.10.3' '' @()).Count -eq 1) ((FloorFailures '1.26.10.4' '1.24.13.3' '1.26.10.3' '' @()) -join '; ')
+        Check 'the first release of a Go minor sets the floor to itself' ((FloorFailures '1.27.0.1' '1.27.0.1' '' '' @()).Count -eq 0) ((FloorFailures '1.27.0.1' '1.27.0.1' '' '' @()) -join '; ')
+        Check 'and reads red when it keeps the old minor''s floor' ((FloorFailures '1.27.0.1' '1.26.10.3' '' '' @()).Count -eq 1) ((FloorFailures '1.27.0.1' '1.26.10.3' '' '' @()) -join '; ')
+        Check 'a missing floor reads red' ((FloorFailures '1.26.10.5' '' '1.26.10.4' '1.26.10.3' @()).Count -eq 1) ((FloorFailures '1.26.10.5' '' '1.26.10.4' '1.26.10.3' @()) -join '; ')
+        Check 'golib is reachable' (Test-GoBreakFloorReachable 'go.lib') 'unreachable'
+        Check 'a public package is reachable' (Test-GoBreakFloorReachable 'go.encoding.json') 'unreachable'
+        Check 'a std-vendored package is not' (-not (Test-GoBreakFloorReachable 'go.vendor.golang.org.x.crypto.cryptobyte')) 'reachable'
+        Check 'an internal package is not' (-not (Test-GoBreakFloorReachable 'go.crypto.internal.fips140.v1.0.0')) 'reachable'
+        Check 'a package whose path only contains the word is reachable' (Test-GoBreakFloorReachable 'go.example.internals') 'unreachable'
+        Check 'the floor is read from a targets text' ((Get-GoBreakFloor '<P><GoBreakFloor>1.26.10.3</GoBreakFloor></P>') -ceq '1.26.10.3') "$(Get-GoBreakFloor '<P><GoBreakFloor>1.26.10.3</GoBreakFloor></P>')"
+        Check 'a targets text without one reads as none' ($null -eq (Get-GoBreakFloor '<Project />')) 'a floor from nothing'
+        $treeFloor = Get-GoBreakFloor ([System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/core/golib/buildTransitive/go.lib.targets')))
+        Check 'the tree''s go.lib.targets states a floor' ($treeFloor -match '^\d+\.\d+\.\d+\.\d+$') "$treeFloor"
+    }
+
     Write-Host 'the release path runs it'
     $push = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/push-nuget.ps1'))
     Check 'push-nuget.ps1 restores the pinned tool' ($push.Contains('Initialize-GoApiCompatTool')) 'no restore call'
     Check 'push-nuget.ps1 runs the guard over the merged packages' ($push.Contains('Invoke-GoApiCompatGuard')) 'no guard call'
     Check 'push-nuget.ps1 finds suppression files through the directory map' ($push.Contains('Get-GoApiCompatSuppressionMap')) 'no map call'
     Check 'push-nuget.ps1 refuses a suppression file that names no packed package' ($push.Contains('names no packed package')) 'no orphan check'
+    Check 'push-nuget.ps1 checks the break floor after the guard' ($push.Contains('Test-GoBreakFloor')) 'no floor check'
     Check 'push-nuget.ps1 compares a pack-only run with what its release would follow' ($push -match '-ReleaseVersion \$guardReleaseVersion' -and $push -match '\$guardReleaseVersion = if \(\$dryRun\) \{ \$wouldBeVersion \} else \{ \$fullVersion \}') 'the guard is not given the would-be version'
     $pack = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/tools/nugetgo/nugetgo-pack.ps1'))
     Check 'nugetgo-pack.ps1 compares a module with its previous revision' ($pack.Contains('Invoke-GoApiCompatGuard')) 'no guard call'
