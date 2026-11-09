@@ -41,6 +41,45 @@ one, prefers AES-GCM on Apple silicon as Go does there. On the other three platf
      hasGCMAsmARM64 holds. Open and owned after 1.26.10.3: the BOARD row's fix shapes (a run-time GOARCH for the shared
      darwin flavour, with its census of compile-time GOARCH branches, or a per-architecture darwin build). -->
 
+## The packages do not ship linux-arm64
+
+linux-arm64 is not supported. The go.* packages ship `win-x64`, `linux-x64`, `osx-x64` and `osx-arm64`. A package
+whose code differs by platform carries one folder per platform under `runtimes/`, and a platform without one gets
+the Windows build in `lib/`. A build resolves its platform the way .NET does at run time, so `linux-musl-x64`
+(Alpine) uses the `linux-x64` folder. For a platform that resolves to no folder, the build reports it:
+- **`GO2CS3002`, an error**, on another operating system, or on Linux with another architecture: linux-arm64 would
+  run the Windows build, and the `linux-x64` build makes x64 system calls. The message names the platform and the
+  first package without a folder for it.
+- **`GO2CS3003`, a warning**, on a Windows platform the packages do not ship (`win-arm64`): the Windows build is
+  that operating system's, so the program runs. What Go decides by architecture when the package was converted
+  follows `amd64`.
+
+A cross-build for a shipped platform from an unshipped host is not affected: it names its platform with
+`-r <rid>` (`RuntimeIdentifier`), and that platform has its folder.
+
+**To avoid it**, build for one of the four shipped platforms. A build that only needs to compile, and knowingly wants
+the Windows build (a test harness that never runs the program, say), passes `-p:GoAllowReferenceFlavor=true`. The
+program then runs the Windows build wherever it runs. The property counts only on the command line: set in a
+project file it changes nothing, so a library cannot switch the check off for the projects that build it.
+
+A portable app built on a shipped platform and then RUN on another one is out of the build's sight. At start-up
+it prints a warning on standard error instead: for another operating system, and for the Linux build on another
+architecture (`linux-x64` run on `linux-arm64`).
+<!-- Source: DESIGN-linux-arm64-flavour.md section 0 (lane G, claude/g-la64-design 7831a23193), SEAT 0, cut by C2 as
+     claude/c2-la64-seat0 on master 0c553534df, with REVIEW-linux-arm64-flavour.md F4 folded in (COORD ruling R2,
+     2026-11-09: its own target, RID-split by runtimes/ presence, RID-graph aware, win-arm64 a warning, the run-time
+     architecture check). Mechanism: src/core/golib/buildTransitive/go.lib.targets, GoRefuseUnshippedRid, over
+     _GoResolveRidFlavors (a breadth-first walk of $(RuntimeIdentifierGraphPath); measured: linux-musl-x64 imports
+     linux-musl and linux-x64, win-arm64 imports only win, in SDK 10.0.403's PortableRuntimeIdentifierGraph.json).
+     Gate: src/tests/PackageTests/RidCompileAsset/test-rid-compile-asset.ps1, read red-first against go.* 1.26.10.3 on
+     2026-11-09: against master's go.lib.targets the UNSHIPPED, swap-off, project-file opt-out, ALPINE and WIN-ARM64
+     arms fail (the linux-arm64 build BUILT against lib/; the Alpine build failed CS0426 against lib/); with the change
+     all ten arms pass, and each of the swap-off and project-file arms fails alone against a copy mutated in that one
+     respect. The run-time check is GoHostOfRecord.Describe (src/core/golib/GoHostOfRecord.cs), called through
+     Verify(GOOS, GOARCH) from src/core/runtime/hostofrecord_impl.cs, gated by src/tests/GolibTests/HostOfRecordTests.cs
+     (red first: the linux/amd64-on-arm64 case failed before the architecture check). The linux-arm64 flavour itself
+     is the design's seat S6, which turns the error into a no-op for that platform. -->
+
 ## On macOS, a `go` statement past the system's thread limit ends the program
 
 Each goroutine is an operating-system thread, and macOS caps how many threads one process may run. When a

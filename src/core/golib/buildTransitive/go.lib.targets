@@ -32,46 +32,172 @@
     reference through HintPath first ("{HintPathFromItem}"), so moving the item identity alone left
     the compiler on lib/ (measured, before the HintPath line existed).
 
-    THE RID is $(RuntimeIdentifier) when the build names one, else the SDK's own
-    $(NETCoreSdkRuntimeIdentifier): the host the build runs on, which is the platform a
-    go2cs -recurse conversion targets by default. $(GoCompileRuntimeIdentifier) overrides both.
-    On win-x64 the twin is the reference flavour itself, so the swap changes the path and not the
-    bytes. On a RID no go.* package ships (linux-arm64, say) nothing is swapped and the reference
-    flavour compiles, exactly as before this target existed; the shipped RID set is stated in the
-    design, not inferred here. Set GoRidCompileAssets=false to turn the swap off.
+    THE RID is $(RuntimeIdentifier) when the build names one, else the host the build runs on, which
+    is the platform a go2cs -recurse conversion targets by default: the SDK's PORTABLE RID
+    ($(NETCoreSdkPortableRuntimeIdentifier)), then its own ($(NETCoreSdkRuntimeIdentifier)). The
+    portable one comes first because a distro-built SDK reports a distro RID as its own (Ubuntu's
+    packaged 10.0.112 reports ubuntu.24.04-x64, with linux-x64 as the portable one; measured
+    2026-11-09), and no package ships a runtimes/<distro rid>/ twin. $(GoCompileRuntimeIdentifier)
+    overrides all three. On win-x64 the twin is the reference flavour itself, so the swap changes
+    the path and not the bytes. Set GoRidCompileAssets=false to turn the swap off.
+
+    THE FLAVOUR is resolved through the SDK's RID graph ($(RuntimeIdentifierGraphPath)), as the host
+    resolves the RUNTIME asset: breadth-first from the RID, nearest first, the first RID a package
+    ships a runtimes/<rid>/ folder for. So linux-musl-x64 compiles against linux-x64, and
+    linux-musl-arm64 and linux-bionic-arm64 against linux-arm64 once a package ships it. Only a
+    RID-SPLIT package (one with a runtimes/ folder) is resolved: the platform-neutral go.* packages,
+    most of them, ship lib/ alone and have nothing to swap or to refuse. An SDK without the graph
+    file resolves the exact RID only.
+
+    A RID NO go.* PACKAGE RESOLVES (linux-arm64, for one) is refused by its own target, which runs
+    whether or not the swap is on. On a platform of another operating system, or of the same one with
+    another system-call ABI (linux-arm64 against the linux-x64 flavour), the program would run code
+    that does not describe its host: GO2CS3002, a build error naming the RID and the first package.
+    On a Windows platform the packages do not ship (win-arm64), the Windows flavour IS that operating
+    system's, so it is GO2CS3003, a warning, and the build goes on. A cross-build for a shipped RID
+    from an unshipped host sets RuntimeIdentifier and never reaches either. GoAllowReferenceFlavor=true
+    turns both off, and the program then RUNS THE WINDOWS FLAVOUR wherever it runs. It is honoured
+    ONLY as a global property (-p:GoAllowReferenceFlavor=true): this file is imported after the
+    project body and sets it to false, which a global property overrides and a project file cannot,
+    so a library cannot switch the refusal off for every consumer that builds it. The shipped RID set
+    is the packages' own runtimes/ folders, never a list here.
   -->
   <PropertyGroup>
     <GoRidCompileAssets Condition="'$(GoRidCompileAssets)' == ''">true</GoRidCompileAssets>
     <GoCompileRuntimeIdentifier Condition="'$(GoCompileRuntimeIdentifier)' == ''">$(RuntimeIdentifier)</GoCompileRuntimeIdentifier>
+    <GoCompileRuntimeIdentifier Condition="'$(GoCompileRuntimeIdentifier)' == ''">$(NETCoreSdkPortableRuntimeIdentifier)</GoCompileRuntimeIdentifier>
     <GoCompileRuntimeIdentifier Condition="'$(GoCompileRuntimeIdentifier)' == ''">$(NETCoreSdkRuntimeIdentifier)</GoCompileRuntimeIdentifier>
+    <GoAllowReferenceFlavor>false</GoAllowReferenceFlavor>
   </PropertyGroup>
 
-  <Target Name="GoSelectRidCompileAssets"
-          AfterTargets="ResolvePackageAssets"
-          Condition="'$(GoRidCompileAssets)' == 'true' and '$(GoCompileRuntimeIdentifier)' != ''">
+  <!-- The RID-graph walk. The graph is read with a regular expression over its `"rid": { "#import": [...] }`
+       entries, so the task needs no JSON library beyond what every MSBuild host carries. -->
+  <UsingTask TaskName="GoResolveRidFlavor" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <Rid ParameterType="System.String" Required="true" />
+      <GraphPath ParameterType="System.String" />
+      <Candidates ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+      <Resolved ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
+      <WindowsOs ParameterType="System.Boolean" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System.Collections.Generic" />
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Text.RegularExpressions" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+        var graph = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        if (!string.IsNullOrEmpty(GraphPath) && File.Exists(GraphPath))
+        {
+            foreach (Match m in Regex.Matches(File.ReadAllText(GraphPath), "\"([^\"]+)\"\\s*:\\s*\\{\\s*\"#import\"\\s*:\\s*\\[([^\\]]*)\\]"))
+            {
+                var imports = new List<string>();
+                foreach (Match q in Regex.Matches(m.Groups[2].Value, "\"([^\"]+)\""))
+                    imports.Add(q.Groups[1].Value);
+                graph[m.Groups[1].Value] = imports;
+            }
+        }
+        var chain = new List<string>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { Rid };
+        var queue = new Queue<string>();
+        queue.Enqueue(Rid);
+        while (queue.Count > 0)
+        {
+            string r = queue.Dequeue();
+            chain.Add(r);
+            List<string> next;
+            if (graph.TryGetValue(r, out next))
+                foreach (string i in next)
+                    if (seen.Add(i)) queue.Enqueue(i);
+        }
+        WindowsOs = false;
+        foreach (string r in chain)
+            if (string.Equals(r, "win", StringComparison.OrdinalIgnoreCase)) WindowsOs = true;
+        var flavourOf = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var resolved = new List<ITaskItem>();
+        foreach (ITaskItem c in Candidates)
+        {
+            string root = c.GetMetadata("GoRidPackageRoot");
+            string flavour;
+            if (!flavourOf.TryGetValue(root, out flavour))
+            {
+                flavour = "";
+                foreach (string r in chain)
+                    if (Directory.Exists(Path.Combine(root, "runtimes", r))) { flavour = r; break; }
+                flavourOf[root] = flavour;
+            }
+            var item = new TaskItem(c);
+            item.SetMetadata("GoRidFlavor", flavour);
+            resolved.Add(item);
+        }
+        Resolved = resolved.ToArray();
+      ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="_GoResolveRidFlavors" Condition="'$(GoCompileRuntimeIdentifier)' != ''">
     <ItemGroup>
       <!-- The `go.` literal below is the published package-ID prefix, a question still open with the
            owner: a rename of the go.* package IDs must update this test too, or the swap silently stops. -->
       <_GoRidCompileCandidate Include="@(ResolvedCompileFileDefinitions)"
                               Condition="$([System.String]::Copy('%(ResolvedCompileFileDefinitions.NuGetPackageId)').StartsWith('go.', System.StringComparison.OrdinalIgnoreCase)) and '%(ResolvedCompileFileDefinitions.PathInPackage)' != ''" />
-      <!-- The twin sits beside lib/ in the same package folder: strip PathInPackage off the item's
-           full path to reach the package root, then descend runtimes/<rid>/ + PathInPackage. -->
+      <!-- The package root: strip PathInPackage off the item's full path. -->
       <_GoRidCompileCandidate>
-        <GoRidTwin>$([System.IO.Path]::GetFullPath('$([System.String]::Copy('%(FullPath)').Substring(0, $([MSBuild]::Subtract($([System.String]::Copy('%(FullPath)').Length), $([System.String]::Copy('%(PathInPackage)').Length)))))runtimes/$(GoCompileRuntimeIdentifier)/%(PathInPackage)'))</GoRidTwin>
+        <GoRidPackageRoot>$([System.String]::Copy('%(FullPath)').Substring(0, $([MSBuild]::Subtract($([System.String]::Copy('%(FullPath)').Length), $([System.String]::Copy('%(PathInPackage)').Length)))))</GoRidPackageRoot>
       </_GoRidCompileCandidate>
-      <_GoRidCompileSwap Include="@(_GoRidCompileCandidate)"
+      <!-- RID-SPLIT only: a package with a runtimes/ folder. -->
+      <_GoRidSplitCandidate Include="@(_GoRidCompileCandidate)" Condition="Exists('%(GoRidPackageRoot)runtimes')" />
+    </ItemGroup>
+    <GoResolveRidFlavor Rid="$(GoCompileRuntimeIdentifier)" GraphPath="$(RuntimeIdentifierGraphPath)"
+                        Candidates="@(_GoRidSplitCandidate)" Condition="'@(_GoRidSplitCandidate)' != ''">
+      <Output TaskParameter="Resolved" ItemName="_GoRidResolved" />
+      <Output TaskParameter="WindowsOs" PropertyName="_GoRidWindowsOs" />
+    </GoResolveRidFlavor>
+  </Target>
+
+  <Target Name="GoSelectRidCompileAssets"
+          AfterTargets="ResolvePackageAssets"
+          DependsOnTargets="_GoResolveRidFlavors"
+          Condition="'$(GoRidCompileAssets)' == 'true' and '$(GoCompileRuntimeIdentifier)' != ''">
+    <ItemGroup>
+      <!-- The twin sits beside lib/ in the same package folder: runtimes/<flavour>/ + PathInPackage. -->
+      <_GoRidCompileTwin Include="@(_GoRidResolved)" Condition="'%(_GoRidResolved.GoRidFlavor)' != ''" />
+      <_GoRidCompileTwin>
+        <GoRidTwin>$([System.IO.Path]::GetFullPath('%(GoRidPackageRoot)runtimes/%(GoRidFlavor)/%(PathInPackage)'))</GoRidTwin>
+      </_GoRidCompileTwin>
+      <_GoRidCompileSwap Include="@(_GoRidCompileTwin)"
                          Condition="Exists('%(GoRidTwin)') and '%(GoRidTwin)' != '%(FullPath)'" />
 
       <ResolvedCompileFileDefinitions Remove="@(_GoRidCompileSwap)" />
       <ResolvedCompileFileDefinitions Include="@(_GoRidCompileSwap->'%(GoRidTwin)')" />
       <ResolvedCompileFileDefinitions Condition="'%(ResolvedCompileFileDefinitions.GoRidTwin)' != ''">
         <HintPath>%(ResolvedCompileFileDefinitions.GoRidTwin)</HintPath>
-        <PathInPackage>runtimes/$(GoCompileRuntimeIdentifier)/%(ResolvedCompileFileDefinitions.PathInPackage)</PathInPackage>
+        <PathInPackage>runtimes/%(ResolvedCompileFileDefinitions.GoRidFlavor)/%(ResolvedCompileFileDefinitions.PathInPackage)</PathInPackage>
       </ResolvedCompileFileDefinitions>
     </ItemGroup>
 
     <Message Importance="low"
-             Text="go.lib: compiling against the $(GoCompileRuntimeIdentifier) flavour of @(_GoRidCompileSwap->Count()) go.* package(s): @(_GoRidCompileSwap->'%(NuGetPackageId)', ', ')" />
+             Text="go.lib: compiling $(GoCompileRuntimeIdentifier) against the resolved flavour of @(_GoRidCompileSwap->Count()) go.* package(s): @(_GoRidCompileSwap->'%(NuGetPackageId) (%(GoRidFlavor))', ', ')" />
+  </Target>
+
+  <Target Name="GoRefuseUnshippedRid"
+          AfterTargets="ResolvePackageAssets"
+          DependsOnTargets="_GoResolveRidFlavors"
+          Condition="'$(GoAllowReferenceFlavor)' != 'true' and '$(GoCompileRuntimeIdentifier)' != ''">
+    <ItemGroup>
+      <_GoRidUnshipped Include="@(_GoRidResolved)" Condition="'%(_GoRidResolved.GoRidFlavor)' == ''" />
+    </ItemGroup>
+    <PropertyGroup Condition="'@(_GoRidUnshipped)' != ''">
+      <_GoRidUnshippedIds>@(_GoRidUnshipped->'%(NuGetPackageId)'->Distinct())</_GoRidUnshippedIds>
+      <_GoRidUnshippedFirst>$(_GoRidUnshippedIds);</_GoRidUnshippedFirst>
+      <_GoRidUnshippedFirst>$(_GoRidUnshippedFirst.Substring(0, $(_GoRidUnshippedFirst.IndexOf(';'))))</_GoRidUnshippedFirst>
+      <_GoRidUnshippedCount>@(_GoRidUnshipped->'%(NuGetPackageId)'->Distinct()->Count())</_GoRidUnshippedCount>
+    </PropertyGroup>
+    <Error Code="$(Go2csDiagnosticUnshippedRid)"
+           Condition="'@(_GoRidUnshipped)' != '' and '$(_GoRidWindowsOs)' != 'true'"
+           Text="The go.* packages do not ship the $(GoCompileRuntimeIdentifier) platform: $(_GoRidUnshippedFirst), one of $(_GoRidUnshippedCount) platform-specific go.* package(s) in this build, has no flavour for it, so the program would compile against, and run, the Windows flavour. Build for a RID the packages ship, or pass -p:GoAllowReferenceFlavor=true to compile against the Windows flavour knowingly: the program then runs the Windows flavour. See https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md#the-packages-do-not-ship-linux-arm64" />
+    <Warning Code="$(Go2csDiagnosticUnshippedWindowsRid)"
+             Condition="'@(_GoRidUnshipped)' != '' and '$(_GoRidWindowsOs)' == 'true'"
+             Text="The go.* packages do not ship the $(GoCompileRuntimeIdentifier) platform: $(_GoRidUnshippedFirst), one of $(_GoRidUnshippedCount) platform-specific go.* package(s) in this build, compiles against, and runs, its Windows flavour. That is this platform's operating system, so the program runs, but what Go decides by architecture when the package was converted follows amd64. Pass -p:GoAllowReferenceFlavor=true to silence this. See https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md#the-packages-do-not-ship-linux-arm64" />
   </Target>
 
   <!--
@@ -150,6 +276,8 @@
   -->
   <PropertyGroup Label="Go2csDiagnosticCodes">
     <Go2csDiagnosticCompilerFloor>GO2CS3001</Go2csDiagnosticCompilerFloor>
+    <Go2csDiagnosticUnshippedRid>GO2CS3002</Go2csDiagnosticUnshippedRid>
+    <Go2csDiagnosticUnshippedWindowsRid>GO2CS3003</Go2csDiagnosticUnshippedWindowsRid>
   </PropertyGroup>
 
   <!--
