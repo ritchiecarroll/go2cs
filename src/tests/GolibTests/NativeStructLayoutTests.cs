@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
@@ -20,7 +21,18 @@ public unsafe class NativeStructLayoutTests
 
         try
         {
-            *(ushort*)(memory + 0) = 2;
+            // Each OS's sockaddr_in, as Go lays RawSockaddrInet4 out: darwin opens with a 1-byte Len and a 1-byte Family
+            // (ztypes_darwin_*.go), linux and windows with a 2-byte Family. Port is at offset 2 on all three.
+            if (OperatingSystem.IsMacOS())
+            {
+                memory[0] = 16;
+                memory[1] = 2;
+            }
+            else
+            {
+                *(ushort*)(memory + 0) = 2;
+            }
+
             *(ushort*)(memory + 2) = 0x1234;
 
             ж<syscall.RawSockaddrInet4> sa = (ж<syscall.RawSockaddrInet4>)(uintptr)(nuint)memory;
@@ -32,7 +44,8 @@ public unsafe class NativeStructLayoutTests
 
             port.Value = 0x5678;
             Assert.AreEqual((ushort)0x5678, *(ushort*)(memory + 2), "a write through Port does not land at Go offset 2");
-            Assert.AreEqual((ushort)2, sa.of(syscall.RawSockaddrInet4.ᏑFamily).Value, "Family does not read Go offset 0");
+            Assert.AreEqual(2, (int)sa.of(syscall.RawSockaddrInet4.ᏑFamily).Value,
+                $"Family does not read its Go offset ({(OperatingSystem.IsMacOS() ? 1 : 0)})");
         }
         finally
         {
