@@ -2740,6 +2740,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckVariadicPointerParam() => CheckTarget("VariadicPointerParam");
 
     [TestMethod]
+    public void CheckVariadicPromotedForwarder() => CheckTarget("VariadicPromotedForwarder");
+
+    [TestMethod]
     public void CheckVariadicSlotInterfaces() => CheckTarget("VariadicSlotInterfaces");
 
     [TestMethod]

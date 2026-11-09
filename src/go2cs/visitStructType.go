@@ -905,14 +905,14 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 							continue
 						}
 
-						if sig, ok := method.Type().(*types.Signature); ok && sig.Variadic() {
-							// Not reached by any current corpus consumer; a variadic forwarder needs
-							// the params-array spelling the adapter matcher expects, which this arm
-							// does not synthesize. Loud, so a future consumer is a report, not a
-							// silent method-set hole.
-							showWarning("embedded-interface promoted method %s.%s is variadic - pointer-form forwarder not emitted", structTypeName, method.Name())
-							continue
-						}
+						// A VARIADIC method forwards too: emitPromotedInterfaceForwarders spells its last
+						// parameter the way the interface declares it (`params ꓸꓸꓸT nameʗp`) and hands the
+						// span straight on. The first cut skipped it with a warning, which left the method
+						// out of the struct's surface: a method value did not compile (CS1061), and reflect
+						// read NumMethod one short on BOTH forms while MethodByName missed it silently.
+						// TypeScript's compiler hosts embed a CompilerHost whose Trace is variadic
+						// (catalogue C3, EXPERIMENT-ts-readiness-2026-11-07.md). Guarded by
+						// tests/Behavioral/VariadicPromotedForwarder.
 
 						// An interface-promoted method that ALSO survives in the VALUE method set
 						// (nothing shadows it — pointerOnly's Read, not its Write) is a value
@@ -1254,7 +1254,7 @@ func (v *Visitor) structZeroValueNeedsConstructionRec(t types.Type, seen map[*ty
 // makes such a method delegate to the field — nil-panicking if the field was never assigned,
 // which is Go's own behavior for the shape and exactly what the forwarder reproduces. Emitted at
 // the struct's own indent, so a function-local lift rides currentFuncPrefix to member level with
-// its type. Variadic methods were excluded (with a warning) at collection.
+// its type. A variadic method takes its tail as the interface declares it: a params span, passed on.
 func (v *Visitor) emitPromotedInterfaceForwarders(target *strings.Builder, mark int) {
 	for _, fwd := range v.promotedInterfaceForwarders[mark:] {
 		signature := fwd.method.Type().(*types.Signature)
@@ -1272,7 +1272,17 @@ func (v *Visitor) emitPromotedInterfaceForwarders(target *strings.Builder, mark 
 			paramName = getSanitizedIdentifier(paramName)
 
 			params.WriteString(", ")
-			params.WriteString(convertToCSTypeName(v.getAliasQualifiedTypeName(param.Type(), false)))
+
+			if sliceType, ok := param.Type().(*types.Slice); ok && i == signature.Params().Len()-1 && signature.Variadic() {
+				// The interface declares the variadic tail as a params span (visitFuncDecl's
+				// signature builder); take it the same way and pass the span on unchanged.
+				paramName = getVariadicParamName(param)
+				params.WriteString("params ")
+				params.WriteString(v.variadicParamType(sliceType.Elem()))
+			} else {
+				params.WriteString(convertToCSTypeName(v.getAliasQualifiedTypeName(param.Type(), false)))
+			}
+
 			params.WriteRune(' ')
 			params.WriteString(paramName)
 

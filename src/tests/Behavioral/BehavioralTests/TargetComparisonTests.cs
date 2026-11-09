@@ -2743,6 +2743,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckVariadicPointerParam() => CheckTarget("VariadicPointerParam");
 
     [TestMethod]
+    public void CheckVariadicPromotedForwarder() => CheckTarget("VariadicPromotedForwarder");
+
+    [TestMethod]
     public void CheckVariadicSlotInterfaces() => CheckTarget("VariadicSlotInterfaces");
 
     [TestMethod]

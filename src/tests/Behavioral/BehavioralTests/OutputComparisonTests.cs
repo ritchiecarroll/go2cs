@@ -2663,6 +2663,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckVariadicPointerParam() => CheckTarget("VariadicPointerParam");
 
     [TestMethod]
+    public void CheckVariadicPromotedForwarder() => CheckTarget("VariadicPromotedForwarder");
+
+    [TestMethod]
     public void CheckVariadicSlotInterfaces() => CheckTarget("VariadicSlotInterfaces");
 
     [TestMethod]
