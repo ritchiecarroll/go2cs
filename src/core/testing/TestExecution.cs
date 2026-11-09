@@ -96,7 +96,11 @@ public sealed class TestExecution
 
     internal const int MaxRecordCharacters = 1 << 16;
 
-    internal const string RecordTruncatedSuffix = " [record truncated]";
+    // An oversize record keeps MaxRecordCharacters of its head and RecordTailCharacters of its tail,
+    // joined by this marker carrying the count of characters dropped between them.
+    internal const int RecordTailCharacters = 1 << 12;
+
+    internal const string RecordTruncatedMarker = " [record truncated: {0} characters dropped] ";
 
     // The test a goroutine belongs to. Set on the test's own thread, it flows into every goroutine
     // that thread starts (and into theirs, transitively) because ThreadPool.QueueUserWorkItem —
@@ -2199,6 +2203,13 @@ public sealed class TestExecution
     /// have matched, while dropping the head would silently unpin disclosed rows.
     /// </para>
     /// <para>
+    /// An oversize RECORD keeps its whole <see cref="MaxRecordCharacters"/> head, byte-identical to
+    /// the head-only cut, plus its last <see cref="RecordTailCharacters"/>, joined by a marker that
+    /// states how many characters were dropped. The tail is a long-running test's last state:
+    /// crypto/tls's TestBogoSuite reports the BoGo runner's progress as one record past the cap, and
+    /// the head-only cut showed the runner ~70-160 s in as if it were the state at its 600 s wall.
+    /// </para>
+    /// <para>
     /// <paramref name="terminal"/> marks the one record the head-keeping policy must not apply to:
     /// the goroutine-panic report is appended LAST and is the whole reason the report is being
     /// built at all. It still passes <see cref="MaxRecordCharacters"/>, so the worst case stays
@@ -2207,8 +2218,8 @@ public sealed class TestExecution
     /// </remarks>
     private void AppendLog(string text, bool terminal = false)
     {
-        if (text.Length > MaxRecordCharacters)
-            text = string.Concat(text.AsSpan(0, MaxRecordCharacters), RecordTruncatedSuffix);
+        if (text.Length > MaxRecordCharacters + RecordTailCharacters)
+            text = TruncateRecord(text);
 
         if (!terminal && m_logCharacters >= MaxLogCharacters)
         {
@@ -2219,6 +2230,23 @@ public sealed class TestExecution
         m_logs.Add(text);
         m_logCharacters += text.Length + Environment.NewLine.Length;
         EmitRecordLocked(text);
+    }
+
+    // The head and the tail of an oversize record around the dropped-count marker. Neither cut splits
+    // a surrogate pair, so the record stays valid UTF-16 for results.json.
+    private static string TruncateRecord(string text)
+    {
+        int head = MaxRecordCharacters;
+
+        if (char.IsHighSurrogate(text[head - 1]))
+            head--;
+
+        int tail = text.Length - RecordTailCharacters;
+
+        if (char.IsLowSurrogate(text[tail]))
+            tail++;
+
+        return string.Concat(text.AsSpan(0, head), string.Format(RecordTruncatedMarker, tail - head), text.AsSpan(tail));
     }
 
     /// <summary>
