@@ -1348,6 +1348,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedByteSliceFromStringLit() => CheckTarget("NamedByteSliceFromStringLit");
 
     [TestMethod]
+    public void CheckNamedBytesByteSeq() => CheckTarget("NamedBytesByteSeq");
+
+    [TestMethod]
     public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
 
     [TestMethod]

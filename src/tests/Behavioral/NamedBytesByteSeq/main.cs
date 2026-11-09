@@ -43,13 +43,13 @@ internal static slice<byte> toBytes<Bytes>(Bytes b)
 internal static Val toVal<Bytes>(Bytes b)
     where Bytes : /* ~[]byte | ~string */ IByteSeq<Bytes, byte>, new()
 {
-    return (Val)b;
+    return (Val)b.ToSlice();
 }
 
 internal static Ptr toPtr<Bytes>(Bytes b)
     where Bytes : /* ~[]byte | ~string */ IByteSeq<Bytes, byte>, new()
 {
-    return (Ptr)b;
+    return (Ptr)b.ToGoString();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

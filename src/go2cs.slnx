@@ -766,6 +766,7 @@
     <Project Path="tests/Behavioral/NamedBasicConversion/NamedBasicConversion.csproj" />
     <Project Path="tests/Behavioral/NamedBooleanLogic/NamedBooleanLogic.csproj" />
     <Project Path="tests/Behavioral/NamedChannelType/NamedChannelType.csproj" />
+    <Project Path="tests/Behavioral/NamedBytesByteSeq/NamedBytesByteSeq.csproj" />
     <Project Path="tests/Behavioral/NamedByteSliceFromStringLit/NamedByteSliceFromStringLit.csproj" />
     <Project Path="tests/Behavioral/NamedCompositeGenericArg/NamedCompositeGenericArg.csproj" />
     <Project Path="tests/Behavioral/NamedConstConversionPrecedence/NamedConstConversionPrecedence.csproj" />
