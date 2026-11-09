@@ -1,0 +1,22 @@
+# P2 arms, mnsched (src/tools/mnspike/mnsched), Release, G-LAPTOP 12 logical CPUs, 2026-11-09T09:44Z
+# each mechanism's arm: mechanism OFF (with the other mechanism held off where it would mask), then ON
+$ mnsched a1 --no-injection --no-handoff
+ARM a1 FAIL (injection=off handoff=off) injections=0 carriers=1 wall=10.00s
+$ mnsched a1 --no-handoff
+ARM a1 PASS (injection=on handoff=off) injections=1 carriers=2 wall=0.03s
+$ mnsched a2 --no-injection --no-handoff
+ARM a2 FAIL (injection=off handoff=off) got=0 handoffs=0 carriers=1 wall=10.00s
+$ mnsched a2 --no-injection
+ARM a2 PASS (injection=off handoff=on) got=42 handoffs=1 carriers=2 wall=0.01s
+$ mnsched a4 --no-injection --no-handoff
+ARM a4 FAIL (injection=off handoff=off) hits=201/100000 handoffs=0 carriers=2 wall=60.00s
+$ mnsched a4
+ARM a4 PASS (injection=on handoff=on) hits=100000/100000 handoffs=117053 carriers=623 wall=2.64s
+$ mnsched a3 --n 100000
+ARM a3 PASS (injection=on handoff=on) n=100000 parked-in=0.13s private=69MB threads-while-parked=23 carriers-at-end=13 carriers-settled=12 procs=12 injections=1 gc-pause=44ms sum-ok=True wall=0.69s
+$ mnsched a3 --n 1000000
+ARM a3 PASS (injection=on handoff=on) n=1000000 parked-in=1.22s private=473MB threads-while-parked=33 carriers-at-end=23 carriers-settled=12 procs=12 injections=11 gc-pause=507ms sum-ok=True wall=2.15s
+$ mnsched a3 --n 1000000
+ARM a3 PASS (injection=on handoff=on) n=1000000 parked-in=1.25s private=472MB threads-while-parked=37 carriers-at-end=27 carriers-settled=12 procs=12 injections=15 gc-pause=519ms sum-ok=True wall=2.15s
+$ mnsched a3 --n 1000000
+ARM a3 PASS (injection=on handoff=on) n=1000000 parked-in=1.30s private=483MB threads-while-parked=38 carriers-at-end=28 carriers-settled=12 procs=12 injections=16 gc-pause=526ms sum-ok=True wall=2.21s

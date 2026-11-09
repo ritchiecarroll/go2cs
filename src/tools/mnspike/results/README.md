@@ -50,3 +50,32 @@ assumed.
 Neither of COORD's stop triggers fires:
 - the can-park share is at most 33.7% of std (the upper bound), against the 60% line;
 - no common park path is left untwinned: 0 hard refusals among the direct parkers on either GOOS.
+
+## P2, the scheduler prototype (`../mnsched`, `P2-arms.txt`)
+
+A standalone spike assembly: GOMAXPROCS P tokens held by carrier threads, twinned parks as awaitables (a parked
+goroutine is a stored continuation), the blocked-worker HANDOFF for untwinned parks (the seam's Enter/Exit shape), and
+CARRIER INJECTION (a sysmon thread adds a carrier and a temporary P when a goroutine runs past 10 ms, net of GC pause,
+while work is queued). Surplus carriers retire after 100 ms idle. It does not sit over golib's goroutine identity; the
+spike measures the mechanism, and wiring it into golib is the real build's work.
+
+| Arm | Mechanism OFF | Mechanism ON |
+|---|---|---|
+| a1, a spinner on one P (preemption parity) | FAIL: livelock, 10 s (handoff also off) | PASS: 1 injection, 0.03 s |
+| a2, an untwinned park on one P (the §4.E trap) | FAIL: deadlock, 10 s (injection held off: it masks, see below) | PASS: 1 handoff, 0.01 s |
+| a4, twinned and untwinned paths mixed | FAIL: stalled at 201 / 100,000 | PASS: 100,000 / 100,000, 2.6 s |
+| a3, 10^5 twinned parks | | PASS: 0.13 s, 69 MB, 23 threads |
+| a3, 10^6 twinned parks (3 runs) | | PASS: 1.22-1.30 s, 472-483 MB, 33-38 threads while parked, settling to 12 carriers |
+
+Two findings, both kept:
+- INJECTION ALONE RESCUES a2 after its 10 ms threshold. It plays Go's sysmon retaking a P from a long syscall: a
+  backstop for any block the handoff does not see.
+- The FIRST a3 at 10^6 read FAIL by its own criterion (40 carriers > procs + 2). The diagnosis: 28-31 FALSE injections
+  that coincided with 560-620 ms of total GC pause; with injection off, exactly 12 carriers. Two changes, the criterion
+  unchanged:
+  - the overrun is measured net of the GC pause accrued since the item started (11-16 injections remain, from
+    oversubscription: a descheduled carrier's wall time also grows);
+  - surplus carriers retire after 100 ms idle. On macOS every thread counts against kern.num_taskthreads, so the
+    budget must come back.
+
+O0 for comparison (P0's G3): 10^6 never parked; the run stopped at 20 GB and 617 s.
