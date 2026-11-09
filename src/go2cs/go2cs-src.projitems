@@ -106,6 +106,7 @@
     <None Include="$(MSBuildThisFileDirectory)constraintProxyForwarding.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintProxyForwarding_test.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintProxyGenericCall_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)coreTypeParamAssign.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testSignals.go" />

@@ -2032,6 +2032,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 						callExprContext.suffixArgWith[i] = suffix
 					}
+				} else if suffix := v.coreTypeParamArgSuffix(paramType, v.info.TypeOf(callExpr.Args[i])); suffix != "" {
+					// A map-cored type parameter passed where its core map type is expected (see
+					// coreTypeParamValue). Only the map's SUFFIX rides here: a slice-cored one keeps
+					// wrapArgWithNew's constructor below, which predates this and emits the same thing.
+					if callExprContext.suffixArgWith == nil {
+						callExprContext.suffixArgWith = make(map[int]string)
+					}
+
+					callExprContext.suffixArgWith[i] = suffix
 				}
 
 				// If a replacement argument is found, add it to the replacementArgs slice,

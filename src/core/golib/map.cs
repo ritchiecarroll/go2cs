@@ -89,6 +89,23 @@ public interface IMap<TKey, TValue> : IMap, IDictionary<TKey, TValue>, IGoReflec
     {
         return IsNil ? default(map<TKey, TValue>) : new map<TKey, TValue>(this);
     }
+    /// <summary>
+    /// This map as golib's concrete <see cref="map{TKey, TValue}"/>, SHARING its store: Go's assignability of a
+    /// map-cored type parameter to its core type. `return dst`, with dst an <c>M ~map[K]V</c> and the result
+    /// <c>map[K]V</c> (tsc's internal/core CopyMapInto), emits <c>return dst.AsMap();</c>. Go's two values name one
+    /// hash table, so a write through either is visible through the other.
+    /// </summary>
+    /// <remarks>
+    /// A DEFAULT, for the reason <see cref="IMap.Clear"/> gives: a generated named-map wrapper in an already-built
+    /// assembly must still load. <see cref="map{TKey, TValue}"/> implements it as itself and go2cs-gen's
+    /// IMapTypeTemplate as the map it wraps. Any other implementer has no golib map to share, so it refuses by
+    /// name. A copy would read right and drop every write made through the result.
+    /// A constructor overload was refused for this: both CloneMap implementations pass a map to
+    /// <c>new map&lt;K, V&gt;(...)</c> and mean a COPY, and an <see cref="IMap{TKey, TValue}"/> overload would be
+    /// the more specific candidate there, so <c>maps.Clone</c> would silently start sharing.
+    /// </remarks>
+    map<TKey, TValue> AsMap() => this is map<TKey, TValue> self ? self :
+        throw new InvalidOperationException($"{GetType().FullName} implements IMap<{typeof(TKey).Name}, {typeof(TValue).Name}> without AsMap: it holds no golib map to share");
 
     /// <summary>
     /// Default <see cref="IMap.Clear"/> for any <see cref="IMap{TKey, TValue}"/> — Go's
@@ -1308,6 +1325,10 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
     // The store's first entry, without the range snapshot. A Go map takes no lock, so neither does this read,
     // and a write that lands between opening the store and reading it ends the read with no entry, as the
     // debugger view does: TypeOf then measures nothing, where Go never reads an entry at all.
+    // IMap<TKey, TValue>.AsMap: this map IS the store to share. Explicit, so a constrained call over the struct does
+    // not box it through the interface default.
+    map<TKey, TValue> IMap<TKey, TValue>.AsMap() => this;
+
     bool IGoReflectMapFirstEntry.ReflectFirstEntry(out object? key, out object? value)
     {
         key = null;

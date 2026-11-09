@@ -12,20 +12,20 @@ public static map<K, V> CopyMapInto<M1, M2, K, V>(M1 dst, M2 src)
     where M2 : /* ~map[K]V */ IMap<K, V>, ISupportMake<M2>, new()
 {
     if (dst.IsNil) {
-        return maps.Clone<M2, K, V>(src);
+        return maps.Clone<M2, K, V>(src).AsMap();
     }
     maps.Copy<M1, M2, K, V>(dst, src);
-    return dst;
+    return dst.AsMap();
 }
 
 public static map<K, V> MapBack<M, K, V>(M m)
     where M : /* ~map[K]V */ IMap<K, V>, ISupportMake<M>, new()
-{ return m; }
+{ return m.AsMap(); }
 
 public static map<K, V> MapVar<M, K, V>(M m)
     where M : /* ~map[K]V */ IMap<K, V>, ISupportMake<M>, new()
 {
-    map<K, V> r = m;
+    map<K, V> r = m.AsMap();
     return r;
 }
 
@@ -33,7 +33,7 @@ public static map<K, V> MapAssign<M, K, V>(M m)
     where M : /* ~map[K]V */ IMap<K, V>, ISupportMake<M>, new()
 {
     map<K, V> r = default;
-    r = m;
+    r = m.AsMap();
     return r;
 }
 
@@ -41,20 +41,20 @@ internal static nint takesMap(map<@string, nint> m) { return len(m); }
 
 public static nint MapArg<M>(M m)
     where M : /* ~map[string]int */ IMap<@string, nint>, ISupportMake<M>, new()
-{ return takesMap(m); }
+{ return takesMap(m.AsMap()); }
 
 public static slice<E> SliceBack<S, E>(S s)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
-{ return s; }
+{ return new slice<E>(s); }
 
 public static slice<E> SliceClone<S, E>(S s)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
-{ return slices.Clone<S, E>(s); }
+{ return new slice<E>(slices.Clone<S, E>(s)); }
 
 public static slice<E> SliceVar<S, E>(S s)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
-    slice<E> r = s;
+    slice<E> r = new slice<E>(s);
     return r;
 }
 
@@ -62,7 +62,7 @@ public static slice<E> SliceAssign<S, E>(S s)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     slice<E> r = default;
-    r = s;
+    r = new slice<E>(s);
     return r;
 }
 

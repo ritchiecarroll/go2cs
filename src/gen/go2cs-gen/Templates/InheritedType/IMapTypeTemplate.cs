@@ -62,6 +62,13 @@ internal static class IMapTypeTemplate
                 /// </summary>
                 IMap IMap.CloneMap() => IsNil ? default({{structName}}) : new {{structName}}(new map<{{keyTypeName}}, {{valueTypeName}}>({{mapValue}}));
 
+                /// <summary>
+                /// The map this wrapper holds, SHARED: a map-cored type parameter assigned to its core type
+                /// (`return dst` as `map[K]V`) emits `dst.AsMap()` (TS readiness C24; IMap's AsMap). Explicit, so a
+                /// Go method of the same name is never shadowed.
+                /// </summary>
+                map<{{keyTypeName}}, {{valueTypeName}}> IMap<{{keyTypeName}}, {{valueTypeName}}>.AsMap() => {{mapValue}};
+
                 /// <summary>ISupportMake factory — a made named map wraps a made concrete map.</summary>
                 public static {{structName}} Make(nint p1, nint p2) => new {{structName}}(map<{{keyTypeName}}, {{valueTypeName}}>.Make(p1, p2));
 
