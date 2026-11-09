@@ -2811,7 +2811,8 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// "not evaluated" carries that carve-out), so those keep the evaluating form rather than
 		// having their side effect silently dropped.
 		if (ident.Name == "len" || ident.Name == "cap") && len(callExpr.Args) == 1 {
-			if ptr, ok := v.info.TypeOf(callExpr.Args[0]).(*types.Pointer); ok {
+			// A NAMED pointer to an array (`type Features *flagSet`) folds the same way.
+			if ptr, ok := types.Unalias(v.info.TypeOf(callExpr.Args[0])).Underlying().(*types.Pointer); ok {
 				if arr, isArray := ptr.Elem().Underlying().(*types.Array); isArray {
 					if !v.exprHasCallOrReceive(callExpr.Args[0]) {
 						return fmt.Sprintf("%d", arr.Len())
