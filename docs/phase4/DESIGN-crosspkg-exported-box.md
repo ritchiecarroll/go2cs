@@ -419,3 +419,10 @@ vars, `runtime.MemProfileRate`, and two-argument linkname vars.
 > reads or assigns `pkg.V` compiles unchanged. go.* packages now depend on each other at the EXACT release version,
 > so a project that mixes 1.26.10.1 and 1.26.10.2 packages fails at restore and names them. A read of such a variable
 > costs about 0.5 ns more than a field read on the JIT, and about 0.7-0.9 ns more under Native AOT.
+
+> **AMENDED 2026-11-09 (P2, measured in `docs/phase4/RECORD-nuget-sibling-pins.md` §4, SDK 10.0.403).** "Fails at restore and names them" holds only
+> when two dependency paths pin one go.* package to different exact versions and the project references that package
+> directly on neither (NU1107). NuGet's NU1107 message says to reference the newer package directly. That reference
+> overrides the exact pins with NU1608 warnings, and the mixed set restores and builds: arm a2 restored 50 go.*
+> packages at 1.26.10.2 beside 69 at 1.26.10.3 with 239 NU1608 warnings, then threw `MissingMethodException` at run
+> time. The text above stays as written; `docs/NEWS.md` was corrected the same day.
