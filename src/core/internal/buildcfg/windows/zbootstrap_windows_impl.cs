@@ -1,0 +1,24 @@
+// zbootstrap_windows_impl.cs - Gbtc
+// Copyright © 2026 The go2cs Authors. All rights reserved.
+//
+// SPDX-License-Identifier: BSD-3-Clause
+// Use of this source code is governed by a BSD-style license
+// that can be found in the LICENSE file.
+
+// internal/buildcfg's defaultGOARCH for the windows flavour: Go's own `const defaultGOARCH = runtime.GOARCH`
+// (zbootstrap.go), kept as a READ of runtime.GOARCH rather than the "amd64" the conversion folded it to.
+//
+// The windows runtime reads its GOARCH from the process architecture (runtime/windows/goarch_windows_impl.cs).
+// Folded, this default would stay "amd64" on Windows on Arm, so go/build's default context (Default.GOARCH, from
+// buildcfg.GOARCH) would disagree with runtime.GOARCH. The converter displaces the const for windows
+// (manualConversionConsts), and this member restores Go's relation, as darwin's zbootstrap hand-own does.
+
+[module: go.GoManualConversion]
+
+namespace go.@internal;
+
+partial class buildcfg_package {
+
+internal static ref readonly @string defaultGOARCH => ref runtime_package.GOARCH;
+
+} // end buildcfg_package

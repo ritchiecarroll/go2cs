@@ -190,33 +190,45 @@ func convertManualConstFixture(t *testing.T, target string) string {
 	return readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "mcc", "mcc.cs"))
 }
 
-// TestAManualConstIsDisplacedOnlyOnItsTarget drives the real emission: a const registered for darwin
-// emits the placeholder there, and the ordinary declaration on every other target. The reference in the
+// TestAManualConstIsDisplacedOnlyOnItsTarget drives the real emission: a const registered for a scope emits
+// the placeholder on each target in it, and the ordinary declaration on every other target. Both scopes the
+// corpus uses are driven: darwin alone, and darwin with windows (runtime.GOARCH's). The reference in the
 // function body is emitted either way, so the hand-owned member is what it reads.
 func TestAManualConstIsDisplacedOnlyOnItsTarget(t *testing.T) {
-	// Copy-on-write: the test installs its own registry and restores the original reference, so no
-	// other test can see the fixture entry or lose a real one.
 	original := manualConversionConsts
-	patched := make(map[string]map[string]goosScope, len(original)+1)
-
-	for pkg, names := range original {
-		patched[pkg] = names
-	}
-
-	patched["example.com/mcc"] = map[string]goosScope{"ARCH": goosDarwin}
-	manualConversionConsts = patched
 	t.Cleanup(func() { manualConversionConsts = original })
 
 	// The declaration's `=>` or `=`, never the first half of an `==` in a one-line body that reads it.
 	member := regexp.MustCompile(`(?m)^[ \t]*[^/\s][^\n]*\bstatic\b[^\n]*\bARCH\s*(=>|=[^=])`)
 
+	for _, scope := range []goosScope{goosDarwin, goosWindowsDarwin} {
+		// Copy-on-write: the test installs its own registry and restores the original reference, so no
+		// other test can see the fixture entry or lose a real one.
+		patched := make(map[string]map[string]goosScope, len(original)+1)
+
+		for pkg, names := range original {
+			patched[pkg] = names
+		}
+
+		patched["example.com/mcc"] = map[string]goosScope{"ARCH": scope}
+		manualConversionConsts = patched
+
+		for _, target := range []string{"darwin/amd64", "linux/amd64", "windows/amd64"} {
+			checkManualConstEmission(t, member, target, scope.includes(goosOfTarget(target)))
+		}
+	}
+}
+
+// checkManualConstEmission converts the fixture for one target and checks the const is displaced there exactly
+// when the scope names the target.
+func checkManualConstEmission(t *testing.T, member *regexp.Regexp, target string, displaced bool) {
+	t.Helper()
+
 	for _, c := range []struct {
 		target    string
 		displaced bool
 	}{
-		{"darwin/amd64", true},
-		{"linux/amd64", false},
-		{"windows/amd64", false},
+		{target, displaced},
 	} {
 		emitted := convertManualConstFixture(t, c.target)
 		placeholder := strings.Contains(emitted, "placeholder — const ARCH is hand-converted")

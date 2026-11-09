@@ -35,8 +35,8 @@ architecture-specific path in the standard library.
      2026-11-06 amendments. Measured on the GitHub-hosted osx-arm64 runner: master's darwin osx-arm64 behavioral red
      (run 41964964302, BuildInfoSettings, stdout mismatch C# vs Go); osx-x64, linux and windows agree because their host
      is amd64. Constants, read at master 72043c1a66 on 2026-11-08, the same in all three flavours:
-     src/core/runtime/windows/extern.cs:375 (`GOARCHᵇ = "amd64";`), src/core/runtime/linux/extern.cs:375
-     (`GOARCHᵇ = "amd64";`) and, until the run-time GOARCH seat of 2026-11-09, darwin's extern.cs at the same line;
+     src/core/runtime/linux/extern.cs:375 (`GOARCHᵇ = "amd64";`) and, until the run-time GOARCH seat of 2026-11-09,
+     windows' and darwin's extern.cs at the same line;
      src/core/internal/goarch/zgoarch_amd64.cs (GOARCH "amd64", IsAmd64 1, IsArm64 0) is the only zgoarch file; and no
      *_arm64.cs file exists anywhere under src/core. debug.ReadBuildInfo's GOARCH setting is composed from runtime.GOARCH
      (src/core/runtime/debug/stubs_impl.cs:199 (`GoModInfoAttribute.Compose(…runtime_package.GOARCH.ToString()`)). The run-time feature read is batch 216
@@ -51,6 +51,12 @@ architecture-specific path in the standard library.
      The census of record: docs/phase4/DESIGN-comparator-arms.md §5, layer 2, plus census E (consts folded from
      runtime.GOARCH: defaultGOARCH incoherent, 4 inert or equivalent). The linux and windows flavours still read amd64 on an
      arm64 host (BOARD 2026-11-09), and no package ships for those. -->
+<!-- Amended 2026-11-09 (G, the same seat, by P2's CENSUS-goarch-linux-windows.md): the windows flavour does the same
+     (src/core/runtime/windows/goarch_windows_impl.cs, src/core/internal/buildcfg/windows/zbootstrap_windows_impl.cs),
+     so Windows on Arm reads arm64. That is unmeasured on an arm64 Windows host: the os-matrix has no windows-arm64
+     runner, and no package ships for it. linux keeps amd64: its syscall numbers and struct layouts are linux/amd64's,
+     so a linux/arm64 host needs a flavour of its own (owner ruling, 2026-11-09: in .4). -->
+
 
 ## On macOS, a `go` statement past the system's thread limit ends the program
 

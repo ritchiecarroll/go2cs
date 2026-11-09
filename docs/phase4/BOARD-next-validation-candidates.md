@@ -34995,4 +34995,49 @@ control `defaultGOARCH`) found 5 production consts: `defaultGOARCH` (incoherent,
 
 — G (2026-11-09)
 
+## 2026-11-09 — G (the run-time GOARCH seat, by P2's census): the windows flavour reads the process architecture too; linux needs a flavour of its own
+
+Amends this BOARD's earlier entry today ("the linux and windows flavours on arm64 hosts report GOARCH=amd64").
+P2's census of the two flavours (`docs/phase4/CENSUS-goarch-linux-windows.md`, `claude/p2-goarch-census`) decided
+both:
+- **windows: YES**, with darwin's two displacements. `runtime.GOARCH` and `internal/buildcfg`'s `defaultGOARCH` are
+  displaced for windows as well (`manualConversionConsts`, scope darwin+windows). Their hand-owns,
+  `runtime/windows/goarch_windows_impl.cs` and `internal/buildcfg/windows/zbootstrap_windows_impl.cs`, read the process
+  architecture, so Windows on Arm reads arm64. That is UNMEASURED on an arm64 Windows host: the os-matrix has no
+  windows-arm64 runner, and no package ships for it. On win-x64 the value is "amd64", as before.
+- **linux: NO.** Its syscall numbers and struct layouts are linux/amd64's, so the flavour cannot run on linux/arm64
+  whatever GOARCH says. A linux/arm64 flavour is the remedy (owner ruling, 2026-11-09: in .4, with a date slip
+  allowed), and its design is G's next record.
+
+— G (2026-11-09)
+
+## 2026-11-09 — G: a linux-arm64 consumer silently compiles against and LOADS the Windows flavour of every RID-split go.* package — OPEN, a refusal seat routed
+
+**What happens.** A go.* package whose C# varies by GOOS ships `runtimes/<rid>/lib/<tfm>/` for each RID the release
+ships (win-x64, linux-x64, osx-x64, osx-arm64), plus a RID-agnostic `lib/<tfm>/` copy that carries the host of
+record's flavour, Windows. On a RID no package ships, linux-arm64 the first a user meets, nothing chooses a
+Linux flavour:
+- **Compile:** `src/core/golib/buildTransitive/go.lib.targets`:38-41. `GoSelectRidCompileAssets` swaps each go.*
+  compile item to `runtimes/$(GoCompileRuntimeIdentifier)/...` only when that file exists, so "on a RID no go.*
+  package ships (linux-arm64, say) nothing is swapped and the reference flavour compiles". The reference flavour is
+  Windows.
+- **Run:** `src/push-nuget.ps1`:1573-1576. The host prefers a `runtimeTargets` asset only when one matches the
+  running RID, so "a Linux-arm64 consumer would silently get Windows behaviour".
+- **The only signal:** `src/core/golib/GoHostOfRecord.cs` (the class comment, 18-26; `Verify` at 56), called once
+  from `src/core/runtime/hostofrecord_impl.cs`:42-44. It writes one stderr warning when the baked GOOS differs from the
+  host's, and the program then runs on Windows answers: syscall numbers, paths and errno values among them.
+
+**Why it is a defect, not a cost.** The packaging design chose `lib/`-as-reference knowing this (push-nuget.ps1
+1569-1577, "the honest cost of this choice"), while no shipped RID could reach it in practice. A Linux arm64 host
+(Graviton, Ampere, Raspberry Pi) is an ordinary .NET target, and it reaches it today with a successful build and wrong
+behaviour, which is worse than any failure.
+
+**The remedy, two steps.**
+- (1) SEAT 0, "refuse loudly": a build-time ERROR, not a warning, when the consumer's RID has no matching flavour.
+  It names the RID and points at KnownIssues. It is small, independent of the flavour, and ships in .4.
+- (2) The linux/arm64 flavour (`DESIGN-linux-arm64-flavour.md`), which turns the refusal into a no-op for
+  linux-arm64.
+
+— G (2026-11-09)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

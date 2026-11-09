@@ -371,7 +371,6 @@ private static readonly @string GOOSᵇ = "windows";
 
 // GOARCH is the running program's architecture target:
 // one of 386, amd64, arm, s390x, and so on.
-public static ref readonly @string GOARCH => ref GOARCHᵇ;
-private static readonly @string GOARCHᵇ = "amd64";
+// go2cs generated this placeholder — const GOARCH is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 } // end runtime_package

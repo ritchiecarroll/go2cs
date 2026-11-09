@@ -31,8 +31,7 @@ internal static ref readonly @string version => ref versionᵇ;
 private static readonly @string versionᵇ = @"go1.26.10"u8;
 internal static ref readonly @string defaultGOOS => ref defaultGOOSᵇ;
 private static readonly @string defaultGOOSᵇ = "windows";
-internal static ref readonly @string defaultGOARCH => ref defaultGOARCHᵇ;
-private static readonly @string defaultGOARCHᵇ = "amd64";
+// go2cs generated this placeholder — const defaultGOARCH is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 public static ref readonly @string DefaultGOFIPS140 => ref DefaultGOFIPS140ᵇ;
 private static readonly @string DefaultGOFIPS140ᵇ = @"off"u8;
 public static ref readonly @string DefaultCGO_ENABLED => ref DefaultCGO_ENABLEDᵇ;

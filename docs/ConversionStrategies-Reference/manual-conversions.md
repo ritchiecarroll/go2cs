@@ -31,7 +31,9 @@ deliberate and visible:** only `runtime.GOARCH` moves. `internal/goarch` (`GOARC
 `ArchFamily`), the files Go selected for `darwin/amd64`, and every constant folded at conversion keep `amd64`, so they
 stay coherent with each other. A reader of the converted runtime will see `GOARCH` read `arm64` beside
 `goarch.GOARCH` reading `amd64` on the same Mac. Each runtime branch on `GOARCH` was checked and reads correctly at
-arm64. The linux and windows flavours keep the converted const.
+arm64. The windows flavour does the same (`runtime/windows/goarch_windows_impl.cs`), for Windows on Arm, by its own
+census. The linux flavour keeps the converted const: its syscall numbers and struct layouts are linux/amd64's, so it
+cannot run on linux/arm64 whatever `GOARCH` says, and needs a flavour of its own.
 <!-- src/go2cs/manualTypeOperations.go `var manualConversionConsts`; the placeholder is visitValueSpec.go's
      constPlaceholderFormat. Guards: TestAManualConstIsDisplacedOnlyOnItsTarget (the emission, per target) and
      TestManualConversionConstsAreDisplacedAndDeclared (the committed corpus), src/go2cs/manualConversionVars_test.go.
@@ -1149,7 +1151,7 @@ borrow expressions; each word-size function is a single expression with no `Uint
 behavioral test, whose output matches Go over the edge cases and a 100,000-value sweep.
 <!-- src/core/math/bits/bits_impl.cs:147 `public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y)`,
      :117 `public static (uint64 sum, uint64 carryOut) Add64(uint64 x, uint64 y, uint64 carry)`,
-     :58-59 (`MEASURED (linux/amd64, min over seven`); src/go2cs/manualTypeOperations.go:2855 (`"math/bits": {`);
+     :58-59 (`MEASURED (linux/amd64, min over seven`); src/go2cs/manualTypeOperations.go:2856 (`"math/bits": {`);
      src/tests/Behavioral/MathBitsLeaves/main.go:37 (`for i := 0; i < 100000; i++ {`); commit d89ec81a23. -->
 
 ## A cross-package `//go:linkname` PULL emits a forwarder, not a throwing stub

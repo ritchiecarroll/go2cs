@@ -143,20 +143,21 @@ var manualConversionVars = map[string]map[string]goosScope{
 // own const contexts are unaffected: go/types folds them at conversion, so a folded constant keeps the
 // converted target's value (the census of record names them category D).
 //
-// runtime.GOARCH, darwin only (R3 of docs/phase4/DESIGN-comparator-arms.md, layer 2): the darwin flavour
-// is converted ONCE, for darwin/amd64, and runs under both mac RIDs, so the converted constant read
-// "amd64" on Apple silicon where Go's binary reads "arm64" (BOARD 2026-11-05). The darwin hand-own reads
-// the process architecture. internal/goarch, the file selection and every folded constant stay amd64;
-// the census found each runtime site that branches on GOARCH inert, improving, equivalent or
-// unreachable at arm64. linux and windows keep the converted const until a census per flavour.
+// runtime.GOARCH, darwin and windows (R3 of docs/phase4/DESIGN-comparator-arms.md, layer 2; windows by
+// CENSUS-goarch-linux-windows.md): each flavour is converted ONCE, for <goos>/amd64, so the converted constant
+// read "amd64" on an arm64 host where Go's binary reads "arm64" (BOARD 2026-11-05): Apple silicon, and Windows on
+// Arm. Each flavour's hand-own reads the process architecture. internal/goarch, the file selection and every
+// folded constant stay amd64; the census found each runtime site that branches on GOARCH inert, equivalent or
+// unreachable at arm64. linux keeps the converted const: its syscall numbers and struct layouts are
+// linux/amd64's, so it cannot run on linux/arm64 whatever GOARCH says, and needs a flavour of its own.
 var manualConversionConsts = map[string]map[string]goosScope{
 	"runtime": {
-		"GOARCH": goosDarwin,
+		"GOARCH": goosWindowsDarwin,
 	},
 	// Go's `const defaultGOARCH = runtime.GOARCH` (zbootstrap.go): folded, it would keep "amd64" beside a run-time
 	// runtime.GOARCH, and go/build's default context would compare the two and disagree.
 	"internal/buildcfg": {
-		"defaultGOARCH": goosDarwin,
+		"defaultGOARCH": goosWindowsDarwin,
 	},
 }
 
