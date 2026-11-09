@@ -50,6 +50,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAnonIfaceMethodSetWidening() => CheckTarget("AnonIfaceMethodSetWidening");
 
     [TestMethod]
+    public void CheckAnonIfaceParamCrossPackage() => CheckTarget("AnonIfaceParamCrossPackage");
+
+    [TestMethod]
     public void CheckAnonIfaceThroughPointerAdapter() => CheckTarget("AnonIfaceThroughPointerAdapter");
 
     [TestMethod]

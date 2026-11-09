@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
+	"path/filepath"
 	"sort"
 	"strings"
 )
@@ -264,6 +265,42 @@ func lookupProductionDynamicTypeName(signature string) string {
 	name := productionDynamicTypeNames[signature]
 	packageLock.Unlock()
 	return name
+}
+
+// importedDynamicInterfaceName returns the qualified C# name of an anonymous interface that ANOTHER
+// package declared and lifted, from that package's published GoDynamicTypeLift records, or "" when
+// the interface is this package's own or the declaring package published no lift for it. The
+// declaring package is read off the interface's explicit methods: an interface literal's methods
+// belong to the package whose source spells it. Without this a call into `func Fail(n interface{
+// K() string })` from another package found no lift of its own and emitted the raw Go text
+// (catalogue C1, EXPERIMENT-ts-readiness-2026-11-07.md).
+func (v *Visitor) importedDynamicInterfaceName(iface *types.Interface) string {
+	if iface.NumExplicitMethods() == 0 {
+		return ""
+	}
+
+	pkg := iface.ExplicitMethod(0).Pkg()
+
+	if pkg == nil || pkg == v.pkg {
+		return ""
+	}
+
+	meta, ok := importPackageDirs[pkg.Path()]
+
+	if !ok {
+		return ""
+	}
+
+	packageLock.Lock()
+	name := importedDynamicTypeNames[filepath.Clean(meta.Dir)][iface.String()]
+	packageLock.Unlock()
+
+	if name == "" {
+		return ""
+	}
+
+	// The qualified form a foreign named interface takes (getFullyQualifiedTypeName, then convertToCSTypeName).
+	return convertToCSTypeName(getSanitizedImport(packageClassPath(pkg.Path(), pkg.Name())+PackageSuffix) + "." + name)
 }
 
 // dynamicStructTypeName resolves the C# type name of an expression whose type is

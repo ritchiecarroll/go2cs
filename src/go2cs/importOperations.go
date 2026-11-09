@@ -908,6 +908,7 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 			if results, parseErr := parseExportedTypeAliasLines(lines); parseErr == nil {
 				applyExportedTypeAliases(results, info)
 				loadPackageImplementLines(lines, info.RootPackageName, info.ImportPath)
+				loadImportedDynamicTypeLiftLines(lines, info.SourceDir)
 				return
 			}
 		}
@@ -951,6 +952,7 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 				if results, parseErr := parseExportedTypeAliasLines(lines); parseErr == nil {
 					applyExportedTypeAliases(results, info)
 					loadPackageImplementLines(lines, info.RootPackageName, info.ImportPath)
+					loadImportedDynamicTypeLiftLines(lines, info.SourceDir)
 					return
 				}
 			}
@@ -974,6 +976,10 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 	if err == nil {
 		applyExportedTypeAliases(results, info)
 		loadPackageImplements(packageInfoFile, info.RootPackageName, info.ImportPath)
+
+		if lines, err := readPackageInfoLines(packageInfoFile); err == nil {
+			loadImportedDynamicTypeLiftLines(lines, info.SourceDir)
+		}
 	} else {
 		showWarning("Failed to parse exported type aliases from package info file \"%s\": %s", packageInfoFile, err)
 	}
@@ -1291,6 +1297,39 @@ func loadPackageImplementLines(lines []string, rootPackageName string, importPat
 	// And its published sstring twins (sstringTwinOperations.go), whose func values name the
 	// canonical delegate rather than the method group.
 	loadSStringTwinLines(lines, rootPackageName)
+}
+
+// loadImportedDynamicTypeLiftLines records an imported package's GoDynamicTypeLift entries under its
+// cleaned source directory (importedDynamicTypeNames), so a value passed to one of its
+// anonymous-interface parameters names that lift (importedDynamicInterfaceName). Keyed by directory,
+// not import path: a co-located `replace` module's PackageInfo carries no ImportPath.
+func loadImportedDynamicTypeLiftLines(lines []string, sourceDir string) {
+	lifts, _ := parseDynamicTypeLiftLines(lines)
+
+	if len(lifts) == 0 || sourceDir == "" {
+		return
+	}
+
+	key := filepath.Clean(sourceDir)
+
+	packageLock.Lock()
+
+	if importedDynamicTypeNames == nil {
+		importedDynamicTypeNames = make(map[string]map[string]string)
+	}
+
+	names, ok := importedDynamicTypeNames[key]
+
+	if !ok {
+		names = make(map[string]string, len(lifts))
+		importedDynamicTypeNames[key] = names
+	}
+
+	for _, entry := range lifts {
+		names[entry[0]] = entry[1]
+	}
+
+	packageLock.Unlock()
 }
 
 // preloadImportedTypeAliases loads the exported type aliases of EVERY package imported by ANY file in
