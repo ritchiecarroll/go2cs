@@ -172,7 +172,15 @@ host_ctx	(host|hostname|computername)[[:space:]]*[=:][a-z0-9][a-z0-9._-]*	refuse
 #      leading and one trailing dot) EQUALS an entry of oid_literal, EXCLUDED and counted as
 #      oid-literal. IN BOTH MODES, like rule 5: it reads the run's own characters, and an exact value
 #      cannot be arranged by a sentence. Consulted last; in delta rule 2 has already excluded these.
-#   8. Otherwise a HIT.
+#   8. NUGETGO MODULE REVISION (COORD 2026-11-09). If the quad begins its whitespace-delimited word and
+#      only sentence punctuation (, ; : .) follows it there, the IMMEDIATELY preceding word is a nugetgo
+#      module token, and the quad's FIRST ARC is a major version that module can have, EXCLUDED and
+#      counted as module-version. IN BOTH MODES. The tokens are not listed here: the consumer derives
+#      them on every census from the tree's two nugetgo registries (src/tools/nugetgo/
+#      nugetgo-modules.psd1 keys, and column 1 of every src/tests/ModuleBehavior/**/mappings.txt), as
+#      each module path's trailing path suffixes, a bare /vN element excepted. The majors are Go's
+#      semantic import versioning: N for a path ending in /vN, otherwise 0 or 1. Consulted last.
+#   9. Otherwise a HIT.
 # STATED RESIDUALS OF DELTA MODE: a quad immediately preceded by a dot is excluded by rule 2, and a
 # real address written within 56/32 characters of a version marker is excluded by rule 4, and a real
 # address spelled as the suffix of a funcLits entry inside a well-formed GoPositionMap record is
@@ -184,6 +192,14 @@ host_ctx	(host|hostname|computername)[[:space:]]*[=:][a-z0-9][a-z0-9._-]*	refuse
 # bounded to the one shape, and it is the whole of what this widening costs.
 # RULE 7 TAKES NO SUCH RESIDUAL: its set holds three exact values, none of which is an address, and a
 # run one arc away from an entry is refused exactly as before.
+# RULE 8 IS A CONTEXT RULE THAT RUNS IN STRICT, and STRICT does not backstop it. What bounds it is
+# condition three, read on the quad's own first arc and the module's own path: an arranged sentence
+# can clear only a quad in the first-arc /8s of the registry's majors (at 2026-11-09: 0/8, 1/8, 5/8),
+# and only directly after that module's name. An address in those /8s written there reads CLEAN --
+# that residual is taken knowingly and pinned by a self-test case. No 10/8, 172.16/12, 192.168/16 or
+# loopback quad clears beside a v0/v1 module. The exact registry version would be narrower and is
+# refused on durability: the BOARD is append-only, so a module's next version bump would turn its
+# earlier rows back into refusals nobody can rewrite.
 ipv4	(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])	refuse	[CONVERTED-CONTEXT] NO GO-GUARD COUNTERPART. The candidate matcher: a dotted quad, octets 0-255. In STRICT mode the only exclusion is rule 5, the release_literal admit; in DELTA mode rules 1-5 decide, and anything they leave is a hit. In CONVERTED mode the arm still runs and still counts, and its surviving occurrences are REPORTED rather than refused: a quad in a converted Go test source is Go's own test data, and the 24 of one lane's 25 measured refusals that were this arm were every one of them found verbatim in the package's own *_test.go. RESPELLED 2026-10-06, and the language is unchanged: the interval-repeated group is written out as three explicit octet groups, as ipv4_arm_re was on 2026-09-15. MEASURED: mawk 1.3.4 20200120 -- the mawk an Ubuntu 20.04 image ships -- reads a braced interval as LITERAL TEXT, so the braced spelling matched no quad there, the arm printed occ=0 exactly as it does on a text that carries none, and every address read CLEAN. Every self-test case that needs this arm to fire was red on that awk and green on gawk, and this one respelling is the whole difference. See PORTABILITY in the header.
 ipv4_arm_re	(^|[^0-9.a-z_])[a-z_]*=?(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])([^0-9.]|$)	context	C2's arm, carried verbatim so the fleet has ONE copy of it and no tool re-derives it. Reported for comparison, and NOT the candidate matcher -- see change (i) above. RESPELLED 2026-09-15 22:15 for mawk 1.3.4 (C1 4aa7745fa): the interval-repeated group before the trailing alternation is expanded into three explicit octet groups and 1[0-9]{2} into 1[0-9][0-9]; semantics identical to the C2 arm as posted.
 ipv4_prefix_ex	^([^0-9a-z_]?([v][0-9]|version=[0-9])|-[0-9])	context	[CONSULTED-ONLY] C2's exemption, carried verbatim. CONSULTED by ipv4 as rule 1, IN DELTA MODE ONLY, read against the reconstructed prefix-plus-quad.

@@ -127,7 +127,13 @@ public class ModuleSourceRemapTests
         registry.Add("TestProbe", _ =>
         {
             s_insideRemap = runtime_package.GoModuleSourceRemap;
-            s_insideDirectory = Environment.CurrentDirectory;
+
+            // The working directory as a Go test reads it: os.Getwd, which answers $PWD when it names "." (the
+            // host publishes it). The CLR's getcwd resolves symlinks instead, and on darwin the temp root
+            // /var/folders/... is reached through /var -> /private/var, so it answers a different spelling of
+            // the same directory than logrus's cwd + "/logrus_test.go" would.
+            (go.@string directory, go.error err) = go.os_package.Getwd();
+            s_insideDirectory = err is null ? (string)directory : $"os.Getwd failed: {err.Error()}";
         }, "keys_test.go", 1);
 
         return registry;

@@ -176,6 +176,10 @@
 # is read on the QUAD'S OWN CHARACTERS and on nothing around it, so unlike a context rule it cannot
 # be arranged by the sentence a lane writes -- which is exactly why a context rule is refused here
 # and a shape admit is not. What it costs is stated on that arm's own line in the definition.
+# Rule 8 (2026-11-09), a NUGETGO MODULE REVISION after its module's name, is the one context rule
+# STRICT takes: the word before must be a module token derived from the tree's registries, and the
+# quad's own first arc must be one of that module's majors, so what a sentence can arrange is bounded
+# to those /8s directly after that name. Its residual is stated in the definition and on the rule.
 # Every other arm is identical in both modes.
 #
 # `entry`/`subject` ask "does what I am about to write carry one?". `tree` asks "does what I am
@@ -802,6 +806,62 @@ idc_build_tokens() {
     if [ -n "$skipped" ]; then IDC_TOKSUMMARY="$IDC_TOKSUMMARY  SKIPPED:$skipped"; fi
     IDC_HASHSUMMARY="hashes=$nRows matched=$IDC_HASH_HITS unmatched=$((nRows - IDC_HASH_HITS))"
     idc_build_admits
+    idc_build_modules
+    return 0
+}
+
+# -------------------------------------------------------------------------------------------------
+# THE NUGETGO MODULE TOKENS -- ipv4 rule 8's input, derived from the tree on every census, never listed.
+#
+# A nugetgo package version is the module's own three-part version plus a revision counter, so prose
+# that names a package revision ("pflag" then a four-part version) is a quad to the candidate matcher.
+# The module paths come from the two registries the tree already carries, and from nothing else:
+#   - src/tools/nugetgo/nugetgo-modules.psd1, the keys '<module path>@v<version>' (the tested modules);
+#   - column 1 of every src/tests/ModuleBehavior/**/mappings.txt, each the module's nugetgo mappings
+#     row (the behaviorally proven modules -- mousetrap has a row there and none in the .psd1).
+# Each module path yields its trailing path suffixes as tokens ("uuid", "google/uuid", ...), except a
+# suffix that is ONLY a major-version element ("v5" alone is no module's name). Each token carries
+# the MAJOR VERSIONS its module can have, by Go's semantic import versioning: a path ending in /vN
+# (N >= 2) is major N and nothing else, and any other path is major 0 or 1. Written as ",0,1," or
+# ",5," so the awk tests membership with index().
+#
+# A registry that is not there yields ZERO tokens and rule 8 admits nothing: the census then refuses
+# MORE, never less, and the header line says modules=0 so the zero is visible. IDC_MODULE_ROOT moves
+# the tree root for the self-test's synthetic registry and is never set in normal use.
+IDC_MODFILE="$IDC_TMP/modules.tsv"
+IDC_MODSUMMARY=""
+idc_build_modules() {
+    local root="${IDC_MODULE_ROOT:-$IDC_DIR/../..}" paths="$IDC_TMP/modules.paths" reg="" beh="" nP=0 nT=0
+    reg="$root/src/tools/nugetgo/nugetgo-modules.psd1"
+    beh="$root/src/tests/ModuleBehavior"
+    : > "$paths"
+    if [ -f "$reg" ]; then
+        sed -n "s/^[[:space:]]*'\([^'@]*\)@v[0-9][^']*'[[:space:]]*=.*/\1/p" "$reg" >> "$paths"
+    fi
+    if [ -d "$beh" ]; then
+        find "$beh" -type f -name mappings.txt -exec awk -F'\t' '{ sub(/\r$/, "") } /^#/ { next } NF >= 2 && $1 != "" { print $1 }' {} + >> "$paths"
+    fi
+    awk '
+        { sub(/\r$/, ""); p = tolower($0) }
+        p == "" || p ~ /[ \t]/ || (p in SEEN) { next }
+        {
+            SEEN[p] = 1; nP++
+            n = split(p, E, "/")
+            maj = ",0,1,"
+            if (n >= 2 && E[n] ~ /^v[0-9]+$/ && substr(E[n], 2) + 0 >= 2) maj = "," (substr(E[n], 2) + 0) ","
+            tok = ""
+            for (i = n; i >= 1; i--) {
+                tok = (i == n) ? E[i] : (E[i] "/" tok)
+                if (i == n && E[i] ~ /^v[0-9]+$/) continue
+                if (index(T[tok], maj) == 0) T[tok] = T[tok] maj
+            }
+        }
+        END { for (t in T) print t "\t" T[t]; print nP > "/dev/stderr" }
+    ' "$paths" > "$IDC_MODFILE" 2> "$IDC_TMP/modules.count"
+    nP="$(cat -- "$IDC_TMP/modules.count" 2>/dev/null)"
+    nT="$(wc -l < "$IDC_MODFILE" | tr -d ' ')"
+    IDC_MODSUMMARY="modules=${nP:-0} tokens=${nT:-0}"
+    if [ "${nP:-0}" = "0" ]; then IDC_MODSUMMARY="$IDC_MODSUMMARY (no registry read: rule 8 admits nothing)"; fi
     return 0
 }
 
@@ -1525,10 +1585,11 @@ function scanArm(arm, lineno, text, lo, pass, joinAt,   pos, s, e, mt, tok, ok) 
 }
 
 # ---- the IPv4 arm --------------------------------------------------------------------------------
-# STRICT (entry/subject): no CONTEXT exclusion of any kind; the release_literal ADMIT SET (rule 5),
-# read on the quad's own shape, is the one exclusion it takes. DELTA (tree): rules 1-4, then rule 5,
-# then rule 6 (a GoPositionMap record's function-literal suffix), which is a context rule and so
-# DELTA ONLY.
+# STRICT (entry/subject): the shape admits (rule 3, doc constants; rule 5, release_literal; rule 7,
+# oid_literal), read on the quad's own characters, and rule 8, the one context rule STRICT takes (a
+# nugetgo module revision, bounded by the quad's own first arc -- see the rule). DELTA (tree): rules
+# 1-4, then rule 5, then rule 6 (a GoPositionMap record's function-literal suffix), which is a
+# context rule and so DELTA ONLY, then rules 7 and 8.
 # ipv4ParseAt walks a four-octet quad BY HAND from position p and sets IPV4E to the position of its
 # last digit. It returns 0 unless all four octets are there, 0-255, unpadded, and not followed by a
 # fifth digit -- the same acceptance the ipv4 ERE has, derived without the ERE.
@@ -1580,6 +1641,16 @@ function wordBefore(lo, s,   i, e2, b) {
     if (e2 < 1) return ""
     b = e2; while (b > 1 && substr(lo, b - 1, 1) !~ /[ \t]/) b--
     return substr(lo, b, e2 - b + 1)
+}
+# modRevision is ipv4 rule 8's test -- see the rule's comment in scanIpv4 for the three conditions.
+function modRevision(lo, s, e, lq,   own, before, arc) {
+    if (s < 2 || substr(lo, s - 1, 1) !~ /[ \t]/) return 0
+    own = wordOwn(lo, s, e)
+    if (substr(own, length(lq) + 1) !~ /^[,;:.]*$/) return 0
+    before = wordBefore(lo, s)
+    if (before == "" || !(before in MODMAJ)) return 0
+    arc = substr(lq, 1, index(lq, ".") - 1)
+    return index(MODMAJ[before], "," arc ",") > 0
 }
 function wordAfter(lo, e,   i, b, e2, L) {
     L = length(lo)
@@ -1798,6 +1869,37 @@ function scanIpv4(lineno, text, lo, pass, joinAt,   pos, s, e, quad, lq, k, b, c
         rr = e; while (rr < length(lo) && substr(lo, rr + 1, 1) ~ /[0-9.]/) rr++
         run = substr(lo, rs, rr - rs + 1); sub(/^\./, "", run); sub(/\.$/, "", run)
         if (admitted("oid_literal", run)) { EXC["ipv4\toid-literal"]++; continue }
+
+        # RULE 8 -- a NUGETGO MODULE REVISION, IN BOTH MODES (COORD 2026-11-09, after master's BOARD
+        # refused in entry mode on seven of them). A nugetgo package version is the module's own
+        # version plus a revision counter, and prose names it after the module: "<token> <quad>". The
+        # quad is excluded when ALL of these hold, each read per OCCURRENCE (see modRevision):
+        #   (1) the quad begins its whitespace-delimited word, and nothing follows it in that word
+        #       but sentence punctuation (, ; : .) -- so an arc more, or anything glued on, refuses;
+        #   (2) the IMMEDIATELY preceding word IS a module token derived from the tree's registries
+        #       (idc_build_modules), whole -- "pflag," or "(pflag" is not "pflag";
+        #   (3) the quad's FIRST ARC is a major version that module can have, by Go's semantic import
+        #       versioning: N for a path ending in /vN, otherwise 0 or 1.
+        # (3) is what separates a revision from an address in prose after a module's name: an address
+        # whose first arc is not one of the module's majors refuses whatever word precedes it, so no
+        # 10/8, 172.16/12, 192.168/16 or loopback quad clears beside a v0/v1 module.
+        #
+        # ⚠ IT IS A CONTEXT RULE IN STRICT, AND THIS IS WHY THAT IS BOUNDED. Rule 5's test is that
+        # STRICT admits only what a sentence cannot arrange. Condition (2) alone would fail that test:
+        # any quad written after "uuid" would clear. (3) is read on the quad's OWN first arc and the
+        # module's own path, so what an arranged sentence can clear is bounded to the first-arc /8s
+        # of the registry's majors -- today 0/8, 1/8 and 5/8 -- and only directly after that module's
+        # name. STATED RESIDUAL: an address in those /8s written directly after a module token reads
+        # CLEAN; rule 8 cannot tell it from a revision, and a self-test case pins that it does not.
+        #
+        # ⚠ WHY THE MAJOR AND NOT THE REGISTRY'S EXACT VERSION. Matching the first three arcs against
+        # the registry's current version is narrower (256 quads a module) and is not durable: the
+        # BOARD is append-only, so the next version bump of any module would turn its earlier rows
+        # back into refusals no lane can rewrite. A module's major changes only with its path.
+        #
+        # ⚠ CONSULTED LAST, for rule 5's reason: an occurrence an older rule already disposes of keeps
+        # ITS reason in the EXCLUSIONS block.
+        if (modRevision(lo, s, e, lq)) { EXC["ipv4\tmodule-version"]++; continue }
 
         if (armRefuses("ipv4")) record("ipv4", pass, lineno, quad, text); else DOWN["ipv4"]++
     }
@@ -2042,6 +2144,16 @@ BEGIN {
     }
     close(PATFILE)
     if (nA < 1) { print "awk: patterns file yielded 0 arms" > "/dev/stderr"; exit 9 }
+    # ipv4 rule 8's input: "<token>\t<majors>" per line, built by idc_build_modules from the tree's
+    # nugetgo registries. Empty (the awk probe passes none) means rule 8 admits nothing.
+    if (MODFILE != "") {
+        while ((getline L < MODFILE) > 0) {
+            sub(/\r$/, "", L)
+            n = split(L, F, "\t")
+            if (n >= 2 && F[1] != "") MODMAJ[F[1]] = F[2]
+        }
+        close(MODFILE)
+    }
     # TWO files, one shape: the run-time literals this box derived, then the denied words the TEXT
     # itself supplied (the TEXT_DENIED arm; empty outside the strict modes).
     for (fi = 1; fi <= 2; fi++) {
@@ -2213,7 +2325,7 @@ idc_run_awk() {
         -v TXTTOK="$IDC_TXTTOK" -v TXTADM="$IDC_TXTADM" \
         -v KEYS="$2" -v STATUS="$4" -v STRICT="$5" -v UNMASK="$IDC_UNMASK" \
         -v SHORT="${IDC_SHORT:-0}" -v CONVERTED="$IDC_CONVERTED" -v FIXTURE="${IDC_FIXTURE:-0}" \
-        -f "$IDC_AWK" -- "$1"
+        -v MODFILE="$IDC_MODFILE" -f "$IDC_AWK" -- "$1"
 }
 
 # -------------------------------------------------------------------------------------------------
@@ -2492,6 +2604,7 @@ idc_census() {
     echo "  public handles: $IDC_ADMITSUMMARY"
     echo "  text-hash arm: $IDC_TXTSUMMARY"
     echo "  awk probe: $IDC_AP_SUMMARY"
+    echo "  nugetgo modules (ipv4 rule 8): $IDC_MODSUMMARY"
     if [ -n "${IDC_INERT:-}" ]; then printf '%b' "$IDC_INERT"; fi
     if [ "$IDC_UNMASK" = "1" ]; then echo "  *** --unmask IS ON. LOCAL CONSOLE ONLY. NOTHING BELOW MAY BE PASTED INTO A POST. ***"; fi
     cat -- "$report"
@@ -3171,6 +3284,53 @@ idc_mode_selftest() {
     # reason is kept: rule 7 is consulted last and re-attributes nothing.
     printf 'OID_A = "%d.%d.%d.%d.%d.%d.%d.%d.%d"\n' 1 3 6 1 5 5 7 3 1      > "$d/o12"; idc_st_case "in DELTA an entry keeps rule 2's reason"    "" "$d/o12" 0
     idc_st_exc "  and it was excluded BY THE TOKEN RUN"           "ipv4|token-run" "$IDC_TMP/st.status"
+
+    echo
+    echo "  A4. THE NUGETGO MODULE-VERSION ADMIT (rule 8) -- BOTH DIRECTIONS, BOTH MODES"
+    echo "      (over a SYNTHETIC registry built here, one module in each of the two sources the"
+    echo "       builder reads, so no case depends on what the live registry holds today)"
+    mkdir -p -- "$d/mr/src/tools/nugetgo" "$d/mr/src/tests/ModuleBehavior/example.test/acme/frob/v7@v7.0.1" "$d/mr/src/tests/ModuleBehavior/example.test/x/zing@v0.19.0"
+    printf "@{\n    'example.test/acme/quuxlib@v1.4.2' = @{\n        Kit = ''\n    }\n}\n" > "$d/mr/src/tools/nugetgo/nugetgo-modules.psd1"
+    printf '# module-path\tnuget-id\tstatus\nexample.test/acme/frob/v7\tnugetgo.example.test.acme.frob.v7\tcommunity\n' > "$d/mr/src/tests/ModuleBehavior/example.test/acme/frob/v7@v7.0.1/mappings.txt"
+    printf '# module-path\tnuget-id\tstatus\r\nexample.test/x/zing\tnugetgo.example.test.x.zing\tcommunity\r\n' > "$d/mr/src/tests/ModuleBehavior/example.test/x/zing@v0.19.0/mappings.txt"
+    IDC_MODULE_ROOT="$d/mr"; idc_build_modules
+    c="$IDC_MODSUMMARY"
+    case "$c" in
+        "modules=3 tokens="*) printf '  PASS  %-48s %s\n' "the synthetic registry reads three modules" "$c"; IDC_ST_PASS=$((IDC_ST_PASS + 1)) ;;
+        *)                    printf '  FAIL  %-48s %s\n' "the synthetic registry reads three modules" "$c"; IDC_ST_FAIL=$((IDC_ST_FAIL + 1)) ;;
+    esac
+    # THE ADMIT DIRECTION: a module token, one space, then a quad whose first arc is a major that
+    # module can have. One case per source, a /vN module, a two-element token, sentence punctuation.
+    printf 'cobra edges move to quuxlib %d.%d.%d.%d and more\n' 1 4 2 3     > "$d/m01"; idc_st_case "STRICT admits a psd1 module's revision"     "" "$d/m01" 1
+    idc_st_exc "  and the MODULE-VERSION ADMIT is what admitted it" "ipv4|module-version" "$IDC_TMP/st.status"
+    printf 'and frob/v7 %d.%d.%d.%d, then the rest\n' 7 0 1 2              > "$d/m02"; idc_st_case "STRICT admits a /vN mappings module at its major" "" "$d/m02" 1
+    idc_st_exc "  and the MODULE-VERSION ADMIT is what admitted it" "ipv4|module-version" "$IDC_TMP/st.status"
+    printf 'the last is x/zing %d.%d.%d.%d.\n' 0 19 0 1                    > "$d/m03"; idc_st_case "STRICT admits a two-element token at sentence end" "" "$d/m03" 1
+    idc_st_exc "  and the MODULE-VERSION ADMIT is what admitted it" "ipv4|module-version" "$IDC_TMP/st.status"
+    printf 'cobra edges move to quuxlib %d.%d.%d.%d and more\n' 1 4 2 3     > "$d/m04"; idc_st_case "the admit is consulted in DELTA mode as well" "" "$d/m04" 0
+    idc_st_exc "  and the MODULE-VERSION ADMIT is what admitted it" "ipv4|module-version" "$IDC_TMP/st.status"
+    # THE STATED RESIDUAL, pinned so a narrowing is a deliberate change: rule 8 reads the first arc
+    # against the module's majors and nothing else, so an address whose first arc is 0 or 1 written
+    # after a v0/v1 module's name is admitted. It cannot separate that text from a revision.
+    printf 'quuxlib %d.%d.%d.%d answered\n' 1 2 3 4                        > "$d/m05"; idc_st_case "RESIDUAL: a 0/8 or 1/8 quad after a v0/v1 name" "" "$d/m05" 1
+    # THE REFUSE DIRECTION (each one property off an admitted case):
+    printf '%d.%d.%d.%d\n' 1 4 2 3                                         > "$d/m06"; idc_st_case "the same quad ALONE still refuses"          "ipv4" "$d/m06" 1
+    printf 'the box answered %d.%d.%d.%d today\n' 1 4 2 3                  > "$d/m07"; idc_st_case "the same quad after an unrelated word refuses" "ipv4" "$d/m07" 1
+    printf 'quuxlib %d.%d.%d.%d answered\n' 10 0 0 1                       > "$d/m08"; idc_st_case "a quad off the module's majors refuses"     "ipv4" "$d/m08" 1
+    printf 'frob/v7 %d.%d.%d.%d answered\n' 1 4 2 3                        > "$d/m09"; idc_st_case "a /vN module admits only its own major"     "ipv4" "$d/m09" 1
+    printf 'v7 %d.%d.%d.%d answered\n' 7 0 1 2                             > "$d/m10"; idc_st_case "a bare major element is not a token"        "ipv4" "$d/m10" 1
+    printf 'quuxlib %d.%d.%d.%d.%d answered\n' 1 4 2 3 9                   > "$d/m11"; idc_st_case "a quad with an arc more refuses"            "ipv4" "$d/m11" 1
+    printf 'quuxlib, %d.%d.%d.%d answered\n' 1 4 2 3                       > "$d/m12"; idc_st_case "the word before must BE the token"          "ipv4" "$d/m12" 1
+    printf 'quuxlib %d.%d.%d.%d via %d.%d.%d.%d\n' 1 4 2 3 10 0 0 1        > "$d/m13"; idc_st_case "an address beside an admitted revision refuses" "ipv4" "$d/m13" 1
+    printf 'quuxlib %d.%d.%d.%d answered\n' 10 0 0 1                       > "$d/m14"; idc_st_case "...and in DELTA mode too"                    "ipv4" "$d/m14" 0
+    # NO REGISTRY, NO ADMIT: the rule refuses more, never less, and the summary says so.
+    IDC_MODULE_ROOT="$d/none"; idc_build_modules
+    idc_st_case "with no registry the revision refuses" "ipv4" "$d/m01" 1
+    case "$IDC_MODSUMMARY" in
+        "modules=0 tokens=0 (no registry read"*) printf '  PASS  %-48s %s\n' "  and the summary names the zero" "$IDC_MODSUMMARY"; IDC_ST_PASS=$((IDC_ST_PASS + 1)) ;;
+        *)                                       printf '  FAIL  %-48s %s\n' "  and the summary names the zero" "$IDC_MODSUMMARY"; IDC_ST_FAIL=$((IDC_ST_FAIL + 1)) ;;
+    esac
+    unset IDC_MODULE_ROOT; idc_build_modules
 
     echo
     echo "  B. KNOWN NEGATIVES -- in DELTA mode, each MUST fire the arm set declared beside it"

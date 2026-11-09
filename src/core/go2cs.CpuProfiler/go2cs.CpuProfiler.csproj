@@ -37,6 +37,7 @@
 
   <ItemGroup>
     <Compile Include="EventPipeSampler.cs" />
+    <Compile Include="DarwinThreadCpu.cs" />
   </ItemGroup>
 
   <ItemGroup>

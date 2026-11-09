@@ -685,6 +685,9 @@
     <Project Path="tests/Behavioral/JsonFixedArrayUnmarshal/JsonFixedArrayUnmarshal.csproj" />
     <Project Path="tests/Behavioral/JsonUnmarshalerDispatch/JsonUnmarshalerDispatch.csproj" />
     <Project Path="tests/Behavioral/KeyedLiteralIfaceAssign/KeyedLiteralIfaceAssign.csproj" />
+    <Project Path="tests/Behavioral/KeyedLiteralNamedForeignStruct/KeyedLiteralNamedForeignStruct.csproj" />
+    <Project Path="tests/Behavioral/KeyedLiteralNamedForeignStruct/guid/KeyedLiteralNamedForeignStruct.guid.csproj" />
+    <Project Path="tests/Behavioral/KeyedLiteralNamedForeignStruct/win/KeyedLiteralNamedForeignStruct.win.csproj" />
     <Project Path="tests/Behavioral/KeywordNamedTypes/KeywordNamedTypes.csproj" />
     <Project Path="tests/Behavioral/KeywordTrueFalseIdent/KeywordTrueFalseIdent.csproj" />
     <Project Path="tests/Behavioral/LambdaFunctions/LambdaFunctions.csproj" />
@@ -954,6 +957,8 @@
     <Project Path="tests/Behavioral/PointerToInterfaceParamDeref/PointerToInterfaceParamDeref.csproj" />
     <Project Path="tests/Behavioral/PointerToNilPointerIdentity/PointerToNilPointerIdentity.csproj" />
     <Project Path="tests/Behavioral/PointerToPointer/PointerToPointer.csproj" />
+    <Project Path="tests/Behavioral/PointerUnionNilCompare/PointerUnionNilCompare.csproj" />
+    <Project Path="tests/Behavioral/PointerUnionNilCompare/ptrunionlib/go.ptrunion.csproj" />
     <Project Path="tests/Behavioral/PointerValueToInterfaceArg/PointerValueToInterfaceArg.csproj" />
     <Project Path="tests/Behavioral/PrintfFormatCommaParen/PrintfFormatCommaParen.csproj" />
     <Project Path="tests/Behavioral/PrintfWidthFlags/PrintfWidthFlags.csproj" />
@@ -1158,6 +1163,7 @@
     <Project Path="tests/Behavioral/TupleMixedDeclareReassign/TupleMixedDeclareReassign.csproj" />
     <Project Path="tests/Behavioral/TupleSpreadIntoCall/TupleSpreadIntoCall.csproj" />
     <Project Path="tests/Behavioral/TwoLevelDefinedStruct/TwoLevelDefinedStruct.csproj" />
+    <Project Path="tests/Behavioral/TwoLevelPointerEmbedBoxPromotion/TwoLevelPointerEmbedBoxPromotion.csproj" />
     <Project Path="tests/Behavioral/TypeAssert/TypeAssert.csproj" />
     <Project Path="tests/Behavioral/TypeAssertionPanic/TypeAssertionPanic.csproj" />
     <Project Path="tests/Behavioral/TypeAssertionSource/TypeAssertionSource.csproj" />
@@ -1236,6 +1242,7 @@
     <Project Path="tests/Behavioral/ValueAdapterDynamicType/colorlike/ValueAdapterDynamicType.colorlike.csproj" />
     <Project Path="tests/Behavioral/ValuePunBits/ValuePunBits.csproj" />
     <Project Path="tests/Behavioral/ValueReceiverArgumentOrder/ValueReceiverArgumentOrder.csproj" />
+    <Project Path="tests/Behavioral/ValueReceiverPointerMethodCall/ValueReceiverPointerMethodCall.csproj" />
     <Project Path="tests/Behavioral/DeferGoPointerValueReceiver/DeferGoPointerValueReceiver.csproj" />
     <Project Path="tests/Behavioral/VarNamedAsType/VarNamedAsType.csproj" />
     <Project Path="tests/Behavioral/VariadicBoxReceiver/VariadicBoxReceiver.csproj" />
@@ -1248,6 +1255,8 @@
     <Project Path="tests/Behavioral/VariadicNamedEmptyIface/VariadicNamedEmptyIface.csproj" />
     <Project Path="tests/Behavioral/VariadicPackPassThrough/VariadicPackPassThrough.csproj" />
     <Project Path="tests/Behavioral/VariadicPointerParam/VariadicPointerParam.csproj" />
+    <Project Path="tests/Behavioral/VariadicPromotedForwarder/VariadicPromotedForwarder.csproj" />
+    <Project Path="tests/Behavioral/VariadicPromotedForwarder/varhostlib/go.varhost.csproj" />
     <Project Path="tests/Behavioral/VariadicSlotInterfaces/VariadicSlotInterfaces.csproj" />
     <Project Path="tests/Behavioral/VariableCapture/VariableCapture.csproj" />
     <Project Path="tests/Behavioral/VariadicClosureShadowParam/VariadicClosureShadowParam.csproj" />

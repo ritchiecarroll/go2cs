@@ -1096,6 +1096,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckKeyedLiteralIfaceAssign() => CheckTarget("KeyedLiteralIfaceAssign");
 
     [TestMethod]
+    public void CheckKeyedLiteralNamedForeignStruct() => CheckTarget("KeyedLiteralNamedForeignStruct");
+
+    [TestMethod]
     public void CheckKeywordNamedTypes() => CheckTarget("KeywordNamedTypes");
 
     [TestMethod]
@@ -1873,6 +1876,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
 
     [TestMethod]
+    public void CheckPointerUnionNilCompare() => CheckTarget("PointerUnionNilCompare");
+
+    [TestMethod]
     public void CheckPointerValueToInterfaceArg() => CheckTarget("PointerValueToInterfaceArg");
 
     [TestMethod]
@@ -2476,6 +2482,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckTwoLevelDefinedStruct() => CheckTarget("TwoLevelDefinedStruct");
 
     [TestMethod]
+    public void CheckTwoLevelPointerEmbedBoxPromotion() => CheckTarget("TwoLevelPointerEmbedBoxPromotion");
+
+    [TestMethod]
     public void CheckTypeAssert() => CheckTarget("TypeAssert");
 
     [TestMethod]
@@ -2701,6 +2710,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckValueReceiverArgumentOrder() => CheckTarget("ValueReceiverArgumentOrder");
 
     [TestMethod]
+    public void CheckValueReceiverPointerMethodCall() => CheckTarget("ValueReceiverPointerMethodCall");
+
+    [TestMethod]
     public void CheckVarNamedAsType() => CheckTarget("VarNamedAsType");
 
     [TestMethod]
@@ -2738,6 +2750,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckVariadicPointerParam() => CheckTarget("VariadicPointerParam");
+
+    [TestMethod]
+    public void CheckVariadicPromotedForwarder() => CheckTarget("VariadicPromotedForwarder");
 
     [TestMethod]
     public void CheckVariadicSlotInterfaces() => CheckTarget("VariadicSlotInterfaces");

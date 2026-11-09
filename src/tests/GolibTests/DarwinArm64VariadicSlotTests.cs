@@ -45,11 +45,20 @@ public class DarwinArm64VariadicSlotTests
     }
 
     [TestMethod]
-    public void Syscall6AndSyscall9StoreTheFourthArgument()
+    public void Syscall6StoresTheFourthArgument()
     {
-        // runtime·syscall6 / runtime·syscall9: "openat, for which the 4th arg must be on the stack".
+        // syscall6 -> syscalln -> runtime·syscallN_trampoline with n == 6: "openat ... historically called with
+        // syscall6", so a4 goes on the stack as well.
         Assert.AreEqual(3, GoLibcCall.VariadicStackSlot(6, GoLibcErrnoRule.Int32MinusOne, darwinArm64: true));
-        Assert.AreEqual(3, GoLibcCall.VariadicStackSlot(9, GoLibcErrnoRule.Int32MinusOne, darwinArm64: true));
+    }
+
+    [TestMethod]
+    public void Syscall9PassesItsNinthArgumentAsItself()
+    {
+        // Go 1.26: syscall9 (syscall_darwin.go) is syscalln(fn, a1..a9), and runtime·syscallN_trampoline copies the
+        // arguments past the eighth onto the stack and stores a3/a4 only for n == 3, 4 and 6 -- so a9 travels at
+        // [sp] as itself and nothing replaces it. (Go 1.24's runtime·syscall9 stored a4 there instead.)
+        Assert.AreEqual(-1, GoLibcCall.VariadicStackSlot(9, GoLibcErrnoRule.Int32MinusOne, darwinArm64: true));
     }
 
     [TestMethod]
@@ -72,7 +81,7 @@ public class DarwinArm64VariadicSlotTests
     [TestMethod]
     public void NoOtherArityStoresAnything()
     {
-        foreach (int arity in new[] { 0, 1, 2, 4, 5, 7, 8 })
+        foreach (int arity in new[] { 0, 1, 2, 4, 5, 7, 8, 9 })
             Assert.AreEqual(-1, GoLibcCall.VariadicStackSlot(arity, GoLibcErrnoRule.Int32MinusOne, darwinArm64: true), $"arity {arity}");
     }
 

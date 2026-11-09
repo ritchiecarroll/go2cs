@@ -107,6 +107,10 @@
     <None Include="$(MSBuildThisFileDirectory)constraintProxyGenericCall_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)testSignals.go" />
+    <None Include="$(MSBuildThisFileDirectory)testSignals_linux_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)testSignals_notunix.go" />
+    <None Include="$(MSBuildThisFileDirectory)testSignals_unix.go" />
     <None Include="$(MSBuildThisFileDirectory)testTargetArch.go" />
     <None Include="$(MSBuildThisFileDirectory)testTargetArch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)thisRefBoxReceiver_test.go" />
@@ -228,6 +232,7 @@
     <None Include="$(MSBuildThisFileDirectory)funcResultProjection_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericDefinedMapChan_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericFuncInstantiationArg_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)genericInstantiationRefusal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericLiftedInterfaceField_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericTypeAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)globalAddressOperations.go" />

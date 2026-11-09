@@ -146,6 +146,16 @@ func namedNumericConvertsDirectly(named *types.Named) bool {
 	return !isNamed || base.Obj().Pkg() == named.Obj().Pkg()
 }
 
+// writtenTypeSpecRHS answers a defined type's written RHS from this package's declarations, then from
+// an imported package's loaded syntax (foreignTypeSpecRHS); a type neither holds misses.
+func writtenTypeSpecRHS(obj types.Object) (types.Type, bool) {
+	if rhs, ok := packageTypeSpecRHS[obj]; ok {
+		return rhs, true
+	}
+
+	return foreignTypeSpecRHS(obj)
+}
+
 var foreignTypeSpecRHSLock sync.Mutex
 
 // foreignTypeSpecRHSByPackage caches, per IMPORTED package, the written RHS of each of its defined
