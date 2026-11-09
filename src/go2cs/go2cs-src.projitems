@@ -92,6 +92,7 @@
     <None Include="$(MSBuildThisFileDirectory)collapsedLambdaTrailingComment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)collectionExpressionTargets.go" />
     <None Include="$(MSBuildThisFileDirectory)collectionExpressionTargets_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)commandLineDocFlags_test.go" />
     <None Include="$(MSBuildThisFileDirectory)compilerIntrinsic.go" />
     <None Include="$(MSBuildThisFileDirectory)compilerIntrinsic_test.go" />
     <None Include="$(MSBuildThisFileDirectory)compilerPropertyClass_test.go" />
@@ -250,6 +251,7 @@
     <None Include="$(MSBuildThisFileDirectory)handOwnReferences_test.go" />
     <None Include="$(MSBuildThisFileDirectory)handOwnTypeAccessibility_test.go" />
     <None Include="$(MSBuildThisFileDirectory)handPackageReadme_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)helpDefaultTags_test.go" />
     <None Include="$(MSBuildThisFileDirectory)hostFatalClass_test.go" />
     <None Include="$(MSBuildThisFileDirectory)hostLaunchLoadTime_test.go" />
     <None Include="$(MSBuildThisFileDirectory)hoistedLiteralOperations.go" />
