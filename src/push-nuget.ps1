@@ -2155,6 +2155,9 @@ try {
         -FlatContainer $ApiCompatFlatContainer -ReleaseVersion $guardReleaseVersion `
         -Identity { param($path) Get-GoNuGetPackageIdentity $path } `
         -SuppressionFor { param($id) $suppressionMap[$id] }
+    # The baseline go.lib's floor, read now: the work directory and the baselines in it go in the finally below.
+    $golibBaseline = $apiCompat.Baselines['go.lib']
+    $golibBaselineFloor = if ($golibBaseline) { Get-GoBreakFloorFromPackage $golibBaseline.Path } else { $null }
 }
 finally {
     if (Test-Path -LiteralPath $apiCompatWork) { Remove-Item -LiteralPath $apiCompatWork -Recurse -Force }
@@ -2177,6 +2180,22 @@ Write-Step ("Binary compatibility: CLEAN -- $($apiCompat.Compared) asset(s) of $
             "published version on this line (reported, not gated)")
 if ($apiCompat.NoBaseline.Count -gt 0) { Write-Host "  no baseline: $($apiCompat.NoBaseline -join ', ')" }
 if ($apiCompat.NoSurface.Count -gt 0) { Write-Host "  no lib/ or runtimes/ asset to compare (an analyzer): $($apiCompat.NoSurface -join ', ')" }
+
+# --- The break floor -------------------------------------------------------------------------------------------------
+# go.lib's targets fail a consumer's build, as GO2CS3002, for any package built below <GoBreakFloor>: the newest release
+# that changed members compiled code binds. The guard is green here, so every suppression entry left is a break
+# against the baseline; a reachable one (Go's import rule: no internal element, not vendor/) means this release breaks,
+# and the floor must be this release. Otherwise it stays where the baseline go.lib put it. Nothing moves the floor but
+# its line in go.lib.targets; this refuses a release whose line is wrong (docs\phase4\DESIGN-go-break-floor.md).
+$reachableBreaks = @($suppressionMap.Keys | Where-Object { (Test-GoBreakFloorReachable $_) -and @(Read-GoApiCompatSuppressions $suppressionMap[$_]).Count -gt 0 } | Sort-Object)
+$breakFloor = Get-GoBreakFloor ([System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/core/golib/buildTransitive/go.lib.targets')))
+$floorFailures = @(Test-GoBreakFloor -ReleaseVersion $guardReleaseVersion -Floor $breakFloor `
+    -BaselineVersion $(if ($golibBaseline) { $golibBaseline.Version } else { '' }) -BaselineFloor $golibBaselineFloor -ReachableBreaks $reachableBreaks)
+if ($floorFailures.Count -gt 0) {
+    $floorFailures | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+    throw "Break floor: $($floorFailures.Count) failure(s) -- go.lib.targets' <GoBreakFloor> disagrees with what this release breaks"
+}
+Write-Step ("Break floor: CLEAN -- <GoBreakFloor> $breakFloor; " + $(if ($reachableBreaks.Count) { "this release breaks $($reachableBreaks -join ', ')" } else { "no reachable break, baseline go.lib $(if ($golibBaseline) { "$($golibBaseline.Version) states $(if ($golibBaselineFloor) { $golibBaselineFloor } else { 'no floor' })" } else { 'none on this line' })" }))
 
 # --- Push gate ----------------------------------------------------------------------------------
 if (-not $Push) {

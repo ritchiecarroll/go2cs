@@ -238,12 +238,12 @@ try {
             @(Test-GoBreakFloor -ReleaseVersion $R -Floor $F -BaselineVersion $BV -BaselineFloor $BF -ReachableBreaks $Breaks)
         }
         Check 'a reachable break with the floor at the release reads green' ((FloorFailures '1.26.10.5' '1.26.10.5' '1.26.10.4' '1.26.10.3' @('go.lib')).Count -eq 0) ((FloorFailures '1.26.10.5' '1.26.10.5' '1.26.10.4' '1.26.10.3' @('go.lib')) -join '; ')
-        $f = FloorFailures '1.26.10.5' '1.26.10.3' '1.26.10.4' '1.26.10.3' @('go.lib')
+        $f = @(FloorFailures '1.26.10.5' '1.26.10.3' '1.26.10.4' '1.26.10.3' @('go.lib'))
         Check 'a reachable break that leaves the floor behind reads red, naming the package and both versions' (
             $f.Count -eq 1 -and $f[0].Contains('go.lib') -and $f[0].Contains('1.26.10.3') -and $f[0].Contains('1.26.10.5')) ($f -join '; ')
         Check 'a rehearsal of a breaking release takes its numeric version' ((FloorFailures '1.26.10.5-ci.7' '1.26.10.5' '1.26.10.4' '1.26.10.3' @('go.lib')).Count -eq 0) ((FloorFailures '1.26.10.5-ci.7' '1.26.10.5' '1.26.10.4' '1.26.10.3' @('go.lib')) -join '; ')
         Check 'no break keeps the baseline''s floor: green' ((FloorFailures '1.26.10.5' '1.26.10.3' '1.26.10.4' '1.26.10.3' @()).Count -eq 0) ((FloorFailures '1.26.10.5' '1.26.10.3' '1.26.10.4' '1.26.10.3' @()) -join '; ')
-        $f = FloorFailures '1.26.10.5' '1.26.10.5' '1.26.10.4' '1.26.10.3' @()
+        $f = @(FloorFailures '1.26.10.5' '1.26.10.5' '1.26.10.4' '1.26.10.3' @())
         Check 'no break, and the floor moved anyway: red (it would force a rebuild wave for nothing)' ($f.Count -eq 1 -and $f[0].Contains('1.26.10.3')) ($f -join '; ')
         Check 'the first release with the floor may name a published release' ((FloorFailures '1.26.10.4' '1.26.10.3' '1.26.10.3' '' @()).Count -eq 0) ((FloorFailures '1.26.10.4' '1.26.10.3' '1.26.10.3' '' @()) -join '; ')
         Check 'and not one above its baseline' ((FloorFailures '1.26.10.4' '1.26.10.4' '1.26.10.3' '' @()).Count -eq 1) ((FloorFailures '1.26.10.4' '1.26.10.4' '1.26.10.3' '' @()) -join '; ')
