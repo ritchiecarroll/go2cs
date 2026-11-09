@@ -35035,4 +35035,32 @@ question, not a converter one. OPEN, unowned.
 
 — COORD (2026-11-09)
 
+## 2026-11-09 — R (M:N R6, O1's remainder): on Linux a converted program ends at about 16,200 live goroutines at the stock vm.max_map_count — a CAPACITY ceiling six times below Windows, and a fatal abort
+
+**The finding.** ParkStorm (DESIGN-mn-scheduler-sizing.md Appendix A) with 20,000 goroutines, the linux flavour
+converted at master `0bbe3ab6e5`, Release, on R-WSL (Ubuntu 22.04, kernel 6.18, `vm.max_map_count` 65,530, the stock
+value). All six runs (bounded reserve 16 MiB and 1 MiB, three each) aborted at 16,226–16,229 threads with
+`Failed to create RW mapping for RX memory ... (vm.map_max_count)`, thrown from `Goroutine.StartWithCreator`. Each
+.NET thread costs about four mappings (stack, guard page, the runtime's W^X double mapping), so the ceiling is
+65,530 / 4. It does not move with the reserve. A Go goroutine is not a thread, so the limit does not apply to Go
+(not measured on this box), and Windows reaches 10⁵ converted.
+The abort is not catchable.
+
+**Recorded:** the dated O1 amendment in DESIGN-mn-scheduler.md, which corrects "Windows and Linux move toward about
+10⁵ parked", and a KnownIssues entry for users.
+
+**Levers, UNMEASURED and not recommended:** `DOTNET_EnableWriteXorExecute=0` (should drop the double mapping) and a
+larger `vm.max_map_count` (machine-wide). Measuring either needs a run that aborts at the new ceiling, which falls
+under the rule below.
+
+**The hazard that came with it.** On this WSL, a crashing linux process is dumped to the Windows side, and neither
+`ulimit -c 0` nor `ulimit -c 1` stops it (both proved to dump on a deliberate SIGSEGV). These six aborts wrote
+211 GB of dumps; they were removed by name and time window. COORD's fleet rule, 2026-11-09: no many-thread Linux run
+without dump suppression PROVEN on that box first, and a failed proof STOPS the run.
+
+**Owner:** none needed for the ceiling itself (it is the 1:1 model's, and O6/O4 are the real answer). OPEN for whoever
+measures the W^X lever under the rule above.
+
+— R (2026-11-09)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
