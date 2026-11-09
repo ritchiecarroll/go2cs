@@ -6,6 +6,9 @@
 > lane R's [sizing note](../DESIGN-mn-scheduler-sizing.md) and the [cooperative scheduler](DESIGN-cooperative-scheduler.md).
 > Their **measurements stand**; their option tables are superseded by §5 and §6 here. The native-call seam it depends
 > on is lane H's DESIGN-native-call-seam, on `claude/h-cgo-foundation` (§7). Amended by dated blocks, never rewritten.
+>
+> **PROPOSED, R1–R6 RULED 2026-11-09** (§9.1): the owner accepted every recommendation. The R5 spike stays outside
+> the `.4` release goals; R6 may land in `.4`, independent of the spike.
 
 ## 1. The ask, the tenets, and how this document decides
 
@@ -394,6 +397,23 @@ Each is one decision, with the recommended answer first.
 - **R4.** Preemption is preserved by **carrier injection**, not inserted yield checks. **Recommended: yes.**
 - **R5.** **Schedule the S2 spike** (3–4 lane-weeks, no emission change), with §8.5's gates. **Recommended: yes.**
 - **R6.** **Schedule O1's remainder** (about 1.5 lane-weeks), independent of R2–R5. **Recommended: yes.**
+
+### 9.1 Rulings — 2026-11-09 (a dated block, not a rewrite)
+
+The owner read this document and ruled, relayed by COORD (wording his):
+
+> "I agree with all recommendations in section 9 -- spike to evaluate hidden async twins. My request, keep the R5
+> spike work separate from .4 release goals -- if spike gates succeed, we can determine where to schedule actual
+> work, but my guess it would be after .4. However, R6 work could land in .4, IMO, independent of spike."
+
+| Ruling | Decision | Consequence (COORD's routing, 2026-11-09) |
+|---|---|---|
+| R1 | Runtime green threads (O2) are not the product path, with §8 item 1's revisit trigger | recorded; no work scheduled |
+| R2 | Hidden async twins (O6 + O7) are the leading M:N candidate, subject to the spike | the spike (R5) decides |
+| R3 | Visible selective async (O4) is the held fallback | held |
+| R4 | Preemption is preserved by carrier injection, not inserted yield checks | binding on any M:N build |
+| R5 | The S2 spike is scheduled, **outside the `.4` release goals** | lane G, on its own branch line (`claude/g-mn-spike-*`); it touches no emission and no master code path. §8 item 5's gates are its contract; a spike plan posts before any build. If the gates succeed, the owner schedules the real work, probably after `.4` |
+| R6 | O1's remainder is scheduled, **independent of the spike; it may land in `.4`** | lane R, the original owner of seat #3, after its TypeScript seats |
 
 ## Appendix — sources
 
