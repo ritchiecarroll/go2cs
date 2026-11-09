@@ -115,7 +115,9 @@ internal class InheritedTypeTemplate : TemplateBase
 
     private string ImplementedInterface => TypeClass switch
     {
-        "Slice" => $" : ISlice<{TargetTypeName}>, ISupportMake<{ObjectName}>, ISliceWrap<{ObjectName}, {TargetTypeName}>",
+        // A named []byte also implements IByteSeq, Go's `~[]byte | ~string` union (ISliceTypeTemplate.ByteSeqMembers).
+        "Slice" => $" : ISlice<{TargetTypeName}>, ISupportMake<{ObjectName}>, ISliceWrap<{ObjectName}, {TargetTypeName}>" +
+            (ISliceTypeTemplate.IsByteSlice(TargetTypeName) ? $", IByteSeq<{ObjectName}, byte>" : ""),
         "Map" => $" : IMap<{TargetTypeName}, {TargetValueTypeName}>, ISupportMake<{ObjectName}>",
         "Channel" => $" : IChannel<{TargetTypeName}>, ISupportMake<{ObjectName}>",
         "Array" => $" : IArray<{TargetTypeName}>, ISupportMake<{ObjectName}>",
@@ -138,8 +140,12 @@ internal class InheritedTypeTemplate : TemplateBase
     // and the numeric wrappers above are the precedent; the operators and CompareTo they need are in
     // StringSurfaceMembers. Without these, every Ordered consumer instantiated with a named string was CS0315 (TS
     // readiness C6: tspath's `slices.Sort(orderedGroups)`).
+    //
+    // It is also a member of Go's `~[]byte | ~string` union, which the converter emits as IByteSeq<TSelf, byte>:
+    // jsontext passes its named strings and named []byte to the same `~[]byte | ~string` functions (TS readiness
+    // C16). The surface below implements it, @string's own way: the sub-slices return the wrapper.
     private string StringInterfaces =>
-        $" : global::System.IComparable<{ObjectName}>, global::System.Numerics.IComparisonOperators<{ObjectName}, {ObjectName}, bool>, global::System.Numerics.IAdditionOperators<{ObjectName}, {ObjectName}, {ObjectName}>";
+        $" : global::System.IComparable<{ObjectName}>, global::System.Numerics.IComparisonOperators<{ObjectName}, {ObjectName}, bool>, global::System.Numerics.IAdditionOperators<{ObjectName}, {ObjectName}, {ObjectName}>, IByteSeq<{ObjectName}, byte>";
 
     // A numeric wrapper over an INTEGER underlying (not float/complex) — the modulus, bitwise and
     // shift operators exist for it (NumericTypeTemplate.GetComplementOperator, same kind-gate), so
@@ -179,7 +185,7 @@ internal class InheritedTypeTemplate : TemplateBase
 
     private string InterfaceImplementation => TypeClass switch
     {
-        "Slice" => ISliceTypeTemplate.Generate(ObjectName, ConstructorName, TypeName, TargetTypeName),
+        "Slice" => ISliceTypeTemplate.Generate(ObjectName, ConstructorName, TypeName, TargetTypeName, GoMethodNames),
         "Map" => HoldsMapInHolder ?
             IMapTypeTemplate.Generate(ObjectName, ConstructorName, TargetTypeName, TargetValueTypeName!, GoMethodNames, ValueMember, made => $"new {ValueFieldType}({made})") :
             IMapTypeTemplate.Generate(ObjectName, ConstructorName, TargetTypeName, TargetValueTypeName!, GoMethodNames),
@@ -541,6 +547,10 @@ internal class InheritedTypeTemplate : TemplateBase
                 public {{ObjectName}} slice(nint low, nint high) => new {{ObjectName}}({{Value}}.slice(low, high));
 
                 public nint Length => {{Value}}.Length;
+
+                // The read-only spread of Go's `~[]byte | ~string` union (IByteSeq; see StringInterfaces). Length, the
+                // nint indexer, the Range indexer and the slice pair above implement the rest implicitly.
+                global::System.ReadOnlySpan<byte> IByteSeq<byte>.{{EllipsisOperator}} => {{Value}}.{{EllipsisOperator}};
 
                 public static implicit operator {{ObjectName}}(global::System.ReadOnlySpan<byte> value) => new {{ObjectName}}(new @string(value));
 

@@ -210,6 +210,8 @@ public class TypeGenerator : ISourceGenerator
                             TypeName = $"slice<{typeName}>",
                             TargetTypeName = typeName,
                             TypeClass = "Slice",
+                            // A Go method named Clone takes ICloneable's member explicit (ISliceTypeTemplate).
+                            GoMethodNames = GoMethodNames(semanticModel, targetSyntax),
                             ReadOnlyValue = false
                         }
                         .Generate();
