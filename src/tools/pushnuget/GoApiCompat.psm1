@@ -397,10 +397,9 @@ function Test-GoBreakFloor {
 
     $release = ($ReleaseVersion -split '[-+]', 2)[0]
     $file = 'src/core/golib/buildTransitive/go.lib.targets'
-    $parsed = $null
-    if (-not $Floor -or -not [version]::TryParse($Floor, [ref]$parsed) -or $parsed.Revision -lt 0) {
-        return @("break floor: $file states no <GoBreakFloor> major.minor.patch.revision (read '$Floor'); release $release cannot ship without one")
-    }
+    $shape = @(Test-GoBreakFloorShape -ReleaseVersion $ReleaseVersion -Floor $Floor)
+    if ($shape.Count -gt 0) { return $shape }
+    $parsed = [version]$Floor
     $breaks = @($ReachableBreaks | Where-Object { $_ })
 
     if ($breaks.Count -gt 0) {
@@ -427,6 +426,31 @@ function Test-GoBreakFloor {
     $baseline = [version](($BaselineVersion -split '[-+]', 2)[0])
     if ($parsed.Major -ne $baseline.Major -or $parsed.Minor -ne $baseline.Minor -or $parsed -gt $baseline) {
         return @("break floor: the baseline go.lib $BaselineVersion states no floor, so <GoBreakFloor> in $file must name a release published on its Go line, at or below $BaselineVersion, not $Floor")
+    }
+    @()
+}
+
+# What holds in all four of Test-GoBreakFloor's cases, and needs no baseline: the floor parses as
+# major.minor.patch.revision, sits on the release's Go line (major.minor) and is at most the release. -VerifyOnly packs
+# nothing and compares with nothing, so this is the part of the check it runs. Returns failure strings.
+function Test-GoBreakFloorShape {
+    param(
+        [Parameter(Mandatory)][string]$ReleaseVersion,
+        [AllowEmptyString()][string]$Floor
+    )
+
+    $release = ($ReleaseVersion -split '[-+]', 2)[0]
+    $file = 'src/core/golib/buildTransitive/go.lib.targets'
+    $parsed = $null
+    if (-not $Floor -or -not [version]::TryParse($Floor, [ref]$parsed) -or $parsed.Revision -lt 0) {
+        return @("break floor: $file states no <GoBreakFloor> major.minor.patch.revision (read '$Floor'); release $release cannot ship without one")
+    }
+    $releaseParsed = [version]$release
+    if ($parsed.Major -ne $releaseParsed.Major -or $parsed.Minor -ne $releaseParsed.Minor) {
+        return @("break floor: <GoBreakFloor> $Floor in $file is not on release ${release}'s Go line ($($releaseParsed.Major).$($releaseParsed.Minor)); every case puts the floor on it")
+    }
+    if ($parsed -gt $releaseParsed) {
+        return @("break floor: <GoBreakFloor> $Floor in $file is above release $release; a floor names this release or one already published")
     }
     @()
 }
@@ -461,4 +485,4 @@ function Get-GoBreakFloor([AllowEmptyString()][string]$TargetsText) {
 
 Export-ModuleMember -Function Initialize-GoApiCompatTool, Get-GoApiCompatAssets, Get-GoApiCompatSuppressionMap,
     Read-GoApiCompatSuppressions, Test-GoApiCompatPackage, Get-GoApiCompatBaselineVersion, Invoke-GoApiCompatGuard,
-    Test-GoBreakFloor, Test-GoBreakFloorReachable, Get-GoBreakFloor, Get-GoBreakFloorFromPackage
+    Test-GoBreakFloor, Test-GoBreakFloorShape, Test-GoBreakFloorReachable, Get-GoBreakFloor, Get-GoBreakFloorFromPackage
