@@ -284,14 +284,14 @@ try {
         # push-nuget reads the floor from the go.lib it packed, which is what ships.
         Write-Host 'the floor is read from a packed go.lib'
         Add-Type -AssemblyName System.IO.Compression.FileSystem
-        $nupkg = Join-Path $work 'go.lib.9.9.9.9.nupkg'
+        $nupkg = Join-Path $work 'go.lib.1.26.10.9.nupkg'
         $zip = [System.IO.Compression.ZipFile]::Open($nupkg, 'Create')
         try {
             $writer = New-Object System.IO.StreamWriter($zip.CreateEntry('buildTransitive/go.lib.targets').Open())
-            try { $writer.Write('<Project><PropertyGroup><GoBreakFloor>9.9.9.8</GoBreakFloor></PropertyGroup></Project>') } finally { $writer.Dispose() }
+            try { $writer.Write('<Project><PropertyGroup><GoBreakFloor>1.26.10.7</GoBreakFloor></PropertyGroup></Project>') } finally { $writer.Dispose() }
         }
         finally { $zip.Dispose() }
-        Check 'a packed go.lib states its floor' ((Get-GoBreakFloorFromPackage $nupkg) -ceq '9.9.9.8') "$(Get-GoBreakFloorFromPackage $nupkg)"
+        Check 'a packed go.lib states its floor' ((Get-GoBreakFloorFromPackage $nupkg) -ceq '1.26.10.7') "$(Get-GoBreakFloorFromPackage $nupkg)"
     }
 
     Write-Host 'the release path runs it'
