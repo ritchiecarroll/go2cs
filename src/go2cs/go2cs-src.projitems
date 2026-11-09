@@ -643,6 +643,11 @@
     <None Include="$(MSBuildThisFileDirectory)testBuildMaxCPU_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testHostGoTargetOS_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testHostLaunchDir_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\README.md" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\cgo_gotypes.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\cgo_import.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\fixture.cgo1.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\fixture.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\hostlaunch\fixture\keys\k" />
     <None Include="$(MSBuildThisFileDirectory)testdata\markercomments\main.cs" />
     <None Include="$(MSBuildThisFileDirectory)testdata\markercomments\main.go" />
