@@ -2512,6 +2512,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckTypeSwitchCollapsedFuncCase() => CheckTarget("TypeSwitchCollapsedFuncCase");
 
     [TestMethod]
+    public void CheckTypeSwitchGuardLaterRedeclare() => CheckTarget("TypeSwitchGuardLaterRedeclare");
+
+    [TestMethod]
     public void CheckTypeSwitchGuardShadow() => CheckTarget("TypeSwitchGuardShadow");
 
     [TestMethod]

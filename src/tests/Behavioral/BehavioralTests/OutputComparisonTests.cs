@@ -2438,6 +2438,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckTypeSwitchCollapsedFuncCase() => CheckTarget("TypeSwitchCollapsedFuncCase");
 
     [TestMethod]
+    public void CheckTypeSwitchGuardLaterRedeclare() => CheckTarget("TypeSwitchGuardLaterRedeclare");
+
+    [TestMethod]
     public void CheckTypeSwitchGuardShadow() => CheckTarget("TypeSwitchGuardShadow");
 
     [TestMethod]
