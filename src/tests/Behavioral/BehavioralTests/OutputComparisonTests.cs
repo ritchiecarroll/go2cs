@@ -1817,6 +1817,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
 
     [TestMethod]
+    public void CheckPointerUnionNilCompare() => CheckTarget("PointerUnionNilCompare");
+
+    [TestMethod]
     public void CheckPointerValueToInterfaceArg() => CheckTarget("PointerValueToInterfaceArg");
 
     [TestMethod]

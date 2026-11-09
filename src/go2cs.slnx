@@ -951,6 +951,8 @@
     <Project Path="tests/Behavioral/PointerToInterfaceParamDeref/PointerToInterfaceParamDeref.csproj" />
     <Project Path="tests/Behavioral/PointerToNilPointerIdentity/PointerToNilPointerIdentity.csproj" />
     <Project Path="tests/Behavioral/PointerToPointer/PointerToPointer.csproj" />
+    <Project Path="tests/Behavioral/PointerUnionNilCompare/PointerUnionNilCompare.csproj" />
+    <Project Path="tests/Behavioral/PointerUnionNilCompare/ptrunionlib/go.ptrunion.csproj" />
     <Project Path="tests/Behavioral/PointerValueToInterfaceArg/PointerValueToInterfaceArg.csproj" />
     <Project Path="tests/Behavioral/PrintfFormatCommaParen/PrintfFormatCommaParen.csproj" />
     <Project Path="tests/Behavioral/PrintfWidthFlags/PrintfWidthFlags.csproj" />

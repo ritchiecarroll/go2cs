@@ -1272,7 +1272,7 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 			}
 
 			v.showWarning("@getGenericDefinition - pointer-core constraint `%s` on generic type `%s` is not erased (no stdlib precedent); emission may not compile", v.getAliasQualifiedTypeName(pointer, false), srcType.String())
-		} else if constraintHasPointerTerm(typeParam) && !constraintIsMethodSetWithPointerNamedUnion(typeParam) {
+		} else if constraintHasPointerTerm(typeParam) && !constraintIsMethodSetWithPointerNamedUnion(typeParam) && !typeParamPointerTerms(typeParam) {
 			v.showWarning("@getGenericDefinition - approximate/union/method-carrying pointer constraint `%s` on `%s` is not erased; emission may not compile", typeParam.Constraint().String(), srcType.String())
 		}
 
@@ -2976,4 +2976,47 @@ func isMethodSetBeyondComparable(iface *types.Interface) bool {
 	}
 
 	return sawComparable
+}
+
+// typeParamPointerTerms reports whether every term of the type parameter's type set is a plain (non-tilde)
+// POINTER type and the constraint carries no methods: `*ast.Node | *ast.Symbol | *checker.Type`, or a generic
+// TYPE's single `[P *T]` core, which only a function's parameter list erases. Every type argument is then a ж<T>
+// box, and a nil pointer reaches the parameter either as C# null (a zero value) or as the typed-nil box (a nil
+// in a composite literal), so `x == nil` must ask golib's nilness rule (GoReflect.IsNilGoValue): the operator
+// form has nothing to bind on an unconstrained T (CS8761), and a reference test alone misses the typed-nil box.
+// Catalogue C4, EXPERIMENT-ts-readiness-2026-11-07.md; guarded by tests/Behavioral/PointerUnionNilCompare.
+func typeParamPointerTerms(tp *types.TypeParam) bool {
+	iface, ok := tp.Constraint().Underlying().(*types.Interface)
+
+	return ok && iface.NumMethods() == 0 && interfacePointerTermsOnly(iface, 0)
+}
+
+// interfacePointerTermsOnly is typeParamPointerTerms' walk: every embedded element is a pointer, a union of
+// non-tilde pointers, or a nested interface of the same kind, and there is at least one term.
+func interfacePointerTermsOnly(iface *types.Interface, depth int) bool {
+	if depth > 8 || iface.NumEmbeddeds() == 0 {
+		return false
+	}
+
+	for i := range iface.NumEmbeddeds() {
+		switch embedded := iface.EmbeddedType(i).(type) {
+		case *types.Union:
+			for j := range embedded.Len() {
+				term := embedded.Term(j)
+
+				if _, isPointer := term.Type().(*types.Pointer); term.Tilde() || !isPointer {
+					return false
+				}
+			}
+		case *types.Pointer:
+		default:
+			nested, ok := embedded.Underlying().(*types.Interface)
+
+			if !ok || nested.NumMethods() != 0 || !interfacePointerTermsOnly(nested, depth+1) {
+				return false
+			}
+		}
+	}
+
+	return true
 }
