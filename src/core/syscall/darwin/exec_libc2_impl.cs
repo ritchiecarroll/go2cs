@@ -625,14 +625,27 @@ private static unsafe delegate* unmanaged[Cdecl]<int, int, int> killFn {
     }
 }
 
-// posixSpawnCall makes the spawn.
+// posixSpawnCall makes the spawn inside the syscall window. The parent blocks here until the child has
+// exec'd, the wait Go's parent spends in readlen on the exec pipe, which is a bracketed syscall().
 internal static unsafe int posixSpawnCall(delegate* unmanaged[Cdecl]<int*, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> fn, int* pid, IntPtr path, IntPtr fileActions, IntPtr attrp, IntPtr argv, IntPtr envp) {
-    return fn(pid, path, fileActions, attrp, argv, envp);
+    runtime_package.syscallEntersyscall();
+    try {
+        return fn(pid, path, fileActions, attrp, argv, envp);
+    }
+    finally {
+        runtime_package.syscallExitsyscall();
+    }
 }
 
-// killCall makes the kill.
+// killCall makes the kill inside the syscall window: Go's kill is syscall() (zsyscall_darwin_amd64.go:403).
 internal static unsafe int killCall(delegate* unmanaged[Cdecl]<int, int, int> fn, int pid, int sig) {
-    return fn(pid, sig);
+    runtime_package.syscallEntersyscall();
+    try {
+        return fn(pid, sig);
+    }
+    finally {
+        runtime_package.syscallExitsyscall();
+    }
 }
 
 // GoPosixSpawnCall and GoKillCall are GolibTests' seams: each runs its helper with fn as the native function.

@@ -107,10 +107,17 @@ private static int readdir_r_native(nint dir, nint entry, nint result) {
     return readdirRCall(s_readdir_r, dir, entry, result);
 }
 
-// readdirRCall makes the call through fn: production passes the resolved readdir_r, and GolibTests' darwin
+// readdirRCall makes the call through fn inside the syscall window, as Go's syscall.readdir_r is syscall()
+// (zsyscall_darwin_amd64.go:1260): production passes the resolved readdir_r, and GolibTests' darwin
 // transition test passes an [UnmanagedCallersOnly] probe through GoReaddirRCall.
 private static int readdirRCall(readdir_r_fn fn, nint dir, nint entry, nint result) {
-    return fn(dir, entry, result);
+    runtime_package.syscallEntersyscall();
+    try {
+        return fn(dir, entry, result);
+    }
+    finally {
+        runtime_package.syscallExitsyscall();
+    }
 }
 
 // GoReaddirRCall is GolibTests' seam: it runs readdirRCall with fn as the native function.
