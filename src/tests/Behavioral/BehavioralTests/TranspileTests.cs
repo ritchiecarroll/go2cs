@@ -1504,6 +1504,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedStringDefine() => CheckTarget("NamedStringDefine");
 
     [TestMethod]
+    public void CheckNamedStringIndexCompare() => CheckTarget("NamedStringIndexCompare");
+
+    [TestMethod]
     public void CheckNamedStringOps() => CheckTarget("NamedStringOps");
 
     [TestMethod]

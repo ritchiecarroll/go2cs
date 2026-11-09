@@ -19,14 +19,14 @@ internal static void Main() {
     ref var k = ref heap(new Kind(), out var Ꮡk);
     k = (@string)"xy";
 
-    fmt.Println(vals["a"] == "x", vals["a"] != "y", "x" == vals["a"], "y" != vals["b"]);
-    fmt.Println(s[0] == "x", s[1] != "x", a[0] == "x", a[1] == "y", ("x") == (s[0]));
-    fmt.Println(vals["a"] < "y", vals["b"] <= "x", vals["b"] > "x", vals["a"] >= "x", "a" < s[0]);
-    fmt.Println(vals["missing"] == "", s[0] == "x" && a[1] == "y");
+    fmt.Println(vals["a"] == "x"u8, vals["a"] != "y"u8, "x"u8 == vals["a"], "y"u8 != vals["b"]);
+    fmt.Println(s[0] == "x"u8, s[1] != "x"u8, a[0] == "x"u8, a[1] == "y"u8, ("x"u8) == (s[0]));
+    fmt.Println(vals["a"] < "y"u8, vals["b"] <= "x"u8, vals["b"] > "x"u8, vals["a"] >= "x"u8, "a"u8 < s[0]);
+    fmt.Println(vals["missing"] == ""u8, s[0] == "x"u8 && a[1] == "y"u8);
 
-    fmt.Println(s[0] + "z"u8 == "xz", vals["a"] + "z"u8 != "xz", "xz" == a[0] + "z"u8, k[1..] + "!"u8 == "y!");
+    fmt.Println(s[0] + "z"u8 == "xz"u8, vals["a"] + "z"u8 != "xz"u8, "xz"u8 == a[0] + "z"u8, k[1..] + "!"u8 == "y!"u8);
 
-    fmt.Println(k[1..] == "y", k[..1] != "x", k[0..2] == "xy", "y" == k[1..], k[1..] > "a");
+    fmt.Println(k[1..] == "y"u8, k[..1] != "x"u8, k[0..2] == "xy"u8, "y"u8 == k[1..], k[1..] > "a"u8);
 
     ref var st = ref heap<S>(new S((@string)"x"), out var Ꮡst);
     var p = Ꮡst;
