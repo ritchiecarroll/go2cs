@@ -1232,6 +1232,7 @@
     <Project Path="tests/Behavioral/ValueAdapterDynamicType/colorlike/ValueAdapterDynamicType.colorlike.csproj" />
     <Project Path="tests/Behavioral/ValuePunBits/ValuePunBits.csproj" />
     <Project Path="tests/Behavioral/ValueReceiverArgumentOrder/ValueReceiverArgumentOrder.csproj" />
+    <Project Path="tests/Behavioral/ValueReceiverPointerMethodCall/ValueReceiverPointerMethodCall.csproj" />
     <Project Path="tests/Behavioral/DeferGoPointerValueReceiver/DeferGoPointerValueReceiver.csproj" />
     <Project Path="tests/Behavioral/VarNamedAsType/VarNamedAsType.csproj" />
     <Project Path="tests/Behavioral/VariadicBoxReceiver/VariadicBoxReceiver.csproj" />
