@@ -5812,8 +5812,9 @@ partial class runtime_package
     // Minted like FuncForPC's (a FuncRecord in s_funcRecords, so Name/Entry/FileLine answer the same way),
     // with the entry of the first frame that reached it. Every frame here is a Go frame (captureCallers
     // keeps no other), and nothing is ever inlined, so every frame with a name carries one; an unnamed
-    // record keeps Go's nil. The box is a HandleBox for FuncForPC's reason below: Func is zero-size, and
-    // a plain box of it would be the zerobase, making every frame's *Func equal to every other.
+    // record keeps Go's nil. FuncForPC answers this same box (one *Func per function, as Go's). The box is a
+    // HandleBox: Func is zero-size, and a plain box of it would be the zerobase, which every zero-size allocation
+    // shares (golib's GoZeroBase), making every *Func equal to every other.
     private static ж<Func> frameFunc(string function, uintptr entry)
     {
         if (function.Length == 0)
@@ -5881,12 +5882,12 @@ partial class runtime_package
     // Frame.Func are deliberately UNCHANGED by this arc: see docs/phase4/CENSUS-runtime-semantic-bill.md.
     // AMENDED 2026-09-28 (census A2, D3; COORD reopened the Frame.Func half): Frames.Next now sets
     // Frame.Func, one *Func interned per Go function (frameFunc, a record in this same table), because
-    // Go leaves Func nil only for an inlined frame and no frame here is inlined. FuncForPC interns one
-    // box per call-site ENTRY (s_funcHandles below) and Frame.Func one per Go function NAME (frameFunc),
-    // so FuncForPC(pc) and a frame's Func are NOT the same pointer, where Go's are, and two call sites of
-    // one function give two FuncForPC boxes but one Frame.Func; stated, not modeled (the one reader,
-    // TestFunctionAlignmentTraceback, is disclosed on its code-byte read before it gets there).
-    // firstmoduledata stays unchanged.
+    // Go leaves Func nil only for an inlined frame and no frame here is inlined.
+    // AMENDED 2026-11-09 (the *Func identity seat): FuncForPC answers the SAME box, frameFunc's, one per Go
+    // function. Until then FuncForPC interned one box per call-site ENTRY, so FuncForPC(pc) and a frame's Func
+    // were not the same pointer where Go's are, and two call sites of one function gave two FuncForPC boxes but
+    // one Frame.Func. runtime's TestFunctionAlignmentTraceback compares the two (frame.Func != f) and reaches the
+    // comparison on an arm64 process, which skips its code-byte read. firstmoduledata stays unchanged.
     private sealed class FuncRecord
     {
         public string Name = string.Empty;
@@ -5895,19 +5896,15 @@ partial class runtime_package
 
     private static readonly ConditionalWeakTable<object, FuncRecord> s_funcRecords = new();
 
-    // One *Func per ENTRY. Go's *Func points into the pclntab at its function, so FuncForPC answers
-    // the same pointer for every pc in it, and symtab_test.go walks `for FuncForPC(pc) == f { pc++ }`
-    // to the function's end; a fresh box per call made that loop exit at once. This host's entry is a
-    // call site's span (frameEntry), the unit Entry() already reports, so a *Func is equal to another
-    // exactly when their Entry() is. Strong: the entries are the finite set of call sites and function
-    // tokens this process has named.
-    private static readonly System.Collections.Concurrent.ConcurrentDictionary<uintptr, ж<Func>> s_funcHandles = new();
-
     // FuncForPC returns a *Func describing the function the token names, or nil when the token
     // names nothing this host can resolve — which is Go's own answer for a pc in no function.
     //
-    // The box is a HandleBox: Func is zero-size, and a plain box of it would be the zerobase, which
-    // every zero-size allocation shares (golib's GoZeroBase), making every *Func equal to every other.
+    // ONE *Func PER GO FUNCTION, the box Frames.Next sets as Frame.Func (frameFunc). Go's *Func points into the
+    // pclntab at its function, so FuncForPC answers the same pointer for every pc in it, at every call site, and a
+    // frame of the function carries that pointer too: symtab_test.go walks `for FuncForPC(pc) == f { pc++ }` to the
+    // function's end and then compares frame.Func with f. Entry() answers per function as well: the entry of the
+    // first span that reached the function, as frameFunc has always recorded it. A call site's own span is
+    // frameEntry's answer (GoCallerSpanEntry), no longer a *Func's.
     public static ж<Func> FuncForPC(uintptr pc)
     {
         string? name = managedFuncName(pc);
@@ -5915,12 +5912,7 @@ partial class runtime_package
         if (string.IsNullOrEmpty(name))
             return default!;
 
-        return s_funcHandles.GetOrAdd(frameEntry(pc), static (entry, funcName) =>
-        {
-            ж<Func> box = new HandleBox<Func>(new Func());
-            s_funcRecords.Add(box, new FuncRecord { Name = funcName, Pc = entry });
-            return box;
-        }, name!);
+        return frameFunc(name!, frameEntry(pc));
     }
 
     // Name returns the Go spelling recorded when the *Func was minted. A Func this host did not
@@ -6024,6 +6016,10 @@ partial class runtime_package
         Callers(1, b);
         return (a[0], b[0]);
     }
+
+    /// <summary>Returns the entry of the span holding <paramref name="pc"/> (frameEntry): a call site's own span,
+    /// which FuncForPC's *Func no longer reports now that it is one per function.</summary>
+    public static uintptr GoCallerSpanEntry(uintptr pc) => frameEntry(pc);
 
     /// <summary>Returns the first and last value the caller-span band can ever hold: the start of span 0
     /// and the end of span <c>int.MaxValue</c>, the largest index the record list can reach.</summary>
