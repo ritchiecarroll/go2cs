@@ -132,6 +132,10 @@ type lambdaConversionState struct {
 }
 
 type Visitor struct {
+	// The slices of copy's arguments that take the Go-image view, marked before the call's arguments convert
+	// (goImageCopyView.go).
+	goImageCopySlices map[*ast.SliceExpr]bool
+
 	// The selector of the deferred or spawned call whose own text visitDeferStmt/visitGoStmt are rendering, or nil.
 	// That text is split at its last dot into the receiver Go evaluates at the statement and the method, so a value
 	// method's receiver there must be the copied value, never the box a twin would copy from later (convSelectorExpr).

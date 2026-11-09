@@ -21,6 +21,11 @@ import (
 )
 
 func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
+	// A byte view over a reference-bearing struct, sliced as a direct argument of copy (goImageCopyView.go).
+	if view, ok := v.goImageCopySlice(sliceExpr); ok {
+		return view
+	}
+
 	// An array field reached through a local reinterpreted from unsafe.Pointer slices through the field's
 	// view, which is a native window when the struct lies in native memory (see fieldAccess.go).
 	if selectorExpr, ok := ast.Unparen(sliceExpr.X).(*ast.SelectorExpr); ok {

@@ -21,7 +21,7 @@ partial struct Pair {
     public uint64 C;
 }
 
-internal static unsafe void Main() {
+internal static void Main() {
     var data = new slice<byte>((nint)(/* unsafe.Sizeof(Dirent{}) */ (uintptr)1048));
     data[0] = 7;
     data[16] = 32;
@@ -29,20 +29,20 @@ internal static unsafe void Main() {
     (data[21], data[22], data[23]) = ((byte)'a', (byte)'b', (byte)'c');
 
     ref var dirent = ref heap(new Dirent(), out var Ꮡdirent);
-    nint n = copy(((ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡdirent))).slice(), data);
+    nint n = copy(@unsafe.GoImage(Ꮡdirent).slice(), data);
     fmt.Println(n, dirent.Ino, dirent.Reclen, dirent.Namlen, (@string)slice<byte>([(byte)dirent.Name[0], (byte)dirent.Name[1], (byte)dirent.Name[2]]));
 
     dirent.Seekoff = 99;
-    n = copy(((ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡdirent))).slice(), data[..10]);
+    n = copy(@unsafe.GoImage(Ꮡdirent).slice(), data[..10]);
     fmt.Println(n, dirent.Ino, dirent.Seekoff, dirent.Reclen);
 
     ref var p = ref heap<Pair>(new Pair(A: 0x0102, B: new uint8[]{5, 6}.array(), C: 0x1122334455667788UL), out var Ꮡp);
     var @out = new slice<byte>(16);
-    n = copy(@out, ((ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡp))).slice());
+    n = copy(@out, @unsafe.GoImage(Ꮡp).slice());
     fmt.Println(n, @out);
 
     var q = Ꮡp;
-    n = copy(new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(@unsafe.Pointer.FromPinnedBox(q)) + 8, 10 - 8)), slice<byte>([0xAA, 0xBB, 0xCC]));
+    n = copy(@unsafe.GoImage(q).slice(8, 10), slice<byte>([0xAA, 0xBB, 0xCC]));
     fmt.Printf("%d %#x %v\n"u8, n, p.C, p.B);
 }
 
