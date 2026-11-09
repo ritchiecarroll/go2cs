@@ -56,7 +56,7 @@ internal static void Main() {
     fmt.Println(cmp.Compare((Path)(@string)"a", (Path)(@string)"b"), cmp.Compare((Path)(@string)"b", (Path)(@string)"a"), cmp.Compare((Path)(@string)"a", (Path)(@string)"a"));
     fmt.Println(cmp.Less((Path)(@string)"a", (Path)(@string)"b"), maxOf<Path>((@string)"m", (@string)"x", (@string)"c"));
     fmt.Println(min((Path)(@string)"q", (Path)(@string)"p"), max((Path)(@string)"q", (Path)(@string)"p", (Path)(@string)"r"));
-    fmt.Println(slices.Index(ps, (@string)"c"), slices.Contains(ps, (@string)"a/z"));
+    fmt.Println(slices.Index(ps, (Path)((@string)"c")), slices.Contains(ps, (Path)((@string)"a/z")));
 
     Path a = (Path)(@string)appleˢ;
     Path b = (Path)(@string)bananaˢ;

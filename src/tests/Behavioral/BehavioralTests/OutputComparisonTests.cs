@@ -1454,6 +1454,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedStringDefine() => CheckTarget("NamedStringDefine");
 
     [TestMethod]
+    public void CheckNamedStringOps() => CheckTarget("NamedStringOps");
+
+    [TestMethod]
     public void CheckNamedStringSliceConcatBoxing() => CheckTarget("NamedStringSliceConcatBoxing");
 
     [TestMethod]
