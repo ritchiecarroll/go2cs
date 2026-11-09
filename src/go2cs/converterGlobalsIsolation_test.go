@@ -9,7 +9,8 @@
 // Isolation of the converter's package-identity globals between tests.
 //
 // A conversion run in-process (ConvertModule, the -tests driver, resetPackageState) leaves
-// currentPackagePath, packageName and currentPackageGorootVendored set to the last package it converted.
+// currentPackagePath, packageName, currentPackageGorootVendored and currentPackageOutsideGoroot set to the
+// last package it converted.
 // goPackageImportPathFor reads them, so a test that builds a package_info seed without converting
 // anything stamps whatever import path an EARLIER test left behind:
 //
@@ -35,14 +36,16 @@ type converterPathGlobals struct {
 	currentPackagePath           string
 	packageName                  string
 	currentPackageGorootVendored bool
+	currentPackageOutsideGoroot  bool
 }
 
 func snapshotConverterPathGlobals() converterPathGlobals {
-	return converterPathGlobals{currentPackagePath, packageName, currentPackageGorootVendored}
+	return converterPathGlobals{currentPackagePath, packageName, currentPackageGorootVendored, currentPackageOutsideGoroot}
 }
 
 func (g converterPathGlobals) restore() {
 	currentPackagePath, packageName, currentPackageGorootVendored = g.currentPackagePath, g.packageName, g.currentPackageGorootVendored
+	currentPackageOutsideGoroot = g.currentPackageOutsideGoroot
 }
 
 // isolateConverterPathGlobals restores the package-identity globals to their present values when the
@@ -71,6 +74,10 @@ func leakedConverterPathGlobals() string {
 		leaked = append(leaked, "currentPackageGorootVendored=true")
 	}
 
+	if currentPackageOutsideGoroot {
+		leaked = append(leaked, "currentPackageOutsideGoroot=true")
+	}
+
 	return strings.Join(leaked, ", ")
 }
 
@@ -87,7 +94,7 @@ func requirePristineConverterPathGlobals(t *testing.T) {
 func TestLeakedConverterPathGlobalsNamesEachLeakedValue(t *testing.T) {
 	isolateConverterPathGlobals(t)
 
-	currentPackagePath, packageName, currentPackageGorootVendored = "", "", false
+	currentPackagePath, packageName, currentPackageGorootVendored, currentPackageOutsideGoroot = "", "", false, false
 
 	if leaked := leakedConverterPathGlobals(); leaked != "" {
 		t.Fatalf("zero values read as leaked: %s", leaked)
@@ -96,10 +103,11 @@ func TestLeakedConverterPathGlobalsNamesEachLeakedValue(t *testing.T) {
 	currentPackagePath = "example.com/leak"
 	packageName = "leak"
 	currentPackageGorootVendored = true
+	currentPackageOutsideGoroot = true
 
 	leaked := leakedConverterPathGlobals()
 
-	for _, want := range []string{`currentPackagePath="example.com/leak"`, `packageName="leak"`, "currentPackageGorootVendored=true"} {
+	for _, want := range []string{`currentPackagePath="example.com/leak"`, `packageName="leak"`, "currentPackageGorootVendored=true", "currentPackageOutsideGoroot=true"} {
 		if !strings.Contains(leaked, want) {
 			t.Fatalf("leak report must name %s, got %q", want, leaked)
 		}
@@ -113,10 +121,11 @@ func TestIsolateConverterPathGlobalsRestoresWhatTheTestChanged(t *testing.T) {
 		isolateConverterPathGlobals(t)
 
 		currentPackagePath, packageName, currentPackageGorootVendored = "example.com/converted", "converted", true
+		currentPackageOutsideGoroot = true
 	})
 
-	if currentPackagePath != outerPath || packageName != outerName || currentPackageGorootVendored {
-		t.Fatalf("the subtest's cleanup must restore the globals: got %q/%q/%v, want %q/%q/false",
-			currentPackagePath, packageName, currentPackageGorootVendored, outerPath, outerName)
+	if currentPackagePath != outerPath || packageName != outerName || currentPackageGorootVendored || currentPackageOutsideGoroot {
+		t.Fatalf("the subtest's cleanup must restore the globals: got %q/%q/%v/%v, want %q/%q/false/false",
+			currentPackagePath, packageName, currentPackageGorootVendored, currentPackageOutsideGoroot, outerPath, outerName)
 	}
 }
