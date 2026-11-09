@@ -297,7 +297,7 @@ func main() {
 	licenseCmd := commandLine.String("license", "", "Override NuGet license metadata with an SPDX expression (for example MIT or BSD-3-Clause); does not relicense input code")
 	provenanceCmd := commandLine.Bool("provenance", false, "Include a deterministic source-file provenance comment (no conversion timestamp)")
 	includeCommentsCmd := commandLine.Bool("comments", false, "Include comments in output")
-	parseCgoTargetsCmd := commandLine.Bool("cgo", false, "Parse cgo targets")
+	parseCgoTargetsCmd := commandLine.Bool("cgo", false, "Reserved for cgo support, which has no C# conversion yet: an import \"C\" source is refused whatever this flag says (docs/PLAN-cgo-interop.md, OQ-5)")
 	showParseTreeCmd := commandLine.Bool("tree", false, "Show parse tree")
 	csprojFileCmd := commandLine.String("csproj", "", "Path to custom .csproj template file")
 	debugModeCmd := commandLine.Bool("debug", false, "Enable debug mode")
