@@ -1876,6 +1876,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
 
     [TestMethod]
+    public void CheckPointerUnionNilCompare() => CheckTarget("PointerUnionNilCompare");
+
+    [TestMethod]
     public void CheckPointerValueToInterfaceArg() => CheckTarget("PointerValueToInterfaceArg");
 
     [TestMethod]

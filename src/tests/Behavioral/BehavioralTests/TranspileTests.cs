@@ -1873,6 +1873,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
 
     [TestMethod]
+    public void CheckPointerUnionNilCompare() => CheckTarget("PointerUnionNilCompare");
+
+    [TestMethod]
     public void CheckPointerValueToInterfaceArg() => CheckTarget("PointerValueToInterfaceArg");
 
     [TestMethod]
