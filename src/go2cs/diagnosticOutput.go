@@ -136,8 +136,9 @@ const (
 	// receiver, which has no box to pass (manualTypeReceiverRefusal.go).
 	diagnosticManualTypeReceiverRefused = "GO2CS2003"
 
-	// diagnosticGenericInstantiationRefused: a defined type written over an instantiated generic type
-	// (`type Q pair[int]`, `type P[T any] pair[T]`), which the converter does not support yet (visitTypeSpec.go).
+	// diagnosticGenericInstantiationRefused: RETIRED, no longer reported. It refused a defined type written over an
+	// instantiated generic type (`type Q pair[int]`, `type P[T any] pair[T]`), which now converts (visitTypeSpec.go).
+	// The code stays registered so its number is not given to another refusal.
 	diagnosticGenericInstantiationRefused = "GO2CS2004"
 )
 

@@ -130,6 +130,10 @@ func (v *Visitor) recordStructFieldInterfaceCasts(compositeLit *ast.CompositeLit
 // `[]*T{{…}}`) wrap through this one answer, so the spellings cannot drift. An EMPTY literal outside the
 // declaring package, or elided, keeps its bare `new pkg.T()` / `new()`: the wrapper's parameterless ctor
 // already builds that zero value, so only a literal with elements needs the wrap.
+//
+// A GENERIC defined type over an instantiation (`type P[T any] pair[T]`) has its RHS written in its own
+// type parameters, so a literal of `P[string]` constructs `pair[string]`, read with t's type arguments in
+// their place (instantiatedTypeSpecRHS); `new pair<T>(…)` would name a parameter the use site lacks.
 func namedStructWrapBase(t *types.Named) *types.Named {
 	rhs, ok := writtenTypeSpecRHS(t.Obj())
 
@@ -137,7 +141,7 @@ func namedStructWrapBase(t *types.Named) *types.Named {
 		return nil
 	}
 
-	base, ok := types.Unalias(rhs).(*types.Named)
+	base, ok := types.Unalias(instantiatedTypeSpecRHS(t, rhs)).(*types.Named)
 
 	if !ok {
 		return nil
@@ -158,7 +162,7 @@ func namedStructWrapBase(t *types.Named) *types.Named {
 			return base
 		}
 
-		nextNamed, okNamed := types.Unalias(next).(*types.Named)
+		nextNamed, okNamed := types.Unalias(instantiatedTypeSpecRHS(base, next)).(*types.Named)
 
 		if !okNamed {
 			return base
@@ -166,6 +170,25 @@ func namedStructWrapBase(t *types.Named) *types.Named {
 
 		base = nextNamed
 	}
+}
+
+// instantiatedTypeSpecRHS returns rhs, the written RHS of t's declaration, with t's type arguments in
+// place of the declaration's own type parameters: `pair[T]` read for `P[string]` is `pair[string]`. A
+// declaration without type parameters returns rhs unchanged.
+func instantiatedTypeSpecRHS(t *types.Named, rhs types.Type) types.Type {
+	params, args := t.Origin().TypeParams(), t.TypeArgs()
+
+	if params == nil || args == nil || params.Len() == 0 || params.Len() != args.Len() {
+		return rhs
+	}
+
+	substitutions := make(map[*types.TypeParam]types.Type, params.Len())
+
+	for i := range params.Len() {
+		substitutions[params.At(i)] = args.At(i)
+	}
+
+	return substituteTypeParams(rhs, substitutions)
 }
 
 func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyValueContext) string {
