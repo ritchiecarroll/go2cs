@@ -28,6 +28,7 @@ internal static class ISliceTypeTemplate
     // (TS readiness C16). Length, the Range indexer and the two slice(...) members above implement it implicitly,
     // returning the named type as Go's sub-slice does. The element read and the read-only spread are explicit, as
     // golib's slice<T> declares them: the public indexer returns a ref and the public spread a writable span.
+    // TryGetSlice hands out the wrapper's own window, so `[]byte(v)` and `Value(b)` share v's backing, as Go's do.
     private static string ByteSeqMembers(string targetTypeName) => !IsByteSlice(targetTypeName) ? "" :
         $$"""
 
@@ -35,6 +36,18 @@ internal static class ISliceTypeTemplate
                 byte IByteSeq<byte>.this[nint index] => m_value[index];
 
                 global::System.ReadOnlySpan<byte> IByteSeq<byte>.{{EllipsisOperator}} => ToSpan();
+
+                bool IByteSeq<byte>.TryGetSlice(out slice<byte> window)
+                {
+                    window = m_value;
+                    return true;
+                }
+
+                bool IByteSeq<byte>.TryGetString(out @string value)
+                {
+                    value = default;
+                    return false;
+                }
         """;
 
     // constructorName is structName without a generic type's parameters (a C# constructor never carries them).

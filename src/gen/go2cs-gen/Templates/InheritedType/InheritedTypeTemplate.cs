@@ -552,6 +552,20 @@ internal class InheritedTypeTemplate : TemplateBase
                 // nint indexer, the Range indexer and the slice pair above implement the rest implicitly.
                 global::System.ReadOnlySpan<byte> IByteSeq<byte>.{{EllipsisOperator}} => {{Value}}.{{EllipsisOperator}};
 
+                // A string member of the union: `string(b)` returns the wrapper's @string unchanged (free, as Go's is), and
+                // `[]byte(b)` copies its bytes (ByteSeqExtensions).
+                bool IByteSeq<byte>.TryGetSlice(out global::go.slice<byte> window)
+                {
+                    window = default;
+                    return false;
+                }
+
+                bool IByteSeq<byte>.TryGetString(out @string value)
+                {
+                    value = {{Value}};
+                    return true;
+                }
+
                 public static implicit operator {{ObjectName}}(global::System.ReadOnlySpan<byte> value) => new {{ObjectName}}(new @string(value));
 
                 // Comparisons directly against a `ReadOnlySpan<byte>` — a `u8` string literal, which is
