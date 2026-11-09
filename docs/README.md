@@ -22,14 +22,14 @@ package, on Windows and Linux, and the same validation is in progress on macOS.
 <!-- HELD for release day with the NEWS.md entry (the .2 precedent): "November XX" and the anchor's "november-xx" both
      become the publish date as the last change before the release tag. The gojq sentence is PENDING on the publish
      (the nugetgo wave); drop it if gojq misses the wave. This block quotes no roster figure (check-roster-format 2e). -->
-**November XX, 2026, NuGet 1.26.10.3.** The second fix release on the Go 1.26 line, still built from Go 1.26.10.
+**November 8, 2026, NuGet 1.26.10.3.** The second fix release on the Go 1.26 line, still built from Go 1.26.10.
 Native AOT now inlines a slice read as the JIT does, so the same programs run faster there, and the P-256, P-384 and
 P-521 curves are faster under ReadyToRun. A program converted against local standard-library sources builds and
 publishes in Release, and a plain single-file publish starts fast. A slice's `foreach` now gives its values, so an
 assembly built against 1.26.10.2 must be rebuilt; from this release, revisions within one Go release stay
 compatible except for a break the notes announce. **PENDING (the publish):** gojq, a jq implementation in Go, ships
 as a NuGet package.
-[Full announcement](NEWS.md#november-xx-2026--faster-native-aot-and-a-release-standard-library-from-source).
+[Full announcement](NEWS.md#november-8-2026--faster-native-aot-and-a-release-standard-library-from-source).
 
 **➡ All announcements can be found in the [go2cs News Archive](NEWS.md).**
 

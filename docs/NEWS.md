@@ -8,7 +8,7 @@ their full text.
 
 ---
 
-## November XX, 2026 — Faster Native AOT, and a Release standard library from source
+## November 8, 2026 — Faster Native AOT, and a Release standard library from source
 
 <!-- Written ahead and HELD for release day (the .2 precedent, e665f4ea51): "November XX" becomes the publish date as the
      last change before the release tag (GoCorpusMigration.md, the release ritual, item 1). Moved from
