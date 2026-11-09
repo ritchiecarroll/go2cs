@@ -1,0 +1,22 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="../../cli/github.com.itchyny.gojq.cli.csproj" />
+    <Project Path="../../github.com.itchyny.gojq.csproj" />
+    <Project Path="gojq.csproj" DefaultStartup="true" />
+  </Folder>
+  <Folder Name="/pkg/">
+    <Project Path="../../../../../../pkg/github.com/clipperhouse/stringish/github.com.clipperhouse.stringish.csproj" />
+    <Project Path="../../../../../../pkg/github.com/clipperhouse/uax29/v2/graphemes/github.com.clipperhouse.uax29.v2.graphemes.csproj" />
+    <Project Path="../../../../../../pkg/github.com/clipperhouse/uax29/v2/internal/iterators/github.com.clipperhouse.uax29.v2.internal.iterators.csproj" />
+    <Project Path="../../../../../../pkg/github.com/itchyny/go-yaml/github.com.itchyny.go-yaml.csproj" />
+    <Project Path="../../../../../../pkg/github.com/itchyny/timefmt-go/github.com.itchyny.timefmt-go.csproj" />
+    <Project Path="../../../../../../pkg/github.com/mattn/go-isatty/github.com.mattn.go-isatty.csproj" />
+    <Project Path="../../../../../../pkg/github.com/mattn/go-runewidth/github.com.mattn.go-runewidth.csproj" />
+    <Project Path="../../../../../../pkg/golang.org/x/sys/unix/golang.org.x.sys.unix.csproj" />
+  </Folder>
+</Solution>
