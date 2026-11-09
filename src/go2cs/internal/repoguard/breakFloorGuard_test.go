@@ -24,10 +24,11 @@ import (
 // a member compiled code binds. A package built below it restores cleanly and then throws MissingMethodException at
 // run time (docs/phase4/RECORD-nuget-sibling-pins.md, arms a2 and h1), so the build is the last place to stop it.
 //
-// TestTheBreakFloorNamesEachPackageBuiltBelowIt runs the target alone, against the working-tree go.lib.targets, over
+// TestTheBreakFloorNamesEachPackageBuiltBelowIt runs the target, against the working-tree go.lib.targets, over
 // hand-made items of the shape ResolvePackageAssets produces and hand-made package folders, so it needs no restore and
-// no feed. The versions are derived from the floor the targets file states, so the test stays true when the floor
-// moves.
+// no feed. It asks for CoreCompile, which the probe stands in for with a target that prints a marker: an error must
+// stop the build before CoreCompile, so nothing is compiled, copied or published. The versions are derived from the
+// floor the targets file states, so the test stays true when the floor moves.
 var breakFloorElement = regexp.MustCompile(`<GoBreakFloor>(\d+)\.(\d+)\.(\d+)\.(\d+)</GoBreakFloor>`)
 
 type breakFloorPackage struct {
@@ -38,13 +39,26 @@ type breakFloorPackage struct {
 	release *string
 	// assets is the number of distinct assets the package resolves; each is listed as a compile AND a runtime item.
 	assets int
+	// ridTwin, when set, also writes each asset's runtimes/<ridTwin>/ twin, which GoSelectRidCompileAssets swaps in for
+	// the compile item of a go.* package.
+	ridTwin string
 }
+
+// breakFloorNoDotnet is the environment variable that lets a host without .NET skip the break-floor arms knowingly.
+const breakFloorNoDotnet = "GO2CS_GUARD_NO_DOTNET"
+
+// breakFloorCompiled is what the probe's stand-in CoreCompile prints.
+const breakFloorCompiled = "PROBE-CORECOMPILE-RAN"
 
 func TestTheBreakFloorNamesEachPackageBuiltBelowIt(t *testing.T) {
 	dotnet, err := exec.LookPath("dotnet")
 
 	if err != nil {
-		t.Skip("dotnet is not on PATH; the break-floor arms need MSBuild")
+		if os.Getenv(breakFloorNoDotnet) == "1" {
+			t.Skipf("BREAK-FLOOR ARMS NOT RUN: dotnet is not on PATH and %s=1", breakFloorNoDotnet)
+		}
+
+		t.Fatalf("dotnet is not on PATH, and the break-floor arms need MSBuild: put a .NET 10 SDK on PATH, or set %s=1 to skip them knowingly", breakFloorNoDotnet)
 	}
 
 	root := repoRootFromPackageDir(t)
@@ -99,6 +113,12 @@ func TestTheBreakFloorNamesEachPackageBuiltBelowIt(t *testing.T) {
 			packages: []breakFloorPackage{{id: "nugetgo.example.com.unknown", version: "1.0.1", release: &empty, assets: 1}},
 			named:    []string{"nugetgo.example.com.unknown"}, kind: "error",
 			text: "nugetgo.example.com.unknown 1.0.1 was built on go.* an unknown release"},
+		// nugetgo-pack.ps1 mints every nugetgo.* ID and writes the metadata into each; a nugetgo.* package without it was
+		// packed some other way, so what it was built on is unknown.
+		{name: "a nugetgo package with no metadata",
+			packages: []breakFloorPackage{{id: "nugetgo.example.com.bare", version: "1.0.3", assets: 1}},
+			named:    []string{"nugetgo.example.com.bare"}, kind: "error",
+			text: "nugetgo.example.com.bare 1.0.3 was built on go.* an unknown release"},
 		{name: "a go.* package below the floor",
 			packages: []breakFloorPackage{{id: "go.encoding.json", version: below, assets: 1}},
 			named:    []string{"go.encoding.json"}, kind: "error",
@@ -112,6 +132,13 @@ func TestTheBreakFloorNamesEachPackageBuiltBelowIt(t *testing.T) {
 			named:    []string{"go.os"}, kind: "error"},
 		{name: "a package go2cs did not build",
 			packages: []breakFloorPackage{{id: "Contoso.Logging", version: "1.0.0", assets: 1}}},
+		// GoSelectRidCompileAssets swaps a go.* compile item for its runtimes/<rid>/ twin, so one package reaches the
+		// target as a lib/ runtime item and a runtimes/ compile item: still one package, still one diagnostic.
+		{name: "a go.* package below the floor whose compile item was swapped for its RID twin",
+			packages: []breakFloorPackage{{id: "go.os", version: below, assets: 2, ridTwin: "linux-x64"}},
+			props:    []string{"GoRidCompileAssets=true", "GoCompileRuntimeIdentifier=linux-x64"},
+			named:    []string{"go.os"}, kind: "error",
+			text: "PROBE-COMPILE-ASSETS: runtimes/linux-x64/lib/net10.0/asset0.dll;runtimes/linux-x64/lib/net10.0/asset1.dll"},
 		{name: "one diagnostic per package, however many assets it has",
 			packages: []breakFloorPackage{
 				{id: "go.syscall", version: below, assets: 3},
@@ -134,7 +161,7 @@ func TestTheBreakFloorNamesEachPackageBuiltBelowIt(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			dir := filepath.Join(t.TempDir(), fmt.Sprintf("case%d", i))
 			project := writeBreakFloorProbe(t, dir, targets, c.packages)
-			args := []string{"msbuild", project, "-t:GoCheckBreakFloor", "-nologo", "-v:m"}
+			args := []string{"msbuild", project, "-t:ResolvePackageAssets;CoreCompile", "-nologo", "-v:m"}
 
 			for _, p := range c.props {
 				args = append(args, "-p:"+p)
@@ -156,6 +183,11 @@ func TestTheBreakFloorNamesEachPackageBuiltBelowIt(t *testing.T) {
 				t.Errorf("build failed=%v (%v), want failed=%v; output:\n%s", failed, runErr, want, output)
 			}
 
+			// An error stops the build at the floor: the target fails, so CoreCompile never runs. Anything else compiles.
+			if compiled, want := strings.Contains(output, breakFloorCompiled), c.kind != "error"; compiled != want {
+				t.Errorf("CoreCompile ran=%v, want ran=%v; output:\n%s", compiled, want, output)
+			}
+
 			// MSBuild prints a diagnostic once inline and once in its summary, so the IDs are counted in distinct lines.
 			diagnostics := map[string]bool{}
 
@@ -165,10 +197,25 @@ func TestTheBreakFloorNamesEachPackageBuiltBelowIt(t *testing.T) {
 				}
 			}
 
+			// One line per package, and, when the build stops, one line saying so.
+			stops := 0
+
 			for line := range diagnostics {
 				if c.kind == "" || !strings.Contains(line, c.kind+" GO2CS3002") {
 					t.Errorf("unexpected diagnostic: %s", line)
 				}
+
+				if strings.Contains(line, "GO2CS3002: The build stops here") {
+					stops++
+				}
+			}
+
+			if want := map[bool]int{true: 1, false: 0}[c.kind == "error"]; stops != want {
+				t.Errorf("%d distinct line(s) saying the build stops, want %d; output:\n%s", stops, want, output)
+			}
+
+			if c.kind == "error" && len(diagnostics) != len(c.named)+1 {
+				t.Errorf("%d distinct GO2CS3002 line(s), want one per named package and one saying the build stops; output:\n%s", len(diagnostics), output)
 			}
 
 			for _, id := range c.named {
@@ -198,7 +245,8 @@ func TestTheBreakFloorNamesEachPackageBuiltBelowIt(t *testing.T) {
 
 // writeBreakFloorProbe lays out each package as NuGet's global folder does (<root>/<id>/<version>/lib/net10.0/*.dll,
 // with go2cs/source-metadata.txt beside lib for a converted module) and writes the smallest project that lists their
-// assets as ResolvePackageAssets would and imports go.lib.targets.
+// assets as ResolvePackageAssets would and imports go.lib.targets. Its ResolvePackageAssets is empty, so
+// GoSelectRidCompileAssets, which runs after it, sees the items as written; its CoreCompile prints breakFloorCompiled.
 func writeBreakFloorProbe(t *testing.T, dir, targets string, packages []breakFloorPackage) string {
 	t.Helper()
 	var items strings.Builder
@@ -221,6 +269,18 @@ func writeBreakFloorProbe(t *testing.T, dir, targets string, packages []breakFlo
 			for _, kind := range []string{"ResolvedCompileFileDefinitions", "RuntimeCopyLocalItems"} {
 				fmt.Fprintf(&items, "    <%s Include=\"%s\" NuGetPackageId=\"%s\" NuGetPackageVersion=\"%s\" PathInPackage=\"%s\" />\n",
 					kind, full, p.id, p.version, inPackage)
+			}
+
+			if p.ridTwin != "" {
+				twin := filepath.Join(pkgRoot, "runtimes", p.ridTwin, filepath.FromSlash(inPackage))
+
+				if err := os.MkdirAll(filepath.Dir(twin), 0o755); err != nil {
+					t.Fatal(err)
+				}
+
+				if err := os.WriteFile(twin, nil, 0o644); err != nil {
+					t.Fatal(err)
+				}
 			}
 		}
 
@@ -246,7 +306,11 @@ func writeBreakFloorProbe(t *testing.T, dir, targets string, packages []breakFlo
 
 	project := filepath.Join(dir, "floor.proj")
 	content := "<Project>\n  <PropertyGroup><Language>C#</Language></PropertyGroup>\n  <ItemGroup>\n" + items.String() +
-		"  </ItemGroup>\n  <Import Project=\"" + targets + "\" />\n</Project>\n"
+		"  </ItemGroup>\n  <Target Name=\"ResolvePackageAssets\" />\n" +
+		"  <Target Name=\"ProbeShowCompileAssets\" AfterTargets=\"GoSelectRidCompileAssets\">\n" +
+		"    <Message Importance=\"high\" Text=\"PROBE-COMPILE-ASSETS: @(ResolvedCompileFileDefinitions->'%(PathInPackage)')\" />\n" +
+		"  </Target>\n  <Target Name=\"CoreCompile\">\n    <Message Importance=\"high\" Text=\"" + breakFloorCompiled + "\" />\n  </Target>\n" +
+		"  <Import Project=\"" + targets + "\" />\n</Project>\n"
 
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
