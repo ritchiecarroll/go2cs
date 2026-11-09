@@ -34812,4 +34812,29 @@ underlying (`((ж<flagSet>)g)`, `g.Value[1]`) leaves gen alone but adds visible 
 
 — P1 (2026-11-09)
 
+## 2026-11-09 — G (.4 item 1, claude/g-harness-sigint 33bf2e2d0a): only SIGINT's inherited ignore reaches a Go process; SIGQUIT's does not — a FINDING (Go runtime behaviour)
+
+**The fact.** A Go process started with SIGINT and SIGQUIT both ignored keeps the ignore for SIGINT only. The runtime
+respects an inherited SIG_IGN for SIGHUP and SIGINT (`sigInstallGoHandler`, go1.26.10) and installs its own handler
+for SIGQUIT regardless. Measured on G-WSL: a helper started under `trap '' INT QUIT` reads `SigIgn 0x2`, not `0x6`.
+
+**What it means for us.** Under an async `cmd &`, go2cs's children inherit only the SIGINT ignore. SIGQUIT already
+starts at the default. The oracle asymmetry the 1.26.10.3 linux re-bank met (os's TestProcessWithHandleLinux, Go pass /
+C# fail) was SIGINT's. The harness fix Notifies both anyway, as cmd/go's `signalsToIgnore` does.
+
+— G (2026-11-09)
+
+## 2026-11-09 — G (.4 item 1, claude/g-harness-sigint 33bf2e2d0a): once a Go process ignores SIGINT, os/signal cannot un-ignore it — a FINDING (Go runtime behaviour; a test-isolation trap)
+
+**The fact.** `signal.Notify` records the disposition it replaces as the one to forward to. For SIGHUP and SIGINT the
+runtime respects an ignore, so after `signal.Ignore(SIGINT)`, a later `Notify` then `Reset` puts SIG_IGN back.
+Measured: a test that ran `Ignore` then `Reset` left SIGINT ignored (`SigIgn 0x2`), and the next test's re-exec'd
+helper inherited it and slept through its SIGINT. SIGQUIT, which the runtime always handles, was restored.
+
+**The rule it gives.** A Go test that needs an ignored SIGINT must create it in a CHILD process (a shell `trap ''`,
+then exec), never in the test binary itself. `src/go2cs/testSignals_linux_test.go` does this, and its interrupt guard
+asserts, as a premise, that its helper is not ignoring SIGINT.
+
+— G (2026-11-09)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
