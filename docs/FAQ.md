@@ -17,11 +17,12 @@ It is for the place where the two meet.
 
 ## Is converted code slower than Go?
 
-Usually, yes. Most compute lands within a small multiple of Go's time, string-heavy work takes several
-times longer, and maps run at parity with Go or better. Asking at run time whether a value satisfies an
-interface is the slowest thing converted code does. A converted program also starts slower and uses more
-memory than the Go it came from. The [performance comparison](Performance.md) has the measurements and
-says which machine and platform produced them. Some optimization is already in, such as
+Usually, yes. In the [performance comparison](Performance.md), measured on Windows x64 (`win-x64`), most
+compute lands within a small multiple of Go's time, string-heavy work takes several times longer, and maps
+run at parity with Go or better. Asking at run time whether a value satisfies an interface is the slowest
+thing converted code does. A converted program also starts slower and uses more memory than the Go it came
+from. The comparison has the measurements and says which machine and toolchain produced them. go2cs applies
+some optimizations, such as
 [stack strings](ConversionStrategies.md#strings-string-and-sstring) and
 [stack slices](ConversionStrategies.md#slices-and-arrays), and the [Roadmap](Roadmap.md#performance)
 lists the work planned to narrow the gap. [Tuning converted code](Tuning.md) says which deployment and runtime settings
@@ -60,16 +61,15 @@ lists them all.
 ## Which Go and .NET versions does it use?
 
 Exactly one Go release and one .NET release at a time, both named in the README's
-[Requirements](README.md#requirements). The Go release it tracks today is still supported upstream. The
+[Requirements](README.md#requirements). The Go release it tracks is supported upstream. The
 [Roadmap](Roadmap.md#go-releases) says which Go releases come next and in what order.
 
 ## Which platforms are supported?
 
 Windows and Linux on x64, where the converted standard library is validated against Go's own tests.
-macOS, on Intel and Apple silicon, has packages and is being validated package by package; a row on the
-[roster](ValidatedTestPackages.md) shows a macOS count once its package validates there. One conversion
-targets one operating system, so you convert once for each. [Platforms](Roadmap.md#platforms) has the
-rest.
+macOS, on Intel and Apple silicon, has packages; a row on the [roster](ValidatedTestPackages.md) shows a
+macOS count once its package validates there. One conversion targets one operating system, so you convert
+once for each. [Platforms](Roadmap.md#platforms) has the rest.
 
 ## What does the generated C# look like?
 
@@ -121,8 +121,8 @@ tests.
 
 It runs, and it costs you. A converted program can be published with Native AOT and starts much faster
 than the same program under the JIT. The publish itself is slow and the executable is large, because
-every converted package the program references is compiled in full, and once running the program is
-slower than the JIT on most measurements.
+every converted package the program references is compiled in full. Once running, the program is slower
+than under the JIT on most rows of the [performance comparison](Performance.md), measured on `win-x64`.
 [Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)
 has the measured cost and the platform it was measured on, and the
 [Roadmap](Roadmap.md#native-aot-and-trimming) has the work under way to reduce it.
@@ -134,8 +134,8 @@ Three kinds of NuGet package, all open source: the runtime library ([`go.lib`](h
 the converted standard-library packages your code imports (`go.<package>`), and the source generators
 ([`go.gen`](https://www.nuget.org/packages/go.gen)), which run only when you compile. They are built and versioned
 together, so a project uses one version of all of them. A converted program
-needs the .NET runtime, or you publish it self-contained. It does not need Go installed to run. You need
-Go only to convert.
+needs the .NET runtime, or you publish it self-contained. It does not need Go installed to run.
+Converting uses a Go toolchain, which the go2cs dotnet tool downloads on first use.
 
 ## What license covers the code go2cs generates?
 

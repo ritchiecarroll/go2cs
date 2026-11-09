@@ -157,14 +157,13 @@ internal static void Main() {
 
 > **NOTE — platforms:** _all four steps run on **Windows** (`windows/amd64`) and **Linux** (`linux/amd64`).
 > The conversion records the platform it targets, and the go2cs packages compile and run against that
-> platform's flavor: `win-x64` for a Windows conversion, `linux-x64` for a Linux one. Use the current go2cs
-> packages, with a converter built from a checkout at or after the commit that published them. The output
-> matches `go run`, including `fatih/color`'s colors in an interactive terminal, on both platforms.
+> platform's flavor: `win-x64` for a Windows conversion, `linux-x64` for a Linux one. Use a go2cs converter
+> and `go.*` packages of the same release (`go2cs -version` names it). The output matches `go run`, including
+> `fatih/color`'s colors in an interactive terminal, on both platforms.
 > macOS (Intel and Apple silicon): packages ship for both chips, the behavioral suite passes on both, and this
-> walkthrough runs. The standard library is being validated package by package on macOS; a
-> [roster](ValidatedTestPackages.md) row shows a macOS count once its package validates there, so don't expect a
-> package without one to be fully operational on macOS yet. Other platforms and architectures are tracked in the Roadmap's
-> [Platforms section](Roadmap.md#platforms)._
+> walkthrough runs. On macOS, a package whose [roster](ValidatedTestPackages.md) row shows a macOS count
+> (`darwin:`) is validated there; a package without one is not yet validated on macOS. Other platforms and
+> architectures are tracked in the Roadmap's [Platforms section](Roadmap.md#platforms)._
 
 **3 — C#: build the generated solution.** The app's per-project `.slnx` builds the app and its whole
 converted dependency tree, restoring the go2cs packages on the way; opening it in Visual Studio makes the
@@ -192,7 +191,11 @@ _Expected output:_
 
 ![colorapp-output](images/colorapp-output.png)
 
-> **NOTE:** this `fatih/color` example **compiles clean** — app plus all four dependency projects — **and runs**. The standard library it references is validated package by package against Go's own tests; see [Validated Test Packages](ValidatedTestPackages.md).
+> **NOTE:** this `fatih/color` example **compiles clean** — app plus all four dependency projects — **and runs**
+> (measured on linux-x64). The standard library it references is validated package by package against Go's own tests; see [Validated Test Packages](ValidatedTestPackages.md).
+
+<!-- measured 2026-11-09 on linux-x64 with the go2cs dotnet tool 1.26.10.3, steps 1-4 end to end (bash forms):
+     5 projects, build 0 warnings 0 errors, prints "hello from fatih/color" (user-facing docs audit). -->
 
 ## Build tags for a module
 

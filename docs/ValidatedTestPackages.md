@@ -8,7 +8,7 @@ or is disclosed, by its exact failure, as something the converted code does not 
 almost passes never appears. [What "validated" means, and what it doesn't](Limitations.md#what-validated-means-and-what-it-doesnt)
 says what that proves and what it does not.
 
-## Where Phase 4 stands
+## Where validation stands
 
 > ### Phase 4 progress: **238 / 242 testable packages validated — 98.3%**
 >
@@ -18,10 +18,9 @@ says what that proves and what it does not.
 > reported. The headline measures against every package that defines a `Test` function; this line
 > measures against only those a faithful managed conversion can honestly validate at all.
 >
-> **Every implementable package is validated**, including the 13 packages new at Go 1.26.10 and
-> `internal/unsafeheader`, which rejoined from the excluded list; the four packages outside the 238 are
-> listed, each with its reason, under [Excluded packages](#excluded-packages). Every row's columns are
-> its own Go 1.26.10 Windows measurement.
+> **Every implementable package is validated**; the four packages outside the 238 are listed, each with its
+> reason, under [Excluded packages](#excluded-packages). Every row's columns are its own Go 1.26.10 Windows
+> measurement.
 >
 > **Linux: 236 of 236 applicable rows validated at their Linux counts** — 77,498 matching verdicts · 404 disclosed · 2 rows platform-exclusive (`linux: n/a`). (They are `internal/syscall/windows` and its child `internal/syscall/windows/registry`; the parent is Windows-exclusive by its own name, every source file is `*_windows.go`, and its layout-L3 csproj compiles nothing under `GoTargetOS=linux`.)
 
@@ -462,7 +461,7 @@ says what that proves and what it does not.
   disclosure and its classes.
 - A verdict count is a fact about a package *and* an operating system: Go runs a different test set
   per `GOOS` (build-tagged tests, `GOOS`-keyed skips, capability gates), so `path/filepath` offers
-  54 eligible verdicts on Linux where Windows offers 61.
+  fewer eligible verdicts on Linux than on Windows; its row gives both counts.
 - A row validated on another OS records that OS's arithmetic as a `linux: N + D` annotation at the
   end of its *What it exercises* cell (matching count, then disclosed count if any). Counts are
   never averaged, blended or footnoted away: under that OS the sweep validates the row against its
@@ -611,7 +610,7 @@ says what that proves and what it does not.
 | [`errors`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/errors) | 80 | | `errors.Is`/`As`/`Join` — reflection-bridge write-back (`Value.Set`, addressability). · linux: 80 · darwin: 80 · [proof](validation/current/errors.md) |
 | [`expvar`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/expvar) | 11 |  | The exported-variable registry — `Int`/`Float`/`String`/`Map`/`Func` publication and atomic update, `Map` key ordering with delete/init, JSON quoting across every rune class, and the `/debug/vars` handler. · linux: 11 · darwin: 11 · [proof](validation/current/expvar.md) |
 | [`flag`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/flag) | 24 |  | Command-line flag parsing end to end — definition, `Set` and `Parse` across every builtin flag type at its range and overflow boundaries, `FlagSet` isolation, `ContinueOnError`/`ExitOnError` handling, the `Value`/`Getter`/`Func`/`BoolFunc`/`TextVar` interfaces, redefinition and invalid-name panics, `-h`/`-help` behaviour, and `PrintDefaults`/`Usage` output byte for byte. `TestDefineAfterSet` matches `.*/flag_test.go:.*` against the file `runtime.Caller` reports, an assertion the position map put in reach: the frame names Go's own source, not the converted `.cs`. · linux: 24 · darwin: 24 · [proof](validation/current/flag.md) |
-| [`fmt`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/fmt) | 62 | 1 | Formatted I/O end to end — the whole `Printf` verb matrix over every kind with its width/precision/flag combinations, `Formatter`/`Stringer`/`GoStringer`/`error` dispatch and its recursion guards, `%v`/`%+v`/`%#v` of nested structs, maps (ordered by `internal/fmtsort`), slices, funcs, pointers and typed nils, the `Append*`/`Fprint*` and `Sscan*` surfaces, and the panic-in-`String` and bad-verb error texts byte for byte. The reflection bridge's deepest test: `%v` and `%T` ARE `reflect` walks, so every row is a descriptor read checked against Go's own answer. The behavioral suite's ~520 stdout comparisons all run through this package, so banking it strengthens each of them. · linux: 62 + 1 · darwin: 62 + 1 · [proof](validation/current/fmt.md) |
+| [`fmt`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/fmt) | 62 | 1 | Formatted I/O end to end — the whole `Printf` verb matrix over every kind with its width/precision/flag combinations, `Formatter`/`Stringer`/`GoStringer`/`error` dispatch and its recursion guards, `%v`/`%+v`/`%#v` of nested structs, maps (ordered by `internal/fmtsort`), slices, funcs, pointers and typed nils, the `Append*`/`Fprint*` and `Sscan*` surfaces, and the panic-in-`String` and bad-verb error texts byte for byte. The reflection bridge's deepest test: `%v` and `%T` ARE `reflect` walks, so every row is a descriptor read checked against Go's own answer. The behavioral suite's ~520 stdout comparisons all run through this package, so validating it strengthens each of them. · linux: 62 + 1 · darwin: 62 + 1 · [proof](validation/current/fmt.md) |
 | [`go/ast`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/go/ast) | 36 |  | The Go syntax tree — comment maps and doc association, `FilterFile`/`FilterPackage` deduplication, `Walk`/`Preorder` traversal with early break, and `ast.Fprint`'s reflective dump of a parsed tree (map iteration and unnamed struct types through the reflection bridge). Go 1.26 folded `go/ast/internal/tests` into this package: its one top-level test, `TestSortImportsUpdatesFileImportsField`, is declared here now, and the second proof link is that package's earlier record. <!-- Until 2026-10-26 (owner ruling OQ-1) the cell read, from here: ⚠ **ABSORBS AN ANCHOR AT go1.26.10 (2026-10-25, H10 roster seat):** this row also carries the **go1.24.13 anchor** of `go/ast/internal/tests`, which retires with the hop. PRINCIPAL by verdict majority, 3 of 3: its one top-level test, `TestSortImportsUpdatesFileImportsField`, is declared here at go1.26.10. The Tests cell is this row's own 9 plus the absorbed 3 until pass 2 re-banks the row at the tip; the second proof link is the absorbed source's record. --> · linux: 36 · darwin: 36 · [proof](validation/current/go.ast.md) · [proof](validation/current/go.ast.internal.tests.md) |
 | [`go/build`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/go/build) | 57 | 1 | The build-context resolver — `Import`/`ImportDir` over the real GOROOT tree, the `+build` and `//go:build` readers across the whole `TestShouldBuild` matrix, `MatchFile` with the GOOS/GOARCH filename rules, the cgo and binary-only paths, `TestDependencies` walking the standard library's own dependency policy, and `TestVendorPackages`. The disclosed row, `TestLocalDirectory`, calls `os.Getwd()` and asserts that `ImportDir` names the result `"go/build"`, which requires cwd to sit under the GOROOT the process REPORTS. The host runs every suite in a sandbox so a test may write without touching the real tree; `ImportDir` then finds no known root and honestly answers `"."`. The ancestry view deliberately does not repoint GOROOT: a directory walk does not descend into a junction, so repointing would regress `compress/gzip` and `path/filepath` (measured: 0 `*.gz` under a mirrored root against the real 4). Same root as `internal/coverage/cfile`'s disclosed row, manifesting differently. · linux: 57 + 1 · darwin: 57 + 1 · [proof](validation/current/go.build.md) |
 | [`go/build/constraint`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/go/build/constraint) | 89 | | Build-constraint expression parsing. · linux: 89 · darwin: 89 · [proof](validation/current/go.build.constraint.md) |
@@ -809,7 +808,7 @@ contains it, so a package that Go's own windows/amd64 constraints leave with no 
 
 [`src/check-roster-format.ps1`](../src/check-roster-format.ps1) recomputes every figure in the header
 from the table and fails on any disagreement. It checks the one figure the table cannot know, the
-denominator, against the population file instead, along with every banked and excluded row's
+denominator, against the population file instead, along with every validated and excluded row's
 membership in it.
 
 **Rows follow Go's import paths.** When a release moves a package, its row validates under the

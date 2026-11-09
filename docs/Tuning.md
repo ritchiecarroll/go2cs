@@ -20,25 +20,33 @@ A converted program can run three ways. All three run the same converted code; t
 | **Native AOT** | `dotnet publish -r <rid> -p:PublishAot=true` | entirely ahead of time, to a native executable with no JIT |
 
 Which wins depends on what the program spends its time on. The `win-x64` comparisons below come from the
-performance comparison's Go 1.23.1 table under History, measured on an earlier converter release; that page dates it.
+performance comparison's current table, measured on one Windows machine (an AMD Ryzen 5 PRO 6650U) against the
+`go.*` 1.26.10.2 packages; a bullet that uses another source names it.
 
-- **Start time.** On `win-x64`, a Native AOT program started in roughly an eighth of the time the same program took
-  under the JIT, though still slower than Go. On `linux-x64`, ReadyToRun cut a converted program's median start time by about a
-  third against the JIT.
-- **Tight loops.** On `win-x64`, the JIT ran slice-indexing, floating-point and pointer-heavy loops faster than
-  Native AOT, which took roughly two to three times as long on each. Native AOT has no dynamic profile-guided optimization or
-  on-stack replacement to tune a hot loop as it runs.
-- **Maps.** On `win-x64`, converted map code ran faster than Go under both the JIT and Native AOT, and fastest under
-  Native AOT.
-- **Interfaces.** On `win-x64`, calling interface methods and asserting to concrete types took within about 15% of
-  the same time under the JIT and Native AOT, with neither ahead on both. The one interface path with no compile-time
-  answer, asserting a value to an interface it satisfies only structurally, took about two thirds longer under Native
-  AOT than under the JIT.
-- **Memory.** On `win-x64`, a Native AOT program's peak working set was lower than the JIT's on every benchmark.
+- **Start time.** On `win-x64`, a Native AOT program started in about a third of the time the same program took
+  under the JIT, though still slower than Go, and a ReadyToRun publish started in about three quarters of the JIT's
+  time. On `linux-x64`, ReadyToRun cut a converted program's median start time by about a third against the JIT.
+- **Tight loops.** On `win-x64`, the JIT ran slice-indexing and floating-point loops faster than Native AOT, which
+  took about 2.2 and 3.3 times as long. On a pointer-heavy loop, Native AOT took about a quarter longer than the JIT.
+  Native AOT has no dynamic profile-guided optimization or on-stack replacement to tune a hot loop as it runs.
+- **Maps.** On `win-x64`, converted map code ran faster than Go under the JIT, ReadyToRun and Native AOT, and fastest
+  under the JIT and ReadyToRun.
+- **Interfaces.** On `win-x64`, calling interface methods and asserting to concrete types took about 1.5 to 1.7 times
+  as long under Native AOT as under the JIT. The one interface path with no compile-time answer, asserting a value to
+  an interface it satisfies only structurally, took about twice as long under Native AOT as under the JIT.
+- **Memory.** On `win-x64`, in the performance comparison's Go 1.23.1 table under History, a Native AOT program's
+  peak working set was lower than the JIT's on every benchmark. The current table reports time only.
 - **Build cost.** A Native AOT publish compiles every converted package the program references, so it is slow and the
   executable is large. [Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)
   has the measured cost and its platform.
 
+<!-- Sources from 2026-11-09. The start-time, tight-loop, map and interface bullets: Performance.md's current table
+     (G-LAPTOP, AMD Ryzen 5 PRO 6650U, Windows 10.0.26300, win-x64, SDK 10.0.400 / runtime 10.0.11, go.* 1.26.10.2,
+     2026-11-04/05). Startup JIT 506.4, ReadyToRun 371.4 (0.73), AOT 158.8 ms (0.31; Go 26.1); Sieve JIT 134.0 vs AOT
+     295.0 (2.20), MatMul 217.0 vs 726.8 (3.35), RefLower 510.2 vs 644.5 (1.26); Map Go 661.7, JIT 251.0, ReadyToRun
+     252.0, AOT 285.6; IfaceCall 336.2 vs 559.6 (1.66), Iface 375.3 vs 572.8 (1.53), IfaceShell 602.7 vs 1,177.5
+     (1.95). The comment below is the earlier derivation; it still sources the memory bullet, the linux-x64 figure
+     and the deployment table's commands. -->
 <!-- Sources. The win-x64 rows: Performance.md's .NET 10 table (AMD Ryzen 5 PRO 6650U, Windows 10.0.26200, .NET SDK
      10.0.400, 2026-08-25): Startup JIT 279.4 ms vs AOT 36.7 ms (Go 22.9); Sieve JIT 126.1 vs AOT 242.4, MatMul 216.3 vs
      594.9, RefLower 643.8 vs 1,852.3; Map Go 631.2, JIT 422.3, AOT 248.8; IfaceCall 398.1 vs 439.2, Iface 557.4 vs
@@ -176,8 +184,8 @@ functions unoptimized. A converted program sets that delay to 0. This applies wh
 `dotnet run` and `dotnet build`, and in a ReadyToRun publish, whose methods are still recompiled as they get hot. It
 does not apply to Native AOT. On `win-x64` (an AMD Ryzen 5 PRO 6650U):
 
-- Under the JIT, a TLS handshake benchmark that loads 112 packages ran about a third faster (about 4.2 s down to
-  2.8 s). A trivial program took about 24 ms, roughly 5%, longer to start.
+- Under the JIT, a TLS handshake benchmark that loads over a hundred packages ran about a third faster (about 4.2 s
+  down to 2.8 s). A trivial program took about 24 ms, roughly 5%, longer to start.
 - Published with ReadyToRun, the same benchmark ran about 30% faster, and the trivial program took about 30 ms longer
   to start.
 
@@ -210,9 +218,8 @@ itself.
 programs run for about 0.1 to 2.5 s, so the delay decides how much of each run executes before the optimized code
 arrives. In a long-running service the delay is only a start-up transient, so the table overstates what the setting
 costs once a service is warm. With the delay at 100, 13 of the 17 programs are slower under the JIT and 11 under
-ReadyToRun; Startup is faster under both. Most of the JIT speed-up from go.\* 1.26.10.1 to 1.26.10.2
-is this setting: with the delay at 100, the 1.26.10.2 JIT times sit on 1.26.10.1's. Medians in ms, in-program time
-except Startup's process wall time; the ratio is delay 100 against delay 0:
+ReadyToRun; Startup is faster under both. Medians in ms, in-program time except Startup's process wall time; the
+ratio is delay 100 against delay 0:
 
 | Benchmark | JIT, delay 0 | JIT, delay 100 | ratio | ReadyToRun, delay 0 | ReadyToRun, delay 100 | ratio |
 |:--|--:|--:|--:|--:|--:|--:|
@@ -331,8 +338,8 @@ Every use still reads `Version` and `Name`, so the Go function bodies are unchan
   the Ryzen it runs about a quarter faster hoisted under the JIT. Parsing URL queries took about the same time
   either way.
 
-Every comparison in this list after the first was measured against the direct field read, before the accessor
-existed; the accessor reads faster than that field.
+The second and third bullets, and the URL-query reading, were measured against the direct field read; the accessor
+reads faster than that field.
 
 **Before and after, across the performance suite.** Of the [performance suite's](Performance.md) 17 programs, only
 StringMatch moves beyond measurement noise with `-hoist-literals`. The other 16 stay within noise under both the JIT
@@ -357,10 +364,9 @@ StringMatch only. Medians in ms, in-program time; the ratio is hoisted against p
      boxes, PROTOCOL v3, arm = mean of its A and AA medians): P and H on G (v2 run) 1288.5 / 1171.8, H/P 0.909, floor
      1.2%; on the i9 (run3) 582.1 / 550.0, H/P 0.945, floor 1.8%. Raw: docs/phase4/DATA-hop126-perf/xbox/. -->
 
-**When it does not:** a literal evaluated rarely costs one lookup either way. A literal passed as an `any` argument,
-`fmt.Println("x")`, measured the same both ways: both forms pass one pre-boxed value. Before the accessor, a small
-function that read a hoisted field could run slower than its plain form, because the compiler would not inline it;
-the accessor removed that case. Measure your own hot path.
+**When it does not:** a literal evaluated rarely costs one lookup either way. On `win-x64` (an AMD Ryzen 5 PRO
+6650U), a literal passed as an `any` argument, `fmt.Println("x")`, measured the same both ways: both forms pass one
+pre-boxed value. Measure your own hot path.
 
 **What it costs:** one more declaration line per literal and per constant. The literal's field is declared above the
 function that first uses it, and each constant becomes an accessor plus a private field. Go function bodies are
@@ -410,13 +416,14 @@ the process with no panic and no deferred calls ([Limitations](Limitations.md)).
      6.4 s (16 MiB); N=20,000 stops at about 16,200 threads at both reserves (vm.max_map_count 65,530). The variables
      and their syntax: src/core/golib/runtime/Goroutine.cs, ResolveStackReserve and BoundedReserve. -->
 
-### What else was considered
+### Options that do not change run-time cost
 
 | Option | Why it is not a tuning option |
 |:--|:--|
 | `-var`, `-uco`, `-indent`, `-comments`, `-provenance`, `-license`, `-tree` | Change how the emitted C# reads or what metadata it carries; the program does the same work. |
 | `-goroot`, `-gopath`, `-go2cspath`, `-stdlib`, `-recurse`, `-csproj`, `-tags`, `-platforms`, `-cgo` | Choose which Go code is converted and for which platforms, not how it runs. |
-| `-debug`, `-convert-timeout`, `-platform-census`, `-version`, `-nuget-map-*`, `-module-*` | Govern the conversion itself. |
+| `-debug`, `-convert-timeout`, `-allow-stale-converter`, `-platform-census`, `-platform-stage`, `-ref-census`, `-version`, `-nuget-map`, `-nuget-map-*`, `-module-*` | Govern the conversion itself, or run an analysis that emits no C#. |
+| `-dual-recv`, `-dual-recv-params` | Experimental, for converter development, and off by default: eligible pointer-receiver methods also emit a form that takes the receiver by reference. Their output is not validated, and their run-time cost is not measured. |
 | `-tests`, `-test-*` | Converted test hosts only; `-test-tiered` is covered [above](#net-runtime-settings). |
 | `GOGC`, `GOMEMLIMIT` | Read and reported, but .NET's collector does not follow them ([Limitations](Limitations.md)). |
 | `GO2CS_GC_PAUSE_HISTORY=0` | Changes what `runtime` reports about garbage collection, not how the program runs. |
