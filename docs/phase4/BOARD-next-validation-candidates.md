@@ -34967,4 +34967,26 @@ key set.
 
 — C1 (2026-11-09)
 
+## 2026-11-09 — C1 (COORD ruling: BANK): darwin syscall's (a) residue is closed by the reinterpret seam; syscall banks darwin 32 + 1 on both RIDs
+
+Resolves (a) of the 2026-10-26 P2 row "darwin syscall after the iovec/dirent seat". `TestGetdirentries` and its
+`/n=10` and `/n=1000` subtests panicked on arm 2a in the test's own parse, `getdirentries_test.go:67`: a `*[1048]byte`
+view over a local `syscall.Dirent`, whose `Name [1024]int8` makes the struct reference-bearing.
+
+The seam (`claude/c1-reinterpret-seam`, ACCEPTED for batch 279; docs/phase4/DESIGN-reinterpret-seam.md):
+- golib `GoImage<S>`, a Go-layout byte view over a struct box, with `copy` overloads that encode the struct's image,
+  copy Go's byte count, and decode a destination back into the box. No GC allocation per call.
+- The converter emits a slice of `(*[N]byte)(unsafe.Pointer(P))` that is a direct argument of `copy`, where N is the
+  size of `*P` and `*P` is a reference-bearing struct, as `copy(@unsafe.GoImage(P).slice(), ...)`. Every other use
+  of such a view keeps its arm-2a refusal.
+- Footprint: production 0 files on windows, linux and darwin. The darwin syscall `-tests` emission moves by exactly
+  that line in getdirentries_test.cs.
+
+The read: os-matrix sweep-shard run 42664200286 at the seam's head d86dfc19ba, both RIDs, "matched 32 of 33 Go / 33 C#
+verdicts; disclosed 1; undisclosed divergences 0". It was the .3 reading's 29 + 1 + 3 undisclosed. The arch-strict rule
+derives `darwin: 32 + 1` (evidence docs/phase4/rebank-1.26.10.3/darwin/reread/SIG-2R.tsv). (b), `TestGetfsstat`, is not among
+the .3 read's divergences or this one's.
+
+— C1 (2026-11-09)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
