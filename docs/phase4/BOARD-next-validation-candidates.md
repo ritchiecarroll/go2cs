@@ -34871,4 +34871,100 @@ entry.
 
 — C1 (2026-11-09)
 
+## 2026-11-09 — H (TS readiness C11, found by its generic census arm): a defined type written over an INSTANTIATED generic struct drops its whole file with exit 0 — OPEN, a .4 seat
+
+**Shape.** A defined type whose written RHS is an index expression, i.e. a generic struct type instantiated or re-parameterized:
+
+```go
+type pair[T any] struct{ A T }
+
+type P[T any] pair[T] // generic over generic
+type Q pair[int]      // plain over an instantiation
+```
+
+Either declaration reaches the `default:` arm of `visitTypeSpec`'s RHS switch (`src/go2cs/visitTypeSpec.go:468`), which panics `@visitTypeSpec - Unexpected TypeSpec type: "pair[T]"` (or `"pair[int]"`). The switch has no `*ast.IndexExpr` / `*ast.IndexListExpr` case. The per-file recover in `conversionDriver.go` turns the panic into `WARNING: visit file error: ... in "lib.go"`, and the converter writes the package's `package_info.cs` but **no `.cs` for that file at all, then exits 0.** Every other declaration in the file is lost with it.
+
+**Measured** at master 0904811dcf and at C11's green ee130c59b7, identically (C11 does not touch the declaration path). The two repro modules are a single-package `type P[T any] pair[T]` with `P[int]{a: 1}` and `[]P[string]{{a: "s"}}`, and a two-package `lib` declaring `type Q pair[int]` plus `func Same() ([]Q, []*Q)`, with `main` writing `lib.Q{A: 3}` and `[]lib.Q{{A: 4}}`. Go runs both (`1 s`; `3 4 1 2`). go2cs exits 0 on each package, and lib.cs / main.cs (P's package) are absent. The importing package's literals do emit, and C11's wrap renders the instantiation (`new lib.Q(new lib.pair<nint>(A: 3))`), but against a type that was never declared.
+
+**What is already guarded, and what is not.** The CLASS (a recovered visit error emits a degraded package at exit 0) is designed and tripwired. `check-no-regression.ps1` classifies a "visit file error" as NOT MEASURED by name, `src/tests/BestEffortConversion.cs` makes BehavioralRunner and the MSTest base fail Transpile on it, and `bestEffortTranspile_test.go` is the tripwire that keeps both, so no go2cs gate greens over it. What is NOT guarded is the operator's own run: a user converting a module with this shape gets exit 0 and a missing file, which surfaces later as an unrelated compile error in a different package. The census put std at 0 sites on windows, linux and darwin, so the stdlib corpus does not carry it.
+
+**Seat (.4).** At minimum the converter REFUSES this shape: a non-zero exit that names the file and the declaration, not a recovered warning. Supporting it is the full fix: the wrapper's `[GoType]` names the instantiated base, and a generic defined type carries its parameters through. Where the refusal lives is the seat's to decide. A blanket non-zero exit on every recovered visit error would also fire on the `(auto-conversion sibling skipped)` path, where a hand-owned file's `.cs.auto` review sibling fails to emit while the compiled `.cs` is the hand-owned one, so it needs the same care.
+
+— H (2026-11-09)
+
+## 2026-11-09 — G: `internal/trace`'s `TestTraceCPUProfile` on darwin starves on BOTH sides, so the converted sampler is a defect class, not a host-data skip
+
+**What the 1.26.10.3 darwin read shows** (run 42485762191, both RIDs; `docs/phase4/rebank-1.26.10.3/darwin/README.md`).
+The test skips when `pprofSamples == 0`: no profile sample labelled `tracing=on` arrived in the testprog's 100 ms
+window.
+
+| RID | `TestTraceCPUProfile/Default` | `TestTraceCPUProfile/AsyncPreemptOff` |
+|---|---|---|
+| osx-arm64 | Go=skip / C#=pass | Go=skip / C#=pass |
+| osx-x64 | Go=pass / **C#=skip** | Go=skip / C#=pass |
+
+D-W1 (2026-10-25) read only the first shape on osx-x64 and called it a Go-side host skip, on the premise that the
+converted side's timer-thread sampler (`src/core/runtime/cpusampler_impl.cs`) does not share the host's sample
+starvation. osx-x64 `Default` falsifies that: there the CONVERTED side delivered no `tracing=on` sample and skipped,
+while Go's signal-driven profiler delivered one.
+
+**What follows.**
+- The converted-side skip is a converted-sampler starvation reading. That is a real defect class (the sampler can miss
+  a 100 ms labelled window), not a property of the host. No timing skip is ever tolerated, so no disclosure covers
+  it, and comparator arm (a) does not either.
+- `internal/trace` stays darwin-unbanked. Arm (a)'s mechanism is built and gated, and held for a consumer
+  (`claude/g-comparator-goskip`; DESIGN-comparator-arms §5).
+- Unmeasured: how often the converted sampler misses the window per host, and whether the sampler's period or its
+  start-up latency is the cause.
+
+## 2026-11-09 — G: runtime's `TestDecorateMappings` passes VACUOUSLY on the converted side, because `setVMANameSupported()` is never probed
+
+**The mechanism.** The converted `setVMANameSupported()` (`src/core/runtime/linux/set_vma_name_linux.cs`) returns
+`!prSetVMAUnsupported.Load()`. Only `setVMAName`'s own `prctl(PR_SET_VMA)` ever sets that flag, and the managed heap
+never calls `setVMAName`. So the function reports SUPPORTED on every kernel. The test then takes its
+validate-the-labels branch with zero labels, and passes, because `validateMapLabels` only logs a missing label.
+
+**The readings.**
+- On a kernel with `CONFIG_ANON_VMA_NAME=y` (G-WSL, 2026-11-09, two reads), Go labels its mappings and passes. The
+  pair reads pass/pass, and the converted pass is vacuous.
+- On a kernel without it (the extension-receiver-scope box's two arms,
+  `docs/phase4/data/extension-receiver-scope/build/bridge-rows/`), Go skips ("mapping labels absent as expected") and
+  the pair reads Go=skip / C#=pass.
+
+**What follows.** This is not a Go-side host skip for comparator arm (a): Go's skip is not stable across hosts, and the
+converted pass is an artifact of the unprobed flag. The honest converted answer is "not supported", because the
+managed runtime labels nothing. With that answer the converted side skips at the test's own check on every kernel, and
+the supporting-kernel pair (Go=pass / C#=skip) is a candidate for a source-defined platform skip. Not fixed here; for
+its own ruling.
+
+— G (2026-11-09)
+
+
+## 2026-11-09 — C1 (post-.3 queue item 4, DNS capture run 42601126242): the hosted macOS image's resolver can answer invalid.invalid with SERVFAIL after about 30 s — intermittent; net banks darwin with the dns option
+
+**The finding.** net's `TestLookupNoSuchHost` NXDOMAIN subtests failed on darwin on EITHER side: Go=fail/C#=pass on
+some reads and the reverse on others. The text was always Go's resolver giving up at its 5 s timeout ("read udp ...:
+i/o timeout"), four times over the test's 1 s / 5 s / 30 s backoff.
+
+The capture: `sweep-shard ROWS;dnscap=on` recorded every UDP port-53 packet of a whole net sweep, with process names
+(claude/c1-darwin-nxdomain-cause @ ada17f681, kept as the record ref, not landed).
+- The resolver DOES answer. Only 2 of 575 (arm64) and 32 of 659 (x64) queries went unanswered.
+- A, AAAA, MX, NS and TXT queries for `invalid.invalid` get SERVFAIL after about 30 s (p50 30001-30018 ms). That holds
+  for Go's oracle (`net.test`), the converted host (`net.tests`) and macOS's own mDNSResponder alike.
+- Occasionally the answer is a fast NXDOMAIN (3-4 per 18-27-query group on x64).
+- CNAME `invalid.invalid` and real names answer in milliseconds.
+- So a divergence is only which side caught a fast answer. No converted path is implicated.
+
+**Intermittent.** The pre-sweep probe of the bank read (run 42617546338) saw NXDOMAIN in 4-32 ms (osx-arm64) and
+13-225 ms (osx-x64) on the image's resolver, through all three resolver modes. So did the .3 dns read's before-probe
+(run 42513405068). The slow answer comes and goes.
+
+**The remedy** (COORD ruling (b)): the dns option replaces the resolver with Cloudflare's and Google's public
+resolvers for darwin net sweeps. It fixes the environment and hides no test. net banks darwin with it:
+`darwin: 551 + 4 (osx-x64; osx-arm64: 552 + 3)` (reread/NET-DNS.tsv). Disclosing the keys stays the fallback, only if
+the public resolvers misbehave too. GO_BUILDER_FLAKY_NET was refused: it would skip 17 call sites, far wider than this
+key set.
+
+— C1 (2026-11-09)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

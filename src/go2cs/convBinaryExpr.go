@@ -1897,31 +1897,46 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 	// carries exactly ONE chan-constrained generic declaration in either release. Adding the member
 	// without a reaching case would be speculative; this arm gains `|| typeParamChanCore(tp) != nil`
 	// the day one arrives, and until then a chan type parameter keeps the operator form it has.
+	//
+	// POINTERS joined for TypeScript's checker (catalogue C4): a type parameter whose type set is all
+	// plain pointer terms and is NOT erased (`[T *ast.Node | *ast.Symbol | *Type]`, or a generic TYPE's
+	// `[P *T]`) has no family interface to constrain on, and its nil pointer arrives as C# null OR as
+	// the typed-nil box, so the check is golib's one nilness rule (typeParamPointerTerms).
 	if isEqualityComparison {
 		nilCompareOperand := func(operand ast.Expr, other ast.Expr) (string, bool) {
 			if ident, ok := other.(*ast.Ident); !ok || ident.Name != "nil" {
 				return "", false
 			}
 
-			if tp, ok := types.Unalias(v.info.TypeOf(operand)).(*types.TypeParam); ok && (typeParamMapCore(tp) != nil || typeParamSliceCore(tp) != nil) {
-				return v.convExpr(operand, nil), true
+			tp, ok := types.Unalias(v.info.TypeOf(operand)).(*types.TypeParam)
+
+			if !ok {
+				return "", false
+			}
+
+			if typeParamMapCore(tp) != nil || typeParamSliceCore(tp) != nil {
+				return v.convExpr(operand, nil) + ".IsNil", true
+			}
+
+			if typeParamPointerTerms(tp) && !v.typeIsErasedPointerCore(tp) {
+				return "GoReflect.IsNilGoValue(" + v.convExpr(operand, nil) + ")", true
 			}
 
 			return "", false
 		}
 
-		operandExpr, isMapNilCompare := nilCompareOperand(binaryExpr.X, binaryExpr.Y)
+		nilCheck, isNilCompare := nilCompareOperand(binaryExpr.X, binaryExpr.Y)
 
-		if !isMapNilCompare {
-			operandExpr, isMapNilCompare = nilCompareOperand(binaryExpr.Y, binaryExpr.X)
+		if !isNilCompare {
+			nilCheck, isNilCompare = nilCompareOperand(binaryExpr.Y, binaryExpr.X)
 		}
 
-		if isMapNilCompare {
+		if isNilCompare {
 			if binaryExpr.Op == token.NEQ {
-				return fmt.Sprintf("!%s.IsNil", operandExpr)
+				return "!" + nilCheck
 			}
 
-			return fmt.Sprintf("%s.IsNil", operandExpr)
+			return nilCheck
 		}
 	}
 

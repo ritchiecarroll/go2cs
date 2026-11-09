@@ -625,9 +625,17 @@ func (v *Visitor) analyzeNamedResults(results *ast.FieldList, body *ast.BlockStm
 // must stay identical for the same reason the parameter pair must (CS0103 one way, a box nothing
 // references the other).
 //
-// Deliberately NARROWER than the parameter trigger: a capture-mode (direct-ж) method called on a
-// receiver is already served by packageDirectBoxReceiverMethods, and a receiver the capture analysis
-// routed to box-ref storage must NOT take the `ʗp` form (see paramNeedsHeapBox).
+// The receiver also boxes for the parameter arm's two IMPLICIT address-of forms, because Go takes
+// `&r` for both: a call of a capture-mode (direct-ж) pointer method on it or on a value chain rooted
+// at it (`r.M()`, `r.f.M()`), whose only emitted receiver is the box, and a pointer-method VALUE of
+// it (`r.M` — see pointerMethodValueAddressTaken). packageDirectBoxReceiverMethods serves only a
+// POINTER receiver, which already is its box; a value receiver had none, so the direct call emitted
+// on the raw value (CS1929), a receiver redefined by `:=` before it named an undeclared `Ꮡr`
+// (CS0103), and the method value and the field call went through a copy box `Ꮡ(r)` that drops the
+// method's writes (x/text's Tag.minimize calling (*Tag).RemakeString, TS seat C8).
+//
+// Still NARROWER than the parameter trigger in one way: a receiver the capture analysis routed to
+// box-ref storage must NOT take the `ʗp` form (see paramNeedsHeapBox).
 func (v *Visitor) markAddressTakenBoxedReceiver(recv *ast.FieldList, body *ast.BlockStmt) {
 	if recv == nil || body == nil {
 		return
@@ -660,8 +668,16 @@ func (v *Visitor) markAddressTakenBoxedReceiver(recv *ast.FieldList, body *ast.B
 				continue
 			}
 
-			if v.paramAddressTakenNeedsBox(obj, body) {
+			captureMode := v.bodyCallsCaptureModeMethodOn(ident, body) || v.pointerMethodValueAddressTaken(obj, body)
+
+			if captureMode || v.paramAddressTakenNeedsBox(obj, body) {
 				v.identEscapesHeap[obj] = true
+
+				// An inherently-heap receiver (named slice/map/chan) boxes only for a recorded
+				// capture-mode reason, as in the parameter arm.
+				if captureMode && packageCaptureModeBoxIdents != nil && isInherentlyHeapAllocatedType(obj.Type()) {
+					packageCaptureModeBoxIdents[obj] = true
+				}
 			}
 		}
 	}
@@ -1240,7 +1256,9 @@ func (v *Visitor) selectsPointerMethodOn(sel *ast.SelectorExpr, obj types.Object
 
 	selection, ok := v.info.Selections[sel]
 
-	if !ok || selection.Kind() != types.MethodVal {
+	// A method promoted through an embedded POINTER binds that pointer's value, so no address of
+	// obj is taken either.
+	if !ok || selection.Kind() != types.MethodVal || selection.Indirect() {
 		return false
 	}
 
