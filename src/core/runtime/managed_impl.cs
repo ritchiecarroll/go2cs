@@ -1209,7 +1209,10 @@ partial class runtime_package
         uvarint((uint64)global::go.@internal.goarch_package.PtrSize);
         uvarint(0);
         uvarint(0);
-        str(global::go.@internal.goarch_package.GOARCH);
+        // The running program's architecture, runtime.GOARCH. Go writes goarch.GOARCH, which in a Go binary is the
+        // same value. Here internal/goarch stays the converted target's "amd64", while the darwin and windows flavours'
+        // runtime.GOARCH reads the process (goarch_<goos>_impl.cs), so an arm64 host's dump says "arm64", as Go's does.
+        str(GOARCH);
         str(buildVersion);
         uvarint((uint64)numCPUStartup);
         uvarint((uint64)tagEOF);

@@ -27,6 +27,7 @@ internal static void Main() {
             break;
         }
         case {} when exprᴛ1 == "GOARCH"u8: {
+            fmt.Printf("%s: %s\n"u8, setting.Key, setting.Value);
             fmt.Println("GOARCH is runtime.GOARCH:", setting.Value == Δruntime.GOARCH);
             break;
         }}

@@ -8,7 +8,11 @@
 
 package main
 
-import "testing"
+import (
+	"strings"
+	"testing"
+	"time"
+)
 
 // The darwin corpus is converted ONCE, for darwin/amd64, and runs under both mac RIDs. On osx-arm64 the converted
 // host is a native arm64 .NET process, while the oracle `go test` child took GOARCH=amd64 from the conversion target
@@ -44,6 +48,31 @@ func TestOracleArchUnsetOrEqualChangesNothing(t *testing.T) {
 
 		if got := testEnvironmentFromOptions(options).OracleGOARCH; got != "" {
 			t.Errorf("-test-oracle-goarch %q: oracleGoarch = %q, want it omitted", arch, got)
+		}
+	}
+}
+
+// The converted host's child environment carries the ORACLE's GOARCH. Go's test binary inherits GOARCH from the
+// oracle's `go test` child, so its build.Default (buildcfg.GOARCH, envOr("GOARCH", ...)) and every `go` command it
+// runs read that arch. The darwin host reads runtime.GOARCH from the process, so on osx-arm64 it must see the same
+// GOARCH, or go/build's default context (TestMatch, TestGoodOSArch) and gcimporter's `go list std` read amd64 beside
+// a runtime.GOARCH of arm64. Asserted through a real child: `go env GOARCH` reports the environment's GOARCH.
+func TestTheConvertedHostSeesTheOraclesGOARCH(t *testing.T) {
+	for _, c := range []struct {
+		oracle, want string
+	}{
+		{"arm64", "arm64"},
+		{"", "amd64"},
+	} {
+		options := Options{targetPlatform: "darwin/amd64", testOracleGOARCH: c.oracle}
+		out, err := runCommandWithTimeoutEnv(time.Minute, t.TempDir(), convertedHostOptions(options), []string{"GOTOOLCHAIN=local"}, "go", "env", "GOARCH")
+
+		if err != nil {
+			t.Fatalf("-test-oracle-goarch %q: go env GOARCH: %v\n%s", c.oracle, err, out)
+		}
+
+		if got := strings.TrimSpace(out); got != c.want {
+			t.Errorf("-test-oracle-goarch %q: the converted host's child environment has GOARCH=%q, want %q (the oracle's)", c.oracle, got, c.want)
 		}
 	}
 }
