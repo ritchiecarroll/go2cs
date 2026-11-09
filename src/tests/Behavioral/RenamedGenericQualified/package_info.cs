@@ -11,8 +11,6 @@
 
 // <ImportedTypeAliases>
 global using collꓸKind = go.RenamedGenericQualified.coll_package.ΔKind;
-global using collꓸPair = go.RenamedGenericQualified.coll_package.ΔPair;
-global using collꓸSet = go.RenamedGenericQualified.coll_package.ΔSet;
 // </ImportedTypeAliases>
 
 using go;

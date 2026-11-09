@@ -1,4 +1,4 @@
-global using pairAlias = go.RenamedGenericQualified.coll_package.Pair<go.@string, nint>;
+global using pairAlias = go.RenamedGenericQualified.coll_package.ΔPair<go.@string, nint>;
 
 namespace go;
 
@@ -9,22 +9,22 @@ using RenamedGenericQualified;
 partial class main_package {
 
 partial struct holder {
-    internal coll.Set<@string> seen;
-    internal slice<coll.Pair<@string, nint>> pairs;
-    internal map<@string, ж<coll.Set<nint>>> byKey;
-    internal coll.Bag<coll.Set<@string>> bag;
+    internal coll.ΔSet<@string> seen;
+    internal slice<coll.ΔPair<@string, nint>> pairs;
+    internal map<@string, ж<coll.ΔSet<nint>>> byKey;
+    internal coll.Bag<coll.ΔSet<@string>> bag;
 }
 
-internal static nint count(ж<coll.Set<@string>> Ꮡs) {
+internal static nint count(ж<coll.ΔSet<@string>> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     return s.Len();
 }
 
-internal static coll.Pair<@string, nint> makePair(@string k, nint v) { return new collꓸPair<@string, nint>(Key: k, Val: v); }
+internal static coll.ΔPair<@string, nint> makePair(@string k, nint v) { return new coll.ΔPair<@string, nint>(Key: k, Val: v); }
 
 internal partial struct main_local /*dyn*/ {
-    internal coll.Set<nint> s;
+    internal coll.ΔSet<nint> s;
 }
 
 internal static void Main() {
@@ -34,8 +34,8 @@ internal static void Main() {
     h.seen.Add((@string)"b");
     fmt.Println(h.seen.Len(), count(Ꮡh.Ꮡseen), h.seen.Has((@string)"b"), h.seen.Has((@string)"z"));
 
-    h.pairs = append(h.pairs, makePair("x", 1), new collꓸPair<@string, nint>(Key: "y", Val: 2));
-    h.byKey = new map<@string, ж<coll.Set<nint>>>{["odd"] = coll.NewSet((nint)1, (nint)3, (nint)5)};
+    h.pairs = append(h.pairs, makePair("x", 1), new coll.ΔPair<@string, nint>(Key: "y", Val: 2));
+    h.byKey = new map<@string, ж<coll.ΔSet<nint>>>{["odd"] = coll.NewSet((nint)1, (nint)3, (nint)5)};
     fmt.Println(len(h.pairs), h.pairs[1].Key, h.pairs[1].Val, h.byKey["odd"].Len());
 
     coll.OrderedMap<@string, nint> o = default;
@@ -45,25 +45,25 @@ internal static void Main() {
     pairAlias pa = p;
     fmt.Println(pa.Key == ""u8, pa.Val);
 
-    h.bag.Put(new collꓸSet<@string>());
+    h.bag.Put(new coll.ΔSet<@string>());
     fmt.Println(h.bag.Count());
 
     any anyv = makePair("z", 26);
-    var (q, ok) = anyv._<collꓸPair<@string, nint>>(ᐧ); if (ok) {
+    var (q, ok) = anyv._<coll.ΔPair<@string, nint>>(ᐧ); if (ok) {
         fmt.Println("asserted", q.Key, q.Val);
     }
     switch (anyv.type()) {
-    case collꓸSet<@string> v: {
+    case coll.ΔSet<@string> v: {
         fmt.Println("set", v.Len());
         break;
     }
-    case collꓸPair<@string, nint> v: {
+    case coll.ΔPair<@string, nint> v: {
         fmt.Println("pair", v.Val);
         break;
     }}
     ref var l = ref heap(new main_local(), out var Ꮡl);
     l.s.Add(4);
-    var ps = slice<ж<coll.Set<nint>>>([Ꮡl.Ꮡs]);
+    var ps = slice<ж<coll.ΔSet<nint>>>([Ꮡl.Ꮡs]);
     fmt.Println(ps[0].Len(), (collꓸKind)3, e.Kind());
 }
 
