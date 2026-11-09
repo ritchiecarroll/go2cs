@@ -1,0 +1,17 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="../github.com.spf13.cobra.csproj" />
+    <Project Path="github.com.spf13.cobra.doc.csproj" DefaultStartup="true" />
+  </Folder>
+  <Folder Name="/pkg/">
+    <Project Path="../../../../../pkg/github.com/cpuguy83/go-md2man/v2/md2man/github.com.cpuguy83.go-md2man.v2.md2man.csproj" />
+    <Project Path="../../../../../pkg/github.com/russross/blackfriday/v2/github.com.russross.blackfriday.v2.csproj" />
+    <Project Path="../../../../../pkg/github.com/spf13/pflag/github.com.spf13.pflag.csproj" />
+    <Project Path="../../../../../pkg/go.yaml.in/yaml/v3/go.yaml.in.yaml.v3.csproj" />
+  </Folder>
+</Solution>
