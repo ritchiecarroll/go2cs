@@ -1522,11 +1522,15 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				// above never sees it. If the guard name shadows an enclosing variable (e.g. a
 				// parameter), C# `case T x:` collides with it (CS0136). Rename the guard — and
 				// every per-case implicit var so body references follow — with the shadow marker.
+				// The collision is order-independent, as for every other binding (declareVar): a
+				// same-named variable declared LATER in an enclosing block collides too
+				// (gotest.tools' ErrorType: `expectedType := reflect.TypeOf(expected)` after its
+				// `switch expectedType := expected.(type)`, CS0136 x2), so the forward set counts.
 				if assign.Tok == token.DEFINE && len(assign.Lhs) == 1 {
 					if lhsIdent, ok := assign.Lhs[0].(*ast.Ident); ok && !isDiscardedVar(lhsIdent.Name) {
 						guardName := lhsIdent.Name
 
-						if v.isFunctionNameInScope(guardName) || v.shadowsCalledBuiltin(guardName) || isDeclaredInOuterScopes(guardName, false) {
+						if v.isFunctionNameInScope(guardName) || v.shadowsCalledBuiltin(guardName) || isDeclaredInOuterScopes(guardName, false) || isForwardDeclaredInOuterBlocks(guardName) {
 							adjustedName := getShadowedVarName(guardName)
 							v.identNames[lhsIdent] = adjustedName
 
