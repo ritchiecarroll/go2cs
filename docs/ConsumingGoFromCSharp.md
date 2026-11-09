@@ -82,6 +82,16 @@ example `dotnet build -p:GoStdLibVersion=1.26.10.1`.
 If you convert and publish a module of your own, its nuget.org page is covered in
 [Publishing your conversion: the package page](ConvertingAModule.md#publishing-your-conversion-the-package-page).
 
+### The break floor
+
+From `go.*` 1.26.10.4, the build checks each converted package it uses against the **break floor**: the newest `go.*`
+release that changed members that compiled code binds. The floor is `go.*` 1.26.10.3, which changed the member a
+`foreach` over a slice binds. A package built below it, such as a `nugetgo.*` revision built against `go.*` 1.26.10.2,
+still restores beside the newer `go.*` packages, and then fails at run time with `MissingMethodException`. So the
+build stops with [`GO2CS3002`](DiagnosticCodes.md), one error for each such package, naming it and the release it
+was built on. Reference the package's revision built for the floor release or later. To build anyway and accept the
+risk, set `<GoAllowBelowBreakFloor>true</GoAllowBelowBreakFloor>` in the project: each error is then a warning.
+
 ## Imports
 
 A Go package becomes a static class named `<name>_package`, in a namespace made of `go` and the rest of its import
