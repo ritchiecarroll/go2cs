@@ -10,6 +10,7 @@ package main
 
 import (
 	"go/ast"
+	"go/build"
 	"go/token"
 	"go/types"
 	"path/filepath"
@@ -49,6 +50,7 @@ func resetPackageState(pkg *packages.Package) {
 	cgoDynamicImportPragmas = nil
 	currentPackagePath = pkg.PkgPath
 	currentPackageGorootVendored = false
+	currentPackageOutsideGoroot = pkg.Dir != "" && !isPathUnder(pkg.Dir, filepath.Join(build.Default.GOROOT, "src"))
 	packageHoistsLiterals = false
 	packagePlainLits = nil
 	packageGoDeferLits = nil

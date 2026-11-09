@@ -945,11 +945,18 @@ func packageUsingAlias(importPath string) (alias string, namespace string) {
 // `vendor/golang.org/x/text/transform`, the key the stdlib dependency graph uses
 // (stdLibConverter). Every namespace-text derivation must agree, or consumers emit
 // `go.golang.org...` refs that exist nowhere (bidirule's 25 CS0234). The dotted-domain first
-// segment is the cheap pre-filter (no plain stdlib path contains a dot). CAVEAT: a USER module
-// that depends on the same golang.org/x package would false-positive here (its copy is not
-// GOROOT-vendored); revisit with module-conversion support - the behavioral corpus has no such
-// dependency today.
+// segment is the cheap pre-filter (no plain stdlib path contains a dot).
+//
+// Only a package of the standard library resolves an import through GOROOT/src/vendor. A module
+// package that imports golang.org/x/text/transform gets the MODULE's package, a different package
+// from std's vendored copy, so outside GOROOT the path is returned as written (see
+// currentPackageOutsideGoroot). A std-vendored package that a module package reaches through the
+// type graph already carries its `vendor/` path there.
 func resolveGorootVendoredPath(importPath string) string {
+	if currentPackageOutsideGoroot {
+		return importPath
+	}
+
 	firstSegment := importPath
 
 	if idx := strings.Index(firstSegment, "/"); idx >= 0 {

@@ -1378,6 +1378,13 @@ func goPackageImportPathFor(className, name string) string {
 // they hold the GOROOT the conversion was given.
 var currentPackageGorootVendored bool
 
+// currentPackageOutsideGoroot reports that the package being converted is not under GOROOT/src, so
+// its imports resolve as Go resolves a module's: golang.org/x/text/transform names the module
+// package, never std's vendored copy (resolveGorootVendoredPath). resetPackageState sets it from the
+// package directory. It is false when no package is being converted, which keeps every
+// stdlib-context caller on the vendored resolution.
+var currentPackageOutsideGoroot bool
+
 // isGorootVendoredDir reports whether dir is a package directory under GOROOT/src/vendor. The test
 // is on the DIRECTORY, never on the import path: a module outside GOROOT may itself be
 // golang.org/x/net, and its packages are not vendored.
