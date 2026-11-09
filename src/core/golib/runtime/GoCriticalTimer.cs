@@ -77,6 +77,80 @@ internal static partial class GoCriticalTimer
         }
     }
 
+    /// <summary>
+    /// A WAKEABLE precise wait for one long-lived thread (GoTimer's service thread): a kqueue holding an
+    /// <c>EVFILT_USER</c> event for the wake, as Go's own darwin netpoll breaks its kevent wait, beside the same
+    /// one-shot <c>EVFILT_TIMER</c> with <c>NOTE_CRITICAL</c> <see cref="TrySleep"/> uses. <see cref="Wait"/> returns at
+    /// the due time or as soon as <see cref="Wake"/> is called from any thread, including before the wait began. Null
+    /// from <see cref="TryCreate"/> where the kqueue cannot be made, and false from <see cref="Wait"/> on any failure:
+    /// the caller then keeps its coarse wait.
+    /// </summary>
+    internal sealed class Waiter
+    {
+        private const nuint TimerIdent = 1;
+        private const nuint WakeIdent = 2;
+
+        private readonly int m_kq;
+
+        private Waiter(int kq) => m_kq = kq;
+
+        internal static Waiter? TryCreate()
+        {
+            if (s_unavailable || !OperatingSystem.IsMacOS())
+                return null;
+
+            try
+            {
+                int kq = kqueue();
+
+                if (kq < 0)
+                    return null;
+
+                Kevent wake = new() { Ident = WakeIdent, Filter = EvfiltUser, Flags = EvAdd | EvClear };
+
+                if (kevent(kq, in wake, 1, out _, 0, 0) < 0)
+                {
+                    close(kq);
+                    return null;
+                }
+
+                return new Waiter(kq);
+            }
+            catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException)
+            {
+                s_unavailable = true;
+                return null;
+            }
+        }
+
+        /// <summary>Waits about <paramref name="nanoseconds"/> (whole microseconds, at least one), or until woken.</summary>
+        internal bool Wait(long nanoseconds)
+        {
+            Kevent timer = new()
+            {
+                Ident = TimerIdent,
+                Filter = EvfiltTimer,
+                Flags = EvAdd | EvOneshot,
+                Fflags = NoteUseconds | NoteCritical,
+                Data = (nint)Math.Max(1, nanoseconds / 1000)
+            };
+
+            int fired = kevent(m_kq, in timer, 1, out Kevent result, 1, 0);
+
+            if (fired == 1)
+                return (result.Flags & EvError) == 0;
+
+            return fired < 0 && Marshal.GetLastPInvokeError() == Eintr;
+        }
+
+        /// <summary>Ends the current or the next <see cref="Wait"/> at once.</summary>
+        internal void Wake()
+        {
+            Kevent trigger = new() { Ident = WakeIdent, Filter = EvfiltUser, Fflags = NoteTrigger };
+            kevent(m_kq, in trigger, 1, out _, 0, 0);
+        }
+    }
+
     // struct kevent (sys/event.h), 64-bit: uintptr_t ident; int16_t filter; uint16_t flags; uint32_t fflags;
     // intptr_t data; void *udata -- 32 bytes.
     [StructLayout(LayoutKind.Sequential)]
@@ -91,8 +165,11 @@ internal static partial class GoCriticalTimer
     }
 
     private const short EvfiltTimer = -7;
+    private const short EvfiltUser = -10;
     private const ushort EvAdd = 0x0001;
     private const ushort EvOneshot = 0x0010;
+    private const ushort EvClear = 0x0020;
+    private const uint NoteTrigger = 0x01000000;
     private const ushort EvError = 0x4000;
     private const uint NoteUseconds = 0x00000002;
     private const uint NoteCritical = 0x00000020;
