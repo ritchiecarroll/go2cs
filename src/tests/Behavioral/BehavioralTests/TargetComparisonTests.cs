@@ -2710,6 +2710,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckVariadicBoxReceiver() => CheckTarget("VariadicBoxReceiver");
 
     [TestMethod]
+    public void CheckVariadicClosureArgument() => CheckTarget("VariadicClosureArgument");
+
+    [TestMethod]
     public void CheckVariadicClosureShadowParam() => CheckTarget("VariadicClosureShadowParam");
 
     [TestMethod]

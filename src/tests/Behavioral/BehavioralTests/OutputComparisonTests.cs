@@ -2630,6 +2630,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckVariadicBoxReceiver() => CheckTarget("VariadicBoxReceiver");
 
     [TestMethod]
+    public void CheckVariadicClosureArgument() => CheckTarget("VariadicClosureArgument");
+
+    [TestMethod]
     public void CheckVariadicClosureShadowParam() => CheckTarget("VariadicClosureShadowParam");
 
     [TestMethod]
