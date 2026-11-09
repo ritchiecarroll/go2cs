@@ -481,6 +481,12 @@ cannot build or run these flavours.
 | linux | `syscall/linux/cgocaller_linux_impl.cs`, the nine credential `[LibraryImport]`s behind `[UnmanagedCallersOnly]` shims | Go's `cgocaller` → `runtime.cgocall` → `entersyscall` | the shims run managed code between the function-pointer call and the import: bracket the IMPORT, inside the shim, and read errno there |
 | linux | F-1: `syscall/linux/syscall_linux_impl.cs:72-78`, the empty `runtime_entersyscall` / `runtime_exitsyscall` bodies | Go linknames them to `runtime.entersyscall` / `exitsyscall` | forward them to the runtime forwarders; this one fix brackets every linux `syscall.Syscall` |
 
+**Amendment 2026-11-09 (the cgocaller row, as built and ruled):** S-b2 (`claude/g-sb2-linux-cgocaller` `0eceb47998`)
+brackets the shim CALL inside `cgocaller`, not the import inside the shim. That is where Go's `cgocall` puts its
+`entersyscall` (`runtime/cgocall.go:110-114` and `:167`, go1.26.10). `Setgroups` now goes through `cgocaller` as Go's
+does, so one path covers all nine setters. The arity is checked before `Enter`, so a refusal never leaves a
+transition open, and the shims still read errno inside the window. COORD ruled the placement right.
+
 **The red for each.** Where a site can call a function pointer (darwin's `libcCall` family, the cgocaller shims),
 use S-b's shape: point the call at an `[UnmanagedCallersOnly]` probe that reads
 `runtime_package.GoCurrentGStatus()` and `GoNativeCall.TransitionDepth` from INSIDE the native window, and expect
