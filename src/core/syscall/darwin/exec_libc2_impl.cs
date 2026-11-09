@@ -368,7 +368,9 @@ internal static (nint pid, error err) posixSpawnForkExec(@string argv0, slice<@s
         acquireForkLock();
         int childPid;
         try {
-            rc = posix_spawn(out childPid, pathz, fileActions, spawnAttr, argvVec, envVec);
+            unsafe {
+                rc = posixSpawnCall(posixSpawnFn, &childPid, pathz, fileActions, spawnAttr, argvVec, envVec);
+            }
         }
         finally {
             releaseForkLock();
@@ -425,7 +427,9 @@ internal static (nint pid, error err) posixSpawnForkExec(@string argv0, slice<@s
                     // syscall/linux/exec_unix.cs -- the design of record -- kills without reaping
                     // while carrying the same "as Go's parent reaps" comment. That half is its
                     // owner's to route and is not touched from here; this seam diverges toward Go.
-                    kill(childPid, (int)SIGKILL);
+                    unsafe {
+                        killCall(killFn, childPid, (int)SIGKILL);
+                    }
                     var (_, werr) = wait4(childPid, nil, 0, nil);
                     while (AreEqual(werr, EINTR)) {
                         (_, werr) = wait4(childPid, nil, 0, nil);
@@ -595,8 +599,46 @@ internal const int SIG_SETMASK = 3;
 
 private const string libSystemB = "/usr/lib/libSystem.B.dylib";
 
-[DllImport(libSystemB, SetLastError = false)]
-internal static extern int posix_spawn(out int pid, IntPtr path, IntPtr fileActions, IntPtr attrp, IntPtr argv, IntPtr envp);
+// posix_spawn(3) and kill(2) are reached through function pointers that golib's import resolver binds
+// (GoCgoDynamicImports.Resolve, the binding os's readdir_r uses), not through DllImport, so that one helper
+// per call can take the call as a pointer: production passes the resolved libc function, and GolibTests'
+// darwin transition tests pass an [UnmanagedCallersOnly] probe through the public seams below. Every argument
+// is blittable (int, int*, IntPtr), so the call needs no marshalling stub.
+private static unsafe delegate* unmanaged[Cdecl]<int*, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> s_posixSpawn;
+private static unsafe delegate* unmanaged[Cdecl]<int, int, int> s_kill;
+
+private static unsafe delegate* unmanaged[Cdecl]<int*, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> posixSpawnFn {
+    get {
+        if (s_posixSpawn == null) {
+            s_posixSpawn = (delegate* unmanaged[Cdecl]<int*, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int>)GoCgoDynamicImports.Resolve("posix_spawn", libSystemB);
+        }
+        return s_posixSpawn;
+    }
+}
+
+private static unsafe delegate* unmanaged[Cdecl]<int, int, int> killFn {
+    get {
+        if (s_kill == null) {
+            s_kill = (delegate* unmanaged[Cdecl]<int, int, int>)GoCgoDynamicImports.Resolve("kill", libSystemB);
+        }
+        return s_kill;
+    }
+}
+
+// posixSpawnCall makes the spawn.
+internal static unsafe int posixSpawnCall(delegate* unmanaged[Cdecl]<int*, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> fn, int* pid, IntPtr path, IntPtr fileActions, IntPtr attrp, IntPtr argv, IntPtr envp) {
+    return fn(pid, path, fileActions, attrp, argv, envp);
+}
+
+// killCall makes the kill.
+internal static unsafe int killCall(delegate* unmanaged[Cdecl]<int, int, int> fn, int pid, int sig) {
+    return fn(pid, sig);
+}
+
+// GoPosixSpawnCall and GoKillCall are GolibTests' seams: each runs its helper with fn as the native function.
+public static unsafe int GoPosixSpawnCall(nint fn) => posixSpawnCall((delegate* unmanaged[Cdecl]<int*, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int>)fn, null, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+
+public static unsafe int GoKillCall(nint fn) => killCall((delegate* unmanaged[Cdecl]<int, int, int>)fn, 0, 0);
 
 [DllImport(libSystemB, SetLastError = false)]
 internal static extern int posix_spawn_file_actions_init(IntPtr fileActions);
@@ -646,9 +688,6 @@ internal static extern int pthread_sigmask(int how, IntPtr set, IntPtr oldset);
 // ioctl(2) returns -1 and SETS errno, so the errno is read back through SetLastError.
 [DllImport(libSystemB, SetLastError = true)]
 internal static extern int ioctl(int fd, ulong request, IntPtr arg);
-
-[DllImport(libSystemB, SetLastError = false)]
-internal static extern int kill(int pid, int sig);
 
 [DllImport(libSystemB, SetLastError = true)]
 internal static extern int execve(IntPtr path, IntPtr argv, IntPtr envp);

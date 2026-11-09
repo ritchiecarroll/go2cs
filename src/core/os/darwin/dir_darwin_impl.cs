@@ -104,8 +104,17 @@ private static int readdir_r_native(nint dir, nint entry, nint result) {
     s_readdir_r ??= Marshal.GetDelegateForFunctionPointer<readdir_r_fn>(
         GoCgoDynamicImports.Resolve("readdir_r", "/usr/lib/libSystem.B.dylib"));
 
-    return s_readdir_r(dir, entry, result);
+    return readdirRCall(s_readdir_r, dir, entry, result);
 }
+
+// readdirRCall makes the call through fn: production passes the resolved readdir_r, and GolibTests' darwin
+// transition test passes an [UnmanagedCallersOnly] probe through GoReaddirRCall.
+private static int readdirRCall(readdir_r_fn fn, nint dir, nint entry, nint result) {
+    return fn(dir, entry, result);
+}
+
+// GoReaddirRCall is GolibTests' seam: it runs readdirRCall with fn as the native function.
+public static int GoReaddirRCall(nint fn) => readdirRCall(Marshal.GetDelegateForFunctionPointer<readdir_r_fn>(fn), 0, 0, 0);
 
 // readdir is Go's dir_darwin.go (*File).readdir, protocol-for-protocol, over an unmanaged entry
 // buffer. The dirInfo/OpenDir handshake, the size/n convention, the EINTR retry, the zero-inode
