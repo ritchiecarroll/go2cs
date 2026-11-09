@@ -2515,6 +2515,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckTypeInference() => CheckTarget("TypeInference");
 
     [TestMethod]
+    public void CheckTypeParamCoreAssign() => CheckTarget("TypeParamCoreAssign");
+
+    [TestMethod]
     public void CheckTypeParamFloatConversion() => CheckTarget("TypeParamFloatConversion");
 
     [TestMethod]

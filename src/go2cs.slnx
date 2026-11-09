@@ -1174,6 +1174,7 @@
     <Project Path="tests/Behavioral/TypeAssertionSource/mid/TypeAssertionSource.mid.csproj" />
     <Project Path="tests/Behavioral/TypeConversion/TypeConversion.csproj" />
     <Project Path="tests/Behavioral/TypeConversionInterfaceParam/TypeConversionInterfaceParam.csproj" />
+    <Project Path="tests/Behavioral/TypeParamCoreAssign/TypeParamCoreAssign.csproj" />
     <Project Path="tests/Behavioral/TypeParamTypedNil/TypeParamTypedNil.csproj" />
     <Project Path="tests/Behavioral/TypedNilFuncBoundaries/TypedNilFuncBoundaries.csproj" />
     <Project Path="tests/Behavioral/TypedNilFuncMethodSet/TypedNilFuncMethodSet.csproj" />
