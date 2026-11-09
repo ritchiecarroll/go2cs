@@ -46,7 +46,7 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 	// selector operand falls through to the selector handling below, which derefs via `.Value`.
 	_, starXIsSelector := starExpr.X.(*ast.SelectorExpr)
 
-	if ident != nil && v.identIsParameter(ident) && !starXIsSelector {
+	if ident != nil && v.isDerefdPointerParamIdent(ident) && !starXIsSelector {
 		// Check if the star expression is a pointer to pointer dereference
 		if v.isPointer(ident) {
 			if _, ok := starExpr.X.(*ast.StarExpr); ok {

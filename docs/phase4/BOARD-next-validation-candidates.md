@@ -34768,4 +34768,48 @@ on H, the windows lane.
 
 — H (2026-11-08)
 
+## 2026-11-09 — P1 (TS readiness C18, found in seat C10): a named POINTER type's locals and fields miss the wrapper surface — OPEN, P1 after C10
+
+**Found while cutting C10.** C10 (claude/p1-ts-c10) fixes a named pointer type's PARAMETER, which the use sites
+treated as a boxed `*T` parameter. Probing the same type as a LOCAL and as a struct FIELD shows two defects that are
+not parameter-rooted: they reproduce at master 0904811dcf and with C10's fix alike. A named pointer type
+(`type Features *flagSet`) is emitted as a generated wrapper class over `ж<flagSet>`; the emission uses it where the
+underlying `ж<T>` is needed, and the wrapper does not carry that surface.
+
+**(a) Passed to a ref-lowered `*T` parameter.** `func first(o *flagSet) uint8` is ref-lowered to
+`first(ref flagSet o)`, and the call site derefs its argument with `DerefOrNull`, an extension on `ж<T>` that a
+user-defined conversion does not reach:
+
+```go
+g := Features(&flagSet{7, 8})
+h := holder{f: g} // type holder struct{ f Features }
+fmt.Println(first(g), first(h.f)) // Go: 7 7
+```
+
+emits `first(ref (g).DerefOrNull())` and `first(ref (h.f).DerefOrNull())`.
+
+**(b) Field select, index, len and range through the named pointer.** Go selects and indexes through a named
+pointer type implicitly; the wrapper has no such members, and `range` is not converted at all:
+
+```go
+p := PP(&point{x: 4}) // type PP *point
+p.y = p.x + 1         // emitted as p.y = p.x + 1;
+g[1] = g[0] + 1       // emitted as g[1] = (uint8)(g[0] + 1);
+fmt.Println(len(g))   // emitted as len(g): no overload takes the wrapper (CS0311 seen for a parameter)
+for _, b := range g { // emitted as a comment; stderr: WARNING: @visitRangeStmt - unexpected 'ast.RangeStmt'
+	sum += int(b)
+}
+```
+
+Go prints `7 7 2 5 15 7` for the full probe (first(g), first(h.f), len(g), p.y, the range sum, h.f[0]).
+
+**Reach:** any module with a named pointer type used beyond plain passing and comparison. Not on the TS site C10
+named (klauspost/cpuid/v2's HasAll uses only the parameter shape).
+
+**Sizing (with the row's prediction):** two candidate shapes. Wrapper members in go2cs-gen (`DerefOrNull`, field
+forwarding, an indexer, `len`/range support) keep the visible emission as written; a converter conversion to the
+underlying (`((ж<flagSet>)g)`, `g.Value[1]`) leaves gen alone but adds visible casts. The prediction picks one.
+
+— P1 (2026-11-09)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
