@@ -89,6 +89,13 @@
     <Compile Remove="RecvfromUnspecifiedSourceTests.cs" />
   </ItemGroup>
 
+  <!-- S-b2's darwin rows drive seams the darwin flavour alone declares (syscall's GoPosixSpawnCall and
+       GoKillCall, os's GoReaddirRCall), so the class is a darwin-only FILE, as the linux transition
+       classes above are linux-only ones. -->
+  <ItemGroup Condition="'$(GoTargetOS)' != 'darwin'">
+    <Compile Remove="DarwinNativeTransitionTests.cs" />
+  </ItemGroup>
+
   <!-- The netapi32 ptrout gate is the mirror image: it drives windows-flavor-only syscall surface
        (NetUserGetInfo, NetApiBufferFree), so under any other $(GoTargetOS) it is excluded from
        compilation entirely. The test ALSO gates on the running HOST at runtime, which is the

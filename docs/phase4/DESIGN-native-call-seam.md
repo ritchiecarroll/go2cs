@@ -499,3 +499,58 @@ reads the status) and a new test seam reading a goroutine's status by id.
 reaches the runtime family through converted Go code (darwin's `libcCall` callers do, through `entersyscall()` in
 the converted runtime), bracketing its bottom again **fails loudly**. That loud failure is the intended assertion,
 not a test bug. Census each funnel's callers first.
+
+**Amendment 2026-11-09 (the darwin rows, as built; H, `claude/h-sb2-darwin`, approved by COORD):**
+
+*The census, read at master `fb885891b3`, judged against Go's own `syscall` vs `rawSyscall` shape.*
+
+- **Already bracketed, so no change: every `libcCall` caller.** The converted darwin runtime's `syscall_syscalln`
+  calls `entersyscall()`, which is S-b's hand-owned family (`runtime/syscall_managed_impl.cs`), so converted
+  `syscall` and `os` callers such as `closedir` are inside the window today. That census is the double-entry check
+  above.
+- **Bracketed now, 3 hand-owned sites that call libc directly where Go makes the call through `syscall()`:**
+  - `syscall/darwin/exec_libc2_impl.cs` `posix_spawn`: the parent blocks until the child has exec'd, the wait Go's
+    parent spends in `readlen` on the exec pipe, a bracketed read.
+  - The same file's `kill` on the Foreground-failure path. Go's `kill` is `syscall()` (`zsyscall_darwin_amd64.go:403`,
+    go1.26.10).
+  - `os/darwin/dir_darwin_impl.cs` `readdir_r`. Go's `syscall.readdir_r` is `syscall()` (`zsyscall_darwin_amd64.go:1260`).
+- **Not bracketed, by Go's shape:**
+  - `execve` in `Exec` and `pipe`: Go makes both as `rawSyscall` (`zsyscall_darwin_amd64.go:1789` and `:370`).
+  - The other 16 of exec's 20 imports: the `posix_spawn_*` setup calls, `sigemptyset`/`sigaddset`, `realpath`/`free`,
+    and the Foreground `ioctl` and `pthread_sigmask`. They are libc bookkeeping with no Go counterpart, or calls Go
+    makes as `rawSyscall` in its fork child (`exec_libc2.go:86-185`).
+  - The runtime and `internal/poll` darwin hand-owns (15 imports: `mmap`, `sigaction`, `sigprocmask`, the signal note,
+    the netpoller's kqueue). These are runtime-internal `libcCall`s, which Go makes without `entersyscall`.
+
+**The shape.** Each bracketed call goes through one helper that takes the native function: `posixSpawnCall`,
+`killCall` and `readdirRCall`. The helper makes the call between `syscallEntersyscall()` and `syscallExitsyscall()`
+and returns the result from inside the window. Production passes the libc function. The public seams
+`GoPosixSpawnCall` and `GoKillCall` (`syscall`) and `GoReaddirRCall` (`os`) pass a test's function.
+
+`posix_spawn` and `kill` moved from `DllImport` to `unmanaged[Cdecl]` function pointers bound by
+`GoCgoDynamicImports.Resolve` (`NativeLibrary.TryLoad`/`TryGetExport`). `readdir_r` keeps its existing delegate
+binding, because `os` builds with `AllowUnsafeBlocks=false`.
+
+**Native AOT: UNMEASURED (COORD's ruling).** The argument: each rebound call is a raw `unmanaged[Cdecl]` pointer over
+blittable arguments (`int`, `int*`, `IntPtr`), so there is no marshalling stub to generate, and the address is
+resolved at run time through `NativeLibrary`, which Native AOT supports. No run shows it. `aot-smoke` takes 4 to 6
+hours on its four RIDs, and its consumer (`PackageSymbols`) never spawns a process or reads a directory, so a green
+run would not show these calls resolving. The retirement read is the first darwin AOT consumer that spawns a process.
+
+**The reds, read on darwin CI.** `GolibTests`' `DarwinNativeTransitionTests` (a darwin-only file) points each helper
+at an `[UnmanagedCallersOnly]` probe that reads `GoCurrentGStatus()` and `GoNativeCall.TransitionDepth` from inside the
+call. This is S-b's shape, and it gives the `kill` bracket a red as well.
+
+At the red commit `8b9559c91d` (run 42651065436), all three failed on both osx-x64 and osx-arm64, each at the
+`_Gsyscall` assertion (expected 3, actual 2), after its premise held.
+
+A fourth test drives the real `kill` path end to end: a Foreground spawn whose `Ctty` is `/dev/null` makes the parent's
+`TIOCSPGRP` fail, and the seam must kill and reap the child and return the `ioctl`'s own errno: `ENODEV`, which macOS's
+null device answers, read on both RIDs.
+
+Its first form used a pipe for `Ctty`, and on both RIDs it read a pid where `ENOTTY` was predicted. A BSD pipe
+**accepts** `TIOCSPGRP`, which sets its SIGIO owner, so the transfer succeeded and the child ran. That was a defect in
+the test's premise, not in the seam, and the test now uses `/dev/null`. Its second form expected `ENOTTY` and read
+`ENODEV` on both RIDs at the green `b0a022eb2f` (run 42662788234), with the child killed and no pid returned. That was
+the same kind of premise miss, so the test now pins the measured `ENODEV`. The three window tests passed on both RIDs
+in that run.
