@@ -191,11 +191,16 @@
     release that made such a break (docs/phase4/DESIGN-go-break-floor.md):
     - a converted module (a package that ships go2cs/source-metadata.txt, whatever its ID) was built on the release
       its `go2cs-release` line names; a module whose metadata names none counts as below the floor;
+    - a nugetgo.* package without that file was not packed by nugetgo-pack.ps1, which mints every nugetgo.* ID and
+      writes the file into each, so what it was built on is unknown and it counts as below the floor too;
     - a go.* package was built on its own version;
-    - any other package is skipped.
-    A prerelease counts as its release. The floor is set here unconditionally, after the project body, so a project
-    cannot lower it; push-nuget refuses a release whose floor disagrees with its suppression files. Set
-    GoAllowBelowBreakFloor=true to build anyway: each error becomes a warning with the same code.
+    - any other package is skipped. A module packed under another ID without the file is not checked.
+    A prerelease counts as its release. Each package below the floor gets its own error, and then one more error stops
+    the target, so CoreCompile never runs and nothing is compiled, copied or published. The floor is set here
+    unconditionally, after the project body, so a project body cannot lower it; a Directory.Build.targets imports after
+    this file and can, which is the opt-out by another name. push-nuget refuses a release whose floor disagrees with
+    its suppression files. Set GoAllowBelowBreakFloor=true to build anyway: each error becomes a warning with the same
+    code, and the build goes on.
   -->
   <PropertyGroup>
     <GoBreakFloor>1.26.10.3</GoBreakFloor>
@@ -231,6 +236,9 @@
         <GoKind>go</GoKind>
         <GoBuiltOn>%(_GoBreakFloorPackage.NuGetPackageVersion)</GoBuiltOn>
       </_GoBreakFloorPackage>
+      <_GoBreakFloorPackage Condition="'%(_GoBreakFloorPackage.GoKind)' == '' and $([System.String]::Copy('%(_GoBreakFloorPackage.NuGetPackageId)').StartsWith('nugetgo.', System.StringComparison.OrdinalIgnoreCase))">
+        <GoKind>module</GoKind>
+      </_GoBreakFloorPackage>
       <_GoBreakFloorPackage Remove="@(_GoBreakFloorPackage)" Condition="'%(_GoBreakFloorPackage.GoKind)' == ''" />
       <_GoBreakFloorPackage Condition="'%(_GoBreakFloorPackage.GoBuiltOn)' != ''">
         <GoRelease>$([System.Text.RegularExpressions.Regex]::Replace('%(_GoBreakFloorPackage.GoBuiltOn)', '-.*$', ''))</GoRelease>
@@ -241,11 +249,11 @@
       <_GoBreakFloorBelow Include="@(_GoBreakFloorPackage)" Condition="'%(_GoBreakFloorPackage.GoRelease)' != '' and $([MSBuild]::VersionLessThan('%(_GoBreakFloorPackage.GoRelease)', '$(GoBreakFloor)'))">
         <GoBuiltOnText>%(_GoBreakFloorPackage.GoBuiltOn)</GoBuiltOnText>
       </_GoBreakFloorBelow>
-      <!-- What the package is, and what to reference instead: a converted module names its own newer revision; a go.*
-           package is usually brought in by another package, so either one is the remedy. -->
+      <!-- What the package is, and what to reference instead: a converted module names its own newer revision, and how
+           to find it; a go.* package is usually brought in by another package, so either one is the remedy. -->
       <_GoBreakFloorBelow Condition="'%(_GoBreakFloorBelow.GoKind)' == 'module'">
         <GoStatement>%(_GoBreakFloorBelow.NuGetPackageId) %(_GoBreakFloorBelow.NuGetPackageVersion) was built on go.* %(_GoBreakFloorBelow.GoBuiltOnText)</GoStatement>
-        <GoRemedy>Reference a revision of %(_GoBreakFloorBelow.NuGetPackageId) built on go.* $(GoBreakFloor) or later</GoRemedy>
+        <GoRemedy>Reference a revision of %(_GoBreakFloorBelow.NuGetPackageId) built on go.* $(GoBreakFloor) or later (on nuget.org a deprecated revision names the one that replaces it, and each revision's go2cs/source-metadata.txt names the release it was built on; a project converted with go2cs -recurse=nuget picks it up by converting again with -nuget-map-refresh)</GoRemedy>
       </_GoBreakFloorBelow>
       <_GoBreakFloorBelow Condition="'%(_GoBreakFloorBelow.GoKind)' == 'go'">
         <GoStatement>%(_GoBreakFloorBelow.NuGetPackageId) %(_GoBreakFloorBelow.NuGetPackageVersion) is a go.* %(_GoBreakFloorBelow.GoBuiltOnText) package</GoStatement>
@@ -257,14 +265,17 @@
       <_GoBreakFloorWhy>below go.* $(GoBreakFloor), the newest release that changed members compiled code binds (see "Upgrading" in the go2cs release notes). Run, it would fail with MissingMethodException or a similar error.</_GoBreakFloorWhy>
     </PropertyGroup>
 
-    <!-- One diagnostic per package. ErrorAndContinue keeps the build failing while every package below the floor is
-         named, not only the first. -->
+    <!-- One diagnostic per package. ErrorAndContinue names every package below the floor, not only the first, but
+         leaves the target succeeding, so the error after them stops it before CoreCompile. -->
     <Error Code="$(Go2csDiagnosticBreakFloor)" ContinueOnError="ErrorAndContinue"
            Condition="'$(GoAllowBelowBreakFloor)' != 'true' and '%(_GoBreakFloorBelow.Identity)' != ''"
            Text="%(_GoBreakFloorBelow.GoStatement), $(_GoBreakFloorWhy) %(_GoBreakFloorBelow.GoRemedy), or set GoAllowBelowBreakFloor=true to build anyway at your own risk." />
     <Warning Code="$(Go2csDiagnosticBreakFloor)"
              Condition="'$(GoAllowBelowBreakFloor)' == 'true' and '%(_GoBreakFloorBelow.Identity)' != ''"
              Text="%(_GoBreakFloorBelow.GoStatement), $(_GoBreakFloorWhy) Built anyway, because GoAllowBelowBreakFloor=true." />
+    <Error Code="$(Go2csDiagnosticBreakFloor)"
+           Condition="'$(GoAllowBelowBreakFloor)' != 'true' and '@(_GoBreakFloorBelow)' != ''"
+           Text="The build stops here, before compiling: @(_GoBreakFloorBelow->Count()) go2cs-built package(s) named above are below go.* $(GoBreakFloor). Set GoAllowBelowBreakFloor=true to build anyway at your own risk." />
   </Target>
 
   <!-- A converted package packed against the go.* packages (a `go2cs -recurse=nuget` conversion) writes its own
