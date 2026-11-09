@@ -188,3 +188,33 @@ timing skip, which no disclosure class may do. The entry is HELD, and `internal/
 
 An osx-arm64 flavour is therefore a full second darwin conversion. Layer 2 (whether a run-time `runtime.GOARCH` stays
 coherent over the amd64 file selection) decides between the two, and is not yet measured.
+
+**Status, 2026-11-09 (later): BUILT, GATED, HELD FOR A CONSUMER.** `claude/g-comparator-goskip` dd241de186 does not land
+while no manifest carries a `goSkipSignature`. Both holes it closes exist only with the mechanism, so master gains
+nothing from it today. The bounded consumer census (every committed record, every RID, for Go=skip / C#=pass with
+Go's skip text stable across reads and the converted pass not a timing outcome) found none:
+- `internal/trace` `TestTraceCPUProfile/*`: flaps on both sides (above);
+- `net/http/pprof` `TestDeltaProfile` (osx-arm64): arm (b)'s GOARCH class, ruled not a disclosure (R2);
+- `testing` `TestChdir/relative` (a ReFS worktree): remedied by the box rule (NTFS), not disclosed;
+- runtime `TestDecorateMappings` (linux): Go's skip is per-kernel (Go passes on a kernel with
+  `CONFIG_ANON_VMA_NAME=y`, two reads), and the converted pass is vacuous (BOARD, 2026-11-09).
+
+The census reads committed records: 17 full comparison records, plus the bank READMEs and the BOARD, which name every
+unbanked divergence. The seat lands with the first consumer that meets the criterion.
+
+**The R3 census, layer 2, 2026-11-09: VERDICT, a run-time `runtime.GOARCH`; no osx-arm64 flavour.** Shape 1 of the
+2026-11-05 BOARD row: only `runtime.GOARCH` reads the process architecture. `internal/goarch` and every folded
+constant keep amd64, so the file selection and the constants built on it stay coherent with each other, exactly as
+the osx-arm64 rows that bank today already run. Population, darwin flavour + flat, production; every category has a
+positive control (`alg.cs`'s branch for A, `xor_generic.cs`'s fold for D). This git's ERE ignores `\b`, so explicit
+classes were used.
+
+| Category | Sites | Reading at arm64 |
+|---|---|---|
+| A. runtime's own `GOARCH` (flips under shape 1) | 42; 17 compare amd64/arm64 | 6 inert (`ios`-guarded, or amd64 and arm64 agree); **3 improve** (`alg.cs`:427/433, `hash_impl.cs`:181: the AES hash, with `cpu.ARM64` filled by `cpu_arm64_impl.cs`; this retires the row's 3 open runtime verdicts); 3 equivalent (`mbitmap`:233 clears the same bit; `lfstack`:40 and `mspanset`:152 are a backoff constant); 1 equivalent for user addresses (`tagptr_64bit`:75, whose only live packer is netpoll's pinned address, with bit 47 clear on arm64 macOS); 4 unreachable (`malloc`:654, because `mallocinit` never runs; `proc`:5087 and `stack`:870, because goroutines are CLR threads with no Go stack; `os_darwin`:361, M bootstrap behind `schedinit`, which never runs) |
+| B. `runtime.GOARCH`, qualified | 28 production, 116 test | production: no behavioural flip (6 report a string, now the true arch; the rest name other arches, are folded comments, or sit behind other-OS guards; one GODEBUG `Required` flag on x86 sse2). Test: 10 in windows-only files; the rest follow the arm64 oracle's own branches, the three class-(s) rows by construction |
+| C. `goarch.*` read live (stays amd64) | 21 | coherent with the amd64 file selection; the Go-stack ones are unreachable as in A |
+| D. folded at conversion | 56 | unchanged, by design |
+
+Layer 1's 14 production packages keep their amd64 selection, which is no change from today. The arm64-only Go test
+files stay Go-only rows, withdrawn as today (`targetArchExcluded`).

@@ -34793,4 +34793,51 @@ asserts, as a premise, that its helper is not ignoring SIGINT.
 
 — G (2026-11-09)
 
+## 2026-11-09 — G: `internal/trace`'s `TestTraceCPUProfile` on darwin starves on BOTH sides, so the converted sampler is a defect class, not a host-data skip
+
+**What the 1.26.10.3 darwin read shows** (run 42485762191, both RIDs; `docs/phase4/rebank-1.26.10.3/darwin/README.md`).
+The test skips when `pprofSamples == 0`: no profile sample labelled `tracing=on` arrived in the testprog's 100 ms
+window.
+
+| RID | `TestTraceCPUProfile/Default` | `TestTraceCPUProfile/AsyncPreemptOff` |
+|---|---|---|
+| osx-arm64 | Go=skip / C#=pass | Go=skip / C#=pass |
+| osx-x64 | Go=pass / **C#=skip** | Go=skip / C#=pass |
+
+D-W1 (2026-10-25) read only the first shape on osx-x64 and called it a Go-side host skip, on the premise that the
+converted side's timer-thread sampler (`src/core/runtime/cpusampler_impl.cs`) does not share the host's sample
+starvation. osx-x64 `Default` falsifies that: there the CONVERTED side delivered no `tracing=on` sample and skipped,
+while Go's signal-driven profiler delivered one.
+
+**What follows.**
+- The converted-side skip is a converted-sampler starvation reading. That is a real defect class (the sampler can miss
+  a 100 ms labelled window), not a property of the host. No timing skip is ever tolerated, so no disclosure covers
+  it, and comparator arm (a) does not either.
+- `internal/trace` stays darwin-unbanked. Arm (a)'s mechanism is built and gated, and held for a consumer
+  (`claude/g-comparator-goskip`; DESIGN-comparator-arms §5).
+- Unmeasured: how often the converted sampler misses the window per host, and whether the sampler's period or its
+  start-up latency is the cause.
+
+## 2026-11-09 — G: runtime's `TestDecorateMappings` passes VACUOUSLY on the converted side, because `setVMANameSupported()` is never probed
+
+**The mechanism.** The converted `setVMANameSupported()` (`src/core/runtime/linux/set_vma_name_linux.cs`) returns
+`!prSetVMAUnsupported.Load()`. Only `setVMAName`'s own `prctl(PR_SET_VMA)` ever sets that flag, and the managed heap
+never calls `setVMAName`. So the function reports SUPPORTED on every kernel. The test then takes its
+validate-the-labels branch with zero labels, and passes, because `validateMapLabels` only logs a missing label.
+
+**The readings.**
+- On a kernel with `CONFIG_ANON_VMA_NAME=y` (G-WSL, 2026-11-09, two reads), Go labels its mappings and passes. The
+  pair reads pass/pass, and the converted pass is vacuous.
+- On a kernel without it (the extension-receiver-scope box's two arms,
+  `docs/phase4/data/extension-receiver-scope/build/bridge-rows/`), Go skips ("mapping labels absent as expected") and
+  the pair reads Go=skip / C#=pass.
+
+**What follows.** This is not a Go-side host skip for comparator arm (a): Go's skip is not stable across hosts, and the
+converted pass is an artifact of the unprobed flag. The honest converted answer is "not supported", because the
+managed runtime labels nothing. With that answer the converted side skips at the test's own check on every kernel, and
+the supporting-kernel pair (Go=pass / C#=skip) is a candidate for a source-defined platform skip. Not fixed here; for
+its own ruling.
+
+— G (2026-11-09)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
