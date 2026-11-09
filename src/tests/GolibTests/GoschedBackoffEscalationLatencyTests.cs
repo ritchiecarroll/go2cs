@@ -54,6 +54,7 @@ public class GoschedBackoffEscalationLatencyTests
     private const int SleepSamples = 500;
     private const double BoundMeanMilliseconds = 5.0;
     private const double BoundDarwinP90Milliseconds = 3.0;
+    private static readonly TimeSpan Cap = TimeSpan.FromSeconds(120);
 
     [TestMethod]
     public void AnEscalationSleepsAboutAMillisecondNotATimerTick()
@@ -66,6 +67,7 @@ public class GoschedBackoffEscalationLatencyTests
         }
 
         long escalations = 0;
+        long yields = 0;
         double elapsedMs = 0;
         var perEscalationMs = new List<double>(Yields / 64 + 16);
         var sleepMs = new double[SleepSamples];
@@ -74,22 +76,8 @@ public class GoschedBackoffEscalationLatencyTests
         var worker = new Thread(() =>
         {
             long before = GoschedBackoff.Escalations;
-            long started = Stopwatch.GetTimestamp();
 
-            for (int i = 0; i < Yields; i++)
-            {
-                long count = GoschedBackoff.Escalations;
-                long callStarted = Stopwatch.GetTimestamp();
-
-                GoschedBackoff.Yield();
-
-                long callEnded = Stopwatch.GetTimestamp();
-
-                if (GoschedBackoff.Escalations != count)
-                    perEscalationMs.Add((callEnded - callStarted) * 1000.0 / Stopwatch.Frequency);
-            }
-
-            elapsedMs = (Stopwatch.GetTimestamp() - started) * 1000.0 / Stopwatch.Frequency;
+            (yields, elapsedMs) = TimeEscalations(() => GoschedBackoff.Escalations, GoschedBackoff.Yield, perEscalationMs, Cap);
             escalations = GoschedBackoff.Escalations - before;
 
             for (int i = 0; i < SleepSamples; i++)
@@ -107,13 +95,13 @@ public class GoschedBackoffEscalationLatencyTests
             $"{Environment.ProcessorCount} processors";
 
         Console.WriteLine($"READING host: {host}");
-        Console.WriteLine($"READING {Yields} lone yields: {escalations} escalations in {elapsedMs:F0} ms, " +
+        Console.WriteLine($"READING {yields} lone yields: {escalations} escalations in {elapsedMs:F0} ms, " +
             $"{(escalations > 0 ? elapsedMs / escalations : 0):F3} ms per escalation overall");
         Console.WriteLine($"READING one escalation's cost (ms): {Describe(perEscalationMs.ToArray())}");
         Console.WriteLine($"READING Thread.Sleep(1) (ms): {Describe(sleepMs)}");
 
         Assert.IsTrue(perEscalationMs.Count >= MinimumEscalations,
-            $"only {perEscalationMs.Count} escalations in {Yields} lone yields -- the escalation path barely ran, " +
+            $"only {perEscalationMs.Count} escalations in {yields} lone yields -- the escalation path barely ran, " +
             "so its cost is unmeasured here");
 
         double[] sorted = perEscalationMs.ToArray();
@@ -132,6 +120,61 @@ public class GoschedBackoffEscalationLatencyTests
                 $"(bound {BoundDarwinP90Milliseconds} ms on macOS; {Describe(sorted)}): " +
                 "the escalation is waiting on a coalesced timer rather than about 1 ms");
         }
+    }
+
+    // The yield loop: Yields lone yields, timing each call during which the escalation counter moved, and adding to
+    // `timed`. Returns the yields taken and the wall time they took.
+    internal static (long Yields, double ElapsedMs) TimeEscalations(Func<long> escalations, Action yield, List<double> timed, TimeSpan cap)
+    {
+        long started = Stopwatch.GetTimestamp();
+        long taken = 0;
+
+        for (; taken < Yields; taken++)
+        {
+            long count = escalations();
+            long callStarted = Stopwatch.GetTimestamp();
+
+            yield();
+
+            long callEnded = Stopwatch.GetTimestamp();
+
+            if (escalations() != count)
+                timed.Add((callEnded - callStarted) * 1000.0 / Stopwatch.Frequency);
+        }
+
+        return (taken, (Stopwatch.GetTimestamp() - started) * 1000.0 / Stopwatch.Frequency);
+    }
+
+    // THE FLOOR UNDER LOAD (item 3 of the post-.3 queue). The inert-yield classifier decides how many escalations a
+    // fixed number of yields makes, and a loaded host makes fewer: 275-396 per 32,000 yields on the mac runners, and 81
+    // on one osx-x64 run, which failed the 200 floor with the path's cost never in question. A yield that escalates
+    // once per 395 calls (that run's rate) must still reach the floor, and the bounds are unchanged; the loop is what
+    // adapts. Deterministic, so it runs on every OS.
+    [TestMethod]
+    public void ASparseEscalationRateStillReachesTheFloor()
+    {
+        long fake = 0, calls = 0;
+        var timed = new List<double>();
+
+        (long yields, _) = TimeEscalations(() => fake, () => { if (++calls % 395 == 0) fake++; }, timed, Cap);
+
+        Assert.IsTrue(timed.Count >= MinimumEscalations,
+            $"a yield escalating once per 395 calls gave {timed.Count} timed escalations in {yields} yields, under the floor of {MinimumEscalations}");
+        Assert.IsTrue(yields >= Yields, $"the loop took {yields} yields, fewer than the {Yields} every reading has taken");
+    }
+
+    // The cap: a yield that never escalates ends at the cap rather than looping forever, and reports what it took.
+    [TestMethod]
+    public void AYieldThatNeverEscalatesStopsAtTheCap()
+    {
+        var timed = new List<double>();
+        Stopwatch wall = Stopwatch.StartNew();
+
+        (long yields, _) = TimeEscalations(() => 0, () => { }, timed, TimeSpan.FromMilliseconds(200));
+
+        Assert.AreEqual(0, timed.Count);
+        Assert.IsTrue(yields >= Yields, $"the loop took {yields} yields, fewer than {Yields}");
+        Assert.IsTrue(wall.Elapsed < TimeSpan.FromSeconds(30), $"the loop ran {wall.Elapsed.TotalSeconds:F1} s against a 200 ms cap");
     }
 
     private static double Mean(double[] samples)
