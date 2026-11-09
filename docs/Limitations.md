@@ -74,7 +74,7 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
          goroutines;
        - osx-x64, macOS 15.7.9: kern.num_taskthreads 3072; the first failure at 3,051.
        Each is the cap less about 21 runtime and host threads, exact to the thread. The go statement itself throws,
-       synchronously, from the thread start at src/core/golib/runtime/Goroutine.cs:1256
+       synchronously, from the thread start at src/core/golib/runtime/Goroutine.cs:1278
        (`GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`). Found when internal/synctest's
        TestWaitGroupManyBubbles (about 10,100 live goroutines) died on both mac runners at the 1.26.10.3 re-bank. A
        developer Mac's cap may differ, so the figures above are stated as the hosted readings, not as macOS's limit. -->
