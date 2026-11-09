@@ -1096,6 +1096,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckKeyedLiteralIfaceAssign() => CheckTarget("KeyedLiteralIfaceAssign");
 
     [TestMethod]
+    public void CheckKeyedLiteralNamedForeignStruct() => CheckTarget("KeyedLiteralNamedForeignStruct");
+
+    [TestMethod]
     public void CheckKeywordNamedTypes() => CheckTarget("KeywordNamedTypes");
 
     [TestMethod]
