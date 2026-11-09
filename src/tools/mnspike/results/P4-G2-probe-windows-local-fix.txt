@@ -1,0 +1,7 @@
+# G2 probe after the isolation fix, local reading on Windows (win-x64, G-LAPTOP), 2026-11-09T10:36Z. The cleanup assert was made to fail once (slack -1000: 'the budget arm did not clean up'), then restored byte-identical.
+  Skipped O0ThreadPerGoroutineParks100k [1 s]
+  Passed UntwinnedBlocksBeforeTheThreadCap [755 ms]
+ READING G2-BUDGET rid=win-x64 kern.num_taskthreads=n/a procs=12 threads-at-start=31 concurrent-untwinned-blocks=1500/1500 threads-at-max=1519 carrier-start-failures=0 all-finished=True threads-after-join=18
+  Passed TwinParks100kOnThePrototype [176 ms]
+ READING G2-TWIN rid=win-x64 kern.num_taskthreads=n/a parked=100000/100000 in 0.11s live=100000 carriers=12 procs=12 injections=0 threads-at-start=18 process-threads=32 private=85MB finished=True threads-after-join=32
+Total tests: 3

@@ -35,6 +35,34 @@ public class MnSpikeTwinParkProbe
         catch (Exception ex) { return $"unread ({ex.GetType().Name})"; }
     }
 
+    // Each arm leaves the test host as it found it: its threads are joined back to within `slack` of the count it
+    // started from, and the arm asserts that. Run 42599838013 showed why: the budget arm's ~3,000 blocked carriers were
+    // still alive when the twin arm ran in the same host, and osx-x64's twin read 3,029 process threads, which
+    // oversubscribed the host into false carrier injections (20 carriers on 4 Ps).
+    private static (bool joined, int threads) JoinThreadsTo(int baseline, int slack, TimeSpan timeout)
+    {
+        Process self = Process.GetCurrentProcess();
+        var sw = Stopwatch.StartNew();
+        int threads;
+        do
+        {
+            self.Refresh();
+            threads = self.Threads.Count;
+            if (threads <= baseline + slack) return (true, threads);
+            Thread.Sleep(200);
+        }
+        while (sw.Elapsed < timeout);
+
+        return (false, threads);
+    }
+
+    private static int ProcessThreads()
+    {
+        Process self = Process.GetCurrentProcess();
+        self.Refresh();
+        return self.Threads.Count;
+    }
+
     [TestMethod]
     public void O0ThreadPerGoroutineParks100k()
     {
@@ -44,6 +72,7 @@ public class MnSpikeTwinParkProbe
             return;
         }
 
+        int threadsAtStart = ProcessThreads();
         using ManualResetEventSlim release = new(false);
         using CountdownEvent exited = new(1);
         int started = 0;
@@ -70,8 +99,11 @@ public class MnSpikeTwinParkProbe
         release.Set();
         exited.Signal();
         bool joined = exited.Wait(TimeSpan.FromSeconds(60));
+        // golib's goroutine pool keeps up to 64 idle workers (10 s each), hence the wider slack here.
+        (bool threadsBack, int threadsAfter) = JoinThreadsTo(threadsAtStart, 80, TimeSpan.FromSeconds(60));
 
-        Console.WriteLine($"READ G2-O0 rid={System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier} kern.num_taskthreads={TaskThreadCap()} started={started}/{Count} in {seconds:F2}s stopped-by={stopped?.GetType().Name ?? "none"} joined={joined}");
+        Console.WriteLine($"READING G2-O0 rid={System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier} kern.num_taskthreads={TaskThreadCap()} started={started}/{Count} in {seconds:F2}s stopped-by={stopped?.GetType().Name ?? "none"} joined={joined} threads-at-start={threadsAtStart} threads-after-join={threadsAfter}");
+        Assert.IsTrue(joined && threadsBack, $"the O0 arm did not clean up: joined={joined}, threads {threadsAfter} against {threadsAtStart} at its start");
         Assert.AreEqual(Count, started, $"O0 (a thread per goroutine) started {started} of {Count} before the `go` statement threw {stopped?.GetType().Name}: the macOS cap (kern.num_taskthreads={TaskThreadCap()})");
     }
 
@@ -115,14 +147,18 @@ public class MnSpikeTwinParkProbe
         gate.Close();
         bool allFinished = finished.Wait(TimeSpan.FromSeconds(120));
         s.Stop();
+        (bool threadsBack, int threadsAfter) = JoinThreadsTo(threadsAtStart, 16, TimeSpan.FromSeconds(60));
 
-        Console.WriteLine($"READ G2-BUDGET rid={System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier} kern.num_taskthreads={TaskThreadCap()} procs={s.Options.Procs} threads-at-start={threadsAtStart} concurrent-untwinned-blocks={held}/{max} threads-at-max={threadsAtMax} carrier-start-failures={failures} all-finished={allFinished}");
+        Console.WriteLine($"READING G2-BUDGET rid={System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier} kern.num_taskthreads={TaskThreadCap()} procs={s.Options.Procs} threads-at-start={threadsAtStart} concurrent-untwinned-blocks={held}/{max} threads-at-max={threadsAtMax} carrier-start-failures={failures} all-finished={allFinished} threads-after-join={threadsAfter}");
         Assert.IsTrue(held > 0, "no goroutine blocked: the arm measured nothing");
+        Assert.IsTrue(allFinished, "the released goroutines did not all finish");
+        Assert.IsTrue(threadsBack, $"the budget arm did not clean up: {threadsAfter} threads against {threadsAtStart} at its start");
     }
 
     [TestMethod]
     public void TwinParks100kOnThePrototype()
     {
+        int threadsAtStart = ProcessThreads();
         var s = new Scheduler(new Options());
         var release = new Chan<ValueTuple>(s);
         var parked = new WaitGroup(s);
@@ -146,8 +182,10 @@ public class MnSpikeTwinParkProbe
         release.Close();
         bool allFinished = finished.Wait(TimeSpan.FromSeconds(120));
         s.Stop();
+        (bool threadsBack, int threadsAfter) = JoinThreadsTo(threadsAtStart, 16, TimeSpan.FromSeconds(60));
 
-        Console.WriteLine($"READ G2-TWIN rid={System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier} kern.num_taskthreads={TaskThreadCap()} parked={(allParked ? Count : -1)}/{Count} in {seconds:F2}s live={live} carriers={carriers} procs={s.Options.Procs} process-threads={threads} private={privateMb}MB finished={allFinished}");
+        Console.WriteLine($"READING G2-TWIN rid={System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier} kern.num_taskthreads={TaskThreadCap()} parked={(allParked ? Count : -1)}/{Count} in {seconds:F2}s live={live} carriers={carriers} procs={s.Options.Procs} injections={s.Injections} threads-at-start={threadsAtStart} process-threads={threads} private={privateMb}MB finished={allFinished} threads-after-join={threadsAfter}");
+        Assert.IsTrue(threadsBack, $"the twin arm did not clean up: {threadsAfter} threads against {threadsAtStart} at its start");
         Assert.IsTrue(allParked, $"only some of {Count} twinned goroutines parked within 120 s");
         Assert.IsTrue(allFinished, "the released goroutines did not all finish");
         Assert.IsTrue(carriers <= s.Options.Procs * 4, $"{carriers} carriers for {Count} parked goroutines: parking held threads");
