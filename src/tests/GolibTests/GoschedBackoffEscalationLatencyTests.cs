@@ -45,7 +45,10 @@ namespace GolibTests;
 // - p90 under 3 ms, on macOS only: osx-x64's Sleep(1) has a mean near 3 ms but a p90 near 7 ms, which the mean alone
 //   would pass; green 1.03-1.16 ms. Windows has no p90 reading, so none is bounded there.
 // It also requires at least 200 escalations, so the path it bounds actually ran (500 expected when every yield is inert;
-// 275-317 measured on the mac runners). Linux keeps Sleep(1), ~1.1 ms there, and is not run.
+// 275-396 measured on the mac runners, and 81 on one loaded osx-x64 run). The loop therefore takes the 64 x 500 yields
+// and then continues until 200 escalations are timed or two minutes have passed (TimeEscalations): a loaded host takes
+// longer to reach the floor instead of failing it, and the bounds are unchanged. Linux keeps Sleep(1), ~1.1 ms there,
+// and is not run.
 [TestClass]
 public class GoschedBackoffEscalationLatencyTests
 {
@@ -122,14 +125,17 @@ public class GoschedBackoffEscalationLatencyTests
         }
     }
 
-    // The yield loop: Yields lone yields, timing each call during which the escalation counter moved, and adding to
-    // `timed`. Returns the yields taken and the wall time they took.
+    // The yield loop: at least Yields lone yields, timing each call during which the escalation counter moved, and
+    // adding to `timed`; then on until MinimumEscalations are timed or `cap` of wall time has passed. A host whose load
+    // turns most yields effective takes longer to reach the floor rather than failing it, and the bounds read the
+    // same distribution. Returns the yields taken and the wall time they took.
     internal static (long Yields, double ElapsedMs) TimeEscalations(Func<long> escalations, Action yield, List<double> timed, TimeSpan cap)
     {
         long started = Stopwatch.GetTimestamp();
+        long capTicks = (long)(cap.TotalSeconds * Stopwatch.Frequency);
         long taken = 0;
 
-        for (; taken < Yields; taken++)
+        for (; taken < Yields || (timed.Count < MinimumEscalations && Stopwatch.GetTimestamp() - started < capTicks); taken++)
         {
             long count = escalations();
             long callStarted = Stopwatch.GetTimestamp();
