@@ -84,13 +84,25 @@ If you convert and publish a module of your own, its nuget.org page is covered i
 
 ### The break floor
 
-From `go.*` 1.26.10.4, the build checks each converted package it uses against the **break floor**: the newest `go.*`
-release that changed members that compiled code binds. The floor is `go.*` 1.26.10.3, which changed the member a
-`foreach` over a slice binds. A package built below it, such as a `nugetgo.*` revision built against `go.*` 1.26.10.2,
-still restores beside the newer `go.*` packages, and then fails at run time with `MissingMethodException`. So the
-build stops with [`GO2CS3002`](DiagnosticCodes.md), one error for each such package, naming it and the release it
-was built on. Reference the package's revision built for the floor release or later. To build anyway and accept the
-risk, set `<GoAllowBelowBreakFloor>true</GoAllowBelowBreakFloor>` in the project: each error is then a warning.
+The check arrives with `go.*` 1.26.10.4; a project whose `go.lib` is 1.26.10.3 or older is not checked. From that
+release, the build checks each converted package it uses against the **break floor**: the newest `go.*` release that
+changed members that compiled code binds. The floor is `go.*` 1.26.10.3, which changed the member a `foreach` over a
+slice binds. A package built below it, such as a `nugetgo.*` revision built against `go.*` 1.26.10.2, still restores
+beside the newer `go.*` packages, and then fails at run time with `MissingMethodException`. So the build stops before
+compiling anything, with [`GO2CS3002`](DiagnosticCodes.md): one error for each such package, naming it and the release
+it was built on, and one more saying the build stops.
+
+Reference the package's revision built for the floor release or later. On nuget.org a deprecated revision names the
+revision that replaces it, and each revision's `go2cs/source-metadata.txt` names the release it was built on. A
+project converted with `go2cs -recurse=nuget` picks up the newer revision by converting again with
+`-nuget-map-refresh`. To build anyway and accept the risk, set `<GoAllowBelowBreakFloor>true</GoAllowBelowBreakFloor>`
+in the project: each error is then a warning, and the build goes on. The project file cannot lower `GoBreakFloor`,
+because go.lib sets it after the project body, but a `Directory.Build.targets` can, which has the same effect as the
+opt-out.
+
+The check knows a converted module by the `go2cs/source-metadata.txt` that `nugetgo-pack.ps1` writes into every
+package it packs. A `nugetgo.*` package without that file counts as built on an unknown release, below the floor. A
+module packed some other way, under an ID that does not start with `nugetgo.`, is not checked.
 
 ## Imports
 

@@ -148,3 +148,62 @@ About 2-3 lane-days, judgement: the target and registry about 80 lines of MSBuil
 Go; the push-nuget function and its cases about 120 lines of PowerShell; the fixture and its script; the docs. The
 one unknown is §5's first step on every published nugetgo revision; the seat reads them first and amends this note
 if any lacks the line.
+
+## 10. AMENDED 2026-11-09 (P2, after COORD's review)
+
+> **AMENDED 2026-11-09 (P2, `claude/p2-break-floor`, after `docs/phase4/REVIEW-go-break-floor.md` on
+> `claude/coord-breakfloor-review`; COORD ruled "land with changes").** The sections above stand as written at the
+> seat. Where this block disagrees with them, this block holds.
+>
+> - **The build stops (§2, §3).** The per-package errors use `ContinueOnError="ErrorAndContinue"` so every package is
+>   named, and that left `GoCheckBreakFloor` succeeding: CoreCompile, copy-local and publish still ran, and only the
+>   exit code failed. One more `GO2CS3002` error, without ContinueOnError, now follows them ("The build stops here,
+>   before compiling: N go2cs-built package(s) named above are below go.* F"), so the target fails and CoreCompile
+>   never runs. Under `GoAllowBelowBreakFloor=true` that line is not raised. The probe asks for CoreCompile and
+>   requires that it does not run on an error; the fixture requires an empty `bin/` after BELOW.
+> - **A `nugetgo.*` package with no `go2cs/source-metadata.txt` is below the floor (§5).** The seat skipped it, the
+>   opposite of what §5 implied. It now counts as built on an unknown release. Only `nugetgo-pack.ps1` mints
+>   `nugetgo.*` IDs (a converted module's csproj carries no PackageId; `projectFileWriter.go`, `packageIdLine`), and it
+>   writes the file into every package, so the rule cannot fire on a package it packed. A module packed some other way
+>   under another ID is not checked; the consumer guide says so.
+> - **The census §5 and §9 promised was not done at the seat.** It is done now, against nuget.org's flat container:
+>   every published version of the nine `nugetgo.*` IDs the repository names (the search service is refused from this
+>   container, so an ID the repository never names would be missed). 29 revisions, every one carrying
+>   `go2cs/source-metadata.txt` in format v1 with a `go2cs-release` line: uuid 1.6.0 and its revisions 1-3 read
+>   1.24.13.5, 1.26.10.1, .2, .3; hashset 1.0.0 and revisions 2-5 read 1.24.13.5, 1.24.13.5, 1.26.10.1, .2, .3;
+>   mousetrap 1.1.0 and revisions 1-2 read 1.26.10.1, .2, .3; pflag 1.0.9 and revisions 1-3 read 1.24.13.7, 1.26.10.1,
+>   .2, .3; jwt/v5 5.3.1 and revisions 1-3 read 1.24.13.5, 1.26.10.1, .2, .3; x/sync 0.19.0 and revisions 1-3 read
+>   1.24.13.7, 1.26.10.1, .2, .3; cobra 1.10.2 and revisions 1-2 read 1.26.10.1, .2, .3; timefmt-go 0.1.8 and gojq
+>   0.12.19 read 1.26.10.3. Ten other IDs the repository names are not published (404).
+> - **-VerifyOnly (§4).** push-nuget exited before the guard and the floor check under -VerifyOnly. What holds in all
+>   four cases needs no baseline: F parses, sits on R's Go line and is at most R (`Test-GoBreakFloorShape`).
+>   push-nuget checks that in the pre-flight, before -VerifyOnly exits, with R the next release (version.props' line,
+>   build + 1). Whether F must equal R or stay at the baseline's floor depends on the guard's verdict against the
+>   published baseline, so that half runs after a pack only. After the guard the floor is read from the go.lib this
+>   run packed, which is what ships, not from the tree.
+> - **The release-day asserts (§4).** Test-GoApiCompat asserted golib's 12 B3 entries and vendored cryptobyte's 5,
+>   which the 1.26.10.4 release deletes (against the .3 baseline they match nothing, and the guard refuses them). The
+>   asserts now read "at most N, and cites its batch while it carries any".
+> - **A Directory.Build.targets can lower the floor (§2).** §2 says a project cannot. A project BODY cannot, because
+>   package targets import after it; a Directory.Build.targets imports after them (read on the fixture's preprocessed
+>   project: go.lib's buildTransitive import precedes the Directory.Build.targets import) and can set `GoBreakFloor`,
+>   which has the same effect as the opt-out.
+> - **The message (§3)** now says how to find the right revision for a converted module: on nuget.org a deprecated
+>   revision names its replacement, and each revision's `go2cs/source-metadata.txt` names its release; a project
+>   converted with `go2cs -recurse=nuget` re-resolves with `-nuget-map-refresh`.
+> - **Residuals, recorded.** (a) The floor is "what ApiCompat's default rule set sees": a changed baked-in constant, or
+>   a change in the shape of go.gen's output, breaks compiled code without a suppression entry and does not move it.
+>   (b) An exported std function whose signature names a type from an `internal` package is missed by §4's
+>   reachability rule. (c) A package whose ID merely starts with `go.` is checked as a go.* package by its own
+>   version; the opt-out is the remedy for that false positive (the `DiagnosticCodes.md` row says so). (d) Reach: no
+>   check runs for a project that never reaches CoreCompile (an aggregator with nothing to compile), nor for
+>   `publish --no-build` after an opted-out build, by design. The live gap is §7's first: a graph whose go.lib is
+>   1.26.10.3 or older has no target, which the consumer guide now states.
+> - **Ordering for later checks.** When the linux/arm64 RID check lands in go.lib.targets, it is declared before
+>   `GoCheckBreakFloor`, with the same shape, so an unsupported RID is named first.
+> - **Arms added.** The probe: a stopped build, a `nugetgo.*` package with no metadata, and a go.* package whose
+>   compile item GoSelectRidCompileAssets swapped for its `runtimes/<rid>/` twin; it fails without dotnet on PATH
+>   unless `GO2CS_GUARD_NO_DOTNET=1`. The fixture: BELOW leaves `bin/` empty; LIBRARY (an application whose library
+>   project references hashset and opts out fails on its own build, naming hashset); MULTI-TFM (both inner builds of
+>   net10.0 and net10.0-windows fail). Test-GoApiCompat: the shape cases, the pre-flight call before the -VerifyOnly
+>   exit, and the packed floor.
