@@ -7402,7 +7402,7 @@ func executeTestAction(inputPath, outputPath string, options Options) error {
 		if err := publishTestHost(outputPath, testProject, options); err != nil {
 			return err
 		}
-		output, err := runCommandWithTimeoutEnv(testChildTimeout(options), testHostLaunchDir(inputPath, outputPath), options, testHostEnv(inputPath, options), publishedTestHostPath(outputPath, testProject),
+		output, err := runCommandWithTimeoutEnv(testChildTimeout(options), testHostLaunchDir(inputPath, outputPath), convertedHostOptions(options), testHostEnv(inputPath, options), publishedTestHostPath(outputPath, testProject),
 			convertedHostArgs(options)...)
 		fmt.Print(output)
 		return err
@@ -7786,8 +7786,9 @@ type testEnvironmentRecord struct {
 
 // oracleOptions is the options the ORACLE child runs under: the conversion's own, with the target's GOARCH replaced
 // by -test-oracle-goarch when one is given. Only the child environment reads it (runCommandWithTimeoutEnv appends
-// GOOS/GOARCH from targetPlatform last), so the oracle's `go test` builds and runs at that arch while the conversion,
-// the converted host and the manifest keep the target.
+// GOOS/GOARCH from targetPlatform last), so the oracle's `go test` builds and runs at that arch while the conversion
+// and the manifest keep the target. The converted host's environment takes the oracle's GOARCH too
+// (convertedHostOptions), as Go's test binary inherits it.
 //
 // The case is osx-arm64: the darwin corpus is converted once, for darwin/amd64, and the converted host there is a native
 // arm64 .NET process, so an oracle at the target's GOARCH ran under Rosetta and the comparison read Rosetta's own
@@ -7804,6 +7805,17 @@ func oracleOptions(options Options) Options {
 
 	options.targetPlatform = goos + "/" + options.testOracleGOARCH
 	return options
+}
+
+// convertedHostOptions is the options the converted test HOST runs under (its child environment): the oracle's,
+// so the host sees the GOARCH Go's own test binary sees. Go's test binary inherits GOARCH from the oracle's `go test`
+// child, and reads it through buildcfg.GOARCH (go/build's default context) and every `go` command it runs. The darwin
+// host reads runtime.GOARCH from the process (runtime/darwin/goarch_darwin_impl.cs), so on osx-arm64 it is arm64; with
+// the target's GOARCH=amd64 in its environment, go/build's default context and gcimporter's `go list std` read amd64
+// beside it (TestMatch, TestGoodOSArch, and gcimporter's two amd64-only subtests on the osx-arm64 runner, run
+// 42645179767). Unchanged wherever -test-oracle-goarch is unset or equals the target.
+func convertedHostOptions(options Options) Options {
+	return oracleOptions(options)
 }
 
 // testEnvironmentFromOptions derives the record from the same two options testHostRunEnv reads, so
@@ -10496,7 +10508,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 		csArgs = append(csArgs, "-test.skip="+hostFatalSkip)
 	}
 	csEnv := append(testHostEnv(inputPath, options), convertedHostResultEnv(outputPath)...)
-	csOutput, csErr := runCommandWithTimeoutEnv(testChildTimeout(options), testHostLaunchDir(inputPath, outputPath), options, csEnv, publishedTestHostPath(outputPath, testProject), csArgs...)
+	csOutput, csErr := runCommandWithTimeoutEnv(testChildTimeout(options), testHostLaunchDir(inputPath, outputPath), convertedHostOptions(options), csEnv, publishedTestHostPath(outputPath, testProject), csArgs...)
 
 	// The RAW command errors, snapshotted here because the two forgiveness arms far below nil them
 	// out — and the record's diagnostic tail (comparisonStderrTails) is attached on exactly the
