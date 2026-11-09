@@ -109,6 +109,73 @@ public class GoTimerLatenessAgainstGoProbe
         Assert.AreEqual(Firings, before.Length, "the GoTimer arm did not run");
     }
 
+    // GoCriticalTimer.Waiter's paths, on a background thread made as GoTimer's service thread is (C1, 2026-11-09): at
+    // 5c37f9745 AFiringIsCloseToItsDueTime read a tight median of 2.5 ms on osx-arm64 (max 2.6), where TrySleep reads
+    // 0.1 ms. The arms separate the wait's own paths: a fresh waiter per wait; one waiter reused; and one reused
+    // waiter after a Wake that came first, so that wait returns at once and the measured one RE-ARMS the timer it
+    // left registered (EV_ADD on a live knote), which is GoTimer's path when an arm wakes the service thread.
+    [TestMethod]
+    public void TheCriticalWaitersPathsAreMeasured()
+    {
+        if (!OperatingSystem.IsMacOS())
+        {
+            Assert.Inconclusive("GoCriticalTimer.Waiter is macOS's");
+            return;
+        }
+
+        List<string> lines = [];
+
+        var worker = new Thread(() =>
+        {
+            lines.Add(Line("TrySleep 5 ms", Measure(() => GoCriticalTimer.TrySleep(FiveMillisecondsNanos))));
+            lines.Add(Line("fresh Waiter per wait, Wait 5 ms", Measure(() => GoCriticalTimer.Waiter.TryCreate()!.Wait(FiveMillisecondsNanos))));
+
+            GoCriticalTimer.Waiter reused = GoCriticalTimer.Waiter.TryCreate()!;
+            lines.Add(Line("one Waiter reused, Wait 5 ms", Measure(() => reused.Wait(FiveMillisecondsNanos))));
+
+            GoCriticalTimer.Waiter woken = GoCriticalTimer.Waiter.TryCreate()!;
+            double[] afterWake = new double[Firings];
+
+            for (int i = 0; i < Firings; i++)
+            {
+                woken.Wake();
+                woken.Wait(FiveMillisecondsNanos);       // returns at once, leaving the timer armed
+                long start = MonotonicClock.Nanoseconds();
+                woken.Wait(FiveMillisecondsNanos);       // re-arms the live timer
+                afterWake[i] = (MonotonicClock.Nanoseconds() - start - FiveMillisecondsNanos) / 1e6;
+            }
+
+            lines.Add(Line("reused Waiter after a Wake, the re-arming Wait 5 ms", afterWake));
+        })
+        { IsBackground = true, Name = "critical waiter probe" };
+
+        worker.Start();
+        worker.Join();
+        lines.Add(Line("GoTimer 5 ms", GoTimerLateness()));
+
+        string host = $"{System.Runtime.InteropServices.RuntimeInformation.OSDescription.Trim()}, " +
+            $"{System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture}";
+
+        foreach (string line in lines)
+            Console.WriteLine($"READING critical waiter, lateness ms: {line} ({host})");
+
+        Assert.AreEqual(5, lines.Count, "an arm did not run");
+
+        static double[] Measure(Func<bool> wait)
+        {
+            double[] late = new double[Firings];
+
+            for (int i = 0; i < Firings; i++)
+            {
+                long start = MonotonicClock.Nanoseconds();
+                wait();
+                late[i] = (MonotonicClock.Nanoseconds() - start - FiveMillisecondsNanos) / 1e6;
+            }
+
+            return late;
+        }
+    }
+
     // The firings AFiringIsCloseToItsDueTime takes: a fresh GoTimer per firing, due 5 ms out.
     private static double[] GoTimerLateness()
     {
