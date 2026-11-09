@@ -175,4 +175,26 @@ re-dispatch stem rule lets a re-read named `SIG-1R` supersede `SIG-1`.
   - runtime/pprof validated at 146;
   - syscall FAIL on exactly the `TestGetdirentries` residue.
 
+## The net re-read with the dns option at e45fd4feb5 (`reread/NET-DNS.tsv`, COORD 2026-11-09, after batch 271)
+
+One row, net, on both RIDs at master `e45fd4feb57e05707f2a82ed6e54c0bb99d77339`, from os-matrix sweep-shard run
+42617546338. The filter was `net;dns=<Cloudflare's and Google's public resolvers>`: the dns option replaces the hosted
+image's resolver on every enabled network service and flushes the caches before the sweep. It is the post-.3 bank
+amendment COORD ruled "bank as read".
+
+The re-read closed both .3 blockers:
+- osx-arm64's `TestUDPZeroByteBuffer`: the converted recvfrom source decode, batch 271.
+- The NXDOMAIN keys: the image's resolver can answer `invalid.invalid` A/AAAA/MX/NS/TXT with SERVFAIL after about
+  30 s (DNS capture run 42601126242; BOARD 2026-11-09, C1).
+
+Both RIDs validate with no `TestLookupNoSuchHost` line:
+- osx-x64: "matched 551 of 555 Go / 555 C# verdicts; disclosed 4; undisclosed divergences 0". The fourth is
+  `TestDialerFallbackDelay`'s darwin timing entry.
+- osx-arm64: "matched 552 of 555 Go / 555 C# verdicts; disclosed 3; undisclosed divergences 0".
+
+That entry fired on osx-arm64 at .3 (run 42513405068) and on osx-x64 here: a disclosed timing class on either RID.
+The counts meet the arch-strict rule (equal verdicts, nothing undisclosed, 551 + 4 = 552 + 3), so the guard derives
+`darwin: 551 + 4 (osx-x64; osx-arm64: 552 + 3)`. `disclosed` and `divergent` are the summary's disclosed count (net
+names no host-fatal test) and `new` is its undisclosed count; every cell is read from the job log.
+
 <!-- {% endraw %} -->
