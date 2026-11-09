@@ -47,7 +47,11 @@ namespace go.golib;
 /// </para>
 /// <para>
 /// THE WAIT. Windows waits on a high-resolution waitable timer (<see cref="GoHighResolutionTimer"/>, the
-/// object Go's windows runtime uses), with no spin. Elsewhere the service thread waits on its wake event to
+/// object Go's windows runtime uses), with no spin. macOS waits in one kevent call on a kqueue that holds a one-shot
+/// <c>NOTE_CRITICAL</c> timer for the head timer's due time and an <c>EVFILT_USER</c> event an arm triggers
+/// (<see cref="GoCriticalTimer.Waiter"/>): the hosted runners coalesce every plain wait, so a 5 ms timer read a median
+/// 13.7-14.9 ms late on osx-arm64 where Go's own time.AfterFunc read 1.3 ms and the critical timer 0.1 ms
+/// (GolibTests' GoTimerLatenessAgainstGoProbe, run 42595674585). Elsewhere the service thread waits on its wake event to
 /// within a millisecond of the head timer's due time, then sleeps out the final sub-millisecond in 250 µs
 /// libc <c>nanosleep</c> slices, spinning with <see cref="SpinWait"/> only where that call is missing. Only
 /// the head timer is ever waited for that closely, so with one far-future timer armed the service thread is
@@ -185,7 +189,12 @@ public sealed partial class GoTimer
     {
         Volatile.Write(ref s_wakeRequested, 1);
         s_wake.Set();
+        Volatile.Read(ref s_criticalWait)?.Wake();
     }
+
+    // macOS: the service thread's wakeable precise wait, published before its first look at the heap, so an arm that
+    // misses it is one that look sees. Cleared for good on the first failed wait.
+    private static GoCriticalTimer.Waiter? s_criticalWait;
 
     private static void ensureServiceLocked()
     {
@@ -208,6 +217,7 @@ public sealed partial class GoTimer
     private static void service()
     {
         GoHighResolutionTimer? highResolution = GoHighResolutionTimer.TryCreate();
+        Volatile.Write(ref s_criticalWait, GoCriticalTimer.Waiter.TryCreate());
         GoTimer[] due = new GoTimer[16];
 
         while (true)
@@ -283,6 +293,14 @@ public sealed partial class GoTimer
         {
             WaitHandle.WaitAny([highResolution, s_wake]);
             return;
+        }
+
+        if (Volatile.Read(ref s_criticalWait) is { } critical)
+        {
+            if (critical.Wait(remaining))
+                return;
+
+            Volatile.Write(ref s_criticalWait, null);
         }
 
         // To within a millisecond of the due time on the wake event, which counts whole milliseconds (at least

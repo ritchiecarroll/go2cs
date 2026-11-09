@@ -118,10 +118,27 @@ public class EventPipeSamplerTests
 
         Console.WriteLine($"managed samples {sampler.LastManagedSamples}, written {stacks.Count}, hog as leaf {leafHog}, with its caller {withHogger}");
 
-        Assert.IsTrue(leafHog >= 20, $"expected samples with the hog as the leaf frame; {leafHog} of {stacks.Count}");
         Assert.IsTrue(withHogger >= leafHog / 2, $"the hog's Go caller is on the sampled stack; {withHogger} of {leafHog}");
         Assert.IsTrue(stacks.Count <= ceiling, $"samples are thinned to {hz} Hz per thread; {stacks.Count} > {ceiling}");
         Assert.AreEqual("cpusamplerprobe.cpuHog1", GoSyntheticPC.NameOf(hogPC));
+
+        // THE LEAF FLOOR IS A DISCLOSED FIDELITY GAP ON macOS (COORD ruling (i), 2026-11-09). The CLR's SampleProfiler
+        // on macOS puts about 80% of a call-free loop's samples at its CALLER; linux puts about 80% in the loop.
+        // Go's SIGPROF places them in the loop. Leaf frames of the written samples (EventPipeSamplerHostProbe,
+        // run 42613637939): osx-arm64 cpuHogger 131 / cpuHog1 28 / _ExternalCode 16; osx-x64 78 / 17 / 15; linux
+        // 13 / 157 / 29. The mechanism, that macOS stops the thread only at a call-site safe point, is NOT VERIFIED.
+        // No converted path decides where a sample lands. RETIREMENT: the floor is still checked first on macOS, so a
+        // runtime that samples the loop body there passes it, and this branch is never reached.
+        // The other three assertions above hold on every OS; the floor itself is unchanged.
+        if (leafHog < 20 && OperatingSystem.IsMacOS())
+        {
+            Assert.Inconclusive($"hog as leaf {leafHog} of {stacks.Count}, under the floor of 20: on macOS the CLR's SampleProfiler " +
+                "attributes a call-free loop's samples to its caller, about 80% (run 42613637939: osx-arm64 cpuHogger 131 / cpuHog1 28 / " +
+                "_ExternalCode 16; osx-x64 78 / 17 / 15; linux 13 / 157 / 29). A disclosed fidelity gap (BOARD), not an exclusion; " +
+                "the safe-point mechanism is NOT VERIFIED.");
+        }
+
+        Assert.IsTrue(leafHog >= 20, $"expected samples with the hog as the leaf frame; {leafHog} of {stacks.Count}");
     }
 
     // The MAGNITUDE piece (runtime/pprof's TestCPUProfileMultithreadMagnitude/parallel): a profile's

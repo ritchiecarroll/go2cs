@@ -35,7 +35,14 @@ public class HelperSandboxContainmentTests
 
         public SymlinkedRoot()
         {
-            Base = Path.Combine(Path.GetTempPath(), "g2cs-containment-" + Guid.NewGuid().ToString("N"));
+            // The base is the temp path's CANONICAL spelling, so <base>/real/run is physical the way getcwd()
+            // is. On darwin the temp path itself sits behind /var -> /private/var, and a base spelled through it
+            // would make the "physical" run a second symlink spelling rather than the one a child's getcwd()
+            // reports (AToolchainChildUnderAStagedFixtureLinkStartsInRealGorootOnUnix read null on both mac RIDs,
+            // run 42456242089; linux reproduces it with TMPDIR set to a symlink). Windows has no realpath here
+            // and keeps the temp path as given.
+            string temp = (OperatingSystem.IsWindows() ? null : TestHost.RealPath(Path.GetTempPath())) ?? Path.GetTempPath();
+            Base = Path.Combine(temp, "g2cs-containment-" + Guid.NewGuid().ToString("N"));
             string real = Path.Combine(Base, "real");
             PhysicalRun = Path.Combine(real, "run");
             Directory.CreateDirectory(Path.Combine(PhysicalRun, "src", "net", "http", "cgi"));

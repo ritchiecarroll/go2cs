@@ -32,7 +32,9 @@
 // session runs, every thread's CPU time is polled (System.Diagnostics.ProcessThread.TotalProcessorTime:
 // GetThreadTimes on windows, /proc/self/task/<tid>/stat on linux) every CpuPollInterval, and at Stop a
 // thread with a reading keeps round(its CPU time x hz) of its samples, spread evenly over them, in
-// place of the wall-time grid. EventPipe's ThreadID is the OS thread id, the id ProcessThread reports.
+// place of the wall-time grid. EventPipe's ThreadID is the OS thread id, the id ProcessThread reports on
+// linux and windows. On macOS ProcessThread answers in another id space with misread times, so the threads
+// are read through mach there (DarwinThreadCpu), keyed by thread_id, the id EventPipe stamps.
 // A thread that exits between two polls loses at most one interval of CPU time; a thread with no
 // reading keeps the grid.
 //
@@ -404,6 +406,29 @@ public sealed class EventPipeSampler : IGoCpuSampler
 
         try
         {
+            // macOS: ProcessThread answers in another id space and misreads the times (DarwinThreadCpu has the
+            // measurement), so the threads are read through mach, keyed as EventPipe keys its samples.
+            if (OperatingSystem.IsMacOS())
+            {
+                List<(int Thread, TimeSpan Cpu)> readings = [];
+
+                if (DarwinThreadCpu.TryRead(readings))
+                {
+                    lock (m_cpuLock)
+                    {
+                        foreach ((int thread, TimeSpan used) in readings)
+                        {
+                            if (baseline)
+                                m_cpuAtStart[thread] = used;
+
+                            m_cpuLatest[thread] = used;
+                        }
+                    }
+                }
+
+                return;
+            }
+
             using Process self = Process.GetCurrentProcess();
 
             foreach (ProcessThread thread in self.Threads)

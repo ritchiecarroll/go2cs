@@ -195,9 +195,10 @@ public static unsafe class GoLibcCall
     /// Apple silicon passes a variadic callee's variadic arguments on the stack, and open, fcntl, ioctl
     /// and openat are variadic in libSystem. Go's runtime entries store one argument there, read off
     /// runtime/sys_darwin_arm64.s: <c>runtime·syscall</c> stores a3 ("open, fcntl, and ioctl ... put the 3rd
-    /// arg on the stack as well"); <c>runtime·syscall6</c> and <c>runtime·syscall9</c> store a4 ("openat,
-    /// for which the 4th arg must be on the stack"); <c>syscallX</c>, <c>syscall6X</c> and
-    /// <c>syscallPtr</c> store nothing. The converted keystones (syscall/darwin/syscall_darwin_impl.cs)
+    /// arg on the stack as well"); <c>runtime·syscall6</c> stores a4 ("openat, for which the 4th arg must
+    /// be on the stack"); <c>syscallX</c>, <c>syscall6X</c> and <c>syscallPtr</c> store nothing. A
+    /// nine-argument call stores nothing either: its ninth argument travels at <c>[sp]</c> as itself, as Go
+    /// 1.26's <c>syscall9</c> passes it (below). The converted keystones (syscall/darwin/syscall_darwin_impl.cs)
     /// reach this dispatch with exactly those arities and errno rules, so (arity, rule) names the entry.
     /// The runtime's own libcCall trampolines arrive here too: its open and fcntl trampolines are
     /// 3-argument Int32MinusOne calls that store a3 (sys_darwin_arm64.s open_trampoline,
@@ -232,7 +233,7 @@ public static unsafe class GoLibcCall
         return arity switch
         {
             3 => 2,       // runtime·syscall: a3
-            6 or 9 => 3,  // runtime·syscall6 / runtime·syscall9: a4
+            6 => 3,       // runtime·syscall6: a4 (syscall9 is syscalln with n == 9, which stores nothing)
             _ => -1,
         };
     }
@@ -241,9 +242,9 @@ public static unsafe class GoLibcCall
     /// Calls <paramref name="fn"/> with its arguments in the eight register slots and
     /// <paramref name="stackValue"/> as a ninth argument, which AAPCS64 places at <c>[sp]</c>: where a
     /// darwin/arm64 variadic callee's va_arg reads its first variadic argument. A callee that is not
-    /// variadic reads only its own registers. A ninth real argument would also travel at <c>[sp]</c>, so for a
-    /// 9-argument call the slot holds a4 and a9 is not passed, exactly as Go's runtime·syscall9 does (its
-    /// one darwin caller, getnameinfo, has seven).
+    /// variadic reads only its own registers. A ninth real argument would also travel at <c>[sp]</c>, which is
+    /// why no nine-argument call comes here: <see cref="VariadicStackSlot"/> answers -1 for arity 9, and the
+    /// plain call passes a9 at <c>[sp]</c> as Go 1.26's <c>runtime·syscallN_trampoline</c> does.
     /// </summary>
     internal static nuint CallWithVariadicStackSlot(nint fn, ReadOnlySpan<nuint> args, nuint stackValue)
     {

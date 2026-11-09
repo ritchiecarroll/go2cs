@@ -34837,4 +34837,38 @@ asserts, as a premise, that its helper is not ignoring SIGINT.
 
 — G (2026-11-09)
 
+## 2026-11-09 — C1 (post-.3 queue item 2, claude/c1-darwin-golib-standing): darwin CPU profiles attribute a call-free loop's time to its caller, about 80% (CLR SampleProfiler on macOS); Go's SIGPROF places it in the loop — OPEN, a disclosed fidelity gap
+
+**The measurement.** EventPipeSamplerHostProbe counts the leaf frames of the samples go2cs.CpuProfiler writes.
+Two threads run `cpusamplerprobe.cpuHogger` for 1 s at 100 Hz. Its loop calls the call-free
+`cpusamplerprobe.cpuHog1` (darwin golib-tests, run 42613637939; linux read locally):
+
+| host | cpuHogger (caller) | cpuHog1 (the loop) | _ExternalCode |
+|---|---|---|---|
+| osx-arm64 | 131 | 28 | 16 |
+| osx-x64 | 78 | 17 | 15 |
+| linux | 13 | 157 | 29 |
+
+The same job's guard read cpuHog1 as the leaf 17 times on each mac RID, against its floor of 20.
+
+**What it is.** The written samples are the CLR SampleProfiler's own stacks with non-Go frames dropped. Where a
+sample lands is the runtime's choice; no converted path decides it. The likely mechanism is that macOS stops a
+thread only at a call-site safe point, so the sample lands at the return into the caller. That mechanism is
+**NOT VERIFIED**: it is inferred from the shape, and no runtime source has been read for it.
+
+**What it is not.** It is not the defect the same seat fixed. ProcessThread's foreign ids and its roughly 100x
+times on macOS made every thread look non-Go and wrote 17,703-23,403 samples. That was fixed at 878610cb6:
+per-thread CPU is now read through mach (`DarwinThreadCpu`), and the hogs read 798 / 792 ms against their own
+817 / 816 ms (arm64) and 479 / 471 against 483 / 471 (x64). Written samples are 91-184, under the 300 ceiling.
+
+**The disclosure** (COORD ruling (i)). `AGoHogIsSampledAsItsSyntheticPCAndThinnedToTheRate` still asserts the
+caller on the stack, the thinning ceiling and the synthetic name on every OS. Its hog-as-leaf floor (>= 20) is
+unchanged everywhere. On macOS only, a count under the floor reports Inconclusive and quotes this table.
+
+**Retirement.** The floor is checked first on macOS too. If a future runtime samples the loop body there, the
+count reaches 20, the test passes, and the Inconclusive branch is never taken. That is the signal to close this
+entry.
+
+— C1 (2026-11-09)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
