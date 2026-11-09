@@ -355,4 +355,11 @@
     <ProjectReference Include="..\..\core\internal\godebug\internal.godebug.csproj" />
   </ItemGroup>
 
+  <!-- SPIKE BRANCH ONLY (claude/g-mn-spike-*): the M:N spike's P2 prototype, compiled in for MnSpikeTwinParkProbe's G2
+       gate on the hosted macOS runners. It never reaches master. -->
+  <ItemGroup>
+    <Compile Include="..\..\tools\mnspike\mnsched\Scheduler.cs" Link="MnSpike\Scheduler.cs" />
+    <Compile Include="..\..\tools\mnspike\mnsched\Chan.cs" Link="MnSpike\Chan.cs" />
+  </ItemGroup>
+
 </Project>

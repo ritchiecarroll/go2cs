@@ -1,0 +1,7 @@
+# G2 probe (MnSpikeTwinParkProbe), local reading on Windows (win-x64, G-LAPTOP), GolibTests Release, 2026-11-09T10:09Z. The macOS reading is the CI dispatch's.
+  Skipped O0ThreadPerGoroutineParks100k [230 ms]
+  Passed UntwinnedBlocksBeforeTheThreadCap [543 ms]
+ READ G2-BUDGET rid=win-x64 kern.num_taskthreads=n/a procs=12 threads-at-start=31 concurrent-untwinned-blocks=1500/1500 threads-at-max=1519 carrier-start-failures=0 all-finished=True
+  Passed TwinParks100kOnThePrototype [235 ms]
+ READ G2-TWIN rid=win-x64 kern.num_taskthreads=n/a parked=100000/100000 in 0.17s live=100000 carriers=13 procs=12 process-threads=33 private=96MB finished=True
+Total tests: 3

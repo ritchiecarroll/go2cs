@@ -48,6 +48,7 @@ public sealed class Scheduler
     public int CarrierCount { get { lock (m_carriersLock) return m_carriers.Count; } }
     public int Injections;
     public int Handoffs;
+    public int CarrierStartFailures;
 
     public Scheduler(Options options)
     {
@@ -127,7 +128,15 @@ public sealed class Scheduler
     {
         Carrier carrier = new(this);
         lock (m_carriersLock) m_carriers.Add(carrier);
-        carrier.Start();
+
+        try { carrier.Start(); }
+        catch (OutOfMemoryException)
+        {
+            // The OS refused a thread: on macOS, kern.num_taskthreads. Counted, not fatal, so the macOS budget probe
+            // can read how many concurrent synchronous blocks a process holds before the cap.
+            lock (m_carriersLock) m_carriers.Remove(carrier);
+            Interlocked.Increment(ref CarrierStartFailures);
+        }
     }
 
     private void Monitor()
