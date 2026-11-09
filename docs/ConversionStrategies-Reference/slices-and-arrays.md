@@ -1849,7 +1849,7 @@ emitted both public; the CS0111 held fmt's (63 verdicts) and archive/tar's (97) 
 
 The non-generic overload is explicit —
 
-<!-- source: src/gen/go2cs-gen/Templates/InheritedType/ISliceTypeTemplate.cs:88 -->
+<!-- source: src/gen/go2cs-gen/Templates/InheritedType/ISliceTypeTemplate.cs:129 -->
 ```csharp
 ISlice? ISlice.Append(object[] elems) => ((ISlice)m_value).Append(elems);
 ```

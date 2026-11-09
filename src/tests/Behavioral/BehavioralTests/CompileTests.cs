@@ -1357,6 +1357,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedByteSliceFromStringLit() => CheckTarget("NamedByteSliceFromStringLit");
 
     [TestMethod]
+    public void CheckNamedBytesByteSeq() => CheckTarget("NamedBytesByteSeq");
+
+    [TestMethod]
     public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
 
     [TestMethod]
