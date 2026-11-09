@@ -2737,6 +2737,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckVariadicSlotInterfaces() => CheckTarget("VariadicSlotInterfaces");
 
     [TestMethod]
+    public void CheckVendoredPathModuleImport() => CheckTarget("VendoredPathModuleImport");
+
+    [TestMethod]
     public void CheckVersionedImport() => CheckTarget("VersionedImport");
 
     [TestMethod]
