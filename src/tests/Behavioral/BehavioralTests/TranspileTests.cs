@@ -1450,6 +1450,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedPointerFieldAddress() => CheckTarget("NamedPointerFieldAddress");
 
     [TestMethod]
+    public void CheckNamedPointerLocalSurface() => CheckTarget("NamedPointerLocalSurface");
+
+    [TestMethod]
     public void CheckNamedPointerParamArgument() => CheckTarget("NamedPointerParamArgument");
 
     [TestMethod]
