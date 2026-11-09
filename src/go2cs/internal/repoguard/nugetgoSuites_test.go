@@ -14,6 +14,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -67,6 +68,49 @@ func TestNugetgoSuitesPass(t *testing.T) {
 
 			if err != nil {
 				t.Error(nugetgoSuiteFailure(name, pwsh, err, string(output), failLine))
+			}
+		})
+	}
+}
+
+// THE RELEASE ROUTE'S SHELL (release-smoke 42533214613, 2026-11-08). release-nuget.ps1 runs push-nuget.ps1 through
+// `powershell`, Windows PowerShell 5.1, and push-nuget.ps1 imports the src/tools/pushnuget modules there. Their suites
+// ran only under pwsh, so nothing saw that 5.1 reads a BOM-less UTF-8 file as the ANSI code page: every
+// CompatibilitySuppressions.xml Target naming ж read as Ð¶, and the .3 release rehearsal's binary-compatibility guard
+// went red on announced breaks. Those suites therefore also run under Windows PowerShell wherever it exists. A host
+// without it (every non-Windows host) skips, and says so by name.
+func TestPushnugetSuitesPassUnderWindowsPowerShell(t *testing.T) {
+	if runtime.GOOS != "windows" {
+		t.Skip("Windows PowerShell 5.1 exists only on Windows: the src/tools/pushnuget suites did NOT run under the release route's shell on this host")
+	}
+
+	powershell, err := exec.LookPath("powershell")
+	if err != nil {
+		t.Skip("powershell (Windows PowerShell 5.1) is not on PATH: the src/tools/pushnuget suites did NOT run under the release route's shell on this host")
+	}
+
+	suites, err := filepath.Glob(filepath.Join(repoRootFromPackageDir(t), "src", "tools", "pushnuget", "Test-*.ps1"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(suites) == 0 {
+		t.Fatal("no src/tools/pushnuget/Test-*.ps1 suite found: the glob or the tree moved")
+	}
+
+	failLine := regexp.MustCompile(`(?m)^\s*FAIL\s.*$`)
+
+	for _, suite := range suites {
+		name := filepath.Base(suite)
+
+		t.Run(strings.TrimSuffix(name, ".ps1"), func(t *testing.T) {
+			command := nugetgoSuiteCommand(powershell, suite)
+			command.Args = []string{powershell, "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", suite}
+
+			output, err := command.CombinedOutput()
+
+			if err != nil {
+				t.Error(nugetgoSuiteFailure(name, powershell, err, string(output), failLine))
 			}
 		})
 	}

@@ -93,7 +93,8 @@ if ($Unsigned -and $OutDir -eq (Resolve-Path $defaultOutDir -ErrorAction Silentl
 }
 
 if (-not $Version) {
-    $props = ([xml](Get-Content -Raw (Join-Path $SrcRoot 'version.props'))).Project.PropertyGroup
+    # ReadAllText: Windows PowerShell 5.1's Get-Content reads BOM-less UTF-8 as the ANSI code page (release-nuget.ps1).
+    $props = ([xml][System.IO.File]::ReadAllText((Join-Path $SrcRoot 'version.props'))).Project.PropertyGroup
     $Version = "$($props.GoStdLibVersion).$($props.GoBuildNumber)".Trim()
 }
 $release = ($Version -split '-', 2)[0]

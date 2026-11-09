@@ -126,7 +126,13 @@ function Get-GoApiCompatSuppressionMap([Parameter(Mandatory)][string]$CoreDir) {
 # The entries of a suppression file, each with the XML node it came from. Refuses a file whose entry names no asset,
 # or names different assets on its two sides: this guard compares an asset only with its own baseline.
 function Read-GoApiCompatSuppressions([Parameter(Mandatory)][string]$Path) {
-    [xml]$xml = Get-Content -Raw -LiteralPath $Path
+    # XmlDocument.Load, never Get-Content: Windows PowerShell 5.1 reads a BOM-less UTF-8 file as the ANSI code page, and
+    # release-nuget.ps1 runs push-nuget.ps1 under 5.1. Every Target naming zhe (U+0436) came back as two cp1252
+    # characters (U+00D0 U+00B6) and matched nothing, so the guard printed each announced break beside an "unnecessary"
+    # entry for the same member (release-smoke 42533214613, 2026-11-08). Load honors the BOM and the file's own encoding
+    # declaration under either PowerShell.
+    $xml = New-Object System.Xml.XmlDocument
+    $xml.Load((Resolve-Path -LiteralPath $Path).ProviderPath)
     if (-not $xml.Suppressions) { throw "${Path} is not an ApiCompat suppression file (no <Suppressions> root)" }
 
     # Under strict mode a missing child element is an error to read as a property, so each is read by name.
@@ -302,6 +308,12 @@ function Save-GoApiCompatBaseline([System.Net.Http.HttpClient]$Client, [string]$
       NoSurface   the ids whose baseline has no lib/ or runtimes/ asset (go.gen, an analyzer): nothing to compare.
       Failures    every reason the guard is red
     A guard that was asked about at least one package with a baseline and compared no asset is itself a failure.
+
+    $ReleaseVersion is the version the run stands for, when that is not the version it packed: the baseline is then
+    the revision before the release, not before the pack. push-nuget.ps1 -VersionSuffix packs at version.props' build,
+    which is the LAST-PUBLISHED one, so the 1.26.10.3 rehearsal packed 1.26.10.2-ci.<run>. By its own version that
+    compared with .1 and read .2's own changes as breaks the release could never meet (release-smoke 42533214613,
+    2026-11-08). Without it, each package's own version decides, as nugetgo-pack.ps1's real revisions want.
 #>
 function Invoke-GoApiCompatGuard {
     param(
@@ -310,7 +322,8 @@ function Invoke-GoApiCompatGuard {
         [scriptblock]$SuppressionFor = { param($id) $null },
         [Parameter(Mandatory)][string]$FlatContainer,
         [Parameter(Mandatory)][string]$RepoRoot,
-        [Parameter(Mandatory)][string]$WorkDir
+        [Parameter(Mandatory)][string]$WorkDir,
+        [string]$ReleaseVersion
     )
 
     Add-Type -AssemblyName System.Net.Http
@@ -329,7 +342,7 @@ function Invoke-GoApiCompatGuard {
         foreach ($package in $Packages) {
             $id = & $Identity $package.FullName
             $published = @(Get-GoApiCompatPublishedVersions $client $flat $id.Id)
-            $baselineVersion = Get-GoApiCompatBaselineVersion -Published $published -Current $id.Version
+            $baselineVersion = Get-GoApiCompatBaselineVersion -Published $published -Current $(if ($ReleaseVersion) { $ReleaseVersion } else { $id.Version })
             if (-not $baselineVersion) { $noBaseline.Add("$($id.Id) $($id.Version)"); continue }
 
             $baseline = Save-GoApiCompatBaseline $client $flat $id.Id $baselineVersion (Join-Path $WorkDir '_baselines')

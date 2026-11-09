@@ -159,10 +159,40 @@ try {
     $threw = $false; try { Read-GoApiCompatSuppressions $split | Out-Null } catch { $threw = $_.Exception.Message.Contains('same asset') }
     Check 'an entry naming two assets is refused' $threw 'read without a refusal'
 
+    # Nearly every converted member's Target names zhe (U+0436, the heap box), and the tree's suppression files carry no
+    # BOM. Windows PowerShell 5.1 -- the shell release-nuget.ps1 drives push-nuget.ps1 through -- read them as the ANSI
+    # code page, so each such Target came back with zhe as two cp1252 characters (U+00D0 U+00B6), matched nothing, and
+    # the guard printed the break beside an "unnecessary" entry for the same member (release-smoke 42533214613,
+    # 2026-11-08). TestPushnugetSuitesPassUnderWindowsPowerShell runs this suite under 5.1 as well. This file has no BOM
+    # either, so the strings below spell zhe as [char]0x0436, never literally.
+    Write-Host 'a suppression file is read as UTF-8, BOM or not, under either PowerShell'
+    $zhe = [string][char]0x0436
+    $rangeTarget = 'M:go.builtin.range``1(go.' + $zhe + '{``0})'
+    $noBom = Join-Path $work 'nobom.xml'
+    [System.IO.File]::WriteAllText($noBom, "<?xml version=`"1.0`" encoding=`"utf-8`"?>`n<Suppressions>`n$(Entry 'CP0002' $rangeTarget $lib)`n</Suppressions>", (New-Object System.Text.UTF8Encoding($false)))
+    $read = @(Read-GoApiCompatSuppressions $noBom)
+    Check "a BOM-less file's non-ASCII Target reads as written (PowerShell $($PSVersionTable.PSVersion))" (
+        $read.Count -eq 1 -and $read[0].Target -ceq $rangeTarget) "read '$(@($read | ForEach-Object { $_.Target }) -join ', ')'"
+    foreach ($file in @((Get-GoApiCompatSuppressionMap (Join-Path $repoRoot 'src/core')).Values)) {
+        $written = @([regex]::Matches([System.IO.File]::ReadAllText($file, [System.Text.Encoding]::UTF8), '<Target>([^<]*)</Target>') | ForEach-Object { [System.Net.WebUtility]::HtmlDecode($_.Groups[1].Value) })
+        $readBack = @(Read-GoApiCompatSuppressions $file | ForEach-Object { $_.Target })
+        $differ = @(for ($i = 0; $i -lt [Math]::Max($written.Count, $readBack.Count); $i++) { if ($i -ge $written.Count -or $i -ge $readBack.Count -or $written[$i] -cne $readBack[$i]) { $i } })
+        $name = Split-Path -Leaf (Split-Path -Parent $file)
+        Check "every Target of $name's suppression file reads as written ($(@($written | Where-Object { $_.Contains($zhe) }).Count) of $($written.Count) name zhe)" (
+            $differ.Count -eq 0 -and $written.Count -gt 0) "$($differ.Count) of $($written.Count) differ; the first read back as '$(if ($differ.Count -and $differ[0] -lt $readBack.Count) { $readBack[$differ[0]] })'"
+    }
+
     Write-Host 'the baseline is the last published revision on the same line'
     $published = @('1.26.10', '1.26.10.1', '1.26.10.2', '1.26.10.3', '1.26.10.2-local.1', '1.27.0.1', '1.24.13.7')
     Check 'a release takes the revision before it' ((Get-GoApiCompatBaselineVersion $published '1.26.10.3') -ceq '1.26.10.2') "$(Get-GoApiCompatBaselineVersion $published '1.26.10.3')"
     Check 'a local rehearsal compares with the published release below it' ((Get-GoApiCompatBaselineVersion $published '1.26.10.3-local.1') -ceq '1.26.10.2') "$(Get-GoApiCompatBaselineVersion $published '1.26.10.3-local.1')"
+    # But push-nuget.ps1 -VersionSuffix packs at version.props' build, which is the LAST-PUBLISHED one: the .3
+    # rehearsal packed 1.26.10.2-ci.<run>, whose own baseline is .1, so it compared with a revision the release does not
+    # follow and read .2's own changes as breaks (release-smoke 42533214613, 2026-11-08). The guard therefore takes the
+    # release version the run stands for, and push-nuget.ps1 passes the would-be version on a pack-only run.
+    Check 'a pack at the last-published build, by its own version, would compare with the revision before that' ((Get-GoApiCompatBaselineVersion $published '1.26.10.2-ci.1') -ceq '1.26.10.1') "$(Get-GoApiCompatBaselineVersion $published '1.26.10.2-ci.1')"
+    $guardParams = (Get-Command Invoke-GoApiCompatGuard).Parameters
+    Check 'the guard takes the release version a run stands for' ($guardParams.ContainsKey('ReleaseVersion')) 'Invoke-GoApiCompatGuard has no -ReleaseVersion'
     Check 'the first release of a Go minor has no baseline' ($null -eq (Get-GoApiCompatBaselineVersion $published '1.27.0.0')) "$(Get-GoApiCompatBaselineVersion $published '1.27.0.0')"
     Check 'a new package has no baseline' ($null -eq (Get-GoApiCompatBaselineVersion @() '1.26.10.3')) 'a baseline from nothing'
     Check 'a module revision takes its own module version''s previous revision' ((Get-GoApiCompatBaselineVersion @('1.0.300', '1.0.300.1', '1.0.300.2', '1.0.301') '1.0.300.3') -ceq '1.0.300.2') "$(Get-GoApiCompatBaselineVersion @('1.0.300', '1.0.300.1', '1.0.300.2', '1.0.301') '1.0.300.3')"
@@ -201,6 +231,7 @@ try {
     Check 'push-nuget.ps1 runs the guard over the merged packages' ($push.Contains('Invoke-GoApiCompatGuard')) 'no guard call'
     Check 'push-nuget.ps1 finds suppression files through the directory map' ($push.Contains('Get-GoApiCompatSuppressionMap')) 'no map call'
     Check 'push-nuget.ps1 refuses a suppression file that names no packed package' ($push.Contains('names no packed package')) 'no orphan check'
+    Check 'push-nuget.ps1 compares a pack-only run with what its release would follow' ($push -match '-ReleaseVersion \$guardReleaseVersion' -and $push -match '\$guardReleaseVersion = if \(\$dryRun\) \{ \$wouldBeVersion \} else \{ \$fullVersion \}') 'the guard is not given the would-be version'
     $pack = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/tools/nugetgo/nugetgo-pack.ps1'))
     Check 'nugetgo-pack.ps1 compares a module with its previous revision' ($pack.Contains('Invoke-GoApiCompatGuard')) 'no guard call'
 }
