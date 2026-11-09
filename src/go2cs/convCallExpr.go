@@ -1049,6 +1049,27 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 		}
 
+		// A `~[]byte | ~string` union-constrained value converted to a NAMED []byte or a NAMED string -
+		// jsontext's `Value(b)` over `type Value []byte`. A type parameter has no conversion to the
+		// [GoType] wrapper (CS0030), so the value takes the union's own conversion first - golib's
+		// ToSlice, which shares a slice argument's backing and copies a string's bytes as Go's `[]byte(b)`
+		// does, or ToGoString - and the wrapper's conversion from its underlying then keeps that window:
+		// `(Value)b.ToSlice()`, `(Ptr)b.ToGoString()`. The `[]byte(b)` and `string(b)` cases are below.
+		if tp, ok := types.Unalias(v.getType(arg, false)).(*types.TypeParam); ok && typeParamIsStringByteUnion(tp) {
+			if named, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Named); ok {
+				switch under := named.Underlying().(type) {
+				case *types.Slice:
+					if elem, ok := types.Unalias(under.Elem()).(*types.Basic); ok && elem.Kind() == types.Byte {
+						return fmt.Sprintf("(%s)%s.ToSlice()", targetTypeName, expr)
+					}
+				case *types.Basic:
+					if under.Kind() == types.String {
+						return fmt.Sprintf("(%s)%s.ToGoString()", targetTypeName, expr)
+					}
+				}
+			}
+		}
+
 		if targetTypeName == "@string" {
 			// Check if it is a generic type parameter - Go will have already
 			// validated constraint, so we can just cast to string directly
