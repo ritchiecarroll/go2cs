@@ -1699,6 +1699,30 @@ public sealed class Goroutine
     }
 
     /// <summary>
+    /// Marks a thread golib did not create, and that carries no goroutine identity, as a goroutine for the span of
+    /// one native-to-Go callback, and gives the thread back clean when the scope ends.
+    /// </summary>
+    /// <remarks>
+    /// Go's <c>cgocallback</c> finds no <c>g</c> on such a thread, binds an extra M (<c>needAndBindM</c>), runs the
+    /// callback as a goroutine on it, and gives the M back when the callback returns (<c>dropm</c>). The thread is a
+    /// C library's and outlives the callback, so ending the scope does what a pooled thread's reuse does: every
+    /// registered thread-static is reset (<see cref="GoroutineThreadState"/>), and a name the scope gave the thread
+    /// is taken back. Otherwise exactly <see cref="Enter()"/>, including the inert scope on a thread that already has
+    /// an identity (docs/phase4/DESIGN-native-call-seam.md §6.3, its 2026-11-08 block).
+    /// </remarks>
+    public static Scope EnterForeignCallback()
+    {
+        if (t_current is not null)
+            return default;
+
+        bool named = Thread.CurrentThread.Name is not null;
+        Goroutine goroutine = Register(isMain: false, creator: null, parentId: 0, entry: null, s_profileLabels.Value);
+        _ = Adopt(goroutine);
+
+        return new Scope(goroutine, owned: true, dropThread: true, clearName: !named);
+    }
+
+    /// <summary>
     /// Retires the goroutine identity a matching <see cref="Enter"/> minted.
     /// </summary>
     public readonly struct Scope : IDisposable
@@ -1709,10 +1733,17 @@ public sealed class Goroutine
         // and owns it; EnterAsMain() only lent this thread an identity that outlives the scope.
         private readonly bool m_owned;
 
-        internal Scope(Goroutine goroutine, bool owned)
+        // Whether disposing also gives the thread back as the pool gives back a reused one, and whether the
+        // name Adopt gave it goes too: Go's dropm, for a foreign thread (EnterForeignCallback).
+        private readonly bool m_dropThread;
+        private readonly bool m_clearName;
+
+        internal Scope(Goroutine goroutine, bool owned, bool dropThread = false, bool clearName = false)
         {
             m_goroutine = goroutine;
             m_owned = owned;
+            m_dropThread = dropThread;
+            m_clearName = clearName;
         }
 
         public void Dispose()
@@ -1742,6 +1773,14 @@ public sealed class Goroutine
                     ExecutionTracer.OnDestroy(m_goroutine);
 
                 Unregister(m_goroutine);
+            }
+
+            if (m_dropThread)
+            {
+                GoroutineThreadState.ResetForReuse();
+
+                if (m_clearName)
+                    Thread.CurrentThread.Name = null;
             }
         }
     }

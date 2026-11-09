@@ -94,28 +94,53 @@ partial class runtime_package
     // ReturnToNative. Under M:N the goroutine is implicitly locked to its thread for the whole callback, because a
     // native frame is below it (§12.1's M7); under today's 1:1 model it always is.
     //
-    // The crossing is INERT where no native call is open, and the callback runs as plain Go code (§6.3's dated block).
-    // A pointer invoked outside any bracketed call: Go throws there (exitsyscall, "syscall frame is no longer valid");
-    // go2cs deliberately does not, since a throw would unwind into native code. A thread a C library created, with no
-    // goroutine identity: Go attaches an extra M; here that is an open gap. The returned flags: 1, the seam was
-    // re-entered; 2, the status moved. The status moves only where it is _Gsyscall, so a crossing opened by
-    // GoNativeCall alone (no runtime family below it) re-enters the seam and leaves the status as it found it.
-    public static int syscallCallbackEnter()
+    // Where no native call is open the crossing re-enters nothing (§6.3's dated block), in two cases. A pointer
+    // invoked outside any bracketed call: Go throws there (exitsyscall, "syscall frame is no longer valid"); go2cs
+    // deliberately does not, since a throw would unwind into native code, and the callback runs as plain Go code. A
+    // thread a C library created, with no goroutine identity: Go binds an extra M and runs the callback as a goroutine
+    // (needm), dropping it on return (dropm); here the callback runs inside Goroutine.EnterForeignCallback's scope,
+    // which gives the thread back clean (S-c2). The flags: 1, the seam was re-entered; 2, the status moved; 4, a
+    // foreign thread was attached. The status moves only where it is _Gsyscall, so a crossing opened by GoNativeCall
+    // alone (no runtime family below it) re-enters the seam and leaves the status as it found it.
+    public readonly struct GoCallbackCrossing
+    {
+        internal readonly int Entered;
+        internal readonly Goroutine.Scope Attached;
+
+        internal GoCallbackCrossing(int entered, Goroutine.Scope attached = default)
+        {
+            Entered = entered;
+            Attached = attached;
+        }
+    }
+
+    public static GoCallbackCrossing syscallCallbackEnter()
     {
         int depth = GoNativeCall.TransitionDepth;
 
-        if (depth <= 0 || (depth & 1) == 0)
-            return 0;
+        if (depth < 0)
+            return new GoCallbackCrossing(4, Goroutine.EnterForeignCallback());
+
+        if ((depth & 1) == 0)
+            return default;
 
         GoNativeCall.ReenterManaged();
 
         ж<g> gp = getg();
 
-        return gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Gsyscall, (uint32)_Grunning) ? 3 : 1;
+        return new GoCallbackCrossing(gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Gsyscall, (uint32)_Grunning) ? 3 : 1);
     }
 
-    public static void syscallCallbackExit(int entered)
+    public static void syscallCallbackExit(GoCallbackCrossing crossing)
     {
+        int entered = crossing.Entered;
+
+        if ((entered & 4) != 0)
+        {
+            crossing.Attached.Dispose();
+            return;
+        }
+
         if (entered == 0)
             return;
 

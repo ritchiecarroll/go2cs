@@ -135,7 +135,8 @@ partial class syscall_package
     //
     // Each shim crosses back into Go as cgocallbackg does, through the runtime's callback pair
     // (syscallCallbackEnter / syscallCallbackExit; DESIGN-native-call-seam §6.3, F-3): the Go function runs
-    // _Grunning, one transition level inside the native call that called it back.
+    // _Grunning, one transition level inside the native call that called it back. On a thread with no goroutine
+    // identity it runs as a goroutine attached for the callback's span, as Go's needm/dropm do (S-c2).
 
     private static class GoCallbackBinder0<TR>
     {
@@ -145,7 +146,7 @@ partial class syscall_package
             var f = (Func<TR>)Delegate.CreateDelegate(typeof(Func<TR>), d.Target, d.Method);
             return new GoCallbackShim0(() =>
             {
-                int entered = runtime_package.syscallCallbackEnter();
+                runtime_package.GoCallbackCrossing entered = runtime_package.syscallCallbackEnter();
 
                 try { return goCallbackToWord(f()); }
                 finally { runtime_package.syscallCallbackExit(entered); }
@@ -162,7 +163,7 @@ partial class syscall_package
             var f = (Func<T1, TR>)Delegate.CreateDelegate(typeof(Func<T1, TR>), d.Target, d.Method);
             return new GoCallbackShim1(a1 =>
             {
-                int entered = runtime_package.syscallCallbackEnter();
+                runtime_package.GoCallbackCrossing entered = runtime_package.syscallCallbackEnter();
 
                 try { return goCallbackToWord(f(goCallbackFromWord<T1>(a1))); }
                 finally { runtime_package.syscallCallbackExit(entered); }
@@ -179,7 +180,7 @@ partial class syscall_package
             var f = (Func<T1, T2, TR>)Delegate.CreateDelegate(typeof(Func<T1, T2, TR>), d.Target, d.Method);
             return new GoCallbackShim2((a1, a2) =>
             {
-                int entered = runtime_package.syscallCallbackEnter();
+                runtime_package.GoCallbackCrossing entered = runtime_package.syscallCallbackEnter();
 
                 try { return goCallbackToWord(f(goCallbackFromWord<T1>(a1), goCallbackFromWord<T2>(a2))); }
                 finally { runtime_package.syscallCallbackExit(entered); }
@@ -198,7 +199,7 @@ partial class syscall_package
                 typeof(Func<T1, T2, T3, T4, TR>), d.Target, d.Method);
             return new GoCallbackShim4((a1, a2, a3, a4) =>
             {
-                int entered = runtime_package.syscallCallbackEnter();
+                runtime_package.GoCallbackCrossing entered = runtime_package.syscallCallbackEnter();
 
                 try
                 {
