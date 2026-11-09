@@ -683,6 +683,9 @@
     <Project Path="tests/Behavioral/JsonFixedArrayUnmarshal/JsonFixedArrayUnmarshal.csproj" />
     <Project Path="tests/Behavioral/JsonUnmarshalerDispatch/JsonUnmarshalerDispatch.csproj" />
     <Project Path="tests/Behavioral/KeyedLiteralIfaceAssign/KeyedLiteralIfaceAssign.csproj" />
+    <Project Path="tests/Behavioral/KeyedLiteralNamedForeignStruct/KeyedLiteralNamedForeignStruct.csproj" />
+    <Project Path="tests/Behavioral/KeyedLiteralNamedForeignStruct/guid/KeyedLiteralNamedForeignStruct.guid.csproj" />
+    <Project Path="tests/Behavioral/KeyedLiteralNamedForeignStruct/win/KeyedLiteralNamedForeignStruct.win.csproj" />
     <Project Path="tests/Behavioral/KeywordNamedTypes/KeywordNamedTypes.csproj" />
     <Project Path="tests/Behavioral/KeywordTrueFalseIdent/KeywordTrueFalseIdent.csproj" />
     <Project Path="tests/Behavioral/LambdaFunctions/LambdaFunctions.csproj" />
