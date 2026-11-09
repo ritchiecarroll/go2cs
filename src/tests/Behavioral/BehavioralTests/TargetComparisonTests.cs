@@ -910,6 +910,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGoHostModuleShadow() => CheckTarget("GoHostModuleShadow");
 
     [TestMethod]
+    public void CheckGoImageCopyThroughView() => CheckTarget("GoImageCopyThroughView");
+
+    [TestMethod]
     public void CheckGoNamespaceShadow() => CheckTarget("GoNamespaceShadow");
 
     [TestMethod]

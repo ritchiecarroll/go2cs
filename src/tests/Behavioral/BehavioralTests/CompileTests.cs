@@ -907,6 +907,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGoHostModuleShadow() => CheckTarget("GoHostModuleShadow");
 
     [TestMethod]
+    public void CheckGoImageCopyThroughView() => CheckTarget("GoImageCopyThroughView");
+
+    [TestMethod]
     public void CheckGoNamespaceShadow() => CheckTarget("GoNamespaceShadow");
 
     [TestMethod]

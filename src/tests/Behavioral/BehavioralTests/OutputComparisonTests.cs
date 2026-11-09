@@ -869,6 +869,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGoHostModuleShadow() => CheckTarget("GoHostModuleShadow");
 
     [TestMethod]
+    public void CheckGoImageCopyThroughView() => CheckTarget("GoImageCopyThroughView");
+
+    [TestMethod]
     public void CheckGoNamespaceShadow() => CheckTarget("GoNamespaceShadow");
 
     [TestMethod]
