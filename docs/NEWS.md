@@ -261,7 +261,10 @@ pointer- or interface-typed variable is still handed over as a copy ([Limitation
 breaking change for compiled C# code**: each exported variable of a value type is now a `ref` property over its
 storage, not a field, so an assembly compiled against 1.26.10.1 must be rebuilt against 1.26.10.2. C# source that
 reads or assigns `pkg.V` compiles unchanged. go.* packages now depend on each other at the exact release version,
-so a project that mixes 1.26.10.1 and 1.26.10.2 packages fails at restore and names them. A read of such a variable
+so when two of a project's dependencies need different releases of one go.* package, the restore fails and names
+them (NU1107). A direct reference to that package overrides the exact versions with NU1608 warnings, and the mixed
+set can then fail at run time with `MissingFieldException`, so keep every go.* package at one release, or treat
+NU1608 as an error (`<WarningsAsErrors>NU1608</WarningsAsErrors>`). A read of such a variable
 costs about 0.5 ns more than a field read on the JIT, and about 0.7 to 0.9 ns more under Native AOT (measured on
 `win-x64`, one development machine).
 
