@@ -34,6 +34,7 @@ artifact-read `docs/phase4/rebank-1.26.10.2/darwin/C1-10.tsv` exactly, all 38 li
 | `darwin_seg` | the roster's darwin segment at the tip for this RID (`Get-RosterRowExpectation -Rid`), `expected/disclosed`, or `-` where the row has none |
 | `win_differs` | derived: `yes` when the darwin segment differs from the windows columns |
 | `run`, `wall_s` | READ from the log |
+| `absent` | (optional; COORD 2026-11-10) the verdicts this RID LACKS against the other RID's reading, ';'-separated, read from the two comparison artifacts; `-` or empty for none. The arch-count form banks a RID-dependent verdict count only when the shorter RID names every missing verdict here (check-roster-format.ps1 Get-ArchCountReading) |
 
 ## The fiat constant-time disassembly on osx-arm64 (`../fiat-osx-arm64/`)
 
@@ -254,6 +255,9 @@ the seam's head, above, which batch 280 landed. The other three rows have no ear
   TestImportStdLib/runtime/race/internal/amd64v1, the two amd64-only std packages. No verdict differs. The guard's
   arch-strict form needs EQUAL verdicts, so a RID-dependent verdict COUNT with nothing divergent has no form. The row
   carries no segment, which the guard accepts, until COORD rules on one.
+  - AMENDED 2026-11-10 (COORD ruling: the arch-count form): GOARCH-279.tsv gains the `absent` column, and osx-arm64's
+    gcimporter line names those two verdicts in it. The guard and annotate_darwin.py now bank the shape, refusing any
+    count difference the column does not wholly name, and gcimporter takes `636 (osx-x64; osx-arm64: 634)`.
 
 `disclosed` is the comparison's disclosure-list length and `divergent` the non-matching verdicts. `new` is the summary's
 undisclosed count. `win_differs` compares the reading with the windows columns, since these rows carried no darwin
