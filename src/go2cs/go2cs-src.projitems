@@ -224,6 +224,7 @@
     <None Include="$(MSBuildThisFileDirectory)fixedSkipCallerClosure_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fixtureWritesTracked_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foldedShiftOperand_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)forClauseReAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignConstraintProxy.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignConstraintProxy_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignFieldConsumer_test.go" />
