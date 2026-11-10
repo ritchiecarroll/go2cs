@@ -7,11 +7,12 @@ refuses to load `ast_package`:
     System.TypeLoadException: Type 'go.github.com.microsoft.TypeScript.tsc.internal.ast_package' from assembly
     'github.com.microsoft.TypeScript.tsc.internal.ast, ...' contains more methods than the current implementation allows.
 
-`ast_package` has 116,102 method definitions. The repro below puts the measured threshold for a package class between
-**65,505 method definitions (loads) and 65,523 (does not)**. That is lower than 65,524, the figure read from
-dotnet/runtime v10.0.0's `MAX_SLOT_INDEX` (65535 - 10). A likely reason, NOT yet verified: the loader counts slots, not
-definitions, and a class also carries `System.Object`'s 4 virtual slots, which would put the last loadable count at
-65,520. 107,787 of ast_package's methods (93%) are `[GoPromoted]` forwarders
+`ast_package` has 116,102 method definitions. The repro below pins the threshold for a compiled package class
+exactly. **65,521 method definitions load; 65,522 do not.** That is not 65,524, the figure read from
+dotnet/runtime v10.0.0's `MAX_SLOT_INDEX` (65535 - 10). It matches the law P1 measured separately across nine type
+shapes: inherited virtual slots + (definitions - overrides) <= 65,525. A static class inherits `System.Object`'s 4
+virtual slots, so 4 + 65,521 = 65,525. A guard threshold must come from this measurement, not from the source
+constant. 107,787 of ast_package's methods (93%) are `[GoPromoted]` forwarders
 that go2cs-gen's TypeGenerator emits into the one package class: a `this ref T` / `this ж<T>` pair per promoted
 method per embedding type. TypeScript's `internal/ast` embeds `Node` (through `NodeDefault`) in about 214 node types.
 
@@ -41,10 +42,29 @@ At go2cs master **66a2e023ca**, the generated package class `main_package` has e
 | 697 | 46 | 65,523 | `TypeLoadException` on `go.repro.main_package` before `main` |
 | 250 | 131 | 66,005 | `TypeLoadException` on `go.repro.main_package` before `main`, the same text as ast |
 
-The runs were meant to bracket 65,524 with 65,523 and 65,525; the count is always odd, so 65,524 itself cannot be
-produced. 65,523 already fails, so the 65,525 run was stopped as redundant. The last loadable count lies between
-65,505 and 65,521. A red-first test should use 65,505 (N=250, M=130) as the loading control and 65,523 or above as the
-failing arm. `repro-results.txt` holds the four result blocks.
+**Pinning the edge: the K axis.** The optional fourth argument K adds K plain package funcs. Each adds exactly one
+method (measured: count = 2NM + 2N + 5 + K). Every K run keeps the loading control's shape, N=250 and M=130, so K is
+the only thing that changes:
+
+| K | `main_package` methods (measured) | Predicted beforehand | Result |
+|---|---|---|---|
+| 14 | 65,519 | loads (i7 and P1) | loads; output matches Go |
+| 16 | 65,521 | fails (i7's Object-slot hypothesis, edge 65,520); loads (P1's law) | **loads**; output matches Go. i7's hypothesis is FALSIFIED |
+| 17 | 65,522 | fails (P1's law) | `TypeLoadException` before `main` |
+| 18 | 65,523 | fails (count-only reading; P1's law) | `TypeLoadException` before `main` |
+
+K=18 fails at the same count as the N=697, M=46 run, at a different shape. From metadata, the two failing assemblies
+and the loading K=16 one show the same method shape in the package class:
+- every method is static;
+- every method has generic arity 0;
+- there are no MethodImpls and no bodiless methods.
+So the count alone decides (`measured-shape-compare.txt`, from `methodflags.ps1.txt`).
+
+An earlier plan bracketed 65,524 with 65,523 and 65,525. The 65,525 run was stopped once 65,523 had failed; the K
+axis replaces it.
+
+For a red-first test: 65,521 (N=250, M=130, K=16) is the highest count that loads, and 65,522 (K=17) is the lowest
+that fails. `repro-results.txt` holds every result block.
 
 To rerun: `python gen_methodcap.py <dir> <N> <M>`, then convert and build `<dir>` as any `-recurse` module. Builds
 at N×M ≈ 32k take about 16 minutes on the i7.

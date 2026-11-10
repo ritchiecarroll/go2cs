@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# repro-methodcap.sh <N> <M> : generate the method-cap repro (gen_methodcap.py), then Go oracle -> go2cs -recurse (box lock,
+# repro-methodcap.sh <N> <M> [K] : generate the method-cap repro (gen_methodcap.py), then Go oracle -> go2cs -recurse (box lock,
 # pinned) -> dotnet build (pinned, no node reuse, no shared compilation) -> run -> compare, at go2cs master 66a2e023ca.
 # Also records main_package's method count from the built assembly's metadata (methodcount.ps1; nothing is loaded).
 # Writes logs/repro-mcap-<name>.result.
-N="$1"; M="$2"; R=/h/go2cs-ts-exp; sha=66a2e023ca; WT=$R/go2cs-gate-$sha
-name="methodcap-n$N-m$M"; src="$R/repros/$name"; out="$R/out/repro-mcap-$name"; res="$R/logs/repro-mcap-$name.result"
+N="$1"; M="$2"; K="${3:-0}"; R=/h/go2cs-ts-exp; sha=66a2e023ca; WT=$R/go2cs-gate-$sha
+name="methodcap-n$N-m$M"; [ "$K" != 0 ] && name="$name-k$K"; src="$R/repros/$name"; out="$R/out/repro-mcap-$name"; res="$R/logs/repro-mcap-$name.result"
 source $R/scripts/env.sh
 export GO2CS_EXE="H:\\go2cs-ts-exp\\bin\\go2cs-$sha.exe" GO2CS_REPO="$WT" MSBUILDDISABLENODEREUSE=1
 rm -rf "$src" "$out"
-python -I "$(cygpath -w $R/scratch/proof/gen_methodcap.py)" "$(cygpath -w "$src")" "$N" "$M" || exit 2
+python -I "$(cygpath -w $R/scratch/proof/gen_methodcap.py)" "$(cygpath -w "$src")" "$N" "$M" "$K" || exit 2
 gout=$(cd "$src" && GOWORK=off go run . 2>&1); grc=$?
 bash $R/scripts/convert.sh "repro-mcap-$name" -recurse -go2cspath "$(cygpath -w "$WT/src")" "$(cygpath -w "$src")" "$(cygpath -w "$out")" >/dev/null; crc=$?
 proj=$(find "$out/src/repro/$name" -maxdepth 1 -name '*.csproj' 2>/dev/null | head -1)
@@ -29,7 +29,7 @@ if [ $crc -eq 0 ] && [ -n "$proj" ]; then
 fi
 match=NO; [ $brc -eq 0 ] && [ "$rout" = "$gout" ] && match=YES
 {
-  echo "repro $name  N=$N M=$M 2*N*M=$((2*N*M))  go2cs=$(git -C $WT rev-parse --short=10 HEAD)"
+  echo "repro $name  N=$N M=$M K=$K 2*N*M=$((2*N*M))  go2cs=$(git -C $WT rev-parse --short=10 HEAD)"
   echo "GO    rc=$grc: $gout"
   echo "CONV  rc=$crc"
   echo "BUILD rc=$brc t=${bt:-0}s $( [ $brc -ne 0 ] && grep -E 'error [A-Z]+[0-9]+' "$R/logs/repro-mcap-$name.build.txt" 2>/dev/null | sort -u | head -3 | cut -c1-220 | tr '\n' '|')"

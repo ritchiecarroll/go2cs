@@ -40,3 +40,49 @@ METHODS methodcap-n250-m131.dll: 33408 types, 135050 methods total
 |
 RUN   rc=127: Unhandled exception. System.TypeLoadException: Type 'go.repro.main_package' from assembly 'methodcap-n250-m131, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' contains more methods than the current implementation allows.
 MATCH NO
+
+# The K axis: N=250, M=130 (the loading control's shape), K plain package funcs added; only K differs.
+
+repro methodcap-n250-m130-k14  N=250 M=130 K=14 2*N*M=65000  go2cs=66a2e023ca
+GO    rc=0: N 250 M 130 promoted forwarders 2*N*M 65000 calls 1 251 K 14 F 13
+CONV  rc=0
+BUILD rc=0 t=976s 
+METHODS methodcap-n250-m130-k14.dll: 33155 types, 134041 methods total
+|    65519  go.repro.main_package
+|      132  .<>c
+|
+RUN   rc=0: N 250 M 130 promoted forwarders 2*N*M 65000 calls 1 251 K 14 F 13
+MATCH YES
+
+repro methodcap-n250-m130-k16  N=250 M=130 K=16 2*N*M=65000  go2cs=66a2e023ca
+GO    rc=0: N 250 M 130 promoted forwarders 2*N*M 65000 calls 1 251 K 16 F 15
+CONV  rc=0
+BUILD rc=0 t=1011s 
+METHODS methodcap-n250-m130-k16.dll: 33155 types, 134043 methods total
+|    65521  go.repro.main_package
+|      132  .<>c
+|
+RUN   rc=0: N 250 M 130 promoted forwarders 2*N*M 65000 calls 1 251 K 16 F 15
+MATCH YES
+
+repro methodcap-n250-m130-k17  N=250 M=130 K=17 2*N*M=65000  go2cs=66a2e023ca
+GO    rc=0: N 250 M 130 promoted forwarders 2*N*M 65000 calls 1 251 K 17 F 16
+CONV  rc=0
+BUILD rc=0 t=871s 
+METHODS methodcap-n250-m130-k17.dll: 33155 types, 134044 methods total
+|    65522  go.repro.main_package
+|      132  .<>c
+|
+RUN   rc=127: Unhandled exception. System.TypeLoadException: Type 'go.repro.main_package' from assembly 'methodcap-n250-m130-k17, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' contains more methods than the current implementation allows.
+MATCH NO
+
+repro methodcap-n250-m130-k18  N=250 M=130 K=18 2*N*M=65000  go2cs=66a2e023ca
+GO    rc=0: N 250 M 130 promoted forwarders 2*N*M 65000 calls 1 251 K 18 F 17
+CONV  rc=0
+BUILD rc=0 t=884s 
+METHODS methodcap-n250-m130-k18.dll: 33155 types, 134045 methods total
+|    65523  go.repro.main_package
+|      132  .<>c
+|
+RUN   rc=127: Unhandled exception. System.TypeLoadException: Type 'go.repro.main_package' from assembly 'methodcap-n250-m130-k18, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' contains more methods than the current implementation allows.
+MATCH NO
