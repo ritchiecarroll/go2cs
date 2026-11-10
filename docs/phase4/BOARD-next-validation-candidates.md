@@ -35809,4 +35809,61 @@ interface. The census counts therefore stand as posted, and the same one-file of
 
 — G (2026-11-10)
 
+## 2026-11-10 — C1 (C36's sibling, COORD's ruling): a NON-generic float-to-integer conversion is a plain C# cast, so out of range it takes .NET's saturating answer, which equals gc/arm64 and differs from gc/amd64 — DISCLOSED; census for .5
+
+**What.** `int8(f)`, `uint64(f)` and the rest, for a float `f` with no constant value, emit a plain C# cast
+(`(int8)f`). In range, the cast truncates toward zero as Go does. Out of range, or for NaN, Go's spec leaves the value
+implementation-dependent ("the conversion succeeds but the result value is implementation-dependent"), and the
+answers differ:
+- .NET (every platform since .NET 9): int32 and int64 saturate, NaN reads 0, the unsigned kinds clamp at 0 and at
+  their maximum, and the 8- and 16-bit kinds take the low bits of the saturated int32. This equals gc on arm64
+  (FCVTZS/FCVTZU), as C36 measured on a hosted osx-arm64 runner (run 42857184743).
+- gc on amd64: CVTTSD2SQ / CVTTSD2SL give the "integer indefinite" (MinInt64, MinInt32), and the unsigned 64-bit kinds
+  take gc's split at 2^63.
+
+Measured on linux x64 (a converted program against go run, at C36's tree), as gc / C#: `uint64(-1.9)` MaxUint64 / 0;
+`uint32(-129.5)` 4294967167 / 0; `int32(2147483648.1)` MinInt32 / MaxInt32; `int8(2147483648.1)` 0 / -1;
+`int64(1e19)` MinInt64 / MaxInt64; `uint32(1e19)` 0 / 4294967295. Every in-range row agrees.
+
+**Two answers in one program.** C36's GENERIC path (`T(f)` with `T ~int32`, golib's `ConvertToType<T>(double)`)
+follows gc for the process's architecture, while the direct cast saturates everywhere. On amd64 one program can
+therefore see two answers for the same conversion: `conv[int64](1e19)` reads MinInt64 and `int64(1e19)` reads
+MaxInt64. On arm64 the two agree. This is the strongest argument either way for the .5 decision: align the direct
+cast with gc per architecture, or align the generic path with .NET.
+
+**Census (for .5).** Non-constant float-to-integer conversions in std, by go/types (the target an integer type, the
+operand a float with no constant value), tests included, windows, linux and darwin:
+- 198 distinct sites: about 92 in production code and 104 in tests.
+- The heaviest packages are runtime (80 production, 90 test), math (48), math/rand/v2 (36 test),
+  internal/trace/traceviewer (27) and text/template/parse (24).
+- Positive control: math/erfinv.go:81 `Inf(int(x))`.
+
+**Do banked rows exercise an out-of-range value?** Measured on linux:
+- Every one of the 196 linux sites was instrumented through a `go test -overlay` of GOROOT. Each operand passes through
+  a helper that prints a tagged line on NaN or out of range.
+- The instrument's positive control is runtime's TestFloat64, which feeds NaN and ±Inf to `int64(f)`.
+- Go's tests of all 238 banked rows ran, without -short: 233 passed and 5 failed on this box, for environment reasons
+  (crypto/tls, crypto/x509, net, and two windows-only packages on linux). Those five may have stopped before reaching
+  a site.
+- Three rows reach an out-of-range value. None of them has a verdict that depends on the rule:
+  - runtime, TestFloat64 (softfloat64_test.go:104, 118, 125): the test compares a hardware conversion with the same
+    hardware conversion ("Match the hardware to pass the test"), so both sides take one rule.
+  - text/template/parse (node.go:703, 707, 729): a round-trip check (`float64(int64(f)) == f`) decides whether a
+    number is also an int or a uint. The values the tests feed (±1e19, -1.2, -1e9, -12) fail it under both rules.
+    The rules would part only at exactly 2^63 or 2^64, which no test parses.
+  - runtime (TestDebugCallGrowStack, TestUserForcedGC) and sync/atomic: mgcpacer.go:528, 538 and 549, inside
+    gcControllerState.revise during Go's own collections. In go2cs, runtime.GC() runs the managed collector
+    (managed_impl.cs:691), which calls neither gcStart nor revise. The converted revise is reached from startCycle,
+    from update, and from gcControllerCommit during a mark phase. TestGcPacer, which drives the converted controller
+    through export_test, reaches no out-of-range value in Go. NOT established: whether any banked runtime test reaches
+    the converted mallocgc's gcStart calls.
+- Reading: a disclosure, not a validation divergence. No banked test verdict measured here depends on the rule. Only
+  linux was measured dynamically; the windows and darwin censuses differ from linux by at most two sites.
+
+**Ruled (COORD, 2026-11-10):** not a .4 seat. The value is implementation-dependent in Go, and routing every cast
+through a helper would cost visible parity (`(int8)f` reads as Go's `int8(f)`) at every site for a value portable Go
+cannot rely on. Disclosed here, and the census informs .5.
+
+— C1 (2026-11-10)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
