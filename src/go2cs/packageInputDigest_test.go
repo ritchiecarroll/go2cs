@@ -122,6 +122,57 @@ func TestPackageInputDigestMovesWithEachInput(t *testing.T) {
 	}
 }
 
+// TestPackageInputDigestReadsTheTargetsLayoutKeyFolders plants a hand-owned companion in each kind of layout key
+// folder. A target's build compiles the package's <goos>/, <arch>/ and <goos>-<arch>/ folders, so a companion in any of
+// them is an input of that target's conversion; one in another target's folder is not. Read flat alone, an edit to
+// out/linux/p_linux_impl.cs left a linux/amd64 digest where it was.
+func TestPackageInputDigestReadsTheTargetsLayoutKeyFolders(t *testing.T) {
+	options := Options{targetPlatform: "linux/amd64", indentSpaces: 4, preferVarDecl: true, useChannelOperators: true}
+	sources := map[string]string{"a.go": "package p\n\nfunc A() int { return 1 }\n"}
+
+	digest := func(t *testing.T, companion string) string {
+		t.Helper()
+
+		root := t.TempDir()
+		paths := writeDigestFixture(t, filepath.Join(root, "in"), sources)
+		output := filepath.Join(root, "out")
+
+		if err := os.MkdirAll(output, 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		if companion != "" {
+			writeDigestFixture(t, output, map[string]string{companion: "// hand-owned\n"})
+		}
+
+		got, err := packageInputDigest(paths, output, options, "rev-1")
+
+		if err != nil {
+			t.Fatalf("packageInputDigest: %v", err)
+		}
+
+		return got
+	}
+
+	reference := digest(t, "")
+
+	for _, companion := range []string{"linux/p_linux_impl.cs", "amd64/p_amd64_impl.cs", "linux-amd64/p_linux_amd64_impl.cs"} {
+		if got := digest(t, companion); got == reference {
+			t.Errorf("a companion at out/%s left the linux/amd64 digest at %s; that build compiles it", companion, reference)
+		}
+	}
+
+	for _, companion := range []string{"linux-arm64/p_linux_arm64_impl.cs", "windows/p_windows_impl.cs", "arm64/p_arm64_impl.cs"} {
+		if got := digest(t, companion); got != reference {
+			t.Errorf("a companion at out/%s moved the linux/amd64 digest; that build never compiles it", companion)
+		}
+	}
+
+	if flat, keyed := digest(t, "p_impl.cs"), digest(t, "linux/p_impl.cs"); flat == keyed {
+		t.Errorf("a companion flat and one of the same name in linux/ read one digest; the name must carry its folder")
+	}
+}
+
 func TestOnlyAModulePackageProjectRecordsAnInputDigest(t *testing.T) {
 	project := filepath.Join(t.TempDir(), "example.com.mod.csproj")
 	cases := []struct {

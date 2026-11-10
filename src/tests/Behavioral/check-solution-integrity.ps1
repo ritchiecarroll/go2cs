@@ -2,7 +2,7 @@
 .SYNOPSIS
     Project-graph integrity guard, in two parts: (1) the set of behavioral test .csproj files on disk
     is exactly the set registered in go2cs.slnx, and (2) the emitted src\core project-reference graph
-    is ACYCLIC for every $(GoTargetOS). Catches a test (or sibling library sub-project) that was
+    is ACYCLIC for every target. Catches a test (or sibling library sub-project) that was
     committed but never added to the solution, and a converter emission that closes a reference cycle.
 
 .DESCRIPTION
@@ -47,16 +47,17 @@
         not change the project GRAPH.
 
     So this check reads the emitted .csproj files themselves -- the artifact, not the converter's
-    intent -- and DFSes them once per $(GoTargetOS), because the per-GOOS <ItemGroup> blocks make
-    each target a DIFFERENT graph (layout L3, docs\phase4\DESIGN-multiplatform-corpus.md). All three
-    emitted flavors are checked: a cycle on the linux graph is just as fatal to the linux build as a
-    windows one is to the corpus reference target.
+    intent -- and DFSes them once per target (GOOS and GOARCH), because the <ItemGroup> blocks gated
+    on $(GoTargetOS), $(GoTargetArch) or both make each target a DIFFERENT graph (layout L3,
+    docs\phase4\DESIGN-multiplatform-corpus.md). Every target of the universe is checked: a cycle on
+    the linux/arm64 graph is just as fatal to that build as a windows one is to the corpus reference
+    target.
 
     POSITIVE CONTROL (a green that cannot go red is not a measurement). -InjectReference adds an edge
     to the parsed graph in memory, so the assertion can be made to fail on demand without touching a
     tracked file:
 
-        ./check-solution-integrity.ps1 -TargetOS windows -InjectReference 'runtime=internal/syscall/windows'
+        ./check-solution-integrity.ps1 -Target windows/amd64 -InjectReference 'runtime=internal/syscall/windows'
 
     must report EXACTLY these six cycles and exit 1 -- W1's own set, independently reproduced in
     DESIGN-linkname-push-cycles.md section 1.3:
@@ -78,13 +79,17 @@
 
 .EXAMPLE
     # Positive control for the cycle assertion -- must print the six W1 cycles and exit 1.
-    ./check-solution-integrity.ps1 -TargetOS windows -InjectReference 'runtime=internal/syscall/windows'
+    ./check-solution-integrity.ps1 -Target windows/amd64 -InjectReference 'runtime=internal/syscall/windows'
 #>
 [CmdletBinding()]
 param(
-    # The $(GoTargetOS) flavors to DFS. Each is a different graph: the per-GOOS <ItemGroup> blocks
-    # contribute references only to their own target.
-    [string[]] $TargetOS = @('windows', 'linux', 'darwin'),
+    # The targets to DFS, <goos>/<arch>: by default the corpus's universe, the converter's platformUniverse
+    # (src\go2cs\platformLattice.go), which the repoguard test TestLayoutKeyListsAreTheUniverses holds this
+    # line to. Each is a different graph: an <ItemGroup> gated on $(GoTargetOS), $(GoTargetArch) or both
+    # contributes references only to the targets it names. A bare GOOS (the -TargetOS spelling this
+    # parameter had) means every default target of that GOOS.
+    [Alias('TargetOS')]
+    [string[]] $Target = @('windows/amd64', 'linux/amd64', 'darwin/amd64', 'linux/arm64'),
 
     # Positive-control edges, '<fromPackage>=<toPackage>' with package paths relative to src\core
     # (e.g. 'runtime=internal/syscall/windows'). Added to the parsed graph in memory only.
@@ -213,12 +218,25 @@ else {
 }
 
 # 5. Corpus project-reference CYCLE assertion (see .DESCRIPTION). Everything below reads emitted
-#    .csproj XML and answers one question: is the reference graph acyclic for each $(GoTargetOS)?
+#    .csproj XML and answers one question: is the reference graph acyclic for each target?
 
-# The one MSBuild condition form that gates a reference group by target OS. Anything else naming
-# GoTargetOS is REJECTED rather than guessed at: a condition this parser half-understands would
-# silently model the wrong edge set, and a cycle assertion over the wrong graph is worse than none.
-$goosConditionPattern = "'\`$\(GoTargetOS\)'\s*==\s*'([A-Za-z0-9_]+)'"
+# A bare GOOS names every default target of that GOOS; anything else must be one default target. The
+# defaults are read back from this script's own param block, so the universe is written once.
+$defaultTargets = @(([System.Management.Automation.Language.Parser]::ParseFile($PSCommandPath, [ref]$null, [ref]$null)).ParamBlock.Parameters |
+    Where-Object { $_.Name.VariablePath.UserPath -eq 'Target' }).DefaultValue.SafeGetValue()
+
+$Target = @(foreach ($requested in $Target) {
+    $matched = @($defaultTargets | Where-Object { $_ -eq $requested -or ($_ -split '/')[0] -eq $requested })
+    if ($matched.Count -eq 0) { throw "-Target '$requested' is neither a target of the universe ($($defaultTargets -join ', ')) nor a GOOS of one" }
+    $matched
+})
+
+# The MSBuild condition forms that gate a reference group by target: '$(GoTargetOS)'=='<goos>',
+# '$(GoTargetArch)'=='<arch>', or the two joined by And. Anything else naming either property is
+# REJECTED rather than guessed at: a condition this parser half-understands would silently model the
+# wrong edge set, and a cycle assertion over the wrong graph is worse than none.
+$goosConditionPattern = "^'\`$\(GoTargetOS\)'\s*==\s*'([A-Za-z0-9_]+)'$"
+$archConditionPattern = "^'\`$\(GoTargetArch\)'\s*==\s*'([A-Za-z0-9_]+)'$"
 
 # A project's Go-import-path-shaped name: the directory it lives in, relative to src\core (so
 # core/internal/syscall/windows -> internal/syscall/windows, core/golib -> golib). Projects outside
@@ -247,9 +265,9 @@ function Get-ProjectGraphNodeName {
 }
 
 # Every <ProjectReference Include="..."> in one .csproj, resolved to a full path and TAGGED with the
-# $(GoTargetOS) its <ItemGroup> is gated on ($null = unconditional, i.e. every target). Parsed once
-# per file and cached, because three graphs are built from the same 306 files and re-reading them per
-# target is most of the runtime. $(go2csPath) is the src root in a Debug build (each csproj sets it
+# $(GoTargetOS) and $(GoTargetArch) its <ItemGroup> is gated on ($null = not gated on it, i.e. every
+# target). Parsed once per file and cached, because one graph per target is built from the same files
+# and re-reading them per target is most of the runtime. $(go2csPath) is the src root in a Debug build (each csproj sets it
 # from $(SolutionDir)), which is how the corpus spells every cross-package reference.
 $projectReferenceCache = @{}
 
@@ -272,13 +290,17 @@ function Get-ProjectReferenceEdges {
 
         $condition = $group.GetAttribute('Condition')
         $goos      = $null
+        $arch      = $null
 
-        if ($condition -match $goosConditionPattern) {
-            $goos = $Matches[1]
-        }
-        elseif ($condition -match 'GoTargetOS') {
-            $form = "'`$(GoTargetOS)'=='<goos>'"
-            throw "Unrecognized GoTargetOS condition in $ProjectPath -- this parser models only $form, and got: $condition"
+        if ($condition -match 'GoTargetOS|GoTargetArch') {
+            foreach ($term in ($condition.Trim() -split '\s+[Aa][Nn][Dd]\s+')) {
+                if ($null -eq $goos -and $term -match $goosConditionPattern) { $goos = $Matches[1] }
+                elseif ($null -eq $arch -and $term -match $archConditionPattern) { $arch = $Matches[1] }
+                else {
+                    $form = "'`$(GoTargetOS)'=='<goos>', '`$(GoTargetArch)'=='<arch>' or the two joined by And"
+                    throw "Unrecognized target condition in $ProjectPath -- this parser models only $form, and got: $condition"
+                }
+            }
         }
         # Any other condition ('$(OutputType)'=='Library', Exists(...)) holds for every corpus
         # package, so its items are unconditional here. Erring toward MORE edges is the safe
@@ -293,7 +315,7 @@ function Get-ProjectReferenceEdges {
             $include = $include -replace '\$\(go2csPath\)', ($SrcRoot.TrimEnd('\', '/') + '/')
 
             $resolved = if ([System.IO.Path]::IsPathRooted($include)) { $include } else { Join-Path $projectDir $include }
-            $edges.Add([pscustomobject]@{ TargetOS = $goos; Path = [System.IO.Path]::GetFullPath($resolved) })
+            $edges.Add([pscustomobject]@{ TargetOS = $goos; TargetArch = $arch; Path = [System.IO.Path]::GetFullPath($resolved) })
         }
     }
 
@@ -301,7 +323,7 @@ function Get-ProjectReferenceEdges {
     return $edges
 }
 
-# The whole reachable project graph for one $(GoTargetOS), keyed by node name. Seeded from every
+# The whole reachable project graph for one target, keyed by node name. Seeded from every
 # non-test .csproj under src\core -- a <pkg>.tests.csproj is a graph SINK (nothing references one),
 # so excluding them changes no cycle while keeping the node set exactly the production corpus -- then
 # expanded transitively so a reference OUT of core (gen/go2cs-gen) is followed too.
@@ -309,8 +331,10 @@ function Get-CorpusProjectGraph {
     param(
         [Parameter(Mandatory)][string] $SrcRoot,
         [Parameter(Mandatory)][string] $CoreRoot,
-        [Parameter(Mandatory)][string] $TargetOS
+        [Parameter(Mandatory)][string] $GraphTarget
     )
+
+    $graphOS, $graphArch = $GraphTarget -split '/'
 
     $adjacency = @{}   # node name -> sorted node names
     $nodePath  = @{}   # node name -> .csproj full path
@@ -337,7 +361,8 @@ function Get-CorpusProjectGraph {
 
         $edges = @()
         foreach ($edge in (Get-ProjectReferenceEdges $projectPath $SrcRoot)) {
-            if ($null -ne $edge.TargetOS -and $edge.TargetOS -ne $TargetOS) { continue }
+            if ($null -ne $edge.TargetOS -and $edge.TargetOS -ne $graphOS) { continue }
+            if ($null -ne $edge.TargetArch -and $edge.TargetArch -ne $graphArch) { continue }
 
             $target = Get-ProjectGraphNodeName $edge.Path $SrcRoot
             if ($null -eq $target) {
@@ -396,8 +421,8 @@ function Find-ProjectGraphCycles {
 
 $coreRoot = Join-Path $srcRoot 'core'
 
-foreach ($goos in $TargetOS) {
-    $graph      = Get-CorpusProjectGraph $srcRoot $coreRoot $goos
+foreach ($graphTarget in $Target) {
+    $graph      = Get-CorpusProjectGraph $srcRoot $coreRoot $graphTarget
     $adjacency  = $graph.Adjacency
 
     foreach ($injection in $InjectReference) {
@@ -413,7 +438,7 @@ foreach ($goos in $TargetOS) {
         # makes the cycle answer below unsound: the missing project's own edges are invisible, so a
         # cycle running through it cannot be seen. Fail rather than report a hollow zero.
         $ok = $false
-        Write-Host "==> UNRESOLVED ProjectReference (GoTargetOS=$goos) -- the graph is incomplete, so the" -ForegroundColor Red
+        Write-Host "==> UNRESOLVED ProjectReference ($graphTarget) -- the graph is incomplete, so the" -ForegroundColor Red
         Write-Host "    cycle assertion below cannot be trusted until these resolve:" -ForegroundColor Red
         $graph.Unresolved | ForEach-Object { Write-Host "    $_" -ForegroundColor Red }
     }
@@ -430,7 +455,7 @@ foreach ($goos in $TargetOS) {
 
     if ($cycles.Count -gt 0) {
         $ok = $false
-        Write-Host "==> PROJECT-REFERENCE CYCLE (GoTargetOS=$goos) -- $($cycles.Count) cycle(s); every project" -ForegroundColor Red
+        Write-Host "==> PROJECT-REFERENCE CYCLE ($graphTarget) -- $($cycles.Count) cycle(s); every project" -ForegroundColor Red
         Write-Host "    on one of these paths fails to build with MSB4006:" -ForegroundColor Red
         $cycles | ForEach-Object { Write-Host "    $_" -ForegroundColor Red }
         if ($InjectReference.Count -eq 0) {
@@ -439,7 +464,7 @@ foreach ($goos in $TargetOS) {
         }
     }
     elseif ($graph.Unresolved.Count -eq 0) {
-        Write-Host "==> PROJECT GRAPH OK (GoTargetOS=$goos): 0 cycles across $($adjacency.Count) projects." -ForegroundColor Green
+        Write-Host "==> PROJECT GRAPH OK ($graphTarget): 0 cycles across $($adjacency.Count) projects." -ForegroundColor Green
     }
 }
 

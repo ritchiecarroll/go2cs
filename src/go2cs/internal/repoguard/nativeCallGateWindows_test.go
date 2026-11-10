@@ -11,8 +11,10 @@ package repoguard
 import (
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -104,8 +106,18 @@ func gateDeclPattern(name string) *regexp.Regexp {
 // by the reading, so this counts CALL SITES.
 var stdcallCallPattern = regexp.MustCompile(`\bstdcall[0-9]{0,2}\s*\(`)
 
-// windowsRuntimeTree is the flavour this guard watches.
-const windowsRuntimeTree = "src/core/runtime/windows/"
+// windowsRuntimeTarget is the flavour this guard watches, and windowsRuntimeTree names the runtime folders its build
+// compiles other than the flat one: windows/, amd64/ and windows-amd64/.
+const windowsRuntimeTarget = "windows/amd64"
+
+var windowsRuntimeTree = "src/core/runtime/{" + strings.Join(layoutKeyFoldersServing(windowsRuntimeTarget), ",") + "}/"
+
+// windowsRuntimeTreeFile reports whether a tracked path is a .cs file of the windows runtime tree.
+func windowsRuntimeTreeFile(rel string) bool {
+	name, ok := strings.CutPrefix(path.Dir(rel), "src/core/runtime/")
+
+	return ok && strings.HasSuffix(rel, ".cs") && slices.Contains(lineKeyedFolderTargets(name), windowsRuntimeTarget)
+}
 
 // nativeCallGate is the one declaration a flavour's kernel access funnels through.
 type nativeCallGate struct {
@@ -223,7 +235,7 @@ func scanWindowsGate(t *testing.T, root string, tracked []string) gateScan {
 	files := map[string]bool{}
 
 	for _, rel := range tracked {
-		if !strings.HasPrefix(rel, windowsRuntimeTree) || !strings.HasSuffix(rel, ".cs") {
+		if !windowsRuntimeTreeFile(rel) {
 			continue
 		}
 
@@ -438,5 +450,24 @@ internal static void caller() {
 
 	if reading.interopDeclared != 1 {
 		t.Fatalf("control: the interop reading counted %d declarations, want 1", reading.interopDeclared)
+	}
+
+	// The windows runtime tree is every runtime folder a windows/amd64 build compiles. A stdcall site planted in
+	// runtime/amd64/ and one in runtime/windows-amd64/ are read; one in runtime/linux-amd64/ is not.
+	keyedRoot := t.TempDir()
+	keyedRels := []string{
+		"src/core/runtime/amd64/stubs_amd64.cs",
+		"src/core/runtime/linux-amd64/sys_linux_amd64.cs",
+		"src/core/runtime/windows-amd64/sys_windows_amd64.cs",
+	}
+
+	for _, keyedRel := range keyedRels {
+		write(keyedRoot, keyedRel, "internal static void caller() {\n    stdcall1(_GetThreadContext, thread);\n}\n")
+	}
+
+	if keyed := scanWindowsGate(t, keyedRoot, keyedRels); keyed.filesScanned != 2 || keyed.stdcallSites != 2 {
+		t.Errorf("control: one stdcall site in each of %v read %d files and %d sites, want 2 and 2 (a windows/amd64 "+
+			"build compiles runtime/amd64/ and runtime/windows-amd64/, never runtime/linux-amd64/)",
+			keyedRels, keyed.filesScanned, keyed.stdcallSites)
 	}
 }

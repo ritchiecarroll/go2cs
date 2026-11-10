@@ -19,6 +19,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/build"
 	"go/parser"
@@ -27,6 +28,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -320,27 +322,116 @@ func TestManualConversionConstsAreDisplacedAndDeclared(t *testing.T) {
 			member := regexp.MustCompile(`(?m)^[ \t]*[^/\s][^\n]*\bstatic\b[^\n]*\b` + regexp.QuoteMeta(name) + `\s*(=>|\{|=|;)`)
 
 			for _, goos := range scope {
-				flavourDir := filepath.Join(coreDir, filepath.FromSlash(pkg), goos)
-				found := false
+				missingAt, err := displacedConstMissing(coreDir, pkg, goos, member)
 
-				_ = filepath.WalkDir(flavourDir, func(path string, entry os.DirEntry, err error) error {
-					if err != nil || entry.IsDir() || !strings.HasSuffix(path, "_impl.cs") {
-						return nil
-					}
+				if err != nil {
+					t.Errorf("%s.%s: %v", pkg, name, err)
+				}
 
-					content, readErr := os.ReadFile(path)
-
-					if readErr == nil && strings.Contains(string(content), "GoManualConversion") {
-						found = found || member.Match(content)
-					}
-
-					return nil
-				})
-
-				if !found {
-					t.Errorf("%s.%s (%s): no hand-owned *_impl.cs under %s declares it; the displaced const has no destination", pkg, name, goos, flavourDir)
+				for _, missing := range missingAt {
+					t.Errorf("%s.%s (%s): no hand-owned *_impl.cs in the folders of %s that %s compiles declares it; the displaced const has no destination there",
+						pkg, name, goos, filepath.Join(coreDir, filepath.FromSlash(pkg)), missing)
 				}
 			}
 		}
+	}
+}
+
+// displacedConstMissing names the targets of goos at which a displaced const has no destination: no marked *_impl.cs
+// declaring member in the key folders that target's build compiles (its <goos>/, <arch>/ and <goos>-<arch>/). A goos
+// with no target in the universe is an error: the const is displaced at no target the corpus builds, and a loop over
+// that GOOS's targets would read nothing and pass.
+func displacedConstMissing(coreDir string, pkg string, goos string, member *regexp.Regexp) (missing []string, err error) {
+	if !isUniverseGOOS(goos) {
+		return nil, fmt.Errorf("the scope names %q, which no target in the universe %v builds; the displaced const is off everywhere", goos, platformUniverse)
+	}
+
+	for _, target := range corpusLattice().targetsOfGOOS(goos) {
+		found := false
+
+		for _, folder := range platformLayoutFolders(target) {
+			_ = filepath.WalkDir(filepath.Join(coreDir, filepath.FromSlash(pkg), folder), func(path string, entry os.DirEntry, err error) error {
+				if err != nil || entry.IsDir() || !strings.HasSuffix(path, "_impl.cs") {
+					return nil
+				}
+
+				content, readErr := os.ReadFile(path)
+
+				if readErr == nil && strings.Contains(string(content), "GoManualConversion") {
+					found = found || member.Match(content)
+				}
+
+				return nil
+			})
+		}
+
+		if !found {
+			missing = append(missing, target)
+		}
+	}
+
+	return missing, nil
+}
+
+// TestDisplacedConstDestinationReadsTheLayoutKeyFolders plants a const's hand-owned destination in layout key folders.
+// A windows scope is supplied by a body in pkg/amd64/, which the windows/amd64 build compiles; a linux scope whose
+// only body sits in pkg/linux-amd64/ has none at linux/arm64. Read from pkg/<goos>/ alone, the first is a false red
+// and the second names a folder rather than the target that lacks the body.
+func TestDisplacedConstDestinationReadsTheLayoutKeyFolders(t *testing.T) {
+	coreDir := t.TempDir()
+
+	for rel, body := range map[string]string{
+		"pkg/amd64/consts_amd64_impl.cs":             "internal static readonly nint archConst = 1;",
+		"pkg/linux-amd64/consts_linux_amd64_impl.cs": "internal static readonly nint pairConst = 2;",
+	} {
+		filePath := filepath.Join(coreDir, filepath.FromSlash(rel))
+
+		if err := os.MkdirAll(filepath.Dir(filePath), 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := os.WriteFile(filePath, []byte("[module: GoManualConversion]\n"+body+"\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	member := func(name string) *regexp.Regexp {
+		return regexp.MustCompile(`(?m)^[ \t]*[^/\s][^\n]*\bstatic\b[^\n]*\b` + regexp.QuoteMeta(name) + `\s*(=>|\{|=|;)`)
+	}
+
+	for _, c := range []struct {
+		name, goos string
+		want       []string
+	}{
+		{"archConst", "windows", nil},
+		{"archConst", "darwin", nil},
+		{"archConst", "linux", []string{"linux/arm64"}},
+		{"pairConst", "linux", []string{"linux/arm64"}},
+		{"pairConst", "windows", []string{"windows/amd64"}},
+	} {
+		got, err := displacedConstMissing(coreDir, "pkg", c.goos, member(c.name))
+
+		if err != nil {
+			t.Errorf("%s scoped to %s: %v", c.name, c.goos, err)
+		}
+
+		if !slices.Equal(got, c.want) {
+			t.Errorf("%s scoped to %s: missing at %v, want %v", c.name, c.goos, got, c.want)
+		}
+	}
+}
+
+// TestDisplacedConstScopeNamingNoUniverseTargetIsAFinding is G's probe: internal/buildcfg.defaultGOARCH scoped to
+// "plan9", a GOOS with no target in the universe. Read per target, such a scope has no target to read and passes
+// vacuously, though the entry is off at every target the corpus builds. The scope itself is the finding.
+func TestDisplacedConstScopeNamingNoUniverseTargetIsAFinding(t *testing.T) {
+	coreDir := t.TempDir()
+	member := regexp.MustCompile(`(?m)^[ \t]*[^/\s][^\n]*\bstatic\b[^\n]*\bdefaultGOARCH\s*(=>|\{|=|;)`)
+
+	missing, err := displacedConstMissing(coreDir, "internal/buildcfg", "plan9", member)
+
+	if err == nil {
+		t.Errorf("internal/buildcfg.defaultGOARCH scoped to plan9: no finding (missing at %v); a GOOS with no universe "+
+			"target leaves the displaced const off at every target, and the guard must say so", missing)
 	}
 }
