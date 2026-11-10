@@ -259,6 +259,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckCastNegativeNamedType() => CheckTarget("CastNegativeNamedType");
 
     [TestMethod]
+    public void CheckCgoPseudoPackageTypes() => CheckTarget("CgoPseudoPackageTypes");
+
+    [TestMethod]
     public void CheckChanDirectionChain() => CheckTarget("ChanDirectionChain");
 
     [TestMethod]

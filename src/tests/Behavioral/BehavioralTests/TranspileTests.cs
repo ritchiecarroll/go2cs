@@ -259,6 +259,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckCastNegativeNamedType() => CheckTarget("CastNegativeNamedType");
 
     [TestMethod]
+    public void CheckCgoPseudoPackageTypes() => CheckTarget("CgoPseudoPackageTypes");
+
+    [TestMethod]
     public void CheckChanDirectionChain() => CheckTarget("ChanDirectionChain");
 
     [TestMethod]

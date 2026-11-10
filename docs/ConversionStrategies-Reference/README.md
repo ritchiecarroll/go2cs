@@ -46,6 +46,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Assembly metadata is one derivation chain, and the framework is hoisted to props](package-conversion.md#assembly-metadata-is-one-derivation-chain-and-the-framework-is-hoisted-to-props)
   - [Cross-package imports (importing another package / assembly)](package-conversion.md#cross-package-imports-importing-another-package--assembly)
   - [An UPWARD `//go:linkname` var alias INVERTS its storage instead of giving up](package-conversion.md#an-upward-golinkname-var-alias-inverts-its-storage-instead-of-giving-up)
+  - [A C type or constant is a member of its package's C pseudo-package, `<pkg>ꓸC_package`](package-conversion.md#a-c-type-or-constant-is-a-member-of-its-packages-c-pseudo-package-pkgꓸc_package)
   - [Build constraints are parsed and evaluated by `go/build/constraint`](package-conversion.md#build-constraints-are-parsed-and-evaluated-by-gobuildconstraint)
   - [Default build tags: `purego` for the standard library, `safe` for modules](package-conversion.md#default-build-tags-purego-for-the-standard-library-safe-for-modules)
   - [An import forces the imported package's `init` to run](package-conversion.md#an-import-forces-the-imported-packages-init-to-run)
