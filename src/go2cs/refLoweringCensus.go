@@ -789,18 +789,10 @@ func diffGoosClassifications(go2csPath string, report *refCensusReport) *refCens
 	return deltas
 }
 
-// packageIsLayoutL3 probes (read-only) whether the corpus already holds per-GOOS subfolders for a
+// packageIsLayoutL3 probes (read-only) whether the corpus already holds layout key subfolders for a
 // package — the census prices NEW L3 membership against existing membership.
 func packageIsLayoutL3(go2csPath, pkgPath string) bool {
-	pkgDir := filepath.Join(go2csPath, "core", filepath.FromSlash(pkgPath))
-
-	for _, goos := range []string{"windows", "linux", "darwin"} {
-		if info, err := os.Stat(filepath.Join(pkgDir, goos)); err == nil && info.IsDir() {
-			return true
-		}
-	}
-
-	return false
+	return packageCarriesPlatformLayout(filepath.Join(go2csPath, "core", filepath.FromSlash(pkgPath)))
 }
 
 // writeRefCensusReport writes the JSON artifact (pretty-printed — the report is read by people

@@ -73,9 +73,15 @@
     <!-- pidfd_open/waitid(P_PIDFD)/pidfd_send_signal: linux-only kernel surface. -->
     <Compile Remove="LinuxPidfdTests.cs" />
 
+    <!-- GoEpollKernelProbe (internal/poll/linux/runtime_netpoll_impl.cs): S3 site 1's per-arch epoll contract. -->
+    <Compile Remove="LinuxNetpollEpollKernelTests.cs" />
+
     <!-- GetRandom (and its runtime.vgetrandom pull) is declared by getrandom.go, whose build tags
          select only the linux flavour of internal/syscall/unix. -->
     <Compile Remove="LinuxGetRandomTests.cs" />
+
+    <!-- GoDieNumbersProbe and GoSigprocmaskNumberProbe (runtime/linux): S3's per-arch syscall numbers. -->
+    <Compile Remove="LinuxRuntimeSyscallNumberTests.cs" />
 
     <!-- The PATH_MAX removal failure is a Unix one: Windows names long paths natively, so compiled
          there the arms would pass with the defect present and guard nothing. -->

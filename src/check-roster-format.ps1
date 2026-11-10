@@ -2302,6 +2302,45 @@ function Get-DarwinArchStrictReading {
     }
 }
 
+# ARCH-COUNT (COORD ruling 2026-11-10, go/internal/gcimporter). Two RIDs whose verdict COUNTS differ because a test
+# exists on only one architecture (gcimporter's TestImportStdLib subtests over the two amd64-only std packages), with
+# nothing divergent beyond an equal disclosed share. The shape: both lines validated (or COUNT), `new` 0 on both,
+# UNEQUAL verdicts, equal disclosed-divergent, and matched + divergent = verdicts on each. It banks the LONGER RID with
+# the shorter as its note, "636 (osx-x64; osx-arm64: 634)", and ONLY when the shorter RID's `absent` column names every
+# verdict it lacks: exactly (longer - shorter) distinct names, ';'-separated, and the longer RID names none. A shape
+# that names fewer, more or twice, or names on the longer RID, returns a Refusal, which the guard reports BY NAME with
+# or without a segment: a count difference is never banked without its cause written down. The predicate reads the
+# RIDs from the lines, so it is not darwin-only (S7's linux-x64 / linux-arm64 pair is the same shape).
+# annotate_darwin.py's arch_count is this function, rule for rule.
+function Get-ArchCountReading {
+    param($A, $X)
+
+    $int = { param($record, $name) $v = 0; if ($record.PSObject.Properties[$name] -and [int]::TryParse([string]$record.$name, [ref]$v)) { $v } else { $null } }
+    $statuses = @('validated', 'COUNT')
+    if (($statuses -cnotcontains $A.status) -or ($statuses -cnotcontains $X.status)) { return $null }
+    $va = & $int $A 'verdicts'; $vx = & $int $X 'verdicts'
+    $ma = & $int $A 'matched'; $mx = & $int $X 'matched'
+    $ga = & $int $A 'divergent'; $gx = & $int $X 'divergent'
+    $na = & $int $A 'new'; $nx = & $int $X 'new'
+    if (@($va, $vx, $ma, $mx, $ga, $gx, $na, $nx) -contains $null) { return $null }
+    if (($na -ne 0) -or ($nx -ne 0) -or ($va -eq $vx) -or ($ga -ne $gx) -or (($ma + $ga) -ne $va) -or (($mx + $gx) -ne $vx)) { return $null }
+
+    $long, $short = if ($va -gt $vx) { $A, $X } else { $X, $A }
+    $names = { param($record) if ($record.PSObject.Properties['absent']) { @(([string]$record.absent).Split(';') | ForEach-Object { $_.Trim() } | Where-Object { $_ -and ($_ -cne '-') }) } else { @() } }
+    $shortNames = @(& $names $short); $longNames = @(& $names $long)
+    $gap = [Math]::Abs($va - $vx)
+    $distinct = @($shortNames | Sort-Object -Unique -CaseSensitive).Count
+    $lm = & $int $long 'matched'; $sm = & $int $short 'matched'
+    $text = "$lm" + $(if ($ga -ne 0) { " + $ga" } else { '' }) + " ($($long.RID); $($short.RID): $sm" + $(if ($ga -ne 0) { " + $ga" } else { '' }) + ')'
+    $refusal = $null
+    if ($longNames.Count -ne 0) {
+        $refusal = "its verdict counts differ by RID ($($long.RID) $(& $int $long 'verdicts'), $($short.RID) $(& $int $short 'verdicts')) with nothing divergent, but the evidence names absent verdicts on $($long.RID), the LONGER RID"
+    } elseif (($distinct -ne $gap) -or ($shortNames.Count -ne $gap)) {
+        $refusal = "its verdict counts differ by RID ($($long.RID) $(& $int $long 'verdicts'), $($short.RID) $(& $int $short 'verdicts')) with nothing divergent, but the evidence names $distinct of the $gap missing verdict(s) on $($short.RID) (column ``absent``) -- an arch-count reading banks only with every missing verdict named once"
+    }
+    return [PSCustomObject]@{ Text = $text; Disclosed = $ga; Refusal = $refusal }
+}
+
 # A segment as the roster spells it, its per-RID note included, for comparison with what the evidence produces.
 function Format-DarwinSegment {
     param($Segment)
@@ -2337,6 +2376,9 @@ function Get-DarwinSegmentRefusal {
     $banked = ((($a.status -ceq 'validated') -and ($x.status -ceq 'validated')) -or $atRuledCount) -and $agreed -and
         ($a.matched -eq $x.matched) -and ((Get-DarwinDisclosedDivergent $a) -eq (Get-DarwinDisclosedDivergent $x))
     $archStrict = if ($banked) { $null } else { Get-DarwinArchStrictReading $a $x }
+    $archCount = if ($banked -or ($null -ne $archStrict)) { $null } else { Get-ArchCountReading $a $x }
+    if (($null -ne $archCount) -and $archCount.Refusal) { return $archCount.Refusal }
+    if ($null -ne $archCount) { $archStrict = $archCount }
 
     if (-not $banked -and ($null -eq $archStrict)) {
         if ($null -eq $Segment) { return $null }
@@ -2490,6 +2532,44 @@ Assert-Equal 'arch-strict: equal counts bank on the plain path, as before' $null
 Assert-Equal 'arch-strict: equal counts carrying a note are refused (no note without a difference)' $true ($null -ne (Get-DarwinSegmentRefusal -Records $strictEqual -Segment (& $strictSeg 10 0 'osx-arm64' 'osx-x64' 10 0)))
 Assert-Equal 'arch-strict: equal counts that DISAGREE still refuse (the arch-strict path never waives agree for equal counts)' $true ($null -ne (Get-DarwinSegmentRefusal -Records @((New-DarwinStrictRecord 'osx-arm64' 'validated' 10 10 0 0), (New-DarwinStrictRecord 'osx-x64' 'validated' 10 10 0 0)) -Segment (& $strictSeg 10 0 $null $null 0 0)))
 Assert-Equal 'arch-strict: a ceiling below the banked disclosures supersedes it, as for any + K reading' $null (Get-DarwinSegmentRefusal -Records $strictPair -Segment $null -Ceiling 2)
+# ARCH-COUNT, against fixtures (COORD ruling 2026-11-10, go/internal/gcimporter). RIDs whose verdict COUNTS differ with
+# the same disclosed share on each: osx-arm64 lacks two subtests over amd64-only std packages, nothing diverges. It banks
+# only with every missing verdict NAMED in the shorter RID's `absent` column, and a shape that names fewer is REFUSED by
+# name, segment or not. RID-generic: S7's linux-x64 / linux-arm64 pair is the same shape.
+function New-ArchCountRecord($rid, [int] $verdicts, [int] $matched, [int] $divergent, $absent, [string] $status = 'validated', [int] $new = 0) {
+    $record = [PSCustomObject]@{ RID = $rid; status = $status; agree = 'no'; verdicts = "$verdicts"; matched = "$matched"; disclosed = "$divergent"; divergent = "$divergent"; new = "$new" }
+    if ($null -ne $absent) { $record | Add-Member -NotePropertyName absent -NotePropertyValue $absent }
+    return $record
+}
+$countPair = @((New-ArchCountRecord 'osx-arm64' 634 634 0 'TestImportStdLib/a;TestImportStdLib/b'), (New-ArchCountRecord 'osx-x64' 636 636 0 '-'))
+Assert-Equal 'arch-count: the reading headlines the larger RID, the other as its note' '636 (osx-x64; osx-arm64: 634)' (Get-ArchCountReading $countPair[0] $countPair[1]).Text
+Assert-Equal 'arch-count: the order of the two lines does not matter' '636 (osx-x64; osx-arm64: 634)' (Get-ArchCountReading $countPair[1] $countPair[0]).Text
+Assert-Equal 'arch-count: a segment with the derived reading and note banks' $null (Get-DarwinSegmentRefusal -Records $countPair -Segment (& $strictSeg 636 0 'osx-x64' 'osx-arm64' 634 0))
+Assert-Equal 'arch-count: banked with no segment is refused' $true ((Get-DarwinSegmentRefusal -Records $countPair -Segment $null) -match 'darwin: 636 \(osx-x64; osx-arm64: 634\)')
+Assert-Equal 'arch-count: the plain segment without its note is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $countPair -Segment (& $strictSeg 636 0 $null $null 0 0)))
+$countDisclosed = @((New-ArchCountRecord 'osx-arm64' 634 630 4 'a;b'), (New-ArchCountRecord 'osx-x64' 636 632 4 ''))
+Assert-Equal 'arch-count: equal disclosed shares ride on both readings' '632 + 4 (osx-x64; osx-arm64: 630 + 4)' (Get-ArchCountReading $countDisclosed[0] $countDisclosed[1]).Text
+Assert-Equal 'arch-count: RID-generic (linux-x64 / linux-arm64, S7)' '636 (linux-x64; linux-arm64: 634)' (Get-ArchCountReading (New-ArchCountRecord 'linux-arm64' 634 634 0 'a;b') (New-ArchCountRecord 'linux-x64' 636 636 0 '-')).Text
+foreach ($case in @(
+        @('names one of the two missing verdicts', 'names 1 of the 2', @((New-ArchCountRecord 'osx-arm64' 634 634 0 'a'), (New-ArchCountRecord 'osx-x64' 636 636 0 '-'))),
+        @('names none (no absent column)', 'names 0 of the 2', @((New-ArchCountRecord 'osx-arm64' 634 634 0 $null), (New-ArchCountRecord 'osx-x64' 636 636 0 $null))),
+        @('names one verdict twice', 'names 1 of the 2', @((New-ArchCountRecord 'osx-arm64' 634 634 0 'a;a'), (New-ArchCountRecord 'osx-x64' 636 636 0 '-'))),
+        @('names more than the difference', 'names 3 of the 2', @((New-ArchCountRecord 'osx-arm64' 634 634 0 'a;b;c'), (New-ArchCountRecord 'osx-x64' 636 636 0 '-'))),
+        @('names a verdict on the LONGER RID', 'names absent verdicts on osx-x64', @((New-ArchCountRecord 'osx-arm64' 634 634 0 'a;b'), (New-ArchCountRecord 'osx-x64' 636 636 0 'z'))))) {
+    $reading = Get-ArchCountReading $case[2][0] $case[2][1]
+    Assert-Equal "arch-count refuses a row that $($case[0]): refused by name" $true (($null -ne $reading) -and ($reading.Refusal -match [regex]::Escape($case[1])))
+    Assert-Equal "arch-count refuses a row that $($case[0]): refused with no segment too" $true ($null -ne (Get-DarwinSegmentRefusal -Records $case[2] -Segment $null))
+    Assert-Equal "arch-count refuses a row that $($case[0]): refused with the would-be segment" $true ($null -ne (Get-DarwinSegmentRefusal -Records $case[2] -Segment (& $strictSeg 636 0 'osx-x64' 'osx-arm64' 634 0)))
+}
+foreach ($case in @(
+        @('unequal disclosed shares', @((New-ArchCountRecord 'osx-arm64' 634 634 0 'a;b'), (New-ArchCountRecord 'osx-x64' 636 635 1 '-'))),
+        @('an undisclosed divergence (new 1)', @((New-ArchCountRecord 'osx-arm64' 634 633 1 'a;b' 'validated' 1), (New-ArchCountRecord 'osx-x64' 636 635 1 '-' 'validated' 1))),
+        @('a FAIL status', @((New-ArchCountRecord 'osx-arm64' 634 634 0 'a;b' 'FAIL'), (New-ArchCountRecord 'osx-x64' 636 636 0 '-'))),
+        @('a count that is not wholly matched or disclosed', @((New-ArchCountRecord 'osx-arm64' 634 633 0 'a;b'), (New-ArchCountRecord 'osx-x64' 636 636 0 '-'))))) {
+    Assert-Equal "arch-count is not $($case[0]): no reading" $null (Get-ArchCountReading $case[1][0] $case[1][1])
+    Assert-Equal "arch-count is not $($case[0]): no segment is not refused" $null (Get-DarwinSegmentRefusal -Records $case[1] -Segment $null)
+}
+Assert-Equal 'arch-count: equal verdicts are never this shape (arch-strict or the plain path decides)' $null (Get-ArchCountReading (New-ArchCountRecord 'osx-arm64' 636 636 0 '-') (New-ArchCountRecord 'osx-x64' 636 636 0 '-'))
 
 Assert-Equal 'darwin segment age: a banked row whose segment equals the reading is not refused' $null (Get-DarwinSegmentRefusal -Records $darwinBanked -Segment (& $darwinSeg 98 2))
 Assert-Equal 'darwin segment age: a banked row whose segment differs is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $darwinBanked -Segment (& $darwinSeg 98 0)))

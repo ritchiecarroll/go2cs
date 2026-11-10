@@ -548,6 +548,22 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 				if target, ok := ambiguousImportedTypeAliasTarget(key, pkg); ok {
 					return aliasQualifier + "." + target[strings.LastIndex(target, ".")+1:]
 				}
+
+				// A collision-renamed type this file reaches ONLY through another package's alias, with no import
+				// of the type's own package, so no alias key was loaded for it: spell the producer's member,
+				// `jsontext.ΔEncoder`, not the Go name (TS readiness C22e; see foreignRenamedTypeSpelling). A file
+				// that imports the producer holds the key and keeps its `pkgꓸName` alias route unchanged.
+				if !importedTypeAliasPublished(key) {
+					if spelling, bare, ok := foreignRenamedTypeSpelling(obj); ok {
+						// The two-hop form (`type Token any`): the producer's member stands for the concrete type its
+						// definition names, so render that, exactly as any reference to it would be rendered.
+						if bare {
+							return v.getAliasQualifiedTypeName(named.Underlying(), isUnderlying)
+						}
+
+						return aliasQualifier + "." + spelling
+					}
+				}
 			}
 
 			pkgPrefix = aliasQualifier + "."

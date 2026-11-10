@@ -242,5 +242,77 @@ Check 'nugetgo-pack.ps1 escapes the description, authors and URLs for MSBuild an
     $pack.Contains('<PackageProjectUrl>$(ConvertTo-NugetgoMSBuildLiteral $RepositoryUrl)</PackageProjectUrl>') -and
     $pack.Contains('if ($md.authors -cne $Authors)') -and $pack.Contains('$md.repository.url -cne $RepositoryUrl -or ([Uri]$md.projectUrl).AbsoluteUri -cne ([Uri]$RepositoryUrl).AbsoluteUri')) 'a free-text value is not MSBuild-escaped or not read back'
 
+Write-Host 'Apache-2.0 4(b) -- the per-file modification notice'
+# A license whose terms ask each modified file to state that it was changed: the pack converts with -provenance and
+# refuses a -RecurseRoot whose converted files carry no notice. The SPDX expression is stated (-LicenseSpdx), never
+# inferred, and only a LICENSE identifier counts: the one after WITH names an exception.
+foreach ($c in @(
+        @('Apache-2.0', $true), @('apache-2.0', $true), @('MIT OR Apache-2.0', $true), @('Apache-2.0 AND MIT', $true),
+        @('Apache-2.0 WITH LLVM-exception', $true), @('Apache-2.0+', $true),
+        @('MIT', $false), @('BSD-3-Clause', $false), @('Apache-1.1', $false), @('MIT WITH Apache-2.0', $false))) {
+    $got = Test-NugetgoProvenanceLicense $c[0]
+    Check "'$($c[0])' $(if ($c[1]) { 'asks for' } else { 'does not ask for' }) the notice" ($got -eq $c[1]) "got $got"
+}
+# The notice the pack looks for IS the converter's (sourceProvenance in src/go2cs/licensing.go).
+$noticeGo = [regex]::Match([System.IO.File]::ReadAllText($licensingGo), '// (Modified from the original by conversion to C# with go2cs) %s\.')
+Check 'the notice the pack looks for is licensing.go''s' ($noticeGo.Success -and $noticeGo.Groups[1].Value -ceq (Get-NugetgoProvenanceNotice)) "licensing.go '$($noticeGo.Groups[1].Value)' vs pack '$(Get-NugetgoProvenanceNotice)'"
+$provenanceRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('nugetgo-provenance-' + [guid]::NewGuid().ToString('N'))
+try {
+    $lib = New-Item -ItemType Directory -Force (Join-Path $provenanceRoot 'lib')
+    $project = Join-Path $lib 'example.com.mod.lib.csproj'
+    Set-Content -LiteralPath $project -Value '<Project />'
+    $notice = "// Converted from Go source: ""a.go"" in module example.com/mod@v1.0.0.`n// $(Get-NugetgoProvenanceNotice) 1.26.10.3.`n"
+    Set-Content -LiteralPath (Join-Path $lib 'a.cs') -Value "// Copyright 2020 Example`n`n$notice`nnamespace go.example.com.mod;"
+    Set-Content -LiteralPath (Join-Path $lib 'package_info.cs') -Value 'namespace go.example.com.mod;'
+    [void](New-Item -ItemType Directory -Force (Join-Path $lib 'obj'))
+    Set-Content -LiteralPath (Join-Path $lib 'obj/AssemblyInfo.cs') -Value '// generated'
+    $missing = @(Find-NugetgoFilesWithoutProvenance -ProjectFiles @(Get-Item -LiteralPath $project))
+    Check 'every converted file carries the notice: nothing missing (package_info.cs and obj/ are not conversions)' ($missing.Count -eq 0) "missing $($missing -join ', ')"
+    Set-Content -LiteralPath (Join-Path $lib 'b.cs') -Value 'namespace go.example.com.mod;'
+    $missing = @(Find-NugetgoFilesWithoutProvenance -ProjectFiles @(Get-Item -LiteralPath $project))
+    Check 'a converted file without the notice is named' ($missing.Count -eq 1 -and $missing[0] -eq (Join-Path $lib 'b.cs')) "missing $($missing -join ', ')"
+}
+finally { Remove-Item -Recurse -Force -LiteralPath $provenanceRoot -ErrorAction SilentlyContinue }
+Check 'nugetgo-pack.ps1 converts each flavor with -provenance and refuses an unmarked -RecurseRoot when the license asks for the notice' (
+    $pack.Contains('$provenance = Test-NugetgoProvenanceLicense $LicenseSpdx') -and
+    $pack.Contains('$unmarked = @(Find-NugetgoFilesWithoutProvenance -ProjectFiles $libraries.ToArray())') -and
+    $pack.Contains('convert it again with go2cs -recurse=nuget -provenance') -and
+    $pack.Contains('& $converter -recurse=nuget @provenanceArgs -platforms')) 'the pack script does not wire the notice'
+$repack = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'Invoke-NugetgoRepack.ps1'))
+Check 'Invoke-NugetgoRepack.ps1 converts PR with -provenance when the row''s license asks for the notice' (
+    $repack.Contains('$provenanceArgs = @(if (Test-NugetgoProvenanceLicense $row.LicenseSpdx) { ''-provenance'' })') -and
+    $repack.Contains('(@(''-recurse=nuget'') + $provenanceArgs + @(''-platforms''')) 'the repack driver does not pass -provenance to step 1.4'
+
+# The driver passes -provenance only for a module it has a row for. A published module with no row is rebuilt by
+# hand, and an Apache-2.0 one then reaches the pack without the notice: mousetrap, Apache-2.0 and without Go tests,
+# had no row (P2, 2026-11-10). Each published module's sample program sits under src/tests/ModuleBehavior/<M@V>/.
+$moduleRows = Import-PowerShellDataFile -LiteralPath (Join-Path $PSScriptRoot 'nugetgo-modules.psd1')
+$behaviorRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../tests/ModuleBehavior'))
+$sampled = @(Get-ChildItem -LiteralPath $behaviorRoot -Recurse -Filter 'mappings.txt' -File |
+        ForEach-Object { [System.IO.Path]::GetRelativePath($behaviorRoot, $_.DirectoryName) -replace '\\', '/' } | Sort-Object)
+$rowless = @($sampled | Where-Object { -not $moduleRows.ContainsKey($_) })
+Check 'every module with a sample program under src/tests/ModuleBehavior has a row in nugetgo-modules.psd1' (
+    $sampled.Count -gt 0 -and $rowless.Count -eq 0) "$($sampled.Count) sampled; no row: $($rowless -join ', ')"
+# The census of the modules whose license asks for the notice, read from the rows, is the one the design note states.
+$noticeRows = @($moduleRows.Keys | Where-Object { Test-NugetgoProvenanceLicense $moduleRows[$_].LicenseSpdx } | Sort-Object)
+$design = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot '../../../docs/phase4/DESIGN-provenance-header.md'))
+$censusLine = [regex]::Match($design, '(?m)^- \*\*The Apache-2\.0 census\*\*[^\n]*: (.+)$')
+$stated = if ($censusLine.Success) { @([regex]::Matches($censusLine.Groups[1].Value, '`([^`]+)`') | ForEach-Object { $_.Groups[1].Value } | Sort-Object) } else { @() }
+Check 'DESIGN-provenance-header.md names every module whose row asks for the notice, and only those' (
+    $noticeRows.Count -gt 0 -and (($stated -join ' ') -ceq ($noticeRows -join ' '))) "rows: $($noticeRows -join ', '); design: $(if ($censusLine.Success) { $stated -join ', ' } else { 'no census line' })"
+# A row with no Go tests carries no Expect, and the driver packs it on the runbook's no-tests route: no VR, the reason
+# as the rehearsal's -UnvalidatedReason, the hosted rows as the release's -BehaviorProofDir.
+$noTestRows = @($moduleRows.Keys | Where-Object { $moduleRows[$_].NoGoTests })
+$tangled = @($noTestRows | Where-Object { $moduleRows[$_].Expect })
+Check 'a row with NoGoTests has no Expect, and every other row has one' (
+    $tangled.Count -eq 0 -and @($moduleRows.Keys | Where-Object { -not $moduleRows[$_].NoGoTests -and -not $moduleRows[$_].Expect }).Count -eq 0) "both or neither: $($tangled -join ', ')"
+Check 'Invoke-NugetgoRepack.ps1 packs a row with no Go tests without VR: the reason for the rehearsal, the hosted rows for the release' (
+    $repack.Contains('$noGoTests = [string]$row.NoGoTests') -and
+    $repack.Contains('if ($noGoTests) {') -and $repack.Contains('Say "1.2-1.3  not run: $noGoTests"') -and
+    $repack.Contains('if ($noGoTests) { Say "1.5      not run: no MODULE.md to bind" }') -and
+    $repack.Contains("elseif (`$pack -eq 'int1') { @('-UnvalidatedReason', `$noGoTests) }") -and
+    $repack.Contains("else { @('-BehaviorProofDir', `$BehaviorProofDir) }") -and
+    $repack.Contains('its release pack needs -BehaviorProofDir')) 'the repack driver has no route for a module with no Go tests'
+
 Write-Host "ran $ran, failed $failed"
 exit $failed

@@ -71,12 +71,30 @@ func _cgoCheckPointer(interface{}, interface{})
 //go:linkname _cgoCheckResult runtime.cgoCheckResult
 //go:noescape
 func _cgoCheckResult(interface{})
+//go:linkname __cgo_twice twice
+//go:cgo_import_static twice
+var __cgo_twice byte
+var _Cfpvar_fp_twice unsafe.Pointer = (unsafe.Pointer)(unsafe.Pointer(&__cgo_twice))
 const _Ciconst_BLUE = 0x6
 const _Ciconst_CONST = 0x2a
 const _Cfconst_FCONST = 2.500000
 const _Ciconst_GREEN = 0x5
 const _Csconst_SCONST = "hi"
 
+//go:cgo_import_static _cgo_f82858858df1_C2func_halve
+//go:linkname __cgofn__cgo_f82858858df1_C2func_halve _cgo_f82858858df1_C2func_halve
+var __cgofn__cgo_f82858858df1_C2func_halve byte
+var _cgo_f82858858df1_C2func_halve = unsafe.Pointer(&__cgofn__cgo_f82858858df1_C2func_halve)
+
+//go:cgo_unsafe_args
+func _C2func_halve(p0 _Ctype_int) (r1 _Ctype_int, r2 error) {
+	errno := _cgo_runtime_cgocall(_cgo_f82858858df1_C2func_halve, uintptr(unsafe.Pointer(&p0)))
+	if errno != 0 { r2 = syscall.Errno(errno) }
+	if _Cgo_always_false {
+		_Cgo_use(p0)
+	}
+	return
+}
 
 // CString converts the Go string s to a C string.
 //
@@ -107,58 +125,81 @@ func _cgo_runtime_gostring(*_Ctype_char) string
 func _Cfunc_GoString(p *_Ctype_char) string {
 	return _cgo_runtime_gostring(p)
 }
-//go:cgo_import_static _cgo_2588f0b89e33_Cfunc_add
-//go:linkname __cgofn__cgo_2588f0b89e33_Cfunc_add _cgo_2588f0b89e33_Cfunc_add
-var __cgofn__cgo_2588f0b89e33_Cfunc_add byte
-var _cgo_2588f0b89e33_Cfunc_add = unsafe.Pointer(&__cgofn__cgo_2588f0b89e33_Cfunc_add)
+//go:cgo_import_static _cgo_f82858858df1_Cmacro_NEXT
+//go:linkname __cgofn__cgo_f82858858df1_Cmacro_NEXT _cgo_f82858858df1_Cmacro_NEXT
+var __cgofn__cgo_f82858858df1_Cmacro_NEXT byte
+var _cgo_f82858858df1_Cmacro_NEXT = unsafe.Pointer(&__cgofn__cgo_f82858858df1_Cmacro_NEXT)
+
+//go:cgo_unsafe_args
+func _Cmacro_NEXT() (r1 _Ctype_int) {
+	_cgo_runtime_cgocall(_cgo_f82858858df1_Cmacro_NEXT, uintptr(unsafe.Pointer(&r1)))
+	return
+}
+//go:cgo_import_static _cgo_f82858858df1_Cfunc_add
+//go:linkname __cgofn__cgo_f82858858df1_Cfunc_add _cgo_f82858858df1_Cfunc_add
+var __cgofn__cgo_f82858858df1_Cfunc_add byte
+var _cgo_f82858858df1_Cfunc_add = unsafe.Pointer(&__cgofn__cgo_f82858858df1_Cfunc_add)
 
 //go:cgo_unsafe_args
 func _Cfunc_add(p0 _Ctype_int, p1 _Ctype_int) (r1 _Ctype_int) {
-	_cgo_runtime_cgocall(_cgo_2588f0b89e33_Cfunc_add, uintptr(unsafe.Pointer(&p0)))
+	_cgo_runtime_cgocall(_cgo_f82858858df1_Cfunc_add, uintptr(unsafe.Pointer(&p0)))
 	if _Cgo_always_false {
 		_Cgo_use(p0)
 		_Cgo_use(p1)
 	}
 	return
 }
-//go:cgo_import_static _cgo_2588f0b89e33_Cfunc_free
-//go:linkname __cgofn__cgo_2588f0b89e33_Cfunc_free _cgo_2588f0b89e33_Cfunc_free
-var __cgofn__cgo_2588f0b89e33_Cfunc_free byte
-var _cgo_2588f0b89e33_Cfunc_free = unsafe.Pointer(&__cgofn__cgo_2588f0b89e33_Cfunc_free)
+//go:cgo_import_static _cgo_f82858858df1_Cfunc_free
+//go:linkname __cgofn__cgo_f82858858df1_Cfunc_free _cgo_f82858858df1_Cfunc_free
+var __cgofn__cgo_f82858858df1_Cfunc_free byte
+var _cgo_f82858858df1_Cfunc_free = unsafe.Pointer(&__cgofn__cgo_f82858858df1_Cfunc_free)
 
 //go:cgo_unsafe_args
 func _Cfunc_free(p0 unsafe.Pointer) (r1 _Ctype_void) {
-	_cgo_runtime_cgocall(_cgo_2588f0b89e33_Cfunc_free, uintptr(unsafe.Pointer(&p0)))
+	_cgo_runtime_cgocall(_cgo_f82858858df1_Cfunc_free, uintptr(unsafe.Pointer(&p0)))
 	if _Cgo_always_false {
 		_Cgo_use(p0)
 	}
 	return
 }
-//go:cgo_import_static _cgo_2588f0b89e33_Cfunc_scale
-//go:linkname __cgofn__cgo_2588f0b89e33_Cfunc_scale _cgo_2588f0b89e33_Cfunc_scale
-var __cgofn__cgo_2588f0b89e33_Cfunc_scale byte
-var _cgo_2588f0b89e33_Cfunc_scale = unsafe.Pointer(&__cgofn__cgo_2588f0b89e33_Cfunc_scale)
+//go:cgo_import_static _cgo_f82858858df1_Cfunc_halve
+//go:linkname __cgofn__cgo_f82858858df1_Cfunc_halve _cgo_f82858858df1_Cfunc_halve
+var __cgofn__cgo_f82858858df1_Cfunc_halve byte
+var _cgo_f82858858df1_Cfunc_halve = unsafe.Pointer(&__cgofn__cgo_f82858858df1_Cfunc_halve)
+
+//go:cgo_unsafe_args
+func _Cfunc_halve(p0 _Ctype_int) (r1 _Ctype_int) {
+	_cgo_runtime_cgocall(_cgo_f82858858df1_Cfunc_halve, uintptr(unsafe.Pointer(&p0)))
+	if _Cgo_always_false {
+		_Cgo_use(p0)
+	}
+	return
+}
+//go:cgo_import_static _cgo_f82858858df1_Cfunc_scale
+//go:linkname __cgofn__cgo_f82858858df1_Cfunc_scale _cgo_f82858858df1_Cfunc_scale
+var __cgofn__cgo_f82858858df1_Cfunc_scale byte
+var _cgo_f82858858df1_Cfunc_scale = unsafe.Pointer(&__cgofn__cgo_f82858858df1_Cfunc_scale)
 
 //go:cgo_unsafe_args
 func _Cfunc_scale(p0 *_Ctype_struct_x) (r1 _Ctype_double) {
-	_cgo_runtime_cgocall(_cgo_2588f0b89e33_Cfunc_scale, uintptr(unsafe.Pointer(&p0)))
+	_cgo_runtime_cgocall(_cgo_f82858858df1_Cfunc_scale, uintptr(unsafe.Pointer(&p0)))
 	if _Cgo_always_false {
 		_Cgo_use(p0)
 	}
 	return
 }
 
-//go:cgo_import_static _cgo_2588f0b89e33_Cfunc__Cmalloc
-//go:linkname __cgofn__cgo_2588f0b89e33_Cfunc__Cmalloc _cgo_2588f0b89e33_Cfunc__Cmalloc
-var __cgofn__cgo_2588f0b89e33_Cfunc__Cmalloc byte
-var _cgo_2588f0b89e33_Cfunc__Cmalloc = unsafe.Pointer(&__cgofn__cgo_2588f0b89e33_Cfunc__Cmalloc)
+//go:cgo_import_static _cgo_f82858858df1_Cfunc__Cmalloc
+//go:linkname __cgofn__cgo_f82858858df1_Cfunc__Cmalloc _cgo_f82858858df1_Cfunc__Cmalloc
+var __cgofn__cgo_f82858858df1_Cfunc__Cmalloc byte
+var _cgo_f82858858df1_Cfunc__Cmalloc = unsafe.Pointer(&__cgofn__cgo_f82858858df1_Cfunc__Cmalloc)
 
 //go:linkname runtime_throw runtime.throw
 func runtime_throw(string)
 
 //go:cgo_unsafe_args
 func _cgo_cmalloc(p0 uint64) (r1 unsafe.Pointer) {
-	_cgo_runtime_cgocall(_cgo_2588f0b89e33_Cfunc__Cmalloc, uintptr(unsafe.Pointer(&p0)))
+	_cgo_runtime_cgocall(_cgo_f82858858df1_Cfunc__Cmalloc, uintptr(unsafe.Pointer(&p0)))
 	if r1 == nil {
 		runtime_throw("runtime: C malloc failed")
 	}

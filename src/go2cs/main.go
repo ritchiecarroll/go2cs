@@ -297,9 +297,9 @@ func main() {
 	hoistLiteralsCmd := commandLine.Bool("hoist-literals", false, "Hoist mode, the standard library's: each string literal in a value slot with a readable name becomes one `static readonly` field (`F(helloˢ)`), and every other literal takes the default plain mode's cached form (`F(\"hello\")`, converted once and shared by golib). The standard library always hoists; this opts any other package in")
 	useChannelOperatorsCmd := commandLine.Bool("uco", true, fmt.Sprintf("Use channel operators: %s / %s", ChannelLeftOp, ChannelRightOp))
 	licenseCmd := commandLine.String("license", "", "Override NuGet license metadata with an SPDX expression (for example MIT or BSD-3-Clause); does not relicense input code")
-	provenanceCmd := commandLine.Bool("provenance", false, "Include a deterministic source-file provenance comment (no conversion timestamp)")
+	provenanceCmd := commandLine.Bool("provenance", false, "Include in each converted file a notice naming its Go source and module and that go2cs modified it by conversion (no timestamp)")
 	includeCommentsCmd := commandLine.Bool("comments", false, "Include comments in output")
-	parseCgoTargetsCmd := commandLine.Bool("cgo", false, "Reserved for cgo support, which has no C# conversion yet: an import \"C\" source is refused whatever this flag says (docs/PLAN-cgo-interop.md, OQ-5)")
+	parseCgoTargetsCmd := commandLine.Bool("cgo", false, "Load a single package cgo-on (CGO_ENABLED=1; needs a C compiler) and report what cgo support recognizes in it. cgo has no C# conversion yet, so an import \"C\" source is still refused, now naming the C declarations it recognized and each generated file's source (docs/PLAN-cgo-interop.md, Phase 1). Not combinable with -stdlib, -tests or -recurse")
 	showParseTreeCmd := commandLine.Bool("tree", false, "Show parse tree")
 	csprojFileCmd := commandLine.String("csproj", "", "Path to custom .csproj template file")
 	debugModeCmd := commandLine.Bool("debug", false, "Enable debug mode")
@@ -621,6 +621,10 @@ Examples:
 	// alone) unambiguous — the measurability condition the flag split exists for.
 	if options.dualRecvParams && !options.dualRecv {
 		log.Fatalln("-dual-recv-params requires -dual-recv: it lowers the parameters of the by-reference forms that -dual-recv emits")
+	}
+
+	if err := checkCgoFlag(options.parseCgoTargets, convertStdLib, options.convertTests, recurseVal.enabled); err != nil {
+		log.Fatalln(err)
 	}
 
 	// The capture-mode pass runs across four drivers with no options in reach; the flag mirrors

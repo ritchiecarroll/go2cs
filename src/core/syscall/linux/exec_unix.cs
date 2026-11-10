@@ -844,7 +844,9 @@ internal static void FreeStringVector(IntPtr vector) {
     System.Runtime.InteropServices.Marshal.FreeHGlobal(vector);
 }
 
-// glibc flag values (spawn.h) and the pidfd_open syscall number (linux-x64).
+// glibc flag values (spawn.h) and the pidfd_open syscall number. pidfd_open is 434 at every arch: it is in
+// the unified table (424 and up), the same at amd64 and arm64, and Go's syscall zsysnum carries it at
+// neither (S3, docs/phase4/DATA-la64-s3-census.md §2).
 internal const short POSIX_SPAWN_SETSIGMASK = 0x08;
 internal const short POSIX_SPAWN_SETSIGDEF = 0x04;
 internal const short POSIX_SPAWN_SETPGROUP = 0x02;
@@ -907,12 +909,15 @@ internal static extern int pthread_sigmask(int how, IntPtr set, IntPtr oldset);
 [System.Runtime.InteropServices.DllImport("libc", SetLastError = true)]
 internal static extern int ioctl(int fd, ulong request, IntPtr arg);
 
-// Foreground's native vocabulary (linux/amd64; the seam already asserts the architecture elsewhere).
+// Foreground's native vocabulary. The signal numbers, the sigprocmask hows and TIOCSPGRP are the generic
+// Linux values, the same at amd64 and arm64 (zerrors_linux_amd64.go and _arm64.go agree). kill's syscall
+// number is not (62 at amd64, 129 at arm64), so it comes from this flavour's own zsysnum (S3 site 5,
+// docs/phase4/DATA-la64-s3-census.md §2, §5(b)).
 internal const int SIG_BLOCK = 0;
 internal const int SIG_SETMASK = 2;
 internal const int SIGTTOU_NUMBER = 22;
 internal const int SIGKILL_NUMBER = 9;
-internal const long SYS_kill = 62;
+internal static long SYS_kill => SYS_KILL;
 internal const ulong TIOCSPGRP_REQUEST = 0x5410;
 
 [System.Runtime.InteropServices.DllImport("libc", EntryPoint = "syscall", SetLastError = false)]

@@ -1,0 +1,7 @@
+row	corpus_commit	converter_commit	converter_mtime	word	rc	ended_utc
+# os LINUX RE-BANK (COORD ruling 2026-11-10: the +9 is HOST). os-matrix sweep-shard run 42764020381, filter os, at master 9b8af3bd3017e52c1e1f161dd9fbf0dc2a58ebb9, GitHub hosted linux-x64 runner
+# cells from the run artifact rows/src/core/os/go2cs_test_comparison.json: status validated, 3842 Go / 3842 C# verdicts, 3840 matched, disclosed 2 (TestRemoveAllNoFcntl, TestWriteStringAlloc, the only divergent), undisclosed 0, errors none, 11 skipped both sides
+# the job printed "COUNT os 3840, banked 3831" (rc 1 against the old expectation); recorded as its VALIDATED state against the new count, word PASS rc 0, by ruling (the RWSL-1 crypto/tls precedent)
+# control: run 42764017334 at 2e3c8dd78b (the banked reading's corpus) reads the identical 3842 names and verdicts on the same host type
+# converter_mtime: not applicable (a CI build from the commit)
+os	9b8af3bd3017e52c1e1f161dd9fbf0dc2a58ebb9	9b8af3bd3017e52c1e1f161dd9fbf0dc2a58ebb9	-	PASS	0	2026-11-10T05:51:54Z

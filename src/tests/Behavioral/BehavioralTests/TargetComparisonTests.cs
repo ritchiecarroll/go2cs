@@ -571,6 +571,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckElidedStructInterfaceField() => CheckTarget("ElidedStructInterfaceField");
 
     [TestMethod]
+    public void CheckEmbedDepthMethodPromotion() => CheckTarget("EmbedDepthMethodPromotion");
+
+    [TestMethod]
     public void CheckEmbedDirectiveForms() => CheckTarget("EmbedDirectiveForms");
 
     [TestMethod]
@@ -2150,6 +2153,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckRenamedReceiverBox() => CheckTarget("RenamedReceiverBox");
+
+    [TestMethod]
+    public void CheckRenamedTypeAliasReexport() => CheckTarget("RenamedTypeAliasReexport");
 
     [TestMethod]
     public void CheckReservedNameShadows() => CheckTarget("ReservedNameShadows");

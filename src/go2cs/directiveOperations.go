@@ -40,6 +40,11 @@ type BuildConstraintEvaluator struct {
 	loaderDir   string
 	releaseTags []string
 	toolTags    []string
+
+	// targetPlatform is the `goos/goarch` the file is being selected FOR, which the tool tags depend on: go1.26
+	// turns the dwarf5 experiment on for windows and linux and off for darwin, and the feature level is amd64.v1 on
+	// amd64 but arm64.v8.0 on arm64. Empty means the converting host's own platform.
+	targetPlatform string
 }
 
 // NewBuildConstraintEvaluator creates a new build constraint evaluator
@@ -239,7 +244,7 @@ func (e *BuildConstraintEvaluator) resolveReleaseTags() []string {
 // use and caching the answer for the rest of the evaluator's life.
 func (e *BuildConstraintEvaluator) resolveToolTags() []string {
 	if e.toolTags == nil {
-		e.toolTags = loaderToolTags(e.loaderDir)
+		e.toolTags = loaderToolTags(e.loaderDir, e.targetPlatform)
 	}
 
 	return e.toolTags
@@ -252,42 +257,53 @@ var (
 
 // loaderToolTags returns the tool tags (go/build's ToolTags: `goexperiment.*` for every active
 // experiment, and the GOARCH feature level such as `amd64.v1`) of the toolchain the go command selects
-// in loaderDir, under the converter's own environment — so GOEXPERIMENT and GOAMD64 apply exactly as
-// they did when go/packages selected the files. It is loaderReleaseTags for the dotted half of the tag
-// namespace: lazy, cached per MODULE ROOT, and falling back to the tags compiled into this binary when
-// there is no loader context or the go command cannot answer, so an unreachable toolchain never starts
-// excluding files.
-func loaderToolTags(loaderDir string) []string {
+// in loaderDir, FOR targetPlatform (`goos/goarch`), under the converter's own environment otherwise — so
+// GOEXPERIMENT and GOAMD64 apply exactly as they did when go/packages selected the files, which it did with
+// the target's GOOS and GOARCH. It is loaderReleaseTags for the dotted half of the tag namespace: lazy,
+// cached per MODULE ROOT and TARGET, and falling back to the tags compiled into this binary when there is no
+// loader context or the go command cannot answer, so an unreachable toolchain never starts excluding files.
+//
+// The target is not optional in effect: the default experiments differ per platform. Asked in the host's own
+// environment, a darwin conversion on a windows box matched windows' `goexperiment.dwarf5` and re-excluded
+// internal/goexperiment's exp_dwarf5_off.go after go/packages had selected it, so darwin held neither half of the
+// pair. An empty targetPlatform asks for the host's own tags, as before.
+func loaderToolTags(loaderDir string, targetPlatform string) []string {
 	if loaderDir == "" {
 		return build.Default.ToolTags
 	}
 
 	moduleRoot := moduleRootDir(loaderDir)
+	key := moduleRoot + "\x00" + targetPlatform
 
 	toolTagsLock.Lock()
 	defer toolTagsLock.Unlock()
 
-	if tags, cached := toolTagsCache[moduleRoot]; cached {
+	if tags, cached := toolTagsCache[key]; cached {
 		return tags
 	}
 
 	tags := build.Default.ToolTags
 
-	if resolved, err := goListToolTags(moduleRoot); err == nil {
+	if resolved, err := goListToolTags(moduleRoot, targetPlatform); err == nil {
 		tags = resolved
 	}
 
-	toolTagsCache[moduleRoot] = tags
+	toolTagsCache[key] = tags
 
 	return tags
 }
 
-// goListToolTags asks the go command in dir for its build context's tool tags. `-find` lists the one
-// named package without loading its dependencies, and `unsafe` exists in every toolchain, so the
-// question costs one short subprocess (~150-220ms on Windows) whatever the module holds.
-func goListToolTags(dir string) ([]string, error) {
+// goListToolTags asks the go command in dir for its build context's tool tags, for targetPlatform
+// (`goos/goarch`; empty for the host's own). `-find` lists the one named package without loading its
+// dependencies, and `unsafe` exists in every toolchain, so the question costs one short subprocess
+// (~150-220ms on Windows) whatever the module holds.
+func goListToolTags(dir string, targetPlatform string) ([]string, error) {
 	cmd := exec.Command("go", "list", "-find", "-f", "{{context.ToolTags}}", "unsafe")
 	cmd.Dir = dir
+
+	if goos, goarch, ok := strings.Cut(targetPlatform, "/"); ok && goos != "" && goarch != "" {
+		cmd.Env = append(os.Environ(), "GOOS="+goos, "GOARCH="+goarch)
+	}
 
 	var out bytes.Buffer
 	cmd.Stdout = &out
@@ -618,6 +634,7 @@ func CheckBuildConstraints(filename string, targetPlatform string, buildTags []s
 	// Create a new build constraint evaluator
 	evaluator := NewBuildConstraintEvaluator([]string{targetPlatform})
 	evaluator.loaderDir = loaderDir
+	evaluator.targetPlatform = targetPlatform
 
 	// A -tags tag must be honored HERE too, not just by the go/packages loader. The loader selects
 	// files with the tag applied — `-tags purego` picks crypto/sha256's sha256block_generic.go, which

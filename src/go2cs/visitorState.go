@@ -563,11 +563,12 @@ type Visitor struct {
 	tupleTempIndex int
 	// inForPost is set while emitting a for-loop's POST statement. A deref-aliased pointer
 	// param/box repointed in the post (`for ; scope != nil; scope = scope.Outer`) expands to a
-	// box-repoint PLUS a value re-alias (`Ꮡscope = scope.Outer; scope = ref Ꮡscope…`); the
-	// second statement cannot share the single for-post slot, so the re-alias is stashed in
-	// forPostReAlias and visitForStmt injects it at the TOP of the loop body instead.
+	// box-repoint PLUS a value re-alias (`Ꮡscope = scope.Outer; scope = ref Ꮡscope…`). The
+	// post clause holds no `;`, so each re-alias is collected in forPostReAlias and visitForStmt
+	// appends it to the clause as an expression list (`Ꮡscope = scope.Outer, scope = ref Ꮡscope…`),
+	// or as statements after a post that spilled out of the header.
 	inForPost      bool
-	forPostReAlias string
+	forPostReAlias []string
 	// forPerIterVars holds the `for i := …` clause variables currently emitted with Go 1.22+
 	// per-iteration semantics (see forClausePerIterVars): the clause drives a renamed carrier
 	// and the body re-declares the variable fresh each pass. convertToHeapTypeDecl consults it

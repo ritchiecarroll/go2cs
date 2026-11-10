@@ -1323,8 +1323,14 @@ func packageInfoBelongsHere(lines []string) (owner string, adopted bool) {
 		if i := strings.Index(rest, importPathKey); i >= 0 && productionPath != "" {
 			stamped := rest[i+len(importPathKey):]
 
-			if j := strings.Index(stamped, `"`); j >= 0 && strings.TrimSuffix(stamped[:j], "_test") != productionPath {
-				continue
+			if j := strings.Index(stamped, `"`); j >= 0 {
+				path := strings.TrimSuffix(stamped[:j], "_test")
+
+				// goPackageImportPathFor stamps a main package's own class "main", whatever its loader path, as
+				// Go's reflect names it; its internal-test bridge keeps the loader path.
+				if path != productionPath && !(path == "main" && name == "main" && productionName == "main") {
+					continue
+				}
 			}
 		}
 

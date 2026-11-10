@@ -9,6 +9,7 @@
 package cgofixture
 //go:cgo_import_dynamic free free#GLIBC_2.2.5 "libc.so.6"
 //go:cgo_import_dynamic __libc_start_main __libc_start_main#GLIBC_2.34 "libc.so.6"
+//go:cgo_import_dynamic __errno_location __errno_location#GLIBC_2.2.5 "libc.so.6"
 //go:cgo_import_dynamic _ITM_deregisterTMCloneTable _ITM_deregisterTMCloneTable ""
 //go:cgo_import_dynamic __gmon_start__ __gmon_start__ ""
 //go:cgo_import_dynamic malloc malloc#GLIBC_2.2.5 "libc.so.6"

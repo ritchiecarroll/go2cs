@@ -49,24 +49,47 @@ public class RuntimeCPUStatsTests
     {
         // TestCPUMetricsSleep: a 100 ms sleep between two cycles adds at least
         // 0.1 s * (GOMAXPROCS - 0.5) of idle time, with Go's ten tries.
-        const double dur = 0.1;
+        //
+        // Go's half-P slack assumes nothing else in the process runs across the sleep. Here idle is the
+        // CPU the process did NOT use (catchUpCPUStats), so a thread another test left running eats it:
+        // one busy thread reads about 0.30 against 0.35 at GOMAXPROCS 4, the full-suite reading. So each
+        // try measures the process's own CPU across the interval, outside GC pauses, and only a QUIET try
+        // (at most 0.2 * dur busy) must reach the floor; ten tries with none quiet are Inconclusive with
+        // the readings, never red. 0.2, not Go's 0.5: this read and catchUpCPUStats' read the same clock
+        // a few instructions apart, which can differ by one Windows tick (15.6 ms), and a quiet try must
+        // still guarantee GOMAXPROCS * dur - 0.02 - 0.0156 >= the floor.
+        const double dur = 0.1, quiet = 0.2 * dur;
         double min = dur * (GOMAXPROCS(-1) - 0.5);
-        double last = 0;
+        var readings = new System.Collections.Generic.List<string>();
 
         for (int tries = 0; tries < 10; tries++)
         {
             GC();
             long before = GoCPUStatsProbe()[Idle];
+            long cpu0 = ProcessCpuNs(), pause0 = PauseNs();
             Thread.Sleep(100);
             GC();
-            last = (GoCPUStatsProbe()[Idle] - before) / 1e9;
+            long cpu1 = ProcessCpuNs(), pause1 = PauseNs();
+            double idle = (GoCPUStatsProbe()[Idle] - before) / 1e9;
+            double busy = (cpu1 - cpu0 - (pause1 - pause0)) / 1e9;
 
-            if (last >= min)
-                return;
+            readings.Add($"{idle:F4} idle / {busy:F4} busy");
+
+            if (busy > quiet)
+                continue;
+
+            Assert.IsTrue(idle >= min, $"a quiet sleep (the process busy {busy:F5} s of it, at most {quiet:F2}) did not reach the idle class: {idle:F5} s, want at least {min:F5} s");
+            System.Console.WriteLine($"CPUSLEEP floor {min:F4}: {string.Join("; ", readings)}");
+            return;
         }
 
-        Assert.Fail($"the sleep did not reach the idle class: {last:F5} s, want at least {min:F5} s");
+        Assert.Inconclusive($"no try was quiet (busy at most {quiet:F2} s): {string.Join("; ", readings)}; floor {min:F5} s");
     }
+
+    // The two clocks catchUpCPUStats reads, in its units (ns).
+    private static long ProcessCpuNs() => System.Environment.CpuUsage.TotalTime.Ticks * 100;
+
+    private static long PauseNs() => System.GC.GetTotalPauseDuration().Ticks * 100;
 
     [TestMethod]
     public void AReadAfterACollectionRuntimeGCDidNotRunCatchesUp()

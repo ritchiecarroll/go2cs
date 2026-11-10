@@ -494,6 +494,7 @@
     <Project Path="tests/Behavioral/ElidedNestedPtrComposite/ElidedNestedPtrComposite.csproj" />
     <Project Path="tests/Behavioral/ElidedPtrElemIfaceAssign/ElidedPtrElemIfaceAssign.csproj" />
     <Project Path="tests/Behavioral/ElidedStructInterfaceField/ElidedStructInterfaceField.csproj" />
+    <Project Path="tests/Behavioral/EmbedDepthMethodPromotion/EmbedDepthMethodPromotion.csproj" />
     <Project Path="tests/Behavioral/EmbedDirectiveForms/EmbedDirectiveForms.csproj" />
     <Project Path="tests/Behavioral/EmbeddedInterfaceWitness/EmbeddedInterfaceWitness.csproj" />
     <Project Path="tests/Behavioral/EmbeddedInterfaceWitness/iolike/EmbeddedInterfaceWitness.iolike.csproj" />
@@ -1050,6 +1051,9 @@
     <Project Path="tests/Behavioral/RenamedGenericQualified/RenamedGenericQualified.csproj" />
     <Project Path="tests/Behavioral/RenamedGenericQualified/coll/RenamedGenericQualified.coll.csproj" />
     <Project Path="tests/Behavioral/RenamedReceiverBox/RenamedReceiverBox.csproj" />
+    <Project Path="tests/Behavioral/RenamedTypeAliasReexport/RenamedTypeAliasReexport.csproj" />
+    <Project Path="tests/Behavioral/RenamedTypeAliasReexport/lib/RenamedTypeAliasReexport.lib.csproj" />
+    <Project Path="tests/Behavioral/RenamedTypeAliasReexport/wrap/RenamedTypeAliasReexport.wrap.csproj" />
     <Project Path="tests/Behavioral/ReturnPointerFieldOfParam/ReturnPointerFieldOfParam.csproj" />
     <Project Path="tests/Behavioral/ReverseSortNaNOrder/ReverseSortNaNOrder.csproj" />
     <Project Path="tests/Behavioral/ReturnTupleFuncLitArg/ReturnTupleFuncLitArg.csproj" />
