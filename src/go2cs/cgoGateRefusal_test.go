@@ -330,6 +330,7 @@ func TestTheCgoFlagRecognizesTheFixtureAndStillRefuses(t *testing.T) {
 	dir := writeCgoGateModule(t, map[string]string{"fixture.go": string(source)})
 
 	stderr, output, err := convertCgoGateFixture(t, dir, []string{"-cgo=true"}, "CGO_ENABLED=")
+	logCgoRecognizedNames(t, dir)
 	requireCgoRefusal(t, stderr, err, output, "fixture.go", "cgogatefixture", "under -cgo: "+cgoFixtureSummaryCounts, " -> fixture.go; ")
 
 	if strings.Count(stderr, ": generated, no source") != 1 {
@@ -339,5 +340,35 @@ func TestTheCgoFlagRecognizesTheFixtureAndStillRefuses(t *testing.T) {
 	// The reading itself, so a passing run on a hosted runner records what the host's cmd/cgo produced.
 	if _, recognized, found := strings.Cut(stderr, "under -cgo: "); found {
 		t.Logf("READING %s", strings.TrimSpace(strings.SplitN(recognized, "\n", 2)[0]))
+	}
+}
+
+// logCgoRecognizedNames makes the load -cgo makes, in-process, and logs cgoDeclarations' names per kind. The refusal
+// carries counts only, so a host whose cmd/cgo declares a different set (another libc's typedef chain) would red the
+// exit gate without saying WHICH declaration moved; these lines say it, on a pass and on a red alike.
+func logCgoRecognizedNames(t *testing.T, dir string) {
+	t.Helper()
+
+	pkgs, err := packages.Load(&packages.Config{
+		Mode: packages.LoadAllSyntax,
+		Dir:  dir,
+		Env:  append(os.Environ(), "GOWORK=off", "GOFLAGS=", "CGO_ENABLED=1"),
+	}, ".")
+
+	if err != nil || len(pkgs) != 1 || pkgs[0].Types == nil {
+		t.Logf("READING names: not loaded (%d package(s), %v)", len(pkgs), err)
+		return
+	}
+
+	names := map[cgoDeclKind][]string{}
+
+	for _, declaration := range cgoDeclarations(pkgs[0].Types) {
+		names[declaration.kind] = append(names[declaration.kind], declaration.cName)
+	}
+
+	for _, entry := range cgoKindLabels {
+		if len(names[entry.kind]) > 0 {
+			t.Logf("READING %s: %s", entry.label, strings.Join(names[entry.kind], ", "))
+		}
 	}
 }
