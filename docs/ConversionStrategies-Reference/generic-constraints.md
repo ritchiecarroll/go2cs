@@ -965,19 +965,46 @@ local-generic arms as a closed record of the pair: the pointer adapter keyed by 
 interface)` and the value partial at the open definition (previous section). An open record and a closed
 record of one pair generate ONE adapter, byte-identical to the closed record's own.
 
-The scope is a LOCAL generic converted to an interface with NO type parameters. Two shapes keep their
-earlier emission:
+The scope is a generic converted to an interface with NO type parameters. A **foreign** generic's pointer
+conversion takes it only when every method the interface requires is declared on the generic's definition
+with a signature free of its type parameters (`foreignGenericAdapterIsOpen` in `interfaceConversion.go`).
+Then every instantiation satisfies the interface the same way. The converter records the definition,
+package-qualified, and names the adapter at each cast site with the instantiation's arguments as C# type
+arguments. `ImplementGenerator` emits ONE generic adapter, package-prefixed like every foreign adapter
+(`fieldlib_ExpectedжField<T>`, wrapping `ж<global::…fieldlib_package.Expected<T>>`). Several instantiations of
+one pair in one package therefore share it (tsc's internal/module, C33: `Expected[string]` and
+`Expected[map[string]string]` as `TypeValidatedField`):
 
-- A **foreign** generic is keyed per closed instantiation (its adapter is non-generic over the closed type),
-  so an open conversion of one has no definition-keyed adapter to share. Its pointer path still records the
-  open instantiation, `GoImplement<…lib_package.Box<T>, Iter>`, which names `T` out of scope.
+<!-- source: src/tests/Behavioral/GenericForeignAdapterInstantiations/package_info.cs:39 -->
+```csharp
+[assembly: GoImplement(typeof(go.GenericForeignAdapterInstantiations.fieldlib_package.Expected<>), typeof(go.GenericForeignAdapterInstantiations.fieldlib_package.Field), Pointer = true)]
+```
+
+<!-- source: src/tests/Behavioral/GenericForeignAdapterInstantiations/main.cs.target:18-20 -->
+```csharp
+    show("string", new fieldlib_ExpectedжField<@string>(Ꮡname));
+    show("map", new fieldlib_ExpectedжField<map<@string, @string>>(Ꮡdeps));
+    show("int", new fieldlib_ExpectedжField<nint>(Ꮡsize));
+```
+
+Two shapes keep their earlier emission:
+
+- A **foreign** generic whose required method MENTIONS a type parameter keeps one non-generic adapter per
+  closed instantiation (`internal/sync.HashTrieMap[any, any]` as sync's `mapInterface`, whose `Load(key K)` an
+  adapter open over `K` could not implement as `Load(any)`). Go lets exactly one instantiation satisfy such an
+  interface, so the un-suffixed closed name cannot collide. A promoted method, a generic interface, and a
+  definition that does not implement the interface take this route too. An open conversion of such a pair
+  still records the open instantiation, `GoImplement<…lib_package.Box<T>, Getter>`, which names `T` out of
+  scope.
 - An interface over the type parameter (`Getter[T]`) cannot be named by `typeof` in its closed form either;
   that pair is unrecorded, as before.
 
 Guarded by the `OpenGenericPointerImplement` behavioral test (pointer and value forms, a type reached only
 through its parameters, and a closed record beside the open one, output-compared against `go run`), by
-`TestOpenGenericImplementIsRecordedByDefinition` in the converter, and by GenTests
-`OpenGenericImplementRecordTests` for the one-adapter claim.
+`GenericForeignAdapterInstantiations` (three instantiations of one foreign generic through one interface, and
+a closed-route `Box[string]` as `Getter`, output-compared), by `TestOpenGenericImplementIsRecordedByDefinition`
+and `TestForeignGenericAdapterRoute` in the converter, and by GenTests `OpenGenericImplementRecordTests` for the
+one-adapter claim.
 
 ## The `string | []byte` union
 C# generic constraints are conjunctive ("and"), so they cannot express Go's `string | []byte` union directly. The two members share no operators (the union is neither comparable nor additive), so a conforming body may only use the read operations common to both — indexing, `len`, and sub-slicing. These are captured by the golib read-only byte-sequence interface [`IByteSeq`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/IByteSeq.cs), which both `@string` and `slice<T>` implement; the converter emits it for the union and suppresses the (spurious) lifted operator constraints:

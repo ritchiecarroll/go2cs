@@ -230,6 +230,7 @@
     <None Include="$(MSBuildThisFileDirectory)foreignConstraintProxy.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignConstraintProxy_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignFieldConsumer_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)foreignGenericAdapter_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases.go" />

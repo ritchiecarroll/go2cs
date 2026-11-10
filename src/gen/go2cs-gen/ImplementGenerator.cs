@@ -1127,7 +1127,26 @@ public class ImplementGenerator : ISourceGenerator
 
                 if (structType is INamedTypeSymbol { IsGenericType: true } genericStructType)
                 {
-                    if (foreignStruct)
+                    if (foreignStruct && SymbolEqualityComparer.Default.Equals(genericStructType, genericStructType.OriginalDefinition))
+                    {
+                        // A FOREIGN generic's DEFINITION: the converter recorded the open typeof form
+                        // (`GoImplement(typeof(Expected<>), typeof(Field), Pointer = true)`) because every
+                        // member the interface requires is declared without the definition's type
+                        // parameters, so every instantiation satisfies it the same way (the converter's
+                        // foreignGenericAdapterIsOpen). One GENERIC adapter over the open parameters,
+                        // package-qualified like every foreign adapter (`fieldlib_ExpectedжField<T>`),
+                        // and the cast sites instantiate it (`new fieldlib_ExpectedжField<@string>(…)`).
+                        // The closed route below gives two instantiations of one such pair a single
+                        // un-suffixed name, one class twice (tsc's internal/module, C33).
+                        if (!emittedGenericPointerAdapters.Add($"open|{genericStructType.ToDisplayString()}|{interfaceName}"))
+                            continue;
+
+                        adapterBaseName = genericStructType.Name;
+                        foreignClosedStructName = GlobalQualify(genericStructType.ToDisplayString());
+                        adapterTypeParameters = $"<{string.Join(", ", genericStructType.TypeParameters.Select(typeParameter => typeParameter.Name))}>";
+                        adapterConstraintClause = GetGenericConstraintClause(genericStructType.TypeParameters);
+                    }
+                    else if (foreignStruct)
                     {
                         if (!emittedGenericPointerAdapters.Add($"closed|{genericStructType.ToDisplayString()}|{interfaceName}"))
                             continue;
