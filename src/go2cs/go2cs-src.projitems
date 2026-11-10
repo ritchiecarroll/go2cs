@@ -296,6 +296,7 @@
     <None Include="$(MSBuildThisFileDirectory)intrinsicPlaceholders_test.go" />
     <None Include="$(MSBuildThisFileDirectory)interfaceConversion.go" />
     <None Include="$(MSBuildThisFileDirectory)interfaceInheritedMemberDoc_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)interfaceEmbedMergedMethod_test.go" />
     <None Include="$(MSBuildThisFileDirectory)interfaceMethodDiamond_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\census.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\census_test.go" />

@@ -577,6 +577,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckEmbedLayoutMatchesGo() => CheckTarget("EmbedLayoutMatchesGo");
 
     [TestMethod]
+    public void CheckEmbeddedInterfaceMergedMethod() => CheckTarget("EmbeddedInterfaceMergedMethod");
+
+    [TestMethod]
     public void CheckEmbeddedInterfaceWitness() => CheckTarget("EmbeddedInterfaceWitness");
 
     [TestMethod]

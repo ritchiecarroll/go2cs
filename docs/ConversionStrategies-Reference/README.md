@@ -350,6 +350,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A publicized unexported interface is emitted `public`](interfaces.md#a-publicized-unexported-interface-is-emitted-public)
   - [Publicized unexported types make their exported methods public](interfaces.md#publicized-unexported-types-make-their-exported-methods-public)
   - [Structural interface satisfaction emits C# interface inheritance](interfaces.md#structural-interface-satisfaction-emits-c-interface-inheritance)
+  - [An interface redeclares a method two embedded interfaces declare](interfaces.md#an-interface-redeclares-a-method-two-embedded-interfaces-declare)
   - [Embedded-pointer hop receivers split per method](interfaces.md#embedded-pointer-hop-receivers-split-per-method)
   - [With SEVERAL embedded pointers the hop is chosen per member, not per struct](interfaces.md#with-several-embedded-pointers-the-hop-is-chosen-per-member-not-per-struct)
   - [A forwarded multi-value call deconstructs when tuple elements need interface conversion](interfaces.md#a-forwarded-multi-value-call-deconstructs-when-tuple-elements-need-interface-conversion)
