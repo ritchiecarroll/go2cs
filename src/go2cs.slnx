@@ -1045,6 +1045,9 @@
     <Project Path="tests/Behavioral/RenamedGenericQualified/RenamedGenericQualified.csproj" />
     <Project Path="tests/Behavioral/RenamedGenericQualified/coll/RenamedGenericQualified.coll.csproj" />
     <Project Path="tests/Behavioral/RenamedReceiverBox/RenamedReceiverBox.csproj" />
+    <Project Path="tests/Behavioral/RenamedTypeAliasReexport/RenamedTypeAliasReexport.csproj" />
+    <Project Path="tests/Behavioral/RenamedTypeAliasReexport/lib/RenamedTypeAliasReexport.lib.csproj" />
+    <Project Path="tests/Behavioral/RenamedTypeAliasReexport/wrap/RenamedTypeAliasReexport.wrap.csproj" />
     <Project Path="tests/Behavioral/ReturnPointerFieldOfParam/ReturnPointerFieldOfParam.csproj" />
     <Project Path="tests/Behavioral/ReverseSortNaNOrder/ReverseSortNaNOrder.csproj" />
     <Project Path="tests/Behavioral/ReturnTupleFuncLitArg/ReturnTupleFuncLitArg.csproj" />
