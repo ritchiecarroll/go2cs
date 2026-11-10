@@ -517,9 +517,13 @@
     <None Include="$(MSBuildThisFileDirectory)platformFilterSkip_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformHandOwn.go" />
     <None Include="$(MSBuildThisFileDirectory)platformHandOwn_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)platformCanonicalForm_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformCensus.go" />
     <None Include="$(MSBuildThisFileDirectory)platformCensus_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformCompanion_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)platformLattice.go" />
+    <None Include="$(MSBuildThisFileDirectory)platformLattice_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)platformLatticeLayout_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformLayout.go" />
     <None Include="$(MSBuildThisFileDirectory)platformLayout_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformLayoutFold_test.go" />
