@@ -378,7 +378,16 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 		// or `type P[T any] pair[T]`, takes the same wrapper: the instantiation is a named type too, and
 		// the wrapper forwards its fields, substituted (go2cs-gen), and none of its methods, which is
 		// Go's rule for a defined type. GO2CS2004 refused this shape until it converted.
+		//
+		// Over another package's ALIAS of a named type (`type DX lib.Alias`, `type Alias = Pair[string]`) the
+		// wrapped type is the alias's target, through any number of hops: the alias's own name is a
+		// `global using` of this compilation, which the generated wrapper cannot read members through. An
+		// alias of a type with no name of its own (`type AS = []int`) keeps the alias's spelling here.
 		if rhsType := v.info.TypeOf(typeSpecType); rhsType != nil {
+			if named, ok := types.Unalias(rhsType).(*types.Named); ok {
+				rhsType = named
+			}
+
 			csName := convertToCSTypeName(v.getFullyQualifiedTypeName(rhsType, false))
 
 			// The GoType attribute is consumed by the generated `<X>.g.cs`, which has no file-local

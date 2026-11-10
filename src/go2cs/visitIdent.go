@@ -17,7 +17,10 @@ import (
 
 // Handles identity types in context of a TypeSpec
 func (v *Visitor) visitIdent(ident *ast.Ident, identType types.Type, name string, lifted bool) {
-	resolvedIdentType := v.getIdentType(ident)
+	// An ALIAS is no type of its own: `type DA A1`, with `type A1 = pair[int]`, is a defined type over
+	// pair[int], through any number of alias hops. Unaliased, it takes the named-type wrapper below; left as
+	// the alias it fell to the underlying's raw Go text (`struct{A int; B int}`), which is no C# type.
+	resolvedIdentType := types.Unalias(v.getIdentType(ident))
 	underlyingIdentType := resolvedIdentType.Underlying()
 
 	// A defined type over a NAMED type whose underlying is a struct/array/etc. (`type winlibcall

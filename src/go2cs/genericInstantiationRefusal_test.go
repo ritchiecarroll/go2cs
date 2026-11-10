@@ -30,6 +30,14 @@ const genericPairSource = "package main\n\nimport \"fmt\"\n\ntype pair[T any] st
 func convertGenericInstantiationFixture(t *testing.T, mainSource string) (string, string, error) {
 	t.Helper()
 
+	return convertGenericInstantiationFixtureFiles(t, map[string]string{"main.go": mainSource})
+}
+
+// convertGenericInstantiationFixtureFiles converts the fixture module's main package from the given files,
+// keyed by their slash path under the module root (`lib/lib.go` is a second package the main one imports).
+func convertGenericInstantiationFixtureFiles(t *testing.T, files map[string]string) (string, string, error) {
+	t.Helper()
+
 	treeSrc, err := filepath.Abs("..")
 
 	if err != nil {
@@ -38,8 +46,18 @@ func convertGenericInstantiationFixture(t *testing.T, mainSource string) (string
 
 	dir, out := t.TempDir(), t.TempDir()
 
-	for name, contents := range map[string]string{"go.mod": "module genericrefusalfixture\n\ngo 1.24\n", "main.go": mainSource} {
-		if err := os.WriteFile(filepath.Join(dir, name), []byte(contents), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte("module genericrefusalfixture\n\ngo 1.24\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	for name, contents := range files {
+		path := filepath.Join(dir, filepath.FromSlash(name))
+
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -91,5 +109,50 @@ func TestAnAliasOfAnInstantiatedGenericStillConverts(t *testing.T) {
 
 	if strings.Contains(output, diagnosticGenericInstantiationRefused) || strings.Contains(output, "visit file error") {
 		t.Errorf("the alias was refused or dropped\noutput:\n%s", output)
+	}
+}
+
+// An ALIAS is no type of its own, so a type defined over one is defined over the alias's target (json's
+// `type marshalersOption Marshalers` in the TS readiness re-run, where Marshalers names an instantiation
+// through two aliases). Left as the alias, the local form declared the wrapper over the target's raw Go
+// struct text and the cross-package form over the alias's `global using` name; neither compiles.
+func TestADefinedTypeOverAnAliasOfANamedTypeConverts(t *testing.T) {
+	const libSource = "package lib\n\ntype Pair[T any] struct{ A, B T }\n\ntype Alias = Pair[string]\n\ntype Alias2 = Alias\n"
+
+	for _, shape := range []struct {
+		name    string
+		files   map[string]string
+		emitted []string
+	}{
+		{
+			"local, one hop and two",
+			map[string]string{"main.go": genericPairSource + "type A1 = pair[int]\n\ntype A2 = A1\n\ntype DA A1\n\ntype DB A2\n\nfunc main() {\n\tda, db := DA{1, 2}, DB{3, 4}\n\tfmt.Println(da.a + db.b)\n}\n"},
+			[]string{"partial struct DA /*pair<nint>*/;", "partial struct DB /*pair<nint>*/;"},
+		},
+		{
+			"local, over a plain struct",
+			map[string]string{"main.go": "package main\n\nimport \"fmt\"\n\ntype S struct{ a, b int }\n\ntype AS = S\n\ntype DS AS\n\nfunc main() {\n\tds := DS{1, 2}\n\tfmt.Println(ds.a + ds.b)\n}\n"},
+			[]string{"partial struct DS /*S*/;"},
+		},
+		{
+			"another package's alias, one hop and two",
+			map[string]string{
+				"lib/lib.go": libSource,
+				"main.go":    "package main\n\nimport (\n\t\"fmt\"\n\n\t\"genericrefusalfixture/lib\"\n)\n\ntype DX lib.Alias\n\ntype DY lib.Alias2\n\nfunc main() {\n\tdx, dy := DX{\"x\", \"y\"}, DY{\"z\", \"w\"}\n\tfmt.Println(dx.A + dy.B)\n}\n",
+			},
+			[]string{"partial struct DX /*global::go.genericrefusalfixture.lib_package.Pair<@string>*/;", "partial struct DY /*global::go.genericrefusalfixture.lib_package.Pair<@string>*/;"},
+		},
+	} {
+		output, emitted, err := convertGenericInstantiationFixtureFiles(t, shape.files)
+
+		if err != nil {
+			t.Errorf("%s: the conversion must succeed, got %v\noutput:\n%s", shape.name, err, output)
+		}
+
+		for _, want := range shape.emitted {
+			if !strings.Contains(emitted, want) {
+				t.Errorf("%s: main.cs does not carry %q\nmain.cs:\n%s", shape.name, want, emitted)
+			}
+		}
 	}
 }

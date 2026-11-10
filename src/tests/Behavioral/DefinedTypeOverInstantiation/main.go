@@ -42,6 +42,31 @@ type C[V any] P[V]
 
 type E C[bool]
 
+// Over an ALIAS of an instantiation, one hop and two. An alias is no type of its own, so each is a defined
+// type over pair[int] (TS readiness, json's `type marshalersOption Marshalers`).
+type A1 = pair[int]
+
+type A2 = A1
+
+type DA A1
+
+type DB A2
+
+// Over another package's alias of its instantiation, one hop and two.
+type DX lib.Alias
+
+type DY lib.Alias2
+
+// Over a local alias of another package's instantiation.
+type LA = lib.Pair[string]
+
+type DL LA
+
+// Over an alias of a plain struct.
+type AS = S
+
+type DS AS
+
 // A struct with the same fields, which every one of them converts to and from.
 type S struct {
 	A int
@@ -77,4 +102,27 @@ func main() {
 	s := S(q)
 	sp := S(P[int]{A: 14})
 	fmt.Println(back.A, eb.B, s.A, s.B, sp.A, Q(s).B, P[int](s).A)
+
+	da := DA{A: 15, B: 16}
+	da.B++
+	db := DB{A: 18}
+	das := []DA{{A: 19}, {B: 20}}
+	fmt.Println(da.A, da.B, db.A, db.B, das[0].A, das[1].B, pair[int](da).First(), A1(db).First(), DA(A2{B: 21}).B, S(da).B, DB(s).A)
+
+	dx := DX{A: "x", B: 22}
+	dy := DY{A: "y"}
+	dy.B = dx.B + 1
+	dl := DL{A: "l", B: 24}
+	fmt.Println(dx.A, dx.B, dy.A, dy.B, dl.A, dl.B, lib.Pair[string](dx).First(), lib.Alias(dy).First(), LA(dl).First(), DX(lib.Alias2{B: 25}).B)
+
+	ds := DS{A: 26, B: 27}
+	ds.A++
+	fmt.Println(ds.A, ds.B, S(ds).B, AS(ds).A, DS(s).A, Q(ds).B)
+
+	// A pointer to the defined type converts to a pointer to the instantiation and back, both ways of writing it.
+	pq := (*pair[int])(&q)
+	pq.B++
+	pda := (*A1)(&da)
+	pda.B++
+	fmt.Println(q.B, (*Q)(pq).A, pq.First(), da.B, (*DA)(pda).A, pda.First())
 }

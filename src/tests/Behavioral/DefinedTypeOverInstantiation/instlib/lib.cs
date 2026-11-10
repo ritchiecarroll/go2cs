@@ -1,3 +1,6 @@
+global using Alias = go.go.instlib_package.Pair<go.@string>;
+global using Alias2 = go.go.instlib_package.Pair<go.@string>;
+
 namespace go.go;
 
 partial class instlib_package {
