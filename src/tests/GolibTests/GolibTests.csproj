@@ -77,7 +77,7 @@
          select only the linux flavour of internal/syscall/unix. -->
     <Compile Remove="LinuxGetRandomTests.cs" />
 
-    <!-- GoDieNumbersProbe (runtime/linux/signal_posix_impl.cs): S3's per-arch syscall numbers. -->
+    <!-- GoDieNumbersProbe and GoSigprocmaskNumberProbe (runtime/linux): S3's per-arch syscall numbers. -->
     <Compile Remove="LinuxRuntimeSyscallNumberTests.cs" />
 
     <!-- The PATH_MAX removal failure is a Unix one: Windows names long paths natively, so compiled

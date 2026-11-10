@@ -42,4 +42,19 @@ public class LinuxRuntimeSyscallNumberTests
         Assert.AreEqual((long)syscall_package.SYS_TGKILL, n.tgkill, "SYS_TGKILL");
         Assert.AreEqual((long)syscall_package.SYS_EXIT_GROUP, n.exitGroup, "SYS_EXIT_GROUP");
     }
+
+    // Site 4: rtsigprocmask's rt_sigprocmask (runtime/linux/sigprocmask_impl.cs).
+    [TestMethod]
+    public void RtSigprocmaskTakesEachArchsOwnNumber()
+    {
+        Assert.AreEqual(14L, runtime_package.GoSigprocmaskNumberProbe(Architecture.X64), "amd64");
+        Assert.AreEqual(135L, runtime_package.GoSigprocmaskNumberProbe(Architecture.Arm64), "arm64 (amd64's 14 is removexattr here)");
+        Assert.AreEqual((long)syscall_package.SYS_RT_SIGPROCMASK, runtime_package.GoSigprocmaskNumberProbe(Architecture.X64), "the converted flavour's SYS_RT_SIGPROCMASK");
+
+        foreach (Architecture arch in Enum.GetValues<Architecture>())
+        {
+            if (arch is not (Architecture.X64 or Architecture.Arm64))
+                Assert.IsNull(runtime_package.GoSigprocmaskNumberProbe(arch), $"{arch} has no mapping and must be refused");
+        }
+    }
 }
