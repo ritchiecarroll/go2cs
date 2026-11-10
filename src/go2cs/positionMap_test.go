@@ -181,11 +181,16 @@ func TestGoSourceIdentityIsBuildShapeFaithful(t *testing.T) {
 	goRootSrc := filepath.Join(goRoot, "src")
 	module := filepath.Join(t.TempDir(), "module")
 
+	// A module with a go.mod, as every -recurse main module has: its sources take the -trimpath identity.
+	mainModule := filepath.Join(t.TempDir(), "mainmod")
+	writeModuleFile(t, filepath.Join(mainModule, "go.mod"), "module example.com/mainmod\n\ngo 1.23\n")
+
 	tests := []struct {
-		name   string
-		source string
-		output string
-		want   string
+		name       string
+		source     string
+		output     string
+		want       string
+		noTrimPath bool
 	}{
 		{
 			// A standard library source is what cmd/go builds with -trimpath, so its frames name
@@ -214,9 +219,26 @@ func TestGoSourceIdentityIsBuildShapeFaithful(t *testing.T) {
 			want:   "main.go",
 		},
 		{
-			// A -recurse module converted into its own output root: the absolute source path, which
-			// is exactly what Go bakes for an ordinary untrimmed build.
-			name:   "separate output root records the absolute path",
+			// A -recurse main module converted into its own output root: what `go build -trimpath` bakes, the
+			// module path and the path in the module, written with the empty-version `@/` the runtime reports
+			// unrooted. Its output is a source artifact shipped elsewhere, so it names no directory of this machine.
+			name:   "separate output root records the module-relative trimpath form",
+			source: filepath.Join(mainModule, "app", "main.go"),
+			output: filepath.Join(t.TempDir(), "out", "src", "app", "main.cs"),
+			want:   "example.com/mainmod@/app/main.go",
+		},
+		{
+			// -trimpath=false: the absolute source path, which is exactly what Go bakes for an ordinary
+			// untrimmed build.
+			name:       "-trimpath=false records the absolute path",
+			source:     filepath.Join(mainModule, "app", "main.go"),
+			output:     filepath.Join(t.TempDir(), "out", "src", "app", "main.cs"),
+			want:       filepath.ToSlash(filepath.Join(mainModule, "app", "main.go")),
+			noTrimPath: true,
+		},
+		{
+			// A source in no module at all has no module path to trim to, so it keeps the absolute path.
+			name:   "a source outside any module records the absolute path",
 			source: filepath.Join(module, "app", "main.go"),
 			output: filepath.Join(t.TempDir(), "out", "src", "app", "main.cs"),
 			want:   filepath.ToSlash(filepath.Join(module, "app", "main.go")),
@@ -225,7 +247,7 @@ func TestGoSourceIdentityIsBuildShapeFaithful(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			visitor := &Visitor{sourceFilePath: test.source, options: Options{goRoot: goRoot}}
+			visitor := &Visitor{sourceFilePath: test.source, options: Options{goRoot: goRoot, noTrimPath: test.noTrimPath}}
 
 			if got := visitor.goSourceIdentity(test.output); got != test.want {
 				t.Errorf("goSourceIdentity = %q, want %q", got, test.want)

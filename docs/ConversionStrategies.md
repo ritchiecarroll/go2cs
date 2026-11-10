@@ -1803,7 +1803,7 @@ also gets `go.lib`, the [golib runtime](#the-golib-runtime-library), and `go.gen
 that imports `fmt` gets these lines in its `.csproj`:
 
 <!-- expected app .csproj lines; emitted by src/go2cs/projectFileWriter.go:408,411,519#a5a0d6 -->
-<!-- source (not checked): the three lines src/go2cs/moduleConverter_integration_test.go:230-232 (`<PackageReference Include="go.fmt" Version="$(GoStdLibVersion)" />`) asserts, which it holds as Go string literals -->
+<!-- source (not checked): the three lines src/go2cs/moduleConverter_integration_test.go:231-233 (`<PackageReference Include="go.fmt" Version="$(GoStdLibVersion)" />`) asserts, which it holds as Go string literals -->
 ```xml
 <PackageReference Include="go.fmt" Version="$(GoStdLibVersion)" />
 <PackageReference Include="go.lib" Version="$(GoStdLibVersion)" />
@@ -1813,7 +1813,7 @@ that imports `fmt` gets these lines in its `.csproj`:
 **`$(GoStdLibVersion)` follows the Go minor doing the conversion.** go2cs writes a
 `Directory.Build.props` beside the converted projects that sets it to that minor with a float. For
 example, Go 1.N.P gives `1.N.*`, and restore takes the newest published `1.N.x.y` package. Set
-the property yourself, for example with `-p:GoStdLibVersion=…`, to pin one exact version. <!-- default + override: src/go2cs/moduleConverter.go:881-882 (`to the converter's Go minor, floating on the patch and revision (e.g.…1.26.*), so a freshly converted project restores the newest release of that minor`); the float: src/go2cs/toolchainResolution.go:525 (`return strings.TrimPrefix(minor, "go") + ".*"`); version = the converting toolchain's GOVERSION (src/go2cs/readme.go:157-165#813dcf); test: src/go2cs/moduleConverter_integration_test.go:276 (`if want := "<GoStdLibVersion>" + minorFloatOf(base) + "</GoStdLibVersion>"`). Why the minor and not the patch: NuGet resolves a float that matches nothing published to the OLDEST package above it, so a 1.N.P.* default left a consumer on an old patch below every published base pinned to that minor's first release (measured 2026-10-24, linux-x64, .NET SDK 10.0.112; docs/PLAN-version-lines.md §4). -->
+the property yourself, for example with `-p:GoStdLibVersion=…`, to pin one exact version. <!-- default + override: src/go2cs/moduleConverter.go:909-910 (`to the converter's Go minor, floating on the patch and revision (e.g.…1.26.*), so a freshly converted project restores the newest release of that minor`); the float: src/go2cs/toolchainResolution.go:525 (`return strings.TrimPrefix(minor, "go") + ".*"`); version = the converting toolchain's GOVERSION (src/go2cs/readme.go:157-165#813dcf); test: src/go2cs/moduleConverter_integration_test.go:277 (`if want := "<GoStdLibVersion>" + minorFloatOf(base) + "</GoStdLibVersion>"`). Why the minor and not the patch: NuGet resolves a float that matches nothing published to the OLDEST package above it, so a 1.N.P.* default left a consumer on an old patch below every published base pinned to that minor's first release (measured 2026-10-24, linux-x64, .NET SDK 10.0.112; docs/PLAN-version-lines.md §4). -->
 
 **`-recurse=nuget` refuses a mismatched Go release.** The published packages match one Go release, by
 major and minor version. When the converting Go toolchain is a different release, the conversion stops
@@ -11729,7 +11729,7 @@ puts the frame back into `runtime.Callers` and the crash report, printed `name(.
 It does so only when the statement's IL holds exactly one call and that call reaches exactly one `panic`. A fault
 the CLR raises itself inside an inlined function, such as an integer divide by zero or a nil dereference, keeps
 the frames the CLR reports.
-<!-- src/core/runtime/managed_impl.cs:5013 `private static (System.Reflection.MethodBase method, int ilOffset)[]? inlinedPanicFrames(System.Reflection.MethodBase faulting, int ilOffset)`;
+<!-- src/core/runtime/managed_impl.cs:5019 `private static (System.Reflection.MethodBase method, int ilOffset)[]? inlinedPanicFrames(System.Reflection.MethodBase faulting, int ilOffset)`;
      the printed form :1959 `trace.Append(name).Append(inlined ? "(...)\n" : "()\n");`. Guards: GolibTests
      PanicFramesInlinedPanicTests (src/tests/GolibTests/PanicFramesInlinedPanicTests.cs). The limit is recorded as a BOARD row
      (docs/phase4/BOARD-next-validation-candidates.md, the frame-hint seat's stated limit). -->
@@ -12491,15 +12491,15 @@ names its portable fallback `math_big_pure_go` rather than `purego`, so both tag
 A `go2cs -recurse` conversion of your own module adds only `safe`, for the reason given at the end of this
 section, unless you pass `-tags` or `-module-safe-tag=false`. Other conversions apply exactly the tags you
 pass and nothing else.
-<!-- src/go2cs/commandLineOptions.go:287 (`var defaultModuleBuildTags = []string{"safe"}`),
+<!-- src/go2cs/commandLineOptions.go:290 (`var defaultModuleBuildTags = []string{"safe"}`),
      :300-310 (`if tagsExplicit {` … `if recurse && moduleSafeTag {`). -->
 
 <!-- The math_big_pure_go member: arith_decl.go (`!math_big_pure_go`) declares eight bodyless
      functions whose bodies are arith_$GOARCH.s; arith_decl_pure.go (`math_big_pure_go`) forwards each
      to the `_g` pure-Go implementation in arith.go. With purego alone, every big.Int/Float/Rat
      arithmetic path compiled and threw on first use (surfaced as time.TestTruncateRound -> big.Int.Mul
-     -> mulAddVWW). Default set: ../src/go2cs/commandLineOptions.go:276#3fe3c3 (defaultStdLibBuildTags);
-     resolveBuildTags (commandLineOptions.go:300#0885a6) keys the default on the -stdlib and -tests flags, not on
+     -> mulAddVWW). Default set: ../src/go2cs/commandLineOptions.go:279#3fe3c3 (defaultStdLibBuildTags);
+     resolveBuildTags (commandLineOptions.go:303#0885a6) keys the default on the -stdlib and -tests flags, not on
      the package being standard library, so a -tests run on any package gets it. `-tags=` clears the
      default. A -stdlib run prints the tags it applies, e.g.
      `Applying build tags: purego,math_big_pure_go (default; pass -tags to override)`

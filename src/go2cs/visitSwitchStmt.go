@@ -1197,6 +1197,16 @@ func (v *Visitor) canUsePatternMatch(caseClauseCount int, caseClause *ast.CaseCl
 			// diverging again: no pointer value is a C# compile-time constant, whatever syntax names
 			// it. `==` is also the RIGHT operator — on `ж<T>` it is pointer identity (ReferenceEquals
 			// or equal order tokens), which is exactly what Go's `p == &inProgress` compares.
+			// A label that is not a GO constant at all can never be a C# constant pattern. An ARRAY composite literal
+			// (`case [2]byte{0xFF, 0xFE}:` under a [2]byte tag, tsc's internal/vfs/internal decodeBytes; TS readiness
+			// C30) slipped every screen here: it is a non-call value, not an identifier, selector or index, and
+			// neither a pointer nor a uintptr, so it emitted `case new byte[]{0xFF, 0xFE}.array():` (CS9135). The
+			// `==` form is Go's comparison: array<T>'s operator compares element-wise, and the clauses keep Go's
+			// order. `nil` is the one non-constant label a pattern spells (`is null`), and it is left alone.
+			if tv, ok := v.info.Types[expr]; ok && tv.Value == nil && !tv.IsNil() {
+				usePattenMatch = false
+			}
+
 			if tv, ok := v.info.Types[expr]; ok && tv.Type != nil {
 				switch underlying := tv.Type.Underlying().(type) {
 				case *types.Pointer:

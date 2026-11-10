@@ -84,7 +84,10 @@
     <None Include="$(MSBuildThisFileDirectory)cgoGateRefusal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoMirrors.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoMirrors_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoWrappers.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoWrappers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoSelectedRefusal_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoStructWrappers.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoUnsafeArgsLift.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoUnsafeArgsLift_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDynamicImports_test.go" />
@@ -588,6 +591,7 @@
     <None Include="$(MSBuildThisFileDirectory)readmeValidationBadge_test.go" />
     <None Include="$(MSBuildThisFileDirectory)reconvertDeletionsSkipList_test.go" />
     <None Include="$(MSBuildThisFileDirectory)recoverForms.go" />
+    <None Include="$(MSBuildThisFileDirectory)recurseTrimpath_test.go" />
     <None Include="$(MSBuildThisFileDirectory)recvRefLowering_test.go" />
     <None Include="$(MSBuildThisFileDirectory)refLoweringAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)refLoweringAnalysis_test.go" />

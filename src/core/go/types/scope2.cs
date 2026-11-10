@@ -25,8 +25,7 @@ partial class types_package {
 public static (ж<ΔScope>, Object) LookupParent(this ж<ΔScope> Ꮡs, @string name, tokenꓸPos pos) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    for (; Ꮡs != nil; Ꮡs = s.parent) {
-        s = ref Ꮡs.DerefOrNull();
+    for (; Ꮡs != nil; Ꮡs = s.parent, s = ref Ꮡs.DerefOrNull()) {
         var obj = s.Lookup(name); if (obj != nil && (!pos.IsValid() || cmpPos(obj.scopePos(), pos) <= 0)) {
             return (Ꮡs, obj);
         }
