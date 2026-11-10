@@ -236,6 +236,14 @@ cross-compilation matrix speculative for this reason.
 >   matters and where §7 stays speculative.
 > - **Status:** QUEUED as a Phase 2 prerequisite: a scout (candidates, pinning, download size and integrity,
 >   licensing, the determinism rules of §5.2), then a design note. Not scheduled.
+>
+> **Owner ruling, 2026-11-10 (dated amendment, COORD):** the pinned default toolchain is **zig** (`zig cc`). Owner
+> (verbatim): "I'm OK with zig default for cgo, it sounds like a good option." The ruling follows H's measured
+> scout (SCOUT-cgo-c-toolchain), which weighed zig against llvm-mingw. The darwin SDK headers that zig bundles
+> carry Apple's APSL licence: that flag was known when the owner ruled, and it is recorded with the licensing
+> notes the converted output already carries. The overrides above stay (CC, no-download, choose or pin), and
+> converter-cgo's `;cc=zig|llvm-mingw` option keeps llvm-mingw selectable. Implementation is a Phase 2 seat,
+> sequenced with increment 4's library capture.
 
 ### 5.2 Determinism, and what that forbids
 

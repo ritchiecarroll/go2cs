@@ -257,14 +257,14 @@ func TestManualConversionRegistrationsHaveBodies(t *testing.T) {
 // red guard. The forward arm fails on a debt that is not listed AND on a row that is no longer owed,
 // so a row leaves the day its body lands and nothing can be added here without being seen.
 //
-// linux/arm64's four are the syscall wrappers whose amd64 bodies marshal amd64 struct layouts
-// (`syscall/linux-amd64/zsyscall_linux_amd64_impl.cs`); each needs an arm64 body of its own.
-var owedHandOwnBodies = map[string]bool{
-	"syscall.Fstat@linux/arm64":   true,
-	"syscall.Uname@linux/arm64":   true,
-	"syscall.fstatat@linux/arm64": true,
-	"syscall.wait4@linux/arm64":   true,
-}
+// The ledger is EMPTY, and the forward arm still holds it: a debt that is not listed fails, so a row
+// is added only with the new target that owes it. linux/arm64 entered with four rows (S2): the syscall
+// wrappers whose amd64 bodies marshal amd64 struct layouts (`syscall/linux-amd64/
+// zsyscall_linux_amd64_impl.cs`). S3 paid them: wait4 and Uname moved to `syscall/linux/`, which both
+// linux builds compile, because Rusage (144) and Utsname (390) are the same at both arches; Fstat and
+// fstatat have linux/arm64's own bodies over its 128-byte Stat_t (`syscall/linux-arm64/
+// zsyscall_linux_arm64_impl.cs`).
+var owedHandOwnBodies = map[string]bool{}
 
 // handOwnBodies is one package's hand-own witness, split by which builds compile it: `flat` is the
 // package's own directory (every target), `perFolder` is one set per layout key folder (a GOOS, a

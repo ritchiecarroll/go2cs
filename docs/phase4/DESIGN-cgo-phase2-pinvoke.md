@@ -328,6 +328,13 @@ from being a false comfort:
 
 > ⟶ **Amended 2026-11-10:** §11.6 (`_Cvar_` and `_Cfpvar_fp_` refused) and §11.13.
 
+> **AMENDED 2026-11-10 (COORD, RULED, for increment 3b2b): single scalar pointee; element pointers remain Phase 3.** A
+> pointer to ONE scalar crosses under §11.1's rule, with a stack copy-in and an unconditional copy-back, exactly as one
+> whole struct does. That covers a `StandardBox<scalar>` (`&t`) and a `FieldRefBox` whose pointee is a scalar field
+> (`&s.f`), since cgo scopes that memory to the field alone. An element pointer (`&xs[i]`, an `ElemRefBox`) is still
+> refused to Phase 3, for scalars as for structs, with its own red. The table row below therefore narrows to element
+> pointers and `unsafe.Pointer` into managed memory.
+
 Phase 1 increment 2 refuses every cgo package and says what it recognized. Phase 2 **narrows** that refusal: a
 package converts only when every recognized declaration is in Phase 2's set. Otherwise the refusal lists each
 declaration that is not, with the phase that owns it:
@@ -453,6 +460,28 @@ stay `SetLastError = false`.
 A C function returning `void` also has a two-result form. cmd/cgo gives it the result `(_Ctype_void, error)`, so the
 wrapper returns the zero `_Ctype_void` and the error.
 
+> **AMENDED 2026-11-10 (COORD, RULED, on H's increment 3b1 finding): the capture above holds on linux and darwin ONLY.**
+> On windows `SetLastError` captures the Win32 `GetLastError`, while C's `errno` is the C runtime's own thread slot, a
+> different one. Measured on H against `ucrtbase.dll`: through a `SetLastError` binding, `exp(1000.0)` left
+> `GetLastPInvokeError()` at 0; with the C runtime's errno zeroed first and read right after, the same call read 34
+> (`ERANGE`). A read made after a further P/Invoke read 0, so intervening runtime work can clobber the slot.
+>
+> **Ruled, for windows targets:** the errno form binds the function WITHOUT `SetLastError`, plus the LIBRARY'S C runtime
+> `_errno()` (an `nint` slot). Inside the bracket, the wrapper:
+>
+> 1. takes the slot's ADDRESS with one `_errno()` call BEFORE the native call;
+> 2. writes 0 through it;
+> 3. calls the function;
+> 4. reads through the same address as the very next statement, with no P/Invoke between the call's return and the read.
+>
+> That is cgo's own trampoline (zero errno, call, capture) in managed code. The slot is the calling thread's, and one
+> synchronous wrapper does not change threads; a GolibTests arm holds the address equal before and after a wrapped call.
+> The C runtime is per library: `ucrtbase.dll` for UCRT builds (llvm-mingw ucrt, zig), `msvcrt.dll` for msvcrt-built
+> DLLs. Increment 4's probe records it from the import table. Linux and darwin keep `SetLastError` plus
+> `GetLastPInvokeError()`. The generator takes the target GOOS (§11.9). **Remaining caveat:** runtime code on the same
+> thread between the stub's return and the read could still touch the C runtime's errno; Phase 4's native shim closes
+> it.
+
 ### 11.4 The seam bracket goes through the runtime forwarders (finding 4)
 
 §4.2 called `GoNativeCall` directly, and that is not the ruled shape. DESIGN-native-call-seam §12.2 Q2 ruled Go's
@@ -535,6 +564,12 @@ checkout cannot regenerate it without that toolchain. **Revised:**
 - the converter never writes `.gitignore` entries into a user's tree.
 
 R9's substance stands: the corpus is wholly `CGO_ENABLED=0`, so no corpus gate ever sees one.
+
+> **AMENDED 2026-11-10 (COORD, RULED, on H's increment 3b1 note): the bindings file is `<package>.cgo.cs`, NOT
+> `<package>.cgo.g.cs`.** Committed converter output cannot carry a suffix that common `.gitignore` files drop, and
+> `*.g.cs` is one: this repository's own `.gitignore` ignores it at line 348, which is why increment 3b1's GolibTests
+> goldens are named `GoCgoWrappers.<os>.golden.cs`. The converter never writes `.gitignore` entries into a user's
+> tree, so the name itself has to survive. Byte-identity gates exclude the bindings file by its `.cgo.cs` suffix.
 
 ### 11.9 Mirrors vary per (GOOS, GOARCH): placed by the layout rule (finding 9; RULED)
 
@@ -629,6 +664,30 @@ Converted call sites read `C.add(C.@int(a), C.@int(b))`, through a nested static
 members and types, per the owner's readability and parity rulings. The mangled form (`_Cfunc_add`, `_Ctype_int`) is a
 fallback only if the arm fails. The arm measures go2cs-gen on `[GoType]` structs nested in a static class, and it
 lands with increment 3. Its red: a converted call site that prints a mangled name.
+
+> **AMENDED 2026-11-10 (COORD, RULED, on H's increment 3c measurement): the `C.` form is a PSEUDO-PACKAGE, not a nested
+> class.** Measured with scratch projects against go2cs-gen, each arm read from the compiler's emitted sources:
+>
+> - a type nested in a static class `C` inside the package class is never generated. The converted-type rule
+>   (go2cs-gen `Common.cs`, `IsConvertedGoTypeDeclaration`) requires the declaration's DIRECT parent to be the
+>   `*_package` class;
+> - with an explicit `[GoType]` it is generated into the WRONG type: `GetParentClassName` (`TypeGenerator.cs`) names
+>   `C`, and the code lands in a namespace-level `C_package`;
+> - a sibling top-level package class, with `using C = <class>;` in the converted file, builds with NO go2cs-gen change.
+>   That is the alias form converted imports already use (`using errors = errors_package;`).
+>
+> **Ruled:** in Go, `C` IS a pseudo-package, so the bindings are a package class of their own, named
+> **`<pkg>ꓸC_package`**. It uses U+A4F8, the converter's own imported-alias separator. The name ends in `_package`, as
+> the converted-type rule needs, and it can never collide with a real Go package's class: `ꓸ` is not a legal Go
+> identifier character, and Go reserves `import "C"`. The emitter's comment states both facts. Two conditions:
+>
+> - **accessibility** follows `package_info`'s rule. cgo forbids a C type in an exported Go signature, so expect
+>   `internal` throughout, and the emitter says so;
+> - **each file that imports `C` gets the alias**, and a file that does not never sees the class.
+>
+> Nested containment plus a go2cs-gen fix is REJECTED: it is bigger, not needed, and every template's package-class
+> wrapper would have to learn it. Increment 3b emits this shape, with the arm committed as its test. §11.17's red is
+> unchanged: a converted call site that prints a mangled name.
 
 ### 11.18 Amendment 2026-11-10 (second): the check of §11
 

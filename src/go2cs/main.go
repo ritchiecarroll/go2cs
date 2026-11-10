@@ -298,6 +298,7 @@ func main() {
 	useChannelOperatorsCmd := commandLine.Bool("uco", true, fmt.Sprintf("Use channel operators: %s / %s", ChannelLeftOp, ChannelRightOp))
 	licenseCmd := commandLine.String("license", "", "Override NuGet license metadata with an SPDX expression (for example MIT or BSD-3-Clause); does not relicense input code")
 	provenanceCmd := commandLine.Bool("provenance", false, "Include in each converted file a notice naming its Go source and module and that go2cs modified it by conversion (no timestamp)")
+	trimPathCmd := commandLine.Bool("trimpath", true, "Record a main-module source in the converted position maps the way `go build -trimpath` bakes it, <module path>/<path in module>, so the output names no directory of this machine; -trimpath=false records the absolute source path, as an untrimmed `go build` does")
 	includeCommentsCmd := commandLine.Bool("comments", false, "Include comments in output")
 	parseCgoTargetsCmd := commandLine.Bool("cgo", false, "Load a single package cgo-on (CGO_ENABLED=1; needs a C compiler) and report what cgo support recognizes in it. cgo has no C# conversion yet, so an import \"C\" source is still refused, now naming the C declarations it recognized and each generated file's source (docs/PLAN-cgo-interop.md, Phase 1). Not combinable with -stdlib, -tests or -recurse")
 	showParseTreeCmd := commandLine.Bool("tree", false, "Show parse tree")
@@ -567,10 +568,22 @@ Examples:
 			len(targetPlatforms), strings.Join(targetPlatforms, ", "))
 	}
 
+	// Whether the operator NAMED the go2cs path, which decides what a -recurse output root may pin
+	// (recurseGo2CSPathPin): a path the operator typed is theirs to write down; a resolved default is not.
+	go2csPathExplicit := false
+	commandLine.Visit(func(f *flag.Flag) {
+		if f.Name == "go2cspath" {
+			go2csPathExplicit = true
+		}
+	})
+
 	options := Options{
 		goRoot:              *goRootCmd,
 		goPath:              *goPathCmd,
 		go2csPath:           absoluteGo2CSPath(*go2csPathCmd),
+		go2csPathExplicit:   go2csPathExplicit,
+		go2csPathFromEnv:    !go2csPathExplicit && os.Getenv("GO2CSPATH") != "",
+		noTrimPath:          !*trimPathCmd,
 		convertStdLib:       convertStdLib,
 		convertTimeout:      *convertTimeoutCmd,
 		convertTests:        *convertTestsCmd,

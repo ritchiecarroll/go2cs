@@ -1,0 +1,306 @@
+// cgoWrappers_test.go - Gbtc
+// Copyright © 2026 The go2cs Authors. All rights reserved.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+// Use of this source code is governed by the GNU Affero General Public License
+// version 3 only, which can be found in the LICENSE file.
+// Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
+
+package main
+
+import (
+	"go/ast"
+	"go/importer"
+	"go/parser"
+	"go/token"
+	"go/types"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+// cgoWrapperTarget is one OS the wrapper golden is generated for: the C library its libc symbols bind in, the width of
+// C long there (LP64 on linux and darwin, LLP64 on windows), the errno arm its libc can take, and the C structs and
+// struct-crossing functions its arms call (increment 3b2a), with the library of each symbol not in libc.
+type cgoWrapperTarget struct {
+	goos, library, crt, long, errnoDecl, structDecls string
+	libraries                                        map[string]string
+}
+
+var cgoWrapperTargets = []cgoWrapperTarget{
+	// close(-1) sets EBADF on every POSIX libc.
+	{"linux", "libc.so.6", "", "int64", "func _C2func_close(p0 _Ctype_int) (r1 _Ctype_int, r2 error) { return }", cgoLinuxStructs, nil},
+	{"darwin", "/usr/lib/libSystem.B.dylib", "", "int64", "func _C2func_close(p0 _Ctype_int) (r1 _Ctype_int, r2 error) { return }", cgoDarwinStructs, nil},
+	// The UCRT's _close(-1) would raise the invalid-parameter handler, so windows' errno arm is exp's overflow (ERANGE).
+	{"windows", "ucrtbase.dll", "ucrtbase.dll", "int32", "func _C2func_exp(p0 _Ctype_double) (r1 _Ctype_double, r2 error) { return }", cgoWindowsStructs,
+		map[string]string{"PtInRect": "user32.dll", "UnionRect": "user32.dll", "GetSystemTime": "kernel32.dll"}},
+}
+
+// The struct arms per OS. div by value everywhere; the by-value argument is inet_ntoa's struct in_addr on linux and
+// darwin and PtInRect's POINT on windows; the copy-back is uname's struct utsname and GetSystemTime's SYSTEMTIME.
+// UnionRect(&r, &r, &o) on windows passes one struct through two pointers, which must share one mirror.
+const cgoLinuxStructs = `
+type _Ctype_char int8
+
+// div_t: two ints, by value in the result.
+type _Ctype_div_t struct {
+	quot _Ctype_int
+	rem  _Ctype_int
+}
+
+// struct in_addr: one in_addr_t (uint32_t), by value in the argument.
+type _Ctype_struct_in_addr struct {
+	s_addr _Ctype_uint
+}
+
+// glibc's struct utsname: six char[65] (the sixth is domainname under _GNU_SOURCE, __domainname otherwise).
+type _Ctype_struct_utsname struct {
+	sysname    [65]_Ctype_char
+	nodename   [65]_Ctype_char
+	release    [65]_Ctype_char
+	version    [65]_Ctype_char
+	machine    [65]_Ctype_char
+	domainname [65]_Ctype_char
+}
+
+func _Cfunc_div(p0 _Ctype_int, p1 _Ctype_int) (r1 _Ctype_div_t) { return }
+func _Cfunc_inet_ntoa(p0 _Ctype_struct_in_addr) (r1 *_Ctype_char) { return }
+func _Cfunc_uname(p0 *_Ctype_struct_utsname) (r1 _Ctype_int) { return }
+`
+
+const cgoDarwinStructs = `
+type _Ctype_char int8
+
+// div_t: two ints, by value in the result.
+type _Ctype_div_t struct {
+	quot _Ctype_int
+	rem  _Ctype_int
+}
+
+// struct in_addr: one in_addr_t (uint32_t), by value in the argument.
+type _Ctype_struct_in_addr struct {
+	s_addr _Ctype_uint
+}
+
+// darwin's struct utsname: five char[_SYS_NAMELEN], which is 256.
+type _Ctype_struct_utsname struct {
+	sysname  [256]_Ctype_char
+	nodename [256]_Ctype_char
+	release  [256]_Ctype_char
+	version  [256]_Ctype_char
+	machine  [256]_Ctype_char
+}
+
+func _Cfunc_div(p0 _Ctype_int, p1 _Ctype_int) (r1 _Ctype_div_t) { return }
+func _Cfunc_inet_ntoa(p0 _Ctype_struct_in_addr) (r1 *_Ctype_char) { return }
+func _Cfunc_uname(p0 *_Ctype_struct_utsname) (r1 _Ctype_int) { return }
+`
+
+const cgoWindowsStructs = `
+type _Ctype_ushort uint16
+
+// div_t: two ints, by value in the result.
+type _Ctype_div_t struct {
+	quot _Ctype_int
+	rem  _Ctype_int
+}
+
+// POINT and RECT: LONGs, which are C long (32 bits under LLP64). POINT crosses by value, RECT by pointer.
+type _Ctype_POINT struct {
+	x _Ctype_long
+	y _Ctype_long
+}
+
+type _Ctype_RECT struct {
+	left   _Ctype_long
+	top    _Ctype_long
+	right  _Ctype_long
+	bottom _Ctype_long
+}
+
+// SYSTEMTIME: eight WORDs, written by GetSystemTime through its pointer.
+type _Ctype_SYSTEMTIME struct {
+	wYear         _Ctype_ushort
+	wMonth        _Ctype_ushort
+	wDayOfWeek    _Ctype_ushort
+	wDay          _Ctype_ushort
+	wHour         _Ctype_ushort
+	wMinute       _Ctype_ushort
+	wSecond       _Ctype_ushort
+	wMilliseconds _Ctype_ushort
+}
+
+func _Cfunc_div(p0 _Ctype_int, p1 _Ctype_int) (r1 _Ctype_div_t) { return }
+func _Cfunc_PtInRect(p0 *_Ctype_RECT, p1 _Ctype_POINT) (r1 _Ctype_int) { return }
+func _Cfunc_GetSystemTime(p0 *_Ctype_SYSTEMTIME) (r1 _Ctype_void) { return }
+func _Cfunc_UnionRect(p0 *_Ctype_RECT, p1 *_Ctype_RECT, p2 *_Ctype_RECT) (r1 _Ctype_int) { return }
+`
+
+// cgoWrapperFixture is the cgo-shaped package the golden binds, as cmd/cgo would declare it for target.
+func cgoWrapperFixture(t *testing.T, target cgoWrapperTarget) *types.Package {
+	t.Helper()
+
+	source := `package cgotest
+
+type _Ctype_int int32
+type _Ctype_uint uint32
+type _Ctype_long ` + target.long + `
+type _Ctype_double float64
+type _Ctype_void [0]byte
+
+func _Cfunc_abs(p0 _Ctype_int) (r1 _Ctype_int) { return }
+func _Cfunc_labs(p0 _Ctype_long) (r1 _Ctype_long) { return }
+func _Cfunc_srand(p0 _Ctype_uint) (r1 _Ctype_void) { return }
+` + target.errnoDecl + "\n" + target.structDecls
+
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, "cgotest.go", source, 0)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	pkg, err := (&types.Config{Importer: importer.Default(), Sizes: types.SizesFor("gc", "amd64")}).Check("cgotest", fset, []*ast.File{file}, nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return pkg
+}
+
+// cgoWrapperGolden is what the GolibTests golden for target holds: a header, then the generator's own output.
+func cgoWrapperGolden(t *testing.T, target cgoWrapperTarget) string {
+	t.Helper()
+
+	members := map[string]string{}
+	set := newCgoWrapperSet(cgoBindingTarget{goos: target.goos, library: target.library, crt: target.crt}, types.SizesFor("gc", "amd64"))
+	set.libraries = target.libraries
+
+	if target.crt != "" {
+		members["ᴍerrno"] = cgoErrnoLocationBinding(target.crt)
+	}
+
+	for _, declaration := range cgoDeclarations(cgoWrapperFixture(t, target)) {
+		if declaration.kind != cgoFunc && declaration.kind != cgoErrnoFunc {
+			continue
+		}
+
+		text, err := set.wrapper(declaration)
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		members[declaration.cName+cgoKindLabel(declaration.kind)] = text
+	}
+
+	for name, text := range set.support() {
+		members[name] = text
+	}
+
+	return "// GoCgoWrappers." + target.goos + ".golden.cs - generated by go2cs's cgo wrapper generator for " + target.goos + ".\n" +
+		"// DO NOT EDIT: src/go2cs's TestCgoScalarWrapperGoldensAreTheGeneratorsOutput holds this file equal to the\n" +
+		"// generator; run it with GO2CS_UPDATE_CGO_GOLDEN=1 to rewrite it. GolibTests compiles and runs it against libc.\n\n" +
+		"namespace go;\n\n" + cgoPseudoPackageText("cgotest", members)
+}
+
+func cgoKindLabel(kind cgoDeclKind) string {
+	for _, entry := range cgoKindLabels {
+		if entry.kind == kind {
+			return " " + entry.label
+		}
+	}
+
+	return ""
+}
+
+func TestCgoPseudoPackageClassIsThePackageWithTheCMark(t *testing.T) {
+	if got, want := cgoPseudoPackageClass("cgotest"), "cgotestꓸC_package"; got != want {
+		t.Errorf("pseudo-package class %q, want %q", got, want)
+	}
+}
+
+// The generator's output for each target, byte for byte, is the golden GolibTests compiles and runs: what is proven
+// against libc there is what the converter writes.
+func TestCgoScalarWrapperGoldensAreTheGeneratorsOutput(t *testing.T) {
+	for _, target := range cgoWrapperTargets {
+		path := filepath.Join("..", "tests", "GolibTests", "GoCgoWrappers."+target.goos+".golden.cs")
+		want := cgoWrapperGolden(t, target)
+
+		if os.Getenv("GO2CS_UPDATE_CGO_GOLDEN") == "1" {
+			if err := os.WriteFile(path, []byte(strings.ReplaceAll(want, "\n", "\r\n")), 0o644); err != nil {
+				t.Fatal(err)
+			}
+
+			continue
+		}
+
+		committed, err := os.ReadFile(path)
+
+		if err != nil {
+			t.Fatalf("%s: %v (run with GO2CS_UPDATE_CGO_GOLDEN=1 to write it)", path, err)
+		}
+
+		if got := strings.ReplaceAll(string(committed), "\r\n", "\n"); got != want {
+			t.Errorf("%s is not the generator's output for %s; run with GO2CS_UPDATE_CGO_GOLDEN=1 and read the diff\n got:\n%s\nwant:\n%s", path, target.goos, got, want)
+		}
+	}
+}
+
+// What 3b1 does not bind is refused by name: a pointer parameter, one of cmd/cgo's own helpers, and uintptr.
+func TestCgoScalarWrapperRefusesWhatIsNotWhollyScalar(t *testing.T) {
+	source := `package cgotest
+
+import "unsafe"
+
+type _Ctype_int int32
+type _Ctype_char int8
+type _Ctype_struct_x struct{ a _Ctype_int }
+
+func _Cfunc_free(p0 unsafe.Pointer) (r1 _Ctype_int) { return }
+func _Cfunc_scale(p0 *_Ctype_struct_x) (r1 _Ctype_int) { return }
+func _Cfunc_CString(p0 string) (r1 *_Ctype_char) { return }
+func _Cfunc_handle(p0 uintptr) (r1 _Ctype_int) { return }
+`
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, "cgotest.go", source, 0)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	pkg, err := (&types.Config{Importer: importer.Default()}).Check("cgotest", fset, []*ast.File{file}, nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := map[string]string{
+		"free":    "C.free's parameter 1 is not a scalar",
+		"scale":   "C.scale's parameter 1 is not a scalar (a C struct is increment 3b2",
+		"CString": "C.CString is one of cmd/cgo's own helpers",
+		"handle":  "C.handle's parameter 1 is of basic kind uintptr",
+	}
+
+	for _, declaration := range cgoDeclarations(pkg) {
+		reason, listed := want[declaration.cName]
+
+		if !listed {
+			continue
+		}
+
+		_, err := cgoScalarWrapper(declaration, cgoBindingTarget{goos: "linux", library: "libc.so.6"})
+
+		if err == nil || !strings.Contains(err.Error(), reason) {
+			t.Errorf("C.%s: err %v, want it to say %q", declaration.cName, err, reason)
+		}
+
+		delete(want, declaration.cName)
+	}
+
+	for name := range want {
+		t.Errorf("C.%s was not recognized", name)
+	}
+}
