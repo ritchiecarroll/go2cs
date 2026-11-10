@@ -201,6 +201,13 @@ public sealed class NativeBox<T> : ж<T>, INativeRooted
     /// </summary>
     public object? RetainedSource => m_retainedSource;
 
+    /// <summary>
+    /// Whether this box's address is INTO managed storage, held still by a pin (see the constructor), rather than a
+    /// genuinely native address. A cgo wrapper never hands C such an address (docs/phase4/DESIGN-cgo-phase2-pinvoke.md
+    /// §11.1).
+    /// </summary>
+    internal bool PinsManagedStorage => m_pin is not null;
+
     /// <inheritdoc/>
     // Two boxes ALIASING the same native address are the same Go pointer — that address is the
     // whole of their identity (`(*T)(unsafe.Pointer(p)) == (*T)(unsafe.Pointer(p))` after a
