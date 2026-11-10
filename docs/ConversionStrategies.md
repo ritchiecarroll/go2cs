@@ -1803,7 +1803,7 @@ also gets `go.lib`, the [golib runtime](#the-golib-runtime-library), and `go.gen
 that imports `fmt` gets these lines in its `.csproj`:
 
 <!-- expected app .csproj lines; emitted by src/go2cs/projectFileWriter.go:408,411,519#a5a0d6 -->
-<!-- source (not checked): the three lines src/go2cs/moduleConverter_integration_test.go:230-232 (`<PackageReference Include="go.fmt" Version="$(GoStdLibVersion)" />`) asserts, which it holds as Go string literals -->
+<!-- source (not checked): the three lines src/go2cs/moduleConverter_integration_test.go:231-233 (`<PackageReference Include="go.fmt" Version="$(GoStdLibVersion)" />`) asserts, which it holds as Go string literals -->
 ```xml
 <PackageReference Include="go.fmt" Version="$(GoStdLibVersion)" />
 <PackageReference Include="go.lib" Version="$(GoStdLibVersion)" />
