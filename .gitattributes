@@ -172,6 +172,9 @@ src/core/**/testdata/** -text
 # (core.autocrlf=true) wrote them CRLF and Test-NugetgoReadme.ps1 failed 3 of 115
 # (TRAIN T4 rehearsal-1, 2026-10-12). Guard: repoguard nugetgoTestdataEol_test.go.
 src/tools/nugetgo/testdata/** -text
+# The saved zig download index is pinned by its own SHA-256 (internal/genzigpins/main_test.go), so it checks out exactly
+# as committed on every host; a Windows clone (core.autocrlf=true) would otherwise write it CRLF and fail the hash.
+src/go2cs/testdata/cctoolchain/** -text
 # Every //go:embed payload OUTSIDE testdata/ that a converted csproj names as an
 # <EmbeddedResource Include>, derived from every tracked and every emitted csproj at the
 # H10 close (2026-09-23). Go embeds these bytes with LF; under core.autocrlf=true an

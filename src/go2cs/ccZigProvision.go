@@ -16,6 +16,7 @@ import (
 	"math/rand/v2"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -26,9 +27,11 @@ import (
 //
 // One zig release per converter release, one archive per host, each with the SHA-256 ziglang.org's download index
 // states. The archive comes from ziglang.org's community mirrors in random order and then ziglang.org itself, as
-// ziglang.org asks of automated downloads. EVERY source's bytes are checked against the pinned hash, and against the
-// archive's signature, before anything is unpacked. A mismatch deletes the file and tries the next source, so a hostile
-// mirror can fail a download but cannot substitute an archive. The install is unpacked into a staging directory and
+// ziglang.org asks of automated downloads. EVERY source's bytes are checked against the pinned hash before anything is
+// unpacked. A mismatch deletes the file and tries the next source, so a hostile mirror can fail a download but cannot
+// substitute an archive. The hash is built into the converter, so a signature adds nothing at run time; genzigpins
+// checks each pinned archive's minisign signature when the pins are generated (DESIGN-cgo-zig-provision.md §6 Q1).
+// The pins themselves are ccToolchainPins.go, generated from ziglang.org's download index. The install is unpacked into a staging directory and
 // renamed into place whole, as the Go toolchain's is (toolchainProvision.go), so a crashed install leaves nothing a
 // later run would mistake for one.
 
@@ -38,22 +41,10 @@ const (
 	zigInstallStampSHA = ".go2cs-sha256" // written into the install before it is renamed into place
 )
 
-// pinnedZigVersion is the release step 4 installs. pinnedZigArchives is generated from ziglang.org's download index,
-// as toolchainPins.go is from go.dev's; until that generator lands (DESIGN-cgo-zig-provision.md §4, §6 Q4) it is empty,
-// so this go2cs has no pin for any host and step 4 refuses by name.
-const pinnedZigVersion = "0.17.0"
-
-var pinnedZigArchives = map[string]zigArchivePin{}
-
-type zigArchivePin struct {
-	file   string
-	sha256 string
-}
-
 // zigSource is one place the pinned archive can be fetched from.
 type zigSource struct {
 	name string // shown in messages: "ziglang.org" or the mirror's base URL
-	url  string // the archive; its signature is url + ".minisig"
+	url  string // the archive
 }
 
 type zigProvisioner struct {
@@ -65,11 +56,11 @@ type zigProvisioner struct {
 	mirrorURL string // the community mirror list
 	client    *http.Client
 	progress  io.Writer
-	// sources lists where to fetch from, in order; verifySignature checks the downloaded archive against the
-	// signature fetched beside it; unpack writes the archive's top-level directory into dest.
-	sources         func() []zigSource
-	verifySignature func(archive, signature string) error
-	unpack          func(archive, dest string) error
+	// sources lists where to fetch from, in order; unpack writes the archive's top-level directory into dest; and
+	// lookPath finds the system tools a .tar.xz unpack needs (exec.LookPath).
+	sources  func() []zigSource
+	unpack   func(archive, dest string) error
+	lookPath func(string) (string, error)
 }
 
 // newZigProvisioner returns this host's pinned zig, or nil when this go2cs carries no pin for it.
@@ -96,8 +87,8 @@ func newZigProvisioner() *zigProvisioner {
 	}
 
 	z.sources = z.defaultSources
-	z.verifySignature = verifyZigSignature
 	z.unpack = z.unpackArchive
+	z.lookPath = exec.LookPath
 
 	return z
 }
@@ -151,6 +142,10 @@ func (z *zigProvisioner) install() (string, []string, error) {
 		return "", nil, err
 	}
 
+	if err := z.checkUnpackTools(); err != nil {
+		return "", nil, err
+	}
+
 	var failures []string
 
 	for _, source := range z.sources() {
@@ -175,6 +170,35 @@ func (z *zigProvisioner) install() (string, []string, error) {
 		z.version, z.pin.file, strings.Join(failures, "\n  "))
 }
 
+// installCommand is `go2cs toolchain install -cc [-from <file>]`: a named archive is checked against the pin even when
+// the pin is already installed, so a wrong file is never reported fine, and nothing is downloaded for it; without one,
+// the pin is downloaded unless it is already cached.
+func (z *zigProvisioner) installCommand(from string) error {
+	if from == "" {
+		if _, _, ok := z.cached(); ok {
+			return nil
+		}
+
+		_, _, err := z.install()
+
+		return err
+	}
+
+	if err := z.checkUnpackTools(); err != nil {
+		return err
+	}
+
+	if err := os.MkdirAll(z.cacheRoot, 0o755); err != nil {
+		return err
+	}
+
+	if err := z.installFile(from); err != nil {
+		return fmt.Errorf("%s is not the pinned zig %s (%s): %w", from, z.version, z.pin.file, err)
+	}
+
+	return nil
+}
+
 func (z *zigProvisioner) installFromSource(source zigSource) error {
 	archive, err := z.download(source.url)
 	if err != nil {
@@ -183,28 +207,17 @@ func (z *zigProvisioner) installFromSource(source zigSource) error {
 
 	defer os.Remove(archive)
 
-	signature, err := z.download(source.url + ".minisig")
-	if err != nil {
-		return fmt.Errorf("its signature: %w", err)
-	}
-
-	defer os.Remove(signature)
-
-	return z.installFile(archive, signature)
+	return z.installFile(archive)
 }
 
-// installFile verifies an archive and its signature, then unpacks and installs it. Nothing is unpacked from an archive
-// that fails either check.
-func (z *zigProvisioner) installFile(archive, signature string) error {
+// installFile verifies an archive against the pinned hash, then unpacks and installs it. Nothing is unpacked from an
+// archive that fails the check.
+func (z *zigProvisioner) installFile(archive string) error {
 	if err := verifySHA256(archive, z.pin.sha256); err != nil {
 		return err
 	}
 
-	if err := z.verifySignature(archive, signature); err != nil {
-		return err
-	}
-
-	staging, err := os.MkdirTemp(z.cacheRoot, ".unpack-")
+	staging, err := os.MkdirTemp(z.cacheRoot, ".zig-unpack-")
 	if err != nil {
 		return err
 	}
@@ -364,13 +377,36 @@ func quoteCCWord(word string) (string, bool) {
 	return "", false
 }
 
-// unpackTarXz and verifyZigSignature are held for the second reader's answers (DESIGN-cgo-zig-provision.md §6 Q3, and
-// minisign's prehashed form, which needs BLAKE2b). Until then each refuses by name, so no pinned install can pass a
-// check that does not exist yet.
-func unpackTarXz(archive, dest, prefix string) error {
-	return errors.New("go2cs cannot unpack a .tar.xz archive yet: its reader is held for a design answer")
+// checkUnpackTools refuses BEFORE any download when this host cannot unpack the pinned archive. A .zip unpacks in
+// process. A .tar.xz goes through the system tar (§6 Q3): macOS's bsdtar reads xz itself, but GNU tar execs an `xz`
+// binary, which slim images (Debian-slim, Alpine) lack, and zig's linux archives ship as .tar.xz only.
+func (z *zigProvisioner) checkUnpackTools() error {
+	if !strings.HasSuffix(z.pin.file, ".tar.xz") {
+		return nil
+	}
+
+	if _, err := z.lookPath("tar"); err != nil {
+		return errors.New("the pinned zig needs tar to unpack: install tar, or pass -cc / CC, or " +
+			"`go2cs toolchain install -cc -from FILE` with an archive unpacked elsewhere")
+	}
+
+	if z.goos == "linux" {
+		if _, err := z.lookPath("xz"); err != nil {
+			return errors.New("the pinned zig needs xz to unpack: install xz-utils, or pass -cc / CC, or " +
+				"`go2cs toolchain install -cc -from FILE` with an archive unpacked elsewhere")
+		}
+	}
+
+	return nil
 }
 
-func verifyZigSignature(archive, signature string) error {
-	return errors.New("go2cs cannot check zig's minisign signature yet: the verifier is held for a design answer")
+// unpackTarXz unpacks a verified .tar.xz into dest through the system tar, dropping the archive's single top-level
+// directory (prefix) as unpackZip does. The archive's bytes are the pinned ones, so its names are zig's own.
+func unpackTarXz(archive, dest, prefix string) error {
+	out, err := exec.Command("tar", "-xf", archive, "-C", dest, "--strip-components=1", strings.TrimSuffix(prefix, "/")).CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("tar could not unpack the pinned zig: %w: %s", err, strings.TrimSpace(string(out)))
+	}
+
+	return nil
 }

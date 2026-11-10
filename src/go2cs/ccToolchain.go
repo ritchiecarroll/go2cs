@@ -9,11 +9,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
+	"sync"
+	"time"
 )
 
 // THE C COMPILER FOR -cgo (seat Z; docs/phase4/DESIGN-cgo-zig-provision.md, PLAN-cgo-interop §5.1)
@@ -33,6 +36,126 @@ const (
 	ccFlagPinned = "pinned"
 	ccFlagHost   = "host"
 )
+
+// ccFlags holds -cc and -cc-download as main parsed them; resolveCToolchain reads them.
+var ccFlags = struct {
+	cmd      string
+	download bool
+}{download: true}
+
+// ccResolution is the process's one resolution: a download happens at most once, and every -cgo load (and increment
+// 4's load-name capture) links with the same compiler and environment.
+var ccResolution struct {
+	once    sync.Once
+	cc      string
+	env     []string
+	version string
+	err     error
+}
+
+// resolveCToolchain returns the C compiler for a -cgo load: the CC value (already quoted the way cmd/go splits CC), the
+// extra environment the load carries (nil for a host compiler; zig's caches for the pin), one provenance line for the
+// log, and a refusal naming every step it tried. It resolves once per process and is safe to call from anywhere.
+//
+// A host compiler is not reproducible (PLAN-cgo-interop §5.2): every byte-comparing gate (converter-cgo, G1/G2) passes
+// -cc pinned.
+func resolveCToolchain() (cc string, env []string, version string, err error) {
+	ccResolution.once.Do(func() {
+		r := newCCResolver(ccFlags.cmd, ccFlags.download)
+
+		choice, err := r.resolve()
+		if err != nil {
+			ccResolution.err = err
+			return
+		}
+
+		ccResolution.cc, ccResolution.version = choice.cc, r.version(choice)
+
+		// choice.env opens with the CC= entry the caller writes itself; what follows is the extra environment.
+		if len(choice.env) > 1 {
+			ccResolution.env = choice.env[1:]
+		}
+	})
+
+	return ccResolution.cc, ccResolution.env, ccResolution.version, ccResolution.err
+}
+
+// resetCToolchainResolution forgets the process's resolution, for tests that resolve under different conditions.
+func resetCToolchainResolution() {
+	ccResolution.once = sync.Once{}
+	ccResolution.cc, ccResolution.env, ccResolution.version, ccResolution.err = "", nil, "", nil
+}
+
+// version is the provenance line: the pin's release and hash prefix, or a host compiler's first `--version` line.
+func (r *ccResolver) version(choice ccChoice) string {
+	if z, ok := r.pinned.(*zigProvisioner); ok && choice.how == "the pinned toolchain" {
+		return fmt.Sprintf("zig %s (pinned, sha256 %s)", z.version, z.pin.sha256[:8])
+	}
+
+	fields := splitCC(choice.cc)
+
+	if r.runVersion == nil || len(fields) == 0 {
+		return fmt.Sprintf("%s (%s)", choice.cc, choice.how)
+	}
+
+	line, err := r.runVersion(fields[0], append(fields[1:], "--version")...)
+	if err != nil || line == "" {
+		return fmt.Sprintf("%s (%s; --version: unavailable)", choice.cc, choice.how)
+	}
+
+	return fmt.Sprintf("%s (%s)", line, choice.how)
+}
+
+// splitCC mirrors cmd/go's quoted.Split (cmd/internal/quoted), which the -cgo load applies to CC: whitespace
+// separates fields, and a field that opens with a quote runs to the matching quote. An unclosed quote takes the rest.
+func splitCC(s string) []string {
+	var fields []string
+
+	for {
+		s = strings.TrimLeft(s, " \t\n\r")
+
+		if s == "" {
+			return fields
+		}
+
+		if quote := s[0]; quote == '\'' || quote == '"' {
+			end := strings.IndexByte(s[1:], quote)
+
+			if end < 0 {
+				return append(fields, s[1:])
+			}
+
+			fields = append(fields, s[1:1+end])
+			s = s[2+end:]
+
+			continue
+		}
+
+		end := strings.IndexAny(s, " \t\n\r")
+
+		if end < 0 {
+			end = len(s)
+		}
+
+		fields = append(fields, s[:end])
+		s = s[end:]
+	}
+}
+
+// firstVersionLine runs a compiler's --version and returns its first line.
+func firstVersionLine(name string, args ...string) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	out, err := exec.CommandContext(ctx, name, args...).Output()
+	if err != nil {
+		return "", err
+	}
+
+	line, _, _ := strings.Cut(string(out), "\n")
+
+	return strings.TrimSpace(line), nil
+}
 
 // ccChoice is a resolved compiler: the CC value, the extra environment its load carries, and which step chose it.
 type ccChoice struct {
@@ -56,10 +179,12 @@ type ccResolver struct {
 	getenv   func(string) string
 	lookPath func(string) (string, error)
 	pinned   ccPinnedToolchain // nil when this build or platform has no pin
+	// runVersion runs a host compiler's --version for the provenance line; nil leaves the line to the command alone.
+	runVersion func(name string, args ...string) (string, error)
 }
 
 func newCCResolver(flag string, download bool) *ccResolver {
-	return &ccResolver{flag: strings.TrimSpace(flag), download: download, goos: runtime.GOOS, getenv: os.Getenv, lookPath: exec.LookPath, pinned: newPinnedCC()}
+	return &ccResolver{flag: strings.TrimSpace(flag), download: download, goos: runtime.GOOS, getenv: os.Getenv, lookPath: exec.LookPath, pinned: newPinnedCC(), runVersion: firstVersionLine}
 }
 
 // platformDefaultCC is the compiler cmd/go uses when CC is unset (cmd/go/internal/cfg/zdefaultcc.go).

@@ -157,3 +157,45 @@ func TestCCFlagsNeedCgo(t *testing.T) {
 		}
 	}
 }
+
+func TestResolveCToolchainResolvesOncePerProcess(t *testing.T) {
+	saved := ccFlags
+	t.Cleanup(func() { ccFlags = saved; resetCToolchainResolution() })
+
+	resetCToolchainResolution()
+	ccFlags.cmd, ccFlags.download = "mycc -O0", true
+
+	cc, env, version, err := resolveCToolchain()
+	if err != nil || cc != "mycc -O0" || env != nil || !strings.Contains(version, "(-cc") {
+		t.Fatalf("got %q %v %q %v; want mycc -O0, no extra environment, a version line naming -cc", cc, env, version, err)
+	}
+
+	ccFlags.cmd = "other"
+
+	if cc, _, _, _ := resolveCToolchain(); cc != "mycc -O0" {
+		t.Fatalf("a second call resolved again: %q", cc)
+	}
+
+	resetCToolchainResolution()
+
+	if cc, _, _, _ := resolveCToolchain(); cc != "other" {
+		t.Fatalf("after the reset: %q, want other", cc)
+	}
+}
+
+func TestSplitCCIsCmdGosSplit(t *testing.T) {
+	for _, c := range []struct {
+		in   string
+		want []string
+	}{
+		{"gcc", []string{"gcc"}},
+		{"  zig  cc ", []string{"zig", "cc"}},
+		{"'/a b/zig' cc", []string{"/a b/zig", "cc"}},
+		{`"/o'b/zig" cc -O0`, []string{"/o'b/zig", "cc", "-O0"}},
+		{"a'b c", []string{"a'b", "c"}},
+	} {
+		if got := splitCC(c.in); strings.Join(got, "|") != strings.Join(c.want, "|") {
+			t.Fatalf("splitCC(%q) = %q, want %q", c.in, got, c.want)
+		}
+	}
+}

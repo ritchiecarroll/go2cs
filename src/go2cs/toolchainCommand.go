@@ -15,6 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -28,6 +29,11 @@ The Go release go2cs converts with, which a release build downloads on first use
   env                     print the GOROOT, GOVERSION and go command go2cs converts with, downloading
                           if needed
   prune [-all]            remove cached Go releases other than the pinned one (-all: the pinned one too)
+
+The C toolchain a -cgo load provisions when no host compiler resolves (see -cc):
+
+  install -cc [-from <file>]  download the pinned zig now, or install it from a zig release archive you
+                              already have (checked against the pin)
 `
 
 // runToolchainCommand runs `go2cs toolchain ...` and returns the process exit code. main dispatches here
@@ -36,6 +42,11 @@ func runToolchainCommand(args []string, stdout, stderr io.Writer) int {
 	if len(args) == 0 || args[0] == "-h" || args[0] == "-help" || args[0] == "--help" || args[0] == "help" {
 		fmt.Fprint(stdout, toolchainUsage)
 		return 0
+	}
+
+	// `install -cc` is the C toolchain's (ccZigProvision.go), whatever Go this build provisions.
+	if args[0] == "install" && slices.Contains(args[1:], "-cc") {
+		return runCCInstall(args[1:], stdout, stderr)
 	}
 
 	provisioner := newToolchainProvisioner()
@@ -49,6 +60,35 @@ func runToolchainCommand(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "go2cs toolchain %s: %v\n", args[0], err)
 		return 1
 	}
+
+	return 0
+}
+
+// runCCInstall runs `go2cs toolchain install -cc [-from <file>]`.
+func runCCInstall(args []string, stdout, stderr io.Writer) int {
+	flags := flag.NewFlagSet("go2cs toolchain install -cc", flag.ContinueOnError)
+	flags.SetOutput(io.Discard)
+	flags.Bool("cc", false, "")
+	from := flags.String("from", "", "")
+
+	if err := flags.Parse(args); err != nil || flags.NArg() > 0 {
+		fmt.Fprintf(stderr, "go2cs toolchain install -cc: unexpected arguments %q\n%s", args, toolchainUsage)
+		return 1
+	}
+
+	z := newZigProvisioner()
+
+	if z == nil {
+		fmt.Fprintf(stderr, "go2cs toolchain install -cc: this go2cs has no pinned C toolchain for %s/%s\n", runtime.GOOS, runtime.GOARCH)
+		return 1
+	}
+
+	if err := z.installCommand(*from); err != nil {
+		fmt.Fprintf(stderr, "go2cs toolchain install -cc: %v\n", err)
+		return 1
+	}
+
+	fmt.Fprintf(stdout, "zig %s is installed at %s\n", z.version, z.root())
 
 	return 0
 }

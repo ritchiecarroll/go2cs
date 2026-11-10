@@ -300,6 +300,8 @@ func main() {
 	provenanceCmd := commandLine.Bool("provenance", false, "Include in each converted file a notice naming its Go source and module and that go2cs modified it by conversion (no timestamp)")
 	includeCommentsCmd := commandLine.Bool("comments", false, "Include comments in output")
 	parseCgoTargetsCmd := commandLine.Bool("cgo", false, "Load a single package cgo-on (CGO_ENABLED=1; needs a C compiler) and report what cgo support recognizes in it. cgo has no C# conversion yet, so an import \"C\" source is still refused, now naming the C declarations it recognized and each generated file's source (docs/PLAN-cgo-interop.md, Phase 1). Not combinable with -stdlib, -tests or -recurse")
+	ccCmd := commandLine.String("cc", "", "With -cgo: the C compiler of the load, a command that may carry arguments (`zig cc`), `pinned` for the C toolchain go2cs provisions, or `host` to refuse it. Unset, go2cs uses CC from the environment, then the platform's default compiler on PATH, then the pinned toolchain (docs/DotnetTool.md)")
+	ccDownloadCmd := commandLine.Bool("cc-download", true, "With -cgo: let the load download the pinned C toolchain when no other compiler resolves; false refuses instead, naming the other choices")
 	showParseTreeCmd := commandLine.Bool("tree", false, "Show parse tree")
 	csprojFileCmd := commandLine.String("csproj", "", "Path to custom .csproj template file")
 	debugModeCmd := commandLine.Bool("debug", false, "Enable debug mode")
@@ -622,6 +624,9 @@ Examples:
 	if options.dualRecvParams && !options.dualRecv {
 		log.Fatalln("-dual-recv-params requires -dual-recv: it lowers the parameters of the by-reference forms that -dual-recv emits")
 	}
+
+	// The -cgo load's C compiler choice, read by resolveCToolchain (ccToolchain.go).
+	ccFlags.cmd, ccFlags.download = strings.TrimSpace(*ccCmd), *ccDownloadCmd
 
 	if err := checkCgoFlag(options.parseCgoTargets, convertStdLib, options.convertTests, recurseVal.enabled); err != nil {
 		log.Fatalln(err)

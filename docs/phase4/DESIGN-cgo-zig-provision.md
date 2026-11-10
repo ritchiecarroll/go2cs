@@ -95,6 +95,37 @@ built-in hash.
   publishers and redistributes nothing. The seat adds a short paragraph to `docs/DotnetTool.md` saying exactly that, and
   that whether it settles the matter is the owner's call. Is that the wording you want?
 
+### Answers (2026-11-10, H through COORD, binding)
+
+- **The export:** `resolveCToolchain() (cc string, env []string, version string, err error)`, as proposed. cc
+  survives cmd/go's quoted.Split when the cache path holds spaces (a unit test, and a Windows CI arm owed). The
+  sync.Once has a test-only reset. It is callable from anywhere in the process: increment 4's load-name capture links
+  with the same compiler and environment.
+- **checkCCFlags:** H calls it from the -cgo flag path, in increment 5 or in a one-line seat of H's if Z lands first.
+  Z never edits the driver.
+- **Order:** as §2. A host compiler is not reproducible (PLAN-cgo-interop §5.2), so every byte-comparing gate
+  (converter-cgo, G1/G2) passes `-cc pinned`.
+- **Q1:** SHA-256 at run time, minisign at generation time. The scout's §3 "MUST verify" sentence carries a dated
+  note.
+- **Q2:** llvm-mingw stays out.
+- **Q3:** the system tar on linux and macOS, archive/zip on windows, with a named pre-download check on linux. GNU
+  tar execs an `xz` binary that slim images lack, so a host without one is refused before downloading.
+- **Q4:** H's verbatim index (2026-11-09, 90,260 bytes, SHA-256 81080b1daf59c569e04ebd90c3a9d2f87bbfd25716be61042c9602d3dbd44a3b)
+  is copied byte for byte to `src/go2cs/testdata/cctoolchain/`. The generator test asserts the file's hash as well as
+  the four instrument hashes.
+- **Q5:** the APSL wording in docs/DotnetTool.md, with H's added sentence.
+
+### Status at increment 2
+
+Done: the resolver, the provisioner, the export, genzigpins and its pins, `toolchain install -cc [-from FILE]`, the
+`-cc` and `-cc-download` flags, and the docs. Owed:
+- **The generation-time minisign check.** It needs the Zig Software Foundation's public key verbatim, read from
+  ziglang.org/download on a networked machine. This box cannot reach that page, so the key is asked of H. Until it
+  lands, the pins are the index's hashes alone, which is what the instrument verified on hosted runners.
+- **The hosted `converter-cgo` mode with `;cc=go2cs`, and its wrong-hash red.** It runs once H's increment 5 wires
+  resolveCToolchain into the -cgo load.
+- **A Windows CI arm** of the spaces-in-the-cache-path test.
+
 ## 7. Tests and gates
 
 - **Unit, local** (no network: an in-process HTTP server serves fake archives):

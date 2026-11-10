@@ -89,6 +89,7 @@
     <None Include="$(MSBuildThisFileDirectory)cgoUnsafeArgsLift_test.go" />
     <None Include="$(MSBuildThisFileDirectory)ccToolchain.go" />
     <None Include="$(MSBuildThisFileDirectory)ccToolchain_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)ccToolchainPins.go" />
     <None Include="$(MSBuildThisFileDirectory)ccZigProvision.go" />
     <None Include="$(MSBuildThisFileDirectory)ccZigProvision_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDynamicImports_test.go" />
@@ -332,6 +333,8 @@
     <None Include="$(MSBuildThisFileDirectory)internal\gensynopsis\main_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gentoolchainpins\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gentoolchainpins\main_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\genzigpins\main.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\genzigpins\main_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\golauncher\golauncher.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\golauncher\golauncher_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\pcensus\census.go" />
@@ -660,6 +663,7 @@
     <None Include="$(MSBuildThisFileDirectory)testHostGoTargetOS_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testHostLaunchDir_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\README.md" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cctoolchain\zig-index-0.17.0.json" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\cgo_gotypes.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\cgo_import.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\fixture.cgo1.go" />

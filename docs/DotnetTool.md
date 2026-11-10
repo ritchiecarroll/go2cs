@@ -70,6 +70,51 @@ $go = (go2cs toolchain env | Select-String '^GO=').Line.Substring(3)
 "$(go2cs toolchain env | sed -n 's/^GO=//p')" build ./...
 ```
 
+## The C compiler for `-cgo`
+
+A conversion with `-cgo` loads the package with cgo on, which runs Go's `cmd/cgo` and needs a C compiler on the
+converting machine.
+
+> **Status:** the choice below reaches the `-cgo` load in a following change. Until that lands, a `-cgo` load uses
+> `CC` or the platform's default compiler exactly as the `go` command does, and `-cc` and `-cc-download` change
+> nothing. `go2cs toolchain install -cc` already works.
+
+Once it lands, go2cs uses the first of these that applies:
+
+1. `-cc CMD`, used as given. It may carry arguments, as `zig cc` does, and it never downloads.
+2. `CC` from the environment, as the `go` command reads it.
+3. The platform's default compiler on `PATH`: `clang` on macOS, `gcc` elsewhere, the names Go itself defaults to.
+4. A pinned zig (0.17.0), downloaded into the user cache on first use and run as `zig cc`.
+
+`-cc pinned` goes straight to step 4. That is the reproducible choice: a host compiler is not reproducible, so every
+conversion whose output is compared byte for byte passes it. `-cc host` refuses step 4. `-cc-download=false` refuses
+to download, but still uses a zig already in the cache. Every refusal names the steps it tried, and no step falls
+back to loading the package with cgo off.
+
+The zig comes from ziglang.org's community mirrors, in random order, and then from ziglang.org itself, as
+ziglang.org asks of automated downloads. Every archive, from any source, is checked against a SHA-256 built into the
+converter before anything is unpacked. A mismatch deletes the file and the next source is tried, so a mirror can
+fail a download but cannot substitute an archive. The hashes are generated from ziglang.org's download index. On
+Linux and macOS the `.tar.xz`
+archive is unpacked with the system `tar`. On Linux that needs `xz` installed (Debian-slim and Alpine images lack
+it), and go2cs says so before downloading anything. zig's caches go beside it, under go2cs's own cache folder.
+
+| Platform | The zig lives in |
+|:--|:--|
+| Windows | `%LocalAppData%\go2cs\toolchains\zig-0.17.0-windows-<arch>` |
+| macOS | `~/Library/Caches/go2cs/toolchains/zig-0.17.0-darwin-<arch>` |
+| Linux | `$XDG_CACHE_HOME/go2cs/toolchains/zig-0.17.0-linux-<arch>`, or `~/.cache/...` |
+
+```shell
+go2cs toolchain install -cc             # download the pinned zig now
+go2cs toolchain install -cc -from FILE  # install it from a zig release archive you have, checked against the pin
+```
+
+go2cs downloads zig from its publishers (ziglang.org or a mirror), verifies it against a pinned SHA-256, and
+redistributes nothing. zig bundles Apple's darwin SDK headers under the APSL; using them is governed by those terms.
+Converted output contains no file from zig: it carries the C declarations cmd/cgo derives from the headers a package
+includes, as a Go cgo build does.
+
 ## Go's telemetry
 
 The Go the tool downloads is Go's own release, unchanged, so it keeps Go's default telemetry setting: local

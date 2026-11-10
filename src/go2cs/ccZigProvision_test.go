@@ -17,6 +17,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -57,13 +58,13 @@ func sha256Hex(data []byte) string {
 	return hex.EncodeToString(sum[:])
 }
 
-// zigTestRig serves each source's archive (and a signature beside it) and records what the provisioner verified and
-// unpacked, so a test can show a bad archive was never unpacked.
+// zigTestRig serves each source's archive and records what the provisioner requested and unpacked, so a test can show a
+// bad archive was never unpacked and a refused install requested nothing.
 type zigTestRig struct {
 	z        *zigProvisioner
 	server   *httptest.Server
 	served   map[string][]byte
-	verified []string
+	requests int
 	unpacked int
 }
 
@@ -73,6 +74,7 @@ func newZigTestRig(t *testing.T, pinSHA string) *zigTestRig {
 	rig := &zigTestRig{served: map[string][]byte{}}
 
 	rig.server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		rig.requests++
 		body, ok := rig.served[r.URL.Path]
 		if !ok {
 			http.NotFound(w, r)
@@ -89,13 +91,7 @@ func newZigTestRig(t *testing.T, pinSHA string) *zigTestRig {
 		pin:       zigArchivePin{file: fakeZigFile, sha256: pinSHA},
 		cacheRoot: filepath.Join(t.TempDir(), "toolchains"),
 		client:    rig.server.Client(),
-	}
-
-	rig.z.verifySignature = func(archive, signature string) error {
-		data, err := os.ReadFile(signature)
-		rig.verified = append(rig.verified, string(data))
-
-		return err
+		lookPath:  exec.LookPath,
 	}
 
 	rig.z.unpack = func(archive, dest string) error {
@@ -106,11 +102,10 @@ func newZigTestRig(t *testing.T, pinSHA string) *zigTestRig {
 	return rig
 }
 
-// serve publishes body at /<name>/<file>, with a signature naming the source, and returns the source.
+// serve publishes body at /<name>/<file> and returns the source.
 func (rig *zigTestRig) serve(name string, body []byte) zigSource {
 	path := "/" + name + "/" + fakeZigFile
 	rig.served[path] = body
-	rig.served[path+".minisig"] = []byte("signature from " + name)
 
 	return zigSource{name: name, url: rig.server.URL + path}
 }
@@ -149,8 +144,8 @@ func TestZigWrongHashIsDeletedAndTheNextSourceTried(t *testing.T) {
 		t.Fatalf("install: %v", err)
 	}
 
-	if rig.unpacked != 1 || len(rig.verified) != 1 || rig.verified[0] != "signature from ziglang.org" {
-		t.Fatalf("unpacked %d, signatures checked %q; want only ziglang.org's archive checked and unpacked", rig.unpacked, rig.verified)
+	if rig.unpacked != 1 {
+		t.Fatalf("unpacked %d archives; want only ziglang.org's, the one whose bytes verify", rig.unpacked)
 	}
 
 	if want := rig.z.exe() + " cc"; cc != want {
@@ -188,8 +183,8 @@ func TestZigPlantedWrongPinRefusesBeforeUnpacking(t *testing.T) {
 		}
 	}
 
-	if rig.unpacked != 0 || len(rig.verified) != 0 {
-		t.Fatalf("unpacked %d, signatures checked %d; a hash mismatch must stop both", rig.unpacked, len(rig.verified))
+	if rig.unpacked != 0 {
+		t.Fatalf("unpacked %d archives; a hash mismatch must stop the unpack", rig.unpacked)
 	}
 
 	if _, err := os.Stat(rig.z.root()); !errors.Is(err, os.ErrNotExist) {
@@ -198,36 +193,6 @@ func TestZigPlantedWrongPinRefusesBeforeUnpacking(t *testing.T) {
 
 	if left := leftovers(t, rig.z.cacheRoot); len(left) != 0 {
 		t.Fatalf("the cache root keeps %q", left)
-	}
-}
-
-func TestZigRefusedSignatureInstallsNothing(t *testing.T) {
-	good := fakeZigArchive(t)
-	rig := newZigTestRig(t, sha256Hex(good))
-
-	sources := []zigSource{rig.serve("ziglang.org", good)}
-	rig.z.sources = func() []zigSource { return sources }
-	rig.z.verifySignature = func(string, string) error { return errors.New("signature does not verify") }
-
-	if _, _, err := rig.z.install(); err == nil || !strings.Contains(err.Error(), "ziglang.org: signature does not verify") {
-		t.Fatalf("install = %v; want the signature refusal named with its source", err)
-	}
-
-	if rig.unpacked != 0 {
-		t.Fatalf("unpacked %d archives whose signature was refused", rig.unpacked)
-	}
-}
-
-func TestZigMissingSignatureIsASourceFailure(t *testing.T) {
-	good := fakeZigArchive(t)
-	rig := newZigTestRig(t, sha256Hex(good))
-
-	source := rig.serve("mirror-a", good)
-	delete(rig.served, "/mirror-a/"+fakeZigFile+".minisig")
-	rig.z.sources = func() []zigSource { return []zigSource{source} }
-
-	if _, _, err := rig.z.install(); err == nil || !strings.Contains(err.Error(), "mirror-a: its signature: GET") {
-		t.Fatalf("install = %v; want the missing signature named", err)
 	}
 }
 
@@ -314,5 +279,134 @@ func TestQuoteCCWord(t *testing.T) {
 		if got, ok := quoteCCWord(c.in); got != c.want || ok != c.ok {
 			t.Fatalf("quoteCCWord(%q) = %q, %v; want %q, %v", c.in, got, ok, c.want, c.ok)
 		}
+	}
+}
+
+// GNU tar execs an `xz` binary that slim images lack, so a linux host without one is refused BEFORE any download.
+func TestZigNeedsXzBeforeDownloadingOnLinux(t *testing.T) {
+	rig := newZigTestRig(t, strings.Repeat("0", 64))
+	rig.z.pin.file = "zig-x86_64-linux-0.17.0.tar.xz"
+	source := rig.serve("ziglang.org", []byte("never fetched"))
+	rig.z.sources = func() []zigSource { return []zigSource{source} }
+	rig.z.lookPath = func(name string) (string, error) {
+		if name == "xz" {
+			return "", errors.New("not found")
+		}
+
+		return "/usr/bin/" + name, nil
+	}
+
+	_, _, err := rig.z.install()
+
+	want := "the pinned zig needs xz to unpack: install xz-utils, or pass -cc / CC, or `go2cs toolchain install -cc -from FILE` with an archive unpacked elsewhere"
+
+	if err == nil || err.Error() != want {
+		t.Fatalf("install = %v; want %q", err, want)
+	}
+
+	if rig.requests != 0 {
+		t.Fatalf("%d requests; the refusal must come before any download", rig.requests)
+	}
+
+	// macOS's bsdtar reads xz itself, so darwin needs tar alone.
+	rig.z.goos = "darwin"
+
+	if err := rig.z.checkUnpackTools(); err != nil {
+		t.Fatalf("darwin with tar and no xz: %v", err)
+	}
+}
+
+// A user whose cache path holds a space (a Windows profile "C:\Users\A B") must get a CC that cmd/go splits back into
+// the zig executable and `cc`; a wrong quote reads as "compiler not found" for exactly those users.
+func TestZigCCSurvivesASpaceInTheCacheRoot(t *testing.T) {
+	for _, root := range []string{filepath.Join(t.TempDir(), "A B", "toolchains"), filepath.Join(t.TempDir(), "o'brien x", "toolchains")} {
+		z := &zigProvisioner{version: "0.17.0", goos: "linux", goarch: "amd64", cacheRoot: root}
+
+		cc, _, err := z.choice()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if fields := splitCC(cc); len(fields) != 2 || fields[0] != z.exe() || fields[1] != "cc" {
+			t.Fatalf("cc %q splits into %q; want [%q cc]", cc, fields, z.exe())
+		}
+	}
+}
+
+// The system-tar path, end to end, where this host has tar and xz: the archive's top-level directory is dropped.
+func TestZigUnpacksATarXzThroughTheSystemTar(t *testing.T) {
+	for _, tool := range []string{"tar", "xz"} {
+		if _, err := exec.LookPath(tool); err != nil {
+			t.Skipf("no %s on this host", tool)
+		}
+	}
+
+	work := t.TempDir()
+	top := filepath.Join(work, "zig-x86_64-linux-0.17.0")
+
+	if err := os.MkdirAll(filepath.Join(top, "lib"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(filepath.Join(top, "zig"), []byte("#!/bin/sh\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	archive := filepath.Join(work, "zig.tar.xz")
+
+	if out, err := exec.Command("tar", "-cJf", archive, "-C", work, "zig-x86_64-linux-0.17.0").CombinedOutput(); err != nil {
+		t.Fatalf("building the fixture: %v: %s", err, out)
+	}
+
+	dest := filepath.Join(work, "dest")
+
+	if err := os.MkdirAll(dest, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := unpackTarXz(archive, dest, "zig-x86_64-linux-0.17.0/"); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := os.Stat(filepath.Join(dest, "zig")); err != nil {
+		t.Fatalf("the zig executable is not at the top of the unpacked tree: %v", err)
+	}
+}
+
+// install -cc -from takes an archive the user already has, only when it matches the pin, and downloads nothing.
+func TestZigInstallFromAFileTakesOnlyThePinnedArchive(t *testing.T) {
+	good := fakeZigArchive(t)
+	rig := newZigTestRig(t, sha256Hex(good))
+	rig.z.sources = func() []zigSource { return []zigSource{rig.serve("ziglang.org", good)} }
+
+	dir := t.TempDir()
+	goodFile, badFile := filepath.Join(dir, "good.zip"), filepath.Join(dir, "bad.zip")
+
+	if err := os.WriteFile(goodFile, good, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(badFile, append(bytes.Clone(good), 0), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := rig.z.installCommand(badFile); err == nil || !strings.Contains(err.Error(), "is not the pinned zig") {
+		t.Fatalf("install -from a wrong archive: %v; want a refusal", err)
+	}
+
+	if err := rig.z.installCommand(goodFile); err != nil {
+		t.Fatalf("install -from the pinned archive: %v", err)
+	}
+
+	if _, _, ok := rig.z.cached(); !ok {
+		t.Fatal("install -from left no whole install")
+	}
+
+	if err := rig.z.installCommand(badFile); err == nil {
+		t.Fatal("install -from a wrong archive over a whole install was reported fine")
+	}
+
+	if rig.requests != 0 {
+		t.Fatalf("install -from made %d requests; it must download nothing", rig.requests)
 	}
 }

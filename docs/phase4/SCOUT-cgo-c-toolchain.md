@@ -62,6 +62,14 @@ Notes that decide between them:
   converter that provisions zig for users should take the mirror list
   (`https://ziglang.org/download/community-mirrors.txt`), try mirrors in random order, and verify the signature as
   well as the pinned hash.
+
+> **2026-11-10, seat Z (H agreed, COORD relayed; DESIGN-cgo-zig-provision.md §6 Q1):** the converter does not check the
+> minisign signature at run time. It pins each archive's SHA-256 in the converter binary (ccToolchainPins.go,
+> generated from the download index), so a mirror can fail a download but cannot substitute an archive, and a run-time
+> signature would add no integrity the pin lacks. The signature check moves to GENERATION time, on the networked
+> machine that writes the pins. The sentence above stands for a provisioner that reads the hash from the index at run
+> time, which this one does not.
+
 - **zig's darwin headers.** zig 0.17.0 ships Apple's libc headers (`lib/libc/include/any-darwin-any`, 143 entries,
   under the Apple Public Source License 2.0), plus `lib/libc/darwin/libSystem.tbd` and `SDKSettings.json`. Their
   provenance is not stated in the files read here. go2cs would download zig from its own publishers and
