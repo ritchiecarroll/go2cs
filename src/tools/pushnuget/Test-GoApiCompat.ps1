@@ -126,19 +126,36 @@ try {
     # The shapes the 1.26.10.3 census packed (362 packages): lib/ only; lib/ plus build/ (318); lib/ plus buildTransitive/
     # (go.lib); lib/ plus the four RID folders plus build/ (41, the L3 packages); analyzers/ only (go.gen). Each assembly
     # has its .pdb beside it, and the two Mac RIDs carry the same darwin bytes.
-    Write-Host 'the release''s own package shapes: a .pdb beside each assembly, build/ and buildTransitive/, all four RID folders'
+    Write-Host 'the release''s own package shapes: a .pdb beside each assembly, build/ and buildTransitive/, all five RID folders'
     $pdb = [System.Text.Encoding]::ASCII.GetBytes('not compared')
     $release = @{ 'lib/net10.0/Widget.dll' = 'widget-base.dll'; 'lib/net10.0/Widget.pdb' = $pdb; 'build/go.widget.props' = $pdb; 'buildTransitive/go.widget.targets' = $pdb }
-    foreach ($rid in 'win-x64', 'linux-x64', 'osx-x64', 'osx-arm64') { $release["runtimes/$rid/lib/net10.0/Widget.dll"] = 'widget-base.dll'; $release["runtimes/$rid/lib/net10.0/Widget.pdb"] = $pdb }
+    foreach ($rid in 'win-x64', 'linux-x64', 'osx-x64', 'osx-arm64', 'linux-arm64') { $release["runtimes/$rid/lib/net10.0/Widget.dll"] = 'widget-base.dll'; $release["runtimes/$rid/lib/net10.0/Widget.pdb"] = $pdb }
     $releaseBase = New-Package 'release-base' $release
     $darwinBreak = $release.Clone(); $darwinBreak['runtimes/osx-arm64/lib/net10.0/Widget.dll'] = 'widget-internal.dll'
     $releaseRed = New-Package 'release-red' $darwinBreak
     $r = Compare-Fixture $releaseBase $releaseBase $null
-    Check 'the release shape compares its five assemblies and nothing else (no .pdb, no build/)' (
-        $r.Failures.Count -eq 0 -and $r.Compared -eq 5 -and $r.Assets.Count -eq 5) "compared $($r.Compared) of $($r.Assets.Count); $($r.Failures -join '; ')"
+    Check 'the release shape compares its six assemblies and nothing else (no .pdb, no build/)' (
+        $r.Failures.Count -eq 0 -and $r.Compared -eq 6 -and $r.Assets.Count -eq 6) "compared $($r.Compared) of $($r.Assets.Count); $($r.Failures -join '; ')"
     $r = Compare-Fixture $releaseBase $releaseRed $null
     Check 'a break in one RID''s flavor alone reads red and names that RID' (
-        $r.Failures.Count -eq 1 -and $r.Failures[0].Contains('runtimes/osx-arm64/') -and $r.Failures[0].Contains('Fixture.Widget.Instance') -and $r.Compared -eq 5) "compared $($r.Compared); $($r.Failures -join '; ')"
+        $r.Failures.Count -eq 1 -and $r.Failures[0].Contains('runtimes/osx-arm64/') -and $r.Failures[0].Contains('Fixture.Widget.Instance') -and $r.Compared -eq 6) "compared $($r.Compared); $($r.Failures -join '; ')"
+
+    # THE NEW-RID RULE (S6 of DESIGN-linux-arm64-flavour.md): a RID the baseline does not ship has no prior surface to
+    # compare, so its first release admits it as new surface, compared with nothing. The baseline's own assets are all
+    # still compared, so a break on a shipped RID stays red beside it. A package newly RID-split (math gains runtimes/
+    # for every RID) is the same case: its lib/ is compared, its runtimes/ folders are new.
+    Write-Host 'a RID the baseline does not ship (the first linux-arm64) is new surface: admitted, not compared'
+    $fourRid = $release.Clone(); $fourRid.Remove('runtimes/linux-arm64/lib/net10.0/Widget.dll'); $fourRid.Remove('runtimes/linux-arm64/lib/net10.0/Widget.pdb')
+    $fourRidBase = New-Package 'release-four-rid' $fourRid
+    $r = Compare-Fixture $fourRidBase $releaseBase $null
+    Check 'the five-RID release against a four-RID baseline: green, the baseline''s five assets compared, linux-arm64 not' (
+        $r.Failures.Count -eq 0 -and $r.Compared -eq 5 -and $r.Assets.Count -eq 5 -and -not ($r.Assets -match 'linux-arm64')) "compared $($r.Compared) of $($r.Assets.Count); $($r.Failures -join '; ')"
+    $newRidBreak = $release.Clone(); $newRidBreak['runtimes/linux-arm64/lib/net10.0/Widget.dll'] = 'widget-internal.dll'
+    $r = Compare-Fixture $fourRidBase (New-Package 'release-new-rid-differs' $newRidBreak) $null
+    Check 'a new RID''s surface is not held to another RID''s: it is new, not a break' ($r.Failures.Count -eq 0 -and $r.Compared -eq 5) "compared $($r.Compared); $($r.Failures -join '; ')"
+    $flat = New-Package 'release-flat' @{ 'lib/net10.0/Widget.dll' = 'widget-base.dll'; 'lib/net10.0/Widget.pdb' = $pdb }
+    $r = Compare-Fixture $flat $releaseBase $null
+    Check 'a package newly RID-split compares its lib/ and admits its five RID folders' ($r.Failures.Count -eq 0 -and $r.Compared -eq 1 -and $r.Assets.Count -eq 1) "compared $($r.Compared) of $($r.Assets.Count); $($r.Failures -join '; ')"
 
     Write-Host 'a package with no lib/ or runtimes/ asset (go.gen, an analyzer) has no surface to compare, and does not stop the guard'
     $analyzer = New-Package 'analyzer' @{ 'analyzers/dotnet/cs/Widget.dll' = 'widget-base.dll' }

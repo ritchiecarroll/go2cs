@@ -196,7 +196,9 @@ function Invoke-GoApiCompatAsset([string]$RepoRoot, [string]$Left, [string]$Righ
       Assets     the baseline's assets
       Failures   one line per reason the package is red, each naming the package and its asset
     Every baseline asset must exist in the current package (a missing one is a break the tool cannot see). An asset only
-    the current package has is new surface, which is compatible, and is not compared. A package with no lib/ or
+    the current package has is new surface, which is compatible, and is not compared. THE NEW-RID RULE: a RID the
+    baseline does not ship (the first linux-arm64, S6) is admitted with no prior baseline, and so is every runtimes/
+    folder of a package newly RID-split; each is compared from the next release on, against this one. A package with no lib/ or
     runtimes/ asset (go.gen, an analyzer) compares nothing and reads green with Compared 0 of 0.
 #>
 function Test-GoApiCompatPackage {
