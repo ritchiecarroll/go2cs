@@ -71,6 +71,18 @@ type _Ctype_struct_clash struct {
 	Hold        _Ctype_int
 }
 
+// Two 16-byte structs with an eightbyte that is all padding (dropped bitfield bytes leave exactly this): under SysV
+// x64 the CLR may classify that eightbyte NO_CLASS where the C compiler says INTEGER.
+type _Ctype_struct_padded struct {
+	a _Ctype_long
+	_ [8]byte
+}
+
+type _Ctype_struct_tailpad struct {
+	a _Ctype_char
+	_ [15]byte
+}
+
 type _Ctype_struct_flex struct {
 	n    _Ctype_int
 	data [0]_Ctype_int
@@ -249,12 +261,16 @@ func TestCgoMirrorRefusesWhatABlittableMirrorCannotHold(t *testing.T) {
 }
 
 // §11.7 (RULED): only an integer- and pointer-only struct crosses by value. A float, an inline array or a union
-// anywhere inside, nested structs included, keeps it to the pointer path.
+// anywhere inside, nested structs included, keeps it to the pointer path, and so does a struct of 16 bytes or less
+// with an eightbyte that holds no member (§11.7's 2026-11-10 ruling).
 func TestCgoMirrorPassesByValueOnlyIntegerAndPointerStructs(t *testing.T) {
 	pkg := checkCgoMirrorShapes(t)
 	builder := newCgoMirrorBuilder(cgoMirrorAmd64)
 
-	for name, want := range map[string]bool{"_Ctype_struct_ints": true, "_Ctype_struct_inner": true, "_Ctype_struct_shapes": false} {
+	for name, want := range map[string]bool{
+		"_Ctype_struct_ints": true, "_Ctype_struct_inner": true, "_Ctype_struct_shapes": false,
+		"_Ctype_struct_padded": false, "_Ctype_struct_tailpad": false,
+	} {
 		built, err := builder.mirror(lookupCgoStruct(t, pkg, name))
 
 		if err != nil {
