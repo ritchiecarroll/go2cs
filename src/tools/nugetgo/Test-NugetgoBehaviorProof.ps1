@@ -102,7 +102,9 @@ $hasCount = [bool](Get-Command Get-NugetgoMeasuredRowCount -ErrorAction Silently
 Check 'the measured count leaves the UNMEASURED row out' ($hasCount -and (Get-NugetgoMeasuredRowCount -Rows $armRows) -eq 4) "$(if ($hasCount) { "got: $(Get-NugetgoMeasuredRowCount -Rows $armRows)" } else { 'no Get-NugetgoMeasuredRowCount' })"
 $hasText = [bool](Get-Command New-NugetgoUnmeasuredRowText -ErrorAction SilentlyContinue)
 $armText = if ($hasText) { New-NugetgoUnmeasuredRowText -ModulePath $module -GoVersion 'v1.1.0' -Package 'nugetgo.github.com.inconshreveable.mousetrap 1.1.0-int.1' -Rid 'linux-arm64' -Reason $armWhy -Date '2026-11-10' } else { $null }
-Check 'New-NugetgoUnmeasuredRowText writes exactly that row' ($hasText -and $armText -ceq [System.IO.File]::ReadAllText($armRows['linux-arm64'].path)) "$(if ($hasText) { "got: $armText" } else { 'no New-NugetgoUnmeasuredRowText' })"
+# The expected text is spelled out: the fixture file at the row's path has been rewritten by the refusal arms since.
+$armExpected = "# nugetgo behavioral proof row`nmodule: $module`nversion: v1.1.0`npackage: nugetgo.github.com.inconshreveable.mousetrap 1.1.0-int.1`nrid: linux-arm64`nunmeasured: $armWhy`ndate: 2026-11-10`n"
+Check 'New-NugetgoUnmeasuredRowText writes exactly that row' ($hasText -and $armText -ceq $armExpected) "$(if ($hasText) { "got: $armText" } else { 'no New-NugetgoUnmeasuredRowText' })"
 $armPage = New-NugetgoBehaviorPage -ModulePath $module -GoVersion 'v1.1.0' -Rows $armRows
 Check 'the page names the RID UNMEASURED, with the reason, in its table row' (@(("$armPage" -split "`n") | Where-Object { $_ -clike "| linux-arm64 | UNMEASURED: $armWhy |*" }).Count -eq 1) "got:`n$armPage"
 Check 'the page still has one table row per shipped RID' (@(("$armPage" -split "`n") | Where-Object { $_ -match '^\| (win-x64|linux-x64|osx-x64|osx-arm64|linux-arm64) \|' }).Count -eq 5) "got:`n$armPage"

@@ -365,10 +365,10 @@ $blockArgs = @{
     DefaultIcon = $packageIcon.Default
 }
 if ($proofMode.Mode -ceq 'unvalidated') { $blockArgs.Unvalidated = $true }
-elseif ($proofMode.Mode -ceq 'behavioral') { $blockArgs.BehaviorRids = $behaviorRows.Count }
+elseif ($proofMode.Mode -ceq 'behavioral') { $blockArgs.BehaviorRids = Get-NugetgoMeasuredRowCount -Rows $behaviorRows }
 else {
     $blockArgs.Matched = $totals.Matched; $blockArgs.Disclosed = $totals.Disclosed
-    if ($proofMode.SampleRows) { $blockArgs.SampleRids = $behaviorRows.Count }
+    if ($proofMode.SampleRows) { $blockArgs.SampleRids = Get-NugetgoMeasuredRowCount -Rows $behaviorRows }
 }
 # The facts the block states that change from pack to pack, printed on every write so that a rehearsal's rewrite is
 # never taken for the release's.
@@ -677,7 +677,10 @@ if ($flavorDecision.RidSpecific) { Set-NugetgoRidAssets -Package $nupkg -Assembl
 if ($proofMode.Mode -ceq 'behavioral' -or $proofMode.SampleRows) {
     $unproven = @(Test-NugetgoBehaviorRows -Rows $behaviorRows -Assemblies (Get-NugetgoPackedRidAssemblies -Package $nupkg -TargetFramework 'net10.0') -ModulePath $ModulePath -GoVersion $GoVersion)
     if ($unproven.Count) { Remove-Item -LiteralPath $nupkg; Refuse "the $(if ($proofMode.SampleRows) { 'sample rows are' } else { 'behavioral proof is' }) not a proof of the packed bytes -- $($unproven -join '; ')" }
-    foreach ($rid in @($behaviorRows.Keys | Sort-Object)) { Write-Host "  proof: $rid ran $($behaviorRows[$rid].assembly) on $($behaviorRows[$rid].host): bound" }
+    foreach ($rid in @($behaviorRows.Keys | Sort-Object)) {
+        if (Test-NugetgoRowUnmeasured $behaviorRows[$rid]) { Write-Host "  proof: $rid UNMEASURED: $($behaviorRows[$rid].unmeasured)"; continue }
+        Write-Host "  proof: $rid ran $($behaviorRows[$rid].assembly) on $($behaviorRows[$rid].host): bound"
+    }
 }
 # The roots no packed byte may name: the build root, the pack's scratch and output, the module cache, the user profile.
 $hostRoots = @($RecurseRoot, $Scratch, $OutDir, (& go env GOMODCACHE).Trim(), [Environment]::GetFolderPath('UserProfile')) |

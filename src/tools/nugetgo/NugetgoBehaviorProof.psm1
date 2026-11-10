@@ -15,6 +15,12 @@
 # differently on another OS, and the page would claim a run that never happened.
 #
 # A row is a small text file, <rid>.md: a title line, then one "key: value" per line.
+#
+# UNMEASURED (COORD ruling for seat S6, 2026-11-10): a RID the release ships but whose hosted leg cannot run yet has a
+# row that records no run, only module, version, package, rid, date and "unmeasured: <reason>". The page names that RID
+# UNMEASURED with the reason, the counts on the page and the readme leave it out, and the row is accepted only for a RID
+# in $script:UnmeasuredRids. linux-arm64 is there because the os-matrix nugetgo-behavior stage runs no arm64 leg until
+# seat S5c; the list empties when that leg runs.
 
 # Without -Force: nugetgo-pack.ps1 has already imported NugetgoFlavors.psm1, and a forced re-import from inside this
 # module would unload the pack's copy (its functions then read "not recognized"). The map is read once, at import.
@@ -26,11 +32,22 @@ $script:RowKeys = @('module', 'version', 'package', 'rid', 'runtime-rid', 'goos'
 $script:RidGoos = [ordered]@{}
 foreach ($entry in (Get-NugetgoRidFlavors).GetEnumerator()) { $script:RidGoos[$entry.Key] = Get-NugetgoFlavorGoos $entry.Value }
 $script:ShippedRids = @($script:RidGoos.Keys)
+$script:UnmeasuredRids = @('linux-arm64')
+$script:UnmeasuredKeys = @('module', 'version', 'package', 'rid', 'unmeasured', 'date')
 # The title of a row's annotation. The fetch script selects by it, so it never collides with a leg's summary chunks or
 # a runner warning in the same step (C1, 2026-10-12).
 $script:RowTitle = 'nugetgo-row'
 
 function Get-NugetgoBehaviorRowKeys { $script:RowKeys }
+
+# A row that records no run: it carries the unmeasured key, with or without a reason (a blank reason is refused).
+function Test-NugetgoRowUnmeasured($Row) { $null -ne $Row -and $null -ne $Row.PSObject.Properties['unmeasured'] }
+
+# The rows that record a run: what "behavior on N RIDs" counts.
+function Get-NugetgoMeasuredRowCount {
+    param([Parameter(Mandatory)]$Rows)
+    @($Rows.Keys | Where-Object { $null -ne $Rows[$_] -and -not (Test-NugetgoRowUnmeasured $Rows[$_]) }).Count
+}
 
 function Read-NugetgoBehaviorRow {
     [CmdletBinding()]
@@ -59,6 +76,18 @@ function Test-NugetgoBehaviorRows {
     foreach ($rid in $script:ShippedRids) {
         if (-not $Rows.ContainsKey($rid) -or $null -eq $Rows[$rid]) { $reasons.Add("no row for ${rid}: every shipped RID is run on its own host"); continue }
         $row = $Rows[$rid]
+        if (Test-NugetgoRowUnmeasured $row) {
+            if ($script:UnmeasuredRids -notcontains $rid) { $reasons.Add("[$rid] the row is UNMEASURED, but ${rid}'s hosted leg runs today: only $($script:UnmeasuredRids -join ', ') may ship UNMEASURED"); continue }
+            foreach ($key in $script:UnmeasuredKeys) {
+                if ([string]::IsNullOrWhiteSpace([string]$row.$key)) { $reasons.Add("[$rid] the UNMEASURED row has no $key") }
+            }
+            foreach ($key in $script:RowKeys) {
+                if ($script:UnmeasuredKeys -notcontains $key -and $null -ne $row.PSObject.Properties[$key]) { $reasons.Add("[$rid] the UNMEASURED row also records ${key}: a row is measured or not") }
+            }
+            if ($row.rid -cne $rid) { $reasons.Add("[$rid] the row's rid is '$($row.rid)', not its file's") }
+            if ($row.module -cne $ModulePath -or $row.version -cne $GoVersion) { $reasons.Add("[$rid] the row is for $($row.module) $($row.version), not $ModulePath $GoVersion") }
+            continue
+        }
         foreach ($key in $script:RowKeys) {
             if ([string]::IsNullOrWhiteSpace([string]$row.$key)) { $reasons.Add("[$rid] the row has no $key") }
         }
@@ -99,6 +128,7 @@ function New-NugetgoBehaviorPage {
     $lines.Add('with dotnet, and the Go program run with `go run`, printed the same bytes. Each row names the assembly that loaded,')
     $lines.Add('which is the package''s own for that RID, and the host it ran on. No row stands for another RID.')
     $lines.Add('')
+    foreach ($line in Get-NugetgoUnmeasuredNote -Rows $Rows) { $lines.Add($line) }
     foreach ($line in Get-NugetgoRowTable -Rows $Rows) { $lines.Add($line) }
     ($lines -join "`n") + "`n"
 }
@@ -111,8 +141,18 @@ function Get-NugetgoRowTable {
     foreach ($rid in $script:ShippedRids) {
         $row = $Rows[$rid]
         if ($null -eq $row) { continue }
+        if (Test-NugetgoRowUnmeasured $row) { "| $rid | UNMEASURED: $($row.unmeasured) | -- | -- |"; continue }
         "| $rid | $($row.host) ($($row.os)) | ``$($row.assembly)`` | $($row.'outputs-equal') (go $($row.go), dotnet $($row.dotnet)) |"
     }
+}
+
+# The sentence above the table when a row is UNMEASURED; nothing when every row ran.
+function Get-NugetgoUnmeasuredNote {
+    param([Parameter(Mandatory)]$Rows)
+    $names = @($script:ShippedRids | Where-Object { Test-NugetgoRowUnmeasured $Rows[$_] })
+    if (-not $names.Count) { return }
+    "A RID marked UNMEASURED ships without a run: its hosted leg cannot run yet, and the row gives the reason. That is $($names -join ', ')."
+    ''
 }
 
 # The hosted sample rows of a module WITH Go tests, as a section under its test comparison (COORD ruling 2026-10-12):
@@ -122,12 +162,13 @@ function New-NugetgoSampleBehaviorSection {
     param([Parameter(Mandatory)][string]$ModulePath, [Parameter(Mandatory)][string]$GoVersion, [Parameter(Mandatory)]$Rows)
 
     $lines = New-Object System.Collections.Generic.List[string]
-    $lines.Add("## Sample behavior on $(@($Rows.Keys).Count) RIDs")
+    $lines.Add("## Sample behavior on $(Get-NugetgoMeasuredRowCount -Rows $Rows) RIDs")
     $lines.Add('')
     $lines.Add("In addition to the test comparison above, a sample program using ``$ModulePath`` $GoVersion was run on each RID's own")
     $lines.Add('host: converted by go2cs against this package, built for that RID and run with dotnet, it printed the same bytes as')
     $lines.Add('`go run`. Each row names the assembly that loaded, which is the package''s own for that RID, and the host it ran on.')
     $lines.Add('')
+    foreach ($line in Get-NugetgoUnmeasuredNote -Rows $Rows) { $lines.Add($line) }
     foreach ($line in Get-NugetgoRowTable -Rows $Rows) { $lines.Add($line) }
     ($lines -join "`n") + "`n"
 }
@@ -249,6 +290,14 @@ function Get-NugetgoRowHost {
     throw 'not a hosted runner (no ImageOS, ImageVersion and NUGETGO_RUNNER): name the host with -HostLabel'
 }
 
+# An UNMEASURED row's text: no run, only who it is for and why (see the head of this file).
+function New-NugetgoUnmeasuredRowText {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$ModulePath, [Parameter(Mandatory)][string]$GoVersion, [Parameter(Mandatory)][string]$Package,
+        [Parameter(Mandatory)][string]$Rid, [Parameter(Mandatory)][string]$Reason, [Parameter(Mandatory)][string]$Date)
+    New-NugetgoBehaviorRowText -Fields ([ordered]@{ module = $ModulePath; version = $GoVersion; package = $Package; rid = $Rid; unmeasured = $Reason; date = $Date })
+}
+
 # A row's text: the title line, then one "key: value" per line, in the order given.
 function New-NugetgoBehaviorRowText {
     [CmdletBinding()]
@@ -256,4 +305,4 @@ function New-NugetgoBehaviorRowText {
     "# nugetgo behavioral proof row`n" + ((@($Fields.Keys) | ForEach-Object { "${_}: $($Fields[$_])" }) -join "`n") + "`n"
 }
 
-Export-ModuleMember -Function Get-NugetgoBehaviorRowKeys, Read-NugetgoBehaviorRow, Test-NugetgoBehaviorRows, New-NugetgoBehaviorPage, Test-NugetgoModuleHasGoTests, Get-NugetgoPackedRidAssemblies, Get-NugetgoProofMode, ConvertTo-NugetgoRowAnnotationText, ConvertFrom-NugetgoRowAnnotations, Get-NugetgoRowHost, New-NugetgoBehaviorRowText, New-NugetgoSampleBehaviorSection
+Export-ModuleMember -Function Get-NugetgoBehaviorRowKeys, Read-NugetgoBehaviorRow, Test-NugetgoBehaviorRows, New-NugetgoBehaviorPage, Test-NugetgoModuleHasGoTests, Get-NugetgoPackedRidAssemblies, Get-NugetgoProofMode, ConvertTo-NugetgoRowAnnotationText, ConvertFrom-NugetgoRowAnnotations, Get-NugetgoRowHost, New-NugetgoBehaviorRowText, New-NugetgoSampleBehaviorSection, New-NugetgoUnmeasuredRowText, Get-NugetgoMeasuredRowCount, Test-NugetgoRowUnmeasured
