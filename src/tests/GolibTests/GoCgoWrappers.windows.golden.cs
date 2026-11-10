@@ -22,9 +22,7 @@ internal static unsafe partial class cgotestꓸC_package
         _Ctype_SYSTEMTIMEᴍ.CheckLayoutᴍ();
 
         _Ctype_SYSTEMTIMEᴍ m0 = default;
-        global::go.golib.GoCgoStructPointer k0 = p0 is null || p0.IsNilPointer ? global::go.golib.GoCgoStructPointer.Nil :
-            p0 is global::go.NativeBox<SYSTEMTIME> ? global::go.golib.GoCgoStructPointer.Native : global::go.golib.GoCgoStructPointer.Mirror;
-        nuint n0 = p0 is global::go.NativeBox<SYSTEMTIME> native0 ? native0.NativeAddress : 0;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "GetSystemTime", out nuint n0);
         nint a0 = (nint)n0;
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -61,9 +59,7 @@ internal static unsafe partial class cgotestꓸC_package
         _Ctype_POINTᴍ.CheckLayoutᴍ();
 
         _Ctype_RECTᴍ m0 = default;
-        global::go.golib.GoCgoStructPointer k0 = p0 is null || p0.IsNilPointer ? global::go.golib.GoCgoStructPointer.Nil :
-            p0 is global::go.NativeBox<RECT> ? global::go.golib.GoCgoStructPointer.Native : global::go.golib.GoCgoStructPointer.Mirror;
-        nuint n0 = p0 is global::go.NativeBox<RECT> native0 ? native0.NativeAddress : 0;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "PtInRect", out nuint n0);
         nint a0 = (nint)n0;
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -103,9 +99,7 @@ internal static unsafe partial class cgotestꓸC_package
         _Ctype_RECTᴍ.CheckLayoutᴍ();
 
         _Ctype_RECTᴍ m0 = default;
-        global::go.golib.GoCgoStructPointer k0 = p0 is null || p0.IsNilPointer ? global::go.golib.GoCgoStructPointer.Nil :
-            p0 is global::go.NativeBox<RECT> ? global::go.golib.GoCgoStructPointer.Native : global::go.golib.GoCgoStructPointer.Mirror;
-        nuint n0 = p0 is global::go.NativeBox<RECT> native0 ? native0.NativeAddress : 0;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "UnionRect", out nuint n0);
         nint a0 = (nint)n0;
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -115,9 +109,7 @@ internal static unsafe partial class cgotestꓸC_package
         }
 
         _Ctype_RECTᴍ m1 = default;
-        global::go.golib.GoCgoStructPointer k1 = p1 is null || p1.IsNilPointer ? global::go.golib.GoCgoStructPointer.Nil :
-            p1 is global::go.NativeBox<RECT> ? global::go.golib.GoCgoStructPointer.Native : global::go.golib.GoCgoStructPointer.Mirror;
-        nuint n1 = p1 is global::go.NativeBox<RECT> native1 ? native1.NativeAddress : 0;
+        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.StructPointer(p1, "UnionRect", out nuint n1);
         nint a1 = (nint)n1;
         bool s1 = false;
 
@@ -136,9 +128,7 @@ internal static unsafe partial class cgotestꓸC_package
         }
 
         _Ctype_RECTᴍ m2 = default;
-        global::go.golib.GoCgoStructPointer k2 = p2 is null || p2.IsNilPointer ? global::go.golib.GoCgoStructPointer.Nil :
-            p2 is global::go.NativeBox<RECT> ? global::go.golib.GoCgoStructPointer.Native : global::go.golib.GoCgoStructPointer.Mirror;
-        nuint n2 = p2 is global::go.NativeBox<RECT> native2 ? native2.NativeAddress : 0;
+        global::go.golib.GoCgoStructPointer k2 = global::go.golib.GoCgoArgs.StructPointer(p2, "UnionRect", out nuint n2);
         nint a2 = (nint)n2;
         bool s2 = false;
 

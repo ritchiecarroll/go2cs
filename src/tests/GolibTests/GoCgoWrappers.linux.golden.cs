@@ -170,9 +170,7 @@ internal static unsafe partial class cgotestꓸC_package
         _Ctype_struct_utsnameᴍ.CheckLayoutᴍ();
 
         _Ctype_struct_utsnameᴍ m0 = default;
-        global::go.golib.GoCgoStructPointer k0 = p0 is null || p0.IsNilPointer ? global::go.golib.GoCgoStructPointer.Nil :
-            p0 is global::go.NativeBox<struct_utsname> ? global::go.golib.GoCgoStructPointer.Native : global::go.golib.GoCgoStructPointer.Mirror;
-        nuint n0 = p0 is global::go.NativeBox<struct_utsname> native0 ? native0.NativeAddress : 0;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "uname", out nuint n0);
         nint a0 = (nint)n0;
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)

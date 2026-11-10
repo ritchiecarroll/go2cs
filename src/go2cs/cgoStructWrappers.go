@@ -18,9 +18,10 @@ import (
 // Phase 2 of docs/PLAN-cgo-interop.md, increment 3b2a (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §5.2, read through
 // §11.1 and §11.7): the binding of a C function that takes or returns C structs. A struct crosses BY VALUE only where
 // its mirror passes §11.7's rule (integers and pointers, no union, no inline array, no all-padding eightbyte). BY
-// POINTER it crosses as §5.2 first wrote it: nil as 0, a native box by its own address, and any other pointer as one
-// whole managed struct through a stack mirror, copied in member by member, checked, handed over by address and copied
-// back unconditionally. A pointer result is C memory, minted native. Pointer MEMBERS are increment 3b2b's.
+// POINTER it crosses as GoCgoArgs.StructPointer answers: nil as 0, a genuinely native struct by its own address, and one
+// whole managed struct (a box, or a struct field) through a stack mirror, copied in member by member, checked, handed
+// over by address and copied back unconditionally; an element of a Go array and a native box minted from managed storage
+// are refused before the call. A pointer result is C memory, minted native. Pointer MEMBERS are increment 3b2b's.
 
 // cgoWrapperSet makes one pseudo-package's members: the wrappers, the mirrors they cross with, and each mirror's copy-in
 // and copy-out functions, every one written once.
@@ -364,10 +365,9 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 		case param.pointer:
 			fmt.Fprintf(&before, "\n        %s m%d = default;\n", param.mirror.name, i)
 
-			// §5.2 as first written: a native box passes its address, and any other pointer is a managed struct, mirrored.
-			fmt.Fprintf(&before, "        global::go.golib.GoCgoStructPointer k%d = p%d is null || p%d.IsNilPointer ? global::go.golib.GoCgoStructPointer.Nil :\n", i, i, i)
-			fmt.Fprintf(&before, "            p%d is global::go.NativeBox<%s> ? global::go.golib.GoCgoStructPointer.Native : %s;\n", i, param.goSide, mirrorKind)
-			fmt.Fprintf(&before, "        nuint n%d = p%d is global::go.NativeBox<%s> native%d ? native%d.NativeAddress : 0;\n", i, i, param.goSide, i, i)
+			// The pointer's kind is GoCgoArgs' to decide (§11.1): it refuses, before any native code runs, an element of a Go
+			// array (C may touch the whole array) and a native box minted from managed storage (C must not write through it).
+			fmt.Fprintf(&before, "        global::go.golib.GoCgoStructPointer k%d = %sStructPointer(p%d, %q, out nuint n%d);\n", i, args, i, function, i)
 			fmt.Fprintf(&before, "        nint a%d = (nint)n%d;\n", i, i)
 
 			// Two pointers to the same Go struct are one object to C, as they are under Go: the later one shares the
