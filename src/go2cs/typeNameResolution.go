@@ -487,7 +487,15 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 					aliasQualifier = qualifier
 				}
 
-				return fmt.Sprintf("%s.%s[%s]", aliasQualifier, obj.Name(), strings.Join(args, ", "))
+				// The member as the producing package declares it: Δ-renamed when its name collides with a
+				// method or function there (`coll.ΔSet<T>`; see foreignRenamedGenericMember).
+				member := obj.Name()
+
+				if renamed, ok := foreignRenamedGenericMember(obj); ok {
+					member = renamed
+				}
+
+				return fmt.Sprintf("%s.%s[%s]", aliasQualifier, member, strings.Join(args, ", "))
 			}
 
 			// A SAME-PACKAGE instantiated generic must ALSO render structurally — each type ARGUMENT
@@ -539,6 +547,22 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 
 				if target, ok := ambiguousImportedTypeAliasTarget(key, pkg); ok {
 					return aliasQualifier + "." + target[strings.LastIndex(target, ".")+1:]
+				}
+
+				// A collision-renamed type this file reaches ONLY through another package's alias, with no import
+				// of the type's own package, so no alias key was loaded for it: spell the producer's member,
+				// `jsontext.ΔEncoder`, not the Go name (TS readiness C22e; see foreignRenamedTypeSpelling). A file
+				// that imports the producer holds the key and keeps its `pkgꓸName` alias route unchanged.
+				if !importedTypeAliasPublished(key) {
+					if spelling, bare, ok := foreignRenamedTypeSpelling(obj); ok {
+						// The two-hop form (`type Token any`): the producer's member stands for the concrete type its
+						// definition names, so render that, exactly as any reference to it would be rendered.
+						if bare {
+							return v.getAliasQualifiedTypeName(named.Underlying(), isUnderlying)
+						}
+
+						return aliasQualifier + "." + spelling
+					}
 				}
 			}
 
@@ -730,6 +754,12 @@ func (v *Visitor) getFullyQualifiedTypeName(t types.Type, isUnderlying bool) str
 					} else {
 						args[i] = v.getFullyQualifiedTypeName(typeArgs.At(i), isUnderlying)
 					}
+				}
+
+				// A Δ-renamed foreign generic names its declared member, as the alias-qualified twin does
+				// (see foreignRenamedGenericMember).
+				if renamed, ok := foreignRenamedGenericMember(obj); ok {
+					baseName = getSanitizedImport(packageClassPath(pkg.Path(), pkg.Name())+PackageSuffix) + "." + renamed
 				}
 
 				return baseName + "[" + strings.Join(args, ", ") + "]"

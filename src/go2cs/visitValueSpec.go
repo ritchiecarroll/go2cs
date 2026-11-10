@@ -719,6 +719,11 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 							valExpr = narrowedChan
 						}
 
+						// A slice- or map-cored type parameter as a typed var's value (see coreTypeParamValue).
+						if materialized := v.coreTypeParamValue(def.Type(), v.info.TypeOf(valueSpec.Values[i]), valExpr); materialized != "" {
+							valExpr = materialized
+						}
+
 						if hoistBuf.Len() > 0 {
 							// The decls carry their own leading newline + per-line indentation;
 							// writeOutput below re-indents the declaration line that follows.

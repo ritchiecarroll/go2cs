@@ -5,8 +5,9 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
-// The one place the corpus knows which operating system it was BUILT for, checked once against the
-// one it is RUNNING on.
+// The one place the corpus knows which operating system and architecture it was BUILT for, checked
+// once against the ones it is RUNNING on (the architecture for the linux flavour only; see golib's
+// GoHostOfRecord.Describe).
 //
 // A published package whose C# varies by GOOS ships a per-RID assembly for every runtime identifier
 // the release supports, plus a RID-agnostic `lib/` copy NuGet resolves when no shipped RID matches.
@@ -41,6 +42,6 @@ partial class runtime_package
     [ModuleInitializer]
     internal static void ᴛVerifyHostOfRecord()
     {
-        GoHostOfRecord.Verify(GOOS);
+        GoHostOfRecord.Verify(GOOS, GOARCH);
     }
 }

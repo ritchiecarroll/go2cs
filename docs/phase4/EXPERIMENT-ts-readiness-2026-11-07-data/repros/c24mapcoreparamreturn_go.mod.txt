@@ -1,0 +1,3 @@
+module repro/c24mapcoreparamreturn
+
+go 1.26

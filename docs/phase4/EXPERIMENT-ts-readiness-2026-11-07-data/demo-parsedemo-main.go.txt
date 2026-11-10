@@ -1,0 +1,40 @@
+// parsedemo: go2cs TS-readiness demo (scratch only, never committed upstream).
+// Parses each .ts file named on the command line and prints its parse
+// diagnostics and a pre-order dump of node kinds with pos/end, so the native
+// and the converted run can be byte-compared.
+package main
+
+import (
+	"fmt"
+	"os"
+	"strings"
+
+	"github.com/microsoft/TypeScript/tsc/internal/ast"
+	"github.com/microsoft/TypeScript/tsc/internal/core"
+	"github.com/microsoft/TypeScript/tsc/internal/parser"
+	"github.com/microsoft/TypeScript/tsc/internal/tspath"
+)
+
+func main() {
+	for _, name := range os.Args[1:] {
+		text, err := os.ReadFile(name)
+		if err != nil {
+			fmt.Println("read error:", err)
+			os.Exit(1)
+		}
+		base := name[strings.LastIndexAny(name, `/\`)+1:]
+		opts := ast.SourceFileParseOptions{FileName: "/" + base, Path: tspath.Path("/" + base)}
+		file := parser.ParseSourceFile(opts, string(text), core.GetScriptKindFromFileName(base))
+		fmt.Printf("file %s (%d bytes)\n", base, len(text))
+		for _, d := range file.Diagnostics() {
+			fmt.Printf("diag TS%d [%d,+%d] %s\n", d.Code(), d.Pos(), d.Len(), d.String())
+		}
+		var walk func(n *ast.Node, depth int) bool
+		walk = func(n *ast.Node, depth int) bool {
+			fmt.Printf("%s%v [%d,%d]\n", strings.Repeat("  ", depth), n.Kind, n.Pos(), n.End())
+			n.ForEachChild(func(c *ast.Node) bool { return walk(c, depth+1) })
+			return false
+		}
+		walk(file.AsNode(), 0)
+	}
+}

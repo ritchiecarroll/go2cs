@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Rebuilds one tested nugetgo module against a go.* release: docs/NugetgoPublish.md sections 1 and 2, end to end.
+    Rebuilds one nugetgo module against a go.* release: docs/NugetgoPublish.md sections 1 and 2, end to end.
 
 .DESCRIPTION
     One module per run, from nugetgo-modules.psd1 (the pack arguments each module was published with, and the counts
@@ -9,11 +9,18 @@
       1.1  build G once in T (or take -Converter), and refuse unless G's corpus release is -Release
       1.2  G -recurse -tests -test-action all -platforms P -module-disclosures ... SRC VR      (watched for free disk)
       1.3  gate: exit 0, MODULE.md present; every row compared with the kit's counts (the prediction)
-      1.4  G -recurse=nuget -platforms P SRC PR                                                (watched for free disk)
+      1.4  G -recurse=nuget [-provenance] -platforms P SRC PR                                   (watched for free disk)
+           -provenance when the row's LicenseSpdx asks each modified file to say so (Apache-2.0); the pack refuses
+           a PR without it
       1.5  gate: every PR project's GoInputDigest equals its MODULE.md row (the binding)
       2    nugetgo-pack.ps1 for each requested pack (int.1 and/or release), -Converter G, -ClosureVersion -Release;
            with -PackageReadme, the author's package README is put in place first (PR/src/M/nuget/README.md), so
            the pack rewrites only its fence and the author's part ships as written
+
+    A module with no Go tests (its row's NoGoTests, mousetrap) has no VR and no MODULE.md, so 1.2, 1.3 and 1.5 do
+    not run (runbook section 1, "A module with no Go tests"). Its rehearsal pack states NoGoTests as
+    -UnvalidatedReason; its release pack takes -BehaviorProofDir, the hosted rows run against that rehearsal package
+    (runbook section 3), so the release is a second run: -Packs int1 first, then -Packs release -BehaviorProofDir.
 
     SRC is the module cache directory, never a copy: a copy has no module version, so -module-disclosures would not
     be consulted for it. The packages land in <Work>/kit/nupkg/<role>/<ID>.nupkg with a SHA256SUMS in the form the
@@ -55,6 +62,10 @@
 .PARAMETER Feed
     The pack's single restore source. nuget.org by default; a local folder when it must hold release candidates that
     are not published yet, beside the go.* release they were packed against.
+.PARAMETER BehaviorProofDir
+    For a module with no Go tests: the directory of its hosted behavior rows (<rid>.md, one per shipped RID), run
+    against this module's rehearsal package. Required for its release pack; refused for a module with Go tests, whose
+    proof is the test comparison.
 .PARAMETER ConversionReadme
     The conversion repository's root README as it will be committed at nuget-<PV>, a local file, checked by the pack
     in place of the module table's ConversionReadme (the README at the repository's last tag).
@@ -75,12 +86,14 @@ param(
     [string[]]$ThirdPartyPackage = @(),
     [string]$Feed = 'https://api.nuget.org/v3/index.json',
     [string]$ConversionReadme,
+    [string]$BehaviorProofDir,
     [string]$ModulesFile = (Join-Path $PSScriptRoot 'nugetgo-modules.psd1')
 )
 
 $ErrorActionPreference = 'Stop'
 function Refuse([string]$why) { throw "REFUSED: $why" }
 Import-Module (Join-Path $PSScriptRoot 'NugetgoValidationBinding.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'NugetgoLicense.psm1') -Force
 # Under pwsh -File a list arrives as one comma-joined string (Split-NugetgoListArgument in the pack does the same).
 $ThirdPartyPackage = @($ThirdPartyPackage | ForEach-Object { "$_" -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
 function Say([string]$line) { Write-Host $line }
@@ -95,6 +108,14 @@ $table = Import-PowerShellDataFile -LiteralPath $ModulesFile
 if (-not $table.ContainsKey($Module)) { Refuse "$Module is not in $ModulesFile ($($table.Keys -join ', '))" }
 $row = $table[$Module]
 $modPath, $goVersion = $Module -split '@', 2
+# A module with no Go tests: NoGoTests is the reason its rehearsal states, and its release needs the hosted rows.
+$noGoTests = [string]$row.NoGoTests
+if ($BehaviorProofDir -and -not $noGoTests) { Refuse "-BehaviorProofDir: $Module has Go tests, and its proof is the test comparison" }
+if ($noGoTests -and $Packs -contains 'release') {
+    if (-not $BehaviorProofDir) { Refuse "$Module has no Go tests: its release pack needs -BehaviorProofDir, the hosted rows run against its rehearsal package (pack -Packs int1 first)" }
+    if (-not (Test-Path -LiteralPath $BehaviorProofDir -PathType Container)) { Refuse "-BehaviorProofDir $BehaviorProofDir is not a directory" }
+    $BehaviorProofDir = (Resolve-Path -LiteralPath $BehaviorProofDir).Path
+}
 
 $T = (Resolve-Path -LiteralPath $T).Path
 $top = git -C $T rev-parse --show-toplevel 2>$null
@@ -187,55 +208,66 @@ $failures = [Collections.Generic.List[string]]::new()
 $VR = Join-Path $Work 'VR'
 $PR = Join-Path $Work 'PR'
 try {
-    # 1.2 and 1.3: the proof, and the prediction.
-    $vrArgs = @('-recurse', '-tests', '-test-action', 'all', '-platforms', $Platform, '-go2cspath', (Join-Path $T 'src'),
-        '-module-disclosures', (Join-Path $T 'src/tests/ModuleDisclosures'))
-    if ($TestTimeout) { $vrArgs += @('-test-timeout', $TestTimeout) }
-    $rc = Invoke-Watched 'VR' ($vrArgs + @($SRC, $VR)) (Join-Path $Work 'VR')
-    if ($rc) { $failures.Add("1.2: -tests exited $rc (a tested package that did not validate is named in MODULE.md)") }
-    $moduleMd = Join-Path $VR "validation/$modPath/MODULE.md"
-    if (-not (Test-Path -LiteralPath $moduleMd)) { Refuse "1.3: $moduleMd was not written" }
     $rows = @{}
-    foreach ($line in Get-Content -LiteralPath $moduleMd) {
-        if ($line -match '^\| `([^`]+)` \| (\d+) \| (\d+) \| `(sha256-[0-9a-f]+)`') {
-            $rows[$Matches[1]] = @{ Matched = [int]$Matches[2]; Disclosed = [int]$Matches[3]; Digest = $Matches[4] }
+    if ($noGoTests) {
+        Say "1.2-1.3  not run: $noGoTests"
+    } else {
+        # 1.2 and 1.3: the proof, and the prediction.
+        $vrArgs = @('-recurse', '-tests', '-test-action', 'all', '-platforms', $Platform, '-go2cspath', (Join-Path $T 'src'),
+            '-module-disclosures', (Join-Path $T 'src/tests/ModuleDisclosures'))
+        if ($TestTimeout) { $vrArgs += @('-test-timeout', $TestTimeout) }
+        $rc = Invoke-Watched 'VR' ($vrArgs + @($SRC, $VR)) (Join-Path $Work 'VR')
+        if ($rc) { $failures.Add("1.2: -tests exited $rc (a tested package that did not validate is named in MODULE.md)") }
+        $moduleMd = Join-Path $VR "validation/$modPath/MODULE.md"
+        if (-not (Test-Path -LiteralPath $moduleMd)) { Refuse "1.3: $moduleMd was not written" }
+        foreach ($line in Get-Content -LiteralPath $moduleMd) {
+            if ($line -match '^\| `([^`]+)` \| (\d+) \| (\d+) \| `(sha256-[0-9a-f]+)`') {
+                $rows[$Matches[1]] = @{ Matched = [int]$Matches[2]; Disclosed = [int]$Matches[3]; Digest = $Matches[4] }
+            }
         }
-    }
-    Say 'PREDICTION (the kit''s counts; a re-pack moves the digests, never the counts)'
-    foreach ($pkg in ($row.Expect.Keys + $rows.Keys | Sort-Object -Unique)) {
-        $want = $row.Expect[$pkg]
-        $got = $rows[$pkg]
-        # A timing-sensitive disclosure's other shape (ExpectOrphaned): the record must list that entry as orphaned.
-        $alternate = if ($row.ExpectOrphaned) { $row.ExpectOrphaned[$pkg] } else { $null }
-        $orphaned = @()
-        $record = Join-Path $VR "src/$pkg/go2cs_test_comparison.json"
-        if ($alternate -and (Test-Path -LiteralPath $record)) {
-            $orphaned = @((Get-Content -Raw -LiteralPath $record | ConvertFrom-Json).orphanedDisclosures | Where-Object { $_ } | ForEach-Object { $_.name })
+        Say 'PREDICTION (the kit''s counts; a re-pack moves the digests, never the counts)'
+        foreach ($pkg in ($row.Expect.Keys + $rows.Keys | Sort-Object -Unique)) {
+            $want = $row.Expect[$pkg]
+            $got = $rows[$pkg]
+            # A timing-sensitive disclosure's other shape (ExpectOrphaned): the record must list that entry as orphaned.
+            $alternate = if ($row.ExpectOrphaned) { $row.ExpectOrphaned[$pkg] } else { $null }
+            $orphaned = @()
+            $record = Join-Path $VR "src/$pkg/go2cs_test_comparison.json"
+            if ($alternate -and (Test-Path -LiteralPath $record)) {
+                $orphaned = @((Get-Content -Raw -LiteralPath $record | ConvertFrom-Json).orphanedDisclosures | Where-Object { $_ } | ForEach-Object { $_.name })
+            }
+            $wantText = if ($want) { "$($want[0]) + $($want[1])$(if ($alternate) { " or $($alternate.Counts[0]) + $($alternate.Counts[1]) with $($alternate.Orphan) orphaned" })" } else { 'no row' }
+            $gotText = if ($got) { "$($got.Matched) + $($got.Disclosed)$(if ($orphaned) { " (orphaned: $($orphaned -join ', '))" })" } else { 'no row' }
+            $prediction = if ($want -and $got) { Test-NugetgoPrediction -Want $want -Alternate $alternate -Matched $got.Matched -Disclosed $got.Disclosed -Orphaned $orphaned } else { $null }
+            $met = $prediction -and $prediction.Met
+            Say ("  {0,-6} {1}: predicted {2}, read {3}" -f $(if ($met) { 'MET' } else { 'MISSED' }), $pkg, $wantText, $gotText)
+            if (-not $met) { $failures.Add("1.3: $pkg predicted $wantText, read $gotText") }
         }
-        $wantText = if ($want) { "$($want[0]) + $($want[1])$(if ($alternate) { " or $($alternate.Counts[0]) + $($alternate.Counts[1]) with $($alternate.Orphan) orphaned" })" } else { 'no row' }
-        $gotText = if ($got) { "$($got.Matched) + $($got.Disclosed)$(if ($orphaned) { " (orphaned: $($orphaned -join ', '))" })" } else { 'no row' }
-        $prediction = if ($want -and $got) { Test-NugetgoPrediction -Want $want -Alternate $alternate -Matched $got.Matched -Disclosed $got.Disclosed -Orphaned $orphaned } else { $null }
-        $met = $prediction -and $prediction.Met
-        Say ("  {0,-6} {1}: predicted {2}, read {3}" -f $(if ($met) { 'MET' } else { 'MISSED' }), $pkg, $wantText, $gotText)
-        if (-not $met) { $failures.Add("1.3: $pkg predicted $wantText, read $gotText") }
     }
 
     # 1.4 and 1.5: the pack's input, and the binding.
-    $rc = Invoke-Watched 'PR' @('-recurse=nuget', '-platforms', $Platform, '-go2cspath', (Join-Path $T 'src'), $SRC, $PR) (Join-Path $Work 'PR')
+    # A license that asks each modified file to carry a notice that it was changed (Apache-2.0 section 4(b)) gets
+    # go2cs's -provenance notice in every converted file; the pack refuses a PR without it.
+    $provenanceArgs = @(if (Test-NugetgoProvenanceLicense $row.LicenseSpdx) { '-provenance' })
+    $rc = Invoke-Watched 'PR' (@('-recurse=nuget') + $provenanceArgs + @('-platforms', $Platform, '-go2cspath', (Join-Path $T 'src'), $SRC, $PR)) (Join-Path $Work 'PR')
     if ($rc) { Refuse "1.4: -recurse=nuget exited $rc" }
     $prModule = Join-Path $PR "src/$modPath"
     $excluded = @($row.ExcludePackage)
-    foreach ($proj in Get-ChildItem -LiteralPath $prModule -Recurse -Filter '*.csproj' | Where-Object { $_.FullName -notmatch '[\\/](bin|obj)[\\/]' }) {
-        $rel = [IO.Path]::GetRelativePath((Join-Path $PR 'src'), $proj.DirectoryName) -replace '\\', '/'
-        $digest = ([regex]::Match((Get-Content -Raw -LiteralPath $proj.FullName), '<GoInputDigest>([^<]+)</GoInputDigest>')).Groups[1].Value
-        if (-not $rows.ContainsKey($rel)) {
-            $why = if ($excluded -contains $rel) { 'excluded by the kit' } else { 'no MODULE.md row (untested, or the pack drops it)' }
-            Say "  binding  $rel  $why"
-            continue
+    # 1.5 binds each project to its MODULE.md row; a module with no Go tests has none.
+    if ($noGoTests) { Say "1.5      not run: no MODULE.md to bind" }
+    else {
+        foreach ($proj in Get-ChildItem -LiteralPath $prModule -Recurse -Filter '*.csproj' | Where-Object { $_.FullName -notmatch '[\\/](bin|obj)[\\/]' }) {
+            $rel = [IO.Path]::GetRelativePath((Join-Path $PR 'src'), $proj.DirectoryName) -replace '\\', '/'
+            $digest = ([regex]::Match((Get-Content -Raw -LiteralPath $proj.FullName), '<GoInputDigest>([^<]+)</GoInputDigest>')).Groups[1].Value
+            if (-not $rows.ContainsKey($rel)) {
+                $why = if ($excluded -contains $rel) { 'excluded by the kit' } else { 'no MODULE.md row (untested, or the pack drops it)' }
+                Say "  binding  $rel  $why"
+                continue
+            }
+            $ok = $digest -eq $rows[$rel].Digest
+            Say ("  binding  {0}  {1}" -f $rel, $(if ($ok) { 'equal' } else { "DIFFERS: PR $digest, MODULE.md $($rows[$rel].Digest)" }))
+            if (-not $ok) { $failures.Add("1.5: $rel input digest differs from MODULE.md") }
         }
-        $ok = $digest -eq $rows[$rel].Digest
-        Say ("  binding  {0}  {1}" -f $rel, $(if ($ok) { 'equal' } else { "DIFFERS: PR $digest, MODULE.md $($rows[$rel].Digest)" }))
-        if (-not $ok) { $failures.Add("1.5: $rel input digest differs from MODULE.md") }
     }
     if ($failures.Count) { Refuse "section 1 failed; no pack made:`n  $($failures -join "`n  ")" }
 
@@ -270,10 +302,14 @@ try {
     foreach ($pack in $Packs) {
         $packArgs = @('-NoProfile', '-NonInteractive', '-File', (Join-Path $T 'src/tools/nugetgo/nugetgo-pack.ps1'),
             '-ModulePath', $modPath, '-GoVersion', $goVersion, '-Revision', $Revision, '-RecurseRoot', $PR,
-            '-ValidationDir', (Join-Path $VR "validation/$modPath"), '-ClosureVersion', $Release,
+            '-ClosureVersion', $Release,
             '-Feed', $Feed, '-OutDir', (Join-Path $Work "out-$pack"),
             '-Scratch', (Join-Path $Work "scratch-$pack"), '-RepositoryUrl', $row.RepositoryUrl, '-Upstream', $row.Upstream,
             '-LicenseSpdx', $row.LicenseSpdx, '-Converter', $G)
+        # The proof: the test comparison, or for a module with no Go tests its reason (rehearsal) or its rows (release).
+        $packArgs += if (-not $noGoTests) { @('-ValidationDir', (Join-Path $VR "validation/$modPath")) }
+                     elseif ($pack -eq 'int1') { @('-UnvalidatedReason', $noGoTests) }
+                     else { @('-BehaviorProofDir', $BehaviorProofDir) }
         if ($row.UpstreamPublishes) { $packArgs += '-UpstreamPublishes' }
         # A license with no Copyright line (cobra): the row states the holder, one of the module's source-header lines.
         if ($row.Copyright) { $packArgs += @('-Copyright', $row.Copyright) }

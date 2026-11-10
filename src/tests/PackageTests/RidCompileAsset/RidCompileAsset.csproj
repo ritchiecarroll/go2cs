@@ -10,6 +10,7 @@
     <!-- The fixture touches a type only ONE flavour of go.syscall defines, chosen by the platform the
          build compiles for; the constant names that platform so Program.cs picks the right type. -->
     <_RidCompileAssetRid>$(RuntimeIdentifier)</_RidCompileAssetRid>
+    <_RidCompileAssetRid Condition="'$(_RidCompileAssetRid)' == ''">$(NETCoreSdkPortableRuntimeIdentifier)</_RidCompileAssetRid>
     <_RidCompileAssetRid Condition="'$(_RidCompileAssetRid)' == ''">$(NETCoreSdkRuntimeIdentifier)</_RidCompileAssetRid>
     <DefineConstants Condition="$(_RidCompileAssetRid.StartsWith('linux'))">$(DefineConstants);GO_FLAVOUR_LINUX</DefineConstants>
     <DefineConstants Condition="$(_RidCompileAssetRid.StartsWith('win'))">$(DefineConstants);GO_FLAVOUR_WINDOWS</DefineConstants>

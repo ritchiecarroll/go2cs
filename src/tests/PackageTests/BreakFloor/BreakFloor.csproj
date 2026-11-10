@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Consumer fixture for go.lib's break floor (src/core/golib/buildTransitive/go.lib.targets, GoCheckBreakFloor;
+       docs/phase4/DESIGN-go-break-floor.md). Driven by test-break-floor.ps1, which restores it from a chosen feed into
+       a fresh package cache; it is not a solution member and is never built by the corpus. It references the go.*
+       release under test and one revision of a converted module, hashset, so a revision built below the floor can
+       be set beside go.* packages at or above it. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="go.fmt" Version="$(GoPackageVersion)" />
+    <PackageReference Include="nugetgo.github.com.ritchiecarroll.hashset" Version="$(HashSetVersion)" />
+  </ItemGroup>
+
+  <!-- Pre-pack only: point GoLibTargets at the working-tree targets file to exercise it against an
+       already-published package set. A packed go.lib brings the same file through buildTransitive. -->
+  <Import Project="$(GoLibTargets)" Condition="'$(GoLibTargets)' != ''" />
+</Project>

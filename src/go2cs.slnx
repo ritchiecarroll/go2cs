@@ -494,6 +494,7 @@
     <Project Path="tests/Behavioral/ElidedNestedPtrComposite/ElidedNestedPtrComposite.csproj" />
     <Project Path="tests/Behavioral/ElidedPtrElemIfaceAssign/ElidedPtrElemIfaceAssign.csproj" />
     <Project Path="tests/Behavioral/ElidedStructInterfaceField/ElidedStructInterfaceField.csproj" />
+    <Project Path="tests/Behavioral/EmbedDepthMethodPromotion/EmbedDepthMethodPromotion.csproj" />
     <Project Path="tests/Behavioral/EmbedDirectiveForms/EmbedDirectiveForms.csproj" />
     <Project Path="tests/Behavioral/EmbeddedInterfaceWitness/EmbeddedInterfaceWitness.csproj" />
     <Project Path="tests/Behavioral/EmbeddedInterfaceWitness/iolike/EmbeddedInterfaceWitness.iolike.csproj" />
@@ -819,6 +820,7 @@
     <Project Path="tests/Behavioral/NamedSliceChildPkg/NamedSliceChildPkg.csproj" />
     <Project Path="tests/Behavioral/NamedSliceChildPkg/netlike/NamedSliceChildPkg.netlike.csproj" />
     <Project Path="tests/Behavioral/NamedSliceConversion/NamedSliceConversion.csproj" />
+    <Project Path="tests/Behavioral/NamedSliceGoClone/NamedSliceGoClone.csproj" />
     <Project Path="tests/Behavioral/NamedSliceNilVsEmpty/NamedSliceNilVsEmpty.csproj" />
     <Project Path="tests/Behavioral/NamedSliceOfArrayDims/NamedSliceOfArrayDims.csproj" />
     <Project Path="tests/Behavioral/NamedSlicePointerReinterpret/NamedSlicePointerReinterpret.csproj" />
@@ -1046,7 +1048,12 @@
     <Project Path="tests/Behavioral/ReinterpretPointerLifetime/ReinterpretPointerLifetime.csproj" />
     <Project Path="tests/Behavioral/RecvArrayFieldElementAddress/RecvArrayFieldElementAddress.csproj" />
     <Project Path="tests/Behavioral/RecvMapElementDeref/RecvMapElementDeref.csproj" />
+    <Project Path="tests/Behavioral/RenamedGenericQualified/RenamedGenericQualified.csproj" />
+    <Project Path="tests/Behavioral/RenamedGenericQualified/coll/RenamedGenericQualified.coll.csproj" />
     <Project Path="tests/Behavioral/RenamedReceiverBox/RenamedReceiverBox.csproj" />
+    <Project Path="tests/Behavioral/RenamedTypeAliasReexport/RenamedTypeAliasReexport.csproj" />
+    <Project Path="tests/Behavioral/RenamedTypeAliasReexport/lib/RenamedTypeAliasReexport.lib.csproj" />
+    <Project Path="tests/Behavioral/RenamedTypeAliasReexport/wrap/RenamedTypeAliasReexport.wrap.csproj" />
     <Project Path="tests/Behavioral/ReturnPointerFieldOfParam/ReturnPointerFieldOfParam.csproj" />
     <Project Path="tests/Behavioral/ReverseSortNaNOrder/ReverseSortNaNOrder.csproj" />
     <Project Path="tests/Behavioral/ReturnTupleFuncLitArg/ReturnTupleFuncLitArg.csproj" />
@@ -1178,6 +1185,7 @@
     <Project Path="tests/Behavioral/TypeAssertionSource/mid/TypeAssertionSource.mid.csproj" />
     <Project Path="tests/Behavioral/TypeConversion/TypeConversion.csproj" />
     <Project Path="tests/Behavioral/TypeConversionInterfaceParam/TypeConversionInterfaceParam.csproj" />
+    <Project Path="tests/Behavioral/TypeParamCoreAssign/TypeParamCoreAssign.csproj" />
     <Project Path="tests/Behavioral/TypeParamTypedNil/TypeParamTypedNil.csproj" />
     <Project Path="tests/Behavioral/TypedNilFuncBoundaries/TypedNilFuncBoundaries.csproj" />
     <Project Path="tests/Behavioral/TypedNilFuncMethodSet/TypedNilFuncMethodSet.csproj" />
@@ -1205,6 +1213,7 @@
     <Project Path="tests/Behavioral/UdpLoopbackRoundTrip/UdpLoopbackRoundTrip.csproj" />
     <Project Path="tests/Behavioral/UdpWriteMsgAddrPort/UdpWriteMsgAddrPort.csproj" />
     <Project Path="tests/Behavioral/Uint8SliceLiteralConversion/Uint8SliceLiteralConversion.csproj" />
+    <Project Path="tests/Behavioral/UintptrAliasAndNot/UintptrAliasAndNot.csproj" />
     <Project Path="tests/Behavioral/UintptrUnsafePointerIdiom/UintptrUnsafePointerIdiom.csproj" />
     <Project Path="tests/Behavioral/UnarySignStack/UnarySignStack.csproj" />
     <Project Path="tests/Behavioral/UncomparableEquality/UncomparableEquality.csproj" />

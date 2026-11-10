@@ -1,0 +1,16 @@
+package main
+
+import (
+	"fmt"
+
+	"repro/c23b-crosspkgbytes/lib"
+)
+
+// TS site: internal/ipc/protocol_jsonrpc.go `result = jsontext.Value("null")` (a named []byte from ANOTHER package).
+func main() {
+	var result any
+	if result == nil {
+		result = lib.Value("null")
+	}
+	fmt.Println(string(result.(lib.Value)), lib.Value(`"id"`).Len()) // Go: null 4
+}

@@ -339,7 +339,7 @@ func censusOneTarget(options Options, target string, packageFilter []string) (*r
 
 			syntax = append(syntax, file)
 
-			outputFile := platformLayoutPath(pkgCorpusDir, targetParts[0],
+			outputFile := platformLayoutPath(pkgCorpusDir, target,
 				strings.TrimSuffix(filepath.Base(filename), ".go")+".cs")
 
 			if manual, probeErr := containsManualConversionMarker(outputFile); probeErr == nil && manual {

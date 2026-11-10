@@ -267,7 +267,7 @@ public class RuntimeStopTheWorldContractTests
             {
                 // A second goroutine, so the one record cannot hold the profile whatever else is live.
                 builtin.goǃ(ProfileParked, c);
-                AwaitParked(1);
+                AwaitParked(ProfileParkedMethod, 1);
 
                 var before = GoStwPauseSampleCounts();
                 (nint n, bool ok) = Δruntime.GoroutineProfile(new slice<Δruntime.StackRecord>(1, () => new()));
@@ -286,7 +286,9 @@ public class RuntimeStopTheWorldContractTests
 
     // The FILL path, over golib's goroutine registry: every user goroutine is one record whose stack
     // is its start function's synthetic PC (the bottom frame of the traceback Go's saveg records), the
-    // world is stopped once, and worldsema is free afterwards.
+    // world is stopped once, and worldsema is free afterwards. Its children start at FillParked, which no
+    // other test starts a goroutine at: a goroutine another test released is unregistered asynchronously,
+    // and one still registered at ProfileParked read "Expected:<3>. Actual:<4>" here.
     [TestMethod]
     public void AGoroutineProfileFillRecordsEveryGoroutineByItsStartFunction()
     {
@@ -297,9 +299,9 @@ public class RuntimeStopTheWorldContractTests
             using (Goroutine.Enter())
             {
                 for (int i = 0; i < 3; i++)
-                    builtin.goǃ(ProfileParked, c);
+                    builtin.goǃ(FillParked, c);
 
-                AwaitParked(3);
+                AwaitParked(FillParkedMethod, 3);
 
                 slice<Δruntime.StackRecord> records = new(1 << 16, () => new());
 
@@ -311,7 +313,7 @@ public class RuntimeStopTheWorldContractTests
                 Assert.IsTrue(n >= 4, $"n {n}: the caller and its three parked children exist");
                 AssertMoved(before, after, gc: false, "runtime.GoroutineProfile (fill)");
 
-                uintptr parked = (uintptr)GoSyntheticPC.Of(ProfileParkedMethod);
+                uintptr parked = (uintptr)GoSyntheticPC.Of(FillParkedMethod);
                 int atParked = 0;
 
                 for (nint i = 0; i < n; i++)
@@ -320,7 +322,7 @@ public class RuntimeStopTheWorldContractTests
                         atParked++;
                 }
 
-                Assert.AreEqual(3, atParked, $"records whose stack is ProfileParked's synthetic PC, of n {n}");
+                Assert.AreEqual(3, atParked, $"records whose stack is FillParked's synthetic PC, of n {n}");
 
                 (string? firstFailure, bool secondCompleted) = GoStopTheWorldTwiceProbe(TimeoutMs);
                 Assert.IsTrue(secondCompleted, $"worldsema was left held; a stop after the fill: {firstFailure ?? "ok"}");
@@ -332,24 +334,33 @@ public class RuntimeStopTheWorldContractTests
         }
     }
 
-    // NoInlining: this frame IS the start function the fill arm identifies its records by.
+    // NoInlining: this frame IS the start function a test identifies its goroutines by (the one-record arm's).
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void ProfileParked(channel<int> c) => c.Receive();
 
-    private static MethodBase ProfileParkedMethod =>
-        typeof(RuntimeStopTheWorldContractTests).GetMethod(nameof(ProfileParked), BindingFlags.NonPublic | BindingFlags.Static)!;
+    // The fill arm's own start function, the same shape as ProfileParked: no other test starts a
+    // goroutine here, so the registry entries and profile records at it are that test's children only.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void FillParked(channel<int> c) => c.Receive();
 
-    // Waits until golib's registry holds `count` goroutines started at ProfileParked, so the profile
-    // taken next cannot race their registration.
-    private static void AwaitParked(int count)
+    private static MethodBase ProfileParkedMethod => StartMethod(nameof(ProfileParked));
+
+    private static MethodBase FillParkedMethod => StartMethod(nameof(FillParked));
+
+    private static MethodBase StartMethod(string name) =>
+        typeof(RuntimeStopTheWorldContractTests).GetMethod(name, BindingFlags.NonPublic | BindingFlags.Static)!;
+
+    // Waits until golib's registry holds `count` goroutines started at `start`, so the profile taken next
+    // cannot race their registration.
+    private static void AwaitParked(MethodBase start, int count)
     {
-        RuntimeMethodHandle parked = ProfileParkedMethod.MethodHandle;
+        RuntimeMethodHandle parked = start.MethodHandle;
         int Live() => Goroutine.ProfileSnapshot().Count(e => e.Function is not null && e.Function.MethodHandle == parked);
 
         for (int i = 0; i < 600 && Live() < count; i++)
             Thread.Sleep(5);
 
-        Assert.AreEqual(count, Live(), "goroutines started at ProfileParked");
+        Assert.AreEqual(count, Live(), $"goroutines started at {start.Name}");
     }
     [TestMethod]
     public void WriteHeapDumpWritesAMinimalDumpAndRecordsAnOtherPause()

@@ -1,0 +1,15 @@
+package main
+
+// TS site: internal/project/dirty box.go/map.go/syncmap.go `fn(b)` inside a generic method.
+type Value[T any] interface{ Value() T }
+
+type Box[T any] struct{ v T }
+
+func (b *Box[T]) Value() T { return b.v }
+
+func (b *Box[T]) Locked(fn func(Value[T])) { fn(b) }
+
+func main() {
+	b := &Box[int]{v: 7}
+	b.Locked(func(v Value[int]) { println(v.Value()) }) // Go: 7
+}

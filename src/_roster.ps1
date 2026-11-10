@@ -221,6 +221,24 @@ function Get-SweepTargetGoos {
     return 'windows'
 }
 
+<#
+.SYNOPSIS
+    The GOARCH of the corpus flavor this host validates -- the arch that flavor was CONVERTED at.
+.DESCRIPTION
+    `_paths.ps1` pins $env:GoTargetArch only where the host's flavor was converted at an arch other
+    than `amd64`, the value every L3 csproj takes when the property is EMPTY; so the environment
+    variable wins where one is set, and 'amd64' is what an unset one means. It is never the host's own
+    arch: an Apple-silicon host is served by the darwin/amd64 flavor and reports 'amd64' (S1b,
+    2026-11-09).
+#>
+function Get-SweepTargetGoarch {
+    if (-not [string]::IsNullOrWhiteSpace($env:GoTargetArch)) {
+        return $env:GoTargetArch.Trim().ToLowerInvariant()
+    }
+
+    return 'amd64'
+}
+
 # The mac RID this sweep's converted host runs as, for a darwin segment's per-RID note (Get-RosterRowExpectation -Rid):
 # os-matrix's RID when the leg sets it, otherwise the host's architecture on macOS. Empty off darwin, where no note
 # applies, so windows and linux resolve exactly as before.

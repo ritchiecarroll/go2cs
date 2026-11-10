@@ -1667,6 +1667,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				rhsExpr = narrowedChan
 			}
 
+			// A slice- or map-cored type parameter assigned to its core type (see coreTypeParamValue).
+			if materialized := v.coreTypeParamValue(v.info.TypeOf(lhs), v.info.TypeOf(rhs), rhsExpr); materialized != "" {
+				rhsExpr = materialized
+			}
+
 			// Narrow-integer arithmetic RHS assigned to a narrow LHS needs a cast back to the LHS
 			// type (see narrowArithmeticCastType). The existing bitwise-assign / `&^=` wrappers take
 			// precedence (their own cast already applies).
@@ -1790,13 +1795,22 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					// to hold, the re-alias would throw on it.
 					derefAccessor := NilDeferringDerefAccessor
 
-					// In a for-loop POST, the re-alias cannot follow the box-repoint in the
-					// single post slot (`for(…; Ꮡscope = scope.Outer scope = ref …)` is a syntax
-					// error) — stash it for visitForStmt to inject at the top of the loop body.
-					if v.inForPost {
-						v.forPostReAlias += fmt.Sprintf("%s = ref %s.%s;", derefExpr, leftExpr, derefAccessor)
-					} else {
-						result.WriteString(fmt.Sprintf(" %s = ref %s.%s;", derefExpr, leftExpr, derefAccessor))
+					reAlias := fmt.Sprintf("%s = ref %s.%s", derefExpr, leftExpr, derefAccessor)
+
+					// A for-loop INIT or POST clause holds no `;`, so the pair cannot be two statements
+					// there. It stays together in the header as a C# expression list, `Ꮡn = n.Parent,
+					// n = ref Ꮡn.DerefOrNull()`, which is Go's order: the alias is current before the
+					// condition runs, on a `continue`, and after the loop. (Injected at the top of the
+					// loop body instead, as the post's re-alias was, the condition read the PREVIOUS
+					// node through the stale alias.) The post's re-alias is handed to visitForStmt,
+					// which appends it to the clause, or to the lowered post when the post spills.
+					switch {
+					case v.inForPost:
+						v.forPostReAlias = append(v.forPostReAlias, reAlias)
+					case format.forInit:
+						result.WriteString(", " + reAlias)
+					default:
+						result.WriteString(" " + reAlias + ";")
 					}
 				}
 			}
@@ -2263,6 +2277,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					// the RHS type, so chanDirCargoName finds no direction and this is a no-op.
 					if narrowedChan := v.chanDirNarrowedValue(v.info.TypeOf(lhs), v.info.TypeOf(rhs), rhsExpr); narrowedChan != "" {
 						rhsExpr = narrowedChan
+					}
+
+					// A slice- or map-cored type parameter assigned to its core type (see coreTypeParamValue).
+					if materialized := v.coreTypeParamValue(v.info.TypeOf(lhs), v.info.TypeOf(rhs), rhsExpr); materialized != "" {
+						rhsExpr = materialized
 					}
 
 					// Give a discarded method group or lambda the target type C# cannot infer. The

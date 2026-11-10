@@ -696,12 +696,25 @@ partial class runtime_package
     private static bool sigIgnoreInstallsKernelDisposition(uint32 sig)
         => sig == 10 || sig == 12 || sig == 20 || sig == 21 || sig == 22;
 
-    // linux/amd64 syscall numbers for Go's own raise (tgkill on the calling thread) and exit
-    // (exit_group), through libc's syscall(2) as the rtsigprocmask seam does.
-    private const long SYS_getpid = 39;
-    private const long SYS_gettid = 186;
-    private const long SYS_tgkill = 234;
-    private const long SYS_exit_group = 231;
+    // The syscall numbers for Go's own raise (tgkill on the calling thread) and exit (exit_group),
+    // through libc's syscall(2) as the rtsigprocmask seam does. They differ per arch (S3 site 3;
+    // docs/phase4/DATA-la64-s3-census.md §2): amd64's exit_group, 231, is munlockall at arm64, which
+    // returns 0 and lets a "dying" process carry on. runtime sits below the syscall flavour, so it
+    // cannot read the flavour's zsysnum; the arch switch is the census's form (a), as
+    // golib/runtime/ThreadCpuTime.cs does it. null for an arch with no mapping. No static field holds
+    // the answer: a throwing initializer here would poison runtime_package.
+    internal static (long getpid, long gettid, long tgkill, long exitGroup)? dieNumbersFor(Architecture arch) => arch switch
+    {
+        Architecture.X64 => (39, 186, 234, 231),
+        Architecture.Arm64 => (172, 178, 131, 94),
+        _ => null,
+    };
+
+    /// <summary>
+    /// GolibTests' probe for dieFromSignal's per-arch numbers (S3 site 3): dieNumbersFor's answer, or
+    /// null for an unmapped arch. Pure: no syscall.
+    /// </summary>
+    public static (long getpid, long gettid, long tgkill, long exitGroup)? GoDieNumbersProbe(Architecture arch) => dieNumbersFor(arch);
 
     [DllImport("libc", EntryPoint = "syscall", SetLastError = true)]
     private static extern long sys_syscall(long number, long a1, long a2, long a3);
@@ -741,7 +754,22 @@ partial class runtime_package
         atomic.Store(ᏑhandlingSig.at<uint32>((nint)(sig)), 0);
 
         sys_signal((int)sig, SIG_DFL);
-        sys_syscall(SYS_tgkill, sys_syscall(SYS_getpid, 0, 0, 0), sys_syscall(SYS_gettid, 0, 0, 0), sig);
+
+        // An arch with no mapping cannot raise by number. It is refused, never misread, and the process
+        // still dies with Go's own fallback status: exactly what Go does below when the signal does not
+        // end it.
+        var numbers = dieNumbersFor(RuntimeInformation.ProcessArchitecture);
+
+        if (numbers is null)
+        {
+            System.Console.Error.WriteLine("fatal: dieFromSignal: no tgkill/exit_group numbers for " + RuntimeInformation.ProcessArchitecture + "; exiting with status 2");
+            System.Environment.Exit(2);
+            return;
+        }
+
+        var (sysGetpid, sysGettid, sysTgkill, sysExitGroup) = numbers.Value;
+
+        sys_syscall(sysTgkill, sys_syscall(sysGetpid, 0, 0, 0), sys_syscall(sysGettid, 0, 0, 0), sig);
 
         // The signal is thread-directed and unblocked, so the default action is taken before tgkill
         // returns; the yields are Go's own allowance for a system that delivers it late.
@@ -750,6 +778,6 @@ partial class runtime_package
         System.Threading.Thread.Yield();
 
         // If we are still somehow running, just exit with the wrong status.
-        sys_syscall(SYS_exit_group, 2, 0, 0);
+        sys_syscall(sysExitGroup, 2, 0, 0);
     }
 }

@@ -48,9 +48,9 @@ func markSeen(p *node, seen map[*node]bool) int {
 
 // walkChain mirrors go/ast resolve.go's scope-chain walk: a deref-aliased pointer PARAMETER
 // repointed in the for-loop POST (`for ; p != nil; p = p.next`). The repoint expands to a
-// box-repoint (`Ꮡp = p.next`) PLUS a value re-alias (`p = ref Ꮡp.DerefOrNil()`); the two
-// cannot share the single for-post slot, so the converter keeps the box-repoint in the post
-// and injects the re-alias at the TOP of the loop body (otherwise CS1003/CS1525).
+// box-repoint (`Ꮡp = p.next`) PLUS a value re-alias (`p = ref Ꮡp.DerefOrNull()`); a clause
+// holds no `;`, so the converter writes the pair as one expression list in the post
+// (`Ꮡp = p.next, p = ref Ꮡp.DerefOrNull()`), which keeps the alias current for the condition.
 func walkChain(p *node) int {
 	count := 0
 	for ; p != nil; p = p.next {
@@ -91,6 +91,137 @@ func collect(list []*node, p *node) []*node {
 	return list
 }
 
+// The functions below repoint a pointer PARAMETER inside a for CLAUSE. Each repoint is a box-repoint plus a
+// re-alias of the value var, and Go runs the clause as one step: the condition, a `continue` and any read after
+// the loop all see the NEW pointer.
+
+// firstAtLeast reads through the pointer in the CONDITION, straight after the post has repointed it.
+func firstAtLeast(p *node, limit int) int {
+	steps := 0
+	for ; p != nil && p.val < limit; p = p.next {
+		steps++
+	}
+	if p == nil {
+		return -steps
+	}
+	return steps
+}
+
+// countOdd reaches the post through a `continue`.
+func countOdd(p *node) int {
+	count := 0
+	for ; p != nil; p = p.next {
+		if p.val%2 == 0 {
+			continue
+		}
+		count++
+	}
+	return count
+}
+
+// lastVal has a condition that only dereferences, and reads the pointer again AFTER the loop.
+func lastVal(p *node) int {
+	depth := 0
+	for ; p.next != nil; p = p.next {
+		depth++
+	}
+	return depth*10 + p.val
+}
+
+// after repoints the parameter in the INIT (the tree-walker idiom `for n = n.Parent; n != nil; n = n.Parent`);
+// the condition reads through it at once.
+func after(p *node, limit int) int {
+	steps := 0
+	for p = p.next; p != nil && p.val < limit; p = p.next {
+		steps++
+	}
+	if p == nil {
+		return -steps - 1
+	}
+	return steps*10 + p.val
+}
+
+// initOnly repoints in the init and again in the body; the loop has no post.
+func initOnly(p *node) int {
+	sum := 0
+	for p = p.next; p != nil; {
+		sum += p.val
+		p = p.next
+	}
+	return sum
+}
+
+// from assigns one pointer parameter from another in the init.
+func from(a, b *node) int {
+	sum := 0
+	for a = b; a != nil; a = a.next {
+		sum += a.val
+	}
+	return sum
+}
+
+// swapWalk repoints two parameters at once, in the init and in the post.
+func swapWalk(a, b *node) int {
+	sum := 0
+	for a, b = b, a; a != nil && b != nil; a, b = a.next, b.next {
+		sum += a.val*10 + b.val
+	}
+	return sum
+}
+
+// nested runs two loops with an init on the same parameter; a labeled continue reaches the outer post.
+func nested(p, start *node) int {
+	sum := 0
+outer:
+	for p = start; p != nil; p = p.next {
+		m := p
+		for p = p.next; p != nil; p = p.next {
+			if p.val == 4 {
+				p = m
+				continue outer
+			}
+			sum += p.val
+		}
+		p = m
+		sum += 100
+	}
+	return sum
+}
+
+func pair(p *node) (*node, int) { return p.next, p.val }
+
+func pick(n *node, k int) *node {
+	if k < 0 {
+		return nil
+	}
+	return n
+}
+
+// spillWalk's post takes a multi-value call as its arguments, so the post is lowered out of the header to the end
+// of the loop body; the repoint and its re-alias go there together, ahead of the condition.
+func spillWalk(p *node, limit int) int {
+	steps := 0
+	for ; p != nil && p.val < limit; p = pick(pair(p)) {
+		steps++
+	}
+	if p == nil {
+		return -steps
+	}
+	return steps*10 + p.val
+}
+
+// spillSkip reaches the lowered post through a `continue`.
+func spillSkip(p *node) int {
+	count := 0
+	for ; p != nil; p = pick(pair(p)) {
+		if p.val%2 == 0 {
+			continue
+		}
+		count++
+	}
+	return count
+}
+
 func main() {
 	a := &node{val: 1}
 	b := &node{val: 2}
@@ -122,4 +253,19 @@ func main() {
 	list = collect(list, b)
 	a.val = 11 // prove the collected pointers alias the original nodes
 	fmt.Println("collect:", list[0].val, list[1].val) // 11 2
+
+	// A nil-terminated chain 1 -> 4 -> 7 for the for-clause repoints.
+	k7 := &node{val: 7}
+	k4 := &node{val: 4, next: k7}
+	k1 := &node{val: 1, next: k4}
+	fmt.Println("cond:", firstAtLeast(k1, 7), firstAtLeast(k1, 4), firstAtLeast(k1, 9), firstAtLeast(nil, 1)) // 2 1 -3 0
+	fmt.Println("continue:", countOdd(k1), countOdd(k4), countOdd(nil))                                       // 2 1 0
+	fmt.Println("after loop:", lastVal(k1), lastVal(k4), lastVal(k7))                                         // 27 17 7
+	fmt.Println("init:", after(k1, 7), after(k1, 4), after(k1, 9), after(k7, 1))                              // 17 4 -3 -1
+	fmt.Println("init only:", initOnly(k1), initOnly(k7))                                                     // 11 0
+	fmt.Println("init from:", from(nil, k1), from(k1, nil))                                                   // 12 0
+	fmt.Println("tuple:", swapWalk(k1, k4), swapWalk(k7, k1))                                                 // 115 17
+	fmt.Println("nested:", nested(nil, k1), nested(k1, k7))                                                   // 207 100
+	fmt.Println("lowered post:", spillWalk(k1, 7), spillWalk(k1, 4), spillWalk(k1, 9), spillWalk(nil, 1))     // 27 14 -3 0
+	fmt.Println("lowered continue:", spillSkip(k1), spillSkip(k4), spillSkip(nil))                            // 2 1 0
 }

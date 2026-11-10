@@ -218,6 +218,19 @@ content differences). Seeding, the marker gate, the overlay rule and the phantom
      that day of a fix being ordered for code that already handles the case. READ THE SITE BEFORE ORDERING
      A FIX FOR A SYMPTOM. Recorded with it: an arm with no readable input ("present and NOT converted this
      run") is documented AT THE SITE, never coded — the unfalsifiable-guard shape, refused. -->
+- **A change that MOVES the corpus layout (where files live, not what they say) runs every reader of the layout before
+  it is posted**: the FULL converter suite (not repoguard alone), GolibTests on every flavour, the comment census and
+  the behavioral harness. Any reader that enumerates a fixed folder set (`""`, `windows`, `linux`, `darwin`) goes blind
+  to a re-homed file, and a blind reader reads GREEN or reads FALLING counts, never red. Grep for such lists first.
+  A count that falls under a byte-identical rename is a blind reader until proven otherwise.
+  <!-- 2026-11-10, linux/arm64 S2 (G, claude/g-la64-s2 780cb9b34f: 74 linux-arm64/ files, 271/271 renames, 0 bytes
+       changed). Before posting, the rehearsal's full suite found 8 converter guards that knew the layout only as
+       "own directory, or its GOOS folder", where repoguard alone was green. After posting, i9 read S2 itself as the
+       control and found three more readers: GolibTests SkipCountedWalkerFrameTests (DeclaringFiles scans only
+       "", windows, linux, darwin; runtime/traceback.cs moved to amd64/, so "no declaration of runtime.gcallers");
+       TestCommentParityCensus (21 FELL lines, e.g. body:extra:unexplained 2502 -> 2474); and a syscall linux
+       sweep moving 42 + 17 to 50 + 9 under the same renames (mechanism owed by S2). COORD kept the seat out of
+       batch 282's first cut until all of them were scored. -->
 
 ## cgo: the corpus is emitted at `CGO_ENABLED=0`
 

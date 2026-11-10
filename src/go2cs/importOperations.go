@@ -922,7 +922,7 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 	// platform THIS conversion is emitting for. Flat wins when the dependency's metadata is shared,
 	// which it is for the overwhelming majority of the corpus; see platformPackageInfoPath for what
 	// asking flat unconditionally would silently cost.
-	packageInfoFile := platformPackageInfoPath(info.TargetDir, goosOfTarget(options.targetPlatform))
+	packageInfoFile := platformPackageInfoPath(info.TargetDir, options.targetPlatform)
 
 	packageLock.Lock()
 

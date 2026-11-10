@@ -1005,6 +1005,28 @@ func (v *Visitor) shiftCountNeedsWiden(expr ast.Expr) bool {
 // untyped-const cast is `(uint8)c`, not `(Tag)c`: an UntypedInt wrapper converts to the basic type
 // in one step, then the basic type converts to the named type implicitly — `(Tag)c` would need two
 // user-defined conversions and is rejected (CS0030). Basic types are their own underlying.
+// aliasOfBasic reports whether t is an alias whose target is a basic type (`type ui = uintptr`).
+func aliasOfBasic(t types.Type) bool {
+	if _, isAlias := t.(*types.Alias); !isAlias {
+		return false
+	}
+
+	_, isBasic := types.Unalias(t).(*types.Basic)
+
+	return isBasic
+}
+
+// namedOverWideUnsigned reports whether t is a NAMED type (not an alias) over uint64, uint or uintptr.
+func (v *Visitor) namedOverWideUnsigned(t types.Type) bool {
+	if _, isNamed := types.Unalias(t).(*types.Named); !isNamed {
+		return false
+	}
+
+	basic, ok := t.Underlying().(*types.Basic)
+
+	return ok && (basic.Kind() == types.Uint64 || basic.Kind() == types.Uint || basic.Kind() == types.Uintptr)
+}
+
 func (v *Visitor) concreteNumericCSType(t types.Type) string {
 	if t == nil {
 		return ""
@@ -2205,7 +2227,9 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 						// (a bare `(arenaIdx)(1 << k)` is CS0030).
 						underlyingCS := v.getCSharpTypeName(basic)
 						resolvedCS := convertToCSTypeName(v.getAliasQualifiedTypeName(shiftType, false))
-						isNamed := resolvedCS != underlyingCS
+						// An alias of a basic type (`type ui = uintptr`) IS that type: only its spelling differs, so it is
+						// not routed like a named type (TS readiness C19).
+						isNamed := resolvedCS != underlyingCS && !aliasOfBasic(shiftType)
 
 						if isWideShiftType(underlyingCS) {
 							// A type that does not promote to `int` in a C# shift (uint/ulong/long/
@@ -2266,7 +2290,7 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 
 						// A NAMED narrow type routes through its underlying (see above) — the
 						// `[GoType]` conversion accepts its exact underlying, never C# `int`.
-						if resolvedCS != underlyingCS {
+						if resolvedCS != underlyingCS && !aliasOfBasic(tv.Type) {
 							shiftExpr = fmt.Sprintf("(%s)%s", resolvedCS, shiftExpr)
 						}
 					}
@@ -2289,8 +2313,14 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 			binaryType := v.info.Types[binaryExpr].Type
 			var binaryTypeName string
 
+			// The width predicates below decide by TYPE, so they read through an alias: `type ui = uintptr` (zeebo/xxh3)
+			// names uintptr itself, and `ui(l) &^ 15` needs the uintptr complement cast (TS readiness C19). The casts
+			// keep the spelling Go wrote, binaryTypeName. A NAMED type is a distinct type and keeps its own name here.
+			var widthTypeName string
+
 			if binaryType != nil {
 				binaryTypeName = convertToCSTypeName(v.getAliasQualifiedTypeName(binaryType, false))
+				widthTypeName = convertToCSTypeName(v.getAliasQualifiedTypeName(types.Unalias(binaryType), false))
 			}
 
 			// A named untyped-const operand (UntypedInt wrapper) resolves to `int` under a
@@ -2315,7 +2345,7 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 				// go/types, gccgoimporter) that draw no warning. A native-int result is skipped: the
 				// block below already casts its computed operands, and a second cast doubled it.
 				castPrefix := "(" + operandCast + ")"
-				nativeResult := binaryTypeName == "nuint" || binaryTypeName == "nint" || binaryTypeName == "uintptr"
+				nativeResult := widthTypeName == "nuint" || widthTypeName == "nint" || widthTypeName == "uintptr"
 
 				if !nativeResult && v.isUntypedNamedConstRef(binaryExpr.Y) && v.isUntypedConstShift(binaryExpr.X) && !strings.HasPrefix(leftOperand, castPrefix) {
 					leftOperand = castPrefix + leftOperand
@@ -2347,9 +2377,18 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 			// `uint64`/`nuint`/`uintptr` are the three unsigned 64-bit results this file already
 			// groups (see the constant-fold arm); the other two carry the same cast in the
 			// native-int block below, and this completes the set.
-			if binaryTypeName == "uint64" && binaryExpr.Op == token.AND_NOT {
+			//
+			// A NAMED type over uint64, uint or uintptr has the same gap (`nw(x) &^ 0xFF` was `nw & ~0xFF`, CS0019:
+			// the wrapper has no `&` with `int`, and a negative `int` converts to none of its widths). It takes
+			// concreteNumericCSType's cast: the underlying for uint64 and uint, after which the wrapper's implicit
+			// conversion binds, and the named type itself for uintptr (its UntypedInt bridge takes the literal).
+			if binaryExpr.Op == token.AND_NOT {
 				if _, isLit := binaryExpr.Y.(*ast.BasicLit); isLit {
-					rightOperand = fmt.Sprintf("(%s)%s", binaryTypeName, rightOperand)
+					if widthTypeName == "uint64" {
+						rightOperand = fmt.Sprintf("(%s)%s", binaryTypeName, rightOperand)
+					} else if v.namedOverWideUnsigned(binaryType) {
+						rightOperand = fmt.Sprintf("(%s)%s", v.concreteNumericCSType(binaryType), rightOperand)
+					}
 				}
 			}
 
@@ -2389,7 +2428,7 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 			}
 
 			if operandCast := v.concreteNumericCSType(binaryType); operandCast != "" &&
-				binaryTypeName != "nuint" && binaryTypeName != "nint" && binaryTypeName != "uintptr" {
+				widthTypeName != "nuint" && widthTypeName != "nint" && widthTypeName != "uintptr" {
 				if arithConstOperand(binaryExpr.X) {
 					leftOperand = castOf(operandCast, leftOperand)
 				}
@@ -2405,7 +2444,7 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 			// not a C# compile-time constant), so `nuint & ((1<<k)-1)` is `nuint & int` → CS0019. Cast
 			// such an operand to the native result type. A bare literal is left alone (C#'s
 			// constant-conversion implicitly fits it), and a named untyped-const ref is handled above.
-			if binaryTypeName == "nuint" || binaryTypeName == "nint" || binaryTypeName == "uintptr" {
+			if widthTypeName == "nuint" || widthTypeName == "nint" || widthTypeName == "uintptr" {
 				if v.isComputedConstOperand(binaryExpr.X) || v.isLargeIntLiteralOperand(binaryExpr.X) {
 					leftOperand = fmt.Sprintf("(%s)%s", binaryTypeName, leftOperand)
 				}
@@ -2425,6 +2464,12 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 				andNotConst := binaryExpr.Op == token.AND_NOT && yConst
 
 				if v.isComputedConstOperand(binaryExpr.Y) || v.isLargeIntLiteralOperand(binaryExpr.Y) || andNotConst {
+					// A constant that leads with a sign is parenthesized: `(nint)-16` parses as `nint` MINUS 16
+					// (CS0119), since the width type is a using-alias, not a C# keyword (the shift casts do the same).
+					if strings.HasPrefix(rightOperand, "-") || strings.HasPrefix(rightOperand, "+") {
+						rightOperand = "(" + rightOperand + ")"
+					}
+
 					rightOperand = fmt.Sprintf("(%s)%s", binaryTypeName, rightOperand)
 				}
 			}

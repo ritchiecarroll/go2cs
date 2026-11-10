@@ -1,3 +1,8 @@
+global using A1 = go.main_package.pair<nint>;
+global using A2 = go.main_package.pair<nint>;
+global using LA = go.go.instlib_package.Pair<go.@string>;
+global using AS = go.main_package.S;
+
 namespace go;
 
 using fmt = fmt_package;
@@ -33,13 +38,25 @@ partial struct C<V> /*P<V>*/;
 
 partial struct E /*C<bool>*/;
 
+partial struct DA /*pair<nint>*/;
+
+partial struct DB /*pair<nint>*/;
+
+partial struct DX /*global::go.go.instlib_package.Pair<@string>*/;
+
+partial struct DY /*global::go.go.instlib_package.Pair<@string>*/;
+
+partial struct DL /*global::go.go.instlib_package.Pair<@string>*/;
+
+partial struct DS /*S*/;
+
 partial struct S {
     public nint A;
     public nint B;
 }
 
 internal static void Main() {
-    var q = new Q(new pair<nint>(A: 3, B: 4));
+    ref var q = ref heap<Q>(new Q(new pair<nint>(A: 3, B: 4)), out var Ꮡq);
     q.B++;
     var qs = slice<Q>([new(new pair<nint>(A: 5)), new(new pair<nint>(B: 6))]);
     ref var p = ref heap<P<@string>>(new P<@string>(new pair<@string>(A: "s", B: 1)), out var Ꮡp);
@@ -67,6 +84,28 @@ internal static void Main() {
     var s = (S)q;
     var sp = (S)new P<nint>(new pair<nint>(A: 14));
     fmt.Println(back.A, eb.B, s.A, s.B, sp.A, ((Q)s).B, ((P<nint>)s).A);
+
+    ref var da = ref heap<DA>(new DA(new pair<nint>(A: 15, B: 16)), out var Ꮡda);
+    da.B++;
+    var db = new DB(new pair<nint>(A: 18));
+    var das = slice<DA>([new(new pair<nint>(A: 19)), new(new pair<nint>(B: 20))]);
+    fmt.Println(da.A, da.B, db.A, db.B, das[0].A, das[1].B, ((pair<nint>)da).First(), ((A1)db).First(), ((DA)new A2(B: 21)).B, ((S)da).B, ((DB)s).A);
+
+    var dx = new DX(new lib.Pair<@string>(A: "x", B: 22));
+    var dy = new DY(new lib.Pair<@string>(A: "y"));
+    dy.B = dx.B + 1;
+    var dl = new DL(new lib.Pair<@string>(A: "l", B: 24));
+    fmt.Println(dx.A, dx.B, dy.A, dy.B, dl.A, dl.B, ((lib.Pair<@string>)dx).First(), ((instlibꓸAlias)dy).First(), ((LA)dl).First(), ((DX)new instlibꓸAlias2(B: 25)).B);
+
+    var ds = new DS(new S(A: 26, B: 27));
+    ds.A++;
+    fmt.Println(ds.A, ds.B, ((S)ds).B, ((AS)ds).A, ((DS)s).A, ((Q)ds).B);
+
+    var pq = Ꮡq.Reinterpret<Q, pair<nint>>();
+    pq.B++;
+    var pda = Ꮡda.Reinterpret<DA, A1>();
+    pda.B++;
+    fmt.Println(q.B, (pq.Reinterpret<pair<nint>, Q>()).Value.A, pq.First(), da.B, (pda.Reinterpret<A1, DA>()).Value.A, pda.First());
 }
 
 } // end main_package

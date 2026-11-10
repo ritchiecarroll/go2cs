@@ -1,0 +1,14 @@
+package main
+
+// Control: the same shape without the alias, which go2cs refuses with GO2CS2004.
+type G[T any] struct {
+	v T
+	n int
+}
+
+type D G[int]
+
+func main() {
+	d := D{v: 7, n: 2}
+	println(d.v + d.n) // Go: 9
+}

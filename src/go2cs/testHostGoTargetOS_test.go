@@ -18,6 +18,7 @@
 package main
 
 import (
+	"slices"
 	"strings"
 	"testing"
 )
@@ -60,6 +61,47 @@ func TestTestHostBuildWithoutATargetLeavesTheCsprojDefault(t *testing.T) {
 
 	if got := targetOSProperties(args); len(got) != 0 {
 		t.Errorf("no target platform, yet the build carries %v", got)
+	}
+
+	for _, arg := range args {
+		if strings.HasPrefix(arg, "-p:GoTargetArch=") {
+			t.Errorf("no target platform, yet the build carries %s", arg)
+		}
+	}
+}
+
+// The GOARCH beside the GOOS is the corpus FLAVOUR's (the arch the corpus was converted at), never the conversion
+// target's or the host's, and it rides on the command right after -p:GoTargetOS= so an inherited GoTargetArch cannot
+// select another flavour's folders. darwin/arm64 builds against darwin's one amd64 flavour, and linux/arm64 against
+// linux/amd64's until the universe carries linux/arm64 (S1b, 2026-11-09).
+func TestTestHostBuildCarriesTheFlavourGOARCH(t *testing.T) {
+	cases := []struct {
+		universe []string
+		target   string
+		want     []string
+	}{
+		{universeToday, "windows/amd64", []string{"-p:GoTargetOS=windows", "-p:GoTargetArch=amd64"}},
+		{universeToday, "darwin/amd64", []string{"-p:GoTargetOS=darwin", "-p:GoTargetArch=amd64"}},
+		{universeToday, "darwin/arm64", []string{"-p:GoTargetOS=darwin", "-p:GoTargetArch=amd64"}},
+		{universeToday, "linux/arm64", []string{"-p:GoTargetOS=linux", "-p:GoTargetArch=amd64"}},
+		{universeArm, "linux/arm64", []string{"-p:GoTargetOS=linux", "-p:GoTargetArch=arm64"}},
+		{universeArm, "darwin/arm64", []string{"-p:GoTargetOS=darwin", "-p:GoTargetArch=amd64"}},
+		{universeToday, "", nil},
+	}
+
+	for _, c := range cases {
+		if got := testHostPlatformProperties(mustPlatformLattice(c.universe), c.target); !slices.Equal(got, c.want) {
+			t.Errorf("over %v, testHostPlatformProperties(%q) = %v, want %v", c.universe, c.target, got, c.want)
+		}
+	}
+
+	for _, config := range []string{"Release", "Debug"} {
+		args := publishTestHostArgs("/out", "/out/p.tests.csproj", Options{targetPlatform: "darwin/arm64", testConfig: config, go2csPath: "/repo/src"})
+		at := slices.Index(args, "-p:GoTargetOS=darwin")
+
+		if at < 0 || at+1 >= len(args) || args[at+1] != "-p:GoTargetArch=amd64" {
+			t.Errorf("%s host build for darwin/arm64 does not carry -p:GoTargetArch=amd64 right after -p:GoTargetOS=darwin: %v", config, args)
+		}
 	}
 }
 

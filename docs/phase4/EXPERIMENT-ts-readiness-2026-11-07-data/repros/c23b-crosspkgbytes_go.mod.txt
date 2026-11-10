@@ -1,0 +1,3 @@
+module repro/c23b-crosspkgbytes
+
+go 1.26

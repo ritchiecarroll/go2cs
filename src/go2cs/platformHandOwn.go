@@ -84,19 +84,16 @@ func platformHandOwnPrincipals(logical string) []string {
 	return principals
 }
 
-// platformHandOwnDestinations applies L3's placement rule to a principal's emitter set: shared by
-// every target means one flat copy, anything less means one copy per emitting target's GOOS folder.
+// platformHandOwnDestinations applies the layout lattice's placement rule (platformLattice.homes) to
+// a principal's emitter set: shared by every target means one flat copy, anything less the key
+// folders that set is homed at — over one target per GOOS, one copy per emitting target's GOOS folder.
 func platformHandOwnDestinations(coreDir string, pkg string, targets []string, emitters []string) []string {
 	packageDir := filepath.Join(coreDir, filepath.FromSlash(pkg))
+	folders := mustPlatformLattice(targets).homeFolders(emitters)
+	destinations := make([]string, 0, len(folders))
 
-	if len(emitters) == len(targets) {
-		return []string{packageDir}
-	}
-
-	destinations := make([]string, 0, len(emitters))
-
-	for _, target := range emitters {
-		destinations = append(destinations, filepath.Join(packageDir, goosOfTarget(target)))
+	for _, folder := range folders {
+		destinations = append(destinations, filepath.Join(packageDir, folder))
 	}
 
 	return destinations
@@ -232,13 +229,16 @@ func resolveHandOwnPlacements(coreDir string, targets []string, emissions []*pla
 }
 
 // handOwnCandidateDirs lists every directory a package's hand-owned file could be sitting in — flat,
-// or any target's GOOS folder. The merge writes to the destinations and clears the rest.
+// or any key folder of the lattice, admitted or not. The merge writes to the destinations and clears
+// the rest. A nested package named like a key is not one of them: its files are its own.
 func handOwnCandidateDirs(coreDir string, pkg string, targets []string) []string {
 	packageDir := filepath.Join(coreDir, filepath.FromSlash(pkg))
 	dirs := []string{packageDir}
 
-	for _, target := range targets {
-		dirs = append(dirs, filepath.Join(packageDir, goosOfTarget(target)))
+	for _, folder := range mustPlatformLattice(targets).candidateFolders() {
+		if !isNestedPackageFolder(packageDir, folder) {
+			dirs = append(dirs, filepath.Join(packageDir, folder))
+		}
 	}
 
 	return dirs

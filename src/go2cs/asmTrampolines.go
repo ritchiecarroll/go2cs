@@ -420,7 +420,7 @@ func asmBuildContext(sourceDir string, targetPlatform string, buildTags []string
 	context.GOOS, context.GOARCH, _ = strings.Cut(targetPlatform, "/")
 	context.BuildTags = append([]string(nil), buildTags...)
 	context.ReleaseTags = loaderReleaseTags(sourceDir)
-	context.ToolTags = loaderToolTags(sourceDir)
+	context.ToolTags = loaderToolTags(sourceDir, targetPlatform)
 	context.CgoEnabled = slices.Contains(buildTags, "cgo")
 
 	return context

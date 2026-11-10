@@ -1,0 +1,3 @@
+module repro/c22renamedtypequalified
+
+go 1.26

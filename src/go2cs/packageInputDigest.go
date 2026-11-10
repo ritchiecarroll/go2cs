@@ -32,7 +32,8 @@ import (
 // is the same on any host), its hand-owned files and *_impl.cs companions, the target platform, the output-affecting
 // conversion options other than comments, the Go toolchain and the converter revision. Comments are left out: they move
 // only the emitted C#'s line layout, and a -tests proof could otherwise never match a -recurse=nuget root converted
-// without -comments.
+// without -comments. -provenance is left out for the same reason: it writes only comment lines, and nugetgo-pack.ps1
+// converts with it for an Apache-2.0 module whose proof was made without it.
 
 const inputDigestProperty = "GoInputDigest"
 
@@ -90,7 +91,7 @@ func packageInputDigest(sourceFiles []string, outputPath string, options Options
 	// A hand-owned file stands in for its source's emission (conversionDriver.go), so its own bytes are an input too.
 	for _, source := range sourceFiles {
 		fileName := strings.TrimSuffix(filepath.Base(source), ".go") + ".cs"
-		handOwned := platformLayoutPath(outputPath, goosOfTarget(options.targetPlatform), fileName)
+		handOwned := platformLayoutPath(outputPath, options.targetPlatform, fileName)
 
 		if marked, err := containsManualConversionMarker(handOwned); err == nil && marked {
 			if rel, err := filepath.Rel(outputPath, handOwned); err == nil {

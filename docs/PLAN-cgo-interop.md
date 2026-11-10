@@ -221,6 +221,22 @@ silent-empty path); and `-platforms` multi-target emission needs a provisioned *
 per target — materially harder than the pure-Go layout-L3 emission already solved. §7 keeps the
 cross-compilation matrix speculative for this reason.
 
+> **Owner direction, 2026-11-09 (dated amendment, COORD):** the default is to **auto-provision a pinned C
+> toolchain on demand**, with **CLI overrides**. Owner (verbatim): "cgo cli override options are going to be
+> important as we get to those stages, but a default that will auto-provision a C toolchain on demand seems to
+> make perfect sense to me."
+> - **Default:** when a cgo package is converted and no usable C compiler resolves, go2cs fetches a pinned
+>   toolchain, the same way it already fetches a pinned Go toolchain. Go itself ships no C compiler, and on
+>   Windows cgo needs a gcc-compatible one (MinGW-w64 or llvm-mingw; MSVC is not supported by cgo).
+>   Candidates: llvm-mingw on Windows, and `zig cc` as a single download that can also cross-compile.
+> - **Overrides:** use a given compiler (CC), refuse to download (fail loudly instead), and choose or pin the
+>   toolchain.
+> - **Scope:** Phase 1-2 recognition needs the compiler only on the CONVERTING machine; consumers of a converted
+>   package never need one. Phase 4 (inline C) needs it per TARGET, which is where a cross-capable toolchain
+>   matters and where §7 stays speculative.
+> - **Status:** QUEUED as a Phase 2 prerequisite: a scout (candidates, pinning, download size and integrity,
+>   licensing, the determinism rules of §5.2), then a design note. Not scheduled.
+
 ### 5.2 Determinism, and what that forbids
 
 [`TestingInfrastructureRequirements.md`](TestingInfrastructureRequirements.md) §2 principle 8 requires
@@ -776,3 +792,25 @@ container, go1.26.10, gcc 13.3.0, x/tools v0.52.0, at `30ad20e17e`, with `CGO_EN
 - a `static` C body arrives only as a typed `_Cfunc_` declaration, so its code still needs Phase 4's native
   side-build;
 - the converting host needs `CGO_ENABLED=1` plus a C compiler. §2 Finding 1 stands.
+
+### 11.8 Phase 1, increments 1 and 2 (2026-11-09, lane H)
+
+*A dated block. The exit gate below reads live only on a host with a C compiler.*
+
+- **Increment 1** (`cgoDeclarations.go`, over P1's checked-in fixture `src/go2cs/testdata/cgo/phase1`): recognition
+  reads cmd/cgo's synthetic names off the type-checked package scope and classifies nine kinds. It filters the plumbing
+  and every C name reserved for the implementation. The `//line`-ADJUSTED position of each tree's package clause maps it
+  back to its source. The fixture type-checks at `CGO_ENABLED=0` with one Overlay declaration, runtime/cgo's
+  `Incomplete`, which lives in a file that itself imports `"C"`.
+- **Increment 2**: `-cgo` is no longer inert. It makes the single-package driver's OWN load cgo-on (`CGO_ENABLED=1`,
+  last, over the loader pin) and nothing else. It is refused beside `-stdlib`, `-tests` and `-recurse`, whose loads it
+  does not reach, and beside an explicit `CGO_ENABLED` other than 1. The package is still refused, with GO2CS2001 and
+  nothing written, but the refusal now says what Phase 1 read: the declarations counted by kind, then each tree by
+  ROLE, sorted by source: how many generated files map to each source (by base name), which trees are plain Go source,
+  and how many are cmd/cgo's own. It names no generated file: the first hosted `converter-cgo` run (linux, 2026-11-10)
+  read every one under a 64-hex build-cache name, so the first wording, which named them, was unreadable on any real
+  host. Where cmd/cgo never ran (no C compiler, §11.1 arm P3) it says that instead. §11.3(c)'s ruling that the
+  gate fires "whatever `-cgo` says" stands: the flag reaches no emission.
+- **The exit gate** (`TestTheCgoFlagRecognizesTheFixtureAndStillRefuses`) loads the fixture's own source through the
+  real driver under `-cgo`. It reads Inconclusive (skipped) without a C compiler, and is read live by the opt-in
+  `converter-cgo` stage of the OS matrix.

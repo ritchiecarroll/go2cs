@@ -1,0 +1,38 @@
+UNIQUE ERRORS 13  projects with errors 3  non-CS error lines 0
+
+-- by project
+     7 github.com/go-json-experiment/json/jsontext
+     4 github.com/zeebo/xxh3
+     2 github.com/microsoft/TypeScript/tsc/internal/vfs/internal
+
+-- by code
+     5 CS0315
+     4 CS0019
+     2 CS9135
+     1 CS0030
+     1 CS0266
+
+-- by file (top 40)
+     5 github.com/go-json-experiment/json/jsontext/encode.cs
+     2 github.com/microsoft/TypeScript/tsc/internal/vfs/internal/internal.cs
+     1 github.com/go-json-experiment/json/jsontext/value.cs
+     1 .artifacts/gen/3c3cc68b9996/go2cs-gen/go2cs.RecvGenerator/go.github.com.go_json_experiment.json.jsontext_package.Clone.global__go.github.com.go_json_experiment.json-f804de1c7f542966.g.cs
+     1 github.com/zeebo/xxh3/hash128.cs
+     1 github.com/zeebo/xxh3/hash128_seed.cs
+     1 github.com/zeebo/xxh3/hash64.cs
+     1 github.com/zeebo/xxh3/hash64_seed.cs
+
+-- all errors (file:line code msg), first 400
+github.com/go-json-experiment/json/jsontext/encode.cs:452 CS0315 The type 'go.github.com.go_json_experiment.json.jsontext_package.Value' cannot be used as type parameter 'Bytes' in the generic type or method 'jsonwire_package.NewInvalidCharacterError<Bytes>(Bytes, @string)'. There is no boxing conversion
+github.com/go-json-experiment/json/jsontext/encode.cs:625 CS0315 The type 'go.github.com.go_json_experiment.json.jsontext_package.Value' cannot be used as type parameter 'Bytes' in the generic type or method 'jsonwire_package.NewInvalidCharacterError<Bytes>(Bytes, @string)'. There is no boxing conversion
+github.com/go-json-experiment/json/jsontext/encode.cs:692 CS0315 The type 'go.github.com.go_json_experiment.json.jsontext_package.Value' cannot be used as type parameter 'Bytes' in the generic type or method 'jsonwire_package.NewInvalidCharacterError<Bytes>(Bytes, @string)'. There is no boxing conversion
+github.com/go-json-experiment/json/jsontext/encode.cs:734 CS0315 The type 'go.github.com.go_json_experiment.json.jsontext_package.Value' cannot be used as type parameter 'Bytes' in the generic type or method 'jsonwire_package.NewInvalidCharacterError<Bytes>(Bytes, @string)'. There is no boxing conversion
+github.com/go-json-experiment/json/jsontext/encode.cs:807 CS0315 The type 'go.github.com.go_json_experiment.json.jsontext_package.Value' cannot be used as type parameter 'Bytes' in the generic type or method 'jsonwire_package.NewInvalidCharacterError<Bytes>(Bytes, @string)'. There is no boxing conversion
+github.com/go-json-experiment/json/jsontext/value.cs:38 CS0030 Cannot convert type 'Bytes' to 'go.github.com.go_json_experiment.json.jsontext_package.Value'
+.artifacts/gen/3c3cc68b9996/go2cs-gen/go2cs.RecvGenerator/go.github.com.go_json_experiment.json.jsontext_package.Clone.global__go.github.com.go_json_experiment.json-f804de1c7f542966.g.cs:27 CS0266 Cannot implicitly convert type 'object' to 'go.github.com.go_json_experiment.json.jsontext_package.Value'. An explicit conversion exists (are you missing a cast?)
+github.com/microsoft/TypeScript/tsc/internal/vfs/internal/internal.cs:165 CS9135 A constant value of type 'array<byte>' is expected
+github.com/microsoft/TypeScript/tsc/internal/vfs/internal/internal.cs:168 CS9135 A constant value of type 'array<byte>' is expected
+github.com/zeebo/xxh3/hash128.cs:193 CS0019 Operator '&' cannot be applied to operands of type 'uintptr' and 'int'
+github.com/zeebo/xxh3/hash128_seed.cs:195 CS0019 Operator '&' cannot be applied to operands of type 'uintptr' and 'int'
+github.com/zeebo/xxh3/hash64.cs:100 CS0019 Operator '&' cannot be applied to operands of type 'uintptr' and 'int'
+github.com/zeebo/xxh3/hash64_seed.cs:101 CS0019 Operator '&' cannot be applied to operands of type 'uintptr' and 'int'

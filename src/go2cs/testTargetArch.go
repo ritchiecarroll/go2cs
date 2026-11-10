@@ -21,37 +21,45 @@ import (
 	"github.com/ritchiecarroll/hashset"
 )
 
-// A TEST FILE NOT BUILT FOR EVERY ARCHITECTURE ITS GOOS SHIPS IS WITHDRAWN FROM BOTH SIDES ON THAT GOOS
+// A TEST FILE NOT BUILT FOR EVERY ARCHITECTURE ITS FLAVOUR SHIPS IS WITHDRAWN FROM BOTH SIDES ON THAT FLAVOUR
 // (COORD rulings 2026-10-25 and 2026-10-26, option 2; BOARD "an amd64-constrained test file runs on the
 // osx-arm64 RID").
 //
-// The corpus is converted for corpusArch, and darwin ships that ONE build under both mac RIDs, osx-x64 and
-// osx-arm64, where the roster banks ONE darwin count. A test file whose build line excludes arm64 was
-// therefore run natively on arm64 too, where Go would never build it: crypto/sha1's issue15617_test.go
-// (`//go:build amd64 && (linux || darwin)`) hardcodes 4 KiB pages, and on Apple silicon's 16 KiB pages its
-// mprotect answers EINVAL. Withdrawing such a test only where it cannot build would split the two RIDs'
-// counts, and a count that varies by RID cannot bank.
+// Each corpus flavour (corpusFlavourOf, testsCorpusArch.go) is converted at its own arch, and darwin's ONE
+// flavour, converted at amd64, ships under both mac RIDs, osx-x64 and osx-arm64, where the roster banks ONE
+// darwin count. A test file whose build line excludes arm64 was therefore run natively on arm64 too, where
+// Go would never build it: crypto/sha1's issue15617_test.go (`//go:build amd64 && (linux || darwin)`)
+// hardcodes 4 KiB pages, and on Apple silicon's 16 KiB pages its mprotect answers EINVAL. Withdrawing such a
+// test only where it cannot build would split the two RIDs' counts, and a count that varies by RID cannot bank.
 //
-// So on a GOOS that ships more than one architecture, a test declared in a file that some shipped
-// architecture does not build leaves the run on EVERY RID of that GOOS: its name joins the -skip string
+// So on a flavour that ships more than one architecture, a test declared in a file that some shipped
+// architecture does not build leaves the run on EVERY RID of that flavour: its name joins the -skip string
 // handed to both sides, exactly as a host-fatal test's does. It is deterministic, read from the source and
-// the shipped set, so both mac RIDs answer the same. windows and linux ship amd64 alone, so nothing leaves
-// there, and every withdrawn test still runs on them against the same amd64 code paths. Not a disclosure:
-// nothing diverged. The comparison record (testComparison.TargetArchExcluded) and the row's proof page name
-// each one with its reason, so no count shrinks unstated.
+// the shipped set, so both mac RIDs answer the same. The windows and linux amd64 flavours ship amd64 alone,
+// so nothing leaves there, and every withdrawn test still runs on them against the same amd64 code paths.
+// The arm leg is the opposite of darwin: a linux/arm64 flavour is converted at arm64, run at arm64 and
+// published under one RID, so nothing leaves there either. Not a disclosure: nothing diverged. The
+// comparison record (testComparison.TargetArchExcluded) and the row's proof page name each one with its
+// reason, so no count shrinks unstated.
 
-// shippedGOARCHs answers the architectures the published go.* packages ship a GOOS's ONE converted build
-// under, in Go's spelling: the RIDs push-nuget.ps1 packs (win-x64, linux-x64, osx-x64, osx-arm64), as
-// compileRuntimeIdentifierForTarget maps them.
-func shippedGOARCHs(goos string) []string {
-	switch goos {
-	case "darwin":
-		return []string{"amd64", "arm64"}
-	case "windows", "linux":
-		return []string{"amd64"}
-	default:
+// shippedGOARCHs answers the architectures the published go.* packages ship the corpus FLAVOUR serving a
+// target (corpusFlavourOf) under, in Go's spelling: the RIDs push-nuget.ps1 packs (win-x64, linux-x64,
+// osx-x64, osx-arm64), as compileRuntimeIdentifierForTarget maps them. A flavour ships its own arch, and
+// darwin/amd64, the one flavour published under two RIDs, ships arm64 too; a target no flavour serves ships
+// nothing. Per flavour and not per GOOS: per GOOS, a linux/arm64 flavour would read linux's amd64 and
+// withdraw every test of an arm64-only file from its own run (S1b, 2026-11-09).
+func shippedGOARCHs(lattice *platformLattice, target string) []string {
+	flavour := corpusFlavourOf(lattice, target)
+
+	if !lattice.includes(flavour) {
 		return nil
 	}
+
+	if flavour == "darwin/amd64" {
+		return []string{"amd64", "arm64"}
+	}
+
+	return []string{archOfTarget(flavour)}
 }
 
 // targetArchExclusion is one test withdrawn because its file is not built for every shipped architecture.
@@ -61,18 +69,25 @@ type targetArchExclusion struct {
 }
 
 // targetArchExcludedTests answers the Test/Benchmark/Fuzz/Example functions declared in the package's
-// _test.go files that the conversion's target selects but some other architecture its GOOS ships excludes,
-// under the same GOOS and the conversion's own tags. Empty on a GOOS that ships one architecture.
+// _test.go files that the conversion's target selects but some other architecture its flavour ships
+// excludes, under the same GOOS and the conversion's own tags. Empty on a flavour that ships one
+// architecture, unless that architecture is not the target's own.
 func targetArchExcludedTests(inputPath string, options Options) []targetArchExclusion {
+	return targetArchExcludedTestsOver(corpusLattice(), inputPath, options)
+}
+
+// targetArchExcludedTestsOver is targetArchExcludedTests under a given lattice.
+func targetArchExcludedTestsOver(lattice *platformLattice, inputPath string, options Options) []targetArchExclusion {
 	goos, targetArch, found := strings.Cut(options.targetPlatform, "/")
 
 	if !found {
 		return nil
 	}
 
+	shipped := shippedGOARCHs(lattice, options.targetPlatform)
 	var others []string
 
-	for _, arch := range shippedGOARCHs(goos) {
+	for _, arch := range shipped {
 		if arch != targetArch {
 			others = append(others, arch)
 		}
@@ -92,7 +107,7 @@ func targetArchExcludedTests(inputPath string, options Options) []targetArchExcl
 
 	serves := "every shipped RID"
 
-	if len(shippedGOARCHs(goos)) == 2 {
+	if len(shipped) == 2 {
 		serves = "both RIDs"
 	}
 
@@ -194,11 +209,16 @@ func targetArchExcludedRecord(exclusions []targetArchExclusion) []string {
 	return out
 }
 
-// proofPageArchWithdrawals answers, for a standard-library row's proof page, every test a GOOS that ships
-// more than one architecture withdraws from the package, one line each ("<goos>: <name>: <detail>"),
-// whatever platform writes the page: the page is the row's one record, and the withdrawal is read from the
-// source, not from a run. nil when nothing is withdrawn, which leaves every other page unchanged.
+// proofPageArchWithdrawals answers, for a standard-library row's proof page, every test a flavour that ships
+// more than one architecture withdraws from the package, one line each ("<goos>: <name>: <detail>"), in GOOS
+// order, whatever platform writes the page: the page is the row's one record, and the withdrawal is read from
+// the source, not from a run. nil when nothing is withdrawn, which leaves every other page unchanged.
 func proofPageArchWithdrawals(goRoot, importPath string, buildTags []string) []string {
+	return proofPageArchWithdrawalsOver(corpusLattice(), goRoot, importPath, buildTags)
+}
+
+// proofPageArchWithdrawalsOver is proofPageArchWithdrawals over a given lattice's flavours.
+func proofPageArchWithdrawalsOver(lattice *platformLattice, goRoot, importPath string, buildTags []string) []string {
 	if goRoot == "" || importPath == "" {
 		return nil
 	}
@@ -206,14 +226,18 @@ func proofPageArchWithdrawals(goRoot, importPath string, buildTags []string) []s
 	dir := filepath.Join(goRoot, "src", filepath.FromSlash(importPath))
 	var out []string
 
-	for _, goos := range []string{"darwin", "linux", "windows"} {
-		if len(shippedGOARCHs(goos)) < 2 {
+	flavours := append([]string(nil), lattice.universe...)
+	sort.SliceStable(flavours, func(i, j int) bool { return goosOfTarget(flavours[i]) < goosOfTarget(flavours[j]) })
+
+	for _, flavour := range flavours {
+		if len(shippedGOARCHs(lattice, flavour)) < 2 {
 			continue
 		}
 
-		options := Options{targetPlatform: goos + "/" + corpusArch, buildTags: buildTags}
+		goos := goosOfTarget(flavour)
+		options := Options{targetPlatform: flavour, buildTags: buildTags}
 
-		for _, line := range targetArchExcludedRecord(targetArchExcludedTests(dir, options)) {
+		for _, line := range targetArchExcludedRecord(targetArchExcludedTestsOver(lattice, dir, options)) {
 			out = append(out, goos+": "+line)
 		}
 	}

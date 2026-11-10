@@ -1,0 +1,62 @@
+# r2b_patch.py <tree> : re-run (2026-11-09) pass B. Hand-patches ONLY the rows still open at go2cs f09e762659
+# (C16) and the NEW first causes the re-run's stage 3A found (C19, C20, C21), in a COPY of the -recurse output.
+# No patch for any row already on master. Byte-exact: each file keeps its own line endings; every replacement
+# asserts its expected match count. Each patch is the smallest emission change that expresses what Go means.
+import os, re, sys
+
+ROOT = sys.argv[1]
+TS = os.path.join(ROOT, r"src\github.com\microsoft\TypeScript\tsc\internal")
+PKG = os.path.join(ROOT, "pkg")
+log = []
+
+def sub(path, pattern, repl, count, cid, regex=False):
+    b = open(path, "rb").read()
+    if regex:
+        n = len(re.findall(pattern, b))
+        nb = re.sub(pattern, repl, b)
+    else:
+        n = b.count(pattern)
+        nb = b.replace(pattern, repl)
+    if count is not None and n != count:
+        sys.exit(f"{cid}: expected {count} match(es) in {path}, found {n}")
+    if n == 0:
+        sys.exit(f"{cid}: no match in {path}")
+    open(path, "wb").write(nb)
+    log.append(f"{cid}: {n} x {os.path.relpath(path, ROOT)}")
+
+u = lambda s: s.encode("utf-8")
+JT = os.path.join(PKG, r"github.com\go-json-experiment\json\jsontext")
+
+# C16: a named []byte (jsontext.Value) passed where a ~[]byte | ~string type parameter is constrained to IByteSeq:
+# pass it as its underlying slice<byte> (Go instantiates Bytes = Value; the bytes are the same).
+sub(os.path.join(JT, "encode.cs"), rb"jsonwire\.NewInvalidCharacterError\((v|src)(\.slice\(n\))?,",
+    rb"jsonwire.NewInvalidCharacterError((slice<byte>)\1\2,", 5, "C16", regex=True)
+# C16: Value(src) where src is the Bytes type parameter: build the Value from the IByteSeq's bytes. (For a []byte
+# src Go shares the bytes and this copies; WriteValue only reads them, so the result is the same.)
+sub(os.path.join(JT, "value.cs"), u("e.Ꮡs.WriteValue((Value)src);"),
+    u("e.Ꮡs.WriteValue((Value)new slice<byte>(src.ꓸꓸꓸ.ToArray()));"), 1, "C16")
+
+# C16 (exposed once jsontext builds): the same named []byte passed to a ~[]byte | ~string generic in package json.
+AD = os.path.join(PKG, r"github.com\go-json-experiment\json\arshal_default.cs")
+sub(AD, u("jsontext.AppendUnquote(default, val);"), u("jsontext.AppendUnquote(default, (slice<byte>)val);"), 1, "C16")
+sub(AD, u("dec.InputOffset() - len64(val));"), u("dec.InputOffset() - len64((slice<byte>)val));"), 2, "C16")
+
+# C19: `ui(l) &^ 15` with `type ui = uintptr`: type the untyped constant as the alias's type.
+X = os.path.join(PKG, r"github.com\zeebo\xxh3")
+for f, k in (("hash64.cs", 15), ("hash64_seed.cs", 15), ("hash128.cs", 31), ("hash128_seed.cs", 31)):
+    sub(os.path.join(X, f), u(f"(ui)(((ui)l) & ~{k})"), u(f"(ui)(((ui)l) & ~(ui){k})"), 1, "C19")
+
+# C20: `switch bom { case [2]byte{0xFF, 0xFE}: ...}` over an array value: compare by value in a when-guard.
+V = os.path.join(TS, r"vfs\internal\internal.cs")
+sub(V, u("case new byte[]{0xFF, 0xFE}.array(): {"), u("case var ᐧ when bom == new byte[]{0xFF, 0xFE}.array(): {"), 1, "C20")
+sub(V, u("case new byte[]{0xFE, 0xFF}.array(): {"), u("case var ᐧ when bom == new byte[]{0xFE, 0xFF}.array(): {"), 1, "C20")
+
+# C21: Go's `func (v Value) Clone() Value` is shadowed by the named-slice wrapper's own `object Clone()`
+# (ICloneable): rename the Go method to ΔClone (the converter's collision convention) at its declaration and
+# at its Value-typed call sites, so the generated pointer forwarder and the callers bind to Go's method.
+sub(os.path.join(JT, "value.cs"), u("public static Value Clone(this Value v) {"), u("public static Value ΔClone(this Value v) {"), 1, "C21")
+sub(os.path.join(PKG, r"github.com\go-json-experiment\json\errors.cs"),
+    u("((jsontext.Value)export.Decoder(d).PreviousTokenOrValue()).Clone();"),
+    u("((jsontext.Value)export.Decoder(d).PreviousTokenOrValue()).ΔClone();"), 1, "C21")
+
+print("\n".join(log))

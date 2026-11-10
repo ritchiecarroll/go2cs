@@ -11,6 +11,7 @@ package main
 import (
 	"go/ast"
 	"go/types"
+	"strings"
 
 	"golang.org/x/tools/go/packages"
 )
@@ -191,4 +192,88 @@ func definedTypeSpecRHS(pkg *packages.Package, name string) ast.Expr {
 	}
 
 	return nil
+}
+
+// foreignRenamedGenericMember returns the member name another package's GENERIC defined type is declared under when
+// that package Δ-renames it, because the type's name is also one of the package's method or function names: tsc's
+// `collections.Set[T]` beside `OrderedMap.Set` is declared `ΔSet<T>` (TS readiness C22, 1,141 references across the
+// tsc closure). A non-generic renamed type is reached through its `pkgꓸName` `global using` alias, but C# cannot
+// alias an open generic, so every spelling of a foreign generic -- the type-driven renderer, a composite literal,
+// a type assertion -- names the renamed member directly: `coll.ΔSet<@string>`.
+//
+// The test is the one the producer applies (typeCollisionAliases, from the package's own scope), so a reference
+// spells the name the declaration carries whether or not the producer has been converted in this run. A Go type
+// ALIAS is never collision-renamed, and an un-renamed or non-generic type returns false and keeps its spelling.
+func foreignRenamedGenericMember(obj *types.TypeName) (string, bool) {
+	if obj == nil || obj.IsAlias() || obj.Pkg() == nil {
+		return "", false
+	}
+
+	named, isNamed := obj.Type().(*types.Named)
+
+	if !isNamed || named.TypeParams().Len() == 0 {
+		return "", false
+	}
+
+	if !packageHasMethodNamed(obj.Pkg(), obj.Name()) {
+		return "", false
+	}
+
+	return getCollisionAvoidanceIdentifier(obj.Name()), true
+}
+
+// foreignRenamedTypeSpelling returns how another package's collision-renamed NON-generic defined type is spelled
+// by a file that has no imported alias for it: the member the producer declares (`ΔEncoder`), or, for the one
+// two-hop form, the concrete target that member stands for (`object`, from `type Token any`), which is bare (not a
+// member of the package) and so returned with bare set.
+//
+// A file reaches such a type without an alias when it names it only through ANOTHER package's alias: tsc's
+// collections writes `*json.Encoder`, where its own internal/json declares `Encoder = jsontext.Encoder`, and
+// collections never imports jsontext (TS readiness C22e). Alias keys are loaded per IMPORT, so no `jsontextꓸEncoder`
+// exists for that file, and the fallback spelled the Go name, `jsontext.Encoder` (CS0426). A file that does import
+// the producer keeps its alias route, and is never asked.
+//
+// The answer is the producer's own published entries (foreignCollisionTypeAliases, derived from its scope and
+// syntax), so every special form is the producer's: a methodless func type publishes nothing, and a defined type
+// over a named non-empty interface publishes nothing either; both keep their spelling. The producer is the loaded
+// package this conversion reached it through; when that is unavailable, nothing is answered.
+func foreignRenamedTypeSpelling(obj *types.TypeName) (spelling string, bare bool, ok bool) {
+	if obj == nil || obj.IsAlias() || obj.Pkg() == nil {
+		return "", false, false
+	}
+
+	if named, isNamed := obj.Type().(*types.Named); !isNamed || named.TypeParams().Len() > 0 {
+		return "", false, false
+	}
+
+	producer := importedPackages[obj.Pkg().Path()]
+
+	if producer == nil || producer.Types != obj.Pkg() {
+		return "", false, false
+	}
+
+	entries := foreignCollisionTypeAliases(producer)
+	source := getCoreSanitizedIdentifier(obj.Name())
+	member := ""
+
+	for _, entry := range entries {
+		if entry[0] == source {
+			member = entry[1]
+			break
+		}
+	}
+
+	if member == "" || strings.HasPrefix(member, "const:") {
+		return "", false, false
+	}
+
+	// The two-hop form: the renamed member is itself an exported alias of a concrete type (Token → ΔToken →
+	// object), and ΔToken is the producer's assembly-scoped `global using`, never a member of its class.
+	for _, entry := range entries {
+		if entry[0] == member {
+			return entry[1], true, true
+		}
+	}
+
+	return member, false, true
 }
