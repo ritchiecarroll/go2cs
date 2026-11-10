@@ -20,7 +20,7 @@ commits, the work folder, block 6's lists, and block 7, which reports exceptions
 | 5 | nugetgo.github.com.spf13.pflag | 1.0.9.4 | claude/c2-nugetgo-1261004-pflag |
 | 6 | nugetgo.github.com.inconshreveable.mousetrap | 1.1.0.3 | claude/c2-nugetgo-1261004-mousetrap |
 
-None of the six depends on another. cobra (session S2) depends on pflag 1.0.9.3 and mousetrap 1.1.0.2, which S1
+None of the six depends on another. cobra (session S2) depends on pflag 1.0.9.4 and mousetrap 1.1.0.3, which S1
 publishes, so S2 starts only after this sheet's block 5 lists both.
 
 **Do not start it until COORD says so.** COORD says so only after: COORD has ruled sections 1-3 green for every
