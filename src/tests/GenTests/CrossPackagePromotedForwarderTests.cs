@@ -476,8 +476,9 @@ public class CrossPackagePromotedForwarderTests
         Assert.IsFalse(package.Contains(" Name("), "the package class must not gain a method named like the package var");
 
         // PINNED GAP (a MISS, never an over-claim): a direct-ж primary two value hops down is
-        // not forwarded — the same-package path has the same limit (it serves a DIRECT value
-        // embed only). Go has (*Mixed).Reset.
+        // not forwarded on a path that CROSSES a package. The same-package path had the same limit
+        // (it served a DIRECT value embed only) until TS readiness C29 lifted it there
+        // (EmbedDepthMethodPromotionTests); the cross-package arm still has it. Go has (*Mixed).Reset.
         Assert.IsFalse(sibling.Contains(" Reset("), "the two-hop box-primary gap moved: update this pin and the seat's residual list");
     }
 
