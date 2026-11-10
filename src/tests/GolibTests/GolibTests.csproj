@@ -96,6 +96,12 @@
     <Compile Remove="DarwinNativeTransitionTests.cs" />
   </ItemGroup>
 
+  <!-- S3's arm64 Stat_t mirror and its GoNativeStatLayoutProbe live in syscall/linux-arm64/, which only the
+       linux/arm64 flavour compiles: the file's only (GOOS, GOARCH) pair. An unset $(GoTargetArch) is amd64. -->
+  <ItemGroup Condition="'$(GoTargetOS)' != 'linux' or '$(GoTargetArch)' != 'arm64'">
+    <Compile Remove="LinuxArm64StatLayoutTests.cs" />
+  </ItemGroup>
+
   <!-- The netapi32 ptrout gate is the mirror image: it drives windows-flavor-only syscall surface
        (NetUserGetInfo, NetApiBufferFree), so under any other $(GoTargetOS) it is excluded from
        compilation entirely. The test ALSO gates on the running HOST at runtime, which is the
