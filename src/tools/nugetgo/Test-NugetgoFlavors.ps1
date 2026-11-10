@@ -36,6 +36,9 @@ Check 'the same RIDs, the same GOOS, the same order (the first is the reference 
     (@($rids.Keys) -join ',') -ceq (@($releaseMap.Keys) -join ',') -and (@($rids.Values) -join ',') -ceq (@($releaseMap.Values) -join ',')) `
     "nugetgo $(@($rids.Keys | ForEach-Object { "$_=$($rids[$_])" }) -join ',') vs release $(@($releaseMap.Keys | ForEach-Object { "$_=$($releaseMap[$_])" }) -join ',')"
 Check 'the reference flavor is windows' ((Get-NugetgoReferenceGoos) -ceq 'windows') "got $(Get-NugetgoReferenceGoos)"
+Check 'linux-arm64 ships linux/arm64, a flavor of its own and not linux-x64''s twin (S6)' (
+    $rids.Contains('linux-arm64') -and $rids['linux-arm64'] -ceq 'linux/arm64' -and $rids['linux-x64'] -ceq 'linux/amd64') "got $(@($rids.Keys | ForEach-Object { "$_=$($rids[$_])" }) -join ',')"
+Check 'both Mac RIDs ship the one darwin/amd64 flavor' ($rids['osx-x64'] -ceq 'darwin/amd64' -and $rids['osx-arm64'] -ceq 'darwin/amd64') "got osx-x64=$($rids['osx-x64']), osx-arm64=$($rids['osx-arm64'])"
 
 Write-Host 'the decision is a measurement'
 $split = Get-NugetgoFlavorDecision -Assemblies (Flavors @{ 'App.dll' = $alpha } @{ 'App.dll' = $bravo } @{ 'App.dll' = $bravo }) -ProofGoos linux
