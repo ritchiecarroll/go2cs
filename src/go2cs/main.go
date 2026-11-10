@@ -287,7 +287,7 @@ func main() {
 	nugetMapRefreshCmd := commandLine.Bool("nuget-map-refresh", false, "With -recurse=nuget: fetch every URL source unconditionally (bypassing the cache) and re-resolve every module, adopting what the sources now say instead of what go2cs.nuget.lock pinned")
 	nugetMapCanonicalOnlyCmd := commandLine.Bool("nuget-map-canonical-only", false, "With -recurse=nuget: apply canonical mappings only (the module owner's own conversion); a community mapping is treated as unmapped")
 	nugetMapFeedCmd := commandLine.String("nuget-map-feed", "", "With -recurse=nuget: read mapped packages' versions from this feed INSTEAD of nuget.org -- an https:// NuGet v3 service index (a rehearsal gallery such as int.nugettest.org) or a local folder of nupkgs; a rehearsal version (nugetgo-pack.ps1 -RehearsalSuffix) is admitted only from it. The restore of the emitted projects reads your own package sources, so name the feed there too")
-	targetPlatformCmd := commandLine.String("platforms", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH), "Target platform(s) for conversion, format: os/arch; comma-separated for a list (windows/amd64,linux/amd64,darwin/amd64), which with -stdlib emits the multi-platform (layout L3) corpus — one GOOS per target")
+	targetPlatformCmd := commandLine.String("platforms", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH), "Target platform(s) for conversion, format: os/arch; comma-separated for a list (windows/amd64,linux/amd64,darwin/amd64,linux/arm64), which with -stdlib emits the multi-platform (layout L3) corpus — one flavour per target")
 	platformCensusCmd := commandLine.String("platform-census", "", "With -stdlib and two or more -platforms targets: convert once per target into an isolated seeded staging root under this directory, classify the emissions (shared/variant/partial/exclusive) and write platform-manifest.json there. Emits NO corpus output")
 	refCensusCmd := commandLine.String("ref-census", "", "With -stdlib: run the ж-box A1 ref-lowering classification census (analysis only, never emits) over the standard library — once per -platforms target — and write the JSON report to this path. See docs/phase4/DESIGN-zh-box-reduction.md §9 stage A1")
 	platformStageCmd := commandLine.String("platform-stage", "", "Directory a multi-platform -stdlib EMISSION stages its per-target conversions in (kept afterwards for inspection); when omitted, the run stages in .go2cs-platform-stage under the output root, reclaims anything an earlier run left there, and removes it at the end")
@@ -413,10 +413,10 @@ Examples:
   go2cs -stdlib -comments -tags purego,math_big_pure_go
                                           # Explicit form of the default: the portable Go implementations over the assembly ones
   go2cs -stdlib -tags=                    # Opt OUT of the default tags (reproduce the asm-backed default build)
-  go2cs -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64 -platform-census out
+  go2cs -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64 -platform-census out
                                           # Emission census: convert once per target into out\<goos>-<goarch>,
                                           # write out\platform-manifest.json; no corpus output
-  go2cs -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64
+  go2cs -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64
                                           # Multi-platform corpus (layout L3): files shared by every target
                                           # stay flat, platform-varying ones land in <pkg>\<goos>, and the
                                           # .csproj selects one with $(GoTargetOS)

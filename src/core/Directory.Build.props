@@ -35,11 +35,32 @@
   <!-- go2cs-gen's escape registry (trim stage 3c-2b(iii)) tells a PER-OS package (an L3 csproj compiling
        $(GoTargetOS)/*.cs) from a platform-neutral one by whether a source file sits in <project>/<GoTargetOS>/. It stamps
        the per-OS assemblies (go2cs.PlatformVariant), and a neutral package never walks their struct fields, so its registry
-       is the same in every OS flavor (the 1.24.13 r6 release rehearsal found two neutral packages that were not). -->
+       is the same in every OS flavor (the 1.24.13 r6 release rehearsal found two neutral packages that were not). The arch
+       axis adds two platform folders, <project>/<GoTargetArch>/ and <project>/<GoTargetOS>-<GoTargetArch>/, read the same
+       way: a package may carry one of them and no GOOS folder. -->
   <ItemGroup>
     <CompilerVisibleProperty Include="GoTargetOS" />
+    <CompilerVisibleProperty Include="GoTargetArch" />
     <CompilerVisibleProperty Include="MSBuildProjectDirectory" />
   </ItemGroup>
+
+  <!-- Layout L3's universe check, the text renderPlatformUniverseCheck (src/go2cs/platformLayout.go) renders for the
+       declared universe; a Go test holds the two equal (TestCorpusBuildFileCarriesTheUniverseCheck). Without it a
+       pair the corpus was never laid out for compiles silently SHORT: a windows build at arm64 would take no amd64/
+       folder and no windows-arm64/ one. It is a target in a props file because this is the one build file every
+       project of the tree already imports: a Directory.Build.targets here would shadow src/Directory.Build.targets. -->
+  <!-- The (GOOS, GOARCH) pairs the converted standard library is laid out for (platformUniverse). -->
+  <Target Name="GoCheckLayoutTarget" BeforeTargets="CoreCompile">
+    <PropertyGroup>
+      <_GoLayoutOS>$(GoTargetOS)</_GoLayoutOS>
+      <_GoLayoutOS Condition="'$(_GoLayoutOS)'==''">windows</_GoLayoutOS>
+      <_GoLayoutArch>$(GoTargetArch)</_GoLayoutArch>
+      <_GoLayoutArch Condition="'$(_GoLayoutArch)'==''">amd64</_GoLayoutArch>
+      <_GoLayoutTarget>$(_GoLayoutOS)/$(_GoLayoutArch)</_GoLayoutTarget>
+    </PropertyGroup>
+    <Error Condition="'$(_GoLayoutTarget)'!='windows/amd64' And '$(_GoLayoutTarget)'!='linux/amd64' And '$(_GoLayoutTarget)'!='darwin/amd64' And '$(_GoLayoutTarget)'!='linux/arm64'"
+           Text="go2cs: $(_GoLayoutTarget) is not a target the converted standard library is laid out for (windows/amd64, linux/amd64, darwin/amd64, linux/arm64); set GoTargetOS and GoTargetArch to one of them." />
+  </Target>
 
   <!-- Shared NuGet version for every converted stdlib package (single source: src/version.props) -->
   <Import Project="$(MSBuildThisFileDirectory)../version.props" />

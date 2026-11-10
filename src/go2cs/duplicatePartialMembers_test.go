@@ -45,14 +45,14 @@ import (
 //        declaration with its enclosing type chain.
 //
 // A zero from a detector with that history is worth exactly what its arms are worth, which is why
-// TestDuplicateMemberScannerControls carries six of them and a NEUTER switch — see its comment.
+// TestDuplicateMemberScannerControls carries nine of them and a NEUTER switch — see its comment.
 //
 // SCOPE, stated because it bounds the zero:
 //   - FIELDS only. Methods legally OVERLOAD, so a name-level compare over methods over-matches by
 //     construction; the motivating class is a relocated struct's fields, which fields cover exactly.
 //   - Two declarations collide only if they can be COMPILED TOGETHER. A type declared under windows/
-//     and one under linux/ never are — the csproj compiles one GOOS folder — so cross-flavour pairs
-//     are not reported.
+//     and one under linux/ never are, nor one under amd64/ and one under linux-arm64/: no target's
+//     build selects both folders (their covers are disjoint), so those pairs are not reported.
 //   - Generated/ is excluded: build output, regenerated from the declarations themselves.
 
 // literalBlankingEnabled exists ONLY so the DESYNC control arm can be shown to go RED without the fix.
@@ -75,8 +75,6 @@ var csStatementKeywords = map[string]bool{
 	"do": true, "yield": true, "await": true, "goto": true, "var": true, "namespace": true,
 	"checked": true, "unchecked": true, "try": true, "catch": true, "finally": true,
 }
-
-var goosFolders = map[string]bool{"windows": true, "linux": true, "darwin": true}
 
 // memberFinding is one member declared by two compile-compatible partials of one type.
 type memberFinding struct {
@@ -265,14 +263,22 @@ func fieldsDeclaredIn(body string) []string {
 	return names
 }
 
-// flavourOf reports the per-GOOS folder a package-relative path sits under, or "flat".
+// flavourOf reports the layout key folder (GOOS, GOARCH or pair) a package-relative path sits under,
+// or "" for a flat file.
 func flavourOf(relPath string) string {
 	for _, part := range strings.Split(filepath.ToSlash(relPath), "/") {
-		if goosFolders[part] {
+		if isLayoutKeyFolderName(part) {
 			return part
 		}
 	}
-	return "flat"
+	return ""
+}
+
+// neverCompiledTogether reports whether no target of the declared universe selects both key folders.
+// Flat is the empty name and covers every target, so a flat file compiles beside every folder.
+func neverCompiledTogether(flavourA, flavourB string) bool {
+	lattice := corpusLattice()
+	return relateCovers(lattice.folderCover(flavourA), lattice.folderCover(flavourB)) == coversDisjoint
 }
 
 // qualifiedName joins the enclosing type chain, so a name nested in two DIFFERENT enclosing types is
@@ -427,8 +433,8 @@ func scanDuplicatePartialMembers(root string) (findings []memberFinding, files, 
 				for i := 0; i < len(sites); i++ {
 					for j := i + 1; j < len(sites); j++ {
 						a, b := sites[i], sites[j]
-						// Different GOOS folders never compile together.
-						if a.flavour != "flat" && b.flavour != "flat" && a.flavour != b.flavour {
+						// Folders with disjoint covers never compile together.
+						if neverCompiledTogether(a.flavour, b.flavour) {
 							continue
 						}
 						findings = append(findings, memberFinding{
@@ -492,6 +498,9 @@ func TestNoDuplicatePartialMembersInTheCorpus(t *testing.T) {
 //	ADMIT    the same type twice with DISJOINT members — the legal partial case                → 0
 //	EMPTY    `partial struct note {}` beside a real declaration (the package_info shape)        → 0
 //	FLAVOUR  the same member under windows/ and linux/, never compiled together                 → 0
+//	ARCH     the same member under amd64/ and linux-arm64/, disjoint covers                     → 0
+//	NESTED-COVER  under linux/ and linux-arm64/, both compiled at linux/arm64                   → 1
+//	OVERLAP  under amd64/ and linux/, both compiled at linux/amd64                              → 1
 //	DESYNC   a literal carrying a net-unbalanced CLOSING brace (killed the 25)                  → 0
 //	NESTED   one name, one member, two DIFFERENT enclosing partial classes (killed the 4)       → 0
 //
@@ -577,6 +586,9 @@ func TestDuplicateMemberScannerControls(t *testing.T) {
 		{"ADMIT", map[string]string{"runtime2.cs": noteMaster, "note_other.cs": noteDisjoint}, 0},
 		{"EMPTY", map[string]string{"runtime2.cs": noteMaster, "package_info.cs": noteEmpty}, 0},
 		{"FLAVOUR", map[string]string{"windows/note.cs": noteMaster, "linux/note.cs": noteMaster}, 0},
+		{"ARCH", map[string]string{"amd64/note.cs": noteMaster, "linux-arm64/note.cs": noteMaster}, 0},
+		{"NESTED-COVER", map[string]string{"linux/note.cs": noteMaster, "linux-arm64/note.cs": noteMaster}, 1},
+		{"OVERLAP", map[string]string{"amd64/note.cs": noteMaster, "linux/note.cs": noteMaster}, 1},
 		{"DESYNC", map[string]string{"http.cs": desyncA, "mmu.cs": desyncB}, 0},
 		{"NESTED", map[string]string{"requestwrite_test.cs": nestedA, "transport_test.cs": nestedB}, 0},
 	}

@@ -225,8 +225,10 @@ var fleetClearedSegments = map[string]string{
 	// The docs/ConversionStrategies-Reference.md entry (a fictitious account in an emitted-XML
 	// example) was retired 2026-09-26: the security-order scrub spelled that segment "<user>".
 	// Upstream Go doc comments and fixtures, carried verbatim into the converted corpus.
-	"src/core/runtime/traceback.cs|rsc":           "upstream Go doc comment: an example traceback path",
-	"src/core/os/user/linux/lookup_unix.cs|kevin": "upstream Go fixture: a passwd-format line in a doc comment",
+	// traceback.cs is one file per GOARCH since the linux/arm64 flavour's corpus apply; the comment is in both.
+	"src/core/runtime/amd64/traceback.cs|rsc":       "upstream Go doc comment: an example traceback path",
+	"src/core/runtime/linux-arm64/traceback.cs|rsc": "upstream Go doc comment: an example traceback path",
+	"src/core/os/user/linux/lookup_unix.cs|kevin":   "upstream Go fixture: a passwd-format line in a doc comment",
 }
 
 // fleetClearedTokenFiles clears the DENIED-TOKEN pass for files that legitimately carry the owner's

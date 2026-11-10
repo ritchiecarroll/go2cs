@@ -371,6 +371,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnPackageBoxParity_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnSourcePins_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\l3BlockPosition_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\layoutKeyLists_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\lineKeyedRecords_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\moduleDisclosureWording_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\stdlibDisclosureWording_test.go" />
@@ -386,6 +387,7 @@
     <None Include="$(MSBuildThisFileDirectory)internalTestDynamicTypeLifts.go" />
     <None Include="$(MSBuildThisFileDirectory)internalTestDynamicTypeLifts_test.go" />
     <None Include="$(MSBuildThisFileDirectory)layoutDuplicates_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)layoutKeyFoldReaders_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeCallGateWindows_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeFieldArrayViewTranscription_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeRootFieldViewCensus_test.go" />

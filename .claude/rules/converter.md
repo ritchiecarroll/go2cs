@@ -88,11 +88,12 @@ Full taxonomy: [`docs/Architecture.md`](docs/Architecture.md).
   `-stdlib` do neither. An explicit *working* root always wins, and every harness passes an EXPLICIT
   `-go2cspath <repo>\src` computed from its own location.
 - `-platforms os/arch` — the ONE target emitted for (default: the host), or a comma-separated LIST
-  (`-platforms windows/amd64,linux/amd64,darwin/amd64`)
+  (`-platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64`)
   which **with `-stdlib`** performs the multi-platform EMISSION (`platformEmit.go`): convert per target
   into a seeded staging root (`-platform-stage <dir>`), then MERGE into the `-go2cspath` corpus as
-  layout L3 — shared files flat, platform-varying per-GOOS, hand-owns routed to their principal's
-  platform set. **A list without `-stdlib` is REJECTED**, never narrowed to the first target.
+  layout L3 — shared files flat, platform-varying in a key folder (`<goos>/`, `<arch>/`, `<goos>-<arch>/`),
+  hand-owns routed to their principal's platform set. The list must equal `platformUniverse`
+  (`platformLattice.go`). **A list without `-stdlib` is REJECTED**, never narrowed to the first target.
 - `-platform-census <dir>` — READ-ONLY instrument over the same staging (`-stdlib` + ≥2 targets):
   converts per target into `<dir>\<goos>-<goarch>\src` (each root SEEDED from `-go2cspath`, wiped and
   re-seeded per run so "never convert twice into one root" is mechanical), classifies every artifact

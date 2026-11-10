@@ -72,10 +72,8 @@ func (v *Visitor) publishedConstraintProxyElements(pkg *types.Package, proxyName
 // embedded record of a published standard-library package. Reading here applies nothing, so a package this file reaches
 // only through a third one is read without importing its aliases.
 func importPackageInfoLines(info PackageInfo, options Options) ([]string, bool) {
-	goos := goosOfTarget(options.targetPlatform)
-
 	if info.NuGetSubstitution != nil {
-		return info.NuGetSubstitution.metadataLines(info.ImportPath, goos)
+		return info.NuGetSubstitution.metadataLines(info.ImportPath, options.targetPlatform)
 	}
 
 	packageInfoFile := platformPackageInfoPath(info.TargetDir, options.targetPlatform)
@@ -86,7 +84,7 @@ func importPackageInfoLines(info PackageInfo, options Options) ([]string, bool) 
 	}
 
 	if info.PublishedStdLib {
-		return stdLibExportedMetadata(info.PackageName, goos)
+		return stdLibExportedMetadata(info.PackageName, options.targetPlatform)
 	}
 
 	return nil, false

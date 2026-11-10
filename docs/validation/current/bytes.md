@@ -6,7 +6,7 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `bytes` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-10-25 · converter `3e3f18925`*
+*Validated 2026-11-10 · converter `780cb9b34`*
 
 **84 matched · 6 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/bytes`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/bytes).
@@ -122,9 +122,9 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 | Test | Class | Pinned reason |
 |:--|:--|:--|
 | `TestGrow` | `deferred` | Want-zero AllocsPerRun assert: Go's Buffer also allocates, once per doubling, and passes because AllocsPerRun's integer quotient truncates the sub-one average to 0 (buffer_test.go:549-568; go1.24.13 testing/allocs.go:40-44). The converted host floors the same sub-one quotient to 1 (testing.cs:755), so the converted run reports 1 allocation per run. |
-| `TestIndex` | `deferred` | Want-zero AllocsPerRun assert: Go compares `string(s[:n]) == string(sep)` without allocating, while the converted generic IndexRabinKarp (src/core/internal/bytealg/bytealg.cs:82 and :90) compares `s[..n].ToGoString() == sep.ToGoString()` and mints an @string copy for each side: 2 counted objects per run. The converter already emits a non-allocating string view for such a comparison; extending it to a type-parameter operand removes both copies. |
+| `TestIndex` | `deferred` | Want-zero AllocsPerRun assert: Go compares `string(s[:n]) == string(sep)` without allocating, while the converted generic IndexRabinKarp (src/core/internal/bytealg/amd64/bytealg.cs:86 and :94) compares `s[..n].ToGoString() == sep.ToGoString()` and mints an @string copy for each side: 2 counted objects per run. The converter already emits a non-allocating string view for such a comparison; extending it to a type-parameter operand removes both copies. |
 | `TestIndexRune` | `deferred` | Want-zero AllocsPerRun assert: string(r) for a lookup materializes a byte[] in the managed model, where Go builds it in runtime.intstring's 4-byte stack buffer. A transient one-rune string over a stack encoding, for a string(r) the callee does not retain, removes it. |
-| `TestLastIndex` | `deferred` | Want-zero AllocsPerRun assert: the converted LastIndexRabinKarp (src/core/internal/bytealg/bytealg.cs:110) compares `s[last..].ToGoString() == sep.ToGoString()`, two @string copies per run where Go's `string(...) == string(...)` allocates none. The converter already emits a non-allocating string view for such a comparison; extending it to a type-parameter operand removes both copies. |
+| `TestLastIndex` | `deferred` | Want-zero AllocsPerRun assert: the converted LastIndexRabinKarp (src/core/internal/bytealg/amd64/bytealg.cs:114) compares `s[last..].ToGoString() == sep.ToGoString()`, two @string copies per run where Go's `string(...) == string(...)` allocates none. The converter already emits a non-allocating string view for such a comparison; extending it to a type-parameter operand removes both copies. |
 | `TestNewBufferShallow` | `deferred` | Want-zero AllocsPerRun assert: the address-taken Buffer copy in the measured closure is heap-boxed per run (one ж box per address-take) in the managed model, where Go's escape analysis keeps the shallow copy on the stack. Reducing per-address-take boxes removes it. |
 | `TestWriteAppend` | `deferred` | Want-zero AllocsPerRun assert over an AvailableBuffer/AppendInt/Write loop: Go's sufficiently-sized buffer appends allocation-free. The counted object is strconv formatBits' local 65-byte array (strconv/itoa.cs:89), allocated on each AppendInt of a value of 100 or more, where Go keeps the array on the stack. |
 

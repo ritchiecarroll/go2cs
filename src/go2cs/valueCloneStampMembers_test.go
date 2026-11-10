@@ -82,7 +82,9 @@ import (
 //	      and a matcher whose continuation set is `; = => {` sees neither of them.
 //	170 → a per-GOOS directory stamps a type declared in its PARENT. Written as a FALLBACK ("look up
 //	      only when the own-directory union is empty") this never fires, because a per-GOOS directory
-//	      usually declares its own partial too. It has to be a UNION.
+//	      usually declares its own partial too. It has to be a UNION — and since the arch axis the
+//	      union is taken PER BUILD over the flat directory and every key folder that build compiles
+//	      (valueCloneScope), because a type can now sit whole in `amd64/` and `linux-arm64/`.
 //	  2 → the generator MINTS the member. A defined type over another [GoType] is declared bodiless —
 //	      `[GoType("encoder")] partial struct EncoderBuffer;` — and go2cs-gen forwards Clone() to a
 //	      single minted `Value`; see src/gen/go2cs-gen/Templates/InheritedType/InheritedTypeTemplate.cs,
@@ -149,14 +151,22 @@ var (
 // A stamp may name one of these on such a type without the corpus declaring it anywhere.
 var valueCloneMintedMembers = map[string]bool{"Value": true}
 
-// stampFinding is one stamped member with no declaration in the type it stamps.
+// stampFinding is one stamped member with no declaration in the type it stamps. Targets names the
+// builds that miss the declaration when only SOME of the builds compiling the stamp do; it is empty
+// when none of them declares the member, which is every finding a single-folder tree can produce.
 type stampFinding struct {
-	File   string
-	Type   string
-	Member string
+	File    string
+	Type    string
+	Member  string
+	Targets string
 }
 
 func (f stampFinding) String() string {
+	if len(f.Targets) > 0 {
+		return fmt.Sprintf("%s: [GoValueClone] on %q names %q, which that type does not declare in the %s build",
+			f.File, f.Type, f.Member, f.Targets)
+	}
+
 	return fmt.Sprintf("%s: [GoValueClone] on %q names %q, which that type does not declare", f.File, f.Type, f.Member)
 }
 
@@ -300,13 +310,16 @@ func multiDeclaratorNames(body string) map[string]bool {
 }
 
 // valueCloneTypeIndex holds, PER DIRECTORY, every partial type declaration's body and every
-// bodiless [GoType("…")] wrapper. A stamp resolves against the union over its own directory AND its
-// parent — the union, not a fallback, because a per-GOOS directory usually declares its own partial
-// of the type as well, and a fallback keyed on "only when the own-directory union is empty" would
-// therefore never fire for the case it was written for.
+// bodiless [GoType("…")] wrapper. A stamp resolves, for each build that compiles it, against the
+// union over the directories that build compiles (valueCloneScope) — the union, not a fallback,
+// because a layout key folder usually declares its own partial of the type as well, and a fallback
+// keyed on "only when the own-directory union is empty" would therefore never fire for the case it
+// was written for. projects holds the directories that carry a .csproj: a key-SHAPED directory with
+// a project of its own (internal/syscall/windows) is a package, not a folder of its parent.
 type valueCloneTypeIndex struct {
 	bodies   map[string]map[valueCloneTypeKey][]string
 	wrappers map[string]map[valueCloneTypeKey]bool
+	projects map[string]bool
 }
 
 // valueCloneTypeKey is what q102 changed. The index used to key on the BARE type name within a
@@ -410,6 +423,7 @@ func newValueCloneTypeIndex() *valueCloneTypeIndex {
 	return &valueCloneTypeIndex{
 		bodies:   map[string]map[valueCloneTypeKey][]string{},
 		wrappers: map[string]map[valueCloneTypeKey]bool{},
+		projects: map[string]bool{},
 	}
 }
 
@@ -498,35 +512,73 @@ func (x *valueCloneTypeIndex) addWrapper(dir string, key valueCloneTypeKey) {
 	x.wrappers[dir][key] = true
 }
 
-// valueCloneScope returns the directories a stamp in `dir` resolves against.
+// valueClonePackage splits a stamp's directory into its PACKAGE directory and the layout key folder
+// the stamp sits in, "" when the stamp is flat. A directory is a key folder of its parent when its
+// name is key-shaped and it carries no project of its own.
 //
 // ⚠ The terminal case is `parent == dir` and NOTHING ELSE. An earlier form also excluded "." and
 // "/", which reads as harmless — src/core's own subdirectories are never "." — and is exactly what
-// makes the per-GOOS rule untestable, because a planted tree rooted at t.TempDir() has its parent
+// makes the key-folder rule untestable, because a planted tree rooted at t.TempDir() has its parent
 // directory spelled ".". The control below caught it; the corpus arm could not have, and a rule
 // whose only proof is the corpus is a rule with no control at all.
-func valueCloneScope(dir string) []string {
+func (x *valueCloneTypeIndex) valueClonePackage(dir string) (packageDir, folder string) {
 	parent := path.Dir(dir)
 
-	if parent == dir {
-		return []string{dir}
+	if parent == dir || x.projects[dir] || !isLayoutKeyFolderName(path.Base(dir)) {
+		return dir, ""
 	}
 
-	return []string{dir, parent}
+	return parent, path.Base(dir)
 }
 
-// declares resolves a stamp against the index.
+// valueCloneScope returns the directories ONE build of a package compiles: the package's flat
+// directory and every layout key folder serving that target. The layout is additive, so this is the
+// set of partial declarations that build's compilation unions.
 //
-// ⚠ THE ENCLOSING CLASS TRAVELS WITH THE DIRECTORY, NOT WITH THE SCOPE. A stamp in a per-GOOS
-// subdirectory resolves against its parent as well, and the parent declares the SAME Go package, so
-// its `*_package` class carries the same NAME — `syscall/linux` and `syscall` both spell it
-// `syscall_package`. That is what makes one key work across the scope union. If a parent ever spells
-// it differently the union stops matching and this guard REPORTS rather than hides, which is the
-// safe direction and is why the corpus arm's finding count is the thing being held at zero.
-func (x *valueCloneTypeIndex) declares(dir, enclosing, typeName, member string) bool {
-	key := valueCloneTypeKey{Enclosing: enclosing, Name: typeName}
+// ⚠ IT WAS "the stamp's own directory and its parent" UNTIL THE ARCH AXIS, and that rule read two
+// real shapes as defects once linux/arm64 entered the universe. A FLAT stamp whose type moved whole
+// into `amd64/` and `linux-arm64/` has no declaration in its own directory or above it; and a stamp
+// in `linux-amd64/` whose members sit in the sibling `linux/` never looked sideways. Both compile,
+// because every build that compiles the stamp also compiles a folder that declares the member — which
+// is the property this states, per build, instead of approximating it by direction.
+func (x *valueCloneTypeIndex) valueCloneScope(packageDir, target string) []string {
+	scope := []string{packageDir}
 
-	for _, d := range valueCloneScope(dir) {
+	for _, folder := range platformLayoutFolders(target) {
+		if child := path.Join(packageDir, folder); !x.projects[child] {
+			scope = append(scope, child)
+		}
+	}
+
+	return scope
+}
+
+// undeclaredAt resolves a stamp against the index and returns the builds, of those that compile the
+// stamp, in which the stamped type does not declare the member. The second result is how many
+// builds compile the stamp, so a caller can tell "nowhere" from "in one flavor".
+//
+// ⚠ THE ENCLOSING CLASS TRAVELS WITH THE DIRECTORY, NOT WITH THE SCOPE. Every directory of one scope
+// declares the SAME Go package, so its `*_package` class carries the same NAME — `syscall/linux` and
+// `syscall` both spell it `syscall_package`. That is what makes one key work across the scope union.
+// If a folder ever spells it differently the union stops matching and this guard REPORTS rather than
+// hides, which is the safe direction and is why the corpus arm's finding count is the thing being
+// held at zero.
+func (x *valueCloneTypeIndex) undeclaredAt(dir, enclosing, typeName, member string) (missing []string, builds int) {
+	key := valueCloneTypeKey{Enclosing: enclosing, Name: typeName}
+	packageDir, folder := x.valueClonePackage(dir)
+	targets := corpusLattice().folderCover(folder)
+
+	for _, target := range targets {
+		if !x.declaresIn(x.valueCloneScope(packageDir, target), key, member) {
+			missing = append(missing, target)
+		}
+	}
+
+	return missing, len(targets)
+}
+
+func (x *valueCloneTypeIndex) declaresIn(scope []string, key valueCloneTypeKey, member string) bool {
+	for _, d := range scope {
 		for _, body := range x.bodies[d][key] {
 			if declaresMember(body, member) {
 				return true
@@ -573,6 +625,21 @@ func scanValueCloneStamps(root string) (valueCloneScan, error) {
 			return nil
 		}
 
+		rel, relErr := filepath.Rel(root, p)
+
+		if relErr != nil {
+			rel = p
+		}
+
+		rel = filepath.ToSlash(rel)
+		dir := path.Dir(rel)
+
+		if strings.HasSuffix(p, ".csproj") {
+			index.projects[dir] = true
+
+			return nil
+		}
+
 		if !strings.HasSuffix(p, ".cs") {
 			return nil
 		}
@@ -582,15 +649,6 @@ func scanValueCloneStamps(root string) (valueCloneScan, error) {
 		if readErr != nil {
 			return readErr
 		}
-
-		rel, relErr := filepath.Rel(root, p)
-
-		if relErr != nil {
-			rel = p
-		}
-
-		rel = filepath.ToSlash(rel)
-		dir := path.Dir(rel)
 
 		scan.Files++
 		texts[rel] = string(raw)
@@ -639,9 +697,19 @@ func scanValueCloneStamps(root string) (valueCloneScan, error) {
 			for _, nm := range quotedNameRe.FindAllStringSubmatch(args, -1) {
 				scan.Members++
 
-				if !index.declares(dirs[rel], encl, typeName, nm[1]) {
-					scan.Findings = append(scan.Findings, stampFinding{File: rel, Type: typeName, Member: nm[1]})
+				missing, builds := index.undeclaredAt(dirs[rel], encl, typeName, nm[1])
+
+				if len(missing) == 0 {
+					continue
 				}
+
+				finding := stampFinding{File: rel, Type: typeName, Member: nm[1]}
+
+				if len(missing) < builds {
+					finding.Targets = strings.Join(missing, ", ")
+				}
+
+				scan.Findings = append(scan.Findings, finding)
 			}
 		}
 	}
@@ -899,6 +967,21 @@ func TestValueCloneScannerAdmitsTheFourCorpusShapes(t *testing.T) {
 				"package_info.cs": "namespace go;\npartial class p { [GoValueClone(\"Value\")] public partial struct IpMaskString {} }\n",
 			},
 		},
+		{
+			name: "arch axis: a flat stamp's type sits whole in the key folders, one per build",
+			files: map[string]string{
+				"package_info.cs":        "namespace go;\npartial class p { [GoValueClone(\"buf\")] public partial struct State {} }\n",
+				"amd64/chacha8.cs":       "namespace go;\npartial class p { public partial struct State { internal array<uint64> buf; } }\n",
+				"linux-arm64/chacha8.cs": "namespace go;\npartial class p { public partial struct State { internal array<uint64> buf; } }\n",
+			},
+		},
+		{
+			name: "arch axis: a stamp in a pair folder names a member the sibling GOOS folder declares",
+			files: map[string]string{
+				"linux-amd64/package_info.cs": "namespace go;\npartial class p { [GoValueClone(\"Sec\")] public partial struct Timespec {} }\n",
+				"linux/types.cs":              "namespace go;\npartial class p { public partial struct Timespec { public int64 Sec; } }\n",
+			},
+		},
 	} {
 		t.Run(shape.name, func(t *testing.T) {
 			dir := t.TempDir()
@@ -928,6 +1011,70 @@ func TestValueCloneScannerAdmitsTheFourCorpusShapes(t *testing.T) {
 
 			if len(scan.Findings) != 0 {
 				t.Fatalf("this shape compiles and must be ADMITTED, got %d finding(s): %v", len(scan.Findings), scan.Findings)
+			}
+		})
+	}
+}
+
+// TestValueCloneStampResolvesPerBuild is the FIRES half of the two arch-axis shapes admitted above. A
+// stamp is compiled by every build its folder serves, so a member declared for only some of them is
+// a CS1061 in the others — and a scope that merely widened ("look in every key folder") would admit
+// exactly that. Each arm is one of the admitted shapes with one declaration taken away or moved.
+func TestValueCloneStampResolvesPerBuild(t *testing.T) {
+	for _, arm := range []struct {
+		name  string
+		files map[string]string
+		want  stampFinding
+	}{
+		{
+			name: "a flat stamp declared for the amd64 builds only is missing in the arm64 build",
+			files: map[string]string{
+				"package_info.cs":  "namespace go;\npartial class p { [GoValueClone(\"buf\")] public partial struct State {} }\n",
+				"amd64/chacha8.cs": "namespace go;\npartial class p { public partial struct State { internal array<uint64> buf; } }\n",
+			},
+			want: stampFinding{File: "package_info.cs", Type: "State", Member: "buf", Targets: "linux/arm64"},
+		},
+		{
+			name: "a pair folder's stamp is not satisfied by the OTHER pair folder",
+			files: map[string]string{
+				"linux-amd64/package_info.cs": "namespace go;\npartial class p { [GoValueClone(\"Sec\")] public partial struct Timespec {} }\n",
+				"linux-arm64/types.cs":        "namespace go;\npartial class p { public partial struct Timespec { public int64 Sec; } }\n",
+			},
+			want: stampFinding{File: "linux-amd64/package_info.cs", Type: "Timespec", Member: "Sec"},
+		},
+		{
+			name: "a key-shaped directory with a project of its own is a package, not a folder of its parent",
+			files: map[string]string{
+				"windows/windows.csproj":  "<Project />\n",
+				"windows/package_info.cs": "namespace go;\npartial class p { [GoValueClone(\"hdr\")] internal partial struct reader {} }\n",
+				"reader.cs":               "namespace go;\npartial class p { internal partial struct reader { internal Header hdr; } }\n",
+			},
+			want: stampFinding{File: "windows/package_info.cs", Type: "reader", Member: "hdr"},
+		},
+	} {
+		t.Run(arm.name, func(t *testing.T) {
+			dir := t.TempDir()
+
+			for name, body := range arm.files {
+				full := filepath.Join(dir, name)
+
+				if err := os.MkdirAll(filepath.Dir(full), 0o750); err != nil {
+					t.Fatalf("planting %s: %v", name, err)
+				}
+
+				if err := os.WriteFile(full, []byte(body), 0o600); err != nil {
+					t.Fatalf("planting %s: %v", name, err)
+				}
+			}
+
+			scan, err := scanValueCloneStamps(dir)
+
+			if err != nil {
+				t.Fatalf("scanning the planted tree: %v", err)
+			}
+
+			if len(scan.Findings) != 1 || scan.Findings[0] != arm.want {
+				t.Fatalf("want exactly %+v, got %d finding(s): %+v", arm.want, len(scan.Findings), scan.Findings)
 			}
 		})
 	}

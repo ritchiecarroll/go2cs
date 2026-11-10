@@ -277,6 +277,39 @@ public class EscapeRegistryGeneratorTests
         Assert.IsFalse(neutral.Any(source => source.Contains("go2cs.PlatformVariant")), "the same package with its sources at the project root is neutral");
     }
 
+    // The arch axis (docs/phase4/DESIGN-linux-arm64-flavour.md): with linux/arm64 in the universe a package's platform
+    // sources can sit in <GoTargetArch>/ or <GoTargetOS>-<GoTargetArch>/ ALONE (most packages that gain an `amd64/` folder
+    // carry no GOOS folder at all). Such a package differs between two flavours exactly as a per-GOOS one does,
+    // so it is stamped the same way; a predicate that knew only <GoTargetOS>/ read it neutral, and a neutral package walking
+    // its fields would differ between linux/amd64 and linux/arm64. A folder that is no key of THIS build's target is not a
+    // platform folder, and a project that does not expose GoTargetArch keeps the GOOS reading.
+    [TestMethod]
+    public void APackageWhoseOnlyPlatformFolderIsAnArchOrPairKeyIsMarked()
+    {
+        const string Members = "internal static object Use() => default(slice<nint>);";
+        static bool Marked(string[] generated) => generated.Any(source => source.Contains("[assembly: global::System.Reflection.AssemblyMetadata(\"go2cs.PlatformVariant\", \"true\")]"));
+
+        foreach (string folder in (string[])["amd64", "linux-amd64", "linux"])
+        {
+            (_, string[] generated, Diagnostic[] errors) = RunIn("opkg", Members, "linux", "amd64", folder);
+
+            Assert.AreEqual(0, errors.Length, $"{folder}: the marker and registry compile: " + string.Join("; ", errors.Take(3)));
+            Assert.IsTrue(Marked(generated), $"a package whose only platform folder is {folder}/ is stamped at linux/amd64");
+        }
+
+        foreach (string folder in (string[])["arm64", "linux-arm64", "windows-amd64", "amd64x", "linux-amd64-extra"])
+        {
+            (_, string[] generated, _) = RunIn("opkg", Members, "linux", "amd64", folder);
+            Assert.IsFalse(Marked(generated), $"{folder}/ is no key of linux/amd64, so its package reads neutral there");
+        }
+
+        (_, string[] root, _) = RunIn("opkg", Members, "linux", "amd64", null);
+        Assert.IsFalse(Marked(root), "the same package with its sources at the project root is neutral");
+
+        (_, string[] hidden, _) = RunIn("opkg", Members, "linux", null, "amd64");
+        Assert.IsFalse(Marked(hidden), "a project that does not expose GoTargetArch has no arch folder to read");
+    }
+
     // The per-OS marker's one lost type (2026-10-11, the six-build count against 0904171759): expvar boxes runtime.MemStats,
     // whose BySize field is array<runtime.MemStats_BySize>; once expvar (neutral) stopped at runtime (per-OS), no registry
     // named it. A per-OS package therefore registers what a referencing compilation reaches through its EXPORTED structs:
@@ -357,10 +390,15 @@ public class EscapeRegistryGeneratorTests
     // Runs the generator over <name>_package holding `members`. goTargetOS non-null sets the two build properties the
     // generator reads (build_property.GoTargetOS, build_property.MSBuildProjectDirectory = ProjectDirectory); perOSSource
     // places the package's source file in ProjectDirectory/<goTargetOS>/ instead of ProjectDirectory/.
-    private static (string[] registered, string[] generated, Diagnostic[] errors) RunOn(string name, string members, string? goTargetOS, bool perOSSource, params MetadataReference[] references)
+    private static (string[] registered, string[] generated, Diagnostic[] errors) RunOn(string name, string members, string? goTargetOS, bool perOSSource, params MetadataReference[] references) =>
+        RunIn(name, members, goTargetOS, null, perOSSource ? goTargetOS : null, references);
+
+    // RunOn with the arch axis: goTargetArch non-null also sets build_property.GoTargetArch, and folder non-null places the
+    // package's source file in ProjectDirectory/<folder>/ (null: at the project root).
+    private static (string[] registered, string[] generated, Diagnostic[] errors) RunIn(string name, string members, string? goTargetOS, string? goTargetArch, string? folder, params MetadataReference[] references)
     {
         CSharpParseOptions options = new(LanguageVersion.Preview);
-        string path = perOSSource && goTargetOS is not null ? $@"{ProjectDirectory}\{goTargetOS}\{name}.cs" : $@"{ProjectDirectory}\{name}.cs";
+        string path = folder is not null ? $@"{ProjectDirectory}\{folder}\{name}.cs" : $@"{ProjectDirectory}\{name}.cs";
 
         CSharpCompilation compilation = CSharpCompilation.Create(name,
             [CSharpSyntaxTree.ParseText($"namespace go; [GoPackage(\"{name}\")] public static partial class {name}_package {{ {members} }}", options, path: path),
@@ -372,6 +410,9 @@ public class EscapeRegistryGeneratorTests
             ["build_property.GoTargetOS"] = goTargetOS,
             ["build_property.MSBuildProjectDirectory"] = ProjectDirectory
         };
+
+        if (goTargetOS is not null && goTargetArch is not null)
+            properties["build_property.GoTargetArch"] = goTargetArch;
 
         CSharpGeneratorDriver.Create([new EscapeRegistryGenerator()], parseOptions: options, optionsProvider: new BuildProperties(properties))
             .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out _);

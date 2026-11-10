@@ -1037,7 +1037,7 @@ constraints and file-name suffixes, as `go build` does. The standard library is 
 Linux and macOS, each on amd64. Files whose C# differs between them go into `windows/`, `linux/` and
 `darwin/` subfolders. For example, `os` keeps `dir_windows.cs` in `os/windows/` and `dirent_linux.cs` in
 `os/linux/`.
-<!-- the multi-target run: docs/ConversionStrategies-Reference/package-conversion.md:536 (`-platforms windows/amd64,linux/amd64,darwin/amd64`) -->
+<!-- the multi-target run: docs/ConversionStrategies-Reference/package-conversion.md:536 (`-platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64`) -->
 
 The project compiles its flat files plus the one folder named by the `GoTargetOS` build property. It
 defaults to `windows`; a build sets another target with, for example, `-p:GoTargetOS=linux`. A package
@@ -10455,7 +10455,7 @@ a func value converted to an interface, a func nested in such a value's paramete
 method. Most registrations are queued when the package loads and run on the registry's first miss. Under
 Native AOT a variadic signature over value types that nothing registered is refused by name, as a Go panic
 that `recover` can catch.
-<!-- golib: src/core/golib/GoReflect.VariadicRegistry.cs:17-32#3ea1de (header), :80-93#5475b8 (closeVariadicTrampoline refuses a value-type family without dynamic code), :95-103#5336d5 (refuseVariadic, builtin.panic naming the family and the registry). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:408-443#15e775 (VariadicRegistration), src/gen/go2cs-gen/MethodSet.cs:429-446#01c819 (a variadic method's arms). Lazy queue: src/core/golib/GoDeferredRegistrations.cs (EscapeRegistry; "Native AOT is unchanged"), src/gen/go2cs-gen/DeferredRegistration.cs. Guards: src/tests/Behavioral/ReflectVariadicCall; GolibTests GoReflectBridgeClosureTests ARegisteredVariadicSignatureIsServedByItsCompiledTrampolines, AnUnregisteredValueTypeVariadicIsRefusedByNameWithoutDynamicCode; GenTests EveryEscapingVariadicFuncSignatureIsRegistered, AVariadicArmRegistersItsSignatures; GolibTests DeferredRegistrationTests. -->
+<!-- golib: src/core/golib/GoReflect.VariadicRegistry.cs:17-32#3ea1de (header), :80-93#5475b8 (closeVariadicTrampoline refuses a value-type family without dynamic code), :95-103#5336d5 (refuseVariadic, builtin.panic naming the family and the registry). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:417-452#15e775 (VariadicRegistration), src/gen/go2cs-gen/MethodSet.cs:429-446#01c819 (a variadic method's arms). Lazy queue: src/core/golib/GoDeferredRegistrations.cs (EscapeRegistry; "Native AOT is unchanged"), src/gen/go2cs-gen/DeferredRegistration.cs. Guards: src/tests/Behavioral/ReflectVariadicCall; GolibTests GoReflectBridgeClosureTests ARegisteredVariadicSignatureIsServedByItsCompiledTrampolines, AnUnregisteredValueTypeVariadicIsRefusedByNameWithoutDynamicCode; GenTests EveryEscapingVariadicFuncSignatureIsRegistered, AVariadicArmRegistersItsSignatures; GolibTests DeferredRegistrationTests. -->
 
 **Full detail:** [Reference → Manually-Converted Declarations: the reflection bridge](ConversionStrategies-Reference/manual-conversions.md#structfieldtag-is-a-real-read--the-converter-has-always-emitted-the-tag-nothing-had-ever-read-it) — the bridge's rules one by one, from tag reads and type names to assignability, the array-length and channel-direction attributes, and the run-time type constructors.
 
@@ -12516,7 +12516,7 @@ pass and nothing else.
 
 <!-- hash/crc32: crc32_amd64.go has no //go:build line; its only constraint is the `_amd64` filename
      suffix, so `-tags purego` selects the same files as the default build. Its hand-owned whole-file
-     replacement is ../src/core/hash/crc32/crc32_amd64.cs. -->
+     replacement is ../src/core/hash/crc32/amd64/crc32_amd64.cs. -->
 
 **Behavior matches the `purego` build, including its gaps.** go2cs converts what Go builds under `purego` and
 does not patch it. Under `purego`, P-256's scalar inverse has no fast implementation, so Go selects a stub
