@@ -50,6 +50,9 @@ func TestCgoLinkFlagsTakeOnlyPlainTokens(t *testing.T) {
 		{"linux", "-framework", "is darwin's"},
 		{"linux", "-Wl,-rpath,/tmp", "is not one Phase 2 passes"},
 		{"linux", "-fplugin=x", "is not one Phase 2 passes"},
+		// The admission of cmd/go's default CGO_LDFLAGS is token-exact (§11.15, as amended).
+		{"linux", "-O3", "is not one Phase 2 passes"},
+		{"linux", "-g3", "is not one Phase 2 passes"},
 	} {
 		if _, err := parseCgoLinkFlags(refused.goos, []string{refused.arg, "x"}, dir); err == nil || !strings.Contains(err.Error(), refused.says) {
 			t.Errorf("%s on %s: %v, want it to say %q", refused.arg, refused.goos, err, refused.says)
@@ -258,6 +261,37 @@ func TestCgoCaptureNamesTheSystemMathLibrary(t *testing.T) {
 		// A C runtime: the UCRT's API set or ucrtbase.dll, or msvcrt.dll for an msvcrt toolchain. Never KERNEL32.
 		if name := strings.ToLower(got[0].name); !strings.HasSuffix(name, ".dll") || !strings.Contains(name, "crt") {
 			t.Errorf("cos resolves to %q, which names no C runtime DLL", got[0].name)
+		}
+	}
+}
+
+// G1's windows arm needs a C runtime symbol that BOTH the host mingw gcc and the pinned zig resolve DYNAMICALLY (§11.10, as
+// amended): cos does not, being static under zig. Each candidate is captured alone, so a static one cannot hide another,
+// and each reading is logged; kernel32's GetCurrentProcessId is held to resolve dynamically under any windows toolchain.
+func TestCgoCaptureReadsWindowsCRuntimeCandidatesOneByOne(t *testing.T) {
+	if runtime.GOOS != "windows" {
+		t.Skip("the windows C runtime candidates for G1: NOT MEASURED off windows")
+	}
+
+	toolchain := cgoCaptureToolchain(t)
+
+	for _, symbol := range []string{"strlen", "puts", "GetCurrentProcessId"} {
+		got, err := captureCgoLibraries(toolchain, runtime.GOOS, cgoLinkFlags{}, []string{symbol}, t.TempDir())
+
+		if err != nil {
+			t.Logf("READING %s: not dynamic under this toolchain: %v", symbol, err)
+
+			if symbol == "GetCurrentProcessId" {
+				t.Errorf("kernel32's GetCurrentProcessId must resolve dynamically: %v", err)
+			}
+
+			continue
+		}
+
+		t.Logf("READING %s: %s", symbol, got[0].name)
+
+		if symbol == "GetCurrentProcessId" && !strings.EqualFold(got[0].name, "kernel32.dll") {
+			t.Errorf("GetCurrentProcessId resolves to %q, want kernel32.dll", got[0].name)
 		}
 	}
 }
