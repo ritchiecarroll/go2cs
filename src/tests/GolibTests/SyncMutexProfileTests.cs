@@ -37,25 +37,84 @@ public class SyncMutexProfileTests
     }
 
     // ONE contended handoff, deterministically: a holder takes the lock and keeps it until this thread
-    // is waiting on it, then releases it to this thread. (Two free-running workers are not a fixture:
-    // one can finish before the other starts, and SemaphoreSlim lets a releasing thread take the lock
-    // straight back, so how many handoffs find a waiter depends on thread start-up.)
+    // is PARKED on it (see Parked), then releases it to this thread. The wait is bounded, and a waiter that
+    // never parked is named after the handoff. (Two free-running workers are not a fixture: one can finish
+    // before the other starts, and SemaphoreSlim lets a releasing thread take the lock straight back, so
+    // how many handoffs find a waiter depends on thread start-up.)
     private static void ContendOnce(Shared shared)
     {
         using var held = new ManualResetEventSlim();
+        using var ready = new ManualResetEventSlim();
+        Thread waiter = Thread.CurrentThread;
+        object? gate = null;
+        int inLock = 0;
+        bool parked = false;
         var holder = new Thread(() =>
         {
             shared.M.Lock();
             held.Set();
-            Thread.Sleep(50);
+            ready.Wait();
+            var waited = System.Diagnostics.Stopwatch.StartNew();
+            while (!(parked = Parked(gate!, waiter, ref inLock)) && waited.Elapsed < ParkBound)
+                Thread.Yield();
             shared.M.Unlock();
-        });
+        }) { IsBackground = true };
         holder.Start();
         held.Wait();
+        gate = GateOf(shared);
+        PrecreateStamps(gate);
+        ready.Set();
+        Volatile.Write(ref inLock, 1);
         shared.M.Lock();
+        Volatile.Write(ref inLock, 0);
         shared.M.Unlock();
         holder.Join();
+        Assert.IsTrue(parked, $"ContendOnce: this thread was not seen parked in Lock within {ParkBound}, so the holder released an unwaited lock");
     }
+
+    private static readonly TimeSpan ParkBound = TimeSpan.FromMinutes(1);
+
+    private static readonly FieldInfo? s_gateField =
+        typeof(sync_package.Mutex).GetField("gate", BindingFlags.NonPublic | BindingFlags.Instance);
+    private static readonly FieldInfo? s_waitStampsField =
+        typeof(sync_package).GetField("s_waitStamps", BindingFlags.NonPublic | BindingFlags.Static);
+    private static readonly FieldInfo? s_semaphoreWaitCount =
+        typeof(SemaphoreSlim).GetField("m_waitCount", BindingFlags.NonPublic | BindingFlags.Instance);
+
+    // The mutex's gate, once a Lock has created it.
+    private static object GateOf(Shared shared) => GateOf(shared.M);
+
+    private static object GateOf(sync_package.Mutex m)
+    {
+        Assert.IsNotNull(s_gateField, "the hand-own's Mutex.gate field");
+        Assert.IsNotNull(s_semaphoreWaitCount, "SemaphoreSlim's m_waitCount field (re-read at each .NET major hop)");
+        object? gate = s_gateField.GetValue(m);
+        Assert.IsNotNull(gate, "a mutex that has been locked has its gate");
+        return gate;
+    }
+
+    // The gate's stamp record, created before any waiter needs it, so Lock's GetValue finds it without the
+    // ConditionalWeakTable's add path and its lock.
+    private static void PrecreateStamps(object gate)
+    {
+        Assert.IsNotNull(s_waitStampsField, "the hand-own's s_waitStamps table");
+        object table = s_waitStampsField.GetValue(null)!;
+        table.GetType().GetMethod("GetOrCreateValue")!.Invoke(table, [gate]);
+    }
+
+    // A thread is PARKED in Lock when its in-Lock flag is set, the gate's SemaphoreSlim counts a thread
+    // inside its monitor section (m_waitCount, read first), and the thread is then in WaitSleepJoin. Read by
+    // the holder, which holds the gate and touches nothing else, about a gate whose stamp record exists
+    // (PrecreateStamps): the thread's try has failed, and the only place in Lock where it can wait after
+    // that is inside gate.Wait(), past its stamp. WaitSleepJoin alone is not enough: a thread blocked on the
+    // gate's monitor INSIDE the Wait(0) try, before the try fails, is in WaitSleepJoin too, and m_waitCount
+    // counts only a thread that has entered the monitor. (Measured: WaitSleepJoin alone read 13 of 20 idle
+    // 300-episode runs red on unchanged golib, mostly at an episode's first Lock.) Plain threads, so Lock's
+    // park scope is inert.
+    private static bool Parked(object gate, Thread thread, ref int inLock) =>
+        Volatile.Read(ref inLock) == 1 &&
+        (int)s_semaphoreWaitCount!.GetValue(gate)! >= 1 &&
+        (thread.ThreadState & ThreadState.WaitSleepJoin) != 0;
 
     private static void WithRates(int mutexFraction, nint blockRate, System.Action body)
     {
@@ -284,25 +343,40 @@ public class SyncMutexProfileTests
                 int64 blockBefore = TotalAt(mutex: false, "sync.(*Mutex).Lock", waiterCaller);
                 int64 mutexBefore = TotalAt(mutex: true, "sync.(*Mutex).Unlock", unlockerCaller);
 
+                // ContendOnce's handshake: the holder releases only once this thread is Parked in Lock.
                 using var held = new ManualResetEventSlim();
+                using var ready = new ManualResetEventSlim();
+                Thread waiter = Thread.CurrentThread;
+                object? gate = null;
+                int inLock = 0;
+                bool parked = false;
                 var holder = new Thread(() =>
                 {
                     mutexframeprobe_package.lockViaPointer(box);
                     held.Set();
-                    Thread.Sleep(50);
+                    ready.Wait();
+                    var waited = System.Diagnostics.Stopwatch.StartNew();
+                    while (!(parked = Parked(gate!, waiter, ref inLock)) && waited.Elapsed < ParkBound)
+                        Thread.Yield();
                     if (waiterViaLocker)
                         mutexframeprobe_package.unlockViaPointer(box);
                     else
                         mutexframeprobe_package.unlockViaLocker(locker);
-                });
+                }) { IsBackground = true };
                 holder.Start();
                 held.Wait();
+                gate = GateOf(box.Value);
+                PrecreateStamps(gate);
+                ready.Set();
+                Volatile.Write(ref inLock, 1);
                 if (waiterViaLocker)
                     mutexframeprobe_package.lockViaLocker(locker);
                 else
                     mutexframeprobe_package.lockViaPointer(box);
+                Volatile.Write(ref inLock, 0);
                 mutexframeprobe_package.unlockViaPointer(box);
                 holder.Join();
+                Assert.IsTrue(parked, $"this thread was not seen parked in Lock within {ParkBound}, so the holder released an unwaited lock");
 
                 Assert.AreEqual(blockBefore + 1, TotalAt(mutex: false, "sync.(*Mutex).Lock", waiterCaller), $"block event's frame [1] must be {waiterCaller}; records: {TopFrames(mutex: false)}");
                 Assert.AreEqual(mutexBefore + 1, TotalAt(mutex: true, "sync.(*Mutex).Unlock", unlockerCaller), $"mutex event's frame [1] must be {unlockerCaller}; records: {TopFrames(mutex: true)}");
@@ -384,14 +458,11 @@ public class SyncMutexProfileTests
     // - this thread locks a fresh mutex, so the gate exists and is held for the whole episode;
     // - the gate's stamp record is created up front (PrecreateStamps), so the waiter's Lock never takes
     //   the side table's add path, whose lock another thread can hold;
-    // - a waiter thread calls Lock, and this thread waits until the waiter is parked: its in-Lock flag set
-    //   and its thread in WaitSleepJoin. The waiter is a plain thread, so Lock's park scope is inert. With
-    //   the gate held and touched by no one else, its try has failed and gate.Wait() is the only place in
-    //   Lock where it can wait;
+    // - a waiter thread calls Lock, and this thread waits until the waiter is Parked;
     // - the Unlock that releases it must record an event.
-    // This replaced two free-running workers whose every episode was ASSUMED to contend. On a loaded
-    // runner one worker could finish its ten short holds before the other's first Lock: an episode with no
-    // contention and so, correctly, no event (osx-x64: "1 of 30 contended episodes recorded no mutex event").
+    // On a loaded runner, two free-running workers can finish one's ten short holds before the other's
+    // first Lock: an episode with no contention and so, correctly, no event (osx-x64: "1 of 30 contended
+    // episodes recorded no mutex event"). The racing shape is kept, with an honest precondition, below.
     [TestMethod]
     public void EveryParkedLockIsChargedByTheUnlockThatReleasesIt()
     {
@@ -403,7 +474,8 @@ public class SyncMutexProfileTests
             {
                 var shared = new Shared();
                 shared.M.Lock();
-                PrecreateStamps(shared);
+                object gate = GateOf(shared);
+                PrecreateStamps(gate);
                 int inLock = 0;
                 var waiter = new Thread(() =>
                 {
@@ -414,32 +486,104 @@ public class SyncMutexProfileTests
                 }) { IsBackground = true };
                 waiter.Start();
                 var waited = System.Diagnostics.Stopwatch.StartNew();
-                while (!(Volatile.Read(ref inLock) == 1 && (waiter.ThreadState & ThreadState.WaitSleepJoin) != 0))
+                while (!Parked(gate, waiter, ref inLock))
                 {
-                    Assert.IsTrue(waited.Elapsed < TimeSpan.FromMinutes(1), $"episode {episode}: the waiter never parked in Lock");
+                    Assert.IsTrue(waited.Elapsed < ParkBound, $"episode {episode}: the waiter was not seen parked in Lock within {ParkBound}");
                     Thread.Yield();
                 }
                 int64 before = Total(mutex: true);
                 shared.M.Unlock();
                 if (Total(mutex: true) == before)
                     missed.Add(episode);
-                Assert.IsTrue(waiter.Join(TimeSpan.FromMinutes(1)), $"episode {episode}: the waiter did not finish");
+                Assert.IsTrue(waiter.Join(ParkBound), $"episode {episode}: the waiter did not finish");
             }
             Assert.AreEqual(0, missed.Count, $"{missed.Count} of {episodes} Unlocks released a parked waiter and recorded no mutex event: {string.Join(", ", missed)}");
         });
     }
 
-    // The gate's stamp record, created before any waiter needs it, so Lock's GetValue finds it without the
-    // ConditionalWeakTable's add path and its lock.
-    private static void PrecreateStamps(Shared shared)
+    // The racing guard, beside the deterministic one: TestMutexBlockFullAggregation's shape, two workers
+    // started together, each re-locking right after its own Unlock, so the start race and every
+    // re-lock-after-unlock are exercised (a CurrentCount snapshot read 3/20 there). Whether an episode
+    // contends at all is the scheduler's call, so the guarantee is asserted only where contention is
+    // PROVEN:
+    // - before each Unlock the holder looks, for up to 10 ms, for the other worker Parked in Lock;
+    // - every Unlock made after such a sighting must record a mutex event;
+    // - an episode with a sighting is CONTENDED. Episodes run until 20 are, under caps of 300 episodes and
+    //   60 s (an oversubscribed box makes few sightings); reaching a cap first is Inconclusive with the
+    //   counts, never red;
+    // - OVERLAPPING episodes (the late worker's first Lock call before the early worker's last Unlock
+    //   returned) and the rest are counted and printed, never asserted. Overlap does not prove a blocked
+    //   Lock: the late worker's try can still come after that Unlock.
+    [TestMethod]
+    public void EveryEpisodeOfTwoAlternatingWorkersRecordsItsContention()
     {
-        FieldInfo? gateField = typeof(sync_package.Mutex).GetField("gate", BindingFlags.NonPublic | BindingFlags.Instance);
-        FieldInfo? tableField = typeof(sync_package).GetField("s_waitStamps", BindingFlags.NonPublic | BindingFlags.Static);
-        Assert.IsNotNull(gateField, "the hand-own's Mutex.gate field");
-        Assert.IsNotNull(tableField, "the hand-own's s_waitStamps table");
-        object? gate = gateField.GetValue(shared.M);
-        Assert.IsNotNull(gate, "a locked mutex has its gate");
-        object table = tableField.GetValue(null)!;
-        table.GetType().GetMethod("GetOrCreateValue")!.Invoke(table, [gate]);
+        const int iterations = 10, MinContended = 20, MaxEpisodes = 300;
+        TimeSpan budget = TimeSpan.FromSeconds(60);
+        long window = System.Diagnostics.Stopwatch.Frequency / 100;   // 10 ms
+        WithRates(1, 1, () =>
+        {
+            var missed = new System.Collections.Generic.List<string>();
+            var elapsed = System.Diagnostics.Stopwatch.StartNew();
+            int episode = 0, contended = 0, overlapping = 0, sightings = 0;
+            for (; episode < MaxEpisodes && contended < MinContended && elapsed.Elapsed < budget; episode++)
+            {
+                var shared = new Shared();
+                shared.M.Lock();                  // creates the gate; uncontended, so it records nothing
+                shared.M.Unlock();
+                object gate = GateOf(shared);
+                PrecreateStamps(gate);
+                using var start = new ManualResetEventSlim();
+                int[] inLock = new int[2];
+                long[] first = new long[2], last = new long[2];
+                int seen = 0, current = episode;
+                Thread[] workers = new Thread[2];
+                for (int w = 0; w < workers.Length; w++)
+                {
+                    int self = w, other = 1 - w;
+                    workers[w] = new Thread(() =>
+                    {
+                        start.Wait();
+                        for (int i = 0; i < iterations; i++)
+                        {
+                            if (i == 0)
+                                first[self] = System.Diagnostics.Stopwatch.GetTimestamp();
+                            Volatile.Write(ref inLock[self], 1);
+                            shared.M.Lock();
+                            Volatile.Write(ref inLock[self], 0);
+                            bool parked = false;
+                            for (long t0 = System.Diagnostics.Stopwatch.GetTimestamp(); !parked && System.Diagnostics.Stopwatch.GetTimestamp() - t0 < window; Thread.Yield())
+                                parked = Parked(gate, workers[other], ref inLock[other]);
+                            if (!parked)
+                            {
+                                shared.M.Unlock();
+                                continue;
+                            }
+                            int64 before = Total(mutex: true);
+                            shared.M.Unlock();
+                            Interlocked.Increment(ref seen);
+                            if (Total(mutex: true) == before)
+                                lock (missed)
+                                    missed.Add($"{current}.{i}");
+                        }
+                        last[self] = System.Diagnostics.Stopwatch.GetTimestamp();
+                    }) { IsBackground = true };
+                    workers[w].Start();
+                }
+                start.Set();
+                foreach (Thread worker in workers)
+                    Assert.IsTrue(worker.Join(ParkBound), $"episode {episode}: a worker did not finish");
+                int early = first[0] <= first[1] ? 0 : 1;
+                if (first[1 - early] < last[early])
+                    overlapping++;
+                if (seen > 0)
+                    contended++;
+                sightings += seen;
+            }
+            string counts = $"{episode} episodes in {elapsed.Elapsed.TotalSeconds:F1} s: {contended} contended ({sightings} parked waiters seen), {overlapping} overlapping, {episode - overlapping} not overlapping";
+            Console.WriteLine(counts);
+            Assert.AreEqual(0, missed.Count, $"{missed.Count} Unlock(s) released a waiter parked in Lock and recorded no mutex event (episode.iteration): {string.Join(", ", missed)}; {counts}");
+            if (contended < MinContended)
+                Assert.Inconclusive($"the race was not exercised enough: {counts}");
+        });
     }
 }
