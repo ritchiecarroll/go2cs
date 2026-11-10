@@ -4,26 +4,24 @@
 > demand only. It reaches platforms the project's own test machines do not cover — **both macOS
 > legs above all** — and gives Linux a second, independent host. It is **never a merge gate**: the
 > project's own machines and their measured budgets stay authoritative, and nothing this workflow
-> produces lands in the repository. See [`.claude/rules/corpus.md`](../.claude/rules/corpus.md) for
-> corpus mechanics and `GoTargetOS` flavors, and
-> [`.claude/rules/harness-gates.md`](../.claude/rules/harness-gates.md) for the budget table the
-> timeouts are scaled from. The darwin leg replays the census-first pattern used to bring up Linux.
+> produces lands in the repository. Its timeouts are scaled from the budgets measured on the project's
+> own machines ([Budgets](#budgets)).
 <!-- Pre-2026-10-26 wording: "It reaches platforms the fleet does not own ... and gives the Linux lane a second,
      independent host ... the fleet's machines and their measured budgets stay authoritative". The census-first
      pattern is the F-series of [`PLAN-linux-operation.md`](PLAN-linux-operation.md) (an internal record; its
      visible link was removed under the 2026-10-26 owner ruling OQ-1 on fleet language in visitor pages). -->
+<!-- 2026-11-09 (audit F147, F148): the visible links to `.claude/rules/corpus.md` (corpus mechanics, GoTargetOS
+     flavors) and `.claude/rules/harness-gates.md` (the budget table the timeouts are scaled from) were removed under
+     OQ-1, with the sentence on the census-first pattern. -->
 
 ## The three fits
 
 **1. The darwin census — the one thing nothing else can do.** Layout L3 emits a `darwin/` folder
 for every platform-varying package, and `-p:GoTargetOS=darwin` selects it, so the flavor *exists*
-in the corpus. Compiled **cross-target from Windows**, it stopped at a known wall in `os`'s
-directory walk (the L3 gate lessons in [`.claude/rules/corpus.md`](../.claude/rules/corpus.md)).
-Nothing else builds it **on Apple hardware** — and there are two of those, arm64 and x64, which are
-different compilations of the same flavor. A darwin dispatch fans out to both, and both have
-compiled clean since 2026-08-23 (below). This is the rule the standard library itself was brought up
-under, applied to a platform: **compile is the milestone, operational is later**, and the census is
-the deliverable whether or not it is green.
+in the corpus. Nothing else builds it **on Apple hardware** — and there are two of those, arm64 and
+x64, which are different compilations of the same flavor. A darwin dispatch fans out to both, and
+both compile clean. **Compile is the milestone, operational is later**, so the census is the
+deliverable whether or not it is green.
 <!-- Pre-2026-10-26 wording: "This is the Phase-3 doctrine applied to a platform". -->
 
 **2. The native-Linux control.** A Linux reading taken under WSL shares its machine with a Windows
@@ -47,9 +45,11 @@ a regression guard whose conclusion is read each morning.
 
 **Why darwin and only darwin.** windows and linux are each compiled by standing gates on the project's
 own machines, so a mechanical break in either surfaces the day it lands. **Nothing else compiles the
-darwin flavor.** A one-line compile error in the darwin flavor once went unnoticed for **seven days**,
-until the next darwin dispatch found it on both mac legs byte-identically. The alternative to a schedule
-is not "no cost"; it is "however long until someone looks". A census is 10–17 runner minutes.
+darwin flavor.** Without a schedule, a darwin-only break goes unnoticed until the next dispatch, however
+long that is. A darwin census dispatch took about 10 to 17 minutes on the hosted `macos-15` and
+`macos-15-intel` runners in September 2026.
+<!-- The runner minutes: docs/phase4/DESIGN-darwin-run-layer.md section 6.1 (2026-09-02), "~10-17 minutes per round
+     trip"; the runners: .github/workflows/os-matrix.yml, the darwin targets. -->
 <!-- The dated instance (pre-2026-10-26 visible text): "On 2026-09-02 a one-line CS0266 — `var` inferring
      `StandardBox<T>` where the base `ж<T>` was needed, left in `os/darwin/dir_darwin_impl.cs` by the box-kind
      split's 754-site emitter flip (`36b7e9d96`) — was found **seven days** after it landed, by the first darwin
@@ -58,15 +58,13 @@ is not "no cost"; it is "however long until someone looks". A census is 10–17 
 **A scheduled event carries no inputs**, so the `plan` job resolves the effective
 goos/stage/filter/dotnet once — `schedule` takes the fixed darwin/census pair, a dispatch takes its
 own inputs unchanged — and every consumer downstream reads `needs.plan.outputs.*` rather than
-`inputs.*`. Dispatch behaviour is unchanged by construction: nothing outside that one branch was
-re-decided. The resolution is positive-controlled in all four arms, negative control included (with
+`inputs.*`. The resolution is positive-controlled in all four arms, negative control included (with
 the schedule branch neutered, a schedule event falls to `linux`, not `darwin` — so the `darwin` in
 the live arm is the branch firing and not a default agreeing by luck).
 
 **Reading a red scheduled census:** it is a regression attributable to that day's merges, not a
-newly discovered wall. darwin has compiled clean since 2026-08-23 (census run 32649840220, zero
-errors on both architectures). Root it against the day's merges, as the seven-day break above was
-rooted.
+newly discovered wall. darwin compiles clean on both architectures. Root it against the day's merges.
+<!-- darwin has compiled clean since 2026-08-23 (census run 32649840220, zero errors on both architectures). -->
 <!-- Pre-2026-10-26 wording: "attributable to that day's trains ... exactly as the CS0266 above was rooted". -->
 
 ## How to trigger
@@ -96,16 +94,9 @@ gh workflow run os-matrix.yml -f goos=linux  -f stage=sweep-shard -f filter=comp
 There is no `all` value: one dispatch per flavor keeps each leg's artifacts, budget and verdict
 separate, which is what makes a wall readable. Dispatching all three is three cheap clicks.
 
-**A restricted-egress host can dispatch — but not always by the same tool.** Dispatch capability is
-per-TOOL, not per-account: on a container whose egress policy blocks the Actions blob domain,
-`gh workflow run` returned **403** while the GitHub MCP `actions_run_trigger` returned **204** for
-the same workflow, so a host that cannot trigger one way should try the other before reporting the
-workflow unavailable. The same policy blocks `go.dev` and every .NET CDN, so such a host provisions
-its own toolchains by other routes — the Go release as a **module** from `proxy.golang.org`, and
-.NET from the distribution's own package rather than a Microsoft CDN. Those are facts about the
-host, never about this workflow: what it measures is unchanged, and the readable channel for the
-results is the annotations route below.
 <!-- Pre-2026-10-26 wording said "lane" for "host" throughout this paragraph (a restricted-egress cloud session). -->
+<!-- 2026-11-09 (audit F155): the paragraph the comment above refers to, on dispatching from a restricted-egress host,
+     was removed. -->
 
 The Go toolchain is **derived, never written here** — the workflow reads `<GoStdLibVersion>` out of
 `src/version.props` and hands that exact release to `setup-go`. Both the converter and the sweep
@@ -124,7 +115,7 @@ timestamp, so an incremental build validates the other target's assemblies.
 It then reports the census the way the repository measures one — **packages-compiling first**:
 projects under `src/core`, assemblies actually produced (each project's own
 `bin/Debug/<TargetFramework>/<AssemblyName>.dll` — the probe **derives** that folder rather than
-spelling it, so a framework hop cannot make it report zero on a green build), diagnostics bucketed
+spelling it, so a target-framework change cannot make it report zero on a green build), diagnostics bucketed
 by code (raw and distinct), the same buckets by project, and the first distinct errors inline.
 Everything lands in the job summary and in the artifact. Raw error count is deliberately *not* the
 headline: fixing a file-inclusion defect raises it by surfacing what was hiding behind the failure.
@@ -145,8 +136,8 @@ from a harness failure in the log.
 
 Runs `run-validated-sweep.ps1 -Filter <name> -Exact` under `pwsh` once for each roster package
 named in the filter, with `setup-go` supplying the
-`go test -json` baseline toolchain the comparison needs. `container/heap` is the default filter —
-the project's provisioning calibration row, and the right answer to "does a sweep run here at all".
+`go test -json` baseline toolchain the comparison needs. `container/heap` is the default filter, a small,
+quick row, and the right answer to "does a sweep run here at all".
 Per-row evidence (each swept package's comparison record and results files) is collected into the
 artifact under `rows/`, alongside the full log and a post-sweep `git status` of `src/core`.
 
@@ -165,8 +156,8 @@ every arm restoring into a fresh cache with `go.*` mapped to the feed alone:
 
 - **A** the RID-selected compile asset gate (`RidCompileAsset`): rid-less, `-r`, publish, and its control;
 - **B** a small generated stdlib program converted with `-recurse=nuget`, its stdout compared with `go run`
-  (it prints `runtime.GOOS`, so a wrong-flavor load is a visible mismatch, and it calls every `sort` form whose
-  converted body once called itself, so that defect fails the release as a named stack overflow; its `BuildTag =`
+  (it prints `runtime.GOOS`, so a wrong-flavor load is a visible mismatch, and it calls every `sort` form, so a
+  self-recursive converted body fails the release as a named stack overflow; its `BuildTag =`
   line fails it when the converter's default tags and the baseline's `go run -tags safe` disagree);
 - **C** `Behavioral/StatLayoutTruth`, converted and compared the same way;
 - **D** the README walkthrough (`fatih/color`), compared the same way — it **gates on every leg**, darwin
@@ -186,20 +177,18 @@ every arm restoring into a fresh cache with `go.*` mapped to the feed alone:
   NuGet hands this RID for `go.internal.coverage.decodemeta` and `go.runtime.debug` (`runtimes/<rid>/` when the
   package carries one, else `lib/`) read for the OS's syscall buffer type. It must not name the other OS's type
   (`WSABuf` off Windows, `Iovec` on it), and a `runtimes/<rid>/` twin must name this OS's type; an assembly that
-  names neither is platform-neutral and passes (1.24.13.7 ships both packages that way). The 1.24.13.6 rehearsal
-  shipped decodemeta's Windows build in `lib/` only, and a consumer died at startup on Linux and macOS
-  (`TypeLoadException` for `WSABuf`); the consumer loads decodemeta at init, so the run reads the behavior and the
-  assembly names the cause. It gates.
+  names neither is platform-neutral and passes. The consumer loads decodemeta at init, so a build for the wrong OS
+  fails the run at startup (`TypeLoadException`), and the assembly check names the cause. It gates.
 
 A leg is green when arms A-D and G pass. Dispatch it at the tree that ships, before every release:
 it is what proves the packages carry what that tree's converter emits on every OS (a converter that emits
-`unsafe.ArrayPointer`, which the published 1.24.13.3 lacks, fails here). The pack job's budget is its own
+a runtime API the packages lack fails here). The pack job's budget is its own
 (240 min; measured 38-53 min).
 <!-- Pre-2026-10-26 wording: "(C2's 2026-10-03 finding: N's converter emits `unsafe.ArrayPointer`, which the
      published 1.24.13.3 lacks)". C2 and N were fleet lane names. -->
 
-**After the publish**, the same stage with `published_version` set to the version just pushed (say
-`-f published_version=1.26.10.1`) skips the pack and runs the same arms on the same four RIDs against
+**After the publish**, the same stage with `published_version` set to the version just pushed
+(`-f published_version=<version>`) skips the pack and runs the same arms on the same four RIDs against
 nuget.org itself, `go.*` and everything else restored from there: the release as a user receives it. It is
 dispatchable once every id in the walkthrough's restore closure is listed (a partial index fails restore loudly,
 NU1102). The input is refused on any other stage and must be four numeric parts.
@@ -215,29 +204,23 @@ deterministic; IlcCompile is not (measured 2026-10-14: one tree read 7,001 s and
 and 6,340 s and 9,897 s on hosted windows, a 56% spread; runs 38555847362 and 38576996407), so a single-run IlcCompile
 comparison is read against its RID's band. A consumer takes
 go.lib's `TrimMode=partial` default, under which the publish compiles every referenced go.* assembly whole. For this
-fixture's 31 assemblies that takes about 4 min on hosted linux and windows, 6 on osx-arm64 and 11 on osx-x64, with 0
+fixture's 31 assemblies that takes about 3 min on hosted linux and windows, 6 on osx-arm64 and 11 on osx-x64, with 0
 cycle cut-offs on every RID, since golib's generic-cycle fix (2026-10-14) broke ILC's generic cycle in golib (runs
-38575258530 and 38587876788). Before that it took about 70 min on hosted linux, which is why it became its own stage
-and not a release-smoke arm.
+38575258530 and 38587876788).
 <!-- Pre-2026-10-26 wording named the fix by its branch: "since e2move broke ILC's generic cycle in golib on
      2026-10-14". -->
-Without that default, the published 1.24.13.4 crashed such an executable at startup (a full trim removed the field
-metadata golib reads). It was non-gating on its first release; from the release after, it is read before every
-release like the census, and a red holds the release. It reads this tree's pack only: `published_version` is refused
-for it.
+It is read before every release like the census, and a red holds the release. It reads this tree's pack only:
+`published_version` is refused for it.
 <!-- Pre-2026-10-26 wording: "**Non-gating on its first train (Q)**; from the release after, read before every
      release like the census, and a red holds the release." -->
-**osx-arm64 is read, and gates like linux-x64 and win-x64.** Before golib's generic-cycle fix it read NOT MEASURED:
-on a hosted `macos-15` (3-core arm64) runner the publish did not finish inside the 6 hours a hosted job may run
-(37523439849, cancelled at 6h00m; osx-x64 read 293 min, linux-x64 56, win-x64 71). Those hours were ILC's generic
-cycle in golib (array/ж/slice, 35,336 cut-off methods on linux). With the cycle broken, run 38587876788 published
-osx-arm64 in 354 s (0 cut-offs, exit 0).
+**osx-arm64 is read, and gates like linux-x64 and win-x64.** On the hosted `macos-15` (3-core arm64) runner it
+publishes in about 6 min (run 38587876788).
 <!-- Pre-2026-10-26 wording: "**osx-arm64 is read, and gates like linux-x64 and win-x64** (2026-10-14). From
      2026-10-07 it was NOT MEASURED ... (array/ж/slice, 35,336 cut-off methods on linux at master). With the cycle
      broken (e2move, merge b1ba1380b4) run 38587876788 published osx-arm64 in 354 s (0 cut-offs, exit 0), and the
      plan's filter and every leg's NOT MEASURED line were retired." -->
-**osx-x64 is BOUNDED, not open-ended:** an osx-x64 publish once ran past 6 h and the job was cancelled in its
-native link, which took the run's conclusion with it. The AOT step now stops at `aot_bound_minutes` (330 by default). On
+**osx-x64 is BOUNDED, not open-ended.** The AOT step stops at `aot_bound_minutes` (330 by default), inside the 6
+hours a hosted job may run. On
 osx-x64 the step is continue-on-error and the next step turns an expired bound into "NOT MEASURED (timeout)" with exit 0,
 while a publish that ENDED with a non-zero exit stays red. linux-x64 and win-x64 keep their gate: an expired bound fails them.
 <!-- Pre-2026-10-26 wording: "**osx-x64 is BOUNDED, not open-ended** (2026-10-14): T4's osx-x64 publish ran past 6 h
@@ -276,14 +259,14 @@ Nothing is automatic and nothing is written back. Every leg uploads an `artifact
 summary, so a verdict is readable without downloading anything.
 
 Every leg ALSO echoes its summary as **annotations** (`.github/annotate-summary.ps1`). That is
-not decoration: a job summary and an uploaded artifact are both served from Azure blob storage
-(`productionresultssa*.blob.core.windows.net`, reached by a 302 from `api.github.com`), so a host
-whose egress policy allows the API and denies that domain — which is the position a
+not decoration: a job summary and an uploaded artifact are both served from GitHub's Azure blob
+storage, reached by a redirect from the GitHub API, so a host
+whose egress policy allows the API and denies that storage domain — which is the position a
 restricted-egress cloud host is in — can dispatch a run, read every job and step *conclusion*, and
 not one line of what the run measured. Annotations come back from
 `GET /repos/{owner}/{repo}/check-runs/{id}/annotations` as JSON from the API itself, so the
 headline survives that block, and it lands on the run page where a reader sees it without opening
-the summary tab. The summary and the artifact are written exactly as before; this is a second,
+the summary tab. The summary and the artifact are still written in full; this is a second,
 cheaper-to-read copy. GitHub caps annotations at ten per level per step, so the helper packs the
 text into a few chunks, stays clear of the length cap, and — when a summary is longer than the
 budget — **says how much it dropped** rather than truncating silently.
@@ -296,14 +279,13 @@ guarded by `src/tests/sweep-row-divergence-selftest.ps1`). The C# FAIL listing i
 shape only; a Go pass / C# skip divergence, a Go skip / C# pass one or a one-sided row is readable from
 these lines alone on a host that cannot fetch the artifact.
 
-**Whoever triggers a run reports its result.** Read the summary, download the artifact if the
-detail matters, and report the finding in the terms the repository uses — a census as a census
-(assemblies produced, buckets by code), a sweep row as its arithmetic. A result that stays in a
-GitHub run page is a result nobody has.
+**Report a result in the repository's terms.** If you trigger a run, read the summary, download the
+artifact if the detail matters, and report the finding the way the repository measures it — a census
+as a census (assemblies produced, buckets by code), a sweep row as its arithmetic.
 <!-- Pre-2026-10-26 wording: "**The triggerer owns the relay.** ... and carry the finding to the status board or the
      fleet mailbox in the same words the fleet uses". -->
 
-Relay a sweep row from its **comparison RECORD**, never from its pass line: the disclosed count is
+Read a sweep row from its **comparison record**, never from its pass line: the disclosed count is
 not on the pass line, so a row summarized from it under-reports by exactly the disclosures — and a
 disclosure count is half of what makes a row honest.
 
@@ -324,8 +306,8 @@ disclosure count is half of what makes a row honest.
   surfaces as corpus failures, not as a disk message — can still be recognized rather than guessed.
 - **The environment report is calibration data.** Cores, RAM-class, toolchain versions and free
   space per runner: the dispatches are what anchor these runners the way measured budgets anchor
-  the project's own machines. Some stages are now measured (the census, the `pack` job,
-  `aot-smoke`); the other budgets here are still estimates.
+  the project's own machines. The census, `pack` and `aot-smoke` budgets are measured; the others
+  are estimates.
 
 ## What this is NOT
 
@@ -339,9 +321,9 @@ disclosure count is half of what makes a row honest.
 - **Not a place that writes to the repository.** It has read-only permissions, records nothing,
   updates no roster row and pushes no branch. A validated count seen here is a *candidate* for the
   roster through the normal validation policy, on a pinned machine.
-- **Not a budget baseline.** The timeouts below are scaled estimates, not measurements. Some
-  stages have since been measured (the census, the `pack` job, `aot-smoke`); those readings are in
-  the stage sections above and in the `aot-smoke` row.
+- **Not a budget baseline.** The timeouts below are scaled estimates, except for the census, the
+  `pack` job and `aot-smoke`, which are measured on hosted runners; those readings are in the stage
+  sections above and in the `aot-smoke` row.
 <!-- Pre-2026-10-26 wording: "A banking merge's proof still comes from the fleet's instruments on the fleet's
      machines" / "provisional until a fleet machine agrees" / "banks nothing ... a *candidate* for banking through
      the normal policy". -->
@@ -355,7 +337,9 @@ disclosure count is half of what makes a row honest.
 | `behavioral-full` | 150 min | 225 min | The whole behavioral enumeration in slices, with a purge between. Provisional. |
 | `behavioral-stderr` | 60 min | 90 min | Converter `go build`, a transpile and compile of a handful of named projects, and one direct run of each. Provisional. |
 | `sweep-shard` | 210 min | 315 min | One convert/build/run/compare cycle per matched row; the sweep's own per-package floors are the reason this is the largest. |
-| `release-smoke` | 90 min | 135 min | The leg only: converter `go build` plus five small restore/build/run arms. The `pack` job (windows, 240 min) is separate. Provisional. |
+| `golib-tests` | 90 min | 135 min | One Release build of `GolibTests` and its core closure for the GOOS, from cold, then `dotnet test` (the whole suite, or a `--filter`). Provisional. |
+| `stack-probe` | 90 min | 135 min | One row's `-tests` convert and build, the filtered compare, and up to the 900 s per-test deadline while the probe waits. Provisional. |
+| `release-smoke` | 90 min | 135 min | The leg only: converter `go build` plus seven small restore/build/run arms. The `pack` job (windows, 240 min) is separate. Provisional. |
 | `nugetgo-behavior` | 90 min | 135 min | The leg: converter `go build`, one `go run`, one conversion against the feed, and one cold restore, build and run of the sample. `release-smoke`'s leg is the closest shape. Provisional. |
 | `aot-smoke` | 240 min | 360 min | The leg only, four RIDs: one Native AOT publish of a 31-package consumer under `TrimMode=partial` -- linux 56, windows 71, osx-x64 293 min before golib's generic-cycle fix (37523439849, where osx-arm64 did not finish in 360); after it, linux 212 s, windows 167 s, osx-arm64 354 s (38587876788), osx-x64 654 s (38575258530). |
 
@@ -370,50 +354,36 @@ sit well above the top of each scaled range on purpose.
 `BehavioralRunner` carries **its own** budgets that no caller-side timeout can influence, so the
 smoke stage sets them explicitly through their documented environment variables
 (`GO2CS_BUILD_TIMEOUT` and friends), sized for a cold four-core runner where the Transpile phase
-rewrites every `.cs` immediately before Compile and warm state can never make the batch a no-op.
+rewrites every `.cs` immediately before Compile and warm state can never make the run a no-op.
 
-## darwin known-unknowns
+## Notes on the darwin legs
 
-Everything below was untested by construction when it was written — the first dispatch was the
-experiment. Named here so a failure is recognized rather than re-diagnosed; the settled entries
-record the answer:
+What a darwin leg establishes, and what it cannot, so a failure is recognized rather than re-diagnosed:
 
-- ~~**Whether the darwin corpus's wall is the same one.**~~ **SETTLED — there is no wall.** The
-  cross-target census from Windows named a specific stop in `os`'s directory walk. Compiled on
-  macOS, the darwin corpus builds with zero errors (census run 32649840220).
+- **The darwin corpus compiles on macOS.** It builds with zero errors on `osx-arm64` and `osx-x64`
+  (census run 32649840220). The two compile the same sources, so a divergence between them is a
+  finding about the corpus, not about macOS.
   <!-- Settled 2026-08-23. -->
-- ~~**Whether the two architectures wall identically.**~~ **SETTLED — neither walls.**
-  `osx-arm64` and `osx-x64` compile the same sources, and both read zero errors in the same run, so
-  a divergence between them would be a finding about the corpus, not about macOS.
   <!-- Settled 2026-08-23. -->
-- ~~**Whether anything past the census can run at all.**~~ **SETTLED — it could not at first; it
-  can now.** The first darwin `behavioral-smoke` compiled and golden-matched 20/20, then
-  failed all twenty at Output with `exit code mismatch: C# 2 vs Go 0`. Darwin's syscall entry points
-  are libc **assembly** trampolines in Go, emitted as bodyless partials and filled with throwing
-  stubs, so a converted program died in a module initializer — before `Main`, whether or not it
-  printed. The run layer has since been written: a darwin `behavioral-full` runs on both legs (run
+- **Converted programs run on both legs.** A darwin `behavioral-full` runs on both legs (run
   33898025427), and the [roster](ValidatedTestPackages.md) shows a macOS count for each package that
   validates on both chips.
   <!-- Settled 2026-08-25; the behavioral-full run 33898025427 was by 2026-09-04. Evidence and remedy shapes:
        [`phase4/FINDING-darwin-run-layer.md`](phase4/FINDING-darwin-run-layer.md) (an internal record). -->
-- ~~**What an explicit `darwin` binding does.**~~ **SETTLED — it works.** `GoTargetOS` in
-  this workflow's `env:` block does reach MSBuild, and a macOS leg builds and runs the darwin flavor.
-  Proved by the contrapositive: the identical env-only mechanism on Linux passed 20/20, and `fmt`'s
-  closure carries thirteen L3 packages including `os`, `runtime` and `syscall`, so a windows flavor
-  would have faulted on `kernel32.dll` just as uniformly. Do not re-diagnose a darwin failure as a
-  flavor-binding failure.
+- **The `darwin` binding reaches MSBuild.** `GoTargetOS` in this workflow's `env:` block reaches
+  MSBuild, and a macOS leg builds and runs the darwin flavor. The same env-only mechanism selects the
+  flavor on Linux, and `fmt`'s closure carries platform-varying packages including `os`, `runtime`
+  and `syscall`, so a windows flavor would fault on `kernel32.dll` in every program. Do not
+  re-diagnose a darwin failure as a flavor-binding failure.
   <!-- Settled 2026-08-25. -->
-- **Which platform the behavioral transpile targets.** The converter defaults `-platforms` to the
+- **The behavioral transpile targets the host.** The converter defaults `-platforms` to the
   *host*, so a mac leg re-transpiles the behavioral corpus for `darwin/arm64` (or `darwin/amd64`)
-  and compares the result against goldens captured on Windows. Linux has already proven those
-  goldens platform-invariant for the behavioral corpus; darwin has not, and whether the converter's
-  darwin path is exercised on **arm64** at all is itself untested — the corpus census work used the
-  amd64 target.
+  and compares the result against goldens captured on Windows. A golden mismatch on a mac leg can
+  therefore come from the darwin conversion itself.
 - **Case sensitivity.** Default APFS is case-**insensitive** like Windows, so the mac legs prove
   nothing about path casing. Linux remains the only filesystem that does.
-- ~~**Runner labels and images.**~~ **SETTLED — the image works.** `macos-15-intel` was a
-  comparatively new label when this was written; its `osx-x64` legs have since run the census,
-  `behavioral-full` and `aot-smoke` (run 38575258530).
+- **The `macos-15-intel` image works.** Its `osx-x64` legs run the census, `behavioral-full` and
+  `aot-smoke` (run 38575258530).
 - **`pwsh` version drift.** The project's Linux readings come from one specific pwsh; hosted images
   ship whatever they ship. A PowerShell-level failure on a runner is a portability finding about the
   instrument, not about the corpus.

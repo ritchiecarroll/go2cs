@@ -68,10 +68,10 @@ docs/doctrine/ProcessGlossary.md#validated-sweep. -->
 <a id="mvp"></a>**MVP — minimum viable [increment].**
 The smallest *correct and fully tested* first version of a converter or runtime feature: the narrowest scope
 that proves the whole mechanism end to end, with the broader coverage added later in separately tested steps.
-For example, the stack-string `sstring` emission (`s := string([]byte)` → a zero-copy view instead of a heap
-`@string` copy) first fired on exactly **one** standard-library site, under a deliberately conservative rule. An
-MVP is **not** a prototype or a shortcut: it ships behind the full set of checks, including its own **guard**,
-and is correct within its scope; only its reach is small.
+For example, a first increment of the stack-string `sstring` emission (`s := string([]byte)` → a zero-copy view
+instead of a heap `@string` copy) can fire on a single standard-library site under a deliberately conservative
+rule. An MVP is **not** a prototype or a shortcut: it ships behind the full set of checks, including its own
+**guard**, and is correct within its scope; only its reach is small.
 
 <a id="hop"></a>**Hop.**
 Moving the converted standard library to a new release of one of its two inputs: a **Go hop** moves the Go
@@ -138,9 +138,10 @@ that generic constraints lift to.
 <a id="ilc"></a>**ILC — the IL Compiler (Native AOT).**
 .NET's ahead-of-time compiler: it consumes IL at **publish** time and emits native machine code, so the
 program starts without a JIT. go2cs measures it as the third column of the performance suite (Go binary /
-C# JIT / C# **Native AOT**), and it is expensive here — each AOT publish compiles the full converted-stdlib
-closure, ~25 min per benchmark on an older six-core desktop, which is why a full perf run takes hours. **ILC
-arrives as a runtime pack selected by the [TFM](#tfm), not by the SDK performing the publish** — so a new SDK
+C# JIT / C# **Native AOT**), and it is expensive here — each AOT publish compiles every `go.*` assembly the
+program references in full
+([Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)).
+**ILC arrives as a runtime pack selected by the [TFM](#tfm), not by the SDK performing the publish** — so a new SDK
 publishing an old TFM silently resolves the OLD ILC and produces the previous generation's codegen, which
 looks like "the new runtime changed nothing" rather than like an error. So no AOT measurement of a new runtime
 exists before the TFM moves.
@@ -180,6 +181,6 @@ converter make those zero values safe to touch.
 .NET's build engine — it drives `dotnet build`, project references, and analyzers. It matters to the
 converter in two places: cross-package references arrive at the source generators as compiled **metadata**
 references (not source syntax), which changes how embeds/interfaces must be resolved; and the converter
-emits MSBuild `.csproj` project files (carrying the `$(go2csPath)` property) plus `.slnx` solutions for the
-converted output.
+emits MSBuild `.csproj` project files (carrying the `$(go2csPath)` property) plus, under `-recurse=nuget` and
+`-stdlib`, `.slnx` solutions for the converted output.
 <!-- {% endraw %} -->

@@ -95,9 +95,10 @@ public class FieldAccessGenerator : ISourceGenerator
             return;
 
         List<INamedTypeSymbol> types = RecordedTypes(context.Compilation, finder.Candidates);
+        List<(INamedTypeSymbol Wrapper, INamedTypeSymbol Pointee)> wrappers = RecordedPointerWrappers(context.Compilation, finder.Candidates);
 
-        if (types.Count > 0)
-            context.AddGeneratedSource("GoFieldAccess.g.cs", Source(context.Compilation, types));
+        if (types.Count > 0 || wrappers.Count > 0)
+            context.AddGeneratedSource("GoFieldAccess.g.cs", Source(context.Compilation, types, wrappers));
     }
 
     // The struct types the records list, each once, generic ones by their open definition. The converter writes the
@@ -108,6 +109,70 @@ public class FieldAccessGenerator : ISourceGenerator
     {
         List<INamedTypeSymbol> types = [];
         HashSet<INamedTypeSymbol> seen = new(SymbolEqualityComparer.Default);
+
+        foreach (INamedTypeSymbol type in RecordArguments(compilation, candidates))
+        {
+            if (type is { TypeKind: TypeKind.Struct } && seen.Add(type.OriginalDefinition))
+                types.Add(type.OriginalDefinition);
+        }
+
+        return types;
+    }
+
+    /// <summary>
+    /// The NAMED POINTER types the records list (TS row C18), each with the struct it points to: go2cs-gen's wrapper
+    /// class over the box, <c>type PP *point</c>, whose field selection <c>p.f</c> the converter writes as Go spells it
+    /// and records the wrapper for.
+    /// </summary>
+    internal static List<(INamedTypeSymbol Wrapper, INamedTypeSymbol Pointee)> RecordedPointerWrappers(Compilation compilation, IEnumerable<ClassDeclarationSyntax> candidates)
+    {
+        List<(INamedTypeSymbol, INamedTypeSymbol)> wrappers = [];
+        HashSet<INamedTypeSymbol> seen = new(SymbolEqualityComparer.Default);
+
+        foreach (INamedTypeSymbol type in RecordArguments(compilation, candidates))
+        {
+            if (type is { TypeKind: TypeKind.Class } && seen.Add(type.OriginalDefinition) &&
+                PointerWrapperTarget(compilation, type.OriginalDefinition) is { } pointee)
+            {
+                wrappers.Add((type.OriginalDefinition, pointee));
+            }
+        }
+
+        return wrappers;
+    }
+
+    /// <summary>
+    /// The struct a named pointer wrapper points to, or null for any other class. A wrapper read from metadata
+    /// implements <c>IPointer&lt;T&gt;</c>; one of this compilation is the converter's declaration, whose definition
+    /// (<c>ж&lt;point&gt;</c>) is bound where it is declared, since generators never see the members another generator
+    /// gives it in the same run.
+    /// </summary>
+    private static INamedTypeSymbol? PointerWrapperTarget(Compilation compilation, INamedTypeSymbol wrapper)
+    {
+        if (!wrapper.Locations.Any(location => location.IsInSource))
+        {
+            return wrapper.AllInterfaces.FirstOrDefault(face => face is { Name: "IPointer", TypeArguments.Length: 1 })?.TypeArguments[0] is
+                INamedTypeSymbol { TypeKind: TypeKind.Struct } target ? target : null;
+        }
+
+        foreach (BaseTypeDeclarationSyntax declaration in wrapper.DeclaringSyntaxReferences.Select(reference => reference.GetSyntax()).OfType<BaseTypeDeclarationSyntax>())
+        {
+            if (declaration.GetGoTypeDefinitionText() is not { } definition || !definition.StartsWith($"{PointerPrefix}<", StringComparison.Ordinal))
+                continue;
+
+            TypeSyntax pointer = Microsoft.CodeAnalysis.CSharp.SyntaxFactory.ParseTypeName(definition);
+
+            return compilation.GetSemanticModel(declaration.SyntaxTree)
+                    .GetSpeculativeTypeInfo(declaration.Span.End - 1, pointer, SpeculativeBindingOption.BindAsTypeOrNamespace).Type is
+                INamedTypeSymbol { Name: PointerPrefix, TypeArguments: [INamedTypeSymbol { TypeKind: TypeKind.Struct } target] } ? target : null;
+        }
+
+        return null;
+    }
+
+    // The types every record names, in record order, duplicates included.
+    private static IEnumerable<INamedTypeSymbol> RecordArguments(Compilation compilation, IEnumerable<ClassDeclarationSyntax> candidates)
+    {
         HashSet<INamedTypeSymbol> classes = new(SymbolEqualityComparer.Default);
         List<AttributeData> records = [.. compilation.Assembly.GetAttributes()];
 
@@ -128,16 +193,17 @@ public class FieldAccessGenerator : ISourceGenerator
 
                 foreach (TypedConstant item in items)
                 {
-                    if (item.Value is INamedTypeSymbol { TypeKind: TypeKind.Struct } type && seen.Add(type.OriginalDefinition))
-                        types.Add(type.OriginalDefinition);
+                    if (item.Value is INamedTypeSymbol type)
+                        yield return type;
                 }
             }
         }
-
-        return types;
     }
 
-    internal static string Source(Compilation compilation, IEnumerable<INamedTypeSymbol> types)
+    internal static string Source(Compilation compilation, IEnumerable<INamedTypeSymbol> types) =>
+        Source(compilation, types, []);
+
+    internal static string Source(Compilation compilation, IEnumerable<INamedTypeSymbol> types, IEnumerable<(INamedTypeSymbol Wrapper, INamedTypeSymbol Pointee)> wrappers)
     {
         StringBuilder source = new();
         source.Append("// <auto-generated/>\r\n#nullable enable\r\n\r\n");
@@ -158,6 +224,31 @@ public class FieldAccessGenerator : ISourceGenerator
 
             source.Append(first ? "\r\n" : "\r\n\r\n");
             source.Append($"    extension{TypeParameterList(type)}(global::go.{PointerPrefix}<{typeName}> {ReceiverName}){Constraints(type)}\r\n    {{");
+
+            foreach (string property in properties)
+                source.Append("\r\n        ").Append(property);
+
+            source.Append("\r\n    }");
+            first = false;
+        }
+
+        // A named pointer wrapper gets the properties its pointee's box gets, each the box's own body over the box the
+        // wrapper holds, so `p.f` through `type PP *point` reaches what `p.f` through `*point` reaches (TS row C18).
+        // The wrapper's static NilInstance is the one member of its own a property name could meet (the box's are on
+        // the collision list).
+        foreach ((INamedTypeSymbol wrapper, INamedTypeSymbol pointee) in wrappers)
+        {
+            HashSet<string> declared = VisibleProperties(visibleClasses, wrapper);
+            declared.Add("NilInstance");
+
+            string pointeeName = pointee.ToDisplayString(s_typeFormat);
+            List<string> properties = Properties(compilation, pointee, declared, $"((global::go.{PointerPrefix}<{pointeeName}>){ReceiverName})");
+
+            if (properties.Count == 0)
+                continue;
+
+            source.Append(first ? "\r\n" : "\r\n\r\n");
+            source.Append($"    extension{TypeParameterList(wrapper)}({wrapper.ToDisplayString(s_typeFormat)} {ReceiverName}){Constraints(wrapper)}\r\n    {{");
 
             foreach (string property in properties)
                 source.Append("\r\n        ").Append(property);
@@ -197,9 +288,11 @@ public class FieldAccessGenerator : ISourceGenerator
             foreach (IMethodSymbol method in visibleClass.GetMembers().OfType<IMethodSymbol>())
             {
                 if (method.IsStatic && method.Name.StartsWith("get_", StringComparison.Ordinal) && method.Parameters.Length == 1 &&
-                    method.Parameters[0].Type is INamedTypeSymbol { Name: PointerPrefix, TypeArguments.Length: 1 } receiver &&
-                    receiver.TypeArguments[0] is INamedTypeSymbol target &&
-                    SymbolEqualityComparer.Default.Equals(target.OriginalDefinition, type))
+                    (method.Parameters[0].Type is INamedTypeSymbol { Name: PointerPrefix, TypeArguments.Length: 1 } receiver &&
+                     receiver.TypeArguments[0] is INamedTypeSymbol target &&
+                     SymbolEqualityComparer.Default.Equals(target.OriginalDefinition, type) ||
+                     method.Parameters[0].Type is INamedTypeSymbol { TypeKind: TypeKind.Class } wrapper &&
+                     SymbolEqualityComparer.Default.Equals(wrapper.OriginalDefinition, type)))
                 {
                     names.Add(method.Name.Substring("get_".Length));
                 }
@@ -209,7 +302,8 @@ public class FieldAccessGenerator : ISourceGenerator
         return names;
     }
 
-    private static List<string> Properties(Compilation compilation, INamedTypeSymbol type, HashSet<string> declared)
+    // receiver is the box expression the bodies read: the extension receiver itself, or a named pointer wrapper's box.
+    private static List<string> Properties(Compilation compilation, INamedTypeSymbol type, HashSet<string> declared, string receiver = ReceiverName)
     {
         List<string> properties = [];
         HashSet<string> served = new(StringComparer.Ordinal);
@@ -245,18 +339,18 @@ public class FieldAccessGenerator : ISourceGenerator
             served.Add(name);
 
             string fieldType = TypeName(field.Type, type);
-            string slot = $"{ReceiverName}.field({typeName}.{accessor})";
+            string slot = $"{receiver}.field({typeName}.{accessor})";
 
             // A readonly field (a zero-size layout field) has no writable slot of its own: its accessor answers the
             // shared one, which only the accessor reaches.
             if (!declared.Contains(name))
             {
                 properties.Add(header
-                    ? $"public {fieldType} {PropertyName(name)} {{ [{GetterAttributes}] get => {slot}; [{GetterAttributes}] set {{ {slot} = value; {ReceiverName}.OnHeaderStore(); }} }}"
-                    : $"public ref {fieldType} {PropertyName(name)} {{ [{GetterAttributes}] get => ref {(field.IsReadOnly ? slot : Specialized(typeName, accessor, name))}; }}");
+                    ? $"public {fieldType} {PropertyName(name)} {{ [{GetterAttributes}] get => {slot}; [{GetterAttributes}] set {{ {slot} = value; {receiver}.OnHeaderStore(); }} }}"
+                    : $"public ref {fieldType} {PropertyName(name)} {{ [{GetterAttributes}] get => ref {(field.IsReadOnly ? slot : Specialized(receiver, typeName, accessor, name))}; }}");
             }
 
-            AddAddress(properties, type, typeName, fieldType, accessor, foreign, declared);
+            AddAddress(properties, receiver, type, typeName, fieldType, accessor, foreign, declared);
         }
 
         // Embedded structs, by their ref accessors (see the remarks).
@@ -286,9 +380,9 @@ public class FieldAccessGenerator : ISourceGenerator
             string propertyType = TypeName(property.Type, type);
 
             if (!declared.Contains(name))
-                properties.Add($"public ref {propertyType} {PropertyName(name)} {{ [{GetterAttributes}] get => ref {Specialized(typeName, accessor, name)}; }}");
+                properties.Add($"public ref {propertyType} {PropertyName(name)} {{ [{GetterAttributes}] get => ref {Specialized(receiver, typeName, accessor, name)}; }}");
 
-            AddAddress(properties, type, typeName, propertyType, accessor, foreign, declared);
+            AddAddress(properties, receiver, type, typeName, propertyType, accessor, foreign, declared);
         }
 
         // Promoted fields (parity seat #31b), by the hops Go walks (see PromotedFields). A foreign struct's value-embed
@@ -311,11 +405,11 @@ public class FieldAccessGenerator : ISourceGenerator
 
             served.Add(name);
 
-            string managed = $"ref {ReceiverName}.Value{string.Concat(hops.Select(hop => $".{PropertyName(hop.Field.Name)}{(hop.Pointer ? ".Value" : "")}"))}.{PropertyName(name)}";
-            string? native = hops.Any(hop => hop.Pointer) ? null : NativeHops(compilation, type, typeName, hops, field);
+            string managed = $"ref {receiver}.Value{string.Concat(hops.Select(hop => $".{PropertyName(hop.Field.Name)}{(hop.Pointer ? ".Value" : "")}"))}.{PropertyName(name)}";
+            string? native = hops.Any(hop => hop.Pointer) ? null : NativeHops(compilation, receiver, type, typeName, hops, field);
 
             properties.Add($"public ref {TypeName(field.Type, type)} {PropertyName(name)} {{ [{GetterAttributes}] get => " +
-                (native is null ? managed : $"ref {ReceiverName} is global::go.NativeBox<{typeName}> ? ref {native} : {managed}") + "; }");
+                (native is null ? managed : $"ref {receiver} is global::go.NativeBox<{typeName}> ? ref {native} : {managed}") + "; }");
         }
 
         return properties;
@@ -411,9 +505,9 @@ public class FieldAccessGenerator : ISourceGenerator
     /// A promoted value-chain field's reference on a NativeBox: each embed's view at its Go offset, then the field at its
     /// own, <c>ʗp.of(T.ᏑE).field(E.Ꮡf)</c>; null when an accessor the chain names is not there to reach.
     /// </summary>
-    private static string? NativeHops(Compilation compilation, INamedTypeSymbol type, string typeName, List<EmbedHop> hops, IFieldSymbol field)
+    private static string? NativeHops(Compilation compilation, string receiver, INamedTypeSymbol type, string typeName, List<EmbedHop> hops, IFieldSymbol field)
     {
-        StringBuilder chain = new(ReceiverName);
+        StringBuilder chain = new(receiver);
         INamedTypeSymbol owner = type;
         string ownerName = typeName;
 
@@ -475,7 +569,7 @@ public class FieldAccessGenerator : ISourceGenerator
             reference.SyntaxTree == target.SyntaxTree && target.Span.Contains(reference.Span));
     }
 
-    private static void AddAddress(List<string> properties, INamedTypeSymbol type, string typeName, string fieldType, string accessor, bool foreign, HashSet<string> declared)
+    private static void AddAddress(List<string> properties, string receiver, INamedTypeSymbol type, string typeName, string fieldType, string accessor, bool foreign, HashSet<string> declared)
     {
         if (s_collisionNames.Contains(accessor) || declared.Contains(accessor))
             return;
@@ -488,7 +582,7 @@ public class FieldAccessGenerator : ISourceGenerator
                 .Any(holder => holder.GetMembers($"{accessor}{FieldAccessTokenSuffix}").OfType<IFieldSymbol>().Any(field => field.IsStatic)))
             token = accessor;
 
-        properties.Add($"public global::go.{PointerPrefix}<{fieldType}> {accessor} {{ [{GetterAttributes}] get => {ReceiverName}.of({typeName}.{token}); }}");
+        properties.Add($"public global::go.{PointerPrefix}<{fieldType}> {accessor} {{ [{GetterAttributes}] get => {receiver}.of({typeName}.{token}); }}");
     }
 
     // The accessors' attributes. A getter is go2cs machinery, not Go code: inlined at Release, and where the JIT keeps
@@ -501,8 +595,8 @@ public class FieldAccessGenerator : ISourceGenerator
     // The specialized body (design Q1, COORD 2026-10-27): a managed box reaches the field directly, `ref ʗp.Value.f`,
     // with Value's own nil check and no delegate; a NativeBox<T> answers it at its Go offset through the accessor,
     // where a struct whose CLR layout is not Go's holds the wrong bytes in its own slot (ж<T>.field's two arms).
-    private static string Specialized(string typeName, string accessor, string name) =>
-        $"{ReceiverName} is global::go.NativeBox<{typeName}> ? ref {ReceiverName}.field({typeName}.{accessor}) : ref {ReceiverName}.Value.{PropertyName(name)}";
+    private static string Specialized(string receiver, string typeName, string accessor, string name) =>
+        $"{receiver} is global::go.NativeBox<{typeName}> ? ref {receiver}.field({typeName}.{accessor}) : ref {receiver}.Value.{PropertyName(name)}";
 
     /// <summary>
     /// Whether a field <paramref name="name"/> of <paramref name="type"/> shadows a method an embedded type promotes,

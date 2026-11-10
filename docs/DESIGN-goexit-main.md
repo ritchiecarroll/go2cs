@@ -210,6 +210,28 @@ Built as designed, with the rulings below; the rest of this note is the design a
   Both deltas are inside the single-process spread, and the floors split in opposite directions (+0.72 ns, -35 ns):
   no cost is separable at this resolution. Go reads 5.47 and 248.5 on the same box. Native AOT was not measured.
 
+### Amendment, 2026-11-09: step 4's re-reads
+
+Read on windows/amd64 at master `0bbe3ab6e5`, which contains this change (`84ed9400b6`).
+- Configuration: Release, tiered JIT off; go1.26.10, .NET SDK 10.0.403.
+- Method: each row was read alone through `run-validated-sweep.ps1 -Filter <row> -Exact`, against its banked
+  1.26.10.3 page. Each reading was predicted before the launch, and each matched its prediction.
+- Hardware: no WHEA event across the three rows.
+
+| row | banked: matched, disclosed | read | drift | the Goexit verdicts, Go / C# |
+|:--|--:|:--|--:|:--|
+| `sync` | 48, 9 | PASS at 48 | 0 | `TestOnceFuncGoexit` pass / pass |
+| `iter` | 28, 0 | PASS at 28 | 0 | `TestPullGoexit` and `TestPull2Goexit`, each with `/next` and `/stop`: six, all pass / pass |
+| `testing` | 82, 3 | PASS at 82 | 0 | `TestGoexitInCleanupAfterPanicHelper` pass / pass |
+
+- `testing`'s `TestMorePanic` stays disclosed (host-identity) and reads pass / fail, as banked.
+  - Its failing case is a `runtime.Goexit` in `t.Cleanup` after a panic.
+  - That case's divergence is the test host's crash report, not this path.
+- `testing`'s `TestCleanupCalledEvenAfterGoexit` stays unconverted: it needs unsupported testing internals.
+- The runtime row was not re-read. Its own Goexit tests build their child programs with the real Go toolchain (step 4).
+- **Step 5, the cost under Native AOT: not measured, by ruling** (COORD, 2026-11-09). Goexit from main is not a hot
+  path. The JIT A/B above stands as the cost reading.
+
 ## Open questions
 
 Ruled by COORD on 2026-11-05; the rulings are recorded under [As built](#as-built).

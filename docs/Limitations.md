@@ -12,8 +12,8 @@ spots real code hits today.
 standard library, and runs on x64 Windows or Linux. **A longer evening:** lots of third-party modules,
 `unsafe`, assembly fast paths, or tests that pull in testify.
 
-* **You need the Go release go2cs tracks on your PATH**, exactly the one in
-  [Requirements](README.md#requirements), and **cgo is refused**.
+* **Your code must build with the Go release go2cs tracks**, the one in
+  [Requirements](README.md#requirements), which the go2cs dotnet tool downloads for you, and **cgo is refused**.
 * **Assembly, `//go:linkname` and deep `unsafe` tricks compile clean, then fail at run time.** Many
   libraries ship a pure-Go fallback behind a build tag, and you have to pass that tag yourself.
 * **Each live goroutine holds an operating-system thread.** Thousands alive at once are fine. A hundred
@@ -108,12 +108,8 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   earlier panic), and exits with status 2. A goroutine that panics while `main` returns still gets its
   report, as in Go. The traceback below the panic lines shows Go's frames for a panic in a function with
   one deferred call, and for a panic raised again by a named deferred function. The named function's
-  frame shows the line it is declared on rather than the line that panics. It is shorter than Go's in
-  three cases:
-  * A panic raised again inside a deferred closure shows one frame, the function the first panic left,
-    where Go shows the closure and the frames above it.
-  * When several functions on the stack each defer a call, only the function that panicked is shown.
-  * A goroutine's crash is labelled `goroutine 1`, and Go's `created by` line is missing.
+  frame shows the line it is declared on rather than the line that panics. It is shorter than Go's when
+  several functions on the stack each defer a call: only the function that panicked is shown.
   <!-- Measured 2026-10-24 by C2 on linux-x64, .NET SDK 10.0.112, converter and corpus at f8fe15c97e (batch 36), seven
        one-file programs converted with -recurse and built with -p:GoTargetOS=linux, each compared with go run under
        Go 1.26.10. Identical frames and lines: a no-import `panic("message")`; a panic in work() with one deferred call,
@@ -198,11 +194,11 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 
 ## What works, but costs you something
 
-* **Speed.** Most compute lands within a small multiple of Go's time, string-heavy work takes several
-  times longer, maps run at parity or better, and asking at run time whether a value satisfies an
-  interface (`v.(fmt.Stringer)`) is the slowest thing converted code does. The
-  [performance comparison](Performance.md) has the numbers, and [Tuning converted code](Tuning.md) says which deployment
-  and runtime settings to choose. Measure your own hot path, in Release.
+* **Speed.** In the [performance comparison](Performance.md), measured on `win-x64`, most compute lands
+  within a small multiple of Go's time, string-heavy work takes several times longer, maps run at parity or
+  better, and asking at run time whether a value satisfies an interface (`v.(fmt.Stringer)`) is the slowest
+  thing converted code does. [Tuning converted code](Tuning.md) says which deployment and runtime settings to
+  choose. Measure your own hot path, in Release.
 * **Startup, memory and shipping.** A converted program loads .NET and one DLL per converted Go package
   it uses, and the JIT compiles each method the first time it runs. Package-level tables are built the
   first time they are read rather than at startup. You ship a .NET app, not Go's small static binary:
@@ -213,12 +209,12 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   project carries `partial` in its project file, and a C# project you write yourself gets the same
   default from the packages. A trimmed publish runs, and its output matches the untrimmed build's. It
   warns, measured on linux-x64: a project that uses the `go.*` packages gets one IL2104 for each package
-  with trim warnings, eight for a program that uses `fmt`, and `-p:TrimmerSingleWarn=false` lists the
+  with trim warnings, a handful for a program that uses `fmt`, and `-p:TrimmerSingleWarn=false` lists the
   hundred or so behind them, most of them golib's, `runtime`'s and `reflect`'s use of reflection. A
   project built from the converted source lists them all. A single-file publish needs ReadyToRun compiled
   per assembly ([Known issues](KnownIssues.md#a-single-file-publish-with-composite-readytorun-runs-out-of-memory)), and a
-  Native AOT publish is slow either way
-  ([Known issues](KnownIssues.md)).
+  Native AOT publish compiles every referenced package in full
+  ([Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)).
   <!-- ReadyToRun: src/go2cs/csproj-template.xml:58 `<PublishReadyToRun>true</PublishReadyToRun>`; the startup figure is
        P1's PerfStartup reading cited in docs/ConsumingGoFromCSharp.md (linux-x64, median 488 ms JIT, 329 ms ReadyToRun).
        Lazy tables: docs/ConversionStrategies.md, the [GoLazy] holder paragraphs (a package var whose initializer
@@ -234,7 +230,7 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 * **Crypto, most hashing and `math/big` run Go's portable code**, the way Go builds with `-tags purego`:
   correct, validated, and slower than Go's assembly. A TLS handshake is where you will notice.
 * **Native AOT** starts much faster and holds less memory, but once running it is slower than the JIT
-  on most rows of the comparison, and a publish compiles every converted package your program
+  on most rows of the comparison (`win-x64`), and a publish compiles every converted package your program
   references in full
   ([Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)
   has the measurements).
@@ -299,9 +295,9 @@ verdict, by full test name. That's a real bar, and narrower than the word sounds
   ([Roadmap](Roadmap.md#go-releases)).
   <!-- The float: src/go2cs/toolchainResolution.go:525 `return strings.TrimPrefix(minor, "go") + ".*"`; the release
        lines: docs/PLAN-version-lines.md (master carries the current Go line with patch hops). -->
-* **One Go release, one .NET release.** `go version` has to print exactly the release in
-  [Requirements](README.md#requirements) when you convert, and when you `go install` the converter from a
-  clone; `go2cs -version` should show that one release throughout. Rebuild after every pull. Each
+* **One Go release, one .NET release.** Convert with the Go release in
+  [Requirements](README.md#requirements), which the go2cs dotnet tool downloads for you; building the
+  converter from a clone needs Go 1.26. `go2cs -version` should show that one release throughout. Rebuild after every pull. Each
   [GitHub release](https://github.com/ritchiecarroll/go2cs/releases) also carries the converter prebuilt
   for six platforms. From the 1.26.10.2 release on, its Windows executables are Authenticode-signed and its
   `SHA256SUMS` carries a GPG signature (`SHA256SUMS.asc`) by the key that signs the release tag. Converted projects
@@ -342,7 +338,7 @@ verdict, by full test name. That's a real bar, and narrower than the word sounds
 
 The language itself (generics, closures, struct embedding, range-over-func, typed nil pointers in
 interfaces, randomized map order), `defer`/`panic`/`recover`, channels and `select`, `reflect`
-(`encoding/json` and `text/template` pass their own suites on it), and `net/http` with HTTP/2 and
+(`encoding/json` and `text/template` pass their own suites on it, on Windows and Linux), and `net/http` with HTTP/2 and
 `crypto/tls` over real sockets.
 
 ## When you hit a seam

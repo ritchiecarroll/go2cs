@@ -1456,6 +1456,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedPointerFieldAddress() => CheckTarget("NamedPointerFieldAddress");
 
     [TestMethod]
+    public void CheckNamedPointerLocalSurface() => CheckTarget("NamedPointerLocalSurface");
+
+    [TestMethod]
     public void CheckNamedPointerParamArgument() => CheckTarget("NamedPointerParamArgument");
 
     [TestMethod]
@@ -1514,6 +1517,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedStringDefine() => CheckTarget("NamedStringDefine");
+
+    [TestMethod]
+    public void CheckNamedStringIndexCompare() => CheckTarget("NamedStringIndexCompare");
+
+    [TestMethod]
+    public void CheckNamedStringOps() => CheckTarget("NamedStringOps");
 
     [TestMethod]
     public void CheckNamedStringSliceConcatBoxing() => CheckTarget("NamedStringSliceConcatBoxing");

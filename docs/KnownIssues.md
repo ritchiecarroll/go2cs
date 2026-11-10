@@ -41,6 +41,45 @@ one, prefers AES-GCM on Apple silicon as Go does there. On the other three platf
      hasGCMAsmARM64 holds. Open and owned after 1.26.10.3: the BOARD row's fix shapes (a run-time GOARCH for the shared
      darwin flavour, with its census of compile-time GOARCH branches, or a per-architecture darwin build). -->
 
+## The packages do not ship linux-arm64
+
+linux-arm64 is not supported. The go.* packages ship `win-x64`, `linux-x64`, `osx-x64` and `osx-arm64`. A package
+whose code differs by platform carries one folder per platform under `runtimes/`, and a platform without one gets
+the Windows build in `lib/`. A build resolves its platform the way .NET does at run time, so `linux-musl-x64`
+(Alpine) uses the `linux-x64` folder. For a platform that resolves to no folder, the build reports it:
+- **`GO2CS3003`, an error**, on another operating system, or on Linux with another architecture: linux-arm64 would
+  run the Windows build, and the `linux-x64` build makes x64 system calls. The message names the platform and the
+  first package without a folder for it.
+- **`GO2CS3004`, a warning**, on a Windows platform the packages do not ship (`win-arm64`): the Windows build is
+  that operating system's, so the program runs. What Go decides by architecture when the package was converted
+  follows `amd64`.
+
+A cross-build for a shipped platform from an unshipped host is not affected: it names its platform with
+`-r <rid>` (`RuntimeIdentifier`), and that platform has its folder.
+
+**To avoid it**, build for one of the four shipped platforms. A build that only needs to compile, and knowingly wants
+the Windows build (a test harness that never runs the program, say), passes `-p:GoAllowReferenceFlavor=true`. The
+program then runs the Windows build wherever it runs. The property counts only on the command line: set in a
+project file it changes nothing, so a library cannot switch the check off for the projects that build it.
+
+A portable app built on a shipped platform and then RUN on another one is out of the build's sight. At start-up
+it prints a warning on standard error instead: for another operating system, and for the Linux build on another
+architecture (`linux-x64` run on `linux-arm64`).
+<!-- Source: DESIGN-linux-arm64-flavour.md section 0 (lane G, claude/g-la64-design 7831a23193), SEAT 0, cut by C2 as
+     claude/c2-la64-seat0 on master 0c553534df, with REVIEW-linux-arm64-flavour.md F4 folded in (COORD ruling R2,
+     2026-11-09: its own target, RID-split by runtimes/ presence, RID-graph aware, win-arm64 a warning, the run-time
+     architecture check). Mechanism: src/core/golib/buildTransitive/go.lib.targets, GoRefuseUnshippedRid, over
+     _GoResolveRidFlavors (a breadth-first walk of $(RuntimeIdentifierGraphPath); measured: linux-musl-x64 imports
+     linux-musl and linux-x64, win-arm64 imports only win, in SDK 10.0.403's PortableRuntimeIdentifierGraph.json).
+     Gate: src/tests/PackageTests/RidCompileAsset/test-rid-compile-asset.ps1, read red-first against go.* 1.26.10.3 on
+     2026-11-09: against master's go.lib.targets the UNSHIPPED, swap-off, project-file opt-out, ALPINE and WIN-ARM64
+     arms fail (the linux-arm64 build BUILT against lib/; the Alpine build failed CS0426 against lib/); with the change
+     all ten arms pass, and each of the swap-off and project-file arms fails alone against a copy mutated in that one
+     respect. The run-time check is GoHostOfRecord.Describe (src/core/golib/GoHostOfRecord.cs), called through
+     Verify(GOOS, GOARCH) from src/core/runtime/hostofrecord_impl.cs, gated by src/tests/GolibTests/HostOfRecordTests.cs
+     (red first: the linux/amd64-on-arm64 case failed before the architecture check). The linux-arm64 flavour itself
+     is the design's seat S6, which turns the error into a no-op for that platform. -->
+
 ## On macOS, a `go` statement past the system's thread limit ends the program
 
 Each goroutine is an operating-system thread, and macOS caps how many threads one process may run. When a
@@ -56,11 +95,12 @@ the limit was about 2,000 goroutines on Apple silicon and about 3,000 on Intel; 
      (macOS 15.8.2, kern.num_taskthreads 2048, first failure at 2,027 live goroutines) and osx-x64 (macOS 15.7.9, 3072,
      first failure at 3,051). The figures and their provenance sit beside the Limitations bullet. -->
 
-## A program converted with local standard-library references runs its standard library built Debug
+## With go2cs 1.26.10.2 or earlier, a program converted with local standard-library references runs its standard library built Debug
 
-**Symptom.** A program converted with plain `-recurse` or `-recurse=module` references the standard library as
-local projects. Built with `dotnet build -c Release` in its folder, its standard-library assemblies come out built
-Debug, unoptimized, and it runs slower than the same program built from its `.csproj`.
+**Symptom.** A program converted by go2cs 1.26.10.2 or earlier with plain `-recurse` or `-recurse=module`
+references the standard library as local projects. Built with `dotnet build -c Release` in its folder, its
+standard-library assemblies come out built Debug, unoptimized, and it runs slower than the same program built from
+its `.csproj` (about 21 times slower on a TLS handshake under the JIT, on `win-x64`, on one development machine).
 `dotnet publish -c Release -r <rid>` in the folder can fail with
 `ILLink : error IL1034: Root assembly 'golib' ... does not have entry point`, and when it succeeds the published
 program carries the same Debug assemblies. A `-recurse=nuget` conversion is not affected.
@@ -70,8 +110,8 @@ program carries the same Debug assemblies. A `-recurse=nuget` conversion is not 
 lists, which were the program, `golib` and the analyzer, so every other standard-library project it built took its
 default configuration, Debug. Publishing the solution also published `golib` as a project of its own.
 
-**Fix.** Re-convert with a converter that includes the fix. It writes no solution for a local-reference conversion,
-and it removes the one an earlier converter wrote, if that file is unchanged.
+**Fix.** Re-convert with go2cs 1.26.10.3 or later. It writes no solution for a local-reference conversion, and it
+removes the one an earlier converter wrote, if that file is unchanged.
 
 **Workaround.** Build or publish the **project**, not a solution: run the command in a folder that holds no `.sln`
 or `.slnx`, or name the `.csproj` (`dotnet build <app>.csproj -c Release`). Do not build these conversions through
@@ -101,7 +141,7 @@ default tiered compilation:
 - more often, a SILENT exit with code 0 and truncated output.
 
 The fault needs the JIT's on-stack replacement. Microsoft's build of the same .NET version does not show it, and
-neither does Windows. No converted Go program has reproduced it so far, only a synthetic reproduction.
+neither does Windows. No converted Go program is known to reproduce it; only a synthetic reproduction does.
 
 **To avoid it**, run on Microsoft's .NET build, or turn off quick JIT for loops, which removes on-stack
 replacement. A build property does it without touching the converted project:
@@ -118,8 +158,8 @@ file, though the next conversion rewrites that file:
 <TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops>
 ```
 
-Converted executable projects carry this line, commented out. It costs about 90 ms (16%) more startup time,
-and steady-state loop speed stays within measurement noise. It becomes the default if a converted Go program
+Converted executable projects carry this line, commented out. On `linux-x64` (Canonical's .NET 10, one 4-core
+machine) it costs about 90 ms (16%) more startup time, and steady-state loop speed stays within measurement noise. It becomes the default if a converted Go program
 ever reproduces the fault. [Tuning converted code](Tuning.md#net-runtime-settings) lists the runtime settings and
 what each trades.
 <!-- Source of the 90 ms (16%) figure, found 2026-10-26: the fleet mailbox post C2 -> COORD of 2026-09-30T10:57Z
@@ -197,22 +237,20 @@ framework-dependent build run the same code under the JIT.
      on every publish), in master through the merge 4d9046eb70. -->
 
 A program that references the `go.*` packages and publishes with Native AOT (`PublishAot`) runs. The check
-that gates each release publishes a C# consumer of the packages and runs it on `linux-x64`, `win-x64`,
-`osx-arm64` and `osx-x64`. A project that sets no trim mode of its own gets the packages' default, `partial`,
+that gates each release publishes a C# consumer of the packages and runs it on `linux-x64`, `win-x64` and
+`osx-arm64`. On `osx-x64` the publish is read when it finishes inside the hosted runner's time limit, and reported as
+not measured when it does not. A project that sets no trim mode of its own gets the packages' default, `partial`,
 which is the setting a converted project carries in its generated project file.
 
 A full trim (`TrimMode` set to `full`) produces a program that runs as well. That is measured on `win-x64`, on
-one development machine; the hosted check measures the default.
+one development machine, with the 1.24.13.5 packages; the hosted check measures the default.
 
 **What it costs.** With `partial`, Native AOT compiles every `go.*` assembly the program references in
 full, not only the parts the program uses. For a small program that references about thirty of them, the
 publish took under four minutes on a hosted CI runner for Linux and for Windows, about six minutes on a Mac
-with Apple silicon and about eleven on an Intel Mac (measured 2026-10-14). Before golib's generic-cycle fix
-of that day, the same publish took about an hour on Linux and Windows and nearly five hours on an Intel Mac,
-did not finish within six hours on Apple silicon, and produced an executable of about 250 MB. A converted
-project pays the same cost, because it uses the same setting. A build, `dotnet run` and a publish without
-Native AOT are not affected. The fix first shipped in the `go.*` 1.26.10.1 packages; for 1.24.13.7 and earlier,
-see the section that follows.
+with Apple silicon and about eleven on an Intel Mac (measured 2026-10-14, with packages converted from Go
+1.24.13). A converted project pays the same cost, because it uses the same setting. A build, `dotnet run` and a publish without
+Native AOT are not affected. For the 1.24.13.7 packages and earlier, see the section that follows.
 
 <!-- 2026-10-26: re-read at a6214f0c5d. The visible costs are the hosted aot-smoke readings after golib's generic-cycle
      fix (e2move, merge b1ba1380b4, 2026-10-14), from the BOARD's 2026-10-14 entry under "the AOT-cost row" and
@@ -262,8 +300,8 @@ notice already points to them.
 The publish then finishes for most programs, at a cost: ILC peaked at about 28 GB, and the executable was 3.3 times
 the size of the same program built against 1.26.10.1. A very large program can still fail at link (`LNK1183`,
 "extended relocation count 9 less than 65535") when the compiler's object file passes 4 GiB, the COFF object
-format's limit, and the workaround has nothing more to offer it: move to 1.26.10.1. Measured on `win-x64`: 16 of the
-performance suite's 17 programs published this way, and the TLS handshake program failed at link.
+format's limit, and the workaround has nothing more to offer it: move to 1.26.10.1. Measured on `win-x64`: every program
+of the performance suite but the TLS handshake published this way; that one failed at link.
 
 <!-- Measured 2026-10-27 on the i9 (win-x64), relayed by COORD; the attribution is G's, settled by the i9's count.
      The 1.24.13.7 leg of the performance re-baseline (PLAN-perf-rebaseline) published PerfChannel and PerfFib with the
@@ -295,8 +333,8 @@ converted program (`-p:PublishProfile=linux-x64` and the others) set
 `<PublishReadyToRunComposite>false</PublishReadyToRunComposite>`, so a profile publish keeps ReadyToRun and is not
 affected. A program converted by a go2cs earlier than 1.26.10.2 has profiles that turn ReadyToRun off instead,
 since go2cs never overwrites a profile; replace their `<PublishReadyToRun>false</PublishReadyToRun>` with that
-line to get ReadyToRun's faster start back. A converted program's project carries the same line, so a plain
-single-file publish is not affected either. A project converted by an earlier go2cs does not; on its command line,
+line to get ReadyToRun's faster start back. A project converted by go2cs 1.26.10.3 or later carries the same line,
+so a plain single-file publish is not affected either. A project converted by an earlier go2cs does not; on its command line,
 turn the composite image off yourself:
 
 ```

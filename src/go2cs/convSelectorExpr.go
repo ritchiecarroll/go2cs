@@ -2117,6 +2117,19 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 						}
 					}
 				}
+			} else if wrapper, isNamed := types.Unalias(exprType).(*types.Named); isNamed {
+				// A NAMED pointer type, `type PP *point`: Go's `p.f` is `(*p).f`, as through the unnamed pointer
+				// (TS row C18). The wrapper forwards the generated field property (namedPointerFieldSelector);
+				// any other field reads through the wrapper's ref Value, which a read and a write both bind.
+				if ptrType, isPtrType := wrapper.Underlying().(*types.Pointer); isPtrType {
+					if structType, ok := ptrType.Elem().Underlying().(*types.Struct); ok && structFieldReachable(structType, selectorExpr.Sel.Name) {
+						if result, ok := v.namedPointerFieldSelector(selectorExpr, wrapper, ptrType.Elem(), xContexts); ok {
+							return result
+						}
+
+						return fmt.Sprintf("%s.Value.%s", v.convExpr(selectorExpr.X, xContexts), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+					}
+				}
 			}
 		}
 	}

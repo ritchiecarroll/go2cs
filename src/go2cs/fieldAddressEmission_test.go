@@ -161,7 +161,9 @@ func TestFieldAddressReadsAsAProperty(t *testing.T) {
 		t.Errorf("a receiver's field address does not read as its property on the receiver's box:\n%s", addr)
 	}
 
-	if got, want := strings.Join(fieldAccessRecordsOf(info), " "), "counter Int32 holder link outer pair<> point"; got != want {
+	// pointPtr is recorded for the control's READ `pp.Y` (TS row C18): go2cs-gen gives the named pointer's wrapper its
+	// pointee's field properties. Its address `&pp.Y` keeps the wrapper's own `of` (below).
+	if got, want := strings.Join(fieldAccessRecordsOf(info), " "), "counter Int32 holder link outer pair<> point pointPtr"; got != want {
 		t.Errorf("package_info.cs records %q, want %q:\n%s", got, want, info)
 	}
 
@@ -188,6 +190,7 @@ func TestFieldAddressReadsAsAProperty(t *testing.T) {
 		"keep(Ꮡa.of(controls_a.Ꮡn));",  // an unnamed struct, which no record can name
 		"keep(Ꮡw.of(wrapped.ᏑX));",     // a wrapper over another named struct: its fields are generated
 		"keep(pp.of(point.ᏑY));",       // a named pointer type's wrapper declares `of`, not the property
+		"w.X, pp.Y, h.arr[1]);",        // ... while its field READ is Go's spelling, through the wrapper's property
 		"keep(Ꮡh.at(holder.Ꮡarr, 1));", // the field address an element address fuses with
 	} {
 		if !strings.Contains(controls, want) {

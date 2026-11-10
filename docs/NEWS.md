@@ -14,10 +14,13 @@ their full text.
      last change before the release tag (GoCorpusMigration.md, the release ritual, item 1). Moved from
      docs/DRAFT-news-1-26-10-3.md by the 1.26.10.3 release-controls batch (claude/g-release-controls-1263, COORD
      2026-11-08), every PENDING item that had landed flipped against its committed record; what still waits on the
-     publish is marked PENDING with the publish as its trigger. -->
+     publish is marked PENDING with the publish as its trigger. Flipped 2026-11-09 by COORD: the nugetgo .3 wave published
+     (S1-S4: nine packages, gojq 0.12.19 and timefmt-go 0.1.8 among them) and the twelve 1.26.10.1/.2-built revisions
+     were deprecated by the owner; the post-publish smoke (Test-PostPublishRestore.ps1) read 9 of 9 PASS. -->
 
 **NuGet 1.26.10.3.** The second fix release on the Go 1.26 line. The converted standard library is still built from
-Go 1.26.10, and converting a module still needs a Go 1.26 toolchain and the .NET 10 SDK. One change below breaks both
+Go 1.26.10. Converting a module uses a Go 1.26 toolchain, which the go2cs dotnet tool downloads on first use, and
+the .NET 10 SDK. One change below breaks both
 C# source that uses the packages and assemblies already compiled against 1.26.10.2; it is first under *Upgrading from
 1.26.10.2*.
 <!-- The compiled-C# break, VERIFIED at the tree (G finding, COORD ruling 2026-11-07): at the nuget-1.26.10.2 tag golib's
@@ -35,8 +38,8 @@ C# source that uses the packages and assemblies already compiled against 1.26.10
   loops over a Go slice fails at its first such loop under 1.26.10.3, because a slice's enumerator now gives values (see
   the next item). NuGet restores an older nugetgo package under 1.26.10.3 without an error, so the failure shows only
   when the program runs. Rebuild against 1.26.10.3, and move each `nugetgo.*` reference to its 1.26.10.3 revision.
-  **PENDING (the owner's deprecation, once the nugetgo wave is live).** The 1.26.10.2 revisions of the published
-  nugetgo packages are deprecated on nuget.org, each naming its 1.26.10.3 revision as the alternate.
+  The nugetgo revisions built against 1.26.10.1 and 1.26.10.2 are deprecated on nuget.org, each naming its 1.26.10.3
+  revision as the alternate.
 - **`foreach` over a slice gives its values.** A Go slice is `slice<T>`, and `foreach` over it gives
   its elements, as over any C# collection. Go's `(index, value)` pairs come from `range(s)`, and the indexes alone
   from `range(len(s))`:
@@ -78,8 +81,9 @@ The JIT and ReadyToRun times did not move.
 Two earlier changes in this release make the same programs faster under Native AOT. A slice element read no
 longer asks whether its element type takes no storage, so matrix-multiply, sieve and sort benchmarks take 13% to
 18% less time. A 64-bit multiply with a 128-bit result now inlines, which together with the first change makes a TLS
-handshake take about 14% less time. Both hold at the default x64 instruction set. Building a converted program for
-`x86-64-v3` (`<IlcInstructionSet>x86-64-v3</IlcInstructionSet>`) gives no gain across the benchmark suite, and an
+handshake take about 14% less time. Both are measured on `win-x64`, on one development machine, at the default x64
+instruction set. Building a converted program for `x86-64-v3` (`<IlcInstructionSet>x86-64-v3</IlcInstructionSet>`)
+gives no gain across the benchmark suite on the same machine, and an
 image built that way refuses to start on a processor without AVX2, BMI1, BMI2, F16C, FMA or LZCNT.
 <!-- source: DATA-hop126-perf.md §11.7 (option A: MatMul 0.823, Sieve 0.865, Sort 0.867; with the Mul inline,
      TlsHandshake 0.856; win-x64, default instruction set) and §11.6 (x86-64-v3 suite geomean 1.000; the cited
@@ -108,7 +112,8 @@ start. On `win-x64`, on one development machine, a small converted program start
 `-recurse=module` against a local go2cs source tree (`-go2cspath`) no longer gets a solution file beside its project.
 So `dotnet build -c Release` in the program's folder builds the standard library in Release, and
 `dotnet publish -c Release -r <rid>` there succeeds. With 1.26.10.2, that build compiled the standard library in
-Debug, about 21 times slower on a TLS handshake under the JIT, and the publish failed. A solution file an earlier
+Debug, about 21 times slower on a TLS handshake under the JIT (on `win-x64`, on one development machine), and the
+publish failed. A solution file an earlier
 converter wrote is removed only when it is exactly the one that converter wrote. A program converted against the
 published packages (`-recurse=nuget`) keeps its solution and was never affected. To build any converted program, name
 its project file: `dotnet build MyProgram.csproj -c Release`.
@@ -164,7 +169,7 @@ describes the limit and how to stay under it.
      (osx-x64, macOS 15.7.9). Landed with the bank (batch 258): internal/synctest's darwin leg C1-8 (run 42485762191)
      reads 56 of 59 matched with 3 divergent on BOTH RIDs, so it banks no darwin segment (the roster row's class (c)). -->
 
-**PENDING (the publish: the nugetgo wave). gojq for .NET.** [`itchyny/gojq`](https://github.com/itchyny/gojq),
+**gojq for .NET.** [`itchyny/gojq`](https://github.com/itchyny/gojq),
 a jq implementation in Go, is a NuGet package: `nugetgo.github.com.itchyny.gojq` 0.12.19 gives a .NET program an
 in-process, fully managed jq, with no native binary per platform. Its one dependency,
 [`itchyny/timefmt-go`](https://github.com/itchyny/timefmt-go), ships with it as `nugetgo.github.com.itchyny.timefmt-go`

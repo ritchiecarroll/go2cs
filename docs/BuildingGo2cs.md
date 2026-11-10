@@ -73,11 +73,14 @@ bash, on Linux and macOS:
 go2cs -tests -test-action all -test-timeout 10m "$(go env GOROOT)/src/unicode/utf8" src/core/unicode/utf8
 ```
 
-Expected final line:
+Expected final line, in outline (its counts depend on the Go release and the platform; the package's
+[proof page](validation/current/unicode.utf8.md) has the current figures):
 
 ```text
-Validated 14 tests against go test (0 skipped identically on both sides, 1 disclosed-divergent (deferred), 49 disclosed-unsupported declarations excluded).
+Validated <n> tests against go test (<s> skipped identically on both sides, <d> disclosed-divergent (deferred), <u> disclosed-unsupported declarations excluded).
 ```
+<!-- The linux/amd64 run in the next comment printed: Validated 14 tests against go test (0 skipped identically
+     on both sides, 1 disclosed-divergent (deferred), 49 disclosed-unsupported declarations excluded). -->
 <!-- Run cold on linux/amd64 (4 vCPU, .NET SDK 10.0.112, empty NuGet and Go build caches) at ac1454281f by C2,
      2026-10-26, the bash form above: this line, rc 0, in 347 s. The 49 are go1.26.10's unicode/utf8 Benchmark,
      Example and Fuzz declarations: 16 in example_test.go and 33 in utf8_test.go. -->
@@ -87,15 +90,16 @@ standard library, runs it in an isolated process, captures a clean `go test -jso
 compares terminal results by full Go test name — reporting `validated` only when every test agrees on both
 sides and every unsupported declaration (benchmarks, examples) is accounted for. It regenerates the local
 converted `.cs` in place and rewrites the package's proof page under `docs/validation/current/`; the Go
-source copies and run manifests it stages are git-ignored. The same
-command validates every other package on the table — substitute its GOROOT source path and its
-`src/core/<pkg>` path in the two arguments.
+source copies and run manifests it stages are git-ignored. The same command validates every other package in
+[Validated Test Packages](ValidatedTestPackages.md) — substitute its GOROOT source path and its `src/core/<pkg>`
+path in the two arguments.
 
 The test host is published in the Release configuration and run with the CLR's tiered JIT off
 (`DOTNET_TieredCompilation=0`), so every method is compiled once at full optimization and a verdict
 cannot depend on when the runtime promotes a method; `-test-tiered` turns tiering back on, and
 `-test-config Debug` publishes a Debug host (a program you ship keeps tiering on: [Tuning converted code](Tuning.md#net-runtime-settings)). ReadyToRun is opt-in — set `PublishReadyToRun=true` in the
-environment to publish a precompiled host — because it buys a slower steady state on heavy suites, a
+environment to publish a precompiled host (`crypto/tls`'s host is always published ReadyToRun, for its start-up
+cost) — because it buys a slower steady state on heavy suites, a
 larger host and a longer first publish, and because precompiled code does not keep the JIT's stack
 frames, so a test that asserts on frames can answer differently.
 

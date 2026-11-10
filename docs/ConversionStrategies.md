@@ -1650,9 +1650,10 @@ without such an entry counts as a mismatch. A third-party module keeps its manif
 `src/tests/ModuleDisclosures/<module path>@<version>/<package dir>/`, read when the run passes
 `-module-disclosures src/tests/ModuleDisclosures`. A manifest there applies only to that exact module
 version, and a manifest in the package's own output directory still takes precedence. A manifest can also
-carry `notes`, which the package's proof page prints above the verdicts, for a caveat that is not a
-divergence: google/uuid v1.6.0's manifest lists no disclosures and notes an upstream test race that Go
-itself reproduces.
+carry `notes`, for a caveat that is not a divergence. The package's proof page, its test report that
+[Validated Test Packages](ValidatedTestPackages.md) or [Validated Modules](ValidatedModules.md) links, prints
+them above the verdicts. For example, google/uuid v1.6.0's manifest lists no disclosures and notes an
+upstream test race that Go itself reproduces.
 
 **Full detail:** [Reference → Test suites reference the production project](ConversionStrategies-Reference/shadowing.md#test-suites-reference-the-production-project-instead-of-recompiling-it) — the test-project models and when each applies, the internal bridge class and its metadata files, test-side name collisions, and exactly which test files get no `.cs`.
 
@@ -7095,7 +7096,7 @@ VariadicPackPassThrough/VariadicPackPassThrough.go:11 `for i := range xs {`
 The string control: src/go2cs/rangeIndexOnly_test.go:281 `expect("overString", "foreach (var (i, _) in str)")`;
 the nil pointer: :261 `expect("overNilPointer", "foreach (var i in range(nilp, 4))")`. -->
 <!-- The count range: src/go2cs/visitRangeStmt.go:832-833 `case isArrayPointee && rangedThroughPointer && derefdValue:`
-then `foreach (%s%s in range(%d))`, and :835 `foreach (%s%s in range(%s, %d))` for a pointer held in a variable.
+then `foreach (%s%s in range(%d))`, and :836 `foreach (%s%s in range(%s, %d))` for a pointer held in a variable.
 src/go2cs/rangeIndexOnly_test.go:267 `expect("overPointerParam", "foreach (var i in range(2))")` and :269
 `expect("setAll", "foreach (var i in range(4))")`; src/go2cs/rangeNilPointerArray_test.go:24
 `func TestRangeOverPointerArrayValueIsCountRange(t *testing.T) {`; the behavioral PointerArrayRange ranges a nil
@@ -8644,11 +8645,12 @@ return waits for its report and exits 2 with it (golib's `MainExit`; see
 **A goroutine that cannot recurse starts on a smaller stack.** A Go goroutine's stack grows as it needs, while a
 .NET thread's stack is a fixed reservation that ends the process when it overflows. So golib reserves a Go-scale
 256 MiB stack for each goroutine by default (`GO2CS_GOROUTINE_STACK` changes it). That reservation is address
-space rather than memory, but it is what makes a hundred thousand goroutines parked at once slow to start. The
-converter proves, for each `go` statement, whether its goroutine can recurse: every call it can make must resolve
-to a function the converter can see, and no chain of calls may return to a function already on it. golib runs a
-goroutine it proves cannot recurse on a 16 MiB stack (`GO2CS_GOROUTINE_BOUNDED_STACK` changes it). Here `produce`
-only computes and sends on a channel, and its `go` statement reads as any other:
+space rather than memory, but it is what makes a hundred thousand goroutines parked at once slow to start
+(measured on win-x64). The converter proves, for each `go` statement, whether its goroutine can recurse: every
+call it can make must resolve to a function the converter can see, and no chain of calls may return to a
+function already on it. golib runs a goroutine it proves cannot recurse on a 16 MiB stack
+(`GO2CS_GOROUTINE_BOUNDED_STACK` changes it). Here `produce` only computes and sends on a channel, and its `go`
+statement reads as any other:
 
 <!-- source: src/tests/Behavioral/GoroutineStackReserve/main.go:47 -->
 ```go
@@ -8673,8 +8675,8 @@ line off, on a neighbouring `goǃ` call, which the position alone cannot tell fr
 
 Anything the proof cannot follow keeps the full stack, unrecorded. That includes a call through an interface or a
 func value, a range-over-func loop, and a goroutine that reaches either through the standard library, so a
-goroutine that does I/O, formats with `fmt` or serves a connection keeps today's reservation. A mistaken mark would
-crash where Go grows the stack, so the proof gives up rather than guess.
+goroutine that does I/O, formats with `fmt` or serves a connection keeps the default 256 MiB
+reservation. A mistaken mark would crash where Go grows the stack, so the proof gives up rather than guess.
 <!-- The proof: src/go2cs/goroutineStackAnalysis.go; the mark: src/go2cs/visitGoStmt.go:247
      `recorded := bounded && v.boundedGoRecordable()`, recorded by src/go2cs/goroutineStackRecords.go:136
      `func applyBoundedGoRecords(packageInfoLines []string, packageInfoFileName string, mergeExisting bool) []string {`;
@@ -8693,7 +8695,7 @@ crash where Go grows the stack, so the proof gives up rather than guess.
 thread, so each goroutine needs a thread of its own. `goǃ` does not use the .NET thread pool, because
 a blocked goroutine would hold a shared pool thread and starve the others. golib cannot run many
 goroutines on fewer threads either, because .NET cannot move a running call to another stack. That is
-a property of today's .NET rather than of the conversion: goroutines are started in one place in golib,
+a property of .NET 10 rather than of the conversion: goroutines are started in one place in golib,
 so if .NET gains threads its runtime can park cheaply, golib can adopt them and converted code stays as
 it is.
 
@@ -11245,7 +11247,7 @@ layout rules and writes the number into the C#. The Go expression stays beside i
 ([Struct Types](#struct-types)), and `default!` is its zero value
 ([Nil and Zero Values](#nil-and-zero-values)). The operand is never evaluated, as in Go. The numbers are
 Go's for the target architecture, here amd64.
-<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:3855-3876#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#c8dfe1, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
+<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:3898-3919#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#c8dfe1, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
 
 `Alignof` and `Offsetof` fold the same way: `unsafe.Offsetof(x.c)` becomes
 `/* unsafe.Offsetof(x.c) */ (uintptr)16`.
@@ -11501,7 +11503,7 @@ internal/unsafeheader's own tests, which build a slice and a string this way, pa
      (docs/phase4/DATA-rebank-prep-c1-2026-10-22.md, section 2). The page said "on linux and windows"; no
      windows reading at go1.26.10 is recorded (the re-bank owes it,
      docs/PLAN-rebank-go126.md:450 (`E3 retires, and the row rejoins`)), so windows is left off until one is. -->
-<!-- emission: a probe at 8c091fc3a (the field-by-field build of internal/unsafeheader's TestWriteThroughHeader over a local `type sliceHeader struct { Data unsafe.Pointer; Len, Cap int }`) converts to `var hdr = Ꮡalias.Reinterpret<slice<byte>, sliceHeader>();` then `hdr.Data = @unsafe.Pointer.FromPinnedBox(Ꮡ(s, 0)); hdr.Cap = cap(s); hdr.Len = len(s);`. Dispatch: src/core/golib/ж.PointerExtensions.cs:288-294#fe0797 (SliceHeaderBox, StringHeaderBox). The setter: src/gen/go2cs-gen/FieldAccessGenerator.cs:53-59#0b034b (remarks), :255 (`{ReceiverName}.OnHeaderStore();`, the setter, ReceiverName being ʗp), :562-578#f10245 (IsHeaderShaped). The commit and limits L1-L3: src/core/golib/ж.SliceHeaderBox.cs:62-80#63bcd1 (remarks), :328#9f58e1 (OnHeaderStore); the string half: src/core/golib/ж.StringHeaderBox.cs:32-58#c14bfc. Guards: GolibTests HeaderWriteThroughTests; GenTests AHeaderShapedStructGetsGetSetPropertiesWhoseSetterCommitsTheHeader, ANearMissOfTheHeaderShapeKeepsItsRefProperties. Reference: docs/ConversionStrategies-Reference/pointers.md:2445-2454#cc40fb. Platform: see the note above. -->
+<!-- emission: a probe at 8c091fc3a (the field-by-field build of internal/unsafeheader's TestWriteThroughHeader over a local `type sliceHeader struct { Data unsafe.Pointer; Len, Cap int }`) converts to `var hdr = Ꮡalias.Reinterpret<slice<byte>, sliceHeader>();` then `hdr.Data = @unsafe.Pointer.FromPinnedBox(Ꮡ(s, 0)); hdr.Cap = cap(s); hdr.Len = len(s);`. Dispatch: src/core/golib/ж.PointerExtensions.cs:288-294#fe0797 (SliceHeaderBox, StringHeaderBox). The setter: src/gen/go2cs-gen/FieldAccessGenerator.cs:53-59#0b034b (remarks), :349 (`{receiver}.OnHeaderStore();`, the setter, receiver being ʗp or the box a named pointer wrapper holds), :656-672#f10245 (IsHeaderShaped). The commit and limits L1-L3: src/core/golib/ж.SliceHeaderBox.cs:62-80#63bcd1 (remarks), :328#9f58e1 (OnHeaderStore); the string half: src/core/golib/ж.StringHeaderBox.cs:32-58#c14bfc. Guards: GolibTests HeaderWriteThroughTests; GenTests AHeaderShapedStructGetsGetSetPropertiesWhoseSetterCommitsTheHeader, ANearMissOfTheHeaderShapeKeepsItsRefProperties. Reference: docs/ConversionStrategies-Reference/pointers.md:2445-2454#cc40fb. Platform: see the note above. -->
 
 **A pointer passed to a system call stays alive until the call returns, as in Go.** Go guarantees this
 for `uintptr(unsafe.Pointer(p))` written directly in a `syscall.Syscall` argument list. The converter
@@ -12171,7 +12173,7 @@ keeps an address in an integer and compares it later, as `sync.Cond`'s copy chec
 number, so that code is written by hand.
 The hand-written C# keeps Go's observable behavior and drops Go's mechanism. A few hot functions, such as
 `math/bits`' `Mul`, are hand-owned for speed instead: Go's compiler replaces each call with a few machine
-instructions, and the converted body is slower.
+instructions, and a converted body cannot match that.
 
 Hand ownership comes in two sizes: a whole file, or a single declaration.
 

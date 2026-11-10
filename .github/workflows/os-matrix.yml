@@ -395,15 +395,16 @@ jobs:
               'sweep-shard'      = 210   # one -tests convert/build/run/compare cycle per matched
                                          # row; the sweep's own per-package floors reach 120m.
               'release-smoke'    = 90    # the LEG only (the pack job has its own budget): converter
-                                         # go build + five small restore/build/run arms against the
+                                         # go build + seven small restore/build/run arms (A-G in
+                                         # src/tests/PackageTests/release-smoke.ps1) against the
                                          # feed, each restoring into a fresh cache. PROVISIONAL
                                          # until the first run.
               'aot-smoke'        = 240   # the LEG only (four RIDs): ONE Native AOT publish + run of PackageSymbols
                                          # under go.lib's TrimMode=partial, which compiles the whole
-                                         # go.* closure (31 assemblies): ~70 min on hosted linux
-                                         # (37495989079), and the windows/mac legs of that run passed
-                                         # 90/135 still compiling. The pack's order, as ruled; the
-                                         # mac multiplier takes it to 360, GitHub's ceiling.
+                                         # go.* closure (31 assemblies). Its measured wall times, before
+                                         # and after golib's generic-cycle fix, are in docs/CIMatrix.md's
+                                         # aot-smoke row. The pack's order, as ruled; the mac
+                                         # multiplier takes it to 360, GitHub's ceiling.
               'nugetgo-behavior' = 90    # release-smoke's leg is the closest shape (C1, 2026-10-12): converter go build,
                                          # one `go run`, one conversion against the feed, and one restore, build and
                                          # run of the sample with its go.* closure restored cold. PROVISIONAL until

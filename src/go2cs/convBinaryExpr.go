@@ -1792,6 +1792,28 @@ func (v *Visitor) concatYieldsNamedString(binaryExpr *ast.BinaryExpr) bool {
 	return isBasic && basic.Info()&types.IsString != 0
 }
 
+// isU8StringOperand reports whether a binary operand counts as a string for the `u8` literal decision. It is
+// isStringType, plus the NAMED-string operands isStringType leaves out: an index or sub-slice of a named string
+// (`vals["a"]`, `s[0]`, `k[1:]` with `type Kind string`) and a concatenation of one (`s[0] + "z"`). Each renders as the
+// named type's [GoType] wrapper, which compares with a `"x"u8` span (its ReadOnlySpan<byte> operators) but not with
+// a plain C# string: C# will not chain string -> @string -> Kind, so `vals["a"] == "x"` was CS0019. A PLAIN string
+// index keeps isStringType's answer, and so its emission (`plain[0] == "x"` binds @string's own operator). Kept out
+// of isStringType itself, which convCallExpr also reads.
+func (v *Visitor) isU8StringOperand(expr ast.Expr) bool {
+	if v.isStringType(expr) {
+		return true
+	}
+
+	switch e := ast.Unparen(expr).(type) {
+	case *ast.IndexExpr, *ast.SliceExpr:
+		return isNamedStringType(v.info.TypeOf(expr))
+	case *ast.BinaryExpr:
+		return e.Op == token.ADD && isNamedStringType(v.info.TypeOf(expr))
+	}
+
+	return false
+}
+
 func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context PatternMatchExprContext, litContext BasicLitContext) string {
 	lhsType := v.getExprType(binaryExpr.X)
 	rhsType := v.getExprType(binaryExpr.Y)
@@ -1816,7 +1838,7 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 	// including beside a sub-slice operand, which renders as the named type too (see concatYieldsNamedString).
 	namedConcat := binaryExpr.Op == token.ADD && v.concatYieldsNamedString(binaryExpr)
 	concatSuppressed := litContext.spanTargetUnsupported && binaryExpr.Op == token.ADD && !namedConcat
-	basicLitContext.u8StringOK = !concatSuppressed && (namedConcat || v.isStringType(binaryExpr.X) && v.isStringType(binaryExpr.Y))
+	basicLitContext.u8StringOK = !concatSuppressed && (namedConcat || v.isU8StringOperand(binaryExpr.X) && v.isU8StringOperand(binaryExpr.Y))
 
 	// Propagate to the OPERAND context so a nested concat is suppressed exactly where the old
 	// coupling suppressed it. That coupling read `!litContext.u8StringOK`, so the signal a child

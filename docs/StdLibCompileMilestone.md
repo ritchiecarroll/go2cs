@@ -17,12 +17,13 @@ at all: a Go-native converter built on `go/ast` + `go/types`, Roslyn source gene
 compile-time semantics, and a regression harness that locks in every fix with a Go-vs-C#
 output-compared behavioral test.
 
-The two weeks were an AI-driven effort of a kind we suspect few codebases have seen: **939 commits, of
-which 683 are individually-gated converter, runtime, and source-generator fixes — each one root-caused
-against real emitted code, each one locked in by a behavioral regression test (371 and counting), each
-one verified byte-for-byte against the full corpus before landing.** The work ran as coordinated
+The two weeks were an AI-driven effort of a kind we suspect few codebases have seen: **939 commits by
+2026-07-10, of which 683 were individually-gated converter, runtime, and source-generator fixes — each one
+root-caused against real emitted code, each one locked in by a behavioral regression test (371 at the time),
+each one verified byte-for-byte against the full corpus before landing.** The work ran as coordinated
 parallel AI sessions: each focused on its own fixes with strict file ownership, adversarial review before
-every merge, and a rebuild of all 302 packages after every wave of merges to prove zero regression.
+every merge, and a rebuild of all 302 packages of the standard library as it then stood after every wave of
+merges to prove zero regression.
 <!-- Pre-2026-10-26 wording: "The two weeks were an AI campaign ... The work ran as a coordinated fleet: focused fix
      sessions with strict file ownership, adversarial review before every merge, and a census loop that rebuilt all
      302 packages after every wave to prove zero regression." -->

@@ -159,14 +159,16 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 			// A POINTER key looked up in an `any`-keyed map crosses as its BOX (see the tuple
 			// arm above and typedNilInterfaceBoxing.go).
 			contexts = v.emptyInterfacePointerContexts(mapType.Key(), indexExpr.Index, contexts)
-		} else if ptr, isPtr := typeAndVal.Type.(*types.Pointer); isPtr {
+		} else if ptr, isPtr := types.Unalias(typeAndVal.Type).Underlying().(*types.Pointer); isPtr {
+			// A NAMED pointer type (`type Features *flagSet`) indexes through its wrapper's Value the same way:
+			// Go indexes a named pointer to an array as it does the unnamed one.
 			// The deref-aliased-parameter exception applies only when the base ITSELF is the
 			// parameter ident (`p[i]` renders through the value alias). A pointer FIELD reached
 			// through a selector — `mp.cgoCallers[0]`, where cgoCallers is `*cgoCallers` (runtime
 			// proc.go) — is a real ж box and needs the `.Value` deref: the old root-ident test
 			// mistook the selector's parameter ROOT for the indexed pointer and skipped it
 			// (CS0021 on every named-array-wrapper box index).
-			if ident, isBare := indexExpr.X.(*ast.Ident); !isBare || !v.identIsParameter(ident) {
+			if ident, isBare := indexExpr.X.(*ast.Ident); !isBare || !v.isDerefdPointerParamIdent(ident) {
 				ptrDeref = ".Value"
 
 				// A deref-aliased pointer RECEIVER (`this ref T v`) is the named array's WRAPPER, not a box,

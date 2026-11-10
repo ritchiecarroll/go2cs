@@ -127,8 +127,19 @@ internal class InheritedTypeTemplate : TemplateBase
         // numeric kind, only the interface declarations were missing (the golib uintptr
         // struct precedent).
         "Numeric" => NumericInterfaces,
+        _ when TypeName == "@string" => StringInterfaces,
         _ => UnderlyingArrayElementType is null ? "" : $" : IArray<{UnderlyingArrayElementType}>"
     };
+
+    // A named type over `string` is ORDERED in Go: `cmp.Ordered` admits it, so `slices.Sort` over `[]Path` (`type Path
+    // string`) is legal, as are cmp.Compare, slices.Max/Min/BinarySearch and the builtin min/max. The converter maps
+    // cmp.Ordered to IAddition/IEquality/IComparisonOperators, and golib's N-argument min/max binds IComparable<T>, so
+    // the wrapper declares all of them (IEqualityOperators rides IComparisonOperators). @string declares the same set,
+    // and the numeric wrappers above are the precedent; the operators and CompareTo they need are in
+    // StringSurfaceMembers. Without these, every Ordered consumer instantiated with a named string was CS0315 (TS
+    // readiness C6: tspath's `slices.Sort(orderedGroups)`).
+    private string StringInterfaces =>
+        $" : global::System.IComparable<{ObjectName}>, global::System.Numerics.IComparisonOperators<{ObjectName}, {ObjectName}, bool>, global::System.Numerics.IAdditionOperators<{ObjectName}, {ObjectName}, {ObjectName}>";
 
     // A numeric wrapper over an INTEGER underlying (not float/complex) — the modulus, bitwise and
     // shift operators exist for it (NumericTypeTemplate.GetComplementOperator, same kind-gate), so
@@ -579,6 +590,35 @@ internal class InheritedTypeTemplate : TemplateBase
 
                 public static {{ObjectName}} operator +(global::System.ReadOnlySpan<byte> left, {{ObjectName}} right) => new {{ObjectName}}(left + right.{{Value}});
 
+                // ORDERED, as Go's named string is (cmp.Ordered admits it; see StringInterfaces). The same-type
+                // operators and CompareTo forward to @string's byte-wise order, which is Go's string order. Before
+                // these, `a < b` over two named strings had no candidate at all (CS0019), so the ordering interfaces
+                // could not be declared either.
+                public static bool operator <({{ObjectName}} left, {{ObjectName}} right) => left.{{Value}} < right.{{Value}};
+
+                public static bool operator <=({{ObjectName}} left, {{ObjectName}} right) => left.{{Value}} <= right.{{Value}};
+
+                public static bool operator >({{ObjectName}} left, {{ObjectName}} right) => left.{{Value}} > right.{{Value}};
+
+                public static bool operator >=({{ObjectName}} left, {{ObjectName}} right) => left.{{Value}} >= right.{{Value}};
+
+                public int CompareTo({{ObjectName}} other) => {{Value}}.CompareTo(other.{{Value}});
+
+                // Go converts a []byte or a []rune straight to a named string (`Pointer(b)`, jsontext's `type Pointer
+                // string`). The converter writes that as a cast from the slice, and C# will not chain the slice ->
+                // @string -> wrapper conversions on its own (CS0030), so the wrapper converts from each slice kind
+                // directly, through @string's own conversion (which copies, as Go's does). Explicit, as Go's is: a
+                // conversion is always written. `int` is rune (every converted project aliases rune = System.Int32).
+                public static explicit operator {{ObjectName}}(global::go.slice<byte> value) => new {{ObjectName}}((@string)value);
+
+                public static explicit operator {{ObjectName}}(global::go.slice<int> value) => new {{ObjectName}}((@string)value);
+
+                // `for i, r := range s` over a named string: Go decodes it rune by rune exactly as it does a string
+                // (index of each rune's first byte, U+FFFD for an invalid byte). The converter emits
+                // `foreach (var (i, r) in s)`, which binds this pattern member; it forwards @string's decoding enumerator.
+                // Before it the loop had no GetEnumerator to bind (CS1579; TS readiness C12).
+                public global::System.Collections.Generic.IEnumerator<(nint, int)> GetEnumerator() => {{Value}}.GetEnumerator();
+
         """;
 
     private string ToStringImplementation => TypeClass switch
@@ -785,6 +825,9 @@ internal class InheritedTypeTemplate : TemplateBase
     private string GoEquatablePart =>
         $"\r\n\r\n    partial {ObjectKind} {ObjectName} : global::go.IGoEquatable\r\n    {{\r\n        bool global::go.IGoEquatable.GoEquals(object? other) => other is {ObjectName} value && this == value;\r\n    }}";
 
+    // A named pointer's deref alias, an extension method of the package class (PointerTypeTemplate.DerefAlias).
+    private string PointerDerefAlias => TypeClass == "Pointer" ? PointerTypeTemplate.DerefAlias(MemberScope, ObjectName, TargetTypeName) : "";
+
     public override string TemplateBody =>
         $$"""
             {{GoTypeAttributePrefix}}[{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
@@ -817,6 +860,6 @@ internal class InheritedTypeTemplate : TemplateBase
                 public static bool operator !=(NilType nil, {{ObjectName}} value) => value != nil;
         
                 public static implicit operator {{ObjectName}}(NilType nil) => {{NilConversionExpression}};
-            }{{GoEquatablePart}}
+            }{{GoEquatablePart}}{{PointerDerefAlias}}
         """;
 }

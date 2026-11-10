@@ -438,7 +438,7 @@ build. The getter holds only the warm path, a null test and a load, and is marke
 touch, which allocates and publishes, is the out-of-line `materializeValue()`, so
 that an element loop over a named array inlines its reads as it does over `array<E>`.
 <!-- the warm/cold split landed 2026-10-22:
-     src/gen/go2cs-gen/Templates/InheritedType/InheritedTypeTemplate.cs:332 `get => m_value is { } value ? value.Value`
+     src/gen/go2cs-gen/Templates/InheritedType/InheritedTypeTemplate.cs:343 `get => m_value is { } value ? value.Value`
 --> The CAS publish
 is unchanged by the split: `materializeValue()` publishes into the same `m_value` of the same wrapper.
 

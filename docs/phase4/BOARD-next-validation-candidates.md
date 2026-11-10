@@ -34967,4 +34967,72 @@ key set.
 
 — C1 (2026-11-09)
 
+## 2026-11-09 — P1 (found in TS seat C18): a GENERIC named pointer type is declared without its type parameters and converted at its use site as a call — OPEN, owner to be sized
+
+**Shape.** A named pointer type with type parameters, `type GP[T any] *box[T]`. Go allows it; std has none (the C18
+typed census found 24-25 named pointer declarations per target, all plain).
+
+```go
+type box[T any] struct{ v T }
+
+type GP[T any] *box[T]
+
+func get(b *box[int]) int { return b.v }
+
+func main() {
+	g := GP[int](&box[int]{v: 3})
+	g.v = g.v + 1
+	fmt.Println(g.v, get(g))
+}
+```
+
+Go prints `4 4`.
+
+**Emission at master fb885891b3** (`go2cs -go2cspath <tree>/src . .`, exit 0, no warning):
+
+```csharp
+partial class GP /*ж<box<T>>*/;
+
+internal static void Main() {
+    var g = GP<nint>(Ꮡ(new box<nint>(v: 3)));
+    g.v = g.v + 1;
+    fmt.Println(g.v, get(ref (g).DerefOrNull()));
+}
+```
+
+Two defects. (1) The declaration drops the type parameter list: the wrapper is `partial class GP` with `T` free in
+its definition comment, so go2cs-gen's generated part names an undeclared `T` (11 x CS0246 in
+`go.main_package.GP.g.cs`, first at line 21). (2) The conversion `GP[int](p)` is emitted as a generic method call,
+`GP<nint>(…)`, where a plain named pointer's conversion is `new PP(…)`. With both fixed, C18's wrapper surface
+(field properties, the DerefOrNull extension) would also need the wrapper's type parameters on its extension blocks;
+C18 already writes `typeof(GP<>)` for the record, and FieldAccessGenerator binds a generic wrapper's pointee at its
+declaration, where its own type parameters are in scope.
+
+**Not guarded:** the converter exits 0. Nothing in the behavioral corpus has the shape.
+
+— P1 (2026-11-09)
+
+
+## 2026-11-09 — COORD (runtime TestDecorateMappings, H's claude/h-vma-decorate): on a naming kernel the CLR heap carries none of Go's region labels — a FIDELITY gap the test cannot see
+
+**The gap.** On a kernel with CONFIG_ANON_VMA_NAME=y, Go's runtime names its heap and metadata mappings
+`[anon: Go: <region>]`, the ten regions validateMapLabels lists (allspans array, gc bits, heap, heap index,
+heap reservation, immortal metadata, page alloc, page alloc index, page summary, scavenge index). Go's own read on
+G-WSL also logged a `profiler hash buckets` label. The converted program's managed heap is the CLR's, and it names
+none of them: the C# side logs all ten "region label missing" lines on the hosted ubuntu runner and on G-WSL, both
+before and after H's fix.
+
+**Why no test sees it.** validateMapLabels (go1.26.10, decoratemappings_test.go:32-42) reports a missing or
+unexpected label with t.Logf only. There is no Errorf, so Go=pass / C#=pass on a naming kernel is the test as Go
+wrote it, and nothing is disclosed.
+
+**What does match.** The converted runtime's own native mappings (sysMmap's seven setVMAName sites) are named
+on such a kernel. After H's fix, setVMANameSupported() makes Go's probe, so a kernel without naming reads
+Go=skip / C#=skip. P1's box proves it: the base was DIVERGED, the tip validates 1 of 1.
+
+**Remedy, if one is wanted.** The CLR does not expose its heap's mappings to be named. Any remedy is a runtime-host
+question, not a converter one. OPEN, unowned.
+
+— COORD (2026-11-09)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
