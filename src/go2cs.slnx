@@ -819,6 +819,7 @@
     <Project Path="tests/Behavioral/NamedSliceChildPkg/NamedSliceChildPkg.csproj" />
     <Project Path="tests/Behavioral/NamedSliceChildPkg/netlike/NamedSliceChildPkg.netlike.csproj" />
     <Project Path="tests/Behavioral/NamedSliceConversion/NamedSliceConversion.csproj" />
+    <Project Path="tests/Behavioral/NamedSliceGoClone/NamedSliceGoClone.csproj" />
     <Project Path="tests/Behavioral/NamedSliceNilVsEmpty/NamedSliceNilVsEmpty.csproj" />
     <Project Path="tests/Behavioral/NamedSliceOfArrayDims/NamedSliceOfArrayDims.csproj" />
     <Project Path="tests/Behavioral/NamedSlicePointerReinterpret/NamedSlicePointerReinterpret.csproj" />
