@@ -411,3 +411,48 @@ for-clause seat, six), routed with this block. The tree was restored by status t
 
 **Not read on the box**, as in §6.9: GolibTests at the linux and darwin flavours, the behavioral harness, the census
 on the four runners and the release smoke are CI legs, dispatched on the pushed tip.
+
+### 6.11 The readers of §6.8, swept (dated block, 2026-11-10, P2)
+
+The follow-up seat §6.8 routes, cut on this record's tip (`012b4566e7`) as `claude/p2-layout-key-guards`. Every row
+got a fixture that plants a file in a layout key folder (or, for the GOROOT readers, a file only linux/arm64 builds)
+and reds at the base, then a fix that reads the folder set from the universe: `platformUniverse` and the corpus
+lattice in the converter package, `lineKeyedUniverse` and `lineKeyedFolderTargets` in repoguard, and for each tool a
+universe literal that `TestLayoutKeyListsAreTheUniverses` now pins (its new `layoutUniverseLists`), with the folders
+derived from it. Red commits `4f50aa8872`, `8ab08a708e`, `c56da40674`; fixes `95988a3989`, `c2d5cf917d`,
+`19dc65cedd`, `59ecf8c954`, `286c637ec0`.
+
+| Site | At the base | After |
+|---|---|---|
+| `osMemoryRegistrationCensus` | runtime/<goos>/ at three targets | flat plus each target's key folders, four targets; files read 218, 234, 230 and 233 (linux/arm64), callers unchanged |
+| `handOwnPackageBoxParity` (twinPrincipal) | a twin in a GOOS folder only | any key folder |
+| `nativeCallGateWindows` | runtime/windows/ | runtime/{amd64,windows,windows-amd64}/; 76 sites over 3 files, as before |
+| `nativeBoundaryBoxDeref` | syscall/windows/ | adds syscall/amd64/ and syscall/windows-amd64/; 67 files, as before |
+| `darwinLinknamePulls` | a part in amd64/ never fills (false red); darwin-amd64/ unread | grouped by the darwin/amd64 build; 15 pulls, 13 filled, as before |
+| `sstringTwinGuard` | `isPlatformFolderName` | `isCorpusLayoutKeyFolder` |
+| `crosspkgExportedBox` (two sites) | GOOS folders | every candidate key folder |
+| `manualConversionScope` | witness per GOOS, <pkg>/<goos>/ only | witness per target; a scope is unbodied at any target of its GOOS that lacks the body |
+| `manualConversionVars` | <pkg>/<goos>/ (false red only) | missing per target of the scope's GOOS |
+| `handOwnTypeAccessibility` | the info file's own folder | its whole assembly; marked files read 117 to 338, once per info file that compiles each; 0 duplicates |
+| `linknameForwardRegistry` (two sites) | GOARCH fixed at amd64 | `corpusTargets = platformUniverse`; 27 rows checked, 35 walked |
+| `packageInputDigest.go` | flat `*_impl.cs` | flat plus the target's key folders, named with the folder; a flat companion keeps its name |
+| `reconvert-deletions.ps1` | `$KnownGoos` | `$layoutUniverse`, pinned; each key folder asked at its own flavour |
+| `h8-comparand.sh` (three sites) | GOOS case lists | `LAYOUT_UNIVERSE`, pinned; view takes `<goos>/<arch>`; selftest 46 of 46 |
+| `check-solution-integrity.ps1` | three GOOS graphs | four target graphs; `$(GoTargetArch)` conditions modelled |
+| `push-nuget.ps1` `$goosNames` | reviewed, not changed | below |
+
+**reconvert-deletions, a dry run on a copy of this tree** (source and target both go1.26.10, linux/amd64, every file
+a candidate): at the base 161 files in amd64/, linux-amd64/ and linux-arm64/ folders read NOT-A-CONVERSION-TARGET,
+as packages such as `syscall/linux-amd64`, so nothing checked them. With the fix they read KEEP-SELECTED (+129),
+KEEP-METADATA (+25) and PROTECTED (+7). Both arms: 0 DELETE, 0 unresolved.
+
+**check-solution-integrity's control.** `-InjectReference 'internal/cpu=math'` closes a cycle at the three amd64
+targets and not at linux/arm64, because math references internal/cpu only under `'$(GoTargetArch)'=='amd64'`; the
+base script read that condition as unconditional and reported the cycle on its linux graph.
+
+**push-nuget.ps1, the review.** Fourteen packages carry key folders and no GOOS folder (math, hash/crc32,
+internal/abi, internal/bytealg and the rest of the amd64/ plus linux-arm64/ set), so `$goosNames` does not split
+them by RID. The RIDs this release ships are all amd64 builds (win-x64, linux-x64, osx-x64, with osx-arm64 taking
+osx-x64's bytes), and an amd64 build of such a package compiles the same flat and amd64/ files on every GOOS, so
+one asset is correct today. The day a linux-arm64 RID ships these packages need a split; that is S6's packaging
+decision and is left to it.
