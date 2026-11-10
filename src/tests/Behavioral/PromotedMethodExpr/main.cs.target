@@ -49,12 +49,15 @@ internal static void Main() {
     var lv = Ꮡm3.Len;
     fmt.Println("m3.Len:", lv());
     
-    var add = ((Func<ж<outer>, nint, nint>)(Add));
+    var add = ((Func<ж<outer>, nint, nint>)([GoWrapper("(*outer).Add")] (p0, p1) => wrapperRecv(p0).Add(p1)));
     ref var o = ref heap(new outer(), out var Ꮡo);
     fmt.Println("(*outer).Add:", add(Ꮡo, 2), add(Ꮡo, 3));
     
-    var get = ((Func<outer, nint>)(Get));
+    var get = ((Func<outer, nint>)([GoWrapper("outer.Get")] (p0) => p0.Get()));
     fmt.Println("outer.Get:", get(o));
+    
+    var getp = ((Func<ж<outer>, nint>)([GoWrapper("(*outer).Get")] (p0) => wrapperRecv(p0).Get()));
+    fmt.Println("(*outer).Get:", getp(Ꮡo));
     
     var oʗ1 = o;
     var gv = () => oʗ1.Get();
