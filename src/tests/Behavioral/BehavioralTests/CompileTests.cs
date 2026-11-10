@@ -151,6 +151,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckArrayRangeSnapshot() => CheckTarget("ArrayRangeSnapshot");
 
     [TestMethod]
+    public void CheckArraySwitchCases() => CheckTarget("ArraySwitchCases");
+
+    [TestMethod]
     public void CheckArrayValueCopySites() => CheckTarget("ArrayValueCopySites");
 
     [TestMethod]

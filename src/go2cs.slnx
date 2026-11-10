@@ -350,6 +350,7 @@
     <Project Path="tests/Behavioral/ArrayPassByValue/ArrayPassByValue.csproj" />
     <Project Path="tests/Behavioral/ArrayPointerElementAlias/ArrayPointerElementAlias.csproj" />
     <Project Path="tests/Behavioral/ArrayRangeSnapshot/ArrayRangeSnapshot.csproj" />
+    <Project Path="tests/Behavioral/ArraySwitchCases/ArraySwitchCases.csproj" />
     <Project Path="tests/Behavioral/ArrayValueCopySites/ArrayValueCopySites.csproj" />
     <Project Path="tests/Behavioral/ArrayWideIndexAddress/ArrayWideIndexAddress.csproj" />
     <Project Path="tests/Behavioral/AtomicFieldThroughPointer/AtomicFieldThroughPointer.csproj" />
