@@ -156,3 +156,57 @@ func TestPackageInfoIsNotAdoptedAcrossAPackageRename(t *testing.T) {
 		t.Errorf("the renamed package's package_info.cs must declare macos_package and no longer macOS_package:\n%s", text)
 	}
 }
+
+// TestAMainPackageKeepsItsOwnPackageInfoOnReconvert is the guard's false refusal. goPackageImportPathFor stamps a main
+// package's class ImportPath = "main" (Go's reflect names a main package's types main.T whatever its module path), and
+// a main package in a module whose namespace does not decode to that path carries the stamp. packageInfoBelongsHere
+// compared the stamp with the LOADER path (example.com/app) instead, so every reconvert of such a package warned that
+// its own package_info.cs was "package main's ..., not main's" and replaced it with the template, dropping anything
+// kept outside the marker sections.
+func TestAMainPackageKeepsItsOwnPackageInfoOnReconvert(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	savedPath, savedName, savedNamespace := currentPackagePath, packageName, packageNamespace
+	t.Cleanup(func() { currentPackagePath, packageName, packageNamespace = savedPath, savedName, savedNamespace })
+
+	root := t.TempDir()
+	appDir := filepath.Join(root, "app")
+	outRoot := filepath.Join(root, "out")
+	infoPath := filepath.Join(outRoot, "src", "example.com", "app", "package_info.cs")
+
+	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/app\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(appDir, "main.go"), "package main\n\nfunc main() { println(1) }\n")
+
+	convertAdoptionModule(t, appDir, outRoot)
+
+	first, err := os.ReadFile(infoPath)
+
+	if err != nil || !strings.Contains(string(first), `[GoPackage("main", ImportPath = "main")]`) {
+		t.Fatalf("control: the main package's package_info.cs does not carry the main stamp (err %v):\n%s", err, first)
+	}
+
+	// A line outside the marker sections survives a reconvert only when the persisted file is adopted.
+	const kept = "// kept across a reconvert"
+	writeModuleFile(t, infoPath, string(first)+kept+"\n")
+
+	convertAdoptionModule(t, appDir, outRoot)
+
+	again, err := os.ReadFile(infoPath)
+
+	if err != nil || !strings.Contains(string(again), kept) {
+		t.Errorf("the main package's own package_info.cs was replaced by the template on reconvert (err %v)", err)
+	}
+
+	// The rule itself: the main stamp is this main package's, and a main stamp is not another package's.
+	packageName, currentPackagePath = "main", "example.com/app"
+
+	if owner, adopted := packageInfoBelongsHere([]string{`[GoPackage("main", ImportPath = "main")]`}); !adopted {
+		t.Errorf("a main package refused its own stamp (owner %q)", owner)
+	}
+
+	packageName, currentPackagePath = "app", "example.com/app"
+
+	if _, adopted := packageInfoBelongsHere([]string{`[GoPackage("main", ImportPath = "main")]`}); adopted {
+		t.Errorf("package app adopted a main package's package_info.cs")
+	}
+}
