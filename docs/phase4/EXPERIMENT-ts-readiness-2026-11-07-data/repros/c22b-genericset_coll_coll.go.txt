@@ -1,0 +1,22 @@
+package coll
+
+// tsc internal/collections: generic type Set beside a method named Set on another type (OrderedMap.Set).
+type Set[T comparable] struct{ m map[T]struct{} }
+
+func (s *Set[T]) Add(v T) {
+	if s.m == nil {
+		s.m = map[T]struct{}{}
+	}
+	s.m[v] = struct{}{}
+}
+
+func (s *Set[T]) Len() int { return len(s.m) }
+
+type OrderedMap[K comparable, V any] struct{ m map[K]V }
+
+func (o *OrderedMap[K, V]) Set(k K, v V) {
+	if o.m == nil {
+		o.m = map[K]V{}
+	}
+	o.m[k] = v
+}

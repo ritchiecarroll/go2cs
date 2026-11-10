@@ -1,0 +1,5 @@
+package lib
+
+type Value []byte
+
+func (v Value) Len() int { return len(v) }

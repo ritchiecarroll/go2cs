@@ -1,0 +1,3 @@
+module repro/c23namedbytesfromconst
+
+go 1.26
