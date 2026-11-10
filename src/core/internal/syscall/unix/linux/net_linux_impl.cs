@@ -100,10 +100,11 @@ using syscall = syscall_package;
 
 partial class unix_package
 {
-    // linux/amd64 syscall numbers; the same values zsysnum_linux_amd64.cs carries, kept local so
-    // this file's kernel contract reads in one place.
-    private const nuint sysRecvfrom = 45;
-    private const nuint sysSendto = 44;
+    // The syscall numbers, from the converted syscall flavour this file compiles against, never a literal
+    // (S3 site 2; docs/phase4/DATA-la64-s3-census.md §2, §5(b)): recvfrom 45 and sendto 44 at linux/amd64,
+    // 207 and 206 at linux/arm64. A literal pinned the amd64 values into every flavour.
+    private static nuint sysRecvfrom => syscall.SYS_RECVFROM;
+    private static nuint sysSendto => syscall.SYS_SENDTO;
 
     // ---- RecvfromInet4 / RecvfromInet6 -----------------------------------------------------------
 
