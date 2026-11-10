@@ -692,13 +692,13 @@ func TestLoaderToolTagsAskTheGoCommand(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	want, err := goListToolTags(moduleRootDir(dir))
+	want, err := goListToolTags(moduleRootDir(dir), "")
 
 	if err != nil {
 		t.Skipf("go command unavailable: %v", err)
 	}
 
-	got := loaderToolTags(dir)
+	got := loaderToolTags(dir, "")
 
 	if got == nil || strings.Join(got, ",") != strings.Join(want, ",") {
 		t.Errorf("loaderToolTags(%q) = %v, want the go command's %v", dir, got, want)
