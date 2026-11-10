@@ -1,0 +1,7 @@
+src/core/hash/crc32/crc32_amd64.cs	src/core/hash/crc32/amd64/crc32_amd64.cs
+src/core/internal/cpu/cpu_x86_impl.cs	src/core/internal/cpu/amd64/cpu_x86_impl.cs
+src/core/internal/cpu/cpu_arm64_process_impl.cs	src/core/internal/cpu/amd64/cpu_arm64_process_impl.cs
+src/core/internal/cpu/linux/cpu_arm64_process_linux_impl.cs	src/core/internal/cpu/linux-amd64/cpu_arm64_process_linux_impl.cs
+src/core/runtime/cputicks_impl.cs	src/core/runtime/amd64/cputicks_impl.cs
+src/core/syscall/linux/syscall_linux_amd64_impl.cs	src/core/syscall/linux-amd64/syscall_linux_amd64_impl.cs
+src/core/syscall/linux/zsyscall_linux_amd64_impl.cs	src/core/syscall/linux-amd64/zsyscall_linux_amd64_impl.cs
