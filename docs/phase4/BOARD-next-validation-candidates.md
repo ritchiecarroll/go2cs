@@ -35433,4 +35433,39 @@ go2cs-gen output implement both explicitly and never reach the defaults.
 
 — C2 (2026-11-10)
 
+## 2026-11-10 — P2: a main package in a module refused its own package_info.cs on every reconvert (fixed on `claude/p2-pkginfo-doc-warning`)
+
+Found as a side note on the provenance header seat (TestLicensingEmissionCompatibility converts twice into one root),
+taken as a scoped finding by COORD's ruling (2026-11-10). Read at master `66a2e023ca`.
+
+**What happened.** Converting a `package main` of a module (here `example.com/app`) a second time into the same output
+printed `"<out>/package_info.cs" is package main's package_info.cs, not main's; writing a fresh one from the template`
+and replaced the file with the template. The doc comment and `-comments` named in the side note are not the trigger:
+both arms warn with and without each. Repro: a module `example.com/app` with `main.go` = `package main` +
+`func main() {}`, converted twice with `go2cs app out`. The first run is silent, the second warns.
+
+**Cause.** `goPackageImportPathFor` stamps a main package's own class `[GoPackage("main", ImportPath = "main")]`,
+since Go's reflect names a main package's types `main.T` whatever its module path. The stamp is written only when the
+namespace does not decode to that path (`goPackageImportPathStamp`), so it appears for a main package in a
+`go.example.com` namespace. `packageInfoBelongsHere`, the guard added for directories that change hands between
+releases, compared the stamped path with the LOADER path (`example.com/app`), so it refused the package's own file.
+
+**Effect.** Anything kept outside the marker sections of such a file was dropped on each reconvert, and the warning
+was false. Under `-tests`, `package_test_info.cs` is seeded from the production `package_info.cs` and then read through
+the same guard, so the seeded production records of a module's main package would be discarded too (inferred from
+`testConversion.go`'s seeding step; not measured).
+
+**Reach.** 0 committed files: std has no main package (`go list std`, 360 packages), and the behavioral corpus's main
+packages sit in the root `go` namespace, which decodes to `main`, so they are stamped `[GoPackage("main")]` with no
+ImportPath and never reached the comparison. Module conversions (`-recurse`, a plain module directory) reach it.
+
+**Fix.** The guard accepts the stamped path `"main"` for a main package's own class, beside the loader path, which a
+main package's internal-test bridge keeps. Any other package still refuses a main package's file. Red-first:
+`TestAMainPackageKeepsItsOwnPackageInfoOnReconvert` (packageInfoAdoption_test.go) keeps a line outside the marker
+sections across a reconvert and checks the rule both ways; red at the red commit, green at the fix. The two existing
+adoption tests printed the same false warning for their own main packages and still pass.
+
+— P2 (2026-11-10)
+
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
