@@ -10,10 +10,14 @@
 // Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 // Package cgofixture is the OQ-1 probe fixture: one cgo file with the five preamble kinds
-// (a function, a mixed struct, a #define, an enum, a typedef'd pointer) used from Go.
+// (a function, a mixed struct, a #define, an enum, a typedef'd pointer) used from Go, and the
+// three ways cmd/cgo spells a C name it does not declare as a plain function, variable, type or
+// constant: a two-result call (r, err := C.f()), a C function used as a value, and a #define
+// that is not a constant.
 package cgofixture
 
 /*
+#include <errno.h>
 #include <stdlib.h>
 
 #define CONST 42
@@ -34,20 +38,38 @@ typedef struct x *xptr;
 
 static int add(int a, int b) { return a + b; }
 static double scale(struct x *p) { return p->b * CONST; }
+
+int counter = 7;
+#define NEXT (counter + 1)
+
+static int halve(int v) { if (v % 2 != 0) { errno = EINVAL; return -1; } return v / 2; }
+int twice(int v) { return 2 * v; }
 */
 import _ "unsafe"
 
 import "unsafe"
 
-func Add(a, b int) int { return int(( /*line :39:37*/_Cfunc_add /*line :39:41*/)( /*line :39:43*/_Ctype_int /*line :39:48*/(a),  /*line :39:53*/_Ctype_int /*line :39:58*/(b))) }
+func Add(a, b int) int { return int(( /*line :49:37*/_Cfunc_add /*line :49:41*/)( /*line :49:43*/_Ctype_int /*line :49:48*/(a),  /*line :49:53*/_Ctype_int /*line :49:58*/(b))) }
 
 func Use() (int, float64, string) {
-	var s  /*line :42:8*/_Ctype_struct_x /*line :42:18*/
-	s.a = ( /*line :43:8*/_Ciconst_CONST /*line :43:14*/)
-	s.b = ( /*line :44:8*/_Cfconst_FCONST /*line :44:15*/)
-	var p  /*line :45:8*/_Ctype_xptr /*line :45:14*/ = &s
-	var col  /*line :46:10*/_Ctype_enum_color /*line :46:22*/ = ( /*line :46:25*/_Ciconst_GREEN /*line :46:31*/)
-	cs := ( /*line :47:8*/_Cfunc_CString /*line :47:16*/)(( /*line :47:18*/_Csconst_SCONST /*line :47:25*/))
-	defer func() func() { _cgo0 := /*line :48:15*/unsafe.Pointer(cs); return func() { _cgoCheckPointer(_cgo0, nil); /*line :48:34*/_Cfunc_free(_cgo0); }}()()
-	return int(s.a) + int(col) + int(( /*line :49:35*/_Ciconst_BLUE /*line :49:40*/)), float64(func() _Ctype_double{ _cgo0 := /*line :49:60*/p; _cgoCheckPointer(_cgo0, nil); return /*line :49:62*/_Cfunc_scale(_cgo0); }()), ( /*line :49:65*/_Cfunc_GoString /*line :49:74*/)(cs)
+	var s  /*line :52:8*/_Ctype_struct_x /*line :52:18*/
+	s.a = ( /*line :53:8*/_Ciconst_CONST /*line :53:14*/)
+	s.b = ( /*line :54:8*/_Cfconst_FCONST /*line :54:15*/)
+	var p  /*line :55:8*/_Ctype_xptr /*line :55:14*/ = &s
+	var col  /*line :56:10*/_Ctype_enum_color /*line :56:22*/ = ( /*line :56:25*/_Ciconst_GREEN /*line :56:31*/)
+	cs := ( /*line :57:8*/_Cfunc_CString /*line :57:16*/)(( /*line :57:18*/_Csconst_SCONST /*line :57:25*/))
+	defer func() func() { _cgo0 := /*line :58:15*/unsafe.Pointer(cs); return func() { _cgoCheckPointer(_cgo0, nil); /*line :58:34*/_Cfunc_free(_cgo0); }}()()
+	return int(s.a) + int(col) + int(( /*line :59:35*/_Ciconst_BLUE /*line :59:40*/)), float64(func() _Ctype_double{ _cgo0 := /*line :59:60*/p; _cgoCheckPointer(_cgo0, nil); return /*line :59:62*/_Cfunc_scale(_cgo0); }()), ( /*line :59:65*/_Cfunc_GoString /*line :59:74*/)(cs)
 }
+
+// Halve calls a C function in Go's two-result form, which reads errno.
+func Halve(n int) (int, error) {
+	r, err := ( /*line :64:12*/_C2func_halve /*line :64:18*/)( /*line :64:20*/_Ctype_int /*line :64:25*/(n))
+	return int(r), err
+}
+
+// Twice is a C function's address, used as a value rather than called.
+func Twice() unsafe.Pointer { return ( /*line :69:38*/_Cgo_ptr(_Cfpvar_fp_twice) /*line :69:44*/) }
+
+// Next reads a #define that is not a constant: cmd/cgo evaluates it in C on each use.
+func Next() int { return int(( /*line :72:30*/_Cmacro_NEXT() /*line :72:35*/)) }

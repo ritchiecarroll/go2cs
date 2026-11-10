@@ -39,9 +39,15 @@ const (
 	cgoFloatConst                     // _Cfconst_x: a floating-point #define
 	cgoStringConst                    // _Csconst_x: a string #define
 	cgoVar                            // _Cvar_x: a C global variable (C.x)
+	cgoErrnoFunc                      // _C2func_x: C.x called in Go's two-result form, r, err := C.x(…), which reads errno
+	cgoFuncValue                      // _Cfpvar_fp_x: C.x used as a value rather than called, its address
+	cgoMacro                          // _Cmacro_x: a #define that is not a constant, evaluated in C on each use
 )
 
-// cgoKindPrefixes maps each synthetic-name prefix to its kind. _Ctype_ is split further by cgoTypeKind.
+// cgoKindPrefixes maps each synthetic-name prefix to its kind. _Ctype_ is split further by cgoTypeKind. cmd/cgo
+// mangles a name as _C<kind>_<Go name> (cmd/cgo/gcc.go, mangleName), and a function used as a value has the Go name
+// fp_<C name>, so its prefix carries the fp_ and what is left is the C name. The two-result form is mangled apart
+// (_C2func_, gcc.go's ctxCall2). cmd/cgo's "not-type" kind never reaches Go code.
 var cgoKindPrefixes = []struct {
 	prefix string
 	kind   cgoDeclKind
@@ -52,6 +58,9 @@ var cgoKindPrefixes = []struct {
 	{"_Cfconst_", cgoFloatConst},
 	{"_Csconst_", cgoStringConst},
 	{"_Cvar_", cgoVar},
+	{"_C2func_", cgoErrnoFunc},
+	{"_Cfpvar_fp_", cgoFuncValue},
+	{"_Cmacro_", cgoMacro},
 }
 
 // cgoDeclaration is one recognized cgo declaration: the name a Go source writes after `C.`, its kind, and the
@@ -182,6 +191,9 @@ var cgoKindLabels = []struct {
 	{cgoFloatConst, "float const"},
 	{cgoStringConst, "string const"},
 	{cgoVar, "var"},
+	{cgoErrnoFunc, "errno func"},
+	{cgoFuncValue, "func value"},
+	{cgoMacro, "macro"},
 }
 
 // cgoRecognitionSummary says what a -cgo load recognized, for the refusal that still follows it: the declarations
