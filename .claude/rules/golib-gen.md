@@ -32,6 +32,18 @@ paths:
      solution's only hand-written, un-gated member, so it would have rotted at the next golib
      change, and the experiments it held (struct/interface promotion hand-simulated *before*
      `go2cs-gen` existed) are covered by real behavioral tests now. Git keeps it at `d3223d252`. -->
+
+**A golib PUBLIC-surface change runs the binary-compat check against the published baseline before it is posted** (`Test-GoApiCompat`, or `push-nuget.ps1 -VerifyOnly`). Adding an ABSTRACT member to a public interface is a break even when every in-tree implementer is updated: go2cs-gen emits implementations into every converted package, so a package built against the last release fails to load. The non-breaking shape is a default interface member returning the conservative answer, with the explicit implementations kept.
+<!-- 2026-11-10, batch 280's release-smoke 42752322043: 2 CP0006 on go.IByteSeq<T>.TryGetSlice /
+     TryGetString, added abstract by 475adb5312 (TS readiness C16 d) after go.* 1.26.10.3 published.
+     The ISliceTypeTemplate/InheritedTypeTemplate wrappers implement IByteSeq<byte> in every package
+     with a named []byte or string, so a .3-built nugetgo package would TypeLoad-fail under a .4 go.lib.
+     The seat's gates (CNR, GolibTests, GenTests) were all green: none of them compares to the published
+     baseline. It surfaced late because the pre-publish packs were already refusing on 17 stale .3
+     suppressions, which hid the second cause until batch 280 retired them. Ruled non-breaking (default
+     members returning false, i.e. the pre-C16 copy fallback; explicit implementations kept, so
+     constrained calls still bind the struct with no box). Fix seat claude/c2-ibyteseq-dim; the break
+     floor stayed 1.26.10.3. -->
 ## Byte costs — the reference numbers
 | Quantity | Measured |
 |---|---|
