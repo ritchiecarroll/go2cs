@@ -19,6 +19,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/build"
 	"go/parser"
@@ -337,8 +338,13 @@ func TestManualConversionConstsAreDisplacedAndDeclared(t *testing.T) {
 }
 
 // displacedConstMissing names the targets of goos at which a displaced const has no destination: no marked *_impl.cs
-// declaring member in the key folders that target's build compiles (its <goos>/, <arch>/ and <goos>-<arch>/).
+// declaring member in the key folders that target's build compiles (its <goos>/, <arch>/ and <goos>-<arch>/). A goos
+// with no target in the universe is an error: the const is displaced at no target the corpus builds, and a loop over
+// that GOOS's targets would read nothing and pass.
 func displacedConstMissing(coreDir string, pkg string, goos string, member *regexp.Regexp) (missing []string, err error) {
+	if !isUniverseGOOS(goos) {
+		return nil, fmt.Errorf("the scope names %q, which no target in the universe %v builds; the displaced const is off everywhere", goos, platformUniverse)
+	}
 
 	for _, target := range corpusLattice().targetsOfGOOS(goos) {
 		found := false

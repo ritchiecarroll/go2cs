@@ -410,7 +410,7 @@ func handOwnSourcesAt(t *testing.T, coreDir string, pkg string) map[string]strin
 
 // handOwnBodied reads a scope's GOOS against the per-target witness: the targets of that GOOS whose witness lacks the
 // text (a displacement there leaves the placeholder unfilled) and those whose witness holds it (a generated body kept
-// there collides with it).
+// there collides with it). A goos with no universe target reads (nil, nil); every caller passes universe GOOS today.
 func handOwnBodied(handOwns map[string]string, goos string, witness string) (unbodied []string, bodied []string) {
 	for _, target := range corpusLattice().targetsOfGOOS(goos) {
 		if strings.Contains(handOwns[target], witness) {
@@ -507,7 +507,15 @@ type manualScopeRegistry struct {
 func manualScopeRegistries(funcs, vars, consts map[string]map[string]goosScope) []manualScopeRegistry {
 	return []manualScopeRegistry{
 		{"manualConversionFuncs", funcs, isKnownGOOS, "a known GOOS"},
+		{"manualConversionVars", vars, isUniverseGOOS, "a GOOS of the universe"},
+		{"manualConversionConsts", consts, isUniverseGOOS, "a GOOS of the universe"},
 	}
+}
+
+// isUniverseGOOS reports whether some target in platformUniverse builds goos. A displaced var or const is checked
+// against its targets' folders, so a scope GOOS outside the universe has nothing to check and is off everywhere.
+func isUniverseGOOS(goos string) bool {
+	return len(corpusLattice().targetsOfGOOS(goos)) > 0
 }
 
 // manualScopeFindings counts the scoped entries across the registries and names each scope GOOS its registry refuses.
