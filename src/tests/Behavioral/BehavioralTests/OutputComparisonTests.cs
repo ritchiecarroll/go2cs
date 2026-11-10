@@ -2702,6 +2702,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckVariadicInterfaceAssert() => CheckTarget("VariadicInterfaceAssert");
 
     [TestMethod]
+    public void CheckVariadicLiftedElement() => CheckTarget("VariadicLiftedElement");
+
+    [TestMethod]
     public void CheckVariadicNamedEmptyIface() => CheckTarget("VariadicNamedEmptyIface");
 
     [TestMethod]

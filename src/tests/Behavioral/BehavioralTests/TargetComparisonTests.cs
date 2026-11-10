@@ -2782,6 +2782,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckVariadicInterfaceAssert() => CheckTarget("VariadicInterfaceAssert");
 
     [TestMethod]
+    public void CheckVariadicLiftedElement() => CheckTarget("VariadicLiftedElement");
+
+    [TestMethod]
     public void CheckVariadicNamedEmptyIface() => CheckTarget("VariadicNamedEmptyIface");
 
     [TestMethod]
