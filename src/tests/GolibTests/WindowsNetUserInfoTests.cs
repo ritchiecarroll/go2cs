@@ -23,11 +23,14 @@ namespace GolibTests;
 // works offline and unprivileged, and the well-known built-in accounts carry values identical on
 // every Windows host -- the same trick PointerOutParameter uses with well-known SIDs:
 //
-//     Administrator   Priv = USER_PRIV_ADMIN (2),  PrimaryGroupID = 513
-//     Guest           Priv = USER_PRIV_GUEST (0),  PrimaryGroupID = 513
+//     the built-in administrator (RID 500)   Priv = USER_PRIV_ADMIN (2),  PrimaryGroupID = 513
+//     the built-in guest         (RID 501)   Priv = USER_PRIV_GUEST (0),  PrimaryGroupID = 513
 //
 // and the account NAME read back out of the record must equal the name queried -- a ROUND TRIP, so
 // a wrapper that hands back the wrong address is caught by the VALUE and not merely by a crash.
+//
+// The accounts are found by RID, never by name (see LocalAccountNameByRid): a host may rename
+// either one, and the values above belong to the account, not to its name.
 //
 // WHAT WOULD FAIL WITHOUT THE FIX. Before the wrapper was taken, `Ꮡbuf`'s ж<ж<byte>> slot could
 // lend the kernel no eight-byte cell, so the operator answered 0, Windows read that as "no output
@@ -101,6 +104,111 @@ public class WindowsNetUserInfoTests
 
     private static bool OnWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
+    // ---- the built-in accounts, found by RID ---------------------------------------------------
+    //
+    // These tests first looked the accounts up by the names "Administrator" and "Guest". The hosted
+    // windows runner image of 2026-11 has no local account by either name: the oracle's own
+    // NetUserGetInfo answered NERR_UserNotFound (2221) for both, at master and at batch 281 alike.
+    // What a rename cannot move is the relative ID in the machine's account domain: 500 is the
+    // built-in administrator and 501 the built-in guest. NetUserEnum at level 20 returns each local
+    // account's name and RID in one record, so the name is read from the RID. The lookup is netapi32
+    // reached directly, like the oracle, so it owes nothing to the converted surface under test.
+    //
+    // A disabled account is still measured: NetUserGetInfo and NetUserGetLocalGroups read a disabled
+    // account like any other (the built-in guest is disabled by default, and these tests measured it).
+
+    [StructLayout(LayoutKind.Sequential)]
+    private unsafe struct NativeUserInfo20
+    {
+        public ushort* Name;
+        public ushort* FullName;
+        public ushort* Comment;
+        public uint Flags;
+        public uint UserId;
+    }
+
+    [DllImport("netapi32.dll", EntryPoint = "NetUserEnum")]
+    private static extern uint NetUserEnumDirect(IntPtr servername, uint level, uint filter, out IntPtr buf,
+        uint prefMaxLen, out uint entriesRead, out uint totalEntries, ref uint resumeHandle);
+
+    private const uint FILTER_NORMAL_ACCOUNT = 0x2;
+    private const uint ERROR_MORE_DATA = 234;
+    private const uint DOMAIN_USER_RID_ADMIN = 500;
+    private const uint DOMAIN_USER_RID_GUEST = 501;
+
+    // The local name of the account whose RID is rid, or null when this host has no such account.
+    private static unsafe string? LocalAccountNameByRid(uint rid)
+    {
+        Assert.AreEqual(32, sizeof(NativeUserInfo20), "USER_INFO_20 is three pointers and two DWORDs");
+
+        uint resume = 0;
+        uint rc;
+
+        do
+        {
+            rc = NetUserEnumDirect(IntPtr.Zero, 20, FILTER_NORMAL_ACCOUNT, out IntPtr buf, MAX_PREFERRED_LENGTH,
+                out uint entriesRead, out _, ref resume);
+
+            try
+            {
+                if (rc != 0 && rc != ERROR_MORE_DATA)
+                {
+                    Assert.Fail($"NetUserEnum(level 20) must succeed, got {rc}");
+                }
+
+                NativeUserInfo20* users = (NativeUserInfo20*)buf;
+
+                for (uint i = 0; i < entriesRead; i++)
+                {
+                    if (users[i].UserId == rid)
+                    {
+                        return NativeString(users[i].Name);
+                    }
+                }
+            }
+            finally
+            {
+                if (buf != IntPtr.Zero)
+                {
+                    NetApiBufferFreeDirect(buf);
+                }
+            }
+        }
+        while (rc == ERROR_MORE_DATA);
+
+        return null;
+    }
+
+    private static string BuiltInLabel(uint rid) =>
+        rid == DOMAIN_USER_RID_ADMIN ? "the built-in administrator (RID 500)" : "the built-in guest (RID 501)";
+
+    // The built-in accounts this host has, by their local names, each with its expected value. An
+    // account the host lacks is left out and named in `missing`; the caller measures the rest and then
+    // reads Inconclusive, never red, for the absent one.
+    private static (string Account, T Expected)[] BuiltInAccounts<T>(T admin, T guest, out string missing)
+    {
+        var present = new System.Collections.Generic.List<(string, T)>();
+        var absent = new System.Collections.Generic.List<string>();
+
+        foreach (var (rid, expected) in new[] { (DOMAIN_USER_RID_ADMIN, admin), (DOMAIN_USER_RID_GUEST, guest) })
+        {
+            string? name = LocalAccountNameByRid(rid);
+
+            if (name is null)
+            {
+                absent.Add(BuiltInLabel(rid));
+            }
+            else
+            {
+                Console.WriteLine($"{BuiltInLabel(rid)} is named \"{name}\" on this host");
+                present.Add((name, expected));
+            }
+        }
+
+        missing = string.Join(" and ", absent);
+        return present.ToArray();
+    }
+
     // The mirrors are only as good as their LAYOUT, and a silently wrong offset would read a
     // neighbouring field rather than fault. These are the numbers Go reports for the same record.
     [TestMethod]
@@ -129,7 +237,15 @@ public class WindowsNetUserInfoTests
             return;
         }
 
-        var (u, uerr) = syscall.UTF16PtrFromString("Administrator");
+        string? admin = LocalAccountNameByRid(DOMAIN_USER_RID_ADMIN);
+
+        if (admin is null)
+        {
+            Assert.Inconclusive($"this host has no {BuiltInLabel(DOMAIN_USER_RID_ADMIN)}");
+            return;
+        }
+
+        var (u, uerr) = syscall.UTF16PtrFromString(admin);
         Assert.IsNull(uerr, "UTF16PtrFromString must succeed");
 
         ref var p = ref heap<ж<byte>>(out var Ꮡp);
@@ -143,7 +259,7 @@ public class WindowsNetUserInfoTests
                 "the wrapper published NOTHING -- this is the exact defect: success reported, caller's pointer left nil");
 
             NativeUserInfo10* info = (NativeUserInfo10*)published;
-            Assert.AreEqual("Administrator", NativeString(info->Name),
+            Assert.AreEqual(admin, NativeString(info->Name),
                 "the account name read back through the published buffer must round-trip");
         }
         finally
@@ -164,7 +280,9 @@ public class WindowsNetUserInfoTests
             return;
         }
 
-        foreach (var (account, expectedPriv) in new[] { ("Administrator", 2u), ("Guest", 0u) })
+        var accounts = BuiltInAccounts(2u, 0u, out string missing);
+
+        foreach (var (account, expectedPriv) in accounts)
         {
             // ---- the ORACLE: netapi32, reached directly ----
             uint rc = NetUserGetInfoDirect(null, account, 4, out IntPtr direct);
@@ -215,6 +333,11 @@ public class WindowsNetUserInfoTests
                 syscall.NetApiBufferFree(p);
             }
         }
+
+        if (missing.Length > 0)
+        {
+            Assert.Inconclusive($"this host has no {missing}; the built-in accounts it has were measured");
+        }
     }
 
     // ---- NetUserGetLocalGroups: the same class, a DIFFERENT fabrication route -------------------
@@ -253,7 +376,9 @@ public class WindowsNetUserInfoTests
 
         // Every Windows host puts these built-ins in these local groups, so the expectation is a
         // VALUE rather than "whatever both sides happened to read".
-        foreach (var (account, mustContain) in new[] { ("Administrator", "Administrators"), ("Guest", "Guests") })
+        var accounts = BuiltInAccounts("Administrators", "Guests", out string missing);
+
+        foreach (var (account, mustContain) in accounts)
         {
             // ---- the ORACLE ----
             uint rc = NetUserGetLocalGroupsDirect(null, account, 0, LG_INCLUDE_INDIRECT,
@@ -313,6 +438,11 @@ public class WindowsNetUserInfoTests
             {
                 syscall.NetApiBufferFree(p0);
             }
+        }
+
+        if (missing.Length > 0)
+        {
+            Assert.Inconclusive($"this host has no {missing}; the built-in accounts it has were measured");
         }
     }
 }

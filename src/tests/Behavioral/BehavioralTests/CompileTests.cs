@@ -2152,6 +2152,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckRenamedReceiverBox() => CheckTarget("RenamedReceiverBox");
 
     [TestMethod]
+    public void CheckRenamedTypeAliasReexport() => CheckTarget("RenamedTypeAliasReexport");
+
+    [TestMethod]
     public void CheckReservedNameShadows() => CheckTarget("ReservedNameShadows");
 
     [TestMethod]

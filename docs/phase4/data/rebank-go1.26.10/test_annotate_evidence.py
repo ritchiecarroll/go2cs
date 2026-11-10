@@ -107,6 +107,26 @@ try:
             case(name, rc == 0 and want in out, f'rc {rc}, out {out!r}, err {err.strip()!r}')
     else:
         case('darwin: the ruled-count path', False, f'{args.guard} declares no $DarwinRuledCounts table')
+
+    # THE ARCH-COUNT FORM (COORD ruling 2026-11-10, gcimporter; the guard's Get-ArchCountReading). The re-bank's darwin
+    # reading is 6 of 6 on osx-x64 and 5 of 5 on osx-arm64, nothing divergent, and osx-arm64 NAMES the verdict it lacks in
+    # its `absent` column: the row banks "6 (osx-x64; osx-arm64: 5)". A difference the column does not wholly name is
+    # REFUSED: the annotator exits non-zero, naming the row, and writes nothing.
+    write(os.path.join(root, 'src/check-roster-format.ps1'), declared_line.sub("$DarwinEvidenceDirectory = 'docs/phase4/h10-evidence/go{pin}/darwin'", guard_text, count=1))
+    def arch_count_evidence(absent_arm, absent_x64):
+        write(os.path.join(root, NEW, 'darwin', 'C1-1.tsv'), DARWIN_HEADER + '\tabsent\n' +
+              '\t'.join(['C1-1', 'f/pkg', 'osx-arm64', '5', '5', '0', '0', '0', 'validated', 'no', absent_arm]) + '\n' +
+              '\t'.join(['C1-1', 'f/pkg', 'osx-x64', '6', '6', '0', '0', '0', 'validated', 'no', absent_x64]) + '\n')
+    arch_count_evidence('TestOnlyOnAmd64', '-')
+    rc, out, err = run('annotate_darwin.py', root, '--evidence', f'{NEW}/darwin')
+    case('darwin: an arch-count reading with its missing verdict named banks "6 (osx-x64; osx-arm64: 5)"', rc == 0 and '-> darwin: 6 (osx-x64; osx-arm64: 5)' in out, f'rc {rc}, out {out!r}, err {err.strip()!r}')
+    for absent_arm, absent_x64, name in (('-', '-', 'names none of it'), ('TestOnlyOnAmd64;TestOther', '-', 'names more than the difference'),
+                                         ('TestOnlyOnAmd64', 'TestZ', 'names a verdict on the longer RID')):
+        arch_count_evidence(absent_arm, absent_x64)
+        rc, out, err = run('annotate_darwin.py', root, '--evidence', f'{NEW}/darwin', '--write')
+        roster = open(os.path.join(root, 'docs/ValidatedTestPackages.md'), encoding='utf-8').read()
+        case(f'darwin: an arch-count difference whose evidence {name} is refused by name, and nothing is written', rc != 0 and 'arch-count' in err and 'f/pkg' in err and '· darwin: 5 ·' in roster,
+             f'rc {rc}, out {out!r}, err {err.strip()!r}')
 finally:
     shutil.rmtree(work, ignore_errors=True)
 

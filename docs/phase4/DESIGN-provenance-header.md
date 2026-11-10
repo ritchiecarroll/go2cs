@@ -155,3 +155,11 @@ settled that this note left open:
   notice.
 - **An end-to-end `-recurse` conversion of a module-cache dependency** is not in the tests: the module-cache path is
   tested at `sourceProvenance` with a fake `GOMODCACHE` root, and the placement on a converted main-module package.
+
+> **AMENDED 2026-11-10 (P2, COORD ruling of the same day).** This note named cobra as the Apache-2.0 nugetgo module and
+> missed mousetrap: its LICENSE is Apache License 2.0, and it had no row in `nugetgo-modules.psd1`, so the repack driver
+> never passed it `-provenance` and the pack would have refused its root. mousetrap now has a row, and the driver packs
+> a row with no Go tests on the runbook's no-tests route. `Test-NugetgoIdentity.ps1` checks the line below against the
+> rows whose `LicenseSpdx` asks for the notice, and that every module with a sample program has a row.
+
+- **The Apache-2.0 census** (read from `nugetgo-modules.psd1`'s `LicenseSpdx`, 2026-11-10): `github.com/inconshreveable/mousetrap@v1.1.0`, `github.com/spf13/cobra@v1.10.2`

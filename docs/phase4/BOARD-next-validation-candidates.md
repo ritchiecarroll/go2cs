@@ -35433,4 +35433,117 @@ go2cs-gen output implement both explicitly and never reach the defaults.
 
 — C2 (2026-11-10)
 
+## 2026-11-10 — P2: a main package in a module refused its own package_info.cs on every reconvert (fixed on `claude/p2-pkginfo-doc-warning`)
+
+Found as a side note on the provenance header seat (TestLicensingEmissionCompatibility converts twice into one root),
+taken as a scoped finding by COORD's ruling (2026-11-10). Read at master `66a2e023ca`.
+
+**What happened.** Converting a `package main` of a module (here `example.com/app`) a second time into the same output
+printed `"<out>/package_info.cs" is package main's package_info.cs, not main's; writing a fresh one from the template`
+and replaced the file with the template. The doc comment and `-comments` named in the side note are not the trigger:
+both arms warn with and without each. Repro: a module `example.com/app` with `main.go` = `package main` +
+`func main() {}`, converted twice with `go2cs app out`. The first run is silent, the second warns.
+
+**Cause.** `goPackageImportPathFor` stamps a main package's own class `[GoPackage("main", ImportPath = "main")]`,
+since Go's reflect names a main package's types `main.T` whatever its module path. The stamp is written only when the
+namespace does not decode to that path (`goPackageImportPathStamp`), so it appears for a main package in a
+`go.example.com` namespace. `packageInfoBelongsHere`, the guard added for directories that change hands between
+releases, compared the stamped path with the LOADER path (`example.com/app`), so it refused the package's own file.
+
+**Effect.** Anything kept outside the marker sections of such a file was dropped on each reconvert, and the warning
+was false. Under `-tests`, `package_test_info.cs` is seeded from the production `package_info.cs` and then read through
+the same guard, so the seeded production records of a module's main package would be discarded too (inferred from
+`testConversion.go`'s seeding step; not measured).
+
+**Reach.** 0 committed files: std has no main package (`go list std`, 360 packages), and the behavioral corpus's main
+packages sit in the root `go` namespace, which decodes to `main`, so they are stamped `[GoPackage("main")]` with no
+ImportPath and never reached the comparison. Module conversions (`-recurse`, a plain module directory) reach it.
+
+**Fix.** The guard accepts the stamped path `"main"` for a main package's own class, beside the loader path, which a
+main package's internal-test bridge keeps. Any other package still refuses a main package's file. Red-first:
+`TestAMainPackageKeepsItsOwnPackageInfoOnReconvert` (packageInfoAdoption_test.go) keeps a line outside the marker
+sections across a reconvert and checks the rule both ways; red at the red commit, green at the fix. The two existing
+adoption tests printed the same false warning for their own main packages and still pass.
+
+— P2 (2026-11-10)
+
+
+## 2026-11-10 — P1 (follow-up to the GO2CS2004 alias ref): a defined type over an ALIAS of an unnamed type takes the alias's spelling, not the direct form's, and two conversion forms are emitted as calls — OPEN, PARKED by COORD (0 std reach)
+
+**Shape.** `type D A` where `A` is an alias of a type with no name of its own. Go gives `D` the alias's underlying
+type, exactly as if it were written directly (`type DP *int`). One package, then the same with the aliases declared
+in another package (`type DP lib.AP`):
+
+```go
+type AS = []int
+type AM = map[string]int
+type AT = struct{ A, B int }
+type AP = *int
+type AF = func(int) int
+type AI = int
+
+type DS AS
+type DM AM
+type DT AT
+type DP AP
+type DF AF
+type DI AI
+
+func main() {
+	ds := DS{1, 2, 3}
+	dm := DM{"a": 4}
+	dt := DT{A: 5, B: 6}
+	n := 7
+	dp := DP(&n)
+	*dp++
+	df := DF(func(i int) int { return i + 1 })
+	di := DI(10)
+	fmt.Println(ds.Sum(), len(AS(ds)), dm["a"], len(AM(dm)), dt.A+dt.B, AT(dt).B, n, df(8), di.Twice(), AI(di))
+}
+```
+
+Go prints `6 3 4 1 11 6 8 9 20 10` (`Sum` adds the slice, `Twice` doubles the integer).
+
+**Where it was measured.** Hand probes, converter built at the alias ref's fix commit `4efe8a4e99`, generator and
+golib at its tip `9bd562223b`. Every shape is present at the seat's base `d0227c54b3` and the ref leaves it as it
+was: the ref unwraps an alias only where the right-hand side reaches a NAMED type (a struct or an instantiation).
+
+**The seven shapes.** The direct form's emission is the reference; the declaration is quoted from the probe.
+
+| # | Go | Direct form emits | Alias form emits | Result |
+|---|---|---|---|---|
+| 1 | `type DP AP`, `AP = *int` | `partial class DP /*ж<nint>*/` | `partial struct DP /*ж<nint>*/` | CS0200 at `*dp++`: `DP.Value` is read only |
+| 2 | `type DM AM`, `AM = map[string]int` | `partial struct DM /*map[@string, nint]*/` | `partial struct DM /*map<@string, nint>*/` | CS0021 at `dm["a"]`: no indexer |
+| 3 | `type DI lib.AI`, `AI = int` | `partial struct DI /*num:nint*/` | `partial struct DI /*instlibꓸAI*/` | CS0266 at `DI(10)`: no conversion from the constant. The LOCAL alias emits `num:nint` and builds |
+| 4 | `type DT AT`, `AT = struct{ A, B int }` | `partial struct DT {` with its fields | local: `partial struct DT /*struct{A int; B int}*/` (raw Go text); other package: `/*instlibꓸAT*/` | local: 13 errors in the generated `DT.g.cs` (CS0501, CS0102, CS0246, CS1019, CS0106); other package: CS1739 and CS1061 at the uses |
+| 5 | `type DS AS`, `type DF AF` (slice, func) | `/*[]nint*/` for the slice | `/*slice<nint>*/`, `/*Func<nint, nint>*/`; other package `/*instlibꓸAS*/`, `/*instlibꓸAF*/` | no error on these probes; the spelling still differs from the direct form, and it was not isolated further |
+| 6 | `GA[int](d)`, `type GA[T any] = pair[T]`, `type D GA[int]` | `((pair<nint>)d)` for `pair[int](d)` | `GA<nint>(d)`, a call | CS0103: the name `GA` does not exist. The declaration itself is right (`D /*pair<nint>*/`) |
+| 7 | `struct{ A, B int }(dt)` on `type DT struct{ A, B int }` | (no alias involved) | `main_type(dt)`, a call on the lifted anonymous struct | CS1955: `main_type` is not invocable |
+
+Rows 1 to 5 are one defect seen through five type kinds; rows 6 and 7 are conversion EXPRESSIONS, not declarations,
+and were found on the same probes.
+
+**Root, as read (not yet proved by a fix).** The defined-type emitters in `visitTypeSpec.go` choose the emitted form
+from the SYNTAX of the right-hand side (`*ast.StarExpr`, `*ast.MapType`, `*ast.StructType`, and so on). Behind an
+alias the syntax is an identifier or a selector, so the declaration falls to the identity arm, which writes the
+type's C# name as the marker. The alias ref added `types.Unalias` to that arm for named targets only. The durable
+fix is a dispatch on the unaliased TYPE (`types.Unalias(t).Underlying()`), so that an alias of `*int` reaches the
+pointer emitter and an alias of `struct{...}` reaches the struct emitter, each writing what the direct form writes.
+Rows 6 and 7 are in the conversion-expression path: a conversion whose target is a generic alias instantiation, or
+an anonymous struct type, is not recognized as a conversion and is emitted as a call.
+
+**Reach.** 0 in std, by the alias ref's census: std's defined-over-alias sites are 7, 7 and 8 on windows, linux and
+darwin, all `type X any` except darwin's one `bufferKind` over `_C_int`, and all of them convert and build. The
+TypeScript experiment's site (json's `type marshalersOption Marshalers`) is an alias of an INSTANTIATION, which the
+alias ref answers.
+
+**Not verified:** whether rows 6 and 7 have other target kinds (a conversion to an anonymous func or map type was
+not probed); whether a method declared on the alias-defined pointer or map type changes any row.
+
+**Not guarded:** the converter exits 0 on every shape above, and nothing in the behavioral corpus has them. A fix
+goes red-first with these declarations added to DefinedTypeOverInstantiation, the direct forms beside them as the
+control.
+
+— P1 (2026-11-10)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
