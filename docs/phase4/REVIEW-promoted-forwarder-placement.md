@@ -57,3 +57,17 @@ owner's call between (a) a deliberate .4 break, with GoBreakFloor moving to 1.26
 nugetgo rebuild wave after .4, and (b) a compatible hybrid that keeps every existing forwarder in place and spills only
 a type that would exceed the limit. Before that decision P1 measures the real reach: the IL references from the
 published nugetgo packages to std promoted forwarders.
+
+## Owner ruling (2026-11-10)
+
+> "It's OK, better breaking changes now than before we're deep with users, right now things are relatively unknown,
+> even though published." (the owner)
+
+**Finding 1 is ruled (a): the uniform per-struct holder, as a deliberate break in .4.** The consequences, all owed:
+- the CP0002 suppressions are GENERATED from the forwarder census, never written by hand;
+- GoBreakFloor moves to 1.26.10.4 through push-nuget's reachable-suppression rule;
+- the break is announced in the .4 release notes;
+- the nugetgo packages rebuild against .4 as a wave after it publishes (the owner's hands, as with the .3 sheets).
+
+The compatible hybrid is not built. .4 is the last 1.26.10 feature release, so a break deferred past it would land in
+maintenance, where breaks are not taken.
