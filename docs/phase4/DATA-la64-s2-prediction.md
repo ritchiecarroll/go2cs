@@ -456,3 +456,31 @@ them by RID. The RIDs this release ships are all amd64 builds (win-x64, linux-x6
 osx-x64's bytes), and an amd64 build of such a package compiles the same flat and amd64/ files on every GOOS, so
 one asset is correct today. The day a linux-arm64 RID ships these packages need a split; that is S6's packaging
 decision and is left to it.
+
+### 6.12 The second read, and the one edge it found (dated block, 2026-11-10, P2)
+
+G read the sweep at `6204b799df` against `012b4566e7`. Every moved reading in §6.11 is the guard seeing more; one
+edge got looser. A displaced const scoped to a GOOS that no universe target builds failed the const guard at the
+base, because `<pkg>/<goos>/` held nothing, and passed at the sweep's tip, because the per-target read loops over
+that GOOS's targets and there are none. G's probe was `internal/buildcfg.defaultGOARCH` scoped to `"plan9"`: red at
+`012b4566e7`, green at `6204b799df`. The typo guard `TestEveryManualConversionScopeNamesAKnownGOOS` walked
+`manualConversionFuncs` alone, so for consts that red had been the only check on a misspelled or not-yet-universe
+GOOS.
+
+The ruled fix, red first with G's probe as fixtures (`e37fcd8273`), then `56b515bd9f`:
+- `displacedConstMissing` returns an error for a scope GOOS with no universe target.
+- The typo guard also walks `manualConversionVars` and `manualConversionConsts`, each scope GOOS checked against the
+  universe; `manualConversionFuncs` keeps the known-GOOS check.
+- `handOwnBodied` has the same empty shape for such a GOOS. Its callers pass fixed universe GOOS lists, and a comment
+  says so.
+
+G's probe against the real registry, restored byte-identical after, reds both guards, each naming the entry and
+`plan9`.
+
+**Residual, for the day the universe grows past these four targets** (none misses a file today):
+- `darwinLinknamePulls_test.go`'s `darwinPullTarget` and `nativeCallGateWindows_test.go`'s `windowsRuntimeTarget` are
+  single-target constants (`darwin/amd64`, `windows/amd64`). A darwin/arm64 or windows/arm64 target needs each read
+  per target of its GOOS.
+- `nativeCallGateWindows` now reads the exact parent folders `runtime/{amd64,windows,windows-amd64}/`; 0 files sit in
+  folders nested under them today.
+- `reconvert-deletions.ps1` matches key folder names case-sensitively.
