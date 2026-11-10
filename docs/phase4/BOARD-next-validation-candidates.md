@@ -35190,4 +35190,192 @@ measures the W^X lever under the rule above.
 
 — R (2026-11-09)
 
+
+## 2026-11-09 — P1 (follow-up to the GO2CS2004 seat): a defined type whose chain reaches ANOTHER package's struct forwards no members past the first hop, and six conversion shapes over such chains have no generated operator — OPEN, PARKED by COORD (0 std reach)
+
+**Shape.** A defined type over another package's struct (`type M lib.Pair[string]`), then a second definition over
+it, a sibling over the same struct, a generic one, and conversions between them. Go converts any two of these whose
+underlying types are identical. Two packages:
+
+```go
+package lib
+
+type Pair[T any] struct {
+	A T
+	B int
+}
+
+type Box[K comparable, V any] struct {
+	Index  map[K]V
+	Arr    [2]V
+	hidden V
+}
+
+func NewBox[K comparable, V any](k K, v V) Box[K, V] {
+	return Box[K, V]{Index: map[K]V{k: v}, hidden: v}
+}
+
+func (b Box[K, V]) Hidden() V { return b.hidden }
+
+type Open struct {
+	A string
+	B int
+}
+
+type Open2 struct {
+	A string
+	B int
+}
+```
+
+```go
+package main
+
+import (
+	"fmt"
+
+	"example.com/dtoi/lib"
+)
+
+type pair[T any] struct {
+	A T
+	B int
+}
+
+type P[T any] pair[T]
+type R[U comparable] pair[U]
+
+type T struct {
+	A string
+	B int
+}
+
+type M lib.Pair[string]
+type MM M
+type M2 lib.Pair[string]
+
+type XB lib.Box[string, int]
+type XB2 lib.Box[string, int]
+type XG[U any] lib.Box[string, U]
+
+type LA lib.Open
+type LB lib.Open2
+
+type G1[U any] lib.Pair[U]
+type G2[U any] lib.Pair[U]
+
+func main() {
+	mm := MM(M{A: "m", B: 2})
+	fmt.Println(mm.A, mm.B) // D1
+
+	xb := XB(lib.NewBox("k", 10))
+	xb2 := XB2(xb) // D2
+	xb2.Arr[0] = 13
+	fmt.Println(xb.Arr[0], xb2.Arr[0], lib.Box[string, int](xb2).Hidden(), M2(mm).A)
+
+	t := T{"t", 16}
+	fmt.Println(M(t).A, MM(t).B) // D3
+
+	fmt.Println(lib.Pair[string](mm).A, MM(lib.Pair[string]{A: "q", B: 15}).B) // D4
+
+	la := LA(lib.Open{A: "o", B: 17})
+	fmt.Println(LB(la).A, lib.Open2(la).B, LB(lib.Open{A: "r", B: 18}).B) // D5
+
+	g1 := G1[int](lib.Pair[int]{A: 19, B: 20})
+	xg := XG[int](lib.Box[string, int](xb2))
+	fmt.Println(G2[int](g1).A, XB(xg).Arr[0], lib.Box[string, int](XB2(xg)).Hidden(), R[int](P[int]{A: 21}).A) // D6
+
+	fmt.Println(T(lib.Open{A: "u", B: 22}).B) // D7
+}
+```
+
+Go 1.26.10 prints `m 2`, `0 13 10 m`, `t 16`, `m 15`, `o 17 18`, `19 13 10 21`, `22`. The second line is the part a
+fix has to keep: the copy does not share the array (`0` beside `13`), and the unexported field arrives (`10`).
+
+**Where it was measured.** These declarations and conversions were added to the seat's behavioral project
+(DefinedTypeOverInstantiation, with its `instlib` package) and built with the converter and generators of the seat's
+tip d0227c54b3 (ref claude/p1-ts-go2cs2004, accepted for batch 279). The converter exits 0 and writes every
+declaration and all 18 `GoImplicitConv` records; the C# build fails. The repro above is the same shapes cut down,
+run with Go only. Before the seat the converter refused the whole file with GO2CS2004, so none of this was reachable
+from Go source through a generic instantiation; the plain (non-generic) forms of D1, D2 and D5 were measured to fail
+the same way before the seat.
+
+| | Shape | Example | C# at d0227c54b3 |
+|---|---|---|---|
+| D1 | a definition over a definition over another package's struct | `type MM M` | CS1929: `MM` has no `A`, `B` |
+| D2 | two definitions over one struct of another package | `XB2(xb)`, `M2(mm)` | CS0030 |
+| D3 | a local struct to a chain that ends in another package | `M(t)`, `MM(t)` | CS0030 |
+| D4 | a chain and the other package's struct it ends in, each way | `lib.Pair[string](mm)` | CS0030 |
+| D5 | chains ending in two different structs of another package | `LB(la)`, `lib.Open2(la)` | CS0030 |
+| D6 | both sides generic, meeting at one instantiation | `G2[int](g1)`, `XB(xg)`, `R[int](P[int]{})` | CS0030 |
+| D7 | another package's struct to a local struct | `T(lib.Open{})` | CS1929, then CS0030 |
+
+`R[int](P[int]{})` in D6 needs no second package: two generic definitions over one LOCAL generic struct fail the
+same way.
+
+**Roots, all in go2cs-gen.**
+
+- **D1, TypeGenerator.** The loop that follows a wrapper's definitions reads each next definition's DECLARATION
+  SYNTAX. A definition in another package has none, so the loop stops with the intermediate local wrapper (`M`) as
+  the struct to forward from, and `M` has no members of its own in syntax: generators do not see each other's
+  output. `MM` gets no `A` or `B`.
+- **D2 to D6, ImplicitConvGenerator.** The struct chain is resolved from syntax too. When either chain ends in
+  another package's struct there is no declaration to read fields from, and the record is skipped WITHOUT a
+  diagnostic. For two generic sides, the open form of the other side is looked up by simple name among the
+  wrapper's own chain; a sibling wrapper is not in that chain, so those records are skipped as well.
+- **D7, ImplicitConvGenerator.** For `GoImplicitConv<lib.Open, T>` the operator is hosted on the SOURCE by its
+  simple name:
+
+```csharp
+public static partial class main_package
+{
+    partial struct Open
+    {
+        public static implicit operator T(Open src) => new T(src.A, src.B);
+    }
+}
+```
+
+  That declares a new empty `main_package.Open` (CS1929 on `src.A`), and the conversion the record asked for still
+  does not exist. C# lets a conversion be declared in either operand's type, so the host has to be `T`, the local
+  side. The reverse record already does that: `T-Open.g.cs` declares, inside `partial struct T`,
+  `operator global::go.go.instlib_package.Open(T src)`. Whether D7 pre-dates the seat was NOT measured.
+
+**Why the skipped records matter.** A skipped record is a Go conversion with no C# counterpart: CS0030 at the call
+site. It fails the build rather than changing behavior, which is why this is parked and not urgent.
+
+**What holds** (same project, same tip): nested generic fields under a wrapper whose parameters carry the base's
+names in the other order (`type W[V comparable, K any] nest[V, K]`), a wrapper over an instantiation of an
+instantiation (`type N pair[pair[int]]`), `T(M(t))` from a chain to a local struct, and `lib.Open(t)`.
+
+**Plan (not cut).**
+
+- **D1:** resolve the next definition by SYMBOL, and when it is in metadata take its public fields and ref
+  properties from there, with the type arguments carried through that hop.
+- **A. Carry the wrapped value when the two chains share a type** (D2, D4, D6 and the local sibling case): convert
+  through the wrappers' existing cast operators to the shared type and back, with exactly one clone. It is the only
+  route that keeps an unexported field, because another package's field-wise constructor lists exported fields only.
+- **B. Field-wise construction with the members read from the SOURCE declaration** when the target's chain ends in
+  another package's struct (D3).
+- **C. Two different structs of another package** (D5): field-wise over the members metadata shows. Where a field
+  is not accessible, report a diagnostic (the next free ID is GO2CS0011) instead of skipping the record.
+- **Host rule** (D7 and all of the above): declare the operator in a LOCAL operand, and in the non-generic one when
+  there is one (`XG<nint>` to `XB` is declared in `XB`). When every local operand is a closed generic (`G1<nint>` to
+  `G2<nint>`), declare the operator once, OPEN, in one of them, so that several closed records share one
+  declaration, as the seat does for `C<V>` and `pair<V>`. A record between two types of other packages has no local
+  host and must be reported, not skipped.
+
+**Not verified:** whether Roslyn metadata shows another package's non-public fields to a generator; whether the
+existing field-wise conversion shares a fixed-array field between source and result (the repro's `0 13` checks it
+once a fix exists); whether D7 pre-dates the seat.
+
+**Reach.** 0 in std, by the seat's census at its base: std has 57 `GoImplicitConv` records, 2 of them over structs
+(`RegPtr` and `Reg` in math/big/internal/asmgen), and neither has a generic operand or a wrapper on the constructed
+side. The TypeScript experiment's C11 shape is the local form, which the seat answers.
+
+**Not guarded:** the converter exits 0 on every shape above, and nothing in the behavioral corpus has them. A fix
+goes red-first with the repro above added to DefinedTypeOverInstantiation.
+
+— P1 (2026-11-09)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
