@@ -33,6 +33,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -355,10 +356,17 @@ func TestSockaddrFamilyIsScopedToEachHandOwningFlavor(t *testing.T) {
 func handOwnSourcesByFlavor(t *testing.T, pkg string) map[string]string {
 	t.Helper()
 
+	return handOwnSourcesAt(t, filepath.Join("..", "core"), pkg)
+}
+
+// handOwnSourcesAt is handOwnSourcesByFlavor over the corpus at coreDir.
+func handOwnSourcesAt(t *testing.T, coreDir string, pkg string) map[string]string {
+	t.Helper()
+
 	sources := map[string]string{}
 
 	for _, goos := range []string{"windows", "linux", "darwin"} {
-		dir := filepath.Join("..", "core", filepath.FromSlash(pkg), goos)
+		dir := filepath.Join(coreDir, filepath.FromSlash(pkg), goos)
 		entries, err := os.ReadDir(dir)
 
 		if err != nil {
@@ -389,6 +397,61 @@ func handOwnSourcesByFlavor(t *testing.T, pkg string) map[string]string {
 	}
 
 	return sources
+}
+
+// TestHandOwnWitnessReadsEachTargetsLayoutKeyFolders plants a marked hand-own in each kind of layout key folder. A
+// scope names a GOOS, and the body behind it must reach every target of that GOOS: a body in syscall/linux-arm64/ is
+// linux/arm64's alone, and one in syscall/amd64/ is every amd64 target's. A witness read from syscall/<goos>/ alone
+// sees neither, so it is kept per target, from the folders each target's build compiles.
+func TestHandOwnWitnessReadsEachTargetsLayoutKeyFolders(t *testing.T) {
+	coreDir := t.TempDir()
+
+	for rel, member := range map[string]string{
+		"syscall/windows/a_windows_impl.cs":         "windowsOnly",
+		"syscall/linux/b_linux_impl.cs":             "linuxShared",
+		"syscall/darwin/c_darwin_impl.cs":           "darwinOnly",
+		"syscall/amd64/d_amd64_impl.cs":             "archShared",
+		"syscall/linux-arm64/e_linux_arm64_impl.cs": "pairOnly",
+		"syscall/linux-amd64/f_linux_amd64.cs":      "unmarked",
+	} {
+		marker := "[module: GoManualConversion]\n"
+
+		if member == "unmarked" {
+			marker = ""
+		}
+
+		filePath := filepath.Join(coreDir, filepath.FromSlash(rel))
+
+		if err := os.MkdirAll(filepath.Dir(filePath), 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := os.WriteFile(filePath, []byte(marker+"internal static void "+member+"() { }\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	handOwns := handOwnSourcesAt(t, coreDir, "syscall")
+
+	for target, want := range map[string][]string{
+		"windows/amd64": {"windowsOnly", "archShared"},
+		"linux/amd64":   {"linuxShared", "archShared"},
+		"darwin/amd64":  {"darwinOnly", "archShared"},
+		"linux/arm64":   {"linuxShared", "pairOnly"},
+	} {
+		source, ok := handOwns[target]
+
+		if !ok {
+			t.Errorf("the witness has no text for %s; it reads %d keys and the corpus is laid out for %v", target, len(handOwns), platformUniverse)
+			continue
+		}
+
+		for _, member := range []string{"windowsOnly", "linuxShared", "darwinOnly", "archShared", "pairOnly", "unmarked"} {
+			if got := strings.Contains(source, " "+member+"("); got != slices.Contains(want, member) {
+				t.Errorf("%s: the witness holds %s = %v, want %v", target, member, got, !got)
+			}
+		}
+	}
 }
 
 // TestEveryManualConversionScopeNamesAKnownGOOS is the typo guard. A scope naming "win" or "macos"

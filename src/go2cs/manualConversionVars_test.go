@@ -27,6 +27,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -320,27 +321,79 @@ func TestManualConversionConstsAreDisplacedAndDeclared(t *testing.T) {
 			member := regexp.MustCompile(`(?m)^[ \t]*[^/\s][^\n]*\bstatic\b[^\n]*\b` + regexp.QuoteMeta(name) + `\s*(=>|\{|=|;)`)
 
 			for _, goos := range scope {
-				flavourDir := filepath.Join(coreDir, filepath.FromSlash(pkg), goos)
-				found := false
-
-				_ = filepath.WalkDir(flavourDir, func(path string, entry os.DirEntry, err error) error {
-					if err != nil || entry.IsDir() || !strings.HasSuffix(path, "_impl.cs") {
-						return nil
-					}
-
-					content, readErr := os.ReadFile(path)
-
-					if readErr == nil && strings.Contains(string(content), "GoManualConversion") {
-						found = found || member.Match(content)
-					}
-
-					return nil
-				})
-
-				if !found {
-					t.Errorf("%s.%s (%s): no hand-owned *_impl.cs under %s declares it; the displaced const has no destination", pkg, name, goos, flavourDir)
+				for _, missing := range displacedConstMissing(coreDir, pkg, goos, member) {
+					t.Errorf("%s.%s (%s): no hand-owned *_impl.cs under %s declares it; the displaced const has no destination", pkg, name, goos, missing)
 				}
 			}
+		}
+	}
+}
+
+// displacedConstMissing names where a displaced const scoped to goos has no destination: each folder that should
+// supply it and holds no marked *_impl.cs declaring member.
+func displacedConstMissing(coreDir string, pkg string, goos string, member *regexp.Regexp) []string {
+	flavourDir := filepath.Join(coreDir, filepath.FromSlash(pkg), goos)
+	found := false
+
+	_ = filepath.WalkDir(flavourDir, func(path string, entry os.DirEntry, err error) error {
+		if err != nil || entry.IsDir() || !strings.HasSuffix(path, "_impl.cs") {
+			return nil
+		}
+
+		content, readErr := os.ReadFile(path)
+
+		if readErr == nil && strings.Contains(string(content), "GoManualConversion") {
+			found = found || member.Match(content)
+		}
+
+		return nil
+	})
+
+	if !found {
+		return []string{flavourDir}
+	}
+
+	return nil
+}
+
+// TestDisplacedConstDestinationReadsTheLayoutKeyFolders plants a const's hand-owned destination in layout key folders.
+// A windows scope is supplied by a body in pkg/amd64/, which the windows/amd64 build compiles; a linux scope whose
+// only body sits in pkg/linux-amd64/ has none at linux/arm64. Read from pkg/<goos>/ alone, the first is a false red
+// and the second names a folder rather than the target that lacks the body.
+func TestDisplacedConstDestinationReadsTheLayoutKeyFolders(t *testing.T) {
+	coreDir := t.TempDir()
+
+	for rel, body := range map[string]string{
+		"pkg/amd64/consts_amd64_impl.cs":             "internal static readonly nint archConst = 1;",
+		"pkg/linux-amd64/consts_linux_amd64_impl.cs": "internal static readonly nint pairConst = 2;",
+	} {
+		filePath := filepath.Join(coreDir, filepath.FromSlash(rel))
+
+		if err := os.MkdirAll(filepath.Dir(filePath), 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := os.WriteFile(filePath, []byte("[module: GoManualConversion]\n"+body+"\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	member := func(name string) *regexp.Regexp {
+		return regexp.MustCompile(`(?m)^[ \t]*[^/\s][^\n]*\bstatic\b[^\n]*\b` + regexp.QuoteMeta(name) + `\s*(=>|\{|=|;)`)
+	}
+
+	for _, c := range []struct {
+		name, goos string
+		want       []string
+	}{
+		{"archConst", "windows", nil},
+		{"archConst", "darwin", nil},
+		{"archConst", "linux", []string{"linux/arm64"}},
+		{"pairConst", "linux", []string{"linux/arm64"}},
+		{"pairConst", "windows", []string{"windows/amd64"}},
+	} {
+		if got := displacedConstMissing(coreDir, "pkg", c.goos, member(c.name)); !slices.Equal(got, c.want) {
+			t.Errorf("%s scoped to %s: missing at %v, want %v", c.name, c.goos, got, c.want)
 		}
 	}
 }

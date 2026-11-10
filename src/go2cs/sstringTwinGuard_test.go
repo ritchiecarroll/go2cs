@@ -95,7 +95,7 @@ func TestNoSStringTwinMethodGroupInCorpus(t *testing.T) {
 				pkgName := path.Base(tw.pkgPath)
 
 				// the declaring package's own files, flat or per-GOOS
-				if relDir == tw.pkgPath || path.Dir(relDir) == tw.pkgPath && isPlatformFolderName(path.Base(relDir)) {
+				if declaringPackageFile(relDir, tw.pkgPath) {
 					for _, line := range methodGroupLines(code, "", tw.name) {
 						t.Errorf("%s:%d names the twin %s.%s as a method group; a func value must name %s%s", filePath, line, tw.pkgPath, tw.name, tw.name, FuncValueMarker)
 					}
@@ -120,6 +120,37 @@ func TestNoSStringTwinMethodGroupInCorpus(t *testing.T) {
 
 	if scanned == 0 {
 		t.Fatal("no .cs file under ../core: the guard would pass vacuously")
+	}
+}
+
+// declaringPackageFile reports whether a corpus file's directory (relative to src/core, slash-spelled) holds pkgPath's
+// own files: the package directory, or one of its platform folders.
+func declaringPackageFile(relDir string, pkgPath string) bool {
+	return relDir == pkgPath || path.Dir(relDir) == pkgPath && isPlatformFolderName(path.Base(relDir))
+}
+
+// TestDeclaringPackageFileReadsTheLayoutKeyFolders plants a file of the declaring package in each kind of layout key
+// folder. A bare reference to a twin inside its own package is a method group wherever the file sits; a guard that
+// knows only the GOOS folders stops reading the package's amd64/ and linux-arm64/ files.
+func TestDeclaringPackageFileReadsTheLayoutKeyFolders(t *testing.T) {
+	for _, plant := range []struct {
+		relDir string
+		want   bool
+	}{
+		{"fmt", true},
+		{"fmt/linux", true},
+		{"fmt/amd64", true},
+		{"fmt/arm64", true},
+		{"fmt/linux-amd64", true},
+		{"fmt/linux-arm64", true},
+		{"fmt/windows-amd64", true},
+		{"fmt/internal", false},
+		{"fmt/linux/amd64", false},
+		{"strconv/amd64", false},
+	} {
+		if got := declaringPackageFile(plant.relDir, "fmt"); got != plant.want {
+			t.Errorf("a file in src/core/%s: one of fmt's own = %v, want %v", plant.relDir, got, plant.want)
+		}
 	}
 }
 
