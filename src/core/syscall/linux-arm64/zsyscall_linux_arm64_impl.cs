@@ -5,7 +5,7 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
-// linux/arm64's Fstat: the struct-passing class's first member (its write-up is the header of
+// linux/arm64's Fstat and fstatat: the struct-passing class's first members (its write-up is the header of
 // linux-amd64/zsyscall_linux_amd64_impl.cs), with arm64's own `struct stat` (S3, the zsyscall twin:
 // docs/phase4/DATA-la64-s3-census.md §3 and §6).
 //
@@ -24,10 +24,11 @@
 // mirror's MEASURED size and offsets to GolibTests' LinuxArm64StatLayoutTests, which asserts them against
 // those values; the size check at each call is the run-time half of the same guard.
 //
-// THE NUMBER IS GO'S. zsyscall_linux_arm64.go's Fstat is Syscall(SYS_FSTAT, …): 80 at arm64, from this
-// flavour's converted zsysnum_linux_arm64.cs, never a literal.
+// THE NUMBERS ARE GO'S. zsyscall_linux_arm64.go's Fstat is Syscall(SYS_FSTAT, …), 80, and its fstatat is
+// Syscall6(SYS_FSTATAT, …), 79: the kernel's newfstatat, which amd64's table names SYS_NEWFSTATAT. Both
+// come from this flavour's converted zsysnum_linux_arm64.cs, never a literal.
 //
-// Displaced by `manualConversionFuncs` ("syscall": Fstat, goosLinux), like the amd64 body. The principal
+// Displaced by `manualConversionFuncs` ("syscall": Fstat, fstatat, goosLinux), like the amd64 pair. The principal
 // is the converted zsyscall_linux_arm64.cs, which only linux/arm64 emits, so the router keeps this file in
 // linux-arm64/.
 
@@ -89,6 +90,34 @@ partial class syscall_package
         uintptr statAddr = Ꮡstat is null || Ꮡstat.IsNilPointer ? (uintptr)0 : (uintptr)(nint)(&native);
 
         var (_, _, e1) = Syscall(SYS_FSTAT, (uintptr)fd, statAddr, 0);
+        if (e1 != 0) {
+            return errnoErr(e1);
+        }
+
+        copyNativeStat(ref native, Ꮡstat!);
+        return default!;
+    }
+
+    // fstatat: the same transcription over the four-argument form, under Go's own number for it at arm64,
+    // SYS_FSTATAT (79: the kernel's newfstatat, which amd64's table names SYS_NEWFSTATAT). The path
+    // handling is the generated wrapper's own, verbatim, as in the amd64 body; only the struct argument is
+    // replaced by the mirror. Stat and Lstat are pure Go over this (syscall_linux_arm64.go) and inherit it.
+    internal static unsafe error /*err*/ fstatat(nint fd, @string path, ж<Stat_t> Ꮡstat, nint flags) {
+        error err = default!;
+
+        ж<byte> _p0 = default!;
+        (_p0, err) = BytePtrFromString(path);
+        if (err != default!) {
+            return err;
+        }
+
+        if (sizeof(NativeStatLinuxArm64) != nativeStatSizeLinuxArm64)
+            throw new InvalidOperationException($"syscall: NativeStatLinuxArm64 is {sizeof(NativeStatLinuxArm64)} bytes, the kernel's struct stat is {nativeStatSizeLinuxArm64}");
+
+        NativeStatLinuxArm64 native = default;
+        uintptr statAddr = Ꮡstat is null || Ꮡstat.IsNilPointer ? (uintptr)0 : (uintptr)(nint)(&native);
+
+        var (_, _, e1) = Syscall6(SYS_FSTATAT, (uintptr)fd, (uintptr)_p0, statAddr, (uintptr)flags, 0, 0);
         if (e1 != 0) {
             return errnoErr(e1);
         }

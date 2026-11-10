@@ -257,15 +257,14 @@ func TestManualConversionRegistrationsHaveBodies(t *testing.T) {
 // red guard. The forward arm fails on a debt that is not listed AND on a row that is no longer owed,
 // so a row leaves the day its body lands and nothing can be added here without being seen.
 //
-// linux/arm64's rows are the syscall wrappers whose amd64 bodies marshal amd64 struct layouts
-// (`syscall/linux-amd64/zsyscall_linux_amd64_impl.cs`); each needs a body linux/arm64 compiles. A
-// struct whose layout differs at arm64 needs an arm64 mirror of its own; one that is the same at both
-// arches moves to `syscall/linux/`, which both linux builds compile (wait4 and Uname left that way:
-// Rusage is 144 bytes and Utsname 390 at both). Fstat's Stat_t is 128 bytes at arm64 and 144 at amd64,
-// so its body is linux-arm64/'s own (zsyscall_linux_arm64_impl.cs).
-var owedHandOwnBodies = map[string]bool{
-	"syscall.fstatat@linux/arm64": true,
-}
+// The ledger is EMPTY, and the forward arm still holds it: a debt that is not listed fails, so a row
+// is added only with the new target that owes it. linux/arm64 entered with four rows (S2): the syscall
+// wrappers whose amd64 bodies marshal amd64 struct layouts (`syscall/linux-amd64/
+// zsyscall_linux_amd64_impl.cs`). S3 paid them: wait4 and Uname moved to `syscall/linux/`, which both
+// linux builds compile, because Rusage (144) and Utsname (390) are the same at both arches; Fstat and
+// fstatat have linux/arm64's own bodies over its 128-byte Stat_t (`syscall/linux-arm64/
+// zsyscall_linux_arm64_impl.cs`).
+var owedHandOwnBodies = map[string]bool{}
 
 // handOwnBodies is one package's hand-own witness, split by which builds compile it: `flat` is the
 // package's own directory (every target), `perFolder` is one set per layout key folder (a GOOS, a
