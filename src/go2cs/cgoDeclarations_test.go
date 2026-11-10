@@ -283,6 +283,29 @@ func TestTheCgoFixtureLoadsAtCgoDisabledMissingOnlyRuntimeCgosIncomplete(t *test
 	}
 }
 
+// A toolchain the go command fetched lives INSIDE the module cache (GOROOT is $GOMODCACHE/golang.org/toolchain@…, as
+// cloud lanes get it), and Go refuses an overlay beneath GOMODCACHE, so the Overlay above must still reach runtime/cgo
+// there. The layout is planted by naming GOROOT's parent as the module cache, which needs no second toolchain.
+func TestTheCgoFixtureLoadsWhenGorootIsInsideTheModuleCache(t *testing.T) {
+	dir, err := filepath.Abs(cgoFixtureDir)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	goRoot, err := getGoEnvFrom(dir, "GOROOT")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Setenv("GOMODCACHE", filepath.Dir(goRoot))
+
+	if overlaid := loadCgoFixture(t, true); len(overlaid.Errors) != 0 {
+		t.Errorf("with GOROOT inside the module cache, the Overlay fixture reports %v, want none", overlaid.Errors)
+	}
+}
+
 // fixture.go writes seventeen C names, and the want table carries every one of them.
 func TestTheCgoFixtureWritesSeventeenCNames(t *testing.T) {
 	file, err := parser.ParseFile(token.NewFileSet(), filepath.Join(cgoFixtureDir, "fixture.go"), nil, 0)
