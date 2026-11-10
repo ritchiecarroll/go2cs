@@ -2968,7 +2968,7 @@ partial class runtime_package
     // resolveRecordedGoFile roots a recorded Go source identity (see GoPositionMapRecord.ResolveGoFile):
     // a bare file name against the C# file's directory, a module form against the link-time module cache
     // when there is one, a GOROOT-relative form against linkRoot's src directory when there is a link-time
-    // root, an absolute path verbatim.
+    // root, a main-module form as its -trimpath string, an absolute path verbatim.
     private static string resolveRecordedGoFile(string goFile, string csPath, string linkRoot) =>
         resolveRecordedGoFile(goFile, csPath, linkRoot, s_linkTimeModuleCache);
 
@@ -2976,6 +2976,12 @@ partial class runtime_package
     {
         if (goFile.Length == 0 || GoPositionMapRecord.isRootedGoPath(goFile))
             return goFile;
+
+        // <module>@/<file>: a -recurse MAIN-module source, recorded with an EMPTY version so the converted output
+        // names no directory of the converting machine. It is reported as `go build -trimpath` bakes it,
+        // <module>/<file>: never rooted, since it lives in neither GOROOT nor the module cache.
+        if (goFile.IndexOf("@/", StringComparison.Ordinal) is > 0 and var marker)
+            return string.Concat(goFile.AsSpan(0, marker), goFile.AsSpan(marker + 1));
 
         // <module>@<version>/<file>: a module-cache source in cmd/go's -trimpath form. No standard-library
         // path holds an '@', so the form is never confused with the GOROOT-relative one.

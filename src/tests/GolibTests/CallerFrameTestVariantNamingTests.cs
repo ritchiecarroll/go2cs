@@ -271,6 +271,23 @@ namespace GolibTests
         }
 
         [TestMethod]
+        public void AMainModuleRecordIsReportedInItsTrimpathForm()
+        {
+            // A -recurse main-module source is recorded `<module path>@/<path in module>` (the module-cache form with
+            // an EMPTY version), so the converted output names no directory of the converting machine. The runtime
+            // reports exactly what `go build -trimpath` bakes, `<module path>/<path in module>`: never rooted under the
+            // link-time GOROOT/src (a plain `<module>/<path>` would be, and that path does not exist), never under the
+            // module cache (the main module is not in it), and without the marker.
+            const string cache = "/srv/gomodcache";
+            Assert.AreEqual("example.com/app/sub/main.go",
+                go.runtime_package.GoResolveRecordedFileProbe("example.com/app@/sub/main.go", "/out/main.cs", "/go/root", cache));
+            Assert.AreEqual("example.com/app/main.go",
+                go.runtime_package.GoResolveRecordedFileProbe("example.com/app@/main.go", "/out/main.cs", "/go/root", ""), "with no module cache too");
+            Assert.AreEqual("RenamedGenericQualified/coll/coll.go",
+                go.runtime_package.GoResolveRecordedFileProbe("RenamedGenericQualified@/coll/coll.go", "/out/coll.cs", "", ""), "a module path with no dot");
+        }
+
+        [TestMethod]
         public void SyntheticPCOfAnUnrecordedFunctionReportsItsConvertedPosition()
         {
             var frame = SyntheticFrame(typeof(go.slcguard.probe_package).GetMethod(nameof(go.slcguard.probe_package.productionShapedFrame))!);
