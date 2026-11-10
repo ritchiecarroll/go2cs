@@ -38,9 +38,19 @@ public static class GoCgoLibraries
         NativeLibrary.SetDllImportResolver(assembly, (name, importing, _) => Resolve(name, importing, owned));
     }
 
+    // Where a library the table owns may load from: where a Go binary's own loader would look for it, and never the
+    // current directory (the DLL-planting surface, §5.4).
+    private static string Places =>
+        OperatingSystem.IsWindows() ? "the application directory, the assembly's directory, System32 and the directories added with AddDllDirectory" :
+        OperatingSystem.IsMacOS() ? "the dynamic loader's resolution of the captured install name" :
+        "the dynamic loader's search (LD_LIBRARY_PATH, the executable's run path, the loader cache and the system directories)";
+
     /// <summary>
-    /// The handle for a library the table owns, loaded as §6.2 first wrote it: the runtime's default search, and 0 on a
-    /// miss, which leaves the runtime to probe on.
+    /// The handle for a library the table owns, or 0 for a name it does not own, which keeps the runtime's own resolution
+    /// for any hand-owned import in the same assembly (§11.11). An owned library loads from where a Go binary's loader
+    /// would find it: on windows the safe directories and the assembly's own, and elsewhere the system loader, with the
+    /// captured SONAME or absolute install name. A miss throws, naming the -l flag, the captured name and the places
+    /// tried, and never falls back to the runtime's probing, whose windows search includes the current directory.
     /// </summary>
     internal static nint Resolve(string name, Assembly assembly, IReadOnlyList<GoCgoLibrary> libraries)
     {
@@ -49,7 +59,16 @@ public static class GoCgoLibraries
             if (library.Name != name)
                 continue;
 
-            return NativeLibrary.TryLoad(name, assembly, null, out nint handle) ? handle : 0;
+            nint handle;
+
+            bool loaded = OperatingSystem.IsWindows() ?
+                NativeLibrary.TryLoad(name, assembly, DllImportSearchPath.SafeDirectories | DllImportSearchPath.AssemblyDirectory, out handle) :
+                NativeLibrary.TryLoad(name, out handle);
+
+            if (loaded)
+                return handle;
+
+            throw new DllNotFoundException($"cgo: {library.Flag} binds {name}, which was not found in {Places}; the current directory is never searched (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §6.2)");
         }
 
         return 0;
