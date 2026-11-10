@@ -558,6 +558,12 @@ checkout cannot regenerate it without that toolchain. **Revised:**
 
 R9's substance stands: the corpus is wholly `CGO_ENABLED=0`, so no corpus gate ever sees one.
 
+> **AMENDED 2026-11-10 (COORD, RULED, on H's increment 3b1 note): the bindings file is `<package>.cgo.cs`, NOT
+> `<package>.cgo.g.cs`.** Committed converter output cannot carry a suffix that common `.gitignore` files drop, and
+> `*.g.cs` is one: this repository's own `.gitignore` ignores it at line 348, which is why increment 3b1's GolibTests
+> goldens are named `GoCgoWrappers.<os>.golden.cs`. The converter never writes `.gitignore` entries into a user's
+> tree, so the name itself has to survive. Byte-identity gates exclude the bindings file by its `.cgo.cs` suffix.
+
 ### 11.9 Mirrors vary per (GOOS, GOARCH): placed by the layout rule (finding 9; RULED)
 
 `_Ctype_char` is `int8` on x64 and `uint8` on linux/arm64, so a mirror set is a property of the target, not of GOOS
