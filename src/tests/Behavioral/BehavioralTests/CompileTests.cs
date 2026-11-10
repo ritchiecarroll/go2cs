@@ -34,6 +34,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckAliasImportLib() => CheckTarget("AliasImportLib");
 
     [TestMethod]
+    public void CheckAliasNamedTargetForms() => CheckTarget("AliasNamedTargetForms");
+
+    [TestMethod]
     public void CheckAliasNamespaceShadow() => CheckTarget("AliasNamespaceShadow");
 
     [TestMethod]
@@ -254,6 +257,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckCastNegativeNamedType() => CheckTarget("CastNegativeNamedType");
+
+    [TestMethod]
+    public void CheckCgoPseudoPackageTypes() => CheckTarget("CgoPseudoPackageTypes");
 
     [TestMethod]
     public void CheckChanDirectionChain() => CheckTarget("ChanDirectionChain");
@@ -580,6 +586,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckEmbedLayoutMatchesGo() => CheckTarget("EmbedLayoutMatchesGo");
 
     [TestMethod]
+    public void CheckEmbeddedInterfaceMergedMethod() => CheckTarget("EmbeddedInterfaceMergedMethod");
+
+    [TestMethod]
     public void CheckEmbeddedInterfaceWitness() => CheckTarget("EmbeddedInterfaceWitness");
 
     [TestMethod]
@@ -760,6 +769,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckFuncLiteralDeclaredResultIface() => CheckTarget("FuncLiteralDeclaredResultIface");
 
     [TestMethod]
+    public void CheckFuncMethodSameNameCollision() => CheckTarget("FuncMethodSameNameCollision");
+
+    [TestMethod]
     public void CheckFuncTypeNilConversion() => CheckTarget("FuncTypeNilConversion");
 
     [TestMethod]
@@ -794,6 +806,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGenericEmbedPromotion() => CheckTarget("GenericEmbedPromotion");
+
+    [TestMethod]
+    public void CheckGenericForeignAdapterInstantiations() => CheckTarget("GenericForeignAdapterInstantiations");
 
     [TestMethod]
     public void CheckGenericFuncCall() => CheckTarget("GenericFuncCall");
@@ -1370,6 +1385,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedBytesByteSeq() => CheckTarget("NamedBytesByteSeq");
+
+    [TestMethod]
+    public void CheckNamedBytesConstConversion() => CheckTarget("NamedBytesConstConversion");
 
     [TestMethod]
     public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
@@ -2783,6 +2801,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckVariadicInterfaceAssert() => CheckTarget("VariadicInterfaceAssert");
+
+    [TestMethod]
+    public void CheckVariadicLiftedElement() => CheckTarget("VariadicLiftedElement");
 
     [TestMethod]
     public void CheckVariadicNamedEmptyIface() => CheckTarget("VariadicNamedEmptyIface");

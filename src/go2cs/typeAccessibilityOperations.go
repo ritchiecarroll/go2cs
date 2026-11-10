@@ -542,10 +542,23 @@ func (v *Visitor) recordTypeAccessibility(kind string, identifier string, typePa
 		access = generatedTypeScope(identifier) + " "
 	}
 
+	// A C type's record belongs to the C pseudo-package's class in package_info.cs, not the package class, where it
+	// would declare a second type of the same name. It is internal whatever the case of its C name (DWORD, FILE): cgo
+	// keeps C types out of a package's exported surface, unless an exported Go declaration publicizes one.
+	records := packageEmittedTypeAccess
+
+	if cgoEmittingPseudoPackage {
+		records = cgoPseudoPackageTypeAccess
+
+		if access != "public " {
+			access = "internal "
+		}
+	}
+
 	line := fmt.Sprintf("%s%spartial %s %s%s {}", attrs, access, kind, identifier, typeParams)
 
 	packageLock.Lock()
-	packageEmittedTypeAccess.Add(line)
+	records.Add(line)
 	packageLock.Unlock()
 
 	return ""

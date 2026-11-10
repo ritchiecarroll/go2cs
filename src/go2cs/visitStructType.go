@@ -326,6 +326,10 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		if named, ok := identType.(*types.Named); ok {
 			localNameAttr = fmt.Sprintf("[GoLocalName(\"%s\")] ", named.Obj().Name())
 		}
+	} else if cgoEmittingPseudoPackage {
+		// A C struct, declared under its C name in the pseudo-package, keeps its Go name the same way
+		// (localNameAttrFor, cgoPseudoPackage.go).
+		localNameAttr = v.localNameAttrFor(identType)
 	}
 
 	// Consume any pending publicized-type access modifier (an unexported type used as an

@@ -273,6 +273,11 @@ func joinDigitLeadingParts(identifier string) string {
 }
 
 func getSanitizedIdentifier(identifier string) string {
+	// A C type or constant cmd/cgo declared is a member of the package's C pseudo-package (cgoPseudoPackage.go).
+	if reference, isCgo := cgoPseudoPackageReference(identifier); isCgo {
+		return reference
+	}
+
 	if nameCollisions[identifier] {
 		return getCollisionAvoidanceIdentifier(identifier)
 	}

@@ -76,11 +76,12 @@ func scanHandOwnBoxParity(handOwns, twins map[string]string) []string {
 }
 
 // twinPrincipal returns the hand-owned file a tracked `.cs.auto` twin reviews: the `.cs` beside it, or, for a twin
-// in a layout key folder of a package (a folder holding no project file of its own), the flat `.cs` in the package
-// directory above. A FLAT hand-own whose emission differs by target keeps one twin per key folder (runtime/runtime2.cs
-// by GOOS, crypto/internal/fips140/subtle/xor_generic.cs by GOARCH; the multi-target merge's mergeReviewSiblings),
-// and reading only beside the twin dropped all of them from this guard. The key folders are the universe's
-// (lineKeyedFolderTargets): a list of the three GOOS names here dropped the GOARCH and pair folders the same way.
+// in a layout key folder of a package (a GOOS, GOARCH or pair folder holding no project file of its own), the flat
+// `.cs` in the package directory above. A FLAT hand-own whose emission differs by target keeps one twin per key folder
+// (runtime/runtime2.cs by GOOS, crypto/internal/fips140/subtle/xor_generic.cs by GOARCH, in folders that hold nothing
+// else; the multi-target merge's mergeReviewSiblings), and reading only beside the twin dropped all of them from this
+// guard. The key folders are the universe's (lineKeyedFolderTargets): a list of the three GOOS names here dropped the
+// GOARCH and pair folders the same way.
 func twinPrincipal(root string, twin string) (string, bool) {
 	beside := strings.TrimSuffix(twin, ".auto")
 
@@ -127,6 +128,10 @@ func TestTwinPrincipalFindsAFlatHandOwnAboveItsGOOSFolder(t *testing.T) {
 		"src/core/internal/syscall/windows/windows.csproj":  "<Project />",
 		"src/core/internal/syscall/windows/syscall.cs.auto": "a nested package's file",
 		"src/core/runtime/darwin/orphan.cs.auto":            "reviews nothing",
+		"src/core/runtime/linux-amd64/runtime2.cs.auto":     "pair-folder twin",
+		"src/core/runtime/stubs.cs":                         "flat hand-own",
+		"src/core/runtime/amd64/stubs.cs.auto":              "arch-folder twin",
+		"src/core/runtime/linux-arm64/orphan.cs.auto":       "reviews nothing",
 		"src/core/subtle/xor_generic.cs":                    "flat hand-own",
 		"src/core/subtle/amd64/xor_generic.cs.auto":         "amd64 twin, in a folder holding nothing else",
 		"src/core/subtle/linux-arm64/xor_generic.cs.auto":   "arm64 twin, in a folder holding nothing else",
@@ -148,6 +153,9 @@ func TestTwinPrincipalFindsAFlatHandOwnAboveItsGOOSFolder(t *testing.T) {
 		{"src/core/syscall/linux/exec_unix.cs.auto", "src/core/syscall/linux/exec_unix.cs"},
 		{"src/core/internal/syscall/windows/syscall.cs.auto", ""},
 		{"src/core/runtime/darwin/orphan.cs.auto", ""},
+		{"src/core/runtime/linux-amd64/runtime2.cs.auto", "src/core/runtime/runtime2.cs"},
+		{"src/core/runtime/amd64/stubs.cs.auto", "src/core/runtime/stubs.cs"},
+		{"src/core/runtime/linux-arm64/orphan.cs.auto", ""},
 		{"src/core/subtle/amd64/xor_generic.cs.auto", "src/core/subtle/xor_generic.cs"},
 		{"src/core/subtle/linux-arm64/xor_generic.cs.auto", "src/core/subtle/xor_generic.cs"},
 		{"src/core/subtle/notakey/xor_generic.cs.auto", ""},

@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -168,12 +169,31 @@ func partialMember(line string) (name string, bodyless bool, ok bool) {
 	return "", false, false
 }
 
-// scanDarwinLinknamePulls reports every bodyless declaration under a darwin folder that carries a
+// darwinPullTarget is the darwin target of the corpus, whose build compiles a package's darwin/, amd64/ and
+// darwin-amd64/ folders beside its flat files.
+const darwinPullTarget = "darwin/amd64"
+
+// darwinOnlyFolder reports whether a folder name is a layout key folder only darwin targets compile (darwin/,
+// darwin-amd64/): where a pull is darwin's own.
+func darwinOnlyFolder(name string) bool {
+	targets := lineKeyedFolderTargets(name)
+
+	for _, target := range targets {
+		if !strings.HasPrefix(target, "darwin/") {
+			return false
+		}
+	}
+
+	return len(targets) > 0
+}
+
+// scanDarwinLinknamePulls reports every bodyless declaration under a darwin-only key folder that carries a
 // //go:linkname pull, and the subset no implementation part fills. tracked is `git ls-files` output.
 func scanDarwinLinknamePulls(t *testing.T, root string, tracked []string) (all []darwinPull, unfilled []darwinPull) {
 	t.Helper()
 
-	// Each package's .cs sources: its root and its darwin folder, where an implementation part can live.
+	// Each package's .cs sources at the darwin target: its flat files and the key folders that target compiles, where an
+	// implementation part can live. Another target's key folder is never compiled beside them.
 	packageFiles := map[string][]string{}
 
 	for _, path := range tracked {
@@ -181,12 +201,17 @@ func scanDarwinLinknamePulls(t *testing.T, root string, tracked []string) (all [
 			continue
 		}
 
-		rel := strings.TrimPrefix(path, "src/core/")
+		dir := filepath.ToSlash(filepath.Dir(strings.TrimPrefix(path, "src/core/")))
 
-		if pkg, _, found := strings.Cut(rel, "/darwin/"); found {
-			packageFiles[pkg] = append(packageFiles[pkg], path)
-		} else if dir := filepath.ToSlash(filepath.Dir(rel)); dir != "." {
+		if dir == "." {
+			continue
+		}
+
+		if targets := lineKeyedFolderTargets(filepath.Base(dir)); len(targets) == 0 {
 			packageFiles[dir] = append(packageFiles[dir], path)
+		} else if slices.Contains(targets, darwinPullTarget) {
+			pkg := filepath.ToSlash(filepath.Dir(dir))
+			packageFiles[pkg] = append(packageFiles[pkg], path)
 		}
 	}
 
@@ -226,7 +251,7 @@ func scanDarwinLinknamePulls(t *testing.T, root string, tracked []string) (all [
 
 				if !bodyless {
 					implemented[name] = true
-				} else if target, pulled := pulls[name]; pulled && strings.Contains(file, "/darwin/") {
+				} else if target, pulled := pulls[name]; pulled && darwinOnlyFolder(filepath.Base(filepath.Dir(file))) {
 					declared = append(declared, darwinPull{key: pkg + "." + name, target: target, file: file})
 				}
 			}
@@ -364,5 +389,52 @@ internal static partial nint filled(nint fd) => fd;
 
 	if len(all) != 3 || len(unfilled) != 1 || unfilled[0].key != "pkg.missing" || unfilled[0].target != "syscall.missing" {
 		t.Fatalf("scanner: all %v, unfilled %v; want 3 pulls and exactly pkg.missing -> syscall.missing unfilled", all, unfilled)
+	}
+
+	// The layout key folders. A darwin/amd64 build compiles keyed/darwin/, keyed/amd64/ and keyed/darwin-amd64/ into
+	// one assembly, so an implementation part in keyed/amd64/ fills a pull declared in keyed/darwin/, and a pull
+	// declared in keyed/darwin-amd64/ is darwin's to fill. A part in keyed/linux-amd64/ is never compiled beside them.
+	keyed := map[string]string{
+		"src/core/keyed/darwin/pulls.cs": `partial class keyed_package {
+//go:linkname byArch syscall.byArch
+internal static partial nint byArch(nint fd);
+
+//go:linkname byLinux syscall.byLinux
+internal static partial nint byLinux(nint fd);
+}
+`,
+		"src/core/keyed/amd64/pulls_amd64_impl.cs": `partial class keyed_package {
+internal static partial nint byArch(nint fd) => fd;
+}
+`,
+		"src/core/keyed/linux-amd64/pulls_linux_amd64_impl.cs": `partial class keyed_package {
+internal static partial nint byLinux(nint fd) => fd;
+}
+`,
+		"src/core/keyed/darwin-amd64/pulls_darwin_amd64.cs": `partial class keyed_package {
+//go:linkname byPair syscall.byPair
+internal static partial nint byPair(nint fd);
+}
+`,
+	}
+
+	var keyedTracked []string
+
+	for rel, content := range keyed {
+		write(rel, content)
+		keyedTracked = append(keyedTracked, rel)
+	}
+
+	sort.Strings(keyedTracked)
+	keyedAll, keyedUnfilled := scanDarwinLinknamePulls(t, root, keyedTracked)
+
+	var unfilledKeys []string
+
+	for _, pull := range keyedUnfilled {
+		unfilledKeys = append(unfilledKeys, pull.key)
+	}
+
+	if want := []string{"keyed.byLinux", "keyed.byPair"}; len(keyedAll) != 3 || !slices.Equal(unfilledKeys, want) {
+		t.Errorf("scanner over layout key folders: all %v, unfilled %v; want 3 pulls and exactly %v unfilled", keyedAll, unfilledKeys, want)
 	}
 }

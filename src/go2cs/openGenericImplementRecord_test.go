@@ -24,11 +24,13 @@ import (
 // DEFINITION, `[assembly: GoImplement(typeof(sliceIter<>), typeof(Iter), Pointer = true)]`, which an unbound
 // generic can spell, and the value form likewise.
 //
-// Controls keep today's behavior: a FOREIGN generic is keyed per closed instantiation, so no typeof record is
-// written for lib.Box[T]; and an interface over T (Getter[T]) is outside the scope, so holder[T] gets none either.
-// The closed sliceIter[int] record is unchanged and sits beside the open one. The foreign arm is not pinned: its
-// pointer path records `GoImplement<…lib_package.Box<T>, Iter>`, which names T out of scope (a known limit on the
-// BOARD), and asserting that line would hold the defect in place.
+// A FOREIGN generic whose required methods do not mention its type parameters (lib.Box[T] as Iter: Next() bool) is
+// recorded by its definition too, package-qualified, since C33 (foreignGenericAdapterIsOpen): go2cs-gen emits one
+// generic adapter `lib_BoxжIter<T>` for it. Before C33 its pointer path recorded the CLOSED
+// `GoImplement<…lib_package.Box<T>, Iter>`, which names T out of scope; that record must be gone.
+//
+// Controls keep today's behavior: an interface over T (Getter[T]) is outside the scope, so holder[T] gets no
+// definition record; the closed sliceIter[int] record is unchanged and sits beside the open one.
 
 func TestOpenGenericImplementIsRecordedByDefinition(t *testing.T) {
 	isolateConverterPathGlobals(t)
@@ -128,14 +130,16 @@ func main() {
 		"[assembly: GoImplement(typeof(counter<>), typeof(Iter), Pointer = true)]",
 		"[assembly: GoImplement(typeof(pair<,>), typeof(Namer))]",
 		"[assembly: GoImplement<sliceIter<nint>, Iter>(Pointer = true)]", // control: the closed record is unchanged
+		"[assembly: GoImplement(typeof(go.example.com.opengeneric.lib_package.Box<>), typeof(Iter), Pointer = true)]",
 	} {
 		if !strings.Contains(info, want) {
 			t.Errorf("package_info.cs is missing %s", want)
 		}
 	}
 
-	// Controls: a foreign generic and an interface over T keep today's behavior and get no definition record.
-	for _, unwanted := range []string{"typeof(lib", "Box<>", "typeof(holder<>)"} {
+	// Controls: an interface over T keeps today's behavior and gets no definition record, and the foreign generic's
+	// closed record, which named T out of scope, is no longer written.
+	for _, unwanted := range []string{"typeof(holder<>)", "lib_package.Box<T>"} {
 		if strings.Contains(info, unwanted) {
 			t.Errorf("package_info.cs records an out-of-scope definition (%s)", unwanted)
 		}

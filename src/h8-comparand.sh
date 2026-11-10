@@ -42,6 +42,21 @@ PROG=${0##*/}
 
 die(){ echo "$PROG: $*" >&2; exit 2; }
 
+# ---- the layout key folders -----------------------------------------------------------------------
+# The corpus's (GOOS, GOARCH) universe: the converter's platformUniverse (src/go2cs/platformLattice.go).
+# The repoguard test TestLayoutKeyListsAreTheUniverses holds this line to it; keep it on ONE line, in
+# this spelling. Layout L3 lays a package's files into a key folder per target: its GOOS, its GOARCH
+# or the pair (windows/, amd64/, linux-arm64/), and every folder list below is derived from this one.
+LAYOUT_UNIVERSE=(windows/amd64 linux/amd64 darwin/amd64 linux/arm64)
+is_layout_key(){ # $1 = folder name -> 0 when the universe can lay a file into a folder of that name
+  local t; for t in "${LAYOUT_UNIVERSE[@]}"; do
+    case "$1" in "${t%/*}"|"${t#*/}"|"${t%/*}-${t#*/}") return 0 ;; esac
+  done; return 1
+}
+layout_key_serves(){ # $1 = folder name, $2 = goos/arch -> 0 when that target's build compiles the folder
+  case "$1" in "${2%/*}"|"${2#*/}"|"${2%/*}-${2#*/}") return 0 ;; esac; return 1
+}
+
 # ---- input hygiene: every compare asserts BOTH sides non-empty BEFORE reporting a difference -----
 norm(){ # $1 = manifest path -> normalized "sha<TAB>path" on stdout
   local f="$1"
@@ -436,14 +451,13 @@ do_manifest(){
     local parts="" seg
     while [ "$d" != "." ] && [ -n "$d" ]; do
       seg=${d##*/}; parent=$(dirname "$d")
-      case "$seg" in
-        windows|linux|darwin)
-          if compgen -G "$d/*.csproj" >/dev/null 2>&1 || ! compgen -G "$parent/*.csproj" >/dev/null 2>&1; then
-            parts="$seg${parts:+/$parts}"      # a real package directory: KEEP it
-          fi                                    # else: a layout folder -- drop it
-          ;;
-        *) parts="$seg${parts:+/$parts}" ;;
-      esac
+      if is_layout_key "$seg"; then
+        if compgen -G "$d/*.csproj" >/dev/null 2>&1 || ! compgen -G "$parent/*.csproj" >/dev/null 2>&1; then
+          parts="$seg${parts:+/$parts}"        # a real package directory: KEEP it
+        fi                                      # else: a layout folder -- drop it
+      else
+        parts="$seg${parts:+/$parts}"
+      fi
       d="$parent"
     done
     out="${parts:+$parts/}$base"
@@ -470,7 +484,9 @@ do_manifest(){
 
 # ---- view: the DEFAULT-FLAVOUR manifest of a corpus root -------------------------------------------
 # The default flavour of an L3 corpus is what a build for <host> compiles: the FLAT files in each
-# package directory plus that package's <host>/ folder, and nothing from a foreign GOOS folder.
+# package directory plus that package's key folders for the host target (<goos>/, <arch>/ and
+# <goos>-<arch>/), and nothing from another target's key folder. <host> is a target of the universe,
+# <goos>/<arch>; a bare <goos> means <goos>/amd64, the arch every GOOS of the universe has.
 #
 # ⚠ A GOOS-NAMED DIRECTORY IS NOT AUTOMATICALLY A LAYOUT FOLDER. `internal/syscall/windows` is a
 # PACKAGE whose directory is named `windows`, and it exists on every target's view. A filter that
@@ -478,14 +494,16 @@ do_manifest(){
 # linux and darwin manifests -- and dropping the same paths from BOTH sides makes the arm agree
 # about files it never looked at, which is the vacuous green this arm exists to avoid.
 #
-# The discriminator is structural and exact: a directory is a LAYOUT folder iff its name is a GOOS
-# name, it holds no .csproj of its own, and its PARENT holds a .csproj. A package directory named
+# The discriminator is structural and exact: a directory is a LAYOUT folder iff its name is a layout
+# key of the universe (is_layout_key), it holds no .csproj of its own, and its PARENT holds a .csproj. A package directory named
 # `windows` carries its own .csproj and is therefore kept.
 do_view(){
-  [ $# -eq 2 ] || die "usage: $PROG view <corpus-root> <host-goos>"
-  local ROOT="$1" HOST="$2"
+  [ $# -eq 2 ] || die "usage: $PROG view <corpus-root> <host-goos>[/<arch>]"
+  local ROOT="$1" HOST="$2" t known=0
   [ -d "$ROOT" ] || die "no such corpus root '$ROOT'"
-  case "$HOST" in windows|linux|darwin) ;; *) die "host goos must be windows, linux or darwin" ;; esac
+  case "$HOST" in */*) ;; *) HOST="$HOST/amd64" ;; esac
+  for t in "${LAYOUT_UNIVERSE[@]}"; do [ "$t" = "$HOST" ] && known=1; done
+  [ "$known" -eq 1 ] || die "host '$HOST' is not a target of the universe (${LAYOUT_UNIVERSE[*]})"
   local n=0
   cd "$ROOT" || die "cannot enter '$ROOT'"
   while IFS= read -r f; do
@@ -494,13 +512,10 @@ do_view(){
     # walk every ancestor directory of the file, looking for a LAYOUT folder that is not the host's
     while [ "$d" != "." ] && [ -n "$d" ]; do
       local base=${d##*/} parent; parent=$(dirname "$d")
-      case "$base" in
-        windows|linux|darwin)
-          # layout folder iff no .csproj here AND the parent has one
-          if ! compgen -G "$d/*.csproj" >/dev/null 2>&1 && compgen -G "$parent/*.csproj" >/dev/null 2>&1; then
-            [ "$base" = "$HOST" ] || { keep=0; break; }
-          fi ;;
-      esac
+      # layout folder iff a key name, no .csproj here AND the parent has one
+      if is_layout_key "$base" && ! compgen -G "$d/*.csproj" >/dev/null 2>&1 && compgen -G "$parent/*.csproj" >/dev/null 2>&1; then
+        layout_key_serves "$base" "$HOST" || { keep=0; break; }
+      fi
       d="$parent"
     done
     [ "$keep" -eq 1 ] || continue
@@ -698,6 +713,36 @@ do_selftest(){
   local CR2="$T/allseed"; mkdir -p "$CR2/pkg"; : > "$CR2/pkg/pkg.csproj"
   echo seeded > "$CR2/pkg/a.cs"; touch -d @946684800 "$CR2/pkg/a.cs"
   st "a root with nothing emitted REFUSES (never empty)"  2 "$0" manifest --emitted-only "$CR2"
+
+  echo "H. the layout key folders -- GOARCH and pair folders beside the GOOS ones"
+  # the corpus lays a file shared by every amd64 target into amd64/, and one target's file into its
+  # pair folder; a tool that knows only windows|linux|darwin reads both as packages of their own.
+  local CK="$T/keyed"
+  mkdir -p "$CK/pkg/linux" "$CK/pkg/amd64" "$CK/pkg/arm64" "$CK/pkg/linux-amd64" "$CK/pkg/linux-arm64"
+  : > "$CK/pkg/pkg.csproj"
+  echo flat > "$CK/pkg/shared.cs"; echo lin > "$CK/pkg/linux/only.cs"
+  echo a64 > "$CK/pkg/amd64/arch.cs"; echo r64 > "$CK/pkg/arm64/archarm.cs"
+  echo la > "$CK/pkg/linux-amd64/pair.cs"; echo lr > "$CK/pkg/linux-arm64/pairarm.cs"
+  local kv; kv=$("$0" view "$CK" linux 2>&1)
+  if printf '%s\n' "$kv" | grep -q 'pkg/amd64/arch.cs' && printf '%s\n' "$kv" | grep -q 'pkg/linux-amd64/pair.cs' \
+     && ! printf '%s\n' "$kv" | grep -q 'pkg/linux-arm64/' && ! printf '%s\n' "$kv" | grep -q 'pkg/arm64/'; then
+    st_pass=$((st_pass+1)); printf '  PASS  %-58s\n' "linux view keeps amd64/ and linux-amd64/, drops arm64 folders"
+  else st_fail=$((st_fail+1)); printf '  FAIL  %-58s\n' "linux view read the key folders wrong:"; printf '%s\n' "$kv" | sed 's/^/        /'; fi
+  st "view takes a <goos>/<arch> host"                0 "$0" view "$CK" linux/arm64
+  kv=$("$0" view "$CK" linux/arm64 2>&1)
+  if printf '%s\n' "$kv" | grep -q 'pkg/linux/only.cs' && printf '%s\n' "$kv" | grep -q 'pkg/linux-arm64/pairarm.cs' \
+     && printf '%s\n' "$kv" | grep -q 'pkg/arm64/archarm.cs' && ! printf '%s\n' "$kv" | grep -q 'pkg/amd64/' \
+     && ! printf '%s\n' "$kv" | grep -q 'pkg/linux-amd64/'; then
+    st_pass=$((st_pass+1)); printf '  PASS  %-58s\n' "linux/arm64 view keeps its folders, drops the amd64 ones"
+  else st_fail=$((st_fail+1)); printf '  FAIL  %-58s\n' "linux/arm64 view read the key folders wrong:"; printf '%s\n' "$kv" | sed 's/^/        /'; fi
+  st "view refuses a host outside the universe"       2 "$0" view "$CK" darwin/arm64
+  local km
+  mkdir -p "$T/keyedcensus/pkg/linux-amd64" "$T/keyedcensus/pkg/amd64"; : > "$T/keyedcensus/pkg/pkg.csproj"
+  echo la > "$T/keyedcensus/pkg/linux-amd64/pairfile.cs"; echo a64 > "$T/keyedcensus/pkg/amd64/archfile.cs"
+  km=$("$0" manifest "$T/keyedcensus" 2>&1)
+  if printf '%s\n' "$km" | grep -qE '[[:space:]]pkg/pairfile\.cs$' && printf '%s\n' "$km" | grep -qE '[[:space:]]pkg/archfile\.cs$'; then
+    st_pass=$((st_pass+1)); printf '  PASS  %-58s\n' "manifest strips GOARCH and pair folders to the flat key"
+  else st_fail=$((st_fail+1)); printf '  FAIL  %-58s\n' "manifest kept a key folder in the key:"; printf '%s\n' "$km" | sed 's/^/        /'; fi
   rm -rf "$T"
   echo
   echo "SELF-TEST: pass=$st_pass fail=$st_fail"
@@ -717,7 +762,7 @@ case "${1:-}" in
   *) echo "usage: $PROG classify [--seeded-content-only] <win> <lin> <dar>"
      echo "       $PROG compare <out-win> <out-lin> <out-dar> -- <in-win> <in-lin> <in-dar>"
      echo "       $PROG identity <manifest-A> <manifest-B>"
-     echo "       $PROG view <corpus-root> <host-goos>"
+     echo "       $PROG view <corpus-root> <host-goos>[/<arch>]"
      echo "       $PROG manifest [--emitted-only] <census-target-root>   (classify's input, flat-keyed + stamped)"
      echo "       $PROG pkgdelta <goroot-outgoing> <goroot-incoming>"
      echo "       $PROG selftest"; exit 2 ;;

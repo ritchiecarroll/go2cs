@@ -412,7 +412,80 @@ for-clause seat, six), routed with this block. The tree was restored by status t
 **Not read on the box**, as in §6.9: GolibTests at the linux and darwin flavours, the behavioral harness, the census
 on the four runners and the release smoke are CI legs, dispatched on the pushed tip.
 
-### 6.11 R1e delivered: the sibling is split by key folder (dated block, 2026-11-10)
+### 6.11 The readers of §6.8, swept (dated block, 2026-11-10, P2)
+
+The follow-up seat §6.8 routes, cut on this record's tip (`012b4566e7`) as `claude/p2-layout-key-guards`. Every row
+got a fixture that plants a file in a layout key folder (or, for the GOROOT readers, a file only linux/arm64 builds)
+and reds at the base, then a fix that reads the folder set from the universe: `platformUniverse` and the corpus
+lattice in the converter package, `lineKeyedUniverse` and `lineKeyedFolderTargets` in repoguard, and for each tool a
+universe literal that `TestLayoutKeyListsAreTheUniverses` now pins (its new `layoutUniverseLists`), with the folders
+derived from it. Red commits `4f50aa8872`, `8ab08a708e`, `c56da40674`; fixes `95988a3989`, `c2d5cf917d`,
+`19dc65cedd`, `59ecf8c954`, `286c637ec0`.
+
+| Site | At the base | After |
+|---|---|---|
+| `osMemoryRegistrationCensus` | runtime/<goos>/ at three targets | flat plus each target's key folders, four targets; files read 218, 234, 230 and 233 (linux/arm64), callers unchanged |
+| `handOwnPackageBoxParity` (twinPrincipal) | a twin in a GOOS folder only | any key folder |
+| `nativeCallGateWindows` | runtime/windows/ | runtime/{amd64,windows,windows-amd64}/; 76 sites over 3 files, as before |
+| `nativeBoundaryBoxDeref` | syscall/windows/ | adds syscall/amd64/ and syscall/windows-amd64/; 67 files, as before |
+| `darwinLinknamePulls` | a part in amd64/ never fills (false red); darwin-amd64/ unread | grouped by the darwin/amd64 build; 15 pulls, 13 filled, as before |
+| `sstringTwinGuard` | `isPlatformFolderName` | `isCorpusLayoutKeyFolder` |
+| `crosspkgExportedBox` (two sites) | GOOS folders | every candidate key folder |
+| `manualConversionScope` | witness per GOOS, <pkg>/<goos>/ only | witness per target; a scope is unbodied at any target of its GOOS that lacks the body |
+| `manualConversionVars` | <pkg>/<goos>/ (false red only) | missing per target of the scope's GOOS |
+| `handOwnTypeAccessibility` | the info file's own folder | its whole assembly; marked files read 117 to 338, once per info file that compiles each; 0 duplicates |
+| `linknameForwardRegistry` (two sites) | GOARCH fixed at amd64 | `corpusTargets = platformUniverse`; 27 rows checked, 35 walked |
+| `packageInputDigest.go` | flat `*_impl.cs` | flat plus the target's key folders, named with the folder; a flat companion keeps its name |
+| `reconvert-deletions.ps1` | `$KnownGoos` | `$layoutUniverse`, pinned; each key folder asked at its own flavour |
+| `h8-comparand.sh` (three sites) | GOOS case lists | `LAYOUT_UNIVERSE`, pinned; view takes `<goos>/<arch>`; selftest 46 of 46 |
+| `check-solution-integrity.ps1` | three GOOS graphs | four target graphs; `$(GoTargetArch)` conditions modelled |
+| `push-nuget.ps1` `$goosNames` | reviewed, not changed | below |
+
+**reconvert-deletions, a dry run on a copy of this tree** (source and target both go1.26.10, linux/amd64, every file
+a candidate): at the base 161 files in amd64/, linux-amd64/ and linux-arm64/ folders read NOT-A-CONVERSION-TARGET,
+as packages such as `syscall/linux-amd64`, so nothing checked them. With the fix they read KEEP-SELECTED (+129),
+KEEP-METADATA (+25) and PROTECTED (+7). Both arms: 0 DELETE, 0 unresolved.
+
+**check-solution-integrity's control.** `-InjectReference 'internal/cpu=math'` closes a cycle at the three amd64
+targets and not at linux/arm64, because math references internal/cpu only under `'$(GoTargetArch)'=='amd64'`; the
+base script read that condition as unconditional and reported the cycle on its linux graph.
+
+**push-nuget.ps1, the review.** Fourteen packages carry key folders and no GOOS folder (math, hash/crc32,
+internal/abi, internal/bytealg and the rest of the amd64/ plus linux-arm64/ set), so `$goosNames` does not split
+them by RID. The RIDs this release ships are all amd64 builds (win-x64, linux-x64, osx-x64, with osx-arm64 taking
+osx-x64's bytes), and an amd64 build of such a package compiles the same flat and amd64/ files on every GOOS, so
+one asset is correct today. The day a linux-arm64 RID ships these packages need a split; that is S6's packaging
+decision and is left to it.
+
+### 6.12 The second read, and the one edge it found (dated block, 2026-11-10, P2)
+
+G read the sweep at `6204b799df` against `012b4566e7`. Every moved reading in §6.11 is the guard seeing more; one
+edge got looser. A displaced const scoped to a GOOS that no universe target builds failed the const guard at the
+base, because `<pkg>/<goos>/` held nothing, and passed at the sweep's tip, because the per-target read loops over
+that GOOS's targets and there are none. G's probe was `internal/buildcfg.defaultGOARCH` scoped to `"plan9"`: red at
+`012b4566e7`, green at `6204b799df`. The typo guard `TestEveryManualConversionScopeNamesAKnownGOOS` walked
+`manualConversionFuncs` alone, so for consts that red had been the only check on a misspelled or not-yet-universe
+GOOS.
+
+The ruled fix, red first with G's probe as fixtures (`e37fcd8273`), then `56b515bd9f`:
+- `displacedConstMissing` returns an error for a scope GOOS with no universe target.
+- The typo guard also walks `manualConversionVars` and `manualConversionConsts`, each scope GOOS checked against the
+  universe; `manualConversionFuncs` keeps the known-GOOS check.
+- `handOwnBodied` has the same empty shape for such a GOOS. Its callers pass fixed universe GOOS lists, and a comment
+  says so.
+
+G's probe against the real registry, restored byte-identical after, reds both guards, each naming the entry and
+`plan9`.
+
+**Residual, for the day the universe grows past these four targets** (none misses a file today):
+- `darwinLinknamePulls_test.go`'s `darwinPullTarget` and `nativeCallGateWindows_test.go`'s `windowsRuntimeTarget` are
+  single-target constants (`darwin/amd64`, `windows/amd64`). A darwin/arm64 or windows/arm64 target needs each read
+  per target of its GOOS.
+- `nativeCallGateWindows` now reads the exact parent folders `runtime/{amd64,windows,windows-amd64}/`; 0 files sit in
+  folders nested under them today.
+- `reconvert-deletions.ps1` matches key folder names case-sensitively.
+
+### 6.13 R1e delivered: the sibling is split by key folder (dated block, 2026-11-10)
 
 The one row of §6.1 that was S2's is closed by a converter seat on master `b9a6d261fc` (batch 283), four commits:
 the converter and its tests (`8c3bc0917c`), the corpus apply (`8e2f9ca776`), the rule and skill text
@@ -493,3 +566,10 @@ rows stand as written.
 **Not read on the box:** GolibTests at the linux and darwin flavours, the full behavioral harness and the census on
 the four runners are CI legs, dispatched on the pushed tip. `go2cs.slnx` was not built: the seat changes no golib or
 generator source.
+
+**Merge note (2026-11-10, at the merge with the batch 284 union `48665b310f`).** This block was written as §6.11 and
+is §6.13 here: §6.11 (the sweep) and §6.12 were in the union first. Commit `5cc542ec33`'s message still names the old
+number. The sweep and this seat each made the same change to the parity guard's twin reader, so that row of §6.8 was
+closed on both sides; the two bodies were identical and merged as one. The guard's fixture table is the union of both
+sets: the sweep's runtime pair-folder and arch-folder twins, and this seat's `subtle` twins with their `notakey`
+control. The guard reads 36 twins on the merged tree, as on the seat.

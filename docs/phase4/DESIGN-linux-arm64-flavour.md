@@ -573,7 +573,7 @@ count that falls, or a pass that survives a rename untouched, is read against a 
 
 ### 11.8 §11.6 closed: R1e is delivered, and the folder holds only the sibling
 
-§11.6 left R1e waiting on a converter seat. That seat is cut on batch 283 (`DATA-la64-s2-prediction.md`, §6.11).
+§11.6 left R1e waiting on a converter seat. That seat is cut on batch 283 (`DATA-la64-s2-prediction.md`, §6.13).
 
 - **What the merge does now.** It splits a differing review sibling into any key folder that is not a nested
   package. `crypto/internal/fips140/subtle` gains `amd64/` and `linux-arm64/`, each holding the sibling and nothing

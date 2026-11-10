@@ -435,7 +435,7 @@ The `-tests` pipeline re-analyzes the package over the **whole variant universe*
 - **A test-file METHOD over a production element's name.** strings' export_test.go declares `func (r *Replacer) Replacer() any` — the ordinary type-vs-method resolution (above) would Δ-rename the *type*, but the production `replace.cs` on disk keeps `Replacer`, so renaming the type would split the assembly into two disagreeing halves (CS0102 `strings_package` already contains `Replacer` + CS0246 `ΔReplacer`). When the colliding method declarators are **all** test-declared and the element is production-declared, the element keeps its bare name (and no exported alias is registered) and the **method** Δ-renames instead; a FuncDecl colliding with a same-package element is necessarily a method (Go keeps method names in a separate namespace — any other same-scope reuse is a Go compile error). When a *production* method also carries the name, the production universe had the same collision and already renamed the element on disk, so the normal path stays consistent.
 - **A test-file METHOD shadowing a dot-imported function the variant calls unqualified.** Go keeps method names and dot-imported function names in separate namespaces, but both land in the C# package class's member-lookup scope, and an enclosing class's method group always wins over `using static` imports — sort_test.go's dot-imported `Sort(data)` would bind example_keys_test.go's `By.Sort` extension (CS1501, with method-group CS1503s downstream). A test-declared method whose name matches a foreign function the variant references **unqualified** (only unqualified sites conflict — SelectorExpr Sels are excluded, so a qualified `sort.Sort(ps)` never triggers; an unqualified foreign-function reference can only come from a dot-import) Δ-renames, and the dot-imported call keeps its bare emission, binding through `using static`.
 
-- **A test-file FREE FUNCTION whose emitted signature matches a production METHOD's receiver.** A method emits as a C# extension method, so its receiver becomes the leading `this` parameter — and `this` does **not** participate in C# signature identity. math/big's `func (z nat) norm() nat` (nat.go) and `func norm(x nat) nat` (int_test.go) are legal Go in separate namespaces, but both emit as `norm(nat)` in `big_package`: CS0111. `resolveReceiverParameterCollisions` compares each same-named pair's *emitted* parameter list — the method's receiver type followed by its parameters, against the free function's parameters — and Δ-renames the test-side declarator. Discrimination is exact: an extra parameter (`func trim(x nat, n int)`) or a different first parameter (`func keep(n int)`) emits distinctly and keeps its plain name, as do generic declarations (type parameters keep the C# signatures distinct) and a variadic/non-variadic mismatch. Two methods can never collide this way (Go forbids redeclaring one method on one type) and two free functions cannot share a package scope, so a method/free-function pair is the only shape. When *both* sides are test-declared the FREE FUNCTION is the one renamed, so the outcome does not depend on declaration order and two colliding declarators never both become `Δ`-prefixed; a collision between two **production** declarators is deliberately left alone, since it would equally break the production-only conversion and is a different problem than test-variant coherence. <!-- at landing: the 302-package converted corpus compiled clean, so no production instance existed. -->
+- **A test-file FREE FUNCTION whose emitted signature matches a production METHOD's receiver.** A method emits as a C# extension method, so its receiver becomes the leading `this` parameter — and `this` does **not** participate in C# signature identity. math/big's `func (z nat) norm() nat` (nat.go) and `func norm(x nat) nat` (int_test.go) are legal Go in separate namespaces, but both emit as `norm(nat)` in `big_package`: CS0111. `resolveReceiverParameterCollisions` compares each same-named pair's *emitted* parameter list — the method's receiver type followed by its parameters, against the free function's parameters — and Δ-renames the test-side declarator. Discrimination is exact: an extra parameter (`func trim(x nat, n int)`) or a different first parameter (`func keep(n int)`) emits distinctly and keeps its plain name, as do generic declarations (type parameters keep the C# signatures distinct) and a variadic/non-variadic mismatch. Two methods can never collide this way (Go forbids redeclaring one method on one type) and two free functions cannot share a package scope, so a method/free-function pair is the only shape. When *both* sides are test-declared the FREE FUNCTION is the one renamed, so the outcome does not depend on declaration order and two colliding declarators never both become `Δ`-prefixed. A collision between two **production** declarators breaks the production-only conversion too, and takes its own rule ([below](#a-production-free-function-and-a-same-named-method-the-function-δ-renames)). <!-- at landing: the 302-package converted corpus compiled clean, so no production instance existed; tsc's internal/checker (C40) is the first. -->
 
 The rename registry is **object-keyed** (`testMethodRenames map[types.Object]bool`) — the same-named production type/function keeps its plain emission at every other site — and **session-scoped**, initialized once per `-tests` conversion rather than per variant: both variants come from one `go/packages` load, so the external variant's references to an internal-variant method (the export_test pattern) resolve by object identity to entries registered during the internal pass. The declaration renames in `visitFuncDecl`, and every reference follows through `convIdent` — a METHOD name through its isMethod arm (all selector emissions funnel there), and a package-level **free function** referenced as a call target or function value through the trailing identifier path, which the receiver/first-parameter case above reaches (without it the declarator would rename while its call sites emit the bare name: CS0103). The go2cs-gen `RecvGenerator` reads the emitted name, so generated `ж`-receiver overloads follow automatically. Real emissions from the probes:
 
@@ -450,6 +450,50 @@ Sort((sort.Interface)((sort.IntSlice)data));                       // dot-import
 ```
 
 Production conversions have no `_test.go` files in their universe, so the analysis is inert there (the behavioral regression check is byte-identical<!-- [CNR](../Glossary.md#cnr) -->). <!-- at landing: ×402. --> (Guarded by `TestTestVariantPinsProductionTypeAgainstTestMethodCollision` — declaration, internal call site, external call site, and the pinned type — and `TestTestVariantRenamesTestMethodShadowingDotImportedFunction` — rename + bare dot-imported call, with never-referenced and qualified-only same-named methods as discrimination controls.)
+
+## A production free function and a same-named method: the function Δ-renames
+
+The same receiver-as-`this` collision between two **production** declarators: tsc's internal/checker declares
+`func (t *Type) IsTupleType() bool` and `func IsTupleType(t *Type) bool`, both `IsTupleType(ж<Type>)` in the
+package class (CS0111). The free function takes the `Δ`, the side the test-variant rule above picks when both
+are test-declared, and the method keeps its name:
+
+<!-- source: src/tests/Behavioral/FuncMethodSameNameCollision/shapes/shapes.cs:11-13 -->
+```csharp
+public static bool IsTupleType(this ж<Type> Ꮡt) { return isTupleType(ref (Ꮡt).DerefOrNull()); }
+
+public static bool ΔIsTupleType(ж<Type> t) { return isTupleType(ref (t).DerefOrNull()); }
+```
+
+`funcRenamedForMethodCollision` decides from go/types alone: a production free function whose signature
+collides (`emittedSignaturesCollide`, the test above) with a production method of a type its own package
+declares. A package that calls the function asks the same `*types.Func` and reaches the same answer, so its
+call sites and function values follow with no metadata between the packages:
+
+<!-- source: src/tests/Behavioral/FuncMethodSameNameCollision/main.cs.target:29 -->
+```csharp
+    fmt.Println("foreign", t.IsTupleType(), shapes.ΔIsTupleType(t), shapes.ΔIsTupleType(Ꮡ(new shapes.Type())));
+```
+
+Two properties of the rule are deliberate:
+
+- **It is decided at the Go level, so it can over-approximate.** A pointer-receiver method emits as `this ж<T>`
+  or as `this ref T` depending on how its body uses the receiver, and only the `ж<T>` form collides in C#. A
+  rule that followed the body would change an exported function's C# name whenever an unrelated body edit
+  moved the receiver form, breaking every other package's callers; the Go-level rule names it the same way for
+  as long as the signatures are what they are. A pair whose method emits `this ref T` is renamed without
+  needing it (the guard's `Deep` and `Combine`).
+- **Only production declarations count.** A method or function declared in a `_test.go` file never renames a
+  production function: the production `.cs` keeps the bare name, and the test-variant rule above renames the
+  test side instead. The decision reads each declaration's file from the load's file set.
+
+A function a whole-file hand-own declares keeps the hand-own's spelling: std's one production pair,
+`testing.checkParallel`, lives in `testing.cs`, which `-stdlib` does not emit, and its only external caller,
+testing/cryptotest's `//go:linkname` push, composes the target from the directive's text. (Guarded by the
+`FuncMethodSameNameCollision` behavioral test — a local pair, a function value, a cross-package pair called and
+taken as a value, a pair with a further parameter, and a non-colliding control, output-compared against `go run`
+— and by `TestProductionFuncMethodCollisionRename`, which pins the colliding shapes, the control, a generic free
+function, and a method declared in a `_test.go` file.)
 
 ## A NESTED package's production `GoImplement` record anchors to the production metadata file
 
