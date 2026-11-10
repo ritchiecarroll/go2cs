@@ -30,6 +30,12 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	// emitted a bare `delegate … Filter` that both duplicated the method (CS0102) and was
 	// unreachable from the ΔFilter uses (CS0246 ×14). Match the declaration to the uses. Manual
 	// types already record the Δ form explicitly (below), so this covers the auto-emitted kinds.
+	// A C type cmd/cgo declared is declared under its C name in the pseudo-package, and a C typedef's alias under its
+	// `Cꓸ` spelling (cgoPseudoPackage.go).
+	if reference, isCgo := cgoPseudoPackageReference(typeSpec.Name.Name); isCgo {
+		name = reference
+	}
+
 	if nameCollisions[typeSpec.Name.Name] {
 		name = getSanitizedIdentifier(typeSpec.Name.Name)
 
@@ -244,7 +250,10 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 		// Add exported type aliases to package info. Never for a function-local declaration: it is
 		// not part of the package's exported surface whatever its Go name looks like, and the lift
 		// above means the name a consumer would import does not exist.
-		if !v.inFunction && getAccess(name) == "public" {
+		// A C typedef is not: cgo keeps C types out of a package's exported surface, whatever the case of the C name.
+		_, isCgo := cgoPseudoPackageNames[typeSpec.Name.Name]
+
+		if !v.inFunction && !isCgo && getAccess(name) == "public" {
 			packageLock.Lock()
 			exportedTypeAliases[name] = typeName
 			packageLock.Unlock()
@@ -300,6 +309,10 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	// Publicization therefore outranks the default, and the inline arm supplies that default.
 	if v.isPublicizedType(typeSpec.Name) {
 		v.pendingTypeAccess = "public "
+	} else if cgoEmittingPseudoPackage {
+		// A C type is internal whatever the case of its C name (DWORD, FILE): cgo keeps C types out of a package's
+		// exported surface. Written inline, as its record is (typeAccessibilityAbsorbs).
+		v.pendingTypeAccess = "internal "
 	} else if localAccess := v.localTypeAccess(); localAccess != "" {
 		// A FUNCTION-LOCAL declaration takes the local-type rule, in EVERY conversion: its Go name
 		// carries no export meaning, and the hoisted `<Func>_<name>` identifier the name-based rules
@@ -586,6 +599,14 @@ func (v *Visitor) recordedLocalName(identType types.Type, identifier string) (in
 }
 
 func (v *Visitor) localNameAttrFor(identType types.Type) string {
+	// A C type cmd/cgo declared is declared under its C name in the pseudo-package (cgoPseudoPackage.go), and keeps
+	// its Go name for reflection: Go prints C.int's type as main._Ctype_int.
+	if named, ok := identType.(*types.Named); ok && !v.inFunction {
+		if _, isCgo := cgoPseudoPackageNames[named.Obj().Name()]; isCgo {
+			return fmt.Sprintf("[GoLocalName(\"%s\")] ", named.Obj().Name())
+		}
+	}
+
 	if !v.inFunction {
 		return ""
 	}

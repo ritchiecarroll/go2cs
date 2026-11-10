@@ -771,6 +771,11 @@ func (v *Visitor) getFullyQualifiedTypeName(t types.Type, isUnderlying bool) str
 		}
 
 		if qualifier != "" {
+			// A C type's qualifier is its pseudo-package class (usingAliasTypeQualifier), and its name the bare member.
+			if member, isCgo := cgoPseudoPackageNames[obj.Name()]; isCgo {
+				return qualifier + member
+			}
+
 			return qualifier + getSanitizedIdentifier(obj.Name())
 		}
 	}
@@ -835,6 +840,8 @@ func (v *Visitor) usingAliasTypeQualifier(t types.Type) string {
 	if named, ok := t.(*types.Named); ok {
 		if obj := named.Obj(); obj == nil || obj.Pkg() == nil || obj.Pkg() != v.pkg {
 			return ""
+		} else if _, isCgo := cgoPseudoPackageNames[obj.Name()]; isCgo {
+			return cgoPseudoPackageQualifier()
 		}
 	}
 

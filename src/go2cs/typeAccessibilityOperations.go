@@ -554,6 +554,12 @@ func (v *Visitor) recordTypeAccessibility(kind string, identifier string, typePa
 // typeAccessibilityAbsorbs reports whether recordTypeAccessibility writes a record for identifier, and so
 // absorbs the attributes handed to it; when it does not, they stay on the declaration.
 func (v *Visitor) typeAccessibilityAbsorbs(identifier string) bool {
+	// A C type in the pseudo-package keeps its record inline: the section is written into the PACKAGE class, where it
+	// would declare a second, phantom type of the same name (cgoPseudoPackage.go).
+	if cgoEmittingPseudoPackage {
+		return false
+	}
+
 	return !v.manualConversion && identifier != "" && (!v.options.testInlineTypeAccess || v.options.testClassNameOverride != "")
 }
 

@@ -70,8 +70,8 @@ func TestCgoTypesAndConstantsConvertIntoThePseudoPackage(t *testing.T) {
 
 	for _, want := range []struct{ file, text, in string }{
 		{"cgo_gotypes.cs", declarations, "partial class mainꓸC_package {"},
-		{"cgo_gotypes.cs", declarations, `[GoLocalName("_Ctype_int")] partial struct @int /*num:int32*/;`},
-		{"cgo_gotypes.cs", declarations, `[GoLocalName("_Ctype_struct_point")] [GoValueClone("name")] partial struct struct_point {`},
+		{"cgo_gotypes.cs", declarations, `[GoLocalName("_Ctype_int")] internal partial struct @int /*num:int32*/;`},
+		{"cgo_gotypes.cs", declarations, `[GoLocalName("_Ctype_struct_point")] [GoValueClone("name")] internal partial struct struct_point {`},
 		{"cgo_gotypes.cs", declarations, "    internal ж<struct_point> next;"},
 		{"cgo_gotypes.cs", declarations, "internal static UntypedInt LIMIT => 0x10;"},
 		{"cgo_gotypes.cs", declarations, "global using Cꓸdiv_t = go.mainꓸC_package.struct___0;"},
@@ -81,10 +81,16 @@ func TestCgoTypesAndConstantsConvertIntoThePseudoPackage(t *testing.T) {
 		{"main.cs", program, "d.quot = (C.@int)C.LIMIT;"},
 		{"main.cs", program, "internal static C.@int add(C.@int a, C.@int b)"},
 		{"package_info.cs", packageInfo, "[GoPackage(\"main\")]\npartial class mainꓸC_package\n{\n}"},
+		{"package_info.cs", packageInfo, "using static go.main_package;\nusing C = go.mainꓸC_package;\n"},
 	} {
 		if !strings.Contains(want.text, want.in) {
 			t.Errorf("%s does not contain %q", want.file, want.in)
 		}
+	}
+
+	// A C typedef is no part of the package's exported surface, so it publishes no alias to importers.
+	if strings.Contains(packageInfo, `GoTypeAlias("Cꓸ`) {
+		t.Errorf("package_info.cs publishes a C typedef to importers:\n%s", packageInfo)
 	}
 
 	// A C type's accessibility record would declare a second, phantom type in the PACKAGE class.

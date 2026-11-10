@@ -14,6 +14,7 @@
 
 using go;
 using static go.main_package;
+using C = go.mainꓸC_package;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -43,7 +44,7 @@ using static go.main_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
-[assembly: GoFieldAccess(typeof(_Ctype_struct_point))]
+[assembly: GoFieldAccess(typeof(C.struct_point))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -53,7 +54,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA0elLKSpqaClKSmpoKCgpSCgpaClIKUgoKUgoKUgpSCgpSCgoKCgg==")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA4elLKSpqaClKSmpoKCgpSCgpaClIKUgoKUgoKUgpSCgpSCgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -69,25 +70,6 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
-    internal partial struct _Ctype_char {}
-    internal partial struct _Ctype_double {}
-    internal partial struct _Ctype_enum_color {}
-    internal partial struct _Ctype_float {}
-    internal partial struct _Ctype_int {}
-    internal partial struct _Ctype_long {}
-    internal partial struct _Ctype_longlong {}
-    internal partial struct _Ctype_schar {}
-    internal partial struct _Ctype_short {}
-    internal partial struct _Ctype_struct___0 {}
-    [GoValueClone("name")] internal partial struct _Ctype_struct_point {}
-    [GoValueClone("from", "to")] internal partial struct _Ctype_struct_segment {}
-    internal partial struct _Ctype_uchar {}
-    internal partial struct _Ctype_uint {}
-    internal partial struct _Ctype_ulong {}
-    internal partial struct _Ctype_ulonglong {}
-    internal partial struct _Ctype_union_value {}
-    internal partial struct _Ctype_ushort {}
-    internal partial struct _Ctype_void {}
     internal partial struct pair {}
     // </TypeAccessibility>
 
@@ -100,4 +82,9 @@ public static partial class main_package
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     // </ImportInitializers>
+}
+
+[GoPackage("main")]
+partial class mainꓸC_package
+{
 }
