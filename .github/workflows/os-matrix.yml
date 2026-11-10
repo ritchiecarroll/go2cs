@@ -639,7 +639,7 @@ jobs:
       # The flavour's ARCH, the second axis of the same binding (seat S5b). `arm64` on the linux-arm64 leg once the
       # linux/arm64 flavour exists (plan, arch); EMPTY on every other leg, because every arch-split csproj defaults an
       # empty GoTargetArch to amd64, the arch every other flavour is converted at. So the other legs bind what they did.
-      GoTargetArch: ${{ matrix.arch }}
+      # RED (scratch): the leg binding removed, so the arm leg compiles the csproj default.
       GOOS_TARGET: ${{ matrix.goos }}
       RID: ${{ matrix.rid }}
       STAGE: ${{ needs.plan.outputs.stage }}
