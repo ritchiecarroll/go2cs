@@ -37,14 +37,15 @@ namespace go2cs;
 internal static class GeneratorDiagnostics
 {
 #pragma warning disable RS2008
-    // The premise StructTypeTemplate.XpkgClassName's uniqueness rests on, checked where it could fail: a package
-    // stem holding `ᴛ` makes the stem boundary ambiguous (stem `aᴛb` + struct `c` and stem `a` + struct `bᴛc`
-    // name one class), and the collision would otherwise surface as a bare CS0101 on a generated class with
-    // nothing pointing here. No Go package in the corpus has such a stem.
+    // The premise the uniqueness of StructTypeTemplate's two forwarder class names rests on (XpkgClassName,
+    // PromotedHostClassName), checked where it could fail: a package stem holding `ᴛ` makes the stem boundary
+    // ambiguous (stem `aᴛb` + struct `c` and stem `a` + struct `bᴛc` name one class), and the collision would
+    // otherwise surface as a bare CS0101 on a generated class with nothing pointing here. No Go package in the
+    // corpus has such a stem.
     public static readonly DiagnosticDescriptor XpkgStemMarker = new(
         id: "GO2CS0001",
         title: "Package class stem contains the lifted-name marker",
-        messageFormat: "Package class stem '{0}' contains '" + TempVarMarker + "': the cross-package forwarder class '{1}' may collide with another struct's (CS0101)",
+        messageFormat: "Package class stem '{0}' contains '" + TempVarMarker + "': the forwarder class '{1}' may collide with another struct's (CS0101)",
         category: "go2cs-gen",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
@@ -142,6 +143,21 @@ internal static class GeneratorDiagnostics
         id: "GO2CS0010",
         title: "A [GoBoundedGoroutine] record does not land on a call of an unmarked goǃ rung",
         messageFormat: "The [GoBoundedGoroutine] record {0}:{1}:{2} {3}; re-convert the package so its records match its source",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    // GO2CS0012, MethodLimitAnalyzer: CoreCLR's method-table builder refuses a type that needs more than 65,525 slots
+    // (MAX_SLOT_INDEX, methodtablebuilder.h; 65,521 methods on a static class, measured) or declares more than
+    // 65,524 methods (measured), and the refusal is a TypeLoadException at the first use of the type, in a program
+    // that built clean. A package class holds every function and method of its Go package, so the generator's own
+    // additions can cross the limit where the Go package does not: one package class held 107,835 promoted-method
+    // forwarders before each struct's went to a class of its own (StructTypeTemplate). The build fails at the type
+    // instead.
+    public static readonly DiagnosticDescriptor TooManyMethods = new(
+        id: "GO2CS0012",
+        title: "A type declares more methods than the runtime loads",
+        messageFormat: "The type '{0}' declares {1} methods; the runtime can load at most {2} on it, so the first use of this type would throw TypeLoadException",
         category: "go2cs-gen",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);

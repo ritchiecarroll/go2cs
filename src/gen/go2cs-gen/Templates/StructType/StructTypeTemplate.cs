@@ -165,7 +165,7 @@ internal class StructTypeTemplate : TemplateBase
                 [
                     {{(StructMembers.Count > 0 ? string.Join(",\r\n            ", StructMembers.Select(GetToStringImplementation)) : "\"\"")}}
                 ]), "}");
-            }{{GoEquatablePart}}{{PromotedStructReceivers()}}
+            }{{GoEquatablePart}}
         """;
 
     // The memberwise `Equals(T)` and `GetHashCode`, omitted when a hand-owned partial declares the
@@ -754,6 +754,45 @@ internal class StructTypeTemplate : TemplateBase
     // panicwrap, when a nil *T calls a promoted value method.
     private const string PromotedMark = "[global::go.GoPromoted] ";
 
+    // ---------------------------------------------------------------------------------------------
+    // Methods promoted through an embed of the struct's OWN package.
+    //
+    // Each is a forwarder, an extension method on the struct like a method it declares. They are written into a class
+    // of the struct's own, `{pkg}ᴛ{Struct}ᴛpkg`, beside the package class (TemplateFooter), never into the package
+    // class: CoreCLR loads no static class with more than 65,521 methods (measured: MethodLimitAnalyzer), and N
+    // methods of one base struct embedded by M structs are 2 x N x M forwarders. One package class held 107,835 of
+    // them and failed to load (docs/phase4/DESIGN-promoted-forwarder-placement.md). The class is outside the package
+    // class, so a forwarder names its struct in full; everything else it names was already spelled in full. A reader
+    // of metadata finds the class by its [GoPromotedHost] (GoMethodHosts), and golib's run-time method set reads every
+    // static class's extension methods, so these are found like any others.
+    // ---------------------------------------------------------------------------------------------
+
+    // The struct as code outside its package class names it.
+    private string QualifiedStructName => string.IsNullOrWhiteSpace(PackageNamespace)
+        ? $"global::{PackageName}_package.{StructName}"
+        : $"global::{PackageNamespace}.{PackageName}_package.{StructName}";
+
+    // The struct as `typeof` names it: a generic struct by its unbound form, `T<,>`.
+    private string UnboundQualifiedStructName
+    {
+        get
+        {
+            string qualified = QualifiedStructName;
+            int typeParams = qualified.LastIndexOf('<');
+
+            return typeParams < 0 ? qualified : $"{qualified[..typeParams]}<{new string(',', qualified[typeParams..].Count(c => c == ','))}>";
+        }
+    }
+
+    // The name of the class holding the struct's same-package forwarders, formed as XpkgClassName forms its sibling's.
+    private string PromotedHostClassName => $"{PackageName}{TempVarMarker}{NonGenericStructName.TrimStart('@')}{TempVarMarker}pkg";
+
+    // How many forwarders PromotedStructReceivers wrote. Its text also holds a note for each method an embed has and
+    // the struct does not promote (overridden, shadowed or ambiguous), so the text alone does not say there is one.
+    private int m_promotedForwarders;
+
+    // The struct's same-package forwarders, each on its own line, or "" when it promotes none. The walk also collects
+    // the cross-package ones into m_xpkg.
     private string PromotedStructReceivers()
     {
         (string typeName, string memberName, bool isReferenceType, bool isPromotedStruct, bool isPublic)[] promotedStructs = StructMembers.Where(item => item.isPromotedStruct).ToArray();
@@ -762,8 +801,6 @@ internal class StructTypeTemplate : TemplateBase
             return "";
 
         StringBuilder result = new();
-
-        result.Append("\r\n\r\n    // Promoted Struct Receivers");
 
         // A GENERIC enclosing struct's forwarders carry its type parameters (methodTypeParams below), so they
         // repeat its where clauses too: gen's `Array[T Value]` embeds valAny, and `initOp<T>(this ref Array<T>
@@ -1235,7 +1272,8 @@ internal class StructTypeTemplate : TemplateBase
                         string shimScope = GetScope(GetSimpleName(method.Name)) == "public" ? methodScope : "internal";
                         string shimReceiver = ReceiverName(method.Parameters);
 
-                        result.Append($"\r\n    {shimScope} static {returnType} {method.Name}(this {PointerPrefix}<{StructName}> {AddressPrefix}{shimReceiver}");
+                        m_promotedForwarders++;
+                        result.Append($"\r\n    {shimScope} static {returnType} {method.Name}(this {PointerPrefix}<{QualifiedStructName}> {AddressPrefix}{shimReceiver}");
 
                         if (method.Parameters.Length > 1)
                         {
@@ -1243,7 +1281,7 @@ internal class StructTypeTemplate : TemplateBase
                             result.Append(typedParams);
                         }
 
-                        result.Append($") => {AddressPrefix}{shimReceiver}.of({StructName}.{AddressPrefix}{embedBox}).{method.Name}(");
+                        result.Append($") => {AddressPrefix}{shimReceiver}.of({QualifiedStructName}.{AddressPrefix}{embedBox}).{method.Name}(");
                         result.Append(string.Join(", ", method.Parameters.Skip(1).Select(ArgumentName)));
                         result.Append(");");
                     }
@@ -1276,7 +1314,8 @@ internal class StructTypeTemplate : TemplateBase
                 string goRecv = !method.IsRefRecv ? "" : method.PathHasPointer ? "[global::go.GoCopyBound] " : "[global::go.GoRecv] ";
                 string receiver = ReceiverName(method.Parameters);
 
-                result.Append($"\r\n    {PromotedMark}{goRecv}{methodScope} static {returnType} {method.Name}{methodTypeParams}(this {recvMod}{StructName} {receiver}");
+                m_promotedForwarders++;
+                result.Append($"\r\n    {PromotedMark}{goRecv}{methodScope} static {returnType} {method.Name}{methodTypeParams}(this {recvMod}{QualifiedStructName} {receiver}");
 
                 if (method.Parameters.Length > 1)
                 {
@@ -1289,7 +1328,7 @@ internal class StructTypeTemplate : TemplateBase
                 result.Append(");");
 
                 // Add pointer extension method
-                result.Append($"\r\n    {methodScope} static {returnType} {method.Name}{methodTypeParams}(this {PointerPrefix}<{StructName}> {AddressPrefix}{receiver}");
+                result.Append($"\r\n    {methodScope} static {returnType} {method.Name}{methodTypeParams}(this {PointerPrefix}<{QualifiedStructName}> {AddressPrefix}{receiver}");
 
                 if (method.Parameters.Length > 1)
                 {
@@ -1480,7 +1519,7 @@ internal class StructTypeTemplate : TemplateBase
         INamedTypeSymbol? siblingClass = packageClass.ContainingNamespace
             .GetTypeMembers(XpkgClassName(packageClass.Name, embedType.Name)).FirstOrDefault();
 
-        IEnumerable<(IMethodSymbol method, bool fromSibling)> candidateMethods = packageClass.GetMembers().OfType<IMethodSymbol>().Select(m => (m, false))
+        IEnumerable<(IMethodSymbol method, bool fromSibling)> candidateMethods = GoMethodHosts.PackageMethods(packageClass, embedType).Select(m => (m, false))
             .Concat(siblingClass?.GetMembers().OfType<IMethodSymbol>().Select(m => (m, true)) ?? []);
 
         foreach ((IMethodSymbol method, bool fromSibling) in candidateMethods)
@@ -1621,9 +1660,10 @@ internal class StructTypeTemplate : TemplateBase
     // Go promotes an embedded struct's exported methods whatever package declares it, and go2cs
     // reads a run-time method set off emitted extension methods, so each such promotion needs a
     // forwarder. They are minted into a SIBLING class, `{pkg}ᴛ{Struct}ᴛxpkg`, never into the
-    // package class: there a forwarder named like a package-level var or function is CS0102, and
-    // every same-package forwarder stays byte for byte what it was. The run-time registry reads
-    // every static class's extension methods, so the sibling's are found like any others.
+    // package class: there a forwarder named like a package-level var or function is CS0102. They
+    // are kept apart from the same-package forwarders' class (`…ᴛpkg`, above) because a reader of
+    // metadata tells the two by where they live. The run-time registry reads every static class's
+    // extension methods, so the sibling's are found like any others.
     // ---------------------------------------------------------------------------------------------
 
     // The Go name of an emitted member: the Δ collision marker and an `@` keyword escape stripped.
@@ -1784,7 +1824,7 @@ internal class StructTypeTemplate : TemplateBase
 
             static void addTo(Dictionary<string, int> into, string name, int n) => into[name] = into.TryGetValue(name, out int c) ? c + n : n;
 
-            foreach ((IMethodSymbol method, bool inSibling) in packageClass.GetMembers().OfType<IMethodSymbol>().Select(m => (m, false))
+            foreach ((IMethodSymbol method, bool inSibling) in GoMethodHosts.PackageMethods(packageClass, embed).Select(m => (m, false))
                          .Concat(sibling?.GetMembers().OfType<IMethodSymbol>().Select(m => (m, true)) ?? []))
             {
                 if (!method.IsExtensionMethod || method.Parameters.Length == 0)
@@ -1944,6 +1984,44 @@ internal class StructTypeTemplate : TemplateBase
         get
         {
             string footer = base.TemplateFooter;
+
+            // Rendered here, after the body: one walk collects the forwarders of both classes.
+            string promoted = PromotedStructReceivers();
+
+            // A struct that declares every method its embeds would promote, or whose embeds' methods all shadow or tie,
+            // forwards nothing: its notes stay in the file, and no class is declared to hold them. An empty public class
+            // would be a type of the package's surface that nothing could ever bind (crypto/ecdsa's PrivateKey declares
+            // all three of PublicKey's methods).
+            if (promoted.Length > 0 && m_promotedForwarders == 0)
+            {
+                footer += promoted.Replace("\r\n    //", "\r\n//") + "\r\n";
+            }
+            else if (promoted.Length > 0)
+            {
+                // The class name rests on the premise XpkgClassName's does (GeneratorDiagnostics.XpkgStemMarker).
+                if (PackageName.Contains(TempVarMarker))
+                    Context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.XpkgStemMarker, Location.None, PackageName, PromotedHostClassName));
+
+                // Outside the package class a type it declares is out of scope by its bare name. A forwarder spells
+                // every type it names in full but one kind: a type that does not exist yet when this generator runs,
+                // which a member's type therefore renders bare. Those are go2cs-gen's own output and are declared in
+                // the package class: a constraint proxy as a generic embed's type argument, `curve<p224жpoint>`
+                // (CS0246 x2 in the GenericEmbedPromotion behavioral test without this). The file's static using
+                // puts the package class's types in scope for the class below, as they were for the forwarders
+                // when the package class held them.
+                AddUsing(string.IsNullOrWhiteSpace(PackageNamespace)
+                    ? $"using static global::{PackageName}_package;"
+                    : $"using static global::{PackageNamespace}.{PackageName}_package;");
+
+                footer += $$"""
+
+                    [global::go.GoPromotedHost(typeof({{UnboundQualifiedStructName}})), {{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
+                    {{Scope ?? "public"}} static class {{DeclareExtensionHost(PromotedHostClassName)}}
+                    {{{promoted}}
+                    }
+
+                    """;
+            }
 
             if (m_xpkg.Length == 0)
                 return footer;

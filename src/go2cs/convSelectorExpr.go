@@ -428,6 +428,50 @@ func crossPackageValuePromotion(sel *types.Selection) []*types.Var {
 	return path
 }
 
+// samePackagePromotion reports whether a method EXPRESSION selects a concrete method promoted through an embed path
+// whose every hop stays in one package: the promotions go2cs-gen forwards from the struct's own promoted-method class.
+// A path with a hop that crosses packages is crossPackageValuePromotion's or crossPackagePointerPromotion's, and a method
+// an embedded interface promotes has no forwarder.
+func samePackagePromotion(sel *types.Selection) bool {
+	if sel == nil || sel.Kind() != types.MethodExpr || len(sel.Index()) < 2 {
+		return false
+	}
+
+	fn, ok := sel.Obj().(*types.Func)
+
+	if !ok || fn.Pkg() == nil {
+		return false
+	}
+
+	sig, ok := fn.Type().(*types.Signature)
+
+	if !ok || sig.Recv() == nil || types.IsInterface(sig.Recv().Type()) {
+		return false
+	}
+
+	owner := sel.Recv()
+
+	for _, idx := range sel.Index()[:len(sel.Index())-1] {
+		ownerNamed := promotionNamed(owner)
+		structType, ok := types.Unalias(promotionDeref(owner)).Underlying().(*types.Struct)
+
+		if !ok || ownerNamed == nil || idx >= structType.NumFields() {
+			return false
+		}
+
+		field := structType.Field(idx)
+		fieldNamed := promotionNamed(field.Type())
+
+		if !field.Embedded() || fieldNamed == nil || ownerNamed.Obj().Pkg() != fieldNamed.Obj().Pkg() {
+			return false
+		}
+
+		owner = field.Type()
+	}
+
+	return true
+}
+
 func promotionDeref(t types.Type) types.Type {
 	if ptr, ok := types.Unalias(t).(*types.Pointer); ok {
 		return ptr.Elem()
@@ -1426,6 +1470,39 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 						return fmt.Sprintf("((%s)(%s(%s) => %s.%s(%s)))", delegateType, v.methodExpressionWrapperMark(sel, recvIsPtr),
 							strings.Join(params, ", "), hop, methodName, strings.Join(args, ", "))
 					}
+				}
+			}
+		}
+
+		// A method promoted through embeds of ONE package (`(*outer).Add`, outer embedding inner beside it) has a
+		// forwarder, but not in a package class: go2cs-gen writes each struct's forwarders into a class of that struct's
+		// own, so no bare or package-qualified method group names one (CS0123 on the embed's own `Add`). Forward through a
+		// lambda that calls the forwarder as the extension method it is, marked as the wrapper Go's compiler emits for a
+		// promoted method's expression: `((Func<ж<outer>, nint, nint>)([GoWrapper("(*outer).Add")] (p0, p1) =>
+		// wrapperRecv(p0).Add(p1)))`. A nil `*outer` faults in the wrapper, as Go's does.
+		if samePackagePromotion(sel) {
+			if fn, ok := sel.Obj().(*types.Func); ok {
+				if sig, ok := fn.Type().(*types.Signature); ok {
+					params := []string{"p0"}
+					args := make([]string, 0, sig.Params().Len())
+
+					for i := 0; i < sig.Params().Len(); i++ {
+						name := fmt.Sprintf("p%d", i+1)
+						params = append(params, name)
+						args = append(args, name)
+					}
+
+					_, recvIsPtr := types.Unalias(sel.Recv()).(*types.Pointer)
+					recv := "p0"
+
+					if recvIsPtr {
+						recv = v.methodExpressionWrapperReceiver(sel)
+					}
+
+					v.addMethodPackageNamespaceUsing(fn.Pkg())
+
+					return fmt.Sprintf("((%s)(%s(%s) => %s.%s(%s)))", delegateType, v.methodExpressionWrapperMark(sel, recvIsPtr),
+						strings.Join(params, ", "), recv, methodName, strings.Join(args, ", "))
 				}
 			}
 		}
