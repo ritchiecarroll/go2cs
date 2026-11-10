@@ -221,6 +221,22 @@ silent-empty path); and `-platforms` multi-target emission needs a provisioned *
 per target — materially harder than the pure-Go layout-L3 emission already solved. §7 keeps the
 cross-compilation matrix speculative for this reason.
 
+> **Owner direction, 2026-11-09 (dated amendment, COORD):** the default is to **auto-provision a pinned C
+> toolchain on demand**, with **CLI overrides**. Owner (verbatim): "cgo cli override options are going to be
+> important as we get to those stages, but a default that will auto-provision a C toolchain on demand seems to
+> make perfect sense to me."
+> - **Default:** when a cgo package is converted and no usable C compiler resolves, go2cs fetches a pinned
+>   toolchain, the same way it already fetches a pinned Go toolchain. Go itself ships no C compiler, and on
+>   Windows cgo needs a gcc-compatible one (MinGW-w64 or llvm-mingw; MSVC is not supported by cgo).
+>   Candidates: llvm-mingw on Windows, and `zig cc` as a single download that can also cross-compile.
+> - **Overrides:** use a given compiler (CC), refuse to download (fail loudly instead), and choose or pin the
+>   toolchain.
+> - **Scope:** Phase 1-2 recognition needs the compiler only on the CONVERTING machine; consumers of a converted
+>   package never need one. Phase 4 (inline C) needs it per TARGET, which is where a cross-capable toolchain
+>   matters and where §7 stays speculative.
+> - **Status:** QUEUED as a Phase 2 prerequisite: a scout (candidates, pinning, download size and integrity,
+>   licensing, the determinism rules of §5.2), then a design note. Not scheduled.
+
 ### 5.2 Determinism, and what that forbids
 
 [`TestingInfrastructureRequirements.md`](TestingInfrastructureRequirements.md) §2 principle 8 requires
