@@ -8,7 +8,8 @@
 # was packed without one. Kit names the kit the published package came from, for provenance. Expect is per package:
 # matched, disclosed; re-read at go1.26.10 by P1 and P2 at 9dcf0bafe1 (2026-10-24), equal to the published counts.
 # cobra's are its 2026-10-14 non-root reading; cobra/doc is validated and excluded from the package (its imports,
-# go-md2man and yaml.v3, are not nugetgo packages). mousetrap has no Go tests and no row here: its proof is behavioral.
+# go-md2man and yaml.v3, are not nugetgo packages). A module with no Go tests (mousetrap) has no Expect: NoGoTests is the
+# reason its rehearsal states (-UnvalidatedReason), and its release carries the hosted behavior rows (-BehaviorProofDir).
 # Copyright states the holder for a license that carries no Copyright line (cobra's LICENSE.txt): one of the module's own
 # source-header lines, which the pack checks (COORD ruling 2026-10-26).
 @{
@@ -67,6 +68,19 @@
         ConversionReadme  = 'ritchiecarroll/pflag-cs@nuget-1.0.9:README.md'
         Kit               = 'claude/c2-nugetgo-pflag-1.0.9'
         Expect            = @{ 'github.com/spf13/pflag' = @(177, 0) }
+    }
+    # No Go tests, so its proof is behavioral: one hosted row per shipped RID, run against the rehearsal package. Apache-2.0,
+    # so step 1.4 converts it with -provenance. Upstream is the holder its LICENSE names. Its row is the one the 1.26.10.3
+    # wave packed by hand (P2, 2026-11-10).
+    'github.com/inconshreveable/mousetrap@v1.1.0' = @{
+        RepositoryUrl     = 'https://github.com/ritchiecarroll/mousetrap-cs'
+        Upstream          = 'Alan Shreve'
+        UpstreamPublishes = $false
+        LicenseSpdx       = 'Apache-2.0'
+        ExcludePackage    = @()
+        ConversionReadme  = ''
+        Kit               = 'claude/c2-nugetgo-1261003-mousetrap'
+        NoGoTests         = 'mousetrap has no Go tests; its proof is the hosted behavior rows, run against this rehearsal package'
     }
     'github.com/spf13/cobra@v1.10.2' = @{
         RepositoryUrl     = 'https://github.com/ritchiecarroll/cobra-cs'

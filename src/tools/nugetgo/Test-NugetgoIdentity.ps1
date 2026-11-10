@@ -300,6 +300,19 @@ $censusLine = [regex]::Match($design, '(?m)^- \*\*The Apache-2\.0 census\*\*[^\n
 $stated = if ($censusLine.Success) { @([regex]::Matches($censusLine.Groups[1].Value, '`([^`]+)`') | ForEach-Object { $_.Groups[1].Value } | Sort-Object) } else { @() }
 Check 'DESIGN-provenance-header.md names every module whose row asks for the notice, and only those' (
     $noticeRows.Count -gt 0 -and (($stated -join ' ') -ceq ($noticeRows -join ' '))) "rows: $($noticeRows -join ', '); design: $(if ($censusLine.Success) { $stated -join ', ' } else { 'no census line' })"
+# A row with no Go tests carries no Expect, and the driver packs it on the runbook's no-tests route: no VR, the reason
+# as the rehearsal's -UnvalidatedReason, the hosted rows as the release's -BehaviorProofDir.
+$noTestRows = @($moduleRows.Keys | Where-Object { $moduleRows[$_].NoGoTests })
+$tangled = @($noTestRows | Where-Object { $moduleRows[$_].Expect })
+Check 'a row with NoGoTests has no Expect, and every other row has one' (
+    $tangled.Count -eq 0 -and @($moduleRows.Keys | Where-Object { -not $moduleRows[$_].NoGoTests -and -not $moduleRows[$_].Expect }).Count -eq 0) "both or neither: $($tangled -join ', ')"
+Check 'Invoke-NugetgoRepack.ps1 packs a row with no Go tests without VR: the reason for the rehearsal, the hosted rows for the release' (
+    $repack.Contains('$noGoTests = [string]$row.NoGoTests') -and
+    $repack.Contains('if ($noGoTests) {') -and $repack.Contains('Say "1.2-1.3  not run: $noGoTests"') -and
+    $repack.Contains('if ($noGoTests) { Say "1.5      not run: no MODULE.md to bind" }') -and
+    $repack.Contains("elseif (`$pack -eq 'int1') { @('-UnvalidatedReason', `$noGoTests) }") -and
+    $repack.Contains("else { @('-BehaviorProofDir', `$BehaviorProofDir) }") -and
+    $repack.Contains('its release pack needs -BehaviorProofDir')) 'the repack driver has no route for a module with no Go tests'
 
 Write-Host "ran $ran, failed $failed"
 exit $failed
