@@ -18,8 +18,7 @@ internal static nint /*n*/ walk(ж<C.struct_point> Ꮡp) {
     nint n = default;
     ref var p = ref Ꮡp.DerefOrNull();
 
-    for (; Ꮡp != nil; Ꮡp = p.next) {
-        p = ref Ꮡp.DerefOrNull();
+    for (; Ꮡp != nil; Ꮡp = p.next, p = ref Ꮡp.DerefOrNull()) {
         n++;
     }
 

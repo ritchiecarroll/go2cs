@@ -1174,7 +1174,7 @@ func add(a, b _Ctype_int) _Ctype_int { return a + b }
 	d.quot = _Ctype_int(_Ciconst_LIMIT)
 ```
 
-<!-- source: src/tests/Behavioral/CgoPseudoPackageTypes/main.cs.target:1,7,15,42-43 -->
+<!-- source: src/tests/Behavioral/CgoPseudoPackageTypes/main.cs.target:1,7,15,41-42 -->
 ```csharp
 global using cint = go.mainꓸC_package.@int;
 …
