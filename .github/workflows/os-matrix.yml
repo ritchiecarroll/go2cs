@@ -528,6 +528,8 @@ jobs:
     #   aot-smoke                           -> pack    every other stage                -> no pack
     if: (needs.plan.outputs.stage == 'release-smoke' || needs.plan.outputs.stage == 'aot-smoke') && needs.plan.outputs.published-version == ''
     runs-on: windows-latest
+    env:
+      GoTargetArch: arm64   # RED (scratch): the pack must refuse an arm64 binding
     # PROVISIONAL: three Release build+pack passes of the whole stdlib solution on a 4-core runner
     # (the i7 measures ~17 min per pass); never yet run on a hosted runner.
     timeout-minutes: 240
