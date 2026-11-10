@@ -82,7 +82,7 @@ private static void hwcapInit(nuint hwCap) {
     // See https://docs.kernel.org/arch/arm64/elf_hwcaps.html.
     // Use HWCap information since reading aarch64 system registers
     // is not supported in user space on older linux kernels.
-    ARM64.HasAES = hwcapIsSet(hwCap, hwcap_AES);
+    ARM64.HasAES = !hwcapIsSet(hwCap, hwcap_AES); // PLANTED RED: inverted
     ARM64.HasPMULL = hwcapIsSet(hwCap, hwcap_PMULL);
     ARM64.HasSHA1 = hwcapIsSet(hwCap, hwcap_SHA1);
     ARM64.HasSHA2 = hwcapIsSet(hwCap, hwcap_SHA2);
