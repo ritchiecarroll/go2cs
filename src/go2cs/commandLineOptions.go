@@ -32,6 +32,9 @@ type Options struct {
 	goRoot              string
 	goPath              string
 	go2csPath           string // -go2cspath: absolute once parsed (absoluteGo2CSPath)
+	go2csPathExplicit   bool   // -go2cspath was given on the command line, so a -recurse output root may pin that path; otherwise the pin names no machine path (recurseGo2CSPathPin)
+	go2csPathFromEnv    bool   // the go2cs path came from the GO2CSPATH environment variable, so the pin reads that variable at build time
+	noTrimPath          bool   // -trimpath=false: record a main-module source by its absolute path, as an untrimmed `go build` bakes it; the default records the -trimpath form (goSourceIdentity)
 	singleFileInput     string // single-file input (`go2cs example.go [out.cs]`): the named .go file, absolute; empty for a package
 	singleFileOutput    string // single-file input: the one .cs file it converts to (singleFileOutputPath)
 	convertStdLib       bool

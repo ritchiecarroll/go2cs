@@ -41,6 +41,30 @@
        runner layer to guard deliberate misuse would be speculative machinery. Named here rather than
        defended against — ruled 2026-08-31. If you meet that stack trace, the target and the host
        disagree; nothing is wrong with the code under test. -->
+  <!-- cgo Phase 2 increment 3b1: the converter's scalar bindings, one generated golden per OS (src/go2cs holds each
+       equal to the generator), with the C types they name hand-declared until increment 3d. An UNSET $(GoTargetOS) is
+       the windows flavour here (see the netapi32 gate below), so windows' files are removed only when another OS is
+       named. GOCGO_FLAVOUR_* tells CgoScalarWrapperTests which flavour it compiled. -->
+  <PropertyGroup Condition="'$(GoTargetOS)' == 'linux'">
+    <DefineConstants>$(DefineConstants);GOCGO_FLAVOUR_LINUX</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(GoTargetOS)' == 'darwin'">
+    <DefineConstants>$(DefineConstants);GOCGO_FLAVOUR_DARWIN</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(GoTargetOS)' != 'linux'">
+    <Compile Remove="GoCgoWrappers.linux.golden.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(GoTargetOS)' != 'darwin'">
+    <Compile Remove="GoCgoWrappers.darwin.golden.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(GoTargetOS)' != '' and '$(GoTargetOS)' != 'windows'">
+    <Compile Remove="GoCgoWrappers.windows.golden.cs" />
+    <Compile Remove="GoCgoWrapperTypes.windows.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(GoTargetOS)' != 'linux' and '$(GoTargetOS)' != 'darwin'">
+    <Compile Remove="GoCgoWrapperTypes.posix.cs" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux'">
     <Compile Remove="LinuxSpawnSeamTests.cs" />
     <Compile Remove="LinuxPipelineEnvironmentTests.cs" />
@@ -100,6 +124,12 @@
        classes above are linux-only ones. -->
   <ItemGroup Condition="'$(GoTargetOS)' != 'darwin'">
     <Compile Remove="DarwinNativeTransitionTests.cs" />
+  </ItemGroup>
+
+  <!-- S3's arm64 Stat_t mirror and its GoNativeStatLayoutProbe live in syscall/linux-arm64/, which only the
+       linux/arm64 flavour compiles: the file's only (GOOS, GOARCH) pair. An unset $(GoTargetArch) is amd64. -->
+  <ItemGroup Condition="'$(GoTargetOS)' != 'linux' or '$(GoTargetArch)' != 'arm64'">
+    <Compile Remove="LinuxArm64StatLayoutTests.cs" />
   </ItemGroup>
 
   <!-- The netapi32 ptrout gate is the mirror image: it drives windows-flavor-only syscall surface

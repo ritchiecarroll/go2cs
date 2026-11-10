@@ -151,6 +151,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckArrayRangeSnapshot() => CheckTarget("ArrayRangeSnapshot");
 
     [TestMethod]
+    public void CheckArraySwitchCases() => CheckTarget("ArraySwitchCases");
+
+    [TestMethod]
     public void CheckArrayValueCopySites() => CheckTarget("ArrayValueCopySites");
 
     [TestMethod]
@@ -809,6 +812,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGenericLiftedInterfaceField() => CheckTarget("GenericLiftedInterfaceField");
+
+    [TestMethod]
+    public void CheckGenericMapArgPointerImpl() => CheckTarget("GenericMapArgPointerImpl");
 
     [TestMethod]
     public void CheckGenericMethodReflect() => CheckTarget("GenericMethodReflect");

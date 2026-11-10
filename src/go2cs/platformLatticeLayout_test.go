@@ -528,7 +528,7 @@ func TestPlatformArchLayoutBlock(t *testing.T) {
 	}
 }
 
-// The shared build check of the arch axis, rendered from a universe (not yet written into any file).
+// The shared build check of the arch axis, rendered from a universe.
 func TestRenderPlatformUniverseCheck(t *testing.T) {
 	check := renderPlatformUniverseCheck(universeArm)
 
@@ -552,8 +552,28 @@ func TestRenderPlatformUniverseCheck(t *testing.T) {
 	}
 }
 
+// The corpus's shared build file carries the check exactly as the declared universe renders it, once: a target joins
+// through the constant, the corpus apply and this block together. Line endings are the checkout's, so both sides are
+// read with them normalised.
+func TestCorpusBuildFileCarriesTheUniverseCheck(t *testing.T) {
+	const buildFile = "Directory.Build.props"
+
+	normalise := func(text string) string { return strings.ReplaceAll(text, "\r\n", "\n") }
+
+	contents := normalise(readLatticeCorpusFile(filepath.Join("..", "core"), buildFile))
+	want := normalise(renderPlatformUniverseCheck(platformUniverse))
+
+	if got := strings.Count(contents, want); got != 1 {
+		t.Errorf("src/core/%s carries the universe check for %q %d times; want exactly once:\n%s", buildFile, platformUniverse, got, want)
+	}
+
+	if got := strings.Count(contents, "<Target Name=\"GoCheckLayoutTarget\""); got != 1 {
+		t.Errorf("src/core/%s declares GoCheckLayoutTarget %d times; want exactly once", buildFile, got)
+	}
+}
+
 // The reference lattice reproduces, byte for byte, every conditioned project file the committed corpus carries: the
-// text the converter renders today at three targets. Read as the multi-target merge reads it (each target's full
+// text the converter renders over the declared universe. Read as the multi-target merge reads it (each target's full
 // set, re-split and re-rendered) and as a single-target reconvert reads it (each target adopting its own set).
 func TestPlatformReferenceLatticeReproducesTheCorpusBlocks(t *testing.T) {
 	coreDir := filepath.Join("..", "core")
@@ -601,7 +621,7 @@ func TestPlatformReferenceLatticeReproducesTheCorpusBlocks(t *testing.T) {
 		contents := string(raw)
 		sets := map[string][]string{}
 
-		for _, target := range universeToday {
+		for _, target := range platformUniverse {
 			references, ok := platformFullReferenceSet(contents, target)
 
 			if !ok {
@@ -621,7 +641,7 @@ func TestPlatformReferenceLatticeReproducesTheCorpusBlocks(t *testing.T) {
 			}
 		}
 
-		shared, deltas, _ := splitPlatformReferenceSetsOver(mustPlatformLattice(universeToday), sets)
+		shared, deltas, _ := splitPlatformReferenceSetsOver(corpusLattice(), sets)
 
 		if rebuilt, err := renderPlatformReferences(contents, shared, deltas); err != nil || rebuilt != contents {
 			t.Errorf("%s: the merge's split does not reproduce the committed file (%v)", projectFile, err)

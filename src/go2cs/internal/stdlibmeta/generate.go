@@ -47,16 +47,37 @@ const PackageInfoFileName = "package_info.cs"
 // makes a Linux consumer compile against the linux flavor, and a Linux conversion that still read the
 // windows record emitted `syscallꓸHandle = go.syscall_package.ΔHandle` (CS0426) and a Δ-renamed
 // `Sockaddr` the linux flavor does not have (CS0305). The converter now reads the section of the GOOS
-// it is converting for, and falls back to the unqualified one.
+// it is converting for, and falls back to the unqualified one. (Since the arch axis the key is the
+// copy's layout FOLDER, of which a GOOS is one kind: see ReferenceGOARCH.)
 //
 // It duplicates the converter's platformDefaultTargetOS for the same reason PackageInfoFileName
 // duplicates its constant (this package cannot import `package main`), and is asserted against it by
 // TestStdLibMetadataAssetFileName.
 const ReferenceGOOS = "windows"
 
-// FlavorSeparator joins a package's dotted name to the GOOS of a non-reference flavor in a section
-// header (`##syscall@linux`). `@` cannot occur in a dotted package name.
+// ReferenceGOARCH is the arch half of the reference flavor: the unqualified section describes the
+// package as its `ReferenceGOOS/ReferenceGOARCH` build compiles it.
+//
+// The layout keys a platform-varying artifact by GOOS, by arch or by a `<goos>-<arch>` pair
+// (docs/phase4/DESIGN-linux-arm64-flavour.md), and a target's build compiles all three of its own
+// folders. So the copy that describes the reference flavor is the one in ANY folder that build
+// compiles — `windows/`, `amd64/` or `windows-amd64/` — and reading only the first, as this did while
+// GOOS was the one axis, leaves `math` with an `@amd64` and an `@linux-arm64` section and no
+// unqualified one: a windows conversion under -recurse=nuget would find no record of it at all.
+//
+// It duplicates the converter's platformDefaultTargetArch and is asserted against it beside
+// ReferenceGOOS.
+const ReferenceGOARCH = "amd64"
+
+// FlavorSeparator joins a package's dotted name to the layout folder of a non-reference flavor in a
+// section header (`##syscall@darwin`, `##syscall@linux-arm64`). `@` cannot occur in a dotted package
+// name.
 const FlavorSeparator = "@"
+
+// servesReferenceFlavor reports whether the reference flavor's build compiles a layout folder.
+func servesReferenceFlavor(folder string) bool {
+	return folder == ReferenceGOOS || folder == ReferenceGOARCH || folder == ReferenceGOOS+"-"+ReferenceGOARCH
+}
 
 // SectionPrefix introduces a package section; the remainder of the line is the package's
 // dotted name (`math.rand.v2`), matching PackageInfo.PackageName and the `go.<name>` NuGet
@@ -91,9 +112,10 @@ var header = []string{
 	"# Format: '##<dotted package name>' opens a section; its lines are the matching",
 	"# " + PackageInfoFileName + " lines verbatim, so the converter's existing parsers read them unchanged.",
 	"# A package whose metadata varies by platform (no flat " + PackageInfoFileName + ") keeps its",
-	"# " + ReferenceGOOS + " flavor in the unqualified section and every other flavor in its own",
-	"# '##<dotted package name>" + FlavorSeparator + "<goos>' section; a conversion for <goos> reads that section and",
-	"# falls back to the unqualified one. Counts are of SECTIONS, not packages.",
+	"# " + ReferenceGOOS + "/" + ReferenceGOARCH + " flavor in the unqualified section and every other flavor in its own",
+	"# '##<dotted package name>" + FlavorSeparator + "<folder>' section, <folder> being the layout folder that copy",
+	"# sits in (a GOOS, an arch, or a <goos>-<arch> pair); a conversion reads the section of a folder",
+	"# its target compiles and falls back to the unqualified one. Counts are of SECTIONS, not packages.",
 	"#",
 	"# Regenerate with `go generate .` from src/go2cs; never hand-edit.",
 }
@@ -200,30 +222,48 @@ func Collect(convertedRoot string) (map[string][]string, error) {
 	// `syscall/linux`, so a flat copy is always seen before any per-GOOS one of the same package.
 	flat := map[string]bool{}
 
+	// The folder each package's unqualified section was taken from, when it was not flat. A target's
+	// build compiles every layout folder that serves it, so two copies the reference flavor both
+	// compiles would be a duplicate-attribute build error long before they were an ambiguity here;
+	// the check exists so that a corpus in that state is refused rather than recorded by walk order.
+	referenceFrom := map[string]string{}
+
 	for _, relDir := range sortedKeys(infoDirs) {
 		packageDir := relDir
 		flavor := ""
+		folder := ""
 
 		if !packageDirs[relDir] && packageDirs[path.Dir(relDir)] {
-			// A per-GOOS copy: the reference flavor keys the unqualified section, every other
-			// flavor its own `<name>@<goos>` section (see ReferenceGOOS).
+			// A per-folder copy: the one the reference flavor compiles keys the unqualified
+			// section, every other its own `<name>@<folder>` section (see ReferenceGOARCH).
 			packageDir = path.Dir(relDir)
+			folder = path.Base(relDir)
 
-			if goos := path.Base(relDir); goos != ReferenceGOOS {
-				flavor = goos
+			if !servesReferenceFlavor(folder) {
+				flavor = folder
 			}
 		}
 
 		name := strings.ReplaceAll(packageDir, "/", ".")
 
-		// A flat copy is authoritative for every flavor; a per-GOOS one only describes a package
-		// that has none, which is exactly when the converter reads the per-GOOS copy.
+		// A flat copy is authoritative for every flavor; a per-folder one only describes a package
+		// that has none, which is exactly when the converter reads the per-folder copy.
 		if packageDir != relDir && flat[name] {
 			continue
 		}
 
 		if packageDir == relDir {
 			flat[name] = true
+		}
+
+		if folder != "" && flavor == "" {
+			if other, taken := referenceFrom[name]; taken {
+				return nil, fmt.Errorf("%s carries a %s in both %s/ and %s/, and the %s/%s build compiles both — "+
+					"one package cannot publish two records for one flavor", packageDir, PackageInfoFileName, other, folder,
+					ReferenceGOOS, ReferenceGOARCH)
+			}
+
+			referenceFrom[name] = folder
 		}
 
 		if flavor != "" {
