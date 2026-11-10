@@ -1,0 +1,59 @@
+--- beyond.py.before
++++ beyond.py
+@@ -7,6 +7,16 @@
+ # build log has its "<assembly> -> ....dll" line, FAILED when the errors log has an error in its project, BLOCKED
+ # otherwise. A stage compiles only when every package in its closure is BUILT. A stage is VALIDATED only when a demo
+ # for it ran converted and matched native Go (its demo_compare.py json says match: true); nothing else can mark it so.
++# The type-check demo's own closure (cmd/checkdemo, the root this log builds) is reported beside the stages, never as
++# one: it adds packages internal/compiler does not import (vfs/vfstest -> vfs/iovfs -> vfs/internal, and bundled), and
++# the demo can run only when its whole closure is BUILT. It does not move the furthest stage. (cmd/parsedemo is built
++# by its own step, whose rc the gate reads; this log never builds it.)
++#
++# 2026-11-10 (i7): the harness row is new. Before it, only the four stage closures were reported, so a failure in a
++# package only the demo harness imports was invisible: vfs/internal (C30, CS9135 x2) failed in the closure builds at
++# 9b8af3bd30, 8836958ee6 and 38caf3558a and no report showed it. Read again with the row: 25 of 68 (9b8af3bd30) and
++# 48 of 68 (38caf3558a) of the type-check demo's closure build. Lesson: a demo's harness closure is reported, never
++# only the product's stages.
+ import argparse, json, os, re, subprocess, sys
+ 
+ sys.stdout.reconfigure(encoding="utf-8")
+@@ -17,6 +27,7 @@
+     ("type-check", "internal/checker"),
+     ("program and emit", "internal/compiler"),
+ ]
++HARNESSES = [("type-check demo", "cmd/checkdemo")]  # reported, not stages
+ ap = argparse.ArgumentParser()
+ for a in ("tsc", "log", "errors", "out", "typecheck-demo", "emit-demo"):
+     ap.add_argument("--" + a)
+@@ -53,20 +64,27 @@
+     return {"match": bool(r["match"]), "sha256_go": r["go"]["sha256"], "sha256_cs": r["cs"]["sha256"]}
+ 
+ 
+-res = {"stages": [], "furthest": None}
+-for name, root in STAGES:
++def classify(name, root):
+     pk = closure(root)
+     b = [p for p in pk if asm(p) in built]
+     f = [p for p in pk if asm(p) in failed and asm(p) not in built]
+     k = [p for p in pk if p not in b and p not in f]
+-    st = {"stage": name, "root": f"{MOD}/{root}", "packages": len(pk), "built": len(b), "failed": f, "blocked": len(k),
+-          "compiles": len(b) == len(pk)}
++    return {"stage": name, "root": f"{MOD}/{root}", "packages": len(pk), "built": len(b), "failed": f, "blocked": len(k),
++            "compiles": len(b) == len(pk)}
++
++
++res = {"stages": [], "furthest": None, "harnesses": []}
++for name, root in STAGES:
++    st = classify(name, root)
+     res["stages"].append(st)
+     if st["compiles"]:
+         res["furthest"] = name
++res["harnesses"] = [classify(name, root) for name, root in HARNESSES]
+ res["typecheck_demo"] = demo(A.typecheck_demo)
+ res["emit_demo"] = demo(A.emit_demo)
+ json.dump(res, open(A.out, "w", encoding="utf-8"), indent=1)
+ for s in res["stages"]:
+     print(f"{s['stage']:<17} {s['built']:>3} of {s['packages']:<3} built; failed {', '.join(x.rsplit('/', 1)[-1] for x in s['failed']) or '-'}; blocked {s['blocked']}")
+ print("furthest stage that compiles:", res["furthest"])
++for s in res["harnesses"]:
++    print(f"{s['stage'] + ' harness':<24} {s['built']:>3} of {s['packages']:<3} built; failed {', '.join(x.removeprefix(MOD + '/') for x in s['failed']) or '-'}; blocked {s['blocked']}  (not a stage)")
