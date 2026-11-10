@@ -521,6 +521,10 @@ gate gains `inet_ntoa(struct in_addr)` as the by-value **argument** arm on linux
 by-value result. **On windows `in_addr` is a union** (`S_un`), which this ruling refuses, so windows takes the probe
 library's (§11.4) exported two-`int` struct as its by-value argument arm instead (RULED).
 
+> **AMENDED 2026-11-10 (COORD, RULED, on P2's question; §11.19):** a struct of 16 bytes or less with an eightbyte that
+> no member covers (dropped bitfield bytes, or tail padding) is also refused by value. Under SysV x64 the CLR may
+> classify that eightbyte NO_CLASS where the C compiler says INTEGER. Conservative, until an exit-gate arm lifts it.
+
 ### 11.8 The bindings file is converter output (finding 8; answers Q4)
 
 §4.1 and R9 called it a git-ignored build output. It is not: the pinned toolchain makes it at convert time, and a
@@ -644,3 +648,18 @@ fixes, made in place above, each gate the increment named:
 - **SHOULD, increment 5:** §11.9 names all four covers; an all-target-identical mirror set lands flat.
 - **SHOULD:** §11.15 refuses a leading `-` or `@` after `-l`. §2's R8 and R9 and §8's first sentence point here.
   §11.6 states that `_Cvar_` was recognized from the start. §11.2 says where its underflow is planted.
+
+### 11.19 Amendment 2026-11-10 (third): P2's second read of increment 2
+
+P2 second-read increment 2 (`claude/h-cgo-phase2-mirrors` `16c71c2886`) against §11.2 and §11.7, with H's own dotnet
+test. COORD ruled each item; each was fixed red-first on the same branch:
+
+- **MATERIAL, §11.2: a nested mirror's members were never checked.** A nested mirror's size is its own explicit
+  `Size`, so the outer member's size check and every inline-array element check over a struct are tautological:
+  finding 2's class, one level down. A nested mirror never crosses on its own, and the outer check never called the
+  nested one. P2 measured it: `inner.b`, a C `int`, generated as `short`, read ACCEPTED through `shapes`. **Fixed:**
+  each mirror's check now calls the check of every mirror a member is, or holds through inline arrays, once each.
+- **RULED: the generated methods carry the `ᴍ` marker.** A C member named `CheckLayout` or `Hold` collided with the
+  generated methods (CS0102). They are now `CheckLayoutᴍ` and `Holdᴍ`. As with the type suffix, a C-derived name is
+  ASCII, so it can never be a marked name.
+- **RULED, §11.7: an all-padding eightbyte is refused by value** (the dated line under §11.7).
