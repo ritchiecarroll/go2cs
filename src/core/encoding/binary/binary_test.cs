@@ -698,6 +698,8 @@ internal partial interface TestByteOrder_byteOrder /*dyn*/ :
     ByteOrder,
     AppendByteOrder
 {
+    // String is declared by ByteOrder and AppendByteOrder
+    new @string String();
 }
 
 public static void TestByteOrder(ж<testing.T> t) {
