@@ -178,6 +178,51 @@ function New-NugetgoAssemblyMetadataTargets {
     ) -join "`r`n"
 }
 
+# The licenses whose terms ask each modified file to carry a prominent notice that it was changed (Apache-2.0 section
+# 4(b)). For a module under one, the pack converts with go2cs -provenance, whose notice says so in every converted file
+# (DESIGN-provenance-header.md). Another license with a like clause joins this list when a module under it is packed.
+$script:NugetgoProvenanceLicenses = @('Apache-2.0')
+
+# The notice's second line as sourceProvenance (src/go2cs/licensing.go) writes it, up to the go2cs release;
+# Test-NugetgoIdentity.ps1 pins the two against each other.
+$script:NugetgoProvenanceNotice = 'Modified from the original by conversion to C# with go2cs'
+
+function Get-NugetgoProvenanceNotice { $script:NugetgoProvenanceNotice }
+
+# Whether the stated SPDX expression names one of those licenses as a LICENSE identifier: alone or joined with AND, OR
+# or WITH, a trailing + (or-later) allowed, matched case-insensitively as SPDX matches identifiers. The identifier after
+# WITH names an exception, never a license. Nothing is inferred from a license file.
+function Test-NugetgoProvenanceLicense([string]$Expression) {
+    $tokens = @($Expression.Trim() -split '\s+' | Where-Object { $_ })
+    for ($i = 0; $i -lt $tokens.Count; $i++) {
+        if ($tokens[$i] -cin @('AND', 'OR', 'WITH')) { continue }
+        if ($i -gt 0 -and $tokens[$i - 1] -ceq 'WITH') { continue }
+        $id = $tokens[$i].TrimEnd('+')
+        foreach ($license in $script:NugetgoProvenanceLicenses) {
+            if ([string]::Equals($id, $license, [StringComparison]::OrdinalIgnoreCase)) { return $true }
+        }
+    }
+    $false
+}
+
+# The converted files of the packed projects that carry no -provenance notice, by full path. A packed project's
+# converted files are the .cs files beside it, each the conversion of one Go file; package_info.cs is the converter's
+# package metadata, not a conversion, and build output under obj/ and bin/ is not beside it.
+function Find-NugetgoFilesWithoutProvenance {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][System.IO.FileInfo[]]$ProjectFiles)
+
+    $marker = "// $script:NugetgoProvenanceNotice "
+    foreach ($project in $ProjectFiles) {
+        $files = Get-ChildItem -LiteralPath $project.DirectoryName -File -Filter '*.cs' |
+            Where-Object { $_.Extension -ceq '.cs' -and $_.Name -cne 'package_info.cs' } | Sort-Object FullName
+        foreach ($file in $files) {
+            if (-not ([System.IO.File]::ReadAllText($file.FullName)).Contains($marker)) { $file.FullName }
+        }
+    }
+}
+
 Export-ModuleMember -Function Get-NugetgoLicenseNames, Find-NugetgoModuleLicense, Get-NugetgoCopyrightLines, Get-NugetgoSourceCopyrightLines,
     Resolve-NugetgoCopyright, Get-NugetgoAssemblyCopyright,
-    ConvertTo-NugetgoMSBuildLiteral, Get-NugetgoTargetsMarker, New-NugetgoAssemblyMetadataTargets
+    ConvertTo-NugetgoMSBuildLiteral, Get-NugetgoTargetsMarker, New-NugetgoAssemblyMetadataTargets,
+    Get-NugetgoProvenanceNotice, Test-NugetgoProvenanceLicense, Find-NugetgoFilesWithoutProvenance

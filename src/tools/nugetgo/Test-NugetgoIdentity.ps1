@@ -278,6 +278,10 @@ Check 'nugetgo-pack.ps1 converts each flavor with -provenance and refuses an unm
     $pack.Contains('$unmarked = @(Find-NugetgoFilesWithoutProvenance -ProjectFiles $libraries.ToArray())') -and
     $pack.Contains('convert it again with go2cs -recurse=nuget -provenance') -and
     $pack.Contains('& $converter -recurse=nuget @provenanceArgs -platforms')) 'the pack script does not wire the notice'
+$repack = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'Invoke-NugetgoRepack.ps1'))
+Check 'Invoke-NugetgoRepack.ps1 converts PR with -provenance when the row''s license asks for the notice' (
+    $repack.Contains('$provenanceArgs = @(if (Test-NugetgoProvenanceLicense $row.LicenseSpdx) { ''-provenance'' })') -and
+    $repack.Contains('(@(''-recurse=nuget'') + $provenanceArgs + @(''-platforms''')) 'the repack driver does not pass -provenance to step 1.4'
 
 Write-Host "ran $ran, failed $failed"
 exit $failed
