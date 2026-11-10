@@ -1176,10 +1176,31 @@ internal class StructTypeTemplate : TemplateBase
                 // ReadCloser's exported `Reader` embed, returns `(io.fs.File, error)` and was emitted
                 // internal, so the test assembly's own ReadCloser→fs.FS adapter could not bind it
                 // (CS1929, and the whole package build-blocked behind it).
+                //
+                // AN EXPORTED METHOD takes the accurate test whatever the embed's kind. Go's rule is that the
+                // METHOD NAME decides visibility: an exported method of an exported struct is exported whatever
+                // its return type is called. The only demotion C# requires is CS0050, a return type that is not
+                // public, and that is the symbols' question and never the spelling's. The reached case is an
+                // exported struct that embeds an exported struct BY VALUE, neither of the two rescued kinds
+                // above: a package's ExportsOrImports embeds its JSONValue, whose AsString() returns `@string`,
+                // and 10 of that package's 12 forwarders were internal (CS1929 at each of the importer's eleven
+                // calls). The answer read is ReturnTypeIsGoPublic, which also reads a hand-written Go type that
+                // is declared with no modifier as go2cs-gen will declare it: such a `Node` reads private while a
+                // generator runs, and `(ж<Node>, error)` ends in a lowercase name. An unexported method's
+                // forwarder keeps the rule above.
+                //
+                // A GENERIC embed's flags describe the DECLARATION's signature, whose type parameters read
+                // public, while the forwarder is written over the embed's type ARGUMENTS, held here as text.
+                // The rescue is taken only when each argument's name reads exported, so a forwarder over
+                // `Base<hidden>` is not made public over `hidden` (CS0050).
+                bool exportedMethod = GetScope(GetSimpleName(method.Name)) == "public" &&
+                    typeArgMap.Values.All(argument => GetScope(GetSimpleName(argument)) == "public");
+
                 if (method.ReturnType != "void")
                 {
                     bool returnTypeIsPublic = GetScope(GetSimpleName(method.ReturnType)) == "public" ||
-                        ((directEmbedIsUnexportedValue || method.IsValueEmbedBoxRecv) && method.ReturnTypeIsPublic);
+                        ((directEmbedIsUnexportedValue || method.IsValueEmbedBoxRecv) && method.ReturnTypeIsPublic) ||
+                        (exportedMethod && method.ReturnTypeIsGoPublic);
 
                     if (!returnTypeIsPublic)
                         methodScope = "internal";
@@ -1204,10 +1225,12 @@ internal class StructTypeTemplate : TemplateBase
                 // method.Parameters[0] is the receiver (Skip(1), matching typedParams below);
                 // ParametersArePublic excludes it at both harvest sites (extension-shaped symbols
                 // carry it in Parameters[0], instance symbols never did).
+                // An exported method's parameters are read as its return type is above (ParametersAreGoPublic).
                 if (methodScope == "public")
                 {
                     bool parametersArePublic = method.Parameters.Skip(1).All(param => GetScope(GetSimpleName(param.type)) == "public") ||
-                        method.ParametersArePublic;
+                        method.ParametersArePublic ||
+                        (exportedMethod && method.ParametersAreGoPublic);
 
                     if (!parametersArePublic)
                         methodScope = "internal";
