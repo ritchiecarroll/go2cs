@@ -1690,6 +1690,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNoinlineDirectiveFrame() => CheckTarget("NoinlineDirectiveFrame");
 
     [TestMethod]
+    public void CheckNonSelfConstraintPointerArg() => CheckTarget("NonSelfConstraintPointerArg");
+
+    [TestMethod]
     public void CheckOpenGenericPointerImplement() => CheckTarget("OpenGenericPointerImplement");
 
     [TestMethod]

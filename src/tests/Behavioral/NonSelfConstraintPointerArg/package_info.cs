@@ -36,8 +36,12 @@ using static go.main_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<compilerOptionsParser, optionParser>(ConstraintProxy = true)]
 [assembly: GoImplement<impl, Cloner<impl>>(ConstraintProxy = true)]
+[assembly: GoImplement<label, go.fmt_package.Stringer>(ConstraintProxy = true)]
+[assembly: GoImplement<label, named>(ConstraintProxy = true)]
 [assembly: GoImplement<plain, optionParser>]
+[assembly: GoImplement<temp, go.fmt_package.Stringer>(ConstraintProxy = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -64,6 +68,7 @@ using static go.main_package;
 namespace go;
 
 [GoPackage("main")]
+[GoTestMatchingConsoleOutput]
 public static partial class main_package
 {
     // C# nested types declared with no access modifier are always private, and the

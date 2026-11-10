@@ -113,7 +113,7 @@ internal static T dup<T>(T x)
 
 internal static void Main() {
     var original = Ꮡ(new compilerOptionsParser());
-    var p = convertMapToOptions(new map<@string, any>{["strict"] = true, ["bad"] = (nint)1}, slice<@string>(["strict", "bad"]), original);
+    var p = ((ж<compilerOptionsParser>)(convertMapToOptions<compilerOptionsParserжoptionParserᴾ>(new map<@string, any>{["strict"] = true, ["bad"] = (nint)1}, slice<@string>(["strict", "bad"]), original)));
     fmt.Println("result fields:", p.seen, len(p.seen));
 
     p.seen = append(p.seen, (@string)"written-through-result");
@@ -121,11 +121,11 @@ internal static void Main() {
 
     fmt.Println("zero:", zeroOr(false, original) == nil, zeroOr(true, original) == original);
 
-    var (q, err) = parse(original, "bad");
+    var (q, err) = (parse<compilerOptionsParserжoptionParserᴾ>(original, "bad") switch { var ᴛr => ((ж<compilerOptionsParser>)ᴛr.Item1, ᴛr.Item2) });
     fmt.Println("tuple:", q == original, err);
-    (_, err) = parse(original, "ok");
+    (_, err) = (parse<compilerOptionsParserжoptionParserᴾ>(original, "ok") switch { var ᴛr => ((ж<compilerOptionsParser>)ᴛr.Item1, ᴛr.Item2) });
     fmt.Println("tuple ok:", err == nil, len(original.seen));
-    convertMapToOptions(default, slice<@string>(["discarded"]), original);
+    convertMapToOptions<compilerOptionsParserжoptionParserᴾ>(default, slice<@string>(["discarded"]), original);
     fmt.Println("discarded:", original.seen[len(original.seen) - 1]);
 
     each(original, slice<@string>(["x", "y"]), (ж<compilerOptionsParser> o, @string k) => {
@@ -133,7 +133,7 @@ internal static void Main() {
     });
     fmt.Println("callback:", original.seen.slice(len(original.seen) - 2));
 
-    any asAny = convertMapToOptions(default, default, original).OrTypedNil();
+    any asAny = ((ж<compilerOptionsParser>)(convertMapToOptions<compilerOptionsParserжoptionParserᴾ>(default, default, original))).OrTypedNil();
     fmt.Println("reflect:", reflect.TypeOf(asAny));
     switch (asAny.type()) {
     case ж<compilerOptionsParser> v: {
@@ -147,16 +147,16 @@ internal static void Main() {
     }}
 
     var l = Ꮡ(new label(name: "a"));
-    fmt.Println("foreign:", show(l).name, show(l) == l);
-    fmt.Println("embedded:", describe(l).name);
+    fmt.Println("foreign:", ((ж<label>)(show<labelжStringerᴾ>(l))).name, ((ж<label>)(show<labelжStringerᴾ>(l))) == l);
+    fmt.Println("embedded:", ((ж<label>)(describe<labelжnamedᴾ>(l))).name);
 
     var t = Ꮡ(new temp(c: 21));
-    show(t).c++;
+    ((ж<temp>)(show<tempжStringerᴾ>(t))).c++;
     fmt.Println("value receiver:", t.c);
 
     fmt.Println("value arg:", convertMapToOptions(new map<@string, any>{["k"] = (nint)1}, slice<@string>(["k"]), new plain(k: "k")).k);
 
-    fmt.Println("self route:", dup<implжCloner>(Ꮡ(new impl(n: 1))).n);
+    fmt.Println("self route:", ((ж<impl>)(dup<implжCloner>(Ꮡ(new impl(n: 1))))).n);
 }
 
 } // end main_package
