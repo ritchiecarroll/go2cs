@@ -272,24 +272,33 @@ Every generated named-slice wrapper also implements the non-generic `IArray` sur
 
 C# has no cast to or from a type parameter, so the Go conversions in `rand.N[Int intType]` — `Int(x)`, `uint64(n)` — and an untyped constant compared against the parameter (`n <= 0`, which Go types AS `Int` but C# leaves as `int`, unacceptable to the lifted `IComparisonOperators<Int, Int, bool>`) have no direct C# form (CS0030/CS0019). Three coordinated pieces, gated on a constraint whose every type-set term has an **integer underlying** (`typeParamIsInteger`): a conversion **to** the parameter emits golib's runtime-typed `ConvertToType<Int>(…)` (typeof-dispatch that JIT-folds to a single branch per instantiation; signed kinds sign-extend, unsigned zero-extend — Go's exact conversion semantics; a `/*num:**/` wrapper instantiation falls back to a reflection-cached bridge over its `Value` property/ctor); a conversion **from** the parameter to a basic integer emits `ConvertToUInt64<Int>(n)` (plus a plain numeric cast when the target is not `uint64`); and a **constant operand** of a binary op against the parameter materializes via `ConvertToType<Int>(0)` — except a SHIFT count, which Go types independently and the emission already coerces to `int`. Result: `if (n <= ConvertToType<Int>(0)) … return ConvertToType<Int>(ConvertToUInt64<Int>(n) / 2);`. (Guarded by the `GenericTypeInference` extension `halveN` — `~int32 | ~int64` with the compare, both conversions, and a negative value proving sign-extension, values vs Go; math/rand/v2's `N` takes this path.)
 
-### A float converted to an integer type parameter takes gc's amd64 answer
+### A float converted to an integer type parameter takes gc's answer for the process's architecture
 
 `T(value.(float64))` with `T ~int32` (typescript-go's internal/tsoptions) emits the same
 `ConvertToType<T>(value._<float64>())`, and golib's `double` overload decides it. An in-range value truncates
 toward zero, as Go's float-to-integer conversion does. An out-of-range value or NaN is implementation-defined in
-Go, and golib answers as gc does on amd64: the 64-bit kinds read CVTTSD2SQ's "integer indefinite"
-(`long.MinValue`), int32 reads CVTTSD2SL's (`int.MinValue`), the 8- and 16-bit kinds keep the low bits of the
-int32 result and uint32 the low bits of the int64 one, and the unsigned 64-bit kinds take gc's split at 2^63. A
-C# cast would saturate, which matches neither. gc on arm64 was not measured here; its out-of-range answers are not
-expected to agree, so they are amd64's only. A `float32` argument widens to `double` exactly and converts the same,
-and a named integer wrapper (`type count int32`) converts to its underlying kind first. The integer overloads keep
-every integer argument, because `long` and `ulong` are better conversion targets than `double`. Guarded by the
-`TypeParamFloatConversion` extension (in-range values only, over every integer kind and a named wrapper, values vs
-Go) and GolibTests' `TypeParamFloatConversionTests` (gc amd64's table, 38 values over 11 kinds, plus the binding
-and wrapper arms).
-<!-- 2026-11-10, TS readiness C36: at master 38caf3558a the repro failed CS1503 ('double' to 'ulong'). The table is
-go1.26.10 linux/amd64 output for int(f) ... uintptr(f), identical direct and through a type parameter. Corpus census:
-23 ConvertToType call sites in src/core, every argument an integer, so none rebinds; apicompat .3 -> cut clean. -->
+Go, and gc's answer differs by GOARCH, so golib gives the answer for the architecture the process runs on:
+- **amd64** (and any architecture not measured): the 64-bit kinds read CVTTSD2SQ's "integer indefinite"
+  (`long.MinValue`), int32 reads CVTTSD2SL's (`int.MinValue`), and the unsigned 64-bit kinds take gc's split at 2^63.
+- **arm64**: FCVTZS and FCVTZU saturate and NaN reads 0. int64 and int32 clamp, and the unsigned 64-bit kinds clamp
+  to [0, MaxUint64], so `uint64(-1.9)` is 0 on arm64 and MaxUint64 on amd64.
+
+On both, the 8- and 16-bit kinds keep the low bits of the int32 result and uint32 the low bits of the int64 one,
+because gc converts them through those widths. A C# cast would saturate the narrow kinds, which matches neither.
+A `float32` argument widens to `double` exactly and converts the same, and a named integer wrapper
+(`type count int32`) converts to its underlying kind first. The integer overloads keep every integer argument,
+because `long` and `ulong` are better conversion targets than `double`. Guarded by the `TypeParamFloatConversion`
+extension (in-range values only, which agree on every architecture, over every integer kind and a named wrapper,
+values vs Go) and GolibTests' `TypeParamFloatConversionTests`: gc's amd64 table (38 values over 11 kinds), both
+architectures' tables (15 out-of-range values each), the host's own architecture through `ConvertToType<T>`, and the
+binding and wrapper arms.
+<!-- 2026-11-10, TS readiness C36: at master 38caf3558a the repro failed CS1503 ('double' to 'ulong'). amd64 is
+go1.26.10 linux/amd64 output for int(f) ... uintptr(f), identical direct and through a type parameter. arm64 is
+go1.26.10 darwin/arm64 on a hosted osx-arm64 runner (os-matrix behavioral-smoke run 42857184743, the
+FloatToIntArchProbe program on the never-merged claude/c1-ts-c36-arm64-probe); golib's own line on that runner was
+gc amd64's exactly, and the osx-x64 leg of the same run, the control, matched Go. linux/arm64 shares gc's arm64
+lowering but was not measured on a linux runner (that leg refuses behavioral stages). Corpus census: 23
+ConvertToType call sites in src/core, every argument an integer, so none rebinds; apicompat .3 -> cut clean. -->
 
 ### Any constant Go types as the parameter is materialized, once, at its top-most node
 
