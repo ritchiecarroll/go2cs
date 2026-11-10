@@ -789,8 +789,11 @@ container, go1.26.10, gcc 13.3.0, x/tools v0.52.0, at `30ad20e17e`, with `CGO_EN
 - **Increment 2**: `-cgo` is no longer inert. It makes the single-package driver's OWN load cgo-on (`CGO_ENABLED=1`,
   last, over the loader pin) and nothing else. It is refused beside `-stdlib`, `-tests` and `-recurse`, whose loads it
   does not reach, and beside an explicit `CGO_ENABLED` other than 1. The package is still refused, with GO2CS2001 and
-  nothing written, but the refusal now says what Phase 1 read: the declarations counted by kind, and each tree's source
-  by base name. Where cmd/cgo never ran (no C compiler, §11.1 arm P3) it says that instead. §11.3(c)'s ruling that the
+  nothing written, but the refusal now says what Phase 1 read: the declarations counted by kind, then each tree by
+  ROLE, sorted by source: how many generated files map to each source (by base name), which trees are plain Go source,
+  and how many are cmd/cgo's own. It names no generated file: the first hosted `converter-cgo` run (linux, 2026-11-10)
+  read every one under a 64-hex build-cache name, so the first wording, which named them, was unreadable on any real
+  host. Where cmd/cgo never ran (no C compiler, §11.1 arm P3) it says that instead. §11.3(c)'s ruling that the
   gate fires "whatever `-cgo` says" stands: the flag reaches no emission.
 - **The exit gate** (`TestTheCgoFlagRecognizesTheFixtureAndStillRefuses`) loads the fixture's own source through the
   real driver under `-cgo`. It reads Inconclusive (skipped) without a C compiler, and is read live by the opt-in

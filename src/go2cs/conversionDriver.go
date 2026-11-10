@@ -308,7 +308,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			if errors.As(err, &refusal) {
 				// Under -cgo the package still converts to nothing, but the refusal first says what Phase 1 read.
 				if options.parseCgoTargets && !refusal.excluded {
-					refusal.recognized = cgoRecognitionSummary(pkg.Types, pkg.Fset, pkg.Syntax)
+					refusal.recognized = cgoRecognitionSummary(pkg.Types, pkg.Fset, pkg.Syntax, pkg.GoFiles)
 				}
 
 				for _, position := range refusal.imports {
