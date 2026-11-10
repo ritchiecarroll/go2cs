@@ -44,8 +44,6 @@ using static go.main_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<Base, DA>]
-[assembly: GoImplicitConv<DA, Base>]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
@@ -62,6 +60,7 @@ using static go.main_package;
 namespace go;
 
 [GoPackage("main")]
+[GoTestMatchingConsoleOutput]
 public static partial class main_package
 {
     // C# nested types declared with no access modifier are always private, and the

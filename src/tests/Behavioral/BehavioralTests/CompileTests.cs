@@ -34,6 +34,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckAliasImportLib() => CheckTarget("AliasImportLib");
 
     [TestMethod]
+    public void CheckAliasNamedTargetForms() => CheckTarget("AliasNamedTargetForms");
+
+    [TestMethod]
     public void CheckAliasNamespaceShadow() => CheckTarget("AliasNamespaceShadow");
 
     [TestMethod]
@@ -1364,6 +1367,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedBytesByteSeq() => CheckTarget("NamedBytesByteSeq");
+
+    [TestMethod]
+    public void CheckNamedBytesConstConversion() => CheckTarget("NamedBytesConstConversion");
 
     [TestMethod]
     public void CheckNamedChannelType() => CheckTarget("NamedChannelType");

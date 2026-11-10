@@ -15,11 +15,11 @@ internal static readonly @string @null = "null"u8;
 
 internal static readonly Label typedLabel = "label"u8;
 
-internal static lib.Value global = ((lib.Value)"global"u8);
+internal static lib.Value global = ((lib.Value)slice<byte>((@string)"global"u8));
 
 internal static void show(@string name, slice<byte> b) { fmt.Printf("%s: %q len=%d\n"u8, name, b, len(b)); }
 
-internal static lib.Value ret() { return (lib.Value)"returned"u8; }
+internal static lib.Value ret() { return (lib.Value)slice<byte>((@string)"returned"u8); }
 
 internal static void Main() {
     show("local literal", (Value)slice<byte>((@string)"null"u8));
@@ -30,22 +30,22 @@ internal static void Main() {
     show("local high byte", (Value)slice<byte>((@string)((@string)(new byte[]{0xff, 0x00}))));
 
     show("imported literal", (lib.Value)slice<byte>((@string)"true"u8));
-    show("re-exported literal", (lib.Value)"null"u8);
-    show("re-exported const", (lib.Value)@null);
+    show("re-exported literal", (lib.Value)slice<byte>((@string)"null"u8));
+    show("re-exported const", (lib.Value)slice<byte>(@null));
     show("package-level", global);
     show("returned", ret());
 
-    var m = (lib.Value)"abc"u8;
+    var m = (lib.Value)slice<byte>((@string)"abc"u8);
     m[0] = (byte)'X';
-    var n = (lib.Value)"abc"u8;
+    var n = (lib.Value)slice<byte>((@string)"abc"u8);
     show("mutated", m);
     show("fresh", n);
 
-    lib.Print((lib.Value)"argument"u8);
-    fmt.Println(((lib.Value)"x"u8).IsNull(), ((lib.Value)"null"u8).IsNull(), ((lib.Value)@null).IsNull());
+    lib.Print((lib.Value)slice<byte>((@string)"argument"u8));
+    fmt.Println(((lib.Value)slice<byte>((@string)"x"u8)).IsNull(), ((lib.Value)slice<byte>((@string)"null"u8)).IsNull(), ((lib.Value)slice<byte>(@null)).IsNull());
 
     @string s = "variable";
-    show("variable", (lib.Value)s);
+    show("variable", (lib.Value)slice<byte>(s));
 }
 
 internal static nint @double(nint x) { return x * 2; }
@@ -55,7 +55,7 @@ internal static nint @double(nint x) { return x * 2; }
     fmt.Println(((lib.Name)(@string)"constant").Len(), ((lib.Name)@null).Len(), ((lib.Name)s).Len());
 
     var f = @double;
-    fmt.Println(((lib.Handler)f).Run(3), ((lib.Handler)@double).Run(4), ((lib.Handler)((nint x) => x + 1)).Run(5), ((lib.Handler)default).Run(6));
+    fmt.Println(NilSafeDelegateConversion<lib.Handler, Func<nint, nint>>(f).Run(3), new lib.Handler(@double).Run(4), new lib.Handler((nint x) => x + 1).Run(5), default(lib.Handler)!.Run(6));
 }
 
 } // end main_package

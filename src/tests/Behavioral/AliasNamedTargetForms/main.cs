@@ -29,7 +29,7 @@ partial struct Key /*num:uint32*/;
 public delegate void Seq<K>(Func<K, bool> yield);
 
 internal static void Main() {
-    var m = new MA();
+    var m = new MA(0);
     fmt.Println("make alias:", m == nil, len(m));
     m["a"] = 1;
     fmt.Println(m);
@@ -43,7 +43,7 @@ internal static void Main() {
     fmt.Println("struct wrapper:", d.A, ((Base)d).A);
 
     Table t = default;
-    t = append(t, slice<nint>([1, 2]));
+    t = append(t, (RowA)(slice<nint>([1, 2])));
     t = append(t, new Row(new nint[]{3}.slice()));
     fmt.Println("append:", t, len(t));
 
@@ -58,12 +58,12 @@ internal static void Main() {
             }
         }
     };
-    var s = (SeqInt)f;
+    var s = NilSafeDelegateConversion<SeqInt, Action<Func<nint, bool>>>(f);
     s((nint i) => {
         fmt.Println("seq", i);
         return i < 1;
     });
-    SeqInt none = ((SeqInt)default);
+    SeqInt none = default(SeqInt)!;
     fmt.Println("nil seq:", none == nil);
 }
 

@@ -35,6 +35,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAliasImport() => CheckTarget("AliasImport");
 
     [TestMethod]
+    public void CheckAliasNamedTargetForms() => CheckTarget("AliasNamedTargetForms");
+
+    [TestMethod]
     public void CheckAliasNamespaceShadow() => CheckTarget("AliasNamespaceShadow");
 
     [TestMethod]
@@ -1314,6 +1317,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedBytesByteSeq() => CheckTarget("NamedBytesByteSeq");
+
+    [TestMethod]
+    public void CheckNamedBytesConstConversion() => CheckTarget("NamedBytesConstConversion");
 
     [TestMethod]
     public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
