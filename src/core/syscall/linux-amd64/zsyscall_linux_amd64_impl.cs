@@ -233,19 +233,13 @@ partial class syscall_package
     //
     // Rusage on linux/amd64 is all-scalar (two Timevals + fourteen int64s, 144 bytes) so its
     // mirror is layout-identity; the copy back is field-for-field like copyNativeStat's. A nil
-    // Ꮡwstatus/Ꮡrusage reaches the kernel as address 0, exactly as in Go.
-    [StructLayout(LayoutKind.Sequential)]
-    private struct NativeTimevalLinuxAmd64
-    {
-        public int64 Sec;
-        public int64 Usec;
-    }
-
+    // Ꮡwstatus/Ꮡrusage reaches the kernel as address 0, exactly as in Go. The Timeval mirror is
+    // NativeTimeval, declared in linux/structclass_linux_impl.cs, which both linux builds compile.
     [StructLayout(LayoutKind.Sequential)]
     private struct NativeRusageLinuxAmd64
     {
-        public NativeTimevalLinuxAmd64 Utime;
-        public NativeTimevalLinuxAmd64 Stime;
+        public NativeTimeval Utime;
+        public NativeTimeval Stime;
         public int64 Maxrss;
         public int64 Ixrss;
         public int64 Idrss;

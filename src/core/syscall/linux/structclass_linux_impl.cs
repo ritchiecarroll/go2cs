@@ -84,17 +84,25 @@ partial class syscall_package
         public fixed int64 Bits[fdSetBitsLength];
     }
 
-    // `struct timeval` (two int64 words) is NativeTimevalLinuxAmd64, already declared beside the
-    // wait4 mirror in zsyscall_linux_amd64_impl.cs — one partial class, so it is reused here
-    // rather than restated. Select's timeout therefore crosses in a stack buffer too, which is
-    // what the blocking shape needs.
+    // `struct timeval`: two int64 words, 16 bytes at linux/amd64 and linux/arm64 alike (the S3 census,
+    // docs/phase4/DATA-la64-s3-census.md §3). It is declared here, in the file both linux builds
+    // compile, because Select's timeout, Timex's Time and the wait4 mirror's two Rusage times all
+    // read it; it was NativeTimevalLinuxAmd64 in zsyscall_linux_amd64_impl.cs, which only the
+    // linux/amd64 build compiles (S3 site b). Select's timeout therefore crosses in a stack buffer
+    // too, which is what the blocking shape needs.
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativeTimeval
+    {
+        public int64 Sec;
+        public int64 Usec;
+    }
 
     public static unsafe (nint n, error err) Select(nint nfd, ж<FdSet> Ꮡr, ж<FdSet> Ꮡw, ж<FdSet> Ꮡe, ж<Timeval> Ꮡtimeout) {
         if (sizeof(NativeFdSetLinuxAmd64) != nativeFdSetSizeLinuxAmd64)
             throw new InvalidOperationException($"syscall: NativeFdSetLinuxAmd64 is {sizeof(NativeFdSetLinuxAmd64)} bytes, the kernel's fd_set is {nativeFdSetSizeLinuxAmd64}");
 
         NativeFdSetLinuxAmd64 nativeR = default, nativeW = default, nativeE = default;
-        NativeTimevalLinuxAmd64 nativeTimeout = default;
+        NativeTimeval nativeTimeout = default;
 
         seedNativeFdSet(Ꮡr, ref nativeR);
         seedNativeFdSet(Ꮡw, ref nativeW);
@@ -413,7 +421,7 @@ partial class syscall_package
         public int64 Constant;
         public int64 Precision;
         public int64 Tolerance;
-        public NativeTimevalLinuxAmd64 Time;
+        public NativeTimeval Time;
         public int64 Tick;
         public int64 Ppsfreq;
         public int64 Jitter;
