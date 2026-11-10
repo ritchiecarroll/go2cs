@@ -241,6 +241,14 @@ func loadCgoFixture(t *testing.T, withIncomplete bool) *packages.Package {
 		config.Overlay = map[string][]byte{
 			filepath.Join(goRoot, "src", "runtime", "cgo", "go2cs_incomplete.go"): []byte(cgoIncompleteOverlay),
 		}
+
+		// Go refuses an overlay beneath GOMODCACHE, and a toolchain the go command fetched lives there. The load then
+		// takes a module cache of its own (the fixture's module has no dependencies), pinned to the toolchain whose
+		// GOROOT this resolved, so nothing can switch it.
+		if modCache, err := getGoEnvFrom(dir, "GOMODCACHE"); err == nil && modCache != "" && isPathUnder(goRoot, modCache) {
+			config.Env = append(config.Env, "GOMODCACHE="+t.TempDir(), "GOTOOLCHAIN=local",
+				"PATH="+filepath.Join(goRoot, "bin")+string(os.PathListSeparator)+os.Getenv("PATH"))
+		}
 	}
 
 	pkgs, err := packages.Load(config, ".")
