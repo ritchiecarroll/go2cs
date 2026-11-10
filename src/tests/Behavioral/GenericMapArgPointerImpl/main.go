@@ -41,6 +41,13 @@ type Fields struct {
 	Mapping Pair[map[string]int, map[int]string]
 }
 
+// Snapshot holds the same type through a POINTER FIELD: tsc's internal/project snapshot.cs
+// declared `ж<WatchedFiles<map<tspath.Path, @string, >>>` here, outside any attribute.
+type Snapshot struct {
+	watched *Expected[map[string]string]
+	named   *Expected[string] // control
+}
+
 func main() {
 	f := Fields{}
 	f.Name = Expected[string]{Value: "pkg", Valid: true}
@@ -60,4 +67,10 @@ func main() {
 	}
 
 	fmt.Println(count(&f.Imports), len(make1().Value))
+
+	// A pointer field, and a LOCAL declared with the pointer type (snapshot.cs:749's shape).
+	s := Snapshot{watched: &f.Imports, named: &f.Name}
+	var local *Expected[map[string]string] = s.watched
+	local.Value["c"] = "d"
+	fmt.Println(len(f.Imports.Value), s.named.Value, local.IsPresent())
 }
