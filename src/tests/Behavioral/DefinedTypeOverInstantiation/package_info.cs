@@ -10,6 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using instlibꓸAlias = go.go.instlib_package.Pair<go.@string>;
+global using instlibꓸAlias2 = go.go.instlib_package.Pair<go.@string>;
 // </ImportedTypeAliases>
 
 using go;
@@ -27,6 +29,10 @@ using static go.main_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoTypeAlias("A1", "go.main_package.pair<nint>")]
+[assembly: GoTypeAlias("A2", "go.main_package.pair<nint>")]
+[assembly: GoTypeAlias("AS", "go.main_package.S")]
+[assembly: GoTypeAlias("LA", "go.go.instlib_package.Pair<go.@string>")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -40,9 +46,12 @@ using static go.main_package;
 
 // <ImplicitConversions>
 [assembly: GoImplicitConv<C<@string>, pair<@string>>]
+[assembly: GoImplicitConv<DA, S>]
+[assembly: GoImplicitConv<DS, Q>]
 [assembly: GoImplicitConv<E, pair<bool>>]
 [assembly: GoImplicitConv<P<nint>, S>]
 [assembly: GoImplicitConv<Q, S>]
+[assembly: GoImplicitConv<S, DB>]
 [assembly: GoImplicitConv<S, P<nint>>]
 [assembly: GoImplicitConv<S, Q>]
 [assembly: GoImplicitConv<pair<@string>, C<@string>>]
@@ -51,7 +60,9 @@ using static go.main_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(A1))]
 [assembly: GoFieldAccess(typeof(go.go.instlib_package.Q))]
+[assembly: GoFieldAccess(typeof(pair<>))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -61,7 +72,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA4kABlCgoKCgoKCgoKCgoKCgpSClIKCgoKUgoKCgg==")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABMkACV0goKCgoKCgoKCgoKCgpSClIKCgoKUgoKCgpSCgoKClIKCgoKUgoKWgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -79,6 +90,12 @@ public static partial class main_package
     // <TypeAccessibility>
     public partial struct C<V> {}
     public partial struct D {}
+    public partial struct DA {}
+    public partial struct DB {}
+    public partial struct DL {}
+    public partial struct DS {}
+    public partial struct DX {}
+    public partial struct DY {}
     public partial struct E {}
     public partial struct M {}
     public partial struct P<T> {}

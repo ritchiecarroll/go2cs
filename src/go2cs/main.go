@@ -812,8 +812,8 @@ Examples:
 			return
 		}
 
-		// A -tests run of a standard-library package re-emits it into the committed corpus, which is
-		// built for corpusArch on every GOOS; the host default would emit the binary's own GOARCH.
+		// A -tests run of a standard-library package re-emits it into the committed corpus, so it targets
+		// the host default's corpus flavour, whose GOARCH need not be the binary's own (testsCorpusArch.go).
 		if platform, pinned := testsTargetPlatform(options.targetPlatform, platformsExplicit, options.convertTests, inputFilePath, options.goRoot); pinned {
 			log.Printf("-tests: %s is a GOROOT package, so the conversion targets the committed corpus's %s (not the host's %s); pass -platforms to override\n",
 				inputFilePath, platform, options.targetPlatform)

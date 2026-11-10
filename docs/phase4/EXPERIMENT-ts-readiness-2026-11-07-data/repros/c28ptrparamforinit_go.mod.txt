@@ -1,0 +1,3 @@
+module repro/c28ptrparamforinit
+
+go 1.26

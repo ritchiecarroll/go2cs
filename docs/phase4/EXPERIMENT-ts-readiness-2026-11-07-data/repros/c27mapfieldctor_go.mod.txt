@@ -1,0 +1,3 @@
+module repro/c27mapfieldctor
+
+go 1.26

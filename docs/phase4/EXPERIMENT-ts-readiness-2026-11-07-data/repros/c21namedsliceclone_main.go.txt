@@ -1,0 +1,14 @@
+package main
+
+import "fmt"
+
+// TS dep: go-json-experiment/json/jsontext value.go:69 `func (v Value) Clone() Value`
+type V []byte
+
+func (v V) Clone() V { r := make(V, len(v)+1); copy(r, v); r[len(v)] = '!'; return r }
+
+func main() {
+	v := V("ab")
+	c := v.Clone()
+	fmt.Println(string(c)) // Go: ab!
+}

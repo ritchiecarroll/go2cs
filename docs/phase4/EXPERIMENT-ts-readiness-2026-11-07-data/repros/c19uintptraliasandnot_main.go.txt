@@ -1,0 +1,7 @@
+package main
+
+type ui = uintptr // TS dep: zeebo/xxh3 utils.go
+
+func top(l int) ui { return ui(l) &^ 15 } // xxh3 hash64.go:90
+
+func main() { println(top(37), top(16)) } // Go: 32 16

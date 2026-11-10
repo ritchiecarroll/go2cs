@@ -1,0 +1,3 @@
+module repro/c20arrayswitch
+
+go 1.26

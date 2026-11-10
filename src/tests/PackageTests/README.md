@@ -51,6 +51,38 @@ Against a go.lib published before the usings existed, `-TargetsFile src/core/gol
 imports the working-tree file explicitly. That is how the gate was read red-first, against the published
 1.24.13.3: without the file the first arm FAILS with CS0246 and CS0103; with it, both arms PASS.
 
+# `BreakFloor`: a package built below the go.* break floor fails the build
+
+`BreakFloor` is the consumer fixture for go.lib's break floor: the `GoCheckBreakFloor` target in
+`buildTransitive/go.lib.targets` fails the build, as `GO2CS3002`, for each package built below `$(GoBreakFloor)`,
+the newest go.* release that changed members compiled code binds (`docs/phase4/DESIGN-go-break-floor.md`). The
+fixture references go.fmt and one revision of hashset, whose `NewHashSet` loops over a slice, the member B3 changed
+in go.* 1.26.10.3. `test-break-floor.ps1` restores it from ONE feed into a fresh package cache and runs five arms:
+
+- BELOW: a hashset revision built below the floor must fail the build with `GO2CS3002` naming it, and leave `bin/`
+  empty, because the floor stops the build before CoreCompile. Without the floor it restores and builds clean, then
+  throws `MissingMethodException` at `NewHashSet`;
+- AT: a hashset revision built on the floor release builds and runs;
+- OPT-OUT: BELOW with `-p:GoAllowBelowBreakFloor=true` builds with `GO2CS3002` as a warning, and its run throws
+  `MissingMethodException`, the risk the warning names;
+- LIBRARY: an application references a library project that references the BELOW revision and opts out. The library
+  builds with the warning; the application's own build fails with `GO2CS3002` naming hashset, which reached it
+  through the ProjectReference, and leaves its `bin/` empty;
+- MULTI-TFM: BELOW with `TargetFrameworks` net10.0 and net10.0-windows fails in both inner builds, `bin/` empty.
+
+```text
+pwsh src/tests/PackageTests/BreakFloor/test-break-floor.ps1 -Version 1.26.10.3 -BelowHashSet <revision 4> -AtHashSet <revision 5> [-Source <feed>] [-TargetsFile <go.lib.targets>]
+```
+
+`<revision 4>` and `<revision 5>` are hashset 1.0.0's fourth and fifth revisions as nuget.org spells them, built on
+go.* 1.26.10.2 and 1.26.10.3. The gate was read red-first against the published go.lib 1.26.10.3, which has no floor: BELOW and OPT-OUT FAIL,
+AT passes. With `-TargetsFile src/core/golib/buildTransitive/go.lib.targets` all three pass.
+
+The floor reaches the other fixtures that take `-TargetsFile` too (ConsumerUsings, PublishSymbols, RidCompileAsset).
+Run with `-TargetsFile src/core/golib/buildTransitive/go.lib.targets` and a `-Version` below the floor (1.26.10.2 or
+older), each now fails with `GO2CS3002` naming every go.* package of that release: pass a `-Version` at or above the
+floor.
+
 # `PackageUsings`: each package's own usings gate
 
 `PackageUsings` is the consumer fixture for the `build/<PackageId>.props` each converted package carries,
@@ -86,9 +118,10 @@ each platform's flavour under `runtimes/<rid>/lib/<tfm>/`. NuGet resolves the CO
 whatever the RID is, so before the targets file a Linux consumer compiled against the Windows surface.
 The fixture touches a type only the current platform's `go.syscall` flavour defines (`Rlimit` on
 Linux, `DLLError` on Windows, `Kevent_t` on macOS, where `osx-x64` and `osx-arm64` ship the same darwin
-build). The flavour is chosen from the RID's prefix (`win`, `linux`, `osx`), so an SDK that reports a
-distro RID (`ubuntu.24.04-x64`, say) selects none and the control arm fails there. `test-rid-compile-asset.ps1` restores it from ONE feed into a fresh
-package cache and runs four arms:
+build). The flavour is chosen from the prefix of the SDK's PORTABLE RID (`win`, `linux`, `osx`), as `go.lib.targets`
+reads it: an SDK that reports a distro RID as its own (`ubuntu.24.04-x64` for Ubuntu's packaged SDK) reports
+`linux-x64` as its portable one. `test-rid-compile-asset.ps1` restores it from ONE feed into a fresh package cache and
+runs ten arms:
 
 - a RID-less build and run;
 - the same with `-r <host rid>`;
@@ -96,12 +129,25 @@ package cache and runs four arms:
 - a control that proves the arm can fail. On Linux and macOS, `-p:GoRidCompileAssets=false` must fail
   with CS0426. On Windows, the reference platform, the control is the no-op proof: the `runtimes/win-x64`
   twin is byte-identical to `lib/`.
+- UNSHIPPED: a build for a RID no go.* package resolves (`-UnshippedRid`, `linux-arm64` by default) must fail with
+  `GO2CS3003` naming that RID. The fixture touches the Windows surface there, so without the refusal the build
+  succeeds, which is the defect the refusal closes. The gate refuses to read the arm if go.syscall ships that RID.
+- UNSHIPPED with the swap off: the same, with `-p:GoRidCompileAssets=false`. The refusal is its own target.
+- OPT-OUT: the same build with `-p:GoAllowReferenceFlavor=true` must build. It is compile-only and is not run.
+- OPT-OUT in a project file: `GoAllowReferenceFlavor=true` in a `Directory.Build.props` must change nothing; the
+  build still fails with `GO2CS3003`.
+- ALPINE: `-r linux-musl-x64` must build against the linux surface. It resolves to `linux-x64` through the RID graph,
+  as the host resolves it at run time.
+- WIN-ARM64: `-r win-arm64` must build, with warning `GO2CS3004` naming it.
 
 ```text
 pwsh src/tests/PackageTests/RidCompileAsset/test-rid-compile-asset.ps1 -Version <go.* version> [-Source <feed dir or URL>]
 ```
 
-Against a package set that predates the targets file, `-TargetsFile src/core/golib/buildTransitive/go.lib.targets`
+`-TargetsFile src/core/golib/buildTransitive/go.lib.targets` reads the working-tree file instead of the packaged
+one. When the restored go.lib ships `buildTransitive/go.lib.targets`, the gate overwrites it in its private package
+cache with the working-tree files and checks the copy by hash; an explicit import alone would be overridden by the
+packaged file, which NuGet imports after the project. Against a package set that predates the file, the gate
 imports the working-tree file explicitly. That is how the gate was read red-first, against the
 published 1.24.13.1: on Linux both build arms FAIL with CS0426 and the control PASSES. With the file,
 all four arms PASS on both platforms.

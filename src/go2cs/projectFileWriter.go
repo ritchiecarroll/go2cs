@@ -556,6 +556,12 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 	// keeps a -tests rewrite of an L3 package's production .csproj from stripping the block.
 	if packageCarriesPlatformLayout(outputFilePath) {
 		newContents = []byte(applyPlatformLayoutBlocks(string(newContents), projectFileName))
+
+		// The arch axis rides on the same adoption: only a package that holds an arch or pair folder gets
+		// the $(GoTargetArch) items, so a package with GOOS folders alone renders exactly as it did.
+		if packageCarriesArchLayout(outputFilePath) {
+			newContents = []byte(applyPlatformArchLayoutBlocks(string(newContents), projectFileName))
+		}
 	}
 
 	// Layout L3's second half (platformProject.go): a package whose DIRECT IMPORT SET differs by
@@ -565,7 +571,7 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 	// Asked of the file rather than of the package directory: the reference axis and the source
 	// axis are measured separately (design §4 vs §4.3) and need not coincide.
 	newContents = []byte(applyPlatformReferenceAdoption(string(newContents), projectFileName,
-		goosOfTarget(options.targetPlatform), emittedReferences))
+		options.targetPlatform, emittedReferences))
 
 	// Resolve the template's license marker for EVERY output type: a library packs real license
 	// metadata (licensing.go), an application resolves the same marker to the local-LICENSE form so

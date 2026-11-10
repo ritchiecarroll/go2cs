@@ -1,0 +1,25 @@
+package main
+
+import "fmt"
+
+// TS site: internal/lsp/lsproto/jsonrpc.go:87 (*RequestMessage).Message, (*ResponseMessage).Message.
+type R struct{ ID *int }
+
+type Msg struct {
+	Kind int
+	msg  any
+}
+
+func (r *R) Message() *Msg {
+	kind := 1
+	if r.ID == nil {
+		kind = 2
+	}
+	return &Msg{Kind: kind, msg: r}
+}
+
+func main() {
+	r := &R{}
+	m := r.Message()
+	fmt.Println(m.Kind, m.msg.(*R) == r) // Go: 2 true
+}

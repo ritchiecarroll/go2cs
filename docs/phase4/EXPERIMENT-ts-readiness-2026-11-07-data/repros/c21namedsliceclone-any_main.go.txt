@@ -1,0 +1,15 @@
+package main
+
+import "fmt"
+
+// The untyped use of C21's shape: does v.Clone() bind to Go's method or to the wrapper's ICloneable.Clone()?
+type V []byte
+
+func (v V) Clone() V { r := make(V, len(v)+1); copy(r, v); r[len(v)] = '!'; return r }
+
+func main() {
+	v := V("ab")
+	var a any = v.Clone()
+	fmt.Printf("%T %s\n", a, a) // Go: main.V ab!
+	fmt.Println(a)              // Go: [97 98 33]
+}

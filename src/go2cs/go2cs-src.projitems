@@ -78,6 +78,8 @@
     <None Include="$(MSBuildThisFileDirectory)syscallFunnelSet_test.go" />
     <None Include="$(MSBuildThisFileDirectory)captureModeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoConfigurationClass_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoDeclarations.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoDeclarations_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDynamicImports.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoGateRefusal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoSelectedRefusal_test.go" />
@@ -106,6 +108,7 @@
     <None Include="$(MSBuildThisFileDirectory)constraintProxyForwarding.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintProxyForwarding_test.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintProxyGenericCall_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)coreTypeParamAssign.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testSignals.go" />
@@ -337,6 +340,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\relocscan\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\relocscan\main_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\annotatorSelfTest_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\breakFloorGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\contextBudget_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\diagnosticCodeRegistry_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsJekyllLiquid_test.go" />
@@ -518,9 +522,13 @@
     <None Include="$(MSBuildThisFileDirectory)platformFilterSkip_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformHandOwn.go" />
     <None Include="$(MSBuildThisFileDirectory)platformHandOwn_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)platformCanonicalForm_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformCensus.go" />
     <None Include="$(MSBuildThisFileDirectory)platformCensus_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformCompanion_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)platformLattice.go" />
+    <None Include="$(MSBuildThisFileDirectory)platformLattice_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)platformLatticeLayout_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformLayout.go" />
     <None Include="$(MSBuildThisFileDirectory)platformLayout_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformLayoutFold_test.go" />
@@ -644,6 +652,11 @@
     <None Include="$(MSBuildThisFileDirectory)testBuildMaxCPU_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testHostGoTargetOS_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testHostLaunchDir_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\README.md" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\cgo_gotypes.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\cgo_import.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\fixture.cgo1.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\fixture.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\hostlaunch\fixture\keys\k" />
     <None Include="$(MSBuildThisFileDirectory)testdata\markercomments\main.cs" />
     <None Include="$(MSBuildThisFileDirectory)testdata\markercomments\main.go" />

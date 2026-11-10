@@ -1,0 +1,3 @@
+module repro/c29embedshadowdepth
+
+go 1.26

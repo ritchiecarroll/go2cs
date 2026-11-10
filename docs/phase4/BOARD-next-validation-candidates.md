@@ -35106,24 +35106,299 @@ behaviour, which is worse than any failure.
 - (2) The linux/arm64 flavour (`DESIGN-linux-arm64-flavour.md`), which turns the refusal into a no-op for
   linux-arm64.
 
+
+## 2026-11-09 — G (internal/goexperiment, found by the linux/arm64 four-target census): the darwin flavour holds NO `exp_dwarf5_*.cs` — the converter resolves tool tags for the HOST, not the target
+
+**The observation.** `src/core/internal/goexperiment` carries `windows/exp_dwarf5_on.cs` and
+`linux/exp_dwarf5_on.cs` and nothing for darwin. Go selects exactly one file of the pair for every target, and for
+darwin/amd64 it is `exp_dwarf5_off.go` (go1.26.10, `go list -f '{{.GoFiles}}' internal/goexperiment` under
+`GOOS=darwin`): the Dwarf5 experiment is in the baseline everywhere except darwin, ios and aix. So the darwin build
+of the package has neither `Dwarf5` nor `Dwarf5Int`.
+
+**The cause, read and probed, not yet fixed.** go/packages selects a target's files with the target's `GOOS` and
+`GOARCH`. The converter then re-evaluates each file's dotted build tags against a tool-tag list it gets from
+`goListToolTags` (`directiveOperations.go`), and that function runs `go list -find -f '{{context.ToolTags}}' unsafe`
+in the converter's own environment and caches the answer per module root. Nothing passes the target. Measured with
+that same command on a windows host: for windows/amd64 and linux/amd64 the list holds `goexperiment.dwarf5`; for
+darwin/amd64 it does not; for linux/arm64 it holds `arm64.v8.0` where the others hold `amd64.v1`. On a windows or
+linux host the darwin conversion is therefore handed `exp_dwarf5_off.go` by the loader and then refuses it, because
+`!goexperiment.dwarf5` is false against the host's list. Neither file of the pair is emitted.
+
+**What it reaches.** Today, one file in one package: Dwarf5 is the only baseline experiment that differs between
+the corpus's targets, and the two constants are read by `cmd/` alone, so nothing converted fails to compile. Two
+things follow from the mechanism rather than from the file. (1) The emission depends on the HOST's `GOOS`: the same
+reconvert run on a Mac would drop `linux/exp_dwarf5_on.cs` and `windows/exp_dwarf5_on.cs` and add the darwin file.
+(2) The architecture feature tag is the host's as well (`amd64.v1` under a linux/arm64 conversion on an x64 box);
+in go1.26.10's standard library only `runtime/race` is constrained on one, so it is latent for the fourth flavour.
+
+**Remedy.** Pass the target's `GOOS` and `GOARCH` to that `go list` and key the cache by target as well as module
+root. Expected corpus footprint: `internal/goexperiment/darwin/exp_dwarf5_off.cs` appears, with its position-map
+line. Not part of the layout seat, whose footprint must be empty. OPEN, unowned.
+
+**Not guarded:** the converter exits 0 and the darwin corpus builds.
+
 — G (2026-11-09)
 
-## 2026-11-10 — C1 (COORD: the batch 279 bank re-read): darwin syscall's (a) residue is closed by the reinterpret seam; syscall banks darwin 32 + 1 on both RIDs
+## 2026-11-09 — C1 (COORD ruling on C24): a chan-cored type parameter emits no channel constraint, so a generic body can do nothing with it — OPEN, its own row
+
+**The finding.** A type parameter constrained `~chan E` emits only `where C : /* ~chan E */ new()`. A slice or map
+core emits `ISlice<E>`/`IMap<K, V>` plus `ISupportMake`. With no `IChannel<E>` in the constraint, nothing a Go body
+does with the channel binds:
+- a send `c <- v` emits `c.ᐸꟷ(v)`;
+- a receive `<-c` emits `<-c`;
+- `len(c)` and `cap(c)`;
+- assigning `c` to its core type `chan E` (C24's class: CS0029 at master 0c553534df, measured with C24's probe).
+
+Probe, go1.26.10: `func Send[C ~chan E, E any](c C, v E) { c <- v }` with a receive, and `type Pipe chan int`.
+Go prints `1 7`; the emission above cannot compile.
+
+**Reach.** No `~chan` or `~<-chan` constraint appears anywhere in GOROOT/src outside testdata (grep, 0 lines), so no
+std package reaches it. The TS readiness rows do not name it either. It is filed because C24 closed the slice and
+map members of the same class (claude/c1-ts-c24) and named this one as out of that seat's scope.
+
+**Owed.** A constraint shape for the chan core: likely `IChannel<E>` plus the send/receive surface and a sharing
+`AsChannel()`, the counterpart of C24's `IMap<K, V>.AsMap()`. Then red-first from the probe, at every position C24
+covers. Not sized.
+
+— C1 (2026-11-09)
+
+## 2026-11-09 — R (M:N R6, O1's remainder): on Linux a converted program ends at about 16,200 live goroutines at the stock vm.max_map_count — a CAPACITY ceiling six times below Windows, and a fatal abort
+
+**The finding.** ParkStorm (DESIGN-mn-scheduler-sizing.md Appendix A) with 20,000 goroutines, the linux flavour
+converted at master `0bbe3ab6e5`, Release, on R-WSL (Ubuntu 22.04, kernel 6.18, `vm.max_map_count` 65,530, the stock
+value). All six runs (bounded reserve 16 MiB and 1 MiB, three each) aborted at 16,226–16,229 threads with
+`Failed to create RW mapping for RX memory ... (vm.map_max_count)`, thrown from `Goroutine.StartWithCreator`. Each
+.NET thread costs about four mappings (stack, guard page, the runtime's W^X double mapping), so the ceiling is
+65,530 / 4. It does not move with the reserve. A Go goroutine is not a thread, so the limit does not apply to Go
+(not measured on this box), and Windows reaches 10⁵ converted.
+The abort is not catchable.
+
+**Recorded:** the dated O1 amendment in DESIGN-mn-scheduler.md, which corrects "Windows and Linux move toward about
+10⁵ parked", and a KnownIssues entry for users.
+
+**Levers, UNMEASURED and not recommended:** `DOTNET_EnableWriteXorExecute=0` (should drop the double mapping) and a
+larger `vm.max_map_count` (machine-wide). Measuring either needs a run that aborts at the new ceiling, which falls
+under the rule below.
+
+**The hazard that came with it.** On this WSL, a crashing linux process is dumped to the Windows side, and neither
+`ulimit -c 0` nor `ulimit -c 1` stops it (both proved to dump on a deliberate SIGSEGV). These six aborts wrote
+211 GB of dumps; they were removed by name and time window. COORD's fleet rule, 2026-11-09: no many-thread Linux run
+without dump suppression PROVEN on that box first, and a failed proof STOPS the run.
+
+**Owner:** none needed for the ceiling itself (it is the 1:1 model's, and O6/O4 are the real answer). OPEN for whoever
+measures the W^X lever under the rule above.
+
+— R (2026-11-09)
+
+
+## 2026-11-09 — P1 (follow-up to the GO2CS2004 seat): a defined type whose chain reaches ANOTHER package's struct forwards no members past the first hop, and six conversion shapes over such chains have no generated operator — OPEN, PARKED by COORD (0 std reach)
+
+**Shape.** A defined type over another package's struct (`type M lib.Pair[string]`), then a second definition over
+it, a sibling over the same struct, a generic one, and conversions between them. Go converts any two of these whose
+underlying types are identical. Two packages:
+
+```go
+package lib
+
+type Pair[T any] struct {
+	A T
+	B int
+}
+
+type Box[K comparable, V any] struct {
+	Index  map[K]V
+	Arr    [2]V
+	hidden V
+}
+
+func NewBox[K comparable, V any](k K, v V) Box[K, V] {
+	return Box[K, V]{Index: map[K]V{k: v}, hidden: v}
+}
+
+func (b Box[K, V]) Hidden() V { return b.hidden }
+
+type Open struct {
+	A string
+	B int
+}
+
+type Open2 struct {
+	A string
+	B int
+}
+```
+
+```go
+package main
+
+import (
+	"fmt"
+
+	"example.com/dtoi/lib"
+)
+
+type pair[T any] struct {
+	A T
+	B int
+}
+
+type P[T any] pair[T]
+type R[U comparable] pair[U]
+
+type T struct {
+	A string
+	B int
+}
+
+type M lib.Pair[string]
+type MM M
+type M2 lib.Pair[string]
+
+type XB lib.Box[string, int]
+type XB2 lib.Box[string, int]
+type XG[U any] lib.Box[string, U]
+
+type LA lib.Open
+type LB lib.Open2
+
+type G1[U any] lib.Pair[U]
+type G2[U any] lib.Pair[U]
+
+func main() {
+	mm := MM(M{A: "m", B: 2})
+	fmt.Println(mm.A, mm.B) // D1
+
+	xb := XB(lib.NewBox("k", 10))
+	xb2 := XB2(xb) // D2
+	xb2.Arr[0] = 13
+	fmt.Println(xb.Arr[0], xb2.Arr[0], lib.Box[string, int](xb2).Hidden(), M2(mm).A)
+
+	t := T{"t", 16}
+	fmt.Println(M(t).A, MM(t).B) // D3
+
+	fmt.Println(lib.Pair[string](mm).A, MM(lib.Pair[string]{A: "q", B: 15}).B) // D4
+
+	la := LA(lib.Open{A: "o", B: 17})
+	fmt.Println(LB(la).A, lib.Open2(la).B, LB(lib.Open{A: "r", B: 18}).B) // D5
+
+	g1 := G1[int](lib.Pair[int]{A: 19, B: 20})
+	xg := XG[int](lib.Box[string, int](xb2))
+	fmt.Println(G2[int](g1).A, XB(xg).Arr[0], lib.Box[string, int](XB2(xg)).Hidden(), R[int](P[int]{A: 21}).A) // D6
+
+	fmt.Println(T(lib.Open{A: "u", B: 22}).B) // D7
+}
+```
+
+Go 1.26.10 prints `m 2`, `0 13 10 m`, `t 16`, `m 15`, `o 17 18`, `19 13 10 21`, `22`. The second line is the part a
+fix has to keep: the copy does not share the array (`0` beside `13`), and the unexported field arrives (`10`).
+
+**Where it was measured.** These declarations and conversions were added to the seat's behavioral project
+(DefinedTypeOverInstantiation, with its `instlib` package) and built with the converter and generators of the seat's
+tip d0227c54b3 (ref claude/p1-ts-go2cs2004, accepted for batch 279). The converter exits 0 and writes every
+declaration and all 18 `GoImplicitConv` records; the C# build fails. The repro above is the same shapes cut down,
+run with Go only. Before the seat the converter refused the whole file with GO2CS2004, so none of this was reachable
+from Go source through a generic instantiation; the plain (non-generic) forms of D1, D2 and D5 were measured to fail
+the same way before the seat.
+
+| | Shape | Example | C# at d0227c54b3 |
+|---|---|---|---|
+| D1 | a definition over a definition over another package's struct | `type MM M` | CS1929: `MM` has no `A`, `B` |
+| D2 | two definitions over one struct of another package | `XB2(xb)`, `M2(mm)` | CS0030 |
+| D3 | a local struct to a chain that ends in another package | `M(t)`, `MM(t)` | CS0030 |
+| D4 | a chain and the other package's struct it ends in, each way | `lib.Pair[string](mm)` | CS0030 |
+| D5 | chains ending in two different structs of another package | `LB(la)`, `lib.Open2(la)` | CS0030 |
+| D6 | both sides generic, meeting at one instantiation | `G2[int](g1)`, `XB(xg)`, `R[int](P[int]{})` | CS0030 |
+| D7 | another package's struct to a local struct | `T(lib.Open{})` | CS1929, then CS0030 |
+
+`R[int](P[int]{})` in D6 needs no second package: two generic definitions over one LOCAL generic struct fail the
+same way.
+
+**Roots, all in go2cs-gen.**
+
+- **D1, TypeGenerator.** The loop that follows a wrapper's definitions reads each next definition's DECLARATION
+  SYNTAX. A definition in another package has none, so the loop stops with the intermediate local wrapper (`M`) as
+  the struct to forward from, and `M` has no members of its own in syntax: generators do not see each other's
+  output. `MM` gets no `A` or `B`.
+- **D2 to D6, ImplicitConvGenerator.** The struct chain is resolved from syntax too. When either chain ends in
+  another package's struct there is no declaration to read fields from, and the record is skipped WITHOUT a
+  diagnostic. For two generic sides, the open form of the other side is looked up by simple name among the
+  wrapper's own chain; a sibling wrapper is not in that chain, so those records are skipped as well.
+- **D7, ImplicitConvGenerator.** For `GoImplicitConv<lib.Open, T>` the operator is hosted on the SOURCE by its
+  simple name:
+
+```csharp
+public static partial class main_package
+{
+    partial struct Open
+    {
+        public static implicit operator T(Open src) => new T(src.A, src.B);
+    }
+}
+```
+
+  That declares a new empty `main_package.Open` (CS1929 on `src.A`), and the conversion the record asked for still
+  does not exist. C# lets a conversion be declared in either operand's type, so the host has to be `T`, the local
+  side. The reverse record already does that: `T-Open.g.cs` declares, inside `partial struct T`,
+  `operator global::go.go.instlib_package.Open(T src)`. Whether D7 pre-dates the seat was NOT measured.
+
+**Why the skipped records matter.** A skipped record is a Go conversion with no C# counterpart: CS0030 at the call
+site. It fails the build rather than changing behavior, which is why this is parked and not urgent.
+
+**What holds** (same project, same tip): nested generic fields under a wrapper whose parameters carry the base's
+names in the other order (`type W[V comparable, K any] nest[V, K]`), a wrapper over an instantiation of an
+instantiation (`type N pair[pair[int]]`), `T(M(t))` from a chain to a local struct, and `lib.Open(t)`.
+
+**Plan (not cut).**
+
+- **D1:** resolve the next definition by SYMBOL, and when it is in metadata take its public fields and ref
+  properties from there, with the type arguments carried through that hop.
+- **A. Carry the wrapped value when the two chains share a type** (D2, D4, D6 and the local sibling case): convert
+  through the wrappers' existing cast operators to the shared type and back, with exactly one clone. It is the only
+  route that keeps an unexported field, because another package's field-wise constructor lists exported fields only.
+- **B. Field-wise construction with the members read from the SOURCE declaration** when the target's chain ends in
+  another package's struct (D3).
+- **C. Two different structs of another package** (D5): field-wise over the members metadata shows. Where a field
+  is not accessible, report a diagnostic (the next free ID is GO2CS0011) instead of skipping the record.
+- **Host rule** (D7 and all of the above): declare the operator in a LOCAL operand, and in the non-generic one when
+  there is one (`XG<nint>` to `XB` is declared in `XB`). When every local operand is a closed generic (`G1<nint>` to
+  `G2<nint>`), declare the operator once, OPEN, in one of them, so that several closed records share one
+  declaration, as the seat does for `C<V>` and `pair<V>`. A record between two types of other packages has no local
+  host and must be reported, not skipped.
+
+**Not verified:** whether Roslyn metadata shows another package's non-public fields to a generator; whether the
+existing field-wise conversion shares a fixed-array field between source and result (the repro's `0 13` checks it
+once a fix exists); whether D7 pre-dates the seat.
+
+**Reach.** 0 in std, by the seat's census at its base: std has 57 `GoImplicitConv` records, 2 of them over structs
+(`RegPtr` and `Reg` in math/big/internal/asmgen), and neither has a generic operand or a wrapper on the constructed
+side. The TypeScript experiment's C11 shape is the local form, which the seat answers.
+
+**Not guarded:** the converter exits 0 on every shape above, and nothing in the behavioral corpus has them. A fix
+goes red-first with the repro above added to DefinedTypeOverInstantiation.
+
+— P1 (2026-11-09)
+
+
+## 2026-11-09 — C1 (COORD ruling: BANK): darwin syscall's (a) residue is closed by the reinterpret seam; syscall banks darwin 32 + 1 on both RIDs
 
 Resolves (a) of the 2026-10-26 P2 row "darwin syscall after the iovec/dirent seat". `TestGetdirentries` and its
 `/n=10` and `/n=1000` subtests panicked on arm 2a in the test's own parse, `getdirentries_test.go:67`: a `*[1048]byte`
 view over a local `syscall.Dirent`, whose `Name [1024]int8` makes the struct reference-bearing.
 
-The reinterpret seam (batch 279; docs/phase4/DESIGN-reinterpret-seam.md) copies through a Go-layout image. golib's
-`GoImage<S>` encodes the struct, copies Go's byte count, and decodes a destination back into the box. The converter
-emits that slice, as a direct argument of `copy`, as `copy(@unsafe.GoImage(Ꮡdirent).slice(), data)`. Production
-footprint: 0 files on all three targets.
+The seam (`claude/c1-reinterpret-seam`, ACCEPTED for batch 279; docs/phase4/DESIGN-reinterpret-seam.md):
+- golib `GoImage<S>`, a Go-layout byte view over a struct box, with `copy` overloads that encode the struct's image,
+  copy Go's byte count, and decode a destination back into the box. No GC allocation per call.
+- The converter emits a slice of `(*[N]byte)(unsafe.Pointer(P))` that is a direct argument of `copy`, where N is the
+  size of `*P` and `*P` is a reference-bearing struct, as `copy(@unsafe.GoImage(P).slice(), ...)`. Every other use
+  of such a view keeps its arm-2a refusal.
+- Footprint: production 0 files on windows, linux and darwin. The darwin syscall `-tests` emission moves by exactly
+  that line in getdirentries_test.cs.
 
-The read: os-matrix sweep-shard run 42740799606 at master 9b8af3bd30, both RIDs, "matched 32 of 33 Go / 33 C#
-verdicts; disclosed 1; undisclosed divergences 0". The seam's own head read the same (run 42664200286). The .3 reading
-was 29 + 1 with 3 undisclosed. Evidence: docs/phase4/rebank-1.26.10.3/darwin/reread/SIG-2R.tsv. (b), `TestGetfsstat`,
-is not among the .3 read's divergences or this one's.
+The read: os-matrix sweep-shard run 42664200286 at the seam's head d86dfc19ba, both RIDs, "matched 32 of 33 Go / 33 C#
+verdicts; disclosed 1; undisclosed divergences 0". It was the .3 reading's 29 + 1 + 3 undisclosed. The arch-strict rule
+derives `darwin: 32 + 1` (evidence docs/phase4/rebank-1.26.10.3/darwin/reread/SIG-2R.tsv). (b), `TestGetfsstat`, is not among
+the .3 read's divergences or this one's.
 
-— C1 (2026-11-10)
+— C1 (2026-11-09)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

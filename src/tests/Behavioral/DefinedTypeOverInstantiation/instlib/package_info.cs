@@ -27,6 +27,8 @@ using static go.go.instlib_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoTypeAlias("Alias", "go.go.instlib_package.Pair<go.@string>")]
+[assembly: GoTypeAlias("Alias2", "go.go.instlib_package.Pair<go.@string>")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -49,7 +51,7 @@ using static go.go.instlib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAkUuIKC")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAwUAAMUgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

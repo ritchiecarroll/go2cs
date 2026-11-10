@@ -487,7 +487,15 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 					aliasQualifier = qualifier
 				}
 
-				return fmt.Sprintf("%s.%s[%s]", aliasQualifier, obj.Name(), strings.Join(args, ", "))
+				// The member as the producing package declares it: Δ-renamed when its name collides with a
+				// method or function there (`coll.ΔSet<T>`; see foreignRenamedGenericMember).
+				member := obj.Name()
+
+				if renamed, ok := foreignRenamedGenericMember(obj); ok {
+					member = renamed
+				}
+
+				return fmt.Sprintf("%s.%s[%s]", aliasQualifier, member, strings.Join(args, ", "))
 			}
 
 			// A SAME-PACKAGE instantiated generic must ALSO render structurally — each type ARGUMENT
@@ -730,6 +738,12 @@ func (v *Visitor) getFullyQualifiedTypeName(t types.Type, isUnderlying bool) str
 					} else {
 						args[i] = v.getFullyQualifiedTypeName(typeArgs.At(i), isUnderlying)
 					}
+				}
+
+				// A Δ-renamed foreign generic names its declared member, as the alias-qualified twin does
+				// (see foreignRenamedGenericMember).
+				if renamed, ok := foreignRenamedGenericMember(obj); ok {
+					baseName = getSanitizedImport(packageClassPath(pkg.Path(), pkg.Name())+PackageSuffix) + "." + renamed
 				}
 
 				return baseName + "[" + strings.Join(args, ", ") + "]"

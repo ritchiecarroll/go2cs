@@ -724,12 +724,17 @@ func mergeWarningEntries(coreDir string, targets []string, emissions []*platform
 				finalPath := relPath
 				logical := relPath
 
-				if folder, rest, found := strings.Cut(relPath, "/"); found && folder == goos && !strings.Contains(rest, "/") {
+				// A section staged in one of this target's key folders (its GOOS, GOARCH or pair folder).
+				if folder, rest, found := strings.Cut(relPath, "/"); found && layoutFolderServes(folder, emission.target) && !strings.Contains(rest, "/") {
 					logical = rest
 				}
 
 				if plan, planned := plans[path.Join(pkg, logical)]; planned {
-					if plan.class == artifactIdentical {
+					// The key folder the merge homed this target's copy in; a plan that does not record
+					// one keeps the GOOS reading every plan had before the arch axis.
+					if home, homed := plan.homes[emission.target]; homed {
+						finalPath = path.Join(home, logical)
+					} else if plan.class == artifactIdentical {
 						finalPath = logical
 					} else {
 						finalPath = goos + "/" + logical

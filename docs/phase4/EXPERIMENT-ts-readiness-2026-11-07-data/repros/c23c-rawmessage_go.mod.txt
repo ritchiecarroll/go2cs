@@ -1,0 +1,3 @@
+module repro/c23c-rawmessage
+
+go 1.26

@@ -1,0 +1,45 @@
+# projstatus.py <tree> <stage3 console log> <errors.log> : per-csproj BUILT / FAILED / BLOCKED over <tree>/_all.slnx.
+# BUILT = an "<asm> -> ...dll" line; FAILED = a project with a compiler error; BLOCKED = neither (a dependency failed).
+# For each BLOCKED project, names the FAILED projects in its transitive reference closure (the first causes it waits on).
+import os, re, sys, collections
+sys.stdout.reconfigure(encoding='utf-8')
+tree, log, errs = sys.argv[1], sys.argv[2], sys.argv[3]
+slnx = open(os.path.join(tree, '_all.slnx'), encoding='utf-8').read()
+projs = [os.path.normcase(os.path.join(tree, p)) for p in re.findall(r'Path="([^"]+)"', slnx)]
+asm = {os.path.splitext(os.path.basename(p))[0]: p for p in projs}
+built = set()
+for l in open(log, encoding='utf-8-sig', errors='replace'):
+    m = re.match(r'^\s*(?:\d+>)?\s*(\S+) -> .*\.dll\s*$', l)
+    if m and m[1].lower() in asm: built.add(asm[m[1].lower()])
+failed = collections.Counter()
+for l in open(errs, encoding='utf-8-sig', errors='replace'):
+    m = re.search(r'error [A-Z]+\d+:.*\[([^\]]+\.csproj)\]\s*$', l)
+    if m: failed[os.path.normcase(m[1])] += 1
+refs = {}
+for p in projs:
+    t = open(p, encoding='utf-8-sig', errors='replace').read()
+    rs = []
+    for r in re.findall(r'<ProjectReference\s+Include="([^"]+)"', t):
+        r = r.replace('$(go2csPath)', '')
+        rp = os.path.normcase(os.path.normpath(os.path.join(os.path.dirname(p), r)))
+        if rp in set(projs): rs.append(rp)
+    refs[p] = rs
+def closure(p, seen=None):
+    seen = set() if seen is None else seen
+    for r in refs.get(p, []):
+        if r not in seen: seen.add(r); closure(r, seen)
+    return seen
+short = lambda p: os.path.splitext(os.path.basename(p))[0]
+blocked = [p for p in projs if p not in built and p not in failed]
+print(f'csproj {len(projs)}  BUILT {len(built)}  FAILED {len(failed)}  BLOCKED {len(blocked)}')
+print('\n-- FAILED (unique error lines incl. MSBuild repeats)')
+for p, n in failed.most_common(): print(f'{n:6} {short(p)}')
+reach = collections.Counter()
+for p in blocked:
+    for f in closure(p) & set(failed): reach[f] += 1
+print('\n-- downstream BLOCKED per FAILED project')
+for p, n in reach.most_common(): print(f'{n:6} {short(p)}')
+print('\n-- BLOCKED (waiting on)')
+for p in sorted(blocked, key=short):
+    print(f'  {short(p)}  <- {", ".join(sorted(short(f) for f in closure(p) & set(failed))) or "?"}')
+print('\n-- BUILT'); print('  ' + '\n  '.join(sorted(short(p) for p in built)))

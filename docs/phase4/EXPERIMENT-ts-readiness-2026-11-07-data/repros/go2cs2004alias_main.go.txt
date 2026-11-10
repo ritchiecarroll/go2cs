@@ -1,0 +1,18 @@
+package main
+
+// TS dep: go-json-experiment/json options.go:266 `type marshalersOption Marshalers`, with
+// arshal_funcs.go `type Marshalers = typedMarshalers` and `type typedMarshalers = typedArshalers[jsontext.Encoder]`.
+type G[T any] struct {
+	v T
+	n int
+}
+
+type A = G[int]
+
+type D A // a defined type over an instantiated generic struct, through an alias
+
+func main() {
+	d := D{v: 7, n: 2}
+	g := (*A)(&d)
+	println(d.v+d.n, g.v) // Go: 9 7
+}

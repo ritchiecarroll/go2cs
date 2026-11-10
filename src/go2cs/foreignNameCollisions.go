@@ -192,3 +192,31 @@ func definedTypeSpecRHS(pkg *packages.Package, name string) ast.Expr {
 
 	return nil
 }
+
+// foreignRenamedGenericMember returns the member name another package's GENERIC defined type is declared under when
+// that package Δ-renames it, because the type's name is also one of the package's method or function names: tsc's
+// `collections.Set[T]` beside `OrderedMap.Set` is declared `ΔSet<T>` (TS readiness C22, 1,141 references across the
+// tsc closure). A non-generic renamed type is reached through its `pkgꓸName` `global using` alias, but C# cannot
+// alias an open generic, so every spelling of a foreign generic -- the type-driven renderer, a composite literal,
+// a type assertion -- names the renamed member directly: `coll.ΔSet<@string>`.
+//
+// The test is the one the producer applies (typeCollisionAliases, from the package's own scope), so a reference
+// spells the name the declaration carries whether or not the producer has been converted in this run. A Go type
+// ALIAS is never collision-renamed, and an un-renamed or non-generic type returns false and keeps its spelling.
+func foreignRenamedGenericMember(obj *types.TypeName) (string, bool) {
+	if obj == nil || obj.IsAlias() || obj.Pkg() == nil {
+		return "", false
+	}
+
+	named, isNamed := obj.Type().(*types.Named)
+
+	if !isNamed || named.TypeParams().Len() == 0 {
+		return "", false
+	}
+
+	if !packageHasMethodNamed(obj.Pkg(), obj.Name()) {
+		return "", false
+	}
+
+	return getCollisionAvoidanceIdentifier(obj.Name()), true
+}

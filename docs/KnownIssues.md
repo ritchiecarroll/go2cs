@@ -58,6 +58,45 @@ architecture-specific path in the standard library.
      so a linux/arm64 host needs a flavour of its own (owner ruling, 2026-11-09: in .4). -->
 
 
+## The packages do not ship linux-arm64
+
+linux-arm64 is not supported. The go.* packages ship `win-x64`, `linux-x64`, `osx-x64` and `osx-arm64`. A package
+whose code differs by platform carries one folder per platform under `runtimes/`, and a platform without one gets
+the Windows build in `lib/`. A build resolves its platform the way .NET does at run time, so `linux-musl-x64`
+(Alpine) uses the `linux-x64` folder. For a platform that resolves to no folder, the build reports it:
+- **`GO2CS3003`, an error**, on another operating system, or on Linux with another architecture: linux-arm64 would
+  run the Windows build, and the `linux-x64` build makes x64 system calls. The message names the platform and the
+  first package without a folder for it.
+- **`GO2CS3004`, a warning**, on a Windows platform the packages do not ship (`win-arm64`): the Windows build is
+  that operating system's, so the program runs. What Go decides by architecture when the package was converted
+  follows `amd64`.
+
+A cross-build for a shipped platform from an unshipped host is not affected: it names its platform with
+`-r <rid>` (`RuntimeIdentifier`), and that platform has its folder.
+
+**To avoid it**, build for one of the four shipped platforms. A build that only needs to compile, and knowingly wants
+the Windows build (a test harness that never runs the program, say), passes `-p:GoAllowReferenceFlavor=true`. The
+program then runs the Windows build wherever it runs. The property counts only on the command line: set in a
+project file it changes nothing, so a library cannot switch the check off for the projects that build it.
+
+A portable app built on a shipped platform and then RUN on another one is out of the build's sight. At start-up
+it prints a warning on standard error instead: for another operating system, and for the Linux build on another
+architecture (`linux-x64` run on `linux-arm64`).
+<!-- Source: DESIGN-linux-arm64-flavour.md section 0 (lane G, claude/g-la64-design 7831a23193), SEAT 0, cut by C2 as
+     claude/c2-la64-seat0 on master 0c553534df, with REVIEW-linux-arm64-flavour.md F4 folded in (COORD ruling R2,
+     2026-11-09: its own target, RID-split by runtimes/ presence, RID-graph aware, win-arm64 a warning, the run-time
+     architecture check). Mechanism: src/core/golib/buildTransitive/go.lib.targets, GoRefuseUnshippedRid, over
+     _GoResolveRidFlavors (a breadth-first walk of $(RuntimeIdentifierGraphPath); measured: linux-musl-x64 imports
+     linux-musl and linux-x64, win-arm64 imports only win, in SDK 10.0.403's PortableRuntimeIdentifierGraph.json).
+     Gate: src/tests/PackageTests/RidCompileAsset/test-rid-compile-asset.ps1, read red-first against go.* 1.26.10.3 on
+     2026-11-09: against master's go.lib.targets the UNSHIPPED, swap-off, project-file opt-out, ALPINE and WIN-ARM64
+     arms fail (the linux-arm64 build BUILT against lib/; the Alpine build failed CS0426 against lib/); with the change
+     all ten arms pass, and each of the swap-off and project-file arms fails alone against a copy mutated in that one
+     respect. The run-time check is GoHostOfRecord.Describe (src/core/golib/GoHostOfRecord.cs), called through
+     Verify(GOOS, GOARCH) from src/core/runtime/hostofrecord_impl.cs, gated by src/tests/GolibTests/HostOfRecordTests.cs
+     (red first: the linux/amd64-on-arm64 case failed before the architecture check). The linux-arm64 flavour itself
+     is the design's seat S6, which turns the error into a no-op for that platform. -->
+
 ## On macOS, a `go` statement past the system's thread limit ends the program
 
 Each goroutine is an operating-system thread, and macOS caps how many threads one process may run. When a
@@ -72,6 +111,21 @@ the limit was about 2,000 goroutines on Apple silicon and about 3,000 on Intel; 
 <!-- Source: C1's run 42497561630 (claude/c1-darwin-threadcap a85e0cf11), on GitHub-hosted macOS runners: osx-arm64
      (macOS 15.8.2, kern.num_taskthreads 2048, first failure at 2,027 live goroutines) and osx-x64 (macOS 15.7.9, 3072,
      first failure at 3,051). The figures and their provenance sit beside the Limitations bullet. -->
+
+## On Linux, a program with more than about 16,000 goroutines alive ends
+
+Each goroutine is an operating-system thread, and on Linux each .NET thread uses about four of the process's memory
+mappings. Linux caps the mappings at the `vm.max_map_count` setting, 65,530 by default. When a program has about
+16,000 goroutines alive, the next `go` statement fails with `Fatal error. Failed to create RW mapping for RX memory`,
+and the program ends; nothing can catch it. A Go goroutine is not a thread, so the limit does not apply to Go itself.
+
+**To avoid it**, bound how many goroutines are alive at once, with a worker pool for example. Two settings may raise
+the limit, but neither has been measured: `DOTNET_EnableWriteXorExecute=0` in the environment, which should cut the
+mappings each thread uses, and a larger `vm.max_map_count` on the machine.
+<!-- Source: lane R's M:N R6 run, 2026-11-09, at master 0bbe3ab6e5: ParkStorm (DESIGN-mn-scheduler-sizing.md Appendix A),
+     20,000 goroutines, linux flavour, Release, on R-WSL (Ubuntu 22.04, kernel 6.18, vm.max_map_count 65530). All six
+     runs (bounded reserve 16 MiB and 1 MiB, three each) aborted at 16,226-16,229 threads. The record is the dated O1
+     amendment in docs/phase4/DESIGN-mn-scheduler.md. -->
 
 ## With go2cs 1.26.10.2 or earlier, a program converted with local standard-library references runs its standard library built Debug
 

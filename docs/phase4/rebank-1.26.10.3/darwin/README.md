@@ -197,7 +197,32 @@ The counts meet the arch-strict rule (equal verdicts, nothing undisclosed, 551 +
 `darwin: 551 + 4 (osx-x64; osx-arm64: 552 + 3)`. `disclosed` and `divergent` are the summary's disclosed count (net
 names no host-fatal test) and `new` is its undisclosed count; every cell is read from the job log.
 
-## The batch 279 re-read at 9b8af3bd30 (`reread/SIG-1R2.tsv`, `SIG-2R.tsv`, `GOARCH-279.tsv`, COORD 2026-11-10)
+## The syscall re-read with the reinterpret seam at d86dfc19ba (`reread/SIG-2R.tsv`, COORD 2026-11-09, ruled BANK)
+
+One row, syscall, on both RIDs at `claude/c1-reinterpret-seam` `d86dfc19ba880545687baec40cbe997ed665d5cb`, from
+os-matrix sweep-shard run 42664200286 (filter `syscall`). The ref is the seam's own head, not master: the reading needs
+the reinterpret seam (docs/phase4/DESIGN-reinterpret-seam.md), ACCEPTED for batch 279. The segment is only true of a
+tree that carries the seam, so this record lands with it or after it.
+
+At .3 (C1-12, then SIG-2) syscall failed on both RIDs on exactly the `TestGetdirentries` residue: 29 matched, 1
+disclosed, 3 undisclosed (the parent and `/n=10`, `/n=1000`). The test decodes each record with
+`copy((*[unsafe.Sizeof(dirent)]byte)(unsafe.Pointer(&dirent))[:], data)`. `syscall.Dirent` holds `Name [1024]int8`,
+a managed `array<sbyte>`, so the view was an order token and the copy panicked on arm 2a. The seam emits it as
+`copy(@unsafe.GoImage(Ꮡdirent).slice(), data)`, which copies through the struct's Go-layout image.
+
+Both RIDs validate:
+- osx-arm64 (278 s): "matched 32 of 33 Go / 33 C# verdicts; disclosed 1; undisclosed divergences 0".
+- osx-x64 (500 s): the same line.
+
+The sweep reports CVAC (no darwin expectation; windows column 66), and the summary's status is `validated`. A matched
+verdict is Go's verdict, and Go passes the three `TestGetdirentries` keys, so the three lines that moved from
+undisclosed to matched are passes on the C# side. The manifest's one darwin-scoped entry is `TestExecPtrace`
+(host-limit). The counts meet the arch-strict rule (both RIDs validated at equal counts, nothing undisclosed), so the
+guard derives `darwin: 32 + 1` with no note. `disclosed` and `divergent` are the summary's disclosed count, and `new`
+is its undisclosed count. The stem `SIG-2R` extends `SIG-2`, so for this row it supersedes SIG-2 in the wave. Every
+cell is read from the job log.
+
+## The batch 279 re-read at 9b8af3bd30 (`reread/SIG-1R2.tsv`, `SIG-2R2.tsv`, `GOARCH-279.tsv`, COORD 2026-11-10)
 
 Five rows on both RIDs at master `9b8af3bd3017e52c1e1f161dd9fbf0dc2a58ebb9`, from ONE os-matrix sweep-shard, run
 42740799606, filter `runtime,debug/buildinfo,net/http/pprof,go/internal/gcimporter,syscall`. Batch 279 landed:
@@ -207,8 +232,9 @@ This is the first read with every cell from the run's ARTIFACTS: each row's `go2
 with `gh run download`, which this box can now reach. The job log agrees on every count.
 
 The file split follows the re-dispatch stem rule. In the reread wave a row's latest file must extend its earlier stem:
-`SIG-1R2` extends `SIG-1R` for runtime, and `SIG-2R` extends `SIG-2` for syscall. The other three rows have no
-earlier reread file, so they sit in `GOARCH-279`.
+`SIG-1R2` extends `SIG-1R` for runtime, and `SIG-2R2` extends `SIG-2R` for syscall. `SIG-2R` is the 2026-11-09 read at
+the seam's head, above, which batch 280 landed. The other three rows have no earlier reread file, so they sit in
+`GOARCH-279`.
 
 | row | osx-x64 | osx-arm64 | banks |
 |:--|:--|:--|:--|

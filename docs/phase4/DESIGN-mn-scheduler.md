@@ -190,6 +190,54 @@ landed half captures that only for the goroutines proved bounded, and only down 
 **Behaviour:** Windows and Linux move toward about 10⁵ parked. **macOS gains nothing**: the cap counts threads.
 **Visual:** none. **Seam:** as O0. **Sizing:** 1 lane-week (the census plus one measurement), plus 0.5 to retune.
 
+> **Amended 2026-11-09 (lane R, ruling R6: O1's remainder, measured).** A dated block; the paragraphs above stand as
+> written. Everything below was measured at master `0bbe3ab6e5`.
+>
+> **The census, through the converter's own analysis.** Every `go` statement in the standard library was run through
+> `newStackBoundsAnalysis` and `callee`, the call `goroutineStackBounded` makes:
+>
+> | `go` statements proved bounded | windows | linux | darwin |
+> |---|---|---|---|
+> | standard library, production files (the `-stdlib` emission) | 1 / 99 | 1 / 98 | 1 / 99 |
+> | standard library, test files (the `-tests` emission) | 151 / 842 | 154 / 880 | 152 / 866 |
+>
+> The one production site is in `net/http`'s bundled HTTP/2 code, and the committed tree records exactly that one. The
+> control, `GoroutineParkStorm`, reads 1 / 1 on each target, equal to its committed record. What defeats the proof, in
+> production code on every target: a call through a func value (28–29), a body-less function given code
+> (`runtime.systemstack`, 23–24), and interface method calls (`Done`, `Close`, `Read`, `WriteTo`, …). So in shipped
+> standard-library code the bounded pool is about one site; the gain is for a program's own statically closed `go`
+> bodies, the ParkStorm shape.
+>
+> **`systemstack` is not a lever.** golib runs `systemstack(fn)` as a plain `fn()` (`runtime/stubs_impl.cs`), so a census
+> arm followed its function argument. It moved **0** sites on any target: the proof then fails one step deeper, on
+> genuine recursion in the runtime's Go source (`runtime.lock`, `runtime.throw`), and on darwin on `runtime.asmcgocall`.
+>
+> **The bounded reserve stays at 16 MiB (the retune closes at no change).** ParkStorm (the sizing note's Appendix A),
+> 100,000 goroutines parked at once, Windows x64 Release on R-LAPTOP, three runs per arm in alternating order:
+>
+> | Bounded reserve | time to park (s) | median | private at park | release (s) |
+> |---|---|---|---|---|
+> | 16 MiB (default) | 81.54, 87.24, 81.39 | 81.54 | 5.73 GB | 76.8–78.6 |
+> | 1 MiB | 79.16, 79.25, 80.97 | 79.25 | 5.33 GB | 74.8–77.2 |
+> | 256 MiB (reference) | 348.63 | — | 5.99 GB | 81.4 |
+>
+> 1 MiB is 1.029x faster to park and about 0.4 GB lighter at 10⁵, for one sixteenth of the headroom on a deep but finite
+> call chain, where an overflow cannot be caught. That is not worth it. The single-run sweep beside
+> `DefaultBoundedStackReserve` (`runtime/Goroutine.cs`, 2026-10-26: 1 MiB 67 s, 16 MiB 70 s) read 1.04x; these replicates
+> agree.
+>
+> **Correction: Linux does NOT move toward about 10⁵ parked.** At the stock `vm.max_map_count` (65,530), a converted
+> program ends at about **16,200** live goroutines, whatever the reserve. ParkStorm with 20,000 goroutines on R-WSL
+> (Ubuntu 22.04, kernel 6.18), three runs each at 16 MiB and 1 MiB: every run aborted at 16,226–16,229 threads with
+> `Fatal error. Failed to create RW mapping for RX memory. This can be caused by insufficient memory or hitting the
+> limit of memory mappings on Linux (vm.map_max_count).`, thrown from `Goroutine.StartWithCreator`. Each .NET thread
+> costs about four memory mappings (its stack, its guard page and the runtime's double mapping of executable memory),
+> and 65,530 / 4 is about 16,000. The failure is a fatal abort, not a catchable exception. A Go goroutine is not a
+> thread, so the limit does not apply to Go (not measured on this machine). Two levers exist and are **unmeasured**: `DOTNET_EnableWriteXorExecute=0`, which should remove the runtime's
+> double mapping, and raising `vm.max_map_count`, a machine-wide setting. Neither is recommended here. So O1's
+> behaviour line reads, corrected: **Windows** moves toward about 10⁵ parked; **Linux** stops near 16,000 at stock
+> settings; **macOS** gains nothing (its cap counts threads).
+
 ### O2 — runtime green threads (§4a)
 
 **Mechanism.** A forked CoreCLR, shipped as a runtime pack, with golib's parks made green-aware.

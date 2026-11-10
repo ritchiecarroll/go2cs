@@ -1667,6 +1667,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				rhsExpr = narrowedChan
 			}
 
+			// A slice- or map-cored type parameter assigned to its core type (see coreTypeParamValue).
+			if materialized := v.coreTypeParamValue(v.info.TypeOf(lhs), v.info.TypeOf(rhs), rhsExpr); materialized != "" {
+				rhsExpr = materialized
+			}
+
 			// Narrow-integer arithmetic RHS assigned to a narrow LHS needs a cast back to the LHS
 			// type (see narrowArithmeticCastType). The existing bitwise-assign / `&^=` wrappers take
 			// precedence (their own cast already applies).
@@ -2263,6 +2268,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					// the RHS type, so chanDirCargoName finds no direction and this is a no-op.
 					if narrowedChan := v.chanDirNarrowedValue(v.info.TypeOf(lhs), v.info.TypeOf(rhs), rhsExpr); narrowedChan != "" {
 						rhsExpr = narrowedChan
+					}
+
+					// A slice- or map-cored type parameter assigned to its core type (see coreTypeParamValue).
+					if materialized := v.coreTypeParamValue(v.info.TypeOf(lhs), v.info.TypeOf(rhs), rhsExpr); materialized != "" {
+						rhsExpr = materialized
 					}
 
 					// Give a discarded method group or lambda the target type C# cannot infer. The

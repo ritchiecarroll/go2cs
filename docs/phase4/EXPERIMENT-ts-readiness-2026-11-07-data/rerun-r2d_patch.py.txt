@@ -1,0 +1,54 @@
+# r2d_patch.py <tree> <r2C tree> : re-run pass D = pass B (r2b_patch.py) + the open GO2CS2004 row hand-OWNED at its
+# real TS site. Pass C (r2c_patch.py: name the underlying instantiated generic in the declaration comment) reaches
+# GO2CS2004's other half: go2cs-gen's wrapper forwards the generic's fields with the type parameter unsubstituted
+# (`slice<typedArshaler<Coder>> fncVals`, CS0246 'Coder'). A generated file cannot be patched, so pass D takes that
+# generated wrapper from the pass-C build, substitutes the type argument in the forwarded field types, and declares it
+# by hand in package_info.cs (which go2cs-gen's converted-Go-type rule never reads), dropping the [GoType] attribute
+# so the generator does not emit it a second time. The converted declaration in options.cs is removed.
+import os, re, sys
+
+ROOT, PASSC = sys.argv[1], sys.argv[2]
+J = os.path.join(ROOT, r"pkg\github.com\go-json-experiment\json")
+log = []
+u = lambda s: s.encode("utf-8")
+
+def sub(path, pattern, repl, count, cid):
+    b = open(path, "rb").read()
+    n = b.count(pattern)
+    if n != count:
+        sys.exit(f"{cid}: expected {count} match(es) in {path}, found {n}")
+    open(path, "wb").write(b.replace(pattern, repl))
+    log.append(f"{cid}: {n} x {os.path.relpath(path, ROOT)}")
+
+gen = [d for d, _, fs in os.walk(os.path.join(PASSC, ".artifacts", "gen")) if d.endswith("go2cs.TypeGenerator")]
+CODER = "global::go.github.com.go_json_experiment.json.jsontext_package.Δ{}"
+for name, coder in (("marshalersOption", "Encoder"), ("unmarshalersOption", "Decoder")):
+    src = [os.path.join(d, f"go.github.com.go_json_experiment.json_package.{name}.g.cs") for d in gen]
+    src = [p for p in src if os.path.exists(p)]
+    if len(src) != 1:
+        sys.exit(f"GO2CS2004: expected one generated {name} wrapper under {PASSC}, found {len(src)}")
+    t = open(src[0], encoding="utf-8-sig").read().replace("\r\n", "\n")
+    start = t.index(f"    internal partial struct {name} :")
+    end = t.rindex("\n}")  # closes json_package
+    body = t[start:end].rstrip() + "\n"
+    n = body.count("typedArshaler<Coder>")
+    if n != 2:
+        sys.exit(f"GO2CS2004: expected 2 unsubstituted typedArshaler<Coder> in {name}, found {n}")
+    body = body.replace("typedArshaler<Coder>", "typedArshaler<" + CODER.format(coder) + ">")
+    # The generic typedArshalers<Coder> carries no generated ΔClone, so the wrapper's by-value copies are plain
+    # struct copies here (Go copies the struct shallowly; the sync.Map's own copy is the same either way at compile time).
+    for a, b in (("value.m_value.ΔClone()", "value.m_value"), ("m_value.ΔClone()", "m_value"), ("(value.ΔClone())", "(value)")):
+        body = body.replace(a, b)
+    if ".ΔClone()" in body.replace("public " + name + " ΔClone()", ""):
+        sys.exit(f"GO2CS2004: a ΔClone call on the generic is left in {name}")
+    if "Coder>" in body.replace(CODER.format(coder), ""):
+        sys.exit(f"GO2CS2004: a type parameter is left in {name}")
+    raw = (f"partial struct {name} /*struct{{github.com.go_json_experiment.json_package.nonComparable; fncVals "
+           f"<>github.com/go_json_experiment/json.typedArshaler<github.com/go_json_experiment/json/jsontext.{coder}>; "
+           f"fncCache sync.Map; fromAny bool}}*/;")
+    sub(os.path.join(J, "options.cs"), u(raw), u(f"// GO2CS2004 hand-own: {name} is declared in package_info.cs"), 1, "GO2CS2004")
+    pi = os.path.join(J, "package_info.cs")
+    eol = b"\r\n" if b"\r\n" in open(pi, "rb").read() else b"\n"
+    sub(pi, u(f"    internal partial struct {name} {{}}"),
+        u("// GO2CS2004 hand-own (TS readiness re-run): go2cs-gen's wrapper with the type argument substituted\n" + body).replace(b"\n", eol).rstrip(eol), 1, "GO2CS2004")
+print("\n".join(log))

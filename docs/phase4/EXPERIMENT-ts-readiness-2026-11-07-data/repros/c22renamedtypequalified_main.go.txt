@@ -1,0 +1,11 @@
+package main
+
+import "repro/c22renamedtypequalified/lib"
+
+func use(e *lib.Encoder) int { return 1 }
+
+func main() {
+	t := lib.New(lib.Kind('{'))
+	k := t.Kind()
+	println(k == lib.Kind('{'), use(lib.NewEncoder(3))) // Go: true 1
+}

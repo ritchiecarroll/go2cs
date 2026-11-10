@@ -1,0 +1,77 @@
+== pass A: stage3 r2A rc=1 t=241s go2cs=f09e762659
+csproj 138  BUILT 54  FAILED 3  BLOCKED 81
+
+-- FAILED (unique error lines incl. MSBuild repeats)
+     7 github.com.go-json-experiment.json.jsontext
+     4 github.com.zeebo.xxh3
+     2 github.com.microsoft.typescript.tsc.internal.vfs.internal
+
+-- downstream BLOCKED per FAILED project
+    79 github.com.go-json-experiment.json.jsontext
+    59 github.com.zeebo.xxh3
+    17 github.com.microsoft.typescript.tsc.internal.vfs.internal
+
+== pass B: stage3 r2B rc=1 t=260s go2cs=f09e762659
+csproj 138  BUILT 59  FAILED 1  BLOCKED 78
+
+-- FAILED (unique error lines incl. MSBuild repeats)
+   184 github.com.go-json-experiment.json
+
+-- downstream BLOCKED per FAILED project
+    78 github.com.go-json-experiment.json
+
+== pass C: stage3 r2C rc=1 t=244s go2cs=f09e762659
+csproj 138  BUILT 59  FAILED 1  BLOCKED 78
+
+-- FAILED (unique error lines incl. MSBuild repeats)
+     4 github.com.go-json-experiment.json
+
+-- downstream BLOCKED per FAILED project
+    78 github.com.go-json-experiment.json
+
+== pass D: stage3 r2D rc=1 t=315s go2cs=f09e762659
+csproj 138  BUILT 64  FAILED 3  BLOCKED 71
+
+-- FAILED (unique error lines incl. MSBuild repeats)
+   768 github.com.microsoft.typescript.tsc.internal.lsp.lsproto
+     6 github.com.microsoft.typescript.tsc.internal.collections
+     1 github.com.microsoft.typescript.tsc.internal.ipc
+
+-- downstream BLOCKED per FAILED project
+    71 github.com.microsoft.typescript.tsc.internal.collections
+    40 github.com.microsoft.typescript.tsc.internal.ipc
+    19 github.com.microsoft.typescript.tsc.internal.lsp.lsproto
+
+== pass E: stage3 r2E rc=1 t=331s go2cs=f09e762659
+csproj 138  BUILT 70  FAILED 3  BLOCKED 65
+
+-- FAILED (unique error lines incl. MSBuild repeats)
+    72 github.com.microsoft.typescript.tsc.internal.lsp.lsproto
+     7 github.com.microsoft.typescript.tsc.internal.project.dirty
+     2 github.com.microsoft.typescript.tsc.internal.core
+
+-- downstream BLOCKED per FAILED project
+    65 github.com.microsoft.typescript.tsc.internal.core
+    19 github.com.microsoft.typescript.tsc.internal.lsp.lsproto
+    12 github.com.microsoft.typescript.tsc.internal.project.dirty
+
+== pass F: stage3 r2F rc=1 t=395s go2cs=f09e762659
+csproj 138  BUILT 78  FAILED 2  BLOCKED 58
+
+-- FAILED (unique error lines incl. MSBuild repeats)
+     3 github.com.microsoft.typescript.tsc.internal.project.dirty
+     2 github.com.microsoft.typescript.tsc.internal.ast
+
+-- downstream BLOCKED per FAILED project
+    58 github.com.microsoft.typescript.tsc.internal.ast
+    12 github.com.microsoft.typescript.tsc.internal.project.dirty
+
+== pass G: stage3 r2G rc=1 t=1121s go2cs=f09e762659
+csproj 138  BUILT 79  FAILED 1  BLOCKED 58
+
+-- FAILED (unique error lines incl. MSBuild repeats)
+   533 github.com.microsoft.typescript.tsc.internal.ast
+
+-- downstream BLOCKED per FAILED project
+    58 github.com.microsoft.typescript.tsc.internal.ast
+

@@ -1,0 +1,5 @@
+package main
+
+func top(l int) uintptr { return uintptr(l) &^ 15 } // control: no alias
+
+func main() { println(top(37), top(16)) } // Go: 32 16
