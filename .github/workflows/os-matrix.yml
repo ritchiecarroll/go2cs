@@ -1227,6 +1227,9 @@ jobs:
           # The dotnet arms (TestCgoMirrorsCompileAndHoldTheirLayoutUnderDotnet) skip where no .NET SDK is installed; here
           # one always is, so its absence must read red, not skipped.
           GO2CS_REQUIRE_DOTNET: '1'
+          # The load-name capture arms (TestCgoCapture*) link with this leg's C compiler, which every hosted runner has,
+          # so a missing one reads red, not skipped.
+          GO2CS_REQUIRE_CC: '1'
         run: |
           $ErrorActionPreference = 'Continue'
 

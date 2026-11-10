@@ -82,6 +82,8 @@
     <None Include="$(MSBuildThisFileDirectory)cgoDeclarations_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDynamicImports.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoGateRefusal_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoLibraryCapture.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoLibraryCapture_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoMirrors.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoMirrors_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoPseudoPackage.go" />
