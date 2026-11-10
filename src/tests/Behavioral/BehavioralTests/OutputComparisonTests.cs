@@ -542,6 +542,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckElidedStructInterfaceField() => CheckTarget("ElidedStructInterfaceField");
 
     [TestMethod]
+    public void CheckEmbedDepthMethodPromotion() => CheckTarget("EmbedDepthMethodPromotion");
+
+    [TestMethod]
     public void CheckEmbedDirectiveForms() => CheckTarget("EmbedDirectiveForms");
 
     [TestMethod]
