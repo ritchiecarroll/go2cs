@@ -45,8 +45,8 @@ package's Go-callable surface compiles and resolves, with library resolution pin
 | R5 | The per-member-when-reached deferral is **ruled out**: every emitted struct crossing gets R2-R4, reached or not. | review correction 3 |
 | R6 | Library resolution is **pinned** (`[DefaultDllImportSearchPaths]` or an explicit `NativeLibrary` resolver), stated here, not discovered in Phase 6. | PLAN §5.4 item 2; review correction 4 |
 | R7 | No `#cgo` flag passes through beyond `-lfoo` unless it is checked against an allowlist modelled on Go's `cmd/go/internal/work/security.go`. | PLAN §5.4 item 1 |
-| R8 | **Every generated wrapper crosses the seam**: `GoNativeCall.Enter(MayBlock)` before the call and `Exit()` in a `finally`. errno is read **between** the native return and `Exit()`. No `[SuppressGCTransition]` binding ever reaches the seam. | DESIGN-native-call-seam §3.5, §4.3, §7.1 |
-| R9 | Generated bindings are **build outputs, not corpus content**: git-ignored, and outside every byte-identity gate. | PLAN §5.2 |
+| R8 | **Every generated wrapper crosses the seam**: `GoNativeCall.Enter(MayBlock)` before the call and `Exit()` in a `finally`. errno is read **between** the native return and `Exit()`. No `[SuppressGCTransition]` binding ever reaches the seam. ⟶ §11.4: through the runtime forwarders. | DESIGN-native-call-seam §3.5, §4.3, §7.1 |
+| R9 | Generated bindings are **build outputs, not corpus content**: git-ignored, and outside every byte-identity gate. ⟶ §11.8: converter output, excluded by path. | PLAN §5.2 |
 | R10 | The output stays reachable under **trimming and R2R**; the production template trims. | PLAN §11.4 |
 
 ## 3. What the converter reads, and what it already has
@@ -349,7 +349,7 @@ parser, and the toolchain is already present.
 
 ## 8. Under M:N, and what Phase 2 does not change
 
-The wrapper's only scheduler contact is `GoNativeCall.Enter`/`Exit` (R8), so M:N changes nothing here. The seam's
+The wrapper's only scheduler contact is the seam bracket (R8; ⟶ §11.4, through the runtime forwarders), so M:N changes nothing here. The seam's
 contract already covers a goroutine that resumes on another worker. The rest also stands as designed:
 
 - errno is read inside the transition (§4.3);
@@ -417,6 +417,15 @@ a stack smash.
 where the pin scope covers the whole backing array. **Red** (increment 3): a wrapper handed `&xs[1]` refuses before
 the extern runs.
 
+**The native row has a second exception.** A `NativeBox<T>` minted FROM MANAGED STORAGE by a reinterpret-fallback arm
+carries a managed address or token, not a native address, and its retained-source slot names the box it came from
+(`src/core/golib/ж.NativeBox.cs`, the class remarks: "the wrapper copies from the retained source and never uses the
+address"). "Pass its address" would hand C a token to write through. **Revised:** a `NativeBox` whose retained source
+is set, or which aliases an order token, is never passed by address. It is refused by name, and the retained source is
+not silently copied either, because §11.1's one-struct rule cannot tell whether C writes past it. Only a `NativeBox`
+with no retained source, a genuinely native address, passes through. **Red** (increment 3): a wrapper handed a
+reinterpret-minted box refuses before the extern runs.
+
 ### 11.2 The size assertion, made able to fail (finding 2; RULED)
 
 §5.3's check cannot fail: under `LayoutKind.Explicit` with `Size = N`, `Unsafe.SizeOf` returns N by construction, and
@@ -428,7 +437,9 @@ could get wrong:
 
 The assertions run once per mirror, before its first crossing, and refuse by name: the struct, the field, both sizes.
 **Red** (increment 2): a planted UNDERFLOW, an `int` member where the Go type is 8 bytes, is refused naming that
-field. §5.3's second half stands: no assertion can see a library built against other headers. The run-time OS and
+field. It is planted in increment 2's own test, not in any converter path: the mirror for a test fixture struct with a
+C `long` member (8 bytes on the LP64 hosts the test reads) is generated with that one member's CLR type forced to
+`int` through a test-only override, and the emitted check must refuse it naming the struct and the member. §5.3's second half stands: no assertion can see a library built against other headers. The run-time OS and
 architecture check stays.
 
 ### 11.3 errno (finding 3)
@@ -450,9 +461,16 @@ per transition. A wrapper that skipped the runtime would show `_Grunning` where 
 reintroduced).
 
 **Revised:** the wrapper brackets with `runtime_package.syscallEntersyscall()` and `syscallExitsyscall()`
-(`src/core/runtime/syscall_managed_impl.cs:85/89` at master). **Red** (increment 3), as S-b's tests do: an
-`[UnmanagedCallersOnly]` probe called through the wrapper reads `GoCurrentGStatus()` (`:165`) and
-`GoNativeCall.TransitionDepth` from inside the call, and must see the syscall status and depth 1.
+(`src/core/runtime/syscall_managed_impl.cs:85/89` at master). **Red** (increment 3): an `[UnmanagedCallersOnly]` probe
+reads `GoCurrentGStatus()` (`:165`) and `GoNativeCall.TransitionDepth` from inside the call, and must see the syscall
+status and depth 1.
+
+**The red's route (RULED).** A `[LibraryImport]`-bound wrapper calls a C symbol, and a C symbol cannot reach a managed
+probe unless it is handed one. S-b's tests worked because `cgocaller` takes a function pointer. So the instrument is a
+**probe library** exporting a call-through, `void call_through(void (*fn)(void *), void *arg)`, which calls `fn(arg)`.
+The wrapper under test binds it, and the probe is the function pointer. The library lands IN increment 3, built by the
+`converter-cgo` leg's own C compiler (gcc, MinGW gcc or Apple clang), without waiting for the pinned toolchain, which is
+still the owner's decision.
 
 ### 11.5 Load-time names are captured per SYMBOL (finding 5)
 
@@ -463,14 +481,16 @@ reintroduced).
 - **ELF:** `--as-needed` drops a library no symbol references, so a probe that references nothing records nothing.
 
 **Revised:** the probe links one shared object that **references every symbol Phase 2 binds**. It then reads the
-symbol-to-library map from the import table (PE), `DT_NEEDED` plus `.dynsym` versioning (ELF), or `LC_LOAD_DYLIB` with
-the two-level namespace (Mach-O). It writes one `[LibraryImport]` per symbol, naming that symbol's library. A symbol
+symbol-to-library map from the import table (PE), or `LC_LOAD_DYLIB` with the two-level namespace (Mach-O). On ELF,
+`DT_NEEDED` plus `.dynsym` versioning maps only VERSIONED symbols to a library, so the probe asks the linker instead:
+`-Wl,--trace-symbol=<sym>` for each bound symbol (or a `-Map` file), falling back to one probe per `-l` where a
+linker lacks it. It writes one `[LibraryImport]` per symbol, naming that symbol's library. A symbol
 resolved statically, or not at all, is **refused by name**.
 
 ### 11.6 `_Cvar_` and `_Cfpvar_fp_` are refused (finding 6)
 
-§7 gave both no owner. Increment 0 recognizes them, so neither is dropped silently any more. Phase 2 **refuses each by
-name** until Phase 2-later:
+§7 gave both no owner. Phase 1 has recognized `_Cvar_` from the start, and increment 0 (`d20526ee99`, seated in
+batch 281) added `_Cfpvar_fp_`, so neither is dropped silently. Phase 2 **refuses each by name** until Phase 2-later:
 
 - `_Cvar_` (a C global) would be `NativeLibrary.GetExport` into a `NativeBox<T>`;
 - `_Cfpvar_fp_` would be the export's address as an `unsafe.Pointer`.
@@ -483,7 +503,9 @@ The CLR classifies a by-value struct for the native ABI from the **mirror's** fi
 the C compiler: a union carried as bytes, or a `float` inline array (an HFA on arm64). **Ruled:** Phase 2 passes and
 returns by value only structs whose members are integers and pointers, with no union and no inline array. Floats,
 unions and inline arrays by value are "Phase 2 later, measured per RID", and refused by name until then. The exit
-gate gains `inet_ntoa(struct in_addr)` as the by-value **argument** arm, beside `div` for the by-value result.
+gate gains `inet_ntoa(struct in_addr)` as the by-value **argument** arm on linux and darwin, beside `div` for the
+by-value result. **On windows `in_addr` is a union** (`S_un`), which this ruling refuses, so windows takes the probe
+library's (§11.4) exported two-`int` struct as its by-value argument arm instead (RULED).
 
 ### 11.8 The bindings file is converter output (finding 8; answers Q4)
 
@@ -500,8 +522,16 @@ R9's substance stands: the corpus is wholly `CGO_ENABLED=0`, so no corpus gate e
 
 `_Ctype_char` is `int8` on x64 and `uint8` on linux/arm64, so a mirror set is a property of the target, not of GOOS
 alone. **Ruled:** bindings follow the four-target LAYOUT RULE from the linux/arm64 work. The converter emits bindings
-per target and homes each file at its coarsest cover: a mirror set identical across a GOOS's architectures lands in
-`<goos>/`, and one that differs lands in `<goos>-<arch>/`. The header's target record (§4.1) names the cover, and the
+per target and homes each file at its coarsest cover, tried in the rule's order over its four keys:
+
+- **flat** (the package root), when the mirror set is identical on all four targets, as a set with no `long`, no
+  `char` and no pointer-width difference is;
+- **`<goos>/`**, when it is identical across a GOOS's targets (`linux/` covers linux/amd64 and linux/arm64);
+- **`<arch>/`**, when it is identical across one GOARCH's targets (`amd64/`, while it has two or more);
+- **`<goos>-<arch>/`**, one target, when it differs from every other (`linux-arm64/` for a `char` that is unsigned
+  there).
+
+A set shared by targets no single key covers is split as the rule splits any file. The header's target record (§4.1) names the cover, and the
 run-time check (§5.3) compares the running OS and architecture against it.
 
 ### 11.10 The exit gate exercises more than scalars (finding 10)
@@ -509,7 +539,8 @@ run-time check (§5.3) compares the running OS and architecture against it.
 §9 increment 4's gate gains four arms:
 
 - **copy-back:** `uname` on linux and darwin, `GetSystemTime` on windows, each through a struct-pointer mirror;
-- **errno:** `sqrt(-1)` reading `EDOM` through the two-result form;
+- **errno:** `strtol` of an out-of-range string, reading `ERANGE` through the two-result form. Not `sqrt(-1)`: darwin's
+  libm is `MATH_ERREXCEPT`, so it may leave errno 0;
 - **a REAL current-directory arm:** a library that exists ONLY in the current directory must throw
   `DllNotFoundException`, while the same library in the application directory loads;
 - **a pinned-zig probe library**, built per target by the scout's provisioned toolchain, as the instrument for
@@ -556,8 +587,11 @@ X` is admitted, with its install name captured. As with a Go binary, a library o
 `//go:cgo_ldflag` without `checkLinkerFlags`, so Phase 2's own check is load-bearing, not a backstop. A "plain token"
 is defined:
 
-- `-l<name>`: the name matches `[A-Za-z0-9_.+-]+`, with no path separator; the GNU `-l:file` form is refused;
-- `-L<dir>`: an absolute path, or one relative to the package directory, that exists.
+- `-l<name>`: the name matches `[A-Za-z0-9_.+-]+`, does not start with `-` or `@` (as cmd/go's own check refuses),
+  and has no path separator; the GNU `-l:file` form is refused;
+- `-L<dir>`: an absolute path, or one relative to the package directory, that exists;
+- `-framework <name>`, **darwin only** (RULED; cmd/go's allowlist admits it): the name a plain token as above, its
+  install name captured as §11.12 says. On any other GOOS it is refused by name.
 
 Everything else is refused by name, whatever increment 1 finds about `go list -compiled`.
 
@@ -577,3 +611,22 @@ Converted call sites read `C.add(C.@int(a), C.@int(b))`, through a nested static
 members and types, per the owner's readability and parity rulings. The mangled form (`_Cfunc_add`, `_Ctype_int`) is a
 fallback only if the arm fails. The arm measures go2cs-gen on `[GoType]` structs nested in a static class, and it
 lands with increment 3. Its red: a converted call site that prints a mangled name.
+
+### 11.18 Amendment 2026-11-10 (second): the check of §11
+
+COORD's Fable check of §11 (a dated amendment to `REVIEW-cgo-phase2-pinvoke.md`, `claude/coord-cgo-phase2-review`
+`8a30cab3e6`) read 13 findings MET, 5 PARTIAL, sequencing MET and nothing contradicted. Increment 2 is released. The
+fixes, made in place above, each gate the increment named:
+
+- **RULED, increment 4:** §11.15's grammar admits `-framework <name>`, darwin only.
+- **RULED, increment 3:** §11.4's red needed a route. It is a probe library exporting a call-through, built by the
+  `converter-cgo` leg's own compiler, landing in increment 3.
+- **RULED, increment 4:** §11.10's `inet_ntoa` arm runs on linux and darwin. Windows' `in_addr` is a union, so windows
+  takes the probe library's two-`int` struct instead.
+- **PROMOTED, increment 3:** §11.1 refuses a reinterpret-minted `NativeBox` (retained source set, or an order token),
+  with its own red.
+- **SHOULD, increment 4:** §11.5 traces ELF symbols through the linker, since `.dynsym` maps only versioned ones.
+  §11.10's errno arm is `strtol` and `ERANGE`, since darwin's `sqrt(-1)` may leave errno 0.
+- **SHOULD, increment 5:** §11.9 names all four covers; an all-target-identical mirror set lands flat.
+- **SHOULD:** §11.15 refuses a leading `-` or `@` after `-l`. §2's R8 and R9 and §8's first sentence point here.
+  §11.6 states that `_Cvar_` was recognized from the start. §11.2 says where its underflow is planted.
