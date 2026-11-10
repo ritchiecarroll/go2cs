@@ -24,6 +24,22 @@ internal static partial class cgotestꓸC_package
         public @uint s_addr;
     }
 
+    // struct tm with glibc's and darwin's tm_gmtoff and the pointer member tm_zone (increment 3b2b).
+    internal struct struct_tm
+    {
+        public @int tm_sec;
+        public @int tm_min;
+        public @int tm_hour;
+        public @int tm_mday;
+        public @int tm_mon;
+        public @int tm_year;
+        public @int tm_wday;
+        public @int tm_yday;
+        public @int tm_isdst;
+        public @long tm_gmtoff;
+        public ж<@char> tm_zone;
+    }
+
 #if GOCGO_FLAVOUR_LINUX
     // glibc: six char[65].
     internal struct struct_utsname

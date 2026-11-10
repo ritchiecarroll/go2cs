@@ -93,6 +93,94 @@ static unsafe partial class cgotestꓸC_package
         return result;
     }
 
+    // C.frexp, bound to libc.so.6.
+    [global::System.Runtime.InteropServices.LibraryImport("libc.so.6", EntryPoint = "frexp")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial double frexpᴍnative(double p0, nint p1);
+
+    internal static @double frexp(@double p0, ж<@int> p1)
+    {
+        int m1 = default;
+        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.StructPointer(p1, "frexp", out nuint n1);
+        nint a1 = (nint)n1;
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m1 = (int32)p1.Value;
+            a1 = (nint)(&m1);
+        }
+
+        double r;
+        global::go.runtime_package.syscallEntersyscall();
+
+        try
+        {
+            r = frexpᴍnative((float64)p0, a1);
+        }
+        finally
+        {
+            global::go.runtime_package.syscallExitsyscall();
+        }
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
+            p1.Value = (@int)(int32)m1;
+
+        return (@double)(float64)r;
+    }
+
+    // C.gmtime_r, bound to libc.so.6.
+    [global::System.Runtime.InteropServices.LibraryImport("libc.so.6", EntryPoint = "gmtime_r")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial nint gmtime_rᴍnative(nint p0, nint p1);
+
+    internal static ж<struct_tm> gmtime_r(ж<@long> p0, ж<struct_tm> p1)
+    {
+        _Ctype_struct_tmᴍ.CheckLayoutᴍ();
+
+        long m0 = default;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "gmtime_r", out nuint n0);
+        nint a0 = (nint)n0;
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m0 = (int64)p0.Value;
+            a0 = (nint)(&m0);
+        }
+
+        _Ctype_struct_tmᴍ m1 = default;
+        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.StructPointer(p1, "gmtime_r", out nuint n1);
+        nint a1 = (nint)n1;
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            ᴍin__Ctype_struct_tmᴍ(ref m1, p1.Value);
+            a1 = (nint)(&m1);
+        }
+
+        nint r;
+        global::go.runtime_package.syscallEntersyscall();
+
+        try
+        {
+            r = gmtime_rᴍnative(a0, a1);
+        }
+        finally
+        {
+            global::go.runtime_package.syscallExitsyscall();
+        }
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            p0.Value = (@long)(int64)m0;
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
+            ᴍout__Ctype_struct_tmᴍ(ref p1.Value, m1);
+
+        if (r != 0 && r == a1)
+            return p1;
+
+        return global::go.golib.GoCgoArgs.PointerMemberBack<struct_tm>((nuint)r, null, 0);
+    }
+
     // C.inet_ntoa, bound to libc.so.6.
     [global::System.Runtime.InteropServices.LibraryImport("libc.so.6", EntryPoint = "inet_ntoa")]
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
@@ -219,6 +307,43 @@ static unsafe partial class cgotestꓸC_package
         }
     }
 
+    [global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit, Size = 56)]
+    internal struct _Ctype_struct_tmᴍ
+    {
+        [global::System.Runtime.InteropServices.FieldOffset(0)] public int tm_sec;
+        [global::System.Runtime.InteropServices.FieldOffset(4)] public int tm_min;
+        [global::System.Runtime.InteropServices.FieldOffset(8)] public int tm_hour;
+        [global::System.Runtime.InteropServices.FieldOffset(12)] public int tm_mday;
+        [global::System.Runtime.InteropServices.FieldOffset(16)] public int tm_mon;
+        [global::System.Runtime.InteropServices.FieldOffset(20)] public int tm_year;
+        [global::System.Runtime.InteropServices.FieldOffset(24)] public int tm_wday;
+        [global::System.Runtime.InteropServices.FieldOffset(28)] public int tm_yday;
+        [global::System.Runtime.InteropServices.FieldOffset(32)] public int tm_isdst;
+        [global::System.Runtime.InteropServices.FieldOffset(40)] public long tm_gmtoff;
+        [global::System.Runtime.InteropServices.FieldOffset(48)] public nint tm_zone;
+
+        internal static void CheckLayoutᴍ()
+        {
+            Holdᴍ("tm_sec", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("tm_min", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("tm_hour", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("tm_mday", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("tm_mon", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("tm_year", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("tm_wday", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("tm_yday", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("tm_isdst", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("tm_gmtoff", "long", global::System.Runtime.CompilerServices.Unsafe.SizeOf<long>(), 8);
+            Holdᴍ("tm_zone", "nint", global::System.Runtime.CompilerServices.Unsafe.SizeOf<nint>(), 8);
+        }
+
+        private static void Holdᴍ(string member, string clrType, int clrSize, int cSize)
+        {
+            if (clrSize != cSize)
+                throw new global::System.InvalidOperationException($"cgo mirror _Ctype_struct_tm: member {member} is {clrSize} bytes as {clrType} and {cSize} bytes in C, so the mirror cannot cross");
+        }
+    }
+
     [global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit, Size = 4)]
     internal struct _Ctype_struct_in_addrᴍ
     {
@@ -297,6 +422,37 @@ static unsafe partial class cgotestꓸC_package
     private static void ᴍout__Ctype_struct_in_addrᴍ(ref struct_in_addr v, in _Ctype_struct_in_addrᴍ m)
     {
         v.s_addr = (@uint)(uint32)m.s_addr;
+    }
+
+    // _Ctype_struct_tm's copy-in and copy-out, member by member (§5.2).
+    private static void ᴍin__Ctype_struct_tmᴍ(ref _Ctype_struct_tmᴍ m, in struct_tm v)
+    {
+        m.tm_sec = (int32)v.tm_sec;
+        m.tm_min = (int32)v.tm_min;
+        m.tm_hour = (int32)v.tm_hour;
+        m.tm_mday = (int32)v.tm_mday;
+        m.tm_mon = (int32)v.tm_mon;
+        m.tm_year = (int32)v.tm_year;
+        m.tm_wday = (int32)v.tm_wday;
+        m.tm_yday = (int32)v.tm_yday;
+        m.tm_isdst = (int32)v.tm_isdst;
+        m.tm_gmtoff = (int64)v.tm_gmtoff;
+        m.tm_zone = (nint)global::go.golib.GoCgoArgs.PointerMember(v.tm_zone);
+    }
+
+    private static void ᴍout__Ctype_struct_tmᴍ(ref struct_tm v, in _Ctype_struct_tmᴍ m)
+    {
+        v.tm_sec = (@int)(int32)m.tm_sec;
+        v.tm_min = (@int)(int32)m.tm_min;
+        v.tm_hour = (@int)(int32)m.tm_hour;
+        v.tm_mday = (@int)(int32)m.tm_mday;
+        v.tm_mon = (@int)(int32)m.tm_mon;
+        v.tm_year = (@int)(int32)m.tm_year;
+        v.tm_wday = (@int)(int32)m.tm_wday;
+        v.tm_yday = (@int)(int32)m.tm_yday;
+        v.tm_isdst = (@int)(int32)m.tm_isdst;
+        v.tm_gmtoff = (@long)(int64)m.tm_gmtoff;
+        v.tm_zone = global::go.golib.GoCgoArgs.PointerMemberBack((nuint)m.tm_zone, v.tm_zone, global::go.golib.GoCgoArgs.PointerMember(v.tm_zone));
     }
 
     // _Ctype_struct_utsname's copy-in and copy-out, member by member (§5.2).
