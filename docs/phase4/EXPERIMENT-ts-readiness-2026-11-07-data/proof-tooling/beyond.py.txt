@@ -41,7 +41,10 @@ def closure(root):
     return [l for l in out.splitlines() if l.strip()]
 
 
-def asm(imp):  # go2cs names a package's project and assembly after its import path, dots for slashes
+def asm(imp):  # go2cs names a package's project and assembly after its import path, dots for slashes; a main package
+    # under cmd/ is named after its leaf (checkdemo.dll), which only the harness row reaches (2026-11-10)
+    if imp.startswith(MOD + "/cmd/"):
+        return imp.rsplit("/", 1)[-1].lower()
     return imp.replace("/", ".").lower()
 
 

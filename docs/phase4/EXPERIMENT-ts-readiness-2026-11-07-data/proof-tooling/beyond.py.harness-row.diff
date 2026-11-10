@@ -25,7 +25,19 @@
  ap = argparse.ArgumentParser()
  for a in ("tsc", "log", "errors", "out", "typecheck-demo", "emit-demo"):
      ap.add_argument("--" + a)
-@@ -53,20 +64,27 @@
+@@ -30,7 +41,10 @@
+     return [l for l in out.splitlines() if l.strip()]
+ 
+ 
+-def asm(imp):  # go2cs names a package's project and assembly after its import path, dots for slashes
++def asm(imp):  # go2cs names a package's project and assembly after its import path, dots for slashes; a main package
++    # under cmd/ is named after its leaf (checkdemo.dll), which only the harness row reaches (2026-11-10)
++    if imp.startswith(MOD + "/cmd/"):
++        return imp.rsplit("/", 1)[-1].lower()
+     return imp.replace("/", ".").lower()
+ 
+ 
+@@ -53,20 +67,27 @@
      return {"match": bool(r["match"]), "sha256_go": r["go"]["sha256"], "sha256_cs": r["cs"]["sha256"]}
  
  

@@ -1,0 +1,84 @@
+# diagpatch_c30c32.py <tsc internal dir> [--restore] : DIAGNOSTIC hand-patches for C30, C31 and C32 in a converted tsc
+# tree, to reach the type-check closure's next layer. Not a gate result. Each file is backed up to <file>.diag-orig first;
+# --restore puts every backup back.
+import os, shutil, sys
+root = sys.argv[1]
+P = [
+ ("vfs/internal/internal.cs",  # C30: a switch on an array value with non-constant cases -> an if-chain
+  """        switch (bom) {
+        case new byte[]{0xFF, 0xFE}.array(): {
+            return (decodeUtf16(s[2..], binary.LittleEndian), true);
+        }
+        case new byte[]{0xFE, 0xFF}.array(): {
+            return (decodeUtf16(s[2..], binary.BigEndian), true);
+        }}
+""",
+  """        if (bom[0] == 0xFF && bom[1] == 0xFE) {
+            return (decodeUtf16(s[2..], binary.LittleEndian), true);
+        } else if (bom[0] == 0xFE && bom[1] == 0xFF) {
+            return (decodeUtf16(s[2..], binary.BigEndian), true);
+        }
+"""),
+ ("module/package_info.cs", "Expected<map<@string, @string, >>", "Expected<map<@string, @string>>"),  # C31
+ ("ipc/protocol_jsonrpc.cs", 'result = (jsontext.Value)"null"u8;', 'result = (jsontext.Value)slice<byte>((@string)"null"u8);'),  # C32
+ # C33, COMPILE-ONLY (wrong at run time): the two Expected instantiations get one adapter name. Drop the map one's
+ # attribute and cast its one site through object, so the packages blocked behind module can build and show their errors.
+ ("module/package_info.cs",
+  "[assembly: GoImplement<go.github.com.microsoft.TypeScript.tsc.@internal.packagejson_package.Expected<map<@string, @string>>, go.github.com.microsoft.TypeScript.tsc.@internal.packagejson_package.TypeValidatedField>(Pointer = true)]\n",
+  ""),
+ ("module/resolver.cs",
+  'new packagejson_ExpectedжTypeValidatedField(ᏑpeerDependencies)',
+  '(packagejson.TypeValidatedField)(object)ᏑpeerDependencies'),
+ # C34 (same meaning): the promoted AsString forwarder is emitted internal in packagejson, so call the embedded field's
+ # public method directly at module's 11 sites (exportsΔ1 is an ExportsOrImports there).
+ ("module/resolver.cs", "exportsΔ1.AsString()", "exportsΔ1.JSONValue.AsString()", 11),
+ # C35, COMPILE-ONLY (wrong at run time): a pointer type argument (ж<compilerOptionsParser>) does not satisfy the
+ # generic's `where O : optionParser`. Drop the two clauses and reach the interface through object in their bodies.
+ ("tsoptions/tsconfigparsing.cs", "    where O : optionParser\n", "", 2),
+ ("tsoptions/tsconfigparsing.cs", "result.ParseOption(", "((optionParser)(object)result!).ParseOption(", 2),
+ ("tsoptions/tsconfigparsing.cs", "result.UnknownDidYouMeanDiagnostic()", "((optionParser)(object)result!).UnknownDidYouMeanDiagnostic()", 2),
+ ("tsoptions/tsconfigparsing.cs", "result.UnknownOptionDiagnostic()", "((optionParser)(object)result!).UnknownOptionDiagnostic()", 1),
+ # C36 (same meaning for in-range values): golib's ConvertToType<T> has no float64 overload; truncate to long first.
+ ("tsoptions/parsinghelpers.cs", "ConvertToType<T>(value._<float64>())", "ConvertToType<T>(unchecked((long)value._<float64>()))"),
+ # C37 (same meaning): the variadic span alias of a lifted anonymous interface names the nested type unqualified.
+ ("printer/utilities.cs", "using ꓸꓸꓸtryGetEnd_node = Span<tryGetEnd_node>;", "using ꓸꓸꓸtryGetEnd_node = Span<printer_package.tryGetEnd_node>;"),
+ # C38 (same meaning): a parenthesized type in a type-switch case keeps its parens, which C# reads as a cast of `v`.
+ ("printer/utilities.cs", "case (ж<ast.Node>) v:", "case ж<ast.Node> v:"),
+ ("printer/utilities.cs", "case (ж<ast.NodeList>) v:", "case ж<ast.NodeList> v:"),
+ ("printer/utilities.cs", "case (ж<ast.ModifierList>) v:", "case ж<ast.ModifierList> v:"),
+ ("printer/utilities.cs", "case (ж<core.TextRange>) v:", "case ж<core.TextRange> v:"),
+ # C39 (same meaning): a method value passed to a type-parameter argument is boxed by OrTypedNilFunc (object), so C#
+ # infers T = object; give the delegate its Go type instead.
+ ("printer/namegenerator.cs", "(g.IsFileLevelUniqueNameInCurrentFile).OrTypedNilFunc()", "(Func<@string, bool, bool>)(g.IsFileLevelUniqueNameInCurrentFile)"),
+ # C40, COMPILE-ONLY within the closure (its two callers, api and ls, are outside it): the package func IsTupleType(*Type)
+ # and the method (*Type).IsTupleType() emit the same C# signature on checker_package; rename the func.
+ ("checker/exports.cs", "public static bool IsTupleType(ж<ΔType> t) {", "public static bool IsTupleTypeᐧfunc(ж<ΔType> t) {"),
+ # C41 (same meaning): `var current *ast.Node = node` reads the deref'd ref local instead of the pointer parameter.
+ ("checker/grammarchecks.cs", "ж<ast.Node> current = node;", "ж<ast.Node> current = Ꮡnode;"),
+ # C42 (same meaning): compiler.EmitHost inherits GetProjectReferenceFromSource from two embedded interfaces (Go merges
+ # identical methods; C# calls through the derived interface are ambiguous). Redeclare it `new` in the derived one.
+ ("compiler/emitHost.cs", "    bool IsEmitBlocked(@string @file);\n}",
+  "    bool IsEmitBlocked(@string @file);\n    new ж<tsoptions.SourceOutputAndProjectReference> GetProjectReferenceFromSource(tspath.Path path);\n}"),
+]
+for rel, a, b, *cnt in P:
+    want = cnt[0] if cnt else 1
+    f = os.path.join(root, rel); o = f + ".diag-orig"
+    if "--restore" in sys.argv:
+        if os.path.exists(o):
+            shutil.move(o, f); print("restored", rel)
+        continue
+    s = open(f, encoding="utf-8-sig", newline="").read()  # newline="": keep CRLF as it is
+    crlf = "\r\n" in s
+    aa, bb = (a.replace("\n", "\r\n"), b.replace("\n", "\r\n")) if crlf else (a, b)
+    # already applied: the text is gone and its replacement is there (or is empty), or a later entry rewrote it again
+    # after this one (C33 drops the line C31 fixed), so only the backup still carries it
+    if s.count(aa) == 0 and (not bb or s.count(bb) >= want or
+                             (os.path.exists(o) and aa in open(o, encoding="utf-8-sig", newline="").read())):
+        print("already patched", rel); continue
+    if s.count(aa) != want:
+        sys.exit(f"{rel}: expected {want} match(es), found {s.count(aa)}")
+    if not os.path.exists(o):
+        shutil.copy2(f, o)
+    bom = open(f, "rb").read(3) == b"\xef\xbb\xbf"
+    open(f, "w", encoding="utf-8-sig" if bom else "utf-8", newline="").write(s.replace(aa, bb))
+    print("patched", rel)

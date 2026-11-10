@@ -1,0 +1,21 @@
+package main
+
+import "fmt"
+
+// C37 green control: the same anonymous interface as a plain SLICE parameter instead of a variadic one.
+type span struct{ end int }
+
+func (s span) End() int { return s.end }
+
+func greatestEnd(end int, nodes []interface{ End() int }) int {
+	for _, n := range nodes {
+		if n.End() > end {
+			end = n.End()
+		}
+	}
+	return end
+}
+
+func main() {
+	fmt.Println(greatestEnd(1, []interface{ End() int }{span{4}, span{2}}), greatestEnd(7, nil)) // Go: 4 7
+}

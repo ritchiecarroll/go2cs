@@ -1,0 +1,22 @@
+package main
+
+import "fmt"
+
+// TS site: internal/printer greatestEnd(end int, nodes ...interface{ End() int }) int (C37): a VARIADIC parameter whose
+// element type is an anonymous interface.
+type span struct{ end int }
+
+func (s span) End() int { return s.end }
+
+func greatestEnd(end int, nodes ...interface{ End() int }) int {
+	for _, n := range nodes {
+		if n.End() > end {
+			end = n.End()
+		}
+	}
+	return end
+}
+
+func main() {
+	fmt.Println(greatestEnd(1, span{4}, span{2}), greatestEnd(7)) // Go: 4 7
+}
