@@ -14,13 +14,17 @@
 package main
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"go/ast"
 	"go/importer"
 	"go/parser"
 	"go/token"
 	"go/types"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 	"testing"
@@ -441,5 +445,112 @@ func TestCgoRecognitionSummarySaysWhenCmdCgoDidNotRun(t *testing.T) {
 
 	if got := cgoRecognitionSummary(types.NewPackage("p", "p"), fset, []*ast.File{raw}, []string{rawPath}); got != want {
 		t.Errorf("summary\n got: %s\nwant: %s", got, want)
+	}
+}
+
+// The fixture's three generated files are cmd/cgo's own output for fixture.go, made as testdata/cgo/phase1/README.md
+// says. On linux/amd64 with a C compiler this makes them again the same way and compares fixture.cgo1.go and
+// cgo_gotypes.go byte for byte, from line 9 of each committed file where the header ends. cgo_import.go names the host
+// C library's symbol versions, so it is read and logged but not compared. Each regenerated file is logged whole, as
+// base64 on one line, so a fixture.go that changes is re-committed from this test's own output.
+func TestTheCgoFixtureIsCmdCgosOutputForFixtureGo(t *testing.T) {
+	requireCCompiler(t)
+
+	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
+		t.Skipf("the fixture's generated files are linux/amd64's (README.md); this host is %s/%s (Inconclusive, not a pass)", runtime.GOOS, runtime.GOARCH)
+	}
+
+	source, err := os.ReadFile(filepath.Join(cgoFixtureDir, "fixture.go"))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dir := t.TempDir()
+	writeCgoFixture(t, dir, "go.mod", "module example.com/cgofixture\ngo 1.26\n")
+	writeCgoFixture(t, dir, "fixture.go", string(source))
+
+	list := exec.Command("go", "list", "-compiled", "-json", "-trimpath", ".")
+	list.Dir = dir
+	list.Env = append(os.Environ(), "CGO_ENABLED=1", "GOWORK=off", "GOFLAGS=")
+	output, err := list.Output()
+
+	if err != nil {
+		t.Fatalf("go list -compiled: %v", err)
+	}
+
+	var listed struct {
+		Dir             string
+		CompiledGoFiles []string
+	}
+
+	if err := json.Unmarshal(output, &listed); err != nil {
+		t.Fatal(err)
+	}
+
+	// go list may hand the files back under build-cache names, so each is known by what it holds.
+	generated := map[string]string{}
+
+	for _, path := range listed.CompiledGoFiles {
+		if !filepath.IsAbs(path) {
+			path = filepath.Join(listed.Dir, path)
+		}
+
+		content, err := os.ReadFile(path)
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		text := strings.ReplaceAll(string(content), "\r\n", "\n")
+
+		switch {
+		case strings.Contains(text, "//go:cgo_import_dynamic"):
+			generated["cgo_import.go"] = text
+		case strings.Contains(text, "_Cgo_always_false"):
+			generated["cgo_gotypes.go"] = text
+		default:
+			// go list -trimpath leaves the fixture directory's absolute path in line 3's //line directive.
+			lines := strings.SplitN(text, "\n", 4)
+
+			if len(lines) == 4 && strings.HasPrefix(lines[2], "//line ") && strings.HasSuffix(lines[2], "fixture.go:1:1") {
+				lines[2] = "//line fixture.go:1:1"
+			}
+
+			generated["fixture.cgo1.go"] = strings.Join(lines, "\n")
+		}
+	}
+
+	for _, name := range []string{"fixture.cgo1.go", "cgo_gotypes.go", "cgo_import.go"} {
+		text, found := generated[name]
+
+		if !found {
+			t.Errorf("go list -compiled handed back no %s: %v", name, listed.CompiledGoFiles)
+			continue
+		}
+
+		committed, err := os.ReadFile(filepath.Join(cgoFixtureDir, name))
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		committedText := strings.ReplaceAll(string(committed), "\r\n", "\n")
+		header := ""
+
+		if name != "fixture.cgo1.go" {
+			// The two renamed files carry the repository's seven-line license header and a blank line first.
+			lines := strings.SplitAfterN(committedText, "\n", 9)
+			header = strings.Join(lines[:8], "")
+			committedText = lines[8]
+		}
+
+		equal := text == committedText
+		t.Logf("READING %s: regenerated %d bytes, equal to the committed file: %t", name, len(text), equal)
+		t.Logf("REGEN %s %s", name, base64.StdEncoding.EncodeToString([]byte(header+text)))
+
+		if !equal && name != "cgo_import.go" {
+			t.Errorf("%s is not what cmd/cgo writes for fixture.go now; re-commit it from this test's REGEN line", name)
+		}
 	}
 }
