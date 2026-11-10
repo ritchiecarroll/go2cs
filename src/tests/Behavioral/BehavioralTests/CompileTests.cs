@@ -814,6 +814,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGenericLiftedInterfaceField() => CheckTarget("GenericLiftedInterfaceField");
 
     [TestMethod]
+    public void CheckGenericMapArgPointerImpl() => CheckTarget("GenericMapArgPointerImpl");
+
+    [TestMethod]
     public void CheckGenericMethodReflect() => CheckTarget("GenericMethodReflect");
 
     [TestMethod]
