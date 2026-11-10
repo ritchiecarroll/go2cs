@@ -472,6 +472,20 @@ The wrapper under test binds it, and the probe is the function pointer. The libr
 `converter-cgo` leg's own C compiler (gcc, MinGW gcc or Apple clang), without waiting for the pinned toolchain, which is
 still the owner's decision.
 
+> **AMENDED 2026-11-10 (COORD, RULED, on H's proposal):** the seam-status red uses **libc's `qsort`**, not a built
+> probe library. A `[LibraryImport]`-bound `qsort`, called in the generated wrapper's shape, calls back an
+> `[UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]` comparator from inside the bracket. There is no C build
+> step, and the red runs in GolibTests on every `golib-tests` leg and on H. Three conditions:
+>
+> - **No "exactly once".** glibc's `qsort` is a mergesort with a malloc'd buffer and may change its comparison count. The
+>   red asserts at least one comparator call, and reads `GoCurrentGStatus()` and `TransitionDepth` on **every** call.
+> - **A negative control, so the red can fail:** the same `qsort` bracketed by `GoNativeCall` DIRECTLY, with no
+>   `syscallEntersyscall`, must read `_Grunning`.
+> - **The library, per OS:** `libc.so.6` on linux, `libSystem.B.dylib` on darwin, `ucrtbase.dll` on windows. It is a
+>   test binding in GolibTests, not a generated one, so §11.11's owned-name resolver rule does not apply to it.
+>
+> The probe library stays only for increment 4's windows two-`int` by-value struct (§11.7).
+
 ### 11.5 Load-time names are captured per SYMBOL (finding 5)
 
 §6.1 captured a name per `-l`, and that is wrong in two ways:
