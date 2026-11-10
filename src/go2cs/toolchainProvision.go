@@ -57,6 +57,10 @@ const (
 	toolchainDownloadTimeout = 30 * time.Minute
 )
 
+// installRenameBackoff is the pause before each retry of a rename transientRenameError accepts: doubling from 25 ms,
+// the last pause trimmed so they total 2 s, the budget the go command's robustio gives the same Windows failures.
+var installRenameBackoff = []time.Duration{25 * time.Millisecond, 50 * time.Millisecond, 100 * time.Millisecond, 200 * time.Millisecond, 400 * time.Millisecond, 800 * time.Millisecond, 425 * time.Millisecond}
+
 // toolchainSource is one place the pinned Go can be fetched from.
 type toolchainSource struct {
 	name   string // shown in messages: "go.dev" or the proxy URL
@@ -78,6 +82,9 @@ type toolchainProvisioner struct {
 	sources   func() []toolchainSource
 	client    *http.Client
 	progress  io.Writer
+	// rename and transientRename are os.Rename and transientRenameError when nil; tests make the rename fail.
+	rename          func(oldpath, newpath string) error
+	transientRename func(error) bool
 }
 
 // ensureGoToolchain is main's first step. It returns an error only when a Go is needed and cannot be
@@ -299,16 +306,45 @@ func (p *toolchainProvisioner) installFile(source toolchainSource, file, root st
 		return err
 	}
 
-	if err := os.Rename(staging, root); err != nil {
-		// Another go2cs finished first: keep its install if it is whole.
-		if p.checkRelease(root) == nil {
-			return nil
-		}
+	return p.renameIntoPlace(staging, root)
+}
 
-		return err
+// renameIntoPlace renames the unpacked staging directory to root. On Windows the rename is denied for a moment while
+// a virus scanner or the search indexer holds a file in the directory that it saw written, so a failure that waiting
+// can clear is retried after each pause of installRenameBackoff, as the go command's robustio.Rename retries one
+// (cmd/internal/robustio). Another go2cs that finished first leaves a whole install at root, which is kept.
+func (p *toolchainProvisioner) renameIntoPlace(staging, root string) error {
+	rename, transient := os.Rename, transientRenameError
+
+	if p.rename != nil {
+		rename = p.rename
 	}
 
-	return nil
+	if p.transientRename != nil {
+		transient = p.transientRename
+	}
+
+	err := rename(staging, root)
+
+	for _, pause := range installRenameBackoff {
+		if err == nil || p.checkRelease(root) == nil || !transient(err) {
+			break
+		}
+
+		time.Sleep(pause)
+		err = rename(staging, root)
+	}
+
+	if err == nil {
+		return nil
+	}
+
+	// Another go2cs finished first: keep its install if it is whole.
+	if p.checkRelease(root) == nil {
+		return nil
+	}
+
+	return fmt.Errorf("go2cs could not move the unpacked %s from %s to %s: %w", p.goVersion, staging, root, err)
 }
 
 // download fetches url into a temporary file in the cache directory and returns its name.

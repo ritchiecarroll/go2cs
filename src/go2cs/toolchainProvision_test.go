@@ -15,6 +15,7 @@ import (
 	"compress/gzip"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -456,5 +457,75 @@ func TestToolchainPinsMatchTheConverterGo(t *testing.T) {
 		if !strings.HasPrefix(archive.file, pinnedGoVersion+"."+goos+"-"+goarch+".") || len(archive.sha256) != 64 {
 			t.Errorf("no release archive pin for %s: %+v", platform, archive)
 		}
+	}
+}
+
+// The install's final rename (renameIntoPlace) retries a failure that waiting can clear, a bounded number of times,
+// and names both paths when it gives up. A fake rename and a fake classifier drive it on any OS; the Windows tests
+// (toolchainRename_windows_test.go) hold a real handle.
+func TestToolchainInstallRenameRetriesATransientFailure(t *testing.T) {
+	transientErr := errors.New("transient")
+	permanentErr := errors.New("permanent")
+
+	cases := []struct {
+		name      string
+		failures  int   // how many renames fail before one succeeds; -1 never succeeds
+		failWith  error // what a failed rename returns
+		installed bool  // a whole install is already at root, as another go2cs leaves it
+		wantCalls int
+		wantErr   bool
+	}{
+		{name: "clears on the third attempt", failures: 2, failWith: transientErr, wantCalls: 3},
+		{name: "never clears: every retry, then a named error", failures: -1, failWith: transientErr, wantCalls: 1 + len(installRenameBackoff), wantErr: true},
+		{name: "a failure waiting cannot clear is not retried", failures: -1, failWith: permanentErr, wantCalls: 1, wantErr: true},
+		{name: "another go2cs finished first: kept, not retried", failures: -1, failWith: transientErr, installed: true, wantCalls: 1},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			p := testProvisioner(t, map[string]string{}, nil)
+			staging := filepath.Join(t.TempDir(), ".unpack-1")
+			root := p.cachedRoot()
+
+			if c.installed {
+				for name, body := range fakeToolchainFiles(runtime.GOOS) {
+					target := filepath.Join(root, filepath.FromSlash(name))
+
+					if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+						t.Fatal(err)
+					}
+
+					if err := os.WriteFile(target, []byte(body), 0o644); err != nil {
+						t.Fatal(err)
+					}
+				}
+			}
+
+			calls := 0
+			p.rename = func(oldpath, newpath string) error {
+				calls++
+
+				if c.failures < 0 || calls <= c.failures {
+					return &os.LinkError{Op: "rename", Old: oldpath, New: newpath, Err: c.failWith}
+				}
+
+				return nil
+			}
+			p.transientRename = func(err error) bool { return errors.Is(err, transientErr) }
+
+			err := p.renameIntoPlace(staging, root)
+
+			if calls != c.wantCalls {
+				t.Errorf("%d rename(s), want %d", calls, c.wantCalls)
+			}
+
+			if (err != nil) != c.wantErr {
+				t.Fatalf("error %v, want error=%v", err, c.wantErr)
+			}
+
+			if err != nil && (!strings.Contains(err.Error(), staging) || !strings.Contains(err.Error(), root) || !errors.Is(err, c.failWith)) {
+				t.Errorf("the error does not name %s and %s, or does not wrap the rename's own: %v", staging, root, err)
+			}
+		})
 	}
 }
