@@ -57,9 +57,9 @@
 // statement about COVERAGE, not about execution.
 //
 // So the rule is now: a member of this class whose converted struct carries `array<>` fields is
-// taken ON THE MECHANISM, before it is reached. Uname is below; wait4 (whose Rusage is the same
-// 144 bytes at linux/arm64, so both linux builds share one body since S3), Select, FcntlFlock,
-// Statfs, Fstatfs, Sysinfo and Adjtimex — the rest of the linux/amd64 surface — are in
+// taken ON THE MECHANISM, before it is reached. wait4 and Uname (whose Rusage and Utsname are the
+// same 144 and 390 bytes at linux/arm64, so both linux builds share one body each since S3), Select,
+// FcntlFlock, Statfs, Fstatfs, Sysinfo and Adjtimex — the rest of the linux/amd64 surface — are in
 // structclass_linux_impl.cs. What remains genuinely not done is the ARCH dimension above: another
 // Linux arch's layouts would need their own mirrors in their own zsyscall_<arch>_impl.cs.
 //
@@ -217,81 +217,5 @@ partial class syscall_package
 
         for (int i = 0; i < 3; i++)
             st.X__unused[i] = native.X__unused[i];
-    }
-
-    // ── Uname: the class's THIRD member, and the one that is ALL inline storage ──────────────
-    //
-    // Reached 2026-08-28 by os/exec's TestFindExecutableVsNoexec, which gates itself on
-    // `unix.KernelVersion()` — and that function's whole body is `syscall.Uname` plus a parse of
-    // the Release field (internal/syscall/unix/kernel_version_linux.go). The generated wrapper
-    // hands the kernel `(uintptr)Ꮡbuf`, and the converted Utsname is SIX `array<int8>` MANAGED
-    // REFERENCES where the kernel's `struct utsname` is six 65-byte character arrays INLINE. So
-    // this member is the class taken to its limit: not a struct with one array field at the end,
-    // but a struct that is nothing BUT inline arrays — 390 native bytes against a managed image
-    // that is six references and no characters at all.
-    //
-    // The observable was a quiet wrong ANSWER of the Stat_t kind, one level further removed:
-    // KernelVersion returned (0, 0) — the version parse reading a Release field the kernel never
-    // filled — so the test took Go's own `t.Skip("requires Linux kernel v5.8 with faccessat2(2)
-    // syscall")` on a WSL2 kernel that is 5.15 and has the syscall. Go passes the test; the
-    // converted side skipped it. That divergence is a DEFECT, never a platform-skip disclosure:
-    // the class's admission test requires the skipped-on property to be one the deployment
-    // genuinely holds, and this kernel genuinely has faccessat2 — the conversion simply could not
-    // read its own uname. A disclosure here would have laundered a fixable seam into a permanent
-    // one, which is exactly what that class's anti-laundering clause exists to prevent.
-    //
-    // Remedy identical to Fstat's, and simpler for having no scalars: a blittable mirror the
-    // kernel writes, then a field-for-field copy back. //sysnb in Go, so RawSyscall with no
-    // enter/exitsyscall bracket, exactly as the generated wrapper had it.
-    [StructLayout(LayoutKind.Sequential)]
-    private unsafe struct NativeUtsnameLinux
-    {
-        public fixed int8 Sysname[utsnameFieldLength];
-        public fixed int8 Nodename[utsnameFieldLength];
-        public fixed int8 Release[utsnameFieldLength];
-        public fixed int8 Version[utsnameFieldLength];
-        public fixed int8 Machine[utsnameFieldLength];
-        public fixed int8 Domainname[utsnameFieldLength];
-    }
-
-    // _UTSNAME_LENGTH on Linux: 65 per field (64 characters plus the NUL), six fields, no padding.
-    private const int utsnameFieldLength = 65;
-    private const int nativeUtsnameSizeLinux = 390;
-
-    public static unsafe error /*err*/ Uname(ж<Utsname> Ꮡbuf) {
-        if (sizeof(NativeUtsnameLinux) != nativeUtsnameSizeLinux)
-            throw new InvalidOperationException($"syscall: NativeUtsnameLinux is {sizeof(NativeUtsnameLinux)} bytes, the kernel's struct utsname is {nativeUtsnameSizeLinux}");
-
-        NativeUtsnameLinux native = default;
-        // A nil *Utsname reaches the kernel as address 0 in Go and answers EFAULT; keep that.
-        uintptr bufAddr = Ꮡbuf is null || Ꮡbuf.IsNilPointer ? (uintptr)0 : (uintptr)(nint)(&native);
-
-        var (_, _, e1) = RawSyscall(SYS_UNAME, bufAddr, 0, 0);
-        if (e1 != 0) {
-            return errnoErr(e1);
-        }
-
-        ref var uts = ref Ꮡbuf!.Value;
-        copyNativeUtsnameField(native.Sysname, ref uts.Sysname);
-        copyNativeUtsnameField(native.Nodename, ref uts.Nodename);
-        copyNativeUtsnameField(native.Release, ref uts.Release);
-        copyNativeUtsnameField(native.Version, ref uts.Version);
-        copyNativeUtsnameField(native.Machine, ref uts.Machine);
-        copyNativeUtsnameField(native.Domainname, ref uts.Domainname);
-        return default!;
-    }
-
-    // One field's 65 inline characters into the converted `array<int8>`. Reuses a backing store
-    // that is already the right length — a default Utsname carries zero-length arrays, the
-    // converted initializer 65-long ones — so the copy allocates only when it must, the same rule
-    // copyNativeStat applies to X__unused. The NUL and everything after it are copied verbatim
-    // rather than trimmed: Go's caller receives the kernel's bytes exactly, and the callers that
-    // want a string (KernelVersion's parse, os.Hostname's) do their own scan for the terminator.
-    private static unsafe void copyNativeUtsnameField(int8* source, ref array<int8> destination) {
-        if (destination.Length != utsnameFieldLength)
-            destination = new array<int8>(utsnameFieldLength);
-
-        for (int i = 0; i < utsnameFieldLength; i++)
-            destination[i] = source[i];
     }
 }

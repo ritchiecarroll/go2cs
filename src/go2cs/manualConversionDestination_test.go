@@ -260,11 +260,10 @@ func TestManualConversionRegistrationsHaveBodies(t *testing.T) {
 // linux/arm64's rows are the syscall wrappers whose amd64 bodies marshal amd64 struct layouts
 // (`syscall/linux-amd64/zsyscall_linux_amd64_impl.cs`); each needs a body linux/arm64 compiles. A
 // struct whose layout differs at arm64 needs an arm64 mirror of its own; one that is the same at both
-// arches moves to `syscall/linux/`, which both linux builds compile (wait4 left that way: its Rusage
-// is 144 bytes at both).
+// arches moves to `syscall/linux/`, which both linux builds compile (wait4 and Uname left that way:
+// Rusage is 144 bytes and Utsname 390 at both).
 var owedHandOwnBodies = map[string]bool{
 	"syscall.Fstat@linux/arm64":   true,
-	"syscall.Uname@linux/arm64":   true,
 	"syscall.fstatat@linux/arm64": true,
 }
 
