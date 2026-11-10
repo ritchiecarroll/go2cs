@@ -21,7 +21,12 @@ foreach ($p in $want) {
         }
     } finally { $fs.Dispose() }
 }
-"built {0} of {1} closure packages; effective per-type limit 65,524 (CoreCLR MAX_SLOT_INDEX = 65535 - 10)" -f $built, $want.Count
-$rows | Sort-Object Methods -Descending | Select-Object -First $Top | ForEach-Object { "  {0,7}  {1}  [{2}]" -f $_.Methods, $_.Type, $_.Asm }
+# The per-type method limit, P1's ruled form (measured: methodcap-repro/README.md): a type loads while its method
+# definitions <= min(65,524, 65,525 - inherited virtual slots + overrides). A go2cs package class is a static class: it
+# inherits System.Object's 4 virtual slots and overrides none, so its limit is 65,521. Rows over that are marked OVER;
+# for any other type the mark is only a hint, since its inherited slots are not read here.
+$limit = [Math]::Min(65524, 65525 - 4 + 0)
+"built {0} of {1} closure packages; per-type method limit for a package class {2:N0} = min(65,524, 65,525 - 4 inherited slots + 0 overrides)" -f $built, $want.Count, $limit
+$rows | Sort-Object Methods -Descending | Select-Object -First $Top | ForEach-Object { "  {0,7}  {1}  [{2}]{3}" -f $_.Methods, $_.Type, $_.Asm, $(if ($_.Methods -gt $limit) { "  OVER" } else { "" }) }
 "not built ({0}):" -f $missing.Count
 $missing | ForEach-Object { "  $_" }
