@@ -9,10 +9,10 @@ internal static @string bomKind(@string s) {
     if (len(s) >= 2) {
         bom = new byte[]{s[0], s[1]}.array();
         switch (bom) {
-        case new byte[]{0xFF, 0xFE}.array(): {
+        case var ᴛ when ᴛ == new byte[]{0xFF, 0xFE}.array(): {
             return "le";
         }
-        case new byte[]{0xFE, 0xFF}.array(): {
+        case var ᴛ when ᴛ == new byte[]{0xFE, 0xFF}.array(): {
             return "be";
         }}
 
@@ -24,10 +24,10 @@ internal static @string pair(/*[2]*/ array<byte> b) {
     b = b.Clone();
 
     switch (b) {
-    case new byte[]{1, 2}.array() or new byte[]{3, 4}.array(): {
+    case var ᴛ when ᴛ == new byte[]{1, 2}.array() || ᴛ == new byte[]{3, 4}.array(): {
         return "low";
     }
-    case new byte[]{9, 9}.array(): {
+    case var ᴛ when ᴛ == new byte[]{9, 9}.array(): {
         return "nines";
     }
     default: {
@@ -70,14 +70,14 @@ internal static slice<@string> through(/*[2]*/ array<byte> b) {
     slice<@string> @out = default;
     var exprᴛ1 = b;
     var matchᴛ1 = false;
-    if (exprᴛ1 is new byte[]{1, 1}.array()) { matchᴛ1 = true;
+    if (exprᴛ1 == new byte[]{1, 1}.array()) { matchᴛ1 = true;
         @out = append(@out, (@string)"one");
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is new byte[]{2, 2}.array()) {
+    if (fallthrough || !matchᴛ1 && exprᴛ1 == new byte[]{2, 2}.array()) {
         @out = append(@out, (@string)"two");
     }
-    else if (exprᴛ1 is new byte[]{3, 3}.array()) { matchᴛ1 = true;
+    else if (exprᴛ1 == new byte[]{3, 3}.array()) { matchᴛ1 = true;
         @out = append(@out, (@string)"three");
     }
 
