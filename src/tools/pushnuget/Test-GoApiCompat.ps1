@@ -197,15 +197,19 @@ try {
     Check 'a new package has no baseline' ($null -eq (Get-GoApiCompatBaselineVersion @() '1.26.10.3')) 'a baseline from nothing'
     Check 'a module revision takes its own module version''s previous revision' ((Get-GoApiCompatBaselineVersion @('1.0.300', '1.0.300.1', '1.0.300.2', '1.0.301') '1.0.300.3') -ceq '1.0.300.2') "$(Get-GoApiCompatBaselineVersion @('1.0.300', '1.0.300.1', '1.0.300.2', '1.0.301') '1.0.300.3')"
 
-    # The 1.26.10.4 release compares with 1.26.10.3, which already carries B3's break, so its entries match nothing
-    # there and the guard refuses them: they are deleted on that release day (REVIEW-go-break-floor.md, item 4). Until
-    # then the file holds at most B3's 12, and cites B3 while it holds any.
+    # Any release after 1.26.10.3 compares with 1.26.10.3, which already carries B3's break, so its entries match
+    # nothing there and the guard refuses them (REVIEW-go-break-floor.md, item 4). They were deleted when 1.26.10.3 was
+    # published (C2, 2026-11-10: every pre-publish pack on master refused on them, release-smoke 42720953059), with the
+    # file, as its header said; the record copy stays at docs/phase4/data/binary-compat/. A later announced break adds
+    # the file back, so the bound stays: at most B3's 12, citing B3 while it holds any.
     Write-Host 'golib carries at most B3''s announced break, and nothing unannounced'
     $golib = Join-Path $repoRoot 'src/core/golib/CompatibilitySuppressions.xml'
-    $entries = @(Read-GoApiCompatSuppressions $golib)
+    $entries = @()
+    if (Test-Path -LiteralPath $golib) { $entries = @(Read-GoApiCompatSuppressions $golib) }
     Check 'golib''s suppression file carries at most the 12 B3 entries' ($entries.Count -le 12) "$($entries.Count) entries"
     Check 'every entry names golib''s lib/ asset' (@($entries | Where-Object { $_.Asset -cne 'lib/net10.0/golib.dll' }).Count -eq 0) 'an entry names another asset'
-    $text = [System.IO.File]::ReadAllText($golib)
+    $text = ''
+    if (Test-Path -LiteralPath $golib) { $text = [System.IO.File]::ReadAllText($golib) }
     Check 'the file cites B3 and batch 231 while it carries any entry' ($entries.Count -eq 0 -or ($text.Contains('B3') -and $text.Contains('batch 231'))) 'no citation'
 
     # A package id cannot be turned back into its directory: go.vendor.golang.org.x.crypto.cryptobyte lives in
@@ -222,11 +226,13 @@ try {
     Check 'a directory with dotted segments maps to its package id' (
         "$($map['go.vendor.golang.org.x.crypto.cryptobyte'])".Contains('golang.org')) "keys: $(@($map.Keys | Sort-Object) -join ', ')"
     Check 'every file is mapped, and nothing else' ($map.Count -eq 3 -and $map.ContainsKey('go.fmt')) "keys: $(@($map.Keys | Sort-Object) -join ', ')"
+    # The tree's own files: every one is mapped, none twice. With no announced break the tree carries none at all.
     $real = Get-GoApiCompatSuppressionMap (Join-Path $repoRoot 'src/core')
-    Check 'the tree''s own files map to golib and vendored cryptobyte' (
-        $real.ContainsKey('go.lib') -and $real.ContainsKey('go.vendor.golang.org.x.crypto.cryptobyte')) "keys: $(@($real.Keys | Sort-Object) -join ', ')"
-    # Emptied on the 1.26.10.4 release day too, as golib's is above.
-    $cb = @(Read-GoApiCompatSuppressions $real['go.vendor.golang.org.x.crypto.cryptobyte'])
+    $onDisk = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot 'src/core') -Recurse -File -Filter 'CompatibilitySuppressions.xml')
+    Check 'every suppression file in the tree is mapped by its package id' ($real.Count -eq $onDisk.Count) "$($real.Count) mapped of $($onDisk.Count) on disk; keys: $(@($real.Keys | Sort-Object) -join ', ')"
+    # Deleted with golib's when 1.26.10.3 was published; a later break re-adds it under the same bound.
+    $cb = @()
+    if ($real.ContainsKey('go.vendor.golang.org.x.crypto.cryptobyte')) { $cb = @(Read-GoApiCompatSuppressions $real['go.vendor.golang.org.x.crypto.cryptobyte']) }
     Check 'vendored cryptobyte carries at most batch 235''s 5 entries, and cites the batch while it carries any' (
         $cb.Count -le 5 -and ($cb.Count -eq 0 -or [System.IO.File]::ReadAllText($real['go.vendor.golang.org.x.crypto.cryptobyte']).Contains('batch 235'))) "$($cb.Count) entries"
 
