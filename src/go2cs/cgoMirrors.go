@@ -222,7 +222,22 @@ func (builder *cgoMirrorBuilder) member(owner, field string, fieldType types.Typ
 // an integer or a pointer, with no union and no inline array. The CLR classifies a by-value struct for the native ABI
 // from the mirror's member types, and floats, unions carried as bytes and inline arrays can classify differently from
 // the C compiler's own struct. cmd/cgo gives a union as a byte array, so the inline-array rule refuses it too.
+//
+// A struct of 16 bytes or less with an eightbyte no member covers (dropped bitfield bytes, or tail padding) is refused
+// too (RULED, 2026-11-10): under SysV x64 the CLR may classify that eightbyte NO_CLASS where the C compiler says
+// INTEGER. Conservative, until an exit-gate arm measures it.
 func (builder *cgoMirrorBuilder) passableByValue(built *cgoMirror) bool {
+	if built.size <= 16 {
+		covered := make([]bool, (built.size+7)/8)
+		builder.coverEightbytes(built, 0, covered)
+
+		for _, holds := range covered {
+			if !holds {
+				return false
+			}
+		}
+	}
+
 	for _, member := range built.fields {
 		switch {
 		case member.length > 0, member.clrType == "float", member.clrType == "double":
@@ -252,6 +267,23 @@ func (builder *cgoMirrorBuilder) nestedMirror(clrType string) string {
 		}
 
 		return ""
+	}
+}
+
+// coverEightbytes marks each eightbyte of an enclosing struct that a member of built, at base, puts bytes in. A nested
+// mirror is walked to its own members, so its padding stays uncovered.
+func (builder *cgoMirrorBuilder) coverEightbytes(built *cgoMirror, base int64, covered []bool) {
+	for _, member := range built.fields {
+		start := base + member.offset
+
+		if nested, found := builder.mirrors[strings.TrimSuffix(member.clrType, cgoMirrorSuffix)]; found && strings.HasSuffix(member.clrType, cgoMirrorSuffix) {
+			builder.coverEightbytes(nested, start, covered)
+			continue
+		}
+
+		for eightbyte := start / 8; eightbyte <= (start+member.goSize-1)/8 && eightbyte < int64(len(covered)); eightbyte++ {
+			covered[eightbyte] = true
+		}
 	}
 }
 
