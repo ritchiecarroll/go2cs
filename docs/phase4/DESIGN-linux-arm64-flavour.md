@@ -19,6 +19,10 @@
 > hand-owned syscall bodies are owed at linux/arm64; the arch binding seats with S2; R1e is not delivered
 > (§11.6); six readers outside the converter suite named the GOOS folders themselves (§11.7). The text above §11
 > is unchanged.
+>
+> **Amended 2026-11-10 (§11.8, new):** R1e is delivered by a converter seat on batch 283. The arch-divergent
+> review sibling of `crypto/internal/fips140/subtle` is split into `amd64/` and `linux-arm64/`, folders that hold
+> nothing else. §11.6 stays as written: it records what S2 seated.
 
 ## 0. The standing defect this closes, and the first seat (SEAT 0)
 
@@ -566,3 +570,20 @@ was posted before any of them was run against the applied tree (`DATA-la64-s2-pr
 before it is posted: `go test ./...`, GolibTests on every flavour, the comment census, the behavioral harness. A
 count that falls, or a pass that survives a rename untouched, is read against a control tree before it is believed.
 §6.8 of the record lists the readers that still hold a fixed list and miss nothing today.
+
+### 11.8 §11.6 closed: R1e is delivered, and the folder holds only the sibling
+
+§11.6 left R1e waiting on a converter seat. That seat is cut on batch 283 (`DATA-la64-s2-prediction.md`, §6.11).
+
+- **What the merge does now.** It splits a differing review sibling into any key folder that is not a nested
+  package. `crypto/internal/fips140/subtle` gains `amd64/` and `linux-arm64/`, each holding the sibling and nothing
+  else, which is §2.6's prediction as first written.
+- **The single-target writer agrees with it** by reading the folder the sibling already sits in, finest first, so a
+  one-target conversion rewrites the copy the merge laid and never lays a flat one beside it. The `-tests` writer
+  resolves the same way.
+- **The project file does not move.** A folder with no compiled file earns no arch block; §11.6's "20 do" stands.
+- **What stays flat and named:** a key name that is a nested package (`internal/syscall/windows`). No package in
+  the corpus is named by the apply today.
+- **§11.7's gate caught one more reader.** A guard in a test file of the converter package admitted a split
+  sibling only in a folder that holds source, and went red on the applied tree. The readers of the layout are not
+  all in non-test sources; the full suite is the census.

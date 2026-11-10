@@ -411,3 +411,85 @@ for-clause seat, six), routed with this block. The tree was restored by status t
 
 **Not read on the box**, as in §6.9: GolibTests at the linux and darwin flavours, the behavioral harness, the census
 on the four runners and the release smoke are CI legs, dispatched on the pushed tip.
+
+### 6.11 R1e delivered: the sibling is split by key folder (dated block, 2026-11-10)
+
+The one row of §6.1 that was S2's is closed by a converter seat on master `b9a6d261fc` (batch 283), four commits:
+the converter and its tests (`8c3bc0917c`), the corpus apply (`8e2f9ca776`), the rule and skill text
+(`277254838f`), and a guard this seat's own gate found (`a6be8bfe06`, below).
+
+**The change.** `mergeReviewSiblings` splits a differing review sibling into any key folder that is not a nested
+package, whether or not the folder holds source, and removes a key folder the split leaves empty. One resolver,
+`heldReviewSiblingPath`, answers "which key folder of this target already holds the sibling" for the three writers
+(the merge, the single-target writer and the `-tests` writer), finest folder first. The flat fallback and the
+closing note remain for one case, a key name that is a nested package (`internal/syscall/windows`). The parity
+guard's twin reader walks every key folder of the universe (`lineKeyedFolderTargets`), which closes §6.8's
+parity-guard row.
+
+**The footprint, each reading predicted in writing before its run.**
+
+| Run | Converter | Into | Predicted | Read |
+|---|---|---|---|---|
+| A, single target linux/arm64 | base `b9a6d261fc` | master's tree | 1 content row | 1: `xor_generic.cs.auto`, 1 line each way; rc 0, 502 s |
+| B, four-target apply | fix `8c3bc0917c` | master's tree | 3 paths, no package named | 3 paths; 4 targets at `Failed: 0`; 0 named; 1,619 s |
+| C, single target, each of the four | fix | the applied tree | no content row, nothing untracked | linux/arm64, linux/amd64, darwin/amd64: none; windows/amd64: master's own `log/syslog` project row of §6.1 and no other |
+| D, single target linux/arm64 | base | the applied tree | a flat sibling comes back | 1 untracked, the flat `xor_generic.cs.auto`; removed again |
+| E, four-target apply again | fix | the applied tree | 0 rows | 0 rows, 0 "differs by target" lines; rc 0, 1,548 s |
+| `-tests` row, `crypto/internal/fips140/subtle` | fix, then base | the applied tree | fix 0 rows; base lays the flat sibling | fix 0; base 1 untracked, removed again |
+
+The three paths: the flat `crypto/internal/fips140/subtle/xor_generic.cs.auto` leaves; `subtle/amd64/` gains it
+byte for byte (blob `683700064e6d`, the flat file's own); `subtle/linux-arm64/` gains arm64's flavour, 1 line apart
+(`supportsUnaligned`). Rows A and D are the defect and its control: the base converter rewrites the flat file on
+master's tree and lays one beside the split on the applied tree. No project file moves: the folders hold no compiled
+file, so the package still gains no arch block and §11.6's "20 do" stands.
+
+**The parity guard's count: a prediction that missed by its reasoning.** The seat's reconnaissance wrote "unchanged
+with the reader fix, one short without it". Read: 35 on the control tree (master's corpus and reader), **36** on the
+seat, **34** on the seat's corpus with master's reader. The second half held; the first did not. The guard counts
+twins by the twin's path, and one flat twin became two, so the true count rises by one. The 34 is a pass: master's
+reader, which names the three GOOS folders, drops the comparison of `xor_generic.cs` and reports nothing. It is the
+shape §6.6 records, a passing count that moves under a rename.
+
+**A reader the seat's census missed, found by the gate.** The full `go test` at `277254838f` was red, rc 1 in
+1,040 s, four fails from two causes, both this seat's:
+
+- `strayReviewSiblings` in `src/go2cs/platformHandOwn_test.go`, the reader behind
+  `TestCorpusHandOwnsFollowTheirPrincipals`, admitted a split sibling only in a platform SOURCE folder (one that
+  holds a `.cs`). It read the two new folders as strays. The seat's census of readers had searched the non-test
+  sources; this one lives in a test file of the converter package. It now tests the folder's name and that the
+  folder is not a nested package; its unit test gained the shape first and failed, then passed, and fails again
+  with the nested-package clause removed.
+- `8c3bc0917c` moved `retireUnemittedPackageInitFiles` nine lines down in `platformEmit.go` under two provenance
+  notes in the published strategy pages. Both now cite the new line; the two planted-note tests that failed with
+  them pass again.
+
+So §11.7's gate did its work a second time, and the order is the lesson: the full suite belongs directly after the
+corpus apply, before the footprint chains, not after them.
+
+**Mutations, each restored byte-identical.** In `8c3bc0917c`: the pruning of an emptied folder removed, the
+candidate folders narrowed back to source folders, and the splittable test narrowed the same way each fail
+`TestMergeSplitsAReviewSiblingIntoKeyFoldersThatHoldNoSource`; the nested-package exception removed from the merge
+fails `TestMergeNamesADifferingReviewSiblingItCannotSplit`, and from the resolver fails
+`TestReviewSiblingFollowsAKeyFolderThatHoldsNoSource`. In `a6be8bfe06`: the nested-package clause removed fails
+`TestStrayReviewSiblingsAdmitsASplitSiblingOfAFlatHandOwn`.
+
+| Gate | Tip | Reading |
+|---|---|---|
+| `go vet ./...` | `a6be8bfe06` | rc 0 |
+| `go test ./...` | `277254838f` | rc 1 in 1,040 s: the four fails above |
+| `go test ./...` | `a6be8bfe06` | rc 0 in 948 s: 11 packages ok, 5 without test files, 0 fails |
+| go2cs-gen tests | `277254838f` | 470 passed of 470 |
+| GolibTests, windows flavour, Release | `277254838f` | build rc 0 with 0 errors; 2,498 passed, 38 skipped, 0 failed of 2,536 |
+| Behavioral re-transpile (`check-no-regression.ps1`) | `a6be8bfe06` | rc 0 in 1,279 s: 1,015 packages byte-identical, 0 status rows |
+| Pack A/B, the `subtle` package | `a6be8bfe06` against master's shape | usings props identical (9 lines); 8 package entries on each side, identical; no `.cs.auto` entry and no key-folder entry in either; build 0 errors, 0 warnings |
+
+The go2cs-gen and GolibTests readings stand at `277254838f`: `a6be8bfe06` changes one test file of the converter
+package and two documentation pages, none of which either suite reads. The pack control is a tree whose `subtle`
+package, props target and repoguard are master's (`ca23b88d6e`).
+
+**Not changed here.** `data/la64-s2/manifest.tsv` still describes S2's tip, where the sibling is flat. §6.8's other
+rows stand as written.
+
+**Not read on the box:** GolibTests at the linux and darwin flavours, the full behavioral harness and the census on
+the four runners are CI legs, dispatched on the pushed tip. `go2cs.slnx` was not built: the seat changes no golib or
+generator source.
