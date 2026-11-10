@@ -311,8 +311,20 @@ func TestCgoMirrorsCompileAndHoldTheirLayoutUnderDotnet(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// The same plant one level down (P2's second read): inner.b, a 4-byte C int, as a C# short, inside struct shapes,
+	// checked only through shapes' own CheckLayout. A nested mirror never crosses on its own, so the outer check must
+	// reach it.
+	plantedNested := newCgoMirrorBuilder(cgoMirrorAmd64)
+	plantedNested.fieldTypeOverride = func(structName, fieldName string) (string, bool) {
+		return "short", structName == "_Ctype_struct_inner" && fieldName == "b"
+	}
+
+	if _, err := plantedNested.mirror(lookupCgoStruct(t, shapesPkg, "_Ctype_struct_shapes")); err != nil {
+		t.Fatal(err)
+	}
+
 	// Program.cs prints one line per reading: SIZE <mirror> <bytes>, OFFSET <mirror>.<member> <bytes>, CHECKED <mirror>,
-	// and for the planted mirror PLANTED <REFUSED message|ACCEPTED>.
+	// and for each planted mirror PLANTED or PLANTED_NESTED <REFUSED message|ACCEPTED>.
 	var program strings.Builder
 	program.WriteString("using U = global::System.Runtime.CompilerServices.Unsafe;\n\nnamespace mirrors\n{\n    public static class Program\n    {\n        public static void Main()\n        {\n")
 
@@ -330,6 +342,8 @@ func TestCgoMirrorsCompileAndHoldTheirLayoutUnderDotnet(t *testing.T) {
 
 	program.WriteString("            try { planted._Ctype_struct_intsᴍ.CheckLayout(); global::System.Console.WriteLine(\"PLANTED ACCEPTED\"); }\n")
 	program.WriteString("            catch (global::System.InvalidOperationException refused) { global::System.Console.WriteLine(\"PLANTED REFUSED \" + refused.Message); }\n")
+	program.WriteString("            try { plantedNested._Ctype_struct_shapesᴍ.CheckLayout(); global::System.Console.WriteLine(\"PLANTED_NESTED ACCEPTED\"); }\n")
+	program.WriteString("            catch (global::System.InvalidOperationException refused) { global::System.Console.WriteLine(\"PLANTED_NESTED REFUSED \" + refused.Message); }\n")
 	program.WriteString("        }\n    }\n}\n")
 
 	root := t.TempDir()
@@ -338,6 +352,7 @@ func TestCgoMirrorsCompileAndHoldTheirLayoutUnderDotnet(t *testing.T) {
 		"    <ImplicitUsings>disable</ImplicitUsings>\n    <Nullable>disable</Nullable>\n  </PropertyGroup>\n</Project>\n", framework[1]))
 	writeModuleFile(t, filepath.Join(root, "Mirrors.cs"), "namespace mirrors\n{\n"+builder.csharp()+"}\n")
 	writeModuleFile(t, filepath.Join(root, "Planted.cs"), "namespace planted\n{\n"+planted.csharp()+"}\n")
+	writeModuleFile(t, filepath.Join(root, "PlantedNested.cs"), "namespace plantedNested\n{\n"+plantedNested.csharp()+"}\n")
 	writeModuleFile(t, filepath.Join(root, "Program.cs"), program.String())
 
 	run := exec.Command(dotnet, "run", "--project", filepath.Join(root, "mirrors.csproj"), "--disable-build-servers", "-nodeReuse:false", "-p:UseSharedCompilation=false")
@@ -351,8 +366,8 @@ func TestCgoMirrorsCompileAndHoldTheirLayoutUnderDotnet(t *testing.T) {
 	readings := map[string]string{}
 
 	for _, line := range strings.Split(strings.ReplaceAll(string(output), "\r\n", "\n"), "\n") {
-		if key, value, found := strings.Cut(strings.TrimSpace(line), " "); found && (key == "SIZE" || key == "OFFSET" || key == "PLANTED") {
-			if key == "PLANTED" {
+		if key, value, found := strings.Cut(strings.TrimSpace(line), " "); found && (key == "SIZE" || key == "OFFSET" || key == "PLANTED" || key == "PLANTED_NESTED") {
+			if key == "PLANTED" || key == "PLANTED_NESTED" {
 				readings[key] = value
 			} else {
 				name, reading, _ := strings.Cut(value, " ")
@@ -383,5 +398,11 @@ func TestCgoMirrorsCompileAndHoldTheirLayoutUnderDotnet(t *testing.T) {
 
 	if want := "REFUSED cgo mirror _Ctype_struct_ints: member b is 4 bytes as int and 8 bytes in C, so the mirror cannot cross"; readings["PLANTED"] != want {
 		t.Errorf("the planted underflow (b, an 8-byte C long, as a C# int) reads %q, want %q", readings["PLANTED"], want)
+	}
+
+	t.Logf("READING planted nested underflow: %s", readings["PLANTED_NESTED"])
+
+	if want := "REFUSED cgo mirror _Ctype_struct_inner: member b is 2 bytes as short and 4 bytes in C, so the mirror cannot cross"; readings["PLANTED_NESTED"] != want {
+		t.Errorf("the planted nested underflow (inner.b, a 4-byte C int, as a C# short, checked through shapes) reads %q, want %q", readings["PLANTED_NESTED"], want)
 	}
 }
