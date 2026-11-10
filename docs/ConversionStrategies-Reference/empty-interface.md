@@ -504,6 +504,15 @@ converter renders the type unwrapped, `v.data._<Map>()` and `v.data._<Map>(ᐧ)`
 C# type argument cannot be parenthesized (`_<(Map)>()` is CS1525). A parenthesized pointer type takes the same
 route: `p.((*point))` becomes `p._<ж<point>>(ᐧ)`. (Guarded by the `ParenthesizedTypeAssertion` behavioral test.)
 
+A type-switch case type takes the same unwrapping: typescript-go's internal/printer writes `case (*ast.Node):`, and
+every case label is rendered from the bare type, so it reads `case ж<point> v:` as an unparenthesized case does.
+With the parentheses kept, C# reads `case (ж<point>) v:` as a cast of `v` (CS0103), `case (nil):` misses the
+`case null:` arm, and `case (int):` misses the identifier path that spells it `nint`. The extension covers a
+single binding, a multi-type clause, an interface case, `(nil)` and a switch that binds nothing, output vs Go.
+<!-- 2026-11-10, TS readiness C38: at master 38caf3558a the extension failed CS1003, CS1026, CS1513 and 2x CS1525.
+Census of parenthesized case types: GOROOT 1 (internal/types/testdata/fixedbugs/issue48008.go, never converted),
+behavioral corpus 0. -->
+
 ---
 
 [← Nil and Zero Values](nil-and-zero-values.md) · [Index](README.md) · [Multi-Assignment and Evaluation Order →](multi-assignment.md)
