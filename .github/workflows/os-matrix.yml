@@ -109,6 +109,14 @@ on:
         type: string
         required: false
         default: ''
+      arch:
+        description: 'goos linux only: which linux legs run. x64 (the default) is the ubuntu-latest leg every linux dispatch ran before this input existed; arm64 runs the ubuntu-24.04-arm leg (rid linux-arm64) instead; both runs the two. Until the linux/arm64 flavour exists (no linux-arm64/ folder under src/core), the arm leg runs census and golib-tests only, against the linux/amd64 flavour, as a CALIBRATION reading that banks nothing (runner walls, and that flavour on the arm64 ABI); every other stage refuses it.'
+        type: choice
+        options:
+          - x64
+          - arm64
+          - both
+        default: x64
 
 permissions:
   contents: read
@@ -180,6 +188,7 @@ jobs:
           INPUT_NUGETGO_PACKAGE: ${{ inputs.nugetgo_package }}
           INPUT_NUGETGO_FEED: ${{ inputs.nugetgo_feed }}
           INPUT_NUGETGO_FEED_SHA256: ${{ inputs.nugetgo_feed_sha256 }}
+          INPUT_ARCH: ${{ inputs.arch }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           $ErrorActionPreference = 'Stop'
@@ -332,6 +341,31 @@ jobs:
               default   { throw "Unknown goos '$($env:INPUT_GOOS)'." }
           }
 
+          # linux's ARCH legs (linux/arm64 seat S5a, DESIGN-linux-arm64-flavour.md section 6). `arch` is opt-in: x64, the
+          # default, is the one ubuntu-latest leg every linux dispatch ran before the input existed, so an existing dispatch
+          # (and a REST dispatch that omits the input, and a schedule) derives the same matrix as before. arm64 runs the
+          # ubuntu-24.04-arm leg instead and both runs the two. The arm leg builds the corpus with GoTargetOS=linux, which is
+          # the linux/AMD64 flavour until the linux/arm64 flavour exists, and that flavour makes amd64 system calls: on an
+          # arm64 host its readings describe that mismatch, not the platform. So, until src/core holds a linux-arm64/ folder
+          # (the flavour's own home, seat S2), the arm leg runs census and golib-tests ONLY, as a labelled calibration that
+          # banks nothing, and every other stage refuses it by name.
+          $arch = if ($env:EVENT_NAME -eq 'schedule' -or -not $env:INPUT_ARCH) { 'x64' } else { $env:INPUT_ARCH }
+          if ($arch -notin 'x64', 'arm64', 'both') { throw "Unknown arch '$arch' (x64, arm64 or both)." }
+          if ($arch -ne 'x64') {
+              if ($env:INPUT_GOOS -ne 'linux') { throw "arch '$arch' applies to goos linux only; got goos '$($env:INPUT_GOOS)'." }
+              if ($env:INPUT_STAGE -in 'release-smoke', 'aot-smoke', 'nugetgo-behavior') {
+                  throw "arch '$arch' does not apply to $($env:INPUT_STAGE), which runs every SHIPPED RID from one pack; linux-arm64 joins it when the packages ship it (seat S5c)."
+              }
+              $armFlavour = @(Get-ChildItem -Path 'src/core' -Directory -Recurse -Filter 'linux-arm64' -ErrorAction SilentlyContinue).Count -gt 0
+              $calibration = -not $armFlavour
+              if ($calibration -and $env:INPUT_STAGE -notin 'census', 'golib-tests') {
+                  throw "arch '$arch': the linux/arm64 flavour does not exist yet (no linux-arm64/ folder under src/core), so the arm leg runs census and golib-tests only, as a calibration; '$($env:INPUT_STAGE)' would read the linux/amd64 flavour on the arm64 ABI and must not be read as an arm64 result."
+              }
+              $arm = @{ goos = 'linux'; runner = 'ubuntu-24.04-arm'; rid = 'linux-arm64'; calibration = $calibration }
+              $targets = if ($arch -eq 'arm64') { @($arm) } else { @($targets) + @($arm) }
+              Write-Host "arch ${arch}: linux legs $(@($targets | ForEach-Object { $_.rid }) -join ', ')$(if ($calibration) { ' (linux-arm64 is a CALIBRATION leg: the linux/amd64 flavour on arm64)' })"
+          }
+
           # release-smoke runs EVERY shipped RID from ONE pack, whatever goos says: its question is whether
           # the packages a release would publish carry what this tree's converter emits, on every OS they
           # ship for (C2, ec147f1d7f: N's converter emits unsafe.ArrayPointer, which the published 1.24.13.3
@@ -419,13 +453,19 @@ jobs:
               # The mac legs get 1.5x: macos-15 (arm64) is a 3-core runner, and every phase here
               # is parallel-MSBuild bound. Rounded to whole minutes; still under the 360 ceiling.
               if ($t.runner -like 'macos-*') { $minutes = [int][math]::Ceiling($minutes * 1.5) }
+              # The arm leg takes the same 1.5x until its own calibration replaces it: ubuntu-24.04-arm has never run
+              # these stages, and a timeout is a safety net, not an estimate.
+              if ($t.runner -eq 'ubuntu-24.04-arm') { $minutes = [int][math]::Ceiling($minutes * 1.5) }
 
-              [pscustomobject]@{
+              $entry = [ordered]@{
                   goos    = $t.goos
                   runner  = $t.runner
                   rid     = $t.rid
                   timeout = $minutes
               }
+              # Only a calibration leg carries the key, so every other dispatch derives the matrix it derived before.
+              if ($t.calibration) { $entry.calibration = $true }
+              [pscustomobject]$entry
           }
 
           # -AsArray so a single-target dispatch still emits a JSON ARRAY: PowerShell unwraps a
@@ -567,6 +607,8 @@ jobs:
       GOOS_TARGET: ${{ matrix.goos }}
       RID: ${{ matrix.rid }}
       STAGE: ${{ needs.plan.outputs.stage }}
+      # true on a linux-arm64 leg before the linux/arm64 flavour exists: it builds the linux/amd64 flavour (plan, arch).
+      CALIBRATION: ${{ matrix.calibration }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -600,6 +642,7 @@ jobs:
               "stage           : $($env:STAGE)"
               "goos / rid      : $($env:GOOS_TARGET) / $($env:RID)"
               "GoTargetOS env  : $($env:GoTargetOS)"
+              "calibration     : $(if ($env:CALIBRATION -eq 'true') { 'YES -- the linux/amd64 flavour on this arm64 runner; banks nothing' } else { 'no' })"
               "runner os       : $([System.Runtime.InteropServices.RuntimeInformation]::OSDescription.Trim())"
               "runner arch     : $([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)"
               "logical cores   : $([Environment]::ProcessorCount)"
