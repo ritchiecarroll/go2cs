@@ -1448,6 +1448,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedSliceConversion() => CheckTarget("NamedSliceConversion");
 
     [TestMethod]
+    public void CheckNamedSliceGoClone() => CheckTarget("NamedSliceGoClone");
+
+    [TestMethod]
     public void CheckNamedSliceNilVsEmpty() => CheckTarget("NamedSliceNilVsEmpty");
 
     [TestMethod]
