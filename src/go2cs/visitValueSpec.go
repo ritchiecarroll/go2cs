@@ -1508,9 +1508,14 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 // An EMPTY-interface declared type (emptyIfaceDeclType non-nil) has no adapter, so a POINTER value
 // takes the boundary treatment directly: the box, carrying its Go type even when it is nil (see
 // typedNilInterfaceBoxing.go). Neither set renders the plain expression.
+//
+// Otherwise the value renders plainly, except that a deref-aliased pointer PARAMETER copied into the var is its box,
+// as the assignment path copies one (appendRhsPtrContext): `var current *Node = node` (typescript-go's checker
+// grammarchecks.go) is `ж<Node> current = Ꮡnode;`, where the plain render bound the value alias `node` (CS0029). The
+// untyped `var r = node` and each name of `var x, y *T = a, b` take the same route.
 func (v *Visitor) convInterfaceDeclValue(value ast.Expr, ifaceDeclType types.Type, emptyIfaceDeclType types.Type, context ExprContext) string {
 	if ifaceDeclType == nil {
-		contexts := v.emptyInterfacePointerContexts(emptyIfaceDeclType, value, []ExprContext{context})
+		contexts := v.emptyInterfacePointerContexts(emptyIfaceDeclType, value, v.appendRhsPtrContext([]ExprContext{context}, value))
 
 		// A `var` declaration initialized from an existing array value takes golib's
 		// `.Clone()` for independent backing storage (see cloneValueCopy).
