@@ -552,6 +552,11 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 					if narrowedChan := v.chanDirNarrowedValue(resultParams.At(i).Type(), v.getExprType(expr), resultExpr); narrowedChan != "" {
 						resultExpr = narrowedChan
 					}
+
+					// A slice- or map-cored type parameter returned as its core type (see coreTypeParamValue).
+					if materialized := v.coreTypeParamValue(resultParams.At(i).Type(), v.getExprType(expr), resultExpr); materialized != "" {
+						resultExpr = materialized
+					}
 				}
 
 				// Box an untyped CONSTANT returned as an EMPTY interface at Go's default type (the

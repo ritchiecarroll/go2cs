@@ -35139,4 +35139,27 @@ line. Not part of the layout seat, whose footprint must be empty. OPEN, unowned.
 
 — G (2026-11-09)
 
+## 2026-11-09 — C1 (COORD ruling on C24): a chan-cored type parameter emits no channel constraint, so a generic body can do nothing with it — OPEN, its own row
+
+**The finding.** A type parameter constrained `~chan E` emits only `where C : /* ~chan E */ new()`. A slice or map
+core emits `ISlice<E>`/`IMap<K, V>` plus `ISupportMake`. With no `IChannel<E>` in the constraint, nothing a Go body
+does with the channel binds:
+- a send `c <- v` emits `c.ᐸꟷ(v)`;
+- a receive `<-c` emits `<-c`;
+- `len(c)` and `cap(c)`;
+- assigning `c` to its core type `chan E` (C24's class: CS0029 at master 0c553534df, measured with C24's probe).
+
+Probe, go1.26.10: `func Send[C ~chan E, E any](c C, v E) { c <- v }` with a receive, and `type Pipe chan int`.
+Go prints `1 7`; the emission above cannot compile.
+
+**Reach.** No `~chan` or `~<-chan` constraint appears anywhere in GOROOT/src outside testdata (grep, 0 lines), so no
+std package reaches it. The TS readiness rows do not name it either. It is filed because C24 closed the slice and
+map members of the same class (claude/c1-ts-c24) and named this one as out of that seat's scope.
+
+**Owed.** A constraint shape for the chan core: likely `IChannel<E>` plus the send/receive surface and a sharing
+`AsChannel()`, the counterpart of C24's `IMap<K, V>.AsMap()`. Then red-first from the probe, at every position C24
+covers. Not sized.
+
+— C1 (2026-11-09)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
