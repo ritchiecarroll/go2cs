@@ -17,7 +17,7 @@ namespace GolibTests;
 [TestClass]
 public partial class CgoScalarWrapperTests
 {
-    private static bool HostRunsThisFlavour() =>
+    internal static bool HostRunsThisFlavour() =>
 #if GOCGO_FLAVOUR_LINUX
         OperatingSystem.IsLinux();
 #elif GOCGO_FLAVOUR_DARWIN
@@ -26,7 +26,7 @@ public partial class CgoScalarWrapperTests
         OperatingSystem.IsWindows();
 #endif
 
-    private static T OnAGoroutine<T>(Func<T> call)
+    internal static T OnAGoroutine<T>(Func<T> call)
     {
         if (!HostRunsThisFlavour())
             Assert.Inconclusive("the cgo wrapper golden compiled here is another OS's: NOT MEASURED on this host");
