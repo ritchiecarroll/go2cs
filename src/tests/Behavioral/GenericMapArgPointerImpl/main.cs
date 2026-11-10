@@ -33,6 +33,11 @@ partial struct Fields {
     public Pair<map<@string, nint>, map<nint, @string>> Mapping;
 }
 
+partial struct Snapshot {
+    internal ж<Expected<map<@string, @string>>> watched;
+    internal ж<Expected<@string>> named;
+}
+
 internal static void Main() {
     ref var f = ref heap<Fields>(new Fields(), out var Ꮡf);
     f.Name = new Expected<@string>(Value: "pkg", Valid: true);
@@ -49,6 +54,11 @@ internal static void Main() {
     Func<Expected<map<@string, @string>>> make1 = () => new Expected<map<@string, @string>>(Value: new map<@string, @string>{["x"] = "y", ["z"] = "w"}, Valid: true);
 
     fmt.Println(count(Ꮡf.ᏑImports), len(make1().Value));
+
+    var s = new Snapshot(watched: Ꮡf.ᏑImports, named: Ꮡf.ᏑName);
+    ж<Expected<map<@string, @string>>> local = s.watched;
+    local.Value.Value["c"] = "d";
+    fmt.Println(len(f.Imports.Value), (~s.named).Value, local.IsPresent());
 }
 
 } // end main_package
