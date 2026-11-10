@@ -51,6 +51,38 @@ Against a go.lib published before the usings existed, `-TargetsFile src/core/gol
 imports the working-tree file explicitly. That is how the gate was read red-first, against the published
 1.24.13.3: without the file the first arm FAILS with CS0246 and CS0103; with it, both arms PASS.
 
+# `BreakFloor`: a package built below the go.* break floor fails the build
+
+`BreakFloor` is the consumer fixture for go.lib's break floor: the `GoCheckBreakFloor` target in
+`buildTransitive/go.lib.targets` fails the build, as `GO2CS3002`, for each package built below `$(GoBreakFloor)`,
+the newest go.* release that changed members compiled code binds (`docs/phase4/DESIGN-go-break-floor.md`). The
+fixture references go.fmt and one revision of hashset, whose `NewHashSet` loops over a slice, the member B3 changed
+in go.* 1.26.10.3. `test-break-floor.ps1` restores it from ONE feed into a fresh package cache and runs five arms:
+
+- BELOW: a hashset revision built below the floor must fail the build with `GO2CS3002` naming it, and leave `bin/`
+  empty, because the floor stops the build before CoreCompile. Without the floor it restores and builds clean, then
+  throws `MissingMethodException` at `NewHashSet`;
+- AT: a hashset revision built on the floor release builds and runs;
+- OPT-OUT: BELOW with `-p:GoAllowBelowBreakFloor=true` builds with `GO2CS3002` as a warning, and its run throws
+  `MissingMethodException`, the risk the warning names;
+- LIBRARY: an application references a library project that references the BELOW revision and opts out. The library
+  builds with the warning; the application's own build fails with `GO2CS3002` naming hashset, which reached it
+  through the ProjectReference, and leaves its `bin/` empty;
+- MULTI-TFM: BELOW with `TargetFrameworks` net10.0 and net10.0-windows fails in both inner builds, `bin/` empty.
+
+```text
+pwsh src/tests/PackageTests/BreakFloor/test-break-floor.ps1 -Version 1.26.10.3 -BelowHashSet <revision 4> -AtHashSet <revision 5> [-Source <feed>] [-TargetsFile <go.lib.targets>]
+```
+
+`<revision 4>` and `<revision 5>` are hashset 1.0.0's fourth and fifth revisions as nuget.org spells them, built on
+go.* 1.26.10.2 and 1.26.10.3. The gate was read red-first against the published go.lib 1.26.10.3, which has no floor: BELOW and OPT-OUT FAIL,
+AT passes. With `-TargetsFile src/core/golib/buildTransitive/go.lib.targets` all three pass.
+
+The floor reaches the other fixtures that take `-TargetsFile` too (ConsumerUsings, PublishSymbols, RidCompileAsset).
+Run with `-TargetsFile src/core/golib/buildTransitive/go.lib.targets` and a `-Version` below the floor (1.26.10.2 or
+older), each now fails with `GO2CS3002` naming every go.* package of that release: pass a `-Version` at or above the
+floor.
+
 # `PackageUsings`: each package's own usings gate
 
 `PackageUsings` is the consumer fixture for the `build/<PackageId>.props` each converted package carries,

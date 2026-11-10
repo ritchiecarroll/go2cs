@@ -82,6 +82,10 @@
     roster-moving sweep, so a release morning cannot discover a stale badge with a signed tag and a
     write-once snapshot already on disk. Mutually exclusive with -Push and -BumpBuild.
 
+    It also checks go.lib.targets' <GoBreakFloor> against the next release: on its Go line and not above
+    it. Whether the floor must equal that release or stay at the baseline go.lib's needs the binary-
+    compatibility guard's verdict against the published baseline, so that half runs after a pack only.
+
     The census is the runbook's NAMED IDENTITIES (tests.csproj, proof pages, green badges and index
     rows, each term named), and the pre-flight also composes the version the next publish would mint
     and refuses it if it already exists, or is not numerically newer than every recorded
@@ -878,6 +882,23 @@ $suppressionEntries = 0
 foreach ($file in $suppressionMap.Values) { $suppressionEntries += @(Read-GoApiCompatSuppressions $file).Count }
 Write-Step ("Binary-compatibility guard: apicompat $apiCompatVersion restored from .config\dotnet-tools.json; " +
             "$($suppressionMap.Count) suppression file(s), $suppressionEntries announced break(s)")
+
+# The break floor's baseline-free cases (GoApiCompat.psm1, Test-GoBreakFloorShape): go.lib.targets' <GoBreakFloor> parses,
+# sits on the next release's Go line and is at most that release. Whether it must equal the release or the baseline
+# go.lib's floor depends on the guard's verdict against the published baseline, so that half runs after the pack,
+# below (docs\phase4\DESIGN-go-break-floor.md section 4).
+$preflightProps = [System.IO.File]::ReadAllText($versionProps)
+if ($preflightProps -notmatch '<GoStdLibVersion>([^<]+)</GoStdLibVersion>') { throw "GoStdLibVersion not found in $versionProps" }
+$preflightLine = $Matches[1]
+if ($preflightProps -notmatch '<GoBuildNumber>(\d+)</GoBuildNumber>') { throw "GoBuildNumber not found in $versionProps" }
+$preflightRelease = "$preflightLine.$([int]$Matches[1] + 1)"
+$preflightFloor = Get-GoBreakFloor ([System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/core/golib/buildTransitive/go.lib.targets')))
+$preflightFloorFailures = @(Test-GoBreakFloorShape -ReleaseVersion $preflightRelease -Floor $preflightFloor)
+if ($preflightFloorFailures.Count -gt 0) {
+    $preflightFloorFailures | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+    throw "Break floor: go.lib.targets' <GoBreakFloor> cannot be right for the next release, $preflightRelease"
+}
+Write-Step "Break floor (baseline-free): <GoBreakFloor> $preflightFloor is on the line of the next release, $preflightRelease, and not above it"
 
 if ($VerifyOnly) {
     Write-Step "Pre-flight clean. -VerifyOnly: nothing was bumped, tagged, frozen, packed or pushed."
@@ -2155,6 +2176,9 @@ try {
         -FlatContainer $ApiCompatFlatContainer -ReleaseVersion $guardReleaseVersion `
         -Identity { param($path) Get-GoNuGetPackageIdentity $path } `
         -SuppressionFor { param($id) $suppressionMap[$id] }
+    # The baseline go.lib's floor, read now: the work directory and the baselines in it go in the finally below.
+    $golibBaseline = $apiCompat.Baselines['go.lib']
+    $golibBaselineFloor = if ($golibBaseline) { Get-GoBreakFloorFromPackage $golibBaseline.Path } else { $null }
 }
 finally {
     if (Test-Path -LiteralPath $apiCompatWork) { Remove-Item -LiteralPath $apiCompatWork -Recurse -Force }
@@ -2177,6 +2201,25 @@ Write-Step ("Binary compatibility: CLEAN -- $($apiCompat.Compared) asset(s) of $
             "published version on this line (reported, not gated)")
 if ($apiCompat.NoBaseline.Count -gt 0) { Write-Host "  no baseline: $($apiCompat.NoBaseline -join ', ')" }
 if ($apiCompat.NoSurface.Count -gt 0) { Write-Host "  no lib/ or runtimes/ asset to compare (an analyzer): $($apiCompat.NoSurface -join ', ')" }
+
+# --- The break floor -------------------------------------------------------------------------------------------------
+# go.lib's targets fail a consumer's build, as GO2CS3002, for any package built below <GoBreakFloor>: the newest release
+# that changed members compiled code binds. The guard is green here, so every suppression entry left is a break
+# against the baseline; a reachable one (Go's import rule: no internal element, not vendor/) means this release breaks,
+# and the floor must be this release. Otherwise it stays where the baseline go.lib put it. Nothing moves the floor but
+# its line in go.lib.targets; this refuses a release whose line is wrong (docs\phase4\DESIGN-go-break-floor.md). The
+# floor is read from the go.lib this run packed, which is what ships.
+$reachableBreaks = @($suppressionMap.Keys | Where-Object { (Test-GoBreakFloorReachable $_) -and @(Read-GoApiCompatSuppressions $suppressionMap[$_]).Count -gt 0 } | Sort-Object)
+$packedGolib = @($pkgs | Where-Object { (Get-GoNuGetPackageIdentity $_.FullName).Id -ceq 'go.lib' })
+if ($packedGolib.Count -ne 1) { throw "Break floor: $($packedGolib.Count) packed go.lib package(s) in $OutDir; the floor is read from exactly one" }
+$breakFloor = Get-GoBreakFloorFromPackage $packedGolib[0].FullName
+$floorFailures = @(Test-GoBreakFloor -ReleaseVersion $guardReleaseVersion -Floor $breakFloor `
+    -BaselineVersion $(if ($golibBaseline) { $golibBaseline.Version } else { '' }) -BaselineFloor $golibBaselineFloor -ReachableBreaks $reachableBreaks)
+if ($floorFailures.Count -gt 0) {
+    $floorFailures | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+    throw "Break floor: $($floorFailures.Count) failure(s) -- go.lib.targets' <GoBreakFloor> disagrees with what this release breaks"
+}
+Write-Step ("Break floor: CLEAN -- <GoBreakFloor> $breakFloor; " + $(if ($reachableBreaks.Count) { "this release breaks $($reachableBreaks -join ', ')" } else { "no reachable break, baseline go.lib $(if ($golibBaseline) { "$($golibBaseline.Version) states $(if ($golibBaselineFloor) { $golibBaselineFloor } else { 'no floor' })" } else { 'none on this line' })" }))
 
 # --- Push gate ----------------------------------------------------------------------------------
 if (-not $Push) {
