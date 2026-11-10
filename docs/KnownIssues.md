@@ -47,10 +47,10 @@ linux-arm64 is not supported. The go.* packages ship `win-x64`, `linux-x64`, `os
 whose code differs by platform carries one folder per platform under `runtimes/`, and a platform without one gets
 the Windows build in `lib/`. A build resolves its platform the way .NET does at run time, so `linux-musl-x64`
 (Alpine) uses the `linux-x64` folder. For a platform that resolves to no folder, the build reports it:
-- **`GO2CS3002`, an error**, on another operating system, or on Linux with another architecture: linux-arm64 would
+- **`GO2CS3003`, an error**, on another operating system, or on Linux with another architecture: linux-arm64 would
   run the Windows build, and the `linux-x64` build makes x64 system calls. The message names the platform and the
   first package without a folder for it.
-- **`GO2CS3003`, a warning**, on a Windows platform the packages do not ship (`win-arm64`): the Windows build is
+- **`GO2CS3004`, a warning**, on a Windows platform the packages do not ship (`win-arm64`): the Windows build is
   that operating system's, so the program runs. What Go decides by architecture when the package was converted
   follows `amd64`.
 

@@ -52,7 +52,7 @@ public class HostOfRecordTests
     }
 
     // The windows and darwin flavours reach the operating system through its own libraries, whose calls do not
-    // depend on the architecture, and their amd64 build is what the packages ship for win-arm64 (with GO2CS3003 at
+    // depend on the architecture, and their amd64 build is what the packages ship for win-arm64 (with GO2CS3004 at
     // build time) and for Apple silicon (a supported platform). A warning there would be a false alarm.
     [TestMethod]
     public void TheWindowsAndDarwinBuildsOfAnotherArchitectureSayNothing()

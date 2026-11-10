@@ -52,9 +52,9 @@
     A RID NO go.* PACKAGE RESOLVES (linux-arm64, for one) is refused by its own target, which runs
     whether or not the swap is on. On a platform of another operating system, or of the same one with
     another system-call ABI (linux-arm64 against the linux-x64 flavour), the program would run code
-    that does not describe its host: GO2CS3002, a build error naming the RID and the first package.
+    that does not describe its host: GO2CS3003, a build error naming the RID and the first package.
     On a Windows platform the packages do not ship (win-arm64), the Windows flavour IS that operating
-    system's, so it is GO2CS3003, a warning, and the build goes on. A cross-build for a shipped RID
+    system's, so it is GO2CS3004, a warning, and the build goes on. A cross-build for a shipped RID
     from an unshipped host sets RuntimeIdentifier and never reaches either. GoAllowReferenceFlavor=true
     turns both off, and the program then RUNS THE WINDOWS FLAVOUR wherever it runs. It is honoured
     ONLY as a global property (-p:GoAllowReferenceFlavor=true): this file is imported after the
@@ -276,8 +276,8 @@
   -->
   <PropertyGroup Label="Go2csDiagnosticCodes">
     <Go2csDiagnosticCompilerFloor>GO2CS3001</Go2csDiagnosticCompilerFloor>
-    <Go2csDiagnosticUnshippedRid>GO2CS3002</Go2csDiagnosticUnshippedRid>
-    <Go2csDiagnosticUnshippedWindowsRid>GO2CS3003</Go2csDiagnosticUnshippedWindowsRid>
+    <Go2csDiagnosticUnshippedRid>GO2CS3003</Go2csDiagnosticUnshippedRid>
+    <Go2csDiagnosticUnshippedWindowsRid>GO2CS3004</Go2csDiagnosticUnshippedWindowsRid>
   </PropertyGroup>
 
   <!--

@@ -16,14 +16,14 @@
                  On the reference platform (windows) there is nothing to swap FROM, so the control is
                  the no-op proof instead: the runtimes/<rid> twin is byte-identical to lib/.
       UNSHIPPED  a build for a RID no go.* package ships (-UnshippedRid, linux-arm64 by default) must FAIL
-                 with GO2CS3002 naming that RID, instead of compiling the reference (Windows) flavour.
+                 with GO2CS3003 naming that RID, instead of compiling the reference (Windows) flavour.
                  It must fail the same way with the compile swap off (-p:GoRidCompileAssets=false).
       OPT-OUT    the same build with -p:GoAllowReferenceFlavor=true must build (compile-only: it is not run,
                  because the reference flavour is not the target platform's); set in a project file
                  (Directory.Build.props) instead, it must change nothing.
       ALPINE     -r linux-musl-x64 must build against the linux surface: the RID resolves to linux-x64
                  through the RID graph, as the host resolves it at run time.
-      WIN-ARM64  -r win-arm64 must build with warning GO2CS3003: the Windows flavour is that platform's
+      WIN-ARM64  -r win-arm64 must build with warning GO2CS3004: the Windows flavour is that platform's
                  operating system.
 
     Exit 0 only when every arm reads as expected. Nothing outside a temporary work directory is
@@ -179,14 +179,14 @@ else {
     # The fixture touches the reference (Windows) surface, the one an unshipped RID compiles against, so the only
     # thing that can fail the build is the refusal itself: without it this arm BUILDS, which is the silent defect.
     $unshipped = @('-r', $UnshippedRid, '-p:_RidCompileAssetRid=win-x64') + $noHost
-    $verdicts += Invoke-Arm "UNSHIPPED -r $UnshippedRid" $unshipped $false 'GO2CS3002' $UnshippedRid
+    $verdicts += Invoke-Arm "UNSHIPPED -r $UnshippedRid" $unshipped $false 'GO2CS3003' $UnshippedRid
     # The refusal is its own target: turning the compile swap off does not turn it off.
-    $verdicts += Invoke-Arm "UNSHIPPED swap off -r $UnshippedRid" ($unshipped + @('-p:GoRidCompileAssets=false')) $false 'GO2CS3002' $UnshippedRid
+    $verdicts += Invoke-Arm "UNSHIPPED swap off -r $UnshippedRid" ($unshipped + @('-p:GoRidCompileAssets=false')) $false 'GO2CS3003' $UnshippedRid
     $verdicts += Invoke-Arm "OPT-OUT -r $UnshippedRid" ($unshipped + @('-p:GoAllowReferenceFlavor=true')) $true '' -BuildOnly
     # The opt-out is honoured as a GLOBAL property only: set in a project file, it changes nothing.
     $dbp = Join-Path $work 'Directory.Build.props'
     Set-Content -Path $dbp -Value '<Project><PropertyGroup><GoAllowReferenceFlavor>true</GoAllowReferenceFlavor></PropertyGroup></Project>' -Encoding utf8
-    $verdicts += Invoke-Arm "OPT-OUT in a project file -r $UnshippedRid" $unshipped $false 'GO2CS3002' $UnshippedRid
+    $verdicts += Invoke-Arm "OPT-OUT in a project file -r $UnshippedRid" $unshipped $false 'GO2CS3003' $UnshippedRid
     Remove-Item $dbp
 }
 
@@ -200,12 +200,12 @@ else {
     $verdicts += Invoke-Arm 'ALPINE -r linux-musl-x64' (@('-r', 'linux-musl-x64') + $noHost) $true '' -BuildOnly
 }
 
-# WIN-ARM64: an unshipped RID of the reference flavour's own operating system builds, with warning GO2CS3003.
+# WIN-ARM64: an unshipped RID of the reference flavour's own operating system builds, with warning GO2CS3004.
 if (& $ships 'win-arm64') {
     $verdicts += "FAIL (WIN-ARM64): go.syscall $Version ships runtimes/win-arm64, so this arm proves nothing"
 }
 else {
-    $verdicts += Invoke-Arm 'WIN-ARM64 -r win-arm64' (@('-r', 'win-arm64') + $noHost) $true '' 'win-arm64' -BuildOnly -ExpectWarning 'GO2CS3003'
+    $verdicts += Invoke-Arm 'WIN-ARM64 -r win-arm64' (@('-r', 'win-arm64') + $noHost) $true '' 'win-arm64' -BuildOnly -ExpectWarning 'GO2CS3004'
 }
 
 $verdicts | ForEach-Object { Write-Host $_ }
