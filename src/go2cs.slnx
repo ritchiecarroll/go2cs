@@ -584,6 +584,7 @@
     <Project Path="tests/Behavioral/GenericFuncDecl/GenericFuncDecl.csproj" />
     <Project Path="tests/Behavioral/GenericFuncInstantiationArg/GenericFuncInstantiationArg.csproj" />
     <Project Path="tests/Behavioral/GenericLiftedInterfaceField/GenericLiftedInterfaceField.csproj" />
+    <Project Path="tests/Behavioral/GenericMapArgPointerImpl/GenericMapArgPointerImpl.csproj" />
     <Project Path="tests/Behavioral/GenericMethodReflect/GenericMethodReflect.csproj" />
     <Project Path="tests/Behavioral/GenericNamedArrayType/GenericNamedArrayType.csproj" />
     <Project Path="tests/Behavioral/GenericNegation/GenericNegation.csproj" />
