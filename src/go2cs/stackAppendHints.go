@@ -63,8 +63,8 @@ import (
 // with -trimpath (whose positions are import-path relative and independent of any working directory), and joins
 // positions by file base name, line and column, which every form of the path agrees on.
 
-// stackAppendHarvestTargets are the targets every harvest reads: the corpus's three (platformEmit.go).
-var stackAppendHarvestTargets = []string{"windows/amd64", "linux/amd64", "darwin/amd64"}
+// stackAppendHarvestTargets are the targets every harvest reads: the corpus's (platformUniverse, platformLattice.go).
+var stackAppendHarvestTargets = platformUniverse
 
 // stackAppendStoreBytes is the buffer Go reserves: base.Debug.VariableMakeThreshold's default.
 const stackAppendStoreBytes = 32
