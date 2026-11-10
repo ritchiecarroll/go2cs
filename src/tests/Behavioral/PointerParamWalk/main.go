@@ -48,9 +48,9 @@ func markSeen(p *node, seen map[*node]bool) int {
 
 // walkChain mirrors go/ast resolve.go's scope-chain walk: a deref-aliased pointer PARAMETER
 // repointed in the for-loop POST (`for ; p != nil; p = p.next`). The repoint expands to a
-// box-repoint (`Ꮡp = p.next`) PLUS a value re-alias (`p = ref Ꮡp.DerefOrNil()`); the two
-// cannot share the single for-post slot, so the converter keeps the box-repoint in the post
-// and injects the re-alias at the TOP of the loop body (otherwise CS1003/CS1525).
+// box-repoint (`Ꮡp = p.next`) PLUS a value re-alias (`p = ref Ꮡp.DerefOrNull()`); a clause
+// holds no `;`, so the converter writes the pair as one expression list in the post
+// (`Ꮡp = p.next, p = ref Ꮡp.DerefOrNull()`), which keeps the alias current for the condition.
 func walkChain(p *node) int {
 	count := 0
 	for ; p != nil; p = p.next {
