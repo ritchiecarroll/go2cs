@@ -16,7 +16,9 @@ import (
 	"fmt"
 	"go/build"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -700,5 +702,89 @@ func TestLoaderToolTagsAskTheGoCommand(t *testing.T) {
 
 	if got == nil || strings.Join(got, ",") != strings.Join(want, ",") {
 		t.Errorf("loaderToolTags(%q) = %v, want the go command's %v", dir, got, want)
+	}
+}
+
+// TestBuildConstraintsUseTheTargetsToolTags locks in that a file's dotted tool tags are evaluated for the TARGET
+// being converted, not for the machine converting it. Go's default experiments differ per platform: go1.26 turns
+// dwarf5 on for windows and linux and leaves it off for darwin, and the GOARCH feature level is amd64.v1 on amd64 but
+// arm64.v8.0 on arm64. goListToolTags used to run `go list` in the converter's own environment, so every target got the
+// HOST's tags: a darwin conversion on a windows box re-excluded internal/goexperiment's exp_dwarf5_off.go after
+// go/packages had selected it, leaving darwin with neither half of the pair, and a linux/arm64 conversion on an x64 box
+// would have matched amd64.v1.
+//
+// The oracle is the go command itself, asked with each target's GOOS and GOARCH, so the test holds on any host and
+// for any toolchain's defaults; it fails at the fix's parent on any host whose own tags differ from a target's.
+func TestBuildConstraintsUseTheTargetsToolTags(t *testing.T) {
+	goRoot := strings.TrimSpace(func() string {
+		out, err := exec.Command("go", "env", "GOROOT").Output()
+
+		if err != nil {
+			t.Skipf("go command unavailable: %v", err)
+		}
+
+		return string(out)
+	}())
+
+	srcDir := filepath.Join(goRoot, "src")
+	dwarf5 := filepath.Join(srcDir, "internal", "goexperiment")
+
+	if _, err := os.Stat(filepath.Join(dwarf5, "exp_dwarf5_on.go")); err != nil {
+		t.Skipf("this toolchain has no dwarf5 experiment pair: %v", err)
+	}
+
+	// A synthetic module for the GOARCH feature level, which no GOROOT file selects on.
+	featureDir := t.TempDir()
+
+	if err := os.WriteFile(filepath.Join(featureDir, "go.mod"), []byte("module featurelevel\n\ngo 1.22\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	featureFile := filepath.Join(featureDir, "amd64v1.go")
+
+	if err := os.WriteFile(featureFile, []byte("//go:build amd64.v1\n\npackage featurelevel\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, target := range []string{"windows/amd64", "linux/amd64", "darwin/amd64", "linux/arm64", "darwin/arm64"} {
+		goos, goarch, _ := strings.Cut(target, "/")
+
+		cmd := exec.Command("go", "list", "-find", "-f", "{{context.ToolTags}}", "unsafe")
+		cmd.Dir = srcDir
+		cmd.Env = append(os.Environ(), "GOOS="+goos, "GOARCH="+goarch)
+
+		out, err := cmd.Output()
+
+		if err != nil {
+			t.Fatalf("%s: go list: %v", target, err)
+		}
+
+		oracle, err := parseToolTagsList(string(out))
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		has := func(tag string) bool { return slices.Contains(oracle, tag) }
+
+		for _, tc := range []struct {
+			file, loaderDir string
+			want            bool
+		}{
+			{filepath.Join(dwarf5, "exp_dwarf5_on.go"), srcDir, has("goexperiment.dwarf5")},
+			{filepath.Join(dwarf5, "exp_dwarf5_off.go"), srcDir, !has("goexperiment.dwarf5")},
+			{featureFile, featureDir, has("amd64.v1")},
+		} {
+			got, err := CheckBuildConstraints(tc.file, target, nil, tc.loaderDir)
+
+			if err != nil {
+				t.Fatalf("%s: CheckBuildConstraints(%s): %v", target, filepath.Base(tc.file), err)
+			}
+
+			if got != tc.want {
+				t.Errorf("%s: CheckBuildConstraints(%s) = %v, want %v (the go command's tool tags for %s: %v)",
+					target, filepath.Base(tc.file), got, tc.want, target, oracle)
+			}
+		}
 	}
 }
