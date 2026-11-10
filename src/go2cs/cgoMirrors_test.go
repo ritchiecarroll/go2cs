@@ -66,6 +66,11 @@ type _Ctype_struct_ints struct {
 	_ [7]byte
 }
 
+type _Ctype_struct_clash struct {
+	CheckLayout _Ctype_int
+	Hold        _Ctype_int
+}
+
 type _Ctype_struct_flex struct {
 	n    _Ctype_int
 	data [0]_Ctype_int
@@ -292,6 +297,7 @@ func TestCgoMirrorsCompileAndHoldTheirLayoutUnderDotnet(t *testing.T) {
 		lookupCgoStruct(t, fixture.Types, "_Ctype_struct_x"),
 		lookupCgoStruct(t, shapesPkg, "_Ctype_struct_shapes"),
 		lookupCgoStruct(t, shapesPkg, "_Ctype_struct_ints"),
+		lookupCgoStruct(t, shapesPkg, "_Ctype_struct_clash"),
 	} {
 		mirror, err := builder.mirror(named)
 
