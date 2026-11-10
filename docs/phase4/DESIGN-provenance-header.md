@@ -133,3 +133,25 @@ A miss on either is a defect of the seat, not a re-scope.
 
 About 1-1.5 lane-days, judgement: the converter change and its tests about 120 lines of Go; the hook and its cases
 about 60 lines of PowerShell; the docs. The three-target reconvert of §4 is most of the wall time on this host.
+
+## 7. AMENDED 2026-11-10: approved and seated
+
+COORD approved the design as proposed (2026-11-10, mailbox): extend `-provenance`, two lines with no license words, the
+path relative to the file's own module root, go2cs's release, its own comment group, the nugetgo-pack hook for a stated
+Apache-2.0, not a `-recurse=nuget` default. The seat follows section 5 on `claude/p2-provenance-header`. What the seat
+settled that this note left open:
+
+- **The module-cache version** is read with the existing `moduleCacheVersion` (`moduleDisclosureRoot.go`), from the
+  module root's directory name, unescaped; a checkout is named by path alone. The module path comes from the root's
+  `go.mod` (`directoryModulePath`), so `go/packages`' `Module` field, which the converter's load mode does not request,
+  is not needed.
+- **The standard-library release** is the first line of GOROOT's `VERSION`; a GOROOT without one is named "the Go
+  standard library" with no release.
+- **Placement under `-comments`**: the leading comments are written first, then the notice, then the doc comment. All
+  of a file's leading comments come before the notice, not only the license groups, since the converter carries them
+  as one run.
+- **The repack driver**: `Invoke-NugetgoRepack.ps1` passes `-provenance` to runbook step 1.4 for a row whose
+  `LicenseSpdx` asks for it, since the pack would otherwise refuse that step's root. cobra's next repack carries the
+  notice.
+- **An end-to-end `-recurse` conversion of a module-cache dependency** is not in the tests: the module-cache path is
+  tested at `sourceProvenance` with a fake `GOMODCACHE` root, and the placement on a converted main-module package.
