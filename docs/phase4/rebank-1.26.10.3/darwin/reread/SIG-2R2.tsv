@@ -1,0 +1,3 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	win_expected	win_disclosed	darwin_seg	win_differs	run	wall_s	cells
+SIG-2R2	syscall	osx-arm64	33	32	1	1	0	validated	yes	66	0	-	yes	42740799606	45	read
+SIG-2R2	syscall	osx-x64	33	32	1	1	0	validated	yes	66	0	-	yes	42740799606	73	read
