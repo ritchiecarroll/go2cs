@@ -453,6 +453,28 @@ stay `SetLastError = false`.
 A C function returning `void` also has a two-result form. cmd/cgo gives it the result `(_Ctype_void, error)`, so the
 wrapper returns the zero `_Ctype_void` and the error.
 
+> **AMENDED 2026-11-10 (COORD, RULED, on H's increment 3b1 finding): the capture above holds on linux and darwin ONLY.**
+> On windows `SetLastError` captures the Win32 `GetLastError`, while C's `errno` is the C runtime's own thread slot, a
+> different one. Measured on H against `ucrtbase.dll`: through a `SetLastError` binding, `exp(1000.0)` left
+> `GetLastPInvokeError()` at 0; with the C runtime's errno zeroed first and read right after, the same call read 34
+> (`ERANGE`). A read made after a further P/Invoke read 0, so intervening runtime work can clobber the slot.
+>
+> **Ruled, for windows targets:** the errno form binds the function WITHOUT `SetLastError`, plus the LIBRARY'S C runtime
+> `_errno()` (an `nint` slot). Inside the bracket, the wrapper:
+>
+> 1. takes the slot's ADDRESS with one `_errno()` call BEFORE the native call;
+> 2. writes 0 through it;
+> 3. calls the function;
+> 4. reads through the same address as the very next statement, with no P/Invoke between the call's return and the read.
+>
+> That is cgo's own trampoline (zero errno, call, capture) in managed code. The slot is the calling thread's, and one
+> synchronous wrapper does not change threads; a GolibTests arm holds the address equal before and after a wrapped call.
+> The C runtime is per library: `ucrtbase.dll` for UCRT builds (llvm-mingw ucrt, zig), `msvcrt.dll` for msvcrt-built
+> DLLs. Increment 4's probe records it from the import table. Linux and darwin keep `SetLastError` plus
+> `GetLastPInvokeError()`. The generator takes the target GOOS (§11.9). **Remaining caveat:** runtime code on the same
+> thread between the stub's return and the read could still touch the C runtime's errno; Phase 4's native shim closes
+> it.
+
 ### 11.4 The seam bracket goes through the runtime forwarders (finding 4)
 
 §4.2 called `GoNativeCall` directly, and that is not the ruled shape. DESIGN-native-call-seam §12.2 Q2 ruled Go's
