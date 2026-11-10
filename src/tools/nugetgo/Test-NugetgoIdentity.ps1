@@ -283,5 +283,23 @@ Check 'Invoke-NugetgoRepack.ps1 converts PR with -provenance when the row''s lic
     $repack.Contains('$provenanceArgs = @(if (Test-NugetgoProvenanceLicense $row.LicenseSpdx) { ''-provenance'' })') -and
     $repack.Contains('(@(''-recurse=nuget'') + $provenanceArgs + @(''-platforms''')) 'the repack driver does not pass -provenance to step 1.4'
 
+# The driver passes -provenance only for a module it has a row for. A published module with no row is rebuilt by
+# hand, and an Apache-2.0 one then reaches the pack without the notice: mousetrap, Apache-2.0 and without Go tests,
+# had no row (P2, 2026-11-10). Each published module's sample program sits under src/tests/ModuleBehavior/<M@V>/.
+$moduleRows = Import-PowerShellDataFile -LiteralPath (Join-Path $PSScriptRoot 'nugetgo-modules.psd1')
+$behaviorRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../tests/ModuleBehavior'))
+$sampled = @(Get-ChildItem -LiteralPath $behaviorRoot -Recurse -Filter 'mappings.txt' -File |
+        ForEach-Object { [System.IO.Path]::GetRelativePath($behaviorRoot, $_.DirectoryName) -replace '\\', '/' } | Sort-Object)
+$rowless = @($sampled | Where-Object { -not $moduleRows.ContainsKey($_) })
+Check 'every module with a sample program under src/tests/ModuleBehavior has a row in nugetgo-modules.psd1' (
+    $sampled.Count -gt 0 -and $rowless.Count -eq 0) "$($sampled.Count) sampled; no row: $($rowless -join ', ')"
+# The census of the modules whose license asks for the notice, read from the rows, is the one the design note states.
+$noticeRows = @($moduleRows.Keys | Where-Object { Test-NugetgoProvenanceLicense $moduleRows[$_].LicenseSpdx } | Sort-Object)
+$design = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot '../../../docs/phase4/DESIGN-provenance-header.md'))
+$censusLine = [regex]::Match($design, '(?m)^- \*\*The Apache-2\.0 census\*\*[^\n]*: (.+)$')
+$stated = if ($censusLine.Success) { @([regex]::Matches($censusLine.Groups[1].Value, '`([^`]+)`') | ForEach-Object { $_.Groups[1].Value } | Sort-Object) } else { @() }
+Check 'DESIGN-provenance-header.md names every module whose row asks for the notice, and only those' (
+    $noticeRows.Count -gt 0 -and (($stated -join ' ') -ceq ($noticeRows -join ' '))) "rows: $($noticeRows -join ', '); design: $(if ($censusLine.Success) { $stated -join ', ' } else { 'no census line' })"
+
 Write-Host "ran $ran, failed $failed"
 exit $failed
