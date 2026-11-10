@@ -37,7 +37,9 @@ namespace go;
 //
 // SEMANTICS
 //   Signed kinds sign-extend and unsigned kinds zero-extend, matching Go integer conversion
-//   exactly; every cast is `unchecked`, because Go conversion truncates and never panics.
+//   exactly; every cast is `unchecked`, because Go conversion truncates and never panics. A FLOAT
+//   source truncates toward zero, and out of range takes gc's amd64 answer, not a C# cast's
+//   saturation (the `double` overload says how).
 //
 // WHY IT LIVES IN ITS OWN FILE
 //   It sat inside the `func<TRef…>` region in builtin.cs purely by accident of where it was
@@ -83,6 +85,77 @@ public static partial class builtin
         DynamicallyAccessedMemberTypes.PublicFields |
         DynamicallyAccessedMemberTypes.NonPublicFields
     )] T>(long value) where T : new() => ConvertToType<T>(unchecked((ulong)value));
+
+    /// <summary>
+    /// Go's <c>T(f)</c> of a float into an integer-constrained type parameter, <c>T(value.(float64))</c> with
+    /// <c>T ~int32</c>. An in-range value truncates toward zero, as Go's float-to-integer conversion does. A value out
+    /// of range (or NaN) is implementation-defined in Go, and the answer here is the one gc produces on amd64, measured
+    /// with go1.26.10 linux/amd64 over every integer kind: the 64-bit kinds take CVTTSD2SQ, whose NaN or out-of-range
+    /// result is the "integer indefinite" value, <c>long.MinValue</c>; int32 takes CVTTSD2SL, likewise
+    /// <c>int.MinValue</c>; the 8- and 16-bit kinds keep the low bits of the int32 result and uint32 the low bits of the
+    /// int64 one; and the unsigned 64-bit kinds take gc's split at 2^63. gc on arm64 is not measured here and is not
+    /// expected to agree out of range, so an out-of-range answer matches Go on amd64. A C# cast cannot stand in for any
+    /// of it: .NET saturates an out-of-range cast. A float32 argument widens to double exactly, so it converts the same.
+    /// </summary>
+    public static T ConvertToType<[DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.NonPublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicProperties |
+        DynamicallyAccessedMemberTypes.NonPublicProperties |
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields
+    )] T>(double value) where T : new()
+    {
+        if (typeof(T) == typeof(nint)) return (T)(object)(nint)FloatToInt64(value);
+        if (typeof(T) == typeof(long)) return (T)(object)FloatToInt64(value);
+        if (typeof(T) == typeof(int)) return (T)(object)FloatToInt32(value);
+        if (typeof(T) == typeof(short)) return (T)(object)unchecked((short)FloatToInt32(value));
+        if (typeof(T) == typeof(sbyte)) return (T)(object)unchecked((sbyte)FloatToInt32(value));
+        if (typeof(T) == typeof(nuint)) return (T)(object)(nuint)FloatToUInt64(value);
+        if (typeof(T) == typeof(ulong)) return (T)(object)FloatToUInt64(value);
+        if (typeof(T) == typeof(uint)) return (T)(object)unchecked((uint)FloatToInt64(value));
+        if (typeof(T) == typeof(ushort)) return (T)(object)unchecked((ushort)FloatToInt32(value));
+        if (typeof(T) == typeof(byte)) return (T)(object)unchecked((byte)FloatToInt32(value));
+        if (typeof(T) == typeof(uintptr)) return (T)(object)new uintptr((nuint)FloatToUInt64(value));
+        if (typeof(T) == typeof(double)) return (T)(object)value;
+        if (typeof(T) == typeof(float)) return (T)(object)(float)value;
+
+        return TypeParamCaster<T>.FromFloat64(value);
+    }
+
+    // CVTTSD2SQ: truncation toward zero, with NaN and every value outside [-2^63, 2^63) giving long.MinValue. The range
+    // test is written so that NaN fails it.
+    private static long FloatToInt64(double value) =>
+        value >= -9223372036854775808.0 && value < 9223372036854775808.0 ? (long)value : long.MinValue;
+
+    // CVTTSD2SL, the int32 twin. Anything above -2^31 - 1 truncates to at least int.MinValue, so the lower bound is open.
+    private static int FloatToInt32(double value) =>
+        value > -2147483649.0 && value < 2147483648.0 ? (int)value : int.MinValue;
+
+    // gc's uint64 conversion on amd64: below 2^63, the signed conversion reinterpreted; otherwise the signed conversion
+    // of value - 2^63 with the top bit set. NaN takes the second arm and reads 2^63, as gc's does.
+    private static ulong FloatToUInt64(double value) => value < 9223372036854775808.0
+        ? unchecked((ulong)FloatToInt64(value))
+        : unchecked((ulong)FloatToInt64(value - 9223372036854775808.0)) | 0x8000000000000000UL;
+
+    // The same conversions keyed by a runtime type, for a named numeric wrapper's underlying kind (TypeParamCaster). Each
+    // arm boxes its own kind: without the (object) casts the chain's natural type is double, and every arm would box a
+    // double that the wrapper's constructor refuses.
+    private static object FloatToKind(double value, Type kind) =>
+        kind == typeof(nint) ? (object)(nint)FloatToInt64(value) :
+        kind == typeof(long) ? (object)FloatToInt64(value) :
+        kind == typeof(int) ? (object)FloatToInt32(value) :
+        kind == typeof(short) ? (object)unchecked((short)FloatToInt32(value)) :
+        kind == typeof(sbyte) ? (object)unchecked((sbyte)FloatToInt32(value)) :
+        kind == typeof(nuint) ? (object)(nuint)FloatToUInt64(value) :
+        kind == typeof(ulong) ? (object)FloatToUInt64(value) :
+        kind == typeof(uint) ? (object)unchecked((uint)FloatToInt64(value)) :
+        kind == typeof(ushort) ? (object)unchecked((ushort)FloatToInt32(value)) :
+        kind == typeof(byte) ? (object)unchecked((byte)FloatToInt32(value)) :
+        kind == typeof(uintptr) ? (object)new uintptr((nuint)FloatToUInt64(value)) :
+        kind == typeof(double) ? (object)value :
+        kind == typeof(float) ? (object)(float)value :
+        throw new NotSupportedException($"ConvertToType: no float conversion to a wrapper over {kind}");
 
     public static ulong ConvertToUInt64<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors |
@@ -223,6 +296,16 @@ public static partial class builtin
                 Convert.ChangeType(unchecked((long)value), s_valueType);
 
             return (T)s_valueCtor.Invoke([underlying]);
+        }
+
+        // A named numeric wrapper built from a float: the float converts to the wrapper's underlying kind exactly as
+        // ConvertToType<T>(double) converts to that kind directly.
+        public static T FromFloat64(double value)
+        {
+            if (s_valueType is null || s_valueCtor is null)
+                throw new NotSupportedException($"ConvertToType: no numeric wrapper surface on {typeof(T)}");
+
+            return (T)s_valueCtor.Invoke([FloatToKind(value, s_valueType)]);
         }
 
         public static ulong ToUInt64(T value)

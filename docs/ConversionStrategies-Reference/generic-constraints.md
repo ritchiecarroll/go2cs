@@ -272,6 +272,25 @@ Every generated named-slice wrapper also implements the non-generic `IArray` sur
 
 C# has no cast to or from a type parameter, so the Go conversions in `rand.N[Int intType]` — `Int(x)`, `uint64(n)` — and an untyped constant compared against the parameter (`n <= 0`, which Go types AS `Int` but C# leaves as `int`, unacceptable to the lifted `IComparisonOperators<Int, Int, bool>`) have no direct C# form (CS0030/CS0019). Three coordinated pieces, gated on a constraint whose every type-set term has an **integer underlying** (`typeParamIsInteger`): a conversion **to** the parameter emits golib's runtime-typed `ConvertToType<Int>(…)` (typeof-dispatch that JIT-folds to a single branch per instantiation; signed kinds sign-extend, unsigned zero-extend — Go's exact conversion semantics; a `/*num:**/` wrapper instantiation falls back to a reflection-cached bridge over its `Value` property/ctor); a conversion **from** the parameter to a basic integer emits `ConvertToUInt64<Int>(n)` (plus a plain numeric cast when the target is not `uint64`); and a **constant operand** of a binary op against the parameter materializes via `ConvertToType<Int>(0)` — except a SHIFT count, which Go types independently and the emission already coerces to `int`. Result: `if (n <= ConvertToType<Int>(0)) … return ConvertToType<Int>(ConvertToUInt64<Int>(n) / 2);`. (Guarded by the `GenericTypeInference` extension `halveN` — `~int32 | ~int64` with the compare, both conversions, and a negative value proving sign-extension, values vs Go; math/rand/v2's `N` takes this path.)
 
+### A float converted to an integer type parameter takes gc's amd64 answer
+
+`T(value.(float64))` with `T ~int32` (typescript-go's internal/tsoptions) emits the same
+`ConvertToType<T>(value._<float64>())`, and golib's `double` overload decides it. An in-range value truncates
+toward zero, as Go's float-to-integer conversion does. An out-of-range value or NaN is implementation-defined in
+Go, and golib answers as gc does on amd64: the 64-bit kinds read CVTTSD2SQ's "integer indefinite"
+(`long.MinValue`), int32 reads CVTTSD2SL's (`int.MinValue`), the 8- and 16-bit kinds keep the low bits of the
+int32 result and uint32 the low bits of the int64 one, and the unsigned 64-bit kinds take gc's split at 2^63. A
+C# cast would saturate, which matches neither. gc on arm64 was not measured here; its out-of-range answers are not
+expected to agree, so they are amd64's only. A `float32` argument widens to `double` exactly and converts the same,
+and a named integer wrapper (`type count int32`) converts to its underlying kind first. The integer overloads keep
+every integer argument, because `long` and `ulong` are better conversion targets than `double`. Guarded by the
+`TypeParamFloatConversion` extension (in-range values only, over every integer kind and a named wrapper, values vs
+Go) and GolibTests' `TypeParamFloatConversionTests` (gc amd64's table, 38 values over 11 kinds, plus the binding
+and wrapper arms).
+<!-- 2026-11-10, TS readiness C36: at master 38caf3558a the repro failed CS1503 ('double' to 'ulong'). The table is
+go1.26.10 linux/amd64 output for int(f) ... uintptr(f), identical direct and through a type parameter. Corpus census:
+23 ConvertToType call sites in src/core, every argument an integer, so none rebinds; apicompat .3 -> cut clean. -->
+
 ### Any constant Go types as the parameter is materialized, once, at its top-most node
 
 Go gives an untyped constant the type of the type parameter it meets, not only as a binary operand: `return 1`
