@@ -995,7 +995,7 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 		return err
 	}
 
-	productionFiles, err := productionCSFiles(outputPath, goosOfTarget(options.targetPlatform))
+	productionFiles, err := productionCSFiles(outputPath, options.targetPlatform)
 	if err != nil {
 		return err
 	}
@@ -1050,7 +1050,7 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 	// are references (fieldAccessReceiverImports). The TARGET GOOS's file, because the records differ by GOOS: only
 	// darwin's net records internal/routebsd structs.
 	if model == testProjectWhiteboxReference {
-		productionInfoFile := platformPackageInfoPath(outputPath, goosOfTarget(options.targetPlatform))
+		productionInfoFile := platformPackageInfoPath(outputPath, options.targetPlatform)
 		referenceImports = append(referenceImports, fieldAccessReceiverImports(productionInfoFile, production.PkgPath, referenceImports)...)
 		referenceImports = append(referenceImports, fieldAccessFieldTypeImports(productionInfoFile, production,
 			[]*packages.Package{production, internal, external}, compileExcluded, referenceImports)...)
@@ -1071,7 +1071,7 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 	referenceImports = append(referenceImports, declarationClosureImports(
 		[]*packages.Package{production, internal, external}, compileExcluded,
 		append([]string{production.PkgPath}, referenceImports...),
-		packageImplementBases(platformPackageInfoPath(outputPath, goosOfTarget(options.targetPlatform))),
+		packageImplementBases(platformPackageInfoPath(outputPath, options.targetPlatform)),
 		foreignImplementBasesResolver(options))...)
 
 	testProjectName := projectFileBaseName(projectName) + ".tests.csproj"
@@ -1424,7 +1424,7 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 		// is the SEED this test conversion's own metadata is merged into — asking flat would fail
 		// the "convert the package itself before its tests" check on a package that HAS been
 		// converted (design §4.3).
-		productionInfoPath := platformPackageInfoPath(outputPath, goosOfTarget(options.targetPlatform))
+		productionInfoPath := platformPackageInfoPath(outputPath, options.targetPlatform)
 		productionInfo, err := os.ReadFile(productionInfoPath)
 		if err != nil {
 			return result, fmt.Errorf("read production package metadata (convert the package itself before its tests): %w", err)
@@ -3093,7 +3093,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	}
 
 	if productionName != "" {
-		productionInfoPath := platformPackageInfoPath(outputPath, goosOfTarget(options.targetPlatform))
+		productionInfoPath := platformPackageInfoPath(outputPath, options.targetPlatform)
 		loadPackageImplements(productionInfoPath, productionName, strings.TrimSuffix(pkg.PkgPath, "_test"))
 		seedProductionAliasLifts(pkg, productionInfoPath)
 		seedProductionInterfaceAliases(pkg, productionInfoPath, options)
@@ -3295,7 +3295,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 			// emit the auto conversion to the `.cs.auto` review sibling, leaving the marked `.cs`
 			// untouched. The HAND-OWNED `.cs` is the compile item; the `.cs.auto` sibling never is.
 			// The tree's own per-GOOS sibling when it holds one there (reviewSiblingLayoutPath), flat otherwise.
-			outputName := platformLayoutPath(outputPath, goosOfTarget(options.targetPlatform), baseName+".cs.auto")
+			outputName := platformLayoutPath(outputPath, options.targetPlatform, baseName+".cs.auto")
 			visitor.finalizePositionMap(outputName)
 			visitor.alignEmittedTrailingComments()
 
@@ -3355,7 +3355,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 			// every L3 package and emitted a SECOND `static <pkg>_package()` beside the real one:
 			// CS0111 on the constructor itself, once crypto/x509's platform folder started
 			// compiling into its test assembly at all.
-			_, statErr := os.Stat(platformLayoutPath(outputPath, goosOfTarget(options.targetPlatform), PackageInitFileName))
+			_, statErr := os.Stat(platformLayoutPath(outputPath, options.targetPlatform, PackageInitFileName))
 			productionOwnsCtor = statErr == nil
 		}
 
@@ -5231,7 +5231,7 @@ func foreignImplementBasesResolver(options Options) func(string) map[string][]st
 				continue
 			}
 
-			if parsed := packageImplementBases(platformPackageInfoPath(info.TargetDir, goosOfTarget(options.targetPlatform))); parsed != nil {
+			if parsed := packageImplementBases(platformPackageInfoPath(info.TargetDir, options.targetPlatform)); parsed != nil {
 				bases = parsed
 			}
 		}
@@ -6415,16 +6415,21 @@ func isSelfProjectReference(reference, projectName string) bool {
 // The per-GOOS `package_init.cs` belongs in the set for the same reason: it holds the production
 // class's static ctor, which the internal variant's package_init_internal_test.cs forces before its
 // own relocations run, and a ctor missing from the test compilation leaves production's relocated
-// vars unset. Only the TARGET platform's folder is taken; the others are a different build.
-func productionCSFiles(outputPath string, goos string) ([]string, error) {
+// vars unset. Only the TARGET platform's key folders are taken (its GOOS, GOARCH and pair folders,
+// platformLayoutFolders; a bare GOOS takes its GOOS folder alone); the others are a different build.
+func productionCSFiles(outputPath string, target string) ([]string, error) {
 	result, err := productionCSFilesIn(outputPath, "")
 
 	if err != nil {
 		return nil, err
 	}
 
-	if len(goos) > 0 && isPlatformSourceFolder(outputPath, goos) {
-		platformFiles, err := productionCSFilesIn(filepath.Join(outputPath, goos), goos)
+	for _, folder := range platformLayoutFolders(target) {
+		if !isPlatformSourceFolder(outputPath, folder) {
+			continue
+		}
+
+		platformFiles, err := productionCSFilesIn(filepath.Join(outputPath, folder), folder)
 
 		if err != nil {
 			return nil, err

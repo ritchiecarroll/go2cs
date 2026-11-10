@@ -68,21 +68,13 @@ func runPlatformEmission(options Options, stageDir string, packageFilter []strin
 		return fmt.Errorf("multi-platform emission needs at least two -platforms targets (got %d)", len(targets))
 	}
 
-	// L3 keys its source folders by GOOS, so two targets sharing one GOOS would write into the same
-	// folder and the second would silently overwrite the first. The GOARCH axis is real (design §5:
-	// 16 packages) and is increment 5's subject; refuse rather than emit a tree that looks fine.
-	seenGOOS := map[string]string{}
-
-	for _, target := range targets {
-		goos := goosOfTarget(target)
-
-		if previous, exists := seenGOOS[goos]; exists {
-			return fmt.Errorf("targets %q and %q share GOOS %q: layout L3 keys its source folders by GOOS, "+
-				"so one emission per GOOS is the most this can write (the GOARCH axis is a later increment)",
-				previous, target, goos)
-		}
-
-		seenGOOS[goos] = target
+	// The merge homes every file by the layout lattice of the targets it is given (platformLattice.go),
+	// and a single-target conversion reads the tree against platformUniverse. So the request must be
+	// exactly that universe: a strict subset would re-home every file the absent targets share as
+	// though they did not exist, and a target outside it would enter a layout no single-target
+	// conversion reproduces. A repeated target has no key that tells its two emissions apart.
+	if err := platformTargetsMatchUniverse(targets, platformUniverse); err != nil {
+		return err
 	}
 
 	rootPath, err := filepath.Abs(options.go2csPath)
@@ -364,16 +356,83 @@ func reclaimEmissionStage(stageDir string) (stageReclaim, error) {
 	return reclaimed, nil
 }
 
-// mergedArtifact is one logical artifact's merge plan: where each emitting target's copy was staged.
+// mergedArtifact is one logical artifact's merge plan: where each emitting target's copy was staged,
+// and the key folder each emitting target's copy is homed in.
 type mergedArtifact struct {
 	class   string
 	staged  map[string]string // target -> absolute path of that target's staged copy
 	emitted []string          // emitting targets, in target order
+	homes   map[string]string // emitting target -> the key folder its build compiles the copy from ("" = flat)
 }
 
-// mergePlatformEmissions writes the classified emissions into the corpus as layout L3.
+// mergedPlacement is one copy a merge plan writes: a content class's bytes in one of its home keys.
+type mergedPlacement struct {
+	folder string // the package-relative key folder; "" = flat
+	source string // the staged copy of the class's first member
+}
+
+// coversAnyOf reports whether a key's cover holds any of the given targets.
+func coversAnyOf(cover []string, targets []string) bool {
+	for _, covered := range cover {
+		for _, target := range targets {
+			if covered == target {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+// refuseNestedPackagesNamedLikeKeys refuses a merge that would give a package a layout block while it
+// holds a NESTED PACKAGE in a folder named like one of the lattice's keys (design §2.4): the project
+// file's `$(GoTargetOS)/*.cs` (or arch, or pair) glob would compile the child's sources into the
+// parent for the targets that key selects. The three nested packages named for a key today
+// (internal/runtime/syscall/{linux,windows}, internal/syscall/windows) have no package for a parent.
+func refuseNestedPackagesNamedLikeKeys(coreDir string, lattice *platformLattice, plans map[string]mergedArtifact, placements map[string][]mergedPlacement) error {
+	layoutPackages := map[string]bool{}
+
+	for logical := range plans {
+		for _, home := range placements[logical] {
+			if pkg := artifactPackage(logical); pkg != "." && len(home.folder) > 0 {
+				layoutPackages[pkg] = true
+			}
+		}
+	}
+
+	var offenders []string
+
+	for _, pkg := range sortedKeys(layoutPackages) {
+		packageDir := filepath.Join(coreDir, filepath.FromSlash(pkg))
+
+		for _, folder := range lattice.candidateFolders() {
+			if isNestedPackageFolder(packageDir, folder) {
+				offenders = append(offenders, path.Join("core", pkg, folder))
+			}
+		}
+	}
+
+	if len(offenders) == 0 {
+		return nil
+	}
+
+	return fmt.Errorf("multi-platform merge: %d package(s) would carry the layout block while holding a nested package in a "+
+		"folder named like a layout key, whose sources that block's <key>/*.cs glob would compile into the parent; "+
+		"rename or move the nested package first:\n  %s", len(offenders), strings.Join(offenders, "\n  "))
+}
+
+// mergePlatformEmissions writes the classified emissions into the corpus as layout L3, keyed by the
+// lattice of the targets that emitted (platformLattice.go).
 func mergePlatformEmissions(rootPath string, targets []string, emissions []*platformEmission) error {
 	coreDir := filepath.Join(rootPath, "core")
+
+	// The lattice of the targets that EMITTED, not of the declared universe: a target skipped for an
+	// empty filter match has no emission to place, and its folders are left as they are.
+	lattice, err := newPlatformLattice(targets)
+
+	if err != nil {
+		return fmt.Errorf("multi-platform merge: %w", err)
+	}
 
 	// Classification is over LOGICAL paths — `<pkg>/<file>`, with any per-GOOS folder segment
 	// already folded away by snapshotConvertedRoot — so an already-L3 corpus reclassifies to exactly
@@ -400,16 +459,41 @@ func mergePlatformEmissions(rootPath string, targets []string, emissions []*plat
 	classes := classifyPlatformEmissions(targets, hashesByTarget)
 	plans := make(map[string]mergedArtifact, len(classes))
 
+	// Each class of identical bytes is homed by the lattice (exact hashes, as the classification above
+	// compares them): every target in a class compiles the one copy its key holds. Over one target
+	// per GOOS this is the L3 rule as it began — shared by all ⟹ flat, anything else ⟹ one copy per
+	// emitting target's GOOS folder.
+	placements := make(map[string][]mergedPlacement, len(classes))
+
 	for logical, class := range classes {
-		plan := mergedArtifact{class: class.class, staged: map[string]string{}, emitted: class.emitters}
+		plan := mergedArtifact{class: class.class, staged: map[string]string{}, emitted: class.emitters, homes: map[string]string{}}
+		hashes := map[string]string{}
 
 		for i, target := range targets {
 			if stagedPath, ok := stagedByTarget[i][logical]; ok {
 				plan.staged[target] = stagedPath
+				hashes[target] = hashesByTarget[i][logical]
+			}
+		}
+
+		for _, contentClass := range partitionContentClasses(targets, hashes) {
+			for _, home := range lattice.homes(contentClass) {
+				placements[logical] = append(placements[logical], mergedPlacement{folder: home.folder, source: plan.staged[contentClass[0]]})
+
+				for _, target := range home.cover {
+					plan.homes[target] = home.folder
+				}
 			}
 		}
 
 		plans[logical] = plan
+	}
+
+	// A package whose project file will select `<key>/*.cs` must not hold a NESTED PACKAGE in a folder
+	// of that name: the glob would compile the child's sources into the parent (design §2.4). Refused
+	// before the first write, so a refused merge leaves the corpus as it found it.
+	if err := refuseNestedPackagesNamedLikeKeys(coreDir, lattice, plans, placements); err != nil {
+		return err
 	}
 
 	written, removed, unchanged := 0, 0, 0
@@ -434,40 +518,17 @@ func mergePlatformEmissions(rootPath string, targets []string, emissions []*plat
 		}
 
 		fileName := path.Base(logical)
-		flatPath := filepath.Join(coreDir, filepath.FromSlash(logical))
+		packageDir := filepath.Join(coreDir, filepath.FromSlash(pkg))
+		destinations := map[string]bool{}
 
-		if plan.class == artifactIdentical {
-			// Shared on every target: one flat copy, and the per-GOOS copies (if this artifact used
-			// to vary) go away.
-			changed, err := copyMergedFile(plan.staged[targets[0]], flatPath)
+		for _, home := range placements[logical] {
+			destinations[home.folder] = true
 
-			if err != nil {
-				return err
+			if len(home.folder) > 0 {
+				layoutPackages[pkg] = true
 			}
 
-			countWrite(changed, &written, &unchanged)
-
-			for _, target := range targets {
-				gone, err := removeIfPresent(filepath.Join(coreDir, filepath.FromSlash(pkg), goosOfTarget(target), fileName))
-
-				if err != nil {
-					return err
-				}
-
-				if gone {
-					removed++
-					foldedPackages[pkg] = true
-				}
-			}
-
-			continue
-		}
-
-		// Varies, or is emitted by only some targets: one copy per emitting target, in that
-		// target's GOOS folder — and the flat copy, if the artifact used to be shared, goes away.
-		for _, target := range plan.emitted {
-			goos := goosOfTarget(target)
-			changed, err := copyMergedFile(plan.staged[target], filepath.Join(coreDir, filepath.FromSlash(pkg), goos, fileName))
+			changed, err := copyMergedFile(home.source, filepath.Join(packageDir, home.folder, fileName))
 
 			if err != nil {
 				return err
@@ -476,16 +537,40 @@ func mergePlatformEmissions(rootPath string, targets []string, emissions []*plat
 			countWrite(changed, &written, &unchanged)
 		}
 
-		layoutPackages[pkg] = true
+		// Then the name goes from every other place a build could compile it from: flat, and each key
+		// folder of the lattice, admitted or not, whose cover holds a target that emitted it (that
+		// target now compiles the copy written above, so another would be a second body). A folder
+		// serving only targets that did NOT emit the name is left alone, as the per-GOOS folder of a
+		// non-emitting target always was: what it holds there is that target's own business (a
+		// per-GOOS hand-own its conversion diverted), not a stale copy of this emission. A nested
+		// package is never a key folder, whatever its name.
+		if !destinations[""] {
+			gone, err := removeIfPresent(filepath.Join(packageDir, fileName))
 
-		gone, err := removeIfPresent(flatPath)
+			if err != nil {
+				return err
+			}
 
-		if err != nil {
-			return err
+			if gone {
+				removed++
+			}
 		}
 
-		if gone {
-			removed++
+		for _, folder := range lattice.candidateFolders() {
+			if destinations[folder] || !coversAnyOf(lattice.folderCover(folder), plan.emitted) || isNestedPackageFolder(packageDir, folder) {
+				continue
+			}
+
+			gone, err := removeIfPresent(filepath.Join(packageDir, folder, fileName))
+
+			if err != nil {
+				return err
+			}
+
+			if gone {
+				removed++
+				foldedPackages[pkg] = true
+			}
 		}
 	}
 
@@ -673,15 +758,24 @@ func mergePlatformEmissions(rootPath string, targets []string, emissions []*plat
 // flat one stays. Copies that DIFFER are not, and are deliberately NOT guessed at — the merge has
 // no emission data for a path no target rewrote, so it cannot tell which target owns the flat copy,
 // and either choice silently breaks a platform. Those are named and fail the run.
+//
+// Generalised from "flat versus GOOS" to every pair of key folders by their COVERS (the targets whose
+// build compiles each; platformLattice.folderCover, design §2.4):
+//
+//	disjoint covers                 nothing to do: no target compiles both
+//	nested covers, identical bytes  the copy in the finer key goes (the narrower cover; on equal covers
+//	                                the later of flat, GOOS, arch, pair)
+//	nested covers, differing bytes  conflict: the shared targets would compile two bodies
+//	overlapping covers              conflict even when identical: each copy serves a target the other
+//	                                does not, so no removal repairs it
+//
+// Flat contains every key folder, a folder whose name is no target of this lattice included (a GOOS
+// the merge did not convert keeps the flat-versus-folder check it always had), and two folders that
+// both cover nothing here are disjoint.
 func reconcileLayoutDuplicates(coreDir string, targets []string) (int, error) {
-	platformFolders := map[string]bool{}
-
-	for _, target := range targets {
-		platformFolders[goosOfTarget(target)] = true
-	}
-
+	lattice := mustPlatformLattice(targets)
 	removed := 0
-	var conflicts []string
+	var conflicts, nestedConflicts, overlaps []string
 
 	err := filepath.WalkDir(coreDir, func(dirPath string, entry fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -697,55 +791,116 @@ func reconcileLayoutDuplicates(coreDir string, targets []string) (int, error) {
 			return filepath.SkipDir
 		}
 
-		for _, goos := range sortedKeys(platformFolders) {
-			// isPlatformSourceFolder, not a bare directory-name test: `internal/syscall/windows` is
-			// a real PACKAGE whose directory happens to be named for a GOOS, and its sources are
-			// not a platform variant of its parent's.
-			if !isPlatformSourceFolder(dirPath, goos) {
-				continue
+		entries, err := os.ReadDir(dirPath)
+
+		if err != nil {
+			return err
+		}
+
+		// Every key folder of this directory, coarsest first. isPlatformSourceFolder, not a bare
+		// directory-name test: `internal/syscall/windows` is a real PACKAGE whose directory happens
+		// to be named for a GOOS, and its sources are not a platform variant of its parent's.
+		var folders []string
+
+		for _, child := range entries {
+			if child.IsDir() && isPlatformSourceFolder(dirPath, child.Name()) {
+				folders = append(folders, child.Name())
+			}
+		}
+
+		if len(folders) == 0 {
+			return nil
+		}
+
+		sort.SliceStable(folders, func(i, j int) bool {
+			if rankI, rankJ := folderRank(folders[i]), folderRank(folders[j]); rankI != rankJ {
+				return rankI < rankJ
 			}
 
-			platformDir := filepath.Join(dirPath, goos)
-			platformEntries, err := os.ReadDir(platformDir)
+			return folders[i] < folders[j]
+		})
+
+		// The locations of each name a key folder holds: flat ("") first when a regular file of that
+		// name sits there too, then the folders in the order above.
+		locations := map[string][]string{}
+
+		for _, folder := range folders {
+			folderEntries, err := os.ReadDir(filepath.Join(dirPath, folder))
 
 			if err != nil {
 				return err
 			}
 
-			for _, platformEntry := range platformEntries {
-				if platformEntry.IsDir() {
+			for _, folderEntry := range folderEntries {
+				if folderEntry.IsDir() {
 					continue
 				}
 
-				flatPath := filepath.Join(dirPath, platformEntry.Name())
-				flatInfo, err := os.Stat(flatPath)
+				name := folderEntry.Name()
 
-				if err != nil || !flatInfo.Mode().IsRegular() {
-					continue
+				if _, seen := locations[name]; !seen {
+					locations[name] = nil
+
+					if flatInfo, err := os.Stat(filepath.Join(dirPath, name)); err == nil && flatInfo.Mode().IsRegular() {
+						locations[name] = append(locations[name], "")
+					}
 				}
 
-				platformPath := filepath.Join(platformDir, platformEntry.Name())
-				identical, err := filesHaveIdenticalBytes(platformPath, flatPath)
+				locations[name] = append(locations[name], folder)
+			}
+		}
 
-				if err != nil {
-					return err
-				}
+		for _, name := range sortedMapKeys(locations) {
+			held := locations[name]
+			gone := map[string]bool{}
 
-				if !identical {
-					conflicts = append(conflicts, fmt.Sprintf("  %s\n  %s",
-						corpusRelativePath(coreDir, flatPath), corpusRelativePath(coreDir, platformPath)))
+			for i := 0; i < len(held); i++ {
+				for j := i + 1; j < len(held); j++ {
+					if gone[held[i]] || gone[held[j]] {
+						continue
+					}
 
-					continue
-				}
+					coarser, finer, relation := relateLayoutFolders(lattice, held[i], held[j])
 
-				gone, err := removeIfPresent(platformPath)
+					if relation == coversDisjoint {
+						continue
+					}
 
-				if err != nil {
-					return err
-				}
+					coarserPath := filepath.Join(dirPath, coarser, name)
+					finerPath := filepath.Join(dirPath, finer, name)
+					pair := fmt.Sprintf("  %s\n  %s", corpusRelativePath(coreDir, coarserPath), corpusRelativePath(coreDir, finerPath))
 
-				if gone {
-					removed++
+					if relation == coversOverlapping {
+						overlaps = append(overlaps, pair)
+						continue
+					}
+
+					identical, err := filesHaveIdenticalBytes(finerPath, coarserPath)
+
+					if err != nil {
+						return err
+					}
+
+					if !identical && len(coarser) == 0 {
+						conflicts = append(conflicts, pair)
+						continue
+					}
+
+					if !identical {
+						nestedConflicts = append(nestedConflicts, pair)
+						continue
+					}
+
+					removedNow, err := removeIfPresent(finerPath)
+
+					if err != nil {
+						return err
+					}
+
+					if removedNow {
+						removed++
+						gone[finer] = true
+					}
 				}
 			}
 		}
@@ -757,17 +912,73 @@ func reconcileLayoutDuplicates(coreDir string, targets []string) (int, error) {
 		return removed, err
 	}
 
+	var problems []string
+
 	if len(conflicts) > 0 {
 		sort.Strings(conflicts)
 
-		return removed, fmt.Errorf("layout L3: %d artifact(s) exist BOTH flat and under a per-GOOS "+
+		problems = append(problems, fmt.Sprintf("layout L3: %d artifact(s) exist BOTH flat and under a per-GOOS "+
 			"folder with DIFFERING contents, so the affected target would compile both copies "+
 			"(CS0579/CS1537). No target re-emitted them, so the merge cannot tell which platform "+
 			"owns the flat copy — resolve by hand, or delete both and reconvert:\n%s",
-			len(conflicts), strings.Join(conflicts, "\n\n"))
+			len(conflicts), strings.Join(conflicts, "\n\n")))
+	}
+
+	if len(nestedConflicts) > 0 {
+		sort.Strings(nestedConflicts)
+
+		problems = append(problems, fmt.Sprintf("layout L3: %d artifact(s) exist under two key folders, one serving "+
+			"every target the other does, with DIFFERING contents, so the targets they share would compile both copies. "+
+			"No target re-emitted them, so the merge cannot tell which copy is current — resolve by hand, or delete both "+
+			"and reconvert:\n%s", len(nestedConflicts), strings.Join(nestedConflicts, "\n\n")))
+	}
+
+	if len(overlaps) > 0 {
+		sort.Strings(overlaps)
+
+		problems = append(problems, fmt.Sprintf("layout L3: %d artifact(s) exist under two key folders whose "+
+			"targets overlap without either containing the other, so the targets they share would compile both "+
+			"copies and removing either would leave a target without one — resolve by hand, or delete both and "+
+			"reconvert:\n%s", len(overlaps), strings.Join(overlaps, "\n\n")))
+	}
+
+	if len(problems) > 0 {
+		return removed, errors.New(strings.Join(problems, "\n\n"))
 	}
 
 	return removed, nil
+}
+
+// relateLayoutFolders relates two key folders of one package directory holding the same name ("" is
+// flat) by their covers in the lattice, and orders them coarser first (reconcileLayoutDuplicates).
+// Flat contains every folder, whatever it covers here; two folders that cover nothing here are
+// disjoint.
+func relateLayoutFolders(lattice *platformLattice, a string, b string) (string, string, coverRelation) {
+	coverA, coverB := lattice.folderCover(a), lattice.folderCover(b)
+
+	switch {
+	case len(a) == 0:
+		return a, b, coversNested
+	case len(b) == 0:
+		return b, a, coversNested
+	case len(coverA) == 0 && len(coverB) == 0:
+		return a, b, coversDisjoint
+	}
+
+	relation := relateCovers(coverA, coverB)
+
+	switch {
+	case relation != coversNested:
+		return a, b, relation
+	case len(coverA) > len(coverB):
+		return a, b, relation
+	case len(coverB) > len(coverA):
+		return b, a, relation
+	case folderRank(b) < folderRank(a):
+		return b, a, relation
+	default:
+		return a, b, relation
+	}
 }
 
 // filesHaveIdenticalBytes compares two files byte for byte. Deliberately exact rather than
@@ -852,7 +1063,7 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 	conditioned := map[string]bool{}
 	residual := map[string]string{}
 
-	siblingsWritten, err := mergeReviewSiblings(coreDir, emissions, names, residual)
+	siblingsWritten, err := mergeReviewSiblings(coreDir, mustPlatformLattice(targets), emissions, names, residual)
 
 	if err != nil {
 		return nil, nil, written, err
@@ -905,9 +1116,10 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 		// shipped bytes exactly as they are, while a platform-exclusive package — absent from the
 		// earlier targets entirely — still lands from the only target that has it.
 		//
-		// A review sibling in a per-GOOS folder is the exception: only that GOOS's target can emit
-		// it, and every other stage merely holds the seed copy it was staged with, so "first target
-		// that has it" would hand the root back its own seed bytes (see perGOOSReviewSiblingOwner).
+		// A review sibling in a key folder is the exception: only a target that folder serves can
+		// emit it, and every other stage merely holds the seed copy it was staged with, so "first
+		// target that has it" would hand the root back its own seed bytes (see
+		// perGOOSReviewSiblingOwner).
 		//
 		// "Has it" is also too weak for the targets themselves. Every stage is a whole-tree copy of
 		// the seed, so a target that never CONVERTED the package still holds the seed's copy of its
@@ -925,7 +1137,7 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 
 		for pass := 0; pass < 2 && len(source) == 0; pass++ {
 			for i, emission := range emissions {
-				if _, ok := emission.artifacts[rawPath]; !ok || (len(owner) != 0 && emission.goos != owner) {
+				if _, ok := emission.artifacts[rawPath]; !ok || (len(owner) != 0 && !layoutFolderServes(owner, emission.target)) {
 					continue
 				}
 
@@ -962,18 +1174,19 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 // [GoValueClone] list on linux only, and g is `public partial struct g` there (R's end-regen F2). One flat sibling,
 // taken from the first target, hid the other flavours (COORD's S5 ruling (a)). So, per sibling:
 //
-//   - the targets that EMITTED it are read, each from the copy it wrote: flat, or in its own GOOS folder once the tree
-//     holds the sibling there (reviewSiblingLayoutPath). A census stage writes every sibling, changed or not
+//   - the targets that EMITTED it are read, each from the copy it wrote: flat, or in one of its own key folders once
+//     the tree holds the sibling there (reviewSiblingLayoutPath). A census stage writes every sibling, changed or not
 //     (alwaysWriteSources), so "emitted" is exact here, unlike for a README;
-//   - when every flavour agrees, one flat sibling, and the GOOS folders' copies go;
-//   - when they differ, one sibling per emitting GOOS folder, and the flat copy goes;
-//   - when they differ and the package has no per-GOOS source folder for some emitting GOOS, the first target's
-//     flavour stays flat and the package is NAMED: a single-target reconvert routes into <goos>/ only where that
-//     folder is a source folder (isPlatformSourceFolder), so a folder holding only a sibling would never be written.
+//   - when every flavour agrees, one flat sibling, and the key folders' copies go;
+//   - when they differ, each class of identical flavours goes to the keys the lattice homes it at (one per emitting
+//     GOOS folder over one target per GOOS), and the flat copy goes;
+//   - when they differ and the package has no source folder for some of those keys, the first target's flavour
+//     stays flat and the package is NAMED: a single-target reconvert routes into a key folder only where that folder
+//     is a source folder (isPlatformSourceFolder), so a folder holding only a sibling would never be written.
 //
 // A sibling whose hand-own is not flat in the root (a per-GOOS hand-own's, or one with no hand-own) keeps the
 // per-artifact rule, which already takes a per-GOOS sibling from its own target (perGOOSReviewSiblingOwner).
-func mergeReviewSiblings(coreDir string, emissions []*platformEmission, names map[string]bool, residual map[string]string) (int, error) {
+func mergeReviewSiblings(coreDir string, lattice *platformLattice, emissions []*platformEmission, names map[string]bool, residual map[string]string) (int, error) {
 	groups := map[string][]string{}
 
 	for rawPath := range names {
@@ -993,7 +1206,7 @@ func mergeReviewSiblings(coreDir string, emissions []*platformEmission, names ma
 		}
 
 		type flavour struct {
-			goos     string
+			target   string
 			contents []byte
 		}
 
@@ -1003,7 +1216,7 @@ func mergeReviewSiblings(coreDir string, emissions []*platformEmission, names ma
 			for _, rawPath := range sortedStrings(groups[logical]) {
 				state, ok := emission.artifacts[rawPath]
 
-				if !ok || !state.emitted || (rawPath != logical && path.Base(path.Dir(rawPath)) != emission.goos) {
+				if !ok || !state.emitted || (rawPath != logical && !layoutFolderServes(path.Base(path.Dir(rawPath)), emission.target)) {
 					continue
 				}
 
@@ -1013,7 +1226,7 @@ func mergeReviewSiblings(coreDir string, emissions []*platformEmission, names ma
 					return written, fmt.Errorf("failed to read staged review sibling %q for target %s: %w", rawPath, emission.target, err)
 				}
 
-				flavours = append(flavours, flavour{emission.goos, contents})
+				flavours = append(flavours, flavour{emission.target, contents})
 				break
 			}
 		}
@@ -1032,7 +1245,28 @@ func mergeReviewSiblings(coreDir string, emissions []*platformEmission, names ma
 
 		for _, f := range flavours {
 			agree = agree && bytes.Equal(f.contents, flavours[0].contents)
-			splittable = splittable && isPlatformSourceFolder(packageDir, f.goos)
+		}
+
+		// The split: each class of identical flavours to the keys the lattice homes it at.
+		split := map[string][]byte{}
+
+		if !agree {
+			var flavourTargets []string
+			hashes := map[string]string{}
+			contentsOf := map[string][]byte{}
+
+			for _, f := range flavours {
+				flavourTargets = append(flavourTargets, f.target)
+				hashes[f.target] = string(f.contents)
+				contentsOf[f.target] = f.contents
+			}
+
+			for _, class := range partitionContentClasses(flavourTargets, hashes) {
+				for _, folder := range lattice.homeFolders(class) {
+					splittable = splittable && len(folder) > 0 && isPlatformSourceFolder(packageDir, folder)
+					split[filepath.Join(packageDir, folder, name)] = contentsOf[class[0]]
+				}
+			}
 		}
 
 		destinations := map[string][]byte{}
@@ -1042,21 +1276,19 @@ func mergeReviewSiblings(coreDir string, emissions []*platformEmission, names ma
 
 			if !agree {
 				addResidualNote(residual, pkg, fmt.Sprintf("review sibling %s differs by GOOS, and the package has no per-GOOS "+
-					"source folder for every flavour, so %s's was kept flat", name, flavours[0].goos))
+					"source folder for every flavour, so %s's was kept flat", name, goosOfTarget(flavours[0].target)))
 			}
 		} else {
-			for _, f := range flavours {
-				destinations[filepath.Join(packageDir, f.goos, name)] = f.contents
-			}
+			destinations = split
 		}
 
-		// Every place the sibling can be: flat, and each GOOS folder that is a source folder (not a nested package
+		// Every place the sibling can be: flat, and each key folder that is a source folder (not a nested package
 		// named for a GOOS, internal/syscall/windows).
 		candidates := []string{filepath.Join(packageDir, name)}
 
-		for _, emission := range emissions {
-			if isPlatformSourceFolder(packageDir, emission.goos) {
-				candidates = append(candidates, filepath.Join(packageDir, emission.goos, name))
+		for _, folder := range lattice.candidateFolders() {
+			if isPlatformSourceFolder(packageDir, folder) {
+				candidates = append(candidates, filepath.Join(packageDir, folder, name))
 			}
 		}
 
@@ -1239,8 +1471,7 @@ func mergePlatformProjectFile(rawPath string, targets []string, emissions []*pla
 			return "", "", fmt.Errorf("failed to read staged project file %q for target %s: %w", rawPath, target, err)
 		}
 
-		goos := goosOfTarget(target)
-		references, ok := platformFullReferenceSet(string(contents), goos)
+		references, ok := platformFullReferenceSet(string(contents), target)
 
 		if !ok {
 			// Not a project file this machinery recognizes (a hand-owned one, or a template without
@@ -1252,7 +1483,7 @@ func mergePlatformProjectFile(rawPath string, targets []string, emissions []*pla
 			return base, fmt.Sprintf("project file has no recognizable <ProjectReference> group; %s's copy was kept", goosOfTarget(targets[0])), nil
 		}
 
-		sets[goos] = references
+		sets[target] = references
 
 		if strings.Contains(string(contents), unsafeBlocksEnabled) {
 			needsUnsafe = true
@@ -1274,7 +1505,8 @@ func mergePlatformProjectFile(rawPath string, targets []string, emissions []*pla
 		}
 	}
 
-	shared, deltas, _ := splitPlatformReferenceSets(sets)
+	// Split over the lattice of the merge's own targets, the ones whose sets were just read.
+	shared, deltas, _ := splitPlatformReferenceSetsOver(mustPlatformLattice(targets), sets)
 	merged, err := renderPlatformReferences(friendAccessUnion(unsafeBlocksUnion(base, needsUnsafe), needsFriend), shared, deltas)
 
 	if err != nil {
@@ -1438,13 +1670,22 @@ func applyLayoutBlockToProjectFile(packageDir string) (bool, error) {
 			return false, fmt.Errorf("failed to read project file %q: %w", projectFileName, err)
 		}
 
-		updated := []byte(applyPlatformLayoutBlocks(string(contents), projectFileName))
+		updated := applyPlatformLayoutBlocks(string(contents), projectFileName)
 
-		if !needToWriteFile(projectFileName, updated) {
+		// The arch items follow the package's arch and pair folders both ways: added when it holds one,
+		// and taken out again when its last one has gone while its GOOS folders stay, which is the file
+		// a single-target writer renders for it either way (writeProjectFile).
+		if packageCarriesArchLayout(packageDir) {
+			updated = applyPlatformArchLayoutBlocks(updated, projectFileName)
+		} else {
+			updated = removePlatformArchLayoutBlocks(updated)
+		}
+
+		if !needToWriteFile(projectFileName, []byte(updated)) {
 			return false, nil
 		}
 
-		if err := os.WriteFile(projectFileName, updated, 0644); err != nil {
+		if err := os.WriteFile(projectFileName, []byte(updated), 0644); err != nil {
 			return false, fmt.Errorf("failed to write project file %q: %w", projectFileName, err)
 		}
 
@@ -1462,8 +1703,8 @@ func dropLayoutBlockFromProjectFile(packageDir string, targets []string) (bool, 
 		return false, nil
 	}
 
-	for _, target := range targets {
-		folder := filepath.Join(packageDir, goosOfTarget(target))
+	for _, name := range mustPlatformLattice(targets).candidateFolders() {
+		folder := filepath.Join(packageDir, name)
 
 		if entries, err := os.ReadDir(folder); err == nil && len(entries) == 0 {
 			if err := os.Remove(folder); err != nil {
@@ -1539,6 +1780,7 @@ func copyMergedFile(source string, destination string) (bool, error) {
 // kept a static constructor calling init methods the package no longer declares (CS0103). Only a file carrying the
 // generated header goes; a package no target converted is left alone. emitted holds the merge plans' logical paths.
 func retireUnemittedPackageInitFiles(coreDir string, targets []string, emissions []*platformEmission, emitted map[string]bool) (int, error) {
+	lattice := mustPlatformLattice(targets)
 	converted := map[string]bool{}
 
 	for _, emission := range emissions {
@@ -1557,8 +1799,12 @@ func retireUnemittedPackageInitFiles(coreDir string, targets []string, emissions
 		packageDir := filepath.Join(coreDir, filepath.FromSlash(pkg))
 		dirs := []string{packageDir}
 
-		for _, target := range targets {
-			dirs = append(dirs, filepath.Join(packageDir, goosOfTarget(target)))
+		// Every key folder of the lattice, admitted or not, that is a source folder rather than a
+		// nested package of the same name (whose package_init.cs is its own).
+		for _, folder := range lattice.candidateFolders() {
+			if isPlatformSourceFolder(packageDir, folder) {
+				dirs = append(dirs, filepath.Join(packageDir, folder))
+			}
 		}
 
 		for _, dir := range dirs {
@@ -1599,11 +1845,12 @@ func removeIfPresent(filePath string) (bool, error) {
 	return true, nil
 }
 
-// normalizeArtifactLogicalPaths folds a per-GOOS folder segment out of every artifact path, so the
-// classification and the merge speak in `<pkg>/<file>` regardless of which layout the tree they were
-// snapshotted from is in. A path is folded only when its directory holds no project file and its
-// PARENT does — `internal/syscall/windows` is a converted package whose own name is a GOOS, and
-// folding it would move its sources into `internal/syscall`.
+// normalizeArtifactLogicalPaths folds a layout key folder segment (GOOS, GOARCH or `<goos>-<arch>`)
+// out of every artifact path, so the classification and the merge speak in `<pkg>/<file>`
+// regardless of which layout the tree they were snapshotted from is in. A path is folded only when
+// its directory holds no project file and its PARENT does — `internal/syscall/windows` is a
+// converted package whose own name is a GOOS, and folding it would move its sources into
+// `internal/syscall`.
 func normalizeArtifactLogicalPaths(artifacts map[string]artifactState) {
 	packageDirs := map[string]bool{}
 
@@ -1617,7 +1864,7 @@ func normalizeArtifactLogicalPaths(artifacts map[string]artifactState) {
 		state.logical = relPath
 		dir := path.Dir(relPath)
 
-		if !packageDirs[dir] && isKnownGOOS(path.Base(dir)) && packageDirs[path.Dir(dir)] {
+		if !packageDirs[dir] && isLayoutKeyFolderName(path.Base(dir)) && packageDirs[path.Dir(dir)] {
 			state.logical = path.Join(path.Dir(dir), path.Base(relPath))
 		}
 

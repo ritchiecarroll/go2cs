@@ -35106,6 +35106,37 @@ behaviour, which is worse than any failure.
 - (2) The linux/arm64 flavour (`DESIGN-linux-arm64-flavour.md`), which turns the refusal into a no-op for
   linux-arm64.
 
+
+## 2026-11-09 — G (internal/goexperiment, found by the linux/arm64 four-target census): the darwin flavour holds NO `exp_dwarf5_*.cs` — the converter resolves tool tags for the HOST, not the target
+
+**The observation.** `src/core/internal/goexperiment` carries `windows/exp_dwarf5_on.cs` and
+`linux/exp_dwarf5_on.cs` and nothing for darwin. Go selects exactly one file of the pair for every target, and for
+darwin/amd64 it is `exp_dwarf5_off.go` (go1.26.10, `go list -f '{{.GoFiles}}' internal/goexperiment` under
+`GOOS=darwin`): the Dwarf5 experiment is in the baseline everywhere except darwin, ios and aix. So the darwin build
+of the package has neither `Dwarf5` nor `Dwarf5Int`.
+
+**The cause, read and probed, not yet fixed.** go/packages selects a target's files with the target's `GOOS` and
+`GOARCH`. The converter then re-evaluates each file's dotted build tags against a tool-tag list it gets from
+`goListToolTags` (`directiveOperations.go`), and that function runs `go list -find -f '{{context.ToolTags}}' unsafe`
+in the converter's own environment and caches the answer per module root. Nothing passes the target. Measured with
+that same command on a windows host: for windows/amd64 and linux/amd64 the list holds `goexperiment.dwarf5`; for
+darwin/amd64 it does not; for linux/arm64 it holds `arm64.v8.0` where the others hold `amd64.v1`. On a windows or
+linux host the darwin conversion is therefore handed `exp_dwarf5_off.go` by the loader and then refuses it, because
+`!goexperiment.dwarf5` is false against the host's list. Neither file of the pair is emitted.
+
+**What it reaches.** Today, one file in one package: Dwarf5 is the only baseline experiment that differs between
+the corpus's targets, and the two constants are read by `cmd/` alone, so nothing converted fails to compile. Two
+things follow from the mechanism rather than from the file. (1) The emission depends on the HOST's `GOOS`: the same
+reconvert run on a Mac would drop `linux/exp_dwarf5_on.cs` and `windows/exp_dwarf5_on.cs` and add the darwin file.
+(2) The architecture feature tag is the host's as well (`amd64.v1` under a linux/arm64 conversion on an x64 box);
+in go1.26.10's standard library only `runtime/race` is constrained on one, so it is latent for the fourth flavour.
+
+**Remedy.** Pass the target's `GOOS` and `GOARCH` to that `go list` and key the cache by target as well as module
+root. Expected corpus footprint: `internal/goexperiment/darwin/exp_dwarf5_off.cs` appears, with its position-map
+line. Not part of the layout seat, whose footprint must be empty. OPEN, unowned.
+
+**Not guarded:** the converter exits 0 and the darwin corpus builds.
+
 — G (2026-11-09)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

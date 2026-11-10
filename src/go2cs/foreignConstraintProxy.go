@@ -78,7 +78,7 @@ func importPackageInfoLines(info PackageInfo, options Options) ([]string, bool) 
 		return info.NuGetSubstitution.metadataLines(info.ImportPath, goos)
 	}
 
-	packageInfoFile := platformPackageInfoPath(info.TargetDir, goos)
+	packageInfoFile := platformPackageInfoPath(info.TargetDir, options.targetPlatform)
 
 	if _, err := os.Stat(packageInfoFile); err == nil {
 		lines, err := readPackageInfoLines(packageInfoFile)
