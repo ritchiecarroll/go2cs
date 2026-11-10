@@ -147,8 +147,8 @@ public class CallerLineMultiLineDebugTests
 
         if (!process.WaitForExit(timeoutMs))
         {
-            process.Kill(entireProcessTree: true);
-            Assert.Fail($"{Path.GetFileName(file)} {string.Join(' ', args)} did not finish in {timeoutMs / 1000} s");
+            string diagnosis = ChildTimeoutDiagnostics.DescribeAndKill(process, stdout, stderr);
+            Assert.Fail($"{Path.GetFileName(file)} {string.Join(' ', args)} did not finish in {timeoutMs / 1000} s{Environment.NewLine}{diagnosis}");
         }
 
         return (process.ExitCode, stdout.Result + stderr.Result);
