@@ -1,9 +1,10 @@
 # PLAN — the nugetgo rebuild wave against go.* 1.26.10.4
 
-> **STATUS: DRAFT (P2, 2026-11-10).** Asked for by COORD on 2026-11-10, after the owner ruled the promoted-forwarder
-> holder move a deliberate .4 break (record: `claude/coord-forwarder-review-r2` `88e650c17c`). Document type: an
-> instance plan. The procedure is the runbook [`NugetgoPublish.md`](NugetgoPublish.md), and the release's gating policy
-> is [`PLAN-rebank-1-26-10-3.md`](PLAN-rebank-1-26-10-3.md) section 8. This file only fixes their values for this wave.
+> **STATUS: DRAFT (P2, 2026-11-10); section 7's questions RULED by COORD the same day.** Asked for by COORD on
+> 2026-11-10, after the owner ruled the promoted-forwarder holder move a deliberate .4 break (record:
+> `claude/coord-forwarder-review-r2` `88e650c17c`). Document type: an instance plan. The procedure is the runbook
+> [`NugetgoPublish.md`](NugetgoPublish.md), and the release's gating policy is
+> [`PLAN-rebank-1-26-10-3.md`](PLAN-rebank-1-26-10-3.md) section 8. This file only fixes their values for this wave.
 > Where they differ, the runbook leads. It follows [`PLAN-nugetgo-wave-1-26-10-2.md`](PLAN-nugetgo-wave-1-26-10-2.md)
 > section for section. Nothing here is published, and nothing is built before `T` exists.
 
@@ -29,7 +30,9 @@ and that belongs in the release notes' *Upgrading* paragraph.
 The policy in `PLAN-rebank-1-26-10-3.md` section 8 applies as written to a release that lists a break:
 
 1. the release notes' *Upgrading* section announces it (P1's seat adds the paragraph to `docs/NEWS.md`);
-2. the nugetgo rebuild wave ships with the release, built on it (this plan);
+2. the nugetgo rebuild wave ships with the release, built on it (this plan). For 1.26.10.4 that means the same release
+   cycle, not the same push (COORD, 2026-11-10): go.* publishes first, the wave is built at the record commit, and the
+   release is announced once the wave is green. go.* does not wait for the wave;
 3. the owner deprecates the earlier revisions of every published module on nuget.org, with the new revision as the
    alternate (block 6 of each sheet). `GO2CS3002`'s text sends the consumer to "a revision built on go.* 1.26.10.4 or
    later", and the deprecation is what names that revision on the package page.
@@ -75,9 +78,10 @@ refuses an Apache-2.0 module whose converted files lack go2cs's `-provenance` no
 
 - cobra goes through `Invoke-NugetgoRepack.ps1`, whose step 1.4 passes `-provenance` when the module's `LicenseSpdx`
   names Apache-2.0. Nothing to do by hand.
-- mousetrap has no row in `nugetgo-modules.psd1` (no Go tests), so its root conversion is made outside that driver.
-  That conversion must be run with `-provenance`, or the pack refuses it by name. `DESIGN-provenance-header.md` names
-  only cobra; mousetrap is the case it did not list.
+- mousetrap had no row in `nugetgo-modules.psd1` (no Go tests), so its root was converted outside that driver, and
+  the pack would have refused it on release day. `DESIGN-provenance-header.md` named only cobra. COORD gave P2 the fix
+  as a seat for batch 282 (`claude/p2-mousetrap-provenance`): mousetrap gets a row, and the driver packs a row with no
+  Go tests on the runbook's no-tests route, `-provenance` included.
 - Both conversion commits change in every converted file: the notice adds two lines, with a blank line on each side,
   after each file's leading comments. The conversion repositories' next commits show it.
 
@@ -123,8 +127,9 @@ Each step is the runbook's, in the order `PLAN-rebank-1-26-10-3.md` section 8 se
    - `1.26.10.4` is listed in the registry repository's `cmd/sitegen/go2cs-releases.txt` (runbook 5, step 1), so the
      CI resolution check can read packages built on it.
 2. **S1's six kits and S3's kit (runbook 1-3).** For each module, one run:
-   `Invoke-NugetgoRepack.ps1 -Module <M@V> -Revision <N> -T <T> -Release 1.26.10.4 -Work <new dir>`, and mousetrap
-   by its own route with `-provenance` (section 2).
+   `Invoke-NugetgoRepack.ps1 -Module <M@V> -Revision <N> -T <T> -Release 1.26.10.4 -Work <new dir>`. mousetrap, with
+   no Go tests, runs twice: `-Packs int1`, then, after its hosted rows are written against that rehearsal package,
+   `-Packs release -BehaviorProofDir <rows>`.
    - Each run exits 0, with every count equal to the module's `Expect`.
    - mousetrap's release candidate carries its four hosted rows.
    - Each kit is committed to its `claude/c2-nugetgo-1261004-<name>` ref.
@@ -150,11 +155,11 @@ Each step is the runbook's, in the order `PLAN-rebank-1-26-10-3.md` section 8 se
 | Item | State |
 |:--|:--|
 | This plan | DRAFT, for COORD's ruling |
-| The S1-S4 sheets | Not cut. They are the 1.26.10.3 sheets with the release, revisions, kit refs, edges and stale lists moved, and with a placeholder for every kit and signer SHA. Owner by precedent: C2, who cut the .2 and .3 sheets. P2 can cut them as templates now if COORD assigns it; `Test-SheetPaste.ps1` must read 0 findings on each. |
+| The S1-S4 sheets | C2 cuts them (COORD, 2026-11-10), from this plan: the 1.26.10.3 sheets with the release, revisions, kit refs, edges and stale lists moved, a placeholder for every kit and signer SHA, and section 3's build arm folded in. `Test-SheetPaste.ps1` must read 0 findings on each. |
 | `Test-PostPublishRestore.ps1` | The 1.26.10.3 script reads the release and the kits from the sheets beside it, so a copy needs no edit for the values. The build arm and the floor control of section 3 are new code. |
 | The release-note paragraph | P1's seat (COORD's item 3). The IL reach count, when P1 has it, sizes its "which old revisions would throw" sentence. |
 | The kits | Wait for `T`, and so for P1's seat and the go.* push |
-| mousetrap's `-provenance` route | Waits for the provenance seat (batch 281) to land |
+| mousetrap's `-provenance` route | P2's seat `claude/p2-mousetrap-provenance`, for batch 282, after the provenance seat (batch 281) |
 
 ## 6. The deprecation lists
 
@@ -179,10 +184,14 @@ The 1.26.10.3 wave deprecated the 1.26.10.1 and 1.26.10.2 revisions with the 1.2
 them again here moves their alternate to the 1.26.10.4 revision, so no package page points at a revision the floor
 refuses.
 
-## 7. Open questions for COORD
+## 7. Open questions for COORD, and the rulings (COORD, 2026-11-10)
 
 1. Does the 1.26.10.4 release wait for the wave, as section 8's policy item 2 says ("ships with it")? COORD's note of
    2026-11-10 says the wave "follows .4's publish". This plan assumes the 1.26.10.3 order: go.* push, record commit,
    wave, and the release announced when the wave is ready.
+   **RULED:** the 1.26.10.3 order. go.* does not wait for the wave; "ships with it" means the same release cycle,
+   before the announcement. Section 1 says so.
 2. Who cuts the four sheets: C2 by precedent, or P2 now as templates?
+   **RULED:** C2, from this plan. The build arm of section 3 is adopted, and C2 folds it into the sheets.
 3. gojq's `cli`: still deferred for 1.26.10.4 (this plan's default), since `golang.org/x/sys` cannot be packed?
+   **RULED:** deferred.
