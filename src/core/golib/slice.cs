@@ -1365,6 +1365,19 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     slice<T> IByteSeq<slice<T>, T>.slice(nint low, nint high) => Reslice(low, high);
 
+    // The union member a slice IS (IByteSeq<T>.TryGetSlice): `[]byte(s)` returns this same window, sharing the backing.
+    bool IByteSeq<T>.TryGetSlice(out slice<T> window)
+    {
+        window = this;
+        return true;
+    }
+
+    bool IByteSeq<T>.TryGetString(out @string value)
+    {
+        value = default;
+        return false;
+    }
+
     ISlice<T> ISlice<T>.Slice(int start, int length) => Slice(start, length);
 
     ISlice<T> ISlice<T>.Slice(nint start, nint length) => Slice(start, length);

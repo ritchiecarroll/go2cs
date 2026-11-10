@@ -52,6 +52,7 @@ partial:directive	6
 partial:free-stmt	7
 top:go-blank-cs-none	79
 top:go-none-cs-blank	39
+top:unmapped:const	2
 top:unmapped:func	363
 top:unmapped:method	168
 top:unmapped:type-alias	62

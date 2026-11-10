@@ -470,6 +470,8 @@
     <Project Path="tests/Behavioral/DefinedStructConversionCopy/DefinedStructConversionCopy.csproj" />
     <Project Path="tests/Behavioral/DefinedTypeOverForeignStruct/DefinedTypeOverForeignStruct.csproj" />
     <Project Path="tests/Behavioral/DefinedTypeOverForeignStruct/ptlike/DefinedTypeOverForeignStruct.ptlike.csproj" />
+    <Project Path="tests/Behavioral/DefinedTypeOverInstantiation/DefinedTypeOverInstantiation.csproj" />
+    <Project Path="tests/Behavioral/DefinedTypeOverInstantiation/instlib/go.instlib.csproj" />
     <Project Path="tests/Behavioral/DefinedTypeOverInterface/DefinedTypeOverInterface.csproj" />
     <Project Path="tests/Behavioral/DefinedTypeOverPkgType/DefinedTypeOverPkgType.csproj" />
     <Project Path="tests/Behavioral/DerefPointerToField/DerefPointerToField.csproj" />
@@ -618,6 +620,7 @@
     <Project Path="tests/Behavioral/GlobalTupleVarDecl/GlobalTupleVarDecl.csproj" />
     <Project Path="tests/Behavioral/GoCallVariations/GoCallVariations.csproj" />
     <Project Path="tests/Behavioral/GoDeferConstArgs/GoDeferConstArgs.csproj" />
+    <Project Path="tests/Behavioral/GoImageCopyThroughView/GoImageCopyThroughView.csproj" />
     <Project Path="tests/Behavioral/GoexitDefers/GoexitDefers.csproj" />
     <Project Path="tests/Behavioral/GoexitFromMain/GoexitFromMain.csproj" />
     <Project Path="tests/Behavioral/GoHostModuleShadow/GoHostModuleShadow.csproj" />
@@ -771,6 +774,7 @@
     <Project Path="tests/Behavioral/NamedBasicConversion/NamedBasicConversion.csproj" />
     <Project Path="tests/Behavioral/NamedBooleanLogic/NamedBooleanLogic.csproj" />
     <Project Path="tests/Behavioral/NamedChannelType/NamedChannelType.csproj" />
+    <Project Path="tests/Behavioral/NamedBytesByteSeq/NamedBytesByteSeq.csproj" />
     <Project Path="tests/Behavioral/NamedByteSliceFromStringLit/NamedByteSliceFromStringLit.csproj" />
     <Project Path="tests/Behavioral/NamedCompositeGenericArg/NamedCompositeGenericArg.csproj" />
     <Project Path="tests/Behavioral/NamedConstConversionPrecedence/NamedConstConversionPrecedence.csproj" />

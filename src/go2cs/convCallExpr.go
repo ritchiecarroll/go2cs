@@ -306,6 +306,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	v.callParens = append(v.callParens, [3]token.Pos{callExpr.Lparen, callExpr.Rparen, firstArg})
 	defer func() { v.callParens = v.callParens[:len(v.callParens)-1] }()
 
+	// A slice of a byte view over a reference-bearing struct, as a direct argument of copy, takes the Go-image view
+	// (goImageCopyView.go); marked before the arguments are converted.
+	v.markGoImageCopyArgs(callExpr)
+
 	// The //go:cgo_unsafe_args block lift (cgoUnsafeArgsLift.go): the ONE `unsafe.Pointer(&first)` the
 	// current declaration's lift consumes renders as the synthesized block's pinned box. Intercepted
 	// ahead of every arm because the conversion reaches two of them -- the type-conversion arm for a
@@ -1046,6 +1050,27 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				}
 
 				return fmt.Sprintf("@unsafe.Pointer.FromBox(%s)", expr)
+			}
+		}
+
+		// A `~[]byte | ~string` union-constrained value converted to a NAMED []byte or a NAMED string -
+		// jsontext's `Value(b)` over `type Value []byte`. A type parameter has no conversion to the
+		// [GoType] wrapper (CS0030), so the value takes the union's own conversion first - golib's
+		// ToSlice, which shares a slice argument's backing and copies a string's bytes as Go's `[]byte(b)`
+		// does, or ToGoString - and the wrapper's conversion from its underlying then keeps that window:
+		// `(Value)b.ToSlice()`, `(Ptr)b.ToGoString()`. The `[]byte(b)` and `string(b)` cases are below.
+		if tp, ok := types.Unalias(v.getType(arg, false)).(*types.TypeParam); ok && typeParamIsStringByteUnion(tp) {
+			if named, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Named); ok {
+				switch under := named.Underlying().(type) {
+				case *types.Slice:
+					if elem, ok := types.Unalias(under.Elem()).(*types.Basic); ok && elem.Kind() == types.Byte {
+						return fmt.Sprintf("(%s)%s.ToSlice()", targetTypeName, expr)
+					}
+				case *types.Basic:
+					if under.Kind() == types.String {
+						return fmt.Sprintf("(%s)%s.ToGoString()", targetTypeName, expr)
+					}
+				}
 			}
 		}
 
@@ -4227,14 +4252,16 @@ func (v *Visitor) applyImplicitConversion(funcType types.Type, arg ast.Expr, tar
 				// CS0030 with the record skipped here; go-cmp's teststructs).
 				wrapperConversion := false
 
+				// A GENERIC defined type's RHS is written in its own type parameters, so it is read with the
+				// instance's type arguments: C[string], declared `type C[V any] P[V]`, wraps P[string].
 				if named, ok := funcType.(*types.Named); ok {
-					if rhs, has := packageTypeSpecRHS[named.Obj()]; has && rhs != nil && !isUnnamedStruct(rhs) && types.Identical(rhs, argType) {
+					if rhs, has := packageTypeSpecRHS[named.Obj()]; has && rhs != nil && !isUnnamedStruct(rhs) && types.Identical(instantiatedTypeSpecRHS(named, rhs), argType) {
 						wrapperConversion = true
 					}
 				}
 
 				if named, ok := argType.(*types.Named); ok {
-					if rhs, has := packageTypeSpecRHS[named.Obj()]; has && rhs != nil && !isUnnamedStruct(rhs) && types.Identical(rhs, funcType) {
+					if rhs, has := packageTypeSpecRHS[named.Obj()]; has && rhs != nil && !isUnnamedStruct(rhs) && types.Identical(instantiatedTypeSpecRHS(named, rhs), funcType) {
 						wrapperConversion = true
 					}
 				}
@@ -4305,13 +4332,13 @@ func (v *Visitor) applyImplicitConversion(funcType types.Type, arg ast.Expr, tar
 			// recording it again makes ImplicitConvGenerator emit the identical operator into the
 			// same type (CS0557 — internal/syscall/windows/registry's Key, gating os/fmt).
 			if named, ok := funcType.(*types.Named); ok {
-				if rhs, okRHS := packageTypeSpecRHS[named.Obj()]; okRHS && rhs != nil && types.Identical(rhs, argType) {
+				if rhs, okRHS := packageTypeSpecRHS[named.Obj()]; okRHS && rhs != nil && types.Identical(instantiatedTypeSpecRHS(named, rhs), argType) {
 					return expr
 				}
 			}
 
 			if named, ok := argType.(*types.Named); ok {
-				if rhs, okRHS := packageTypeSpecRHS[named.Obj()]; okRHS && rhs != nil && types.Identical(rhs, funcType) {
+				if rhs, okRHS := packageTypeSpecRHS[named.Obj()]; okRHS && rhs != nil && types.Identical(instantiatedTypeSpecRHS(named, rhs), funcType) {
 					return expr
 				}
 			}

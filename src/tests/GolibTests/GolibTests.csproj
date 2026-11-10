@@ -17,6 +17,10 @@
          sync/atomic assemblies and read the compiler's own verdict (diagnostics + SemanticModel),
          which is the only way to prove a "cannot select" claim by construction. -->
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0" />
+    <!-- A child that times out is described before it is killed (ChildTimeoutDiagnostics.cs): the runtime
+         writes its own dump over the diagnostics port, and ClrMD reads the stacks from it. -->
+    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.745401" />
+    <PackageReference Include="Microsoft.Diagnostics.Runtime" Version="4.2.751201" />
   </ItemGroup>
 
   <!-- The spawn-seam gate file drives linux-flavor-only syscall surface (Wait4, the unix
@@ -87,6 +91,13 @@
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux' and '$(GoTargetOS)' != 'darwin'">
     <Compile Remove="InheritedIgnoredSignalTests.cs" />
     <Compile Remove="RecvfromUnspecifiedSourceTests.cs" />
+  </ItemGroup>
+
+  <!-- S-b2's darwin rows drive seams the darwin flavour alone declares (syscall's GoPosixSpawnCall and
+       GoKillCall, os's GoReaddirRCall), so the class is a darwin-only FILE, as the linux transition
+       classes above are linux-only ones. -->
+  <ItemGroup Condition="'$(GoTargetOS)' != 'darwin'">
+    <Compile Remove="DarwinNativeTransitionTests.cs" />
   </ItemGroup>
 
   <!-- The netapi32 ptrout gate is the mirror image: it drives windows-flavor-only syscall surface

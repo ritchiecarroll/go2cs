@@ -277,3 +277,10 @@ revision before it, except for the breaks listed in that release's suppression f
 > packages, only a consumer's own code and nugetgo modules (B4's `[build, next minor)` range) can bind across
 > revisions, and that is where the guard's verdict matters. It still compares every package, because that is what a
 > C# consumer referencing go.* directly binds.
+>
+> **AMENDED 2026-11-09 (P2, measured in `docs/phase4/RECORD-nuget-sibling-pins.md` §4 and §6, SDK 10.0.403).** "A mixed go.* set fails at
+> restore" holds only without a direct reference. A project that references the conflicting package directly, as
+> NuGet's NU1107 message tells it to, restores a mixed go.* set with NU1608 warnings (arm a2), so code built against
+> one go.* revision can bind another even among go.* packages. The cryptobyte entries above stay unreachable, on the
+> ground that only the standard library imports a std-vendored package; the exact pin from crypto/x509 is not what
+> keeps them so.

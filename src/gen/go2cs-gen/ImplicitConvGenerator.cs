@@ -10,7 +10,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using go2cs.Templates.ImplicitConv;
+using go2cs.Templates.StructType;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static go2cs.Common;
 using static go2cs.Symbols;
@@ -121,10 +123,31 @@ public class ImplicitConvGenerator : ISourceGenerator
 
             List<(string typeName, string memberName)> structMembers;
             bool foreignStructTarget = false;
+            string? genericHost = null;
+            List<string> constructionChain = [];
 
             if (string.IsNullOrWhiteSpace(valueType))
             {
-                StructDeclarationSyntax? structDeclaration = GetStructDeclaration(syntaxContext, targetTypeName);
+                // A GENERIC struct operand, from a defined type over an instantiation (`type Q pair[int]`,
+                // `type C[V any] P[V]`): a closed `pair<bool>` cannot host an operator (`partial struct
+                // pair<bool>` is CS0264), so the pair takes the form GenericPairForm finds or is skipped.
+                if (IsGenericStruct(sourceType) || IsGenericStruct(targetType))
+                {
+                    if (GenericPairForm(syntaxContext, (INamedTypeSymbol)sourceType, (INamedTypeSymbol)targetType, context.Compilation.Assembly) is not { } form)
+                        continue;
+
+                    (sourceTypeName, targetTypeName, genericHost) = form;
+                }
+
+                // A DEFINED type over a struct declares no fields of its own: its members are the struct's at
+                // the end of its definitions, read with the type arguments each definition passes on, and it
+                // is constructed through each definition (`new t3(new t4(src.A, src.B))`). Built bare, as
+                // `new t3()`, the conversion dropped every field value.
+                (StructDeclarationSyntax? structDeclaration, string[] memberTypeParameters, string[] memberTypeArguments) = ResolveStructChain(syntaxContext, targetTypeName, null);
+                string constructedTypeName = inverted ? sourceTypeName : targetTypeName;
+
+                if (!PointerExpr.IsMatch(constructedTypeName))
+                    ResolveStructChain(syntaxContext, constructedTypeName, constructionChain);
 
                 // A struct target declared in a REFERENCED assembly has no declaration in syntax. Go
                 // converts between struct types only when their fields are identical in name, type and
@@ -135,7 +158,7 @@ public class ImplicitConvGenerator : ISourceGenerator
                     !SymbolEqualityComparer.Default.Equals(targetType.ContainingAssembly, context.Compilation.Assembly) &&
                     SymbolEqualityComparer.Default.Equals(sourceType.ContainingAssembly, context.Compilation.Assembly))
                 {
-                    structDeclaration = GetStructDeclaration(syntaxContext, sourceTypeName);
+                    (structDeclaration, memberTypeParameters, memberTypeArguments) = ResolveStructChain(syntaxContext, sourceTypeName, null);
                     foreignStructTarget = structDeclaration is not null;
                 }
 
@@ -148,7 +171,7 @@ public class ImplicitConvGenerator : ISourceGenerator
 
                 structMembers = structDeclaration
                     .GetStructMembers(context.Compilation, true)
-                    .Select(member => (member.typeName, member.memberName))
+                    .Select(member => (TypeArgumentSubstitution.Substitute(member.typeName, memberTypeParameters, memberTypeArguments), member.memberName))
                     .ToList();
             }
             else
@@ -172,11 +195,11 @@ public class ImplicitConvGenerator : ISourceGenerator
             // it through its UNDERLYING basic — `new global::…NameOff((int)src.Value)` — mirroring the
             // converter's through-underlying inline cast; and if the default host (the source type) is
             // itself foreign, relocate the operator into the LOCAL type so it can be declared at all.
-            string? hostTypeNameOverride = null, lhTypeNameOverride = null, rhTypeNameOverride = null, convExprOverride = null;
+            string? hostTypeNameOverride = genericHost, lhTypeNameOverride = null, rhTypeNameOverride = null, convExprOverride = null;
 
             // A foreign struct target is returned and constructed by its QUALIFIED name: its simple
             // name resolves only inside its own package class, not in this one (CS0246).
-            if (foreignStructTarget)
+            if (foreignStructTarget && genericHost is null)
                 lhTypeNameOverride = targetType.ToDisplayString(s_qualifiedFormat);
 
             if (!string.IsNullOrWhiteSpace(valueType))
@@ -328,13 +351,127 @@ public class ImplicitConvGenerator : ISourceGenerator
                 HostTypeNameOverride = hostTypeNameOverride,
                 LHTypeNameOverride = lhTypeNameOverride,
                 RHTypeNameOverride = rhTypeNameOverride,
-                ConvExprOverride = convExprOverride
+                ConvExprOverride = convExprOverride,
+                ConstructionChain = constructionChain
             }
             .Generate();
 
             // Add the source code to the compilation
             context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{sourceTypeName}-{targetTypeName}{(inverted ? "-inv" : "")}.g.cs")), generatedSource);
         }
+    }
+
+    // A closed instantiation of a generic struct, `pair<bool>` (never golib's box).
+    private static bool IsGenericStruct(ITypeSymbol type) =>
+        type is INamedTypeSymbol { IsGenericType: true, TypeKind: TypeKind.Struct } && !IsBox(type);
+
+    // The spelling of a closed generic struct in a generated file of the package class: its simple name when it
+    // is declared here (the package class's own nested type), else qualified; the type arguments always qualified.
+    private static string GenericStructName(INamedTypeSymbol type, IAssemblySymbol thisAssembly) =>
+        SymbolEqualityComparer.Default.Equals(type.ContainingAssembly, thisAssembly) ?
+            $"{EscapeCsKeyword(type.Name)}<{string.Join(", ", type.TypeArguments.Select(argument => argument.ToDisplayString(s_qualifiedFormat)))}>" :
+            type.ToDisplayString(s_qualifiedFormat);
+
+    // The OPEN spelling of a generic struct declared here: its name over its own type parameters, `C<V>`.
+    private static string OpenStructName(INamedTypeSymbol type) =>
+        $"{EscapeCsKeyword(type.Name)}<{string.Join(", ", type.OriginalDefinition.TypeParameters.Select(parameter => parameter.Name))}>";
+
+    // The form of a conversion with a GENERIC struct operand: the source and target spellings and the type that
+    // hosts the operator, or null when C# has no operator for the pair (the conversion site then fails to
+    // compile, loudly, as it did before generic operands were read).
+    //
+    // With ONE generic side the other hosts it, closed: `partial struct E { operator pair<bool>(E src) }`. An
+    // operator is public, so that host must be no more accessible than the generic side it names (CS0057).
+    //
+    // With BOTH sides generic, a closed pair has no host at all, but one side is a defined type written over
+    // the other's instantiation (`type C[V any] P[V]`, P over pair), so the operator is declared once, OPEN, in
+    // that wrapper: `partial struct C<V> { operator pair<V>(C<V> src) }`, which covers every instantiation. The
+    // open target is read off the wrapper's definitions with its own parameters passed down, and is bound in the
+    // wrapper's declaration to confirm that, closed with the record's arguments, it is the record's other side.
+    private static (string source, string target, string host)? GenericPairForm(GeneratorSyntaxContext context, INamedTypeSymbol source, INamedTypeSymbol target, IAssemblySymbol thisAssembly)
+    {
+        bool sourceGeneric = IsGenericStruct(source), targetGeneric = IsGenericStruct(target);
+
+        bool IsLocal(ITypeSymbol type) => SymbolEqualityComparer.Default.Equals(type.ContainingAssembly, thisAssembly);
+        bool IsPublic(ITypeSymbol type) => EffectiveScopeIsPublic(type, GetSimpleName(type.Name, dropCollisionPrefix: true));
+
+        if (sourceGeneric != targetGeneric)
+        {
+            (INamedTypeSymbol host, INamedTypeSymbol generic) = sourceGeneric ? (target, source) : (source, target);
+
+            if (!IsLocal(host) || IsPublic(host) && !IsPublic(generic))
+                return null;
+
+            string hostName = EscapeCsKeyword(host.GetFullTypeName());
+            string genericName = GenericStructName(generic, thisAssembly);
+
+            return sourceGeneric ? (genericName, hostName, hostName) : (hostName, genericName, hostName);
+        }
+
+        foreach ((INamedTypeSymbol wrapper, INamedTypeSymbol other) in new[] { (source, target), (target, source) })
+        {
+            if (!IsLocal(wrapper))
+                continue;
+
+            string wrapperOpen = OpenStructName(wrapper);
+            List<string> definitions = [];
+            ResolveStructChain(context, wrapperOpen, definitions);
+
+            string? otherOpen = definitions.FirstOrDefault(definition => TypeArgumentSubstitution.SimpleName(definition) == other.Name);
+
+            if (otherOpen is null)
+                continue;
+
+            string otherClosed = TypeArgumentSubstitution.Substitute(otherOpen,
+                wrapper.OriginalDefinition.TypeParameters.Select(parameter => parameter.Name).ToArray(),
+                wrapper.TypeArguments.Select(argument => argument.ToDisplayString(s_qualifiedFormat)).ToArray());
+
+            // Bound where the wrapper is declared, inside its package class, where its definition's spellings resolve.
+            if (GetStructDeclaration(context, wrapper.Name) is not { } declaration)
+                continue;
+
+            ITypeSymbol? bound = context.SemanticModel.Compilation.GetSemanticModel(declaration.SyntaxTree)
+                .GetSpeculativeTypeInfo(declaration.SpanStart, SyntaxFactory.ParseTypeName(otherClosed), SpeculativeBindingOption.BindAsTypeOrNamespace).Type;
+
+            if (!SymbolEqualityComparer.Default.Equals(bound, other))
+                continue;
+
+            return SymbolEqualityComparer.Default.Equals(wrapper, source) ? (wrapperOpen, otherOpen, wrapperOpen) : (otherOpen, wrapperOpen, wrapperOpen);
+        }
+
+        return null;
+    }
+
+    // Follows a struct type's DEFINITIONS, each read with the type arguments the previous one passes on, to the
+    // struct that declares the fields: for `type E C[bool]`, `type C[V any] P[V]`, `type P[T any] pair[T]` it
+    // adds `C<bool>`, `P<bool>`, `pair<bool>` to chain (outermost first) and returns pair's declaration with its
+    // parameters and the arguments it is read with. A struct declared with its own fields adds nothing. A
+    // definition outside this compilation ends the walk with no declaration.
+    private static (StructDeclarationSyntax? declaration, string[] parameters, string[] arguments) ResolveStructChain(GeneratorSyntaxContext context, string typeName, List<string>? chain)
+    {
+        // A spelling with no type arguments, or golib's box, is looked up as it always was; an instantiation by
+        // its generic declaration's name, and a qualified one not at all.
+        StructDeclarationSyntax? Lookup(string spelling) =>
+            !spelling.Contains('<') || PointerExpr.IsMatch(spelling) ? GetStructDeclaration(context, spelling) :
+            TypeArgumentSubstitution.SimpleName(spelling) is { } name ? GetStructDeclaration(context, name) : null;
+
+        string current = typeName;
+        StructDeclarationSyntax? declaration = Lookup(current);
+        HashSet<string> seen = [current];
+
+        while (declaration is not null && StructTypeTemplate.InheritedStructDefinition(declaration) is { } definition)
+        {
+            string next = TypeArgumentSubstitution.Substitute(definition, TypeArgumentSubstitution.TypeParameters(declaration), TypeArgumentSubstitution.TypeArguments(current));
+
+            if (!seen.Add(next))
+                return (null, [], []);
+
+            chain?.Add(next);
+            current = next;
+            declaration = Lookup(current);
+        }
+
+        return declaration is null ? (null, [], []) : (declaration, TypeArgumentSubstitution.TypeParameters(declaration), TypeArgumentSubstitution.TypeArguments(current));
     }
 
     // True when exactly one side of the pair is declared in ANOTHER assembly and that foreign side is

@@ -511,6 +511,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDefinedTypeOverForeignStruct() => CheckTarget("DefinedTypeOverForeignStruct");
 
     [TestMethod]
+    public void CheckDefinedTypeOverInstantiation() => CheckTarget("DefinedTypeOverInstantiation");
+
+    [TestMethod]
     public void CheckDefinedTypeOverInterface() => CheckTarget("DefinedTypeOverInterface");
 
     [TestMethod]
@@ -908,6 +911,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGoHostModuleShadow() => CheckTarget("GoHostModuleShadow");
+
+    [TestMethod]
+    public void CheckGoImageCopyThroughView() => CheckTarget("GoImageCopyThroughView");
 
     [TestMethod]
     public void CheckGoNamespaceShadow() => CheckTarget("GoNamespaceShadow");
@@ -1355,6 +1361,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedByteSliceFromStringLit() => CheckTarget("NamedByteSliceFromStringLit");
+
+    [TestMethod]
+    public void CheckNamedBytesByteSeq() => CheckTarget("NamedBytesByteSeq");
 
     [TestMethod]
     public void CheckNamedChannelType() => CheckTarget("NamedChannelType");

@@ -281,6 +281,12 @@ restore and on the package page. It does not unlist or delete anything, and it c
 The revisions built against go.* 1.24.13 cap their range below 1.25, cannot resolve under 1.26, and are left as
 they are.
 
+> **AMENDED 2026-11-09 (P2, measured in `docs/phase4/RECORD-nuget-sibling-pins.md` §5, SDK 10.0.403).** "A deprecation shows a warning at
+> restore" is false. `dotnet restore` printed no deprecation line for hashset 1.0.0 (revision 4), even at `-v n`, and
+> the restore and build beside go.fmt 1.26.10.3 were clean; the program then threw `MissingMethodException` at its
+> first loop over a slice. Only `dotnet list package --deprecated`, an IDE's package manager and the package page show
+> a deprecation. The rest of this paragraph stands.
+
 **Ruled IN** (owner, 2026-11-07: "Can deprecate existing published modules, no prob"; COORD ruling 2026-11-08: every
 listed revision that admits 1.26.10.3 and breaks on it). Run it only after block 5 has listed the new six revisions: the
 block checks that again before it prints anything, and it changes nothing itself. nuget.org deprecates from the

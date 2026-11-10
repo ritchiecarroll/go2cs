@@ -5,7 +5,6 @@
 // that can be found in the LICENSE file.
 
 using System;
-using System.Runtime.CompilerServices;
 
 namespace go;
 
@@ -43,6 +42,18 @@ public interface IByteSeq<T> : IByteSeq
     // write corrupt them all. slice<T> keeps its own writable Span<T> spread and implements this
     // member explicitly.
     ReadOnlySpan<T> ꓸꓸꓸ { get; }
+
+    // Which member of the union this value IS, for the two conversions (ByteSeqExtensions). Go's `[]byte(s)` over a
+    // value whose type is a []byte - `[]byte` itself or a named one, jsontext's `type Value []byte` - is that SAME
+    // slice: it shares the backing, and a write through the result is seen through s. So a byte-slice member hands out
+    // its own window (golib's slice<T>; go2cs-gen's named []byte wrapper, its m_value) and the conversion returns it;
+    // a string member answers false, and its bytes are copied, as Go's `[]byte(string)` does. TryGetString is the
+    // mirror for `string(s)`: a string member (@string, or a named string wrapper's @string) IS the result, immutable,
+    // so the conversion is free, as Go's is. These are members rather than type tests because the named wrappers are
+    // types golib cannot name, and a member reached through the constraint is a direct call on the value type: no box.
+    bool TryGetSlice(out slice<T> window);
+
+    bool TryGetString(out @string value);
 }
 
 // The SELF-REFERENTIAL form, and the one the converter emits as the constraint
@@ -102,10 +113,11 @@ public static class ByteSeqExtensions
     // `[]byte(s)` inside parseUint, six times per parse.
     public static slice<byte> ToSlice<TSeq>(this TSeq seq) where TSeq : IByteSeq<TSeq, byte>
     {
-        // A slice source IS the result — Go's []byte([]byte) shares its backing. The type test
-        // is folded to a constant by the JIT, so only this arm is compiled for that instantiation.
-        if (typeof(TSeq) == typeof(slice<byte>))
-            return Unsafe.As<TSeq, slice<byte>>(ref seq);
+        // A byte-slice source IS the result — Go's []byte([]byte) shares its backing, and so does []byte(v) over a
+        // NAMED []byte (TS readiness C16). Each implementation is a constant answer, so the JIT folds the test per
+        // instantiation and compiles only one arm.
+        if (seq.TryGetSlice(out slice<byte> window))
+            return window;
 
         // Any other source materializes its own bytes, as Go's []byte(string) does — one object,
         // charged here because this extension IS the conversion the converter emits for it.
@@ -115,12 +127,12 @@ public static class ByteSeqExtensions
     // Go's `string(s)` over the same — bytealg's Rabin-Karp compares `string(s[i:j])`.
     public static @string ToGoString<TSeq>(this TSeq seq) where TSeq : IByteSeq<TSeq, byte>
     {
-        // An @string source IS the result — `string(s)` over a string is the identity conversion,
-        // and @string is immutable, so there is nothing to copy or rebuild. (This used to
+        // A string source IS the result — `string(s)` over a string (or a named string) is the identity
+        // conversion, and @string is immutable, so there is nothing to copy or rebuild. (This used to
         // reconstruct the value from its backing array; now that @string is a WINDOW over shared
         // storage, that would silently widen a sub-string back to its whole backing.)
-        if (typeof(TSeq) == typeof(@string))
-            return Unsafe.As<TSeq, @string>(ref seq);
+        if (seq.TryGetString(out @string value))
+            return value;
 
         return new @string(AllocationCounter.CopyOf<byte>(seq.ꓸꓸꓸ));
     }
