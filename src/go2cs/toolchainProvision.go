@@ -57,8 +57,9 @@ const (
 	toolchainDownloadTimeout = 30 * time.Minute
 )
 
-// installRenameBackoff is the pause before each retry of a rename transientRenameError accepts: 375 ms in all.
-var installRenameBackoff = []time.Duration{25 * time.Millisecond, 50 * time.Millisecond, 100 * time.Millisecond, 200 * time.Millisecond}
+// installRenameBackoff is the pause before each retry of a rename transientRenameError accepts: doubling from 25 ms,
+// the last pause trimmed so they total 2 s, the budget the go command's robustio gives the same Windows failures.
+var installRenameBackoff = []time.Duration{25 * time.Millisecond, 50 * time.Millisecond, 100 * time.Millisecond, 200 * time.Millisecond, 400 * time.Millisecond, 800 * time.Millisecond, 425 * time.Millisecond}
 
 // toolchainSource is one place the pinned Go can be fetched from.
 type toolchainSource struct {
