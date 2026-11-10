@@ -256,10 +256,18 @@ func (builder *cgoMirrorBuilder) csharp() string {
 			fmt.Fprintf(&text, "    [%sFieldOffset(%d)] public %s %s;\n", interop, member.offset, member.clrType, member.name)
 		}
 
-		// The layout check (§5.3): the whole mirror's size against the C size. It runs once, before the mirror first
-		// crosses.
+		// The layout check (§11.2, RULED). Explicit layout makes the size and every offset true by construction, so
+		// what can be wrong is a member's C# type: each is held to the size go/types gives it, and each inline array to
+		// its length and element size. It runs once, before the mirror first crosses.
 		fmt.Fprintf(&text, "\n    internal static void CheckLayout()\n    {\n")
-		fmt.Fprintf(&text, "        Hold(%q, %q, %sUnsafe.SizeOf<%s>(), %d);\n", "the whole mirror", built.name, compiler, built.name, built.size)
+
+		for _, member := range built.fields {
+			fmt.Fprintf(&text, "        Hold(%q, %q, %sUnsafe.SizeOf<%s>(), %d);\n", member.name, member.clrType, compiler, member.clrType, member.goSize)
+
+			if member.length > 0 {
+				fmt.Fprintf(&text, "        Hold(%q, %q, %sUnsafe.SizeOf<%s>(), %d);\n", member.name+" element", member.elemType, compiler, member.elemType, member.elemSize)
+			}
+		}
 
 		fmt.Fprintf(&text, "    }\n\n")
 		fmt.Fprintf(&text, "    private static void Hold(string member, string clrType, int clrSize, int cSize)\n    {\n")
