@@ -303,7 +303,7 @@ func TestDeclaredNotImplementedCensus(t *testing.T) {
 }
 
 // memberKey folds a stub's file path and name into the (package, symbol) key the declared set is
-// written in, collapsing a layout-L3 GOOS folder into its parent package.
+// written in, collapsing a layout-L3 key folder (a GOOS, a GOARCH or a pair) into its parent package.
 func memberKey(file, name string) string {
 	parts := strings.Split(file, "/")
 
@@ -311,11 +311,8 @@ func memberKey(file, name string) string {
 		parts = parts[:len(parts)-1]
 	}
 
-	if n := len(parts); n > 0 {
-		switch parts[n-1] {
-		case "windows", "linux", "darwin":
-			parts = parts[:n-1]
-		}
+	if n := len(parts); n > 0 && isLayoutKeyFolderName(parts[n-1]) {
+		parts = parts[:n-1]
 	}
 
 	return strings.Join(parts, "/") + "." + name
@@ -546,8 +543,8 @@ var (
 // declaredNotImplementedIn walks a converted corpus and reports the partial declarations that no
 // implementing part supplies, classified by the reason the body is absent.
 //
-// The package key folds a layout-L3 GOOS folder into its parent, because one package's flavours
-// compile as ONE assembly and an implementing part may sit in either.
+// The package key folds a layout-L3 key folder (a GOOS, a GOARCH or a pair) into its parent, because
+// one package's flavours compile as ONE assembly and an implementing part may sit in any of them.
 func declaredNotImplementedIn(coreDir string) (stubCensus, error) {
 	type decl struct {
 		name, file string
@@ -588,8 +585,7 @@ func declaredNotImplementedIn(coreDir string) (stubCensus, error) {
 		dir := filepath.ToSlash(filepath.Dir(rel))
 		pkg := dir
 
-		switch filepath.Base(dir) {
-		case "windows", "linux", "darwin":
+		if isLayoutKeyFolderName(filepath.Base(dir)) {
 			pkg = filepath.ToSlash(filepath.Dir(dir))
 		}
 
