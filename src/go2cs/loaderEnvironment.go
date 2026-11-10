@@ -8,7 +8,10 @@
 
 package main
 
-import "os"
+import (
+	"fmt"
+	"os"
+)
 
 // converterLoaderEnv is the environment every go/packages load the converter makes runs in: the host's own, then
 // the caller's settings (GOOS, GOARCH, GO111MODULE, GOTOOLCHAIN ...), then -- unless the environment SETS
@@ -39,5 +42,22 @@ func converterLoaderEnv(settings ...string) []string {
 // ruling), and beside -tests and -recurse, whose loads it does not reach and would otherwise leave silently cgo-off.
 // An explicit CGO_ENABLED other than 1 asks for the opposite load and is refused too; an empty one is Go's "unset".
 func checkCgoFlag(cgo, stdlib, tests, recurse bool) error {
+	if !cgo {
+		return nil
+	}
+
+	switch {
+	case stdlib:
+		return fmt.Errorf("-cgo cannot be combined with -stdlib: the standard library converts at CGO_ENABLED=0 by ruling")
+	case tests:
+		return fmt.Errorf("-cgo cannot be combined with -tests: the test drivers' loads stay at CGO_ENABLED=0")
+	case recurse:
+		return fmt.Errorf("-cgo cannot be combined with -recurse: the module driver's loads stay at CGO_ENABLED=0")
+	}
+
+	if value, set := os.LookupEnv("CGO_ENABLED"); set && value != "" && value != "1" {
+		return fmt.Errorf("-cgo asks for a cgo-on load, and the environment sets CGO_ENABLED=%s: unset it or drop -cgo", value)
+	}
+
 	return nil
 }

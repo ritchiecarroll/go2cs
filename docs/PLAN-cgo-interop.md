@@ -776,3 +776,22 @@ container, go1.26.10, gcc 13.3.0, x/tools v0.52.0, at `30ad20e17e`, with `CGO_EN
 - a `static` C body arrives only as a typed `_Cfunc_` declaration, so its code still needs Phase 4's native
   side-build;
 - the converting host needs `CGO_ENABLED=1` plus a C compiler. §2 Finding 1 stands.
+
+### 11.8 Phase 1, increments 1 and 2 (2026-11-09, lane H)
+
+*A dated block. The exit gate below reads live only on a host with a C compiler.*
+
+- **Increment 1** (`cgoDeclarations.go`, over P1's checked-in fixture `src/go2cs/testdata/cgo/phase1`): recognition
+  reads cmd/cgo's synthetic names off the type-checked package scope and classifies nine kinds. It filters the plumbing
+  and every C name reserved for the implementation. The `//line`-ADJUSTED position of each tree's package clause maps it
+  back to its source. The fixture type-checks at `CGO_ENABLED=0` with one Overlay declaration, runtime/cgo's
+  `Incomplete`, which lives in a file that itself imports `"C"`.
+- **Increment 2**: `-cgo` is no longer inert. It makes the single-package driver's OWN load cgo-on (`CGO_ENABLED=1`,
+  last, over the loader pin) and nothing else. It is refused beside `-stdlib`, `-tests` and `-recurse`, whose loads it
+  does not reach, and beside an explicit `CGO_ENABLED` other than 1. The package is still refused, with GO2CS2001 and
+  nothing written, but the refusal now says what Phase 1 read: the declarations counted by kind, and each tree's source
+  by base name. Where cmd/cgo never ran (no C compiler, §11.1 arm P3) it says that instead. §11.3(c)'s ruling that the
+  gate fires "whatever `-cgo` says" stands: the flag reaches no emission.
+- **The exit gate** (`TestTheCgoFlagRecognizesTheFixtureAndStillRefuses`) loads the fixture's own source through the
+  real driver under `-cgo`. It reads Inconclusive (skipped) without a C compiler, and is read live by the opt-in
+  `converter-cgo` stage of the OS matrix.

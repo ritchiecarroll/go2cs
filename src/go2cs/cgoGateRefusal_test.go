@@ -335,4 +335,9 @@ func TestTheCgoFlagRecognizesTheFixtureAndStillRefuses(t *testing.T) {
 	if strings.Count(stderr, ": generated, no source") != 1 {
 		t.Errorf("want cmd/cgo's own files listed once as generated with no source\noutput:\n%s", stderr)
 	}
+
+	// The reading itself, so a passing run on a hosted runner records what the host's cmd/cgo produced.
+	if _, recognized, found := strings.Cut(stderr, "under -cgo: "); found {
+		t.Logf("READING %s", strings.TrimSpace(strings.SplitN(recognized, "\n", 2)[0]))
+	}
 }

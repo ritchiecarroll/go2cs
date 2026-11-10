@@ -9,6 +9,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"go/types"
@@ -188,5 +189,46 @@ var cgoKindLabels = []struct {
 // log. A load in which no tree maps to a source is one cmd/cgo never rewrote: go list runs cgo only where it finds
 // a C compiler, and otherwise hands the raw `import "C"` file to the parser as itself (§11.1, arm P3).
 func cgoRecognitionSummary(pkg *types.Package, fset *token.FileSet, files []*ast.File) string {
-	return ""
+	var mapped, unmapped []string
+
+	for _, entry := range cgoSourceFiles(fset, files) {
+		generated := filepath.Base(entry.generated)
+
+		if entry.source == "" {
+			unmapped = append(unmapped, generated)
+			continue
+		}
+
+		mapped = append(mapped, generated+" -> "+filepath.Base(entry.source))
+	}
+
+	if len(mapped) == 0 || pkg == nil {
+		return "cmd/cgo did not run for this load (no C compiler), so nothing was recognized"
+	}
+
+	declarations := cgoDeclarations(pkg)
+	counts := map[cgoDeclKind]int{}
+
+	for _, declaration := range declarations {
+		counts[declaration.kind]++
+	}
+
+	var kinds []string
+
+	for _, entry := range cgoKindLabels {
+		if count := counts[entry.kind]; count > 0 {
+			kinds = append(kinds, fmt.Sprintf("%d %s", count, entry.label))
+		}
+	}
+
+	sort.Strings(mapped)
+	sort.Strings(unmapped)
+
+	summary := fmt.Sprintf("recognized %d C declarations (%s); %s", len(declarations), strings.Join(kinds, ", "), strings.Join(mapped, "; "))
+
+	if len(unmapped) > 0 {
+		summary += "; " + strings.Join(unmapped, ", ") + ": generated, no source"
+	}
+
+	return summary
 }

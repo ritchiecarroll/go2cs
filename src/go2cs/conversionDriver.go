@@ -142,6 +142,12 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 	cfg.Env = converterLoaderEnv(fmt.Sprintf("GOOS=%s", targetParts[0]), fmt.Sprintf("GOARCH=%s", targetParts[1]),
 		"GOTOOLCHAIN=local")
 
+	// -cgo makes this load, and only this one, cgo-on: the loader pin made explicit (PLAN-cgo-interop §11.1). Last,
+	// so it wins; checkCgoFlag has already refused an environment asking for the opposite.
+	if options.parseCgoTargets {
+		cfg.Env = append(cfg.Env, "CGO_ENABLED=1")
+	}
+
 	// A MODULE-CACHE package is loaded from the MAIN MODULE's directory, by import path — not from
 	// its own directory, by path. The distinction is not stylistic: the go command treats the module
 	// whose go.mod it finds by walking up from cfg.Dir as the MAIN module, and a cache directory is
