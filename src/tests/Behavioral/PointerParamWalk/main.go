@@ -188,6 +188,40 @@ outer:
 	return sum
 }
 
+func pair(p *node) (*node, int) { return p.next, p.val }
+
+func pick(n *node, k int) *node {
+	if k < 0 {
+		return nil
+	}
+	return n
+}
+
+// spillWalk's post takes a multi-value call as its arguments, so the post is lowered out of the header to the end
+// of the loop body; the repoint and its re-alias go there together, ahead of the condition.
+func spillWalk(p *node, limit int) int {
+	steps := 0
+	for ; p != nil && p.val < limit; p = pick(pair(p)) {
+		steps++
+	}
+	if p == nil {
+		return -steps
+	}
+	return steps*10 + p.val
+}
+
+// spillSkip reaches the lowered post through a `continue`.
+func spillSkip(p *node) int {
+	count := 0
+	for ; p != nil; p = pick(pair(p)) {
+		if p.val%2 == 0 {
+			continue
+		}
+		count++
+	}
+	return count
+}
+
 func main() {
 	a := &node{val: 1}
 	b := &node{val: 2}
@@ -225,11 +259,13 @@ func main() {
 	k4 := &node{val: 4, next: k7}
 	k1 := &node{val: 1, next: k4}
 	fmt.Println("cond:", firstAtLeast(k1, 7), firstAtLeast(k1, 4), firstAtLeast(k1, 9), firstAtLeast(nil, 1)) // 2 1 -3 0
-	fmt.Println("continue:", countOdd(k1), countOdd(k4), countOdd(nil))                                     // 2 1 0
-	fmt.Println("after loop:", lastVal(k1), lastVal(k4), lastVal(k7))                                       // 27 17 7
-	fmt.Println("init:", after(k1, 7), after(k1, 4), after(k1, 9), after(k7, 1))                            // 17 4 -3 -1
-	fmt.Println("init only:", initOnly(k1), initOnly(k7))                                                   // 11 0
-	fmt.Println("init from:", from(nil, k1), from(k1, nil))                                                 // 12 0
-	fmt.Println("tuple:", swapWalk(k1, k4), swapWalk(k7, k1))                                               // 115 17
-	fmt.Println("nested:", nested(nil, k1), nested(k1, k7))                                                 // 207 100
+	fmt.Println("continue:", countOdd(k1), countOdd(k4), countOdd(nil))                                       // 2 1 0
+	fmt.Println("after loop:", lastVal(k1), lastVal(k4), lastVal(k7))                                         // 27 17 7
+	fmt.Println("init:", after(k1, 7), after(k1, 4), after(k1, 9), after(k7, 1))                              // 17 4 -3 -1
+	fmt.Println("init only:", initOnly(k1), initOnly(k7))                                                     // 11 0
+	fmt.Println("init from:", from(nil, k1), from(k1, nil))                                                   // 12 0
+	fmt.Println("tuple:", swapWalk(k1, k4), swapWalk(k7, k1))                                                 // 115 17
+	fmt.Println("nested:", nested(nil, k1), nested(k1, k7))                                                   // 207 100
+	fmt.Println("lowered post:", spillWalk(k1, 7), spillWalk(k1, 4), spillWalk(k1, 9), spillWalk(nil, 1))     // 27 14 -3 0
+	fmt.Println("lowered continue:", spillSkip(k1), spillSkip(k4), spillSkip(nil))                            // 2 1 0
 }
