@@ -51,9 +51,26 @@ public interface IByteSeq<T> : IByteSeq
     // mirror for `string(s)`: a string member (@string, or a named string wrapper's @string) IS the result, immutable,
     // so the conversion is free, as Go's is. These are members rather than type tests because the named wrappers are
     // types golib cannot name, and a member reached through the constraint is a direct call on the value type: no box.
-    bool TryGetSlice(out slice<T> window);
+    //
+    // DEFAULT BODIES, because these two members were added after go.lib 1.26.10.3 shipped. A package built against .3
+    // implements IByteSeq<byte> without them (go2cs-gen emits the implementation into every converted package that
+    // declares a named []byte or named string), and an ABSTRACT member it lacks would make the type fail to load under
+    // a later go.lib: the binary-compatibility guard refuses that as CP0006. With a default, such an implementer
+    // answers false to both, so ByteSeqExtensions copies, which is what .3's conversions did for it: the values are
+    // right, and only the sharing of `[]byte(v)` with v waits for the package to be rebuilt. Every implementer
+    // golib and go2cs-gen write today implements both explicitly, so none of them reaches these bodies. Reaching one
+    // through the constraint boxes a struct implementer, a cost only the old-built packages pay.
+    bool TryGetSlice(out slice<T> window)
+    {
+        window = default;
+        return false;
+    }
 
-    bool TryGetString(out @string value);
+    bool TryGetString(out @string value)
+    {
+        value = default;
+        return false;
+    }
 }
 
 // The SELF-REFERENTIAL form, and the one the converter emits as the constraint
