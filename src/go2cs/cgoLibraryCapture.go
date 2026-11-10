@@ -184,7 +184,7 @@ func cgoProbeExtension(goos string) string {
 
 // linkCgoProbe links the probe for symbols with the package's flags, plus extra linker arguments, and returns the shared
 // object's path and the linker's combined output.
-func linkCgoProbe(toolchain cgoToolchain, goos string, flags cgoLinkFlags, symbols []string, workDir string, extra ...string) (string, string, error) {
+func linkCgoProbe(toolchain cgoToolchain, goos string, flags cgoLinkFlags, symbols []string, workDir string, leading []string, extra ...string) (string, string, error) {
 	source := filepath.Join(workDir, "go2cs_cgo_probe.c")
 	output := filepath.Join(workDir, "go2cs_cgo_probe"+cgoProbeExtension(goos))
 
@@ -197,6 +197,9 @@ func linkCgoProbe(toolchain cgoToolchain, goos string, flags cgoLinkFlags, symbo
 	if goos != "windows" {
 		args = append(args, "-fPIC")
 	}
+
+	// A flag that governs the libraries after it (--as-needed) goes ahead of them.
+	args = append(args, leading...)
 
 	for _, dir := range flags.dirs {
 		args = append(args, "-L"+dir)
@@ -239,7 +242,18 @@ func captureCgoLibraries(toolchain cgoToolchain, goos string, flags cgoLinkFlags
 		}
 	}
 
-	probe, trace, err := linkCgoProbe(toolchain, goos, flags, symbols, workDir, extra...)
+	probe, trace, err := linkCgoProbe(toolchain, goos, flags, symbols, workDir, nil, extra...)
+
+	// A linker with no --trace-symbol (zig's refuses it) takes the per-symbol fallback.
+	if err != nil && goos == "linux" && strings.Contains(trace, "trace-symbol") {
+		resolved, err := elfProbeLoadNames(toolchain, flags, symbols, filepath.Join(workDir, "fallback"))
+
+		if err != nil {
+			return nil, err
+		}
+
+		return cgoSymbolLibraries(symbols, resolved)
+	}
 
 	if err != nil {
 		return nil, err
@@ -414,6 +428,11 @@ func elfTracedLibraries(trace string) (map[string]string, error) {
 
 		file, symbol := match[1], match[2]
 
+		// GNU ld prefixes the line with its own name ("/usr/bin/ld.bfd: /usr/lib/.../libm.so.6: definition of cos").
+		if at := strings.LastIndex(file, ": "); at >= 0 {
+			file = file[at+2:]
+		}
+
 		if strings.HasSuffix(file, ")") {
 			continue // an archive member: a static definition, which the caller refuses
 		}
@@ -452,142 +471,81 @@ func elfLoadName(path string) (string, error) {
 	return filepath.Base(path), nil
 }
 
-// elfLibraryLoadNames is the per -l fallback for a linker with no --trace-symbol: each -l resolved as the linker would
-// (the first file the toolchain finds), its dynamic symbol table read, and each symbol mapped to the FIRST library in
-// link order that defines it, as an ELF linker resolves it. A GNU linker script (glibc's libm.so) is followed to the
-// shared objects it names.
-func elfLibraryLoadNames(toolchain cgoToolchain, flags cgoLinkFlags, workDir string) (map[string]string, error) {
-	resolved := map[string]string{}
+// elfProbeLoadNames is the fallback for a linker with no --trace-symbol (zig's): one probe per symbol, referencing that
+// symbol alone and linked with --as-needed against every -l, so the one DT_NEEDED entry the symbol adds over a probe that
+// references nothing is the library it resolves to, recorded exactly as a Go binary's linker records it. A symbol that
+// adds none resolved statically, or not at all.
+func elfProbeLoadNames(toolchain cgoToolchain, flags cgoLinkFlags, symbols []string, workDir string) (map[string]string, error) {
+	needed := func(probeSymbols []string, dir string) (map[string]bool, error) {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return nil, err
+		}
 
-	for _, library := range flags.libraries {
-		path, err := findCgoLibraryFile(toolchain, flags.dirs, library, workDir)
+		probe, _, err := linkCgoProbe(toolchain, "linux", flags, probeSymbols, dir, []string{"-Wl,--as-needed"})
 
 		if err != nil {
 			return nil, err
 		}
 
-		files, err := elfLinkerInputs(path)
+		file, err := elf.Open(probe)
 
 		if err != nil {
 			return nil, err
 		}
 
-		for _, file := range files {
-			if err := elfDefinedSymbols(file, resolved); err != nil {
-				return nil, err
-			}
+		defer file.Close()
+
+		libraries, err := file.ImportedLibraries()
+
+		if err != nil {
+			return nil, err
 		}
-	}
 
-	return resolved, nil
-}
+		set := map[string]bool{}
 
-// findCgoLibraryFile finds the file -l<library> names: lib<library>.so in a -L directory, first, then the toolchain's
-// own search (-print-file-name, which GNU cc and clang both answer).
-func findCgoLibraryFile(toolchain cgoToolchain, dirs []string, library, workDir string) (string, error) {
-	file := "lib" + library + ".so"
-
-	for _, dir := range dirs {
-		if candidate := filepath.Join(dir, file); fileExists(candidate) {
-			return candidate, nil
+		for _, library := range libraries {
+			set[library] = true
 		}
+
+		return set, nil
 	}
 
-	cmd := exec.Command(toolchain.cc[0], append(append([]string{}, toolchain.cc[1:]...), "-print-file-name="+file)...)
-	cmd.Dir = workDir
-	cmd.Env = append(os.Environ(), toolchain.env...)
-	output, err := cmd.Output()
-
-	if err != nil {
-		return "", fmt.Errorf("cgo: the C toolchain could not say where -l%s is: %v", library, err)
-	}
-
-	path := strings.TrimSpace(string(output))
-
-	if !filepath.IsAbs(path) || !fileExists(path) {
-		return "", fmt.Errorf("cgo: the C toolchain finds no %s for -l%s", file, library)
-	}
-
-	return path, nil
-}
-
-// cgoLinkerScriptFile is one absolute path a GNU linker script's GROUP, INPUT or AS_NEEDED names.
-var cgoLinkerScriptFile = regexp.MustCompile(`/[^\s()]+`)
-
-// elfLinkerInputs returns the shared objects a -l file stands for: itself when it is ELF, or the absolute paths a GNU
-// linker script names, in order.
-func elfLinkerInputs(path string) ([]string, error) {
-	content, err := os.ReadFile(path)
+	baseline, err := needed(nil, filepath.Join(workDir, "baseline"))
 
 	if err != nil {
 		return nil, err
 	}
 
-	if bytes.HasPrefix(content, []byte(elf.ELFMAG)) {
-		return []string{path}, nil
-	}
+	resolved := map[string]string{}
 
-	var inputs []string
+	for i, symbol := range symbols {
+		libraries, err := needed([]string{symbol}, filepath.Join(workDir, fmt.Sprintf("s%d", i)))
 
-	for _, line := range strings.Split(string(content), "\n") {
-		line = strings.TrimSpace(line)
-
-		if !strings.HasPrefix(line, "GROUP") && !strings.HasPrefix(line, "INPUT") {
-			continue
+		if err != nil {
+			return nil, err
 		}
 
-		for _, input := range cgoLinkerScriptFile.FindAllString(line, -1) {
-			if !strings.HasSuffix(input, ".a") {
-				inputs = append(inputs, input)
+		var added []string
+
+		for library := range libraries {
+			if !baseline[library] {
+				added = append(added, library)
 			}
 		}
-	}
 
-	if len(inputs) == 0 {
-		return nil, fmt.Errorf("cgo: %s is neither an ELF shared object nor a linker script naming one", path)
-	}
+		sort.Strings(added)
 
-	return inputs, nil
-}
-
-// elfDefinedSymbols adds each global symbol a shared object DEFINES to resolved, unless an earlier library defined it.
-func elfDefinedSymbols(path string, resolved map[string]string) error {
-	file, err := elf.Open(path)
-
-	if err != nil {
-		return err
-	}
-
-	defer file.Close()
-
-	name, err := elfLoadName(path)
-
-	if err != nil {
-		return err
-	}
-
-	symbols, err := file.DynamicSymbols()
-
-	if err != nil {
-		return fmt.Errorf("cgo: %s has no dynamic symbol table: %v", path, err)
-	}
-
-	for _, symbol := range symbols {
-		binding := elf.ST_BIND(symbol.Info)
-
-		if symbol.Section == elf.SHN_UNDEF || (binding != elf.STB_GLOBAL && binding != elf.STB_WEAK) {
-			continue
-		}
-
-		// A versioned name ("cos@@GLIBC_2.2.5") is the symbol's default version; go2cs binds the plain name.
-		plain, _, _ := strings.Cut(symbol.Name, "@")
-
-		if _, seen := resolved[plain]; !seen {
-			resolved[plain] = name
+		switch len(added) {
+		case 0:
+			// statically, or not at all: the caller refuses it by name
+		case 1:
+			resolved[symbol] = added[0]
+		default:
+			return nil, fmt.Errorf("cgo: %s alone makes the linker record %s, so it names no one library", symbol, strings.Join(added, ", "))
 		}
 	}
 
-	return nil
+	return resolved, nil
 }
 
 // splitCgoCommand splits a CC command the way cmd/go does (cmd/internal/quoted): fields separated by spaces, a field may

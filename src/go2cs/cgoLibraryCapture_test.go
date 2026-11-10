@@ -181,8 +181,9 @@ func buildCgoTestLibrary(t *testing.T, toolchain cgoToolchain, dir, name, symbol
 }
 
 // Two -l libraries defining disjoint symbols: each symbol is captured with ITS library's load-time name, per symbol and
-// not per -l. On ELF the linker's --trace-symbol route and the per -l fallback must agree, so the fallback is proven and
-// not only described (COORD's 4b ruling).
+// not per -l. On ELF the per-symbol fallback must give the same answer as the capture, so the fallback is proven and not
+// only described (COORD's 4b ruling): where the linker takes --trace-symbol (GNU ld) that is the two routes agreeing, and
+// where it does not (zig) the capture IS the fallback.
 func TestCgoCaptureNamesEachSymbolsOwnLibrary(t *testing.T) {
 	toolchain := cgoCaptureToolchain(t)
 	dir := t.TempDir()
@@ -208,7 +209,7 @@ func TestCgoCaptureNamesEachSymbolsOwnLibrary(t *testing.T) {
 		return
 	}
 
-	fallback, err := elfLibraryLoadNames(toolchain, flags, t.TempDir())
+	fallback, err := elfProbeLoadNames(toolchain, flags, symbols, t.TempDir())
 
 	if err != nil {
 		t.Fatal(err)
@@ -216,17 +217,23 @@ func TestCgoCaptureNamesEachSymbolsOwnLibrary(t *testing.T) {
 
 	for _, entry := range want {
 		if fallback[entry.symbol] != entry.name {
-			t.Errorf("the per -l fallback maps %s to %q, the --trace-symbol route to %q", entry.symbol, fallback[entry.symbol], entry.name)
+			t.Errorf("the per-symbol fallback maps %s to %q, the capture to %q", entry.symbol, fallback[entry.symbol], entry.name)
 		}
 	}
 }
 
 // A system library every host has: cos through -lm, captured as each linker records it. Windows records the import as
-// LINKED, an API set included (COORD's Q3 ruling), so its reading is logged and held to name a C runtime DLL.
+// LINKED, an API set included (COORD's Q3 ruling), so its reading is logged and held to name a C runtime DLL. A windows
+// toolchain whose libm links cos STATICALLY (zig's mingw libm does) is refused by name, which is §11.5's own example.
 func TestCgoCaptureNamesTheSystemMathLibrary(t *testing.T) {
 	toolchain := cgoCaptureToolchain(t)
 
 	got, err := captureCgoLibraries(toolchain, runtime.GOOS, cgoLinkFlags{libraries: []string{"m"}}, []string{"cos"}, t.TempDir())
+
+	if err != nil && runtime.GOOS == "windows" && strings.Contains(err.Error(), "cos resolved to no shared library") {
+		t.Logf("READING cos via -lm: resolved statically by this toolchain, so refused by name: %v", err)
+		return
+	}
 
 	if err != nil {
 		t.Fatal(err)
