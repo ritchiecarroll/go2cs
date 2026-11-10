@@ -33,7 +33,7 @@ internal static partial class cgotestꓸC_package
     }
 
     // C.exp, bound to ucrtbase.dll.
-    [global::System.Runtime.InteropServices.LibraryImport("ucrtbase.dll", EntryPoint = "exp", SetLastError = true)]
+    [global::System.Runtime.InteropServices.LibraryImport("ucrtbase.dll", EntryPoint = "exp")]
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
     private static partial double expᴍnativeerrno(double p0);
 
@@ -45,8 +45,10 @@ internal static partial class cgotestꓸC_package
 
         try
         {
+            nint errnoAddress = errnoᴍlocation();
+            global::System.Runtime.InteropServices.Marshal.WriteInt32(errnoAddress, 0);
             r = expᴍnativeerrno((float64)p0);
-            errno = global::System.Runtime.InteropServices.Marshal.GetLastPInvokeError();
+            errno = global::System.Runtime.InteropServices.Marshal.ReadInt32(errnoAddress);
         }
         finally
         {

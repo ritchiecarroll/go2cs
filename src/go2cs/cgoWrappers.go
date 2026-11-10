@@ -201,7 +201,7 @@ func cgoScalarWrapper(declaration cgoDeclaration, target cgoBindingTarget) (stri
 	// stub clears errno before the call and saves it after, so the read sees this call's errno and nothing the GC
 	// transition did since. On windows SetLastError captures GetLastError, not errno, which is the C RUNTIME's own
 	// slot, so the wrapper reads that through the library's C runtime instead (cgoErrnoLocationBinding).
-	crtErrno := false // §11.3 as first ruled: SetLastError on every target
+	crtErrno := errnoForm && target.goos == "windows"
 
 	if errnoForm && !crtErrno {
 		setLastError = ", SetLastError = true"
