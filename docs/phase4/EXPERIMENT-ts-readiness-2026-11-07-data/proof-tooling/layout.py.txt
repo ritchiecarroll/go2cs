@@ -1,0 +1,269 @@
+# layout.py: stage the typescript-go-cs repository from a go2cs -recurse conversion, then fill its pages.
+#
+#   python -I layout.py stage --tree <converted root> --tsc <tsc module dir> --ts-root <TypeScript checkout> \
+#                             --proof <this dir> --dest <staging dir>
+#   python -I layout.py fill  --dest <staging dir> --proof <this dir> --results <compare.py out dir> \
+#                             --converter <go2cs commit> --gostdlib <go.* version> --sdk <.NET SDK> \
+#                             --platform <goos/goarch measured> --goversion <go version> [--handpatches <file>]
+#   python -I layout.py census --dest <staging dir>
+#
+# stage copies ONLY the parse closure of cmd/parsedemo (go list -deps, non-standard packages), each third-party
+# module's license files, TypeScript's LICENSE and NOTICE.txt verbatim, the Go sources of the demo and the corpus
+# extractor, the samples and the harness, and writes the solution. It rewrites one thing in the converted C#: the
+# absolute source path a local main module's GoPositionMap records becomes the module-path form `go build -trimpath`
+# gives (MODIFICATIONS.md states it). fill writes README.md and PROOF.md from the measured results only. census fails
+# on any local path, user name or internal name in the staged tree.
+import argparse, datetime, filecmp, json, os, re, shutil, subprocess, sys
+
+sys.stdout.reconfigure(encoding="utf-8")
+MOD = "github.com/microsoft/TypeScript/tsc"
+TS_COMMIT = "ba29a562991ceb942481e2a00810b4e5e4062e52"
+LICENSE_NAMES = re.compile(r"^(LICEN[CS]E|COPYING|NOTICE|PATENTS|AUTHORS|CONTRIBUTORS)(\..*)?$", re.I)
+SKIP_DIRS = {"bin", "obj", "Generated", ".artifacts"}
+
+
+def golist(tsc):
+    fmt = "{{if not .Standard}}{{.ImportPath}}\t{{.Module.Path}}\t{{.Module.Version}}\t{{.Module.Dir}}{{end}}"
+    env = dict(os.environ, GOWORK="off")
+    out = subprocess.run(["go", "list", "-deps", "-f", fmt, "./cmd/parsedemo"], cwd=tsc, env=env,
+                         capture_output=True, text=True, check=True).stdout
+    return [l.split("\t") for l in out.splitlines() if l.strip()]
+
+
+def copy_files(src, dst, with_subdirs=()):
+    os.makedirs(dst, exist_ok=True)
+    n = 0
+    for e in os.scandir(src):
+        if e.is_file():
+            shutil.copy2(e.path, os.path.join(dst, e.name)); n += 1
+        elif e.is_dir() and e.name in with_subdirs:
+            shutil.copytree(e.path, os.path.join(dst, e.name), dirs_exist_ok=True); n += 1
+    return n
+
+
+def stage(A):
+    if os.path.exists(A.dest):
+        sys.exit(f"refusing: {A.dest} exists")
+    pkgs = golist(A.tsc)
+    report = {"packages": [], "modules": {}, "positionmap_rewrites": 0}
+    for imp, mod, ver, moddir in pkgs:
+        rel = ("src/" if mod == MOD else "pkg/") + imp
+        src = os.path.join(A.tree, rel)
+        if not os.path.isdir(src):
+            sys.exit(f"missing in the converted tree: {rel}")
+        n = copy_files(src, os.path.join(A.dest, rel), with_subdirs=("Properties",))
+        report["packages"].append({"import": imp, "path": rel, "files": n})
+        if mod != MOD and mod not in report["modules"]:
+            mroot = os.path.join(A.tree, "pkg", mod)
+            lic = [e.name for e in os.scandir(mroot) if e.is_file() and LICENSE_NAMES.match(e.name)]
+            if not lic:
+                sys.exit(f"no license file for module {mod} in the converted tree")
+            for name in lic:
+                os.makedirs(os.path.join(A.dest, "pkg", mod), exist_ok=True)
+                shutil.copy2(os.path.join(mroot, name), os.path.join(A.dest, "pkg", mod, name))
+                if not filecmp.cmp(os.path.join(mroot, name), os.path.join(moddir, name), shallow=False):
+                    sys.exit(f"{mod}/{name} differs from the module's own copy")
+            report["modules"][mod] = {"version": ver, "licenses": lic}
+    # root files
+    for f in ("Directory.Build.props", "Directory.Build.targets"):
+        shutil.copy2(os.path.join(A.tree, f), os.path.join(A.dest, f))
+    shutil.copy2(os.path.join(A.ts_root, "LICENSE.txt"), os.path.join(A.dest, "LICENSE"))
+    shutil.copy2(os.path.join(A.ts_root, "NOTICE.txt"), os.path.join(A.dest, "NOTICE.txt"))
+    if not filecmp.cmp(os.path.join(A.ts_root, "LICENSE.txt"), os.path.join(A.tsc, "LICENSE"), shallow=False):
+        sys.exit("TypeScript's LICENSE.txt and tsc/LICENSE differ")
+    for name in ("parsedemo", "checkdemo", "parsecorpus-extract"):
+        os.makedirs(os.path.join(A.dest, "go", "cmd", name), exist_ok=True)
+        shutil.copy2(os.path.join(A.tsc, "cmd", name, "main.go"), os.path.join(A.dest, "go", "cmd", name, "main.go"))
+    shutil.copytree(os.path.join(A.proof, "samples"), os.path.join(A.dest, "samples"))
+    os.makedirs(os.path.join(A.dest, "proof"), exist_ok=True)
+    shutil.copy2(os.path.join(A.proof, "compare.py"), os.path.join(A.dest, "proof", "compare.py"))
+    for f in (".gitignore", ".gitattributes", "MODIFICATIONS.md"):
+        shutil.copy2(os.path.join(A.proof, "templates", f), os.path.join(A.dest, f))
+    # GoPositionMap: <absolute module dir>/<file>  ->  github.com/microsoft/TypeScript/tsc/<file>
+    # (any absolute checkout of the module: the tree may have been converted from another copy than --tsc)
+    pat = re.compile(r'(GoPositionMap\(")(?:[A-Za-z]:)?/[^"]*?/tsc/(?=(?:internal|cmd)/)')
+    for root, dirs, files in os.walk(os.path.join(A.dest, "src")):
+        for f in files:
+            if f.endswith(".cs"):
+                p = os.path.join(root, f)
+                s = open(p, encoding="utf-8-sig").read()
+                t, k = pat.subn(r"\g<1>" + MOD + "/", s)
+                if k:
+                    with open(p, "w", encoding="utf-8", newline="") as o:
+                        o.write(t)
+                    report["positionmap_rewrites"] += k
+    # solution
+    projs = sorted(os.path.relpath(os.path.join(r, f), A.dest).replace("\\", "/")
+                   for r, _, fs in os.walk(A.dest) for f in fs if f.endswith(".csproj"))
+    with open(os.path.join(A.dest, "typescript-go-cs.slnx"), "w", encoding="utf-8", newline="\r\n") as o:
+        o.write("<Solution>\n" + "".join(f'  <Project Path="{p}" />\n' for p in projs) + "</Solution>\n")
+    report["projects"] = projs
+    json.dump(report, open(os.path.join(A.proof, "stage-report.json"), "w", encoding="utf-8"), indent=1)
+    print(f"staged {len(pkgs)} packages ({len(report['modules'])} third-party modules), {len(projs)} projects, "
+          f"{report['positionmap_rewrites']} GoPositionMap paths rewritten")
+
+
+def em_packages(st):  # the largest stage closure's size (program and emit), which a harness closure extends
+    return max(s["packages"] for s in st.values())
+
+
+def beyond_section(results_dir, parse_validated):
+    """The README's "Beyond parsing" section and its scope sentence, from beyond.json only. A stage is called
+    validated only when its demo matched native Go; one that compiles without that is "compiles, not yet validated"."""
+    p = os.path.join(results_dir, "beyond.json")
+    if not os.path.exists(p):
+        return ("Not measured in this run.",
+                "This repository proves parsing only. **It makes no claim about type-checking or JavaScript emit.**")
+    B = json.load(open(p, encoding="utf-8"))
+    st = {s["stage"]: s for s in B["stages"]}
+    demos = {"parse": {"match": parse_validated}, "type-check": B.get("typecheck_demo"), "program and emit": B.get("emit_demo")}
+
+    def status(s):
+        dm = demos.get(s["stage"])
+        if not s["compiles"]:
+            first = ", ".join(f"`{x.rsplit('/', 1)[-1]}`" for x in s["failed"]) or "a dependency"
+            return f"does not compile yet: {first} fails"
+        if dm and dm.get("match"):
+            return "**validated**: its demo runs converted and matches native Go byte for byte"
+        if dm is not None and "sha256_cs" in dm:
+            return "compiles; its demo does not yet match native Go"
+        return "compiles, not yet validated"
+
+    tc = st["type-check"]
+    rows = "\n".join(f"| {s['stage'].capitalize()} | `{s['root'].replace(MOD + '/', '')}` | {s['built']} of {s['packages']} | {status(s)} |"
+                     for s in B["stages"])
+    md = (f"Measured on the same conversion. The packages past the parser are not in this repository.\n\n"
+          f"**{tc['built']} of {tc['packages']} packages in the type-check closure compile.** "
+          f"The furthest stage whose whole closure compiles is **{B['furthest'] or 'none yet'}**.\n\n"
+          "| Stage | Root package | Packages that compile | Status |\n|:--|:--|:--|:--|\n" + rows + "\n\n"
+          "A stage is called validated only when a demo of it runs converted and matches native Go byte for byte. "
+          "Compiling is not validation.")
+    # The type-check demo's harness closure (beyond.py's "harnesses"): reported beside the stages, worded as progress,
+    # never as working. It is absent from a beyond.json written before 2026-11-10.
+    for h in B.get("harnesses", []):
+        if h["stage"] != "type-check demo":
+            continue
+        extra = h["packages"] - em_packages(st)
+        more = f", {extra} more than the stages above include" if extra > 0 else ""
+        if h["compiles"]:
+            hs = ("All of them compile. That is progress, not a result: the type-check demo is validated only by the "
+                  "table above, when it runs converted and matches native Go.")
+        else:
+            names = [f"`{x.removeprefix(MOD + '/')}`" for x in h["failed"]]
+            failing = (", ".join(names[:-1]) + " and " + names[-1]) if len(names) > 1 else (names[0] if names else "a dependency")
+            hs = (f"{h['built']} of them compile so far; {failing} {'does' if len(names) <= 1 else 'do'} not compile yet, "
+                  "so the demo cannot run.")
+        md += (f"\n\nThe type-check demo itself (`{h['root'].replace(MOD + '/', '')}`) needs {h['packages']} packages"
+               f"{more}. {hs}")
+    tc_ok = bool((B.get("typecheck_demo") or {}).get("match")) and tc["compiles"]
+    em = st["program and emit"]
+    em_ok = bool((B.get("emit_demo") or {}).get("match")) and em["compiles"]
+    if tc_ok and em_ok:
+        scope = "This repository's code proves parsing; type-checking and JavaScript emit are validated as the table below shows."
+    elif tc_ok:
+        scope = ("This repository's code proves parsing; type-checking is validated as the table below shows. "
+                 "**It makes no claim about JavaScript emit.**")
+    else:
+        scope = "This repository proves parsing only. **It makes no claim about type-checking or JavaScript emit.**"
+    return md, scope
+
+
+def fill(A):
+    R = json.load(open(os.path.join(A.results, "results.json"), encoding="utf-8"))
+    d, c = R["demo"], R["corpus"]
+    hp = open(A.handpatches, encoding="utf-8").read().strip() if A.handpatches else ""
+    units, n = c["units"], c["matched"]
+    full = n == units
+    if full:
+        corpus_sentence = f"all **{n:,} of {units:,}** parser-corpus inputs match"
+    else:
+        corpus_sentence = (f"**{n:,} of {units:,}** parser-corpus inputs match; {units - n:,} do not, and "
+                           f"[PROOF.md](PROOF.md) lists every one by class")
+    rows = "\n".join(f"| {k} | {v:,} |" for k, v in sorted(c["classes"].items(), key=lambda kv: -kv[1])) or "| (none) | 0 |"
+    mism = c["mismatches"]
+    lst = "\n".join(f"| `{m['index']}` | {m['class']} | `{m['source']}`{(' `' + m['unit'] + '`') if m['unit'] else ''} | "
+                    f"{('`' + m.get('go', '')[:80] + '` / `' + m.get('cs', '')[:80] + '`') if 'go' in m else m.get('panic', m.get('status', ''))[:120]} |"
+                    for m in mism[:300]) or "| | (none) | | |"
+    more = f"\n\n{len(mism) - 300:,} more are in `proof/results.json`." if len(mism) > 300 else ""
+    demo_go = open(os.path.join(A.results, "demo.go.txt"), encoding="utf-8").read()
+    demo_cs = open(os.path.join(A.results, "demo.cs.txt"), encoding="utf-8", errors="replace").read()
+    if full and d["match"]:
+        headline = "On .NET, the converted code produces the same output as the native Go build, byte for byte."
+    elif d["match"]:
+        headline = ("On .NET, the converted code reproduces the native Go build's output byte for byte on the demo, "
+                    "and on the parser corpus as counted below.")
+    else:
+        headline = "On .NET, the converted code does NOT yet reproduce the native Go build's output on the demo."
+    beyond_md, scope = beyond_section(A.results, d["match"] and full)
+    v = {
+        "BEYOND": beyond_md, "SCOPE": scope,
+        "HEADLINE": headline,
+        "DEMO_VERDICT": "byte-identical" if d["match"] else "NOT byte-identical",
+        "DEMO_LINES": f"{d['go']['lines']:,}", "DEMO_SHA_GO": d["go"]["sha256"], "DEMO_SHA_CS": d["cs"]["sha256"],
+        "DEMO_GO": demo_go.rstrip("\n"), "DEMO_CS": demo_cs.rstrip("\n"),
+        "CORPUS_SENTENCE": corpus_sentence, "N": f"{n:,}", "UNITS": f"{units:,}", "MISMATCHED": f"{units - n:,}",
+        "NODES": f"{c['nodes']:,}", "DIAGS": f"{c['diagnostics']:,}", "CLASS_ROWS": rows, "MISMATCH_ROWS": lst + more,
+        "BADGE_COLOR": "brightgreen" if full and d["match"] else "yellow",
+        "CONVERTER": A.converter, "GOSTDLIB": A.gostdlib, "SDK": A.sdk, "PLATFORM": A.platform, "GOVERSION": A.goversion,
+        "DATE": datetime.date.today().isoformat(), "TS_COMMIT": TS_COMMIT, "TS_SHORT": TS_COMMIT[:10],
+        "SECS_GO": f"{c['native']['seconds']:,}", "SECS_CS": f"{c['converted']['seconds']:,}",
+        "HANDPATCHES": hp if hp else "None. Every C# file under `src/` and `pkg/` is the converter's output, unedited, "
+                                     "apart from the one path rewrite MODIFICATIONS.md states.",
+    }
+    for name in ("README.md", "PROOF.md"):
+        t = open(os.path.join(A.proof, "templates", name + ".tmpl"), encoding="utf-8").read()
+        for k, val in v.items():
+            t = t.replace("{{" + k + "}}", val)
+        left = re.findall(r"\{\{[A-Z_]+\}\}", t)
+        if left:
+            sys.exit(f"{name}: unfilled {left}")
+        open(os.path.join(A.dest, name), "w", encoding="utf-8", newline="\n").write(t)
+    for f in ("results.json", "demo.go.txt", "demo.cs.txt", "corpus.go.txt", "corpus.cs.txt"):
+        shutil.copy2(os.path.join(A.results, f), os.path.join(A.dest, "proof", f))
+    for f in ("beyond.json", "checkdemo.json", "checkdemo.go.txt", "checkdemo.cs.txt"):  # present only when measured
+        if os.path.exists(os.path.join(A.results, f)):
+            shutil.copy2(os.path.join(A.results, f), os.path.join(A.dest, "proof", f))
+    shutil.rmtree(os.path.join(A.dest, "proof", "mismatch"), ignore_errors=True)
+    shutil.copytree(os.path.join(A.results, "mismatch"), os.path.join(A.dest, "proof", "mismatch"))
+    print("filled README.md and PROOF.md:", corpus_sentence.replace("**", ""), "| demo", v["DEMO_VERDICT"])
+
+
+# Everywhere: no local path or user name. In the files this project writes (not the converted C#, not TypeScript's
+# verbatim LICENSE/NOTICE, not third-party licenses): no internal working names either.
+PATHS = [r"go2cs-ts-exp", r"\b[A-Z]:[\\/]", r"[\\/]Users[\\/]", r"<user>(?!carroll)"]
+INTERNAL = [r"\bCOORD\b", r"\bi7\b", r"\bi9\b", r"R-LAPTOP", r"G-LAPTOP", r"\bmailbox\b", r"\bfleet\b",
+            r"\blanes?\b", r"\bseats?\b", r"scratch", r"\bowner\b", r"EXPERIMENT", r"\bBOARD\b"]
+AUTHORED = re.compile(r"^(README\.md|PROOF\.md|MODIFICATIONS\.md|\.git\w+|[^/]*\.slnx|proof/[^/]*\.py|go/.*|samples/.*)$")
+
+
+def census(A):
+    hits = []
+    for root, dirs, files in os.walk(A.dest):
+        dirs[:] = [x for x in dirs if x not in SKIP_DIRS and x != ".git"]
+        for f in files:
+            p = os.path.join(root, f)
+            try:
+                s = open(p, encoding="utf-8", errors="strict").read()
+            except (UnicodeDecodeError, OSError):
+                continue
+            rel = os.path.relpath(p, A.dest).replace("\\", "/")
+            # proof data quotes TypeScript's test-case file names, some of which are Windows-style (C:/foo/...):
+            # there, only the drive-letter rule is relaxed.
+            paths = [x for x in PATHS if not (rel.startswith("proof/") and not rel.endswith(".py") and x.startswith(r"\b[A-Z]"))]
+            for pat in paths + (INTERNAL if AUTHORED.match(rel) else []):
+                for m in re.finditer(pat, s):
+                    line = s.count("\n", 0, m.start()) + 1
+                    hits.append(f"{rel}:{line}: {pat}: {s[max(0, m.start() - 40):m.end() + 40]!r}")
+    print(f"census: {len(hits)} hit(s)")
+    for h in hits[:200]:
+        print(" ", h)
+    sys.exit(1 if hits else 0)
+
+
+ap = argparse.ArgumentParser()
+ap.add_argument("cmd", choices=("stage", "fill", "census"))
+for a in ("tree", "tsc", "ts-root", "proof", "dest", "results", "converter", "gostdlib", "sdk", "platform", "goversion",
+          "handpatches"):
+    ap.add_argument("--" + a)
+A = ap.parse_args()
+{"stage": stage, "fill": fill, "census": census}[A.cmd](A)

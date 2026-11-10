@@ -1,0 +1,37 @@
+--- layout.py.before
++++ layout.py
+@@ -103,6 +103,10 @@
+           f"{report['positionmap_rewrites']} GoPositionMap paths rewritten")
+ 
+ 
++def em_packages(st):  # the largest stage closure's size (program and emit), which a harness closure extends
++    return max(s["packages"] for s in st.values())
++
++
+ def beyond_section(results_dir, parse_validated):
+     """The README's "Beyond parsing" section and its scope sentence, from beyond.json only. A stage is called
+     validated only when its demo matched native Go; one that compiles without that is "compiles, not yet validated"."""
+@@ -134,6 +138,23 @@
+           "| Stage | Root package | Packages that compile | Status |\n|:--|:--|:--|:--|\n" + rows + "\n\n"
+           "A stage is called validated only when a demo of it runs converted and matches native Go byte for byte. "
+           "Compiling is not validation.")
++    # The type-check demo's harness closure (beyond.py's "harnesses"): reported beside the stages, worded as progress,
++    # never as working. It is absent from a beyond.json written before 2026-11-10.
++    for h in B.get("harnesses", []):
++        if h["stage"] != "type-check demo":
++            continue
++        extra = h["packages"] - em_packages(st)
++        more = f", {extra} more than the stages above include" if extra > 0 else ""
++        if h["compiles"]:
++            hs = ("All of them compile. That is progress, not a result: the type-check demo is validated only by the "
++                  "table above, when it runs converted and matches native Go.")
++        else:
++            names = [f"`{x.removeprefix(MOD + '/')}`" for x in h["failed"]]
++            failing = (", ".join(names[:-1]) + " and " + names[-1]) if len(names) > 1 else (names[0] if names else "a dependency")
++            hs = (f"{h['built']} of them compile so far; {failing} {'does' if len(names) <= 1 else 'do'} not compile yet, "
++                  "so the demo cannot run.")
++        md += (f"\n\nThe type-check demo itself (`{h['root'].replace(MOD + '/', '')}`) needs {h['packages']} packages"
++               f"{more}. {hs}")
+     tc_ok = bool((B.get("typecheck_demo") or {}).get("match")) and tc["compiles"]
+     em = st["program and emit"]
+     em_ok = bool((B.get("emit_demo") or {}).get("match")) and em["compiles"]
