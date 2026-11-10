@@ -46,14 +46,30 @@ public static class GoCgoArgs
         if (pointer is null || pointer.IsNilPointer)
             return GoCgoStructPointer.Nil;
 
-        // §5.2 as first written: a native box passes its address, and any other pointer is a managed struct, mirrored.
-        if (pointer is NativeBox<T> native)
+        switch (pointer)
         {
-            address = native.NativeAddress;
-            return GoCgoStructPointer.Native;
-        }
+            case NativeBox<T> native:
+                if (!IsGenuinelyNative(native))
+                    throw Refused(function, typeof(T), "a native pointer minted from managed storage (a reinterpret view, an order token or a pinned managed address), which C must not write through");
 
-        return GoCgoStructPointer.Mirror;
+                address = native.NativeAddress;
+                return GoCgoStructPointer.Native;
+
+            case StandardBox<T>:
+                return GoCgoStructPointer.Mirror;
+
+            case FieldRefBox<T> field:
+                if (((INativeRooted)field).IsNativeRooted)
+                    throw Refused(function, typeof(T), "a field of a struct in native memory, which Phase 2 does not yet pass");
+
+                return GoCgoStructPointer.Mirror;
+
+            case ElemRefBox<T>:
+                throw Refused(function, typeof(T), "an element of a Go array or slice: cgo lets C touch the whole array, which one struct's mirror cannot hold (Phase 3)");
+
+            default:
+                throw Refused(function, typeof(T), $"a {pointer.GetType().Name}, a pointer kind Phase 2 does not classify");
+        }
     }
 
     /// <summary>

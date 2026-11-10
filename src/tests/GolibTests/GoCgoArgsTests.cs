@@ -230,6 +230,32 @@ public unsafe partial class GoCgoArgsTests
     {
         List<(uint status, int depth)> readings = ReadingsInside(items =>
         {
+            runtime_package.syscallEntersyscall();
+
+            try
+            {
+                Qsort((int*)items, 2);
+            }
+            finally
+            {
+                runtime_package.syscallExitsyscall();
+            }
+        });
+
+        foreach ((uint status, int depth) in readings)
+        {
+            Assert.AreEqual(runtime_package.GoGSyscallStatus(), status, "inside the wrapped call the goroutine reads _Gsyscall, as Go's cgocall makes it");
+            Assert.AreEqual(1, depth, "and the seam saw exactly one transition");
+        }
+    }
+
+    // The negative control, so the arm above can fail: the seam alone, with no runtime entersyscall, leaves the
+    // goroutine _Grunning inside the call. That is the shape §4.2 first proposed, and F-2 reintroduced.
+    [TestMethod]
+    public void ADirectSeamBracketLeavesTheGoroutineRunning()
+    {
+        List<(uint status, int depth)> readings = ReadingsInside(items =>
+        {
             GoNativeCall.Enter();
 
             try
@@ -244,8 +270,8 @@ public unsafe partial class GoCgoArgsTests
 
         foreach ((uint status, int depth) in readings)
         {
-            Assert.AreEqual(runtime_package.GoGSyscallStatus(), status, "inside the wrapped call the goroutine reads _Gsyscall, as Go's cgocall makes it");
-            Assert.AreEqual(1, depth, "and the seam saw exactly one transition");
+            Assert.AreEqual(Grunning, status, "a direct GoNativeCall bracket moves no g status");
+            Assert.AreEqual(1, depth, "though the seam itself is open");
         }
     }
 }
