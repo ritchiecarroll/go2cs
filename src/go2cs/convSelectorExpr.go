@@ -1188,6 +1188,17 @@ func importedTypeAliasIsAmbiguous(aliasObj *types.TypeName) bool {
 	return ambiguousImportedTypeAliases.Contains(key)
 }
 
+// importedTypeAliasPublished reports whether this conversion loaded an imported-type-alias entry under key
+// (`<package>.<Name>`), which it does only for the packages it imports.
+func importedTypeAliasPublished(key string) bool {
+	packageLock.Lock()
+	defer packageLock.Unlock()
+
+	_, published := importedTypeAliases[key]
+
+	return published
+}
+
 // ambiguousImportedTypeAliasTarget returns the fully-qualified target that pkg ITSELF published under
 // an ambiguous key (see ambiguousImportedTypeAliases), read by pkg's source directory; false for every
 // other key, and for a package whose directory is unknown.
