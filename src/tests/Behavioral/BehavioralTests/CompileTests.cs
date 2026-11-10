@@ -2797,6 +2797,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckVariadicInterfaceAssert() => CheckTarget("VariadicInterfaceAssert");
 
     [TestMethod]
+    public void CheckVariadicLiftedElement() => CheckTarget("VariadicLiftedElement");
+
+    [TestMethod]
     public void CheckVariadicNamedEmptyIface() => CheckTarget("VariadicNamedEmptyIface");
 
     [TestMethod]

@@ -161,7 +161,7 @@ func (v *Visitor) variadicElementParts(elem types.Type) (typeName string, identB
 	// Derived BEFORE the referent is qualified/rewritten below — the identifier tracks the Go source,
 	// the referent tracks what C# can resolve, and the two deliberately diverge.
 	aliasIdent := v.variadicAliasIdent(elem, typeName)
-	selfQualified := false
+	typeName, selfQualified := v.qualifyLiftedVariadicElement(elem, typeName)
 
 	if named, ok := elem.(*types.Named); ok {
 		// A methodless named func type has already been rendered AS its base delegate
