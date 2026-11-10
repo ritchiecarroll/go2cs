@@ -328,6 +328,13 @@ from being a false comfort:
 
 > ⟶ **Amended 2026-11-10:** §11.6 (`_Cvar_` and `_Cfpvar_fp_` refused) and §11.13.
 
+> **AMENDED 2026-11-10 (COORD, RULED, for increment 3b2b): single scalar pointee; element pointers remain Phase 3.** A
+> pointer to ONE scalar crosses under §11.1's rule, with a stack copy-in and an unconditional copy-back, exactly as one
+> whole struct does. That covers a `StandardBox<scalar>` (`&t`) and a `FieldRefBox` whose pointee is a scalar field
+> (`&s.f`), since cgo scopes that memory to the field alone. An element pointer (`&xs[i]`, an `ElemRefBox`) is still
+> refused to Phase 3, for scalars as for structs, with its own red. The table row below therefore narrows to element
+> pointers and `unsafe.Pointer` into managed memory.
+
 Phase 1 increment 2 refuses every cgo package and says what it recognized. Phase 2 **narrows** that refusal: a
 package converts only when every recognized declaration is in Phase 2's set. Otherwise the refusal lists each
 declaration that is not, with the phase that owns it:
