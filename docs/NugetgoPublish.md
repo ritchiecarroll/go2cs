@@ -91,7 +91,10 @@ Stop at the first one that fails.
 refuses it ("has no package with Go test files"), so there is no `VR` and no MODULE.md: skip steps 2, 3 and 5. Its
 proof is behavioral, one row per shipped RID, each run on a host of that RID (section 3, *A module with no Go tests*).
 Its sample program is committed at `T` under `src/tests/ModuleBehavior/M@V/`: `main.go`, `go.mod`, `go.sum`, and
-`mappings.txt` with the module's row.
+`mappings.txt` with the module's row. `Invoke-NugetgoRepack.ps1` takes it from its `nugetgo-modules.psd1` row, whose
+`NoGoTests` is the reason the rehearsal states: run `-Packs int1`, write the rows (section 3), then run
+`-Packs release -BehaviorProofDir <rows>`. Step 4's `-provenance` applies to it as to any module (mousetrap is
+Apache-2.0).
 
 ## 2. Pack (lane, at `T`)
 
