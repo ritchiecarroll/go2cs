@@ -143,6 +143,12 @@ kernels may run 16K or 64K pages. Read the page size instead; `syscall/syscall_i
 `runtime/linux/set_vma_name_linux.cs:66` uses `(uintptr)4096` as a length, not as a page assumption: the seat judges
 it.
 
+- **Site 8, done (i9, 2026-11-10, `aaef00bef6`; COORD-accepted).** mem_linux's probe strides by `physPageSize`, and
+  its test asserts alignment to the OS page. mranges' 4096 is a range length in pure arithmetic, so it is judged and
+  kept. set_vma_name's 4096 is the probe's mmap/prctl/munmap length; the kernel rounds all three to a whole page, so
+  it is kept too. **Unmeasured: a 16 or 64 KiB kernel.** linux-x64 has 4 KiB pages, and so, unmeasured, does the arm
+  runner's generic Ubuntu kernel. On a 4 KiB kernel the old and new assertions agree, so no red is possible there.
+
 - **RECONCILE: 18 + 2 mirror types here, "30 explicit-layout mirrors in 7 files" in the design (§9).** The design
   does not state its predicate. The candidates tried at the design's own base `0bbe3ab6e5` do not reproduce 30 in 7:
   - StructLayout lines: 20 in 4 files (2 of them in comments);
