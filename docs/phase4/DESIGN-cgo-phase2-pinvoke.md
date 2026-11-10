@@ -630,6 +630,30 @@ members and types, per the owner's readability and parity rulings. The mangled f
 fallback only if the arm fails. The arm measures go2cs-gen on `[GoType]` structs nested in a static class, and it
 lands with increment 3. Its red: a converted call site that prints a mangled name.
 
+> **AMENDED 2026-11-10 (COORD, RULED, on H's increment 3c measurement): the `C.` form is a PSEUDO-PACKAGE, not a nested
+> class.** Measured with scratch projects against go2cs-gen, each arm read from the compiler's emitted sources:
+>
+> - a type nested in a static class `C` inside the package class is never generated. The converted-type rule
+>   (go2cs-gen `Common.cs`, `IsConvertedGoTypeDeclaration`) requires the declaration's DIRECT parent to be the
+>   `*_package` class;
+> - with an explicit `[GoType]` it is generated into the WRONG type: `GetParentClassName` (`TypeGenerator.cs`) names
+>   `C`, and the code lands in a namespace-level `C_package`;
+> - a sibling top-level package class, with `using C = <class>;` in the converted file, builds with NO go2cs-gen change.
+>   That is the alias form converted imports already use (`using errors = errors_package;`).
+>
+> **Ruled:** in Go, `C` IS a pseudo-package, so the bindings are a package class of their own, named
+> **`<pkg>ꓸC_package`**. It uses U+A4F8, the converter's own imported-alias separator. The name ends in `_package`, as
+> the converted-type rule needs, and it can never collide with a real Go package's class: `ꓸ` is not a legal Go
+> identifier character, and Go reserves `import "C"`. The emitter's comment states both facts. Two conditions:
+>
+> - **accessibility** follows `package_info`'s rule. cgo forbids a C type in an exported Go signature, so expect
+>   `internal` throughout, and the emitter says so;
+> - **each file that imports `C` gets the alias**, and a file that does not never sees the class.
+>
+> Nested containment plus a go2cs-gen fix is REJECTED: it is bigger, not needed, and every template's package-class
+> wrapper would have to learn it. Increment 3b emits this shape, with the arm committed as its test. §11.17's red is
+> unchanged: a converted call site that prints a mangled name.
+
 ### 11.18 Amendment 2026-11-10 (second): the check of §11
 
 COORD's Fable check of §11 (a dated amendment to `REVIEW-cgo-phase2-pinvoke.md`, `claude/coord-cgo-phase2-review`
