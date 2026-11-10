@@ -363,3 +363,51 @@ copy-local hard-link properties the build of §6.2 ran with; the reading in the 
 
 **Not read on the box.** GolibTests at the linux and darwin flavours, the behavioral harness, the census on the four
 runners and the release smoke are CI legs. They are dispatched on the pushed tip and reported with their run numbers.
+
+### 6.10 After batch 282 (dated block, 2026-11-10)
+
+Batch 282 landed (master `38caf3558a`) before this section's results were posted, and the seat took it in as a merge,
+`2c1d4e4acd`, the way it took batch 281. Every reading of §6.9 was read again on that tip, so the findings above are
+scored on the base they will seat on.
+
+**The merge.** One conflict, `docs/ValidatedTestPackages.md`: batch 282 rewrote the `go/internal/gcimporter` row and
+this seat re-points one cite in it (`runtime/linux/extern.cs` to `runtime/linux-amd64/extern.cs`); resolved as
+master's row with the cite re-pointed. The four corpus files batch 282 changes sit in per-GOOS folders this seat did
+not move, and merged as plain modifications.
+
+**Batch 282's own files, read for a fixed folder list.** The 54 files the batch adds or changes outside `docs/` were
+read with one expression for the shapes §6.4 found (quoted GOOS names side by side, an alternation, a corpus path
+that names a GOOS folder). 11 lines match, all of them Go package paths (`core/internal/syscall/windows/…`) in
+`go2cs.slnx` and `GolibTests.csproj`; none is a list of layout folders. The control: the same expression matches the
+lines that `d2c32ec082`, `d211483a97` and `25bc6c1720` removed (1, 2 and 3 lines). The first pass read 53 files: git
+quotes a path with a non-ASCII name, and the one such file (a golib box) was skipped as missing. The count of files
+read, set beside the count of files changed, showed it.
+
+| Gate | Tip | Reading |
+|---|---|---|
+| `go vet ./...` | `2c1d4e4acd` | rc 0 |
+| `go test ./...` | `2c1d4e4acd` | rc 0 in 974 s: 11 packages ok, 5 without test files, 0 fails |
+| go2cs-gen tests | `2c1d4e4acd` | 470 passed of 470 |
+| GolibTests, windows flavour, Release | `2c1d4e4acd` | build rc 0 with 0 errors; 2,484 passed, 38 skipped, 0 failed of 2,522 (§6.9 read 2,514; batch 282 adds tests) |
+| `go2cs.slnx`, Debug | `2c1d4e4acd` | rc 0 in 457 s, 0 distinct errors |
+| Four-target apply, a third time | `2c1d4e4acd` | convert rc 0 in 1,668 s; 7 status rows where 1 was predicted (below) |
+
+**The apply: predicted 1 row, read 7, none of them this seat's.** The prediction, written before the run, was the
+one file of §6.9 and no row under a `linux-arm64` folder. Both held. The other six rows are three flat files at
+2 lines removed and 1 added each, `go/ast/resolve.cs`, `go/types/scope2.cs` and `net/http/h2_bundle.cs`, and their
+three `package_info.cs` at 1 and 1. Each is one `for` header that now carries the re-alias,
+`for (; Ꮡs != nil; Ꮡs = s.parent, s = ref Ꮡs.DerefOrNull())`, where the tree holds it as the body's first statement.
+That is, file for file and line for line, the footprint batch 282's merge of the for-clause re-alias seat states
+(`0fb8ea1fd2`, merge `7dcbfb74b4`: "6 files on every target"); the merge carries the converter change and no corpus
+file, and master at `38caf3558a` holds the old lines.
+
+The prediction missed by its reasoning, not by its measurement: it read "batch 282 commits no converted file" as
+"batch 282's converter seats have no footprint", when the merge message states one. Master's own apply was not run
+for this block; `visitForStmt.go`, `visitAssignStmt.go` and `visitorState.go` are byte-identical between master and
+this tip.
+
+Neither footprint is committed here: seven rows, two seats (batch 281's tool-tags seat, one file; batch 282's
+for-clause seat, six), routed with this block. The tree was restored by status to 0 rows.
+
+**Not read on the box**, as in §6.9: GolibTests at the linux and darwin flavours, the behavioral harness, the census
+on the four runners and the release smoke are CI legs, dispatched on the pushed tip.
