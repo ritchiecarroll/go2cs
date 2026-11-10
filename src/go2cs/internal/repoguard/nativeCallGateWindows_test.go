@@ -11,8 +11,10 @@ package repoguard
 import (
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -104,8 +106,18 @@ func gateDeclPattern(name string) *regexp.Regexp {
 // by the reading, so this counts CALL SITES.
 var stdcallCallPattern = regexp.MustCompile(`\bstdcall[0-9]{0,2}\s*\(`)
 
-// windowsRuntimeTree is the flavour this guard watches.
-const windowsRuntimeTree = "src/core/runtime/windows/"
+// windowsRuntimeTarget is the flavour this guard watches, and windowsRuntimeTree names the runtime folders its build
+// compiles other than the flat one: windows/, amd64/ and windows-amd64/.
+const windowsRuntimeTarget = "windows/amd64"
+
+var windowsRuntimeTree = "src/core/runtime/{" + strings.Join(layoutKeyFoldersServing(windowsRuntimeTarget), ",") + "}/"
+
+// windowsRuntimeTreeFile reports whether a tracked path is a .cs file of the windows runtime tree.
+func windowsRuntimeTreeFile(rel string) bool {
+	name, ok := strings.CutPrefix(path.Dir(rel), "src/core/runtime/")
+
+	return ok && strings.HasSuffix(rel, ".cs") && slices.Contains(lineKeyedFolderTargets(name), windowsRuntimeTarget)
+}
 
 // nativeCallGate is the one declaration a flavour's kernel access funnels through.
 type nativeCallGate struct {
@@ -223,7 +235,7 @@ func scanWindowsGate(t *testing.T, root string, tracked []string) gateScan {
 	files := map[string]bool{}
 
 	for _, rel := range tracked {
-		if !strings.HasPrefix(rel, windowsRuntimeTree) || !strings.HasSuffix(rel, ".cs") {
+		if !windowsRuntimeTreeFile(rel) {
 			continue
 		}
 

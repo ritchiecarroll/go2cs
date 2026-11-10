@@ -201,15 +201,23 @@ func osMemoryFindings(goos string, scan osMemoryScan) []string {
 	return findings
 }
 
-// osMemoryCensusTargets are the targets the census reads the runtime at, one scan each.
-var osMemoryCensusTargets = []string{"windows/amd64", "linux/amd64", "darwin/amd64"}
+// osMemoryCensusTargets are the targets the census reads the runtime at, one scan each: the corpus's universe. Each
+// target reads its GOOS's row of osMemoryCallers.
+var osMemoryCensusTargets = lineKeyedUniverse
 
 // osMemoryCensusReads reports whether a tracked folder (slash-spelled, with its trailing slash) is one the census reads
-// at target: the flat runtime/ or a runtime folder that target's build compiles.
+// at target: the flat runtime/ or a runtime key folder that target's build compiles.
 func osMemoryCensusReads(dir string, target string) bool {
-	goos, _, _ := strings.Cut(target, "/")
+	const runtimeDir = "src/core/runtime/"
 
-	return dir == "src/core/runtime/" || dir == "src/core/runtime/"+goos+"/"
+	if dir == runtimeDir {
+		return true
+	}
+
+	name, ok := strings.CutPrefix(dir, runtimeDir)
+	name = strings.TrimSuffix(name, "/")
+
+	return ok && !strings.Contains(name, "/") && slices.Contains(lineKeyedFolderTargets(name), target)
 }
 
 // TestOsMemoryRegistrationCensus is the guard.
@@ -248,7 +256,7 @@ func TestOsMemoryRegistrationCensus(t *testing.T) {
 		}
 
 		if scan.files < 20 {
-			t.Fatalf("VACUOUS: %d runtime files for %s; the census is measuring nothing", scan.files, goos)
+			t.Fatalf("VACUOUS: %d runtime files for %s; the census is measuring nothing", scan.files, target)
 		}
 
 		var readings []string
@@ -258,10 +266,10 @@ func TestOsMemoryRegistrationCensus(t *testing.T) {
 			}
 		}
 		sort.Strings(readings)
-		t.Logf("READING · %s: %d files, callers %v", goos, scan.files, readings)
+		t.Logf("READING · %s: %d files, callers %v", target, scan.files, readings)
 
 		for _, finding := range osMemoryFindings(goos, scan) {
-			t.Error(finding)
+			t.Errorf("at %s, %s", target, finding)
 		}
 	}
 }

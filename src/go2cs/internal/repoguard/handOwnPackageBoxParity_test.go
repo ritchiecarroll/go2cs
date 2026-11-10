@@ -76,8 +76,8 @@ func scanHandOwnBoxParity(handOwns, twins map[string]string) []string {
 }
 
 // twinPrincipal returns the hand-owned file a tracked `.cs.auto` twin reviews: the `.cs` beside it, or, for a twin
-// in a GOOS folder of a package (a folder holding no project file of its own), the flat `.cs` in the package directory
-// above. A FLAT hand-own whose emission differs by GOOS keeps one twin per GOOS folder (runtime/runtime2.cs; the
+// in a layout key folder of a package (a GOOS, GOARCH or pair folder holding no project file of its own), the flat
+// `.cs` in the package directory above. A FLAT hand-own whose emission differs by GOOS keeps one twin per GOOS folder (runtime/runtime2.cs; the
 // three-target merge's mergeReviewSiblings), and reading only beside the twin dropped all of them from this guard.
 func twinPrincipal(root string, twin string) (string, bool) {
 	beside := strings.TrimSuffix(twin, ".auto")
@@ -88,9 +88,7 @@ func twinPrincipal(root string, twin string) (string, bool) {
 
 	dir := path.Dir(twin)
 
-	switch path.Base(dir) {
-	case "windows", "linux", "darwin":
-	default:
+	if len(lineKeyedFolderTargets(path.Base(dir))) == 0 {
 		return "", false
 	}
 

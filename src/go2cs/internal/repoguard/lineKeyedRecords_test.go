@@ -107,6 +107,20 @@ func lineKeyedFolders() []string {
 	return names
 }
 
+// layoutKeyFoldersServing are the key folder names a target's build compiles, sorted: its GOOS, its GOARCH and the
+// pair.
+func layoutKeyFoldersServing(target string) []string {
+	var names []string
+
+	for _, name := range lineKeyedFolders() {
+		if slices.Contains(lineKeyedFolderTargets(name), target) {
+			names = append(names, name)
+		}
+	}
+
+	return names
+}
+
 // lineKeyedCompanionDirs are the directories, other than dir itself, whose files compile into one assembly with an
 // info file in dir. Read as a package's directory, dir takes each of its key folders (a flat info file is compiled at
 // every target). Read as a key folder, by its name, it takes the package's directory and each key folder that shares

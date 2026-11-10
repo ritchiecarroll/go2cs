@@ -159,10 +159,22 @@ var memberHeaderPattern = regexp.MustCompile(`^\s*(?:\[[^\]]*\]\s*)*(?:public|in
 
 var identifierPattern = regexp.MustCompile(`[A-Za-z_\p{L}][A-Za-z0-9_\p{L}]*`)
 
-// nativeBoundaryTrees is the scope: the two Windows syscall trees. Paths are repo-relative, slash-spelled.
-var nativeBoundaryTrees = []string{
-	"src/core/syscall/windows/",
-	"src/core/internal/syscall/windows/",
+// nativeBoundaryTrees is the scope: what a windows/amd64 build compiles of the two Windows syscall packages. syscall
+// contributes the key folders that target's build compiles (windows/, amd64/, windows-amd64/); internal/syscall/windows
+// is a package named for its GOOS and contributes its whole directory, key folders included. Paths are repo-relative,
+// slash-spelled, each a prefix.
+var nativeBoundaryTrees = append(packageKeyFolderTrees("src/core/syscall/", "windows/amd64"), "src/core/internal/syscall/windows/")
+
+// packageKeyFolderTrees are the key folders of the package at pkgDir (slash-spelled, with its trailing slash) that a
+// target's build compiles, each as a path prefix.
+func packageKeyFolderTrees(pkgDir string, target string) []string {
+	var trees []string
+
+	for _, name := range layoutKeyFoldersServing(target) {
+		trees = append(trees, pkgDir+name+"/")
+	}
+
+	return trees
 }
 
 // blittablePointees are the pointee spellings that need no declaration to be judged: a machine scalar

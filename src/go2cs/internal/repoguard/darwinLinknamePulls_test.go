@@ -169,12 +169,31 @@ func partialMember(line string) (name string, bodyless bool, ok bool) {
 	return "", false, false
 }
 
-// scanDarwinLinknamePulls reports every bodyless declaration under a darwin folder that carries a
+// darwinPullTarget is the darwin target of the corpus, whose build compiles a package's darwin/, amd64/ and
+// darwin-amd64/ folders beside its flat files.
+const darwinPullTarget = "darwin/amd64"
+
+// darwinOnlyFolder reports whether a folder name is a layout key folder only darwin targets compile (darwin/,
+// darwin-amd64/): where a pull is darwin's own.
+func darwinOnlyFolder(name string) bool {
+	targets := lineKeyedFolderTargets(name)
+
+	for _, target := range targets {
+		if !strings.HasPrefix(target, "darwin/") {
+			return false
+		}
+	}
+
+	return len(targets) > 0
+}
+
+// scanDarwinLinknamePulls reports every bodyless declaration under a darwin-only key folder that carries a
 // //go:linkname pull, and the subset no implementation part fills. tracked is `git ls-files` output.
 func scanDarwinLinknamePulls(t *testing.T, root string, tracked []string) (all []darwinPull, unfilled []darwinPull) {
 	t.Helper()
 
-	// Each package's .cs sources: its root and its darwin folder, where an implementation part can live.
+	// Each package's .cs sources at the darwin target: its flat files and the key folders that target compiles, where an
+	// implementation part can live. Another target's key folder is never compiled beside them.
 	packageFiles := map[string][]string{}
 
 	for _, path := range tracked {
@@ -182,12 +201,17 @@ func scanDarwinLinknamePulls(t *testing.T, root string, tracked []string) (all [
 			continue
 		}
 
-		rel := strings.TrimPrefix(path, "src/core/")
+		dir := filepath.ToSlash(filepath.Dir(strings.TrimPrefix(path, "src/core/")))
 
-		if pkg, _, found := strings.Cut(rel, "/darwin/"); found {
-			packageFiles[pkg] = append(packageFiles[pkg], path)
-		} else if dir := filepath.ToSlash(filepath.Dir(rel)); dir != "." {
+		if dir == "." {
+			continue
+		}
+
+		if targets := lineKeyedFolderTargets(filepath.Base(dir)); len(targets) == 0 {
 			packageFiles[dir] = append(packageFiles[dir], path)
+		} else if slices.Contains(targets, darwinPullTarget) {
+			pkg := filepath.ToSlash(filepath.Dir(dir))
+			packageFiles[pkg] = append(packageFiles[pkg], path)
 		}
 	}
 
@@ -227,7 +251,7 @@ func scanDarwinLinknamePulls(t *testing.T, root string, tracked []string) (all [
 
 				if !bodyless {
 					implemented[name] = true
-				} else if target, pulled := pulls[name]; pulled && strings.Contains(file, "/darwin/") {
+				} else if target, pulled := pulls[name]; pulled && darwinOnlyFolder(filepath.Base(filepath.Dir(file))) {
 					declared = append(declared, darwinPull{key: pkg + "." + name, target: target, file: file})
 				}
 			}
