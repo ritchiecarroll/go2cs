@@ -1094,6 +1094,20 @@ func (v *Visitor) aliasResolvedSelector(selectorExpr *ast.SelectorExpr, rendered
 		return rendered
 	}
 
+	// A foreign GENERIC type its package Δ-renames (tsc's `collections.Set[T]` beside `OrderedMap.Set`) spells
+	// its renamed member directly: `coll.ΔSet<…>`. The imported-alias route below would answer `collꓸSet`, the
+	// `global using` name, and C# cannot alias an open generic, so that name is CS0426 at the reference and the
+	// `global using collꓸSet = …ΔSet;` it earns is CS0305 in package_info.cs. See foreignRenamedGenericMember.
+	if obj, ok := v.info.Uses[selectorExpr.Sel].(*types.TypeName); ok {
+		if member, renamed := foreignRenamedGenericMember(obj); renamed {
+			// Only the member is swapped: the qualifier stays this file's own spelling of the import, and any
+			// type arguments already rendered after the name stay where they are.
+			if qualifier, rest, found := strings.Cut(rendered, "."); found && strings.HasPrefix(rest, obj.Name()) {
+				return qualifier + "." + member + rest[len(obj.Name()):]
+			}
+		}
+	}
+
 	// An ALIASED import (`import pl "PALib"`) renders its base as the file's alias, but the table
 	// is keyed by the package's DECLARED name, so `pl.B2` found nothing and a composite literal of
 	// the imported type alias `B2` rendered `new pl.B2(…)`: B2 is a `global using`, not a member of

@@ -1046,6 +1046,8 @@
     <Project Path="tests/Behavioral/ReinterpretPointerLifetime/ReinterpretPointerLifetime.csproj" />
     <Project Path="tests/Behavioral/RecvArrayFieldElementAddress/RecvArrayFieldElementAddress.csproj" />
     <Project Path="tests/Behavioral/RecvMapElementDeref/RecvMapElementDeref.csproj" />
+    <Project Path="tests/Behavioral/RenamedGenericQualified/RenamedGenericQualified.csproj" />
+    <Project Path="tests/Behavioral/RenamedGenericQualified/coll/RenamedGenericQualified.coll.csproj" />
     <Project Path="tests/Behavioral/RenamedReceiverBox/RenamedReceiverBox.csproj" />
     <Project Path="tests/Behavioral/ReturnPointerFieldOfParam/ReturnPointerFieldOfParam.csproj" />
     <Project Path="tests/Behavioral/ReverseSortNaNOrder/ReverseSortNaNOrder.csproj" />
