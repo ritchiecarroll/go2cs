@@ -105,8 +105,9 @@ func TestMethodExpressionWrapperMark(t *testing.T) {
 		// message) only for a DIRECT value method off *T, and a plain wrapper fault otherwise.
 		{"ifaceExpr", `[GoWrapper("I.M")] (p0, p1) => wrapperRecv(p0).M(p1)`},
 		{"ptrOfValueExpr", `[GoWrapper("(*S).value")] (p0, p1) => value(panicwrapRecv(p0, "value method main.S.value called using nil *S pointer").Value, p1)`},
-		{"promotedExpr", `[GoWrapper("(*Outer).value")] (p0, p1) => `},
-		{"promotedExpr", `wrapperRecv(p0).Value`},
+		// A method promoted through a same-package embed is called as the extension method its forwarder is:
+		// go2cs-gen writes the forwarder into a class of the struct's own, which no method group names.
+		{"promotedExpr", `[GoWrapper("(*Outer).value")] (p0, p1) => wrapperRecv(p0).value(p1)`},
 		{"valueExpr", ""},
 		{"ptrExpr", ""},
 	}

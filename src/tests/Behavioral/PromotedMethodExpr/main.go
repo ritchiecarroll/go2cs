@@ -51,6 +51,8 @@ func main() {
 	fmt.Println("(*outer).Add:", add(&o, 2), add(&o, 3))
 	get := outer.Get
 	fmt.Println("outer.Get:", get(o))
+	getp := (*outer).Get
+	fmt.Println("(*outer).Get:", getp(&o))
 	gv := o.Get
 	fmt.Println("o.Get:", gv())
 

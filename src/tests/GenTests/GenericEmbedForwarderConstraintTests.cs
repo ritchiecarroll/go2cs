@@ -102,8 +102,8 @@ public class GenericEmbedForwarderConstraintTests
         Assert.IsTrue(array.Length > 0, "the generator emitted no part for Array<T>");
 
         // The forwarders exist (the subject is their constraints, not their presence).
-        StringAssert.Contains(array, "initOp<T>(this ref Array<T> target", "the embed's ref-receiver initOp is not promoted:\n" + array);
-        StringAssert.Contains(array, "getOp<T>(this Array<T> target", "the embed's value-receiver getOp is not promoted:\n" + array);
+        StringAssert.Contains(array, "initOp<T>(this ref global::go.utest_package.Array<T> target", "the embed's ref-receiver initOp is not promoted:\n" + array);
+        StringAssert.Contains(array, "getOp<T>(this global::go.utest_package.Array<T> target", "the embed's value-receiver getOp is not promoted:\n" + array);
 
         // Every forwarder over Array<T> compiles: the generated part reports no CS0314. GenTests' Roslyn (4.10,
         // C# 12) has no partial properties, so the embed declarations themselves report CS0267/CS8145 here, as
