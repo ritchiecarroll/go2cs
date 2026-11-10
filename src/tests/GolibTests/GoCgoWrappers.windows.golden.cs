@@ -198,9 +198,7 @@ static unsafe partial class cgotestꓸC_package
         }
 
         long m1 = default;
-        global::go.golib.GoCgoStructPointer k1 = p1 is null || p1.IsNilPointer ? global::go.golib.GoCgoStructPointer.Nil :
-            p1 is global::go.NativeBox<longlong> ? global::go.golib.GoCgoStructPointer.Native : global::go.golib.GoCgoStructPointer.Mirror;
-        nuint n1 = p1 is global::go.NativeBox<longlong> native1 ? native1.NativeAddress : 0;
+        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.StructPointer(p1, "_gmtime64_s", out nuint n1);
         nint a1 = (nint)n1;
 
         if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -318,9 +316,7 @@ static unsafe partial class cgotestꓸC_package
     internal static @double frexp(@double p0, ж<@int> p1)
     {
         int m1 = default;
-        global::go.golib.GoCgoStructPointer k1 = p1 is null || p1.IsNilPointer ? global::go.golib.GoCgoStructPointer.Nil :
-            p1 is global::go.NativeBox<@int> ? global::go.golib.GoCgoStructPointer.Native : global::go.golib.GoCgoStructPointer.Mirror;
-        nuint n1 = p1 is global::go.NativeBox<@int> native1 ? native1.NativeAddress : 0;
+        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.StructPointer(p1, "frexp", out nuint n1);
         nint a1 = (nint)n1;
 
         if (k1 == global::go.golib.GoCgoStructPointer.Mirror)

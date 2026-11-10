@@ -101,9 +101,7 @@ static unsafe partial class cgotestꓸC_package
     internal static @double frexp(@double p0, ж<@int> p1)
     {
         int m1 = default;
-        global::go.golib.GoCgoStructPointer k1 = p1 is null || p1.IsNilPointer ? global::go.golib.GoCgoStructPointer.Nil :
-            p1 is global::go.NativeBox<@int> ? global::go.golib.GoCgoStructPointer.Native : global::go.golib.GoCgoStructPointer.Mirror;
-        nuint n1 = p1 is global::go.NativeBox<@int> native1 ? native1.NativeAddress : 0;
+        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.StructPointer(p1, "frexp", out nuint n1);
         nint a1 = (nint)n1;
 
         if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -140,9 +138,7 @@ static unsafe partial class cgotestꓸC_package
         _Ctype_struct_tmᴍ.CheckLayoutᴍ();
 
         long m0 = default;
-        global::go.golib.GoCgoStructPointer k0 = p0 is null || p0.IsNilPointer ? global::go.golib.GoCgoStructPointer.Nil :
-            p0 is global::go.NativeBox<@long> ? global::go.golib.GoCgoStructPointer.Native : global::go.golib.GoCgoStructPointer.Mirror;
-        nuint n0 = p0 is global::go.NativeBox<@long> native0 ? native0.NativeAddress : 0;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "gmtime_r", out nuint n0);
         nint a0 = (nint)n0;
 
         if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
@@ -178,6 +174,9 @@ static unsafe partial class cgotestꓸC_package
 
         if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
             ᴍout__Ctype_struct_tmᴍ(ref p1.Value, m1);
+
+        if (r != 0 && r == a1)
+            return p1;
 
         return global::go.golib.GoCgoArgs.PointerMemberBack<struct_tm>((nuint)r, null, 0);
     }
@@ -435,7 +434,7 @@ static unsafe partial class cgotestꓸC_package
         m.tm_yday = (int32)v.tm_yday;
         m.tm_isdst = (int32)v.tm_isdst;
         m.tm_gmtoff = (int64)v.tm_gmtoff;
-        m.tm_zone = (nint)(v.tm_zone is null ? 0 : v.tm_zone.NativeAddress);
+        m.tm_zone = (nint)global::go.golib.GoCgoArgs.PointerMember(v.tm_zone);
     }
 
     private static void ᴍout__Ctype_struct_tmᴍ(ref struct_tm v, in _Ctype_struct_tmᴍ m)
@@ -450,7 +449,7 @@ static unsafe partial class cgotestꓸC_package
         v.tm_yday = (@int)(int32)m.tm_yday;
         v.tm_isdst = (@int)(int32)m.tm_isdst;
         v.tm_gmtoff = (@long)(int64)m.tm_gmtoff;
-        v.tm_zone = global::go.golib.GoCgoArgs.PointerMemberBack((nuint)m.tm_zone, v.tm_zone, (v.tm_zone is null ? 0 : v.tm_zone.NativeAddress));
+        v.tm_zone = global::go.golib.GoCgoArgs.PointerMemberBack((nuint)m.tm_zone, v.tm_zone, global::go.golib.GoCgoArgs.PointerMember(v.tm_zone));
     }
 
     // _Ctype_struct_utsname's copy-in and copy-out, member by member (§5.2).
