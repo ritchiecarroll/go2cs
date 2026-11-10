@@ -14,7 +14,10 @@ import (
 	"go/token"
 	"go/types"
 	"log"
+	"sort"
 	"strings"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // Phase 2 of docs/PLAN-cgo-interop.md, increment 3d (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.17, as amended): the
@@ -31,6 +34,10 @@ import (
 // name in the pseudo-package: _Ctype_int to @int, _Ctype_struct_point to struct_point, _Ciconst_LIMIT to LIMIT. A typedef
 // alias maps to its `Cꓸ` spelling instead. Package-scoped, reset with the rest of the package state.
 var cgoPseudoPackageNames map[string]string
+
+// cgoPseudoPackageTypeAccess holds the C types' accessibility records, written into the pseudo-package class's
+// declaration in package_info.cs (applyCgoPseudoPackageStamp). Reset with the rest of the package state.
+var cgoPseudoPackageTypeAccess hashset.HashSet[string]
 
 // cgoPseudoPackageAlias is the qualifier every reference to a pseudo-package member is written through.
 const cgoPseudoPackageAlias = "C"
@@ -168,16 +175,20 @@ func cgoPseudoPackageQualifier() string {
 	return nsSegments + "." + classQualifier + "/"
 }
 
-// applyCgoPseudoPackageStamp gives the package info file exactly one [GoPackage]-stamped declaration of the package's C
-// pseudo-package class, and its `using C` alias, when the package declares C names, and neither when it does not. The stamp is reflection's
-// authority for a class's Go package (GoReflect.goPackageNameOf), so a C type prints as Go prints it, main._Ctype_int,
-// not as its class name would decode. It is written once per package here, since an attribute on a partial class
-// cannot repeat across the files that declare parts of it (CS0579).
-func applyCgoPseudoPackageStamp(lines []string) []string {
+// applyCgoPseudoPackageStamp gives the package info file exactly one declaration of the package's C pseudo-package class,
+// and its `using C` alias, when the package declares C names, and neither when it does not. The declaration carries the
+// class's [GoPackage] stamp, which is reflection's authority for a class's Go package (GoReflect.goPackageNameOf), so a
+// C type prints as Go prints it, main._Ctype_int, not as its class name would decode. Its body holds the C types'
+// accessibility records, as the package class's <TypeAccessibility> section holds the package's (section 11 of
+// docs/PLAN-marker-comment-parity.md). It is written once per package here, since an attribute on a partial class
+// cannot repeat across the files that declare parts of it (CS0579). mergeExisting keeps a persisted block's records, as
+// the package class's section does on a single-file conversion.
+func applyCgoPseudoPackageStamp(lines []string, mergeExisting bool) []string {
 	className := getSanitizedImport(cgoPseudoPackageClass(packageName))
 	declaration := "partial class " + className
 	alias := fmt.Sprintf("using %s = %s.%s;", cgoPseudoPackageAlias, packageNamespace, className)
 	packageClassUsing := fmt.Sprintf("using static %s.%s;", packageNamespace, getSanitizedImport(packageName+PackageSuffix))
+	records := hashset.HashSet[string]{}
 	kept := make([]string, 0, len(lines)+6)
 
 	for i := 0; i < len(lines); i++ {
@@ -192,7 +203,7 @@ func applyCgoPseudoPackageStamp(lines []string) []string {
 			continue
 		}
 
-		// A persisted block is the stamp, the declaration and its empty body, after one blank line.
+		// A persisted block is one blank line, the stamp, the declaration and its body of records.
 		if strings.TrimSpace(lines[i]) == declaration && len(kept) > 0 && strings.HasPrefix(strings.TrimSpace(kept[len(kept)-1]), goPackageStampPrefix) {
 			kept = kept[:len(kept)-1]
 
@@ -200,7 +211,12 @@ func applyCgoPseudoPackageStamp(lines []string) []string {
 				kept = kept[:len(kept)-1]
 			}
 
-			i += 2
+			for i++; i < len(lines) && strings.TrimSpace(lines[i]) != "}"; i++ {
+				if record := strings.TrimSpace(lines[i]); mergeExisting && record != "" && record != "{" {
+					records.Add(record)
+				}
+			}
+
 			continue
 		}
 
@@ -215,7 +231,19 @@ func applyCgoPseudoPackageStamp(lines []string) []string {
 		kept = kept[:len(kept)-1]
 	}
 
-	importPath := goPackageImportPathFor(getSanitizedImport(packageName+PackageSuffix), packageName)
+	records.UnionWith(cgoPseudoPackageTypeAccess.Keys())
 
-	return append(kept, "", goPackageAttributeLine(packageNamespace, packageName, importPath), declaration, "{", "}")
+	sorted := records.Keys()
+	sort.Slice(sorted, func(i, j int) bool {
+		return typeAccessibilityKey(sorted[i]) < typeAccessibilityKey(sorted[j])
+	})
+
+	importPath := goPackageImportPathFor(getSanitizedImport(packageName+PackageSuffix), packageName)
+	kept = append(kept, "", goPackageAttributeLine(packageNamespace, packageName, importPath), declaration, "{")
+
+	for _, record := range sorted {
+		kept = append(kept, typeAccessibilityIndent+record)
+	}
+
+	return append(kept, "}")
 }

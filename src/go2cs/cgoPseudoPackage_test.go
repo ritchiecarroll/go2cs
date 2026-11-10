@@ -70,8 +70,8 @@ func TestCgoTypesAndConstantsConvertIntoThePseudoPackage(t *testing.T) {
 
 	for _, want := range []struct{ file, text, in string }{
 		{"cgo_gotypes.cs", declarations, "partial class mainꓸC_package {"},
-		{"cgo_gotypes.cs", declarations, `[GoLocalName("_Ctype_int")] internal partial struct @int /*num:int32*/;`},
-		{"cgo_gotypes.cs", declarations, `[GoLocalName("_Ctype_struct_point")] [GoValueClone("name")] internal partial struct struct_point {`},
+		{"cgo_gotypes.cs", declarations, "\npartial struct @int /*num:int32*/;"},
+		{"cgo_gotypes.cs", declarations, "\npartial struct struct_point {"},
 		{"cgo_gotypes.cs", declarations, "    internal ж<struct_point> next;"},
 		{"cgo_gotypes.cs", declarations, "internal static UntypedInt LIMIT => 0x10;"},
 		{"cgo_gotypes.cs", declarations, "global using Cꓸdiv_t = go.mainꓸC_package.struct___0;"},
@@ -80,7 +80,9 @@ func TestCgoTypesAndConstantsConvertIntoThePseudoPackage(t *testing.T) {
 		{"main.cs", program, "Cꓸdiv_t d = default;"},
 		{"main.cs", program, "d.quot = (C.@int)C.LIMIT;"},
 		{"main.cs", program, "internal static C.@int add(C.@int a, C.@int b)"},
-		{"package_info.cs", packageInfo, "[GoPackage(\"main\")]\npartial class mainꓸC_package\n{\n}"},
+		{"package_info.cs", packageInfo, "[GoPackage(\"main\")]\npartial class mainꓸC_package\n{\n"},
+		{"package_info.cs", packageInfo, "\n    [GoLocalName(\"_Ctype_int\")] internal partial struct @int {}\n"},
+		{"package_info.cs", packageInfo, "\n    [GoLocalName(\"_Ctype_struct_point\")] [GoValueClone(\"name\")] internal partial struct struct_point {}\n"},
 		{"package_info.cs", packageInfo, "using static go.main_package;\nusing C = go.mainꓸC_package;\n"},
 	} {
 		if !strings.Contains(want.text, want.in) {
@@ -93,9 +95,18 @@ func TestCgoTypesAndConstantsConvertIntoThePseudoPackage(t *testing.T) {
 		t.Errorf("package_info.cs publishes a C typedef to importers:\n%s", packageInfo)
 	}
 
-	// A C type's accessibility record would declare a second, phantom type in the PACKAGE class.
-	if strings.Contains(packageInfo, "partial struct struct_point {}") || strings.Contains(packageInfo, "partial struct @int {}") {
-		t.Errorf("package_info.cs records a C type in the package class:\n%s", packageInfo)
+	// A C type's accessibility record belongs to the pseudo-package's class: in the PACKAGE class's section it would
+	// declare a second, phantom type of the same name.
+	_, section, _ := strings.Cut(packageInfo, "<TypeAccessibility>")
+	section, _, _ = strings.Cut(section, "</TypeAccessibility>")
+
+	if strings.Contains(section, "struct_point") || strings.Contains(section, "@int") {
+		t.Errorf("package_info.cs records a C type in the package class:\n%s", section)
+	}
+
+	// The record carries what the declaration does not (section 11 of docs/PLAN-marker-comment-parity.md).
+	if strings.Contains(declarations, "[GoLocalName") || strings.Contains(declarations, "[GoValueClone") {
+		t.Errorf("cgo_gotypes.cs carries an attribute its accessibility record should:\n%s", declarations)
 	}
 }
 

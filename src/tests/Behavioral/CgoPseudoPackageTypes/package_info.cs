@@ -87,4 +87,23 @@ public static partial class main_package
 [GoPackage("main")]
 partial class mainꓸC_package
 {
+    [GoLocalName("_Ctype_char")] internal partial struct @char {}
+    [GoLocalName("_Ctype_double")] internal partial struct @double {}
+    [GoLocalName("_Ctype_float")] internal partial struct @float {}
+    [GoLocalName("_Ctype_int")] internal partial struct @int {}
+    [GoLocalName("_Ctype_long")] internal partial struct @long {}
+    [GoLocalName("_Ctype_short")] internal partial struct @short {}
+    [GoLocalName("_Ctype_uint")] internal partial struct @uint {}
+    [GoLocalName("_Ctype_ulong")] internal partial struct @ulong {}
+    [GoLocalName("_Ctype_ushort")] internal partial struct @ushort {}
+    [GoLocalName("_Ctype_void")] internal partial struct @void {}
+    [GoLocalName("_Ctype_enum_color")] internal partial struct enum_color {}
+    [GoLocalName("_Ctype_longlong")] internal partial struct longlong {}
+    [GoLocalName("_Ctype_schar")] internal partial struct schar {}
+    [GoLocalName("_Ctype_struct___0")] internal partial struct struct___0 {}
+    [GoLocalName("_Ctype_struct_point")] [GoValueClone("name")] internal partial struct struct_point {}
+    [GoLocalName("_Ctype_struct_segment")] [GoValueClone("from", "to")] internal partial struct struct_segment {}
+    [GoLocalName("_Ctype_uchar")] internal partial struct uchar {}
+    [GoLocalName("_Ctype_ulonglong")] internal partial struct ulonglong {}
+    [GoLocalName("_Ctype_union_value")] internal partial struct union_value {}
 }

@@ -309,10 +309,6 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	// Publicization therefore outranks the default, and the inline arm supplies that default.
 	if v.isPublicizedType(typeSpec.Name) {
 		v.pendingTypeAccess = "public "
-	} else if cgoEmittingPseudoPackage {
-		// A C type is internal whatever the case of its C name (DWORD, FILE): cgo keeps C types out of a package's
-		// exported surface. Written inline, as its record is (typeAccessibilityAbsorbs).
-		v.pendingTypeAccess = "internal "
 	} else if localAccess := v.localTypeAccess(); localAccess != "" {
 		// A FUNCTION-LOCAL declaration takes the local-type rule, in EVERY conversion: its Go name
 		// carries no export meaning, and the hoisted `<Func>_<name>` identifier the name-based rules

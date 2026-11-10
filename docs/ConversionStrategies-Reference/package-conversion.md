@@ -1148,9 +1148,9 @@ using C = mainꓸC_package;
 …
 partial class mainꓸC_package {
 
-[GoLocalName("_Ctype_int")] internal partial struct @int /*num:int32*/;
+partial struct @int /*num:int32*/;
 …
-[GoLocalName("_Ctype_struct_point")] [GoValueClone("name")] internal partial struct struct_point {
+partial struct struct_point {
     internal @int x;
     internal @int y;
     internal array<@char> name = new(8);
@@ -1193,10 +1193,14 @@ type. A numeric C type is a value wrapper, a C struct a struct, and an inline ar
 (`[GoValueClone]`). C# has no alias nested in a class, so a typedef takes the converter's imported-alias spelling,
 which reads as `C.div_t`.
 
-**Reflection keeps Go's names.** Each C type carries its Go name in `[GoLocalName]`, and `package_info.cs` stamps the
-class with the package it belongs to. Go's `%T` of a `C.int` is `main._Ctype_int`, and so is the converted program's.
+**The records are the class's own.** As for any converted type, the declaration stays bare and its accessibility and
+machinery attributes ride a record in `package_info.cs`. A C type's record sits in that file's declaration of the
+pseudo-package class, never in the package class's `<TypeAccessibility>` section, where it would declare a second type
+of the same name. The same declaration stamps the class with its Go package, so reflection keeps Go's names: each C
+type carries its Go name in `[GoLocalName]`, and Go's `%T` of a `C.int` is `main._Ctype_int`, as is the converted
+program's. The file names C types itself (a `GoFieldAccess` record), so it imports `C` too.
 
-<!-- source: src/tests/Behavioral/CgoPseudoPackageTypes/package_info.cs:16-17,87-90 -->
+<!-- source: src/tests/Behavioral/CgoPseudoPackageTypes/package_info.cs:16-17,87-89,93,104,109 -->
 ```csharp
 using static go.main_package;
 using C = go.mainꓸC_package;
@@ -1204,13 +1208,16 @@ using C = go.mainꓸC_package;
 [GoPackage("main")]
 partial class mainꓸC_package
 {
+…
+    [GoLocalName("_Ctype_int")] internal partial struct @int {}
+…
+    [GoLocalName("_Ctype_struct_point")] [GoValueClone("name")] internal partial struct struct_point {}
+…
 }
 ```
 
 **Accessibility.** Every member is `internal`, whatever the case of its C name: cgo keeps C types out of a package's
-exported surface. For the same reason a typedef publishes no `GoTypeAlias` record to importers. A C type's attributes
-stay on its own declaration rather than on an accessibility record in `package_info.cs`, since that record is written
-inside the package class and would declare a second type there.
+exported surface. For the same reason a typedef publishes no `GoTypeAlias` record to importers.
 
 **Limits.** A package that imports `"C"` is still refused: converting cmd/cgo's own files, and the bindings of C
 functions, are not done yet. C functions, variables and macros are not members of the class yet. A declaration that

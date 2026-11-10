@@ -943,7 +943,7 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 	packageInfoLines = applyFieldAccessRecords(packageInfoLines, packageInfoFileName, mergeExisting, qualifyLocalTypeRef)
 	packageInfoLines = applyBoundedGoRecords(packageInfoLines, packageInfoFileName, mergeExisting)
 	packageInfoLines = applyCgoDynamicImports(packageInfoLines, packageInfoFileName, mergeExisting)
-	packageInfoLines = applyCgoPseudoPackageStamp(packageInfoLines)
+	packageInfoLines = applyCgoPseudoPackageStamp(packageInfoLines, mergeExisting)
 
 	// Remove trailing empty lines
 	for i := len(packageInfoLines) - 1; i >= 0; i-- {
