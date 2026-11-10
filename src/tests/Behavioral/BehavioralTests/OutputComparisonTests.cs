@@ -2525,6 +2525,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckUint8SliceLiteralConversion() => CheckTarget("Uint8SliceLiteralConversion");
 
     [TestMethod]
+    public void CheckUintptrAliasAndNot() => CheckTarget("UintptrAliasAndNot");
+
+    [TestMethod]
     public void CheckUintptrUnsafePointerIdiom() => CheckTarget("UintptrUnsafePointerIdiom");
 
     [TestMethod]
