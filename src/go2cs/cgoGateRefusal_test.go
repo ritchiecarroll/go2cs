@@ -115,13 +115,12 @@ func writeCgoGateModule(t *testing.T, files map[string]string) string {
 	return dir
 }
 
-// P1: every file excluded because cgo is off, and the excluded file imports "C".
+// P1: every file excluded because cgo is off, and the excluded file imports "C". The same load under -cgo asks for
+// the opposite and is refused before loading (TestTheCgoFlagRefusesAnEnvironmentThatSetsCgoOff).
 func TestACgoOnlyPackageWithCgoOffIsRefused(t *testing.T) {
-	for _, args := range [][]string{nil, {"-cgo=true"}} {
-		dir := writeCgoGateModule(t, map[string]string{"add.go": cgoImportSource})
-		stderr, output, err := convertCgoGateFixture(t, dir, args, "CGO_ENABLED=0")
-		requireCgoRefusal(t, stderr, err, output, "add.go", "cgogatefixture")
-	}
+	dir := writeCgoGateModule(t, map[string]string{"add.go": cgoImportSource})
+	stderr, output, err := convertCgoGateFixture(t, dir, nil, "CGO_ENABLED=0")
+	requireCgoRefusal(t, stderr, err, output, "add.go", "cgogatefixture")
 }
 
 // The internal/testpty-on-windows shape: every file excluded, one of them imports "C", but the build
@@ -259,5 +258,136 @@ func TestARawCgoSourcePairedWithItsOwnTreeIsRefusedByName(t *testing.T) {
 
 	if strings.Contains(refusal.Error(), "plain.go") {
 		t.Errorf("the refusal names a plain source: %v", refusal)
+	}
+}
+
+// requireCCompiler skips where cgo cannot run: go list hands a cgo source to cmd/cgo only where it finds a C compiler.
+func requireCCompiler(t *testing.T) {
+	t.Helper()
+
+	for _, compiler := range []string{"gcc", "cc", "clang"} {
+		if _, err := exec.LookPath(compiler); err == nil {
+			return
+		}
+	}
+
+	t.Skip("no C compiler: cmd/cgo cannot run here, so a -cgo load cannot recognize anything (Inconclusive, not a pass)")
+}
+
+// -cgo makes the driver's own load cgo-on, with the environment leaving CGO_ENABLED unset: without the flag the loader
+// pins cgo off, add.go is deselected and plain.go converts with exit 0. With no C compiler cmd/cgo still does not run,
+// and the refusal says so.
+func TestTheCgoFlagLoadsCgoOnAndSaysWhenCmdCgoDidNotRun(t *testing.T) {
+	requireNoCCompiler(t)
+
+	dir := writeCgoGateModule(t, map[string]string{
+		"plain.go": "package p\n\nfunc Twice(a int) int { return a * 2 }\n",
+		"add.go":   cgoImportSource,
+	})
+
+	stderr, output, err := convertCgoGateFixture(t, dir, []string{"-cgo=true"}, "CGO_ENABLED=")
+	requireCgoRefusal(t, stderr, err, output, "add.go", "cgogatefixture",
+		"under -cgo: cmd/cgo did not run for this load (no C compiler), so nothing was recognized")
+}
+
+// -cgo beside an environment asking for the opposite load is refused before anything loads: for P1's cgo-only shape,
+// which a cgo-off load refuses anyway, and for a mixed package, whose cgo-off load would convert its plain file.
+func TestTheCgoFlagRefusesAnEnvironmentThatSetsCgoOff(t *testing.T) {
+	for _, files := range []map[string]string{
+		{"add.go": cgoImportSource},
+		{"plain.go": "package p\n\nfunc Twice(a int) int { return a * 2 }\n", "add.go": cgoImportSource},
+	} {
+		dir := writeCgoGateModule(t, files)
+		stderr, output, err := convertCgoGateFixture(t, dir, []string{"-cgo=true"}, "CGO_ENABLED=0")
+
+		if err == nil {
+			t.Errorf("-cgo with CGO_ENABLED=0 must refuse with a non-zero exit\noutput:\n%s", stderr)
+		}
+
+		if !strings.Contains(stderr, "-cgo asks for a cgo-on load, and the environment sets CGO_ENABLED=0") {
+			t.Errorf("the refusal does not name the contradiction\noutput:\n%s", stderr)
+		}
+
+		if emitted := emittedProjectFiles(t, output); len(emitted) > 0 {
+			t.Errorf("a refused conversion must write no project file, wrote %v", emitted)
+		}
+	}
+}
+
+// Phase 1's EXIT GATE (PLAN-cgo-interop §6): on a host with a C compiler, the fixture's own source, loaded through the
+// real driver under -cgo, has every C name recognized and its rewritten tree mapped back to it, and still emits
+// nothing. The summary is the checked-in fixture's (TestCgoRecognitionSummaryCountsTheFixtureByKindAndNamesEachTreeByRole),
+// asserted WHOLE to the end of its line: it names trees by role, so the build-cache names go list hands back on a real
+// host cannot reach it.
+func TestTheCgoFlagRecognizesTheFixtureAndStillRefuses(t *testing.T) {
+	requireCCompiler(t)
+
+	source, err := os.ReadFile(filepath.Join(cgoFixtureDir, "fixture.go"))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dir := writeCgoGateModule(t, map[string]string{"fixture.go": string(source)})
+
+	stderr, output, err := convertCgoGateFixture(t, dir, []string{"-cgo=true"}, "CGO_ENABLED=")
+	logCgoRecognizedNames(t, dir)
+	requireCgoRefusal(t, stderr, err, output, "fixture.go", "cgogatefixture",
+		"under -cgo: "+cgoFixtureSummaryCounts+"; "+cgoFixtureSummaryRoles+"\n")
+
+	// The reading itself, so a passing run on a hosted runner records what the host's cmd/cgo produced.
+	if _, recognized, found := strings.Cut(stderr, "under -cgo: "); found {
+		t.Logf("READING %s", strings.TrimSpace(strings.SplitN(recognized, "\n", 2)[0]))
+	}
+}
+
+// A mixed package on a host with a C compiler: go list hands the plain file over at its own path, untouched by cmd/cgo,
+// so the summary names it as plain Go source rather than counting it among cmd/cgo's own files.
+func TestTheCgoFlagNamesAMixedPackagesPlainFileAsPlainSource(t *testing.T) {
+	requireCCompiler(t)
+
+	source, err := os.ReadFile(filepath.Join(cgoFixtureDir, "fixture.go"))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dir := writeCgoGateModule(t, map[string]string{
+		"fixture.go": string(source),
+		"plain.go":   "package cgofixture\n\nfunc Twice(a int) int { return a * 2 }\n",
+	})
+
+	stderr, output, err := convertCgoGateFixture(t, dir, []string{"-cgo=true"}, "CGO_ENABLED=")
+	requireCgoRefusal(t, stderr, err, output, "fixture.go", "cgogatefixture", "under -cgo: "+cgoFixtureSummaryCounts+
+		"; 1 generated file -> fixture.go; plain.go: plain Go source; 2 generated by cmd/cgo with no source\n")
+}
+
+// logCgoRecognizedNames makes the load -cgo makes, in-process, and logs cgoDeclarations' names per kind. The refusal
+// carries counts only, so a host whose cmd/cgo declares a different set (another libc's typedef chain) would red the
+// exit gate without saying WHICH declaration moved; these lines say it, on a pass and on a red alike.
+func logCgoRecognizedNames(t *testing.T, dir string) {
+	t.Helper()
+
+	pkgs, err := packages.Load(&packages.Config{
+		Mode: packages.LoadAllSyntax,
+		Dir:  dir,
+		Env:  append(os.Environ(), "GOWORK=off", "GOFLAGS=", "CGO_ENABLED=1"),
+	}, ".")
+
+	if err != nil || len(pkgs) != 1 || pkgs[0].Types == nil {
+		t.Logf("READING names: not loaded (%d package(s), %v)", len(pkgs), err)
+		return
+	}
+
+	names := map[cgoDeclKind][]string{}
+
+	for _, declaration := range cgoDeclarations(pkgs[0].Types) {
+		names[declaration.kind] = append(names[declaration.kind], declaration.cName)
+	}
+
+	for _, entry := range cgoKindLabels {
+		if len(names[entry.kind]) > 0 {
+			t.Logf("READING %s: %s", entry.label, strings.Join(names[entry.kind], ", "))
+		}
 	}
 }

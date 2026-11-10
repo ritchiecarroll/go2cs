@@ -46,7 +46,7 @@ on:
           - linux
           - darwin
       stage:
-        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks)'
+        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here)'
         type: choice
         required: true
         default: census
@@ -61,6 +61,7 @@ on:
           - nugetgo-behavior
           - golib-tests
           - stack-probe
+          - converter-cgo
       filter:
         description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s). Options on any other stage are refused.'
         type: string
@@ -423,6 +424,9 @@ jobs:
                                          # the headroom the table's own doctrine asks for.
               'stack-probe'      = 90    # one row's -tests convert/build, the filtered compare, and up to the 900 s per-test
                                          # deadline while the probe waits. PROVISIONAL until the first run (C1, 2026-11-08).
+              'converter-cgo'    = 15    # the converter's go test filtered to its cgo tests: one cold module download and
+                                         # build, plus one converter go build for the driver-level arms. About 15 s of
+                                         # tests on H with no compiler. PROVISIONAL until the first run (H, 2026-11-09).
               'golib-tests'      = 90    # one Release build of GolibTests and its core closure for this GOOS from
                                          # cold, then `dotnet test` (whole suite, or a --filter). PROVISIONAL until
                                          # the first run; added for the AES seat's osx-arm64 guard (C1, 2026-11-06).
@@ -1049,6 +1053,63 @@ jobs:
 
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
           & ./.github/annotate-summary.ps1 -Title "golib-tests $goos/$rid" -Lines $summary
+
+          exit $runExit
+
+      # -------------------------------------------------------------------------------------
+      # converter-cgo -- OPT-IN: the converter's own cgo tests on this leg's host, where a C compiler lets go list run
+      # cmd/cgo. No other hosted stage gives them one (licensing.yml's go test is filtered to ^TestLicensing), so the
+      # compiler-gated tests -- cgo Phase 1's exit gate, TestRealLoadRefusesOnlyASelectedCgoFile -- skip everywhere
+      # else. A SKIP here is a reading too: this runner had no compiler on PATH, which the summary's first line names.
+      # -------------------------------------------------------------------------------------
+      - name: Converter cgo tests — go test with this host's C compiler
+        if: needs.plan.outputs.stage == 'converter-cgo'
+        shell: pwsh
+        env:
+          CGO_TEST_FILTER: ${{ needs.plan.outputs.filter }}
+        run: |
+          $ErrorActionPreference = 'Continue'
+
+          $goos = $env:GOOS_TARGET
+          $rid = $env:RID
+          $art = Join-Path $PWD 'artifacts'
+          New-Item -ItemType Directory -Force -Path $art | Out-Null
+          $log = Join-Path $art "converter-cgo-$goos-$rid.log"
+
+          $filter = $env:CGO_TEST_FILTER
+          if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^Test.*Cgo|^TestRealLoad' }
+
+          # The instrument line: the compiler go would hand cmd/cgo, and whether go's own default turns cgo on here.
+          $cc = "$(& go env CC)".Trim()
+          $ccVersion = if (Get-Command $cc -ErrorAction SilentlyContinue) { "$(& $cc --version 2>&1 | Select-Object -First 1)" } else { 'NOT FOUND on PATH' }
+          $instrument = "go env CC = $cc ($ccVersion); go env CGO_ENABLED = $("$(& go env CGO_ENABLED)".Trim())"
+          Write-Host "==> $instrument"
+
+          Push-Location 'src/go2cs'
+          try {
+              & go test -buildvcs=false -count=1 -v -run $filter . *>&1 | Tee-Object -FilePath $log
+              $runExit = $LASTEXITCODE
+          }
+          finally { Pop-Location }
+
+          # Every test's outcome by name, so a SKIP is visible rather than counted as a pass, then each READING a test logs.
+          $lines = @(Get-Content -LiteralPath $log -ErrorAction SilentlyContinue)
+          $outcomes = @($lines | Where-Object { $_ -match '^\s*--- (PASS|FAIL|SKIP):' } | ForEach-Object { $_.Trim() })
+          $readings = @($lines | Where-Object { $_ -match 'READING ' } | ForEach-Object { $_.Trim() })
+          if ($readings.Count) { $outcomes += @('', 'Readings:') + $readings }
+
+          $summary = @(
+              "## Converter cgo tests -- $goos ($rid)"
+              ''
+              $instrument
+              ''
+              "Filter ``$filter`` -- exit ``$runExit``"
+              ''
+              '```'
+          ) + $outcomes + @('```')
+
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title "converter-cgo $goos/$rid" -Lines $summary
 
           exit $runExit
 
