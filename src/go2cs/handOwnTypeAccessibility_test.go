@@ -256,29 +256,66 @@ func TestNoHandOwnDuplicatesAnImportInitHook(t *testing.T) {
 }
 
 // importInitHookFiles are the source files compiled into one assembly with the package_info.cs in infoDir, other than
-// the generated ones: the files a hand-owned duplicate of one of its hooks could sit in.
+// the generated ones: the files a hand-owned duplicate of one of its hooks could sit in. Read as a package directory,
+// infoDir takes its layout key folders; read as a key folder of a package (infoDir holds no project file), it takes the
+// package directory and each key folder sharing a target with it (amd64/ takes linux-amd64/, never linux-arm64/). A
+// folder with a project file of its own is another package.
 func importInitHookFiles(infoDir string) []string {
-	var files []string
+	lattice := corpusLattice()
+	dirs := []string{infoDir}
 
-	entries, err := os.ReadDir(infoDir)
-
-	if err != nil {
-		return nil
+	// A key folder that holds a project file is a nested package of the same name, never part of this assembly.
+	addKeyFolder := func(dir string) {
+		if !dirHoldsProjectFile(dir) {
+			dirs = append(dirs, dir)
+		}
 	}
 
-	for _, e := range entries {
-		name := e.Name()
+	for _, folder := range lattice.candidateFolders() {
+		addKeyFolder(filepath.Join(infoDir, folder))
+	}
 
-		if e.IsDir() || !strings.HasSuffix(name, ".cs") ||
-			name == PackageInfoFileName || strings.HasSuffix(name, ".cs.auto") ||
-			name == "package_test_info.cs" {
+	if own := lattice.folderCover(filepath.Base(infoDir)); len(own) > 0 && !dirHoldsProjectFile(infoDir) {
+		pkgDir := filepath.Dir(infoDir)
+		dirs = append(dirs, pkgDir)
+
+		for _, folder := range lattice.candidateFolders() {
+			if folder != filepath.Base(infoDir) && slices.ContainsFunc(lattice.folderCover(folder), func(target string) bool { return slices.Contains(own, target) }) {
+				addKeyFolder(filepath.Join(pkgDir, folder))
+			}
+		}
+	}
+
+	var files []string
+
+	for _, dir := range dirs {
+		entries, err := os.ReadDir(dir)
+
+		if err != nil {
 			continue
 		}
 
-		files = append(files, filepath.Join(infoDir, name))
+		for _, e := range entries {
+			name := e.Name()
+
+			if e.IsDir() || !strings.HasSuffix(name, ".cs") ||
+				name == PackageInfoFileName || strings.HasSuffix(name, ".cs.auto") ||
+				name == "package_test_info.cs" {
+				continue
+			}
+
+			files = append(files, filepath.Join(dir, name))
+		}
 	}
 
 	return files
+}
+
+// dirHoldsProjectFile reports whether a directory holds a .csproj of its own: a package directory, never a key folder.
+func dirHoldsProjectFile(dir string) bool {
+	projects, _ := filepath.Glob(filepath.Join(dir, "*.csproj"))
+
+	return len(projects) > 0
 }
 
 // TestImportInitHookFilesReadTheLayoutKeyFolders plants hand-owns in each kind of layout key folder. A package's

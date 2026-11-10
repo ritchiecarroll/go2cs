@@ -301,18 +301,18 @@ func TestSockaddrFamilyIsScopedToEachHandOwningFlavor(t *testing.T) {
 
 		for _, goos := range flavors {
 			inScope := scope.includes(goos)
-			bodied := strings.Contains(handOwns[goos], witness)
+			unbodied, bodied := handOwnBodied(handOwns, goos, witness)
 
 			if inScope != want[goos] {
 				t.Errorf("syscall.%s: applies on %s = %v, want %v", name, goos, inScope, want[goos])
 			}
 
-			if inScope && !bodied {
-				t.Errorf("syscall.%s is displaced on %s but no marked hand-own under src/core/syscall/%s/ declares %q: the placeholder would leave it unimplemented", name, goos, goos, strings.TrimSpace(witness))
+			if inScope && len(unbodied) > 0 {
+				t.Errorf("syscall.%s is displaced on %s but no marked hand-own in src/core/syscall/ that %v compiles declares %q: the placeholder would leave it unimplemented", name, goos, unbodied, strings.TrimSpace(witness))
 			}
 
-			if !inScope && bodied {
-				t.Errorf("syscall.%s has a hand-own body under src/core/syscall/%s/ but is NOT displaced there: the generated body survives beside it (CS0111)", name, goos)
+			if !inScope && len(bodied) > 0 {
+				t.Errorf("syscall.%s has a hand-own body in src/core/syscall/ that %v compiles but is NOT displaced on %s: the generated body survives beside it (CS0111)", name, bodied, goos)
 			}
 		}
 	}
@@ -346,8 +346,9 @@ func TestSockaddrFamilyIsScopedToEachHandOwningFlavor(t *testing.T) {
 	}
 }
 
-// handOwnSourcesByFlavor concatenates, per flavor, the text of every marked hand-own under
-// src/core/<pkg>/<goos>/ — the witness a per-flavor scope guard checks each scope against. It is
+// handOwnSourcesByFlavor concatenates, per target, the text of every marked hand-own in the key folders that target's
+// build compiles under src/core/<pkg>/ (its <goos>/, <arch>/ and <goos>-<arch>/) — the witness a per-flavor scope
+// guard checks each scope against, at every target of the scope's GOOS (handOwnBodied). It is
 // deliberately PER FLAVOR where the seam guard (manualConversionDestination_test.go) witnesses per
 // NAME across the whole package: with a linux body on disk, that guard cannot see that a darwin
 // scope has no darwin body (measured 2026-09-05, the Q52 negative control: the darwin bridge file
@@ -365,38 +366,60 @@ func handOwnSourcesAt(t *testing.T, coreDir string, pkg string) map[string]strin
 
 	sources := map[string]string{}
 
-	for _, goos := range []string{"windows", "linux", "darwin"} {
-		dir := filepath.Join(coreDir, filepath.FromSlash(pkg), goos)
-		entries, err := os.ReadDir(dir)
-
-		if err != nil {
-			t.Skipf("src/core/%s/%s is not beside the converter; nothing to witness: %v", pkg, goos, err)
-		}
-
+	for _, target := range platformUniverse {
 		var text strings.Builder
 
-		for _, entry := range entries {
-			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".cs") {
+		for _, folder := range platformLayoutFolders(target) {
+			dir := filepath.Join(coreDir, filepath.FromSlash(pkg), folder)
+			entries, err := os.ReadDir(dir)
+
+			if err != nil {
+				// A GOOS folder is the flavour itself; a GOARCH or pair folder is there only when the layout admitted one.
+				if folder == goosOfTarget(target) {
+					t.Skipf("src/core/%s/%s is not beside the converter; nothing to witness: %v", pkg, folder, err)
+				}
+
 				continue
 			}
 
-			body, err := os.ReadFile(filepath.Join(dir, entry.Name()))
+			for _, entry := range entries {
+				if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".cs") {
+					continue
+				}
 
-			if err != nil {
-				t.Fatal(err)
-			}
+				body, err := os.ReadFile(filepath.Join(dir, entry.Name()))
 
-			// The converter's own line-anchored marker (testConversion.go), never a comment's mention of it.
-			if manualConversionMarker.Match(body) {
-				text.Write(body)
-				text.WriteByte('\n')
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				// The converter's own line-anchored marker (testConversion.go), never a comment's mention of it.
+				if manualConversionMarker.Match(body) {
+					text.Write(body)
+					text.WriteByte('\n')
+				}
 			}
 		}
 
-		sources[goos] = text.String()
+		sources[target] = text.String()
 	}
 
 	return sources
+}
+
+// handOwnBodied reads a scope's GOOS against the per-target witness: the targets of that GOOS whose witness lacks the
+// text (a displacement there leaves the placeholder unfilled) and those whose witness holds it (a generated body kept
+// there collides with it).
+func handOwnBodied(handOwns map[string]string, goos string, witness string) (unbodied []string, bodied []string) {
+	for _, target := range corpusLattice().targetsOfGOOS(goos) {
+		if strings.Contains(handOwns[target], witness) {
+			bodied = append(bodied, target)
+		} else {
+			unbodied = append(unbodied, target)
+		}
+	}
+
+	return unbodied, bodied
 }
 
 // TestHandOwnWitnessReadsEachTargetsLayoutKeyFolders plants a marked hand-own in each kind of layout key folder. A
@@ -555,18 +578,18 @@ func TestSignalInstallLayerIsScopedToEachHandOwningFlavor(t *testing.T) {
 
 		for _, goos := range []string{"windows", "linux", "darwin"} {
 			inScope := scope.includes(goos)
-			bodied := strings.Contains(handOwns[goos], witness)
+			unbodied, bodied := handOwnBodied(handOwns, goos, witness)
 
 			if inScope != want[goos] {
 				t.Errorf("runtime.%s: applies on %s = %v, want %v", name, goos, inScope, want[goos])
 			}
 
-			if inScope && !bodied {
-				t.Errorf("runtime.%s is displaced on %s but no marked hand-own under src/core/runtime/%s/ declares %q: the placeholder would leave it unimplemented", name, goos, goos, witness)
+			if inScope && len(unbodied) > 0 {
+				t.Errorf("runtime.%s is displaced on %s but no marked hand-own in src/core/runtime/ that %v compiles declares %q: the placeholder would leave it unimplemented", name, goos, unbodied, witness)
 			}
 
-			if !inScope && bodied {
-				t.Errorf("runtime.%s has a hand-own body under src/core/runtime/%s/ but is NOT displaced there: the generated body survives beside it (CS0111)", name, goos)
+			if !inScope && len(bodied) > 0 {
+				t.Errorf("runtime.%s has a hand-own body in src/core/runtime/ that %v compiles but is NOT displaced on %s: the generated body survives beside it (CS0111)", name, bodied, goos)
 			}
 		}
 	}
@@ -622,8 +645,8 @@ func TestDarwinPointerArgumentMirrorsAreScopedToDarwin(t *testing.T) {
 			}
 		}
 
-		if !strings.Contains(handOwns["darwin"], " "+name+"(") {
-			t.Errorf("syscall.%s is scoped to darwin but no marked hand-own under src/core/syscall/darwin declares it", name)
+		if unbodied, _ := handOwnBodied(handOwns, "darwin", " "+name+"("); len(unbodied) > 0 {
+			t.Errorf("syscall.%s is scoped to darwin but no marked hand-own in src/core/syscall/ that %v compiles declares it", name, unbodied)
 		}
 	}
 }
@@ -646,12 +669,12 @@ func TestNetpollBreakIsRefusedByNameOnEveryFlavor(t *testing.T) {
 			continue
 		}
 
-		if !strings.Contains(handOwns[goos], " netpollBreak()") {
-			t.Errorf("runtime.netpollBreak is displaced on %s but no marked hand-own under src/core/runtime/%s/ declares it: the placeholder would leave it unimplemented", goos, goos)
+		if unbodied, _ := handOwnBodied(handOwns, goos, " netpollBreak()"); len(unbodied) > 0 {
+			t.Errorf("runtime.netpollBreak is displaced on %s but no marked hand-own in src/core/runtime/ that %v compiles declares it: the placeholder would leave it unimplemented", goos, unbodied)
 		}
 
-		if !strings.Contains(handOwns[goos], `"runtime: netpollBreak: the managed host has no runtime poller to break (`) {
-			t.Errorf("runtime.netpollBreak on %s does not refuse with the shared leading words", goos)
+		if unbodied, _ := handOwnBodied(handOwns, goos, `"runtime: netpollBreak: the managed host has no runtime poller to break (`); len(unbodied) > 0 {
+			t.Errorf("runtime.netpollBreak at %v does not refuse with the shared leading words", unbodied)
 		}
 	}
 }

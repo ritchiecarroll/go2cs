@@ -238,19 +238,25 @@ func TestDisplacedExportedVarsAreBoxedOrRegistered(t *testing.T) {
 }
 
 // displacedVarPackageDir is the package directory of a corpus file's directory: the directory itself, or its parent
-// when the file sits in one of the package's platform folders.
+// when the file sits in one of the package's layout key folders.
 func displacedVarPackageDir(fileDir string) string {
-	if base := filepath.Base(fileDir); base == "windows" || base == "linux" || base == "darwin" {
+	if isCorpusLayoutKeyFolder(filepath.Base(fileDir)) {
 		return filepath.Dir(fileDir)
 	}
 
 	return fileDir
 }
 
-// packageBoxDirs are the directories a package's box declarations can sit in: the package directory and each of its
-// platform folders.
+// packageBoxDirs are the directories a package's box declarations can sit in: the package directory and every layout
+// key folder the corpus's universe can lay a file into.
 func packageBoxDirs(pkgDir string) []string {
-	return []string{pkgDir, filepath.Join(pkgDir, "windows"), filepath.Join(pkgDir, "linux"), filepath.Join(pkgDir, "darwin")}
+	dirs := []string{pkgDir}
+
+	for _, folder := range corpusLattice().candidateFolders() {
+		dirs = append(dirs, filepath.Join(pkgDir, folder))
+	}
+
+	return dirs
 }
 
 // TestPackageBoxDirsReadTheLayoutKeyFolders plants a hand-owned companion in each kind of layout key folder. The

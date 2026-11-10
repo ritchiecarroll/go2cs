@@ -253,8 +253,8 @@ func pkgHasLinknameHandle(t *testing.T, goRoot string, pkgPath string, symbol st
 // unexported `type _C_int int32`, broke the darwin syscall build with exactly that error. Such a pull
 // needs a hand companion in the PULLING package instead (S7b: vendor/golang.org/x/net/route).
 //
-// Every declaration WITH A BODY in a file one of the corpus's targets builds (windows, linux, darwin;
-// amd64; cgo off) is checked, because each is one the converter emits; a bodyless one (assembly,
+// Every declaration WITH A BODY in a file one of the corpus's targets builds (corpusTargets, the
+// universe; cgo off) is checked, because each is one the converter emits; a bodyless one (assembly,
 // another GOOS's stub) emits no signature to widen, and a file no corpus target builds (wasip1's
 // `openat(..., pathLen size, ...)`) is never converted at all. A definition row is checked at its
 // definition, which is the func the converter widens. Each offending type is reported once per row.
@@ -321,7 +321,7 @@ func TestLinknameForwardTargetsExposeNoUnexportedTypes(t *testing.T) {
 }
 
 // corpusTargetFiles parses the non-test files of pkgPath that at least one corpus target builds: the
-// -stdlib platforms windows/amd64, linux/amd64 and darwin/amd64, with cgo off (the corpus's pinned state).
+// -stdlib platforms of corpusTargets, with cgo off (the corpus's pinned state).
 func corpusTargetFiles(t *testing.T, goRoot string, pkgPath string) []*ast.File {
 	t.Helper()
 
@@ -463,7 +463,7 @@ func unexportedSignatureTypes(decl *ast.FuncDecl, typeNames map[string]bool) []s
 // syscall_darwin.go.
 //
 // For every row whose target the converter emits with a body (unexported, not a definition row), each
-// corpus target (windows, linux, darwin; amd64; cgo off; purego) on which a file pulling it builds must
+// corpus target (corpusTargets; cgo off; purego) on which a file pulling it builds must
 // also build a file of the target's package carrying the handle — or the row must be in
 // linknameForwardHandleElsewhere, which widens without the local handle, and then must still need it.
 func TestLinknameForwardHandlesCoverEveryPullingTarget(t *testing.T) {
@@ -529,8 +529,8 @@ func TestLinknameForwardHandlesCoverEveryPullingTarget(t *testing.T) {
 	t.Logf("checked %d forward rows; %d rows have a pulling file in GOROOT", checked, len(pullers))
 }
 
-// corpusTargets are the (GOOS, GOARCH) pairs the corpus is converted for.
-var corpusTargets = []string{"windows/amd64", "linux/amd64", "darwin/amd64"}
+// corpusTargets are the (GOOS, GOARCH) pairs the corpus is converted for: the converter's platformUniverse.
+var corpusTargets = platformUniverse
 
 // corpusTargetParses reports whether at least one corpus target builds file name in dir, with cgo off (the corpus's
 // pinned state).

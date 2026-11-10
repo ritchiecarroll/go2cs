@@ -322,38 +322,44 @@ func TestManualConversionConstsAreDisplacedAndDeclared(t *testing.T) {
 
 			for _, goos := range scope {
 				for _, missing := range displacedConstMissing(coreDir, pkg, goos, member) {
-					t.Errorf("%s.%s (%s): no hand-owned *_impl.cs under %s declares it; the displaced const has no destination", pkg, name, goos, missing)
+					t.Errorf("%s.%s (%s): no hand-owned *_impl.cs in the folders of %s that %s compiles declares it; the displaced const has no destination there",
+						pkg, name, goos, filepath.Join(coreDir, filepath.FromSlash(pkg)), missing)
 				}
 			}
 		}
 	}
 }
 
-// displacedConstMissing names where a displaced const scoped to goos has no destination: each folder that should
-// supply it and holds no marked *_impl.cs declaring member.
+// displacedConstMissing names the targets of goos at which a displaced const has no destination: no marked *_impl.cs
+// declaring member in the key folders that target's build compiles (its <goos>/, <arch>/ and <goos>-<arch>/).
 func displacedConstMissing(coreDir string, pkg string, goos string, member *regexp.Regexp) []string {
-	flavourDir := filepath.Join(coreDir, filepath.FromSlash(pkg), goos)
-	found := false
+	var missing []string
 
-	_ = filepath.WalkDir(flavourDir, func(path string, entry os.DirEntry, err error) error {
-		if err != nil || entry.IsDir() || !strings.HasSuffix(path, "_impl.cs") {
-			return nil
+	for _, target := range corpusLattice().targetsOfGOOS(goos) {
+		found := false
+
+		for _, folder := range platformLayoutFolders(target) {
+			_ = filepath.WalkDir(filepath.Join(coreDir, filepath.FromSlash(pkg), folder), func(path string, entry os.DirEntry, err error) error {
+				if err != nil || entry.IsDir() || !strings.HasSuffix(path, "_impl.cs") {
+					return nil
+				}
+
+				content, readErr := os.ReadFile(path)
+
+				if readErr == nil && strings.Contains(string(content), "GoManualConversion") {
+					found = found || member.Match(content)
+				}
+
+				return nil
+			})
 		}
 
-		content, readErr := os.ReadFile(path)
-
-		if readErr == nil && strings.Contains(string(content), "GoManualConversion") {
-			found = found || member.Match(content)
+		if !found {
+			missing = append(missing, target)
 		}
-
-		return nil
-	})
-
-	if !found {
-		return []string{flavourDir}
 	}
 
-	return nil
+	return missing
 }
 
 // TestDisplacedConstDestinationReadsTheLayoutKeyFolders plants a const's hand-owned destination in layout key folders.

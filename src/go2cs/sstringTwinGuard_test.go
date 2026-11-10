@@ -124,9 +124,9 @@ func TestNoSStringTwinMethodGroupInCorpus(t *testing.T) {
 }
 
 // declaringPackageFile reports whether a corpus file's directory (relative to src/core, slash-spelled) holds pkgPath's
-// own files: the package directory, or one of its platform folders.
+// own files: the package directory, or one of its layout key folders.
 func declaringPackageFile(relDir string, pkgPath string) bool {
-	return relDir == pkgPath || path.Dir(relDir) == pkgPath && isPlatformFolderName(path.Base(relDir))
+	return relDir == pkgPath || path.Dir(relDir) == pkgPath && isCorpusLayoutKeyFolder(path.Base(relDir))
 }
 
 // TestDeclaringPackageFileReadsTheLayoutKeyFolders plants a file of the declaring package in each kind of layout key
@@ -154,13 +154,11 @@ func TestDeclaringPackageFileReadsTheLayoutKeyFolders(t *testing.T) {
 	}
 }
 
-func isPlatformFolderName(name string) bool {
-	switch name {
-	case "windows", "linux", "darwin":
-		return true
-	}
-
-	return false
+// isCorpusLayoutKeyFolder reports whether a folder name is one the corpus's universe lays files into: a target's GOOS,
+// its GOARCH or the pair. Like the GOOS list it replaced, it cannot tell a key folder from a nested package of the same
+// name.
+func isCorpusLayoutKeyFolder(name string) bool {
+	return name != "" && len(corpusLattice().folderCover(name)) > 0
 }
 
 // methodGroupLines returns the 1-based lines where `<qualifier><name>` occurs as a whole identifier
