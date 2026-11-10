@@ -21,8 +21,10 @@
 Import-Module (Join-Path $PSScriptRoot 'NugetgoFlavors.psm1')
 
 $script:RowKeys = @('module', 'version', 'package', 'rid', 'runtime-rid', 'goos', 'host', 'os', 'go', 'dotnet', 'go-output', 'dotnet-output', 'outputs-equal', 'assembly', 'date')
-# The release's RID map (NugetgoFlavors.psm1): the RIDs a row is owed for, and the GOOS each one's row is recorded on.
-$script:RidGoos = Get-NugetgoRidFlavors
+# The release's RID map (NugetgoFlavors.psm1): the RIDs a row is owed for, and the GOOS each one's row is recorded on
+# (its flavor's GOOS).
+$script:RidGoos = [ordered]@{}
+foreach ($entry in (Get-NugetgoRidFlavors).GetEnumerator()) { $script:RidGoos[$entry.Key] = Get-NugetgoFlavorGoos $entry.Value }
 $script:ShippedRids = @($script:RidGoos.Keys)
 # The title of a row's annotation. The fetch script selects by it, so it never collides with a leg's summary chunks or
 # a runner warning in the same step (C1, 2026-10-12).
