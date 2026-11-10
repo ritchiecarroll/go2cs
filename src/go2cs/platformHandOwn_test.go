@@ -586,8 +586,10 @@ func assertCorpusAutoSiblingsAreColocated(t *testing.T, coreDir string) {
 }
 
 // strayReviewSiblings returns every `<name>.cs.auto` under coreDir with no hand-owned `<name>.cs` beside it, or, for
-// a sibling in a GOOS folder, in the package directory above it: a FLAT hand-own whose emission differs by GOOS keeps
-// one sibling per GOOS folder (mergeReviewSiblings; COORD's S5 ruling (a), runtime/runtime2.cs).
+// a sibling in a layout key folder, in the package directory above it: a FLAT hand-own whose emission differs by target
+// keeps one sibling per key folder (mergeReviewSiblings; COORD's S5 ruling (a), runtime/runtime2.cs by GOOS). The key
+// folder need not hold source — crypto/internal/fips140/subtle's hold only the sibling, which differs by GOARCH — so
+// the test is the folder's NAME, and a nested package of that name (internal/syscall/windows) is not one.
 func strayReviewSiblings(coreDir string) ([]string, error) {
 	var strays []string
 
@@ -606,7 +608,7 @@ func strayReviewSiblings(coreDir string) ([]string, error) {
 			return nil
 		}
 
-		if dir := filepath.Dir(filePath); isPlatformSourceFolder(filepath.Dir(dir), filepath.Base(dir)) {
+		if dir := filepath.Dir(filePath); isLayoutKeyFolderName(filepath.Base(dir)) && !isNestedPackageFolder(filepath.Dir(dir), filepath.Base(dir)) {
 			flat := filepath.Join(filepath.Dir(dir), filepath.Base(handOwn))
 
 			if info, err := os.Stat(flat); err == nil && info.Mode().IsRegular() {
@@ -636,6 +638,15 @@ func TestStrayReviewSiblingsAdmitsASplitSiblingOfAFlatHandOwn(t *testing.T) {
 	writeTestFile(t, filepath.Join(coreDir, "internal", "syscall", "windows", "zsyscall.cs"), "nested package source")
 	writeTestFile(t, filepath.Join(coreDir, "internal", "syscall", "windows", "syscall.cs.auto"), "not the parent's sibling")
 
+	// A key folder that holds NO source: the sibling differs by GOARCH and nothing else in the package does
+	// (crypto/internal/fips140/subtle). It reviews the flat hand-own all the same; an orphan beside it does not.
+	subtle := filepath.Join(coreDir, "crypto", "internal", "fips140", "subtle")
+	writeTestFile(t, filepath.Join(subtle, "subtle.csproj"), "<Project />")
+	writeTestFile(t, filepath.Join(subtle, "xor_generic.cs"), "hand-owned, flat")
+	writeTestFile(t, filepath.Join(subtle, "amd64", "xor_generic.cs.auto"), "amd64 flavour")
+	writeTestFile(t, filepath.Join(subtle, "linux-arm64", "xor_generic.cs.auto"), "linux/arm64 flavour")
+	writeTestFile(t, filepath.Join(subtle, "amd64", "orphan.cs.auto"), "reviews nothing")
+
 	strays, err := strayReviewSiblings(coreDir)
 
 	if err != nil {
@@ -643,6 +654,7 @@ func TestStrayReviewSiblingsAdmitsASplitSiblingOfAFlatHandOwn(t *testing.T) {
 	}
 
 	want := []string{
+		filepath.Join(subtle, "amd64", "orphan.cs.auto"),
 		filepath.Join(coreDir, "internal", "syscall", "windows", "syscall.cs.auto"),
 		filepath.Join(coreDir, "runtime", "linux", "orphan.cs.auto"),
 	}
