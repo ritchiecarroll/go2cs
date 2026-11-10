@@ -23,7 +23,10 @@ namespace GolibTests;
 /// share an expression (array and struct elements, one call's arguments, a sum, a chain) to ONE IL
 /// offset, so it prints only the three shapes an optimized build answers exactly. This arm builds the same
 /// project Debug, runs it and Go's with GO2CS_CALLER_LINE_ALL_SHAPES=1, and compares all thirteen shapes
-/// line for line. The control: Go must print every shape (fourteen lines), or the switch did not reach the
+/// line for line. Only the program builds Debug: its references build (or reuse) Release, through
+/// ReleaseProjectReferences.targets, because the shapes are the program's own calls. Every child runs inside one
+/// <see cref="ChildDeadline"/>, so a slow or stuck child fails this test by name before the CI's hang watchdog
+/// kills the test host. The control: Go must print every shape (fourteen lines), or the switch did not reach the
 /// programs and an equal two-line output would prove nothing. Inconclusive only where no pinned Go
 /// toolchain or no dotnet host resolves, naming which.
 /// </remarks>
@@ -32,6 +35,10 @@ public class CallerLineMultiLineDebugTests
 {
     private const string AllShapes = "GO2CS_CALLER_LINE_ALL_SHAPES";
     private const int ShapeLines = 14;
+
+    // The whole test's budget: under the os-matrix stage's 10-minute --blame-hang-timeout, with room left for
+    // ChildTimeoutDiagnostics to dump a timed-out child (see ChildDeadline).
+    private const int BudgetMs = 360_000;
 
     [TestMethod]
     public void EveryShapeEqualsGoInADebugBuild()
@@ -51,14 +58,16 @@ public class CallerLineMultiLineDebugTests
 
         string project = Path.Combine(src!, "tests", "Behavioral", "CallerLineMultiLine");
         string go2csPath = src!.Replace('\\', '/').TrimEnd('/') + "/";
+        string releaseReferences = Path.Combine(src!, "tests", "GolibTests", "ReleaseProjectReferences.targets");
+        ChildDeadline deadline = new(BudgetMs);
 
         // The program runs on this host, so it is built for this host's GOOS. Without it the corpus builds its default
         // flavour, windows, and on linux syscall/windows' dll loader throws at package init (every linux run since 10-20).
-        (int buildCode, string buildOut) = Run(dotnet!, ["build", Path.Combine(project, "CallerLineMultiLine.csproj"), "-c", "Debug", "-nologo", "-nodeReuse:false", "-p:go2csPath=" + go2csPath, "-p:GoTargetOS=" + HostGoos()], project, 1_800_000);
+        (int buildCode, string buildOut) = Run(dotnet!, ["build", Path.Combine(project, "CallerLineMultiLine.csproj"), "-c", "Debug", "-nologo", "-nodeReuse:false", "-p:go2csPath=" + go2csPath, "-p:GoTargetOS=" + HostGoos(), "-p:CustomBeforeMicrosoftCommonTargets=" + releaseReferences], project, deadline.For(300_000));
         Assert.AreEqual(0, buildCode, $"the Debug build failed:{Environment.NewLine}{Tail(buildOut)}");
 
-        (int csCode, string csOut) = Run(dotnet!, [Path.Combine(project, "bin", "Debug", "net10.0", "CallerLineMultiLine.dll")], project, 120_000);
-        (int goCode, string goOut) = Run(go!, ["run", "."], project, 600_000);
+        (int csCode, string csOut) = Run(dotnet!, [Path.Combine(project, "bin", "Debug", "net10.0", "CallerLineMultiLine.dll")], project, deadline.For(120_000));
+        (int goCode, string goOut) = Run(go!, ["run", "."], project, deadline.For(300_000));
 
         Assert.AreEqual(0, goCode, $"go run failed:{Environment.NewLine}{Tail(goOut)}");
         Assert.AreEqual(0, csCode, $"the converted program failed:{Environment.NewLine}{Tail(csOut)}");
