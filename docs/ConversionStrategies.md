@@ -11985,7 +11985,7 @@ named `math_impl.cs` sits beside the converted files and
 supplies the implementing half. It calls `max`, the same portable Go fallback `math.Max` uses. The file
 fills `archMin` and the other `arch…` functions the same way:
 
-<!-- source: src/core/math/math_impl.cs:8-34 -->
+<!-- source: src/core/math/math_impl.cs:8-36 -->
 ```csharp
 namespace go;
 
