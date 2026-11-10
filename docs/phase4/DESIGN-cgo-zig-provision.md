@@ -1,0 +1,117 @@
+# DESIGN: seat Z — auto-provision a pinned zig as the C compiler for `-cgo`
+
+C1, 2026-11-10. COORD's seat Z, carrying the owner's direction (PLAN-cgo-interop §5.1, the 2026-11-09 amendment: "a
+default that will auto-provision a C toolchain on demand"). It builds on H's scout,
+`docs/phase4/SCOUT-cgo-c-toolchain.md`, which measured the candidates, recommended zig and laid out the CLI. H is the
+second reader. Branch `claude/c1-cgo-zig-provision`, cut from master `38caf3558a`.
+
+This note adds three things to the scout: where the change lands in the converter, how the pins are produced, and what
+tests the seat. Open questions for H are at the end.
+
+## 1. What the seat delivers
+
+When a conversion runs with `-cgo` and no C compiler resolves, go2cs downloads a pinned zig, checks its SHA-256 against
+a hash built into the converter, unpacks it into the user cache, and hands it to the `-cgo` load as `CC="<zig> cc"`. It
+uses the same machinery as the pinned Go toolchain (`toolchainProvision.go`). Nothing changes for a conversion without
+`-cgo`, and `-version` and `-help` never download.
+
+Scope, as §5.1 states it: Phase 1 and 2 need a compiler only on the CONVERTING machine, for the host target. Per-target
+`zig cc -target …` for Phase 4 is out of scope here, and so is llvm-mingw (§6, Q2).
+
+## 2. Resolution order
+
+The first that applies wins (the scout's §6):
+
+1. **`-cc CMD`**, used as given. Like `CC`, it may carry arguments. It never downloads. Two reserved values:
+   - `-cc pinned` forces step 4 even when a host compiler exists. This is the reproducible choice for CI and any
+     byte-comparing gate.
+   - `-cc host` forces steps 2 to 3 and refuses step 4.
+2. **`CC`** from the environment, as `go` itself reads it.
+3. **The platform's default compiler on `PATH`**: `gcc`, or `clang` on darwin, the name Go's `cmd/go/internal/cfg`
+   defaults to.
+4. **The pinned zig** in the user cache, downloaded on first use.
+
+**`-cc-download=false`** turns step 4 into a loud refusal. The refusal names steps 1 to 3 and
+`go2cs toolchain install -cc -from FILE`, and never falls back to a silently cgo-off load (PLAN §2, Finding 1).
+
+The resolved value is printed once with the toolchain provenance line, in the form `C compiler: <cmd> (<which step>)`.
+That keeps a conversion's compiler visible in its log, as the Go toolchain's already is.
+
+## 3. Where it lands in the converter
+
+- `conversionDriver.go:148` already appends `CGO_ENABLED=1` to the `-cgo` load's `cfg.Env`. The resolved compiler is
+  appended beside it, as `CC=<cmd>` plus, for a pinned zig, `ZIG_GLOBAL_CACHE_DIR` and `ZIG_LOCAL_CACHE_DIR`. Those go
+  under go2cs's own cache, beside the toolchain, as the scout's instrument did (`os-matrix.yml:1150`), so zig never
+  writes to the user's home cache. Only this load sees them, as only it sees `CGO_ENABLED=1`.
+- Resolution runs once per process, before the first `-cgo` load, so a download happens at most once. A conversion
+  without `-cgo` never calls it.
+- A new `ccToolchain.go` holds the resolver and the zig provisioner, reusing `toolchainProvision.go`'s primitives:
+  `verifySHA256`, the staging directory and `renameIntoPlace`, `safeJoin`, `unpackZip`, and the per-user cache root. A
+  `.tar.xz` unpacker is new. Go's stdlib has no xz, and the module has no xz dependency, so §6 Q3 asks.
+
+## 4. Pins
+
+`ccToolchainPins.go` is generated, as `toolchainPins.go` is, by `internal/genzigpins`. It reads ziglang.org's
+`download/index.json` for the pinned version and writes, per host:
+
+| host | archive | size |
+|:--|:--|--:|
+| windows-amd64 | `zig-x86_64-windows-0.17.0.zip` | 100.3 MB |
+| linux-amd64 | `zig-x86_64-linux-0.17.0.tar.xz` | 57.3 MB |
+| darwin-amd64 | `zig-x86_64-macos-0.17.0.tar.xz` | 59.3 MB |
+| darwin-arm64 | `zig-aarch64-macos-0.17.0.tar.xz` | 54.0 MB |
+| linux-arm64, windows-arm64 | from the same index | not measured |
+
+The four measured hashes are already in the scout's instrument (`os-matrix.yml:1101-1104`), each verified on a hosted
+runner. The generator must reproduce exactly those four from the index: that is its positive control. The pin is a
+release property. It moves when the converter does, by regeneration, never per run.
+
+## 5. Download sources and integrity
+
+ziglang.org asks automated downloads to use its community mirrors. The order is the mirror list
+(`download/community-mirrors.txt`) in random order, then ziglang.org itself. **Every byte from any source is checked
+against the pinned SHA-256 before it is unpacked**, and a mismatch deletes the file and tries the next source, as the Go
+provisioner does. Because the hash is built into the converter binary, a hostile mirror can only fail the download.
+It cannot substitute an archive. §6 Q1 asks whether the minisign check the scout recommends is still owed under a
+built-in hash.
+
+`go2cs toolchain install -cc -from FILE` installs from a copied archive against the same hash, for an offline machine.
+
+## 6. Open questions for H, the second reader
+
+- **Q1, minisign.** The scout says a mirror download MUST verify the minisign signature. That holds when the hash is read
+  from the index at run time. Here the hash is compiled into the converter, so a signature adds no integrity the pin
+  lacks, and checking it would add a BLAKE2b dependency (`golang.org/x/crypto`). My proposal is pinned SHA-256 only, and
+  the generator verifies the minisign signature of each archive it pins, at GENERATION time, on a networked machine.
+- **Q2, llvm-mingw.** It is out of this seat, being a second, windows-only, unsigned pin, unless you want it here.
+- **Q3, `.tar.xz`.** Three of the four measured hosts ship `.tar.xz`. The options are a vendored pure-Go xz reader (for
+  example `github.com/ulikunitz/xz`, BSD-3-Clause) or shelling out to the system `tar`, which reads xz on linux and macOS,
+  and which the scout's instrument used. Which do you prefer? I lean to the system `tar` on non-windows hosts, where it
+  is always present, with zip on windows: no new dependency.
+- **Q4, the index snapshot.** This box's network policy refuses ziglang.org, so the generator's testdata snapshot of
+  `index.json` (and the arm64 pins) has to come from a networked machine. Do you have the 0.17.0 index you read, or
+  should a hosted leg fetch it?
+- **Q5, the APSL note.** zig bundles Apple's darwin headers under APSL 2.0 (scout §3). go2cs downloads zig from its
+  publishers and redistributes nothing. The seat adds a short paragraph to `docs/DotnetTool.md` saying exactly that, and
+  that whether it settles the matter is the owner's call. Is that the wording you want?
+
+## 7. Tests and gates
+
+- **Unit, local** (no network: an in-process HTTP server serves fake archives):
+  - the resolution order, each step;
+  - `-cc pinned`, `-cc host`, `-cc-download=false` refusing by name;
+  - a wrong-hash archive deleted before unpacking and the next source tried;
+  - every source failing reported by name;
+  - `install -from` accepting the right archive and refusing a wrong one;
+  - a conversion without `-cgo` never resolving;
+  - the zig env vars set only on the `-cgo` load.
+- **Generator:** reproduces the four instrument hashes from the snapshot (the positive control). A one-byte edit to the
+  snapshot changes its output (the negative).
+- **Hosted, end to end:** the `converter-cgo` stage gains `;cc=go2cs`, under which the leg installs NO compiler and the
+  converter provisions zig itself.
+  - On the four hosted systems: H's Phase 1 fixture must read the scout's two sets exactly (§4 there): set 1 on
+    linux and darwin, set 2 on windows.
+  - Red: `;cc=go2cs;sha=` with a wrong hash planted through a test-only override must refuse before unpacking, as the
+    instrument's red did.
+- `go test ./...` with TestLicensing, repoguard, and `docs/DotnetTool.md` updated (the CLI and the cache table).
+- Package compatibility: converter only, no API change.
