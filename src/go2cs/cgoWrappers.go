@@ -301,9 +301,12 @@ func cgoPseudoPackageText(packageName string, members map[string]string) string 
 	text.WriteString("// declared for its C names, reached from each converted file that imports \"C\" through `using C = <this class>;`.\n")
 	text.WriteString("// The class name cannot collide with a real Go package's: 'ꓸ' is not a Go identifier character, and Go reserves\n")
 	text.WriteString("// `import \"C\"` for cgo. Every member is internal: cgo forbids a C type in an exported Go signature.\n")
-	text.WriteString("// It is unsafe because a C struct crosses by its stack mirror's address; every converted project already sets\n")
-	text.WriteString("// AllowUnsafeBlocks (csprojTemplate_test.go holds it unconditional), so this asks nothing new of one.\n")
-	fmt.Fprintf(&text, "internal static unsafe partial class %s\n{\n", cgoPseudoPackageClass(packageName))
+	text.WriteString("// It is unsafe because a C struct crosses by its stack mirror's address. That needs the project's\n")
+	text.WriteString("// AllowUnsafeBlocks, which [LibraryImport] already does (SYSLIB1062); the converter's value for it is computed,\n")
+	text.WriteString("// so a package with bindings has to raise it (allowUnsafeBlocks, projectFileWriter.go).\n")
+	text.WriteString("// The class carries no accessibility of its own: go2cs-gen declares every package class it generates into\n")
+	text.WriteString("// `public static partial`, and a second accessibility on another part is CS0262. The members carry it.\n")
+	fmt.Fprintf(&text, "static unsafe partial class %s\n{\n", cgoPseudoPackageClass(packageName))
 
 	for i, name := range names {
 		if i > 0 {

@@ -8,9 +8,12 @@ namespace go;
 // declared for its C names, reached from each converted file that imports "C" through `using C = <this class>;`.
 // The class name cannot collide with a real Go package's: 'ꓸ' is not a Go identifier character, and Go reserves
 // `import "C"` for cgo. Every member is internal: cgo forbids a C type in an exported Go signature.
-// It is unsafe because a C struct crosses by its stack mirror's address; every converted project already sets
-// AllowUnsafeBlocks (csprojTemplate_test.go holds it unconditional), so this asks nothing new of one.
-internal static unsafe partial class cgotestꓸC_package
+// It is unsafe because a C struct crosses by its stack mirror's address. That needs the project's
+// AllowUnsafeBlocks, which [LibraryImport] already does (SYSLIB1062); the converter's value for it is computed,
+// so a package with bindings has to raise it (allowUnsafeBlocks, projectFileWriter.go).
+// The class carries no accessibility of its own: go2cs-gen declares every package class it generates into
+// `public static partial`, and a second accessibility on another part is CS0262. The members carry it.
+static unsafe partial class cgotestꓸC_package
 {
     // C.abs, bound to /usr/lib/libSystem.B.dylib.
     [global::System.Runtime.InteropServices.LibraryImport("/usr/lib/libSystem.B.dylib", EntryPoint = "abs")]
