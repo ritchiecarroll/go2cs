@@ -132,7 +132,7 @@ func TestLicensingProvenanceDefaultAndPortable(t *testing.T) {
 	if got := sourceProvenance(filepath.Join(otherRoot, "src", "sync", "mutex.go"), options, "\n"); got != want {
 		t.Fatalf("machine-dependent provenance: %q", got)
 	}
-	if got := sourceProvenance(source, options, "\r\n"); got != strings.ReplaceAll(want, "\n", "\r\n") {
+	if got := sourceProvenance(filepath.Join(otherRoot, "src", "sync", "mutex.go"), options, "\r\n"); got != strings.ReplaceAll(want, "\n", "\r\n") {
 		t.Fatalf("CRLF output: %q", got)
 	}
 	// A GOROOT whose release cannot be read still names the standard library.
