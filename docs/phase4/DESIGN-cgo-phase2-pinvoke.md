@@ -244,6 +244,21 @@ through the existing native mint.
 twice, so C sees one object, as it does under Go. A wrapper that built two would let C write one copy and the
 copy-back of the other overwrite it.
 
+> **AMENDED 2026-11-10 (H's increments 3b2a and 3b2b; COORD, RULED): sameness is the storage's, and a returned argument
+> IS the argument.**
+>
+> - **Aliasing is decided by STORAGE, not by box.** Two boxes can reach one struct (a `FieldRefBox` and the box of
+>   the struct it is a field of, or two field boxes over one field), so a later pointer parameter of the same type
+>   shares an earlier one's mirror when `Unsafe.AreSame` holds over their `Value` refs, and the struct is copied back
+>   once. The same rule covers a pointer to one scalar. Arm: windows' `UnionRect(&r, &r, &o)` writes the union into r
+>   through the shared mirror; two mirrors would copy r's stale second mirror back over it.
+> - **A pointer RESULT that equals a pointer argument's address is that argument's box** (RULED). `gmtime_r(&t, &tm)`
+>   returns `&tm` in Go. Here the address C returns is the wrapper's stack mirror, which dies when the wrapper
+>   returns, so minting it native would hand back a use-after-return. The wrapper compares the result with each
+>   same-typed pointer argument's address and returns that argument's own box; any other result is C memory, minted
+>   native. Red (3b2b, measured on hosted linux and darwin at `3dad6ea07b`): with every result minted, "gmtime_r
+>   returns the pointer it was handed" failed.
+
 ### 5.3 The size assertion, and what it can and cannot catch (R3)
 
 > ⟶ **Amended 2026-11-10:** §11.2 (the assertion above is tautological).
@@ -530,6 +545,22 @@ symbol-to-library map from the import table (PE), or `LC_LOAD_DYLIB` with the tw
 linker lacks it. It writes one `[LibraryImport]` per symbol, naming that symbol's library. A symbol
 resolved statically, or not at all, is **refused by name**.
 
+> **AMENDED 2026-11-10 (H's increment 4b, measured on hosted converter-cgo legs; COORD, RULED):**
+>
+> - **A windows API set is recorded AS LINKED** (Q3). For mingw's `cos` the probe's import table names
+>   `api-ms-win-crt-math-l1-1-0.dll`, which is what a Go binary built by the same toolchain imports; the OS loader
+>   resolves the set. Recording today's host DLL instead would bake in a mapping Windows is free to change.
+> - **The ELF fallback is one probe PER SYMBOL, not per `-l`.** COORD's earlier "per -l fallback" is superseded: each
+>   bound symbol gets its own probe, referencing that symbol alone and linked `--as-needed` against every `-l`. The
+>   `DT_NEEDED` entry it adds over a probe that references nothing is its library, recorded exactly as a Go binary's
+>   linker records it. It needs no file lookup and no tracing. zig refuses `-Wl,--trace-symbol` ("unsupported linker
+>   arg") and cannot be relied on to locate its stub libraries, so for zig this IS the route. Under GNU ld, the
+>   two-library fixture holds the trace route and this fallback to one answer.
+> - **Measured:** GNU ld prefixes its trace lines with its own name, and zig links `--as-needed`, so a probe that
+>   references nothing records nothing (§6.1's one-line probe, the red). Under zig, windows' `cos` resolves
+>   STATICALLY (zig's mingw libm), and is refused by name, this section's own example; the host mingw gcc resolves it
+>   to `api-ms-win-crt-math-l1-1-0.dll`.
+
 ### 11.6 `_Cvar_` and `_Cfpvar_fp_` are refused (finding 6)
 
 §7 gave both no owner. Phase 1 has recognized `_Cvar_` from the start, and increment 0 (`d20526ee99`, seated in
@@ -599,6 +630,12 @@ run-time check (§5.3) compares the running OS and architecture against it.
 - **a pinned-zig probe library**, built per target by the scout's provisioned toolchain, as the instrument for
   aliasing, unions and HFA classification.
 
+> **AMENDED 2026-11-10 (COORD, RULED, on H's increment 4b reading): G1's windows arm is NOT `cos`.** Under the pinned zig
+> (the owner's default toolchain, PLAN §5.1), mingw's libm links `cos` statically, so a cgo package calling `C.cos` on
+> windows is refused by name (§11.5). The windows arm takes a symbol that BOTH the host mingw gcc and the pinned zig
+> resolve dynamically (a UCRT string or stdio function, or a kernel32 one), confirmed by increment 4b's own capture on
+> both toolchains before G1 relies on it.
+
 ### 11.11 A resolver miss throws (finding 11)
 
 §6.2's resolver could return `IntPtr.Zero`, and the runtime then falls back to default probing. That is legacy search
@@ -645,6 +682,11 @@ is defined:
 - `-L<dir>`: an absolute path, or one relative to the package directory, that exists;
 - `-framework <name>`, **darwin only** (RULED; cmd/go's allowlist admits it): the name a plain token as above, its
   install name captured as §11.12 says. On any other GOOS it is refused by name.
+
+> **AMENDED 2026-11-10 (COORD, RULED, on H's increment 4b): `-O2` and `-g` are admitted, token-exact, and set aside.**
+> They are cmd/go's default `CGO_LDFLAGS`, so every cgo package's `//go:cgo_ldflag` lines carry them (the Phase 1
+> fixture shows exactly those two), and neither names a library. The admission is token-exact: `-O3`, `-g3` and every
+> other flag beyond `-l`/`-L`/`-framework` stay refused by name.
 
 Everything else is refused by name, whatever increment 1 finds about `go list -compiled`.
 
