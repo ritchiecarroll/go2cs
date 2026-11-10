@@ -39,6 +39,9 @@ const (
 	cgoFloatConst                     // _Cfconst_x: a floating-point #define
 	cgoStringConst                    // _Csconst_x: a string #define
 	cgoVar                            // _Cvar_x: a C global variable (C.x)
+	cgoErrnoFunc                      // _C2func_x: C.x called in Go's two-result form, r, err := C.x(…), which reads errno
+	cgoFuncValue                      // _Cfpvar_fp_x: C.x used as a value rather than called, its address
+	cgoMacro                          // _Cmacro_x: a #define that is not a constant, evaluated in C on each use
 )
 
 // cgoKindPrefixes maps each synthetic-name prefix to its kind. _Ctype_ is split further by cgoTypeKind.
@@ -182,6 +185,9 @@ var cgoKindLabels = []struct {
 	{cgoFloatConst, "float const"},
 	{cgoStringConst, "string const"},
 	{cgoVar, "var"},
+	{cgoErrnoFunc, "errno func"},
+	{cgoFuncValue, "func value"},
+	{cgoMacro, "macro"},
 }
 
 // cgoRecognitionSummary says what a -cgo load recognized, for the refusal that still follows it: the declarations

@@ -4,7 +4,12 @@ One cgo package and the three Go files `cmd/cgo` generates for it. The converter
 these as its input; nothing here is built or run by `go test`.
 
 The five kinds in `fixture.go`'s preamble are a function, a mixed struct, a `#define` (an integer, a
-float and a string), an enum and a typedef'd pointer.
+float and a string), an enum and a typedef'd pointer. Three more uses spell C names the way cmd/cgo
+writes them for anything that is not a plain function, variable, type or constant:
+
+- `C.halve` called in Go's two-result form (`_C2func_halve`; cmd/cgo also declares `_Cfunc_halve`);
+- `C.twice` used as a value (`_Cfpvar_fp_twice`);
+- `C.NEXT`, a `#define` over a global that is not a constant (`_Cmacro_NEXT`).
 
 | File | What it is |
 |---|---|
@@ -15,7 +20,11 @@ float and a string), an enum and a typedef'd pointer.
 
 ## How the generated files were produced
 
-Generated on the P1 lane box, with go1.26.10 on linux/amd64.
+First generated on the P1 lane box, with go1.26.10 on linux/amd64. The three uses above were added
+on 2026-11-10 (cgo Phase 1 increment 0). The files were then regenerated on a GitHub-hosted linux/amd64
+runner by `TestTheCgoFixtureIsCmdCgosOutputForFixtureGo`, which repeats the steps below and logs each
+file it makes (run 42760125424, toolchain below). Before the change, the same test reproduced
+all three of P1's files byte for byte on that runner (run 42760111742).
 
 `fixture.go` sat alone in a directory beside a `go.mod` of two lines:
 
@@ -72,6 +81,9 @@ gcc
 $ gcc --version
 gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
 ```
+
+That was P1's box. The regeneration ran on the hosted runner, where `go env CC` is
+`gcc (Ubuntu 15.2.0-16ubuntu1) 15.2.0`.
 
 The generated files depend on the toolchain and the C library. `cgo_import.go` names glibc symbol
 versions (`free#GLIBC_2.2.5`), and `cgo_gotypes.go` carries the `-O2` and `-g` flags of Go's default

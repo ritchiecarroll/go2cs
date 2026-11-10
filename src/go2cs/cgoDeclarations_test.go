@@ -62,6 +62,11 @@ func _Cfunc_free(p0 unsafe.Pointer) (r1 _Ctype_void)         { return }
 func _Cfunc_CString(s string) *_Ctype_char                    { return nil }
 func _Cfunc__CMalloc(n uintptr) unsafe.Pointer                { return nil }
 
+func _C2func_halve(p0 _Ctype_int) (r1 _Ctype_int, r2 error) { return }
+func _Cmacro_NEXT() (r1 _Ctype_int)                          { return }
+
+var _Cfpvar_fp_twice unsafe.Pointer
+
 var _cgo_0123456789ab_Cfunc_add byte
 var __cgofn__cgo_0123456789ab_Cfunc_add byte
 var _Cgo_always_false bool
@@ -93,6 +98,7 @@ func TestCgoDeclarationsClassifiesEachKindAndFiltersThePlumbing(t *testing.T) {
 		"CString":    cgoFunc,
 		"FCONST":     cgoFloatConst,
 		"GREEN":      cgoIntConst,
+		"NEXT":       cgoMacro,
 		"SCONST":     cgoStringConst,
 		"add":        cgoFunc,
 		"char":       cgoType,
@@ -100,8 +106,10 @@ func TestCgoDeclarationsClassifiesEachKindAndFiltersThePlumbing(t *testing.T) {
 		"double":     cgoType,
 		"enum_color": cgoEnum,
 		"free":       cgoFunc,
+		"halve":      cgoErrnoFunc,
 		"int":        cgoType,
 		"struct_x":   cgoStruct,
+		"twice":      cgoFuncValue,
 		"union_u":    cgoUnion,
 		"void":       cgoType,
 		"xptr":       cgoType,
@@ -113,7 +121,10 @@ func TestCgoDeclarationsClassifiesEachKindAndFiltersThePlumbing(t *testing.T) {
 		t.Errorf("recognized %d cgo declarations, want %d: %v", len(got), len(want), cgoDeclarationNames(got))
 	}
 
+	seen := map[string]bool{}
+
 	for _, declaration := range got {
+		seen[declaration.cName] = true
 		kind, known := want[declaration.cName]
 
 		if !known {
@@ -127,6 +138,13 @@ func TestCgoDeclarationsClassifiesEachKindAndFiltersThePlumbing(t *testing.T) {
 
 		if declaration.object == nil {
 			t.Errorf("C.%s carries no typed object", declaration.cName)
+		}
+	}
+
+	// A declaration cmd/cgo writes under a prefix this does not know is dropped as plumbing, silently; name each one.
+	for name := range want {
+		if !seen[name] {
+			t.Errorf("C.%s is declared but was not recognized", name)
 		}
 	}
 }
@@ -144,31 +162,44 @@ func cgoDeclarationNames(declarations []cgoDeclaration) []string {
 // cgoFixtureDir holds fixture.go and the three files cmd/cgo generated from it.
 var cgoFixtureDir = filepath.Join("testdata", "cgo", "phase1")
 
-// cgoFixtureWant is every declaration the fixture's generated files carry, by C name: the fourteen fixture.go writes
-// (TestTheCgoFixtureWritesFourteenCNames derives them from its source) and the seven C types cmd/cgo declares on the
-// way to them (scale returns a double that Go reads through float64, so C.double is never written). cgo's own _GoString_ is not here: its C name is reserved.
-var cgoFixtureWant = map[string]cgoDeclKind{
-	"BLUE":       cgoIntConst,
-	"CONST":      cgoIntConst,
-	"CString":    cgoFunc,
-	"FCONST":     cgoFloatConst,
-	"GREEN":      cgoIntConst,
-	"GoString":   cgoFunc,
-	"SCONST":     cgoStringConst,
-	"add":        cgoFunc,
-	"char":       cgoType,
-	"double":     cgoType,
-	"enum_color": cgoEnum,
-	"free":       cgoFunc,
-	"int":        cgoType,
-	"intgo":      cgoType,
-	"long":       cgoType,
-	"ptrdiff_t":  cgoType,
-	"scale":      cgoFunc,
-	"struct_x":   cgoStruct,
-	"uchar":      cgoType,
-	"void":       cgoType,
-	"xptr":       cgoType,
+// cgoFixtureEntry is one declaration the fixture's generated files carry: a C name and its kind. One name can carry two
+// kinds: cmd/cgo declares C.halve as a plain function (_Cfunc_halve) beside the two-result form fixture.go calls
+// (_C2func_halve).
+type cgoFixtureEntry struct {
+	cName string
+	kind  cgoDeclKind
+}
+
+// cgoFixtureWant is every declaration the fixture's generated files carry: the seventeen C names fixture.go writes
+// (TestTheCgoFixtureWritesSeventeenCNames derives them from its source), the seven C types cmd/cgo declares on the way
+// to them (scale returns a double that Go reads through float64, so C.double is never written), and halve's plain
+// function. cgo's own _GoString_ is not here: its C name is reserved.
+var cgoFixtureWant = map[cgoFixtureEntry]bool{
+	{"BLUE", cgoIntConst}:      true,
+	{"CONST", cgoIntConst}:     true,
+	{"CString", cgoFunc}:       true,
+	{"FCONST", cgoFloatConst}:  true,
+	{"GREEN", cgoIntConst}:     true,
+	{"GoString", cgoFunc}:      true,
+	{"NEXT", cgoMacro}:         true,
+	{"SCONST", cgoStringConst}: true,
+	{"add", cgoFunc}:           true,
+	{"char", cgoType}:          true,
+	{"double", cgoType}:        true,
+	{"enum_color", cgoEnum}:    true,
+	{"free", cgoFunc}:          true,
+	{"halve", cgoErrnoFunc}:    true,
+	{"halve", cgoFunc}:         true,
+	{"int", cgoType}:           true,
+	{"intgo", cgoType}:         true,
+	{"long", cgoType}:          true,
+	{"ptrdiff_t", cgoType}:     true,
+	{"scale", cgoFunc}:         true,
+	{"struct_x", cgoStruct}:    true,
+	{"twice", cgoFuncValue}:    true,
+	{"uchar", cgoType}:         true,
+	{"void", cgoType}:          true,
+	{"xptr", cgoType}:          true,
 }
 
 // cgoIncompleteOverlay declares runtime/cgo's Incomplete exactly as cgo.go does.
@@ -252,8 +283,8 @@ func TestTheCgoFixtureLoadsAtCgoDisabledMissingOnlyRuntimeCgosIncomplete(t *test
 	}
 }
 
-// fixture.go writes fourteen C names, and the want table carries every one of them.
-func TestTheCgoFixtureWritesFourteenCNames(t *testing.T) {
+// fixture.go writes seventeen C names, and the want table carries every one of them.
+func TestTheCgoFixtureWritesSeventeenCNames(t *testing.T) {
 	file, err := parser.ParseFile(token.NewFileSet(), filepath.Join(cgoFixtureDir, "fixture.go"), nil, 0)
 
 	if err != nil {
@@ -272,12 +303,18 @@ func TestTheCgoFixtureWritesFourteenCNames(t *testing.T) {
 		return true
 	})
 
-	if len(written) != 14 {
-		t.Errorf("fixture.go writes %d C names, want 14: %v", len(written), written)
+	if len(written) != 17 {
+		t.Errorf("fixture.go writes %d C names, want 17: %v", len(written), written)
+	}
+
+	carried := map[string]bool{}
+
+	for entry := range cgoFixtureWant {
+		carried[entry.cName] = true
 	}
 
 	for name := range written {
-		if _, ok := cgoFixtureWant[name]; !ok {
+		if !carried[name] {
 			t.Errorf("fixture.go writes C.%s, which the want table does not carry", name)
 		}
 	}
@@ -291,19 +328,15 @@ func TestCgoDeclarationsResolvesEveryCNameInTheFixture(t *testing.T) {
 		t.Errorf("recognized %d cgo declarations in the fixture, want %d: %v", len(got), len(cgoFixtureWant), cgoDeclarationNames(got))
 	}
 
-	seen := map[string]bool{}
+	seen := map[cgoFixtureEntry]bool{}
 
 	for _, declaration := range got {
-		seen[declaration.cName] = true
-		kind, known := cgoFixtureWant[declaration.cName]
+		entry := cgoFixtureEntry{declaration.cName, declaration.kind}
+		seen[entry] = true
 
-		if !known {
-			t.Errorf("C.%s was recognized, but it is plumbing or not a cgo declaration", declaration.cName)
+		if !cgoFixtureWant[entry] {
+			t.Errorf("C.%s was recognized as kind %d, which the fixture does not declare", declaration.cName, declaration.kind)
 			continue
-		}
-
-		if declaration.kind != kind {
-			t.Errorf("C.%s classified as %d, want %d", declaration.cName, declaration.kind, kind)
 		}
 
 		if declaration.object == nil || declaration.object.Pkg() != pkg.Types {
@@ -311,9 +344,9 @@ func TestCgoDeclarationsResolvesEveryCNameInTheFixture(t *testing.T) {
 		}
 	}
 
-	for name := range cgoFixtureWant {
-		if !seen[name] {
-			t.Errorf("C.%s is declared by the fixture but was not recognized", name)
+	for entry := range cgoFixtureWant {
+		if !seen[entry] {
+			t.Errorf("C.%s (kind %d) is declared by the fixture but was not recognized", entry.cName, entry.kind)
 		}
 	}
 }
@@ -358,7 +391,7 @@ func TestCgoSourceFilesMapsTheFixturesTreesToTheirSource(t *testing.T) {
 }
 
 // cgoFixtureSummaryCounts is what the driver's -cgo refusal reports for the fixture, by kind (cgoFixtureWant counted).
-const cgoFixtureSummaryCounts = "recognized 21 C declarations (5 func, 9 type, 1 struct, 1 enum, 3 int const, 1 float const, 1 string const)"
+const cgoFixtureSummaryCounts = "recognized 25 C declarations (6 func, 9 type, 1 struct, 1 enum, 3 int const, 1 float const, 1 string const, 1 errno func, 1 func value, 1 macro)"
 
 // cgoFixtureSummaryRoles is the rest of the fixture's summary: its trees by role, which no file name can change.
 const cgoFixtureSummaryRoles = "1 generated file -> fixture.go; 2 generated by cmd/cgo with no source"
