@@ -35108,4 +35108,22 @@ behaviour, which is worse than any failure.
 
 — G (2026-11-09)
 
+## 2026-11-10 — C1 (COORD: the batch 279 bank re-read): darwin syscall's (a) residue is closed by the reinterpret seam; syscall banks darwin 32 + 1 on both RIDs
+
+Resolves (a) of the 2026-10-26 P2 row "darwin syscall after the iovec/dirent seat". `TestGetdirentries` and its
+`/n=10` and `/n=1000` subtests panicked on arm 2a in the test's own parse, `getdirentries_test.go:67`: a `*[1048]byte`
+view over a local `syscall.Dirent`, whose `Name [1024]int8` makes the struct reference-bearing.
+
+The reinterpret seam (batch 279; docs/phase4/DESIGN-reinterpret-seam.md) copies through a Go-layout image. golib's
+`GoImage<S>` encodes the struct, copies Go's byte count, and decodes a destination back into the box. The converter
+emits that slice, as a direct argument of `copy`, as `copy(@unsafe.GoImage(Ꮡdirent).slice(), data)`. Production
+footprint: 0 files on all three targets.
+
+The read: os-matrix sweep-shard run 42740799606 at master 9b8af3bd30, both RIDs, "matched 32 of 33 Go / 33 C#
+verdicts; disclosed 1; undisclosed divergences 0". The seam's own head read the same (run 42664200286). The .3 reading
+was 29 + 1 with 3 undisclosed. Evidence: docs/phase4/rebank-1.26.10.3/darwin/reread/SIG-2R.tsv. (b), `TestGetfsstat`,
+is not among the .3 read's divergences or this one's.
+
+— C1 (2026-11-10)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

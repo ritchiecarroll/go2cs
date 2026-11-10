@@ -197,4 +197,40 @@ The counts meet the arch-strict rule (equal verdicts, nothing undisclosed, 551 +
 `darwin: 551 + 4 (osx-x64; osx-arm64: 552 + 3)`. `disclosed` and `divergent` are the summary's disclosed count (net
 names no host-fatal test) and `new` is its undisclosed count; every cell is read from the job log.
 
+## The batch 279 re-read at 9b8af3bd30 (`reread/SIG-1R2.tsv`, `SIG-2R.tsv`, `GOARCH-279.tsv`, COORD 2026-11-10)
+
+Five rows on both RIDs at master `9b8af3bd3017e52c1e1f161dd9fbf0dc2a58ebb9`, from ONE os-matrix sweep-shard, run
+42740799606, filter `runtime,debug/buildinfo,net/http/pprof,go/internal/gcimporter,syscall`. Batch 279 landed:
+- G's (F) and GOARCH seats (runtime.GOARCH reads the process architecture);
+- the reinterpret seam.
+This is the first read with every cell from the run's ARTIFACTS: each row's `go2cs_test_comparison.json`, downloaded
+with `gh run download`, which this box can now reach. The job log agrees on every count.
+
+The file split follows the re-dispatch stem rule. In the reread wave a row's latest file must extend its earlier stem:
+`SIG-1R2` extends `SIG-1R` for runtime, and `SIG-2R` extends `SIG-2` for syscall. The other three rows have no
+earlier reread file, so they sit in `GOARCH-279`.
+
+| row | osx-x64 | osx-arm64 | banks |
+|:--|:--|:--|:--|
+| runtime | 11062 + 58 (PASS) | 11063 + 57 (DISC), 0 undisclosed | `11062 + 58 (osx-x64; osx-arm64: 11063 + 57)`, arch-strict |
+| debug/buildinfo | 211 (PASS) | 211 (PASS) | `211` |
+| net/http/pprof | 15 (PASS) | 15 (PASS) | `15` |
+| syscall | 32 + 1 (CVAC) | 32 + 1 (CVAC) | `32 + 1` |
+| go/internal/gcimporter | 636 of 636 (CVAC) | 634 of 634 (CVAC) | none yet (held for a ruling) |
+
+- runtime: G's (F) makes TestFunctionAlignmentTraceback MATCH on osx-arm64, so its darwin disclosure fires on osx-x64
+  only (64 disclosures against 63). The entry stays, and its osx-arm64 non-firing is the expected orphan. The job log
+  prints no orphan line; the DISC row ("disclosed 57 vs the darwin expectation 58") is where it shows. Arch-strict:
+  equal verdicts (11120), 0 new, 11063 + 57 = 11062 + 58.
+- debug/buildinfo: the count is equal, while the subtest NAMES differ by RID (TestReadFile/darwin_amd64/... against
+  .../darwin_arm64/...), since GOARCH now reads the process architecture.
+- go/internal/gcimporter: osx-arm64 lacks exactly two verdicts, TestImportStdLib/internal/runtime/startlinetest and
+  TestImportStdLib/runtime/race/internal/amd64v1, the two amd64-only std packages. No verdict differs. The guard's
+  arch-strict form needs EQUAL verdicts, so a RID-dependent verdict COUNT with nothing divergent has no form. The row
+  carries no segment, which the guard accepts, until COORD rules on one.
+
+`disclosed` is the comparison's disclosure-list length and `divergent` the non-matching verdicts. `new` is the summary's
+undisclosed count. `win_differs` compares the reading with the windows columns, since these rows carried no darwin
+segment.
+
 <!-- {% endraw %} -->
