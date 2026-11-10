@@ -89,9 +89,13 @@
 // branch for that machine, `GOARCH == "arm64" && cpu.ARM64.HasAES`, and Apple silicon always takes it.
 // initHashAlgorithm takes it too, keyed on the PROCESS architecture (the converted GOARCH constant still
 // reads "amd64": the BOARD's 2026-11-05 GOARCH row, OPEN), over cpu.ARM64 as internal/cpu's
-// cpu_arm64_impl.cs fills it (darwin's osInit, then GODEBUG, so cpu.aes=off selects the fallback here as
-// in Go). Without it the trio diverged from Go on osx-arm64 (run 42138564497): MemHash32/64Equality
-// passed where Go skips, and GlobalSeed/aes skipped where Go passes.
+// amd64/cpu_arm64_process_impl.cs fills it (darwin's osInit, then GODEBUG, so cpu.aes=off selects the
+// fallback here as in Go). Without it the trio diverged from Go on osx-arm64 (run 42138564497):
+// MemHash32/64Equality passed where Go skips, and GlobalSeed/aes skipped where Go passes. The linux/arm64
+// flavour, whose converted GOARCH is "arm64", is an arm64 process too, so the same test selects Go's branch
+// there, over cpu.ARM64 as internal/cpu/linux-arm64/cpu_arm64_hwcap_impl.cs fills it. The test reads
+// RuntimeInformation itself rather than the amd64 stand-in's cpu.GoIsArm64Process, which the linux/arm64
+// build does not compile (S3 site a).
 //
 // WHICH SCHEDULE, and why amd64's. Go on arm64 runs asm_arm64.s's aeshashbody, a different schedule from
 // asm_amd64.s's. Which one runs is NOT OBSERVABLE from Go code: the 128-byte aeskeysched is random per
@@ -182,7 +186,7 @@ internal static void initHashAlgorithm() {
         X86Aes.IsSupported && System.Runtime.Intrinsics.X86.Sse41.IsSupported) {
         selectAesHash();
     }
-    else if (cpu.GoIsArm64Process && cpu.ARM64.HasAES && ArmAes.IsSupported) {
+    else if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64 && cpu.ARM64.HasAES && ArmAes.IsSupported) {
         selectAesHash();
     }
 
