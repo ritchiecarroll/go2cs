@@ -253,3 +253,148 @@ licensing, repoguard.
 - §5's table: a reader of forwarders that is not listed.
 - §6: a test that passes today BECAUSE the forwarder frame is counted.
 - §7: a certain MethodDef that the analyzer's count would include and the loader does not (a false refusal).
+
+## Amendment 2026-11-10 — the seat as cut: the owner's ruling, review r2, and what was measured
+
+> Appended, not rewritten: §§1-12 above stand as proposed and as reviewed. Where this block and the text above
+> disagree, this block is the seat. The review record is `claude/coord-forwarder-review-r2` `88e650c17c`.
+
+### A. The ruling: the per-struct class, uniformly, and the break is owned in 1.26.10.4
+
+The review's finding 1 was that §2 moves PUBLIC static methods between classes, which is a binary break for every
+assembly compiled against the old placement (`MissingMethodException` at the first call), and that the note did not
+say so. The owner ruled the uniform shape and the break ("better breaking changes now than before we're deep with
+users"). The compatible hybrid (old placement kept below a threshold) is not built. What owns the break:
+
+- **Suppressions are generated, never written by hand.** `src/tools/pushnuget/New-GoApiCompatMoveSuppressions.ps1`
+  reads each merged package and its published baseline as metadata and accepts a removed member only where a class
+  marked `[GoPromotedHost(typeof(S))]` now declares it with the same name, signature and attributes for the same
+  struct `S`. Nullable annotations are compared decoded, position by position, because the compiler writes
+  `NullableContext` on a class by the value most of its members share, so a moved method's own attributes change
+  while its annotations do not. Anything else removed is listed as REFUSED and the script exits 1. Its suite is
+  `Test-GoApiCompatMoves.ps1`. This release: 900 entries in 20 files.
+- **`<GoBreakFloor>` moves to 1.26.10.4** (`src/core/golib/buildTransitive/go.lib.targets`), so a package built
+  against an earlier go.lib fails its consumer's build as GO2CS3002 instead of failing at run time.
+- **The release notes** carry the break under "Upgrading from 1.26.10.3" in the held 1.26.10.4 section of
+  `docs/NEWS.md`.
+- **The verdict instrument** is `push-nuget.ps1 -VerifyOnly` plus the pack-only rehearsal
+  `push-nuget.ps1 -VersionSuffix local.1 -OutDir <scratch>`; only the second runs the guard.
+- The rebuild of the published nugetgo packages is the owner's, after the release.
+
+### B. §1 and §7 corrected: the limit is a SLOT law, and the guard is GO2CS0012
+
+§1 read the limit as 65,524 MethodDef rows from the source constant. Measured on .NET 10.0.14 (linux-x64) by emitting
+types with `PersistedAssemblyBuilder`, loading each in its own `AssemblyLoadContext` and bisecting:
+
+| Shape | Most methods that load | One more |
+|---|---|---|
+| static class | 65,521 | fails |
+| static class with a static constructor (counted) | 65,521 | fails |
+| struct | 65,521 | fails |
+| class deriving from `object` (its constructor counted) | 65,521 | fails |
+| class whose base adds 1 virtual method | 65,520 | fails |
+| class whose base adds 7 virtual methods | 65,514 | fails |
+| class overriding 1 of `object`'s virtual methods | 65,522 | fails |
+| class overriding 3 of them | 65,524 | fails |
+| class overriding all 4 of them | 65,524 (the slot law alone allows 65,525) | fails |
+| interface | 65,524 | fails |
+
+**The law has two clauses: inherited virtual slots + (method definitions − overrides) ≤ 65,525** (`MAX_SLOT_INDEX`),
+**and method definitions ≤ 65,524 on any type.** The second shows only where no inherited slot is left unoverridden:
+the last two rows. `object` brings
+four slots, so a static class, a struct or a class deriving from `object` loads with at most 65,521 methods. The TS
+session's repro brackets the same edge from the converted side: 65,505 loads, 65,523 fails
+(`claude/i7-ts-readiness-rerun` `ffcbd57694`).
+
+The guard is **GO2CS0012** (GO2CS0011 was taken), a compilation-end analyzer (`MethodLimitAnalyzer`). Its threshold
+is DERIVED per type, by COORD's ruling: 65,525 less the base chain's virtual slots, plus the type's own overrides,
+and never above 65,524. It
+does not count a partial method that has no implementation, nor a struct's implicit constructor. GenTests pins both
+sides of the measured edge by LOADING the compiled fixture (65,521 loads, 65,522 does not), the repro's two readings,
+a struct, a base type with virtual methods, a class that overrides all four, and an interface.
+
+### C. §2 and §5 corrected: a struct's class is found by an attribute, not by its name
+
+Review finding 6. The class carries `[GoPromotedHost(typeof(S))]` (golib, `GoPromotedHostAttribute`), and every
+metadata reader finds a struct's class by that attribute (`GoMethodHosts.PromotedHost`). The name
+`{pkg}ᴛ{Struct}ᴛpkg` is for a reader of the generated file and binds nothing. The class is `public` when its struct
+is and `internal` otherwise, the struct's own scope.
+
+### D. §9 corrected: the generator half is a SET diff, not count invariants
+
+Review finding 3. §9's four count invariants could all hold while one method changed its signature. The instrument
+is a Roslyn metadata dump of every type and method (static or instance, accessibility, ref kind, return type, name,
+parameters, attribute names, constraints), per target, at base and at the fix. Each method of a promoted-method class
+is read as a method of its struct's package class; the two multisets must then be EQUAL, and the only new types may
+be the promoted-method classes. Result: on windows, linux and darwin, base `ae69e4ce74` against the fix
+on the same base: 238,075 / 237,652 / 238,672 methods at base and two more at the fix, the new attribute's own
+constructor and getter; 2,618 / 2,636 / 2,628 methods read back from the promoted-method classes; 0 only at base, 0
+only at the fix, 0 moved methods without a base counterpart, 0 types gone or changed.
+
+The first run read DIFFERS, for two reasons, and the second is a defect this note did not foresee:
+
+1. The compiler names a lambda by the ORDINAL of its containing method within its class (`<M>b__423_0`), and the
+   ordinal moved in every package class that lost forwarders (381 / 396 / 400 rows). No source names one. The
+   instrument now reads the ordinal as N and keeps the index that counts within the method.
+2. Four classes on each target held no method, only the comments for a struct that declares every method its embed
+   would promote: crypto/ecdsa `PrivateKey`, image/color `NYCbCrA`, testing/quick `CheckEqualError` and x/crypto
+   poly1305 `MAC`. An empty public class is a type nothing can bind and a break to take away later. The generator now
+   declares no class for a struct that forwards nothing and writes its comments after the package class (GenTests
+   `AStructThatForwardsNothingGetsNoClass`, which fails when the rule is taken out).
+
+The new types are otherwise the promoted-method classes with at least one method (187 / 188 / 188), the attribute,
+and 66 compiler-generated `<>O` classes nested in them: the cache of method-group delegates that the package class's
+own `<>O` held at base.
+
+### E. What a C# consumer sees
+
+Review finding 4. `using go.pkg;` (the namespace) brings every method, promoted ones included, as before.
+`using static go.pkg_package;` ALONE no longer brings a promoted method: it brings the package class's members and
+nothing of a sibling class. `docs/ConsumingGoFromCSharp.md` says so, and GenTests `PromotedHostClassTests` pins both
+(`UsingStaticAloneBringsDeclaredMethodsAndNoPromotedOne` expects CS1929).
+
+### F. §6 scored: four of six fixed, two MISSED
+
+§6 predicted that six probe lines would read as Go's once the forwarder frames stopped counting.
+
+| Line | Predicted | Measured at the fix |
+|---|---|---|
+| `o.Val()` through two value embeds | Go's | Go's |
+| `p.Val()` through a pointer embed | Go's | Go's |
+| `p.Ptr()` through a pointer embed | Go's | Go's |
+| both through method expressions | Go's | Go's |
+| the value method through an interface | Go's | **MISSED**: `main.global::go.main_package.valer.Val` |
+| both through method values | Go's | **MISSED**: `ok == false` and `main.viaValue.func1` |
+
+Both misses are frames the forwarder frame used to stand in front of: a struct's generated explicit interface
+implementation, and a method value's lambda. Neither is a forwarder, and both are measured at base behind the
+forwarder's name. They are BOARD rows (2026-11-10, P1), with their roots; the behavioral test `PromotedMethodFrames`
+prints the lines this seat fixes and none of those.
+
+### G. Results
+
+Trees: base is master `ae69e4ce74` for the rehearsals and the set diff, and master `38caf3558a` (batch 282, onto
+which the seat was rebased) for the footprint and the gates. Batch 282 changes no file under `src/gen`.
+
+- **Red first.** At the red commit GenTests does not compile (CS0103, `MethodLimitAnalyzer`), the converter test
+  `TestMethodExpressionWrapperMark` fails on the promoted arm, and `PromotedMethodFrames` differs from Go 1.26.10 on
+  7 of its 12 lines. At the fix: GenTests 489 of 489, the converter test passes, 0 of 12 lines differ.
+- **The repro** (the generator committed on `claude/i7-ts-readiness-rerun` at `25df29a2b3`), each arm predicted
+  before it was read: base `250 130 16` (65,521 methods) loads and matches Go; base `250 130 17` (65,522) builds and
+  throws `TypeLoadException` before `main`; the fix at `250 130 17` and at `250 131` loads and matches Go.
+- **Rehearsals** (`push-nuget.ps1 -VersionSuffix local.1 -OutDir <scratch>`). Base: `Binary compatibility: CLEAN
+  -- 525 asset(s) of 362 package(s) compared with the revisions before 1.26.10.4 by apicompat 10.0.403`, floor
+  1.26.10.3. The fix without suppressions: three builds, 0 errors; `Binary compatibility: 900 failure(s) across 362
+  package(s)`, every one CP0002, in 20 packages.
+- **The suppression generator** over those 362 packages: 900 entries, 20 files, 0 refused; 13 of the 20 packages can
+  be imported by a program, 6 are internal and 1 is vendored. Two defects it showed on real packages and not on its
+  first fixture now have fixture cases, each red before its fix: nullable context compared as written (6 of 32
+  checks failed), and a namespace with a keyword segment such as `go.@internal.abi` (5 of 32).
+- **The converter half's stdlib footprint** (two-seeded `-stdlib` reconvert, master's converter against the seat's,
+  each emitting 1,949 / 2,023 / 2,022 files for windows / linux / darwin): 0 files differ. Predicted 0.
+- **The behavioral corpus** (`check-no-regression.ps1`): `PromotedMethodExpr` alone moves, to the lambda form, and
+  gains a line for `(*outer).Get`, a value method taken off the pointer type, which no test covered.
+- **Review finding 5** (hand-owned code that names a forwarder in its static form): the three-target compile is the
+  census, and it reads 0 errors.
+- **Reach** (not gating): the nine go2cs packages published on nuget.org for this line hold 25 assemblies, which
+  make 1,489 references to members of the standard library's package classes. None names a moved forwarder.

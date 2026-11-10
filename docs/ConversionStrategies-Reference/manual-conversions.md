@@ -677,7 +677,7 @@ Guards: the behavioral test `ReflectVariadicCall`; GolibTests' `GoReflectBridgeC
      (`public void ARegisteredVariadicSignatureIsServedByItsCompiledTrampolines()`), :209
      (`public void AnUnregisteredValueTypeVariadicIsRefusedByNameWithoutDynamicCode()`);
      src/tests/GenTests/EscapeRegistryGeneratorTests.cs:126 (`public void EveryEscapingVariadicFuncSignatureIsRegistered()`);
-     src/tests/GenTests/GoMethodSetTests.cs:256 (`public void AVariadicArmRegistersItsSignatures()`);
+     src/tests/GenTests/GoMethodSetTests.cs:260 (`public void AVariadicArmRegistersItsSignatures()`);
      src/tests/GolibTests/DeferredRegistrationTests.cs:178 (`public void TheFirstVariadicMissRunsTheQueuedEscapeRegistry()`). -->
 
 **A ZERO test is a descriptor read too, and this one had degraded to a CONSTANT — `Value.IsZero`,
