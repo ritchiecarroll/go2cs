@@ -4111,7 +4111,9 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		v.applyImplicitConversion(paramType, arg, convertToCSTypeName(v.getAliasQualifiedTypeName(paramType, false)), "")
 	}
 
-	return result
+	// A type-parameter result whose type argument rendered as a constraint proxy is the caller's pointer in Go: cast it
+	// back to the box (the proxy's own box, no copy) so a field read or a pointer comparison sees *T.
+	return v.proxiedResultCast(callExpr, result)
 }
 
 // argumentParameterType is the type the i-th argument of a call to signature is passed as: its own
