@@ -60,9 +60,12 @@ MIT for the templates and scaffolding the converter reproduces in output.
 Converted standard-library packages carry the upstream BSD license, in their README
 and in the packed license file alike.
 
-`-provenance` adds a deterministic `// Converted from Go source: "..."` comment.
-It defaults to **off** and never includes a conversion timestamp. Paths are relative
-to GOROOT or the main module when known, otherwise only the filename is emitted.
+`-provenance` adds a two-line notice to each converted file: `// Converted from Go
+source: "..." in module <path>@<version>.`, then `// Modified from the original by
+conversion to C# with go2cs <release>.` It defaults to **off** and never includes a
+conversion timestamp. The path is relative to GOROOT or to the file's own module root,
+otherwise only the filename is emitted. The notice follows the file's upstream notices
+as its own comment group, before the package doc comment.
 Recognized leading copyright/license notices are retained even with `-comments` off.
 
 `-license "MIT"` (or another NuGet-supported SPDX expression) overrides package

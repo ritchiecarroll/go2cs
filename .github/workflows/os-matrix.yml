@@ -46,7 +46,7 @@ on:
           - linux
           - darwin
       stage:
-        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks)'
+        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad, and may end ;cc=zig|llvm-mingw[;sha=HEX], a pinned C toolchain the leg downloads, refuses unless its sha256 matches, and hands go as CC; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here)'
         type: choice
         required: true
         default: census
@@ -61,6 +61,7 @@ on:
           - nugetgo-behavior
           - golib-tests
           - stack-probe
+          - converter-cgo
       filter:
         description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s). Options on any other stage are refused.'
         type: string
@@ -169,6 +170,8 @@ jobs:
       dns-servers: ${{ steps.derive.outputs.dns-servers }}
       probe-at: ${{ steps.derive.outputs.probe-at }}
       jit-disasm: ${{ steps.derive.outputs.jit-disasm }}
+      cgo-cc: ${{ steps.derive.outputs.cgo-cc }}
+      cgo-cc-sha: ${{ steps.derive.outputs.cgo-cc-sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -218,10 +221,12 @@ jobs:
           # dispatch form's input count is guarded (Test-NugetgoBehaviorProof.ps1), and these are options OF those two
           # stages. golib-tests: jit=PATTERN. stack-probe: test=REGEX (required), at=S,S. sweep-shard (darwin only):
           # dns=IP[,IP], the job's resolver (an opt-in for net's NXDOMAIN keys, which the hosted mac resolver answers late;
-          # C1, 2026-11-08). An unknown or repeated key, an empty value, or any option on any other stage FAILS the plan
-          # by name rather than being ignored.
-          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''
-          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns' } })
+          # C1, 2026-11-08). converter-cgo: cc=zig|llvm-mingw, a pinned C toolchain the leg downloads, hash-checks and hands
+          # go as CC (the cgo toolchain scout, H, 2026-11-10); sha=HEX replaces the pin's sha256, and exists so a wrong
+          # hash can be shown to refuse before anything runs. An unknown or repeated key, an empty value, or any option on
+          # any other stage FAILS the plan by name rather than being ignored.
+          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''
+          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns' } 'converter-cgo' { 'cc', 'sha' } })
           if ($optionKeys.Count) {
               $parts = @($filter -split ';')
               $filter = $parts[0].Trim()
@@ -250,8 +255,16 @@ jobs:
                   if ($dnsServers -notmatch '^\d{1,3}(\.\d{1,3}){3}(,\d{1,3}(\.\d{1,3}){3})*$') { throw "sweep-shard filter option dns= must be a comma-separated IPv4 list; got '$dnsServers'." }
                   Write-Host "sweep-shard: the job's resolver is set to $dnsServers before the sweep (opt-in; the effective resolver is logged)"
               }
+              if ($stage -eq 'converter-cgo') {
+                  $cgoCc = "$($seen['cc'])"; $cgoCcSha = "$($seen['sha'])".ToLowerInvariant()
+                  if ($cgoCc -and $cgoCc -notin @('zig', 'llvm-mingw')) { throw "converter-cgo filter option cc= names a pinned toolchain, zig or llvm-mingw; got '$cgoCc'." }
+                  if ($cgoCcSha -and -not $cgoCc) { throw 'converter-cgo filter option sha= replaces a pinned toolchain''s hash, so it needs cc= beside it.' }
+                  if ($cgoCcSha -and $cgoCcSha -notmatch '^[0-9a-f]{64}$') { throw "converter-cgo filter option sha= must be 64 hex digits; got '$cgoCcSha'." }
+                  if ($cgoCc -eq 'llvm-mingw' -and $goos -ne 'windows') { throw "llvm-mingw's compilers target windows only, so cc=llvm-mingw applies to goos windows only; got goos '$goos'." }
+                  if ($cgoCc) { Write-Host "converter-cgo: CC is the pinned $cgoCc$(if ($cgoCcSha) { ", its sha256 REPLACED by $cgoCcSha" })" }
+              }
           }
-          elseif ($filter -match '(^|;)\s*(jit|test|at|dns)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe and sweep-shard only; got stage '$stage' and filter '$filter'." }
+          elseif ($filter -match '(^|;)\s*(jit|test|at|dns|cc|sha)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe, sweep-shard and converter-cgo only; got stage '$stage' and filter '$filter'." }
 
           # The behavioral stages' per-program run budget. A schedule has no inputs and keeps 120, as
           # does a blank dispatch. A value that is not a whole number of seconds in 1..1800 FAILS the
@@ -423,6 +436,9 @@ jobs:
                                          # the headroom the table's own doctrine asks for.
               'stack-probe'      = 90    # one row's -tests convert/build, the filtered compare, and up to the 900 s per-test
                                          # deadline while the probe waits. PROVISIONAL until the first run (C1, 2026-11-08).
+              'converter-cgo'    = 15    # the converter's go test filtered to its cgo tests: one cold module download and
+                                         # build, plus one converter go build for the driver-level arms. About 15 s of
+                                         # tests on H with no compiler. PROVISIONAL until the first run (H, 2026-11-09).
               'golib-tests'      = 90    # one Release build of GolibTests and its core closure for this GOOS from
                                          # cold, then `dotnet test` (whole suite, or a --filter). PROVISIONAL until
                                          # the first run; added for the AES seat's osx-arm64 guard (C1, 2026-11-06).
@@ -492,6 +508,8 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "probe-at=$probeAt" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "jit-disasm=$jitDisasm" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dns-servers=$dnsServers" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-cc=$cgoCc" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-cc-sha=$cgoCcSha" -Encoding utf8
 
   # ---------------------------------------------------------------------------------------------
   # pack — release-smoke only: the release's own pack, as a rehearsal, on a hosted Windows runner.
@@ -1049,6 +1067,152 @@ jobs:
 
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
           & ./.github/annotate-summary.ps1 -Title "golib-tests $goos/$rid" -Lines $summary
+
+          exit $runExit
+
+      # -------------------------------------------------------------------------------------
+      # converter-cgo -- OPT-IN: the converter's own cgo tests on this leg's host, where a C compiler lets go list run
+      # cmd/cgo. No other hosted stage gives them one (licensing.yml's go test is filtered to ^TestLicensing), so the
+      # compiler-gated tests -- cgo Phase 1's exit gate, TestRealLoadRefusesOnlyASelectedCgoFile -- skip everywhere
+      # else. A SKIP here is a reading too: this runner had no compiler on PATH, which the summary's first line names.
+      # -------------------------------------------------------------------------------------
+      # converter-cgo with ;cc= -- the cgo C toolchain scout's instrument (H, 2026-11-10; the owner's direction is
+      # PLAN-cgo-interop §5.1's dated amendment). ONE pinned toolchain archive for this runner is downloaded and refused
+      # unless its sha256 is the pin's (or the plan's sha= replacement); only a verified archive is unpacked and handed to
+      # go as CC. A refusal fails the leg HERE, so the tests step below never runs on an unverified compiler. The gate
+      # tests still look for gcc, cc or clang on PATH, which every hosted image has; go itself reads CC, so cmd/cgo runs
+      # the pinned compiler, and the tests step's instrument line names it.
+      - name: Converter cgo tests — provision the pinned C toolchain
+        if: needs.plan.outputs.stage == 'converter-cgo' && needs.plan.outputs.cgo-cc != ''
+        shell: pwsh
+        env:
+          CGO_CC: ${{ needs.plan.outputs.cgo-cc }}
+          CGO_CC_SHA: ${{ needs.plan.outputs.cgo-cc-sha }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $ProgressPreference = 'SilentlyContinue'
+
+          # One archive per toolchain and runner, with the sha256 its publisher states: zig's from ziglang.org's download
+          # index (whose tarballs minisign signs), llvm-mingw's from its GitHub release's asset digest. Both releases were
+          # at least two weeks old when pinned. llvm-mingw's compilers target windows only, so it has a windows pin only.
+          $zig = 'https://ziglang.org/download/0.17.0'
+          $mingw = 'https://github.com/mstorsjo/llvm-mingw/releases/download/20261020'
+          $pins = @{
+              'zig|win-x64'        = @{ version = 'zig 0.17.0'; url = "$zig/zig-x86_64-windows-0.17.0.zip"; sha256 = 'b5663f69581dcf391293fbf16c06cb80d81d806545ce618b4d0bab7f0eb8c428'; cc = @('zig.exe', 'cc') }
+              'zig|linux-x64'      = @{ version = 'zig 0.17.0'; url = "$zig/zig-x86_64-linux-0.17.0.tar.xz"; sha256 = '1cbe9df9f27e6b78d14ccbca43b6703a404ef79ef1c463de901d7f088d4e2026'; cc = @('zig', 'cc') }
+              'zig|osx-x64'        = @{ version = 'zig 0.17.0'; url = "$zig/zig-x86_64-macos-0.17.0.tar.xz"; sha256 = '4f9a1c5269aa17ebda5e6d3c2b89d6cbf36f7d2b22a0306e9ab98f25f95529c6'; cc = @('zig', 'cc') }
+              'zig|osx-arm64'      = @{ version = 'zig 0.17.0'; url = "$zig/zig-aarch64-macos-0.17.0.tar.xz"; sha256 = 'b607e9b9234790a008116ae5bdb71c6243b84b9fb42a53a9e70fde41c06c536a'; cc = @('zig', 'cc') }
+              'llvm-mingw|win-x64' = @{ version = 'llvm-mingw 20261020 (ucrt)'; url = "$mingw/llvm-mingw-20261020-ucrt-x86_64.zip"; sha256 = 'fd5462b7f5d93b2ff981fcd3f9c7e427e47f3203c64ea91c27bcc444eebd74cd'; cc = @('bin/x86_64-w64-mingw32-clang.exe') }
+          }
+
+          $key = "$env:CGO_CC|$env:RID"
+          if (-not $pins.ContainsKey($key)) { throw "converter-cgo: no $env:CGO_CC pin for runner $env:RID." }
+          $pin = $pins[$key]
+          $expected = if ($env:CGO_CC_SHA) { $env:CGO_CC_SHA } else { $pin.sha256 }
+          $hashSource = if ($env:CGO_CC_SHA) { 'REPLACED by the plan''s sha= option' } else { 'the pin' }
+
+          $root = Join-Path $env:RUNNER_TEMP "cgo-cc-$env:CGO_CC"
+          New-Item -ItemType Directory -Force -Path $root | Out-Null
+          $archive = Join-Path $root ([IO.Path]::GetFileName($pin.url))
+
+          $clock = [Diagnostics.Stopwatch]::StartNew()
+          Invoke-WebRequest -Uri $pin.url -OutFile $archive
+          $downloadSeconds = [math]::Round($clock.Elapsed.TotalSeconds, 1)
+          $bytes = (Get-Item -LiteralPath $archive).Length
+          $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $archive).Hash.ToLowerInvariant()
+
+          if ($actual -ne $expected) {
+              Remove-Item -LiteralPath $archive -Force
+              $summary = @(
+                  "## Converter cgo toolchain -- $env:CGO_CC REFUSED on $env:RID"
+                  ''
+                  "$($pin.version): $($pin.url)"
+                  "$bytes bytes in $downloadSeconds s; sha256 $actual, want $expected ($hashSource)."
+                  'Nothing was unpacked, CC was not set, and the tests step does not run.'
+              )
+              Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+              & ./.github/annotate-summary.ps1 -Title "converter-cgo toolchain $env:RID" -Lines $summary
+              throw "converter-cgo: REFUSED $($pin.url): sha256 $actual, want $expected ($hashSource)."
+          }
+
+          # Unpacked only now. Each archive holds one top-level directory.
+          $clock.Restart()
+          if ($archive.EndsWith('.zip')) { & tar -xf $archive -C $root } else { & tar -xJf $archive -C $root }
+          if ($LASTEXITCODE -ne 0) { throw "converter-cgo: could not unpack $archive (tar exit $LASTEXITCODE)." }
+          $unpackSeconds = [math]::Round($clock.Elapsed.TotalSeconds, 1)
+          $unpacked = @(Get-ChildItem -LiteralPath $root -Directory)
+          if ($unpacked.Count -ne 1) { throw "converter-cgo: $archive unpacked to $($unpacked.Count) directories, want one." }
+
+          $exe = Join-Path $unpacked[0].FullName $pin.cc[0]
+          if (-not (Test-Path -LiteralPath $exe)) { throw "converter-cgo: $exe is not in the unpacked $($pin.version)." }
+          $cc = (@($exe) + @($pin.cc | Select-Object -Skip 1)) -join ' '
+
+          # zig keeps a cache of the C runtime it builds; keep it beside the toolchain, inside this job.
+          $zigCache = Join-Path $root 'zig-cache'
+          Add-Content -Path $env:GITHUB_ENV -Value "CC=$cc" -Encoding utf8
+          Add-Content -Path $env:GITHUB_ENV -Value "ZIG_GLOBAL_CACHE_DIR=$zigCache" -Encoding utf8
+          Add-Content -Path $env:GITHUB_ENV -Value "ZIG_LOCAL_CACHE_DIR=$zigCache" -Encoding utf8
+
+          $summary = @(
+              "## Converter cgo toolchain -- $env:CGO_CC on $env:RID"
+              ''
+              "$($pin.version): $($pin.url)"
+              "READING download $bytes bytes in $downloadSeconds s; sha256 $actual = $hashSource; unpacked in $unpackSeconds s"
+              "CC = $cc"
+          )
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title "converter-cgo toolchain $env:RID" -Lines $summary
+
+      - name: Converter cgo tests — go test with this host's C compiler
+        if: needs.plan.outputs.stage == 'converter-cgo'
+        shell: pwsh
+        env:
+          CGO_TEST_FILTER: ${{ needs.plan.outputs.filter }}
+        run: |
+          $ErrorActionPreference = 'Continue'
+
+          $goos = $env:GOOS_TARGET
+          $rid = $env:RID
+          $art = Join-Path $PWD 'artifacts'
+          New-Item -ItemType Directory -Force -Path $art | Out-Null
+          $log = Join-Path $art "converter-cgo-$goos-$rid.log"
+
+          $filter = $env:CGO_TEST_FILTER
+          if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^Test.*Cgo|^TestRealLoad' }
+
+          # The instrument line: the compiler go would hand cmd/cgo, and whether go's own default turns cgo on here.
+          # CC may carry arguments (a pinned zig is "zig cc"): the first field is the executable, the rest go before --version.
+          $cc = "$(& go env CC)".Trim()
+          $ccFields = @($cc -split '\s+' | Where-Object { $_ })
+          $ccVersion = if ($ccFields.Count -and (Get-Command $ccFields[0] -ErrorAction SilentlyContinue)) { "$(& $ccFields[0] @($ccFields | Select-Object -Skip 1) --version 2>&1 | Select-Object -First 1)" } else { 'NOT FOUND on PATH' }
+          $instrument = "go env CC = $cc ($ccVersion); go env CGO_ENABLED = $("$(& go env CGO_ENABLED)".Trim())"
+          Write-Host "==> $instrument"
+
+          Push-Location 'src/go2cs'
+          try {
+              & go test -buildvcs=false -count=1 -v -run $filter . *>&1 | Tee-Object -FilePath $log
+              $runExit = $LASTEXITCODE
+          }
+          finally { Pop-Location }
+
+          # Every test's outcome by name, so a SKIP is visible rather than counted as a pass, then each READING a test logs.
+          $lines = @(Get-Content -LiteralPath $log -ErrorAction SilentlyContinue)
+          $outcomes = @($lines | Where-Object { $_ -match '^\s*--- (PASS|FAIL|SKIP):' } | ForEach-Object { $_.Trim() })
+          $readings = @($lines | Where-Object { $_ -match 'READING ' } | ForEach-Object { $_.Trim() })
+          if ($readings.Count) { $outcomes += @('', 'Readings:') + $readings }
+
+          $summary = @(
+              "## Converter cgo tests -- $goos ($rid)"
+              ''
+              $instrument
+              ''
+              "Filter ``$filter`` -- exit ``$runExit``"
+              ''
+              '```'
+          ) + $outcomes + @('```')
+
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title "converter-cgo $goos/$rid" -Lines $summary
 
           exit $runExit
 

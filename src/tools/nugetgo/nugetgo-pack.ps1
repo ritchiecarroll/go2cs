@@ -233,6 +233,16 @@ if (-not (Test-Path -LiteralPath $LicenseFile -PathType Leaf)) { Refuse "no upst
 $licenseName = Split-Path -Leaf $LicenseFile
 if (-not $LicenseSpdx) { Refuse '-LicenseSpdx is required: the README names the upstream license as an SPDX expression (for example MIT or BSD-3-Clause), stated by the caller, never inferred' }
 if (-not (Test-NugetgoSpdx $LicenseSpdx)) { Refuse "-LicenseSpdx '$LicenseSpdx' is not an SPDX expression (identifiers joined by AND, OR or WITH)" }
+# A license that asks each modified file to state that it was changed (Apache-2.0 section 4(b)): every converted file
+# of the packed projects must carry go2cs's -provenance notice, and the pack's own flavor conversions write it too. The
+# notice is a comment, which GoInputDigest leaves out, so the flavors still reproduce -RecurseRoot's digests.
+$provenance = Test-NugetgoProvenanceLicense $LicenseSpdx
+$provenanceArgs = @(if ($provenance) { '-provenance' })
+if ($provenance) {
+    $unmarked = @(Find-NugetgoFilesWithoutProvenance -ProjectFiles $libraries.ToArray())
+    if ($unmarked.Count) { Refuse "-LicenseSpdx '$LicenseSpdx' asks each modified file to carry a notice that it was changed (Apache-2.0 section 4(b)), and $($unmarked.Count) converted file(s) under -RecurseRoot carry none, the first $($unmarked[0]): convert it again with go2cs -recurse=nuget -provenance" }
+    Write-Host "  provenance: every converted file carries go2cs's modification notice (-LicenseSpdx '$LicenseSpdx'); the flavors convert with -provenance"
+}
 $resolvedCopyright = Resolve-NugetgoCopyright -LicenseFile $LicenseFile -Stated $Copyright -ModuleDir $moduleCacheDir
 if ($resolvedCopyright.Reason) { Refuse $resolvedCopyright.Reason }
 if ($resolvedCopyright.Source -ceq 'stated') { Write-Host "  copyright: stated with -Copyright (the license carries none); evidence: $($resolvedCopyright.Evidence)" }
@@ -436,7 +446,7 @@ $flavorProjects = @{}
 foreach ($goos in Get-NugetgoFlavorGoos) {
     $root = Join-Path $flavorDir $goos
     $log = Join-Path $flavorDir "$goos.log"
-    & $converter -recurse=nuget -platforms "$goos/$flavorArch" -go2cspath (Split-Path $flavorConverterDir) $moduleCacheDir $root *> $log
+    & $converter -recurse=nuget @provenanceArgs -platforms "$goos/$flavorArch" -go2cspath (Split-Path $flavorConverterDir) $moduleCacheDir $root *> $log
     if ($LASTEXITCODE -ne 0) { Refuse "the $goos flavor of $ModulePath did not convert ($LASTEXITCODE): $log" }
     $flavorSrc = Join-Path (Join-Path $root 'src') $ModulePath
     $flavorProjects[$goos] = @(foreach ($p in $libraries) {

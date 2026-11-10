@@ -18,6 +18,8 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+
+	"golang.org/x/mod/module"
 )
 
 // go2csCopyrightLine is the second line of the converted standard library's LICENSE: the upstream
@@ -82,25 +84,76 @@ func sourceLicenseNotices(file *ast.File, newline string) string {
 	return out.String()
 }
 
-// A GOROOT-relative path identifies stdlib files; a module-relative path identifies
-// recursive module inputs. Otherwise the basename is the only portable fact known.
+// sourceProvenance is -provenance's notice (Apache-2.0 4(b): modified files carry a notice that they were changed),
+// two comment lines:
+//
+//	// Converted from Go source: "doc/md_docs.go" in module github.com/spf13/cobra@v1.10.2.
+//	// Modified from the original by conversion to C# with go2cs <release>.
+//
+// The path is relative to the file's own root: GOROOT for a standard-library file, otherwise its module's root, which
+// names the module (path@version for a module-cache directory, the path alone for a module checked out from source).
+// Under neither, the file name is the only portable fact. Never an absolute path, and no date, so output stays the
+// same run to run; no word in it reads as a license header. Default off.
 func sourceProvenance(source string, options Options, newline string) string {
 	if !options.provenance {
 		return ""
 	}
-	name := filepath.Base(source)
-	for _, root := range []string{options.goRoot, options.mainModuleDir} {
-		if root == "" {
-			continue
+
+	name, origin := sourceOrigin(source, options)
+
+	// Quoting escapes newlines and other control characters in unusual filenames.
+	return fmt.Sprintf("// Converted from Go source: %q%s.%s// Modified from the original by conversion to C# with go2cs %s.%s",
+		name, origin, newline, corpusRelease(), newline)
+}
+
+// sourceOrigin is source's path relative to its own root and the " in ..." clause naming that root, or the file name
+// and no clause when it has neither.
+func sourceOrigin(source string, options Options) (name string, origin string) {
+	if rel, ok := relativeUnder(options.goRoot, source); ok {
+		origin = " in the Go standard library"
+
+		if data, err := os.ReadFile(filepath.Join(options.goRoot, "VERSION")); err == nil {
+			if release, _, _ := strings.Cut(strings.TrimSpace(string(data)), "\n"); strings.HasPrefix(release, "go") {
+				origin += ", " + strings.TrimSpace(release)
+			}
 		}
-		rel, err := filepath.Rel(root, source)
-		if err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) && !filepath.IsAbs(rel) {
-			name = filepath.ToSlash(rel)
-			break
+
+		return rel, origin
+	}
+
+	if root := licenseModuleRoot(filepath.Dir(source)); root != "" {
+		if rel, ok := relativeUnder(root, source); ok {
+			if modulePath := directoryModulePath(root); modulePath != "" {
+				origin = " in module " + modulePath
+
+				// A module-cache directory names the version (moduleCacheVersion); a checkout has none to claim.
+				if escaped, err := module.EscapePath(modulePath); err == nil {
+					if version := moduleCacheVersion(root, escaped); version != "" {
+						origin += "@" + version
+					}
+				}
+			}
+
+			return rel, origin
 		}
 	}
-	// Quoting escapes newlines and other control characters in unusual filenames.
-	return fmt.Sprintf("// Converted from Go source: %q%s", name, newline)
+
+	return filepath.Base(source), ""
+}
+
+// relativeUnder is path relative to root, slash-separated, when path lies under root.
+func relativeUnder(root, path string) (string, bool) {
+	if root == "" {
+		return "", false
+	}
+
+	rel, err := filepath.Rel(root, path)
+
+	if err != nil || rel == "." || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) || filepath.IsAbs(rel) {
+		return "", false
+	}
+
+	return filepath.ToSlash(rel), true
 }
 
 // packageLicenseMarker is the placeholder csproj-template.xml carries where the package's license

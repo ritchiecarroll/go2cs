@@ -105,8 +105,10 @@ Full taxonomy: [`docs/Architecture.md`](docs/Architecture.md).
   project; never relicenses source. Default packing: a library's local `LICENSE`, a stdlib package's
   `src/core/LICENSE` by relative path, a `-recurse` dependency's own module license copied verbatim to
   the converted module root once per module (`licensing.go`).
-- `-provenance` — deterministic `// Converted from Go source: "<path>"`, GOROOT- or module-relative,
-  default OFF, no timestamp. Leading copyright/license notices are emitted even WITHOUT `-comments`.
+- `-provenance` — a deterministic two-line notice, `// Converted from Go source: "<path>" in module
+  <path>@<version>.` (GOROOT- or own-module-relative) then `// Modified from the original by conversion to C#
+  with go2cs <release>.`, after the upstream notices and before the package doc comment; default OFF, no
+  timestamp, not in GoInputDigest. nugetgo-pack turns it on for an Apache-2.0 `-LicenseSpdx`. Leading copyright/license notices are emitted even WITHOUT `-comments`.
   The converter is AGPL-3.0-only with the output exception in `src/go2cs/LICENSE-EXCEPTION`; every
   converter `.go` header carries the section 7 notice (`TestLicensingConverterHeaders`). See
   `LICENSING.md`.

@@ -35401,4 +35401,36 @@ the .3 read's divergences or this one's.
 
 — C1 (2026-11-09)
 
+## 2026-11-10 — C2 (batch 280's release-smoke, COORD's ruling): a RED GUARD MASKED A SECOND FAILURE — go.lib's IByteSeq gained two abstract members after 1.26.10.3; now defaulted
+
+**The reading.** Batch 280's release-smoke (42752322043, the pack job) packed 362 packages and then refused go.lib on two
+CP0006: `Cannot add interface member 'bool go.IByteSeq<T>.TryGetSlice(out go.slice<T>)'` and `... TryGetString(out
+go.@string)`, against the baseline 1.26.10.3. Reproduced against the .3 nupkg from nuget.org with go.lib alone packed
+from master 9b8af3bd30 (Test-GoApiCompatPackage): those two, and nothing else.
+
+**The cause.** 475adb5312 (2026-11-09, TS readiness C16 (d)) added both members to `IByteSeq<T>` as ABSTRACT members,
+after .3 shipped. go2cs-gen emits an `IByteSeq<byte>` implementation into every converted package that declares a
+named []byte or a named string, so a nugetgo package built against .3 would fail to load that type under a .4 go.lib.
+
+**Why nobody saw it.** Every pre-publish pack on master was already refusing on the 17 stale suppressions .3 left
+behind (42720953059). The guard was red for a known cause, so the second red behind it never printed. It surfaced only
+when the suppression retirement (b4152307a5) cleared the first one.
+
+**The lesson.** When a guard is red for a known cause, the next red behind it is invisible until the first is
+cleared. Read the guard's FULL refusal list, not its first cause. A guard that is red for a reason everyone already
+knows has stopped guarding anything else.
+
+**The remedy, ruled (COORD, 2026-11-10): non-breaking, not suppressed, the floor unmoved at 1.26.10.3.** Both members
+have default bodies in `src/core/golib/IByteSeq.cs` that answer false. A .3-built implementer takes the copy path,
+its .3 behaviour: the values are right, and only the C16 sharing waits for a rebuild. golib's own types and today's
+go2cs-gen output implement both explicitly and never reach the defaults.
+
+**Gates.**
+- ApiCompat against .3: 2 CP0006 at master (red), 0 with the defaults (green). ApiCompat accepts a default-implemented
+  interface member.
+- GolibTests ByteSeqPreMemberImplementerTests: two structs of the .3 shape, without either member, convert by value
+  through the fallback. Red at master's IByteSeq: CS0535 on all four missing implementations.
+
+— C2 (2026-11-10)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

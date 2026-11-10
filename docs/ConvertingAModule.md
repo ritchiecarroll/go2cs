@@ -344,5 +344,10 @@ measured, says so, and leaves everything outside it alone. Keep both marker line
 line before and after, and put no link above the block. The pack refuses the file, by name, otherwise.
 
 `nuget/icon.png` beside it replaces the go2cs icon (PNG, at most 1 MB).
+
+If the module's license asks that modified files say they were changed (Apache-2.0 does, in section 4(b)), convert
+with `-provenance`. Each converted file then carries a notice after its upstream copyright lines: the Go file and
+module it came from, and that go2cs modified it by converting it to C#. The pack turns the option on for its own
+conversions when `-LicenseSpdx` names Apache-2.0, and refuses a conversion whose files lack the notice.
 <!-- The publishing runbook, [`NugetgoPublish.md`](NugetgoPublish.md#customizing-the-package-page), has the
      same rules in its "Customizing the package page" section (internal record, unlinked 2026-10-26, OQ-1). -->

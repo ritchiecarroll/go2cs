@@ -142,6 +142,12 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 	cfg.Env = converterLoaderEnv(fmt.Sprintf("GOOS=%s", targetParts[0]), fmt.Sprintf("GOARCH=%s", targetParts[1]),
 		"GOTOOLCHAIN=local")
 
+	// -cgo makes this load, and only this one, cgo-on: the loader pin made explicit (PLAN-cgo-interop §11.1). Last,
+	// so it wins; checkCgoFlag has already refused an environment asking for the opposite.
+	if options.parseCgoTargets {
+		cfg.Env = append(cfg.Env, "CGO_ENABLED=1")
+	}
+
 	// A MODULE-CACHE package is loaded from the MAIN MODULE's directory, by import path — not from
 	// its own directory, by path. The distinction is not stylistic: the go command treats the module
 	// whose go.mod it finds by walking up from cfg.Dir as the MAIN module, and a cache directory is
@@ -300,6 +306,11 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			var refusal *cgoSourceRefusal
 
 			if errors.As(err, &refusal) {
+				// Under -cgo the package still converts to nothing, but the refusal first says what Phase 1 read.
+				if options.parseCgoTargets && !refusal.excluded {
+					refusal.recognized = cgoRecognitionSummary(pkg.Types, pkg.Fset, pkg.Syntax, pkg.GoFiles)
+				}
+
 				for _, position := range refusal.imports {
 					reportDiagnostic(position.String(), diagnosticCgoRefused, refusal.diagnostic())
 				}
@@ -978,11 +989,13 @@ func refuseCgoOnlyPackage(pkg *packages.Package, targetPlatform string, buildTag
 
 // cgoSourceRefusal is the error of refuseSelectedCgoSources and refuseCgoOnlyPackage: the package,
 // and the `import "C"` of each cgo source, which the driver reports as a canonical diagnostic before
-// refusing. excluded marks refuseCgoOnlyPackage's case, where the sources are excluded, not selected.
+// refusing. excluded marks refuseCgoOnlyPackage's case, where the sources are excluded, not selected. recognized is
+// what a -cgo load recognized before the refusal (cgoRecognitionSummary), or "" without -cgo.
 type cgoSourceRefusal struct {
-	pkgPath  string
-	imports  []token.Position
-	excluded bool
+	pkgPath    string
+	imports    []token.Position
+	excluded   bool
+	recognized string
 }
 
 // diagnostic is the text of the canonical diagnostic reported at each source's `import "C"`.
@@ -1006,8 +1019,14 @@ func (refusal *cgoSourceRefusal) Error() string {
 			refusal.pkgPath, strings.Join(sources, ", "))
 	}
 
-	return fmt.Sprintf("package %s selects cgo source %s (import \"C\") for this build, and cgo has no C# conversion yet, so the converted package would silently lack that code; convert with CGO_ENABLED=0 (the corpus convention) or exclude the file from the build",
+	message := fmt.Sprintf("package %s selects cgo source %s (import \"C\") for this build, and cgo has no C# conversion yet, so the converted package would silently lack that code; convert with CGO_ENABLED=0 (the corpus convention) or exclude the file from the build",
 		refusal.pkgPath, strings.Join(sources, ", "))
+
+	if refusal.recognized != "" {
+		message += "; under -cgo: " + refusal.recognized
+	}
+
+	return message
 }
 
 // importCPosition reports where the Go source at path imports the pseudo-package "C", if it does.

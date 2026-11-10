@@ -9,7 +9,9 @@
       1.1  build G once in T (or take -Converter), and refuse unless G's corpus release is -Release
       1.2  G -recurse -tests -test-action all -platforms P -module-disclosures ... SRC VR      (watched for free disk)
       1.3  gate: exit 0, MODULE.md present; every row compared with the kit's counts (the prediction)
-      1.4  G -recurse=nuget -platforms P SRC PR                                                (watched for free disk)
+      1.4  G -recurse=nuget [-provenance] -platforms P SRC PR                                   (watched for free disk)
+           -provenance when the row's LicenseSpdx asks each modified file to say so (Apache-2.0); the pack refuses
+           a PR without it
       1.5  gate: every PR project's GoInputDigest equals its MODULE.md row (the binding)
       2    nugetgo-pack.ps1 for each requested pack (int.1 and/or release), -Converter G, -ClosureVersion -Release;
            with -PackageReadme, the author's package README is put in place first (PR/src/M/nuget/README.md), so
@@ -81,6 +83,7 @@ param(
 $ErrorActionPreference = 'Stop'
 function Refuse([string]$why) { throw "REFUSED: $why" }
 Import-Module (Join-Path $PSScriptRoot 'NugetgoValidationBinding.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'NugetgoLicense.psm1') -Force
 # Under pwsh -File a list arrives as one comma-joined string (Split-NugetgoListArgument in the pack does the same).
 $ThirdPartyPackage = @($ThirdPartyPackage | ForEach-Object { "$_" -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
 function Say([string]$line) { Write-Host $line }
@@ -221,7 +224,10 @@ try {
     }
 
     # 1.4 and 1.5: the pack's input, and the binding.
-    $rc = Invoke-Watched 'PR' @('-recurse=nuget', '-platforms', $Platform, '-go2cspath', (Join-Path $T 'src'), $SRC, $PR) (Join-Path $Work 'PR')
+    # A license that asks each modified file to carry a notice that it was changed (Apache-2.0 section 4(b)) gets
+    # go2cs's -provenance notice in every converted file; the pack refuses a PR without it.
+    $provenanceArgs = @(if (Test-NugetgoProvenanceLicense $row.LicenseSpdx) { '-provenance' })
+    $rc = Invoke-Watched 'PR' (@('-recurse=nuget') + $provenanceArgs + @('-platforms', $Platform, '-go2cspath', (Join-Path $T 'src'), $SRC, $PR)) (Join-Path $Work 'PR')
     if ($rc) { Refuse "1.4: -recurse=nuget exited $rc" }
     $prModule = Join-Path $PR "src/$modPath"
     $excluded = @($row.ExcludePackage)
