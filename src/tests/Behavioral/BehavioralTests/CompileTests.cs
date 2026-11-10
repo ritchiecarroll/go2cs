@@ -757,6 +757,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckFuncLiteralDeclaredResultIface() => CheckTarget("FuncLiteralDeclaredResultIface");
 
     [TestMethod]
+    public void CheckFuncMethodSameNameCollision() => CheckTarget("FuncMethodSameNameCollision");
+
+    [TestMethod]
     public void CheckFuncTypeNilConversion() => CheckTarget("FuncTypeNilConversion");
 
     [TestMethod]

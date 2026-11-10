@@ -597,10 +597,10 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		csFunctionName = getGlobalTempVarName("_")
 	}
 
-	// A `-tests` variant registered THIS test-file method declarator for a Δ-rename — its name
-	// collides with a pinned production element or a dot-imported function (B2/B9, see
-	// performNameCollisionAnalysis); reference sites follow via convIdent's isMethod arm.
-	if testMethodRenames[v.info.ObjectOf(funcDecl.Name)] {
+	// A `-tests` variant registered THIS test-file declarator for a Δ-rename (B2/B9, see performNameCollisionAnalysis),
+	// or THIS production free function collides with a same-named production method (C40, see
+	// funcRenamedForMethodCollision); reference sites follow through convIdent.
+	if testMethodRenames[v.info.ObjectOf(funcDecl.Name)] || funcRenamedForMethodCollision(v.info.ObjectOf(funcDecl.Name), v.fset) {
 		csFunctionName = ShadowVarMarker + csFunctionName
 	}
 

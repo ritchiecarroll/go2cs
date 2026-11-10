@@ -550,6 +550,8 @@
     <Project Path="tests/Behavioral/FormatTypeAdapters/typelib/FormatTypeAdapters.typelib.csproj" />
     <Project Path="tests/Behavioral/FuncFieldNestedTupleParam/FuncFieldNestedTupleParam.csproj" />
     <Project Path="tests/Behavioral/FuncForPCName/FuncForPCName.csproj" />
+    <Project Path="tests/Behavioral/FuncMethodSameNameCollision/FuncMethodSameNameCollision.csproj" />
+    <Project Path="tests/Behavioral/FuncMethodSameNameCollision/shapes/FuncMethodSameNameCollision.shapes.csproj" />
     <Project Path="tests/Behavioral/FuncTypeNilConversion/FuncTypeNilConversion.csproj" />
     <Project Path="tests/Behavioral/FuncTypeVerbs/FuncTypeVerbs.csproj" />
     <Project Path="tests/Behavioral/ForeignPairNumericConv/ForeignPairNumericConv.csproj" />
