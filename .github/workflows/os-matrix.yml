@@ -567,19 +567,14 @@ jobs:
         with:
           dotnet-version: ${{ needs.plan.outputs.dotnet }}
 
-      # Until linux-arm64 ships (seat S5c), every flavour push-nuget packs is an amd64 flavour, and a package carrying arm64
-      # code under an amd64 RID would be a wrong package that compiles. push-nuget passes GoTargetOS per flavour and takes
-      # GoTargetArch from the environment, so the guard reads each flavour from this job's environment, as the pack will.
-      - name: Pack flavour guard — every flavour packs at amd64 until linux-arm64 ships
+      # push-nuget builds one flavour per GOOS/GOARCH pair of its $ridFlavors map (seat S6), passing -p:GoTargetOS and
+      # -p:GoTargetArch, so the job's environment no longer decides any flavour's architecture. A pair at the wrong
+      # architecture would pack a wrong package that compiles; the guard reads the map and probes each pair.
+      - name: Pack flavour guard — linux-arm64 packs at linux/arm64, every other RID at amd64
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          if ($env:GoTargetArch -and $env:GoTargetArch -ne 'amd64') {
-              throw "the pack job binds GoTargetArch=$($env:GoTargetArch); no package ships an arm64 flavour until seat S5c, so this pack stops before it builds."
-          }
-          foreach ($goos in 'windows', 'linux', 'darwin') {
-              & ./.github/flavour-probe.ps1 -Expected amd64 -GoTargetOS $goos -Label "the $goos pack flavour"
-          }
+          & ./.github/pack-flavour-guard.ps1
 
       - name: Pack every go.* package (rehearsal)
         shell: powershell
