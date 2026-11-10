@@ -361,7 +361,10 @@ jobs:
           # the linux/AMD64 flavour until the linux/arm64 flavour exists, and that flavour makes amd64 system calls: on an
           # arm64 host its readings describe that mismatch, not the platform. So, until src/core holds a linux-arm64/ folder
           # (the flavour's own home, seat S2), the arm leg runs census and golib-tests ONLY, as a labelled calibration that
-          # banks nothing, and every other stage refuses it by name.
+          # banks nothing, and every other stage refuses it by name. Once the folder exists (seat S5b) the arm leg is no
+          # calibration: it carries arch = arm64, which the run job binds as GoTargetArch beside GoTargetOS, so it builds
+          # the linux/ARM64 flavour. Without that binding every arch-split csproj defaults GoTargetArch to amd64, and the
+          # leg would build the linux/amd64 flavour under the arm64 label; the run job's flavour probe refuses that.
           $arch = if ($env:EVENT_NAME -eq 'schedule' -or -not $env:INPUT_ARCH) { 'x64' } else { $env:INPUT_ARCH }
           if ($arch -notin 'x64', 'arm64', 'both') { throw "Unknown arch '$arch' (x64, arm64 or both)." }
           if ($arch -ne 'x64') {
@@ -374,7 +377,20 @@ jobs:
               if ($calibration -and $env:INPUT_STAGE -notin 'census', 'golib-tests') {
                   throw "arch '$arch': the linux/arm64 flavour does not exist yet (no linux-arm64/ folder under src/core), so the arm leg runs census and golib-tests only, as a calibration; '$($env:INPUT_STAGE)' would read the linux/amd64 flavour on the arm64 ABI and must not be read as an arm64 result."
               }
-              $arm = @{ goos = 'linux'; runner = 'ubuntu-24.04-arm'; rid = 'linux-arm64'; calibration = $calibration }
+              # Once the flavour exists, census and golib-tests are open on it, and every stage that RUNS converted programs
+              # stays refused by name until the seat that lifts it lands (COORD, 2026-11-10): those programs reach the
+              # linux hand-owns' runtime sites (syscall numbers, netpoll), which are DESIGN-linux-arm64-flavour.md's S3.
+              $armLiftedBy = [ordered]@{
+                  'behavioral-smoke'  = 'S3 (the linux hand-owns at arm64)'
+                  'behavioral-full'   = 'S3 (the linux hand-owns at arm64)'
+                  'behavioral-stderr' = 'S3 (the linux hand-owns at arm64)'
+                  'sweep-shard'       = 'S3 (the linux hand-owns at arm64), then the bank of section 7'
+                  'stack-probe'       = 'S3 (the linux hand-owns at arm64)'
+              }
+              if (-not $calibration -and $armLiftedBy.Contains($env:INPUT_STAGE)) {
+                  throw "arch '$arch': '$($env:INPUT_STAGE)' runs converted programs on the linux/arm64 flavour, whose runtime sites are not yet arm64's; it is refused on the arm leg until seat $($armLiftedBy[$env:INPUT_STAGE]) lands. census and golib-tests run there."
+              }
+              $arm = @{ goos = 'linux'; runner = 'ubuntu-24.04-arm'; rid = 'linux-arm64'; calibration = $calibration; arch = $(if ($calibration) { '' } else { 'arm64' }) }
               $targets = if ($arch -eq 'arm64') { @($arm) } else { @($targets) + @($arm) }
               Write-Host "arch ${arch}: linux legs $(@($targets | ForEach-Object { $_.rid }) -join ', ')$(if ($calibration) { ' (linux-arm64 is a CALIBRATION leg: the linux/amd64 flavour on arm64)' })"
           }
@@ -481,6 +497,8 @@ jobs:
               }
               # Only a calibration leg carries the key, so every other dispatch derives the matrix it derived before.
               if ($t.calibration) { $entry.calibration = $true }
+              # Likewise arch: only the linux-arm64 leg, once its flavour exists, carries one.
+              if ($t.arch) { $entry.arch = $t.arch }
               [pscustomobject]$entry
           }
 
@@ -548,6 +566,20 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ needs.plan.outputs.dotnet }}
+
+      # Until linux-arm64 ships (seat S5c), every flavour push-nuget packs is an amd64 flavour, and a package carrying arm64
+      # code under an amd64 RID would be a wrong package that compiles. push-nuget passes GoTargetOS per flavour and takes
+      # GoTargetArch from the environment, so the guard reads each flavour from this job's environment, as the pack will.
+      - name: Pack flavour guard — every flavour packs at amd64 until linux-arm64 ships
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:GoTargetArch -and $env:GoTargetArch -ne 'amd64') {
+              throw "the pack job binds GoTargetArch=$($env:GoTargetArch); no package ships an arm64 flavour until seat S5c, so this pack stops before it builds."
+          }
+          foreach ($goos in 'windows', 'linux', 'darwin') {
+              & ./.github/flavour-probe.ps1 -Expected amd64 -GoTargetOS $goos -Label "the $goos pack flavour"
+          }
 
       - name: Pack every go.* package (rehearsal)
         shell: powershell
@@ -622,6 +654,10 @@ jobs:
       # On Windows this is the identity; on Linux it agrees with _paths.ps1's own pin; on macOS it
       # is new, and it is what makes a darwin run a DARWIN run instead of a windows-flavor one.
       GoTargetOS: ${{ matrix.goos }}
+      # The flavour's ARCH, the second axis of the same binding (seat S5b). `arm64` on the linux-arm64 leg once the
+      # linux/arm64 flavour exists (plan, arch); EMPTY on every other leg, because every arch-split csproj defaults an
+      # empty GoTargetArch to amd64, the arch every other flavour is converted at. So the other legs bind what they did.
+      GoTargetArch: ${{ matrix.arch }}
       GOOS_TARGET: ${{ matrix.goos }}
       RID: ${{ matrix.rid }}
       STAGE: ${{ needs.plan.outputs.stage }}
@@ -660,6 +696,7 @@ jobs:
               "stage           : $($env:STAGE)"
               "goos / rid      : $($env:GOOS_TARGET) / $($env:RID)"
               "GoTargetOS env  : $($env:GoTargetOS)"
+              "GoTargetArch env: $(if ($env:GoTargetArch) { $env:GoTargetArch } else { '(empty: the csproj default, amd64)' })"
               "calibration     : $(if ($env:CALIBRATION -eq 'true') { 'YES -- the linux/amd64 flavour on this arm64 runner; banks nothing' } else { 'no' })"
               "runner os       : $([System.Runtime.InteropServices.RuntimeInformation]::OSDescription.Trim())"
               "runner arch     : $([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)"
@@ -680,6 +717,21 @@ jobs:
 
           $lines | Tee-Object -FilePath $report
           $lines | ForEach-Object { "    $_" } | Add-Content -Path $env:GITHUB_STEP_SUMMARY
+
+      # -------------------------------------------------------------------------------------
+      # The flavour this leg builds, as MSBuild evaluates it, and a refusal when it is not the one the plan gave the leg
+      # (seat S5b; .github/flavour-probe.ps1 explains the witness). The expected arch is the matrix's own arch field,
+      # amd64 when it has none: the binding above is what is tested, so a leg whose GoTargetArch was not bound reads amd64
+      # where the plan said arm64, and stops before any stage reads it. Stages that build no corpus are not probed.
+      # -------------------------------------------------------------------------------------
+      - name: Flavour probe — the arch this leg compiles
+        if: ${{ !contains(fromJson('["release-smoke","aot-smoke","nugetgo-behavior"]'), needs.plan.outputs.stage) }}
+        shell: pwsh
+        env:
+          PLANNED_ARCH: ${{ matrix.arch }}
+        run: |
+          $expected = if ($env:PLANNED_ARCH) { $env:PLANNED_ARCH } else { 'amd64' }
+          & ./.github/flavour-probe.ps1 -Expected $expected -Label "the $($env:RID) leg"
 
       # -------------------------------------------------------------------------------------
       # census — compile the corpus flavor and bucket the errors by CS code.
@@ -709,6 +761,8 @@ jobs:
               '-p:UseSharedCompilation=false',
               '-clp:ErrorsOnly'
           )
+          # The arch axis, stated beside the OS axis when the leg binds one (seat S5b).
+          if ($env:GoTargetArch) { $buildArgs += "-p:GoTargetArch=$($env:GoTargetArch)" }
 
           Write-Host "==> dotnet $($buildArgs -join ' ')"
 
@@ -1007,11 +1061,13 @@ jobs:
 
           Push-Location 'src/tests/GolibTests'
           try {
-              & dotnet build -c Release "-p:GoTargetOS=$goos" -nologo -v q *>&1 | Tee-Object -FilePath $log
+              # The arch axis beside the OS axis, when the leg binds one (seat S5b).
+              $archArgs = @(if ($env:GoTargetArch) { "-p:GoTargetArch=$($env:GoTargetArch)" })
+              & dotnet build -c Release "-p:GoTargetOS=$goos" @archArgs -nologo -v q *>&1 | Tee-Object -FilePath $log
               $runExit = $LASTEXITCODE
 
               if ($runExit -eq 0) {
-                  $testArgs = @('test', '-c', 'Release', '--no-build', "-p:GoTargetOS=$goos", '--blame-hang-timeout', '10m',
+                  $testArgs = @('test', '-c', 'Release', '--no-build', "-p:GoTargetOS=$goos") + $archArgs + @('--blame-hang-timeout', '10m',
                       '--logger', "trx;LogFileName=$trx", '--logger', 'console;verbosity=normal')
 
                   if (-not [string]::IsNullOrWhiteSpace($env:GOLIB_FILTER)) { $testArgs += @('--filter', $env:GOLIB_FILTER) }
