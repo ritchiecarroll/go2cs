@@ -50,3 +50,16 @@ table th code {
   table-layout: auto;
   overflow: visible;
 }
+
+/* The Go feature support page (GoFeatureSupport.md) wraps its tables in
+   <div class="feature-matrix">, so every section's table gets the SAME column widths
+   and the tables line up down the page. A fixed layout honours the widths; prose
+   still wraps inside each cell. GitHub's own markdown view ignores the class, so
+   there the tables keep their auto widths. */
+.main-content .feature-matrix table {
+  table-layout: fixed;
+}
+.main-content .feature-matrix th:nth-child(1) { width: 32%; }
+.main-content .feature-matrix th:nth-child(2) { width: 9%; }
+.main-content .feature-matrix th:nth-child(2),
+.main-content .feature-matrix td:nth-child(2) { text-align: center; }
