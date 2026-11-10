@@ -1,4 +1,4 @@
-// cpu_arm64_impl.cs - Gbtc
+// cpu_arm64_process_impl.cs - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
 // SPDX-License-Identifier: BSD-3-Clause
@@ -25,9 +25,18 @@
 // So this file is cpu_arm64.go's doinit (the option table below, verbatim) and the stand-in for
 // Initialize's slot, keyed on the PROCESS architecture rather than on the converted GOARCH constant:
 // it runs only when RuntimeInformation.ProcessArchitecture is Arm64, so an x64 process on any OS is
-// unchanged. osInit is per-OS in Go; darwin's is darwin/cpu_arm64_darwin_impl.cs. darwin is the only
-// OS that ships an arm64 process, so on any other OS the partial below has no body and every flag
-// keeps its zero value, the answer it gives today.
+// unchanged. osInit is per-OS in Go: darwin's is darwin/cpu_arm64_darwin_impl.cs, and linux's (an
+// arm64 process running the linux flavour, which is converted at amd64) is
+// linux/cpu_arm64_process_linux_impl.cs. Windows has none: on a win-arm64 process the partial below
+// reaches the generated stub, which throws at module init. win-arm64 is not a shipped RID.
+//
+// THE NAME HAS NO PRINCIPAL, ON PURPOSE (docs/phase4/DESIGN-linux-arm64-flavour.md §2.7). A hand-own
+// is routed by its principal's presence (src/go2cs/platformHandOwn.go), and this file was
+// cpu_arm64_impl.cs, whose principal is the converted cpu_arm64.cs. Once a linux/arm64 target emits
+// that file, the routing would move this stand-in into the linux/arm64 build only: it would collide
+// there with the converted doinit, and darwin would lose its Apple-silicon detection. No Go file is
+// named cpu_arm64_process.go, so no target emits a principal for this name and the routing leaves it
+// where it is. The flavour seat homes it beside the other amd64-only hand-owns.
 //
 // GODEBUG: Go's Initialize runs doinit, then processOptions(env), with env from getGodebugEarly (GODEBUG
 // off Windows, "" on it). This does the same, through the same GoCpuAppliesGodebug cpu_x86_impl.cs
@@ -70,7 +79,8 @@ partial class cpu_package
             processOptions(Environment.GetEnvironmentVariable("GODEBUG") ?? "");
     }
 
-    // The OS half of Go's arm64 doinit: darwin/cpu_arm64_darwin_impl.cs on darwin, nothing elsewhere.
+    // The OS half of Go's arm64 doinit: darwin/cpu_arm64_darwin_impl.cs on darwin,
+    // linux/cpu_arm64_process_linux_impl.cs on linux.
     static partial void osInitArm64();
 
     // The option table this process's Initialize registered: arm64's on an arm64 process, x86's otherwise.
