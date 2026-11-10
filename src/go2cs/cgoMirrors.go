@@ -239,6 +239,22 @@ func (builder *cgoMirrorBuilder) passableByValue(built *cgoMirror) bool {
 	return true
 }
 
+// nestedMirror returns the mirror a member's C# type is, or holds through any inline arrays, or "" for none.
+func (builder *cgoMirrorBuilder) nestedMirror(clrType string) string {
+	for {
+		if helper, found := builder.arrays[clrType]; found {
+			clrType = helper.elemType
+			continue
+		}
+
+		if strings.HasSuffix(clrType, cgoMirrorSuffix) {
+			return clrType
+		}
+
+		return ""
+	}
+}
+
 // csharp writes every mirror and inline-array helper the builder made, each in the order it was first needed.
 func (builder *cgoMirrorBuilder) csharp() string {
 	const interop = "global::System.Runtime.InteropServices."
@@ -266,6 +282,17 @@ func (builder *cgoMirrorBuilder) csharp() string {
 
 			if member.length > 0 {
 				fmt.Fprintf(&text, "        Hold(%q, %q, %sUnsafe.SizeOf<%s>(), %d);\n", member.name+" element", member.elemType, compiler, member.elemType, member.elemSize)
+			}
+		}
+
+		// A nested mirror's own size is its explicit Size, so holding the member to it checks nothing inside it, and a
+		// nested mirror never crosses on its own: its check is called from here, through any inline arrays (P2's read).
+		checkedNested := map[string]bool{}
+
+		for _, member := range built.fields {
+			if nested := builder.nestedMirror(member.clrType); nested != "" && !checkedNested[nested] {
+				checkedNested[nested] = true
+				fmt.Fprintf(&text, "        %s.CheckLayout();\n", nested)
 			}
 		}
 
