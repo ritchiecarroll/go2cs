@@ -352,3 +352,35 @@ func TestCgoSourceFilesMapsTheFixturesTreesToTheirSource(t *testing.T) {
 		}
 	}
 }
+
+// cgoFixtureSummaryCounts is what the driver's -cgo refusal reports for the fixture, by kind (cgoFixtureWant counted).
+const cgoFixtureSummaryCounts = "recognized 21 C declarations (5 func, 9 type, 1 struct, 1 enum, 3 int const, 1 float const, 1 string const)"
+
+// The summary a -cgo refusal carries, read over the checked-in fixture: the counts, then each tree's source by base
+// name. The live load names cmd/cgo's own two files as go list writes them; here they are the fixture's copies.
+func TestCgoRecognitionSummaryCountsTheFixtureByKindAndNamesEachTreesSource(t *testing.T) {
+	pkg := loadCgoFixture(t, true)
+
+	want := cgoFixtureSummaryCounts + "; fixture.cgo1.go -> fixture.go; cgo_gotypes.go, cgo_import.go: generated, no source"
+
+	if got := cgoRecognitionSummary(pkg.Types, pkg.Fset, pkg.Syntax); got != want {
+		t.Errorf("summary\n got: %s\nwant: %s", got, want)
+	}
+}
+
+// With no C compiler go list never runs cgo, and the raw `import "C"` file is parsed as itself: no tree points back
+// to a source, so the summary says cgo did not run rather than reporting zero declarations as a reading.
+func TestCgoRecognitionSummarySaysWhenCmdCgoDidNotRun(t *testing.T) {
+	fset := token.NewFileSet()
+	raw, err := parser.ParseFile(fset, filepath.Join(t.TempDir(), "add.go"), cgoImportSource, parser.ParseComments)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := "cmd/cgo did not run for this load (no C compiler), so nothing was recognized"
+
+	if got := cgoRecognitionSummary(types.NewPackage("p", "p"), fset, []*ast.File{raw}); got != want {
+		t.Errorf("summary\n got: %s\nwant: %s", got, want)
+	}
+}

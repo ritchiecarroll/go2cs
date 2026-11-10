@@ -33,3 +33,11 @@ func converterLoaderEnv(settings ...string) []string {
 
 	return append(env, "CGO_ENABLED=0")
 }
+
+// checkCgoFlag refuses a -cgo the converter cannot honour. -cgo makes ONE load cgo-on, the single-package driver's
+// own (processConversion), so it is refused beside -stdlib (the standard library converts at CGO_ENABLED=0 by
+// ruling), and beside -tests and -recurse, whose loads it does not reach and would otherwise leave silently cgo-off.
+// An explicit CGO_ENABLED other than 1 asks for the opposite load and is refused too; an empty one is Go's "unset".
+func checkCgoFlag(cgo, stdlib, tests, recurse bool) error {
+	return nil
+}

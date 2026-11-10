@@ -130,3 +130,42 @@ func hostTarget(t *testing.T) (string, string) {
 
 	return fields[0], fields[1]
 }
+
+// -cgo makes the single-package driver's own load cgo-on, so it is refused wherever it would be silently ignored (a
+// driver whose loads it does not reach) and wherever the environment asks for the opposite load.
+func TestCheckCgoFlagRefusesWhatItCannotHonour(t *testing.T) {
+	cases := []struct {
+		name                        string
+		cgo, stdlib, tests, recurse bool
+		env                         string // "-" leaves CGO_ENABLED unset
+		refused                     string
+	}{
+		{name: "off", env: "0"},
+		{name: "on, unset", cgo: true, env: "-"},
+		{name: "on, empty", cgo: true, env: ""},
+		{name: "on, 1", cgo: true, env: "1"},
+		{name: "on, 0", cgo: true, env: "0", refused: "CGO_ENABLED=0"},
+		{name: "stdlib", cgo: true, stdlib: true, env: "-", refused: "-stdlib"},
+		{name: "tests", cgo: true, tests: true, env: "-", refused: "-tests"},
+		{name: "recurse", cgo: true, recurse: true, env: "-", refused: "-recurse"},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if c.env == "-" {
+				unsetCgoEnabled(t)
+			} else {
+				t.Setenv("CGO_ENABLED", c.env)
+			}
+
+			err := checkCgoFlag(c.cgo, c.stdlib, c.tests, c.recurse)
+
+			switch {
+			case c.refused == "" && err != nil:
+				t.Errorf("refused: %v", err)
+			case c.refused != "" && (err == nil || !strings.Contains(err.Error(), c.refused)):
+				t.Errorf("want a refusal naming %q, got %v", c.refused, err)
+			}
+		})
+	}
+}

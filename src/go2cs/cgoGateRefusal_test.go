@@ -115,13 +115,12 @@ func writeCgoGateModule(t *testing.T, files map[string]string) string {
 	return dir
 }
 
-// P1: every file excluded because cgo is off, and the excluded file imports "C".
+// P1: every file excluded because cgo is off, and the excluded file imports "C". The same load under -cgo asks for
+// the opposite and is refused before loading (TestTheCgoFlagRefusesAnEnvironmentThatSetsCgoOff).
 func TestACgoOnlyPackageWithCgoOffIsRefused(t *testing.T) {
-	for _, args := range [][]string{nil, {"-cgo=true"}} {
-		dir := writeCgoGateModule(t, map[string]string{"add.go": cgoImportSource})
-		stderr, output, err := convertCgoGateFixture(t, dir, args, "CGO_ENABLED=0")
-		requireCgoRefusal(t, stderr, err, output, "add.go", "cgogatefixture")
-	}
+	dir := writeCgoGateModule(t, map[string]string{"add.go": cgoImportSource})
+	stderr, output, err := convertCgoGateFixture(t, dir, nil, "CGO_ENABLED=0")
+	requireCgoRefusal(t, stderr, err, output, "add.go", "cgogatefixture")
 }
 
 // The internal/testpty-on-windows shape: every file excluded, one of them imports "C", but the build
@@ -259,5 +258,81 @@ func TestARawCgoSourcePairedWithItsOwnTreeIsRefusedByName(t *testing.T) {
 
 	if strings.Contains(refusal.Error(), "plain.go") {
 		t.Errorf("the refusal names a plain source: %v", refusal)
+	}
+}
+
+// requireCCompiler skips where cgo cannot run: go list hands a cgo source to cmd/cgo only where it finds a C compiler.
+func requireCCompiler(t *testing.T) {
+	t.Helper()
+
+	for _, compiler := range []string{"gcc", "cc", "clang"} {
+		if _, err := exec.LookPath(compiler); err == nil {
+			return
+		}
+	}
+
+	t.Skip("no C compiler: cmd/cgo cannot run here, so a -cgo load cannot recognize anything (Inconclusive, not a pass)")
+}
+
+// -cgo makes the driver's own load cgo-on, with the environment leaving CGO_ENABLED unset: without the flag the loader
+// pins cgo off, add.go is deselected and plain.go converts with exit 0. With no C compiler cmd/cgo still does not run,
+// and the refusal says so.
+func TestTheCgoFlagLoadsCgoOnAndSaysWhenCmdCgoDidNotRun(t *testing.T) {
+	requireNoCCompiler(t)
+
+	dir := writeCgoGateModule(t, map[string]string{
+		"plain.go": "package p\n\nfunc Twice(a int) int { return a * 2 }\n",
+		"add.go":   cgoImportSource,
+	})
+
+	stderr, output, err := convertCgoGateFixture(t, dir, []string{"-cgo=true"}, "CGO_ENABLED=")
+	requireCgoRefusal(t, stderr, err, output, "add.go", "cgogatefixture",
+		"under -cgo: cmd/cgo did not run for this load (no C compiler), so nothing was recognized")
+}
+
+// -cgo beside an environment asking for the opposite load is refused before anything loads: for P1's cgo-only shape,
+// which a cgo-off load refuses anyway, and for a mixed package, whose cgo-off load would convert its plain file.
+func TestTheCgoFlagRefusesAnEnvironmentThatSetsCgoOff(t *testing.T) {
+	for _, files := range []map[string]string{
+		{"add.go": cgoImportSource},
+		{"plain.go": "package p\n\nfunc Twice(a int) int { return a * 2 }\n", "add.go": cgoImportSource},
+	} {
+		dir := writeCgoGateModule(t, files)
+		stderr, output, err := convertCgoGateFixture(t, dir, []string{"-cgo=true"}, "CGO_ENABLED=0")
+
+		if err == nil {
+			t.Errorf("-cgo with CGO_ENABLED=0 must refuse with a non-zero exit\noutput:\n%s", stderr)
+		}
+
+		if !strings.Contains(stderr, "-cgo asks for a cgo-on load, and the environment sets CGO_ENABLED=0") {
+			t.Errorf("the refusal does not name the contradiction\noutput:\n%s", stderr)
+		}
+
+		if emitted := emittedProjectFiles(t, output); len(emitted) > 0 {
+			t.Errorf("a refused conversion must write no project file, wrote %v", emitted)
+		}
+	}
+}
+
+// Phase 1's EXIT GATE (PLAN-cgo-interop §6): on a host with a C compiler, the fixture's own source, loaded through the
+// real driver under -cgo, has every C name recognized and its rewritten tree mapped back to it, and still emits
+// nothing. The counts are the checked-in fixture's (TestCgoRecognitionSummaryCountsTheFixtureByKindAndNamesEachTreesSource);
+// cmd/cgo's own two files are not named here, because go list may hand them back under build-cache names.
+func TestTheCgoFlagRecognizesTheFixtureAndStillRefuses(t *testing.T) {
+	requireCCompiler(t)
+
+	source, err := os.ReadFile(filepath.Join(cgoFixtureDir, "fixture.go"))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dir := writeCgoGateModule(t, map[string]string{"fixture.go": string(source)})
+
+	stderr, output, err := convertCgoGateFixture(t, dir, []string{"-cgo=true"}, "CGO_ENABLED=")
+	requireCgoRefusal(t, stderr, err, output, "fixture.go", "cgogatefixture", "under -cgo: "+cgoFixtureSummaryCounts, " -> fixture.go; ")
+
+	if strings.Count(stderr, ": generated, no source") != 1 {
+		t.Errorf("want cmd/cgo's own files listed once as generated with no source\noutput:\n%s", stderr)
 	}
 }

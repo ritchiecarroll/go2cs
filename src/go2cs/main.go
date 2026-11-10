@@ -623,6 +623,10 @@ Examples:
 		log.Fatalln("-dual-recv-params requires -dual-recv: it lowers the parameters of the by-reference forms that -dual-recv emits")
 	}
 
+	if err := checkCgoFlag(options.parseCgoTargets, convertStdLib, options.convertTests, recurseVal.enabled); err != nil {
+		log.Fatalln(err)
+	}
+
 	// The capture-mode pass runs across four drivers with no options in reach; the flag mirrors
 	// into its package global once, here (see selectRefReturnPrimaries).
 	dualRecvEnabled = options.dualRecv

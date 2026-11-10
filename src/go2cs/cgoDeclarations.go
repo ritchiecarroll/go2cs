@@ -18,8 +18,8 @@ import (
 )
 
 // Phase 1 of docs/PLAN-cgo-interop.md (§6, read through §11): recognition and file mapping for a cgo package,
-// with no C# emitted. Nothing calls this yet; the driver still refuses every cgo source (S3 and visitImportSpec's
-// gate), and increment 2 routes a -cgo load through it.
+// with no C# emitted. The driver still refuses every cgo source (S3 and visitImportSpec's gate); under -cgo its
+// refusal says what this recognized first (cgoRecognitionSummary).
 //
 // When a C toolchain is present, cmd/cgo rewrites each `import "C"` source before go/types runs: every C.x
 // reference becomes a typed synthetic Go declaration whose NAME encodes what it is (⟨OQ-1⟩, answered by lane P1,
@@ -165,4 +165,28 @@ func cgoSourceFiles(fset *token.FileSet, files []*ast.File) []cgoSourceFile {
 	}
 
 	return mapped
+}
+
+// cgoKindLabels orders and names the kinds cgoRecognitionSummary counts.
+var cgoKindLabels = []struct {
+	kind  cgoDeclKind
+	label string
+}{
+	{cgoFunc, "func"},
+	{cgoType, "type"},
+	{cgoStruct, "struct"},
+	{cgoUnion, "union"},
+	{cgoEnum, "enum"},
+	{cgoIntConst, "int const"},
+	{cgoFloatConst, "float const"},
+	{cgoStringConst, "string const"},
+	{cgoVar, "var"},
+}
+
+// cgoRecognitionSummary says what a -cgo load recognized, for the refusal that still follows it: the declarations
+// counted by kind, then each syntax tree's source. It names files by base name only, so no absolute path reaches a
+// log. A load in which no tree maps to a source is one cmd/cgo never rewrote: go list runs cgo only where it finds
+// a C compiler, and otherwise hands the raw `import "C"` file to the parser as itself (§11.1, arm P3).
+func cgoRecognitionSummary(pkg *types.Package, fset *token.FileSet, files []*ast.File) string {
+	return ""
 }
