@@ -78,6 +78,39 @@ Check 'a row whose recorded GOOS is not its file''s GOOS is refused (COORD: host
 $why = Reasons (Rows @{ 'win-x64' = @{ 'goos' = $null } })
 Check 'a row that records no GOOS is refused' (@($why | Where-Object { $_ -like '*win-x64*goos*' }).Count -ge 1) "$($why -join ' | ')"
 
+Write-Host 'a RID the arm leg cannot run yet is named UNMEASURED on the package (COORD ruling, S6 Q1)'
+$armWhy = 'the os-matrix nugetgo-behavior stage runs no arm64 leg until seat S5c'
+function Unmeasured([string]$rid, [string]$version = 'v1.1.0', [string]$reason = $armWhy) {
+    $path = Join-Path $scratch "$rid.md"
+    [System.IO.File]::WriteAllText($path, "# nugetgo behavioral proof row`nmodule: $module`nversion: $version`npackage: nugetgo.github.com.inconshreveable.mousetrap 1.1.0-int.1`nrid: $rid`nunmeasured: $reason`ndate: 2026-11-10`n")
+    Read-NugetgoBehaviorRow -Path $path
+}
+function RowsWith([string]$rid, $row) { $r = Rows; $r[$rid] = $row; $r }
+$armRows = RowsWith 'linux-arm64' (Unmeasured 'linux-arm64')
+$why = Reasons $armRows
+Check 'four measured rows and linux-arm64 named UNMEASURED with its reason: accepted' ($why.Count -eq 0) "$($why -join ' | ')"
+$why = Reasons (RowsWith 'win-x64' (Unmeasured 'win-x64'))
+Check 'an UNMEASURED row for a RID whose leg runs today is refused, naming it' (@($why | Where-Object { $_ -like '*win-x64*UNMEASURED*' }).Count -ge 1) "$($why -join ' | ')"
+$why = Reasons (RowsWith 'linux-arm64' (Unmeasured 'linux-arm64' 'v1.0.0'))
+Check 'an UNMEASURED row for another module version is refused' (@($why | Where-Object { $_ -like '*linux-arm64*v1.0.0*' }).Count -ge 1) "$($why -join ' | ')"
+$why = Reasons (RowsWith 'linux-arm64' (Unmeasured 'linux-arm64' 'v1.1.0' ' '))
+Check 'an UNMEASURED row with no reason is refused' (@($why | Where-Object { $_ -like '*linux-arm64*' }).Count -ge 1) "$($why -join ' | ')"
+$mixed = Unmeasured 'linux-arm64'; $mixed | Add-Member -NotePropertyName 'outputs-equal' -NotePropertyValue 'true'
+$why = Reasons (RowsWith 'linux-arm64' $mixed)
+Check 'an UNMEASURED row that also records a run is refused (a row is measured or not)' (@($why | Where-Object { $_ -like '*linux-arm64*outputs-equal*' }).Count -ge 1) "$($why -join ' | ')"
+$hasCount = [bool](Get-Command Get-NugetgoMeasuredRowCount -ErrorAction SilentlyContinue)
+Check 'the measured count leaves the UNMEASURED row out' ($hasCount -and (Get-NugetgoMeasuredRowCount -Rows $armRows) -eq 4) "$(if ($hasCount) { "got: $(Get-NugetgoMeasuredRowCount -Rows $armRows)" } else { 'no Get-NugetgoMeasuredRowCount' })"
+$hasText = [bool](Get-Command New-NugetgoUnmeasuredRowText -ErrorAction SilentlyContinue)
+$armText = if ($hasText) { New-NugetgoUnmeasuredRowText -ModulePath $module -GoVersion 'v1.1.0' -Package 'nugetgo.github.com.inconshreveable.mousetrap 1.1.0-int.1' -Rid 'linux-arm64' -Reason $armWhy -Date '2026-11-10' } else { $null }
+Check 'New-NugetgoUnmeasuredRowText writes exactly that row' ($hasText -and $armText -ceq [System.IO.File]::ReadAllText($armRows['linux-arm64'].path)) "$(if ($hasText) { "got: $armText" } else { 'no New-NugetgoUnmeasuredRowText' })"
+$armPage = New-NugetgoBehaviorPage -ModulePath $module -GoVersion 'v1.1.0' -Rows $armRows
+Check 'the page names the RID UNMEASURED, with the reason, in its table row' (@(("$armPage" -split "`n") | Where-Object { $_ -clike "| linux-arm64 | UNMEASURED: $armWhy |*" }).Count -eq 1) "got:`n$armPage"
+Check 'the page still has one table row per shipped RID' (@(("$armPage" -split "`n") | Where-Object { $_ -match '^\| (win-x64|linux-x64|osx-x64|osx-arm64|linux-arm64) \|' }).Count -eq 5) "got:`n$armPage"
+Check 'the page says a RID marked UNMEASURED ships without a run' ("$armPage" -like '*UNMEASURED ships without a run*') "got:`n$armPage"
+Check 'a page with every row measured says nothing about UNMEASURED' ("$(New-NugetgoBehaviorPage -ModulePath $module -GoVersion 'v1.1.0' -Rows (Rows))" -notlike '*UNMEASURED*') 'it does'
+$armSection = New-NugetgoSampleBehaviorSection -ModulePath $module -GoVersion 'v1.1.0' -Rows $armRows
+Check 'the sample section counts measured RIDs only' ("$armSection" -match '(?m)^## Sample behavior on 4 RIDs$') "got: $(("$armSection" -split "`n")[0])"
+
 Write-Host 'the page says plainly that upstream has no Go tests'
 $page = New-NugetgoBehaviorPage -ModulePath $module -GoVersion 'v1.1.0' -Rows (Rows)
 Check 'its title' ("$page" -match '(?m)^# `github\.com/inconshreveable/mousetrap` -- behavioral proof \(upstream has no Go tests\)$') "got: $(("$page" -split "`n")[0])"
