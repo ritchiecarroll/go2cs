@@ -321,7 +321,13 @@ func TestManualConversionConstsAreDisplacedAndDeclared(t *testing.T) {
 			member := regexp.MustCompile(`(?m)^[ \t]*[^/\s][^\n]*\bstatic\b[^\n]*\b` + regexp.QuoteMeta(name) + `\s*(=>|\{|=|;)`)
 
 			for _, goos := range scope {
-				for _, missing := range displacedConstMissing(coreDir, pkg, goos, member) {
+				missingAt, err := displacedConstMissing(coreDir, pkg, goos, member)
+
+				if err != nil {
+					t.Errorf("%s.%s: %v", pkg, name, err)
+				}
+
+				for _, missing := range missingAt {
 					t.Errorf("%s.%s (%s): no hand-owned *_impl.cs in the folders of %s that %s compiles declares it; the displaced const has no destination there",
 						pkg, name, goos, filepath.Join(coreDir, filepath.FromSlash(pkg)), missing)
 				}
@@ -332,8 +338,7 @@ func TestManualConversionConstsAreDisplacedAndDeclared(t *testing.T) {
 
 // displacedConstMissing names the targets of goos at which a displaced const has no destination: no marked *_impl.cs
 // declaring member in the key folders that target's build compiles (its <goos>/, <arch>/ and <goos>-<arch>/).
-func displacedConstMissing(coreDir string, pkg string, goos string, member *regexp.Regexp) []string {
-	var missing []string
+func displacedConstMissing(coreDir string, pkg string, goos string, member *regexp.Regexp) (missing []string, err error) {
 
 	for _, target := range corpusLattice().targetsOfGOOS(goos) {
 		found := false
@@ -359,7 +364,7 @@ func displacedConstMissing(coreDir string, pkg string, goos string, member *rege
 		}
 	}
 
-	return missing
+	return missing, nil
 }
 
 // TestDisplacedConstDestinationReadsTheLayoutKeyFolders plants a const's hand-owned destination in layout key folders.
@@ -398,8 +403,29 @@ func TestDisplacedConstDestinationReadsTheLayoutKeyFolders(t *testing.T) {
 		{"pairConst", "linux", []string{"linux/arm64"}},
 		{"pairConst", "windows", []string{"windows/amd64"}},
 	} {
-		if got := displacedConstMissing(coreDir, "pkg", c.goos, member(c.name)); !slices.Equal(got, c.want) {
+		got, err := displacedConstMissing(coreDir, "pkg", c.goos, member(c.name))
+
+		if err != nil {
+			t.Errorf("%s scoped to %s: %v", c.name, c.goos, err)
+		}
+
+		if !slices.Equal(got, c.want) {
 			t.Errorf("%s scoped to %s: missing at %v, want %v", c.name, c.goos, got, c.want)
 		}
+	}
+}
+
+// TestDisplacedConstScopeNamingNoUniverseTargetIsAFinding is G's probe: internal/buildcfg.defaultGOARCH scoped to
+// "plan9", a GOOS with no target in the universe. Read per target, such a scope has no target to read and passes
+// vacuously, though the entry is off at every target the corpus builds. The scope itself is the finding.
+func TestDisplacedConstScopeNamingNoUniverseTargetIsAFinding(t *testing.T) {
+	coreDir := t.TempDir()
+	member := regexp.MustCompile(`(?m)^[ \t]*[^/\s][^\n]*\bstatic\b[^\n]*\bdefaultGOARCH\s*(=>|\{|=|;)`)
+
+	missing, err := displacedConstMissing(coreDir, "internal/buildcfg", "plan9", member)
+
+	if err == nil {
+		t.Errorf("internal/buildcfg.defaultGOARCH scoped to plan9: no finding (missing at %v); a GOOS with no universe "+
+			"target leaves the displaced const off at every target, and the guard must say so", missing)
 	}
 }

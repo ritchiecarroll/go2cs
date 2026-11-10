@@ -28,6 +28,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -482,27 +483,80 @@ func TestHandOwnWitnessReadsEachTargetsLayoutKeyFolders(t *testing.T) {
 // and compiles, and the hand-own it was protecting is simply gone. Nothing else in the pipeline can
 // report that, because "not hand-owned" is a legitimate answer for every other declaration.
 func TestEveryManualConversionScopeNamesAKnownGOOS(t *testing.T) {
-	scoped := 0
+	scoped, findings := manualScopeFindings(manualScopeRegistries(manualConversionFuncs, manualConversionVars, manualConversionConsts))
 
-	for pkgPath, funcScopes := range manualConversionFuncs {
-		for name, scope := range funcScopes {
-			if len(scope) == 0 {
-				continue
-			}
+	for _, finding := range findings {
+		t.Error(finding)
+	}
 
-			scoped++
+	if scoped == 0 {
+		t.Error("no entry carries a platform scope; goosScope has no live use and this guard proves nothing")
+	}
+}
 
-			for _, goos := range scope {
-				if !isKnownGOOS(goos) {
-					t.Errorf("%s.%s is scoped to %q, which is not a known GOOS: the entry matches nothing and the hand-own "+
-						"it names is silently unprotected", pkgPath, name, goos)
+// manualScopeRegistry is one goosScope-keyed registry the typo guard walks, and the test a scope's GOOS must pass.
+type manualScopeRegistry struct {
+	name     string
+	entries  map[string]map[string]goosScope
+	accepts  func(goos string) bool
+	accepted string
+}
+
+// manualScopeRegistries lists the registries the typo guard walks. The registries are parameters so a fixture can
+// hand in a registry of its own without touching the package's.
+func manualScopeRegistries(funcs, vars, consts map[string]map[string]goosScope) []manualScopeRegistry {
+	return []manualScopeRegistry{
+		{"manualConversionFuncs", funcs, isKnownGOOS, "a known GOOS"},
+	}
+}
+
+// manualScopeFindings counts the scoped entries across the registries and names each scope GOOS its registry refuses.
+func manualScopeFindings(registries []manualScopeRegistry) (scoped int, findings []string) {
+	for _, registry := range registries {
+		for pkgPath, scopes := range registry.entries {
+			for name, scope := range scopes {
+				if len(scope) == 0 {
+					continue
+				}
+
+				scoped++
+
+				for _, goos := range scope {
+					if !registry.accepts(goos) {
+						findings = append(findings, fmt.Sprintf("%s: %s.%s is scoped to %q, which is not %s: the entry "+
+							"matches nothing and the hand-own it names is silently unprotected", registry.name, pkgPath, name,
+							goos, registry.accepted))
+					}
 				}
 			}
 		}
 	}
 
-	if scoped == 0 {
-		t.Error("no entry carries a platform scope; goosScope has no live use and this guard proves nothing")
+	slices.Sort(findings)
+
+	return scoped, findings
+}
+
+// TestManualScopeGuardReadsTheConstAndVarRegistries is G's probe run through the typo guard: a displaced const scoped
+// to "plan9" names a known GOOS that no universe target builds, so the const is off at every target the corpus
+// produces. The guard must name it; a guard that walks manualConversionFuncs alone passes it.
+func TestManualScopeGuardReadsTheConstAndVarRegistries(t *testing.T) {
+	probe := map[string]map[string]goosScope{"internal/buildcfg": {"defaultGOARCH": goosScope{"plan9"}}}
+
+	for _, c := range []struct {
+		label        string
+		vars, consts map[string]map[string]goosScope
+	}{
+		{"const", manualConversionVars, probe},
+		{"var", probe, manualConversionConsts},
+	} {
+		_, findings := manualScopeFindings(manualScopeRegistries(manualConversionFuncs, c.vars, c.consts))
+
+		if !slices.ContainsFunc(findings, func(finding string) bool {
+			return strings.Contains(finding, "internal/buildcfg.defaultGOARCH") && strings.Contains(finding, `"plan9"`)
+		}) {
+			t.Errorf("a %s scoped to plan9 drew no finding (findings: %v)", c.label, findings)
+		}
 	}
 }
 
