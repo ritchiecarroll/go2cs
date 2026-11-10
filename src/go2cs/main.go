@@ -298,6 +298,7 @@ func main() {
 	useChannelOperatorsCmd := commandLine.Bool("uco", true, fmt.Sprintf("Use channel operators: %s / %s", ChannelLeftOp, ChannelRightOp))
 	licenseCmd := commandLine.String("license", "", "Override NuGet license metadata with an SPDX expression (for example MIT or BSD-3-Clause); does not relicense input code")
 	provenanceCmd := commandLine.Bool("provenance", false, "Include a deterministic source-file provenance comment (no conversion timestamp)")
+	trimPathCmd := commandLine.Bool("trimpath", true, "Record a main-module source in the converted position maps the way `go build -trimpath` bakes it, <module path>/<path in module>, so the output names no directory of this machine; -trimpath=false records the absolute source path, as an untrimmed `go build` does")
 	includeCommentsCmd := commandLine.Bool("comments", false, "Include comments in output")
 	parseCgoTargetsCmd := commandLine.Bool("cgo", false, "Reserved for cgo support, which has no C# conversion yet: an import \"C\" source is refused whatever this flag says (docs/PLAN-cgo-interop.md, OQ-5)")
 	showParseTreeCmd := commandLine.Bool("tree", false, "Show parse tree")
@@ -567,10 +568,22 @@ Examples:
 			len(targetPlatforms), strings.Join(targetPlatforms, ", "))
 	}
 
+	// Whether the operator NAMED the go2cs path, which decides what a -recurse output root may pin
+	// (recurseGo2CSPathPin): a path the operator typed is theirs to write down; a resolved default is not.
+	go2csPathExplicit := false
+	commandLine.Visit(func(f *flag.Flag) {
+		if f.Name == "go2cspath" {
+			go2csPathExplicit = true
+		}
+	})
+
 	options := Options{
 		goRoot:              *goRootCmd,
 		goPath:              *goPathCmd,
 		go2csPath:           absoluteGo2CSPath(*go2csPathCmd),
+		go2csPathExplicit:   go2csPathExplicit,
+		go2csPathFromEnv:    !go2csPathExplicit && os.Getenv("GO2CSPATH") != "",
+		noTrimPath:          !*trimPathCmd,
 		convertStdLib:       convertStdLib,
 		convertTimeout:      *convertTimeoutCmd,
 		convertTests:        *convertTestsCmd,

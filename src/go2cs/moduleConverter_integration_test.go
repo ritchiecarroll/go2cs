@@ -54,6 +54,7 @@ func TestRecurseSyntheticModule(t *testing.T) {
 		goRoot:              goRoot,
 		goPath:              build.Default.GOPATH,
 		go2csPath:           filepath.Join(root, "runtime"),
+		go2csPathExplicit:   true, // -go2cspath given, so the output root pins that path (recurseGo2CSPathPin)
 		recurseOutputRoot:   filepath.Join(root, "out"),
 		recurse:             true,
 		targetPlatform:      runtime.GOOS + "/" + runtime.GOARCH,
