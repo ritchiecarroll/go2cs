@@ -127,6 +127,10 @@ func TestTwinPrincipalFindsAFlatHandOwnAboveItsGOOSFolder(t *testing.T) {
 		"src/core/internal/syscall/windows/windows.csproj":  "<Project />",
 		"src/core/internal/syscall/windows/syscall.cs.auto": "a nested package's file",
 		"src/core/runtime/darwin/orphan.cs.auto":            "reviews nothing",
+		"src/core/runtime/linux-amd64/runtime2.cs.auto":     "pair-folder twin",
+		"src/core/runtime/stubs.cs":                         "flat hand-own",
+		"src/core/runtime/amd64/stubs.cs.auto":              "arch-folder twin",
+		"src/core/runtime/linux-arm64/orphan.cs.auto":       "reviews nothing",
 	} {
 		filePath := filepath.Join(root, filepath.FromSlash(relPath))
 
@@ -144,6 +148,9 @@ func TestTwinPrincipalFindsAFlatHandOwnAboveItsGOOSFolder(t *testing.T) {
 		{"src/core/syscall/linux/exec_unix.cs.auto", "src/core/syscall/linux/exec_unix.cs"},
 		{"src/core/internal/syscall/windows/syscall.cs.auto", ""},
 		{"src/core/runtime/darwin/orphan.cs.auto", ""},
+		{"src/core/runtime/linux-amd64/runtime2.cs.auto", "src/core/runtime/runtime2.cs"},
+		{"src/core/runtime/amd64/stubs.cs.auto", "src/core/runtime/stubs.cs"},
+		{"src/core/runtime/linux-arm64/orphan.cs.auto", ""},
 	}
 
 	for _, c := range cases {

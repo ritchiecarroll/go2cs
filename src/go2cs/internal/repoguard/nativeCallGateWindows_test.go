@@ -439,4 +439,23 @@ internal static void caller() {
 	if reading.interopDeclared != 1 {
 		t.Fatalf("control: the interop reading counted %d declarations, want 1", reading.interopDeclared)
 	}
+
+	// The windows runtime tree is every runtime folder a windows/amd64 build compiles. A stdcall site planted in
+	// runtime/amd64/ and one in runtime/windows-amd64/ are read; one in runtime/linux-amd64/ is not.
+	keyedRoot := t.TempDir()
+	keyedRels := []string{
+		"src/core/runtime/amd64/stubs_amd64.cs",
+		"src/core/runtime/linux-amd64/sys_linux_amd64.cs",
+		"src/core/runtime/windows-amd64/sys_windows_amd64.cs",
+	}
+
+	for _, keyedRel := range keyedRels {
+		write(keyedRoot, keyedRel, "internal static void caller() {\n    stdcall1(_GetThreadContext, thread);\n}\n")
+	}
+
+	if keyed := scanWindowsGate(t, keyedRoot, keyedRels); keyed.filesScanned != 2 || keyed.stdcallSites != 2 {
+		t.Errorf("control: one stdcall site in each of %v read %d files and %d sites, want 2 and 2 (a windows/amd64 "+
+			"build compiles runtime/amd64/ and runtime/windows-amd64/, never runtime/linux-amd64/)",
+			keyedRels, keyed.filesScanned, keyed.stdcallSites)
+	}
 }
