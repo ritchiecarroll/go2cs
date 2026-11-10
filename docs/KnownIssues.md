@@ -112,6 +112,21 @@ the limit was about 2,000 goroutines on Apple silicon and about 3,000 on Intel; 
      (macOS 15.8.2, kern.num_taskthreads 2048, first failure at 2,027 live goroutines) and osx-x64 (macOS 15.7.9, 3072,
      first failure at 3,051). The figures and their provenance sit beside the Limitations bullet. -->
 
+## On Linux, a program with more than about 16,000 goroutines alive ends
+
+Each goroutine is an operating-system thread, and on Linux each .NET thread uses about four of the process's memory
+mappings. Linux caps the mappings at the `vm.max_map_count` setting, 65,530 by default. When a program has about
+16,000 goroutines alive, the next `go` statement fails with `Fatal error. Failed to create RW mapping for RX memory`,
+and the program ends; nothing can catch it. A Go goroutine is not a thread, so the limit does not apply to Go itself.
+
+**To avoid it**, bound how many goroutines are alive at once, with a worker pool for example. Two settings may raise
+the limit, but neither has been measured: `DOTNET_EnableWriteXorExecute=0` in the environment, which should cut the
+mappings each thread uses, and a larger `vm.max_map_count` on the machine.
+<!-- Source: lane R's M:N R6 run, 2026-11-09, at master 0bbe3ab6e5: ParkStorm (DESIGN-mn-scheduler-sizing.md Appendix A),
+     20,000 goroutines, linux flavour, Release, on R-WSL (Ubuntu 22.04, kernel 6.18, vm.max_map_count 65530). All six
+     runs (bounded reserve 16 MiB and 1 MiB, three each) aborted at 16,226-16,229 threads. The record is the dated O1
+     amendment in docs/phase4/DESIGN-mn-scheduler.md. -->
+
 ## With go2cs 1.26.10.2 or earlier, a program converted with local standard-library references runs its standard library built Debug
 
 **Symptom.** A program converted by go2cs 1.26.10.2 or earlier with plain `-recurse` or `-recurse=module`
