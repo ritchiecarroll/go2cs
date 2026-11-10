@@ -1285,9 +1285,43 @@ EmitHostᴠMayBeEmittedHost(h)`; typescript-go `internal/compiler`'s `EmitHost` 
 rebuilt, and a hand-written C# type that implements the method implicitly already satisfies it; an
 assembly compiled against the earlier shape that IMPLEMENTS such an interface must be rebuilt.
 
-**Bounds.** A method that a declared embed and a **structural** base (the section above) both
-supply, and that the interface does not declare itself, is not redeclared and stays CS0121: the
-structural bases are not among the declarers this rule counts.
+**Bounds.** Two shapes stay compile errors in the converted project.
+
+A method that a declared embed and a **structural** base (the section above) both supply is not
+redeclared, and a lookup of it through the interface stays CS0121, whether or not the interface
+declares the method itself:
+
+```go
+type Reader interface {
+	Read(p []byte) (int, error)
+}
+
+// X's method set contains io.ReadCloser's, so io.ReadCloser becomes a structural base of X,
+// and Reader and io.ReadCloser both supply Read.
+type X interface {
+	Reader
+	Close() error
+	Extra() int
+}
+```
+
+The structural bases are not among the declarers this rule counts, and a member that exactly one
+structural base covers is inherited from that base instead of being declared, so writing `Read` in
+`X` changes nothing.
+
+An exported interface that embeds an **unexported** interface of its own package is CS0061 (the base
+interface is less accessible than the interface that embeds it):
+
+```go
+type reader interface {
+	Read(p []byte) (int, error)
+}
+
+type X interface {
+	reader
+	Extra() int
+}
+```
 
 Guarded by the `EmbeddedInterfaceMergedMethod` behavioral test (the adapter, type-parameter,
 method-value, nested, alias, function-local and anonymous arms, with the one-declarer diamond and the

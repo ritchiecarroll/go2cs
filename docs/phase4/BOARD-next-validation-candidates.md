@@ -35621,6 +35621,192 @@ by name, and the bank does not keep the names to compare.
 
 **Ruled (COORD, 2026-11-10):** a host artifact. No membership change, no re-bank, no disclosure retired.
 
+## 2026-11-10 — G (C42 bound, COORD's ruling R1): a method a DECLARED embed and a STRUCTURAL base both supply is CS0121 at a lookup through the interface — also when the interface declares the method itself
+
+**Not a .4 seat** (COORD, 2026-11-10): the shape is outside the typescript-go closure. It becomes a seat when a TS
+row surfaces it; this row is here so that row is recognised on sight. C42 itself (`claude/g-c42-iface-embed-merge`,
+`b88adc6112`, accepted for batch 284) neither causes nor cures it: both arms below read the same at its base.
+
+**The shape** (the complete repro, module `example.com/c42struct2`, `go 1.23`; `go run` prints `2 <nil> <nil> 3 4`):
+
+```go
+package main
+
+import (
+	"fmt"
+	"io"
+)
+
+type Reader interface {
+	Read(p []byte) (int, error)
+}
+
+// X embeds Reader, and its method set strictly contains io.ReadCloser, which also declares Read.
+type X interface {
+	Reader
+	Close() error
+	Extra() int
+}
+
+type impl struct{}
+
+func (impl) Read(p []byte) (int, error) { return len(p), nil }
+func (impl) Close() error               { return nil }
+func (impl) Extra() int                 { return 3 }
+
+func drain(r io.ReadCloser) int {
+	n, _ := r.Read(make([]byte, 4))
+	r.Close()
+	return n
+}
+
+func main() {
+	var x X = impl{}
+	n, err := x.Read(make([]byte, 2))
+	fmt.Println(n, err, x.Close(), x.Extra(), drain(x))
+}
+```
+
+**Measured**, with the converter built at master `38caf3558a` and with the one built at `2c3882632d` (C42; `src/go2cs`
+is unchanged from there to the accepted tip), identically: the conversion exits 0 and the build fails with three
+errors, all on the one call —
+
+```
+main.cs(34,22): error CS0121: The call is ambiguous between the following methods or properties: 'go.example.com.main_package.Reader.Read(go.slice<byte>)' and 'go.io_package.Reader.Read(go.slice<byte>)'
+main.cs(34,10): error CS8130: Cannot infer the type of implicitly-typed deconstruction variable 'n'.
+main.cs(34,13): error CS8130: Cannot infer the type of implicitly-typed deconstruction variable 'err'.
+```
+
+— over this emission, where `Close` is taken from the structural base and nothing in `X` names `Read`:
+
+```csharp
+partial interface X :
+    Reader,
+    io.ReadCloser
+{
+    nint Extra();
+}
+```
+
+**The control arm, and a prediction that was wrong.** `c42structctl` is the same program with
+`Read(p []byte) (int, error)` ALSO written in `X` itself. Predicted green, from C42's own sentence "a method the
+interface declares itself already hides the inherited ones". Measured: the same three errors and the same emission
+at both converters. The own declaration is dropped, so declaring the method is no way out. The C42 page's Bounds
+said "and that the interface does not declare itself"; that clause was too narrow and is corrected with this row.
+
+**Root, as read in `visitInterfaceType.go`.** `getStructuralInterfaceBases` counts, per method, the STRUCTURAL bases
+that cover it (`coveredCounts`). A member exactly one structural base covers is `structuralCovered`, and the body
+loop skips its declaration as inherited from that base — own-declared or not. Declared embeds are not in that
+count: `coveredByEmbed` only drops a structural candidate that a declared embed implements WHOLE, and `Reader` does
+not implement `io.ReadCloser`. C42's `writeMergedEmbeddedMethods` and the H7 call-site cast both ask go/types for a
+method's declaring interfaces (`interfaceMethodDeclarers`), and go/types sees ONE declarer of `Read` here: the
+structural base is the converter's own choice, not a Go embed. So no rule writes a member in `X`, no cast is
+written at the call, and C# finds `Reader.Read` and `io.Reader.Read` side by side.
+
+**Scope.** Measured on a call. By C42's reading, the other lookups through the interface (the generated adapter, a
+type-parameter call, a method value, hand-written C#) meet the same two members; those were not run here. Passing
+`x` on as an `io.ReadCloser` (`drain(x)`) compiles. std is not censused for the shape: which interface becomes a
+structural base is the converter's selection, so a census has to run that selection, not go/types. The converted
+corpus builds, so no std lookup trips it today.
+
+**Where a fix would sit** (not designed): the two rules have to agree on who supplies a method. The member is
+already written when TWO structural bases cover it; this is the one-structural-plus-one-declared case. Red-first
+with both arms above added to `EmbeddedInterfaceMergedMethod`.
+
+**Kept:** the Bounds of "An interface redeclares a method two embedded interfaces declare"
+(`docs/ConversionStrategies-Reference/interfaces.md`) carries the shape.
+
+— G (2026-11-10)
+
+## 2026-11-10 — G (adjacent to C42, COORD's ruling): an EXPORTED interface that embeds an UNEXPORTED interface of its own package is CS0061; std has none (0 of 54, three targets)
+
+**Not a .4 seat** (COORD, 2026-11-10), on the same terms as the row above: outside the typescript-go closure until a
+TS row surfaces it. Found while reducing the row above; it is independent of C42 and of structural bases.
+
+**The shape** (the complete repro, module `example.com/c42unexp`, `go 1.23`; legal Go, `go run` prints `2 <nil> 3`):
+
+```go
+package main
+
+import "fmt"
+
+type reader interface {
+	Read(p []byte) (int, error)
+}
+
+// X is exported and embeds reader, an unexported interface of the same package.
+type X interface {
+	reader
+	Extra() int
+}
+
+type impl struct{}
+
+func (impl) Read(p []byte) (int, error) { return len(p), nil }
+func (impl) Extra() int                 { return 3 }
+
+func main() {
+	var x X = impl{}
+	n, err := x.Read(make([]byte, 2))
+	fmt.Println(n, err, x.Extra())
+}
+```
+
+**Measured**, at the same two converters as the row above, identically: the conversion exits 0 and the build fails
+with one error —
+
+```
+main.cs(11,19): error CS0061: Inconsistent accessibility: base interface 'main_package.reader' is less accessible than interface 'main_package.X'
+```
+
+The emission is `partial interface X :` / `    reader`, and the package's `package_info.cs` pins
+`internal partial interface reader {}` in its `TypeAccessibility` section: accessibility follows the Go name's
+case, and nothing publicizes `reader`. **Control** (`c42unexpctl`, the same program with the interface spelled
+`x`): builds, prints `2 <nil> 3`, matches Go, at both converters.
+
+**Census of std** (go/packages, go1.26.10, `GOARCH=amd64`, production files; a package-scope EXPORTED interface
+whose embed list names an UNEXPORTED named interface of the same package):
+
+| target | packages | files | exported package-scope interfaces | of them embedding | hits |
+|---|---|---|---|---|---|
+| windows | 362 | 1600 | 202 | 54 | 0 |
+| linux | 360 | 1674 | 202 | 54 | 0 |
+| darwin | 360 | 1669 | 205 | 54 | 0 |
+
+Load errors 0 on each. The instrument's controls: the repro reads 1 hit (`X` / `reader`), its control reads 0, and
+`c42struct2` (an exported interface embedding an EXPORTED one) reads 0. Zero in std is why the compiled corpus
+never met the shape. Not censused: `_test.go` files and function-local interfaces.
+
+**Where a fix would sit** (not designed, and the pass was not read end to end): the publicize pass
+(`typeAccessibilityOperations.go`, `packagePublicizedTypes`) already publicizes an unexported type that an exported
+surface exposes — a field, a package var, an interface member's signature
+(`TestInterfaceMemberSignatureTypesArePublicized`). An exported interface's own embed list is the same exposure.
+Red-first with the repro as a behavioral arm and its control beside it.
+
+**Kept:** the same Bounds paragraph carries this shape too.
+
+— G (2026-11-10)
+
+## 2026-11-10 — G (C42's census, COORD's ruling): the one file the go/packages census reads short of `go list` is `src/unsafe/unsafe.go`, on every target, and it holds no interface
+
+C42's footprint census read one production file fewer than `go list` on each target, and the READY post carried
+that gap unexplained while both known hits were found. COORD's ruling: an unexplained instrument gap is the
+instrument's own finding. Named, by diffing the census's own file list against `go list -f` over `.GoFiles`
+(production) and over `.TestGoFiles` + `.XTestGoFiles` (tests), lower-cased and sorted:
+
+| target | go list, production | census, production | only in go list | tests: go list = census |
+|---|---|---|---|---|
+| windows | 1601 | 1600 | `src/unsafe/unsafe.go` | 1088 = 1088 |
+| linux | 1675 | 1674 | `src/unsafe/unsafe.go` | 1157 = 1157 |
+| darwin | 1670 | 1669 | `src/unsafe/unsafe.go` | 1130 = 1130 |
+
+"Only in census" is empty in all six compares. **Why:** go/packages hands back the built-in `unsafe` package with
+no syntax (`types.Unsafe` is not type-checked from source), so a walk over `pkg.Syntax` cannot see its one file.
+**Why it hides nothing:** `unsafe.go` declares three types (`ArbitraryType`, `IntegerType`, `Pointer`), none an
+interface. The census counts therefore stand as posted, and the same one-file offset applies to every
+`pkg.Syntax` census of std, the CS0061 census in the row above included (its file counts are the same 1600 / 1674
+/ 1669).
+
 — G (2026-11-10)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
