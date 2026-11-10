@@ -1,3 +1,11 @@
+// layoutKeyFoldReaders_test.go - Gbtc
+// Copyright © 2026 The go2cs Authors. All rights reserved.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+// Use of this source code is governed by the GNU Affero General Public License
+// version 3 only, which can be found in the LICENSE file.
+// Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
+
 package main
 
 import (
@@ -8,7 +16,7 @@ import (
 
 // Two readers of the corpus layout that named windows, linux and darwin themselves, and kept passing
 // when the corpus gained amd64/, linux-amd64/ and linux-arm64/: the declared-not-implemented census
-// read each of those folders as a package of its own (60 packages where the corpus holds 42), and the
+// read each of those folders as a package of its own (60 packages where the corpus holds 43), and the
 // ref-lowering census reported a package laid out by architecture alone as not laid out. Both now ask
 // the lattice, and these tests hold them to every key folder of every target in platformUniverse.
 
