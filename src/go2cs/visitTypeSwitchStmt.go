@@ -220,6 +220,13 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 			}
 
 			for i, expr := range caseClause.List {
+				// Go accepts parentheses around a case type, `case (*ast.Node):` (typescript-go's internal/printer).
+				// They are syntax only, and every reading below takes the bare type: rendered with them, the label
+				// is `case (ж<Node>) v:`, which C# reads as a cast of v (CS0103), `(nil)` misses the nil arm, and
+				// `(int)` misses the identifier path that spells it nint. convTypeAssertExpr unparens the asserted
+				// type the same way.
+				expr = ast.Unparen(expr)
+
 				// A `case nil` in a type switch matches a nil interface — emit the C# `case null:`
 				// pattern (which binds nothing), not `case default x:` (convExpr(nil) → "default",
 				// which is not a valid pattern). The bound variable is the nil value and is rarely
