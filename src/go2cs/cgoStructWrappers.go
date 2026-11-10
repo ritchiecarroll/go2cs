@@ -21,7 +21,9 @@ import (
 // POINTER it crosses as GoCgoArgs.StructPointer answers: nil as 0, a genuinely native struct by its own address, and one
 // whole managed struct (a box, or a struct field) through a stack mirror, copied in member by member, checked, handed
 // over by address and copied back unconditionally; an element of a Go array and a native box minted from managed storage
-// are refused before the call. A pointer result is C memory, minted native. Pointer MEMBERS are increment 3b2b's.
+// are refused before the call. A pointer result is C memory, minted native, unless it is a pointer the call was handed.
+// Increment 3b2b adds pointer MEMBERS, checked as cgo checks them, and a pointer to one C scalar, which crosses as a
+// struct pointer does (§7, amended: single scalar pointee; element pointers remain Phase 3).
 
 // cgoWrapperSet makes one pseudo-package's members: the wrappers, the mirrors they cross with, and each mirror's copy-in
 // and copy-out functions, every one written once.
@@ -163,7 +165,18 @@ func (set *cgoWrapperSet) copyMember(function, member string, depth int, m, g st
 		return fmt.Sprintf("%sfor (int %s = 0; %s < %d; %s++)\n%s", indent, index, index, underlying.Len(), index, element), nil
 
 	case *types.Pointer:
-		return "", fmt.Errorf("cgo wrapper: C.%s crosses %s, a pointer member, which is increment 3b2b's", function, member)
+		if pointee, ok := types.Unalias(underlying.Elem()).(*types.Named); !ok || !strings.HasPrefix(pointee.Obj().Name(), "_Ctype_") {
+			return "", fmt.Errorf("cgo wrapper: C.%s crosses %s, a pointer member to something other than a C type, which is Phase 3's", function, member)
+		}
+
+		// §5.2 as first written: a pointer member crosses as its address, and comes back as C memory unless C left it.
+		address := fmt.Sprintf("(%s is null ? 0 : %s.NativeAddress)", g, g)
+
+		if in {
+			return fmt.Sprintf("%s%s = (nint)%s;\n", indent, m, address), nil
+		}
+
+		return fmt.Sprintf("%s%s = global::go.golib.GoCgoArgs.PointerMemberBack((nuint)%s, %s, %s);\n", indent, g, m, g, address), nil
 	}
 
 	scalar, err := cgoScalarOf(function, member, t)
@@ -179,12 +192,21 @@ func (set *cgoWrapperSet) copyMember(function, member string, depth int, m, g st
 	return fmt.Sprintf("%s%s = %s;\n", indent, g, scalar.fromPrimitive(m)), nil
 }
 
-// cgoStructParam is one parameter: a scalar, a struct by value, or a struct by pointer.
+// cgoStructParam is one parameter: a scalar, a struct by value, or a pointer to a struct or to one scalar.
 type cgoStructParam struct {
 	scalar  cgoScalar
 	mirror  *cgoMirror
 	goSide  string
 	pointer bool
+}
+
+// pointee is what a pointer parameter points at, as two pointer parameters that may share one object compare it.
+func (param cgoStructParam) pointee() string {
+	if param.mirror != nil {
+		return "struct " + param.mirror.name
+	}
+
+	return "scalar " + param.scalar.goSide
 }
 
 // param reads one parameter.
@@ -194,8 +216,16 @@ func (set *cgoWrapperSet) param(function string, index int, t types.Type) (cgoSt
 	if pointer, ok := t.(*types.Pointer); ok {
 		named := cgoStructOf(pointer.Elem())
 
+		// A pointer to ONE C scalar crosses as a struct pointer does: a stack copy in, its address handed over, and the
+		// value copied back unconditionally (§7, amended 2026-11-10).
 		if named == nil {
-			return cgoStructParam{}, fmt.Errorf("cgo wrapper: C.%s's %s is a pointer to something other than a C struct, which is Phase 3's", function, role)
+			scalar, err := cgoScalarOf(function, role, pointer.Elem())
+
+			if err != nil || scalar.isVoid {
+				return cgoStructParam{}, fmt.Errorf("cgo wrapper: C.%s's %s is a pointer to something other than a C struct or one C scalar, which is Phase 3's", function, role)
+			}
+
+			return cgoStructParam{scalar: scalar, goSide: scalar.goSide, pointer: true}, nil
 		}
 
 		mirror, err := set.mirrorOf(function, named)
@@ -263,7 +293,7 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 		}
 
 		params[i] = param
-		scalarsOnly = scalarsOnly && param.mirror == nil
+		scalarsOnly = scalarsOnly && param.mirror == nil && !param.pointer
 	}
 
 	resultType := signature.Results().At(0).Type()
@@ -363,11 +393,25 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 	for i, param := range params {
 		switch {
 		case param.pointer:
-			fmt.Fprintf(&before, "\n        %s m%d = default;\n", param.mirror.name, i)
+			copyType := param.scalar.primitive
+
+			if param.mirror != nil {
+				copyType = param.mirror.name
+			}
+
+			fmt.Fprintf(&before, "\n        %s m%d = default;\n", copyType, i)
 
 			// The pointer's kind is GoCgoArgs' to decide (§11.1): it refuses, before any native code runs, an element of a Go
 			// array (C may touch the whole array) and a native box minted from managed storage (C must not write through it).
-			fmt.Fprintf(&before, "        global::go.golib.GoCgoStructPointer k%d = %sStructPointer(p%d, %q, out nuint n%d);\n", i, args, i, function, i)
+			// A pointer to one scalar is classified as §5.2 first wrote it: a native box passes its address, and any other
+			// pointer is copied.
+			if param.mirror != nil {
+				fmt.Fprintf(&before, "        global::go.golib.GoCgoStructPointer k%d = %sStructPointer(p%d, %q, out nuint n%d);\n", i, args, i, function, i)
+			} else {
+				fmt.Fprintf(&before, "        global::go.golib.GoCgoStructPointer k%d = p%d is null || p%d.IsNilPointer ? global::go.golib.GoCgoStructPointer.Nil :\n", i, i, i)
+				fmt.Fprintf(&before, "            p%d is global::go.NativeBox<%s> ? global::go.golib.GoCgoStructPointer.Native : %s;\n", i, param.goSide, mirrorKind)
+				fmt.Fprintf(&before, "        nuint n%d = p%d is global::go.NativeBox<%s> native%d ? native%d.NativeAddress : 0;\n", i, i, param.goSide, i, i)
+			}
 			fmt.Fprintf(&before, "        nint a%d = (nint)n%d;\n", i, i)
 
 			// Two pointers to the same Go struct are one object to C, as they are under Go: the later one shares the
@@ -376,12 +420,20 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 			var earlier []int
 
 			for j := 0; j < i; j++ {
-				if params[j].pointer && params[j].mirror == param.mirror {
+				if params[j].pointer && params[j].pointee() == param.pointee() {
 					earlier = append(earlier, j)
 				}
 			}
 
-			copyIn := fmt.Sprintf("ᴍin_%s(ref m%d, p%d.Value);\n%[4]sa%[2]d = (nint)(&m%[2]d);\n", param.mirror.name, i, i, "            ")
+			var copyIn, copyOut string
+
+			if param.mirror != nil {
+				copyIn = fmt.Sprintf("ᴍin_%s(ref m%d, p%d.Value);\n%[4]sa%[2]d = (nint)(&m%[2]d);\n", param.mirror.name, i, i, "            ")
+				copyOut = fmt.Sprintf("ᴍout_%s(ref p%d.Value, m%d);", param.mirror.name, i, i)
+			} else {
+				copyIn = fmt.Sprintf("m%d = %s;\n%[3]sa%[1]d = (nint)(&m%[1]d);\n", i, param.scalar.toPrimitive(fmt.Sprintf("p%d.Value", i)), "            ")
+				copyOut = fmt.Sprintf("p%d.Value = %s;", i, param.scalar.fromPrimitive(fmt.Sprintf("m%d", i)))
+			}
 			mirrored := fmt.Sprintf("k%d == %s", i, mirrorKind)
 
 			if len(earlier) == 0 {
@@ -404,7 +456,7 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 				mirrored += fmt.Sprintf(" && !s%d", i)
 			}
 
-			fmt.Fprintf(&after, "\n        if (%s)\n            ᴍout_%s(ref p%d.Value, m%d);\n", mirrored, param.mirror.name, i, i)
+			fmt.Fprintf(&after, "\n        if (%s)\n            %s\n", mirrored, copyOut)
 
 		case param.mirror != nil:
 			fmt.Fprintf(&before, "\n        %s v%d = default;\n        ᴍin_%s(ref v%d, p%d);\n", param.mirror.name, i, param.mirror.name, i, i)
@@ -415,7 +467,9 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 	case resultMirror != nil:
 		returned = fmt.Sprintf("\n        %s result = new();\n        ᴍout_%s(ref result, r);\n\n        return result;\n", wrapperResult, resultMirror.name)
 	case pointerResult:
-		returned = fmt.Sprintf("\n        return %sPointerMemberBack<%s>((nuint)r, null, 0);\n", args, strings.TrimSuffix(strings.TrimPrefix(wrapperResult, "ж<"), ">"))
+		// §5.2 as first written: a pointer result is C memory, minted native.
+		pointee := strings.TrimSuffix(strings.TrimPrefix(wrapperResult, "ж<"), ">")
+		returned = fmt.Sprintf("\n        return %sPointerMemberBack<%s>((nuint)r, null, 0);\n", args, pointee)
 	case resultScalar.isVoid:
 		returned = "\n        return default;\n"
 	default:
@@ -430,7 +484,7 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 	fmt.Fprintf(&text, "    [%sUnmanagedCallConv(CallConvs = new[] { typeof(%sCallConvCdecl) })]\n", interop, compiler)
 	fmt.Fprintf(&text, "    private static partial %s %s(%s);\n\n", externResult, native, strings.Join(externParams, ", "))
 	fmt.Fprintf(&text, "    internal static %s %s(%s)\n    {\n", wrapperResult, getCoreSanitizedIdentifier(function), strings.Join(wrapperParams, ", "))
-	text.WriteString(before.String())
+	text.WriteString(strings.TrimPrefix(before.String(), "\n"))
 
 	call := fmt.Sprintf("%s(%s)", native, strings.Join(arguments, ", "))
 

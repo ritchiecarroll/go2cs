@@ -1,5 +1,7 @@
-// The C types GoCgoWrappers.<os>.golden.cs names, HAND-DECLARED until cgo Phase 2 increment 3d emits cmd/cgo's own type
-// declarations into the pseudo-package (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.17). Each is the shape a converted
+// The C types GoCgoWrappers.<os>.golden.cs names, HAND-DECLARED. Increment 3d emits cmd/cgo's own type declarations into
+// the pseudo-package (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.17), but in the shape go2cs-gen expands, which
+// GolibTests (no go2cs-gen analyzer) cannot compile; these retire at increment 5 or G1, where a converted project compiles
+// the converter's own types and these wrappers together. Each is the shape a converted
 // numeric type takes: a value wrapper over its Go type, converting implicitly both ways. C long's width differs by data
 // model, so it is declared per OS (GoCgoWrapperTypes.windows.cs and GoCgoWrapperTypes.posix.cs). Increment 3b2a's C
 // structs are the shape a converted Go struct takes: a C# struct with the C names as fields, each of a C type above, and
