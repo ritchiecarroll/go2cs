@@ -1,0 +1,27 @@
+# toptypes.ps1 <bin dir> <closure list file> [top N] : the N types with the most method definitions across every built assembly
+# whose name is a package in the closure list (one Go import path per line; a cmd/<name> package also matches <name>.dll).
+# Metadata only. Also prints the closure packages with no built assembly.
+param([string]$Bin, [string]$List, [int]$Top = 10)
+Add-Type -AssemblyName System.Reflection.Metadata
+$want = Get-Content $List | Where-Object { $_ }
+$dlls = Get-ChildItem $Bin -Recurse -Filter *.dll | Where-Object { $_.FullName -like '*\Release\*' }
+$rows = @(); $missing = @(); $built = 0
+foreach ($p in $want) {
+    $dotted = $p -replace '/', '.'; $leaf = ($p -split '/')[-1]
+    $f = $dlls | Where-Object { $_.BaseName -eq $dotted } | Select-Object -First 1
+    if (-not $f -and $p -match '/cmd/') { $f = $dlls | Where-Object { $_.BaseName -eq $leaf } | Select-Object -First 1 }
+    if (-not $f) { $missing += $p; continue }
+    $built++
+    $fs = [System.IO.File]::OpenRead($f.FullName)
+    try {
+        $md = [System.Reflection.Metadata.PEReaderExtensions]::GetMetadataReader([System.Reflection.PortableExecutable.PEReader]::new($fs))
+        foreach ($h in $md.TypeDefinitions) {
+            $t = $md.GetTypeDefinition($h)
+            $rows += [pscustomobject]@{ Methods = $t.GetMethods().Count; Type = ($md.GetString($t.Namespace) + "." + $md.GetString($t.Name)); Asm = $f.BaseName }
+        }
+    } finally { $fs.Dispose() }
+}
+"built {0} of {1} closure packages; effective per-type limit 65,524 (CoreCLR MAX_SLOT_INDEX = 65535 - 10)" -f $built, $want.Count
+$rows | Sort-Object Methods -Descending | Select-Object -First $Top | ForEach-Object { "  {0,7}  {1}  [{2}]" -f $_.Methods, $_.Type, $_.Asm }
+"not built ({0}):" -f $missing.Count
+$missing | ForEach-Object { "  $_" }
