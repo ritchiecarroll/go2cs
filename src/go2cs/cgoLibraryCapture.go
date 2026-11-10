@@ -224,83 +224,43 @@ func linkCgoProbe(toolchain cgoToolchain, goos string, flags cgoLinkFlags, symbo
 	return output, string(combined), nil
 }
 
-// captureCgoLibraries answers, for each symbol, the load-time name of the library it resolves to, as §6.1 first wrote
-// it: one one-line shared object linked against each -l, the name its dynamic section, load commands or import table
-// records read back, and that name given to the package's symbols.
+// captureCgoLibraries answers, for each symbol, the load-time name of the library it resolves to. Every symbol must
+// resolve to a shared library: one resolved statically, or not at all, is refused by name.
 func captureCgoLibraries(toolchain cgoToolchain, goos string, flags cgoLinkFlags, symbols []string, workDir string) ([]cgoSymbolLibrary, error) {
 	if len(symbols) == 0 {
 		return nil, nil
 	}
 
-	var captured string
+	var extra []string
 
-	for i, library := range flags.libraries {
-		dir := filepath.Join(workDir, fmt.Sprintf("l%d", i))
-
-		if err := os.MkdirAll(dir, 0o755); err != nil {
-			return nil, err
-		}
-
-		probe, _, err := linkCgoProbe(toolchain, goos, cgoLinkFlags{libraries: []string{library}, dirs: flags.dirs}, nil, dir)
-
-		if err != nil {
-			return nil, err
-		}
-
-		names, err := cgoRecordedLibraries(goos, probe)
-
-		if err != nil {
-			return nil, err
-		}
-
-		if len(names) > 0 && captured == "" {
-			captured = names[0]
+	if goos == "linux" {
+		for _, symbol := range symbols {
+			extra = append(extra, "-Wl,--trace-symbol="+symbol)
 		}
 	}
 
-	resolved := map[string]string{}
-
-	for _, symbol := range symbols {
-		resolved[symbol] = captured
-	}
-
-	return cgoSymbolLibraries(symbols, resolved)
-}
-
-// cgoRecordedLibraries is what a linked shared object records it needs: DT_NEEDED, LC_LOAD_DYLIB or the import table.
-func cgoRecordedLibraries(goos, path string) ([]string, error) {
-	switch goos {
-	case "windows":
-		file, err := pe.Open(path)
-
-		if err != nil {
-			return nil, err
-		}
-
-		defer file.Close()
-
-		return file.ImportedLibraries()
-	case "darwin":
-		file, err := macho.Open(path)
-
-		if err != nil {
-			return nil, err
-		}
-
-		defer file.Close()
-
-		return file.ImportedLibraries()
-	}
-
-	file, err := elf.Open(path)
+	probe, trace, err := linkCgoProbe(toolchain, goos, flags, symbols, workDir, extra...)
 
 	if err != nil {
 		return nil, err
 	}
 
-	defer file.Close()
+	var resolved map[string]string
 
-	return file.ImportedLibraries()
+	switch goos {
+	case "windows":
+		resolved, err = peImportedLibraries(probe)
+	case "darwin":
+		resolved, err = machoImportedLibraries(probe)
+	default:
+		resolved, err = elfTracedLibraries(trace)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return cgoSymbolLibraries(symbols, resolved)
 }
 
 // cgoSymbolLibraries orders the answer by symbol and refuses each symbol with no library.
