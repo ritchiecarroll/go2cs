@@ -27,7 +27,8 @@ func TestLicensingEmissionCompatibility(t *testing.T) {
 	out := filepath.Join(root, "out")
 	writeModuleFile(t, filepath.Join(sourceDir, "go.mod"), "module example.com/app\n\ngo 1.23\n")
 	const notice = "// Copyright 2020 Example Author.\n// SPDX-License-Identifier: BSD-3-Clause\n\n"
-	writeModuleFile(t, filepath.Join(sourceDir, "main.go"), notice+"package main\nfunc main() {}\n")
+	writeModuleFile(t, filepath.Join(sourceDir, "main.go"), notice+"// Package main does a thing.\npackage main\nfunc main() {}\n")
+	writeModuleFile(t, filepath.Join(sourceDir, "other.go"), "package main\nfunc other() {}\n")
 	options := Options{goRoot: runtime.GOROOT(), goPath: build.Default.GOPATH,
 		go2csPath: filepath.Join(root, "runtime"), targetPlatform: runtime.GOOS + "/" + runtime.GOARCH,
 		indentSpaces: 4, preferVarDecl: true, useChannelOperators: true}
@@ -55,14 +56,36 @@ func TestLicensingEmissionCompatibility(t *testing.T) {
 	if got := convert(); got != baseline {
 		t.Fatal("reconversion changed default output")
 	}
+	options.includeComments = true
+	commented := convert()
+	if strings.Count(commented, "Copyright 2020 Example Author.") != 1 {
+		t.Fatalf("-comments duplicated/dropped notices: %s", commented)
+	}
+	options.includeComments = false
+
+	// The notice is its own comment group after the upstream notices: upstream's stay first, then a blank line,
+	// the notice and a blank line, and nothing else in the file changes.
 	options.provenance = true
 	provenance := sourceProvenance(filepath.Join(sourceDir, "main.go"), options, "\n")
-	if got := convert(); strings.Replace(got, provenance, "", 1) != baseline || strings.Count(got, provenance) != 1 {
-		t.Fatal("provenance changed the converted body or duplicated the header")
+	if !strings.HasPrefix(provenance, "// Converted from Go source: \"main.go\" in module example.com/app.\n") {
+		t.Fatalf("provenance for the main module: %q", provenance)
 	}
+	const carried = "// Copyright 2020 Example Author.\n// SPDX-License-Identifier: BSD-3-Clause\n\n"
+	if !strings.HasPrefix(baseline, carried) {
+		t.Fatalf("the upstream notice no longer leads the default output: %s", baseline)
+	}
+	if got, want := convert(), carried+provenance+"\n"+strings.TrimPrefix(baseline, carried); got != want {
+		t.Fatalf("provenance without -comments:\n%s\nwant:\n%s", got, want)
+	}
+	// With -comments the notice stays out of the package doc comment.
 	options.includeComments = true
-	if got := convert(); strings.Count(got, "Copyright 2020 Example Author.") != 1 {
-		t.Fatalf("-comments duplicated/dropped notices: %s", got)
+	if got, want := convert(), strings.Replace(commented, carried, carried+provenance+"\n", 1); got != want || !strings.Contains(got, provenance+"\n// Package main does a thing.") {
+		t.Fatalf("provenance with -comments:\n%s\nwant:\n%s", got, want)
+	}
+	// A file with no upstream notice starts with go2cs's.
+	other := strings.ReplaceAll(readGenerated(t, filepath.Join(out, "other.cs")), "\r\n", "\n")
+	if want := sourceProvenance(filepath.Join(sourceDir, "other.go"), options, "\n") + "\n"; !strings.HasPrefix(other, want) {
+		t.Fatalf("a file with no upstream notice:\n%s\nwant it to start with:\n%s", other, want)
 	}
 }
 
@@ -87,23 +110,76 @@ func TestLicensingNoticePreservation(t *testing.T) {
 	}
 }
 
+// -provenance writes a two-line notice: the Go file's path relative to its own root and the module or standard
+// library it came from, then that go2cs changed it by converting it, with go2cs's release. Never an absolute path,
+// and never a word a license-header reader would take for a license.
 func TestLicensingProvenanceDefaultAndPortable(t *testing.T) {
+	modified := "// Modified from the original by conversion to C# with go2cs " + corpusRelease() + ".\n"
 	root := t.TempDir()
+	writeModuleFile(t, filepath.Join(root, "VERSION"), "go1.26.10\ntime 2026-01-01T00:00:00Z\n")
 	source := filepath.Join(root, "src", "sync", "mutex.go")
 	if got := sourceProvenance(source, Options{}, "\n"); got != "" {
 		t.Fatalf("default output changed: %q", got)
 	}
 	options := Options{goRoot: root, provenance: true}
-	want := "// Converted from Go source: \"src/sync/mutex.go\"\n"
+	want := "// Converted from Go source: \"src/sync/mutex.go\" in the Go standard library, go1.26.10.\n" + modified
 	if got := sourceProvenance(source, options, "\n"); got != want {
 		t.Fatalf("got %q, want %q", got, want)
 	}
 	otherRoot := t.TempDir()
+	writeModuleFile(t, filepath.Join(otherRoot, "VERSION"), "go1.26.10\n")
 	options.goRoot = otherRoot
 	if got := sourceProvenance(filepath.Join(otherRoot, "src", "sync", "mutex.go"), options, "\n"); got != want {
 		t.Fatalf("machine-dependent provenance: %q", got)
 	}
-	if got := sourceProvenance(source, Options{provenance: true}, "\n"); got != "// Converted from Go source: \"mutex.go\"\n" {
+	if got := sourceProvenance(source, options, "\r\n"); got != strings.ReplaceAll(want, "\n", "\r\n") {
+		t.Fatalf("CRLF output: %q", got)
+	}
+	// A GOROOT whose release cannot be read still names the standard library.
+	options.goRoot = t.TempDir()
+	if got := sourceProvenance(filepath.Join(options.goRoot, "src", "sync", "mutex.go"), options, "\n"); got != "// Converted from Go source: \"src/sync/mutex.go\" in the Go standard library.\n"+modified {
+		t.Fatal(got)
+	}
+	// Under no module and no GOROOT, the file name is the only portable fact.
+	loose := filepath.Join(t.TempDir(), "mutex.go")
+	if licenseModuleRoot(filepath.Dir(loose)) != "" {
+		t.Skip("a go.mod above the temp directory; the bare-name case cannot be built here")
+	}
+	if got := sourceProvenance(loose, Options{provenance: true}, "\n"); got != "// Converted from Go source: \"mutex.go\".\n"+modified {
+		t.Fatal(got)
+	}
+	for _, word := range []string{"copyright", "license", "spdx"} {
+		if strings.Contains(strings.ToLower(want), word) {
+			t.Fatalf("the notice contains %q, which a license-header reader would take for a license", word)
+		}
+	}
+}
+
+// The path is relative to the file's OWN module root: the main module checked out from source is named by path,
+// and a dependency in the module cache by path@version, where the old form fell back to the bare file name.
+func TestLicensingProvenanceNamesTheFilesOwnModule(t *testing.T) {
+	modified := "// Modified from the original by conversion to C# with go2cs " + corpusRelease() + ".\n"
+	root := t.TempDir()
+	app := filepath.Join(root, "app")
+	writeModuleFile(t, filepath.Join(app, "go.mod"), "module example.com/app\n\ngo 1.23\n")
+	options := Options{goRoot: t.TempDir(), mainModuleDir: app, provenance: true}
+	if got := sourceProvenance(filepath.Join(app, "cmd", "tool", "main.go"), options, "\n"); got != "// Converted from Go source: \"cmd/tool/main.go\" in module example.com/app.\n"+modified {
+		t.Fatal(got)
+	}
+
+	cache := filepath.Join(root, "mod")
+	previous := goModCache
+	goModCache = cache
+	t.Cleanup(func() { goModCache = previous })
+	cobra := filepath.Join(cache, "github.com", "spf13", "cobra@v1.10.2")
+	writeModuleFile(t, filepath.Join(cobra, "go.mod"), "module github.com/spf13/cobra\n\ngo 1.15\n")
+	if got := sourceProvenance(filepath.Join(cobra, "doc", "md_docs.go"), options, "\n"); got != "// Converted from Go source: \"doc/md_docs.go\" in module github.com/spf13/cobra@v1.10.2.\n"+modified {
+		t.Fatal(got)
+	}
+	// A module path with an upper-case letter is escaped in the cache directory, never in the notice.
+	burnt := filepath.Join(cache, "github.com", "!burnt!sushi", "toml@v1.4.0")
+	writeModuleFile(t, filepath.Join(burnt, "go.mod"), "module github.com/BurntSushi/toml\n")
+	if got := sourceProvenance(filepath.Join(burnt, "decode.go"), options, "\n"); got != "// Converted from Go source: \"decode.go\" in module github.com/BurntSushi/toml@v1.4.0.\n"+modified {
 		t.Fatal(got)
 	}
 }
