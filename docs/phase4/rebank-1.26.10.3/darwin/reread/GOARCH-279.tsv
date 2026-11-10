@@ -1,7 +1,7 @@
-shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	win_expected	win_disclosed	darwin_seg	win_differs	run	wall_s	cells
-GOARCH-279	debug/buildinfo	osx-arm64	211	211	0	0	0	validated	yes	211	0	-	no	42740799606	68	read
-GOARCH-279	debug/buildinfo	osx-x64	211	211	0	0	0	validated	yes	211	0	-	no	42740799606	115	read
-GOARCH-279	net/http/pprof	osx-arm64	15	15	0	0	0	validated	yes	15	0	-	no	42740799606	145	read
-GOARCH-279	net/http/pprof	osx-x64	15	15	0	0	0	validated	yes	15	0	-	no	42740799606	252	read
-GOARCH-279	go/internal/gcimporter	osx-arm64	634	634	0	0	0	validated	no	638	0	-	yes	42740799606	130	read
-GOARCH-279	go/internal/gcimporter	osx-x64	636	636	0	0	0	validated	no	638	0	-	yes	42740799606	222	read
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	win_expected	win_disclosed	darwin_seg	win_differs	run	wall_s	cells	absent
+GOARCH-279	debug/buildinfo	osx-arm64	211	211	0	0	0	validated	yes	211	0	-	no	42740799606	68	read	-
+GOARCH-279	debug/buildinfo	osx-x64	211	211	0	0	0	validated	yes	211	0	-	no	42740799606	115	read	-
+GOARCH-279	net/http/pprof	osx-arm64	15	15	0	0	0	validated	yes	15	0	-	no	42740799606	145	read	-
+GOARCH-279	net/http/pprof	osx-x64	15	15	0	0	0	validated	yes	15	0	-	no	42740799606	252	read	-
+GOARCH-279	go/internal/gcimporter	osx-arm64	634	634	0	0	0	validated	no	638	0	-	yes	42740799606	130	read	TestImportStdLib/internal/runtime/startlinetest;TestImportStdLib/runtime/race/internal/amd64v1
+GOARCH-279	go/internal/gcimporter	osx-x64	636	636	0	0	0	validated	no	638	0	-	yes	42740799606	222	read	-

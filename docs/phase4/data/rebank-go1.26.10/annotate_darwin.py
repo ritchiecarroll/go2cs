@@ -21,6 +21,12 @@
 #     `new` 0 on both, equal verdicts, and matched + disclosed-divergent equal across the RIDs. The segment is the RID
 #     with more disclosed-divergent, with the other RID's reading as its note: "7 + 3 (osx-arm64; osx-x64: 10)". The
 #     `agree` column is not consulted there: the RIDs' raw verdicts differ in exactly the disclosed tests;
+#   - ARCH-COUNT (COORD ruling 2026-11-10, gcimporter; the guard's Get-ArchCountReading): RIDs whose verdict COUNTS
+#     differ because a test exists on one architecture only. Both validated or COUNT, `new` 0, unequal verdicts, equal
+#     disclosed-divergent, matched + divergent = verdicts on each. The segment headlines the LONGER RID with the other
+#     as its note, "636 (osx-x64; osx-arm64: 634)", and ONLY when the shorter RID's `absent` column names every missing
+#     verdict once (';'-separated) and the longer names none. Otherwise the row is REFUSED: this script exits non-zero
+#     naming it and writes nothing, as the guard refuses it with or without a segment. RID-generic, as the guard is;
 #   - read and not banked: the row carries NO darwin: segment;
 #   - a row the evidence does not name is left as it is.
 # The waves are the guard's own list, read from the script so the two cannot drift.
@@ -129,16 +135,45 @@ def arch_strict(a, x):
     (rb, mb, db), (ro, mo, do) = ((a['RID'], ma, da), (x['RID'], mx, dx)) if da > dx else ((x['RID'], mx, dx), (a['RID'], ma, da))
     return f'{mb}' + (f' + {db}' if db else '') + f' ({rb}; {ro}: {mo}' + (f' + {do}' if do else '') + ')'
 
+class ArchCountRefusal(Exception):
+    pass
+
+def arch_count(a, x):
+    # The guard's Get-ArchCountReading, rule for rule. Returns the segment text, None when the shape does not apply,
+    # and raises ArchCountRefusal when it applies with its missing verdicts not wholly named.
+    if a['status'] not in ('validated', 'COUNT') or x['status'] not in ('validated', 'COUNT'):
+        return None
+    try:
+        va, vx, ma, mx = int(a['verdicts']), int(x['verdicts']), int(a['matched']), int(x['matched'])
+        ga, gx, na, nx = int(a['divergent']), int(x['divergent']), int(a['new']), int(x['new'])
+    except (KeyError, ValueError, TypeError):
+        return None
+    if na or nx or va == vx or ga != gx or ma + ga != va or mx + gx != vx:
+        return None
+    long_, short = (a, x) if va > vx else (x, a)
+    def names(r):
+        return [n.strip() for n in (r.get('absent') or '').split(';') if n.strip() and n.strip() != '-']
+    gap, short_names, long_names = abs(va - vx), names(short), names(long_)
+    if long_names:
+        raise ArchCountRefusal(f"{a['row']}: arch-count: the evidence names absent verdicts on {long_['RID']}, the LONGER RID")
+    if len(set(short_names)) != gap or len(short_names) != gap:
+        raise ArchCountRefusal(f"{a['row']}: arch-count: its verdict counts differ by RID ({long_['RID']} {long_['verdicts']}, {short['RID']} {short['verdicts']}) "
+                               f"with nothing divergent, but the evidence names {len(set(short_names))} of the {gap} missing verdict(s) on {short['RID']} (column absent)")
+    d = f' + {ga}' if ga else ''
+    return f"{long_['matched']}{d} ({long_['RID']}; {short['RID']}: {short['matched']}{d})"
+
 def reading_of_record(records):
     banked = reading(records)
     if banked is not None:
         return banked
     a, x = latest_pair(records)
-    return arch_strict(a, x)
+    strict = arch_strict(a, x)
+    return strict if strict is not None else arch_count(a, x)
 
 table = os.path.join(tree, 'docs/ValidatedTestPackages.md')
 lines = open(table, encoding='utf-8', newline='').read().split('\n')
-SEG = re.compile(r' · darwin: (?:\d+(?: \+ \d+)?(?: \((?:osx-arm64|osx-x64); (?:osx-arm64|osx-x64): \d+(?: \+ \d+)?\))?|n/a)(?= · | \|$)')
+RID = r'[a-z0-9]+(?:-[a-z0-9]+)*'
+SEG = re.compile(r' · darwin: (?:\d+(?: \+ \d+)?(?: \(' + RID + '; ' + RID + r': \d+(?: \+ \d+)?\))?|n/a)(?= · | \|$)')
 row_re = re.compile(r'^\| \[`([^`]+)`\]\(')
 changes = []
 for i, line in enumerate(lines):
@@ -146,7 +181,10 @@ for i, line in enumerate(lines):
     if not m or m.group(1) not in by_row:
         continue
     pkg = m.group(1)
-    want = reading_of_record(by_row[pkg])
+    try:
+        want = reading_of_record(by_row[pkg])
+    except ArchCountRefusal as refusal:
+        sys.exit(f'REFUSED, nothing written: {refusal}')
     have = SEG.search(line)
     if want is None:
         new = SEG.sub('', line) if have else line
