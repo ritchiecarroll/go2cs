@@ -64,13 +64,14 @@ architecture-specific path in the standard library.
      ships for it. The darwin and windows flavours are as this entry describes them. -->
 
 
-## The packages do not ship linux-arm64
+<a id="the-packages-do-not-ship-linux-arm64"></a>
+## Platforms the packages do not ship
 
-linux-arm64 is not supported. The go.* packages ship `win-x64`, `linux-x64`, `osx-x64` and `osx-arm64`. A package
+The go.* packages ship `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64` and `osx-arm64`. A package
 whose code differs by platform carries one folder per platform under `runtimes/`, and a platform without one gets
 the Windows build in `lib/`. A build resolves its platform the way .NET does at run time, so `linux-musl-x64`
 (Alpine) uses the `linux-x64` folder. For a platform that resolves to no folder, the build reports it:
-- **`GO2CS3003`, an error**, on another operating system, or on Linux with another architecture: linux-arm64 would
+- **`GO2CS3003`, an error**, on another operating system, or on Linux with another architecture: linux-riscv64 would
   run the Windows build, and the `linux-x64` build makes x64 system calls. The message names the platform and the
   first package without a folder for it.
 - **`GO2CS3004`, a warning**, on a Windows platform the packages do not ship (`win-arm64`): the Windows build is
@@ -80,7 +81,7 @@ the Windows build in `lib/`. A build resolves its platform the way .NET does at 
 A cross-build for a shipped platform from an unshipped host is not affected: it names its platform with
 `-r <rid>` (`RuntimeIdentifier`), and that platform has its folder.
 
-**To avoid it**, build for one of the four shipped platforms. A build that only needs to compile, and knowingly wants
+**To avoid it**, build for one of the five shipped platforms. A build that only needs to compile, and knowingly wants
 the Windows build (a test harness that never runs the program, say), passes `-p:GoAllowReferenceFlavor=true`. The
 program then runs the Windows build wherever it runs. The property counts only on the command line: set in a
 project file it changes nothing, so a library cannot switch the check off for the projects that build it.
@@ -102,6 +103,11 @@ architecture (`linux-x64` run on `linux-arm64`).
      Verify(GOOS, GOARCH) from src/core/runtime/hostofrecord_impl.cs, gated by src/tests/GolibTests/HostOfRecordTests.cs
      (red first: the linux/amd64-on-arm64 case failed before the architecture check). The linux-arm64 flavour itself
      is the design's seat S6, which turns the error into a no-op for that platform. -->
+<!-- Amended 2026-11-10 (P2, seat S6 of DESIGN-linux-arm64-flavour.md, COORD ruling): the packages ship linux-arm64
+     (push-nuget.ps1 builds the linux/arm64 flavour by its GOOS/GOARCH pair, branch claude/p2-la64-s6-packaging), so
+     the heading, which named linux-arm64 as unshipped, became "Platforms the packages do not ship", and GO2CS3003's
+     example moved to linux-riscv64, as S0's gate did. The old anchor is kept as an explicit id: go.lib.targets in the
+     packages already published links to it. -->
 
 ## On macOS, a `go` statement past the system's thread limit ends the program
 

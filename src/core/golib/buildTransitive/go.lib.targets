@@ -44,7 +44,7 @@
     THE FLAVOUR is resolved through the SDK's RID graph ($(RuntimeIdentifierGraphPath)), as the host
     resolves the RUNTIME asset: breadth-first from the RID, nearest first, the first RID a package
     ships a runtimes/<rid>/ folder for. So linux-musl-x64 compiles against linux-x64, and
-    linux-musl-arm64 and linux-bionic-arm64 against linux-arm64 once a package ships it. Only a
+    linux-musl-arm64 and linux-bionic-arm64 against linux-arm64, which the packages ship. Only a
     RID-SPLIT package (one with a runtimes/ folder) is resolved: the platform-neutral go.* packages,
     most of them, ship lib/ alone and have nothing to swap or to refuse. An SDK without the graph
     file resolves the exact RID only.
@@ -194,10 +194,10 @@
     </PropertyGroup>
     <Error Code="$(Go2csDiagnosticUnshippedRid)"
            Condition="'@(_GoRidUnshipped)' != '' and '$(_GoRidWindowsOs)' != 'true'"
-           Text="The go.* packages do not ship the $(GoCompileRuntimeIdentifier) platform: $(_GoRidUnshippedFirst), one of $(_GoRidUnshippedCount) platform-specific go.* package(s) in this build, has no flavour for it, so the program would compile against, and run, the Windows flavour. Build for a RID the packages ship, or pass -p:GoAllowReferenceFlavor=true to compile against the Windows flavour knowingly: the program then runs the Windows flavour. See https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md#the-packages-do-not-ship-linux-arm64" />
+           Text="The go.* packages do not ship the $(GoCompileRuntimeIdentifier) platform: $(_GoRidUnshippedFirst), one of $(_GoRidUnshippedCount) platform-specific go.* package(s) in this build, has no flavour for it, so the program would compile against, and run, the Windows flavour. Build for a RID the packages ship, or pass -p:GoAllowReferenceFlavor=true to compile against the Windows flavour knowingly: the program then runs the Windows flavour. See https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md#platforms-the-packages-do-not-ship" />
     <Warning Code="$(Go2csDiagnosticUnshippedWindowsRid)"
              Condition="'@(_GoRidUnshipped)' != '' and '$(_GoRidWindowsOs)' == 'true'"
-             Text="The go.* packages do not ship the $(GoCompileRuntimeIdentifier) platform: $(_GoRidUnshippedFirst), one of $(_GoRidUnshippedCount) platform-specific go.* package(s) in this build, compiles against, and runs, its Windows flavour. That is this platform's operating system, so the program runs, but what Go decides by architecture when the package was converted follows amd64. Pass -p:GoAllowReferenceFlavor=true to silence this. See https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md#the-packages-do-not-ship-linux-arm64" />
+             Text="The go.* packages do not ship the $(GoCompileRuntimeIdentifier) platform: $(_GoRidUnshippedFirst), one of $(_GoRidUnshippedCount) platform-specific go.* package(s) in this build, compiles against, and runs, its Windows flavour. That is this platform's operating system, so the program runs, but what Go decides by architecture when the package was converted follows amd64. Pass -p:GoAllowReferenceFlavor=true to silence this. See https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md#platforms-the-packages-do-not-ship" />
   </Target>
 
   <!--
