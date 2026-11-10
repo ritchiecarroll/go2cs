@@ -763,6 +763,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckFuncLiteralDeclaredResultIface() => CheckTarget("FuncLiteralDeclaredResultIface");
 
     [TestMethod]
+    public void CheckFuncMethodSameNameCollision() => CheckTarget("FuncMethodSameNameCollision");
+
+    [TestMethod]
     public void CheckFuncTypeNilConversion() => CheckTarget("FuncTypeNilConversion");
 
     [TestMethod]

@@ -731,6 +731,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckFuncLiteralDeclaredResultIface() => CheckTarget("FuncLiteralDeclaredResultIface");
 
     [TestMethod]
+    public void CheckFuncMethodSameNameCollision() => CheckTarget("FuncMethodSameNameCollision");
+
+    [TestMethod]
     public void CheckFuncTypeNilConversion() => CheckTarget("FuncTypeNilConversion");
 
     [TestMethod]
