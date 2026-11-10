@@ -1168,6 +1168,9 @@ jobs:
         shell: pwsh
         env:
           CGO_TEST_FILTER: ${{ needs.plan.outputs.filter }}
+          # The dotnet arms (TestCgoMirrorsCompileAndHoldTheirLayoutUnderDotnet) skip where no .NET SDK is installed; here
+          # one always is, so its absence must read red, not skipped.
+          GO2CS_REQUIRE_DOTNET: '1'
         run: |
           $ErrorActionPreference = 'Continue'
 
