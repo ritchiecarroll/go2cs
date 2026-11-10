@@ -51,6 +51,25 @@ public class CgoLibrariesTests
             .First();
     }
 
+    // Increment 4c: the generated bindings (GoCgoWrappers.<os>.golden.cs) register their table with this resolver when
+    // the module loads, so this assembly's resolver is already set and a second registration is refused.
+    [TestMethod]
+    public void TheGeneratedBindingsRegisterTheirLibrariesWhenTheModuleLoads()
+    {
+        InvalidOperationException? refused = null;
+
+        try
+        {
+            NativeLibrary.SetDllImportResolver(s_assembly, static (_, _, _) => 0);
+        }
+        catch (InvalidOperationException ex)
+        {
+            refused = ex;
+        }
+
+        Assert.IsNotNull(refused, "no resolver was registered for this assembly when its module loaded");
+    }
+
     [TestMethod]
     public void AnOwnedLibraryLoads()
     {
