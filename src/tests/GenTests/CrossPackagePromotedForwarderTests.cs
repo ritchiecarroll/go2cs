@@ -559,7 +559,13 @@ public class CrossPackagePromotedForwarderTests
         foreach (string source in run.Sources.Values)
             Assert.IsFalse(source.Contains("ᴛxpkg"), "the CompilationReference view moved: re-measure it against the metadata view");
 
-        StringAssert.Contains(GeneratedFor(run, "Direct"), "[global::go.GoPromoted] internal static string Name(this global::go.main_package.Direct target) => target.Inner.Name();");
+        //
+        // The forwarder itself is public: Name is an exported method, and its return type is public whatever it
+        // is called (PromotedForwarderScopeTests). It was internal here for the lowercase spelling of `string`.
+        StringAssert.Contains(GeneratedFor(run, "Direct"), "[global::go.GoPromoted] public static string Name(this global::go.main_package.Direct target) => target.Inner.Name();");
+
+        // The control: Leak is exported too, and returns a type that is not public.
+        StringAssert.Contains(GeneratedFor(run, "Direct"), "[global::go.GoPromoted] internal static global::go.xa_package.hidden Leak(this global::go.main_package.Direct target) => target.Inner.Leak();");
     }
 
     [TestMethod]
