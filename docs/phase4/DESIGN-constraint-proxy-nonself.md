@@ -176,3 +176,48 @@ result-field row from §3.2. Each row prints, so the Output phase compares C# wi
 Red first; GenTests (generator change, route #7: the golib/gen twins); GolibTests is not needed unless the template
 change reaches golib (it does not: the template is gen-owned); the two-seeded three-target footprint; CNR; `go test ./...`;
 the package-compat line (no golib public surface touched).
+
+## 9. Review and rulings (2026-11-10)
+
+COORD's adversarial review of `e74a9a530b` (17:02Z): **APPROVE WITH CHANGES**, read-only. Verified by the review: the
+result cast is the same reference (the operator returns `m_box`) and mutation through forwarders reaches the box; `==` on
+`O` is rightly refused without `comparable`; rejecting the adapter's `NilBox` substitution is right; the cost is one
+allocation per proxied call and none on the cast, with value arguments unaffected. Above all, this is a
+GENERALIZATION, not a parallel mechanism: with a null self, `RenderWithProxy`/`MarshalAcrossProxy` are identity and
+`UnforwardablePositions` is empty, so today's self route becomes the self-not-null case. Rulings, now part of this
+design:
+
+1. **Generic NAMED types are out of scope.** `constraintProxyArg` reaches `constraintProxyFor` for `Set[*T]` too, and a
+   named type has no callee signature for the position gate (§3.2), so `type Set[O optionParser] struct{ items []O }`
+   would admit a proxy whose `[]O` aliases. A pointer type argument to a generic named type with a non-self constraint
+   is **refused by name**. The TS site is a function call. This also makes the cross-assembly identity question moot
+   (a per-consumer `EжIᴾ` would make `Set<proxyA>` and `Set<proxyB>` different types): no named type takes the route.
+2. **The nil zero value is refused where it matters.** In Go, `var zero O` is a typed nil pointer: `zero.M()` calls the
+   method with a nil receiver, and `any(zero) != nil`. As `default(proxy)` it is a null reference, so `zero.M()` throws and
+   `any(zero) == nil` is true; the template's `Equals` also disagrees between proxy-over-null and proxy-over-`NilBox`.
+   Inside a body taking the non-self route, a zero `O` that has a method called on it, or that escapes to `any`/an
+   interface, is **refused by name at conversion**. Returning it, comparing it to nil and passing it back as `O` stay
+   allowed. The box-to-proxy operator normalizes what it can (§4), and the pre-existing self-route case is disclosed as
+   a BOARD row.
+3. **Refusals, each by name**, beyond §5:
+   - (a) union-plus-methods `interface{ ~*T; M() }`: `IsMethodSet()` is false and `pointerCoreConstraint` requires
+     `NumMethods() == 0`, so it is neither erased nor proxied and would read as a silent CS0311. The new gate uses the
+     declaration arm's own predicate (`isMethodSetWithPointerNamedUnion`), so the declaration and the proxy agree (the
+     RED 8 disagreement class).
+   - (b) a SIBLING type parameter whose constraint mentions `O` (`S ~[]O`, `F ~func(O)`) instantiated with `[]*E`.
+   - (c) `O` passed on, inside the body, to another generic with a different constraint: out of scope.
+4. **Every refusal gets a red arm seen to FIRE by name**, then restored byte-identical (safety floor 13).
+5. The cross-assembly identity note is in ruling 1.
+6. **Test-side prediction**, from the per-site census (std, 3 targets): every DIRECT site is `errors.AsType`-shaped
+   (constraint `error`), in production (debug/buildinfo, net) and in tests (errors_test, net, os/exec_test, os_test,
+   io/fs_test, crypto/tls, log, log/slog, go/types_test, text/template). That clause is ELIDED (`methodSetConstraintNeeded`),
+   so under ruling 7 none of them takes the new route. Every other NONGEN site is FUNC (hash.Hash, mlkem_test) or SLICE
+   (go/ast) and keeps its route. **Predicted reach: 0 production, 0 test sites on all three targets**, so no roster
+   package's emission moves.
+7. **The proxy is gated on `methodSetConstraintNeeded`**: where the clause is elided, the box binds and stays.
+8. **The two naming schemes are DELIBERATE**: the self route keeps `EжI` (renaming it would churn the crypto corpus for
+   nothing), and the non-self route takes `EжIᴾ` (§3.1(a)).
+9. **Added arms** for §7: a value-receiver method satisfying the constraint via `*T`; `reflect.TypeOf(p)` and a type
+   SWITCH on the result; `(O, error)` deconstruction; a discarded result.
+
+No second review unless the shape changes. Next: push this section, then cut code.
