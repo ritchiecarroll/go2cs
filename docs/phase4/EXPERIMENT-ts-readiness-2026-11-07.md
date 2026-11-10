@@ -544,3 +544,38 @@ All under `EXPERIMENT-ts-readiness-2026-11-07-data/`:
 - `rerun-repro.sh.txt` and `rerun-repro-results.txt`: every repro module run end to end: Go oracle → convert → build → run → compare.
 - `rerun-projstatus.py.txt`: the built / failed / blocked classifier. It reproduces the first run's recorded pass-C count, 46 built / 7 failed, as its control.
 - New repro modules under `repros/`: `c19*`, `c2*`, `go2cs2004alias`, `go2cs2004direct`. They use their own numbering, which matches the catalogue ids above.
+
+## Amendment 2026-11-09 (i7), later: the parse demo, built as far as the tree allows
+
+The owner OK'd (2026-11-09) adding one Go file to a **scratch copy** of TypeScript's tree, so that a demo can import `tsc/internal/...`. The copy is `tsc/` without `testdata/`, outside the TypeScript clone. The clone itself is unchanged, and nothing from either copy is committed.
+
+**The demo.** `cmd/parsedemo/main.go` is 40 lines (data: `demo-parsedemo-main.go.txt`).
+- For each `.ts` file named, it calls `parser.ParseSourceFile`.
+- It prints every parse diagnostic (code, start, length, message), then a pre-order dump of node kinds with `[pos,end]`.
+- The output is meant to be byte-compared between the native and the converted run, so node kinds and positions have to match exactly.
+- The inputs are one valid file and one with syntax errors (`demo-samples.txt`).
+
+**Native (the oracle):** go1.26.10, `GOTOOLCHAIN=local`, `GOWORK=off`.
+- `go vet` is clean, and the run exits 0 with 211 lines (`demo-native-output.txt`, SHA-256 `3d40bddc…02ae`).
+- The valid file has no diagnostics.
+- The bad file has 5: TS1109, TS1005 ×2, TS1109 and TS1128.
+
+**Converted.**
+- `cmd/parsedemo` was converted on its own with the pinned `go2cs.exe` (built at `f09e762659`): rc 0 in 5 s, no warnings.
+- The emission reads like the Go source (`demo-converted-main.cs.txt`).
+- The project was placed in the pass-G tree. Its four internal project references were re-pointed to that tree's layout, because a standalone conversion guesses them. That is wiring, not a converter finding: a module `-recurse` emits the references itself.
+
+**Build:** rc 1 in 1,647 s, run beside COORD's batteries (`demo-build-result.txt`).
+- **23 of the parse closure's 26 non-std packages build.** That is exactly the number the demo-distance read predicted from the re-run's logs.
+- `ast` fails with 533 CS1929. The distinct (site, code, message) set is **identical** to pass G's `ast` errors, so this is C29 and nothing else.
+- `scanner`, `parser` and the demo itself are blocked behind `ast`.
+
+**Read.**
+- The demo adds no new first cause. What it adds is a native oracle and a ready harness at the parser's real entry point.
+- A converted parse of a real `.ts` file is gated by C29, then by whatever `scanner` and `parser` hold, which nothing has measured yet.
+- Once C29 lands, the next step is mechanical:
+  1. reconvert;
+  2. apply only the hand-patches for rows still open;
+  3. build `cmd/parsedemo`;
+  4. compare against `demo-native-output.txt`.
+- The same binary can then be pointed at the 17,424-unit parser corpus, one digest line per file, for a wider byte-compare.
