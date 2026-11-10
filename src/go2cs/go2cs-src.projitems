@@ -477,6 +477,8 @@
     <None Include="$(MSBuildThisFileDirectory)noinlineDirective_test.go" />
     <None Include="$(MSBuildThisFileDirectory)noInliningPartialUsing_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nonSelfConstraintProxy.go" />
+    <None Include="$(MSBuildThisFileDirectory)nonSelfConstraintProxyRefusals.go" />
+    <None Include="$(MSBuildThisFileDirectory)nonSelfConstraintProxyRefusals_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetFeed.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetFeed_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetLock.go" />
