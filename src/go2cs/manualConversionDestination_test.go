@@ -257,13 +257,15 @@ func TestManualConversionRegistrationsHaveBodies(t *testing.T) {
 // red guard. The forward arm fails on a debt that is not listed AND on a row that is no longer owed,
 // so a row leaves the day its body lands and nothing can be added here without being seen.
 //
-// linux/arm64's four are the syscall wrappers whose amd64 bodies marshal amd64 struct layouts
-// (`syscall/linux-amd64/zsyscall_linux_amd64_impl.cs`); each needs an arm64 body of its own.
+// linux/arm64's rows are the syscall wrappers whose amd64 bodies marshal amd64 struct layouts
+// (`syscall/linux-amd64/zsyscall_linux_amd64_impl.cs`); each needs a body linux/arm64 compiles. A
+// struct whose layout differs at arm64 needs an arm64 mirror of its own; one that is the same at both
+// arches moves to `syscall/linux/`, which both linux builds compile (wait4 left that way: its Rusage
+// is 144 bytes at both).
 var owedHandOwnBodies = map[string]bool{
 	"syscall.Fstat@linux/arm64":   true,
 	"syscall.Uname@linux/arm64":   true,
 	"syscall.fstatat@linux/arm64": true,
-	"syscall.wait4@linux/arm64":   true,
 }
 
 // handOwnBodies is one package's hand-own witness, split by which builds compile it: `flat` is the

@@ -7,7 +7,8 @@
 
 // The syscall STRUCT-PASSING class, closed PROACTIVELY for the five remaining Linux members whose
 // converted struct carries `array<>` fields. zsyscall_linux_amd64_impl.cs carries the class's full
-// write-up and its first members (Fstat/fstatat, wait4, Uname); this file is that same remedy
+// write-up and its first members (Fstat/fstatat, Uname; wait4, the second, is at the end of this
+// file, which both linux builds compile, since S3); this file is that same remedy
 // applied to the rest of the surface, and it exists because the class's DEFERRAL RULE was found to
 // be unsafe for these members rather than because a suite reached them.
 //
@@ -50,8 +51,13 @@
 // Select and FcntlFlock's F_SETLKW BLOCK. The mirror is a stack local for the whole call, which is
 // the same property wait4 needed when GC compaction relocated its boxes mid-wait.
 //
-// SCOPE. linux/amd64's layouts (ztypes_linux_amd64.go), registered goosLinux in
-// manualConversionFuncs. Another Linux arch would need its own mirrors; darwin declares Select,
+// SCOPE. Registered goosLinux in manualConversionFuncs, and compiled by both linux builds,
+// linux/amd64 and linux/arm64. The mirrors were written from ztypes_linux_amd64.go; the S3 census
+// (docs/phase4/DATA-la64-s3-census.md §3) read Go's own layouts at both arches and found FdSet 128,
+// Flock_t 32, Statfs_t 120, Sysinfo_t 112, Timex 208 and Rusage 144 the same size with every field
+// at the same offset, so the mirrors serve linux/arm64 unchanged and their `LinuxAmd64` names are
+// historical. Select's SYSCALL is the exception, not its layout: arm64 has no select(2), so Select
+// at linux/arm64 is S3 site 6. A Linux arch whose layouts differ needs its own mirrors; darwin declares Select,
 // Statfs and Fstatfs too, with layouts of its own and bodies that are not defective here, which is
 // exactly what the goosLinux scoping protects.
 
@@ -691,5 +697,87 @@ partial class syscall_package
             value.Data[i] = ((uint32*)buffer)[i];
 
         return (Ꮡvalue, err);
+    }
+
+    // ── wait4: the class's first BLOCKING member (JOB-024's os/exec SIGSEGV arc, 2026-08-26) ──
+    //
+    // The generated wrapper handed the kernel `(uintptr)Ꮡwstatus` and `(uintptr)Ꮡrusage` — golib
+    // box addresses — across SYS_WAIT4. Unlike Fstat's instantaneous write, wait4 BLOCKS until a
+    // child changes state, and a transient box address does not survive a blocking call: GC
+    // compaction relocates the boxes mid-wait and the kernel's eventual status/rusage write lands
+    // on whatever object moved in — heap corruption that surfaces as a SIGSEGV at an unrelated
+    // later point. Measured 4-for-4 on os/exec's suite the day the exec wall opened (the death
+    // point moved between runs, which IS this mechanism's signature; rooted from a crash dump
+    // whose wait threads sat parked in exactly this call). Same remedy as above, plus the rule
+    // the blocking shape adds: the native buffer must live for the WHOLE call, so it is a stack
+    // local of this frame, which cannot move and cannot outlive the syscall.
+    //
+    // Rusage on linux/amd64 is all-scalar (two Timevals + fourteen int64s, 144 bytes) so its
+    // mirror is layout-identity; the copy back is field-for-field like copyNativeStat's. A nil
+    // Ꮡwstatus/Ꮡrusage reaches the kernel as address 0, exactly as in Go. The Timeval mirror is
+    // NativeTimeval, declared in linux/structclass_linux_impl.cs, which both linux builds compile.
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativeRusageLinuxAmd64
+    {
+        public NativeTimeval Utime;
+        public NativeTimeval Stime;
+        public int64 Maxrss;
+        public int64 Ixrss;
+        public int64 Idrss;
+        public int64 Isrss;
+        public int64 Minflt;
+        public int64 Majflt;
+        public int64 Nswap;
+        public int64 Inblock;
+        public int64 Oublock;
+        public int64 Msgsnd;
+        public int64 Msgrcv;
+        public int64 Nsignals;
+        public int64 Nvcsw;
+        public int64 Nivcsw;
+    }
+
+    private const int nativeRusageSizeLinuxAmd64 = 144;
+
+    internal static unsafe (nint wpid, error err) wait4(nint pid, ж<_C_int> Ꮡwstatus, nint options, ж<Rusage> Ꮡrusage) {
+        if (sizeof(NativeRusageLinuxAmd64) != nativeRusageSizeLinuxAmd64)
+            throw new InvalidOperationException($"syscall: NativeRusageLinuxAmd64 is {sizeof(NativeRusageLinuxAmd64)} bytes, the kernel's struct rusage is {nativeRusageSizeLinuxAmd64}");
+
+        int32 nativeStatus = 0;
+        NativeRusageLinuxAmd64 nativeRusage = default;
+        uintptr statusAddr = Ꮡwstatus is null || Ꮡwstatus.IsNilPointer ? (uintptr)0 : (uintptr)(nint)(&nativeStatus);
+        uintptr rusageAddr = Ꮡrusage is null || Ꮡrusage.IsNilPointer ? (uintptr)0 : (uintptr)(nint)(&nativeRusage);
+
+        var (r0, _, e1) = Syscall6(SYS_WAIT4, (uintptr)pid, statusAddr, (uintptr)options, rusageAddr, 0, 0);
+        nint wpid = (nint)r0;
+        if (e1 != 0) {
+            return (wpid, errnoErr(e1));
+        }
+
+        if (Ꮡwstatus is not null && !Ꮡwstatus.IsNilPointer) {
+            Ꮡwstatus.Value = nativeStatus;
+        }
+
+        if (Ꮡrusage is not null && !Ꮡrusage.IsNilPointer) {
+            ref var ru = ref Ꮡrusage.Value;
+            ru.Utime = new Timeval{ Sec = nativeRusage.Utime.Sec, Usec = nativeRusage.Utime.Usec };
+            ru.Stime = new Timeval{ Sec = nativeRusage.Stime.Sec, Usec = nativeRusage.Stime.Usec };
+            ru.Maxrss = nativeRusage.Maxrss;
+            ru.Ixrss = nativeRusage.Ixrss;
+            ru.Idrss = nativeRusage.Idrss;
+            ru.Isrss = nativeRusage.Isrss;
+            ru.Minflt = nativeRusage.Minflt;
+            ru.Majflt = nativeRusage.Majflt;
+            ru.Nswap = nativeRusage.Nswap;
+            ru.Inblock = nativeRusage.Inblock;
+            ru.Oublock = nativeRusage.Oublock;
+            ru.Msgsnd = nativeRusage.Msgsnd;
+            ru.Msgrcv = nativeRusage.Msgrcv;
+            ru.Nsignals = nativeRusage.Nsignals;
+            ru.Nvcsw = nativeRusage.Nvcsw;
+            ru.Nivcsw = nativeRusage.Nivcsw;
+        }
+
+        return (wpid, default!);
     }
 }
