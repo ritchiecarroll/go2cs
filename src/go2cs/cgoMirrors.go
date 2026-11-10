@@ -272,16 +272,18 @@ func (builder *cgoMirrorBuilder) csharp() string {
 			fmt.Fprintf(&text, "    [%sFieldOffset(%d)] public %s %s;\n", interop, member.offset, member.clrType, member.name)
 		}
 
-		// The layout check (§11.2, RULED). Explicit layout makes the size and every offset true by construction, so
+		// The layout check (§11.2, RULED). It and its helper carry the ᴍ marker, so a C member named CheckLayout or Hold
+		// cannot collide with them (CS0102).
+		// Explicit layout makes the size and every offset true by construction, so
 		// what can be wrong is a member's C# type: each is held to the size go/types gives it, and each inline array to
 		// its length and element size. It runs once, before the mirror first crosses.
-		fmt.Fprintf(&text, "\n    internal static void CheckLayout()\n    {\n")
+		fmt.Fprintf(&text, "\n    internal static void CheckLayout%s()\n    {\n", cgoMirrorSuffix)
 
 		for _, member := range built.fields {
-			fmt.Fprintf(&text, "        Hold(%q, %q, %sUnsafe.SizeOf<%s>(), %d);\n", member.name, member.clrType, compiler, member.clrType, member.goSize)
+			fmt.Fprintf(&text, "        Hold%s(%q, %q, %sUnsafe.SizeOf<%s>(), %d);\n", cgoMirrorSuffix, member.name, member.clrType, compiler, member.clrType, member.goSize)
 
 			if member.length > 0 {
-				fmt.Fprintf(&text, "        Hold(%q, %q, %sUnsafe.SizeOf<%s>(), %d);\n", member.name+" element", member.elemType, compiler, member.elemType, member.elemSize)
+				fmt.Fprintf(&text, "        Hold%s(%q, %q, %sUnsafe.SizeOf<%s>(), %d);\n", cgoMirrorSuffix, member.name+" element", member.elemType, compiler, member.elemType, member.elemSize)
 			}
 		}
 
@@ -292,12 +294,12 @@ func (builder *cgoMirrorBuilder) csharp() string {
 		for _, member := range built.fields {
 			if nested := builder.nestedMirror(member.clrType); nested != "" && !checkedNested[nested] {
 				checkedNested[nested] = true
-				fmt.Fprintf(&text, "        %s.CheckLayout();\n", nested)
+				fmt.Fprintf(&text, "        %s.CheckLayout%s();\n", nested, cgoMirrorSuffix)
 			}
 		}
 
 		fmt.Fprintf(&text, "    }\n\n")
-		fmt.Fprintf(&text, "    private static void Hold(string member, string clrType, int clrSize, int cSize)\n    {\n")
+		fmt.Fprintf(&text, "    private static void Hold%s(string member, string clrType, int clrSize, int cSize)\n    {\n", cgoMirrorSuffix)
 		fmt.Fprintf(&text, "        if (clrSize != cSize)\n")
 		fmt.Fprintf(&text, "            throw new global::System.InvalidOperationException($\"cgo mirror %s: member {member} is {clrSize} bytes as {clrType} and {cSize} bytes in C, so the mirror cannot cross\");\n", goName)
 		fmt.Fprintf(&text, "    }\n}\n\n")

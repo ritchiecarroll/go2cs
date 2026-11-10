@@ -125,17 +125,17 @@ internal struct _Ctype_struct_xᴍ
     [global::System.Runtime.InteropServices.FieldOffset(24)] public byte flag;
     [global::System.Runtime.InteropServices.FieldOffset(32)] public nint next;
 
-    internal static void CheckLayout()
+    internal static void CheckLayoutᴍ()
     {
-        Hold("a", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
-        Hold("b", "double", global::System.Runtime.CompilerServices.Unsafe.SizeOf<double>(), 8);
-        Hold("name", "ᴍarray8_sbyte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<ᴍarray8_sbyte>(), 8);
-        Hold("name element", "sbyte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<sbyte>(), 1);
-        Hold("flag", "byte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<byte>(), 1);
-        Hold("next", "nint", global::System.Runtime.CompilerServices.Unsafe.SizeOf<nint>(), 8);
+        Holdᴍ("a", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+        Holdᴍ("b", "double", global::System.Runtime.CompilerServices.Unsafe.SizeOf<double>(), 8);
+        Holdᴍ("name", "ᴍarray8_sbyte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<ᴍarray8_sbyte>(), 8);
+        Holdᴍ("name element", "sbyte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<sbyte>(), 1);
+        Holdᴍ("flag", "byte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<byte>(), 1);
+        Holdᴍ("next", "nint", global::System.Runtime.CompilerServices.Unsafe.SizeOf<nint>(), 8);
     }
 
-    private static void Hold(string member, string clrType, int clrSize, int cSize)
+    private static void Holdᴍ(string member, string clrType, int clrSize, int cSize)
     {
         if (clrSize != cSize)
             throw new global::System.InvalidOperationException($"cgo mirror _Ctype_struct_x: member {member} is {clrSize} bytes as {clrType} and {cSize} bytes in C, so the mirror cannot cross");
@@ -343,12 +343,12 @@ func TestCgoMirrorsCompileAndHoldTheirLayoutUnderDotnet(t *testing.T) {
 				mirror.name, member.name, mirror.name, member.clrType, member.name)
 		}
 
-		fmt.Fprintf(&program, "            }\n            %s.CheckLayout();\n            global::System.Console.WriteLine(\"CHECKED %s\");\n", mirror.name, mirror.name)
+		fmt.Fprintf(&program, "            }\n            %s.CheckLayoutᴍ();\n            global::System.Console.WriteLine(\"CHECKED %s\");\n", mirror.name, mirror.name)
 	}
 
-	program.WriteString("            try { planted._Ctype_struct_intsᴍ.CheckLayout(); global::System.Console.WriteLine(\"PLANTED ACCEPTED\"); }\n")
+	program.WriteString("            try { planted._Ctype_struct_intsᴍ.CheckLayoutᴍ(); global::System.Console.WriteLine(\"PLANTED ACCEPTED\"); }\n")
 	program.WriteString("            catch (global::System.InvalidOperationException refused) { global::System.Console.WriteLine(\"PLANTED REFUSED \" + refused.Message); }\n")
-	program.WriteString("            try { plantedNested._Ctype_struct_shapesᴍ.CheckLayout(); global::System.Console.WriteLine(\"PLANTED_NESTED ACCEPTED\"); }\n")
+	program.WriteString("            try { plantedNested._Ctype_struct_shapesᴍ.CheckLayoutᴍ(); global::System.Console.WriteLine(\"PLANTED_NESTED ACCEPTED\"); }\n")
 	program.WriteString("            catch (global::System.InvalidOperationException refused) { global::System.Console.WriteLine(\"PLANTED_NESTED REFUSED \" + refused.Message); }\n")
 	program.WriteString("        }\n    }\n}\n")
 
