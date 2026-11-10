@@ -16,8 +16,9 @@
 >
 > **Amended 2026-11-10 (§11, new):** what cutting S2 corrected. Class (iii) of §9's S3 row is 18 types in 4
 > files; the metadata record is keyed by layout folder; every layout-reading guard reads per target; four
-> hand-owned syscall bodies are owed at linux/arm64; the arch binding seats with S2. The text above §11 is
-> unchanged.
+> hand-owned syscall bodies are owed at linux/arm64; the arch binding seats with S2; R1e is not delivered
+> (§11.6); six readers outside the converter suite named the GOOS folders themselves (§11.7). The text above §11
+> is unchanged.
 
 ## 0. The standing defect this closes, and the first seat (SEAT 0)
 
@@ -529,3 +530,39 @@ wrong is the order: it says "S0, S4 and S5 are independent of [the spine]", and 
 - The binding is S5b's to design. What S2's reads used was a scratch: one job-environment line beside the
   `GoTargetOS` binding, keyed on the leg's RID by an inline test. It is right for today's universe; §6's map is
   the durable form.
+
+### 11.6 §2.6 and R1e: the arch-divergent review sibling stays flat, and the package is named
+
+§2.6 predicts that `crypto/internal/fips140/subtle/xor_generic.cs.auto` is homed by its own content, so the package
+gains `amd64/` and `linux-arm64/` holding no compiled file, and R1e recommends it. The merge does not do that.
+
+- **What the merge does.** It splits a review sibling only into key folders that are already source folders (a `.cs`
+  and no project file inside). Otherwise it keeps the first target's flavour flat and names the package in the
+  apply's closing note. The rule predates this design: a single-target conversion routes into a key folder only
+  where it finds a source folder, so a folder holding only a sibling would never be rewritten.
+- **So S2's apply names one package,** the corpus's first, and its project file is not the 21st to gain the arch
+  block (20 do).
+- **The cost is one row.** A single-target linux/arm64 conversion into the applied tree rewrites the flat sibling
+  with arm64's flavour (`supportsUnaligned` folds to `false` there). The four-target apply is a fixed point.
+- **Delivering R1e** needs the merge and the single-target writer to agree on a folder that holds only a sibling: a
+  converter seat of its own, with a three-path footprint (the flat sibling out, one in each folder). It waits on a
+  ruling; until then R1e reads as not delivered.
+
+### 11.7 §2.4 again: the readers outside the converter suite
+
+§11.3 stops at the converter suite and repoguard. Six more readers named the three GOOS folders themselves, and S2
+was posted before any of them was run against the applied tree (`DATA-la64-s2-prediction.md`, §6.4).
+
+- **Two went red:** a GolibTests guard that finds a walker's declaration, and the comment census.
+- **Four kept passing and were wrong:** the pack's props target (nine packages would have shipped without their
+  usings), the hand-own upstream census, the declared-not-implemented census (60 packages counted where the corpus
+  holds 43), and the ref-lowering census's layout probe.
+- **The spelling is not one shape.** The lists sat in a slice, a map, a `switch`, a PowerShell array and an MSBuild
+  `Exists` chain. A search for one shape finds one of them.
+- **A list a tool must own is pinned, not trusted.** MSBuild and PowerShell cannot read `platformLattice.go`, so
+  their key lists stay where they are and a repoguard test holds them equal to the universe's key folders.
+
+**The gate, as now ruled** (`.claude/rules/corpus.md`): a change that moves the corpus layout runs every reader of it
+before it is posted: `go test ./...`, GolibTests on every flavour, the comment census, the behavioral harness. A
+count that falls, or a pass that survives a rename untouched, is read against a control tree before it is believed.
+§6.8 of the record lists the readers that still hold a fixed list and miss nothing today.
