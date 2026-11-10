@@ -7597,6 +7597,10 @@ func testPublishTimeout(options Options) time.Duration {
 // own source of truth for the platform a run is FOR (the same value that routes the sources and
 // scopes the disclosure manifest); a run with no target set leaves the csproj default alone.
 //
+// Right after it rides the corpus flavour's GOARCH (-p:GoTargetArch=, testHostPlatformProperties), always: an
+// explicit -p: beats an inherited environment variable exactly as for GoTargetOS, and the arch is the one the
+// flavour was converted at, not the target's or the host's (darwin/arm64 builds against darwin/amd64's).
+//
 // The publish also states its build output (-getProperty:TargetPath), which publishBuildOutput reads. MSBuild prints
 // the value after the build and, asked for a property, writes no build log to the console: errors still reach the
 // captured output (on stderr), and the exit code is the build's. Measured 2026-10-07 (SDK 10, a project whose
@@ -7609,11 +7613,7 @@ func testPublishTimeout(options Options) time.Duration {
 func publishTestHostArgs(outputPath, testProject string, options Options) []string {
 	publishDir := filepath.Join(outputPath, "bin", "tests", "publish")
 
-	var buildArgs []string
-
-	if goos := goosOfTarget(options.targetPlatform); goos != "" {
-		buildArgs = []string{"-p:GoTargetOS=" + goos}
-	}
+	buildArgs := testHostPlatformProperties(corpusLattice(), options.targetPlatform)
 
 	if options.testBuildMaxCPU > 0 {
 		buildArgs = append(buildArgs, "-m:"+strconv.Itoa(options.testBuildMaxCPU))
