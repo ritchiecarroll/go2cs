@@ -85,3 +85,41 @@
   `<goos>-<arch>/`. That uses the axis the linux/arm64 work just built, rather than refusing arm64.
 - **Finding 18:** the `C.` form is the target, as the owner's readability rulings favour.
 - Increment 3 waits on findings 1 and 4; increment 4 on 5, 10, 11 and 12; increment 5 on 6, 8 and 9.
+
+## Amendment 2026-11-10: the §11 conformance check
+
+> A second Fable 5.2 pass read H's amendment (claude/h-cgo-phase2-design 6ae0285d8c, §11.1-11.17, +212/-0) against
+> findings 1-18 and the four rulings above. **MET: 1, 2, 3, 6, 7, 8, 11, 13-18, and the sequencing (§11.14).
+> PARTIAL: 4, 5, 9, 10, 12.** Nothing was contradicted outright; three internal contradictions were found inside §11.
+
+### Must fix before the increment each gates
+
+1. **§11.12 against §11.15, `-framework`.** §11.12 admits `-framework X`; §11.15 refuses everything but `-l`/`-L`.
+   **RULED:** extend §11.15's grammar with `-framework <name>` on darwin only (cmd/go's allowlist admits it). Gates
+   increment 4.
+2. **§11.4's red has no route at increment 3.** A `[LibraryImport]`-bound wrapper cannot reach a managed
+   `[UnmanagedCallersOnly]` probe: S-b's shape worked because `cgocaller` takes a function pointer. **RULED:** the
+   instrument is a probe library exporting a call-through that takes a function pointer and an argument. It lands in
+   increment 3, built by the converter-cgo leg's own compiler (gcc, mingw or clang); it does not wait for the pinned
+   toolchain, which is still the owner's call. Gates increment 3.
+3. **§11.10's `inet_ntoa` by-value arm cannot run on windows under §11.7**: windows' `in_addr` is a union (`S_un`),
+   which by-value refuses. **RULED:** the arm runs on linux and darwin. Windows gets the probe library's export taking a
+   two-int struct. Gates increment 4.
+4. **Promoted from should-fix: a reinterpret-minted `NativeBox`** carries a managed token with its retained source
+   set (`ж.NativeBox.cs:31-39`). "Pass its address" must refuse that arm, or C writes at a token. Gates increment 3,
+   with a red.
+
+### Should fix (each with its increment)
+
+- §11.5 (inc 4): ELF `DT_NEEDED` plus `.dynsym` maps only VERSIONED symbols to a library. Derive the rest with
+  `ld --trace-symbol` / `-Map`, or a per-`-l` probe.
+- §11.10 (inc 4): darwin's libm sets `math_errhandling == MATH_ERREXCEPT`, so `sqrt(-1)` may leave errno 0. Use a
+  `strtol` overflow (ERANGE) or an `open` miss (ENOENT), which all three CRTs set.
+- §11.9 (inc 5): name all four covers (flat, `<goos>/`, `<arch>/`, `<goos>-<arch>/`). An all-target-identical mirror set
+  lands flat.
+- §11.15: align the `-l` name rule with cmd/go's leading-character refusal (`-l-foo` and `-l@x` are refused).
+- Pointers to §11 from §2's R8/R9 rows and §8's first sentence. §11.6's tense: "increment 0 recognizes them", which
+  is true at master once claude/h-cgo-phase1-kinds lands in batch 281. §11.2: say where the underflow is planted (the
+  type map or the emission).
+
+**Increment 2 (findings 2 and 7, both MET) may be cut now.**
