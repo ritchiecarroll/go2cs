@@ -83,7 +83,7 @@ func packageDocFor(files []*ast.File, sourceDir string, packageName string) stri
 		context.CgoEnabled = false
 		context.BuildTags = nil
 		context.ReleaseTags = loaderReleaseTags(sourceDir)
-		context.ToolTags = loaderToolTags(sourceDir)
+		context.ToolTags = loaderToolTags(sourceDir, platform)
 
 		var selected []*ast.File
 
