@@ -841,6 +841,20 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 				if recordableBase && exprResult != "" {
 					recordName := PointerPrefix + "<" + targetTypeName + ">"
 
+					// An OPEN foreign generic pair records the generic's definition and is named below
+					// with the instantiation's arguments (see foreignGenericAdapterIsOpen). Not for the
+					// same-assembly branch: there the struct is local to the generator, whose local
+					// generic route already keys the closed record on the open definition.
+					openForeignGeneric := !v.isSameAssemblyPkg(pkg) && foreignGenericAdapterIsOpen(named, interfaceType)
+
+					if openForeignGeneric {
+						if openRecord, ok := openGenericImplementRecordName(named, targetTypeName); ok {
+							recordName = PointerPrefix + "<" + openRecord + ">"
+						} else {
+							openForeignGeneric = false
+						}
+					}
+
 					packageLock.Lock()
 
 					if implementations, exists := interfaceImplementations[interfaceTypeName]; exists {
@@ -890,7 +904,17 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 					// Dropped BEFORE the qualifier scan below, the order splitAdapterStructReference
 					// already documents: a '<' left in place swallows the rest of the scan as soon
 					// as an argument is itself a dotted type.
+					//
+					// An OPEN pair is the exception: its adapter IS generic over the definition's type
+					// parameters, so the closed argument list is kept and trails the reference
+					// (`fieldlib_ExpectedжField<@string>`), exactly as it does for a local generic.
+					typeArgs := ""
+
 					if idx := strings.Index(simpleTarget, "<"); idx >= 0 {
+						if openForeignGeneric {
+							typeArgs = simpleTarget[idx:]
+						}
+
 						simpleTarget = simpleTarget[:idx]
 					}
 
@@ -898,7 +922,7 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 						simpleTarget = simpleTarget[idx+1:]
 					}
 
-					qualifiedTarget := getSanitizedIdentifier(pkg.Name()) + "_" + simpleTarget
+					qualifiedTarget := getSanitizedIdentifier(pkg.Name()) + "_" + simpleTarget + typeArgs
 
 					return fmt.Sprintf("new %s(%s)", adapterTypeRef(qualifiedTarget, interfaceTypeName), exprResult)
 				}
@@ -1070,6 +1094,127 @@ func wholeTypeAliasAdapterBase(aliasQualified, adapterBase, targetTypeName strin
 	}
 
 	return adapterBase
+}
+
+// foreignGenericAdapterIsOpen reports whether a pointer conversion of an instantiation of the FOREIGN
+// generic `named` to `interfaceType` can go through ONE generic adapter over the generic's open type
+// parameters (`fieldlib_ExpectedжField<T>`), rather than one non-generic adapter per closed
+// instantiation (`sync_HashTrieMapжmapInterface`).
+//
+// It can when every method the interface requires is declared on the generic DEFINITION with a
+// signature that mentions none of the definition's type parameters. Then every instantiation
+// satisfies the interface the same way, and the adapter's members forward without naming T. Two
+// instantiations of one such pair converted in one package (tsc's internal/module: packagejson's
+// Expected[string] and Expected[map[string]string] as TypeValidatedField) composed one closed class
+// twice on the closed route (CS0102/CS0111/CS0579/CS8646), because the closed name carries no type
+// arguments.
+//
+// It cannot when a required method mentions a type parameter (internal/sync's HashTrieMap[any, any]
+// against sync's mapInterface, `Load(key K)`): an adapter open over K could not implement the
+// interface's `Load(any)`. Go's own rule then lets exactly one instantiation satisfy the interface,
+// so the closed route is collision-free there. A method reached by PROMOTION, a generic interface,
+// and an interface the definition does not implement keep the closed route too.
+//
+// The converter decides and the record says which: an open pair records the generic's DEFINITION
+// (the typeof form, `GoImplement(typeof(Expected<>), typeof(Field), Pointer = true)`), which is the
+// shape go2cs-gen reads as "emit the generic adapter". The cast site then names the generic adapter
+// with the instantiation's arguments as C# type arguments, so the generator never has to re-derive
+// Go method signatures, and the two sides cannot spell the name differently.
+func foreignGenericAdapterIsOpen(named *types.Named, interfaceType types.Type) bool {
+	origin := named.Origin()
+
+	if origin.TypeParams().Len() == 0 {
+		return false
+	}
+
+	if ifaceNamed, ok := types.Unalias(interfaceType).(*types.Named); ok && ifaceNamed.TypeArgs().Len() > 0 {
+		return false
+	}
+
+	iface, ok := interfaceType.Underlying().(*types.Interface)
+
+	if !ok || iface.NumMethods() == 0 {
+		return false
+	}
+
+	methods := types.NewMethodSet(types.NewPointer(origin))
+
+	for i := range iface.NumMethods() {
+		required := iface.Method(i)
+		selection := methods.Lookup(required.Pkg(), required.Name())
+
+		// A missing method (the definition does not implement it) or a PROMOTED one (reached through
+		// an embedded field, whose forwarding the generic adapter does not compose) keeps the closed route.
+		if selection == nil || len(selection.Index()) != 1 {
+			return false
+		}
+
+		signature, ok := selection.Obj().Type().(*types.Signature)
+
+		if !ok || mentionsTypeParam(signature, map[types.Type]bool{}) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// mentionsTypeParam reports whether t contains a type parameter anywhere in its structure, through
+// func signatures, struct fields and interface methods as well as the element types
+// typeContainsTypeParams follows.
+func mentionsTypeParam(t types.Type, seen map[types.Type]bool) bool {
+	if t == nil || seen[t] {
+		return false
+	}
+
+	seen[t] = true
+
+	switch typ := t.(type) {
+	case *types.TypeParam:
+		return true
+	case *types.Alias:
+		return mentionsTypeParam(types.Unalias(typ), seen)
+	case *types.Pointer:
+		return mentionsTypeParam(typ.Elem(), seen)
+	case *types.Slice:
+		return mentionsTypeParam(typ.Elem(), seen)
+	case *types.Array:
+		return mentionsTypeParam(typ.Elem(), seen)
+	case *types.Chan:
+		return mentionsTypeParam(typ.Elem(), seen)
+	case *types.Map:
+		return mentionsTypeParam(typ.Key(), seen) || mentionsTypeParam(typ.Elem(), seen)
+	case *types.Named:
+		if args := typ.TypeArgs(); args != nil {
+			for i := range args.Len() {
+				if mentionsTypeParam(args.At(i), seen) {
+					return true
+				}
+			}
+		}
+	case *types.Signature:
+		for _, tuple := range []*types.Tuple{typ.Params(), typ.Results()} {
+			for i := range tuple.Len() {
+				if mentionsTypeParam(tuple.At(i).Type(), seen) {
+					return true
+				}
+			}
+		}
+	case *types.Struct:
+		for i := range typ.NumFields() {
+			if mentionsTypeParam(typ.Field(i).Type(), seen) {
+				return true
+			}
+		}
+	case *types.Interface:
+		for i := range typ.NumMethods() {
+			if mentionsTypeParam(typ.Method(i).Type(), seen) {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 func adapterTypeRef(structTypeName string, interfaceTypeName string) string {

@@ -582,6 +582,8 @@
     <Project Path="tests/Behavioral/GenericCompositeType/GenericCompositeType.csproj" />
     <Project Path="tests/Behavioral/GenericDefinedMapChan/GenericDefinedMapChan.csproj" />
     <Project Path="tests/Behavioral/GenericEmbedPromotion/GenericEmbedPromotion.csproj" />
+    <Project Path="tests/Behavioral/GenericForeignAdapterInstantiations/GenericForeignAdapterInstantiations.csproj" />
+    <Project Path="tests/Behavioral/GenericForeignAdapterInstantiations/fieldlib/GenericForeignAdapterInstantiations.fieldlib.csproj" />
     <Project Path="tests/Behavioral/GenericFuncCall/GenericFuncCall.csproj" />
     <Project Path="tests/Behavioral/GenericFuncDecl/GenericFuncDecl.csproj" />
     <Project Path="tests/Behavioral/GenericFuncInstantiationArg/GenericFuncInstantiationArg.csproj" />

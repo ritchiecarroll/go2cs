@@ -802,6 +802,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGenericEmbedPromotion() => CheckTarget("GenericEmbedPromotion");
 
     [TestMethod]
+    public void CheckGenericForeignAdapterInstantiations() => CheckTarget("GenericForeignAdapterInstantiations");
+
+    [TestMethod]
     public void CheckGenericFuncCall() => CheckTarget("GenericFuncCall");
 
     [TestMethod]

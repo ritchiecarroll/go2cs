@@ -767,6 +767,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGenericEmbedPromotion() => CheckTarget("GenericEmbedPromotion");
 
     [TestMethod]
+    public void CheckGenericForeignAdapterInstantiations() => CheckTarget("GenericForeignAdapterInstantiations");
+
+    [TestMethod]
     public void CheckGenericFuncCall() => CheckTarget("GenericFuncCall");
 
     [TestMethod]

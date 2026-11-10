@@ -799,6 +799,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGenericEmbedPromotion() => CheckTarget("GenericEmbedPromotion");
 
     [TestMethod]
+    public void CheckGenericForeignAdapterInstantiations() => CheckTarget("GenericForeignAdapterInstantiations");
+
+    [TestMethod]
     public void CheckGenericFuncCall() => CheckTarget("GenericFuncCall");
 
     [TestMethod]
