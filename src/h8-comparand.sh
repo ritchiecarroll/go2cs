@@ -698,6 +698,36 @@ do_selftest(){
   local CR2="$T/allseed"; mkdir -p "$CR2/pkg"; : > "$CR2/pkg/pkg.csproj"
   echo seeded > "$CR2/pkg/a.cs"; touch -d @946684800 "$CR2/pkg/a.cs"
   st "a root with nothing emitted REFUSES (never empty)"  2 "$0" manifest --emitted-only "$CR2"
+
+  echo "H. the layout key folders -- GOARCH and pair folders beside the GOOS ones"
+  # the corpus lays a file shared by every amd64 target into amd64/, and one target's file into its
+  # pair folder; a tool that knows only windows|linux|darwin reads both as packages of their own.
+  local CK="$T/keyed"
+  mkdir -p "$CK/pkg/linux" "$CK/pkg/amd64" "$CK/pkg/arm64" "$CK/pkg/linux-amd64" "$CK/pkg/linux-arm64"
+  : > "$CK/pkg/pkg.csproj"
+  echo flat > "$CK/pkg/shared.cs"; echo lin > "$CK/pkg/linux/only.cs"
+  echo a64 > "$CK/pkg/amd64/arch.cs"; echo r64 > "$CK/pkg/arm64/archarm.cs"
+  echo la > "$CK/pkg/linux-amd64/pair.cs"; echo lr > "$CK/pkg/linux-arm64/pairarm.cs"
+  local kv; kv=$("$0" view "$CK" linux 2>&1)
+  if printf '%s\n' "$kv" | grep -q 'pkg/amd64/arch.cs' && printf '%s\n' "$kv" | grep -q 'pkg/linux-amd64/pair.cs' \
+     && ! printf '%s\n' "$kv" | grep -q 'pkg/linux-arm64/' && ! printf '%s\n' "$kv" | grep -q 'pkg/arm64/'; then
+    st_pass=$((st_pass+1)); printf '  PASS  %-58s\n' "linux view keeps amd64/ and linux-amd64/, drops arm64 folders"
+  else st_fail=$((st_fail+1)); printf '  FAIL  %-58s\n' "linux view read the key folders wrong:"; printf '%s\n' "$kv" | sed 's/^/        /'; fi
+  st "view takes a <goos>/<arch> host"                0 "$0" view "$CK" linux/arm64
+  kv=$("$0" view "$CK" linux/arm64 2>&1)
+  if printf '%s\n' "$kv" | grep -q 'pkg/linux/only.cs' && printf '%s\n' "$kv" | grep -q 'pkg/linux-arm64/pairarm.cs' \
+     && printf '%s\n' "$kv" | grep -q 'pkg/arm64/archarm.cs' && ! printf '%s\n' "$kv" | grep -q 'pkg/amd64/' \
+     && ! printf '%s\n' "$kv" | grep -q 'pkg/linux-amd64/'; then
+    st_pass=$((st_pass+1)); printf '  PASS  %-58s\n' "linux/arm64 view keeps its folders, drops the amd64 ones"
+  else st_fail=$((st_fail+1)); printf '  FAIL  %-58s\n' "linux/arm64 view read the key folders wrong:"; printf '%s\n' "$kv" | sed 's/^/        /'; fi
+  st "view refuses a host outside the universe"       2 "$0" view "$CK" darwin/arm64
+  local km
+  mkdir -p "$T/keyedcensus/pkg/linux-amd64" "$T/keyedcensus/pkg/amd64"; : > "$T/keyedcensus/pkg/pkg.csproj"
+  echo la > "$T/keyedcensus/pkg/linux-amd64/pairfile.cs"; echo a64 > "$T/keyedcensus/pkg/amd64/archfile.cs"
+  km=$("$0" manifest "$T/keyedcensus" 2>&1)
+  if printf '%s\n' "$km" | grep -qE '[[:space:]]pkg/pairfile\.cs$' && printf '%s\n' "$km" | grep -qE '[[:space:]]pkg/archfile\.cs$'; then
+    st_pass=$((st_pass+1)); printf '  PASS  %-58s\n' "manifest strips GOARCH and pair folders to the flat key"
+  else st_fail=$((st_fail+1)); printf '  FAIL  %-58s\n' "manifest kept a key folder in the key:"; printf '%s\n' "$km" | sed 's/^/        /'; fi
   rm -rf "$T"
   echo
   echo "SELF-TEST: pass=$st_pass fail=$st_fail"
