@@ -76,3 +76,21 @@ Posted to COORD before any commit, read at `10c6f7067f`:
 Section 6.11 (batch 284) says fourteen packages carry layout key folders and no GOOS folder. Re-measured at
 `10c6f7067f`, the count is 13, the 13 named in the plan, which matches the design's 13. How 14 was derived cannot be
 recovered, so the figure is superseded, not explained.
+
+## 7. Amendment, 2026-11-10: the first hosted pack (os-matrix release-smoke run 42889284895)
+
+Dispatched on `cef68bbe3caa022dd34ef393bcb31f4a0f945a31` (goos linux, stage release-smoke), pack job on
+windows-latest. push-nuget.ps1 exited 1 after 7 minutes with no package.
+
+- **"Layout L3: 54 package(s) carry layout key folders (amd64, arm64, darwin, darwin-amd64, linux, linux-amd64,
+  linux-arm64, windows, windows-amd64)"**: the first prediction of section 5 is MET on the hosted pack too.
+- "[osx-arm64] ships the darwin/amd64 flavor built under [osx-x64] (no pass of its own)": osx-arm64 has no pass.
+- The passes run in reverse map order, so linux-arm64 built first, at `-p:GoTargetOS=linux -p:GoTargetArch=arm64`. It
+  failed with three errors, each CS0111, a member defined twice in its package: `math_package.archHypot` and
+  `math_package.archLog`, and `runtime_package.testSPWrite`. These are the three duplicate members the design
+  leaves for seat S3 (§2.7, "M2's compile wall": `testSPWrite`, `archLog` and `archHypot` remain for S3). Declaration
+  errors hide body errors, so three is a floor on the linux/arm64 flavour's compile errors, not a count.
+- The remaining predictions (four passes, five RID folders, 54 twins) and the size are therefore NOT MEASURED. They
+  are read on a release-smoke dispatch after S3's arm64 sites are in the branch, which COORD's ordering ruling
+  (S6 seats with or after S3's last arm64 site) already requires.
+- The pack log is the run's `release-smoke-pack-log` artifact (UTF-16; lines 37-39 and 470-502).
