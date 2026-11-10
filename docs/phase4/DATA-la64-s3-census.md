@@ -198,3 +198,39 @@ it.
   and gated at amd64 for no regression.
 - **Their arm readings follow S2 (G's flip) and S4 (osInitArm64).** netpoll's X64 guard is lifted only in the commit
   that carries the passing arm64 read.
+
+## Amendment, 2026-11-09: three sites from G's S2 prediction
+
+**Where they come from.** G's S2 prediction (`claude/g-la64-s2`, record `DATA-la64-s2-prediction.md`, not yet
+pushed when this was written) shows that once S2 homes the amd64-only files in `amd64/` and `linux-amd64/`, the
+linux/arm64 flavour compiles its OWN files. Three hand-owns then lose something they depend on.
+
+**Each was checked in code at master 9b8af3bd30.** None of them is in §2-§3's predicates: they are not numbers or
+layouts, but a dependency on a file S2 moves.
+
+| # | Site | What breaks at linux/arm64 after S2 | Work | Lane-days |
+|---|---|---|---|---|
+| 0 | internal/cpu initializer | The package's only two `[ModuleInitializer]`s are `cpu_x86_impl.cs:123` and the darwin stand-in `cpu_arm64_impl.cs:60`, and §2.7 homes both in `amd64/`. At linux/arm64 nothing runs `doinit` or fills `cpu.HWCap`/`HWCap2`, so every `cpu.ARM64` flag reads false: the hash, crypto and bytealg CPU branches. | A `linux-arm64/` initializer hand-own: getauxval(AT_HWCAP/AT_HWCAP2), then the converted `doinit`. It reuses S4's mapping (C2, `463a4d3283`), which today serves the amd64-converted flavour on an arm64 host, a path S2 retires. The arm-runner cross-check reads .NET's `Arm.*.IsSupported`, which is never the source. | 0.5-0.75 |
+| a | runtime/hash_impl.cs:185 | `initHashAlgorithm` reads `cpu.GoIsArm64Process`, declared only by the stand-in (`cpu_arm64_impl.cs:54`), now in `amd64/`. That is CS0117 at linux/arm64. | Test the arch the way Go's hash selection does, by GOARCH, so that it holds for every flavour on an arm64 process (the darwin arm64 path included). | 0.1-0.25 |
+| b | syscall/linux/structclass_linux_impl.cs:97, :416 | Select's timeout and Timex's Time name `NativeTimevalLinuxAmd64`, declared in `zsyscall_linux_amd64_impl.cs:238`, which moves to `linux-amd64/`. | Timeval is 16 bytes at both arches (§3), so hoist the mirror into `structclass_linux_impl.cs` under an arch-neutral name, used by both twins. It lands with site 6, where Select's arm64 path takes a Timespec. | 0.25 |
+
+- **Ordering:** site 0 goes ahead of site 1, since without it every arm64 CPU-feature branch is dark. Sites 0, a
+  and b are compile-level at linux/arm64, so they are testable as soon as S2 lands.
+- **Revised total: 6.15-8.35 lane-days** (§6's 5.3-7.1, plus 0.85-1.25).
+
+### The mirror reconcile of §3, resolved (G, 2026-11-09)
+
+- **The design's predicate:** matching LINES of the unanchored extended regex `StructLayout|FieldOffset|Pack *= *[0-9]`
+  over the same population, at `0bbe3ab6e5`. It reads 30 lines in 7 files:
+  - 20 StructLayout lines in the 4 files of §3. Dropping the two that are not declarations gives this record's 18
+    types.
+  - 10 lines in 3 flat files (`reflect/value_impl.cs` 6, `internal/reflectlite/type_impl.cs` 2,
+    `internal/abi/type_impl.cs` 2), which match FieldOffset only as a substring of the helper name
+    `GoReflect.GoFieldOffsets` (calls and comments). None is a layout attribute: the population holds no
+    `[FieldOffset]` and no `Pack=` line.
+- So the 10 extra lines and the 3 extra files are false positives of the unanchored alternation, and class (iii) is
+  18 + 2 types, as §3 reads. G amends the design's S3 row.
+- **Named, not claimed (G):** GoFieldOffsets computes Go's amd64 field offsets, so those three files may belong on
+  a list of their own for arm64 alignment rules. Go's gc sizes align every field the same way at amd64 and arm64
+  (§3's probe found no offset difference in any type it read), but nobody has measured that for GoFieldOffsets'
+  callers.
