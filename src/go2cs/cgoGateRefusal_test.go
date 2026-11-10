@@ -27,6 +27,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -34,6 +35,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -390,4 +392,98 @@ func logCgoRecognizedNames(t *testing.T, dir string) {
 			t.Logf("READING %s: %s", entry.label, strings.Join(names[entry.kind], ", "))
 		}
 	}
+}
+
+// cgo Phase 2's link-flag check (DESIGN-cgo-phase2-pinvoke §6.3, §11.15) reads -l and -L from the //go:cgo_ldflag
+// lines cmd/cgo writes into a cgo load. Which of those flags Go has already checked is what this measures, on a host
+// with a C compiler, by planting each kind of flag and running go list -compiled:
+//   - a #cgo LDFLAGS flag outside Go's allowlist (-fplugin=…) is refused by the load itself (cmd/go's buildFlags runs
+//     checkLinkerFlags on the package's own flags);
+//   - an allowed one (-lm) reaches the generated file;
+//   - CGO_LDFLAGS from the ENVIRONMENT reaches it UNCHECKED, so Phase 2's own check is the only one on that path.
+func TestTheCgoLoadChecksPackageLinkerFlagsButNotTheEnvironments(t *testing.T) {
+	requireCCompiler(t)
+
+	source := func(flag string) string {
+		return "package p\n\n/*\n#cgo LDFLAGS: " + flag + "\nint one(void) { return 1; }\n*/\nimport \"C\"\n\nfunc One() int { return int(C.one()) }\n"
+	}
+
+	// load runs go list -compiled over one cgo file and returns its stderr, its exit error and every //go:cgo_ldflag
+	// line in the _cgo_gotypes.go it compiled.
+	load := func(t *testing.T, flag string, env ...string) (string, error, []string) {
+		t.Helper()
+
+		dir := t.TempDir()
+		writeCgoFixture(t, dir, "go.mod", "module example.com/ldflags\n\ngo 1.24\n")
+		writeCgoFixture(t, dir, "p.go", source(flag))
+
+		var stderr bytes.Buffer
+		list := exec.Command("go", "list", "-compiled", "-json", ".")
+		list.Dir = dir
+		list.Env = append(append(os.Environ(), "CGO_ENABLED=1", "GOWORK=off", "GOFLAGS="), env...)
+		list.Stderr = &stderr
+		output, err := list.Output()
+
+		if err != nil {
+			return stderr.String(), err, nil
+		}
+
+		var listed struct {
+			Dir             string
+			CompiledGoFiles []string
+		}
+
+		if err := json.Unmarshal(output, &listed); err != nil {
+			t.Fatal(err)
+		}
+
+		var ldflags []string
+
+		for _, path := range listed.CompiledGoFiles {
+			if !filepath.IsAbs(path) {
+				path = filepath.Join(listed.Dir, path)
+			}
+
+			content, err := os.ReadFile(path)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			for _, line := range strings.Split(strings.ReplaceAll(string(content), "\r\n", "\n"), "\n") {
+				if strings.HasPrefix(line, "//go:cgo_ldflag ") {
+					ldflags = append(ldflags, strings.TrimPrefix(line, "//go:cgo_ldflag "))
+				}
+			}
+		}
+
+		return stderr.String(), nil, ldflags
+	}
+
+	t.Run("a package flag outside the allowlist is refused", func(t *testing.T) {
+		stderr, err, _ := load(t, "-fplugin=evil.so")
+		t.Logf("READING #cgo LDFLAGS: -fplugin=evil.so -> err=%v; %s", err, strings.TrimSpace(stderr))
+
+		if err == nil || !strings.Contains(stderr, "invalid flag in #cgo LDFLAGS: -fplugin=evil.so") {
+			t.Errorf("go list -compiled accepted a #cgo LDFLAGS flag outside Go's allowlist")
+		}
+	})
+
+	t.Run("an allowed package flag reaches the generated file", func(t *testing.T) {
+		stderr, err, ldflags := load(t, "-lm")
+		t.Logf("READING #cgo LDFLAGS: -lm -> err=%v; cgo_ldflag %v", err, ldflags)
+
+		if err != nil || !slices.Contains(ldflags, `"-lm"`) {
+			t.Errorf("want -lm among the generated //go:cgo_ldflag lines\nstderr:\n%s", stderr)
+		}
+	})
+
+	t.Run("CGO_LDFLAGS from the environment arrives unchecked", func(t *testing.T) {
+		stderr, err, ldflags := load(t, "-lm", "CGO_LDFLAGS=-fplugin=evil.so")
+		t.Logf("READING CGO_LDFLAGS=-fplugin=evil.so -> err=%v; cgo_ldflag %v", err, ldflags)
+
+		if err != nil || !slices.Contains(ldflags, `"-fplugin=evil.so"`) {
+			t.Errorf("want the environment's -fplugin=evil.so among the generated //go:cgo_ldflag lines, unchecked\nstderr:\n%s", stderr)
+		}
+	})
 }
