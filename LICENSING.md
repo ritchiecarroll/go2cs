@@ -157,10 +157,16 @@ surrounding BSD or converter terms. The converter's own test suite
 corpus package's license metadata, and the `Licensing boundaries` workflow runs
 those checks on master and on pull requests.
 
-`-provenance` optionally identifies a converted file's source. It defaults to off,
-contains no conversion date/time and uses portable paths. Required recognized
-source license notices are preserved independently of this option. Unknown source
-licenses remain unknown. No blanket SPDX declaration is added to user output.
+`-provenance` optionally writes a notice into each converted file naming its Go
+source file and module and stating that the file was modified by conversion to C#
+with go2cs, naming go2cs's release. This is the notice Apache-2.0 section 4(b) asks
+of modified files. It defaults to off, contains no conversion date/time and uses
+portable paths. It follows the file's upstream notices, which stay first, and it
+contains no license wording. `nugetgo-pack.ps1` turns it on when the stated
+`-LicenseSpdx` names Apache-2.0, and refuses a conversion whose files lack it.
+Required recognized source license notices are preserved independently of this
+option. Unknown source licenses remain unknown. No blanket SPDX declaration is added
+to user output.
 
 ## Ownership and contributions
 
