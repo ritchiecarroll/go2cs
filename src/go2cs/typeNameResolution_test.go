@@ -136,6 +136,43 @@ func TestConvertToCSFullTypeNameConstructedModulePaths(t *testing.T) {
 	}
 }
 
+// TestGenericArgumentsRenderOnce pins C31 (tsc's internal/module package_info.cs:41, CS1031): a
+// pointer or func type whose generic arguments hold a MAP rendered `map<@string, @string, >`. The
+// generic-argument pass ran BEFORE the pointer and func branches and rewrote the arguments to C# in
+// place; those branches then re-rendered the result, and the `map<` arm is the one arm that is not
+// idempotent on its own output (splitMapKeyValue splits `@string, @string>` at its first top-level
+// `>`, keeping the whole list as the key and an empty value). Each extra pass added one dangling
+// `, `, so `**` added two. The non-pointer rows are controls: they rendered correctly before the fix.
+func TestGenericArgumentsRenderOnce(t *testing.T) {
+	cases := map[string]string{
+		// The reported record, `GoImplement<Expected<map<…>>, TypeValidatedField>(Pointer = true)`.
+		"*Expected[map[string]string]":          "ж<Expected<map<@string, @string>>>",
+		"**Expected[map[string]string]":         "ж<ж<Expected<map<@string, @string>>>>",
+		"*Outer[Inner[map[string]string]]":      "ж<Outer<Inner<map<@string, @string>>>>",
+		"*Pair[map[string]int, map[int]string]": "ж<Pair<map<@string, nint>, map<nint, @string>>>",
+
+		// The func branches re-rendered the same way: a parameter, a named parameter, a result.
+		"func(Expected[map[string]string])":         "Action<Expected<map<@string, @string>>>",
+		"func(x Expected[map[string]string]) error": "Func<Expected<map<@string, @string>>, error>",
+		"func() Expected[map[string]string]":        "Func<Expected<map<@string, @string>>>",
+
+		// Controls: no pointer or func branch above the pass, or no map inside it.
+		"Expected[map[string]string]":      "Expected<map<@string, @string>>",
+		"Outer[Inner[map[string]string]]":  "Outer<Inner<map<@string, @string>>>",
+		"*Expected[string]":                "ж<Expected<@string>>",
+		"*map[string]string":               "ж<map<@string, @string>>",
+		"[]Expected[map[string]string]":    "slice<Expected<map<@string, @string>>>",
+		"*[]Expected[map[string]string]":   "ж<slice<Expected<map<@string, @string>>>>",
+		"chan Expected[map[string]string]": "channel<Expected<map<@string, @string>>>",
+	}
+
+	for in, want := range cases {
+		if got := convertToCSTypeName(in); got != want {
+			t.Errorf("convertToCSTypeName(%q)\n  = %q\nwant %q", in, got, want)
+		}
+	}
+}
+
 // TestUnclosedBracketTerminates is the crash-proofing half, and it runs in a CHILD PROCESS on
 // purpose: the defect it guards is a Go STACK OVERFLOW, which is a fatal runtime error rather than
 // a panic — unrecoverable, so it cannot be asserted in-process and, in production, the conversion

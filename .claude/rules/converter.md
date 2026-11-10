@@ -88,11 +88,12 @@ Full taxonomy: [`docs/Architecture.md`](docs/Architecture.md).
   `-stdlib` do neither. An explicit *working* root always wins, and every harness passes an EXPLICIT
   `-go2cspath <repo>\src` computed from its own location.
 - `-platforms os/arch` — the ONE target emitted for (default: the host), or a comma-separated LIST
-  (`-platforms windows/amd64,linux/amd64,darwin/amd64`)
+  (`-platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64`)
   which **with `-stdlib`** performs the multi-platform EMISSION (`platformEmit.go`): convert per target
   into a seeded staging root (`-platform-stage <dir>`), then MERGE into the `-go2cspath` corpus as
-  layout L3 — shared files flat, platform-varying per-GOOS, hand-owns routed to their principal's
-  platform set. **A list without `-stdlib` is REJECTED**, never narrowed to the first target.
+  layout L3 — shared files flat, platform-varying in a key folder (`<goos>/`, `<arch>/`, `<goos>-<arch>/`),
+  hand-owns routed to their principal's platform set. The list must equal `platformUniverse`
+  (`platformLattice.go`). **A list without `-stdlib` is REJECTED**, never narrowed to the first target.
 - `-platform-census <dir>` — READ-ONLY instrument over the same staging (`-stdlib` + ≥2 targets):
   converts per target into `<dir>\<goos>-<goarch>\src` (each root SEEDED from `-go2cspath`, wiped and
   re-seeded per run so "never convert twice into one root" is mechanical), classifies every artifact
@@ -104,8 +105,10 @@ Full taxonomy: [`docs/Architecture.md`](docs/Architecture.md).
   project; never relicenses source. Default packing: a library's local `LICENSE`, a stdlib package's
   `src/core/LICENSE` by relative path, a `-recurse` dependency's own module license copied verbatim to
   the converted module root once per module (`licensing.go`).
-- `-provenance` — deterministic `// Converted from Go source: "<path>"`, GOROOT- or module-relative,
-  default OFF, no timestamp. Leading copyright/license notices are emitted even WITHOUT `-comments`.
+- `-provenance` — a deterministic two-line notice, `// Converted from Go source: "<path>" in module
+  <path>@<version>.` (GOROOT- or own-module-relative) then `// Modified from the original by conversion to C#
+  with go2cs <release>.`, after the upstream notices and before the package doc comment; default OFF, no
+  timestamp, not in GoInputDigest. nugetgo-pack turns it on for an Apache-2.0 `-LicenseSpdx`. Leading copyright/license notices are emitted even WITHOUT `-comments`.
   The converter is AGPL-3.0-only with the output exception in `src/go2cs/LICENSE-EXCEPTION`; every
   converter `.go` header carries the section 7 notice (`TestLicensingConverterHeaders`). See
   `LICENSING.md`.

@@ -1,0 +1,22 @@
+package main
+
+// TS site: internal/project/dirty map.go:52 `type Map[K, V] struct { base map[K]V; dirty map[K]*MapEntry[K, V] }`.
+type entry[K comparable, V any] struct {
+	key   K
+	value V
+}
+
+type MapEntry[K comparable, V any] struct {
+	m *Map[K, V]
+	entry[K, V] // an embed: MapEntry needs construction
+}
+
+type Map[K comparable, V any] struct {
+	base  map[K]V
+	dirty map[K]*MapEntry[K, V]
+}
+
+func main() {
+	m := &Map[string, int]{base: map[string]int{"a": 1}}
+	println(m.dirty == nil, len(m.base)) // Go: true 1
+}

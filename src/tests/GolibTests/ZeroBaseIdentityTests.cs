@@ -182,7 +182,7 @@ public class ZeroBaseIdentityTests
     }
 
     [TestMethod]
-    public void FuncForPCAnswersOneHandlePerEntry()
+    public void FuncForPCAnswersOneHandlePerFunction()
     {
         var (pc, _) = Δruntime.GoCallerSitesProbe();
         uintptr here = reflect_package.ValueOf((Action)wrapperprobe_package.plain).Pointer();
@@ -192,5 +192,23 @@ public class ZeroBaseIdentityTests
         Assert.IsTrue(Δruntime.FuncForPC(pc) == Δruntime.FuncForPC(pc - 1), "one entry, one *Func");
         Assert.IsFalse(Δruntime.FuncForPC(pc) == Δruntime.FuncForPC(here), "two functions are two *Func, though Func is zero-size");
         Assert.AreEqual("runtime.GoCallerSitesProbe", (string)Δruntime.FuncForPC(pc).Name(), "and each keeps its own name");
+    }
+
+    // Go's *Func points into the one pclntab entry of its function, so every pc of the function, at any call site,
+    // answers the same pointer, and a frame of it carries that pointer too. runtime's TestFunctionAlignmentTraceback
+    // compares the two (symtab_test.go: frame.Func != f), and reaches that comparison on an arm64 process.
+    [TestMethod]
+    public void FuncForPCIsOneFuncPerFunctionAndTheFuncFramesNextSets()
+    {
+        var (first, second) = Δruntime.GoCallerSitesProbe();
+
+        Assert.IsTrue(Δruntime.FuncForPC(first) == Δruntime.FuncForPC(second), "two call sites of one function are one *Func");
+        Assert.AreEqual(Δruntime.FuncForPC(first).Entry(), Δruntime.FuncForPC(second).Entry(), "one function, one entry");
+
+        slice<uintptr> pcs = new slice<uintptr>(1);
+        pcs[0] = first;
+        var (frame, _) = Δruntime.CallersFrames(pcs).Next();
+
+        Assert.IsTrue(frame.Func == Δruntime.FuncForPC(first), "FuncForPC(pc) is the *Func Frames.Next sets for pc");
     }
 }

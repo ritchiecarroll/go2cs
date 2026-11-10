@@ -1,0 +1,18 @@
+package main
+
+// TS site: internal/vfs/internal/internal.go:158 decodeBytes
+func kind(s string) string {
+	var bom [2]byte
+	if len(s) >= 2 {
+		bom = [2]byte{s[0], s[1]}
+		switch bom {
+		case [2]byte{0xFF, 0xFE}:
+			return "le"
+		case [2]byte{0xFE, 0xFF}:
+			return "be"
+		}
+	}
+	return "none"
+}
+
+func main() { println(kind("\xff\xfeab"), kind("\xfe\xffab"), kind("ab")) } // Go: le be none

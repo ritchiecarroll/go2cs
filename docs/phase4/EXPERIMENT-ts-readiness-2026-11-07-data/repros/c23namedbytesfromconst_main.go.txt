@@ -1,0 +1,11 @@
+package main
+
+import "fmt"
+
+// TS site: internal/ipc/protocol_jsonrpc.go `result = jsontext.Value("null")`; lsproto's generated code (70 sites).
+type V []byte
+
+func main() {
+	var a any = V("null")
+	fmt.Println(string(a.(V)), len(V(`"id"`))) // Go: null 4
+}

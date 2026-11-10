@@ -306,6 +306,7 @@ function Save-GoApiCompatBaseline([System.Net.Http.HttpClient]$Client, [string]$
       NoBaseline  the ids whose line has no published version: new packages, or the first release of a Go minor.
                   They are reported, not gated (DESIGN-binary-compat-guard.md section 6).
       NoSurface   the ids whose baseline has no lib/ or runtimes/ asset (go.gen, an analyzer): nothing to compare.
+      Baselines   id -> { Version, Path } of each baseline downloaded, under $WorkDir (read it before $WorkDir goes)
       Failures    every reason the guard is red
     A guard that was asked about at least one package with a baseline and compared no asset is itself a failure.
 
@@ -334,6 +335,7 @@ function Invoke-GoApiCompatGuard {
     $failures = New-Object System.Collections.Generic.List[string]
     $noBaseline = New-Object System.Collections.Generic.List[string]
     $noSurface = New-Object System.Collections.Generic.List[string]
+    $baselines = @{}
     $packagesCompared = 0
     $compared = 0
     $expected = 0
@@ -346,6 +348,7 @@ function Invoke-GoApiCompatGuard {
             if (-not $baselineVersion) { $noBaseline.Add("$($id.Id) $($id.Version)"); continue }
 
             $baseline = Save-GoApiCompatBaseline $client $flat $id.Id $baselineVersion (Join-Path $WorkDir '_baselines')
+            $baselines[$id.Id] = [pscustomobject]@{ Version = $baselineVersion; Path = $baseline }
             $suppression = & $SuppressionFor $id.Id
             $result = Test-GoApiCompatPackage -Id $id.Id -Baseline $baseline -Current $package.FullName -SuppressionFile $suppression -RepoRoot $RepoRoot -WorkDir $WorkDir
 
@@ -367,8 +370,119 @@ function Invoke-GoApiCompatGuard {
         NoBaseline = @($noBaseline)
         NoSurface  = @($noSurface)
         Failures   = @($failures)
+        Baselines  = $baselines
     }
 }
 
+<#
+    THE BREAK FLOOR (docs/phase4/DESIGN-go-break-floor.md). go.lib's buildTransitive/go.lib.targets states
+    <GoBreakFloor>, the newest go.* release that changed members compiled code binds, and fails a consumer's build for
+    any package built below it (GO2CS3002). Nothing moves the floor but its one line in that file; push-nuget refuses a
+    release whose floor disagrees with what the guard says the release does. Once the guard is green, every suppression
+    entry left is a break against the baseline (an entry that matches nothing is red), so:
+      a reachable break             the floor is this release
+      no reachable break            the floor is the baseline go.lib's floor
+        ... and the baseline has none (the first release with the floor): a published release on this Go line
+      no baseline on this Go line   the floor is this release (the first release of a Go minor)
+    Returns one line per failure; none when the floor is right.
+#>
+function Test-GoBreakFloor {
+    param(
+        [Parameter(Mandatory)][string]$ReleaseVersion,
+        [AllowEmptyString()][string]$Floor,
+        [AllowEmptyString()][string]$BaselineVersion,
+        [AllowEmptyString()][string]$BaselineFloor,
+        [AllowEmptyCollection()][string[]]$ReachableBreaks = @()
+    )
+
+    $release = ($ReleaseVersion -split '[-+]', 2)[0]
+    $file = 'src/core/golib/buildTransitive/go.lib.targets'
+    $shape = @(Test-GoBreakFloorShape -ReleaseVersion $ReleaseVersion -Floor $Floor)
+    if ($shape.Count -gt 0) { return $shape }
+    $parsed = [version]$Floor
+    $breaks = @($ReachableBreaks | Where-Object { $_ })
+
+    if ($breaks.Count -gt 0) {
+        if ($Floor -cne $release) {
+            return @("break floor: release $release breaks members a consumer binds ($($breaks -join ', ') carr$(if ($breaks.Count -eq 1) { 'ies' } else { 'y' }) suppression entries), so <GoBreakFloor> in $file must be $release, not $Floor")
+        }
+        return @()
+    }
+
+    if (-not $BaselineVersion) {
+        if ($Floor -cne $release) {
+            return @("break floor: release $release is the first on its Go line, so <GoBreakFloor> in $file must be $release, not $Floor (everything built on an earlier minor is below it)")
+        }
+        return @()
+    }
+
+    if ($BaselineFloor) {
+        if ($Floor -cne $BaselineFloor) {
+            return @("break floor: release $release breaks nothing a consumer binds, so <GoBreakFloor> in $file must stay at the baseline $BaselineVersion's $BaselineFloor, not $Floor (a move forces a rebuild wave for no break)")
+        }
+        return @()
+    }
+
+    $baseline = [version](($BaselineVersion -split '[-+]', 2)[0])
+    if ($parsed.Major -ne $baseline.Major -or $parsed.Minor -ne $baseline.Minor -or $parsed -gt $baseline) {
+        return @("break floor: the baseline go.lib $BaselineVersion states no floor, so <GoBreakFloor> in $file must name a release published on its Go line, at or below $BaselineVersion, not $Floor")
+    }
+    @()
+}
+
+# What holds in all four of Test-GoBreakFloor's cases, and needs no baseline: the floor parses as
+# major.minor.patch.revision, sits on the release's Go line (major.minor) and is at most the release. -VerifyOnly packs
+# nothing and compares with nothing, so this is the part of the check it runs. Returns failure strings.
+function Test-GoBreakFloorShape {
+    param(
+        [Parameter(Mandatory)][string]$ReleaseVersion,
+        [AllowEmptyString()][string]$Floor
+    )
+
+    $release = ($ReleaseVersion -split '[-+]', 2)[0]
+    $file = 'src/core/golib/buildTransitive/go.lib.targets'
+    $parsed = $null
+    if (-not $Floor -or -not [version]::TryParse($Floor, [ref]$parsed) -or $parsed.Revision -lt 0) {
+        return @("break floor: $file states no <GoBreakFloor> major.minor.patch.revision (read '$Floor'); release $release cannot ship without one")
+    }
+    $releaseParsed = [version]$release
+    if ($parsed.Major -ne $releaseParsed.Major -or $parsed.Minor -ne $releaseParsed.Minor) {
+        return @("break floor: <GoBreakFloor> $Floor in $file is not on release ${release}'s Go line ($($releaseParsed.Major).$($releaseParsed.Minor)); every case puts the floor on it")
+    }
+    if ($parsed -gt $releaseParsed) {
+        return @("break floor: <GoBreakFloor> $Floor in $file is above release $release; a floor names this release or one already published")
+    }
+    @()
+}
+
+# Whether a converted module can bind a package: Go's import rule. A path with an `internal` element, or under
+# `vendor/`, is importable only by the standard library. golib (go.lib) is reachable.
+function Test-GoBreakFloorReachable([Parameter(Mandatory)][string]$Id) {
+    if ($Id -ceq 'go.lib') { return $true }
+    $segments = @(($Id -replace '^go\.', '') -split '\.')
+    if ($segments[0] -ceq 'vendor') { return $false }
+    -not ($segments -ccontains 'internal')
+}
+
+# The floor a go.lib package states, read from its buildTransitive/go.lib.targets; $null when it states none.
+function Get-GoBreakFloorFromPackage([Parameter(Mandatory)][string]$Package) {
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $zip = [System.IO.Compression.ZipFile]::OpenRead($Package)
+    try {
+        $entry = $zip.GetEntry('buildTransitive/go.lib.targets')
+        if (-not $entry) { return $null }
+        $reader = New-Object System.IO.StreamReader($entry.Open())
+        try { Get-GoBreakFloor $reader.ReadToEnd() } finally { $reader.Dispose() }
+    }
+    finally { $zip.Dispose() }
+}
+
+# The floor a go.lib.targets text states; $null when it states none.
+function Get-GoBreakFloor([AllowEmptyString()][string]$TargetsText) {
+    if ($TargetsText -match '<GoBreakFloor>\s*([^<\s]+)\s*</GoBreakFloor>') { return $Matches[1] }
+    $null
+}
+
 Export-ModuleMember -Function Initialize-GoApiCompatTool, Get-GoApiCompatAssets, Get-GoApiCompatSuppressionMap,
-    Read-GoApiCompatSuppressions, Test-GoApiCompatPackage, Get-GoApiCompatBaselineVersion, Invoke-GoApiCompatGuard
+    Read-GoApiCompatSuppressions, Test-GoApiCompatPackage, Get-GoApiCompatBaselineVersion, Invoke-GoApiCompatGuard,
+    Test-GoBreakFloor, Test-GoBreakFloorShape, Test-GoBreakFloorReachable, Get-GoBreakFloor, Get-GoBreakFloorFromPackage

@@ -3,9 +3,13 @@
     Guards handown-census.ps1's hand-own -> upstream mapping (src/handown-upstream.ps1) on FABRICATED GOROOTs.
 
 .DESCRIPTION
-    Builds two temporary GOROOTs, From and To, and checks Resolve-HandOwnUpstream on eight layouts:
+    Builds two temporary GOROOTs, From and To, and checks Resolve-HandOwnUpstream on ten layouts:
       plain       pkg/x_impl.cs, upstream pkg/x.go in both                     -> pkg/x.go both, not relocated
       l3          pkg/linux/x_impl.cs, upstream pkg/x.go in both (layout L3)   -> pkg/x.go both, not relocated
+      l3-arch     pkg/amd64/x_impl.cs, upstream pkg/x.go in both               -> pkg/x.go both, not relocated
+      l3-pair     pkg/linux-arm64/x_impl.cs, upstream pkg/x.go in both         -> pkg/x.go both, not relocated
+                  (a per-GOARCH and a per-pair key folder are routing as a per-GOOS one is; read as package
+                  path, hash/crc32/amd64/crc32_amd64.cs looked like a hand-own with no upstream)
       moved       pkg/linux/x_impl.cs, pkg/x.go at From, pkg/linux/x.go at To  -> RELOCATED pkg/x.go -> pkg/linux/x.go
                   (Go 1.26's internal/runtime/syscall -> internal/runtime/syscall/linux)
       moved-back  pkg/linux/x_impl.cs, pkg/linux/x.go at From, pkg/x.go at To  -> RELOCATED, the other direction
@@ -50,6 +54,8 @@ function Expect([string] $Case, [string] $Rel, [string] $WantFrom, [string] $Wan
 try {
     Plant $from 'plain/x.go';        Plant $to 'plain/x.go'
     Plant $from 'l3/x.go';           Plant $to 'l3/x.go'
+    Plant $from 'arch/x.go';         Plant $to 'arch/x.go'
+    Plant $from 'pair/x.go';         Plant $to 'pair/x.go'
     Plant $from 'moved/x.go';        Plant $to 'moved/linux/x.go'
     Plant $from 'back/linux/x.go';   Plant $to 'back/x.go'
     Plant $from 'real/linux/x.go';   Plant $to 'real/linux/x.go'
@@ -59,6 +65,8 @@ try {
 
     Expect 'plain'      'plain\x_impl.cs'       'plain/x.go'       'plain/x.go'       $false
     Expect 'l3'         'l3\linux\x_impl.cs'    'l3/x.go'          'l3/x.go'          $false
+    Expect 'l3-arch'    'arch\amd64\x_impl.cs'  'arch/x.go'        'arch/x.go'        $false
+    Expect 'l3-pair'    'pair\linux-arm64\x_impl.cs' 'pair/x.go'   'pair/x.go'        $false
     Expect 'moved'      'moved\linux\x_impl.cs' 'moved/x.go'       'moved/linux/x.go' $true
     Expect 'moved-back' 'back\linux\x_impl.cs'  'back/linux/x.go'  'back/x.go'        $true
     Expect 'real-goos'  'real\linux\x_impl.cs'  'real/linux/x.go'  'real/linux/x.go'  $false

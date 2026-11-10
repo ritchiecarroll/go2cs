@@ -173,6 +173,19 @@
     <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInitAttribute" />
   </ItemGroup>
 
+  <!-- Selects which per-GOOS source folder this package compiles. Exactly one must be chosen,
+       so an unset build takes `windows`, the corpus reference target; a pack pass sets it
+       explicitly per RID (-p:GoTargetOS=linux). -->
+  <PropertyGroup Condition="'$(GoTargetOS)'==''">
+    <GoTargetOS>windows</GoTargetOS>
+  </PropertyGroup>
+
+  <!-- Selects which per-GOARCH and per-(GOOS, GOARCH) source folders this package compiles: the
+       architecture the flavour was converted at, so an unset build takes `amd64`. -->
+  <PropertyGroup Condition="'$(GoTargetArch)'==''">
+    <GoTargetArch>amd64</GoTargetArch>
+  </PropertyGroup>
+
   <ItemGroup>
     <!-- Remove all .cs files, including those in sub-folders -->
     <Compile Remove="**/*.cs" />
@@ -188,8 +201,18 @@
          correctly contributes nothing. An unguarded item naming an absent file is not a no-op; it
          is CS2001. -->
     <Compile Include="package_info.cs" Condition="Exists('package_info.cs')" />
+    <Compile Include="$(GoTargetOS)/package_info.cs" Condition="Exists('$(GoTargetOS)/package_info.cs')" />
+    <Compile Include="$(GoTargetArch)/package_info.cs" Condition="Exists('$(GoTargetArch)/package_info.cs')" />
+    <Compile Include="$(GoTargetOS)-$(GoTargetArch)/package_info.cs" Condition="Exists('$(GoTargetOS)-$(GoTargetArch)/package_info.cs')" />
     <!-- Include only .cs files from current folder -->
     <Compile Include="*.cs" Exclude="package_info.cs" />
+    <!-- Layout L3: this package's platform-varying sources live in per-GOOS subfolders, so
+         exactly one platform's copy joins the compilation (docs/phase4/DESIGN-multiplatform-corpus.md). -->
+    <Compile Include="$(GoTargetOS)/*.cs" Exclude="$(GoTargetOS)/package_info.cs" />
+    <!-- Layout L3 arch keys: sources every target of one GOARCH shares live in $(GoTargetArch)/, and those of
+         one (GOOS, GOARCH) pair in $(GoTargetOS)-$(GoTargetArch)/ (docs/phase4/DESIGN-linux-arm64-flavour.md). -->
+    <Compile Include="$(GoTargetArch)/*.cs" Exclude="$(GoTargetArch)/package_info.cs" />
+    <Compile Include="$(GoTargetOS)-$(GoTargetArch)/*.cs" Exclude="$(GoTargetOS)-$(GoTargetArch)/package_info.cs" />
     <!-- Converted test artifacts share this folder but belong to the colocated
          <name>.tests.csproj, which compiles them. A Go test file is `*_test.go`, so its
          conversion is `*_test.cs`. -->
@@ -201,9 +224,23 @@
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
-    <ProjectReference Include="$(go2csPath)core/internal/cpu/internal.cpu.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/bits/math.bits.csproj" />
     <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />
+  </ItemGroup>
+
+  <!-- Layout L3: this package's direct imports differ by GOOS, so the references that are not
+       common to every platform are selected by $(GoTargetOS)
+       (docs/phase4/DESIGN-multiplatform-corpus.md §8). A group with no items is not noise: it
+       records that the platform takes part in this package's axis and adds nothing beyond the
+       shared list above, which is what lets a single-target reconvert reproduce this file. -->
+  <ItemGroup Condition="'$(GoTargetOS)'=='darwin'" />
+
+  <ItemGroup Condition="'$(GoTargetOS)'=='linux'" />
+
+  <ItemGroup Condition="'$(GoTargetOS)'=='windows'" />
+
+  <ItemGroup Condition="'$(GoTargetArch)'=='amd64'">
+    <ProjectReference Include="$(go2csPath)core/internal/cpu/internal.cpu.csproj" />
   </ItemGroup>
 
   <ItemGroup>

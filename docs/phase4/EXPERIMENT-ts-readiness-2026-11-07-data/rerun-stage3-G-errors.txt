@@ -1,0 +1,203 @@
+UNIQUE ERRORS 533  projects with errors 1  non-CS error lines 0
+
+-- by project
+   533 github.com/microsoft/TypeScript/tsc/internal/ast
+
+-- by code
+   533 CS1929
+
+-- by file (top 40)
+
+-- C29: failing receiver type (count of unique errors)
+     48 ast_package.TypeNodeBase
+     30 ast_package.StatementBase
+     16 ast_package.AccessorDeclarationBase
+     14 ast_package.NodeBase
+     10 ast_package.FunctionOrConstructorTypeNodeBase
+      9 ж<ast_package.MethodDeclaration>
+      9 ж<ast_package.FunctionExpression>
+      9 ж<ast_package.FunctionDeclaration>
+      9 ж<ast_package.ArrowFunction>
+      8 ж<ast_package.TypeAliasDeclaration>
+      8 ж<ast_package.ModuleDeclaration>
+      8 ж<ast_package.MethodSignatureDeclaration>
+      8 ж<ast_package.IndexSignatureDeclaration>
+      8 ж<ast_package.ConstructorDeclaration>
+      7 ж<ast_package.InterfaceDeclaration>
+      6 ж<ast_package.TypeParameterDeclaration>
+      6 ж<ast_package.PropertySignatureDeclaration>
+      6 ж<ast_package.NamespaceExportDeclaration>
+      6 ж<ast_package.ImportEqualsDeclaration>
+      6 ж<ast_package.EnumDeclaration>
+      6 ж<ast_package.ConstructSignatureDeclaration>
+      6 ж<ast_package.ClassStaticBlockDeclaration>
+      6 ж<ast_package.ClassExpression>
+      6 ж<ast_package.ClassDeclaration>
+      6 ж<ast_package.CallSignatureDeclaration>
+      5 ж<ast_package.ShorthandPropertyAssignment>
+      5 ж<ast_package.PropertyDeclaration>
+      5 ж<ast_package.PropertyAssignment>
+      5 ж<ast_package.ParameterDeclaration>
+      5 ж<ast_package.ImportDeclaration>
+      5 ж<ast_package.ExportDeclaration>
+      5 ж<ast_package.ExportAssignment>
+      5 ж<ast_package.EnumMember>
+      5 ж<ast_package.BindingElement>
+      4 ж<ast_package.ΔImportClause>
+      4 ж<ast_package.VariableStatement>
+      4 ж<ast_package.VariableDeclaration>
+      4 ж<ast_package.SourceFile>
+      4 ж<ast_package.NoSubstitutionTemplateLiteral>
+      4 ж<ast_package.MissingDeclaration>
+      4 ж<ast_package.JSDocSignature>
+      4 ж<ast_package.ImportSpecifier>
+      4 ж<ast_package.ExportSpecifier>
+      4 ж<ast_package.BinaryExpression>
+      4 ast_package.LiteralExpressionBase
+      3 ж<ast_package.TemplateTail>
+      3 ж<ast_package.TemplateMiddle>
+      3 ж<ast_package.TemplateHead>
+      3 ж<ast_package.QualifiedName>
+      3 ж<ast_package.PropertyAccessExpression>
+      3 ж<ast_package.ObjectLiteralExpression>
+      3 ж<ast_package.NamespaceImport>
+      3 ж<ast_package.MetaProperty>
+      3 ж<ast_package.MappedTypeNode>
+      3 ж<ast_package.JsxAttributes>
+      3 ж<ast_package.JsxAttribute>
+      3 ж<ast_package.ForStatement>
+      3 ж<ast_package.ForInOrOfStatement>
+      3 ж<ast_package.ElementAccessExpression>
+      3 ж<ast_package.CatchClause>
+      3 ж<ast_package.CaseBlock>
+      3 ж<ast_package.CallExpression>
+      3 ж<ast_package.Block>
+      2 ж<ast_package.WithStatement>
+      2 ж<ast_package.WhileStatement>
+      2 ж<ast_package.VariableDeclarationList>
+      2 ж<ast_package.TypeLiteralNode>
+      2 ж<ast_package.TryStatement>
+      2 ж<ast_package.ThrowStatement>
+      2 ж<ast_package.TemplateExpression>
+      2 ж<ast_package.TaggedTemplateExpression>
+      2 ж<ast_package.SwitchStatement>
+      2 ж<ast_package.SpreadAssignment>
+      2 ж<ast_package.SemicolonClassElement>
+      2 ж<ast_package.ReturnStatement>
+      2 ж<ast_package.NewExpression>
+      2 ж<ast_package.NamespaceExport>
+      2 ж<ast_package.NamedTupleMember>
+      2 ж<ast_package.NamedImports>
+      2 ж<ast_package.NamedExports>
+      2 ж<ast_package.ModuleBlock>
+      2 ж<ast_package.KeywordExpression>
+      2 ж<ast_package.JsxText>
+      2 ж<ast_package.JsxSelfClosingElement>
+      2 ж<ast_package.JsxOpeningElement>
+      2 ж<ast_package.JsxNamespacedName>
+      2 ж<ast_package.JsxFragment>
+      2 ж<ast_package.JsxElement>
+      2 ж<ast_package.JSDocTypeLiteral>
+      2 ж<ast_package.ImportAttributes>
+      2 ж<ast_package.ImportAttribute>
+      2 ж<ast_package.IfStatement>
+      2 ж<ast_package.Identifier>
+      2 ж<ast_package.HeritageClause>
+      2 ж<ast_package.ExpressionWithTypeArguments>
+      2 ж<ast_package.DoStatement>
+      2 ж<ast_package.Decorator>
+      2 ж<ast_package.ConditionalTypeNode>
+      2 ж<ast_package.ConditionalExpression>
+      2 ж<ast_package.ComputedPropertyName>
+      2 ж<ast_package.CaseOrDefaultClause>
+      2 ж<ast_package.BindingPattern>
+      2 ж<ast_package.ArrayLiteralExpression>
+      1 ж<ast_package.UnionTypeNode>
+      1 ж<ast_package.TypeReferenceNode>
+      1 ж<ast_package.TypeQueryNode>
+      1 ж<ast_package.TypePredicateNode>
+      1 ж<ast_package.TypeOperatorNode>
+      1 ж<ast_package.TupleTypeNode>
+      1 ж<ast_package.ThisTypeNode>
+      1 ж<ast_package.TemplateLiteralTypeSpan>
+      1 ж<ast_package.TemplateLiteralTypeNode>
+      1 ж<ast_package.StringLiteral>
+      1 ж<ast_package.SetAccessorDeclaration>
+      1 ж<ast_package.RestTypeNode>
+      1 ж<ast_package.RegularExpressionLiteral>
+      1 ж<ast_package.PrivateIdentifier>
+      1 ж<ast_package.PrefixUnaryExpression>
+      1 ж<ast_package.PostfixUnaryExpression>
+      1 ж<ast_package.PartiallyEmittedExpression>
+      1 ж<ast_package.ParenthesizedTypeNode>
+      1 ж<ast_package.ParenthesizedExpression>
+      1 ж<ast_package.OptionalTypeNode>
+      1 ж<ast_package.NumericLiteral>
+      1 ж<ast_package.NotEmittedTypeElement>
+      1 ж<ast_package.NotEmittedStatement>
+      1 ж<ast_package.NonNullExpression>
+      1 ж<ast_package.LiteralTypeNode>
+      1 ж<ast_package.LabeledStatement>
+      1 ж<ast_package.KeywordTypeNode>
+      1 ж<ast_package.JsxSpreadAttribute>
+      1 ж<ast_package.JSDocVariadicType>
+      1 ж<ast_package.JSDocTypeExpression>
+      1 ж<ast_package.JSDocOptionalType>
+      1 ж<ast_package.JSDocNullableType>
+      1 ж<ast_package.JSDocNonNullableType>
+      1 ж<ast_package.JSDocNameReference>
+      1 ж<ast_package.JSDocAllType>
+      1 ж<ast_package.IntersectionTypeNode>
+      1 ж<ast_package.InferTypeNode>
+      1 ж<ast_package.IndexedAccessTypeNode>
+      1 ж<ast_package.ImportTypeNode>
+      1 ж<ast_package.GetAccessorDeclaration>
+      1 ж<ast_package.FunctionTypeNode>
+      1 ж<ast_package.ExpressionStatement>
+      1 ж<ast_package.EmptyStatement>
+      1 ж<ast_package.DebuggerStatement>
+      1 ж<ast_package.ContinueStatement>
+      1 ж<ast_package.ConstructorTypeNode>
+      1 ж<ast_package.BreakStatement>
+      1 ж<ast_package.BigIntLiteral>
+      1 ж<ast_package.ArrayTypeNode>
+
+-- C29: missing member <- the receiver the best overload wants (count)
+    146 AsNode <- go.ж<ast_package.Node>
+     70 subtreeFactsWorker <- ref ast_package.NodeDefault
+     54 DeclarationData <- ref ast_package.Node
+     42 FlowNodeData <- ref ast_package.Node
+     35 computeSubtreeFacts <- ref ast_package.NodeDefault
+     33 propagateSubtreeFacts <- ref ast_package.Node
+     33 Modifiers <- ref ast_package.Node
+     32 setModifiers <- ref ast_package.NodeDefault
+     25 LocalsContainerData <- ref ast_package.Node
+     14 VisitEachChild <- ref ast_package.Node
+     14 FunctionLikeData <- ref ast_package.Node
+     12 ExportableData <- ref ast_package.Node
+      9 LiteralLikeData <- ref ast_package.Node
+      8 BodyData <- ref ast_package.Node
+      4 TemplateLiteralLikeData <- ref ast_package.Node
+      2 ClassLikeData <- ref ast_package.Node
+
+-- first 20 errors
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.StatementBase.g.cs:507 CS1929 'ast_package.NodeBase' does not contain a definition for 'VisitEachChild' and the best extension method overload 'ast_package.VisitEachChild(ref ast_package.Node, ж<ast_package.NodeVisitor>)' requires a receiver of type 'ref go.github.com.m
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.IterationStatementBase.g.cs:425 CS1929 'ast_package.StatementBase' does not contain a definition for 'FlowNodeData' and the best extension method overload 'ast_package.FlowNodeData(ref ast_package.Node)' requires a receiver of type 'ref go.github.com.microsoft.TypeScript.tsc.@in
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.ExpressionBase.g.cs:502 CS1929 'ast_package.NodeBase' does not contain a definition for 'VisitEachChild' and the best extension method overload 'ast_package.VisitEachChild(ref ast_package.Node, ж<ast_package.NodeVisitor>)' requires a receiver of type 'ref go.github.com.m
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.TypeNodeBase.g.cs:501 CS1929 'ast_package.NodeBase' does not contain a definition for 'VisitEachChild' and the best extension method overload 'ast_package.VisitEachChild(ref ast_package.Node, ж<ast_package.NodeVisitor>)' requires a receiver of type 'ref go.github.com.m
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.NodeWithTypeArgumentsBase.g.cs:393 CS1929 'ast_package.TypeNodeBase' does not contain a definition for 'computeSubtreeFacts' and the best extension method overload 'ast_package.computeSubtreeFacts(ref ast_package.NodeDefault)' requires a receiver of type 'ref go.github.com.microsof
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.NodeWithTypeArgumentsBase.g.cs:399 CS1929 'ast_package.TypeNodeBase' does not contain a definition for 'propagateSubtreeFacts' and the best extension method overload 'ast_package.propagateSubtreeFacts(ref ast_package.Node)' requires a receiver of type 'ref go.github.com.microsoft.T
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.JSDocTypeBase.g.cs:386 CS1929 'ast_package.TypeNodeBase' does not contain a definition for 'computeSubtreeFacts' and the best extension method overload 'ast_package.computeSubtreeFacts(ref ast_package.NodeDefault)' requires a receiver of type 'ref go.github.com.microsof
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.JSDocTypeBase.g.cs:392 CS1929 'ast_package.TypeNodeBase' does not contain a definition for 'propagateSubtreeFacts' and the best extension method overload 'ast_package.propagateSubtreeFacts(ref ast_package.Node)' requires a receiver of type 'ref go.github.com.microsoft.T
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.AccessorDeclarationBase.g.cs:549 CS1929 'ast_package.NodeBase' does not contain a definition for 'VisitEachChild' and the best extension method overload 'ast_package.VisitEachChild(ref ast_package.Node, ж<ast_package.NodeVisitor>)' requires a receiver of type 'ref go.github.com.m
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.FunctionOrConstructorTypeNodeBase.g.cs:426 CS1929 'ast_package.TypeNodeBase' does not contain a definition for 'computeSubtreeFacts' and the best extension method overload 'ast_package.computeSubtreeFacts(ref ast_package.NodeDefault)' requires a receiver of type 'ref go.github.com.
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.FunctionOrConstructorTypeNodeBase.g.cs:432 CS1929 'ast_package.TypeNodeBase' does not contain a definition for 'propagateSubtreeFacts' and the best extension method overload 'ast_package.propagateSubtreeFacts(ref ast_package.Node)' requires a receiver of type 'ref go.github.com.mic
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.UnionOrIntersectionTypeNodeBase.g.cs:393 CS1929 'ast_package.TypeNodeBase' does not contain a definition for 'computeSubtreeFacts' and the best extension method overload 'ast_package.computeSubtreeFacts(ref ast_package.NodeDefault)' requires a receiver of type 'ref go.github.com.mi
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.UnionOrIntersectionTypeNodeBase.g.cs:399 CS1929 'ast_package.TypeNodeBase' does not contain a definition for 'propagateSubtreeFacts' and the best extension method overload 'ast_package.propagateSubtreeFacts(ref ast_package.Node)' requires a receiver of type 'ref go.github.com.micro
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.JSDocTagBase.g.cs:516 CS1929 'ast_package.NodeBase' does not contain a definition for 'VisitEachChild' and the best extension method overload 'ast_package.VisitEachChild(ref ast_package.Node, ж<ast_package.NodeVisitor>)' requires a receiver of type 'ref go.github.com.m
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.JSDocCommentBase.g.cs:515 CS1929 'ast_package.NodeBase' does not contain a definition for 'VisitEachChild' and the best extension method overload 'ast_package.VisitEachChild(ref ast_package.Node, ж<ast_package.NodeVisitor>)' requires a receiver of type 'ref go.github.com.m
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.Token.g.cs:494 CS1929 'ast_package.NodeBase' does not contain a definition for 'VisitEachChild' and the best extension method overload 'ast_package.VisitEachChild(ref ast_package.Node, ж<ast_package.NodeVisitor>)' requires a receiver of type 'ref go.github.com.m
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.EmptyStatement.g.cs:415 CS1929 'ast_package.StatementBase' does not contain a definition for 'FlowNodeData' and the best extension method overload 'ast_package.FlowNodeData(ref ast_package.Node)' requires a receiver of type 'ref go.github.com.microsoft.TypeScript.tsc.@in
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.IfStatement.g.cs:441 CS1929 'ast_package.StatementBase' does not contain a definition for 'FlowNodeData' and the best extension method overload 'ast_package.FlowNodeData(ref ast_package.Node)' requires a receiver of type 'ref go.github.com.microsoft.TypeScript.tsc.@in
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.ForInOrOfStatement.g.cs:460 CS1929 'ast_package.StatementBase' does not contain a definition for 'FlowNodeData' and the best extension method overload 'ast_package.FlowNodeData(ref ast_package.Node)' requires a receiver of type 'ref go.github.com.microsoft.TypeScript.tsc.@in
+.artifacts/gen/2fef83b2bc5f/go2cs-gen/go2cs.TypeGenerator/go.github.com.microsoft.TypeScript.tsc.internal.ast_package.BreakStatement.g.cs:417 CS1929 'ast_package.StatementBase' does not contain a definition for 'FlowNodeData' and the best extension method overload 'ast_package.FlowNodeData(ref ast_package.Node)' requires a receiver of type 'ref go.github.com.microsoft.TypeScript.tsc.@in

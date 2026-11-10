@@ -367,7 +367,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				// probe follows layout L3's routing (platformLayout.go): a hand-owned file of an
 				// L3 package lives in the per-GOOS folder its emission does, so asking flat would
 				// miss the marker and convert over it.
-				outputFileName := platformLayoutPath(packageOutputPath, goosOfTarget(options.targetPlatform),
+				outputFileName := platformLayoutPath(packageOutputPath, options.targetPlatform,
 					strings.TrimSuffix(filepath.Base(path), ".go")+".cs")
 
 				if !isDir && isSingleFileInput(path, options) {
@@ -616,9 +616,9 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				} else if fileEntry.manualConversion {
 					// The `.cs.auto` review sibling follows its hand-owned `.cs` into whichever
 					// folder layout L3 put that file in, so the pair stays together.
-					outputFileName = reviewSiblingLayoutPath(packageOutputPath, goosOfTarget(options.targetPlatform), baseName)
+					outputFileName = reviewSiblingLayoutPath(packageOutputPath, options.targetPlatform, baseName)
 				} else {
-					outputFileName = platformLayoutPath(packageOutputPath, goosOfTarget(options.targetPlatform), baseName+".cs")
+					outputFileName = platformLayoutPath(packageOutputPath, options.targetPlatform, baseName+".cs")
 				}
 
 				if fileEntry.manualConversion {
@@ -755,7 +755,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			// Go's InitOrder differs when the file set does, so package_init.cs is per-GOOS in the
 			// four packages where it varies (design §4.3) — routed by the same L3 rule, passed as
 			// the directory this writer joins its fixed file name onto.
-			packageInitDir := platformLayoutDir(packageOutputPath, goosOfTarget(options.targetPlatform), PackageInitFileName)
+			packageInitDir := platformLayoutDir(packageOutputPath, options.targetPlatform, PackageInitFileName)
 
 			if err := writePackageInitFile(packageInitDir, packageNamespace, packageName); err != nil {
 				log.Fatalf("Failed to write package init file for \"%s\": %s\n", packageOutputPath, err)
@@ -877,7 +877,7 @@ func aliasCoveredImplementationKeys() hashset.HashSet[string] {
 // file does.
 func packageInfoPath(packageOutputPath string, isDir bool, options Options) string {
 	if isDir {
-		return platformLayoutPath(packageOutputPath, goosOfTarget(options.targetPlatform), PackageInfoFileName)
+		return platformLayoutPath(packageOutputPath, options.targetPlatform, PackageInfoFileName)
 	}
 
 	// A single-file conversion's output path is the directory holding the one converted file (see main).

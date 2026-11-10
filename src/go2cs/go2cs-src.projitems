@@ -115,6 +115,7 @@
     <None Include="$(MSBuildThisFileDirectory)constraintProxyForwarding.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintProxyForwarding_test.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintProxyGenericCall_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)coreTypeParamAssign.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testSignals.go" />
@@ -230,6 +231,7 @@
     <None Include="$(MSBuildThisFileDirectory)fixedSkipCallerClosure_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fixtureWritesTracked_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foldedShiftOperand_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)forClauseReAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignConstraintProxy.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignConstraintProxy_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignFieldConsumer_test.go" />
@@ -252,6 +254,7 @@
     <None Include="$(MSBuildThisFileDirectory)goDeferConstArgs_test.go" />
     <None Include="$(MSBuildThisFileDirectory)goDeferThunkSites_test.go" />
     <None Include="$(MSBuildThisFileDirectory)goFrameOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)goImageCopyView.go" />
     <None Include="$(MSBuildThisFileDirectory)goroutineStackAnalysis.go" />
     <None Include="$(MSBuildThisFileDirectory)goroutineStackAnalysis_test.go" />
     <None Include="$(MSBuildThisFileDirectory)goroutineStackRecords.go" />
@@ -345,6 +348,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\relocscan\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\relocscan\main_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\annotatorSelfTest_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\breakFloorGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\contextBudget_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\diagnosticCodeRegistry_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsJekyllLiquid_test.go" />
@@ -369,6 +373,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnPackageBoxParity_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnSourcePins_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\l3BlockPosition_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\layoutKeyLists_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\lineKeyedRecords_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\moduleDisclosureWording_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\stdlibDisclosureWording_test.go" />
@@ -384,6 +389,7 @@
     <None Include="$(MSBuildThisFileDirectory)internalTestDynamicTypeLifts.go" />
     <None Include="$(MSBuildThisFileDirectory)internalTestDynamicTypeLifts_test.go" />
     <None Include="$(MSBuildThisFileDirectory)layoutDuplicates_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)layoutKeyFoldReaders_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeCallGateWindows_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeFieldArrayViewTranscription_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeRootFieldViewCensus_test.go" />
@@ -526,9 +532,13 @@
     <None Include="$(MSBuildThisFileDirectory)platformFilterSkip_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformHandOwn.go" />
     <None Include="$(MSBuildThisFileDirectory)platformHandOwn_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)platformCanonicalForm_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformCensus.go" />
     <None Include="$(MSBuildThisFileDirectory)platformCensus_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformCompanion_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)platformLattice.go" />
+    <None Include="$(MSBuildThisFileDirectory)platformLattice_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)platformLatticeLayout_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformLayout.go" />
     <None Include="$(MSBuildThisFileDirectory)platformLayout_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformLayoutFold_test.go" />
@@ -583,6 +593,7 @@
     <None Include="$(MSBuildThisFileDirectory)readmeValidationBadge_test.go" />
     <None Include="$(MSBuildThisFileDirectory)reconvertDeletionsSkipList_test.go" />
     <None Include="$(MSBuildThisFileDirectory)recoverForms.go" />
+    <None Include="$(MSBuildThisFileDirectory)recurseTrimpath_test.go" />
     <None Include="$(MSBuildThisFileDirectory)recvRefLowering_test.go" />
     <None Include="$(MSBuildThisFileDirectory)refLoweringAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)refLoweringAnalysis_test.go" />
@@ -671,6 +682,9 @@
     <None Include="$(MSBuildThisFileDirectory)toolchainPins.go" />
     <None Include="$(MSBuildThisFileDirectory)toolchainProvision.go" />
     <None Include="$(MSBuildThisFileDirectory)toolchainProvision_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)toolchainRename_notwindows.go" />
+    <None Include="$(MSBuildThisFileDirectory)toolchainRename_windows.go" />
+    <None Include="$(MSBuildThisFileDirectory)toolchainRename_windows_test.go" />
     <None Include="$(MSBuildThisFileDirectory)toolchainResolution.go" />
     <None Include="$(MSBuildThisFileDirectory)toolchainResolution_test.go" />
     <None Include="$(MSBuildThisFileDirectory)topLevelSeparation.go" />

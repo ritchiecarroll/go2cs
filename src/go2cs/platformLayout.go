@@ -79,14 +79,15 @@ func goosOfTarget(target string) string {
 }
 
 // isPlatformSourceFolder reports whether a directory ENTRY of a converted package directory is a
-// per-GOOS source folder rather than a nested package.
+// layout source folder (a GOOS, GOARCH or `<goos>-<arch>` key; platformLattice.go) rather than a
+// nested package.
 //
 // The discriminator is the project file: every converted Go package directory holds exactly one
 // `.csproj`, and a per-GOOS source folder holds none. That distinction is load-bearing, not
 // decorative — `internal/syscall/windows` is a real converted package whose directory name IS a
 // GOOS, and treating its sources as `internal/syscall`'s Windows variants would corrupt both.
 func isPlatformSourceFolder(packageOutputPath string, name string) bool {
-	if !isKnownGOOS(name) {
+	if !isLayoutKeyFolderName(name) {
 		return false
 	}
 
@@ -114,24 +115,27 @@ func isPlatformSourceFolder(packageOutputPath string, name string) bool {
 	return holdsSource
 }
 
-// platformLayoutDir returns the directory a converted package's artifact is written to: the
-// package's `<goos>` subfolder when the tree already carries THIS file there, and the package
-// directory itself otherwise. See rule 1 in the file header.
+// platformLayoutDir returns the directory a converted package's artifact is written to: the first of
+// the target's key folders (`<goos>-<arch>`, `<arch>`, `<goos>`; platformLayoutFolders) where the
+// tree already carries THIS file, and the package directory itself otherwise. See rule 1 in the file
+// header. A bare GOOS probes its GOOS folder alone, which is the rule as it read before the arch axis.
 //
 // The check is per FILE, not per directory, so a package that carries per-GOOS sources still writes
 // its shared files flat — which is the whole of L3.
-func platformLayoutDir(packageOutputPath string, goos string, fileName string) string {
-	// isPlatformSourceFolder first, and not merely "does <goos>/<file> exist": `internal/syscall`
-	// holds a NESTED PACKAGE called `windows`, and a file name that happens to match one of its
-	// sources would otherwise route this package's emission into that package's directory.
-	if len(goos) == 0 || !isPlatformSourceFolder(packageOutputPath, goos) {
-		return packageOutputPath
-	}
+func platformLayoutDir(packageOutputPath string, target string, fileName string) string {
+	for _, folder := range platformLayoutFolders(target) {
+		// isPlatformSourceFolder first, and not merely "does <folder>/<file> exist": `internal/syscall`
+		// holds a NESTED PACKAGE called `windows`, and a file name that happens to match one of its
+		// sources would otherwise route this package's emission into that package's directory.
+		if !isPlatformSourceFolder(packageOutputPath, folder) {
+			continue
+		}
 
-	platformDir := filepath.Join(packageOutputPath, goos)
+		platformDir := filepath.Join(packageOutputPath, folder)
 
-	if info, err := os.Stat(filepath.Join(platformDir, fileName)); err == nil && info.Mode().IsRegular() {
-		return platformDir
+		if info, err := os.Stat(filepath.Join(platformDir, fileName)); err == nil && info.Mode().IsRegular() {
+			return platformDir
+		}
 	}
 
 	return packageOutputPath
@@ -139,23 +143,23 @@ func platformLayoutDir(packageOutputPath string, goos string, fileName string) s
 
 // platformLayoutPath is platformLayoutDir with the file name joined back on — the form every
 // emission site wants.
-func platformLayoutPath(packageOutputPath string, goos string, fileName string) string {
-	return filepath.Join(platformLayoutDir(packageOutputPath, goos, fileName), fileName)
+func platformLayoutPath(packageOutputPath string, target string, fileName string) string {
+	return filepath.Join(platformLayoutDir(packageOutputPath, target, fileName), fileName)
 }
 
 // reviewSiblingLayoutPath returns where a whole-file hand-own's `<baseName>.cs.auto` review sibling is written: the
-// `<goos>` folder when the tree already holds the sibling there, and otherwise beside its hand-owned `.cs`, flat or
-// per-GOOS. The first arm is a FLAT hand-own whose emission differs by GOOS (runtime/runtime2.cs): the three-target
-// merge keeps one sibling per GOOS folder for it (mergeReviewSiblings), and a single-target reconvert must write its
+// target's key folder when the tree already holds the sibling there, and otherwise beside its hand-owned `.cs`, flat
+// or per-GOOS. The first arm is a FLAT hand-own whose emission differs by GOOS (runtime/runtime2.cs): the multi-target
+// merge keeps one sibling per key folder for it (mergeReviewSiblings), and a single-target reconvert must write its
 // flavour back there rather than lay a flat sibling beside them.
-func reviewSiblingLayoutPath(packageOutputPath string, goos string, baseName string) string {
+func reviewSiblingLayoutPath(packageOutputPath string, target string, baseName string) string {
 	sibling := baseName + ".cs.auto"
 
-	if dir := platformLayoutDir(packageOutputPath, goos, sibling); dir != packageOutputPath {
+	if dir := platformLayoutDir(packageOutputPath, target, sibling); dir != packageOutputPath {
 		return filepath.Join(dir, sibling)
 	}
 
-	return platformLayoutPath(packageOutputPath, goos, baseName+".cs") + ".auto"
+	return platformLayoutPath(packageOutputPath, target, baseName+".cs") + ".auto"
 }
 
 // platformPackageInfoPath resolves the `package_info.cs` a CONSUMER of an already-converted package
@@ -170,31 +174,48 @@ func reviewSiblingLayoutPath(packageOutputPath string, goos string, baseName str
 // `-go2cspath` produced (CLAUDE.md, 2026-08-06), and it is worth the same care.
 //
 // Flat wins whenever it exists, so every package whose metadata is shared is untouched and this
-// costs them one `os.Stat`. When neither exists the FLAT path is returned, so every caller keeps its
-// existing not-exist handling unchanged.
-func platformPackageInfoPath(packageDir string, goos string) string {
+// costs them one `os.Stat`. Otherwise the target's key folders are probed finest first, as
+// platformLayoutDir probes them. When none holds it the FLAT path is returned, so every caller keeps
+// its existing not-exist handling unchanged.
+func platformPackageInfoPath(packageDir string, target string) string {
 	flatPath := filepath.Join(packageDir, PackageInfoFileName)
 
 	if info, err := os.Stat(flatPath); err == nil && info.Mode().IsRegular() {
 		return flatPath
 	}
 
-	if len(goos) == 0 || !isPlatformSourceFolder(packageDir, goos) {
-		return flatPath
-	}
+	for _, folder := range platformLayoutFolders(target) {
+		if !isPlatformSourceFolder(packageDir, folder) {
+			continue
+		}
 
-	platformPath := filepath.Join(packageDir, goos, PackageInfoFileName)
+		platformPath := filepath.Join(packageDir, folder, PackageInfoFileName)
 
-	if info, err := os.Stat(platformPath); err == nil && info.Mode().IsRegular() {
-		return platformPath
+		if info, err := os.Stat(platformPath); err == nil && info.Mode().IsRegular() {
+			return platformPath
+		}
 	}
 
 	return flatPath
 }
 
-// packageCarriesPlatformLayout reports whether a converted package directory holds any per-GOOS
+// packageCarriesPlatformLayout reports whether a converted package directory holds any layout key
 // source folder, i.e. whether its project file needs the conditioned <Compile Include>.
 func packageCarriesPlatformLayout(packageOutputPath string) bool {
+	return packageHoldsLayoutFolder(packageOutputPath, isLayoutKeyFolderName)
+}
+
+// packageCarriesArchLayout reports whether a converted package directory holds a GOARCH or
+// `<goos>-<arch>` source folder, i.e. whether its project file also needs the $(GoTargetArch) items
+// (applyPlatformArchLayoutBlocks). A package with GOOS folders alone never does, which is what keeps
+// every project file of a single-architecture corpus exactly as it was.
+func packageCarriesArchLayout(packageOutputPath string) bool {
+	return packageHoldsLayoutFolder(packageOutputPath, isArchLayoutFolderName)
+}
+
+// packageHoldsLayoutFolder reports whether a package directory holds a layout source folder whose
+// name the predicate admits.
+func packageHoldsLayoutFolder(packageOutputPath string, admits func(name string) bool) bool {
 	entries, err := os.ReadDir(packageOutputPath)
 
 	if err != nil {
@@ -202,7 +223,26 @@ func packageCarriesPlatformLayout(packageOutputPath string) bool {
 	}
 
 	for _, entry := range entries {
-		if entry.IsDir() && isPlatformSourceFolder(packageOutputPath, entry.Name()) {
+		if entry.IsDir() && admits(entry.Name()) && isPlatformSourceFolder(packageOutputPath, entry.Name()) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// isNestedPackageFolder reports whether a package directory's child folder is a NESTED PACKAGE: it
+// holds a project file. A merge never writes into or removes from one, whatever its name, because
+// its sources are another package's (`internal/syscall/windows`).
+func isNestedPackageFolder(packageDir string, name string) bool {
+	entries, err := os.ReadDir(filepath.Join(packageDir, name))
+
+	if err != nil {
+		return false
+	}
+
+	for _, entry := range entries {
+		if !entry.IsDir() && strings.EqualFold(filepath.Ext(entry.Name()), ".csproj") {
 			return true
 		}
 	}
@@ -278,12 +318,126 @@ func applyPlatformLayoutBlocks(projectFileContents string, projectFileName strin
 }
 
 // removePlatformLayoutBlocks is applyPlatformLayoutBlocks' inverse: it takes the three L3 fragments back out of a
-// project file, giving the file a single-target writer renders for a package with no per-GOOS sources. A file without
-// them is returned unchanged.
+// project file, and the arch fragments with them, giving the file a single-target writer renders for a package with no
+// per-GOOS sources. A file without them is returned unchanged.
 func removePlatformLayoutBlocks(projectFileContents string) string {
+	projectFileContents = removePlatformArchLayoutBlocks(projectFileContents)
+
 	for _, block := range []string{platformCompileBlock, platformPackageInfoBlock, platformPropertyBlock} {
 		projectFileContents = strings.Replace(projectFileContents, block, "", 1)
 	}
 
 	return projectFileContents
+}
+
+const (
+	// platformTargetArchProperty is the MSBuild property that selects a package's per-GOARCH and
+	// per-pair sources, beside platformTargetOSProperty.
+	platformTargetArchProperty = "GoTargetArch"
+
+	// platformDefaultTargetArch is what $(GoTargetArch) resolves to when a build does not set it: the
+	// architecture every flavour of the corpus was CONVERTED at, not the host's. A Mac build under
+	// either RID compiles the darwin/amd64 conversion, as it does today.
+	platformDefaultTargetArch = "amd64"
+
+	// The arch fragments attach to the L3 block's own lines, so they are applied only after it.
+	platformArchPackageInfoAnchor = platformPackageInfoBlock
+
+	platformArchCompileAnchor = "    <Compile Include=\"$(" + platformTargetOSProperty + ")/*.cs\" Exclude=\"$(" + platformTargetOSProperty + ")/package_info.cs\" />\r\n"
+
+	// package_info.cs stays among the first items whichever key holds it, so the import hooks'
+	// module initializers keep running ahead of the package's own (platformPackageInfoAnchor).
+	platformArchPackageInfoBlock = "    <Compile Include=\"$(GoTargetArch)/package_info.cs\" Condition=\"Exists('$(GoTargetArch)/package_info.cs')\" />\r\n" +
+		"    <Compile Include=\"$(GoTargetOS)-$(GoTargetArch)/package_info.cs\" Condition=\"Exists('$(GoTargetOS)-$(GoTargetArch)/package_info.cs')\" />\r\n"
+
+	platformArchCompileBlock = "    <!-- Layout L3 arch keys: sources every target of one GOARCH shares live in $(GoTargetArch)/, and those of\r\n" +
+		"         one (GOOS, GOARCH) pair in $(GoTargetOS)-$(GoTargetArch)/ (docs/phase4/DESIGN-linux-arm64-flavour.md). -->\r\n" +
+		"    <Compile Include=\"$(GoTargetArch)/*.cs\" Exclude=\"$(GoTargetArch)/package_info.cs\" />\r\n" +
+		"    <Compile Include=\"$(GoTargetOS)-$(GoTargetArch)/*.cs\" Exclude=\"$(GoTargetOS)-$(GoTargetArch)/package_info.cs\" />\r\n"
+
+	platformArchPropertyBlock = "  <!-- Selects which per-GOARCH and per-(GOOS, GOARCH) source folders this package compiles: the\r\n" +
+		"       architecture the flavour was converted at, so an unset build takes `amd64`. -->\r\n" +
+		"  <PropertyGroup Condition=\"'$(" + platformTargetArchProperty + ")'==''\">\r\n" +
+		"    <" + platformTargetArchProperty + ">" + platformDefaultTargetArch + "</" + platformTargetArchProperty + ">\r\n" +
+		"  </PropertyGroup>\r\n\r\n"
+
+	// platformArchPresence is what applyPlatformArchLayoutBlocks' idempotence check looks for. It is
+	// the whole attribute, quote included: `$(GoTargetOS)-$(GoTargetArch)/*.cs` ends with the bare glob.
+	platformArchPresence = "Include=\"$(" + platformTargetArchProperty + ")/*.cs\""
+)
+
+// applyPlatformArchLayoutBlocks adds the $(GoTargetArch) property default and the per-GOARCH and
+// per-pair <Compile> items to a project file that already carries the L3 block, for a package that
+// holds an arch or pair folder (packageCarriesArchLayout). Each arch item sits right after its GOOS
+// counterpart: package_info.cs among the first items, the source globs after the per-GOOS one, so a
+// file that moves from flat or a GOOS folder into an arch or pair folder moves later in item order
+// and nothing else does. Idempotent, and removable again byte for byte (removePlatformArchLayoutBlocks).
+func applyPlatformArchLayoutBlocks(projectFileContents string, projectFileName string) string {
+	if strings.Contains(projectFileContents, platformArchPresence) {
+		return projectFileContents
+	}
+
+	compileAt := strings.Index(projectFileContents, platformArchCompileAnchor)
+	packageInfoAt := strings.Index(projectFileContents, platformArchPackageInfoAnchor)
+	propertyAt := strings.Index(projectFileContents, platformPropertyAnchor)
+
+	if compileAt < 0 || packageInfoAt < 0 || propertyAt < 0 {
+		// Without the L3 lines there is nothing to attach to, and the arch folders' sources would not
+		// be compiled at all; worth a word rather than a silent short compile.
+		showWarning("Project file \"%s\" carries per-GOARCH sources but has no $(%s) block to attach the $(%s) items to; per-GOARCH sources will NOT be compiled",
+			projectFileName, platformTargetOSProperty, platformTargetArchProperty)
+
+		return projectFileContents
+	}
+
+	// The same order applyPlatformLayoutBlocks inserts in, for the same reason: property < packageInfo
+	// < compile in the file, so the last anchor goes first.
+	contents := projectFileContents[:compileAt+len(platformArchCompileAnchor)] +
+		platformArchCompileBlock +
+		projectFileContents[compileAt+len(platformArchCompileAnchor):]
+
+	contents = contents[:packageInfoAt+len(platformArchPackageInfoAnchor)] +
+		platformArchPackageInfoBlock +
+		contents[packageInfoAt+len(platformArchPackageInfoAnchor):]
+
+	return contents[:propertyAt] + platformArchPropertyBlock + contents[propertyAt:]
+}
+
+// removePlatformArchLayoutBlocks is applyPlatformArchLayoutBlocks' inverse, for a package whose last arch or pair
+// folder has gone while its GOOS folders stay. A file without the arch fragments is returned unchanged.
+func removePlatformArchLayoutBlocks(projectFileContents string) string {
+	for _, block := range []string{platformArchCompileBlock, platformArchPackageInfoBlock, platformArchPropertyBlock} {
+		projectFileContents = strings.Replace(projectFileContents, block, "", 1)
+	}
+
+	return projectFileContents
+}
+
+// renderPlatformUniverseCheck renders the shared build check of the arch axis: an MSBuild target that fails a build
+// whose ($(GoTargetOS), $(GoTargetArch)) is not a target of the universe. Without it a pair the corpus was never laid
+// out for compiles silently short: a windows build at arm64 takes no `amd64/` folder and no `windows-arm64/` one. An
+// unset property reads as its project-file default, as the conditioned items read it. The corpus carries it in
+// src/core/Directory.Build.props, the one build file every package of the tree already imports (a
+// Directory.Build.targets beside it would shadow src/Directory.Build.targets, which MSBuild stops looking for at the
+// first one it finds), and TestCorpusBuildFileCarriesTheUniverseCheck holds that copy to platformUniverse.
+func renderPlatformUniverseCheck(universe []string) string {
+	conditions := make([]string, 0, len(universe))
+
+	for _, target := range universe {
+		conditions = append(conditions, "'$(_GoLayoutTarget)'!='"+target+"'")
+	}
+
+	return "  <!-- The (GOOS, GOARCH) pairs the converted standard library is laid out for (platformUniverse). -->\r\n" +
+		"  <Target Name=\"GoCheckLayoutTarget\" BeforeTargets=\"CoreCompile\">\r\n" +
+		"    <PropertyGroup>\r\n" +
+		"      <_GoLayoutOS>$(" + platformTargetOSProperty + ")</_GoLayoutOS>\r\n" +
+		"      <_GoLayoutOS Condition=\"'$(_GoLayoutOS)'==''\">" + platformDefaultTargetOS + "</_GoLayoutOS>\r\n" +
+		"      <_GoLayoutArch>$(" + platformTargetArchProperty + ")</_GoLayoutArch>\r\n" +
+		"      <_GoLayoutArch Condition=\"'$(_GoLayoutArch)'==''\">" + platformDefaultTargetArch + "</_GoLayoutArch>\r\n" +
+		"      <_GoLayoutTarget>$(_GoLayoutOS)/$(_GoLayoutArch)</_GoLayoutTarget>\r\n" +
+		"    </PropertyGroup>\r\n" +
+		"    <Error Condition=\"" + strings.Join(conditions, " And ") + "\"\r\n" +
+		"           Text=\"go2cs: $(_GoLayoutTarget) is not a target the converted standard library is laid out for (" +
+		strings.Join(universe, ", ") + "); set GoTargetOS and GoTargetArch to one of them.\" />\r\n" +
+		"  </Target>\r\n"
 }

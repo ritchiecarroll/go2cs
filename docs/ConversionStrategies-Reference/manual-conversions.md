@@ -22,6 +22,24 @@ when it emits the declaration itself.
      TestLazyPackageVarLeavesHandOwnedEager and TestLazyPackageVarLeavesManualVarEager
      (src/go2cs/lazyPackageVar_test.go). -->
 
+A package-level **const** can be displaced too, through `manualConversionConsts`, when the converted program must
+compute at run time what Go's toolchain fixes per build. Its first members are darwin's `runtime.GOARCH` and
+`internal/buildcfg`'s `defaultGOARCH` (Go's `const defaultGOARCH = runtime.GOARCH`). The darwin flavour is converted
+once, for `darwin/amd64`, and serves Intel and Apple-silicon Macs, so `runtime/darwin/goarch_darwin_impl.cs` reads the
+process architecture: `runtime.GOARCH` is `arm64` on Apple silicon, as in Go's own binary there. **The asymmetry is
+deliberate and visible:** only `runtime.GOARCH` moves. `internal/goarch` (`GOARCH`, `IsAmd64`, `IsArm64`,
+`ArchFamily`), the files Go selected for `darwin/amd64`, and every constant folded at conversion keep `amd64`, so they
+stay coherent with each other. A reader of the converted runtime will see `GOARCH` read `arm64` beside
+`goarch.GOARCH` reading `amd64` on the same Mac. Each runtime branch on `GOARCH` was checked and reads correctly at
+arm64. The windows flavour does the same (`runtime/windows/goarch_windows_impl.cs`), for Windows on Arm, by its own
+census. The linux flavour keeps the converted const: its syscall numbers and struct layouts are linux/amd64's, so it
+cannot run on linux/arm64 whatever `GOARCH` says, and needs a flavour of its own.
+<!-- src/go2cs/manualTypeOperations.go `var manualConversionConsts`; the placeholder is visitValueSpec.go's
+     constPlaceholderFormat. Guards: TestAManualConstIsDisplacedOnlyOnItsTarget (the emission, per target) and
+     TestManualConversionConstsAreDisplacedAndDeclared (the committed corpus), src/go2cs/manualConversionVars_test.go.
+     The census of record: docs/phase4/DESIGN-comparator-arms.md §5, layer 2 (categories A-D), plus census E, consts
+     folded from runtime.GOARCH, which found defaultGOARCH (G, 2026-11-09). -->
+
 **The runtime lock/note model (`core/runtime/lock_managed_impl.cs`).** Go's `mutex.key` is a tagged atomic slot — 0 unlocked, `locked` (1) held, or an `*m` `address|locked` heading a waiter chain through `m.nextwaitm`, parked on OS semaphores. The managed model hand-owns `mutexContended`/`lock2`/`unlock2`/`notewakeup`/`notesleep`/`notetsleep_internal` (via the same registry; thin wrappers and consts stay auto) and keeps the **same key protocol restricted to `{0, keyLocked}`**: the mutex is an `Interlocked` spinlock on the real `key` storage with `SpinWait` escalation standing in for the spin→yield→park ladder; the note is a signaled/clear latch (double-wakeup throw preserved; timeout at millisecond granularity). Deliberately not modeled, documented in place: the waiter queue (fairness), lock profiling, and the `m.locks`/preempt bookkeeping. `getg()` has since been realized (a thread-static g/m pair minted per goroutine, `runtime/stubs_impl.cs`), but the bookkeeping has not yet been returned to these bodies.
 
 Go actually has **two** flavors of that protocol and picks one per GOOS: `lock_sema.go` (windows, darwin, plan9, aix …) parks on OS semaphores as described above, and `lock_futex.go` (linux, freebsd, dragonfly) uses a `{0,1,2}` slot and parks on a futex. Neither primitive survives conversion, so both collapse onto the identical managed answer — which is why the core above is **one flat, platform-neutral file** and not a copy per flavor. What genuinely differs is a single signature: `notetsleep_internal` is `(n, ns, gp, deadline)` in `lock_sema.go` and `(n, ns)` in `lock_futex.go`. Each flavor keeps only that declaration, four lines delegating to the shared `noteSleepDeadline`, in `runtime/{windows,darwin}/lock_sema_impl.cs` and `runtime/linux/lock_futex_impl.cs`. `keyLocked` is the managed spelling of the value Go calls `locked` on one flavor and `mutex_locked` on the other — both 1, and neither name is declared on the other flavor's platforms.
@@ -651,7 +669,7 @@ Guards: the behavioral test `ReflectVariadicCall`; GolibTests' `GoReflectBridgeC
 <!-- golib: src/core/golib/GoReflect.VariadicRegistry.cs:26-28 (`go2cs-gen calls one of these for every variadic signature that can`),
      :49-53 (`GoDeferredRegistrations.EscapeRegistry.Run()`), :82-83
      (`if (!golib.TypeExtensions.IsDynamicCodeSupported && System.Array.Exists(typeArguments, static argument => argument.IsValueType))`),
-     :100 (`go2cs: reflect cannot call or make the variadic func`). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:414
+     :100 (`go2cs: reflect cannot call or make the variadic func`). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:423
      (`internal static string? VariadicRegistration(Compilation? compilation, INamedTypeSymbol? package, ITypeSymbol type)`),
      src/gen/go2cs-gen/MethodSet.cs:431 (`private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)`),
      :392 (`Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns)`), :129-130
@@ -1133,7 +1151,7 @@ borrow expressions; each word-size function is a single expression with no `Uint
 behavioral test, whose output matches Go over the edge cases and a 100,000-value sweep.
 <!-- src/core/math/bits/bits_impl.cs:147 `public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y)`,
      :117 `public static (uint64 sum, uint64 carryOut) Add64(uint64 x, uint64 y, uint64 carry)`,
-     :58-59 (`MEASURED (linux/amd64, min over seven`); src/go2cs/manualTypeOperations.go:2814 (`"math/bits": {`);
+     :58-59 (`MEASURED (linux/amd64, min over seven`); src/go2cs/manualTypeOperations.go:2856 (`"math/bits": {`);
      src/tests/Behavioral/MathBitsLeaves/main.go:37 (`for i := 0; i < 100000; i++ {`); commit d89ec81a23. -->
 
 ## A cross-package `//go:linkname` PULL emits a forwarder, not a throwing stub
@@ -3636,7 +3654,7 @@ levels. Anything the IL cannot prove keeps the frames the trace has, and an impl
 nil dereference) inside an inlinee is not covered, since a statement cannot say which instruction faulted. Nothing
 is emitted for this and nothing runs off the panic path. Guarded by GolibTests' `PanicFramesInlinedPanicTests`,
 including the controls where the IL names no single callee.
-<!-- src/core/runtime/managed_impl.cs:4993 (`INLINED PANIC SITES`), :5001 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
+<!-- src/core/runtime/managed_impl.cs:5002 (`INLINED PANIC SITES`), :5010 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
      src/tests/GolibTests/PanicFramesInlinedPanicTests.cs:14 (`AN EXPLICIT PANIC RAISED INSIDE A GO FUNCTION THE JIT INLINED`). -->
 
 ## `runtime.Stack(all: true)` enumerates every goroutine, and each one names the wait it is parked on

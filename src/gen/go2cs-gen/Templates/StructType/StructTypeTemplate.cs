@@ -793,8 +793,10 @@ internal class StructTypeTemplate : TemplateBase
         // the path's pointer state (pathHasPointer), as the cross-package arm is. At depth 1 the hop
         // `target.<embed>` is already a ж<T> that binds the box receiver (sha3's cshakeState embeds *state —
         // CS1929 without this); deeper, the forwarder binds the embed's own promoted forwarder, which exists
-        // because the same rule held one level down. A VALUE-only path cannot bind a ж-receiver and takes only
-        // the direct embed's descent shim (IsValueEmbedBoxRecv).
+        // because the same rule held one level down. A path of plain VALUE embeds cannot bind a ж-receiver on
+        // its hop, so it takes the descent shim (IsValueEmbedBoxRecv) instead: the box-field accessor of the
+        // DIRECT embed, at whatever depth the method is declared, since the embed carries the same shim (or the
+        // primary itself) by the same rule one level down.
         //
         // ⚠ The gate was once the enclosing struct's DIRECT pointer embeds, keyed by simple type name. That
         // missed two shapes, both measured (TS readiness C17, guarded by TwoLevelPointerEmbedBoxPromotion):
@@ -805,55 +807,57 @@ internal class StructTypeTemplate : TemplateBase
         // forwarders, the same on every target: those three in os, 26 on net's tcpConnWithoutReadFrom and
         // tcpConnWithoutWriteTo, and archive/zip's fileWriter.FileInfo — each a method Go's method set has.
 
-        // Go's AMBIGUITY rule: a method name promoted from TWO OR MORE embeds at the same depth
-        // is not promoted at all — bufio ReadWriter's Reader.Size vs Writer.Size (Go requires the
-        // qualified rw.Reader.Size(); both generated wrappers were CS0111).
-        Dictionary<string, int> promotedMethodCounts = new(StringComparer.Ordinal);
-
-        // Go's ambiguity rule has a SECOND clause the cross-embed count above cannot see: a name the
-        // embed annihilates WITHIN ITS OWN subtree (reached through two of ITS embeds at one depth) is
-        // not a member of the embed at all, so the enclosing type cannot promote it either -- and the
-        // forwarder it would emit, `target.<embed>.M()`, does not bind (CS1929). Names collected here are
-        // suppressed at the emission filter below; their ABSENCE from promotedMethodCounts would not be
-        // enough, since that filter only skips names it finds with a count > 1 (increment E2c).
-        HashSet<string> annihilatedWithinEmbed = new(StringComparer.Ordinal);
+        // Go's SELECTOR rule for a promoted method, the one promotes() applies to fields above: `x.M` names
+        // the M at the SHALLOWEST embedding depth, and only when exactly one M sits at that depth. A name
+        // that ties there is promoted from nothing — bufio ReadWriter's Reader.Size vs Writer.Size (Go
+        // requires the qualified rw.Reader.Size(); both generated wrappers were CS0111) — and a name another
+        // embed declares deeper is SHADOWED, so the embed that holds the shallowest one forwards it alone.
+        //
+        // Both tables hold, per name, the shallowest depth it is reached at and how many declarations sit
+        // there: embedMethodDepths through each direct embed (in promotedStructs order), and
+        // promotedMethodDepths through all of them. An embed whose OWN count is above one annihilates the
+        // name inside its own subtree: the name is no member of the embed, and the forwarder it would take,
+        // `target.<embed>.M()`, does not bind (CS1929, increment E2c).
+        //
+        // ⚠ The cross-embed half was once a count of the EMBEDS that reach the name, with the depth dropped,
+        // and the within-embed half one set of names applied to every embed. Both are measured (TS readiness
+        // C29, 533 CS1929 in the TypeScript compiler's ast package; guarded by EmbedDepthMethodPromotion): a
+        // name at depth 1 through one embed and depth 2 through another counted two and was promoted from
+        // NEITHER, where Go takes the depth-1 method; and a name one embed annihilates two levels down was
+        // withheld from a sibling embed that declares it once at depth 1.
+        List<Dictionary<string, (int depth, int count)>> embedMethodDepths = [];
+        Dictionary<string, (int depth, int count)> promotedMethodDepths = new(StringComparer.Ordinal);
 
         foreach ((string promotedStructType, _, _, _, _) in promotedStructs)
         {
             List<(string name, int depth)> embedMethodOccurrences = [];
+            Dictionary<string, (int depth, int count)> embedDepths = new(StringComparer.Ordinal);
 
-            // A DIRECT (depth-1) NON-GENERIC VALUE embed also promotes its box-receiver (direct-ж)
-            // primaries through a descent shim (see IsValueEmbedBoxRecv). Count them for the same
-            // cross-embed ambiguity rule so two such embeds carrying the same method name drop (as
-            // Go's ambiguity rule requires) rather than emitting a duplicate forwarder. A plain
-            // value embed's type name never carries '<' — both the pointer-box embed form (`ж<…>`) and a
-            // generic embed do — which is a more robust discriminator than a membership test on embed
-            // names (whose `@`-keyword-escaped names, e.g. os.File's `ж<@file>`, mismatch).
-            bool directEmbedIsValue = !promotedStructType.Contains("<");
+            embedMethodDepths.Add(embedDepths);
 
-            countPromotedMethods(promotedStructType, [], 1, IsPointerHop(promotedStructType));
+            // A path of plain VALUE embeds also promotes the box-receiver (direct-ж) primaries along it,
+            // through a descent shim (see IsValueEmbedBoxRecv). They are counted at their own depth like
+            // any other method, so the selector rule reads one method set whatever the receiver kind.
+            countPromotedMethods(promotedStructType, [], 1, IsPointerHop(promotedStructType), IsPlainValueHop(promotedStructType));
 
-            // Go's rule INSIDE the embed, the same one promotes() applies to fields: a name is a member of
-            // the embed iff it occurs exactly once at its MINIMUM depth. Occurring twice there means the
-            // embed annihilates it, so it contributes nothing to the cross-embed count and is suppressed.
             foreach (IGrouping<string, (string name, int depth)> occurrences in embedMethodOccurrences.GroupBy(o => o.name, StringComparer.Ordinal))
             {
                 int minDepth = occurrences.Min(o => o.depth);
+                int atMinDepth = occurrences.Count(o => o.depth == minDepth);
 
-                if (occurrences.Count(o => o.depth == minDepth) > 1)
-                {
-                    annihilatedWithinEmbed.Add(occurrences.Key);
-                    continue;
-                }
+                embedDepths[occurrences.Key] = (minDepth, atMinDepth);
 
-                promotedMethodCounts[occurrences.Key] = promotedMethodCounts.TryGetValue(occurrences.Key, out int count) ? count + 1 : 1;
+                if (!promotedMethodDepths.TryGetValue(occurrences.Key, out (int depth, int count) shallowest) || minDepth < shallowest.depth)
+                    promotedMethodDepths[occurrences.Key] = (minDepth, atMinDepth);
+                else if (minDepth == shallowest.depth)
+                    promotedMethodDepths[occurrences.Key] = (minDepth, shallowest.count + atMinDepth);
             }
 
             // seenTypes is the PATH, copied at each recursion -- see collect() in getStructMembers for the rule
             // and the measurement (increment E2c). A shared set counts a method reached through two SIBLING
             // embeds once, so Go's same-depth annihilation never fires and an enclosing type promotes what the
             // embed itself does not have.
-            void countPromotedMethods(string typeName, HashSet<string> seenTypes, int depth, bool pathHasPointer)
+            void countPromotedMethods(string typeName, HashSet<string> seenTypes, int depth, bool pathHasPointer, bool pathIsPlainValue)
             {
                 if (!seenTypes.Add(typeName))
                     return;
@@ -874,7 +878,7 @@ internal class StructTypeTemplate : TemplateBase
                     foreach (MethodInfo m in metadataValueMethods.Where(m => !m.IsCrossPackage))
                         embedMethodOccurrences.Add((m.Name, depth));
 
-                    if (pathHasPointer || (typeName == promotedStructType && directEmbedIsValue))
+                    if (pathHasPointer || pathIsPlainValue)
                     {
                         foreach (MethodInfo m in metadataBoxMethods.Where(m => !m.IsCrossPackage))
                             embedMethodOccurrences.Add((m.Name, depth));
@@ -887,9 +891,9 @@ internal class StructTypeTemplate : TemplateBase
                     embedMethodOccurrences.Add((m.Name, depth));
 
                 // Box-receiver primaries reached through a pointer anywhere on the path promote too (see
-                // below) — count them for the same cross-embed ambiguity rule. A direct VALUE embed likewise
-                // promotes its box-receiver primaries via the descent shim.
-                if (pathHasPointer || (typeName == promotedStructType && directEmbedIsValue))
+                // below) — count them for the same selector rule. A path of plain VALUE embeds likewise
+                // promotes its box-receiver primaries, via the descent shim.
+                if (pathHasPointer || pathIsPlainValue)
                 {
                     foreach (MethodInfo m in decl.GetBoxReceiverExtensionMethods(comp!))
                         embedMethodOccurrences.Add((m.Name, depth));
@@ -898,13 +902,17 @@ internal class StructTypeTemplate : TemplateBase
                 foreach ((string memberType, _, _, bool isEmbedded, _) in decl.GetStructMembers(comp!, true))
                 {
                     if (isEmbedded)
-                        countPromotedMethods(memberType, [.. seenTypes], depth + 1, pathHasPointer || IsPointerHop(memberType));
+                        countPromotedMethods(memberType, [.. seenTypes], depth + 1, pathHasPointer || IsPointerHop(memberType), pathIsPlainValue && IsPlainValueHop(memberType));
                 }
             }
         }
 
+        int embedIndex = -1;
+
         foreach ((string promotedStructType, string promotedMemberName, _, _, _) in promotedStructs)
         {
+            embedIndex++;
+
             // Rewrite the embed's type PARAMETERS to this instantiation's type ARGUMENTS on the
             // promoted method's return + parameter types — a generic embed's method signature may
             // carry `Point` (`pointFromAffine` returns `(Point, error)`), out of scope on the
@@ -915,12 +923,36 @@ internal class StructTypeTemplate : TemplateBase
             // it from a deeper embedding level (Go promotes methods through every level). A 2+-level
             // method (e.g. top.greet from inner, via top→mid→inner) is forwarded through the 1-level
             // accessor `target.<promotedStruct>.greet()`, which exists by the embedded struct's own
-            // one-level promotion of that method. Closest declaration of a name wins (Go's rule).
+            // one-level promotion of that method. Closest declaration of a name wins (Go's rule), whatever
+            // order the walk meets them in: promotedMethodNames holds the depth of the declaration kept, and
+            // a shallower one REPLACES it in place. The walk is depth-first, so the first one met was once
+            // kept, and a deeper method reached through an earlier embed gave the forwarder its signature
+            // and its receiver kind (TS readiness C29: a ref-receiver forwarder through an embed that holds
+            // the name only as a box shim, CS1929).
             List<MethodInfo> promotedStructMethods = [];
-            HashSet<string> promotedMethodNames = new(StringComparer.Ordinal);
+            Dictionary<string, int> promotedMethodNames = new(StringComparer.Ordinal);
 
-            // See the identical computation in the ambiguity-counting pass above.
-            bool directEmbedIsValue = !promotedStructType.Contains("<");
+            void offerPromotedMethod(MethodInfo method, int depth)
+            {
+                if (promotedMethodNames.TryGetValue(method.Name, out int keptDepth))
+                {
+                    if (depth >= keptDepth)
+                        return;
+
+                    promotedStructMethods[promotedStructMethods.FindIndex(kept => kept.Name == method.Name)] = method;
+                }
+                else
+                {
+                    promotedStructMethods.Add(method);
+                }
+
+                promotedMethodNames[method.Name] = depth;
+            }
+
+            // A plain value embed's type name never carries '<' — both the pointer-box embed form (`ж<…>`)
+            // and a generic embed do — which is a more robust discriminator than a membership test on embed
+            // names (whose `@`-keyword-escaped names, e.g. os.File's `ж<@file>`, mismatch).
+            bool directEmbedIsValue = IsPlainValueHop(promotedStructType);
 
             // The NARROWER unexported-embed form, kept for the return-type accessibility relaxation
             // below only — that relaxation is about a cross-package call the converter emits as a bare
@@ -934,13 +966,13 @@ internal class StructTypeTemplate : TemplateBase
             List<MethodInfo> crossMethods = [];
             HashSet<string> crossMethodNames = new(StringComparer.Ordinal);
 
-            collectPromotedMethods(promotedStructType, [], IsPointerHop(promotedStructType));
+            collectPromotedMethods(promotedStructType, [], 1, IsPointerHop(promotedStructType), directEmbedIsValue);
 
             // PATH-scoped for the same reason as countPromotedMethods above (increment E2c).
             // pathHasPointer is carried down the same path and stamped on every method harvested
             // along it (MethodInfo.PathHasPointer): whether a POINTER embed lies between the
             // enclosing struct and the type declaring the method.
-            void collectPromotedMethods(string typeName, HashSet<string> seenTypes, bool pathHasPointer)
+            void collectPromotedMethods(string typeName, HashSet<string> seenTypes, int depth, bool pathHasPointer, bool pathIsPlainValue)
             {
                 // Go forbids embedding cycles, but guard anyway.
                 if (!seenTypes.Add(typeName))
@@ -985,30 +1017,19 @@ internal class StructTypeTemplate : TemplateBase
                     (List<MethodInfo> metadataValueMethods, List<MethodInfo> metadataBoxMethods) = GetMetadataPromotedMethods(typeName);
 
                     foreach (MethodInfo m in metadataValueMethods.Where(m => !m.IsCrossPackage))
-                    {
-                        if (promotedMethodNames.Add(m.Name))
-                            promotedStructMethods.Add(m with { PathHasPointer = pathHasPointer });
-                    }
+                        offerPromotedMethod(m with { PathHasPointer = pathHasPointer }, depth);
 
-                    bool metadataValueEmbedBoxRecv = typeName == promotedStructType && directEmbedIsValue;
-
-                    if (pathHasPointer || metadataValueEmbedBoxRecv)
+                    if (pathHasPointer || pathIsPlainValue)
                     {
                         foreach (MethodInfo m in metadataBoxMethods.Where(m => !m.IsCrossPackage))
-                        {
-                            if (promotedMethodNames.Add(m.Name))
-                                promotedStructMethods.Add(m with { IsBoxRecv = true, IsValueEmbedBoxRecv = metadataValueEmbedBoxRecv, PathHasPointer = pathHasPointer });
-                        }
+                            offerPromotedMethod(m with { IsBoxRecv = true, IsValueEmbedBoxRecv = pathIsPlainValue, PathHasPointer = pathHasPointer }, depth);
                     }
 
                     return;
                 }
 
                 foreach (MethodInfo m in decl.GetExtensionMethods(comp!) ?? [])
-                {
-                    if (promotedMethodNames.Add(m.Name))
-                        promotedStructMethods.Add(m with { PathHasPointer = pathHasPointer });
-                }
+                    offerPromotedMethod(m with { PathHasPointer = pathHasPointer }, depth);
 
                 // BOX-receiver primaries (`this ж<T>`) reached through a pointer anywhere on the path promote
                 // unchanged — at depth 1 the hop `target.<embed>` is a ж<T>, so the value/pointer forwarders
@@ -1016,10 +1037,21 @@ internal class StructTypeTemplate : TemplateBase
                 // embed's own promoted forwarder (see pathHasPointer above). GetExtensionMethods above
                 // harvests only value-receiver forms, so collect the box primaries here (sha3's
                 // cshakeState←*state.Write, CS1929).
-                // A direct VALUE embed also promotes its box-receiver primaries, but through the
+                // A path of plain VALUE embeds also promotes its box-receiver primaries, but through the
                 // box-field descent shim (IsValueEmbedBoxRecv) — its hop `target.<embed>` is a value,
-                // not a ж<T>, so the plain forwarder body would be CS1929. Only the direct embed is taken
-                // (a deeper value hop would need a multi-level descent this narrow fix does not emit).
+                // not a ж<T>, so the plain forwarder body would be CS1929. The shim descends ONE level,
+                // into the direct embed's box, and binds what that embed holds under the name: the primary
+                // when the embed declares it, else the embed's own shim, which this rule gave it.
+                //
+                // ⚠ Only the DIRECT embed's primaries were once taken, and a deeper one was invisible to
+                // both walks. Two shapes failed, both measured (TS readiness C29, guarded by
+                // EmbedDepthMethodPromotion). A method that returns its receiver, declared three value
+                // embeds down, had no forwarder on any type above the first, and the pointer adapter of a
+                // type whose chain passes a struct with two embeds calls it on the outer box (CS1929; a
+                // chain of single embeds is projected by the adapter itself and never needed one). And
+                // where the invisible method SHADOWS a ref-receiver method one level further down, the
+                // shadowed one was promoted in its place, by ref, through an embed that holds the name
+                // only as a box shim (CS1929).
                 //
                 // ⚠ NOT gated on the embed's EXPORTEDNESS. It was, and that gate was not a Go rule: Go
                 // puts a value embed's POINTER-receiver methods in the OUTER type's pointer method set
@@ -1029,15 +1061,10 @@ internal class StructTypeTemplate : TemplateBase
                 // `BasicType`, whose `Basic()` takes a pointer receiver) did not satisfy the lifted
                 // anonymous `interface{ Basic() *BasicType }`, and its assertion threw for ten of the
                 // package's forty tests.
-                bool valueEmbedBoxRecv = typeName == promotedStructType && directEmbedIsValue;
-
-                if (pathHasPointer || valueEmbedBoxRecv)
+                if (pathHasPointer || pathIsPlainValue)
                 {
                     foreach (MethodInfo m in decl.GetBoxReceiverExtensionMethods(comp!))
-                    {
-                        if (promotedMethodNames.Add(m.Name))
-                            promotedStructMethods.Add(m with { IsBoxRecv = true, IsValueEmbedBoxRecv = valueEmbedBoxRecv, PathHasPointer = pathHasPointer });
-                    }
+                        offerPromotedMethod(m with { IsBoxRecv = true, IsValueEmbedBoxRecv = pathIsPlainValue, PathHasPointer = pathHasPointer }, depth);
                 }
 
                 // Recurse into nested embedded struct fields. The converter emits every embed -
@@ -1050,7 +1077,7 @@ internal class StructTypeTemplate : TemplateBase
                 foreach ((string memberType, _, _, bool isEmbedded, _) in decl.GetStructMembers(comp!, true))
                 {
                     if (isEmbedded)
-                        collectPromotedMethods(memberType, [.. seenTypes], pathHasPointer || IsPointerHop(memberType));
+                        collectPromotedMethods(memberType, [.. seenTypes], depth + 1, pathHasPointer || IsPointerHop(memberType), pathIsPlainValue && IsPlainValueHop(memberType));
                 }
             }
 
@@ -1066,16 +1093,26 @@ internal class StructTypeTemplate : TemplateBase
                     continue;
                 }
 
-                if (annihilatedWithinEmbed.Contains(method.Name))
+                if (embedMethodDepths[embedIndex].TryGetValue(method.Name, out (int depth, int count) reached) &&
+                    promotedMethodDepths.TryGetValue(method.Name, out (int depth, int count) shallowest))
                 {
-                    result.Append($"\r\n    // '{GetSimpleName(promotedStructType)}.{method.Name}' is AMBIGUOUS inside the embed itself (Go promotes it to neither) - not promoted");
-                    continue;
-                }
+                    if (reached.depth > shallowest.depth)
+                    {
+                        result.Append($"\r\n    // '{GetSimpleName(promotedStructType)}.{method.Name}' is SHADOWED by a shallower '{method.Name}' through another embed (Go takes the shallowest) - not promoted");
+                        continue;
+                    }
 
-                if (promotedMethodCounts.TryGetValue(method.Name, out int nameCount) && nameCount > 1)
-                {
-                    result.Append($"\r\n    // '{GetSimpleName(promotedStructType)}.{method.Name}' promotion is AMBIGUOUS across embeds (Go requires the qualified selector) - not promoted");
-                    continue;
+                    if (reached.count > 1)
+                    {
+                        result.Append($"\r\n    // '{GetSimpleName(promotedStructType)}.{method.Name}' is AMBIGUOUS inside the embed itself (Go promotes it to neither) - not promoted");
+                        continue;
+                    }
+
+                    if (shallowest.count > 1)
+                    {
+                        result.Append($"\r\n    // '{GetSimpleName(promotedStructType)}.{method.Name}' promotion is AMBIGUOUS across embeds (Go requires the qualified selector) - not promoted");
+                        continue;
+                    }
                 }
 
                 // Add ref extension method
@@ -1297,6 +1334,11 @@ internal class StructTypeTemplate : TemplateBase
     // promotion through it skipped the deref (handle.cs:49,52 and uniqueMap<T>'s accessors).
     private static bool IsPointerHop(string embedTypeName) =>
         !ReferenceEquals(UnboxedEmbedType(embedTypeName), embedTypeName);
+
+    // A plain VALUE embed: neither a pointer embed (`ж<…>`) nor a generic one, both of which carry '<'.
+    // Only such a hop has the non-generic box-field accessor the descent shim goes through.
+    private static bool IsPlainValueHop(string embedTypeName) =>
+        !embedTypeName.Contains("<");
 
     // The embed's type with its pointer box removed -- `global::go.ж<global::go.p.canonMap<T>>` (or the
     // short `ж<canonMap<T>>`) to `global::go.p.canonMap<T>` -- and the SAME string instance for a value

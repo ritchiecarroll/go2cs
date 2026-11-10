@@ -42,7 +42,7 @@ import (
 // is reported AT THE CALL; it is attributed only when exactly one callee with appends is inlined there and it has
 // exactly one append, and any other inlined copy leaves the site unhinted (G's inlining rule).
 //
-// The harvest always runs the corpus's three targets, whatever this conversion's target is, so a shared file
+// The harvest always runs every target of the corpus, whatever this conversion's target is, so a shared file
 // converts to the same text on every host and under every -platforms run. A site is hinted when every target that
 // reports it agrees it is the variable's first qualifying site and none contradicts it; a site only some targets
 // compile (a `runtime.GOOS == "windows"` branch the others fold away) takes the hint from the targets that report it.
@@ -63,8 +63,8 @@ import (
 // with -trimpath (whose positions are import-path relative and independent of any working directory), and joins
 // positions by file base name, line and column, which every form of the path agrees on.
 
-// stackAppendHarvestTargets are the targets every harvest reads: the corpus's three (platformEmit.go).
-var stackAppendHarvestTargets = []string{"windows/amd64", "linux/amd64", "darwin/amd64"}
+// stackAppendHarvestTargets are the targets every harvest reads: the corpus's (platformUniverse, platformLattice.go).
+var stackAppendHarvestTargets = platformUniverse
 
 // stackAppendStoreBytes is the buffer Go reserves: base.Debug.VariableMakeThreshold's default.
 const stackAppendStoreBytes = 32

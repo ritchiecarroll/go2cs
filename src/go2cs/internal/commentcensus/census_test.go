@@ -17,6 +17,8 @@ package commentcensus
 import (
 	"maps"
 	"os"
+	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
@@ -471,5 +473,72 @@ func TestHandOwnIsTheAttributeLineNotAMention(t *testing.T) {
 
 	if !slices.Equal(got, want) {
 		t.Errorf("paired %v, want %v (a mention of GoManualConversion is not the attribute)", got, want)
+	}
+}
+
+// A package's sources sit in its directory and in its layout key folders: `<goos>`, `<goarch>` and
+// `<goos>-<goarch>` for each target of the universe. The census reads a file from every one of them, once, and a
+// folder with a project file of its own is a package however it is named. Fixture: package p with a.cs in amd64/
+// and linux-arm64/, b.cs in linux-arm64/ alone, c.cs in linux-amd64/ and darwin/ and d.cs in windows/, linux-amd64/
+// and darwin/; and package p/linux, a real package named for a GOOS, with e.cs.
+func TestFindPairsReadsEveryLayoutKeyFolder(t *testing.T) {
+	const cs = "namespace go;\n\npartial class p_package {\n} // end p_package\n"
+
+	core, goroot := t.TempDir(), t.TempDir()
+
+	write := func(path string, text string) {
+		t.Helper()
+
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := os.WriteFile(path, []byte(text), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	write(filepath.Join(core, "p", "p.csproj"), "<Project />\n")
+	write(filepath.Join(core, "p", "linux", "linux.csproj"), "<Project />\n")
+
+	for _, rel := range []string{
+		"p/amd64/a.cs", "p/linux-arm64/a.cs", "p/linux-arm64/b.cs", "p/linux-amd64/c.cs", "p/darwin/c.cs",
+		"p/windows/d.cs", "p/linux-amd64/d.cs", "p/darwin/d.cs", "p/linux/e.cs",
+	} {
+		write(filepath.Join(core, filepath.FromSlash(rel)), cs)
+	}
+
+	for _, rel := range []string{"p/a.go", "p/b.go", "p/c.go", "p/d.go", "p/linux/e.go"} {
+		write(filepath.Join(goroot, "src", filepath.FromSlash(rel)), "package p\n")
+	}
+
+	want := []string{"p/a from amd64", "p/b from linux-arm64", "p/c from linux-amd64", "p/d from windows", "p/linux/e from "}
+
+	var got []string
+
+	for _, p := range FindPairs(core, goroot) {
+		got = append(got, filepath.ToSlash(p.Pkg)+"/"+p.Base+" from "+p.Flavor)
+	}
+
+	if !slices.Equal(got, want) {
+		t.Errorf("paired %q, want %q (one reading per file, from the first key folder that holds it)", got, want)
+	}
+}
+
+// The key folders follow from the universe, which is the converter's: a target the layout gains and this list does
+// not would read here as files the census no longer sees.
+func TestLayoutUniverseIsTheConvertersUniverse(t *testing.T) {
+	lattice, err := os.ReadFile(filepath.Join("..", "..", "platformLattice.go"))
+
+	if err != nil {
+		t.Fatalf("reading the converter's universe: %v", err)
+	}
+
+	declared := regexp.MustCompile(`(?m)^var platformUniverse = \[\]string\{(.*)\}\r?$`).FindSubmatch(lattice)
+
+	if want := `"` + strings.Join(layoutUniverse, `", "`) + `"`; declared == nil {
+		t.Error("src/go2cs/platformLattice.go no longer declares platformUniverse on one line; layoutUniverse has nothing to be held to")
+	} else if string(declared[1]) != want {
+		t.Errorf("src/go2cs/platformLattice.go declares platformUniverse {%s} and layoutUniverse is {%s}; they change together", declared[1], want)
 	}
 }

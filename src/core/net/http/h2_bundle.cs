@@ -12850,8 +12850,7 @@ internal static void addBytes(this ж<http2priorityNodeRFC7540> Ꮡn, int64 b) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     n.bytes += b;
-    for (; Ꮡn != nil; Ꮡn = n.parent) {
-        n = ref Ꮡn.DerefOrNull();
+    for (; Ꮡn != nil; Ꮡn = n.parent, n = ref Ꮡn.DerefOrNull()) {
         n.subtreeBytes += b;
     }
 }

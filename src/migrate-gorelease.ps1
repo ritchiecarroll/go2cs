@@ -1070,7 +1070,7 @@ function Write-Handoff {
     Write-Host '        go2cs -stdlib -comments -go2cspath <staging>/src' -ForegroundColor White
     Write-Host ''
     Write-Host '        # and the layout-L3 multi-target emission this corpus actually carries:' -ForegroundColor DarkGray
-    Write-Host '        go2cs -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64 \' -ForegroundColor White
+    Write-Host '        go2cs -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64 \' -ForegroundColor White
     Write-Host '              -platform-stage <stage> -go2cspath <staging>/src' -ForegroundColor White
     Write-Host ''
     Write-Host '     Delete and re-seed per run; never convert twice into one staging root.'

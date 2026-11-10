@@ -20,7 +20,7 @@
         . (Join-Path $PSScriptRoot '_paths.ps1')          # from src\
         . (Join-Path $PSScriptRoot '../_paths.ps1')       # from a src\<sub>\ script
 
-    Nothing here has side effects; it defines variables and two helpers and returns.
+    Nothing here has side effects; it defines variables and three helpers and returns.
 
 .NOTES
     Requires PowerShell 5.1 (Windows) or PowerShell 7+ (any platform).
@@ -57,10 +57,11 @@ $HostGoos =
 # enumerate behavioral packages must agree on which packages a host may measure.
 #
 # ProcessArchitecture rather than OSArchitecture: what matters is the arch the CONVERTER defaults its
-# `-platforms` to, and go2cs is built and run by the same toolchain as this host process. There is no
-# GoTargetArch override to honor -- none exists anywhere in the tree, and inventing one no instrument
-# sets would be a branch nothing can exercise. An unrecognized architecture answers its own lowercase
-# .NET name rather than a guess, matching $HostGoos's refusal to invent a flavor.
+# `-platforms` to, and go2cs is built and run by the same toolchain as this host process. GoTargetArch
+# is deliberately NOT read here: it exists since 2026-11-09 (S1b, the pin below), but it names the arch
+# the corpus FLAVOR was converted at, a different fact -- on Apple silicon the converter defaults to
+# arm64 while the darwin flavor is amd64. An unrecognized architecture answers its own lowercase .NET
+# name rather than a guess, matching $HostGoos's refusal to invent a flavor.
 #
 # THE BOTH-EDITIONS DEBT, stated so the next reader does not have to find it. A shared .ps1 change owes
 # 5.1 on a Windows lane AND 7 on a Linux lane, because the trap this file is most exposed to is a
@@ -118,6 +119,49 @@ $HostGoarch =
 # makes a darwin host measure a corpus it is not.
 if ($HostGoos -and $HostGoos -ne 'windows' -and [string]::IsNullOrEmpty($env:GoTargetOS)) {
     $env:GoTargetOS = $HostGoos
+}
+
+# The corpus's declared universe of GOOS/GOARCH targets, one converted FLAVOR each. It mirrors
+# platformUniverse (src/go2cs/platformLattice.go), and a Go test holds the two equal element for
+# element (TestPathsCorpusPlatformUniverseMirrorsTheConverter): a target joins through both together.
+$CorpusPlatformUniverse = @('windows/amd64', 'linux/amd64', 'darwin/amd64', 'linux/arm64')
+
+# The GOARCH of the corpus flavor that serves a GOOS/GOARCH -- the converter's corpusFlavourOf
+# (src/go2cs/testsCorpusArch.go), restated: $Goarch when "$Goos/$Goarch" is a target of the universe;
+# otherwise the arch of the FIRST universe target of that GOOS (darwin/arm64 is served by darwin/amd64,
+# the one flavor published under both mac RIDs); otherwise $null, because a GOOS the universe does not
+# carry has no flavor this file can name -- the same refusal to guess as $HostGoos's. A Go test runs this
+# function against the Go helper over two universes (TestPathsCorpusFlavorArchMatchesTheConverter).
+function Get-CorpusFlavorArch {
+    param([string] $Goos, [string] $Goarch, [string[]] $Universe = $CorpusPlatformUniverse)
+
+    if ([string]::IsNullOrEmpty($Goos) -or [string]::IsNullOrEmpty($Goarch)) { return $null }
+    if ($Universe -ccontains "$Goos/$Goarch") { return $Goarch }
+
+    foreach ($target in $Universe) {
+        $parts = $target.Split('/')
+        if ($parts[0] -ceq $Goos) { return $parts[1] }
+    }
+
+    return $null
+}
+
+# The corpus flavor's ARCH, pinned like GoTargetOS above and for the same reason: an L3 csproj with arch
+# folders defaults `GoTargetArch` to `amd64` when the property is EMPTY, so a host whose flavor was
+# converted at another arch would otherwise build the amd64 folders. GoTargetArch names the arch the
+# flavor was CONVERTED at, never the host's: an Apple-silicon host is served by darwin/amd64 (one flavor,
+# both mac RIDs) and gets no variable, and a linux/arm64 host gets `arm64` only once the universe carries
+# linux/arm64. 'amd64' is excluded by the value, exactly as 'windows' is for GoTargetOS: it IS the csproj
+# default. At today's universe this never fires on any host (S1b, 2026-11-09). A pre-set variable or an
+# explicit `-p:GoTargetArch` still wins.
+if ([string]::IsNullOrEmpty($env:GoTargetArch) -and $HostGoos) {
+    $hostFlavorArch = Get-CorpusFlavorArch -Goos $HostGoos -Goarch $HostGoarch
+
+    if ($hostFlavorArch -and $hostFlavorArch -ne 'amd64') {
+        $env:GoTargetArch = $hostFlavorArch
+    }
+
+    Remove-Variable -Name hostFlavorArch
 }
 
 # Pin GO2CSPATH on every non-Windows host so the converter's child-env `$(go2csPath)` race has one

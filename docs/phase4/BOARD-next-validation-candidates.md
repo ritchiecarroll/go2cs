@@ -35035,4 +35035,592 @@ question, not a converter one. OPEN, unowned.
 
 — COORD (2026-11-09)
 
+## 2026-11-09 — G (the run-time GOARCH seat): the linux and windows flavours on arm64 hosts report GOARCH=amd64; same remedy pending a layer-2 census per flavour
+
+**The scope of the seat.** `claude/g-goarch-runtime` makes `runtime.GOARCH` read the process architecture in the
+DARWIN flavour only, as measured: it displaces two consts, `runtime.GOARCH` and `internal/buildcfg`'s
+`defaultGOARCH`, for darwin (`manualConversionConsts`). The census that licenses it read darwin plus flat files.
+
+**What stays open.** The linux and windows flavours are converted for amd64 too, and `ProcessArchitecture` reads the
+same on any OS. So a converted program on an arm64 Linux or Windows host (for example Windows on Arm, or a Linux arm64
+server) runs as a native arm64 .NET process and reads `runtime.GOARCH` as `amd64`. No package ships for those hosts
+(the four RIDs are win-x64, linux-x64, osx-x64 and osx-arm64), so this is not a shipped divergence today.
+
+**The remedy, once measured.** The same displacement, scoped to that flavour, after a layer-2 census of that flavour's
+own runtime branches on GOARCH (its `runtime/<goos>/` files differ: windows' `signal_windows.cs`:57 and :365 and
+linux's `os_linux.cs`:502 compare GOARCH and are not in darwin's census), plus census E over that flavour's file
+selection. Do not widen the darwin seat unmeasured.
+
+**Census E, the hole layer 2 had** (recorded here because it applies to every flavour). Layer 2 read the sites that
+NAME `GOARCH`, so it could not see a const that Go computes FROM `runtime.GOARCH` and the conversion folds silently,
+with no comment: `internal/buildcfg`'s `const defaultGOARCH = runtime.GOARCH` emitted `defaultGOARCHᵇ = "amd64"`.
+Kept folded beside a run-time `runtime.GOARCH`, go/build's default context (`Default.GOARCH`, from
+`buildcfg.GOARCH`) would disagree with it, and `runtime.GOARCH == c.GOARCH` would turn `Default.CgoEnabled` off on
+Apple silicon. A syntactic census over Go's darwin/amd64 file selection (transitive within each package; positive
+control `defaultGOARCH`) found 5 production consts: `defaultGOARCH` (incoherent, so the seat displaces it),
+`framepointer_enabled`, `haveSysmon` and chacha20's `unaligned` (inert: the same value at amd64 and arm64), and
+`subtle.supportsUnaligned` (equivalent: it selects a word-at-a-time XOR with the same result).
+
+— G (2026-11-09)
+
+## 2026-11-09 — G (the run-time GOARCH seat, by P2's census): the windows flavour reads the process architecture too; linux needs a flavour of its own
+
+Amends this BOARD's earlier entry today ("the linux and windows flavours on arm64 hosts report GOARCH=amd64").
+P2's census of the two flavours (`docs/phase4/CENSUS-goarch-linux-windows.md`, `claude/p2-goarch-census`) decided
+both:
+- **windows: YES**, with darwin's two displacements. `runtime.GOARCH` and `internal/buildcfg`'s `defaultGOARCH` are
+  displaced for windows as well (`manualConversionConsts`, scope darwin+windows). Their hand-owns,
+  `runtime/windows/goarch_windows_impl.cs` and `internal/buildcfg/windows/zbootstrap_windows_impl.cs`, read the process
+  architecture, so Windows on Arm reads arm64. That is UNMEASURED on an arm64 Windows host: the os-matrix has no
+  windows-arm64 runner, and no package ships for it. On win-x64 the value is "amd64", as before.
+- **linux: NO.** Its syscall numbers and struct layouts are linux/amd64's, so the flavour cannot run on linux/arm64
+  whatever GOARCH says. A linux/arm64 flavour is the remedy (owner ruling, 2026-11-09: in .4, with a date slip
+  allowed), and its design is G's next record.
+
+— G (2026-11-09)
+
+## 2026-11-09 — G: a linux-arm64 consumer silently compiles against and LOADS the Windows flavour of every RID-split go.* package — OPEN, a refusal seat routed
+
+**What happens.** A go.* package whose C# varies by GOOS ships `runtimes/<rid>/lib/<tfm>/` for each RID the release
+ships (win-x64, linux-x64, osx-x64, osx-arm64), plus a RID-agnostic `lib/<tfm>/` copy that carries the host of
+record's flavour, Windows. On a RID no package ships, linux-arm64 the first a user meets, nothing chooses a
+Linux flavour:
+- **Compile:** `src/core/golib/buildTransitive/go.lib.targets`:38-41. `GoSelectRidCompileAssets` swaps each go.*
+  compile item to `runtimes/$(GoCompileRuntimeIdentifier)/...` only when that file exists, so "on a RID no go.*
+  package ships (linux-arm64, say) nothing is swapped and the reference flavour compiles". The reference flavour is
+  Windows.
+- **Run:** `src/push-nuget.ps1`:1573-1576. The host prefers a `runtimeTargets` asset only when one matches the
+  running RID, so "a Linux-arm64 consumer would silently get Windows behaviour".
+- **The only signal:** `src/core/golib/GoHostOfRecord.cs` (the class comment, 18-26; `Verify` at 56), called once
+  from `src/core/runtime/hostofrecord_impl.cs`:42-44. It writes one stderr warning when the baked GOOS differs from the
+  host's, and the program then runs on Windows answers: syscall numbers, paths and errno values among them.
+
+**Why it is a defect, not a cost.** The packaging design chose `lib/`-as-reference knowing this (push-nuget.ps1
+1569-1577, "the honest cost of this choice"), while no shipped RID could reach it in practice. A Linux arm64 host
+(Graviton, Ampere, Raspberry Pi) is an ordinary .NET target, and it reaches it today with a successful build and wrong
+behaviour, which is worse than any failure.
+
+**The remedy, two steps.**
+- (1) SEAT 0, "refuse loudly": a build-time ERROR, not a warning, when the consumer's RID has no matching flavour.
+  It names the RID and points at KnownIssues. It is small, independent of the flavour, and ships in .4.
+- (2) The linux/arm64 flavour (`DESIGN-linux-arm64-flavour.md`), which turns the refusal into a no-op for
+  linux-arm64.
+
+
+## 2026-11-09 — G (internal/goexperiment, found by the linux/arm64 four-target census): the darwin flavour holds NO `exp_dwarf5_*.cs` — the converter resolves tool tags for the HOST, not the target
+
+**The observation.** `src/core/internal/goexperiment` carries `windows/exp_dwarf5_on.cs` and
+`linux/exp_dwarf5_on.cs` and nothing for darwin. Go selects exactly one file of the pair for every target, and for
+darwin/amd64 it is `exp_dwarf5_off.go` (go1.26.10, `go list -f '{{.GoFiles}}' internal/goexperiment` under
+`GOOS=darwin`): the Dwarf5 experiment is in the baseline everywhere except darwin, ios and aix. So the darwin build
+of the package has neither `Dwarf5` nor `Dwarf5Int`.
+
+**The cause, read and probed, not yet fixed.** go/packages selects a target's files with the target's `GOOS` and
+`GOARCH`. The converter then re-evaluates each file's dotted build tags against a tool-tag list it gets from
+`goListToolTags` (`directiveOperations.go`), and that function runs `go list -find -f '{{context.ToolTags}}' unsafe`
+in the converter's own environment and caches the answer per module root. Nothing passes the target. Measured with
+that same command on a windows host: for windows/amd64 and linux/amd64 the list holds `goexperiment.dwarf5`; for
+darwin/amd64 it does not; for linux/arm64 it holds `arm64.v8.0` where the others hold `amd64.v1`. On a windows or
+linux host the darwin conversion is therefore handed `exp_dwarf5_off.go` by the loader and then refuses it, because
+`!goexperiment.dwarf5` is false against the host's list. Neither file of the pair is emitted.
+
+**What it reaches.** Today, one file in one package: Dwarf5 is the only baseline experiment that differs between
+the corpus's targets, and the two constants are read by `cmd/` alone, so nothing converted fails to compile. Two
+things follow from the mechanism rather than from the file. (1) The emission depends on the HOST's `GOOS`: the same
+reconvert run on a Mac would drop `linux/exp_dwarf5_on.cs` and `windows/exp_dwarf5_on.cs` and add the darwin file.
+(2) The architecture feature tag is the host's as well (`amd64.v1` under a linux/arm64 conversion on an x64 box);
+in go1.26.10's standard library only `runtime/race` is constrained on one, so it is latent for the fourth flavour.
+
+**Remedy.** Pass the target's `GOOS` and `GOARCH` to that `go list` and key the cache by target as well as module
+root. Expected corpus footprint: `internal/goexperiment/darwin/exp_dwarf5_off.cs` appears, with its position-map
+line. Not part of the layout seat, whose footprint must be empty. OPEN, unowned.
+
+**Not guarded:** the converter exits 0 and the darwin corpus builds.
+
+— G (2026-11-09)
+
+## 2026-11-09 — C1 (COORD ruling on C24): a chan-cored type parameter emits no channel constraint, so a generic body can do nothing with it — OPEN, its own row
+
+**The finding.** A type parameter constrained `~chan E` emits only `where C : /* ~chan E */ new()`. A slice or map
+core emits `ISlice<E>`/`IMap<K, V>` plus `ISupportMake`. With no `IChannel<E>` in the constraint, nothing a Go body
+does with the channel binds:
+- a send `c <- v` emits `c.ᐸꟷ(v)`;
+- a receive `<-c` emits `<-c`;
+- `len(c)` and `cap(c)`;
+- assigning `c` to its core type `chan E` (C24's class: CS0029 at master 0c553534df, measured with C24's probe).
+
+Probe, go1.26.10: `func Send[C ~chan E, E any](c C, v E) { c <- v }` with a receive, and `type Pipe chan int`.
+Go prints `1 7`; the emission above cannot compile.
+
+**Reach.** No `~chan` or `~<-chan` constraint appears anywhere in GOROOT/src outside testdata (grep, 0 lines), so no
+std package reaches it. The TS readiness rows do not name it either. It is filed because C24 closed the slice and
+map members of the same class (claude/c1-ts-c24) and named this one as out of that seat's scope.
+
+**Owed.** A constraint shape for the chan core: likely `IChannel<E>` plus the send/receive surface and a sharing
+`AsChannel()`, the counterpart of C24's `IMap<K, V>.AsMap()`. Then red-first from the probe, at every position C24
+covers. Not sized.
+
+— C1 (2026-11-09)
+
+## 2026-11-09 — R (M:N R6, O1's remainder): on Linux a converted program ends at about 16,200 live goroutines at the stock vm.max_map_count — a CAPACITY ceiling six times below Windows, and a fatal abort
+
+**The finding.** ParkStorm (DESIGN-mn-scheduler-sizing.md Appendix A) with 20,000 goroutines, the linux flavour
+converted at master `0bbe3ab6e5`, Release, on R-WSL (Ubuntu 22.04, kernel 6.18, `vm.max_map_count` 65,530, the stock
+value). All six runs (bounded reserve 16 MiB and 1 MiB, three each) aborted at 16,226–16,229 threads with
+`Failed to create RW mapping for RX memory ... (vm.map_max_count)`, thrown from `Goroutine.StartWithCreator`. Each
+.NET thread costs about four mappings (stack, guard page, the runtime's W^X double mapping), so the ceiling is
+65,530 / 4. It does not move with the reserve. A Go goroutine is not a thread, so the limit does not apply to Go
+(not measured on this box), and Windows reaches 10⁵ converted.
+The abort is not catchable.
+
+**Recorded:** the dated O1 amendment in DESIGN-mn-scheduler.md, which corrects "Windows and Linux move toward about
+10⁵ parked", and a KnownIssues entry for users.
+
+**Levers, UNMEASURED and not recommended:** `DOTNET_EnableWriteXorExecute=0` (should drop the double mapping) and a
+larger `vm.max_map_count` (machine-wide). Measuring either needs a run that aborts at the new ceiling, which falls
+under the rule below.
+
+**The hazard that came with it.** On this WSL, a crashing linux process is dumped to the Windows side, and neither
+`ulimit -c 0` nor `ulimit -c 1` stops it (both proved to dump on a deliberate SIGSEGV). These six aborts wrote
+211 GB of dumps; they were removed by name and time window. COORD's fleet rule, 2026-11-09: no many-thread Linux run
+without dump suppression PROVEN on that box first, and a failed proof STOPS the run.
+
+**Owner:** none needed for the ceiling itself (it is the 1:1 model's, and O6/O4 are the real answer). OPEN for whoever
+measures the W^X lever under the rule above.
+
+— R (2026-11-09)
+
+
+## 2026-11-09 — P1 (follow-up to the GO2CS2004 seat): a defined type whose chain reaches ANOTHER package's struct forwards no members past the first hop, and six conversion shapes over such chains have no generated operator — OPEN, PARKED by COORD (0 std reach)
+
+**Shape.** A defined type over another package's struct (`type M lib.Pair[string]`), then a second definition over
+it, a sibling over the same struct, a generic one, and conversions between them. Go converts any two of these whose
+underlying types are identical. Two packages:
+
+```go
+package lib
+
+type Pair[T any] struct {
+	A T
+	B int
+}
+
+type Box[K comparable, V any] struct {
+	Index  map[K]V
+	Arr    [2]V
+	hidden V
+}
+
+func NewBox[K comparable, V any](k K, v V) Box[K, V] {
+	return Box[K, V]{Index: map[K]V{k: v}, hidden: v}
+}
+
+func (b Box[K, V]) Hidden() V { return b.hidden }
+
+type Open struct {
+	A string
+	B int
+}
+
+type Open2 struct {
+	A string
+	B int
+}
+```
+
+```go
+package main
+
+import (
+	"fmt"
+
+	"example.com/dtoi/lib"
+)
+
+type pair[T any] struct {
+	A T
+	B int
+}
+
+type P[T any] pair[T]
+type R[U comparable] pair[U]
+
+type T struct {
+	A string
+	B int
+}
+
+type M lib.Pair[string]
+type MM M
+type M2 lib.Pair[string]
+
+type XB lib.Box[string, int]
+type XB2 lib.Box[string, int]
+type XG[U any] lib.Box[string, U]
+
+type LA lib.Open
+type LB lib.Open2
+
+type G1[U any] lib.Pair[U]
+type G2[U any] lib.Pair[U]
+
+func main() {
+	mm := MM(M{A: "m", B: 2})
+	fmt.Println(mm.A, mm.B) // D1
+
+	xb := XB(lib.NewBox("k", 10))
+	xb2 := XB2(xb) // D2
+	xb2.Arr[0] = 13
+	fmt.Println(xb.Arr[0], xb2.Arr[0], lib.Box[string, int](xb2).Hidden(), M2(mm).A)
+
+	t := T{"t", 16}
+	fmt.Println(M(t).A, MM(t).B) // D3
+
+	fmt.Println(lib.Pair[string](mm).A, MM(lib.Pair[string]{A: "q", B: 15}).B) // D4
+
+	la := LA(lib.Open{A: "o", B: 17})
+	fmt.Println(LB(la).A, lib.Open2(la).B, LB(lib.Open{A: "r", B: 18}).B) // D5
+
+	g1 := G1[int](lib.Pair[int]{A: 19, B: 20})
+	xg := XG[int](lib.Box[string, int](xb2))
+	fmt.Println(G2[int](g1).A, XB(xg).Arr[0], lib.Box[string, int](XB2(xg)).Hidden(), R[int](P[int]{A: 21}).A) // D6
+
+	fmt.Println(T(lib.Open{A: "u", B: 22}).B) // D7
+}
+```
+
+Go 1.26.10 prints `m 2`, `0 13 10 m`, `t 16`, `m 15`, `o 17 18`, `19 13 10 21`, `22`. The second line is the part a
+fix has to keep: the copy does not share the array (`0` beside `13`), and the unexported field arrives (`10`).
+
+**Where it was measured.** These declarations and conversions were added to the seat's behavioral project
+(DefinedTypeOverInstantiation, with its `instlib` package) and built with the converter and generators of the seat's
+tip d0227c54b3 (ref claude/p1-ts-go2cs2004, accepted for batch 279). The converter exits 0 and writes every
+declaration and all 18 `GoImplicitConv` records; the C# build fails. The repro above is the same shapes cut down,
+run with Go only. Before the seat the converter refused the whole file with GO2CS2004, so none of this was reachable
+from Go source through a generic instantiation; the plain (non-generic) forms of D1, D2 and D5 were measured to fail
+the same way before the seat.
+
+| | Shape | Example | C# at d0227c54b3 |
+|---|---|---|---|
+| D1 | a definition over a definition over another package's struct | `type MM M` | CS1929: `MM` has no `A`, `B` |
+| D2 | two definitions over one struct of another package | `XB2(xb)`, `M2(mm)` | CS0030 |
+| D3 | a local struct to a chain that ends in another package | `M(t)`, `MM(t)` | CS0030 |
+| D4 | a chain and the other package's struct it ends in, each way | `lib.Pair[string](mm)` | CS0030 |
+| D5 | chains ending in two different structs of another package | `LB(la)`, `lib.Open2(la)` | CS0030 |
+| D6 | both sides generic, meeting at one instantiation | `G2[int](g1)`, `XB(xg)`, `R[int](P[int]{})` | CS0030 |
+| D7 | another package's struct to a local struct | `T(lib.Open{})` | CS1929, then CS0030 |
+
+`R[int](P[int]{})` in D6 needs no second package: two generic definitions over one LOCAL generic struct fail the
+same way.
+
+**Roots, all in go2cs-gen.**
+
+- **D1, TypeGenerator.** The loop that follows a wrapper's definitions reads each next definition's DECLARATION
+  SYNTAX. A definition in another package has none, so the loop stops with the intermediate local wrapper (`M`) as
+  the struct to forward from, and `M` has no members of its own in syntax: generators do not see each other's
+  output. `MM` gets no `A` or `B`.
+- **D2 to D6, ImplicitConvGenerator.** The struct chain is resolved from syntax too. When either chain ends in
+  another package's struct there is no declaration to read fields from, and the record is skipped WITHOUT a
+  diagnostic. For two generic sides, the open form of the other side is looked up by simple name among the
+  wrapper's own chain; a sibling wrapper is not in that chain, so those records are skipped as well.
+- **D7, ImplicitConvGenerator.** For `GoImplicitConv<lib.Open, T>` the operator is hosted on the SOURCE by its
+  simple name:
+
+```csharp
+public static partial class main_package
+{
+    partial struct Open
+    {
+        public static implicit operator T(Open src) => new T(src.A, src.B);
+    }
+}
+```
+
+  That declares a new empty `main_package.Open` (CS1929 on `src.A`), and the conversion the record asked for still
+  does not exist. C# lets a conversion be declared in either operand's type, so the host has to be `T`, the local
+  side. The reverse record already does that: `T-Open.g.cs` declares, inside `partial struct T`,
+  `operator global::go.go.instlib_package.Open(T src)`. Whether D7 pre-dates the seat was NOT measured.
+
+**Why the skipped records matter.** A skipped record is a Go conversion with no C# counterpart: CS0030 at the call
+site. It fails the build rather than changing behavior, which is why this is parked and not urgent.
+
+**What holds** (same project, same tip): nested generic fields under a wrapper whose parameters carry the base's
+names in the other order (`type W[V comparable, K any] nest[V, K]`), a wrapper over an instantiation of an
+instantiation (`type N pair[pair[int]]`), `T(M(t))` from a chain to a local struct, and `lib.Open(t)`.
+
+**Plan (not cut).**
+
+- **D1:** resolve the next definition by SYMBOL, and when it is in metadata take its public fields and ref
+  properties from there, with the type arguments carried through that hop.
+- **A. Carry the wrapped value when the two chains share a type** (D2, D4, D6 and the local sibling case): convert
+  through the wrappers' existing cast operators to the shared type and back, with exactly one clone. It is the only
+  route that keeps an unexported field, because another package's field-wise constructor lists exported fields only.
+- **B. Field-wise construction with the members read from the SOURCE declaration** when the target's chain ends in
+  another package's struct (D3).
+- **C. Two different structs of another package** (D5): field-wise over the members metadata shows. Where a field
+  is not accessible, report a diagnostic (the next free ID is GO2CS0011) instead of skipping the record.
+- **Host rule** (D7 and all of the above): declare the operator in a LOCAL operand, and in the non-generic one when
+  there is one (`XG<nint>` to `XB` is declared in `XB`). When every local operand is a closed generic (`G1<nint>` to
+  `G2<nint>`), declare the operator once, OPEN, in one of them, so that several closed records share one
+  declaration, as the seat does for `C<V>` and `pair<V>`. A record between two types of other packages has no local
+  host and must be reported, not skipped.
+
+**Not verified:** whether Roslyn metadata shows another package's non-public fields to a generator; whether the
+existing field-wise conversion shares a fixed-array field between source and result (the repro's `0 13` checks it
+once a fix exists); whether D7 pre-dates the seat.
+
+**Reach.** 0 in std, by the seat's census at its base: std has 57 `GoImplicitConv` records, 2 of them over structs
+(`RegPtr` and `Reg` in math/big/internal/asmgen), and neither has a generic operand or a wrapper on the constructed
+side. The TypeScript experiment's C11 shape is the local form, which the seat answers.
+
+**Not guarded:** the converter exits 0 on every shape above, and nothing in the behavioral corpus has them. A fix
+goes red-first with the repro above added to DefinedTypeOverInstantiation.
+
+— P1 (2026-11-09)
+
+
+## 2026-11-09 — C1 (COORD ruling: BANK): darwin syscall's (a) residue is closed by the reinterpret seam; syscall banks darwin 32 + 1 on both RIDs
+
+Resolves (a) of the 2026-10-26 P2 row "darwin syscall after the iovec/dirent seat". `TestGetdirentries` and its
+`/n=10` and `/n=1000` subtests panicked on arm 2a in the test's own parse, `getdirentries_test.go:67`: a `*[1048]byte`
+view over a local `syscall.Dirent`, whose `Name [1024]int8` makes the struct reference-bearing.
+
+The seam (`claude/c1-reinterpret-seam`, ACCEPTED for batch 279; docs/phase4/DESIGN-reinterpret-seam.md):
+- golib `GoImage<S>`, a Go-layout byte view over a struct box, with `copy` overloads that encode the struct's image,
+  copy Go's byte count, and decode a destination back into the box. No GC allocation per call.
+- The converter emits a slice of `(*[N]byte)(unsafe.Pointer(P))` that is a direct argument of `copy`, where N is the
+  size of `*P` and `*P` is a reference-bearing struct, as `copy(@unsafe.GoImage(P).slice(), ...)`. Every other use
+  of such a view keeps its arm-2a refusal.
+- Footprint: production 0 files on windows, linux and darwin. The darwin syscall `-tests` emission moves by exactly
+  that line in getdirentries_test.cs.
+
+The read: os-matrix sweep-shard run 42664200286 at the seam's head d86dfc19ba, both RIDs, "matched 32 of 33 Go / 33 C#
+verdicts; disclosed 1; undisclosed divergences 0". It was the .3 reading's 29 + 1 + 3 undisclosed. The arch-strict rule
+derives `darwin: 32 + 1` (evidence docs/phase4/rebank-1.26.10.3/darwin/reread/SIG-2R.tsv). (b), `TestGetfsstat`, is not among
+the .3 read's divergences or this one's.
+
+— C1 (2026-11-09)
+
+## 2026-11-10 — C2 (batch 280's release-smoke, COORD's ruling): a RED GUARD MASKED A SECOND FAILURE — go.lib's IByteSeq gained two abstract members after 1.26.10.3; now defaulted
+
+**The reading.** Batch 280's release-smoke (42752322043, the pack job) packed 362 packages and then refused go.lib on two
+CP0006: `Cannot add interface member 'bool go.IByteSeq<T>.TryGetSlice(out go.slice<T>)'` and `... TryGetString(out
+go.@string)`, against the baseline 1.26.10.3. Reproduced against the .3 nupkg from nuget.org with go.lib alone packed
+from master 9b8af3bd30 (Test-GoApiCompatPackage): those two, and nothing else.
+
+**The cause.** 475adb5312 (2026-11-09, TS readiness C16 (d)) added both members to `IByteSeq<T>` as ABSTRACT members,
+after .3 shipped. go2cs-gen emits an `IByteSeq<byte>` implementation into every converted package that declares a
+named []byte or a named string, so a nugetgo package built against .3 would fail to load that type under a .4 go.lib.
+
+**Why nobody saw it.** Every pre-publish pack on master was already refusing on the 17 stale suppressions .3 left
+behind (42720953059). The guard was red for a known cause, so the second red behind it never printed. It surfaced only
+when the suppression retirement (b4152307a5) cleared the first one.
+
+**The lesson.** When a guard is red for a known cause, the next red behind it is invisible until the first is
+cleared. Read the guard's FULL refusal list, not its first cause. A guard that is red for a reason everyone already
+knows has stopped guarding anything else.
+
+**The remedy, ruled (COORD, 2026-11-10): non-breaking, not suppressed, the floor unmoved at 1.26.10.3.** Both members
+have default bodies in `src/core/golib/IByteSeq.cs` that answer false. A .3-built implementer takes the copy path,
+its .3 behaviour: the values are right, and only the C16 sharing waits for a rebuild. golib's own types and today's
+go2cs-gen output implement both explicitly and never reach the defaults.
+
+**Gates.**
+- ApiCompat against .3: 2 CP0006 at master (red), 0 with the defaults (green). ApiCompat accepts a default-implemented
+  interface member.
+- GolibTests ByteSeqPreMemberImplementerTests: two structs of the .3 shape, without either member, convert by value
+  through the fallback. Red at master's IByteSeq: CS0535 on all four missing implementations.
+
+— C2 (2026-11-10)
+
+## 2026-11-10 — P2: a main package in a module refused its own package_info.cs on every reconvert (fixed on `claude/p2-pkginfo-doc-warning`)
+
+Found as a side note on the provenance header seat (TestLicensingEmissionCompatibility converts twice into one root),
+taken as a scoped finding by COORD's ruling (2026-11-10). Read at master `66a2e023ca`.
+
+**What happened.** Converting a `package main` of a module (here `example.com/app`) a second time into the same output
+printed `"<out>/package_info.cs" is package main's package_info.cs, not main's; writing a fresh one from the template`
+and replaced the file with the template. The doc comment and `-comments` named in the side note are not the trigger:
+both arms warn with and without each. Repro: a module `example.com/app` with `main.go` = `package main` +
+`func main() {}`, converted twice with `go2cs app out`. The first run is silent, the second warns.
+
+**Cause.** `goPackageImportPathFor` stamps a main package's own class `[GoPackage("main", ImportPath = "main")]`,
+since Go's reflect names a main package's types `main.T` whatever its module path. The stamp is written only when the
+namespace does not decode to that path (`goPackageImportPathStamp`), so it appears for a main package in a
+`go.example.com` namespace. `packageInfoBelongsHere`, the guard added for directories that change hands between
+releases, compared the stamped path with the LOADER path (`example.com/app`), so it refused the package's own file.
+
+**Effect.** Anything kept outside the marker sections of such a file was dropped on each reconvert, and the warning
+was false. Under `-tests`, `package_test_info.cs` is seeded from the production `package_info.cs` and then read through
+the same guard, so the seeded production records of a module's main package would be discarded too (inferred from
+`testConversion.go`'s seeding step; not measured).
+
+**Reach.** 0 committed files: std has no main package (`go list std`, 360 packages), and the behavioral corpus's main
+packages sit in the root `go` namespace, which decodes to `main`, so they are stamped `[GoPackage("main")]` with no
+ImportPath and never reached the comparison. Module conversions (`-recurse`, a plain module directory) reach it.
+
+**Fix.** The guard accepts the stamped path `"main"` for a main package's own class, beside the loader path, which a
+main package's internal-test bridge keeps. Any other package still refuses a main package's file. Red-first:
+`TestAMainPackageKeepsItsOwnPackageInfoOnReconvert` (packageInfoAdoption_test.go) keeps a line outside the marker
+sections across a reconvert and checks the rule both ways; red at the red commit, green at the fix. The two existing
+adoption tests printed the same false warning for their own main packages and still pass.
+
+— P2 (2026-11-10)
+
+
+## 2026-11-10 — P1 (follow-up to the GO2CS2004 alias ref): a defined type over an ALIAS of an unnamed type takes the alias's spelling, not the direct form's, and two conversion forms are emitted as calls — OPEN, PARKED by COORD (0 std reach)
+
+**Shape.** `type D A` where `A` is an alias of a type with no name of its own. Go gives `D` the alias's underlying
+type, exactly as if it were written directly (`type DP *int`). One package, then the same with the aliases declared
+in another package (`type DP lib.AP`):
+
+```go
+type AS = []int
+type AM = map[string]int
+type AT = struct{ A, B int }
+type AP = *int
+type AF = func(int) int
+type AI = int
+
+type DS AS
+type DM AM
+type DT AT
+type DP AP
+type DF AF
+type DI AI
+
+func main() {
+	ds := DS{1, 2, 3}
+	dm := DM{"a": 4}
+	dt := DT{A: 5, B: 6}
+	n := 7
+	dp := DP(&n)
+	*dp++
+	df := DF(func(i int) int { return i + 1 })
+	di := DI(10)
+	fmt.Println(ds.Sum(), len(AS(ds)), dm["a"], len(AM(dm)), dt.A+dt.B, AT(dt).B, n, df(8), di.Twice(), AI(di))
+}
+```
+
+Go prints `6 3 4 1 11 6 8 9 20 10` (`Sum` adds the slice, `Twice` doubles the integer).
+
+**Where it was measured.** Hand probes, converter built at the alias ref's fix commit `4efe8a4e99`, generator and
+golib at its tip `9bd562223b`. Every shape is present at the seat's base `d0227c54b3` and the ref leaves it as it
+was: the ref unwraps an alias only where the right-hand side reaches a NAMED type (a struct or an instantiation).
+
+**The seven shapes.** The direct form's emission is the reference; the declaration is quoted from the probe.
+
+| # | Go | Direct form emits | Alias form emits | Result |
+|---|---|---|---|---|
+| 1 | `type DP AP`, `AP = *int` | `partial class DP /*ж<nint>*/` | `partial struct DP /*ж<nint>*/` | CS0200 at `*dp++`: `DP.Value` is read only |
+| 2 | `type DM AM`, `AM = map[string]int` | `partial struct DM /*map[@string, nint]*/` | `partial struct DM /*map<@string, nint>*/` | CS0021 at `dm["a"]`: no indexer |
+| 3 | `type DI lib.AI`, `AI = int` | `partial struct DI /*num:nint*/` | `partial struct DI /*instlibꓸAI*/` | CS0266 at `DI(10)`: no conversion from the constant. The LOCAL alias emits `num:nint` and builds |
+| 4 | `type DT AT`, `AT = struct{ A, B int }` | `partial struct DT {` with its fields | local: `partial struct DT /*struct{A int; B int}*/` (raw Go text); other package: `/*instlibꓸAT*/` | local: 13 errors in the generated `DT.g.cs` (CS0501, CS0102, CS0246, CS1019, CS0106); other package: CS1739 and CS1061 at the uses |
+| 5 | `type DS AS`, `type DF AF` (slice, func) | `/*[]nint*/` for the slice | `/*slice<nint>*/`, `/*Func<nint, nint>*/`; other package `/*instlibꓸAS*/`, `/*instlibꓸAF*/` | no error on these probes; the spelling still differs from the direct form, and it was not isolated further |
+| 6 | `GA[int](d)`, `type GA[T any] = pair[T]`, `type D GA[int]` | `((pair<nint>)d)` for `pair[int](d)` | `GA<nint>(d)`, a call | CS0103: the name `GA` does not exist. The declaration itself is right (`D /*pair<nint>*/`) |
+| 7 | `struct{ A, B int }(dt)` on `type DT struct{ A, B int }` | (no alias involved) | `main_type(dt)`, a call on the lifted anonymous struct | CS1955: `main_type` is not invocable |
+
+Rows 1 to 5 are one defect seen through five type kinds; rows 6 and 7 are conversion EXPRESSIONS, not declarations,
+and were found on the same probes.
+
+**Root, as read (not yet proved by a fix).** The defined-type emitters in `visitTypeSpec.go` choose the emitted form
+from the SYNTAX of the right-hand side (`*ast.StarExpr`, `*ast.MapType`, `*ast.StructType`, and so on). Behind an
+alias the syntax is an identifier or a selector, so the declaration falls to the identity arm, which writes the
+type's C# name as the marker. The alias ref added `types.Unalias` to that arm for named targets only. The durable
+fix is a dispatch on the unaliased TYPE (`types.Unalias(t).Underlying()`), so that an alias of `*int` reaches the
+pointer emitter and an alias of `struct{...}` reaches the struct emitter, each writing what the direct form writes.
+Rows 6 and 7 are in the conversion-expression path: a conversion whose target is a generic alias instantiation, or
+an anonymous struct type, is not recognized as a conversion and is emitted as a call.
+
+**Reach.** 0 in std, by the alias ref's census: std's defined-over-alias sites are 7, 7 and 8 on windows, linux and
+darwin, all `type X any` except darwin's one `bufferKind` over `_C_int`, and all of them convert and build. The
+TypeScript experiment's site (json's `type marshalersOption Marshalers`) is an alias of an INSTANTIATION, which the
+alias ref answers.
+
+**Not verified:** whether rows 6 and 7 have other target kinds (a conversion to an anonymous func or map type was
+not probed); whether a method declared on the alias-defined pointer or map type changes any row.
+
+**Not guarded:** the converter exits 0 on every shape above, and nothing in the behavioral corpus has them. A fix
+goes red-first with these declarations added to DefinedTypeOverInstantiation, the direct forms beside them as the
+control.
+
+— P1 (2026-11-10)
+
+
+## 2026-11-10 — G: a single-target `-stdlib` conversion leaves rows the three-target apply does not: six root attribution files rewritten with LF, and `log/syslog`'s project file without its friend-access group at windows; runbook E1 is a single-target build and carries both — OPEN, for routing
+
+**Where it was measured.** The linux/arm64 corpus seat (S2, `claude/g-la64-s2`, record
+`DATA-la64-s2-prediction.md` §6.1) ran four single-target `-stdlib -comments -platforms <target>` conversions into
+its applied tree, each from a clean tree. Every one ended rc 0 with `Failed: 0`, and none left the tree clean. The
+rows below are master's and not that seat's. **Control:** the one-package conversion
+`-platforms windows/amd64 log/syslog` in a tree at master `66a2e023ca`, converter built from that tree, left the same
+seven rows and the same seven removed lines.
+
+| # | Row | At | What changes |
+|---|---|---|---|
+| 1 | `src/core/VERSION`, `LICENSE`, `PATENTS`, `README.md`, `SECURITY.md`, `CONTRIBUTING.md` | every target | 6 status rows, no content: the bytes are GOROOT's, with LF, over a CRLF checkout |
+| 2 | `src/core/log/syslog/log.syslog.csproj` | windows/amd64 only | 7 lines removed: the `InternalsVisibleTo` item group |
+
+**Row 1, as read.** `copyRootAttributionFiles` (stdLibConverter.go) reads each file from GOROOT and writes its bytes.
+On a checkout with `core.autocrlf=true` the six files are CRLF in the working tree and LF in the index, so the
+rewrite is a status row that carries no diff. Probe on master `38caf3558a`, `PATENTS` rewritten with LF by hand:
+`git status --porcelain` prints ` M src/core/PATENTS`, `git diff --numstat` prints nothing, `git diff --quiet` exits
+0. An LF checkout would show no row; that was not measured. A merged apply (`-platform-stage`) leaves the six alone:
+S2's second four-target apply read 0 rows.
+
+**Row 2, as read.** The project-file writer adds the friend-access group when the target being converted sees an
+in-package test file (`hasSiblingInternalTestFiles`). `log/syslog`'s only one, `syslog_test.go`, is `!windows`, so a
+windows conversion writes the project file without the group. The merged path repairs this with `friendAccessUnion`
+(platformEmit.go; BOARD 2026-11-03, G), which a single-target conversion never reaches. The committed file is right;
+a windows-only reconvert of the package, or of the whole library, takes the group out, and with it the
+`go2cs.SynthesizedStructs` grant the linux and darwin flavours rely on.
+
+**What inherits it.**
+
+- Runbook E1 (`docs/GoCorpusMigration.md`, the default-flavour byte-identity arm) IS a single-target
+  `-stdlib -comments -platforms <host>/amd64` build, so its root carries both rows. The arm's manifest lists `*.cs`
+  files only, so neither row reaches its verdict: read from `h8-comparand.sh`, not run.
+- Any gate worded "a single-target conversion into the applied tree writes nothing" reads 6 on a CRLF checkout, and 7
+  at windows. S2's record claimed exactly that, without this control, and was red on it.
+- A restore by status after a single-target conversion puts both back. A commit staged from such a tree would carry
+  row 2.
+
+**Smallest fixes, not applied.** Row 1: write an attribution file only when its content differs from the
+destination's with line endings set aside, or write it with the destination's line ending. Row 2: a single-target
+conversion keeps a friend-access group the existing project file already holds, the way the merge takes the union.
+Each goes red-first on the conversions above.
+
+**Not verified:** whether any other package's project file differs between a single-target and a merged conversion
+(the four full single-target runs changed this one alone, at 356 to 360 packages each); whether row 1 shows on a
+checkout with `core.autocrlf=false`.
+
+— G (2026-11-10)
+
+
+## 2026-11-10 — G (note): `syscall` on linux reads 50 matched + 9 disclosed on the CI runner against a bank of 42 + 17: the HOST, not a regression; the bank's 17 names are not in the repository — NOTE, no re-bank (COORD)
+
+**Reading.** A CI sweep of the S2 seat read the row at 50 and 9. **Control:** the same leg on master `ae69e4ce74`
+(run 42788267168) reads 50 and 9, with the same nine names. The bank row
+(`docs/phase4/rebank-1.26.10.3/linux/P1-2.tsv`: `syscall PASS 42 … 17`) is a root host's reading; the CI runner is
+unprivileged.
+
+**Why the counts move.** `src/core/syscall/go2cs_test_disclosures.json` carries twelve disclosures for tests Go skips
+without root (`TestAmbientCaps`, `TestAmbientCapsUserns`, `TestCloneTimeNamespace`, `TestDeathSignalSetuid`,
+`TestGroupCleanup`, `TestGroupCleanupUserNamespace`, `TestRlimitRestored`, `TestUnshare`, `TestUnshareMountNameSpace`,
+`TestUnshareMountNameSpaceChroot`, `TestUnshareUidGidMapping`, `TestUseCgroupFD`). On the root host they run and
+differ, so they count as disclosed; on the runner both sides skip, and the row counts them as matched. The move from
+17 to 9 is eight names, and these twelve are its candidates. The nine the runner discloses: `TestAllThreadsSyscall`,
+`TestAllThreadsSyscallBlockedSyscall`, `TestAllThreadsSyscallError`, `TestCloneNEWUSERAndRemap/setgroups=false` and
+`=true`, `TestEmptyCredGroupsDisableSetgroups`, `TestPidFDWithUserNS` (Go passes, C# skips), `TestExecPtrace` and
+`TestPrlimitFileLimit` (Go passes, C# fails).
+
+**The gap this note records.** The bank table holds the row's COUNTS and not its names. Which eight of the twelve
+moved, and whether the bank host's other nine are the runner's nine, cannot be read from the repository: it takes a
+run on a root host. A row whose disclosed count depends on the host's privilege can only be compared across hosts name
+by name, and the bank does not keep the names to compare.
+
+**Ruled (COORD, 2026-11-10):** a host artifact. No membership change, no re-bank, no disclosure retired.
+
+— G (2026-11-10)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

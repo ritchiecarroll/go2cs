@@ -271,10 +271,12 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 			postHoistBuf := &strings.Builder{}
 			postStart := v.outputBuilder.Len()
 			v.hoistedDecls = postHoistBuf
+			savedInForPost, savedForPostReAlias := v.inForPost, v.forPostReAlias
 			v.inForPost = true
-			v.forPostReAlias = ""
+			v.forPostReAlias = nil
 			v.visitStmt(forStmt.Post, contexts)
-			v.inForPost = false
+			postReAlias := v.forPostReAlias
+			v.inForPost, v.forPostReAlias = savedInForPost, savedForPostReAlias
 			v.hoistedDecls = savedHoist
 
 			// A post that spilled leaves the header: its rendering is cut back out of the output and
@@ -283,8 +285,21 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 				emitted := v.outputBuilder.String()
 				postSpilled = true
 				postLowered = v.loopBodyLines(postHoistBuf.String()) + v.newline + v.indent(v.indentLevel+1) + emitted[postStart:] + ";"
+
+				// Out of the header the pair is two statements again, as at any other repoint.
+				for _, reAlias := range postReAlias {
+					postLowered += " " + reAlias + ";"
+				}
+
 				v.outputBuilder.Reset()
 				v.outputBuilder.WriteString(emitted[:postStart])
+			} else {
+				// A deref-aliased pointer param/box repointed in the POST (`for ; scope != nil;
+				// scope = scope.Outer`) re-aliases its value var in the same clause, after the
+				// box-repoint: `Ꮡscope = scope.Outer, scope = ref Ꮡscope.DerefOrNull()`.
+				for _, reAlias := range postReAlias {
+					v.outputBuilder.WriteString(", " + reAlias)
+				}
 			}
 		}
 	}
@@ -295,15 +310,6 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 	blockContext.format.useNewLine = false
 
 	bodyIndent := v.indent(v.indentLevel + 1)
-
-	// A deref-aliased pointer param/box repointed in the POST (`for ; scope != nil;
-	// scope = scope.Outer`) stashed its value re-alias here — inject it as the first
-	// statement of the loop body so each iteration re-binds the value var to the new box
-	// (the box-repoint stayed in the post). go/ast resolve.go's scope-chain walk.
-	if len(v.forPostReAlias) > 0 {
-		blockContext.innerPrefix = v.newline + bodyIndent + v.forPostReAlias
-		v.forPostReAlias = ""
-	}
 
 	// Open the body with each per-iteration variable's fresh declaration — a plain copy of the
 	// carrier, or a fresh heap box assigned from it — and collect the copy-back statements the

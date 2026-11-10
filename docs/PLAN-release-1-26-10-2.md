@@ -63,6 +63,13 @@ release notes:
      that section's bench (probe docs/phase4/probes/g-crosspkg-read-ab, median of 9, each runtime run twice): JIT nint
      0.25 for a field against 0.80 adopted; AOT nint 0.32-0.47 against 1.18. -->
 
+> **AMENDED 2026-11-09 (P2, measured in `docs/phase4/RECORD-nuget-sibling-pins.md` §4, SDK 10.0.403).** "Fails at restore and names them" holds only
+> when two dependency paths pin one go.* package to different exact versions and the project references that package
+> directly on neither (NU1107). NuGet's NU1107 message says to reference the newer package directly. That reference
+> overrides the exact pins with NU1608 warnings, and the mixed set restores and builds: arm a2 restored 50 go.*
+> packages at 1.26.10.2 beside 69 at 1.26.10.3 with 239 NU1608 warnings, then threw `MissingMethodException` at run
+> time. The text above stays as written; `docs/NEWS.md` was corrected the same day.
+
 **Not in this release, already scheduled:** the performance re-baseline against the published 1.26.10.1 packages
 ([`PLAN-perf-rebaseline.md`](PLAN-perf-rebaseline.md), G with the i9's AOT builds), the nugetgo rebuild wave against
 1.26.10.1 (C2), and R's docs follow-up from the 1.26.10.1 veracity review. They need no converter change.

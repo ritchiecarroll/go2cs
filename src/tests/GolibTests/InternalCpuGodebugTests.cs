@@ -5,9 +5,12 @@
 // that can be found in the LICENSE file.
 
 using System;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go.@internal;
+using Arm = System.Runtime.Intrinsics.Arm;
 using X86 = System.Runtime.Intrinsics.X86;
 
 namespace GolibTests;
@@ -17,8 +20,9 @@ namespace GolibTests;
 /// registered on every OS and GODEBUG's cpu.* options are applied only off Windows, as Go's
 /// getGodebugEarly does. An empty or non-cpu GODEBUG leaves every flag alone, and cpu.aes=off clears
 /// HasAES and nothing else. On an arm64 process the table is cpu_arm64.go's and the flags are cpu.ARM64,
-/// filled by darwin's osInit (cpu_arm64_impl.cs, darwin/cpu_arm64_darwin_impl.cs), with HasDIT held false
-/// by ruling; on an x64 process cpu.ARM64 stays unfilled, as before.
+/// filled by the OS's osInit (cpu_arm64_process_impl.cs; darwin/cpu_arm64_darwin_impl.cs from sysctl,
+/// linux/cpu_arm64_process_linux_impl.cs from the kernel's AT_HWCAP), with HasDIT held false by ruling; on an
+/// x64 process cpu.ARM64 stays unfilled, as before.
 /// </summary>
 [TestClass]
 public class InternalCpuGodebugTests
@@ -115,6 +119,66 @@ public class InternalCpuGodebugTests
         // darwin's osInit sets neither.
         Assert.IsFalse(cpu_package.ARM64.HasCPUID, "HasCPUID");
         Assert.IsFalse(cpu_package.ARM64.IsNeoverse, "IsNeoverse");
+    }
+
+    [TestMethod]
+    public void LinuxArm64OsInitMapsTheKernelsHwcapAsGoDoes()
+    {
+        if (!(cpu_package.GoIsArm64Process && OperatingSystem.IsLinux()))
+            Assert.Inconclusive("not an arm64 process on Linux");
+
+        // A second read of the kernel's word, independent of the file under test's getauxval: the
+        // auxiliary vector as /proc/self/auxv publishes it, (type, value) pairs of 64-bit words.
+        ulong hwcap = ReadAuxv(16); // AT_HWCAP
+        bool Bit(int n) => (hwcap & (1UL << n)) != 0;
+
+        // cpu_arm64_hwcap.go's hwcapInit, bit for bit (arch/arm64/include/uapi/asm/hwcap.h).
+        Assert.AreEqual(Bit(3), cpu_package.ARM64.HasAES, "HWCAP_AES");
+        Assert.AreEqual(Bit(4), cpu_package.ARM64.HasPMULL, "HWCAP_PMULL");
+        Assert.AreEqual(Bit(5), cpu_package.ARM64.HasSHA1, "HWCAP_SHA1");
+        Assert.AreEqual(Bit(6), cpu_package.ARM64.HasSHA2, "HWCAP_SHA2");
+        Assert.AreEqual(Bit(7), cpu_package.ARM64.HasCRC32, "HWCAP_CRC32");
+        Assert.AreEqual(Bit(8), cpu_package.ARM64.HasATOMICS, "HWCAP_ATOMICS");
+        Assert.AreEqual(Bit(11), cpu_package.ARM64.HasCPUID, "HWCAP_CPUID");
+        Assert.AreEqual(Bit(17), cpu_package.ARM64.HasSHA3, "HWCAP_SHA3");
+        Assert.AreEqual(Bit(21), cpu_package.ARM64.HasSHA512, "HWCAP_SHA512");
+
+        // RULED (COORD, 2026-11-06), as on darwin: whatever HWCAP_DIT (bit 24) says.
+        Assert.IsFalse(cpu_package.ARM64.HasDIT, "HasDIT is held false");
+
+        // .NET reads the same word for its own intrinsics, so where it has a class for the feature the
+        // two agree. A cross-check only: the kernel's word above is the source.
+        Assert.AreEqual(Arm.Aes.IsSupported, cpu_package.ARM64.HasAES, "Arm.Aes");
+        Assert.AreEqual(Arm.Sha1.IsSupported, cpu_package.ARM64.HasSHA1, "Arm.Sha1");
+        Assert.AreEqual(Arm.Sha256.IsSupported, cpu_package.ARM64.HasSHA2, "Arm.Sha256");
+        Assert.AreEqual(Arm.Crc32.IsSupported, cpu_package.ARM64.HasCRC32, "Arm.Crc32");
+
+        // IsNeoverse: Arm Ltd. (implementer 'A') and one of hwcapInit's seven part numbers, read from
+        // the kernel's MIDR_EL1 for cpu0, only when HWCAP_CPUID lets Go read it at all.
+        bool neoverse = false;
+        string midrPath = "/sys/devices/system/cpu/cpu0/regs/identification/midr_el1";
+        if (Bit(11) && File.Exists(midrPath))
+        {
+            ulong midr = ulong.Parse(File.ReadAllText(midrPath).Trim()[2..], NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture);
+            ushort part = (ushort)((midr >> 4) & 0xfff);
+            neoverse = ((midr >> 24) & 0xff) == 'A' && part is 0xd0c or 0xd40 or 0xd49 or 0xd4f or 0xd8e or 0xd84 or 0xd83;
+        }
+        Assert.AreEqual(neoverse, cpu_package.ARM64.IsNeoverse, "IsNeoverse");
+    }
+
+    private static ulong ReadAuxv(ulong type)
+    {
+        byte[] auxv = File.ReadAllBytes("/proc/self/auxv");
+        for (int i = 0; i + 16 <= auxv.Length; i += 16)
+        {
+            ulong key = BitConverter.ToUInt64(auxv, i);
+            if (key == type)
+                return BitConverter.ToUInt64(auxv, i + 8);
+            if (key == 0) // AT_NULL
+                break;
+        }
+        Assert.Fail($"/proc/self/auxv carries no entry of type {type}");
+        return 0;
     }
 
     private static bool Flag((string name, bool enabled)[] options, string name) => options.Single(o => o.name == name).enabled;

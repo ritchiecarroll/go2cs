@@ -8,7 +8,7 @@
 // runtime.rtsigprocmask — the linux flavour's signal-mask syscall, realized over the kernel's own
 // rt_sigprocmask(2) through libc's syscall(2), with Go's set as the kernel sees it.
 //
-// Go implements this in assembly (sys_linux_amd64.s: `rt_sigprocmask` → SYS_rt_sigprocmask with
+// Go implements this in assembly (sys_linux_amd64.s and sys_linux_arm64.s: `rt_sigprocmask` → SYS_rt_sigprocmask with
 // an 8-byte set, crashing the process on failure), so the converted declaration in os_linux.cs is a
 // bodyless partial and PartialStubGenerator fills it with a throw. That throw was the runtime row's
 // INIT door on Linux (the 2026-09-04 first-contact census): crash_unix_test.go's `//go:build unix`
@@ -50,14 +50,30 @@ using go.golib;
 
 partial class runtime_package {
 
-// linux/amd64 syscall number; the seam asserts the architecture elsewhere (sys_linux_amd64 is
-// the only linux flavour the corpus emits).
-private const long SYS_rt_sigprocmask = 14;
+// The rt_sigprocmask number by arch (S3 site 4; docs/phase4/DATA-la64-s3-census.md §2): 14 at amd64,
+// 135 at arm64, where 14 is removexattr. runtime sits below the syscall flavour, so this is the census's
+// form (a), an arch switch, as golib/runtime/ThreadCpuTime.cs does it. null for an arch with no mapping;
+// rtsigprocmask refuses it by name, as Go's asm crashes rather than return a wrong mask. The 8-byte
+// kernel set below is the same at both arches (Go's sigset is [2]uint32 at amd64 and arm64).
+internal static long? sigprocmaskNumberFor(Architecture arch) => arch switch
+{
+    Architecture.X64 => 14,
+    Architecture.Arm64 => 135,
+    _ => null,
+};
+
+/// <summary>
+/// GolibTests' probe for rtsigprocmask's per-arch number (S3 site 4): sigprocmaskNumberFor's answer, or null
+/// for an unmapped arch. Pure: no syscall.
+/// </summary>
+public static long? GoSigprocmaskNumberProbe(Architecture arch) => sigprocmaskNumberFor(arch);
 
 [DllImport("libc", EntryPoint = "syscall", SetLastError = true)]
 private static extern long sys_rt_sigprocmask(long number, long how, IntPtr set, IntPtr oldset, long sigsetsize);
 
 internal static partial void rtsigprocmask(int32 how, ж<sigset> @new, ж<sigset> old, int32 size) {
+    long sysRtSigprocmask = sigprocmaskNumberFor(RuntimeInformation.ProcessArchitecture) ??
+        throw new PlatformNotSupportedException($"runtime.rtsigprocmask: no rt_sigprocmask number for {RuntimeInformation.ProcessArchitecture}; refused rather than misread");
     bool hasNew = @new is not null && !@new.IsNilPointer;
     bool hasOld = old is not null && !old.IsNilPointer;
 
@@ -71,7 +87,7 @@ internal static partial void rtsigprocmask(int32 how, ж<sigset> @new, ж<sigset
             Marshal.WriteInt64(buffer, 0, unchecked((long)((ulong)set[0] | ((ulong)set[1] << 32))));
         }
 
-        long rc = sys_rt_sigprocmask(SYS_rt_sigprocmask, how,
+        long rc = sys_rt_sigprocmask(sysRtSigprocmask, how,
             hasNew ? buffer : IntPtr.Zero,
             hasOld ? buffer + 8 : IntPtr.Zero,
             size);

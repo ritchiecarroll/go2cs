@@ -33,6 +33,13 @@ internal class ImplicitConvTemplate : TemplateBase
     public string? RHTypeNameOverride = null;
     public string? ConvExprOverride = null;
 
+    // The definitions a DEFINED type over a struct is built through, outermost first, when the constructed
+    // type is such a wrapper: `type Q pair[int]` constructs as `new Q(new pair<nint>(…))`, and a wrapper over
+    // another wrapper adds a level per definition. The wrapper declares no fields of its own, so its members
+    // are read from the struct at the end of the chain and that struct is the one built from them. Empty for a
+    // struct declared with its own fields.
+    public IReadOnlyList<string> ConstructionChain = [];
+
     public override string TemplateBody =>
         $$"""
              partial struct {{HostTypeName}}
@@ -51,7 +58,21 @@ internal class ImplicitConvTemplate : TemplateBase
 
     // The operator never returns a box: ImplicitConvGenerator refuses a record whose operator would return
     // one from a value (GO2CS0008), since it could only box a copy, and a box parameter has no struct source.
-    private string ConvExpr => $"new {LHTypeName}({ParamList})";
+    private string ConvExpr
+    {
+        get
+        {
+            if (ConstructionChain.Count == 0)
+                return $"new {LHTypeName}({ParamList})";
+
+            string built = $"new {ConstructionChain[^1]}({ParamList})";
+
+            for (int i = ConstructionChain.Count - 2; i >= 0; i--)
+                built = $"new {ConstructionChain[i]}({built})";
+
+            return $"new {LHTypeName}({built})";
+        }
+    }
 
     private string ParamList => string.IsNullOrWhiteSpace(ValueType) ? 
         string.Join(", ", StructMembers.Select(GetParamExpr)) : 

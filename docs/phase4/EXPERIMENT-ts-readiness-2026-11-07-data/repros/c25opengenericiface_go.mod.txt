@@ -1,0 +1,3 @@
+module repro/c25opengenericiface
+
+go 1.26

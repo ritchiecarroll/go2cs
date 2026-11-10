@@ -904,7 +904,7 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 		parsedPackageInfoFiles.Add(key)
 		packageLock.Unlock()
 
-		if lines, ok := info.NuGetSubstitution.metadataLines(info.ImportPath, goosOfTarget(options.targetPlatform)); ok {
+		if lines, ok := info.NuGetSubstitution.metadataLines(info.ImportPath, options.targetPlatform); ok {
 			if results, parseErr := parseExportedTypeAliasLines(lines); parseErr == nil {
 				applyExportedTypeAliases(results, info)
 				loadPackageImplementLines(lines, info.RootPackageName, info.ImportPath)
@@ -922,7 +922,7 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 	// platform THIS conversion is emitting for. Flat wins when the dependency's metadata is shared,
 	// which it is for the overwhelming majority of the corpus; see platformPackageInfoPath for what
 	// asking flat unconditionally would silently cost.
-	packageInfoFile := platformPackageInfoPath(info.TargetDir, goosOfTarget(options.targetPlatform))
+	packageInfoFile := platformPackageInfoPath(info.TargetDir, options.targetPlatform)
 
 	packageLock.Lock()
 
@@ -948,7 +948,7 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 		// pair locally in this package — go2cs-gen then emits a second, duplicate adapter class
 		// (syscall.Errno → error, consumed by golang.org/x/sys/windows: CS0102/CS0111/CS8646).
 		if info.PublishedStdLib {
-			if lines, ok := stdLibExportedMetadata(info.PackageName, goosOfTarget(options.targetPlatform)); ok {
+			if lines, ok := stdLibExportedMetadata(info.PackageName, options.targetPlatform); ok {
 				if results, parseErr := parseExportedTypeAliasLines(lines); parseErr == nil {
 					applyExportedTypeAliases(results, info)
 					loadPackageImplementLines(lines, info.RootPackageName, info.ImportPath)

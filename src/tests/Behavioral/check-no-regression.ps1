@@ -368,9 +368,10 @@ function Get-ArchExclusiveArches {
 $measuredGoos = if ($env:GoTargetOS) { $env:GoTargetOS } else { $HostGoos }
 
 # The GOARCH this run measures as. NO env override, deliberately, where $measuredGoos honors
-# GoTargetOS: no GoTargetArch exists anywhere in the tree, the corpus layout has no arch dimension,
-# and no instrument passes the converter's -platforms -- so the arch measured is the one go2cs
-# defaults to, which src\_paths.ps1 derives ONCE as $HostGoarch.
+# GoTargetOS: GoTargetArch names the arch the corpus FLAVOR was converted at, and a behavioral project
+# is not a GOROOT package, so it converts at the converter's default -- the host's arch, which
+# src\_paths.ps1 derives ONCE as $HostGoarch -- and that is what an arch-exclusive marker is judged
+# against. On Apple silicon the two differ (project at arm64, flavor amd64); on linux/arm64 they agree.
 $measuredGoarch = $HostGoarch
 $skippedExclusive = @()
 $measurable = @()

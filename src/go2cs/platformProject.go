@@ -98,8 +98,65 @@ const (
 var platformReferenceLineRegex = regexp.MustCompile(`^\s*<ProjectReference Include="([^"]*)"\s*/>\s*$`)
 
 // platformReferenceGroupRegex matches the opening tag of a conditioned reference group, in both the
-// populated (`>`) and empty (`/>`) spellings.
-var platformReferenceGroupRegex = regexp.MustCompile(`^\s*<ItemGroup Condition="'\$\(` + platformTargetOSProperty + `\)'=='([^']*)'"\s*(/?)>\s*$`)
+// populated (`>`) and empty (`/>`) spellings. The condition is captured whole and read by
+// platformReferenceGroupKey, which admits exactly the three spellings composePlatformReferenceGroups
+// writes.
+var platformReferenceGroupRegex = regexp.MustCompile(`^\s*<ItemGroup Condition="([^"]*)"\s*(/?)>\s*$`)
+
+// The three conditions a reference group is selected by, one per kind of layout key (platformLattice.go):
+// a GOOS key, an arch key, and a (GOOS, GOARCH) pair key.
+var (
+	platformGOOSConditionRegex = regexp.MustCompile(`^'\$\(` + platformTargetOSProperty + `\)'=='([^']*)'$`)
+	platformArchConditionRegex = regexp.MustCompile(`^'\$\(` + platformTargetArchProperty + `\)'=='([^']*)'$`)
+	platformPairConditionRegex = regexp.MustCompile(`^'\$\(` + platformTargetOSProperty + `\)'=='([^']*)' And '\$\(` +
+		platformTargetArchProperty + `\)'=='([^']*)'$`)
+)
+
+// platformReferenceGroupKey reads a reference group's condition back as the layout key folder it
+// selects (`linux`, `amd64`, `linux-arm64`), or ok=false for any other condition.
+func platformReferenceGroupKey(condition string) (string, bool) {
+	if match := platformGOOSConditionRegex.FindStringSubmatch(condition); match != nil {
+		return match[1], true
+	}
+
+	if match := platformArchConditionRegex.FindStringSubmatch(condition); match != nil {
+		return match[1], true
+	}
+
+	if match := platformPairConditionRegex.FindStringSubmatch(condition); match != nil {
+		return match[1] + "-" + match[2], true
+	}
+
+	return "", false
+}
+
+// platformReferenceGroupKind classifies a reference group's key. Anything that is neither a GOARCH
+// nor a `<goos>-<arch>` pair is a GOOS group, which is how every key was read before the arch axis.
+func platformReferenceGroupKind(key string) layoutKeyKind {
+	if isKnownGOARCH(key) {
+		return layoutKeyArch
+	}
+
+	if _, _, pair := splitPairFolderName(key); pair {
+		return layoutKeyPair
+	}
+
+	return layoutKeyGOOS
+}
+
+// platformReferenceGroupCondition renders the condition that selects a reference group's key.
+func platformReferenceGroupCondition(key string) string {
+	switch platformReferenceGroupKind(key) {
+	case layoutKeyArch:
+		return "'$(" + platformTargetArchProperty + ")'=='" + key + "'"
+	case layoutKeyPair:
+		goos, arch, _ := splitPairFolderName(key)
+
+		return "'$(" + platformTargetOSProperty + ")'=='" + goos + "' And '$(" + platformTargetArchProperty + ")'=='" + arch + "'"
+	default:
+		return "'$(" + platformTargetOSProperty + ")'=='" + key + "'"
+	}
+}
 
 // parseSharedProjectReferences returns the UNCONDITIONED <ProjectReference> list of an emitted
 // .csproj — every reference except golib itself, in emitted spelling and emitted order. The second
@@ -136,10 +193,11 @@ func parseReferenceLines(region string) []string {
 	return references
 }
 
-// parsePlatformReferenceGroups returns the per-GOOS reference DELTAS an emitted .csproj carries, or
-// ok=false when it carries no conditioned block at all (the 280 packages whose imports are the same
-// everywhere). A platform that takes part with an empty delta is present in the map with an empty
-// slice — that presence is the axis membership the adoption rule needs.
+// parsePlatformReferenceGroups returns the reference DELTAS an emitted .csproj carries, keyed by the
+// layout key folder each group selects (`linux`, `amd64`, `linux-arm64`), or ok=false when it
+// carries no conditioned block at all (the 280 packages whose imports are the same everywhere). A
+// platform that takes part with an empty delta is present in the map with an empty slice — that
+// presence is the axis membership the adoption rule needs.
 func parsePlatformReferenceGroups(contents string) (map[string][]string, bool) {
 	blockAt := strings.Index(contents, platformReferenceBlockHeader)
 
@@ -154,37 +212,39 @@ func parsePlatformReferenceGroups(contents string) (map[string][]string, bool) {
 	}
 
 	deltas := map[string][]string{}
-	goos := ""
+	group := ""
 
 	for _, raw := range strings.Split(contents[blockAt:closeAt], "\n") {
 		line := strings.TrimSuffix(raw, "\r")
 
 		if match := platformReferenceGroupRegex.FindStringSubmatch(line); match != nil {
-			goos = match[1]
+			if key, ok := platformReferenceGroupKey(match[1]); ok {
+				group = key
 
-			// `/>` — the platform takes part and adds nothing. Record the membership and close it
-			// out immediately, so a following unconditioned line cannot be read as one of its items.
-			if match[2] == "/" {
-				deltas[goos] = []string{}
-				goos = ""
-			} else {
-				deltas[goos] = []string{}
+				// `/>` — the platform takes part and adds nothing. Record the membership and close it
+				// out immediately, so a following unconditioned line cannot be read as one of its items.
+				if match[2] == "/" {
+					deltas[group] = []string{}
+					group = ""
+				} else {
+					deltas[group] = []string{}
+				}
+
+				continue
 			}
-
-			continue
 		}
 
-		if len(goos) == 0 {
+		if len(group) == 0 {
 			continue
 		}
 
 		if strings.TrimSpace(line) == strings.TrimSpace(platformReferenceGroupClose) {
-			goos = ""
+			group = ""
 			continue
 		}
 
 		if match := platformReferenceLineRegex.FindStringSubmatch(line); match != nil {
-			deltas[goos] = append(deltas[goos], match[1])
+			deltas[group] = append(deltas[group], match[1])
 		}
 	}
 
@@ -192,10 +252,11 @@ func parsePlatformReferenceGroups(contents string) (map[string][]string, bool) {
 }
 
 // platformFullReferenceSet returns the COMPLETE reference set an emitted .csproj expresses for one
-// GOOS: the unconditioned list plus that platform's conditioned delta. It is how the other
-// platforms' sets are recovered from the file a single-target reconvert is about to overwrite, and
-// how each staging root's project file is read during a multi-target merge.
-func platformFullReferenceSet(contents string, goos string) ([]string, bool) {
+// target: the unconditioned list plus every conditioned group whose key the target's build selects —
+// its GOOS, its GOARCH and its pair (layoutFolderServes). A bare GOOS reads its GOOS group alone. It
+// is how the other platforms' sets are recovered from the file a single-target reconvert is about to
+// overwrite, and how each staging root's project file is read during a multi-target merge.
+func platformFullReferenceSet(contents string, target string) ([]string, bool) {
 	shared, ok := parseSharedProjectReferences(contents)
 
 	if !ok {
@@ -203,68 +264,181 @@ func platformFullReferenceSet(contents string, goos string) ([]string, bool) {
 	}
 
 	if deltas, hasBlock := parsePlatformReferenceGroups(contents); hasBlock {
-		shared = append(shared, deltas[goos]...)
+		for key, delta := range deltas {
+			if layoutFolderServes(key, target) {
+				shared = append(shared, delta...)
+			}
+		}
 	}
 
 	return sortedUniqueStrings(shared), true
 }
 
-// splitPlatformReferenceSets splits each participating platform's FULL reference set into the shared
-// list (present on EVERY platform) and that platform's delta. Every key of sets appears in deltas,
-// empty or not — see the file header on why an empty group is written rather than omitted.
+// referenceParticipants resolves a reference-set key to the participants it stands for. A target of
+// the lattice is itself. Any other key is read as its GOOS, the reading every key had before the
+// arch axis: every lattice target of that GOOS, or, when the lattice has none, the GOOS itself as a
+// participant of its own whose only group is its GOOS group. So a single-target conversion at a
+// target outside the declared universe (a host default of darwin/arm64) stands in for its GOOS's
+// target, as it always did.
+func referenceParticipants(lattice *platformLattice, key string) []string {
+	if lattice.includes(key) {
+		return []string{key}
+	}
+
+	goos := goosOfTarget(key)
+
+	if targets := lattice.targetsOfGOOS(goos); len(targets) > 0 {
+		return targets
+	}
+
+	return []string{goos}
+}
+
+// splitPlatformReferenceSets is splitPlatformReferenceSetsOver the declared universe's lattice: the
+// reading a single-target conversion has.
+func splitPlatformReferenceSets(sets map[string][]string) ([]string, map[string][]string, bool) {
+	return splitPlatformReferenceSetsOver(corpusLattice(), sets)
+}
+
+// splitPlatformReferenceSetsOver splits each participating platform's FULL reference set into the
+// shared list (present on EVERY participant) and the conditioned groups, keyed by layout key folder.
+// A key of sets is a target or a GOOS (referenceParticipants). A reference the participants do not
+// all share, held by the set S of them, goes to the keys the lattice homes S at (platformLattice.homes)
+// — a GOOS group, an arch group or a pair group — so each target selects it exactly when it holds it.
+//
+// Participation is recorded too, because an intersection over a forgotten platform is wrong in the
+// dangerous direction (the file header): a GOOS group, empty or not, for a GOOS all of whose lattice
+// targets take part, and otherwise a pair group for each target of that GOOS that does. An arch group
+// records none. Over one target per GOOS every participant gets its GOOS group, as before the arch
+// axis.
 //
 // The third result reports whether any platform actually differs; when it is false the package's
 // imports agree everywhere and no conditioned block is emitted, so a package that stops varying
 // converges back to the plain project file rather than carrying an inert block forever.
-func splitPlatformReferenceSets(sets map[string][]string) ([]string, map[string][]string, bool) {
+func splitPlatformReferenceSetsOver(lattice *platformLattice, sets map[string][]string) ([]string, map[string][]string, bool) {
 	if len(sets) == 0 {
 		return nil, nil, false
 	}
 
+	participants := map[string][]string{}
+
+	for _, key := range sortedMapKeys(sets) {
+		for _, participant := range referenceParticipants(lattice, key) {
+			participants[participant] = sortedUniqueStrings(sets[key])
+		}
+	}
+
 	counts := map[string]int{}
 
-	for _, references := range sets {
-		for _, reference := range sortedUniqueStrings(references) {
+	for _, references := range participants {
+		for _, reference := range references {
 			counts[reference]++
 		}
 	}
 
 	shared := make([]string, 0, len(counts))
+	var varying []string
 
 	for reference, count := range counts {
-		if count == len(sets) {
+		if count == len(participants) {
 			shared = append(shared, reference)
+		} else {
+			varying = append(varying, reference)
 		}
 	}
 
 	sort.Strings(shared)
+	sort.Strings(varying)
 
-	sharedSet := map[string]bool{}
+	deltas := map[string][]string{}
 
-	for _, reference := range shared {
-		sharedSet[reference] = true
-	}
+	for _, goos := range sortedKeys(func() map[string]bool {
+		set := map[string]bool{}
+		for _, target := range lattice.universe {
+			set[goosOfTarget(target)] = true
+		}
+		return set
+	}()) {
+		targets := lattice.targetsOfGOOS(goos)
+		var taking []string
 
-	deltas := make(map[string][]string, len(sets))
-	varies := false
-
-	for goos, references := range sets {
-		delta := make([]string, 0)
-
-		for _, reference := range sortedUniqueStrings(references) {
-			if !sharedSet[reference] {
-				delta = append(delta, reference)
+		for _, target := range targets {
+			if _, ok := participants[target]; ok {
+				taking = append(taking, target)
 			}
 		}
 
+		if len(taking) == len(targets) {
+			deltas[goos] = []string{}
+			continue
+		}
+
+		for _, target := range taking {
+			deltas[platformTargetTag(target)] = []string{}
+		}
+	}
+
+	for participant := range participants {
+		if !lattice.includes(participant) {
+			deltas[participant] = []string{}
+		}
+	}
+
+	for _, reference := range varying {
+		var holders []string
+		var foreign []string
+
+		for participant, references := range participants {
+			if !containsSortedString(references, reference) {
+				continue
+			}
+
+			if lattice.includes(participant) {
+				holders = append(holders, participant)
+			} else {
+				foreign = append(foreign, participant)
+			}
+		}
+
+		var keys []string
+
+		if len(holders) > 0 {
+			homes := lattice.homes(holders)
+
+			// Flat is a home only when a participant outside the lattice is the one that lacks the
+			// reference; the lattice's own targets then each select it through their split keys.
+			if len(homes) == 1 && homes[0].kind == layoutKeyFlat {
+				homes = lattice.split(holders)
+			}
+
+			for _, home := range homes {
+				keys = append(keys, home.folder)
+			}
+		}
+
+		keys = append(keys, foreign...)
+
+		for _, key := range keys {
+			deltas[key] = append(deltas[key], reference)
+		}
+	}
+
+	varies := false
+
+	for _, delta := range deltas {
 		if len(delta) > 0 {
 			varies = true
 		}
-
-		deltas[goos] = delta
 	}
 
 	return shared, deltas, varies
+}
+
+// containsSortedString reports whether a sorted slice holds a value.
+func containsSortedString(values []string, value string) bool {
+	at := sort.SearchStrings(values, value)
+
+	return at < len(values) && values[at] == value
 }
 
 // sortedUniqueStrings returns values sorted with duplicates collapsed, leaving the input untouched.
@@ -374,10 +548,12 @@ func renderPlatformReferences(contents string, shared []string, deltas map[strin
 // `… />` or an open group closed by platformReferenceGroupClose), each followed by its blank line.
 // Whatever comes after -- another ItemGroup, or </Project> -- is not part of it.
 func platformReferenceBlockEnd(contents string, blockAt int) (int, error) {
-	groupOpen := "  <ItemGroup Condition=\"'$(" + platformTargetOSProperty + ")'=='"
+	// A GOOS or pair group opens on $(GoTargetOS), an arch group on $(GoTargetArch).
+	goosGroupOpen := "  <ItemGroup Condition=\"'$(" + platformTargetOSProperty + ")'=='"
+	archGroupOpen := "  <ItemGroup Condition=\"'$(" + platformTargetArchProperty + ")'=='"
 	at := blockAt + len(platformReferenceBlockHeader)
 
-	for strings.HasPrefix(contents[at:], groupOpen) {
+	for strings.HasPrefix(contents[at:], goosGroupOpen) || strings.HasPrefix(contents[at:], archGroupOpen) {
 		lineEnd := strings.Index(contents[at:], "\r\n")
 
 		if lineEnd < 0 {
@@ -406,14 +582,15 @@ func platformReferenceBlockEnd(contents string, blockAt int) (int, error) {
 	return at, nil
 }
 
-// composePlatformReferenceGroups renders the conditioned <ItemGroup> block, GOOS-sorted for
-// determinism. Returns "" when no platform has a delta.
+// composePlatformReferenceGroups renders the conditioned <ItemGroup> block: the GOOS groups, then the
+// arch groups, then the pair groups, each kind sorted by key for determinism. Returns "" when no
+// platform has a delta.
 func composePlatformReferenceGroups(deltas map[string][]string) string {
 	names := make([]string, 0, len(deltas))
 	varies := false
 
-	for goos, delta := range deltas {
-		names = append(names, goos)
+	for key, delta := range deltas {
+		names = append(names, key)
 
 		if len(delta) > 0 {
 			varies = true
@@ -424,22 +601,28 @@ func composePlatformReferenceGroups(deltas map[string][]string) string {
 		return ""
 	}
 
-	sort.Strings(names)
+	sort.SliceStable(names, func(i, j int) bool {
+		if kindI, kindJ := platformReferenceGroupKind(names[i]), platformReferenceGroupKind(names[j]); kindI != kindJ {
+			return kindI < kindJ
+		}
+
+		return names[i] < names[j]
+	})
 
 	block := &strings.Builder{}
 	block.WriteString(platformReferenceBlockHeader)
 
-	for _, goos := range names {
-		condition := "  <ItemGroup Condition=\"'$(" + platformTargetOSProperty + ")'=='" + goos + "'\""
+	for _, key := range names {
+		condition := "  <ItemGroup Condition=\"" + platformReferenceGroupCondition(key) + "\""
 
-		if len(deltas[goos]) == 0 {
+		if len(deltas[key]) == 0 {
 			block.WriteString(condition + " />\r\n\r\n")
 			continue
 		}
 
 		block.WriteString(condition + ">\r\n")
 
-		for _, reference := range deltas[goos] {
+		for _, reference := range deltas[key] {
 			block.WriteString("    <ProjectReference Include=\"" + reference + "\" />\r\n")
 		}
 
@@ -449,14 +632,25 @@ func composePlatformReferenceGroups(deltas map[string][]string) string {
 	return block.String()
 }
 
-// adoptPlatformReferences is layout adoption for REFERENCES: given the project file that is about to
-// be overwritten and THIS conversion's own reference list, re-derive the shared list and the
-// per-GOOS deltas so the other platforms' sets survive a single-target reconvert.
+// adoptPlatformReferences is adoptPlatformReferencesOver the declared universe's lattice, which is
+// what a single-target conversion reads the tree against.
+func adoptPlatformReferences(existingContents string, target string, references []string) ([]string, map[string][]string, bool) {
+	return adoptPlatformReferencesOver(corpusLattice(), existingContents, target, references)
+}
+
+// adoptPlatformReferencesOver is layout adoption for REFERENCES: given the project file that is about
+// to be overwritten and THIS conversion's own reference list, re-derive the shared list and the
+// conditioned groups so the other platforms' sets survive a single-target reconvert.
+//
+// The participants are read back from the groups that record them (splitPlatformReferenceSetsOver):
+// a GOOS group stands for every lattice target of that GOOS, a pair group for its one target, and an
+// arch group for none. Each participant's full set is the shared list plus every group its build
+// selects.
 //
 // Returns ok=false when the existing file carries no conditioned block — the overwhelmingly common
 // case, and the one where writeProjectFile must emit exactly the project file it always did.
-func adoptPlatformReferences(existingContents string, goos string, references []string) ([]string, map[string][]string, bool) {
-	if len(goos) == 0 {
+func adoptPlatformReferencesOver(lattice *platformLattice, existingContents string, target string, references []string) ([]string, map[string][]string, bool) {
+	if len(target) == 0 {
 		return nil, nil, false
 	}
 
@@ -472,18 +666,43 @@ func adoptPlatformReferences(existingContents string, goos string, references []
 		return nil, nil, false
 	}
 
-	sets := make(map[string][]string, len(existingDeltas)+1)
+	sets := map[string][]string{}
 
-	for platform, delta := range existingDeltas {
-		sets[platform] = append(append([]string{}, existingShared...), delta...)
+	for key := range existingDeltas {
+		var recorded []string
+
+		switch platformReferenceGroupKind(key) {
+		case layoutKeyGOOS:
+			recorded = referenceParticipants(lattice, key)
+		case layoutKeyPair:
+			// A pair group for a target outside the lattice records nothing this lattice can build.
+			if goos, arch, _ := splitPairFolderName(key); lattice.includes(goos + "/" + arch) {
+				recorded = []string{goos + "/" + arch}
+			}
+		}
+
+		for _, participant := range recorded {
+			set := append([]string{}, existingShared...)
+
+			for group, delta := range existingDeltas {
+				// A participant outside the lattice is a bare GOOS, served by its GOOS group alone.
+				if layoutFolderServes(group, participant) {
+					set = append(set, delta...)
+				}
+			}
+
+			sets[participant] = set
+		}
 	}
 
 	// This target's set is recomputed from the conversion, never recovered — it is the one platform
 	// whose truth this run actually holds. A target absent from the recorded axis JOINS it, which is
-	// how a fourth platform would be added without a special case.
-	sets[goos] = references
+	// how a new platform would be added without a special case.
+	for _, participant := range referenceParticipants(lattice, target) {
+		sets[participant] = references
+	}
 
-	shared, deltas, _ := splitPlatformReferenceSets(sets)
+	shared, deltas, _ := splitPlatformReferenceSetsOver(lattice, sets)
 
 	return shared, deltas, true
 }
@@ -493,14 +712,14 @@ func adoptPlatformReferences(existingContents string, goos string, references []
 // generated contents so the other platforms' sets survive. Returns newContents unchanged in every
 // other case — no existing file, no block, or an unusable template — so a conversion that has
 // nothing to adopt emits exactly the project file it always did.
-func applyPlatformReferenceAdoption(newContents string, projectFileName string, goos string, references []string) string {
+func applyPlatformReferenceAdoption(newContents string, projectFileName string, target string, references []string) string {
 	existing, err := os.ReadFile(projectFileName)
 
 	if err != nil {
 		return newContents
 	}
 
-	shared, deltas, ok := adoptPlatformReferences(string(existing), goos, references)
+	shared, deltas, ok := adoptPlatformReferences(string(existing), target, references)
 
 	if !ok {
 		return newContents

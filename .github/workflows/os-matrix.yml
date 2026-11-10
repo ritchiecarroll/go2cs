@@ -46,7 +46,7 @@ on:
           - linux
           - darwin
       stage:
-        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here)'
+        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored), golib-tests (build and run src/tests/GolibTests for this GOOS on each of its runners; filter is an MSTest --filter expression, blank runs the whole suite, and may end ;jit=PATTERN), stack-probe (OPT-IN diagnostic: filter is ROW;test=REGEX[;at=S,S] -- one row swept with -TestFilter REGEX while dotnet-stack dumps its converted test host at the at= offsets; proves the instrument on a deliberately hung program first; never banks), converter-cgo (OPT-IN: go test of the converter in src/go2cs on each runner of this GOOS, where a C compiler lets go list run cmd/cgo; filter is a go test -run regex, blank runs ^Test.*Cgo|^TestRealLoad, and may end ;cc=zig|llvm-mingw[;sha=HEX], a pinned C toolchain the leg downloads, refuses unless its sha256 matches, and hands go as CC; the summary names the C compiler go would use. No other hosted stage gives the converter tests one: until this stage, TestRealLoadRefusesOnlyASelectedCgoFile had never run on a hosted runner, and cgo Phase 1 has its exit gate here)'
         type: choice
         required: true
         default: census
@@ -110,6 +110,14 @@ on:
         type: string
         required: false
         default: ''
+      arch:
+        description: 'goos linux only: which linux legs run. x64 (the default) is the ubuntu-latest leg every linux dispatch ran before this input existed; arm64 runs the ubuntu-24.04-arm leg (rid linux-arm64) instead; both runs the two. Until the linux/arm64 flavour exists (no linux-arm64/ folder under src/core), the arm leg runs census and golib-tests only, against the linux/amd64 flavour, as a CALIBRATION reading that banks nothing (runner walls, and that flavour on the arm64 ABI); every other stage refuses it.'
+        type: choice
+        options:
+          - x64
+          - arm64
+          - both
+        default: x64
 
 permissions:
   contents: read
@@ -162,6 +170,8 @@ jobs:
       dns-servers: ${{ steps.derive.outputs.dns-servers }}
       probe-at: ${{ steps.derive.outputs.probe-at }}
       jit-disasm: ${{ steps.derive.outputs.jit-disasm }}
+      cgo-cc: ${{ steps.derive.outputs.cgo-cc }}
+      cgo-cc-sha: ${{ steps.derive.outputs.cgo-cc-sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -181,6 +191,7 @@ jobs:
           INPUT_NUGETGO_PACKAGE: ${{ inputs.nugetgo_package }}
           INPUT_NUGETGO_FEED: ${{ inputs.nugetgo_feed }}
           INPUT_NUGETGO_FEED_SHA256: ${{ inputs.nugetgo_feed_sha256 }}
+          INPUT_ARCH: ${{ inputs.arch }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           $ErrorActionPreference = 'Stop'
@@ -210,10 +221,12 @@ jobs:
           # dispatch form's input count is guarded (Test-NugetgoBehaviorProof.ps1), and these are options OF those two
           # stages. golib-tests: jit=PATTERN. stack-probe: test=REGEX (required), at=S,S. sweep-shard (darwin only):
           # dns=IP[,IP], the job's resolver (an opt-in for net's NXDOMAIN keys, which the hosted mac resolver answers late;
-          # C1, 2026-11-08). An unknown or repeated key, an empty value, or any option on any other stage FAILS the plan
-          # by name rather than being ignored.
-          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''
-          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns' } })
+          # C1, 2026-11-08). converter-cgo: cc=zig|llvm-mingw, a pinned C toolchain the leg downloads, hash-checks and hands
+          # go as CC (the cgo toolchain scout, H, 2026-11-10); sha=HEX replaces the pin's sha256, and exists so a wrong
+          # hash can be shown to refuse before anything runs. An unknown or repeated key, an empty value, or any option on
+          # any other stage FAILS the plan by name rather than being ignored.
+          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''
+          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns' } 'converter-cgo' { 'cc', 'sha' } })
           if ($optionKeys.Count) {
               $parts = @($filter -split ';')
               $filter = $parts[0].Trim()
@@ -242,8 +255,16 @@ jobs:
                   if ($dnsServers -notmatch '^\d{1,3}(\.\d{1,3}){3}(,\d{1,3}(\.\d{1,3}){3})*$') { throw "sweep-shard filter option dns= must be a comma-separated IPv4 list; got '$dnsServers'." }
                   Write-Host "sweep-shard: the job's resolver is set to $dnsServers before the sweep (opt-in; the effective resolver is logged)"
               }
+              if ($stage -eq 'converter-cgo') {
+                  $cgoCc = "$($seen['cc'])"; $cgoCcSha = "$($seen['sha'])".ToLowerInvariant()
+                  if ($cgoCc -and $cgoCc -notin @('zig', 'llvm-mingw')) { throw "converter-cgo filter option cc= names a pinned toolchain, zig or llvm-mingw; got '$cgoCc'." }
+                  if ($cgoCcSha -and -not $cgoCc) { throw 'converter-cgo filter option sha= replaces a pinned toolchain''s hash, so it needs cc= beside it.' }
+                  if ($cgoCcSha -and $cgoCcSha -notmatch '^[0-9a-f]{64}$') { throw "converter-cgo filter option sha= must be 64 hex digits; got '$cgoCcSha'." }
+                  if ($cgoCc -eq 'llvm-mingw' -and $goos -ne 'windows') { throw "llvm-mingw's compilers target windows only, so cc=llvm-mingw applies to goos windows only; got goos '$goos'." }
+                  if ($cgoCc) { Write-Host "converter-cgo: CC is the pinned $cgoCc$(if ($cgoCcSha) { ", its sha256 REPLACED by $cgoCcSha" })" }
+              }
           }
-          elseif ($filter -match '(^|;)\s*(jit|test|at|dns)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe and sweep-shard only; got stage '$stage' and filter '$filter'." }
+          elseif ($filter -match '(^|;)\s*(jit|test|at|dns|cc|sha)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe, sweep-shard and converter-cgo only; got stage '$stage' and filter '$filter'." }
 
           # The behavioral stages' per-program run budget. A schedule has no inputs and keeps 120, as
           # does a blank dispatch. A value that is not a whole number of seconds in 1..1800 FAILS the
@@ -331,6 +352,47 @@ jobs:
               'darwin'  { @(@{ goos = 'darwin';  runner = 'macos-15';        rid = 'osx-arm64' },
                             @{ goos = 'darwin';  runner = 'macos-15-intel';  rid = 'osx-x64'   }) }
               default   { throw "Unknown goos '$($env:INPUT_GOOS)'." }
+          }
+
+          # linux's ARCH legs (linux/arm64 seat S5a, DESIGN-linux-arm64-flavour.md section 6). `arch` is opt-in: x64, the
+          # default, is the one ubuntu-latest leg every linux dispatch ran before the input existed, so an existing dispatch
+          # (and a REST dispatch that omits the input, and a schedule) derives the same matrix as before. arm64 runs the
+          # ubuntu-24.04-arm leg instead and both runs the two. The arm leg builds the corpus with GoTargetOS=linux, which is
+          # the linux/AMD64 flavour until the linux/arm64 flavour exists, and that flavour makes amd64 system calls: on an
+          # arm64 host its readings describe that mismatch, not the platform. So, until src/core holds a linux-arm64/ folder
+          # (the flavour's own home, seat S2), the arm leg runs census and golib-tests ONLY, as a labelled calibration that
+          # banks nothing, and every other stage refuses it by name. Once the folder exists (seat S5b) the arm leg is no
+          # calibration: it carries arch = arm64, which the run job binds as GoTargetArch beside GoTargetOS, so it builds
+          # the linux/ARM64 flavour. Without that binding every arch-split csproj defaults GoTargetArch to amd64, and the
+          # leg would build the linux/amd64 flavour under the arm64 label; the run job's flavour probe refuses that.
+          $arch = if ($env:EVENT_NAME -eq 'schedule' -or -not $env:INPUT_ARCH) { 'x64' } else { $env:INPUT_ARCH }
+          if ($arch -notin 'x64', 'arm64', 'both') { throw "Unknown arch '$arch' (x64, arm64 or both)." }
+          if ($arch -ne 'x64') {
+              if ($env:INPUT_GOOS -ne 'linux') { throw "arch '$arch' applies to goos linux only; got goos '$($env:INPUT_GOOS)'." }
+              if ($env:INPUT_STAGE -in 'release-smoke', 'aot-smoke', 'nugetgo-behavior') {
+                  throw "arch '$arch' does not apply to $($env:INPUT_STAGE), which runs every SHIPPED RID from one pack; linux-arm64 joins it when the packages ship it (seat S5c)."
+              }
+              $armFlavour = @(Get-ChildItem -Path 'src/core' -Directory -Recurse -Filter 'linux-arm64' -ErrorAction SilentlyContinue).Count -gt 0
+              $calibration = -not $armFlavour
+              if ($calibration -and $env:INPUT_STAGE -notin 'census', 'golib-tests') {
+                  throw "arch '$arch': the linux/arm64 flavour does not exist yet (no linux-arm64/ folder under src/core), so the arm leg runs census and golib-tests only, as a calibration; '$($env:INPUT_STAGE)' would read the linux/amd64 flavour on the arm64 ABI and must not be read as an arm64 result."
+              }
+              # Once the flavour exists, census and golib-tests are open on it, and every stage that RUNS converted programs
+              # stays refused by name until the seat that lifts it lands (COORD, 2026-11-10): those programs reach the
+              # linux hand-owns' runtime sites (syscall numbers, netpoll), which are DESIGN-linux-arm64-flavour.md's S3.
+              $armLiftedBy = [ordered]@{
+                  'behavioral-smoke'  = 'S3 (the linux hand-owns at arm64)'
+                  'behavioral-full'   = 'S3 (the linux hand-owns at arm64)'
+                  'behavioral-stderr' = 'S3 (the linux hand-owns at arm64)'
+                  'sweep-shard'       = 'S3 (the linux hand-owns at arm64), then the bank of section 7'
+                  'stack-probe'       = 'S3 (the linux hand-owns at arm64)'
+              }
+              if (-not $calibration -and $armLiftedBy.Contains($env:INPUT_STAGE)) {
+                  throw "arch '$arch': '$($env:INPUT_STAGE)' runs converted programs on the linux/arm64 flavour, whose runtime sites are not yet arm64's; it is refused on the arm leg until seat $($armLiftedBy[$env:INPUT_STAGE]) lands. census and golib-tests run there."
+              }
+              $arm = @{ goos = 'linux'; runner = 'ubuntu-24.04-arm'; rid = 'linux-arm64'; calibration = $calibration; arch = $(if ($calibration) { '' } else { 'arm64' }) }
+              $targets = if ($arch -eq 'arm64') { @($arm) } else { @($targets) + @($arm) }
+              Write-Host "arch ${arch}: linux legs $(@($targets | ForEach-Object { $_.rid }) -join ', ')$(if ($calibration) { ' (linux-arm64 is a CALIBRATION leg: the linux/amd64 flavour on arm64)' })"
           }
 
           # release-smoke runs EVERY shipped RID from ONE pack, whatever goos says: its question is whether
@@ -423,13 +485,21 @@ jobs:
               # The mac legs get 1.5x: macos-15 (arm64) is a 3-core runner, and every phase here
               # is parallel-MSBuild bound. Rounded to whole minutes; still under the 360 ceiling.
               if ($t.runner -like 'macos-*') { $minutes = [int][math]::Ceiling($minutes * 1.5) }
+              # The arm leg takes the same 1.5x until its own calibration replaces it: ubuntu-24.04-arm has never run
+              # these stages, and a timeout is a safety net, not an estimate.
+              if ($t.runner -eq 'ubuntu-24.04-arm') { $minutes = [int][math]::Ceiling($minutes * 1.5) }
 
-              [pscustomobject]@{
+              $entry = [ordered]@{
                   goos    = $t.goos
                   runner  = $t.runner
                   rid     = $t.rid
                   timeout = $minutes
               }
+              # Only a calibration leg carries the key, so every other dispatch derives the matrix it derived before.
+              if ($t.calibration) { $entry.calibration = $true }
+              # Likewise arch: only the linux-arm64 leg, once its flavour exists, carries one.
+              if ($t.arch) { $entry.arch = $t.arch }
+              [pscustomobject]$entry
           }
 
           # -AsArray so a single-target dispatch still emits a JSON ARRAY: PowerShell unwraps a
@@ -456,6 +526,8 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "probe-at=$probeAt" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "jit-disasm=$jitDisasm" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dns-servers=$dnsServers" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-cc=$cgoCc" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-cc-sha=$cgoCcSha" -Encoding utf8
 
   # ---------------------------------------------------------------------------------------------
   # pack — release-smoke only: the release's own pack, as a rehearsal, on a hosted Windows runner.
@@ -494,6 +566,20 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ needs.plan.outputs.dotnet }}
+
+      # Until linux-arm64 ships (seat S5c), every flavour push-nuget packs is an amd64 flavour, and a package carrying arm64
+      # code under an amd64 RID would be a wrong package that compiles. push-nuget passes GoTargetOS per flavour and takes
+      # GoTargetArch from the environment, so the guard reads each flavour from this job's environment, as the pack will.
+      - name: Pack flavour guard — every flavour packs at amd64 until linux-arm64 ships
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:GoTargetArch -and $env:GoTargetArch -ne 'amd64') {
+              throw "the pack job binds GoTargetArch=$($env:GoTargetArch); no package ships an arm64 flavour until seat S5c, so this pack stops before it builds."
+          }
+          foreach ($goos in 'windows', 'linux', 'darwin') {
+              & ./.github/flavour-probe.ps1 -Expected amd64 -GoTargetOS $goos -Label "the $goos pack flavour"
+          }
 
       - name: Pack every go.* package (rehearsal)
         shell: powershell
@@ -568,9 +654,15 @@ jobs:
       # On Windows this is the identity; on Linux it agrees with _paths.ps1's own pin; on macOS it
       # is new, and it is what makes a darwin run a DARWIN run instead of a windows-flavor one.
       GoTargetOS: ${{ matrix.goos }}
+      # The flavour's ARCH, the second axis of the same binding (seat S5b). `arm64` on the linux-arm64 leg once the
+      # linux/arm64 flavour exists (plan, arch); EMPTY on every other leg, because every arch-split csproj defaults an
+      # empty GoTargetArch to amd64, the arch every other flavour is converted at. So the other legs bind what they did.
+      GoTargetArch: ${{ matrix.arch }}
       GOOS_TARGET: ${{ matrix.goos }}
       RID: ${{ matrix.rid }}
       STAGE: ${{ needs.plan.outputs.stage }}
+      # true on a linux-arm64 leg before the linux/arm64 flavour exists: it builds the linux/amd64 flavour (plan, arch).
+      CALIBRATION: ${{ matrix.calibration }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -604,6 +696,8 @@ jobs:
               "stage           : $($env:STAGE)"
               "goos / rid      : $($env:GOOS_TARGET) / $($env:RID)"
               "GoTargetOS env  : $($env:GoTargetOS)"
+              "GoTargetArch env: $(if ($env:GoTargetArch) { $env:GoTargetArch } else { '(empty: the csproj default, amd64)' })"
+              "calibration     : $(if ($env:CALIBRATION -eq 'true') { 'YES -- the linux/amd64 flavour on this arm64 runner; banks nothing' } else { 'no' })"
               "runner os       : $([System.Runtime.InteropServices.RuntimeInformation]::OSDescription.Trim())"
               "runner arch     : $([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)"
               "logical cores   : $([Environment]::ProcessorCount)"
@@ -623,6 +717,21 @@ jobs:
 
           $lines | Tee-Object -FilePath $report
           $lines | ForEach-Object { "    $_" } | Add-Content -Path $env:GITHUB_STEP_SUMMARY
+
+      # -------------------------------------------------------------------------------------
+      # The flavour this leg builds, as MSBuild evaluates it, and a refusal when it is not the one the plan gave the leg
+      # (seat S5b; .github/flavour-probe.ps1 explains the witness). The expected arch is the matrix's own arch field,
+      # amd64 when it has none: the binding above is what is tested, so a leg whose GoTargetArch was not bound reads amd64
+      # where the plan said arm64, and stops before any stage reads it. Stages that build no corpus are not probed.
+      # -------------------------------------------------------------------------------------
+      - name: Flavour probe — the arch this leg compiles
+        if: ${{ !contains(fromJson('["release-smoke","aot-smoke","nugetgo-behavior"]'), needs.plan.outputs.stage) }}
+        shell: pwsh
+        env:
+          PLANNED_ARCH: ${{ matrix.arch }}
+        run: |
+          $expected = if ($env:PLANNED_ARCH) { $env:PLANNED_ARCH } else { 'amd64' }
+          & ./.github/flavour-probe.ps1 -Expected $expected -Label "the $($env:RID) leg"
 
       # -------------------------------------------------------------------------------------
       # census — compile the corpus flavor and bucket the errors by CS code.
@@ -652,6 +761,8 @@ jobs:
               '-p:UseSharedCompilation=false',
               '-clp:ErrorsOnly'
           )
+          # The arch axis, stated beside the OS axis when the leg binds one (seat S5b).
+          if ($env:GoTargetArch) { $buildArgs += "-p:GoTargetArch=$($env:GoTargetArch)" }
 
           Write-Host "==> dotnet $($buildArgs -join ' ')"
 
@@ -950,11 +1061,13 @@ jobs:
 
           Push-Location 'src/tests/GolibTests'
           try {
-              & dotnet build -c Release "-p:GoTargetOS=$goos" -nologo -v q *>&1 | Tee-Object -FilePath $log
+              # The arch axis beside the OS axis, when the leg binds one (seat S5b).
+              $archArgs = @(if ($env:GoTargetArch) { "-p:GoTargetArch=$($env:GoTargetArch)" })
+              & dotnet build -c Release "-p:GoTargetOS=$goos" @archArgs -nologo -v q *>&1 | Tee-Object -FilePath $log
               $runExit = $LASTEXITCODE
 
               if ($runExit -eq 0) {
-                  $testArgs = @('test', '-c', 'Release', '--no-build', "-p:GoTargetOS=$goos", '--blame-hang-timeout', '10m',
+                  $testArgs = @('test', '-c', 'Release', '--no-build', "-p:GoTargetOS=$goos") + $archArgs + @('--blame-hang-timeout', '10m',
                       '--logger', "trx;LogFileName=$trx", '--logger', 'console;verbosity=normal')
 
                   if (-not [string]::IsNullOrWhiteSpace($env:GOLIB_FILTER)) { $testArgs += @('--filter', $env:GOLIB_FILTER) }
@@ -1019,6 +1132,93 @@ jobs:
       # compiler-gated tests -- cgo Phase 1's exit gate, TestRealLoadRefusesOnlyASelectedCgoFile -- skip everywhere
       # else. A SKIP here is a reading too: this runner had no compiler on PATH, which the summary's first line names.
       # -------------------------------------------------------------------------------------
+      # converter-cgo with ;cc= -- the cgo C toolchain scout's instrument (H, 2026-11-10; the owner's direction is
+      # PLAN-cgo-interop §5.1's dated amendment). ONE pinned toolchain archive for this runner is downloaded and refused
+      # unless its sha256 is the pin's (or the plan's sha= replacement); only a verified archive is unpacked and handed to
+      # go as CC. A refusal fails the leg HERE, so the tests step below never runs on an unverified compiler. The gate
+      # tests still look for gcc, cc or clang on PATH, which every hosted image has; go itself reads CC, so cmd/cgo runs
+      # the pinned compiler, and the tests step's instrument line names it.
+      - name: Converter cgo tests — provision the pinned C toolchain
+        if: needs.plan.outputs.stage == 'converter-cgo' && needs.plan.outputs.cgo-cc != ''
+        shell: pwsh
+        env:
+          CGO_CC: ${{ needs.plan.outputs.cgo-cc }}
+          CGO_CC_SHA: ${{ needs.plan.outputs.cgo-cc-sha }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $ProgressPreference = 'SilentlyContinue'
+
+          # One archive per toolchain and runner, with the sha256 its publisher states: zig's from ziglang.org's download
+          # index (whose tarballs minisign signs), llvm-mingw's from its GitHub release's asset digest. Both releases were
+          # at least two weeks old when pinned. llvm-mingw's compilers target windows only, so it has a windows pin only.
+          $zig = 'https://ziglang.org/download/0.17.0'
+          $mingw = 'https://github.com/mstorsjo/llvm-mingw/releases/download/20261020'
+          $pins = @{
+              'zig|win-x64'        = @{ version = 'zig 0.17.0'; url = "$zig/zig-x86_64-windows-0.17.0.zip"; sha256 = 'b5663f69581dcf391293fbf16c06cb80d81d806545ce618b4d0bab7f0eb8c428'; cc = @('zig.exe', 'cc') }
+              'zig|linux-x64'      = @{ version = 'zig 0.17.0'; url = "$zig/zig-x86_64-linux-0.17.0.tar.xz"; sha256 = '1cbe9df9f27e6b78d14ccbca43b6703a404ef79ef1c463de901d7f088d4e2026'; cc = @('zig', 'cc') }
+              'zig|osx-x64'        = @{ version = 'zig 0.17.0'; url = "$zig/zig-x86_64-macos-0.17.0.tar.xz"; sha256 = '4f9a1c5269aa17ebda5e6d3c2b89d6cbf36f7d2b22a0306e9ab98f25f95529c6'; cc = @('zig', 'cc') }
+              'zig|osx-arm64'      = @{ version = 'zig 0.17.0'; url = "$zig/zig-aarch64-macos-0.17.0.tar.xz"; sha256 = 'b607e9b9234790a008116ae5bdb71c6243b84b9fb42a53a9e70fde41c06c536a'; cc = @('zig', 'cc') }
+              'llvm-mingw|win-x64' = @{ version = 'llvm-mingw 20261020 (ucrt)'; url = "$mingw/llvm-mingw-20261020-ucrt-x86_64.zip"; sha256 = 'fd5462b7f5d93b2ff981fcd3f9c7e427e47f3203c64ea91c27bcc444eebd74cd'; cc = @('bin/x86_64-w64-mingw32-clang.exe') }
+          }
+
+          $key = "$env:CGO_CC|$env:RID"
+          if (-not $pins.ContainsKey($key)) { throw "converter-cgo: no $env:CGO_CC pin for runner $env:RID." }
+          $pin = $pins[$key]
+          $expected = if ($env:CGO_CC_SHA) { $env:CGO_CC_SHA } else { $pin.sha256 }
+          $hashSource = if ($env:CGO_CC_SHA) { 'REPLACED by the plan''s sha= option' } else { 'the pin' }
+
+          $root = Join-Path $env:RUNNER_TEMP "cgo-cc-$env:CGO_CC"
+          New-Item -ItemType Directory -Force -Path $root | Out-Null
+          $archive = Join-Path $root ([IO.Path]::GetFileName($pin.url))
+
+          $clock = [Diagnostics.Stopwatch]::StartNew()
+          Invoke-WebRequest -Uri $pin.url -OutFile $archive
+          $downloadSeconds = [math]::Round($clock.Elapsed.TotalSeconds, 1)
+          $bytes = (Get-Item -LiteralPath $archive).Length
+          $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $archive).Hash.ToLowerInvariant()
+
+          if ($actual -ne $expected) {
+              Remove-Item -LiteralPath $archive -Force
+              $summary = @(
+                  "## Converter cgo toolchain -- $env:CGO_CC REFUSED on $env:RID"
+                  ''
+                  "$($pin.version): $($pin.url)"
+                  "$bytes bytes in $downloadSeconds s; sha256 $actual, want $expected ($hashSource)."
+                  'Nothing was unpacked, CC was not set, and the tests step does not run.'
+              )
+              Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+              & ./.github/annotate-summary.ps1 -Title "converter-cgo toolchain $env:RID" -Lines $summary
+              throw "converter-cgo: REFUSED $($pin.url): sha256 $actual, want $expected ($hashSource)."
+          }
+
+          # Unpacked only now. Each archive holds one top-level directory.
+          $clock.Restart()
+          if ($archive.EndsWith('.zip')) { & tar -xf $archive -C $root } else { & tar -xJf $archive -C $root }
+          if ($LASTEXITCODE -ne 0) { throw "converter-cgo: could not unpack $archive (tar exit $LASTEXITCODE)." }
+          $unpackSeconds = [math]::Round($clock.Elapsed.TotalSeconds, 1)
+          $unpacked = @(Get-ChildItem -LiteralPath $root -Directory)
+          if ($unpacked.Count -ne 1) { throw "converter-cgo: $archive unpacked to $($unpacked.Count) directories, want one." }
+
+          $exe = Join-Path $unpacked[0].FullName $pin.cc[0]
+          if (-not (Test-Path -LiteralPath $exe)) { throw "converter-cgo: $exe is not in the unpacked $($pin.version)." }
+          $cc = (@($exe) + @($pin.cc | Select-Object -Skip 1)) -join ' '
+
+          # zig keeps a cache of the C runtime it builds; keep it beside the toolchain, inside this job.
+          $zigCache = Join-Path $root 'zig-cache'
+          Add-Content -Path $env:GITHUB_ENV -Value "CC=$cc" -Encoding utf8
+          Add-Content -Path $env:GITHUB_ENV -Value "ZIG_GLOBAL_CACHE_DIR=$zigCache" -Encoding utf8
+          Add-Content -Path $env:GITHUB_ENV -Value "ZIG_LOCAL_CACHE_DIR=$zigCache" -Encoding utf8
+
+          $summary = @(
+              "## Converter cgo toolchain -- $env:CGO_CC on $env:RID"
+              ''
+              "$($pin.version): $($pin.url)"
+              "READING download $bytes bytes in $downloadSeconds s; sha256 $actual = $hashSource; unpacked in $unpackSeconds s"
+              "CC = $cc"
+          )
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title "converter-cgo toolchain $env:RID" -Lines $summary
+
       - name: Converter cgo tests — go test with this host's C compiler
         if: needs.plan.outputs.stage == 'converter-cgo'
         shell: pwsh
@@ -1040,8 +1240,10 @@ jobs:
           if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^Test.*Cgo|^TestRealLoad' }
 
           # The instrument line: the compiler go would hand cmd/cgo, and whether go's own default turns cgo on here.
+          # CC may carry arguments (a pinned zig is "zig cc"): the first field is the executable, the rest go before --version.
           $cc = "$(& go env CC)".Trim()
-          $ccVersion = if (Get-Command $cc -ErrorAction SilentlyContinue) { "$(& $cc --version 2>&1 | Select-Object -First 1)" } else { 'NOT FOUND on PATH' }
+          $ccFields = @($cc -split '\s+' | Where-Object { $_ })
+          $ccVersion = if ($ccFields.Count -and (Get-Command $ccFields[0] -ErrorAction SilentlyContinue)) { "$(& $ccFields[0] @($ccFields | Select-Object -Skip 1) --version 2>&1 | Select-Object -First 1)" } else { 'NOT FOUND on PATH' }
           $instrument = "go env CC = $cc ($ccVersion); go env CGO_ENABLED = $("$(& go env CGO_ENABLED)".Trim())"
           Write-Host "==> $instrument"
 

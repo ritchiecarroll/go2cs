@@ -97,9 +97,15 @@
     <!-- pidfd_open/waitid(P_PIDFD)/pidfd_send_signal: linux-only kernel surface. -->
     <Compile Remove="LinuxPidfdTests.cs" />
 
+    <!-- GoEpollKernelProbe (internal/poll/linux/runtime_netpoll_impl.cs): S3 site 1's per-arch epoll contract. -->
+    <Compile Remove="LinuxNetpollEpollKernelTests.cs" />
+
     <!-- GetRandom (and its runtime.vgetrandom pull) is declared by getrandom.go, whose build tags
          select only the linux flavour of internal/syscall/unix. -->
     <Compile Remove="LinuxGetRandomTests.cs" />
+
+    <!-- GoDieNumbersProbe and GoSigprocmaskNumberProbe (runtime/linux): S3's per-arch syscall numbers. -->
+    <Compile Remove="LinuxRuntimeSyscallNumberTests.cs" />
 
     <!-- The PATH_MAX removal failure is a Unix one: Windows names long paths natively, so compiled
          there the arms would pass with the defect present and guard nothing. -->
@@ -111,6 +117,19 @@
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux' and '$(GoTargetOS)' != 'darwin'">
     <Compile Remove="InheritedIgnoredSignalTests.cs" />
     <Compile Remove="RecvfromUnspecifiedSourceTests.cs" />
+  </ItemGroup>
+
+  <!-- S-b2's darwin rows drive seams the darwin flavour alone declares (syscall's GoPosixSpawnCall and
+       GoKillCall, os's GoReaddirRCall), so the class is a darwin-only FILE, as the linux transition
+       classes above are linux-only ones. -->
+  <ItemGroup Condition="'$(GoTargetOS)' != 'darwin'">
+    <Compile Remove="DarwinNativeTransitionTests.cs" />
+  </ItemGroup>
+
+  <!-- S3's arm64 Stat_t mirror and its GoNativeStatLayoutProbe live in syscall/linux-arm64/, which only the
+       linux/arm64 flavour compiles: the file's only (GOOS, GOARCH) pair. An unset $(GoTargetArch) is amd64. -->
+  <ItemGroup Condition="'$(GoTargetOS)' != 'linux' or '$(GoTargetArch)' != 'arm64'">
+    <Compile Remove="LinuxArm64StatLayoutTests.cs" />
   </ItemGroup>
 
   <!-- The netapi32 ptrout gate is the mirror image: it drives windows-flavor-only syscall surface

@@ -1,0 +1,3 @@
+module repro/c22b-genericset
+
+go 1.26

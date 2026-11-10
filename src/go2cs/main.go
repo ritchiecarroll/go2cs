@@ -287,7 +287,7 @@ func main() {
 	nugetMapRefreshCmd := commandLine.Bool("nuget-map-refresh", false, "With -recurse=nuget: fetch every URL source unconditionally (bypassing the cache) and re-resolve every module, adopting what the sources now say instead of what go2cs.nuget.lock pinned")
 	nugetMapCanonicalOnlyCmd := commandLine.Bool("nuget-map-canonical-only", false, "With -recurse=nuget: apply canonical mappings only (the module owner's own conversion); a community mapping is treated as unmapped")
 	nugetMapFeedCmd := commandLine.String("nuget-map-feed", "", "With -recurse=nuget: read mapped packages' versions from this feed INSTEAD of nuget.org -- an https:// NuGet v3 service index (a rehearsal gallery such as int.nugettest.org) or a local folder of nupkgs; a rehearsal version (nugetgo-pack.ps1 -RehearsalSuffix) is admitted only from it. The restore of the emitted projects reads your own package sources, so name the feed there too")
-	targetPlatformCmd := commandLine.String("platforms", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH), "Target platform(s) for conversion, format: os/arch; comma-separated for a list (windows/amd64,linux/amd64,darwin/amd64), which with -stdlib emits the multi-platform (layout L3) corpus — one GOOS per target")
+	targetPlatformCmd := commandLine.String("platforms", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH), "Target platform(s) for conversion, format: os/arch; comma-separated for a list (windows/amd64,linux/amd64,darwin/amd64,linux/arm64), which with -stdlib emits the multi-platform (layout L3) corpus — one flavour per target")
 	platformCensusCmd := commandLine.String("platform-census", "", "With -stdlib and two or more -platforms targets: convert once per target into an isolated seeded staging root under this directory, classify the emissions (shared/variant/partial/exclusive) and write platform-manifest.json there. Emits NO corpus output")
 	refCensusCmd := commandLine.String("ref-census", "", "With -stdlib: run the ж-box A1 ref-lowering classification census (analysis only, never emits) over the standard library — once per -platforms target — and write the JSON report to this path. See docs/phase4/DESIGN-zh-box-reduction.md §9 stage A1")
 	platformStageCmd := commandLine.String("platform-stage", "", "Directory a multi-platform -stdlib EMISSION stages its per-target conversions in (kept afterwards for inspection); when omitted, the run stages in .go2cs-platform-stage under the output root, reclaims anything an earlier run left there, and removes it at the end")
@@ -297,7 +297,8 @@ func main() {
 	hoistLiteralsCmd := commandLine.Bool("hoist-literals", false, "Hoist mode, the standard library's: each string literal in a value slot with a readable name becomes one `static readonly` field (`F(helloˢ)`), and every other literal takes the default plain mode's cached form (`F(\"hello\")`, converted once and shared by golib). The standard library always hoists; this opts any other package in")
 	useChannelOperatorsCmd := commandLine.Bool("uco", true, fmt.Sprintf("Use channel operators: %s / %s", ChannelLeftOp, ChannelRightOp))
 	licenseCmd := commandLine.String("license", "", "Override NuGet license metadata with an SPDX expression (for example MIT or BSD-3-Clause); does not relicense input code")
-	provenanceCmd := commandLine.Bool("provenance", false, "Include a deterministic source-file provenance comment (no conversion timestamp)")
+	provenanceCmd := commandLine.Bool("provenance", false, "Include in each converted file a notice naming its Go source and module and that go2cs modified it by conversion (no timestamp)")
+	trimPathCmd := commandLine.Bool("trimpath", true, "Record a main-module source in the converted position maps the way `go build -trimpath` bakes it, <module path>/<path in module>, so the output names no directory of this machine; -trimpath=false records the absolute source path, as an untrimmed `go build` does")
 	includeCommentsCmd := commandLine.Bool("comments", false, "Include comments in output")
 	parseCgoTargetsCmd := commandLine.Bool("cgo", false, "Load a single package cgo-on (CGO_ENABLED=1; needs a C compiler) and report what cgo support recognizes in it. cgo has no C# conversion yet, so an import \"C\" source is still refused, now naming the C declarations it recognized and each generated file's source (docs/PLAN-cgo-interop.md, Phase 1). Not combinable with -stdlib, -tests or -recurse")
 	showParseTreeCmd := commandLine.Bool("tree", false, "Show parse tree")
@@ -412,10 +413,10 @@ Examples:
   go2cs -stdlib -comments -tags purego,math_big_pure_go
                                           # Explicit form of the default: the portable Go implementations over the assembly ones
   go2cs -stdlib -tags=                    # Opt OUT of the default tags (reproduce the asm-backed default build)
-  go2cs -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64 -platform-census out
+  go2cs -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64 -platform-census out
                                           # Emission census: convert once per target into out\<goos>-<goarch>,
                                           # write out\platform-manifest.json; no corpus output
-  go2cs -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64
+  go2cs -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64
                                           # Multi-platform corpus (layout L3): files shared by every target
                                           # stay flat, platform-varying ones land in <pkg>\<goos>, and the
                                           # .csproj selects one with $(GoTargetOS)
@@ -567,10 +568,22 @@ Examples:
 			len(targetPlatforms), strings.Join(targetPlatforms, ", "))
 	}
 
+	// Whether the operator NAMED the go2cs path, which decides what a -recurse output root may pin
+	// (recurseGo2CSPathPin): a path the operator typed is theirs to write down; a resolved default is not.
+	go2csPathExplicit := false
+	commandLine.Visit(func(f *flag.Flag) {
+		if f.Name == "go2cspath" {
+			go2csPathExplicit = true
+		}
+	})
+
 	options := Options{
 		goRoot:              *goRootCmd,
 		goPath:              *goPathCmd,
 		go2csPath:           absoluteGo2CSPath(*go2csPathCmd),
+		go2csPathExplicit:   go2csPathExplicit,
+		go2csPathFromEnv:    !go2csPathExplicit && os.Getenv("GO2CSPATH") != "",
+		noTrimPath:          !*trimPathCmd,
 		convertStdLib:       convertStdLib,
 		convertTimeout:      *convertTimeoutCmd,
 		convertTests:        *convertTestsCmd,
@@ -816,8 +829,8 @@ Examples:
 			return
 		}
 
-		// A -tests run of a standard-library package re-emits it into the committed corpus, which is
-		// built for corpusArch on every GOOS; the host default would emit the binary's own GOARCH.
+		// A -tests run of a standard-library package re-emits it into the committed corpus, so it targets
+		// the host default's corpus flavour, whose GOARCH need not be the binary's own (testsCorpusArch.go).
 		if platform, pinned := testsTargetPlatform(options.targetPlatform, platformsExplicit, options.convertTests, inputFilePath, options.goRoot); pinned {
 			log.Printf("-tests: %s is a GOROOT package, so the conversion targets the committed corpus's %s (not the host's %s); pass -platforms to override\n",
 				inputFilePath, platform, options.targetPlatform)

@@ -1,0 +1,39 @@
+# converted cmd/parsedemo/main.cs: single-package conversion, go2cs.exe built at f09e762659
+namespace go;
+
+using fmt = fmt_package;
+using os = os_package;
+using strings = strings_package;
+using ast = github.com.microsoft.TypeScript.tsc.@internal.ast_package;
+using core = github.com.microsoft.TypeScript.tsc.@internal.core_package;
+using parser = github.com.microsoft.TypeScript.tsc.@internal.parser_package;
+using tspath = github.com.microsoft.TypeScript.tsc.@internal.tspath_package;
+using github.com.microsoft.TypeScript.tsc.@internal;
+
+partial class main_package {
+
+internal static void Main() {
+    foreach (var (_, name) in range(os.Args[1..])) {
+        var (text, err) = os.ReadFile(name);
+        if (err != nil) {
+            fmt.Println("read error:", err);
+            os.Exit(1);
+        }
+        @string @base = name.slice(strings.LastIndexAny(name, @"/\") + 1);
+        var opts = new ast.SourceFileParseOptions(FileName: "/"u8 + @base, Path: ((tspath.Path)("/"u8 + @base)));
+        var @file = parser.ParseSourceFile(opts, (@string)text, core.GetScriptKindFromFileName(@base));
+        fmt.Printf("file %s (%d bytes)\n"u8, @base, len(text));
+        foreach (var (_, d) in range(@file.Diagnostics())) {
+            fmt.Printf("diag TS%d [%d,+%d] %s\n"u8, d.Code(), d.Pos(), d.Len(), d.String());
+        }
+        ref var walk = ref heap<Func<ж<ast.Node>, nint, bool>>(out var Ꮡwalk);
+        walk = (ж<ast.Node> n, nint depth) => {
+            fmt.Printf("%s%v [%d,%d]\n"u8, strings.Repeat("  ", depth), n.Kind, n.Pos(), n.End());
+            n.ForEachChild((ж<ast.Node> c) => Ꮡwalk.ValueSlot(c, depth + 1));
+            return false;
+        };
+        walk(@file.of(ast.SourceFile.ᏑNodeBase).of(ast.NodeBase.ᏑNodeDefault).AsNode(), 0);
+    }
+}
+
+} // end main_package

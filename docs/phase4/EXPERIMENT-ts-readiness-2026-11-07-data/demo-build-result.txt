@@ -1,0 +1,30 @@
+# demo build: dotnet build cmd/parsedemo/parsedemo.csproj inside the pass-G tree (recurse-r2F), -m:6, pinned 0xFC0
+demo build rc=1 t=1647s
+# errors: 533, all in internal.ast.csproj, all CS1929
+# vs pass G's ast errors (distinct file(line,col)+code+message): 533 533 IDENTICAL
+# non-std projects built:
+  github.com.go-json-experiment.json
+  github.com.go-json-experiment.json.internal
+  github.com.go-json-experiment.json.internal.jsonflags
+  github.com.go-json-experiment.json.internal.jsonopts
+  github.com.go-json-experiment.json.internal.jsonwire
+  github.com.go-json-experiment.json.jsontext
+  github.com.klauspost.cpuid.v2
+  github.com.microsoft.TypeScript.tsc.internal.collections
+  github.com.microsoft.TypeScript.tsc.internal.core
+  github.com.microsoft.TypeScript.tsc.internal.debug
+  github.com.microsoft.TypeScript.tsc.internal.diagnostics
+  github.com.microsoft.TypeScript.tsc.internal.jsnum
+  github.com.microsoft.TypeScript.tsc.internal.json
+  github.com.microsoft.TypeScript.tsc.internal.locale
+  github.com.microsoft.TypeScript.tsc.internal.spanmap
+  github.com.microsoft.TypeScript.tsc.internal.stringutil
+  github.com.microsoft.TypeScript.tsc.internal.tspath
+  github.com.zeebo.xxh3
+  golang.org.x.sync.errgroup
+  golang.org.x.text.internal.language
+  golang.org.x.text.internal.language.compact
+  golang.org.x.text.internal.tag
+  golang.org.x.text.language
+# FAILED: github.com.microsoft.TypeScript.tsc.internal.ast (C29)
+# BLOCKED: internal.scanner, internal.parser, parsedemo

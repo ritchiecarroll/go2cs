@@ -4,14 +4,55 @@
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
 
+using System.Collections.Generic;
 using static go2cs.Symbols;
 
 namespace go2cs.Templates.InheritedType;
 
 internal static class ISliceTypeTemplate
 {
+    // A named []byte (`[]uint8` is the same Go type) satisfies Go's `~[]byte | ~string` union constraint, which the
+    // converter emits as IByteSeq<TSelf, byte> (InheritedTypeTemplate declares the interface for it).
+    public static bool IsByteSlice(string targetTypeName) => targetTypeName is "byte" or "uint8";
+
+    // ICloneable's member. A named slice whose Go type declares its OWN `Clone` method (jsontext's `func (v Value)
+    // Clone() Value`) implements it explicitly: an instance member is bound before the extension method Go's Clone
+    // becomes, so a public `object Clone()` shadowed Go's method and `v.Clone()` returned an object. The named array
+    // wrapper does the same (IArrayTypeTemplate.CloneMembers).
+    private static string CloneMember(ICollection<string> goMethods) =>
+        goMethods.Contains("Clone") ?
+            "object global::System.ICloneable.Clone() => ((global::System.ICloneable)m_value).Clone();" :
+            "public object Clone() => ((global::System.ICloneable)m_value).Clone();";
+
+    // IByteSeq<TSelf, byte> for a named []byte, so it can be the type argument of a `~[]byte | ~string` parameter
+    // (TS readiness C16). Length, the Range indexer and the two slice(...) members above implement it implicitly,
+    // returning the named type as Go's sub-slice does. The element read and the read-only spread are explicit, as
+    // golib's slice<T> declares them: the public indexer returns a ref and the public spread a writable span.
+    // TryGetSlice hands out the wrapper's own window, so `[]byte(v)` and `Value(b)` share v's backing, as Go's do.
+    private static string ByteSeqMembers(string targetTypeName) => !IsByteSlice(targetTypeName) ? "" :
+        $$"""
+
+
+                byte IByteSeq<byte>.this[nint index] => m_value[index];
+
+                global::System.ReadOnlySpan<byte> IByteSeq<byte>.{{EllipsisOperator}} => ToSpan();
+
+                bool IByteSeq<byte>.TryGetSlice(out slice<byte> window)
+                {
+                    window = m_value;
+                    return true;
+                }
+
+                bool IByteSeq<byte>.TryGetString(out @string value)
+                {
+                    value = default;
+                    return false;
+                }
+        """;
+
     // constructorName is structName without a generic type's parameters (a C# constructor never carries them).
-    public static string Generate(string structName, string constructorName, string typeName, string targetTypeName) =>
+    // goMethods are the Go methods declared on the type (InheritedTypeTemplate.GoMethodNames).
+    public static string Generate(string structName, string constructorName, string typeName, string targetTypeName, ICollection<string> goMethods) =>
         $$"""
         
                 public {{targetTypeName}}[] Source => m_value;
@@ -100,8 +141,8 @@ internal static class ISliceTypeTemplate
 
                 public bool Equals(ISlice<{{targetTypeName}}>? other) => m_value.Equals(other);
 
-                public object Clone() => ((global::System.ICloneable)m_value).Clone();
-                
+                {{CloneMember(goMethods)}}{{ByteSeqMembers(targetTypeName)}}
+
                 public static {{structName}} Make(nint p1 = 0, nint p2 = -1) => new {{structName}}(p1, p2);
         
                 public {{constructorName}}(nint length, nint capacity = -1, nint low = 0) => m_value = new {{typeName}}(length, capacity, low);

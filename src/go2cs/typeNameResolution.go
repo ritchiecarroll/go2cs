@@ -487,7 +487,15 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 					aliasQualifier = qualifier
 				}
 
-				return fmt.Sprintf("%s.%s[%s]", aliasQualifier, obj.Name(), strings.Join(args, ", "))
+				// The member as the producing package declares it: Δ-renamed when its name collides with a
+				// method or function there (`coll.ΔSet<T>`; see foreignRenamedGenericMember).
+				member := obj.Name()
+
+				if renamed, ok := foreignRenamedGenericMember(obj); ok {
+					member = renamed
+				}
+
+				return fmt.Sprintf("%s.%s[%s]", aliasQualifier, member, strings.Join(args, ", "))
 			}
 
 			// A SAME-PACKAGE instantiated generic must ALSO render structurally — each type ARGUMENT
@@ -539,6 +547,22 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 
 				if target, ok := ambiguousImportedTypeAliasTarget(key, pkg); ok {
 					return aliasQualifier + "." + target[strings.LastIndex(target, ".")+1:]
+				}
+
+				// A collision-renamed type this file reaches ONLY through another package's alias, with no import
+				// of the type's own package, so no alias key was loaded for it: spell the producer's member,
+				// `jsontext.ΔEncoder`, not the Go name (TS readiness C22e; see foreignRenamedTypeSpelling). A file
+				// that imports the producer holds the key and keeps its `pkgꓸName` alias route unchanged.
+				if !importedTypeAliasPublished(key) {
+					if spelling, bare, ok := foreignRenamedTypeSpelling(obj); ok {
+						// The two-hop form (`type Token any`): the producer's member stands for the concrete type its
+						// definition names, so render that, exactly as any reference to it would be rendered.
+						if bare {
+							return v.getAliasQualifiedTypeName(named.Underlying(), isUnderlying)
+						}
+
+						return aliasQualifier + "." + spelling
+					}
 				}
 			}
 
@@ -730,6 +754,12 @@ func (v *Visitor) getFullyQualifiedTypeName(t types.Type, isUnderlying bool) str
 					} else {
 						args[i] = v.getFullyQualifiedTypeName(typeArgs.At(i), isUnderlying)
 					}
+				}
+
+				// A Δ-renamed foreign generic names its declared member, as the alias-qualified twin does
+				// (see foreignRenamedGenericMember).
+				if renamed, ok := foreignRenamedGenericMember(obj); ok {
+					baseName = getSanitizedImport(packageClassPath(pkg.Path(), pkg.Name())+PackageSuffix) + "." + renamed
 				}
 
 				return baseName + "[" + strings.Join(args, ", ") + "]"
@@ -1648,59 +1678,6 @@ func renderCSFullTypeName(typeName string, rootNested bool) string {
 		return fmt.Sprintf("%s.map<%s, %s>", RootNamespace, renderCSTypeName(keyType, rootNested), renderCSTypeName(valueType, rootNested))
 	}
 
-	// Find all types inside '<T1, T2>' type expressions and recurse into them for conversion
-	if start := strings.Index(typeName, "<"); start != -1 {
-		// Locate the matching closing '>' by bracket depth rather than the first '>' — the latter
-		// mis-handles nested generics (e.g. Pointer<node<K, V>> would stop at the inner '>',
-		// extract the unbalanced "node<K, V", and recurse into "node<K", slicing out of range).
-		depth := 0
-		end := -1
-
-		for i := start; i < len(typeName); i++ {
-			if typeName[i] == '<' {
-				depth++
-			} else if typeName[i] == '>' {
-				depth--
-
-				if depth == 0 {
-					end = i
-					break
-				}
-			}
-		}
-
-		// Only split when a matching '>' exists; otherwise the '<' is not a generic bracket (e.g.
-		// the '<-' of a directional channel inside a func type) and is handled by a later branch.
-		if end != -1 {
-			subTypes := splitTopLevelTypes(typeName[start+1 : end])
-
-			for i := range subTypes {
-				// Trim BEFORE converting: splitTopLevelTypes keeps the ", " separator's space, so
-				// later args arrive as " string". The conversion switch matches the type name
-				// exactly (`case "string"`), so a leading space would miss it and fall through to
-				// the default named-type path — emitting C# `string` (System.String) instead of
-				// golib `@string`. That violates the generic `new()` constraint the converter adds
-				// (CS0310) and breaks string-literal assignment (CS0029).
-				subTypes[i] = renderCSTypeName(strings.TrimSpace(subTypes[i]), rootNested)
-			}
-
-			base := typeName[:start]
-
-			// The type-vs-method collision Δ-rename keys on the BARE type name; a generic
-			// instantiation reaches the default sanitize with its `<args>` attached
-			// (`indirect<K, V>`), missing the map — internal/concurrent's `type indirect[K, V]`
-			// vs `func (n *node[K, V]) indirect()` renamed the DECLARATION `Δindirect<K, V>`
-			// while every use kept the raw name (CS0246 ×33, leaking into net/netip). Rename
-			// the bare base at reassembly; a dotted (package-qualified) base never matches the
-			// per-package map and keeps its exported-alias route.
-			if nameCollisions[base] {
-				base = getCollisionAvoidanceIdentifier(base)
-			}
-
-			typeName = fmt.Sprintf("%s<%s>%s", base, strings.Join(subTypes, ", "), typeName[end+1:])
-		}
-	}
-
 	if typeName == "func()" {
 		return delegateRoot(rootNested, "") + "Action"
 	}
@@ -1779,6 +1756,68 @@ func renderCSFullTypeName(typeName string, rootNested bool) string {
 	// Handle pointer types
 	if strings.HasPrefix(typeName, "*") {
 		return fmt.Sprintf("%s.%s<%s>", RootNamespace, PointerPrefix, renderCSTypeName(typeName[1:], rootNested))
+	}
+
+	// The generic-argument pass runs AFTER the func-type and pointer branches, never before them.
+	// Both of those branches RE-RENDER their pieces (the pointer's element, each func parameter and
+	// result) through this function, so a pass that had already rewritten the arguments in place
+	// handed the recursion C# text where it expects Go text. Most arms are idempotent on their own
+	// output; the `map<` arm is not: splitMapKeyValue splits `@string, @string>` at its first
+	// top-level `>`, keeping the whole argument list as the KEY and an empty VALUE, so every extra
+	// pass added a dangling `, ` (`ж<Expected<map<@string, @string, >>>` from
+	// `*Expected[map[string]string]`, CS1031 in a GoImplement record; `**` added two). A pointer or
+	// func type now reaches this pass only inside its recursion, once per piece.
+	// Find all types inside '<T1, T2>' type expressions and recurse into them for conversion
+	if start := strings.Index(typeName, "<"); start != -1 {
+		// Locate the matching closing '>' by bracket depth rather than the first '>' — the latter
+		// mis-handles nested generics (e.g. Pointer<node<K, V>> would stop at the inner '>',
+		// extract the unbalanced "node<K, V", and recurse into "node<K", slicing out of range).
+		depth := 0
+		end := -1
+
+		for i := start; i < len(typeName); i++ {
+			if typeName[i] == '<' {
+				depth++
+			} else if typeName[i] == '>' {
+				depth--
+
+				if depth == 0 {
+					end = i
+					break
+				}
+			}
+		}
+
+		// Only split when a matching '>' exists; otherwise the '<' is not a generic bracket (e.g.
+		// the '<-' of a directional channel) and the name falls through to the default render.
+		if end != -1 {
+			subTypes := splitTopLevelTypes(typeName[start+1 : end])
+
+			for i := range subTypes {
+				// Trim BEFORE converting: splitTopLevelTypes keeps the ", " separator's space, so
+				// later args arrive as " string". The conversion switch matches the type name
+				// exactly (`case "string"`), so a leading space would miss it and fall through to
+				// the default named-type path — emitting C# `string` (System.String) instead of
+				// golib `@string`. That violates the generic `new()` constraint the converter adds
+				// (CS0310) and breaks string-literal assignment (CS0029).
+				subTypes[i] = renderCSTypeName(strings.TrimSpace(subTypes[i]), rootNested)
+			}
+
+			base := typeName[:start]
+
+			// The type-vs-method collision Δ-rename keys on the BARE type name; a generic
+			// instantiation reaches the default sanitize with its `<args>` attached
+			// (`indirect<K, V>`), missing the map — internal/concurrent's `type indirect[K, V]`
+			// vs `func (n *node[K, V]) indirect()` renamed the DECLARATION `Δindirect<K, V>`
+			// while every use kept the raw name (CS0246 ×33, leaking into net/netip). Rename
+			// the bare base at reassembly; a dotted (package-qualified) base never matches the
+			// per-package map and keeps its exported-alias route.
+			if nameCollisions[base] {
+				base = getCollisionAvoidanceIdentifier(base)
+			}
+
+			typeName = fmt.Sprintf("%s<%s>%s", base, strings.Join(subTypes, ", "), typeName[end+1:])
+		}
 	}
 
 	// A golib csproj-level `<Using Alias=…>` name is not a member of `go` and cannot be rooted:

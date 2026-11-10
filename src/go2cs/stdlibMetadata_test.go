@@ -39,6 +39,11 @@ func TestStdLibMetadataAssetFileName(t *testing.T) {
 		t.Errorf("stdlibmeta.ReferenceGOOS = %q, converter's platformDefaultTargetOS = %q — the unqualified section would describe the wrong flavor",
 			stdlibmeta.ReferenceGOOS, platformDefaultTargetOS)
 	}
+
+	if stdlibmeta.ReferenceGOARCH != platformDefaultTargetArch {
+		t.Errorf("stdlibmeta.ReferenceGOARCH = %q, converter's platformDefaultTargetArch = %q — the unqualified section would describe the wrong flavor",
+			stdlibmeta.ReferenceGOARCH, platformDefaultTargetArch)
+	}
 }
 
 // TestStdLibMetadataInSync is the drift guard for the committed stdlib-metadata.txt: it
@@ -272,10 +277,15 @@ func normalizeLineEndings(text string) string {
 	return strings.ReplaceAll(text, "\r\n", "\n")
 }
 
-// TestStdLibExportedMetadataSelectsTheTargetFlavor pins the per-GOOS lookup. syscall is an L3
+// TestStdLibExportedMetadataSelectsTheTargetFlavor pins the per-target lookup. syscall is an L3
 // package with no flat package_info.cs: its windows flavor exports the `Handle` alias and Δ-renames
 // `Sockaddr`, and its linux flavor does neither. Before the record carried non-reference flavors, a
 // linux lookup silently answered with the windows section.
+//
+// The lookup is asked with TARGETS since the arch axis: syscall's linux copies sit in `linux-amd64/`
+// and `linux-arm64/`, which a bare `linux` does not name. Both linux targets are asked, because a
+// lookup that walked only the GOOS folder would answer each of them with the windows section — the
+// 2026-09-24 defect again, one axis over.
 func TestStdLibExportedMetadataSelectsTheTargetFlavor(t *testing.T) {
 	aliasesOf := func(goos string) map[string]string {
 		t.Helper()
@@ -302,13 +312,13 @@ func TestStdLibExportedMetadataSelectsTheTargetFlavor(t *testing.T) {
 	}
 
 	// The reference flavor, asked for by name and by default, is the unqualified section.
-	for _, goos := range []string{stdlibmeta.ReferenceGOOS, ""} {
+	for _, goos := range []string{stdlibmeta.ReferenceGOOS, stdlibmeta.ReferenceGOOS + "/" + stdlibmeta.ReferenceGOARCH, ""} {
 		if _, ok := aliasesOf(goos)["Handle"]; !ok {
 			t.Errorf("syscall (goos %q) lost the windows-only `Handle` alias", goos)
 		}
 	}
 
-	for _, goos := range []string{"linux", "darwin"} {
+	for _, goos := range []string{"linux/amd64", "linux/arm64", "darwin/amd64", "darwin"} {
 		found := aliasesOf(goos)
 
 		if _, ok := found["Handle"]; ok {
@@ -326,7 +336,7 @@ func TestStdLibExportedMetadataSelectsTheTargetFlavor(t *testing.T) {
 
 	// A package with ONE flat package_info.cs has no flavor sections: every GOOS reads the same record.
 	fmtWindows, windowsOK := stdLibExportedMetadata("fmt", stdlibmeta.ReferenceGOOS)
-	fmtLinux, linuxOK := stdLibExportedMetadata("fmt", "linux")
+	fmtLinux, linuxOK := stdLibExportedMetadata("fmt", "linux/arm64")
 
 	if !windowsOK || !linuxOK {
 		t.Fatalf("fmt must be recorded for every GOOS (windows %v, linux %v)", windowsOK, linuxOK)
@@ -334,6 +344,50 @@ func TestStdLibExportedMetadataSelectsTheTargetFlavor(t *testing.T) {
 
 	if strings.Join(fmtWindows, "\n") != strings.Join(fmtLinux, "\n") {
 		t.Error("fmt has a flat package_info.cs, yet its linux record differs from its windows one")
+	}
+
+	// A package split by ARCH alone. math's copies sit in `amd64/` and `linux-arm64/`: the amd64 one is
+	// what the reference flavor compiles, so it is the unqualified section, and every amd64 target
+	// reads it whatever its GOOS. This is the arm that had NO record while the unqualified section was
+	// taken from a `windows/` folder only. Its two copies export the same lines (they differ in position
+	// maps, which are not exported metadata), so the arm reads which SECTIONS exist, not their content.
+	sections := parseStdLibMetadata(stdLibMetadataAsset)
+
+	if _, ok := sections["math"]; !ok {
+		t.Error("math has no unqualified section: its `amd64/` copy was not read as the reference flavor's")
+	}
+
+	if _, ok := sections["math"+stdlibmeta.FlavorSeparator+"linux-arm64"]; !ok {
+		t.Error("math has no `@linux-arm64` section, though it carries a linux-arm64/ copy")
+	}
+
+	if _, ok := sections["math"+stdlibmeta.FlavorSeparator+stdlibmeta.ReferenceGOARCH]; ok {
+		t.Error("math's `amd64/` copy was recorded as a flavor section; it is the reference flavor's")
+	}
+
+	for _, target := range []string{"windows/amd64", "linux/amd64", "darwin/amd64", "linux/arm64"} {
+		if _, ok := stdLibExportedMetadata("math", target); !ok {
+			t.Errorf("math has no record at %s", target)
+		}
+	}
+
+	// The PAIR lookup, on content: vendor/golang.org/x/sys/cpu records an implementation at linux/arm64
+	// (os.File as io.Reader) that its linux/amd64 flavor does not, so a lookup that could not tell the
+	// two linux targets apart answers one of them wrongly.
+	cpuOf := func(target string) string {
+		t.Helper()
+
+		lines, ok := stdLibExportedMetadata("vendor.golang.org.x.sys.cpu", target)
+
+		if !ok {
+			t.Fatalf("embedded stdlib metadata has no record for vendor.golang.org.x.sys.cpu (target %q)", target)
+		}
+
+		return strings.Join(lines, "\n")
+	}
+
+	if cpuOf("linux/arm64") == cpuOf("linux/amd64") {
+		t.Error("vendor.golang.org.x.sys.cpu reads the same at linux/arm64 and linux/amd64: the pair sections are not told apart")
 	}
 }
 
@@ -394,6 +448,19 @@ func TestStdLibMetadataCollectFlatWins(t *testing.T) {
 	write("splitpkg/windows/package_info.cs", record("Windows"))
 	write("splitpkg/linux/package_info.cs", record("Linux"))
 
+	// archpkg: split by ARCH and by pair, with no GOOS folder at all. The reference flavor
+	// (windows/amd64) compiles `amd64/`, so that copy is the unqualified section; before the arch axis
+	// was read it became `archpkg@amd64` and the package had no unqualified section.
+	write("archpkg/archpkg.csproj", "<Project />")
+	write("archpkg/amd64/package_info.cs", record("Amd64"))
+	write("archpkg/linux-arm64/package_info.cs", record("LinuxArm64"))
+
+	// pairpkg: the reference flavor's own PAIR folder beside two GOOS-arch pairs of another GOOS.
+	write("pairpkg/pairpkg.csproj", "<Project />")
+	write("pairpkg/windows-amd64/package_info.cs", record("WindowsAmd64"))
+	write("pairpkg/linux-amd64/package_info.cs", record("LinuxAmd64"))
+	write("pairpkg/linux-arm64/package_info.cs", record("LinuxArm64Pair"))
+
 	sections, err := stdlibmeta.Collect(root)
 
 	if err != nil {
@@ -401,9 +468,14 @@ func TestStdLibMetadataCollectFlatWins(t *testing.T) {
 	}
 
 	want := map[string]string{
-		"flatpkg":        "Flat",
-		"splitpkg":       "Windows",
-		"splitpkg@linux": "Linux",
+		"flatpkg":             "Flat",
+		"splitpkg":            "Windows",
+		"splitpkg@linux":      "Linux",
+		"archpkg":             "Amd64",
+		"archpkg@linux-arm64": "LinuxArm64",
+		"pairpkg":             "WindowsAmd64",
+		"pairpkg@linux-amd64": "LinuxAmd64",
+		"pairpkg@linux-arm64": "LinuxArm64Pair",
 	}
 
 	for name, alias := range want {
@@ -412,7 +484,7 @@ func TestStdLibMetadataCollectFlatWins(t *testing.T) {
 		}
 	}
 
-	for _, name := range []string{"flatpkg@linux", "flatpkg@windows", "splitpkg@windows"} {
+	for _, name := range []string{"flatpkg@linux", "flatpkg@windows", "splitpkg@windows", "archpkg@amd64", "pairpkg@windows-amd64"} {
 		if _, exists := sections[name]; exists {
 			t.Errorf("section %q must not exist: %q", name, sections[name])
 		}
@@ -420,6 +492,19 @@ func TestStdLibMetadataCollectFlatWins(t *testing.T) {
 
 	if len(sections) != len(want) {
 		t.Errorf("collected %d sections, want %d: %v", len(sections), len(want), sections)
+	}
+
+	// Two copies the reference flavor's build both compiles are one flavor described twice. The layout
+	// cannot hold that (the build would see two sets of assembly attributes), and the generator refuses
+	// it by name rather than letting the walk order pick the unqualified section.
+	write("twicepkg/twicepkg.csproj", "<Project />")
+	write("twicepkg/windows/package_info.cs", record("ByGOOS"))
+	write("twicepkg/amd64/package_info.cs", record("ByArch"))
+
+	if _, err := stdlibmeta.Collect(root); err == nil {
+		t.Error("Collect accepted a package whose windows/ and amd64/ copies both describe windows/amd64")
+	} else if !strings.Contains(err.Error(), "twicepkg") || !strings.Contains(err.Error(), "amd64/") || !strings.Contains(err.Error(), "windows/") {
+		t.Errorf("the refusal does not name the package and both folders: %v", err)
 	}
 }
 

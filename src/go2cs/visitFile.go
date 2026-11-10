@@ -115,15 +115,23 @@ func (v *Visitor) visitFile(file *ast.File) {
 			return v.sortedCommentPos[i] < v.sortedCommentPos[j]
 		})
 
+		// -provenance's notice is its own comment group after the file's leading comments (its upstream notices
+		// among them) and before the package doc comment, which it would otherwise read as the end of.
+		if v.options.provenance {
+			v.writeStandAloneCommentString(v.outputBuilder, file.Package, nil, "")
+			v.writeProvenance(file)
+		}
+
 		v.writeDoc(file.Doc, file.Package)
 	}
 
 	// License notices are retained even when ordinary comments are disabled.
 	if !v.options.includeComments {
 		v.outputBuilder.WriteString(sourceLicenseNotices(file, v.newline))
-	}
-	if v.options.provenance {
-		v.outputBuilder.WriteString(sourceProvenance(v.fset.PositionFor(file.Package, false).Filename, v.options, v.newline))
+
+		if v.options.provenance {
+			v.writeProvenance(file)
+		}
 	}
 
 	// Derive package name
@@ -380,4 +388,15 @@ func (v *Visitor) needsNewLine(text string) bool {
 	lastChars := text[len(text)-(newLineLen*2):]
 
 	return lastChars != v.newline+v.newline
+}
+
+// writeProvenance writes -provenance's notice (sourceProvenance) as its own comment group: a blank line before it
+// unless the file starts with it or one is already there, and a blank line after it.
+func (v *Visitor) writeProvenance(file *ast.File) {
+	if written := v.outputBuilder.String(); written != "" && !strings.HasSuffix(written, v.newline+v.newline) {
+		v.outputBuilder.WriteString(v.newline)
+	}
+
+	v.outputBuilder.WriteString(sourceProvenance(v.fset.PositionFor(file.Package, false).Filename, v.options, v.newline))
+	v.outputBuilder.WriteString(v.newline)
 }

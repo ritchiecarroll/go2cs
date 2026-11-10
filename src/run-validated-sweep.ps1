@@ -361,6 +361,8 @@ if (-not $rows) {
 # every row, Source 'columns', and every line printed below is the line that was printed before the
 # dimension existed. That is the invariant the Windows-unchanged proof rests on.
 $targetGoos = Get-SweepTargetGoos
+# The arch that flavor was converted at (GoTargetArch, 'amd64' when unset), recorded beside the OS; it is not the host's.
+$targetGoarch = Get-SweepTargetGoarch
 # On darwin, the RID this host runs as: a darwin segment may carry the other RID's reading as a per-RID note (arch-strict
 # banking, COORD ruling (1)), and this host reads the note where it names this RID. Empty everywhere else.
 $targetRid = Get-SweepHostRid -Goos $targetGoos
@@ -477,7 +479,7 @@ if ($TestBuildMaxCpu -gt 0) {
 # missing expectation and not this one. The hop header above says which reason is in force.
 if ($targetGoos -ne 'windows' -and -not $Hop) {
     $annotatedCount = @($rows | Where-Object { $_.Effective.Source -ne 'columns' }).Count
-    Write-Host ("  target OS $targetGoos -- $annotatedCount row(s) carry a $targetGoos expectation; " +
+    Write-Host ("  target OS $targetGoos (flavor arch $targetGoarch) -- $annotatedCount row(s) carry a $targetGoos expectation; " +
         "$($rows.Count - $annotatedCount) fall back to the windows columns and report " +
         'comparison-validated-at-count when their count differs') -ForegroundColor Cyan
 }
@@ -2141,6 +2143,7 @@ $timingLines = New-Object System.Collections.Generic.List[string]
 [void]$timingLines.Add("# run-validated-sweep per-row wall times")
 [void]$timingLines.Add("# started`t$($started.ToString('o'))")
 [void]$timingLines.Add("# goos`t$targetGoos")
+[void]$timingLines.Add("# goarch`t$targetGoarch")
 [void]$timingLines.Add("# mode`t$modeWord")
 [void]$timingLines.Add("# test-config`t$sweepConfigLabel")
 [void]$timingLines.Add("# rows`t$($rowTimings.Count)")

@@ -3,9 +3,10 @@
     Maps one hand-owned file to the upstream Go source it replaces, in each of two releases.
     Dot-sourced by handown-census.ps1 and by src/tests/handown-census-selftest.ps1.
 .DESCRIPTION
-    src/core/<pkg-path>/[<goos>/]<name>[_impl].cs  ->  <GOROOT>/src/<pkg-path>/<name>.go
+    src/core/<pkg-path>/[<key>/]<name>[_impl].cs  ->  <GOROOT>/src/<pkg-path>/<name>.go
 
-    Under layout L3 the GOOS folder is routing, so pkg/linux/x_impl.cs maps to pkg/x.go. But a release
+    Under layout L3 a key folder (<goos>, <goarch> or <goos>-<goarch>) is routing, so pkg/linux/x_impl.cs
+    and pkg/amd64/x_impl.cs both map to pkg/x.go. But a release
     can hold a REAL package named after a GOOS: Go 1.26 splits internal/runtime/syscall into
     syscall/linux (package linux) and syscall/windows. So each release is resolved on its own:
       the folded path (pkg/x.go) when that release has it,
@@ -26,7 +27,9 @@
 #>
 
 function Resolve-HandOwnUpstream([string] $Rel, [string] $FromGoRoot, [string] $ToGoRoot) {
-    $goosDirs = @('windows', 'linux', 'darwin')
+    # The layout key folders: a target's GOOS, its GOARCH and the pair, for each target of the converter's
+    # platform universe (src/go2cs/platformLattice.go). Repoguard holds this list to that universe.
+    $layoutKeys = @('windows', 'linux', 'darwin', 'amd64', 'arm64', 'windows-amd64', 'linux-amd64', 'darwin-amd64', 'linux-arm64')
     $parts = $Rel -split '[\\/]'
     $file = $parts[-1]
     # DROP THE LEAF via Select-Object, never `$x[0..($x.Count - 2)]`. On a SINGLE-element array that
@@ -35,8 +38,8 @@ function Resolve-HandOwnUpstream([string] $Rel, [string] $FromGoRoot, [string] $
     # result is not an error: it is a silently DOUBLED path segment, and the row it mismaps lands in
     # `no-upstream-counterpart`, the largest bucket, looking like an ordinary finding.
     $dirParts = @($parts | Select-Object -SkipLast 1)
-    if ($dirParts.Count -gt 0 -and $goosDirs -contains $dirParts[-1]) {
-        # layout L3: per-GOOS folder is routing, not package path. `-gt 0` is the right guard HERE
+    if ($dirParts.Count -gt 0 -and $layoutKeys -contains $dirParts[-1]) {
+        # layout L3: a key folder is routing, not package path. `-gt 0` is the right guard HERE
         # only because -SkipLast 1 yields @() on a one-element array; the old slice yielded @(x, x).
         $dirParts = @($dirParts | Select-Object -SkipLast 1)
     }
@@ -45,7 +48,7 @@ function Resolve-HandOwnUpstream([string] $Rel, [string] $FromGoRoot, [string] $
     # A SECOND trailing GOOS folder (pkg/linux/linux/x_impl.cs): fold it too, as a candidate after $folded.
     # Taken only where that release has the file, so a real package named after a GOOS still wins first.
     $twiceFolded = $folded
-    if ($dirParts.Count -gt 0 -and $goosDirs -contains $dirParts[-1] -and $dirParts.Count -lt ($parts.Count - 1)) {
+    if ($dirParts.Count -gt 0 -and $layoutKeys -contains $dirParts[-1] -and $dirParts.Count -lt ($parts.Count - 1)) {
         $twiceFolded = (@($dirParts | Select-Object -SkipLast 1) + $goName) -join '/'
     }
     $unfolded = (@($parts | Select-Object -SkipLast 1) + $goName) -join '/'

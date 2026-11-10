@@ -1,0 +1,30 @@
+# r2c_patch.py <tree> : re-run pass C = pass B (r2b_patch.py) + the open GO2CS2004 row at its real TS site.
+# `type marshalersOption Marshalers`, where Marshalers = typedMarshalers = typedArshalers[jsontext.Encoder]: a defined
+# type over an instantiated generic struct, reached through two ALIASES, so the GO2CS2004 refusal does not fire and
+# the declaration is emitted with a raw Go struct text as its underlying type. Patch: name the underlying instantiated
+# generic, in the same form the converter emits for a defined type over a named struct (go-winio guid.GUID over
+# windows.GUID: the underlying named in the declaration comment, and [GoValueClone("Value")] in package_info).
+import os, re, sys
+
+ROOT = sys.argv[1]
+J = os.path.join(ROOT, r"pkg\github.com\go-json-experiment\json")
+log = []
+
+def sub(path, pattern, repl, count, cid):
+    b = open(path, "rb").read()
+    n = b.count(pattern)
+    if n != count:
+        sys.exit(f"{cid}: expected {count} match(es) in {path}, found {n}")
+    open(path, "wb").write(b.replace(pattern, repl))
+    log.append(f"{cid}: {n} x {os.path.relpath(path, ROOT)}")
+
+u = lambda s: s.encode("utf-8")
+TA = "global::go.github.com.go_json_experiment.json_package.typedArshalers<global::go.github.com.go_json_experiment.json.jsontext_package.Δ{}>"
+for name, coder in (("marshalersOption", "Encoder"), ("unmarshalersOption", "Decoder")):
+    raw = (f"partial struct {name} /*struct{{github.com.go_json_experiment.json_package.nonComparable; fncVals "
+           f"<>github.com/go_json_experiment/json.typedArshaler<github.com/go_json_experiment/json/jsontext.{coder}>; "
+           f"fncCache sync.Map; fromAny bool}}*/;")
+    sub(os.path.join(J, "options.cs"), u(raw), u(f"partial struct {name} /*{TA.format(coder)}*/;"), 1, "GO2CS2004")
+    sub(os.path.join(J, "package_info.cs"), u(f"    internal partial struct {name} {{}}"),
+        u(f"    [GoValueClone(\"Value\")] internal partial struct {name} {{}}"), 1, "GO2CS2004")
+print("\n".join(log))

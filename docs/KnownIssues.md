@@ -12,34 +12,96 @@ variable declared with a two-argument `//go:linkname`.
 [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) describes the cases and the
 workarounds.
 
-## On Apple silicon, `runtime.GOARCH` reports `amd64`
+## On Apple silicon, the standard library is the `amd64` build {#on-apple-silicon-runtimegoarch-reports-amd64}
 
 The packages ship for four platforms: `win-x64`, `linux-x64`, `osx-x64` and `osx-arm64`. The converted standard library
 for macOS is built once, for `darwin/amd64`, and the same packages serve Intel and Apple-silicon Macs. On an
-Apple-silicon Mac a converted program runs as a native arm64 .NET process, but it reports the architecture it was
-converted for:
-- `runtime.GOARCH` reads `amd64`, where Go's own program on the same Mac reads `arm64`, and so does the `GOARCH`
-  setting that `debug.ReadBuildInfo` returns;
-- anything Go decides by architecture at build time follows `amd64` too. Go's `_arm64.go` files are not in the
-  packages, and a branch on `runtime.GOARCH == "arm64"` is never taken.
+Apple-silicon Mac a converted program runs as a native arm64 .NET process:
+- `runtime.GOARCH` reads `arm64`, as Go's own program on the same Mac does. It is read from the process when the
+  program starts, and the `GOARCH` setting that `debug.ReadBuildInfo` returns and `go/build`'s default context
+  follow it;
+- everything Go decides by architecture at build time still follows `amd64`. Go's `_arm64.go` files are not in the
+  packages, `internal/goarch` reports `amd64`, and a constant Go computes from the architecture keeps its `amd64`
+  value.
 
-The processor features that the standard library reads at run time come from the real processor, so `crypto/tls`, for
-one, prefers AES-GCM on Apple silicon as Go does there. On the other three platforms the report is correct.
+So the converted runtime reads `runtime.GOARCH` as `arm64` beside `goarch.GOARCH` as `amd64` on the same Mac. That
+asymmetry is deliberate: each runtime branch on `GOARCH` was checked and reads correctly on Apple silicon. The
+processor features that the standard library reads at run time come from the real processor, so `crypto/tls`, for
+one, prefers AES-GCM on Apple silicon as Go does there.
 
-**To avoid it**, do not use `runtime.GOARCH` to learn the machine's architecture on macOS. From C#,
-`System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture` reports `Arm64` on Apple silicon.
+**To avoid it**, rely on `runtime.GOARCH` for the machine's architecture, never on the presence of an
+architecture-specific path in the standard library.
 <!-- Source: BOARD 2026-11-05 (C1, master reds seat), "runtime.GOARCH reads amd64 on Apple silicon", with its two
      2026-11-06 amendments. Measured on the GitHub-hosted osx-arm64 runner: master's darwin osx-arm64 behavioral red
      (run 41964964302, BuildInfoSettings, stdout mismatch C# vs Go); osx-x64, linux and windows agree because their host
      is amd64. Constants, read at master 72043c1a66 on 2026-11-08, the same in all three flavours:
-     src/core/runtime/windows/extern.cs:375 (`GOARCHᵇ = "amd64";`), src/core/runtime/linux/extern.cs:375
-     (`GOARCHᵇ = "amd64";`) and src/core/runtime/darwin/extern.cs:375 (`GOARCHᵇ = "amd64";`);
-     src/core/internal/goarch/zgoarch_amd64.cs (GOARCH "amd64", IsAmd64 1, IsArm64 0) is the only zgoarch file; and no
+     src/core/runtime/linux-amd64/extern.cs:375 (`GOARCHᵇ = "amd64";`) and, until the run-time GOARCH seat of 2026-11-09,
+     windows' and darwin's extern.cs at the same line;
+     src/core/internal/goarch/amd64/zgoarch_amd64.cs (GOARCH "amd64", IsAmd64 1, IsArm64 0) is the only zgoarch file; and no
      *_arm64.cs file exists anywhere under src/core. debug.ReadBuildInfo's GOARCH setting is composed from runtime.GOARCH
      (src/core/runtime/debug/stubs_impl.cs:199 (`GoModInfoAttribute.Compose(…runtime_package.GOARCH.ToString()`)). The run-time feature read is batch 216
      (C1, claude/c1-aes-arm64): internal/cpu's ARM64 flags are filled on an arm64 process, so crypto/tls's
      hasGCMAsmARM64 holds. Open and owned after 1.26.10.3: the BOARD row's fix shapes (a run-time GOARCH for the shared
      darwin flavour, with its census of compile-time GOARCH branches, or a per-architecture darwin build). -->
+<!-- Amended 2026-11-09 (G, the run-time GOARCH seat, claude/g-goarch-runtime): the first fix shape landed, for darwin
+     only. The heading was "On Apple silicon, `runtime.GOARCH` reports `amd64`"; its old id is kept explicitly, because
+     NEWS.md (1.26.10.3) links it. runtime.GOARCH and internal/buildcfg's defaultGOARCH are displaced for darwin
+     (src/go2cs/manualTypeOperations.go manualConversionConsts) and read the process architecture
+     (src/core/runtime/darwin/goarch_darwin_impl.cs, src/core/internal/buildcfg/darwin/zbootstrap_darwin_impl.cs).
+     The census of record: docs/phase4/DESIGN-comparator-arms.md §5, layer 2, plus census E (consts folded from
+     runtime.GOARCH: defaultGOARCH incoherent, 4 inert or equivalent). The linux and windows flavours still read amd64 on an
+     arm64 host (BOARD 2026-11-09), and no package ships for those. -->
+<!-- Amended 2026-11-09 (G, the same seat, by P2's CENSUS-goarch-linux-windows.md): the windows flavour does the same
+     (src/core/runtime/windows/goarch_windows_impl.cs, src/core/internal/buildcfg/windows/zbootstrap_windows_impl.cs),
+     so Windows on Arm reads arm64. That is unmeasured on an arm64 Windows host: the os-matrix has no windows-arm64
+     runner, and no package ships for it. linux keeps amd64: its syscall numbers and struct layouts are linux/amd64's,
+     so a linux/arm64 host needs a flavour of its own (owner ruling, 2026-11-09: in .4). -->
+<!-- Amended 2026-11-09 (G, the linux/arm64 flavour's corpus apply): the two constants' paths above are re-cited to
+     where the apply moved the files, content unchanged (runtime's linux/extern.cs to linux-amd64/, internal/goarch's
+     zgoarch_amd64.cs to amd64/). "The only zgoarch file" and "no *_arm64.cs file" describe the tree as read on
+     2026-11-08: the apply lays a linux/arm64 flavour out beside the three (src/core/runtime/linux-arm64/extern.cs,
+     src/core/internal/goarch/linux-arm64/zgoarch_arm64.cs). It compiles there and does not run yet, and no package
+     ships for it. The darwin and windows flavours are as this entry describes them. -->
+
+
+## The packages do not ship linux-arm64
+
+linux-arm64 is not supported. The go.* packages ship `win-x64`, `linux-x64`, `osx-x64` and `osx-arm64`. A package
+whose code differs by platform carries one folder per platform under `runtimes/`, and a platform without one gets
+the Windows build in `lib/`. A build resolves its platform the way .NET does at run time, so `linux-musl-x64`
+(Alpine) uses the `linux-x64` folder. For a platform that resolves to no folder, the build reports it:
+- **`GO2CS3003`, an error**, on another operating system, or on Linux with another architecture: linux-arm64 would
+  run the Windows build, and the `linux-x64` build makes x64 system calls. The message names the platform and the
+  first package without a folder for it.
+- **`GO2CS3004`, a warning**, on a Windows platform the packages do not ship (`win-arm64`): the Windows build is
+  that operating system's, so the program runs. What Go decides by architecture when the package was converted
+  follows `amd64`.
+
+A cross-build for a shipped platform from an unshipped host is not affected: it names its platform with
+`-r <rid>` (`RuntimeIdentifier`), and that platform has its folder.
+
+**To avoid it**, build for one of the four shipped platforms. A build that only needs to compile, and knowingly wants
+the Windows build (a test harness that never runs the program, say), passes `-p:GoAllowReferenceFlavor=true`. The
+program then runs the Windows build wherever it runs. The property counts only on the command line: set in a
+project file it changes nothing, so a library cannot switch the check off for the projects that build it.
+
+A portable app built on a shipped platform and then RUN on another one is out of the build's sight. At start-up
+it prints a warning on standard error instead: for another operating system, and for the Linux build on another
+architecture (`linux-x64` run on `linux-arm64`).
+<!-- Source: DESIGN-linux-arm64-flavour.md section 0 (lane G, claude/g-la64-design 7831a23193), SEAT 0, cut by C2 as
+     claude/c2-la64-seat0 on master 0c553534df, with REVIEW-linux-arm64-flavour.md F4 folded in (COORD ruling R2,
+     2026-11-09: its own target, RID-split by runtimes/ presence, RID-graph aware, win-arm64 a warning, the run-time
+     architecture check). Mechanism: src/core/golib/buildTransitive/go.lib.targets, GoRefuseUnshippedRid, over
+     _GoResolveRidFlavors (a breadth-first walk of $(RuntimeIdentifierGraphPath); measured: linux-musl-x64 imports
+     linux-musl and linux-x64, win-arm64 imports only win, in SDK 10.0.403's PortableRuntimeIdentifierGraph.json).
+     Gate: src/tests/PackageTests/RidCompileAsset/test-rid-compile-asset.ps1, read red-first against go.* 1.26.10.3 on
+     2026-11-09: against master's go.lib.targets the UNSHIPPED, swap-off, project-file opt-out, ALPINE and WIN-ARM64
+     arms fail (the linux-arm64 build BUILT against lib/; the Alpine build failed CS0426 against lib/); with the change
+     all ten arms pass, and each of the swap-off and project-file arms fails alone against a copy mutated in that one
+     respect. The run-time check is GoHostOfRecord.Describe (src/core/golib/GoHostOfRecord.cs), called through
+     Verify(GOOS, GOARCH) from src/core/runtime/hostofrecord_impl.cs, gated by src/tests/GolibTests/HostOfRecordTests.cs
+     (red first: the linux/amd64-on-arm64 case failed before the architecture check). The linux-arm64 flavour itself
+     is the design's seat S6, which turns the error into a no-op for that platform. -->
 
 ## On macOS, a `go` statement past the system's thread limit ends the program
 
@@ -55,6 +117,21 @@ the limit was about 2,000 goroutines on Apple silicon and about 3,000 on Intel; 
 <!-- Source: C1's run 42497561630 (claude/c1-darwin-threadcap a85e0cf11), on GitHub-hosted macOS runners: osx-arm64
      (macOS 15.8.2, kern.num_taskthreads 2048, first failure at 2,027 live goroutines) and osx-x64 (macOS 15.7.9, 3072,
      first failure at 3,051). The figures and their provenance sit beside the Limitations bullet. -->
+
+## On Linux, a program with more than about 16,000 goroutines alive ends
+
+Each goroutine is an operating-system thread, and on Linux each .NET thread uses about four of the process's memory
+mappings. Linux caps the mappings at the `vm.max_map_count` setting, 65,530 by default. When a program has about
+16,000 goroutines alive, the next `go` statement fails with `Fatal error. Failed to create RW mapping for RX memory`,
+and the program ends; nothing can catch it. A Go goroutine is not a thread, so the limit does not apply to Go itself.
+
+**To avoid it**, bound how many goroutines are alive at once, with a worker pool for example. Two settings may raise
+the limit, but neither has been measured: `DOTNET_EnableWriteXorExecute=0` in the environment, which should cut the
+mappings each thread uses, and a larger `vm.max_map_count` on the machine.
+<!-- Source: lane R's M:N R6 run, 2026-11-09, at master 0bbe3ab6e5: ParkStorm (DESIGN-mn-scheduler-sizing.md Appendix A),
+     20,000 goroutines, linux flavour, Release, on R-WSL (Ubuntu 22.04, kernel 6.18, vm.max_map_count 65530). All six
+     runs (bounded reserve 16 MiB and 1 MiB, three each) aborted at 16,226-16,229 threads. The record is the dated O1
+     amendment in docs/phase4/DESIGN-mn-scheduler.md. -->
 
 ## With go2cs 1.26.10.2 or earlier, a program converted with local standard-library references runs its standard library built Debug
 

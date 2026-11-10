@@ -91,8 +91,10 @@ func writtenRHSIsNamedType(named *types.Named, base *types.Named) bool {
 		return false
 	}
 
-	rhsNamed, isNamed := types.Unalias(rhs).(*types.Named)
-	return isNamed && rhsNamed == base
+	// A generic declaration's RHS is written in its own type parameters (`type P[T any] pair[T]`), so it is
+	// read with named's type arguments before the comparison: P[string] was written over pair[string].
+	rhsNamed, isNamed := types.Unalias(instantiatedTypeSpecRHS(named, rhs)).(*types.Named)
+	return isNamed && types.Identical(rhsNamed, base)
 }
 
 // foreignWrittenBase returns the named type ANOTHER package declares that `named` was written over —

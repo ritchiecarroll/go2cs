@@ -533,7 +533,7 @@ several targets' *emissions*, and it is emphatically not derivable from Go file 
 different C# from identical Go source (constant folding, escape analysis, cross-file collision renaming,
 dead-branch folding), and others emit identical C# from differing Go source. <!-- the design's census: four and three
 --> So the layout is produced by a
-multi-target run — `go2cs -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64` — which
+multi-target run — `go2cs -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64` — which
 converts once per target into a seeded staging root, classifies every emitted artifact (shared / variant /
 partial / exclusive), and merges the result into one tree.
 
@@ -989,7 +989,7 @@ A pull whose direct reference would close a project cycle is instead reached **l
 golib's `LinknameVar<T>` — the same storage, with no `ProjectReference`. math/bits is that case at Go 1.26,
 because `runtime` imports `math/bits`:
 
-<!-- source: src/core/runtime/panic.cs:342 -->
+<!-- source: src/core/runtime/amd64/panic.cs:342 -->
 ```csharp
 public static error overflowError = ((error)((errorString)(@string)"integer overflow"));
 ```

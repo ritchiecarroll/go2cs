@@ -1,0 +1,15 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+// C23 probe: a named []byte from ANOTHER MODULE (std) converted from a string constant.
+func main() {
+	var result any
+	if result == nil {
+		result = json.RawMessage("null")
+	}
+	fmt.Println(string(result.(json.RawMessage)), len(json.RawMessage(`"id"`))) // Go: null 4
+}

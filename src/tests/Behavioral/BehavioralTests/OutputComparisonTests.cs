@@ -149,6 +149,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckArrayRangeSnapshot() => CheckTarget("ArrayRangeSnapshot");
 
     [TestMethod]
+    public void CheckArraySwitchCases() => CheckTarget("ArraySwitchCases");
+
+    [TestMethod]
     public void CheckArrayValueCopySites() => CheckTarget("ArrayValueCopySites");
 
     [TestMethod]
@@ -488,6 +491,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckDefinedTypeOverForeignStruct() => CheckTarget("DefinedTypeOverForeignStruct");
 
     [TestMethod]
+    public void CheckDefinedTypeOverInstantiation() => CheckTarget("DefinedTypeOverInstantiation");
+
+    [TestMethod]
     public void CheckDefinedTypeOverInterface() => CheckTarget("DefinedTypeOverInterface");
 
     [TestMethod]
@@ -543,6 +549,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckElidedStructInterfaceField() => CheckTarget("ElidedStructInterfaceField");
+
+    [TestMethod]
+    public void CheckEmbedDepthMethodPromotion() => CheckTarget("EmbedDepthMethodPromotion");
 
     [TestMethod]
     public void CheckEmbedDirectiveForms() => CheckTarget("EmbedDirectiveForms");
@@ -776,6 +785,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGenericLiftedInterfaceField() => CheckTarget("GenericLiftedInterfaceField");
 
     [TestMethod]
+    public void CheckGenericMapArgPointerImpl() => CheckTarget("GenericMapArgPointerImpl");
+
+    [TestMethod]
     public void CheckGenericMethodReflect() => CheckTarget("GenericMethodReflect");
 
     [TestMethod]
@@ -870,6 +882,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGoHostModuleShadow() => CheckTarget("GoHostModuleShadow");
+
+    [TestMethod]
+    public void CheckGoImageCopyThroughView() => CheckTarget("GoImageCopyThroughView");
 
     [TestMethod]
     public void CheckGoNamespaceShadow() => CheckTarget("GoNamespaceShadow");
@@ -1307,6 +1322,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedByteSliceFromStringLit() => CheckTarget("NamedByteSliceFromStringLit");
 
     [TestMethod]
+    public void CheckNamedBytesByteSeq() => CheckTarget("NamedBytesByteSeq");
+
+    [TestMethod]
     public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
 
     [TestMethod]
@@ -1440,6 +1458,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedSliceConversion() => CheckTarget("NamedSliceConversion");
+
+    [TestMethod]
+    public void CheckNamedSliceGoClone() => CheckTarget("NamedSliceGoClone");
 
     [TestMethod]
     public void CheckNamedSliceNilVsEmpty() => CheckTarget("NamedSliceNilVsEmpty");
@@ -2072,7 +2093,13 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckRelationalPatternGuard() => CheckTarget("RelationalPatternGuard");
 
     [TestMethod]
+    public void CheckRenamedGenericQualified() => CheckTarget("RenamedGenericQualified");
+
+    [TestMethod]
     public void CheckRenamedReceiverBox() => CheckTarget("RenamedReceiverBox");
+
+    [TestMethod]
+    public void CheckRenamedTypeAliasReexport() => CheckTarget("RenamedTypeAliasReexport");
 
     [TestMethod]
     public void CheckReservedNameShadows() => CheckTarget("ReservedNameShadows");
@@ -2444,6 +2471,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckTypeInference() => CheckTarget("TypeInference");
 
     [TestMethod]
+    public void CheckTypeParamCoreAssign() => CheckTarget("TypeParamCoreAssign");
+
+    [TestMethod]
     public void CheckTypeParamFloatConversion() => CheckTarget("TypeParamFloatConversion");
 
     [TestMethod]
@@ -2517,6 +2547,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUint8SliceLiteralConversion() => CheckTarget("Uint8SliceLiteralConversion");
+
+    [TestMethod]
+    public void CheckUintptrAliasAndNot() => CheckTarget("UintptrAliasAndNot");
 
     [TestMethod]
     public void CheckUintptrUnsafePointerIdiom() => CheckTarget("UintptrUnsafePointerIdiom");

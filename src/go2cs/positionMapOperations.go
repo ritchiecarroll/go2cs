@@ -1253,9 +1253,47 @@ func (v *Visitor) goSourceIdentity(outputFileName string) string {
 		}
 	}
 
-	// Anything else — a -recurse module converted into its own output root — is what Go bakes for an
-	// ordinary build: the absolute source path, forward-slashed as Go spells one everywhere.
+	// A main-module (or local replace) source converted into its own output root — the -recurse case. Its output
+	// is a source artifact built and shipped elsewhere, so by default it records what `go build -trimpath` bakes,
+	// the module path and the path inside the module, never this machine's directories (COORD's ruling,
+	// 2026-11-10). The record writes it `<module>@/<path>`: the module-cache form with an EMPTY version, which the
+	// runtime reports as `<module>/<path>`, unrooted. A plain `<module>/<path>` would read as the GOROOT-relative
+	// form and be rooted under the link-time GOROOT, a path that does not exist (resolveRecordedGoFile).
+	if !v.options.noTrimPath {
+		if identity, ok := mainModuleSourceIdentity(source); ok {
+			return identity
+		}
+	}
+
+	// Anything else — -trimpath=false, or a source outside any module — is what Go bakes for an ordinary
+	// untrimmed build: the absolute source path, forward-slashed as Go spells one everywhere.
 	return filepath.ToSlash(source)
+}
+
+// mainModuleSourceIdentity spells a source by the module that holds it, `<module path>@/<path in module>`: the
+// nearest go.mod above it names the module, and the rest is the source's path below that go.mod. False when no
+// go.mod is found or it names no module.
+func mainModuleSourceIdentity(source string) (string, bool) {
+	root := moduleRootDir(filepath.Dir(source))
+	goMod, found := goModFile(root)
+
+	if !found {
+		return "", false
+	}
+
+	modulePath := readModuleFromGoMod(goMod)
+
+	if modulePath == "" {
+		return "", false
+	}
+
+	relative, err := filepath.Rel(root, source)
+
+	if err != nil || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
+		return "", false
+	}
+
+	return modulePath + "@/" + filepath.ToSlash(relative), true
 }
 
 // moduleCacheSourceIdentity spells a source under the module cache as <module>@<version>/<file>: the

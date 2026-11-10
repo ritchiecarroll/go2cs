@@ -60,9 +60,12 @@
 // epoll descriptor is CLOEXEC so no child inherits it; isPollServerDescriptor answers truthfully for
 // it, which os/exec's TestExtraFiles relies on when it enumerates the parent's descriptors.
 //
-// SCOPE. Linux amd64: the struct epoll_event image below is amd64's PACKED 12 bytes (uint32 events
-// at 0, uint64 data at 4), and pollServerInit refuses any other architecture rather than misread
-// (arm64's record is 16 bytes unpacked). darwin has its own poller in darwin/runtime_netpoll_impl.cs
+// SCOPE. Linux amd64, with linux/arm64 MAPPED but not yet admitted. The syscall numbers and the struct
+// epoll_event image differ per arch (amd64: packed 12 bytes; arm64: unpacked 16, and no epoll_wait at
+// all), so they come from epollKernelFor, and an arch it does not map is refused rather than misread.
+// pollServerInit still admits X64 only: arm64's mapping is written ahead of its proof (S3 site 1,
+// docs/phase4/DATA-la64-s3-census.md), and the guard is lifted in the commit that carries a passing
+// linux/arm64 reading. darwin has its own poller in darwin/runtime_netpoll_impl.cs
 // -- this file's twin over kqueue, cut as a copy of it. Windows keeps its own poller in
 // windows/runtime_netpoll_impl.cs, untouched: the desc machinery here is a COPY of it (OQ-7, the
 // lock_sema/lock_futex per-GOOS-authority precedent) and the two files cite each other so they
@@ -91,11 +94,9 @@ partial class poll_package
 {
     // ---- the kernel surface: private copies of the numbers and flags this file uses (design §3) ---
     // Kept local rather than read from the converted syscall flavor so the file's kernel contract is
-    // visible in one place; each value is Linux amd64's (syscall/linux/zsysnum_linux_amd64.cs,
-    // zerrors_linux_amd64.cs, internal/runtime/syscall/linux/defs_linux.cs).
-    private const nuint SYS_EPOLL_WAIT = 232;
-    private const nuint SYS_EPOLL_CTL = 233;
-    private const nuint SYS_EPOLL_CREATE1 = 291;
+    // visible in one place. The flags and EINTR below are the generic Linux values, the same at amd64
+    // and arm64 (zerrors_linux_amd64.cs, internal/runtime/syscall/linux/defs_linux.cs). The syscall
+    // numbers and the epoll_event image are per arch: see epollKernelFor.
     private const uint EPOLL_CLOEXEC = 0x80000;
     private const nuint EPOLL_CTL_ADD = 1;
     private const nuint EPOLL_CTL_DEL = 2;
@@ -107,12 +108,44 @@ partial class poll_package
     private const uint EPOLLET = 0x80000000;
     private const nuint EINTR = 4;
 
-    // struct epoll_event on linux/amd64: __attribute__((packed)) { uint32_t events; uint64_t data; }.
-    // 12 bytes; data is at offset 4 and UNALIGNED, which Marshal.ReadInt64/WriteInt64 are specified
-    // for (S0 measured the round trip through a 2-slot buffer).
-    private const int epollEventSize = 12;
+    // The per-arch half of the kernel contract (S3 site 1; docs/phase4/DATA-la64-s3-census.md §2-§3,
+    // checked against Go's own zsysnum and EpollEvent at each arch):
+    // - amd64: epoll_wait 232, epoll_ctl 233, epoll_create1 291. struct epoll_event is
+    //   __attribute__((packed)) { uint32_t events; uint64_t data; }: 12 bytes, data at offset 4 and
+    //   UNALIGNED, which Marshal.ReadInt64/WriteInt64 are specified for (S0 measured the round trip
+    //   through a 2-slot buffer).
+    // - arm64: there is NO epoll_wait. epoll_pwait (22) with a NULL sigmask is the same call
+    //   (epoll_pwait(2)), and it is the call Go's own runtime makes on every arch
+    //   (internal/runtime/syscall/linux EpollWait: Syscall6(SYS_EPOLL_PWAIT, ..., 0, 0)). A renumbered
+    //   epoll_wait would compile and return ENOSYS. epoll_ctl 21, epoll_create1 20. struct epoll_event is
+    //   UNPACKED: 16 bytes, events at 0, a 4-byte pad, data at 8; a 12-byte image would misread every
+    //   event after the first.
+    // - any other arch: null, and pollServerInit refuses it.
+    // The wait's fifth and sixth arguments are always 0, 0 (NULL sigmask, size 0): Go's own call, and
+    // ignored by amd64's epoll_wait, which takes four. amd64 keeps epoll_wait so this commit changes
+    // nothing it runs.
+    internal readonly record struct EpollKernel(nuint Wait, nuint Ctl, nuint Create1, int EventSize, int DataOffset);
+
+    internal static EpollKernel? epollKernelFor(Architecture arch) => arch switch
+    {
+        Architecture.X64 => new EpollKernel(Wait: 232, Ctl: 233, Create1: 291, EventSize: 12, DataOffset: 4),
+        Architecture.Arm64 => new EpollKernel(Wait: 22, Ctl: 21, Create1: 20, EventSize: 16, DataOffset: 8),
+        _ => null,
+    };
+
+    /// <summary>
+    /// GolibTests' probe for the per-arch kernel contract (S3 site 1): epollKernelFor's answer for
+    /// <paramref name="arch"/>, or null for an arch this file refuses. Pure: no syscall and no state.
+    /// </summary>
+    public static (nuint wait, nuint ctl, nuint create1, int eventSize, int dataOffset)? GoEpollKernelProbe(Architecture arch) =>
+        epollKernelFor(arch) is EpollKernel k ? (k.Wait, k.Ctl, k.Create1, k.EventSize, k.DataOffset) : null;
+
     private const int epollEventsOffset = 0;
-    private const int epollDataOffset = 4;
+
+    // This process's half: set once by pollServerInit, before epfd, the drain buffer and the drain
+    // thread exist. Every other reader runs after it (internal/poll reaches them only through
+    // serverInit.Do(runtime_pollServerInit), and the drain thread starts after the write).
+    private static EpollKernel kernel;
 
     // Go's batch: `var events [128]syscall.EpollEvent` (runtime/netpoll_epoll.go).
     private const int drainBatch = 128;
@@ -214,17 +247,21 @@ partial class poll_package
 
     private static uintptr fdArg(int fd) => (uintptr)(nuint)(uint)fd;
 
-    // EPOLL_CTL_ADD/DEL with a 12-byte native epoll_event image (§4.1). DEL ignores the image but a
-    // valid one is passed anyway -- Go passes &ev for both, and pre-2.6.9 kernels required it.
+    // EPOLL_CTL_ADD/DEL with this arch's native epoll_event image (§4.1). DEL ignores the image but a
+    // valid one is passed anyway -- Go passes &ev for both, and pre-2.6.9 kernels required it. The image
+    // is zeroed first, so arm64's pad word is 0 rather than whatever AllocHGlobal left.
     private static nuint epollCtl(nuint op, int fd, uint events, uintptr token)
     {
-        nint ev = Marshal.AllocHGlobal(epollEventSize);
+        nint ev = Marshal.AllocHGlobal(kernel.EventSize);
 
         try
         {
+            for (int b = 0; b < kernel.EventSize; b += 4)
+                Marshal.WriteInt32(ev, b, 0);
+
             Marshal.WriteInt32(ev, epollEventsOffset, unchecked((int)events));
-            Marshal.WriteInt64(ev, epollDataOffset, unchecked((long)(ulong)(nuint)token));
-            return rawSyscall6(SYS_EPOLL_CTL, fdArg(epfd), op, fdArg(fd), (uintptr)ev, out _);
+            Marshal.WriteInt64(ev, kernel.DataOffset, unchecked((long)(ulong)(nuint)token));
+            return rawSyscall6(kernel.Ctl, fdArg(epfd), op, fdArg(fd), (uintptr)ev, out _);
         }
         finally
         {
@@ -241,20 +278,33 @@ partial class poll_package
     // degradation this file exists to remove.
     internal static partial void runtime_pollServerInit()
     {
-        if (RuntimeInformation.ProcessArchitecture != Architecture.X64)
+        Architecture arch = RuntimeInformation.ProcessArchitecture;
+
+        if (epollKernelFor(arch) is not EpollKernel mapped)
         {
             throw new PlatformNotSupportedException(
-                "runtime: netpoll (linux flavor) mirrors linux/amd64's packed 12-byte struct epoll_event; " +
-                RuntimeInformation.ProcessArchitecture + " is not supported by this hand-own");
+                "runtime: netpoll (linux flavor) has no epoll syscall numbers or struct epoll_event layout for " +
+                arch + "; refused rather than misread");
         }
 
-        nuint errno = rawSyscall6(SYS_EPOLL_CREATE1, EPOLL_CLOEXEC, 0, 0, 0, out uintptr r1);
+        // The admission guard: X64 only, until a linux/arm64 run proves the arm64 mapping (S3 site 1). It
+        // is lifted in the commit that carries that reading, not before.
+        if (arch != Architecture.X64)
+        {
+            throw new PlatformNotSupportedException(
+                "runtime: netpoll (linux flavor): the " + arch + " epoll mapping is written but not yet proven " +
+                "on a " + arch + " host; only X64 is admitted");
+        }
+
+        kernel = mapped;
+
+        nuint errno = rawSyscall6(kernel.Create1, EPOLL_CLOEXEC, 0, 0, 0, out uintptr r1);
 
         if (errno != 0)
             throw new InvalidOperationException("runtime: epollcreate failed (errno " + errno + ")");
 
         epfd = (int)(nuint)r1;
-        drainBuffer = Marshal.AllocHGlobal(drainBatch * epollEventSize);
+        drainBuffer = Marshal.AllocHGlobal(drainBatch * kernel.EventSize);
 
         // Background: the process does not wait for it at exit, and it needs no shutdown signal
         // (OQ-2). Started AFTER epfd and the buffer exist, BEFORE pollServerInitialized is published.
@@ -285,7 +335,9 @@ partial class poll_package
 
         while (true)
         {
-            nuint errno = rawSyscall6(SYS_EPOLL_WAIT, fdArg(epfd), (uintptr)drainBuffer, (uintptr)(nuint)drainBatch, forever, out uintptr r1);
+            // epoll_wait (amd64) or epoll_pwait (arm64); the fifth and sixth arguments are rawSyscall6's
+            // 0, 0, which is the NULL sigmask epoll_pwait needs.
+            nuint errno = rawSyscall6(kernel.Wait, fdArg(epfd), (uintptr)drainBuffer, (uintptr)(nuint)drainBatch, forever, out uintptr r1);
 
             // epoll_wait is NEVER restarted after a signal handler, SA_RESTART or not (signal(7)), so
             // EINTR is retried unconditionally -- Go: `if errno == _EINTR { goto retry }`. S0 measured
@@ -308,8 +360,8 @@ partial class poll_package
 
             for (int i = 0; i < n; i++)
             {
-                uint events = unchecked((uint)Marshal.ReadInt32(drainBuffer, i * epollEventSize + epollEventsOffset));
-                uintptr token = (uintptr)unchecked((ulong)Marshal.ReadInt64(drainBuffer, i * epollEventSize + epollDataOffset));
+                uint events = unchecked((uint)Marshal.ReadInt32(drainBuffer, i * kernel.EventSize + epollEventsOffset));
+                uintptr token = (uintptr)unchecked((ulong)Marshal.ReadInt64(drainBuffer, i * kernel.EventSize + kernel.DataOffset));
 
                 // A token that no longer resolves is an event for a descriptor closed under us
                 // (pollClose removed it); under ET it is not repeated and needs nothing (§4.6).

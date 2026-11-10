@@ -21,6 +21,11 @@ import (
 )
 
 func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
+	// A byte view over a reference-bearing struct, sliced as a direct argument of copy (goImageCopyView.go).
+	if view, ok := v.goImageCopySlice(sliceExpr); ok {
+		return view
+	}
+
 	// An array field reached through a local reinterpreted from unsafe.Pointer slices through the field's
 	// view, which is a native window when the struct lies in native memory (see fieldAccess.go).
 	if selectorExpr, ok := ast.Unparen(sliceExpr.X).(*ast.SelectorExpr); ok {
@@ -722,11 +727,11 @@ func typeParamIsNumericWithFloat(tp *types.TypeParam) bool {
 // decided here from the TYPE SET so the definition site (getGenericDefinition's constraint) and the
 // slice, conversion and construction sites always agree.
 //
-// A NAMED term (crypto/x509's `net.IP | string`) does not count, although its core type is []byte:
-// a named string or []byte type's C# struct does not implement IByteSeq, so constraining such a
-// parameter to it would reject the type argument Go instantiates it with (CS0315). For the same
-// reason a `~` term still cannot be satisfied in C# by a NAMED string or []byte type argument, which
-// Go allows; nothing in the corpus instantiates one.
+// A `~` term is satisfied by a NAMED string or []byte type argument, as Go allows: go2cs-gen's named
+// []byte and named string wrappers implement IByteSeq<TSelf, byte> (TS readiness C16, jsontext's
+// `type Value []byte`). A NAMED term (crypto/x509's `net.IP | string`) still does not count, although
+// its core type is []byte. It was excluded while a named wrapper could not satisfy IByteSeq (CS0315),
+// and its sites keep their own emission; counting it now is a separate change with its own footprint.
 func typeParamIsStringByteUnion(tp *types.TypeParam) bool {
 	iface, ok := tp.Constraint().Underlying().(*types.Interface)
 

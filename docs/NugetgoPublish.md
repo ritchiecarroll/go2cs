@@ -81,6 +81,9 @@ Stop at the first one that fails.
    `Input digest`, and its disclosed and excluded declarations are read. COORD reads MODULE.md: it is what the
    package ships as VALIDATION.md.
 4. Convert the pack's input into another fresh root `PR`: `G -recurse=nuget -platforms P -go2cspath <T>/src <SRC> <PR>`.
+   For a module whose `-LicenseSpdx` names Apache-2.0, add `-provenance`: its section 4(b) asks every modified file
+   to carry a notice that it was changed, and the pack refuses a `PR` whose converted files lack go2cs's.
+   `Invoke-NugetgoRepack.ps1` adds it from the module's row.
 5. **Gate: the binding.** Each library project under `PR/src/M` records a `GoInputDigest` equal to its MODULE.md row.
    The pack checks this again; reading it here catches a wrong binary before a pack runs.
 
@@ -88,7 +91,10 @@ Stop at the first one that fails.
 refuses it ("has no package with Go test files"), so there is no `VR` and no MODULE.md: skip steps 2, 3 and 5. Its
 proof is behavioral, one row per shipped RID, each run on a host of that RID (section 3, *A module with no Go tests*).
 Its sample program is committed at `T` under `src/tests/ModuleBehavior/M@V/`: `main.go`, `go.mod`, `go.sum`, and
-`mappings.txt` with the module's row.
+`mappings.txt` with the module's row. `Invoke-NugetgoRepack.ps1` takes it from its `nugetgo-modules.psd1` row, whose
+`NoGoTests` is the reason the rehearsal states: run `-Packs int1`, write the rows (section 3), then run
+`-Packs release -BehaviorProofDir <rows>`. Step 4's `-provenance` applies to it as to any module (mousetrap is
+Apache-2.0).
 
 ## 2. Pack (lane, at `T`)
 

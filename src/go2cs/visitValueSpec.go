@@ -23,6 +23,9 @@ import (
 // displaces a package-level var declaration (funcPlaceholderFormat's twin for vars).
 const varPlaceholderFormat = "// go2cs generated this placeholder — var %s is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])"
 
+// constPlaceholderFormat is varPlaceholderFormat's twin for a manualConversionConsts registration.
+const constPlaceholderFormat = "// go2cs generated this placeholder — const %s is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])"
+
 // visitValueSpec converts one spec of a const or var declaration. doc is the comment it writes above the
 // spec (visitGenDecl's specDoc); declDoc is the declaration's own doc, which the //go:linkname and
 // //go:embed reads take together with valueSpec.Doc.
@@ -47,20 +50,28 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 
 	v.writeDoc(doc, token.NoPos)
 
-	// A var displaced by manualConversionVars: its hand-owned member replaces the declaration. Only a
-	// spec that declares that one name can be displaced; a registered name sharing a spec is refused
-	// rather than split, since nothing in the corpus needs it.
-	if tok == token.VAR && !v.inFunction {
+	// A var displaced by manualConversionVars, or a const by manualConversionConsts: its hand-owned member
+	// replaces the declaration. Only a spec that declares that one name can be displaced; a registered
+	// name sharing a spec is refused rather than split, since nothing in the corpus needs it.
+	if (tok == token.VAR || tok == token.CONST) && !v.inFunction {
 		for _, name := range valueSpec.Names {
-			if !v.isManualVar(name.Name) {
+			placeholder := varPlaceholderFormat
+
+			if tok == token.CONST {
+				if !v.isManualConst(name.Name) {
+					continue
+				}
+
+				placeholder = constPlaceholderFormat
+			} else if !v.isManualVar(name.Name) {
 				continue
 			}
 
 			if len(valueSpec.Names) != 1 {
-				panic(fmt.Sprintf("@visitValueSpec - manualConversionVars entry %s shares its spec with other names; declare it alone", name.Name))
+				panic(fmt.Sprintf("@visitValueSpec - manual conversion entry %s shares its spec with other names; declare it alone", name.Name))
 			}
 
-			v.writeOutput(varPlaceholderFormat, name.Name)
+			v.writeOutput(placeholder, name.Name)
 			v.discardStandAloneComments(valueSpec.Pos(), valueSpec.End())
 			return
 		}
@@ -706,6 +717,11 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 						// a post-conversion wrap keyed on the DECLARED type versus the value's.
 						if narrowedChan := v.chanDirNarrowedValue(def.Type(), v.info.TypeOf(valueSpec.Values[i]), valExpr); narrowedChan != "" {
 							valExpr = narrowedChan
+						}
+
+						// A slice- or map-cored type parameter as a typed var's value (see coreTypeParamValue).
+						if materialized := v.coreTypeParamValue(def.Type(), v.info.TypeOf(valueSpec.Values[i]), valExpr); materialized != "" {
+							valExpr = materialized
 						}
 
 						if hoistBuf.Len() > 0 {

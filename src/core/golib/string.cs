@@ -312,6 +312,20 @@ public readonly struct @string :
     // to widen @string's int Length to the interface's nint.
     nint IByteSeq.Length => m_length;
 
+    // The union member a string IS (IByteSeq<T>.TryGetString): `string(s)` returns it unchanged, and `[]byte(s)`
+    // copies its bytes, since a string is no slice to share.
+    bool IByteSeq<byte>.TryGetSlice(out slice<byte> window)
+    {
+        window = default;
+        return false;
+    }
+
+    bool IByteSeq<byte>.TryGetString(out @string value)
+    {
+        value = this;
+        return true;
+    }
+
     public ReadOnlySpan<byte> Slice(int start, int length)
     {
         return Bytes.Slice(start, length);
