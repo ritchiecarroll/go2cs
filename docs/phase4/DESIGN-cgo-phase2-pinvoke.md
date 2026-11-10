@@ -15,6 +15,12 @@
 >
 > Every choice below is a recommendation with its alternative named; §10 lists the questions for review. Amended by
 > dated blocks, never rewritten.
+>
+> **AMENDED 2026-11-10 (§11): the adversarial review is folded in.** The record is
+> [`REVIEW-cgo-phase2-pinvoke.md`](REVIEW-cgo-phase2-pinvoke.md) (`claude/coord-cgo-phase2-review` `2e859d6c9b`); the
+> verdict is APPROVE WITH CHANGES, with COORD's rulings. Where §11 and the text above disagree, **§11 governs**. Each
+> superseded section carries a pointer to the §11 item that replaces it. Increments 0 and 1 are released; increment 2
+> may be cut on rulings §11.2 and §11.7; 3, 4 and 5 wait on the items §11.14 names.
 
 ## 1. What Phase 2 is, in one paragraph
 
@@ -85,6 +91,8 @@ consumes the recognizer. Until then Phase 2 could not even refuse these by name.
 
 ### 4.1 Files
 
+> ⟶ **Amended 2026-11-10:** §11.8 (the bindings file is converter output, not git-ignored) and §11.9 (one per target, placed by the layout rule).
+
 Per cgo package, the converter writes:
 
 - **The user's files**, each from its rewritten tree and named for its source (Phase 1's mapping): `fixture.go` →
@@ -102,6 +110,8 @@ Its header records the target (GOOS/GOARCH), the C toolchain that produced the l
 provenance, not only by content.
 
 ### 4.2 One function, end to end
+
+> ⟶ **Amended 2026-11-10:** §11.4 (the seam bracket goes through the runtime forwarders) and §11.3 (errno).
 
 For `int add(int, int);` declared in the preamble and `#cgo LDFLAGS: -lfoo`:
 
@@ -138,12 +148,16 @@ partial class cgofixture_package
 
 ### 4.3 The errno form (`_C2func_`, once §3.1 lands)
 
+> ⟶ **Amended 2026-11-10:** §11.3.
+
 `r, err := C.f(x)` binds the same symbol with `SetLastError = true`. The wrapper reads
 `Marshal.GetLastSystemError()` **after the extern returns and before `GoNativeCall.Exit()`**, which is the seam's
 §4.3 rule. It then returns `(r, err)` with `err` nil when the value is 0, and `syscall.Errno(value)` otherwise, as
 cgo does.
 
 ### 4.4 What converted user code shows
+
+> ⟶ **Amended 2026-11-10:** §11.17 (RULED: the visible `C.add(C.int(a))` form is the target).
 
 Recommendation: user code reads **as cgo rewrote it**, `_Cfunc_add(_Ctype_int(a), _Ctype_int(b))`. That is the text
 the type checker resolved, and it is what Go's own toolchain compiles.
@@ -156,6 +170,8 @@ unmeasured. ⟨Q1⟩ for review, with the plain form as the safe default.
 ## 5. Mirrors: the struct-passing discipline at generated scale
 
 ### 5.1 The mirror
+
+> ⟶ **Amended 2026-11-10:** §11.2 (the assertions), §11.9 (per target) and §11.13 (flexible arrays, bitfields, `_Bool`).
 
 For each `_Ctype_struct_*` (and `_Ctype_union_*`, which cmd/cgo gives as a byte array) that any wrapper hands
 across, the generator emits:
@@ -185,6 +201,8 @@ internal unsafe struct _Ctype_struct_x__ꓸmirror
   the struct then has no Phase 2 crossing.
 
 ### 5.2 The crossing
+
+> ⟶ **Amended 2026-11-10:** §11.1 (BLOCKER: one element wide) and §11.7 (by value, RULED).
 
 Which parameter shapes Phase 2 covers:
 
@@ -228,6 +246,8 @@ copy-back of the other overwrite it.
 
 ### 5.3 The size assertion, and what it can and cannot catch (R3)
 
+> ⟶ **Amended 2026-11-10:** §11.2 (the assertion above is tautological).
+
 Each mirror carries a static check that runs once, before its first crossing:
 
 ```csharp
@@ -252,6 +272,8 @@ library someone built elsewhere, and the note says so rather than implying a che
 
 ### 6.1 Which library: the load-time name is captured at convert time
 
+> ⟶ **Amended 2026-11-10:** §11.5 (per symbol, not per library) and §11.12 (darwin install names).
+
 `-lfoo` is a **link-time** name. The name the loader needs at run time is different on every system:
 
 - **ELF:** the library's `SONAME`, e.g. `libfoo.so.1`. Only a `-dev` package installs the bare `libfoo.so` link a
@@ -274,6 +296,8 @@ directories, which is the opposite of pinned. ⟨Q2⟩.
 
 ### 6.2 Where it is loaded from
 
+> ⟶ **Amended 2026-11-10:** §11.11 (a resolver miss throws; assembly-level search paths).
+
 Each converted package is its own assembly, so it can carry its own resolver. It is registered from a
 `[ModuleInitializer]` with `NativeLibrary.SetDllImportResolver`. A module initializer is rooted, so trimming keeps it
 (R10), and `LibraryImport` is source-generated, so AOT needs nothing more.
@@ -290,6 +314,8 @@ The resolver loads the captured name only:
 
 ### 6.3 What passes through (R7)
 
+> ⟶ **Amended 2026-11-10:** §11.15 (a plain token, defined; CGO_LDFLAGS is unchecked upstream).
+
 Phase 2 reads `-l<name>` and `-L<dir>` from the `//go:cgo_ldflag` lines (§3), and nothing else. Every other flag is
 **refused by name**, until a later phase has a use for it and an allowlist to check it against. Two things keep that
 from being a false comfort:
@@ -299,6 +325,8 @@ from being a false comfort:
   first point turns out to be, Phase 2 never hands an unchecked flag to a tool.
 
 ## 7. What Phase 2 refuses, by name
+
+> ⟶ **Amended 2026-11-10:** §11.6 (`_Cvar_` and `_Cfpvar_fp_` refused) and §11.13.
 
 Phase 1 increment 2 refuses every cgo package and says what it recognized. Phase 2 **narrows** that refusal: a
 package converts only when every recognized declaration is in Phase 2's set. Otherwise the refusal lists each
@@ -332,6 +360,8 @@ contract already covers a goroutine that resumes on another worker. The rest als
 
 ## 9. Increments, each a seat, red-first
 
+> ⟶ **Amended 2026-11-10:** §11.10 (the exit gate's arms) and §11.14 (sequencing).
+
 0. **Phase 1 follow-up (§3.1):** recognize `_C2func_`, `_Cfpvar_` and `_Cmacro_`. Extend the fixture; the red runs on
    hosted `converter-cgo`.
 1. **Arm, no code:** does `go list -compiled` run cmd/go's `checkLinkerFlags`? Predicted YES, by §3's reading. Plant
@@ -350,6 +380,8 @@ contract already covers a goroutine that resumes on another worker. The rest als
 
 ## 10. Questions for review
 
+> ⟶ **Amended 2026-11-10:** §11.17 (Q1 RULED), §11.8 (Q4 answered) and §11.7.
+
 - **⟨Q1⟩ Visible call sites.** cgo's rewritten names (`_Cfunc_add`, `_Ctype_int`), or the source's `C.add` through a
   nested static class `C`? The plain form is the safe default; `C.` reads more like the Go but depends on unmeasured
   go2cs-gen behaviour.
@@ -365,3 +397,183 @@ contract already covers a goroutine that resumes on another worker. The rest als
 
 The review this note asks for is adversarial: §5.2's copy-in rule, §6.1's capture and §7's discriminator are the
 claims most likely to be wrong, and each names the arm that would show it.
+
+## 11. Amendment 2026-11-10 — the adversarial review, folded in
+
+The review ([`REVIEW-cgo-phase2-pinvoke.md`](REVIEW-cgo-phase2-pinvoke.md), `claude/coord-cgo-phase2-review`
+`2e859d6c9b`) approved with changes. COORD ruled findings 2, 7, 9 and 18. Each item below names the review finding it
+answers, and where it disagrees with §1-§10, it governs. The text above stays as written, so the record shows what
+the review corrected.
+
+### 11.1 BLOCKER: the stack mirror is one element wide (finding 1)
+
+§5.2's managed-struct row is wrong for a pointer to an element. Under cgo's pointer rules, when Go passes a pointer to
+an element of an array or slice, the Go memory in question is the entire array. So `C.f(&xs[0], C.int(len(xs)))` is
+legal Go, and C may read and **write** `n` consecutive structs. A one-struct stack mirror turns that native write into
+a stack smash.
+
+**Revised:** the mirror row admits only a pointer whose pointee is **one whole struct**: a `StandardBox<T>`, or a
+`FieldRefBox` whose field is the whole struct. An `ElemRefBox` of a struct element is **refused by name** to Phase 3,
+where the pin scope covers the whole backing array. **Red** (increment 3): a wrapper handed `&xs[1]` refuses before
+the extern runs.
+
+### 11.2 The size assertion, made able to fail (finding 2; RULED)
+
+§5.3's check cannot fail: under `LayoutKind.Explicit` with `Size = N`, `Unsafe.SizeOf` returns N by construction, and
+`[FieldOffset]` makes the offsets true by definition. **Ruled:** keep explicit layout, and assert what the generator
+could get wrong:
+
+- for every mirror field, `sizeof(clrType) == types.Sizes.Sizeof(goType)`;
+- for every `[InlineArray(N)]`, its length is N and its element size is the Go element's size.
+
+The assertions run once per mirror, before its first crossing, and refuse by name: the struct, the field, both sizes.
+**Red** (increment 2): a planted UNDERFLOW, an `int` member where the Go type is 8 bytes, is refused naming that
+field. §5.3's second half stands: no assertion can see a library built against other headers. The run-time OS and
+architecture check stays.
+
+### 11.3 errno (finding 3)
+
+§4.3 named the wrong API. The `_C2func_` binding is `[LibraryImport(…, SetLastError = true)]`, whose generated stub
+clears the error before the call and captures it after. The wrapper reads `Marshal.GetLastPInvokeError()` between the
+extern's return and the seam's exit. That reproduces cgo's own trampoline: errno set to 0, the call, the capture.
+`GetLastSystemError()` after the stub returns could read a value the GC transition clobbered. Plain `_Cfunc_` bindings
+stay `SetLastError = false`.
+
+A C function returning `void` also has a two-result form. cmd/cgo gives it the result `(_Ctype_void, error)`, so the
+wrapper returns the zero `_Ctype_void` and the error.
+
+### 11.4 The seam bracket goes through the runtime forwarders (finding 4)
+
+§4.2 called `GoNativeCall` directly, and that is not the ruled shape. DESIGN-native-call-seam §12.2 Q2 ruled Go's
+shape: the `g`-status move happens in the runtime's entersyscall family, which then calls `GoNativeCall` exactly once
+per transition. A wrapper that skipped the runtime would show `_Grunning` where Go shows `_Gsyscall` (F-2,
+reintroduced).
+
+**Revised:** the wrapper brackets with `runtime_package.syscallEntersyscall()` and `syscallExitsyscall()`
+(`src/core/runtime/syscall_managed_impl.cs:85/89` at master). **Red** (increment 3), as S-b's tests do: an
+`[UnmanagedCallersOnly]` probe called through the wrapper reads `GoCurrentGStatus()` (`:165`) and
+`GoNativeCall.TransitionDepth` from inside the call, and must see the syscall status and depth 1.
+
+### 11.5 Load-time names are captured per SYMBOL (finding 5)
+
+§6.1 captured a name per `-l`, and that is wrong in two ways:
+
+- **Windows:** mingw's `-lm` resolves `cos` to `api-ms-win-crt-math-*` and `div` to `api-ms-win-crt-utility-*`, both
+  API-set forwarders. Some libm symbols are static in `libmingwex.a` and import from nothing.
+- **ELF:** `--as-needed` drops a library no symbol references, so a probe that references nothing records nothing.
+
+**Revised:** the probe links one shared object that **references every symbol Phase 2 binds**. It then reads the
+symbol-to-library map from the import table (PE), `DT_NEEDED` plus `.dynsym` versioning (ELF), or `LC_LOAD_DYLIB` with
+the two-level namespace (Mach-O). It writes one `[LibraryImport]` per symbol, naming that symbol's library. A symbol
+resolved statically, or not at all, is **refused by name**.
+
+### 11.6 `_Cvar_` and `_Cfpvar_fp_` are refused (finding 6)
+
+§7 gave both no owner. Increment 0 recognizes them, so neither is dropped silently any more. Phase 2 **refuses each by
+name** until Phase 2-later:
+
+- `_Cvar_` (a C global) would be `NativeLibrary.GetExport` into a `NativeBox<T>`;
+- `_Cfpvar_fp_` would be the export's address as an `unsafe.Pointer`.
+
+A converted managed zero standing in for a C global is worse than a refusal.
+
+### 11.7 Structs by value: integer- and pointer-only (finding 7; RULED)
+
+The CLR classifies a by-value struct for the native ABI from the **mirror's** field types, so it can disagree with
+the C compiler: a union carried as bytes, or a `float` inline array (an HFA on arm64). **Ruled:** Phase 2 passes and
+returns by value only structs whose members are integers and pointers, with no union and no inline array. Floats,
+unions and inline arrays by value are "Phase 2 later, measured per RID", and refused by name until then. The exit
+gate gains `inet_ntoa(struct in_addr)` as the by-value **argument** arm, beside `div` for the by-value result.
+
+### 11.8 The bindings file is converter output (finding 8; answers Q4)
+
+§4.1 and R9 called it a git-ignored build output. It is not: the pinned toolchain makes it at convert time, and a
+checkout cannot regenerate it without that toolchain. **Revised:**
+
+- `<package>.cgo.g.cs` is converter output beside the converted files, committed with them by whoever converts;
+- byte-identity gates exclude `*.cgo.g.cs` **by path**;
+- the converter never writes `.gitignore` entries into a user's tree.
+
+R9's substance stands: the corpus is wholly `CGO_ENABLED=0`, so no corpus gate ever sees one.
+
+### 11.9 Mirrors vary per (GOOS, GOARCH): placed by the layout rule (finding 9; RULED)
+
+`_Ctype_char` is `int8` on x64 and `uint8` on linux/arm64, so a mirror set is a property of the target, not of GOOS
+alone. **Ruled:** bindings follow the four-target LAYOUT RULE from the linux/arm64 work. The converter emits bindings
+per target and homes each file at its coarsest cover: a mirror set identical across a GOOS's architectures lands in
+`<goos>/`, and one that differs lands in `<goos>-<arch>/`. The header's target record (§4.1) names the cover, and the
+run-time check (§5.3) compares the running OS and architecture against it.
+
+### 11.10 The exit gate exercises more than scalars (finding 10)
+
+§9 increment 4's gate gains four arms:
+
+- **copy-back:** `uname` on linux and darwin, `GetSystemTime` on windows, each through a struct-pointer mirror;
+- **errno:** `sqrt(-1)` reading `EDOM` through the two-result form;
+- **a REAL current-directory arm:** a library that exists ONLY in the current directory must throw
+  `DllNotFoundException`, while the same library in the application directory loads;
+- **a pinned-zig probe library**, built per target by the scout's provisioned toolchain, as the instrument for
+  aliasing, unions and HFA classification.
+
+### 11.11 A resolver miss throws (finding 11)
+
+§6.2's resolver could return `IntPtr.Zero`, and the runtime then falls back to default probing. That is legacy search
+order, current directory included, on windows. **Revised:**
+
+- the assembly carries `[assembly: DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories |
+  DllImportSearchPath.AssemblyDirectory)]`, so even a fallback is pinned;
+- for a name it owns, the resolver throws `DllNotFoundException` on a miss, and never returns 0;
+- it returns 0 only for names it does not own (hand-owned imports in the same assembly).
+
+**Red** (increment 4): a deleted library throws, naming the `-l`, the captured name and the places tried.
+
+### 11.12 darwin install names (finding 12)
+
+An install name of `@rpath/…`, `@loader_path/…` or `@executable_path/…` cannot be resolved by the CLR's loader as Go's
+binary resolves it. **Revised:** record the absolute path the probe's linker resolved, or refuse by name. `-framework
+X` is admitted, with its install name captured. As with a Go binary, a library outside the system loader's path needs
+`LD_LIBRARY_PATH` on linux; the note says so to users and does not paper over it.
+
+### 11.13 Flexible arrays, bitfields and `_Bool` (findings 13 and 14)
+
+- A **flexible array member** (`T[]`, which cmd/cgo gives as `[0]T`) is **refused by name**: such a struct only ever
+  lives in native memory, and a mirror cannot hold its tail.
+- **Bitfields** are dropped by cmd/cgo, not padded with named fields, so those bytes round-trip as opaque bytes in the
+  mirror and the Go side cannot read them. That is Go's behaviour too.
+- **C `_Bool`** maps to `byte` in mirrors and externs. A C# `bool` marshals as a 4-byte `BOOL`.
+
+### 11.14 Sequencing (COORD)
+
+- Increments 0 and 1 are released now.
+- Increment 2 (mirrors) is cut on §11.2 and §11.7.
+- Increment 3 (wrappers) waits on §11.1 and §11.4.
+- Increment 4 (resolution, the exit gate) waits on §11.5, §11.10, §11.11 and §11.12.
+- Increment 5 (the narrowed refusal) waits on §11.6, §11.8 and §11.9.
+
+### 11.15 `-l` and `-L` as plain tokens; CGO_LDFLAGS is unchecked upstream (note 15)
+
+§6.3's reliance on cmd/go's allowlist is narrower than it read. `CGO_LDFLAGS` from the **environment** reaches
+`//go:cgo_ldflag` without `checkLinkerFlags`, so Phase 2's own check is load-bearing, not a backstop. A "plain token"
+is defined:
+
+- `-l<name>`: the name matches `[A-Za-z0-9_.+-]+`, with no path separator; the GNU `-l:file` form is refused;
+- `-L<dir>`: an absolute path, or one relative to the package directory, that exists.
+
+Everything else is refused by name, whatever increment 1 finds about `go list -compiled`.
+
+### 11.16 Divergences, stated (notes 16 and 17)
+
+- A struct member pinned with `runtime.Pinner`, and a struct that points at itself, are refused by name. That is
+  **narrower than Go**, which accepts a pinned Go pointer.
+- A `uintptr` member that carries a managed-pointer token is invisible to the copy-in check. Go's cgocheck is equally
+  blind to it.
+- A union holding pointers is bytes, as cmd/cgo gives it.
+- The cost of the seam bracket is on par with Go's `cgocall` bracket. §8 on blocking, affinity and signals stands as
+  the review read it.
+
+### 11.17 Q1 RULED: the visible `C.` form is the target (note 18)
+
+Converted call sites read `C.add(C.@int(a), C.@int(b))`, through a nested static class `C` that declares the C-named
+members and types, per the owner's readability and parity rulings. The mangled form (`_Cfunc_add`, `_Ctype_int`) is a
+fallback only if the arm fails. The arm measures go2cs-gen on `[GoType]` structs nested in a static class, and it
+lands with increment 3. Its red: a converted call site that prints a mangled name.
