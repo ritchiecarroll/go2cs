@@ -88,6 +88,12 @@ import (
 // deliberate over-collection can hand THIS arm a false pass on a member some other declaration line
 // happens to name (measured: `runtime.read` is answered flat by `consistentHeapStats.read` in
 // managed_impl.cs — a different member, same bare name). Two witnesses, two failure modes; keep both.
+//
+// THE ARCH AXIS reads the same question per TARGET. A goosScope names a GOOS, and a GOOS can have
+// more than one target (linux/amd64 and linux/arm64), each compiling its own key folders, so "a body
+// on linux" is no longer one fact: a hand-own that follows an amd64-only principal into
+// `linux-amd64/` leaves linux/arm64 with the placeholder and no body. The forward arm therefore asks
+// each target, and where a target's own sources carry the placeholder, that target owes the body.
 func TestManualConversionRegistrationsHaveBodies(t *testing.T) {
 	coreDir := filepath.Join("..", "core")
 
@@ -96,7 +102,7 @@ func TestManualConversionRegistrationsHaveBodies(t *testing.T) {
 	}
 
 	type finding struct {
-		entry, goos, detail string
+		entry, target, detail string
 	}
 
 	var missing []finding
@@ -105,6 +111,7 @@ func TestManualConversionRegistrationsHaveBodies(t *testing.T) {
 	for pkg, funcs := range manualConversionFuncs {
 		packageDir := filepath.Join(coreDir, filepath.FromSlash(pkg))
 		bodies := handOwnedDefinitionsByFlavor(t, packageDir)
+		placeholders := generatedFuncPlaceholdersByFolder(t, packageDir)
 
 		// A package the corpus does not carry at all is not this guard's business (a scope naming
 		// something unconverted), matching TestScopedSuppressionsHaveCompanions' own skip.
@@ -123,11 +130,15 @@ func TestManualConversionRegistrationsHaveBodies(t *testing.T) {
 			entry := pkg + "." + name
 			checked := 0
 
-			for _, goos := range knownTargetGOOS {
+			// The scope is written per GOOS and the layout is keyed per (GOOS, GOARCH), so the walk is
+			// over the declared universe's TARGETS and each asks the scope about its GOOS half.
+			for _, target := range platformUniverse {
+				goos := goosOfTarget(target)
+
 				// A package that this target does not build cannot owe a body for it. Reuses the
 				// same reading suppressionCompanion_test.go arrived at: no folder of its own AND no
 				// flat sources means the target simply has no such package.
-				if !packageBuildsOn(t, packageDir, goos) {
+				if !packageBuildsOn(t, packageDir, target) {
 					continue
 				}
 
@@ -136,30 +147,45 @@ func TestManualConversionRegistrationsHaveBodies(t *testing.T) {
 				if inScope {
 					checked++
 
-					if !bodies.compiledOn(member, goos) {
-						where := bodies.locations(member)
-						detail := "no hand-own in that flavour's build declares it"
-
-						if where != "" {
-							detail = "the only hand-own declaring it is in " + where + ", which this flavour's build does not compile"
-						}
-
-						missing = append(missing, finding{entry: entry, goos: goos, detail: detail})
+					if bodies.compiledOn(member, target) {
+						continue
 					}
+
+					// TWO WAYS TO OWE A BODY, one per axis. The scope names a GOOS, so SOME target of
+					// that GOOS must compile a body — the pre-arch rule at its old strength. A scope
+					// cannot name an arch, so the arch axis asks the converter's own record instead:
+					// where this target's sources carry the displacement placeholder, the generated
+					// body is gone HERE and a body is owed here. A target whose sources never declared
+					// the member (an amd64-only assembly stub read at arm64) carries no placeholder and
+					// owes nothing, while its sibling arch answers for the GOOS.
+					displacedHere := placeholders.compiledOn(member, target)
+
+					if !displacedHere && bodies.compiledOnSomeTargetOf(member, goos) {
+						continue
+					}
+
+					where := bodies.locations(member)
+					detail := "no hand-own in that target's build declares it"
+
+					if where != "" {
+						detail = "the only hand-own declaring it is in " + where + ", which this target's build does not compile"
+					}
+
+					missing = append(missing, finding{entry: entry, target: target, detail: detail})
 
 					continue
 				}
 
-				// REVERSE: a body this flavour compiles that nothing displaces there.
-				if bodies.strandedOn(member, goos) {
-					stranded = append(stranded, finding{entry: entry, goos: goos})
+				// REVERSE: a body this target compiles that nothing displaces there.
+				if bodies.strandedOn(member, target) {
+					stranded = append(stranded, finding{entry: entry, target: target})
 				}
 			}
 
 			// Every scoped flavour was skipped as "not built there" — fall back to the pre-Q62
 			// question so no entry goes unasserted.
 			if checked == 0 && !bodies.anywhere(member) {
-				missing = append(missing, finding{entry: entry, goos: "(any target)",
+				missing = append(missing, finding{entry: entry, target: "(any target)",
 					detail: "no hand-owned file in that package defines it"})
 			}
 		}
@@ -171,49 +197,117 @@ func TestManualConversionRegistrationsHaveBodies(t *testing.T) {
 				return list[i].entry < list[j].entry
 			}
 
-			return list[i].goos < list[j].goos
+			return list[i].target < list[j].target
 		})
 	}
 
 	sortFindings(missing)
 	sortFindings(stranded)
 
+	// The owed-body ledger takes its rows out of the findings, and each row must still be owed: a row
+	// whose body has been authored is stale and fails here, so the ledger can only shrink.
+	settled := map[string]bool{}
+	unledgered := missing[:0]
+
+	for _, f := range missing {
+		row := f.entry + "@" + f.target
+
+		if owedHandOwnBodies[row] {
+			settled[row] = true
+			continue
+		}
+
+		unledgered = append(unledgered, f)
+	}
+
+	missing = unledgered
+
+	for _, row := range sortedKeys(owedHandOwnBodies) {
+		if !settled[row] {
+			t.Errorf("owedHandOwnBodies lists %s, but that target's build is no longer short of a body for it "+
+				"— the debt is paid (or the entry is gone); retire the row", row)
+		}
+	}
+
 	for _, f := range missing {
 		t.Errorf("manualConversionFuncs registers %s and displaces it on %s, but %s — the generated body "+
 			"is gone and the displacement has no destination there, which is a build failure on that "+
 			"platform alone (CS0117 at the first consumer) while every other flavour's gate stays green. "+
-			"Either author the body under src/core/<pkg>/%s/, or narrow the entry's goosScope to the "+
-			"flavours that carry one", f.entry, f.goos, f.detail, f.goos)
+			"Either author the body in a folder of src/core/<pkg>/ that target compiles (%s), or narrow "+
+			"the entry's goosScope to the flavours that carry one", f.entry, f.target, f.detail,
+			strings.Join(platformLayoutFolders(f.target), ", "))
 	}
 
 	for _, f := range stranded {
-		t.Errorf("a hand-own under src/core/%s/ declares %s, but the registration does NOT displace it on "+
-			"%s — the generated body survives beside the hand-owned one and the package fails CS0111 on "+
-			"that platform alone. Either widen the entry's goosScope to %s, or retire the stranded body. "+
-			"(A `partial` body is exempt: writing into a bodyless partial is the other displacement "+
-			"mechanism and needs no registration.)",
-			strings.SplitN(f.entry, ".", 2)[0]+"/"+f.goos, f.entry, f.goos, f.goos)
+		goos := goosOfTarget(f.target)
+
+		t.Errorf("a hand-own of src/core/%s in a folder %s compiles declares %s, but the registration does "+
+			"NOT displace it on %s — the generated body survives beside the hand-owned one and the package "+
+			"fails CS0111 on that platform alone. Either widen the entry's goosScope to %s, or retire the "+
+			"stranded body. (A `partial` body is exempt: writing into a bodyless partial is the other "+
+			"displacement mechanism and needs no registration.)",
+			strings.SplitN(f.entry, ".", 2)[0], f.target, f.entry, goos, goos)
 	}
 }
 
+// owedHandOwnBodies is the ledger of bodies a target's build is KNOWN to be short of, one row per
+// `<package>.<registration>@<target>`. It exists for a target that has entered the universe before
+// its hand-owns were authored: the converter displaces the member there, the body that answers for
+// its GOOS sits in a folder that target does not compile, and the debt is a named one rather than a
+// red guard. The forward arm fails on a debt that is not listed AND on a row that is no longer owed,
+// so a row leaves the day its body lands and nothing can be added here without being seen.
+//
+// The ledger is EMPTY, and the forward arm still holds it: a debt that is not listed fails, so a row
+// is added only with the new target that owes it. linux/arm64 entered with four rows (S2): the syscall
+// wrappers whose amd64 bodies marshal amd64 struct layouts (`syscall/linux-amd64/
+// zsyscall_linux_amd64_impl.cs`). S3 paid them: wait4 and Uname moved to `syscall/linux/`, which both
+// linux builds compile, because Rusage (144) and Utsname (390) are the same at both arches; Fstat and
+// fstatat have linux/arm64's own bodies over its 128-byte Stat_t (`syscall/linux-arm64/
+// zsyscall_linux_arm64_impl.cs`).
+var owedHandOwnBodies = map[string]bool{}
+
 // handOwnBodies is one package's hand-own witness, split by which builds compile it: `flat` is the
-// package's own directory (every target), `perGOOS` is one set per platform folder (that target
-// alone). `perGOOSPartial` narrows a per-GOOS set to declarations carrying `partial` — the bodyless
-// partial completion, which displaces without a registration. `perGOOSReplaced` narrows it to
-// declarations sitting in a WHOLE-FILE `[module: GoManualConversion]` replacement — the third
-// displacement mechanism, which also needs no registration (see strandedOn).
+// package's own directory (every target), `perFolder` is one set per layout key folder (a GOOS, a
+// GOARCH or a `<goos>-<arch>` pair: the targets that folder serves, and no other).
+// `perFolderPartial` narrows a folder's set to declarations carrying `partial` — the bodyless partial
+// completion, which displaces without a registration. `perFolderReplaced` narrows it to declarations
+// sitting in a WHOLE-FILE `[module: GoManualConversion]` replacement — the third displacement
+// mechanism, which also needs no registration (see strandedOn).
 type handOwnBodies struct {
-	flat            map[string]bool
-	perGOOS         map[string]map[string]bool
-	perGOOSPartial  map[string]map[string]bool
-	perGOOSReplaced map[string]map[string]bool
+	flat              map[string]bool
+	perFolder         map[string]map[string]bool
+	perFolderPartial  map[string]map[string]bool
+	perFolderReplaced map[string]map[string]bool
 }
 
 // compiledOn is the FORWARD arm's whole rule: is a hand-own declaring this member in the set of
-// files a build of `goos` compiles? A flat hand-own is in every flavour's build; a per-GOOS one is
-// in its own alone, and in no other's — which is the fact the pre-Q62 union witness lost.
-func (b handOwnBodies) compiledOn(member string, goos string) bool {
-	return b.flat[member] || b.perGOOS[goos][member]
+// files a build of `target` compiles? A flat hand-own is in every target's build; one in a key
+// folder is in the builds that folder serves, and in no other's — which is the fact the pre-Q62
+// union witness lost.
+func (b handOwnBodies) compiledOn(member string, target string) bool {
+	if b.flat[member] {
+		return true
+	}
+
+	for folder, names := range b.perFolder {
+		if names[member] && layoutFolderServes(folder, target) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// compiledOnSomeTargetOf is the GOOS-level reading a goosScope is written at: does ANY target of
+// this GOOS in the declared universe compile a hand-own declaring the member?
+func (b handOwnBodies) compiledOnSomeTargetOf(member string, goos string) bool {
+	for _, target := range corpusLattice().targetsOfGOOS(goos) {
+		if b.compiledOn(member, target) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // strandedOn is the REVERSE arm's whole rule: a body this flavour compiles that no registration
@@ -233,10 +327,22 @@ func (b handOwnBodies) compiledOn(member string, goos string) bool {
 // `Exec`/`forkExec` under linux/ and windows/ as stranded the moment a darwin-scoped entry existed,
 // three findings, zero real — the windows corpus builds at 0 errors across 307 projects and
 // syscall.csproj builds at 0 errors under -p:GoTargetOS=linux.
-func (b handOwnBodies) strandedOn(member string, goos string) bool {
-	return b.perGOOS[goos][member] &&
-		!b.perGOOSPartial[goos][member] &&
-		!b.perGOOSReplaced[goos][member]
+//
+// The scope a body can be stranded outside of is a GOOS scope, so the folders this arm reads are the
+// GOOS-BEARING ones a target compiles — its GOOS folder and its pair folder. A bare GOARCH folder
+// routes a body to no GOOS in particular, exactly as flat does, and like flat it is not a stranding.
+func (b handOwnBodies) strandedOn(member string, target string) bool {
+	for folder, names := range b.perFolder {
+		if isKnownGOARCH(folder) || !layoutFolderServes(folder, target) {
+			continue
+		}
+
+		if names[member] && !b.perFolderPartial[folder][member] && !b.perFolderReplaced[folder][member] {
+			return true
+		}
+	}
+
+	return false
 }
 
 // anywhere is the pre-Q62 question, kept for the fallback: does SOME hand-own of this package
@@ -246,7 +352,7 @@ func (b handOwnBodies) anywhere(member string) bool {
 		return true
 	}
 
-	for _, names := range b.perGOOS {
+	for _, names := range b.perFolder {
 		if names[member] {
 			return true
 		}
@@ -264,17 +370,21 @@ func (b handOwnBodies) locations(member string) string {
 		where = append(where, "the package's own directory")
 	}
 
-	for _, goos := range knownTargetGOOS {
-		if b.perGOOS[goos][member] {
-			where = append(where, goos+"/")
+	var folders []string
+
+	for folder, names := range b.perFolder {
+		if names[member] {
+			folders = append(folders, folder+"/")
 		}
 	}
 
-	return strings.Join(where, ", ")
+	sort.Strings(folders)
+
+	return strings.Join(append(where, folders...), ", ")
 }
 
 // handOwnedDefinitionsByFlavor reads one package's hand-owns the way a BUILD reads them: the
-// package's own directory plus each `<goos>/` folder, never a sibling's and never a child package's.
+// package's own directory plus each layout key folder, never a sibling's and never a child package's.
 //
 // Two scope rules, both of them the reason this replaced a recursive walk:
 //
@@ -288,20 +398,45 @@ func handOwnedDefinitionsByFlavor(t *testing.T, packageDir string) handOwnBodies
 	t.Helper()
 
 	bodies := handOwnBodies{
-		flat:            map[string]bool{},
-		perGOOS:         map[string]map[string]bool{},
-		perGOOSPartial:  map[string]map[string]bool{},
-		perGOOSReplaced: map[string]map[string]bool{},
+		flat:              map[string]bool{},
+		perFolder:         map[string]map[string]bool{},
+		perFolderPartial:  map[string]map[string]bool{},
+		perFolderReplaced: map[string]map[string]bool{},
 	}
 
 	bodies.flat, _, _ = handOwnedDefinitionsIn(packageDir)
 
-	for _, goos := range knownTargetGOOS {
-		bodies.perGOOS[goos], bodies.perGOOSPartial[goos], bodies.perGOOSReplaced[goos] =
-			handOwnedDefinitionsIn(filepath.Join(packageDir, goos))
+	for _, folder := range layoutKeyFoldersIn(packageDir) {
+		bodies.perFolder[folder], bodies.perFolderPartial[folder], bodies.perFolderReplaced[folder] =
+			handOwnedDefinitionsIn(filepath.Join(packageDir, folder))
 	}
 
 	return bodies
+}
+
+// layoutKeyFoldersIn names the child directories of a package directory whose NAME is a layout key —
+// a GOOS, a GOARCH or a `<goos>-<arch>` pair — in name order. It is the depth-1 reading every witness
+// in this file shares: a key-named child that is really a nested package (`internal/syscall/windows`
+// is the corpus's only one) holds its own sources one level further down, in ITS key folders, so what
+// sits directly in it is that package's flat set and carries neither a hand-own nor a placeholder of
+// the parent's.
+func layoutKeyFoldersIn(packageDir string) []string {
+	entries, err := os.ReadDir(packageDir)
+	if err != nil {
+		return nil
+	}
+
+	var folders []string
+
+	for _, entry := range entries {
+		if entry.IsDir() && isLayoutKeyFolderName(entry.Name()) {
+			folders = append(folders, entry.Name())
+		}
+	}
+
+	sort.Strings(folders)
+
+	return folders
 }
 
 // handOwnedDefinitionsIn returns the member names declared by the hand-owned files sitting DIRECTLY
@@ -375,16 +510,19 @@ func handOwnedDefinitionsIn(dir string) (map[string]bool, map[string]bool, map[s
 // the displacement mechanism that needs no registry entry, and therefore the reverse arm's exemption.
 var csharpPartialDeclaration = regexp.MustCompile(`\bpartial\b`)
 
-// packageBuildsOn reports whether a target's build of this package compiles anything: its own
-// `<goos>/` folder, or flat sources every target shares. A package with neither is simply not built
-// there (crypto/x509/internal/macos on windows), and cannot owe a body for it. The same reading
-// suppressionCompanion_test.go arrived at, reached through its own helpers so there is one
-// definition of the fact rather than two that merge without a conflict.
-func packageBuildsOn(t *testing.T, packageDir string, goos string) bool {
+// packageBuildsOn reports whether a target's build of this package compiles anything: a key folder
+// that target's build reads (its pair, GOARCH or GOOS folder), or flat sources every target shares.
+// A package with neither is simply not built there (crypto/x509/internal/macos on windows), and
+// cannot owe a body for it. The same reading suppressionCompanion_test.go arrived at, reached
+// through its own helpers so there is one definition of the fact rather than two that merge without
+// a conflict.
+func packageBuildsOn(t *testing.T, packageDir string, target string) bool {
 	t.Helper()
 
-	if info, err := os.Stat(filepath.Join(packageDir, goos)); err == nil && info.IsDir() {
-		return true
+	for _, folder := range platformLayoutFolders(target) {
+		if info, err := os.Stat(filepath.Join(packageDir, folder)); err == nil && info.IsDir() {
+			return true
+		}
 	}
 
 	return hasFlatSources(t, packageDir)
@@ -410,6 +548,13 @@ func packageBuildsOn(t *testing.T, packageDir string, goos string) bool {
 //	                        the corpus reads as a stranded body (nanotime1 is the live instance).
 //	child/deep_impl.cs      a CHILD package's body — never a witness for its parent, the depth rule
 //	                        generatedFuncPlaceholders already states and the replaced walk did not.
+//
+// And two for the arch axis, which a GOOS-keyed witness could not see at all:
+//
+//	linux-arm64/arch_impl.cs  a pair-folder body — visible to linux/arm64 ALONE: not to linux/amd64,
+//	                          its own GOOS's other target, and not to any other GOOS.
+//	amd64/wide_impl.cs        a GOARCH-folder body — visible to every amd64 target and not to
+//	                          linux/arm64, and, like flat, never a GOOS stranding.
 func TestPerFlavorWitnessCannotAnswerAcrossFlavors(t *testing.T) {
 	packageDir := t.TempDir()
 
@@ -450,6 +595,8 @@ func TestPerFlavorWitnessCannotAnswerAcrossFlavors(t *testing.T) {
 	write("darwin/partial_impl.cs", "internal static partial int64 partialCompletion()")
 	write("child/deep_impl.cs", "internal static error childPackageOnly(nint fd)")
 	writeMarked("linux/whole_file.cs", "internal static error wholeFileReplacement(nint fd)")
+	write("linux-arm64/arch_impl.cs", "internal static error pairFolderOnly(nint fd)")
+	write("amd64/wide_impl.cs", "internal static error archFolderOnly(nint fd)")
 
 	if err := os.MkdirAll(filepath.Join(packageDir, "windows"), 0o755); err != nil {
 		t.Fatal(err)
@@ -458,9 +605,10 @@ func TestPerFlavorWitnessCannotAnswerAcrossFlavors(t *testing.T) {
 	bodies := handOwnedDefinitionsByFlavor(t, packageDir)
 
 	// The witness must collect what it was pointed at, or every assertion below is vacuous.
-	if !bodies.perGOOS["linux"]["perFlavorOnly"] || !bodies.flat["flatEverywhere"] || !bodies.perGOOS["darwin"]["partialCompletion"] {
-		t.Fatalf("the witness did not collect the fixture bodies (linux=%v flat=%v darwin=%v); the control measures nothing",
-			bodies.perGOOS["linux"], bodies.flat, bodies.perGOOS["darwin"])
+	if !bodies.perFolder["linux"]["perFlavorOnly"] || !bodies.flat["flatEverywhere"] || !bodies.perFolder["darwin"]["partialCompletion"] ||
+		!bodies.perFolder["linux-arm64"]["pairFolderOnly"] || !bodies.perFolder["amd64"]["archFolderOnly"] {
+		t.Fatalf("the witness did not collect the fixture bodies (linux=%v flat=%v darwin=%v linux-arm64=%v amd64=%v); the control measures nothing",
+			bodies.perFolder["linux"], bodies.flat, bodies.perFolder["darwin"], bodies.perFolder["linux-arm64"], bodies.perFolder["amd64"])
 	}
 
 	// THE POPULATION MUST STAY WHOLE. The whole-file replacement is exempt from the REVERSE arm, and
@@ -469,28 +617,50 @@ func TestPerFlavorWitnessCannotAnswerAcrossFlavors(t *testing.T) {
 	// hand-own would read as MISSING. That is the silent-subtraction class arriving through the fix
 	// for a false positive. This assertion fails on a collector-level exemption and passes on the
 	// reasoning-level one, which is the whole difference between the two implementations.
-	if !bodies.perGOOS["linux"]["wholeFileReplacement"] {
+	if !bodies.perFolder["linux"]["wholeFileReplacement"] {
 		t.Fatal("the witness did not collect the whole-file-marked body — the exemption belongs in strandedOn, " +
 			"NOT in handOwnedDefinitionsIn: a collector that skips marked files blinds the FORWARD arm too")
 	}
 
-	// FORWARD: a per-GOOS body answers for its own flavour and for no other.
-	for _, goos := range knownTargetGOOS {
-		want := goos == "linux"
+	// The targets are spelled out rather than read from platformUniverse: the control states the
+	// folder rule for a GOOS with two targets, and must not go vacuous if the universe changes.
+	targets := []string{"windows/amd64", "linux/amd64", "darwin/amd64", "linux/arm64"}
 
-		if got := bodies.compiledOn("perFlavorOnly", goos); got != want {
-			t.Errorf("compiledOn(perFlavorOnly, %s) = %v, want %v — a body under <pkg>/linux/ is compiled by the linux build alone", goos, got, want)
+	// FORWARD: a per-GOOS body answers for every target of its own GOOS and for no other.
+	for _, target := range targets {
+		want := goosOfTarget(target) == "linux"
+
+		if got := bodies.compiledOn("perFlavorOnly", target); got != want {
+			t.Errorf("compiledOn(perFlavorOnly, %s) = %v, want %v — a body under <pkg>/linux/ is compiled by the linux builds alone", target, got, want)
 		}
 
 		// FORWARD: a flat body answers for every flavour.
-		if !bodies.compiledOn("flatEverywhere", goos) {
-			t.Errorf("compiledOn(flatEverywhere, %s) = false — a flat hand-own is in every flavour's build", goos)
+		if !bodies.compiledOn("flatEverywhere", target) {
+			t.Errorf("compiledOn(flatEverywhere, %s) = false — a flat hand-own is in every flavour's build", target)
 		}
 
 		// A child package is never a witness for its parent, on any flavour.
-		if bodies.compiledOn("childPackageOnly", goos) {
-			t.Errorf("compiledOn(childPackageOnly, %s) = true — a subdirectory that is not a GOOS folder is another PACKAGE, and its bodies cannot answer for this one", goos)
+		if bodies.compiledOn("childPackageOnly", target) {
+			t.Errorf("compiledOn(childPackageOnly, %s) = true — a subdirectory that is not a layout key folder is another PACKAGE, and its bodies cannot answer for this one", target)
 		}
+
+		// FORWARD, the arch axis: a pair folder answers for its one target, and for neither its GOOS's
+		// other arch nor its arch's other GOOSes; a GOARCH folder answers for that arch's targets alone.
+		if got, want := bodies.compiledOn("pairFolderOnly", target), target == "linux/arm64"; got != want {
+			t.Errorf("compiledOn(pairFolderOnly, %s) = %v, want %v — a body under <pkg>/linux-arm64/ is compiled by the linux/arm64 build alone", target, got, want)
+		}
+
+		if got, want := bodies.compiledOn("archFolderOnly", target), archOfTarget(target) == "amd64"; got != want {
+			t.Errorf("compiledOn(archFolderOnly, %s) = %v, want %v — a body under <pkg>/amd64/ is compiled by the amd64 builds alone", target, got, want)
+		}
+	}
+
+	// The GOOS-level reading a goosScope is written at: linux has a target compiling each of these,
+	// which is what lets the forward arm pass linux/amd64 for a body only linux/arm64 carries when
+	// linux/amd64's own sources never declared the member. darwin has none for the pair-folder body.
+	if !bodies.compiledOnSomeTargetOf("pairFolderOnly", "linux") || bodies.compiledOnSomeTargetOf("pairFolderOnly", "darwin") {
+		t.Errorf("compiledOnSomeTargetOf(pairFolderOnly) = linux %v, darwin %v; want true, false",
+			bodies.compiledOnSomeTargetOf("pairFolderOnly", "linux"), bodies.compiledOnSomeTargetOf("pairFolderOnly", "darwin"))
 	}
 
 	// The pre-Q62 union question still answers TRUE for the per-GOOS body, which is precisely why it
@@ -499,20 +669,30 @@ func TestPerFlavorWitnessCannotAnswerAcrossFlavors(t *testing.T) {
 		t.Error("anywhere(perFlavorOnly) = false; the pre-Q62 witness is mis-modelled and the contrast this control draws is not the real one")
 	}
 
-	// REVERSE: a non-partial per-GOOS body is stranded on its own flavour and nowhere else.
-	for _, goos := range knownTargetGOOS {
-		if got, want := bodies.strandedOn("perFlavorOnly", goos), goos == "linux"; got != want {
-			t.Errorf("strandedOn(perFlavorOnly, %s) = %v, want %v", goos, got, want)
+	// REVERSE: a non-partial per-GOOS body is stranded on its own GOOS's targets and nowhere else.
+	for _, target := range targets {
+		if got, want := bodies.strandedOn("perFlavorOnly", target), goosOfTarget(target) == "linux"; got != want {
+			t.Errorf("strandedOn(perFlavorOnly, %s) = %v, want %v", target, got, want)
+		}
+
+		// REVERSE, the arch axis: a pair-folder body is stranded on its one target; a GOARCH-folder
+		// body routes to no GOOS in particular and, like a flat one, is not a stranding anywhere.
+		if got, want := bodies.strandedOn("pairFolderOnly", target), target == "linux/arm64"; got != want {
+			t.Errorf("strandedOn(pairFolderOnly, %s) = %v, want %v", target, got, want)
+		}
+
+		if bodies.strandedOn("archFolderOnly", target) {
+			t.Errorf("strandedOn(archFolderOnly, %s) = true — a GOARCH folder is not routed to any one GOOS, and a goosScope cannot strand it", target)
 		}
 
 		// REVERSE: a `partial` completion is never stranded — it displaces by being written.
-		if bodies.strandedOn("partialCompletion", goos) {
-			t.Errorf("strandedOn(partialCompletion, %s) = true — writing a body into a bodyless partial is the other displacement mechanism and needs no registration", goos)
+		if bodies.strandedOn("partialCompletion", target) {
+			t.Errorf("strandedOn(partialCompletion, %s) = true — writing a body into a bodyless partial is the other displacement mechanism and needs no registration", target)
 		}
 
 		// REVERSE: a flat body is not a per-GOOS stranding; the flat/per-GOOS split is the point.
-		if bodies.strandedOn("flatEverywhere", goos) {
-			t.Errorf("strandedOn(flatEverywhere, %s) = true — a flat body is not routed to any one flavour", goos)
+		if bodies.strandedOn("flatEverywhere", target) {
+			t.Errorf("strandedOn(flatEverywhere, %s) = true — a flat body is not routed to any one flavour", target)
 		}
 
 		// REVERSE: a WHOLE-FILE replacement is never stranded — the converter drops the marked file
@@ -520,18 +700,18 @@ func TestPerFlavorWitnessCannotAnswerAcrossFlavors(t *testing.T) {
 		// to collide with and no registration is owed. Corpus instance: syscall's Exec/forkExec under
 		// linux/ and windows/ read as stranded the moment a darwin-scoped entry existed, three
 		// findings and zero real, while both platforms built at 0 errors.
-		if bodies.strandedOn("wholeFileReplacement", goos) {
+		if bodies.strandedOn("wholeFileReplacement", target) {
 			t.Errorf("strandedOn(wholeFileReplacement, %s) = true — a whole-file [module: GoManualConversion] "+
 				"replacement is the THIRD displacement mechanism: the converter never emits a body for it, "+
-				"so nothing can collide and no registry entry is owed", goos)
+				"so nothing can collide and no registry entry is owed", target)
 		}
 	}
 
 	// AND THE ARM MUST STILL BITE. The exemption above is narrow by construction — it keys on a file
 	// being marked AND not an `_impl` companion — so the genuinely stranded case must survive it. If
 	// this ever goes quiet, the exemption has widened into a blanket and the reverse arm is disarmed.
-	if !bodies.strandedOn("perFlavorOnly", "linux") {
-		t.Error("strandedOn(perFlavorOnly, linux) = false — the reverse arm no longer fires on a plain " +
+	if !bodies.strandedOn("perFlavorOnly", "linux/amd64") {
+		t.Error("strandedOn(perFlavorOnly, linux/amd64) = false — the reverse arm no longer fires on a plain " +
 			"`_impl` body that no registration covers; the whole-file exemption has widened into a blanket")
 	}
 }
@@ -748,41 +928,78 @@ func testDeclaredFuncs(goRoot, pkg string) map[string]bool {
 }
 
 // generatedFuncPlaceholders returns the member names the converter displaced a func body for in ONE
-// package: the generated `.cs` at the package root, the per-GOOS folders layout L3 routes a
-// platform-scoped declaration into, and the `.cs.auto` review siblings (see the caller's note on why
-// the siblings count here and not in handOwnedDefinitionsIn).
+// package: the generated `.cs` at the package root, the layout key folders (GOOS, GOARCH and pair)
+// a platform-scoped declaration is routed into, and the `.cs.auto` review siblings (see the caller's
+// note on why the siblings count here and not in handOwnedDefinitionsIn).
 //
-// Scope is the package's OWN files — root plus GOOS folders — not a full recursive walk. A converted
+// Scope is the package's OWN files — root plus key folders — not a full recursive walk. A converted
 // package's subdirectories are usually OTHER packages (net/http holds cgi, httptest, …), and counting
 // a child's placeholder for its parent would be a false PASS on exactly the question this test asks.
 func generatedFuncPlaceholders(t *testing.T, packageDir string) map[string]bool {
 	t.Helper()
 
 	witnessed := map[string]bool{}
+	placeholders := generatedFuncPlaceholdersByFolder(t, packageDir)
 
-	dirs := []string{packageDir}
+	for member := range placeholders.flat {
+		witnessed[member] = true
+	}
 
-	// Layout L3's platform folders, and ONLY those: a GOOS-named subdirectory can also be a package
-	// (`internal/syscall/windows` is the corpus's only one), but a package's placeholders sit in its
-	// OWN platform folder — depth 2 from here — and this walk stops at depth 1, so a child package's
-	// placeholders cannot answer for its parent. Measured 2026-09-01 rather than assumed:
-	// `internal/syscall/windows/*.cs` carries no placeholder at all; all NINE of them are in
-	// `internal/syscall/windows/windows/`, its own platform folder. A csproj test was written here
-	// first and then removed: it could not be made to fire, because the depth rule already closes the
-	// case, and an unexercisable branch in a guard is exactly what this file's neighbours refuse to
-	// carry.
-	if entries, err := os.ReadDir(packageDir); err == nil {
-		for _, entry := range entries {
-			if entry.IsDir() && isKnownGOOS(entry.Name()) {
-				dirs = append(dirs, filepath.Join(packageDir, entry.Name()))
-			}
+	for _, names := range placeholders.perFolder {
+		for member := range names {
+			witnessed[member] = true
 		}
 	}
 
-	for _, dir := range dirs {
+	return witnessed
+}
+
+// funcPlaceholders is one package's displacement record split the way handOwnBodies splits the
+// hand-owns: `flat` is the package's own directory, `perFolder` one set per layout key folder. The
+// two are read against each other target by target — a placeholder says the generated body is gone
+// from a build, a hand-own says what took its place there.
+type funcPlaceholders struct {
+	flat      map[string]bool
+	perFolder map[string]map[string]bool
+}
+
+// compiledOn reports whether a build of `target` reads a file carrying this member's placeholder —
+// flat, or a key folder serving that target. A `.cs.auto` sibling counts where it sits: it is the
+// converter's record of what it would emit into that folder beside a whole-file hand-own.
+func (p funcPlaceholders) compiledOn(member string, target string) bool {
+	if p.flat[member] {
+		return true
+	}
+
+	for folder, names := range p.perFolder {
+		if names[member] && layoutFolderServes(folder, target) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// generatedFuncPlaceholdersByFolder reads one package's placeholders per folder.
+//
+// The layout's key folders, and ONLY those: a key-named subdirectory can also be a package
+// (`internal/syscall/windows` is the corpus's only one), but a package's placeholders sit in its
+// OWN platform folder — depth 2 from here — and this walk stops at depth 1, so a child package's
+// placeholders cannot answer for its parent. Measured 2026-09-01 rather than assumed:
+// `internal/syscall/windows/*.cs` carries no placeholder at all; all NINE of them are in
+// `internal/syscall/windows/windows/`, its own platform folder. A csproj test was written here
+// first and then removed: it could not be made to fire, because the depth rule already closes the
+// case, and an unexercisable branch in a guard is exactly what this file's neighbours refuse to
+// carry.
+func generatedFuncPlaceholdersByFolder(t *testing.T, packageDir string) funcPlaceholders {
+	t.Helper()
+
+	placeholdersIn := func(dir string) map[string]bool {
+		witnessed := map[string]bool{}
+
 		entries, err := os.ReadDir(dir)
 		if err != nil {
-			continue
+			return witnessed
 		}
 
 		for _, entry := range entries {
@@ -801,9 +1018,17 @@ func generatedFuncPlaceholders(t *testing.T, packageDir string) map[string]bool 
 				witnessed[match[1]] = true
 			}
 		}
+
+		return witnessed
 	}
 
-	return witnessed
+	placeholders := funcPlaceholders{flat: placeholdersIn(packageDir), perFolder: map[string]map[string]bool{}}
+
+	for _, folder := range layoutKeyFoldersIn(packageDir) {
+		placeholders.perFolder[folder] = placeholdersIn(filepath.Join(packageDir, folder))
+	}
+
+	return placeholders
 }
 
 // The displacement witness, anchored on the converter's own prefix rather than on the trailing prose.

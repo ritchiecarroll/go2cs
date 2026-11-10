@@ -315,6 +315,19 @@ untrue. #6-#8 are other shapes, and re-running catches none of them.
   - Where a clean reading is itself EMPTY, "assert non-empty" cannot apply: gate the arm on the command's OWN exit code, never on the shape of its output — `wc -l` or `grep -c` over a `git` that died prints the passing 0. <!-- 2026-09-26 routing (C1, hop lessons appendix D): 2026-09-16: three guards added to the per-flavour H7 script died under MSYS_NO_PATHCONV=1 (a POSIX path reached native git) and still printed PASS values; fixed with drive-letter spelling and every git arm gated on git's own rc. mailbox-archive.md:74104; 46307b4704, docs seat cbf8c63c15 [M3#24] -->
   <!-- 2026-09-26 routing (C1, hop lessons appendix D): 2026-09-14: H5c printed its orphan block only when orphans existed, and its slnx post-condition compared 0 with 0 over an empty population ("a zero that can only be observed as silence is worth one printed line"). mailbox-archive.md:33716 [M2#22] -->
 ## Instruments that cannot fail: shell and patching traps
+- **A file restored by MOVE (or `cp -p`, `git stash pop`, a backup copy) keeps its OLD mtime, so MSBuild's
+  incremental build sees outputs newer than the inputs and recompiles NOTHING: the rebuild reads rc 0 over
+  the very defect it was meant to show.** After any restore, touch the restored files or build with
+  `--no-incremental`, then require the known red to reproduce before trusting a green.
+  <!-- 2026-11-10, TS readiness session at master 38caf3558a: the C30-C42 diagnostic hand-patches were backed
+       up, and shutil.move restored the backups with their pre-patch mtimes, older than the patched build's
+       outputs. The first unpatched rebuild came back rc 0. After touching the 11 restored files, it reproduced
+       the original 4 errors exactly. Recorded in the experiment's rerun-diag-38caf3558a-layers.txt (4505b95021). -->
+- **`echo "$(cmd) rc=$?"` reports `cmd`'s status, not the previous command's**: bash expands the string left to
+  right, so the `$(...)` runs first and `$?` then reads ITS exit. Capture `rc=$?` on its own, first.
+  <!-- 2026-11-10, C1: a battery status line `...; echo "$(date -u +%H:%M:%S) go test rc=$?"` recorded rc=0 over a
+       log showing FAIL go2cs. `false; echo "$(date) rc=$?"` prints rc=0. The safety floor's item 7, in its
+       in-string form. -->
 - **A `sed` that matches nothing and a `grep` that matches nothing BOTH EXIT 0 and both look like the work
   being done**; **deriving a script from the previous one by pattern substitution is a SILENT-NO-OP GENERATOR
   whose error COMPOUNDS across generations. ASSERT THE SUBSTITUTION CHANGED SOMETHING** — `sed`'s exit code

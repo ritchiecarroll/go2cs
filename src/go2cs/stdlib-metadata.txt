@@ -10,9 +10,10 @@
 # Format: '##<dotted package name>' opens a section; its lines are the matching
 # package_info.cs lines verbatim, so the converter's existing parsers read them unchanged.
 # A package whose metadata varies by platform (no flat package_info.cs) keeps its
-# windows flavor in the unqualified section and every other flavor in its own
-# '##<dotted package name>@<goos>' section; a conversion for <goos> reads that section and
-# falls back to the unqualified one. Counts are of SECTIONS, not packages.
+# windows/amd64 flavor in the unqualified section and every other flavor in its own
+# '##<dotted package name>@<folder>' section, <folder> being the layout folder that copy
+# sits in (a GOOS, an arch, or a <goos>-<arch> pair); a conversion reads the section of a folder
+# its target compiles and falls back to the unqualified one. Counts are of SECTIONS, not packages.
 #
 # Regenerate with `go generate .` from src/go2cs; never hand-edit.
 
@@ -1403,6 +1404,13 @@
 [assembly: GoImplement<digest, hash_package.Cloner>(Pointer = true)]
 [assembly: GoImplement<digest, hash_package.Hash32>(Pointer = true)]
 
+##hash.crc32@linux-arm64
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("Size", "const:ΔSize")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<digest, hash_package.Cloner>(Pointer = true)]
+[assembly: GoImplement<digest, hash_package.Hash32>(Pointer = true)]
+
 ##hash.crc64
 // <ExportedTypeAliases>
 [assembly: GoTypeAlias("Size", "const:ΔSize")]
@@ -1586,6 +1594,10 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
+##internal.bytealg@linux-arm64
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
 ##internal.byteorder
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
@@ -1680,7 +1692,11 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
-##internal.cpu@linux
+##internal.cpu@linux-amd64
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
+##internal.cpu@linux-arm64
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
@@ -1897,6 +1913,10 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
+##internal.runtime.atomic@linux-arm64
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
 ##internal.runtime.cgroup
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
@@ -1941,6 +1961,10 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
+##internal.runtime.gc.scan@linux-arm64
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
 ##internal.runtime.maps
 // <ExportedTypeAliases>
 [assembly: GoTypeAlias("Map", "ΔMap")]
@@ -1963,7 +1987,15 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
-##internal.runtime.syscall.linux@linux
+##internal.runtime.sys@linux-arm64
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
+##internal.runtime.syscall.linux@linux-amd64
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
+##internal.runtime.syscall.linux@linux-arm64
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
@@ -2371,6 +2403,10 @@
 [assembly: GoImplement<Rand, Source>(Pointer = true)]
 [assembly: GoImplement<Zipf, Source>(Pointer = true)]
 [assembly: GoImplement<runtimeSource, Source>]
+
+##math@linux-arm64
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
 
 ##mime
 // <ExportedTypeAliases>
@@ -3243,7 +3279,18 @@
 [assembly: GoImplement<errorString, ΔError>]
 [assembly: GoImplement<plainError, ΔError>]
 
-##runtime@linux
+##runtime@linux-amd64
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("Error", "ΔError")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<PanicNilError, ΔError>(Pointer = true)]
+[assembly: GoImplement<TypeAssertionError, ΔError>(Pointer = true)]
+[assembly: GoImplement<boundsError, ΔError>]
+[assembly: GoImplement<errorAddressString, ΔError>]
+[assembly: GoImplement<errorString, ΔError>]
+[assembly: GoImplement<plainError, ΔError>]
+
+##runtime@linux-arm64
 // <ExportedTypeAliases>
 [assembly: GoTypeAlias("Error", "ΔError")]
 // </ExportedTypeAliases>
@@ -3330,7 +3377,18 @@
 [assembly: GoImplement<SockaddrInet6, Sockaddr>(Pointer = true)]
 [assembly: GoImplement<SockaddrUnix, Sockaddr>(Pointer = true)]
 
-##syscall@linux
+##syscall@linux-amd64
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("Signal", "ΔSignal")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<Errno, error>]
+[assembly: GoImplement<SockaddrInet4, Sockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrInet6, Sockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrLinklayer, Sockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrNetlink, Sockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrUnix, Sockaddr>(Pointer = true)]
+
+##syscall@linux-arm64
 // <ExportedTypeAliases>
 [assembly: GoTypeAlias("Signal", "ΔSignal")]
 // </ExportedTypeAliases>
@@ -3649,11 +3707,18 @@
 [assembly: GoImplement<bigEndian, byteOrder>]
 [assembly: GoImplement<littleEndian, byteOrder>]
 
-##vendor.golang.org.x.sys.cpu@linux
+##vendor.golang.org.x.sys.cpu@linux-amd64
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 [assembly: GoImplement<bigEndian, byteOrder>]
 [assembly: GoImplement<littleEndian, byteOrder>]
+
+##vendor.golang.org.x.sys.cpu@linux-arm64
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<bigEndian, byteOrder>]
+[assembly: GoImplement<littleEndian, byteOrder>]
+[assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
 
 ##vendor.golang.org.x.text.secure.bidirule
 // <ExportedTypeAliases>

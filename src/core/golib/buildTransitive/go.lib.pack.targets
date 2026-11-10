@@ -36,9 +36,9 @@
 
     WHO GETS ONE. A project whose Product is go2cs (the converter's csproj template sets it, so no
     converted csproj changes) and that has a package_info.cs, at its root or, for a layout-L3 package,
-    in a per-GOOS folder. Every flavour's copy declares the same namespace and package class, and the
-    files are read from disk rather than from the compile items, so the props is the same whichever
-    $(GoTargetOS) the pack ran under. golib has no package_info.cs and gets none. A pack that bundles
+    in its layout key folders (per GOOS, per GOARCH or per pair). Every copy declares the same namespace
+    and package class, and the files are read from disk rather than from the compile items, so the props
+    is the same whichever target the pack ran under. golib has no package_info.cs and gets none. A pack that bundles
     SEVERAL converted packages into one nupkg (nugetgo-pack.ps1's module pack project) names their
     directories as GoPackageDirectory items, and the one props covers all of them.
 
@@ -78,21 +78,22 @@
   <Target Name="GoWritePackageUsingsProps"
           BeforeTargets="_GetPackageFiles"
           Condition="'$(Product)' == 'go2cs' and '$(GoPackageUsingsProps)' != 'false' and '$(PackageId)' != ''">
-    <!-- One package_info.cs per package directory: the root copy, else the first per-GOOS copy. The
-         per-GOOS folders are read only when the root has none, so a real subpackage that happens to be
-         named for a GOOS (internal/syscall/windows) is never mistaken for a flavour folder of a package
-         that has its own root copy. -->
+    <!-- The package_info.cs of each package directory: the root copy, else every copy in a layout key
+         folder. The key folders are a target's GOOS, its GOARCH and the pair (linux, amd64, linux-arm64),
+         for each target of the converter's platform universe (src/go2cs/platformLattice.go); repoguard
+         holds this list to that universe. They are read only when the root has no copy, so a real
+         subpackage that happens to be named for a key (internal/syscall/windows) is never mistaken for a
+         key folder of a package that has its own root copy. A list of windows, linux and darwin alone
+         wrote no props for a package whose copies sit in amd64/ and linux-arm64/ (math, hash/crc32). -->
     <ItemGroup>
       <_GoPackageDirectory Include="@(GoPackageDirectory->'%(FullPath)')" />
       <_GoPackageDirectory Include="$(MSBuildProjectDirectory)" Condition="'@(GoPackageDirectory)' == ''" />
+      <_GoLayoutKey Include="windows;linux;darwin;amd64;arm64;windows-amd64;linux-amd64;darwin-amd64;linux-arm64" />
       <_GoPackageInfo Include="%(_GoPackageDirectory.FullPath)/package_info.cs"
                       Condition="Exists('%(_GoPackageDirectory.FullPath)/package_info.cs')" />
-      <_GoPackageInfo Include="%(_GoPackageDirectory.FullPath)/windows/package_info.cs"
-                      Condition="!Exists('%(_GoPackageDirectory.FullPath)/package_info.cs') and Exists('%(_GoPackageDirectory.FullPath)/windows/package_info.cs')" />
-      <_GoPackageInfo Include="%(_GoPackageDirectory.FullPath)/linux/package_info.cs"
-                      Condition="!Exists('%(_GoPackageDirectory.FullPath)/package_info.cs') and !Exists('%(_GoPackageDirectory.FullPath)/windows/package_info.cs') and Exists('%(_GoPackageDirectory.FullPath)/linux/package_info.cs')" />
-      <_GoPackageInfo Include="%(_GoPackageDirectory.FullPath)/darwin/package_info.cs"
-                      Condition="!Exists('%(_GoPackageDirectory.FullPath)/package_info.cs') and !Exists('%(_GoPackageDirectory.FullPath)/windows/package_info.cs') and !Exists('%(_GoPackageDirectory.FullPath)/linux/package_info.cs') and Exists('%(_GoPackageDirectory.FullPath)/darwin/package_info.cs')" />
+      <_GoKeyFolder Include="@(_GoPackageDirectory)" GoLayoutKey="%(_GoLayoutKey.Identity)" />
+      <_GoPackageInfo Include="%(_GoKeyFolder.FullPath)/%(_GoKeyFolder.GoLayoutKey)/package_info.cs"
+                      Condition="!Exists('%(_GoKeyFolder.FullPath)/package_info.cs') and Exists('%(_GoKeyFolder.FullPath)/%(_GoKeyFolder.GoLayoutKey)/package_info.cs')" />
     </ItemGroup>
 
     <!-- The converter's package_info.cs declares `namespace <ns>;` and then
@@ -117,6 +118,8 @@
         <GoAlias Condition="$([System.String]::Copy(';abstract;as;base;bool;break;byte;case;catch;char;checked;class;const;continue;decimal;default;delegate;do;double;else;enum;event;explicit;extern;false;finally;fixed;float;for;foreach;goto;if;implicit;in;int;interface;internal;is;lock;long;namespace;new;null;object;operator;out;override;params;private;protected;public;readonly;ref;return;sbyte;sealed;short;sizeof;stackalloc;static;string;struct;switch;this;throw;true;try;typeof;uint;ulong;unchecked;unsafe;ushort;using;virtual;void;volatile;while;').Contains(';%(GoPackageName);'))">@%(GoPackageName)</GoAlias>
       </_GoPackageInfo>
       <_GoNamespaceUsing Include="%(_GoPackageInfo.GoNamespace)" Condition="'%(_GoPackageInfo.GoNamespace)' != 'go'" />
+      <!-- One alias per package class: the key folders' copies of one package all name the same class. -->
+      <_GoAliasUsing Include="%(_GoPackageInfo.GoNamespace).%(_GoPackageInfo.GoPackageClass)" GoAlias="%(_GoPackageInfo.GoAlias)" />
     </ItemGroup>
 
     <!-- One string with escaped line breaks (%0A), so WriteLinesToFile keeps the indentation an item
@@ -124,7 +127,7 @@
     <PropertyGroup>
       <_GoPackageUsingsProps>$(IntermediateOutputPath)go2cs-pack/$(PackageId).props</_GoPackageUsingsProps>
       <_GoNamespaceUsings>@(_GoNamespaceUsing->Distinct()->'    &lt;Using Include="%(Identity)" /&gt;', '%0A')</_GoNamespaceUsings>
-      <_GoAliasUsings>@(_GoPackageInfo->'    &lt;Using Include="%(GoNamespace).%(GoPackageClass)" Alias="%(GoAlias)" /&gt;', '%0A')</_GoAliasUsings>
+      <_GoAliasUsings>@(_GoAliasUsing->Distinct()->'    &lt;Using Include="%(Identity)" Alias="%(GoAlias)" /&gt;', '%0A')</_GoAliasUsings>
       <_GoPackageUsingsText>&lt;Project&gt;%0A  &lt;!-- Written by go.lib.pack.targets when $(PackageId) was packed: the package's usings (see that file in go.lib). --&gt;</_GoPackageUsingsText>
       <_GoPackageUsingsText Condition="'$(_GoNamespaceUsings)' != ''">$(_GoPackageUsingsText)%0A  &lt;ItemGroup Condition="'%24(GoConsumerUsings)' != 'false'"&gt;%0A$(_GoNamespaceUsings)%0A  &lt;/ItemGroup&gt;</_GoPackageUsingsText>
       <_GoPackageUsingsText>$(_GoPackageUsingsText)%0A  &lt;ItemGroup Condition="'%24(GoGlobalPackageAliases)' == 'true'"&gt;%0A$(_GoAliasUsings)%0A  &lt;/ItemGroup&gt;%0A&lt;/Project&gt;</_GoPackageUsingsText>

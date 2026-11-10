@@ -34,6 +34,8 @@ public class SkipCountedWalkerFrameTests
 
     private static readonly Regex s_walkerEntry = new("\"([A-Za-z0-9_/]+)\\.([A-Za-z0-9_]+)\":\\s*true", RegexOptions.Compiled);
     private static readonly Regex s_moduleHandOwn = new(@"^\[module: go\.GoManualConversion\]", RegexOptions.Compiled | RegexOptions.Multiline);
+    private static readonly Regex s_universe = new(@"^var platformUniverse = \[\]string\{([^}]*)\}", RegexOptions.Compiled | RegexOptions.Multiline);
+    private static readonly Regex s_universeTarget = new("\"([a-z0-9]+)/([a-z0-9]+)\"", RegexOptions.Compiled);
 
     // The walker set, parsed from the map literal so a walker added there is guarded here without an edit.
     private static List<(string Package, string Function)> Walkers(string src)
@@ -46,16 +48,47 @@ public class SkipCountedWalkerFrameTests
         return [.. s_walkerEntry.Matches(analysis[start..end]).Select(m => (m.Groups[1].Value, m.Groups[2].Value))];
     }
 
+    // The folders a package's sources live in: the package directory itself and every layout key folder a
+    // target of the converter's declared universe can select -- its GOOS, its GOARCH and the pair
+    // (`linux`, `amd64`, `linux-arm64`). Parsed from platformUniverse, so a target added there is walked here
+    // without an edit. A fixed { windows, linux, darwin } list missed runtime.gcallers the day traceback.cs
+    // moved to amd64/ and linux-arm64/.
+    private static List<string> SourceFolders(string src)
+    {
+        string lattice = File.ReadAllText(Path.Combine(src, "go2cs", "platformLattice.go"));
+        Match universe = s_universe.Match(lattice);
+        Assert.IsTrue(universe.Success, "platformLattice.go no longer declares platformUniverse where this guard reads it");
+
+        List<string> folders = [""];
+
+        foreach (Match target in s_universeTarget.Matches(universe.Groups[1].Value))
+        {
+            string goos = target.Groups[1].Value, goarch = target.Groups[2].Value;
+
+            foreach (string key in new[] { goos, goarch, $"{goos}-{goarch}" })
+            {
+                if (!folders.Contains(key))
+                    folders.Add(key);
+            }
+        }
+
+        // The parser's positive control: the three per-OS folders and one per-arch and one pair folder.
+        foreach (string expected in new[] { "windows", "linux", "darwin", "amd64", "linux-arm64" })
+            Assert.IsTrue(folders.Contains(expected), $"parsed only [{string.Join(", ", folders)}] from platformUniverse: the reader, not the tree, is broken");
+
+        return folders;
+    }
+
     // The files that declare `function` as a plain static (not a `this` extension, which is a METHOD of a
     // record type that merely shares the name, e.g. (*StackRecord).Stack), in the package's directory and
-    // its per-OS subdirectories.
-    private static List<string> DeclaringFiles(string src, string package, string function)
+    // its layout key folders.
+    private static List<string> DeclaringFiles(string src, string package, string function, List<string> folders)
     {
         string dir = Path.Combine(src, "core", package.Replace('/', Path.DirectorySeparatorChar));
         var declaration = new Regex($@"\bstatic\s+[^=;(){{}}]+?\s{Regex.Escape(function)}\s*\((?!\s*this\b)");
         List<string> files = [];
 
-        foreach (string sub in new[] { "", "windows", "linux", "darwin" })
+        foreach (string sub in folders)
         {
             string path = Path.Combine(dir, sub);
 
@@ -101,11 +134,12 @@ public class SkipCountedWalkerFrameTests
         Assert.IsTrue(walkers.Count >= 5 && walkers.Contains(("runtime", "callers")),
             $"parsed only [{string.Join(", ", walkers)}] from skipCountedWalkers: the reader, not the tree, is broken");
 
+        List<string> folders = SourceFolders(src);
         List<string> handOwned = [], unmarked = [];
 
         foreach ((string package, string function) in walkers)
         {
-            List<string> files = DeclaringFiles(src, package, function);
+            List<string> files = DeclaringFiles(src, package, function, folders);
             Assert.IsTrue(files.Count > 0, $"no declaration of {package}.{function} found under core/{package}");
 
             if (!files.Any(IsHandOwned))

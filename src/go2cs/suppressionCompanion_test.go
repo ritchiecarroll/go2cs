@@ -82,15 +82,27 @@ func TestScopedSuppressionsHaveCompanions(t *testing.T) {
 
 			// The package may not exist for this GOOS: no per-GOOS folder AND no flat sources is
 			// not a gap, it is a package that target does not build.
-			perGoos := filepath.Join(pkgDir, goos)
-			hasPerGoos := false
+			//
+			// "This GOOS's folders" are every key folder some target of the GOOS compiles: `linux/`,
+			// and since the arch axis `amd64/`, `linux-amd64/` and `linux-arm64/` as well. The scope
+			// this guard reads is per GOOS (a goosScope has no arch half), so it asks the question at
+			// that grain and no finer: `internal/cpu`'s getGOAMD64level is suppressed wherever
+			// cpu_x86.go is emitted, its companion sits in `amd64/`, and linux/arm64 emits no
+			// cpu_x86.go to suppress. WHICH target of a GOOS is short of a body is
+			// TestManualConversionRegistrationsHaveBodies's question, asked per target there.
+			goosFolders := keyFoldersServingGOOS(pkgDir, goos)
+			hasPerGoos := len(goosFolders) > 0
+			companionInFolder := false
 
-			if info, err := os.Stat(perGoos); err == nil && info.IsDir() {
-				hasPerGoos = true
+			for _, folder := range goosFolders {
+				if hasCompanion(t, filepath.Join(pkgDir, folder)) {
+					companionInFolder = true
+					break
+				}
 			}
 
-			// A companion in the TARGET's own folder is the answer for a per-GOOS-varying package.
-			if hasCompanion(t, perGoos) {
+			// A companion in one of the GOOS's own folders is the answer for a per-target-varying package.
+			if companionInFolder {
 				continue
 			}
 
@@ -145,8 +157,9 @@ func TestScopedSuppressionsHaveCompanions(t *testing.T) {
 
 	for _, g := range gaps {
 		b.WriteString("  " + g.pkg + " on " + g.goos + " — suppressed: " + strings.Join(g.members, ", ") + "\n")
-		b.WriteString("      expected a companion under src/core/" + g.pkg + "/" + g.goos + "/ (or flat, for a\n")
-		b.WriteString("      platform-neutral package) carrying [module: GoManualConversion]\n")
+		b.WriteString("      expected a companion under src/core/" + g.pkg + "/" + g.goos + "/, or under a key folder one of\n")
+		b.WriteString("      that GOOS's targets compiles (or flat, for a platform-neutral package), carrying\n")
+		b.WriteString("      [module: GoManualConversion]\n")
 	}
 
 	b.WriteString("\nEach gap compiles clean on every OTHER target and fails only on the named one — the\n")
@@ -347,16 +360,50 @@ func hasFlatSources(t *testing.T, dir string) bool {
 }
 
 // hasAnyPlatformFolder reports whether the package carries per-GOOS source folders at all — the
-// L3 shape. A package that does is one whose emission VARIES by target, so only a companion in the
-// target's own folder can answer for it.
+// L3 shape. A package that does is one whose emission VARIES by GOOS, so only a companion in one of
+// the GOOS's own folders can answer for it.
+//
+// A folder that only tells one ARCH from another is not such a folder, and that is read off the
+// lattice rather than off the name: `amd64/` covers every amd64 target, and `linux-arm64/` covers
+// exactly what a bare `arm64/` would while linux is the universe's only arm64 GOOS. `internal/abi`
+// splits into those two and nothing else, its suppressed members are emitted from flat `type.go` on
+// every target, and its flat `type.cs` answers for all of them exactly as it did before the split.
+// `linux-amd64/` does tell a GOOS apart (amd64 has three), and so does any bare GOOS folder.
 func hasAnyPlatformFolder(t *testing.T, dir string) bool {
 	t.Helper()
 
-	for _, goos := range knownTargetGOOS {
-		if info, err := os.Stat(filepath.Join(dir, goos)); err == nil && info.IsDir() {
+	lattice := corpusLattice()
+
+	for _, folder := range layoutKeyFoldersIn(dir) {
+		arch := folder
+
+		if _, pairArch, isPair := splitPairFolderName(folder); isPair {
+			arch = pairArch
+		}
+
+		if !isKnownGOARCH(arch) || strings.Join(lattice.folderCover(folder), " ") != strings.Join(lattice.folderCover(arch), " ") {
 			return true
 		}
 	}
 
 	return false
+}
+
+// keyFoldersServingGOOS names the package's key folders that at least one target of the GOOS
+// compiles: the GOOS's own folder, its GOOS-arch pairs, and the bare arch folders of its targets.
+func keyFoldersServingGOOS(pkgDir string, goos string) []string {
+	targets := corpusLattice().targetsOfGOOS(goos)
+
+	var folders []string
+
+	for _, folder := range layoutKeyFoldersIn(pkgDir) {
+		for _, target := range targets {
+			if layoutFolderServes(folder, target) {
+				folders = append(folders, folder)
+				break
+			}
+		}
+	}
+
+	return folders
 }

@@ -10,12 +10,12 @@
 // docs/phase4/DESIGN-multiplatform-corpus.md; platformLayout.go owns what L3 IS, and every rule for
 // honoring it afterwards).
 //
-//	go2cs -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64 -go2cspath <repo>\src
+//	go2cs -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64 -go2cspath <repo>\src
 //
-// converts once per target and merges the three emissions into ONE tree, per L3: an artifact that is
+// converts once per target and merges the emissions into ONE tree, per L3: an artifact that is
 // byte-identical on every target is written flat in its package directory, and anything else — a
-// name whose content varies, or one only some targets emit at all — is written to that package's
-// `<goos>/` subfolder, once per emitting target.
+// name whose content varies, or one only some targets emit at all — is written to the key folders
+// of that package the layout lattice homes it at (platformLattice.go).
 //
 // **It is increment 1's census with a write step, deliberately.** The staging, the seeding ritual,
 // the sentinel-modification-time "did this run emit it", the hand-own marker gate and the four-way
@@ -718,8 +718,8 @@ func mergePlatformEmissions(rootPath string, targets []string, emissions []*plat
 	// §4). The merge still lands the first target's remainder, but the difference is named rather
 	// than absorbed: it is either a genuine design gap or a measurement worth recording.
 	if len(residual) > 0 {
-		fmt.Printf("\n⚠ %d package(s) emitted a flat companion that differs by GOOS in a way layout L3 does not express\n", len(residual))
-		fmt.Printf("  (a project file outside its <ProjectReference> lists, or a review sibling with no per-GOOS folder to hold it),\n")
+		fmt.Printf("\n⚠ %d package(s) emitted a flat companion that differs by target in a way layout L3 does not express\n", len(residual))
+		fmt.Printf("  (a project file outside its <ProjectReference> lists, or a review sibling with no source folder to hold it),\n")
 		fmt.Printf("  so %s's copy was kept:\n", goosOfTarget(targets[0]))
 
 		for _, pkg := range sortedKeys(func() map[string]bool {
@@ -1275,8 +1275,8 @@ func mergeReviewSiblings(coreDir string, lattice *platformLattice, emissions []*
 			destinations[filepath.Join(packageDir, name)] = flavours[0].contents
 
 			if !agree {
-				addResidualNote(residual, pkg, fmt.Sprintf("review sibling %s differs by GOOS, and the package has no per-GOOS "+
-					"source folder for every flavour, so %s's was kept flat", name, goosOfTarget(flavours[0].target)))
+				addResidualNote(residual, pkg, fmt.Sprintf("review sibling %s differs by target, and the package has no "+
+					"source folder for every flavour's key, so %s's was kept flat", name, flavours[0].target))
 			}
 		} else {
 			destinations = split

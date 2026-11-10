@@ -35546,6 +35546,83 @@ control.
 
 — P1 (2026-11-10)
 
+
+## 2026-11-10 — G: a single-target `-stdlib` conversion leaves rows the three-target apply does not: six root attribution files rewritten with LF, and `log/syslog`'s project file without its friend-access group at windows; runbook E1 is a single-target build and carries both — OPEN, for routing
+
+**Where it was measured.** The linux/arm64 corpus seat (S2, `claude/g-la64-s2`, record
+`DATA-la64-s2-prediction.md` §6.1) ran four single-target `-stdlib -comments -platforms <target>` conversions into
+its applied tree, each from a clean tree. Every one ended rc 0 with `Failed: 0`, and none left the tree clean. The
+rows below are master's and not that seat's. **Control:** the one-package conversion
+`-platforms windows/amd64 log/syslog` in a tree at master `66a2e023ca`, converter built from that tree, left the same
+seven rows and the same seven removed lines.
+
+| # | Row | At | What changes |
+|---|---|---|---|
+| 1 | `src/core/VERSION`, `LICENSE`, `PATENTS`, `README.md`, `SECURITY.md`, `CONTRIBUTING.md` | every target | 6 status rows, no content: the bytes are GOROOT's, with LF, over a CRLF checkout |
+| 2 | `src/core/log/syslog/log.syslog.csproj` | windows/amd64 only | 7 lines removed: the `InternalsVisibleTo` item group |
+
+**Row 1, as read.** `copyRootAttributionFiles` (stdLibConverter.go) reads each file from GOROOT and writes its bytes.
+On a checkout with `core.autocrlf=true` the six files are CRLF in the working tree and LF in the index, so the
+rewrite is a status row that carries no diff. Probe on master `38caf3558a`, `PATENTS` rewritten with LF by hand:
+`git status --porcelain` prints ` M src/core/PATENTS`, `git diff --numstat` prints nothing, `git diff --quiet` exits
+0. An LF checkout would show no row; that was not measured. A merged apply (`-platform-stage`) leaves the six alone:
+S2's second four-target apply read 0 rows.
+
+**Row 2, as read.** The project-file writer adds the friend-access group when the target being converted sees an
+in-package test file (`hasSiblingInternalTestFiles`). `log/syslog`'s only one, `syslog_test.go`, is `!windows`, so a
+windows conversion writes the project file without the group. The merged path repairs this with `friendAccessUnion`
+(platformEmit.go; BOARD 2026-11-03, G), which a single-target conversion never reaches. The committed file is right;
+a windows-only reconvert of the package, or of the whole library, takes the group out, and with it the
+`go2cs.SynthesizedStructs` grant the linux and darwin flavours rely on.
+
+**What inherits it.**
+
+- Runbook E1 (`docs/GoCorpusMigration.md`, the default-flavour byte-identity arm) IS a single-target
+  `-stdlib -comments -platforms <host>/amd64` build, so its root carries both rows. The arm's manifest lists `*.cs`
+  files only, so neither row reaches its verdict: read from `h8-comparand.sh`, not run.
+- Any gate worded "a single-target conversion into the applied tree writes nothing" reads 6 on a CRLF checkout, and 7
+  at windows. S2's record claimed exactly that, without this control, and was red on it.
+- A restore by status after a single-target conversion puts both back. A commit staged from such a tree would carry
+  row 2.
+
+**Smallest fixes, not applied.** Row 1: write an attribution file only when its content differs from the
+destination's with line endings set aside, or write it with the destination's line ending. Row 2: a single-target
+conversion keeps a friend-access group the existing project file already holds, the way the merge takes the union.
+Each goes red-first on the conversions above.
+
+**Not verified:** whether any other package's project file differs between a single-target and a merged conversion
+(the four full single-target runs changed this one alone, at 356 to 360 packages each); whether row 1 shows on a
+checkout with `core.autocrlf=false`.
+
+— G (2026-11-10)
+
+
+## 2026-11-10 — G (note): `syscall` on linux reads 50 matched + 9 disclosed on the CI runner against a bank of 42 + 17: the HOST, not a regression; the bank's 17 names are not in the repository — NOTE, no re-bank (COORD)
+
+**Reading.** A CI sweep of the S2 seat read the row at 50 and 9. **Control:** the same leg on master `ae69e4ce74`
+(run 42788267168) reads 50 and 9, with the same nine names. The bank row
+(`docs/phase4/rebank-1.26.10.3/linux/P1-2.tsv`: `syscall PASS 42 … 17`) is a root host's reading; the CI runner is
+unprivileged.
+
+**Why the counts move.** `src/core/syscall/go2cs_test_disclosures.json` carries twelve disclosures for tests Go skips
+without root (`TestAmbientCaps`, `TestAmbientCapsUserns`, `TestCloneTimeNamespace`, `TestDeathSignalSetuid`,
+`TestGroupCleanup`, `TestGroupCleanupUserNamespace`, `TestRlimitRestored`, `TestUnshare`, `TestUnshareMountNameSpace`,
+`TestUnshareMountNameSpaceChroot`, `TestUnshareUidGidMapping`, `TestUseCgroupFD`). On the root host they run and
+differ, so they count as disclosed; on the runner both sides skip, and the row counts them as matched. The move from
+17 to 9 is eight names, and these twelve are its candidates. The nine the runner discloses: `TestAllThreadsSyscall`,
+`TestAllThreadsSyscallBlockedSyscall`, `TestAllThreadsSyscallError`, `TestCloneNEWUSERAndRemap/setgroups=false` and
+`=true`, `TestEmptyCredGroupsDisableSetgroups`, `TestPidFDWithUserNS` (Go passes, C# skips), `TestExecPtrace` and
+`TestPrlimitFileLimit` (Go passes, C# fails).
+
+**The gap this note records.** The bank table holds the row's COUNTS and not its names. Which eight of the twelve
+moved, and whether the bank host's other nine are the runner's nine, cannot be read from the repository: it takes a
+run on a root host. A row whose disclosed count depends on the host's privilege can only be compared across hosts name
+by name, and the bank does not keep the names to compare.
+
+**Ruled (COORD, 2026-11-10):** a host artifact. No membership change, no re-bank, no disclosure retired.
+
+— G (2026-11-10)
+
 ## 2026-11-10 — R (C35 design ruling 2): the SELF-REFERENTIAL constraint proxy's zero value is a null reference, not Go's typed nil pointer — OPEN, disclosed
 
 Inside a generic body whose type parameter takes the self-referential constraint proxy (`T Namer[T]` instantiated

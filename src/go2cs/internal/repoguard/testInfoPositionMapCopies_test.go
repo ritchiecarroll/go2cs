@@ -29,7 +29,7 @@ import (
 // past the end of the file; a shift that stays inside the file passes it.
 //
 // THE RULE: a GoPositionMap record in a test info whose Go file and C# file are those of a record in a production
-// package_info.cs (beside the test info, in its GOOS subdirectories, or in its parent, the places guard A looks for
+// package_info.cs (beside the test info or in a platform folder that compiles with it, the places guard A looks for
 // the .cs file) has the same arguments as one of those records. The attribute's spelling (`GoPositionMap`,
 // `go.GoPositionMap`) is not compared. A test info's records for its own test files have no production
 // counterpart and are not this rule's.
@@ -95,11 +95,7 @@ func scanTestInfoPositionMapCopies(infos map[string]string) ([]string, int) {
 
 	for _, infoPath := range paths {
 		dir := path.Dir(infoPath)
-		candidates := []string{dir, path.Dir(dir)}
-
-		for _, goos := range lineKeyedGOOS {
-			candidates = append(candidates, path.Join(dir, goos))
-		}
+		candidates := append([]string{dir}, lineKeyedCompanionDirs(dir)...)
 
 		records := positionMapArguments(infos[infoPath])
 		lines := make([]int, 0, len(records))
@@ -198,19 +194,22 @@ func TestTestInfoPositionMapCopyScannerFires(t *testing.T) {
 			record("GoPositionMap", "p/a_test.go", "a_test.cs", "gIA="),
 		}, "\n"),
 		"q/package_test_info.cs": record("GoPositionMap", "q/c_linux.go", "c_linux.cs", "gIA="),
+		// r's production info sits in a <goos>-<arch> folder, as a package split by GOARCH lays it.
+		"r/linux-arm64/package_info.cs": record("GoPositionMap", "r/d_arm64.go", "d_arm64.cs", "gIA="),
+		"r/package_test_info.cs":        record("GoPositionMap", "r/d_arm64.go", "d_arm64.cs", "gIA="),
 	}
 
 	findings, copies := scanTestInfoPositionMapCopies(infos)
 
-	if len(findings) != 0 || copies != 3 {
-		t.Fatalf("the clean tree reads %d copies (want 3) and %d findings (want 0): %v", copies, len(findings), findings)
+	if len(findings) != 0 || copies != 4 {
+		t.Fatalf("the clean tree reads %d copies (want 4) and %d findings (want 0): %v", copies, len(findings), findings)
 	}
 
 	// The plant: p's copy of a.cs keeps a table the production record no longer has.
 	infos["p/package_test_info.cs"] = strings.Replace(infos["p/package_test_info.cs"], record("GoPositionMap", "p/a.go", "a.cs", "gJA="), record("GoPositionMap", "p/a.go", "a.cs", "gIA="), 1)
 	findings, copies = scanTestInfoPositionMapCopies(infos)
 
-	if len(findings) != 1 || copies != 3 || !strings.Contains(findings[0], "p/package_test_info.cs:1:") || !strings.Contains(findings[0], "a.cs (p/a.go)") {
+	if len(findings) != 1 || copies != 4 || !strings.Contains(findings[0], "p/package_test_info.cs:1:") || !strings.Contains(findings[0], "a.cs (p/a.go)") {
 		t.Fatalf("the stale copy was not named once, at p/package_test_info.cs:1 (copies %d): %v", copies, findings)
 	}
 }
