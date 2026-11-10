@@ -31,7 +31,7 @@ if ((GOARCH == "386"u8 || GOARCH == "amd64"u8) && cpu.X86.HasAES && cpu.X86.HasS
 ```
 
 On an arm64 process every `cpu.X86` flag is false, because `initX86FeatureDetection`
-(`src/core/internal/cpu/cpu_x86_impl.cs`) returns at once when `X86Base.IsSupported` is false. `cpu.ARM64` is never
+(`src/core/internal/cpu/amd64/cpu_x86_impl.cs`) returns at once when `X86Base.IsSupported` is false. `cpu.ARM64` is never
 filled by anything, so the converted runtime takes the fallback hash. Its AES bodies (`GoAeshash`, `GoAeshash32`,
 `GoAeshash64`) are written against `System.Runtime.Intrinsics.X86.Aes` and could not run on Arm in any case.
 
@@ -157,7 +157,7 @@ skip/pass pattern and hash quality. Two shapes:
   table taken from Go on an arm64 Mac, and a second body family to keep. It changes no verdict that 3-i leaves
   unchanged.
 
-**Footprint:** two hand-owned files in converted packages (`src/core/internal/cpu/cpu_x86_impl.cs`, or a new
+**Footprint:** two hand-owned files in converted packages (`src/core/internal/cpu/amd64/cpu_x86_impl.cs`, or a new
 `cpu_arm64_impl.cs` beside it, and `src/core/runtime/hash_impl.cs`), plus GolibTests guards. Zero converter change,
 zero emission, golib untouched.
 

@@ -35,7 +35,7 @@
 //
 // Invocation (the one-command re-derivation):
 //
-//	go2cs -stdlib -ref-census <out.json> -platforms windows/amd64,linux/amd64,darwin/amd64 -go2cspath <repo>\src
+//	go2cs -stdlib -ref-census <out.json> -platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64 -go2cspath <repo>\src
 //
 // Optional positionals narrow the package set exactly as `-stdlib <pkgs>` does (iteration only —
 // a narrowed run under-counts cross-package traffic and skips nothing else).

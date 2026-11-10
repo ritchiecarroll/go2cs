@@ -14,8 +14,8 @@ import (
 	"testing"
 )
 
-// The universes the lattice is exercised over. universeToday is the declared one; universeArm is the
-// one docs/phase4/DESIGN-linux-arm64-flavour.md designs for; universeFive adds the fifth target the
+// The universes the lattice is exercised over. universeToday is the three-target one of before linux/arm64; universeArm is
+// the one docs/phase4/DESIGN-linux-arm64-flavour.md designed, declared since; universeFive adds the fifth target the
 // design names as the first place the GOOS-first split order becomes observable.
 var (
 	universeToday = []string{"windows/amd64", "linux/amd64", "darwin/amd64"}

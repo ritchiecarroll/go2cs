@@ -14,6 +14,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -41,9 +42,9 @@ import (
 //	(b) GoPositionMap: the table decodes, its C# lines increase, no mapped line is past the end of the
 //	    file, every calls key is a table line, and every thunk's column follows "=>".
 //
-// The .cs file is looked for beside the info file, then in its parent directory, then in its GOOS
-// subdirectories; a record passes when it fits one of them (an L3 package's flat info file can describe a
-// file each GOOS emits on its own). Columns are 1-based UTF-16 units, as the records write them.
+// The .cs file is looked for beside the info file, then in the directories that compile with it
+// (lineKeyedCompanionDirs: layout L3's platform folders); a record passes when it fits one of them (an L3 package's
+// flat info file can describe a file each target emits on its own). Columns are 1-based UTF-16 units, as written.
 //
 // Each check reads only committed files: no build, no transpile. Measured at 8ae147d458 (C2's scout): every
 // record fits as committed, and with each record read one line off, 209 of 215 bounded records and 1424 of
@@ -65,8 +66,78 @@ var (
 	packageInfoFileName    = regexp.MustCompile(`^package_(?:info|test_info|info_internal_test)\.cs$`)
 )
 
-// lineKeyedGOOS are the GOOS subdirectories an L3 package emits a per-OS file into.
-var lineKeyedGOOS = []string{"darwin", "linux", "windows"}
+// lineKeyedUniverse is the (GOOS, GOARCH) pairs the corpus is laid out for, the converter's platformUniverse
+// (src/go2cs/platformLattice.go); TestLineKeyedRecordsLandOnTheirCode holds the two equal.
+var lineKeyedUniverse = []string{"windows/amd64", "linux/amd64", "darwin/amd64", "linux/arm64"}
+
+// lineKeyedFolderTargets are the targets a layout L3 key folder compiles at, by its name: a `<goos>`, an `<arch>` or
+// a `<goos>-<arch>` folder. No target means the name is not a key folder's.
+func lineKeyedFolderTargets(name string) []string {
+	var targets []string
+
+	for _, target := range lineKeyedUniverse {
+		goos, arch, _ := strings.Cut(target, "/")
+
+		if name == goos || name == arch || name == goos+"-"+arch {
+			targets = append(targets, target)
+		}
+	}
+
+	return targets
+}
+
+// lineKeyedFolders are the key folder names the universe can lay a file into, sorted.
+func lineKeyedFolders() []string {
+	seen := map[string]bool{}
+	var names []string
+
+	for _, target := range lineKeyedUniverse {
+		goos, arch, _ := strings.Cut(target, "/")
+
+		for _, name := range []string{goos, arch, goos + "-" + arch} {
+			if !seen[name] {
+				seen[name] = true
+				names = append(names, name)
+			}
+		}
+	}
+
+	sort.Strings(names)
+
+	return names
+}
+
+// lineKeyedCompanionDirs are the directories, other than dir itself, whose files compile into one assembly with an
+// info file in dir. Read as a package's directory, dir takes each of its key folders (a flat info file is compiled at
+// every target). Read as a key folder, by its name, it takes the package's directory and each key folder that shares
+// a target with it: linux-amd64/ takes linux/ and amd64/ and never linux-arm64/. Both readings are taken, because a
+// package named for a GOOS (internal/runtime/syscall/linux) is not told from a key folder by its path.
+func lineKeyedCompanionDirs(dir string) []string {
+	var dirs []string
+
+	if own := lineKeyedFolderTargets(path.Base(dir)); len(own) > 0 {
+		dirs = append(dirs, path.Dir(dir))
+
+		for _, name := range lineKeyedFolders() {
+			if name == path.Base(dir) {
+				continue
+			}
+
+			for _, target := range lineKeyedFolderTargets(name) {
+				if slices.Contains(own, target) {
+					dirs = append(dirs, path.Join(path.Dir(dir), name))
+					break
+				}
+			}
+		}
+	}
+
+	for _, name := range lineKeyedFolders() {
+		dirs = append(dirs, path.Join(dir, name))
+	}
+
+	return dirs
+}
 
 // sourceLines splits a converted file into its lines: BOM dropped, CRLF folded, no phantom line after a
 // final newline.
@@ -105,14 +176,12 @@ func lineKeyedCandidates(infoPath, csFile string, exists func(string) bool) []st
 	dir := path.Dir(infoPath)
 	var candidates []string
 
-	for _, p := range []string{path.Join(dir, csFile), path.Join(path.Dir(dir), csFile)} {
-		if exists(p) {
-			return []string{p}
-		}
+	if p := path.Join(dir, csFile); exists(p) {
+		return []string{p}
 	}
 
-	for _, goos := range lineKeyedGOOS {
-		if p := path.Join(dir, goos, csFile); exists(p) {
+	for _, companion := range lineKeyedCompanionDirs(dir) {
+		if p := path.Join(companion, csFile); exists(p) {
 			candidates = append(candidates, p)
 		}
 	}
@@ -298,7 +367,7 @@ func checkAgainstCandidates(at, kind, csFile, infoPath string, exists func(strin
 	candidates := lineKeyedCandidates(infoPath, csFile, exists)
 
 	if len(candidates) == 0 {
-		return []string{fmt.Sprintf("%s: %s names %s, which is not beside the info file, in its parent or in a GOOS subdirectory", at, kind, csFile)}
+		return []string{fmt.Sprintf("%s: %s names %s, which is not beside the info file or in a platform folder that compiles with it", at, kind, csFile)}
 	}
 
 	var reasons []string
@@ -342,6 +411,22 @@ func TestLineKeyedRecordsLandOnTheirCode(t *testing.T) {
 
 	if len(infos) == 0 {
 		t.Fatal("no package info file with a GoPositionMap or GoBoundedGoroutine record found: wrong root or broken predicate")
+	}
+
+	// The folders this guard looks in follow from its universe, which is the converter's: a target the layout gains
+	// and this list does not would read here as records that name no file.
+	lattice, err := os.ReadFile(filepath.Join(root, "src", "go2cs", "platformLattice.go"))
+
+	if err != nil {
+		t.Fatalf("reading the converter's universe: %v", err)
+	}
+
+	declared := regexp.MustCompile(`(?m)^var platformUniverse = \[\]string\{(.*)\}\r?$`).FindSubmatch(lattice)
+
+	if want := `"` + strings.Join(lineKeyedUniverse, `", "`) + `"`; declared == nil {
+		t.Error("src/go2cs/platformLattice.go no longer declares platformUniverse on one line; lineKeyedUniverse has nothing to be held to")
+	} else if string(declared[1]) != want {
+		t.Errorf("src/go2cs/platformLattice.go declares platformUniverse {%s} and lineKeyedUniverse is {%s}; they change together", declared[1], want)
 	}
 
 	cache := map[string][]string{}
@@ -424,6 +509,38 @@ func TestLineKeyedRecordScannerFires(t *testing.T) {
 		}
 
 		if len(findings) != 1 || !strings.Contains(findings[0], c.want) {
+			t.Errorf("%s: findings %v; want one naming %q", c.name, findings, c.want)
+		}
+	}
+
+	// THE PLATFORM FOLDERS. q lays a.cs in linux/ (both linux targets), n.cs in amd64/ (the three amd64 targets) and
+	// b.cs in linux-arm64/. An info file in a key folder describes the files its own targets compile and no other's.
+	layout := map[string][]string{"q/linux/a.cs": clean, "q/amd64/n.cs": neighbours, "q/linux-arm64/b.cs": clean}
+	readLayout := func(p string) ([]string, bool) { lines, ok := layout[p]; return lines, ok }
+	shared := "[assembly: GoBoundedGoroutine(\"a.cs\", 1, 5, 0)]"
+	amd64Only := "[assembly: GoBoundedGoroutine(\"n.cs\", 2, 5, 1)]"
+	arm64Only := "[assembly: GoBoundedGoroutine(\"b.cs\", 1, 5, 0)]"
+
+	folders := []struct {
+		name, infoPath, info, want string
+	}{
+		{"linux/amd64 reads linux/ and amd64/", "q/linux-amd64/package_info.cs", shared + "\n" + amd64Only, ""},
+		{"linux/arm64 reads linux/ and its own folder", "q/linux-arm64/package_info.cs", shared + "\n" + arm64Only, ""},
+		{"a flat info file reads every folder", "q/package_info.cs", shared + "\n" + amd64Only + "\n" + arm64Only, ""},
+		{"darwin reads amd64/", "q/darwin/package_info.cs", amd64Only, ""},
+		{"linux/arm64 does not compile amd64/", "q/linux-arm64/package_info.cs", amd64Only, "names n.cs, which is not"},
+		{"linux/amd64 does not compile linux-arm64/", "q/linux-amd64/package_info.cs", arm64Only, "names b.cs, which is not"},
+		{"darwin does not compile linux/", "q/darwin/package_info.cs", shared, "names a.cs, which is not"},
+	}
+
+	for _, c := range folders {
+		findings := scanLineKeyedRecords(map[string]string{c.infoPath: c.info}, readLayout)
+
+		if c.want == "" && len(findings) != 0 {
+			t.Errorf("%s: the clean control reads %v", c.name, findings)
+		}
+
+		if c.want != "" && (len(findings) != 1 || !strings.Contains(findings[0], c.want)) {
 			t.Errorf("%s: findings %v; want one naming %q", c.name, findings, c.want)
 		}
 	}

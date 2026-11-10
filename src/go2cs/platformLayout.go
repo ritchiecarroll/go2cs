@@ -416,8 +416,10 @@ func removePlatformArchLayoutBlocks(projectFileContents string) string {
 // renderPlatformUniverseCheck renders the shared build check of the arch axis: an MSBuild target that fails a build
 // whose ($(GoTargetOS), $(GoTargetArch)) is not a target of the universe. Without it a pair the corpus was never laid
 // out for compiles silently short: a windows build at arm64 takes no `amd64/` folder and no `windows-arm64/` one. An
-// unset property reads as its project-file default, as the conditioned items read it. Not yet written into any file:
-// where the corpus carries it is a later decision.
+// unset property reads as its project-file default, as the conditioned items read it. The corpus carries it in
+// src/core/Directory.Build.props, the one build file every package of the tree already imports (a
+// Directory.Build.targets beside it would shadow src/Directory.Build.targets, which MSBuild stops looking for at the
+// first one it finds), and TestCorpusBuildFileCarriesTheUniverseCheck holds that copy to platformUniverse.
 func renderPlatformUniverseCheck(universe []string) string {
 	conditions := make([]string, 0, len(universe))
 

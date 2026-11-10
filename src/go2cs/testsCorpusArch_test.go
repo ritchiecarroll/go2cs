@@ -21,10 +21,10 @@ import (
 	"time"
 )
 
-// A -tests run of a standard-library package re-emits that package into the COMMITTED corpus, which is
-// built for amd64 on every GOOS. On an arm64 host the -platforms default (the converter binary's own
-// runtime.GOOS/runtime.GOARCH) re-emitted it for darwin/arm64 instead: hash/crc32 then selected
-// crc32_arm64.go beside the committed crc32_amd64.cs and its test host failed to build, CS0111 x6
+// A -tests run of a standard-library package re-emits that package into the COMMITTED corpus, which is built
+// for amd64 on every GOOS (and, on linux alone, for arm64 too). On an arm64 host the -platforms default (the
+// converter binary's own runtime.GOOS/runtime.GOARCH) re-emitted it for darwin/arm64 instead: hash/crc32 then
+// selected crc32_arm64.go beside the committed crc32_amd64.cs and its test host failed to build, CS0111 x6
 // (darwin row pilot, run 37112360853, 2026-10-03). These pin the decision that replaces that default.
 func TestTestsTargetPlatformPinsTheCorpusArchForGOROOTPackages(t *testing.T) {
 	goRoot := filepath.Join(t.TempDir(), "go")
@@ -41,7 +41,7 @@ func TestTestsTargetPlatformPinsTheCorpusArchForGOROOTPackages(t *testing.T) {
 		wantPinned   bool
 	}{
 		{"stdlib on darwin/arm64 pins amd64", "darwin/arm64", false, true, stdlibPackage, "darwin/amd64", true},
-		{"stdlib on linux/arm64 pins amd64", "linux/arm64", false, true, stdlibPackage, "linux/amd64", true},
+		{"stdlib on linux/arm64 is its own flavour", "linux/arm64", false, true, stdlibPackage, "linux/arm64", false},
 		{"stdlib on darwin/amd64 is unchanged", "darwin/amd64", false, true, stdlibPackage, "darwin/amd64", false},
 		{"stdlib on windows/amd64 is unchanged", "windows/amd64", false, true, stdlibPackage, "windows/amd64", false},
 		{"stdlib on linux/amd64 is unchanged", "linux/amd64", false, true, stdlibPackage, "linux/amd64", false},
