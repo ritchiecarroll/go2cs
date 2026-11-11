@@ -677,7 +677,7 @@ Guards: the behavioral test `ReflectVariadicCall`; GolibTests' `GoReflectBridgeC
      (`public void ARegisteredVariadicSignatureIsServedByItsCompiledTrampolines()`), :209
      (`public void AnUnregisteredValueTypeVariadicIsRefusedByNameWithoutDynamicCode()`);
      src/tests/GenTests/EscapeRegistryGeneratorTests.cs:126 (`public void EveryEscapingVariadicFuncSignatureIsRegistered()`);
-     src/tests/GenTests/GoMethodSetTests.cs:256 (`public void AVariadicArmRegistersItsSignatures()`);
+     src/tests/GenTests/GoMethodSetTests.cs:260 (`public void AVariadicArmRegistersItsSignatures()`);
      src/tests/GolibTests/DeferredRegistrationTests.cs:178 (`public void TheFirstVariadicMissRunsTheQueuedEscapeRegistry()`). -->
 
 **A ZERO test is a descriptor read too, and this one had degraded to a CONSTANT — `Value.IsZero`,
@@ -3654,7 +3654,7 @@ levels. Anything the IL cannot prove keeps the frames the trace has, and an impl
 nil dereference) inside an inlinee is not covered, since a statement cannot say which instruction faulted. Nothing
 is emitted for this and nothing runs off the panic path. Guarded by GolibTests' `PanicFramesInlinedPanicTests`,
 including the controls where the IL names no single callee.
-<!-- src/core/runtime/managed_impl.cs:5002 (`INLINED PANIC SITES`), :5010 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
+<!-- src/core/runtime/managed_impl.cs:5024 (`INLINED PANIC SITES`), :5032 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
      src/tests/GolibTests/PanicFramesInlinedPanicTests.cs:14 (`AN EXPLICIT PANIC RAISED INSIDE A GO FUNCTION THE JIT INLINED`). -->
 
 ## `runtime.Stack(all: true)` enumerates every goroutine, and each one names the wait it is parked on

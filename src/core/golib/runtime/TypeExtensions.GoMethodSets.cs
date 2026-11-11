@@ -232,6 +232,13 @@ public static partial class TypeExtensions
     // answer. The stated residual: a PROMOTED method's candidate is the generator's wrapper in
     // the EMBEDDING package, so a cross-package embed satisfying a foreign marker interface
     // answers false — the conservative direction, with no measured consumer.
+    //
+    // A SAME-package promoted method's wrapper is in the struct's promoted-method class from 1.26.10.4
+    // (`<pkg>ᴛ<Struct>ᴛpkg`, marked [GoPromotedHost(typeof(Struct))]) and no longer in the package class.
+    // Its package is the STRUCT's: Go puts a promoted method in the embedding type's method set, and
+    // net's `w.(buffersWriter)` over a `*TCPConn` that promotes `writeBuffers` from its embedded `conn`
+    // must hold (behavioral UnexportedIfaceDynamicAssert took the per-chunk fallback while this method
+    // read the forwarder's own class). The class is found by its attribute, never by its name.
     private static bool UnexportedMethodPackageMatches(MethodInfo interfaceMethod, MethodInfo candidate)
     {
         string goName = interfaceMethod.Name;
@@ -247,8 +254,18 @@ public static partial class TypeExtensions
         if (interfacePackage.Length == 0)
             return true;
 
-        return string.Equals(interfacePackage, GoReflect.GoPackageClassPath(candidate.DeclaringType), StringComparison.Ordinal);
+        return string.Equals(interfacePackage, GoReflect.GoPackageClassPath(MethodPackageClass(candidate)), StringComparison.Ordinal);
     }
+
+    // The package class a candidate extension method is declared in: its own class, or for a forwarder in a
+    // struct's promoted-method class the class that struct is nested in.
+    private static Type? MethodPackageClass(MethodInfo candidate) =>
+        candidate.DeclaringType is { } declaring
+            ? s_promotedHostPackages.GetOrAdd(declaring, static type =>
+                type.GetCustomAttributes(typeof(GoPromotedHostAttribute), inherit: false) is [GoPromotedHostAttribute host] ? host.Struct.DeclaringType : type)
+            : null;
+
+    private static readonly ConcurrentDictionary<Type, Type?> s_promotedHostPackages = [];
 
     /// <summary>
     /// Matches an emitted extension method's name against the Go method name

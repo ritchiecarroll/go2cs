@@ -212,18 +212,22 @@ public class GoMethodSetTests
         return (sources, errors, executed);
     }
 
-    // The package class's static extension methods from the TypeGenerator's main parts: the promoted forwarders.
+    // The static extension methods of the TypeGenerator's main parts, each kept in a class of its own class's name and
+    // modifiers: the promoted forwarders, which a struct's own promoted-method class holds.
     private static SyntaxTree Forwarders(IEnumerable<SyntaxTree> generated, CSharpParseOptions options)
     {
-        IEnumerable<MethodDeclarationSyntax> forwarders = generated
+        IEnumerable<string> classes = generated
             .Where(tree => tree.FilePath.Contains("go2cs.TypeGenerator") && !tree.FilePath.EndsWith(".MethodSet.g.cs", StringComparison.Ordinal) &&
                            !tree.FilePath.EndsWith(".MethodSource.g.cs", StringComparison.Ordinal))
             .SelectMany(tree => tree.GetRoot().DescendantNodes().OfType<MethodDeclarationSyntax>())
             .Where(method => method.Parent is ClassDeclarationSyntax && method.Modifiers.Any(SyntaxKind.StaticKeyword) &&
-                             method.ParameterList.Parameters.FirstOrDefault()?.Modifiers.Any(SyntaxKind.ThisKeyword) == true);
+                             method.ParameterList.Parameters.FirstOrDefault()?.Modifiers.Any(SyntaxKind.ThisKeyword) == true)
+            .GroupBy(method => (ClassDeclarationSyntax)method.Parent!, method => method.ToFullString(),
+                (host, methods) => $"{host.Modifiers} class {host.Identifier}\n{{\n{string.Join("\n", methods)}\n}}\n",
+                EqualityComparer<ClassDeclarationSyntax>.Create((left, right) => left!.Identifier.ValueText == right!.Identifier.ValueText,
+                    host => host.Identifier.ValueText.GetHashCode()));
 
-        return CSharpSyntaxTree.ParseText($"namespace go;\npublic static partial class mtest_package\n{{\n{string.Join("\n", forwarders.Select(method => method.ToFullString()))}\n}}\n",
-            options, path: @"C:\go2cs\src\core\mtest\obj\forwarders.g.cs");
+        return CSharpSyntaxTree.ParseText($"namespace go;\n{string.Join("\n", classes)}", options, path: @"C:\go2cs\src\core\mtest\obj\forwarders.g.cs");
     }
 
     [TestMethod]
@@ -374,21 +378,22 @@ public class GoMethodSetTests
         Assembly assembly = Assembly.Load(image.ToArray());
         Type package = assembly.GetType("go.mtest_package", throwOnError: true)!;
 
-        (string type, string method, bool pointer)[] cases =
+        // A promoted method's arm is the forwarder in the struct's own promoted-method class.
+        (string type, string method, bool pointer, string host)[] cases =
         [
-            ("Plain", "Get", false), ("Plain", "Sum", false), ("Plain", "Wide", false), ("file", "Size", true),
-            ("Outer", "Twice", false), ("Outer", "Bump", true)
+            ("Plain", "Get", false, "mtest_package"), ("Plain", "Sum", false, "mtest_package"), ("Plain", "Wide", false, "mtest_package"),
+            ("file", "Size", true, "mtest_package"), ("Outer", "Twice", false, "mtestᴛOuterᴛpkg"), ("Outer", "Bump", true, "mtestᴛOuterᴛpkg")
         ];
 
         List<string> mismatches = [];
 
-        foreach ((string type, string method, bool pointer) in cases)
+        foreach ((string type, string method, bool pointer, string host) in cases)
         {
             golib::go.IGoMethodSet set = (golib::go.IGoMethodSet)Activator.CreateInstance(package.GetNestedType(type)!)!;
 
             if (set.ᴛMethod(method, pointer, false, null) is not { } arm)
                 mismatches.Add($"{type}.{method}: no arm");
-            else if (arm.Method.Name != method || arm.Method.DeclaringType != package)
+            else if (arm.Method.Name != method || arm.Method.DeclaringType != assembly.GetType($"go.{host}", throwOnError: true))
                 mismatches.Add($"{type}.{method}: the arm calls through {arm.Method.DeclaringType?.Name}.{arm.Method.Name}");
         }
 

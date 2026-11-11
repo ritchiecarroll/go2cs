@@ -236,6 +236,36 @@ try {
     Check 'vendored cryptobyte carries at most batch 235''s 5 entries, and cites the batch while it carries any' (
         $cb.Count -le 5 -and ($cb.Count -eq 0 -or [System.IO.File]::ReadAllText($real['go.vendor.golang.org.x.crypto.cryptobyte']).Contains('batch 235'))) "$($cb.Count) entries"
 
+    # 1.26.10.4 announces one break: every struct's promoted-method forwarders left the package class for a class of
+    # the struct's own (docs/phase4/DESIGN-promoted-forwarder-placement.md; the owner's ruling, 2026-11-10). Its entries
+    # are GENERATED from the packed assemblies and their 1.26.10.3 baselines (New-GoApiCompatMoveSuppressions.ps1 over
+    # the pack rehearsal of 2026-11-10: master ae69e4ce74 and the seat), one CP0002 per moved public forwarder per
+    # asset: 900 in these 20 files. The bound is those counts and no other file. Each header says when its file goes:
+    # once 1.26.10.4 is published, the release after it compares with 1.26.10.4 and the entries match nothing.
+    Write-Host 'the tree carries at most the promoted-forwarder move''s generated entries'
+    $moveCaps = [ordered]@{
+        'go.archive.zip' = 14; 'go.bufio' = 4; 'go.crypto.internal.fips140.aes' = 2; 'go.debug.dwarf' = 20;
+        'go.debug.macho' = 4; 'go.encoding.binary' = 18; 'go.encoding.gob' = 10; 'go.go.types' = 232; 'go.image' = 4;
+        'go.internal.abi' = 119; 'go.internal.poll' = 6; 'go.internal.reflectlite' = 6;
+        'go.internal.runtime.gc.internal.gen' = 74; 'go.internal.trace' = 16; 'go.net' = 240; 'go.net.textproto' = 9;
+        'go.reflect' = 14; 'go.runtime' = 10; 'go.text.template.parse' = 96;
+        'go.vendor.golang.org.x.net.dns.dnsmessage' = 2
+    }
+    $capTotal = 0
+    foreach ($cap in $moveCaps.Values) { $capTotal += $cap }
+    Check 'the caps are the generator''s 900 entries in 20 files' ($capTotal -eq 900 -and $moveCaps.Count -eq 20) "$capTotal in $($moveCaps.Count)"
+    $known = @('go.lib', 'go.vendor.golang.org.x.crypto.cryptobyte') + @($moveCaps.Keys)
+    $other = @($real.Keys | Where-Object { $known -cnotcontains $_ } | Sort-Object)
+    Check 'no other package carries a suppression file' ($other.Count -eq 0) ($other -join ', ')
+    $over = New-Object System.Collections.Generic.List[string]
+    foreach ($id in @($real.Keys | Where-Object { $moveCaps.Contains($_) } | Sort-Object)) {
+        $read = @(Read-GoApiCompatSuppressions $real[$id])
+        if ($read.Count -gt $moveCaps[$id]) { $over.Add("$id has $($read.Count) entries, over its $($moveCaps[$id])") }
+        if (@($read | Where-Object { $_.DiagnosticId -cne 'CP0002' }).Count) { $over.Add("$id has an entry that is not CP0002") }
+        if (-not [System.IO.File]::ReadAllText($real[$id]).Contains('DESIGN-promoted-forwarder-placement.md')) { $over.Add("$id does not cite the design note") }
+    }
+    Check 'each file holds at most its generated count, CP0002 only, and cites the design note' ($over.Count -eq 0) ($over -join '; ')
+
     # The break floor (DESIGN-go-break-floor.md section 4): go.lib's targets fail a consumer's build for a package built
     # below $(GoBreakFloor), and push-nuget refuses a release whose floor disagrees with its suppression files. Once the
     # guard is green every suppression entry left is a break against the baseline, so a reachable one means this

@@ -484,5 +484,6 @@ function Get-GoBreakFloor([AllowEmptyString()][string]$TargetsText) {
 }
 
 Export-ModuleMember -Function Initialize-GoApiCompatTool, Get-GoApiCompatAssets, Get-GoApiCompatSuppressionMap,
-    Read-GoApiCompatSuppressions, Test-GoApiCompatPackage, Get-GoApiCompatBaselineVersion, Invoke-GoApiCompatGuard,
+    Read-GoApiCompatSuppressions, Test-GoApiCompatPackage, Get-GoApiCompatBaselineVersion, Get-GoApiCompatPublishedVersions,
+    Save-GoApiCompatBaseline, Invoke-GoApiCompatGuard,
     Test-GoBreakFloor, Test-GoBreakFloorShape, Test-GoBreakFloorReachable, Get-GoBreakFloor, Get-GoBreakFloorFromPackage
