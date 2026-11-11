@@ -60,7 +60,7 @@ internal static nint endsInSwitch(nint k) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     fallsOffEnd();
     loopDefer();
     func(() => {

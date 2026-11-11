@@ -31,7 +31,7 @@ partial struct own {
 
 internal static @string Say(this own o, @string p) { return p + o.s; }
 
-internal static void Main() {
+internal static void main() {
     var write = ((Func<ж<myType>, slice<byte>, (nint, error)>)([GoWrapper("(*myType).Write")] (p0, p1) => wrapperRecv(p0).of(myType.ᏑBuffer).Write(p1)));
     ref var m = ref heap(new myType(), out var Ꮡm);
     var (n, err) = write(Ꮡm, slice<byte>("expr"u8));

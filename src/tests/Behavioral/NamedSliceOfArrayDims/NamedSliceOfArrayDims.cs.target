@@ -32,7 +32,7 @@ public static nint Sum(this Rows r) {
     return total;
 }
 
-internal static void Main() {
+internal static void main() {
     var (a, b) = (new UUID(new byte[]{0xab, 0x01}.array(16)), new UUID(new byte[]{0xcd, 0x02}.array(16)));
 
     fmt.Println(new UUIDs(GoReflect.WithElemDims(new UUID[]{a.Clone(), b.Clone()}.slice(), 16)).Strings());

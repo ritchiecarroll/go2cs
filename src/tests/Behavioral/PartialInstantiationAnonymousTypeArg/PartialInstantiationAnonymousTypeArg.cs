@@ -32,7 +32,7 @@ internal partial struct main_typeᴛ3 /*dyn*/ {
     public nint X, Y;
 }
 
-internal static void Main() {
+internal static void main() {
     var (_, okA) = assertAs<main_type, withM>(new withM("x"));
     var (_, okAPtr) = assertAs<main_type, ж<withM>>(Ꮡ(new withM("y")));
     var (m, okM) = assertAs<main_typeᴛ1, withM>(new withM("z"));

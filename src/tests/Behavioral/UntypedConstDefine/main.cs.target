@@ -13,7 +13,7 @@ internal static UntypedFloat folded => /* 19.0 / 35.0 */ 0.5428571428571428;
 
 internal static UntypedInt fsize => 5;
 
-internal static void Main() {
+internal static void main() {
     rune codepoint = replacementChar;
     @string s = (@string)codepoint;
     fmt.Println(len(s), codepoint);

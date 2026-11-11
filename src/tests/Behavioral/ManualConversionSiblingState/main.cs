@@ -8,7 +8,7 @@ internal static void reportProcs() {
     fmt.Println("newprocs:", newprocs);
 }
 
-internal static void Main() {
+internal static void main() {
     newprocs = 4;
 
     sched.disable.user = true;

@@ -19,7 +19,7 @@ internal static array<byte> pkgEmpty = new byte[]{}.array(8);
 internal static array<byte> pkgPartial = new byte[]{1, 2}.array(8);
 internal static array<array<uint8>> pkgNested = new array<uint8>[]{}.array(2, () => new(3));
 
-internal static void Main() {
+internal static void main() {
     var empty = new byte[]{}.array(8);
     fmt.Println("empty", len(empty), empty[0], empty[7]);
 

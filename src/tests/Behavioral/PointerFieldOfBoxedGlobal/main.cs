@@ -51,7 +51,7 @@ internal static nint viaLocal(ref holder h) {
     return s.log.sum();
 }
 
-internal static void Main() {
+internal static void main() {
     cpuprof.log = Ꮡ(new profBuf());
     run();
     fmt.Println(cpuprof.count);

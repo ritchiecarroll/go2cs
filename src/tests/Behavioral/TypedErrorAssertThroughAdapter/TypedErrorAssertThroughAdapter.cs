@@ -32,7 +32,7 @@ internal partial interface main_type /*dyn*/ {
     @string Error();
 }
 
-internal static void Main() {
+internal static void main() {
     var err = pointerSourced();
     var p = err._<ж<myErr>>();
     p.code = 7;

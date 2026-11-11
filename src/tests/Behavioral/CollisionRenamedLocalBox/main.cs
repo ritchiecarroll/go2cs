@@ -47,7 +47,7 @@ internal static nint usesTypeP() {
     return pv.id;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var Δp = ref heap<box>(new box(n: 0), out var Ꮡp);
     setN(Ꮡp, 7);
     setN(Ꮡp, Δp.n + 3);

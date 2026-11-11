@@ -27,7 +27,7 @@ internal static float32 orBits(float32 xʗp, float32 y) {
     return x;
 }
 
-internal static void Main() {
+internal static void main() {
     foreach (var (_, f) in range(slice<float64>([0D, 1.5D, -2.25D, Δmath.Inf(1), Δmath.Inf(-1), Δmath.MaxFloat64, Δmath.SmallestNonzeroFloat64]))) {
         fmt.Printf("%v %#016x %v\n"u8, f, Δmath.Float64bits(f), Δmath.Float64frombits(Δmath.Float64bits(f)) == f);
     }

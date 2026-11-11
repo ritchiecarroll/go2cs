@@ -18,7 +18,7 @@ internal static partial byte wrapCase(byte x) {
     return buf[0];
 }
 
-internal static void Main() {
+internal static void main() {
     var b = encode(305);
     fmt.Println(b[0], b[1], b[2]);
     fmt.Println(wrapCase(200));

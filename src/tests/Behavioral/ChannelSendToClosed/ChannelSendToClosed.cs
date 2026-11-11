@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static partial void Main() {
+internal static partial void main() {
     channel<nint> c = new channel<nint>(100);
     for (nint i = 0; i < 10; i++) {
         var cʗ1 = c;

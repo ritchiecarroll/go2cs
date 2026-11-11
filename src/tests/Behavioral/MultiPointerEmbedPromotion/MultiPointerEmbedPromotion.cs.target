@@ -79,7 +79,7 @@ partial interface readStringWriter {
     (nint, error) WriteString(@string s);
 }
 
-internal static void Main() {
+internal static void main() {
     var r = Ꮡ(new reader(src: "hello world"));
     var w = Ꮡ(new writer());
     var d = Ꮡ(new duplex(r, w));

@@ -20,7 +20,7 @@ partial struct sink {
 
 internal static nint sum(Funcꓸꓸꓸ<nint, nint> add) { return add(1, 2, 3); }
 
-internal static void Main() {
+internal static void main() {
     @string @out = "";
     Actionꓸꓸꓸ<@string, any> writeFormat = (@string format, params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp.sslice();

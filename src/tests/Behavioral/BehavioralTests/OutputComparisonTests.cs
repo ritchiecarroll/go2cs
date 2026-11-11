@@ -1166,6 +1166,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckLookupServicePort() => CheckTarget("LookupServicePort");
 
     [TestMethod]
+    public void CheckMainDeepRecursion() => CheckTarget("MainDeepRecursion");
+
+    [TestMethod]
     public void CheckMainSelectForeverAfterFunc() => CheckTarget("MainSelectForeverAfterFunc");
 
     [TestMethod]

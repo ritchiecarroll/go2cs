@@ -82,7 +82,7 @@ internal static ж<Ring> makeRing(nint count) {
     return r;
 }
 
-internal static void Main() {
+internal static void main() {
     var a = Ꮡ(new Ring(Value: 42));
     a.init();
     fmt.Println((~a.Next()).Value);

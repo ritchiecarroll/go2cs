@@ -22,7 +22,7 @@ internal static nint run(nint n) {
     return a[0] + a[n / 4] + a[n / 2] + a[3 * n / 4] + a[n - 1];
 }
 
-internal static void Main() {
+internal static void main() {
     var start = time.Now().UnixNano();
 
     nint total = run(2000000);

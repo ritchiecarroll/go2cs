@@ -89,7 +89,7 @@ internal static bool solve() {
     return false;
 }
 
-internal static void Main() {
+internal static void main() {
     if (!solve()) {
         println((@string)"no solution found");
     }

@@ -26,7 +26,7 @@ internal static @string classify(any v) {
 
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(store((nint)42)._<nint>());
 
     any a = (nint)7;

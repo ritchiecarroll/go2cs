@@ -19,7 +19,7 @@ internal static @string classify(nint x, nint y) {
     return "less";
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(classify(-1, 5));
     fmt.Println(classify(5, 5));
     fmt.Println(classify(7, 3));

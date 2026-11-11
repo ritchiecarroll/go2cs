@@ -19,7 +19,7 @@ internal static (ж<nint>, ж<nint>, ж<nint>) viaParam(pubPtr pp, ж<pub> q) {
     return (pp.of(pub.ᏑI), pp.of(pub.ᏑI), q.ᏑI);
 }
 
-internal static void Main() {
+internal static void main() {
     var pp = new pubPtr(Ꮡ(new pub(3)));
     var a = pp.of(pub.ᏑI);
     a.Value = 7;

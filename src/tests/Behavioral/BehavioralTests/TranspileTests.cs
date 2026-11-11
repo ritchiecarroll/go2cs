@@ -1216,6 +1216,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckLookupServicePort() => CheckTarget("LookupServicePort");
 
     [TestMethod]
+    public void CheckMainDeepRecursion() => CheckTarget("MainDeepRecursion");
+
+    [TestMethod]
     public void CheckMainSelectForeverAfterFunc() => CheckTarget("MainSelectForeverAfterFunc");
 
     [TestMethod]

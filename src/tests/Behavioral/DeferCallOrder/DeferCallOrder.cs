@@ -14,7 +14,7 @@ internal static Action makeStop(@string tag, channel/*<-*/<@string> @out) {
     };
 }
 
-internal static partial void Main() {
+internal static partial void main() {
     GoFrame ᒐ = default;
     try {
         defer(() => fmt.Println("First"), ref ᒐ);

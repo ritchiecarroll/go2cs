@@ -58,7 +58,7 @@ Big:
     return @out;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(pick(1, 2), pick(1, 5), pick(3, 0));
     fmt.Println(classify(stateA, true));
     fmt.Println(classify(stateA, false));

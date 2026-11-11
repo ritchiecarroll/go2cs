@@ -30,7 +30,7 @@ internal static @string describe(Features f) {
 
 internal static void reset(Features f) { f.Value = new flagSet(new uint8[]{9, 9}.array()); }
 
-internal static void Main() {
+internal static void main() {
     var c = Ꮡ(new CPU(fs: new flagSet(new uint8[]{3, 0}.array())));
     fmt.Println(c.HasAll(Ꮡ(new flagSet(new uint8[]{1, 0}.array()))), c.HasAll(Ꮡ(new flagSet(new uint8[]{4, 0}.array()))));
     fmt.Println(describe(Ꮡ(new flagSet(new uint8[]{5, 6}.array()))), describe(nil));

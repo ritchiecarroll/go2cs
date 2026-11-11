@@ -39,7 +39,7 @@ internal static void writeTo(Writer w, @string s) { w.Write(s); }
 
 internal static Writer asWriter(Conn c) { return new ConnᴠWriter(c); }
 
-internal static void Main() {
+internal static void main() {
     Conn c = new connжConn(Ꮡ(new conn(data: "init")));
 
     ReadWriteCloser rwc = new ConnᴠReadWriteCloser(c);

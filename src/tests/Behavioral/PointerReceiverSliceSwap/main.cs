@@ -39,7 +39,7 @@ internal static void showCells(ref cells c) {
     fmt.Println();
 }
 
-internal static void Main() {
+internal static void main() {
     var p = Ꮡ(new ints(new nint[]{10, 20, 30, 40}.slice()));
     p.swap(0, 3);
     p.swap(1, 2);

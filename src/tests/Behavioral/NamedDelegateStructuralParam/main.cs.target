@@ -20,7 +20,7 @@ internal static @string describe(nint n, @string s) {
     return fmt.Sprintf("%d-%s"u8, n, s);
 }
 
-internal static void Main() {
+internal static void main() {
     Handler h = describe;
     fmt.Println(invoke(new Func<nint, @string, @string>(h), 1, "a"));
     fmt.Println(h.tag());

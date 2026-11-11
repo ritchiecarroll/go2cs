@@ -18,7 +18,7 @@ internal partial struct main_type /*dyn*/ {
     public nint A;
 }
 
-internal static void Main() {
+internal static void main() {
     var b = (structs.AssignB)new main_type(3);
     fmt.Println(b.A, b.Sum());
 

@@ -148,7 +148,7 @@ using github.com.fatih;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     color.New(color.FgGreen, color.Bold).Println("hello from fatih/color");
 }
 

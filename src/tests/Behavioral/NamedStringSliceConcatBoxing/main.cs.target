@@ -42,7 +42,7 @@ internal static void show(@string label, any v) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string abcdefˢ = "abcdef"u8;
 
-internal static void Main() {
+internal static void main() {
     var itemsᴷ = new stackAppend<any>();
 
     foreach (var (_, v) in range(slice<any>([(json.Number)(@string)"1", (json.Number)(@string)"-2.5"]))) {

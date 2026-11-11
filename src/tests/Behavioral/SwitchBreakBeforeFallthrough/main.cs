@@ -56,7 +56,7 @@ internal partial struct main_cases /*dyn*/ {
     internal @string s;
 }
 
-internal static void Main() {
+internal static void main() {
     var cases = slice<main_cases>([
         new(isoZone, "Z07:00"),
         new(isoZone, "Z"),

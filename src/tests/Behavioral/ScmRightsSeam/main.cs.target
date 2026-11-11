@@ -12,7 +12,7 @@ internal static void fatal(@string what, error err) {
     }
 }
 
-internal static void Main() {
+internal static void main() {
     GoFrame ᒐ = default;
     try {
         @string secret = "scm-rights-payload";

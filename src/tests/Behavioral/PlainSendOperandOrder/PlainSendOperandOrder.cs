@@ -43,7 +43,7 @@ internal static void deferredSend(channel<nint> ch) {
     finally { ᒐ.Run(); }
 }
 
-internal static partial void Main() {
+internal static partial void main() {
     var ch = new channel<nint>(8);
 
     var chanᴛ2 = chanFor(ch);

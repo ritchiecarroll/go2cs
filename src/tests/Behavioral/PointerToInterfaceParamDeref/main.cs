@@ -32,7 +32,7 @@ internal static error /*err*/ doit() {
     return Ꮡerr.ValueSlot;
 }
 
-internal static void Main() {
+internal static void main() {
     GoFrame ᒐ = default;
     try {
         defer(() => {

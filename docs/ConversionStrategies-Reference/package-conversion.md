@@ -25,6 +25,66 @@ Go projects that contain a `main` function are converted into a standard C# exec
 
 An executable's **`<AssemblyName>` is the last element of its import path**, mirroring `go build`, which names a binary after the module/directory's final segment — so `module example.com/colordemo` produces `colordemo.exe`, not `example.com.colordemo.exe` (the full dotted project name). Only the `Exe` assembly name is shortened; the `.csproj` filename keeps the full dotted path (its identity in the solution and in `ProjectReference`s), and **library** assemblies keep the full dotted `<AssemblyName>` — their DLL and NuGet `PackageId` (`go.$(AssemblyName)`) must stay unique across the package graph (e.g. `github.com.fatih.color`).
 
+## `main` keeps its name, and the entry point is generated
+
+Go's `func main` is emitted as `main`, under its own name, like every other Go function. The C# entry point is
+not in the converted source: go2cs-gen's `MainEntryGenerator` adds it to the program's `main_package` class.
+
+```csharp
+// main.cs (converted)
+internal static void main() {
+    fmt.Println("depth:", depth(levels));
+}
+
+// go2cs.main-entry.g.cs (generated)
+partial class main_package
+{
+    private static void Main() => global::go.golib.MainThread.Run(main);
+}
+```
+
+**Why it is generated.** Go runs `main` as the main goroutine, whose stack grows to 1 GB, so deep recursion in
+`main` is ordinary Go. A .NET thread's stack is fixed when the thread starts, and the process's startup thread
+gets the operating system's default: 1 MiB on Windows, `ulimit -s` (usually 8 MiB) on linux, 8 MiB on macOS.
+golib's `MainThread.Run` starts one thread that reserves 1 GiB, gives it goroutine 1's identity, runs `main`
+there and waits. A reservation is address space, not memory. Running `main` on another thread cannot be done
+from golib alone: a module initializer that called the entry point from a new thread would block on the entry
+module's own initialization, and `runtimeconfig` `DefaultStackSize` does not size the startup thread. So the
+entry point itself had to change. Generating it keeps that plumbing out of the converted code, which reads as
+the Go does.
+
+**Edge cases.**
+- An `init` that called `runtime.LockOSThread` keeps `main` on the startup thread. Go's documented rule is that
+  "all init functions are run on the startup thread. Calling LockOSThread from an init function will cause the
+  main function to be invoked on that thread". `MainThread.Run` reads the main goroutine's lock count, which
+  runtime's hand-owned `LockOSThread` and `UnlockOSThread` mirror into golib, and calls `main` inline when it
+  is locked. That `main` has the startup thread's stack.
+- The main package's own `init` functions run before `Main`, on the startup thread, as module initializers of
+  the entry assembly. They keep the startup thread's stack (a disclosed limitation).
+- The generator writes nothing when the compilation already declares an entry-point-shaped `Main`: the
+  converted-test host's `Go2CsTestHost.Main(string[])`, or a program converted before this rule, which declares
+  `main_package.Main` itself. A Go *method* named `Main` is a static extension method, which is not an
+  entry-point candidate, so it does not suppress the entry point. A Go *function* named `Main` is still renamed
+  `ΔMain` so it cannot collide with the generated one.
+- The converted-test host runs `TestMain` and `M.Run` through `MainThread.Start`, on the same kind of thread,
+  because Go runs them on the main goroutine. Each test body still gets its own 1 GiB thread.
+- Past the reservation, .NET ends the process with `Stack overflow.` where Go prints
+  `goroutine stack exceeds 1000000000-byte limit` and `fatal error: stack overflow` and exits 2.
+
+**Cost.** The thread hop, measured on all four shipped RIDs on hosted runners: 0.07 to 0.45 ms on linux-x64
+and win-x64, inside the process's start-up spread. On macOS runners thread creation is slower and highly
+variable, a median of up to about 3 ms. A 1 GiB reservation costs the same as a default-stack thread on every
+RID.
+
+**Guards:** Behavioral `MainDeepRecursion` (recursion 2,000,000 deep in `main`; before this rule it aborted
+after 174,430 frames on linux), GolibTests `MainThreadTests`, GenTests `MainEntryGeneratorTests`.
+<!-- C46, COORD ruling 2026-11-11 (option A). Converter: src/go2cs/visitFuncDecl.go (the `main` -> `Main` rename removed).
+     Generator: src/gen/go2cs-gen/MainEntryGenerator.cs. golib: src/core/golib/runtime/MainThread.cs, Goroutine.cs
+     NoteLockOSThread/NoteUnlockOSThread; runtime: src/core/runtime/managed_impl.cs LockOSThread/UnlockOSThread.
+     Test host: src/core/testing/TestHost.cs `MainThread.Start(() => RunTests(registry, runner))`.
+     Go's rule: runtime.LockOSThread's doc comment (go1.26.10 src/runtime/proc.go). Start-up measurement: probe branch
+     claude/c1-c46-startup-probe a2c4508d52, runs 42987722709 (linux), 42987726907 (darwin), 42987730438 (windows). -->
+
 ## A project name is the package's FULL import path — a go-file-free container directory does not truncate it
 
 The dotted project name above is the package's **import path**, every segment of it, joined with `.`

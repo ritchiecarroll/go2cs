@@ -5,7 +5,7 @@ using runtime = runtime_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("before");
     runtime.Breakpoint();
     fmt.Println("after");

@@ -42,7 +42,7 @@ internal static slice<filesᴛ1> files = slice<filesᴛ1>([
     new("ÜnicödeDir\\Inner.dat", 65, time.Date(2024, time.May, 6, 7, 8, 9, 0, time.ΔUTC))
 ]);
 
-internal static void Main() {
+internal static void main() {
     @string root = filepath.Join(os.TempDir(), fmt.Sprintf("go2cs_findfirstfile_%d"u8, os.Getpid()));
     os.RemoveAll(root);
 

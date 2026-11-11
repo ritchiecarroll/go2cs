@@ -6,7 +6,7 @@ using ꓸꓸꓸstring = Span<@string>;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     GoFrame ᒐ = default;
     try {
         nint count = 1;

@@ -61,7 +61,7 @@ internal static nint /*r*/ viaRecover(nint i) {
 internal static UntypedInt deferCalls => 5_000_000;
 internal static UntypedInt recoverCalls => 200_000;
 
-internal static void Main() {
+internal static void main() {
     var start = time.Now().UnixNano();
 
     nint sum = 0;

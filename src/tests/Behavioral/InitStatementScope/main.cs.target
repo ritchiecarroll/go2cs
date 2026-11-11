@@ -146,7 +146,7 @@ internal static error siblings(nint n) {
     return default;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(dropped(0), "|", dropped(1), "|", dropped(5));
     fmt.Println(describe(new Square(3)), "|", describe((Label)(@string)"go"), "|", describe((nint)7));
     fmt.Println(classify(new Square(2)), "|", classify((Label)(@string)"x"), "|", classify((nint)42), "|", classify(errors.New("e")));

@@ -9,7 +9,7 @@ partial struct Pair<T, U> {
     public U Second;
 }
 
-internal static void Main() {
+internal static void main() {
     var p = new Pair<@string, nint>(
         First: "answer",
         Second: 42

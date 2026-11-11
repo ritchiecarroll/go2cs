@@ -43,7 +43,7 @@ internal static array<byte> roundTrip(/*[10]*/ array<byte> a) {
     return a.Clone();
 }
 
-internal static void Main() {
+internal static void main() {
     array<byte> localArr = new(100); /* globalLen */
     localArr[0] = 1;
     localArr[globalLen - 1] = 2;

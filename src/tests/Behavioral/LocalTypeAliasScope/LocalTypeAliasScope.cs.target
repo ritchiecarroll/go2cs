@@ -94,7 +94,7 @@ internal static void aliasedIfaceConv() {
     fmt.Println("aliasedIfaceConv:", n.String(), d.String());
 }
 
-internal static void Main() {
+internal static void main() {
     writeOps();
     fileOps();
     localAliases();

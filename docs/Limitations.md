@@ -90,10 +90,19 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   thread named `goroutine-N`.
   <!-- src/core/golib/runtime/Goroutine.cs:1036 `internal static bool IsForeverWait(WaitReason reason) =>`
        and :1095 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
-* **Stacks don't grow.** A goroutine's thread reserves 256 MB (`GO2CS_GOROUTINE_STACK` changes it), and
-  `main` gets the first thread's stack, usually far less. Recursion past that ends the process with no
-  panic and no deferred calls, so run deep recursion in a goroutine. A goroutine the converter proves cannot
-  recurse at all reserves 16 MB instead ([how](ConversionStrategies.md#goroutines)).
+* **Stacks don't grow.** `main` runs on a thread that reserves 1 GiB, which covers Go's 1 GB limit for it, and
+  a goroutine's thread reserves 256 MB (`GO2CS_GOROUTINE_STACK` changes it). A goroutine the converter proves
+  cannot recurse at all reserves 16 MB instead ([how](ConversionStrategies.md#goroutines)). Recursion past a
+  thread's reserve ends the process with .NET's `Stack overflow.` and no panic and no deferred calls, where Go
+  prints `goroutine stack exceeds 1000000000-byte limit` and `fatal error: stack overflow` and exits 2. Two
+  pieces of code keep the startup thread's smaller stack (1 MiB on Windows, usually 8 MiB on linux and macOS):
+  your main package's `init` functions, which run before `main`, and `main` itself when an `init` called
+  `runtime.LockOSThread`, because Go then runs `main` on the startup thread and so does go2cs.
+  <!-- C46 (COORD ruling 2026-11-11, option A): src/core/golib/runtime/MainThread.cs `public const int StackReserve =
+       1024 * 1024 * 1024;` and its LockOSThread rule; go2cs-gen MainEntryGenerator writes the entry point. The init
+       residual: the main package's init is a module initializer of the entry assembly, which the CLR runs before
+       Main on the startup thread. The overflow message is its own seat (BOARD). Guards: Behavioral MainDeepRecursion
+       (2,000,000 levels in main; at the base it aborted after 174,430 frames on linux), GolibTests MainThreadTests. -->
 * **`recover()` catches Go panics, not every .NET exception.** Nil dereference, divide by zero and index
   out of range recover as in Go. Any other .NET exception, that `NotImplementedException` included, runs
   your deferred calls and keeps unwinding; `recover()` returns nil. As in Go, `recover()` stops a panic

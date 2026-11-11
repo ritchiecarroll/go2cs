@@ -35914,4 +35914,34 @@ CLOSED by claude/h-cgo-phase2-probes 3c4875b988.
 
 — H (2026-11-10)
 
+## 2026-11-11 — C1 (C46, COORD's ruling): past a thread's stack reservation a converted program ends with .NET's `Stack overflow.` abort, where Go prints a fatal error and exits 2 — OPEN, its own seat
+
+**What differs.** C46 gives `main` (and the converted-test host's `TestMain`) a thread reserving 1 GiB, Go's own
+limit, so a recursion Go completes now completes. A recursion that goes PAST the reservation still ends differently.
+Go's runtime reports and exits 2:
+
+```
+runtime: goroutine stack exceeds 1000000000-byte limit
+fatal error: stack overflow
+```
+
+followed by its usual `runtime stack:` and `goroutine 1 [running]:` blocks. .NET cannot catch a stack overflow: the
+runtime writes `Stack overflow.` and a `Repeated N times:` frame list to stderr and aborts the process, exit 134
+(SIGABRT) on linux and macOS and 0xC00000FD on windows. No deferred calls run in either case, so only the report and
+the status differ. Measured at the C46 base on linux: Behavioral MainDeepRecursion's program printed `Stack
+overflow.` and `Repeated 174430 times:` over `go.main_package.depth(IntPtr)`, exit 134.
+
+**Reach.** Any converted program or test whose recursion exceeds its thread's reservation: 1 GiB for `main` and for
+each test body, 256 MiB for a goroutine (16 MiB for one the converter proves cannot recurse), and the startup thread's
+OS default for the main package's `init` and for a `main` an `init` locked to the startup thread. Converted .NET
+frames are larger than Go's, so the depth at which it happens is smaller than Go's for the same reservation.
+
+**Not verified:** whether any banked row or the TS corpus reaches it after C46 (the two TS units that overflowed,
+00770/00771, are C46's confirming arm); which remedy fits. The candidates: a depth guard at function entry
+(`RuntimeHelpers.TryEnsureSufficientExecutionStack`, which turns the overflow into a Go fatal error at a per-call cost
+that would have to be measured), a guard on recursive functions only (the converter already proves non-recursion for
+GoStack.Bounded), or disclosure alone.
+
+— C1 (2026-11-11)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

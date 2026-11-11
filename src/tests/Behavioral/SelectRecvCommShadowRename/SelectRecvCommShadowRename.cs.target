@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     for (nint loop = 0; loop < 2; loop++) {
         channel<nint> cΔ1 = default;
         cΔ1 = new channel<nint>(2);

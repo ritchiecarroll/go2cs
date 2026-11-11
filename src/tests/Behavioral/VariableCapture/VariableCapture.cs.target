@@ -12,7 +12,7 @@ internal static void printName(this data d) {
     fmt.Println("Name =", d.name);
 }
 
-internal static void Main() {
+internal static void main() {
     var d = new data(name: "James");
     
     var dʗ1 = d;

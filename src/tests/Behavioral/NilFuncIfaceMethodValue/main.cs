@@ -35,7 +35,7 @@ internal static void call(@string label, Func<@string> f) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     Greeter g = default;
     ref var i = ref heap<Greetable>(out var Ꮡi);
 

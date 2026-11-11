@@ -19,7 +19,7 @@ internal static void Unlock(this ref noCopy _) { }
 public static void Add(this ref Counter c, int64 n) { c.v += n; }
 public static int64 Value(this ref Counter c) { return c.v; }
 
-internal static void Main() {
+internal static void main() {
     Counter c = default;
     c.Add(5);
     c.Add(3);

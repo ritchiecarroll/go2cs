@@ -15,7 +15,7 @@ partial struct Tally /*Counts*/;
 
 partial struct Score /*Tally*/;
 
-internal static void Main() {
+internal static void main() {
     Tally t = new();
     t.vals[1] = 5;
     t.n = 2;

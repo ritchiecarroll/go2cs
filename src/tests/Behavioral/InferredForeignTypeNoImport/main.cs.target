@@ -5,7 +5,7 @@ using strings = strings_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     ж<strings.Reader> r = makeReader();
     nint k = 5;
 

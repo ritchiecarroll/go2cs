@@ -20,7 +20,7 @@ partial struct slotBox {
     internal holder slot;
 }
 
-internal static void Main() {
+internal static void main() {
     var b = new slotBox(id: 3);
     b.slot.counter.inc();
     b.slot.counter.inc();

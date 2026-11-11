@@ -84,7 +84,7 @@ internal static partial ж<node> dropIfShort(ж<node> Ꮡp, nint min) {
     return Ꮡp;
 }
 
-internal static void Main() {
+internal static void main() {
     var list = build(1, 2, 3, 4);
     fmt.Println(sumList(list));
     doubleList(list);

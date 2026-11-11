@@ -47,7 +47,7 @@ internal static void @try(@string name, Func<any> f) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     ref var p = ref heap<plain>(new plain(4, 5), out var Ꮡp);
     @try("plain int as *int", () => ~(ж<nint>)(uintptr)((@unsafe.Pointer)reflect.ValueOf(Ꮡp).Elem().Field(1).UnsafeAddr()));
     ref var pn = ref heap<plainNamed>(new plainNamed(4, 6), out var Ꮡpn);

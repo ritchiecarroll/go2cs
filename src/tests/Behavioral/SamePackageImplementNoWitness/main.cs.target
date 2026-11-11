@@ -16,7 +16,7 @@ partial struct Stamp {
 
 public static @string Mark(this Stamp s) { return s.S; }
 
-internal static void Main() {
+internal static void main() {
     ledger.Metric m = new ledger.Counter(N: 7);
     var want = new ledger.Counter(N: 7);
 

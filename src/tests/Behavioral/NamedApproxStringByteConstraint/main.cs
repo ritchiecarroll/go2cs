@@ -68,7 +68,7 @@ private static readonly @string helloWorldˢ = "hello, world"u8;
 private static readonly @string bananaˢ = "banana"u8;
 private static readonly @string gopherˢ = "gopher"u8;
 
-internal static void Main() {
+internal static void main() {
     var it = NewIterator(helloWorldˢ);
     while (it.Next(5)) {
         fmt.Printf("%q\n"u8, it.Value());

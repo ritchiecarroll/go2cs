@@ -13,7 +13,7 @@ internal static @string describe(nint n) {
     return names[n];
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(first);
     fmt.Println(entryName);
     fmt.Println(entryUpper);

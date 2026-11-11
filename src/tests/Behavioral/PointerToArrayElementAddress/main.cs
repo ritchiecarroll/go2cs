@@ -16,7 +16,7 @@ internal static void populate(ж<row> Ꮡt, uint32 @base) {
     }
 }
 
-internal static void Main() {
+internal static void main() {
     var g = @new<grid>();
     for (nint j = 0; j < 3; j++) {
         populate(g.at<row>(j), (uint32)(j * 10));

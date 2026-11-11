@@ -16,7 +16,7 @@ internal static timestamp toTimestamp(Time t) {
     return (timestamp)(uint64)t;
 }
 
-internal static void Main() {
+internal static void main() {
     timestamp ts = 1234567890;
     var t = toTime(ts);
     fmt.Println((int64)t);

@@ -5,7 +5,7 @@ using Δmath = math_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var z = 0.0D;
     var nz = -z;
     fmt.Println(Δmath.Float64bits(z));

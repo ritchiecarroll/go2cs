@@ -111,6 +111,7 @@ Compile-time emission so converted C# stays visually close to Go. Referenced as 
 | `EscapeRegistryGenerator` | a closed golib container converted to an interface | A per-package registration of that container's operations, so reflect can reach them. |
 | `NativeArrayOpenerGenerator` | a native array spelled with a pointer element (`*[N]*E` and native struct array fields) | A per-package registration of an opener for each such element. |
 | `RuntimeInitHookGenerator` | an executable that references the converted `runtime` package | A module initializer that lets golib initialize `runtime` lazily, so an unrecovered panic prints Go's traceback. |
+| `MainEntryGenerator` | an executable whose `main_package` declares Go's `main` and no entry point | The C# entry point, `Main() => MainThread.Run(main)`: Go's `main` runs as the main goroutine on a thread reserving Go's 1 GB stack. |
 | `BoundedGoroutineInterceptorGenerator` | `[assembly: GoBoundedGoroutine(...)]` records (in `package_info.cs`), each naming a `goǃ` call the converter proved cannot recurse | An interceptor of that `goǃ` call that starts the goroutine on golib's smaller stack reservation; a record that lands on no such call fails the build (`GO2CS0010`). |
 | `ExtensionHostListGenerator` | every converted project | `[assembly: GoExtensionHostList]` and one `[assembly: GoExtensionHost(typeof(X))]` per top-level static class, which golib's extension-method scan reads in place of `Assembly.GetTypes()` under Native AOT. |
 

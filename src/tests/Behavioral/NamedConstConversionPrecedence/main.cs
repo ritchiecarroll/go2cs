@@ -26,7 +26,7 @@ internal static ri negA = ((ri)(-5));
 internal static ri notA = ((ri)~0);
 internal static ri litA = ((ri)42);
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(divA, divB, divC, divD);
     fmt.Println(sumA, mulA, subA, shfA);
     fmt.Println(cA, cB, cC, cD);

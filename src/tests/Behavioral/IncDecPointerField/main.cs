@@ -15,7 +15,7 @@ partial struct counter {
 
 internal static partial ж<counter> get(ж<counter> c) { return c; }
 
-internal static void Main() {
+internal static void main() {
     var @base = Ꮡ(new counter(n: 5));
     @base.sub.k = 3;
     var c = get(@base);

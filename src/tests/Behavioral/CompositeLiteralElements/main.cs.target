@@ -29,7 +29,7 @@ internal partial struct main_sa /*dyn*/ {
     public array<array<nint>> A = new(2, () => new(3));
 }
 
-internal static void Main() {
+internal static void main() {
     var pa = slice<ж<array<byte>>>([Ꮡ(new byte[]{}.array(4))]);
     fmt.Println("pa:", len(pa), len(pa[0].Value), pa[0].Value);
     pa[0].Value[1] = 9;

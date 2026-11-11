@@ -50,7 +50,7 @@ partial struct guarded {
     internal @string name;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(reflect.DeepEqual(slice<@string>(["a", "bc"]), slice<@string>(["a", "bc"])));
     fmt.Println(reflect.DeepEqual(slice<@string>(["a"]), slice<@string>(["b"])));
     fmt.Println(reflect.DeepEqual(slice<nint>([1, 2, 3]), slice<nint>([1, 2, 3])));

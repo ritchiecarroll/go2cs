@@ -20,7 +20,7 @@ partial struct headerA /*map[@string, nint]*/;
 
 partial struct headerB /*map[@string, nint]*/;
 
-internal static void Main() {
+internal static void main() {
     var m = new fslike.MapFS(new map<@string, nint>{["a"] = 1, ["b"] = 2});
 
     var s = (shuffledFS)m;

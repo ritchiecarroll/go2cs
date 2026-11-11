@@ -28,7 +28,7 @@ internal static (ж<encKey>, error) newEncapKey(slice<byte> b) {
     return (Ꮡ(new encKey(b: appendꓸꓸꓸ(slice<byte>(default), b))), default);
 }
 
-internal static void Main() {
+internal static void main() {
     keylike.RoundTrip<keylike.EncapKey, keylike.DecapKey<keylike.EncapKey>>("round trip", widenResult<ж<decKey>, keylike.DecapKey<keylike.EncapKey>>(generateKey, elemᴛ1 => new decKeyжDecapKey(elemᴛ1)), widen<slice<byte>, ж<encKey>, keylike.EncapKey>(newEncapKey, elemᴛ2 => new encKeyжEncapKey(elemᴛ2)));
 }
 

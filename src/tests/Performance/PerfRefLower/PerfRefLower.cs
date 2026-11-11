@@ -35,7 +35,7 @@ internal static void mix(ref felem e, ref felem t, uint64 k) {
     }
 }
 
-internal static void Main() {
+internal static void main() {
     var start = time.Now().UnixNano();
 
     felem e = new();

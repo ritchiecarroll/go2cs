@@ -10,7 +10,7 @@ partial struct sname /*@string*/;
 
 internal static readonly sname typed = "t1"u8;
 
-internal static void Main() {
+internal static void main() {
     var values = slice<any>([
         (any)((@string)("lit"u8)),
         (any)((@string)("paren"u8)),

@@ -163,7 +163,7 @@ internal static void probe(@string name, any value, any pointer, map<@string, sl
     ["Ord2[age]"] = new slice<@string>[]{["Less"], ["Less"]}.array()
 }; }
 
-internal static void Main() {
+internal static void main() {
     probe("Plain", new Plain(v: 7), Ꮡ(new Plain(v: 1)), new map<@string, slice<any>>{["Describe"] = [(@string)"p="], ["Set"] = [(nint)9]});
     probe("Box[int]", new Box<nint>(v: 7), Ꮡ(new Box<nint>(v: 1)), new map<@string, slice<any>>{["Describe"] = [(@string)"b="], ["Set"] = [(nint)9]});
     probe("Box[string]", new Box<@string>(v: "s"), Ꮡ(new Box<@string>(v: "t")), new map<@string, slice<any>>{["Describe"] = [(@string)"b="], ["Set"] = [(@string)"u"]});

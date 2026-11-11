@@ -15,7 +15,7 @@ internal static nint takeArg(ж<Sigset> p) { return reflect.ValueOf(p.OrTypedNil
 
 internal static ж<array<byte>> ret() { return ж<array<byte>>.NilBoxOfDims(5L); }
 
-internal static void Main() {
+internal static void main() {
     var a = Ꮡ(new nint[]{1, 2, 3}.array());
     a = ж<array<nint>>.NilBoxOfDims(3L);
     fmt.Println("assign local  Len:", reflect.ValueOf(a.OrTypedNil()).Len(), "Cap:", reflect.ValueOf(a.OrTypedNil()).Cap());

@@ -91,7 +91,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var m = new map<@string, nint>{["a"] = 1, ["b"] = 2};
 
     var (v, ok) = m["a", ꟷ];
@@ -119,8 +119,8 @@ internal static void Main() {
 What to notice:
 
 - **The package is a class.** `package main` becomes `partial class main_package` in `namespace go`, and
-  each function is a `static` method of it. `func main` becomes `Main`, the C# entry point
-  ([Package Conversion](#package-conversion)).
+  each function is a `static` method of it. `func main` keeps its name; go2cs-gen generates the C# entry point
+  `Main`, which runs it ([Package Conversion](#package-conversion)).
 - **An import is a `using` alias.** `import "fmt"` becomes `using fmt = fmt_package;`, so calls still read
   `fmt.Println(…)`.
 - **Go types map to golib types.** `map[string]int` becomes golib's `map<@string, nint>`. `@string` is
@@ -307,8 +307,7 @@ The machinery behind these forms has its own sections: [Source Generators](#sour
 
 ## Reading Converted Code: Names and Glyphs
 
-Converted C# keeps Go's names wherever it can: `bindAdd` stays `bindAdd`, and the entry point `main` becomes
-`Main`. The naming rules in this section and the glyphs in the tables are the exceptions. The glyphs mark the
+Converted C# keeps Go's names wherever it can: `bindAdd` stays `bindAdd`, and `main` stays `main`. The naming rules in this section and the glyphs in the tables are the exceptions. The glyphs mark the
 names and helpers the converter adds. Most are Unicode letters that C# accepts in identifiers and ordinary Go
 code does not use, so they never clash with a Go name.
 
@@ -330,7 +329,7 @@ Lookalike code points (python unicodedata): ꓸ U+A4F8 LISU LETTER TONE MYA TI; 
 ᶠ is FuncValueMarker (symbols.json:200-211#c870aa): only an sstring-twinned function has it, because a twinned function has no single method group; an ordinary function value stays a plain method group (GoCallVariations.cs.target:13#ee6601).
 _ΔpN: src/go2cs/visitFuncDecl.go:1400-1414#03b3c7 and :2961-2969#701c82; :60-68#c625cd and :2045#dbca80 (a lone blank parameter stays `_` unless the body uses a `_ =` discard or a select receive-and-discard, `case <-ch:`, because a parameter named `_` captures C#'s discards); in a function declaration, UnnamedParams/main.cs.target:17 `internal static void discard(nint _) {` (Go UnnamedParams/main.go:14 `func discard(int)`) and UnnamedParams/main.cs.target:22 `internal static void bothUnnamed(nint _Δp0, params ꓸꓸꓸstring ʗp) {`; a body-less signature (a function type, or an interface method) takes its discard test from the function being converted or last converted, src/go2cs/visitFuncDecl.go:2046 `dupBlankParams := hasDuplicateBlankParams(parameters) || bodyUsesBlankDiscard(v.currentFuncDecl)`, set at src/go2cs/visitFuncDecl.go:515 `v.currentFuncDecl = funcDecl` and never cleared; a lone `_`: CaptureHoistThroughConversion/main.cs.target:7 `public delegate void Handler(nint _);` (Go CaptureHoistThroughConversion/main.go:23 `type Handler func(int)`, converted before any function); a lone `_Δp0`: BlankIdentifierCollision/main.cs.target:36 `internal delegate stateFn stateFn(nint _Δp0);` (converted after BlankIdentifierCollision/main.go:40 `_, _, _, _ = a, b, c, d`) and AnonymousInterfaces.cs.target:38 `(nint, error) Read(slice<byte> _Δp0);` (lifted from AnonymousInterfaces.go:28 `func takesReader(r interface{ Read([]byte) (int, error) }) {`, whose body has AnonymousInterfaces.go:30 `n, _ := r.Read(buf)`); several: GenericTypeInstantiation.cs.target:45#f1c413.
 Δio: the import alias `io` collides with the child namespace `go.io` (from io/fs) inside `namespace go`: src/go2cs/conversionDriver.go:535#df2c73, src/go2cs/perUnitAliasRenames_test.go:57#b26865.
-Other renames beyond `main` -> `Main`: a Go function named `Main` becomes `ΔMain` (src/go2cs/identifierNaming.go:373-381#853c51).
+`main` -> `Main` until C46 (2026-11-11); since then `main` keeps its name and go2cs-gen's MainEntryGenerator writes `Main`. A Go function named `Main` becomes `ΔMain` (src/go2cs/identifierNaming.go:373-381#853c51).
 A member golib adds itself: src/core/golib/array.cs:563 `public array<T> ΔClone()`.
 The ʗp box-forwarder: the [GoRecv] generator's ж-forwarder, src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:86-90#b0ed6c and :144#941a6a.
 Set‿ example: NamedMapMethodShadow/main.cs.target:90#7fd7fe (a user package, so plain literals).
@@ -504,7 +503,7 @@ partial struct ΔGoFrame {
 A Go type that shares its name with a method is renamed the same way. A method becomes an extension method
 of the package class, which also holds the package's types, so the two names would clash there. For example,
 the time package's type `Month` becomes `ΔMonth`, because `Time` also has a method named `Month`. A Go function named `Main` becomes
-`ΔMain`, since C# reserves `Main` for the entry point.
+`ΔMain`, since `Main` is the entry point go2cs-gen generates for a program.
 
 **A capitalized Go name becomes `public`; any other name becomes `internal`.** This is Go's export rule in C#
 terms. Lowercase `accum`, its field `total` and its method `add` are all `internal`, while the exported
@@ -605,7 +604,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var ch = new channel<nint>(3);
     fmt.Println(len(ch), cap(ch));
     …
@@ -837,8 +836,11 @@ partial class main_package {
 `main` sits in `namespace go`, so it can leave the `go.` prefix off `BlankImportSideEffects`. Other
 files may spell it out as `go.BlankImportSideEffects`; both name the same namespace.
 
-**`init` becomes a `[GoInit]` method, and `main` becomes `Main`.** `[GoInit]` is the project's alias for
-C#'s `[ModuleInitializer]`, which .NET runs once, before the first use of anything in its assembly. The
+**`init` becomes a `[GoInit]` method, and `main` keeps its name.** `[GoInit]` is the project's alias for
+C#'s `[ModuleInitializer]`, which .NET runs once, before the first use of anything in its assembly. The C#
+entry point is not in `main.cs`: go2cs-gen generates `static void Main() => MainThread.Run(main);`, which runs
+`main` as the main goroutine on a thread that reserves Go's 1 GB of stack
+([reference](ConversionStrategies-Reference/package-conversion.md#main-keeps-its-name-and-the-entry-point-is-generated)). The
 rest of `main.cs` continues the `main_package` class opened in the previous example:
 
 <!-- source: src/tests/Behavioral/BlankImportSideEffects/main.go:20-42 -->
@@ -875,7 +877,7 @@ internal static nint countAtInit;
     countAtInit = registry.Count();
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("count at init:", countAtInit);
 
     foreach (var (_, name) in range(slice<@string>(["jpeglike", "pnglike", "giflike"]))) {
@@ -1707,7 +1709,7 @@ partial struct Buffer {
     internal int8 lastRead;
 }
 …
-internal static void Main() {
+internal static void main() {
 …
     ref var b = ref heap<Buffer>(new Buffer(), out var Ꮡb);
     PrintValPtr(Ꮡb.Ꮡoff);
@@ -1767,7 +1769,7 @@ internal static void addTo(ref uint64 @out, uint64 v) {
     @out += v;
 }
 …
-internal static void Main() {
+internal static void main() {
     uint64 total = default;
     addTo(ref total, 5);
     addTo(ref total, 7);
@@ -1901,7 +1903,7 @@ func main() {
 internal static UntypedInt replacementChar => /* '�' */ 65533;
 internal static UntypedFloat scale => 2.5;
 …
-internal static void Main() {
+internal static void main() {
     rune codepoint = replacementChar;
     @string s = (@string)codepoint;
     fmt.Println(len(s), codepoint);
@@ -1967,7 +1969,7 @@ func main() {
 ```csharp
 internal static UntypedInt fsize => 5;
 …
-internal static void Main() {
+internal static void main() {
 …
     fmt.Println(fmt.Sprintf("size=%d"u8, (nint)(fsize + 1)));
 ```
@@ -1991,7 +1993,7 @@ func main() {
 ```csharp
 internal static UntypedInt two32 => /* 1 << 32 */ 4294967296;
 …
-internal static void Main() {
+internal static void main() {
     uint64 a = 100;
     uint64 b = 3;
     fmt.Println(a * (uint64)two32 + b);
@@ -2187,7 +2189,7 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/NamedStringConsts/main.cs.target:35-46 -->
 ```csharp
-internal static void Main() {
+internal static void main() {
 …
     @string plain = "plain";
     fmt.Println(plain);
@@ -2903,7 +2905,7 @@ internal static void probe(@string name, bool isNil, nint length, nint capacity)
     fmt.Println(name, isNil, length, capacity);
 }
 
-internal static void Main() {
+internal static void main() {
     slice<byte> zero = default;
     probe("zeroValue", zero == nil, len(zero), cap(zero));
 
@@ -2966,7 +2968,7 @@ internal static @string onlyNilCheck(ж<node> p) {
 internal static bool inner(ж<node> p) { return p == nil; }
 internal static bool passThrough(ж<node> p) { return inner(p); }
 …
-internal static void Main() {
+internal static void main() {
     fmt.Println(onlyNilCheck(nil));
     fmt.Println(onlyNilCheck(Ꮡ(new node())));
     fmt.Println(passThrough(nil));
@@ -3093,7 +3095,7 @@ partial struct point {
     internal nint x, y;
 }
 
-internal static void Main() {
+internal static void main() {
     holder z = new();
     fmt.Println(len(z.name), len(z.tbl), len(z.tail));
 …
@@ -4312,7 +4314,7 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/MapCommaOk/main.cs.target:7-27 -->
 ```csharp
-internal static void Main() {
+internal static void main() {
     var m = new map<@string, nint>{["a"] = 1, ["b"] = 2};
 
     var (v, ok) = m["a", ꟷ];
@@ -4777,7 +4779,7 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/VariadicPackPassThrough/VariadicPackPassThrough.cs.target:90-93 -->
 ```csharp
-internal static void Main() {
+internal static void main() {
     var a = slice<nint>([1, 2, 3]);
     forward(a.ꓸꓸꓸ);
     fmt.Println("forward wrote through:", a);
@@ -4941,7 +4943,7 @@ fmt.Println("pre boxed any target")
 ```
 <!-- source: src/tests/Behavioral/StringLiteralHoisting/main.cs.target:51, 70, 101 -->
 ```csharp
-internal static void Main() {
+internal static void main() {
 …
     fmt.Println("pre boxed any target");
 …
@@ -5254,7 +5256,7 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/MapMutateDuringRange/main.cs.target:17-26, 32 -->
 ```csharp
-internal static void Main() {
+internal static void main() {
     var insert = new map<@string, nint>{["a"] = 1, ["b"] = 2, ["c"] = 3};
     nint visited = 0;
     foreach (var (k, v) in insert) {
@@ -5276,8 +5278,8 @@ visited. Each range starts its walk at a random entry, as Go's does.
 [Loops, Range and Labels](#loops-range-and-labels) covers `range` over other types.
 <!-- The snapshot: src/core/golib/map.cs:1085 `private static IEnumerator<KeyValuePair<TKey, TValue>> enumerateStore(NilKeyDictionary store)`. -->
 
-Go's package functions become static methods of a class for the package, and `main` becomes `Main`, the C#
-entry point ([Package Conversion](#package-conversion)). `"insert visited:"` stays a plain C# literal: it is passed to
+Go's package functions become static methods of a class for the package, and `main` keeps its name; the C#
+entry point is generated ([Package Conversion](#package-conversion)). `"insert visited:"` stays a plain C# literal: it is passed to
 `fmt.Println` as an `any` value, so [go2cs-gen](#source-generators) intercepts the call and boxes it once as a Go string, not on
 every call ([Strings](#strings-string-and-sstring), [Empty Interface](#empty-interface-any)).
 
@@ -5322,7 +5324,7 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/NilMapOperations/main.cs.target:24-46, 54 -->
 ```csharp
-internal static void Main() {
+internal static void main() {
     map<@string, nint> m = default;
 
     fmt.Println(m["a"]);
@@ -5458,7 +5460,7 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/MapStringBytesLookup/main.cs.target:7-41 -->
 ```csharp
-internal static void Main() {
+internal static void main() {
 …
     var w = new map<@string, nint>{};
     var k = slice<byte>("alpha"u8);
@@ -5983,7 +5985,7 @@ partial struct point {
 
 internal static @string String(this point p) { return fmt.Sprintf("(%d,%d)"u8, p.x, p.y); }
 …
-internal static void Main() {
+internal static void main() {
 …
     Named n = new point(3, 4);
     fmt.Println(n.String());
@@ -6483,7 +6485,7 @@ public static int32 Add(this ж<Counter> Ꮡc, int32 delta) {
 public static void Set(this ж<Counter> Ꮡc, int32 v) { (Ꮡc.Ꮡn).Value = v; }
 public static int32 Get(this ref Counter c) { return c.n; }
 
-internal static void Main() {
+internal static void main() {
     ref var c = ref heap(new Counter(), out var Ꮡc);
     Ꮡc.Set(100);
     fmt.Println("after Set:", c.Get());
@@ -6514,7 +6516,7 @@ Reading the C# piece by piece:
 
 **Go's export rule becomes C# access.** A capitalized name is `public`, and any other name is `internal`
 ([Names and Glyphs](#reading-converted-code-names-and-glyphs)). So `Add` is `public` and `bump` is `internal`.
-The entry point `func main` becomes `internal static void Main()`.
+The entry point `func main` becomes `internal static void main()`.
 
 A method is `public` only when its type is emitted `public` too. That is an exported type, or an unexported
 type that an exported signature exposes. C# forbids a public member from exposing an internal type, so such
@@ -6925,7 +6927,7 @@ internal static void printName(this data d) {
     fmt.Println("Name =", d.name);
 }
 
-internal static void Main() {
+internal static void main() {
     var d = new data(name: "James");
     
     var dʗ1 = d;
@@ -8059,7 +8061,7 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/DeferSimple/DeferSimple.cs.target:7-16 -->
 ```csharp
-internal static void Main() {
+internal static void main() {
     GoFrame ᒐ = default;
     try {
         fmt.Println("Open file");
@@ -8526,7 +8528,7 @@ internal static void emit(channel<nint> @out) {
     @out.ᐸꟷ(8);
 }
 …
-internal static partial void Main() {
+internal static partial void main() {
     var @out = new channel<nint>(0);
 
     goǃ(ᴛ1 => sum(ᴛ1, 3, 4), @out);
@@ -8566,7 +8568,7 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:8-41 -->
 ```csharp
-internal static partial void Main() {
+internal static partial void main() {
     …
     nint count = 1;
     goǃ(() => {
@@ -8606,7 +8608,7 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/GoroutinePanicExitCode/main.cs.target:7-17 -->
 ```csharp
-internal static partial void Main() {
+internal static partial void main() {
     fmt.Println("before goroutine panic");
 
     var done = new channel<EmptyStruct>(0);
@@ -9043,7 +9045,7 @@ partial struct mixed {
     internal @string label;
 }
 
-internal static void Main() {
+internal static void main() {
 …
     var m = new mixed(X: 10, y: 20, p: 30, q: 40, label: "tag");
     fmt.Println(m.X, m.y, m.p, m.q, m.label);
@@ -9103,7 +9105,7 @@ partial struct ColorList {
     public ж<ж<ColorList>> NextNext;
 }
 
-internal static void Main() {
+internal static void main() {
     var red = new ColorList(2, "red", nil, nil);
     ref var blue = ref heap<ColorList>(new ColorList(2, "blue", nil, nil), out var Ꮡblue);
 
@@ -9197,7 +9199,7 @@ partial struct point {
     internal nint x, y;
 }
 
-internal static void Main() {
+internal static void main() {
 …
     holder z = new();
 …
@@ -9331,7 +9333,7 @@ internal partial struct main_point /*dyn*/ {
     public nint X, Y;
 }
 
-internal static void Main() {
+internal static void main() {
     var a = new main_a(X: 1);
     main_a b = default;
     b = a;
@@ -9479,7 +9481,7 @@ public static bool IsDr(this Record p) {
     return strings.HasPrefix(p.name, "Dr") && p.age > 18;
 }
 …
-internal static void Main() {
+internal static void main() {
 …
     var record = new Record();
     record.name = "Dr. Michał";
@@ -9637,7 +9639,7 @@ partial struct top {
     internal @string label;
 }
 
-internal static void Main() {
+internal static void main() {
     var h = new holder(leaf: Ꮡ(new leaf(n: 0)), tag: "h");
     h.bump();
     h.bump();
@@ -10243,7 +10245,7 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/ReflectStructTagCopy/main.cs.target:48-60, 90 -->
 ```csharp
-internal static void Main() {
+internal static void main() {
     var t = reflect.TypeOf(new record());
 
     for (nint i = 0; i < t.NumField(); i++) {
@@ -10348,7 +10350,7 @@ partial struct holder {
     public aliasIface A;
 }
 
-internal static void Main() {
+internal static void main() {
     var t = reflect.TypeFor<holder>();
 
     for (nint i = 0; i < t.NumField(); i++) {
@@ -10426,7 +10428,7 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/GenericTypeNameCompanion/main.cs.target:26-36 -->
 ```csharp
-internal static void Main() {
+internal static void main() {
     nameOf<eface, efaceᴅ>("eface");
     nameOf<namedIface, namedIfaceᴅ>("namedIface");
     nameOf<any, any>("any");
@@ -10591,7 +10593,7 @@ partial struct counter {
 
 internal static partial ж<counter> get(ж<counter> c) { return c; }
 
-internal static void Main() {
+internal static void main() {
     var @base = Ꮡ(new counter(n: 5));
     @base.sub.k = 3;
     var c = get(@base);
@@ -10831,7 +10833,7 @@ func main() {
 ```
 <!-- source: src/tests/Behavioral/ReceiverFieldAddress/main.cs.target:25-32 -->
 ```csharp
-internal static void Main() {
+internal static void main() {
     ref var c = ref heap(new Counter(), out var Ꮡc);
     Ꮡc.Set(100);
     fmt.Println("after Set:", c.Get());
@@ -11041,7 +11043,7 @@ partial struct counter {
 
 internal static partial ж<counter> get(ж<counter> c) { return c; }
 
-internal static void Main() {
+internal static void main() {
     var @base = Ꮡ(new counter(n: 5));
     @base.sub.k = 3;
     var c = get(@base);
@@ -11114,7 +11116,7 @@ internal static void start(this ref iter it, nint n) {
 internal static bool valid(this ref iter it) { return it.i < it.n; }
 internal static void next(this ref iter it) { it.i++; }
 …
-internal static void Main() {
+internal static void main() {
     iter u = default;
     nint sum = 0;
     for (u.start(3); u.valid(); u.next()) {
@@ -11184,7 +11186,7 @@ internal static void linkTo(this ref ring r, ж<ring> other) {
     r.next = other;
 }
 …
-internal static void Main() {
+internal static void main() {
     var a = Ꮡ(new ring(data: 1));
     a.initSelf();
 …

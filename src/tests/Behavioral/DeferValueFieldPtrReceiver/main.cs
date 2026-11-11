@@ -29,7 +29,7 @@ internal static void run(this ж<builder> Ꮡb) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     var b = Ꮡ(new builder());
     b.run();
     fmt.Println("after:", b.c.n);

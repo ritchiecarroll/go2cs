@@ -28,7 +28,7 @@ partial struct Deep {
     internal nint depth;
 }
 
-internal static void Main() {
+internal static void main() {
     var shapes = slice<ж<Shape>>([Ꮡ(new Shape(Point: new Point(1, 2), Named: new Named("tri"), sides: 3)), Ꮡ(new Shape(Point: new Point(4, 5), Named: new Named("sq"), sides: 4))]);
 
     foreach (var (_, s) in range(shapes)) {

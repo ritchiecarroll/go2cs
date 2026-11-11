@@ -12,7 +12,7 @@ internal static @string describe(ж<PromotedValueEmbedLib.Widget> w) {
     return "nomatch";
 }
 
-internal static void Main() {
+internal static void main() {
     var w = PromotedValueEmbedLib.New("widget");
     fmt.Println(w.Name(), w.Name() == "widget"u8, describe(w));
     var g = PromotedValueEmbedLib.NewGadget("gadget");

@@ -20,7 +20,7 @@ partial struct holder {
     public aliasIface A;
 }
 
-internal static void Main() {
+internal static void main() {
     var t = reflect.TypeFor<holder>();
 
     for (nint i = 0; i < t.NumField(); i++) {

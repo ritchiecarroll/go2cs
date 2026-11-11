@@ -46,7 +46,7 @@ internal static void apply(any v) {
     }
 }
 
-internal static void Main() {
+internal static void main() {
     serve(new pusher(id: "v"));
 
     serve(Ꮡ(new pusher(id: "p")));

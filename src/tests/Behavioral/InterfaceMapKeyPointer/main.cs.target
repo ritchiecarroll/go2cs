@@ -29,7 +29,7 @@ internal static @string plainRead(map<Node, @string> seen, ж<Item> it) {
     return seen[new ItemжNode(it)];
 }
 
-internal static void Main() {
+internal static void main() {
     var item = Ꮡ(new Item(pos: 7));
     var seen = new map<Node, @string>{};
 

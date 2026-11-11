@@ -443,7 +443,10 @@ public static class TestHost
             // are answering about the same instant.
             PackageDeadlineUtc = options.Timeout > TimeSpan.Zero ? DateTime.UtcNow + options.Timeout : null;
 
-            Task<nint> run = Task.Run(() => RunTests(registry, runner));
+            // On the main goroutine's own thread, as Go runs TestMain and M.Run: one that reserves Go's main-goroutine
+            // stack (golib MainThread, C46). It was a pool thread, whose stack is the platform default, so a TestMain
+            // that recursed deeply overflowed where Go's grows. Each test body still gets its own thread (TestExecution).
+            Task<nint> run = MainThread.Start(() => RunTests(registry, runner));
 
             if (!run.Wait(options.Timeout))
             {

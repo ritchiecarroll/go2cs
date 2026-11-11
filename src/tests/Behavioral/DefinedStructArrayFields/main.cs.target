@@ -29,7 +29,7 @@ partial struct Path /*path*/;
 
 internal static Counts global = new();
 
-internal static void Main() {
+internal static void main() {
     Counts c = new();
     c.vals[1] = 5;
     fmt.Println("zero:", len(c.vals), c.vals, c.n);

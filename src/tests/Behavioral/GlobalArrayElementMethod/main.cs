@@ -13,7 +13,7 @@ internal static void inc(this ref counter c) { c.n++; }
 internal static readonly ж<array<counter>> Ꮡpool = new StaticBox<array<counter>>(new array<counter>(3));
 internal static ref array<counter> pool => ref ((StaticBox<array<counter>>)Ꮡpool).ValueSlot;
 
-internal static void Main() {
+internal static void main() {
     pool[0].inc();
     pool[0].inc();
     pool[1].inc();

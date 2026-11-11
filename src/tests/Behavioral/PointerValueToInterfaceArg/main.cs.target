@@ -37,7 +37,7 @@ internal static void free(this ж<pp> Ꮡp) {
 
 internal static void keep(ж<pp> q) { poolPut(q.OrTypedNil()); }
 
-internal static void Main() {
+internal static void main() {
     var a = newPrinter();
     a.buf = append(a.buf, (byte)'a');
     fmt.Println((@string)a.buf, a.id);

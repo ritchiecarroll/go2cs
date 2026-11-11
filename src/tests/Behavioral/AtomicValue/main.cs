@@ -6,7 +6,7 @@ using sync;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     ref var v = ref heap(new atomic.Value(), out var Ꮡv);
     fmt.Println(Ꮡv.Load() == nil);
 

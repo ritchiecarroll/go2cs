@@ -46,7 +46,7 @@ internal static (@string, nint) run() {
     return (rep.label, rep.n);
 }
 
-internal static void Main() {
+internal static void main() {
     var (label, n) = run();
     fmt.Println("outer:", label, n);
 }

@@ -62,7 +62,7 @@ internal static @string viaBareMethodValue(this ж<widget> Ꮡw) {
     return call(() => recvʗ1.tag());
 }
 
-internal static void Main() {
+internal static void main() {
     var c = Ꮡ(new counter(n: 0));
     fmt.Println(c.addInClosure(5));
     fmt.Println(c.addViaFieldPtr(3));

@@ -35,7 +35,7 @@ internal static void premultiplyLike(slice<byte> dst, slice<byte> src) {
     }
 }
 
-internal static void Main() {
+internal static void main() {
     var buf = new slice<byte>(9);
     buf[0] = 0x99;
     writeThrough(buf[1..]);

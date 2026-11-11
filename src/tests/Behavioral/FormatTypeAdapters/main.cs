@@ -26,7 +26,7 @@ partial interface stamper {
     @string Stamp();
 }
 
-internal static void Main() {
+internal static void main() {
     greeter g = new loudжgreeter(Ꮡ(new loud(n: 1)));
     fmt.Printf("%T\n"u8, g);
 

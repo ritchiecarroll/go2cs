@@ -33,7 +33,7 @@ internal partial struct main_rows /*dyn*/ {
     internal bool want;
 }
 
-internal static void Main() {
+internal static void main() {
     any x = ((ж<nint>)nil);
     fmt.Printf("%T\n"u8, x);
     fmt.Println("x==nil", x == nil);

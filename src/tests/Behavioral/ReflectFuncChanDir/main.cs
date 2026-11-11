@@ -34,7 +34,7 @@ internal static /*<-*/channel<bool> mixed(nint a, channel/*<-*/<nint> c) { retur
 
 internal static void nestedDir(channel/*<-*/</*<-*/channel<nint>> c) { }
 
-internal static void Main() {
+internal static void main() {
     Func<time.Duration, /*<-*/channel<time.Time>> after = time.After;
     fmt.Println("func value:", reflect.TypeOf((after).OrTypedNilFunc()), reflect.TypeOf((after).OrTypedNilFunc()).Out(0).ChanDir());
 

@@ -31,7 +31,7 @@ internal static partial void allocNew() { sinkT = @new<T>(); }
 
 internal static partial void allocLiteral() { sinkLit = Ꮡ(new T(a: 1)); }
 
-internal static partial void Main() {
+internal static partial void main() {
     var namesᴷ = new stackAppend<@string>();
     var linesᴷ = new stackAppend<@string>();
 
