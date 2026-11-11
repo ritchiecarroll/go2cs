@@ -1,0 +1,46 @@
+# typecheck_classes.py <out dir> : group a typecheck_slice.py run's misses into CLASSES, one row per class with a count
+# and its first instance verbatim. A crash's class is its first panic/exception line (numbers and addresses masked) plus
+# its first Go frame (or first C# frame when there is no Go trace). An output difference's class is the shape of its first
+# differing line on both sides (numbers, positions and quoted text masked). Writes <out>/classes.json and prints a table.
+import json, os, re, sys
+
+sys.stdout.reconfigure(encoding="utf-8")
+out = sys.argv[1]
+r = json.load(open(os.path.join(out, "slice.json"), encoding="utf-8"))
+
+
+def mask(s):
+    s = re.sub(r"'[^']*'", "'…'", s)
+    s = re.sub(r'"[^"]*"', '"…"', s)
+    s = re.sub(r"0x[0-9a-fA-F]+", "0x…", s)
+    return re.sub(r"\d+", "#", s).strip()
+
+
+def crash_key(text):
+    err = text.split("--- stderr", 1)[-1]
+    lines = [l.strip() for l in err.splitlines() if l.strip()]
+    head = next((l for l in lines if l.startswith(("panic:", "System.", "Unhandled", "fatal error", "Stack overflow"))), lines[0] if lines else "")
+    gofr = next((l for l in lines if re.match(r"^[\w./-]+\.\(?\*?[\w]+\)?\.?[\w]*\(\)$", l) and not l.startswith(("runtime.", "panic("))), None)
+    csfr = next((l for l in lines if l.startswith("at go.")), None)
+    frame = gofr or (re.sub(r"\(.*", "", csfr) if csfr else "")
+    return f"{mask(head)} @ {frame}", head, frame
+
+
+classes = {}
+for m in r["mismatches"]:
+    src = open(os.path.join(out, "mismatch", m["index"] + ".cs.txt"), encoding="utf-8").read()
+    if m["class"] == "converted crashed":
+        key, head, frame = crash_key(src)
+        first = {"error": head, "frame": frame}
+    else:
+        key = f"DIFF go: {mask(m['go'])[:140]} || cs: {mask(m['cs'])[:140]}"
+        first = {"go": m["go"], "cs": m["cs"], "line": m["first_diff_line"]}
+    c = classes.setdefault(key, {"kind": m["class"], "count": 0, "first": {"index": m["index"], "source": m["source"], **first}, "units": []})
+    c["count"] += 1
+    c["units"].append(m["index"])
+rows = sorted(classes.items(), key=lambda kv: -kv[1]["count"])
+json.dump([{"key": k, **v} for k, v in rows], open(os.path.join(out, "classes.json"), "w", encoding="utf-8"), indent=1)
+print(f"{r['matched']} of {r['units']} match; {len(r['mismatches'])} misses in {len(rows)} classes")
+for k, v in rows:
+    print(f"{v['count']:5}  {v['kind']:18}  {k[:220]}")
+    print(f"       first: {v['first']['index']} {v['first']['source']}")

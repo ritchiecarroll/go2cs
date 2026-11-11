@@ -1,0 +1,395 @@
+{
+ "pool": 7404,
+ "every": 1,
+ "units": 7404,
+ "matched": 7362,
+ "classes": {
+  "converted crashed": 26,
+  "output differs": 5,
+  "native missing": 11
+ },
+ "seconds": {
+  "go": 356.8,
+  "cs": 16450.9
+ },
+ "mismatches": [
+  {
+   "index": "00701",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/automaticTypeDirectiveResolutionBundler.ts",
+   "unit": "/index.ts",
+   "first_diff_line": 0,
+   "go": "file 00701.txt (353 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "02396",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/declarationEmitRedundantTripleSlashModuleAugmentation.ts",
+   "unit": "/index.ts",
+   "first_diff_line": 0,
+   "go": "file 02396.txt (200 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "02456",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/declarationEmitSubpathImportsReexport.ts",
+   "unit": "/packages/a/src/re_export.ts",
+   "first_diff_line": 0,
+   "go": "file 02456.txt (98 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "02478",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/declarationEmitTripleSlashReferenceAmbientModule.ts",
+   "unit": "/usage2.ts",
+   "first_diff_line": 0,
+   "go": "file 02478.txt (79 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "02535",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/declarationEmitWithInvalidPackageJsonTypings.ts",
+   "unit": "/p1/index.ts",
+   "first_diff_line": 0,
+   "go": "file 02535.txt (269 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "02549",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/declarationImportTypeAliasInferredAndEmittable.ts",
+   "unit": "usage.ts",
+   "first_diff_line": 0,
+   "go": "file 02549.txt (158 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "02572",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/declarationsForInferredTypeFromOtherFile.ts",
+   "unit": "file2.ts",
+   "first_diff_line": 0,
+   "go": "file 02572.txt (72 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "03069",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/emitDecoratorMetadata_isolatedModules.ts",
+   "unit": "index.ts",
+   "first_diff_line": 0,
+   "go": "file 03069.txt (518 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "03153",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/enumMemberInterfacePropertyDeclarationEmit.ts",
+   "unit": "base.ts",
+   "first_diff_line": 0,
+   "go": "file 03153.txt (118 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "04150",
+   "class": "output differs",
+   "source": "tests/cases/compiler/genericConstraint1.ts",
+   "unit": "genericConstraint1.ts",
+   "first_diff_line": 3,
+   "go": "semantic TS2344 /main.ts [121,+6] Type 'string' does not satisfy the constraint 'number'.",
+   "cs": "semantic TS2322 /main.ts [121,+6] Type 'string' is not assignable to type 'number'."
+  },
+  {
+   "index": "04639",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/importTypeWithUnparenthesizedGenericFunctionParsed.ts",
+   "unit": "importTypeWithUnparenthesizedGenericFunctionParsed.ts",
+   "first_diff_line": 0,
+   "go": "file 04639.txt (100 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "04645",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/importUsedAsTypeWithErrors.ts",
+   "unit": "main.ts",
+   "first_diff_line": 0,
+   "go": "file 04645.txt (41 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "04650",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/importUsedInGenericImportResolves.ts",
+   "unit": "test3.ts",
+   "first_diff_line": 0,
+   "go": "file 04650.txt (82 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "05056",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/intersectionConstructorReductionCrash.ts",
+   "unit": "intersectionConstructorReductionCrash.ts",
+   "first_diff_line": 0,
+   "go": "file 05056.txt (22196 bytes)",
+   "cs": "CRASH rc=timeout"
+  },
+  {
+   "index": "05077",
+   "class": "output differs",
+   "source": "tests/cases/compiler/invalidConstraint1.ts",
+   "unit": "invalidConstraint1.ts",
+   "first_diff_line": 1,
+   "go": "semantic TS2344 /main.ts [72,+13] Type '{ a: number; }' does not satisfy the constraint '{ a: string; }'.",
+   "cs": "semantic TS2322 /main.ts [72,+13] Type '{ a: number; }' is not assignable to type '{ a: string; }'."
+  },
+  {
+   "index": "05185",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/isolatedModulesReExportType.ts",
+   "unit": "/reExportValueAsTypeOnly.ts",
+   "first_diff_line": 0,
+   "go": "file 05185.txt (40 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "05186",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/isolatedModulesReExportType.ts",
+   "unit": "/user.ts",
+   "first_diff_line": 0,
+   "go": "file 05186.txt (752 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "05191",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/isolatedModulesShadowGlobalTypeNotValue.ts",
+   "unit": "./good.ts",
+   "first_diff_line": 0,
+   "go": "file 05191.txt (277 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "05194",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/isolatedModulesSketchyAliasLocalMerge.ts",
+   "unit": "good.ts",
+   "first_diff_line": 0,
+   "go": "file 05194.txt (61 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "05868",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/metadataImportType.ts",
+   "unit": "metadataImportType.ts",
+   "first_diff_line": 0,
+   "go": "file 05868.txt (51 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "06260",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/moduleResolutionWithRequireAndImport.ts",
+   "unit": "/index.ts",
+   "first_diff_line": 0,
+   "go": "file 06260.txt (208 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "06544",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/nestedGenericConditionalTypeWithGenericImportType.ts",
+   "unit": "index.ts",
+   "first_diff_line": 0,
+   "go": "file 06544.txt (121 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "07208",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/pathMappingBasedModuleResolution_rootImport_aliasWithRoot_differentRootTypes.ts",
+   "unit": "/root/a.ts",
+   "first_diff_line": 0,
+   "go": "file 07208.txt (780 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "07210",
+   "class": "native missing",
+   "source": "tests/cases/compiler/pathMappingBasedModuleResolution_rootImport_aliasWithRoot_multipleAliases.ts",
+   "unit": "/root/import/foo.ts",
+   "first_diff_line": null,
+   "go": "",
+   "cs": "file 07210.txt (25 bytes)\nfiles 83\n"
+  },
+  {
+   "index": "07212",
+   "class": "native missing",
+   "source": "tests/cases/compiler/pathMappingBasedModuleResolution_rootImport_aliasWithRoot_multipleAliases.ts",
+   "unit": "/root/src/a.ts",
+   "first_diff_line": null,
+   "go": "",
+   "cs": "file 07212.txt (70 bytes)\nsemantic TS2307 /main.ts [20,+13] Cannot find module '/import/foo' or its corresponding type declarations.\nsemantic TS2307 /main.ts [55,+13] Cannot find module '/client/bar' or its corresponding type declarations.\nfiles 83\n"
+  },
+  {
+   "index": "07214",
+   "class": "native missing",
+   "source": "tests/cases/compiler/pathMappingBasedModuleResolution_rootImport_aliasWithRoot_realRootFile.ts",
+   "unit": "/foo.ts",
+   "first_diff_line": null,
+   "go": "",
+   "cs": "file 07214.txt (25 bytes)\nfiles 83\n"
+  },
+  {
+   "index": "07216",
+   "class": "native missing",
+   "source": "tests/cases/compiler/pathMappingBasedModuleResolution_rootImport_aliasWithRoot_realRootFile.ts",
+   "unit": "/root/a.ts",
+   "first_diff_line": null,
+   "go": "",
+   "cs": "file 07216.txt (56 bytes)\nsemantic TS2307 /main.ts [20,+6] Cannot find module '/foo' or its corresponding type declarations.\nsemantic TS2307 /main.ts [48,+6] Cannot find module '/bar' or its corresponding type declarations.\nfiles 83\n"
+  },
+  {
+   "index": "07218",
+   "class": "native missing",
+   "source": "tests/cases/compiler/pathMappingBasedModuleResolution_rootImport_noAliasWithRoot.ts",
+   "unit": "/root/src/foo.ts",
+   "first_diff_line": null,
+   "go": "",
+   "cs": "file 07218.txt (25 bytes)\nfiles 83\n"
+  },
+  {
+   "index": "07220",
+   "class": "native missing",
+   "source": "tests/cases/compiler/pathMappingBasedModuleResolution_rootImport_noAliasWithRoot.ts",
+   "unit": "/root/a.ts",
+   "first_diff_line": null,
+   "go": "",
+   "cs": "file 07220.txt (56 bytes)\nsemantic TS2307 /main.ts [20,+6] Cannot find module '/foo' or its corresponding type declarations.\nsemantic TS2307 /main.ts [48,+6] Cannot find module '/bar' or its corresponding type declarations.\nfiles 83\n"
+  },
+  {
+   "index": "07222",
+   "class": "native missing",
+   "source": "tests/cases/compiler/pathMappingBasedModuleResolution_rootImport_noAliasWithRoot_realRootFile.ts",
+   "unit": "/foo.ts",
+   "first_diff_line": null,
+   "go": "",
+   "cs": "file 07222.txt (25 bytes)\nfiles 83\n"
+  },
+  {
+   "index": "07224",
+   "class": "native missing",
+   "source": "tests/cases/compiler/pathMappingBasedModuleResolution_rootImport_noAliasWithRoot_realRootFile.ts",
+   "unit": "/root/a.ts",
+   "first_diff_line": null,
+   "go": "",
+   "cs": "file 07224.txt (56 bytes)\nsemantic TS2307 /main.ts [20,+6] Cannot find module '/foo' or its corresponding type declarations.\nsemantic TS2307 /main.ts [48,+6] Cannot find module '/bar' or its corresponding type declarations.\nfiles 83\n"
+  },
+  {
+   "index": "07226",
+   "class": "native missing",
+   "source": "tests/cases/compiler/pathMappingBasedModuleResolution_withExtension.ts",
+   "unit": "/foo/foo.ts",
+   "first_diff_line": null,
+   "go": "",
+   "cs": "file 07226.txt (25 bytes)\nfiles 83\n"
+  },
+  {
+   "index": "07228",
+   "class": "native missing",
+   "source": "tests/cases/compiler/pathMappingBasedModuleResolution_withExtension.ts",
+   "unit": "/a.ts",
+   "first_diff_line": null,
+   "go": "",
+   "cs": "file 07228.txt (54 bytes)\nsemantic TS2307 /main.ts [20,+5] Cannot find module 'foo' or its corresponding type declarations.\nsemantic TS2307 /main.ts [47,+5] Cannot find module 'bar' or its corresponding type declarations.\nfiles 83\n"
+  },
+  {
+   "index": "07233",
+   "class": "native missing",
+   "source": "tests/cases/compiler/pathMappingBasedModuleResolution_withExtensionInName.ts",
+   "unit": "/a.ts",
+   "first_diff_line": null,
+   "go": "",
+   "cs": "file 07233.txt (59 bytes)\nsemantic TS2307 /main.ts [18,+9] Cannot find module 'zone.js' or its corresponding type declarations.\nsemantic TS2307 /main.ts [47,+10] Cannot find module 'zone.tsx' or its corresponding type declarations.\nfiles 83\n"
+  },
+  {
+   "index": "07291",
+   "class": "output differs",
+   "source": "tests/cases/compiler/primitiveConstraints1.ts",
+   "unit": "primitiveConstraints1.ts",
+   "first_diff_line": 1,
+   "go": "semantic TS2344 /main.ts [51,+6] Type 'string' does not satisfy the constraint 'number'.",
+   "cs": "semantic TS2322 /main.ts [51,+6] Type 'string' is not assignable to type 'number'."
+  },
+  {
+   "index": "07292",
+   "class": "output differs",
+   "source": "tests/cases/compiler/primitiveConstraints2.ts",
+   "unit": "primitiveConstraints2.ts",
+   "first_diff_line": 4,
+   "go": "semantic TS2344 /main.ts [151,+6] Type 'string' does not satisfy the constraint 'number'.",
+   "cs": "semantic TS2322 /main.ts [151,+6] Type 'string' is not assignable to type 'number'."
+  },
+  {
+   "index": "08137",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/spuriousCircularityOnTypeImport.ts",
+   "unit": "index.ts",
+   "first_diff_line": 0,
+   "go": "file 08137.txt (489 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "08902",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/typeofImportInstantiationExpression.ts",
+   "unit": "main.ts",
+   "first_diff_line": 0,
+   "go": "file 08902.txt (124 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "09058",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/unmetTypeConstraintInImportCall.ts",
+   "unit": "file2.ts",
+   "first_diff_line": 0,
+   "go": "file 09058.txt (40 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "09304",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/varianceComputationNoCrash.ts",
+   "unit": "camelcase.ts",
+   "first_diff_line": 0,
+   "go": "file 09304.txt (3908 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "09305",
+   "class": "converted crashed",
+   "source": "tests/cases/compiler/varianceComputationNoCrash.ts",
+   "unit": "main.ts",
+   "first_diff_line": 0,
+   "go": "file 09305.txt (191 bytes)",
+   "cs": "CRASH rc=2"
+  },
+  {
+   "index": "09360",
+   "class": "output differs",
+   "source": "tests/cases/compiler/yieldExpression1.ts",
+   "unit": "yieldExpression1.ts",
+   "first_diff_line": 1,
+   "go": "semantic TS2322 /main.ts [89,+5] Type 'undefined' is not assignable to type 'number'.",
+   "cs": "files 83"
+  }
+ ]
+}
