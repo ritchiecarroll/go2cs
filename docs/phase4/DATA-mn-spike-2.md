@@ -476,3 +476,12 @@ moves the lines below it, and the documents cite those lines. A real change of t
 additions in files of their own (partial types make that cheap, as here) or re-cites every note
 under it in the same commit. The first is the rule B2 follows; the channel twins are the case that cannot
 follow it, and their re-cite is one note today.
+
+The converter's full test (`go test ./...`) was then run on the relocated commit and was red on one test:
+`TestByRefReceiversFollowTheReceiverRule` names `sync/mutex.cs:250`, the `Lock` twin, a hand-written
+`this ref` receiver that says neither `[GoRecv]` nor `[GoCopyBound]`. The twin now carries `[GoRecv]`, as
+`Lock` does. The storm builds and reads as before (twins at 1,000: 24 threads, 3.8 s; at 100,000: 43
+threads, 7.0 s, 610 MB; switch off at 1,000: 1,011 threads; exit 0 and Go's hashes), and the test passes.
+This is the fourth guard that read the spike's own lines (findings 12 and 14): a hand-written twin in a
+hand-owned file is a receiver like any other. Whether the mark's generated pointer-receiver overload is the
+box-taking form that finding 7 asks for was not read; B2 reads it.

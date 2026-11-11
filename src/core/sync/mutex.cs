@@ -246,7 +246,7 @@ private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Sem
 // is async. A contended Lock parks on a GoParkSlot that the gate's own queue wakes (SemaphoreSlim
 // completes an awaited wait on the ThreadPool, which is one hop per contended Lock). The profiling arms
 // of Lock are not twinned here.
-[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+[GoRecv, System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 public static System.Threading.Tasks.ValueTask Lockꞏtwin(this ref Mutex m) {
     SemaphoreSlim gate = gateOf(ref m);
     if (gate.Wait(0)) {
