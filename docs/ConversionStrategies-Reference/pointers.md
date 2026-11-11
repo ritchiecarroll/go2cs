@@ -2106,14 +2106,71 @@ the TypeScript-Go type-check slice panicked in ast.(*Node).GetResolutionModeOver
 use of such a receiver was a compile error. Census at master 742a3dbb24: 0 alias-typed receivers in the
 standard library on four targets and in the behavioral tree. docs/phase4/DESIGN-alias-receiver-form.md. -->
 
-A receiver that is an alias of the POINTER type (`type P = *T`, `func (p P) M()`) is not covered: such a
-program does not compile after conversion.
+A receiver that is an alias of the POINTER type (`type P = *T`, `func (p P) M()`) is the next section.
 
 (Guarded by the `AliasReceiverForms` behavioral test, output-compared vs `go run`: fifteen receiver
 shapes through aliases, each called on a nil and on a real pointer, with a named-receiver control and a
 value-receiver control; and by the converter tests `TestAliasReceiverTakesTheNamedForm` and
 `TestAliasReceiverEmitsAsNamedReceiver`, the second of which converts one source with alias-typed and
 with named receivers and requires the same emission.)
+
+## A pointer type written through an ALIAS is a pointer wherever the converter asks
+An alias may denote a pointer type, and Go accepts such an alias as a receiver:
+
+```go
+type Node struct{ kind int }
+type NodePtr = *Node
+
+func (p NodePtr) Mode(def int) (int, bool) {
+    if p == nil {
+        return def, false
+    }
+    return p.kind, true
+}
+```
+
+`Mode` is the pointer method `(*Node).Mode`. It is emitted as it is when the source writes `*Node`, with
+the alias kept where Go writes it:
+
+<!-- source: src/tests/Behavioral/PointerAliasForms/main.cs:21-28 -->
+```csharp
+public static (nint, bool) Mode(this NodePtr Ꮡp, nint def) {
+    ref var p = ref Ꮡp.DerefOrNull();
+
+    if (Ꮡp == nil) {
+        return (def, false);
+    }
+    return (p.kind, true);
+}
+```
+
+The file declares `global using NodePtr = go.ж<go.main_package.Node>;`, so `NodePtr` names the box. A
+receiver its body never observes as a pointer is taken by reference, and there the element is named,
+because `ref` has no alias spelling: `SetKind(this ref Node p, nint kind)`. The same holds away from
+receivers. A parameter, a local, a field, an element, a map value and a channel element of the alias type
+are pointers and keep the alias name (`viaParam(NodePtr Ꮡq)`, `internal NodePtr attrs;`,
+`slice<NodePtr>`), a call on one reaches a pointer method without taking the variable's address, and a
+type parameter constrained by the alias (`[P NodePtr]`) is erased to the pointer exactly as `[P *Node]` is.
+
+**The rule in the converter**: a read that decides what a type IS resolves an alias first
+(`types.Unalias(x).(*types.Pointer)`). Only the two type-name renderers read the type as written, which
+is what keeps the alias name in the emission. `TestPointerTypeReadsResolveAliases` fails on a new bare
+read. <!-- history: C48 part B, 2026-11-11. To go/types `type NodePtr = *Node` is a *types.Alias, and 151
+assertions `.(*types.Pointer)` in 41 converter files, plus three type switches over a constraint's term,
+answered "not a pointer" for it. A receiver `func (p NodePtr) M()` was read as a value receiver, a call on
+a field of the alias type took the field's address (`h.Ꮡattrs.M()`), and a parameter of the alias type got
+no box and no entry alias. The fixture did not compile (34 errors at 17 sites), and a probe with no
+alias-typed receiver at all, only variables of the alias type calling ordinary pointer methods, read 14
+errors at master 742a3dbb24. The standard library spells no pointer through an alias in a default build
+(runtime's `dlogger = *dloggerImpl` is behind the debuglog tag), which is how the class stayed unseen.
+docs/phase4/DESIGN-alias-receiver-form.md, the second amendment of 2026-11-11. -->
+
+(Guarded by the `PointerAliasForms` behavioral test, output-compared vs `go run`: seventeen receiver
+shapes through the alias, each on a nil pointer, a real pointer and a real pointer to a zero value, with a
+pointer-receiver and a value-receiver control; then the alias as a parameter, a local, a field, an
+element, a map value, a channel element, a typed nil in an interface, a type-switch case and a type
+parameter's constraint. And by the converter tests `TestPointerAliasEmitsAsPointer`, which converts the
+source as written and with `*Node` and requires one emission, and `TestPointerTypeReadsResolveAliases`.)
 
 ## A pointer PARAMETER is nil-deferring for exactly the reason a receiver is
 Go's nil rule does not distinguish the two. Passing a nil `*T` to a function is as legal as calling a

@@ -72,12 +72,20 @@ type that is not public. In the standard library 268 forwarders in 12 packages b
 pointer and test `n == nil` itself. The converter took such a method's receiver by reference, so the nil test read
 the struct through the nil pointer and the call panicked where Go returns; a method that used the receiver as a
 pointer in any other way did not compile. Such a method is now emitted as it is when the receiver is written with
-the type's own name. The standard library has no such method, so its converted code is unchanged. A receiver that
-is an alias of the pointer type itself (`type P = *T`) still does not compile after conversion.
+the type's own name. The standard library has no such method, so its converted code is unchanged.
 <!-- source: C48 of the TypeScript-Go readiness run (one type-check unit panicked in
      ast.(*Node).GetResolutionModeOverride), P1; docs/phase4/DESIGN-alias-receiver-form.md. Behavioral
      AliasReceiverForms; converter tests TestAliasReceiverTakesTheNamedForm and
      TestAliasReceiverEmitsAsNamedReceiver. -->
+
+**A pointer type written through an alias converts as the pointer it is.** PENDING. `type NodePtr = *Node` may be the
+type of a variable, a field or a parameter, and of a method's receiver: `func (p NodePtr) Mode()` is the pointer
+method `(*Node).Mode`. The converter did not recognize such a type as a pointer, and a program that used one did not
+compile after conversion. It is now converted exactly as the same program written with `*Node`, and the alias keeps
+its name in the converted code. The standard library spells no pointer this way in a default build, so its converted
+code is unchanged.
+<!-- source: C48 part B, P1; docs/phase4/DESIGN-alias-receiver-form.md (second amendment). Behavioral
+     PointerAliasForms; converter tests TestPointerAliasEmitsAsPointer and TestPointerTypeReadsResolveAliases. -->
 
 ## November 8, 2026 — Faster Native AOT, and a Release standard library from source
 
