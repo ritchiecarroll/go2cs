@@ -189,7 +189,9 @@ try {
     # But push-nuget.ps1 -VersionSuffix packs at version.props' build, which is the LAST-PUBLISHED one: the .3
     # rehearsal packed 1.26.10.2-ci.<run>, whose own baseline is .1, so it compared with a revision the release does not
     # follow and read .2's own changes as breaks (release-smoke 42533214613, 2026-11-08). The guard therefore takes the
-    # release version the run stands for, and push-nuget.ps1 passes the would-be version on a pack-only run.
+    # release version the run stands for, and push-nuget.ps1 passes the would-be version on a pack-only run. (A
+    # -VersionSuffix rehearsal now packs a prerelease of the would-be release, release-smoke 43000314806; an unsuffixed
+    # pack-only run still packs at the last-published build, so the arm stays.)
     Check 'a pack at the last-published build, by its own version, would compare with the revision before that' ((Get-GoApiCompatBaselineVersion $published '1.26.10.2-ci.1') -ceq '1.26.10.1') "$(Get-GoApiCompatBaselineVersion $published '1.26.10.2-ci.1')"
     $guardParams = (Get-Command Invoke-GoApiCompatGuard).Parameters
     Check 'the guard takes the release version a run stands for' ($guardParams.ContainsKey('ReleaseVersion')) 'Invoke-GoApiCompatGuard has no -ReleaseVersion'

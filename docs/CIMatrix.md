@@ -149,7 +149,11 @@ budget is a ceiling, not an allowance.
 
 The release's own pack, rehearsed, then consumed on the chosen flavor's legs. A `pack` job on
 `windows-latest` runs `push-nuget.ps1 -VersionSuffix ci.<run id>` under Windows PowerShell — pack-only by
-the script's own contract (no bump, no tag, nothing under `docs/validation`, no push) — and uploads the
+the script's own contract (no bump, no tag, nothing under `docs/validation`, no push) — and packs every package
+as a prerelease of the release the tree would publish next, `<GoStdLibVersion>.<GoBuildNumber + 1>-ci.<run id>`
+(`GoBuildNumber` is the last-published build; `go.lib.targets` reads a prerelease as its release, so a pack
+labelled with the published build fails every consumer's `GO2CS3002` once `<GoBreakFloor>` names the release in
+development, and the pack's own "Pack floor" check refuses it). It uploads the
 merged packages as the `release-smoke-feed` artifact. It is the only Release-configuration build of the
 darwin flavor anywhere. The stage fans out to ALL FOUR shipped RIDs (win-x64, linux-x64, osx-arm64, osx-x64) from that
 one pack, whatever `goos` says. Each leg then runs `src/tests/PackageTests/release-smoke.ps1` against the feed,

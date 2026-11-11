@@ -108,9 +108,12 @@
 
 .PARAMETER VersionSuffix
     A LOCAL REHEARSAL's prerelease label (e.g. local.1): every package is packed as
-    <GoStdLibVersion>.<GoBuildNumber>-<VersionSuffix>, and every go.* dependency between them carries that
-    same version. PACK-ONLY: refused with -Push, -BumpBuild and -VerifyOnly, so a suffixed package can never
-    reach a feed through this script, and version.props, the tags and docs\validation are never touched.
+    <GoStdLibVersion>.<GoBuildNumber + 1>-<VersionSuffix>, a prerelease of the release the tree would publish
+    next (GoBuildNumber is the LAST-PUBLISHED build), and every go.* dependency between them carries that
+    same version. go.lib.targets reads a prerelease as its release, so this is what lets the pack pass the
+    <GoBreakFloor> of the go.lib it ships when that floor names the release in development. PACK-ONLY:
+    refused with -Push, -BumpBuild and -VerifyOnly, so a suffixed package can never reach a feed through
+    this script, and version.props, the tags and docs\validation are never touched.
     Only the PACKAGE version moves; assembly versions are unchanged. It exists for local-feed rehearsals
     (the J0 pilot) whose packages must not share an id+version with a published release in a NuGet cache.
 
@@ -120,7 +123,7 @@
 
 .EXAMPLE
     .\push-nuget.ps1 -VersionSuffix local.1 -OutDir D:\feeds\go2cs-local
-    A local rehearsal: pack every package as <version>-local.1 into a folder feed. Nothing is bumped,
+    A local rehearsal: pack every package as <next version>-local.1 into a folder feed. Nothing is bumped,
     tagged, frozen or pushed.
 
 .EXAMPLE
@@ -983,16 +986,22 @@ if ($propsText -match '<GoStdLibVersion>([^<]+)</GoStdLibVersion>') { $baseVersi
 $fullVersion = "$baseVersion.$build"
 Write-Step "Package version: $fullVersion   (solution: go2cs-stdlib.slnx)"
 
-# The version the PACK writes. Unchanged unless a local rehearsal passed -VersionSuffix, which is refused on
-# every release path above, so on a release $packVersion IS $fullVersion and nothing below moves.
-$packVersion = if ($VersionSuffix) { "$fullVersion-$VersionSuffix" } else { $fullVersion }
-if ($VersionSuffix) { Write-Step "LOCAL REHEARSAL: packing as $packVersion (pack-only; nothing is bumped, tagged or pushed)" }
-
 # The version a BUMPING run would publish. Only meaningful when this run did not bump: $build is then
 # still the last-published number, so +1 names the next release. After a bump $build already IS that
 # number, so the value would be one release too far ahead -- it is set to $null rather than computed
 # wrongly, and every consumer below sits on a -not $doBump path where that cannot happen.
 if ($doBump) { $wouldBeVersion = $null } else { $wouldBeVersion = "$baseVersion.$($build + 1)" }
+
+# The version the PACK writes. On a release it IS $fullVersion and nothing below moves. A local or CI rehearsal
+# (-VersionSuffix, refused with -Push and -BumpBuild above, so this run did not bump and $wouldBeVersion is set) packs
+# a PRERELEASE OF THE RELEASE IT REHEARSES, <would-be>-<suffix>: SemVer orders it after the published build and before
+# the release it becomes. Labelled with the last-published build instead, it reads as that build to go.lib.targets,
+# which counts a prerelease as its release, and once <GoBreakFloor> names the release in development every build that
+# consumes it fails GO2CS3002 (release-smoke 43000314806: 1.26.10.3-ci.<run> beside a floor of 1.26.10.4). The pack
+# floor check below refuses that by name. Only the PACKAGE version moves; $fullVersion (the tag it names, the proof
+# snapshot, the badges) and the assembly versions stay at version.props' build.
+$packVersion = if ($VersionSuffix) { "$wouldBeVersion-$VersionSuffix" } else { $fullVersion }
+if ($VersionSuffix) { Write-Step "LOCAL REHEARSAL: packing as $packVersion, a prerelease of the would-be $wouldBeVersion (pack-only; nothing is bumped, tagged or pushed)" }
 
 # A pack-only INSPECTION run -- the dry run docs\phase4\MILESTONE-75pct-prep.md section 3.3 recommends, and the
 # only shape in which the dry-run affordances below engage. Deliberately NARROWER than -not $doBump:
@@ -1014,8 +1023,9 @@ if ($doBump) { $wouldBeVersion = $null } else { $wouldBeVersion = "$baseVersion.
 # CODE-PATH PROOF that -Push behaves exactly as it did before this affordance existed. The dry-run fix
 # touches six executable sites, and with -Push every one of them resolves to its pre-existing form:
 #
-#   1. $wouldBeVersion  -- a new variable. $null when $doBump; read ONLY inside `if ($dryRun)` branches,
-#                          so on any -Push run it is either $null or computed-and-never-read.
+#   1. $wouldBeVersion  -- a new variable. $null when $doBump; read ONLY inside `if ($dryRun)` branches
+#                          and in $packVersion's `if ($VersionSuffix)` arm, which -Push refuses, so on any
+#                          -Push run it is either $null or computed-and-never-read.
 #   2. $dryRun          -- $false whenever $Push, regardless of $doBump. This is the keystone: it makes
 #                          sites 3-6 unreachable on every release path.
 #   3. the tag skip message, 4. the "Froze N" message, 6. the "Verified N" message
@@ -2167,9 +2177,10 @@ Write-Step "Pack paths: CLEAN -- no absolute path in any assembly or symbol file
 # ran: the assets it compared must equal the baselines' assets. docs\phase4\DESIGN-binary-compat-guard.md.
 . (Join-Path $PSScriptRoot '_nugetpush.ps1')
 $apiCompatWork = Join-Path ([System.IO.Path]::GetTempPath()) ('go2cs-apicompat-' + [guid]::NewGuid().ToString('N'))
-# The release this run stands for. A pack-only run (a dry run or a -VersionSuffix rehearsal) packs at version.props'
-# build, which is the LAST-PUBLISHED one, so its own version's baseline is a revision the release does not follow;
-# it is compared with what the would-be release follows instead (GoApiCompat.psm1, Invoke-GoApiCompatGuard).
+# The release this run stands for. An unsuffixed pack-only run packs at version.props' build, which is the
+# LAST-PUBLISHED one, so its own version's baseline is a revision the release does not follow; it is compared with
+# what the would-be release follows instead (GoApiCompat.psm1, Invoke-GoApiCompatGuard). A -VersionSuffix rehearsal
+# packs a prerelease of the would-be release, whose own baseline is the same one.
 $guardReleaseVersion = if ($dryRun) { $wouldBeVersion } else { $fullVersion }
 try {
     $apiCompat = Invoke-GoApiCompatGuard -Packages $pkgs -RepoRoot $repoRoot -WorkDir $apiCompatWork `

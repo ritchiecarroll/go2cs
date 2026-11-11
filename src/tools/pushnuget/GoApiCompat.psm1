@@ -311,10 +311,13 @@ function Save-GoApiCompatBaseline([System.Net.Http.HttpClient]$Client, [string]$
     A guard that was asked about at least one package with a baseline and compared no asset is itself a failure.
 
     $ReleaseVersion is the version the run stands for, when that is not the version it packed: the baseline is then
-    the revision before the release, not before the pack. push-nuget.ps1 -VersionSuffix packs at version.props' build,
+    the revision before the release, not before the pack. push-nuget.ps1 -VersionSuffix packed at version.props' build,
     which is the LAST-PUBLISHED one, so the 1.26.10.3 rehearsal packed 1.26.10.2-ci.<run>. By its own version that
     compared with .1 and read .2's own changes as breaks the release could never meet (release-smoke 42533214613,
-    2026-11-08). Without it, each package's own version decides, as nugetgo-pack.ps1's real revisions want.
+    2026-11-08). A rehearsal now packs a prerelease of the would-be release (the same root failed the consumer's break
+    floor in release-smoke 43000314806), so its own version gives the same baseline; an unsuffixed pack-only run still
+    packs at the last-published build, and push-nuget passes the would-be version for both. Without it, each package's
+    own version decides, as nugetgo-pack.ps1's real revisions want.
 #>
 function Invoke-GoApiCompatGuard {
     param(
