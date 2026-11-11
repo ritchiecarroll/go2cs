@@ -135,3 +135,75 @@ and the same lists for a real module's closure (B5, the TypeScript compiler's Go
   request to the seam's owner after the spike, not a spike change.
 - The seam's stated gap M7 (a callback arriving on a foreign thread runs with no goroutine identity) matters
   more under M:N, where identity decides which state is mounted. It stays a named gap in the spike.
+
+## 2. B0: the shape set and its baselines on today's runtime (2026-11-11)
+
+Written before any spike code touches the runtime. It fixes what B3 re-runs under generated twins, and what
+today's runtime (one OS thread per goroutine) reads on the same programs. Branch `claude/g-mn-spike2-b0`, on
+`6afb937753`. It adds one Behavioral test and one sampler, and changes no converter, generator or golib file.
+
+### 2.1 The shape set
+
+Eighteen existing Behavioral programs, picked because each parks or unwinds a goroutine in a way P4 names:
+
+| shape | programs |
+|---|---|
+| channel rendezvous and close | ChannelRendezvous, CloseWakesBlocked, ChannelReceiveFromClosed |
+| select (fairness, default, send and receive mixed, nil channel, recursion) | SelectStatement, SelectRandomFairness, SelectSendDefault, SelectSendRecvMix, NilChannelInSelect, DeepSelectRecursion |
+| timers and sleep | SyncTimerChannel |
+| Mutex, WaitGroup, many parked goroutines | GoroutineWaitState, GoroutineParkStorm |
+| panic, recover and Goexit in a goroutine | GoexitDefers, GoroutinePanicExitCode, GoroutinePanicAfterDeferredDone, PanicRecover, GoroutineRecoveringWhenMainReturns, CrashGoroutineCreatedBy |
+
+One new Behavioral program, `MnMixedStorm`, is the nineteenth. n goroutines are alive at once, and each parks
+four ways before it ends: a select over two channels, `time.Sleep`, a contended `sync.Mutex`, and an unbuffered
+send that main receives. Half start from a named method (`go s.worker(i)`) and half from a func literal that
+calls it, because the two take different routes to a hidden twin. Its output is deterministic by construction
+(ids and tokens are summed, never printed in arrival order). n is 100,000 unless `MN_STORM_N` names another
+count; `MN_STORM_HOLD_MS` holds the goroutines parked so a sampler can read the process. It is a real
+Behavioral test (registered, golden minted), so a hosted leg reaches it with
+`stage=behavioral-smoke filter=MnMixedStorm`.
+
+At its default size the test is **red on today's runtime by design**, on every host. That is the point of it,
+and it is why this branch never lands.
+
+### 2.2 Today's runtime on the shape set (Windows x64, local)
+
+Each of the eighteen ran alone through `run-behavioral.ps1 --filter <name>` (all four phases, Release):
+**18 of 18 PASS**. Seventeen were compared with Go on exit code and standard output. `SelectStatement` carries
+no `[GoTestMatchingConsoleOutput]`, so its Output phase reports `skip 1`: for that program the baseline is
+"transpiles, matches its golden, compiles", and B3 can claim no more for it than that.
+
+### 2.3 MnMixedStorm on today's runtime (Windows x64, local)
+
+Read with `src/tools/mnspike2/Measure-Shape.ps1`: it starts one program, samples OS threads and private bytes
+every 250 ms, and hashes the standard output with carriage returns removed. `MN_STORM_HOLD_MS=3000` in every
+row, so the wall time includes a 3 s hold. "Same output" means the converted build's output hash equals the Go
+build's for that n.
+
+| n | build | verdict | wall | peak OS threads | peak private | output |
+|---|---|---|---|---|---|---|
+| 1,000 | Go | EXITED 0 | 3.3 s | 9 | 22 MB | 4 lines |
+| 1,000 | converted | EXITED 0 | 3.8 s | 1,011 | 90 MB | same as Go |
+| 10,000 | Go | EXITED 0 | 3.3 s | 14 | 101 MB | 4 lines |
+| 10,000 | converted | EXITED 0 | 6.3 s | 10,012 | 634 MB | same as Go |
+| 100,000 | Go | EXITED 0 | 3.8 s | 15 | 890 MB | 4 lines |
+| 100,000 | converted | EXITED 0 | 115.1 s | 100,008 | 5,962 MB | same as Go |
+
+- The sampler is proven both ways by the table itself: the Go build reads 9 to 15 threads where the converted
+  build reads n plus 8 to 12.
+- The conversion is right at every n: where the process survives, today's runtime prints Go's output. What is
+  red is the cost. Each parked goroutine holds a thread, about 60 KB of private memory each, and the
+  100,000 run takes 111 s longer than Go's.
+- Through the Behavioral runner at the default n the test is **red on Windows too**: Transpile, Compile and
+  Target pass, and Output reports `timeout 1` ("timed out after 30s (C# side)"), because the run needs 115 s
+  against the runner's 30 s budget. With `MN_STORM_N=1000` the same runner passes all four phases.
+
+### 2.4 What B0 could not read
+
+`GoroutineParkStorm` (1,000 parked goroutines, no hold) ends in 0.9 s, and a 250 ms sampler caught 400 and 328
+threads in two runs, not the roughly 1,010 that must exist at its gate. A peak thread count from this sampler is
+a lower bound unless the program holds. `MnMixedStorm` has the hold for that reason, and B1 adds a reading
+printed by the runtime itself (carriers and OS threads), which does not depend on a sampler's timing.
+
+The hosted readings (osx-arm64, osx-x64, linux-x64, linux-arm64) follow in a dated block below once the legs
+have run on this branch.
