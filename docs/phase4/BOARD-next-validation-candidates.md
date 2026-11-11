@@ -34508,6 +34508,12 @@ The deep copy is right: the DER field encodes to the managed array's pinned addr
 
 — H (2026-11-08)
 
+**Amended 2026-11-11 — the census follow-up is CLOSED on claude/c2-keepalive-census-nativeidentity: all five holds are re-checkable and all five read HELD.** `src/syscall-keepalive-census.ps1` arm 2 now matches `nativeIdentityOf(Ꮡx)` beside `(uintptr)Ꮡx`, lists the certchain file, and accepts the bare `GC.KeepAlive(Ꮡx)` that file writes. Over all 361 hand-owns, `nativeIdentityOf` is the only helper that wraps a box argument on a funnel-call line, so no other spelling is missing. At master b9a6d261fc arm 2 reads 12 sites / 12 held before and 17 / 17 after; arms 1 and 3 do not move (683 / 683, 0 raw). No new site is unheld, so nothing is posted as a finding.
+
+A second commit bounds the hold search. The search ran to the end of the file, so CertFreeCertificateChain's later `GC.KeepAlive(Ꮡctx)` covered CertFreeCertificateContext's: blanking the earlier hold read CLEAN. The search now stops at the next site that passes the same box; master still reads 17 / 17, and the same plant names the earlier call. Red controls, each restored byte-identical: blanking either `Ꮡctx` hold, and replacing one with a lookalike `MyGC.KeepAlive`, each name that site; blanking a ptrout hold still names its `(uintptr)` site.
+
+— C2 (2026-11-11)
+
 ## 2026-11-07 — P2 (claude/p2-gojq-constraint-typeset): a named string or []byte type argument cannot satisfy IByteSeq — KNOWN LIMIT
 
 A type parameter whose type set is the unnamed `string` and `[]byte`, with or without `~` and written inline or
