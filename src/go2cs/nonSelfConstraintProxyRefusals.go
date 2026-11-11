@@ -198,19 +198,19 @@ func aliasingTypeParamPosition(signature *types.Signature, typeParam *types.Type
 	check := func(verb string, t types.Type) string {
 		switch x := types.Unalias(t).(type) {
 		case *types.Slice:
-			if mentionsTypeParam(x.Elem(), typeParam) {
+			if mentionsTypeParamOutsideInterface(x.Elem(), typeParam) {
 				return verb + " " + types.TypeString(t, nil)
 			}
 		case *types.Map:
-			if mentionsTypeParam(x.Key(), typeParam) || mentionsTypeParam(x.Elem(), typeParam) {
+			if mentionsTypeParamOutsideInterface(x.Key(), typeParam) || mentionsTypeParamOutsideInterface(x.Elem(), typeParam) {
 				return verb + " " + types.TypeString(t, nil)
 			}
 		case *types.Chan:
-			if mentionsTypeParam(x.Elem(), typeParam) {
+			if mentionsTypeParamOutsideInterface(x.Elem(), typeParam) {
 				return verb + " " + types.TypeString(t, nil)
 			}
 		case *types.Pointer:
-			if mentionsTypeParam(x.Elem(), typeParam) {
+			if mentionsTypeParamOutsideInterface(x.Elem(), typeParam) {
 				return verb + " " + types.TypeString(t, nil)
 			}
 		}
@@ -378,8 +378,8 @@ func onwardGenericCalls(decl *ast.FuncDecl, info *types.Info, typeParam *types.T
 	return onward
 }
 
-// mentionsTypeParam reports whether t mentions the type parameter outside an interface.
-func mentionsTypeParam(t types.Type, typeParam *types.TypeParam) bool {
+// mentionsTypeParamOutsideInterface reports whether t mentions the type parameter outside an interface.
+func mentionsTypeParamOutsideInterface(t types.Type, typeParam *types.TypeParam) bool {
 	return typeMentionsTypeParam(t, typeParam, map[types.Type]bool{})
 }
 
@@ -389,19 +389,19 @@ func constraintMentionsTypeParam(constraint types.Type, typeParam *types.TypePar
 	iface, ok := constraint.Underlying().(*types.Interface)
 
 	if !ok {
-		return mentionsTypeParam(constraint, typeParam)
+		return mentionsTypeParamOutsideInterface(constraint, typeParam)
 	}
 
 	for i := range iface.NumEmbeddeds() {
 		switch embedded := iface.EmbeddedType(i).(type) {
 		case *types.Union:
 			for j := range embedded.Len() {
-				if mentionsTypeParam(embedded.Term(j).Type(), typeParam) {
+				if mentionsTypeParamOutsideInterface(embedded.Term(j).Type(), typeParam) {
 					return true
 				}
 			}
 		default:
-			if mentionsTypeParam(embedded, typeParam) {
+			if mentionsTypeParamOutsideInterface(embedded, typeParam) {
 				return true
 			}
 		}
