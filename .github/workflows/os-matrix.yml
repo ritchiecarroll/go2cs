@@ -168,6 +168,7 @@ jobs:
       nugetgo-feed-sha256: ${{ steps.derive.outputs.nugetgo-feed-sha256 }}
       probe-test: ${{ steps.derive.outputs.probe-test }}
       dns-servers: ${{ steps.derive.outputs.dns-servers }}
+      dump-proof: ${{ steps.derive.outputs.dump-proof }}
       probe-at: ${{ steps.derive.outputs.probe-at }}
       jit-disasm: ${{ steps.derive.outputs.jit-disasm }}
       cgo-cc: ${{ steps.derive.outputs.cgo-cc }}
@@ -221,12 +222,13 @@ jobs:
           # dispatch form's input count is guarded (Test-NugetgoBehaviorProof.ps1), and these are options OF those two
           # stages. golib-tests: jit=PATTERN. stack-probe: test=REGEX (required), at=S,S. sweep-shard (darwin only):
           # dns=IP[,IP], the job's resolver (an opt-in for net's NXDOMAIN keys, which the hosted mac resolver answers late;
-          # C1, 2026-11-08). converter-cgo: cc=zig|llvm-mingw, a pinned C toolchain the leg downloads, hash-checks and hands
+          # C1, 2026-11-08); sweep-shard (linux only): dumpproof=red, the dump-suppression proof's red arm, which runs the
+          # proof's crash probe with suppression OFF so the proof fails by name and the sweep never starts (S7-b). converter-cgo: cc=zig|llvm-mingw, a pinned C toolchain the leg downloads, hash-checks and hands
           # go as CC (the cgo toolchain scout, H, 2026-11-10); sha=HEX replaces the pin's sha256, and exists so a wrong
           # hash can be shown to refuse before anything runs. An unknown or repeated key, an empty value, or any option on
           # any other stage FAILS the plan by name rather than being ignored.
-          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''
-          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns' } 'converter-cgo' { 'cc', 'sha' } })
+          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''; $dumpProof = ''
+          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof' } 'converter-cgo' { 'cc', 'sha' } })
           if ($optionKeys.Count) {
               $parts = @($filter -split ';')
               $filter = $parts[0].Trim()
@@ -255,6 +257,12 @@ jobs:
                   if ($dnsServers -notmatch '^\d{1,3}(\.\d{1,3}){3}(,\d{1,3}(\.\d{1,3}){3})*$') { throw "sweep-shard filter option dns= must be a comma-separated IPv4 list; got '$dnsServers'." }
                   Write-Host "sweep-shard: the job's resolver is set to $dnsServers before the sweep (opt-in; the effective resolver is logged)"
               }
+              if ($seen.ContainsKey('dumpproof')) {
+                  if ($goos -ne 'linux') { throw "sweep-shard filter option dumpproof= is the linux dump-suppression proof's red arm and applies to goos linux only; got goos '$goos'." }
+                  $dumpProof = $seen['dumpproof']
+                  if ($dumpProof -ne 'red') { throw "sweep-shard filter option dumpproof= takes one value, red; got '$dumpProof'." }
+                  Write-Host 'sweep-shard: dumpproof=red -- the proof runs its crash probe with suppression OFF and must FAIL by name; the sweep does not run'
+              }
               if ($stage -eq 'converter-cgo') {
                   $cgoCc = "$($seen['cc'])"; $cgoCcSha = "$($seen['sha'])".ToLowerInvariant()
                   if ($cgoCc -and $cgoCc -notin @('zig', 'llvm-mingw')) { throw "converter-cgo filter option cc= names a pinned toolchain, zig or llvm-mingw; got '$cgoCc'." }
@@ -264,7 +272,7 @@ jobs:
                   if ($cgoCc) { Write-Host "converter-cgo: CC is the pinned $cgoCc$(if ($cgoCcSha) { ", its sha256 REPLACED by $cgoCcSha" })" }
               }
           }
-          elseif ($filter -match '(^|;)\s*(jit|test|at|dns|cc|sha)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe, sweep-shard and converter-cgo only; got stage '$stage' and filter '$filter'." }
+          elseif ($filter -match '(^|;)\s*(jit|test|at|dns|dumpproof|cc|sha)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe, sweep-shard and converter-cgo only; got stage '$stage' and filter '$filter'." }
 
           # The behavioral stages' per-program run budget. A schedule has no inputs and keeps 120, as
           # does a blank dispatch. A value that is not a whole number of seconds in 1..1800 FAILS the
@@ -380,11 +388,13 @@ jobs:
               # Once the flavour exists, census and golib-tests are open on it, and every stage that RUNS converted programs
               # stays refused by name until the seat that lifts it lands (COORD, 2026-11-10): those programs reach the
               # linux hand-owns' runtime sites (syscall numbers, netpoll), which are DESIGN-linux-arm64-flavour.md's S3.
+              # sweep-shard is lifted (S7-b, the linux/arm64 bank, docs/phase4/DATA-la64-s7-bank-plan.md): the arm leg binds
+              # GoTargetArch=arm64, the flavour probe refuses any other flavour, and the dump-suppression proof runs on
+              # both linux legs before the sweep.
               $armLiftedBy = [ordered]@{
                   'behavioral-smoke'  = 'S3 (the linux hand-owns at arm64)'
                   'behavioral-full'   = 'S3 (the linux hand-owns at arm64)'
                   'behavioral-stderr' = 'S3 (the linux hand-owns at arm64)'
-                  'sweep-shard'       = 'S3 (the linux hand-owns at arm64), then the bank of section 7'
                   'stack-probe'       = 'S3 (the linux hand-owns at arm64)'
               }
               if (-not $calibration -and $armLiftedBy.Contains($env:INPUT_STAGE)) {
@@ -526,6 +536,7 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "probe-at=$probeAt" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "jit-disasm=$jitDisasm" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dns-servers=$dnsServers" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "dump-proof=$dumpProof" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-cc=$cgoCc" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-cc-sha=$cgoCcSha" -Encoding utf8
 
@@ -1789,6 +1800,55 @@ jobs:
           exit $exit
 
       # -------------------------------------------------------------------------------------
+      # Dump suppression, proven per job (S7-b; docs/phase4/DATA-la64-s7-bank-plan.md section 3). The fleet rule after
+      # six aborts wrote 211 GB of dumps on a lane box: no many-thread linux run without suppression PROVEN on that
+      # machine first, and a failed proof STOPS the run. A hosted job is a fresh machine whose image can change its dump
+      # handler without notice, so the proof runs in every linux sweep-shard job, on both legs, before the sweep.
+      # .github/dump-suppression-proof.sh does the work; these steps only sequence it and keep its records.
+      # Step 1 records the settings, runs the POSITIVE control (the census must see a dump and a 128 MiB write with
+      # suppression off) and applies suppression, reading each value back. Step 2 is a NEW step on purpose: it reads its
+      # own inherited core limit, then crashes a 2,000-thread .NET probe twice and requires 0 new dump files and under
+      # 64 MiB. Either failing fails the job before the sweep. dumpproof=red (filter option) skips the apply and runs
+      # step 2 with suppression OFF: it must fail by name, and the sweep never starts.
+      # -------------------------------------------------------------------------------------
+      - name: Dump suppression — record, positive control, apply
+        id: dumpproof-apply
+        if: needs.plan.outputs.stage == 'sweep-shard' && matrix.goos == 'linux'
+        shell: bash
+        env:
+          DUMP_PROOF_MODE: ${{ needs.plan.outputs.dump-proof }}
+        run: |
+          state="$RUNNER_TEMP/dumpproof"
+          proof=./.github/dump-suppression-proof.sh
+          rc=0
+          bash "$proof" record "$state" || rc=$?
+          if [ "$rc" -eq 0 ]; then bash "$proof" control "$state" || rc=$?; fi
+          if [ "$rc" -eq 0 ]; then
+            if [ "$DUMP_PROOF_MODE" = red ]; then
+              echo "DUMPPROOF apply: RED ARM -- suppression is NOT applied"
+            else
+              bash "$proof" apply "$state" || rc=$?
+            fi
+          fi
+          mkdir -p "artifacts/dumpproof-$RID"
+          cp "$state"/*.txt "$state"/*.tsv "artifacts/dumpproof-$RID/" 2>/dev/null || true
+          exit "$rc"
+
+      - name: Dump suppression — negative proof (2,000-thread .NET probe, crashed twice)
+        id: dumpproof-prove
+        if: needs.plan.outputs.stage == 'sweep-shard' && matrix.goos == 'linux'
+        shell: bash
+        env:
+          DUMP_PROOF_MODE: ${{ needs.plan.outputs.dump-proof }}
+        run: |
+          state="$RUNNER_TEMP/dumpproof"
+          rc=0
+          bash ./.github/dump-suppression-proof.sh prove "$state" "$DUMP_PROOF_MODE" || rc=$?
+          mkdir -p "artifacts/dumpproof-$RID"
+          cp "$state"/*.txt "$state"/*.tsv "$state"/*.out "artifacts/dumpproof-$RID/" 2>/dev/null || true
+          exit "$rc"
+
+      # -------------------------------------------------------------------------------------
       # sweep-shard's opt-in resolver (C1, 2026-11-08): net's TestLookupNoSuchHost NXDOMAIN keys fail on the hosted mac
       # runners because the image's resolver answers an invalid name late or not as NXDOMAIN. With filter option
       # dns=IP[,IP] this step times NXDOMAIN for invalid.invalid through Go's resolvers (default, netdns=go,
@@ -2101,6 +2161,22 @@ jobs:
           & ./.github/annotate-summary.ps1 -Title "sweep $goos/$rid" -Lines $summary
 
           exit $sweepExit
+
+      # -------------------------------------------------------------------------------------
+      # The proof's post-run twin (S7-b, plan section 3): the dump census again, against the one taken when the proof
+      # passed. A new dump file HOLDS this shard's evidence: its rows do not bank and no further shard is dispatched
+      # until the cause is named. It runs whatever the sweep's outcome, and only when the proof itself passed.
+      # -------------------------------------------------------------------------------------
+      - name: Dump suppression — recheck after the sweep
+        if: always() && needs.plan.outputs.stage == 'sweep-shard' && matrix.goos == 'linux' && steps.dumpproof-prove.outcome == 'success'
+        shell: bash
+        run: |
+          state="$RUNNER_TEMP/dumpproof"
+          rc=0
+          bash ./.github/dump-suppression-proof.sh recheck "$state" || rc=$?
+          mkdir -p "artifacts/dumpproof-$RID"
+          cp "$state"/*.txt "artifacts/dumpproof-$RID/" 2>/dev/null || true
+          exit "$rc"
 
       # -------------------------------------------------------------------------------------
       # release-smoke — consume the pack job's feed the way a user does, on this leg's host.
