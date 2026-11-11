@@ -1672,6 +1672,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNilFuncIfaceMethodValue() => CheckTarget("NilFuncIfaceMethodValue");
 
     [TestMethod]
+    public void CheckNilFuncNamedDelegateArg() => CheckTarget("NilFuncNamedDelegateArg");
+
+    [TestMethod]
     public void CheckNilMapKey() => CheckTarget("NilMapKey");
 
     [TestMethod]
