@@ -16,7 +16,8 @@ namespace GolibTests;
 //
 // The current-directory arm plants a COPY of a system library under a probe name, and first proves the copy loads by
 // its absolute path, so a refusal cannot be a broken copy. darwin keeps its system dylibs in the shared cache, with no
-// file on disk to copy, so its arm takes the probe library (increment 4d) and reads Inconclusive until then.
+// file on disk to copy, so its arm plants a copy of the probe library (increment 4d, CgoProbe), and the resolver is asked
+// for it by its bare name, the name dyld's leaf-name search would meet.
 [TestClass]
 [DoNotParallelize]
 public class CgoLibrariesTests
@@ -29,17 +30,22 @@ public class CgoLibrariesTests
         ("-lm", "libm.so.6");
 
     private static string ProbeFileName(string stem) =>
-        OperatingSystem.IsWindows() ? $"{stem}.dll" : $"lib{stem}.so";
+        OperatingSystem.IsWindows() ? $"{stem}.dll" :
+        OperatingSystem.IsMacOS() ? $"lib{stem}.dylib" :
+        $"lib{stem}.so";
 
     private static List<GoCgoLibrary> Table(params (string flag, string name)[] libraries) =>
         [.. libraries.Select(library => new GoCgoLibrary(library.flag, library.name))];
 
-    // The file a planted copy is made from: the system library itself on windows, and on linux the file the loader
-    // mapped for libm.so.6.
+    // The file a planted copy is made from: the system library itself on windows, on linux the file the loader mapped
+    // for libm.so.6, and on darwin the probe library, since its system dylibs have no file on disk.
     private static string SystemLibraryFile()
     {
         if (OperatingSystem.IsWindows())
             return Path.Combine(Environment.SystemDirectory, "ucrtbase.dll");
+
+        if (OperatingSystem.IsMacOS())
+            return CgoProbe.Require();
 
         NativeLibrary.Free(NativeLibrary.Load("libm.so.6"));
         NativeLibrary.Load("libm.so.6");
@@ -112,12 +118,11 @@ public class CgoLibrariesTests
     }
 
     // §11.10's real current-directory arm: a library that exists ONLY in the current directory is not the one loaded.
+    // On darwin a RED here is a security finding, not a test detail (COORD, 2026-11-10): dyld's search for a bare name
+    // reached the current directory, and §11.12's absolute-name rule becomes mandatory for every darwin load.
     [TestMethod]
     public void ALibraryOnlyInTheCurrentDirectoryIsNotLoaded()
     {
-        if (OperatingSystem.IsMacOS())
-            Assert.Inconclusive("darwin's system dylibs live in the shared cache, with no file to plant: this arm takes the probe library (increment 4d). NOT MEASURED");
-
         string name = ProbeFileName($"go2cscwdprobe{Environment.ProcessId}");
         string directory = Directory.CreateTempSubdirectory("go2cs-cgo-cwd-").FullName;
         string planted = Path.Combine(directory, name);

@@ -44,8 +44,6 @@ var cgoWrapperTargets = []cgoWrapperTarget{
 // darwin and PtInRect's POINT on windows; the copy-back is uname's struct utsname and GetSystemTime's SYSTEMTIME.
 // UnionRect(&r, &r, &o) on windows passes one struct through two pointers, which must share one mirror.
 const cgoLinuxStructs = `
-type _Ctype_char int8
-
 // div_t: two ints, by value in the result.
 type _Ctype_div_t struct {
 	quot _Ctype_int
@@ -94,8 +92,6 @@ func _Cfunc_frexp(p0 _Ctype_double, p1 *_Ctype_int) (r1 _Ctype_double) { return 
 `
 
 const cgoDarwinStructs = `
-type _Ctype_char int8
-
 // div_t: two ints, by value in the result.
 type _Ctype_div_t struct {
 	quot _Ctype_int
@@ -202,12 +198,55 @@ func _Cfunc__gmtime64_s(p0 *_Ctype_struct_tm, p1 *_Ctype___time64_t) (r1 _Ctype_
 func _Cfunc_frexp(p0 _Ctype_double, p1 *_Ctype_int) (r1 _Ctype_double) { return }
 `
 
+// The probe library's declarations (increment 4d), as cmd/cgo gives them on every OS: src/tests/GolibTests/cgo-probe's
+// probe.c, which the hosted golib-tests legs build per RID with the OS's default C toolchain. A pair by value both ways
+// (windows' stand-in for inet_ntoa, whose in_addr is a union there), one struct through two pointers, a union inside a
+// struct as the bytes cmd/cgo gives it, a struct of two doubles by pointer, and strtol's errno through the probe.
+const cgoProbeDecls = `
+type _Ctype_struct_go2cs_probe_pair struct {
+	a _Ctype_int
+	b _Ctype_int
+}
+
+type _Ctype_struct_go2cs_probe_tagged struct {
+	tag _Ctype_int
+	_   [4]byte
+	u   [8]byte
+}
+
+type _Ctype_struct_go2cs_probe_hfa struct {
+	x _Ctype_double
+	y _Ctype_double
+}
+
+func _Cfunc_go2cs_probe_pair(p0 _Ctype_int, p1 _Ctype_int) (r1 _Ctype_struct_go2cs_probe_pair) { return }
+func _Cfunc_go2cs_probe_pair_sum(p0 _Ctype_struct_go2cs_probe_pair) (r1 _Ctype_int) { return }
+func _Cfunc_go2cs_probe_add_into(p0 *_Ctype_struct_go2cs_probe_pair, p1 *_Ctype_struct_go2cs_probe_pair, p2 *_Ctype_struct_go2cs_probe_pair) (r1 _Ctype_int) { return }
+func _Cfunc_go2cs_probe_tagged_double(p0 *_Ctype_struct_go2cs_probe_tagged) (r1 _Ctype_int) { return }
+func _Cfunc_go2cs_probe_hfa_scale(p0 *_Ctype_struct_go2cs_probe_hfa, p1 _Ctype_double) (r1 _Ctype_double) { return }
+func _C2func_go2cs_probe_strtol(p0 *_Ctype_char, p1 _Ctype_int) (r1 _Ctype_long, r2 error) { return }
+`
+
+// cgoProbeLibrary is the probe library's load-time name on goos, as the hosted leg builds it (its SONAME on linux, its
+// install name on darwin, its DLL name on windows).
+func cgoProbeLibrary(goos string) string {
+	switch goos {
+	case "windows":
+		return "go2csprobe.dll"
+	case "darwin":
+		return "libgo2csprobe.dylib"
+	default:
+		return "libgo2csprobe.so"
+	}
+}
+
 // cgoWrapperFixture is the cgo-shaped package the golden binds, as cmd/cgo would declare it for target.
 func cgoWrapperFixture(t *testing.T, target cgoWrapperTarget) *types.Package {
 	t.Helper()
 
 	source := `package cgotest
 
+type _Ctype_char int8
 type _Ctype_int int32
 type _Ctype_uint uint32
 type _Ctype_long ` + target.long + `
@@ -217,7 +256,7 @@ type _Ctype_void [0]byte
 func _Cfunc_abs(p0 _Ctype_int) (r1 _Ctype_int) { return }
 func _Cfunc_labs(p0 _Ctype_long) (r1 _Ctype_long) { return }
 func _Cfunc_srand(p0 _Ctype_uint) (r1 _Ctype_void) { return }
-` + target.errnoDecl + "\n" + target.structDecls
+` + target.errnoDecl + "\n" + target.structDecls + cgoProbeDecls
 
 	fset := token.NewFileSet()
 	file, err := parser.ParseFile(fset, "cgotest.go", source, 0)
@@ -241,7 +280,15 @@ func cgoWrapperGolden(t *testing.T, target cgoWrapperTarget) string {
 
 	members := map[string]string{}
 	set := newCgoWrapperSet(cgoBindingTarget{goos: target.goos, library: target.library, crt: target.crt}, types.SizesFor("gc", "amd64"))
-	set.libraries = target.libraries
+	set.libraries = maps.Clone(target.libraries)
+
+	if set.libraries == nil {
+		set.libraries = map[string]string{}
+	}
+
+	for _, symbol := range []string{"go2cs_probe_pair", "go2cs_probe_pair_sum", "go2cs_probe_add_into", "go2cs_probe_tagged_double", "go2cs_probe_hfa_scale", "go2cs_probe_strtol"} {
+		set.libraries[symbol] = cgoProbeLibrary(target.goos)
+	}
 
 	if target.crt != "" {
 		members["ᴍerrno"] = cgoErrnoLocationBinding(target.crt)
@@ -268,11 +315,11 @@ func cgoWrapperGolden(t *testing.T, target cgoWrapperTarget) string {
 	// The resolver's table: every library the bindings load, each named for its -l (increment 4c).
 	var loaded []cgoSymbolLibrary
 
-	for _, name := range append([]string{target.library}, slices.Sorted(maps.Values(target.libraries))...) {
+	for _, name := range append([]string{target.library}, slices.Sorted(maps.Values(set.libraries))...) {
 		loaded = append(loaded, cgoSymbolLibrary{name: name})
 	}
 
-	members[cgoMirrorSuffix+"0 libraries"] = cgoLibrariesRegistration("cgotest", cgoLibraryTable(cgoLinkFlags{libraries: target.ldflags}, loaded))
+	members[cgoMirrorSuffix+"0 libraries"] = cgoLibrariesRegistration("cgotest", cgoLibraryTable(cgoLinkFlags{libraries: append(slices.Clone(target.ldflags), "go2csprobe")}, loaded))
 
 	return "// GoCgoWrappers." + target.goos + ".golden.cs - generated by go2cs's cgo wrapper generator for " + target.goos + ".\n" +
 		"// DO NOT EDIT: src/go2cs's TestCgoScalarWrapperGoldensAreTheGeneratorsOutput holds this file equal to the\n" +
