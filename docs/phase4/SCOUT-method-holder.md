@@ -202,3 +202,153 @@ lists of the first two lines, which no Go release can extend.
    already writes for a shadowed import alias) or a per-file alias.
 4. The analyzer of §3 as the move's red-first guard, and its diagnostic number.
 5. Whether the hand-owned leg rides the same batch (recommended: the tree does not build without it).
+
+## Amendment 2026-11-11 — the rulings, and the cut plan for the move
+
+> Appended, not rewritten: sections 1 to 9 above stand as posted. COORD ruled section 9 on 2026-11-11 (20:35Z,
+> 20:43Z, 21:06Z). This block records the rulings, measures what the owner's self-alias amendment asked for, and
+> gives the cut plan with its predictions. Nothing is cut. Read at master `742a3dbb24`.
+
+### 10. The rulings
+
+1. One holder per RECEIVER TYPE (`timeᴛTime`), declared once in `package_info.cs` with the receiver-type
+   attribute.
+2. Switched in place, so Go's declaration order stays.
+3. **The qualifier is a per-file self-alias** (the owner's amendment): where a holder must qualify a
+   package-level name of its OWN package, the file declares `using time = time_package;` and writes `time.Now()`.
+   It falls back to `time_package.X` exactly where the alias name is shadowed at the use, decided from Go's
+   scopes and never from a compile error. The alias goes through the existing CS0576 rename pre-pass
+   (`computeImportAliasRenames`), and only a file that needs it declares it.
+4. The analyzer that makes the silent cases loud is cut red first, and understands the alias form.
+5. The hand-owned leg and the `RecvGenerator` class fix ride the same batch.
+6. Each holder TYPE carries `[EditorBrowsable(Never)]`; its methods never do (C1's measurement).
+7. The move is its own batch. The `-tests` variants and the white-box bridge are measured inside it.
+
+### 11. The self-alias, measured
+
+Instrument: the scout's typed census, extended (`go/packages`, `go/types`; one run per target over `std`,
+and one over the behavioral workspace of 968 modules). For each package-level name a method body uses, it reads
+whether the holder must qualify it and why, then looks up the package's own name at the use
+(`Scope.LookupParent`), and applies the CS0576 test of `computeImportAliasRenames` to the package's own name.
+
+| `std` | linux/amd64 | windows/amd64 | darwin/amd64 | linux/arm64 |
+|---|---|---|---|---|
+| references a holder must qualify | 356 | 358 | 356 | 356 |
+| … because the name is a method of the holder (exact) | 260 | 262 | 260 | 260 |
+| … because it is a `go.builtin` member (bound) | 71 | 71 | 71 | 71 |
+| … because it is a type of namespace `go` (bound) | 25 | 25 | 25 | 25 |
+| … because it is a child namespace in view | 0 | 0 | 0 | 0 |
+| written through the alias (`time.X`) | 330 | 332 | 330 | 330 |
+| written through a RENAMED alias (`Δsync.X`) | 18 | 18 | 18 | 18 |
+| fall back to `<pkg>_package.X` | 8 | 8 | 8 | 8 |
+| methods touched | 230 | 232 | 230 | 230 |
+| files that gain the alias line (of them renamed) | 65 (7) | 67 (7) | 65 (7) | 65 (7) |
+| packages that gain it (of them renamed) | 35 (5) | 36 (5) | 35 (5) | 35 (5) |
+
+- **No reference falls back because of a local, a parameter, a result or a receiver.** A free function keeps
+  the package class and qualifies nothing, so `func Clean(path string)` never meets the alias; only method
+  bodies do. 18 methods in `std` declare a variable named like their package (`flag`, `net`, `url`, `types`,
+  `doc`), and one reference to qualify sits in such a method (`go/types`, `Checker.builtin`), outside the
+  variable's scope.
+- **The 8 fallbacks**, the same on every target:
+  - 7 in `vendor/golang.org/x/crypto/chacha20poly1305`: the package declares a TYPE named like itself, so the
+    alias would take the type's name in every holder of the file;
+  - 1 in `html/template`: `template.go` imports `text/template`, whose alias already owns the name.
+- **The renamed alias** is 18 references in 7 files of 5 packages whose own closure holds a child namespace of
+  the same name: `sync` (5), `text/template` (4), `go/build` (4), `crypto/tls` (3), `net/http` (2). There the
+  pre-pass gives `using Δsync = sync_package;`, the spelling an importer of `sync` in namespace `go` reads today.
+- **Behavioral tree**: 422 of 1,038 packages declare a method. 4 references must be qualified (1 exact, 3
+  bound), all in `package main`. So the corpus exercises none of this: the move brings its own fixtures.
+- The bound rows are upper bounds, as in section 3: arity clears most `go`-type matches. The exact row is the
+  Go source's; the emitter adds references Go did not write (section 6's named arm).
+
+**C# facts for the alias, measured** (SDK 10.0.403, LangVersion 14; three compiled cases):
+
+- With `using main = main_package;` and `using static main_package;` in one file, a holder's `main.Sort(3)` and
+  `main.Limit` bind the package class, and a bare call `main()` still binds the function. A FUNCTION named like
+  its package does not shadow the alias.
+- A TYPE named like its package does: with the alias, `this chacha c` is CS0721, because the alias names the
+  static class. The fallback form compiles and runs.
+- A parameter named like the alias binds first, with no diagnostic when its type has a member of that name:
+  the probe printed the parameter's field (2) where the package's variable holds 7. This is the silent case.
+- C# scopes a local over its whole block. The alias used before a later declaration of that name in the same
+  block is CS0841; a nested block may declare the name for itself. So the shadow test reads C#'s block, not
+  Go's point of declaration. Neither `std` nor the behavioral tree has such a reference.
+- Not measured: a package-level VARIABLE or CONSTANT named like its package. No package that qualifies a
+  reference declares one, so the plan sends that shape to the fallback.
+
+### 12. The analyzer (`GO2CS0013`, proposed number)
+
+`GO2CS0011` is taken by the `-warn` work and the internal-package warning takes its own, so this takes
+`GO2CS0013` unless COORD assigns another. It reports, as an error, inside a class marked `[GoMethodHost]`:
+
+- a simple name that binds a method of the holder, a `go.builtin` member or a type of namespace `go` while the
+  holder's package class declares a member of that name (the three silent cases of section 2);
+- **the alias arm**: in a file that declares the self-alias, a member access `time.X` where `time` binds a
+  local or a parameter and the package class declares `X`. That is the one shape in which a shadowed alias
+  compiles and reads another member.
+
+The alias arm has a known false-positive shape in correct Go: a selector through a variable named like the
+package, of a name the package also declares. `std` has 7, in two files: `flag.Value` (a field of a `*Flag`
+named `flag`; the package has the type `Value`) four times in `flag/flag.go`, and `url.User` three times in
+`net/url/url.go` (the package has the function `User`). **Proposed rule, for COORD to confirm**: a file that
+holds such a selector in a method does not take the self-alias and falls back. In `std` that is `url.go` alone
+(`flag.go` qualifies nothing), which moves 2 references from the alias to the fallback (8 becomes 10). The
+analyzer then has no false positive on converted code, and stays exact for hand-owned bodies.
+
+### 13. The cut, in order
+
+A new worktree from the master that carries batch 286. Each step is its own commit; a red commit comes first
+wherever a step changes behavior or emission.
+
+1. **Analyzer, inert on the tree**: `GO2CS0013` in `go2cs-gen` with its GenTests (the silent cases compile
+   without a diagnostic at the red commit), its registry entry and its row in `docs/DiagnosticCodes.md`. No
+   class carries `[GoMethodHost]` yet, so no existing project changes.
+2. **Generators and run time, behind the attribute**: `GoMethodHostAttribute` in golib;
+   `RecvGenerator`, `TemplateBase.TemplateHeader` and `StrGenerator` place output in the method's own class;
+   `GoMethodHosts` and `MethodSetKeep` find methods through the attribute; frame and function names
+   (`goImportPathOf`, `classifyGoSourceFrame`, `GoSyntheticPC.GoNameOf`, `GoReflect.goPackageNameOf`,
+   `RuntimePanicCheck`) map a holder to its package. GenTests and GolibTests red first.
+3. **Red for the emission**: behavioral projects for the forms the corpus lacks (a constant, a variable, a type
+   and a function named like a method; each reason to qualify; the alias, the renamed alias and each fallback;
+   method expressions and method values; a dot import; generic, pointer, value and alias-typed receivers;
+   promoted methods beside declared ones), and converter tests that state the new emission.
+4. **Converter**: the switch lines and the holder declarations; `using static` of the package class in a file
+   with a holder; qualification by rule with the self-alias; method expressions name the holder; a dot import
+   brings the namespace; the element rename and its exported aliases are removed, and each rule of section 5
+   that exists only because methods share the class is re-derived, not deleted blind.
+5. **Hand-owned leg**: the 115 files that declare extension methods, by script and then by the analyzer;
+   static-form calls of methods and reflection on a method by name (section 5).
+6. **Goldens**: every behavioral project that declares a method or names a renamed element.
+7. **`src/core`**: the seeded reconvert per target, as its own commits.
+8. **Compatibility and docs**: the generated API-compat suppressions and the `GoBreakFloor` move (section 5);
+   `ConversionStrategies` and its reference; NEWS; the contract line for C1 (`using static <pkg>` no longer
+   brings methods; a consumer uses the namespace).
+
+### 14. Predictions, stated before any reconvert
+
+- **`std`, two-seeded, one target per run**: 952 / 958 / 957 / 951 converted files differ, in 253 / 254 / 253 /
+  253 packages, plus the `package_info.cs` of each such package (243 of them on each target declare holders).
+  To be read again at the cut's own base.
+- **Line kinds, linux/amd64**: 6,000 switch lines; 848 `using static` lines; 65 alias lines; 225 declarations
+  and their references lose the `Δ`; 356 qualified references at most (330 alias, 18 renamed alias, 8
+  fallback; 10 fallback and 328 alias if section 12's rule is confirmed); 81 method expressions name a holder;
+  1,993 holder declarations in `package_info.cs`. Any other kind is a miss.
+- **Behavioral**: 429 packages (435 files) move with their goldens; `check-no-regression.ps1` reads every other
+  golden unchanged apart from the new projects.
+- **Go-visible names** (`runtime.Caller`, `FuncForPC`, panics, `reflect`): none changes.
+- **Named arm most likely to miss**: the qualification counts, for section 6's reason, and the hand-owned leg,
+  which no census of Go source can size (the `reflect` prototype read 110 errors in 4 files).
+- **Not predicted**: the `-tests` variants and the white-box bridge. They are measured inside the move, before
+  its goldens are minted.
+
+### 15. For COORD
+
+1. Confirm `GO2CS0013`, or assign the number.
+2. Confirm section 12's file rule for the analyzer's alias arm.
+3. **`package main`**: Go's `func main` is a package-level name equal to the alias, so by Go's scopes every
+   `package main` would fall back. By section 11's measurement the function does not shadow the alias in C#.
+   Recommended: a function named like its package does not force the fallback (`main.Sort(x)`); a type does.
+   The behavioral tree has 4 such references and `std` none.
+4. Who regenerates `src/core` in the batch (step 7), and where the batch sits against the linux/arm64 bank
+   waves, whose rows are read on the corpus this move rewrites.
