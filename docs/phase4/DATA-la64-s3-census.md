@@ -143,6 +143,12 @@ kernels may run 16K or 64K pages. Read the page size instead; `syscall/syscall_i
 `runtime/linux/set_vma_name_linux.cs:66` uses `(uintptr)4096` as a length, not as a page assumption: the seat judges
 it.
 
+- **Site 8, done (i9, 2026-11-10, `aaef00bef6`; COORD-accepted).** mem_linux's probe strides by `physPageSize`, and
+  its test asserts alignment to the OS page. mranges' 4096 is a range length in pure arithmetic, so it is judged and
+  kept. set_vma_name's 4096 is the probe's mmap/prctl/munmap length; the kernel rounds all three to a whole page, so
+  it is kept too. **Unmeasured: a 16 or 64 KiB kernel.** linux-x64 has 4 KiB pages, and so, unmeasured, does the arm
+  runner's generic Ubuntu kernel. On a 4 KiB kernel the old and new assertions agree, so no red is possible there.
+
 - **RECONCILE: 18 + 2 mirror types here, "30 explicit-layout mirrors in 7 files" in the design (§9).** The design
   does not state its predicate. The candidates tried at the design's own base `0bbe3ab6e5` do not reproduce 30 in 7:
   - StructLayout lines: 20 in 4 files (2 of them in comments);
@@ -234,3 +240,62 @@ layouts, but a dependency on a file S2 moves.
   a list of their own for arm64 alignment rules. Go's gc sizes align every field the same way at amd64 and arm64
   (§3's probe found no offset difference in any type it read), but nobody has measured that for GoFieldOffsets'
   callers.
+
+## Amendment, 2026-11-10: the arm64-only stubbed declarations (S3 site 9, COORD-ordered)
+
+**Why.** PartialStubGenerator gives every bodyless `partial` with no implementing part a THROWING body. The project
+then compiles clean and dies at the first call. At linux/arm64 that can happen to a declaration that only arm64
+emits: `math.archExp2` was one (9c), and no amd64 reading could see it. COORD made the class a site 9 deliverable:
+triage every arm64-only stubbed declaration as (a) bodied, (b) a legitimate Go-side stub (cite Go's file), or
+(c) a named refusal. Leave the count explained row by row.
+
+**The instrument, and why the census alone cannot answer.** G's declared-not-implemented census
+(`declaredNotImplemented_test.go`, read with every key folder since S2's `25bc6c1720`) POOLS a package's key folders
+into one population. A body that exists in only one flavour's folder therefore satisfies the name for every flavour.
+The seat ran the UNCHANGED census function over per-flavour views of `src/core`: the flat files plus only that
+flavour's key folders (goos, arch and goos-arch, the set its csproj compiles), selected with the converter's own
+`isLayoutKeyFolderName`. Control: the unfiltered view equals the census test's own reading on the same tree.
+
+| reading at | pooled (control = census test) | linux/arm64 | linux/amd64 | windows/amd64 | darwin/amd64 |
+|---|---|---|---|---|---|
+| `a719a19546` (site 9a-9d, before this triage) | 843 decl, 501 stubbed, 43 pkgs (= census) | 214 | 231 | 213 | 427 |
+| after this triage | 843 decl, 495 stubbed, 43 pkgs (= census) | 208 | 231 | 213 | 427 |
+
+**S2's +23 stubbed, explained.** S2 read 503 stubbed against master's 480 (COORD).
+- Two of the 23 were bodied before this triage: `internal/cpu.getMIDR` (site 0, `8ca192fb77`) and `math.archExp2`
+  (9c, `ebe1b5ea34`).
+- The other 21 are the pooled census's stubs in `linux-arm64/` files at `a719a19546`, one row each below.
+- 15 of the 21 are stubbed at linux/arm64 and at no other flavour; the per-flavour views compute this set
+  difference against linux/amd64 by (package, member). The other 6 are each arch's own assembly, stubbed at
+  linux/amd64 too, and S3 leaves them as they are.
+
+| # | member | Go's declaration | class | reach and disposition |
+|---|---|---|---|---|
+| 1 | hash/crc32 `castagnoliUpdate` | crc32_arm64.go:13 | (a) bodied | Reached whenever `cpu.ARM64.HasCRC32` (crc32_arm64.go:16-31), which site 0 fills from AT_HWCAP. `linux-arm64/crc32_arm64_impl.cs`: Arm.Crc32 CRC32CX/CRC32CB, the instructions crc32_arm64.s issues. |
+| 2 | hash/crc32 `ieeeUpdate` | crc32_arm64.go:14 | (a) bodied | The same for IEEE (crc32_arm64.go:34-49): CRC32X/CRC32B. |
+| 3 | internal/runtime/sys `EnableDIT` | dit_arm64.go:15 | (a) bodied | Go's own no_dit.go:11 body (false). `DITSupported` is false because HasDIT is held false (site 0, darwin ruling). The unguarded callers are GODEBUG `dataindependenttiming=1` in mstart (proc.go:1930), which never runs here, and cgocallbackg on a C thread (cgocall.go:443), which has no cgo. |
+| 4 | internal/runtime/sys `DITEnabled` | dit_arm64.go:16 | (a) bodied | no_dit.go:12 (false), as row 3. |
+| 5 | internal/runtime/sys `DisableDIT` | dit_arm64.go:17 | (a) bodied | no_dit.go:13 (no-op), as row 3. |
+| 6 | runtime `walltime` | timestub2.go:10 | (a) bodied | timestub.go:27's `time_now` calls it. time.Now does not (time/time_impl.cs reads the clock itself). `linux-arm64/timestub2_impl.cs`: DateTime.UtcNow, read as time_impl's now() reads it. |
+| 7 | runtime `load_g` | stubs_arm64.go:10 | (b) Go-side | "Called from assembly only; declared for go vet" (stubs_arm64.go:9). No Go caller, and no assembly is converted. |
+| 8 | runtime `save_g` | stubs_arm64.go:11 | (b) Go-side | As row 7. |
+| 9 | runtime `emptyfunc` | stubs_arm64.go:16 | (c) refused | No caller anywhere in Go's non-test tree. |
+| 10 | internal/cpu `getisar0` | cpu_arm64.go:30 | (c) refused | Its callers are freebsd's and openbsd's osInit (cpu_arm64_freebsd.go:11-14, cpu_arm64_openbsd.go:34), never linux's, which maps AT_HWCAP (site 0). |
+| 11 | internal/cpu `getpfr0` | cpu_arm64.go:32 | (c) refused | As row 10. |
+| 12 | x/sys/cpu `getisar0` | cpu_gc_arm64.go:9 | (c) refused | Reached only through readARM64Registers (x/sys/cpu cpu_arm64.go:65-68), which doinit calls only when readHWCAP fails on a 4.11+ kernel (cpu_linux_arm64.go:63-82). readHWCAP fails only when both the runtime's auxv AND /proc/self/auxv are unreadable. The runtime copy is always empty here (sysargs never runs), so /proc/self/auxv is the path, and only a setcap'd binary loses it. Managed code cannot issue MRS, and the kernel publishes no sysfs copy of these registers. |
+| 13 | x/sys/cpu `getisar1` | cpu_gc_arm64.go:10 | (c) refused | As row 12. |
+| 14 | x/sys/cpu `getpfr0` | cpu_gc_arm64.go:11 | (c) refused | As row 12. |
+| 15 | x/sys/cpu `getzfr0` | cpu_gc_arm64.go:12 | (c) refused | As row 12, and further behind SVE in pfr0 (cpu_arm64.go:176). |
+| 16 | runtime `asmcgocall_no_g` | stubs_arm64.go:14 | shared | Each arch's own assembly. Stubbed at linux/amd64 too, and unchanged by S3. |
+| 17 | runtime `panicBounds` | arm64 assembly | shared | As row 16. |
+| 18 | runtime `panicExtend` | arm64 assembly | shared | As row 16. |
+| 19 | runtime `spillArgs` | arm64 assembly | shared | As row 16. |
+| 20 | runtime `unspillArgs` | arm64 assembly | shared | As row 16. |
+| 21 | syscall `rawVforkSyscall` | arm64 assembly | shared | As row 16. |
+
+- **After the triage:** the pooled census's `linux-arm64/` stubs are 15 (21 less rows 1-6). 9 stubs exist only at
+  linux/arm64 (rows 7-15), all class (b) or (c).
+- **The arm leg's sweeps read the bodies:** hash/crc32 (rows 1-2), math (9c's archExp2), and crypto/subtle and
+  time (rows 3-6). A compile shows none of them, because a throw is a body.
+- **Not done here:** the instrument is a scratch test of the seat's, run and then deleted. Making the per-flavour
+  view a standing guard beside G's census is a proposal to COORD, not part of this commit.
