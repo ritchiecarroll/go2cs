@@ -70,6 +70,27 @@ type _Ctype_struct_utsname struct {
 func _Cfunc_div(p0 _Ctype_int, p1 _Ctype_int) (r1 _Ctype_div_t) { return }
 func _Cfunc_inet_ntoa(p0 _Ctype_struct_in_addr) (r1 *_Ctype_char) { return }
 func _Cfunc_uname(p0 *_Ctype_struct_utsname) (r1 _Ctype_int) { return }
+
+// struct tm: nine ints, then glibc's and darwin's two extensions, tm_gmtoff and the pointer MEMBER tm_zone
+// (increment 3b2b). time_t is C long, and cmd/cgo writes the typedef as a Go alias.
+type _Ctype_struct_tm struct {
+	tm_sec    _Ctype_int
+	tm_min    _Ctype_int
+	tm_hour   _Ctype_int
+	tm_mday   _Ctype_int
+	tm_mon    _Ctype_int
+	tm_year   _Ctype_int
+	tm_wday   _Ctype_int
+	tm_yday   _Ctype_int
+	tm_isdst  _Ctype_int
+	tm_gmtoff _Ctype_long
+	tm_zone   *_Ctype_char
+}
+
+type _Ctype_time_t = _Ctype_long
+
+func _Cfunc_gmtime_r(p0 *_Ctype_time_t, p1 *_Ctype_struct_tm) (r1 *_Ctype_struct_tm) { return }
+func _Cfunc_frexp(p0 _Ctype_double, p1 *_Ctype_int) (r1 _Ctype_double) { return }
 `
 
 const cgoDarwinStructs = `
@@ -98,6 +119,27 @@ type _Ctype_struct_utsname struct {
 func _Cfunc_div(p0 _Ctype_int, p1 _Ctype_int) (r1 _Ctype_div_t) { return }
 func _Cfunc_inet_ntoa(p0 _Ctype_struct_in_addr) (r1 *_Ctype_char) { return }
 func _Cfunc_uname(p0 *_Ctype_struct_utsname) (r1 _Ctype_int) { return }
+
+// struct tm: nine ints, then glibc's and darwin's two extensions, tm_gmtoff and the pointer MEMBER tm_zone
+// (increment 3b2b). time_t is C long, and cmd/cgo writes the typedef as a Go alias.
+type _Ctype_struct_tm struct {
+	tm_sec    _Ctype_int
+	tm_min    _Ctype_int
+	tm_hour   _Ctype_int
+	tm_mday   _Ctype_int
+	tm_mon    _Ctype_int
+	tm_year   _Ctype_int
+	tm_wday   _Ctype_int
+	tm_yday   _Ctype_int
+	tm_isdst  _Ctype_int
+	tm_gmtoff _Ctype_long
+	tm_zone   *_Ctype_char
+}
+
+type _Ctype_time_t = _Ctype_long
+
+func _Cfunc_gmtime_r(p0 *_Ctype_time_t, p1 *_Ctype_struct_tm) (r1 *_Ctype_struct_tm) { return }
+func _Cfunc_frexp(p0 _Ctype_double, p1 *_Ctype_int) (r1 _Ctype_double) { return }
 `
 
 const cgoWindowsStructs = `
@@ -138,6 +180,26 @@ func _Cfunc_div(p0 _Ctype_int, p1 _Ctype_int) (r1 _Ctype_div_t) { return }
 func _Cfunc_PtInRect(p0 *_Ctype_RECT, p1 _Ctype_POINT) (r1 _Ctype_int) { return }
 func _Cfunc_GetSystemTime(p0 *_Ctype_SYSTEMTIME) (r1 _Ctype_void) { return }
 func _Cfunc_UnionRect(p0 *_Ctype_RECT, p1 *_Ctype_RECT, p2 *_Ctype_RECT) (r1 _Ctype_int) { return }
+
+// windows' struct tm is the nine ints alone, and __time64_t is long long (increment 3b2b: a pointer to one scalar).
+type _Ctype_longlong int64
+
+type _Ctype_struct_tm struct {
+	tm_sec   _Ctype_int
+	tm_min   _Ctype_int
+	tm_hour  _Ctype_int
+	tm_mday  _Ctype_int
+	tm_mon   _Ctype_int
+	tm_year  _Ctype_int
+	tm_wday  _Ctype_int
+	tm_yday  _Ctype_int
+	tm_isdst _Ctype_int
+}
+
+type _Ctype___time64_t = _Ctype_longlong
+
+func _Cfunc__gmtime64_s(p0 *_Ctype_struct_tm, p1 *_Ctype___time64_t) (r1 _Ctype_int) { return }
+func _Cfunc_frexp(p0 _Ctype_double, p1 *_Ctype_int) (r1 _Ctype_double) { return }
 `
 
 // cgoWrapperFixture is the cgo-shaped package the golden binds, as cmd/cgo would declare it for target.

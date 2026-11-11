@@ -178,6 +178,56 @@ static unsafe partial class cgotestꓸC_package
         return (@int)(int32)r;
     }
 
+    // C._gmtime64_s, bound to ucrtbase.dll.
+    [global::System.Runtime.InteropServices.LibraryImport("ucrtbase.dll", EntryPoint = "_gmtime64_s")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial int _gmtime64_sᴍnative(nint p0, nint p1);
+
+    internal static @int _gmtime64_s(ж<struct_tm> p0, ж<longlong> p1)
+    {
+        _Ctype_struct_tmᴍ.CheckLayoutᴍ();
+
+        _Ctype_struct_tmᴍ m0 = default;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "_gmtime64_s", out nuint n0);
+        nint a0 = (nint)n0;
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            ᴍin__Ctype_struct_tmᴍ(ref m0, p0.Value);
+            a0 = (nint)(&m0);
+        }
+
+        long m1 = default;
+        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.StructPointer(p1, "_gmtime64_s", out nuint n1);
+        nint a1 = (nint)n1;
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m1 = (int64)p1.Value;
+            a1 = (nint)(&m1);
+        }
+
+        int r;
+        global::go.runtime_package.syscallEntersyscall();
+
+        try
+        {
+            r = _gmtime64_sᴍnative(a0, a1);
+        }
+        finally
+        {
+            global::go.runtime_package.syscallExitsyscall();
+        }
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            ᴍout__Ctype_struct_tmᴍ(ref p0.Value, m0);
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
+            p1.Value = (longlong)(int64)m1;
+
+        return (@int)(int32)r;
+    }
+
     // C.abs, bound to ucrtbase.dll.
     [global::System.Runtime.InteropServices.LibraryImport("ucrtbase.dll", EntryPoint = "abs")]
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
@@ -256,6 +306,41 @@ static unsafe partial class cgotestꓸC_package
             err = (global::go.syscall_package.Errno)(uintptr)(nuint)(uint)errno;
 
         return ((@double)(float64)r, err);
+    }
+
+    // C.frexp, bound to ucrtbase.dll.
+    [global::System.Runtime.InteropServices.LibraryImport("ucrtbase.dll", EntryPoint = "frexp")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial double frexpᴍnative(double p0, nint p1);
+
+    internal static @double frexp(@double p0, ж<@int> p1)
+    {
+        int m1 = default;
+        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.StructPointer(p1, "frexp", out nuint n1);
+        nint a1 = (nint)n1;
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m1 = (int32)p1.Value;
+            a1 = (nint)(&m1);
+        }
+
+        double r;
+        global::go.runtime_package.syscallEntersyscall();
+
+        try
+        {
+            r = frexpᴍnative((float64)p0, a1);
+        }
+        finally
+        {
+            global::go.runtime_package.syscallExitsyscall();
+        }
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
+            p1.Value = (@int)(int32)m1;
+
+        return (@double)(float64)r;
     }
 
     // C.labs, bound to ucrtbase.dll.
@@ -382,6 +467,39 @@ static unsafe partial class cgotestꓸC_package
         }
     }
 
+    [global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit, Size = 36)]
+    internal struct _Ctype_struct_tmᴍ
+    {
+        [global::System.Runtime.InteropServices.FieldOffset(0)] public int tm_sec;
+        [global::System.Runtime.InteropServices.FieldOffset(4)] public int tm_min;
+        [global::System.Runtime.InteropServices.FieldOffset(8)] public int tm_hour;
+        [global::System.Runtime.InteropServices.FieldOffset(12)] public int tm_mday;
+        [global::System.Runtime.InteropServices.FieldOffset(16)] public int tm_mon;
+        [global::System.Runtime.InteropServices.FieldOffset(20)] public int tm_year;
+        [global::System.Runtime.InteropServices.FieldOffset(24)] public int tm_wday;
+        [global::System.Runtime.InteropServices.FieldOffset(28)] public int tm_yday;
+        [global::System.Runtime.InteropServices.FieldOffset(32)] public int tm_isdst;
+
+        internal static void CheckLayoutᴍ()
+        {
+            Holdᴍ("tm_sec", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("tm_min", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("tm_hour", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("tm_mday", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("tm_mon", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("tm_year", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("tm_wday", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("tm_yday", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("tm_isdst", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+        }
+
+        private static void Holdᴍ(string member, string clrType, int clrSize, int cSize)
+        {
+            if (clrSize != cSize)
+                throw new global::System.InvalidOperationException($"cgo mirror _Ctype_struct_tm: member {member} is {clrSize} bytes as {clrType} and {cSize} bytes in C, so the mirror cannot cross");
+        }
+    }
+
     [global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit, Size = 8)]
     internal struct _Ctype_div_tᴍ
     {
@@ -467,6 +585,33 @@ static unsafe partial class cgotestꓸC_package
     {
         v.quot = (@int)(int32)m.quot;
         v.rem = (@int)(int32)m.rem;
+    }
+
+    // _Ctype_struct_tm's copy-in and copy-out, member by member (§5.2).
+    private static void ᴍin__Ctype_struct_tmᴍ(ref _Ctype_struct_tmᴍ m, in struct_tm v)
+    {
+        m.tm_sec = (int32)v.tm_sec;
+        m.tm_min = (int32)v.tm_min;
+        m.tm_hour = (int32)v.tm_hour;
+        m.tm_mday = (int32)v.tm_mday;
+        m.tm_mon = (int32)v.tm_mon;
+        m.tm_year = (int32)v.tm_year;
+        m.tm_wday = (int32)v.tm_wday;
+        m.tm_yday = (int32)v.tm_yday;
+        m.tm_isdst = (int32)v.tm_isdst;
+    }
+
+    private static void ᴍout__Ctype_struct_tmᴍ(ref struct_tm v, in _Ctype_struct_tmᴍ m)
+    {
+        v.tm_sec = (@int)(int32)m.tm_sec;
+        v.tm_min = (@int)(int32)m.tm_min;
+        v.tm_hour = (@int)(int32)m.tm_hour;
+        v.tm_mday = (@int)(int32)m.tm_mday;
+        v.tm_mon = (@int)(int32)m.tm_mon;
+        v.tm_year = (@int)(int32)m.tm_year;
+        v.tm_wday = (@int)(int32)m.tm_wday;
+        v.tm_yday = (@int)(int32)m.tm_yday;
+        v.tm_isdst = (@int)(int32)m.tm_isdst;
     }
 
     // The calling thread's errno slot in ucrtbase.dll, the C runtime the bound library uses: on windows SetLastError
