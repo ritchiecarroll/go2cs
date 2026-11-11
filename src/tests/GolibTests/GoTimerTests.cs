@@ -162,10 +162,14 @@ public class GoTimerTests
     // The reason the queue exists: a 5 ms deadline fired on the windows tick read 10-13 ms late. The median of
     // twenty firings stays under the probe's bar for the I/O rows.
     //
-    // A MEASUREMENT rides it on macOS (G, 2026-11-10): each firing is paired with the test's own kernel wait over
-    // the same 5 ms, taken on this thread while the timer is armed, and the pairs are printed. The hosted osx-arm64
-    // runner serves a 5 ms wait either on time or about 2.5 ms late, for Go's own runtime as well, so the absolute
-    // bar reads which of the two held. The bar itself is unchanged here.
+    // On macOS the bar is RELATIVE to the host (G, 2026-11-10): each firing is paired with the test's own kernel
+    // wait over the same 5 ms, taken on this thread while the timer is armed, and the median of the per-pair
+    // difference stays under the bar. The hosted osx-arm64 runner serves a 5 ms wait anywhere from on time to about
+    // 2.6 ms late, for Go's own runtime as well, so the absolute bar read the host there and failed 3 of 13 full
+    // runs. The pairs do not: in one full run the host's wait read 0.069 to 2.602 ms late and every GoTimer firing
+    // stood within 0.103 ms of its pair. A timer that loses the short wait is later than its pair by the coarse
+    // wait's whole error, which is what the bar is for. Where the host's wait gives no reading (linux, windows, or
+    // a wait unanswered) the absolute bar holds.
     [TestMethod]
     public void AFiringIsCloseToItsDueTime()
     {
@@ -189,6 +193,8 @@ public class GoTimerTests
             late.Add((firedAt - due) / 1e6);
         }
 
+        double? beyondHostMedian = null;
+
         if (hostLate.Count == late.Count)
         {
             List<double> beyondHost = late.Select((value, i) => value - hostLate[i]).ToList();
@@ -197,13 +203,14 @@ public class GoTimerTests
 
             hostLate.Sort();
             beyondHost.Sort();
+            beyondHostMedian = beyondHost[beyondHost.Count / 2];
 
             Console.WriteLine($"host 5 ms kernel wait lateness, ms: min {hostLate[0]:F3} median {hostLate[hostLate.Count / 2]:F3} max {hostLate[^1]:F3}");
-            Console.WriteLine($"GoTimer beyond the host's wait, per pair, ms: min {beyondHost[0]:F3} median {beyondHost[beyondHost.Count / 2]:F3} max {beyondHost[^1]:F3}");
+            Console.WriteLine($"GoTimer beyond the host's wait, per pair, ms: min {beyondHost[0]:F3} median {beyondHostMedian:F3} max {beyondHost[^1]:F3}");
         }
-        else
+        else if (OperatingSystem.IsMacOS())
         {
-            Console.WriteLine($"host 5 ms kernel wait: {hostLate.Count} of {late.Count} waits answered, no pairs");
+            Console.WriteLine($"host 5 ms kernel wait: {hostLate.Count} of {late.Count} waits answered, no pairs: the absolute bar holds");
         }
 
         late.Sort();
@@ -211,7 +218,11 @@ public class GoTimerTests
 
         Console.WriteLine($"GoTimer 5 ms lateness, ms: min {late[0]:F3} median {median:F3} max {late[^1]:F3}");
         Assert.IsTrue(late[0] >= 0, $"a timer fired {-late[0]:F3} ms EARLY");
-        Assert.IsTrue(median < 1.5, $"median lateness {median:F3} ms");
+
+        if (beyondHostMedian is double beyond)
+            Assert.IsTrue(beyond < 1.5, $"median lateness beyond the host's own wait {beyond:F3} ms (absolute median {median:F3} ms)");
+        else
+            Assert.IsTrue(median < 1.5, $"median lateness {median:F3} ms");
     }
 
     // The host's own short wait on macOS: a one-shot kqueue EVFILT_TIMER with NOTE_CRITICAL (sys/event.h), made and
