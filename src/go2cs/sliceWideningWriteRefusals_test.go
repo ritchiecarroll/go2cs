@@ -374,3 +374,40 @@ func TestSliceWideningGateExaminesEveryWidenedArgument(t *testing.T) {
 			widened, len(examined), emitted)
 	}
 }
+
+// TestRecurseSkipsASliceWideningRefusal: under -recurse a package refused with GO2CS2006 is skipped like any other
+// pre-emission refusal (recurseRefusal.go): it gets no project, the rest of the module converts, and the run ends
+// nonzero naming it with its code.
+func TestRecurseSkipsASliceWideningRefusal(t *testing.T) {
+	module := t.TempDir()
+
+	writeModuleFiles(t, module, map[string]string{
+		"go.mod":             "module example.com/rw\n\ngo 1.24\n",
+		"main.go":            "package main\n\nimport (\n\t\"example.com/rw/other\"\n\t\"example.com/rw/refused\"\n)\n\nfunc main() {\n\tother.Hello()\n\trefused.Run()\n}\n",
+		"refused/refused.go": strings.Replace(strings.Replace(sliceWideningReverseRepro, "package main", "package refused", 1), "func main() {", "func Run() {", 1),
+		"other/other.go":     "package other\n\nimport \"fmt\"\n\nfunc Hello() { fmt.Println(\"hello\") }\n",
+	})
+
+	out := t.TempDir()
+	output, exit := runCLIExit(t, module, "-recurse", "-go2cspath", t.TempDir(), ".", out)
+
+	if exit == 0 {
+		t.Errorf("exit 0; want nonzero, since a package was refused\n%s", output)
+	}
+
+	root := filepath.Join(out, "src", "example.com", "rw")
+
+	if !hasProject(t, filepath.Join(root, "other")) {
+		t.Errorf("other/ has no project; want it converted even though refused/ was refused\n%s", output)
+	}
+
+	if hasProject(t, filepath.Join(root, "refused")) {
+		t.Errorf("refused/ has a project; want none, since it was refused")
+	}
+
+	for _, want := range []string{"error GO2CS2006", "  example.com/rw/refused  GO2CS2006"} {
+		if !strings.Contains(output, want) {
+			t.Errorf("output does not contain %q\n%s", want, output)
+		}
+	}
+}

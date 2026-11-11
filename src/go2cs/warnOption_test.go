@@ -30,6 +30,7 @@ func TestWarnFlagAllowsOnlyLoudCodes(t *testing.T) {
 		diagnosticManualTypeReceiverRefused:   "GO2CS0008",
 		diagnosticGenericInstantiationRefused: "retired",
 		diagnosticNonSelfProxyRefused:         "not loud",
+		diagnosticSliceWideningRefused:        "silent",
 	} {
 		if _, err := parseWarnCodes(code); err == nil || !strings.Contains(err.Error(), "cannot downgrade "+code) || !strings.Contains(err.Error(), reason) {
 			t.Errorf("-warn %s: error %v, want it to refuse %s naming %q", code, err, code, reason)

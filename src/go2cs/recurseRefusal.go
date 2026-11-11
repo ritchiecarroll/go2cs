@@ -15,9 +15,9 @@ import (
 	"strings"
 )
 
-// A package refused at a pre-emission gate (GO2CS2001 cgo, GO2CS2002, GO2CS2003, GO2CS2005) gets no project. A
-// single-package conversion has nothing else to convert, so the refusal is fatal there, as it always was. Under
-// -recurse one refused package used to end the whole run, and every package queued behind it went unconverted. So
+// A package refused at a pre-emission gate (GO2CS2001 cgo, GO2CS2002, GO2CS2003, GO2CS2005, GO2CS2006) gets no
+// project. A single-package conversion has nothing else to convert, so the refusal is fatal there, as it always was.
+// Under -recurse one refused package used to end the whole run, and every package queued behind it went unconverted. So
 // -recurse skips it instead: its diagnostics print as errors, the rest of the module converts, and the run ends
 // nonzero naming the refused package and each converted package that imports it (those cannot build until it
 // converts). A code downgraded by -warn never reaches a gate, so its package is not refused at all. A package that

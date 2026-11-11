@@ -350,7 +350,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// (sliceWideningWriteRefusals.go). Last, so the gates above refuse exactly as before.
 		if refusal := refuseSliceWideningWrites(pkg); refusal != nil {
 			refusal.report()
-			log.Fatalf("Refusing to convert: %s\n", refusal)
+			return refusePackage(options, diagnosticSliceWideningRefused, refusal)
 		}
 
 		var projectName, projectFileName, projectFileContents string

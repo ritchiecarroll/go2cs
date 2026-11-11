@@ -37,6 +37,7 @@ var warnRefusedCodes = map[string]string{
 	diagnosticManualTypeReceiverRefused:   "its downgraded site has no loud form: the conversion would take the receiver's value through a box-from-value record, which go2cs-gen refuses (GO2CS0008)",
 	diagnosticGenericInstantiationRefused: "retired, so it is never reported",
 	diagnosticNonSelfProxyRefused:         "its downgraded sites are not loud: most would not compile, and a zero value boxed to an interface would be silently wrong",
+	diagnosticSliceWideningRefused:        "its downgraded sites are silent: the callee's writes go to an element-wise copy and the program runs on with a wrong result",
 }
 
 // parseWarnCodes reads -warn's comma-separated list. An unknown code, or a known code that is not allowed, is an
