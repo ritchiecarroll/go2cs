@@ -147,19 +147,50 @@ func platformLayoutPath(packageOutputPath string, target string, fileName string
 	return filepath.Join(platformLayoutDir(packageOutputPath, target, fileName), fileName)
 }
 
+// heldReviewSiblingPath returns the copy of `<baseName>.cs.auto` the tree already holds in one of the target's key
+// folders, finest first. It is platformLayoutDir's probe without the SOURCE-folder condition: a review sibling is
+// never compiled, so the multi-target merge splits one into key folders that may hold nothing else
+// (mergeReviewSiblings; crypto/internal/fips140/subtle's amd64/ and linux-arm64/), and a probe that asked for a `.cs`
+// beside it would send a single-target reconvert's flavour flat, over nothing or over another target's. Only a NESTED
+// PACKAGE of a key's name is skipped (`internal/syscall/windows`): a file there is that package's.
+func heldReviewSiblingPath(packageOutputPath string, target string, baseName string) (string, bool) {
+	for _, folder := range platformLayoutFolders(target) {
+		if isNestedPackageFolder(packageOutputPath, folder) {
+			continue
+		}
+
+		siblingPath := filepath.Join(packageOutputPath, folder, baseName+".cs.auto")
+
+		if info, err := os.Stat(siblingPath); err == nil && info.Mode().IsRegular() {
+			return siblingPath, true
+		}
+	}
+
+	return "", false
+}
+
 // reviewSiblingLayoutPath returns where a whole-file hand-own's `<baseName>.cs.auto` review sibling is written: the
 // target's key folder when the tree already holds the sibling there, and otherwise beside its hand-owned `.cs`, flat
-// or per-GOOS. The first arm is a FLAT hand-own whose emission differs by GOOS (runtime/runtime2.cs): the multi-target
-// merge keeps one sibling per key folder for it (mergeReviewSiblings), and a single-target reconvert must write its
-// flavour back there rather than lay a flat sibling beside them.
+// or per-GOOS. The first arm is a FLAT hand-own whose emission differs by target (runtime/runtime2.cs): the
+// multi-target merge keeps one sibling per key folder for it (mergeReviewSiblings), and a single-target reconvert must
+// write its flavour back there rather than lay a flat sibling beside them.
 func reviewSiblingLayoutPath(packageOutputPath string, target string, baseName string) string {
-	sibling := baseName + ".cs.auto"
-
-	if dir := platformLayoutDir(packageOutputPath, target, sibling); dir != packageOutputPath {
-		return filepath.Join(dir, sibling)
+	if held, ok := heldReviewSiblingPath(packageOutputPath, target, baseName); ok {
+		return held
 	}
 
 	return platformLayoutPath(packageOutputPath, target, baseName+".cs") + ".auto"
+}
+
+// flatReviewSiblingLayoutPath is reviewSiblingLayoutPath for the two writers that fall back to a FLAT sibling rather
+// than to one beside the hand-owned `.cs`: a fully hand-owned package's (autoSiblingOperations.go) and a test file's
+// (testConversion.go).
+func flatReviewSiblingLayoutPath(packageOutputPath string, target string, baseName string) string {
+	if held, ok := heldReviewSiblingPath(packageOutputPath, target, baseName); ok {
+		return held
+	}
+
+	return filepath.Join(packageOutputPath, baseName+".cs.auto")
 }
 
 // platformPackageInfoPath resolves the `package_info.cs` a CONSUMER of an already-converted package

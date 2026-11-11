@@ -56,9 +56,10 @@
 // (docs/phase4/DATA-la64-s3-census.md §3) read Go's own layouts at both arches and found FdSet 128,
 // Flock_t 32, Statfs_t 120, Sysinfo_t 112, Timex 208, Rusage 144 and Utsname 390 the same size with every field
 // at the same offset, so the mirrors serve linux/arm64 unchanged and their `LinuxAmd64` names are
-// historical. Select's SYSCALL is the exception, not its layout: arm64 has no select(2), so Select
-// at linux/arm64 is S3 site 6. A Linux arch whose layouts differ needs its own mirrors; darwin declares Select,
-// Statfs and Fstatfs too, with layouts of its own and bodies that are not defective here, which is
+// historical. Select's SYSCALL is the exception, not its layout. arm64 has no select(2), and Go's arm64
+// Select is pselect6 with the Timeval converted to a fresh Timespec, so the trap and the timeout live in
+// each arch's selectTrap (S3 site 6) and the fd_set mirrors stay here. A Linux arch whose layouts
+// differ needs its own mirrors; darwin declares Select, Statfs and Fstatfs too, with layouts of its own and bodies that are not defective here, which is
 // exactly what the goosLinux scoping protects.
 
 using System;
@@ -94,8 +95,8 @@ partial class syscall_package
     // docs/phase4/DATA-la64-s3-census.md §3). It is declared here, in the file both linux builds
     // compile, because Select's timeout, Timex's Time and the wait4 mirror's two Rusage times all
     // read it; it was NativeTimevalLinuxAmd64 in zsyscall_linux_amd64_impl.cs, which only the
-    // linux/amd64 build compiles (S3 site b). Select's timeout therefore crosses in a stack buffer
-    // too, which is what the blocking shape needs.
+    // linux/amd64 build compiles (S3 site b). Select's timeout crosses in one at linux/amd64 (its
+    // selectTrap), a stack buffer, which is what the blocking shape needs.
     [StructLayout(LayoutKind.Sequential)]
     private struct NativeTimeval
     {
@@ -108,26 +109,21 @@ partial class syscall_package
             throw new InvalidOperationException($"syscall: NativeFdSetLinuxAmd64 is {sizeof(NativeFdSetLinuxAmd64)} bytes, the kernel's fd_set is {nativeFdSetSizeLinuxAmd64}");
 
         NativeFdSetLinuxAmd64 nativeR = default, nativeW = default, nativeE = default;
-        NativeTimeval nativeTimeout = default;
 
         seedNativeFdSet(Ꮡr, ref nativeR);
         seedNativeFdSet(Ꮡw, ref nativeW);
         seedNativeFdSet(Ꮡe, ref nativeE);
-
-        if (Ꮡtimeout is not null && !Ꮡtimeout.IsNilPointer) {
-            ref var tv = ref Ꮡtimeout.Value;
-            nativeTimeout.Sec = tv.Sec;
-            nativeTimeout.Usec = tv.Usec;
-        }
 
         // A nil set reaches the kernel as address 0 in Go — "do not watch this class" — and a nil
         // timeout means block forever. Both must stay nil rather than becoming a zeroed buffer.
         uintptr rAddr = Ꮡr is null || Ꮡr.IsNilPointer ? (uintptr)0 : (uintptr)(nint)(&nativeR);
         uintptr wAddr = Ꮡw is null || Ꮡw.IsNilPointer ? (uintptr)0 : (uintptr)(nint)(&nativeW);
         uintptr eAddr = Ꮡe is null || Ꮡe.IsNilPointer ? (uintptr)0 : (uintptr)(nint)(&nativeE);
-        uintptr timeoutAddr = Ꮡtimeout is null || Ꮡtimeout.IsNilPointer ? (uintptr)0 : (uintptr)(nint)(&nativeTimeout);
 
-        var (r0, _, e1) = Syscall6(SYS_SELECT, (uintptr)nfd, rAddr, wAddr, eAddr, timeoutAddr, 0);
+        // The trap and the timeout belong to each arch (S3 site 6). selectTrap is select(2), with the
+        // caller's Timeval written back, in linux-amd64/zsyscall_linux_amd64_impl.cs. It is pselect6, with
+        // Go's temporary Timespec, in linux-arm64/zsyscall_linux_arm64_impl.cs.
+        var (r0, e1) = selectTrap((uintptr)nfd, rAddr, wAddr, eAddr, Ꮡtimeout);
         nint n = (nint)r0;
 
         // Unconditional, per the file header: the mirrors were seeded from the caller, so this is
@@ -136,12 +132,6 @@ partial class syscall_package
         copyNativeFdSet(ref nativeR, Ꮡr);
         copyNativeFdSet(ref nativeW, Ꮡw);
         copyNativeFdSet(ref nativeE, Ꮡe);
-
-        if (Ꮡtimeout is not null && !Ꮡtimeout.IsNilPointer) {
-            ref var tv = ref Ꮡtimeout.Value;
-            tv.Sec = nativeTimeout.Sec;
-            tv.Usec = nativeTimeout.Usec;
-        }
 
         error err = default!;
         if (e1 != 0) {

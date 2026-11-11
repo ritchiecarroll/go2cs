@@ -283,23 +283,139 @@ func TestMergeSplitsAFlatHandOwnsReviewSiblingWhenItsFlavoursDiffer(t *testing.T
 	}
 }
 
-// A package with no per-GOOS source folders cannot hold a per-GOOS sibling: a single-target reconvert routes a file
-// into <goos>/ only where that folder is a source folder (isPlatformSourceFolder). There the merge keeps the first
-// converting target's flavour flat, as before, and NAMES the package rather than hiding the difference.
+// subtleSiblingSeed is crypto/internal/fips140/subtle's shape for the review-sibling split: a package with NO key
+// source folder, a FLAT whole-file hand-own, xor_generic.cs, and its review sibling wherever `siblings` puts it.
+func subtleSiblingSeed(siblings map[string]string) map[string]string {
+	seed := map[string]string{
+		"subtle/subtle.csproj":  "<Project />",
+		"subtle/xor.cs":         "seed source",
+		"subtle/xor_generic.cs": "hand-owned, flat",
+	}
+
+	for relPath, contents := range siblings {
+		seed[relPath] = contents
+	}
+
+	return seed
+}
+
+// convertSubtleIn has every target convert subtle: each rewrites the shared source, so the merge reads the package as
+// converted there, and writes its flavour of the review sibling at relPath(target).
+func convertSubtleIn(t *testing.T, targets []string, stages []string, relPath func(target string) string, flavour func(target string) string) {
+	t.Helper()
+
+	for i, target := range targets {
+		writeTestFile(t, filepath.Join(stages[i], "core", "subtle", "xor.cs"), "source")
+		writeTestFile(t, filepath.Join(stages[i], "core", filepath.FromSlash(relPath(target))), flavour(target))
+	}
+}
+
+// A review sibling is never compiled, so the key folder it is split into needs no source of its own.
+// crypto/internal/fips140/subtle's xor_generic.cs is a flat hand-own whose emission differs by GOARCH in one line, and
+// the package holds no key source folder. The merge used to split only into SOURCE folders, so it kept the first
+// target's flavour flat and named the package, and a linux/arm64 reconvert then wrote its own flavour over the flat
+// sibling (the linux/arm64 flavour's single-target residual). Each class of identical flavours now goes to the key the
+// lattice homes it at, in a folder that holds the sibling alone; the split shape is stable under a second merge; and
+// flavours that converge fold back to one flat sibling, leaving no empty folder behind.
+func TestMergeSplitsAReviewSiblingIntoKeyFoldersThatHoldNoSource(t *testing.T) {
+	targets := []string{"windows/amd64", "linux/amd64", "darwin/amd64", "linux/arm64"}
+	flat := func(string) string { return "subtle/xor_generic.cs.auto" }
+	byArch := func(target string) string { return archOfTarget(target) + " flavour" }
+
+	// Where the single-target routing writes each target's flavour once the tree holds the split shape.
+	keyed := func(target string) string {
+		if target == "linux/arm64" {
+			return "subtle/linux-arm64/xor_generic.cs.auto"
+		}
+
+		return "subtle/amd64/xor_generic.cs.auto"
+	}
+
+	splitSeed := map[string]string{
+		"subtle/amd64/xor_generic.cs.auto":       "amd64 flavour",
+		"subtle/linux-arm64/xor_generic.cs.auto": "arm64 flavour",
+	}
+
+	assertSplit := func(arm string, coreDir string, residual map[string]string) {
+		t.Helper()
+
+		for relPath, want := range splitSeed {
+			if got := readCompanionFile(t, filepath.Join(coreDir, filepath.FromSlash(relPath))); got != want {
+				t.Errorf("%s root %s = %q, want %q", arm, relPath, got, want)
+			}
+		}
+
+		if companionFileExists(t, filepath.Join(coreDir, "subtle", "xor_generic.cs.auto")) {
+			t.Errorf("%s the flat sibling survived a split: the root holds both shapes", arm)
+		}
+
+		if note, named := residual["subtle"]; named {
+			t.Errorf("%s the package was named for a difference the merge can now express: %q", arm, note)
+		}
+	}
+
+	// (i) The committed shape: one flat sibling. Each target emits it flat, in its GOARCH's flavour.
+	coreDir, stages := newCompanionStages(t, targets, subtleSiblingSeed(map[string]string{"subtle/xor_generic.cs.auto": "seed flat sibling"}))
+	convertSubtleIn(t, targets, stages, flat, byArch)
+
+	_, residual, _, err := mergeCompanionArtifacts(coreDir, targets, snapshotCompanionStages(t, targets, stages))
+
+	if err != nil {
+		t.Fatalf("(i) mergeCompanionArtifacts failed: %v", err)
+	}
+
+	assertSplit("(i)", coreDir, residual)
+
+	// (ii) The split shape, flavours unchanged: each target writes its own key folder's sibling. Nothing moves.
+	coreDir, stages = newCompanionStages(t, targets, subtleSiblingSeed(splitSeed))
+	convertSubtleIn(t, targets, stages, keyed, byArch)
+
+	if _, residual, _, err = mergeCompanionArtifacts(coreDir, targets, snapshotCompanionStages(t, targets, stages)); err != nil {
+		t.Fatalf("(ii) mergeCompanionArtifacts failed: %v", err)
+	}
+
+	assertSplit("(ii)", coreDir, residual)
+
+	// (iii) The split shape, after the flavours converge: one flat sibling again, and the folders that held nothing
+	// else are gone with their copies.
+	coreDir, stages = newCompanionStages(t, targets, subtleSiblingSeed(splitSeed))
+	convertSubtleIn(t, targets, stages, keyed, func(string) string { return "one flavour" })
+
+	if _, _, _, err = mergeCompanionArtifacts(coreDir, targets, snapshotCompanionStages(t, targets, stages)); err != nil {
+		t.Fatalf("(iii) mergeCompanionArtifacts failed: %v", err)
+	}
+
+	if got := readCompanionFile(t, filepath.Join(coreDir, "subtle", "xor_generic.cs.auto")); got != "one flavour" {
+		t.Errorf("(iii) root subtle/xor_generic.cs.auto = %q, want the agreed flavour flat", got)
+	}
+
+	for _, folder := range []string{"amd64", "linux-arm64"} {
+		if _, err := os.Stat(filepath.Join(coreDir, "subtle", folder)); !os.IsNotExist(err) {
+			t.Errorf("(iii) subtle/%s survived flavours that agree (stat: %v)", folder, err)
+		}
+	}
+}
+
+// The one difference the merge still cannot express: a flavour's key folder is a NESTED PACKAGE of the same name
+// (`internal/syscall/windows`), whose directory is another package's and is never written into. There the merge keeps
+// the first converting target's flavour flat and NAMES the package rather than hiding the difference; no other key
+// folder gains a copy, so the root never holds both shapes.
 func TestMergeNamesADifferingReviewSiblingItCannotSplit(t *testing.T) {
 	targets := []string{"windows/amd64", "linux/amd64", "darwin/amd64"}
 	seed := map[string]string{
-		"time/time.csproj":  "<Project />",
-		"time/sleep.cs":     "seed source",
-		"time/tick.cs":      "hand-owned, flat",
-		"time/tick.cs.auto": "seed sibling",
+		"internal/syscall/syscall.csproj":         "<Project />",
+		"internal/syscall/sleep.cs":               "seed source",
+		"internal/syscall/tick.cs":                "hand-owned, flat",
+		"internal/syscall/tick.cs.auto":           "seed sibling",
+		"internal/syscall/windows/windows.csproj": "<Project />",
+		"internal/syscall/windows/zsyscall.cs":    "seed nested source",
 	}
 
 	coreDir, stages := newCompanionStages(t, targets, seed)
 
 	for i, target := range targets {
-		writeTestFile(t, filepath.Join(stages[i], "core", "time", "sleep.cs"), "source")
-		writeTestFile(t, filepath.Join(stages[i], "core", "time", "tick.cs.auto"), goosOfTarget(target)+" flavour")
+		writeTestFile(t, filepath.Join(stages[i], "core", "internal", "syscall", "sleep.cs"), "source")
+		writeTestFile(t, filepath.Join(stages[i], "core", "internal", "syscall", "tick.cs.auto"), goosOfTarget(target)+" flavour")
 	}
 
 	_, residual, _, err := mergeCompanionArtifacts(coreDir, targets, snapshotCompanionStages(t, targets, stages))
@@ -308,11 +424,19 @@ func TestMergeNamesADifferingReviewSiblingItCannotSplit(t *testing.T) {
 		t.Fatalf("mergeCompanionArtifacts failed: %v", err)
 	}
 
-	if got := readCompanionFile(t, filepath.Join(coreDir, "time", "tick.cs.auto")); got != "windows flavour" {
-		t.Errorf("root time/tick.cs.auto = %q, want the first converting target's flavour", got)
+	packageDir := filepath.Join(coreDir, "internal", "syscall")
+
+	if got := readCompanionFile(t, filepath.Join(packageDir, "tick.cs.auto")); got != "windows flavour" {
+		t.Errorf("root internal/syscall/tick.cs.auto = %q, want the first converting target's flavour", got)
 	}
 
-	if note := residual["time"]; !strings.Contains(note, "tick.cs.auto") {
-		t.Errorf("the unsplittable difference was not named: residual[time] = %q", note)
+	for _, goos := range []string{"windows", "linux", "darwin"} {
+		if companionFileExists(t, filepath.Join(packageDir, goos, "tick.cs.auto")) {
+			t.Errorf("internal/syscall/%s/tick.cs.auto was written beside a sibling kept flat", goos)
+		}
+	}
+
+	if note := residual["internal/syscall"]; !strings.Contains(note, "tick.cs.auto") {
+		t.Errorf("the unsplittable difference was not named: residual[internal/syscall] = %q", note)
 	}
 }

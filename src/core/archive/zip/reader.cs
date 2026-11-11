@@ -802,6 +802,10 @@ partial interface fileInfoDirEntry :
     fs.FileInfo,
     fs.DirEntry
 {
+    // IsDir is declared by fs.FileInfo and fs.DirEntry
+    new bool IsDir();
+    // Name is declared by fs.FileInfo and fs.DirEntry
+    new @string Name();
 }
 
 internal static (fileInfoDirEntry, error) stat(this ж<fileListEntry> Ꮡf) {

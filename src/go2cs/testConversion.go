@@ -3025,6 +3025,11 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 		return nil, nil, refusal
 	}
 
+	if refusal := refuseNonSelfConstraintProxies(pkg); refusal != nil {
+		refusal.report()
+		return nil, nil, refusal
+	}
+
 	if refusal := refuseManualTypeReceiverOperands(pkg, goosOfTarget(options.targetPlatform)); refusal != nil {
 		refusal.report()
 		return nil, nil, refusal
@@ -3295,7 +3300,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 			// emit the auto conversion to the `.cs.auto` review sibling, leaving the marked `.cs`
 			// untouched. The HAND-OWNED `.cs` is the compile item; the `.cs.auto` sibling never is.
 			// The tree's own per-GOOS sibling when it holds one there (reviewSiblingLayoutPath), flat otherwise.
-			outputName := platformLayoutPath(outputPath, options.targetPlatform, baseName+".cs.auto")
+			outputName := flatReviewSiblingLayoutPath(outputPath, options.targetPlatform, baseName)
 			visitor.finalizePositionMap(outputName)
 			visitor.alignEmittedTrailingComments()
 

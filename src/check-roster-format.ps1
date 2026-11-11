@@ -235,13 +235,46 @@ Assert-Equal 'per-RID expectation: the banked RID reads the segment' '7/3/darwin
 Assert-Equal 'per-RID expectation: no RID given reads the segment, as before' 7 (Get-RosterRowExpectation -Row $ridRow -Goos 'darwin').Expected
 Assert-Equal 'per-RID expectation: a plain darwin row ignores the RID' 'darwin' (Get-RosterRowExpectation -Row $byName['dar/pkg'] -Goos 'darwin' -Rid 'osx-x64').Source
 Assert-Equal 'per-RID expectation: windows still reads the columns' 'columns' (Get-RosterRowExpectation -Row $ridRow -Goos 'windows' -Rid 'osx-x64').Source
-Assert-Throws 'per-RID note: a note on a linux annotation is refused by name' {
+Assert-Throws 'per-RID note: a linux note naming mac RIDs is refused by name' {
     Read-FixtureRoster @("| [``ridl/pkg``](https://x/ridl) | 3 |  | Linux. $dot linux: 3 (osx-arm64; osx-x64: 4) $dot [proof](p.md) |")
-} 'per-RID note on its ''linux'' annotation'
+} 'linux annotation names osx-arm64 and osx-x64'
 Assert-Throws 'per-RID note: a note naming one RID twice is refused' {
     Read-FixtureRoster @("| [``rid2/pkg``](https://x/rid2) | 3 |  | Twice. $dot darwin: 3 (osx-x64; osx-x64: 4) $dot [proof](p.md) |")
 } 'twice'
-Assert-Equal 'per-RID note: an unknown RID is not a note, so the segment is prose' 0 (Read-FixtureRoster @("| [``ridu/pkg``](https://x/ridu) | 3 |  | Prose. $dot darwin: 3 (osx-arm64; linux-x64: 4) $dot [proof](p.md) |"))[0].OS.Count
+Assert-Throws 'per-RID note: a darwin note naming a linux RID is refused by name (S7-a: no longer read as prose)' {
+    Read-FixtureRoster @("| [``ridu/pkg``](https://x/ridu) | 3 |  | Prose. $dot darwin: 3 (osx-arm64; linux-x64: 4) $dot [proof](p.md) |")
+} 'darwin annotation names osx-arm64 and linux-x64'
+Assert-Equal 'per-RID note: a RID no key ships is not a note, so the segment is prose' 0 (Read-FixtureRoster @("| [``ridv/pkg``](https://x/ridv) | 3 |  | Prose. $dot darwin: 3 (osx-arm64; win-arm64: 4) $dot [proof](p.md) |"))[0].OS.Count
+
+# ---- 1-rid-linux. the LINUX per-RID note and `pending` (S7-a; DATA-la64-s7-bank-plan.md 2.4, COORD 2026-11-11) -------
+# linux ships two flavours under two RIDs, so a linux segment names both: "linux: 3840 + 2 (linux-x64; linux-arm64:
+# 3838 + 2)" once linux-arm64 is read, and "(linux-x64; linux-arm64: pending)" until then. `pending` is linux's only:
+# darwin's two RIDs are read in one dispatch, so a darwin note always carries a reading.
+$linNote = (Read-FixtureRoster @("| [``lin/pkg``](https://x/lin) | 10 |  | Two flavours. $dot linux: 3840 + 2 (linux-x64; linux-arm64: 3838 + 2) $dot [proof](p.md) |"))[0]
+Assert-Equal 'linux note: the banked RID and its reading' '3840/2/linux-x64' "$($linNote.OS['linux'].Expected)/$($linNote.OS['linux'].Disclosed)/$($linNote.OS['linux'].Rid)"
+Assert-Equal 'linux note: the other RID and its reading' '3838/2/linux-arm64/False' "$($linNote.OS['linux'].Other.Expected)/$($linNote.OS['linux'].Other.Disclosed)/$($linNote.OS['linux'].Other.Rid)/$($linNote.OS['linux'].Other.Pending)"
+$linPending = (Read-FixtureRoster @("| [``linp/pkg``](https://x/linp) | 10 |  | Not read yet. $dot linux: 3840 + 2 (linux-x64; linux-arm64: pending) $dot [proof](p.md) |"))[0]
+Assert-Equal 'linux note: pending parses, with no reading' 'linux-arm64/True/' "$($linPending.OS['linux'].Other.Rid)/$($linPending.OS['linux'].Other.Pending)/$($linPending.OS['linux'].Other.Expected)"
+Assert-Equal 'linux note: pending keeps the banked RID''s reading as the segment' '3840/2/linux-x64' "$($linPending.OS['linux'].Expected)/$($linPending.OS['linux'].Disclosed)/$($linPending.OS['linux'].Rid)"
+Assert-Equal 'linux expectation: the noted RID reads the note' '3838/2/linux (linux-arm64)' ("$((Get-RosterRowExpectation -Row $linNote -Goos 'linux' -Rid 'linux-arm64').Expected)/$((Get-RosterRowExpectation -Row $linNote -Goos 'linux' -Rid 'linux-arm64').Disclosed)/$((Get-RosterRowExpectation -Row $linNote -Goos 'linux' -Rid 'linux-arm64').Source)")
+Assert-Equal 'linux expectation: a pending RID reads the banked reading, and says it is pending' '3840/2/linux (linux-arm64 pending)' ("$((Get-RosterRowExpectation -Row $linPending -Goos 'linux' -Rid 'linux-arm64').Expected)/$((Get-RosterRowExpectation -Row $linPending -Goos 'linux' -Rid 'linux-arm64').Disclosed)/$((Get-RosterRowExpectation -Row $linPending -Goos 'linux' -Rid 'linux-arm64').Source)")
+Assert-Equal 'linux expectation: the banked RID reads the segment' '3840/linux' ("$((Get-RosterRowExpectation -Row $linPending -Goos 'linux' -Rid 'linux-x64').Expected)/$((Get-RosterRowExpectation -Row $linPending -Goos 'linux' -Rid 'linux-x64').Source)")
+Assert-Throws 'linux note: darwin never takes pending' {
+    Read-FixtureRoster @("| [``darp/pkg``](https://x/darp) | 3 |  | Mac. $dot darwin: 3 (osx-arm64; osx-x64: pending) $dot [proof](p.md) |")
+} 'pending'
+Assert-Throws 'linux note: only linux-arm64 is ever pending (linux-x64 is the banked flavour)' {
+    Read-FixtureRoster @("| [``linx/pkg``](https://x/linx) | 3 |  | Wrong way round. $dot linux: 9 (linux-arm64; linux-x64: pending) $dot [proof](p.md) |")
+} 'only linux-arm64 is pending'
+$savedRid = $env:RID
+try {
+    $env:RID = 'linux-arm64'
+    Assert-Equal 'sweep host RID: a linux leg''s RID names its flavour' 'linux-arm64' (Get-SweepHostRid -Goos 'linux')
+    $env:RID = 'linux-x64'
+    Assert-Equal 'sweep host RID: the x64 leg' 'linux-x64' (Get-SweepHostRid -Goos 'linux')
+    $env:RID = 'osx-x64'
+    Assert-Equal 'sweep host RID: a mac RID never answers for linux' $true ((Get-SweepHostRid -Goos 'linux') -cne 'osx-x64')
+}
+finally { $env:RID = $savedRid }
 
 # ---- 1a. the per-row EXECUTION annotation (owner ruling 2026-08-30, Option A) ---------------------
 # The annotation names the local execution CONFIG a row's pipeline leg runs under -- an execution
@@ -1331,6 +1364,38 @@ Assert-Equal 'link resolution: a missing path, a file spelled as a directory and
 Assert-Equal 'link resolution: an EMPTY tracked list resolves nothing (the check fails closed)' 1 `
     @(Get-UnresolvedRelativeLinks -Targets @('phase4/list.txt') -TrackedPaths @()).Count
 
+# The roster's linux-x64 reading in a linux segment: the headline when the headline is linux-x64's (or the segment has no
+# note), else the note's. $null when the segment names no linux-x64 reading.
+function Get-LinuxX64Reading {
+    param($Segment)
+
+    $other = if ($Segment.PSObject.Properties['Other']) { $Segment.Other } else { $null }
+    $rid = if ($Segment.PSObject.Properties['Rid']) { $Segment.Rid } else { $null }
+    if ((-not $rid) -or ($rid -ceq 'linux-x64')) { return [PSCustomObject]@{ Expected = [int]$Segment.Expected; Disclosed = [int]$Segment.Disclosed } }
+    if (($null -ne $other) -and ($other.Rid -ceq 'linux-x64') -and -not $other.Pending) { return [PSCustomObject]@{ Expected = [int]$other.Expected; Disclosed = [int]$other.Disclosed } }
+    return $null
+}
+
+# The Linux line's two populations (ONE POPULATION PER RID, below): the linux-x64 counts summed from each applicable
+# segment's linux-x64 reading, and how many applicable rows carry a linux-arm64 reading (banked) or do not (pending: a
+# pending note, or no note yet). NoX64 names a segment with no linux-x64 reading, which the parser never yields.
+function Get-LinuxHeaderPopulation {
+    param($Rows)
+
+    $population = [PSCustomObject]@{ X64Matched = 0; X64Disclosed = 0; ArmBanked = 0; ArmPending = 0; Applicable = 0; NoX64 = @() }
+    foreach ($row in $Rows) {
+        if (-not $row.OS.ContainsKey('linux') -or -not $row.OS['linux'].Applicable) { continue }
+        $segment = $row.OS['linux']
+        $population.Applicable++
+        $x64 = Get-LinuxX64Reading $segment
+        if ($null -eq $x64) { $population.NoX64 += $row.Package } else { $population.X64Matched += $x64.Expected; $population.X64Disclosed += $x64.Disclosed }
+        $other = if ($segment.PSObject.Properties['Other']) { $segment.Other } else { $null }
+        $armRead = ($null -ne $other) -and (-not $other.Pending) -and (@($segment.Rid, $other.Rid) -ccontains 'linux-arm64')
+        if ($armRead) { $population.ArmBanked++ } else { $population.ArmPending++ }
+    }
+    return $population
+}
+
 # The Linux progress line is summed from the annotations exactly as the header above it is summed
 # from the columns -- derived on both sides, so neither can drift from the table it describes.
 # Three populations since the 2026-08-29 n/a ruling: validated-at-count (numeric annotation),
@@ -1338,23 +1403,53 @@ Assert-Equal 'link resolution: an EMPTY tracked list resolves nothing (the check
 # annotation). The header's honest denominator is the APPLICABLE rows -- the whole table minus the
 # n/a set -- because a denominator silently containing rows no Linux can ever measure makes 100%
 # unreachable and the line quietly dishonest against the parity goal.
+#
+# ONE POPULATION PER RID (S7-a, COORD 2026-11-11; DATA-la64-s7-bank-plan.md 2.4). linux ships two flavours under two
+# RIDs, so the line states each: the linux-x64 population is the banked counts (summed from each segment's linux-x64
+# reading, which is the note's where linux-arm64 headlines an arch-strict row), and the linux-arm64 population is how
+# many applicable rows carry a linux-arm64 reading and how many are pending (a pending note, or no note yet). Proposed
+# with the plan and accepted: "Linux: 236 of 236 applicable rows validated at their linux-x64 counts -- 77,507
+# matching verdicts · 404 disclosed · linux-arm64: 0 of 236 banked, 236 pending · 2 rows platform-exclusive".
 $linuxRows = @($rows | Where-Object { $_.OS.ContainsKey('linux') -and $_.OS['linux'].Applicable })
 $linuxNaRows = @($rows | Where-Object { $_.OS.ContainsKey('linux') -and -not $_.OS['linux'].Applicable })
-$linuxTotal = 0
-$linuxDisclosed = 0
-foreach ($row in $linuxRows) {
-    $linuxTotal += $row.OS['linux'].Expected
-    $linuxDisclosed += $row.OS['linux'].Disclosed
-}
+$linuxPopulation = Get-LinuxHeaderPopulation -Rows $rows
+$linuxTotal = $linuxPopulation.X64Matched
+$linuxDisclosed = $linuxPopulation.X64Disclosed
+
+$linFixturePopulation = Get-LinuxHeaderPopulation -Rows (Read-FixtureRoster @(
+        "| [``lha/pkg``](https://x/lha) | 1 |  | Pending. $dot linux: 10 + 1 (linux-x64; linux-arm64: pending) $dot [proof](p.md) |"
+        "| [``lhb/pkg``](https://x/lhb) | 1 |  | Arch-strict, linux-arm64 headlines. $dot linux: 8 + 3 (linux-arm64; linux-x64: 11) $dot [proof](p.md) |"
+        "| [``lhc/pkg``](https://x/lhc) | 1 |  | Equal. $dot linux: 5 (linux-x64; linux-arm64: 5) $dot [proof](p.md) |"
+        "| [``lhd/pkg``](https://x/lhd) | 1 |  | No note yet. $dot linux: 7 $dot [proof](p.md) |"
+        "| [``lhe/pkg``](https://x/lhe) | 1 |  | Windows only. $dot linux: n/a $dot [proof](p.md) |"))
+Assert-Equal 'linux header population: linux-x64 matched sums each row''s linux-x64 reading (the note''s where linux-arm64 headlines)' 33 $linFixturePopulation.X64Matched
+Assert-Equal 'linux header population: linux-x64 disclosed likewise' 1 $linFixturePopulation.X64Disclosed
+Assert-Equal 'linux header population: linux-arm64 banked counts the rows carrying a linux-arm64 reading' 2 $linFixturePopulation.ArmBanked
+Assert-Equal 'linux header population: linux-arm64 pending counts a pending note and a bare segment' 2 $linFixturePopulation.ArmPending
+Assert-Equal 'linux header population: n/a rows are outside both populations' 4 $linFixturePopulation.Applicable
+# The parser never yields a segment without a linux-x64 reading (only linux-arm64 is ever pending), so this row is built.
+$linBadPopulation = Get-LinuxHeaderPopulation -Rows @([PSCustomObject]@{ Package = 'lhx/pkg'; OS = @{ linux = [PSCustomObject]@{
+                Applicable = $true; Expected = 9; Disclosed = 0; Rid = 'linux-arm64'
+                Other = [PSCustomObject]@{ Rid = 'linux-x64'; Expected = $null; Disclosed = $null; Pending = $true } } } })
+Assert-Equal 'linux header population: a segment with no linux-x64 reading is named' 'lhx/pkg' ($linBadPopulation.NoX64 -join ', ')
 
 Assert-Equal 'linux header: annotated row count' $linuxRows.Count `
     (Get-HeaderNumber $lines 'Linux:' 'Linux:\s*\*{0,2}(\d+)\s+of\s+(\d+)\s+applicable rows')
 Assert-Equal 'linux header: denominator is the applicable table (whole minus n/a)' ($rows.Count - $linuxNaRows.Count) `
     (Get-HeaderNumber $lines 'Linux:' 'Linux:\s*\*{0,2}(\d+)\s+of\s+(\d+)\s+applicable rows' 2)
-Assert-Equal 'linux header: matching verdicts equal the annotation sum' $linuxTotal `
+Assert-Equal 'linux header: the counts it validates at are named as linux-x64''s' $true `
+    (@($lines | Where-Object { $_ -match 'Linux:\s*\*{0,2}\d+\s+of\s+\d+\s+applicable rows validated at their linux-x64 counts' }).Count -eq 1)
+Assert-Equal 'linux header: no linux segment lacks a linux-x64 reading' '' ($linuxPopulation.NoX64 -join ', ')
+Assert-Equal 'linux header: matching verdicts equal the linux-x64 annotation sum' $linuxTotal `
     (Get-HeaderNumber $lines 'Linux:' '([\d,]+)\s+matching verdicts')
-Assert-Equal 'linux header: disclosed equals the annotation sum' $linuxDisclosed `
+Assert-Equal 'linux header: disclosed equals the linux-x64 annotation sum' $linuxDisclosed `
     (Get-HeaderNumber $lines 'Linux:' '([\d,]+)\s+disclosed')
+Assert-Equal 'linux header: linux-arm64 banked rows, derived from the notes' $linuxPopulation.ArmBanked `
+    (Get-HeaderNumber $lines 'Linux:' 'linux-arm64:\s*(\d+)\s+of\s+(\d+)\s+banked,\s*(\d+)\s+pending')
+Assert-Equal 'linux header: linux-arm64''s denominator is the applicable linux rows' $linuxPopulation.Applicable `
+    (Get-HeaderNumber $lines 'Linux:' 'linux-arm64:\s*(\d+)\s+of\s+(\d+)\s+banked,\s*(\d+)\s+pending' 2)
+Assert-Equal 'linux header: linux-arm64 pending rows, derived from the notes' $linuxPopulation.ArmPending `
+    (Get-HeaderNumber $lines 'Linux:' 'linux-arm64:\s*(\d+)\s+of\s+(\d+)\s+banked,\s*(\d+)\s+pending' 3)
 if ($linuxNaRows.Count -gt 0) {
     Assert-Equal 'linux header: the n/a count is stated, derived from the annotations' $linuxNaRows.Count `
         (Get-HeaderNumber $lines 'Linux:' '(\d+)\s+row(?:s)?\s+platform-exclusive')
@@ -2341,14 +2436,16 @@ function Get-ArchCountReading {
     return [PSCustomObject]@{ Text = $text; Disclosed = $ga; Refusal = $refusal }
 }
 
-# A segment as the roster spells it, its per-RID note included, for comparison with what the evidence produces.
+# A segment as the roster spells it, its per-RID note included (a linux note may read `pending`), for comparison with
+# what the evidence produces.
 function Format-DarwinSegment {
     param($Segment)
 
     $text = "$($Segment.Expected)" + $(if ($Segment.Disclosed) { " + $($Segment.Disclosed)" } else { '' })
     $other = if ($Segment.PSObject.Properties['Other']) { $Segment.Other } else { $null }
     if ($null -ne $other) {
-        $text += " ($($Segment.Rid); $($other.Rid): $($other.Expected)" + $(if ($other.Disclosed) { " + $($other.Disclosed)" } else { '' }) + ')'
+        $reading = if ($other.PSObject.Properties['Pending'] -and $other.Pending) { 'pending' } else { "$($other.Expected)" + $(if ($other.Disclosed) { " + $($other.Disclosed)" } else { '' }) }
+        $text += " ($($Segment.Rid); $($other.Rid): $reading)"
     }
     return $text
 }
@@ -2435,7 +2532,7 @@ function Resolve-DarwinEvidenceDirectory {
 }
 
 function Read-DarwinEvidence {
-    param([string] $Directory)
+    param([string] $Directory, [string[]] $Waves = $DarwinEvidenceWaves)
 
     # row -> list of records, each tagged with its wave's index. Every TSV's header names its columns, so a column
     # added later never shifts one.
@@ -2445,7 +2542,7 @@ function Read-DarwinEvidence {
     foreach ($file in @(Get-ChildItem -LiteralPath $Directory -Filter '*.tsv' -Recurse -File | Sort-Object FullName)) {
         $relative = [System.IO.Path]::GetRelativePath($root, $file.DirectoryName).Replace('\', '/')
         if ($relative -eq '.') { $relative = '' }
-        $wave = [array]::IndexOf($DarwinEvidenceWaves, $relative)
+        $wave = [array]::IndexOf($Waves, $relative)
         if ($wave -lt 0) {
             if (-not $undeclared.Contains($relative)) { [void]$undeclared.Add($relative) }
             continue
@@ -2744,6 +2841,462 @@ if (Test-Path -LiteralPath $darwinEvidenceDir) {
 
 # Printed UNCONDITIONALLY: a gate whose reach is never shown cannot be told apart from one that reached nothing.
 Write-Host ('darwin segments against {0} (pin go{1}): {2} rows read at the pin, {3} not yet read (not gated), {4} refused, {6} superseded (manifest ceiling below the reading; the re-pass owes them), {7} of {8} ruled count(s) banked{5}' -f $darwinEvidenceAt.Relative, $goPin, $darwinRowsGated, $darwinRowsUnread, $darwinRefused, $(if (Test-Path -LiteralPath $darwinEvidenceDir) { '' } else { ' -- no darwin evidence there yet, so nothing is gated' }), $darwinSuperseded, $darwinRuledBanked, $DarwinRuledCounts.Count) -ForegroundColor Cyan
+
+# ---- 2i. a linux segment names both RIDs, DERIVED from the two-RID evidence (S7-a; COORD 2026-11-10/11) ----------
+# DATA-la64-s7-bank-plan.md 2.4: the bank reads every linux row on linux-x64 AND linux-arm64, and each row's segment is
+# derived from its two evidence lines, never typed: EQUAL (both RIDs written out), ARCH-STRICT, ARCH-COUNT, or the
+# COMBINED form (verdicts and disclosed-divergent both differ, both deltas named), else (linux-x64; linux-arm64:
+# pending). annotate_linux.py --rids applies the same rules.
+# The names one evidence column lists: ';'-separated, '-' or empty for none. $null when the line has no such column.
+function Get-EvidenceNames {
+    param($Record, [string] $Column)
+
+    if (-not $Record.PSObject.Properties[$Column]) { return $null }
+    return @(([string]$Record.$Column).Split(';') | ForEach-Object { $_.Trim() } | Where-Object { $_ -and ($_ -cne '-') })
+}
+
+# COMBINED (COORD 2026-11-10, G's Q1 RULED; DATA-la64-s7-bank-plan.md 4.3 P4, runtime). Two RIDs whose verdict counts
+# AND disclosed-divergent counts both differ: a test that exists on one architecture only, and a disclosure that applies
+# on one only. Neither arch-strict (equal verdicts) nor arch-count (equal disclosed share) covers it. The shape: both
+# lines validated, COUNT or DISC, `new` 0 on both, UNEQUAL verdicts, UNEQUAL disclosed-divergent, and matched +
+# divergent = verdicts on each. It banks the LONGER RID, each RID with its own disclosed share, "17 + 3 (linux-x64;
+# linux-arm64: 15 + 2)", and ONLY when both deltas are named in full:
+#   - the verdict delta: the shorter RID's `absent` names exactly (longer - shorter) distinct verdicts, the longer none
+#     (arch-count's rule);
+#   - the disclosed delta: each RID's `divergent_names` names exactly its divergent - new distinct verdicts, so the two
+#     lists, compared, name every disclosure that applies on one RID only; and no verdict the shorter RID lacks is also
+#     one it discloses.
+# A shape that names less returns a Refusal, reported by name: the row stays pending and nothing is edited to pass it.
+# annotate_linux.py's arch_combined is this function, rule for rule.
+function Get-ArchCombinedReading {
+    param($A, $X)
+
+    $int = { param($record, $name) $v = 0; if ($record.PSObject.Properties[$name] -and [int]::TryParse([string]$record.$name, [ref]$v)) { $v } else { $null } }
+    $statuses = @('validated', 'COUNT', 'DISC')
+    if (($statuses -cnotcontains $A.status) -or ($statuses -cnotcontains $X.status)) { return $null }
+    $va = & $int $A 'verdicts'; $vx = & $int $X 'verdicts'
+    $ma = & $int $A 'matched'; $mx = & $int $X 'matched'
+    $ga = & $int $A 'divergent'; $gx = & $int $X 'divergent'
+    $na = & $int $A 'new'; $nx = & $int $X 'new'
+    if (@($va, $vx, $ma, $mx, $ga, $gx, $na, $nx) -contains $null) { return $null }
+    if (($na -ne 0) -or ($nx -ne 0) -or ($va -eq $vx) -or ($ga -eq $gx) -or (($ma + $ga) -ne $va) -or (($mx + $gx) -ne $vx)) { return $null }
+
+    $long, $short = if ($va -gt $vx) { $A, $X } else { $X, $A }
+    $lv = & $int $long 'verdicts'; $sv = & $int $short 'verdicts'
+    $lm = & $int $long 'matched'; $sm = & $int $short 'matched'
+    $lg = & $int $long 'divergent'; $sg = & $int $short 'divergent'
+    $text = "$lm" + $(if ($lg -ne 0) { " + $lg" } else { '' }) + " ($($long.RID); $($short.RID): $sm" + $(if ($sg -ne 0) { " + $sg" } else { '' }) + ')'
+    $counts = "$($long.RID) $lv verdicts + $lg disclosed, $($short.RID) $sv + $sg"
+
+    $shortAbsent = @(Get-EvidenceNames $short 'absent')
+    $longAbsent = @(Get-EvidenceNames $long 'absent')
+    $gap = $lv - $sv
+    $distinct = @($shortAbsent | Sort-Object -Unique -CaseSensitive).Count
+    $refusal = $null
+    if ($longAbsent.Count -ne 0) {
+        $refusal = "its verdicts and disclosed-divergent both differ by RID ($counts), but the evidence names absent verdicts on $($long.RID), the LONGER RID"
+    } elseif (($distinct -ne $gap) -or ($shortAbsent.Count -ne $gap)) {
+        $refusal = "its verdicts and disclosed-divergent both differ by RID ($counts), but the evidence names $distinct of the $gap missing verdict(s) on $($short.RID) (column ``absent``) -- a combined reading banks only with every missing verdict named once"
+    } else {
+        foreach ($side in @($short, $long)) {
+            $names = Get-EvidenceNames $side 'divergent_names'
+            $want = (& $int $side 'divergent') - (& $int $side 'new')
+            if ($null -eq $names) {
+                $refusal = "its verdicts and disclosed-divergent both differ by RID ($counts), but the evidence names no disclosed-divergent verdicts on $($side.RID) (column ``divergent_names``) -- a combined reading banks only with both RIDs' disclosed verdicts named in full"
+                break
+            }
+            $named = @($names | Sort-Object -Unique -CaseSensitive).Count
+            if (($named -ne $want) -or (@($names).Count -ne $want)) {
+                $refusal = "its verdicts and disclosed-divergent both differ by RID ($counts), but the evidence names $named of the $want disclosed-divergent verdict(s) on $($side.RID) (column ``divergent_names``) -- a combined reading banks only with each disclosed verdict named once"
+                break
+            }
+        }
+        if ($null -eq $refusal) {
+            $both = @(@(Get-EvidenceNames $short 'divergent_names') | Where-Object { $shortAbsent -ccontains $_ })
+            if ($both.Count -ne 0) {
+                $refusal = "its verdicts and disclosed-divergent both differ by RID ($counts), but the evidence names $($both -join ', ') as both absent and disclosed on $($short.RID)"
+            }
+        }
+    }
+    return [PSCustomObject]@{ Text = $text; Disclosed = $lg; Refusal = $refusal }
+}
+
+# One row's two-RID linux reading: Form equal / arch-strict / arch-count / combined (Text is the derived segment),
+# pending (no form fits) or host-difference (Reason says why), or refused (Reason: a guard's Refusal, or malformed
+# evidence). $Segment is the row's roster linux segment, which supplies the linux-x64 reading of record.
+function Get-LinuxPairReading {
+    param($Records, $Segment)
+
+    $x64 = @($Records | Where-Object { $_.RID -ceq 'linux-x64' })
+    $arm = @($Records | Where-Object { $_.RID -ceq 'linux-arm64' })
+    if (($x64.Count -ne 1) -or ($arm.Count -ne 1)) {
+        return [PSCustomObject]@{ Form = 'refused'; Text = $null; Reason = "the linux evidence holds $($x64.Count) linux-x64 and $($arm.Count) linux-arm64 line(s) for it, not one of each" }
+    }
+    $x = $x64[0]; $a = $arm[0]
+    $roster = if (($null -ne $Segment) -and $Segment.Applicable) { Get-LinuxX64Reading $Segment } else { $null }
+    if ($null -eq $roster) {
+        return [PSCustomObject]@{ Form = 'refused'; Text = $null; Reason = 'the linux evidence names it, but it carries no numeric linux: segment with a linux-x64 reading' }
+    }
+    $fmt = { param($m, $d) "$m" + $(if ($d -ne 0) { " + $d" } else { '' }) }
+    $xd = Get-DarwinDisclosedDivergent $x; $ad = Get-DarwinDisclosedDivergent $a
+    # THE HOST DIFFERENCE (COORD 2026-11-10: differing x64 readings are recorded, not written). The pair is read in one
+    # dispatch on hosted runners; where its linux-x64 line is not the roster's linux-x64 reading, the comparison is
+    # against a different host, so nothing is derived and linux-arm64 stays pending.
+    if (($x.status -cne 'validated') -or ("$($x.new)" -cne '0') -or ([int]$x.matched -ne $roster.Expected) -or ($xd -ne $roster.Disclosed)) {
+        return [PSCustomObject]@{ Form = 'host-difference'; Text = $null
+            Reason = "the same dispatch's linux-x64 line ($($x.status) $(& $fmt $x.matched $xd), new $($x.new)) is not the roster's linux-x64 reading ($(& $fmt $roster.Expected $roster.Disclosed)): a host difference, recorded and not written, so linux-arm64 stays pending" }
+    }
+    if (($x.status -ceq 'validated') -and ($a.status -ceq 'validated') -and ($x.agree -ceq 'yes') -and ($a.agree -ceq 'yes') -and
+        ("$($x.verdicts)" -ceq "$($a.verdicts)") -and ([int]$x.matched -eq [int]$a.matched) -and ($xd -eq $ad)) {
+        $one = & $fmt $x.matched $xd
+        return [PSCustomObject]@{ Form = 'equal'; Text = "$one (linux-x64; linux-arm64: $one)"; Reason = $null }
+    }
+    $strict = Get-DarwinArchStrictReading $x $a
+    if ($null -ne $strict) { return [PSCustomObject]@{ Form = 'arch-strict'; Text = $strict.Text; Reason = $null } }
+    foreach ($form in @(@('arch-count', (Get-ArchCountReading $x $a)), @('combined', (Get-ArchCombinedReading $x $a)))) {
+        if ($null -eq $form[1]) { continue }
+        if ($form[1].Refusal) { return [PSCustomObject]@{ Form = 'refused'; Text = $null; Reason = $form[1].Refusal } }
+        return [PSCustomObject]@{ Form = $form[0]; Text = $form[1].Text; Reason = $null }
+    }
+    return [PSCustomObject]@{ Form = 'pending'; Text = $null
+        Reason = "no bank form fits (linux-x64 $($x.status) $($x.verdicts) verdicts $(& $fmt $x.matched $xd); linux-arm64 $($a.status) $($a.verdicts) verdicts $(& $fmt $a.matched $ad), new $($a.new), agree $($x.agree)/$($a.agree))" }
+}
+
+# The guard's verdict on one row the linux evidence names: $null, or why its segment is not the evidence's.
+# -Ledgered: the row has a line in the UNMEASURED ledger, which accepts a guard's Refusal on a row that stays pending.
+function Get-LinuxSegmentRefusal {
+    param($Records, $Segment, [switch] $Ledgered)
+
+    $reading = Get-LinuxPairReading -Records $Records -Segment $Segment
+    $other = if (($null -ne $Segment) -and $Segment.PSObject.Properties['Other']) { $Segment.Other } else { $null }
+    $pending = ($null -ne $other) -and $other.Pending
+    if ($reading.Form -ceq 'refused') {
+        if ($pending -and $Ledgered) { return $null }
+        return $reading.Reason + $(if ($pending) { ' -- it stays pending, and needs a line in the UNMEASURED ledger naming why' } else { '' })
+    }
+    $have = Format-DarwinSegment $Segment
+    if ($null -eq $reading.Text) {
+        if ($pending) { return $null }
+        return "it does not bank on both RIDs ($($reading.Reason)), but carries linux: $have -- it stays (linux-x64; linux-arm64: pending)"
+    }
+    if ($have -cne $reading.Text) { return "its linux: $have is not the two-RID reading, linux: $($reading.Text) ($($reading.Form))" }
+    return $null
+}
+
+# A row no declared linux evidence names: a linux-arm64 READING there cannot have been derived. A pending note, and a
+# bare segment (the format rule's, piece 6), are not this check's.
+function Get-LinuxUnreadRefusal {
+    param($Segment)
+
+    if (($null -eq $Segment) -or -not $Segment.PSObject.Properties['Other'] -or ($null -eq $Segment.Other) -or $Segment.Other.Pending) { return $null }
+    if (@($Segment.Rid, $Segment.Other.Rid) -cnotcontains 'linux-arm64') { return $null }
+    return "it carries linux: $(Format-DarwinSegment $Segment), a linux-arm64 reading, but no declared linux evidence names it, so the reading was not derived"
+}
+
+# The two-RID linux segment's contract, against fixtures. Evidence lines carry the mac form's columns (verdicts, matched,
+# divergent, new, status, agree, absent) plus divergent_names (S7-a Q2: the disclosed-divergent verdict names, ';'-
+# separated, '-' for none). Each fixture's roster linux-x64 reading is the same dispatch's linux-x64 line unless the
+# case is a host difference.
+function New-LinuxPairRecord([string] $rid, [string] $status, [int] $verdicts, [int] $matched, [int] $divergent, [int] $new = 0, [string] $agree = 'no', $absent = '-', $names = $null) {
+    $record = [PSCustomObject]@{ RID = $rid; status = $status; agree = $agree; verdicts = "$verdicts"; matched = "$matched"; disclosed = "$divergent"; divergent = "$divergent"; new = "$new" }
+    if ($null -ne $absent) { $record | Add-Member -NotePropertyName absent -NotePropertyValue $absent }
+    if ($null -ne $names) { $record | Add-Member -NotePropertyName divergent_names -NotePropertyValue $names }
+    return $record
+}
+$linSeg = { param($n, $d, $rid, $orid, $on, $od)
+    [PSCustomObject]@{ Applicable = $true; Expected = $n; Disclosed = $d; Rid = $rid
+        Other = $(if ($orid) { [PSCustomObject]@{ Rid = $orid; Expected = $on; Disclosed = $od; Pending = $false } } else { $null }) } }
+$linPendingSeg = { param($n, $d)
+    [PSCustomObject]@{ Applicable = $true; Expected = $n; Disclosed = $d; Rid = 'linux-x64'
+        Other = [PSCustomObject]@{ Rid = 'linux-arm64'; Expected = $null; Disclosed = $null; Pending = $true } } }
+
+# EQUAL: both RIDs validated and agreeing, the same counts. The segment writes both RIDs out, because once the bank is
+# open a bare segment is refused.
+$linEqual = @((New-LinuxPairRecord 'linux-x64' 'validated' 3842 3840 2 0 'yes' '-' 'a;b'), (New-LinuxPairRecord 'linux-arm64' 'validated' 3842 3840 2 0 'yes' '-' 'a;b'))
+$r = Get-LinuxPairReading -Records $linEqual -Segment (& $linPendingSeg 3840 2)
+Assert-Equal 'linux pair: equal readings write both RIDs out' 'equal/3840 + 2 (linux-x64; linux-arm64: 3840 + 2)' "$($r.Form)/$($r.Text)"
+Assert-Equal 'linux pair: the equal segment banks (not refused)' $null (Get-LinuxSegmentRefusal -Records $linEqual -Segment (& $linSeg 3840 2 'linux-x64' 'linux-arm64' 3840 2))
+Assert-Equal 'linux pair: banked on both RIDs but still pending is refused' $true ((Get-LinuxSegmentRefusal -Records $linEqual -Segment (& $linPendingSeg 3840 2)) -match [regex]::Escape('linux: 3840 + 2 (linux-x64; linux-arm64: 3840 + 2)'))
+Assert-Equal 'linux pair: banked on both RIDs with a BARE segment is refused' $true ($null -ne (Get-LinuxSegmentRefusal -Records $linEqual -Segment (& $linSeg 3840 2 $null $null 0 0)))
+Assert-Equal 'linux pair: a hand-set note the evidence does not produce is refused' $true ($null -ne (Get-LinuxSegmentRefusal -Records $linEqual -Segment (& $linSeg 3840 2 'linux-x64' 'linux-arm64' 3839 3)))
+Assert-Equal 'linux pair: equal counts that DISAGREE (agree no) do not bank equal' $true ((Get-LinuxPairReading -Records @((New-LinuxPairRecord 'linux-x64' 'validated' 3842 3840 2), (New-LinuxPairRecord 'linux-arm64' 'validated' 3842 3840 2)) -Segment (& $linPendingSeg 3840 2)).Form -cne 'equal')
+$r = Get-LinuxPairReading -Records @((New-LinuxPairRecord 'linux-x64' 'validated' 16 16 0 0 'yes'), (New-LinuxPairRecord 'linux-arm64' 'validated' 16 16 0 0 'yes')) -Segment (& $linPendingSeg 16 0)
+Assert-Equal 'linux pair: an equal reading with nothing disclosed' '16 (linux-x64; linux-arm64: 16)' $r.Text
+
+# ARCH-STRICT (Get-DarwinArchStrictReading, RID-generic): equal verdicts, the difference wholly disclosed on one RID.
+$linStrict = @((New-LinuxPairRecord 'linux-x64' 'validated' 11 11 0), (New-LinuxPairRecord 'linux-arm64' 'DISC' 11 8 3))
+$r = Get-LinuxPairReading -Records $linStrict -Segment (& $linPendingSeg 11 0)
+Assert-Equal 'linux pair: arch-strict headlines the RID carrying the disclosures' 'arch-strict/8 + 3 (linux-arm64; linux-x64: 11)' "$($r.Form)/$($r.Text)"
+Assert-Equal 'linux pair: the arch-strict segment banks' $null (Get-LinuxSegmentRefusal -Records $linStrict -Segment (& $linSeg 8 3 'linux-arm64' 'linux-x64' 11 0))
+
+# ARCH-COUNT (C1's Get-ArchCountReading): unequal verdicts, equal disclosed share, every missing verdict named.
+$linCount = @((New-LinuxPairRecord 'linux-x64' 'validated' 9 9 0 0 'no' '-'), (New-LinuxPairRecord 'linux-arm64' 'validated' 2 2 0 0 'no' 'a;b;c;d;e;f;g'))
+$r = Get-LinuxPairReading -Records $linCount -Segment (& $linPendingSeg 9 0)
+Assert-Equal 'linux pair: arch-count headlines the longer RID' 'arch-count/9 (linux-x64; linux-arm64: 2)' "$($r.Form)/$($r.Text)"
+Assert-Equal 'linux pair: the arch-count segment banks' $null (Get-LinuxSegmentRefusal -Records $linCount -Segment (& $linSeg 9 0 'linux-x64' 'linux-arm64' 2 0))
+$linCountShort = @((New-LinuxPairRecord 'linux-x64' 'validated' 9 9 0 0 'no' '-'), (New-LinuxPairRecord 'linux-arm64' 'validated' 2 2 0 0 'no' 'a;b'))
+$r = Get-LinuxPairReading -Records $linCountShort -Segment (& $linPendingSeg 9 0)
+Assert-Equal 'linux pair: an arch-count shape naming 2 of the 7 missing verdicts is refused by name' $true (($r.Form -ceq 'refused') -and ($r.Reason -match 'names 2 of the 7'))
+Assert-Equal 'linux pair: that refusal is reported while the row is pending' $true ($null -ne (Get-LinuxSegmentRefusal -Records $linCountShort -Segment (& $linPendingSeg 9 0)))
+
+# COMBINED (COORD 2026-11-10, G's Q1 for runtime): verdicts AND disclosed-divergent both differ. new 0 on both, matched +
+# divergent = verdicts on each, the shorter RID names exactly the missing verdicts and the longer none, and each RID
+# names its disclosed-divergent verdicts in full, so both deltas are named. The longer RID headlines.
+$linCombined = @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;a3' 'd1;d2'))
+$r = Get-ArchCombinedReading $linCombined[0] $linCombined[1]
+Assert-Equal 'combined: the reading headlines the longer RID, each RID with its own disclosed share' '17 + 3 (linux-x64; linux-arm64: 15 + 2)' "$($r.Text)"
+Assert-Equal 'combined: no refusal when both deltas are named in full' $null "$($r.Refusal)".Trim()
+Assert-Equal 'combined: the order of the two lines does not matter' '17 + 3 (linux-x64; linux-arm64: 15 + 2)' "$((Get-ArchCombinedReading $linCombined[1] $linCombined[0]).Text)"
+$r = Get-LinuxPairReading -Records $linCombined -Segment (& $linPendingSeg 17 3)
+Assert-Equal 'linux pair: the combined form is the fourth form' 'combined/17 + 3 (linux-x64; linux-arm64: 15 + 2)' "$($r.Form)/$($r.Text)"
+Assert-Equal 'linux pair: the combined segment banks' $null (Get-LinuxSegmentRefusal -Records $linCombined -Segment (& $linSeg 17 3 'linux-x64' 'linux-arm64' 15 2))
+$r = Get-ArchCombinedReading (New-LinuxPairRecord 'linux-arm64' 'validated' 9 9 0 0 'no' '-' '-') (New-LinuxPairRecord 'linux-x64' 'DISC' 8 7 1 0 'no' 'z' 'q')
+Assert-Equal 'combined: either RID can be the longer, and a RID with nothing disclosed reads bare' '9 (linux-arm64; linux-x64: 7 + 1)' "$($r.Text)"
+foreach ($case in @(
+        @('names 2 of the 3 missing verdicts', 'names 2 of the 3', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2' 'd1;d2'))),
+        @('names a missing verdict twice', 'names 2 of the 3', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a1;a2' 'd1;d2'))),
+        @('names absent verdicts on the LONGER RID', 'the LONGER RID', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' 'z' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;a3' 'd1;d2'))),
+        @('has no divergent_names column on one RID', 'names no disclosed-divergent verdicts on linux-arm64', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;a3'))),
+        @('names 1 of the 2 disclosed-divergent verdicts', 'names 1 of the 2 disclosed-divergent', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;a3' 'd1'))),
+        @('names a disclosed verdict twice', 'names 1 of the 2 disclosed-divergent', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;a3' 'd1;d1'))),
+        @('names more disclosed verdicts than it diverges', 'names 4 of the 3 disclosed-divergent', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3;d4'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;a3' 'd1;d2'))),
+        @('names one verdict as both absent and disclosed', 'both absent and disclosed', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;d2' 'd1;d2'))))) {
+    $reading = Get-ArchCombinedReading $case[2][0] $case[2][1]
+    Assert-Equal "combined refuses a row that $($case[0]): refused by name" $true (($null -ne $reading) -and ("$($reading.Refusal)" -match [regex]::Escape($case[1])))
+    Assert-Equal "combined refuses a row that $($case[0]): the pair reading says refused" 'refused' (Get-LinuxPairReading -Records $case[2] -Segment (& $linPendingSeg 17 3)).Form
+    Assert-Equal "combined refuses a row that $($case[0]): refused while pending" $true ($null -ne (Get-LinuxSegmentRefusal -Records $case[2] -Segment (& $linPendingSeg 17 3)))
+    Assert-Equal "combined refuses a row that $($case[0]): refused with the would-be segment" $true ($null -ne (Get-LinuxSegmentRefusal -Records $case[2] -Segment (& $linSeg 17 3 'linux-x64' 'linux-arm64' 15 2)))
+}
+foreach ($case in @(
+        @('an undisclosed divergence (new 1)', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 1 'no' '-' 'd1;d2'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;a3' 'd1;d2'))),
+        @('equal disclosed shares (arch-count decides)', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 18 2 0 'no' '-' 'd1;d2'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;a3' 'd1;d2'))),
+        @('equal verdicts (arch-strict decides)', @((New-LinuxPairRecord 'linux-x64' 'validated' 17 14 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' '-' 'd1;d2'))),
+        @('a FAIL status', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'FAIL' 17 15 2 0 'no' 'a1;a2;a3' 'd1;d2'))),
+        @('a count not wholly matched or divergent', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 16 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;a3' 'd1;d2'))))) {
+    Assert-Equal "combined is not $($case[0]): no combined reading" $null (Get-ArchCombinedReading $case[1][0] $case[1][1])
+}
+
+# NOT BANKED: no form fits, so the row stays (linux-x64; linux-arm64: pending) and any reading it carries is refused.
+$linNoForm = @((New-LinuxPairRecord 'linux-x64' 'validated' 10 10 0), (New-LinuxPairRecord 'linux-arm64' 'FAIL' 10 9 1 1))
+Assert-Equal 'linux pair: no form fits, so pending' 'pending' (Get-LinuxPairReading -Records $linNoForm -Segment (& $linPendingSeg 10 0)).Form
+Assert-Equal 'linux pair: a pending row that does not bank is not refused' $null (Get-LinuxSegmentRefusal -Records $linNoForm -Segment (& $linPendingSeg 10 0))
+Assert-Equal 'linux pair: a row that does not bank but carries a linux-arm64 reading is refused' $true ((Get-LinuxSegmentRefusal -Records $linNoForm -Segment (& $linSeg 10 0 'linux-x64' 'linux-arm64' 10 0)) -match 'pending')
+
+# A HOST DIFFERENCE (COORD 2026-11-10: differing x64 readings are recorded, not written): the same dispatch's linux-x64
+# line is not the roster's linux-x64 reading, so no form is derived and linux-arm64 stays pending.
+$linHost = @((New-LinuxPairRecord 'linux-x64' 'COUNT' 52 51 1 0 'yes' '-' 'x'), (New-LinuxPairRecord 'linux-arm64' 'COUNT' 52 51 1 0 'yes' '-' 'x'))
+Assert-Equal 'linux pair: a hosted linux-x64 reading that is not the roster''s is a host difference' 'host-difference' (Get-LinuxPairReading -Records $linHost -Segment (& $linPendingSeg 52 0)).Form
+Assert-Equal 'linux pair: a host-difference row that stays pending is not refused' $null (Get-LinuxSegmentRefusal -Records $linHost -Segment (& $linPendingSeg 52 0))
+Assert-Equal 'linux pair: a host difference never writes the hosted linux-x64 reading' $true ((Get-LinuxSegmentRefusal -Records $linHost -Segment (& $linSeg 52 0 'linux-x64' 'linux-arm64' 51 1)) -match 'host difference')
+
+# THE RECORDS: one line per RID, and a numeric segment to compare against.
+Assert-Equal 'linux pair: one RID alone is refused, never read as pending' $true ((Get-LinuxSegmentRefusal -Records @($linEqual[0]) -Segment (& $linPendingSeg 3840 2)) -match 'not one of each')
+Assert-Equal 'linux pair: a row the evidence names with no linux segment is refused' $true ($null -ne (Get-LinuxSegmentRefusal -Records $linEqual -Segment $null))
+
+# UNREAD: a linux-arm64 reading on a row no declared evidence names cannot have been derived.
+Assert-Equal 'linux unread: a linux-arm64 reading with no evidence behind it is refused' $true ($null -ne (Get-LinuxUnreadRefusal -Segment (& $linSeg 3840 2 'linux-x64' 'linux-arm64' 3840 2)))
+Assert-Equal 'linux unread: a pending row needs no evidence' $null (Get-LinuxUnreadRefusal -Segment (& $linPendingSeg 3840 2))
+Assert-Equal 'linux unread: a bare segment is not this check''s (the format rule owns it)' $null (Get-LinuxUnreadRefusal -Segment (& $linSeg 3840 2 $null $null 0 0))
+Assert-Equal 'linux format: a pending segment spells its note' '3840 + 2 (linux-x64; linux-arm64: pending)' (Format-DarwinSegment (& $linPendingSeg 3840 2))
+
+# THE NOTE IS MANDATORY (S7-a piece 6): from the commit that writes "(linux-x64; linux-arm64: pending)" on every numeric
+# linux segment, a numeric linux segment with no per-RID note is refused: it would read as banked on a RID it never ran
+# on. n/a is not numeric, and is not this check's.
+function Get-LinuxNoteRefusal {
+    param($Segment)
+
+    if (($null -eq $Segment) -or -not $Segment.Applicable) { return $null }
+    if ($Segment.PSObject.Properties['Other'] -and ($null -ne $Segment.Other)) { return $null }
+    return "its linux: $(Format-DarwinSegment $Segment) has no per-RID note -- a numeric linux segment names both RIDs, '(linux-x64; linux-arm64: pending)' until linux-arm64 is read (annotate_linux.py --rids writes it)"
+}
+$noteBare = [PSCustomObject]@{ Applicable = $true; Expected = 7; Disclosed = 0; Rid = $null; Other = $null }
+Assert-Equal 'linux note mandatory: a bare numeric segment is refused by name' $true ("$(Get-LinuxNoteRefusal -Segment $noteBare)" -match 'no per-RID note')
+Assert-Equal 'linux note mandatory: a bare segment with disclosures is refused too' $true ($null -ne (Get-LinuxNoteRefusal -Segment ([PSCustomObject]@{ Applicable = $true; Expected = 7; Disclosed = 2 })))
+Assert-Equal 'linux note mandatory: a pending note is accepted' $null (Get-LinuxNoteRefusal -Segment (& $linPendingSeg 7 0))
+Assert-Equal 'linux note mandatory: a two-RID reading is accepted' $null (Get-LinuxNoteRefusal -Segment (& $linSeg 7 0 'linux-x64' 'linux-arm64' 7 0))
+Assert-Equal 'linux note mandatory: n/a is not this check''s' $null (Get-LinuxNoteRefusal -Segment ([PSCustomObject]@{ Applicable = $false; Expected = 0; Disclosed = 0 }))
+Assert-Equal 'linux note mandatory: no linux segment is not this check''s' $null (Get-LinuxNoteRefusal -Segment $null)
+
+
+# The UNMEASURED ledger's reader: its records, each with its line number, and HeaderError when the header is not exactly
+# row / reason / shard / run.
+function Read-LinuxArm64Ledger {
+    param([string] $Path)
+
+    $text = [System.IO.File]::ReadAllText($Path).Replace("`r`n", "`n")
+    $header = ($text -split "`n", 2)[0]
+    if ($header -cne "row`treason`tshard`trun") {
+        return [PSCustomObject]@{ Records = @(); HeaderError = "its header is '$($header.Replace("`t", '\t'))', not row\treason\tshard\trun" }
+    }
+    $records = New-Object System.Collections.Generic.List[object]
+    $n = 1
+    foreach ($line in @($text.Split("`n") | Select-Object -Skip 1)) {
+        $n++
+        if ($line -ceq '') { continue }
+        $cells = $line.Split("`t")
+        $records.Add([PSCustomObject]@{ Line = $n; row = $cells[0]; reason = $(if ($cells.Count -gt 1) { $cells[1] } else { '' })
+            shard = $(if ($cells.Count -gt 2) { $cells[2] } else { '' }); run = $(if ($cells.Count -gt 3) { $cells[3] } else { '' }) })
+    }
+    return [PSCustomObject]@{ Records = $records.ToArray(); HeaderError = $null }
+}
+
+# The ledger's refusals against the roster: each names its line or row. A row is "banked" on linux-arm64 when its
+# segment carries a linux-arm64 reading, and pending otherwise (Get-LinuxHeaderPopulation's split).
+function Get-LinuxArm64LedgerRefusals {
+    param($Records, $Rows, [bool] $BankClosed)
+
+    $refusals = New-Object System.Collections.Generic.List[string]
+    $applicable = @{}
+    foreach ($row in $Rows) {
+        if (-not $row.OS.ContainsKey('linux') -or -not $row.OS['linux'].Applicable) { continue }
+        $segment = $row.OS['linux']
+        $other = if ($segment.PSObject.Properties['Other']) { $segment.Other } else { $null }
+        $applicable[$row.Package] = [PSCustomObject]@{ Segment = $segment
+            Banked = ($null -ne $other) -and (-not $other.Pending) -and (@($segment.Rid, $other.Rid) -ccontains 'linux-arm64') }
+    }
+    $seen = @{}
+    foreach ($record in @($Records)) {
+        $where = "line $($record.Line) ($($record.row))"
+        if (-not "$($record.reason)".Trim()) { [void]$refusals.Add("${where}: blank reason -- an UNMEASURED line names why the row did not bank") }
+        foreach ($field in @('shard', 'run')) {
+            if (-not "$($record.$field)".Trim()) { [void]$refusals.Add("${where}: blank $field -- '-' where it was never dispatched") }
+        }
+        if (-not $applicable.ContainsKey($record.row)) {
+            [void]$refusals.Add("${where}: names no applicable linux roster row")
+        } elseif ($applicable[$record.row].Banked) {
+            [void]$refusals.Add("${where}: the row carries linux: $(Format-DarwinSegment $applicable[$record.row].Segment), a linux-arm64 reading, so it is not UNMEASURED")
+        }
+        $seen[$record.row] = 1 + $(if ($seen.ContainsKey($record.row)) { $seen[$record.row] } else { 0 })
+    }
+    foreach ($row in @($seen.Keys | Sort-Object)) {
+        if ($seen[$row] -gt 1) { [void]$refusals.Add("$row is listed $($seen[$row]) times") }
+    }
+    if ($BankClosed) {
+        foreach ($row in @($applicable.Keys | Sort-Object)) {
+            if (-not $applicable[$row].Banked -and -not $seen.ContainsKey($row)) {
+                [void]$refusals.Add("$row is pending on linux-arm64 and the bank is closed (`$LinuxArm64BankClosed), but the ledger has no line for it")
+            }
+        }
+    }
+    return $refusals.ToArray()
+}
+
+# THE UNMEASURED LEDGER (S7-a; COORD 2026-11-10, P2's S6 rule; DATA-la64-s7-bank-plan.md 5.3), against fixtures. One TSV,
+# row / reason / shard / run, names each linux row that does not bank on linux-arm64 in the release and why. A blank
+# reason is refused, as an UNMEASURED package row's is; so is a line for a banked row, a line naming no applicable
+# linux row, and a row listed twice. Once the bank closes ($LinuxArm64BankClosed), a pending row with no line is refused.
+# A row a guard REFUSES stays pending, and its ledger line is what accepts it.
+$luRows = Read-FixtureRoster @(
+    "| [``lu/banked``](https://x/lub) | 5 |  | Banked. $dot linux: 5 (linux-x64; linux-arm64: 5) $dot [proof](p.md) |"
+    "| [``lu/pend``](https://x/lup) | 5 |  | Pending. $dot linux: 5 (linux-x64; linux-arm64: pending) $dot [proof](p.md) |"
+    "| [``lu/pend2``](https://x/lup2) | 5 |  | Pending. $dot linux: 6 (linux-x64; linux-arm64: pending) $dot [proof](p.md) |"
+    "| [``lu/na``](https://x/lun) | 5 |  | Windows only. $dot linux: n/a $dot [proof](p.md) |")
+$luLine = { param($n, $row, $reason, $shard = 'W1-3', $run = '1') [PSCustomObject]@{ Line = $n; row = $row; reason = $reason; shard = $shard; run = $run } }
+$luRefusals = { param($records, [bool] $closed) @(Get-LinuxArm64LedgerRefusals -Records $records -Rows $luRows -BankClosed $closed) }
+Assert-Equal 'ledger: a pending row with a reasoned line, bank open, refuses nothing' '' ((& $luRefusals @((& $luLine 2 'lu/pend' 'arch-count Refusal: names 1 of the 2 missing verdicts')) $false) -join '; ')
+Assert-Equal 'ledger: bank open, a pending row needs no line' '' ((& $luRefusals @() $false) -join '; ')
+foreach ($case in @(
+        @('a blank reason', @((& $luLine 2 'lu/pend' '  ')), 'blank reason'),
+        @('a blank shard', @((& $luLine 2 'lu/pend' 'host difference' '')), 'blank shard'),
+        @('a line for a banked row', @((& $luLine 2 'lu/banked' 'stale')), 'a linux-arm64 reading'),
+        @('a line naming no roster row', @((& $luLine 2 'lu/nowhere' 'x')), 'no applicable linux roster row'),
+        @('a line naming an n/a row', @((& $luLine 2 'lu/na' 'x')), 'no applicable linux roster row'),
+        @('a row listed twice', @((& $luLine 2 'lu/pend' 'a'), (& $luLine 3 'lu/pend' 'b')), 'listed 2 times'))) {
+    $got = (& $luRefusals $case[1] $false) -join '; '
+    Assert-Equal "ledger refuses $($case[0]), by name" $true ($got -match [regex]::Escape($case[2]))
+}
+$closedGot = (& $luRefusals @((& $luLine 2 'lu/pend' 'host difference')) $true) -join '; '
+Assert-Equal 'ledger: bank closed, a pending row with no line is refused by name' $true (($closedGot -match 'lu/pend2') -and ($closedGot -notmatch 'lu/pend[^2]'))
+Assert-Equal 'ledger: bank closed, every pending row with a line refuses nothing' '' ((& $luRefusals @((& $luLine 2 'lu/pend' 'a'), (& $luLine 3 'lu/pend2' 'b')) $true) -join '; ')
+$luFile = Join-Path ([System.IO.Path]::GetTempPath()) ('g2cs-la64-ledger-' + [Guid]::NewGuid().ToString('N') + '.tsv')
+try {
+    [System.IO.File]::WriteAllText($luFile, "row`treason`tshard`trun`nlu/pend`tthe arm leg died at a throwing stub (load_g)`tW1-3`t42`n")
+    $luRead = Read-LinuxArm64Ledger -Path $luFile
+    Assert-Equal 'ledger file: a line reads as row / reason / shard / run with its line number' 'lu/pend|the arm leg died at a throwing stub (load_g)|W1-3|42|2' ("$($luRead.Records[0].row)|$($luRead.Records[0].reason)|$($luRead.Records[0].shard)|$($luRead.Records[0].run)|$($luRead.Records[0].Line)")
+    [System.IO.File]::WriteAllText($luFile, "row`treason`tshard`n")
+    Assert-Equal 'ledger file: a header that is not row / reason / shard / run is named' $true ("$((Read-LinuxArm64Ledger -Path $luFile).HeaderError)" -match 'row\\treason\\tshard\\trun')
+}
+finally { Remove-Item -LiteralPath $luFile -Force -ErrorAction SilentlyContinue }
+# A REFUSED row (a guard's Refusal) is accepted pending only with its ledger line; never with a reading.
+Assert-Equal 'ledger: a refused row that is pending and ledgered is accepted' $null (Get-LinuxSegmentRefusal -Records $linCountShort -Segment (& $linPendingSeg 9 0) -Ledgered)
+Assert-Equal 'ledger: a refused row that is pending and NOT ledgered is still refused' $true ($null -ne (Get-LinuxSegmentRefusal -Records $linCountShort -Segment (& $linPendingSeg 9 0)))
+Assert-Equal 'ledger: a refused row carrying a reading is refused, ledger or not' $true ($null -ne (Get-LinuxSegmentRefusal -Records $linCountShort -Segment (& $linSeg 9 0 'linux-x64' 'linux-arm64' 2 0) -Ledgered))
+Assert-Equal 'ledger: a ledgered row that banks is refused (banked with pending), ledger or not' $true ($null -ne (Get-LinuxSegmentRefusal -Records $linEqual -Segment (& $linPendingSeg 3840 2) -Ledgered))
+
+# THE LINUX EVIDENCE DIRECTORY (S7-a; S7-c fills it). The ONE place the two-RID linux evidence is named, relative to
+# the repository root, `{pin}` standing for the corpus pin: one TSV per shard in the mac form (shard, row, RID,
+# verdicts, matched, disclosed, divergent, new, status, agree, absent, divergent_names), a line per row per RID.
+# EMPTY until the arm leg's first shard is read: then no linux evidence is declared, so no linux-arm64 reading can have
+# been derived and every linux note must read pending. annotate_linux.py --rids reads the same directory.
+# $LinuxRidEvidenceWaves declares its wave subdirectories in order, as $DarwinEvidenceWaves does.
+$LinuxRidEvidenceDirectory = ''
+$LinuxRidEvidenceWaves = @('')
+
+# THE UNMEASURED LEDGER (S7-a; DATA-la64-s7-bank-plan.md 5.3): the release's linux-arm64 rows that do not bank, each
+# with its reason, shard and run. Its own refusals hold from the start; while the file is absent it holds no lines.
+# $LinuxArm64BankClosed is flipped by S7-d when the release's bank closes: from then a pending row with no line is
+# refused.
+$LinuxArm64LedgerPath = 'docs/phase4/rebank-1.26.10.4/linux-arm64/UNMEASURED.tsv'
+$LinuxArm64BankClosed = $false
+$linuxLedgerFile = Join-Path $repo $LinuxArm64LedgerPath
+$linuxLedgerRecords = @()
+if (Test-Path -LiteralPath $linuxLedgerFile) {
+    $linuxLedgerRead = Read-LinuxArm64Ledger -Path $linuxLedgerFile
+    if ($linuxLedgerRead.HeaderError) { Assert-Equal "linux-arm64 ledger ${LinuxArm64LedgerPath}: $($linuxLedgerRead.HeaderError)" $true $false }
+    $linuxLedgerRecords = @($linuxLedgerRead.Records)
+}
+$linuxLedgerRefusals = @(Get-LinuxArm64LedgerRefusals -Records $linuxLedgerRecords -Rows $rows -BankClosed $LinuxArm64BankClosed)
+foreach ($refusal in $linuxLedgerRefusals) { Assert-Equal "linux-arm64 ledger ${LinuxArm64LedgerPath}: $refusal" $true $false }
+$linuxLedgered = @{}
+foreach ($record in $linuxLedgerRecords) { if ("$($record.reason)".Trim()) { $linuxLedgered[$record.row] = $true } }
+Write-Host ('linux-arm64 UNMEASURED ledger {0}: {1} line(s){2}, bank {3}, {4} refused' -f $LinuxArm64LedgerPath, $linuxLedgerRecords.Count, $(if (Test-Path -LiteralPath $linuxLedgerFile) { '' } else { ' (no file yet)' }), $(if ($LinuxArm64BankClosed) { 'CLOSED' } else { 'open' }), $linuxLedgerRefusals.Count) -ForegroundColor Cyan
+
+$linuxPairBanked = 0
+$linuxPairPending = 0
+$linuxPairRefused = 0
+$linuxPairUnread = 0
+$linuxEvidenceAt = if ($LinuxRidEvidenceDirectory) { Resolve-DarwinEvidenceDirectory -Repo $repo -Declared $LinuxRidEvidenceDirectory -Pin $goPin } else { $null }
+$linuxEvidence = @{}
+if ($null -ne $linuxEvidenceAt) {
+    if (-not (Test-Path -LiteralPath $linuxEvidenceAt.Path)) {
+        Assert-Equal "linux segments: the declared evidence directory $($linuxEvidenceAt.Relative) (`$LinuxRidEvidenceDirectory) does not exist" $true $false
+    } else {
+        $linuxRead = Read-DarwinEvidence -Directory $linuxEvidenceAt.Path -Waves $LinuxRidEvidenceWaves
+        foreach ($stray in $linuxRead.Undeclared) {
+            Assert-Equal "linux segments: evidence subdirectory '$stray' is not a declared wave (`$LinuxRidEvidenceWaves)" $true $false
+        }
+        $linuxEvidence = $linuxRead.ByRow
+    }
+}
+$linuxBare = 0
+foreach ($row in $rows) {
+    $segment = if ($row.OS.ContainsKey('linux')) { $row.OS['linux'] } else { $null }
+    $noteRefusal = Get-LinuxNoteRefusal -Segment $segment
+    if ($null -ne $noteRefusal) {
+        $linuxBare++
+        Assert-Equal "linux segments: $($row.Package): $noteRefusal" $true $false
+        continue
+    }
+    if (-not $linuxEvidence.ContainsKey($row.Package)) {
+        if (($null -eq $segment) -or -not $segment.Applicable) { continue }
+        $linuxPairUnread++
+        $refusal = Get-LinuxUnreadRefusal -Segment $segment
+    } else {
+        $refusal = Get-LinuxSegmentRefusal -Records (Select-LatestDarwinWave $linuxEvidence[$row.Package]) -Segment $segment -Ledgered:($linuxLedgered.ContainsKey($row.Package))
+        if ($null -eq $refusal) {
+            if ($segment.PSObject.Properties['Other'] -and ($null -ne $segment.Other) -and $segment.Other.Pending) { $linuxPairPending++ } else { $linuxPairBanked++ }
+        }
+    }
+    if ($null -ne $refusal) {
+        $linuxPairRefused++
+        Assert-Equal "linux segments: $($row.Package): $refusal" $true $false
+    }
+}
+if ($linuxEvidence.Count -gt 0) {
+    Assert-Equal 'linux segments: the evidence named at least one roster row (a zero means the rows were never matched)' $true (($linuxPairBanked + $linuxPairPending + $linuxPairRefused) -gt 0)
+}
+# Printed UNCONDITIONALLY, as the darwin line is.
+Write-Host ('linux segments (linux-x64; linux-arm64) against {0}: {1} rows banked on both RIDs, {2} read and pending, {3} not read (not gated), {4} refused, {5} with no per-RID note' -f $(if ($null -ne $linuxEvidenceAt) { $linuxEvidenceAt.Relative } else { 'no declared evidence ($LinuxRidEvidenceDirectory is empty), so every linux-arm64 reading is refused' }), $linuxPairBanked, $linuxPairPending, $linuxPairUnread, $linuxPairRefused, $linuxBare) -ForegroundColor Cyan
 
 # ---- 3. the RENDERED table's column integrity -----------------------------------------------------
 # Everything above guards what the roster MEANS to the parser. This guards what it LOOKS LIKE to a

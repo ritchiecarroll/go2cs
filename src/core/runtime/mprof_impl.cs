@@ -73,20 +73,24 @@ private static readonly ConditionalWeakTable<ж<bucket>, bucketParts> s_bucketPa
 // buckhash as a managed array of chain heads. Written under profInsertLock, read without it, as Go does.
 private static ж<bucket>?[]? s_buckhash;
 
+// Go's newBucket takes the bucket from persistentalloc, which the memory profiler never samples: stkbucket
+// calls it holding profInsertLock, and a sampled allocation there would call memProfileAlloc, whose own
+// stkbucket takes the same lock on the same thread. So every part is built through golib's persistentalloc
+// doors (GoMemProfile.PersistentBox / PersistentSlice), never through make or new.
 internal static ж<bucket> newBucket(bucketType typ, nint nstk) {
-    var parts = new bucketParts { stk = new slice<uintptr>((int)nstk) };
+    var parts = new bucketParts { stk = GoMemProfile.PersistentSlice<uintptr>(nstk) };
 
     if (typ == memProfile) {
-        parts.mp = Ꮡ(new memRecord());
+        parts.mp = GoMemProfile.PersistentBox(new memRecord());
     }
     else if (typ == blockProfile || typ == mutexProfile) {
-        parts.bp = Ꮡ(new blockRecord());
+        parts.bp = GoMemProfile.PersistentBox(new blockRecord());
     }
     else {
         @throw("invalid profile bucket type"u8);
     }
 
-    var b = Ꮡ(new bucket());
+    var b = GoMemProfile.PersistentBox(new bucket());
     b.Value.typ = typ;
     b.Value.nstk = (uintptr)nstk;
     s_bucketParts.Add(b, parts);
@@ -213,8 +217,9 @@ internal static void saveblockevent(int64 cycles, int64 rate, nint skip, bucketT
         @throw("invalid skip value"u8);
     }
 
-    // Go's callers branch into its own buffer (Go: mp.profStack, 1 + maxSkip + profstackdepth words).
-    var stk = new slice<uintptr>(1 + (int)maxSkip + (int)debug.profstackdepth);
+    // Go's callers branch into its own buffer (Go: mp.profStack, 1 + maxSkip + profstackdepth words), which
+    // is the M's and not a Go allocation: the event samples and counts nothing.
+    var stk = GoMemProfile.PersistentSlice<uintptr>(1 + (nint)maxSkip + (nint)debug.profstackdepth);
     nint nstk = callers(skip, stk);
 
     saveBlockEventStack(cycles, rate, stk[..(int)nstk], which);

@@ -37,6 +37,8 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
+	"sort"
 	"strings"
 	"testing"
 
@@ -211,22 +213,7 @@ func TestNoHandOwnDuplicatesAnImportInitHook(t *testing.T) {
 			return nil
 		}
 
-		entries, dirErr := os.ReadDir(path)
-
-		if dirErr != nil {
-			return nil
-		}
-
-		for _, e := range entries {
-			name := e.Name()
-
-			if e.IsDir() || !strings.HasSuffix(name, ".cs") ||
-				name == PackageInfoFileName || strings.HasSuffix(name, ".cs.auto") ||
-				name == "package_test_info.cs" {
-				continue
-			}
-
-			filePath := filepath.Join(path, name)
+		for _, filePath := range importInitHookFiles(path) {
 			marked, markErr := containsManualConversionMarker(filePath)
 
 			if markErr != nil || !marked {
@@ -266,4 +253,115 @@ func TestNoHandOwnDuplicatesAnImportInitHook(t *testing.T) {
 	}
 
 	t.Logf("scanned %d packages, %d marked files, %d duplicate hooks", packagesScanned, markedFilesScanned, duplicates)
+}
+
+// importInitHookFiles are the source files compiled into one assembly with the package_info.cs in infoDir, other than
+// the generated ones: the files a hand-owned duplicate of one of its hooks could sit in. Read as a package directory,
+// infoDir takes its layout key folders; read as a key folder of a package (infoDir holds no project file), it takes the
+// package directory and each key folder sharing a target with it (amd64/ takes linux-amd64/, never linux-arm64/). A
+// folder with a project file of its own is another package.
+func importInitHookFiles(infoDir string) []string {
+	lattice := corpusLattice()
+	dirs := []string{infoDir}
+
+	// A key folder that holds a project file is a nested package of the same name, never part of this assembly.
+	addKeyFolder := func(dir string) {
+		if !dirHoldsProjectFile(dir) {
+			dirs = append(dirs, dir)
+		}
+	}
+
+	for _, folder := range lattice.candidateFolders() {
+		addKeyFolder(filepath.Join(infoDir, folder))
+	}
+
+	if own := lattice.folderCover(filepath.Base(infoDir)); len(own) > 0 && !dirHoldsProjectFile(infoDir) {
+		pkgDir := filepath.Dir(infoDir)
+		dirs = append(dirs, pkgDir)
+
+		for _, folder := range lattice.candidateFolders() {
+			if folder != filepath.Base(infoDir) && slices.ContainsFunc(lattice.folderCover(folder), func(target string) bool { return slices.Contains(own, target) }) {
+				addKeyFolder(filepath.Join(pkgDir, folder))
+			}
+		}
+	}
+
+	var files []string
+
+	for _, dir := range dirs {
+		entries, err := os.ReadDir(dir)
+
+		if err != nil {
+			continue
+		}
+
+		for _, e := range entries {
+			name := e.Name()
+
+			if e.IsDir() || !strings.HasSuffix(name, ".cs") ||
+				name == PackageInfoFileName || strings.HasSuffix(name, ".cs.auto") ||
+				name == "package_test_info.cs" {
+				continue
+			}
+
+			files = append(files, filepath.Join(dir, name))
+		}
+	}
+
+	return files
+}
+
+// dirHoldsProjectFile reports whether a directory holds a .csproj of its own: a package directory, never a key folder.
+func dirHoldsProjectFile(dir string) bool {
+	projects, _ := filepath.Glob(filepath.Join(dir, "*.csproj"))
+
+	return len(projects) > 0
+}
+
+// TestImportInitHookFilesReadTheLayoutKeyFolders plants hand-owns in each kind of layout key folder. A package's
+// package_info.cs is compiled with its key folders, and a package_info.cs that itself sits in a key folder (math's, in
+// amd64/ and linux-arm64/) is compiled with the package directory and every key folder sharing a target with it. A
+// census reading the info file's own folder alone misses a duplicate hook in any of the others. A folder with a project
+// file of its own is another package and is never read.
+func TestImportInitHookFilesReadTheLayoutKeyFolders(t *testing.T) {
+	root := t.TempDir()
+
+	for _, rel := range []string{
+		"flat/flat.csproj", "flat/package_info.cs", "flat/a.cs", "flat/a.cs.auto", "flat/linux/b.cs", "flat/amd64/c.cs",
+		"flat/linux-arm64/d.cs", "flat/debug/debug.csproj", "flat/debug/package_info.cs", "flat/debug/e.cs",
+		"keyed/keyed.csproj", "keyed/amd64/package_info.cs", "keyed/amd64/m.cs", "keyed/flat.cs", "keyed/linux/l.cs",
+		"keyed/linux-amd64/la.cs", "keyed/linux-arm64/package_info.cs", "keyed/linux-arm64/lr.cs", "keyed/windows/w.cs",
+		"outer/outer.csproj", "outer/package_info.cs", "outer/o.cs", "outer/windows/windows.csproj",
+		"outer/windows/package_info.cs", "outer/windows/w.cs",
+	} {
+		filePath := filepath.Join(root, filepath.FromSlash(rel))
+
+		if err := os.MkdirAll(filepath.Dir(filePath), 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := os.WriteFile(filePath, nil, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	for infoDir, want := range map[string][]string{
+		"flat":          {"flat/a.cs", "flat/amd64/c.cs", "flat/linux-arm64/d.cs", "flat/linux/b.cs"},
+		"keyed/amd64":   {"keyed/amd64/m.cs", "keyed/flat.cs", "keyed/linux-amd64/la.cs", "keyed/linux/l.cs", "keyed/windows/w.cs"},
+		"outer":         {"outer/o.cs"},
+		"outer/windows": {"outer/windows/w.cs"},
+	} {
+		var got []string
+
+		for _, filePath := range importInitHookFiles(filepath.Join(root, filepath.FromSlash(infoDir))) {
+			rel, _ := filepath.Rel(root, filePath)
+			got = append(got, filepath.ToSlash(rel))
+		}
+
+		sort.Strings(got)
+
+		if !slices.Equal(got, want) {
+			t.Errorf("package_info.cs in %s: reads %v, want %v", infoDir, got, want)
+		}
+	}
 }

@@ -60,7 +60,8 @@
 // taken ON THE MECHANISM, before it is reached. wait4 and Uname (whose Rusage and Utsname are the
 // same 144 and 390 bytes at linux/arm64, so both linux builds share one body each since S3), Select,
 // FcntlFlock, Statfs, Fstatfs, Sysinfo and Adjtimex — the rest of the linux/amd64 surface — are in
-// structclass_linux_impl.cs. What remains genuinely not done is the ARCH dimension above: another
+// structclass_linux_impl.cs. Select's trap and timeout are this flavour's own: selectTrap, at the end of
+// this file (S3 site 6). What remains genuinely not done is the ARCH dimension above: another
 // Linux arch's layouts would need their own mirrors in their own zsyscall_<arch>_impl.cs.
 //
 // And the landing rule both halves of the fleet learned the same day, by each hitting it: a
@@ -217,5 +218,29 @@ partial class syscall_package
 
         for (int i = 0; i < 3; i++)
             st.X__unused[i] = native.X__unused[i];
+    }
+
+    // Select's trap at linux/amd64 (S3 site 6; the fd_set mirrors and the rest of Select are in
+    // linux/structclass_linux_impl.cs). Go's amd64 Select is `//sys Select(...) = SYS_SELECT`
+    // (syscall_linux_amd64.go): the caller's Timeval is the kernel's timeout, and select(2) writes the
+    // time not slept back into it, on EINTR too. So the Timeval crosses in a NativeTimeval mirror and is
+    // copied back UNCONDITIONALLY, an identity copy wherever the kernel wrote nothing. A nil timeout stays
+    // address 0, which is "block forever".
+    private static unsafe (uintptr r0, Errno e1) selectTrap(uintptr nfd, uintptr r, uintptr w, uintptr e, ж<Timeval> Ꮡtimeout) {
+        if (Ꮡtimeout is null || Ꮡtimeout.IsNilPointer) {
+            var (r0, _, e1) = Syscall6(SYS_SELECT, nfd, r, w, e, 0, 0);
+            return (r0, e1);
+        }
+
+        ref var tv = ref Ꮡtimeout.Value;
+        NativeTimeval native = default;
+        native.Sec = tv.Sec;
+        native.Usec = tv.Usec;
+
+        var (tr0, _, te1) = Syscall6(SYS_SELECT, nfd, r, w, e, (uintptr)(nint)(&native), 0);
+
+        tv.Sec = native.Sec;
+        tv.Usec = native.Usec;
+        return (tr0, te1);
     }
 }

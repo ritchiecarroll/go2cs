@@ -159,10 +159,22 @@ var memberHeaderPattern = regexp.MustCompile(`^\s*(?:\[[^\]]*\]\s*)*(?:public|in
 
 var identifierPattern = regexp.MustCompile(`[A-Za-z_\p{L}][A-Za-z0-9_\p{L}]*`)
 
-// nativeBoundaryTrees is the scope: the two Windows syscall trees. Paths are repo-relative, slash-spelled.
-var nativeBoundaryTrees = []string{
-	"src/core/syscall/windows/",
-	"src/core/internal/syscall/windows/",
+// nativeBoundaryTrees is the scope: what a windows/amd64 build compiles of the two Windows syscall packages. syscall
+// contributes the key folders that target's build compiles (windows/, amd64/, windows-amd64/); internal/syscall/windows
+// is a package named for its GOOS and contributes its whole directory, key folders included. Paths are repo-relative,
+// slash-spelled, each a prefix.
+var nativeBoundaryTrees = append(packageKeyFolderTrees("src/core/syscall/", "windows/amd64"), "src/core/internal/syscall/windows/")
+
+// packageKeyFolderTrees are the key folders of the package at pkgDir (slash-spelled, with its trailing slash) that a
+// target's build compiles, each as a path prefix.
+func packageKeyFolderTrees(pkgDir string, target string) []string {
+	var trees []string
+
+	for _, name := range layoutKeyFoldersServing(target) {
+		trees = append(trees, pkgDir+name+"/")
+	}
+
+	return trees
 }
 
 // blittablePointees are the pointee spellings that need no declaration to be judged: a machine scalar
@@ -566,6 +578,40 @@ func scanBoxDerefs(t *testing.T, root string, tracked []string, trees []string) 
 	sort.Strings(scan.unresolved)
 
 	return scan
+}
+
+// TestNativeBoundaryTreesAreTheWindowsBuilds plants a syscall file in each kind of layout key folder. The scope is what
+// a windows/amd64 build compiles of the two packages: syscall's windows/, amd64/ and windows-amd64/ folders, and the
+// whole of internal/syscall/windows (a package named for its GOOS, whose own key folders sit under it).
+func TestNativeBoundaryTreesAreTheWindowsBuilds(t *testing.T) {
+	inScope := func(rel string) bool {
+		for _, tree := range nativeBoundaryTrees {
+			if strings.HasPrefix(rel, tree) {
+				return true
+			}
+		}
+
+		return false
+	}
+
+	for _, plant := range []struct {
+		rel  string
+		want bool
+	}{
+		{"src/core/syscall/windows/syscall_windows.cs", true},
+		{"src/core/syscall/amd64/syscall_windows_amd64.cs", true},
+		{"src/core/syscall/windows-amd64/types_windows_amd64.cs", true},
+		{"src/core/internal/syscall/windows/zsyscall_windows.cs", true},
+		{"src/core/internal/syscall/windows/amd64/types_amd64.cs", true},
+		{"src/core/syscall/syscall.cs", false},
+		{"src/core/syscall/linux/syscall_linux.cs", false},
+		{"src/core/syscall/linux-amd64/zsyscall_linux_amd64.cs", false},
+		{"src/core/syscall/arm64/asm_arm64.cs", false},
+	} {
+		if got := inScope(plant.rel); got != plant.want {
+			t.Errorf("%s: in the native-boundary scope = %v, want %v", plant.rel, got, plant.want)
+		}
+	}
 }
 
 // TestNativeBoundaryBoxDerefsAreBlittable is the guard.
