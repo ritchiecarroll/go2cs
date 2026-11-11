@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
+using go.golib;
 using runtime = go.runtime_package;
 
 namespace GolibTests;
@@ -66,10 +67,23 @@ public class GoschedBackoffTests
     // sleep cost. The bound is generous — its job is to catch an unconditional-sleep regression
     // (which would add ~390 ms per worker at minimum and scale with any tuning mistake), not to
     // benchmark the scheduler.
+    //
+    // THE MEASUREMENT ARM (COORD ruling M, 2026-11-11; the bar below is unchanged). The hosted macOS
+    // runners have a slow mode: 27 full-suite osx-arm64 readings since 2026-11-06 split into 0.09-1 s
+    // (25) and 11.1 / 14.7 s (2), with nothing between, the same tree passing and failing in the same
+    // minute. Whether that mode reaches the sleep tier (the backoff misjudging the host) or slows the
+    // host's own yields is not yet known. So the timed Gosched phase G is bracketed by two raw
+    // Thread.Yield phases of the same shape (R1 before, R2 after: same worker count, same 25,000 calls,
+    // the stopwatch started before the threads are made, as G's is), and G's sleep-tier entries are
+    // counted (GoschedBackoff.Escalations, process-wide; GolibTests runs serially, as
+    // GoschedBackoffEscalationLatencyTests relies on). The READING line goes to the test's stdout
+    // (the trx) on every OS; the bar that follows will be chosen from these readings.
     [TestMethod]
     public void EffectiveGoschedYieldsStayCheap()
     {
         int workerCount = Environment.ProcessorCount * 2;
+        double r1 = RawYieldSeconds(workerCount);
+        long escalationsBefore = GoschedBackoff.Escalations;
         Stopwatch timer = Stopwatch.StartNew();
 
         Thread[] workers = Enumerable.Range(0, workerCount).Select(_ => new Thread(() =>
@@ -86,9 +100,38 @@ public class GoschedBackoffTests
             worker.Join();
 
         timer.Stop();
+        long escalations = GoschedBackoff.Escalations - escalationsBefore;
+        double r2 = RawYieldSeconds(workerCount);
+
+        Console.WriteLine($"READING EffectiveGoschedYieldsStayCheap: workers {workerCount} (ProcessorCount " +
+            $"{Environment.ProcessorCount}), R1 raw Thread.Yield {r1:F3} s, G Gosched {timer.Elapsed.TotalSeconds:F3} s, " +
+            $"R2 raw Thread.Yield {r2:F3} s, G escalations {escalations}");
 
         Assert.IsTrue(timer.Elapsed.TotalSeconds < 10.0,
             $"{workerCount} contended workers × 25,000 effective Gosched calls took {timer.Elapsed.TotalSeconds:F1} s — " +
             "effective yields must never reach the sleep tier; the backoff's escalation is firing on the fast path.");
+    }
+
+    // The host's own reference for G: the same contended shape with a raw Thread.Yield, which never
+    // enters GoschedBackoff, so it reads what the scheduler itself charges for these yields.
+    private static double RawYieldSeconds(int workerCount)
+    {
+        Stopwatch timer = Stopwatch.StartNew();
+
+        Thread[] workers = Enumerable.Range(0, workerCount).Select(_ => new Thread(() =>
+        {
+            for (int i = 0; i < 25_000; i++)
+                Thread.Yield();
+        })
+        { IsBackground = true }).ToArray();
+
+        foreach (Thread worker in workers)
+            worker.Start();
+
+        foreach (Thread worker in workers)
+            worker.Join();
+
+        timer.Stop();
+        return timer.Elapsed.TotalSeconds;
     }
 }
