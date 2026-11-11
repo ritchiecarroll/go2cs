@@ -14,11 +14,11 @@ namespace go2cs.Tests;
 /// <summary>
 /// Guards the converted-Go-type rule (Common.IsConvertedGoTypeDeclaration) that lets the converter stop
 /// writing a plain <c>[GoType]</c>: a struct or interface declared directly inside a <c>*_package</c>
-/// class, in a converted file, not a descriptor carrier, in an assembly that does not opt out with
+/// class, in a converted file, not a descriptor carrier or a cgo mirror, in an assembly that does not opt out with
 /// <c>[assembly: GoHandOwnedPackage]</c>, is generated for exactly as if it carried the attribute, and
 /// its generated part re-emits <c>[GoType]</c> so reflection reads it as before. Each exclusion arm is a
 /// type the rule must NOT select: a hand-written companion, a whole-file hand conversion, a metadata
-/// part, a descriptor carrier, a nested type, and the hand-owned assembly.
+/// part, a descriptor carrier, a cgo mirror, a nested type, and the hand-owned assembly.
 /// </summary>
 [TestClass]
 public class ConvertedGoTypeRuleTests
@@ -60,6 +60,10 @@ public class ConvertedGoTypeRuleTests
 
                 // Descriptor carrier for `Token` -- uninhabited; never a Go type anything is emitted for.
                 [GoLocalName("Token")] public interface Tokenᴅ { }
+
+                // A cgo mirror of a C struct (the converter's cgoMirrors.go), written whole with C's layout; never a Go type.
+                [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit, Size = 4)]
+                internal struct _Ctype_struct_pointᴍ { [System.Runtime.InteropServices.FieldOffset(0)] public int x; }
 
                 public delegate int Fn(int x);
 
@@ -175,6 +179,7 @@ public class ConvertedGoTypeRuleTests
         Assert.IsNull(PartFor(generated, "struct", "Helper"), "a hand-written companion (*_impl.cs) is not converted code");
         Assert.IsNull(PartFor(generated, "struct", "Manual"), "a [module: GoManualConversion] file is not converted code");
         Assert.IsNull(PartFor(generated, "interface", "Tokenᴅ"), "a descriptor carrier draws no generated output");
+        Assert.IsNull(PartFor(generated, "struct", "_Ctype_struct_pointᴍ"), "a cgo mirror draws no generated output");
         Assert.IsNull(PartFor(generated, "struct", "Nested"), "only a type declared DIRECTLY in the package class is a Go type");
         Assert.IsFalse(generated.Any(text => text.Contains(" Fn(")), "a delegate is never a Go type for the generators");
         Assert.AreEqual(1, generated.Count(text => text.Contains(" partial struct Plain")), "the package_info.cs accessibility part is not a second definition");
