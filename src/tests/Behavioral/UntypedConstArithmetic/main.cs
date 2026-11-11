@@ -8,7 +8,7 @@ internal static UntypedInt two32 => /* 1 << 32 */ 4294967296;
 
 internal static int64 sum(int64 n) { return n; }
 
-internal static void Main() {
+internal static void main() {
     uint64 a = 100;
     uint64 b = 3;
     fmt.Println(a * (uint64)two32 + b);

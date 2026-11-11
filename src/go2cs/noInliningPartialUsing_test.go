@@ -95,7 +95,7 @@ func TestCompilerServicesUsingOnlyWhereTheAttributeIsWritten(t *testing.T) {
 	)
 
 	// Controls: main is a partial carrier (it executes a go), and the literal writes the attribute itself.
-	if !strings.Contains(carrier, "static partial void Main(") || strings.Contains(carrier, attribute) {
+	if !strings.Contains(carrier, "static partial void main(") || strings.Contains(carrier, attribute) {
 		t.Fatalf("control: carrier.cs must declare main as a partial carrier with no attribute text, or this test proves nothing:\n%s", carrier)
 	}
 

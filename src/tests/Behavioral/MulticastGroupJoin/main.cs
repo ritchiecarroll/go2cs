@@ -5,7 +5,7 @@ using Δnet = net_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     GoFrame ᒐ = default;
     try {
         var (ifis, err) = Δnet.Interfaces();

@@ -37,7 +37,7 @@ internal static uint32 second(this ж<holder> Ꮡh) {
     return ~(ж<uint32>)(uintptr)(add((uintptr)@unsafe.Pointer.FromRef(ref h), /* unsafe.Sizeof(uint32(0)) */ (uintptr)4));
 }
 
-internal static void Main() {
+internal static void main() {
     ref var vals = ref heap<array<uint32>>(new uint32[]{10, 20, 30, 40}.array(), out var Ꮡvals);
     fmt.Println(step(Ꮡvals.at<uint32>(0)));
 

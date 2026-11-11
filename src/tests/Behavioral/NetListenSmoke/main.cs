@@ -15,7 +15,7 @@ internal static (nint, bool) portOf(Δnet.Listener l) {
     return (addr.Port, true);
 }
 
-internal static void Main() {
+internal static void main() {
     var (first, err) = Δnet.Listen("tcp", "127.0.0.1:0");
     if (err != nil) {
         fmt.Println("listener1: listen failed");

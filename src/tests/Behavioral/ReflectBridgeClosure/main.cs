@@ -77,7 +77,7 @@ internal static (bool, bool) zeroAgrees<T, Tᴀ>()
 
 private sealed class ᴀ3 : IGoArrayDims { public static nint[] Dims { get; } = [3]; }
 
-internal static void Main() {
+internal static void main() {
     var ht = reflect.TypeOf(new host());
     fmt.Println("fields:", ht.NumField());
     foreach (var (_, name) in range(slice<@string>(["Plain", "inner", "tagged", "Named"]))) {

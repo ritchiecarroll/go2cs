@@ -731,6 +731,7 @@
     <Project Path="tests/Behavioral/LocalTypeSliceElement/LocalTypeSliceElement.csproj" />
     <Project Path="tests/Behavioral/LongPathRoundTrip/LongPathRoundTrip.csproj" />
     <Project Path="tests/Behavioral/LookupServicePort/LookupServicePort.csproj" />
+    <Project Path="tests/Behavioral/MainDeepRecursion/MainDeepRecursion.csproj" />
     <Project Path="tests/Behavioral/MainSelectForeverAfterFunc/MainSelectForeverAfterFunc.csproj" />
     <Project Path="tests/Behavioral/MainSelectForeverWorkerExits/MainSelectForeverWorkerExits.csproj" />
     <Project Path="tests/Behavioral/MakeLenNamedNumeric/MakeLenNamedNumeric.csproj" />

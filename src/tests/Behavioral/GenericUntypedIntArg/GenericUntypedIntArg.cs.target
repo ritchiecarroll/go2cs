@@ -25,7 +25,7 @@ internal static S appendAll<S, E>(S s, params Span<E> vʗp)
 
 partial struct numbers /*[]nint*/;
 
-internal static void Main() {
+internal static void main() {
     var ints = slice<nint>([10, 20, 30, 40]);
     fmt.Println(Index(ints, (nint)20));
     fmt.Println(Index(ints, (nint)99));

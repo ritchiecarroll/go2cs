@@ -34,7 +34,7 @@ internal static nint readPlusOne(ж<atomic.Int32> v) {
     return (nint)v.Load() + 1;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var v = ref heap(new atomic.Int32(), out var Ꮡv);
     Ꮡv.Store(10);
 

@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     @string s = "a¢b☺\U0001d11e!";
     foreach (var (i, r) in s) {
         fmt.Println(i, (int32)r, (int32)s[i]);

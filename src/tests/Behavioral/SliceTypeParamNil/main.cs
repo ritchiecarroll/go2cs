@@ -27,7 +27,7 @@ internal static S cloneOrNil<S, E>(S s)
 
 partial struct Named /*[]nint*/;
 
-internal static void Main() {
+internal static void main() {
     slice<nint> nilSlice = default;
     var emptyNotNil = slice<nint>([]);
     var filled = slice<nint>([3, 1, 2]);

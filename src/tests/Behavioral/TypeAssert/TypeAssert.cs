@@ -8,7 +8,7 @@ partial struct box {
     internal nint n;
 }
 
-internal static void Main() {
+internal static void main() {
     safeAssertions();
 
     assertionsWithPanic();

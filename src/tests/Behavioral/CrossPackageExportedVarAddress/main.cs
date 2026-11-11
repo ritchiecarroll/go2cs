@@ -8,7 +8,7 @@ using xpkgvar = global::go.go.xpkgvar_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var p = lib.ᏑN;
     p.Value = 5;
     fmt.Println("&lib.N write:", lib.N, lib.ReadN());

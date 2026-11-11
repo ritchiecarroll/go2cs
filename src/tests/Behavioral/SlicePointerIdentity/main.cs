@@ -8,7 +8,7 @@ partial struct node {
     internal nint id;
 }
 
-internal static void Main() {
+internal static void main() {
     var s = new slice<nint>(4, 8);
     foreach (var i in range(len(s))) {
         s[i] = i * 10;

@@ -21,7 +21,7 @@ internal static slice<byte> key(@string label) {
 
 internal static readonly @string fixedSig = "30660231009f9537dcd1b97340cbc064cc9d1f6ef09f142c1d70472b4f9738d58d9d69c35755ab0baca0ae0849b2b845b39bff4c4b023100cceb089f51f1f4b122ca5d7b7a6779459b661539662c1585d6f15598d7e2f361b36622275e1bbe9f88ddbd87ea710e2d"u8;
 
-internal static void Main() {
+internal static void main() {
     var curve = ecdh.P384();
 
     for (nint i = 0; i < 4; i++) {

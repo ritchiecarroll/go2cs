@@ -9,7 +9,7 @@ internal static void probe(@string name, bool isNil, nint length, nint capacity)
     fmt.Println(name, isNil, length, capacity);
 }
 
-internal static void Main() {
+internal static void main() {
     slice<byte> zero = default;
     probe("zeroValue", zero == nil, len(zero), cap(zero));
 

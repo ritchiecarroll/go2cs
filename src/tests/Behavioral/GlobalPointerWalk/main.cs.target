@@ -48,7 +48,7 @@ internal static @string list() {
     return s;
 }
 
-internal static void Main() {
+internal static void main() {
     insert(30);
     insert(10);
     insert(20);

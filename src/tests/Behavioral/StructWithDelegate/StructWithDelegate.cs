@@ -10,7 +10,7 @@ partial struct Person {
     internal int32 age;
 }
 
-internal static void Main() {
+internal static void main() {
     var person = new Person(work: default, name: "Michał", age: 29);
     fmt.Println(person);
 }

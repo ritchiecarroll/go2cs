@@ -19,7 +19,7 @@ internal static nint search(slice<nint> xs, nint t) {
     return b;
 }
 
-internal static void Main() {
+internal static void main() {
     var xs = slice<nint>([5, 6, 7, 8]);
     fmt.Println(search(xs, 7));
     fmt.Println(search(xs, 3));

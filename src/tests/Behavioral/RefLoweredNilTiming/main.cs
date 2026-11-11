@@ -67,7 +67,7 @@ internal static void deferredFault() {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     ж<elem> e1 = default;
     tryEager("zerovar", ref (e1).DerefOrNull());
 

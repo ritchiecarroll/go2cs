@@ -139,7 +139,7 @@ partial interface bumper {
     nint bump();
 }
 
-internal static void Main() {
+internal static void main() {
     var f1 = Ꮡ(new rawFile());
     use(new pipeжPipeConn(Ꮡ(new pipe(rawFile: f1, path: @"\.\pipe\a"))));
     fmt.Println(f1.closed, f1.rd.t.Unix(), f1.wd.t.Unix());

@@ -89,7 +89,7 @@ internal static void nilDefer() {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     pointerLocal();
     pointerLocalArg(1);
     pointerParam(Ꮡ(new path("pointee")));

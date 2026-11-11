@@ -19,7 +19,7 @@ internal static partial fieldElement spread(fieldElement a, fieldElement b) {
     return min((fieldElement)(a - b), (fieldElement)(b - a), (fieldElement)(a - b + 3329), (fieldElement)(b - a + 3329));
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(min((nint)3, (nint)7));
     fmt.Println(max((nint)3, (nint)7));
 

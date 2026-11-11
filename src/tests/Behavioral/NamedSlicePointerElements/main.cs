@@ -14,7 +14,7 @@ partial struct Array {
 
 partial struct queue /*[]ж<item>*/;
 
-internal static void Main() {
+internal static void main() {
     var qᴷ = new stackAppend<ж<item>>();
 
     var q = new queue(new ж<item>[]{Ꮡ(new item(v: 1)), Ꮡ(new item(v: 2))}.slice());

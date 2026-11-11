@@ -111,7 +111,7 @@ internal static T dup<T>(T x)
     where T : Cloner<T>
 { return x.Clone(); }
 
-internal static void Main() {
+internal static void main() {
     var original = Ꮡ(new compilerOptionsParser());
     var p = ((ж<compilerOptionsParser>)(convertMapToOptions<compilerOptionsParserжoptionParserᴾ>(new map<@string, any>{["strict"] = true, ["bad"] = (nint)1}, slice<@string>(["strict", "bad"]), original)));
     fmt.Println("result fields:", p.seen, len(p.seen));

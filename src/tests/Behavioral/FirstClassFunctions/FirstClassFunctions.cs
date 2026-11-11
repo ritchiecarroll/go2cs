@@ -94,7 +94,7 @@ internal static @string ratioString(params ꓸꓸꓸnint valsʗp) {
     return s;
 }
 
-internal static void Main() {
+internal static void main() {
     var strategies = new slice<strategy>(win);
     foreach (var kΔ1 in range(len(strategies))) {
         strategies[kΔ1] = stayAtK(kΔ1 + 1);

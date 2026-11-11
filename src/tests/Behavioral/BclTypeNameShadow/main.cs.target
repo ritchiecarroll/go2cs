@@ -15,7 +15,7 @@ partial struct byteView /*[]byte*/;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string abcdefˢ = "abcdef"u8;
 
-internal static void Main() {
+internal static void main() {
     var r = new Range(Start: 1, End: 4);
     ViewType v = (ViewType)(@string)abcdefˢ;
 

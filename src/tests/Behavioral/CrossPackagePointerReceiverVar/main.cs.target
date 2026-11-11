@@ -6,7 +6,7 @@ using global::go.go;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     lib.ᏑBoxed.RLock();
     lib.ᏑBoxed.RUnlock();
     fmt.Println("boxed: rlock/runlock ok");

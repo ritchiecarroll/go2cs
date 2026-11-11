@@ -57,7 +57,7 @@ internal static void arm(@string @class, Func<@string> f) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     arm("fmt arg", () => fmt.Sprint((int8)(a + a), " ", (uint8)(u + u), " ", (int16)(w + w), " ", (uint16)(z + z)));
     arm("fmt %T", () => fmt.Sprintf("%T %T %T %T"u8, (int8)(a + a), (uint8)(u + u), (int8)(-a - a), ((uint8)(~u))));
     arm("any var", () => {

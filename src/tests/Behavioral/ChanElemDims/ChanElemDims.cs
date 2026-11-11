@@ -5,7 +5,7 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var c = new channel<array<nint>>(0, ChanCargo.Of(null, new nint[] { 3 }));
 
     fmt.Printf("value row [red by boundary until increment C: not measurable from a channel value] %%T=%T String()=%s Elem().Len()=%d\n"u8,

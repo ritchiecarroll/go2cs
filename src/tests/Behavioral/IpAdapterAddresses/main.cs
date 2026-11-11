@@ -5,7 +5,7 @@ using Δnet = net_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("-- net.Interfaces --");
 
     var (ifs, err) = Δnet.Interfaces();

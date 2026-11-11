@@ -10,7 +10,7 @@ internal static @string genericKey<M>(M m)
     where M : /* ~map[int8]string */ IMap<int8, @string>, ISupportMake<M>, new()
 { return m[(int8)((h >> 1))]; }
 
-internal static void Main() {
+internal static void main() {
     uint8 u = 200;
     uint8 d = 250;
     int16 w = 30000;

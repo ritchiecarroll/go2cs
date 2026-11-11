@@ -11,7 +11,7 @@ partial struct namedKey {
     internal nint id;
 }
 
-internal static void Main() {
+internal static void main() {
     var bg = context.Background();
 
     var c1 = context.WithValue(bg, (ctxKey)1, "v1");

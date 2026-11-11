@@ -9,7 +9,7 @@ partial struct Fields /*map[@string, any]*/;
 
 partial struct Tree /*map[@string, Tree]*/;
 
-internal static void Main() {
+internal static void main() {
     var f = new Fields(new map<@string, any>{["a"] = (nint)1});
     var c = maps.Clone<Fields, @string, any>(f);
     c["b"] = (nint)2;

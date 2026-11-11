@@ -26,7 +26,7 @@ public static T Get<T>(this ж<Box<T>> Ꮡb) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string helloˢ = "hello"u8;
 
-internal static void Main() {
+internal static void main() {
     ref var bi = ref heap(new Box<nint>(), out var Ꮡbi);
     Ꮡbi.Set(42);
     Ꮡbi.Set(Ꮡbi.Get() + 1);

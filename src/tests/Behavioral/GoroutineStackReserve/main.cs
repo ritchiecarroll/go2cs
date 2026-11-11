@@ -23,7 +23,7 @@ internal static void produce(nint id, channel/*<-*/<nint> @out) {
 
 internal static nint square(nint n) { return n * n; }
 
-internal static partial void Main() {
+internal static partial void main() {
     var deep = new channel<nint>(0);
 
     var deepʗ1 = deep;

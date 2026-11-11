@@ -24,7 +24,7 @@ public static Option<T> NewEmptyOption<T>() {
     );
 }
 
-internal static void Main() {
+internal static void main() {
     var optionPtr = Ꮡ(new Option<@string>(
         value: "hello",
         valid: true

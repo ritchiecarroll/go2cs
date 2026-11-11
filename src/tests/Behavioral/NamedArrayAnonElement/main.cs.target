@@ -19,7 +19,7 @@ internal static ж<semaRoot> rootFor(this ref semTable t, nint i) {
     return Ꮡ(t.Value, i).of(semTableᴛ1.Ꮡroot);
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("named-array anon element compiles");
 }
 

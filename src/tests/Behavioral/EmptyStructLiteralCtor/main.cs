@@ -46,7 +46,7 @@ partial struct IntSlice /*[]nint*/;
 
 partial struct StrMap /*map[@string, nint]*/;
 
-internal static void Main() {
+internal static void main() {
     var p = new point();
     p.x = 3;
     fmt.Println("point:", p, p.x + p.y);

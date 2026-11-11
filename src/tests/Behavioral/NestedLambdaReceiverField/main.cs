@@ -42,7 +42,7 @@ internal static void exec(this ж<stmt> Ꮡs) {
     });
 }
 
-internal static void Main() {
+internal static void main() {
     var s = Ꮡ(new stmt(d: Ꮡ(new dep(label: "d1")), cg: new connGrabжgrabber(Ꮡ(new connGrab(name: "g1"))), id: 7));
     s.exec();
     fmt.Println("done");

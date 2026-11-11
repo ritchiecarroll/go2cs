@@ -34,7 +34,7 @@ partial interface V :
     void N();
 }
 
-internal static void Main() {
+internal static void main() {
     var m = new map<I, nint>();
     I i1 = new T1("foo");
     I i2 = new T2("bar");

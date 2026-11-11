@@ -16,7 +16,7 @@ internal static void start(this ref iter it, nint n) {
 internal static bool valid(this ref iter it) { return it.i < it.n; }
 internal static void next(this ref iter it) { it.i++; }
 
-internal static void Main() {
+internal static void main() {
     iter u = default;
     nint sum = 0;
     for (u.start(3); u.valid(); u.next()) {

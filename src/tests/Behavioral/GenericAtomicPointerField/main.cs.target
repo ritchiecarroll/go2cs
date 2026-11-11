@@ -34,7 +34,7 @@ public static ж<V> Get<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey) {
     return default;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var c = ref heap(new Cache<nint>(), out var Ꮡc);
     ref var a = ref heap<nint>(out var Ꮡa);
     a = 1;

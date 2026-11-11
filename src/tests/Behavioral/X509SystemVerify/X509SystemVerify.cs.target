@@ -19,7 +19,7 @@ using Δio = io_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var namesᴷ = new stackAppend<@string>();
 
     var (key, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);

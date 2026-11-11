@@ -103,7 +103,7 @@ internal static slice<nint> inDecl() {
     return @out;
 }
 
-internal static void Main() {
+internal static void main() {
     foreach (var (_, e) in range(table)) {
         fmt.Println(e.name, e.f());
     }

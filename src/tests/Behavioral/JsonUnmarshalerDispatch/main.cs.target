@@ -23,7 +23,7 @@ internal partial struct main_s /*dyn*/ {
     public Celsius C;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var t = ref heap(new time.Time(), out var Ꮡt);
     var err = json.Unmarshal(slice<byte>(@"""2020-01-02T03:04:05Z"""u8), Ꮡt);
     fmt.Println(err, t.UTC().Format(time.RFC3339));

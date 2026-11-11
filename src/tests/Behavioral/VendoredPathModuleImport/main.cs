@@ -29,7 +29,7 @@ internal static (nint nDst, nint nSrc, error err) Transform(this upper _, slice<
     return (n, n, err);
 }
 
-internal static void Main() {
+internal static void main() {
     var (s, n, err) = transform.String(new transform_SpanningTransformerᴠTransformer(transform.Nop), "abc");
     fmt.Println(s, n, err);
 

@@ -26,7 +26,7 @@ partial struct outer<T> {
     internal nint n;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var x = ref heap<nint>(out var Ꮡx);
     x = 5;
     ref var y = ref heap<nint>(out var Ꮡy);

@@ -33,7 +33,7 @@ internal static uintptr onTimeFormatPanics(uintptr timeFormatString, uintptr lpa
     throw panic(callbackPanicText);
 }
 
-internal static void Main() {
+internal static void main() {
     var kernel32 = syscall.NewLazyDLL("kernel32.dll");
     var enumSystemLocalesW = kernel32.NewProc("EnumSystemLocalesW");
 

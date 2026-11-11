@@ -41,7 +41,7 @@ internal static partial @string boundInsideLiteral(ж<T> t) {
     })();
 }
 
-internal static partial void Main() {
+internal static partial void main() {
     ref var t = ref heap<T>(new T(n: 1), out var Ꮡt);
     var p = Ꮡt;
 

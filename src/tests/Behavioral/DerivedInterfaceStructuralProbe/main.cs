@@ -70,7 +70,7 @@ internal static @string describe(any v) {
     return "not deep";
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(classify(new tempErrжerror(Ꮡ(new tempErr(msg: "boom")))));
     fmt.Println(classify(new plainErrжerror(Ꮡ(new plainErr(msg: "plain")))));
     fmt.Println(describe(Ꮡ(new node(id: "n1"))));

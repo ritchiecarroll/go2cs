@@ -6,7 +6,7 @@ using mep = MethodExprDotImport.mep_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var readers = slice<Func<ж<mep.Reader>, byte, (@string, error)>>([
         ((Func<ж<mep.Reader>, byte, (@string, error)>)(mep.Read)),
         ((Func<ж<mep.Reader>, byte, (@string, error)>)(mep.Peek))

@@ -16,7 +16,7 @@ internal static void expectPanic(@string name, Action f) {
     finally { ᒐ.Run(); }
 }
 
-internal static partial void Main() {
+internal static partial void main() {
     var ch = new channel<nint>(0);
     var res = new channel<@string>(3);
     for (nint i = 0; i < 3; i++) {

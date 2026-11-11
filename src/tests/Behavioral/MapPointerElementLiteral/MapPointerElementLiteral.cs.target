@@ -16,7 +16,7 @@ internal static map<ж<node>, nint> buildKeyMap(ж<node> a, ж<node> b) {
     return new map<ж<node>, nint>{[a] = 10, [b] = 20};
 }
 
-internal static void Main() {
+internal static void main() {
     var a = Ꮡ(new node(id: 1));
     var b = Ꮡ(new node(id: 2));
 

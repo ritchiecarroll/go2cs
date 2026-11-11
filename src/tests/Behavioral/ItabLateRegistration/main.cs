@@ -31,7 +31,7 @@ internal static (@string, nint) primeLate() {
     return latelib.Prime();
 }
 
-internal static void Main() {
+internal static void main() {
     round("before");
 
     var (pn, ps) = primeLate();

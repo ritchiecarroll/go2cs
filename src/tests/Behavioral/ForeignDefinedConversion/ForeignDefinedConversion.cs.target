@@ -15,7 +15,7 @@ partial struct Dur /*global::go.time_package.Duration*/;
 
 internal static fmt.Stringer _ᴛ1ʗ = ((Level)(levellib.Level)0);
 
-internal static void Main() {
+internal static void main() {
     fmt.Println((Level)(levellib.Level)0, (Level)(levellib.Level)3);
 
     uint32 u = 5;

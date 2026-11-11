@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var x = (uint64)0b1011010;
     (x, var frac) = (x >> 3, x & 7);
     fmt.Println(x, frac);

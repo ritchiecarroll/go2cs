@@ -25,7 +25,7 @@ internal static void dump(@string name, @string s) {
     fmt.Println();
 }
 
-internal static void Main() {
+internal static void main() {
     dump("constTable", constTable);
     dump("varTable", varTable);
     dump("varSingle", varSingle);

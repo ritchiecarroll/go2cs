@@ -14,7 +14,7 @@ internal partial interface main_d /*dyn*/ {
     nint Foo();
 }
 
-internal static void Main() {
+internal static void main() {
     nint p = 42;
     var t = new T(7);
 

@@ -11,7 +11,7 @@ internal static void use(Func<@string, (Δio.ReadCloser, error)> open) {
     fmt.Println(rc == nil, err != nil);
 }
 
-internal static void Main() {
+internal static void main() {
     var open = (Δio.ReadCloser, error) (@string name) => {
         var (ᴛ1, ᴛ2) = os.Open(name);
         return (new os_FileжReadCloser(ᴛ1), ᴛ2);

@@ -20,7 +20,7 @@ internal partial interface main_type /*dyn*/ {
     @string Bar();
 }
 
-internal static void Main() {
+internal static void main() {
     fooer v = new gadget(1);
     if (v._<main_type>(out _)) {
         fmt.Println("value-widened-wrong");

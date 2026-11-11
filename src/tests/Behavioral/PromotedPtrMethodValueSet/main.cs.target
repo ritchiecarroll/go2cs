@@ -91,7 +91,7 @@ internal static void describe(@string label, any v) {
     }
 }
 
-internal static void Main() {
+internal static void main() {
     ref var p = ref heap<SameP>(new SameP(Ꮡ(new Inner(10))), out var Ꮡp);
     describe("SameP", p);
     describe("*SameP", Ꮡp);

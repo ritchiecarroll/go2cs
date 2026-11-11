@@ -19,7 +19,7 @@ internal static void bump() {
     Ꮡctrl.Ꮡtotal.Add(5);
 }
 
-internal static void Main() {
+internal static void main() {
     keep(Ꮡctrl);
     bump();
     bump();

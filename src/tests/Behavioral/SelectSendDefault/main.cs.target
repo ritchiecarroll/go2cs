@@ -242,7 +242,7 @@ internal static void namedChannelType() {
     fmt.Println("named channel: held =", ᐸꟷ<nint>(q));
 }
 
-internal static void Main() {
+internal static void main() {
     fullBuffered();
     freeBuffered();
     unbufferedWithReceiver();

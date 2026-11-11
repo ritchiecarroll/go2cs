@@ -20,7 +20,7 @@ internal static void apply(this ж<State> Ꮡs, nint x) {
     adder()(Ꮡs, x);
 }
 
-internal static void Main() {
+internal static void main() {
     var s = Ꮡ(new State());
     s.apply(5);
     s.apply(3);

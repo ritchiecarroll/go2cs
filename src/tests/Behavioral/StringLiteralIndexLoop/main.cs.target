@@ -12,7 +12,7 @@ internal static nint sumTable(nint n) {
     return total;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(sumTable(4));
     fmt.Println("abcd"u8[2]);
 }

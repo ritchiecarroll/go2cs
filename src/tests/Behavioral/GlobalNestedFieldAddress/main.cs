@@ -25,7 +25,7 @@ internal static void mutate() {
     q.b = 7;
 }
 
-internal static void Main() {
+internal static void main() {
     keep(Ꮡg);
     mutate();
     fmt.Println(g.mid.a, g.mid.b, g.tag);

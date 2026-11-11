@@ -96,7 +96,7 @@ internal partial interface main_typeᴛ6 /*dyn*/ {
     void Error(params ꓸꓸꓸstring ʗp);
 }
 
-internal static void Main() {
+internal static void main() {
     any tt = new TT();
     var (_, ok) = tt._<main_type>(ᐧ);
     check("TT    Error(...any)", ok);

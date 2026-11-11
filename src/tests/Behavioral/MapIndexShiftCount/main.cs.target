@@ -58,7 +58,7 @@ internal static T shrIndex<T>(map<nint, T> m, nuint n)
     return m[1];
 }
 
-internal static void Main() {
+internal static void main() {
     arm("uint32 const right", () => {
         var m = new map<nint, uint32>{[1] = 0xFFFFFFFFU};
         m[1] = m[1].Rsh((uint64)40);

@@ -20,7 +20,7 @@ internal static partial nint run() {
     return x.get().n + arr[0].n + arr[2].n;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(run());
 }
 

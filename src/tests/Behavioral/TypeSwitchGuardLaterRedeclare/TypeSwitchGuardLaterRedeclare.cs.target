@@ -73,7 +73,7 @@ internal static @string describe(any v, bool nested) {
     return x;
 }
 
-internal static void Main() {
+internal static void main() {
     var e = errors.New("x");
     fmt.Println(kind(e, bool (error _) => true));
     fmt.Println(kind(e, reflect.TypeOf((nint)1)));
