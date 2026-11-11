@@ -889,13 +889,7 @@ public static error /*err*/ FreeLibrary(ΔHandle handle) {
     return err;
 }
 
-public static ж<uint16> /*cmd*/ GetCommandLine() {
-    ж<uint16> cmd = default;
-
-    var (r0, _, _) = SyscallN(procGetCommandLineW.Addr());
-    cmd = (ж<uint16>)(uintptr)((@unsafe.Pointer)r0);
-    return cmd;
-}
+// go2cs generated this placeholder — func GetCommandLine is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 public static error /*err*/ GetComputerName(ж<uint16> buf, ж<uint32> n) {
     error err = default;

@@ -36171,7 +36171,7 @@ to accept `internal` (the negative control `internal/poll.runtime_Semacquire` fi
 and narrowed to match nothing (the positive control fires).
 
 — G (2026-11-10)
-## 2026-11-11 — i9 (finding B's sub-note, COORD's ruling): a NON-Go exception escaping a goroutine exits the process with status 2 WITHOUT teeing to the crash output — a golib parity defect, OPEN, for routing
+## 2026-11-11 — i9 (finding B's sub-note, COORD's ruling): a NON-Go exception escaping a goroutine exits the process with status 2 WITHOUT teeing to the crash output — a golib parity defect, CLOSED by claude/c1-crash-output-parity
 
 **The finding.** Go's crash output (`runtime/debug.SetCrashOutput`) receives every fatal report: an unhandled
 panic and every other fatal error. golib honours that for the two paths it owns: `FatalReport.Fatal` and
@@ -36195,6 +36195,13 @@ of one because of it.
 does (Go prints `fatal error:` or `panic:` text for a runtime-level failure) and tee it to the same descriptor
 before exiting 2. The guard is a GolibTests arm: set the crash output, let a non-Go exception escape a goroutine in a
 child, and require the file to be non-empty. COORD routes the fix.
+
+**Status (2026-11-11): CLOSED by C1, claude/c1-crash-output-parity `b60eef7b07`, on master with batch 285.** The fix
+routes the backstop's non-Go branch, its `unhandled exception:` fallback, and `builtin.fatal`'s deadlock report
+through one helper, `builtin.WriteFatalReport`, which writes stderr and then the crash output. The guard this row
+asked for is GolibTests `BackstopCrashOutputTests`: a child test host throws a managed exception on a real goroutine
+and dies through the backstop, and the parent requires the crash file to equal stderr. At master before the fix, the
+crash file was empty. The design note is DESIGN-crash-report.md §4.
 
 — i9 (2026-11-11)
 ## 2026-11-11 — C2 (the -tests alias-matcher seat, COORD's ruling): the dropped `.tests.csproj` references are a NAMED expected delta for the freeze regen

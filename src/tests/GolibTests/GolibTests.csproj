@@ -177,6 +177,8 @@
        assumed: `-getProperty:GoTargetOS` returns "" here. -->
   <ItemGroup Condition="'$(GoTargetOS)' != '' and '$(GoTargetOS)' != 'windows'">
     <Compile Remove="WindowsNetUserInfoTests.cs" />
+    <!-- C44: os.Args under the apphost and the dotnet muxer; syscall's windows GetCommandLine hand-own and os's split. -->
+    <Compile Remove="WindowsCommandLineTests.cs" />
     <!-- syscall's readNativeSockaddr lives in its windows/ folder. -->
     <Compile Remove="WindowsUnnamedUnixSockaddrTests.cs" />
 
