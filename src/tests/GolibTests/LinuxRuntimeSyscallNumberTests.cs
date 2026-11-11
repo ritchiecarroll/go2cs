@@ -57,4 +57,20 @@ public class LinuxRuntimeSyscallNumberTests
                 Assert.IsNull(runtime_package.GoSigprocmaskNumberProbe(arch), $"{arch} has no mapping and must be refused");
         }
     }
+
+    // Not an S3 site: sched_getaffinity (runtime/linux/stubs2_impl.cs), bodied after the census. The numbers are
+    // Go's own (sys_linux_amd64.s and sys_linux_arm64.s). The converted flavour's constant is the compiled arch's,
+    // so its cross-check is against the host's row, beside the body's own tests (RuntimeLinuxSchedExitTests).
+    [TestMethod]
+    public void SchedGetaffinityTakesEachArchsOwnNumber()
+    {
+        Assert.AreEqual(204L, runtime_package.GoSchedGetaffinityNumberProbe(Architecture.X64), "amd64");
+        Assert.AreEqual(123L, runtime_package.GoSchedGetaffinityNumberProbe(Architecture.Arm64), "arm64 (amd64's 204 is getsockname here, and 123 is setfsgid at amd64)");
+
+        foreach (Architecture arch in Enum.GetValues<Architecture>())
+        {
+            if (arch is not (Architecture.X64 or Architecture.Arm64))
+                Assert.IsNull(runtime_package.GoSchedGetaffinityNumberProbe(arch), $"{arch} has no mapping and must be refused");
+        }
+    }
 }

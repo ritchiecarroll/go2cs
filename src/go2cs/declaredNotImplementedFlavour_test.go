@@ -357,6 +357,10 @@ type flavourRow struct {
 // gate exempts by rule. Measured at the batch 284 union (b328dd71e7): pooled 495; per target
 // windows/amd64 213, linux/amd64 231, darwin/amd64 427, linux/arm64 208.
 //
+// 2026-11-11: runtime.sched_getaffinity, runtime.exit and runtime.osyield were bodied at linux
+// (runtime/linux/stubs2_impl.cs) and their three rows left. Measured after: pooled 492; linux/amd64
+// 228, linux/arm64 205; windows/amd64 and darwin/amd64 as above.
+//
 // The two MASKED rows are findings of this guard, not triage results:
 //
 //   - internal/cpu.osInitArm64 is declared and CALLED in amd64/cpu_arm64_process_impl.cs (from a
@@ -385,16 +389,13 @@ var declaredFlavourOnlyStubs = map[string]flavourRow{
 	"runtime.callCgoMunmap":        {atLinux, flavourUntriaged},
 	"runtime.callCgoSigaction":     {atLinux, flavourUntriaged},
 	"runtime.connect":              {atLinux, flavourUntriaged},
-	"runtime.exit":                 {atLinux, flavourUntriaged},
 	"runtime.exitThread":           {atLinux, flavourUntriaged},
 	"runtime.futex":                {atLinux, flavourUntriaged},
 	"runtime.gettid":               {atLinux, flavourUntriaged},
-	"runtime.osyield":              {atLinux, flavourUntriaged},
 	"runtime.raise":                {atLinux, flavourUntriaged},
 	"runtime.raiseproc":            {atLinux, flavourUntriaged},
 	"runtime.rt_sigaction":         {atLinux, flavourUntriaged},
 	"runtime.sbrk0":                {atLinux, flavourUntriaged},
-	"runtime.sched_getaffinity":    {atLinux, flavourUntriaged},
 	"runtime.setitimer":            {atLinux, flavourUntriaged},
 	"runtime.sigaltstack":          {atLinux, flavourUntriaged},
 	"runtime.sigreturn__sigaction": {atLinux, flavourUntriaged},

@@ -21,6 +21,18 @@
 // A buffer or name is pinned for the call through the box's own uintptr conversion
 // (ж<T>.EnsureStableAddress, the FromPinnedBox door) and held reachable until the call returns.
 //
+// ALSO HERE: sched_getaffinity and osyield (os_linux.go) and exit (stubs2.go), three more partials
+// whose only bodies are assembly. Each threw from its generated stub on linux/amd64 and linux/arm64:
+// the public SetDefaultGOMAXPROCS reaches sched_getaffinity through getCPUCount with no branch on the
+// way, the spin loops call osyield only under contention, and sysAllocOS calls exit(2) when mmap fails
+// with EACCES or EAGAIN.
+//   - sched_getaffinity is the RAW syscall, not libc's wrapper of the same name. The kernel answers
+//     the number of bytes it wrote, which getCPUCount slices its buffer by; the wrapper answers 0,
+//     and a body over it would count no CPU at all. The number is per arch.
+//   - osyield is libc's sched_yield, as the windows and darwin bodies are their hosts' yields.
+//   - exit is the raw exit_group, as Go's is: the process ends there, with no managed shutdown to
+//     wait on. Its caller is a failure path inside the allocator.
+//
 // Hand-owned (no stubs2_impl.go exists, so a reconvert never regenerates this file).
 
 using System;
@@ -101,6 +113,53 @@ partial class runtime_package
         return r < 0 ? negativeErrno() : 0;
     }
 
+    // The sched_getaffinity number by arch (Go's sys_linux_amd64.s and sys_linux_arm64.s): 204 at amd64,
+    // 123 at arm64. Crossed, 204 is getsockname at arm64 and 123 is setfsgid at amd64, a call that changes
+    // the process. runtime sits below the syscall flavour, so this is an arch switch, as
+    // sigprocmaskNumberFor is. null for an arch with no mapping; sched_getaffinity refuses it by name.
+    internal static long? schedGetaffinityNumberFor(Architecture arch) => arch switch
+    {
+        Architecture.X64 => 204,
+        Architecture.Arm64 => 123,
+        _ => null,
+    };
+
+    [DllImport("libc", EntryPoint = "sched_yield")]
+    private static extern int libc_sched_yield();
+
+    // os_linux.go: sched_getaffinity returns the number of bytes the kernel wrote into buf, or the
+    // negative errno. libc's syscall answers -1 and sets errno, which is turned back into Go's form.
+    internal static partial int32 sched_getaffinity(uintptr pid, uintptr len, ж<byte> buf)
+    {
+        Architecture arch = RuntimeInformation.ProcessArchitecture;
+        long number = schedGetaffinityNumberFor(arch) ??
+            throw new PlatformNotSupportedException($"runtime.sched_getaffinity: no sched_getaffinity number for {arch}; refused rather than misread");
+
+        long r = sys_syscall(number, (long)(nuint)pid, (long)(nuint)len, (nint)(nuint)(uintptr)buf);
+        System.GC.KeepAlive(buf);
+        return r < 0 ? negativeErrno() : (int32)r;
+    }
+
+    // os_linux.go: osyield gives up the processor (sched_yield).
+    internal static partial void osyield() => libc_sched_yield();
+
+    // stubs2.go: exit ends the process with this status and does not return (exit_group). An arch with
+    // no number still ends the process, through the host, and says why on stderr first.
+    internal static partial void exit(int32 code)
+    {
+        Architecture arch = RuntimeInformation.ProcessArchitecture;
+        var numbers = dieNumbersFor(arch);
+
+        if (numbers is null)
+        {
+            System.Console.Error.WriteLine("fatal: runtime.exit: no exit_group number for " + arch + "; exiting through the host with status " + code);
+            System.Environment.Exit(code);
+            return;
+        }
+
+        sys_syscall(numbers.Value.exitGroup, code, 0, 0);
+    }
+
     // ---- the guard's view (GolibTests RuntimeFdSyscallTests) ----
 
     private static string failureOf(Exception ex) => $"{ex.GetType().Name}: {ex.Message}";
@@ -168,4 +227,81 @@ partial class runtime_package
             return (0, failureOf(ex));
         }
     }
+
+    // ---- sched_getaffinity, osyield and exit: the guard's view (GolibTests RuntimeLinuxSchedExitTests) ----
+
+    /// <summary>
+    /// GolibTests' probe for sched_getaffinity's per-arch number: schedGetaffinityNumberFor's answer, or null
+    /// for an unmapped arch. Pure: no syscall.
+    /// </summary>
+    public static long? GoSchedGetaffinityNumberProbe(Architecture arch) => schedGetaffinityNumberFor(arch);
+
+    /// <summary>
+    /// getCPUCount's own call, sched_getaffinity(0, 8192, buf). Returns what the call returned and the
+    /// number of bits set in that many bytes of the buffer.
+    /// </summary>
+    public static (int result, int bits, string? failure) GoSchedGetaffinityProbe()
+    {
+        try
+        {
+            ref var buf = ref heap(new array<byte>(8192), out var Ꮡbuf);
+            int r = (int)sched_getaffinity(0, (uintptr)8192, Ꮡbuf.at<byte>(0));
+            int bits = 0;
+
+            for (int i = 0; i < r; i++)
+                bits += System.Numerics.BitOperations.PopCount(buf[i]);
+
+            return (r, bits, null);
+        }
+        catch (Exception ex)
+        {
+            return (0, 0, failureOf(ex));
+        }
+    }
+
+    /// <summary>sched_getaffinity over a 1-byte buffer, which the kernel refuses. Go answers -EINVAL (-22).</summary>
+    public static (int result, string? failure) GoSchedGetaffinityErrorSignProbe()
+    {
+        try
+        {
+            ref var dst = ref heap(new byte(), out var Ꮡdst);
+            return ((int)sched_getaffinity(0, 1, Ꮡdst), null);
+        }
+        catch (Exception ex)
+        {
+            return (0, failureOf(ex));
+        }
+    }
+
+    /// <summary>getCPUCount, the converted caller that slices its buffer by sched_getaffinity's result.</summary>
+    public static (int count, string? failure) GoGetCPUCountProbe()
+    {
+        try
+        {
+            return ((int)getCPUCount(), null);
+        }
+        catch (Exception ex)
+        {
+            return (0, failureOf(ex));
+        }
+    }
+
+    /// <summary>osyield, <paramref name="times"/> times over. Null when every call returned.</summary>
+    public static string? GoOsyieldProbe(int times)
+    {
+        try
+        {
+            for (int i = 0; i < times; i++)
+                osyield();
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            return failureOf(ex);
+        }
+    }
+
+    /// <summary>exit(code). It does not return: the process ends with that status.</summary>
+    public static void GoExitProbe(int code) => exit((int32)code);
 }
