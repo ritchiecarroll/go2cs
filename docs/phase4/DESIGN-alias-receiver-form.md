@@ -127,3 +127,55 @@ test over the selection (`TestAliasReceiverTakesTheNamedForm`) is red at master 
 - Any change to which named-receiver methods take which form. The census reads no gap there.
 - A converted struct's equality operator with nil, which is what let the wrong form compile. Inferred, not
   measured: other value-versus-nil comparisons may compile the same way. A BOARD candidate once measured.
+
+## Amendment 2026-11-11 — part A as cut, and what was measured
+
+> Appended, not rewritten: sections 1 to 7 above stand as posted. COORD had not ruled on the design when the cut
+> began; P1 announced at 17:44Z that part A (option 1, the first two changes of section 4) starts locally, to be
+> dropped if another option is ruled. **Part B is not cut** and still waits for that ruling.
+
+### A. The cut
+
+Branch `claude/p1-c48-alias-receiver`, on the design commit `13510f5eed`, base master `742a3dbb24`:
+
+| Commit | What |
+|---|---|
+| `d464b962a2` | red: behavioral project `AliasReceiverForms` (15 receiver shapes through aliases, each on a nil and on a real pointer, plus a named-receiver and a value-receiver control; 63 lines under Go) with master's emission as its `main.cs`, which does not compile (7 errors); two converter tests, both failing |
+| `7c38e4418d` | fix: `types.Unalias` on the receiver's element in `scanFileForCaptureModeMethods` and on the field owner in `receiverFieldChainAddressForm`; 2 conditions in 2 files |
+| `93e68e328c`, `ef5533c3bc` | the rule in `ConversionStrategies-Reference/pointers.md`, the PENDING entry in the held 1.26.10.4 section of `NEWS.md`, and three provenance notes whose lines moved |
+| `375586878e` | goldens: the project's `main.cs`, `main.cs.target`, position map, and its line in the four test lists |
+| `c8fd69b9c1` | test fix, found by the first full `go test`: the two new tests call `isolateConverterPathGlobals`, and the test file is registered in `go2cs-src.projitems` |
+
+The fixture is narrower than section 5 said: it holds part A's shapes only, so the receiver that is an alias of
+the pointer type (probe 3) is not in it. The equivalence test of section 4 is `TestAliasReceiverEmitsAsNamedReceiver`.
+
+### B. Predictions of section 6, scored
+
+- **Standard-library footprint: MET, 0 files on each of four targets.** Two-seeded, master's converter against
+  `7c38e4418d`, one target per run, each arm seeded from `src/core` (4,662 `.cs` counted in each seed):
+  linux/amd64, windows/amd64, darwin/amd64 and linux/arm64 each read an empty diff. The named arm (the
+  field-address condition) did not miss. The instrument is the method-limit seat's script in the same form; its
+  control (a planted space reads as 15 files) was run in that seat and not rerun here. Runs 2 to 4 began with one
+  uncommitted docs edit in the tree; the converter binaries were built once, before run 1.
+- **`check-no-regression.ps1`: MET, 0 existing goldens move.** At `375586878e`, on a linux host: 1,038 packages
+  transpiled, 12 windows-only projects skipped, and the one changed file is
+  `CgoPseudoPackageTypes/.editorconfig`, the linux-host drift already routed to lane H (exit code 1 for that file
+  alone). `AliasReceiverForms` itself does not move.
+- **`go test -timeout 60m ./...`**: 11 packages ok at `c8fd69b9c1`, the repository guards among them. The first
+  run, at `375586878e`, failed two tests in the converter's package, both from the new test file; `c8fd69b9c1`
+  is their fix. Both new tests fail at master's converter and pass from `7c38e4418d`.
+- **The behavioral runner on the new project** (`--filter AliasReceiverForms`, at `c8fd69b9c1`, linux): transpile,
+  golden byte-compare, compile and output each pass 1 of 1; the C# program prints Go's 63 lines. Run with
+  `-IgnoreDiskPreflight`: this box has about 12 GB free, under the runner's 25 GB floor. The full runner was not
+  run: the footprint and the regression check read no other emission change.
+- **GenTests, GolibTests: not run.** No generator or runtime file is changed by the cut.
+- **The three-target `-stdlib` compile arm an emission seat owes: not run, because it has nothing to compile.**
+  The emission is byte-identical to master's on four targets.
+- **TypeScript: not measured here.** Unit 02478 is the TS session's to confirm against a converter built at this
+  branch.
+
+### C. Still open
+
+- Part B (section 4): the 28 receiver-type reads and the declaration path, for `type P = *T; func (p P) M()`.
+  Probe 3 is its repro. In-seat commits or a BOARD row: COORD's call.
+- The struct equality operator with nil (section 7) is unchanged and unmeasured beyond section 1.
