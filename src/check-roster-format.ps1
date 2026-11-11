@@ -235,13 +235,43 @@ Assert-Equal 'per-RID expectation: the banked RID reads the segment' '7/3/darwin
 Assert-Equal 'per-RID expectation: no RID given reads the segment, as before' 7 (Get-RosterRowExpectation -Row $ridRow -Goos 'darwin').Expected
 Assert-Equal 'per-RID expectation: a plain darwin row ignores the RID' 'darwin' (Get-RosterRowExpectation -Row $byName['dar/pkg'] -Goos 'darwin' -Rid 'osx-x64').Source
 Assert-Equal 'per-RID expectation: windows still reads the columns' 'columns' (Get-RosterRowExpectation -Row $ridRow -Goos 'windows' -Rid 'osx-x64').Source
-Assert-Throws 'per-RID note: a note on a linux annotation is refused by name' {
+Assert-Throws 'per-RID note: a linux note naming mac RIDs is refused by name' {
     Read-FixtureRoster @("| [``ridl/pkg``](https://x/ridl) | 3 |  | Linux. $dot linux: 3 (osx-arm64; osx-x64: 4) $dot [proof](p.md) |")
-} 'per-RID note on its ''linux'' annotation'
+} 'linux annotation names osx-arm64 and osx-x64'
 Assert-Throws 'per-RID note: a note naming one RID twice is refused' {
     Read-FixtureRoster @("| [``rid2/pkg``](https://x/rid2) | 3 |  | Twice. $dot darwin: 3 (osx-x64; osx-x64: 4) $dot [proof](p.md) |")
 } 'twice'
-Assert-Equal 'per-RID note: an unknown RID is not a note, so the segment is prose' 0 (Read-FixtureRoster @("| [``ridu/pkg``](https://x/ridu) | 3 |  | Prose. $dot darwin: 3 (osx-arm64; linux-x64: 4) $dot [proof](p.md) |"))[0].OS.Count
+Assert-Throws 'per-RID note: a darwin note naming a linux RID is refused by name (S7-a: no longer read as prose)' {
+    Read-FixtureRoster @("| [``ridu/pkg``](https://x/ridu) | 3 |  | Prose. $dot darwin: 3 (osx-arm64; linux-x64: 4) $dot [proof](p.md) |")
+} 'darwin annotation names osx-arm64 and linux-x64'
+Assert-Equal 'per-RID note: a RID no key ships is not a note, so the segment is prose' 0 (Read-FixtureRoster @("| [``ridv/pkg``](https://x/ridv) | 3 |  | Prose. $dot darwin: 3 (osx-arm64; win-arm64: 4) $dot [proof](p.md) |"))[0].OS.Count
+
+# ---- 1-rid-linux. the LINUX per-RID note and `pending` (S7-a; DATA-la64-s7-bank-plan.md 2.4, COORD 2026-11-11) -------
+# linux ships two flavours under two RIDs, so a linux segment names both: "linux: 3840 + 2 (linux-x64; linux-arm64:
+# 3838 + 2)" once linux-arm64 is read, and "(linux-x64; linux-arm64: pending)" until then. `pending` is linux's only:
+# darwin's two RIDs are read in one dispatch, so a darwin note always carries a reading.
+$linNote = (Read-FixtureRoster @("| [``lin/pkg``](https://x/lin) | 10 |  | Two flavours. $dot linux: 3840 + 2 (linux-x64; linux-arm64: 3838 + 2) $dot [proof](p.md) |"))[0]
+Assert-Equal 'linux note: the banked RID and its reading' '3840/2/linux-x64' "$($linNote.OS['linux'].Expected)/$($linNote.OS['linux'].Disclosed)/$($linNote.OS['linux'].Rid)"
+Assert-Equal 'linux note: the other RID and its reading' '3838/2/linux-arm64/False' "$($linNote.OS['linux'].Other.Expected)/$($linNote.OS['linux'].Other.Disclosed)/$($linNote.OS['linux'].Other.Rid)/$($linNote.OS['linux'].Other.Pending)"
+$linPending = (Read-FixtureRoster @("| [``linp/pkg``](https://x/linp) | 10 |  | Not read yet. $dot linux: 3840 + 2 (linux-x64; linux-arm64: pending) $dot [proof](p.md) |"))[0]
+Assert-Equal 'linux note: pending parses, with no reading' 'linux-arm64/True/' "$($linPending.OS['linux'].Other.Rid)/$($linPending.OS['linux'].Other.Pending)/$($linPending.OS['linux'].Other.Expected)"
+Assert-Equal 'linux note: pending keeps the banked RID''s reading as the segment' '3840/2/linux-x64' "$($linPending.OS['linux'].Expected)/$($linPending.OS['linux'].Disclosed)/$($linPending.OS['linux'].Rid)"
+Assert-Equal 'linux expectation: the noted RID reads the note' '3838/2/linux (linux-arm64)' ("$((Get-RosterRowExpectation -Row $linNote -Goos 'linux' -Rid 'linux-arm64').Expected)/$((Get-RosterRowExpectation -Row $linNote -Goos 'linux' -Rid 'linux-arm64').Disclosed)/$((Get-RosterRowExpectation -Row $linNote -Goos 'linux' -Rid 'linux-arm64').Source)")
+Assert-Equal 'linux expectation: a pending RID reads the banked reading, and says it is pending' '3840/2/linux (linux-arm64 pending)' ("$((Get-RosterRowExpectation -Row $linPending -Goos 'linux' -Rid 'linux-arm64').Expected)/$((Get-RosterRowExpectation -Row $linPending -Goos 'linux' -Rid 'linux-arm64').Disclosed)/$((Get-RosterRowExpectation -Row $linPending -Goos 'linux' -Rid 'linux-arm64').Source)")
+Assert-Equal 'linux expectation: the banked RID reads the segment' '3840/linux' ("$((Get-RosterRowExpectation -Row $linPending -Goos 'linux' -Rid 'linux-x64').Expected)/$((Get-RosterRowExpectation -Row $linPending -Goos 'linux' -Rid 'linux-x64').Source)")
+Assert-Throws 'linux note: darwin never takes pending' {
+    Read-FixtureRoster @("| [``darp/pkg``](https://x/darp) | 3 |  | Mac. $dot darwin: 3 (osx-arm64; osx-x64: pending) $dot [proof](p.md) |")
+} 'pending'
+$savedRid = $env:RID
+try {
+    $env:RID = 'linux-arm64'
+    Assert-Equal 'sweep host RID: a linux leg''s RID names its flavour' 'linux-arm64' (Get-SweepHostRid -Goos 'linux')
+    $env:RID = 'linux-x64'
+    Assert-Equal 'sweep host RID: the x64 leg' 'linux-x64' (Get-SweepHostRid -Goos 'linux')
+    $env:RID = 'osx-x64'
+    Assert-Equal 'sweep host RID: a mac RID never answers for linux' $true ((Get-SweepHostRid -Goos 'linux') -cne 'osx-x64')
+}
+finally { $env:RID = $savedRid }
 
 # ---- 1a. the per-row EXECUTION annotation (owner ruling 2026-08-30, Option A) ---------------------
 # The annotation names the local execution CONFIG a row's pipeline leg runs under -- an execution
