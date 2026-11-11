@@ -105,6 +105,10 @@ A tier-1 or tier-2 name changes in one of two ways, and no other:
    - the release notes have an "Upgrading" section that says what changed and what to do;
    - every published `nugetgo.*` package is rebuilt against the new release.
 
+Before each release, the previous release's C# consumer program (`src/tests/CSharpConsumer`) is built unchanged
+against the new packages and must pass all its checks ([`release-smoke`](CIMatrix.md), arm H). A tier-1 name changed
+any other way fails that build.
+
 <!-- The contract adopted by the owner, 2026-11-11 (docs/PLAN-public-surface-stability.md, ruling block; OQ3 and the
      "freeze and document" items; seat C1). Sources: the type mapping, docs/ConversionStrategies.md; the MSBuild
      properties, src/core/golib/buildTransitive/go.lib.targets and go.lib.symbols.targets (GoTargetOS:

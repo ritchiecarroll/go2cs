@@ -27,8 +27,14 @@
                             go.runtime.debug (runtimes/<rid>/, else lib/): it must not name the other OS's syscall
                             buffer type, and a runtimes/<rid>/ twin must name this OS's (the 1.24.13.6 release
                             blocker). Naming neither is platform-neutral and passes.
+      H  SOURCE COMPAT      the previous release's src/tests/CSharpConsumer, built UNCHANGED against the feed
+                            (docs/PublicSurface.md: code written against the last release compiles against this
+                            one). Its files come from -ConsumerRef, else from the newest nuget-<version> release
+                            tag below the version under test. The modules it calls are converted with -Converter
+                            at the versions that ref's run-csharp-consumer.ps1 pins, and the program must print
+                            that runner's own "checks: <N> ok, 0 failed".
 
-    Exit 0 when A, B, C and G pass (and D, with -GateWalkthrough); 1 otherwise. Every arm's evidence lands
+    Exit 0 when A, B, C, G and H pass (and D, with -GateWalkthrough); 1 otherwise. Every arm's evidence lands
     under -WorkRoot.
 
 .PARAMETER Feed
@@ -45,13 +51,18 @@
 
 .PARAMETER GateWalkthrough
     Make arm D gate. The release-smoke stage passes it on every leg; without it D is a measurement.
+
+.PARAMETER ConsumerRef
+    The git ref (a tag or a branch on origin) whose src/tests/CSharpConsumer arm H builds. Default: the newest
+    nuget-<version> tag whose version is below -Version (for 1.26.10.4-ci.7, the newest tag below 1.26.10.4).
 #>
 param(
     [Parameter(Mandatory)] [string] $Feed,
     [Parameter(Mandatory)] [string] $Converter,
     [Parameter(Mandatory)] [string] $WorkRoot,
     [string] $Version,
-    [switch] $GateWalkthrough
+    [switch] $GateWalkthrough,
+    [string] $ConsumerRef
 )
 
 $ErrorActionPreference = 'Stop'
@@ -64,6 +75,7 @@ $Converter = (Resolve-Path $Converter).Path
 New-Item -ItemType Directory -Force $WorkRoot | Out-Null
 $WorkRoot = (Resolve-Path $WorkRoot).Path
 $repoSrc = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+$repoRoot = Split-Path $repoSrc -Parent
 
 if (-not $Version) {
     $lib = @(Get-ChildItem $Feed -Filter 'go.lib.*.nupkg' | Where-Object { $_.Name -match '^go\.lib\.(\d.*)\.nupkg$' })
@@ -357,6 +369,102 @@ if ($gVerdict -like 'PASS*') {
     if ($gVerdict -like 'PASS*') { $gVerdict += "; " + ($notes -join '; ') }
 }
 $verdicts += $gVerdict
+
+# ---- H: source compatibility: the previous release's consumer, unchanged -----------------------------
+# The newest nuget-<a.b.c.d> release tag below the version under test. A prerelease (1.26.10.4-ci.7) is below its own
+# release, so it compares by its numeric part; a published version's own tag is not below it and is skipped.
+function Resolve-ConsumerRef([string]$UnderTest) {
+    $base = [version](($UnderTest -split '-', 2)[0])
+    $ErrorActionPreference = 'Continue'
+    $lines = @(& git -C $repoRoot ls-remote --tags origin 'refs/tags/nuget-*' 2>$null)
+    $code = $LASTEXITCODE
+    $ErrorActionPreference = 'Stop'
+    if ($code -ne 0) { return $null }
+    $best = $null
+    $bestVersion = $null
+    foreach ($line in $lines) {
+        if ($line -notmatch 'refs/tags/nuget-(\d+\.\d+\.\d+\.\d+)$') { continue }
+        $tagVersion = [version]$Matches[1]
+        if ($tagVersion -lt $base -and (-not $bestVersion -or $tagVersion -gt $bestVersion)) {
+            $best = "nuget-$($Matches[1])"
+            $bestVersion = $tagVersion
+        }
+    }
+    return $best
+}
+
+function Invoke-SourceCompatArm {
+    $name = 'H-source-compat'
+    $arm = Join-Path $WorkRoot $name
+    $cache = Join-Path $arm 'nuget-cache'
+    New-Item -ItemType Directory -Force $cache | Out-Null
+
+    $ref = $ConsumerRef
+    $how = 'the -ConsumerRef override'
+    if (-not $ref) {
+        $ref = Resolve-ConsumerRef $Version
+        $how = "the newest nuget-* release tag below $Version"
+    }
+    if (-not $ref) { return "FAIL ($name): found no nuget-<version> release tag below $Version on origin" }
+
+    # Exactly that ref, shallow, so a shallow checkout has its tree too.
+    $code = Invoke-Logged (Join-Path $arm 'fetch.log') { & git -C $repoRoot fetch --depth 1 --no-tags origin $ref }
+    if ($code -ne 0) { return "FAIL ($name): git fetch origin $ref exited $code$(Get-FirstError (Join-Path $arm 'fetch.log'))" }
+    $commit = (& git -C $repoRoot rev-parse FETCH_HEAD).Trim()
+    Write-Host "release smoke: H builds the CSharpConsumer of $ref ($commit), chosen as $how"
+
+    $tar = Join-Path $arm 'consumer.tar'
+    $code = Invoke-Logged (Join-Path $arm 'archive.log') {
+        & git -C $repoRoot archive --format=tar -o $tar $commit src/tests/CSharpConsumer
+        if ($LASTEXITCODE -eq 0) { & tar -xf $tar -C $arm }
+    }
+    if ($code -ne 0) { return "FAIL ($name): $ref has no src/tests/CSharpConsumer to extract (exit $code)" }
+    $consumer = Join-Path $arm 'src/tests/CSharpConsumer'
+
+    # The ref's own runner says which modules its program calls, at which versions, and how many checks it runs.
+    $runner = [System.IO.File]::ReadAllText((Join-Path $consumer 'run-csharp-consumer.ps1'))
+    if ($runner -notmatch '\[int\]\s*\$ExpectedChecks\s*=\s*(\d+)') { return "FAIL ($name): $ref's run-csharp-consumer.ps1 names no ExpectedChecks default" }
+    $expected = "checks: $($Matches[1]) ok, 0 failed"
+    $modules = @([regex]::Matches($runner, "(?m)^\s*(\w+)\s*=\s*'([^'@\s]+@v[^'\s]+)'") | ForEach-Object { @{ Name = $_.Groups[1].Value; Module = $_.Groups[2].Value } })
+    if ($modules.Count -eq 0) { return "FAIL ($name): $ref's run-csharp-consumer.ps1 pins no modules" }
+
+    $converted = Join-Path $arm 'converted'
+    foreach ($module in $modules) {
+        $ErrorActionPreference = 'Continue'
+        $download = (& go mod download -json $module.Module 2> (Join-Path $arm "download-$($module.Name).log")) -join "`n"
+        $code = $LASTEXITCODE
+        $ErrorActionPreference = 'Stop'
+        if ($code -ne 0) { return "FAIL ($name): go mod download $($module.Module) exited $code" }
+        $source = ($download | ConvertFrom-Json).Dir
+
+        $code = Invoke-Logged (Join-Path $arm "convert-$($module.Name).log") { & $Converter -recurse=nuget $source (Join-Path $converted $module.Name) }
+        if ($code -ne 0) { return "FAIL ($name): go2cs -recurse=nuget $($module.Module) exited $code$(Get-FirstError (Join-Path $arm "convert-$($module.Name).log"))" }
+    }
+
+    # One nuget.config above the consumer and the converted modules both.
+    Write-FeedConfig $arm
+    $project = Join-Path $consumer 'CSharpConsumer.csproj'
+    $env:NUGET_PACKAGES = $cache
+    try {
+        $code = Invoke-Logged (Join-Path $arm 'build.log') { & dotnet build $project -c Release "-p:ConsumerConvertedRoot=$converted" "-p:GoStdLibVersion=$Version" --nologo }
+        if ($code -ne 0) { return "FAIL ($name): $ref's CSharpConsumer does not build unchanged against go.* $Version$(Get-FirstError (Join-Path $arm 'build.log'))" }
+
+        $stdout = Join-Path $arm 'cs.stdout.txt'
+        $ErrorActionPreference = 'Continue'
+        & dotnet run --project $project -c Release --no-build "-p:ConsumerConvertedRoot=$converted" "-p:GoStdLibVersion=$Version" 1> $stdout 2> (Join-Path $arm 'cs.stderr.txt')
+        $runCode = $LASTEXITCODE
+        $ErrorActionPreference = 'Stop'
+    }
+    finally { $env:NUGET_PACKAGES = $null }
+
+    $lines = @(Get-Content -LiteralPath $stdout -ErrorAction SilentlyContinue)
+    $failedChecks = @($lines | Where-Object { $_ -match '\bFAIL\b' } | Select-Object -First 3)
+    if ($runCode -ne 0) { return "FAIL ($name): $ref's CSharpConsumer exited $runCode$(if ($failedChecks) { ' -- ' + ($failedChecks -join ' | ') })$(Get-StderrHead (Join-Path $arm 'cs.stderr.txt'))" }
+    if (@($lines | Where-Object { $_ -ceq $expected }).Count -ne 1) { return "FAIL ($name): $ref's CSharpConsumer did not print '$expected'$(if ($failedChecks) { ' -- ' + ($failedChecks -join ' | ') })" }
+
+    return "PASS ($name): the CSharpConsumer of $ref ($($commit.Substring(0, 10))) built unchanged against go.* $Version and printed '$expected'"
+}
+$verdicts += Invoke-SourceCompatArm
 
 # ---- D: the README walkthrough, measured, never gating -------------------------------------------
 $walk = Join-Path $WorkRoot 'D-walkthrough-src'
