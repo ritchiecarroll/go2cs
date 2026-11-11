@@ -310,3 +310,62 @@ ledger line, a ledger line with a blank reason, and a ledger line for a banked r
 
 The total is 3 to 4.5 days, inside the design's 3 to 5. S7-a and S7-b touch no arm64 code and can be cut before
 E1; S7-c cannot.
+
+## 8. The rulings and the entry checklist (dated block, 2026-11-10)
+
+COORD accepted this plan at `7608783cda` on 2026-11-10. Sections 0 to 7 stand as written; this block adds the
+rulings, the seats' owners and the state of the entry gates. **Still nothing dispatched, built for the target or
+run.**
+
+### 8.1 Rulings
+
+| Asked | Ruled |
+|---|---|
+| Q5 | **All 236 rows**, in the three waves of §2.2, wave 1 first. A row that does not bank is UNMEASURED with a reason, never undispatched. |
+| Q3 | **The floor set is the nine rows of §5.1** (runtime, syscall, os, net, internal/poll, internal/runtime/atomic, sync/atomic, math, internal/cpu). The RID ships as supported in .4 only if the floor banks. If it cannot bank before the release date, COORD takes the choice to the owner (slip .4, or ship with linux-arm64 withheld); the default is the slip, never a quiet ship. |
+| Q1 | **A combined form is approved as a named form**, for a row whose verdicts AND disclosed-divergent both differ. It is built in S7-a with mandatory naming, as arch-count has. A row that fits no form stays PENDING and is never banked. |
+| Q2 | **Tip refs** for the parallel shards. |
+| Q4 | A hosted linux-x64 reading that differs from the roster is **recorded as a finding** and never written into the roster in S7. A re-bank is its own ruled seat. |
+| §4.1's rule | Ruled as written: an arm64-only divergence in an arch-own row is read against the hand-own list before any disclosure. |
+
+A correction to §6: Q5 names "the other 119 rows". The count is 120 (236 less wave 1's 116), as §1 has it.
+
+### 8.2 Seats
+
+| Seat | Owner | State |
+|---|---|---|
+| S7-a (the §7 grammar, the two-RID `annotate_linux.py`, the combined form of Q1) | P2, after S6 | cuttable now |
+| S7-b (the `sweep-shard` lift on the arm leg, the per-job proof step with its positive control) | C2 | cuttable now |
+| S7-c and S7-d (the dispatches, the bank, this record) | G | gated on §8.3 |
+
+### 8.3 The entry checklist
+
+Read on origin on 2026-11-10 after a fetch: master `b9a6d261fc`, the batch 284 union `c4b47c4f61`. A line is
+CLEARED only by a fact read at master.
+
+| Gate | State | Read |
+|---|---|---|
+| E1, site 9 on master | OPEN | Site 9 is on `claude/i9-s3-s2-sites` at `a719a19546` (`9b706f4d82`, `ebe1b5ea34`, `a1d01fdfec`, `11171d1265`). That tip is an ancestor of neither master nor the union. |
+| E2, the triage of §4.1's 58 names on a record | OPEN | The S3 census at `a719a19546` carries no triage of them, and site 9 adds no other record (its `docs/` changes are that census and one re-cite). |
+| E3, the ruling | **CLEARED** | §8.1. |
+| E4, S7-a landed | OPEN | Assigned to P2, after S6. |
+| E5, S7-b and the proof step landed | OPEN | Assigned to C2. |
+| A-0's proof green and read | OPEN | Dispatched only after E1 to E5. No shard before it. |
+
+### 8.4 What site 9 changes in §4 (read at `a719a19546`; nothing built or run)
+
+The predictions of §4 were written at `0e1e143a51`. Site 9 moves two of them, and the move is written here before
+any dispatch, as §4 requires.
+
+- **§4.1, math: 1 to 0.** `ebe1b5ea34` adds `src/core/math/linux-arm64/exp2_asm_impl.cs`, which bodies
+  `archExp2` as a call to Go's own pure-Go `exp2`. The stub ceiling at the E1 tree is PREDICTED at 57 and is
+  re-measured there before A-0.
+- **P3, math.** The "before triage" clause is spent once E1 clears: `math.Exp2` no longer throws at arm64. The
+  prediction is `76 + 0`, equal to the x64 leg. linux-amd64 reaches the same `exp2` directly (`haveArchExp2` is
+  false there), so the two legs run one body. `archExp2` is now the first arm64 hand-own of the
+  bodied-but-wrong class: a wrong body reads as exactly one divergence, TestExp2. The census of `math.Exp2`
+  callers outside the math row, owed at E2, is owed again only if TestExp2 diverges.
+- **The M2 wall.** `9b706f4d82` and `a1d01fdfec` move the bodies of `testSPWrite`, `archLog` and `archHypot` to
+  `amd64/`, beside their only bodyless principals. That is the compile error P3 said must be gone at E1.
+- **GolibTests.** `11171d1265` states that GolibTests compiles at linux/arm64. S7-b's arm leg depends on it; it
+  is read again at the E1 tree, not taken from the commit's subject.
