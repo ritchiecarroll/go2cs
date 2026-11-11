@@ -319,7 +319,9 @@ public abstract class BehavioralTestBase
             if (!forceBuild && s_transpiledProjects.ContainsKey(targetProject))
                 return;
 
-            if (!forceBuild && File.Exists(csproj))
+            // A project converted only under go2cs.options (an expected-output project) is always transpiled: the
+            // options file's REMOVAL leaves no newer file behind (BehavioralRunner.UpToDate makes the same exception).
+            if (!forceBuild && File.Exists(csproj) && !File.Exists(Path.Combine(projPath, ExpectedOutputFile)))
             {
                 // If all .cs files are newer than associated .go files AND newer than the converter that
                 // produced them, skip build. The converter must be part of this test: converter work is
@@ -365,6 +367,10 @@ public abstract class BehavioralTestBase
 
             s_converterRuns.AddOrUpdate(targetProject, 1, (_, runs) => runs + 1);
 
+            // The project's go2cs.options (extra converter arguments; only -warn=<codes>), read here as at the other
+            // three converter call sites (TestBehavioralHarnessReadsConverterOptions).
+            string options = ProjectConverterOptions(projPath);
+
             foreach (string pkgPath in GoPackageDirs(projPath))
             {
                 StringBuilder stdErr = new();
@@ -372,7 +378,7 @@ public abstract class BehavioralTestBase
                 // The dedicated errorHandler suppresses the base Exec's stdout echo for this call, so
                 // the converter's own stdout is re-attached explicitly: losing it would make a
                 // transpile the least readable step in the log precisely when it goes wrong.
-                exitCode = Exec(go2cs, $"-go2cspath \"{Go2csRoot}\" \"{pkgPath}\"", null,
+                exitCode = Exec(go2cs, $"{options}-go2cspath \"{Go2csRoot}\" \"{pkgPath}\"", null,
                     (_, e) => { if (!string.IsNullOrEmpty(e.Data)) TestContext?.WriteLine(e.Data); },
                     DefaultExecTimeoutMs,
                     (_, e) =>
@@ -612,4 +618,21 @@ public abstract class BehavioralTestBase
         // load assembly and verify attribute presence via reflection -- this is a simpler approach:
         return packageInfoLines.Any(line => line.Trim().Equals("[GoTestMatchingConsoleOutput]"));
     }
+
+    // The project's go2cs.options as one converter-argument prefix, read through the ONE shared reader
+    // (BehavioralPackages.ConverterOptions); a line the file may not carry fails the test by name.
+    protected static string ProjectConverterOptions(string projPath)
+    {
+        (string options, string? error) = BehavioralPackages.ConverterOptions(projPath);
+
+        if (error is not null)
+            Assert.Fail(error);
+
+        return options;
+    }
+
+    protected const string ExpectedOutputFile = BehavioralPackages.ExpectedOutputFile;
+
+    protected static bool HasExpectedOutput(string targetProject) =>
+        BehavioralPackages.HasExpectedOutput(Path.GetFullPath($"{TestRootPath}{targetProject}"));
 }
