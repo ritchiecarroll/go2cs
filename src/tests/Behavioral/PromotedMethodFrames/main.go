@@ -93,6 +93,9 @@ func viaExpr(o *outer) {
 	ep := (*outer).Ptr
 	fmt.Println("method expr call:", ev(*o), ep(o))
 	fmt.Println("method expr name:", name(ev), name(ep))
+	tv, _ := reflect.TypeOf(*o).MethodByName("Val")
+	tp, _ := reflect.TypeOf(o).MethodByName("Ptr")
+	fmt.Println("method table name:", name(tv.Func.Interface()), name(tp.Func.Interface()))
 	es := outer.ValStack
 	fmt.Println("method expr stack:", es(*o))
 }
