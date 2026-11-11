@@ -98,8 +98,8 @@ The type is golib's own, or a fixed BCL shape, so golib can state what it needs 
 | `GoReflect.TypeLayout.cs:796`, `:797` | 2075 | `Key` / `Value` of a map entry read by name from `KeyValuePair<,>`: enumerate through golib's map interface instead of by property name. |
 | `GoMemProfile.cs:84` | 2026 | `Assembly.GetType("go.runtime.pprof_package")`: a `DynamicDependency` naming that type and assembly keeps it when the assembly is present. |
 | `GoReflect.TypeLayout.cs:1610` | 2026 | `Delegate.CreateDelegate(type, target, "Invoke")` by NAME: pass the `MethodInfo` instead. |
-| `builtin.cs:3039` | 2075 | `GetField("_out")` on an error wrapper golib defines itself: name the wrapper's type statically. |
-| `builtin.cs:1590` | 2090 | `ZeroFacts<T>` asks `GetConstructor` whether a Go struct needs constructing. go2cs-gen already registers a factory for exactly those structs (`GoZeroFactory<T>`), so ask the registry instead and drop the reflection. |
+| `builtin.cs:3040` | 2075 | `GetField("_out")` on an error wrapper golib defines itself: name the wrapper's type statically. |
+| `builtin.cs:1591` | 2090 | `ZeroFacts<T>` asks `GetConstructor` whether a Go struct needs constructing. go2cs-gen already registers a factory for exactly those structs (`GoZeroFactory<T>`), so ask the registry instead and drop the reflection. |
 | `array.cs:477` | 2091 | `GoZero(T template)` carries `DynamicallyAccessedMembers` on `T` for its `Activator` fallback. With the registry answering above, the fallback and the annotation can go, and the cascade with them. |
 
 ### S — safe, and suppressible with a one-sentence proof (6)
@@ -130,7 +130,7 @@ reports no instance fields", stays as the check that the registry did its job.
 
 | Members needed | Sites |
 |---|---|
-| instance fields | `GoFieldMetadata.cs:55`, `GoLayoutFacts.cs:48`, `GoLibcCall.cs:348`, `GoReflect.FieldAccess.cs:385`, `GoReflect.TypeLayout.cs:746`, `GoReflect.ValueMarshalling.cs:547`, `:552`, `GoReflect.cs:370`, `builtin.cs:2014` |
+| instance fields | `GoFieldMetadata.cs:55`, `GoLayoutFacts.cs:48`, `GoLibcCall.cs:348`, `GoReflect.FieldAccess.cs:385`, `GoReflect.TypeLayout.cs:746`, `GoReflect.ValueMarshalling.cs:547`, `:552`, `GoReflect.cs:370`, `builtin.cs:2015` |
 | the `m_value` field of a defined-type wrapper | `GoReflect.cs:191`, `GoReflect.FinalizerBinding.cs:252`, `GoReflect.ValueMarshalling.cs:963` |
 | constructors | `GoReflect.FieldAccess.cs:499`, `GoReflect.ValueMarshalling.cs:941`, `GoReflect.cs:398`, `:421` |
 | the parameterless constructor (`Activator.CreateInstance`: a Go struct's zero value) | `GoReflect.TypeLayout.cs:901`, `:1224`, `:1265`, `GoReflect.ValueMarshalling.cs:540`, `:598`, `:614` |
@@ -151,7 +151,7 @@ may remove those sites rather than suppress them.
 | Sites | IL |
 |---|---|
 | `GoReflect.MethodSets.cs:695`, `GoReflect.TypeLayout.cs:1395`, `:1597` (`MakeGenericType`) | 2055 |
-| `ж.SliceHeaderBox.cs:138`, `GoReflect.MakeVariadicDelegate.cs:58`, `GoReflect.TypeLayout.cs:1599`, `builtin.cs:3456` (`MakeGenericMethod`) | 2060 |
+| `ж.SliceHeaderBox.cs:138`, `GoReflect.MakeVariadicDelegate.cs:58`, `GoReflect.TypeLayout.cs:1599`, `builtin.cs:3478` (`MakeGenericMethod`) | 2060 |
 | `AdapterBinder.cs:269` (`RunClassConstructor` on a type just made with `MakeGenericType`) | 2059 |
 | `GoReflect.ValueMarshalling.cs:670`, `:677` (`Activator.CreateInstance` on an `array<T>` made at run time) | 2067 |
 
@@ -194,7 +194,7 @@ synthesized types only.
 
 | Site | Use |
 |---|---|
-| `GoFrame.cs:443`, `runtime/Goroutine.cs:1117`, `runtime/RuntimePanicCheck.cs:81` | `StackFrame.GetMethod()`: which Go function a frame belongs to (`runtime.Caller`, the panic and recover machinery) |
+| `GoFrame.cs:443`, `runtime/Goroutine.cs:1117`, `runtime/RuntimePanicCheck.cs:92` | `StackFrame.GetMethod()`: which Go function a frame belongs to (`runtime.Caller`, the panic and recover machinery) |
 
 Under Native AOT `GetMethod()` answers only for methods whose metadata was kept. The windows `MetadataToken` failure
 recorded in docs/KnownIssues.md (fixed on `claude/i9-aot-metadata-token`) is the same family. These sites need
@@ -433,7 +433,7 @@ Native AOT compiles a generic instantiation only when compiled code names it. go
   can carry one `[DynamicDependency("<documentation signature>", typeof(<pkg>_package))]` per recorded method: the
   method's metadata is then kept exactly where a record needs it. GenTests' registration guard grows an arm: every
   `[GoParamDims]` record's method is registered.
-- **`builtin.cs:1590` and `array.cs:477`** (the BOARD row of 2026-10-08). A generic struct that needs construction has
+- **`builtin.cs:1591` and `array.cs:477`** (the BOARD row of 2026-10-08). A generic struct that needs construction has
   no GoZero factory, because a module initializer cannot name an open generic. Answer 2 fits: the creation hook on the
   generated part of a generic needy struct can name its own closed instantiation's zero, so both sites read the hook
   and stop asking for a constructor. GoZeroResidualTests gains the `array<T>` case first, red.

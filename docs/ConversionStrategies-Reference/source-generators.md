@@ -473,7 +473,7 @@ zero, an adapter, a container's operations, a variadic family) runs its queued r
 queued after a run is run by the next miss.
 <!-- The queueing initializer: src/gen/go2cs-gen/DeferredRegistration.cs:22
      (`public static string Initializer(string registry, string name)`). Its callers:
-     src/gen/go2cs-gen/ImplementGenerator.cs:1562 (`DeferredRegistration.Initializer("Adapters", "Adapters")`),
+     src/gen/go2cs-gen/ImplementGenerator.cs:1565 (`DeferredRegistration.Initializer("Adapters", "Adapters")`),
      src/gen/go2cs-gen/TypeGenerator.cs:665 (`DeferredRegistration.Initializer("ZeroFactories", "GoZeroFactories")`),
      src/gen/go2cs-gen/EscapeRegistryGenerator.cs:402 (`DeferredRegistration.Initializer("EscapeRegistry", "EscapingContainers")`),
      src/gen/go2cs-gen/NativeArrayOpenerGenerator.cs:220
@@ -483,7 +483,7 @@ queued after a run is run by the next miss.
      (`public void Defer(Action register)`); Run :83 (`internal bool Run()`); Native AOT :28
      (`Native AOT is unchanged`). Each consumer runs its queue on a miss, then looks again:
      src/core/golib/AdapterRegistry.cs:116 (`GoDeferredRegistrations.Adapters.Run()`),
-     src/core/golib/builtin.cs:1632 (`GoDeferredRegistrations.ZeroFactories.Run()`),
+     src/core/golib/builtin.cs:1633 (`GoDeferredRegistrations.ZeroFactories.Run()`),
      src/core/golib/GoTypeOps.cs:233 (`GoDeferredRegistrations.EscapeRegistry.Run()`),
      src/core/golib/GoReflect.VariadicRegistry.cs:51 (`GoDeferredRegistrations.EscapeRegistry.Run()`),
      src/core/golib/NativeArrayOpeners.cs:56 (`GoDeferredRegistrations.NativeArrayOpeners.Run()`), :63

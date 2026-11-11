@@ -39,10 +39,10 @@
 | `modulesLock.go:176` | `go mod download` (`-mod=readonly`) | dependency preflight; needs network or a warm module cache |
 | `projectFileWriter.go:45` | `go env <name>` | GOROOT/GOPATH/GOVERSION resolution (`main.go:216-225`, `toolchainResolution.go`) |
 | `stackAppendHints.go:681-712` | `go build` / `go test -c` with `-gcflags=-m -d=variablemakehash=vy` | the stack-append harvest, for **three targets** (`windows/linux/darwin amd64`) |
-| `testConversion.go:10506` | `go test`, the oracle (`-tests` mode) | contributor validation only |
+| `testConversion.go:10550` | `go test`, the oracle (`-tests` mode) | contributor validation only |
 
 Plus every `packages.Load` (`conversionDriver.go:206-220`, `moduleConverter.go:262`, `moduleTestsDriver.go:115`,
-`linknameOperations.go:160`, `testConversion.go:761,1775`, `stdLibConverter.go:319,391`), which shells out to
+`linknameOperations.go:160`, `testConversion.go:761,1775`, `stdLibConverter.go:311,391`), which shells out to
 `go list` on `PATH`.
 
 **1b. GOROOT/src.** `go/types` type-checks the standard library from source (`LoadAllSyntax`); `checkGoRootSpelling`
