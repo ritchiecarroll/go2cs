@@ -225,11 +225,23 @@ CS
 
   for how in sigquit failfast; do
     out="$state/probe-$how.out"
-    (cd "$scratch" && exec dotnet "$probe/bin/probe.dll" "$PROBE_THREADS" "$how") > "$out" 2>&1 &
+    # env --default-signal=QUIT restores SIGQUIT's default action in case the probe inherits it IGNORED. On the hosted
+    # linux-x64 leg (runs 42936721919 and 42936743025) the probe outlived SIGQUIT by 120 s and left no dump, where the
+    # same probe died at once (status 131) on linux-arm64 and on a local linux-x64 host. The cause is not yet shown:
+    # a local test of a bare `&` launch did NOT reproduce it (SIGQUIT neither ignored nor blocked there). The masks
+    # printed below (blocked, ignored, caught, pending) are the evidence that names it.
+    (cd "$scratch" && exec env --default-signal=QUIT dotnet "$probe/bin/probe.dll" "$PROBE_THREADS" "$how") > "$out" 2>&1 &
     pid=$!
     for _ in $(seq 1 120); do grep -q '^READY' "$out" && break; sleep 0.5; done
     grep -q "^READY $PROBE_THREADS" "$out" || { kill -KILL "$pid" 2>/dev/null; fail "prove: the probe ($how) never reported $PROBE_THREADS threads"; }
-    [ "$how" = sigquit ] && kill -QUIT "$pid"
+    masks() { grep -E '^(SigPnd|ShdPnd|SigBlk|SigIgn|SigCgt)' "/proc/$1/status" 2>/dev/null | tr '\t\n' '  '; }
+    say "prove: probe $how pid $pid before: $(masks "$pid")"
+    say "prove: this step's shell $$: $(masks $$)"
+    if [ "$how" = sigquit ]; then
+      kill -QUIT "$pid"
+      sleep 1
+      say "prove: probe $how pid $pid 1 s after SIGQUIT: $(masks "$pid")"
+    fi
     late=0
     if ! timeout 120 tail --pid="$pid" -f /dev/null; then
       # A process the kernel is still dumping has not died yet: kill it, then count the files BEFORE any verdict, so a
