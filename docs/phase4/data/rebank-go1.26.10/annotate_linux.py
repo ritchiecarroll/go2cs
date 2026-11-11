@@ -37,7 +37,9 @@
 #     verdicts AND disclosed-divergent both differ, both deltas named in the `absent` and `divergent_names` columns):
 #     the guard's functions, as arch_strict, arch_count and arch_combined below;
 #   - anything else: "<linux-x64 reading> (linux-x64; linux-arm64: pending)", listed with its reason;
-#   - a shape a guard REFUSES (a difference not wholly named) exits non-zero naming every such row, and writes nothing;
+#   - a shape a guard REFUSES (a difference not wholly named) exits non-zero naming every such row, and writes nothing,
+#     unless the guard's UNMEASURED ledger ($LinuxArm64LedgerPath) has a line with a reason for that row: then the row is
+#     written pending and listed (the guard's own ledger checks decide whether the line is well formed);
 #   - a numeric linux segment the evidence does not name is written pending (an unread row has no linux-arm64 reading),
 #     its linux-x64 reading kept.
 import argparse, csv, json, os, re, sys
@@ -209,6 +211,15 @@ if args.rids:
     if not declared or not waves_line:
         sys.exit('the guard declares no $LinuxRidEvidenceDirectory / $LinuxRidEvidenceWaves: --rids derives by the guard\'s section 2i and will not run against a guard that lacks it')
     waves = re.findall(r"'([^']*)'", waves_line.group(1))
+    ledger_line = re.search(r"^\$LinuxArm64LedgerPath = '([^']*)'", guard, re.M)
+    if not ledger_line:
+        sys.exit('the guard declares no $LinuxArm64LedgerPath: --rids accepts a refused row only through the guard\'s ledger')
+    ledgered = set()
+    ledger_file = os.path.join(tree, ledger_line.group(1))
+    if os.path.exists(ledger_file):
+        for r in csv.DictReader(open(ledger_file, encoding='utf-8'), delimiter='\t'):
+            if (r.get('reason') or '').strip():
+                ledgered.add(r['row'])
     evrel = args.evidence or declared.group(1).replace('{pin}', pin)
     by_row = {}
     if evrel:
@@ -237,8 +248,10 @@ if args.rids:
             try:
                 form, text, reason = pair_reading(pkg, by_row[pkg], roster)
             except Refusal as refusal:
-                refused.append(str(refusal))
-                continue
+                if pkg not in ledgered or roster is None:
+                    refused.append(str(refusal))
+                    continue
+                form, text, reason = 'refused', None, f'UNMEASURED (ledgered): {refusal}'
         elif roster is not None:
             form, text, reason = 'unread', None, 'not read on linux-arm64'
         else:

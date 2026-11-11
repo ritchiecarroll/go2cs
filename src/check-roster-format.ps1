@@ -2963,13 +2963,17 @@ function Get-LinuxPairReading {
 }
 
 # The guard's verdict on one row the linux evidence names: $null, or why its segment is not the evidence's.
+# -Ledgered: the row has a line in the UNMEASURED ledger, which accepts a guard's Refusal on a row that stays pending.
 function Get-LinuxSegmentRefusal {
-    param($Records, $Segment)
+    param($Records, $Segment, [switch] $Ledgered)
 
     $reading = Get-LinuxPairReading -Records $Records -Segment $Segment
-    if ($reading.Form -ceq 'refused') { return $reading.Reason }
-    $other = if ($Segment.PSObject.Properties['Other']) { $Segment.Other } else { $null }
+    $other = if (($null -ne $Segment) -and $Segment.PSObject.Properties['Other']) { $Segment.Other } else { $null }
     $pending = ($null -ne $other) -and $other.Pending
+    if ($reading.Form -ceq 'refused') {
+        if ($pending -and $Ledgered) { return $null }
+        return $reading.Reason + $(if ($pending) { ' -- it stays pending, and needs a line in the UNMEASURED ledger naming why' } else { '' })
+    }
     $have = Format-DarwinSegment $Segment
     if ($null -eq $reading.Text) {
         if ($pending) { return $null }
@@ -3096,9 +3100,68 @@ Assert-Equal 'linux unread: a bare segment is not this check''s (the format rule
 Assert-Equal 'linux format: a pending segment spells its note' '3840 + 2 (linux-x64; linux-arm64: pending)' (Format-DarwinSegment (& $linPendingSeg 3840 2))
 
 
-# RED STUBS (S7-a piece 5): the ledger reader and its refusals do not exist yet; the fix replaces these.
-function Read-LinuxArm64Ledger { param([string] $Path) return [PSCustomObject]@{ Records = @(); HeaderError = 'unimplemented' } }
-function Get-LinuxArm64LedgerRefusals { param($Records, $Rows, [bool] $BankClosed) return @() }
+# The UNMEASURED ledger's reader: its records, each with its line number, and HeaderError when the header is not exactly
+# row / reason / shard / run.
+function Read-LinuxArm64Ledger {
+    param([string] $Path)
+
+    $text = [System.IO.File]::ReadAllText($Path).Replace("`r`n", "`n")
+    $header = ($text -split "`n", 2)[0]
+    if ($header -cne "row`treason`tshard`trun") {
+        return [PSCustomObject]@{ Records = @(); HeaderError = "its header is '$($header.Replace("`t", '\t'))', not row\treason\tshard\trun" }
+    }
+    $records = New-Object System.Collections.Generic.List[object]
+    $n = 1
+    foreach ($line in @($text.Split("`n") | Select-Object -Skip 1)) {
+        $n++
+        if ($line -ceq '') { continue }
+        $cells = $line.Split("`t")
+        $records.Add([PSCustomObject]@{ Line = $n; row = $cells[0]; reason = $(if ($cells.Count -gt 1) { $cells[1] } else { '' })
+            shard = $(if ($cells.Count -gt 2) { $cells[2] } else { '' }); run = $(if ($cells.Count -gt 3) { $cells[3] } else { '' }) })
+    }
+    return [PSCustomObject]@{ Records = $records.ToArray(); HeaderError = $null }
+}
+
+# The ledger's refusals against the roster: each names its line or row. A row is "banked" on linux-arm64 when its
+# segment carries a linux-arm64 reading, and pending otherwise (Get-LinuxHeaderPopulation's split).
+function Get-LinuxArm64LedgerRefusals {
+    param($Records, $Rows, [bool] $BankClosed)
+
+    $refusals = New-Object System.Collections.Generic.List[string]
+    $applicable = @{}
+    foreach ($row in $Rows) {
+        if (-not $row.OS.ContainsKey('linux') -or -not $row.OS['linux'].Applicable) { continue }
+        $segment = $row.OS['linux']
+        $other = if ($segment.PSObject.Properties['Other']) { $segment.Other } else { $null }
+        $applicable[$row.Package] = [PSCustomObject]@{ Segment = $segment
+            Banked = ($null -ne $other) -and (-not $other.Pending) -and (@($segment.Rid, $other.Rid) -ccontains 'linux-arm64') }
+    }
+    $seen = @{}
+    foreach ($record in @($Records)) {
+        $where = "line $($record.Line) ($($record.row))"
+        if (-not "$($record.reason)".Trim()) { [void]$refusals.Add("${where}: blank reason -- an UNMEASURED line names why the row did not bank") }
+        foreach ($field in @('shard', 'run')) {
+            if (-not "$($record.$field)".Trim()) { [void]$refusals.Add("${where}: blank $field -- '-' where it was never dispatched") }
+        }
+        if (-not $applicable.ContainsKey($record.row)) {
+            [void]$refusals.Add("${where}: names no applicable linux roster row")
+        } elseif ($applicable[$record.row].Banked) {
+            [void]$refusals.Add("${where}: the row carries linux: $(Format-DarwinSegment $applicable[$record.row].Segment), a linux-arm64 reading, so it is not UNMEASURED")
+        }
+        $seen[$record.row] = 1 + $(if ($seen.ContainsKey($record.row)) { $seen[$record.row] } else { 0 })
+    }
+    foreach ($row in @($seen.Keys | Sort-Object)) {
+        if ($seen[$row] -gt 1) { [void]$refusals.Add("$row is listed $($seen[$row]) times") }
+    }
+    if ($BankClosed) {
+        foreach ($row in @($applicable.Keys | Sort-Object)) {
+            if (-not $applicable[$row].Banked -and -not $seen.ContainsKey($row)) {
+                [void]$refusals.Add("$row is pending on linux-arm64 and the bank is closed (`$LinuxArm64BankClosed), but the ledger has no line for it")
+            }
+        }
+    }
+    return $refusals.ToArray()
+}
 
 # THE UNMEASURED LEDGER (S7-a; COORD 2026-11-10, P2's S6 rule; DATA-la64-s7-bank-plan.md 5.3), against fixtures. One TSV,
 # row / reason / shard / run, names each linux row that does not bank on linux-arm64 in the release and why. A blank
@@ -3151,6 +3214,25 @@ Assert-Equal 'ledger: a ledgered row that banks is refused (banked with pending)
 $LinuxRidEvidenceDirectory = ''
 $LinuxRidEvidenceWaves = @('')
 
+# THE UNMEASURED LEDGER (S7-a; DATA-la64-s7-bank-plan.md 5.3): the release's linux-arm64 rows that do not bank, each
+# with its reason, shard and run. Its own refusals hold from the start; while the file is absent it holds no lines.
+# $LinuxArm64BankClosed is flipped by S7-d when the release's bank closes: from then a pending row with no line is
+# refused.
+$LinuxArm64LedgerPath = 'docs/phase4/rebank-1.26.10.4/linux-arm64/UNMEASURED.tsv'
+$LinuxArm64BankClosed = $false
+$linuxLedgerFile = Join-Path $repo $LinuxArm64LedgerPath
+$linuxLedgerRecords = @()
+if (Test-Path -LiteralPath $linuxLedgerFile) {
+    $linuxLedgerRead = Read-LinuxArm64Ledger -Path $linuxLedgerFile
+    if ($linuxLedgerRead.HeaderError) { Assert-Equal "linux-arm64 ledger ${LinuxArm64LedgerPath}: $($linuxLedgerRead.HeaderError)" $true $false }
+    $linuxLedgerRecords = @($linuxLedgerRead.Records)
+}
+$linuxLedgerRefusals = @(Get-LinuxArm64LedgerRefusals -Records $linuxLedgerRecords -Rows $rows -BankClosed $LinuxArm64BankClosed)
+foreach ($refusal in $linuxLedgerRefusals) { Assert-Equal "linux-arm64 ledger ${LinuxArm64LedgerPath}: $refusal" $true $false }
+$linuxLedgered = @{}
+foreach ($record in $linuxLedgerRecords) { if ("$($record.reason)".Trim()) { $linuxLedgered[$record.row] = $true } }
+Write-Host ('linux-arm64 UNMEASURED ledger {0}: {1} line(s){2}, bank {3}, {4} refused' -f $LinuxArm64LedgerPath, $linuxLedgerRecords.Count, $(if (Test-Path -LiteralPath $linuxLedgerFile) { '' } else { ' (no file yet)' }), $(if ($LinuxArm64BankClosed) { 'CLOSED' } else { 'open' }), $linuxLedgerRefusals.Count) -ForegroundColor Cyan
+
 $linuxPairBanked = 0
 $linuxPairPending = 0
 $linuxPairRefused = 0
@@ -3175,7 +3257,7 @@ foreach ($row in $rows) {
         $linuxPairUnread++
         $refusal = Get-LinuxUnreadRefusal -Segment $segment
     } else {
-        $refusal = Get-LinuxSegmentRefusal -Records (Select-LatestDarwinWave $linuxEvidence[$row.Package]) -Segment $segment
+        $refusal = Get-LinuxSegmentRefusal -Records (Select-LatestDarwinWave $linuxEvidence[$row.Package]) -Segment $segment -Ledgered:($linuxLedgered.ContainsKey($row.Package))
         if ($null -eq $refusal) {
             if ($segment.PSObject.Properties['Other'] -and ($null -ne $segment.Other) -and $segment.Other.Pending) { $linuxPairPending++ } else { $linuxPairBanked++ }
         }
