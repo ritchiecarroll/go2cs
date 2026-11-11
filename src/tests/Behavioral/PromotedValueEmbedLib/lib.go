@@ -48,3 +48,34 @@ func (g *Gadget) Name() string {
 func NewGadget(tag string) *Gadget {
 	return &Gadget{tag: tag}
 }
+
+// Meta is an EXPORTED struct embedded by VALUE in the exported Badge, and its exported methods return
+// builtins. The promoted forwarders' scope was read off the SPELLING of the return type, so `@string`,
+// `bool` and every tuple that ends in one made the forwarder `internal`, and a call from another
+// package could not bind it (CS1929). Go's rule is that the method's NAME decides: an exported method
+// is exported whatever it returns.
+type Meta struct {
+	text string
+	ok   bool
+}
+
+func (m Meta) Text() string { return m.text }
+
+func (m Meta) Ok() bool { return m.ok }
+
+func (m Meta) Both() (string, bool) { return m.text, m.ok }
+
+// Self is a pointer-receiver method that returns a type of THIS package beside a builtin, the
+// `(*T, error)` shape. Another package reaches it through the embed's box, so it is the control.
+func (m *Meta) Self() (*Meta, string) { return m, m.text }
+
+// Badge promotes Meta's four methods to other packages.
+type Badge struct {
+	Meta
+	kind int
+}
+
+// NewBadge returns a Badge by value: the promoted value methods are called on a local of the caller.
+func NewBadge(text string) Badge {
+	return Badge{Meta: Meta{text: text, ok: true}, kind: 1}
+}

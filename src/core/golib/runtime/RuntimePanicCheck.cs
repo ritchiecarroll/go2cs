@@ -6,6 +6,7 @@
 
 using System;
 using System.Diagnostics;
+using static go2cs.Symbols;
 
 namespace go.golib;
 
@@ -45,6 +46,15 @@ namespace go.golib;
 /// exactly. No message text is read and no assembly name is guessed.
 /// </para>
 /// <para>
+/// ONE MEMBER KIND IS BESIDE THE CLASS. From 1.26.10.4 go2cs-gen writes the forwarders of a struct's same-package
+/// promoted methods on a class of the struct's own, <c>go.runtimeᴛ&lt;Struct&gt;ᴛpkg</c>
+/// (<c>go.runtime_internal_testᴛ&lt;Struct&gt;ᴛpkg</c> for a struct of the bridge), and no longer on the package
+/// class. Go names a promoted method's wrapper <c>runtime.*</c> as well, and the forwarder's frame is the first one
+/// outside golib when the JIT inlines the promoted method into it, so both names are the marker too
+/// (<see cref="IsPromotedMethodClassOf"/>). They are read by the form of the NAME, as everything here is: a trimmed
+/// or Native AOT image keeps a frame's names and not the class's <c>[GoPromotedHost]</c>.
+/// </para>
+/// <para>
 /// The raising frame must still EXIST in the trace. A method the JIT inlines into a non-runtime caller
 /// hides, and the panic then stays recoverable, which is never a false fatal. Go's <c>//go:noinline</c>
 /// is emitted as <c>NoInlining</c>, which keeps the frames Go's own tests rely on.
@@ -64,7 +74,8 @@ internal static class RuntimePanicCheck
 
     /// <summary>
     /// Reports whether the first frame of <paramref name="site"/> outside golib is declared on package
-    /// <c>runtime</c>'s class, its internal-test bridge, or a type nested in either, and names that frame.
+    /// <c>runtime</c>'s class, its internal-test bridge, a type nested in either, or the promoted-method class of a
+    /// struct of either, and names that frame.
     /// </summary>
     internal static bool RaisedInRuntimePackage(StackTrace? site, out string frameName)
     {
@@ -94,13 +105,32 @@ internal static class RuntimePanicCheck
 
     /// <summary>
     /// Reports whether the type whose full name is <paramref name="typeName"/> is package <c>runtime</c>'s
-    /// class or its internal-test bridge, or is nested in either.
+    /// class or its internal-test bridge, is nested in either, or is the promoted-method class of a struct of either.
     /// </summary>
     internal static bool IsRuntimePackageType(string typeName)
     {
         // A nested type's full name is its outermost type's, then '+' and each nested name, so the outermost decides.
         int nested = typeName.IndexOf('+');
+        ReadOnlySpan<char> outermost = nested < 0 ? typeName : typeName.AsSpan(0, nested);
 
-        return (nested < 0 ? typeName : typeName[..nested]) is "go.runtime_package" or "go.runtime_internal_test_package";
+        return outermost is "go.runtime_package" or "go.runtime_internal_test_package" ||
+               IsPromotedMethodClassOf(outermost, "go.runtime") || IsPromotedMethodClassOf(outermost, "go.runtime_internal_test");
     }
+
+    /// <summary>
+    /// Reports whether <paramref name="typeName"/> is the full name of the promoted-method class go2cs-gen writes for
+    /// a struct of the package whose class is <c>&lt;packageStem&gt;_package</c>:
+    /// <c>&lt;packageStem&gt;ᴛ&lt;Struct&gt;ᴛpkg</c>, where <c>ᴛ</c> is <see cref="go2cs.Symbols.TempVarMarker"/>.
+    /// </summary>
+    /// <remarks>
+    /// The form is go2cs-gen's <c>PromotedHostClassName</c> (StructTypeTemplate). A cross-package forwarder class
+    /// ends <c>ᴛxpkg</c> and is not matched: it was never a member of the package class.
+    /// </remarks>
+    internal static bool IsPromotedMethodClassOf(ReadOnlySpan<char> typeName, ReadOnlySpan<char> packageStem) =>
+        typeName.Length > packageStem.Length + PromotedMethodClassEnding.Length + TempVarMarker.Length &&
+        typeName.StartsWith(packageStem, StringComparison.Ordinal) &&
+        typeName[packageStem.Length..].StartsWith(TempVarMarker, StringComparison.Ordinal) &&
+        typeName.EndsWith(PromotedMethodClassEnding, StringComparison.Ordinal);
+
+    private const string PromotedMethodClassEnding = $"{TempVarMarker}pkg";
 }

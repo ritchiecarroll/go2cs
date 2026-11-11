@@ -150,6 +150,24 @@ Unix: a dup'd descriptor), which is what `SafeFileHandle` means on each, so one 
 non-owning `SafeFileHandle` serves both. The handle is not closed — `SetCrashOutput` owns it, and
 Go's own comment explains why it must outlive the caller's `File`.
 
+> **2026-11-11 (C1, i9's sub-finding in run 42969401661):** the tee now covers every fatal report golib writes. Go
+> copies whatever it prints while dying to the crash fd: a panic, a throw, a deadlock, main's Goexit. Census of golib's
+> fatal-report writers:
+> - Already teed: `CrashReport.Report` (a Go panic), `FatalReport.Fatal` (throw / fatal, and channel faults) and
+>   `MainGoexit.Park` (main called Goexit).
+> - Not teed, and fixed: the process backstop's NON-Go branch (a managed exception escaping a goroutine wrote
+>   `ex.ToString()` to stderr only), its `unhandled exception:` fallback, and `builtin.fatal`, the deadlock path
+>   ("all goroutines are asleep - deadlock!", five sites in channel.cs; a Debug build throws instead and so reaches
+>   the backstop).
+> - All three now write through one helper, `builtin.WriteFatalReport`: stderr first, guarded on its own, then
+>   `CrashReport.WriteToCrashOutput`.
+> - Left alone: `runtime/linux/signal_posix_impl.cs`'s "no tgkill/exit_group numbers" exit, a runtime-internal
+>   refusal for an architecture with no syscall table, which is not a report Go would write.
+>
+> Guarded by GolibTests' `BackstopCrashOutputTests`. A child test host points the crash output at a file and its
+> stderr at another, throws `InvalidOperationException` on a real goroutine, and dies through the backstop. The two
+> files must be equal. Before the fix the crash file was empty.
+
 ## 5. Exit code
 
 **Unchanged: 2.** golib already exits 2; the test host already returns 2. Nothing about process

@@ -665,7 +665,7 @@ public class ImplementGenerator : ISourceGenerator
                     HashSet<string> boxBound = new(StringComparer.Ordinal);
                     HashSet<string> refBound = new(StringComparer.Ordinal);
 
-                    foreach (IMethodSymbol method in packageClass.GetMembers().OfType<IMethodSymbol>())
+                    foreach (IMethodSymbol method in GoMethodHosts.PackageMethods(packageClass, structType))
                     {
                         if (!method.IsStatic || method.Parameters.Length == 0)
                             continue;
@@ -698,10 +698,7 @@ public class ImplementGenerator : ISourceGenerator
                     // — forward via the package-class STATIC call instead.
                     string emittingNamespace = packageNamespace;
                     string foreignNamespace = packageClass.ContainingNamespace?.ToDisplayString() ?? "";
-                    string? staticClass = null;
-
-                    if (!string.Equals(foreignNamespace, emittingNamespace, StringComparison.Ordinal))
-                        staticClass = packageClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    bool staticForm = !string.Equals(foreignNamespace, emittingNamespace, StringComparison.Ordinal);
 
                     foreach (MethodInfo method in methods)
                     {
@@ -726,10 +723,10 @@ public class ImplementGenerator : ISourceGenerator
                         // promoted, not declared — has no such static, so `xcoff_package.ReadAt(m_box,…)`
                         // targets a nonexistent overload (CS1501). Fall to the box VALUE, invoking the
                         // struct's own PUBLIC promoted method (`m_box.Value.ReadAt(…)`).
-                        if (staticClass is not null && (viaBox || refBound.Contains(simpleName)))
+                        if (staticForm && (viaBox || refBound.Contains(simpleName)))
                         {
                             string recvArg = viaBox ? "m_box" : "ref m_box.Value";
-                            forwardStaticCalls[simpleName] = $"{staticClass}.{simpleName}";
+                            forwardStaticCalls[simpleName] = $"{GoMethodHosts.StaticClass(structType, simpleName)}.{simpleName}";
                             forwardReceivers[simpleName] = recvArg;
                         }
                         else
@@ -749,9 +746,7 @@ public class ImplementGenerator : ISourceGenerator
 
                     foreach ((string embedName, INamedTypeSymbol embedType) in StructDeclarationSyntaxExtensions.GetForeignValueEmbeds((INamedTypeSymbol)structType))
                     {
-                        string embedStaticClass = embedType.ContainingType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "";
-
-                        if (embedStaticClass.Length == 0)
+                        if (embedType.ContainingType is null)
                             continue;
 
                         Dictionary<string, RefKind> embedMethods = StructDeclarationSyntaxExtensions.GetForeignValueReceiverMethods(embedType);
@@ -779,7 +774,7 @@ public class ImplementGenerator : ISourceGenerator
                                 _ => ""
                             };
 
-                            forwardStaticCalls[simpleName] = $"{embedStaticClass}.{simpleName}";
+                            forwardStaticCalls[simpleName] = $"{GoMethodHosts.StaticClass(embedType, simpleName)}.{simpleName}";
                             forwardReceivers[simpleName] = $"{receiverPrefix}m_box.Value.{embedName}";
                         }
                     }
@@ -831,7 +826,7 @@ public class ImplementGenerator : ISourceGenerator
                             if (pointerEmbedNamespace != packageNamespace && pointerEmbedNamespace != Namespace &&
                                 !packageNamespace.StartsWith($"{pointerEmbedNamespace}.", StringComparison.Ordinal))
                             {
-                                forwardStaticCalls[simpleName] = $"{pointerEmbedType.ContainingType!.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{simpleName}";
+                                forwardStaticCalls[simpleName] = $"{GoMethodHosts.StaticClass(pointerEmbedType, simpleName)}.{simpleName}";
                             }
 
                             forwardReceivers[simpleName] = $"m_box.Value.{pointerEmbedName}";
@@ -1477,6 +1472,12 @@ public class ImplementGenerator : ISourceGenerator
                 .Where(method => emittedPartialMembers.Add($"{implTypeKey}|{method.Name}"))
                 .ToList();
 
+            // The promoted-method class of a single FOREIGN value embed's type, for the static form below.
+            INamedTypeSymbol? valueEmbedPromotedHost = embedHop is null && (structDecl?.GetEmbeddedValueHopNames(compilation!) is [var promotedHop]) && promotedHop.TypeName.Contains('.') &&
+                                                       ResolveValueEmbedType(structType, promotedHop.Name) is INamedTypeSymbol promotedHopType
+                ? GoMethodHosts.PromotedHost(promotedHopType)
+                : null;
+
             string generatedSource = new InterfaceImplTemplate
             {
                 PackageNamespace = packageNamespace,
@@ -1526,6 +1527,8 @@ public class ImplementGenerator : ISourceGenerator
                 ValueEmbedHopStaticClass = embedHop is null && (structDecl?.GetEmbeddedValueHopNames(compilation!) is [var svh]) && svh.TypeName.Contains('.')
                     ? ResolveValueEmbedPackageClass(structType, svh.Name) ?? "global::go." + svh.TypeName.Substring(0, svh.TypeName.LastIndexOf('.'))
                     : null,
+                ValueEmbedHopPromotedClass = valueEmbedPromotedHost?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                ValueEmbedHopPromotedMethods = valueEmbedPromotedHost is null ? null : new(valueEmbedPromotedHost.MemberNames, StringComparer.Ordinal),
                 UsingStatements = usingStatements
             }
             .Generate();
@@ -2227,12 +2230,15 @@ public class ImplementGenerator : ISourceGenerator
     /// not resolve to a type nested in a class.
     /// </summary>
     private static string? ResolveValueEmbedPackageClass(ITypeSymbol structType, string embedName) =>
+        ResolveValueEmbedType(structType, embedName)?.ContainingType is INamedTypeSymbol packageClass
+            ? packageClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+            : null;
+
+    private static INamedTypeSymbol? ResolveValueEmbedType(ITypeSymbol structType, string embedName) =>
         structType.GetMembers(embedName)
             .Select(member => member switch { IPropertySymbol property => property.Type, IFieldSymbol field => field.Type, _ => null })
             .OfType<INamedTypeSymbol>()
-            .FirstOrDefault()?.ContainingType is INamedTypeSymbol packageClass
-            ? packageClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
-            : null;
+            .FirstOrDefault();
 
     /// <summary>
     /// Reads a lifted type's ORIGINAL Go name from its <c>[GoLocalName]</c> stamp, or <c>null</c>
@@ -2477,7 +2483,7 @@ public class ImplementGenerator : ISourceGenerator
     /// </summary>
     private static bool DeclaresGoMethod(INamedTypeSymbol packageClass, INamedTypeSymbol openTarget, IMethodSymbol member)
     {
-        foreach (IMethodSymbol method in packageClass.GetMembers(member.Name).OfType<IMethodSymbol>())
+        foreach (IMethodSymbol method in GoMethodHosts.PackageMethods(packageClass, openTarget, member.Name))
         {
             if (!method.IsExtensionMethod || method.Parameters.Length != member.Parameters.Length + 1 ||
                 method.TypeParameters.Length != openTarget.TypeParameters.Length ||

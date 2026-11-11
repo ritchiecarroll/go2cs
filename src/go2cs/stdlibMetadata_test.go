@@ -516,6 +516,11 @@ func TestRecurseNuGetPinsTheCompileRidToTheTarget(t *testing.T) {
 	cases := map[string]string{
 		"linux/amd64":   "linux-x64",
 		"windows/amd64": "win-x64",
+		// linux/arm64 is a flavour of its own (S6), shipped under its own RID: it is not linux-x64's twin.
+		"linux/arm64": "linux-arm64",
+		// A target outside the universe compiles against the flavour serving its GOOS, as before.
+		"linux/riscv64": "linux-x64",
+		"windows/arm64": "win-x64",
 		// Both Mac RIDs ship the same darwin build; the pin names the one matching the target's arch.
 		"darwin/amd64": "osx-x64",
 		"darwin/arm64": "osx-arm64",

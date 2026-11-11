@@ -1,0 +1,59 @@
+# Repro runs at go2cs master 38caf3558a (batch 282), unpatched. Go oracle -> go2cs -recurse -> dotnet build -> run ->
+# compare: the steps of rerun-repro.sh.txt, with GO2CS_EXE and go2cspath at a detached worktree of 38caf3558a.
+# C30 / C31 / C32 are the rows COORD numbered from the unpatched checkdemo closure build at that master. Each red
+# reproduces the TS site's error code; each has a green control that differs on one axis:
+#   C30 c30arrayswitch RED (CS9135) / c30ctl-constswitch GREEN: the same switch on constant (uint16) cases.
+#   C31 c31genericmaparg RED (CS1031) / c31ctl-genericstringarg GREEN: Expected[string], no nested generic argument.
+#   C32 c32aliasbytesfromconst RED (CS0030) / c23b-crosspkgbytes GREEN: the same lib.Value imported directly, no alias.
+#       c32b-aliasbytesfromvar is also RED (CS0030 from go.@string): the string VARIABLE converted through the alias
+#       fails too, so the ingredient is the alias (wrap.Value = lib.Value), not the constant. The direct emission is
+#       (lib.Value)slice<byte>((@string)"null"u8); through the alias it is (lib.Value)"null"u8 and (lib.Value)s.
+
+repro c30arrayswitch  go2cs=38caf3558a
+GO   rc=0: utf16le utf16be utf8 utf8
+CONV rc=0  
+BUILD rc=1  main.cs(12,14) CS9135: A constant value of type 'array<byte>' is expected|main.cs(15,14) CS9135: A constant value of type 'array<byte>' is expected|
+RUN  rc=-1: 
+MATCH NO
+
+repro c30ctl-constswitch  go2cs=38caf3558a
+GO   rc=0: utf16le utf16be utf8 utf8
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: utf16le utf16be utf8 utf8
+MATCH YES
+
+repro c31genericmaparg  go2cs=38caf3558a
+GO   rc=0: true 1
+CONV rc=0  WARNING: Package license is unspecified for repro\c31genericmaparg\lib\repro.c31genericmaparg.lib.csproj (reported once per module); add a LICENSE b|
+BUILD rc=1  package_info.cs(39,93) CS1031: Type expected|
+RUN  rc=-1: 
+MATCH NO
+
+repro c31ctl-genericstringarg  go2cs=38caf3558a
+GO   rc=0: true 1
+CONV rc=0  WARNING: Package license is unspecified for repro\c31ctl-genericstringarg\lib\repro.c31ctl-genericstringarg.lib.csproj (reported once per mod|
+BUILD rc=0  
+RUN  rc=0: true 1
+MATCH YES
+
+repro c32aliasbytesfromconst  go2cs=38caf3558a
+GO   rc=0: null
+CONV rc=0  WARNING: Package license is unspecified for repro\c32aliasbytesfromconst\lib\repro.c32aliasbytesfromconst.lib.csproj (reported once per module|
+BUILD rc=1  main.cs(13,18) CS0030: Cannot convert type 'System.ReadOnlySpan<byte>' to 'go.repro.c32aliasbytesfromconst.lib_package.Value'|
+RUN  rc=-1: 
+MATCH NO
+
+repro c32b-aliasbytesfromvar  go2cs=38caf3558a
+GO   rc=0: null
+CONV rc=0  WARNING: Package license is unspecified for repro\c32b-aliasbytesfromvar\lib\repro.c32b-aliasbytesfromvar.lib.csproj (reported once per module|
+BUILD rc=1  main.cs(14,18) CS0030: Cannot convert type 'go.@string' to 'go.repro.c32b_aliasbytesfromvar.lib_package.Value'|
+RUN  rc=-1: 
+MATCH NO
+
+repro c23b-crosspkgbytes  go2cs=38caf3558a
+GO   rc=0: null 4
+CONV rc=0  WARNING: Package license is unspecified for repro\c23b-crosspkgbytes\lib\repro.c23b-crosspkgbytes.lib.csproj (reported once per module); add a LIC|
+BUILD rc=0  
+RUN  rc=0: null 4
+MATCH YES

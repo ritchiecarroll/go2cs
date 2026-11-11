@@ -721,6 +721,33 @@ Only the **collection** gate is wide. The return-type relaxation's OTHER arm
 the narrow condition, because it answers a different question — a cross-package call the converter emits
 as a bare `Ꮡt.M()` — which remains the unexported-embed case alone.
 
+**Exported-method addendum — the method's NAME decides, whatever the embed's kind.**<!-- 2026-11-10, C34: the
+packagejson shape of the TypeScript-Go readiness run (repro c34promotedbuiltinreturn at 4505b95021 on
+claude/i7-ts-readiness-rerun); 10 of that package's 12 forwarders were internal, and its importer's eleven calls of
+the promoted AsString() were CS1929. --> The paragraph above was wrong about who reaches a forwarder from another
+package. A VALUE-receiver method promoted through an EXPORTED value embed is called bare there too
+(`e.AsString()`, where `ExportsOrImports` embeds `JSONValue`), and that embed is neither of the two rescued kinds,
+so its forwarder went `internal` for a return type spelled `@string`, `bool` or any tuple that ends in a lowercase
+name. Go's rule is that an exported method of an exported struct is exported whatever it returns. So the forwarder of
+an **exported** method now takes the accurate test on every embed kind, on its return type and on its parameters, and
+the one demotion left is the one C# requires: a signature that names a type which is not public (CS0050, CS0051).
+An unexported method's forwarder keeps the rules above.
+
+The accurate test of this arm is `MethodInfo.ReturnTypeIsGoPublic` / `ParametersAreGoPublic`: `IsEffectivelyPublicType`
+with one more reading. The converter states each type's accessibility in `package_info.cs`, and a converted type
+reads as declared. A hand-written file may declare a Go type with the `GoType` attribute and no modifier; that type
+reads private while a generator runs, so `ReturnTypeIsPublic` is false for `(ж<Node>, error)` in `Node`'s own
+package. The Go-public flags read such a type as go2cs-gen's own part will declare it, by the rule the sibling
+generators share (`Common.EffectiveScopeIsPublic`): a modifier written in source wins, and the Go export case of
+the name answers for a declaration that carries none. A **generic** embed is the exception: its flags
+describe the declaration's signature, whose type parameters read public, while the forwarder is written over the
+embed's type arguments, which the template holds as text. There the rescue is taken only when each argument's name
+reads exported, so a forwarder over `Base<hidden>` is not made public over `hidden`. (Guarded by GenTests
+`PromotedForwarderScopeTests`, whose control was made to fail once without the generic guard, and by
+`PromotedValueEmbedLib`/`PromotedValueEmbedUser`: the exported `Badge` embeds the exported `Meta` by value, and the
+user package calls its promoted `Text() string`, `Ok() bool` and `Both() (string, bool)`, CS1929 at each before the
+rule.)
+
 **Third gate, same reasoning — the promoted METHOD's own exportedness.**<!-- 2026-08-29 --> A
 `GetScope(…) == "public"` test on the **method name** would rest on the argument that "an
 unexported method is never reachable across packages, so it needs no shim and its in-package callers keep

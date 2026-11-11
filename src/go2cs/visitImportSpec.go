@@ -915,7 +915,7 @@ func (v *Visitor) collectMethodNamespaceUsings(file *ast.File) {
 
 	ast.Inspect(file, func(node ast.Node) bool {
 		if selectorExpr, ok := node.(*ast.SelectorExpr); ok {
-			if sel, ok := v.info.Selections[selectorExpr]; ok && sel.Kind() == types.MethodVal {
+			if sel, ok := v.info.Selections[selectorExpr]; ok && (sel.Kind() == types.MethodVal || samePackagePromotion(sel)) {
 				if namespace, ok := v.methodPackageNamespace(sel.Obj().Pkg()); ok {
 					v.methodNamespaceUsings.Add(namespace)
 				}

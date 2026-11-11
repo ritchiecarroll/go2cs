@@ -10,7 +10,9 @@ package main
 
 import (
 	"go/ast"
+	"go/token"
 	"go/types"
+	"path/filepath"
 	"strings"
 
 	"golang.org/x/tools/go/packages"
@@ -99,6 +101,15 @@ func deriveCollisionTypeAliases(pkg *packages.Package) [][2]string {
 		// packageHasMethodNamed walks that package's own scope (free functions plus every named
 		// type's methods), which is the types-level equivalent of the analysis's FuncDecl scan.
 		if !packageHasMethodNamed(pkg.Types, name) {
+			continue
+		}
+
+		// B2 (test-variant coherence), as performNameCollisionAnalysis applies it: a collision that exists only
+		// because TEST files declare the method leaves the production element's name alone. The test method takes
+		// the Δ, and the producer's assembly declares the bare name. A consumer that reaches the producer through
+		// its TEST variant (an external _test package) sees the test method in this scope, and must not be told
+		// the element was renamed (strings' export_test.go `(*Replacer).Replacer`: CS0426 on strings.ΔReplacer).
+		if testOnlyMethodCollision(pkg, name) {
 			continue
 		}
 
@@ -276,4 +287,58 @@ func foreignRenamedTypeSpelling(obj *types.TypeName) (spelling string, bare bool
 	}
 
 	return member, false, true
+}
+
+// testOnlyMethodCollision reports whether name collides in pkg only because TEST files declare the method: the
+// element is declared in a production file and every method carrying the name is declared in a _test.go file. It
+// is performNameCollisionAnalysis's B2 predicate over the loaded scope (a free function cannot share the element's
+// package-scope name, so only methods can collide). A production-only universe has no test methods, so it is never
+// true there; without position information it answers false, and the collision stands as before.
+func testOnlyMethodCollision(pkg *packages.Package, name string) bool {
+	if pkg == nil || pkg.Types == nil || pkg.Fset == nil {
+		return false
+	}
+
+	inTestFile := func(pos token.Pos) bool {
+		return pos.IsValid() && strings.HasSuffix(strings.ToLower(filepath.Base(pkg.Fset.Position(pos).Filename)), "_test.go")
+	}
+
+	scope := pkg.Types.Scope()
+	element := scope.Lookup(name)
+
+	if element == nil || !element.Pos().IsValid() || inTestFile(element.Pos()) {
+		return false
+	}
+
+	testMethods := 0
+
+	for _, typeName := range scope.Names() {
+		object, isTypeName := scope.Lookup(typeName).(*types.TypeName)
+
+		if !isTypeName {
+			continue
+		}
+
+		named, isNamed := object.Type().(*types.Named)
+
+		if !isNamed {
+			continue
+		}
+
+		for i := range named.NumMethods() {
+			method := named.Method(i)
+
+			if method.Name() != name {
+				continue
+			}
+
+			if !inTestFile(method.Pos()) {
+				return false
+			}
+
+			testMethods++
+		}
+	}
+
+	return testMethods > 0
 }

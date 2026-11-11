@@ -48,6 +48,18 @@ public record MethodInfo
     // symbols — route through the symbol-based GetMethodInfo, so both compute this for real.
     public bool ParametersArePublic { get; init; }
 
+    // The two flags above, read as they will stand once go2cs-gen has written its own part of each Go type. The
+    // converter states a type's accessibility in package_info.cs, and such a type reads as declared. A hand-written
+    // file may declare a Go type with the GoType attribute and no modifier: its modifier is then in TypeGenerator's
+    // part, its symbol reads private while a generator runs, and the two flags above are false for every signature
+    // that names it inside a tuple or as a type argument (`(ж<Node>, error)`). These read the type by the rule that
+    // part follows (Common.EffectiveScopeIsPublic): a modifier written in source wins, and the Go export case of
+    // the name answers for a declaration that carries none. StructTypeTemplate reads them for the forwarder of an
+    // EXPORTED promoted method, where Go's rule is that the method's name decides its visibility.
+    public bool ReturnTypeIsGoPublic { get; init; }
+
+    public bool ParametersAreGoPublic { get; init; }
+
     // Set when this is a direct-ж (box-receiver, `this ж<T>`) primary being promoted through a POINTER
     // embed: the promoted forwarder must call it on the embed's BOX hop (`target.<embed>`), not the
     // deref'd value (`target.<embed>.Value`) a value-receiver method uses — the box receiver needs ж<T>.
@@ -258,7 +270,12 @@ public static class MethodSyntaxExtensions
     // despite their Go-lowercase names, which the name-based GetScope heuristic misreads as
     // unexported. Used to keep a promoted forwarder returning such a type PUBLIC (visible
     // cross-assembly) rather than wrongly downgrading it to internal (testing.T.Name → CS1929).
-    internal static bool IsEffectivelyPublicType(ITypeSymbol? type)
+    //
+    // With goScope, a type that carries no accessibility of its own is read as go2cs-gen will declare it: public
+    // when its Go name is exported (Common.EffectiveScopeIsPublic, the rule every sibling generator shares). That is
+    // a hand-written Go type declared with the GoType attribute and no modifier, whose modifier is in TypeGenerator's
+    // part and so in no symbol a generator can read. Without goScope such a type reads private, as it is declared.
+    internal static bool IsEffectivelyPublicType(ITypeSymbol? type, bool goScope = false)
     {
         switch (type)
         {
@@ -267,9 +284,9 @@ public static class MethodSyntaxExtensions
             case ITypeParameterSymbol:
                 return true;                            // accessibility is bound at the use site
             case IArrayTypeSymbol array:
-                return IsEffectivelyPublicType(array.ElementType);
+                return IsEffectivelyPublicType(array.ElementType, goScope);
             case IPointerTypeSymbol pointer:
-                return IsEffectivelyPublicType(pointer.PointedAtType);
+                return IsEffectivelyPublicType(pointer.PointedAtType, goScope);
         }
 
         // A builtin special type (int, string primitive, void, …) is always public.
@@ -279,8 +296,13 @@ public static class MethodSyntaxExtensions
         // A public type must not be nested inside a less-accessible one.
         for (ITypeSymbol? enclosing = type; enclosing is not null; enclosing = enclosing.ContainingType)
         {
-            if (enclosing.DeclaredAccessibility is not (Accessibility.Public or Accessibility.NotApplicable))
-                return false;
+            if (enclosing.DeclaredAccessibility is Accessibility.Public or Accessibility.NotApplicable)
+                continue;
+
+            if (goScope && ReferenceEquals(enclosing, type) && Common.EffectiveScopeIsPublic(type, Common.GetSimpleName(type.Name, dropCollisionPrefix: true)))
+                continue;
+
+            return false;
         }
 
         if (type is INamedTypeSymbol named)
@@ -288,9 +310,9 @@ public static class MethodSyntaxExtensions
             // A ValueTuple's own accessibility is public even when an element is internal, so a Go
             // multi-return forwarder must check each element (CS0051 fires on the least-accessible one).
             if (named.IsTupleType)
-                return named.TupleElements.All(element => IsEffectivelyPublicType(element.Type));
+                return named.TupleElements.All(element => IsEffectivelyPublicType(element.Type, goScope));
 
-            return named.TypeArguments.All(IsEffectivelyPublicType);
+            return named.TypeArguments.All(argument => IsEffectivelyPublicType(argument, goScope));
         }
 
         return true;
@@ -417,11 +439,15 @@ public static class MethodSyntaxExtensions
             VariadicDelegate = variadicDelegate,
             ReturnType = methodDeclaration.GetReturnType(semanticModel),
             ReturnTypeIsPublic = IsEffectivelyPublicType(semanticModel.GetTypeInfo(methodDeclaration.ReturnType).Type),
+            ReturnTypeIsGoPublic = IsEffectivelyPublicType(semanticModel.GetTypeInfo(methodDeclaration.ReturnType).Type, goScope: true),
             // Receiver excluded (the `this`-modified parameter): its type is the embed itself,
             // internal by design for an unexported embed — see the symbol-based harvest below.
             ParametersArePublic = methodDeclaration.ParameterList.Parameters
                 .Where(param => !param.Modifiers.Any(SyntaxKind.ThisKeyword))
                 .All(param => param.Type is null || IsEffectivelyPublicType(semanticModel.GetTypeInfo(param.Type).Type)),
+            ParametersAreGoPublic = methodDeclaration.ParameterList.Parameters
+                .Where(param => !param.Modifiers.Any(SyntaxKind.ThisKeyword))
+                .All(param => param.Type is null || IsEffectivelyPublicType(semanticModel.GetTypeInfo(param.Type).Type, goScope: true)),
             IsInvokerForwardable = invokerForwardable,
             IsSignatureRenderable = signatureRenderable,
             GenericTypes = string.Join(", ", typeParameters),
@@ -573,6 +599,7 @@ public static class MethodSyntaxExtensions
             VariadicDelegate = compilation is not null && !invokerForwardable && !methodSymbol.IsExtensionMethod ? VariadicDelegateType(methodSymbol, compilation) : null,
             ReturnType = GlobalQualify(methodSymbol.ReturnType.ToDisplayString()),
             ReturnTypeIsPublic = IsEffectivelyPublicType(methodSymbol.ReturnType),
+            ReturnTypeIsGoPublic = IsEffectivelyPublicType(methodSymbol.ReturnType, goScope: true),
             // The parameter-side twin of ReturnTypeIsPublic (W3a's promoted-member-forwarding site,
             // docs/phase4/DESIGN-w3a-wrapper-scaffolding.md's own arc): StructTypeTemplate's
             // promoted-method forwarder downgrade only ever consulted the RETURN type, so a void
@@ -587,6 +614,8 @@ public static class MethodSyntaxExtensions
             // (interface adapters) have no receiver slot here.
             ParametersArePublic = (methodSymbol.IsExtensionMethod ? methodSymbol.Parameters.Skip(1) : methodSymbol.Parameters)
                 .All(parameter => IsEffectivelyPublicType(parameter.Type)),
+            ParametersAreGoPublic = (methodSymbol.IsExtensionMethod ? methodSymbol.Parameters.Skip(1) : methodSymbol.Parameters)
+                .All(parameter => IsEffectivelyPublicType(parameter.Type, goScope: true)),
             IsInvokerForwardable = invokerForwardable,
             IsSignatureRenderable = signatureRenderable,
             Parameters = parameters,

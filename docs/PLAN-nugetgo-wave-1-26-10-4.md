@@ -66,7 +66,8 @@ revisions were read from nuget.org's flat container on 2026-11-10; each module's
 The counts each module's proof must read are the `Expect` entries of
 [`nugetgo-modules.psd1`](../src/tools/nugetgo/nugetgo-modules.psd1), unchanged (gojq's root 164 + 0, timefmt-go
 417 + 0). A rebuild moves the package version and the digests, never a count; a count that moves is a finding, posted
-before any sheet is filled. mousetrap has no Go tests, and its proof is its four hosted behavior rows. gojq's `cli`
+before any sheet is filled. mousetrap has no Go tests, and its proof is its five behavior rows, one per shipped RID
+(see *linux-arm64* below). gojq's `cli`
 and its six-module closure stay deferred, as ruled for 1.26.10.3 (OQ-4i); `golang.org/x/sys` still cannot be packed.
 
 All nine registry rows are live at `https://nugetgo.net/v1/mappings.txt` (read 2026-11-10), and no package ID changes,
@@ -84,6 +85,22 @@ refuses an Apache-2.0 module whose converted files lack go2cs's `-provenance` no
   Go tests on the runbook's no-tests route, `-provenance` included.
 - Both conversion commits change in every converted file: the notice adds two lines, with a blank line on each side,
   after each file's leading comments. The conversion repositories' next commits show it.
+
+**linux-arm64 (seat S6, COORD's ruling 2026-11-10).** This wave's two RID-specific packages, cobra and mousetrap, ship
+a fifth RID folder, `runtimes/linux-arm64/`, converted and built at linux/arm64. Without it, go.lib refuses a
+linux-arm64 consumer of either package (`GO2CS3003`). The other seven packages carry `lib/` only, which every RID
+already reads, so nothing changes for them.
+
+- The pack converts and builds four flavours (windows/amd64, linux/amd64, darwin/amd64, linux/arm64); both Mac RIDs
+  still share the darwin/amd64 bytes.
+- The API-compat guard compares baseline assets only. `runtimes/linux-arm64/` is new surface, so it is not compared
+  against 1.26.10.3 (`GoApiCompat.psm1`, the new-RID rule).
+- mousetrap's linux-arm64 behavior row comes from the os-matrix arm leg (seats S5b and S5c). If that leg cannot run
+  the row when mousetrap is packed, the row is an UNMEASURED row instead: it records no run, only the reason, and the
+  package's page names linux-arm64 UNMEASURED. Write it with `New-NugetgoUnmeasuredRowText` from
+  `NugetgoBehaviorProof.psm1` into the `-BehaviorProofDir` folder as `linux-arm64.md`. The pack accepts an UNMEASURED
+  row only for linux-arm64, and the badge counts measured rows only.
+- cobra has Go tests, so its proof is its test comparison, as in 1.26.10.3.
 
 ## 3. The order, and the exact-pin rule
 
@@ -131,7 +148,8 @@ Each step is the runbook's, in the order `PLAN-rebank-1-26-10-3.md` section 8 se
    no Go tests, runs twice: `-Packs int1`, then, after its hosted rows are written against that rehearsal package,
    `-Packs release -BehaviorProofDir <rows>`.
    - Each run exits 0, with every count equal to the module's `Expect`.
-   - mousetrap's release candidate carries its four hosted rows.
+   - mousetrap's release candidate carries five rows: four hosted rows, and linux-arm64's from the arm leg or
+     UNMEASURED (section 2).
    - Each kit is committed to its `claude/c2-nugetgo-1261004-<name>` ref.
 3. **cobra's kit, from the local feed.** The same driver, with `-Feed` set to a folder holding S1's pflag and
    mousetrap release candidates beside go.* 1.26.10.4, and the 1.26.10.3 wave's `-ThirdPartyPackage` argument with

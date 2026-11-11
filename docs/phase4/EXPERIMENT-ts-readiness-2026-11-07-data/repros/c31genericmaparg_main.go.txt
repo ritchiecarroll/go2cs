@@ -1,0 +1,15 @@
+package main
+
+import (
+	"fmt"
+
+	"repro/c31genericmaparg/lib"
+)
+
+// TS site: internal/module uses packagejson's Expected[map[string]string] as a TypeValidatedField (C31).
+func present(f lib.TypeValidatedField) bool { return f.IsPresent() }
+
+func main() {
+	deps := lib.Expected[map[string]string]{Value: map[string]string{"a": "1"}, Valid: true}
+	fmt.Println(present(&deps), len(deps.Value)) // Go: true 1
+}

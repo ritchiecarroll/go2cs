@@ -1,0 +1,15 @@
+package lib
+
+// C34 green control: the same embed, with the promoted method returning an EXPORTED named type instead of a builtin.
+type Text string
+
+type JSONValue struct {
+	Value any
+}
+
+func (v JSONValue) AsText() Text { return Text(v.Value.(string)) }
+
+type ExportsOrImports struct {
+	JSONValue
+	kind int
+}

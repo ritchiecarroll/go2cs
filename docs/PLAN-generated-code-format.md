@@ -257,7 +257,7 @@ After:
 All 205 MethodSet files have this shape, 1,739 lines in total. The value-receiver form at `:396` writes a
 one-line braced block, `{ T ᴛc = v; return …; }`, which the formatter leaves alone.
 
-The same class has a second writer. `StructTypeTemplate.cs:2489` and `:2491` write a constructor's
+The same class has a second writer. `StructTypeTemplate.cs:2590` and `:2491` write a constructor's
 `if (x.Source is not null) this.x = x;` and `if (x != nil) this.x = x;` as one line (239 lines in 128 files),
 where coding-style rule 1 puts the embedded statement on its own indented line. `dotnet format` makes that split.
 **Fix:** a `"\r\n"` and four more columns before `this.`.
@@ -314,10 +314,10 @@ whitespace-only line, or a second blank line. Fragment properties that end in `"
 | `StructTypeTemplate.cs:151`, `:153` and the lines around them in `TemplateBody` (`:131`–`:171`) | 8-space lines between members |
 | `StructTypeTemplate.cs:144`, a line of four interpolations (`ValueCloneImplementation`, `GoZeroConstructionHook`, `TypeOpsSourceMembers`, `FieldBoxTableMembers`) | a whitespace-only line, or a blank run, when all four are empty |
 | `NumericTypeTemplate.cs:28`, `:32`, `:34` and the operator ladder below them | 8-space lines between operators (InheritedType) |
-| `InterfaceImplTemplate.cs:314`, `:316`, `:318` | 8-space lines between the interface `==`/`!=` operators (Implement, 4 files) |
+| `InterfaceImplTemplate.cs:321`, `:316`, `:318` | 8-space lines between the interface `==`/`!=` operators (Implement, 4 files) |
 | `ImplicitConvTemplate.cs:41`, `}    ` | four spaces after a closing brace (all 21 files) |
-| `MethodDeclarationSyntaxExtensions.cs:206`, `GetWhereConstraints` | a line break plus an indent with no `where` clause after it, when every type parameter's constraint list is empty (Recv, 1 file) |
-| `PartialStubGenerator.cs:149`, a line holding only the using-statement interpolation, written after the namespace | a blank run when there are no usings (4 files) |
+| `MethodDeclarationSyntaxExtensions.cs:218`, `GetWhereConstraints` | a line break plus an indent with no `where` clause after it, when every type parameter's constraint list is empty (Recv, 1 file) |
+| `PartialStubGenerator.cs:152`, a line holding only the using-statement interpolation, written after the namespace | a blank run when there are no usings (4 files) |
 
 `core/runtime/…/go.runtime_package.dlogPerM.g.cs`, before (`·` marks a trailing space):
 
@@ -349,9 +349,9 @@ when the empty interpolation is the templates' normal idiom.
 ### F. No final newline: PartialStub and InterfaceType
 
 **Cause.** A raw string drops the line break before its closing `"""`. The PartialStub template
-(`PartialStubGenerator.cs:141`–`:157`) ends at `}`, and so does InterfaceTypeTemplate's `AssertSourceOverloadClass`
+(`PartialStubGenerator.cs:144`–`:157`) ends at `}`, and so does InterfaceTypeTemplate's `AssertSourceOverloadClass`
 (`InterfaceTypeTemplate.cs:87`–`:100`), which `:84` appends after the base footer. The base footer itself
-(`TemplateBase.cs:113`–`:117`) ends in `PackageFooter ?? ""`, which leaves a final newline only when the footer is
+(`TemplateBase.cs:116`–`:117`) ends in `PackageFooter ?? ""`, which leaves a final newline only when the footer is
 empty. Every one of the 221 PartialStub files, and every interface file that carries assertion overloads (71),
 ends `}` with no line break. **Fix:** §4's helper adds the one final newline. The template fix is a trailing
 empty line before each closing `"""`.
@@ -394,8 +394,8 @@ silently. Keeping the helper text-only keeps it free of a parse. A token-aware v
 figure above.
 
 **The writer fixes** are the structural edits in §3: A (`LiteralInterceptorGenerator.cs:527`–`:591`), B
-(`MethodSet.cs:140`, `:363`; `StructTypeTemplate.cs:2489`, `:2491`), C (`TemplateBase.cs:38`–`:40`, `StructTypeTemplate.cs:755`), Recv's empty `where`
-line (`MethodDeclarationSyntaxExtensions.cs:206`), and G's 22 `AppendLine` calls. F's and ImplicitConv's
+(`MethodSet.cs:140`, `:363`; `StructTypeTemplate.cs:2590`, `:2491`), C (`TemplateBase.cs:38`–`:40`, `StructTypeTemplate.cs:755`), Recv's empty `where`
+line (`MethodDeclarationSyntaxExtensions.cs:218`), and G's 22 `AppendLine` calls. F's and ImplicitConv's
 template ends can ride along, or be left to the helper.
 
 ## 5. Proof and guard

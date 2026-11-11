@@ -1,0 +1,3 @@
+module repro/c38ctl-plaintypeswitchcase
+
+go 1.26
