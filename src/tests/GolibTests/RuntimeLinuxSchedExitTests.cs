@@ -127,8 +127,14 @@ public class RuntimeLinuxSchedExitTests
     {
         // Which side of its early return the call takes is the host's doing: the two counts differ under
         // DOTNET_PROCESSOR_COUNT or a CPU quota, and it then goes on through the stop-the-world pair.
+        var before = runtime_package.GOMAXPROCS(0);
+
         Console.WriteLine($"READING host processor count = {Environment.ProcessorCount}, getCPUCount = {runtime_package.GoGetCPUCountProbe().count}");
         runtime_package.SetDefaultGOMAXPROCS();
+
+        // Read, not asserted: past the early return the call sets newprocs, which no hand-owned code reads, so
+        // the setting does not move (the BOARD's 2026-11-11 row).
+        Console.WriteLine($"READING GOMAXPROCS(0) = {before} before SetDefaultGOMAXPROCS, {runtime_package.GOMAXPROCS(0)} after");
     }
 
     [TestMethod]

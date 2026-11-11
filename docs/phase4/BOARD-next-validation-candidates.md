@@ -35972,4 +35972,44 @@ names 91 members); the records emptied (VACUOUS).
 
 — G (2026-11-10)
 
+## 2026-11-11 — G (COORD's ruling on the linux stub bodies seat): `runtime.SetDefaultGOMAXPROCS` is a SILENT NO-OP on a public API: past its early return it sets `newprocs`, which no hand-owned code reads, so the setting never moves — OPEN, post-hop queue
+
+**What a caller sees.** The call returns normally and changes nothing: no exception, no message. Go resets
+GOMAXPROCS to the runtime's default; a converted program keeps the setting it had.
+
+**Go's own answer (go1.26.10, windows/amd64, 12 CPUs, a probe):** with `GOMAXPROCS=3` in the environment, or after
+`runtime.GOMAXPROCS(3)`, the setting reads 3; after `runtime.SetDefaultGOMAXPROCS()` it reads 12.
+
+**Measured here (linux/amd64 under WSL, 10 CPUs, SDK 10.0.403;
+`RuntimeLinuxSchedExitTests.SetDefaultGOMAXPROCSReachesNoStub`, which prints and does not assert), predicted before
+the run:**
+
+- `DOTNET_PROCESSOR_COUNT=3`: the host's processor count is 3 and `getCPUCount` answers 10, so the call goes past
+  its early return and through the stop-the-world pair. `GOMAXPROCS(0)` reads 3 before the call and 3 after. Go's
+  rule gives 10.
+- Variable unset: 10 before and 10 after. That is the early return, and it is right: there is nothing to change.
+
+**Read at the tree (`claude/g-linux-stub-bodies`, the same lines in the linux, windows and darwin folders):**
+
+- `runtime/debug.cs:23-53` (converted, shared). `procs = defaultGOMAXPROCS(0)`; it returns early when the setting is
+  not custom and already equals `procs`. Otherwise: `stopTheWorldGC`, `newprocs = procs` (line 47),
+  `sched.customGOMAXPROCS = false`, `startTheWorldGC`.
+- `newprocs` (`runtime2.cs:1304`) has one reader: `<os>/proc.cs:1812`, inside the converted
+  `startTheWorldWithSema`, which only the converted collector calls (`mgc.cs`). `startTheWorldGC`
+  (`<os>/proc.cs:1603`) calls the hand-owned `startTheWorld` (`managed_impl.cs:1014`), which never reads it.
+- The setting a caller reads is the hand-owned `GOMAXPROCS` (`managed_impl.cs:372`). It keeps its own field and
+  writes `gomaxprocs`. It never sets `sched.customGOMAXPROCS`; only the converted `<os>/proc.cs:978` does.
+- So a setting made through `runtime.GOMAXPROCS(n)` is not reset either: read, not run.
+
+**Scope.** All three targets by the read; run at linux/amd64 only. On linux the call used to throw from
+`sched_getaffinity`'s generated stub, at both arches. With the three bodies in (`456c49f81f`) it returns, and this
+no-op is what is left. The automatic updater (`<os>/proc.cs:6860`) writes `newprocs` the same way; whether it
+ever runs here is not read.
+
+**Owed (post-hop queue, ruled 2026-11-11):** hand-convert `SetDefaultGOMAXPROCS` beside `GOMAXPROCS` in
+`managed_impl.cs`, so that it sets the hand-owned setting to the default. The test's two printed readings become
+asserts with that fix. Until then this is a silent divergence on a public API, and a disclosure candidate.
+
+— G (2026-11-11)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
