@@ -127,6 +127,82 @@ try:
         roster = open(os.path.join(root, 'docs/ValidatedTestPackages.md'), encoding='utf-8').read()
         case(f'darwin: an arch-count difference whose evidence {name} is refused by name, and nothing is written', rc != 0 and 'arch-count' in err and 'f/pkg' in err and '· darwin: 5 ·' in roster,
              f'rc {rc}, out {out!r}, err {err.strip()!r}')
+
+    # THE TWO-RID LINUX MODE (S7-a; COORD 2026-11-10/11; DATA-la64-s7-bank-plan.md 2.4). annotate_linux.py --rids reads
+    # the mac-form evidence of both linux RIDs and DERIVES the row's segment by the guard's section 2i rules: equal (both
+    # RIDs written out), arch-strict, arch-count, combined, else "(linux-x64; linux-arm64: pending)". A refused shape
+    # exits non-zero naming the row and writes nothing. The roster's linux-x64 reading is never rewritten from the
+    # evidence: a hosted linux-x64 line that differs is a host difference, and the row stays pending.
+    RIDS = f'{NEW}/linux-rids'
+    RIDS_HEADER = DARWIN_HEADER + '\tabsent\tdivergent_names'
+    write(os.path.join(root, 'src/check-roster-format.ps1'), declared_line.sub("$DarwinEvidenceDirectory = 'docs/phase4/h10-evidence/go{pin}/darwin'", guard_text, count=1))
+    def rids_line(rid, status, verdicts, matched, divergent, new='0', agree='no', absent='-', names=None):
+        cells = ['W1-1', 'f/pkg', rid, str(verdicts), str(matched), str(divergent), str(divergent), str(new), status, agree, absent]
+        return '\t'.join(cells + ([names] if names is not None else [])) + '\n'
+    def rids_case(name, linux, lines, want=None, refused=None, extra=()):
+        write(os.path.join(root, 'docs/ValidatedTestPackages.md'), '# Roster\n\n| a | b | c | d |\n|:--|--:|--:|:--|\n' +
+              ROW.replace('· linux: 5 ·', f'· linux: {linux} ·') + '\n')
+        write(os.path.join(root, RIDS, 'W1-1.tsv'), RIDS_HEADER + '\n' + ''.join(lines))
+        rc, out, err = run('annotate_linux.py', root, '--rids', '--evidence', RIDS, '--write', *extra)
+        roster = open(os.path.join(root, 'docs/ValidatedTestPackages.md'), encoding='utf-8').read()
+        if refused is None:
+            case(name, rc == 0 and f'· linux: {want} ·' in roster, f'rc {rc}, out {out!r}, err {err.strip()!r}, roster {roster.splitlines()[-1]!r}')
+        else:
+            case(name, rc != 0 and refused in err and 'f/pkg' in err and f'· linux: {linux} ·' in roster,
+                 f'rc {rc}, out {out!r}, err {err.strip()!r}, roster {roster.splitlines()[-1]!r}')
+        return out, err
+    rids_case('linux --rids: equal readings write both RIDs out', '5',
+              [rids_line('linux-x64', 'validated', 5, 5, 0, agree='yes'), rids_line('linux-arm64', 'validated', 5, 5, 0, agree='yes')], '5 (linux-x64; linux-arm64: 5)')
+    rids_case('linux --rids: arch-strict headlines the RID carrying the disclosures', '11',
+              [rids_line('linux-x64', 'validated', 11, 11, 0), rids_line('linux-arm64', 'DISC', 11, 8, 3)], '8 + 3 (linux-arm64; linux-x64: 11)')
+    rids_case('linux --rids: arch-count with its missing verdict named', '6',
+              [rids_line('linux-x64', 'validated', 6, 6, 0), rids_line('linux-arm64', 'validated', 5, 5, 0, absent='TestOnlyOnAmd64')], '6 (linux-x64; linux-arm64: 5)')
+    rids_case('linux --rids: the combined form, both deltas named', '6 + 2',
+              [rids_line('linux-x64', 'validated', 8, 6, 2, names='d1;d2'), rids_line('linux-arm64', 'DISC', 6, 5, 1, absent='a1;a2', names='d1')], '6 + 2 (linux-x64; linux-arm64: 5 + 1)')
+    for name, lines, refused in (
+            ('names 1 of the 2 missing verdicts', [rids_line('linux-x64', 'validated', 8, 6, 2, names='d1;d2'), rids_line('linux-arm64', 'DISC', 6, 5, 1, absent='a1', names='d1')], 'names 1 of the 2 missing'),
+            ('has no divergent_names column', [rids_line('linux-x64', 'validated', 8, 6, 2), rids_line('linux-arm64', 'DISC', 6, 5, 1, absent='a1;a2')], 'names no disclosed-divergent verdicts'),
+            ('names none of its disclosed verdict', [rids_line('linux-x64', 'validated', 8, 6, 2, names='d1;d2'), rids_line('linux-arm64', 'DISC', 6, 5, 1, absent='a1;a2', names='-')], 'names 0 of the 1 disclosed-divergent'),
+            ('names a verdict as both absent and disclosed', [rids_line('linux-x64', 'validated', 8, 6, 2, names='d1;d2'), rids_line('linux-arm64', 'DISC', 6, 5, 1, absent='a1;d1', names='d1')], 'both absent and disclosed'),
+            ('names absent verdicts on the longer RID', [rids_line('linux-x64', 'validated', 8, 6, 2, absent='z', names='d1;d2'), rids_line('linux-arm64', 'DISC', 6, 5, 1, absent='a1;a2', names='d1')], 'LONGER')):
+        rids_case(f'linux --rids: a combined shape that {name} is refused by name, and nothing is written', '6 + 2', lines, refused=refused)
+    rids_case('linux --rids: an arch-count shape naming too little is refused by name too', '6',
+              [rids_line('linux-x64', 'validated', 6, 6, 0), rids_line('linux-arm64', 'validated', 4, 4, 0, absent='TestOnlyOnAmd64')], refused='names 1 of the 2')
+    rids_case('linux --rids: no form fits, so the row is written pending', '5',
+              [rids_line('linux-x64', 'validated', 5, 5, 0), rids_line('linux-arm64', 'FAIL', 5, 4, 1, new='1')], '5 (linux-x64; linux-arm64: pending)')
+    out, err = rids_case('linux --rids: a hosted linux-x64 reading that differs is a host difference, and the row stays pending', '5',
+                         [rids_line('linux-x64', 'COUNT', 4, 4, 0, agree='yes'), rids_line('linux-arm64', 'COUNT', 4, 4, 0, agree='yes')], '5 (linux-x64; linux-arm64: pending)')
+    case('linux --rids: the host difference is listed by name', 'host difference' in out, f'out {out!r}')
+    rids_case('linux --rids: a pending row read and banked loses its pending', '5 (linux-x64; linux-arm64: pending)',
+              [rids_line('linux-x64', 'validated', 5, 5, 0, agree='yes'), rids_line('linux-arm64', 'validated', 5, 5, 0, agree='yes')], '5 (linux-x64; linux-arm64: 5)')
+    rids_case('linux --rids: a row the evidence does not name is written pending', '5',
+              [rids_line('linux-x64', 'validated', 5, 5, 0, agree='yes').replace('f/pkg', 'g/other')], '5 (linux-x64; linux-arm64: pending)')
+    rids_case('linux --rids: a linux-arm64 reading no evidence names is put back to pending, the linux-x64 reading kept', '7 + 1 (linux-arm64; linux-x64: 9)',
+              [rids_line('linux-x64', 'validated', 5, 5, 0, agree='yes').replace('f/pkg', 'g/other')], '9 (linux-x64; linux-arm64: pending)')
+    # The guard's declared $LinuxRidEvidenceDirectory is the default, as $DarwinEvidenceDirectory is darwin's; while it is
+    # empty, no evidence is read and every numeric linux segment is written pending (the S7-a mechanical commit).
+    rids_line_eq = [rids_line('linux-x64', 'validated', 5, 5, 0, agree='yes'), rids_line('linux-arm64', 'validated', 5, 5, 0, agree='yes')]
+    write(os.path.join(root, RIDS, 'W1-1.tsv'), RIDS_HEADER + '\n' + ''.join(rids_line_eq))
+    linux_declared = re.compile(r"^\$LinuxRidEvidenceDirectory = '[^']*'", re.M)
+    for declared, want, name in ((RIDS.replace(PIN, '{pin}'), '5 (linux-x64; linux-arm64: 5)', 'linux --rids: the guard\'s declared directory is the default'),
+                                 ('', '5 (linux-x64; linux-arm64: pending)', 'linux --rids: with no directory declared, every numeric segment is written pending')):
+        write(os.path.join(root, 'docs/ValidatedTestPackages.md'), '# Roster\n\n| a | b | c | d |\n|:--|--:|--:|:--|\n' + ROW + '\n')
+        if linux_declared.search(guard_text):
+            write(os.path.join(root, 'src/check-roster-format.ps1'), linux_declared.sub(f"$LinuxRidEvidenceDirectory = '{declared}'", guard_text, count=1))
+            rc, out, err = run('annotate_linux.py', root, '--rids', '--write')
+            roster = open(os.path.join(root, 'docs/ValidatedTestPackages.md'), encoding='utf-8').read()
+            case(name, rc == 0 and f'· linux: {want} ·' in roster, f'rc {rc}, out {out!r}, err {err.strip()!r}')
+        else:
+            case(name, False, f'{args.guard} declares no $LinuxRidEvidenceDirectory')
+    # Single-RID mode (an x64-only re-bank) keeps a pending note and refuses a two-RID reading.
+    write(os.path.join(root, 'src/check-roster-format.ps1'), declared_line.sub("$DarwinEvidenceDirectory = 'docs/phase4/h10-evidence/go{pin}/darwin'", guard_text, count=1))
+    for linux, want, name in (('5 (linux-x64; linux-arm64: pending)', '6 (linux-x64; linux-arm64: pending)', 'linux single-RID: a pending note is kept while linux-x64 is re-banked'),
+                              ('5 (linux-x64; linux-arm64: 5)', None, 'linux single-RID: a two-RID reading is refused (re-bank it with --rids), nothing written')):
+        write(os.path.join(root, 'docs/ValidatedTestPackages.md'), '# Roster\n\n| a | b | c | d |\n|:--|--:|--:|:--|\n' + ROW.replace('· linux: 5 ·', f'· linux: {linux} ·') + '\n')
+        rc, out, err = run('annotate_linux.py', root, '--evidence', f'{NEW}/linux', '--write')
+        roster = open(os.path.join(root, 'docs/ValidatedTestPackages.md'), encoding='utf-8').read()
+        ok = (rc == 0 and f'· linux: {want} ·' in roster) if want else (rc != 0 and '--rids' in err and f'· linux: {linux} ·' in roster)
+        case(name, ok, f'rc {rc}, out {out!r}, err {err.strip()!r}, roster {roster.splitlines()[-1]!r}')
 finally:
     shutil.rmtree(work, ignore_errors=True)
 
