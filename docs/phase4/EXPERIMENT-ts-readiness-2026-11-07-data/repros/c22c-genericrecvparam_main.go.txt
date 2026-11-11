@@ -1,0 +1,17 @@
+package main
+
+import "repro/c22c-genericrecvparam/lib"
+
+// TS readiness C22, the route its generic-type fix leaves: a NON-generic Δ-renamed type of another package
+// (lib.Encoder: a method named Encoder exists in lib) in the signature of a method of a GENERIC type, as
+// tsc's collections.OrderedMap[K, V].MarshalJSONTo(enc *jsontext.Encoder) does.
+type OrderedMap[K comparable, V any] struct{ m map[K]V }
+
+func (o *OrderedMap[K, V]) MarshalTo(enc *lib.Encoder) int { return len(o.m) }
+
+func plain(enc *lib.Encoder) int { return 1 }
+
+func main() {
+	o := &OrderedMap[string, int]{m: map[string]int{"a": 1, "b": 2}}
+	println(o.MarshalTo(lib.NewEncoder(3)), plain(lib.NewEncoder(4))) // Go: 2 1
+}

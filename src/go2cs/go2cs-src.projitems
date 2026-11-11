@@ -603,6 +603,7 @@
     <None Include="$(MSBuildThisFileDirectory)readmeValidationBadge_test.go" />
     <None Include="$(MSBuildThisFileDirectory)reconvertDeletionsSkipList_test.go" />
     <None Include="$(MSBuildThisFileDirectory)recoverForms.go" />
+    <None Include="$(MSBuildThisFileDirectory)recurseDefaultTags_test.go" />
     <None Include="$(MSBuildThisFileDirectory)recurseTrimpath_test.go" />
     <None Include="$(MSBuildThisFileDirectory)recvRefLowering_test.go" />
     <None Include="$(MSBuildThisFileDirectory)refLoweringAnalysisOperations.go" />

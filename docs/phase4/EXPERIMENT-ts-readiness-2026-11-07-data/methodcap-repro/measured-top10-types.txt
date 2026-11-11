@@ -1,0 +1,46 @@
+# toptypes.ps1: the ten largest types by method count, metadata only, diagnostic build of local merge 8836958ee6
+## demo closure (go list -deps ./cmd/parsedemo, 27 non-std packages)
+built 27 of 27 closure packages; effective per-type limit 65,524 (CoreCLR MAX_SLOT_INDEX = 65535 - 10)
+   116102  go.github.com.microsoft.TypeScript.tsc.internal.ast_package  [github.com.microsoft.TypeScript.tsc.internal.ast]
+     2776  go.GoFieldAccess  [github.com.microsoft.TypeScript.tsc.internal.ast]
+      891  go.golang.org.x.text.internal.language.compact_package  [golang.org.x.text.internal.language.compact]
+      750  go.github.com.microsoft.TypeScript.tsc.internal.parser_package  [github.com.microsoft.TypeScript.tsc.internal.parser]
+      746  go.GoFieldAccess  [github.com.microsoft.TypeScript.tsc.internal.parser]
+      446  go.github.com.go_json_experiment.json.jsontext_package  [github.com.go-json-experiment.json.jsontext]
+      420  go.github.com.microsoft.TypeScript.tsc.internal.core_package  [github.com.microsoft.TypeScript.tsc.internal.core]
+      377  go.golang.org.x.text.internal.language_package  [golang.org.x.text.internal.language]
+      367  go.github.com.klauspost.cpuid.cpuid_package  [github.com.klauspost.cpuid.v2]
+      307  go.golang.org.x.text.language_package  [golang.org.x.text.language]
+not built (0):
+
+## type-check closure (go list -deps ./internal/checker, 54 non-std packages)
+built 36 of 54 closure packages; effective per-type limit 65,524 (CoreCLR MAX_SLOT_INDEX = 65535 - 10)
+   116102  go.github.com.microsoft.TypeScript.tsc.internal.ast_package  [github.com.microsoft.TypeScript.tsc.internal.ast]
+    13563  go.golang.org.x.sys.windows_package  [golang.org.x.sys.windows]
+     2776  go.GoFieldAccess  [github.com.microsoft.TypeScript.tsc.internal.ast]
+      891  go.golang.org.x.text.internal.language.compact_package  [golang.org.x.text.internal.language.compact]
+      750  go.github.com.microsoft.TypeScript.tsc.internal.parser_package  [github.com.microsoft.TypeScript.tsc.internal.parser]
+      746  go.GoFieldAccess  [github.com.microsoft.TypeScript.tsc.internal.parser]
+      446  go.github.com.go_json_experiment.json.jsontext_package  [github.com.go-json-experiment.json.jsontext]
+      420  go.github.com.microsoft.TypeScript.tsc.internal.core_package  [github.com.microsoft.TypeScript.tsc.internal.core]
+      377  go.golang.org.x.text.internal.language_package  [golang.org.x.text.internal.language]
+      367  go.github.com.klauspost.cpuid.cpuid_package  [github.com.klauspost.cpuid.v2]
+not built (18):
+  github.com/microsoft/TypeScript/tsc/internal/astnav
+  github.com/microsoft/TypeScript/tsc/internal/binder
+  github.com/microsoft/TypeScript/tsc/internal/evaluator
+  github.com/microsoft/TypeScript/tsc/internal/packagejson
+  github.com/microsoft/TypeScript/tsc/internal/vfs/vfsmatch
+  github.com/microsoft/TypeScript/tsc/internal/module
+  github.com/microsoft/TypeScript/tsc/internal/outputpaths
+  github.com/microsoft/TypeScript/tsc/internal/symlinks
+  github.com/microsoft/TypeScript/tsc/internal/ipc
+  github.com/microsoft/TypeScript/tsc/internal/contentmapper
+  github.com/microsoft/TypeScript/tsc/internal/tsoptions
+  github.com/microsoft/TypeScript/tsc/internal/modulespecifiers
+  github.com/microsoft/TypeScript/tsc/internal/nodebuilder
+  github.com/microsoft/TypeScript/tsc/internal/sourcemap
+  github.com/microsoft/TypeScript/tsc/internal/printer
+  github.com/microsoft/TypeScript/tsc/internal/pseudochecker
+  github.com/microsoft/TypeScript/tsc/internal/tracing
+  github.com/microsoft/TypeScript/tsc/internal/checker

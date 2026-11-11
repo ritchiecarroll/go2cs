@@ -1,0 +1,21 @@
+package main
+
+import "fmt"
+
+// C30 green control: the decodeBytes shape with constant cases (a uint16 built from the two bytes).
+func kind(s string) string {
+	if len(s) >= 2 {
+		bom := uint16(s[0])<<8 | uint16(s[1])
+		switch bom {
+		case 0xFFFE:
+			return "utf16le"
+		case 0xFEFF:
+			return "utf16be"
+		}
+	}
+	return "utf8"
+}
+
+func main() {
+	fmt.Println(kind("\xFF\xFEa"), kind("\xFE\xFFa"), kind("ab"), kind("a")) // Go: utf16le utf16be utf8 utf8
+}

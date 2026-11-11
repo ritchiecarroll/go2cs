@@ -1,0 +1,3 @@
+module repro/c39b-funcvartypeparam
+
+go 1.26

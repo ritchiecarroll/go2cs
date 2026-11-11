@@ -205,13 +205,13 @@ public class EmbedDepthMethodPromotionTests
         {
             string generated = GeneratedFor(outer);
 
-            StringAssert.Contains(generated, $"Root(this ж<{outer}> Ꮡtarget) => Ꮡtarget.of({outer}.Ꮡ{embed}).Root();", $"{outer} must promote Root:\n{generated}");
-            StringAssert.Contains(generated, $"Self(this ж<{outer}> Ꮡtarget) => Ꮡtarget.of({outer}.Ꮡ{embed}).Self();", $"{outer} must promote Self:\n{generated}");
-            Assert.IsFalse(generated.Contains($"Self(this ref {outer} "), $"a box primary has no by-ref forwarder on {outer}");
+            StringAssert.Contains(generated, $"Root(this ж<global::go.dtest_package.{outer}> Ꮡtarget) => Ꮡtarget.of(global::go.dtest_package.{outer}.Ꮡ{embed}).Root();", $"{outer} must promote Root:\n{generated}");
+            StringAssert.Contains(generated, $"Self(this ж<global::go.dtest_package.{outer}> Ꮡtarget) => Ꮡtarget.of(global::go.dtest_package.{outer}.Ꮡ{embed}).Self();", $"{outer} must promote Self:\n{generated}");
+            Assert.IsFalse(generated.Contains($"Self(this ref global::go.dtest_package.{outer} "), $"a box primary has no by-ref forwarder on {outer}");
         }
 
         // The sibling embed's ref-receiver method promotes as it always did.
-        StringAssert.Contains(GeneratedFor("aStmt"), "Flag(this ref aStmt target) => target.aSide.Flag();");
+        StringAssert.Contains(GeneratedFor("aStmt"), "Flag(this ref global::go.dtest_package.aStmt target) => target.aSide.Flag();");
     }
 
     [TestMethod]
@@ -224,12 +224,12 @@ public class EmbedDepthMethodPromotionTests
         {
             string generated = GeneratedFor(outer);
 
-            StringAssert.Contains(generated, $"Name(this ref {outer} target) => target.bFlat.Name();", $"{outer} must take bFlat's Name:\n{generated}");
+            StringAssert.Contains(generated, $"Name(this ref global::go.dtest_package.{outer} target) => target.bFlat.Name();", $"{outer} must take bFlat's Name:\n{generated}");
             Assert.IsFalse(generated.Contains("target.bMid.Name()"), $"{outer} must not forward the deeper Name:\n{generated}");
             StringAssert.Contains(generated, "'bMid.Name' is SHADOWED", $"{outer} must say why bMid's Name is not promoted:\n{generated}");
         }
 
-        StringAssert.Contains(GeneratedFor("bOuter"), "Name(this ref bOuter target) => target.bBoth.Name();");
+        StringAssert.Contains(GeneratedFor("bOuter"), "Name(this ref global::go.dtest_package.bOuter target) => target.bBoth.Name();");
     }
 
     [TestMethod]
@@ -239,12 +239,12 @@ public class EmbedDepthMethodPromotionTests
         // must take a shim too.
         //
         // RED at the base: cStmt forwarded cNode's Visit by ref through cBase, which has no such method (CS1929).
-        StringAssert.Contains(GeneratedFor("cBase"), "Visit(this ж<cBase> Ꮡtarget) => Ꮡtarget.of(cBase.ᏑcDefault).Visit();");
+        StringAssert.Contains(GeneratedFor("cBase"), "Visit(this ж<global::go.dtest_package.cBase> Ꮡtarget) => Ꮡtarget.of(global::go.dtest_package.cBase.ᏑcDefault).Visit();");
 
         string stmt = GeneratedFor("cStmt");
 
-        StringAssert.Contains(stmt, "Visit(this ж<cStmt> Ꮡtarget) => Ꮡtarget.of(cStmt.ᏑcBase).Visit();", "cStmt must promote the shadowing Visit:\n" + stmt);
-        Assert.IsFalse(stmt.Contains("Visit(this ref cStmt "), "the shadowed by-ref Visit must not be promoted:\n" + stmt);
+        StringAssert.Contains(stmt, "Visit(this ж<global::go.dtest_package.cStmt> Ꮡtarget) => Ꮡtarget.of(global::go.dtest_package.cStmt.ᏑcBase).Visit();", "cStmt must promote the shadowing Visit:\n" + stmt);
+        Assert.IsFalse(stmt.Contains("Visit(this ref global::go.dtest_package.cStmt "), "the shadowed by-ref Visit must not be promoted:\n" + stmt);
     }
 
     [TestMethod]
@@ -260,7 +260,7 @@ public class EmbedDepthMethodPromotionTests
 
         string all = GeneratedFor("dAll");
 
-        StringAssert.Contains(all, "Tag(this ref dAll target) => target.dTop.Tag();", "dAll must take dTop's Tag:\n" + all);
+        StringAssert.Contains(all, "Tag(this ref global::go.dtest_package.dAll target) => target.dTop.Tag();", "dAll must take dTop's Tag:\n" + all);
         StringAssert.Contains(all, "'dPair.Tag' is SHADOWED", "dAll must say why dPair's Tag is not promoted:\n" + all);
     }
 
@@ -274,7 +274,7 @@ public class EmbedDepthMethodPromotionTests
         // not have (CS1929).
         string outer = GeneratedFor("eOuter");
 
-        StringAssert.Contains(outer, "Pick(this ref eOuter target) => target.eFork.Pick();", "eOuter must take eNear's signature:\n" + outer);
+        StringAssert.Contains(outer, "Pick(this ref global::go.dtest_package.eOuter target) => target.eFork.Pick();", "eOuter must take eNear's signature:\n" + outer);
         Assert.IsFalse(outer.Contains("nint n"), "eOuter must not take eFar's signature:\n" + outer);
     }
 
@@ -291,6 +291,6 @@ public class EmbedDepthMethodPromotionTests
         Assert.IsFalse(all.Contains(" Tie(this "), "a name that ties at its shallowest depth is not promoted:\n" + all);
         StringAssert.Contains(all, "'fBoth.Tie' is AMBIGUOUS inside the embed itself");
         StringAssert.Contains(all, "'fWrap.Tie' promotion is AMBIGUOUS across embeds");
-        StringAssert.Contains(GeneratedFor("fWrap"), "Tie(this ref fWrap target) => target.fDeep.Tie();");
+        StringAssert.Contains(GeneratedFor("fWrap"), "Tie(this ref global::go.dtest_package.fWrap target) => target.fDeep.Tie();");
     }
 }

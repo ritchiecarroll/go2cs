@@ -428,6 +428,97 @@ func crossPackageValuePromotion(sel *types.Selection) []*types.Var {
 	return path
 }
 
+// samePackagePromotion reports whether a method EXPRESSION selects a concrete method promoted through an embed path
+// whose every hop stays in one package: the promotions go2cs-gen forwards from the struct's own promoted-method class.
+// A path with a hop that crosses packages is crossPackageValuePromotion's or crossPackagePointerPromotion's, and a method
+// an embedded interface promotes has no forwarder.
+func samePackagePromotion(sel *types.Selection) bool {
+	if sel == nil || sel.Kind() != types.MethodExpr || len(sel.Index()) < 2 {
+		return false
+	}
+
+	fn, ok := sel.Obj().(*types.Func)
+
+	if !ok || fn.Pkg() == nil {
+		return false
+	}
+
+	sig, ok := fn.Type().(*types.Signature)
+
+	if !ok || sig.Recv() == nil || types.IsInterface(sig.Recv().Type()) {
+		return false
+	}
+
+	owner := sel.Recv()
+
+	for _, idx := range sel.Index()[:len(sel.Index())-1] {
+		ownerNamed := promotionNamed(owner)
+		structType, ok := types.Unalias(promotionDeref(owner)).Underlying().(*types.Struct)
+
+		if !ok || ownerNamed == nil || idx >= structType.NumFields() {
+			return false
+		}
+
+		field := structType.Field(idx)
+		fieldNamed := promotionNamed(field.Type())
+
+		if !field.Embedded() || fieldNamed == nil || ownerNamed.Obj().Pkg() != fieldNamed.Obj().Pkg() {
+			return false
+		}
+
+		owner = field.Type()
+	}
+
+	return true
+}
+
+// promotedMethodClass spells the class go2cs-gen writes a struct's promoted-method forwarders into, for the file being
+// converted: the struct's package class with its `_package` ending replaced by the struct's name between two markers
+// and `pkg` (`mainᴛouterᴛpkg`; StructTypeTemplate.PromotedHostClassName in go2cs-gen, which this must follow). The
+// class sits beside the package class, so a struct of the class being emitted needs no qualifier and any other takes
+// its package class's own namespace. A wrong spelling here is a CS0103 at the first method expression that uses it.
+func (v *Visitor) promotedMethodClass(recv types.Type) string {
+	named := promotionNamed(recv)
+
+	if named == nil || named.Obj() == nil || named.Obj().Pkg() == nil {
+		return ""
+	}
+
+	obj := named.Obj()
+
+	// The struct's own C# identifier, as every reference to the type renders it: without its qualifier, its type
+	// arguments (a generic struct's forwarders are generic methods of a non-generic class) and a keyword's `@`.
+	structName := convertToCSTypeName(v.getCSharpTypeName(named))
+
+	if open := strings.Index(structName, "<"); open != -1 {
+		structName = structName[:open]
+	}
+
+	structName = strings.TrimPrefix(structName[strings.LastIndex(structName, ".")+1:], "@")
+
+	var qualifier, packageClass string
+
+	switch {
+	case v.whiteboxProductionObject(obj):
+		qualifier = "global::" + packageNamespace + "."
+		packageClass = getSanitizedImport(v.options.testProductionName + PackageSuffix)
+	case v.whiteboxBridgeObject(obj):
+		qualifier = "global::" + packageNamespace + "."
+		packageClass = v.options.testInternalBridgeName
+	case obj.Pkg() != v.pkg:
+		qualifier = "global::" + packageClassNamespace(obj.Pkg()) + "."
+		packageClass = getSanitizedImport(obj.Pkg().Name() + PackageSuffix)
+	default:
+		packageClass = v.packageScopeClassName(obj)
+	}
+
+	if structName == "" || !strings.HasSuffix(packageClass, PackageSuffix) {
+		return ""
+	}
+
+	return qualifier + strings.TrimSuffix(packageClass, PackageSuffix) + TempVarMarker + structName + TempVarMarker + "pkg"
+}
+
 func promotionDeref(t types.Type) types.Type {
 	if ptr, ok := types.Unalias(t).(*types.Pointer); ok {
 		return ptr.Elem()
@@ -1426,6 +1517,56 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 						return fmt.Sprintf("((%s)(%s(%s) => %s.%s(%s)))", delegateType, v.methodExpressionWrapperMark(sel, recvIsPtr),
 							strings.Join(params, ", "), hop, methodName, strings.Join(args, ", "))
 					}
+				}
+			}
+		}
+
+		// A method promoted through embeds of ONE package (`(*outer).Add`, outer embedding inner beside it) has a
+		// forwarder, but not in a package class: go2cs-gen writes each struct's forwarders into a class of that struct's
+		// own, so no bare or package-qualified method group names one (CS0123 on the embed's own `Add`). The forwarder IS
+		// the one function Go's compiler emits for the expression, and the one go2cs-gen's method set hands reflect for
+		// the struct's method table (reflect's TestEmbeddedMethods compares the two), so the expression is the method group
+		// over that class: `((Func<ж<outer>, nint, nint>)(mainᴛouterᴛpkg.Add))`. A lambda is a second method, and
+		// another one at each site.
+		//
+		// The group is taken where a forwarder has the delegate's own receiver: the `this ж<T>` forwarder of a
+		// pointer-receiver method off the pointer type, and the `this T` forwarder of a value-receiver method off the value
+		// type. The other two shapes have none (a value-receiver method off the pointer type, `(*outer).Get`; a
+		// pointer-receiver method off the value type, reached through a pointer embed), and forward through a lambda that
+		// calls the forwarder as the extension method it is, marked as Go's wrapper: `((Func<ж<outer>, nint>)(
+		// [GoWrapper("(*outer).Get")] (p0) => wrapperRecv(p0).Get()))`. A nil `*outer` faults in the wrapper, as Go's does.
+		if samePackagePromotion(sel) {
+			if fn, ok := sel.Obj().(*types.Func); ok {
+				if sig, ok := fn.Type().(*types.Signature); ok {
+					_, exprRecvIsPointer := types.Unalias(sel.Recv()).(*types.Pointer)
+					_, declRecvIsPointer := types.Unalias(sig.Recv().Type()).(*types.Pointer)
+					boxForwarder := declRecvIsPointer || packageDirectBoxReceiverMethods[fn.Origin()]
+
+					if exprRecvIsPointer == boxForwarder {
+						if class := v.promotedMethodClass(sel.Recv()); class != "" {
+							return fmt.Sprintf("((%s)(%s.%s))", delegateType, class, methodName)
+						}
+					}
+
+					params := []string{"p0"}
+					args := make([]string, 0, sig.Params().Len())
+
+					for i := 0; i < sig.Params().Len(); i++ {
+						name := fmt.Sprintf("p%d", i+1)
+						params = append(params, name)
+						args = append(args, name)
+					}
+
+					recv := "p0"
+
+					if exprRecvIsPointer {
+						recv = v.methodExpressionWrapperReceiver(sel)
+					}
+
+					v.addMethodPackageNamespaceUsing(fn.Pkg())
+
+					return fmt.Sprintf("((%s)(%s(%s) => %s.%s(%s)))", delegateType, v.methodExpressionWrapperMark(sel, exprRecvIsPointer),
+						strings.Join(params, ", "), recv, methodName, strings.Join(args, ", "))
 				}
 			}
 		}

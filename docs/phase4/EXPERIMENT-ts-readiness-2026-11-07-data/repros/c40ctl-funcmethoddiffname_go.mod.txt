@@ -1,0 +1,3 @@
+module repro/c40ctl-funcmethoddiffname
+
+go 1.26

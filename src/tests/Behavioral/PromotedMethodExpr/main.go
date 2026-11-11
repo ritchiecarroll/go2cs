@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
+	"reflect"
 	"strings"
 )
 
@@ -20,6 +22,22 @@ func (i *inner) Add(d int) int { i.n += d; return i.n }
 func (i inner) Get() int       { return i.n }
 
 type outer struct{ inner }
+
+// Two hops, and a generic struct: each has its own function for a method it promotes.
+type deep struct{ outer }
+
+type box[T any] struct {
+	inner
+	v T
+}
+
+// pc is the function a func value runs, and tablePC the function a type's method table holds for a method.
+func pc(f any) uintptr { return reflect.ValueOf(f).Pointer() }
+
+func tablePC(t reflect.Type, name string) uintptr {
+	m, _ := t.MethodByName(name)
+	return m.Func.Pointer()
+}
 
 type own struct{ s string }
 
@@ -51,8 +69,25 @@ func main() {
 	fmt.Println("(*outer).Add:", add(&o, 2), add(&o, 3))
 	get := outer.Get
 	fmt.Println("outer.Get:", get(o))
+	getp := (*outer).Get
+	fmt.Println("(*outer).Get:", getp(&o))
 	gv := o.Get
 	fmt.Println("o.Get:", gv())
+
+	// A promoted method's expression is ONE function: Go's compiler emits a single wrapper for it, so two
+	// sites of the expression agree with each other and with the method table reflect reads.
+	fmt.Println("(*outer).Add is one func:", pc((*outer).Add) == pc((*outer).Add),
+		pc((*outer).Add) == tablePC(reflect.TypeOf((*outer)(nil)), "Add"))
+	fmt.Println("outer.Get is one func:", pc(outer.Get) == pc(outer.Get),
+		pc(outer.Get) == tablePC(reflect.TypeOf(outer{}), "Get"))
+	fmt.Println("(*deep).Add is one func:", pc((*deep).Add) == pc((*deep).Add),
+		pc((*deep).Add) == tablePC(reflect.TypeOf((*deep)(nil)), "Add"))
+	fmt.Println("box[int].Get is one func:", pc(box[int].Get) == pc(box[int].Get),
+		pc(box[int].Get) == tablePC(reflect.TypeOf(box[int]{}), "Get"))
+	fmt.Println("(*bufio.ReadWriter).ReadString is one func:",
+		pc((*bufio.ReadWriter).ReadString) == pc((*bufio.ReadWriter).ReadString))
+	fmt.Println("and not another's:", pc((*outer).Add) != pc((*inner).Add), pc((*outer).Add) != pc((*deep).Add),
+		pc(outer.Get) != pc(box[int].Get))
 
 	// Non-promoted controls.
 	say := own.Say

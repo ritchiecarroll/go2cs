@@ -1,0 +1,19 @@
+package main
+
+import "fmt"
+
+type Base struct{ v int }
+
+func (b *Base) Get() int { return b.v }
+
+type Outer struct{ Base }
+
+func (o *Outer) Own() int { return 7 }
+
+func main() {
+	o := &Outer{Base{3}}
+	f := o.Get               // promoted method value      -> must be reported
+	g := (*Outer).Get        // promoted method expression -> must be reported
+	h := o.Own               // declared method value      -> counted, not listed
+	fmt.Println(o.Get(), f(), g(o), h()) // promoted CALL  -> must not be reported
+}

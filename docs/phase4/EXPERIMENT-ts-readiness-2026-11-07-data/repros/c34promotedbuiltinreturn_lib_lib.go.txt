@@ -1,0 +1,14 @@
+package lib
+
+// The shape of TS internal/packagejson: ExportsOrImports embeds the EXPORTED struct JSONValue by value, and JSONValue's
+// exported value-receiver method AsString returns a builtin (string).
+type JSONValue struct {
+	Value any
+}
+
+func (v JSONValue) AsString() string { return v.Value.(string) }
+
+type ExportsOrImports struct {
+	JSONValue
+	kind int
+}
