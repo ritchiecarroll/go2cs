@@ -1,0 +1,3 @@
+module repro/c38parentypeswitchcase
+
+go 1.26

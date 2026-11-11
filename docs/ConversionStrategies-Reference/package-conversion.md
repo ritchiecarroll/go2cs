@@ -1335,12 +1335,15 @@ That subprocess costs ~300 ms on Windows, so it is contained twice. Resolution i
 Guarded by `src/go2cs/buildConstraints_test.go` (release tags bare/negated/compound, the legacy `+build` grammar,
 extraction precedence, loader-toolchain resolution).
 
-## Default build tags: `purego` for the standard library, `safe` for modules
+## Default build tags: `purego` for the standard library, `safe`, `purego` and `noasm` for modules
 
-A build tag decides which Go files a build compiles, so the tags a conversion applies decide what the converted code is. go2cs applies two by default, each for one thing converted code cannot do.
+A build tag decides which Go files a build compiles, so the tags a conversion applies decide what the converted code is. go2cs applies two sets by default, each tag for one thing converted code cannot do.
 
 * **`purego` for the standard library** (with `math_big_pure_go`, the same switch under math/big's older spelling). Go binds its hottest crypto, hash and big-number routines to `.s` assembly, and C# has no way to run assembly. These tags select Go's own portable implementations instead. They apply to `-stdlib` and to every `-tests` run. [The standard-library conversion applies `-tags purego`](purego.md#the-standard-library-conversion-applies--tags-purego) covers them in full.
-* **`safe` for modules.** Some libraries do pointer arithmetic into the runtime's private layout: testify's internal copy of spew adds a computed byte offset to a `reflect.Value` to reach its private flag word. Converted code keeps those values in .NET's own layout, so golib refuses that arithmetic with a panic rather than reading the wrong memory. Such libraries ship a fallback for builds tagged `safe`, and a `-recurse` conversion adds the tag so the fallback is what converts. The cost is the fallback's own: spew cannot print unexported fields, so testify's assertion messages show less of a struct than a default Go build would. The standard library uses the tag nowhere, so it changes nothing there. `-module-safe-tag=false` turns it off.
+* **`safe`, `purego` and `noasm` for modules.** A `-recurse` conversion applies all three, in every reference mode (local references, `-recurse=module`, `-recurse=nuget`), and prints them at the start of the run. `-module-safe-tag=false` turns all three off.
+  * `safe`: some libraries do pointer arithmetic into the runtime's private layout: testify's internal copy of spew adds a computed byte offset to a `reflect.Value` to reach its private flag word. Converted code keeps those values in .NET's own layout, so golib refuses that arithmetic with a panic rather than reading the wrong memory. Such libraries ship a fallback for builds tagged `safe`, so with the tag the fallback is what converts. The cost is the fallback's own: spew cannot print unexported fields, so testify's assertion messages show less of a struct than a default Go build would. The standard library uses the tag nowhere, so it changes nothing there.
+  * `purego` and `noasm`: the module-side twin of the standard library's `purego`. Libraries name their pure-Go fallback for hand-written assembly with one or the other, and an assembly path converts only to declarations that throw when called. klauspost/cpuid/v2 v2.2.10 gates its x86 and arm64 CPU detection on `!noasm` (`purego` alone does not deselect it) and calls it from its package `init`, so without `noasm` every converted program importing it (zeebo/xxh3 does) failed before `main`. With `noasm` it selects `detect_ref.go`, which reports no CPU features, and xxh3 takes its portable path. A file gated on architecture alone, as xxh3's own `accum_stubs_amd64.go` is, is not reached by any tag: its declarations still convert to stubs, and only code that calls them throws (xxh3's tests force its vector paths on, so they do).
+  * With `-tests` the two sets are joined, standard library first and each tag once: `purego,math_big_pure_go,safe,noasm`.
 
 **The Go baseline uses the same tags.** When `-tests` validates a package, the `go test` run that produces Go's verdicts is given exactly the tags the conversion used (`oracleTestArgs` reads the one resolved set). Both sides therefore compile the same files, and a verdict compares like with like. A module's proof pages and its `MODULE.md` state the tags their verdicts were read under.
 
@@ -1348,7 +1351,7 @@ A build tag decides which Go files a build compiles, so the tags a conversion ap
 
 **An explicit `-tags` replaces every default**, `-tags=` included, so a caller can always choose the exact set.
 
-Guarded by `TestResolveBuildTags` (the default for each mode, the switch, and the explicit override), `TestDefaultModuleBuildTagsContent` (exactly `safe`, never `appengine`), `TestOracleTestArgsCarryResolvedBuildTags`, and the proof-page tests for the build-tags sentence.
+Guarded by `TestResolveBuildTags` (the default for each mode, the switch, and the explicit override), `TestDefaultModuleBuildTagsContent` (exactly `safe`, `purego`, `noasm`, never `appengine`), `TestRecurseDefaultTagsSelectThePureFallback` and `TestRecurseExplicitTagsReplaceTheDefault` (a real `-recurse` conversion of a module with an asm path behind `!noasm` and a pure fallback: the default converts the fallback, `-tags safe` the asm path, and both runs announce their tags), `TestOracleTestArgsCarryResolvedBuildTags`, and the proof-page tests for the build-tags sentence.
 
 ## An import forces the imported package's `init` to run
 

@@ -1,0 +1,15 @@
+# methodcount.ps1 <assembly.dll> [top N] : method-definition counts per type, from metadata only (nothing is loaded or run).
+# CoreCLR refuses to load a type with more than 0xFFFF methods ("contains more methods than the current implementation allows").
+param([string]$Path, [int]$Top = 8)
+Add-Type -AssemblyName System.Reflection.Metadata
+$fs = [System.IO.File]::OpenRead($Path)
+try {
+    $pe = [System.Reflection.PortableExecutable.PEReader]::new($fs)
+    $md = [System.Reflection.Metadata.PEReaderExtensions]::GetMetadataReader($pe)
+    $rows = foreach ($h in $md.TypeDefinitions) {
+        $t = $md.GetTypeDefinition($h)
+        [pscustomobject]@{ Methods = $t.GetMethods().Count; Type = ($md.GetString($t.Namespace) + "." + $md.GetString($t.Name)) }
+    }
+    "{0}: {1} types, {2} methods total" -f [IO.Path]::GetFileName($Path), $rows.Count, ($rows | Measure-Object Methods -Sum).Sum
+    $rows | Sort-Object Methods -Descending | Select-Object -First $Top | ForEach-Object { "  {0,7}  {1}" -f $_.Methods, $_.Type }
+} finally { $fs.Dispose() }

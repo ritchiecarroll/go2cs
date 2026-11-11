@@ -19,6 +19,12 @@ namespace GolibTests;
 // this test can load must be listed in CopyBoundReceivers.allowlist.txt, where each row was classified
 // VALUE independently, from the Go sources, and every listed receiver it meets must carry the mark.
 //
+// Where it reads: a forwarder of a method promoted through an embed of the struct's OWN package is a
+// member of the struct's promoted-method class, `{pkg}ᴛ{Struct}ᴛpkg`, which names its struct by
+// [GoPromotedHost]; through 1.26.10.3 it was a member of the package class. Both are read, and a
+// promoted-method class's rows are keyed by the package its struct belongs to. The asserted count
+// caught the move: with the package classes alone this guard matched 0 receivers.
+//
 // What it reads is what the PROCESS can load: the converted packages GolibTests references, directly
 // and transitively. The count is asserted, so the guard cannot pass by reading nothing. The whole
 // standard library's population is measured when the list is regenerated (see the list's header); the
@@ -37,23 +43,33 @@ public class CopyBoundReceiverAllowlistTests
         List<string> unlisted = [];
         List<string> unmarked = [];
         HashSet<string> seen = new(StringComparer.Ordinal);
-        int packages = 0;
+        int packages = 0, promotedClasses = 0;
 
         foreach (Assembly assembly in LoadReferencedClosure())
         {
-            foreach (Type packageClass in SafeTypes(assembly))
+            foreach (Type methodClass in SafeTypes(assembly))
             {
+                if (!methodClass.IsAbstract || !methodClass.IsSealed)
+                    continue;
+
+                // A struct's promoted-method class is read as its struct's package class.
+                Type? promotedFor = methodClass.GetCustomAttribute<GoPromotedHostAttribute>()?.Struct;
+                Type? packageClass = promotedFor is null ? methodClass : promotedFor.DeclaringType;
+
                 // A converted package class: `go[.…].<pkg>_package`, static (abstract + sealed).
-                if (!packageClass.IsAbstract || !packageClass.IsSealed || packageClass.Namespace is not { } ns ||
+                if (packageClass is null || !packageClass.IsAbstract || !packageClass.IsSealed || packageClass.Namespace is not { } ns ||
                     !(ns == "go" || ns.StartsWith("go.", StringComparison.Ordinal)) ||
                     !packageClass.Name.EndsWith("_package", StringComparison.Ordinal))
                     continue;
 
-                packages++;
+                if (promotedFor is null)
+                    packages++;
+                else
+                    promotedClasses++;
 
                 string package = packageClass.FullName!["go.".Length..^"_package".Length];
 
-                foreach (MethodInfo method in packageClass.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
+                foreach (MethodInfo method in methodClass.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
                 {
                     if (!method.IsDefined(typeof(ExtensionAttribute), false))
                         continue;
@@ -98,10 +114,10 @@ public class CopyBoundReceiverAllowlistTests
             "POINTER-set method, so the value set loses it: " + string.Join(", ", unmarked.Take(20)));
 
         // Not vacuous: runtime alone carries dozens of these, and it is always loaded here.
-        Assert.IsTrue(packages >= 20 && seen.Count >= 40,
-            $"the guard read {packages} package classes and matched {seen.Count} allowlisted receivers: too few to be the corpus");
+        Assert.IsTrue(packages >= 20 && promotedClasses >= 20 && seen.Count >= 40,
+            $"the guard read {packages} package classes and {promotedClasses} promoted-method classes, and matched {seen.Count} allowlisted receivers: too few to be the corpus");
 
-        Console.WriteLine($"package classes read: {packages}; allowlisted copy-bound receivers seen: {seen.Count} of {allowlist.Count}");
+        Console.WriteLine($"package classes read: {packages}; promoted-method classes read: {promotedClasses}; allowlisted copy-bound receivers seen: {seen.Count} of {allowlist.Count}");
     }
 
     // A method promoted through ANOTHER package's embed is forwarded from a sibling class,

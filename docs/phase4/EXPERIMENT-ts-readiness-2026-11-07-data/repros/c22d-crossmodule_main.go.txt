@@ -1,0 +1,17 @@
+package main
+
+import "example.com/c22lib"
+
+// TS readiness C22, cross-MODULE: lib.Encoder is Δ-renamed in ANOTHER module (a method named Encoder exists there),
+// referenced by package qualification, as tsc's collections references go-json-experiment's jsontext.Encoder.
+type OrderedMap[K comparable, V any] struct{ m map[K]V }
+
+func (o *OrderedMap[K, V]) MarshalTo(enc *lib.Encoder) int { return len(o.m) }
+
+func plain(enc *lib.Encoder) int { return 1 }
+
+func main() {
+	o := &OrderedMap[string, int]{m: map[string]int{"a": 1, "b": 2}}
+	t := lib.New(lib.Kind('{'))
+	println(o.MarshalTo(lib.NewEncoder(3)), plain(lib.NewEncoder(4)), t.Kind() == lib.Kind('{')) // Go: 2 1 true
+}

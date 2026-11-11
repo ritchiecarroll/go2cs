@@ -52,7 +52,7 @@ internal static void main() {
     fmt.Println(show(p));
     fmt.Println(box(p) == nil, isNil(p), assign(p) == nil, slot(p)[0] == nil, send(p) == nil);
     fmt.Printf("%T %T\n"u8, box(p), assign(p));
-    fmt.Println(fmt.Sprintf("%T"u8, box((f).OrTypedNilFunc())), box((f).OrTypedNilFunc()) == nil, isNil((f).OrTypedNilFunc()));
+    fmt.Println(fmt.Sprintf("%T"u8, box(f)), box(f) == nil, isNil(f));
     fmt.Println(nameOf<ж<myErr>>(nil));
     fmt.Println(box(e) == nil, isNil(e));
     fmt.Println(show(Ꮡ(new P(1))), plain<nint>(3), plain((@string)"s"));

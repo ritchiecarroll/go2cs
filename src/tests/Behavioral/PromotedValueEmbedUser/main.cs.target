@@ -17,6 +17,11 @@ internal static void main() {
     fmt.Println(w.Name(), w.Name() == "widget"u8, describe(w));
     var g = PromotedValueEmbedLib.NewGadget("gadget");
     fmt.Println(g.Name());
+
+    ref var b = ref heap<PromotedValueEmbedLib.Badge>(PromotedValueEmbedLib.NewBadge("badge"), out var Ꮡb);
+    var (text, ok) = b.Both();
+    var (self, name) = Ꮡb.of(PromotedValueEmbedLib.Badge.ᏑMeta).Self();
+    fmt.Println(b.Text(), b.Ok(), text, ok, self.Text(), name);
 }
 
 } // end main_package

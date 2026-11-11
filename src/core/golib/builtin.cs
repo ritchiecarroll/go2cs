@@ -132,11 +132,12 @@ public static partial class builtin
                 // evidence: a TypeInitializationException's own Message merely names the type and
                 // says "see inner exception", so the actual fault and its stack were LOST (a whole
                 // gob run's real cause was invisible this way). ToString() carries the full chain.
-                Console.Error.WriteLine(ex);
+                // It is a fatal report all the same, so it goes to the crash output too.
+                WriteFatalReport(ex + "\n");
             }
             else
             {
-                Console.Error.WriteLine($"unhandled exception: {e.ExceptionObject}");
+                WriteFatalReport($"unhandled exception: {e.ExceptionObject}\n");
             }
 
             go.golib.MainExit.FatalExit(2);
@@ -3290,10 +3291,31 @@ public static partial class builtin
     #if DEBUG
         throw new InvalidOperationException($"{message} [{code}]");
     #else
-        // A bare "\n", as Go's runtime writes "fatal error: ..." on every OS (see println).
-        Console.Error.Write(message + "\n");
+        // A bare "\n", as Go's runtime writes "fatal error: ..." on every OS (see println). Go's checkdead reports a
+        // deadlock through its fatal, so this goes to the crash output too.
+        WriteFatalReport(message + "\n");
         go.golib.MainExit.Exit((int)code);
     #endif
+    }
+
+    /// <summary>
+    /// Writes a fatal report Go would write to standard error AND to the descriptor <c>debug.SetCrashOutput</c>
+    /// configured: Go copies every fatal report there while the runtime is dying (a panic, a throw, a deadlock), and
+    /// golib's <see cref="go.golib.CrashReport"/>, <see cref="go.golib.FatalReport"/> and <see cref="go.golib.MainGoexit"/>
+    /// already do. stderr goes first and is guarded on its own: a failing stderr must not cost the crash file its copy.
+    /// </summary>
+    internal static void WriteFatalReport(string report)
+    {
+        try
+        {
+            Console.Error.Write(report);
+            Console.Error.Flush();
+        }
+        catch (Exception)
+        {
+        }
+
+        go.golib.CrashReport.WriteToCrashOutput(report);
     }
 
     // ** Type Assertion Functions **

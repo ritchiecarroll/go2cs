@@ -1,0 +1,21 @@
+# methodnames.ps1 <assembly.dll> <type full name> : the named type's methods grouped by name (overload multiplicity) and by
+# parameter-0 type shape, from metadata only.
+param([string]$Path, [string]$TypeName, [int]$Top = 25)
+Add-Type -AssemblyName System.Reflection.Metadata
+$fs = [System.IO.File]::OpenRead($Path)
+try {
+    $pe = [System.Reflection.PortableExecutable.PEReader]::new($fs)
+    $md = [System.Reflection.Metadata.PEReaderExtensions]::GetMetadataReader($pe)
+    foreach ($h in $md.TypeDefinitions) {
+        $t = $md.GetTypeDefinition($h)
+        if (($md.GetString($t.Namespace) + "." + $md.GetString($t.Name)) -ne $TypeName) { continue }
+        $names = foreach ($mh in $t.GetMethods()) { $md.GetString($md.GetMethodDefinition($mh).Name) }
+        $g = $names | Group-Object | Sort-Object Count -Descending
+        "{0} methods, {1} distinct names" -f $names.Count, $g.Count
+        "names with >1 overload: {0} names covering {1} methods" -f ($g | ? Count -gt 1).Count, (($g | ? Count -gt 1) | Measure-Object Count -Sum).Sum
+        "top names by overload count:"
+        $g | Select-Object -First $Top | % { "  {0,6}  {1}" -f $_.Count, $_.Name }
+        "overload-count histogram (overloads per name -> names):"
+        $g | Group-Object Count | Sort-Object { [int]$_.Name } | % { "  {0,5} -> {1}" -f $_.Name, $_.Count } | Select-Object -Last 15
+    }
+} finally { $fs.Dispose() }

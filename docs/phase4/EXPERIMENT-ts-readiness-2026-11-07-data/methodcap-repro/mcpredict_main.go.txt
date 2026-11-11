@@ -1,0 +1,94 @@
+// mcpredict: predicts, from Go method sets only, how many [GoPromoted] forwarders go2cs-gen's TypeGenerator emits into each
+// package class (two per promoted method per named type: `this ref T` and `this ж<T>`), plus the package's declared funcs and
+// methods. Standard library only; it reads the gc export data that `go list -export -deps -json` names.
+//
+//	cd <module> && go list -export -deps -json <pkg> | mcpredict
+//
+// It is a prediction, calibrated against a measured assembly (internal/ast), never a substitute for metadata.
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"go/importer"
+	"go/token"
+	"go/types"
+	"io"
+	"os"
+	"sort"
+)
+
+type pkg struct {
+	ImportPath string
+	Export     string
+	Standard   bool
+}
+
+func main() {
+	exports := map[string]string{}
+	var mine []string
+	dec := json.NewDecoder(os.Stdin)
+	for {
+		var p pkg
+		if err := dec.Decode(&p); err == io.EOF {
+			break
+		} else if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		exports[p.ImportPath] = p.Export
+		if !p.Standard {
+			mine = append(mine, p.ImportPath)
+		}
+	}
+	fset := token.NewFileSet()
+	imp := importer.ForCompiler(fset, "gc", func(path string) (io.ReadCloser, error) {
+		f, ok := exports[path]
+		if !ok || f == "" {
+			return nil, fmt.Errorf("no export data for %s", path)
+		}
+		return os.Open(f)
+	})
+	type row struct {
+		path                          string
+		promoted, declared, funcs, ty int
+	}
+	var rows []row
+	for _, path := range mine {
+		tp, err := imp.Import(path)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, path, err)
+			continue
+		}
+		r := row{path: path}
+		sc := tp.Scope()
+		for _, name := range sc.Names() {
+			switch o := sc.Lookup(name).(type) {
+			case *types.Func:
+				r.funcs++
+			case *types.TypeName:
+				if o.IsAlias() {
+					continue
+				}
+				n, ok := o.Type().(*types.Named)
+				if !ok || types.IsInterface(n) {
+					continue
+				}
+				r.ty++
+				r.declared += n.NumMethods()
+				ms := types.NewMethodSet(types.NewPointer(n))
+				for i := 0; i < ms.Len(); i++ {
+					if len(ms.At(i).Index()) > 1 {
+						r.promoted++
+					}
+				}
+			}
+		}
+		rows = append(rows, r)
+	}
+	sort.Slice(rows, func(i, j int) bool { return rows[i].promoted > rows[j].promoted })
+	fmt.Printf("%9s %9s %8s %6s %6s  %s\n", "fwd=2*pr", "promoted", "declared", "funcs", "types", "package")
+	for _, r := range rows {
+		fmt.Printf("%9d %9d %8d %6d %6d  %s\n", 2*r.promoted, r.promoted, r.declared, r.funcs, r.ty, r.path)
+	}
+}

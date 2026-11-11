@@ -1,0 +1,3 @@
+module repro/c35ctl-ifacetypearg
+
+go 1.26

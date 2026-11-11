@@ -1,0 +1,17 @@
+package main
+
+import (
+	"fmt"
+
+	"repro/c33ctl-twoinsttwoifaces/lib"
+)
+
+// C33 green control: the same two instantiations, each converted to a DIFFERENT interface.
+func present(f lib.TypeValidatedField) bool { return f.IsPresent() }
+func presence(p lib.Presence) bool          { return p.IsPresent() }
+
+func main() {
+	name := lib.Expected[string]{Value: "a", Valid: true}
+	count := lib.Expected[int]{Value: 2}
+	fmt.Println(present(&name), presence(&count)) // Go: true false
+}

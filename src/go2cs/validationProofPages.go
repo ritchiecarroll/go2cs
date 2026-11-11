@@ -107,8 +107,8 @@ type proofPageProvenance struct {
 
 	// buildTags are the tags both sides of a THIRD-PARTY reading were built with (the conversion and its
 	// `go test` baseline share one resolved set). A module page states them because a module's default
-	// adds `safe` (defaultModuleBuildTags), so its verdicts are Go's under that tag, not under a bare
-	// `go test`. Unused on a stdlib page, whose purego default is documented once for the whole library.
+	// adds `safe`, `purego` and `noasm` (defaultModuleBuildTags), so its verdicts are Go's under those
+	// tags, not under a bare `go test`. Unused on a stdlib page, whose purego default is documented once for the whole library.
 	buildTags []string
 
 	// inputDigest is a THIRD-PARTY page's GoInputDigest, as the package's production project records it

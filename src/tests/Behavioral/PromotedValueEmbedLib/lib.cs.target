@@ -30,4 +30,30 @@ public static ж<Gadget> NewGadget(@string tag) {
     return Ꮡ(new Gadget(tag: tag));
 }
 
+partial struct Meta {
+    internal @string text;
+    internal bool ok;
+}
+
+public static @string Text(this Meta m) { return m.text; }
+
+public static bool Ok(this Meta m) { return m.ok; }
+
+public static (@string, bool) Both(this Meta m) { return (m.text, m.ok); }
+
+public static (ж<Meta>, @string) Self(this ж<Meta> Ꮡm) {
+    ref var m = ref Ꮡm.DerefOrNull();
+
+    return (Ꮡm, m.text);
+}
+
+partial struct Badge {
+    /*embed*/ public Meta Meta;
+    internal nint kind;
+}
+
+public static Badge NewBadge(@string text) {
+    return new Badge(Meta: new Meta(text: text, ok: true), kind: 1);
+}
+
 } // end PromotedValueEmbedLib_package

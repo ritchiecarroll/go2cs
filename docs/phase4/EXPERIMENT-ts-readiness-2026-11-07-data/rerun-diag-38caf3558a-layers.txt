@@ -1,0 +1,34 @@
+# DIAGNOSTIC closure builds at go2cs master 38caf3558a (batch 282), 2026-11-10, i7. NOT a gate result.
+#
+# Base: the unpatched conversion of the scratch tsc module (cmd/parsedemo builds; cmd/checkdemo's closure stops at
+# type-check, see rerun-repro-results-m282.txt). Each build below is `dotnet build cmd/checkdemo -c Release` on the same
+# converted tree after one more layer of hand-patches (diagpatch_c30c32.py.txt; each file backed up first). Each layer
+# exposed the next defect; each defect has a one-file repro pair (rerun-repro-results-m282*.txt).
+#
+# Patch kinds: SAME = the patched C# means what the Go means. COMPILE-ONLY = compiles but is wrong at run time.
+#
+# build            patches added (kind)                    result                    next defect found
+# unpatched        -                                       4 errors, 3 packages      C30 vfs/internal, C31 module, C32 ipc
+# patched          C30, C31, C32 (SAME)                    14 errors, module         C33 (CS0579/CS0102/CS0111 x8/CS8646 x4)
+# patched2         C33 (COMPILE-ONLY)                      11 errors, module         C34 (CS1929 x11)
+# patched3         C34 (SAME)                              7 errors, tsoptions       C35 (CS0311 x6), C36 (CS1503)
+# patched4         C35 (COMPILE-ONLY), C36 (SAME)          7 errors, printer         C37 (CS0246 x7)
+# patched5         C37 (SAME)                              13 errors, printer        C38 (CS0103 x12), C39 (CS1503)
+# patched6         C38, C39 (SAME)                         1 error, checker          C40 (CS0111)
+# patched7         C40 (COMPILE-ONLY within the closure)   1 error, checker          C41 (CS0029)
+# patched8         C41 (SAME)                              1 error, compiler         C42 (CS0121, generated adapter)
+# patched9         C42 (SAME)                              rc 0, 0 errors            -
+#
+# patched9, classified by beyond.py: parse 26/26, bind 26/26, type-check 54/54, program and emit 63/63 (furthest stage
+# that compiles: program and emit); the type-check demo's harness closure 68/68.
+# The patched checkdemo was NOT run: the C33 and C35 patches are wrong at run time, so a run would say nothing.
+# C40's rename leaves its two callers (internal/api, internal/ls) unpatched; both are outside the 68.
+#
+# Caveat: a fix can unmask what a hand-patch hid, above all behind the compile-only C33 and C35. The reading of record is
+# the UNPATCHED closure build at each master as the rows land.
+#
+# Restore: every backup moved back. The first unpatched rebuild was a FALSE GREEN (rc 0): the restored files kept their
+# pre-patch mtimes, older than the patched build's outputs, so MSBuild recompiled nothing. After touching the 11 restored
+# files, the unpatched rebuild reproduced the original 4 errors exactly (the same error lines, 4 = 4). The packages
+# downstream of module were not rebuilt by that check (they are blocked again), so their assemblies under .artifacts are
+# from the patched builds; the parse closure's are untouched.

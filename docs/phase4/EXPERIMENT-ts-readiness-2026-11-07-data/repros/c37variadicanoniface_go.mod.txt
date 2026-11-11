@@ -1,0 +1,3 @@
+module repro/c37variadicanoniface
+
+go 1.26

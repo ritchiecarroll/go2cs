@@ -15,7 +15,7 @@
                  (linux), turning the swap off (-p:GoRidCompileAssets=false) must fail with CS0426.
                  On the reference platform (windows) there is nothing to swap FROM, so the control is
                  the no-op proof instead: the runtimes/<rid> twin is byte-identical to lib/.
-      UNSHIPPED  a build for a RID no go.* package ships (-UnshippedRid, linux-arm64 by default) must FAIL
+      UNSHIPPED  a build for a RID no go.* package ships (-UnshippedRid, linux-riscv64 by default) must FAIL
                  with GO2CS3003 naming that RID, instead of compiling the reference (Windows) flavour.
                  It must fail the same way with the compile swap off (-p:GoRidCompileAssets=false).
       OPT-OUT    the same build with -p:GoAllowReferenceFlavor=true must build (compile-only: it is not run,
@@ -38,7 +38,9 @@
 .PARAMETER UnshippedRid
     A RID for which go.syscall ships no runtimes/<rid>/ twin; the UNSHIPPED and OPT-OUT arms build for it.
     The gate refuses to read those arms if the restored package does ship it, so a later flavour that ships
-    this RID moves the arm to another RID rather than letting it pass vacuously.
+    this RID moves the arm to another RID rather than letting it pass vacuously. It was linux-arm64 until S6
+    shipped that flavour (DESIGN-linux-arm64-flavour.md); linux-riscv64 is a linux RID of another system-call
+    ABI that no flavour serves, so it reads GO2CS3003 as linux-arm64 did.
 
 .PARAMETER TargetsFile
     PRE-PACK ONLY: import this go.lib.targets explicitly, to test the working-tree file against an
@@ -51,7 +53,7 @@ param(
     [Parameter(Mandatory)] [string] $Version,
     [string] $Source = 'https://api.nuget.org/v3/index.json',
     [string] $TargetsFile,
-    [string] $UnshippedRid = 'linux-arm64',
+    [string] $UnshippedRid = 'linux-riscv64',
     [switch] $KeepWork
 )
 

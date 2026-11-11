@@ -435,7 +435,14 @@ public sealed class Goroutine
         int packageSuffix = name.LastIndexOf("_package", StringComparison.Ordinal);
 
         // The same derivation runtime's goFrameName uses: `go.runtime_package` -> `runtime`.
-        return name.StartsWith("go.", StringComparison.Ordinal) && packageSuffix > 3 && name[3..packageSuffix] == "runtime";
+        if (name.StartsWith("go.", StringComparison.Ordinal) && packageSuffix > 3 && name[3..packageSuffix] == "runtime")
+            return true;
+
+        // The forwarders of a runtime struct's same-package promoted methods are on `go.runtimeᴛ<Struct>ᴛpkg` from
+        // 1.26.10.4, and Go names such a wrapper `runtime.*` too. The forwarder is the start function of `go s.M()`
+        // for a promoted M, and the creator the walk finds when the JIT inlines a promoted method that holds a `go`
+        // into it. Read by the name's form, as the line above is.
+        return RuntimePanicCheck.IsPromotedMethodClassOf(name, "go.runtime");
     }
 
     // Running until a park-accounting scope says otherwise — DERIVED, never stored, so it cannot

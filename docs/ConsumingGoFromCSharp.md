@@ -169,8 +169,11 @@ projects, or in a project that sets `GoConsumerUsings` to `false`, turn the warn
 <NoWarn>$(NoWarn);CS8981</NoWarn>
 ```
 
-**Two other forms work too.** `using static` on a package class gives bare names, and brings the package's methods
-as well. Several `using static` lines can collide, though: `Contains` is in `strings`, `bytes` and `slices`, and
+**Two other forms work too.** `using static` on a package class gives bare names, and brings the methods the
+package's types declare as well. It does not bring a method a struct promotes from an embedded field: since
+1.26.10.4 those are extension methods of a class of the struct's own beside the package class, which the
+namespace brings (`using go;`, or the package's own namespace, both of which the packages add for you). Several
+`using static` lines can collide, though: `Contains` is in `strings`, `bytes` and `slices`, and
 `Reader` is a type in both `strings` and `bytes`. It suits a file that leans on one package. The package class
 itself, through `using go;`, always works and reads a little noisier:
 
@@ -298,8 +301,8 @@ shortest exact text.
 `fmt.Sprintf("%v", x)` gives the Go text of any value as an `@string`. Converted Go code's `print` and `println`
 print a named value's underlying value and a pointer's address, as in Go, never its `String()`. That holds for a
 type-parameter value in generic code too.
-<!-- A pointer: src/core/golib/builtin.cs:3275 (`IPrintPointer pointer => pointer.PrintPointer(),`).
-     Every other value: src/core/golib/builtin.cs:3276 (`_ => GoPrintText.Text(arg) ?? arg.ToString()`).
+<!-- A pointer: src/core/golib/builtin.cs:3276 (`IPrintPointer pointer => pointer.PrintPointer(),`).
+     Every other value: src/core/golib/builtin.cs:3277 (`_ => GoPrintText.Text(arg) ?? arg.ToString()`).
      The run-time unwrap of a named basic type:
      src/core/golib/GoPrintText.cs:31 (`GoReflect.TryUnwrapWrapperValue(value, out object? underlying)`).
      Guard:

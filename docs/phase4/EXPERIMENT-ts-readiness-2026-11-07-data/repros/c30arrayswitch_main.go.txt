@@ -1,0 +1,22 @@
+package main
+
+import "fmt"
+
+// TS site: internal/vfs/internal/internal.go decodeBytes, `switch bom { case [2]byte{0xFF, 0xFE}: ... }` (C30).
+func kind(s string) string {
+	var bom [2]byte
+	if len(s) >= 2 {
+		bom = [2]byte{s[0], s[1]}
+		switch bom {
+		case [2]byte{0xFF, 0xFE}:
+			return "utf16le"
+		case [2]byte{0xFE, 0xFF}:
+			return "utf16be"
+		}
+	}
+	return "utf8"
+}
+
+func main() {
+	fmt.Println(kind("\xFF\xFEa"), kind("\xFE\xFFa"), kind("ab"), kind("a")) // Go: utf16le utf16be utf8 utf8
+}

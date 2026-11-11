@@ -1,0 +1,3 @@
+module repro/c34promotedbuiltinreturn
+
+go 1.26
