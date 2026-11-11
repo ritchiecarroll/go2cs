@@ -138,6 +138,8 @@
     <Compile Remove="LinuxArm64NetpollFlavourTests.cs" />
     <!-- S3 site 0's reading: internal/cpu's linux/arm64 start-up (cpu_arm64_hwcap_impl.cs) and its options probe. -->
     <Compile Remove="LinuxArm64CpuStartupTests.cs" />
+    <!-- S3 sites 3/4's Arm64 rows against the flavour's own converted SYS_* constants (the first arm-leg reading). -->
+    <Compile Remove="LinuxArm64RuntimeSyscallFlavourTests.cs" />
   </ItemGroup>
 
   <!-- The amd64 flavour's own surface, which an arm64 build does not have (S3 site 9: GolibTests at linux/arm64).
@@ -150,6 +152,8 @@
   </ItemGroup>
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux' or '$(GoTargetArch)' == 'arm64'">
     <Compile Remove="LinuxAmd64NetpollFlavourTests.cs" />
+    <!-- Its X64 rows against amd64's own converted SYS_* constants, which only that table has these values for. -->
+    <Compile Remove="LinuxAmd64RuntimeSyscallFlavourTests.cs" />
   </ItemGroup>
 
   <!-- The netapi32 ptrout gate is the mirror image: it drives windows-flavor-only syscall surface
