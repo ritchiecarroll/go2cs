@@ -361,6 +361,17 @@ func TestCgoPhase2FixtureConvertsAsTheSourceReads(t *testing.T) {
 		if strings.HasSuffix(file, ".csproj") && !strings.Contains(readConverted(t, output, file), "<AllowUnsafeBlocks>true</AllowUnsafeBlocks>") {
 			t.Errorf("%s does not allow unsafe blocks, which the bindings need", file)
 		}
+
+		// A build that names no target compiles the bindings' one target, whose folder is the only one there is.
+		if strings.HasSuffix(file, ".csproj") {
+			project := readConverted(t, output, file)
+
+			for _, property := range []string{"<GoTargetOS>linux</GoTargetOS>", "<GoTargetArch>amd64</GoTargetArch>"} {
+				if !strings.Contains(project, property) {
+					t.Errorf("%s does not default to the bindings' one target: no %s", file, property)
+				}
+			}
+		}
 	}
 
 	for file, found := range want {
