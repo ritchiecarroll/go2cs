@@ -54,6 +54,19 @@ type and its method count.
      the package class; N=250, M=131 (66,005) failed to load and M=130 (65,505) loaded. One converted package class
      held 116,102 methods, 107,835 of them forwarders. -->
 
+**A promoted method that returns a string, a bool or several values can be called from another package.** PENDING.
+A Go struct that embeds an exported struct promotes its methods, and code in another package may call them on the
+outer struct. The C# forwarder for such a method was `internal` whenever its return type's C# spelling ended in a
+lowercase name (`@string`, `bool`, `error`, any multi-value return), so a call that Go accepts did not compile in
+the converted program (`CS1929`). The forwarder of an exported method is now public unless its signature names a
+type that is not public. In the standard library 268 forwarders in 12 packages became public, `bufio.ReadWriter`'s
+`Read` and `Peek` among them; none was removed, so nothing compiled against 1.26.10.3 breaks on this change.
+<!-- source: C34 of the TypeScript-Go readiness run (repro c34promotedbuiltinreturn at 4505b95021 on
+     claude/i7-ts-readiness-rerun), folded into the promoted-forwarder seat. GenTests PromotedForwarderScopeTests;
+     behavioral PromotedValueEmbedLib / PromotedValueEmbedUser. The count is of forwarder methods in one target's
+     packed assemblies, the same on windows, linux and darwin (docs/phase4/DESIGN-promoted-forwarder-placement.md,
+     amendment section H). -->
+
 ## November 8, 2026 — Faster Native AOT, and a Release standard library from source
 
 <!-- Written ahead and HELD for release day (the .2 precedent, e665f4ea51): "November XX" becomes the publish date as the

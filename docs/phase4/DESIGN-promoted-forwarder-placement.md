@@ -398,3 +398,182 @@ which the seat was rebased) for the footprint and the gates. Batch 282 changes n
   census, and it reads 0 errors.
 - **Reach** (not gating): the nine go2cs packages published on nuget.org for this line hold 25 assemblies, which
   make 1,489 references to members of the standard library's package classes. None names a moved forwarder.
+
+### H. The gates at the tip, what they found, and C34
+
+Gated tree: `02d843fe97` on master `b9a6d261fc` (batch 283). This section is the one commit above it and changes
+documents only. The first nine commits were gated on master `38caf3558a` (batch 282), then rebased to `e89725a9da`;
+the one conflict was in the BOARD, where both sides had appended rows, and both are kept. The ten commits above
+`e89725a9da` are fixes for what the gates then read, each with its red first: two in golib for readers the move
+changed, with `c1001afba1`, which re-cites nine provenance notes the second fix shifted in `Goroutine.cs` (the
+repository guard read them); and two for what `reflect`'s own tests read, one in the hand-owned runtime and one in
+the converter, with the two goldens they move. Each gate names the commit it was read at. Two counts in the commit
+messages were read on the earlier base, where GenTests had 489 tests before C34 and 492 with it; the rebased tree
+has 493, the one more being master's.
+
+**What the first gate pass found.** Three defects of the seat that none of its own tests had read. Each was fixed in
+the commit it belongs to, before the branch was pushed.
+
+- `go2cs.slnx` (Debug, windows) read CS0246 twice in behavioral `GenericEmbedPromotion`. A forwarder names its
+  embed's type argument, and there the argument is a constraint proxy, which another go2cs-gen generator declares
+  inside the package class. Inside the package class the bare name bound; in the struct's own class it did not. The
+  class's file now imports the package class (`using static`), and GenTests
+  `AForwarderThatNamesAGeneratedTypeBindsItThroughThePackageClass` compiles the case (CS0246 twice without the
+  import).
+- GolibTests `EveryCopyBoundReceiverInALoadedPackageIsAllowlisted` read 126 package classes and matched 0
+  allowlisted receivers: it looked for copy-bound forwarders in the package classes. It now reads each struct's
+  class through the attribute, and requires at least 20 package classes and 20 promoted-method classes read.
+- The set diff of section D found a class with no member for 4 structs on each target (`crypto/ecdsa`'s
+  `PrivateKey`, `image/color`'s `NYCbCrA`, `testing/quick`'s `CheckEqualError`, the vendored poly1305 `MAC`). Each
+  declares every method its embed would promote. A struct that forwards nothing now gets no class (GenTests
+  `AStructThatForwardsNothingGetsNoClass`, made to fail once), and the dump of the tip reads 0 promoted-method
+  classes with no method on each target.
+
+**Readers of a forwarder's CLASS that §5 and §6 did not list.** Four, three in golib and one in the hand-owned
+runtime, all fixed in the seat with a red first. §5's table lists golib's extension scan as needing no change. That
+holds for FINDING a forwarder; what a reader then takes from the found method's class was not in the table, which is
+the miss §12 asked a reviewer to look for ("a reader of forwarders that is not listed"). §6's second falsifier FIRED
+("a behavioral Output that passes today and fails after"), and is scored as that: the prediction that only frame
+counts change was wrong.
+
+| Reader | Takes from the class | Found by | Fix |
+|---|---|---|---|
+| `UnexportedMethodPackageMatches` (`runtime/TypeExtensions.GoMethodSets.cs`) | the package of a candidate for an interface's unexported method | the behavioral runner at `e89725a9da`: 931 of 932 | the class's `[GoPromotedHost]` struct's package class (`c022d3f86b`) |
+| `RuntimePanicCheck.IsRuntimePackageType` | whether a bounds, slice, slice-to-array or shift panic was raised in package `runtime`, where Go throws | COORD's second read of `c022d3f86b` | the name's form, `go.runtimeᴛ<Struct>ᴛpkg` and the bridge's (`049f33f2af`) |
+| `Goroutine.IsSystemCreator` | whether a goroutine's start function or creator is package `runtime`'s | the same read | the name's form, `go.runtimeᴛ<Struct>ᴛpkg` (`049f33f2af`) |
+| `goFrameName` (`src/core/runtime/managed_impl.cs`) | the Go name of a func VALUE over a forwarder (`runtime.FuncForPC`) | behavioral `PromotedMethodFrames`, once it read the name of a method table's func | the class's `[GoPromotedHost]` struct's package class (`cf841d2287`) |
+
+- The first is behavior every program can reach. `UnexportedIfaceDynamicAssert` printed 3 of Go's 5 lines
+  differently at `e89725a9da`: it is `net`'s writev shape, `w.(buffersWriter)` over a `*TCPConn` that promotes the
+  unexported `writeBuffers` from its embedded `conn`, and the assertion missed, so the converted program took the
+  per-chunk fallback. The same project matches Go at `ae69e4ce74`, before the move. Red: GolibTests
+  `GoUnexportedMethodPackageTests` gained the promoted case (1 failed of 5 at `b7b1a33ee3`) and a control (a foreign
+  struct's promoted unexported method still does not satisfy another package's marker). At `c022d3f86b`, 5 of 5 and
+  the project prints Go's 5 lines. The runner is the gate that read it; it had not completed on this branch before.
+- The second and third are reached where a forwarder's frame stands for its promoted method, which a .NET trace
+  shows when the JIT inlines the method into the forwarder, and where a `go` statement starts a promoted method. The
+  converted runtime has no such `go` statement today. Both readers work from names (a trimmed or Native AOT image
+  keeps a frame's names, not a class's attributes), so COORD ruled the name's form for them, the one place in the
+  seat where the class is not found by its attribute (section C). One predicate reads it,
+  `RuntimePanicCheck.IsPromotedMethodClassOf`, and each reader accepts the twin of what it accepted before: the
+  first reads the internal-test bridge as `runtime`, the second never did. Red: `RuntimePanicCheckTests` and
+  `SystemGoroutineTests` gained a case each and a control each (2 failed of 13 at `36c06e036c`); at `049f33f2af` the
+  three fixtures' 18 tests pass, and the controls were made to fail once (the package stem left out of the form).
+- The census made for these fixes read every use of a method's or a frame's declaring class in golib and in the
+  hand-owned files. It did not list the fourth reader: the runtime's name derivation takes a package from a
+  `_package` class and spells any other class as it stands, and the census read that as a frame's rule, which the
+  move does not change, without asking what names a func VALUE over a forwarder. `reflect`'s tests led to it
+  (below). One reader is left, as a BOARD row (2026-11-10, "a reflect panic text names its method by class name"):
+  `reflect`'s `methodName`, unchanged in the ordinary case and not measured where a forwarder stands for an inlined
+  method. A cross-package forwarder class (`…ᴛxpkg`) was never in the package class; nothing changes for it.
+
+**What `reflect`'s own tests found: the method expression of §5 was the wrong form.** §5 planned the lambda for a
+method expression that selects a promoted method, and `e82b7bc2ac` emitted it. §9 listed `reflect`'s `-tests` row
+as convert-and-build; RUN at `c1001afba1` it failed one test the row passes on master, `TestEmbeddedMethods`
+("Wrong method table for OuterInt"); every other failure there is one `docs/validation/current/reflect.md` discloses.
+
+- In Go a method expression is ONE function, and it is the function the type's method table holds:
+  `reflect.TypeOf(T).Method(i).Func.Pointer()` equals the expression's pc. `reflect` here tokens a func by the method
+  its delegate invokes, and go2cs-gen's method set hands it the method group over the forwarder. Through 1.26.10.3
+  the converter's bare group named the same forwarder. A lambda is another method, at every site.
+- The fix (`6fe4982004`): the converter names the group over the struct's promoted-method class,
+  `((Func<ж<outer>, nint, nint>)(mainᴛouterᴛpkg.Add))`, wherever a forwarder takes the expression's receiver as the
+  delegate passes it. Two shapes keep the `[GoWrapper]` lambda because no forwarder has the receiver: a value
+  method off the pointer type (`(*outer).Get`, a lambda on master too), and a pointer method off a value type that
+  reaches it through a pointer embed (`outerp.Add`), which a bare group did not compile for before the seat (read
+  from the overload set, not run there).
+- With the group in place a second defect of the move showed, the fourth reader in the table above:
+  `runtime.FuncForPC(pc).Name()` of such a func read `mainᴛouterᴛpkg.Val`, where Go reads `main.outer.Val` and
+  `main.(*outer).Ptr`. At `c1001afba1` the func a method table holds already read so, and no gate read that name.
+  The fix (`cf841d2287`) names an UNBOUND func over a forwarder as Go names its wrapper, for the embedding struct in
+  its package at `<autogenerated>:1`; a forwarder's FRAME is still not a frame of the program (§6). It is ordered
+  before the converter's fix, so no commit of the branch prints a name the one before it did not.
+- Reds: `TestMethodExpressionWrapperMark` gained three rows (2 fail at `84693710f6`); `PromotedMethodExpr` gained
+  six lines that ask "is the expression the method table's func" of five shapes and a control (at `84693710f6`, 9
+  answers on 5 lines read `false` and the control agrees with Go); `PromotedMethodFrames` gained the line "method
+  table name" (wrong at `f84ffae964`). At `02d843fe97` the two print Go's 16 and 13 lines.
+- What is left is a BOARD row (2026-11-11, "a method expression rendered as a lambda is not the function the method
+  table holds"): the lambda shapes, and a pointer method through a pointer embed, whose method-set arm is a lambda
+  of its own. Each read the same before the seat.
+- The lesson for the plan of a seat like this one: a row listed as convert-and-build is RUN when the seat changes
+  what the row's tests compare.
+
+**C34, folded in as its own two commits** (`5cd07c51c3` the tests, `65d08a5c3c` the fix; COORD, 2026-11-10 14:53Z).
+The forwarder of an EXPORTED promoted method is public unless its signature names a type that is not public, on
+every embed kind; the rule and its generic-embed guard are in `docs/ConversionStrategies-Reference/interfaces.md`
+(the exported-method addendum). Red before the fix: 2 of `PromotedForwarderScopeTests`' 3 tests and one existing
+pin, and CS1929 at 3 calls of behavioral `PromotedValueEmbedUser`. At the fix: every GenTests test passes, the
+pair's 3 lines match Go, and the repro committed on `claude/i7-ts-readiness-rerun` at `4505b95021` builds with 0
+errors and prints Go's `./index.js`, as its control does.
+
+Its footprint, stated apart from the move's. The instrument is a direct set diff of every type and method of the
+packed assemblies of two rehearsals: the seat without C34 (section G's second rehearsal, on master `ae69e4ce74`) and
+the nine commits on master `38caf3558a`. It was made to fail once on three planted changes of accessibility and one
+dropped row, and named them. It was not repeated after the rebase, where batch 283's own changes would be in the
+diff; the dump of the rebased tip is read by a census instead, below.
+
+- **Predicted** before the measurement, from the first rehearsal's assemblies: 268 forwarder methods in 12 packages
+  go from internal to public, the same on each target, and nothing else moves. Falsifier named with it: a struct
+  that embeds one of these structs from another package may mint forwarders it could not read before.
+- **Measured**, windows, linux and darwin alike: 268 forwarder methods in 12 packages (42 classes). MET.
+  `internal/abi` 112, `debug/dwarf` 52, `bufio` 40, `debug/macho` 18, `net/textproto` 16, `debug/gosym` 8,
+  `text/template/parse` 6, `image` 4, `text/scanner` 4, the vendored `dnsmessage` 4, `crypto/rsa` 2, `runtime` 2.
+- **"Nothing else moves": MISSED, by the named falsifier.** `reflect`'s five unexported structs that embed an
+  `internal/abi` struct (`interfaceType`, `ptrType`, `sliceType`, `structType`, `structTypeUncommon`) each gain
+  forwarders for seven methods of `abi.Type`: `Align`, `FieldAlign`, `GcSlice`, `HasName`, `IsDirectIface`,
+  `Pointers`, `Size`. That is 70 internal methods in their cross-package classes on each target, and the seven
+  methods in each struct's generated method set. `internal/abi`'s own forwarders for the seven were internal for
+  their return types' spelling (`uintptr`, `bool`, `nint`, `slice<byte>`), so `reflect`'s generator could not read
+  them. Go has all seven on each of the five structs. No other assembly gains a cross-package forwarder (468 to
+  538 in all, the 70 in `reflect`).
+- **At the rebased tip**, the census of the packed assemblies reads 187 / 188 / 188 promoted-method classes for
+  windows / linux / darwin, none with no method, and 0 internal forwarders of an exported method in a public
+  struct's class on each target.
+- **The rest of that diff is not C34's**: batch 282's six files under `src/core` (golib's cgo argument helpers on
+  every target; `internal/syscall/unix`, `runtime` and `syscall` on linux), and the 4 classes with no member that
+  the rule above took away.
+- **Goldens**: the `PromotedValueEmbed` pair, whose Go sources gained the shape, and nothing else.
+  `check-no-regression.ps1` at `e89725a9da` reads all 1,012 behavioral packages byte-identical with the pair
+  re-minted. C34 changes no converter file, so it has no standard-library conversion footprint of its own.
+- **Binary compatibility**: C34 removes no public member, and the verdict below is read with the same 900 entries.
+
+**The verdict at `e89725a9da`** (`push-nuget.ps1 -VersionSuffix local.1 -OutDir <scratch>`; three builds, 0 errors),
+verbatim:
+
+    ==> Binary compatibility: CLEAN -- 525 asset(s) of 362 package(s) compared with the revisions before 1.26.10.4 by apicompat 10.0.403; 0 package(s) with no published version on this line (reported, not gated)
+    ==> Break floor: CLEAN -- <GoBreakFloor> 1.26.10.4; this release breaks go.archive.zip, go.bufio, go.debug.dwarf, go.debug.macho, go.encoding.binary, go.encoding.gob, go.go.types, go.image, go.net, go.net.textproto, go.reflect, go.runtime, go.text.template.parse
+
+It was not repeated at `02d843fe97`. The ten commits above `e89725a9da` change no public member: private and
+internal members of three golib files, private members of `runtime`'s hand-owned `managed_impl.cs`, one converter
+file, tests and goldens. `push-nuget.ps1 -VerifyOnly` at `02d843fe97` reads `20 suppression file(s), 900 announced
+break(s)` and `<GoBreakFloor> 1.26.10.4 is on the line of the next release, 1.26.10.4, and not above it`.
+
+**Gates, each read at `02d843fe97`.** `check-no-regression.ps1`: 1,012 behavioral packages byte-identical. GenTests
+493 of 493. `go2cs.slnx` Debug at `-p:GoTargetOS=windows`: 0 errors. GolibTests 2,584: Debug 2,530 passed and 54
+skipped, Release 2,555 passed and 29 skipped, 0 failed. `Test-GoApiCompat.ps1` ran 99, failed 0;
+`Test-GoApiCompatMoves.ps1` ran 33, failed 0. The behavioral runner (`run-behavioral.ps1`, five slices): 932
+projects, all pass (its Output phase: 903 pass, 29 skipped, 0 fail), where `e89725a9da` read 931.
+
+- **Go's own tests** (`-tests`, action `all`, Release, linux, in a scratch worktree), each row rc 0: `reflect` 445
+  validated with 21 disclosed, its banked counts, where `c1001afba1` failed on `TestEmbeddedMethods`;
+  `encoding/binary` 143, `archive/zip` 101, `bufio` 81, `debug/dwarf` 41, `net/textproto` 27, the counts
+  `c1001afba1` read; `net`'s tests convert and build with 0 errors.
+- **Method expressions written in test files** (a probe module through `-tests -recurse`; not committed). The
+  converter names a struct's class differently for each place a test can declare or reach the struct, so each was
+  read: an internal test file over the production struct (`global::go.wbprobeᴛOuterᴛpkg.Add`) and over a struct of
+  its own (`wbprobe_internal_testᴛTestOuterᴛpkg.Add`), an external test file over the production struct and over a
+  struct of its own (`wbprobe_testᴛExtOuterᴛpkg.Add`). Its 4 tests compare each expression with the method table's
+  func and validate against `go test`.
+- **The hand-owned runtime file** of `cf841d2287` compiles in `runtime` for windows, linux and darwin, 0 errors.
+- **Native AOT** (linux-x64, the template's partial trim, one native image). A program whose promoted methods are
+  reached only at run time (through `fmt`, two type assertions and two method expressions) prints Go's 5 lines.
+  `PromotedMethodFrames` prints Go's 13 lines, among them the two that name an unbound forwarder, which the
+  runtime reads from the class's attribute. Not measured: a full trim. `PublishAot` goes into the project file
+  AFTER the conversion, which writes that file: the first reading of this gate set it before, published the
+  template's ReadyToRun image, and was read as a pass from the program's output alone.
+- **The standard-library conversion footprint** of the ten commits is not re-measured here. The one converter
+  change is inside the arm for a same-package promoted method's expression, and section G's two-seeded reconvert
+  read 0 files for that arm's first change on each target, so no production file enters it. The measurement at
+  the tip follows this section as a dated block.
+- `go test ./...` is read with this section in place (the repository guard reads its cites) and is in the seat's
+  DONE post.

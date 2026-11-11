@@ -35700,4 +35700,81 @@ decision.
 
 — P1 (2026-11-10)
 
+## 2026-11-10 — P1 (census made while fixing the method-cap seat's readers): a reflect panic text names its method by class name, and a promoted forwarder's class — OPEN, read and not measured
+
+**The reading.** The method-cap seat moved each struct's same-package promotion forwarders out of the package class
+into a class of the struct's own (`<pkg>ᴛ<Struct>ᴛpkg`). Four readers that took a package from a class missed for it
+and are fixed in the seat: golib's `UnexportedMethodPackageMatches` (behavioral `UnexportedIfaceDynamicAssert` was
+the red), `RuntimePanicCheck.IsRuntimePackageType` and `Goroutine.IsSystemCreator` (COORD's second read), and the
+runtime's name for a func value over a forwarder (`goFrameName`, found through `reflect`'s own tests). The census of
+every reader of a declaring class in golib and in the hand-owned files found one more, left here.
+
+`methodName` (`src/core/reflect/value_impl.cs`, and its twin in `internal/reflectlite/value_impl.cs`) names the
+reflect method a panic text reports ("reflect: call of reflect.Value.Set on …"). It walks the managed stack to the
+first frame whose class name ends `_package` and whose method is not a `mustBe*` helper. `reflect.Value` embeds
+`flag`, so `Value`'s promoted `flag` methods are forwarders in `go.reflectᴛΔValueᴛpkg`.
+
+- **Ordinary case: unchanged.** The promoted method's own frame is under the forwarder's and is met first, and a
+  `mustBe*` forwarder was skipped by its name before and is skipped by its class now.
+- **When the JIT inlines a promoted non-`mustBe` method into its forwarder**, a .NET trace has no frame for the
+  method and the forwarder's frame stands for it. Through 1.26.10.3 that frame read `reflect.<method>`; now it is
+  passed over and the next frame out is named. Not measured: no probe was built, and `reflect`'s own tests are the
+  consumer that would show it (the seat's `-tests` row for `reflect` reads its banked 445 and 21 on linux, Release).
+
+**Also read, not changed.** A CROSS-package forwarder class (`<pkg>ᴛ<Struct>ᴛxpkg`) was never a member of the package
+class, so the three fixed readers answer for it as they did before the seat: not its package's. Go names that
+wrapper by the embedding package too. No consumer was looked for.
+
+**What it needs.** A probe first (a promoted `flag` method that reports through `methodName`, Release). If it
+differs, `methodName` reads the promoted-method class by the form `RuntimePanicCheck.IsPromotedMethodClassOf` reads.
+
+— P1 (2026-11-10)
+
+## 2026-11-11 — P1 (probe made while fixing the method-cap seat's method expressions): a method expression rendered as a lambda is not the function the method table holds, nor one function at two sites — OPEN, measured
+
+**The rule in Go.** A method expression `T.M` is ONE function: two sites of the expression have one pc, and it is
+the pc the type's method table holds (`reflect.TypeOf(T).Method(i).Func.Pointer()`). reflect's own
+`TestEmbeddedMethods` asserts the second half.
+
+**The mechanism here.** reflect names a func value by the method its delegate invokes (`delegateMethodToken`,
+`src/core/reflect/value_impl.cs`). go2cs-gen's method set (`MethodSet.cs`, `Arms`) hands reflect a method group
+where an arm only passes its receiver through, and a lambda of its own elsewhere. So an expression the converter
+renders as a method group agrees with the table, and one it renders as a lambda is another method at every site.
+
+**The measurement.** A probe of 13 expressions, each asked "are two sites equal" and "does a site equal the method
+table"; Go prints `true` 26 times. Converted and run at the method-cap seat's tip (linux, Release):
+
+| expression | rendered as | two sites | method table |
+|---|---|---|---|
+| `(*outer).Add`: pointer method, value embed | group | true | true |
+| `outer.Get`: value method, value embed | group | true | true |
+| `outerp.Get`: value method, pointer embed | group | true | true |
+| `(*deep).Add`, `deep.Get`: two hops | group | true | true |
+| `(*gen[int]).Add`, `gen[int].Get`: generic struct | group | true | true |
+| `(*outerp).Add`: pointer method, pointer embed | group | true | **false** |
+| `(*bufio.ReadWriter).ReadString`: the same, foreign struct | group | true | **false** |
+| `(*outer).Get`: value method off the pointer type | lambda | **false** | **false** |
+| `outerp.Add`: pointer method off a value type, pointer embed | lambda | **false** | **false** |
+| `bufio.ReadWriter.ReadString`: the same, foreign struct | lambda | **false** | **false** |
+| `(*myType).Write`: `myType` embeds `bytes.Buffer`, cross-package | lambda | **false** | **false** |
+
+**What the seat owned, and fixed.** Every same-package row was a bare method group before the forwarders moved
+(`(Add)`), bound to the forwarder in the package class. The seat's move left no bare name for one, and its first
+fix rendered all of them as lambdas: reflect's `-tests` row went red on `TestEmbeddedMethods`. The seat now renders
+the group over the struct's promoted-method class (`mainᴛouterᴛpkg.Add`) wherever a forwarder has the delegate's
+receiver. That is every row marked "group".
+
+**What is left, and was so before the seat.** The `false` cells. They are read at the base, not run there: the
+base converter renders `(*outer).Get` and `(*myType).Write` as the same lambdas and the two "group, false" rows as
+the same group against the same method-set lambda, and the probe does not compile at the base at all (`outerp.Add`
+and `bufio.ReadWriter.ReadString` have no by-value forwarder for a bare group, CS0123; the seat's lambda compiles
+them). Not probed: a declared value method off its pointer type (`(*S).value`), the same lambda shape.
+
+**What it needs.** One method per (struct, method, receiver form) that both sides name. For example go2cs-gen
+writes each wrapper it now builds as a lambda in `MethodSet.cs` as a static method beside the forwarders, its
+method set returns the group over it, and the converter names the same group in place of its own lambda. The probe
+is the red: every cell `true`.
+
+— P1 (2026-11-11)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
