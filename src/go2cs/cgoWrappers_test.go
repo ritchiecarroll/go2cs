@@ -425,3 +425,78 @@ func _Cfunc_handle(p0 uintptr) (r1 _Ctype_int) { return }
 		t.Errorf("C.%s was not recognized", name)
 	}
 }
+
+// Increment 4d: the two-result form crosses a pointer for a SCALAR result (the probe's strtol is its arm); an errno form
+// returning a struct or a pointer waits for a measured arm and is refused by name.
+func TestCgoErrnoFormThroughAPointerTakesAScalarResultOnly(t *testing.T) {
+	source := `package cgotest
+
+type _Ctype_int int32
+type _Ctype_struct_x struct{ a _Ctype_int }
+
+func _C2func_count(p0 *_Ctype_int) (r1 _Ctype_int, r2 error) { return }
+func _C2func_fill(p0 *_Ctype_int) (r1 _Ctype_struct_x, r2 error) { return }
+func _C2func_find(p0 *_Ctype_struct_x) (r1 *_Ctype_int, r2 error) { return }
+`
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, "cgotest.go", source, 0)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	pkg, err := (&types.Config{Importer: importer.Default()}).Check("cgotest", fset, []*ast.File{file}, nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	const refused = "an errno form with a struct or pointer result waits for a measured arm"
+	want := map[string]string{"count": "", "fill": refused, "find": refused}
+
+	for _, goos := range []string{"linux", "windows"} {
+		set := newCgoWrapperSet(cgoBindingTarget{goos: goos, library: "libc.so.6", crt: "ucrtbase.dll"}, types.SizesFor("gc", "amd64"))
+		seen := 0
+
+		for _, declaration := range cgoDeclarations(pkg) {
+			reason, listed := want[declaration.cName]
+
+			if !listed || declaration.kind != cgoErrnoFunc {
+				continue
+			}
+
+			seen++
+			text, err := set.wrapper(declaration)
+
+			if reason != "" {
+				if err == nil || !strings.Contains(err.Error(), reason) {
+					t.Errorf("%s C.%s: err %v, want it to say %q", goos, declaration.cName, err, reason)
+				}
+
+				continue
+			}
+
+			if err != nil {
+				t.Fatalf("%s C.%s: %v", goos, declaration.cName, err)
+			}
+
+			// The pointer crosses as 3b2b's scalar pointer does, and errno is read inside the transition: by the binding
+			// on linux, through the C runtime's slot on windows.
+			for _, line := range []string{"internal static (@int, error) countꓸerrno(ж<@int> p0)", "StructPointer(p0, \"count\"", "return ((@int)(int32)r, err);"} {
+				if !strings.Contains(text, line) {
+					t.Errorf("%s C.count's errno form lacks %q:\n%s", goos, line, text)
+				}
+			}
+
+			errnoRead := map[string]string{"linux": "SetLastError = true", "windows": "errno = global::System.Runtime.InteropServices.Marshal.ReadInt32(errnoAddress);"}[goos]
+
+			if !strings.Contains(text, errnoRead) {
+				t.Errorf("%s C.count's errno form does not read errno by %q:\n%s", goos, errnoRead, text)
+			}
+		}
+
+		if seen != len(want) {
+			t.Errorf("%s: %d of the %d errno forms were recognized", goos, seen, len(want))
+		}
+	}
+}

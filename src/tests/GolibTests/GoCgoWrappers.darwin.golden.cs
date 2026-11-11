@@ -181,6 +181,262 @@ static unsafe partial class cgotestꓸC_package
         return global::go.golib.GoCgoArgs.PointerMemberBack<struct_tm>((nuint)r, null, 0);
     }
 
+    // C.go2cs_probe_add_into, bound to libgo2csprobe.dylib.
+    [global::System.Runtime.InteropServices.LibraryImport("libgo2csprobe.dylib", EntryPoint = "go2cs_probe_add_into")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial int go2cs_probe_add_intoᴍnative(nint p0, nint p1, nint p2);
+
+    internal static @int go2cs_probe_add_into(ж<struct_go2cs_probe_pair> p0, ж<struct_go2cs_probe_pair> p1, ж<struct_go2cs_probe_pair> p2)
+    {
+        _Ctype_struct_go2cs_probe_pairᴍ.CheckLayoutᴍ();
+
+        _Ctype_struct_go2cs_probe_pairᴍ m0 = default;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "go2cs_probe_add_into", out nuint n0);
+        nint a0 = (nint)n0;
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            ᴍin__Ctype_struct_go2cs_probe_pairᴍ(ref m0, p0.Value);
+            a0 = (nint)(&m0);
+        }
+
+        _Ctype_struct_go2cs_probe_pairᴍ m1 = default;
+        global::go.golib.GoCgoStructPointer k1 = global::go.golib.GoCgoArgs.StructPointer(p1, "go2cs_probe_add_into", out nuint n1);
+        nint a1 = (nint)n1;
+        bool s1 = false;
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            if (k0 == global::go.golib.GoCgoStructPointer.Mirror && global::System.Runtime.CompilerServices.Unsafe.AreSame(ref p1.Value, ref p0.Value))
+            {
+                s1 = true;
+                a1 = a0;
+            }
+            else
+            {
+                ᴍin__Ctype_struct_go2cs_probe_pairᴍ(ref m1, p1.Value);
+                a1 = (nint)(&m1);
+            }
+        }
+
+        _Ctype_struct_go2cs_probe_pairᴍ m2 = default;
+        global::go.golib.GoCgoStructPointer k2 = global::go.golib.GoCgoArgs.StructPointer(p2, "go2cs_probe_add_into", out nuint n2);
+        nint a2 = (nint)n2;
+        bool s2 = false;
+
+        if (k2 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            if (k0 == global::go.golib.GoCgoStructPointer.Mirror && global::System.Runtime.CompilerServices.Unsafe.AreSame(ref p2.Value, ref p0.Value))
+            {
+                s2 = true;
+                a2 = a0;
+            }
+            else if (k1 == global::go.golib.GoCgoStructPointer.Mirror && global::System.Runtime.CompilerServices.Unsafe.AreSame(ref p2.Value, ref p1.Value))
+            {
+                s2 = true;
+                a2 = a1;
+            }
+            else
+            {
+                ᴍin__Ctype_struct_go2cs_probe_pairᴍ(ref m2, p2.Value);
+                a2 = (nint)(&m2);
+            }
+        }
+
+        int r;
+        global::go.runtime_package.syscallEntersyscall();
+
+        try
+        {
+            r = go2cs_probe_add_intoᴍnative(a0, a1, a2);
+        }
+        finally
+        {
+            global::go.runtime_package.syscallExitsyscall();
+        }
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            ᴍout__Ctype_struct_go2cs_probe_pairᴍ(ref p0.Value, m0);
+
+        if (k1 == global::go.golib.GoCgoStructPointer.Mirror && !s1)
+            ᴍout__Ctype_struct_go2cs_probe_pairᴍ(ref p1.Value, m1);
+
+        if (k2 == global::go.golib.GoCgoStructPointer.Mirror && !s2)
+            ᴍout__Ctype_struct_go2cs_probe_pairᴍ(ref p2.Value, m2);
+
+        return (@int)(int32)r;
+    }
+
+    // C.go2cs_probe_hfa_scale, bound to libgo2csprobe.dylib.
+    [global::System.Runtime.InteropServices.LibraryImport("libgo2csprobe.dylib", EntryPoint = "go2cs_probe_hfa_scale")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial double go2cs_probe_hfa_scaleᴍnative(nint p0, double p1);
+
+    internal static @double go2cs_probe_hfa_scale(ж<struct_go2cs_probe_hfa> p0, @double p1)
+    {
+        _Ctype_struct_go2cs_probe_hfaᴍ.CheckLayoutᴍ();
+
+        _Ctype_struct_go2cs_probe_hfaᴍ m0 = default;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "go2cs_probe_hfa_scale", out nuint n0);
+        nint a0 = (nint)n0;
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            ᴍin__Ctype_struct_go2cs_probe_hfaᴍ(ref m0, p0.Value);
+            a0 = (nint)(&m0);
+        }
+
+        double r;
+        global::go.runtime_package.syscallEntersyscall();
+
+        try
+        {
+            r = go2cs_probe_hfa_scaleᴍnative(a0, (float64)p1);
+        }
+        finally
+        {
+            global::go.runtime_package.syscallExitsyscall();
+        }
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            ᴍout__Ctype_struct_go2cs_probe_hfaᴍ(ref p0.Value, m0);
+
+        return (@double)(float64)r;
+    }
+
+    // C.go2cs_probe_pair, bound to libgo2csprobe.dylib.
+    [global::System.Runtime.InteropServices.LibraryImport("libgo2csprobe.dylib", EntryPoint = "go2cs_probe_pair")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial _Ctype_struct_go2cs_probe_pairᴍ go2cs_probe_pairᴍnative(int p0, int p1);
+
+    internal static struct_go2cs_probe_pair go2cs_probe_pair(@int p0, @int p1)
+    {
+        _Ctype_struct_go2cs_probe_pairᴍ.CheckLayoutᴍ();
+
+        _Ctype_struct_go2cs_probe_pairᴍ r;
+        global::go.runtime_package.syscallEntersyscall();
+
+        try
+        {
+            r = go2cs_probe_pairᴍnative((int32)p0, (int32)p1);
+        }
+        finally
+        {
+            global::go.runtime_package.syscallExitsyscall();
+        }
+
+        struct_go2cs_probe_pair result = new();
+        ᴍout__Ctype_struct_go2cs_probe_pairᴍ(ref result, r);
+
+        return result;
+    }
+
+    // C.go2cs_probe_pair_sum, bound to libgo2csprobe.dylib.
+    [global::System.Runtime.InteropServices.LibraryImport("libgo2csprobe.dylib", EntryPoint = "go2cs_probe_pair_sum")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial int go2cs_probe_pair_sumᴍnative(_Ctype_struct_go2cs_probe_pairᴍ p0);
+
+    internal static @int go2cs_probe_pair_sum(struct_go2cs_probe_pair p0)
+    {
+        _Ctype_struct_go2cs_probe_pairᴍ.CheckLayoutᴍ();
+
+        _Ctype_struct_go2cs_probe_pairᴍ v0 = default;
+        ᴍin__Ctype_struct_go2cs_probe_pairᴍ(ref v0, p0);
+
+        int r;
+        global::go.runtime_package.syscallEntersyscall();
+
+        try
+        {
+            r = go2cs_probe_pair_sumᴍnative(v0);
+        }
+        finally
+        {
+            global::go.runtime_package.syscallExitsyscall();
+        }
+
+        return (@int)(int32)r;
+    }
+
+    // C.go2cs_probe_strtol, bound to libgo2csprobe.dylib.
+    [global::System.Runtime.InteropServices.LibraryImport("libgo2csprobe.dylib", EntryPoint = "go2cs_probe_strtol", SetLastError = true)]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial long go2cs_probe_strtolᴍnativeerrno(nint p0, int p1);
+
+    internal static (@long, error) go2cs_probe_strtolꓸerrno(ж<@char> p0, @int p1)
+    {
+        sbyte m0 = default;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "go2cs_probe_strtol", out nuint n0);
+        nint a0 = (nint)n0;
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            m0 = (int8)p0.Value;
+            a0 = (nint)(&m0);
+        }
+
+        long r;
+        int errno;
+        global::go.runtime_package.syscallEntersyscall();
+
+        try
+        {
+            r = go2cs_probe_strtolᴍnativeerrno(a0, (int32)p1);
+            errno = global::System.Runtime.InteropServices.Marshal.GetLastPInvokeError();
+        }
+        finally
+        {
+            global::go.runtime_package.syscallExitsyscall();
+        }
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            p0.Value = (@char)(int8)m0;
+
+        error err = null;
+
+        if (errno != 0)
+            err = (global::go.syscall_package.Errno)(uintptr)(nuint)(uint)errno;
+
+        return ((@long)(int64)r, err);
+    }
+
+    // C.go2cs_probe_tagged_double, bound to libgo2csprobe.dylib.
+    [global::System.Runtime.InteropServices.LibraryImport("libgo2csprobe.dylib", EntryPoint = "go2cs_probe_tagged_double")]
+    [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static partial int go2cs_probe_tagged_doubleᴍnative(nint p0);
+
+    internal static @int go2cs_probe_tagged_double(ж<struct_go2cs_probe_tagged> p0)
+    {
+        _Ctype_struct_go2cs_probe_taggedᴍ.CheckLayoutᴍ();
+
+        _Ctype_struct_go2cs_probe_taggedᴍ m0 = default;
+        global::go.golib.GoCgoStructPointer k0 = global::go.golib.GoCgoArgs.StructPointer(p0, "go2cs_probe_tagged_double", out nuint n0);
+        nint a0 = (nint)n0;
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+        {
+            ᴍin__Ctype_struct_go2cs_probe_taggedᴍ(ref m0, p0.Value);
+            a0 = (nint)(&m0);
+        }
+
+        int r;
+        global::go.runtime_package.syscallEntersyscall();
+
+        try
+        {
+            r = go2cs_probe_tagged_doubleᴍnative(a0);
+        }
+        finally
+        {
+            global::go.runtime_package.syscallExitsyscall();
+        }
+
+        if (k0 == global::go.golib.GoCgoStructPointer.Mirror)
+            ᴍout__Ctype_struct_go2cs_probe_taggedᴍ(ref p0.Value, m0);
+
+        return (@int)(int32)r;
+    }
+
     // C.inet_ntoa, bound to /usr/lib/libSystem.B.dylib.
     [global::System.Runtime.InteropServices.LibraryImport("/usr/lib/libSystem.B.dylib", EntryPoint = "inet_ntoa")]
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
@@ -292,7 +548,8 @@ static unsafe partial class cgotestꓸC_package
     // assembly's own [LibraryImport] bindings when the module loads (§6.2, §11.11).
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void registerᴍlibraries() => global::go.golib.GoCgoLibraries.Register(typeof(cgotestꓸC_package).Assembly,
-        new global::go.golib.GoCgoLibrary("-lSystem", "/usr/lib/libSystem.B.dylib"));
+        new global::go.golib.GoCgoLibrary("-lSystem", "/usr/lib/libSystem.B.dylib"),
+        new global::go.golib.GoCgoLibrary("-lgo2csprobe", "libgo2csprobe.dylib"));
 
     [global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit, Size = 8)]
     internal struct _Ctype_div_tᴍ
@@ -350,6 +607,64 @@ static unsafe partial class cgotestꓸC_package
         }
     }
 
+    [global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit, Size = 8)]
+    internal struct _Ctype_struct_go2cs_probe_pairᴍ
+    {
+        [global::System.Runtime.InteropServices.FieldOffset(0)] public int a;
+        [global::System.Runtime.InteropServices.FieldOffset(4)] public int b;
+
+        internal static void CheckLayoutᴍ()
+        {
+            Holdᴍ("a", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("b", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+        }
+
+        private static void Holdᴍ(string member, string clrType, int clrSize, int cSize)
+        {
+            if (clrSize != cSize)
+                throw new global::System.InvalidOperationException($"cgo mirror _Ctype_struct_go2cs_probe_pair: member {member} is {clrSize} bytes as {clrType} and {cSize} bytes in C, so the mirror cannot cross");
+        }
+    }
+
+    [global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit, Size = 16)]
+    internal struct _Ctype_struct_go2cs_probe_hfaᴍ
+    {
+        [global::System.Runtime.InteropServices.FieldOffset(0)] public double x;
+        [global::System.Runtime.InteropServices.FieldOffset(8)] public double y;
+
+        internal static void CheckLayoutᴍ()
+        {
+            Holdᴍ("x", "double", global::System.Runtime.CompilerServices.Unsafe.SizeOf<double>(), 8);
+            Holdᴍ("y", "double", global::System.Runtime.CompilerServices.Unsafe.SizeOf<double>(), 8);
+        }
+
+        private static void Holdᴍ(string member, string clrType, int clrSize, int cSize)
+        {
+            if (clrSize != cSize)
+                throw new global::System.InvalidOperationException($"cgo mirror _Ctype_struct_go2cs_probe_hfa: member {member} is {clrSize} bytes as {clrType} and {cSize} bytes in C, so the mirror cannot cross");
+        }
+    }
+
+    [global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit, Size = 16)]
+    internal struct _Ctype_struct_go2cs_probe_taggedᴍ
+    {
+        [global::System.Runtime.InteropServices.FieldOffset(0)] public int tag;
+        [global::System.Runtime.InteropServices.FieldOffset(8)] public ᴍarray8_byte u;
+
+        internal static void CheckLayoutᴍ()
+        {
+            Holdᴍ("tag", "int", global::System.Runtime.CompilerServices.Unsafe.SizeOf<int>(), 4);
+            Holdᴍ("u", "ᴍarray8_byte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<ᴍarray8_byte>(), 8);
+            Holdᴍ("u element", "byte", global::System.Runtime.CompilerServices.Unsafe.SizeOf<byte>(), 1);
+        }
+
+        private static void Holdᴍ(string member, string clrType, int clrSize, int cSize)
+        {
+            if (clrSize != cSize)
+                throw new global::System.InvalidOperationException($"cgo mirror _Ctype_struct_go2cs_probe_tagged: member {member} is {clrSize} bytes as {clrType} and {cSize} bytes in C, so the mirror cannot cross");
+        }
+    }
+
     [global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit, Size = 4)]
     internal struct _Ctype_struct_in_addrᴍ
     {
@@ -397,6 +712,12 @@ static unsafe partial class cgotestꓸC_package
         }
     }
 
+    [global::System.Runtime.CompilerServices.InlineArray(8)]
+    internal struct ᴍarray8_byte
+    {
+        private byte m_element;
+    }
+
     [global::System.Runtime.CompilerServices.InlineArray(256)]
     internal struct ᴍarray256_sbyte
     {
@@ -414,6 +735,47 @@ static unsafe partial class cgotestꓸC_package
     {
         v.quot = (@int)(int32)m.quot;
         v.rem = (@int)(int32)m.rem;
+    }
+
+    // _Ctype_struct_go2cs_probe_hfa's copy-in and copy-out, member by member (§5.2).
+    private static void ᴍin__Ctype_struct_go2cs_probe_hfaᴍ(ref _Ctype_struct_go2cs_probe_hfaᴍ m, in struct_go2cs_probe_hfa v)
+    {
+        m.x = (float64)v.x;
+        m.y = (float64)v.y;
+    }
+
+    private static void ᴍout__Ctype_struct_go2cs_probe_hfaᴍ(ref struct_go2cs_probe_hfa v, in _Ctype_struct_go2cs_probe_hfaᴍ m)
+    {
+        v.x = (@double)(float64)m.x;
+        v.y = (@double)(float64)m.y;
+    }
+
+    // _Ctype_struct_go2cs_probe_pair's copy-in and copy-out, member by member (§5.2).
+    private static void ᴍin__Ctype_struct_go2cs_probe_pairᴍ(ref _Ctype_struct_go2cs_probe_pairᴍ m, in struct_go2cs_probe_pair v)
+    {
+        m.a = (int32)v.a;
+        m.b = (int32)v.b;
+    }
+
+    private static void ᴍout__Ctype_struct_go2cs_probe_pairᴍ(ref struct_go2cs_probe_pair v, in _Ctype_struct_go2cs_probe_pairᴍ m)
+    {
+        v.a = (@int)(int32)m.a;
+        v.b = (@int)(int32)m.b;
+    }
+
+    // _Ctype_struct_go2cs_probe_tagged's copy-in and copy-out, member by member (§5.2).
+    private static void ᴍin__Ctype_struct_go2cs_probe_taggedᴍ(ref _Ctype_struct_go2cs_probe_taggedᴍ m, in struct_go2cs_probe_tagged v)
+    {
+        m.tag = (int32)v.tag;
+        for (int i0 = 0; i0 < 8; i0++)
+            m.u[i0] = (byte)v.u[i0];
+    }
+
+    private static void ᴍout__Ctype_struct_go2cs_probe_taggedᴍ(ref struct_go2cs_probe_tagged v, in _Ctype_struct_go2cs_probe_taggedᴍ m)
+    {
+        v.tag = (@int)(int32)m.tag;
+        for (int i0 = 0; i0 < 8; i0++)
+            v.u[i0] = (byte)(byte)m.u[i0];
     }
 
     // _Ctype_struct_in_addr's copy-in and copy-out, member by member (§5.2).
