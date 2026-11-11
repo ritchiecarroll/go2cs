@@ -30,13 +30,17 @@ An executable's **`<AssemblyName>` is the last element of its import path**, mir
 Go's `func main` is emitted as `main`, under its own name, like every other Go function. The C# entry point is
 not in the converted source: go2cs-gen's `MainEntryGenerator` adds it to the program's `main_package` class.
 
+<!-- source: src/tests/Behavioral/MainDeepRecursion/main.cs.target:16-18 -->
 ```csharp
-// main.cs (converted)
 internal static void main() {
     fmt.Println("depth:", depth(levels));
 }
+```
 
-// go2cs.main-entry.g.cs (generated)
+The generator's file, `go2cs.main-entry.g.cs`:
+
+<!-- illustration: generator output, held as a string in src/gen/go2cs-gen/MainEntryGenerator.cs (Source) -->
+```csharp
 partial class main_package
 {
     private static void Main() => global::go.golib.MainThread.Run(main);

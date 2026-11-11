@@ -77,8 +77,8 @@ public static partial class builtin
         // unless golib asks for it here. See builtin.WindowsLongPaths.cs.
         InitializeWindowsLongPaths();
 
-        // The thread that first touches golib is the one running `main`. Registering it makes the
-        // main goroutine visible to the live-goroutine registry, as Go's own accounting sees it —
+        // The first thread to touch golib is the startup thread; MainThread lends this identity to main's (C46).
+        // Registering it makes the main goroutine visible to the live-goroutine registry, as Go's accounting sees it —
         // without marking the thread as being "on a goroutine", which is a different question that
         // only runtime.Goexit asks (golib/runtime/Goroutine.cs).
         //

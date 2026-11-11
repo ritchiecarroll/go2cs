@@ -628,9 +628,9 @@ public sealed class Goroutine
     /// <remarks>
     /// <para>
     /// The main goroutine is minted exactly once per process, by <see cref="RegisterMainGoroutine"/>
-    /// on the thread that first touched golib. A host whose "main" runs on some OTHER thread -- the
-    /// converted-test host hands the whole run to a pool thread and parks its own main thread on the
-    /// package deadline -- would otherwise run Go's <c>TestMain</c> on a thread with no identity at
+    /// on the thread that first touched golib. A host whose "main" runs on some OTHER thread -- every converted
+    /// program (its generated entry point uses <see cref="MainThread"/>) and the converted-test host, which
+    /// waits on the package deadline -- would otherwise run Go's <c>TestMain</c> on a thread with no identity at
     /// all (a traceback headed <c>goroutine 0</c>, an id Go never mints) while the registered main
     /// goroutine sat in the registry as a goroutine that runs no Go code: a frameless block in every
     /// <c>runtime.Stack(all)</c> dump that no program's filter can drop, which is exactly how
