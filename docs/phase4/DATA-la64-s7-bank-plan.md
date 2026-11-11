@@ -369,3 +369,77 @@ any dispatch, as §4 requires.
   `amd64/`, beside their only bodyless principals. That is the compile error P3 said must be gone at E1.
 - **GolibTests.** `11171d1265` states that GolibTests compiles at linux/arm64. S7-b's arm leg depends on it; it
   is read again at the E1 tree, not taken from the commit's subject.
+
+## 9. The entry checklist, read at master (dated block, 2026-11-11)
+
+Batch 284 landed. Read on origin on 2026-11-11 after a fetch: master `50dd9a065c`. Sections 0 to 8 stand as
+written; this block moves gate states and scores §8.4's predictions. **One hosted run was dispatched for it
+(GolibTests on the arm leg, §9.3). No sweep shard has been dispatched.**
+
+### 9.1 The gates
+
+| Gate | State | Read at `50dd9a065c` |
+|---|---|---|
+| E1, site 9 on master | **CLEARED** | `a719a19546`, `9b706f4d82`, `ebe1b5ea34`, `a1d01fdfec` and `11171d1265` are each an ancestor of master (`git merge-base --is-ancestor`, five of five). `src/core/math/linux-arm64/exp2_asm_impl.cs` is in the tree. |
+| E2, the triage of §4.1's names on a record | **CLEARED** (ruled 2026-11-10) | The triage is `DATA-la64-s3-census.md`, "Amendment, 2026-11-10", and it is on master. §9.2 reads it against the tree. |
+| E3, the ruling | **CLEARED** | §8.1. |
+| E4, S7-a landed | **CLEARED** | `f566323426` is an ancestor of master. Its fixups (`claude/p2-la64-s7a-fixups` at `fbb9169c42`) are second-read with no defect and are NOT on master. They land before the first combined bank; A-0 banks nothing. |
+| E5, S7-b and the proof step landed | **CLEARED** | `356d2b7eb3` is an ancestor of master. The workflow at master sequences `.github/dump-suppression-proof.sh` on the linux `sweep-shard` legs in three steps (record, control and apply; prove; recheck under `always()`, which runs only when the prove step succeeded), and carries the `dumpproof=red` arm. |
+| A-0's proof green and read | OPEN | Dispatched next, at master's tip, on both legs. No other shard before it. |
+| Wave 1's arm64 banking | **HELD** (ruled 2026-11-11) | Until batch 285 lands with the netpoll guard lift (§9.3). Not one of §8.3's entry gates; a new hold. |
+
+This record itself is not on master: neither `7608783cda` nor `a0c988af41` is an ancestor of `50dd9a065c`, and
+master's workflow cites this file by path. The link resolves once the plan's branch lands.
+
+### 9.2 The stub ceiling, re-measured (§8.4's first prediction)
+
+§8.4 predicted 57 at the E1 tree, because `archExp2` is bodied. **The prediction is scored a MISS: its reason
+was wrong, and 57 is the record's number for another reason.**
+
+- **The plan's instrument does not move.** A grep for bodiless `partial` declarations in the 18 `linux-arm64`
+  folders reads 58 at master, the same 58 names as at the plan's tree. A companion body does not remove the
+  declaration, so this count cannot fall when a stub is bodied.
+- **One of §4.1's 58 was never a stub.** `internal/cpu.libcGetauxval` is a `[LibraryImport]` declaration in a
+  hand-owned companion; the platform's own generator bodies it. §4.1 counts it in internal/cpu's 4. The row
+  reads 3, and the table's total 57.
+- **The census's own predicates exclude it.** The S3 record's complete table has 57 declarations in 10 packages:
+  42 bodied, 15 stubbed.
+- **A second instrument agrees, at master.** For each of the 57 names, a body is searched in the `linux-arm64`
+  folder and then in the package's other files: 8 are bodied in the arch folder, 34 in a flat or `linux/` file,
+  and 15 have no body. The 15 are the record's 15, member for member (set difference empty).
+- **Control.** The first cut of the body filter read `archExp2` as unbodied, because an expression body also
+  ends in `);`. It was corrected before any number above was taken; `archExp2` is the positive control and
+  `rawVforkSyscall` the negative.
+
+So the ceiling on throwing stubs at linux/arm64 is **15**, not 58. Nine exist only at linux/arm64 (the record's
+rows 7 to 15, classes (b) and (c)); six are each arch's own assembly and are stubbed at linux/amd64 too. P0
+stands as written, against these 15 names.
+
+### 9.3 GolibTests at linux/arm64 (§8.4's last line)
+
+Run 42979136871 at `50dd9a065c`, `golib-tests`, the arm leg only:
+
+- **It compiles.** That is the claim S7-b's arm leg depends on, and it holds at the E1 tree.
+- **It does not pass: 1845 passed, 2 failed, and the test host exited.**
+  - The two failures are `LinuxRuntimeSyscallNumberTests`' flavour cross-checks. They compare the amd64 probe
+    row with the converted flavour's constants, which are arm64's on this leg (172 against 39, 135 against 14).
+    The runtime's numbers are right; the tests assume the flavour. The fix is on `claude/i9-s3-s2-sites` at
+    `11a355e936` and is not on master.
+  - The host exited while `RuntimeCPUProfilerTests.StartStopThenStartAgain` ran. **The cause is not the
+    profiler.** i9 localised it (runs 42967529386, 42967662456, 42969401661, 42970423967):
+    `runtime_pollServerInit` in `src/core/internal/poll/linux/runtime_netpoll_impl.cs` carries an admission
+    guard, X64 only, and throws `PlatformNotSupportedException` at the first pollable `FD.Init`. pprof's writer
+    opens `/proc/self/maps`, so the test died at its first open. Read here: the guard is in that function at
+    master, and run 42970423967's log prints the exception by its message ("only X64 is admitted", 2 hits).
+    Run 42979136871's own log does not print it (0 hits); it carries no first-chance trace.
+- **What it means for S7.** At master, a converted program at linux/arm64 dies at its first `os.Open` or
+  `os.Create`. A row that opens a file reads UNMEASURED with that reason (§5.3). It is not a divergence to
+  disclose, and it is not a profiler limitation. The lift is on `claude/i9-s3-s2-sites` and rides batch 285,
+  with a live arm64 epoll reading in the same commit.
+- **RULED 2026-11-11: wave 1's arm64 banking waits for batch 285 to land with the guard lift.** No arm64 row
+  banks on master as it stands. A-0, and preparation that banks nothing, proceed now.
+- **A prediction for A-0, written before its dispatch.** `container/heap`'s tests open no file, so P0 stands on
+  the arm leg at master. If the row's host does open one, the row reads UNMEASURED for the guard, and the proof
+  and the calibration still read.
+
+The linux-x64 GolibTests leg at the same SHA is green (run 42962618559).
