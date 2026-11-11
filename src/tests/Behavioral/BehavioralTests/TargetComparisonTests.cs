@@ -2572,6 +2572,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckTypeParamFloatConversion() => CheckTarget("TypeParamFloatConversion");
 
     [TestMethod]
+    public void CheckTypeParamFuncArgNoBox() => CheckTarget("TypeParamFuncArgNoBox");
+
+    [TestMethod]
     public void CheckTypeParamTypedNil() => CheckTarget("TypeParamTypedNil");
 
     [TestMethod]
