@@ -35,7 +35,10 @@
     never been made to fail proves nothing"), and both arms have been made to fail: arm 1 by
     injecting one unpaired temp into zsyscall_linux_amd64.cs, arm 2 by deleting one KeepAlive and,
     separately, by stripping the two retention arguments from ConnectEx's rearmOverlapped call --
-    each naming exactly the site touched, each restored byte-identical.
+    each naming exactly the site touched, each restored byte-identical. Arm 2's second spelling,
+    `nativeIdentityOf(Ꮡx)` (2026-11-11), was made to fail the same way: blanking the hold after
+    certchain's CertFreeCertificateChain call names that line, and so does replacing it with a
+    lookalike `MyGC.KeepAlive(...)`; blanking a ptrout hold still names its `(uintptr)Ꮡx` site.
 #>
 
 param(
@@ -168,18 +171,32 @@ function Remove-LineComments {
 # disableAllPrivileges, not a pointer box; the other pointer arguments are native stack images).
 # Keeping it listed makes that verdict re-checkable -- if a box argument ever appears in it, the
 # arm reports it -- rather than resting on a note.
+#
+# zsyscall_windows_certchain_impl.cs joined on 2026-11-11 (the batch-264 follow-up, H's certchain
+# seat): its five crypt32 calls pass the context box through `nativeIdentityOf(Ꮡx)` rather than
+# `(uintptr)Ꮡx`, and the helper's fallback (`return (uintptr)box;`) is the token arm this rule is
+# about. Each call is held by a bare `GC.KeepAlive(Ꮡx)` on the next line (the file imports System),
+# so the hold below accepts that spelling too.
 $handOwnPinFiles = @(
     'syscall\windows\zsyscall_windows_ptrout_impl.cs',
     'syscall\windows\syscall_windows_impl.cs',
     'internal\syscall\windows\windows\zsyscall_windows_ptrout_impl.cs',
-    'internal\syscall\windows\windows\zsyscall_windows_privilege_impl.cs'
+    'internal\syscall\windows\windows\zsyscall_windows_privilege_impl.cs',
+    'syscall\windows\zsyscall_windows_certchain_impl.cs'
 )
 
 # Ꮡ is the converter's address-of glyph. Spelled as an escape, not as a literal: a .ps1 that
 # lost its BOM is re-read by Windows PowerShell 5.1 through the system codepage, and an embedded
 # non-ASCII literal then decodes to mojibake at PARSE time -- a regex that silently never matches
 # and a guard that reports a clean zero (CLAUDE.md's own BOM trap, met from the detector side).
-$handOwnBoxArgPattern = [regex]'\(uintptr\)(\u13D1[A-Za-z_][A-Za-z0-9_]*)'
+#
+# TWO spellings hand a box to the kernel as a number: the operator itself, `(uintptr)Ꮡx`, and
+# certchain's `nativeIdentityOf(Ꮡx)` (with or without an explicit type argument), which answers a
+# crypt32-issued context with its native address and every other box with `(uintptr)box` -- the
+# same operator one call down, where the first spelling cannot see it. Measured when the second
+# spelling joined: over all 361 hand-owns, `nativeIdentityOf` is the ONLY helper that wraps a box
+# argument on a funnel-call line, at 5 sites, all in the certchain file.
+$handOwnBoxArgPattern = [regex]'(?:\(uintptr\)|\bnativeIdentityOf(?:<[^<>()]*>)?\()(\u13D1[A-Za-z_][A-Za-z0-9_]*)'
 $handOwnRetentionCalls = [regex]'(rearmOverlapped|stageBuffers|retainForFlight)\('
 
 $totalTemps = 0
@@ -285,12 +302,14 @@ foreach ($relative in $handOwnPinFiles) {
             $handOwnSites++
 
             # The KeepAlive must come AFTER the call: one placed before it holds nothing across
-            # the boundary, which is the whole property being asserted.
-            $keepAlive = 'System.GC.KeepAlive(' + $box + ')'
+            # the boundary, which is the whole property being asserted. `System.GC.KeepAlive` and a
+            # bare `GC.KeepAlive` (a file that imports System) are the same call; the lookbehind keeps
+            # a member that merely ENDS in `GC.KeepAlive` (`MyGC.KeepAlive`, `x.GC.KeepAlive`) out.
+            $keepAlive = [regex]('(?<![\w.])(?:System\.)?GC\.KeepAlive\(' + [regex]::Escape($box) + '\)')
             $held = $false
 
             for ($j = $i + 1; $j -lt $lines.Count; $j++) {
-                if ($lines[$j].Contains($keepAlive)) {
+                if ($keepAlive.IsMatch($lines[$j])) {
                     $held = $true
                     break
                 }
@@ -311,7 +330,9 @@ foreach ($relative in $handOwnPinFiles) {
                 $handOwnHeld++
             }
             else {
-                $handOwnUnheld += "$relative`:$($i + 1)  (uintptr)$box  -- no later System.GC.KeepAlive($box) and not retained for flight"
+                # The operator spelling ends at the box; the helper spelling closes its own call.
+                $site = if ($match.Value.StartsWith('(uintptr)')) { $match.Value } else { $match.Value + ')' }
+                $handOwnUnheld += "$relative`:$($i + 1)  $site  -- no later GC.KeepAlive($box) and not retained for flight"
             }
         }
     }
@@ -325,7 +346,7 @@ Write-Host "    matching KeepAlive calls:         $totalKeepAlives"
 Write-Host "  ARM 3 -- raw pointer-derived funnel arguments in converted emission"
 Write-Host "    UNHELD:                           $($rawFunnelArgs.Count)"
 Write-Host "  ARM 2 -- hand-own pin holders ($($handOwnPinFiles.Count) listed file(s))"
-Write-Host "    (uintptr)<box> argument sites:    $handOwnSites"
+Write-Host "    <box> argument sites:             $handOwnSites  ((uintptr)<box> and nativeIdentityOf(<box>))"
 Write-Host "    held across the call:             $handOwnHeld"
 Write-Host "    UNHELD:                           $($handOwnUnheld.Count)"
 
@@ -366,7 +387,7 @@ if ($totalTemps -eq 0) {
 }
 
 if ($handOwnSites -eq 0) {
-    Write-Error "HAND-OWN ARM IS VACUOUS: zero (uintptr)<box> sites found across $($handOwnPinFiles.Count) listed file(s) -- either the corpus changed shape or the glyph escape stopped matching; an arm that can only report zero has never been positive-controlled"
+    Write-Error "HAND-OWN ARM IS VACUOUS: zero <box> argument sites found across $($handOwnPinFiles.Count) listed file(s) -- either the corpus changed shape or the glyph escape stopped matching; an arm that can only report zero has never been positive-controlled"
     exit 1
 }
 
