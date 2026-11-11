@@ -150,3 +150,20 @@ against the TS closure plan; the struct-proxy view is what would let it convert.
 - A predicate unit test per rule in section 3, positive and negative.
 - The trigger-agreement test (section 4).
 - R's repro (`reverse(all)`) converted at master shows `abc`; after the cut, conversion refuses it by name.
+
+## 8. Amendment, 2026-11-11: gate order and the TS prediction (R)
+
+R pointed out an interaction with `-recurse`. tsc's `internal/ls` is already one of the four TS packages refused on
+the batch-284 tree, by the non-self proxy gate (GO2CS2002 on master, GO2CS2005 on `claude/r-warn-option`). The
+pre-emission gates stop at the FIRST refusal: each ends `return refusePackage(...)`, as each ended `log.Fatalf` on
+master.
+
+- **Order.** The 2006 gate runs AFTER the existing gates, so their behaviour is unchanged and the new gate is purely
+  additive. A package that an earlier gate refuses never reaches it.
+- **TS prediction, corrected.** On the TS closure the 2006 gate refuses NO package that is not already refused, and
+  prints nothing: `internal/ls` stops at 2005 first. The `crossproject.go:360` refusal is observable only from a
+  single-package conversion of `internal/ls` with the 2005 gate out of the way, or once C35's shape converts there.
+  Section 6's line "exactly one refusal" is superseded by this; its guess about what that site does today is moot,
+  because the package never reaches emission.
+- **Not built here.** Printing every refusal of a package in one run (2005 and 2006 on `ls`) would mean the gates
+  collect findings and refuse once. That changes all five gates, not this one, so it is COORD's call.
