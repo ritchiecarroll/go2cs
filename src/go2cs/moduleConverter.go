@@ -79,6 +79,10 @@ func NewModuleConverter(options Options) *ModuleConverter {
 func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 	fmt.Printf("Recursively converting module at %s\n", moduleDir)
 
+	// Announce the effective build tags, as -stdlib does: a bare -recurse run reports the module default
+	// (safe,purego,noasm) and that it is the default; an explicit -tags reports exactly what was passed.
+	fmt.Println(m.options.buildTagsAnnouncement("module"))
+
 	// The main module's directory is the CONTEXT every module-cache package is re-loaded from — see
 	// the load-shape note in processConversion. Resolve it absolute once: the per-package load sets
 	// it as the go command's working directory, and a relative path would resolve against whatever

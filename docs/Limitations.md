@@ -239,14 +239,19 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 
 The [validated modules](ValidatedModules.md) page is still short.
 
-* **A plain `-recurse` (your module plus its dependencies) applies one build tag for you, `safe`**,
-  while the standard library is converted with Go's portable tags, `purego` and `math_big_pure_go`.
-  So a dependency with an assembly fast path converts the fast path unless its fallback is behind
-  `safe`: pass its portable tag (`purego` is the common one). An explicit `-tags` replaces every
-  default, so include `safe` with yours, and under `-tests` include `purego,math_big_pure_go` too.
+* **A dependency's assembly converts to methods that throw when called, unless a tag deselects it.**
+  A plain `-recurse` (your module plus its dependencies) applies `safe`, `purego` and `noasm` for
+  you, so a fast path behind `!purego` or `!noasm` is replaced by the library's pure-Go fallback
+  ([Build tags for a module](ConvertingAModule.md#build-tags-for-a-module)). A file gated on the
+  architecture alone has no such fallback: zeebo/xxh3's `accum_stubs_amd64.go` declares its vector
+  routines with no body, so they convert to stubs. xxh3 calls them only when the CPU reports AVX2,
+  AVX-512 or SSE2, which the converted klauspost/cpuid never does under `noasm`, so hashing works and
+  only code that forces a vector path on (xxh3's own tests do) throws. An explicit `-tags` replaces
+  every default, so include `safe,purego,noasm` with yours, and under `-tests` include
+  `math_big_pure_go` too.
 * **A test suite that imports testify depends on the `safe` tag.** Its bundled go-spew does pointer
   arithmetic into `reflect.Value` at load, which the runtime library refuses by design, and go-spew's
-  `safe` tag selects its fallback. `-recurse` passes that tag for you
+  `safe` tag selects its fallback. `-recurse` passes that tag for you, with `purego` and `noasm`
   ([Build tags for a module](ConvertingAModule.md#build-tags-for-a-module)). Drop it, with
   `-module-safe-tag=false` or an explicit `-tags` that leaves it out, and the converted test program
   dies at startup.
