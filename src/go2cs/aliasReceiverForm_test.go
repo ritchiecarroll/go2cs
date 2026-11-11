@@ -92,6 +92,8 @@ func convertAliasReceiverFixture(t *testing.T, named bool) string {
 // TestAliasReceiverTakesTheNamedForm pins the two shapes the defect showed on: the nil guard and the
 // address of a receiver field, each on a receiver written through an alias.
 func TestAliasReceiverTakesTheNamedForm(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
 	emitted := convertAliasReceiverFixture(t, false)
 
 	for _, want := range []string{
@@ -131,6 +133,8 @@ func TestAliasReceiverTakesTheNamedForm(t *testing.T) {
 // names are mapped. A receiver-type read that forgets to resolve an alias fails it on whichever shape
 // that read decides, without this test having to name the shape.
 func TestAliasReceiverEmitsAsNamedReceiver(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
 	normalise := func(emitted string) []string {
 		var lines []string
 
