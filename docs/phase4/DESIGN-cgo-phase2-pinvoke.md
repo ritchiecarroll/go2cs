@@ -828,7 +828,8 @@ forms differ:
 - the VARIABLE form, `_cgoN := p; _cgoCheckPointer(_cgoN, nil)`, scans the whole heap object (`cgocall.go:618`,
   `:728-768`) and panics for any pointer into data or bss (`:772-777`).
 
-**The variable form is admitted (H's proposal, on a measurement).** `TestCgoCheckClosureFormsAcrossGorootsCgoPackages`
+**RULED (COORD, 2026-11-11, on H's measured proposal): the variable form is admitted, and its two Go-panics cases are
+DISCLOSED divergences** (§11.16, `Limitations.md`). `TestCgoCheckClosureFormsAcrossGorootsCgoPackages`
 counted each form in the generated trees of GOROOT's 29 cgo packages (hosted linux, go1.26.10, run 42973745743):
 
 | Form | Count |
@@ -844,11 +845,15 @@ The variable form is the majority among the closures that do not take element me
 the address form only (2 sites). `net` reaches the variable form only (4 sites), because its resolver passes its
 pointers through as parameters (`cgo_unix_cgo.go:76`, `:84`), and that is ordinary cgo style. Most of `net`'s sites
 also pass a `void *` or a `T **`, which Phase 2 refuses anyway (N2), so the case for admitting the variable form rests
-on the census, not on `net`. The rest are `cmd/cgo/internal/test`. Phase 2 admits the variable form. In both cases where Go's wider scan panics and Phase 2
-proceeds, C is handed a stack mirror of the pointee alone, never the Go object. The memory Go's check guards (the rest
-of the heap object, or a data/bss variable C might retain) is unreachable from C. Those programs already break cgo's
-pointer rules and panic under Go's default `cgocheck=1`. A run-time equivalent of the variable form's scan is Phase 2
-later, if a program is ever found that depends on the panic.
+on the census, not on `net`. The rest are `cmd/cgo/internal/test`.
+
+In both cases where Go's wider scan panics and Phase 2 proceeds, C is handed a stack mirror of the pointee alone,
+never the Go object. The memory Go's check guards (the rest of the heap object, or a data/bss variable C might retain)
+is unreachable from C. Only a program that already breaks cgo's pointer rules can observe the difference, and Go
+itself proceeds under `cgocheck=0`. Refusing the form would refuse correct programs to catch incorrect ones.
+
+**NAMED DEFERRAL, not a promise:** a run-time equivalent of the variable form's scan is Phase 2 later. Nothing
+schedules it, and it opens only if a program is found that depends on the panic.
 
 **A correction to the review, measured.** cmd/cgo DOES write a closure for a struct passed by value with a pointer
 member. The fixture's `ByValue` gets the variable form, `_cgo0 := link; _cgoCheckPointer(_cgo0, nil)`
@@ -943,3 +948,21 @@ toolchain and committed as Phase 1's were.
   is evaluated, and the converted call must too.
 - Four of §11.16's five divergences have a fixture function each. The fifth, `GODEBUG=cgocheck=0`, is an environment
   setting.
+
+Each divergence is a tested decision, not an accident (COORD's condition on the M1 ruling). In 5a, each of the four
+fixture functions converts, and the converted call is asserted. Their run-time behaviour is G1's, and goes on **G1's
+checklist** as these run-time arms, each asserting go2cs's actual behaviour beside `go run`'s:
+
+- `PackageLevel` and `Sibling` PROCEED in go2cs (Go panics);
+- `Pinned` REFUSES in go2cs with the copy-in message (Go proceeds), and the same arm is run again under
+  `GODEBUG=cgocheck=0`, where Go proceeds and go2cs still refuses;
+- `ByValue` REFUSES in go2cs with the copy-in message (Go proceeds);
+- `Reinterpreted` REFUSES in go2cs at `GoCgoArgs.StructPointer` (§11.1);
+- `Ordered` passes the pair as it was before `mutate` ran;
+- `Nested`, `TwoResults` and `Statement` each match `go run`.
+
+**`_cgo_import.go` is missing from the fixture, cause UNMEASURED.** `go list -compiled` handed back none for
+`fixture.go` (run 42973745743), where it does for Phase 1's. The likely cause is that `-dynimport` reads a binary
+linked from the preamble, and nothing here defines the four probe functions. 5b PREDICTS that once `probe.c` defines
+them and the fixture links the probe library, `-dynimport` writes `_cgo_import.go` again. If it does not, that is a
+finding.

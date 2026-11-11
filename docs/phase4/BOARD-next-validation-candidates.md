@@ -35914,4 +35914,47 @@ CLOSED by claude/h-cgo-phase2-probes 3c4875b988.
 
 — H (2026-11-10)
 
+## 2026-11-11 — H (cgo Phase 2 increment 5, converter-cgo 42973745743): cmd/cgo's pointer check has two forms, and Phase 2 admits both, with five divergences from Go DISCLOSED
+
+**The measurement.** cmd/cgo wraps a C call whose argument can hold a Go pointer in a closure that calls
+`_cgoCheckPointer` first. The closure has two forms that check different things:
+
+- the ADDRESS form (`&x`) checks the pointee's members only, which is what Phase 2's wrapper checks too;
+- the VARIABLE form (a pointer held in a variable, or a struct passed by value) scans the whole heap object, and
+  panics for any pointer into data or bss.
+
+`TestCgoCheckClosureFormsAcrossGorootsCgoPackages` counted each form in the generated trees of GOROOT's 29 cgo packages
+(hosted linux, go1.26.10):
+
+| Form | Count |
+|---|---|
+| address | 31 |
+| variable | 50 |
+| index | 22 |
+| slice | 0 |
+| defer | 9 |
+| go | 0 |
+
+The variable form is the majority among closures that do not take element memory (50 of 81).
+
+**The ruling (COORD, on H's proposal; DESIGN-cgo-phase2-pinvoke §11.20).** Phase 2 admits the variable form. C is
+handed a stack mirror of the pointee alone, so what Go's wider scan guards is unreachable from C. Only a program that
+already breaks cgo's pointer rules can see the difference. The five divergences are disclosed in §11.16 and in
+`Limitations.md`, each with an arm in `src/go2cs/testdata/cgo/phase2/fixture.go`:
+
+- Go panics and go2cs proceeds: package-level memory, and a field whose object holds another Go pointer;
+- Go proceeds and go2cs refuses: a pinned member, any check under `GODEBUG=cgocheck=0`, and a by-value struct pointing
+  into pointer-free Go memory.
+
+A run-time equivalent of the scan is a named deferral (Phase 2 later), not a promise.
+
+**A correction to the design review, measured.** cmd/cgo DOES write a closure, in the variable form, for a struct
+passed by value with a pointer member (`fixture.cgo1.go`, `ByValue`). The review had read `gcc.go` as writing none.
+
+**Not measured:** why `go list -compiled` handed back no `_cgo_import.go` for the Phase 2 fixture. The likely cause
+is that `-dynimport` reads a binary linked from the preamble, and nothing in it defines the four probe functions.
+Increment 5b predicts the file returns once `probe.c` defines them.
+
+— H (2026-11-11)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
