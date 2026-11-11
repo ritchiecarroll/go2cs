@@ -3229,11 +3229,15 @@ stub** (`atomic_impl.cs`). Its ~40 declarations are all `.s` files, but they are
 over native scalars, and the CLR has an exact equivalent: `Xadd*`→`Interlocked.Add` (both return the
 NEW value), `Xchg*`→`Interlocked.Exchange` and `And32`/`Or32`/`And64`/`Or64`→`Interlocked.And`/`Or`
 (all return the OLD value), `Cas*`→`CompareExchange`, `Store*`/`StoreRel*`→`Volatile.Write` (a
-release store in both models). Two widths have no intrinsic and take a shared latch instead: 8-bit
-(`And8`/`Or8` — the CLR has no byte-width `Interlocked`) and the `unsafe.Pointer` family
-(`Casp1`/`StorepNoWB`/`storePointer`/`casPointer` — golib models `unsafe.Pointer` as a class wrapping
-a `uintptr`, so a CAS must compare the wrapped NUMBER and swap the REFERENCE, which no single
-intrinsic expresses); `Xadduintptr`/`Anduintptr`/`Oruintptr` ride a CAS loop because `Interlocked`
+release store in both models). The 8-bit family is lock-free too: `Xchg8` is the byte
+`Interlocked.Exchange` and `And8`/`Or8` are byte `CompareExchange` loops, because the CLR has no
+byte-width `Interlocked.And`/`Or`. Every 8-bit op, `Store8` included, must be atomic with respect to
+every other on one byte; an `And8`/`Or8` taken under a latch beside a lock-free `Store8` is not, since
+a `Store8` landing between the latched read and its write-back is overwritten (guarded by GolibTests'
+`AtomicByteStoreRaceTests`). One family has no intrinsic and takes a latch instead: the
+`unsafe.Pointer` family (`Casp1`/`StorepNoWB`/`storePointer`/`casPointer` — golib models
+`unsafe.Pointer` as a class wrapping a `uintptr`, so a CAS must compare the wrapped NUMBER and swap the
+REFERENCE, which no single intrinsic expresses); `Xadduintptr`/`Anduintptr`/`Oruintptr` ride a CAS loop because `Interlocked`
 offers `Exchange`/`CompareExchange` for `nuint` but not `Add`/`And`/`Or`. Leaving this package
 stubbed poisons everything built on it — `runtime.SetMutexProfileFraction`, an otherwise perfectly
 faithful conversion, died on `Store64` (sync's `TestMutex`).
