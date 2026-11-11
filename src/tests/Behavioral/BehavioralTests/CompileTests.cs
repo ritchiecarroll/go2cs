@@ -40,6 +40,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckAliasNamespaceShadow() => CheckTarget("AliasNamespaceShadow");
 
     [TestMethod]
+    public void CheckAliasReceiverForms() => CheckTarget("AliasReceiverForms");
+
+    [TestMethod]
     public void CheckAliasStructComposite() => CheckTarget("AliasStructComposite");
 
     [TestMethod]

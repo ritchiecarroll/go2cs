@@ -18,8 +18,10 @@ partial struct List /*[]nint*/;
 
 internal static slice<ж<Node>> registry;
 
-public static (nint, bool) Mode(this ref AttrNode n, nint def) {
-    if (n == nil) {
+public static (nint, bool) Mode(this ж<AttrNode> Ꮡn, nint def) {
+    ref var n = ref Ꮡn.DerefOrNull();
+
+    if (Ꮡn == nil) {
         return (def, false);
     }
     return (n.kind, true);
@@ -34,7 +36,7 @@ public static (nint, bool) ModeNamed(this ж<Node> Ꮡnode, nint def) {
     return (node.kind, true);
 }
 
-public static ж<Node> Self(this ref AttrNode n) { return Ꮡn; }
+public static ж<Node> Self(this ж<AttrNode> Ꮡn) { return Ꮡn; }
 
 internal static @string describe(ж<Node> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
@@ -45,51 +47,57 @@ internal static @string describe(ж<Node> Ꮡn) {
     return n.name;
 }
 
-public static @string Describe(this ref AttrNode n) { return describe(n); }
+public static @string Describe(this ж<AttrNode> Ꮡn) { return describe(Ꮡn); }
 
-public static void Register(this ref AttrNode n) { registry = append(registry, n); }
+public static void Register(this ж<AttrNode> Ꮡn) { registry = append(registry, Ꮡn); }
 
-public static ж<nint> KindPtr(this ref AttrNode n) { return n.Ꮡkind; }
+public static ж<nint> KindPtr(this ж<AttrNode> Ꮡn) { return Ꮡn.Ꮡkind; }
 
-public static void LinkFrom(this ref AttrNode n, ж<Node> Ꮡother) {
+public static void LinkFrom(this ж<AttrNode> Ꮡn, ж<Node> Ꮡother) {
     ref var other = ref Ꮡother.DerefOrNull();
 
-    other.next = n;
+    other.next = Ꮡn;
 }
 
-public static Func<@string> Namer(this ref AttrNode n) { return () => n.name; }
+public static Func<@string> Namer(this ж<AttrNode> Ꮡn) { return () => Ꮡn.Value.name; }
 
-public static Func<nint, (nint, bool)> ModeFunc(this ref AttrNode n) { return n.Mode; }
+public static Func<nint, (nint, bool)> ModeFunc(this ж<AttrNode> Ꮡn) { return Ꮡn.Mode; }
 
 public static @string Announce(this ref AttrNode n) {
     fmt.Println("  side effect ran");
     return n.name;
 }
 
-public static @string SafeName(this ref AttrNode n) {
-    var (_, ok) = n.Mode(0); if (!ok) {
+public static @string SafeName(this ж<AttrNode> Ꮡn) {
+    ref var n = ref Ꮡn.DerefOrNull();
+
+    var (_, ok) = Ꮡn.Mode(0); if (!ok) {
         return "none";
     }
     return n.name;
 }
 
-public static bool IsNil(this ref Chain n) { return n == nil; }
+public static bool IsNil(this ж<Chain> Ꮡn) { return Ꮡn == nil; }
 
 public static nint Kind(this AttrNode n) { return n.kind; }
 
 public static void Push(this ref ListAlias l, nint v) { l = append(l, v); }
 
-public static nint Len(this ref ListAlias l) {
-    if (l == nil) {
+public static nint Len(this ж<ListAlias> Ꮡl) {
+    ref var l = ref Ꮡl.DerefOrNull();
+
+    if (Ꮡl == nil) {
         return -1;
     }
     return len(l);
 }
 
-public static @string /*s*/ Deferred(this ref AttrNode n) {
+public static @string /*s*/ Deferred(this ж<AttrNode> Ꮡn) {
     @string s = default;
     GoFrame ᒐ = default;
     try {
+        ref var n = ref Ꮡn.DerefOrNull();
+
         defer(() => {
             var r = recover(); if (r != nil) {
                 s = "recovered";
@@ -102,8 +110,10 @@ public static @string /*s*/ Deferred(this ref AttrNode n) {
     return s;
 }
 
-public static @string String(this ref AttrNode n) {
-    if (n == nil) {
+public static @string String(this ж<AttrNode> Ꮡn) {
+    ref var n = ref Ꮡn.DerefOrNull();
+
+    if (Ꮡn == nil) {
         return "Node(nil)";
     }
     return "Node("u8 + n.name + ")"u8;
