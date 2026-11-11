@@ -1361,6 +1361,10 @@ Assert-Equal 'link resolution: a missing path, a file spelled as a directory and
 Assert-Equal 'link resolution: an EMPTY tracked list resolves nothing (the check fails closed)' 1 `
     @(Get-UnresolvedRelativeLinks -Targets @('phase4/list.txt') -TrackedPaths @()).Count
 
+# RED STUB (S7-a piece 2): the per-RID linux population does not exist yet; the fix replaces this. Its -2 is not
+# Get-HeaderNumber's -1 (a clause the header lacks), so an absent clause cannot pass against it.
+function Get-LinuxHeaderPopulation { param($Rows) return [PSCustomObject]@{ X64Matched = 0; X64Disclosed = 0; ArmBanked = -2; ArmPending = -2; Applicable = -2; NoX64 = @('unimplemented') } }
+
 # The Linux progress line is summed from the annotations exactly as the header above it is summed
 # from the columns -- derived on both sides, so neither can drift from the table it describes.
 # Three populations since the 2026-08-29 n/a ruling: validated-at-count (numeric annotation),
@@ -1368,23 +1372,53 @@ Assert-Equal 'link resolution: an EMPTY tracked list resolves nothing (the check
 # annotation). The header's honest denominator is the APPLICABLE rows -- the whole table minus the
 # n/a set -- because a denominator silently containing rows no Linux can ever measure makes 100%
 # unreachable and the line quietly dishonest against the parity goal.
+#
+# ONE POPULATION PER RID (S7-a, COORD 2026-11-11; DATA-la64-s7-bank-plan.md 2.4). linux ships two flavours under two
+# RIDs, so the line states each: the linux-x64 population is the banked counts (summed from each segment's linux-x64
+# reading, which is the note's where linux-arm64 headlines an arch-strict row), and the linux-arm64 population is how
+# many applicable rows carry a linux-arm64 reading and how many are pending (a pending note, or no note yet). Proposed
+# with the plan and accepted: "Linux: 236 of 236 applicable rows validated at their linux-x64 counts -- 77,507
+# matching verdicts · 404 disclosed · linux-arm64: 0 of 236 banked, 236 pending · 2 rows platform-exclusive".
 $linuxRows = @($rows | Where-Object { $_.OS.ContainsKey('linux') -and $_.OS['linux'].Applicable })
 $linuxNaRows = @($rows | Where-Object { $_.OS.ContainsKey('linux') -and -not $_.OS['linux'].Applicable })
-$linuxTotal = 0
-$linuxDisclosed = 0
-foreach ($row in $linuxRows) {
-    $linuxTotal += $row.OS['linux'].Expected
-    $linuxDisclosed += $row.OS['linux'].Disclosed
-}
+$linuxPopulation = Get-LinuxHeaderPopulation -Rows $rows
+$linuxTotal = $linuxPopulation.X64Matched
+$linuxDisclosed = $linuxPopulation.X64Disclosed
+
+$linFixturePopulation = Get-LinuxHeaderPopulation -Rows (Read-FixtureRoster @(
+        "| [``lha/pkg``](https://x/lha) | 1 |  | Pending. $dot linux: 10 + 1 (linux-x64; linux-arm64: pending) $dot [proof](p.md) |"
+        "| [``lhb/pkg``](https://x/lhb) | 1 |  | Arch-strict, linux-arm64 headlines. $dot linux: 8 + 3 (linux-arm64; linux-x64: 11) $dot [proof](p.md) |"
+        "| [``lhc/pkg``](https://x/lhc) | 1 |  | Equal. $dot linux: 5 (linux-x64; linux-arm64: 5) $dot [proof](p.md) |"
+        "| [``lhd/pkg``](https://x/lhd) | 1 |  | No note yet. $dot linux: 7 $dot [proof](p.md) |"
+        "| [``lhe/pkg``](https://x/lhe) | 1 |  | Windows only. $dot linux: n/a $dot [proof](p.md) |"))
+Assert-Equal 'linux header population: linux-x64 matched sums each row''s linux-x64 reading (the note''s where linux-arm64 headlines)' 33 $linFixturePopulation.X64Matched
+Assert-Equal 'linux header population: linux-x64 disclosed likewise' 1 $linFixturePopulation.X64Disclosed
+Assert-Equal 'linux header population: linux-arm64 banked counts the rows carrying a linux-arm64 reading' 2 $linFixturePopulation.ArmBanked
+Assert-Equal 'linux header population: linux-arm64 pending counts a pending note and a bare segment' 2 $linFixturePopulation.ArmPending
+Assert-Equal 'linux header population: n/a rows are outside both populations' 4 $linFixturePopulation.Applicable
+# The parser never yields a segment without a linux-x64 reading (only linux-arm64 is ever pending), so this row is built.
+$linBadPopulation = Get-LinuxHeaderPopulation -Rows @([PSCustomObject]@{ Package = 'lhx/pkg'; OS = @{ linux = [PSCustomObject]@{
+                Applicable = $true; Expected = 9; Disclosed = 0; Rid = 'linux-arm64'
+                Other = [PSCustomObject]@{ Rid = 'linux-x64'; Expected = $null; Disclosed = $null; Pending = $true } } } })
+Assert-Equal 'linux header population: a segment with no linux-x64 reading is named' 'lhx/pkg' ($linBadPopulation.NoX64 -join ', ')
 
 Assert-Equal 'linux header: annotated row count' $linuxRows.Count `
     (Get-HeaderNumber $lines 'Linux:' 'Linux:\s*\*{0,2}(\d+)\s+of\s+(\d+)\s+applicable rows')
 Assert-Equal 'linux header: denominator is the applicable table (whole minus n/a)' ($rows.Count - $linuxNaRows.Count) `
     (Get-HeaderNumber $lines 'Linux:' 'Linux:\s*\*{0,2}(\d+)\s+of\s+(\d+)\s+applicable rows' 2)
-Assert-Equal 'linux header: matching verdicts equal the annotation sum' $linuxTotal `
+Assert-Equal 'linux header: the counts it validates at are named as linux-x64''s' $true `
+    (@($lines | Where-Object { $_ -match 'Linux:\s*\*{0,2}\d+\s+of\s+\d+\s+applicable rows validated at their linux-x64 counts' }).Count -eq 1)
+Assert-Equal 'linux header: no linux segment lacks a linux-x64 reading' '' ($linuxPopulation.NoX64 -join ', ')
+Assert-Equal 'linux header: matching verdicts equal the linux-x64 annotation sum' $linuxTotal `
     (Get-HeaderNumber $lines 'Linux:' '([\d,]+)\s+matching verdicts')
-Assert-Equal 'linux header: disclosed equals the annotation sum' $linuxDisclosed `
+Assert-Equal 'linux header: disclosed equals the linux-x64 annotation sum' $linuxDisclosed `
     (Get-HeaderNumber $lines 'Linux:' '([\d,]+)\s+disclosed')
+Assert-Equal 'linux header: linux-arm64 banked rows, derived from the notes' $linuxPopulation.ArmBanked `
+    (Get-HeaderNumber $lines 'Linux:' 'linux-arm64:\s*(\d+)\s+of\s+(\d+)\s+banked,\s*(\d+)\s+pending')
+Assert-Equal 'linux header: linux-arm64''s denominator is the applicable linux rows' $linuxPopulation.Applicable `
+    (Get-HeaderNumber $lines 'Linux:' 'linux-arm64:\s*(\d+)\s+of\s+(\d+)\s+banked,\s*(\d+)\s+pending' 2)
+Assert-Equal 'linux header: linux-arm64 pending rows, derived from the notes' $linuxPopulation.ArmPending `
+    (Get-HeaderNumber $lines 'Linux:' 'linux-arm64:\s*(\d+)\s+of\s+(\d+)\s+banked,\s*(\d+)\s+pending' 3)
 if ($linuxNaRows.Count -gt 0) {
     Assert-Equal 'linux header: the n/a count is stated, derived from the annotations' $linuxNaRows.Count `
         (Get-HeaderNumber $lines 'Linux:' '(\d+)\s+row(?:s)?\s+platform-exclusive')
