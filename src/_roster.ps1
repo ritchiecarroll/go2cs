@@ -92,13 +92,24 @@ $RosterConditionalDisclosurePattern = 'host-conditional-disclosure\s*(?:\([^)]*\
 # three DIT tests are Go pass / C# skip (disclosed) on osx-arm64 and skip/skip on osx-x64. Such a row banks the
 # ARCH-STRICT reading -- the RID whose difference is disclosed -- and names the other RID's reading beside it:
 #     darwin: 7 + 3 (osx-arm64; osx-x64: 10)
-# Groups 4-7: the banked RID, the other RID, and its matched and disclosed counts. darwin only (a linux note is
-# refused by name), the two RIDs must differ, and both are derived by annotate_darwin.py from the evidence, never set
-# by hand: section 2h of check-roster-format.ps1 refuses a note the evidence does not produce.
+# Groups 4-8: the banked RID, the other RID, and its matched and disclosed counts, or `pending` (group 8). The two
+# RIDs must differ and both must be RIDs of the segment's key ($RosterNoteRids); both are derived by the annotators from
+# the evidence, never set by hand: section 2h of check-roster-format.ps1 refuses a darwin note the evidence does not
+# produce, and section 2i a linux one.
+#
+# THE LINUX NOTE (S7-a, COORD 2026-11-11; DATA-la64-s7-bank-plan.md 2.4). linux ships two flavours under two RIDs, so
+# once the linux-arm64 bank opens a linux segment names both: "linux: 3840 + 2 (linux-x64; linux-arm64: 3838 + 2)",
+# or "(linux-x64; linux-arm64: pending)" while linux-arm64 has no reading of record. `pending` is linux's only: darwin's
+# two RIDs are read in one dispatch, so a darwin note always carries a reading.
+$RosterNoteRids = [ordered]@{
+    darwin = @('osx-arm64', 'osx-x64')
+    linux  = @('linux-x64', 'linux-arm64')
+}
+$RosterNoteRidAlternation = (@($RosterNoteRids.Values | ForEach-Object { $_ }) | ForEach-Object { [regex]::Escape($_) }) -join '|'
 $RosterOsPattern =
     [regex]::Escape($RosterSegmentSeparator) +
     '\s*([a-z][a-z0-9]*)\s*:\s*(\d+)\s*(?:\+\s*(\d+)\s*)?' +
-    '(?:\(\s*(osx-arm64|osx-x64)\s*;\s*(osx-arm64|osx-x64)\s*:\s*(\d+)\s*(?:\+\s*(\d+)\s*)?\)\s*)?(?=' +
+    "(?:\(\s*($RosterNoteRidAlternation)\s*;\s*($RosterNoteRidAlternation)\s*:\s*(?:(\d+)\s*(?:\+\s*(\d+)\s*)?|(pending)\s*)\)\s*)?(?=" +
     [regex]::Escape($RosterSegmentSeparator) + '|\||$)'
 
 # The permanently-inapplicable form of the same annotation (ruled 2026-08-29, from the registry
@@ -239,12 +250,21 @@ function Get-SweepTargetGoarch {
     return 'amd64'
 }
 
-# The mac RID this sweep's converted host runs as, for a darwin segment's per-RID note (Get-RosterRowExpectation -Rid):
-# os-matrix's RID when the leg sets it, otherwise the host's architecture on macOS. Empty off darwin, where no note
-# applies, so windows and linux resolve exactly as before.
+# The RID this sweep's converted host runs as, for a segment's per-RID note (Get-RosterRowExpectation -Rid): os-matrix's
+# RID when the leg sets it to one of the GOOS's RIDs ($RosterNoteRids), otherwise the host's architecture on that OS.
+# Empty on windows, where no note applies, so it resolves exactly as before.
 function Get-SweepHostRid {
     param([string] $Goos)
 
+    if ($Goos -ceq 'linux') {
+        if ($env:RID -in $RosterNoteRids['linux']) { return $env:RID }
+        if (-not $IsLinux) { return '' }
+        switch ([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture) {
+            'Arm64' { return 'linux-arm64' }
+            'X64' { return 'linux-x64' }
+            default { return '' }
+        }
+    }
     if ($Goos -cne 'darwin') { return '' }
     if ($env:RID -in @('osx-arm64', 'osx-x64')) { return $env:RID }
     if (-not $IsMacOS) { return '' }
@@ -317,26 +337,37 @@ function Get-ValidatedRosterRows {
                 throw "Roster row '$rowPackage' carries more than one '$key' annotation."
             }
 
-            # The per-RID note ($RosterOsPattern, THE PER-RID NOTE): darwin only, and two different RIDs.
+            # The per-RID note ($RosterOsPattern, THE PER-RID NOTE): two different RIDs of the key's own set, and
+            # `pending` on linux only.
             $noteRid = $null
             $noteOther = $null
 
             if ($match.Groups[4].Success) {
-                if ($key -cne 'darwin') {
-                    throw ("Roster row '$rowPackage' carries a per-RID note on its '$key' annotation. Only darwin " +
-                        'ships one build under two RIDs; the note is darwin''s arch-strict reading.')
+                $bankRid = $match.Groups[4].Value
+                $otherRid = $match.Groups[5].Value
+                $keyRids = if ($RosterNoteRids.Contains($key)) { @($RosterNoteRids[$key]) } else { @() }
+                if (($keyRids -cnotcontains $bankRid) -or ($keyRids -cnotcontains $otherRid)) {
+                    throw ("Roster row '$rowPackage' carries a per-RID note: its $key annotation names $bankRid and " +
+                        "$otherRid, not two of $key's RIDs" + $(if ($keyRids.Count) { " ($($keyRids -join ', '))" } else { " ($key ships one build under one RID)" }) + '.')
                 }
 
-                if ($match.Groups[4].Value -ceq $match.Groups[5].Value) {
-                    throw ("Roster row '$rowPackage' carries a darwin per-RID note naming $($match.Groups[4].Value) " +
+                if ($bankRid -ceq $otherRid) {
+                    throw ("Roster row '$rowPackage' carries a $key per-RID note naming $bankRid " +
                         'twice. The note names the banked RID, then the OTHER RID''s reading.')
                 }
 
-                $noteRid = $match.Groups[4].Value
+                $pending = $match.Groups[8].Success
+                if ($pending -and ($key -cne 'linux')) {
+                    throw ("Roster row '$rowPackage' carries a $key per-RID note reading 'pending'. Only linux, whose " +
+                        'two RIDs are two flavours read in separate banks, has a pending RID; a darwin note carries a reading.')
+                }
+
+                $noteRid = $bankRid
                 $noteOther = [PSCustomObject]@{
-                    Rid       = $match.Groups[5].Value
-                    Expected  = [int]$match.Groups[6].Value
-                    Disclosed = if ($match.Groups[7].Success) { [int]$match.Groups[7].Value } else { 0 }
+                    Rid       = $otherRid
+                    Expected  = if ($pending) { $null } else { [int]$match.Groups[6].Value }
+                    Disclosed = if ($pending) { $null } elseif ($match.Groups[7].Success) { [int]$match.Groups[7].Value } else { 0 }
+                    Pending   = $pending
                 }
             }
 
@@ -1636,9 +1667,10 @@ function Get-RosterRowExpectation {
     param(
         [Parameter(Mandatory)][PSCustomObject] $Row,
         [Parameter(Mandatory)][string] $Goos,
-        # The host RID (osx-arm64 / osx-x64), for a darwin segment with a per-RID note: where the note names this RID,
-        # its reading is this host's expectation (THE PER-RID NOTE, above). Empty, or a RID the note does not name,
-        # reads the segment itself, exactly as before.
+        # The host RID (osx-arm64 / osx-x64, linux-x64 / linux-arm64), for a segment with a per-RID note: where the
+        # note names this RID, its reading is this host's expectation (THE PER-RID NOTE, above); a PENDING note has no
+        # reading, so that RID reads the banked reading and the Source says it is pending. Empty, or a RID the note
+        # does not name, reads the segment itself, exactly as before.
         [string] $Rid = ''
     )
 
@@ -1647,6 +1679,15 @@ function Get-RosterRowExpectation {
     if ($key -ne 'windows' -and $Row.OS -and $Row.OS.ContainsKey($key)) {
         $entry = $Row.OS[$key]
         $other = if ($entry.PSObject.Properties['Other']) { $entry.Other } else { $null }
+
+        if ($Rid -and ($null -ne $other) -and ($other.Rid -ceq $Rid) -and $other.Pending) {
+            return [PSCustomObject]@{
+                Expected   = $entry.Expected
+                Disclosed  = $entry.Disclosed
+                Source     = "$key ($Rid pending)"
+                Applicable = $entry.Applicable
+            }
+        }
 
         if ($Rid -and ($null -ne $other) -and ($other.Rid -ceq $Rid)) {
             return [PSCustomObject]@{
