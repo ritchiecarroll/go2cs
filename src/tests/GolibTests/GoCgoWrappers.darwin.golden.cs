@@ -181,8 +181,8 @@ static unsafe partial class cgotestꓸC_package
         return global::go.golib.GoCgoArgs.PointerMemberBack<struct_tm>((nuint)r, null, 0);
     }
 
-    // C.go2cs_probe_add_into, bound to libgo2csprobe.dylib.
-    [global::System.Runtime.InteropServices.LibraryImport("libgo2csprobe.dylib", EntryPoint = "go2cs_probe_add_into")]
+    // C.go2cs_probe_add_into, bound to /tmp/go2cs-cgo-probe/libgo2csprobe.dylib.
+    [global::System.Runtime.InteropServices.LibraryImport("/tmp/go2cs-cgo-probe/libgo2csprobe.dylib", EntryPoint = "go2cs_probe_add_into")]
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
     private static partial int go2cs_probe_add_intoᴍnative(nint p0, nint p1, nint p2);
 
@@ -267,8 +267,8 @@ static unsafe partial class cgotestꓸC_package
         return (@int)(int32)r;
     }
 
-    // C.go2cs_probe_hfa_scale, bound to libgo2csprobe.dylib.
-    [global::System.Runtime.InteropServices.LibraryImport("libgo2csprobe.dylib", EntryPoint = "go2cs_probe_hfa_scale")]
+    // C.go2cs_probe_hfa_scale, bound to /tmp/go2cs-cgo-probe/libgo2csprobe.dylib.
+    [global::System.Runtime.InteropServices.LibraryImport("/tmp/go2cs-cgo-probe/libgo2csprobe.dylib", EntryPoint = "go2cs_probe_hfa_scale")]
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
     private static partial double go2cs_probe_hfa_scaleᴍnative(nint p0, double p1);
 
@@ -304,8 +304,8 @@ static unsafe partial class cgotestꓸC_package
         return (@double)(float64)r;
     }
 
-    // C.go2cs_probe_pair, bound to libgo2csprobe.dylib.
-    [global::System.Runtime.InteropServices.LibraryImport("libgo2csprobe.dylib", EntryPoint = "go2cs_probe_pair")]
+    // C.go2cs_probe_pair, bound to /tmp/go2cs-cgo-probe/libgo2csprobe.dylib.
+    [global::System.Runtime.InteropServices.LibraryImport("/tmp/go2cs-cgo-probe/libgo2csprobe.dylib", EntryPoint = "go2cs_probe_pair")]
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
     private static partial _Ctype_struct_go2cs_probe_pairᴍ go2cs_probe_pairᴍnative(int p0, int p1);
 
@@ -331,8 +331,8 @@ static unsafe partial class cgotestꓸC_package
         return result;
     }
 
-    // C.go2cs_probe_pair_sum, bound to libgo2csprobe.dylib.
-    [global::System.Runtime.InteropServices.LibraryImport("libgo2csprobe.dylib", EntryPoint = "go2cs_probe_pair_sum")]
+    // C.go2cs_probe_pair_sum, bound to /tmp/go2cs-cgo-probe/libgo2csprobe.dylib.
+    [global::System.Runtime.InteropServices.LibraryImport("/tmp/go2cs-cgo-probe/libgo2csprobe.dylib", EntryPoint = "go2cs_probe_pair_sum")]
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
     private static partial int go2cs_probe_pair_sumᴍnative(_Ctype_struct_go2cs_probe_pairᴍ p0);
 
@@ -358,8 +358,8 @@ static unsafe partial class cgotestꓸC_package
         return (@int)(int32)r;
     }
 
-    // C.go2cs_probe_strtol, bound to libgo2csprobe.dylib.
-    [global::System.Runtime.InteropServices.LibraryImport("libgo2csprobe.dylib", EntryPoint = "go2cs_probe_strtol", SetLastError = true)]
+    // C.go2cs_probe_strtol, bound to /tmp/go2cs-cgo-probe/libgo2csprobe.dylib.
+    [global::System.Runtime.InteropServices.LibraryImport("/tmp/go2cs-cgo-probe/libgo2csprobe.dylib", EntryPoint = "go2cs_probe_strtol", SetLastError = true)]
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
     private static partial long go2cs_probe_strtolᴍnativeerrno(nint p0, int p1);
 
@@ -400,8 +400,8 @@ static unsafe partial class cgotestꓸC_package
         return ((@long)(int64)r, err);
     }
 
-    // C.go2cs_probe_tagged_double, bound to libgo2csprobe.dylib.
-    [global::System.Runtime.InteropServices.LibraryImport("libgo2csprobe.dylib", EntryPoint = "go2cs_probe_tagged_double")]
+    // C.go2cs_probe_tagged_double, bound to /tmp/go2cs-cgo-probe/libgo2csprobe.dylib.
+    [global::System.Runtime.InteropServices.LibraryImport("/tmp/go2cs-cgo-probe/libgo2csprobe.dylib", EntryPoint = "go2cs_probe_tagged_double")]
     [global::System.Runtime.InteropServices.UnmanagedCallConv(CallConvs = new[] { typeof(global::System.Runtime.CompilerServices.CallConvCdecl) })]
     private static partial int go2cs_probe_tagged_doubleᴍnative(nint p0);
 
@@ -548,8 +548,8 @@ static unsafe partial class cgotestꓸC_package
     // assembly's own [LibraryImport] bindings when the module loads (§6.2, §11.11).
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void registerᴍlibraries() => global::go.golib.GoCgoLibraries.Register(typeof(cgotestꓸC_package).Assembly,
-        new global::go.golib.GoCgoLibrary("-lSystem", "/usr/lib/libSystem.B.dylib"),
-        new global::go.golib.GoCgoLibrary("-lgo2csprobe", "libgo2csprobe.dylib"));
+        new global::go.golib.GoCgoLibrary("-lgo2csprobe", "/tmp/go2cs-cgo-probe/libgo2csprobe.dylib"),
+        new global::go.golib.GoCgoLibrary("-lSystem", "/usr/lib/libSystem.B.dylib"));
 
     [global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit, Size = 8)]
     internal struct _Ctype_div_tᴍ

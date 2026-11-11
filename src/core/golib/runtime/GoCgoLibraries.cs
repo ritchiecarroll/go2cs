@@ -42,7 +42,7 @@ public static class GoCgoLibraries
     // current directory (the DLL-planting surface, §5.4).
     private static string Places =>
         OperatingSystem.IsWindows() ? "the application directory, the assembly's directory, System32 and the directories added with AddDllDirectory" :
-        OperatingSystem.IsMacOS() ? "the dynamic loader's resolution of the captured install name" :
+        OperatingSystem.IsMacOS() ? "the dynamic loader's resolution of the captured absolute install name" :
         "the dynamic loader's search (LD_LIBRARY_PATH, the executable's run path, the loader cache and the system directories)";
 
     /// <summary>
@@ -51,6 +51,8 @@ public static class GoCgoLibraries
     /// would find it: on windows the safe directories and the assembly's own, and elsewhere the system loader, with the
     /// captured SONAME or absolute install name. A miss throws, naming the -l flag, the captured name and the places
     /// tried, and never falls back to the runtime's probing, whose windows search includes the current directory.
+    /// On darwin a name that is not absolute is refused before dyld sees it (§11.12, mandatory since increment 4d): dyld's
+    /// search for a bare name reached the current directory on both hosted RIDs.
     /// </summary>
     internal static nint Resolve(string name, Assembly assembly, IReadOnlyList<GoCgoLibrary> libraries)
     {
@@ -58,6 +60,9 @@ public static class GoCgoLibraries
         {
             if (library.Name != name)
                 continue;
+
+            if (OperatingSystem.IsMacOS() && !name.StartsWith('/'))
+                throw new DllNotFoundException($"cgo: {library.Flag} binds {name}, which is not an absolute install name: darwin loads a captured library only by its absolute path, since dyld's search for a bare name reaches the current directory; the current directory is never searched (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.12)");
 
             nint handle;
 

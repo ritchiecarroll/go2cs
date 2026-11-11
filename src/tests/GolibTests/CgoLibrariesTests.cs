@@ -17,7 +17,9 @@ namespace GolibTests;
 // The current-directory arm plants a COPY of a system library under a probe name, and first proves the copy loads by
 // its absolute path, so a refusal cannot be a broken copy. darwin keeps its system dylibs in the shared cache, with no
 // file on disk to copy, so its arm plants a copy of the probe library (increment 4d, CgoProbe), and the resolver is asked
-// for it by its bare name, the name dyld's leaf-name search would meet.
+// for it by its bare name, the name dyld's leaf-name search would meet. That search DID reach the current directory on
+// both hosted RIDs (42936395011), so on darwin the resolver now refuses any name that is not absolute (§11.12), and this
+// arm is that rule's guard.
 [TestClass]
 [DoNotParallelize]
 public class CgoLibrariesTests

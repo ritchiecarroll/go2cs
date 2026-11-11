@@ -1045,8 +1045,9 @@ jobs:
       # (GO2CS_REQUIRE_CGO_PROBE=1): an arm that cannot load it fails here, and reads Inconclusive only where nothing
       # built it (a local run, or a runner with no pin). It loads as the resolver loads anything, never from the
       # current directory: linux through LD_LIBRARY_PATH (set to the directory alone when it was empty -- an empty
-      # entry is the current directory to ld.so), darwin through DYLD_LIBRARY_PATH, and windows from the test
-      # assembly's own directory, where CgoProbeTests copies it.
+      # entry is the current directory to ld.so), darwin by its ABSOLUTE install name at a fixed path (§11.12: dyld's
+      # search for a bare name reached the current directory, 42936395011), and windows from the test assembly's own
+      # directory, where CgoProbeTests copies it.
       - name: GolibTests — build the cgo probe library
         if: needs.plan.outputs.stage == 'golib-tests' && contains(fromJSON('["linux-x64","osx-x64","osx-arm64","win-x64"]'), matrix.rid)
         shell: pwsh
@@ -1057,14 +1058,15 @@ jobs:
           $cc = if ($goos -eq 'windows') { 'llvm-mingw' } else { 'zig' }
           $toolchain = & ./.github/cgo-toolchain.ps1 -Cc $cc -Rid $env:RID -Label 'golib-tests cgo probe'
 
-          $dir = Join-Path $env:RUNNER_TEMP 'cgo-probe'
+          # darwin's directory is fixed, since the golden binds the probe by its absolute install name there.
+          $dir = if ($goos -eq 'darwin') { '/tmp/go2cs-cgo-probe' } else { Join-Path $env:RUNNER_TEMP 'cgo-probe' }
           New-Item -ItemType Directory -Force -Path $dir | Out-Null
 
           # Each OS's load-time name, which the golden's probe fixture binds (src/go2cs's cgoProbeLibrary): the SONAME on
-          # linux, the install name on darwin, the DLL's own name on windows.
+          # linux, the absolute install name on darwin, the DLL's own name on windows.
           $probe = @{
               windows = @{ name = 'go2csprobe.dll'; flags = @() }
-              darwin  = @{ name = 'libgo2csprobe.dylib'; flags = @('-Wl,-install_name,libgo2csprobe.dylib') }
+              darwin  = @{ name = 'libgo2csprobe.dylib'; flags = @("-Wl,-install_name,$dir/libgo2csprobe.dylib") }
               linux   = @{ name = 'libgo2csprobe.so'; flags = @('-fPIC', '-Wl,-soname,libgo2csprobe.so') }
           }[$goos]
           $name = $probe.name
@@ -1084,10 +1086,6 @@ jobs:
           if ($goos -eq 'linux') {
               $path = if ([string]::IsNullOrEmpty($env:LD_LIBRARY_PATH)) { $dir } else { "${dir}:$($env:LD_LIBRARY_PATH)" }
               Add-Content -Path $env:GITHUB_ENV -Value "LD_LIBRARY_PATH=$path" -Encoding utf8
-          }
-          elseif ($goos -eq 'darwin') {
-              $path = if ([string]::IsNullOrEmpty($env:DYLD_LIBRARY_PATH)) { $dir } else { "${dir}:$($env:DYLD_LIBRARY_PATH)" }
-              Add-Content -Path $env:GITHUB_ENV -Value "DYLD_LIBRARY_PATH=$path" -Encoding utf8
           }
 
           $summary = @(

@@ -228,13 +228,14 @@ func _C2func_go2cs_probe_strtol(p0 *_Ctype_char, p1 _Ctype_int) (r1 _Ctype_long,
 `
 
 // cgoProbeLibrary is the probe library's load-time name on goos, as the hosted leg builds it (its SONAME on linux, its
-// install name on darwin, its DLL name on windows).
+// install name on darwin, its DLL name on windows). darwin's is absolute, as every darwin load name must be (§11.12):
+// the leg builds the probe at that fixed path.
 func cgoProbeLibrary(goos string) string {
 	switch goos {
 	case "windows":
 		return "go2csprobe.dll"
 	case "darwin":
-		return "libgo2csprobe.dylib"
+		return "/tmp/go2cs-cgo-probe/libgo2csprobe.dylib"
 	default:
 		return "libgo2csprobe.so"
 	}

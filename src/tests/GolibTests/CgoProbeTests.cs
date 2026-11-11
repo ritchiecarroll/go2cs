@@ -170,14 +170,18 @@ public unsafe class CgoProbeTests
 // The probe library on this host: where the hosted leg built it, or an Inconclusive (a Fail where the leg requires it).
 internal static class CgoProbe
 {
-    // The load-time name each OS's golden binds (src/go2cs's cgoProbeLibrary).
+    // The probe's file name. Each OS's golden binds it by this name, except darwin's, which binds it by its absolute install
+    // name (DarwinInstallName; src/go2cs's cgoProbeLibrary).
     public static string Name =>
         OperatingSystem.IsWindows() ? "go2csprobe.dll" :
         OperatingSystem.IsMacOS() ? "libgo2csprobe.dylib" :
         "libgo2csprobe.so";
 
+    // darwin loads a captured library only by its absolute install name (§11.12), so the leg builds the probe here.
+    public const string DarwinInstallName = "/tmp/go2cs-cgo-probe/libgo2csprobe.dylib";
+
     // The built probe's path. On windows it is also copied beside the test assembly, the directory the resolver searches
-    // there; linux and darwin find it through the loader path the leg set.
+    // there; linux finds it through the LD_LIBRARY_PATH the leg set, and darwin by its absolute install name.
     public static string Require()
     {
         string? directory = Environment.GetEnvironmentVariable("GO2CS_CGO_PROBE_DIR");
@@ -204,16 +208,15 @@ internal static class CgoProbe
         return path;
     }
 
-    // Which route loaded the probe by its bare name, for the leg's summary: on darwin, whether DYLD_LIBRARY_PATH reached
-    // this process (a hardened host strips it, and §11.12's absolute name is the fallback).
+    // Which route loaded the probe, for the leg's summary.
     public static void ReadLoad()
     {
         string route =
-            OperatingSystem.IsWindows() ? "the test assembly's directory" :
-            OperatingSystem.IsMacOS() ? $"DYLD_LIBRARY_PATH as this process sees it: {Environment.GetEnvironmentVariable("DYLD_LIBRARY_PATH") ?? "(stripped or unset)"}" :
-            $"LD_LIBRARY_PATH: {Environment.GetEnvironmentVariable("LD_LIBRARY_PATH") ?? "(unset)"}";
+            OperatingSystem.IsWindows() ? $"its bare name {Name} through the test assembly's directory" :
+            OperatingSystem.IsMacOS() ? $"its absolute install name {DarwinInstallName}" :
+            $"its bare name {Name} through LD_LIBRARY_PATH: {Environment.GetEnvironmentVariable("LD_LIBRARY_PATH") ?? "(unset)"}";
 
-        Console.WriteLine($"READING the probe loaded by its bare name {Name} through {route}");
+        Console.WriteLine($"READING the probe loaded by {route}");
     }
 
     // The DLL the probe imports symbol from, read from its PE import table, or null when it does not import it.
