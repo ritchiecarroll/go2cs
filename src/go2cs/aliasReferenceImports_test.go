@@ -11,6 +11,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -218,5 +219,136 @@ func TestAliasReferenceImportsDoesNotMatchAcrossSegmentBoundaries(t *testing.T) 
 
 	if found := aliasReferenceImports([]string{infoFile}, "math/rand/v2", nil); len(found) != 0 {
 		t.Fatalf("aliasReferenceImports = %v, want no matches (maphash must not imply hash)", found)
+	}
+}
+
+// A bare single-segment target resolves from the namespace that EMITS it, as C# outward lookup does. fmt's
+// `using strconv = strconv_package;` and `using math = math_package;` sit in `namespace go`, so they name
+// go.strconv_package and go.math_package. The unrooted-tail shape matched ANY token ending in ".strconv_package",
+// so fmt.tests gained references to internal/strconv (go.@internal.strconv_package) and internal/runtime/math that
+// nothing uses: the same leaf, a different package.
+func TestAliasReferenceImportsBareTargetResolvesFromItsNamespace(t *testing.T) {
+	previous := importPackageDirs
+	t.Cleanup(func() { importPackageDirs = previous })
+
+	importPackageDirs = map[string]importedPackageMeta{
+		"strconv":               {Name: "strconv"},
+		"internal/strconv":      {Name: "strconv"},
+		"math":                  {Name: "math"},
+		"internal/runtime/math": {Name: "math"},
+	}
+
+	infoFile := filepath.Join(t.TempDir(), "format.cs")
+
+	contents := "namespace go;\r\n" +
+		"using strconv = strconv_package;\r\n" +
+		"using math = math_package;\r\n"
+
+	if err := os.WriteFile(infoFile, []byte(contents), 0644); err != nil {
+		t.Fatalf("write alias scan fixture: %v", err)
+	}
+
+	if found := aliasReferenceImports([]string{infoFile}, "fmt", []string{"math", "strconv"}); len(found) != 0 {
+		t.Fatalf("aliasReferenceImports = %v, want no matches (strconv_package in namespace go is go.strconv_package)", found)
+	}
+}
+
+// The field-access record scan shares the matcher. fmt's package_info.cs records
+// `[assembly: GoFieldAccess(typeof(strconv_package.NumError))]` at compilation-unit level, where the qualifier resolves
+// from the root `go`, so it names strconv and never internal/strconv.
+func TestFieldAccessReceiverImportsBareRecordTargetResolvesFromRoot(t *testing.T) {
+	previous := importPackageDirs
+	t.Cleanup(func() { importPackageDirs = previous })
+
+	importPackageDirs = map[string]importedPackageMeta{
+		"strconv":          {Name: "strconv"},
+		"internal/strconv": {Name: "strconv"},
+	}
+
+	infoFile := filepath.Join(t.TempDir(), "package_info.cs")
+
+	contents := "[assembly: GoFieldAccess(typeof(strconv_package.NumError))]\r\n" +
+		"namespace go;\r\n"
+
+	if err := os.WriteFile(infoFile, []byte(contents), 0644); err != nil {
+		t.Fatalf("write record scan fixture: %v", err)
+	}
+
+	if found := fieldAccessReceiverImports(infoFile, "fmt", []string{"strconv"}); len(found) != 0 {
+		t.Fatalf("fieldAccessReceiverImports = %v, want no matches (strconv_package names strconv, not internal/strconv)", found)
+	}
+}
+
+// qualifierTargetNamesPackage answers for a conversion record, read at compilation-unit level: a bare single-segment
+// qualifier names only the single-segment package, and every rooted and unrooted spelling of a multi-segment package
+// still names it.
+func TestQualifierTargetNamesPackageResolvesFromRoot(t *testing.T) {
+	cases := []struct {
+		target, importPath string
+		want               bool
+	}{
+		{"strconv_package", "strconv", true},
+		{"strconv_package", "internal/strconv", false},
+		{"math_package", "internal/runtime/math", false},
+		{"io.fs_package", "io/fs", true},
+		{"go.io.fs_package", "io/fs", true},
+		{"global::go.io.fs_package", "io/fs", true},
+		{"go.io.fs_package.FileInfo", "io/fs", true},
+		{"fs_package", "io/fs", false},
+	}
+
+	for _, c := range cases {
+		if got := qualifierTargetNamesPackage(c.target, c.importPath); got != c.want {
+			t.Errorf("qualifierTargetNamesPackage(%q, %q) = %v, want %v", c.target, c.importPath, got, c.want)
+		}
+	}
+}
+
+// The shapes the alias scan has met in emitted output must all still match once a bare target resolves from its
+// namespace:
+//   - a ROOTED target that continues past the package class (`go.@internal.abi_package.ΔKind`, sort's metadata);
+//   - a ROOTED target that ends at it, `global::`-qualified or not (math/rand's default_test.cs);
+//   - an UNROOTED multi-segment tail inside a namespace that shadows the root (go/doc/comment's std_test.cs);
+//   - an UNROOTED single-segment target that outward lookup resolves to a MULTI-segment package: internal/godebug's
+//     godebug.cs writes `using bisect = bisect_package;` inside `namespace go.@internal`, which binds
+//     go.@internal.bisect_package. A rule that refused every single-segment tail would lose this one.
+func TestAliasReferenceImportsKeepsEveryObservedShape(t *testing.T) {
+	previous := importPackageDirs
+	t.Cleanup(func() { importPackageDirs = previous })
+
+	importPackageDirs = map[string]importedPackageMeta{
+		"internal/abi":    {Name: "abi"},
+		"os/exec":         {Name: "exec"},
+		"internal/diff":   {Name: "diff"},
+		"internal/bisect": {Name: "bisect"},
+		"strings":         {Name: "strings"},
+	}
+
+	dir := t.TempDir()
+
+	fixtures := map[string]string{
+		"package_test_info.cs": "global using reflectliteꓸKind = go.@internal.abi_package.ΔKind;\r\nnamespace go;\r\n",
+		"default_test.cs":      "namespace go.math;\r\nusing exec = global::go.os.exec_package;\r\n",
+		"std_test.cs":          "namespace go.go.doc;\r\nusing diff = @internal.diff_package;\r\n",
+		"godebug.cs":           "namespace go.@internal;\r\nusing bisect = bisect_package;\r\nusing strings = strings_package;\r\n",
+	}
+
+	var files []string
+
+	for name, contents := range fixtures {
+		path := filepath.Join(dir, name)
+
+		if err := os.WriteFile(path, []byte(contents), 0644); err != nil {
+			t.Fatalf("write alias scan fixture %s: %v", name, err)
+		}
+
+		files = append(files, path)
+	}
+
+	found := aliasReferenceImports(files, "internal/godebug", nil)
+	want := []string{"internal/abi", "internal/bisect", "internal/diff", "os/exec", "strings"}
+
+	if strings.Join(found, ",") != strings.Join(want, ",") {
+		t.Fatalf("aliasReferenceImports = %v, want %v", found, want)
 	}
 }
