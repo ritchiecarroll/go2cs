@@ -92,6 +92,15 @@ worker_pid() {
 # The new census lines since a baseline file, and their count.
 new_files() { comm -13 "$1" <(census); }
 
+# Each new file's apparent size and its size on disk: a core of a many-thread process is mostly holes, so the two differ.
+describe() {
+  local size path
+  while read -r size path; do
+    [ -n "$path" ] || continue
+    say "$1 saw: $path apparent=$size on-disk=$(sudo du -B1 --apparent-size=no "$path" 2>/dev/null | cut -f1)"
+  done
+}
+
 # Fails when any watched filesystem lost more than DELTA_LIMIT bytes since a free-space record.
 check_free() {
   local baseline="$1" label="$2" path before now delta
@@ -112,8 +121,9 @@ record)
     echo "ulimit -c hard : $(ulimit -H -c)"
     echo "core_pattern   : $(cat /proc/sys/kernel/core_pattern)"
     echo "core_uses_pid  : $(cat /proc/sys/kernel/core_uses_pid)"
-    echo "apport         : $(systemctl is-active apport.service 2>/dev/null || echo absent)"
-    echo "systemd-coredump socket: $(systemctl is-active systemd-coredump.socket 2>/dev/null || echo absent)"
+    unit() { local state; state="$(systemctl is-active "$1" 2>/dev/null)"; echo "${state:-absent}"; }
+    echo "apport         : $(unit apport.service)"
+    echo "systemd-coredump socket: $(unit systemd-coredump.socket)"
     echo "coredumpctl entries: $(coredump_entries)"
   } | tee "$state/settings.txt" | sed 's/^/DUMPPROOF record: /'
   free_bytes | tee "$state/free-record.tsv" | sed 's/^/DUMPPROOF record free: /'
@@ -134,7 +144,7 @@ control)
   count="$(printf '%s' "$seen" | grep -c . || true)"
   say "control: SIGSEGV of a one-thread process left $count new file(s)"
   [ "$count" -ge 1 ] || fail "control: the census saw no dump with suppression OFF, so it is blind and proves nothing"
-  printf '%s\n' "$seen" | sed 's/^/DUMPPROOF control saw: /'
+  printf '%s\n' "$seen" | describe control
   free_bytes > "$state/free-control.tsv"
   dd if=/dev/zero of="$scratch/control-128MiB" bs=1M count=128 conv=fsync status=none || fail "control: cannot write 128 MiB"
   while IFS=$'\t' read -r path before_bytes; do
@@ -220,19 +230,27 @@ CS
     for _ in $(seq 1 120); do grep -q '^READY' "$out" && break; sleep 0.5; done
     grep -q "^READY $PROBE_THREADS" "$out" || { kill -KILL "$pid" 2>/dev/null; fail "prove: the probe ($how) never reported $PROBE_THREADS threads"; }
     [ "$how" = sigquit ] && kill -QUIT "$pid"
-    timeout 120 tail --pid="$pid" -f /dev/null || { kill -KILL "$pid" 2>/dev/null; fail "prove: the probe ($how) did not die within 120 s"; }
+    late=0
+    if ! timeout 120 tail --pid="$pid" -f /dev/null; then
+      # A process the kernel is still dumping has not died yet: kill it, then count the files BEFORE any verdict, so a
+      # dump in progress reads as a dump and not as a probe that never crashed.
+      say "prove: the probe ($how) is still alive 120 s after the crash; killing it"
+      late=1
+      kill -KILL "$pid" 2>/dev/null
+    fi
     wait "$pid"; status=$?
     say "prove: probe $how with $PROBE_THREADS threads ended with status $status"
-    [ "$status" -ge 128 ] || fail "prove: the probe ($how) exited $status, not by a signal, so it did not crash"
     sleep 2
     seen="$(new_files "$baseline")"
     count="$(printf '%s' "$seen" | grep -c . || true)"
     say "prove: after the $how crash, $count new dump file(s)"
     if [ "$count" -ne 0 ]; then
-      printf '%s\n' "$seen" | sed 's/^/DUMPPROOF prove saw: /'
+      printf '%s\n' "$seen" | describe prove
       sudo rm -f -- "$scratch"/core.*
       fail "prove: the $how crash of a $PROBE_THREADS-thread .NET probe left $count dump file(s); the sweep does not run"
     fi
+    [ "$late" = 0 ] || fail "prove: the probe ($how) did not die within 120 s and left no dump file"
+    [ "$status" -ge 128 ] || fail "prove: the probe ($how) exited $status, not by a signal, so it did not crash"
     check_free "$state/free-prove.tsv" "prove $how"
     entries_now="$(coredump_entries)"
     [ "$entries_now" -eq "$entries_before" ] || fail "prove: systemd-coredump gained $((entries_now - entries_before)) entr(ies) after the $how crash"
@@ -251,7 +269,7 @@ recheck)
   count="$(printf '%s' "$seen" | grep -c . || true)"
   say "recheck: $count new dump file(s) since the proof"
   if [ "$count" -ne 0 ]; then
-    printf '%s\n' "$seen" | sed 's/^/DUMPPROOF recheck saw: /'
+    printf '%s\n' "$seen" | describe recheck
     fail "recheck: $count dump file(s) appeared during the run; HOLD this shard's evidence and dispatch no further shard until the cause is named"
   fi
   say "recheck: PASS"
