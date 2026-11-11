@@ -144,7 +144,7 @@ func (v *Visitor) convSendValueExpr(sendStmt *ast.SendStmt) string {
 	}
 
 	if elemIsNonEmptyIface || elemIsPointer {
-		if _, isPtr := v.getType(sendStmt.Value, false).(*types.Pointer); isPtr {
+		if _, isPtr := types.Unalias(v.getType(sendStmt.Value, false)).(*types.Pointer); isPtr {
 			identContext := DefaultIdentContext()
 			identContext.isPointer = true
 			contexts = append(contexts, identContext)

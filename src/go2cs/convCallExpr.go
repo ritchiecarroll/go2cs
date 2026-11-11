@@ -613,8 +613,8 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// methods (Load/Store/…) resolve: `Ꮡ((atomic.Uint32)(c))`. Done before checkForImplicitConversion
 		// so it does not record a spurious counter→ж<atomic.Uint32> indirect conversion. (The address is
 		// of a copy — the atomic intrinsics behind it are asm stubs, so this is about compilable C#.)
-		if resultPtr, ok := v.info.TypeOf(callExpr).(*types.Pointer); ok {
-			if argPtr, ok := v.info.TypeOf(arg).(*types.Pointer); ok {
+		if resultPtr, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Pointer); ok {
+			if argPtr, ok := types.Unalias(v.info.TypeOf(arg)).(*types.Pointer); ok {
 				resultElem := resultPtr.Elem()
 				argElem := argPtr.Elem()
 
@@ -786,7 +786,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				return fmt.Sprintf("new array<%s>(%s, %d)", elemName, v.convExpr(arg, nil), resultArr.Len())
 			}
 
-			if resultPtr, ok := v.info.TypeOf(callExpr).(*types.Pointer); ok {
+			if resultPtr, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Pointer); ok {
 				if resultArr, ok := types.Unalias(resultPtr.Elem()).(*types.Array); ok {
 					elemName := convertToCSTypeName(v.getAliasQualifiedTypeName(resultArr.Elem(), false))
 					return fmt.Sprintf("%s(array<%s>.Alias(%s, %d))", AddressPrefix, elemName, v.convExpr(arg, nil), resultArr.Len())
@@ -851,7 +851,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// sources keep their existing plain-cast/partial-impl routes (no churn).
 		if callTargetType := v.info.TypeOf(callExpr); callTargetType != nil {
 			if targetIsIface, isEmpty := isInterface(callTargetType); targetIsIface && !isEmpty {
-				if argPtrType, srcIsPtr := v.getType(arg, false).(*types.Pointer); srcIsPtr {
+				if argPtrType, srcIsPtr := types.Unalias(v.getType(arg, false)).(*types.Pointer); srcIsPtr {
 					identContext := DefaultIdentContext()
 					identContext.isPointer = true
 
@@ -1019,7 +1019,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				}
 			}
 
-			if _, isPtr := v.info.TypeOf(arg).(*types.Pointer); isPtr {
+			if _, isPtr := types.Unalias(v.info.TypeOf(arg)).(*types.Pointer); isPtr {
 				// A pointer PARAMETER carries its BOX (`Ꮡp`) alongside the value alias, and golib's
 				// `implicit operator uintptr(ж<T>)` already yields exactly the address Go wants: 0 for
 				// a nil box, the aliased address for a reinterpreted native pointer, the pinned
@@ -2107,7 +2107,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						if iface, ok := tp.Constraint().Underlying().(*types.Interface); ok && iface.NumMethods() > 0 && iface.IsMethodSet() {
 							if instParam := v.instantiatedParamType(callExpr, i); instParam != nil {
 								if instSlice, ok := instParam.Underlying().(*types.Slice); ok {
-									if ptrElem, ok := instSlice.Elem().(*types.Pointer); ok && types.Implements(ptrElem, iface) {
+									if ptrElem, ok := types.Unalias(instSlice.Elem()).(*types.Pointer); ok && types.Implements(ptrElem, iface) {
 										elemVar := fmt.Sprintf("elem%s%d", TempVarMarker, i)
 										wrapped := v.convertToInterfaceType(tp.Constraint(), ptrElem, elemVar)
 
@@ -2774,7 +2774,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 								callExprContext.markAnyBoxedTypeParamArg(j)
 							}
 
-							if _, argIsPtr := argType.(*types.Pointer); argIsPtr {
+							if _, argIsPtr := types.Unalias(argType).(*types.Pointer); argIsPtr {
 								ident := getIdentifier(callExpr.Args[j])
 
 								if !v.isPointer(ident) || v.identIsParameter(ident) || v.exprIsCurrentDirectBoxReceiver(callExpr.Args[j]) {
@@ -3264,7 +3264,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 								}
 							}
 
-							if _, argIsPtr := v.getType(callExpr.Args[i], false).(*types.Pointer); argIsPtr {
+							if _, argIsPtr := types.Unalias(v.getType(callExpr.Args[i], false)).(*types.Pointer); argIsPtr {
 								callExprContext.argTypeIsPtr[i] = true
 								callExprContext.anyBoxedPtrArgs[i] = true
 							}
@@ -3352,7 +3352,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		if ident.Name == "delete" && len(callExpr.Args) == 2 {
 			if mapArgType := v.getType(callExpr.Args[0], false); mapArgType != nil {
 				if mapType, ok := mapArgType.Underlying().(*types.Map); ok {
-					if _, keyIsPtr := v.getType(callExpr.Args[1], false).(*types.Pointer); keyIsPtr && isEmptyInterfaceTarget(mapType.Key()) {
+					if _, keyIsPtr := types.Unalias(v.getType(callExpr.Args[1], false)).(*types.Pointer); keyIsPtr && isEmptyInterfaceTarget(mapType.Key()) {
 						callExprContext.argTypeIsPtr[1] = true
 						callExprContext.anyBoxedPtrArgs[1] = true
 					}
@@ -3588,7 +3588,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					// Check if receiver is a pointer type
 					isRecvPointer := false
 
-					if ptrType, ok := recvType.(*types.Pointer); ok {
+					if ptrType, ok := types.Unalias(recvType).(*types.Pointer); ok {
 						recvType = ptrType.Elem()
 						isRecvPointer = true
 					}
@@ -3598,7 +3598,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					isArgPointer := false
 
 					// Check if the argument is a pointer
-					if ptrType, ok := argType.(*types.Pointer); ok {
+					if ptrType, ok := types.Unalias(argType).(*types.Pointer); ok {
 						argType = ptrType.Elem()
 						isArgPointer = true
 					}
@@ -4252,14 +4252,14 @@ func (v *Visitor) applyImplicitConversion(funcType types.Type, arg ast.Expr, tar
 	var targetTypeIsPointer bool
 
 	// Check if function type is a struct or a pointer to a struct
-	if ptrType, ok := funcType.(*types.Pointer); ok {
+	if ptrType, ok := types.Unalias(funcType).(*types.Pointer); ok {
 		funcType = ptrType.Elem()
 		targetTypeIsPointer = true
 	}
 
 	if _, ok := funcType.Underlying().(*types.Struct); ok {
 		// Check if argType is a struct or a pointer to a struct
-		if ptrType, ok := argType.(*types.Pointer); ok {
+		if ptrType, ok := types.Unalias(argType).(*types.Pointer); ok {
 			argType = ptrType.Elem()
 		}
 
@@ -4355,7 +4355,7 @@ func (v *Visitor) applyImplicitConversion(funcType types.Type, arg ast.Expr, tar
 	// Check if the function type is an aliased numeric type
 	if ok := isAliasedNumericType(funcType); ok {
 		// Check if argType is a pointer type
-		if ptrType, ok := argType.(*types.Pointer); ok {
+		if ptrType, ok := types.Unalias(argType).(*types.Pointer); ok {
 			argType = ptrType.Elem()
 		}
 
@@ -5304,7 +5304,7 @@ func (v *Visitor) makeLenArgNeedsNintCast(arg ast.Expr) bool {
 }
 
 func (v *Visitor) isRawAddressPointerConversion(callExpr *ast.CallExpr, arg ast.Expr) bool {
-	if _, ok := v.info.TypeOf(callExpr).(*types.Pointer); !ok {
+	if _, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Pointer); !ok {
 		return false
 	}
 
@@ -5938,7 +5938,7 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 					return true, "*" + v.getAliasQualifiedTypeName(elemType, false)
 				}
 
-				if argPtr, ok := argType.(*types.Pointer); ok {
+				if argPtr, ok := types.Unalias(argType).(*types.Pointer); ok {
 					if named, ok := argPtr.Elem().(*types.Named); ok && writtenRHSIsUnnamedArray(named) &&
 						types.Identical(elemType, named.Underlying()) {
 						return types.ConvertibleTo(argType, types.NewPointer(elemType)), "*" + v.getAliasQualifiedTypeName(elemType, false)
@@ -6118,7 +6118,7 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 	originalArgType := argType
 
 	// Check if the argument is a pointer
-	if pointer, ok := argType.(*types.Pointer); ok {
+	if pointer, ok := types.Unalias(argType).(*types.Pointer); ok {
 		argType = pointer.Elem()
 	}
 
@@ -6233,7 +6233,7 @@ func (v *Visitor) addImplicitSubStructConversions(sourceType types.Type, targetT
 	if subStructTypes, exists := v.subStructTypes[sourceType]; exists {
 		for _, subStructType := range subStructTypes {
 			// Check if subStructType is a pointer
-			if ptrType, ok := subStructType.(*types.Pointer); ok {
+			if ptrType, ok := types.Unalias(subStructType).(*types.Pointer); ok {
 				subStructType = ptrType.Elem()
 			}
 
@@ -7507,7 +7507,7 @@ func (v *Visitor) opaquePointerMintEmission(callExpr *ast.CallExpr, arg ast.Expr
 		return "", false
 	}
 
-	if _, isPtr := v.info.TypeOf(inner).(*types.Pointer); !isPtr {
+	if _, isPtr := types.Unalias(v.info.TypeOf(inner)).(*types.Pointer); !isPtr {
 		return "", false
 	}
 
@@ -7768,7 +7768,7 @@ func (v *Visitor) sameNameMethodCapture(callExpr *ast.CallExpr, paramType types.
 		return ""
 	}
 
-	if ptr, ok := argType.(*types.Pointer); ok {
+	if ptr, ok := types.Unalias(argType).(*types.Pointer); ok {
 		argType = ptr.Elem()
 	}
 

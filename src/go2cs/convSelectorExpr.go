@@ -775,7 +775,7 @@ func (v *Visitor) exprFieldRootsAtAddressedGlobal(expr ast.Expr) bool {
 		return false
 	}
 
-	if _, isPtr := v.info.TypeOf(sel).(*types.Pointer); isPtr {
+	if _, isPtr := types.Unalias(v.info.TypeOf(sel)).(*types.Pointer); isPtr {
 		return false
 	}
 
@@ -825,7 +825,7 @@ func (v *Visitor) exprIsValueFieldOfPointerRvalue(expr ast.Expr) bool {
 	}
 
 	// The field itself must be a VALUE — a pointer field is already a box.
-	if _, isPtr := v.info.TypeOf(sel).(*types.Pointer); isPtr {
+	if _, isPtr := types.Unalias(v.info.TypeOf(sel)).(*types.Pointer); isPtr {
 		return false
 	}
 
@@ -835,7 +835,7 @@ func (v *Visitor) exprIsValueFieldOfPointerRvalue(expr ast.Expr) bool {
 		switch b := base.(type) {
 		case *ast.SelectorExpr:
 			// A pointer field/chain mid-way is exprIsValueFieldOfPointer's territory, not this.
-			if _, ok := v.getType(b, false).(*types.Pointer); ok {
+			if _, ok := types.Unalias(v.getType(b, false)).(*types.Pointer); ok {
 				return false
 			}
 
@@ -859,7 +859,7 @@ func (v *Visitor) exprIsValueFieldOfPointerRvalue(expr ast.Expr) bool {
 
 			// A genuine CALL / INDEX / other rvalue: route only when it is a pointer-to-struct box (the
 			// value it yields IS a `ж<T>`, so `root.of(T.Ꮡfield)` field-refs the real storage).
-			ptrType, ok := v.getType(b, false).(*types.Pointer)
+			ptrType, ok := types.Unalias(v.getType(b, false)).(*types.Pointer)
 
 			if !ok {
 				return false
@@ -905,7 +905,7 @@ func (v *Visitor) exprIsValueFieldOfPointer(expr ast.Expr) bool {
 	}
 
 	// The field itself must be a VALUE — a pointer field is already a box.
-	if _, isPtr := v.info.TypeOf(sel).(*types.Pointer); isPtr {
+	if _, isPtr := types.Unalias(v.info.TypeOf(sel)).(*types.Pointer); isPtr {
 		return false
 	}
 
@@ -921,7 +921,7 @@ func (v *Visitor) exprIsValueFieldOfPointer(expr ast.Expr) bool {
 	for {
 		switch b := base.(type) {
 		case *ast.SelectorExpr:
-			if ptrType, ok := v.getType(b, false).(*types.Pointer); ok {
+			if ptrType, ok := types.Unalias(v.getType(b, false)).(*types.Pointer); ok {
 				_, ok := ptrType.Elem().Underlying().(*types.Struct)
 				return ok
 			}
@@ -931,7 +931,7 @@ func (v *Visitor) exprIsValueFieldOfPointer(expr ast.Expr) bool {
 		case *ast.Ident:
 			// Root identifier: route a pointer-to-struct LOCAL only (its box is dereferenced via `~`,
 			// an rvalue). A deref'd pointer parameter and the receiver are addressable refs.
-			ptrType, ok := v.getType(b, false).(*types.Pointer)
+			ptrType, ok := types.Unalias(v.getType(b, false)).(*types.Pointer)
 
 			if !ok {
 				return false
@@ -1016,7 +1016,7 @@ func (v *Visitor) exprIsValueFieldOfDerefdPointerRoot(expr ast.Expr) bool {
 	}
 
 	// The field itself must be a VALUE — a pointer field is already a box.
-	if _, isPtr := v.info.TypeOf(sel).(*types.Pointer); isPtr {
+	if _, isPtr := types.Unalias(v.info.TypeOf(sel)).(*types.Pointer); isPtr {
 		return false
 	}
 
@@ -1026,7 +1026,7 @@ func (v *Visitor) exprIsValueFieldOfDerefdPointerRoot(expr ast.Expr) bool {
 		switch b := base.(type) {
 		case *ast.SelectorExpr:
 			// A pointer field/chain mid-way is exprIsValueFieldOfPointer's territory, not this.
-			if _, ok := v.getType(b, false).(*types.Pointer); ok {
+			if _, ok := types.Unalias(v.getType(b, false)).(*types.Pointer); ok {
 				return false
 			}
 
@@ -1040,7 +1040,7 @@ func (v *Visitor) exprIsValueFieldOfDerefdPointerRoot(expr ast.Expr) bool {
 			// Root identifier: a deref-aliased pointer PARAMETER or the pointer RECEIVER (box `Ꮡx`).
 			// A pointer LOCAL is excluded — it is handled by exprIsValueFieldOfPointer / the
 			// exprIsPointerLocalField branch.
-			if _, ok := v.getType(b, false).(*types.Pointer); !ok {
+			if _, ok := types.Unalias(v.getType(b, false)).(*types.Pointer); !ok {
 				return false
 			}
 
@@ -1078,7 +1078,7 @@ func (v *Visitor) exprIsValueFieldOfDerefdPointerRoot(expr ast.Expr) bool {
 func (v *Visitor) exprIsAlreadyBoxedPointerFieldOrElement(expr ast.Expr) bool {
 	switch expr.(type) {
 	case *ast.SelectorExpr, *ast.IndexExpr:
-		_, isPtr := v.info.TypeOf(expr).(*types.Pointer)
+		_, isPtr := types.Unalias(v.info.TypeOf(expr)).(*types.Pointer)
 		return isPtr
 	}
 
@@ -1153,7 +1153,7 @@ func (v *Visitor) isPointerReceiverMethodCall(selectorExpr *ast.SelectorExpr) bo
 		return false
 	}
 
-	_, isPtr := sig.Recv().Type().(*types.Pointer)
+	_, isPtr := types.Unalias(sig.Recv().Type()).(*types.Pointer)
 
 	return isPtr
 }
@@ -1696,9 +1696,9 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	if sel, ok := v.info.Selections[selectorExpr]; ok && sel.Kind() == types.MethodVal {
 		if fn, ok := sel.Obj().(*types.Func); ok {
 			if sig, ok := fn.Type().(*types.Signature); ok && sig.Recv() != nil {
-				if _, recvIsPtr := sig.Recv().Type().(*types.Pointer); recvIsPtr {
+				if _, recvIsPtr := types.Unalias(sig.Recv().Type()).(*types.Pointer); recvIsPtr {
 					if indexExpr, ok := selectorExpr.X.(*ast.IndexExpr); ok {
-						if ptr, ok := v.info.TypeOf(indexExpr.X).(*types.Pointer); ok {
+						if ptr, ok := types.Unalias(v.info.TypeOf(indexExpr.X)).(*types.Pointer); ok {
 							if named, ok := types.Unalias(ptr.Elem()).(*types.Named); ok {
 								if arrayType, ok := named.Underlying().(*types.Array); ok {
 									elemTypeName := convertToCSTypeName(v.getScopeCheckedTypeName(arrayType.Elem()))
@@ -1774,9 +1774,9 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 
 		if funcObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Func); ok {
 			if sig, ok := funcObj.Type().(*types.Signature); ok && sig.Recv() != nil {
-				if _, isPtrRecv := sig.Recv().Type().(*types.Pointer); isPtrRecv {
+				if _, isPtrRecv := types.Unalias(sig.Recv().Type()).(*types.Pointer); isPtrRecv {
 					if recvType := v.getType(selectorExpr.X, false); recvType != nil {
-						if _, alreadyPtr := recvType.(*types.Pointer); alreadyPtr {
+						if _, alreadyPtr := types.Unalias(recvType).(*types.Pointer); alreadyPtr {
 							if identX, ok := selectorExpr.X.(*ast.Ident); ok {
 								ptrContext := DefaultIdentContext()
 								ptrContext.isPointer = true
@@ -1831,11 +1831,11 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 			if recvIdent, isIdent := selectorExpr.X.(*ast.Ident); isIdent && v.hoistedDecls != nil && v.lambdaCapture != nil && v.isLambdaBoxRefVar(v.info.ObjectOf(recvIdent)) {
 				if funcObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Func); ok {
 					if sig, ok := funcObj.Type().(*types.Signature); ok && sig.Recv() != nil {
-						_, isPtrRecv := sig.Recv().Type().(*types.Pointer)
+						_, isPtrRecv := types.Unalias(sig.Recv().Type()).(*types.Pointer)
 
 						if !isPtrRecv && !types.IsInterface(sig.Recv().Type()) {
 							if recvType := v.getType(selectorExpr.X, false); recvType != nil {
-								if _, isPtr := recvType.(*types.Pointer); !isPtr {
+								if _, isPtr := types.Unalias(recvType).(*types.Pointer); !isPtr {
 									v.lambdaCapture.detectingCaptures = false
 									snapshotName := v.getCapturedVarName(recvIdent.Name)
 
@@ -1941,9 +1941,9 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	if v.isMethodValue(selectorExpr, context.isCallExpr) && !context.isAssignment {
 		if funcObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Func); ok {
 			if sig, ok := funcObj.Type().(*types.Signature); ok && sig.Recv() != nil {
-				if _, isPtrRecv := sig.Recv().Type().(*types.Pointer); isPtrRecv {
+				if _, isPtrRecv := types.Unalias(sig.Recv().Type()).(*types.Pointer); isPtrRecv {
 					if recvType := v.getType(selectorExpr.X, false); recvType != nil {
-						if _, alreadyPtr := recvType.(*types.Pointer); !alreadyPtr {
+						if _, alreadyPtr := types.Unalias(recvType).(*types.Pointer); !alreadyPtr {
 							boundRecv := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
 							return fmt.Sprintf("%s.%s", boundRecv, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 						}
@@ -2017,7 +2017,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 
 					if recvIdent, isIdent := selectorExpr.X.(*ast.Ident); isIdent && v.hoistedDecls != nil && v.lambdaCapture != nil {
 						if recvType := v.getType(selectorExpr.X, false); recvType != nil {
-							if _, isPtr := recvType.(*types.Pointer); !isPtr {
+							if _, isPtr := types.Unalias(recvType).(*types.Pointer); !isPtr {
 								// getCapturedVarName only advances its per-name counter once the
 								// detection phase is over (prepareStmtCaptures clears the flag for the
 								// same reason); minting while it is still set hands out one name twice.
@@ -2192,7 +2192,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 					// and `.Value` must be omitted.
 					if sel, ok := v.info.Selections[selectorExpr]; ok && sel.Kind() == types.MethodVal {
 						if sig, ok := sel.Obj().Type().(*types.Signature); ok && sig.Recv() != nil {
-							if _, isPtr := sig.Recv().Type().(*types.Pointer); isPtr {
+							if _, isPtr := types.Unalias(sig.Recv().Type()).(*types.Pointer); isPtr {
 								return fmt.Sprintf("(%s).%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 							}
 						}
@@ -2206,7 +2206,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		}
 
 		if selection, ok := v.info.Selections[selectorExpr]; ok && selection.Kind() == types.FieldVal {
-			if ptrType, isPtrType := exprType.(*types.Pointer); isPtrType {
+			if ptrType, isPtrType := types.Unalias(exprType).(*types.Pointer); isPtrType {
 				// A local reinterpreted from unsafe.Pointer reads its fields through the generated field
 				// properties, at the Go offset when it aliases native memory (see fieldAccess.go).
 				if pointee := v.fieldAccessLocal(selectorExpr.X); pointee != nil {
@@ -2325,10 +2325,10 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		if sel := v.info.Selections[selectorExpr]; sel != nil && sel.Kind() == types.MethodVal && len(sel.Index()) == 1 {
 			if funcObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Func); ok {
 				if sig, ok := funcObj.Type().(*types.Signature); ok && sig.Recv() != nil {
-					_, isPtrRecvMethod := sig.Recv().Type().(*types.Pointer)
+					_, isPtrRecvMethod := types.Unalias(sig.Recv().Type()).(*types.Pointer)
 
 					if !isPtrRecvMethod && !types.IsInterface(sig.Recv().Type()) {
-						if _, exprIsPtr := v.getExprType(selectorExpr.X).(*types.Pointer); exprIsPtr {
+						if _, exprIsPtr := types.Unalias(v.getExprType(selectorExpr.X)).(*types.Pointer); exprIsPtr {
 							needsDeref := true
 
 							if ident, isIdent := selectorExpr.X.(*ast.Ident); isIdent {
@@ -2396,7 +2396,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 					if _, isIface := embedField.Type().Underlying().(*types.Interface); isIface {
 						xExpr := v.convExpr(selectorExpr.X, nil)
 
-						if _, exprIsPtr := v.getExprType(selectorExpr.X).(*types.Pointer); exprIsPtr {
+						if _, exprIsPtr := types.Unalias(v.getExprType(selectorExpr.X)).(*types.Pointer); exprIsPtr {
 							needsDeref := true
 
 							if ident, isIdent := selectorExpr.X.(*ast.Ident); isIdent {
@@ -2735,7 +2735,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// the global's SLOT box (ж<ж<itabTableType>>), one layer too high (CS1929, runtime iface.go).
 	// A DEREF-ALIASED pointer param/receiver is the opposite: its rendering is the value alias
 	// (`ref var s = ref Ꮡs.Value`), so it still needs the box route.
-	_, receiverIsPointerValue := v.info.TypeOf(selectorExpr.X).(*types.Pointer)
+	_, receiverIsPointerValue := types.Unalias(v.info.TypeOf(selectorExpr.X)).(*types.Pointer)
 	receiverYieldsBox := receiverIsPointerValue && !v.exprIsDerefAliasedPointer(selectorExpr.X)
 
 	if context.isCallExpr && !receiverYieldsBox && v.isCaptureModeMethod(selectorExpr) && !v.exprIsAlreadyBoxedPointerFieldOrElement(selectorExpr.X) && (v.isHeapBoxedExpr(selectorExpr.X) || v.exprIsCurrentDirectBoxReceiver(selectorExpr.X) || v.exprIsDerefdPointerParam(selectorExpr.X) || v.exprIsPointerLocalField(selectorExpr.X)) {
@@ -3012,7 +3012,7 @@ func (v *Visitor) receiverExprIsAutoDerefdPointee(selectorExpr *ast.SelectorExpr
 		return false
 	}
 
-	_, recvIsPointer := sig.Recv().Type().(*types.Pointer)
+	_, recvIsPointer := types.Unalias(sig.Recv().Type()).(*types.Pointer)
 
 	return !recvIsPointer
 }

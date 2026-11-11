@@ -254,7 +254,7 @@ func sigIsGeneric(info *types.Info, fun ast.Expr) bool {
 	if recv := sig.Recv(); recv != nil {
 		t := recv.Type()
 
-		if ptr, ok := t.(*types.Pointer); ok {
+		if ptr, ok := types.Unalias(t).(*types.Pointer); ok {
 			t = ptr.Elem()
 		}
 

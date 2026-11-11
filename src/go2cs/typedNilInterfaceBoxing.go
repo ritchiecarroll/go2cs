@@ -84,7 +84,7 @@ func (v *Visitor) pointerBoxesIntoEmptyInterface(target types.Type, value ast.Ex
 		return false
 	}
 
-	_, isPointer := v.getType(value, false).(*types.Pointer)
+	_, isPointer := types.Unalias(v.getType(value, false)).(*types.Pointer)
 
 	return isPointer
 }
@@ -125,7 +125,7 @@ func (v *Visitor) applyTypedNilPointerBox(value ast.Expr, rendered string) strin
 		return v.applyTypedNilUnsafePointerBox(valueType, v.unsafePointerExprNeverRendersNull(value), rendered)
 	}
 
-	if _, isPointer := valueType.(*types.Pointer); !isPointer {
+	if _, isPointer := types.Unalias(valueType).(*types.Pointer); !isPointer {
 		// The sibling treatments this file owns, at the same boundary and mutually exclusive
 		// with the pointer one: a VARIADIC func value must carry its Go func type, or C#'s
 		// synthesized natural delegate becomes the box's dynamic type; and a func value that can
@@ -227,7 +227,7 @@ func (v *Visitor) applyTypedNilPointerBoxToType(valueType types.Type, rendered s
 		return v.applyTypedNilUnsafePointerBox(valueType, false, rendered)
 	}
 
-	if _, isPointer := valueType.(*types.Pointer); !isPointer {
+	if _, isPointer := types.Unalias(valueType).(*types.Pointer); !isPointer {
 		// No AST expression to test, so the func arm takes its conservative answer — a tuple
 		// element deconstructed from a call result is exactly the shape that can be nil, and it is
 		// neither a literal nor a method group.

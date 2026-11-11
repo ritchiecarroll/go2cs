@@ -514,7 +514,7 @@ func packageVarMutations(fset *token.FileSet, pkg *types.Package, info *types.In
 
 				if selection := info.Selections[node]; selection != nil && selection.Kind() == types.MethodVal {
 					if signature, ok := selection.Obj().Type().(*types.Signature); ok && signature.Recv() != nil {
-						_, pointerMethod := signature.Recv().Type().(*types.Pointer)
+						_, pointerMethod := types.Unalias(signature.Recv().Type()).(*types.Pointer)
 
 						if t := typeOf(node.X); pointerMethod && t != nil {
 							if _, viaPointer := t.Underlying().(*types.Pointer); !viaPointer {

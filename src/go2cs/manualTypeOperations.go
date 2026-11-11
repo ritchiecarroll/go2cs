@@ -2929,7 +2929,7 @@ func (v *Visitor) isManualBoxReceiverMethod(obj types.Object) bool {
 
 	recvType := sig.Recv().Type()
 
-	if ptr, ok := recvType.(*types.Pointer); ok {
+	if ptr, ok := types.Unalias(recvType).(*types.Pointer); ok {
 		recvType = ptr.Elem()
 	}
 

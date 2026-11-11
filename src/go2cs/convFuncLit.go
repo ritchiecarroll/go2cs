@@ -1499,7 +1499,7 @@ func (v *Visitor) funcLitHeapBoxParamIdents(funcLit *ast.FuncLit) []*ast.Ident {
 				continue
 			}
 
-			if _, isPointer := obj.Type().(*types.Pointer); isPointer {
+			if _, isPointer := types.Unalias(obj.Type()).(*types.Pointer); isPointer {
 				continue
 			}
 

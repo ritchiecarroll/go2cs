@@ -483,7 +483,7 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 				exprContexts := []ExprContext{elemBasicLitContext, lambdaContext}
 
 				if resultParamIsInterface != nil && i < len(resultParamIsInterface) && resultParamIsInterface[i] {
-					if _, isPtr := v.getType(expr, false).(*types.Pointer); isPtr {
+					if _, isPtr := types.Unalias(v.getType(expr, false)).(*types.Pointer); isPtr {
 						identContext := DefaultIdentContext()
 						identContext.isPointer = true
 						exprContexts = []ExprContext{elemBasicLitContext, identContext, lambdaContext}

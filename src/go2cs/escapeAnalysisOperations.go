@@ -513,7 +513,7 @@ func (v *Visitor) markCaptureModeBoxedParams(params *ast.FieldList, body *ast.Bl
 			}
 
 			// A pointer parameter already carries its box (`Ꮡp` IS the emitted parameter).
-			if _, isPointer := obj.Type().(*types.Pointer); isPointer {
+			if _, isPointer := types.Unalias(obj.Type()).(*types.Pointer); isPointer {
 				continue
 			}
 
@@ -654,7 +654,7 @@ func (v *Visitor) markAddressTakenBoxedReceiver(recv *ast.FieldList, body *ast.B
 			}
 
 			// A pointer receiver already carries its box (`Ꮡr` IS the emitted receiver).
-			if _, isPointer := obj.Type().(*types.Pointer); isPointer {
+			if _, isPointer := types.Unalias(obj.Type()).(*types.Pointer); isPointer {
 				continue
 			}
 
@@ -1268,7 +1268,7 @@ func (v *Visitor) selectsPointerMethodOn(sel *ast.SelectorExpr, obj types.Object
 		return false
 	}
 
-	_, isPointerRecv := sig.Recv().Type().(*types.Pointer)
+	_, isPointerRecv := types.Unalias(sig.Recv().Type()).(*types.Pointer)
 
 	return isPointerRecv
 }

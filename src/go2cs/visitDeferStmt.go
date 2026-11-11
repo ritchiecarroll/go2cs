@@ -499,7 +499,7 @@ func (v *Visitor) pointerReceiverBoxMethodGroup(fun ast.Expr) string {
 		return ""
 	}
 
-	recvPtr, isPtrRecv := sig.Recv().Type().(*types.Pointer)
+	recvPtr, isPtrRecv := types.Unalias(sig.Recv().Type()).(*types.Pointer)
 
 	if !isPtrRecv {
 		return ""
@@ -517,7 +517,7 @@ func (v *Visitor) pointerReceiverBoxMethodGroup(fun ast.Expr) string {
 	// an ident whose box is `Ꮡ`+name. A PROMOTED method (net's `defer zc.Unlock()` — Unlock on the
 	// embedded sync.RWMutex) has no extension on the OUTER box type (CS1061), so only a method
 	// declared DIRECTLY on the pointee takes the box group.
-	if xPtr, alreadyPtr := recvType.(*types.Pointer); alreadyPtr {
+	if xPtr, alreadyPtr := types.Unalias(recvType).(*types.Pointer); alreadyPtr {
 		identX, ok := selectorExpr.X.(*ast.Ident)
 
 		if !ok {
@@ -583,7 +583,7 @@ func (v *Visitor) deferCalleeValueReceiverMethod(call *ast.CallExpr) *types.Sign
 		return nil
 	}
 
-	_, isPtrRecv := sig.Recv().Type().(*types.Pointer)
+	_, isPtrRecv := types.Unalias(sig.Recv().Type()).(*types.Pointer)
 
 	if isPtrRecv || types.IsInterface(sig.Recv().Type()) {
 		return nil
@@ -664,7 +664,7 @@ func (v *Visitor) deferGoLateReceiver(call *ast.CallExpr) *lateReceiver {
 		return &lateReceiver{sig: sig, x: selectorExpr.X}
 	}
 
-	recvPtr, isPtrRecv := sig.Recv().Type().(*types.Pointer)
+	recvPtr, isPtrRecv := types.Unalias(sig.Recv().Type()).(*types.Pointer)
 
 	if !isPtrRecv {
 		return nil

@@ -1139,7 +1139,7 @@ func receiverTypeIsPublicized(t types.Type) bool {
 		return false
 	}
 
-	if ptr, ok := t.(*types.Pointer); ok {
+	if ptr, ok := types.Unalias(t).(*types.Pointer); ok {
 		t = ptr.Elem()
 	}
 

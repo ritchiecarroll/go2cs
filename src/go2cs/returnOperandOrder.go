@@ -304,7 +304,7 @@ func (v *Visitor) pathThroughBase(base ast.Expr) (storagePath, bool) {
 		return storagePath{}, false
 	}
 
-	if _, isPointer := v.getType(base, false).(*types.Pointer); isPointer {
+	if _, isPointer := types.Unalias(v.getType(base, false)).(*types.Pointer); isPointer {
 		path = appendStep(path, storageStep{deref: true})
 	}
 
@@ -370,7 +370,7 @@ func (v *Visitor) callWritePaths(call *ast.CallExpr, add func(storagePath)) {
 		if selection, ok := v.info.Selections[selector]; ok && selection.Kind() == types.MethodVal {
 			if method, ok := selection.Obj().(*types.Func); ok {
 				if signature, ok := method.Type().(*types.Signature); ok && signature.Recv() != nil {
-					if _, isPointerRecv := signature.Recv().Type().(*types.Pointer); isPointerRecv {
+					if _, isPointerRecv := types.Unalias(signature.Recv().Type()).(*types.Pointer); isPointerRecv {
 						v.addReceiverWritePath(selector.X, add)
 					}
 				}
@@ -394,7 +394,7 @@ func (v *Visitor) addReceiverWritePath(receiver ast.Expr, add func(storagePath))
 		return
 	}
 
-	if _, isPointer := v.getType(receiver, false).(*types.Pointer); isPointer {
+	if _, isPointer := types.Unalias(v.getType(receiver, false)).(*types.Pointer); isPointer {
 		path = appendStep(path, storageStep{deref: true})
 	}
 
@@ -419,7 +419,7 @@ func (v *Visitor) addArgumentWritePath(argument ast.Expr, add func(storagePath))
 		}
 	}
 
-	if _, isPointer := v.getType(argument, false).(*types.Pointer); !isPointer {
+	if _, isPointer := types.Unalias(v.getType(argument, false)).(*types.Pointer); !isPointer {
 		return
 	}
 

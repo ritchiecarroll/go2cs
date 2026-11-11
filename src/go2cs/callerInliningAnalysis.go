@@ -748,7 +748,7 @@ var testingDecoratorReceivers = map[string]bool{"T": true, "B": true, "F": true,
 
 // testingReceiverName is the name of a testing method's receiver type, through a pointer.
 func testingReceiverName(recv types.Type) string {
-	if pointer, ok := recv.(*types.Pointer); ok {
+	if pointer, ok := types.Unalias(recv).(*types.Pointer); ok {
 		recv = pointer.Elem()
 	}
 

@@ -2293,7 +2293,7 @@ func (v *Visitor) selectorImpliesReceiverAddr(sel *ast.SelectorExpr, varObj type
 		return false
 	}
 
-	recvPtr, isPtrRecv := sig.Recv().Type().(*types.Pointer)
+	recvPtr, isPtrRecv := types.Unalias(sig.Recv().Type()).(*types.Pointer)
 
 	if !isPtrRecv {
 		return false
@@ -2306,7 +2306,7 @@ func (v *Visitor) selectorImpliesReceiverAddr(sel *ast.SelectorExpr, varObj type
 	}
 
 	// Already a pointer (arm 1 of pointerReceiverBoxMethodGroup) — excluded (see doc).
-	if _, alreadyPtr := recvType.(*types.Pointer); alreadyPtr {
+	if _, alreadyPtr := types.Unalias(recvType).(*types.Pointer); alreadyPtr {
 		return false
 	}
 
@@ -2828,7 +2828,7 @@ func (v *Visitor) methodValueBindsReceiverAddress(sel *ast.SelectorExpr) bool {
 		return false
 	}
 
-	if _, isPtrRecv := sig.Recv().Type().(*types.Pointer); !isPtrRecv {
+	if _, isPtrRecv := types.Unalias(sig.Recv().Type()).(*types.Pointer); !isPtrRecv {
 		return false
 	}
 
@@ -2838,7 +2838,7 @@ func (v *Visitor) methodValueBindsReceiverAddress(sel *ast.SelectorExpr) bool {
 		return false
 	}
 
-	_, alreadyPtr := recvType.(*types.Pointer)
+	_, alreadyPtr := types.Unalias(recvType).(*types.Pointer)
 
 	return !alreadyPtr
 }

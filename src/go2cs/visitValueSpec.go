@@ -1527,7 +1527,7 @@ func (v *Visitor) convInterfaceDeclValue(value ast.Expr, ifaceDeclType types.Typ
 	rhsType := v.info.TypeOf(value)
 	contexts := []ExprContext{context}
 
-	if _, isPtr := rhsType.(*types.Pointer); isPtr {
+	if _, isPtr := types.Unalias(rhsType).(*types.Pointer); isPtr {
 		identContext := DefaultIdentContext()
 		identContext.isPointer = true
 		contexts = []ExprContext{identContext, context}

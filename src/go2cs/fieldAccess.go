@@ -894,7 +894,7 @@ func shadowsPromotedMethod(owner types.Type, name string) bool {
 
 			embedded := types.Unalias(field.Type())
 
-			if ptr, isPtr := embedded.(*types.Pointer); isPtr {
+			if ptr, isPtr := types.Unalias(embedded).(*types.Pointer); isPtr {
 				embedded = ptr.Elem()
 			}
 

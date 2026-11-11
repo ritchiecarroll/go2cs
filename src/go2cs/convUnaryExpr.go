@@ -187,7 +187,7 @@ func (v *Visitor) boxAccessorType(typeName, receiver string, owner types.Type) s
 // means) keeps the production class — unchanged behavior for every site that cannot name an object.
 func (v *Visitor) boxAccessorQualifier(owner types.Type) string {
 	if owner != nil {
-		if pointer, ok := owner.(*types.Pointer); ok {
+		if pointer, ok := types.Unalias(owner).(*types.Pointer); ok {
 			owner = pointer.Elem()
 		}
 
@@ -255,7 +255,7 @@ func (v *Visitor) boxBaseName(ident *ast.Ident) string {
 	// `rand` package) and crypto/rsa (CS0103, ~50 sites). The collision case already resolved to the
 	// raw name via the `base` check below; this generalizes it to the shadow-rename case for params.
 	if v.identIsParameter(ident) {
-		if _, isPointer := v.getIdentType(ident).(*types.Pointer); isPointer {
+		if _, isPointer := types.Unalias(v.getIdentType(ident)).(*types.Pointer); isPointer {
 			return ident.Name
 		}
 	}
@@ -356,7 +356,7 @@ func (v *Visitor) receiverFieldChainAddressForm(recv *types.Var, recvName string
 			ownerType = v.info.TypeOf(hop.X)
 		}
 
-		if pointer, ok := ownerType.(*types.Pointer); ok {
+		if pointer, ok := types.Unalias(ownerType).(*types.Pointer); ok {
 			ownerType = pointer.Elem()
 		}
 
@@ -488,7 +488,7 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 				recvType := v.currentFuncSignature.Recv().Type()
 
 				// Check if receiver is a pointer type
-				if _, ok := recvType.(*types.Pointer); ok {
+				if _, ok := types.Unalias(recvType).(*types.Pointer); ok {
 					isRecvPointer = true
 					recvName = recv.Name()
 				}
@@ -766,7 +766,7 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 			// slicingMakeTable's `simplePopulateTable(poly, &t[0])` left the CRC tables all-zeros —
 			// TestGolden/TestSlicing). A pointer-to-SLICE cannot reach here (Go does not auto-deref
 			// `*[]E` for indexing; it is written `(*t)[i]`, a StarExpr the slice branch handles).
-			if ptr, isPtr := exprType.(*types.Pointer); isPtr {
+			if ptr, isPtr := types.Unalias(exprType).(*types.Pointer); isPtr {
 				if arrayType, isArray := ptr.Elem().Underlying().(*types.Array); isArray {
 					// The pointer RECEIVER is the one base with NO box to go through: a Go pointer
 					// receiver renders as `this ref T recv`, so `recv.at<E>(i)` names a member the
@@ -1087,7 +1087,7 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 		// would silently orphan writes through the double pointer (runtime proc.go's allm walk
 		// REMOVES entries via `*pprev = mp.alllink` from `pprev := &allm`) — fall through to
 		// the identity-box branches below for those.
-		if _, ok := v.getType(unaryExpr.X, true).(*types.Pointer); ok {
+		if _, ok := types.Unalias(v.getType(unaryExpr.X, true)).(*types.Pointer); ok {
 			identityBoxed := false
 
 			if ident := getIdentifier(unaryExpr.X); ident != nil {

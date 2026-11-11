@@ -171,7 +171,7 @@ func (v *Visitor) elementAddressTakeOf(operand ast.Expr) (elementAddressTake, bo
 		refRecv = true
 	}
 
-	if ptr, isPtr := exprType.(*types.Pointer); isPtr {
+	if ptr, isPtr := types.Unalias(exprType).(*types.Pointer); isPtr {
 		arrayType, isArray := ptr.Elem().Underlying().(*types.Array)
 
 		if !isArray {
@@ -289,7 +289,7 @@ func (v *Visitor) pointerReceiverName() (string, bool) {
 		return "", false
 	}
 
-	if _, ok := recv.Type().(*types.Pointer); !ok {
+	if _, ok := types.Unalias(recv.Type()).(*types.Pointer); !ok {
 		return "", false
 	}
 

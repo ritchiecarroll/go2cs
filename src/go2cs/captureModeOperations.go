@@ -490,7 +490,7 @@ func scanFileForCaptureModeMethods(file *ast.File, info *types.Info) {
 			return true
 		}
 
-		pointer, ok := signature.Recv().Type().(*types.Pointer)
+		pointer, ok := types.Unalias(signature.Recv().Type()).(*types.Pointer)
 
 		if !ok {
 			return true
@@ -719,7 +719,7 @@ func selectorRootsAtReceiverValueFieldChain(expr ast.Expr, recvName string, info
 			return false
 		}
 
-		if _, isPtr := info.TypeOf(sel).(*types.Pointer); isPtr {
+		if _, isPtr := types.Unalias(info.TypeOf(sel)).(*types.Pointer); isPtr {
 			return false
 		}
 
@@ -849,7 +849,7 @@ func bodyHasPointerMethodValueOnReceiver(body *ast.BlockStmt, recvName string, i
 			return true
 		}
 
-		if _, isPtr := sig.Recv().Type().(*types.Pointer); !isPtr {
+		if _, isPtr := types.Unalias(sig.Recv().Type()).(*types.Pointer); !isPtr {
 			return true
 		}
 
@@ -916,7 +916,7 @@ func bodyCapturesReceiverInValueMethodValue(body *ast.BlockStmt, recvName string
 		// A POINTER-receiver method value renders as a box-bound method group (handled separately),
 		// and an INTERFACE receiver delegate-binds directly — neither synthesizes a capturing lambda.
 		// Only a concrete VALUE receiver produces the `() => recv.….method()` wrapper.
-		if _, isPtr := sig.Recv().Type().(*types.Pointer); isPtr {
+		if _, isPtr := types.Unalias(sig.Recv().Type()).(*types.Pointer); isPtr {
 			return true
 		}
 
@@ -1079,7 +1079,7 @@ func bodyHasGoStmtBoxMethodGroupOnReceiver(body *ast.BlockStmt, recvName string,
 			return true
 		}
 
-		if _, isPtr := sig.Recv().Type().(*types.Pointer); !isPtr {
+		if _, isPtr := types.Unalias(sig.Recv().Type()).(*types.Pointer); !isPtr {
 			return true
 		}
 
@@ -1133,7 +1133,7 @@ func bodyPassesReceiverAsPointerArg(body *ast.BlockStmt, recvName string, info *
 			// the parameter is the same pointer type, but check the signature to exclude a
 			// SHADOWED local of another type).
 			if argType := info.TypeOf(arg); argType != nil {
-				if _, isPtr := argType.(*types.Pointer); isPtr {
+				if _, isPtr := types.Unalias(argType).(*types.Pointer); isPtr {
 					found = true
 					return false
 				}
@@ -1188,7 +1188,7 @@ func bodyUsesReceiverAsPointerValue(body *ast.BlockStmt, recvName string, info *
 			// of another type cannot promote (mirrors bodyPassesReceiverAsPointerArg).
 			if ident, ok := n.Value.(*ast.Ident); ok && ident.Name == recvName {
 				if valueType := info.TypeOf(n.Value); valueType != nil {
-					if _, isPtr := valueType.(*types.Pointer); isPtr {
+					if _, isPtr := types.Unalias(valueType).(*types.Pointer); isPtr {
 						found = true
 						return false
 					}
@@ -1227,7 +1227,7 @@ func bodyUsesReceiverAsPointerValue(body *ast.BlockStmt, recvName string, info *
 
 					if ident, ok := val.(*ast.Ident); ok && ident.Name == recvName {
 						if fieldIdx >= 0 && fieldIdx < structType.NumFields() {
-							if _, isPtr := structType.Field(fieldIdx).Type().(*types.Pointer); isPtr {
+							if _, isPtr := types.Unalias(structType.Field(fieldIdx).Type()).(*types.Pointer); isPtr {
 								found = true
 								return false
 							}
@@ -1250,12 +1250,12 @@ func bodyUsesReceiverAsPointerValue(body *ast.BlockStmt, recvName string, info *
 				// `descendents := []*UserTaskSummary{s}` inside `func (s *UserTaskSummary)
 				// Descendents()` (internal/trace summary.go): the receiver becomes a POINTER element
 				// of the slice, so `s` must render as its box `Ꮡs`, not the value alias (CS0029).
-				if _, isPtr := litType.Elem().(*types.Pointer); isPtr && compositeLitHasReceiverElement(n.Elts, recvName) {
+				if _, isPtr := types.Unalias(litType.Elem()).(*types.Pointer); isPtr && compositeLitHasReceiverElement(n.Elts, recvName) {
 					found = true
 					return false
 				}
 			case *types.Array:
-				if _, isPtr := litType.Elem().(*types.Pointer); isPtr && compositeLitHasReceiverElement(n.Elts, recvName) {
+				if _, isPtr := types.Unalias(litType.Elem()).(*types.Pointer); isPtr && compositeLitHasReceiverElement(n.Elts, recvName) {
 					found = true
 					return false
 				}
@@ -1275,7 +1275,7 @@ func bodyUsesReceiverAsPointerValue(body *ast.BlockStmt, recvName string, info *
 			if ident, ok := n.Index.(*ast.Ident); ok && ident.Name == recvName {
 				if baseType := info.TypeOf(n.X); baseType != nil {
 					if mapType, isMap := baseType.Underlying().(*types.Map); isMap {
-						if _, keyIsPtr := mapType.Key().(*types.Pointer); keyIsPtr {
+						if _, keyIsPtr := types.Unalias(mapType.Key()).(*types.Pointer); keyIsPtr {
 							found = true
 							return false
 						}
@@ -1536,7 +1536,7 @@ func bodyTakesImplicitReceiverFieldAddress(body *ast.BlockStmt, recvName string,
 
 		// A value-receiver method takes no address of its argument; only a pointer receiver forces
 		// Go to address `v.field`.
-		if _, isPtr := signature.Recv().Type().(*types.Pointer); !isPtr {
+		if _, isPtr := types.Unalias(signature.Recv().Type()).(*types.Pointer); !isPtr {
 			return true
 		}
 
@@ -1665,7 +1665,7 @@ func (v *Visitor) exprIsCaptureModeFieldBase(expr ast.Expr) bool {
 		return false
 	}
 
-	if _, isPtr := v.info.TypeOf(sel).(*types.Pointer); isPtr {
+	if _, isPtr := types.Unalias(v.info.TypeOf(sel)).(*types.Pointer); isPtr {
 		return false
 	}
 
@@ -1681,7 +1681,7 @@ func (v *Visitor) exprIsCaptureModeFieldBase(expr ast.Expr) bool {
 		return false
 	}
 
-	_, isPtr := v.info.TypeOf(baseIdent).(*types.Pointer)
+	_, isPtr := types.Unalias(v.info.TypeOf(baseIdent)).(*types.Pointer)
 
 	return isPtr
 }
@@ -1697,7 +1697,7 @@ func (v *Visitor) exprIsDerefdPointerParam(expr ast.Expr) bool {
 		return false
 	}
 
-	_, isPtr := v.getIdentType(ident).(*types.Pointer)
+	_, isPtr := types.Unalias(v.getIdentType(ident)).(*types.Pointer)
 
 	return isPtr
 }
@@ -1849,7 +1849,7 @@ func (v *Visitor) bodyCallsCaptureModeMethodOnObject(target types.Object, body a
 			}
 
 			// Only a value receiver needs boxing; a pointer receiver already carries its box.
-			if _, isPointer := v.info.TypeOf(recvIdent).(*types.Pointer); isPointer {
+			if _, isPointer := types.Unalias(v.info.TypeOf(recvIdent)).(*types.Pointer); isPointer {
 				return true
 			}
 		} else {
@@ -2014,7 +2014,7 @@ func bodyCallsValueMethodOnReceiver(body *ast.BlockStmt, recvName string, info *
 
 		if funcObj, ok := info.ObjectOf(selectorExpr.Sel).(*types.Func); ok && funcObj != nil {
 			if sig, ok := funcObj.Type().(*types.Signature); ok && sig.Recv() != nil {
-				if _, isPtr := sig.Recv().Type().(*types.Pointer); !isPtr && !types.IsInterface(sig.Recv().Type()) {
+				if _, isPtr := types.Unalias(sig.Recv().Type()).(*types.Pointer); !isPtr && !types.IsInterface(sig.Recv().Type()) {
 					found = true
 					return false
 				}

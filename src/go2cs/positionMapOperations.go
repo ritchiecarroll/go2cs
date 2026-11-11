@@ -1113,7 +1113,7 @@ func (v *Visitor) collectMethodValueNames(funcDecl *ast.FuncDecl) {
 			return true
 		}
 
-		if _, pointer := recv.Type().(*types.Pointer); pointer {
+		if _, pointer := types.Unalias(recv.Type()).(*types.Pointer); pointer {
 			return true
 		}
 

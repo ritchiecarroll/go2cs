@@ -1133,7 +1133,7 @@ func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {
 		named, _ := types.Unalias(fieldType).(*types.Named)
 
 		if named == nil {
-			if ptr, isPtr := fieldType.(*types.Pointer); isPtr {
+			if ptr, isPtr := types.Unalias(fieldType).(*types.Pointer); isPtr {
 				named, _ = types.Unalias(ptr.Elem()).(*types.Named)
 			}
 		}
@@ -1145,7 +1145,7 @@ func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {
 
 		// Same-package `*X` embed: any named pointee promotes (struct underlying and named
 		// non-struct both take the partial-ref path); `*int` (builtin pointee) stays plain.
-		if ptr, isPtr := fieldType.(*types.Pointer); isPtr {
+		if ptr, isPtr := types.Unalias(fieldType).(*types.Pointer); isPtr {
 			if _, isNamed := types.Unalias(ptr.Elem()).(*types.Named); isNamed {
 				return true
 			}

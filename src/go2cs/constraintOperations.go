@@ -724,13 +724,13 @@ func interfacePointerTerm(iface *types.Interface, depth int) (*types.Pointer, bo
 
 	// The single embedded element is the term type directly, a one-term union (go/types wraps
 	// explicit terms in a Union; both shapes appear in practice), or a named constraint interface.
-	switch embedded := iface.EmbeddedType(0).(type) {
+	switch embedded := types.Unalias(iface.EmbeddedType(0)).(type) {
 	case *types.Union:
 		if embedded.Len() != 1 || embedded.Term(0).Tilde() {
 			return nil, false
 		}
 
-		pointer, ok := embedded.Term(0).Type().(*types.Pointer)
+		pointer, ok := types.Unalias(embedded.Term(0).Type()).(*types.Pointer)
 		return pointer, ok
 
 	case *types.Pointer:
@@ -775,12 +775,12 @@ func interfaceHasPointerTerm(iface *types.Interface, depth int) bool {
 	}
 
 	for i := range iface.NumEmbeddeds() {
-		switch embedded := iface.EmbeddedType(i).(type) {
+		switch embedded := types.Unalias(iface.EmbeddedType(i)).(type) {
 		case *types.Union:
 			for j := range embedded.Len() {
 				term := embedded.Term(j).Type()
 
-				if _, ok := term.(*types.Pointer); ok {
+				if _, ok := types.Unalias(term).(*types.Pointer); ok {
 					return true
 				}
 
@@ -855,7 +855,7 @@ func (v *Visitor) typeParamErased(typeParam *types.TypeParam) (*types.Pointer, b
 // function (see typeParamErased) — so a `p P` parameter under `[P *T]` takes the same deref-alias
 // and box (`Ꮡ`) conventions as a plain `p *T` parameter.
 func (v *Visitor) paramPointerType(t types.Type) (*types.Pointer, bool) {
-	if pointer, ok := t.(*types.Pointer); ok {
+	if pointer, ok := types.Unalias(t).(*types.Pointer); ok {
 		return pointer, true
 	}
 
@@ -1710,7 +1710,7 @@ func genericOwner(named *types.Named, signature *types.Signature, typeParams *ty
 
 	recv := signature.Recv().Type()
 
-	if pointer, ok := recv.(*types.Pointer); ok {
+	if pointer, ok := types.Unalias(recv).(*types.Pointer); ok {
 		recv = pointer.Elem()
 	}
 
@@ -3005,12 +3005,12 @@ func interfacePointerTermsOnly(iface *types.Interface, depth int) bool {
 	}
 
 	for i := range iface.NumEmbeddeds() {
-		switch embedded := iface.EmbeddedType(i).(type) {
+		switch embedded := types.Unalias(iface.EmbeddedType(i)).(type) {
 		case *types.Union:
 			for j := range embedded.Len() {
 				term := embedded.Term(j)
 
-				if _, isPointer := term.Type().(*types.Pointer); term.Tilde() || !isPointer {
+				if _, isPointer := types.Unalias(term.Type()).(*types.Pointer); term.Tilde() || !isPointer {
 					return false
 				}
 			}

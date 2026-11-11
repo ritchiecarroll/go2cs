@@ -215,7 +215,7 @@ func (param cgoStructParam) pointee() string {
 func (set *cgoWrapperSet) param(function string, index int, t types.Type) (cgoStructParam, error) {
 	role := fmt.Sprintf("parameter %d", index+1)
 
-	if pointer, ok := t.(*types.Pointer); ok {
+	if pointer, ok := types.Unalias(t).(*types.Pointer); ok {
 		named := cgoStructOf(pointer.Elem())
 
 		// A pointer to ONE C scalar crosses as a struct pointer does: a stack copy in, its address handed over, and the
@@ -306,7 +306,7 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 
 	resultType := signature.Results().At(0).Type()
 	resultStruct := cgoStructOf(resultType)
-	resultPointer, pointerResult := resultType.(*types.Pointer)
+	resultPointer, pointerResult := types.Unalias(resultType).(*types.Pointer)
 
 	if scalarsOnly && resultStruct == nil && !pointerResult {
 		return cgoScalarWrapper(declaration, scalarTarget)

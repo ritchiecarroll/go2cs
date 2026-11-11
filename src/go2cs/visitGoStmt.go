@@ -106,7 +106,7 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 	if selectorExpr, ok := goStmt.Call.Fun.(*ast.SelectorExpr); ok {
 		if funcObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Func); ok {
 			if sig, ok := funcObj.Type().(*types.Signature); ok && sig.Recv() != nil {
-				if _, isPtrRecv := sig.Recv().Type().(*types.Pointer); !isPtrRecv && !types.IsInterface(sig.Recv().Type()) {
+				if _, isPtrRecv := types.Unalias(sig.Recv().Type()).(*types.Pointer); !isPtrRecv && !types.IsInterface(sig.Recv().Type()) {
 					valueRecvMethodGroup = true
 				}
 			}

@@ -155,8 +155,8 @@ func (v *Visitor) rangeVarNeedsMutableCopy(expr ast.Expr, body *ast.BlockStmt) b
 			}
 
 			if sig, ok := sel.Obj().Type().(*types.Signature); ok && sig.Recv() != nil {
-				if _, recvIsPtr := sig.Recv().Type().(*types.Pointer); recvIsPtr {
-					if _, recvExprIsPtr := v.info.TypeOf(s.X).(*types.Pointer); !recvExprIsPtr {
+				if _, recvIsPtr := types.Unalias(sig.Recv().Type()).(*types.Pointer); recvIsPtr {
+					if _, recvExprIsPtr := types.Unalias(v.info.TypeOf(s.X)).(*types.Pointer); !recvExprIsPtr {
 						found = true
 						return false
 					}

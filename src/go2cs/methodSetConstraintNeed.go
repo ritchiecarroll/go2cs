@@ -200,7 +200,7 @@ func (v *Visitor) methodSetConstraintNeededSeen(fn *types.Func, index int, seen 
 			if selection := info.Selections[node]; selection != nil && (selection.Kind() == types.MethodVal || selection.Kind() == types.MethodExpr) {
 				receiver := selection.Recv()
 
-				if pointer, ok := receiver.(*types.Pointer); ok {
+				if pointer, ok := types.Unalias(receiver).(*types.Pointer); ok {
 					receiver = pointer.Elem()
 				}
 

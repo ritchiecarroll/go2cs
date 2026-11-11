@@ -86,7 +86,7 @@ func (v *Visitor) recordStructFieldInterfaceCasts(compositeLit *ast.CompositeLit
 							// method set), while the non-interface guard tests the pointee.
 							implSource := eltType
 
-							if ptr, ok := eltType.(*types.Pointer); ok {
+							if ptr, ok := types.Unalias(eltType).(*types.Pointer); ok {
 								implSource = ptr.Elem()
 							}
 
@@ -792,7 +792,7 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 		if _, ok := elementType.Underlying().(*types.Pointer); ok {
 			for i, elt := range compositeLit.Elts {
 				if ident, ok := elt.(*ast.Ident); ok {
-					if _, isPtr := v.getType(ident, false).(*types.Pointer); isPtr {
+					if _, isPtr := types.Unalias(v.getType(ident, false)).(*types.Pointer); isPtr {
 						callContext.argTypeIsPtr[i] = true
 					}
 				}
@@ -1500,7 +1500,7 @@ func (v *Visitor) elidedPointerElemContext(elem types.Type, elts []ast.Expr) *Ca
 		context.u8StringArgOK[i] = true
 
 		if ident, ok := elt.(*ast.Ident); ok {
-			if _, isPtr := v.getType(ident, false).(*types.Pointer); isPtr {
+			if _, isPtr := types.Unalias(v.getType(ident, false)).(*types.Pointer); isPtr {
 				context.argTypeIsPtr[i] = true
 				hasPtrIdent = true
 			}
@@ -1603,7 +1603,7 @@ func (v *Visitor) markAnyFieldLits(structType *types.Struct, elts []ast.Expr, co
 		// typedNilInterfaceBoxing.go). `encoding/gob`'s TestNilPointerPanics table is the shape:
 		// `[]struct{ value any; mustPanic bool }{{nilStringPtr, true}, …}`, where every nil
 		// pointer row must reach gob as a TYPED nil for gob to panic on it as Go does.
-		if _, eltIsPtr := v.getType(elt, false).(*types.Pointer); eltIsPtr {
+		if _, eltIsPtr := types.Unalias(v.getType(elt, false)).(*types.Pointer); eltIsPtr {
 			context.argTypeIsPtr[i] = true
 			context.anyBoxedPtrArgs[i] = true
 		}
@@ -1665,7 +1665,7 @@ func (v *Visitor) markEmptyInterfaceElems(elts []ast.Expr, context *CallExprCont
 		// A POINTER element crosses into interface space as its BOX, carrying its Go
 		// type — the same boundary the call-argument arm applies (see
 		// typedNilInterfaceBoxing.go); both halves are consumed in convExprList.
-		if _, eltIsPtr := v.getType(elt, false).(*types.Pointer); eltIsPtr {
+		if _, eltIsPtr := types.Unalias(v.getType(elt, false)).(*types.Pointer); eltIsPtr {
 			context.argTypeIsPtr[i] = true
 			context.anyBoxedPtrArgs[i] = true
 			marked = true

@@ -295,8 +295,8 @@ func (v *Visitor) layoutBridges(local *types.Signature, target *types.Signature)
 			continue
 		}
 
-		localPtr, isLocalPtr := localType.(*types.Pointer)
-		targetPtr, isTargetPtr := targetType.(*types.Pointer)
+		localPtr, isLocalPtr := types.Unalias(localType).(*types.Pointer)
+		targetPtr, isTargetPtr := types.Unalias(targetType).(*types.Pointer)
 
 		if !isLocalPtr || !isTargetPtr {
 			return nil, false

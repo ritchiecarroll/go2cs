@@ -57,7 +57,7 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 			// passed a typeInfo where ж<typeInfo> was expected (CS1503). The isPointer ident
 			// context renders the box (`building[Ꮡinfo]`), mirroring the pointer-field struct
 			// initializer in convKeyValueExpr.
-			_, mapKeyIsPointer := mapType.Key().(*types.Pointer)
+			_, mapKeyIsPointer := types.Unalias(mapType.Key()).(*types.Pointer)
 
 			// The box (`Ꮡ`) key rendering applies ONLY where the box exists under the raw name:
 			// a deref-aliased pointer PARAMETER (its value alias `ref var info = ref Ꮡinfo.Value`
@@ -88,7 +88,7 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 			mapKeyOperandIsPointer := false
 
 			if mapKeyInterfaceType != nil {
-				if _, isPtr := v.getType(indexExpr.Index, false).(*types.Pointer); isPtr {
+				if _, isPtr := types.Unalias(v.getType(indexExpr.Index, false)).(*types.Pointer); isPtr {
 					mapKeyOperandIsPointer = true
 				}
 			}

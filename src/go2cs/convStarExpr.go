@@ -101,7 +101,7 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 		// underlying type and derefs the same way -- its generated wrapper declares `Value`. Read
 		// only for a VALUE operand: matching *types.Pointer alone took `*h.p` for a pointer cast and
 		// rendered the type spelling `ж<h.p>` (CS0119).
-		_, selIsPointer := v.getIdentType(selectorExpr.Sel).(*types.Pointer)
+		_, selIsPointer := types.Unalias(v.getIdentType(selectorExpr.Sel)).(*types.Pointer)
 
 		if !selIsPointer {
 			if tv, isType := v.info.Types[starExpr.X]; !(isType && tv.IsType()) {

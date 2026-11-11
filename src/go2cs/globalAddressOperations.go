@@ -171,7 +171,7 @@ func scanAddressedGlobals(file *ast.File, pkg *types.Package, info *types.Info, 
 			}
 
 			// A pointer global already carries its box; only value globals need boxing.
-			if _, isPtr := varObj.Type().(*types.Pointer); isPtr {
+			if _, isPtr := types.Unalias(varObj.Type()).(*types.Pointer); isPtr {
 				return true
 			}
 
@@ -188,7 +188,7 @@ func scanAddressedGlobals(file *ast.File, pkg *types.Package, info *types.Info, 
 
 			if !shouldBox {
 				if sig, ok := funcObj.Type().(*types.Signature); ok && sig.Recv() != nil {
-					_, shouldBox = sig.Recv().Type().(*types.Pointer)
+					_, shouldBox = types.Unalias(sig.Recv().Type()).(*types.Pointer)
 				}
 			}
 
@@ -225,7 +225,7 @@ func methodValueStorageRoot(selectorExpr *ast.SelectorExpr, info *types.Info) *t
 
 	if signature, ok := selection.Obj().Type().(*types.Signature); !ok || signature.Recv() == nil {
 		return nil
-	} else if _, pointerMethod := signature.Recv().Type().(*types.Pointer); !pointerMethod {
+	} else if _, pointerMethod := types.Unalias(signature.Recv().Type()).(*types.Pointer); !pointerMethod {
 		return nil
 	}
 
@@ -326,7 +326,7 @@ func siblingMethodValueRoot(pkg *types.Package, candidate siblingMethodValue) *t
 
 	if signature, ok := method.Type().(*types.Signature); !ok || signature.Recv() == nil {
 		return nil
-	} else if _, pointerMethod := signature.Recv().Type().(*types.Pointer); !pointerMethod {
+	} else if _, pointerMethod := types.Unalias(signature.Recv().Type()).(*types.Pointer); !pointerMethod {
 		return nil
 	}
 

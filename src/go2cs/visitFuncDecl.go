@@ -135,7 +135,7 @@ func (v *Visitor) variadicElementParts(elem types.Type) (typeName string, identB
 	// `ж<main_package.box>` where the INLINE form can say bare `ж<box>`, since only the inline form
 	// sits inside the package class. A pointee with no alias form of its own (a type parameter, a
 	// constructed pointee such as `*[]byte`) takes the whole element inline with it.
-	if pointer, ok := elem.(*types.Pointer); ok {
+	if pointer, ok := types.Unalias(elem).(*types.Pointer); ok {
 		if typeName != fmt.Sprintf("%s<%s>", PointerPrefix, v.getCSharpTypeName(pointer.Elem())) {
 			// getCSharpTypeName rendered this pointer some other way (an erased pointer-core type
 			// parameter, a lifted type) — do not guess at its structure.
@@ -2325,7 +2325,7 @@ func (v *Visitor) paramNeedsHeapBox(param *types.Var) bool {
 		return false
 	}
 
-	if _, isPointer := param.Type().(*types.Pointer); isPointer {
+	if _, isPointer := types.Unalias(param.Type()).(*types.Pointer); isPointer {
 		return false
 	}
 

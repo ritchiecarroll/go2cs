@@ -35,7 +35,7 @@ func isDynamicStruct(t types.Type) bool {
 	}
 
 	// If it's a pointer, get its element.
-	if ptr, ok := t.(*types.Pointer); ok {
+	if ptr, ok := types.Unalias(t).(*types.Pointer); ok {
 		t = ptr.Elem()
 	}
 
@@ -125,11 +125,11 @@ func (v *Visitor) checkForDynamicStructs(argType types.Type, targetType types.Ty
 // types used with an operator must also be public :-p
 func (v *Visitor) dynamicCast(sourceType types.Type, targetType types.Type, targetTypeName string) string {
 	// Unwrap pointer types if needed
-	if sourcePtr, ok := sourceType.(*types.Pointer); ok {
+	if sourcePtr, ok := types.Unalias(sourceType).(*types.Pointer); ok {
 		sourceType = sourcePtr.Elem()
 	}
 
-	if targetPtr, ok := targetType.(*types.Pointer); ok {
+	if targetPtr, ok := types.Unalias(targetType).(*types.Pointer); ok {
 		targetType = targetPtr.Elem()
 	}
 

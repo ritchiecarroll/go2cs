@@ -294,6 +294,10 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 	// recursing into getAliasQualifiedTypeName.
 	v.collectTypePackages(t, nil)
 
+	// The SPELLED type is read here, not the type an alias denotes: an alias of a pointer type
+	// (`type NodePtr = *Node`) is rendered by its own name below, as Go writes it. Every other
+	// pointer-type read in the converter decides what an expression IS and resolves the alias
+	// (TestPointerTypeReadsResolveAliases).
 	if pointer, ok := t.(*types.Pointer); ok {
 		return "*" + v.getAliasQualifiedTypeName(pointer.Elem(), isUnderlying)
 	}
@@ -671,6 +675,7 @@ func (v *Visitor) getFullyQualifiedTypeName(t types.Type, isUnderlying bool) str
 		}
 	}
 
+	// The SPELLED type, as in getAliasQualifiedTypeName: an alias of a pointer type keeps its name.
 	if pointer, ok := t.(*types.Pointer); ok {
 		return "*" + v.getFullyQualifiedTypeName(pointer.Elem(), isUnderlying)
 	}
@@ -1076,6 +1081,13 @@ func getAliasedTypeName(typeName string) string {
 // ordinary C# rendering would produce — the box is the heap-allocated form, while a `ref` param is
 // the caller's own storage.
 func (v *Visitor) getRefParameterTypeName(t types.Type) string {
+	// A receiver written through an alias of the pointer type (`type NodePtr = *Node`,
+	// `func (p NodePtr) M()`) has no alias spelling by reference: `ref` names the element, so the
+	// pointer is read through the alias (`this ref Node p`).
+	if pointer, ok := types.Unalias(t).(*types.Pointer); ok {
+		t = pointer
+	}
+
 	typeName := v.getAliasQualifiedTypeName(t, false)
 
 	if strings.HasPrefix(typeName, "*") {

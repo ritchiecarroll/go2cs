@@ -319,7 +319,7 @@ func isDynamicInterface(t types.Type) bool {
 	}
 
 	// If it's a pointer, get its element.
-	if ptr, ok := t.(*types.Pointer); ok {
+	if ptr, ok := types.Unalias(t).(*types.Pointer); ok {
 		t = ptr.Elem()
 	}
 
@@ -398,7 +398,7 @@ func (v *Visitor) isPointerReceiver() (bool, string) {
 	recvType := v.currentFuncSignature.Recv().Type()
 	isRecvPointer := false
 
-	if _, ok := recvType.(*types.Pointer); ok {
+	if _, ok := types.Unalias(recvType).(*types.Pointer); ok {
 		isRecvPointer = true
 	}
 
@@ -475,7 +475,7 @@ func (v *Visitor) isLocalImplType(t types.Type) bool {
 		return true
 	}
 
-	if pointer, ok := t.(*types.Pointer); ok {
+	if pointer, ok := types.Unalias(t).(*types.Pointer); ok {
 		return v.isLocalImplType(pointer.Elem())
 	}
 

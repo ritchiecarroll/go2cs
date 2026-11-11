@@ -4162,7 +4162,7 @@ func applyCapabilityGate(entry *testDeclaration, requirements hashset.HashSet[st
 }
 
 func isTestingPointer(t types.Type, typeName string) bool {
-	pointer, ok := t.(*types.Pointer)
+	pointer, ok := types.Unalias(t).(*types.Pointer)
 	if !ok {
 		return false
 	}
@@ -4593,7 +4593,7 @@ func analyzeTestingCapabilities(pkg *packages.Package) testCapabilityAnalysis {
 							}
 
 							receiver := selection.Recv()
-							if pointer, ok := receiver.(*types.Pointer); ok {
+							if pointer, ok := types.Unalias(receiver).(*types.Pointer); ok {
 								receiver = pointer.Elem()
 							}
 							if named, ok := receiver.(*types.Named); ok && named.Obj().Pkg() != nil && named.Obj().Pkg().Path() == "testing" {

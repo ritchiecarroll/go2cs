@@ -123,7 +123,7 @@ func refuseManualTypeReceiverOperands(pkg *packages.Package, goos string) *manua
 						position: pkg.Fset.Position(call.Pos()),
 						text: fmt.Sprintf("%s(unsafe.Pointer(%s)) in method %s converts the pointer receiver %s to the manual type %s, which stores the referent: "+
 							"a receiver renders as its value with no box to pass, so the conversion would hold a copy; hand-convert the method with a `this ж<%s>` receiver",
-							named.Obj().Name(), ident.Name, funcDecl.Name.Name, ident.Name, named.Obj().Name(), types.TypeString(receiver.Type().(*types.Pointer).Elem(), types.RelativeTo(pkg.Types))),
+							named.Obj().Name(), ident.Name, funcDecl.Name.Name, ident.Name, named.Obj().Name(), types.TypeString(types.Unalias(receiver.Type()).(*types.Pointer).Elem(), types.RelativeTo(pkg.Types))),
 					})
 				}
 

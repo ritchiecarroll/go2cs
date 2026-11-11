@@ -124,7 +124,7 @@ func (v *Visitor) convertToProjectedInterfaceType(interfaceType types.Type, chec
 
 // unaliasPointerElem returns *T for a pointer to an alias of T, and t unchanged otherwise.
 func unaliasPointerElem(t types.Type) types.Type {
-	if ptr, ok := t.(*types.Pointer); ok {
+	if ptr, ok := types.Unalias(t).(*types.Pointer); ok {
 		if _, isAlias := ptr.Elem().(*types.Alias); isAlias {
 			return types.NewPointer(types.Unalias(ptr.Elem()))
 		}
@@ -267,7 +267,7 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 	{
 		openTarget := targetType
 
-		if ptr, ok := openTarget.(*types.Pointer); ok {
+		if ptr, ok := types.Unalias(openTarget).(*types.Pointer); ok {
 			openTarget = ptr.Elem()
 		}
 
@@ -424,7 +424,7 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 		// from the unwrapped VALUE form above) is structurally false here — unwrap and ask directly.
 		namedTarget := targetType
 
-		if ptr, ok := namedTarget.(*types.Pointer); ok {
+		if ptr, ok := types.Unalias(namedTarget).(*types.Pointer); ok {
 			namedTarget = ptr.Elem()
 		}
 
@@ -786,7 +786,7 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 		// The pointer-sourced target arrives as the *types.Pointer - unwrap to its named elem.
 		namedTarget := targetType
 
-		if ptr, ok := namedTarget.(*types.Pointer); ok {
+		if ptr, ok := types.Unalias(namedTarget).(*types.Pointer); ok {
 			namedTarget = ptr.Elem()
 		}
 
@@ -1315,7 +1315,7 @@ const openGenericImplementRecordPrefix = "typeof("
 // writer emits as `typeof(Name<>)`: the rendered name up to its type-argument list, with one comma per extra type
 // parameter. It reports false for a target that is not a generic named type.
 func openGenericImplementRecordName(targetType types.Type, targetTypeName string) (string, bool) {
-	if ptr, ok := targetType.(*types.Pointer); ok {
+	if ptr, ok := types.Unalias(targetType).(*types.Pointer); ok {
 		targetType = ptr.Elem()
 	}
 

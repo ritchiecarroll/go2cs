@@ -58,7 +58,7 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 			if fieldObj := v.info.Uses[keyIdent]; fieldObj != nil {
 				structFieldType = fieldObj.Type()
 
-				if _, isPtr := fieldObj.Type().(*types.Pointer); isPtr {
+				if _, isPtr := types.Unalias(fieldObj.Type()).(*types.Pointer); isPtr {
 					identContext := DefaultIdentContext()
 					identContext.isPointer = true
 					valueContexts = []ExprContext{identContext}
@@ -70,7 +70,7 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 					// raw box meets the interface-typed ctor parameter (CS1503).
 					structFieldIfaceType = fieldObj.Type()
 
-					if _, valIsPtr := v.getExprType(keyValueExpr.Value).(*types.Pointer); valIsPtr {
+					if _, valIsPtr := types.Unalias(v.getExprType(keyValueExpr.Value)).(*types.Pointer); valIsPtr {
 						identContext := DefaultIdentContext()
 						identContext.isPointer = true
 						valueContexts = []ExprContext{identContext}
@@ -97,7 +97,7 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 	if context.source == MapSource && context.compositeType != nil {
 		if mapType, ok := types.Unalias(context.compositeType).Underlying().(*types.Map); ok {
 			if _, elemIsPtr := mapType.Elem().Underlying().(*types.Pointer); elemIsPtr {
-				if _, valIsPtr := v.getExprType(keyValueExpr.Value).(*types.Pointer); valIsPtr {
+				if _, valIsPtr := types.Unalias(v.getExprType(keyValueExpr.Value)).(*types.Pointer); valIsPtr {
 					identContext := DefaultIdentContext()
 					identContext.isPointer = true
 					valueContexts = []ExprContext{identContext}
@@ -288,7 +288,7 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 		if context.compositeType != nil {
 			if mapType, ok := types.Unalias(context.compositeType).Underlying().(*types.Map); ok {
 				if _, keyIsPtr := mapType.Key().Underlying().(*types.Pointer); keyIsPtr {
-					if _, exprIsPtr := v.getExprType(keyValueExpr.Key).(*types.Pointer); exprIsPtr {
+					if _, exprIsPtr := types.Unalias(v.getExprType(keyValueExpr.Key)).(*types.Pointer); exprIsPtr {
 						keyIdentContext := DefaultIdentContext()
 						keyIdentContext.isPointer = true
 						keyExpr = v.convExpr(keyValueExpr.Key, []ExprContext{keyIdentContext})

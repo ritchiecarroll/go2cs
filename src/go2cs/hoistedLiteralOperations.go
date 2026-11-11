@@ -1411,7 +1411,7 @@ func isPlainStringLiteral(basicLit *ast.BasicLit) bool {
 func (c *hoistCollector) compositeUnder(composite *ast.CompositeLit) types.Type {
 	under := c.typeUnder(c.info.TypeOf(composite))
 
-	if pointer, ok := under.(*types.Pointer); ok {
+	if pointer, ok := types.Unalias(under).(*types.Pointer); ok {
 		return pointer.Elem().Underlying()
 	}
 
