@@ -44,6 +44,11 @@ func keyCount[K comparable](keys ...K) int {
 	return len(m)
 }
 
+// one wraps a value in a one-element array, so a nil made inside generic code becomes an array element.
+func one[T any](v T) [1]T {
+	return [1]T{v}
+}
+
 func asAny[T any](v T) any {
 	return v
 }
@@ -116,4 +121,22 @@ func main() {
 	fmt.Println(same[nodePtr](nil, named), same(named, nodePtr(nil)), keyCount[nodePtr](nil, named))
 	fmt.Println(slices.Contains([]*node{field.p}, nil), slices.Index([]*node{n, nil}, field.p))
 	fmt.Println(slices.Contains([]*node{nil}, field.p), slices.Equal([]*node{nil}, []*node{field.p}))
+
+	// Phase 7: a nil pointer as an array element and inside map keys of array and struct type.
+	fmt.Println("phase 7:")
+	fmt.Println(one[*node](nil) == [1]*node{}, one(field.p) == one[*node](nil), one(n) == one[*node](nil))
+	a := [2]*node{n, n}
+	a[1] = nil
+	a[0] = field.p
+	fmt.Println(a == [2]*node{}, same(a, [2]*node{}))
+	byArray := map[[1]*node]int{}
+	byArray[one[*node](nil)]++
+	byArray[[1]*node{}]++
+	byArray[one(field.p)]++
+	fmt.Println(len(byArray), byArray[[1]*node{nil}])
+	byStruct := map[holder]int{}
+	byStruct[holder{p: nil}]++
+	byStruct[field]++
+	byStruct[holder{}]++
+	fmt.Println(len(byStruct), byStruct[holder{p: nil}], keyCount(holder{p: nil}, field, holder{}))
 }

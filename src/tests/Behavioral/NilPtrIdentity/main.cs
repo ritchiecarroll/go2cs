@@ -41,6 +41,10 @@ internal static nint keyCount<K>(params Span<K> keysʗp) {
     return len(m);
 }
 
+internal static array<T> one<T>(T v) {
+    return new T[]{v}.array();
+}
+
 internal static any asAny<T>(T v) {
     return (v).OrTypedNilOf();
 }
@@ -112,6 +116,23 @@ internal static void Main() {
     fmt.Println(same<nodePtr>(nil, named), same(named, (nodePtr)nil), keyCount<nodePtr>((nodePtr)(nil), named));
     fmt.Println(slices.Contains(slice<ж<node>>([field.p]), (ж<node>)(nil)), slices.Index(slice<ж<node>>([n, default]), field.p));
     fmt.Println(slices.Contains(slice<ж<node>>([default]), field.p), slices.Equal<slice<ж<node>>, ж<node>>(slice<ж<node>>([default]), slice<ж<node>>([field.p])));
+
+    fmt.Println("phase 7:");
+    fmt.Println(one<ж<node>>(nil) == new ж<node>[]{}.array(1), one(field.p) == one<ж<node>>(nil), one(n) == one<ж<node>>(nil));
+    var a = new ж<node>[]{n, n}.array();
+    a[1] = default;
+    a[0] = field.p;
+    fmt.Println(a == new ж<node>[]{}.array(2), same(a, new ж<node>[]{}.array(2)));
+    var byArray = new map<array<ж<node>>, nint>{};
+    byArray[one<ж<node>>(nil)]++;
+    byArray[new ж<node>[]{}.array(1)]++;
+    byArray[one(field.p)]++;
+    fmt.Println(len(byArray), byArray[new ж<node>[]{default}.array()]);
+    var byStruct = new map<holder, nint>{};
+    byStruct[new holder(p: nil)]++;
+    byStruct[field]++;
+    byStruct[new holder()]++;
+    fmt.Println(len(byStruct), byStruct[new holder(p: nil)], keyCount(new holder(p: nil), field, new holder()));
 }
 
 } // end main_package
