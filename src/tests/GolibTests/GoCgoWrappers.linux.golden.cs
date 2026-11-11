@@ -288,6 +288,12 @@ static unsafe partial class cgotestꓸC_package
         return (@int)(int32)r;
     }
 
+    // The package's C libraries, as the converter captured them (§6.1, §11.5), registered with golib's resolver for this
+    // assembly's own [LibraryImport] bindings when the module loads (§6.2, §11.11).
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void registerᴍlibraries() => global::go.golib.GoCgoLibraries.Register(typeof(cgotestꓸC_package).Assembly,
+        new global::go.golib.GoCgoLibrary("-lc", "libc.so.6"));
+
     [global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit, Size = 8)]
     internal struct _Ctype_div_tᴍ
     {
