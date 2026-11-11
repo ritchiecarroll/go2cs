@@ -58,7 +58,7 @@ namespace go.golib;
 /// smaller than the one it replaces.
 /// </para>
 /// </remarks>
-public sealed class Goroutine
+public sealed partial class Goroutine
 {
     /// <summary>
     /// Environment variable overriding <see cref="StackReserve"/>.
@@ -695,7 +695,11 @@ public sealed class Goroutine
     /// having woken.
     /// </para>
     /// </remarks>
-    public static ParkScope Park(WaitReason reason)
+    public static ParkScope Park(WaitReason reason) => ParkCore(reason, handoff: true);
+
+    // M:N SPIKE: handoff is false for a twin's park (ParkTwin), which gives its carrier back instead of
+    // blocking it.
+    private static ParkScope ParkCore(WaitReason reason, bool handoff)
     {
         if (t_current is not { } goroutine)
             return default;
@@ -737,7 +741,10 @@ public sealed class Goroutine
             bubble.Idled();
         }
 
-        return new ParkScope(goroutine, previous);
+        // M:N SPIKE: a multiplexed goroutine about to block its carrier's thread gives the P away first.
+        bool handedOff = handoff && previous == (int)WaitReason.Zero && goroutine.m_multiplexed && GoScheduler.EnterBlocked();
+
+        return new ParkScope(goroutine, previous, handedOff);
     }
 
     /// <summary>
@@ -1640,11 +1647,13 @@ public sealed class Goroutine
     {
         private readonly Goroutine? m_goroutine;
         private readonly int m_previous;
+        private readonly bool m_handoff;
 
-        internal ParkScope(Goroutine goroutine, int previous)
+        internal ParkScope(Goroutine goroutine, int previous, bool handoff = false)
         {
             m_goroutine = goroutine;
             m_previous = previous;
+            m_handoff = handoff;
         }
 
         public void Dispose()
@@ -1652,6 +1661,10 @@ public sealed class Goroutine
             // Inert when Park found no identity: a thread that is not a goroutine parks nothing.
             if (m_goroutine is null)
                 return;
+
+            // M:N SPIKE: a thread that blocked under a hand-off takes a P back before it runs on.
+            if (m_handoff)
+                GoScheduler.ExitBlocked();
 
             int current = Volatile.Read(ref m_goroutine.m_waitReason);
 

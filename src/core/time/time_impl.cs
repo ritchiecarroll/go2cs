@@ -566,6 +566,49 @@ partial class time_package
         }
     }
 
+    // M:N SPIKE: the hidden twin of Sleep, which a twin awaits. The sleeper's timer wakes a GoParkSlot
+    // instead of an event, so the sleep gives its carrier back instead of blocking it. A bubbled sleep
+    // takes the thread path. The timer and the slot are allocated per sleep here; a real build hangs the
+    // timer off the goroutine, as Go's gp.timer.
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public static System.Threading.Tasks.ValueTask Sleepꞏtwin(Duration d)
+    {
+        if (d <= 0)
+            return default;
+
+        if (SyncTestBubble.Current is not null)
+        {
+            Sleep(d);
+            return default;
+        }
+
+        int64 deadline = runtimeNano() + (int64)d;
+
+        if (deadline < 0)
+            deadline = int64.MaxValue;
+
+        return sleepTwin(deadline);
+    }
+
+    private static async System.Threading.Tasks.ValueTask sleepTwin(int64 deadline)
+    {
+        Goroutine.ParkScope scope = Goroutine.ParkTwin(WaitReason.Sleep);
+
+        while (true)
+        {
+            global::go.golib.GoParkSlot slot = new();
+            GoTimer engine = new(static state => ((global::go.golib.GoParkSlot)state!).Wake(), slot);
+            engine.Reset(deadline);
+
+            await slot;
+
+            if (realNano() >= deadline)
+                break;
+        }
+
+        scope.Dispose();
+    }
+
     // A thread's sleep timer: a GoTimer whose callback sets the event the sleeper waits on.
     private sealed class sleepTimer
     {

@@ -210,7 +210,16 @@ internal sealed class SelectState
     internal int Winner = -1;
 
     /// <summary>The park shared by all of the select's waiters — released once, by the claimant.</summary>
-    internal readonly SemaphoreSlim Park = new(0, 1);
+    internal readonly SemaphoreSlim Park;
+
+    // M:N SPIKE: a twin's select parks on a slot instead, and allocates no semaphore.
+    internal readonly GoParkSlot? Slot;
+
+    internal SelectState(GoParkSlot? slot = null)
+    {
+        Slot = slot;
+        Park = slot is null ? new SemaphoreSlim(0, 1) : null!;
+    }
 
     internal bool TryClaim(int opIndex)
     {
@@ -224,7 +233,7 @@ internal sealed class SelectState
 /// waiters share its park). An AWAITED operation (<c>channel&lt;T&gt;.ReceiveAsync</c> / <c>SendAsync</c>) parks
 /// like a one-case select and is <c>detached</c>: no thread and no goroutine waits on it.
 /// </summary>
-internal sealed class Waiter(bool isSend, SelectState? sel = null, int opIndex = -1, bool detached = false)
+internal sealed class Waiter(bool isSend, SelectState? sel = null, int opIndex = -1, bool detached = false, GoParkSlot? slot = null)
 {
     /// <summary>Send: the (boxed) value to deliver. Receive: the delivered value (null = zero value).</summary>
     internal object? Elem;
@@ -236,7 +245,10 @@ internal sealed class Waiter(bool isSend, SelectState? sel = null, int opIndex =
     internal bool Ok;
 
     /// <summary>Park for a PLAIN waiter; a select waiter parks on <see cref="SelectState.Park"/> instead.</summary>
-    internal readonly SemaphoreSlim Park = new(0, 1);
+    internal readonly SemaphoreSlim Park = slot is null && sel?.Slot is null ? new SemaphoreSlim(0, 1) : null!;
+
+    // M:N SPIKE: a twin's plain waiter parks on a slot instead, and allocates no semaphore.
+    internal readonly GoParkSlot? Slot = slot;
 
     internal readonly SelectState? Sel = sel;
     internal readonly int OpIndex = opIndex;
@@ -267,7 +279,11 @@ internal sealed class Waiter(bool isSend, SelectState? sel = null, int opIndex =
     internal void Wake()
     {
         Goroutine.Ready(Parker);
-        (Sel?.Park ?? Park).Release();
+
+        if ((Sel is null ? Slot : Sel.Slot) is { } parkSlot)
+            parkSlot.Wake();
+        else
+            (Sel?.Park ?? Park).Release();
     }
 }
 
@@ -970,6 +986,82 @@ internal sealed class ChanCore<T> : ChanCore
         return awaitSend(parked, token);
     }
 
+    // M:N SPIKE: Go's chansend for a hidden TWIN. The ready path is Send's own, with no allocation; a send
+    // that must wait parks a waiter whose wake is a GoParkSlot, and the twin awaits the slot, which gives
+    // its carrier back instead of blocking it.
+    internal ValueTask SendTwin(T value)
+    {
+        if (Send(value, block: false))
+            return default;
+
+        return SendTwinSlow(value);
+    }
+
+    private async ValueTask SendTwinSlow(T value)
+    {
+        GoParkSlot slot = new();
+        Waiter parked;
+        Goroutine.ParkScope scope;
+
+        lock (SyncRoot)
+        {
+            // Again under the lock that publishes the waiter: a receiver may have parked since.
+            if (Closed)
+                throw RuntimeErrorPanic.PlainError("send on closed channel");
+
+            if (TryCommitSendLocked(value))
+                return;
+
+            parked = new Waiter(isSend: true, slot: slot) { Elem = value };
+            Sendq.Enqueue(parked);
+
+            // As Send: the park is entered under the lock that publishes the waiter.
+            scope = Goroutine.ParkTwin(Bubble is null ? WaitReason.ChanSend : WaitReason.SynctestChanSend);
+        }
+
+        await slot;
+        scope.Dispose();
+
+        if (!parked.Ok)
+            throw RuntimeErrorPanic.PlainError("send on closed channel");
+    }
+
+    // M:N SPIKE: Go's chanrecv for a hidden TWIN; see SendTwin.
+    internal ValueTask<(T value, bool ok)> RecvTwin()
+    {
+        if (Recv(out T value, out bool ok, block: false))
+            return new ValueTask<(T value, bool ok)>((value, ok));
+
+        return RecvTwinSlow();
+    }
+
+    private async ValueTask<(T value, bool ok)> RecvTwinSlow()
+    {
+        GoParkSlot slot = new();
+        Waiter parked;
+        Goroutine.ParkScope scope;
+
+        lock (SyncRoot)
+        {
+            // Again under the lock that publishes the waiter: a send or a close may have landed since.
+            if (TryCommitRecvLocked(out object? committed, out bool committedOk))
+            {
+                T received = committedOk ? (committed is null ? default! : (T)committed) : builtin.GoZero<T>();
+                return (received, committedOk);
+            }
+
+            parked = new Waiter(isSend: false, slot: slot);
+            Recvq.Enqueue(parked);
+            scope = Goroutine.ParkTwin(Bubble is null ? WaitReason.ChanReceive : WaitReason.SynctestChanReceive);
+        }
+
+        await slot;
+        scope.Dispose();
+
+        // As Recv's parked arm: woken by close, Elem is null and the receive yields the Go zero value.
+        return (parked.Elem is null ? builtin.GoZero<T>() : (T)parked.Elem, parked.Ok);
+    }
+
     private async Task awaitSend(Waiter parked, CancellationToken token)
     {
         await AwaitParked(parked, token).ConfigureAwait(false);
@@ -1031,6 +1123,14 @@ internal static class SelectPending
 
     /// <summary>Drops this thread's pending frames before a pooled thread runs its next goroutine.</summary>
     internal static void ResetThread() => t_frames = null;
+
+    // M:N SPIKE: exchanges this thread's pending frames with a goroutine's saved ones (Goroutine.Mount / Unmount).
+    internal static void SwapMounted(ref object? saved)
+    {
+        object? mine = t_frames;
+        t_frames = (Stack<Frame>?)saved;
+        saved = mine;
+    }
 
     /// <summary>Pushes a committed receive (called by the select runtime, exactly once per recv win).</summary>
     internal static void Push(ChanCore core, object? value, bool ok)
@@ -1188,6 +1288,96 @@ internal static class SelectRuntime
         }
         else
         {
+            SelectPending.Push(ops[winner].Core!, won.Elem, won.Ok);
+        }
+
+        return winner;
+    }
+
+    // M:N SPIKE: Run for a hidden TWIN. Everything up to the park is Run's own and synchronous, so the
+    // channel locks are never held across an await; a select that must wait parks its waiters on one
+    // GoParkSlot and the twin awaits it, which gives its carrier back instead of blocking it.
+    internal static ValueTask<int> RunTwin(SelectOp[] ops)
+    {
+        int liveCount = CountLive(ops);
+
+        // select{} or every case on a nil channel blocks forever: the thread path, which hands the P away.
+        if (liveCount == 0)
+            return new ValueTask<int>(Run(ops));
+
+        bool allSynctest = AllCasesBubbled(ops);
+
+        ChanCore[] lockOrder = BuildLockOrder(ops);
+        int[] pollOrder = BuildPollOrder(ops, liveCount);
+
+        LockAll(lockOrder);
+
+        int committed = PollPassLocked(ops, pollOrder, lockOrder);
+
+        if (committed >= 0)
+            return new ValueTask<int>(committed);
+
+        GoParkSlot slot = new();
+        SelectState sel = new(slot);
+        Waiter?[] waiters = AllocationCounter.NewArray<Waiter?>(ops.Length);
+
+        foreach (int i in pollOrder)
+        {
+            SelectOp op = ops[i];
+            ChanCore core = op.Core!;
+            Waiter waiter = new(op.IsSend, sel, i);
+
+            if (op.IsSend)
+            {
+                waiter.Elem = op.SendValue;
+                core.Sendq.Enqueue(waiter);
+            }
+            else
+            {
+                core.Recvq.Enqueue(waiter);
+            }
+
+            waiters[i] = waiter;
+        }
+
+        // As Run: the park is entered while every case's channel lock is still held.
+        Goroutine.ParkScope scope = Goroutine.ParkTwin(allSynctest && SyncTestBubble.Current is not null ? WaitReason.SynctestSelect : WaitReason.Select);
+        UnlockAll(lockOrder);
+
+        return RunTwinParked(ops, lockOrder, sel, waiters, slot, scope);
+    }
+
+    private static async ValueTask<int> RunTwinParked(SelectOp[] ops, ChanCore[] lockOrder, SelectState sel, Waiter?[] waiters, GoParkSlot slot, Goroutine.ParkScope scope)
+    {
+        await slot;
+        scope.Dispose();
+
+        int winner = Volatile.Read(ref sel.Winner);
+
+        // As Run: re-lock and unregister the losing waiters.
+        LockAll(lockOrder);
+
+        for (int i = 0; i < waiters.Length; i++)
+        {
+            Waiter? waiter = waiters[i];
+
+            if (waiter is not null && i != winner)
+                waiter.Queue?.Remove(waiter);
+        }
+
+        UnlockAll(lockOrder);
+
+        Waiter won = waiters[winner]!;
+
+        if (won.IsSend)
+        {
+            if (!won.Ok)
+                throw RuntimeErrorPanic.PlainError("send on closed channel");
+        }
+        else
+        {
+            // Pushed on the carrier that resumed the twin, into the mounted goroutine's own frames; the
+            // winning case's guard pops it in the same step.
             SelectPending.Push(ops[winner].Core!, won.Elem, won.Ok);
         }
 
@@ -1753,6 +1943,49 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     public void ᐸꟷ(in T value)
     {
         Send(value);
+    }
+
+    // M:N SPIKE: the hidden twins of Send and Receive, which a twin awaits. A send or receive that must
+    // wait gives its carrier back instead of blocking it. A nil channel blocks forever, so it takes the
+    // thread path.
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public ValueTask Sendꞏtwin(T value)
+    {
+        if (m_core is null)
+        {
+            Send(value);
+            return default;
+        }
+
+        return m_core.SendTwin(value);
+    }
+
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public ValueTask<T> Receiveꞏtwin()
+    {
+        if (m_core is null)
+            return new ValueTask<T>(Receive());
+
+        ValueTask<(T value, bool ok)> pending = m_core.RecvTwin();
+
+        return pending.IsCompletedSuccessfully ? new ValueTask<T>(pending.Result.value) : ReceiveTwinSlow(pending);
+    }
+
+    private static async ValueTask<T> ReceiveTwinSlow(ValueTask<(T value, bool ok)> pending)
+    {
+        return (await pending).value;
+    }
+
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public ValueTask<(T value, bool ok)> Receiveꞏtwin(bool _)
+    {
+        if (m_core is null)
+        {
+            (T val, bool ok) = Receive(_);
+            return new ValueTask<(T value, bool ok)>((val, ok));
+        }
+
+        return m_core.RecvTwin();
     }
 
     /// <summary>

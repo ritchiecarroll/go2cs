@@ -227,3 +227,202 @@ Compile and Target pass on every leg that ran; the Output phase is where each on
 - The first dispatch failed at `plan` on both workflows and read nothing: the darwin one was sent with an `arch`
   input it does not take, and the linux one asked for the arm leg. The runs above are the re-dispatch.
 - B3 re-runs the three legs that ran on a ref carrying generated twins. Green there is P4.
+
+## 3. B1: the scheduler in golib behind a switch, on a hand-twinned program (2026-11-11)
+
+B1 asks whether golib can carry O6 and O7 at all, before any generator exists: a scheduler, the park paths
+wired to it, and one program whose twins are written by hand the way B2's generator would write them. Branch
+`claude/g-mn-spike2-b1`, on `b6165f507b`. Windows x64, 12 logical processors, .NET SDK 10.0.400 (runtime
+10.0.11), go1.26.10. Spike code: it stays on the branch.
+
+### 3.1 What was built
+
+- `golib/runtime/GoScheduler.cs` (564 lines): a global run queue of goroutine steps, P tokens (one per
+  processor), carrier threads (1 MB stacks) that take a P to run one step, a per-carrier run-next slot, hand-off
+  of the P when a mounted goroutine blocks its thread, and a monitor thread that injects a P beside a step that
+  runs long. `GoParkSlot` is where a twin waits: its continuation is published by the carrier after the
+  goroutine is unmounted, so a waker cannot make a goroutine runnable while it is still mounted.
+- `golib/runtime/Goroutine.Multiplexed.cs` (228 lines): `StartTwin`, the twin's root (the thread root's
+  try/catch ladder with awaits), and `Mount`/`Unmount`, which exchange the goroutine-logical state golib keeps
+  in thread-statics (`GoThreadState`, pending select frames, the last adopted panic, the Goexit flag, the
+  `GoFrame` activation and thread token) between the goroutine and the carrier.
+- Twin entry points beside the blocking ones: `selectꞏtwin`, `channel<T>.Sendꞏtwin`, `Receiveꞏtwin` (both
+  forms), `time.Sleepꞏtwin`, `sync.Mutex.Lockꞏtwin`. Ten existing golib and stdlib files change by 355 added
+  and 10 removed lines; 237 of the additions are the channel twins. One test file gains one row: the carrier's
+  thread-static in the thread-state census (3.4).
+- `GoFrame` loses nothing a converted body can see: `defer(…, ref ᒐ)`, the converted `catch … when
+  (GoFrame.IsPanic…)` and `finally { ᒐ.Run(); }` compile unchanged inside an `async ValueTask` method.
+- `runtime.getg` cached its descriptor per thread; under carriers that hands one goroutine another's
+  descriptor. It now re-mints when the cached owner is not the mounted goroutine.
+- `src/tools/mnspike2/MnStormTwin`: the converted `MnMixedStorm` with `workerꞏtwin` written by hand (the same
+  statements in the same order, each parking call replaced by the callee's twin, awaited; the receiver stays the
+  box and the `ref` local is derived again after each await), a `goǃtwin` that takes the body and the twin, and
+  two micro programs (`MN_MODE=ping`, `MN_MODE=leaf`).
+
+With `GO2CS_MN` unset, `StartTwin` is `Goroutine.Start` and nothing in the scheduler runs.
+
+### 3.2 Switches and the runtime's own reading
+
+| switch | meaning |
+|---|---|
+| `GO2CS_MN=1` | goroutines started with a twin are multiplexed |
+| `GO2CS_MN_READING=1` | print the scheduler's counters at exit (one `READING go-scheduler` line on stderr) |
+| `GO2CS_MN_PROCS` | P count (default: the processor count) |
+| `GO2CS_MN_PREEMPT_MS` | how long a step runs before a P is injected beside it (default 10; 0 = off, an arm) |
+| `GO2CS_MN_MAXINJECT` | injected Ps live at once (default: the P count) |
+| `GO2CS_MN_RUNNEXT=0` | run-next slot off (an arm) |
+| `GO2CS_MN_NOGETGFIX=1` | the `getg` fix off (the red proof) |
+| `GO2CS_MN_MOUNTBENCH=1` | time `Mount` + `Unmount` at exit |
+
+The reading line carries peak carriers, carriers started, peak OS threads, steps, parks, hand-offs, injections,
+run-next steps and steals, steps over 10 ms and the longest step. It answers 2.4: a 250 ms sampler read 24
+threads on an arm whose scheduler counted 226.
+
+### 3.3 MnMixedStorm under hand-written twins
+
+Every reading in section 3 is from the tree as committed unless it says otherwise. Same sampler and hold
+(3,000 ms) as 2.3; the last three columns are the scheduler's own. Every row exits 0 and
+its output hash equals the Go build's for that n.
+
+| n | build | wall | peak OS threads | peak private | carriers (peak) | steps | steps over 10 ms |
+|---|---|---|---|---|---|---|---|
+| 1,000 | Go | 3.3 s | 9 | 22 MB | | | |
+| 1,000 | thread path (switch off) | 3.8 s | 1,011 | 92 MB | | | |
+| 1,000 | twins | 3.8 s | 24 | 29 MB | 12 | 3,711 | 12 |
+| 10,000 | Go | 3.3 s | 14 | 101 MB | | | |
+| 10,000 | thread path (2.3) | 6.3 s | 10,012 | 634 MB | | | |
+| 10,000 | twins | 4.0 s | 28 | 75 MB | 18 | 39,981 | 92 |
+| 100,000 | Go | 3.8 s | 15 | 890 MB | | | |
+| 100,000 | thread path (2.3) | 115.1 s | 100,008 | 5,962 MB | | | |
+| 100,000 | twins | 6.9 s | 43 | 614 MB | 24 | 450,411 | 794 |
+
+- At 100,000 goroutines the twin build holds 43 OS threads where the thread path holds 100,008, finishes in
+  6.9 s against 115.1 s, and uses less private memory than the Go build (614 MB against 890 MB). It is 3.1 s
+  behind Go on wall time.
+- No arm in B1 lost a wakeup or printed a wrong line.
+- About 0.2% to 0.3% of steps run past 10 ms (the longest 110 ms). A twin cannot be preempted, so this is the latency
+  cost of a run-to-park step under load. Injection does not move it: an earlier build with injection off read
+  756 such steps, the longest 106 ms.
+
+### 3.4 Red controls
+
+- **Switch off** is the thread path: 1,011 threads at n = 1,000 in the same build (row two above).
+- **GolibTests with the switch off** (the whole suite, Release, on the B1 tree; the base was not re-run): the
+  first run read 2 failed, 2,528 passed, 49 skipped of 2,579. Both failures are source censuses naming the
+  spike's own new lines, not behaviour: `NoUncountedBackingAllocations` (the select twin allocated its waiter
+  array past the allocation counter) and `EveryThreadStaticInTheTree_IsClassified` (the carrier's
+  thread-static). With the array counted as the blocking select counts its own, and the thread-static listed
+  as a kept thread resource, the second run reads 0 failed, 2,530 passed, 49 skipped.
+- **`getg` fix off** (`GO2CS_MN_NOGETGFIX=1`, n = 1,000): exit 2, `panic: runtime: park transition leaving
+  select on goroutine 13 whose status is 2, not _Gwaiting (4) or _Grunnable (1)`. The trace names
+  `main.MoveNext()` and `created by main.goǃtwin`: that is how a panic trace reads under hand twins today
+  (finding 8).
+- **The first build** read 489 OS threads at 100,000: the monitor started a thread for every long step. The
+  injection budget in 3.2 (and a carrier count bounded at twice the P count) is the fix; 43 threads on the tree
+  as committed.
+
+### 3.5 A missing twin
+
+The design's rule is that a missing twin costs a thread, never correctness. Two arms, both on the twin build:
+
+| arm | n | wall | peak OS threads (scheduler's count) | carriers (peak) | hand-offs | output |
+|---|---|---|---|---|---|---|
+| the whole goroutine has no twin (`MN_STORM_NOTWIN=1`) | 1,000 | 3.8 s | 1,012 | 1,000 | 3,985 | same as Go |
+| one callee has no twin (`MN_STORM_SYNCSLEEP=1`: the 1 ms sleep) | 1,000 | 3.8 s | 226 | 206 | 1,000 | same as Go |
+| the same | 10,000 | 4.3 s | 540 | 517 | 10,000 | same as Go |
+| the same | 100,000 | 7.8 s | 792 | 772 | 100,000 | same as Go |
+
+- Correctness holds in every arm, and in the sync-sleep arms hand-offs equal the untwinned sleeps exactly.
+- The thread cost is **per concurrently blocked untwinned call**, not per goroutine and not per call site. A
+  goroutine with no twin at all is one thread for as long as it lives (row one equals the thread path). One
+  untwinned 1 ms sleep in 100,000 goroutines costs about 800 threads at its peak, because that many sleeps
+  overlap. A long-blocking untwinned call on a hot path would put one thread back under every goroutine parked
+  in it, which on macOS is the cap again. Twin coverage of the calls that park for long is what the cap needs,
+  and B5's census has to count those.
+- This table is on the second hand-off rule. The first one added a carrier at every hand-off that found none
+  idle, and read 1,869 threads for 1,000 untwinned goroutines and 10,015 for the sync-sleep arm at 10,000.
+  Go's rule (add one only when work is queued and fewer than P carriers are unblocked) reads the rows above.
+
+### 3.6 Micro-readings
+
+| reading | twin | thread path |
+|---|---|---|
+| unbuffered ping-pong, one round trip (two parks, two wakes) | 1,422 to 1,550 ns (slot off: 3,334 to 3,419) | 1,677 to 1,715 ns |
+| buffered send + receive that never parks, per iteration | 24.9 to 25.8 ns | 27.1 to 28.7 ns |
+| allocation over 2,000,000 such iterations | 40 bytes | 40 bytes |
+| `Mount` + `Unmount` | 38.4 to 38.6 ns | |
+
+- The no-park path costs a twin nothing measurable and allocates nothing: an operation that completes returns
+  a completed `ValueTask`. That the twin reads about 3 ns under the body is not explained.
+- The parking path is where the cost is. Through the global queue a wake crosses carriers and costs twice the
+  thread path, whose park completes inside its spin on this box. With the run-next slot the twin is under the
+  thread path, at about 700 ns per step (two steps per round trip). The same program built by Go reads 425 to
+  432 ns per round trip (232 ns at `GOMAXPROCS=1`), so the twin is 3.3 to 3.6 times Go here. The step is
+  unoptimised (a semaphore take and release for the P, `Mount` and `Unmount`, a timestamp and a GC-pause read
+  per step, park accounting); B4 prices it.
+
+### 3.7 Predictions and verdicts
+
+Written to the prediction file before each measurement.
+
+| | prediction | verdict |
+|---|---|---|
+| B1-1 | switch off: GolibTests passes as before | FALSE on the first run (2 failed: two source censuses named the spike's new lines); 0 failed of 2,579 once both were answered |
+| B1-2 | 1,000 goroutines with no twin: n + 8 to 12 threads | FALSE first (1,869), TRUE after the hand-off rule (1,012) |
+| B1-3 | twinned storm at 100,000: at most 60 threads, 10 s, 400 to 1,500 MB | FALSE first (489 threads), TRUE after the injection budget (43, 6.9 s, 614 MB) |
+| B1-4 | ping-pong: twin 700 to 1,800 ns, thread path 5 to 25 µs | FALSE both halves (3,334 to 3,419 without the slot; 1,677 to 1,715) |
+| B1-5 | no-park path: no allocation, at most +10 ns | TRUE |
+| B1-6 | a twin calling one untwinned parking callee prints Go's output; threads grow with concurrent parks | TRUE |
+| B1-7 | no lost wakeup, no wrong output | TRUE in every arm run |
+| B1-8 | the `getg` fix has a red | TRUE |
+| B1-9 | 1 MB carrier stacks: no stack failure | TRUE so far |
+| B1-10 | `GoFrame` change compiles | golib, runtime, time, sync and the storm compile; the full stdlib was not built |
+| B1-11 | `Mount` + `Unmount` 20 to 60 ns | TRUE (38.4 to 38.6) |
+| B1-12 | a contended `Lock` twin hops through the thread pool; few extra threads | consistent (about 19 threads beyond the carriers), not isolated |
+| B1-13 | no injection arm: output unchanged | TRUE |
+| B1-14 | run-next slot: ping-pong 300 to 900 ns | FALSE on the range (1,422 to 1,550), TRUE that it beats the thread path |
+| B1-15 | hand-off rule: the no-twin arm reads n + 12, and the sync-sleep arm is unchanged | first half TRUE; second FALSE (its carriers fell from 1,011 to 206) |
+
+### 3.8 Findings
+
+1. **Injection needs a budget.** Twins cannot be preempted, so a long step can only be answered by more
+   parallelism, and unbounded that is a thread per long step (489). A real build needs a bounded policy.
+2. **Hand-off needs Go's rule.** A carrier per hand-off cost up to two threads per untwinned goroutine.
+3. **The cost of a missing twin is per concurrently blocked call** (3.5). This is the line that decides how
+   much twin coverage the macOS cap needs.
+4. **Wakes need a run-next slot**, and a step still costs about 700 ns, against about 215 ns in Go (3.6).
+5. **Hand-off covers golib's own parks only.** `Goroutine.EnterBlocked` and `GoNativeCall` (H's native-call
+   seam) do not hand off a P in the spike: a goroutine blocked in native code holds its carrier's P. That is a
+   B3 item. B1 needed nothing from H's seam and changed nothing in it.
+6. **Per-thread caches keyed on "this thread is this goroutine" break** (`getg` was one). The thread-statics
+   other code registers through `GoroutineThreadState.Register` (the memory profile's recording flag, the
+   escape markers, the CPU sampler's draining flag, `runtime/debug`'s panic-on-fault flag, the runtime's
+   held-lock list, `sync`'s proc id) do not move with the goroutine in the spike, and must in a real build.
+7. **`ref` and `in` receivers cannot be twin parameters**, and a `ref` local does not survive an await. The
+   hand twin takes the box and derives the `ref` again after each await; B2 has to emit that.
+8. **A twin's panic trace names the state machine** (`main.MoveNext()`), and a parked twin has no thread id in
+   a goroutine dump. Both are visible to a consumer who reads traces (1.5), and B2 and B3 owe the answers.
+9. **The BCL runs continuations inline**, so a chain of twins completing synchronously deepens the carrier's
+   stack. 1 MB carriers have not failed, and a real build probably wants its own task type and builder.
+10. **Not twinned in B1:** `sync.WaitGroup.Wait`, `sync.Cond`, `RuntimeSemaphore`, the profiling arms. The
+    `Lock` twin waits on the mutex's gate through the thread pool; the `Sleep` twin allocates a timer and a slot
+    per sleep.
+11. **`goǃ` positions are already keys**: the `[GoBoundedGoroutine]` interceptor records in `package_info.cs`
+    key on them (a copied `package_info.cs` fails with GO2CS0010). B2's routing of `goǃ` to a twin has to
+    compose with that interceptor.
+12. **golib's source censuses caught the spike on its first full run** (3.4): an allocation past the counter
+    and an unclassified thread-static. Those are the gates a real build meets, and they fire on new golib code
+    whether or not the switch is on. Run GolibTests early in B2.
+13. **At 100,000 goroutines the twin build uses less private memory than Go** (614 MB against 890 MB). Not
+    explained; B4 reads where each build's memory goes.
+
+### 3.9 What B1 did not measure, and instrument notes
+
+- Nothing here ran on a hosted leg: no macOS or linux reading under twins exists yet. That is B3, on generated
+  twins.
+- The full stdlib was not built against the `GoFrame` change.
+- The thread-pool share of the twin build's threads (B1-12) was not isolated.
+- Twice the first arm after a build read about 3.5 s long on wall time (7.3 and 7.5 s where the repeat reads
+  3.8 to 4.0 s), once with the switch off and once with it on. On the build as committed it did not (3.8 s).
+  Every wall time above follows a discarded warm-up arm.
+- A peak from the 250 ms sampler is a lower bound for a burst; burst arms quote the scheduler's own peak.

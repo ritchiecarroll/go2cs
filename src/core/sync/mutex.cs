@@ -241,6 +241,32 @@ private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Sem
 // TryLock tries to lock m and reports whether it succeeded.
 [GoRecv] public static bool TryLock(this ref Mutex m) => gateOf(ref m).Wait(0);
 
+// M:N SPIKE: the hidden twin of Lock, which a twin awaits. An async method cannot take a ref receiver, so
+// the twin is this synchronous wrapper: it resolves the gate and takes the free lock, and only the wait
+// is async. A contended Lock parks on a GoParkSlot that the gate's own queue wakes (SemaphoreSlim
+// completes an awaited wait on the ThreadPool, which is one hop per contended Lock). The profiling arms
+// of Lock are not twinned here.
+[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+public static System.Threading.Tasks.ValueTask Lockꞏtwin(this ref Mutex m) {
+    SemaphoreSlim gate = gateOf(ref m);
+    if (gate.Wait(0)) {
+        return default;
+    }
+    return lockTwinSlow(gate);
+}
+
+private static async System.Threading.Tasks.ValueTask lockTwinSlow(SemaphoreSlim gate) {
+    System.Threading.Tasks.Task acquired = gate.WaitAsync();
+    if (acquired.IsCompleted) {
+        return;
+    }
+    global::go.golib.GoParkSlot slot = new();
+    Goroutine.ParkScope scope = Goroutine.ParkTwin(WaitReason.SyncMutexLock);
+    acquired.GetAwaiter().UnsafeOnCompleted(slot.Wake);
+    await slot;
+    scope.Dispose();
+}
+
 // Unlock unlocks m.
 // It is a run-time error if m is not locked on entry to Unlock.
 // A locked Mutex is not associated with a particular goroutine; one goroutine may lock a Mutex and

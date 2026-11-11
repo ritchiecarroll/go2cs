@@ -783,6 +783,13 @@ public static partial class builtin
         return SelectRuntime.Run(ops);
     }
 
+    // M:N SPIKE: the hidden twin of select, which a twin awaits.
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public static System.Threading.Tasks.ValueTask<int> selectꞏtwin(params SelectOp[] ops)
+    {
+        return SelectRuntime.RunTwin(ops);
+    }
+
     /// <summary>
     /// Executes a non-blocking Go <c>select</c> (the <c>default:</c> form) over the registered
     /// channel <paramref name="ops"/>: commits exactly ONE ready case — chosen uniformly at random

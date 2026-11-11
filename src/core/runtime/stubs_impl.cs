@@ -170,6 +170,8 @@ partial class runtime_package
     private static readonly bool s_lockedExitRetires = GoroutineThreadState.RegisterRetire(static () =>
         t_getg is { } gp && gp.Value.m is { IsNilPointer: false } mp && (mp.Value.lockedExt != 0 || mp.Value.lockedInt != 0));
 
+    private static readonly bool s_mnReuseG = Environment.GetEnvironmentVariable("GO2CS_MN_NOGETGFIX") != "1";
+
     internal static partial ж<g> getg()
     {
         ж<g>? gp = t_getg;
@@ -177,7 +179,10 @@ partial class runtime_package
 
         if (gp is null || !ReferenceEquals(t_getgOwner, current))
         {
-            gp = mintGoroutineDescriptor();
+            // M:N SPIKE: a multiplexed goroutine resumes on whichever carrier is free, and it is still the
+            // goroutine it was: its g is the one it minted on its first step, not a fresh one.
+            // GO2CS_MN_NOGETGFIX=1 takes this out, to show what it prevents.
+            gp = s_mnReuseG && current is { IsMultiplexed: true, RuntimeDescriptor: ж<g> existing } ? existing : mintGoroutineDescriptor();
             t_getg = gp;
             t_getgOwner = current;
         }
