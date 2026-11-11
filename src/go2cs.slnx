@@ -947,6 +947,7 @@
     <Project Path="tests/Behavioral/PipeCloseUnblocksRead/PipeCloseUnblocksRead.csproj" />
     <Project Path="tests/Behavioral/PipeSharedFileObject/PipeSharedFileObject.csproj" />
     <Project Path="tests/Behavioral/PlainSendOperandOrder/PlainSendOperandOrder.csproj" />
+    <Project Path="tests/Behavioral/PointerAliasForms/PointerAliasForms.csproj" />
     <Project Path="tests/Behavioral/PointerArraySlice/PointerArraySlice.csproj" />
     <Project Path="tests/Behavioral/PointerEmbedValueChainPromotion/PointerEmbedValueChainPromotion.csproj" />
     <Project Path="tests/Behavioral/PointerElementAtUnsignedIndex/PointerElementAtUnsignedIndex.csproj" />

@@ -20,7 +20,12 @@
 package main
 
 import (
+	"fmt"
+	"go/ast"
 	"go/build"
+	"go/parser"
+	"go/token"
+	"go/types"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -29,18 +34,42 @@ import (
 	"testing"
 )
 
-// The alias declarations of the fixture, and what each alias denotes.
+// aliasReceiverFixture names a behavioral source whose receivers are written through aliases, and how
+// to rewrite it with each alias replaced by what it denotes.
+type aliasReceiverFixture struct {
+	project   string            // the behavioral project that holds main.go
+	decls     *regexp.Regexp    // the alias declarations, removed for the named spelling
+	declCount int               // how many declarations decls must find
+	goNames   *strings.Replacer // each alias to what it denotes, in the Go source
+	csNames   *strings.Replacer // each alias to what it denotes, in the emission
+}
+
 var (
-	aliasReceiverDecls = regexp.MustCompile(`(?m)^(?:\t(?:AttrNode|Chain)\s+= .*|type ListAlias = List)\n`)
-	aliasReceiverNames = strings.NewReplacer("AttrNode", "Node", "Chain", "Node", "ListAlias", "List")
+	// Aliases of the receiver's ELEMENT type: `type AttrNode = Node`, `func (n *AttrNode) M()`.
+	aliasReceiverForms = aliasReceiverFixture{
+		project:   "AliasReceiverForms",
+		decls:     regexp.MustCompile(`(?m)^(?:\t(?:AttrNode|Chain)\s+= .*|type ListAlias = List)\n`),
+		declCount: 3,
+		goNames:   strings.NewReplacer("AttrNode", "Node", "Chain", "Node", "ListAlias", "List"),
+		csNames:   strings.NewReplacer("AttrNode", "Node", "Chain", "Node", "ListAlias", "List"),
+	}
+
+	// Aliases of the POINTER type: `type NodePtr = *Node`, `func (p NodePtr) M()`, `var q NodePtr`.
+	pointerAliasForms = aliasReceiverFixture{
+		project:   "PointerAliasForms",
+		decls:     regexp.MustCompile(`(?m)^(?:\t(?:NodePtr|ChainPtr)\s+= .*|type ListPtr = \*List)\n`),
+		declCount: 3,
+		goNames:   strings.NewReplacer("(NodePtr).", "(*Node).", "NodePtr", "*Node", "ChainPtr", "*Node", "ListPtr", "*List"),
+		csNames:   strings.NewReplacer("NodePtr", "ж<Node>", "ChainPtr", "ж<Node>", "ListPtr", "ж<List>"),
+	}
 )
 
 // convertAliasReceiverFixture converts the behavioral source, as written (alias-typed receivers) or with
 // every alias replaced by the name it denotes, and returns the emitted main.cs.
-func convertAliasReceiverFixture(t *testing.T, named bool) string {
+func convertAliasReceiverFixture(t *testing.T, fixture aliasReceiverFixture, named bool) string {
 	t.Helper()
 
-	data, err := os.ReadFile(filepath.Join("..", "tests", "Behavioral", "AliasReceiverForms", "main.go"))
+	data, err := os.ReadFile(filepath.Join("..", "tests", "Behavioral", fixture.project, "main.go"))
 
 	if err != nil {
 		t.Fatalf("read the fixture: %v", err)
@@ -49,11 +78,11 @@ func convertAliasReceiverFixture(t *testing.T, named bool) string {
 	source := string(data)
 
 	if named {
-		if got := len(aliasReceiverDecls.FindAllString(source, -1)); got != 3 {
-			t.Fatalf("the fixture declares %d aliases this test knows, want 3", got)
+		if got := len(fixture.decls.FindAllString(source, -1)); got != fixture.declCount {
+			t.Fatalf("the fixture declares %d aliases this test knows, want %d", got, fixture.declCount)
 		}
 
-		source = aliasReceiverNames.Replace(aliasReceiverDecls.ReplaceAllString(source, ""))
+		source = fixture.goNames.Replace(fixture.decls.ReplaceAllString(source, ""))
 	}
 
 	root := t.TempDir()
@@ -94,7 +123,7 @@ func convertAliasReceiverFixture(t *testing.T, named bool) string {
 func TestAliasReceiverTakesTheNamedForm(t *testing.T) {
 	isolateConverterPathGlobals(t)
 
-	emitted := convertAliasReceiverFixture(t, false)
+	emitted := convertAliasReceiverFixture(t, aliasReceiverForms, false)
 
 	for _, want := range []string{
 		// The nil guard compares the BOX, and the value alias binds without a dereference.
@@ -135,6 +164,14 @@ func TestAliasReceiverTakesTheNamedForm(t *testing.T) {
 func TestAliasReceiverEmitsAsNamedReceiver(t *testing.T) {
 	isolateConverterPathGlobals(t)
 
+	requireAliasEmissionMatchesNamed(t, aliasReceiverForms)
+}
+
+// requireAliasEmissionMatchesNamed converts the fixture as written and with each alias replaced by what
+// it denotes, and fails on every line the two emissions differ in once the alias names are mapped.
+func requireAliasEmissionMatchesNamed(t *testing.T, fixture aliasReceiverFixture) {
+	t.Helper()
+
 	normalise := func(emitted string) []string {
 		var lines []string
 
@@ -149,8 +186,8 @@ func TestAliasReceiverEmitsAsNamedReceiver(t *testing.T) {
 		return lines
 	}
 
-	alias := normalise(aliasReceiverNames.Replace(convertAliasReceiverFixture(t, false)))
-	named := normalise(convertAliasReceiverFixture(t, true))
+	alias := normalise(fixture.csNames.Replace(convertAliasReceiverFixture(t, fixture, false)))
+	named := normalise(convertAliasReceiverFixture(t, fixture, true))
 
 	if len(named) < 100 {
 		t.Fatalf("the named-receiver emission has %d lines, want the whole program", len(named))
@@ -180,5 +217,194 @@ func TestAliasReceiverEmitsAsNamedReceiver(t *testing.T) {
 
 	if differing > 12 {
 		t.Errorf("%d lines differ in all", differing)
+	}
+}
+
+// TestPointerAliasEmitsAsPointer is the same requirement for a pointer type written through an alias
+// (`type NodePtr = *Node`): as a receiver (`func (p NodePtr) M()`, which Go accepts as the pointer
+// method `(*Node).M`) and as the type of a parameter, a local, a field, an element, a map value and a
+// channel element. The converter once asked "is this a pointer?" of the type as written, and an alias
+// answered no. The alias keeps its name wherever Go writes it in a type position.
+func TestPointerAliasEmitsAsPointer(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	requireAliasEmissionMatchesNamed(t, pointerAliasForms)
+
+	emitted := convertAliasReceiverFixture(t, pointerAliasForms, false)
+
+	for _, want := range []string{
+		// The box form, under the alias's own name.
+		"Mode(this NodePtr Ꮡp, nint def)",
+		"IsNil(this ChainPtr Ꮡp) { return Ꮡp == nil; }",
+		// By reference there is no alias spelling: `ref` names the element.
+		"SetKind(this ref Node p, nint kind) { p.kind = kind; }",
+		"Push(this ref List l, nint v)",
+		// A field, a parameter and an element keep the alias name.
+		"internal NodePtr attrs;",
+		"viaParam(NodePtr Ꮡq)",
+		"slice<NodePtr>",
+	} {
+		if !strings.Contains(emitted, want) {
+			t.Errorf("the emission lacks %q", want)
+		}
+	}
+}
+
+// pointerTypeReadsThatKeepTheSpelling are the functions that read a pointer type AS WRITTEN on
+// purpose: the type-name renderers, which print an alias of a pointer type by its own name.
+var pointerTypeReadsThatKeepTheSpelling = map[string]bool{
+	"getAliasQualifiedTypeName": true,
+	"getFullyQualifiedTypeName": true,
+}
+
+// unresolvedPointerTypeReads lists, as "function:line", every type assertion `X.(*types.Pointer)` in
+// the source whose X is not resolved first: not `types.Unalias(...)`, not `....Underlying()`, and not
+// a local name its function assigns only from such expressions.
+func unresolvedPointerTypeReads(t *testing.T, fileName string, source any) []string {
+	t.Helper()
+
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, fileName, source, 0)
+
+	if err != nil {
+		t.Fatalf("parse %s: %v", fileName, err)
+	}
+
+	resolved := func(expr ast.Expr) bool {
+		call, ok := expr.(*ast.CallExpr)
+
+		if !ok {
+			return false
+		}
+
+		selector, ok := call.Fun.(*ast.SelectorExpr)
+
+		if !ok {
+			return false
+		}
+
+		if selector.Sel.Name == "Underlying" {
+			return true
+		}
+
+		pkg, ok := selector.X.(*ast.Ident)
+
+		return ok && pkg.Name == "types" && selector.Sel.Name == "Unalias"
+	}
+
+	resolvedName := func(expr ast.Expr, function *ast.FuncDecl) bool {
+		ident, ok := expr.(*ast.Ident)
+
+		if !ok {
+			return false
+		}
+
+		assigned, all := 0, true
+
+		ast.Inspect(function, func(node ast.Node) bool {
+			assign, ok := node.(*ast.AssignStmt)
+
+			if !ok {
+				return true
+			}
+
+			for i, lhs := range assign.Lhs {
+				if name, ok := lhs.(*ast.Ident); ok && name.Name == ident.Name {
+					assigned++
+
+					if len(assign.Rhs) != len(assign.Lhs) || !resolved(assign.Rhs[i]) {
+						all = false
+					}
+				}
+			}
+
+			return true
+		})
+
+		return assigned > 0 && all
+	}
+
+	var unresolved []string
+
+	for _, decl := range file.Decls {
+		function, ok := decl.(*ast.FuncDecl)
+
+		if !ok || function.Body == nil || pointerTypeReadsThatKeepTheSpelling[function.Name.Name] {
+			continue
+		}
+
+		ast.Inspect(function, func(node ast.Node) bool {
+			assert, ok := node.(*ast.TypeAssertExpr)
+
+			if !ok || assert.Type == nil || types.ExprString(assert.Type) != "*types.Pointer" {
+				return true
+			}
+
+			if !resolved(assert.X) && !resolvedName(assert.X, function) {
+				unresolved = append(unresolved, fmt.Sprintf("%s:%d", function.Name.Name, fset.Position(assert.Pos()).Line))
+			}
+
+			return true
+		})
+	}
+
+	return unresolved
+}
+
+// TestPointerTypeReadsResolveAliases holds the rule the two fixtures above cannot hold shape by shape:
+// a read that decides whether a type IS a pointer resolves an alias first, because `type NodePtr = *Node`
+// is a `*types.Alias` to go/types and a bare `.(*types.Pointer)` answers no for it. 151 such reads were
+// bare when this test was written; a new one fails here instead of on the first program that spells a
+// pointer through an alias.
+func TestPointerTypeReadsResolveAliases(t *testing.T) {
+	// The detector first: one bare read among the resolved forms, and the renderers' exemption.
+	sample := `package main
+
+import "go/types"
+
+func decide(t types.Type, v *types.Var) bool {
+	_, bare := t.(*types.Pointer)
+	_, viaAlias := types.Unalias(t).(*types.Pointer)
+	_, viaUnderlying := v.Type().Underlying().(*types.Pointer)
+	under := types.Unalias(t)
+	_, viaName := under.(*types.Pointer)
+
+	return bare || viaAlias || viaUnderlying || viaName
+}
+
+func getAliasQualifiedTypeName(t types.Type) bool {
+	_, spelled := t.(*types.Pointer)
+
+	return spelled
+}
+`
+
+	if got := unresolvedPointerTypeReads(t, "sample.go", sample); len(got) != 1 || got[0] != "decide:6" {
+		t.Fatalf("the detector reads %v in its sample, want [decide:6]", got)
+	}
+
+	files, err := filepath.Glob("*.go")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	scanned := 0
+
+	for _, fileName := range files {
+		if strings.HasSuffix(fileName, "_test.go") {
+			continue
+		}
+
+		scanned++
+
+		for _, site := range unresolvedPointerTypeReads(t, fileName, nil) {
+			t.Errorf("%s: %s asserts `.(*types.Pointer)` on a type that may be an alias of a pointer type; "+
+				"resolve it first (`types.Unalias(x).(*types.Pointer)`)", fileName, site)
+		}
+	}
+
+	if scanned < 100 {
+		t.Fatalf("scanned %d converter sources, want the whole converter", scanned)
 	}
 }
