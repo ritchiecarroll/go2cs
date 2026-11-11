@@ -262,6 +262,9 @@ Assert-Equal 'linux expectation: the banked RID reads the segment' '3840/linux' 
 Assert-Throws 'linux note: darwin never takes pending' {
     Read-FixtureRoster @("| [``darp/pkg``](https://x/darp) | 3 |  | Mac. $dot darwin: 3 (osx-arm64; osx-x64: pending) $dot [proof](p.md) |")
 } 'pending'
+Assert-Throws 'linux note: only linux-arm64 is ever pending (linux-x64 is the banked flavour)' {
+    Read-FixtureRoster @("| [``linx/pkg``](https://x/linx) | 3 |  | Wrong way round. $dot linux: 9 (linux-arm64; linux-x64: pending) $dot [proof](p.md) |")
+} 'only linux-arm64 is pending'
 $savedRid = $env:RID
 try {
     $env:RID = 'linux-arm64'
