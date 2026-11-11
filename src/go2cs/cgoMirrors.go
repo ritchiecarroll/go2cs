@@ -21,9 +21,9 @@ import (
 // wrappers that cross with a mirror are increment 3.
 
 // cgoMirrorSuffix ends a generated mirror's C# name, and cgoMirrorArrayPrefix starts an inline-array helper's. A
-// C-derived name is ASCII, so neither can collide with a name cmd/cgo declares. go2cs-gen reads the suffix too
-// (Common.CgoMirrorSuffix): a mirror sits directly in the pseudo-package class, so its converted-Go-type rule would
-// otherwise take it for a Go type.
+// C-derived name is ASCII, so neither can collide with a name cmd/cgo declares. go2cs-gen reads both too
+// (Common.CgoMirrorSuffix, Common.CgoMirrorArrayPrefix): a mirror and its helpers sit directly in the pseudo-package
+// class, so its converted-Go-type rule would otherwise take each for a Go type.
 const (
 	cgoMirrorSuffix      = "ᴍ"
 	cgoMirrorArrayPrefix = "ᴍarray"
