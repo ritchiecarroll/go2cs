@@ -3019,10 +3019,14 @@ type productionSeed struct {
 // processConversion (the per-file visitors share package-level state claimed at visit time; the
 // branch's concurrent goroutines reproduced exactly the nondeterminism master removed).
 func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPath, projectNamespace string, seed productionSeed, options Options) ([]string, hashset.HashSet[string], error) {
-	// A test file's instantiation is refused as a production one is (constraintProxyForwarding.go).
-	if refusal := refuseUnforwardableConstraintProxies(pkg); refusal != nil {
-		refusal.report()
-		return nil, nil, refusal
+	// A test file's instantiation is refused as a production one is (constraintProxyForwarding.go), or under
+	// -warn GO2CS2002 downgraded as one is. The sites are recorded AFTER resetPackageState below, which would
+	// otherwise clear them.
+	downgraded := refuseUnforwardableConstraintProxies(pkg)
+
+	if downgraded != nil && !options.warnCodes[diagnosticProxyRefused] {
+		downgraded.report()
+		return nil, nil, downgraded
 	}
 
 	if refusal := refuseNonSelfConstraintProxies(pkg); refusal != nil {
@@ -3036,6 +3040,11 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	}
 
 	resetPackageState(pkg)
+
+	if downgraded != nil {
+		recordDowngradedRefusals(diagnosticProxyRefused, downgraded.sites)
+	}
+
 	packageNamespace = projectNamespace
 	currentPackageGorootVendored = isGorootVendoredDir(pkg.Dir, options.goRoot)
 	packageHoistsLiterals = literalsHoistedFor(pkg.Dir, options)

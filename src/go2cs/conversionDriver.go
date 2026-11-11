@@ -322,8 +322,14 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// Refuse, before any file is written as well, an instantiation whose constraint proxy could not
 		// forward its constraint without breaking Go's aliasing (constraintProxyForwarding.go).
 		if refusal := refuseUnforwardableConstraintProxies(pkg); refusal != nil {
-			refusal.report()
-			log.Fatalf("Refusing to convert: %s\n", refusal)
+			// Under -warn GO2CS2002 each site is a WARNING, recorded for package_info.cs, and the conversion goes on:
+			// go2cs-gen emits the unforwardable method as a forwarder that panics with the refusal text (warnOption.go).
+			if options.warnCodes[diagnosticProxyRefused] {
+				recordDowngradedRefusals(diagnosticProxyRefused, refusal.sites)
+			} else {
+				refusal.report()
+				log.Fatalf("Refusing to convert: %s\n", refusal)
+			}
 		}
 
 		// ...and a pointer type argument the NON-self constraint proxy cannot carry (nonSelfConstraintProxyRefusals.go).
