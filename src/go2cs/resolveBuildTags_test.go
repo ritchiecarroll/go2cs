@@ -26,7 +26,9 @@ import (
 func TestResolveBuildTags(t *testing.T) {
 	explicit := []string{"foo", "bar"}
 
-	moduleTestTags := append(append([]string{}, defaultStdLibBuildTags...), defaultModuleBuildTags...)
+	// -recurse -tests is the stdlib default followed by the module default with the tags they share dropped
+	// (purego is in both), so the oracle and the conversion carry one set with no repeated tag.
+	moduleTestTags := []string{"purego", "math_big_pure_go", "safe", "noasm"}
 
 	tests := []struct {
 		name          string
@@ -45,11 +47,12 @@ func TestResolveBuildTags(t *testing.T) {
 		{"stdlib with explicit -tags -> explicit honored", true, false, false, true, true, explicit, explicit},
 		{"tests with -tags= (explicit clear) -> empty", false, true, false, true, true, nil, nil},
 		{"neither (single-file) -> tag-neutral", false, false, false, true, false, explicit, explicit},
-		{"recurse default -> safe", false, false, true, true, false, nil, defaultModuleBuildTags},
-		{"recurse+tests default -> purego and safe", false, true, true, true, false, nil, moduleTestTags},
+		{"recurse default -> safe,purego,noasm", false, false, true, true, false, nil, []string{"safe", "purego", "noasm"}},
+		{"recurse+tests default -> purego, math_big_pure_go, safe, noasm", false, true, true, true, false, nil, moduleTestTags},
 		{"recurse with -module-safe-tag=false -> tag-neutral", false, false, true, false, false, nil, nil},
 		{"recurse+tests with -module-safe-tag=false -> purego only", false, true, true, false, false, nil, defaultStdLibBuildTags},
 		{"recurse with explicit -tags -> explicit honored", false, true, true, true, true, explicit, explicit},
+		{"recurse (no -tests) with explicit -tags safe -> safe only", false, false, true, true, true, []string{"safe"}, []string{"safe"}},
 	}
 
 	for _, tt := range tests {
@@ -63,13 +66,16 @@ func TestResolveBuildTags(t *testing.T) {
 	}
 }
 
-// TestDefaultModuleBuildTagsContent pins the module default to exactly `safe`. `appengine` is the
-// tempting second spelling and must stay out: libraries switch behavior beyond unsafe on it (logrus
+// TestDefaultModuleBuildTagsContent pins the module default to exactly `safe`, `purego` and `noasm`, in
+// that order. `safe` selects a library's fallback for unsafe pointer arithmetic into Go's runtime
+// internals; `purego` and `noasm` select a library's pure-Go fallback for its assembly, which converts
+// only to stubs that throw (klauspost/cpuid/v2 gates its asm detector on `!noasm`). `appengine` is the
+// tempting fourth spelling and must stay out: libraries switch behavior beyond unsafe on it (logrus
 // selects a different terminal check), so adding it would change what a converted module does rather
 // than only which fallback it takes.
 func TestDefaultModuleBuildTagsContent(t *testing.T) {
-	if !reflect.DeepEqual(defaultModuleBuildTags, []string{"safe"}) {
-		t.Fatalf("defaultModuleBuildTags = %v, want [safe]", defaultModuleBuildTags)
+	if want := []string{"safe", "purego", "noasm"}; !reflect.DeepEqual(defaultModuleBuildTags, want) {
+		t.Fatalf("defaultModuleBuildTags = %v, want %v", defaultModuleBuildTags, want)
 	}
 }
 
