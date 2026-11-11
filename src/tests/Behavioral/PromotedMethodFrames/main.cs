@@ -89,14 +89,14 @@ internal static partial void viaValue(ж<outer> o) {
 internal static partial void viaExpr(ж<outer> Ꮡo) {
     ref var o = ref Ꮡo.DerefOrNull();
 
-    var ev = ((Func<outer, @string>)([GoWrapper("outer.Val")] (p0) => p0.Val()));
-    var ep = ((Func<ж<outer>, @string>)([GoWrapper("(*outer).Ptr")] (p0) => wrapperRecv(p0).Ptr()));
+    var ev = ((Func<outer, @string>)(mainᴛouterᴛpkg.Val));
+    var ep = ((Func<ж<outer>, @string>)(mainᴛouterᴛpkg.Ptr));
     fmt.Println("method expr call:", ev(o), ep(Ꮡo));
     fmt.Println("method expr name:", name((ev).OrTypedNilFunc()), name((ep).OrTypedNilFunc()));
     var (tv, _) = reflect.TypeOf(o).MethodByName("Val");
     var (tp, _) = reflect.TypeOf(Ꮡo.OrTypedNil()).MethodByName("Ptr");
     fmt.Println("method table name:", name(tv.Func.Interface()), name(tp.Func.Interface()));
-    var es = ((Func<outer, @string>)([GoWrapper("outer.ValStack")] (p0) => p0.ValStack()));
+    var es = ((Func<outer, @string>)(mainᴛouterᴛpkg.ValStack));
     fmt.Println("method expr stack:", es(o));
 }
 
