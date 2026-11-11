@@ -20,6 +20,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -1048,4 +1049,17 @@ func (v *Visitor) convCgoClosureArgument(argument cgoClosureArgument, context Id
 	}
 
 	return fmt.Sprintf("(%s)(%s)", v.getExpressionTypeName(argument.declared, false), value)
+}
+
+// cgoTargetDefaults makes a cgo package's project default to the one target its bindings were converted for: layout
+// L3's own defaults are the corpus's (windows, amd64), and a build of another target would compile no bindings.
+func cgoTargetDefaults(projectFileContents, targetPlatform string) string {
+	goos, goarch, _ := strings.Cut(targetPlatform, "/")
+
+	for property, value := range map[string]string{platformTargetOSProperty: goos, platformTargetArchProperty: goarch} {
+		projectFileContents = regexp.MustCompile(`<`+property+`>[^<]*</`+property+`>`).
+			ReplaceAllLiteralString(projectFileContents, "<"+property+">"+value+"</"+property+"> <!-- the one target of this package's cgo bindings -->")
+	}
+
+	return projectFileContents
 }
