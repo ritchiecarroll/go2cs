@@ -1264,6 +1264,98 @@ structural pairs, the universe `error`, and non-imported-package pairs would sti
 compile errors and would need the adapter complement. Guarded by `CrossPkgUser` (`namedLabel :
 CrossPkgLib_package.Labeled`, passed to `CrossPkgLib.Describe`).
 
+## An interface redeclares a method two embedded interfaces declare
+Go merges a method that two or more embedded interfaces declare into ONE method of the embedding
+interface (identical signatures, Go 1.14). C# keeps each embed as a base interface with the method
+declared only there, so a lookup of that method through the derived interface finds two members and
+is ambiguous (CS0121). The interface therefore **redeclares each such method once, `new`**, which
+hides every inherited member of that name; every implementer fills the redeclaration with the same
+method that fills the inherited slots:
+
+<!-- source: src/tests/Behavioral/EmbeddedInterfaceMergedMethod/main.cs:20-26 -->
+```csharp
+partial interface EmitHost :
+    PrinterHost,
+    SpecifierHost
+{
+    bool Blocked(@string @file);
+    new @string Ref(Path p);
+}
+```
+
+The rule is go/types' own (`writeMergedEmbeddedMethods`): a method of the interface's method set is
+redeclared when the interface does not declare it itself and it reaches the interface through **two
+or more distinct declaring interfaces** — `interfaceMethodDeclarers`, the predicate the call-site
+cast below already used. One declaring interface reached by two embed paths (`shared interface {
+left; right }`, both embedding `PrinterHost`) is not an overlap: C# finds the same member twice and
+binds it, and nothing is redeclared. A method the interface declares itself already hides the
+inherited ones. The spelling is the merged method's as go/types holds it, which is the first
+declarer's; a second declarer that spells a parameter through an alias or another parameter name
+(`Ref(q PathAlias)`) is the same C# signature. An interface that embeds a merging interface AND
+another declarer (`LabeledHost interface { EmitHost; Labeler }`) redeclares too, and so do lifted
+function-local and anonymous interfaces. A constraint interface (a type set, not a method set) is
+skipped. With `-comments`, one line naming the declarers as Go spells them precedes each
+redeclaration (`// Name is declared by fs.FileInfo and fs.DirEntry`).
+
+**Why the declaration, and not only the call.** The converter casts the calls IT writes to the
+interface go/types resolved (`((PrinterHost)(h)).Ref(p)`, `overlappingInterfaceMethodOwner`), and it
+keeps doing so: the cast is what lets a call compile against an interface that carries no
+redeclaration — one declared in an already-published package, or a hand-owned one. But four sites
+are not calls the converter writes: the **generated adapter** that forwards to a value of the
+merging interface when that value is assigned to another interface (`new
+EmitHostᴠMayBeEmittedHost(h)`; typescript-go `internal/compiler`'s `EmitHost` embeds
+`printer.EmitHost` and `declarations.DeclarationEmitHost`, which both declare
+`GetProjectReferenceFromSource`), a call on a **type parameter** the interface constrains, a
+**method value**, and **hand-written C#**. All four bind the redeclaration.
+
+**Compatibility.** The interface gains one member. Generated implementers pick it up when they are
+rebuilt, and a hand-written C# type that implements the method implicitly already satisfies it; an
+assembly compiled against the earlier shape that IMPLEMENTS such an interface must be rebuilt.
+
+**Bounds.** Two shapes stay compile errors in the converted project.
+
+A method that a declared embed and a **structural** base (the section above) both supply is not
+redeclared, and a lookup of it through the interface stays CS0121, whether or not the interface
+declares the method itself:
+
+```go
+type Reader interface {
+	Read(p []byte) (int, error)
+}
+
+// X's method set contains io.ReadCloser's, so io.ReadCloser becomes a structural base of X,
+// and Reader and io.ReadCloser both supply Read.
+type X interface {
+	Reader
+	Close() error
+	Extra() int
+}
+```
+
+The structural bases are not among the declarers this rule counts, and a member that exactly one
+structural base covers is inherited from that base instead of being declared, so writing `Read` in
+`X` changes nothing.
+
+An exported interface that embeds an **unexported** interface of its own package is CS0061 (the base
+interface is less accessible than the interface that embeds it):
+
+```go
+type reader interface {
+	Read(p []byte) (int, error)
+}
+
+type X interface {
+	reader
+	Extra() int
+}
+```
+
+Guarded by the `EmbeddedInterfaceMergedMethod` behavioral test (the adapter, type-parameter,
+method-value, nested, alias, function-local and anonymous arms, with the one-declarer diamond and the
+own-declaration as controls, output-compared vs Go) and by
+`TestAnInterfaceRedeclaresAMethodTwoEmbeddedInterfacesDeclare`; the call-site cast by
+`TestACallOnAMethodTwoEmbeddedInterfacesDeclareNamesTheResolvedInterface`.
+
 ## Embedded-pointer hop receivers split per method
 An interface member satisfied by promotion through an embedded POINTER field forwards through
 the hop — but the receiver form depends on the target method: a `this ref` extension (or

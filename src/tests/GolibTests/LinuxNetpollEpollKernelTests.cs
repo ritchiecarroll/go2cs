@@ -12,7 +12,9 @@ namespace GolibTests;
 /// internal/poll/linux/runtime_netpoll_impl.cs's epollKernelFor, read through its GoEpollKernelProbe.
 /// - The rows are pinned to Go's own go1.26.10 tables beside the census: sysnum-linux-amd64.tsv,
 ///   sysnum-linux-arm64.tsv and layouts-linux-amd64-arm64.tsv.
-/// - The amd64 row is also cross-checked against the converted linux flavour's own constants.
+/// - Each flavour's own row is also cross-checked against that flavour's converted constants:
+///   LinuxAmd64NetpollFlavourTests at linux/amd64 and LinuxArm64NetpollFlavourTests at linux/arm64. Each names
+///   constants only its flavour's table has (SYS_EPOLL_WAIT is amd64's alone), so each is its own file.
 /// - Linux flavour only: the probe exists only in internal/poll/linux (GolibTests.csproj excludes this file
 ///   under every other $(GoTargetOS)).
 /// </summary>
@@ -49,18 +51,5 @@ public class LinuxNetpollEpollKernelTests
 
             Assert.IsNull(poll.GoEpollKernelProbe(arch), $"{arch} has no mapping and must be refused, not misread");
         }
-    }
-
-    // The flavour these tests compile against is converted at linux/amd64, so its constants and its
-    // EpollEvent are amd64's: the X64 row must agree with them.
-    [TestMethod]
-    public void TheAmd64RowAgreesWithTheConvertedFlavour()
-    {
-        var k = poll.GoEpollKernelProbe(Architecture.X64)!.Value;
-
-        Assert.AreEqual((uintptr)syscall_package.SYS_EPOLL_WAIT, (uintptr)k.wait, "SYS_EPOLL_WAIT");
-        Assert.AreEqual((uintptr)syscall_package.SYS_EPOLL_CTL, (uintptr)k.ctl, "SYS_EPOLL_CTL");
-        Assert.AreEqual((uintptr)syscall_package.SYS_EPOLL_CREATE1, (uintptr)k.create1, "SYS_EPOLL_CREATE1");
-        Assert.AreEqual(Unsafe.SizeOf<syscall_package.EpollEvent>(), k.eventSize, "the flavour's EpollEvent size");
     }
 }

@@ -13,6 +13,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -100,14 +101,18 @@ func packageInputDigest(sourceFiles []string, outputPath string, options Options
 		}
 	}
 
-	companions, err := filepath.Glob(filepath.Join(outputPath, "*_impl.cs"))
+	// The companions this target's build compiles: flat, and in each of its layout key folders. A key folder's
+	// companion is named with its folder, so it never stands for a flat one of the same name.
+	for _, folder := range append([]string{""}, platformLayoutFolders(options.targetPlatform)...) {
+		companions, err := filepath.Glob(filepath.Join(outputPath, folder, "*_impl.cs"))
 
-	if err != nil {
-		return "", err
-	}
+		if err != nil {
+			return "", err
+		}
 
-	for _, companion := range companions {
-		inputs["output:"+filepath.Base(companion)] = companion
+		for _, companion := range companions {
+			inputs["output:"+path.Join(folder, filepath.Base(companion))] = companion
+		}
 	}
 
 	names := make([]string, 0, len(inputs))

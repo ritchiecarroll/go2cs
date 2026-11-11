@@ -217,7 +217,7 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 			// symbol names immutable (B2/B9, see performNameCollisionAnalysis) — matched by
 			// OBJECT identity, so the same-named production type / dot-imported function keeps
 			// its plain emission at every other site.
-			if testMethodRenames[v.info.ObjectOf(ident)] {
+			if testMethodRenames[v.info.ObjectOf(ident)] || funcRenamedForMethodCollision(v.info.ObjectOf(ident), v.fset) {
 				name = ShadowVarMarker + name
 			}
 		}
@@ -342,7 +342,10 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 	// but a package-level FREE FUNCTION referenced as a call target or a function value falls
 	// through to here — and its reference must follow the rename or it binds to nothing (CS0103).
 	// Object identity, so a same-named production symbol keeps its plain emission.
-	if testMethodRenames[v.info.ObjectOf(ident)] {
+	//
+	// A PRODUCTION free function renamed for a method collision (C40, funcRenamedForMethodCollision) follows the
+	// same way, here and from another package, which reaches this arm through the selector's Sel.
+	if testMethodRenames[v.info.ObjectOf(ident)] || funcRenamedForMethodCollision(v.info.ObjectOf(ident), v.fset) {
 		name = ShadowVarMarker + getSanitizedIdentifier(v.getIdentName(ident))
 	}
 

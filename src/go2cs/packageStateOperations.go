@@ -92,6 +92,8 @@ func resetPackageState(pkg *packages.Package) {
 	numericConversions = make(map[string]map[string]string)
 	indirectNumericConversions = make(map[string]map[string]string)
 	nameCollisions = make(map[string]bool)
+	cgoPseudoPackageNames = make(map[string]string)
+	cgoPseudoPackageTypeAccess = hashset.HashSet[string]{}
 	globalTempVarCount = make(map[string]int)
 	packageDynamicTypeNames = make(map[string]string)
 	importedDynamicTypeNames = make(map[string]map[string]string)

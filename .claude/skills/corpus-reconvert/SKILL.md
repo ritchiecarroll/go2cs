@@ -273,9 +273,12 @@ description: Measure a converter change's corpus footprint. The seeded two-seede
      because linux's `m` carries `sigmask` at the head of the `[GoValueClone(…)]` list; full narrative
      on the corrected-before-measurement rule in §1. -->
 - **A THIRD invalid-base class: NOT-AN-EMISSION.** A tracked review sibling can be HAND-AUTHORED, carrying no generated-file header at any commit, so a 3-way rooted on it resolves hunks against content the converter NEVER WROTE; **a date screen cannot see it, only a content compare against a target-matched emission can.** Refreshed siblings land as a TRACKED seat, so base and record are one artifact. <!-- ⚠ 2026-09-08, surfaced the same hour as the date-screen ruling: one sibling was created whole in a two-file hand cut, and nothing enforced the sibling's own do-not-edit banner. -->
-- **A FLAT hand-own whose emission differs by GOOS has ONE SIBLING PER GOOS FOLDER, and its re-derive reads ALL of
-  them** (`runtime/{windows,linux,darwin}/runtime2.cs.auto` for the flat `runtime/runtime2.cs`): the hand file serves
-  every flavour, so a residue or MISSING GENERATED call made against one flavour's sibling is a one-flavour call. <!--
+- **A FLAT hand-own whose emission differs by target has ONE SIBLING PER KEY FOLDER, and its re-derive reads ALL of
+  them** (`runtime/{windows,linux,darwin}/runtime2.cs.auto` for the flat `runtime/runtime2.cs`; by GOARCH,
+  `crypto/internal/fips140/subtle/{amd64,linux-arm64}/xor_generic.cs.auto`, in folders that hold nothing else): the hand
+  file serves every flavour, so a residue or MISSING GENERATED call made against one flavour's sibling is a one-flavour
+  call. **A sibling census walks every key folder of the universe**, never the three GOOS names. <!--
+     2026-11-10, G claude/g-xor-generic-sibling: the GOARCH case and the sibling-only folder.
      COORD's S5 ruling (a), 2026-11-05. Before it, the committed sibling was the windows flavour alone, which is the
      "committed siblings are ONE flavour's emissions" premise of the date-screen rule above. -->
 - **Restoring a converter-decision attribute the hand file lacks (`[GoValueClone]`) is a BEHAVIOUR CHANGE consumers read, and rides as its OWN cut, never inside a re-derive seat.** <!-- ⚠ 2026-09-07 companion to the `.cs.auto` base rules. -->

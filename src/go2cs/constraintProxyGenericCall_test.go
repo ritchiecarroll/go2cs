@@ -12,6 +12,8 @@ import (
 	"go/ast"
 	"go/types"
 	"testing"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // The defect these tests lock in: the SELF-REFERENTIAL constraint proxy — the machinery that lets a
@@ -50,9 +52,9 @@ type point[T any] interface {
 	restore([]byte) (T, error)
 }
 
-// named is a plain, NON-self-referential method-set constraint, so it must never take a proxy. A
-// pointer argument does NOT widen to it in C# — the box implements nothing; its pointer adapter
-// does, and a call site reaches the adapter only through a projection (slice element, func result).
+// named is a plain, NON-self-referential method-set constraint. A pointer argument does NOT widen to it
+// in C# — the box implements nothing. A call site reaches the pointer adapter through a projection (slice
+// element, func result); a DIRECT position takes the non-self proxy (nonSelfConstraintProxy.go, TS C35).
 type named interface {
 	label() string
 }
@@ -86,9 +88,15 @@ func withFactory[P point[P]](newPoint func() P, tag string) string { return newP
 // alone even though the CALL takes a proxy.
 func withPlainFunc[P point[P]](p P, format func(string) string) string { return format(p.label()) }
 
-// widenToNamed's constraint is not self-referential, so no proxy. Its bare N reach has no projection:
-// the box that C# infers here still cannot satisfy "where N : named" (never compiled as C#).
+// widenToNamed's constraint is not self-referential and its bare N reach has no projection: the box C#
+// infers cannot satisfy "where N : named" (CS0311 before C35), so it takes the NON-self proxy.
 func widenToNamed[N named](n N) string { return n.label() }
+
+// widenFactory reaches N only as a func RESULT: the adapter projection carries it, never a proxy.
+func widenFactory[N named](f func() N) string { return f().label() }
+
+// keepNamed never uses N as the interface, so its clause is elided and the box binds: no proxy.
+func keepNamed[N named](n N) N { return n }
 
 func pointerCall() string { return benchPoint(newP224(), 28) }
 
@@ -99,6 +107,10 @@ func factoryCall() string { return withFactory(newP224, "tag") }
 func plainFuncCall() string { return withPlainFunc(newP224(), func(s string) string { return s }) }
 
 func widenCall() string { return widenToNamed(newP224()) }
+
+func widenFactoryCall() string { return widenFactory(newP224) }
+
+func keepNamedCall() *p224 { return keepNamed(newP224()) }
 `
 
 // proxyFixture loads the fixture once and exposes each driver call by the name of the FUNCTION that
@@ -127,6 +139,13 @@ func loadProxyFixture(t *testing.T) proxyFixture {
 	t.Cleanup(func() { constraintProxies = previousProxies })
 	constraintProxies = make(map[string][3]string)
 
+	// A VALUE type argument records its closed constraint implementation (recordClosedConstraintImplementation)
+	// into interfaceImplementations, which a conversion run also initializes per package. Run alone, these
+	// tests reached it nil and panicked (a pre-existing isolation hole, the same with or without C35).
+	previousImplementations := interfaceImplementations
+	t.Cleanup(func() { interfaceImplementations = previousImplementations })
+	interfaceImplementations = make(map[string]hashset.HashSet[string])
+
 	production := loadProductionForDir(t, dir)
 	fixture := proxyFixture{
 		visitor: &Visitor{info: production.TypesInfo, pkg: production.Types},
@@ -134,6 +153,10 @@ func loadProxyFixture(t *testing.T) proxyFixture {
 	}
 
 	for _, file := range production.Syntax {
+		// The file's declarations, as a conversion collects them per file: methodSetConstraintNeeded reads a
+		// callee's body from them, and without them it keeps every clause (keepNamed's elided one included).
+		fixture.visitor.collectFileFuncDecls(file)
+
 		for _, decl := range file.Decls {
 			funcDecl, ok := decl.(*ast.FuncDecl)
 
@@ -238,16 +261,37 @@ func TestGenericCallProxyNegativeControls(t *testing.T) {
 		t.Fatal("a value type argument forced an explicit type-argument list")
 	}
 
-	// A POINTER argument whose constraint is NOT self-referential is not the proxy's: a box widens to
-	// nothing, and the adapter projection (not a proxy) is what carries such a pointer.
+	// A POINTER argument whose NON-self-referential constraint is reached only as a func RESULT keeps the
+	// adapter projection, and one whose clause is elided keeps the box: neither may take a proxy, or the
+	// non-self route churns the sites the existing routes already carry (std's hkdf/hmac and errors.AsType).
+	for _, call := range []string{"widenFactoryCall", "keepNamedCall"} {
+		ident, args := fixture.instance(t, call)
+
+		if proxyName, ok := fixture.visitor.constraintProxySigArg(ident, args, 0); ok {
+			t.Fatalf("%s: a NON-self-referential constraint resolved proxy %q; a func-result reach takes the adapter projection and an elided clause keeps the box", call, proxyName)
+		}
+
+		if fixture.visitor.callNeedsConstraintProxy(ident, args) {
+			t.Fatalf("%s: forced an explicit type-argument list through a proxy; unrelated generics must not churn", call)
+		}
+	}
+}
+
+// TestGenericCallNonSelfProxyAtADirectPosition is the C35 positive (DESIGN-constraint-proxy-nonself): a
+// pointer argument in a DIRECT position of a non-self-referential constraint whose clause is emitted takes
+// the non-self proxy, named element + ж + interface + ᴾ, and forces the explicit type-argument list.
+func TestGenericCallNonSelfProxyAtADirectPosition(t *testing.T) {
+	fixture := loadProxyFixture(t)
 	namedIdent, namedArgs := fixture.instance(t, "widenCall")
 
-	if proxyName, ok := fixture.visitor.constraintProxySigArg(namedIdent, namedArgs, 0); ok {
-		t.Fatalf("a NON-self-referential constraint resolved proxy %q; such an interface is reached through the adapter projection, never a proxy", proxyName)
+	want := "p224" + PointerPrefix + "named" + NonSelfConstraintProxySuffix
+
+	if proxyName, ok := fixture.visitor.constraintProxySigArg(namedIdent, namedArgs, 0); !ok || proxyName != want {
+		t.Fatalf("widenCall resolved proxy %q (ok=%v), want %q (must match ImplementGenerator's non-self naming)", proxyName, ok, want)
 	}
 
-	if fixture.visitor.callNeedsConstraintProxy(namedIdent, namedArgs) {
-		t.Fatal("a non-self-referential constraint forced an explicit type-argument list — unrelated generics must not churn")
+	if !fixture.visitor.callNeedsConstraintProxy(namedIdent, namedArgs) {
+		t.Fatal("the non-self proxy call was not flagged as needing an EXPLICIT type-argument list; C# would infer the box (CS0311)")
 	}
 }
 

@@ -61,6 +61,9 @@ public static class Symbols
     // Composes VALUE-form foreign interface adapter class names ({Struct}ᴠ{Iface}) - the
     // value sibling of the ж-composed pointer adapters (wraps a COPY, Go value semantics).
     public const string ValueAdapterInfix = "ᴠ";
+    // Suffixes the constraint proxy for a NON-self-referential method-set constraint ({Elem}ж{Iface}ᴾ),
+    // kept distinct from the same-package pointer adapter {Elem}ж{Iface} (DESIGN-constraint-proxy-nonself 3.1).
+    public const string NonSelfConstraintProxySuffix = "ᴾ";
     // Channel operator method names - the Go-visual send/receive member forms the converter
     // emits ("ch.ᐸꟷ(val)" for "ch <- val", "ch.ꟷᐳ(out val)" for "val := <-ch"); the named
     // channel wrapper template forwards these to its underlying channel<T>.

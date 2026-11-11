@@ -102,15 +102,8 @@ partial class runtime_package
     // the bodyless assembly half it calls.
     internal static partial void procyieldAsm(uint32 cycles) => Thread.SpinWait((int)cycles);
 
-    // testSPWrite exists only for runtime's own TestSPWrite (#62326): on amd64 it is an assembly frame
-    // with a 16 KB locals area that writes SP, so Go's stack-growth prologue has to be traced back from
-    // a function that clobbers SP. The managed host has no Go stack growth and no such prologue, and Go's
-    // own body for every other architecture (test_stubs.go, `//go:build !amd64`) is exactly this empty
-    // one -- the test then only calls it on a fresh goroutine and returns. Go's portable body, not a
-    // stand-in; left as the PartialStubGenerator stub it threw on that goroutine and ended the runtime
-    // row's test host (COORD ruling 2026-09-22).
-    internal static partial void testSPWrite() { }
-
+    // GolibTests' handle on testSPWrite (RuntimeTestSPWriteTests). The body is amd64/test_amd64_impl.cs's at the
+    // amd64 targets, and Go's own converted test_stubs.cs everywhere else, so it is one body in every build (S3 site 9).
     public static void GoTestSPWrite() => testSPWrite();
 
     // breakpoint executes the architecture's trap instruction (INT3 on amd64, BRK on arm64); it is
