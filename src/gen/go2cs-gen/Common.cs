@@ -34,6 +34,14 @@ public static class Common
     // AllowMultiple, so a partial TYPE carries it from exactly one generator; elsewhere it marks members.
     public const string NonUserCodeAttribute = "global::System.Diagnostics.DebuggerNonUserCode";
 
+    // Generated PLUMBING: names converted code needs and a C# consumer never writes (docs/PublicSurface.md, tier 2), kept
+    // out of IntelliSense. On a plumbing type, or on a generated member no Go declaration names (a canonical delegate
+    // field, a named pointer's DerefOrNull); never on a Go-declared member or a contract member such as a box overload
+    // or a field accessor. On a holder of extension methods it hides the holder's name and leaves its methods in member
+    // completion (measured with Roslyn's CompletionService against a metadata reference). Not AllowMultiple, so a
+    // partial type takes it from exactly one declaration.
+    public const string HiddenAttribute = "global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)";
+
     // The trimming registration an interface adapter carries on its constructor (golib's GoTypeRegistry; the plan's
     // stage 2): golib reads an adapter's wrapped field and its constructor, so a constructed adapter keeps both. Spelled
     // with the BCL's own enum, not a golib constant, so an adapter compiles against any golib.

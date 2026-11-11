@@ -40,8 +40,8 @@ They may change when the [break floor](ConsumingGoFromCSharp.md#the-break-floor)
 not name them, and IntelliSense hides them: each carries `[EditorBrowsable(EditorBrowsableState.Never)]`.
 
 - **Generated plumbing**: the interface adapters (`SжI`, `SᴠI`), the `{pkg}_package_asserts` classes, the promoted
-  method hosts (`…ᴛpkg`, `…ᴛxpkg`), the field-access token classes, constraint proxies, and the canonical delegate
-  fields (`Fᶠ`).
+  method hosts (`…ᴛpkg`, `…ᴛxpkg`), the field-access token classes, constraint proxies, the canonical delegate
+  fields (`Fᶠ`), and a named pointer type's `DerefOrNull`.
 - **golib's emitted-code API**: the `Go…` attributes (`GoImplement`, `GoRecv`, `GoPromoted`, `GoType` and the rest),
   the adapter and type registries, `StandardBox<T>` and the other box classes, `GoFrame`, `sstring`, `UntypedInt`,
   and the runtime classes in namespace `go.golib`.

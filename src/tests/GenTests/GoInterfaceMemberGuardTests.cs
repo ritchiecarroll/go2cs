@@ -79,7 +79,7 @@ public class GoInterfaceMemberGuardTests
 
     private static readonly string[] GoInterfaces = ["Reader", "Writer", "ReadWriter", "Container`1", "Stringer", "empty", "sizer"];
 
-    private static IEnumerable<MetadataReference> References()
+    internal static IEnumerable<MetadataReference> References()
     {
         string trusted = (string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!;
 
@@ -89,7 +89,7 @@ public class GoInterfaceMemberGuardTests
     }
 
     // Every generator go2cs-gen declares, as the analyzer host would load it.
-    private static List<ISourceGenerator> AllGenerators()
+    internal static List<ISourceGenerator> AllGenerators()
     {
         List<ISourceGenerator> generators = [];
 
