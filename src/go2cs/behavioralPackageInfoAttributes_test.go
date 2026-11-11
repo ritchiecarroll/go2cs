@@ -114,7 +114,9 @@ func TestRepeatedAttributeLinesKeysEachLineByItsDeclaration(t *testing.T) {
 // it is dropped by any re-baseline, even one scoped to an unrelated project with --only (AppendOfMake
 // and ValuePunBits were listed by hand in 0fcdba94d5 and 9ac6051e46 without the attribute; G's
 // re-baseline carried their deletion). An attribute without a list entry is a comparison nobody runs.
-// The attribute is matched exactly as the harness matches it: a trimmed line equal to the attribute.
+// The attribute is matched exactly as the harness matches it: a trimmed line equal to the attribute. A project
+// with an expected-output.txt (its stdout compared with that file, not with Go's: a -warn refusal panics) counts as
+// marked, since UpdateTestTargets lists it on either.
 func TestOutputComparisonListMatchesConsoleOutputAttribute(t *testing.T) {
 	behavioral := filepath.Join("..", "tests", "Behavioral")
 	listFile := filepath.Join(behavioral, "BehavioralTests", "OutputComparisonTests.cs")
@@ -140,6 +142,13 @@ func TestOutputComparisonListMatchesConsoleOutputAttribute(t *testing.T) {
 	marked := map[string]bool{}
 
 	for _, file := range files {
+		// An expected-output project (expected-output.txt beside it, BehavioralPackages.HasExpectedOutput) is
+		// listed too: UpdateTestTargets lists a project whose output it compares, by the attribute OR that file.
+		if _, err := os.Stat(filepath.Join(filepath.Dir(file), "expected-output.txt")); err == nil {
+			marked[filepath.Base(filepath.Dir(file))] = true
+			continue
+		}
+
 		contents, err := os.ReadFile(file)
 
 		if err != nil {
