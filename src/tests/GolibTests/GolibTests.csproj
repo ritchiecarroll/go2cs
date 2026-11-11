@@ -17,6 +17,10 @@
          sync/atomic assemblies and read the compiler's own verdict (diagnostics + SemanticModel),
          which is the only way to prove a "cannot select" claim by construction. -->
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0" />
+    <!-- A child that times out is described before it is killed (ChildTimeoutDiagnostics.cs): the runtime
+         writes its own dump over the diagnostics port, and ClrMD reads the stacks from it. -->
+    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.745401" />
+    <PackageReference Include="Microsoft.Diagnostics.Runtime" Version="4.2.751201" />
   </ItemGroup>
 
   <!-- The spawn-seam gate file drives linux-flavor-only syscall surface (Wait4, the unix

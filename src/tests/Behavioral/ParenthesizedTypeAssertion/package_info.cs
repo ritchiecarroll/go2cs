@@ -53,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("ParenthesizedTypeAssertion.go", "ParenthesizedTypeAssertion.cs", "AAwagpaCqIKWgoKWgoI=")]
+[assembly: GoPositionMap("ParenthesizedTypeAssertion.go", "ParenthesizedTypeAssertion.cs", "ABAolIKUxKSklKaClKSkpoKWgqiCloKCloKCpoKmgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -69,6 +69,7 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct named {}
     internal partial struct point {}
     public partial struct Map {}
     // </TypeAccessibility>

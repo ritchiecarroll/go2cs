@@ -272,6 +272,34 @@ Every generated named-slice wrapper also implements the non-generic `IArray` sur
 
 C# has no cast to or from a type parameter, so the Go conversions in `rand.N[Int intType]` — `Int(x)`, `uint64(n)` — and an untyped constant compared against the parameter (`n <= 0`, which Go types AS `Int` but C# leaves as `int`, unacceptable to the lifted `IComparisonOperators<Int, Int, bool>`) have no direct C# form (CS0030/CS0019). Three coordinated pieces, gated on a constraint whose every type-set term has an **integer underlying** (`typeParamIsInteger`): a conversion **to** the parameter emits golib's runtime-typed `ConvertToType<Int>(…)` (typeof-dispatch that JIT-folds to a single branch per instantiation; signed kinds sign-extend, unsigned zero-extend — Go's exact conversion semantics; a `/*num:**/` wrapper instantiation falls back to a reflection-cached bridge over its `Value` property/ctor); a conversion **from** the parameter to a basic integer emits `ConvertToUInt64<Int>(n)` (plus a plain numeric cast when the target is not `uint64`); and a **constant operand** of a binary op against the parameter materializes via `ConvertToType<Int>(0)` — except a SHIFT count, which Go types independently and the emission already coerces to `int`. Result: `if (n <= ConvertToType<Int>(0)) … return ConvertToType<Int>(ConvertToUInt64<Int>(n) / 2);`. (Guarded by the `GenericTypeInference` extension `halveN` — `~int32 | ~int64` with the compare, both conversions, and a negative value proving sign-extension, values vs Go; math/rand/v2's `N` takes this path.)
 
+### A float converted to an integer type parameter takes gc's answer for the process's architecture
+
+`T(value.(float64))` with `T ~int32` (typescript-go's internal/tsoptions) emits the same
+`ConvertToType<T>(value._<float64>())`, and golib's `double` overload decides it. An in-range value truncates
+toward zero, as Go's float-to-integer conversion does. An out-of-range value or NaN is implementation-defined in
+Go, and gc's answer differs by GOARCH, so golib gives the answer for the architecture the process runs on:
+- **amd64** (and any architecture not measured): the 64-bit kinds read CVTTSD2SQ's "integer indefinite"
+  (`long.MinValue`), int32 reads CVTTSD2SL's (`int.MinValue`), and the unsigned 64-bit kinds take gc's split at 2^63.
+- **arm64**: FCVTZS and FCVTZU saturate and NaN reads 0. int64 and int32 clamp, and the unsigned 64-bit kinds clamp
+  to [0, MaxUint64], so `uint64(-1.9)` is 0 on arm64 and MaxUint64 on amd64.
+
+On both, the 8- and 16-bit kinds keep the low bits of the int32 result and uint32 the low bits of the int64 one,
+because gc converts them through those widths. A C# cast would saturate the narrow kinds, which matches neither.
+A `float32` argument widens to `double` exactly and converts the same, and a named integer wrapper
+(`type count int32`) converts to its underlying kind first. The integer overloads keep every integer argument,
+because `long` and `ulong` are better conversion targets than `double`. Guarded by the `TypeParamFloatConversion`
+extension (in-range values only, which agree on every architecture, over every integer kind and a named wrapper,
+values vs Go) and GolibTests' `TypeParamFloatConversionTests`: gc's amd64 table (38 values over 11 kinds), both
+architectures' tables (15 out-of-range values each), the host's own architecture through `ConvertToType<T>`, and the
+binding and wrapper arms.
+<!-- 2026-11-10, TS readiness C36: at master 38caf3558a the repro failed CS1503 ('double' to 'ulong'). amd64 is
+go1.26.10 linux/amd64 output for int(f) ... uintptr(f), identical direct and through a type parameter. arm64 is
+go1.26.10 darwin/arm64 on a hosted osx-arm64 runner (os-matrix behavioral-smoke run 42857184743, the
+FloatToIntArchProbe program on the never-merged claude/c1-ts-c36-arm64-probe); golib's own line on that runner was
+gc amd64's exactly, and the osx-x64 leg of the same run, the control, matched Go. linux/arm64 shares gc's arm64
+lowering but was not measured on a linux runner (that leg refuses behavioral stages). Corpus census: 23
+ConvertToType call sites in src/core, every argument an integer, so none rebinds; apicompat .3 -> cut clean. -->
+
 ### Any constant Go types as the parameter is materialized, once, at its top-most node
 
 Go gives an untyped constant the type of the type parameter it meets, not only as a binary operand: `return 1`
@@ -965,19 +993,46 @@ local-generic arms as a closed record of the pair: the pointer adapter keyed by 
 interface)` and the value partial at the open definition (previous section). An open record and a closed
 record of one pair generate ONE adapter, byte-identical to the closed record's own.
 
-The scope is a LOCAL generic converted to an interface with NO type parameters. Two shapes keep their
-earlier emission:
+The scope is a generic converted to an interface with NO type parameters. A **foreign** generic's pointer
+conversion takes it only when every method the interface requires is declared on the generic's definition
+with a signature free of its type parameters (`foreignGenericAdapterIsOpen` in `interfaceConversion.go`).
+Then every instantiation satisfies the interface the same way. The converter records the definition,
+package-qualified, and names the adapter at each cast site with the instantiation's arguments as C# type
+arguments. `ImplementGenerator` emits ONE generic adapter, package-prefixed like every foreign adapter
+(`fieldlib_ExpectedжField<T>`, wrapping `ж<global::…fieldlib_package.Expected<T>>`). Several instantiations of
+one pair in one package therefore share it (tsc's internal/module, C33: `Expected[string]` and
+`Expected[map[string]string]` as `TypeValidatedField`):
 
-- A **foreign** generic is keyed per closed instantiation (its adapter is non-generic over the closed type),
-  so an open conversion of one has no definition-keyed adapter to share. Its pointer path still records the
-  open instantiation, `GoImplement<…lib_package.Box<T>, Iter>`, which names `T` out of scope.
+<!-- source: src/tests/Behavioral/GenericForeignAdapterInstantiations/package_info.cs:39 -->
+```csharp
+[assembly: GoImplement(typeof(go.GenericForeignAdapterInstantiations.fieldlib_package.Expected<>), typeof(go.GenericForeignAdapterInstantiations.fieldlib_package.Field), Pointer = true)]
+```
+
+<!-- source: src/tests/Behavioral/GenericForeignAdapterInstantiations/main.cs.target:18-20 -->
+```csharp
+    show("string", new fieldlib_ExpectedжField<@string>(Ꮡname));
+    show("map", new fieldlib_ExpectedжField<map<@string, @string>>(Ꮡdeps));
+    show("int", new fieldlib_ExpectedжField<nint>(Ꮡsize));
+```
+
+Two shapes keep their earlier emission:
+
+- A **foreign** generic whose required method MENTIONS a type parameter keeps one non-generic adapter per
+  closed instantiation (`internal/sync.HashTrieMap[any, any]` as sync's `mapInterface`, whose `Load(key K)` an
+  adapter open over `K` could not implement as `Load(any)`). Go lets exactly one instantiation satisfy such an
+  interface, so the un-suffixed closed name cannot collide. A promoted method, a generic interface, and a
+  definition that does not implement the interface take this route too. An open conversion of such a pair
+  still records the open instantiation, `GoImplement<…lib_package.Box<T>, Getter>`, which names `T` out of
+  scope.
 - An interface over the type parameter (`Getter[T]`) cannot be named by `typeof` in its closed form either;
   that pair is unrecorded, as before.
 
 Guarded by the `OpenGenericPointerImplement` behavioral test (pointer and value forms, a type reached only
 through its parameters, and a closed record beside the open one, output-compared against `go run`), by
-`TestOpenGenericImplementIsRecordedByDefinition` in the converter, and by GenTests
-`OpenGenericImplementRecordTests` for the one-adapter claim.
+`GenericForeignAdapterInstantiations` (three instantiations of one foreign generic through one interface, and
+a closed-route `Box[string]` as `Getter`, output-compared), by `TestOpenGenericImplementIsRecordedByDefinition`
+and `TestForeignGenericAdapterRoute` in the converter, and by GenTests `OpenGenericImplementRecordTests` for the
+one-adapter claim.
 
 ## The `string | []byte` union
 C# generic constraints are conjunctive ("and"), so they cannot express Go's `string | []byte` union directly. The two members share no operators (the union is neither comparable nor additive), so a conforming body may only use the read operations common to both — indexing, `len`, and sub-slicing. These are captured by the golib read-only byte-sequence interface [`IByteSeq`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/IByteSeq.cs), which both `@string` and `slice<T>` implement; the converter emits it for the union and suppresses the (spurious) lifted operator constraints:

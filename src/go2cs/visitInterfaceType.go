@@ -487,6 +487,15 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		}
 	}
 
+	// Go merges a method two or more embedded interfaces declare into ONE method of this interface (identical
+	// signatures, Go 1.14). C# keeps each embed as a base interface and the method declared only there, so every
+	// lookup on this interface finds two members and is ambiguous (CS0121): the calls the converter writes, which
+	// overlappingInterfaceMethodOwner casts, but also a generated adapter forwarding to a value of this interface,
+	// a call on a type parameter it constrains, a method value, and hand-written C#, which no cast reaches.
+	// The interface redeclares each such method once: the redeclaration hides the inherited members, and every
+	// implementer fills it with the method that fills them.
+	v.writeMergedEmbeddedMethods(result, interfaceType, innerIndent)
+
 	v.indentLevel--
 	result.WriteString(v.indent(v.indentLevel))
 	result.WriteRune('}')
@@ -795,6 +804,59 @@ func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, 
 	}
 
 	return baseNames, canonicalBaseNames, covered
+}
+
+// writeMergedEmbeddedMethods redeclares, as `new` members of the interface being written, each method the interface
+// reaches through two or more DISTINCT declaring interfaces and does not declare itself (see the call site). The
+// spelling is the one go/types gives the merged method. The predicate is overlappingInterfaceMethodOwner's, so a
+// call site is cast exactly where its receiver's interface redeclares: one declaring interface reached by two embed
+// paths is no overlap, and neither is a method the interface declares itself. An interface that is not a method
+// set (a constraint) is no value type and keeps its own machinery.
+func (v *Visitor) writeMergedEmbeddedMethods(result *strings.Builder, interfaceType *ast.InterfaceType, indent string) {
+	ifaceType := v.getType(interfaceType, false)
+
+	if ifaceType == nil {
+		return
+	}
+
+	iface, isInterface := ifaceType.Underlying().(*types.Interface)
+
+	if !isInterface || !iface.IsMethodSet() {
+		return
+	}
+
+	// A declarer as Go spells it from this package (`fs.FileInfo`), for the line that names it in the body
+	goSpelling := func(p *types.Package) string {
+		if p == v.pkg {
+			return ""
+		}
+
+		return p.Name()
+	}
+
+	for i := 0; i < iface.NumMethods(); i++ {
+		method := iface.Method(i)
+		declarers := interfaceMethodDeclarers(ifaceType, iface, method.Name())
+
+		if len(declarers) < 2 {
+			continue
+		}
+
+		if v.options.includeComments {
+			names := make([]string, len(declarers))
+
+			for j, declarer := range declarers {
+				names[j] = types.TypeString(declarer, goSpelling)
+			}
+
+			result.WriteString(fmt.Sprintf("%s// %s is declared by %s and %s%s", indent, method.Name(), strings.Join(names[:len(names)-1], ", "), names[len(names)-1], v.newline))
+		}
+
+		signature := method.Signature()
+		parameterSignature, _ := v.generateParametersSignature(signature, false)
+
+		result.WriteString(fmt.Sprintf("%snew %s %s(%s);%s", indent, v.generateResultSignature(signature), getSanitizedFunctionName(method.Name()), parameterSignature, v.newline))
+	}
 }
 
 func (v *Visitor) getSourceParameterSignatureLen(signature *types.Signature) int {

@@ -18,6 +18,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -252,8 +253,8 @@ func pkgHasLinknameHandle(t *testing.T, goRoot string, pkgPath string, symbol st
 // unexported `type _C_int int32`, broke the darwin syscall build with exactly that error. Such a pull
 // needs a hand companion in the PULLING package instead (S7b: vendor/golang.org/x/net/route).
 //
-// Every declaration WITH A BODY in a file one of the corpus's targets builds (windows, linux, darwin;
-// amd64; cgo off) is checked, because each is one the converter emits; a bodyless one (assembly,
+// Every declaration WITH A BODY in a file one of the corpus's targets builds (corpusTargets, the
+// universe; cgo off) is checked, because each is one the converter emits; a bodyless one (assembly,
 // another GOOS's stub) emits no signature to widen, and a file no corpus target builds (wasip1's
 // `openat(..., pathLen size, ...)`) is never converted at all. A definition row is checked at its
 // definition, which is the func the converter widens. Each offending type is reported once per row.
@@ -320,7 +321,7 @@ func TestLinknameForwardTargetsExposeNoUnexportedTypes(t *testing.T) {
 }
 
 // corpusTargetFiles parses the non-test files of pkgPath that at least one corpus target builds: the
-// -stdlib platforms windows/amd64, linux/amd64 and darwin/amd64, with cgo off (the corpus's pinned state).
+// -stdlib platforms of corpusTargets, with cgo off (the corpus's pinned state).
 func corpusTargetFiles(t *testing.T, goRoot string, pkgPath string) []*ast.File {
 	t.Helper()
 
@@ -342,19 +343,7 @@ func corpusTargetFiles(t *testing.T, goRoot string, pkgPath string) []*ast.File 
 			continue
 		}
 
-		built := false
-
-		for _, goos := range []string{"windows", "linux", "darwin"} {
-			ctx := build.Default
-			ctx.GOROOT, ctx.GOOS, ctx.GOARCH, ctx.CgoEnabled = goRoot, goos, "amd64", false
-
-			if match, err := ctx.MatchFile(dir, name); err == nil && match {
-				built = true
-				break
-			}
-		}
-
-		if !built {
+		if !corpusTargetParses(goRoot, dir, name) {
 			continue
 		}
 
@@ -474,7 +463,7 @@ func unexportedSignatureTypes(decl *ast.FuncDecl, typeNames map[string]bool) []s
 // syscall_darwin.go.
 //
 // For every row whose target the converter emits with a body (unexported, not a definition row), each
-// corpus target (windows, linux, darwin; amd64; cgo off; purego) on which a file pulling it builds must
+// corpus target (corpusTargets; cgo off; purego) on which a file pulling it builds must
 // also build a file of the target's package carrying the handle — or the row must be in
 // linknameForwardHandleElsewhere, which widens without the local handle, and then must still need it.
 func TestLinknameForwardHandlesCoverEveryPullingTarget(t *testing.T) {
@@ -514,9 +503,9 @@ func TestLinknameForwardHandlesCoverEveryPullingTarget(t *testing.T) {
 		var unhandled []string
 
 		for _, site := range pullers[target] {
-			for _, goos := range corpusGOOS {
-				if !handled[goos] && corpusTargetBuilds(goRoot, site.dir, site.name, goos) {
-					unhandled = append(unhandled, goos+" ("+site.pkg+"/"+site.name+")")
+			for _, target := range corpusTargets {
+				if !handled[target] && corpusTargetBuilds(goRoot, site.dir, site.name, target) {
+					unhandled = append(unhandled, target+" ("+site.pkg+"/"+site.name+")")
 				}
 			}
 		}
@@ -540,13 +529,29 @@ func TestLinknameForwardHandlesCoverEveryPullingTarget(t *testing.T) {
 	t.Logf("checked %d forward rows; %d rows have a pulling file in GOROOT", checked, len(pullers))
 }
 
-var corpusGOOS = []string{"windows", "linux", "darwin"}
+// corpusTargets are the (GOOS, GOARCH) pairs the corpus is converted for: the converter's platformUniverse.
+var corpusTargets = platformUniverse
 
-// corpusTargetBuilds reports whether file name in dir is compiled by the corpus conversion for goos:
-// amd64, cgo off, and the purego tag the -stdlib default passes.
-func corpusTargetBuilds(goRoot string, dir string, name string, goos string) bool {
+// corpusTargetParses reports whether at least one corpus target builds file name in dir, with cgo off (the corpus's
+// pinned state).
+func corpusTargetParses(goRoot string, dir string, name string) bool {
+	for _, target := range corpusTargets {
+		ctx := build.Default
+		ctx.GOROOT, ctx.GOOS, ctx.GOARCH, ctx.CgoEnabled = goRoot, goosOfTarget(target), archOfTarget(target), false
+
+		if match, err := ctx.MatchFile(dir, name); err == nil && match {
+			return true
+		}
+	}
+
+	return false
+}
+
+// corpusTargetBuilds reports whether file name in dir is compiled by the corpus conversion for target: cgo off, and
+// the purego tag the -stdlib default passes.
+func corpusTargetBuilds(goRoot string, dir string, name string, target string) bool {
 	ctx := build.Default
-	ctx.GOROOT, ctx.GOOS, ctx.GOARCH, ctx.CgoEnabled = goRoot, goos, "amd64", false
+	ctx.GOROOT, ctx.GOOS, ctx.GOARCH, ctx.CgoEnabled = goRoot, goosOfTarget(target), archOfTarget(target), false
 	ctx.BuildTags = []string{"purego"}
 
 	match, err := ctx.MatchFile(dir, name)
@@ -554,7 +559,42 @@ func corpusTargetBuilds(goRoot string, dir string, name string, goos string) boo
 	return err == nil && match
 }
 
-// handleTargets returns the corpus GOOS values on which a non-test file of pkgPath carrying the one-arg
+// TestCorpusTargetsAreTheUniverse plants the question on a file only linux/arm64 builds. Both readers of GOROOT here
+// fixed GOARCH at amd64, so syscall's zsyscall_linux_arm64.go was a file no corpus target built: a linux/arm64 puller
+// went unread, and a handle in an arm64-only file covered nothing.
+func TestCorpusTargetsAreTheUniverse(t *testing.T) {
+	if !slices.Equal(corpusTargets, platformUniverse) {
+		t.Errorf("the linkname registry reads GOROOT at %v and the corpus is converted for %v", corpusTargets, platformUniverse)
+	}
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	dir := filepath.Join(goRoot, "src", "syscall")
+
+	if _, err := os.Stat(filepath.Join(dir, "zsyscall_linux_arm64.go")); err != nil {
+		t.Skipf("no syscall/zsyscall_linux_arm64.go under GOROOT %q: %v", goRoot, err)
+	}
+
+	if !corpusTargetParses(goRoot, dir, "zsyscall_linux_arm64.go") {
+		t.Errorf("syscall/zsyscall_linux_arm64.go is parsed by no corpus target; linux/arm64 builds it")
+	}
+
+	builtAt := map[string]bool{}
+
+	for _, target := range corpusTargets {
+		builtAt[target] = corpusTargetBuilds(goRoot, dir, "zsyscall_linux_arm64.go", target)
+	}
+
+	if !builtAt["linux/arm64"] || builtAt["linux/amd64"] {
+		t.Errorf("syscall/zsyscall_linux_arm64.go builds at %v; want linux/arm64 alone", builtAt)
+	}
+}
+
+// handleTargets returns the corpus targets on which a non-test file of pkgPath carrying the one-arg
 // `//go:linkname symbol` handle builds.
 func handleTargets(t *testing.T, goRoot string, pkgPath string, symbol string) map[string]bool {
 	t.Helper()
@@ -596,9 +636,9 @@ func handleTargets(t *testing.T, goRoot string, pkgPath string, symbol string) m
 			continue
 		}
 
-		for _, goos := range corpusGOOS {
-			if corpusTargetBuilds(goRoot, dir, name, goos) {
-				handled[goos] = true
+		for _, target := range corpusTargets {
+			if corpusTargetBuilds(goRoot, dir, name, target) {
+				handled[target] = true
 			}
 		}
 	}

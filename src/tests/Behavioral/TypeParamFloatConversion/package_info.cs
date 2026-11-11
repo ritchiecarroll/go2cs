@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("TypeParamFloatConversion.go", "TypeParamFloatConversion.cs", "AAcekJSQlKKCgoKUpqaCgoKC")]
+[assembly: GoPositionMap("TypeParamFloatConversion.go", "TypeParamFloatConversion.cs", "AAcokJSQAAgQkJSQlJCUooKCgpSmpoKCgoKCgoKC")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -65,6 +65,8 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial interface integer<ΔT> {}
+    internal partial struct count {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

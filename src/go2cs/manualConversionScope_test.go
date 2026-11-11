@@ -28,11 +28,13 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -300,18 +302,18 @@ func TestSockaddrFamilyIsScopedToEachHandOwningFlavor(t *testing.T) {
 
 		for _, goos := range flavors {
 			inScope := scope.includes(goos)
-			bodied := strings.Contains(handOwns[goos], witness)
+			unbodied, bodied := handOwnBodied(handOwns, goos, witness)
 
 			if inScope != want[goos] {
 				t.Errorf("syscall.%s: applies on %s = %v, want %v", name, goos, inScope, want[goos])
 			}
 
-			if inScope && !bodied {
-				t.Errorf("syscall.%s is displaced on %s but no marked hand-own under src/core/syscall/%s/ declares %q: the placeholder would leave it unimplemented", name, goos, goos, strings.TrimSpace(witness))
+			if inScope && len(unbodied) > 0 {
+				t.Errorf("syscall.%s is displaced on %s but no marked hand-own in src/core/syscall/ that %v compiles declares %q: the placeholder would leave it unimplemented", name, goos, unbodied, strings.TrimSpace(witness))
 			}
 
-			if !inScope && bodied {
-				t.Errorf("syscall.%s has a hand-own body under src/core/syscall/%s/ but is NOT displaced there: the generated body survives beside it (CS0111)", name, goos)
+			if !inScope && len(bodied) > 0 {
+				t.Errorf("syscall.%s has a hand-own body in src/core/syscall/ that %v compiles but is NOT displaced on %s: the generated body survives beside it (CS0111)", name, bodied, goos)
 			}
 		}
 	}
@@ -345,8 +347,9 @@ func TestSockaddrFamilyIsScopedToEachHandOwningFlavor(t *testing.T) {
 	}
 }
 
-// handOwnSourcesByFlavor concatenates, per flavor, the text of every marked hand-own under
-// src/core/<pkg>/<goos>/ — the witness a per-flavor scope guard checks each scope against. It is
+// handOwnSourcesByFlavor concatenates, per target, the text of every marked hand-own in the key folders that target's
+// build compiles under src/core/<pkg>/ (its <goos>/, <arch>/ and <goos>-<arch>/) — the witness a per-flavor scope
+// guard checks each scope against, at every target of the scope's GOOS (handOwnBodied). It is
 // deliberately PER FLAVOR where the seam guard (manualConversionDestination_test.go) witnesses per
 // NAME across the whole package: with a linux body on disk, that guard cannot see that a darwin
 // scope has no darwin body (measured 2026-09-05, the Q52 negative control: the darwin bridge file
@@ -355,40 +358,124 @@ func TestSockaddrFamilyIsScopedToEachHandOwningFlavor(t *testing.T) {
 func handOwnSourcesByFlavor(t *testing.T, pkg string) map[string]string {
 	t.Helper()
 
+	return handOwnSourcesAt(t, filepath.Join("..", "core"), pkg)
+}
+
+// handOwnSourcesAt is handOwnSourcesByFlavor over the corpus at coreDir.
+func handOwnSourcesAt(t *testing.T, coreDir string, pkg string) map[string]string {
+	t.Helper()
+
 	sources := map[string]string{}
 
-	for _, goos := range []string{"windows", "linux", "darwin"} {
-		dir := filepath.Join("..", "core", filepath.FromSlash(pkg), goos)
-		entries, err := os.ReadDir(dir)
-
-		if err != nil {
-			t.Skipf("src/core/%s/%s is not beside the converter; nothing to witness: %v", pkg, goos, err)
-		}
-
+	for _, target := range platformUniverse {
 		var text strings.Builder
 
-		for _, entry := range entries {
-			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".cs") {
+		for _, folder := range platformLayoutFolders(target) {
+			dir := filepath.Join(coreDir, filepath.FromSlash(pkg), folder)
+			entries, err := os.ReadDir(dir)
+
+			if err != nil {
+				// A GOOS folder is the flavour itself; a GOARCH or pair folder is there only when the layout admitted one.
+				if folder == goosOfTarget(target) {
+					t.Skipf("src/core/%s/%s is not beside the converter; nothing to witness: %v", pkg, folder, err)
+				}
+
 				continue
 			}
 
-			body, err := os.ReadFile(filepath.Join(dir, entry.Name()))
+			for _, entry := range entries {
+				if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".cs") {
+					continue
+				}
 
-			if err != nil {
-				t.Fatal(err)
-			}
+				body, err := os.ReadFile(filepath.Join(dir, entry.Name()))
 
-			// The converter's own line-anchored marker (testConversion.go), never a comment's mention of it.
-			if manualConversionMarker.Match(body) {
-				text.Write(body)
-				text.WriteByte('\n')
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				// The converter's own line-anchored marker (testConversion.go), never a comment's mention of it.
+				if manualConversionMarker.Match(body) {
+					text.Write(body)
+					text.WriteByte('\n')
+				}
 			}
 		}
 
-		sources[goos] = text.String()
+		sources[target] = text.String()
 	}
 
 	return sources
+}
+
+// handOwnBodied reads a scope's GOOS against the per-target witness: the targets of that GOOS whose witness lacks the
+// text (a displacement there leaves the placeholder unfilled) and those whose witness holds it (a generated body kept
+// there collides with it). A goos with no universe target reads (nil, nil); every caller passes universe GOOS today.
+func handOwnBodied(handOwns map[string]string, goos string, witness string) (unbodied []string, bodied []string) {
+	for _, target := range corpusLattice().targetsOfGOOS(goos) {
+		if strings.Contains(handOwns[target], witness) {
+			bodied = append(bodied, target)
+		} else {
+			unbodied = append(unbodied, target)
+		}
+	}
+
+	return unbodied, bodied
+}
+
+// TestHandOwnWitnessReadsEachTargetsLayoutKeyFolders plants a marked hand-own in each kind of layout key folder. A
+// scope names a GOOS, and the body behind it must reach every target of that GOOS: a body in syscall/linux-arm64/ is
+// linux/arm64's alone, and one in syscall/amd64/ is every amd64 target's. A witness read from syscall/<goos>/ alone
+// sees neither, so it is kept per target, from the folders each target's build compiles.
+func TestHandOwnWitnessReadsEachTargetsLayoutKeyFolders(t *testing.T) {
+	coreDir := t.TempDir()
+
+	for rel, member := range map[string]string{
+		"syscall/windows/a_windows_impl.cs":         "windowsOnly",
+		"syscall/linux/b_linux_impl.cs":             "linuxShared",
+		"syscall/darwin/c_darwin_impl.cs":           "darwinOnly",
+		"syscall/amd64/d_amd64_impl.cs":             "archShared",
+		"syscall/linux-arm64/e_linux_arm64_impl.cs": "pairOnly",
+		"syscall/linux-amd64/f_linux_amd64.cs":      "unmarked",
+	} {
+		marker := "[module: GoManualConversion]\n"
+
+		if member == "unmarked" {
+			marker = ""
+		}
+
+		filePath := filepath.Join(coreDir, filepath.FromSlash(rel))
+
+		if err := os.MkdirAll(filepath.Dir(filePath), 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := os.WriteFile(filePath, []byte(marker+"internal static void "+member+"() { }\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	handOwns := handOwnSourcesAt(t, coreDir, "syscall")
+
+	for target, want := range map[string][]string{
+		"windows/amd64": {"windowsOnly", "archShared"},
+		"linux/amd64":   {"linuxShared", "archShared"},
+		"darwin/amd64":  {"darwinOnly", "archShared"},
+		"linux/arm64":   {"linuxShared", "pairOnly"},
+	} {
+		source, ok := handOwns[target]
+
+		if !ok {
+			t.Errorf("the witness has no text for %s; it reads %d keys and the corpus is laid out for %v", target, len(handOwns), platformUniverse)
+			continue
+		}
+
+		for _, member := range []string{"windowsOnly", "linuxShared", "darwinOnly", "archShared", "pairOnly", "unmarked"} {
+			if got := strings.Contains(source, " "+member+"("); got != slices.Contains(want, member) {
+				t.Errorf("%s: the witness holds %s = %v, want %v", target, member, got, !got)
+			}
+		}
+	}
 }
 
 // TestEveryManualConversionScopeNamesAKnownGOOS is the typo guard. A scope naming "win" or "macos"
@@ -396,27 +483,88 @@ func handOwnSourcesByFlavor(t *testing.T, pkg string) map[string]string {
 // and compiles, and the hand-own it was protecting is simply gone. Nothing else in the pipeline can
 // report that, because "not hand-owned" is a legitimate answer for every other declaration.
 func TestEveryManualConversionScopeNamesAKnownGOOS(t *testing.T) {
-	scoped := 0
+	scoped, findings := manualScopeFindings(manualScopeRegistries(manualConversionFuncs, manualConversionVars, manualConversionConsts))
 
-	for pkgPath, funcScopes := range manualConversionFuncs {
-		for name, scope := range funcScopes {
-			if len(scope) == 0 {
-				continue
-			}
+	for _, finding := range findings {
+		t.Error(finding)
+	}
 
-			scoped++
+	if scoped == 0 {
+		t.Error("no entry carries a platform scope; goosScope has no live use and this guard proves nothing")
+	}
+}
 
-			for _, goos := range scope {
-				if !isKnownGOOS(goos) {
-					t.Errorf("%s.%s is scoped to %q, which is not a known GOOS: the entry matches nothing and the hand-own "+
-						"it names is silently unprotected", pkgPath, name, goos)
+// manualScopeRegistry is one goosScope-keyed registry the typo guard walks, and the test a scope's GOOS must pass.
+type manualScopeRegistry struct {
+	name     string
+	entries  map[string]map[string]goosScope
+	accepts  func(goos string) bool
+	accepted string
+}
+
+// manualScopeRegistries lists the registries the typo guard walks. The registries are parameters so a fixture can
+// hand in a registry of its own without touching the package's.
+func manualScopeRegistries(funcs, vars, consts map[string]map[string]goosScope) []manualScopeRegistry {
+	return []manualScopeRegistry{
+		{"manualConversionFuncs", funcs, isKnownGOOS, "a known GOOS"},
+		{"manualConversionVars", vars, isUniverseGOOS, "a GOOS of the universe"},
+		{"manualConversionConsts", consts, isUniverseGOOS, "a GOOS of the universe"},
+	}
+}
+
+// isUniverseGOOS reports whether some target in platformUniverse builds goos. A displaced var or const is checked
+// against its targets' folders, so a scope GOOS outside the universe has nothing to check and is off everywhere.
+func isUniverseGOOS(goos string) bool {
+	return len(corpusLattice().targetsOfGOOS(goos)) > 0
+}
+
+// manualScopeFindings counts the scoped entries across the registries and names each scope GOOS its registry refuses.
+func manualScopeFindings(registries []manualScopeRegistry) (scoped int, findings []string) {
+	for _, registry := range registries {
+		for pkgPath, scopes := range registry.entries {
+			for name, scope := range scopes {
+				if len(scope) == 0 {
+					continue
+				}
+
+				scoped++
+
+				for _, goos := range scope {
+					if !registry.accepts(goos) {
+						findings = append(findings, fmt.Sprintf("%s: %s.%s is scoped to %q, which is not %s: the entry "+
+							"matches nothing and the hand-own it names is silently unprotected", registry.name, pkgPath, name,
+							goos, registry.accepted))
+					}
 				}
 			}
 		}
 	}
 
-	if scoped == 0 {
-		t.Error("no entry carries a platform scope; goosScope has no live use and this guard proves nothing")
+	slices.Sort(findings)
+
+	return scoped, findings
+}
+
+// TestManualScopeGuardReadsTheConstAndVarRegistries is G's probe run through the typo guard: a displaced const scoped
+// to "plan9" names a known GOOS that no universe target builds, so the const is off at every target the corpus
+// produces. The guard must name it; a guard that walks manualConversionFuncs alone passes it.
+func TestManualScopeGuardReadsTheConstAndVarRegistries(t *testing.T) {
+	probe := map[string]map[string]goosScope{"internal/buildcfg": {"defaultGOARCH": goosScope{"plan9"}}}
+
+	for _, c := range []struct {
+		label        string
+		vars, consts map[string]map[string]goosScope
+	}{
+		{"const", manualConversionVars, probe},
+		{"var", probe, manualConversionConsts},
+	} {
+		_, findings := manualScopeFindings(manualScopeRegistries(manualConversionFuncs, c.vars, c.consts))
+
+		if !slices.ContainsFunc(findings, func(finding string) bool {
+			return strings.Contains(finding, "internal/buildcfg.defaultGOARCH") && strings.Contains(finding, `"plan9"`)
+		}) {
+			t.Errorf("a %s scoped to plan9 drew no finding (findings: %v)", c.label, findings)
+		}
 	}
 }
 
@@ -492,18 +640,18 @@ func TestSignalInstallLayerIsScopedToEachHandOwningFlavor(t *testing.T) {
 
 		for _, goos := range []string{"windows", "linux", "darwin"} {
 			inScope := scope.includes(goos)
-			bodied := strings.Contains(handOwns[goos], witness)
+			unbodied, bodied := handOwnBodied(handOwns, goos, witness)
 
 			if inScope != want[goos] {
 				t.Errorf("runtime.%s: applies on %s = %v, want %v", name, goos, inScope, want[goos])
 			}
 
-			if inScope && !bodied {
-				t.Errorf("runtime.%s is displaced on %s but no marked hand-own under src/core/runtime/%s/ declares %q: the placeholder would leave it unimplemented", name, goos, goos, witness)
+			if inScope && len(unbodied) > 0 {
+				t.Errorf("runtime.%s is displaced on %s but no marked hand-own in src/core/runtime/ that %v compiles declares %q: the placeholder would leave it unimplemented", name, goos, unbodied, witness)
 			}
 
-			if !inScope && bodied {
-				t.Errorf("runtime.%s has a hand-own body under src/core/runtime/%s/ but is NOT displaced there: the generated body survives beside it (CS0111)", name, goos)
+			if !inScope && len(bodied) > 0 {
+				t.Errorf("runtime.%s has a hand-own body in src/core/runtime/ that %v compiles but is NOT displaced on %s: the generated body survives beside it (CS0111)", name, bodied, goos)
 			}
 		}
 	}
@@ -559,8 +707,8 @@ func TestDarwinPointerArgumentMirrorsAreScopedToDarwin(t *testing.T) {
 			}
 		}
 
-		if !strings.Contains(handOwns["darwin"], " "+name+"(") {
-			t.Errorf("syscall.%s is scoped to darwin but no marked hand-own under src/core/syscall/darwin declares it", name)
+		if unbodied, _ := handOwnBodied(handOwns, "darwin", " "+name+"("); len(unbodied) > 0 {
+			t.Errorf("syscall.%s is scoped to darwin but no marked hand-own in src/core/syscall/ that %v compiles declares it", name, unbodied)
 		}
 	}
 }
@@ -583,12 +731,12 @@ func TestNetpollBreakIsRefusedByNameOnEveryFlavor(t *testing.T) {
 			continue
 		}
 
-		if !strings.Contains(handOwns[goos], " netpollBreak()") {
-			t.Errorf("runtime.netpollBreak is displaced on %s but no marked hand-own under src/core/runtime/%s/ declares it: the placeholder would leave it unimplemented", goos, goos)
+		if unbodied, _ := handOwnBodied(handOwns, goos, " netpollBreak()"); len(unbodied) > 0 {
+			t.Errorf("runtime.netpollBreak is displaced on %s but no marked hand-own in src/core/runtime/ that %v compiles declares it: the placeholder would leave it unimplemented", goos, unbodied)
 		}
 
-		if !strings.Contains(handOwns[goos], `"runtime: netpollBreak: the managed host has no runtime poller to break (`) {
-			t.Errorf("runtime.netpollBreak on %s does not refuse with the shared leading words", goos)
+		if unbodied, _ := handOwnBodied(handOwns, goos, `"runtime: netpollBreak: the managed host has no runtime poller to break (`); len(unbodied) > 0 {
+			t.Errorf("runtime.netpollBreak at %v does not refuse with the shared leading words", unbodied)
 		}
 	}
 }

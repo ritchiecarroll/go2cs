@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -200,6 +201,25 @@ func osMemoryFindings(goos string, scan osMemoryScan) []string {
 	return findings
 }
 
+// osMemoryCensusTargets are the targets the census reads the runtime at, one scan each: the corpus's universe. Each
+// target reads its GOOS's row of osMemoryCallers.
+var osMemoryCensusTargets = lineKeyedUniverse
+
+// osMemoryCensusReads reports whether a tracked folder (slash-spelled, with its trailing slash) is one the census reads
+// at target: the flat runtime/ or a runtime key folder that target's build compiles.
+func osMemoryCensusReads(dir string, target string) bool {
+	const runtimeDir = "src/core/runtime/"
+
+	if dir == runtimeDir {
+		return true
+	}
+
+	name, ok := strings.CutPrefix(dir, runtimeDir)
+	name = strings.TrimSuffix(name, "/")
+
+	return ok && !strings.Contains(name, "/") && slices.Contains(lineKeyedFolderTargets(name), target)
+}
+
 // TestOsMemoryRegistrationCensus is the guard.
 func TestOsMemoryRegistrationCensus(t *testing.T) {
 	root := repoRootFromPackageDir(t)
@@ -209,14 +229,15 @@ func TestOsMemoryRegistrationCensus(t *testing.T) {
 		t.Fatalf("git ls-files returned %d paths, too few to be this repository; a guard that scans nothing passes everything", len(tracked))
 	}
 
-	for _, goos := range []string{"windows", "linux", "darwin"} {
+	for _, target := range osMemoryCensusTargets {
+		goos, _, _ := strings.Cut(target, "/")
 		scan := osMemoryScan{methods: map[string]*osMemoryMethod{}}
 
 		for _, rel := range tracked {
 			dir, file := filepath.Split(filepath.FromSlash(rel))
 			dir = filepath.ToSlash(dir)
 
-			if dir != "src/core/runtime/" && dir != "src/core/runtime/"+goos+"/" {
+			if !osMemoryCensusReads(dir, target) {
 				continue
 			}
 
@@ -235,7 +256,7 @@ func TestOsMemoryRegistrationCensus(t *testing.T) {
 		}
 
 		if scan.files < 20 {
-			t.Fatalf("VACUOUS: %d runtime files for %s; the census is measuring nothing", scan.files, goos)
+			t.Fatalf("VACUOUS: %d runtime files for %s; the census is measuring nothing", scan.files, target)
 		}
 
 		var readings []string
@@ -245,10 +266,42 @@ func TestOsMemoryRegistrationCensus(t *testing.T) {
 			}
 		}
 		sort.Strings(readings)
-		t.Logf("READING · %s: %d files, callers %v", goos, scan.files, readings)
+		t.Logf("READING · %s: %d files, callers %v", target, scan.files, readings)
 
 		for _, finding := range osMemoryFindings(goos, scan) {
-			t.Error(finding)
+			t.Errorf("at %s, %s", target, finding)
+		}
+	}
+}
+
+// TestOsMemoryCensusReadsTheLayoutKeyFolders plants a runtime file in each kind of layout key folder. A census that
+// reads runtime/<goos>/ alone is blind to runtime/amd64/ and runtime/linux-amd64/, which a linux/amd64 build compiles,
+// and it never reads linux/arm64 at all.
+func TestOsMemoryCensusReadsTheLayoutKeyFolders(t *testing.T) {
+	if !slices.Equal(osMemoryCensusTargets, lineKeyedUniverse) {
+		t.Errorf("the census reads the runtime at %v and the corpus is laid out for %v", osMemoryCensusTargets, lineKeyedUniverse)
+	}
+
+	for _, plant := range []struct {
+		dir    string
+		target string
+		want   bool
+	}{
+		{"src/core/runtime/", "linux/arm64", true},
+		{"src/core/runtime/linux/", "linux/arm64", true},
+		{"src/core/runtime/arm64/", "linux/arm64", true},
+		{"src/core/runtime/linux-arm64/", "linux/arm64", true},
+		{"src/core/runtime/amd64/", "darwin/amd64", true},
+		{"src/core/runtime/linux-amd64/", "linux/amd64", true},
+		{"src/core/runtime/windows/", "windows/amd64", true},
+		{"src/core/runtime/linux-amd64/", "linux/arm64", false},
+		{"src/core/runtime/amd64/", "linux/arm64", false},
+		{"src/core/runtime/windows/", "linux/amd64", false},
+		{"src/core/runtime/debug/", "linux/amd64", false},
+		{"src/core/runtime/debug/linux/", "linux/amd64", false},
+	} {
+		if got := osMemoryCensusReads(plant.dir, plant.target); got != plant.want {
+			t.Errorf("a file in %s: read at %s = %v, want %v", plant.dir, plant.target, got, plant.want)
 		}
 	}
 }

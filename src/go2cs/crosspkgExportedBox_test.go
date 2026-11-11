@@ -20,6 +20,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -200,11 +201,7 @@ func TestDisplacedExportedVarsAreBoxedOrRegistered(t *testing.T) {
 			}
 
 			found++
-			pkgDir := filepath.Dir(path)
-
-			if base := filepath.Base(pkgDir); base == "windows" || base == "linux" || base == "darwin" {
-				pkgDir = filepath.Dir(pkgDir)
-			}
+			pkgDir := displacedVarPackageDir(filepath.Dir(path))
 
 			rel, _ := filepath.Rel(core, pkgDir)
 			key := filepath.ToSlash(rel) + "." + name
@@ -240,11 +237,59 @@ func TestDisplacedExportedVarsAreBoxedOrRegistered(t *testing.T) {
 	}
 }
 
+// displacedVarPackageDir is the package directory of a corpus file's directory: the directory itself, or its parent
+// when the file sits in one of the package's layout key folders.
+func displacedVarPackageDir(fileDir string) string {
+	if isCorpusLayoutKeyFolder(filepath.Base(fileDir)) {
+		return filepath.Dir(fileDir)
+	}
+
+	return fileDir
+}
+
+// packageBoxDirs are the directories a package's box declarations can sit in: the package directory and every layout
+// key folder the corpus's universe can lay a file into.
+func packageBoxDirs(pkgDir string) []string {
+	dirs := []string{pkgDir}
+
+	for _, folder := range corpusLattice().candidateFolders() {
+		dirs = append(dirs, filepath.Join(pkgDir, folder))
+	}
+
+	return dirs
+}
+
+// TestPackageBoxDirsReadTheLayoutKeyFolders plants a hand-owned companion in each kind of layout key folder. The
+// guard reads a displaced var's package from the companion's folder and looks for its box in the package's folders;
+// with the GOOS folders alone, a companion in runtime/linux-amd64/ reads as a package runtime/linux-amd64, and a box
+// declared in runtime/amd64/ is never found.
+func TestPackageBoxDirsReadTheLayoutKeyFolders(t *testing.T) {
+	pkgDir := filepath.Join("core", "runtime")
+
+	for _, folder := range []string{"", "windows", "linux", "darwin", "amd64", "arm64", "linux-amd64", "linux-arm64"} {
+		if got := displacedVarPackageDir(filepath.Join(pkgDir, folder)); got != pkgDir {
+			t.Errorf("a companion in %s: package directory %s, want %s", filepath.Join(pkgDir, folder), got, pkgDir)
+		}
+	}
+
+	if got, want := displacedVarPackageDir(filepath.Join(pkgDir, "debug")), filepath.Join(pkgDir, "debug"); got != want {
+		t.Errorf("a file in %s: package directory %s, want %s (a nested package is its own)", want, got, want)
+	}
+
+	read := packageBoxDirs(pkgDir)
+
+	for _, folder := range []string{"windows", "linux", "darwin", "amd64", "arm64", "linux-amd64", "linux-arm64"} {
+		if !slices.Contains(read, filepath.Join(pkgDir, folder)) {
+			t.Errorf("a box declared in %s is not read: the guard reads %v", filepath.Join(pkgDir, folder), read)
+		}
+	}
+}
+
 func packageDeclaresBox(t *testing.T, pkgDir, name string) bool {
 	t.Helper()
 	decl := regexp.MustCompile(`static\s+(?:readonly\s+)?(?:ж|StaticBox|StandardBox)<.+>\s+` + regexp.QuoteMeta(AddressPrefix+name) + `\b`)
 
-	for _, dir := range []string{pkgDir, filepath.Join(pkgDir, "windows"), filepath.Join(pkgDir, "linux"), filepath.Join(pkgDir, "darwin")} {
+	for _, dir := range packageBoxDirs(pkgDir) {
 		entries, _ := os.ReadDir(dir)
 
 		for _, e := range entries {

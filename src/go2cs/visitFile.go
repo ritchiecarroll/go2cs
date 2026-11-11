@@ -181,19 +181,36 @@ func (v *Visitor) visitFile(file *ast.File) {
 	var prevDecl ast.Decl
 	prevShape := declShapeOther
 
+	// cmd/cgo's C type and constant declarations are emitted into this file's part of the package's C pseudo-package
+	// (cgoPseudoPackage.go), separated there as they would be in the package class.
+	packageBuilder, cgoPart := v.outputBuilder, &strings.Builder{}
+	cgoClassName := getSanitizedImport(cgoPseudoPackageClass(packageName))
+	var cgoPrevDecl ast.Decl
+	cgoPrevShape := declShapeOther
+
 	for _, decl := range file.Decls {
+		previous, previousShape := &prevDecl, &prevShape
+		v.outputBuilder, v.emittedClassName, cgoEmittingPseudoPackage = packageBuilder, packageClassName, false
+
+		if v.cgoPseudoPackageDecl(decl) {
+			previous, previousShape = &cgoPrevDecl, &cgoPrevShape
+			v.outputBuilder, v.emittedClassName, cgoEmittingPseudoPackage = cgoPart, cgoClassName, true
+		}
+
 		mark := v.outputBuilder.Len()
 		v.lastDeclShape = declShapeOther
 		v.visitDecl(decl)
 
 		if genDecl, isGen := decl.(*ast.GenDecl); (isGen && genDecl.Tok == token.IMPORT) || !v.emittedSince(mark) {
-			prevDecl = nil
+			*previous = nil
 			continue
 		}
 
-		v.separateTopLevelDecl(prevDecl, prevShape, decl, v.lastDeclShape, mark)
-		prevDecl, prevShape = decl, v.lastDeclShape
+		v.separateTopLevelDecl(*previous, *previousShape, decl, v.lastDeclShape, mark)
+		*previous, *previousShape = decl, v.lastDeclShape
 	}
+
+	v.outputBuilder, v.emittedClassName, cgoEmittingPseudoPackage = packageBuilder, packageClassName, false
 
 	if v.options.includeComments {
 		// Add any remaining standalone comments
@@ -215,6 +232,24 @@ func (v *Visitor) visitFile(file *ast.File) {
 	}
 
 	v.writeOutputLn("} // end %s", packageClassName)
+
+	if cgoPart.Len() > 0 {
+		v.outputBuilder.WriteString(v.newline)
+		v.writeOutputLn("partial class %s {", cgoClassName)
+		v.outputBuilder.WriteString(cgoPart.String())
+
+		if v.needsNewLine(v.outputBuilder.String()) {
+			v.outputBuilder.WriteString(v.newline)
+		}
+
+		v.writeOutputLn("} // end %s", cgoClassName)
+	}
+
+	// Each file that names a C type or constant reaches the pseudo-package through `C`, and a file that names none
+	// never sees it (§11.17).
+	if v.namesCgoPseudoPackageMember(file) {
+		v.addRequiredUsing(fmt.Sprintf("%s = %s", cgoPseudoPackageAlias, cgoClassName))
+	}
 
 	// Take the completed body as text so the deferred markers below can be substituted. The using
 	// directives and type aliases are only KNOWN once the whole file has been visited, so they are

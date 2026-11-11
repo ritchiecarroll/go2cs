@@ -19,6 +19,27 @@ internal static partial class cgotestꓸC_package
         public static implicit operator uint16(@ushort value) => value.m_value;
     }
 
+    internal readonly struct @longlong(int64 value)
+    {
+        private readonly int64 m_value = value;
+        public static implicit operator @longlong(int64 value) => new(value);
+        public static implicit operator int64(@longlong value) => value.m_value;
+    }
+
+    // windows' struct tm: the nine ints alone (increment 3b2b).
+    internal struct struct_tm
+    {
+        public @int tm_sec;
+        public @int tm_min;
+        public @int tm_hour;
+        public @int tm_mday;
+        public @int tm_mon;
+        public @int tm_year;
+        public @int tm_wday;
+        public @int tm_yday;
+        public @int tm_isdst;
+    }
+
     internal struct POINT
     {
         public @long x;

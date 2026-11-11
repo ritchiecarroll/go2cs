@@ -83,6 +83,7 @@ const FuncValueMarker = "\u1DA0"                 // Suffix of an sstring twin's 
 const TrueMarker = "\u1427"                      // Variants: ᐧ true
 const OpaqueTrueMarker = TrueMarker + TrueMarker // golib static readonly true - NOT compiler-foldable (leading constant-true case, CS8120)
 const ValueAdapterInfix = "\u1D20"               // ᴠ - value-form foreign adapter infix ({Struct}ᴠ{Iface})
+const NonSelfConstraintProxySuffix = "\u1D3E"    // ᴾ - non-self-referential constraint proxy suffix ({Elem}ж{Iface}ᴾ)
 const OverloadDiscriminator = "\uA7F7"           // Variants: ꟷ false
 const ChannelLeftOp = "\u1438\uA7F7"             // Example: `ch.ᐸꟷ(val)` for `ch <- val`
 const ChannelRightOp = "\uA7F7\u1433"            // Example: `ch.ꟷᐳ(out var val)` for `val := <-ch`

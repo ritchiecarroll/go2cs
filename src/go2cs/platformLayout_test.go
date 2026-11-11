@@ -122,6 +122,51 @@ func TestReviewSiblingFollowsTheTreesPerGoosSibling(t *testing.T) {
 	}
 }
 
+// A review sibling is never compiled, so the key folder the tree holds it in need not be a SOURCE folder:
+// crypto/internal/fips140/subtle keeps xor_generic.cs.auto in amd64/ and linux-arm64/, folders that hold nothing
+// else (mergeReviewSiblings). Every writer of a review sibling follows the tree there: the per-file path
+// (reviewSiblingLayoutPath) and the two that fall back to a flat sibling, a fully hand-owned package's and a test
+// file's (flatReviewSiblingLayoutPath). A linux/arm64 reconvert that wrote flat instead laid a second sibling beside
+// the two. A NESTED PACKAGE named for a key (`internal/syscall/windows`) is never such a folder.
+func TestReviewSiblingFollowsAKeyFolderThatHoldsNoSource(t *testing.T) {
+	packageDir := filepath.Join(t.TempDir(), "subtle")
+
+	writeTestFile(t, filepath.Join(packageDir, "subtle.csproj"), "<Project />")
+	writeTestFile(t, filepath.Join(packageDir, "xor_generic.cs"), "hand-owned, flat")
+	writeTestFile(t, filepath.Join(packageDir, "amd64", "xor_generic.cs.auto"), "amd64 flavour")
+	writeTestFile(t, filepath.Join(packageDir, "linux-arm64", "xor_generic.cs.auto"), "arm64 flavour")
+	writeTestFile(t, filepath.Join(packageDir, "nested.cs"), "hand-owned, flat")
+	writeTestFile(t, filepath.Join(packageDir, "windows", "windows.csproj"), "<Project />")
+	writeTestFile(t, filepath.Join(packageDir, "windows", "nested.cs.auto"), "a nested package's file")
+
+	tests := []struct {
+		target   string
+		baseName string
+		want     string
+	}{
+		{"windows/amd64", "xor_generic", filepath.Join(packageDir, "amd64", "xor_generic.cs.auto")},
+		{"linux/amd64", "xor_generic", filepath.Join(packageDir, "amd64", "xor_generic.cs.auto")},
+		{"darwin/amd64", "xor_generic", filepath.Join(packageDir, "amd64", "xor_generic.cs.auto")},
+		{"linux/arm64", "xor_generic", filepath.Join(packageDir, "linux-arm64", "xor_generic.cs.auto")},
+		// No folder of this target's holds the sibling: flat, beside the hand-own.
+		{"darwin/arm64", "xor_generic", filepath.Join(packageDir, "xor_generic.cs.auto")},
+		// The nested package's file of the same name is another package's: flat.
+		{"windows/amd64", "nested", filepath.Join(packageDir, "nested.cs.auto")},
+		// A sibling the tree holds nowhere: flat.
+		{"linux/arm64", "absent", filepath.Join(packageDir, "absent.cs.auto")},
+	}
+
+	for _, test := range tests {
+		if got := reviewSiblingLayoutPath(packageDir, test.target, test.baseName); got != test.want {
+			t.Errorf("reviewSiblingLayoutPath(%q, %q) = %q, want %q", test.target, test.baseName, got, test.want)
+		}
+
+		if got := flatReviewSiblingLayoutPath(packageDir, test.target, test.baseName); got != test.want {
+			t.Errorf("flatReviewSiblingLayoutPath(%q, %q) = %q, want %q", test.target, test.baseName, got, test.want)
+		}
+	}
+}
+
 // TestPlatformLayoutIgnoresNestedPackageNamedForGOOS is the negative case that matters most:
 // `internal/syscall/windows` is a converted PACKAGE whose directory name is a GOOS. Folding its
 // sources into `internal/syscall` would corrupt both, so the discriminator is the project file every
