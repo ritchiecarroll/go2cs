@@ -36,8 +36,8 @@ func TestWarnFlagAllowsOnlyLoudCodes(t *testing.T) {
 		}
 	}
 
-	if _, err := parseWarnCodes("GO2CS2002,GO2CS9999"); err == nil || !strings.Contains(err.Error(), "GO2CS9999") || !strings.Contains(err.Error(), "not a go2cs refusal code") {
-		t.Errorf("-warn with an unknown code: error %v, want it to name GO2CS9999 as not a refusal code", err)
+	if _, err := parseWarnCodes("GO2CS2002,GO2CS0011"); err == nil || !strings.Contains(err.Error(), "GO2CS0011") || !strings.Contains(err.Error(), "not a go2cs refusal code") {
+		t.Errorf("-warn with a code that is not a refusal (GO2CS0011 is the build-side warning): error %v, want it to name GO2CS0011 as not a refusal code", err)
 	}
 }
 
