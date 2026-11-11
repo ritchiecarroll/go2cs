@@ -179,3 +179,93 @@ the pointer type (probe 3) is not in it. The equivalence test of section 4 is `T
 - Part B (section 4): the 28 receiver-type reads and the declaration path, for `type P = *T; func (p P) M()`.
   Probe 3 is its repro. In-seat commits or a BOARD row: COORD's call.
 - The struct equality operator with nil (section 7) is unchanged and unmeasured beyond section 1.
+
+## Amendment 2 of 2026-11-11 — part B as cut: the class is the pointer alias, not the receiver
+
+> Appended, not rewritten. COORD ruled part B into this seat (2026-11-11 20:35Z), as its own commits after
+> part A. Section 4 sized it as "28 reads and the declaration path"; that estimate was wrong, and this block
+> says by how much and why.
+
+### D. What part B turned out to be
+
+Section 4 read the defect as the RECEIVER of a method (`type P = *T; func (p P) M()`). A second probe with no
+alias-typed receiver at all, only a parameter, a local and a field of type `NodePtr` calling ordinary `*Node`
+methods, does not compile at master either (14 errors: CS0103, CS1929, CS1615, CS1061, CS8130). **Measured
+cause**: to `go/types`, `type NodePtr = *Node` is a `*types.Alias`, and the converter decides "is this a
+pointer?" with a bare `.(*types.Pointer)` assertion. A census of the converter at part A's tip reads 297 such
+assertions, of which 151 were bare and decide something, 2 are the type-name renderers, and the rest already
+resolve the type (`types.Unalias`, `.Underlying()`, or a local assigned only from one of them). The 28 reads of
+section 4 are 27 of the 151.
+
+So the alias-typed receiver was one visible member of a wider class: **a pointer type written through an
+alias**. Fixing the receiver alone would have left a method that compiles and a caller that does not.
+
+### E. The cut
+
+On part A's tip `47069bdd0e`:
+
+| Commit | What |
+|---|---|
+| `b454409f5b` | red: behavioral project `PointerAliasForms` (17 receiver shapes through the alias, each on a nil pointer, a real pointer and a real pointer to a zero value, with two controls; then the alias as a parameter, a local, a field, an element, a map value, a channel element, a typed nil in an interface, a type-switch case and a type parameter's constraint; 90 lines under Go) with part A's emission as its `main.cs`, which does not compile (34 errors at 17 sites); `TestPointerAliasEmitsAsPointer` and `TestPointerTypeReadsResolveAliases`, both failing |
+| `0aab467d3a` | fix: `types.Unalias(x).(*types.Pointer)` at the 151 assertions (41 files, one line each); the same at three type switches over a constraint's embedded term; `getRefParameterTypeName` reads the pointer through the alias |
+| `5dd2e579a4` | goldens: the project's `main.cs`, `main.cs.target`, `package_info.cs`, and its line in the four test lists |
+| `00d1662b12` | docs: the rule in `ConversionStrategies-Reference/pointers.md`, the PENDING entry in the held 1.26.10.4 section of `NEWS.md`, one provenance note re-cited |
+
+- **Why all 151 and not the ones the fixture reaches**: `types.Unalias` returns a type that is not an alias
+  unchanged, so each wrap is the identity on every program that spells no pointer through an alias, and the
+  alternative leaves a wrong answer at every read no fixture happens to reach. The rule is held by a test
+  that parses the converter (`TestPointerTypeReadsResolveAliases`), which named all 151 at the red commit.
+- **The alias keeps its name.** The two type-name renderers read the type as WRITTEN on purpose, so the
+  emission says `this NodePtr Ꮡp`, `internal NodePtr attrs;`, `slice<NodePtr>`. With them resolved too (tried
+  in a scratch copy) every alias name became `ж<Node>`. By reference there is no alias spelling
+  (`this ref Node p`).
+- **The emission is that of the `*Node` spelling.** `TestPointerAliasEmitsAsPointer` converts the fixture as
+  written and with each alias replaced by the pointer it denotes, and requires one emission once the alias
+  names are mapped.
+
+### F. Predictions, stated before the gates and the reconvert, then scored
+
+Written at 21:25Z, after the full `go test` and before the regression check and any reconvert.
+
+- **`check-no-regression.ps1`: 0 existing goldens move**, with two named candidates, the only behavioral
+  sources besides the new project that spell a pointer through an alias: `TypeConversionReturnType`
+  (`type P = *bool`, embedded in an anonymous struct) and `GenericTypeAlias` with its library
+  (`type Ptr[T any] = *Box[T]`). **MET**: at `00d1662b12`, linux host, 1,039 packages transpiled, 12
+  windows-only projects skipped, and the one changed file is `CgoPseudoPackageTypes/.editorconfig`, the
+  linux-host drift (exit code 1 for that file alone). Neither candidate moved.
+- **Standard-library footprint: 0 files on each of four targets**, two-seeded, master's converter against the
+  seat's tip, one target per run. Basis: a grep of the Go tree for alias declarations of the form `= *T` reads
+  one outside tests and string literals, `runtime/debuglog_on.go` (`type dlogger = *dloggerImpl`), behind the
+  `debuglog` build tag. Named arm most likely to miss: an alias of a pointer declared in a form the grep does
+  not match. **MET**: at `00d1662b12`, linux/amd64, windows/amd64, darwin/amd64 and linux/arm64 each read an
+  empty diff (4,662 `.cs` counted in each seed, both arms exit code 0, no unresolved-marker line in either
+  log).
+- **`go test -timeout 60m ./...`**: 11 packages ok at `5dd2e579a4` (exit code 0), the repository guards among
+  them; the guards alone pass again at this block's commit. Both new tests fail at the red commit, read in an
+  export of it, where the guard names 151 reads.
+- **The behavioral runner** (`-IgnoreDiskPreflight`, about 12 GB free against a 25 GB floor; linux; at
+  `00d1662b12`), one filter each: `PointerAliasForms` and `AliasReceiverForms` pass transpile, golden
+  byte-compare, compile and output 1 of 1; `TypeConversionReturnType` passes the first three 1 of 1 (it is not
+  marked for output comparison); `GenericTypeAlias` passes them on 3 of 3 projects and output on the 2 that
+  are programs. The full runner was not run: the regression check moved no other emission.
+- **Not run**: GenTests and GolibTests (no generator or runtime file changes); the three-target `-stdlib`
+  compile arm (the emission is byte-identical to master's on four targets, so it has nothing to compile);
+  anything on the TypeScript module.
+
+### G. Found on the way, not fixed here (for COORD to route)
+
+- **A method value on a field reached through a pointer parameter, taken inside a closure, does not compile
+  at master** (CS8175: the lambda names the parameter's `ref` alias: `var recvʗ1 = h.attrs;`). No alias is
+  involved: a 25-line program with `*Node` reproduces it. Loud, not silent. It was in the first draft of the
+  fixture and was moved out of the closure there.
+- **Eight type switches walk a type's structure with no case for an alias** (collecting packages, usings,
+  constraint sets and unexported types). An alias of any kind, not only of a pointer, is not descended into.
+  Read, not measured: no probe here shows a wrong emission from one.
+- **A conversion to the alias type as a call's receiver** (`NodePtr(x).M()`) is emitted `x.M()` where the
+  pointer spelling `(*Node)(x).M()` is emitted `(x).M()`. Both are correct; the equivalence test's fixture
+  avoids the shape.
+
+### H. Still open after part B
+
+- The struct equality operator with nil (section 7), unchanged.
+- TypeScript: the 24 C48 units are the TS session's to re-read on this branch.
