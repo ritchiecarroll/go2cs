@@ -283,6 +283,34 @@ func TestCgoMirrorPassesByValueOnlyIntegerAndPointerStructs(t *testing.T) {
 	}
 }
 
+// requireDotnetSdk returns the dotnet on PATH when it has an SDK for framework (net10.0 needs a 10.x SDK). Without one the
+// test reads Inconclusive, a skip naming what is missing, unless GO2CS_REQUIRE_DOTNET=1, which the CI legs set: there a
+// runner whose SDK went missing must read red, not skipped. A dotnet with only an older SDK counts as missing, since it
+// cannot build the project and would otherwise fail the test for a reason that is not the test's.
+func requireDotnetSdk(t *testing.T, framework string) string {
+	t.Helper()
+
+	major := strings.TrimSuffix(strings.TrimPrefix(framework, "net"), ".0")
+	missing := ""
+	dotnet, err := exec.LookPath("dotnet")
+
+	if err != nil {
+		missing = "no dotnet on PATH"
+	} else if sdks, err := exec.Command(dotnet, "--list-sdks").Output(); err != nil || !regexp.MustCompile(`(?m)^`+regexp.QuoteMeta(major)+`\.`).Match(sdks) {
+		missing = fmt.Sprintf("the dotnet on PATH has no .NET %s SDK for %s", major, framework)
+	}
+
+	if missing != "" {
+		if os.Getenv("GO2CS_REQUIRE_DOTNET") == "1" {
+			t.Fatalf("%s, and GO2CS_REQUIRE_DOTNET=1 requires one", missing)
+		}
+
+		t.Skipf("NOT RUN: %s (Inconclusive, not a pass)", missing)
+	}
+
+	return dotnet
+}
+
 // The mirrors compiled and run by .NET itself. A standalone console project holds every mirror this file builds; for
 // each it runs CheckLayout and prints the CLR's own reading of every member offset and of the mirror's size, which the
 // test holds to go/types. Then the planted UNDERFLOW (§11.2): struct ints' 8-byte C long member b, generated as a C#
@@ -292,17 +320,13 @@ func TestCgoMirrorsCompileAndHoldTheirLayoutUnderDotnet(t *testing.T) {
 		t.Skip("integration test: builds and runs a project with the installed .NET SDK")
 	}
 
-	dotnet, err := exec.LookPath("dotnet")
-
-	if err != nil {
-		t.Skip("cgo mirror layout NOT RUN: no dotnet on PATH (Inconclusive, not a pass)")
-	}
-
 	framework := regexp.MustCompile(`<TargetFramework Condition="[^"]*">([^<]+)</TargetFramework>`).FindStringSubmatch(renderCsprojTemplate("Exe", "", ""))
 
 	if framework == nil {
 		t.Fatal("the rendered template names no TargetFramework")
 	}
+
+	dotnet := requireDotnetSdk(t, framework[1])
 
 	shapesPkg := checkCgoMirrorShapes(t)
 	fixture := loadCgoFixture(t, true)

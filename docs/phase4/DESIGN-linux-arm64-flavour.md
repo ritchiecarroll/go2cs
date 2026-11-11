@@ -13,6 +13,16 @@
 >
 > **Amended 2026-11-09 (§9, the S2 line):** the escape-registry `IsPerOS` predicate joins S2's scope, by COORD's
 > routing of a gap found while cutting S1a. Nothing else in this revision changes.
+>
+> **Amended 2026-11-10 (§11, new):** what cutting S2 corrected. Class (iii) of §9's S3 row is 18 types in 4
+> files; the metadata record is keyed by layout folder; every layout-reading guard reads per target; four
+> hand-owned syscall bodies are owed at linux/arm64; the arch binding seats with S2; R1e is not delivered
+> (§11.6); six readers outside the converter suite named the GOOS folders themselves (§11.7). The text above §11
+> is unchanged.
+>
+> **Amended 2026-11-10 (§11.8, new):** R1e is delivered by a converter seat on batch 283. The arch-divergent
+> review sibling of `crypto/internal/fips140/subtle` is split into `amd64/` and `linux-arm64/`, folders that hold
+> nothing else. §11.6 stays as written: it records what S2 seated.
 
 ## 0. The standing defect this closes, and the first seat (SEAT 0)
 
@@ -430,3 +440,150 @@ The spine is S1, S2, S3, S7. S0, S4 and S5 are independent of it; S6 needs S2.
   `crypto/internal/fips140/subtle` gains two folders holding no compiled file (§2.6). **Recommended: yes,** it is
   today's `runtime2.cs.auto` precedent; the alternative is a block predicate that counts only `.cs`.
 - **R2, R3.** Already ruled (approved with changes); restated in §0 and §7 as ruled.
+
+## 11. Amendment, 2026-11-10: what cutting S2 corrected
+
+Read while cutting S2 (branch `claude/g-la64-s2`, `780cb9b34f`, on master `66a2e023ca`). The sections above stand as
+written. Where this block disagrees with them, this block is the later reading. S2's file-by-file prediction and
+its score (271 paths predicted, 271 hit) are in that branch's `DATA-la64-s2-prediction.md`, not restated here.
+
+### 11.1 §9, the S3 row: class (iii) is 18 types in 4 files
+
+The row says "(iii) 30 explicit-layout mirrors in 7 files". Re-read at `66a2e023ca` over the row's own population
+(hand-owns under `**/linux/`, plus every flat `_impl.cs`; 26 + 95 files at this ref):
+
+| File (hand-owned) | `StructLayout` types |
+|---|---|
+| syscall's `sockaddr_linux_impl.cs` | 6 |
+| syscall's `structclass_linux_impl.cs` | 6 |
+| syscall's `zsyscall_linux_amd64_impl.cs` | 5 |
+| internal/syscall/unix's `siginfo_linux.cs` | 1 |
+| **Total** | **18 types, on 20 matching lines (two are comments)** |
+
+- Every one is `LayoutKind.Sequential`; none is explicit. "Explicit-layout" in the row was the wrong word for them.
+- Nine of the 18 carry `LinuxAmd64` in their name (the six of `structclass_linux_impl.cs` and three of
+  `zsyscall_linux_amd64_impl.cs`). That is where S3 looks first; it is not a claim that the other nine are
+  arch-neutral.
+- The 30-in-7 figure is not reproduced, by this predicate or by a wider one (every `.cs` under `**/linux/`, converted
+  files included: 21 lines in 5 files, the fifth being a converted `gcBits`). The row recorded a count without its
+  predicate. S3's audit list is the 18.
+- Classes (i) and (ii) of the row were not re-read here.
+
+### 11.2 A record the design did not cover: the standard-library metadata record
+
+`stdlib-metadata.txt` (and the same record inside a published package's self-description) keyed a package's
+copies by GOOS: one unqualified section, plus `@linux` and `@darwin` sections where a package differs there. A
+package split only by arch had no section to key, and S2 makes six of them.
+
+- A copy is now keyed by its **layout folder**. The copy the windows/amd64 build compiles is the unqualified
+  section; every other copy is `##name@<folder>`. The generator refuses two copies that both serve the reference
+  build.
+- A lookup takes the **target** and reads the finest folder that target compiles first (pair, arch, GOOS), then the
+  unqualified section. A record written with only `@linux` and `@darwin` sections reads as before.
+- Measured: 417 sections become 428, as predicted before the regeneration: six new `@linux-arm64` sections for the
+  packages split only by arch, and five `@linux` sections renamed `@linux-amd64` beside five new `@linux-arm64`
+  ones. No unqualified section changes.
+- S6 inherits this: a published package's self-description is the same record, so the pair-keyed pass of §3 reads
+  folder-keyed sections.
+
+### 11.3 §2.4, enforcement: every guard that reads the layout reads it per target
+
+§2.4 lists the merge, the writer, the reconcile and the canonical-form guard. They are not the only readers of the
+layout. Ten other guards knew a package as "its own directory, or its GOOS folder", and each was wrong the moment a
+file sat in `amd64/` or a pair folder:
+
+- **In the converter suite (eight failing tests, seven guards):** `duplicatePartialMembers`,
+  `manualConversionDestination` (two tests), `platformHandOwn`, `platformLatticeLayout`, the metadata record of
+  §11.2, `suppressionCompanion`, `valueCloneStampMembers`.
+- **In repoguard (three guards):** `lineKeyedRecords`, `testInfoPositionMapCopies`, `golibGrowSlice`.
+
+**The rule they now share:** a guard reads what a TARGET compiles, flat plus every key folder whose cover holds
+that target, and compares two locations by the builds they take part in, never by how their folders are spelled.
+`linux/` and `linux-amd64/` plus `linux-arm64/` are the same builds; `amd64/` and `linux-arm64/` share none.
+
+Two readings moved, with zero corpus findings before and after:
+
+- **`platformHandOwn`:** "the principal is in every folder" was tested by counting folders, so a flat principal in a
+  one-folder package satisfied it by accident. It is now a cover comparison that excludes a flat principal, and
+  such a principal is read as shared.
+- **`valueCloneStampMembers`:** a key-shaped directory with its own project file is a package
+  (`internal/runtime/syscall/linux` is one), and only a key-shaped directory without one is a folder of its parent.
+
+**The gate lesson.** Repoguard was green on the rehearsal while the full converter suite read eight fails. A layout
+change is gated by the full suite; repoguard alone does not cover it.
+
+### 11.4 §2.7: four hand-owned bodies are owed at linux/arm64
+
+§2.7 lists `zsyscall_linux_amd64_impl.cs` moving to `linux-amd64/` with its amd64-only principal. It does not state
+the consequence: the hand-owned bodies of four syscall members live only in that file, so at linux/arm64 the four
+are generated placeholders.
+
+- The four: `Fstat`, `Uname`, `fstatat`, `wait4`. Each marshals through a mirror declared in that file (§11.1).
+- They join S3's population. S2 pins them in a ledger (`owedHandOwnBodies`, in `manualConversionDestination`) that
+  fails on a debt it does not list and on a listed row that is no longer owed. Both directions were made to fail.
+
+### 11.5 §6 and §9: the arch binding is a co-requisite of S2, not independent of it
+
+§6 already places the binding ("each leg passes `GoTargetArch` from its RID through §3's one map"). What §9 gets
+wrong is the order: it says "S0, S4 and S5 are independent of [the spine]", and for this part of S5 that is false.
+
+- The arm leg binds `GoTargetOS` only, and calls itself a calibration only while the corpus holds no `linux-arm64/`
+  folder. After S2 alone it would compile the linux/amd64 flavour on the arm runner and report it, unlabelled, as
+  arm64.
+- **Ruled (COORD, 2026-11-10): S2 does not seat without the `GoTargetArch` binding; S2 and S5b seat together.**
+- The binding is S5b's to design. What S2's reads used was a scratch: one job-environment line beside the
+  `GoTargetOS` binding, keyed on the leg's RID by an inline test. It is right for today's universe; §6's map is
+  the durable form.
+
+### 11.6 §2.6 and R1e: the arch-divergent review sibling stays flat, and the package is named
+
+§2.6 predicts that `crypto/internal/fips140/subtle/xor_generic.cs.auto` is homed by its own content, so the package
+gains `amd64/` and `linux-arm64/` holding no compiled file, and R1e recommends it. The merge does not do that.
+
+- **What the merge does.** It splits a review sibling only into key folders that are already source folders (a `.cs`
+  and no project file inside). Otherwise it keeps the first target's flavour flat and names the package in the
+  apply's closing note. The rule predates this design: a single-target conversion routes into a key folder only
+  where it finds a source folder, so a folder holding only a sibling would never be rewritten.
+- **So S2's apply names one package,** the corpus's first, and its project file is not the 21st to gain the arch
+  block (20 do).
+- **The cost is one row.** A single-target linux/arm64 conversion into the applied tree rewrites the flat sibling
+  with arm64's flavour (`supportsUnaligned` folds to `false` there). The four-target apply is a fixed point.
+- **Delivering R1e** needs the merge and the single-target writer to agree on a folder that holds only a sibling: a
+  converter seat of its own, with a three-path footprint (the flat sibling out, one in each folder). It waits on a
+  ruling; until then R1e reads as not delivered.
+
+### 11.7 §2.4 again: the readers outside the converter suite
+
+§11.3 stops at the converter suite and repoguard. Six more readers named the three GOOS folders themselves, and S2
+was posted before any of them was run against the applied tree (`DATA-la64-s2-prediction.md`, §6.4).
+
+- **Two went red:** a GolibTests guard that finds a walker's declaration, and the comment census.
+- **Four kept passing and were wrong:** the pack's props target (nine packages would have shipped without their
+  usings), the hand-own upstream census, the declared-not-implemented census (60 packages counted where the corpus
+  holds 43), and the ref-lowering census's layout probe.
+- **The spelling is not one shape.** The lists sat in a slice, a map, a `switch`, a PowerShell array and an MSBuild
+  `Exists` chain. A search for one shape finds one of them.
+- **A list a tool must own is pinned, not trusted.** MSBuild and PowerShell cannot read `platformLattice.go`, so
+  their key lists stay where they are and a repoguard test holds them equal to the universe's key folders.
+
+**The gate, as now ruled** (`.claude/rules/corpus.md`): a change that moves the corpus layout runs every reader of it
+before it is posted: `go test ./...`, GolibTests on every flavour, the comment census, the behavioral harness. A
+count that falls, or a pass that survives a rename untouched, is read against a control tree before it is believed.
+§6.8 of the record lists the readers that still hold a fixed list and miss nothing today.
+
+### 11.8 §11.6 closed: R1e is delivered, and the folder holds only the sibling
+
+§11.6 left R1e waiting on a converter seat. That seat is cut on batch 283 (`DATA-la64-s2-prediction.md`, §6.13).
+
+- **What the merge does now.** It splits a differing review sibling into any key folder that is not a nested
+  package. `crypto/internal/fips140/subtle` gains `amd64/` and `linux-arm64/`, each holding the sibling and nothing
+  else, which is §2.6's prediction as first written.
+- **The single-target writer agrees with it** by reading the folder the sibling already sits in, finest first, so a
+  one-target conversion rewrites the copy the merge laid and never lays a flat one beside it. The `-tests` writer
+  resolves the same way.
+- **The project file does not move.** A folder with no compiled file earns no arch block; §11.6's "20 do" stands.
+- **What stays flat and named:** a key name that is a nested package (`internal/syscall/windows`). No package in
+  the corpus is named by the apply today.
+- **§11.7's gate caught one more reader.** A guard in a test file of the converter package admitted a split
+  sibling only in a folder that holds source, and went red on the applied tree. The readers of the layout are not
+  all in non-test sources; the full suite is the census.

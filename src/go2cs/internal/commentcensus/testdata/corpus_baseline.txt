@@ -1,13 +1,13 @@
-# Comment and spacing census of src/core against GOROOT go1.26.10: 1825 files, 54005 Go comment groups.
+# Comment and spacing census of src/core against GOROOT go1.26.10: 1864 files, 54309 Go comment groups.
 # Written by TestCommentParityCensus with GO2CS_COMMENT_CENSUS_UPDATE=1; one defect class per line.
 # Lower a count only in the commit whose corpus re-emission lowers it (see corpus_test.go).
 blank2:member-boundary	15
-body:extra:after-lowered-switch	91
-body:extra:after-named-result-locals	214
+body:extra:after-lowered-switch	95
+body:extra:after-named-result-locals	239
 body:extra:after-param-prelude	194
-body:extra:unexplained	2502
-body:go-blank-cs-none	1829
-body:go-blank-unmapped	2126
+body:extra:unexplained	2503
+body:go-blank-cs-none	1831
+body:go-blank-unmapped	2127
 eol:cs-ragged-run	77
 eol:missing	3
 eol:moved-to-own-line	4
@@ -21,7 +21,7 @@ misplaced:decl-doc/anchor-differs	84
 misplaced:field-doc/anchor-differs	25
 misplaced:free-in-type/anchor-differs	23
 misplaced:free-stmt/anchor-differs	350
-misplaced:free-top-level/anchor-differs	29
+misplaced:free-top-level/anchor-differs	37
 misplaced:in-composite-literal/anchor-differs	25
 misplaced:in-composite-literal/trailing-to-own-line	4
 misplaced:in-expression/anchor-differs	1
@@ -37,8 +37,8 @@ missed:after-case-label	2
 missed:after-open-brace	12
 missed:before-case	1
 missed:before-close-brace	4
-missed:decl-doc	232
-missed:directive	25
+missed:decl-doc	233
+missed:directive	31
 missed:field-doc	1
 missed:free-stmt	530
 missed:in-composite-literal	2
@@ -53,7 +53,7 @@ partial:free-stmt	7
 top:go-blank-cs-none	79
 top:go-none-cs-blank	39
 top:unmapped:const	2
-top:unmapped:func	363
+top:unmapped:func	379
 top:unmapped:method	168
 top:unmapped:type-alias	62
 top:unmapped:type-other	72

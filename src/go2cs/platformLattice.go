@@ -27,10 +27,10 @@
 // class are disjoint and the classes of one name are disjoint, so each target compiles exactly one
 // copy of the name and it is its own.
 //
-// Ties go to the coarser key, which is what keeps today's corpus where it is: over three targets of
-// one architecture `amd64/` covers the same set flat does and every pair key covers the same single
-// target its GOOS key does, so neither an arch folder nor a pair folder is ever written and the rule
-// is exactly the "identical ⟹ flat, anything else ⟹ one copy per emitting GOOS" layout L3 began as.
+// Ties go to the coarser key. Over three targets of one architecture that kept the corpus where layout
+// L3 began ("identical ⟹ flat, anything else ⟹ one copy per emitting GOOS"): `amd64/` covered what flat
+// does and each pair key what its GOOS key does. linux/arm64 separates them: `amd64/` holds what the
+// three amd64 targets share and arm64 does not, and `linux-amd64/` and `linux-arm64/` split `linux/`.
 
 package main
 
@@ -45,7 +45,7 @@ import (
 // target is this constant plus the corpus apply that re-homes the files the new target does not
 // share, committed together: a tree and a constant that disagree are a tree no single-target
 // conversion reproduces.
-var platformUniverse = []string{"windows/amd64", "linux/amd64", "darwin/amd64"}
+var platformUniverse = []string{"windows/amd64", "linux/amd64", "darwin/amd64", "linux/arm64"}
 
 // layoutKeyKind orders the lattice's keys from coarsest to finest.
 type layoutKeyKind int

@@ -35,9 +35,9 @@ architecture-specific path in the standard library.
      2026-11-06 amendments. Measured on the GitHub-hosted osx-arm64 runner: master's darwin osx-arm64 behavioral red
      (run 41964964302, BuildInfoSettings, stdout mismatch C# vs Go); osx-x64, linux and windows agree because their host
      is amd64. Constants, read at master 72043c1a66 on 2026-11-08, the same in all three flavours:
-     src/core/runtime/linux/extern.cs:375 (`GOARCHᵇ = "amd64";`) and, until the run-time GOARCH seat of 2026-11-09,
+     src/core/runtime/linux-amd64/extern.cs:375 (`GOARCHᵇ = "amd64";`) and, until the run-time GOARCH seat of 2026-11-09,
      windows' and darwin's extern.cs at the same line;
-     src/core/internal/goarch/zgoarch_amd64.cs (GOARCH "amd64", IsAmd64 1, IsArm64 0) is the only zgoarch file; and no
+     src/core/internal/goarch/amd64/zgoarch_amd64.cs (GOARCH "amd64", IsAmd64 1, IsArm64 0) is the only zgoarch file; and no
      *_arm64.cs file exists anywhere under src/core. debug.ReadBuildInfo's GOARCH setting is composed from runtime.GOARCH
      (src/core/runtime/debug/stubs_impl.cs:199 (`GoModInfoAttribute.Compose(…runtime_package.GOARCH.ToString()`)). The run-time feature read is batch 216
      (C1, claude/c1-aes-arm64): internal/cpu's ARM64 flags are filled on an arm64 process, so crypto/tls's
@@ -56,6 +56,12 @@ architecture-specific path in the standard library.
      so Windows on Arm reads arm64. That is unmeasured on an arm64 Windows host: the os-matrix has no windows-arm64
      runner, and no package ships for it. linux keeps amd64: its syscall numbers and struct layouts are linux/amd64's,
      so a linux/arm64 host needs a flavour of its own (owner ruling, 2026-11-09: in .4). -->
+<!-- Amended 2026-11-09 (G, the linux/arm64 flavour's corpus apply): the two constants' paths above are re-cited to
+     where the apply moved the files, content unchanged (runtime's linux/extern.cs to linux-amd64/, internal/goarch's
+     zgoarch_amd64.cs to amd64/). "The only zgoarch file" and "no *_arm64.cs file" describe the tree as read on
+     2026-11-08: the apply lays a linux/arm64 flavour out beside the three (src/core/runtime/linux-arm64/extern.cs,
+     src/core/internal/goarch/linux-arm64/zgoarch_arm64.cs). It compiles there and does not run yet, and no package
+     ships for it. The darwin and windows flavours are as this entry describes them. -->
 
 
 ## The packages do not ship linux-arm64

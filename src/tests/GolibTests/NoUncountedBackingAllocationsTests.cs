@@ -36,6 +36,8 @@ namespace GolibTests;
 ///     whose charge the scan could not see, and these five are what remained. The stack-append seat added a
 ///     sixth, the buffer of Go's stack backing store for a non-escaping append, which Go keeps in the frame,
 ///     and parity seat #30 the backing of a slice literal, which Go keeps in the frame when it does not escape.
+///     The profilers' own stack storage is listed here too: Go takes it from <c>persistentalloc</c> and the
+///     M's <c>profStack</c>, outside <c>mallocgc</c>.
 ///   </description></item>
 ///   <item><description>
 ///     <see cref="Infrastructure"/>, the (c) block: allocations that are not Go-visible backings at all
@@ -56,6 +58,7 @@ public class NoUncountedBackingAllocationsTests
     // Key: "<golib-relative path>|<normalized source line>". Duplicates are listed once per occurrence.
     private static readonly (string Site, string Reason)[] ByDesign =
     [
+        ("GoMemProfile.cs|internal static slice<T> PersistentSlice<T>(nint length) => new(new T[length]);", "the profilers' own stack storage: Go takes a bucket's stack from persistentalloc (runtime/mprof.go, newBucket) and reads an event's stack into the M's profStack (saveblockevent), both outside mallocgc, so neither is a malloc, and a counted or sampled one under profInsertLock re-enters the profiler"),
         ("GoReflect.TypeLayout.cs|s = new slice<T>(new T[0]);", "a zero-length backing: Go's mallocgc answers size 0 with &zerobase and no malloc (runtime/malloc.go); the fresh object exists only as the dims table's identity key"),
         ("builtin.cs|return (slice<T>)slice.Append(elems.Cast<object>().ToArray())!;", "the ISlice bridge's staging array: Go's append is a builtin that writes the elements in place, with no staging array"),
         ("channel.cs|ChanCore[] lockOrder = cores.ToArray();", "select scratch: Go's select statement keeps its lock/poll order in a compiler stack temp (cmd/compile/internal/walk/select.go, order TempAt)"),

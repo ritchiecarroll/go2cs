@@ -54,12 +54,13 @@ func nugetSubstitutionFor(importPath string) *nugetSubstitution {
 }
 
 // metadataLines returns the self-description's metadata section for one of the package's import paths, for
-// a conversion targeting goos: the flavored section first, then the unqualified one (the stdlib record's rule).
-func (s *nugetSubstitution) metadataLines(importPath string, goos string) ([]string, bool) {
+// a conversion targeting target: the section of a layout folder the target compiles first, then the
+// unqualified one (the stdlib record's rule; see stdLibExportedMetadata).
+func (s *nugetSubstitution) metadataLines(importPath string, target string) ([]string, bool) {
 	name := strings.ReplaceAll(importPath, "/", ".")
 
-	if goos != "" {
-		if lines, ok := s.description.Sections[name+stdlibmeta.FlavorSeparator+goos]; ok {
+	for _, folder := range platformLayoutFolders(target) {
+		if lines, ok := s.description.Sections[name+stdlibmeta.FlavorSeparator+folder]; ok {
 			return lines, true
 		}
 	}

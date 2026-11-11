@@ -42,7 +42,7 @@ import (
 // is reported AT THE CALL; it is attributed only when exactly one callee with appends is inlined there and it has
 // exactly one append, and any other inlined copy leaves the site unhinted (G's inlining rule).
 //
-// The harvest always runs the corpus's three targets, whatever this conversion's target is, so a shared file
+// The harvest always runs every target of the corpus, whatever this conversion's target is, so a shared file
 // converts to the same text on every host and under every -platforms run. A site is hinted when every target that
 // reports it agrees it is the variable's first qualifying site and none contradicts it; a site only some targets
 // compile (a `runtime.GOOS == "windows"` branch the others fold away) takes the hint from the targets that report it.

@@ -1175,7 +1175,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// (`internal delegate uint64 metricReader();`). Distinct delegate types have no cast
 		// conversion (CS0030 from `Func<ulong>`); C# converts via DELEGATE CREATION:
 		// `new metricReader(read)` (accepts a compatible delegate or method group).
-		if named, ok := v.info.TypeOf(callExpr).(*types.Named); ok {
+		//
+		// The target is UNALIASED, as the named-numeric arms of this function are: a conversion spelled
+		// through an alias of the named type — `wrap.Handler(f)` with `type Handler = lib.Handler`, the
+		// re-export shape tsc's json package uses — types as the *types.Alias, and missing this arm left the
+		// bare cast `(lib.Handler)f`, CS0030 (TS C32; NamedBytesConstConversion).
+		if named, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Named); ok {
 			if _, isSig := named.Underlying().(*types.Signature); isSig {
 				// `T(nil)` for a func type is the TYPED NIL delegate, and delegate CREATION cannot
 				// express it: `new HandlerFunc(default)` asks for a method group or a delegate value
@@ -1247,8 +1252,13 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// through to they were CS0030 exactly as the literal was. The operand's own `@string` step,
 		// and a DEFINED element type (`type S []myByte`, which no conversion reaches from
 		// `slice<byte>` at all), both live in stringSliceConversions.go.
+		//
+		// The target is UNALIASED: tsc's `json.Value("null")` names jsontext's `type Value []byte` through
+		// the alias `type Value = jsontext.Value`, which types as the *types.Alias. Missing this arm left
+		// the bare cast `(jsontext.Value)"null"u8` (and `(jsontext.Value)s` for a variable), CS0030 (TS C32;
+		// NamedBytesConstConversion).
 		if targetTypeName != "@string" {
-			if named, ok := v.info.TypeOf(callExpr).(*types.Named); ok {
+			if named, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Named); ok {
 				if sliceType, ok := named.Underlying().(*types.Slice); ok && isByteOrRuneSlice(sliceType) {
 					if argType := v.info.TypeOf(arg); argType != nil && isStringTyped(argType) {
 						return fmt.Sprintf("((%s)%s)", targetTypeName, v.stringToByteSliceConversion(sliceType, arg, expr))
@@ -2999,7 +3009,9 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// NON-nil empty map (`m == nil` is false), so default the size to 0 to run the
 				// allocating ctor. Scoped to *types.Named defined types: the UNNAMED `map<K,V>`
 				// builtin already has an allocating parameterless ctor and is left as `new map<K,V>()`.
-				if _, isNamed := typeParam.(*types.Named); isNamed && !isTypeParam {
+				// UNALIASED: `make(MA)` over `type MA = StrIntMap` names the defined map through an alias,
+				// which types as the *types.Alias, and missing this arm made it a NIL map (TS C32 family).
+				if _, isNamed := types.Unalias(typeParam).(*types.Named); isNamed && !isTypeParam {
 					if _, ok := typeParam.Underlying().(*types.Map); ok && len(remainingArgs) == 0 {
 						remainingArgs = "0"
 					}
@@ -3259,7 +3271,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					// []AttributeTypeAndValue (the element UNDERLYING). Go implicitly converts s to the element
 					// type; C# append otherwise infers the element as slice<ATV>, so the result slice<slice<ATV>>
 					// does not bind RDNSequence (CS0029). Cast the differing arg to the named element type.
-					if named, isNamed := sliceUnder.Elem().(*types.Named); isNamed {
+					// The element is UNALIASED, as the operand comparison below already is: `type Table []RowA`
+					// with `type RowA = Row` declares an ALIAS element, which missed this arm (CS0029, TS C32
+					// family).
+					if named, isNamed := types.Unalias(sliceUnder.Elem()).(*types.Named); isNamed {
 						switch named.Underlying().(type) {
 						case *types.Basic, *types.Interface:
 							// numeric / interface element casts are handled above
@@ -4111,7 +4126,9 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		v.applyImplicitConversion(paramType, arg, convertToCSTypeName(v.getAliasQualifiedTypeName(paramType, false)), "")
 	}
 
-	return result
+	// A type-parameter result whose type argument rendered as a constraint proxy is the caller's pointer in Go: cast it
+	// back to the box (the proxy's own box, no copy) so a field read or a pointer comparison sees *T.
+	return v.proxiedResultCast(callExpr, result)
 }
 
 // argumentParameterType is the type the i-th argument of a call to signature is passed as: its own
@@ -4263,13 +4280,15 @@ func (v *Visitor) applyImplicitConversion(funcType types.Type, arg ast.Expr, tar
 
 				// A GENERIC defined type's RHS is written in its own type parameters, so it is read with the
 				// instance's type arguments: C[string], declared `type C[V any] P[V]`, wraps P[string].
-				if named, ok := funcType.(*types.Named); ok {
+				// Both ends are UNALIASED: `DA(b)` over `type DA = Def` (`type Def Base`) names the wrapper
+				// through an alias, and missing it recorded the duplicate (CS0557, TS C32 family).
+				if named, ok := types.Unalias(funcType).(*types.Named); ok {
 					if rhs, has := packageTypeSpecRHS[named.Obj()]; has && rhs != nil && !isUnnamedStruct(rhs) && types.Identical(instantiatedTypeSpecRHS(named, rhs), argType) {
 						wrapperConversion = true
 					}
 				}
 
-				if named, ok := argType.(*types.Named); ok {
+				if named, ok := types.Unalias(argType).(*types.Named); ok {
 					if rhs, has := packageTypeSpecRHS[named.Obj()]; has && rhs != nil && !isUnnamedStruct(rhs) && types.Identical(instantiatedTypeSpecRHS(named, rhs), funcType) {
 						wrapperConversion = true
 					}

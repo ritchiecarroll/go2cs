@@ -168,11 +168,20 @@ content differences). Seeding, the marker gate, the overlay rule and the phantom
   marked file's `.cs.auto`), then REFUSES unless every candidate — each flavour folder plus flat — is BYTE-IDENTICAL; a
   companion with no emitted principal is left UNCOMPARED. **A per-flavour companion that differs from its sibling carries a
   flavour-distinct basename; a byte-identical one keeps one basename.**
-- **A FLAT hand-own's `.cs.auto` review sibling splits per GOOS when its emission differs**: one
-  `<pkg>/<goos>/<name>.cs.auto` per emitting target, back to one flat sibling when they agree (`mergeReviewSiblings`). A
-  single-target run writes its flavour back into its folder (`reviewSiblingLayoutPath`); the hand-own move leaves the split
-  alone, and its single-copy refusal binds hand-maintained files only. A reader pairing `X.cs` with `X.cs.auto` also looks
-  one folder up from a GOOS folder. <!-- COORD's S5 ruling (a), 2026-11-05, C1 claude/c1-flatfile-drift. The case:
+- **A FLAT hand-own's `.cs.auto` review sibling splits per KEY FOLDER when its emission differs**: one
+  `<pkg>/<key>/<name>.cs.auto` per class of identical flavours, at the key the lattice homes the class (a GOOS, a GOARCH or
+  a pair folder), back to one flat sibling when they agree (`mergeReviewSiblings`). **The folder need not hold source**: a
+  sibling is never compiled, so `crypto/internal/fips140/subtle` keeps `amd64/` and `linux-arm64/` holding
+  `xor_generic.cs.auto` alone, and its project file gains no block for them. A single-target run writes its flavour back
+  into the key folder that HOLDS the sibling (`heldReviewSiblingPath`); the hand-own move leaves the split alone, and its
+  single-copy refusal binds hand-maintained files only. A reader pairing `X.cs` with `X.cs.auto` also looks one folder up
+  from ANY key folder of the universe, never from a list of the three GOOS names. The one flavour set that stays flat, and
+  NAMED in the merge report, is one whose key folder is a nested package of the same name (`internal/syscall/windows`).
+  <!-- 2026-11-10, G claude/g-xor-generic-sibling (the S2 residual, design R1e). Before it the merge split only into
+     SOURCE key folders, kept subtle's first flavour flat and named the package, and a single-target linux/arm64
+     reconvert wrote its own flavour over the flat file: one changed row on a tree that should read clean. The
+     sentence about a package with no per-GOOS source folder, below, describes that earlier rule.
+     COORD's S5 ruling (a), 2026-11-05, C1 claude/c1-flatfile-drift. The case:
      runtime/runtime2.cs.auto, whose linux flavour carries `sigmask` in m's [GoValueClone] list and `public partial
      struct g`, and whose darwin flavour differs by one mPadded line (R's end-regen F2); the one windows-flavoured flat
      sibling hid both. A package with no per-GOOS source folder keeps the first flavour flat and is NAMED in the merge

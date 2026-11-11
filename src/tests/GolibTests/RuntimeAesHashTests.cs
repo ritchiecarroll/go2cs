@@ -6,6 +6,7 @@
 
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
@@ -344,10 +345,15 @@ public class RuntimeAesHashTests
     }
 
     // Go's alginit condition for this process: the amd64 branch, or (on an arm64 process) the arm64 branch
-    // over cpu.ARM64 as internal/cpu fills it. No GODEBUG cpu.* option is set in the test host.
+    // over cpu.ARM64 as internal/cpu fills it. No GODEBUG cpu.* option is set in the test host. The process's
+    // architecture is asked of the CLR, as runtime/hash_impl.cs asks it (S3 site a): internal/cpu's
+    // GoIsArm64Process is the amd64 flavour's (amd64/cpu_arm64_process_impl.cs), and the linux/arm64 flavour has
+    // no such member.
+    private static bool IsArm64Process => RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
+
     private static bool GoSelectsAes =>
         (X86.Aes.IsSupported && X86.Ssse3.IsSupported && X86.Sse41.IsSupported) ||
-        (cpu.GoIsArm64Process && cpu.ARM64.HasAES && Arm.Aes.IsSupported);
+        (IsArm64Process && cpu.ARM64.HasAES && Arm.Aes.IsSupported);
 
     [TestMethod]
     public void AesHashMatchesGoAcrossEverySizeClass()
@@ -397,7 +403,7 @@ public class RuntimeAesHashTests
     {
         // darwin's osInit sets ARM64.HasAES unconditionally, so Go on Apple silicon always runs the AES hash;
         // so must the converted runtime, though its GOARCH constant reads amd64.
-        if (!(cpu.GoIsArm64Process && OperatingSystem.IsMacOS()))
+        if (!(IsArm64Process && OperatingSystem.IsMacOS()))
             Assert.Inconclusive("not an arm64 process on macOS");
 
         Assert.IsTrue(cpu.ARM64.HasAES, "darwin's osInit sets HasAES");

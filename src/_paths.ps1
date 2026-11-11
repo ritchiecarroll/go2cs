@@ -124,7 +124,7 @@ if ($HostGoos -and $HostGoos -ne 'windows' -and [string]::IsNullOrEmpty($env:GoT
 # The corpus's declared universe of GOOS/GOARCH targets, one converted FLAVOR each. It mirrors
 # platformUniverse (src/go2cs/platformLattice.go), and a Go test holds the two equal element for
 # element (TestPathsCorpusPlatformUniverseMirrorsTheConverter): a target joins through both together.
-$CorpusPlatformUniverse = @('windows/amd64', 'linux/amd64', 'darwin/amd64')
+$CorpusPlatformUniverse = @('windows/amd64', 'linux/amd64', 'darwin/amd64', 'linux/arm64')
 
 # The GOARCH of the corpus flavor that serves a GOOS/GOARCH -- the converter's corpusFlavourOf
 # (src/go2cs/testsCorpusArch.go), restated: $Goarch when "$Goos/$Goarch" is a target of the universe;

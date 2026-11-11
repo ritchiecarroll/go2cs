@@ -1188,7 +1188,7 @@ n=$(powershell -NoProfile -Command "@(Get-Process go2cs -ErrorAction SilentlyCon
 [ "${n:-0}" = 0 ] || { echo "ABORT: $n converter(s) alive"; exit 2; }
 rm -f "$SENT"; touch "$SENT"; sleep 2
 START=$(date +%s)
-"$EXE" -stdlib -comments -go2cspath "<stage>/$R/src" -platforms windows/amd64,linux/amd64,darwin/amd64 \
+"$EXE" -stdlib -comments -go2cspath "<stage>/$R/src" -platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64 \
   -platform-stage "$ST" -convert-timeout 90m > "$LOG" 2>&1
 rc=$?; echo "  exit $rc after $(( $(date +%s) - START ))s"
 ```
@@ -1202,11 +1202,11 @@ rc=$?; echo "  exit $rc after $(( $(date +%s) - START ))s"
 | exit and wall | `$rc`, the elapsed line | 0; wall posted |
 | log encoding | <code>head -c 200 "$LOG" &#124; tr -d -c '&#92;000' &#124; wc -c</code> | 0 — otherwise every grep below lies |
 | degraded packages | `grep -ac 'did not fully type-check' "$LOG"` | 0 |
-| per-target failures | `grep -a 'Failed:' "$LOG"` | three lines, each `Failed: 0` |
+| per-target failures | `grep -a 'Failed:' "$LOG"` | one line per target (four since linux/arm64 joined the universe, 2026-11-09), each `Failed: 0` |
 | warnings | `grep -a WARNING "$LOG"` | posted verbatim, uncounted and never gated (147 lines read on lane R's box, 2026-09-13: a reading, not a want) |
 | what was read | `grep -a 'toolchain: GOROOT' "$LOG"` | provenance AVAILABLE (Block C): `VERSION go1.24.13` (H4a `go1.23.12`). NOT AVAILABLE: no line, and the row reads NOT AVAILABLE, never pass |
 | emission | <code>find "&lt;stage&gt;/$R/src/core" -name '&#42;.cs' -newer "$SENT" &#124; wc -l</code> | non-zero — zero is an arm that emitted nothing: abort |
-| per target | <code>find "$ST/&lt;goos&gt;-amd64" -name '&#42;.cs' &#124; wc -l</code>, three goos | reported |
+| per target | <code>find "$ST/&lt;goos&gt;-&lt;goarch&gt;" -name '&#42;.cs' &#124; wc -l</code>, each target | reported |
 | misrouted emission | <code>grep -rl --include='&#42;.cs' -E '^namespace go&#91;.&#93;std' "&lt;stage&gt;/$R/src/core" &#124; wc -l</code> | 0 (floor 6) |
 | release, second arm | <code>find "&lt;stage&gt;/$R/src/core/runtime" -name 'mcleanup.cs&#42;' &#124; wc -l</code> | H5 ≥ 1, H4a 0 (minor-level only) |
 | a Go root in emitted metadata | below: the box's own GOROOT basenames, not a guessed name shape | 0 before any overlay (0 read on lane R's box, 2026-09-13: a reading, not a want) |
@@ -2191,7 +2191,7 @@ reproduces the single-target build byte-for-byte.
   binary, **before the overlay** (the only CLEAN tree whose `version.props` reads 1.24.13 is `<tree>` at `<H2>`
   before the overlay dirties it, or a second clean worktree of `<H2>`), into a directory never reused:
   ```bash
-  '<stage>/bin/go2cs.exe' -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64 \
+  '<stage>/bin/go2cs.exe' -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64 \
     -platform-census '<stage>/census-1.24.13' -go2cspath '<tree>/src' > "<stage>/logs/census-1.24.13-$(date +%Y%m%d-%H%M%S).log" 2>&1
   ```
   `-comments` because the census's control target is supposed to reproduce the seed byte for byte, and the seed
@@ -2249,7 +2249,7 @@ one axis from the 1.24.13 census (`GOROOT` + `version.props`), same binary, same
 into a directory never reused:
 
 ```bash
-'<stage>/bin/go2cs.exe' -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64 \
+'<stage>/bin/go2cs.exe' -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64 \
   -platform-census '<stage>/census-1.23.12' -go2cspath '<tree-1.23.12>/src' \
   > "<stage>/logs/census-1.23.12-$(date +%Y%m%d-%H%M%S).log" 2>&1
 ```

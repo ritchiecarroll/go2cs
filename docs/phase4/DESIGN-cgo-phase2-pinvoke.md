@@ -244,6 +244,21 @@ through the existing native mint.
 twice, so C sees one object, as it does under Go. A wrapper that built two would let C write one copy and the
 copy-back of the other overwrite it.
 
+> **AMENDED 2026-11-10 (H's increments 3b2a and 3b2b; COORD, RULED): sameness is the storage's, and a returned argument
+> IS the argument.**
+>
+> - **Aliasing is decided by STORAGE, not by box.** Two boxes can reach one struct (a `FieldRefBox` and the box of
+>   the struct it is a field of, or two field boxes over one field), so a later pointer parameter of the same type
+>   shares an earlier one's mirror when `Unsafe.AreSame` holds over their `Value` refs, and the struct is copied back
+>   once. The same rule covers a pointer to one scalar. Arm: windows' `UnionRect(&r, &r, &o)` writes the union into r
+>   through the shared mirror; two mirrors would copy r's stale second mirror back over it.
+> - **A pointer RESULT that equals a pointer argument's address is that argument's box** (RULED). `gmtime_r(&t, &tm)`
+>   returns `&tm` in Go. Here the address C returns is the wrapper's stack mirror, which dies when the wrapper
+>   returns, so minting it native would hand back a use-after-return. The wrapper compares the result with each
+>   same-typed pointer argument's address and returns that argument's own box; any other result is C memory, minted
+>   native. Red (3b2b, measured on hosted linux and darwin at `3dad6ea07b`): with every result minted, "gmtime_r
+>   returns the pointer it was handed" failed.
+
 ### 5.3 The size assertion, and what it can and cannot catch (R3)
 
 > ⟶ **Amended 2026-11-10:** §11.2 (the assertion above is tautological).
@@ -327,6 +342,13 @@ from being a false comfort:
 ## 7. What Phase 2 refuses, by name
 
 > ⟶ **Amended 2026-11-10:** §11.6 (`_Cvar_` and `_Cfpvar_fp_` refused) and §11.13.
+
+> **AMENDED 2026-11-10 (COORD, RULED, for increment 3b2b): single scalar pointee; element pointers remain Phase 3.** A
+> pointer to ONE scalar crosses under §11.1's rule, with a stack copy-in and an unconditional copy-back, exactly as one
+> whole struct does. That covers a `StandardBox<scalar>` (`&t`) and a `FieldRefBox` whose pointee is a scalar field
+> (`&s.f`), since cgo scopes that memory to the field alone. An element pointer (`&xs[i]`, an `ElemRefBox`) is still
+> refused to Phase 3, for scalars as for structs, with its own red. The table row below therefore narrows to element
+> pointers and `unsafe.Pointer` into managed memory.
 
 Phase 1 increment 2 refuses every cgo package and says what it recognized. Phase 2 **narrows** that refusal: a
 package converts only when every recognized declaration is in Phase 2's set. Otherwise the refusal lists each
@@ -453,6 +475,28 @@ stay `SetLastError = false`.
 A C function returning `void` also has a two-result form. cmd/cgo gives it the result `(_Ctype_void, error)`, so the
 wrapper returns the zero `_Ctype_void` and the error.
 
+> **AMENDED 2026-11-10 (COORD, RULED, on H's increment 3b1 finding): the capture above holds on linux and darwin ONLY.**
+> On windows `SetLastError` captures the Win32 `GetLastError`, while C's `errno` is the C runtime's own thread slot, a
+> different one. Measured on H against `ucrtbase.dll`: through a `SetLastError` binding, `exp(1000.0)` left
+> `GetLastPInvokeError()` at 0; with the C runtime's errno zeroed first and read right after, the same call read 34
+> (`ERANGE`). A read made after a further P/Invoke read 0, so intervening runtime work can clobber the slot.
+>
+> **Ruled, for windows targets:** the errno form binds the function WITHOUT `SetLastError`, plus the LIBRARY'S C runtime
+> `_errno()` (an `nint` slot). Inside the bracket, the wrapper:
+>
+> 1. takes the slot's ADDRESS with one `_errno()` call BEFORE the native call;
+> 2. writes 0 through it;
+> 3. calls the function;
+> 4. reads through the same address as the very next statement, with no P/Invoke between the call's return and the read.
+>
+> That is cgo's own trampoline (zero errno, call, capture) in managed code. The slot is the calling thread's, and one
+> synchronous wrapper does not change threads; a GolibTests arm holds the address equal before and after a wrapped call.
+> The C runtime is per library: `ucrtbase.dll` for UCRT builds (llvm-mingw ucrt, zig), `msvcrt.dll` for msvcrt-built
+> DLLs. Increment 4's probe records it from the import table. Linux and darwin keep `SetLastError` plus
+> `GetLastPInvokeError()`. The generator takes the target GOOS (§11.9). **Remaining caveat:** runtime code on the same
+> thread between the stub's return and the read could still touch the C runtime's errno; Phase 4's native shim closes
+> it.
+
 ### 11.4 The seam bracket goes through the runtime forwarders (finding 4)
 
 §4.2 called `GoNativeCall` directly, and that is not the ruled shape. DESIGN-native-call-seam §12.2 Q2 ruled Go's
@@ -501,6 +545,22 @@ symbol-to-library map from the import table (PE), or `LC_LOAD_DYLIB` with the tw
 linker lacks it. It writes one `[LibraryImport]` per symbol, naming that symbol's library. A symbol
 resolved statically, or not at all, is **refused by name**.
 
+> **AMENDED 2026-11-10 (H's increment 4b, measured on hosted converter-cgo legs; COORD, RULED):**
+>
+> - **A windows API set is recorded AS LINKED** (Q3). For mingw's `cos` the probe's import table names
+>   `api-ms-win-crt-math-l1-1-0.dll`, which is what a Go binary built by the same toolchain imports; the OS loader
+>   resolves the set. Recording today's host DLL instead would bake in a mapping Windows is free to change.
+> - **The ELF fallback is one probe PER SYMBOL, not per `-l`.** COORD's earlier "per -l fallback" is superseded: each
+>   bound symbol gets its own probe, referencing that symbol alone and linked `--as-needed` against every `-l`. The
+>   `DT_NEEDED` entry it adds over a probe that references nothing is its library, recorded exactly as a Go binary's
+>   linker records it. It needs no file lookup and no tracing. zig refuses `-Wl,--trace-symbol` ("unsupported linker
+>   arg") and cannot be relied on to locate its stub libraries, so for zig this IS the route. Under GNU ld, the
+>   two-library fixture holds the trace route and this fallback to one answer.
+> - **Measured:** GNU ld prefixes its trace lines with its own name, and zig links `--as-needed`, so a probe that
+>   references nothing records nothing (§6.1's one-line probe, the red). Under zig, windows' `cos` resolves
+>   STATICALLY (zig's mingw libm), and is refused by name, this section's own example; the host mingw gcc resolves it
+>   to `api-ms-win-crt-math-l1-1-0.dll`.
+
 ### 11.6 `_Cvar_` and `_Cfpvar_fp_` are refused (finding 6)
 
 §7 gave both no owner. Phase 1 has recognized `_Cvar_` from the start, and increment 0 (`d20526ee99`, seated in
@@ -536,6 +596,12 @@ checkout cannot regenerate it without that toolchain. **Revised:**
 
 R9's substance stands: the corpus is wholly `CGO_ENABLED=0`, so no corpus gate ever sees one.
 
+> **AMENDED 2026-11-10 (COORD, RULED, on H's increment 3b1 note): the bindings file is `<package>.cgo.cs`, NOT
+> `<package>.cgo.g.cs`.** Committed converter output cannot carry a suffix that common `.gitignore` files drop, and
+> `*.g.cs` is one: this repository's own `.gitignore` ignores it at line 348, which is why increment 3b1's GolibTests
+> goldens are named `GoCgoWrappers.<os>.golden.cs`. The converter never writes `.gitignore` entries into a user's
+> tree, so the name itself has to survive. Byte-identity gates exclude the bindings file by its `.cgo.cs` suffix.
+
 ### 11.9 Mirrors vary per (GOOS, GOARCH): placed by the layout rule (finding 9; RULED)
 
 `_Ctype_char` is `int8` on x64 and `uint8` on linux/arm64, so a mirror set is a property of the target, not of GOOS
@@ -564,6 +630,19 @@ run-time check (§5.3) compares the running OS and architecture against it.
 - **a pinned-zig probe library**, built per target by the scout's provisioned toolchain, as the instrument for
   aliasing, unions and HFA classification.
 
+> **AMENDED 2026-11-10 (COORD, RULED, on H's increment 4b reading): G1's windows arm is NOT `cos`.** Under the pinned zig
+> (the owner's default toolchain, PLAN §5.1), mingw's libm links `cos` statically, so a cgo package calling `C.cos` on
+> windows is refused by name (§11.5). The windows arm takes a symbol that BOTH the host mingw gcc and the pinned zig
+> resolve dynamically (a UCRT string or stdio function, or a kernel32 one), confirmed by increment 4b's own capture on
+> both toolchains before G1 relies on it.
+>
+> **RULED 2026-11-10 (COORD, on H's capture readings, windows converter-cgo jobs 42924514691 gcc and 42924536206 zig):
+> G1's windows arm is `puts`.** It resolves to `api-ms-win-crt-stdio-l1-1-0.dll` under both the host mingw gcc and
+> the pinned zig, and its output is checkable for G2. `GetCurrentProcessId` (`KERNEL32.dll` under both) is the named
+> kernel32 alternative. Rejected, as static under zig: `cos` (libm) and `strlen`, which the host gcc resolves to
+> `api-ms-win-crt-string-l1-1-0.dll`. A cold zig cache cost 140 s per probe target on the hosted windows runner, which
+> goes into G1's leg budget; a pinned cache-warming step on the leg is allowed.
+
 ### 11.11 A resolver miss throws (finding 11)
 
 §6.2's resolver could return `IntPtr.Zero`, and the runtime then falls back to default probing. That is legacy search
@@ -582,6 +661,22 @@ An install name of `@rpath/…`, `@loader_path/…` or `@executable_path/…` ca
 binary resolves it. **Revised:** record the absolute path the probe's linker resolved, or refuse by name. `-framework
 X` is admitted, with its install name captured. As with a Go binary, a library outside the system loader's path needs
 `LD_LIBRARY_PATH` on linux; the note says so to users and does not paper over it.
+
+> **MANDATORY 2026-11-10 (increment 4d, a SECURITY finding caught before any release shipped it; COORD ruled the fix
+> into 4d itself):** the absolute-name rule binds EVERY darwin load, not only the capture's preference. dyld's search
+> for a BARE name reached the current directory on both hosted darwin RIDs: golib-tests 42936395011 planted a copy of
+> the probe library in the current directory, asked the resolver for it by its bare name, and dyld loaded it (handles
+> 1913759472 on osx-arm64 and 1108903152 on osx-x64), where the arm required a refusal. Both halves now refuse by name
+> any darwin name that is not absolute: the converter's capture (`cgoDarwinInstallName`, red 8dfe7398ee, green
+> 3c4875b988) and golib's resolver, which refuses before dyld sees the name. `ALibraryOnlyInTheCurrentDirectoryIsNotLoaded`
+> stays as the rule's guard. The probe library is built at the fixed absolute install name
+> `/tmp/go2cs-cgo-probe/libgo2csprobe.dylib`.
+>
+> **The portability consequence, and it is the intended trade:** a captured absolute install name is baked into the
+> bindings, as it is into a Go binary's load commands. A library installed at a different path on the consumer's
+> machine, say Homebrew's `/opt/homebrew/lib` on Apple silicon against `/usr/local/lib` on Intel, fails by name, with a
+> DllNotFoundException naming the `-l`, the captured name and the rule. It does not load whatever a search would find.
+> A package that must load from more than one location is converted on, or for, the layout it targets.
 
 ### 11.13 Flexible arrays, bitfields and `_Bool` (findings 13 and 14)
 
@@ -611,6 +706,11 @@ is defined:
 - `-framework <name>`, **darwin only** (RULED; cmd/go's allowlist admits it): the name a plain token as above, its
   install name captured as §11.12 says. On any other GOOS it is refused by name.
 
+> **AMENDED 2026-11-10 (COORD, RULED, on H's increment 4b): `-O2` and `-g` are admitted, token-exact, and set aside.**
+> They are cmd/go's default `CGO_LDFLAGS`, so every cgo package's `//go:cgo_ldflag` lines carry them (the Phase 1
+> fixture shows exactly those two), and neither names a library. The admission is token-exact: `-O3`, `-g3` and every
+> other flag beyond `-l`/`-L`/`-framework` stay refused by name.
+
 Everything else is refused by name, whatever increment 1 finds about `go list -compiled`.
 
 ### 11.16 Divergences, stated (notes 16 and 17)
@@ -629,6 +729,30 @@ Converted call sites read `C.add(C.@int(a), C.@int(b))`, through a nested static
 members and types, per the owner's readability and parity rulings. The mangled form (`_Cfunc_add`, `_Ctype_int`) is a
 fallback only if the arm fails. The arm measures go2cs-gen on `[GoType]` structs nested in a static class, and it
 lands with increment 3. Its red: a converted call site that prints a mangled name.
+
+> **AMENDED 2026-11-10 (COORD, RULED, on H's increment 3c measurement): the `C.` form is a PSEUDO-PACKAGE, not a nested
+> class.** Measured with scratch projects against go2cs-gen, each arm read from the compiler's emitted sources:
+>
+> - a type nested in a static class `C` inside the package class is never generated. The converted-type rule
+>   (go2cs-gen `Common.cs`, `IsConvertedGoTypeDeclaration`) requires the declaration's DIRECT parent to be the
+>   `*_package` class;
+> - with an explicit `[GoType]` it is generated into the WRONG type: `GetParentClassName` (`TypeGenerator.cs`) names
+>   `C`, and the code lands in a namespace-level `C_package`;
+> - a sibling top-level package class, with `using C = <class>;` in the converted file, builds with NO go2cs-gen change.
+>   That is the alias form converted imports already use (`using errors = errors_package;`).
+>
+> **Ruled:** in Go, `C` IS a pseudo-package, so the bindings are a package class of their own, named
+> **`<pkg>ꓸC_package`**. It uses U+A4F8, the converter's own imported-alias separator. The name ends in `_package`, as
+> the converted-type rule needs, and it can never collide with a real Go package's class: `ꓸ` is not a legal Go
+> identifier character, and Go reserves `import "C"`. The emitter's comment states both facts. Two conditions:
+>
+> - **accessibility** follows `package_info`'s rule. cgo forbids a C type in an exported Go signature, so expect
+>   `internal` throughout, and the emitter says so;
+> - **each file that imports `C` gets the alias**, and a file that does not never sees the class.
+>
+> Nested containment plus a go2cs-gen fix is REJECTED: it is bigger, not needed, and every template's package-class
+> wrapper would have to learn it. Increment 3b emits this shape, with the arm committed as its test. §11.17's red is
+> unchanged: a converted call site that prints a mangled name.
 
 ### 11.18 Amendment 2026-11-10 (second): the check of §11
 

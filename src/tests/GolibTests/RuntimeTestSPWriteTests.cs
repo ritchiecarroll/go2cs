@@ -5,7 +5,8 @@ using go;
 
 namespace GolibTests;
 
-// runtime.testSPWrite (src/core/runtime/stubs_impl.cs): Go's own body on every non-amd64 architecture
+// runtime.testSPWrite (src/core/runtime/amd64/test_amd64_impl.cs at amd64; Go's converted test_stubs.cs at
+// every other arch, linux/arm64 included). Go's own body on every non-amd64 architecture
 // is empty (test_stubs.go); the managed host has no Go stack growth for the amd64 assembly's SP write to
 // exercise. As a PartialStubGenerator stub it threw on TestSPWrite's goroutine and ended the runtime
 // row's test host.

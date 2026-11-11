@@ -92,7 +92,7 @@ var asmJumpForwardTargets = map[string]string{
 	// golang.org/x/sys v0.25.0, unix/asm_linux_amd64.s:56:
 	//     TEXT ·gettimeofday(SB),NOSPLIT,$0-16
 	//         JMP syscall·gettimeofday(SB)
-	// The corpus implements syscall.gettimeofday in core/syscall/linux/syscall_linux_amd64_impl.cs.
+	// The corpus implements syscall.gettimeofday in core/syscall/linux-amd64/syscall_linux_amd64_impl.cs.
 	// x/sys passes its own unix.Timeval, which is bridged field by field (layoutIdenticalStructs).
 	"syscall.gettimeofday": "golang.org/x/sys v0.25.0 unix/asm_linux_amd64.s:56",
 }

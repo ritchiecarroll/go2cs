@@ -50,8 +50,7 @@ internal static void declare(this ref pkgBuilder p, ж<Scope> Ꮡscope, ж<Scope
 internal static bool resolve(ж<Scope> Ꮡscope, ref Ident ident) {
     ref var scope = ref Ꮡscope.DerefOrNull();
 
-    for (; Ꮡscope != nil; Ꮡscope = scope.Outer) {
-        scope = ref Ꮡscope.DerefOrNull();
+    for (; Ꮡscope != nil; Ꮡscope = scope.Outer, scope = ref Ꮡscope.DerefOrNull()) {
         var obj = scope.Lookup(ident.Name); if (obj != nil) {
             ident.Obj = obj;
             return true;

@@ -41,6 +41,9 @@ var emitterSpelledTypeNames = map[string]bool{
 }
 
 func performNameCollisionAnalysis(pkg *packages.Package) {
+	// cmd/cgo's C type and constant names are renamed package-wide into the C pseudo-package (cgoPseudoPackage.go).
+	collectCgoPseudoPackageNames(pkg.Types)
+
 	// Track names of various declarations
 	namedElementNames := make(map[string]bool)
 	methodNames := make(map[string]bool)

@@ -169,26 +169,37 @@ func TestGolibSizeClassesMatchTheToolchain(t *testing.T) {
 		}
 	}
 
-	convertedGoarch, err := os.ReadFile(filepath.Join(root, "src", "core", "internal", "goarch", "goarch.cs"))
+	// goarch.go folds a GOARCH's constants, so the corpus holds one goarch.cs per GOARCH it is laid out for, each in a
+	// platform folder (amd64/, linux-arm64/). golib has ONE PtrSize, so every one of them agrees with it.
+	convertedGoarchFiles, err := filepath.Glob(filepath.Join(root, "src", "core", "internal", "goarch", "*", "goarch.cs"))
 
-	if err != nil {
-		t.Fatalf("reading the converted goarch: %v", err)
+	if err != nil || len(convertedGoarchFiles) == 0 {
+		t.Fatalf("no converted internal/goarch/<platform folder>/goarch.cs found (%v)", err)
 	}
 
-	convertedPtrSize := ""
+	for _, convertedGoarchFile := range convertedGoarchFiles {
+		convertedGoarch, err := os.ReadFile(convertedGoarchFile)
 
-	for _, m := range csGoarchConst.FindAllStringSubmatch(string(convertedGoarch), -1) {
-		if m[1] == "PtrSize" {
-			convertedPtrSize = m[2]
+		if err != nil {
+			t.Fatalf("reading the converted goarch: %v", err)
 		}
-	}
 
-	if convertedPtrSize == "" {
-		t.Fatalf("the converted internal/goarch no longer declares PtrSize in the form this guard reads")
-	}
+		flavour := filepath.Base(filepath.Dir(convertedGoarchFile))
+		convertedPtrSize := ""
 
-	if got := csConsts["PtrSize"]; got != convertedPtrSize {
-		t.Errorf("golib's GoSizeClasses.PtrSize is %q, the converted internal/goarch's PtrSize is %s", got, convertedPtrSize)
+		for _, m := range csGoarchConst.FindAllStringSubmatch(string(convertedGoarch), -1) {
+			if m[1] == "PtrSize" {
+				convertedPtrSize = m[2]
+			}
+		}
+
+		if convertedPtrSize == "" {
+			t.Fatalf("the converted internal/goarch (%s) no longer declares PtrSize in the form this guard reads", flavour)
+		}
+
+		if got := csConsts["PtrSize"]; got != convertedPtrSize {
+			t.Errorf("golib's GoSizeClasses.PtrSize is %q, the converted internal/goarch's PtrSize (%s) is %s", got, flavour, convertedPtrSize)
+		}
 	}
 
 	table := csClassTable.FindStringSubmatch(string(golib))

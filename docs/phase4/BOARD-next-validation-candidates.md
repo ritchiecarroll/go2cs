@@ -35546,4 +35546,372 @@ control.
 
 — P1 (2026-11-10)
 
+
+## 2026-11-10 — G: a single-target `-stdlib` conversion leaves rows the three-target apply does not: six root attribution files rewritten with LF, and `log/syslog`'s project file without its friend-access group at windows; runbook E1 is a single-target build and carries both — OPEN, for routing
+
+**Where it was measured.** The linux/arm64 corpus seat (S2, `claude/g-la64-s2`, record
+`DATA-la64-s2-prediction.md` §6.1) ran four single-target `-stdlib -comments -platforms <target>` conversions into
+its applied tree, each from a clean tree. Every one ended rc 0 with `Failed: 0`, and none left the tree clean. The
+rows below are master's and not that seat's. **Control:** the one-package conversion
+`-platforms windows/amd64 log/syslog` in a tree at master `66a2e023ca`, converter built from that tree, left the same
+seven rows and the same seven removed lines.
+
+| # | Row | At | What changes |
+|---|---|---|---|
+| 1 | `src/core/VERSION`, `LICENSE`, `PATENTS`, `README.md`, `SECURITY.md`, `CONTRIBUTING.md` | every target | 6 status rows, no content: the bytes are GOROOT's, with LF, over a CRLF checkout |
+| 2 | `src/core/log/syslog/log.syslog.csproj` | windows/amd64 only | 7 lines removed: the `InternalsVisibleTo` item group |
+
+**Row 1, as read.** `copyRootAttributionFiles` (stdLibConverter.go) reads each file from GOROOT and writes its bytes.
+On a checkout with `core.autocrlf=true` the six files are CRLF in the working tree and LF in the index, so the
+rewrite is a status row that carries no diff. Probe on master `38caf3558a`, `PATENTS` rewritten with LF by hand:
+`git status --porcelain` prints ` M src/core/PATENTS`, `git diff --numstat` prints nothing, `git diff --quiet` exits
+0. An LF checkout would show no row; that was not measured. A merged apply (`-platform-stage`) leaves the six alone:
+S2's second four-target apply read 0 rows.
+
+**Row 2, as read.** The project-file writer adds the friend-access group when the target being converted sees an
+in-package test file (`hasSiblingInternalTestFiles`). `log/syslog`'s only one, `syslog_test.go`, is `!windows`, so a
+windows conversion writes the project file without the group. The merged path repairs this with `friendAccessUnion`
+(platformEmit.go; BOARD 2026-11-03, G), which a single-target conversion never reaches. The committed file is right;
+a windows-only reconvert of the package, or of the whole library, takes the group out, and with it the
+`go2cs.SynthesizedStructs` grant the linux and darwin flavours rely on.
+
+**What inherits it.**
+
+- Runbook E1 (`docs/GoCorpusMigration.md`, the default-flavour byte-identity arm) IS a single-target
+  `-stdlib -comments -platforms <host>/amd64` build, so its root carries both rows. The arm's manifest lists `*.cs`
+  files only, so neither row reaches its verdict: read from `h8-comparand.sh`, not run.
+- Any gate worded "a single-target conversion into the applied tree writes nothing" reads 6 on a CRLF checkout, and 7
+  at windows. S2's record claimed exactly that, without this control, and was red on it.
+- A restore by status after a single-target conversion puts both back. A commit staged from such a tree would carry
+  row 2.
+
+**Smallest fixes, not applied.** Row 1: write an attribution file only when its content differs from the
+destination's with line endings set aside, or write it with the destination's line ending. Row 2: a single-target
+conversion keeps a friend-access group the existing project file already holds, the way the merge takes the union.
+Each goes red-first on the conversions above.
+
+**Not verified:** whether any other package's project file differs between a single-target and a merged conversion
+(the four full single-target runs changed this one alone, at 356 to 360 packages each); whether row 1 shows on a
+checkout with `core.autocrlf=false`.
+
+— G (2026-11-10)
+
+
+## 2026-11-10 — G (note): `syscall` on linux reads 50 matched + 9 disclosed on the CI runner against a bank of 42 + 17: the HOST, not a regression; the bank's 17 names are not in the repository — NOTE, no re-bank (COORD)
+
+**Reading.** A CI sweep of the S2 seat read the row at 50 and 9. **Control:** the same leg on master `ae69e4ce74`
+(run 42788267168) reads 50 and 9, with the same nine names. The bank row
+(`docs/phase4/rebank-1.26.10.3/linux/P1-2.tsv`: `syscall PASS 42 … 17`) is a root host's reading; the CI runner is
+unprivileged.
+
+**Why the counts move.** `src/core/syscall/go2cs_test_disclosures.json` carries twelve disclosures for tests Go skips
+without root (`TestAmbientCaps`, `TestAmbientCapsUserns`, `TestCloneTimeNamespace`, `TestDeathSignalSetuid`,
+`TestGroupCleanup`, `TestGroupCleanupUserNamespace`, `TestRlimitRestored`, `TestUnshare`, `TestUnshareMountNameSpace`,
+`TestUnshareMountNameSpaceChroot`, `TestUnshareUidGidMapping`, `TestUseCgroupFD`). On the root host they run and
+differ, so they count as disclosed; on the runner both sides skip, and the row counts them as matched. The move from
+17 to 9 is eight names, and these twelve are its candidates. The nine the runner discloses: `TestAllThreadsSyscall`,
+`TestAllThreadsSyscallBlockedSyscall`, `TestAllThreadsSyscallError`, `TestCloneNEWUSERAndRemap/setgroups=false` and
+`=true`, `TestEmptyCredGroupsDisableSetgroups`, `TestPidFDWithUserNS` (Go passes, C# skips), `TestExecPtrace` and
+`TestPrlimitFileLimit` (Go passes, C# fails).
+
+**The gap this note records.** The bank table holds the row's COUNTS and not its names. Which eight of the twelve
+moved, and whether the bank host's other nine are the runner's nine, cannot be read from the repository: it takes a
+run on a root host. A row whose disclosed count depends on the host's privilege can only be compared across hosts name
+by name, and the bank does not keep the names to compare.
+
+**Ruled (COORD, 2026-11-10):** a host artifact. No membership change, no re-bank, no disclosure retired.
+
+## 2026-11-10 — G (C42 bound, COORD's ruling R1): a method a DECLARED embed and a STRUCTURAL base both supply is CS0121 at a lookup through the interface — also when the interface declares the method itself
+
+**Not a .4 seat** (COORD, 2026-11-10): the shape is outside the typescript-go closure. It becomes a seat when a TS
+row surfaces it; this row is here so that row is recognised on sight. C42 itself (`claude/g-c42-iface-embed-merge`,
+`b88adc6112`, accepted for batch 284) neither causes nor cures it: both arms below read the same at its base.
+
+**The shape** (the complete repro, module `example.com/c42struct2`, `go 1.23`; `go run` prints `2 <nil> <nil> 3 4`):
+
+```go
+package main
+
+import (
+	"fmt"
+	"io"
+)
+
+type Reader interface {
+	Read(p []byte) (int, error)
+}
+
+// X embeds Reader, and its method set strictly contains io.ReadCloser, which also declares Read.
+type X interface {
+	Reader
+	Close() error
+	Extra() int
+}
+
+type impl struct{}
+
+func (impl) Read(p []byte) (int, error) { return len(p), nil }
+func (impl) Close() error               { return nil }
+func (impl) Extra() int                 { return 3 }
+
+func drain(r io.ReadCloser) int {
+	n, _ := r.Read(make([]byte, 4))
+	r.Close()
+	return n
+}
+
+func main() {
+	var x X = impl{}
+	n, err := x.Read(make([]byte, 2))
+	fmt.Println(n, err, x.Close(), x.Extra(), drain(x))
+}
+```
+
+**Measured**, with the converter built at master `38caf3558a` and with the one built at `2c3882632d` (C42; `src/go2cs`
+is unchanged from there to the accepted tip), identically: the conversion exits 0 and the build fails with three
+errors, all on the one call —
+
+```
+main.cs(34,22): error CS0121: The call is ambiguous between the following methods or properties: 'go.example.com.main_package.Reader.Read(go.slice<byte>)' and 'go.io_package.Reader.Read(go.slice<byte>)'
+main.cs(34,10): error CS8130: Cannot infer the type of implicitly-typed deconstruction variable 'n'.
+main.cs(34,13): error CS8130: Cannot infer the type of implicitly-typed deconstruction variable 'err'.
+```
+
+— over this emission, where `Close` is taken from the structural base and nothing in `X` names `Read`:
+
+```csharp
+partial interface X :
+    Reader,
+    io.ReadCloser
+{
+    nint Extra();
+}
+```
+
+**The control arm, and a prediction that was wrong.** `c42structctl` is the same program with
+`Read(p []byte) (int, error)` ALSO written in `X` itself. Predicted green, from C42's own sentence "a method the
+interface declares itself already hides the inherited ones". Measured: the same three errors and the same emission
+at both converters. The own declaration is dropped, so declaring the method is no way out. The C42 page's Bounds
+said "and that the interface does not declare itself"; that clause was too narrow and is corrected with this row.
+
+**Root, as read in `visitInterfaceType.go`.** `getStructuralInterfaceBases` counts, per method, the STRUCTURAL bases
+that cover it (`coveredCounts`). A member exactly one structural base covers is `structuralCovered`, and the body
+loop skips its declaration as inherited from that base — own-declared or not. Declared embeds are not in that
+count: `coveredByEmbed` only drops a structural candidate that a declared embed implements WHOLE, and `Reader` does
+not implement `io.ReadCloser`. C42's `writeMergedEmbeddedMethods` and the H7 call-site cast both ask go/types for a
+method's declaring interfaces (`interfaceMethodDeclarers`), and go/types sees ONE declarer of `Read` here: the
+structural base is the converter's own choice, not a Go embed. So no rule writes a member in `X`, no cast is
+written at the call, and C# finds `Reader.Read` and `io.Reader.Read` side by side.
+
+**Scope.** Measured on a call. By C42's reading, the other lookups through the interface (the generated adapter, a
+type-parameter call, a method value, hand-written C#) meet the same two members; those were not run here. Passing
+`x` on as an `io.ReadCloser` (`drain(x)`) compiles. std is not censused for the shape: which interface becomes a
+structural base is the converter's selection, so a census has to run that selection, not go/types. The converted
+corpus builds, so no std lookup trips it today.
+
+**Where a fix would sit** (not designed): the two rules have to agree on who supplies a method. The member is
+already written when TWO structural bases cover it; this is the one-structural-plus-one-declared case. Red-first
+with both arms above added to `EmbeddedInterfaceMergedMethod`.
+
+**Kept:** the Bounds of "An interface redeclares a method two embedded interfaces declare"
+(`docs/ConversionStrategies-Reference/interfaces.md`) carries the shape.
+
+— G (2026-11-10)
+
+## 2026-11-10 — G (adjacent to C42, COORD's ruling): an EXPORTED interface that embeds an UNEXPORTED interface of its own package is CS0061; std has none (0 of 54, three targets)
+
+**Not a .4 seat** (COORD, 2026-11-10), on the same terms as the row above: outside the typescript-go closure until a
+TS row surfaces it. Found while reducing the row above; it is independent of C42 and of structural bases.
+
+**The shape** (the complete repro, module `example.com/c42unexp`, `go 1.23`; legal Go, `go run` prints `2 <nil> 3`):
+
+```go
+package main
+
+import "fmt"
+
+type reader interface {
+	Read(p []byte) (int, error)
+}
+
+// X is exported and embeds reader, an unexported interface of the same package.
+type X interface {
+	reader
+	Extra() int
+}
+
+type impl struct{}
+
+func (impl) Read(p []byte) (int, error) { return len(p), nil }
+func (impl) Extra() int                 { return 3 }
+
+func main() {
+	var x X = impl{}
+	n, err := x.Read(make([]byte, 2))
+	fmt.Println(n, err, x.Extra())
+}
+```
+
+**Measured**, at the same two converters as the row above, identically: the conversion exits 0 and the build fails
+with one error —
+
+```
+main.cs(11,19): error CS0061: Inconsistent accessibility: base interface 'main_package.reader' is less accessible than interface 'main_package.X'
+```
+
+The emission is `partial interface X :` / `    reader`, and the package's `package_info.cs` pins
+`internal partial interface reader {}` in its `TypeAccessibility` section: accessibility follows the Go name's
+case, and nothing publicizes `reader`. **Control** (`c42unexpctl`, the same program with the interface spelled
+`x`): builds, prints `2 <nil> 3`, matches Go, at both converters.
+
+**Census of std** (go/packages, go1.26.10, `GOARCH=amd64`, production files; a package-scope EXPORTED interface
+whose embed list names an UNEXPORTED named interface of the same package):
+
+| target | packages | files | exported package-scope interfaces | of them embedding | hits |
+|---|---|---|---|---|---|
+| windows | 362 | 1600 | 202 | 54 | 0 |
+| linux | 360 | 1674 | 202 | 54 | 0 |
+| darwin | 360 | 1669 | 205 | 54 | 0 |
+
+Load errors 0 on each. The instrument's controls: the repro reads 1 hit (`X` / `reader`), its control reads 0, and
+`c42struct2` (an exported interface embedding an EXPORTED one) reads 0. Zero in std is why the compiled corpus
+never met the shape. Not censused: `_test.go` files and function-local interfaces.
+
+**Where a fix would sit** (not designed, and the pass was not read end to end): the publicize pass
+(`typeAccessibilityOperations.go`, `packagePublicizedTypes`) already publicizes an unexported type that an exported
+surface exposes — a field, a package var, an interface member's signature
+(`TestInterfaceMemberSignatureTypesArePublicized`). An exported interface's own embed list is the same exposure.
+Red-first with the repro as a behavioral arm and its control beside it.
+
+**Kept:** the same Bounds paragraph carries this shape too.
+
+— G (2026-11-10)
+
+## 2026-11-10 — G (C42's census, COORD's ruling): the one file the go/packages census reads short of `go list` is `src/unsafe/unsafe.go`, on every target, and it holds no interface
+
+C42's footprint census read one production file fewer than `go list` on each target, and the READY post carried
+that gap unexplained while both known hits were found. COORD's ruling: an unexplained instrument gap is the
+instrument's own finding. Named, by diffing the census's own file list against `go list -f` over `.GoFiles`
+(production) and over `.TestGoFiles` + `.XTestGoFiles` (tests), lower-cased and sorted:
+
+| target | go list, production | census, production | only in go list | tests: go list = census |
+|---|---|---|---|---|
+| windows | 1601 | 1600 | `src/unsafe/unsafe.go` | 1088 = 1088 |
+| linux | 1675 | 1674 | `src/unsafe/unsafe.go` | 1157 = 1157 |
+| darwin | 1670 | 1669 | `src/unsafe/unsafe.go` | 1130 = 1130 |
+
+"Only in census" is empty in all six compares. **Why:** go/packages hands back the built-in `unsafe` package with
+no syntax (`types.Unsafe` is not type-checked from source), so a walk over `pkg.Syntax` cannot see its one file.
+**Why it hides nothing:** `unsafe.go` declares three types (`ArbitraryType`, `IntegerType`, `Pointer`), none an
+interface. The census counts therefore stand as posted, and the same one-file offset applies to every
+`pkg.Syntax` census of std, the CS0061 census in the row above included (its file counts are the same 1600 / 1674
+/ 1669).
+
+— G (2026-11-10)
+
+## 2026-11-10 — C1 (C36's sibling, COORD's ruling): a NON-generic float-to-integer conversion is a plain C# cast, so out of range it takes .NET's saturating answer, which equals gc/arm64 and differs from gc/amd64 — DISCLOSED; census for .5
+
+**What.** `int8(f)`, `uint64(f)` and the rest, for a float `f` with no constant value, emit a plain C# cast
+(`(int8)f`). In range, the cast truncates toward zero as Go does. Out of range, or for NaN, Go's spec leaves the value
+implementation-dependent ("the conversion succeeds but the result value is implementation-dependent"), and the
+answers differ:
+- .NET (every platform since .NET 9): int32 and int64 saturate, NaN reads 0, the unsigned kinds clamp at 0 and at
+  their maximum, and the 8- and 16-bit kinds take the low bits of the saturated int32. This equals gc on arm64
+  (FCVTZS/FCVTZU), as C36 measured on a hosted osx-arm64 runner (run 42857184743).
+- gc on amd64: CVTTSD2SQ / CVTTSD2SL give the "integer indefinite" (MinInt64, MinInt32), and the unsigned 64-bit kinds
+  take gc's split at 2^63.
+
+Measured on linux x64 (a converted program against go run, at C36's tree), as gc / C#: `uint64(-1.9)` MaxUint64 / 0;
+`uint32(-129.5)` 4294967167 / 0; `int32(2147483648.1)` MinInt32 / MaxInt32; `int8(2147483648.1)` 0 / -1;
+`int64(1e19)` MinInt64 / MaxInt64; `uint32(1e19)` 0 / 4294967295. Every in-range row agrees.
+
+**Two answers in one program.** C36's GENERIC path (`T(f)` with `T ~int32`, golib's `ConvertToType<T>(double)`)
+follows gc for the process's architecture, while the direct cast saturates everywhere. On amd64 one program can
+therefore see two answers for the same conversion: `conv[int64](1e19)` reads MinInt64 and `int64(1e19)` reads
+MaxInt64. On arm64 the two agree. This is the strongest argument either way for the .5 decision: align the direct
+cast with gc per architecture, or align the generic path with .NET.
+
+**Census (for .5).** Non-constant float-to-integer conversions in std, by go/types (the target an integer type, the
+operand a float with no constant value), tests included, windows, linux and darwin:
+- 198 distinct sites: about 92 in production code and 104 in tests.
+- The heaviest packages are runtime (80 production, 90 test), math (48), math/rand/v2 (36 test),
+  internal/trace/traceviewer (27) and text/template/parse (24).
+- Positive control: math/erfinv.go:81 `Inf(int(x))`.
+
+**Do banked rows exercise an out-of-range value?** Measured on linux:
+- Every one of the 196 linux sites was instrumented through a `go test -overlay` of GOROOT. Each operand passes through
+  a helper that prints a tagged line on NaN or out of range.
+- The instrument's positive control is runtime's TestFloat64, which feeds NaN and ±Inf to `int64(f)`.
+- Go's tests of all 238 banked rows ran, without -short: 233 passed and 5 failed on this box, for environment reasons
+  (crypto/tls, crypto/x509, net, and two windows-only packages on linux). Those five may have stopped before reaching
+  a site.
+- Three rows reach an out-of-range value. None of them has a verdict that depends on the rule:
+  - runtime, TestFloat64 (softfloat64_test.go:104, 118, 125): the test compares a hardware conversion with the same
+    hardware conversion ("Match the hardware to pass the test"), so both sides take one rule.
+  - text/template/parse (node.go:703, 707, 729): a round-trip check (`float64(int64(f)) == f`) decides whether a
+    number is also an int or a uint. The values the tests feed (±1e19, -1.2, -1e9, -12) fail it under both rules.
+    The rules would part only at exactly 2^63 or 2^64, which no test parses.
+  - runtime (TestDebugCallGrowStack, TestUserForcedGC) and sync/atomic: mgcpacer.go:528, 538 and 549, inside
+    gcControllerState.revise during Go's own collections. In go2cs, runtime.GC() runs the managed collector
+    (managed_impl.cs:691), which calls neither gcStart nor revise. The converted revise is reached from startCycle,
+    from update, and from gcControllerCommit during a mark phase. TestGcPacer, which drives the converted controller
+    through export_test, reaches no out-of-range value in Go. NOT established: whether any banked runtime test reaches
+    the converted mallocgc's gcStart calls.
+- Reading: a disclosure, not a validation divergence. No banked test verdict measured here depends on the rule. Only
+  linux was measured dynamically; the windows and darwin censuses differ from linux by at most two sites.
+
+**Ruled (COORD, 2026-11-10):** not a .4 seat. The value is implementation-dependent in Go, and routing every cast
+through a helper would cost visible parity (`(int8)f` reads as Go's `int8(f)`) at every site for a value portable Go
+cannot rely on. Disclosed here, and the census informs .5.
+
+— C1 (2026-11-10)
+
+## 2026-11-10 — R (C35 design ruling 2): the SELF-REFERENTIAL constraint proxy's zero value is a null reference, not Go's typed nil pointer — OPEN, disclosed
+
+Inside a generic body whose type parameter takes the self-referential constraint proxy (`T Namer[T]` instantiated
+with `*node`), `var zero T` is C#'s `default(proxy)`, a null reference. In Go it is a typed nil pointer: a method
+called on it runs with a nil receiver, and boxing it gives a non-nil interface. Measured on a single-package probe
+at `claude/r-ts-c35` (the converter and generator of the C35 seat; the self route itself is unchanged there):
+
+| Row | Go | Converted |
+|---|---|---|
+| `var zero T; var a any = zero; a == nil` | `false` | `true` |
+| `var zero T; zero.Name()` (a nil-receiver method) | `nil-node` | panic: nil pointer dereference |
+
+**Scope.** The NON-self route (C35) refuses both shapes by name (DESIGN-constraint-proxy-nonself ruling 2, the
+zero-call and zero-any refusals), but the self route has no such refusal, and no census has looked for the shape in
+std's self-route instantiations (crypto/internal/nistec, crypto/elliptic, crypto/internal/fips140/ecdsa and their
+tests). C35's template change does make a NULL proxy convert to a nil box (so `return zero` gives Go's nil), but it
+does not make a method call on the zero proxy, or its boxing, match Go.
+
+**Not verified:** whether any std self-route body uses a zero value this way (a census through
+`zeroValueMisuses` over the self route's instantiations would answer it); whether a fix should refuse, as the
+non-self route does, or make the zero value a proxy over a nil box.
+
+— R (2026-11-10)
+
+## 2026-11-10 — H (cgo Phase 2 increment 4d, golib-tests 42936395011): on darwin, dyld's search for a BARE library name reaches the current directory — a SECURITY finding, CLOSED in 4d before any release shipped it
+
+**The finding.** Increment 4d's exit-gate arm `ALibraryOnlyInTheCurrentDirectoryIsNotLoaded` planted a copy of the
+probe library in the current directory and asked golib's cgo resolver for it by its bare name. On both hosted darwin
+RIDs, dyld loaded it: handle 1913759472 on osx-arm64 and 1108903152 on osx-x64, where the arm required a refusal. The
+red was predicted before the run (PREDICTIONS-4d D6, leaning red at about 60/40, from man dlopen's leaf-name order). A
+converted cgo package whose captured darwin name was not absolute would therefore load a library planted in whatever
+directory the program was started from: the DLL-planting surface §5.4 exists to close.
+
+**The fix, in 4d itself (COORD's ruling).** DESIGN-cgo-phase2-pinvoke §11.12's absolute-name rule is MANDATORY for
+every darwin load (dated line there). Both halves refuse, by name, any darwin name that is not absolute: the
+converter's capture (`cgoDarwinInstallName`; red 8dfe7398ee fails on exactly the bare and the relative name) and
+golib's resolver, which refuses before dyld sees the name (green 3c4875b988). The current-directory arm stays as the
+rule's guard. Linux (ld.so does not search the current directory for a bare name unless LD_LIBRARY_PATH has an
+empty entry, which the hosted leg avoids) and windows (SafeDirectories | AssemblyDirectory) read green on the same arm.
+
+**The trade, stated.** An absolute install name is baked into the bindings, as into a Go binary's load commands, so a
+library at another path on the consumer's machine (Homebrew's `/opt/homebrew` against `/usr/local`) fails by name
+rather than loading something else.
+
+CLOSED by claude/h-cgo-phase2-probes 3c4875b988.
+
+— H (2026-11-10)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

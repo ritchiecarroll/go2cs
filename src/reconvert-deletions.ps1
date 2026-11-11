@@ -200,8 +200,8 @@
 
 .PARAMETER Goos
     The GOOS the reconvert targeted, for files that sit FLAT in a package directory. Files inside an
-    L3 per-GOOS folder (core\<pkg>\{windows,linux,darwin}\) are asked under THAT folder's flavour
-    regardless. Defaults to this host's flavour.
+    L3 key folder (core\<pkg>\<goos>\, <arch>\ or <goos>-<arch>\) are asked under THAT folder's
+    flavour regardless (Get-LayoutKeyFlavour). Defaults to this host's flavour.
 
 .PARAMETER Goarch
     The GOARCH to ask Go under. Defaults to this host's architecture. Stated explicitly rather than
@@ -469,8 +469,12 @@ function Invoke-Go {
     param(
         [Parameter(Mandatory = $true)][object]   $Toolchain,
         [Parameter(Mandatory = $true)][string[]] $Arguments,
-        [Parameter(Mandatory = $true)][string]   $ForGoos
+        [Parameter(Mandatory = $true)][string]   $ForGoos,
+        # A key folder's own GOARCH (Get-LayoutKeyFlavour); the run's -Goarch otherwise.
+        [Parameter(Mandatory = $false)][string]  $ForGoarch
     )
+
+    if ([string]::IsNullOrWhiteSpace($ForGoarch)) { $ForGoarch = $Goarch }
 
     $saved = @{}
     $vars  = @{}
@@ -479,7 +483,7 @@ function Invoke-Go {
 
     $vars['GOROOT'] = $Toolchain.Root
     $vars['GOOS']   = $ForGoos
-    $vars['GOARCH'] = $Goarch
+    $vars['GOARCH'] = $ForGoarch
 
     foreach ($key in $vars.Keys) {
         $saved[$key] = [System.Environment]::GetEnvironmentVariable($key)
@@ -640,7 +644,34 @@ $HandOwnMarkerPattern = '(?m)^\s*\[\s*module\s*:\s*(go\.)?\s*GoManualConversion(
 # MSBuild's directories, not the conversion's -- mirrors isBuildOutputDirectory (platformCensus.go).
 $BuildOutputDirs = @('bin', 'obj', 'Generated')
 
-$KnownGoos = @('windows', 'linux', 'darwin')
+# The corpus's (GOOS, GOARCH) universe: the converter's platformUniverse (src\go2cs\platformLattice.go).
+# The repoguard test TestLayoutKeyListsAreTheUniverses holds this line to it; keep it on ONE line, in
+# this spelling. Layout L3 lays a package's files into a KEY FOLDER per target set -- a GOOS (linux\), a
+# GOARCH (amd64\) or the pair (linux-arm64\) -- and $layoutKeys, every name such a folder can carry, is
+# derived from it rather than listed a second time.
+$layoutUniverse = @('windows/amd64', 'linux/amd64', 'darwin/amd64', 'linux/arm64')
+
+$layoutKeys = @($layoutUniverse | ForEach-Object { $g, $a = $_ -split '/'; $g; $a; "$g-$a" } | Sort-Object -Unique)
+
+# The flavour a key folder's files are asked about: one target its build compiles the folder at. A GOOS
+# folder is asked at this run's GOARCH when the universe has that pair, an arch folder at this run's GOOS
+# when the universe has that pair, and otherwise at the folder's first target -- a pair folder is always
+# its own target. Asking linux-arm64\ at linux/amd64 would deselect every arm64-only principal in it.
+function Get-LayoutKeyFlavour {
+    param([Parameter(Mandatory = $true)][string] $Folder)
+
+    $targets = @($layoutUniverse | Where-Object { $g, $a = $_ -split '/'; $Folder -ceq $g -or $Folder -ceq $a -or $Folder -ceq "$g-$a" })
+
+    if ($targets.Count -eq 0) { return $null }
+
+    $pick = @($targets | Where-Object { $_ -ceq "$Goos/$Goarch" })
+    if ($pick.Count -eq 0) { $pick = @($targets | Where-Object { ($_ -split '/')[0] -ceq $Goos -or ($_ -split '/')[1] -ceq $Goarch }) }
+    if ($pick.Count -eq 0) { $pick = $targets }
+
+    $g, $a = $pick[0] -split '/'
+
+    return [pscustomobject]@{ Goos = $g; Goarch = $a }
+}
 
 # The converter's OWN skip-list, MIRRORED. `go list std` names unsafe and testing like any other
 # package, so no Go question can exclude them -- the converter's isNonConvertedStdLibPackage
@@ -827,12 +858,15 @@ function Get-GoSelection {
         [Parameter(Mandatory = $true)][string] $ForGoos,
         # Which release to ask. Defaults to the target, which is every caller except the deselection
         # gate -- so an un-updated caller keeps its old meaning rather than silently changing release.
-        [Parameter(Mandatory = $false)][object] $Toolchain
+        [Parameter(Mandatory = $false)][object] $Toolchain,
+        # A key folder's own GOARCH; the run's -Goarch otherwise.
+        [Parameter(Mandatory = $false)][string] $ForGoarch
     )
 
     if ($null -eq $Toolchain) { $Toolchain = $TargetGo }
+    if ([string]::IsNullOrWhiteSpace($ForGoarch)) { $ForGoarch = $Goarch }
 
-    $key = "$($Toolchain.Label)|$ForGoos|$ImportPath"
+    $key = "$($Toolchain.Label)|$ForGoos/$ForGoarch|$ImportPath"
 
     if ($SelectionCache.ContainsKey($key)) {
         return $SelectionCache[$key]
@@ -847,7 +881,7 @@ function Get-GoSelection {
 
     $listArgs += @('-f', '{{.GoFiles}} {{.CgoFiles}}', $ImportPath)
 
-    $result = Invoke-Go -Toolchain $Toolchain -Arguments $listArgs -ForGoos $ForGoos
+    $result = Invoke-Go -Toolchain $Toolchain -Arguments $listArgs -ForGoos $ForGoos -ForGoarch $ForGoarch
 
     $selection = [pscustomobject]@{
         PackageExists = ($result.ExitCode -eq 0)
@@ -904,18 +938,19 @@ function Resolve-Principal {
     $asPackage = Get-GoSelection -ImportPath $fullDir -ForGoos $Goos
 
     if ($asPackage.PackageExists) {
-        return [pscustomobject]@{ ImportPath = $fullDir; Goos = $Goos; Principal = "$stem.go"; Selection = $asPackage }
+        return [pscustomobject]@{ ImportPath = $fullDir; Goos = $Goos; Goarch = $Goarch; Principal = "$stem.go"; Selection = $asPackage }
     }
 
     $leaf = $dirs[-1]
 
-    if ($dirs.Count -ge 2 -and ($KnownGoos -contains $leaf) -and
+    if ($dirs.Count -ge 2 -and ($layoutKeys -ccontains $leaf) -and
         -not (Get-SourceStdSet -ForGoos $Goos).Contains($fullDir)) {
 
         $parentPath = ($dirs[0..($dirs.Count - 2)] -join '/')
-        $selection  = Get-GoSelection -ImportPath $parentPath -ForGoos $leaf
+        $flavour    = Get-LayoutKeyFlavour -Folder $leaf
+        $selection  = Get-GoSelection -ImportPath $parentPath -ForGoos $flavour.Goos -ForGoarch $flavour.Goarch
 
-        return [pscustomobject]@{ ImportPath = $parentPath; Goos = $leaf; Principal = "$stem.go"; Selection = $selection }
+        return [pscustomobject]@{ ImportPath = $parentPath; Goos = $flavour.Goos; Goarch = $flavour.Goarch; Principal = "$stem.go"; Selection = $selection }
     }
 
     # Neither a package Go knows at the target nor an L3 folder: either the package is gone at the
@@ -923,7 +958,7 @@ function Resolve-Principal {
     # NOT-A-CONVERSION-TARGET row). The source-std test in Test-ConversionTarget tells those apart;
     # this reports it under its own path so the row reads honestly either way, with the failed lookup
     # as its selection.
-    return [pscustomobject]@{ ImportPath = $fullDir; Goos = $Goos; Principal = "$stem.go"; Selection = $asPackage }
+    return [pscustomobject]@{ ImportPath = $fullDir; Goos = $Goos; Goarch = $Goarch; Principal = "$stem.go"; Selection = $asPackage }
 }
 
 # Does the converter EMIT into this file's directory? Asked FIRST, of every candidate, because a
@@ -1089,7 +1124,7 @@ foreach ($file in $allCs) {
     # human" instead of DELETE-ABSENT, and H5c refused on a real three-target tree with 42 such rows.
     # $resolved was already computed above and then discarded: the answer was in hand and unused.
     #
-    # ⚠ AND `Resolve-Principal` ALREADY STRIPS A TRAILING GOOS SEGMENT (its L3 arm: leaf in $KnownGoos
+    # ⚠ AND `Resolve-Principal` ALREADY STRIPS A TRAILING GOOS SEGMENT (its L3 arm: leaf in $layoutKeys
     # and the full directory not a source-std package -> the import path is the PARENT and the leaf is
     # the flavour). So a layout-L3 per-GOOS metadata row -- os/windows/package_info.cs and its nine
     # siblings -- resolves to a LIVE package and falls to the KEEP arm below on its own. No derivation
@@ -1175,7 +1210,7 @@ foreach ($file in $allCs) {
     if ($resolved.Selection.Files.Contains($resolved.Principal)) {
         $null = $rows.Add([pscustomobject]@{
             Path = $relative; Principal = $principalLabel; Class = 'KEEP-SELECTED'
-            Reason = "selected for $($resolved.Goos) at $ExpectGo under tags [$BuildTagsLabel]"
+            Reason = "selected for $($resolved.Goos)/$($resolved.Goarch) at $ExpectGo under tags [$BuildTagsLabel]"
             Group = ''; Full = $file.FullName
         })
 
@@ -1220,7 +1255,7 @@ foreach ($file in $allCs) {
     # defaults. Asking `go list` asks about all three at once and read 7 of 7 correctly on the rows
     # above. And it is still ONE tag resolution -- the converter's set, at both ends -- which is what
     # ruling 9c07f494f forbade doing twice with two different sets.
-    $sourceSelection = Get-GoSelection -ImportPath $resolved.ImportPath -ForGoos $resolved.Goos -Toolchain $SourceGo
+    $sourceSelection = Get-GoSelection -ImportPath $resolved.ImportPath -ForGoos $resolved.Goos -ForGoarch $resolved.Goarch -Toolchain $SourceGo
     $selectedAtSource = ($sourceSelection.PackageExists -and $sourceSelection.Files.Contains($resolved.Principal))
 
     if ($selectedAtSource) {
@@ -1347,7 +1382,7 @@ foreach ($row in @($deleteRows | Where-Object { $_.Class -eq 'DELETE-ABSENT' -an
     $absentPackageDirs[$dir] = $true
 
     $importPath = $row.Principal.Substring(0, [Math]::Max(0, $row.Principal.LastIndexOf('/')))
-    if ($importPath -ne $dir -and ($KnownGoos -contains $segments[-2])) { $absentL3Folders[$dir] = $true }
+    if ($importPath -ne $dir -and ($layoutKeys -ccontains $segments[-2])) { $absentL3Folders[$dir] = $true }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1389,7 +1424,7 @@ foreach ($dir in $stagedProjectDirs) {
     if (-not (Test-OwnGoSource -Root $SourceGoRoot -ImportPath $dir)) { continue }
     if (Test-OwnGoSource -Root $GoRoot -ImportPath $dir) { continue }
 
-    $children = @($KnownGoos | Where-Object { Test-OwnGoSource -Root $GoRoot -ImportPath "$dir/$_" })
+    $children = @($layoutKeys | Where-Object { Test-OwnGoSource -Root $GoRoot -ImportPath "$dir/$_" })
 
     if ($children.Count -eq 0) {
         # ⚠ THE SAME HOLE WITHOUT A CHILD (coordinator ruling 2026-10-15, the Go 1.26 hop's H5). A package
@@ -1403,7 +1438,7 @@ foreach ($dir in $stagedProjectDirs) {
         $onDisk  = Join-Path $CoreDir ($dir -replace '/', [System.IO.Path]::DirectorySeparatorChar)
         $flatCs  = @(Get-ChildItem -LiteralPath $onDisk -File -Filter '*.cs' -ErrorAction SilentlyContinue | Where-Object {
             $_.Name -notlike '*_test.cs' -and $_.Name -ne 'package_test_info.cs' -and $_.Name -ne 'go2cs_test_host.cs' })
-        $goosCs  = @($KnownGoos | Where-Object {
+        $goosCs  = @($layoutKeys | Where-Object {
             @(Get-ChildItem -LiteralPath (Join-Path $onDisk $_) -File -Filter '*.cs' -ErrorAction SilentlyContinue).Count -gt 0 })
 
         if ($flatCs.Count -eq 0 -and $goosCs.Count -gt 0) { $absentPackageDirs[$dir] = $true }
@@ -1418,7 +1453,8 @@ foreach ($dir in $stagedProjectDirs) {
 # ---------------------------------------------------------------------------------------------
 # THE HAZARD ITSELF, REFUSED: a project directory that SURVIVES this pass beside a child directory named for
 # a GOOS that is a package of its own (it carries its own project). The per-OS layout compiles
-# $(GoTargetOS)/*.cs, so that parent's project would compile the CHILD package's files. No Go release from
+# $(GoTargetOS)/*.cs, so that parent's project would compile the CHILD package's files; the same holds for
+# a child named for any layout key, since the project globs its GOARCH and pair folders too. No Go release from
 # 1.24 to 1.27 has that shape (internal/syscall and internal/runtime/syscall, the only parents with
 # GOOS-named children, have no Go source of their own), so a hit is a new upstream shape the converter's
 # layout cannot hold, and it is refused by name rather than built wrong.
@@ -1427,7 +1463,7 @@ $goosChildCollisions = @()
 foreach ($dir in $stagedProjectDirs) {
     if ($absentPackageDirs.ContainsKey($dir)) { continue }
 
-    foreach ($g in $KnownGoos) {
+    foreach ($g in $layoutKeys) {
         $child = Join-Path $CoreDir (("$dir/$g") -replace '/', [System.IO.Path]::DirectorySeparatorChar)
 
         if ((Test-Path -LiteralPath $child -PathType Container) -and

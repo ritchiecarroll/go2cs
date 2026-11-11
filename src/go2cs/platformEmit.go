@@ -10,12 +10,12 @@
 // docs/phase4/DESIGN-multiplatform-corpus.md; platformLayout.go owns what L3 IS, and every rule for
 // honoring it afterwards).
 //
-//	go2cs -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64 -go2cspath <repo>\src
+//	go2cs -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64,linux/arm64 -go2cspath <repo>\src
 //
-// converts once per target and merges the three emissions into ONE tree, per L3: an artifact that is
+// converts once per target and merges the emissions into ONE tree, per L3: an artifact that is
 // byte-identical on every target is written flat in its package directory, and anything else — a
-// name whose content varies, or one only some targets emit at all — is written to that package's
-// `<goos>/` subfolder, once per emitting target.
+// name whose content varies, or one only some targets emit at all — is written to the key folders
+// of that package the layout lattice homes it at (platformLattice.go).
 //
 // **It is increment 1's census with a write step, deliberately.** The staging, the seeding ritual,
 // the sentinel-modification-time "did this run emit it", the hand-own marker gate and the four-way
@@ -718,8 +718,8 @@ func mergePlatformEmissions(rootPath string, targets []string, emissions []*plat
 	// §4). The merge still lands the first target's remainder, but the difference is named rather
 	// than absorbed: it is either a genuine design gap or a measurement worth recording.
 	if len(residual) > 0 {
-		fmt.Printf("\n⚠ %d package(s) emitted a flat companion that differs by GOOS in a way layout L3 does not express\n", len(residual))
-		fmt.Printf("  (a project file outside its <ProjectReference> lists, or a review sibling with no per-GOOS folder to hold it),\n")
+		fmt.Printf("\n⚠ %d package(s) emitted a flat companion that differs by target in a way layout L3 does not express\n", len(residual))
+		fmt.Printf("  (a project file outside its <ProjectReference> lists, or a review sibling with no source folder to hold it),\n")
 		fmt.Printf("  so %s's copy was kept:\n", goosOfTarget(targets[0]))
 
 		for _, pkg := range sortedKeys(func() map[string]bool {
@@ -1179,10 +1179,13 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 //     (alwaysWriteSources), so "emitted" is exact here, unlike for a README;
 //   - when every flavour agrees, one flat sibling, and the key folders' copies go;
 //   - when they differ, each class of identical flavours goes to the keys the lattice homes it at (one per emitting
-//     GOOS folder over one target per GOOS), and the flat copy goes;
-//   - when they differ and the package has no source folder for some of those keys, the first target's flavour
-//     stays flat and the package is NAMED: a single-target reconvert routes into a key folder only where that folder
-//     is a source folder (isPlatformSourceFolder), so a folder holding only a sibling would never be written.
+//     GOOS folder over one target per GOOS), and the flat copy goes. A sibling is never compiled, so the key folder
+//     need not be a source folder: crypto/internal/fips140/subtle holds no key source at all and keeps
+//     xor_generic.cs.auto in amd64/ and linux-arm64/, folders a single-target reconvert finds again by the sibling
+//     itself (heldReviewSiblingPath). Such a folder adds nothing to the project file, which conditions source
+//     folders only;
+//   - when they differ and one of those keys is a NESTED PACKAGE of the same name (`internal/syscall/windows`), whose
+//     directory is never written into, the first target's flavour stays flat and the package is NAMED.
 //
 // A sibling whose hand-own is not flat in the root (a per-GOOS hand-own's, or one with no hand-own) keeps the
 // per-artifact rule, which already takes a per-GOOS sibling from its own target (perGOOSReviewSiblingOwner).
@@ -1263,7 +1266,7 @@ func mergeReviewSiblings(coreDir string, lattice *platformLattice, emissions []*
 
 			for _, class := range partitionContentClasses(flavourTargets, hashes) {
 				for _, folder := range lattice.homeFolders(class) {
-					splittable = splittable && len(folder) > 0 && isPlatformSourceFolder(packageDir, folder)
+					splittable = splittable && len(folder) > 0 && !isNestedPackageFolder(packageDir, folder)
 					split[filepath.Join(packageDir, folder, name)] = contentsOf[class[0]]
 				}
 			}
@@ -1275,19 +1278,19 @@ func mergeReviewSiblings(coreDir string, lattice *platformLattice, emissions []*
 			destinations[filepath.Join(packageDir, name)] = flavours[0].contents
 
 			if !agree {
-				addResidualNote(residual, pkg, fmt.Sprintf("review sibling %s differs by GOOS, and the package has no per-GOOS "+
-					"source folder for every flavour, so %s's was kept flat", name, goosOfTarget(flavours[0].target)))
+				addResidualNote(residual, pkg, fmt.Sprintf("review sibling %s differs by target, and a flavour's key "+
+					"folder is a nested package, so %s's was kept flat", name, flavours[0].target))
 			}
 		} else {
 			destinations = split
 		}
 
-		// Every place the sibling can be: flat, and each key folder that is a source folder (not a nested package
-		// named for a GOOS, internal/syscall/windows).
+		// Every place the sibling can be: flat, and each key folder that is the package's own (not a nested package
+		// named for a GOOS, internal/syscall/windows), whether it holds source or the sibling alone.
 		candidates := []string{filepath.Join(packageDir, name)}
 
 		for _, folder := range lattice.candidateFolders() {
-			if isPlatformSourceFolder(packageDir, folder) {
+			if !isNestedPackageFolder(packageDir, folder) {
 				candidates = append(candidates, filepath.Join(packageDir, folder, name))
 			}
 		}
@@ -1317,6 +1320,12 @@ func mergeReviewSiblings(coreDir string, lattice *platformLattice, emissions []*
 
 			if gone {
 				written++
+
+				// A key folder that held the sibling alone is now empty and goes with it. One holding anything else
+				// is not empty, and this removal fails, as it should.
+				if dir := filepath.Dir(candidate); dir != packageDir {
+					_ = os.Remove(dir)
+				}
 			}
 		}
 	}

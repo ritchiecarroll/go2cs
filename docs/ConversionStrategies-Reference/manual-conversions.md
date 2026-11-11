@@ -669,7 +669,7 @@ Guards: the behavioral test `ReflectVariadicCall`; GolibTests' `GoReflectBridgeC
 <!-- golib: src/core/golib/GoReflect.VariadicRegistry.cs:26-28 (`go2cs-gen calls one of these for every variadic signature that can`),
      :49-53 (`GoDeferredRegistrations.EscapeRegistry.Run()`), :82-83
      (`if (!golib.TypeExtensions.IsDynamicCodeSupported && System.Array.Exists(typeArguments, static argument => argument.IsValueType))`),
-     :100 (`go2cs: reflect cannot call or make the variadic func`). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:414
+     :100 (`go2cs: reflect cannot call or make the variadic func`). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:423
      (`internal static string? VariadicRegistration(Compilation? compilation, INamedTypeSymbol? package, ITypeSymbol type)`),
      src/gen/go2cs-gen/MethodSet.cs:431 (`private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)`),
      :392 (`Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns)`), :129-130
@@ -840,7 +840,7 @@ field is an embed to `reflect`* below).
 <!-- history: Anonymous first waited on field ORDER, because go2cs-gen declared the promoted-embed backing box
      after the declared fields, so struct{X; y; Inner; inner; Ptr} walked as X, y, Ptr, Inner, inner; GoFields'
      reorder by the all-fields constructor and the Anonymous projection landed together. The converter has since
-     declared embeds in place (src/go2cs/visitStructType.go:972 `// declaration order, marked like every other embed:`). -->
+     declared embeds in place (src/go2cs/visitStructType.go:976 `// declaration order, marked like every other embed:`). -->
 
 Guard: `tests/Behavioral/ReflectUnexportedFieldFlags`, byte-identical to `go run` — the indexed
 walk's `IsExported`/`PkgPath`/`Tag`, `FieldByName` carrying the same flags (including the blank
@@ -2880,7 +2880,7 @@ MINI-BRIDGE* above; `GoStructLayoutTests.FieldOrder_IsGoDeclarationOrder_NotMeta
      encoding/json's dominance rules are decided by DEPTH and tag, never by declaration order, and its one
      order-sensitive test (TestMarshalEmbeds) declares its single plain field first. The section then named
      declaration-order cargo as the remedy; the constructor reorder landed instead, and the converter later declared
-     embeds in place (src/go2cs/visitStructType.go:972 `// declaration order, marked like every other embed:`). The
+     embeds in place (src/go2cs/visitStructType.go:976 `// declaration order, marked like every other embed:`). The
      legacy property shape: src/core/golib/GoReflect.FieldAccess.cs:507 (`An embed is emitted by the converter as a partial PROPERTY`). -->
 
 ## An UNNAMED func type renders STRUCTURALLY, exactly as an unnamed struct does
@@ -3654,7 +3654,7 @@ levels. Anything the IL cannot prove keeps the frames the trace has, and an impl
 nil dereference) inside an inlinee is not covered, since a statement cannot say which instruction faulted. Nothing
 is emitted for this and nothing runs off the panic path. Guarded by GolibTests' `PanicFramesInlinedPanicTests`,
 including the controls where the IL names no single callee.
-<!-- src/core/runtime/managed_impl.cs:4996 (`INLINED PANIC SITES`), :5004 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
+<!-- src/core/runtime/managed_impl.cs:5002 (`INLINED PANIC SITES`), :5010 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
      src/tests/GolibTests/PanicFramesInlinedPanicTests.cs:14 (`AN EXPLICIT PANIC RAISED INSIDE A GO FUNCTION THE JIT INLINED`). -->
 
 ## `runtime.Stack(all: true)` enumerates every goroutine, and each one names the wait it is parked on

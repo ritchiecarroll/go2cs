@@ -312,7 +312,8 @@ func TestMergeLeavesPrincipalLessCompanionsWhereTheyAre(t *testing.T) {
 //     the two is stale in a way no build can report;
 //  3. a source whose name carries Go's own GOOS filename constraint (`*_windows.cs`, `*_linux.cs`,
 //     `*_darwin.cs`, with an `_impl` companion suffix stripped first) is never flat in an L3 package —
-//     it lives in the folder its suffix names. Rule 1 cannot see a MARKED whole-file hand-own, whose
+//     it lives in the folder its suffix names, or in one of that GOOS's GOOS-arch pair folders
+//     (`syscall/linux-arm64/syscall_linux.cs`). Rule 1 cannot see a MARKED whole-file hand-own, whose
 //     principal is its `.cs.auto` rather than another `.cs`, and this is the rule that catches those:
 //     `syscall/dll_windows.cs` and `syscall/exec_windows.cs` replace Windows-only Go files and sat
 //     flat — latently in every Linux build — through the whole of increment 3, unreached only because
@@ -342,9 +343,10 @@ func TestCorpusHandOwnsFollowTheirPrincipals(t *testing.T) {
 
 			if goos, constrained := goosFilenameConstraint(stem); constrained {
 				for _, location := range locations {
-					if location != goos {
+					if !folderIsOfGOOS(location, goos) {
 						t.Errorf("%s: %s carries Go's %q filename build constraint but is in [%s]; a GOOS-constrained source "+
-							"belongs in that GOOS's folder, never flat (docs/phase4/DESIGN-multiplatform-corpus.md §12, increment 3.5)",
+							"belongs in a folder of that GOOS (the GOOS's own, or one of its GOOS-arch pairs), never flat and never "+
+							"a bare arch folder (docs/phase4/DESIGN-multiplatform-corpus.md §12, increment 3.5)",
 							packageDir, name, goos, orFlat(location))
 					}
 				}
@@ -366,7 +368,13 @@ func TestCorpusHandOwnsFollowTheirPrincipals(t *testing.T) {
 			// CS0111 on windows — the shape the three-target merge produced and this guard waved
 			// through (found 2026-09-01 by a seeded temp-root build; A/B'd byte-identical at master,
 			// so it is the merge's routing rule, not any one arc).
-			if found && len(principalAt) == len(goosDirs) && len(goosDirs) > 0 {
+			//
+			// "Every folder" is read as a COVER since the arch axis: a principal split across
+			// `amd64/` and `linux-arm64/` is in two of `runtime`'s six key folders and in every
+			// target's build all the same. So the question is whether the folders the principal is
+			// in cover the targets the package's key folders cover, never how many folders that is.
+			if found && len(goosDirs) > 0 && !hasFlat(principalAt) &&
+				coverOfLocations(principalAt) == coverOfLocations(goosDirs) {
 				assertScopedHandOwnFollowsItsRegistration(t, coreDir, packageDir, name, locations)
 				continue
 			}
@@ -374,19 +382,68 @@ func TestCorpusHandOwnsFollowTheirPrincipals(t *testing.T) {
 			// No principal in this package: a go2cs runtime companion with no Go file behind it
 			// (runtime/managed_impl.cs, internal/poll/runtime_sema_impl.cs). No evidence, no rule.
 			// A flat principal is shared, and shared needs no per-GOOS reasoning.
-			if !found || len(principalAt) == 0 || (len(principalAt) == 1 && principalAt[0] == "") {
+			if !found || len(principalAt) == 0 || isFlatOnly(principalAt) {
 				continue
 			}
 
-			if strings.Join(locations, ",") != strings.Join(principalAt, ",") {
-				t.Errorf("%s: %s is in [%s] but its principal %s is in [%s]; a hand-owned companion must take part in "+
-					"exactly its principal's platform builds (docs/phase4/DESIGN-multiplatform-corpus.md §12, increment 3.5)",
-					packageDir, name, strings.Join(locations, " "), principal, strings.Join(principalAt, " "))
+			// Compared by cover, not by folder name: `runtime/linux/netpoll_epoll_impl.cs` beside a
+			// principal in `linux-amd64/` and `linux-arm64/` takes part in exactly the same builds.
+			if coverOfLocations(locations) != coverOfLocations(principalAt) {
+				t.Errorf("%s: %s is in [%s] (builds: %s) but its principal %s is in [%s] (builds: %s); a hand-owned "+
+					"companion must take part in exactly its principal's platform builds "+
+					"(docs/phase4/DESIGN-multiplatform-corpus.md §12, increment 3.5)",
+					packageDir, name, strings.Join(locations, " "), orFlat(coverOfLocations(locations)),
+					principal, strings.Join(principalAt, " "), coverOfLocations(principalAt))
 			}
 		}
 	}
 
 	assertCorpusAutoSiblingsAreColocated(t, coreDir)
+}
+
+// folderIsOfGOOS reports whether a source location is a folder only that GOOS's builds compile: the
+// GOOS's own folder or one of its GOOS-arch pairs. Flat is every GOOS's, and a bare arch folder is
+// every GOOS's on that arch, so neither is.
+func folderIsOfGOOS(location string, goos string) bool {
+	if location == goos {
+		return true
+	}
+
+	pairGOOS, _, isPair := splitPairFolderName(location)
+
+	return isPair && pairGOOS == goos
+}
+
+// hasFlat reports whether a location set includes the package's flat root.
+func hasFlat(locations []string) bool {
+	for _, location := range locations {
+		if len(location) == 0 {
+			return true
+		}
+	}
+
+	return false
+}
+
+// isFlatOnly reports whether a source is in the package's flat root and nowhere else.
+func isFlatOnly(locations []string) bool {
+	return len(locations) == 1 && len(locations[0]) == 0
+}
+
+// coverOfLocations names the targets whose build compiles a source found at these locations — flat
+// covers the universe, a key folder its own cover — sorted and joined, so two location sets compare
+// by the builds they take part in rather than by how their folders are spelled.
+func coverOfLocations(locations []string) string {
+	lattice := corpusLattice()
+	covered := map[string]bool{}
+
+	for _, location := range locations {
+		for _, target := range lattice.folderCover(location) {
+			covered[target] = true
+		}
+	}
+
+	return strings.Join(sortedKeys(covered), " ")
 }
 
 // corpusPlatformPackages returns every converted package directory that carries per-GOOS sources.
@@ -529,8 +586,10 @@ func assertCorpusAutoSiblingsAreColocated(t *testing.T, coreDir string) {
 }
 
 // strayReviewSiblings returns every `<name>.cs.auto` under coreDir with no hand-owned `<name>.cs` beside it, or, for
-// a sibling in a GOOS folder, in the package directory above it: a FLAT hand-own whose emission differs by GOOS keeps
-// one sibling per GOOS folder (mergeReviewSiblings; COORD's S5 ruling (a), runtime/runtime2.cs).
+// a sibling in a layout key folder, in the package directory above it: a FLAT hand-own whose emission differs by target
+// keeps one sibling per key folder (mergeReviewSiblings; COORD's S5 ruling (a), runtime/runtime2.cs by GOOS). The key
+// folder need not hold source — crypto/internal/fips140/subtle's hold only the sibling, which differs by GOARCH — so
+// the test is the folder's NAME, and a nested package of that name (internal/syscall/windows) is not one.
 func strayReviewSiblings(coreDir string) ([]string, error) {
 	var strays []string
 
@@ -549,7 +608,7 @@ func strayReviewSiblings(coreDir string) ([]string, error) {
 			return nil
 		}
 
-		if dir := filepath.Dir(filePath); isPlatformSourceFolder(filepath.Dir(dir), filepath.Base(dir)) {
+		if dir := filepath.Dir(filePath); isLayoutKeyFolderName(filepath.Base(dir)) && !isNestedPackageFolder(filepath.Dir(dir), filepath.Base(dir)) {
 			flat := filepath.Join(filepath.Dir(dir), filepath.Base(handOwn))
 
 			if info, err := os.Stat(flat); err == nil && info.Mode().IsRegular() {
@@ -579,6 +638,15 @@ func TestStrayReviewSiblingsAdmitsASplitSiblingOfAFlatHandOwn(t *testing.T) {
 	writeTestFile(t, filepath.Join(coreDir, "internal", "syscall", "windows", "zsyscall.cs"), "nested package source")
 	writeTestFile(t, filepath.Join(coreDir, "internal", "syscall", "windows", "syscall.cs.auto"), "not the parent's sibling")
 
+	// A key folder that holds NO source: the sibling differs by GOARCH and nothing else in the package does
+	// (crypto/internal/fips140/subtle). It reviews the flat hand-own all the same; an orphan beside it does not.
+	subtle := filepath.Join(coreDir, "crypto", "internal", "fips140", "subtle")
+	writeTestFile(t, filepath.Join(subtle, "subtle.csproj"), "<Project />")
+	writeTestFile(t, filepath.Join(subtle, "xor_generic.cs"), "hand-owned, flat")
+	writeTestFile(t, filepath.Join(subtle, "amd64", "xor_generic.cs.auto"), "amd64 flavour")
+	writeTestFile(t, filepath.Join(subtle, "linux-arm64", "xor_generic.cs.auto"), "linux/arm64 flavour")
+	writeTestFile(t, filepath.Join(subtle, "amd64", "orphan.cs.auto"), "reviews nothing")
+
 	strays, err := strayReviewSiblings(coreDir)
 
 	if err != nil {
@@ -586,6 +654,7 @@ func TestStrayReviewSiblingsAdmitsASplitSiblingOfAFlatHandOwn(t *testing.T) {
 	}
 
 	want := []string{
+		filepath.Join(subtle, "amd64", "orphan.cs.auto"),
 		filepath.Join(coreDir, "internal", "syscall", "windows", "syscall.cs.auto"),
 		filepath.Join(coreDir, "runtime", "linux", "orphan.cs.auto"),
 	}
@@ -672,9 +741,11 @@ func assertScopedHandOwnFollowsItsRegistration(t *testing.T, coreDir string, pac
 	got := append([]string(nil), locations...)
 	sort.Strings(got)
 
-	if strings.Join(got, ",") != strings.Join(want, ",") {
+	// By cover: a registration scoped to linux is met by `linux/`, and equally by `linux-amd64/` plus
+	// `linux-arm64/` — the folders differ, the builds they take part in do not.
+	if coverOfLocations(got) != coverOfLocations(want) {
 		t.Errorf("%s: %s is in [%s] but the registrations it defines are scoped to [%s]; a companion whose members are "+
-			"displaced on only some targets belongs in exactly those GOOS folders — flat compiles it beside the "+
+			"displaced on only some targets belongs in exactly those GOOSes' folders — flat compiles it beside the "+
 			"undisplaced body (CS0111). Its principal being emitted on every target does not make the companion shared.",
 			packageDir, name, orFlat(strings.Join(got, " ")), strings.Join(want, " "))
 	}

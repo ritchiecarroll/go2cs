@@ -167,6 +167,52 @@ func (v *Visitor) claimLiftedTypeName(name string) {
 	packageLock.Unlock()
 }
 
+// qualifyLiftedVariadicElement qualifies a variadic element's alias REFERENT when the element is a
+// LIFTED anonymous struct or interface, returning the referent and whether it qualified it. The lift is a
+// nested type of the class this file emits into, just as a same-package named type is, and the alias
+// sits at namespace scope: `nodes ...interface{ End() int }` lifts to `greatestEnd_nodes`, and the bare
+// `using ꓸꓸꓸgreatestEnd_nodes = Span<greatestEnd_nodes>;` is CS0246 (TS readiness C37,
+// internal/printer). Only a lift THIS conversion claimed is qualified. A lift a `-tests` variant reuses
+// from PRODUCTION lives in the production class, and a production alias lift reached through a
+// `global using` (internal/fuzz's CorpusEntry) resolves bare already, so both keep their spelling.
+func (v *Visitor) qualifyLiftedVariadicElement(elem types.Type, typeName string) (string, bool) {
+	switch typ := elem.(type) {
+	case *types.Struct:
+		if isEmptyStructType(typ) {
+			return typeName, false
+		}
+	case *types.Interface:
+		if typ.Empty() {
+			return typeName, false
+		}
+	default:
+		return typeName, false
+	}
+
+	if v.emittedClassName == "" || strings.Contains(typeName, ".") || !v.liftedByThisConversion(typeName) {
+		return typeName, false
+	}
+
+	return v.emittedClassName + "." + typeName, true
+}
+
+// liftedByThisConversion reports whether name is a lifted type name this file or, unless the file is
+// hand-owned, this package conversion claimed (see claimLiftedTypeName).
+func (v *Visitor) liftedByThisConversion(name string) bool {
+	if v.liftedTypeNames.Contains(name) {
+		return true
+	}
+
+	if v.manualConversion {
+		return false
+	}
+
+	packageLock.Lock()
+	defer packageLock.Unlock()
+
+	return packageLiftedTypeNames.Contains(name)
+}
+
 func (v *Visitor) liftedTypeExists(expr ast.Expr) bool {
 	if expr == nil {
 		return false

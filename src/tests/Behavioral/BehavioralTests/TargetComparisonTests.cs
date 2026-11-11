@@ -37,6 +37,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAliasImportLib() => CheckTarget("AliasImportLib");
 
     [TestMethod]
+    public void CheckAliasNamedTargetForms() => CheckTarget("AliasNamedTargetForms");
+
+    [TestMethod]
     public void CheckAliasNamespaceShadow() => CheckTarget("AliasNamespaceShadow");
 
     [TestMethod]
@@ -154,6 +157,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckArrayRangeSnapshot() => CheckTarget("ArrayRangeSnapshot");
 
     [TestMethod]
+    public void CheckArraySwitchCases() => CheckTarget("ArraySwitchCases");
+
+    [TestMethod]
     public void CheckArrayValueCopySites() => CheckTarget("ArrayValueCopySites");
 
     [TestMethod]
@@ -254,6 +260,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckCastNegativeNamedType() => CheckTarget("CastNegativeNamedType");
+
+    [TestMethod]
+    public void CheckCgoPseudoPackageTypes() => CheckTarget("CgoPseudoPackageTypes");
 
     [TestMethod]
     public void CheckChanDirectionChain() => CheckTarget("ChanDirectionChain");
@@ -580,6 +589,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckEmbedLayoutMatchesGo() => CheckTarget("EmbedLayoutMatchesGo");
 
     [TestMethod]
+    public void CheckEmbeddedInterfaceMergedMethod() => CheckTarget("EmbeddedInterfaceMergedMethod");
+
+    [TestMethod]
     public void CheckEmbeddedInterfaceWitness() => CheckTarget("EmbeddedInterfaceWitness");
 
     [TestMethod]
@@ -760,6 +772,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckFuncLiteralDeclaredResultIface() => CheckTarget("FuncLiteralDeclaredResultIface");
 
     [TestMethod]
+    public void CheckFuncMethodSameNameCollision() => CheckTarget("FuncMethodSameNameCollision");
+
+    [TestMethod]
     public void CheckFuncTypeNilConversion() => CheckTarget("FuncTypeNilConversion");
 
     [TestMethod]
@@ -796,6 +811,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGenericEmbedPromotion() => CheckTarget("GenericEmbedPromotion");
 
     [TestMethod]
+    public void CheckGenericForeignAdapterInstantiations() => CheckTarget("GenericForeignAdapterInstantiations");
+
+    [TestMethod]
     public void CheckGenericFuncCall() => CheckTarget("GenericFuncCall");
 
     [TestMethod]
@@ -812,6 +830,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGenericLiftedInterfaceField() => CheckTarget("GenericLiftedInterfaceField");
+
+    [TestMethod]
+    public void CheckGenericMapArgPointerImpl() => CheckTarget("GenericMapArgPointerImpl");
 
     [TestMethod]
     public void CheckGenericMethodReflect() => CheckTarget("GenericMethodReflect");
@@ -1369,6 +1390,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedBytesByteSeq() => CheckTarget("NamedBytesByteSeq");
 
     [TestMethod]
+    public void CheckNamedBytesConstConversion() => CheckTarget("NamedBytesConstConversion");
+
+    [TestMethod]
     public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
 
     [TestMethod]
@@ -1691,6 +1715,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNoinlineDirectiveFrame() => CheckTarget("NoinlineDirectiveFrame");
+
+    [TestMethod]
+    public void CheckNonSelfConstraintPointerArg() => CheckTarget("NonSelfConstraintPointerArg");
 
     [TestMethod]
     public void CheckOpenGenericPointerImplement() => CheckTarget("OpenGenericPointerImplement");
@@ -2780,6 +2807,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckVariadicInterfaceAssert() => CheckTarget("VariadicInterfaceAssert");
+
+    [TestMethod]
+    public void CheckVariadicLiftedElement() => CheckTarget("VariadicLiftedElement");
 
     [TestMethod]
     public void CheckVariadicNamedEmptyIface() => CheckTarget("VariadicNamedEmptyIface");

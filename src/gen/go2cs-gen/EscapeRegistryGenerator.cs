@@ -352,24 +352,33 @@ public class EscapeRegistryGenerator : ISourceGenerator
         return variant;
     }
 
-    // A compilation is PER-OS exactly when one of its source files sits in <project>/<GoTargetOS>/: the folder an L3 csproj's
-    // `$(GoTargetOS)/*.cs` glob compiles. Both properties reach the generator through core/Directory.Build.props
-    // (CompilerVisibleProperty); a project that does not expose them (golib, tests, a nugetgo package) is neutral.
+    // A compilation is PER-OS exactly when one of its source files sits in a platform folder of its project: <GoTargetOS>/,
+    // the folder an L3 csproj's `$(GoTargetOS)/*.cs` glob compiles, or one of the arch axis's two, <GoTargetArch>/ and
+    // <GoTargetOS>-<GoTargetArch>/ (a package may carry an arch folder and no GOOS folder at all, and it differs between
+    // two flavours all the same). The properties reach the generator through core/Directory.Build.props
+    // (CompilerVisibleProperty); a project that does not expose them (golib, tests, a nugetgo package) is neutral, and one
+    // that exposes no GoTargetArch has only its GOOS folder read.
     internal static bool IsPerOS(Compilation compilation, Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions options)
     {
         if (!options.TryGetValue("build_property.GoTargetOS", out string? goos) || string.IsNullOrWhiteSpace(goos) ||
             !options.TryGetValue("build_property.MSBuildProjectDirectory", out string? projectDirectory) || string.IsNullOrWhiteSpace(projectDirectory))
             return false;
 
-        string relative = goos.Trim() + "\\";
-        string absolute = projectDirectory.Replace('/', '\\').TrimEnd('\\') + "\\" + relative;
+        goos = goos.Trim();
+
+        string[] folders = options.TryGetValue("build_property.GoTargetArch", out string? goarch) && !string.IsNullOrWhiteSpace(goarch)
+            ? [goos + "\\", goarch.Trim() + "\\", goos + "-" + goarch.Trim() + "\\"]
+            : [goos + "\\"];
+
+        string root = projectDirectory.Replace('/', '\\').TrimEnd('\\') + "\\";
 
         return compilation.SyntaxTrees.Any(tree =>
         {
             string path = tree.FilePath.Replace('/', '\\');
+            bool relative = path.Length > 0 && !System.IO.Path.IsPathRooted(path);
 
-            return path.StartsWith(absolute, System.StringComparison.OrdinalIgnoreCase) ||
-                   (path.Length > 0 && !System.IO.Path.IsPathRooted(path) && path.StartsWith(relative, System.StringComparison.OrdinalIgnoreCase));
+            return folders.Any(folder => path.StartsWith(root + folder, System.StringComparison.OrdinalIgnoreCase) ||
+                                         (relative && path.StartsWith(folder, System.StringComparison.OrdinalIgnoreCase)));
         });
     }
 

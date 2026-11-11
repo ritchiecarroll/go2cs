@@ -85,6 +85,7 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
 * Real converted code: [the Go standard library](https://github.com/ritchiecarroll/go2cs/tree/master/src/core)
 * How each Go construct maps to C#: [Conversion Strategies](ConversionStrategies.md)
 * What the converter does: [Features](Features.md)
+* What Go features work: [Go feature support](GoFeatureSupport.md)
 * Call converted Go from C#: [Consuming converted Go](ConsumingGoFromCSharp.md)
 * Go modules on NuGet: [nugetgo.net](https://nugetgo.net)
 * Packages passing Go's own tests: [Validated Test Packages](ValidatedTestPackages.md)

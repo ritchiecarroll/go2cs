@@ -17,6 +17,10 @@
          sync/atomic assemblies and read the compiler's own verdict (diagnostics + SemanticModel),
          which is the only way to prove a "cannot select" claim by construction. -->
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0" />
+    <!-- A child that times out is described before it is killed (ChildTimeoutDiagnostics.cs): the runtime
+         writes its own dump over the diagnostics port, and ClrMD reads the stacks from it. -->
+    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.745401" />
+    <PackageReference Include="Microsoft.Diagnostics.Runtime" Version="4.2.751201" />
   </ItemGroup>
 
   <!-- The spawn-seam gate file drives linux-flavor-only syscall surface (Wait4, the unix
@@ -41,6 +45,30 @@
        runner layer to guard deliberate misuse would be speculative machinery. Named here rather than
        defended against — ruled 2026-08-31. If you meet that stack trace, the target and the host
        disagree; nothing is wrong with the code under test. -->
+  <!-- cgo Phase 2 increment 3b1: the converter's scalar bindings, one generated golden per OS (src/go2cs holds each
+       equal to the generator), with the C types they name hand-declared until increment 3d. An UNSET $(GoTargetOS) is
+       the windows flavour here (see the netapi32 gate below), so windows' files are removed only when another OS is
+       named. GOCGO_FLAVOUR_* tells CgoScalarWrapperTests which flavour it compiled. -->
+  <PropertyGroup Condition="'$(GoTargetOS)' == 'linux'">
+    <DefineConstants>$(DefineConstants);GOCGO_FLAVOUR_LINUX</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(GoTargetOS)' == 'darwin'">
+    <DefineConstants>$(DefineConstants);GOCGO_FLAVOUR_DARWIN</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(GoTargetOS)' != 'linux'">
+    <Compile Remove="GoCgoWrappers.linux.golden.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(GoTargetOS)' != 'darwin'">
+    <Compile Remove="GoCgoWrappers.darwin.golden.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(GoTargetOS)' != '' and '$(GoTargetOS)' != 'windows'">
+    <Compile Remove="GoCgoWrappers.windows.golden.cs" />
+    <Compile Remove="GoCgoWrapperTypes.windows.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(GoTargetOS)' != 'linux' and '$(GoTargetOS)' != 'darwin'">
+    <Compile Remove="GoCgoWrapperTypes.posix.cs" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux'">
     <Compile Remove="LinuxSpawnSeamTests.cs" />
     <Compile Remove="LinuxPipelineEnvironmentTests.cs" />
@@ -83,6 +111,10 @@
     <!-- GoDieNumbersProbe and GoSigprocmaskNumberProbe (runtime/linux): S3's per-arch syscall numbers. -->
     <Compile Remove="LinuxRuntimeSyscallNumberTests.cs" />
 
+    <!-- syscall's linux Select and its per-arch selectTrap (S3 site 6); the flavour is told apart by
+         SYS_PSELECT6, which only the linux tables name. -->
+    <Compile Remove="LinuxSelectTimeoutTests.cs" />
+
     <!-- The PATH_MAX removal failure is a Unix one: Windows names long paths natively, so compiled
          there the arms would pass with the defect present and guard nothing. -->
     <Compile Remove="DeepTreeRemovalTests.cs" />
@@ -100,6 +132,26 @@
        classes above are linux-only ones. -->
   <ItemGroup Condition="'$(GoTargetOS)' != 'darwin'">
     <Compile Remove="DarwinNativeTransitionTests.cs" />
+  </ItemGroup>
+
+  <!-- S3's arm64 Stat_t mirror and its GoNativeStatLayoutProbe live in syscall/linux-arm64/, which only the
+       linux/arm64 flavour compiles: the file's only (GOOS, GOARCH) pair. An unset $(GoTargetArch) is amd64. -->
+  <ItemGroup Condition="'$(GoTargetOS)' != 'linux' or '$(GoTargetArch)' != 'arm64'">
+    <Compile Remove="LinuxArm64StatLayoutTests.cs" />
+    <!-- S3 site 1's Arm64 row against the flavour's own SYS_EPOLL_PWAIT and EpollEvent (site 9). -->
+    <Compile Remove="LinuxArm64NetpollFlavourTests.cs" />
+  </ItemGroup>
+
+  <!-- The amd64 flavour's own surface, which an arm64 build does not have (S3 site 9: GolibTests at linux/arm64).
+       - InternalCpuGodebugTests drives internal/cpu's amd64/ hand-owns (cpu_x86_impl.cs, cpu_arm64_process_impl.cs)
+         through their probes. The linux/arm64 flavour starts internal/cpu in linux-arm64/cpu_arm64_hwcap_impl.cs,
+         which has no probe yet.
+       - LinuxAmd64NetpollFlavourTests names SYS_EPOLL_WAIT, which only amd64's table has; it is also linux-only. -->
+  <ItemGroup Condition="'$(GoTargetArch)' == 'arm64'">
+    <Compile Remove="InternalCpuGodebugTests.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(GoTargetOS)' != 'linux' or '$(GoTargetArch)' == 'arm64'">
+    <Compile Remove="LinuxAmd64NetpollFlavourTests.cs" />
   </ItemGroup>
 
   <!-- The netapi32 ptrout gate is the mirror image: it drives windows-flavor-only syscall surface

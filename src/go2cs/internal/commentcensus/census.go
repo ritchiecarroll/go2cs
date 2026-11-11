@@ -28,7 +28,27 @@ import (
 	"strings"
 )
 
-var goosDirs = map[string]bool{"windows": true, "linux": true, "darwin": true}
+// layoutUniverse is the (GOOS, GOARCH) pairs the corpus is laid out for, the converter's platformUniverse
+// (src/go2cs/platformLattice.go); TestLayoutUniverseIsTheConvertersUniverse holds the two equal.
+var layoutUniverse = []string{"windows/amd64", "linux/amd64", "darwin/amd64", "linux/arm64"}
+
+// layoutKeyRank ranks the layout key folders a package's sources can sit in, `<goos>`, `<goarch>` and
+// `<goos>-<goarch>` per target, in the universe's order: the first target's folders, then the next one's
+// (windows, amd64, windows-amd64, linux, linux-amd64, ...). The package directory itself is rank 0. A fixed
+// { windows, linux, darwin } set stopped seeing every file the day sources moved to amd64/, linux-amd64/ and
+// linux-arm64/, and the corpus counts fell with nothing fixed.
+var layoutKeyRank = func() map[string]int {
+	rank := map[string]int{}
+	for _, target := range layoutUniverse {
+		goos, goarch, _ := strings.Cut(target, "/")
+		for _, name := range []string{goos, goarch, goos + "-" + goarch} {
+			if _, seen := rank[name]; !seen {
+				rank[name] = len(rank) + 1
+			}
+		}
+	}
+	return rank
+}()
 
 // handOwnMarker is the hand-own attribute on a line of its own, bare or qualified, the predicate repoguard's
 // hand-own guards use. A file that only mentions GoManualConversion (go2cs's placeholder for a displaced func
@@ -65,7 +85,7 @@ func findPairs(core, goroot string) []pair {
 		}
 		dir := filepath.Dir(rel)
 		flavor := ""
-		if goosDirs[filepath.Base(dir)] {
+		if layoutKeyRank[filepath.Base(dir)] > 0 {
 			parent := filepath.Dir(dir)
 			// a flavour dir has no project of its own and sits in a package dir that has one
 			if m, _ := filepath.Glob(filepath.Join(core, dir, "*.csproj")); len(m) == 0 {
@@ -84,7 +104,7 @@ func findPairs(core, goroot string) []pair {
 		if _, err := os.Stat(gofile); err != nil {
 			return nil
 		}
-		rank := map[string]int{"": 0, "windows": 1, "linux": 2, "darwin": 3}[flavor]
+		rank := layoutKeyRank[flavor]
 		key := dir + "/" + base
 		if c, ok := best[key]; !ok || rank < c.rank {
 			best[key] = cand{pair{dir, base, path, gofile, flavor}, rank}
@@ -988,13 +1008,13 @@ type Pair struct {
 	Base   string // file name without extension
 	CS     string // path of the converted .cs
 	GoFile string // path of the Go source
-	Flavor string // "" for a flat file, else the GOOS directory it was read from
+	Flavor string // "" for a flat file, else the layout key folder it was read from
 }
 
 // FindPairs pairs every converted production .cs under core with its Go source under goroot/src, skipping
 // hand-owned files (a `[module: GoManualConversion]` attribute line, *_impl.cs), test files, package_info.cs and golib. A file
-// converted per GOOS is read from the flat copy when there is one, else from the windows, linux, darwin flavour
-// in that order.
+// converted per target is read once: from the flat copy when there is one, else from the first layout key folder
+// that holds it, in the universe's order (layoutKeyRank).
 func FindPairs(core, goroot string) []Pair {
 	var out []Pair
 

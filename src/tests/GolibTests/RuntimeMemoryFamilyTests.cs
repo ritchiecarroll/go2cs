@@ -22,10 +22,12 @@ public class RuntimeMemoryFamilyTests
     public void AMappedRegionRoundTripsAndUnmaps()
     {
         if (!OnLinux) Assert.Inconclusive("the primitives are the linux flavour's");
-        (nuint address, bool roundTrip, nint firstErr, int madviseRc) = GoSysMmapProbe(1 << 20);
+        // 1 MiB is a whole number of pages at 4, 16 and 64 KiB alike.
+        (nuint address, bool roundTrip, nint firstErr, int madviseRc, nuint pageSize) = GoSysMmapPagedProbe(1 << 20);
+        Assert.AreEqual((nuint)Environment.SystemPageSize, pageSize, "the probe strides by physPageSize, the OS page size");
         Assert.AreEqual((nint)0, firstErr, "mmap answered");
         Assert.AreNotEqual((nuint)0, address, "a real address");
-        Assert.AreEqual((nuint)0, address & 0xFFF, "page-aligned");
+        Assert.AreEqual((nuint)0, address & (pageSize - 1), "aligned to the OS page size, not to 4 KiB alone");
         Assert.IsTrue(roundTrip, "every page written reads back");
         Assert.AreEqual(0, madviseRc, "madvise(DONTNEED) answered 0");
     }
