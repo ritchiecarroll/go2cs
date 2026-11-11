@@ -114,9 +114,11 @@ Compile-time emission so converted C# stays visually close to Go. Referenced as 
 | `BoundedGoroutineInterceptorGenerator` | `[assembly: GoBoundedGoroutine(...)]` records (in `package_info.cs`), each naming a `goǃ` call the converter proved cannot recurse | An interceptor of that `goǃ` call that starts the goroutine on golib's smaller stack reservation; a record that lands on no such call fails the build (`GO2CS0010`). |
 | `ExtensionHostListGenerator` | every converted project | `[assembly: GoExtensionHostList]` and one `[assembly: GoExtensionHost(typeof(X))]` per top-level static class, which golib's extension-method scan reads in place of `Assembly.GetTypes()` under Native AOT. |
 
-Two analyzers ship beside them: `StringLiteralBindingAnalyzer` fails the build when a C# string literal in
-converted code binds a C# type where Go has a `string`, and `StackAppendBufferAnalyzer` fails it when a
-stack-append buffer is passed as anything but a plain local.
+Four analyzers ship beside them: `StringLiteralBindingAnalyzer` fails the build when a C# string literal in
+converted code binds a C# type where Go has a `string`, `StackAppendBufferAnalyzer` fails it when a
+stack-append buffer is passed as anything but a plain local, `MethodLimitAnalyzer` when a type declares more
+methods than the runtime loads, and `MethodHolderNameAnalyzer` when a name in a method-holder class binds
+another member than its package's.
 
 ## Runtime type map (`src/core/golib/`)
 

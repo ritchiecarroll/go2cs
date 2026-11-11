@@ -62,11 +62,14 @@ Several Go semantics cannot be written directly in C#, so the converter emits co
 `TypeGenerator`, `ImplementGenerator`, `EscapeRegistryGenerator` and `NativeArrayOpenerGenerator` also fill golib
 registries that code finds at run time, and none of them fills its registry at startup; see
 [Run-time registrations wait for the first lookup that misses](#run-time-registrations-wait-for-the-first-lookup-that-misses).
-The same assembly ships two analyzers, which report and generate nothing: `StringLiteralBindingAnalyzer`
-([`GO2CS0004`](../DiagnosticCodes.md)) and `StackAppendBufferAnalyzer` ([`GO2CS0007`](../DiagnosticCodes.md)).
+The same assembly ships four analyzers, which report and generate nothing: `StringLiteralBindingAnalyzer`
+([`GO2CS0004`](../DiagnosticCodes.md)), `StackAppendBufferAnalyzer` ([`GO2CS0007`](../DiagnosticCodes.md)),
+`MethodLimitAnalyzer` ([`GO2CS0012`](../DiagnosticCodes.md)) and `MethodHolderNameAnalyzer`
+([`GO2CS0013`](../DiagnosticCodes.md)).
 <!-- The list is every class under src/gen/go2cs-gen declared `[Generator]`: sixteen at 3e3f18925a (fourteen
-     at b335356d6; grep for `^\[Generator`); the two analyzers are declared
-     `[DiagnosticAnalyzer(LanguageNames.CSharp)]`. -->
+     at b335356d6; grep for `^\[Generator`); the analyzers are the classes declared
+     `[DiagnosticAnalyzer(LanguageNames.CSharp)]`: four with MethodHolderNameAnalyzer (2026-11-11; the page said
+     two while MethodLimitAnalyzer was already the third). -->
 
 What the generators read is, for the most part, the code itself: where a type is declared, a receiver's `ref`, a parameter's type, and a few short comments written in Go's own spelling. [Marker comments: what converted code carries instead of an attribute](#marker-comments-what-converted-code-carries-instead-of-an-attribute) lists each of them and the attributes that remain. The records a package keeps out of view are classified in [Extended attributes: what stays on the declaration and what moves](#extended-attributes-what-stays-on-the-declaration-and-what-moves).
 
