@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -49,6 +50,15 @@ namespace GolibTests;
 // and then continues until 200 escalations are timed or two minutes have passed (TimeEscalations): a loaded host takes
 // longer to reach the floor instead of failing it, and the bounds are unchanged. Linux keeps Sleep(1), ~1.1 ms there,
 // and is not run.
+//
+// THE PAIRED READING (COORD, 2026-11-11; a measurement, the bounds above are unchanged). The macOS bounds are absolute,
+// and the hosted mac runners have a slow mode that makes an absolute wall-clock bar read the host; COORD's rule wants
+// 10x over the typical or a paired host reference, and red and green here are only ~5x apart (p90 green 1.08-1.55 ms,
+// a coalesced Sleep(1) 7.2-10.2 ms), so no widened bound can do both. So on macOS each timed escalation is followed at
+// once, on the same thread, by the host's own one-shot NOTE_CRITICAL 1 ms kqueue wait (GoTimerTests.kernelWait, the
+// test's P/Invoke and not GoCriticalTimer's), and the pairs print as READING lines: the host wait's distribution and
+// the escalation minus the host, per pair. The paired bar follows from those readings, as GoTimer's did (5861ecd1d4,
+// then 375a6617de). Windows is unpaired and keeps its mean bound.
 [TestClass]
 public class GoschedBackoffEscalationLatencyTests
 {
@@ -74,13 +84,17 @@ public class GoschedBackoffEscalationLatencyTests
         double elapsedMs = 0;
         var perEscalationMs = new List<double>(Yields / 64 + 16);
         var sleepMs = new double[SleepSamples];
+        var hostMs = new List<double>(Yields / 64 + 16);
+
+        // On macOS each timed escalation is paired with the host's own 1 ms wait on the same clock class.
+        Func<double> hostWait = OperatingSystem.IsMacOS() ? HostCriticalWaitMilliseconds : null;
 
         // A fresh thread: its [ThreadStatic] inert streak starts at zero, as a new goroutine's does.
         var worker = new Thread(() =>
         {
             long before = GoschedBackoff.Escalations;
 
-            (yields, elapsedMs) = TimeEscalations(() => GoschedBackoff.Escalations, GoschedBackoff.Yield, perEscalationMs, Cap);
+            (yields, elapsedMs) = TimeEscalations(() => GoschedBackoff.Escalations, GoschedBackoff.Yield, perEscalationMs, Cap, hostWait, hostMs);
             escalations = GoschedBackoff.Escalations - before;
 
             for (int i = 0; i < SleepSamples; i++)
@@ -102,6 +116,22 @@ public class GoschedBackoffEscalationLatencyTests
             $"{(escalations > 0 ? elapsedMs / escalations : 0):F3} ms per escalation overall");
         Console.WriteLine($"READING one escalation's cost (ms): {Describe(perEscalationMs.ToArray())}");
         Console.WriteLine($"READING Thread.Sleep(1) (ms): {Describe(sleepMs)}");
+
+        if (hostWait is not null)
+        {
+            int answered = hostMs.Count(ms => !double.IsNaN(ms));
+
+            if (answered == perEscalationMs.Count && answered > 0)
+            {
+                double[] excess = perEscalationMs.Select((ms, i) => ms - hostMs[i]).ToArray();
+                Console.WriteLine($"READING host NOTE_CRITICAL 1 ms wait, paired (ms): {Describe(hostMs.ToArray())}");
+                Console.WriteLine($"READING escalation minus host, per pair (ms): {Describe(excess)}");
+            }
+            else
+            {
+                Console.WriteLine($"READING host NOTE_CRITICAL 1 ms wait: {answered} of {perEscalationMs.Count} answered, no pairs");
+            }
+        }
 
         Assert.IsTrue(perEscalationMs.Count >= MinimumEscalations,
             $"only {perEscalationMs.Count} escalations in {yields} lone yields -- the escalation path barely ran, " +
@@ -129,7 +159,10 @@ public class GoschedBackoffEscalationLatencyTests
     // adding to `timed`; then on until MinimumEscalations are timed or `cap` of wall time has passed. A host whose load
     // turns most yields effective takes longer to reach the floor rather than failing it, and the bounds read the
     // same distribution. Returns the yields taken and the wall time they took.
-    internal static (long Yields, double ElapsedMs) TimeEscalations(Func<long> escalations, Action yield, List<double> timed, TimeSpan cap)
+    // With `pair`, each timed escalation is followed at once, on the same thread, by pair(), whose milliseconds are
+    // added to `paired` (NaN where it took no reading), so timed[i] and paired[i] are a pair.
+    internal static (long Yields, double ElapsedMs) TimeEscalations(Func<long> escalations, Action yield, List<double> timed, TimeSpan cap,
+        Func<double> pair = null, List<double> paired = null)
     {
         long started = Stopwatch.GetTimestamp();
         long capTicks = (long)(cap.TotalSeconds * Stopwatch.Frequency);
@@ -145,7 +178,12 @@ public class GoschedBackoffEscalationLatencyTests
             long callEnded = Stopwatch.GetTimestamp();
 
             if (escalations() != count)
+            {
                 timed.Add((callEnded - callStarted) * 1000.0 / Stopwatch.Frequency);
+
+                if (pair is not null)
+                    paired.Add(pair());
+            }
         }
 
         return (taken, (Stopwatch.GetTimestamp() - started) * 1000.0 / Stopwatch.Frequency);
@@ -181,6 +219,17 @@ public class GoschedBackoffEscalationLatencyTests
         Assert.AreEqual(0, timed.Count);
         Assert.IsTrue(yields >= Yields, $"the loop took {yields} yields, fewer than {Yields}");
         Assert.IsTrue(wall.Elapsed < TimeSpan.FromSeconds(30), $"the loop ran {wall.Elapsed.TotalSeconds:F1} s against a 200 ms cap");
+    }
+
+    // The host's own 1 ms NOTE_CRITICAL wait (GoTimerTests' kernelWait: the test's P/Invoke, not GoCriticalTimer's, so a
+    // change to golib's wait cannot move both sides of a pair), in milliseconds; NaN where it took no reading.
+    private static double HostCriticalWaitMilliseconds()
+    {
+        long started = Stopwatch.GetTimestamp();
+        bool answered = GoTimerTests.kernelWait(1_000_000);
+        double ms = (Stopwatch.GetTimestamp() - started) * 1000.0 / Stopwatch.Frequency;
+
+        return answered ? ms : double.NaN;
     }
 
     private static double Mean(double[] samples)
