@@ -170,6 +170,12 @@ public class GoTimerTests
     // stood within 0.103 ms of its pair. A timer that loses the short wait is later than its pair by the coarse
     // wait's whole error, which is what the bar is for. Where the host's wait gives no reading (linux, windows, or
     // a wait unanswered) the absolute bar holds.
+    //
+    // What this test can see, measured with GoTimer forced back to the coarse wait (2026-11-11): on osx-arm64 the
+    // median stood 13.3 and 15.2 ms beyond the host's wait and the test failed, 2 runs of 2. On osx-x64 it PASSED,
+    // 2 runs of 2: the coarse wait is late in only 6 or 7 of twenty firings there, so the median stays under the
+    // bar, relative or absolute. This test is the osx-arm64 arm for a lost short wait; on osx-x64 the arm that saw
+    // it was TimersFireInDeadlineOrder, in 1 run of 2.
     [TestMethod]
     public void AFiringIsCloseToItsDueTime()
     {
