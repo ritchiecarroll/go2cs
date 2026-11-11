@@ -662,6 +662,22 @@ binary resolves it. **Revised:** record the absolute path the probe's linker res
 X` is admitted, with its install name captured. As with a Go binary, a library outside the system loader's path needs
 `LD_LIBRARY_PATH` on linux; the note says so to users and does not paper over it.
 
+> **MANDATORY 2026-11-10 (increment 4d, a SECURITY finding caught before any release shipped it; COORD ruled the fix
+> into 4d itself):** the absolute-name rule binds EVERY darwin load, not only the capture's preference. dyld's search
+> for a BARE name reached the current directory on both hosted darwin RIDs: golib-tests 42936395011 planted a copy of
+> the probe library in the current directory, asked the resolver for it by its bare name, and dyld loaded it (handles
+> 1913759472 on osx-arm64 and 1108903152 on osx-x64), where the arm required a refusal. Both halves now refuse by name
+> any darwin name that is not absolute: the converter's capture (`cgoDarwinInstallName`, red 8dfe7398ee, green
+> 3c4875b988) and golib's resolver, which refuses before dyld sees the name. `ALibraryOnlyInTheCurrentDirectoryIsNotLoaded`
+> stays as the rule's guard. The probe library is built at the fixed absolute install name
+> `/tmp/go2cs-cgo-probe/libgo2csprobe.dylib`.
+>
+> **The portability consequence, and it is the intended trade:** a captured absolute install name is baked into the
+> bindings, as it is into a Go binary's load commands. A library installed at a different path on the consumer's
+> machine, say Homebrew's `/opt/homebrew/lib` on Apple silicon against `/usr/local/lib` on Intel, fails by name, with a
+> DllNotFoundException naming the `-l`, the captured name and the rule. It does not load whatever a search would find.
+> A package that must load from more than one location is converted on, or for, the layout it targets.
+
 ### 11.13 Flexible arrays, bitfields and `_Bool` (findings 13 and 14)
 
 - A **flexible array member** (`T[]`, which cmd/cgo gives as `[0]T`) is **refused by name**: such a struct only ever

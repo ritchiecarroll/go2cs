@@ -2190,7 +2190,13 @@ func (v *Visitor) constraintProxySigArg(funIdent *ast.Ident, typeArgs *types.Typ
 		v.recordValueConstraintImplementation(typeParams.At(i), typeArgs.At(i), fn, i)
 	}
 
-	return v.constraintProxyFor(typeParams.At(i), typeArgs.At(i))
+	if proxyName, ok := v.constraintProxyFor(typeParams.At(i), typeArgs.At(i)); ok {
+		return proxyName, true
+	}
+
+	// A NON-self-referential method-set constraint takes the same proxy with no self parameter, at a generic FUNCTION
+	// call only (nonSelfConstraintProxy.go).
+	return v.nonSelfConstraintProxyFor(funIdent, typeParams, typeArgs, i)
 }
 
 // funcResultProjection reports whether type-parameter position `k` of the generic FUNCTION

@@ -3025,6 +3025,11 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 		return nil, nil, refusal
 	}
 
+	if refusal := refuseNonSelfConstraintProxies(pkg); refusal != nil {
+		refusal.report()
+		return nil, nil, refusal
+	}
+
 	if refusal := refuseManualTypeReceiverOperands(pkg, goosOfTarget(options.targetPlatform)); refusal != nil {
 		refusal.report()
 		return nil, nil, refusal

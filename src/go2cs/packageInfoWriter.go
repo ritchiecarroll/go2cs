@@ -663,7 +663,18 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 			// is the single identity; defer to it. A test-DECLARED constraint interface still
 			// renders bare (crypto/internal/nistec's own nistPoint) and is emitted here as before. A BIND record
 			// (foreignConstraintProxy) declares no class, only this assembly's binding, so it is always written.
-			if metadataAnchorLocalTypes && strings.Contains(interfaceRef, PackageSuffix+".") && !strings.HasPrefix(key, constraintProxyBindKey) {
+			// A NON-self proxy (nonSelfConstraintProxy.go) is always written: its class exists only where it is recorded
+			// (a production package that never instantiates the pair has none to defer to), and its interface is often
+			// foreign (fmt.Stringer), which this qualification test would read as production-owned.
+			nonSelf := strings.HasPrefix(key, nonSelfConstraintProxyKey)
+
+			if metadataAnchorLocalTypes && strings.Contains(interfaceRef, PackageSuffix+".") && !strings.HasPrefix(key, constraintProxyBindKey) && !nonSelf {
+				continue
+			}
+
+			// A non-self record names the interface as it is: there is no type parameter to close over a placeholder.
+			if nonSelf {
+				lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>(ConstraintProxy = true)]", elementRef, interfaceRef))
 				continue
 			}
 

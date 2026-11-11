@@ -35866,6 +35866,54 @@ cannot rely on. Disclosed here, and the census informs .5.
 
 — C1 (2026-11-10)
 
+## 2026-11-10 — R (C35 design ruling 2): the SELF-REFERENTIAL constraint proxy's zero value is a null reference, not Go's typed nil pointer — OPEN, disclosed
+
+Inside a generic body whose type parameter takes the self-referential constraint proxy (`T Namer[T]` instantiated
+with `*node`), `var zero T` is C#'s `default(proxy)`, a null reference. In Go it is a typed nil pointer: a method
+called on it runs with a nil receiver, and boxing it gives a non-nil interface. Measured on a single-package probe
+at `claude/r-ts-c35` (the converter and generator of the C35 seat; the self route itself is unchanged there):
+
+| Row | Go | Converted |
+|---|---|---|
+| `var zero T; var a any = zero; a == nil` | `false` | `true` |
+| `var zero T; zero.Name()` (a nil-receiver method) | `nil-node` | panic: nil pointer dereference |
+
+**Scope.** The NON-self route (C35) refuses both shapes by name (DESIGN-constraint-proxy-nonself ruling 2, the
+zero-call and zero-any refusals), but the self route has no such refusal, and no census has looked for the shape in
+std's self-route instantiations (crypto/internal/nistec, crypto/elliptic, crypto/internal/fips140/ecdsa and their
+tests). C35's template change does make a NULL proxy convert to a nil box (so `return zero` gives Go's nil), but it
+does not make a method call on the zero proxy, or its boxing, match Go.
+
+**Not verified:** whether any std self-route body uses a zero value this way (a census through
+`zeroValueMisuses` over the self route's instantiations would answer it); whether a fix should refuse, as the
+non-self route does, or make the zero value a proxy over a nil box.
+
+— R (2026-11-10)
+
+## 2026-11-10 — H (cgo Phase 2 increment 4d, golib-tests 42936395011): on darwin, dyld's search for a BARE library name reaches the current directory — a SECURITY finding, CLOSED in 4d before any release shipped it
+
+**The finding.** Increment 4d's exit-gate arm `ALibraryOnlyInTheCurrentDirectoryIsNotLoaded` planted a copy of the
+probe library in the current directory and asked golib's cgo resolver for it by its bare name. On both hosted darwin
+RIDs, dyld loaded it: handle 1913759472 on osx-arm64 and 1108903152 on osx-x64, where the arm required a refusal. The
+red was predicted before the run (PREDICTIONS-4d D6, leaning red at about 60/40, from man dlopen's leaf-name order). A
+converted cgo package whose captured darwin name was not absolute would therefore load a library planted in whatever
+directory the program was started from: the DLL-planting surface §5.4 exists to close.
+
+**The fix, in 4d itself (COORD's ruling).** DESIGN-cgo-phase2-pinvoke §11.12's absolute-name rule is MANDATORY for
+every darwin load (dated line there). Both halves refuse, by name, any darwin name that is not absolute: the
+converter's capture (`cgoDarwinInstallName`; red 8dfe7398ee fails on exactly the bare and the relative name) and
+golib's resolver, which refuses before dyld sees the name (green 3c4875b988). The current-directory arm stays as the
+rule's guard. Linux (ld.so does not search the current directory for a bare name unless LD_LIBRARY_PATH has an
+empty entry, which the hosted leg avoids) and windows (SafeDirectories | AssemblyDirectory) read green on the same arm.
+
+**The trade, stated.** An absolute install name is baked into the bindings, as into a Go binary's load commands, so a
+library at another path on the consumer's machine (Homebrew's `/opt/homebrew` against `/usr/local`) fails by name
+rather than loading something else.
+
+CLOSED by claude/h-cgo-phase2-probes 3c4875b988.
+
+— H (2026-11-10)
+
 ## 2026-11-10 — G (COORD's seat, i9's per-flavour census made a standing guard): the pooled declared-not-implemented census cannot see a member bodied in ANOTHER target's key folder; two such MASKED throwing stubs exist, and one of them is a classic C# partial the generator stubs instead of erasing
 
 **The guard.** `TestFlavourOnlyStubCensus` (`src/go2cs/declaredNotImplementedFlavour_test.go`) reads the walk

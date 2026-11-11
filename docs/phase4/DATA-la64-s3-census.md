@@ -299,3 +299,74 @@ flavour's key folders (goos, arch and goos-arch, the set its csproj compiles), s
   time (rows 3-6). A compile shows none of them, because a throw is a body.
 - **Not done here:** the instrument is a scratch test of the seat's, run and then deleted. Making the per-flavour
   view a standing guard beside G's census is a proposal to COORD, not part of this commit.
+
+### The complete linux-arm64 declaration table (COORD ruling (1), 2026-11-10)
+
+Every bodyless `partial` declaration the census counts in a `linux-arm64/` file, at `1f2f6f82fd`. These are **57 in 10 packages**, which is S2's +57 over master. The list re-walks with the census's own predicates
+(`partialDeclRe`, `partialDefnRe`, `leadingTrivia` and its two exclusions) and is held to it in every view:
+the declaration count equals the census's, and the stubbed subset equals the census's stubs member for member.
+**42 have bodies and 15 are stubbed.** The stubbed rows are the 15 the table above leaves: rows 7-21, all (b), (c) or shared.
+
+- **A body in a flat file serves every flavour** (atomic, bytealg, chacha8rand, the runtime and syscall rows).
+- **That is what design §2.7's stay list judges** for arm64, the next S3 item.
+- **The pooled census cannot tell** whether such a body is right for arm64, only that it exists.
+
+| # | package | member | declared in | status | body in |
+|---|---|---|---|---|---|
+| 1 | hash/crc32 | `castagnoliUpdate` | `hash/crc32/linux-arm64/crc32_arm64.cs` | bodied | `hash/crc32/linux-arm64/crc32_arm64_impl.cs` |
+| 2 | hash/crc32 | `ieeeUpdate` | `hash/crc32/linux-arm64/crc32_arm64.cs` | bodied | `hash/crc32/linux-arm64/crc32_arm64_impl.cs` |
+| 3 | internal/bytealg | `MakeNoZero` | `internal/bytealg/linux-arm64/bytealg.cs` | bodied | `internal/bytealg/bytealg_impl.cs` |
+| 4 | internal/chacha8rand | `block` | `internal/chacha8rand/linux-arm64/chacha8.cs` | bodied | `internal/chacha8rand/chacha8_impl.cs` |
+| 5 | internal/cpu | `getMIDR` | `internal/cpu/linux-arm64/cpu_arm64.cs` | bodied | `internal/cpu/linux-arm64/cpu_arm64_hwcap_impl.cs` |
+| 6 | internal/cpu | `getisar0` | `internal/cpu/linux-arm64/cpu_arm64.cs` | stubbed | - |
+| 7 | internal/cpu | `getpfr0` | `internal/cpu/linux-arm64/cpu_arm64.cs` | stubbed | - |
+| 8 | internal/runtime/atomic | `And` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 9 | internal/runtime/atomic | `And32` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 10 | internal/runtime/atomic | `And64` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 11 | internal/runtime/atomic | `And8` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 12 | internal/runtime/atomic | `Anduintptr` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 13 | internal/runtime/atomic | `Cas64` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 14 | internal/runtime/atomic | `CasRel` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 15 | internal/runtime/atomic | `Or` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 16 | internal/runtime/atomic | `Or32` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 17 | internal/runtime/atomic | `Or64` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 18 | internal/runtime/atomic | `Or8` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 19 | internal/runtime/atomic | `Oruintptr` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 20 | internal/runtime/atomic | `Store` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 21 | internal/runtime/atomic | `Store64` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 22 | internal/runtime/atomic | `Store8` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 23 | internal/runtime/atomic | `StoreRel` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 24 | internal/runtime/atomic | `StoreRel64` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 25 | internal/runtime/atomic | `StoreReluintptr` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 26 | internal/runtime/atomic | `StorepNoWB` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 27 | internal/runtime/atomic | `Xadd` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 28 | internal/runtime/atomic | `Xadd64` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 29 | internal/runtime/atomic | `Xadduintptr` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 30 | internal/runtime/atomic | `Xchg` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 31 | internal/runtime/atomic | `Xchg64` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 32 | internal/runtime/atomic | `Xchg8` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 33 | internal/runtime/atomic | `Xchguintptr` | `internal/runtime/atomic/linux-arm64/atomic_arm64.cs` | bodied | `internal/runtime/atomic/atomic_impl.cs` |
+| 34 | internal/runtime/sys | `DITEnabled` | `internal/runtime/sys/linux-arm64/dit_arm64.cs` | bodied | `internal/runtime/sys/linux-arm64/dit_arm64_impl.cs` |
+| 35 | internal/runtime/sys | `DisableDIT` | `internal/runtime/sys/linux-arm64/dit_arm64.cs` | bodied | `internal/runtime/sys/linux-arm64/dit_arm64_impl.cs` |
+| 36 | internal/runtime/sys | `EnableDIT` | `internal/runtime/sys/linux-arm64/dit_arm64.cs` | bodied | `internal/runtime/sys/linux-arm64/dit_arm64_impl.cs` |
+| 37 | math | `archExp2` | `math/linux-arm64/exp2_asm.cs` | bodied | `math/linux-arm64/exp2_asm_impl.cs` |
+| 38 | runtime | `asmcgocall_no_g` | `runtime/linux-arm64/stubs_arm64.cs` | stubbed | - |
+| 39 | runtime | `emptyfunc` | `runtime/linux-arm64/stubs_arm64.cs` | stubbed | - |
+| 40 | runtime | `getfp` | `runtime/linux-arm64/stubs_arm64.cs` | bodied | `runtime/stubs_impl.cs` |
+| 41 | runtime | `load_g` | `runtime/linux-arm64/stubs_arm64.cs` | stubbed | - |
+| 42 | runtime | `panicBounds` | `runtime/linux-arm64/panic.cs` | stubbed | - |
+| 43 | runtime | `panicExtend` | `runtime/linux-arm64/panic.cs` | stubbed | - |
+| 44 | runtime | `save_g` | `runtime/linux-arm64/stubs_arm64.cs` | stubbed | - |
+| 45 | runtime | `spillArgs` | `runtime/linux-arm64/stubs_arm64.cs` | stubbed | - |
+| 46 | runtime | `unspillArgs` | `runtime/linux-arm64/stubs_arm64.cs` | stubbed | - |
+| 47 | runtime | `walltime` | `runtime/linux-arm64/timestub2.cs` | bodied | `runtime/linux-arm64/timestub2_impl.cs` |
+| 48 | syscall | `cgocaller` | `syscall/linux-arm64/syscall_linux.cs` | bodied | `syscall/linux/cgocaller_linux_impl.cs` |
+| 49 | syscall | `rawSyscallNoError` | `syscall/linux-arm64/syscall_linux.cs` | bodied | `syscall/linux/syscall_linux_impl.cs` |
+| 50 | syscall | `rawVforkSyscall` | `syscall/linux-arm64/syscall_linux.cs` | stubbed | - |
+| 51 | syscall | `runtime_doAllThreadsSyscall` | `syscall/linux-arm64/syscall_linux.cs` | bodied | `syscall/linux/syscall_linux_impl.cs` |
+| 52 | syscall | `runtime_entersyscall` | `syscall/linux-arm64/syscall_linux.cs` | bodied | `syscall/linux/syscall_linux_impl.cs` |
+| 53 | syscall | `runtime_exitsyscall` | `syscall/linux-arm64/syscall_linux.cs` | bodied | `syscall/linux/syscall_linux_impl.cs` |
+| 54 | vendor/golang.org/x/sys/cpu | `getisar0` | `vendor/golang.org/x/sys/cpu/linux-arm64/cpu_gc_arm64.cs` | stubbed | - |
+| 55 | vendor/golang.org/x/sys/cpu | `getisar1` | `vendor/golang.org/x/sys/cpu/linux-arm64/cpu_gc_arm64.cs` | stubbed | - |
+| 56 | vendor/golang.org/x/sys/cpu | `getpfr0` | `vendor/golang.org/x/sys/cpu/linux-arm64/cpu_gc_arm64.cs` | stubbed | - |
+| 57 | vendor/golang.org/x/sys/cpu | `getzfr0` | `vendor/golang.org/x/sys/cpu/linux-arm64/cpu_gc_arm64.cs` | stubbed | - |

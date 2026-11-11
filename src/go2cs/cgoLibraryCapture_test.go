@@ -306,3 +306,25 @@ func TestCgoCaptureRefusesASymbolNoLibraryDefines(t *testing.T) {
 		t.Errorf("err %v, want a refusal naming go2cs_cgo_nowhere", err)
 	}
 }
+
+// darwin loads a captured library only by an absolute install name (§11.12, mandatory since increment 4d): dyld's search
+// for a bare name reached the current directory on both hosted RIDs (golib-tests 42936395011), and an @ name is one the
+// CLR's loader cannot resolve as dyld does. Both are refused by name; an absolute name is admitted.
+func TestCgoDarwinCaptureAdmitsOnlyAbsoluteInstallNames(t *testing.T) {
+	for _, c := range []struct{ library, refusal string }{
+		{"/usr/lib/libSystem.B.dylib", ""},
+		{"/tmp/go2cs-cgo-probe/libgo2csprobe.dylib", ""},
+		{"@rpath/libfoo.dylib", "cannot resolve as dyld does"},
+		{"libgo2csprobe.dylib", "dyld's search for a bare name reaches the current directory"},
+		{"lib/libfoo.dylib", "dyld's search for a bare name reaches the current directory"},
+	} {
+		err := cgoDarwinInstallName("f", c.library)
+
+		switch {
+		case c.refusal == "" && err != nil:
+			t.Errorf("%s: refused (%v), want it admitted", c.library, err)
+		case c.refusal != "" && (err == nil || !strings.Contains(err.Error(), c.refusal) || !strings.Contains(err.Error(), c.library)):
+			t.Errorf("%s: err %v, want a refusal naming it and saying %q", c.library, err, c.refusal)
+		}
+	}
+}

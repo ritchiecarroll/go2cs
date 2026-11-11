@@ -25,6 +25,13 @@ internal static partial class cgotestꓸC_package
         public static implicit operator uint32(@uint value) => value.m_value;
     }
 
+    internal readonly struct @char(int8 value)
+    {
+        private readonly int8 m_value = value;
+        public static implicit operator @char(int8 value) => new(value);
+        public static implicit operator int8(@char value) => value.m_value;
+    }
+
     internal readonly struct @double(float64 value)
     {
         private readonly float64 m_value = value;
@@ -40,5 +47,27 @@ internal static partial class cgotestꓸC_package
     {
         public @int quot;
         public @int rem;
+    }
+
+    // The probe library's structs (increment 4d, src/tests/GolibTests/cgo-probe/probe.c), the same on every OS. The
+    // tagged struct's union is the bytes cmd/cgo gives it; its padding is a blank field, which a converted struct omits.
+    internal struct struct_go2cs_probe_pair
+    {
+        public @int a;
+        public @int b;
+    }
+
+    internal struct struct_go2cs_probe_tagged
+    {
+        public @int tag;
+        public array<byte> u = new(8);
+
+        public struct_go2cs_probe_tagged() { }
+    }
+
+    internal struct struct_go2cs_probe_hfa
+    {
+        public @double x;
+        public @double y;
     }
 }
