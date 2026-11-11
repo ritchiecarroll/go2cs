@@ -244,7 +244,11 @@ Assert-Throws 'per-RID note: a note naming one RID twice is refused' {
 Assert-Throws 'per-RID note: a darwin note naming a linux RID is refused by name (S7-a: no longer read as prose)' {
     Read-FixtureRoster @("| [``ridu/pkg``](https://x/ridu) | 3 |  | Prose. $dot darwin: 3 (osx-arm64; linux-x64: 4) $dot [proof](p.md) |")
 } 'darwin annotation names osx-arm64 and linux-x64'
-Assert-Equal 'per-RID note: a RID no key ships is not a note, so the segment is prose' 0 (Read-FixtureRoster @("| [``ridv/pkg``](https://x/ridv) | 3 |  | Prose. $dot darwin: 3 (osx-arm64; win-arm64: 4) $dot [proof](p.md) |"))[0].OS.Count
+# Was read as prose until G's second read of S7-a (2026-11-11): a note opening on a RID is a note attempt, so a second
+# RID no key ships makes it malformed, and it is refused by name.
+Assert-Throws 'per-RID note: a RID no key ships is a malformed note, refused by name' {
+    Read-FixtureRoster @("| [``ridv/pkg``](https://x/ridv) | 3 |  | Prose. $dot darwin: 3 (osx-arm64; win-arm64: 4) $dot [proof](p.md) |")
+} 'cannot read'
 
 # ---- 1-rid-linux. the LINUX per-RID note and `pending` (S7-a; DATA-la64-s7-bank-plan.md 2.4, COORD 2026-11-11) -------
 # linux ships two flavours under two RIDs, so a linux segment names both: "linux: 3840 + 2 (linux-x64; linux-arm64:
@@ -265,6 +269,12 @@ Assert-Throws 'linux note: darwin never takes pending' {
 Assert-Throws 'linux note: only linux-arm64 is ever pending (linux-x64 is the banked flavour)' {
     Read-FixtureRoster @("| [``linx/pkg``](https://x/linx) | 3 |  | Wrong way round. $dot linux: 9 (linux-arm64; linux-x64: pending) $dot [proof](p.md) |")
 } 'only linux-arm64 is pending'
+# A MALFORMED note never reads as prose (G's second read): a segment start the parser cannot read is refused by name.
+foreach ($case in @(@('a missing colon', 'linux: 5 (linux-x64; linux-arm64 5)'), @('a misspelt pending', 'linux: 5 (linux-x64; linux-arm64: pendng)'), @('a non-numeric reading', 'darwin: 7 (osx-arm64; osx-x64: x)'))) {
+    Assert-Throws "per-RID note: $($case[0]) is refused, never read as prose" {
+        Read-FixtureRoster @("| [``mal/pkg``](https://x/mal) | 3 |  | Malformed. $dot $($case[1]) $dot [proof](p.md) |")
+    } 'cannot read'
+}
 $savedRid = $env:RID
 try {
     $env:RID = 'linux-arm64'
@@ -2888,20 +2898,25 @@ function Get-ArchCombinedReading {
     $text = "$lm" + $(if ($lg -ne 0) { " + $lg" } else { '' }) + " ($($long.RID); $($short.RID): $sm" + $(if ($sg -ne 0) { " + $sg" } else { '' }) + ')'
     $counts = "$($long.RID) $lv verdicts + $lg disclosed, $($short.RID) $sv + $sg"
 
+    # Column PRESENCE is read from the line, never from Get-EvidenceNames' value: PowerShell unrolls the empty list a
+    # '-' cell gives into $null at the caller, which is how a RID disclosing nothing once read as "no such column"
+    # (G's second read of S7-a, 2026-11-11).
     $shortAbsent = @(Get-EvidenceNames $short 'absent')
     $longAbsent = @(Get-EvidenceNames $long 'absent')
     $gap = $lv - $sv
     $distinct = @($shortAbsent | Sort-Object -Unique -CaseSensitive).Count
     $refusal = $null
-    if ($longAbsent.Count -ne 0) {
+    if (-not $short.PSObject.Properties['absent']) {
+        $refusal = "its verdicts and disclosed-divergent both differ by RID ($counts), but the evidence for $($short.RID), the shorter RID, has no absent column, so its $gap missing verdict(s) are not named"
+    } elseif ($longAbsent.Count -ne 0) {
         $refusal = "its verdicts and disclosed-divergent both differ by RID ($counts), but the evidence names absent verdicts on $($long.RID), the LONGER RID"
     } elseif (($distinct -ne $gap) -or ($shortAbsent.Count -ne $gap)) {
         $refusal = "its verdicts and disclosed-divergent both differ by RID ($counts), but the evidence names $distinct of the $gap missing verdict(s) on $($short.RID) (column ``absent``) -- a combined reading banks only with every missing verdict named once"
     } else {
         foreach ($side in @($short, $long)) {
-            $names = Get-EvidenceNames $side 'divergent_names'
+            $names = @(Get-EvidenceNames $side 'divergent_names')
             $want = (& $int $side 'divergent') - (& $int $side 'new')
-            if ($null -eq $names) {
+            if (-not $side.PSObject.Properties['divergent_names']) {
                 $refusal = "its verdicts and disclosed-divergent both differ by RID ($counts), but the evidence names no disclosed-divergent verdicts on $($side.RID) (column ``divergent_names``) -- a combined reading banks only with both RIDs' disclosed verdicts named in full"
                 break
             }
@@ -2933,6 +2948,15 @@ function Get-LinuxPairReading {
         return [PSCustomObject]@{ Form = 'refused'; Text = $null; Reason = "the linux evidence holds $($x64.Count) linux-x64 and $($arm.Count) linux-arm64 line(s) for it, not one of each" }
     }
     $x = $x64[0]; $a = $arm[0]
+    # Every count cell the forms read must be a number: a malformed line is refused by name, never a crash.
+    foreach ($line in @($x, $a)) {
+        foreach ($column in @('verdicts', 'matched', 'divergent', 'new')) {
+            $cell = if ($line.PSObject.Properties[$column]) { [string]$line.$column } else { $null }
+            if ($cell -notmatch '^\d+$') {
+                return [PSCustomObject]@{ Form = 'refused'; Text = $null; Reason = "the linux evidence's $($line.RID) line has $column '$cell', not a number" }
+            }
+        }
+    }
     $roster = if (($null -ne $Segment) -and $Segment.Applicable) { Get-LinuxX64Reading $Segment } else { $null }
     if ($null -eq $roster) {
         return [PSCustomObject]@{ Form = 'refused'; Text = $null; Reason = 'the linux evidence names it, but it carries no numeric linux: segment with a linux-x64 reading' }
@@ -2946,7 +2970,7 @@ function Get-LinuxPairReading {
         return [PSCustomObject]@{ Form = 'host-difference'; Text = $null
             Reason = "the same dispatch's linux-x64 line ($($x.status) $(& $fmt $x.matched $xd), new $($x.new)) is not the roster's linux-x64 reading ($(& $fmt $roster.Expected $roster.Disclosed)): a host difference, recorded and not written, so linux-arm64 stays pending" }
     }
-    if (($x.status -ceq 'validated') -and ($a.status -ceq 'validated') -and ($x.agree -ceq 'yes') -and ($a.agree -ceq 'yes') -and
+    if (($x.status -ceq 'validated') -and ($a.status -ceq 'validated') -and ($x.agree -ceq 'yes') -and ($a.agree -ceq 'yes') -and ("$($a.new)" -ceq '0') -and
         ("$($x.verdicts)" -ceq "$($a.verdicts)") -and ([int]$x.matched -eq [int]$a.matched) -and ($xd -eq $ad)) {
         $one = & $fmt $x.matched $xd
         return [PSCustomObject]@{ Form = 'equal'; Text = "$one (linux-x64; linux-arm64: $one)"; Reason = $null }
@@ -3052,6 +3076,12 @@ Assert-Equal 'linux pair: the combined form is the fourth form' 'combined/17 + 3
 Assert-Equal 'linux pair: the combined segment banks' $null (Get-LinuxSegmentRefusal -Records $linCombined -Segment (& $linSeg 17 3 'linux-x64' 'linux-arm64' 15 2))
 $r = Get-ArchCombinedReading (New-LinuxPairRecord 'linux-arm64' 'validated' 9 9 0 0 'no' '-' '-') (New-LinuxPairRecord 'linux-x64' 'DISC' 8 7 1 0 'no' 'z' 'q')
 Assert-Equal 'combined: either RID can be the longer, and a RID with nothing disclosed reads bare' '9 (linux-arm64; linux-x64: 7 + 1)' "$($r.Text)"
+Assert-Equal 'combined: a RID that discloses nothing (divergent_names -) is fully named, so no refusal (G''s second read, follow-up 1)' '' "$($r.Refusal)"
+$linZero = @((New-LinuxPairRecord 'linux-x64' 'validated' 9 9 0 0 'no' '-' '-'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 8 7 1 0 'no' 'z' 'q'))
+$r = Get-LinuxPairReading -Records $linZero -Segment (& $linPendingSeg 9 0)
+Assert-Equal 'linux pair: a combined pair where linux-x64 discloses nothing banks (the annotator''s reading)' 'combined/9 (linux-x64; linux-arm64: 7 + 1)/' "$($r.Form)/$($r.Text)/$($r.Reason)"
+$r = Get-ArchCombinedReading (New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' $null 'd1;d2;d3') (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' $null 'd1;d2')
+Assert-Equal 'combined: a pair with no absent column is refused for the missing column, by name' $true ("$($r.Refusal)" -match 'has no absent column')
 foreach ($case in @(
         @('names 2 of the 3 missing verdicts', 'names 2 of the 3', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2' 'd1;d2'))),
         @('names a missing verdict twice', 'names 2 of the 3', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a1;a2' 'd1;d2'))),
@@ -3088,6 +3118,21 @@ $linHost = @((New-LinuxPairRecord 'linux-x64' 'COUNT' 52 51 1 0 'yes' '-' 'x'), 
 Assert-Equal 'linux pair: a hosted linux-x64 reading that is not the roster''s is a host difference' 'host-difference' (Get-LinuxPairReading -Records $linHost -Segment (& $linPendingSeg 52 0)).Form
 Assert-Equal 'linux pair: a host-difference row that stays pending is not refused' $null (Get-LinuxSegmentRefusal -Records $linHost -Segment (& $linPendingSeg 52 0))
 Assert-Equal 'linux pair: a host difference never writes the hosted linux-x64 reading' $true ((Get-LinuxSegmentRefusal -Records $linHost -Segment (& $linSeg 52 0 'linux-x64' 'linux-arm64' 51 1)) -match 'host difference')
+# Each clause of the host-difference test, alone (G's second read, follow-up 3: none was pinned). The pair is otherwise
+# EQUAL (10 of 10 on both, agree yes) against a roster linux-x64 reading of 10, so a missing clause reads it as equal.
+Assert-Equal 'linux pair: the host-difference control (every clause holds) reads equal' 'equal' (Get-LinuxPairReading -Records @((New-LinuxPairRecord 'linux-x64' 'validated' 10 10 0 0 'yes'), (New-LinuxPairRecord 'linux-arm64' 'validated' 10 10 0 0 'yes')) -Segment (& $linPendingSeg 10 0)).Form
+foreach ($case in @(
+        @('a linux-x64 status other than validated', (New-LinuxPairRecord 'linux-x64' 'COUNT' 10 10 0 0 'yes')),
+        @('a linux-x64 undisclosed divergence (new 1), counts otherwise equal', (New-LinuxPairRecord 'linux-x64' 'validated' 10 10 1 1 'yes')),
+        @('a linux-x64 matched count off the roster''s', (New-LinuxPairRecord 'linux-x64' 'validated' 9 9 0 0 'yes')),
+        @('a linux-x64 disclosed count off the roster''s', (New-LinuxPairRecord 'linux-x64' 'validated' 11 10 1 0 'yes')))) {
+    Assert-Equal "linux pair: $($case[0]) is a host difference" 'host-difference' (Get-LinuxPairReading -Records @($case[1], (New-LinuxPairRecord 'linux-arm64' 'validated' 10 10 0 0 'yes')) -Segment (& $linPendingSeg 10 0)).Form
+}
+Assert-Equal 'linux pair: two linux-x64 lines are refused, never read' $true ((Get-LinuxSegmentRefusal -Records @($linEqual[0], $linEqual[0], $linEqual[1]) -Segment (& $linPendingSeg 3840 2)) -match '2 linux-x64 and 1 linux-arm64')
+$linBadCell = [PSCustomObject]@{ RID = 'linux-arm64'; status = 'validated'; agree = 'yes'; verdicts = '3842'; matched = 'x'; disclosed = '2'; divergent = '2'; new = '0' }
+$r = try { Get-LinuxPairReading -Records @($linEqual[0], $linBadCell) -Segment (& $linPendingSeg 3840 2) } catch { [PSCustomObject]@{ Form = 'crashed'; Reason = "$_" } }
+Assert-Equal 'linux pair: a count cell that is not a number is refused by name, not a crash' 'refused/True' "$($r.Form)/$("$($r.Reason)" -match 'matched')"
+Assert-Equal 'linux pair: equal never banks a linux-arm64 undisclosed divergence (new 1)' $true ((Get-LinuxPairReading -Records @((New-LinuxPairRecord 'linux-x64' 'validated' 10 10 0 0 'yes'), (New-LinuxPairRecord 'linux-arm64' 'validated' 10 10 1 1 'yes')) -Segment (& $linPendingSeg 10 0)).Form -cne 'equal')
 
 # THE RECORDS: one line per RID, and a numeric segment to compare against.
 Assert-Equal 'linux pair: one RID alone is refused, never read as pending' $true ((Get-LinuxSegmentRefusal -Records @($linEqual[0]) -Segment (& $linPendingSeg 3840 2)) -match 'not one of each')
@@ -3215,6 +3260,11 @@ try {
     Assert-Equal 'ledger file: a line reads as row / reason / shard / run with its line number' 'lu/pend|the arm leg died at a throwing stub (load_g)|W1-3|42|2' ("$($luRead.Records[0].row)|$($luRead.Records[0].reason)|$($luRead.Records[0].shard)|$($luRead.Records[0].run)|$($luRead.Records[0].Line)")
     [System.IO.File]::WriteAllText($luFile, "row`treason`tshard`n")
     Assert-Equal 'ledger file: a header that is not row / reason / shard / run is named' $true ("$((Read-LinuxArm64Ledger -Path $luFile).HeaderError)" -match 'row\\treason\\tshard\\trun')
+    foreach ($case in @(@('an empty reason cell', "lu/pend`t`tW1-3`t1"), @('a line with the row alone', 'lu/pend'))) {
+        [System.IO.File]::WriteAllText($luFile, "row`treason`tshard`trun`n$($case[1])`n")
+        $emptyGot = (@(Get-LinuxArm64LedgerRefusals -Records (Read-LinuxArm64Ledger -Path $luFile).Records -Rows $luRows -BankClosed $false)) -join '; '
+        Assert-Equal "ledger file: $($case[0]) is refused as a blank reason" $true ($emptyGot -match 'blank reason')
+    }
 }
 finally { Remove-Item -LiteralPath $luFile -Force -ErrorAction SilentlyContinue }
 # A REFUSED row (a guard's Refusal) is accepted pending only with its ledger line; never with a reading.

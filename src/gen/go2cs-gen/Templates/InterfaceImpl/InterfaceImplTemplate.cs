@@ -66,6 +66,12 @@ internal class InterfaceImplTemplate : TemplateBase
     // directly: `global::go.net.netip_package.String(this.AddrPort)`.
     public string? ValueEmbedHopStaticClass;
 
+    // The foreign value embed's promoted-method class and the names it holds, when its type has one: a method the
+    // embed's type promotes from an embedded field of its own package is a member of that class, not of the package
+    // class, so its static call names it (GoMethodHosts).
+    public string? ValueEmbedHopPromotedClass;
+    public HashSet<string>? ValueEmbedHopPromotedMethods;
+
     // Both sides' effective accessibility, resolved by the GENERATOR from the SYMBOLS (see
     // ImplementGenerator.AdapterSidePublic / Common.EffectiveScopeIsPublic). The template cannot ask
     // that question itself — it holds only names — and a name is the wrong oracle for a lifted
@@ -286,7 +292,8 @@ internal class InterfaceImplTemplate : TemplateBase
                         if (ValueEmbedHopStaticClass is not null)
                         {
                             string staticArgs = string.IsNullOrEmpty(method.CallParameters) ? $"this.{ValueEmbedHop}" : $"this.{ValueEmbedHop}, {method.CallParameters}";
-                            result.Append($"[{NonUserCodeAttribute}] {method.ReturnType} {method.GetSignature()} => {ValueEmbedHopStaticClass}.{simpleMethodName}{method.GetGenericSignature()}({staticArgs});");
+                            string staticClass = ValueEmbedHopPromotedMethods?.Contains(simpleMethodName.TrimStart('@')) is true ? ValueEmbedHopPromotedClass! : ValueEmbedHopStaticClass;
+                            result.Append($"[{NonUserCodeAttribute}] {method.ReturnType} {method.GetSignature()} => {staticClass}.{simpleMethodName}{method.GetGenericSignature()}({staticArgs});");
                             continue;
                         }
 

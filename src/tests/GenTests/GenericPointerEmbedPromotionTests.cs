@@ -111,7 +111,7 @@ public class GenericPointerEmbedPromotionTests
 
         // (3) The box-receiver method is promoted, bound on the box hop itself, and the ref-receiver one
         // through its deref.
-        StringAssert.Contains(uniqueMap, "Load<T>(this uniqueMap<T> target, T key) => target.canonMap.Load(key);",
+        StringAssert.Contains(uniqueMap, "Load<T>(this global::go.utest_package.uniqueMap<T> target, T key) => target.canonMap.Load(key);",
             "the embed's box-receiver Load is not promoted:\n" + uniqueMap);
         StringAssert.Contains(uniqueMap, "=> target.canonMap.Value.grow(Ꮡc);", "the ref-receiver grow does not descend the box:\n" + uniqueMap);
 

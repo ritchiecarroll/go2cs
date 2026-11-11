@@ -1,0 +1,30 @@
+package main
+
+import "fmt"
+
+// C35 green control: the same generic, instantiated with the INTERFACE type instead of the pointer type.
+type optionParser interface {
+	ParseOption(key string, value any) []string
+}
+
+type compilerOptionsParser struct {
+	Options map[string]any
+}
+
+func (o *compilerOptionsParser) ParseOption(key string, value any) []string {
+	o.Options[key] = value
+	return nil
+}
+
+func convertMapToOptions[O optionParser](options map[string]any, result O) O {
+	for k, v := range options {
+		result.ParseOption(k, v)
+	}
+	return result
+}
+
+func main() {
+	p := &compilerOptionsParser{map[string]any{}}
+	convertMapToOptions[optionParser](map[string]any{"strict": true}, p)
+	fmt.Println(len(p.Options), p.Options["strict"]) // Go: 1 true
+}

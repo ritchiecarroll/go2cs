@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 	"unicode"
@@ -271,8 +272,9 @@ func parseArgsInterspersed(fs *flag.FlagSet, args []string) ([]string, error) {
 // convert to throwing stubs that COMPILE but cannot RUN. `purego` selects the portable pure-Go
 // variants (real bodies the transpiler can convert), making "the corpus reproduces Go -tags purego"
 // a claim go2cs can actually honor. This default applies to `-stdlib` (the whole-library corpus) AND
-// to `-tests` (see resolveBuildTags); `-recurse` end-user conversions and single-file/dir conversions
-// stay tag-neutral so the user's own build tags govern, and an explicit `-tags` overrides it verbatim.
+// to `-tests` (see resolveBuildTags); a `-recurse` conversion adds defaultModuleBuildTags instead,
+// single-file/dir conversions stay tag-neutral so the user's own build tags govern, and an explicit
+// `-tags` overrides every default verbatim.
 //
 // `math_big_pure_go` is the SAME decision under a different spelling. `purego` is the tag the crypto
 // and hash packages happen to use; math/big predates it and gates its own portable fallbacks on
@@ -285,16 +287,26 @@ func parseArgsInterspersed(fs *flag.FlagSet, args []string) ([]string, error) {
 // failure (TestTruncateRound → big.Int.Mul → mulAddVWW), but the scope is all of math/big.
 var defaultStdLibBuildTags = []string{"purego", "math_big_pure_go"}
 
-// defaultModuleBuildTags are added to a `-recurse` module conversion unless `-module-safe-tag=false`
-// or an explicit `-tags` says otherwise. `safe` is the tag libraries use to choose their own fallback
-// over unsafe pointer arithmetic into Go's runtime internals, which golib refuses by design:
-// testify's internal/spew computes reflect.Value's private `flag` offset at init and dereferences
-// `&v` plus that offset, so every converted test host importing testify panicked before its first
-// test, while bypasssafe.go (`-tags safe`) is spew's shipped answer. The standard library uses the
-// tag nowhere, so it changes no stdlib file selection. `appengine`, the older spelling some
-// libraries also honor for the same purpose, is deliberately NOT added: it changes behavior beyond
-// unsafe (logrus switches its terminal check on it).
-var defaultModuleBuildTags = []string{"safe"}
+// defaultModuleBuildTags are added to a `-recurse` module conversion, in every reference mode (local
+// project references, -recurse=module, -recurse=nuget), unless `-module-safe-tag=false` or an explicit
+// `-tags` says otherwise. Each selects a library's own fallback for something converted code cannot do.
+//
+// `safe` is the tag libraries use to choose their own fallback over unsafe pointer arithmetic into Go's
+// runtime internals, which golib refuses by design: testify's internal/spew computes reflect.Value's
+// private `flag` offset at init and dereferences `&v` plus that offset, so every converted test host
+// importing testify panicked before its first test, while bypasssafe.go (`-tags safe`) is spew's
+// shipped answer. The standard library uses the tag nowhere, so it changes no stdlib file selection.
+//
+// `purego` and `noasm` are the two spellings libraries use to choose their pure-Go fallback over their
+// hand-written assembly, the module-side twin of defaultStdLibBuildTags: an asm path converts to
+// bodyless declarations that compile and throw when called. klauspost/cpuid/v2 v2.2.10 gates its x86
+// and arm64 detectors on `!noasm` (purego alone does not deselect them), and its package init calls
+// the asm stub, so every converted program importing it (zeebo/xxh3 does) failed before main; under
+// `noasm` it selects detect_ref.go, which reports no CPU features and needs no assembly.
+//
+// `appengine`, the older spelling some libraries also honor for unsafe, is deliberately NOT added: it
+// changes behavior beyond unsafe (logrus switches its terminal check on it).
+var defaultModuleBuildTags = []string{"safe", "purego", "noasm"}
 
 // resolveBuildTags picks the effective build tags for a conversion run. A bare `-stdlib` run and a
 // `-tests` run both apply the purego default (unless `-tags` was passed explicitly, even `-tags=` to
@@ -305,8 +317,10 @@ var defaultModuleBuildTags = []string{"safe"}
 // gated `!purego`/`purego` (crypto/subtle's xor_amd64.go vs xor_generic.go, both declaring xorBytes)
 // gets BOTH files converted and collides (CS0111), and the regenerated production .cs diverges from
 // the committed purego emission. A `-recurse` module conversion adds defaultModuleBuildTags when
-// moduleSafeTag is set. All other conversions stay tag-neutral (explicit tags only). The `go test`
-// oracle of a validation run reads the same answer (oracleTestArgs), so both sides build one file set.
+// moduleSafeTag is set, dropping a tag the stdlib default already holds (purego), so `-recurse -tests`
+// resolves to purego,math_big_pure_go,safe,noasm. All other conversions stay tag-neutral (explicit
+// tags only). The `go test` oracle of a validation run reads the same answer (oracleTestArgs), so both
+// sides build one file set.
 func resolveBuildTags(convertStdLib, convertTests, recurse, moduleSafeTag, tagsExplicit bool, explicit []string) []string {
 	if tagsExplicit {
 		return explicit
@@ -319,7 +333,11 @@ func resolveBuildTags(convertStdLib, convertTests, recurse, moduleSafeTag, tagsE
 	}
 
 	if recurse && moduleSafeTag {
-		tags = append(tags, defaultModuleBuildTags...)
+		for _, tag := range defaultModuleBuildTags {
+			if !slices.Contains(tags, tag) {
+				tags = append(tags, tag)
+			}
+		}
 	}
 
 	if tags == nil {
@@ -478,4 +496,26 @@ func (o Options) loaderBuildFlags() []string {
 	}
 
 	return []string{"-tags=" + strings.Join(o.buildTags, ",")}
+}
+
+// buildTagsAnnouncement is the line a -stdlib or -recurse run prints at its start, so the default tag set
+// is visible, not magic: the tags it applies and whether they are the default, or exactly what an
+// explicit -tags passed. defaultName names the default in the line printed when `-tags=` cleared it; an
+// empty set nobody passed (-recurse with -module-safe-tag=false) prints just "none".
+func (o Options) buildTagsAnnouncement(defaultName string) string {
+	if len(o.buildTags) == 0 {
+		if !o.tagsExplicit {
+			return "Applying build tags: none"
+		}
+
+		return fmt.Sprintf("Applying build tags: none (-tags= cleared the %s default)", defaultName)
+	}
+
+	suffix := ""
+
+	if !o.tagsExplicit {
+		suffix = " (default; pass -tags to override)"
+	}
+
+	return "Applying build tags: " + strings.Join(o.buildTags, ",") + suffix
 }

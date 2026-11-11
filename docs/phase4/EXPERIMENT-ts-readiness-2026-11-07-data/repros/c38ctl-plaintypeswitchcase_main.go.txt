@@ -1,0 +1,30 @@
+package main
+
+import "fmt"
+
+// C38 green control: the same type switch with the case type written WITHOUT parentheses.
+type node struct{ end int }
+
+func (n *node) End() int { return n.end }
+
+type text struct{ end int }
+
+func (t text) End() int { return t.end }
+
+func tryGetEnd(x interface{ End() int }) (int, bool) {
+	switch v := x.(type) {
+	case *node:
+		if v != nil {
+			return v.End(), true
+		}
+	case text:
+		return v.End(), true
+	}
+	return 0, false
+}
+
+func main() {
+	a, ok1 := tryGetEnd(&node{3})
+	b, ok2 := tryGetEnd(text{5})
+	fmt.Println(a, ok1, b, ok2) // Go: 3 true 5 true
+}

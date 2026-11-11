@@ -1,0 +1,15 @@
+package main
+
+import (
+	"fmt"
+
+	"repro/c31ctl-genericstringarg/lib"
+)
+
+// C31 green control: Expected[string], a type argument with no nested generic.
+func present(f lib.TypeValidatedField) bool { return f.IsPresent() }
+
+func main() {
+	name := lib.Expected[string]{Value: "a", Valid: true}
+	fmt.Println(present(&name), len(name.Value)) // Go: true 1
+}

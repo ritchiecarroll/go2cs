@@ -223,7 +223,8 @@ jobs:
           # stages. golib-tests: jit=PATTERN. stack-probe: test=REGEX (required), at=S,S. sweep-shard (darwin only):
           # dns=IP[,IP], the job's resolver (an opt-in for net's NXDOMAIN keys, which the hosted mac resolver answers late;
           # C1, 2026-11-08); sweep-shard (linux only): dumpproof=red, the dump-suppression proof's red arm, which runs the
-          # proof's crash probe with suppression OFF so the proof fails by name and the sweep never starts (S7-b). converter-cgo: cc=zig|llvm-mingw, a pinned C toolchain the leg downloads, hash-checks and hands
+          # proof's crash probe with suppression OFF so the proof fails by name and the sweep never starts (S7-b), or
+          # dumpproof=red-space, the same arm with the file count not enforced, so the free-space check fails alone. converter-cgo: cc=zig|llvm-mingw, a pinned C toolchain the leg downloads, hash-checks and hands
           # go as CC (the cgo toolchain scout, H, 2026-11-10); sha=HEX replaces the pin's sha256, and exists so a wrong
           # hash can be shown to refuse before anything runs. An unknown or repeated key, an empty value, or any option on
           # any other stage FAILS the plan by name rather than being ignored.
@@ -260,8 +261,8 @@ jobs:
               if ($seen.ContainsKey('dumpproof')) {
                   if ($goos -ne 'linux') { throw "sweep-shard filter option dumpproof= is the linux dump-suppression proof's red arm and applies to goos linux only; got goos '$goos'." }
                   $dumpProof = $seen['dumpproof']
-                  if ($dumpProof -ne 'red') { throw "sweep-shard filter option dumpproof= takes one value, red; got '$dumpProof'." }
-                  Write-Host 'sweep-shard: dumpproof=red -- the proof runs its crash probe with suppression OFF and must FAIL by name; the sweep does not run'
+                  if ($dumpProof -cnotin 'red', 'red-space') { throw "sweep-shard filter option dumpproof= takes red or red-space; got '$dumpProof'." }
+                  Write-Host "sweep-shard: dumpproof=$dumpProof -- the proof runs its crash probe with suppression OFF and must FAIL by name; the sweep does not run"
               }
               if ($stage -eq 'converter-cgo') {
                   $cgoCc = "$($seen['cc'])"; $cgoCcSha = "$($seen['sha'])".ToLowerInvariant()
@@ -578,19 +579,14 @@ jobs:
         with:
           dotnet-version: ${{ needs.plan.outputs.dotnet }}
 
-      # Until linux-arm64 ships (seat S5c), every flavour push-nuget packs is an amd64 flavour, and a package carrying arm64
-      # code under an amd64 RID would be a wrong package that compiles. push-nuget passes GoTargetOS per flavour and takes
-      # GoTargetArch from the environment, so the guard reads each flavour from this job's environment, as the pack will.
-      - name: Pack flavour guard — every flavour packs at amd64 until linux-arm64 ships
+      # push-nuget builds one flavour per GOOS/GOARCH pair of its $ridFlavors map (seat S6), passing -p:GoTargetOS and
+      # -p:GoTargetArch, so the job's environment no longer decides any flavour's architecture. A pair at the wrong
+      # architecture would pack a wrong package that compiles; the guard reads the map and probes each pair.
+      - name: Pack flavour guard — linux-arm64 packs at linux/arm64, every other RID at amd64
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          if ($env:GoTargetArch -and $env:GoTargetArch -ne 'amd64') {
-              throw "the pack job binds GoTargetArch=$($env:GoTargetArch); no package ships an arm64 flavour until seat S5c, so this pack stops before it builds."
-          }
-          foreach ($goos in 'windows', 'linux', 'darwin') {
-              & ./.github/flavour-probe.ps1 -Expected amd64 -GoTargetOS $goos -Label "the $goos pack flavour"
-          }
+          & ./.github/pack-flavour-guard.ps1
 
       - name: Pack every go.* package (rehearsal)
         shell: powershell
@@ -1800,8 +1796,9 @@ jobs:
       # Step 1 records the settings, runs the POSITIVE control (the census must see a dump and a 128 MiB write with
       # suppression off) and applies suppression, reading each value back. Step 2 is a NEW step on purpose: it reads its
       # own inherited core limit, then crashes a 2,000-thread .NET probe twice and requires 0 new dump files and under
-      # 64 MiB. Either failing fails the job before the sweep. dumpproof=red (filter option) skips the apply and runs
-      # step 2 with suppression OFF: it must fail by name, and the sweep never starts.
+      # 8 MiB. Either failing fails the job before the sweep. dumpproof=red (filter option) skips the apply and runs
+      # step 2 with suppression OFF: it must fail by name, at the file count, and the sweep never starts.
+      # dumpproof=red-space is that arm with the file count not enforced: the free-space check must fail alone.
       # -------------------------------------------------------------------------------------
       - name: Dump suppression — record, positive control, apply
         id: dumpproof-apply
@@ -1816,8 +1813,8 @@ jobs:
           bash "$proof" record "$state" || rc=$?
           if [ "$rc" -eq 0 ]; then bash "$proof" control "$state" || rc=$?; fi
           if [ "$rc" -eq 0 ]; then
-            if [ "$DUMP_PROOF_MODE" = red ]; then
-              echo "DUMPPROOF apply: RED ARM -- suppression is NOT applied"
+            if [ "$DUMP_PROOF_MODE" = red ] || [ "$DUMP_PROOF_MODE" = red-space ]; then
+              echo "DUMPPROOF apply: RED ARM ($DUMP_PROOF_MODE) -- suppression is NOT applied"
             else
               bash "$proof" apply "$state" || rc=$?
             fi

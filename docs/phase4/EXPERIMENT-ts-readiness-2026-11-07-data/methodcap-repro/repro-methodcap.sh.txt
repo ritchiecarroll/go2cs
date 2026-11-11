@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# repro-methodcap.sh <N> <M> [K] : generate the method-cap repro (gen_methodcap.py), then Go oracle -> go2cs -recurse (box lock,
+# pinned) -> dotnet build (pinned, no node reuse, no shared compilation) -> run -> compare, at go2cs master 66a2e023ca.
+# Also records main_package's method count from the built assembly's metadata (methodcount.ps1; nothing is loaded).
+# Writes logs/repro-mcap-<name>.result.
+N="$1"; M="$2"; K="${3:-0}"; R=/h/go2cs-ts-exp; sha=66a2e023ca; WT=$R/go2cs-gate-$sha
+name="methodcap-n$N-m$M"; [ "$K" != 0 ] && name="$name-k$K"; src="$R/repros/$name"; out="$R/out/repro-mcap-$name"; res="$R/logs/repro-mcap-$name.result"
+source $R/scripts/env.sh
+export GO2CS_EXE="H:\\go2cs-ts-exp\\bin\\go2cs-$sha.exe" GO2CS_REPO="$WT" MSBUILDDISABLENODEREUSE=1
+rm -rf "$src" "$out"
+python -I "$(cygpath -w $R/scratch/proof/gen_methodcap.py)" "$(cygpath -w "$src")" "$N" "$M" "$K" || exit 2
+gout=$(cd "$src" && GOWORK=off go run . 2>&1); grc=$?
+bash $R/scripts/convert.sh "repro-mcap-$name" -recurse -go2cspath "$(cygpath -w "$WT/src")" "$(cygpath -w "$src")" "$(cygpath -w "$out")" >/dev/null; crc=$?
+proj=$(find "$out/src/repro/$name" -maxdepth 1 -name '*.csproj' 2>/dev/null | head -1)
+brc=-1; rout=""; rrc=-1; mc="n/a"
+if [ $crc -eq 0 ] && [ -n "$proj" ]; then
+  s=$(date +%s)
+  bash $R/scripts/aff.sh "$R/logs/repro-mcap-$name.build.txt" dotnet build "$(cygpath -w "$proj")" -c Release -m:2 -p:UseSharedCompilation=false -nodeReuse:false -v:q -nologo; brc=$?
+  bt=$(( $(date +%s)-s ))
+  if [ $brc -eq 0 ]; then
+    dll=$(find "$out/.artifacts/bin" -path '*Release*' -name "$name.dll" 2>/dev/null | head -1)
+    if [ -z "$dll" ]; then rout="NO ASSEMBLY"; rrc=99; else
+      p=":$PATH:"; p="${p//:\/c\/Users\/<user>\/dotnet10:/:}"; p="${p#:}"; p="${p%:}"
+      mc=$(env -u DOTNET_ROOT PATH="$p" pwsh -NoProfile -File "$(cygpath -w $R/scratch/proof/methodcount.ps1)" "$(cygpath -w "$dll")" 2 | tr '\n' '|')
+      dotnet "$(cygpath -w "$dll")" > "$out.run.txt" 2>&1; rrc=$?
+      rout=$(head -c 600 "$out.run.txt")
+    fi
+  fi
+fi
+match=NO; [ $brc -eq 0 ] && [ "$rout" = "$gout" ] && match=YES
+{
+  echo "repro $name  N=$N M=$M K=$K 2*N*M=$((2*N*M))  go2cs=$(git -C $WT rev-parse --short=10 HEAD)"
+  echo "GO    rc=$grc: $gout"
+  echo "CONV  rc=$crc"
+  echo "BUILD rc=$brc t=${bt:-0}s $( [ $brc -ne 0 ] && grep -E 'error [A-Z]+[0-9]+' "$R/logs/repro-mcap-$name.build.txt" 2>/dev/null | sort -u | head -3 | cut -c1-220 | tr '\n' '|')"
+  echo "METHODS $mc"
+  echo "RUN   rc=$rrc: $(printf '%s' "$rout" | head -3 | tr '\n' '|')"
+  echo "MATCH $match"
+} > "$res"
+cat "$res"

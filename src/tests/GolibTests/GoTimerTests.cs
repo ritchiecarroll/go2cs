@@ -161,10 +161,26 @@ public class GoTimerTests
 
     // The reason the queue exists: a 5 ms deadline fired on the windows tick read 10-13 ms late. The median of
     // twenty firings stays under the probe's bar for the I/O rows.
+    //
+    // On macOS the bar is RELATIVE to the host (G, 2026-11-10): each firing is paired with the test's own kernel
+    // wait over the same 5 ms, taken on this thread while the timer is armed, and the median of the per-pair
+    // difference stays under the bar. The hosted osx-arm64 runner serves a 5 ms wait anywhere from on time to about
+    // 2.6 ms late, for Go's own runtime as well, so the absolute bar read the host there and failed 3 of 13 full
+    // runs. The pairs do not: in one full run the host's wait read 0.069 to 2.602 ms late and every GoTimer firing
+    // stood within 0.103 ms of its pair. A timer that loses the short wait is later than its pair by the coarse
+    // wait's whole error, which is what the bar is for. Where the host's wait gives no reading (linux, windows, or
+    // a wait unanswered) the absolute bar holds.
+    //
+    // What this test can see, measured with GoTimer forced back to the coarse wait (2026-11-11): on osx-arm64 the
+    // median stood 13.3 and 15.2 ms beyond the host's wait and the test failed, 2 runs of 2. On osx-x64 it PASSED,
+    // 2 runs of 2: the coarse wait is late in only 6 or 7 of twenty firings there, so the median stays under the
+    // bar, relative or absolute. This test is the osx-arm64 arm for a lost short wait; on osx-x64 the arm that saw
+    // it was TimersFireInDeadlineOrder, in 1 run of 2.
     [TestMethod]
     public void AFiringIsCloseToItsDueTime()
     {
         List<double> late = new();
+        List<double> hostLate = new();
 
         for (int i = 0; i < 20; i++)
         {
@@ -174,8 +190,33 @@ public class GoTimerTests
 
             new GoTimer(_ => { firedAt = now(); done.Set(); }, null).Reset(due);
 
+            long hostStart = now();
+
+            if (kernelWait(5 * Millisecond))
+                hostLate.Add((now() - hostStart - 5 * Millisecond) / 1e6);
+
             Assert.IsTrue(done.Wait(5_000));
             late.Add((firedAt - due) / 1e6);
+        }
+
+        double? beyondHostMedian = null;
+
+        if (hostLate.Count == late.Count)
+        {
+            List<double> beyondHost = late.Select((value, i) => value - hostLate[i]).ToList();
+
+            Console.WriteLine($"pairs host/GoTimer, ms: {string.Join(" ", late.Select((value, i) => $"{hostLate[i]:F3}/{value:F3}"))}");
+
+            hostLate.Sort();
+            beyondHost.Sort();
+            beyondHostMedian = beyondHost[beyondHost.Count / 2];
+
+            Console.WriteLine($"host 5 ms kernel wait lateness, ms: min {hostLate[0]:F3} median {hostLate[hostLate.Count / 2]:F3} max {hostLate[^1]:F3}");
+            Console.WriteLine($"GoTimer beyond the host's wait, per pair, ms: min {beyondHost[0]:F3} median {beyondHostMedian:F3} max {beyondHost[^1]:F3}");
+        }
+        else if (OperatingSystem.IsMacOS())
+        {
+            Console.WriteLine($"host 5 ms kernel wait: {hostLate.Count} of {late.Count} waits answered, no pairs: the absolute bar holds");
         }
 
         late.Sort();
@@ -183,8 +224,73 @@ public class GoTimerTests
 
         Console.WriteLine($"GoTimer 5 ms lateness, ms: min {late[0]:F3} median {median:F3} max {late[^1]:F3}");
         Assert.IsTrue(late[0] >= 0, $"a timer fired {-late[0]:F3} ms EARLY");
-        Assert.IsTrue(median < 1.5, $"median lateness {median:F3} ms");
+
+        if (beyondHostMedian is double beyond)
+            Assert.IsTrue(beyond < 1.5, $"median lateness beyond the host's own wait {beyond:F3} ms (absolute median {median:F3} ms)");
+        else
+            Assert.IsTrue(median < 1.5, $"median lateness {median:F3} ms");
     }
+
+    // The host's own short wait on macOS: a one-shot kqueue EVFILT_TIMER with NOTE_CRITICAL (sys/event.h), made and
+    // closed per wait. It is the test's own, not GoCriticalTimer's, so a change to golib's wait cannot move both
+    // sides of a pair. False where there is no reading to take: not macOS, kqueue refused, or the wait cut short.
+    private static bool kernelWait(long nanoseconds)
+    {
+        if (!OperatingSystem.IsMacOS())
+            return false;
+
+        int kq = kqueue();
+
+        if (kq < 0)
+            return false;
+
+        try
+        {
+            Kevent change = new()
+            {
+                Ident = 1,
+                Filter = EvfiltTimer,
+                Flags = EvAdd | EvOneshot,
+                Fflags = NoteUseconds | NoteCritical,
+                Data = (nint)(nanoseconds / 1000)
+            };
+
+            return kevent(kq, ref change, 1, out Kevent fired, 1, 0) == 1 && (fired.Flags & EvError) == 0;
+        }
+        finally
+        {
+            close(kq);
+        }
+    }
+
+    // struct kevent (sys/event.h), 64-bit: uintptr_t ident; int16_t filter; uint16_t flags; uint32_t fflags;
+    // intptr_t data; void *udata.
+    [StructLayout(LayoutKind.Sequential)]
+    private struct Kevent
+    {
+        public nuint Ident;
+        public short Filter;
+        public ushort Flags;
+        public uint Fflags;
+        public nint Data;
+        public nint Udata;
+    }
+
+    private const short EvfiltTimer = -7;
+    private const ushort EvAdd = 0x0001;
+    private const ushort EvOneshot = 0x0010;
+    private const ushort EvError = 0x4000;
+    private const uint NoteUseconds = 0x00000002;
+    private const uint NoteCritical = 0x00000020;
+
+    [DllImport("libc")]
+    private static extern int kqueue();
+
+    [DllImport("libc")]
+    private static extern int kevent(int kq, ref Kevent changelist, int nchanges, out Kevent eventlist, int nevents, nint timeout);
+
+    [DllImport("libc")]
+    private static extern int close(int fd);
 
     // G's condition 3: with one far-future timer armed the service thread is blocked, not spinning. A thread spinning
     // for the head timer would burn about a whole second of CPU over the second.

@@ -1,0 +1,3 @@
+module repro/c37ctl-sliceanoniface
+
+go 1.26

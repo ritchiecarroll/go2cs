@@ -13,10 +13,14 @@
 #                         space. A detector that sees neither proves nothing.
 #   apply    STATE        core_pattern = |/bin/false, the core limit 0:0 on the runner's worker (every later step's
 #                         parent), and DOTNET_DbgEnableMiniDump=0 for every later step; each read back
-#   prove    STATE [red]  NEGATIVE proof, in a NEW step: this shell's own core limit must read 0 (inherited); a .NET
+#   prove    STATE [red|red-space]
+#                         NEGATIVE proof, in a NEW step: this shell's own core limit must read 0 (inherited); a .NET
 #                         probe of 2,000 threads crashed from outside and by Environment.FailFast must leave 0 new
-#                         files, no new systemd-coredump entry, and free space within 64 MiB on every filesystem.
-#                         `red` runs the same probe with suppression OFF (the control's settings) and must FAIL here.
+#                         files, no new systemd-coredump entry, and free space within 8 MiB on every filesystem.
+#                         `red` runs the same probe with suppression OFF (the control's settings) and must FAIL here,
+#                         at the file count. `red-space` is the same arm with the file count NOT enforced: the dump
+#                         stays in place and the free-space check must fail ALONE, naming the crash. Two detectors
+#                         are only worth having if each can fire by itself.
 #
 # The outside crash is SIGQUIT, not SIGSEGV. Measured on .NET 10 (linux x64, 2026-11-11): a process that receives
 # SIGSEGV, SIGABRT or SIGBUS from kill(2) keeps running (one was still alive ten minutes after kill -SEGV), because
@@ -28,7 +32,13 @@ set -uo pipefail
 export LC_ALL=C
 
 readonly MIB=$((1024 * 1024))
-readonly DELTA_LIMIT=$((64 * MIB))
+# The free-space bar. Measured on the hosted linux legs (runs 42982194260 and 42982976703, 2026-11-11): the proof's
+# two suppressed crashes moved free space by at most 32,768 bytes on any watched filesystem, and ONE unsuppressed dump
+# of the 2,000-thread probe costs 47,390,720 bytes on disk on x64 and 66,560,000 on arm64 (33.7 GB apparent; the file
+# is sparse). The bar was 64 MiB, which one dump does not reach on either leg, so the check could not fire alone.
+# 8 MiB is 256 times the measured noise and under a fifth of the smaller dump.
+readonly DELTA_MIB=8
+readonly DELTA_LIMIT=$((DELTA_MIB * MIB))
 readonly CONTROL_BYTES=$((128 * MIB))
 readonly PROBE_THREADS=2000
 
@@ -36,7 +46,7 @@ say()  { echo "DUMPPROOF $*"; }
 fail() { echo "DUMPPROOF FAIL: $*"; echo "::error title=dump-suppression proof::$*"; exit 1; }
 
 cmd="${1:-}"; state="${2:-}"; mode="${3:-}"
-[ -n "$cmd" ] && [ -n "$state" ] || fail "usage: $0 record|control|apply|prove|recheck STATE [red]"
+[ -n "$cmd" ] && [ -n "$state" ] || fail "usage: $0 record|control|apply|prove|recheck STATE [red|red-space]"
 mkdir -p "$state" || fail "cannot create the state folder $state"
 scratch="$state/cores"
 mkdir -p "$scratch"
@@ -109,7 +119,7 @@ check_free() {
     delta=$((before - now))
     say "free $label: $path before=$before now=$now used=$delta"
     if [ "$delta" -gt "$DELTA_LIMIT" ]; then
-      fail "$label: $path lost $delta bytes, more than the 64 MiB the proof allows"
+      fail "$label: $path lost $delta bytes, more than the $DELTA_MIB MiB the proof allows"
     fi
   done < "$baseline"
 }
@@ -174,11 +184,20 @@ apply)
   ;;
 
 prove)
-  if [ "$mode" = red ]; then
+  case "$mode" in
+  ''|red|red-space) ;;
+  *) fail "prove: unknown mode '$mode' (none, red or red-space)" ;;
+  esac
+  if [ -n "$mode" ]; then
     say "prove: RED ARM -- suppression NOT applied; this step must fail"
     sudo sysctl -q -w "kernel.core_pattern=$scratch/core.%e.%p" > /dev/null || fail "prove: red arm cannot set a file core_pattern"
     sudo prlimit --pid $$ --core=unlimited:unlimited || fail "prove: red arm cannot lift this step's core limit"
     say "prove: red arm core_pattern $(cat /proc/sys/kernel/core_pattern), ulimit -c $(ulimit -S -c):$(ulimit -H -c)"
+    if [ "$mode" = red-space ]; then
+      say "prove: red-space -- the file count is NOT enforced; the free-space check ($DELTA_MIB MiB) must fail alone"
+      # The dump stays on disk until the free-space check has read it; it is removed when this step exits.
+      trap 'sudo rm -f -- "$scratch"/core.*' EXIT
+    fi
   else
     soft="$(ulimit -S -c)"; hard="$(ulimit -H -c)"; pattern="$(cat /proc/sys/kernel/core_pattern)"
     say "prove: this step inherits ulimit -c $soft:$hard, core_pattern $pattern, DOTNET_DbgEnableMiniDump=${DOTNET_DbgEnableMiniDump:-unset}"
@@ -259,8 +278,14 @@ CS
     say "prove: after the $how crash, $count new dump file(s)"
     if [ "$count" -ne 0 ]; then
       printf '%s\n' "$seen" | describe prove
-      sudo rm -f -- "$scratch"/core.*
-      fail "prove: the $how crash of a $PROBE_THREADS-thread .NET probe left $count dump file(s); the sweep does not run"
+      if [ "$mode" = red-space ]; then
+        say "prove: red-space -- $count dump file(s) left in place for the free-space check"
+      else
+        sudo rm -f -- "$scratch"/core.*
+        fail "prove: the $how crash of a $PROBE_THREADS-thread .NET probe left $count dump file(s); the sweep does not run"
+      fi
+    elif [ "$mode" = red-space ]; then
+      fail "prove: RED ARM (red-space) -- the $how crash left no dump file with suppression OFF, so the free-space check has nothing to see"
     fi
     [ "$late" = 0 ] || fail "prove: the probe ($how) did not die within 120 s and left no dump file"
     [ "$status" -ge 128 ] || fail "prove: the probe ($how) exited $status, not by a signal, so it did not crash"
@@ -272,8 +297,11 @@ CS
   if [ "$mode" = red ]; then
     fail "prove: RED ARM -- the probe crashed twice with suppression OFF and the census saw nothing, so the proof is blind"
   fi
+  if [ "$mode" = red-space ]; then
+    fail "prove: RED ARM (red-space) -- the probe crashed twice with suppression OFF and the free-space check saw nothing, so it is blind"
+  fi
   census > "$state/census-proven.txt"
-  say "prove: PASS (2 crashes of a $PROBE_THREADS-thread .NET probe, 0 new files, under 64 MiB on every filesystem)"
+  say "prove: PASS (2 crashes of a $PROBE_THREADS-thread .NET probe, 0 new files, under $DELTA_MIB MiB on every filesystem)"
   ;;
 
 recheck)

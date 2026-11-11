@@ -1,0 +1,31 @@
+package main
+
+import "fmt"
+
+// C41 green control: the same function with a short variable declaration, `current := node`.
+type Node struct {
+	Kind   int
+	Parent *Node
+}
+
+func (n *Node) Label() int { return n.Kind }
+
+func depth(node *Node) (int, int) {
+	if node.Kind < 0 {
+		return 0, 0
+	}
+	label := node.Label()
+	current := node
+	d := 0
+	for current != nil {
+		d++
+		current = current.Parent
+	}
+	return label, d
+}
+
+func main() {
+	root := &Node{Kind: 1}
+	leaf := &Node{Kind: 3, Parent: &Node{Kind: 2, Parent: root}}
+	fmt.Println(depth(leaf)) // Go: 3 3
+}

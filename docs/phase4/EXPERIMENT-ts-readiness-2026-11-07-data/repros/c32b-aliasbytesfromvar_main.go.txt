@@ -1,0 +1,18 @@
+package main
+
+import (
+	"fmt"
+
+	"repro/c32b-aliasbytesfromvar/wrap"
+)
+
+// C32 variant (RED at 38caf3558a): the same alias, converted from a string variable. The constant is not the ingredient;
+// the alias is. The green control is c23b-crosspkgbytes (the same lib.Value, imported directly).
+func main() {
+	s := "null"
+	var result any
+	if result == nil {
+		result = wrap.Value(s)
+	}
+	fmt.Println(string(result.(wrap.Value))) // Go: null
+}

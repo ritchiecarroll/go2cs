@@ -1,0 +1,3 @@
+module repro/c36ctl-inttotypeparam
+
+go 1.26

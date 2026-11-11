@@ -74,13 +74,13 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
          goroutines;
        - osx-x64, macOS 15.7.9: kern.num_taskthreads 3072; the first failure at 3,051.
        Each is the cap less about 21 runtime and host threads, exact to the thread. The go statement itself throws,
-       synchronously, from the thread start at src/core/golib/runtime/Goroutine.cs:1278
+       synchronously, from the thread start at src/core/golib/runtime/Goroutine.cs:1285
        (`GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`). Found when internal/synctest's
        TestWaitGroupManyBubbles (about 10,100 live goroutines) died on both mac runners at the 1.26.10.3 re-bank. A
        developer Mac's cap may differ, so the figures above are stated as the hosted readings, not as macOS's limit. -->
   <!-- [Sizing M:N scheduling](DESIGN-mn-scheduler-sizing.md) has the measurements and what removing
        the limit would take (internal record, unlinked 2026-10-26, OQ-1). -->
-  <!-- Thread reuse: src/core/golib/runtime/Goroutine.cs:1278 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`.
+  <!-- Thread reuse: src/core/golib/runtime/Goroutine.cs:1285 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`.
        The figures are lane R's ParkStorm reading in docs/DESIGN-mn-scheduler-sizing.md §1 (Windows x64, 16 hardware
        threads, 31 GB RAM, Go 1.26.10, Release, today's 256 MiB stack reserve): 10,000 parked at 622 MB and 4.4 s against
        Go's 99 MB and 0.07 s; 100,000 at 5,904 MB and 302 s; 1,000,000 never parked within 600 s. -->
@@ -88,8 +88,8 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   appears only when every goroutine, `main` included, waits on a nil channel or an empty `select {}`. A
   deadlock on an ordinary channel or lock blocks forever. Break in with a debugger: each goroutine is a
   thread named `goroutine-N`.
-  <!-- src/core/golib/runtime/Goroutine.cs:1036 `internal static bool IsForeverWait(WaitReason reason) =>`
-       and :1095 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
+  <!-- src/core/golib/runtime/Goroutine.cs:1043 `internal static bool IsForeverWait(WaitReason reason) =>`
+       and :1102 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
 * **Stacks don't grow.** A goroutine's thread reserves 256 MB (`GO2CS_GOROUTINE_STACK` changes it), and
   `main` gets the first thread's stack, usually far less. Recursion past that ends the process with no
   panic and no deferred calls, so run deep recursion in a goroutine. A goroutine the converter proves cannot
@@ -102,7 +102,7 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   stops the panic even when a deferred function calls it. An unexported one that another package defers
   through a func value returns nil.
   <!-- docs/ConversionStrategies.md, the recover-in-helper paragraph below the catchError sample; the read:
-       src/core/golib/builtin.cs:369 `public static object? recover(bool calledByDefer) => calledByDefer ? recover() : null;`. -->
+       src/core/golib/builtin.cs:370 `public static object? recover(bool calledByDefer) => calledByDefer ? recover() : null;`. -->
 * **A crash's traceback is sometimes shorter than Go's.** An unrecovered panic prints Go's panic lines,
   the whole chain included (`panic: message [recovered, repanicked]`, and one TAB-indented line per
   earlier panic), and exits with status 2. A goroutine that panics while `main` returns still gets its
@@ -239,14 +239,19 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 
 The [validated modules](ValidatedModules.md) page is still short.
 
-* **A plain `-recurse` (your module plus its dependencies) applies one build tag for you, `safe`**,
-  while the standard library is converted with Go's portable tags, `purego` and `math_big_pure_go`.
-  So a dependency with an assembly fast path converts the fast path unless its fallback is behind
-  `safe`: pass its portable tag (`purego` is the common one). An explicit `-tags` replaces every
-  default, so include `safe` with yours, and under `-tests` include `purego,math_big_pure_go` too.
+* **A dependency's assembly converts to methods that throw when called, unless a tag deselects it.**
+  A plain `-recurse` (your module plus its dependencies) applies `safe`, `purego` and `noasm` for
+  you, so a fast path behind `!purego` or `!noasm` is replaced by the library's pure-Go fallback
+  ([Build tags for a module](ConvertingAModule.md#build-tags-for-a-module)). A file gated on the
+  architecture alone has no such fallback: zeebo/xxh3's `accum_stubs_amd64.go` declares its vector
+  routines with no body, so they convert to stubs. xxh3 calls them only when the CPU reports AVX2,
+  AVX-512 or SSE2, which the converted klauspost/cpuid never does under `noasm`, so hashing works and
+  only code that forces a vector path on (xxh3's own tests do) throws. An explicit `-tags` replaces
+  every default, so include `safe,purego,noasm` with yours, and under `-tests` include
+  `math_big_pure_go` too.
 * **A test suite that imports testify depends on the `safe` tag.** Its bundled go-spew does pointer
   arithmetic into `reflect.Value` at load, which the runtime library refuses by design, and go-spew's
-  `safe` tag selects its fallback. `-recurse` passes that tag for you
+  `safe` tag selects its fallback. `-recurse` passes that tag for you, with `purego` and `noasm`
   ([Build tags for a module](ConvertingAModule.md#build-tags-for-a-module)). Drop it, with
   `-module-safe-tag=false` or an explicit `-tags` that leaves it out, and the converted test program
   dies at startup.
