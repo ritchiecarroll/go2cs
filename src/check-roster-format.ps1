@@ -3095,6 +3095,53 @@ Assert-Equal 'linux unread: a pending row needs no evidence' $null (Get-LinuxUnr
 Assert-Equal 'linux unread: a bare segment is not this check''s (the format rule owns it)' $null (Get-LinuxUnreadRefusal -Segment (& $linSeg 3840 2 $null $null 0 0))
 Assert-Equal 'linux format: a pending segment spells its note' '3840 + 2 (linux-x64; linux-arm64: pending)' (Format-DarwinSegment (& $linPendingSeg 3840 2))
 
+
+# RED STUBS (S7-a piece 5): the ledger reader and its refusals do not exist yet; the fix replaces these.
+function Read-LinuxArm64Ledger { param([string] $Path) return [PSCustomObject]@{ Records = @(); HeaderError = 'unimplemented' } }
+function Get-LinuxArm64LedgerRefusals { param($Records, $Rows, [bool] $BankClosed) return @() }
+
+# THE UNMEASURED LEDGER (S7-a; COORD 2026-11-10, P2's S6 rule; DATA-la64-s7-bank-plan.md 5.3), against fixtures. One TSV,
+# row / reason / shard / run, names each linux row that does not bank on linux-arm64 in the release and why. A blank
+# reason is refused, as an UNMEASURED package row's is; so is a line for a banked row, a line naming no applicable
+# linux row, and a row listed twice. Once the bank closes ($LinuxArm64BankClosed), a pending row with no line is refused.
+# A row a guard REFUSES stays pending, and its ledger line is what accepts it.
+$luRows = Read-FixtureRoster @(
+    "| [``lu/banked``](https://x/lub) | 5 |  | Banked. $dot linux: 5 (linux-x64; linux-arm64: 5) $dot [proof](p.md) |"
+    "| [``lu/pend``](https://x/lup) | 5 |  | Pending. $dot linux: 5 (linux-x64; linux-arm64: pending) $dot [proof](p.md) |"
+    "| [``lu/pend2``](https://x/lup2) | 5 |  | Pending. $dot linux: 6 (linux-x64; linux-arm64: pending) $dot [proof](p.md) |"
+    "| [``lu/na``](https://x/lun) | 5 |  | Windows only. $dot linux: n/a $dot [proof](p.md) |")
+$luLine = { param($n, $row, $reason, $shard = 'W1-3', $run = '1') [PSCustomObject]@{ Line = $n; row = $row; reason = $reason; shard = $shard; run = $run } }
+$luRefusals = { param($records, [bool] $closed) @(Get-LinuxArm64LedgerRefusals -Records $records -Rows $luRows -BankClosed $closed) }
+Assert-Equal 'ledger: a pending row with a reasoned line, bank open, refuses nothing' '' ((& $luRefusals @((& $luLine 2 'lu/pend' 'arch-count Refusal: names 1 of the 2 missing verdicts')) $false) -join '; ')
+Assert-Equal 'ledger: bank open, a pending row needs no line' '' ((& $luRefusals @() $false) -join '; ')
+foreach ($case in @(
+        @('a blank reason', @((& $luLine 2 'lu/pend' '  ')), 'blank reason'),
+        @('a blank shard', @((& $luLine 2 'lu/pend' 'host difference' '')), 'blank shard'),
+        @('a line for a banked row', @((& $luLine 2 'lu/banked' 'stale')), 'a linux-arm64 reading'),
+        @('a line naming no roster row', @((& $luLine 2 'lu/nowhere' 'x')), 'no applicable linux roster row'),
+        @('a line naming an n/a row', @((& $luLine 2 'lu/na' 'x')), 'no applicable linux roster row'),
+        @('a row listed twice', @((& $luLine 2 'lu/pend' 'a'), (& $luLine 3 'lu/pend' 'b')), 'listed 2 times'))) {
+    $got = (& $luRefusals $case[1] $false) -join '; '
+    Assert-Equal "ledger refuses $($case[0]), by name" $true ($got -match [regex]::Escape($case[2]))
+}
+$closedGot = (& $luRefusals @((& $luLine 2 'lu/pend' 'host difference')) $true) -join '; '
+Assert-Equal 'ledger: bank closed, a pending row with no line is refused by name' $true (($closedGot -match 'lu/pend2') -and ($closedGot -notmatch 'lu/pend[^2]'))
+Assert-Equal 'ledger: bank closed, every pending row with a line refuses nothing' '' ((& $luRefusals @((& $luLine 2 'lu/pend' 'a'), (& $luLine 3 'lu/pend2' 'b')) $true) -join '; ')
+$luFile = Join-Path ([System.IO.Path]::GetTempPath()) ('g2cs-la64-ledger-' + [Guid]::NewGuid().ToString('N') + '.tsv')
+try {
+    [System.IO.File]::WriteAllText($luFile, "row`treason`tshard`trun`nlu/pend`tthe arm leg died at a throwing stub (load_g)`tW1-3`t42`n")
+    $luRead = Read-LinuxArm64Ledger -Path $luFile
+    Assert-Equal 'ledger file: a line reads as row / reason / shard / run with its line number' 'lu/pend|the arm leg died at a throwing stub (load_g)|W1-3|42|2' ("$($luRead.Records[0].row)|$($luRead.Records[0].reason)|$($luRead.Records[0].shard)|$($luRead.Records[0].run)|$($luRead.Records[0].Line)")
+    [System.IO.File]::WriteAllText($luFile, "row`treason`tshard`n")
+    Assert-Equal 'ledger file: a header that is not row / reason / shard / run is named' $true ("$((Read-LinuxArm64Ledger -Path $luFile).HeaderError)" -match 'row\\treason\\tshard\\trun')
+}
+finally { Remove-Item -LiteralPath $luFile -Force -ErrorAction SilentlyContinue }
+# A REFUSED row (a guard's Refusal) is accepted pending only with its ledger line; never with a reading.
+Assert-Equal 'ledger: a refused row that is pending and ledgered is accepted' $null (Get-LinuxSegmentRefusal -Records $linCountShort -Segment (& $linPendingSeg 9 0) -Ledgered)
+Assert-Equal 'ledger: a refused row that is pending and NOT ledgered is still refused' $true ($null -ne (Get-LinuxSegmentRefusal -Records $linCountShort -Segment (& $linPendingSeg 9 0)))
+Assert-Equal 'ledger: a refused row carrying a reading is refused, ledger or not' $true ($null -ne (Get-LinuxSegmentRefusal -Records $linCountShort -Segment (& $linSeg 9 0 'linux-x64' 'linux-arm64' 2 0) -Ledgered))
+Assert-Equal 'ledger: a ledgered row that banks is refused (banked with pending), ledger or not' $true ($null -ne (Get-LinuxSegmentRefusal -Records $linEqual -Segment (& $linPendingSeg 3840 2) -Ledgered))
+
 # THE LINUX EVIDENCE DIRECTORY (S7-a; S7-c fills it). The ONE place the two-RID linux evidence is named, relative to
 # the repository root, `{pin}` standing for the corpus pin: one TSV per shard in the mac form (shard, row, RID,
 # verdicts, matched, disclosed, divergent, new, status, agree, absent, divergent_names), a line per row per RID.

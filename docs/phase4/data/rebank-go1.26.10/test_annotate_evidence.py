@@ -194,6 +194,28 @@ try:
             case(name, rc == 0 and f'· linux: {want} ·' in roster, f'rc {rc}, out {out!r}, err {err.strip()!r}')
         else:
             case(name, False, f'{args.guard} declares no $LinuxRidEvidenceDirectory')
+    # THE UNMEASURED LEDGER (S7-a; DATA-la64-s7-bank-plan.md 5.3). A shape a guard refuses stays pending, and the
+    # guard's declared ledger ($LinuxArm64LedgerPath) accepts it: a refused row with a reasoned ledger line is written
+    # pending and listed, not refused. A blank reason accepts nothing.
+    ledger_declared = re.compile(r"^\$LinuxArm64LedgerPath = '[^']*'", re.M)
+    LEDGER = f'{NEW}/linux-arm64/UNMEASURED.tsv'
+    refused_lines = [rids_line('linux-x64', 'validated', 8, 6, 2, names='d1;d2'), rids_line('linux-arm64', 'DISC', 6, 5, 1, absent='a1', names='d1')]
+    if ledger_declared.search(guard_text):
+        hop_guard = declared_line.sub("$DarwinEvidenceDirectory = 'docs/phase4/h10-evidence/go{pin}/darwin'", guard_text, count=1)
+        write(os.path.join(root, 'src/check-roster-format.ps1'), ledger_declared.sub(f"$LinuxArm64LedgerPath = '{LEDGER}'", hop_guard, count=1))
+        for reason, ok_pending, name in (('combined Refusal: names 1 of the 2 missing verdicts', True, 'linux --rids: a refused row with a reasoned ledger line is written pending, not refused'),
+                                         ('   ', False, 'linux --rids: a ledger line with a blank reason accepts nothing (still refused)')):
+            write(os.path.join(root, LEDGER), f'row\treason\tshard\trun\nf/pkg\t{reason}\tW1-1\t7\n')
+            if ok_pending:
+                out, err = rids_case(name, '6 + 2', refused_lines, '6 + 2 (linux-x64; linux-arm64: pending)')
+                case('linux --rids: the ledgered refusal is listed by name', 'UNMEASURED' in out and 'f/pkg' in out, f'out {out!r}')
+            else:
+                rids_case(name, '6 + 2', refused_lines, refused='names 1 of the 2 missing')
+        os.remove(os.path.join(root, LEDGER))
+    else:
+        for name in ('linux --rids: a refused row with a reasoned ledger line is written pending, not refused', 'linux --rids: the ledgered refusal is listed by name',
+                     'linux --rids: a ledger line with a blank reason accepts nothing (still refused)'):
+            case(name, False, f'{args.guard} declares no $LinuxArm64LedgerPath')
     # Single-RID mode (an x64-only re-bank) keeps a pending note and refuses a two-RID reading.
     write(os.path.join(root, 'src/check-roster-format.ps1'), declared_line.sub("$DarwinEvidenceDirectory = 'docs/phase4/h10-evidence/go{pin}/darwin'", guard_text, count=1))
     for linux, want, name in (('5 (linux-x64; linux-arm64: pending)', '6 (linux-x64; linux-arm64: pending)', 'linux single-RID: a pending note is kept while linux-x64 is re-banked'),
