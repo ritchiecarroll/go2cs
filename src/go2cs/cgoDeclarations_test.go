@@ -520,22 +520,23 @@ func TestCgoRecognitionSummarySaysWhenCmdCgoDidNotRun(t *testing.T) {
 // C library's symbol versions, so it is read and logged but not compared. Each regenerated file is logged whole, as
 // base64 on one line, so a fixture.go that changes is re-committed from this test's own output.
 func TestTheCgoFixtureIsCmdCgosOutputForFixtureGo(t *testing.T) {
-	requireCmdCgoOutput(t, cgoFixtureDir, "example.com/cgofixture")
+	requireCmdCgoOutput(t, cgoFixtureDir, "example.com/cgofixture", "fixture.cgo1.go", "cgo_gotypes.go", "cgo_import.go")
 }
 
-// cgoPhase2FixtureDir holds cgo Phase 2's extern-only fixture and the three files cmd/cgo generated from it
+// cgoPhase2FixtureDir holds cgo Phase 2's extern-only fixture and the two files cmd/cgo generated from it
 // (testdata/cgo/phase2/README.md): the trees the converter's cgo route is tested on where no C compiler is.
 var cgoPhase2FixtureDir = filepath.Join("testdata", "cgo", "phase2")
 
-// Phase 2's fixture is made and held the same way as Phase 1's (increment 5a-0).
+// Phase 2's fixture is made and held the same way as Phase 1's (increment 5a-0), without cgo_import.go: go list
+// hands back none for it (README.md).
 func TestTheCgoPhase2FixtureIsCmdCgosOutputForFixtureGo(t *testing.T) {
-	requireCmdCgoOutput(t, cgoPhase2FixtureDir, "example.com/cgophase2")
+	requireCmdCgoOutput(t, cgoPhase2FixtureDir, "example.com/cgophase2", "fixture.cgo1.go", "cgo_gotypes.go")
 }
 
 // requireCmdCgoOutput makes fixtureDir's generated files again from its fixture.go, in a module named modulePath, and
-// compares them with the committed ones. A generated file not yet committed fails by name, and its REGEN line carries
+// compares each of names with the committed one. A generated file not yet committed fails by name, and its REGEN line carries
 // the license header the renamed files take, so it can be committed from the decode as it stands.
-func requireCmdCgoOutput(t *testing.T, fixtureDir, modulePath string) {
+func requireCmdCgoOutput(t *testing.T, fixtureDir, modulePath string, names ...string) {
 	t.Helper()
 	requireCCompiler(t)
 
@@ -605,6 +606,12 @@ func requireCmdCgoOutput(t *testing.T, fixtureDir, modulePath string) {
 	}
 
 	for _, name := range []string{"fixture.cgo1.go", "cgo_gotypes.go", "cgo_import.go"} {
+		if _, found := generated[name]; !found && !slices.Contains(names, name) {
+			t.Logf("READING %s: not handed back, as expected", name)
+		}
+	}
+
+	for _, name := range names {
 		text, found := generated[name]
 
 		if !found {
