@@ -38,7 +38,7 @@ namespace go;
 /// <c>TrimMode=partial</c> and is refused by that tripwire under a full trim, exactly as before.
 /// </para>
 /// </remarks>
-public static class GoTypeRegistry
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoTypeRegistry
 {
     /// <summary>
     /// A Go struct: its fields, constructors and properties (field-level record members, a struct's zero value, the

@@ -12,7 +12,7 @@ namespace go;
 /// <summary>
 /// Represents an untyped complex value.
 /// </summary>
-public readonly struct UntypedComplex(complex128 value) : IEquatable<UntypedComplex>
+[EditorBrowsable(EditorBrowsableState.Never)] public readonly struct UntypedComplex(complex128 value) : IEquatable<UntypedComplex>
 {
     // Value of the struct 'UntypedComplex'
     private readonly complex128 m_value = value;

@@ -76,7 +76,7 @@ namespace go;
 /// <typeparam name="TElem">Field type.</typeparam>
 /// <param name="structPtr"><see cref="ж{T}"/> heap reference of struct.</param>
 /// <returns>A <c>ref</c> to the field value within the struct <see cref="ж{T}"/> reference.</returns>
-public delegate ref TElem FieldRefFunc<TElem>(object structPtr);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate ref TElem FieldRefFunc<TElem>(object structPtr);
 
 /// <summary>
 /// Delegate that returns a <c>ref</c> to a field value within a struct <see cref="ж{T}"/> reference.
@@ -85,7 +85,7 @@ public delegate ref TElem FieldRefFunc<TElem>(object structPtr);
 /// <typeparam name="TElem">Field type.</typeparam>
 /// <param name="structRef">Reference to struct.</param>
 /// <returns>A <c>ref</c> to the field value within the struct <see cref="ж{T}"/> reference.</returns>
-public delegate ref TElem FieldRefFunc<T, TElem>(ref T structRef);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate ref TElem FieldRefFunc<T, TElem>(ref T structRef);
 
 /// <summary>
 /// Delegate that returns a <see cref="ж{T}"/> POINTER to a field whose storage lives in a DIFFERENT
@@ -116,13 +116,13 @@ public delegate ref TElem FieldRefFunc<T, TElem>(ref T structRef);
 /// accessor's return type.
 /// </para>
 /// </remarks>
-public delegate ж<TElem> FieldPtrFunc<T, TElem>(ref T structRef);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate ж<TElem> FieldPtrFunc<T, TElem>(ref T structRef);
 
 /// <summary>
 /// Helper class for creating a <see cref="FieldRefFunc{TElem}"/> delegate for a struct field.
 /// </summary>
 /// <typeparam name="T">Type of struct.</typeparam>
-public static class FieldRef<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] T> where T : struct
+[EditorBrowsable(EditorBrowsableState.Never)] public static class FieldRef<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] T> where T : struct
 {
     /// <summary>
     /// Creates a <see cref="FieldRefFunc{TElem}"/> delegate for a struct field.
@@ -178,7 +178,7 @@ public static class FieldRef<[DynamicallyAccessedMembers(DynamicallyAccessedMemb
 /// nil question without reflection. See <see cref="ж{T}.IsNilPointer"/> for the structural-vs-
 /// value-peeking distinction.
 /// </summary>
-public interface INilPointer
+[EditorBrowsable(EditorBrowsableState.Never)] public interface INilPointer
 {
     /// <summary>
     /// Gets a flag indicating whether this box IS the nil pointer (structural — the
@@ -315,7 +315,7 @@ public interface INilPointer
 /// <c>Data</c> word back to the storage it names (<see cref="SliceHeaderBox{T, TDst}"/>, <see cref="StringHeaderBox{TDst}"/>).
 /// </para>
 /// </remarks>
-public interface IUnsafePointer
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IUnsafePointer
 {
     /// <summary>The managed box this pointer was minted from, when there is one; null for numeric and native mints.</summary>
     /// <remarks>unsafe.Pointer's own public property implements it; the default serves a probe type that carries none.</remarks>
@@ -424,7 +424,7 @@ internal readonly struct RuntimeArrayViewCheck(Type elementType) : IArrayViewChe
 /// Defines an interface that represents a pointer <see cref="ж{T}"/> type.
 /// </summary>
 /// <typeparam name="T">Type for heap based reference.</typeparam>
-public interface IPointer<T> : IGoReflectPointer
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IPointer<T> : IGoReflectPointer
 {
     // STRUCTURAL nil first: there is no storage to read, so the pointee reads as the zero value. Every other box
     // resolves its REAL storage through Value, including a struct-field or array-element reference, whose own `m_val`

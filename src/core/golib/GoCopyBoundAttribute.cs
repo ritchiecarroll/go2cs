@@ -26,4 +26,4 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Method)]
-public sealed class GoCopyBoundAttribute : Attribute;
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoCopyBoundAttribute : Attribute;

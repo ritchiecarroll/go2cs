@@ -24,7 +24,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly)]
-public sealed class GoExtensionHostListAttribute : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoExtensionHostListAttribute : Attribute
 {
     /// <summary>
     /// Gets or sets whether every listed class names the other assemblies whose types its extension methods extend
@@ -44,7 +44,7 @@ public sealed class GoExtensionHostListAttribute : Attribute
 /// </remarks>
 /// <param name="host">The listed class.</param>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-public sealed class GoExtensionHostAttribute([DynamicallyAccessedMembers(GoExtensionHostAttribute.HostMembers)] Type host)
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoExtensionHostAttribute([DynamicallyAccessedMembers(GoExtensionHostAttribute.HostMembers)] Type host)
     : Attribute
 {
     // What the scan reads from a host: its static methods, public and not. The annotation keeps them through a trim.

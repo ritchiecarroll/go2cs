@@ -35,7 +35,7 @@ namespace go;
 /// to zero, because a zero here is exactly the silent wrong answer the arc exists to remove.
 /// </para>
 /// </remarks>
-public static class GoCgoDynamicImports
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoCgoDynamicImports
 {
     // Keyed on the method itself: the same trampoline resolves to the same export for the process's
     // life, and the dictionary also keeps the resolution off the hot path after first call.

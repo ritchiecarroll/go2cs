@@ -32,7 +32,7 @@ namespace go.golib;
 /// thread that made it.
 /// </summary>
 [EventSource(Name = ProviderName)]
-public sealed class ProfileLabelEvents : EventSource
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class ProfileLabelEvents : EventSource
 {
     /// <summary>The provider name a sampler enables.</summary>
     public const string ProviderName = "go2cs-ProfileLabels";

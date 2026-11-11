@@ -19,7 +19,7 @@ namespace go;
 /// <c>runtime·syscall_rawsyscalln</c>, which reads errno after EVERY call and leaves the failure test
 /// to the caller (syscall's <c>errno</c>, <c>errnoX</c> and <c>errnoPtr</c>): that is <see cref="AlwaysRead"/>.
 /// </summary>
-public enum GoLibcErrnoRule
+[EditorBrowsable(EditorBrowsableState.Never)] public enum GoLibcErrnoRule
 {
     /// <summary>The call cannot fail in the errno sense; errno is never read.</summary>
     None,
@@ -74,7 +74,7 @@ public enum GoLibcErrnoRule
 /// than in registers, IS modelled since S9 (2026-10-02): see <see cref="VariadicStackSlot"/>.
 /// </para>
 /// </remarks>
-public static unsafe class GoLibcCall
+[EditorBrowsable(EditorBrowsableState.Never)] public static unsafe class GoLibcCall
 {
     /// <summary>The widest keystone entry: <c>Syscall9</c>.</summary>
     public const int MaxArgs = 9;

@@ -24,4 +24,4 @@ namespace go;
 /// element that is itself an array wrapper (<see cref="IArray"/>) or one of these structs, so
 /// <c>[2]digest</c> copies both digests' arrays exactly as Go does.
 /// </remarks>
-public interface IGoValueClone : ICloneable;
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IGoValueClone : ICloneable;

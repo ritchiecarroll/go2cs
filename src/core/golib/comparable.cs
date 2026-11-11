@@ -19,7 +19,7 @@ namespace go;
 /// Defines constraints for the `==`, `!=` operators.
 /// </remarks>
 /// <typeparam name="T">Constrained type.</typeparam>
-public interface comparable<T> : 
+[EditorBrowsable(EditorBrowsableState.Never)] public interface comparable<T> : 
     IEqualityOperators<T, T, bool> 
     where T : comparable<T>
 {

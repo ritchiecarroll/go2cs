@@ -77,7 +77,7 @@ internal interface IFirstFieldView
     object? FirstFieldParent { get; }
 }
 
-public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IExactOrderToken, IFirstFieldView, IReinterpretView, IPackageLevelStorage
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IExactOrderToken, IFirstFieldView, IReinterpretView, IPackageLevelStorage
 {
     private readonly object m_source;
     private readonly FieldRefFunc<T> m_accessor;

@@ -18,7 +18,7 @@ namespace go;
 /// (<see cref="go.golib.Goroutine.BoundedStackReserve"/>). An unmarked <c>go</c> statement, and any code that starts a
 /// goroutine without a mark, keeps the default.
 /// </remarks>
-public enum GoStack
+[EditorBrowsable(EditorBrowsableState.Never)] public enum GoStack
 {
     /// <summary>The Go-scale reservation: the goroutine may recurse as deeply as Go allows.</summary>
     Default,

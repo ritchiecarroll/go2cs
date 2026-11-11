@@ -16,6 +16,6 @@ namespace go;
 /// reports phantom Go fields).
 /// </summary>
 [AttributeUsage(AttributeTargets.Field)]
-public sealed class GoReflectCompanionAttribute : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoReflectCompanionAttribute : Attribute
 {
 }

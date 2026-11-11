@@ -44,7 +44,7 @@ namespace go.golib;
 /// report.
 /// </para>
 /// </remarks>
-public static class CrashReport
+[EditorBrowsable(EditorBrowsableState.Never)] public static class CrashReport
 {
     /// <summary>
     /// Go's <c>^uintptr(0)</c> — "no additional crash output is configured".

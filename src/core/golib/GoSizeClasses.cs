@@ -32,7 +32,7 @@ namespace go;
 /// <c>noscan</c> false). A request past the largest small class rounds up to whole 8 KiB pages.
 /// </para>
 /// </remarks>
-public static class GoSizeClasses
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoSizeClasses
 {
     private static ReadOnlySpan<ushort> SizeClassToSize =>
     [

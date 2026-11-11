@@ -16,7 +16,7 @@ namespace go;
 /// A stack-only Go slice view over a <see cref="Span{T}"/>. Unlike <see cref="slice{T}"/>, an
 /// <see cref="sslice{T}"/> cannot escape the current stack frame or be boxed, stored, or captured.
 /// </summary>
-public ref struct sslice<T>
+[EditorBrowsable(EditorBrowsableState.Never)] public ref struct sslice<T>
 {
     // The full accessible window establishes capacity; m_length establishes the Go slice length.
     private Span<T> m_span;
@@ -259,7 +259,7 @@ public ref struct sslice<T>
     }
 }
 
-public static class SSliceExtensions
+[EditorBrowsable(EditorBrowsableState.Never)] public static class SSliceExtensions
 {
     /// <summary>
     /// Creates a stack-only slice view over a span. The view shares the span's storage and does not allocate.

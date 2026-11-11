@@ -37,7 +37,7 @@ namespace go;
 /// </remarks>
 /// <typeparam name="TKey">Type of the map's keys, the set's elements.</typeparam>
 /// <typeparam name="TValue">Type of the map's values, which the view ignores.</typeparam>
-public sealed class MapKeySet<TKey, TValue> : IReadOnlySet<TKey> where TKey : notnull
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class MapKeySet<TKey, TValue> : IReadOnlySet<TKey> where TKey : notnull
 {
     private readonly IMap<TKey, TValue> m_map;
 

@@ -60,7 +60,7 @@ namespace go;
 /// FALSE of a field or element reference whose root merely happens to be reference-bearing. The
 /// middle answer below is that class, and it is the one the merged Q44 arm turned into a token.
 /// </remarks>
-public enum PointerStorage
+[EditorBrowsable(EditorBrowsableState.Never)] public enum PointerStorage
 {
     /// <summary>
     /// No storage whose address means anything: the value is an order token, never an address.

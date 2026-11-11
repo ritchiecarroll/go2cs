@@ -36,7 +36,7 @@ namespace go;
 /// type, in a stack buffer (a pooled one above 4 KiB): nothing is allocated on the GC heap per call.
 /// </para>
 /// </remarks>
-public readonly struct GoImage<S>
+[EditorBrowsable(EditorBrowsableState.Never)] public readonly struct GoImage<S>
 {
     private readonly ж<S> m_box;
     private readonly nint m_low;

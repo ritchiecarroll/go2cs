@@ -42,6 +42,6 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Method)]
-public sealed class GoExternalStubAttribute : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoExternalStubAttribute : Attribute
 {
 }

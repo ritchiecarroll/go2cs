@@ -17,7 +17,7 @@ namespace go;
 /// no non-zero-size slice is longer than <see cref="Array.MaxLength"/>; a zero-size element never spans
 /// its storage and keeps Go's own length rules (its representation limit stays Int32, the length field).
 /// </summary>
-public static class GoSliceLimit
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoSliceLimit
 {
     /// <summary>Whether <paramref name="length"/> is longer than any managed span can hold.</summary>
     public static bool LongerThanAnySpan(long length) => length > Array.MaxLength;

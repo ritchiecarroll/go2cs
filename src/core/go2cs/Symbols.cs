@@ -11,6 +11,9 @@
 
 namespace go2cs;
 
+// Tier 2 of docs/PublicSurface.md: golib ships this class, and converted code and go2cs-gen read it; a C#
+// consumer does not.
+[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
 public static class Symbols
 {
     public const string PackageSuffix = "_package";

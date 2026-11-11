@@ -58,7 +58,7 @@ namespace go.golib;
 /// lives in the method-sets file. A type can pass one and fail the other in both directions.
 /// </para>
 /// </remarks>
-public static partial class TypeExtensions
+[EditorBrowsable(EditorBrowsableState.Never)] public static partial class TypeExtensions
 {
     private static readonly ConcurrentDictionary<Type, bool> s_dynamicTypes = [];
     private static readonly ConcurrentDictionary<Type, MethodInfo?> s_typeEqualityOperators = [];

@@ -63,7 +63,7 @@ namespace go;
 /// <summary>
 /// Extension methods for <see cref="ж{T}"/> pointer references.
 /// </summary>
-public static class PointerExtensions
+[EditorBrowsable(EditorBrowsableState.Never)] public static class PointerExtensions
 {
     /// <summary>
     /// Yields this pointer in the form that carries its Go TYPE into interface space — itself when
@@ -705,7 +705,7 @@ public static class PointerExtensions
 /// is Go-observable) and <c>null</c> for a source it does not describe, which leaves the reinterpret
 /// exactly as it was. Unregistered pairs cost one static read.
 /// </remarks>
-public static class PrefixProjection<T, TDst>
+[EditorBrowsable(EditorBrowsableState.Never)] public static class PrefixProjection<T, TDst>
 {
     public static Func<ж<T>, ж<TDst>?>? Project;
 }

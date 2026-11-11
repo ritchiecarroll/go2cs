@@ -35,7 +35,7 @@ namespace go;
 /// <c>heap()</c> hands out a <c>ref</c> alias to it before any address is taken.
 /// </para>
 /// </remarks>
-public class StandardBox<T> : ж<T>
+[EditorBrowsable(EditorBrowsableState.Never)] public class StandardBox<T> : ж<T>
 {
     // A managed T lives here (reference-containing layouts cannot be pinned, and no syscall can
     // meaningfully take their address, so no slot exists for them).
@@ -268,7 +268,7 @@ internal sealed class HandleBox<T> : StandardBox<T>
 /// </para>
 /// </remarks>
 /// <typeparam name="T">Pointee type.</typeparam>
-public sealed class StaticBox<T> : StandardBox<T>, IPackageLevelStorage
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class StaticBox<T> : StandardBox<T>, IPackageLevelStorage
 {
     /// <summary>
     /// Creates the box of a package-level variable of type <typeparamref name="T"/>.
@@ -294,7 +294,7 @@ internal interface IPackageLevelStorage
 /// <summary>
 /// Go's non-heap question for a converted pointer.
 /// </summary>
-public static class PackageLevelStorage
+[EditorBrowsable(EditorBrowsableState.Never)] public static class PackageLevelStorage
 {
     /// <summary>
     /// True when <paramref name="pointer"/> addresses a package-level variable, or a field of one: the
