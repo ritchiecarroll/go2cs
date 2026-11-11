@@ -1,0 +1,58 @@
+# LOCAL PREVIEW readings, 2026-11-10/11, i7, at COORD's request. DIAGNOSTIC: NOT a gate result, never pushed as code.
+#
+# Trees (local commits in a scratch worktree, unsigned, never pushed, never a landing source; docs cites unresolved):
+#   129ca2b954 = 284 gate / master 50dd9a065c + P1's method-cap seat claude/p1-method-cap 02d843fe97 (C34 rides it).
+#                The merge conflicted in three docs files only; resolved per COORD's preview-tree ruling (cite hunks take
+#                one side as-is; the BOARD keeps both appended entries, HEAD's first).
+#   cd8983156b = 129ca2b954 + a DIAGNOSTIC converter patch (proof-tooling/diagpatch_skip_go2cs2002.py.txt): a package the
+#                GO2CS2002 non-self constraint-proxy check refuses is skipped and the run continues (COORD ruling 2).
+#   1714f5de61 = cd8983156b + R's C39 fix claude/r-ts-c39 dd8eeedaa8 (one docs cite hunk, same ruling), converted with
+#                "-tags safe,noasm, DIAGNOSTIC" (-recurse's default is `safe`; `noasm` is C43's diagnostic stand-in).
+# TS module: the same scratch tsc module (TypeScript ba29a56299 + cmd/parsedemo, cmd/checkdemo) as every earlier reading.
+#
+# 284 master alone (50dd9a065c, unpatched): the -recurse convert REFUSES at [107/142] internal/ls/lsconv, GO2CS2002 x6
+#   (MappedSpan[*ast.SourceFile] / MappedPosition[*ast.SourceFile] under lsconv.Script, whose SpanMap() returns a
+#   pointer), log.Fatalf, convert rc 1, nothing built. Predicted beforehand; MET. Same at 129ca2b954.
+#
+# Skipped by the diagnostic patch (named in every count): internal/ls/lsconv, internal/ls/autoimport, internal/ls,
+#   internal/project (all GO2CS2002). Their module dependents, which then fail at build on the missing project:
+#   cmd/tsc, internal/api, internal/api/requestfilesystem, internal/fourslash, internal/fourslash/tests/util,
+#   internal/ls/change, internal/lsp, internal/lsp/lspwatcher, internal/testutil/autoimporttestutil,
+#   internal/testutil/lsptestutil, internal/testutil/projecttestutil. None of the 15 is in any stage closure or the 68.
+#
+# cd8983156b (S1-S3; predictions posted before the build):
+#   S1 MET  closure fails in exactly one project, printer: CS1503 x1 (C39, out of 284). module clean (C33, C34 fixed),
+#           tsoptions builds (C35, C36 fixed); checker, compiler, checkdemo blocked.
+#   S2 MET  parse 26/26, bind 26/26, type-check 52/54, program and emit 53/63, failing printer; furthest: bind;
+#           harness 57 of 68 (failing internal/printer, 10 blocked).
+#   S3 HALF ast_package 4,085 methods (was 116,102; largest type astᴛJSDocTagBaseᴛpkg 533; none over 65,521): the
+#           TypeLoadException is gone. The demo does not run: module init dies in klauspost/cpuid's asm stub
+#           (NotImplementedException: asmCpuid ...; detect_x86.go is selected without `noasm`) -> C43.
+#
+# 1714f5de61, "-tags safe,noasm, DIAGNOSTIC" (cpuid and xxh3 are inside the parse closure, the type-check closure and the
+# 68; the tag changes only cpuid's file selection, detect_ref.go for detect_x86.go):
+#   S4 compile MET  closure rc 0, 0 errors: parse 26/26, bind 26/26, type-check 54/54, program and emit 63/63;
+#           furthest stage that compiles: program and emit; harness 68 of 68. No hand-patch to any converted C#.
+#   S3 rerun  the parse demo RUNS through its apphost (parsedemo.exe) and its demo output is IDENTICAL to native
+#           (good.ts + bad.ts, 8,101 bytes, sha 3d40bddc3d75 both sides). Under `dotnet parsedemo.dll` on Windows it
+#           panics ("ScriptKind must be specified when parsing source file: /parsedemo.dll"): os.Args comes from the
+#           Windows command line, which under the muxer includes the dll -> C44.
+#   Corpus  17,420 of 17,422 units MATCH native (compare.py with the lost-window fix, rc 1). The 2 are STACK OVERFLOWS
+#           (0xC00000FD) in the converted process: 00770 tests/cases/compiler/binderBinaryExpressionStress.ts and 00771
+#           binderBinaryExpressionStressJs.ts; native parses both -> C46 (a converted program's main runs on the OS
+#           default stack, 1 MB on Windows; Go grows a goroutine to 1 GB). No output divergence on any unit.
+#           Nodes 2,583,651, diagnostics 3,815 (native's counts). Converted ~81-102 s vs native ~3-20 s.
+#   S4 run  checkdemo (apphost) prints its first line identical to native ("file check.ts (181 bytes)"), then panics at
+#           checker init, rc 2, 26 of 318 bytes: "cannot read native memory as xxh3.str: its CLR layout is not its Go
+#           layout (field p is a managed reference where Go stores the value inline)", HashString128 <- checker.go:177
+#           -> C45 (xxh3 reinterprets a string/slice header as struct{p unsafe.Pointer; l uint} and then reads bytes at
+#           uintptr offsets from p, including from the end; a design scout, not a .4 gate).
+#
+# The proof harness's crash attribution (compare.py): the demo writes the corpus through a bufio.Writer flushed only at
+# exit, so a crashed process loses its buffered lines, and the old logic named the first missing unit as the crash.
+#   Negative control (the pre-fix logic, rebuilt by reversing the fix exactly; the fix is
+#   proof-tooling/compare.py.lost-window.diff), today's apphost, today's data: 17,401 of 17,422, "converted process crashed" x20
+#   (00752-00771) and "digest only" x1 (00751, a line truncated by the crash). REPRODUCED.
+#   The fix: 17,420 of 17,422, crashes at 00770 (window 00751, 19 units re-checked by -unit dump on both sides, all
+#   identical) and 00771 (window 00771, 0 re-checked). Independently, a by-hand -unit pass over 00751-00771 gave the same.
+#   An earlier wrapper printed "compare rc=0": `echo "... $(date) ... rc=$?"` reset $? (safety floor 7); the real rc was 1.
