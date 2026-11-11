@@ -183,6 +183,7 @@
     <None Include="$(MSBuildThisFileDirectory)deferFinallyDeadReceiverAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deferFinallyLowering.go" />
     <None Include="$(MSBuildThisFileDirectory)deferValueReceiverSnapshot_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)delegateArgWrap.go" />
     <None Include="$(MSBuildThisFileDirectory)deferLambdaReceiverCopy_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deferReceiverCopy_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deferredMarkerOperations.go" />

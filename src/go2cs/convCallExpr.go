@@ -2599,11 +2599,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						if argType := v.getType(callExpr.Args[i], false); argType != nil && !types.Identical(types.Unalias(argType), types.Unalias(delegateParamType)) {
 							if _, argIsSig := argType.Underlying().(*types.Signature); argIsSig {
 								if _, isLit := callExpr.Args[i].(*ast.FuncLit); !isLit && !typeContainsTypeParams(delegateParamType) {
-									if callExprContext.wrapArgWithNew == nil {
-										callExprContext.wrapArgWithNew = make(map[int]string)
-									}
-
-									callExprContext.wrapArgWithNew[i] = v.getCSharpTypeName(delegateParamType)
+									v.recordDelegateArgWrap(callExprContext, i, delegateParamType, callExpr.Args[i], argType)
 								}
 							}
 						}
@@ -2641,11 +2637,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						}
 
 						if argRendersNamedDelegate {
-							if callExprContext.wrapArgWithNew == nil {
-								callExprContext.wrapArgWithNew = make(map[int]string)
-							}
-
-							callExprContext.wrapArgWithNew[i] = v.getCSharpTypeName(paramType)
+							v.recordDelegateArgWrap(callExprContext, i, paramType, callExpr.Args[i], argType)
 						}
 					}
 				}

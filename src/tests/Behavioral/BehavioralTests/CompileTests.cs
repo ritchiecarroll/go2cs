@@ -1675,6 +1675,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNilFuncIfaceMethodValue() => CheckTarget("NilFuncIfaceMethodValue");
 
     [TestMethod]
+    public void CheckNilFuncNamedDelegateArg() => CheckTarget("NilFuncNamedDelegateArg");
+
+    [TestMethod]
     public void CheckNilMapKey() => CheckTarget("NilMapKey");
 
     [TestMethod]

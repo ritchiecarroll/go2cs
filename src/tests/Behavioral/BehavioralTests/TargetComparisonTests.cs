@@ -1678,6 +1678,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNilFuncIfaceMethodValue() => CheckTarget("NilFuncIfaceMethodValue");
 
     [TestMethod]
+    public void CheckNilFuncNamedDelegateArg() => CheckTarget("NilFuncNamedDelegateArg");
+
+    [TestMethod]
     public void CheckNilMapKey() => CheckTarget("NilMapKey");
 
     [TestMethod]

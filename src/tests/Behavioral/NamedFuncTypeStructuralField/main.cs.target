@@ -12,7 +12,7 @@ public partial struct item {
 public delegate bool By(ж<item> a, ж<item> b);
 
 public static void Sort(this By by, slice<item> items) {
-    var s = Ꮡ(new sorter(items: items, by: new Func<ж<item>, ж<item>, bool>(by)));
+    var s = Ꮡ(new sorter(items: items, by: NilSafeDelegateConversion<Func<ж<item>, ж<item>, bool>, By>(by)));
     s.run();
 }
 
