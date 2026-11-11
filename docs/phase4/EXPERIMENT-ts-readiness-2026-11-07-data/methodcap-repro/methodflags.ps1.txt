@@ -1,0 +1,17 @@
+# methodflags.ps1 <assembly.dll> <type full name> : the named type's methods by attribute set, generic arity and body
+# presence, from metadata only, plus its nested-type and MethodImpl counts.
+param([string]$Path, [string]$TypeName)
+Add-Type -AssemblyName System.Reflection.Metadata
+$fs = [System.IO.File]::OpenRead($Path)
+try {
+    $md = [System.Reflection.Metadata.PEReaderExtensions]::GetMetadataReader([System.Reflection.PortableExecutable.PEReader]::new($fs))
+    foreach ($h in $md.TypeDefinitions) {
+        $t = $md.GetTypeDefinition($h)
+        if (($md.GetString($t.Namespace) + "." + $md.GetString($t.Name)) -ne $TypeName) { continue }
+        $ms = foreach ($mh in $t.GetMethods()) { $md.GetMethodDefinition($mh) }
+        "{0}: methods {1}, nested types {2}, MethodImpls {3}" -f $TypeName, $ms.Count, $t.GetNestedTypes().Count, $t.GetMethodImplementations().Count
+        "by attributes:"; $ms | Group-Object { $_.Attributes.ToString() } | Sort-Object Count -Descending | % { "  {0,6}  {1}" -f $_.Count, $_.Name }
+        "by generic arity:"; $ms | Group-Object { $_.GetGenericParameters().Count } | Sort-Object Name | % { "  {0,6}  arity {1}" -f $_.Count, $_.Name }
+        "without a body (RVA 0): {0}" -f ($ms | ? { $_.RelativeVirtualAddress -eq 0 }).Count
+    }
+} finally { $fs.Dispose() }

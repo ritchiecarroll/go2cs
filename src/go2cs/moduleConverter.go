@@ -79,6 +79,10 @@ func NewModuleConverter(options Options) *ModuleConverter {
 func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 	fmt.Printf("Recursively converting module at %s\n", moduleDir)
 
+	// Announce the effective build tags, as -stdlib does: a bare -recurse run reports the module default
+	// (safe,purego,noasm) and that it is the default; an explicit -tags reports exactly what was passed.
+	fmt.Println(m.options.buildTagsAnnouncement("module"))
+
 	// The main module's directory is the CONTEXT every module-cache package is re-loaded from — see
 	// the load-shape note in processConversion. Resolve it absolute once: the per-package load sets
 	// it as the go command's working directory, and a relative path would resolve against whatever
@@ -1064,18 +1068,22 @@ func (m *ModuleConverter) writeRecurseBuildFile(path string, lines []string) {
 }
 
 // compileRuntimeIdentifierForTarget maps a conversion target (`os/arch`) to the RID whose go.* compile
-// asset matches the metadata the conversion read: the flavors push-nuget.ps1 ships (win-x64, linux-x64,
-// osx-x64, osx-arm64), keyed by GOOS because the record is. darwin ships the SAME build under both Mac
-// RIDs, so either would compile identically; the target's arch picks the one that names it. Any other
-// GOOS has no shipped twin and returns "", leaving the property unset.
+// asset matches the metadata the conversion read: the RID push-nuget.ps1 ships the corpus flavour serving the
+// target under (corpusFlavourOf). Each flavour has its own RID: win-x64, linux-x64, and linux-arm64, which
+// is a flavour of its own and not linux-x64's twin. darwin ships its one build under both Mac RIDs, so either
+// would compile identically; the target's arch picks the one that names it. A target outside the universe
+// takes its GOOS's flavour (linux/riscv64 compiles against linux-x64); a GOOS no flavour serves returns "",
+// leaving the property unset.
 func compileRuntimeIdentifierForTarget(targetPlatform string) string {
-	switch goosOfTarget(targetPlatform) {
-	case "windows":
+	switch flavour := corpusFlavourOf(corpusLattice(), targetPlatform); flavour {
+	case "windows/amd64":
 		return "win-x64"
-	case "linux":
+	case "linux/amd64":
 		return "linux-x64"
-	case "darwin":
-		if _, arch, _ := strings.Cut(targetPlatform, "/"); arch == "arm64" {
+	case "linux/arm64":
+		return "linux-arm64"
+	case "darwin/amd64":
+		if archOfTarget(targetPlatform) == "arm64" {
 			return "osx-arm64"
 		}
 

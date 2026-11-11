@@ -1,0 +1,30 @@
+package main
+
+import "fmt"
+
+// TS site: internal/printer namegenerator.go, core.IfElse(cond, g.IsFileLevelUniqueNameInCurrentFile, nil), where
+// IsFileLevelUniqueNameInCurrentFile is a func-typed FIELD of NameGenerator (C39): a func-typed value as the argument of
+// a type parameter T, which Go infers as the func type.
+func IfElse[T any](b bool, whenTrue T, whenFalse T) T {
+	if b {
+		return whenTrue
+	}
+	return whenFalse
+}
+
+type NameGenerator struct {
+	IsUnique func(name string, private bool) bool
+}
+
+func makeName(base string, check func(name string, private bool) bool) string {
+	if check == nil || check(base, false) {
+		return base
+	}
+	return base + "_1"
+}
+
+func main() {
+	used := map[string]bool{"x": true}
+	g := &NameGenerator{IsUnique: func(name string, private bool) bool { return !used[name] }}
+	fmt.Println(makeName("x", IfElse(true, g.IsUnique, nil)), makeName("x", IfElse(false, g.IsUnique, nil))) // Go: x_1 x
+}

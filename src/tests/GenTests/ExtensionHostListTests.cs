@@ -143,6 +143,19 @@ public class ExtensionHostListTests
         AssertEveryDeclaredHostIsListed(run.Sources.Values, "go.main_package");
     }
 
+    // StructTypeTemplate: methods promoted through an embed of the struct's own package are forwarded from
+    // `{pkg}ᴛ{Struct}ᴛpkg`.
+    [TestMethod]
+    public void ThePromotedMethodClassIsListed()
+    {
+        Dictionary<string, string> sources = PromotedHostClassTests.Generate(PromotedHostClassTests.Package);
+        string holder = $"go.pa{TempVarMarker}outer{TempVarMarker}pkg";
+
+        CollectionAssert.Contains(sources.Values.SelectMany(ExtensionHostsDeclaredIn).ToArray(), holder, "the case reaches the template's host");
+        CollectionAssert.Contains(sources.Values.SelectMany(ExtensionHostsListedIn).ToArray(), holder);
+        AssertEveryDeclaredHostIsListed(sources.Values);
+    }
+
     // LiteralInterceptorGenerator: an instance target's interceptor takes its receiver as `this`, in a `file` class
     // only its own file can name. The fixture compiles and runs, so the declaration of a file class binds.
     [TestMethod]
@@ -357,7 +370,7 @@ public class ExtensionHostListTests
     {
         ["InterfaceTypeTemplate:AssertSourceOverloadClass"] = (1, nameof(TheInterfaceAssertsClassIsListed)),
         ["InterfaceImplTemplate:PromotedTwinsClass"] = (1, nameof(ThePromotedTwinsClassIsListed)),
-        ["StructTypeTemplate:TemplateFooter"] = (1, nameof(TheCrossPackageSiblingClassIsListed)),
+        ["StructTypeTemplate:TemplateFooter"] = (2, nameof(ThePromotedMethodClassIsListed) + "; " + nameof(TheCrossPackageSiblingClassIsListed)),
         ["LiteralInterceptorGenerator:Emit"] = (2, nameof(TheInterceptorClassIsListedAndBinds) + "; ˢLiterals " + NoExtensionMethod),
         ["TemplateBase:TemplateHeader"] = (1, ListedByWriterOne + ": " + nameof(TheHostListGeneratorListsEveryStaticClassOfTheSources)),
         ["TypeGenerator:EmitGoTypeRegistrations"] = (1, ListedByWriterOne),

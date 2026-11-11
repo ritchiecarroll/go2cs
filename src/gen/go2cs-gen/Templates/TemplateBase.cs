@@ -48,6 +48,9 @@ internal abstract class TemplateBase
     ],
     StringComparer.Ordinal);
 
+    // Adds a using directive to the header from a template's body or footer, which render before it.
+    protected void AddUsing(string directive) => m_usings.Add(directive);
+
     public const string TypeElemIndent = "        ";
 
     public virtual string Usings => 

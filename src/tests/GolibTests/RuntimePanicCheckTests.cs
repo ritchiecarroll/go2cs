@@ -36,6 +36,9 @@ public class RuntimePanicCheckTests
     private static bool IsRuntimePackageType(Type type) =>
         (bool)s_check.GetMethod("IsRuntimePackageType", BindingFlags.Static | BindingFlags.NonPublic)!.Invoke(null, [type.FullName])!;
 
+    private static bool IsRuntimePackageTypeName(string typeName) =>
+        (bool)s_check.GetMethod("IsRuntimePackageType", BindingFlags.Static | BindingFlags.NonPublic)!.Invoke(null, [typeName])!;
+
     // The predicate over a thrown panic's trace. The trace is the exception's own, so reflection adds no
     // frame to it: what the walk reads is exactly the frames from the throw site to the catch.
     private static bool RaisedInRuntimePackage(Exception thrown, out string frameName)
@@ -79,6 +82,39 @@ public class RuntimePanicCheckTests
         Assert.IsFalse(RaisedInRuntimePackage(ThrowHere(runtime_internal_test_package.Build()), out frame),
             "a panic built in package runtime but thrown outside it carries no runtime frame");
         Assert.AreEqual($"{typeof(RuntimePanicCheckTests).FullName}.{nameof(ThrowHere)}", frame);
+    }
+
+    // From 1.26.10.4 the forwarders of a struct's same-package promoted methods are in a class of the struct's own,
+    // `<pkg>ᴛ<Struct>ᴛpkg`, and no longer in the package class. Go names a promoted method's wrapper runtime.*, and
+    // the forwarder's frame is the one the walk meets when the JIT inlines the promoted method into it (a .NET trace
+    // has no frame for an inlined method). The reader has names only, so the class is read by its name's form.
+    [TestMethod]
+    public void APromotedMethodClassOfPackageRuntimeIsTheMarkerToo()
+    {
+        Assert.IsTrue(IsRuntimePackageType(typeof(runtimeᴛheldᴛpkg)), "the promoted-method class of a struct of package runtime is runtime");
+        Assert.IsTrue(IsRuntimePackageType(typeof(runtime_internal_testᴛheldᴛpkg)), "and of a struct of package runtime's own _test.go files");
+        Assert.IsTrue(IsRuntimePackageTypeName("go.runtimeᴛmPaddedᴛpkg"), "the form, as the converted runtime's own class is named");
+
+        Assert.IsTrue(RaisedInRuntimePackage(runtimeᴛheldᴛpkg.Raise(), out string frame), "a panic raised on package runtime's promoted-method class must HIT");
+        Assert.AreEqual("go.runtimeᴛheldᴛpkg.Raise", frame);
+
+        Assert.IsTrue(RaisedInRuntimePackage(runtime_internal_testᴛheldᴛpkg.Raise(), out frame), "a panic raised on the bridge's promoted-method class must HIT");
+        Assert.AreEqual("go.runtime_internal_testᴛheldᴛpkg.Raise", frame);
+    }
+
+    // The control for the test above: the form is exact. Another package's promoted-method class is not runtime's,
+    // and neither is a name that only starts or only ends as the form does.
+    [TestMethod]
+    public void AnotherPackagesPromotedMethodClassIsNotTheMarker()
+    {
+        Assert.IsFalse(IsRuntimePackageType(typeof(runtime_testᴛheldᴛpkg)), "package runtime_test's promoted-method class is not runtime.*");
+        Assert.IsFalse(RaisedInRuntimePackage(runtime_testᴛheldᴛpkg.Raise(), out string frame), "a panic raised on it must MISS");
+        Assert.AreEqual("go.runtime_testᴛheldᴛpkg.Raise", frame);
+
+        Assert.IsFalse(IsRuntimePackageTypeName("go.runtime.debugᴛBuildInfoᴛpkg"), "runtime/debug is another package");
+        Assert.IsFalse(IsRuntimePackageTypeName("go.runtimeᴛheld"), "the ending is part of the form");
+        Assert.IsFalse(IsRuntimePackageTypeName("go.runtimeᴛpkg"), "a struct name is part of the form");
+        Assert.IsFalse(IsRuntimePackageTypeName("go.syncᴛheldᴛpkg"), "another package's class is not runtime");
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]

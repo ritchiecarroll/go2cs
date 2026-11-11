@@ -1,0 +1,16 @@
+package main
+
+import (
+	"fmt"
+
+	"repro/c32aliasbytesfromconst/wrap"
+)
+
+// TS site: internal/ipc/protocol_jsonrpc.go `result = json.Value("null")`, where tsc's json has Value = jsontext.Value (C32).
+func main() {
+	var result any
+	if result == nil {
+		result = wrap.Value("null")
+	}
+	fmt.Println(string(result.(wrap.Value))) // Go: null
+}

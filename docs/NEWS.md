@@ -8,6 +8,65 @@ their full text.
 
 ---
 
+## November XX, 2026 — Packages with very large method sets load
+
+<!-- Written ahead and HELD for release day (the .2 and .3 precedent): "November XX" becomes the publish date as the
+     last change before the release tag (GoCorpusMigration.md, the release ritual, item 1). Section opened by the
+     promoted-forwarder seat (P1, COORD ruling 2026-11-10 08:28Z); later 1.26.10.4 seats append to it. Every item is
+     PENDING until 1.26.10.4 publishes. -->
+
+**NuGet 1.26.10.4.** PENDING. The third fix release on the Go 1.26 line. The converted standard library is still built
+from Go 1.26.10. One change below breaks assemblies already compiled against 1.26.10.3, and C# source that reaches a
+promoted method through `using static` alone; it is first under *Upgrading from 1.26.10.3*.
+
+**Upgrading from 1.26.10.3.**
+
+- **Rebuild what you built against 1.26.10.3.** PENDING. A Go struct that embeds another struct of its own package
+  gets a forwarder for each method the embedding promotes. Through 1.26.10.3 those forwarders were members of the
+  package class (`bufio_package` for `bufio`); from 1.26.10.4 each struct's forwarders are in a class of the
+  struct's own, beside the package class in the same namespace. In the standard library 900 public forwarders moved,
+  counted once for each assembly a package ships, in 20 packages; a program can import 13 of the 20, and the other
+  7 are internal or vendored. An assembly or nugetgo package compiled against go.* 1.26.10.3 that calls such a
+  promoted method fails at that call under 1.26.10.4 with `MissingMethodException`. The build refuses the
+  combination first: a package built below the new break floor is error `GO2CS3002`, which names the package
+  ([Diagnostic codes](DiagnosticCodes.md)). Rebuild against 1.26.10.4, and move each `nugetgo.*` reference to its
+  1.26.10.4 revision.
+  <!-- source: the promoted-forwarder seat (docs/phase4/DESIGN-promoted-forwarder-placement.md; owner ruling
+       2026-11-10: "better breaking changes now than before we're deep with users"). The moved members are announced
+       to the binary-compatibility guard as generated CP0002 entries, 900 entries in 20 suppression files
+       (src/tools/pushnuget/New-GoApiCompatMoveSuppressions.ps1), and <GoBreakFloor> is 1.26.10.4. The nugetgo
+       rebuild wave ships with this release (the owner's hands). -->
+- **`using static` alone no longer brings promoted methods.** PENDING. C# that calls into a converted package with
+  only `using static go.bufio_package;` still sees the package's types, functions and the methods its types declare.
+  A method a struct promotes from an embedded struct of the same package now needs the namespace as well:
+  add `using go;` (or `using go.<path>;` for a package below the root). Converted code already has it.
+  [Consuming Go from C#](ConsumingGoFromCSharp.md) has the details.
+  <!-- source: the same seat; GenTests PromotedHostClassTests.UsingStaticAloneBringsDeclaredMethodsAndNoPromotedOne
+       (CS1929 without the namespace) and TheNamespaceBringsThePromotedMethods. -->
+
+**A package whose types promote very many methods now loads.** PENDING. The .NET runtime loads no type with more
+than 65,521 methods. A converted package class held every promoted-method forwarder of every struct in the package,
+so a package where many structs embed one method-rich base could pass that limit: it compiled, and its first use
+threw `TypeLoadException`. With each struct's forwarders in a class of their own, the package class holds only what
+the package declares. A type that would still exceed the limit is now a compile error, `GO2CS0012`, which names the
+type and its method count.
+<!-- source: the same seat. Measured shape: N methods on one base embedded by M structs put 2NM + 2N + 5 methods in
+     the package class; N=250, M=131 (66,005) failed to load and M=130 (65,505) loaded. One converted package class
+     held 116,102 methods, 107,835 of them forwarders. -->
+
+**A promoted method that returns a string, a bool or several values can be called from another package.** PENDING.
+A Go struct that embeds an exported struct promotes its methods, and code in another package may call them on the
+outer struct. The C# forwarder for such a method was `internal` whenever its return type's C# spelling ended in a
+lowercase name (`@string`, `bool`, `error`, any multi-value return), so a call that Go accepts did not compile in
+the converted program (`CS1929`). The forwarder of an exported method is now public unless its signature names a
+type that is not public. In the standard library 268 forwarders in 12 packages became public, `bufio.ReadWriter`'s
+`Read` and `Peek` among them; none was removed, so nothing compiled against 1.26.10.3 breaks on this change.
+<!-- source: C34 of the TypeScript-Go readiness run (repro c34promotedbuiltinreturn at 4505b95021 on
+     claude/i7-ts-readiness-rerun), folded into the promoted-forwarder seat. GenTests PromotedForwarderScopeTests;
+     behavioral PromotedValueEmbedLib / PromotedValueEmbedUser. The count is of forwarder methods in one target's
+     packed assemblies, the same on windows, linux and darwin (docs/phase4/DESIGN-promoted-forwarder-placement.md,
+     amendment section H). -->
+
 ## November 8, 2026 — Faster Native AOT, and a Release standard library from source
 
 <!-- Written ahead and HELD for release day (the .2 precedent, e665f4ea51): "November XX" becomes the publish date as the

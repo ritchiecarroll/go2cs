@@ -1,0 +1,52 @@
+# Repro runs at a LOCAL merge 8836958ee6 = master 9b8af3bd30 + 4cf021749e (C29 candidate) + 9bd562223b (GO2CS2004 alias)
+# + 8f35969ada (C19) + d476260cba (C22), never pushed. Go oracle -> go2cs -recurse -> dotnet build -> run -> compare
+# (the steps of rerun-repro.sh.txt, with the converter and go2cspath at that merge).
+
+repro c22e-aliasreexport  go2cs=8836958ee6
+GO   rc=0: 2 1 true
+CONV rc=0  WARNING: Package license is unspecified for repro.c22e-aliasreexport.lib.csproj (reported once per module); add a LIC|
+BUILD rc=1  go.repro.main_package.MarshalTo.global__go.repro.main_package.OrderedMap_K, V_.g.cs(23,160) CS0426: The type name 'Encoder' does not exist in the type 'lib_package'|go.repro.main_package.OrderedMap_K, V_.MethodSource.g.cs(10,170) CS0426: The type name 'Encoder' does not exist in the type 'lib_package'|main.cs(13,71) CS0426: The type name 'Encoder' does not exist in the type 'lib_package'|main.cs(15,36) CS0426: The type name 'Encoder' does not exist in the type 'lib_package'|
+RUN  rc=-1: 
+MATCH NO
+
+repro c22renamedtypequalified  go2cs=8836958ee6
+GO   rc=0: true 1
+CONV rc=0  WARNING: Package license is unspecified for repro.c22renamedtypequalified.lib.csproj (reported once per mod|
+BUILD rc=0  
+RUN  rc=0: true 1
+MATCH YES
+
+repro c22b-genericset  go2cs=8836958ee6
+GO   rc=0: 1
+CONV rc=0  WARNING: Package license is unspecified for repro.c22b-genericset.coll.csproj (reported once per module); add a LICENSE be|
+BUILD rc=0  
+RUN  rc=0: 1
+MATCH YES
+
+repro c22c-genericrecvparam  go2cs=8836958ee6
+GO   rc=0: 2 1
+CONV rc=0  WARNING: Package license is unspecified for repro.c22c-genericrecvparam.lib.csproj (reported once per module); |
+BUILD rc=0  
+RUN  rc=0: 2 1
+MATCH YES
+
+repro c22d-crossmodule  go2cs=8836958ee6
+GO   rc=0: 2 1 true
+CONV rc=0  WARNING: Package license is unspecified for example.com.c22lib.csproj (reported once per module); add a LICENSE beside the projec|
+BUILD rc=0  
+RUN  rc=0: 2 1 true
+MATCH YES
+
+repro go2cs2004alias  go2cs=8836958ee6
+GO   rc=0: 9 7
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: 9 7
+MATCH YES
+
+repro c19uintptraliasandnot  go2cs=8836958ee6
+GO   rc=0: 32 16
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: 32 16
+MATCH YES

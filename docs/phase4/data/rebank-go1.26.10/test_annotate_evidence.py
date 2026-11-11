@@ -139,10 +139,10 @@ try:
     def rids_line(rid, status, verdicts, matched, divergent, new='0', agree='no', absent='-', names=None):
         cells = ['W1-1', 'f/pkg', rid, str(verdicts), str(matched), str(divergent), str(divergent), str(new), status, agree, absent]
         return '\t'.join(cells + ([names] if names is not None else [])) + '\n'
-    def rids_case(name, linux, lines, want=None, refused=None, extra=()):
+    def rids_case(name, linux, lines, want=None, refused=None, extra=(), header=None):
         write(os.path.join(root, 'docs/ValidatedTestPackages.md'), '# Roster\n\n| a | b | c | d |\n|:--|--:|--:|:--|\n' +
               ROW.replace('· linux: 5 ·', f'· linux: {linux} ·') + '\n')
-        write(os.path.join(root, RIDS, 'W1-1.tsv'), RIDS_HEADER + '\n' + ''.join(lines))
+        write(os.path.join(root, RIDS, 'W1-1.tsv'), (header or RIDS_HEADER) + '\n' + ''.join(lines))
         rc, out, err = run('annotate_linux.py', root, '--rids', '--evidence', RIDS, '--write', *extra)
         roster = open(os.path.join(root, 'docs/ValidatedTestPackages.md'), encoding='utf-8').read()
         if refused is None:
@@ -175,6 +175,32 @@ try:
     case('linux --rids: the host difference is listed by name', 'host difference' in out, f'out {out!r}')
     rids_case('linux --rids: a pending row read and banked loses its pending', '5 (linux-x64; linux-arm64: pending)',
               [rids_line('linux-x64', 'validated', 5, 5, 0, agree='yes'), rids_line('linux-arm64', 'validated', 5, 5, 0, agree='yes')], '5 (linux-x64; linux-arm64: 5)')
+    # G's second read of S7-a (COORD 2026-11-11): the follow-ups, each pinned here and in the guard.
+    rids_case('linux --rids: a combined pair where linux-x64 discloses nothing banks (the guard agrees)', '9',
+              [rids_line('linux-x64', 'validated', 9, 9, 0, names='-'), rids_line('linux-arm64', 'DISC', 8, 7, 1, absent='z', names='q')], '9 (linux-x64; linux-arm64: 7 + 1)')
+    for name, x64 in (('a linux-x64 status other than validated', rids_line('linux-x64', 'COUNT', 10, 10, 0, agree='yes')),
+                      ('a linux-x64 undisclosed divergence (new 1), counts otherwise equal', rids_line('linux-x64', 'validated', 10, 10, 1, new='1', agree='yes')),
+                      ("a linux-x64 matched count off the roster's", rids_line('linux-x64', 'validated', 9, 9, 0, agree='yes')),
+                      ("a linux-x64 disclosed count off the roster's", rids_line('linux-x64', 'validated', 11, 10, 1, agree='yes'))):
+        out, err = rids_case(f'linux --rids: {name} is a host difference, and the row stays pending', '10',
+                             [x64, rids_line('linux-arm64', 'validated', 10, 10, 0, agree='yes')], '10 (linux-x64; linux-arm64: pending)')
+        case(f'linux --rids: {name} is listed as a host difference', 'host difference' in out, f'out {out!r}')
+    rids_case('linux --rids: the host-difference control (every clause holds) banks equal', '10',
+              [rids_line('linux-x64', 'validated', 10, 10, 0, agree='yes'), rids_line('linux-arm64', 'validated', 10, 10, 0, agree='yes')], '10 (linux-x64; linux-arm64: 10)')
+    rids_case('linux --rids: equal counts that DISAGREE (agree no) do not bank equal', '10',
+              [rids_line('linux-x64', 'validated', 10, 10, 0, agree='yes'), rids_line('linux-arm64', 'validated', 10, 10, 0, agree='no')], '10 (linux-x64; linux-arm64: pending)')
+    rids_case('linux --rids: equal never banks a linux-arm64 undisclosed divergence (new 1)', '10',
+              [rids_line('linux-x64', 'validated', 10, 10, 0, agree='yes'), rids_line('linux-arm64', 'validated', 10, 10, 1, new='1', agree='yes')], '10 (linux-x64; linux-arm64: pending)')
+    rids_case('linux --rids: an arch-count shape naming absent verdicts on the LONGER RID is refused by name', '6',
+              [rids_line('linux-x64', 'validated', 6, 6, 0, absent='z'), rids_line('linux-arm64', 'validated', 5, 5, 0, absent='TestOnlyOnAmd64')], refused='LONGER')
+    rids_case('linux --rids: two linux-x64 lines are refused by name', '5',
+              [rids_line('linux-x64', 'validated', 5, 5, 0, agree='yes')] * 2 + [rids_line('linux-arm64', 'validated', 5, 5, 0, agree='yes')], refused='2 linux-x64 and 1 linux-arm64')
+    rids_case('linux --rids: a count cell that is not a number is refused by name, not a crash', '5',
+              [rids_line('linux-x64', 'validated', 5, 5, 0, agree='yes'), rids_line('linux-arm64', 'validated', 5, 'x', 0, agree='yes')], refused='not a number')
+    no_absent = RIDS_HEADER.replace('\tabsent', '')
+    rids_case('linux --rids: a combined pair with no absent column is refused for the missing column', '17 + 3',
+              [rids_line('linux-x64', 'validated', 20, 17, 3, names='d1;d2;d3').replace('\t-\td1;d2;d3', '\td1;d2;d3'),
+               rids_line('linux-arm64', 'DISC', 17, 15, 2, names='d1;d2').replace('\t-\td1;d2', '\td1;d2')], refused='has no absent column', header=no_absent)
     rids_case('linux --rids: a row the evidence does not name is written pending', '5',
               [rids_line('linux-x64', 'validated', 5, 5, 0, agree='yes').replace('f/pkg', 'g/other')], '5 (linux-x64; linux-arm64: pending)')
     rids_case('linux --rids: a linux-arm64 reading no evidence names is put back to pending, the linux-x64 reading kept', '7 + 1 (linux-arm64; linux-x64: 9)',

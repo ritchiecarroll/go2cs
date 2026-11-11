@@ -1,0 +1,16 @@
+# per-embedding-type forwarder declarations in ast (go2cs.TypeGenerator per-type files, MethodSet files excluded), same build
+298 per-type TypeGenerator files in ast; extension declarations total 107787; GoPromoted-attributed 55265
+  ext-decls  [GoPromoted]  this-ref  this-box  type
+        511          263       252       259  UpdateExpressionBase
+        511          263       252       259  UnionOrIntersectionTypeNodeBase
+        511          263       252       259  UnaryExpressionBase
+        511          263       252       259  TypeNodeBase
+        511          263       252       259  PrimaryExpressionBase
+        511          263       252       259  NodeWithTypeArgumentsBase
+        511          263       252       259  NodeBase
+        511          263       252       259  MemberExpressionBase
+        511          263       252       259  LeftHandSideExpressionBase
+        511          263       252       259  JSDocTypeBase
+        511          263       252       259  JSDocTagBase
+        511          263       252       259  JSDocCommentBase
+histogram (decls per type -> types), top: [(0, 80), (508, 51), (506, 45), (505, 28), (504, 19), (511, 15), (503, 15), (507, 9)]

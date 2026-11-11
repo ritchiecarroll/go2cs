@@ -24,8 +24,8 @@ None of the six depends on another. cobra (session S2) depends on pflag 1.0.9.3 
 publishes, so S2 starts only after this sheet's block 5 lists both.
 
 **Do not start it until COORD says so.** COORD says so only after: COORD has ruled sections 1-3 green for every
-kit (for mousetrap, its four hosted rows are in its release candidate); and the six conversion commits and their
-`nuget-<PV>` tags are pushed (runbook 4.5), mousetrap-cs's included.
+kit (for mousetrap, its five rows are in its release candidate, linux-arm64's measured or UNMEASURED); and the six
+conversion commits and their `nuget-<PV>` tags are pushed (runbook 4.5), mousetrap-cs's included.
 
 **A version pushed to nuget.org is permanent.** It can be unlisted, but never deleted or replaced. Every block below
 stops before the push if a gate fails.

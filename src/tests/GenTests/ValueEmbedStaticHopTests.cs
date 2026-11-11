@@ -45,6 +45,13 @@ public class ValueEmbedStaticHopTests
                 public bool Promoted { get; set; }
                 public bool Pointer { get; set; }
             }
+
+            public class GoPromotedAttribute : System.Attribute { }
+
+            public class GoPromotedHostAttribute : System.Attribute
+            {
+                public GoPromotedHostAttribute(System.Type @struct) { }
+            }
         }
 
         namespace go.example.com
@@ -59,6 +66,15 @@ public class ValueEmbedStaticHopTests
                 {
                     string Name();
                 }
+
+                public partial struct Mid { public Base ʗBase; }
+            }
+
+            // Mid promotes Base's Name: its forwarder is in Mid's promoted-method class, found by the attribute.
+            [GoPromotedHost(typeof(lib_package.Mid))]
+            public static class forwardersOfMid
+            {
+                [GoPromoted] public static string Name(this lib_package.Mid m) => "mid";
             }
         }
         """;
@@ -71,6 +87,7 @@ public class ValueEmbedStaticHopTests
         [assembly: GoImplement<global::go.example.com.lib_internal_test_package.inner, global::go.example.com.lib_package.Namer>]
         [assembly: GoImplement<global::go.example.com.lib_test_package.outer, global::go.example.com.lib_package.Namer>]
         [assembly: GoImplement<global::go.example.com.lib_test_package.relative, global::go.example.com.lib_package.Namer>]
+        [assembly: GoImplement<global::go.example.com.lib_test_package.viaMid, global::go.example.com.lib_package.Namer>]
 
         namespace go.example.com
         {
@@ -92,6 +109,11 @@ public class ValueEmbedStaticHopTests
                 public partial struct relative
                 {
                     public partial ref example.com.lib_package.Base Base { get; }
+                }
+
+                public partial struct viaMid
+                {
+                    public partial ref go.example.com.lib_package.Mid Mid { get; }
                 }
             }
         }
@@ -161,5 +183,16 @@ public class ValueEmbedStaticHopTests
             Assert.IsFalse(implementation.Contains("global::go.global::"), $"{structName}: a doubled global:: alias (CS7000)");
             Assert.IsFalse(implementation.Contains("global::go.go."), $"{structName}: a doubled go. segment (CS0234)");
         }
+    }
+
+    // The embed's method is one it promotes itself: the static lives in the embed's promoted-method class, not in its
+    // package class, and the call names that class (CS0117 on the package class otherwise).
+    [TestMethod]
+    public void AMethodTheEmbedPromotesIsCalledOnTheEmbedsPromotedMethodClass()
+    {
+        string implementation = ValueImplementation(RunImplementGenerator(), "viaMid");
+
+        StringAssert.Contains(implementation, "=> global::go.example.com.forwardersOfMid.Name(this.Mid);");
+        Assert.IsFalse(implementation.Contains("lib_package.Name("), "the package class holds no Name over Mid: " + implementation);
     }
 }
