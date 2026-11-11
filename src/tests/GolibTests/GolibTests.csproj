@@ -136,6 +136,8 @@
     <Compile Remove="LinuxArm64StatLayoutTests.cs" />
     <!-- S3 site 1's Arm64 row against the flavour's own SYS_EPOLL_PWAIT and EpollEvent (site 9). -->
     <Compile Remove="LinuxArm64NetpollFlavourTests.cs" />
+    <!-- S3 site 0's reading: internal/cpu's linux/arm64 start-up (cpu_arm64_hwcap_impl.cs) and its options probe. -->
+    <Compile Remove="LinuxArm64CpuStartupTests.cs" />
   </ItemGroup>
 
   <!-- The amd64 flavour's own surface, which an arm64 build does not have (S3 site 9: GolibTests at linux/arm64).

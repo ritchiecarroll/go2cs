@@ -86,6 +86,35 @@ internal static void initLinuxArm64FeatureDetection() {
     ARM64.HasDIT = false;
 }
 
+/// <summary>
+/// GolibTests' probe (LinuxArm64CpuStartupTests; S3's site 0 reading, COORD ruling 2026-11-10): applies
+/// <paramref name="godebug"/> exactly as start-up does. The converted doinit registers cpu_arm64.go's option table and
+/// maps HWCap through hwcapInit; processOptions applies the GODEBUG options; HasDIT is cleared as above. The probe
+/// returns each option's name and resulting flag, then restores the flags and the table. Re-running doinit gives a
+/// fresh table, because processOptions leaves its Specified/Enable marks on the options it read.
+/// </summary>
+public static (string name, bool enabled)[] GoLinuxArm64OptionsProbe(string godebug) {
+    ARM64ᴛ1 saved = ARM64;
+    slice<option> savedOptions = options;
+
+    try {
+        doinit();
+        processOptions(godebug);
+        ARM64.HasDIT = false;
+
+        (string, bool)[] result = new (string, bool)[len(options)];
+
+        for (int i = 0; i < result.Length; i++)
+            result[i] = (options[i].Name.ToString(), options[i].Feature.Value);
+
+        return result;
+    }
+    finally {
+        ARM64 = saved;
+        options = savedOptions;
+    }
+}
+
 // cpu_arm64.go's getMIDR, from the kernel's copy of the register (the header's second departure).
 internal static partial uint64 getMIDR() {
     try {
