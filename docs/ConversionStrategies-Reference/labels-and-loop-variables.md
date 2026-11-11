@@ -324,8 +324,8 @@ is re-measured by a guard. -->
 ## An index-only range over a slice or array reads no element
 <!-- src/go2cs/visitRangeStmt.go:776 `} else if (isSlice || isArray) && valExpr == "_" {` and :846
 `foreach (%s%s in range(%s(%s)))`, the length named by :840 `lenName := "len"` (`builtin.len` where the package
-declares its own len); src/core/golib/builtin.cs:2189 `public static nint len<T>(in slice<T> slice)`,
-:2199 `public static nint len<T>(in sslice<T> slice)`, :2149 `public static nint len<T>(in array<T> array)`. -->
+declares its own len); src/core/golib/builtin.cs:2190 `public static nint len<T>(in slice<T> slice)`,
+:2200 `public static nint len<T>(in sslice<T> slice)`, :2150 `public static nint len<T>(in array<T> array)`. -->
 Go's index-only range (`for i := range s`, `for i, _ := range s`, or `for range s`) reads the length once and
 loads no element. The converter ranges the length, `foreach (var i in range(len(s)))`, when the operand is a
 slice, an array, a named slice or array type, a type parameter whose core type is one, or a variadic parameter

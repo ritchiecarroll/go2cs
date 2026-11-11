@@ -142,6 +142,62 @@ partial class poll_package
 
     private const int epollEventsOffset = 0;
 
+    /// <summary>
+    /// GolibTests' LIVE proof of this process's mapping (S3 site 1's admission reading). It uses its own epoll
+    /// instance, never the poller's, and exercises the same numbers, event image and call shapes the poller uses:
+    /// epoll_create1; EPOLL_CTL_ADD of a pipe's read end with <paramref name="token"/> in the data word; one byte
+    /// written; then the wait (epoll_wait at amd64, epoll_pwait with a NULL sigmask at arm64) with a 1 s timeout.
+    /// Returns each step's errno, the ready count, the first event's events word, and the token read back from this
+    /// arch's data offset, so a wrong event size or offset reads as a wrong token. Null for an unmapped arch. The pipe
+    /// is .NET's anonymous pipe, whose handle IS the fd on Linux.
+    /// </summary>
+    public static (nuint createErrno, nuint ctlErrno, nuint waitErrno, int ready, uint events, ulong token, int eventSize)? GoEpollLiveProbe(ulong token)
+    {
+        if (epollKernelFor(RuntimeInformation.ProcessArchitecture) is not EpollKernel k)
+            return null;
+
+        using System.IO.Pipes.AnonymousPipeServerStream writer = new(System.IO.Pipes.PipeDirection.Out);
+        using System.IO.Pipes.AnonymousPipeClientStream reader = new(System.IO.Pipes.PipeDirection.In, writer.ClientSafePipeHandle);
+        int readFd = (int)reader.SafePipeHandle.DangerousGetHandle();
+
+        nuint createErrno = rawSyscall6(k.Create1, EPOLL_CLOEXEC, 0, 0, 0, out uintptr r1);
+        if (createErrno != 0)
+            return (createErrno, 0, 0, 0, 0, 0, k.EventSize);
+
+        using Microsoft.Win32.SafeHandles.SafeFileHandle ep = new((nint)(nuint)r1, ownsHandle: true);
+        nint ev = Marshal.AllocHGlobal(k.EventSize);
+        nint buf = Marshal.AllocHGlobal(4 * k.EventSize);
+
+        try
+        {
+            for (int b = 0; b < k.EventSize; b += 4)
+                Marshal.WriteInt32(ev, b, 0);
+            for (int b = 0; b < 4 * k.EventSize; b += 4)
+                Marshal.WriteInt32(buf, b, 0);
+
+            Marshal.WriteInt32(ev, epollEventsOffset, unchecked((int)EPOLLIN));
+            Marshal.WriteInt64(ev, k.DataOffset, unchecked((long)token));
+
+            nuint ctlErrno = rawSyscall6(k.Ctl, (uintptr)(nuint)r1, EPOLL_CTL_ADD, fdArg(readFd), (uintptr)ev, out _);
+            if (ctlErrno != 0)
+                return (0, ctlErrno, 0, 0, 0, 0, k.EventSize);
+
+            writer.WriteByte(42);
+            writer.Flush();
+
+            nuint waitErrno = rawSyscall6(k.Wait, (uintptr)(nuint)r1, (uintptr)buf, 4, 1000, out uintptr n);
+            uint events = unchecked((uint)Marshal.ReadInt32(buf, epollEventsOffset));
+            ulong readBack = unchecked((ulong)Marshal.ReadInt64(buf, k.DataOffset));
+
+            return (0, 0, waitErrno, waitErrno == 0 ? (int)(nuint)n : 0, events, readBack, k.EventSize);
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(ev);
+            Marshal.FreeHGlobal(buf);
+        }
+    }
+
     // This process's half: set once by pollServerInit, before epfd, the drain buffer and the drain
     // thread exist. Every other reader runs after it (internal/poll reaches them only through
     // serverInit.Do(runtime_pollServerInit), and the drain thread starts after the write).
@@ -287,14 +343,12 @@ partial class poll_package
                 arch + "; refused rather than misread");
         }
 
-        // The admission guard: X64 only, until a linux/arm64 run proves the arm64 mapping (S3 site 1). It
-        // is lifted in the commit that carries that reading, not before.
-        if (arch != Architecture.X64)
-        {
-            throw new PlatformNotSupportedException(
-                "runtime: netpoll (linux flavor): the " + arch + " epoll mapping is written but not yet proven " +
-                "on a " + arch + " host; only X64 is admitted");
-        }
+        // The X64-only admission guard that stood here is LIFTED (S3 site 1, COORD-ruled), in the commit that carries
+        // the linux/arm64 proof: GolibTests' LinuxEpollLiveTests drives this file's mapping live (GoEpollLiveProbe)
+        // and round-trips os.Create and os.ReadFile, which reach this initializer. While it stood, every pollable
+        // FD.Init at linux/arm64 threw here, so the first os.Open of any program failed. Measured by the arm leg: runs
+        // 42967662456, 42969401661 and 42970423967 (pprof's /proc/self/maps open) and run 42959669726 (testing's
+        // test-log os.Create). An UNMAPPED arch is still refused above.
 
         kernel = mapped;
 

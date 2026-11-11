@@ -1,0 +1,28 @@
+# methodflags.ps1 on go.repro.main_package: the two failing 65,523 assemblies (two shapes) and the loading 65,521 one
+=== methodcap-n697-m46
+go.repro.main_package: methods 65523, nested types 49, MethodImpls 0
+by attributes:
+   64128  Assembly, Static, HideBySig
+    1394  Public, Static, HideBySig
+       1  Private, Static, HideBySig
+by generic arity:
+   65523  arity 0
+without a body (RVA 0): 0
+=== methodcap-n250-m130-k18
+go.repro.main_package: methods 65523, nested types 133, MethodImpls 0
+by attributes:
+   65004  Assembly, Static, HideBySig
+     518  Public, Static, HideBySig
+       1  Private, Static, HideBySig
+by generic arity:
+   65523  arity 0
+without a body (RVA 0): 0
+=== methodcap-n250-m130-k16
+go.repro.main_package: methods 65521, nested types 133, MethodImpls 0
+by attributes:
+   65004  Assembly, Static, HideBySig
+     516  Public, Static, HideBySig
+       1  Private, Static, HideBySig
+by generic arity:
+   65521  arity 0
+without a body (RVA 0): 0

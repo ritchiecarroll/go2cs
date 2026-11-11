@@ -47,6 +47,44 @@ var layoutUniverseLists = []struct {
 	{"src/tests/Behavioral/check-solution-integrity.ps1", regexp.MustCompile(`(?m)^\s*\[string\[\]\] \$Target = @\(([^)]*)\)`)},
 }
 
+// ridFlavorMaps are the RID maps a package is packed by: each maps a shipped RID to the corpus flavour (a universe
+// target) whose assemblies it carries, and the distinct flavours, in map order, must be lineKeyedUniverse (S6: a pack
+// builds one pass per flavour, so a flavour the map lacks ships no assembly and one it adds builds a tree that does not
+// exist). The first entry is the reference flavour, so the order is part of the pin.
+var ridFlavorMaps = []struct {
+	file    string
+	pattern *regexp.Regexp
+}{
+	{"src/push-nuget.ps1", regexp.MustCompile(`(?s)\$ridFlavors = \[ordered\]@\{(.*?)\}`)},
+	{"src/tools/nugetgo/NugetgoFlavors.psm1", regexp.MustCompile(`(?s)function Get-NugetgoRidFlavors \{\s*\[ordered\]@\{(.*?)\}`)},
+}
+
+// ridFlavorEntry is one `'rid' = 'flavour'` line of a RID map.
+var ridFlavorEntry = regexp.MustCompile(`'([^']+)'\s*=\s*'([^']+)'`)
+
+func TestRidFlavorMapsShipTheUniverse(t *testing.T) {
+	for _, list := range ridFlavorMaps {
+		found := list.pattern.FindAllStringSubmatch(readRepoFile(t, list.file), -1)
+
+		if len(found) != 1 {
+			t.Errorf("%s: %d RID maps match %s, want 1; the map moved and this pin reads nothing", list.file, len(found), list.pattern)
+			continue
+		}
+
+		var flavours []string
+
+		for _, entry := range ridFlavorEntry.FindAllStringSubmatch(found[0][1], -1) {
+			if !slices.Contains(flavours, entry[2]) {
+				flavours = append(flavours, entry[2])
+			}
+		}
+
+		if !slices.Equal(flavours, lineKeyedUniverse) {
+			t.Errorf("%s ships the flavours %v and the corpus is laid out for %v; they change together", list.file, flavours, lineKeyedUniverse)
+		}
+	}
+}
+
 func TestLayoutKeyListsAreTheUniverses(t *testing.T) {
 	want := lineKeyedFolders()
 

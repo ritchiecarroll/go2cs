@@ -1,0 +1,3 @@
+module repro/c40funcmethodsamename
+
+go 1.26

@@ -1,0 +1,18 @@
+package main
+
+import "fmt"
+
+// TS site: internal/checker exports.go `func IsTupleType(t *Type) bool` beside types.go `func (t *Type) IsTupleType() bool`
+// (C40): a package func and a pointer-receiver method with the same name, the func taking the receiver's pointer type.
+type Type struct{ flags int }
+
+func isTupleType(t *Type) bool { return t.flags&1 != 0 }
+
+func (t *Type) IsTupleType() bool { return isTupleType(t) }
+
+func IsTupleType(t *Type) bool { return isTupleType(t) }
+
+func main() {
+	t := &Type{flags: 1}
+	fmt.Println(t.IsTupleType(), IsTupleType(t), IsTupleType(&Type{})) // Go: true true false
+}

@@ -1,0 +1,3 @@
+module repro/c41ptrvardeclparam
+
+go 1.26

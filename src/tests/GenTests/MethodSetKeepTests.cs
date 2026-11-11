@@ -123,8 +123,8 @@ public class MethodSetKeepTests
 
         for (int i = toString - 1; i >= 0 && lines[i].Contains("DynamicDependency("); i--)
         {
-            Match match = Regex.Match(lines[i], @"DynamicDependency\(""([^""]+)"", typeof\(global::go\.mtest_package\)\)");
-            Assert.IsTrue(match.Success, $"{name}: a dependency names the package class: {lines[i]}");
+            Match match = Regex.Match(lines[i], $@"DynamicDependency\(""([^""]+)"", typeof\(global::go\.(mtest_package|mtestᴛ{name}ᴛpkg)\)\)");
+            Assert.IsTrue(match.Success, $"{name}: a dependency names the package class or the type's promoted-method class: {lines[i]}");
             kept.Add(match.Groups[1].Value);
         }
 
@@ -170,8 +170,9 @@ public class MethodSetKeepTests
 
         string outer = generated.Single(pair => pair.Key.EndsWith(".Outer.g.cs", StringComparison.Ordinal)).Value;
 
-        StringAssert.Contains(outer, "Error(this Outer", "the fixture: the generator writes Outer's promoted Error forwarder");
+        StringAssert.Contains(outer, "Error(this global::go.mtest_package.Outer", "the fixture: the generator writes Outer's promoted Error forwarder");
         CollectionAssert.Contains(KeptOnToString(generated, "Outer"), "Error", "the promoted forwarder is kept on Outer's ToString");
+        StringAssert.Contains(outer, "DynamicDependency(\"Error\", typeof(global::go.mtestᴛOuterᴛpkg))", "the dependency names the class that holds the forwarder");
         CollectionAssert.AreEqual(new[] { "Error" }, KeptOnToString(generated, "Inner"), "the declaring type keeps its own method");
     }
 

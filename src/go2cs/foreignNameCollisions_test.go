@@ -9,6 +9,7 @@
 package main
 
 import (
+	"go/types"
 	"os"
 	"path/filepath"
 	"testing"
@@ -216,5 +217,106 @@ func TestUnconvertedDependencySpellsCollisionRenamedMember(t *testing.T) {
 
 	if usedImportedTypeAliases.Contains("dep.Token") {
 		t.Fatal("an unreferenced derived alias must not be marked used")
+	}
+}
+
+// B2 on the FOREIGN path. strings' export_test.go declares `func (r *Replacer) Replacer() any`, a TEST method over
+// a PRODUCTION type. The collision analysis pins the production name there (the type keeps `Replacer`, the test
+// method takes the Δ), so the strings assembly declares `Replacer`. The external strings_test package reaches
+// strings through its TEST variant, whose scope carries that method, and the derived table renamed the type
+// anyway: replace_test.cs spelled `strings.ΔReplacer` (CS0426 x22) once C22e made the foreign spelling consult
+// it. A collision that exists only because test files declared the method must publish no rename. A
+// production method of the same name still must.
+func TestForeignCollisionAliasesPinProductionNamesAgainstTestMethods(t *testing.T) {
+	dir := t.TempDir()
+
+	if err := os.MkdirAll(filepath.Join(dir, "rep"), 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	writeModuleFiles(t, dir, map[string]string{
+		"go.mod": "module example/b2\n\ngo 1.23\n",
+	})
+
+	writeModuleFiles(t, filepath.Join(dir, "rep"), map[string]string{
+		"rep.go": `package rep
+
+type Replacer struct{}
+
+func NewReplacer() *Replacer { return &Replacer{} }
+
+type Month int
+
+type Clock struct{}
+
+func (Clock) Month() Month { return 0 }
+`,
+		"export_test.go": `package rep
+
+func (r *Replacer) Replacer() any { return r }
+`,
+		"rep_ext_test.go": `package rep_test
+
+import (
+	"testing"
+
+	"example/b2/rep"
+)
+
+var shared *rep.Replacer = rep.NewReplacer()
+
+func TestReplacer(t *testing.T) { _ = shared }
+`,
+	})
+
+	loaded, err := packages.Load(&packages.Config{Mode: packages.LoadAllSyntax, Dir: dir, Tests: true}, "./rep")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var producer *packages.Package
+
+	for _, pkg := range loaded {
+		if pkg.Name == "rep_test" {
+			producer = pkg.Imports["example/b2/rep"]
+		}
+	}
+
+	if producer == nil {
+		t.Fatal("the external test package and its view of rep did not load")
+	}
+
+	if obj := producer.Types.Scope().Lookup("Replacer"); obj == nil || !packageHasMethodNamed(producer.Types, "Replacer") {
+		t.Fatal("fixture: the external test package must see rep's TEST variant, which carries the export_test method")
+	}
+
+	derived := aliasPairs(foreignCollisionTypeAliases(producer))
+
+	if got, published := derived["Replacer"]; published {
+		t.Fatalf("a production type shadowed only by a TEST method keeps its name (B2); the derivation published %q", got)
+	}
+
+	if got := derived["Month"]; got != ShadowVarMarker+"Month" {
+		t.Fatalf("a production method still renames the type it collides with, got %q", got)
+	}
+
+	// The spelling path that met the table: C22e's foreignRenamedTypeSpelling, which the external test package's
+	// qualified `rep.Replacer` reaches when no alias key is published for it. It must leave the Go name in place.
+	previous := importedPackages
+	t.Cleanup(func() { importedPackages = previous })
+
+	importedPackages = map[string]*packages.Package{"example/b2/rep": producer}
+
+	replacer, _ := producer.Types.Scope().Lookup("Replacer").(*types.TypeName)
+
+	if spelling, _, renamed := foreignRenamedTypeSpelling(replacer); renamed {
+		t.Fatalf("the external test package must spell rep.Replacer by its Go name, got the renamed member %q", spelling)
+	}
+
+	month, _ := producer.Types.Scope().Lookup("Month").(*types.TypeName)
+
+	if spelling, _, renamed := foreignRenamedTypeSpelling(month); !renamed || spelling != ShadowVarMarker+"Month" {
+		t.Fatalf("a production collision is still spelled by its renamed member, got %q (renamed=%v)", spelling, renamed)
 	}
 }

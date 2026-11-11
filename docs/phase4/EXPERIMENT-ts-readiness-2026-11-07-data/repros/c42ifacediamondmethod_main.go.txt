@@ -1,0 +1,40 @@
+package main
+
+import "fmt"
+
+// TS site: internal/compiler EmitHost embeds printer.EmitHost and declarations.DeclarationEmitHost, and both declare
+// GetProjectReferenceFromSource (C42). Go merges identical methods of embedded interfaces; the merged method is then
+// called through the outer interface, and the outer value satisfies a third interface that names the method.
+type Path string
+
+type PrinterHost interface {
+	Ref(p Path) string
+}
+
+type SpecifierHost interface {
+	Ref(p Path) string
+	Dir() string
+}
+
+type EmitHost interface {
+	PrinterHost
+	SpecifierHost
+	Blocked(file string) bool
+}
+
+type MayBeEmittedHost interface {
+	Ref(p Path) string
+}
+
+type host struct{}
+
+func (host) Ref(p Path) string        { return "ref:" + string(p) }
+func (host) Dir() string              { return "/src" }
+func (host) Blocked(file string) bool { return false }
+
+func emit(h MayBeEmittedHost, p Path) string { return h.Ref(p) }
+
+func main() {
+	var h EmitHost = host{}
+	fmt.Println(h.Ref("a.ts"), emit(h, "b.ts"), h.Dir()) // Go: ref:a.ts ref:b.ts /src
+}

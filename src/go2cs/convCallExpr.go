@@ -2759,7 +2759,13 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 							// convExprList, which applies the predicate that exempts method groups
 							// and literals (they can never be null, and an extension method cannot
 							// be invoked on a method group at all).
-							if _, argIsFunc := argType.Underlying().(*types.Signature); argIsFunc {
+							//
+							// Gated to a REAL `any` parameter (isEmptyInterfaceTarget), as the type-parameter sibling below
+							// is: a TYPE PARAMETER constrained by `any` also reads as empty here, but Go instantiates it as
+							// the func type and boxes nothing. The carrier returns object, so `core.IfElse(c, g.f, nil)`
+							// inferred T = object (CS1503) and, where that still compiled, a nil func came back non-nil
+							// (TS C39; TypeParamFuncArgNoBox).
+							if _, argIsFunc := argType.Underlying().(*types.Signature); argIsFunc && isEmptyInterfaceTarget(paramType) {
 								callExprContext.anyBoxedFuncArgs[j] = true
 							}
 

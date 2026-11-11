@@ -1,0 +1,3 @@
+module repro/c35ptrtypeargconstraint
+
+go 1.26

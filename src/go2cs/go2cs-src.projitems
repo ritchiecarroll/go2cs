@@ -180,6 +180,7 @@
     <None Include="$(MSBuildThisFileDirectory)singleFileComposite_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deadPointerParamAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)declaredNotImplemented_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)declaredNotImplementedFlavour_test.go" />
     <None Include="$(MSBuildThisFileDirectory)descriptorCompanion.go" />
     <None Include="$(MSBuildThisFileDirectory)descriptorCompanionCall_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deferFinallyDeadReceiverAlias_test.go" />
@@ -605,6 +606,7 @@
     <None Include="$(MSBuildThisFileDirectory)readmeValidationBadge_test.go" />
     <None Include="$(MSBuildThisFileDirectory)reconvertDeletionsSkipList_test.go" />
     <None Include="$(MSBuildThisFileDirectory)recoverForms.go" />
+    <None Include="$(MSBuildThisFileDirectory)recurseDefaultTags_test.go" />
     <None Include="$(MSBuildThisFileDirectory)recurseTrimpath_test.go" />
     <None Include="$(MSBuildThisFileDirectory)recvRefLowering_test.go" />
     <None Include="$(MSBuildThisFileDirectory)refLoweringAnalysisOperations.go" />

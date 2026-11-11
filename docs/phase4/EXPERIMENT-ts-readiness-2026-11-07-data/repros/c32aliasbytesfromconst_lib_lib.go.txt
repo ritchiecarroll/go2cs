@@ -1,0 +1,3 @@
+package lib
+
+type Value []byte

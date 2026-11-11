@@ -846,7 +846,7 @@ public static class StructDeclarationSyntaxExtensions
         if (structType.ContainingType is not INamedTypeSymbol packageClass)
             return returnTypes;
 
-        foreach (IMethodSymbol method in packageClass.GetMembers().OfType<IMethodSymbol>())
+        foreach (IMethodSymbol method in GoMethodHosts.PackageMethods(packageClass, structType))
         {
             if (!method.IsExtensionMethod || method.Parameters.Length == 0)
                 continue;
@@ -963,7 +963,7 @@ public static class StructDeclarationSyntaxExtensions
         if (embedType.ContainingType is not INamedTypeSymbol packageClass)
             return boxMethods;
 
-        foreach (IMethodSymbol method in packageClass.GetMembers().OfType<IMethodSymbol>())
+        foreach (IMethodSymbol method in GoMethodHosts.PackageMethods(packageClass, embedType))
         {
             if (!method.IsStatic ||
                 method.DeclaredAccessibility != Accessibility.Public ||
@@ -1065,7 +1065,7 @@ public static class StructDeclarationSyntaxExtensions
         if (type.ContainingType is not INamedTypeSymbol packageClass)
             return methods;
 
-        foreach (IMethodSymbol method in packageClass.GetMembers().OfType<IMethodSymbol>())
+        foreach (IMethodSymbol method in GoMethodHosts.PackageMethods(packageClass, type))
         {
             if (!method.IsStatic ||
                 method.DeclaredAccessibility != Accessibility.Public ||

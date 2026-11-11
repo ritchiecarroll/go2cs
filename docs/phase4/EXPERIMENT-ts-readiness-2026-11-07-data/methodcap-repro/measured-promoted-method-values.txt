@@ -1,0 +1,6 @@
+# mcexpr over the demo and type-check closures: uncalled method values / expressions whose method is PROMOTED
+# positive control (mcexpr-control_main.go.txt): 1 promoted value + 1 promoted expression reported, the promoted call excluded
+## demo closure
+packages 27; uncalled method selections: map[method expression, declared:103 method value, declared:22]
+## type-check closure
+packages 54; uncalled method selections: map[method expression, declared:193 method value, declared:263]

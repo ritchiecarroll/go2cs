@@ -29,19 +29,23 @@
 //   - Store* are release stores; StoreRel*/StoreReluintptr are explicitly release-ordered, and
 //     .NET's Volatile.Write IS a release store, so both map to the same call.
 //
-// TWO widths have no managed intrinsic and are served by a lock instead:
-//   - 8-bit (Xchg8/And8/Or8): the CLR has no byte-width Interlocked And/Or. A read-modify-write
-//     under a shared latch is atomic with respect to every other 8-bit atomic here, which is the
-//     only guarantee Go's callers rely on (bitmap bytes are never touched non-atomically). Xchg8
-//     takes the SAME latch although .NET 9+ has a byte Interlocked.Exchange: a lock-free exchange
-//     racing a latched And8/Or8 on one byte would lose an update (the RMW reads, the exchange
-//     writes, the RMW writes back over it), and Go's own caller mixes them on one location --
-//     runtime/lock_spinbit.go's key8 byte, Xchg8 at :163/:198/:262.
+// 8-bit (Xchg8/And8/Or8/Store8/Load8) is LOCK-FREE, like the hardware's: Xchg8 is the byte
+// Interlocked.Exchange (.NET 9+) and And8/Or8 are byte Interlocked.CompareExchange loops -- the CLR
+// has no byte-width Interlocked And/Or, so they take the CAS shape Go itself uses where the
+// instruction is missing (atomic_andor_generic.go). Every 8-bit op must be atomic with respect to
+// EVERY other on one byte, Store8 included, and a mixed scheme cannot be: an And8/Or8 under a latch
+// is a read and a separate write-back, so a lock-free Store8 landing between them is overwritten by
+// the stale byte -- lost, not merely reordered. A CAS cannot do that: a byte that changed under it
+// fails the compare and the loop re-reads. Go's own callers mix these ops on one location (Go
+// 1.26 runtime/lock_spinbit.go's key8 byte: Xchg8 at :165/:199/:275/:284, Or8 at :168), and Store8
+// is part of the same contract (internal/runtime/atomic's own tests and benchmarks drive it).
+//
+// ONE family has no managed intrinsic and is served by a lock instead:
 //   - the unsafe.Pointer family (Casp1/StorepNoWB/Loadp/storePointer/casPointer): golib models
 //     unsafe.Pointer as a CLASS wrapping a uintptr, so the "pointer word" is the wrapped NUMBER,
 //     not the object reference — a CAS must compare the numbers (two distinct Pointer objects
 //     addressing the same location are the same pointer to Go). Interlocked cannot express
-//     "compare the wrapped field, swap the reference", so these take the same latch. The BARE
+//     "compare the wrapped field, swap the reference", so these take a latch. The BARE
 //     unsafe.Pointer members (StorepNoWB, Loadp) additionally reach their location through the
 //     mint's RETAINED referent — see the family header below (the I5 ruling).
 // The latch is a plain object monitor, uncontended in practice; correctness, not throughput, is
@@ -231,35 +235,39 @@ partial class atomic_package
         }
     }
 
-    // ---- 8-bit (latched — no byte-width intrinsic) ------------------------------------------
+    // ---- 8-bit (lock-free: byte-width Interlocked; see the header) --------------------------
 
     public static partial void Store8(ж<uint8> ptr, uint8 val) =>
         Volatile.Write(ref ptr.Value, val);
 
-    // Acquire load (see the 32-bit pair). A byte read is atomic without the latch; the latch
-    // orders the read-modify-writes among themselves, and Volatile.Read orders this read.
+    // Acquire load (see the 32-bit pair). A byte read is atomic; Volatile.Read orders it.
     public static uint8 Load8(ж<uint8> ptr) =>
         Volatile.Read(ref ptr.Value);
 
-    public static partial void And8(ж<uint8> ptr, uint8 val)
-    {
-        lock (s_wideLatch)
-            ptr.Value &= val;
-    }
+    public static partial void And8(ж<uint8> ptr, uint8 val) =>
+        casLoop8(ref ptr.Value, val, and: true);
 
-    public static partial void Or8(ж<uint8> ptr, uint8 val)
-    {
-        lock (s_wideLatch)
-            ptr.Value |= val;
-    }
+    public static partial void Or8(ж<uint8> ptr, uint8 val) =>
+        casLoop8(ref ptr.Value, val, and: false);
 
-    public static partial uint8 Xchg8(ж<uint8> ptr, uint8 @new)
+    public static partial uint8 Xchg8(ж<uint8> ptr, uint8 @new) =>
+        Interlocked.Exchange(ref ptr.Value, @new);
+
+    // A CAS loop, never a latched read-and-write-back: a Store8 or Xchg8 that lands between this
+    // loop's read and its write fails the compare instead of being overwritten.
+    private static void casLoop8(ref uint8 slot, uint8 operand, bool and)
     {
-        lock (s_wideLatch)
+        uint8 old = Volatile.Read(ref slot);
+
+        while (true)
         {
-            uint8 old = ptr.Value;
-            ptr.Value = @new;
-            return old;
+            uint8 updated = and ? (uint8)(old & operand) : (uint8)(old | operand);
+            uint8 seen = Interlocked.CompareExchange(ref slot, updated, old);
+
+            if (seen == old)
+                return;
+
+            old = seen;
         }
     }
 

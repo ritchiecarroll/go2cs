@@ -1,0 +1,3 @@
+module example.com/c22lib
+
+go 1.26

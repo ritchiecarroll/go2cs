@@ -1,0 +1,3 @@
+module repro/c22e-aliasreexport
+
+go 1.26
