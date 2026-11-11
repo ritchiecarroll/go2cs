@@ -48,6 +48,9 @@ func resetPackageState(pkg *packages.Package) {
 	linknamePullDirectives = nil
 	cgoDynamicImports = nil
 	cgoDynamicImportPragmas = nil
+	cgoRouteActive = false
+	cgoRouteFunctions = nil
+	cgoCheckClosures = nil
 	currentPackagePath = pkg.PkgPath
 	currentPackageGorootVendored = false
 	currentPackageOutsideGoroot = pkg.Dir != "" && !isPathUnder(pkg.Dir, filepath.Join(build.Default.GOROOT, "src"))

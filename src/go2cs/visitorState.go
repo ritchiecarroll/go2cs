@@ -70,6 +70,10 @@ type FileEntry struct {
 	// `"abc"` in ExampleClone did exactly this once 3-char slugs became hoistable — CS0103 across
 	// reader_test/replace_test).
 	emissionExcluded bool
+	// outputBase names a cgo tree's converted file for the import "C" source it was rewritten from, and cgoBindings
+	// marks cmd/cgo's types file, which becomes the package's bindings file (cgoRoute.go).
+	outputBase  string
+	cgoBindings bool
 }
 
 // CapturedVarInfo tracks information about captured variables
@@ -315,6 +319,10 @@ type Visitor struct {
 	// (cgoUnsafeArgsLift.go): the block-prefix assembly renders its construction line and convCallExpr
 	// renders its `unsafe.Pointer(&first)` as the block's pinned box.
 	currentCgoLift *cgoUnsafeArgsLift
+
+	// cgoClosureArguments holds, while an unwrapped call through cmd/cgo's check closure converts, what each of the
+	// closure's variables stands for (cgoRoute.go).
+	cgoClosureArguments map[types.Object]cgoClosureArgument
 	// liftAtCallBoundary marks an anonymous-struct/interface lift reached from a function's OWN
 	// parameter/result declaration or from a call argument being passed to a known callee's
 	// matching parameter — positions whose type is externally significant ACROSS function scopes,

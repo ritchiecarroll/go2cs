@@ -204,16 +204,6 @@ var cgoFixtureWant = map[cgoFixtureEntry]bool{
 	{"xptr", cgoType}:          true,
 }
 
-// cgoIncompleteOverlay declares runtime/cgo's Incomplete exactly as cgo.go does.
-const cgoIncompleteOverlay = `package cgo
-
-import "internal/runtime/sys"
-
-type Incomplete struct {
-	_ sys.NotInHeap
-}
-`
-
 // loadCgoFixture loads the fixture directory at CGO_ENABLED=0, where fixture.go drops out (it imports "C") and the
 // three generated files are the package. withIncomplete adds an Overlay giving runtime/cgo the one declaration it
 // loses at CGO_ENABLED=0: Incomplete is declared in cgo.go, which imports "C" itself, and every _cgo_gotypes.go names

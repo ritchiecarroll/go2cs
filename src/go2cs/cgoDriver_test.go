@@ -178,8 +178,9 @@ func replaceOnce(t *testing.T, text, old, new string) string {
 	return strings.Replace(text, old, new, 1)
 }
 
-// convertCgoOffline converts the package files make, in a module of its own, through the command line under -cgo for
-// linux/amd64, and returns its combined output, the output directory and the exit error.
+// convertCgoOffline converts the package files make, in a module of its own, through the command line under -cgo and
+// -comments (so a comment cmd/cgo wrote would reach the C#) for linux/amd64, and returns its combined output, the
+// output directory and the exit error.
 func convertCgoOffline(t *testing.T, files map[string]string) (string, string, error) {
 	t.Helper()
 
@@ -198,7 +199,7 @@ func convertCgoOffline(t *testing.T, files map[string]string) (string, string, e
 
 	output := t.TempDir()
 	encoded, err := json.Marshal(cgoOfflineRun{
-		Args:      []string{"-cgo=true", "-go2cspath", treeSrc, "-platforms", "linux/amd64", dir, output},
+		Args:      []string{"-cgo=true", "-comments", "-go2cspath", treeSrc, "-platforms", "linux/amd64", dir, output},
 		Libraries: cgoPhase2Libraries,
 		Toolchain: cgoPhase2Toolchain,
 	})
@@ -311,14 +312,16 @@ func cgoPhase2Admitted(t *testing.T) map[string]string {
 	return files
 }
 
-// cgoBindingsPath is where the Phase 2 fixture's bindings file lands: homed at its one target's folder (§11.20, S3).
-const cgoBindingsPath = "linux-amd64/cgooffline.cgo.cs"
+// cgoBindingsPath is where the Phase 2 fixture's bindings file lands: homed at its one target's folder (§11.20, S3),
+// and named for the Go package, cgophase2.
+const cgoBindingsPath = "linux-amd64/cgophase2.cgo.cs"
 
 // cgoMangledSpellings are cmd/cgo's own spellings, which no converted file may carry.
 var cgoMangledSpellings = regexp.MustCompile(`_Cfunc_|_C2func_|_cgoCheckPointer|_cgoBase\d|\b_cgo\d|/\*line `)
 
-// cgoParenthesisedCall is a pseudo-package member in parentheses and then called, which C# reads as a cast.
-var cgoParenthesisedCall = regexp.MustCompile(`\(C\.[^()\s]+\)\(`)
+// cgoParenthesisedCall is one of the fixture's C functions in parentheses and then called, which C# reads as a cast. A
+// C TYPE in parentheses before an operand, `(C.@int)(x)`, is the conversion it should be.
+var cgoParenthesisedCall = regexp.MustCompile(`\(C\.(?:abs|labs|div|cos|exp\S*|frexp|mktime|go2cs_probe_\w+)\)\(`)
 
 // §11.20, P4': with its two refused calls removed, the Phase 2 fixture converts. Call sites read as the source wrote
 // them, the check closures unwrap to the direct call, and the bindings land in one file.
