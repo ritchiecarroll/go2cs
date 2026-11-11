@@ -155,7 +155,7 @@ static class Program
             uuid.MustParse("not-a-uuid");
             Check("7 MustParse panics on bad input", false);
         }
-        catch (PanicException panic)
+        catch (ᴛRenamedPanicException panic)
         {
             // panic.State is the value Go passed to panic; panic.Message is its text
             Check("7 a Go panic is caught as PanicException", panic.State is not null && panic.Message.StartsWith("uuid: Parse(not-a-uuid)"));
