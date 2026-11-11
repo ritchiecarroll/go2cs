@@ -49,6 +49,8 @@ Entry `src/go2cs/main.go`; stdlib driver `stdLibConverter.go` (dependency graph 
 `nameCollisionAnalysisOperations.go`, `constraintOperations.go` (generics), `importOperations.go`.
 Full taxonomy: [`docs/Architecture.md`](docs/Architecture.md).
 
+**A change to what a C# consumer can bind to states its tier** ([`docs/PublicSurface.md`](docs/PublicSurface.md)): emitted names and shapes, package or assembly identity, diagnostic codes, flags. A tier-1 or tier-2 break takes the page's single deprecation path.
+
 ## Flag reference
 
 `go2cs [options] <input_dir> [output_dir]`; `main.go` is authoritative.
