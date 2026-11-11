@@ -97,7 +97,7 @@ describe() {
   local size path
   while read -r size path; do
     [ -n "$path" ] || continue
-    say "$1 saw: $path apparent=$size on-disk=$(sudo du -B1 --apparent-size=no "$path" 2>/dev/null | cut -f1)"
+    say "$1 saw: $path apparent=$size on-disk=$(sudo du -B1 "$path" 2>/dev/null | cut -f1)"
   done
 }
 
@@ -225,11 +225,12 @@ CS
 
   for how in sigquit failfast; do
     out="$state/probe-$how.out"
-    # env --default-signal=QUIT restores SIGQUIT's default action in case the probe inherits it IGNORED. On the hosted
-    # linux-x64 leg (runs 42936721919 and 42936743025) the probe outlived SIGQUIT by 120 s and left no dump, where the
-    # same probe died at once (status 131) on linux-arm64 and on a local linux-x64 host. The cause is not yet shown:
-    # a local test of a bare `&` launch did NOT reproduce it (SIGQUIT neither ignored nor blocked there). The masks
-    # printed below (blocked, ignored, caught, pending) are the evidence that names it.
+    # env --default-signal=QUIT: the runner starts every step shell with SIGQUIT IGNORED (its SigIgn reads 0x1004 on
+    # both linux legs, run 42938068113), and an ignored disposition survives exec. The x64 .NET runtime keeps an
+    # inherited ignore, so a probe started without this outlived SIGQUIT by 120 s and left no dump (runs 42936721919
+    # and 42936743025); the arm64 runtime installs its own handler anyway, which is why only x64 showed it. With the
+    # default restored the probe's SigIgn reads 0x1002 and SIGQUIT ends it with status 131 on both legs. The masks
+    # printed below keep that visible.
     (cd "$scratch" && exec env --default-signal=QUIT dotnet "$probe/bin/probe.dll" "$PROBE_THREADS" "$how") > "$out" 2>&1 &
     pid=$!
     for _ in $(seq 1 120); do grep -q '^READY' "$out" && break; sleep 0.5; done
