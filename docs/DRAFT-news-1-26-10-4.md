@@ -16,6 +16,13 @@ method that cannot be forwarded (for example `Tree.Children` returning `[]N`). E
 never converted again still shows that it carries a known-broken path. See [`-warn`](CommandLine.md) and
 [diagnostic codes](DiagnosticCodes.md).
 
+**`-recurse` converts the rest of a module when one package is refused.** One package the converter refused (a
+`GO2CS2001`, `GO2CS2002`, `GO2CS2003` or `GO2CS2005` error) used to end a `-recurse` run, so every package queued after it
+went unconverted. Now the refused package is skipped: its diagnostics still print as errors and it gets no project,
+but every other package converts. The run still ends with exit 1, naming each refused package and each converted
+package that imports one, since those will not build until the refused package converts. A single-package conversion
+still stops at a refusal and writes nothing. See [`-recurse`](CommandLine.md).
+
 **A refusal is renumbered: `GO2CS2005`.** The refusals for a pointer type argument to a generic with a
 non-self-referential method-set constraint (new in 1.26.10.4, alongside the conversions that now work for that shape)
 are reported as `GO2CS2005` instead of `GO2CS2002`. Their sites cannot fail loud if downgraded, so `-warn` does not
