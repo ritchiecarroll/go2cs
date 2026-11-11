@@ -35914,4 +35914,43 @@ CLOSED by claude/h-cgo-phase2-probes 3c4875b988.
 
 — H (2026-11-10)
 
+## 2026-11-11 — R (struct-proxy scout): the element-wise `[]N` widening silently COPIES a slice the generic WRITES — OPEN, a fix seat after -warn
+
+A pointer type argument against a NON-self-referential method-set constraint, where the type parameter is reached
+only inside `[]N`, takes the element-wise widening (the route go/ast's `walkList` uses): the call site copies the
+caller's slice into adapters, `widen<ж<item>, Named>(all, e => new itemжNamed(e))`. That copy is exact only for a
+callee that never writes the slice. A callee that writes it runs on the copy, and the caller's slice is untouched:
+
+```go
+type Named interface{ Name() string }
+type item struct{ n string }
+func (i *item) Name() string { return i.n }
+func reverse[N Named](ns []N) {
+	_ = ns[0].Name()
+	for i, j := 0, len(ns)-1; i < j; i, j = i+1, j-1 {
+		ns[i], ns[j] = ns[j], ns[i]
+	}
+}
+// all := []*item{{"a"}, {"b"}, {"c"}}; reverse(all); prints the names
+```
+
+| Converter | Emission | Output |
+|---|---|---|
+| Go | — | `cba` |
+| base master `38caf3558a` | `reverse(widen<ж<item>, Named>(all, …))` | `abc`, no diagnostic |
+| C35 (`claude/r-ts-c35` 8b792492eb) | the same | `abc`, no diagnostic |
+
+A `[]N` RESULT written back through (`head(all)[0] = x`) fails at build instead (CS0266, the result is a
+`slice<Named>`), so that half is loud; the PARAMETER half is silent and wrong, the worst class.
+
+**Reach.** std: go/ast's four `walkList` sites (`*Comment`, `*Field`, `*Ident` x2), which only read the slice, so
+the defect is latent there (per-site census, `claude/r-ts-c35`, all three amd64 targets and linux/arm64).
+
+**Direction (COORD, 2026-11-11, design to be posted before any cut).** Refuse the widening when the callee may write
+the slice: an index assignment, an append whose result flows back, a pass to anything not proven read-only. It must
+stay conservative enough that go/ast's four walkList sites still convert; census std's widening sites first. The
+struct-proxy view (the post-.4 scout) is the path to making such writes work rather than refused.
+
+— R (2026-11-11)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
