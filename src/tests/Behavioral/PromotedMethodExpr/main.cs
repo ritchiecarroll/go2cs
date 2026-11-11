@@ -1,7 +1,9 @@
 namespace go;
 
+using bufio = bufio_package;
 using bytes = bytes_package;
 using fmt = fmt_package;
+using reflect = reflect_package;
 using strings = strings_package;
 
 partial class main_package {
@@ -23,6 +25,22 @@ internal static nint Get(this inner i) { return i.n; }
 
 partial struct outer {
     /*embed*/ internal inner inner;
+}
+
+partial struct deep {
+    /*embed*/ internal outer outer;
+}
+
+partial struct box<T> {
+    /*embed*/ internal inner inner;
+    internal T v;
+}
+
+internal static uintptr pc(any f) { return reflect.ValueOf(f).Pointer(); }
+
+internal static uintptr tablePC(reflectꓸType t, @string name) {
+    var (m, _) = t.MethodByName(name);
+    return m.Func.Pointer();
 }
 
 partial struct own {
@@ -62,6 +80,19 @@ internal static void Main() {
     var oʗ1 = o;
     var gv = () => oʗ1.Get();
     fmt.Println("o.Get:", gv());
+
+    fmt.Println("(*outer).Add is one func:", pc(((Func<ж<outer>, nint, nint>)([GoWrapper("(*outer).Add")] (p0, p1) => wrapperRecv(p0).Add(p1)))) == pc(((Func<ж<outer>, nint, nint>)([GoWrapper("(*outer).Add")] (p0, p1) => wrapperRecv(p0).Add(p1)))),
+        pc(((Func<ж<outer>, nint, nint>)([GoWrapper("(*outer).Add")] (p0, p1) => wrapperRecv(p0).Add(p1)))) == tablePC(reflect.TypeOf((ж<outer>)nil), "Add"));
+    fmt.Println("outer.Get is one func:", pc(((Func<outer, nint>)([GoWrapper("outer.Get")] (p0) => p0.Get()))) == pc(((Func<outer, nint>)([GoWrapper("outer.Get")] (p0) => p0.Get()))),
+        pc(((Func<outer, nint>)([GoWrapper("outer.Get")] (p0) => p0.Get()))) == tablePC(reflect.TypeOf(new outer()), "Get"));
+    fmt.Println("(*deep).Add is one func:", pc(((Func<ж<deep>, nint, nint>)([GoWrapper("(*deep).Add")] (p0, p1) => wrapperRecv(p0).Add(p1)))) == pc(((Func<ж<deep>, nint, nint>)([GoWrapper("(*deep).Add")] (p0, p1) => wrapperRecv(p0).Add(p1)))),
+        pc(((Func<ж<deep>, nint, nint>)([GoWrapper("(*deep).Add")] (p0, p1) => wrapperRecv(p0).Add(p1)))) == tablePC(reflect.TypeOf((ж<deep>)nil), "Add"));
+    fmt.Println("box[int].Get is one func:", pc(((Func<box<nint>, nint>)([GoWrapper("box[...].Get")] (p0) => p0.Get()))) == pc(((Func<box<nint>, nint>)([GoWrapper("box[...].Get")] (p0) => p0.Get()))),
+        pc(((Func<box<nint>, nint>)([GoWrapper("box[...].Get")] (p0) => p0.Get()))) == tablePC(reflect.TypeOf(new box<nint>()), "Get"));
+    fmt.Println("(*bufio.ReadWriter).ReadString is one func:",
+        pc(((Func<ж<bufio.ReadWriter>, byte, (@string, error)>)([GoWrapper("(*ReadWriter).ReadString", "bufio")] (p0, p1) => wrapperRecv(p0).ReadString(p1)))) == pc(((Func<ж<bufio.ReadWriter>, byte, (@string, error)>)([GoWrapper("(*ReadWriter).ReadString", "bufio")] (p0, p1) => wrapperRecv(p0).ReadString(p1)))));
+    fmt.Println("and not another's:", pc(((Func<ж<outer>, nint, nint>)([GoWrapper("(*outer).Add")] (p0, p1) => wrapperRecv(p0).Add(p1)))) != pc(((Func<ж<inner>, nint, nint>)(Add))), pc(((Func<ж<outer>, nint, nint>)([GoWrapper("(*outer).Add")] (p0, p1) => wrapperRecv(p0).Add(p1)))) != pc(((Func<ж<deep>, nint, nint>)([GoWrapper("(*deep).Add")] (p0, p1) => wrapperRecv(p0).Add(p1)))),
+        pc(((Func<outer, nint>)([GoWrapper("outer.Get")] (p0) => p0.Get()))) != pc(((Func<box<nint>, nint>)([GoWrapper("box[...].Get")] (p0) => p0.Get()))));
     
     var say = ((Func<own, @string, @string>)(Say));
     fmt.Println("own.Say:", say(new own("!"), "hi"));

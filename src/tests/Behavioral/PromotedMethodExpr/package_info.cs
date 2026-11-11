@@ -10,6 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using reflectꓸType = go.reflect_package.ΔType;
 // </ImportedTypeAliases>
 
 using go;
@@ -49,7 +50,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABAmgICiAAkMlISCgoKWgqKCmIKCgoaSgoKSgpKCooaSgqKWgoKC", "66-70:1", "56=main.inner.Get;62=main.own.Say")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABIqgICiAA4alIKC6pSEgoKCloKigpiCgoKGkoKCkoKSgqKYlJSUlJSYkoKiloKCgg==", "99-103:1", "74=main.inner.Get;95=main.own.Say", "84=pc/3/3/1,TypeOf/1/1/1,tablePC/1/1/1;86=pc/3/3/1,TypeOf/1/1/1,tablePC/1/1/1;88=pc/3/3/1,TypeOf/1/1/1,tablePC/1/1/1;90=pc/3/3/1,TypeOf/1/1/1,tablePC/1/1/1;92=pc/1/2/1,pc/2/2/1;94=pc/5/6/1,pc/6/6/1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -65,6 +66,8 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct box<T> {}
+    internal partial struct deep {}
     internal partial struct inner {}
     internal partial struct myType {}
     internal partial struct outer {}
@@ -78,8 +81,10 @@ public static partial class main_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸbufio() => builtin.initPackage(typeof(bufio_package));
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }

@@ -12,6 +12,11 @@
 // converter renders both as lambdas, and the lambda carries [GoWrapper("<name>")] so the runtime names
 // its frame and its reflect PC the way Go does (runtime's TestCallersFromWrapper). The CONTROLS are the
 // method-group forms, which ARE the method in Go too and must stay unmarked.
+//
+// A method PROMOTED inside one package is a group as well where a forwarder has the expression's receiver: the
+// forwarder is the one function Go emits for the expression, and the one go2cs-gen's method set hands reflect, so the
+// group names it in the struct's promoted-method class. A lambda there is a second method (reflect's
+// TestEmbeddedMethods compares the expression with the method table).
 
 package main
 
@@ -44,6 +49,8 @@ func (s *S) pointer(x int) int { return s.v * x }
 
 type Outer struct{ S }
 
+type PtrOuter struct{ *S }
+
 func main() {
 	// POSITIVE 1: an interface method expression.
 	ifaceExpr := I.M
@@ -54,14 +61,24 @@ func main() {
 	// POSITIVE 3: a PROMOTED value method off the outer pointer type (no panicwrap in Go).
 	promotedExpr := (*Outer).value
 
+	// POSITIVE 4: a PROMOTED pointer method off a value type that embeds a pointer has no by-value forwarder.
+	promotedPtrEmbedExpr := PtrOuter.pointer
+
 	// CONTROL 1: a value-receiver method off the value type is the method itself.
 	valueExpr := S.value
 
 	// CONTROL 2: a pointer-receiver method off the pointer type is the method itself.
 	ptrExpr := (*S).pointer
 
+	// GROUP 1: a PROMOTED pointer method off the outer pointer type is its forwarder.
+	promotedPtrGroup := (*Outer).pointer
+
+	// GROUP 2: a PROMOTED value method off the outer value type is its forwarder.
+	promotedValueGroup := Outer.value
+
 	s := &S{v: 2}
 	fmt.Println(ifaceExpr != nil, ptrOfValueExpr(s, 1), valueExpr(*s, 1), ptrExpr(s, 3), promotedExpr(&Outer{S{v: 4}}, 1))
+	fmt.Println(promotedPtrEmbedExpr(PtrOuter{s}, 5), promotedPtrGroup(&Outer{S{v: 6}}, 7), promotedValueGroup(Outer{S{v: 8}}, 9))
 }
 `)
 
@@ -105,11 +122,16 @@ func TestMethodExpressionWrapperMark(t *testing.T) {
 		// message) only for a DIRECT value method off *T, and a plain wrapper fault otherwise.
 		{"ifaceExpr", `[GoWrapper("I.M")] (p0, p1) => wrapperRecv(p0).M(p1)`},
 		{"ptrOfValueExpr", `[GoWrapper("(*S).value")] (p0, p1) => value(panicwrapRecv(p0, "value method main.S.value called using nil *S pointer").Value, p1)`},
-		// A method promoted through a same-package embed is called as the extension method its forwarder is:
-		// go2cs-gen writes the forwarder into a class of the struct's own, which no method group names.
+		// A method promoted through a same-package embed has its forwarder in a class of the struct's own
+		// (go2cs-gen). Where no forwarder has the expression's receiver, the wrapper calls it as the extension
+		// method it is.
 		{"promotedExpr", `[GoWrapper("(*Outer).value")] (p0, p1) => wrapperRecv(p0).value(p1)`},
+		{"promotedPtrEmbedExpr", `[GoWrapper("PtrOuter.pointer")] (p0, p1) => p0.pointer(p1)`},
 		{"valueExpr", ""},
 		{"ptrExpr", ""},
+		// Where one has, the expression is that forwarder: the method group over the struct's class, unmarked.
+		{"promotedPtrGroup", "((Func<ж<Outer>, nint, nint>)(main" + TempVarMarker + "Outer" + TempVarMarker + "pkg.pointer))"},
+		{"promotedValueGroup", "((Func<Outer, nint, nint>)(main" + TempVarMarker + "Outer" + TempVarMarker + "pkg.value))"},
 	}
 
 	for _, arm := range arms {
