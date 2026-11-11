@@ -3102,8 +3102,13 @@ Assert-Equal 'linux format: a pending segment spells its note' '3840 + 2 (linux-
 # THE NOTE IS MANDATORY (S7-a piece 6): from the commit that writes "(linux-x64; linux-arm64: pending)" on every numeric
 # linux segment, a numeric linux segment with no per-RID note is refused: it would read as banked on a RID it never ran
 # on. n/a is not numeric, and is not this check's.
-# RED STUB (S7-a piece 6): the fix replaces this.
-function Get-LinuxNoteRefusal { param($Segment) return $null }
+function Get-LinuxNoteRefusal {
+    param($Segment)
+
+    if (($null -eq $Segment) -or -not $Segment.Applicable) { return $null }
+    if ($Segment.PSObject.Properties['Other'] -and ($null -ne $Segment.Other)) { return $null }
+    return "its linux: $(Format-DarwinSegment $Segment) has no per-RID note -- a numeric linux segment names both RIDs, '(linux-x64; linux-arm64: pending)' until linux-arm64 is read (annotate_linux.py --rids writes it)"
+}
 $noteBare = [PSCustomObject]@{ Applicable = $true; Expected = 7; Disclosed = 0; Rid = $null; Other = $null }
 Assert-Equal 'linux note mandatory: a bare numeric segment is refused by name' $true ("$(Get-LinuxNoteRefusal -Segment $noteBare)" -match 'no per-RID note')
 Assert-Equal 'linux note mandatory: a bare segment with disclosures is refused too' $true ($null -ne (Get-LinuxNoteRefusal -Segment ([PSCustomObject]@{ Applicable = $true; Expected = 7; Disclosed = 2 })))
@@ -3263,8 +3268,15 @@ if ($null -ne $linuxEvidenceAt) {
         $linuxEvidence = $linuxRead.ByRow
     }
 }
+$linuxBare = 0
 foreach ($row in $rows) {
     $segment = if ($row.OS.ContainsKey('linux')) { $row.OS['linux'] } else { $null }
+    $noteRefusal = Get-LinuxNoteRefusal -Segment $segment
+    if ($null -ne $noteRefusal) {
+        $linuxBare++
+        Assert-Equal "linux segments: $($row.Package): $noteRefusal" $true $false
+        continue
+    }
     if (-not $linuxEvidence.ContainsKey($row.Package)) {
         if (($null -eq $segment) -or -not $segment.Applicable) { continue }
         $linuxPairUnread++
@@ -3284,7 +3296,7 @@ if ($linuxEvidence.Count -gt 0) {
     Assert-Equal 'linux segments: the evidence named at least one roster row (a zero means the rows were never matched)' $true (($linuxPairBanked + $linuxPairPending + $linuxPairRefused) -gt 0)
 }
 # Printed UNCONDITIONALLY, as the darwin line is.
-Write-Host ('linux segments (linux-x64; linux-arm64) against {0}: {1} rows banked on both RIDs, {2} read and pending, {3} not read (not gated), {4} refused' -f $(if ($null -ne $linuxEvidenceAt) { $linuxEvidenceAt.Relative } else { 'no declared evidence ($LinuxRidEvidenceDirectory is empty), so every linux-arm64 reading is refused' }), $linuxPairBanked, $linuxPairPending, $linuxPairUnread, $linuxPairRefused) -ForegroundColor Cyan
+Write-Host ('linux segments (linux-x64; linux-arm64) against {0}: {1} rows banked on both RIDs, {2} read and pending, {3} not read (not gated), {4} refused, {5} with no per-RID note' -f $(if ($null -ne $linuxEvidenceAt) { $linuxEvidenceAt.Relative } else { 'no declared evidence ($LinuxRidEvidenceDirectory is empty), so every linux-arm64 reading is refused' }), $linuxPairBanked, $linuxPairPending, $linuxPairUnread, $linuxPairRefused, $linuxBare) -ForegroundColor Cyan
 
 # ---- 3. the RENDERED table's column integrity -----------------------------------------------------
 # Everything above guards what the roster MEANS to the parser. This guards what it LOOKS LIKE to a
