@@ -51,14 +51,20 @@ namespace GolibTests;
 // longer to reach the floor instead of failing it, and the bounds are unchanged. Linux keeps Sleep(1), ~1.1 ms there,
 // and is not run.
 //
-// THE PAIRED READING (COORD, 2026-11-11; a measurement, the bounds above are unchanged). The macOS bounds are absolute,
-// and the hosted mac runners have a slow mode that makes an absolute wall-clock bar read the host; COORD's rule wants
-// 10x over the typical or a paired host reference, and red and green here are only ~5x apart (p90 green 1.08-1.55 ms,
-// a coalesced Sleep(1) 7.2-10.2 ms), so no widened bound can do both. So on macOS each timed escalation is followed at
-// once, on the same thread, by the host's own one-shot NOTE_CRITICAL 1 ms kqueue wait (GoTimerTests.kernelWait, the
-// test's P/Invoke and not GoCriticalTimer's), and the pairs print as READING lines: the host wait's distribution and
-// the escalation minus the host, per pair. The paired bar follows from those readings, as GoTimer's did (5861ecd1d4,
-// then 375a6617de). Windows is unpaired and keeps its mean bound.
+// THE PAIRED BAR ON macOS (COORD, 2026-11-11). The macOS bounds above are absolute, and the hosted mac runners have a
+// slow mode that makes an absolute wall-clock bar read the host; COORD's rule wants 10x over the typical or a paired
+// host reference, and red and green here are only ~5x apart (p90 green 1.08-1.60 ms, a coalesced Sleep(1) 7.0-13.6 ms),
+// so no widened bound can do both. So on macOS each timed escalation is followed at once, on the same thread, by the
+// host's own one-shot NOTE_CRITICAL 1 ms kqueue wait (GoTimerTests.kernelWait, the test's P/Invoke and not
+// GoCriticalTimer's, so a change to golib's wait cannot move both sides), and the pairs print as READING lines.
+// When every pair answered, the bar is the p90 of the escalation minus the host, per pair, under 1.0 ms; the absolute
+// mean and p90 bounds then do not apply. Derivation, from the four darwin legs of the measurement commit (runs
+// 43099468163 and 43099488996): the per-pair excess read p50 0.001-0.008, p90 0.037-0.112 and p99 0.157-2.298 ms, so
+// 1.0 ms is 8.9x the worst p90; a coalesced Sleep(1) (p90 7.0-13.6 ms against a host wait of ~1.1-1.6 ms) leaves an
+// excess p90 of 5.8 ms or more, so the red it guards still reds by about 6x. One slot read the host's own wait at a
+// 1.55 ms median and the escalation at 1.56 ms: an absolute bar reads that as the escalation's drift, the pair as 0.003.
+// When a pair went unanswered the absolute bounds hold, as GoTimer's paired bar falls back. Windows is unpaired and
+// keeps its mean bound.
 [TestClass]
 public class GoschedBackoffEscalationLatencyTests
 {
@@ -67,6 +73,7 @@ public class GoschedBackoffEscalationLatencyTests
     private const int SleepSamples = 500;
     private const double BoundMeanMilliseconds = 5.0;
     private const double BoundDarwinP90Milliseconds = 3.0;
+    private const double BoundDarwinPairedP90Milliseconds = 1.0;
     private static readonly TimeSpan Cap = TimeSpan.FromSeconds(120);
 
     [TestMethod]
@@ -117,13 +124,15 @@ public class GoschedBackoffEscalationLatencyTests
         Console.WriteLine($"READING one escalation's cost (ms): {Describe(perEscalationMs.ToArray())}");
         Console.WriteLine($"READING Thread.Sleep(1) (ms): {Describe(sleepMs)}");
 
+        double[] excess = null;
+
         if (hostWait is not null)
         {
             int answered = hostMs.Count(ms => !double.IsNaN(ms));
 
             if (answered == perEscalationMs.Count && answered > 0)
             {
-                double[] excess = perEscalationMs.Select((ms, i) => ms - hostMs[i]).ToArray();
+                excess = perEscalationMs.Select((ms, i) => ms - hostMs[i]).ToArray();
                 Console.WriteLine($"READING host NOTE_CRITICAL 1 ms wait, paired (ms): {Describe(hostMs.ToArray())}");
                 Console.WriteLine($"READING escalation minus host, per pair (ms): {Describe(excess)}");
             }
@@ -136,6 +145,21 @@ public class GoschedBackoffEscalationLatencyTests
         Assert.IsTrue(perEscalationMs.Count >= MinimumEscalations,
             $"only {perEscalationMs.Count} escalations in {yields} lone yields -- the escalation path barely ran, " +
             "so its cost is unmeasured here");
+
+        if (excess is not null)
+        {
+            // macOS with every pair answered: the bar is the escalation's excess over the host's own 1 ms wait.
+            double[] byPair = (double[])excess.Clone();
+            Array.Sort(byPair);
+            double excessP90 = Percentile(byPair, 0.90);
+
+            Assert.IsTrue(excessP90 < BoundDarwinPairedP90Milliseconds,
+                $"one escalation's p90 excess over the host's own 1 ms NOTE_CRITICAL wait is {excessP90:F2} ms " +
+                $"(bound {BoundDarwinPairedP90Milliseconds} ms; per pair: {Describe(byPair)}): " +
+                "the escalation is waiting on a coalesced timer rather than about 1 ms");
+
+            return;
+        }
 
         double[] sorted = perEscalationMs.ToArray();
         Array.Sort(sorted);
