@@ -9,6 +9,11 @@
 
 ## <DATE>, 2026 — <TITLE>
 
+<!-- One section per item, each owned by the seat that writes it, so the seats' merges touch separate lines (COORD,
+     2026-11-11). At release the sections are merged into the entry's prose. -->
+
+### Converting a module: default build tags (C43)
+
 **Converting a module picks a library's pure-Go code over its assembly.** `go2cs -recurse`, in every form (local
 references, `-recurse=module` and `-recurse=nuget`), now builds a module with the build tags `safe`, `purego` and
 `noasm`, where it used `safe` alone, and prints them at the start of the run. A library that ships hand-written
@@ -19,6 +24,11 @@ loaded, so every converted program that imported it, github.com/zeebo/xxh3 among
 `-module-safe-tag=false` drops all three tags. None of the nine published nugetgo packages selects a different
 file under the new tags, so none needs a rebuild for this change. See
 [Build tags for a module](ConvertingAModule.md#build-tags-for-a-module).
+
+A known limit: no tag removes assembly that a library gates on the architecture alone. Its declarations still
+convert to methods that throw, and they stay reachable through code that forces the fast path on. xxh3's
+vector routines are the case: hashing takes the portable path, because the converted cpuid reports no CPU
+features, but xxh3's own tests switch the vector paths on and reach the throwing methods.
 <!-- seat C43 (COORD, 2026-11-11), branch claude/p2-c43-recurse-tags. The default: src/go2cs/commandLineOptions.go
      defaultModuleBuildTags. The nine-package census, at both tag sets on windows/amd64, linux/amd64, linux/arm64,
      darwin/amd64 and darwin/arm64, and the cpuid/xxh3 control: docs/phase4/DATA-c43-recurse-tags.md. -->
