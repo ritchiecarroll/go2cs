@@ -20,8 +20,10 @@ never converted again still shows that it carries a known-broken path. See [`-wa
 `GO2CS2001`, `GO2CS2002`, `GO2CS2003` or `GO2CS2005` error) used to end a `-recurse` run, so every package queued after it
 went unconverted. Now the refused package is skipped: its diagnostics still print as errors and it gets no project,
 but every other package converts. The run still ends with exit 1, naming each refused package and each converted
-package that imports one, since those will not build until the refused package converts. A single-package conversion
-still stops at a refusal and writes nothing. See [`-recurse`](CommandLine.md).
+package that imports one, since those will not build until the refused package converts. A package that fails to
+convert (it does not load, or the converter panics) was already skipped, but the run used to exit 0; it now exits 1
+too, so a script that checks the exit code sees it. A single-package conversion still stops at a refusal and writes
+nothing. See [`-recurse`](CommandLine.md).
 
 **A refusal is renumbered: `GO2CS2005`.** The refusals for a pointer type argument to a generic with a
 non-self-referential method-set constraint (new in 1.26.10.4, alongside the conversions that now work for that shape)
