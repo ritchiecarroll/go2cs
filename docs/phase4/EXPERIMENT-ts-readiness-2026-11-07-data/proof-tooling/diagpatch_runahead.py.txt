@@ -1,0 +1,36 @@
+# diagpatch_runahead.py <tsc internal dir> [--restore] : DIAGNOSTIC hand-patches (i7 local preview only, never landed) for
+# the owner's 2026-11-11 type-check run-ahead, one entry per new C-row behind C45. Each patch is small and keeps the Go
+# meaning. Each file is backed up to <file>.diag-orig first; --restore moves every backup back AND touches it (a restore
+# by move keeps the old mtime, and MSBuild then rebuilds nothing: the 2026-11-10 false green).
+import os, shutil, sys
+
+root = sys.argv[1]
+CR, LF = chr(13), chr(10)
+P = [
+    # C47: a func value converted to the delegate type it already has is wrapped `new D(f)`; with f nil (Go: nil func),
+    # C# throws "Delegate to an instance method cannot have null 'this'". The wrapped value is already of type D, so the
+    # wrapper is dropped (core.IfElse(reportErrors, r.reportError, nil) passed as an ErrorReporter; relater.go:2694).
+    ("checker/relater.cs",
+     "new Actionꓸꓸꓸ<ж<diagnostics.Message>, any>(core.IfElse<Actionꓸꓸꓸ<ж<diagnostics.Message>, any>>(reportErrors, Ꮡr.reportError, (Actionꓸꓸꓸ<ж<diagnostics.Message>, any>)(default)))",
+     "core.IfElse<Actionꓸꓸꓸ<ж<diagnostics.Message>, any>>(reportErrors, Ꮡr.reportError, (Actionꓸꓸꓸ<ж<diagnostics.Message>, any>)(default))",
+     2),
+]
+for rel, a, b, *cnt in P:
+    want = cnt[0] if cnt else 1
+    f = os.path.join(root, rel); o = f + ".diag-orig"
+    if "--restore" in sys.argv:
+        if os.path.exists(o):
+            shutil.move(o, f); os.utime(f, None); print("restored (and touched)", rel)
+        continue
+    s = open(f, encoding="utf-8-sig", newline="").read()
+    if CR + LF in s:
+        a, b = a.replace(LF, CR + LF), b.replace(LF, CR + LF)
+    if s.count(a) == 0 and (not b or s.count(b) >= want):
+        print("already patched", rel); continue
+    if s.count(a) != want:
+        sys.exit(f"{rel}: expected {want} match(es), found {s.count(a)}")
+    if not os.path.exists(o):
+        shutil.copy2(f, o)
+    bom = open(f, "rb").read(3) == b"\xef\xbb\xbf"
+    open(f, "w", encoding="utf-8-sig" if bom else "utf-8", newline="").write(s.replace(a, b))
+    print("patched", rel)

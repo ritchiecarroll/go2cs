@@ -1,0 +1,3 @@
+module repro/c49orelsenilptr
+
+go 1.26

@@ -1,0 +1,9 @@
+package core
+
+// The shape of TS internal/core.OrElse.
+func OrElse[T comparable](value T, defaultValue T) T {
+	if value != *new(T) {
+		return value
+	}
+	return defaultValue
+}
