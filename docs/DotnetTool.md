@@ -84,36 +84,46 @@ Once it lands, go2cs uses the first of these that applies:
 1. `-cc CMD`, used as given. It may carry arguments, as `zig cc` does, and it never downloads.
 2. `CC` from the environment, as the `go` command reads it.
 3. The platform's default compiler on `PATH`: `clang` on macOS, `gcc` elsewhere, the names Go itself defaults to.
-4. A pinned zig (0.17.0), downloaded into the user cache on first use and run as `zig cc`.
+4. The C toolchain go2cs pins for the OS, downloaded into the user cache on first use:
+
+| OS | Pinned toolchain | Why |
+|:--|:--|:--|
+| Linux, macOS | zig 0.17.0, run as `zig cc` | One download; it links against the system's own C libraries. |
+| Windows | llvm-mingw 20261020 (UCRT, x86_64), run as its `x86_64-w64-mingw32-clang` | It resolves C functions to the Windows DLLs (`cos` and `strlen` to the UCRT, `GetCurrentProcessId` to KERNEL32), as Go's own MinGW build does. zig links them into the program statically, which leaves nothing to call from C#. |
 
 `-cc pinned` goes straight to step 4. That is the reproducible choice: a host compiler is not reproducible, so every
-conversion whose output is compared byte for byte passes it. `-cc host` refuses step 4. `-cc-download=false` refuses
-to download, but still uses a zig already in the cache. Every refusal names the steps it tried, and no step falls
-back to loading the package with cgo off.
+conversion whose output is compared byte for byte passes it. `-cc pinned:zig` and `-cc pinned:llvm-mingw` choose one
+pinned toolchain explicitly, wherever go2cs pins it (zig on every platform, llvm-mingw on Windows x64). `-cc host`
+refuses step 4. `-cc-download=false` refuses to download, but still uses a pinned toolchain already in the cache.
+Every refusal names the steps it tried, and no step falls back to loading the package with cgo off.
 
-The zig comes from ziglang.org's community mirrors, in random order, and then from ziglang.org itself, as
-ziglang.org asks of automated downloads. Every archive, from any source, is checked against a SHA-256 built into the
-converter before anything is unpacked. A mismatch deletes the file and the next source is tried, so a mirror can
-fail a download but cannot substitute an archive. The hashes are generated from ziglang.org's download index. On
-Linux and macOS the `.tar.xz`
-archive is unpacked with the system `tar`. On Linux that needs `xz` installed (Debian-slim and Alpine images lack
-it), and go2cs says so before downloading anything. zig's caches go beside it, under go2cs's own cache folder.
+Every archive, from any source, is checked against a SHA-256 built into the converter before anything is unpacked.
+A mismatch deletes the file and the next source is tried, so a source can fail a download but cannot substitute an
+archive.
+- **zig** comes from ziglang.org's community mirrors, in random order, and then from ziglang.org itself, as ziglang.org
+  asks of automated downloads. Its hashes are generated from ziglang.org's download index. On Linux and macOS its
+  `.tar.xz` archive is unpacked with the system `tar`. On Linux that needs `xz` installed (Debian-slim and Alpine images
+  lack it), and go2cs says so before downloading anything. zig's caches go beside it, under go2cs's own cache folder.
+- **llvm-mingw** comes from its GitHub release. Its publisher signs nothing, so it is pinned by the release asset's
+  SHA-256 digest alone. Its archive is a `.zip` and needs no other tool.
 
-| Platform | The zig lives in |
+| Platform | The pinned toolchain lives in |
 |:--|:--|
-| Windows | `%LocalAppData%\go2cs\toolchains\zig-0.17.0-windows-<arch>` |
+| Windows | `%LocalAppData%\go2cs\toolchains\llvm-mingw-20261020-windows-amd64` (or `zig-0.17.0-windows-<arch>` when chosen) |
 | macOS | `~/Library/Caches/go2cs/toolchains/zig-0.17.0-darwin-<arch>` |
 | Linux | `$XDG_CACHE_HOME/go2cs/toolchains/zig-0.17.0-linux-<arch>`, or `~/.cache/...` |
 
 ```shell
-go2cs toolchain install -cc             # download the pinned zig now
-go2cs toolchain install -cc -from FILE  # install it from a zig release archive you have, checked against the pin
+go2cs toolchain install -cc                  # download this OS's pinned C toolchain now
+go2cs toolchain install -cc -pin zig         # or a named one: zig, or llvm-mingw (Windows x64)
+go2cs toolchain install -cc -from FILE       # install it from a release archive you have, checked against the pin
 ```
 
 go2cs downloads zig from its publishers (ziglang.org or a mirror), verifies it against a pinned SHA-256, and
 redistributes nothing. zig bundles Apple's darwin SDK headers under the APSL; using them is governed by those terms.
 Converted output contains no file from zig: it carries the C declarations cmd/cgo derives from the headers a package
 includes, as a Go cgo build does.
+On Windows the default is llvm-mingw, which go2cs likewise downloads from its publisher and does not redistribute.
 
 ## Go's telemetry
 

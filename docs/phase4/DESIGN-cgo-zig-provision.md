@@ -126,6 +126,29 @@ Done: the resolver, the provisioner, the export, genzigpins and its pins, `toolc
   resolveCToolchain into the -cgo load.
 - **A Windows CI arm** of the spaces-in-the-cache-path test.
 
+### Owner ruling: the default is per OS (2026-11-11, COORD relayed; PLAN-cgo-interop §5.1, b77b2e78a4)
+
+The pinned default is **zig on linux and darwin, llvm-mingw on windows**. This reverses Q2. Under zig, windows links
+cos and strlen statically, leaving no DLL to P/Invoke. llvm-mingw's UCRT build resolves all four of H's probes to UCRT
+or KERNEL32 DLLs, and a cold capture took 0.31 s against zig's 140 s. Increment 3 applies it:
+- The provisioner is generic over a pinned toolchain (ccPinnedToolchain.go): a name, a release, an archive pin, the
+  compiler's path under the install, its CC arguments (` cc` for zig, none for llvm-mingw), and its sources (zig's
+  mirrors then ziglang.org; llvm-mingw's GitHub release, which has no mirrors). zig's caches are set for zig only.
+- `defaultCCToolchain(goos)` picks llvm-mingw on windows and zig elsewhere. `-cc pinned` takes that default, and
+  `-cc pinned:zig` / `-cc pinned:llvm-mingw` name one, so zig stays reachable on windows by an explicit choice. A name
+  with no pin for the platform refuses by name (llvm-mingw is pinned for windows-amd64 only, so windows-arm64 has no
+  default pin).
+- genzigpins became genccpins. zig's pins still come from the saved index. llvm-mingw 20261020 ucrt-x86_64
+  (sha256 fd5462b7f5d93b2ff981fcd3f9c7e427e47f3203c64ea91c27bcc444eebd74cd, 190,612,575 bytes) is held as constants,
+  because it has no index and NO publisher signature: the pin is the GitHub asset digest alone. Its test reads the
+  converter-cgo instrument's pin table in os-matrix.yml and fails if the two disagree.
+- llvm-mingw's archive is a zip, so it takes archive/zip and needs no xz check.
+- `go2cs toolchain install -cc [-pin zig|llvm-mingw] [-from FILE]`.
+- docs/DotnetTool.md carries the per-OS table, says llvm-mingw is pinned by digest alone, and keeps the APSL paragraph
+  with one line on windows.
+- A correction the provisioner's header owed: genzigpins never checked minisign signatures. That generation-time check
+  is still owed (Status at increment 2), for zig only, since llvm-mingw has no signature to check.
+
 ## 7. Tests and gates
 
 - **Unit, local** (no network: an in-process HTTP server serves fake archives):

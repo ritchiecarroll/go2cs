@@ -35,6 +35,9 @@ import (
 const (
 	ccFlagPinned = "pinned"
 	ccFlagHost   = "host"
+	// ccFlagPinnedPrefix names one pinned toolchain explicitly: pinned:zig or pinned:llvm-mingw. A bare `pinned` takes
+	// the host OS's default (defaultCCToolchain).
+	ccFlagPinnedPrefix = "pinned:"
 )
 
 // ccFlags holds -cc and -cc-download as main parsed them; resolveCToolchain reads them.
@@ -88,8 +91,8 @@ func resetCToolchainResolution() {
 
 // version is the provenance line: the pin's release and hash prefix, or a host compiler's first `--version` line.
 func (r *ccResolver) version(choice ccChoice) string {
-	if z, ok := r.pinned.(*zigProvisioner); ok && choice.how == "the pinned toolchain" {
-		return fmt.Sprintf("zig %s (pinned, sha256 %s)", z.version, z.pin.sha256[:8])
+	if z, ok := r.pinned.(*pinnedProvisioner); ok && choice.how == "the pinned toolchain" {
+		return fmt.Sprintf("%s (pinned, sha256 %s)", z.label(), z.pin.sha256[:8])
 	}
 
 	fields := splitCC(choice.cc)
@@ -173,7 +176,7 @@ type ccPinnedToolchain interface {
 }
 
 type ccResolver struct {
-	flag     string // -cc: "", ccFlagPinned, ccFlagHost, or a compiler command
+	flag     string // -cc: "", ccFlagPinned, pinned:<name>, ccFlagHost, or a compiler command
 	download bool   // -cc-download
 	goos     string
 	getenv   func(string) string
@@ -184,7 +187,7 @@ type ccResolver struct {
 }
 
 func newCCResolver(flag string, download bool) *ccResolver {
-	return &ccResolver{flag: strings.TrimSpace(flag), download: download, goos: runtime.GOOS, getenv: os.Getenv, lookPath: exec.LookPath, pinned: newPinnedCC(), runVersion: firstVersionLine}
+	return &ccResolver{flag: strings.TrimSpace(flag), download: download, goos: runtime.GOOS, getenv: os.Getenv, lookPath: exec.LookPath, pinned: newPinnedCC(pinnedToolchainName(flag)), runVersion: firstVersionLine}
 }
 
 // platformDefaultCC is the compiler cmd/go uses when CC is unset (cmd/go/internal/cfg/zdefaultcc.go).
@@ -196,11 +199,22 @@ func platformDefaultCC(goos string) string {
 	return "gcc"
 }
 
-// newPinnedCC returns this platform's pinned C toolchain, the zig provisioner (ccZigProvision.go), or nil when this
-// go2cs carries no pin for the platform. The nil is returned bare: a nil *zigProvisioner inside the interface would
-// read as a pin.
-func newPinnedCC() ccPinnedToolchain {
-	if z := newZigProvisioner(); z != nil {
+// pinnedToolchainName is the toolchain a -cc value names: the one after pinned:, or "" for the host OS's default.
+func pinnedToolchainName(flag string) string {
+	name, _ := strings.CutPrefix(strings.TrimSpace(flag), ccFlagPinnedPrefix)
+
+	if name == strings.TrimSpace(flag) {
+		return ""
+	}
+
+	return name
+}
+
+// newPinnedCC returns this platform's pinned C toolchain (ccPinnedToolchain.go): the named one, or for "" the host OS's
+// default, llvm-mingw on windows and zig elsewhere; nil when this go2cs carries no pin of it for the platform. The nil is
+// returned bare: a nil *pinnedProvisioner inside the interface would read as a pin.
+func newPinnedCC(name string) ccPinnedToolchain {
+	if z := newPinnedProvisioner(name); z != nil {
 		return z
 	}
 
@@ -217,13 +231,20 @@ func checkCCFlags(cgo bool, cc string, download bool) error {
 }
 
 func (r *ccResolver) resolve() (ccChoice, error) {
-	switch r.flag {
-	case "", ccFlagPinned, ccFlagHost:
+	pinnedOnly := r.flag == ccFlagPinned || strings.HasPrefix(r.flag, ccFlagPinnedPrefix)
+
+	switch {
+	case r.flag == "" || r.flag == ccFlagHost:
+	case pinnedOnly:
+		if name := pinnedToolchainName(r.flag); r.flag != ccFlagPinned && name != ccToolchainZig && name != ccToolchainLLVMMingw {
+			return ccChoice{}, fmt.Errorf("-cc %s names no pinned C toolchain; the pinned ones are pinned:%s and pinned:%s, and `pinned` takes this OS's default",
+				r.flag, ccToolchainZig, ccToolchainLLVMMingw)
+		}
 	default:
 		return ccChoice{cc: r.flag, env: []string{"CC=" + r.flag}, how: "-cc"}, nil
 	}
 
-	if r.flag != ccFlagPinned {
+	if !pinnedOnly {
 		if cc := strings.TrimSpace(r.getenv("CC")); cc != "" {
 			return ccChoice{cc: cc, env: []string{"CC=" + cc}, how: "CC from the environment"}, nil
 		}
@@ -242,8 +263,14 @@ func (r *ccResolver) resolve() (ccChoice, error) {
 	}
 
 	if r.pinned == nil {
-		return ccChoice{}, fmt.Errorf("-cgo needs a C compiler: none of %s resolved, and this go2cs has no pinned C toolchain for %s/%s",
-			hostSteps, r.goos, runtime.GOARCH)
+		name := pinnedToolchainName(r.flag)
+
+		if name == "" {
+			name = defaultCCToolchain(r.goos)
+		}
+
+		return ccChoice{}, fmt.Errorf("-cgo needs a C compiler: none of %s resolved, and this go2cs has no pinned C toolchain (%s) for %s/%s",
+			hostSteps, name, r.goos, runtime.GOARCH)
 	}
 
 	if cc, env, ok := r.pinned.cached(); ok {

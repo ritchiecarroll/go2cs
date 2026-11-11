@@ -90,8 +90,8 @@
     <None Include="$(MSBuildThisFileDirectory)ccToolchain.go" />
     <None Include="$(MSBuildThisFileDirectory)ccToolchain_test.go" />
     <None Include="$(MSBuildThisFileDirectory)ccToolchainPins.go" />
-    <None Include="$(MSBuildThisFileDirectory)ccZigProvision.go" />
-    <None Include="$(MSBuildThisFileDirectory)ccZigProvision_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)ccPinnedToolchain.go" />
+    <None Include="$(MSBuildThisFileDirectory)ccPinnedToolchain_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDynamicImports_test.go" />
     <None Include="$(MSBuildThisFileDirectory)chainedCallScaling_test.go" />
     <None Include="$(MSBuildThisFileDirectory)chanDirComment_test.go" />
@@ -333,8 +333,8 @@
     <None Include="$(MSBuildThisFileDirectory)internal\gensynopsis\main_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gentoolchainpins\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gentoolchainpins\main_test.go" />
-    <None Include="$(MSBuildThisFileDirectory)internal\genzigpins\main.go" />
-    <None Include="$(MSBuildThisFileDirectory)internal\genzigpins\main_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\genccpins\main.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\genccpins\main_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\golauncher\golauncher.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\golauncher\golauncher_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\pcensus\census.go" />

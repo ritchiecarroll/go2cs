@@ -1,4 +1,4 @@
-// ccZigProvision_test.go - Gbtc
+// ccPinnedToolchain_test.go - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
 // SPDX-License-Identifier: AGPL-3.0-only
@@ -61,7 +61,7 @@ func sha256Hex(data []byte) string {
 // zigTestRig serves each source's archive and records what the provisioner requested and unpacked, so a test can show a
 // bad archive was never unpacked and a refused install requested nothing.
 type zigTestRig struct {
-	z        *zigProvisioner
+	z        *pinnedProvisioner
 	server   *httptest.Server
 	served   map[string][]byte
 	requests int
@@ -86,9 +86,9 @@ func newZigTestRig(t *testing.T, pinSHA string) *zigTestRig {
 
 	t.Cleanup(rig.server.Close)
 
-	rig.z = &zigProvisioner{
-		version: "0.17.0", goos: "linux", goarch: "amd64",
-		pin:       zigArchivePin{file: fakeZigFile, sha256: pinSHA},
+	rig.z = &pinnedProvisioner{
+		name: ccToolchainZig, version: "0.17.0", exeRel: "zig", ccArgs: " cc", goos: "linux", goarch: "amd64",
+		pin:       ccArchivePin{file: fakeZigFile, sha256: pinSHA},
 		cacheRoot: filepath.Join(t.TempDir(), "toolchains"),
 		client:    rig.server.Client(),
 		lookPath:  exec.LookPath,
@@ -103,11 +103,11 @@ func newZigTestRig(t *testing.T, pinSHA string) *zigTestRig {
 }
 
 // serve publishes body at /<name>/<file> and returns the source.
-func (rig *zigTestRig) serve(name string, body []byte) zigSource {
+func (rig *zigTestRig) serve(name string, body []byte) ccSource {
 	path := "/" + name + "/" + fakeZigFile
 	rig.served[path] = body
 
-	return zigSource{name: name, url: rig.server.URL + path}
+	return ccSource{name: name, url: rig.server.URL + path}
 }
 
 // leftovers lists what the cache root holds besides the install and zig's caches: downloads and staging directories
@@ -136,8 +136,8 @@ func TestZigWrongHashIsDeletedAndTheNextSourceTried(t *testing.T) {
 	rig := newZigTestRig(t, sha256Hex(good))
 
 	tampered := append(bytes.Clone(good), 0)
-	sources := []zigSource{rig.serve("hostile-mirror", tampered), rig.serve("ziglang.org", good)}
-	rig.z.sources = func() []zigSource { return sources }
+	sources := []ccSource{rig.serve("hostile-mirror", tampered), rig.serve("ziglang.org", good)}
+	rig.z.sources = func() []ccSource { return sources }
 
 	cc, env, err := rig.z.install()
 	if err != nil {
@@ -169,8 +169,8 @@ func TestZigPlantedWrongPinRefusesBeforeUnpacking(t *testing.T) {
 	good := fakeZigArchive(t)
 	rig := newZigTestRig(t, sha256Hex(append(bytes.Clone(good), 'x')))
 
-	sources := []zigSource{rig.serve("mirror-a", good), rig.serve("ziglang.org", good)}
-	rig.z.sources = func() []zigSource { return sources }
+	sources := []ccSource{rig.serve("mirror-a", good), rig.serve("ziglang.org", good)}
+	rig.z.sources = func() []ccSource { return sources }
 
 	_, _, err := rig.z.install()
 	if err == nil {
@@ -216,7 +216,7 @@ func TestZigCachedNeedsTheStampOfThisPin(t *testing.T) {
 		t.Fatal("an install with no stamp reads as cached")
 	}
 
-	stamp := filepath.Join(rig.z.root(), zigInstallStampSHA)
+	stamp := filepath.Join(rig.z.root(), ccInstallStampSHA)
 
 	if err := os.WriteFile(stamp, []byte(strings.Repeat("0", 64)+"\n"), 0o644); err != nil {
 		t.Fatal(err)
@@ -287,7 +287,7 @@ func TestZigNeedsXzBeforeDownloadingOnLinux(t *testing.T) {
 	rig := newZigTestRig(t, strings.Repeat("0", 64))
 	rig.z.pin.file = "zig-x86_64-linux-0.17.0.tar.xz"
 	source := rig.serve("ziglang.org", []byte("never fetched"))
-	rig.z.sources = func() []zigSource { return []zigSource{source} }
+	rig.z.sources = func() []ccSource { return []ccSource{source} }
 	rig.z.lookPath = func(name string) (string, error) {
 		if name == "xz" {
 			return "", errors.New("not found")
@@ -320,7 +320,7 @@ func TestZigNeedsXzBeforeDownloadingOnLinux(t *testing.T) {
 // the zig executable and `cc`; a wrong quote reads as "compiler not found" for exactly those users.
 func TestZigCCSurvivesASpaceInTheCacheRoot(t *testing.T) {
 	for _, root := range []string{filepath.Join(t.TempDir(), "A B", "toolchains"), filepath.Join(t.TempDir(), "o'brien x", "toolchains")} {
-		z := &zigProvisioner{version: "0.17.0", goos: "linux", goarch: "amd64", cacheRoot: root}
+		z := newPinnedProvisionerFor(ccToolchainZig, "linux", "amd64", root)
 
 		cc, _, err := z.choice()
 		if err != nil {
@@ -377,7 +377,7 @@ func TestZigUnpacksATarXzThroughTheSystemTar(t *testing.T) {
 func TestZigInstallFromAFileTakesOnlyThePinnedArchive(t *testing.T) {
 	good := fakeZigArchive(t)
 	rig := newZigTestRig(t, sha256Hex(good))
-	rig.z.sources = func() []zigSource { return []zigSource{rig.serve("ziglang.org", good)} }
+	rig.z.sources = func() []ccSource { return []ccSource{rig.serve("ziglang.org", good)} }
 
 	dir := t.TempDir()
 	goodFile, badFile := filepath.Join(dir, "good.zip"), filepath.Join(dir, "bad.zip")
@@ -408,5 +408,93 @@ func TestZigInstallFromAFileTakesOnlyThePinnedArchive(t *testing.T) {
 
 	if rig.requests != 0 {
 		t.Fatalf("install -from made %d requests; it must download nothing", rig.requests)
+	}
+}
+
+// The default pin is PER OS (owner ruling, PLAN-cgo-interop §5.1): llvm-mingw on windows, zig on linux and darwin. A
+// named pin is reachable wherever this go2cs carries one for the platform, and nowhere else.
+func TestTheDefaultPinIsPerOS(t *testing.T) {
+	root := t.TempDir()
+
+	for _, c := range []struct {
+		name, goos, goarch string
+		want, file, exeRel string
+	}{
+		{"", "windows", "amd64", ccToolchainLLVMMingw, "llvm-mingw-20261020-ucrt-x86_64.zip", "bin/x86_64-w64-mingw32-clang.exe"},
+		{"", "linux", "amd64", ccToolchainZig, "zig-x86_64-linux-0.17.0.tar.xz", "zig"},
+		{"", "darwin", "arm64", ccToolchainZig, "zig-aarch64-macos-0.17.0.tar.xz", "zig"},
+		{ccToolchainZig, "windows", "amd64", ccToolchainZig, "zig-x86_64-windows-0.17.0.zip", "zig.exe"},
+	} {
+		z := newPinnedProvisionerFor(c.name, c.goos, c.goarch, root)
+		if z == nil || z.name != c.want || z.pin.file != c.file || z.exeRel != c.exeRel {
+			t.Fatalf("%q on %s/%s: %+v; want %s %s %s", c.name, c.goos, c.goarch, z, c.want, c.file, c.exeRel)
+		}
+	}
+
+	// No pin, no provisioner: llvm-mingw is pinned for windows-amd64 only, so windows-arm64 has no default pin.
+	for _, c := range [][3]string{{"", "windows", "arm64"}, {ccToolchainLLVMMingw, "linux", "amd64"}, {"gcc", "linux", "amd64"}} {
+		if z := newPinnedProvisionerFor(c[0], c[1], c[2], root); z != nil {
+			t.Fatalf("%q on %s/%s: %+v; want no pin", c[0], c[1], c[2], z)
+		}
+	}
+}
+
+// llvm-mingw's CC is its compiler alone, with no zig caches, and its only source is the GitHub release.
+func TestLLVMMingwIsItsCompilerAloneFromItsRelease(t *testing.T) {
+	z := newPinnedProvisionerFor(ccToolchainLLVMMingw, "windows", "amd64", filepath.Join(t.TempDir(), "A B"))
+
+	cc, env, err := z.choice()
+	if err != nil || env != nil {
+		t.Fatalf("choice = %q %v %v; want the compiler and no environment", cc, env, err)
+	}
+
+	if fields := splitCC(cc); len(fields) != 1 || fields[0] != z.exe() || !strings.HasSuffix(fields[0], filepath.FromSlash("bin/x86_64-w64-mingw32-clang.exe")) {
+		t.Fatalf("cc %q splits into %q; want the one compiler path", cc, fields)
+	}
+
+	sources := z.defaultSources()
+	if len(sources) != 1 || sources[0].url != "https://github.com/mstorsjo/llvm-mingw/releases/download/20261020/llvm-mingw-20261020-ucrt-x86_64.zip" {
+		t.Fatalf("sources = %+v; want the GitHub release alone", sources)
+	}
+}
+
+// An llvm-mingw archive installs end to end: the pinned hash, the top-level directory dropped, the compiler under bin.
+func TestLLVMMingwInstallsThroughTheSamePath(t *testing.T) {
+	var buf bytes.Buffer
+	w := zip.NewWriter(&buf)
+
+	for _, name := range []string{"llvm-mingw-20261020-ucrt-x86_64/bin/x86_64-w64-mingw32-clang.exe", "llvm-mingw-20261020-ucrt-x86_64/include/stdio.h"} {
+		f, err := w.Create(name)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		f.Write([]byte("x"))
+	}
+
+	if err := w.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	archive := buf.Bytes()
+	rig := newZigTestRig(t, sha256Hex(archive))
+	llvm := newPinnedProvisionerFor(ccToolchainLLVMMingw, "windows", "amd64", rig.z.cacheRoot)
+	llvm.pin.sha256 = sha256Hex(archive)
+	llvm.client = rig.z.client
+	path := "/release/llvm-mingw-20261020-ucrt-x86_64.zip"
+	rig.served[path] = archive
+	llvm.sources = func() []ccSource { return []ccSource{{name: "release", url: rig.server.URL + path}} }
+
+	cc, env, err := llvm.install()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if want, _ := quoteCCWord(llvm.exe()); cc != want || env != nil {
+		t.Fatalf("install = %q %v; want %q and no environment", cc, env, want)
+	}
+
+	if _, _, ok := llvm.cached(); !ok {
+		t.Fatal("the llvm-mingw install is not seen as cached")
 	}
 }

@@ -199,3 +199,23 @@ func TestSplitCCIsCmdGosSplit(t *testing.T) {
 		}
 	}
 }
+
+// -cc pinned:<name> picks one pinned toolchain; any other name after pinned: is refused, naming the two.
+func TestPinnedFlagNamesAToolchain(t *testing.T) {
+	for flag, want := range map[string]string{"pinned": "", "pinned:zig": ccToolchainZig, "pinned:llvm-mingw": ccToolchainLLVMMingw, " pinned:zig ": ccToolchainZig, "gcc": "", "zig cc": ""} {
+		if got := pinnedToolchainName(flag); got != want {
+			t.Fatalf("pinnedToolchainName(%q) = %q, want %q", flag, got, want)
+		}
+	}
+
+	_, err := ccResolverFor("pinned:gcc", true, map[string]string{"CC": "cc"}, []string{"gcc"}, &fakePinnedCC{}).resolve()
+	if err == nil || !strings.Contains(err.Error(), "pinned:zig") || !strings.Contains(err.Error(), "pinned:llvm-mingw") {
+		t.Fatalf("-cc pinned:gcc: %v; want a refusal naming both pinned toolchains", err)
+	}
+
+	// pinned:zig skips CC and PATH exactly as pinned does.
+	choice, err := ccResolverFor("pinned:zig", true, map[string]string{"CC": "cc"}, []string{"gcc"}, &fakePinnedCC{}).resolve()
+	if err != nil || choice.how != "the pinned toolchain" {
+		t.Fatalf("-cc pinned:zig: %+v %v; want the pinned toolchain", choice, err)
+	}
+}

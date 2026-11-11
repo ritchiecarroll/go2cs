@@ -88,7 +88,7 @@ func TestCCToolchainPinsAreWhatTheGeneratorWrites(t *testing.T) {
 	}
 
 	if !bytes.Equal(bytes.ReplaceAll(got, []byte("\r\n"), []byte("\n")), want) {
-		t.Fatalf("src/go2cs/ccToolchainPins.go is not what genzigpins writes from the saved index; regenerate it:\n%s", want)
+		t.Fatalf("src/go2cs/ccToolchainPins.go is not what genccpins writes from the saved index; regenerate it:\n%s", want)
 	}
 }
 
@@ -119,4 +119,25 @@ func TestAOneByteEditOfTheIndexChangesThePins(t *testing.T) {
 	if _, err := pinsFromIndex(malformed); err == nil || !strings.Contains(err.Error(), "aarch64-macos") {
 		t.Fatalf("a malformed hash: %v; want a refusal naming aarch64-macos", err)
 	}
+}
+
+// llvm-mingw's pin is held as constants (no index to read), so it is checked against the instrument that verified it
+// on hosted runners: the converter-cgo step's pin table in os-matrix.yml.
+func TestTheLLVMMingwPinIsTheInstruments(t *testing.T) {
+	data, err := os.ReadFile(filepath.Join("..", "..", "..", "..", ".github", "workflows", "os-matrix.yml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, line := range strings.Split(string(data), "\n") {
+		if strings.Contains(line, "'llvm-mingw|win-x64'") {
+			if !strings.Contains(line, "/"+llvmMingwFile+"\"") || !strings.Contains(line, "sha256 = '"+llvmMingwSHA256+"'") {
+				t.Fatalf("the instrument pins %q; genccpins pins %s %s", strings.TrimSpace(line), llvmMingwFile, llvmMingwSHA256)
+			}
+
+			return
+		}
+	}
+
+	t.Fatal("os-matrix.yml has no llvm-mingw|win-x64 pin; the guard proves nothing")
 }
