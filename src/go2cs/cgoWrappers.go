@@ -197,13 +197,9 @@ func cgoScalarWrapper(declaration cgoDeclaration, target cgoBindingTarget) (stri
 	var text strings.Builder
 	setLastError := ""
 
-	// The errno form reads errno inside the transition (§11.3). On linux and darwin the binding captures it itself: its
-	// stub clears errno before the call and saves it after, so the read sees this call's errno and nothing the GC
-	// transition did since. On windows SetLastError captures GetLastError, not errno, which is the C RUNTIME's own
-	// slot, so the wrapper reads that through the library's C runtime instead (cgoErrnoLocationBinding).
-	crtErrno := errnoForm && target.goos == "windows"
-
-	if errnoForm && !crtErrno {
+	// The errno form reads errno inside the transition (§11.3, cgoErrnoCall): through SetLastError on linux and darwin,
+	// and through the C runtime's own slot on windows.
+	if errnoForm && target.goos != "windows" {
 		setLastError = ", SetLastError = true"
 	}
 
@@ -228,7 +224,35 @@ func cgoScalarWrapper(declaration cgoDeclaration, target cgoBindingTarget) (stri
 	// native-call seam once (§11.4).
 	fmt.Fprintf(&text, "        %ssyscallEntersyscall();\n\n        try\n        {\n", runtime)
 
-	if crtErrno {
+	text.WriteString(cgoErrnoCall(call, errnoForm, target.goos))
+	fmt.Fprintf(&text, "        }\n        finally\n        {\n            %ssyscallExitsyscall();\n        }\n", runtime)
+
+	returned := "default"
+
+	if !result.isVoid {
+		returned = result.fromPrimitive("r")
+	}
+
+	if errnoForm {
+		fmt.Fprintf(&text, "\n%s    }\n", cgoErrnoReturn(returned))
+	} else {
+		fmt.Fprintf(&text, "\n        return %s;\n    }\n", returned)
+	}
+
+	return text.String(), nil
+}
+
+// cgoErrnoCall writes the native call's statements inside the transition, with the errno form's read of errno (§11.3).
+// On linux and darwin the binding captures errno itself (SetLastError): its stub clears errno before the call and saves
+// it after, so the read sees this call's errno and nothing the GC transition did since. On windows SetLastError captures
+// GetLastError, not errno, which is the C RUNTIME's own slot, so the wrapper reads that through the library's C runtime
+// instead (cgoErrnoLocationBinding).
+func cgoErrnoCall(call string, errnoForm bool, goos string) string {
+	const interop = "global::System.Runtime.InteropServices."
+
+	var text strings.Builder
+
+	if errnoForm && goos == "windows" {
 		// cgo's own trampoline, in managed code: the thread's errno slot is taken BEFORE the call, zeroed, and read as
 		// the very next statement after it, with no P/Invoke between the call's return and the read. The slot is the
 		// calling thread's, and one synchronous wrapper does not change threads. What remains: runtime code on this
@@ -246,23 +270,14 @@ func cgoScalarWrapper(declaration cgoDeclaration, target cgoBindingTarget) (stri
 		}
 	}
 
-	fmt.Fprintf(&text, "        }\n        finally\n        {\n            %ssyscallExitsyscall();\n        }\n", runtime)
+	return text.String()
+}
 
-	returned := "default"
-
-	if !result.isVoid {
-		returned = result.fromPrimitive("r")
-	}
-
-	if errnoForm {
-		// cgo's own rule: a zero errno is a nil error, and any other is syscall.Errno(errno).
-		fmt.Fprintf(&text, "\n        error err = null;\n\n        if (errno != 0)\n            err = (global::go.syscall_package.Errno)(uintptr)(nuint)(uint)errno;\n\n")
-		fmt.Fprintf(&text, "        return (%s, err);\n    }\n", returned)
-	} else {
-		fmt.Fprintf(&text, "\n        return %s;\n    }\n", returned)
-	}
-
-	return text.String(), nil
+// cgoErrnoReturn writes the errno form's return of returned under cgo's own rule: a zero errno is a nil error, and any
+// other is syscall.Errno(errno).
+func cgoErrnoReturn(returned string) string {
+	return "        error err = null;\n\n        if (errno != 0)\n            err = (global::go.syscall_package.Errno)(uintptr)(nuint)(uint)errno;\n\n" +
+		fmt.Sprintf("        return (%s, err);\n", returned)
 }
 
 // cgoErrnoLocation is the C# name of the binding of a windows C runtime's _errno().
