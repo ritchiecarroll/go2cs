@@ -35890,4 +35890,28 @@ non-self route does, or make the zero value a proxy over a nil box.
 
 — R (2026-11-10)
 
+## 2026-11-10 — H (cgo Phase 2 increment 4d, golib-tests 42936395011): on darwin, dyld's search for a BARE library name reaches the current directory — a SECURITY finding, CLOSED in 4d before any release shipped it
+
+**The finding.** Increment 4d's exit-gate arm `ALibraryOnlyInTheCurrentDirectoryIsNotLoaded` planted a copy of the
+probe library in the current directory and asked golib's cgo resolver for it by its bare name. On both hosted darwin
+RIDs, dyld loaded it: handle 1913759472 on osx-arm64 and 1108903152 on osx-x64, where the arm required a refusal. The
+red was predicted before the run (PREDICTIONS-4d D6, leaning red at about 60/40, from man dlopen's leaf-name order). A
+converted cgo package whose captured darwin name was not absolute would therefore load a library planted in whatever
+directory the program was started from: the DLL-planting surface §5.4 exists to close.
+
+**The fix, in 4d itself (COORD's ruling).** DESIGN-cgo-phase2-pinvoke §11.12's absolute-name rule is MANDATORY for
+every darwin load (dated line there). Both halves refuse, by name, any darwin name that is not absolute: the
+converter's capture (`cgoDarwinInstallName`; red 8dfe7398ee fails on exactly the bare and the relative name) and
+golib's resolver, which refuses before dyld sees the name (green 3c4875b988). The current-directory arm stays as the
+rule's guard. Linux (ld.so does not search the current directory for a bare name unless LD_LIBRARY_PATH has an
+empty entry, which the hosted leg avoids) and windows (SafeDirectories | AssemblyDirectory) read green on the same arm.
+
+**The trade, stated.** An absolute install name is baked into the bindings, as into a Go binary's load commands, so a
+library at another path on the consumer's machine (Homebrew's `/opt/homebrew` against `/usr/local`) fails by name
+rather than loading something else.
+
+CLOSED by claude/h-cgo-phase2-probes 3c4875b988.
+
+— H (2026-11-10)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
