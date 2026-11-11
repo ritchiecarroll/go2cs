@@ -400,14 +400,24 @@ func machoImportedLibraries(path string) (map[string]string, error) {
 
 		library := dylibs[ordinal-1]
 
-		if strings.HasPrefix(library, "@") {
-			return nil, fmt.Errorf("cgo: %s resolves to %s, an install name the CLR's loader cannot resolve as dyld does (§11.12)", name, library)
+		if err := cgoDarwinInstallName(name, library); err != nil {
+			return nil, err
 		}
 
 		resolved[name] = library
 	}
 
 	return resolved, nil
+}
+
+// cgoDarwinInstallName refuses, by name, an install name a converted package must not load by (§11.12): one the CLR's
+// loader cannot resolve as dyld does (@rpath, @loader_path, @executable_path).
+func cgoDarwinInstallName(symbol, library string) error {
+	if strings.HasPrefix(library, "@") {
+		return fmt.Errorf("cgo: %s resolves to %s, an install name the CLR's loader cannot resolve as dyld does (§11.12)", symbol, library)
+	}
+
+	return nil
 }
 
 // cgoTraceDefinition is one line of the linker's --trace-symbol output, GNU ld's and lld's alike: the file that defines
