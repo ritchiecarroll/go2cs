@@ -2102,6 +2102,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckReflectliteTypeName() => CheckTarget("ReflectliteTypeName");
 
     [TestMethod]
+    public void CheckRefusalDowngradeProxy() => CheckTarget("RefusalDowngradeProxy");
+
+    [TestMethod]
     public void CheckReinterpretPinLifetime() => CheckTarget("ReinterpretPinLifetime");
 
     [TestMethod]
@@ -2802,6 +2805,14 @@ public class D4_OutputComparisonTests : BehavioralTestBase
         // Compile C# project, if needed
         CompileCSProject(targetProject);
 
+        // An EXPECTED-OUTPUT project (converted under go2cs.options' -warn) has no Go oracle: Go runs to the end, while
+        // the converted program must panic at its refused site. Compared with the recorded expectation instead.
+        if (HasExpectedOutput(targetProject))
+        {
+            CheckExpectedOutput(projPath, targetProject);
+            return;
+        }
+
         // Compile Go project
         CompileGoProject(targetProject);
 
@@ -2877,5 +2888,26 @@ public class D4_OutputComparisonTests : BehavioralTestBase
         int index = text.IndexOf('\n');
 
         return (index < 0 ? text : text[..index]).TrimEnd('\r');
+    }
+
+    // An expected-output project's C# run: stdout exactly expected-output.txt (line endings normalized), exit code 2, and
+    // stderr's first line a "panic: go2cs:" refusal, which is go2cs-gen's refused forwarder (the -warn contract).
+    private void CheckExpectedOutput(string projPath, string targetProject)
+    {
+        string csExe = GetCSExeFile(projPath, targetProject);
+        Assert.IsTrue(File.Exists(csExe), $"Expected C# executable does not exist: {csExe}");
+
+        StringBuilder csOutput = new();
+        StringBuilder csError = new();
+
+        int csExitCode = Exec(csExe, null, Path.GetDirectoryName(projPath),
+            (_, e) => { if (e.Data is not null) csOutput.AppendLine(e.Data); }, RunExecTimeoutMs,
+            (_, e) => { if (e.Data is not null) csError.AppendLine(e.Data); });
+
+        string expected = File.ReadAllText(Path.Combine(projPath, ExpectedOutputFile)).Replace("\r\n", "\n");
+
+        Assert.AreEqual(2, csExitCode, $"Expected a refusal panic (exit 2), the C# executable exited {csExitCode:N0}: {FirstLine(csError)}");
+        Assert.AreEqual(expected, csOutput.ToString().Replace("\r\n", "\n"), $"Output mismatch with {ExpectedOutputFile}");
+        Assert.IsTrue(FirstLine(csError).StartsWith("panic: go2cs:", StringComparison.Ordinal), $"stderr's first line is not a go2cs refusal panic: \"{FirstLine(csError)}\"");
     }
 }

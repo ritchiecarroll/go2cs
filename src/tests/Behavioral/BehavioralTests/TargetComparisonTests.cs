@@ -2167,6 +2167,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckReflectliteTypeName() => CheckTarget("ReflectliteTypeName");
 
     [TestMethod]
+    public void CheckRefusalDowngradeProxy() => CheckTarget("RefusalDowngradeProxy");
+
+    [TestMethod]
     public void CheckReinterpretPinLifetime() => CheckTarget("ReinterpretPinLifetime");
 
     [TestMethod]

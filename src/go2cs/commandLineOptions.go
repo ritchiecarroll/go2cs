@@ -120,6 +120,13 @@ type Options struct {
 	// programDependencies is the -recurse closure's third-party modules, in path order: a main package's
 	// build-info `dep` lines (buildInfoStamp.go). Set per package by the -recurse drivers; nil otherwise.
 	programDependencies []thirdPartyModule
+
+	// warnCodes is -warn's refusal codes, downgraded to warnings, each on the allow-list (warnOption.go).
+	warnCodes map[string]bool
+
+	// skipRefusedPackages makes a pre-emission refusal a returned *packageRefusal rather than fatal, so -recurse skips
+	// the package and goes on (recurseRefusal.go). Set per package by ModuleConverter.convertAll only.
+	skipRefusedPackages bool
 }
 
 // packageUnderTestPath returns the import path of the package under test, whichever field the

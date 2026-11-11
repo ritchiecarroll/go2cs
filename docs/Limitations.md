@@ -262,10 +262,10 @@ The [validated modules](ValidatedModules.md) page is still short.
   own code, reshape the Go. In a dependency, point a `replace` at a patched copy, or fix the generated
   `.cs` and mark the file `[module: go.GoManualConversion]` so the next conversion leaves it alone. New
   ones still turn up: [tell me](#when-you-hit-a-seam).
-* **One bad dependency blocks everything above it.** A package that fails to convert is reported and
-  skipped, the run still exits 0, and every project that imports it fails to build. Read the summary
-  line, `Recursive conversion complete in ...: N/M packages converted (K failed: ...)`, not the exit
-  code. `-recurse=module`
+* **One bad dependency blocks everything above it.** A package that fails to convert, or that the
+  converter refuses, is reported and skipped: the rest of the module still converts, and every project
+  that imports it fails to build. The run ends with exit 1, and its summary names each such package
+  and, for a refused one, each converted package that imports it. `-recurse=module`
   [converts only your packages](ConvertingAModule.md#optional-convert-the-module-only-and-deal-with-its-dependencies-later).
 
 ## What "validated" means, and what it doesn't
@@ -274,7 +274,7 @@ A package's own Go `Test` functions were converted, run, and compared with `go t
 verdict, by full test name. That's a real bar, and narrower than the word sounds:
 
 * **Tests only.** Examples, benchmarks and fuzz targets never run. No race detector either.
-  <!-- src/go2cs/testConversion.go:4144 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
+  <!-- src/go2cs/testConversion.go:4153 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
        Example- and Benchmark-only test files are left out of the compile set, :849
        `// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the`. -->
 * **Matched is not passed.** A test that skips on both sides counts as a match and measures nothing.

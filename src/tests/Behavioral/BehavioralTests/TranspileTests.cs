@@ -2164,6 +2164,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckReflectliteTypeName() => CheckTarget("ReflectliteTypeName");
 
     [TestMethod]
+    public void CheckRefusalDowngradeProxy() => CheckTarget("RefusalDowngradeProxy");
+
+    [TestMethod]
     public void CheckReinterpretPinLifetime() => CheckTarget("ReinterpretPinLifetime");
 
     [TestMethod]

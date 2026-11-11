@@ -299,6 +299,7 @@ func main() {
 	licenseCmd := commandLine.String("license", "", "Override NuGet license metadata with an SPDX expression (for example MIT or BSD-3-Clause); does not relicense input code")
 	provenanceCmd := commandLine.Bool("provenance", false, "Include in each converted file a notice naming its Go source and module and that go2cs modified it by conversion (no timestamp)")
 	trimPathCmd := commandLine.Bool("trimpath", true, "Record a main-module source in the converted position maps the way `go build -trimpath` bakes it, <module path>/<path in module>, so the output names no directory of this machine; -trimpath=false records the absolute source path, as an untrimmed `go build` does")
+	warnCmd := commandLine.String("warn", "", "Downgrade the listed converter refusal codes to warnings (comma-separated), so a package holding a refused site still converts; each downgraded site fails loud, a panic carrying the refusal text, when reached, and the build reports it (GO2CS0011). Opt-in per code, never a default; only GO2CS2002 is allowed (an unknown or disallowed code is an error that names it)")
 	includeCommentsCmd := commandLine.Bool("comments", false, "Include comments in output")
 	parseCgoTargetsCmd := commandLine.Bool("cgo", false, "Load a single package cgo-on (CGO_ENABLED=1; needs a C compiler) and report what cgo support recognizes in it. cgo has no C# conversion yet, so an import \"C\" source is still refused, now naming the C declarations it recognized and each generated file's source (docs/PLAN-cgo-interop.md, Phase 1). Not combinable with -stdlib, -tests or -recurse")
 	showParseTreeCmd := commandLine.Bool("tree", false, "Show parse tree")
@@ -577,7 +578,15 @@ Examples:
 		}
 	})
 
+	// -warn names refusal codes to downgrade; an unknown code, or one that cannot fail loud, is a usage error.
+	warnCodes, warnErr := parseWarnCodes(*warnCmd)
+
+	if warnErr != nil {
+		log.Fatalln(warnErr)
+	}
+
 	options := Options{
+		warnCodes:           warnCodes,
 		goRoot:              *goRootCmd,
 		goPath:              *goPathCmd,
 		go2csPath:           absoluteGo2CSPath(*go2csPathCmd),
