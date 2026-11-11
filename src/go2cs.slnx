@@ -291,6 +291,7 @@
     <Project Path="tests/Behavioral/AliasNamespaceShadow/inner/AliasNamespaceShadow.inner.csproj" />
     <Project Path="tests/Behavioral/AliasNamespaceShadow/sort/AliasNamespaceShadow.sort.csproj" />
     <Project Path="tests/Behavioral/AliasNamedTargetForms/AliasNamedTargetForms.csproj" />
+    <Project Path="tests/Behavioral/AliasReceiverForms/AliasReceiverForms.csproj" />
     <Project Path="tests/Behavioral/AliasStructComposite/AliasStructComposite.csproj" />
     <Project Path="tests/Behavioral/AndNotAssignNarrow/AndNotAssignNarrow.csproj" />
     <Project Path="tests/Behavioral/AnonIfaceMethodSetWidening/AnonIfaceMethodSetWidening.csproj" />
