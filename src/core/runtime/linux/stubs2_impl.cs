@@ -145,6 +145,8 @@ partial class runtime_package
 
     // stubs2.go: exit ends the process with this status and does not return (exit_group). An arch with
     // no number still ends the process, through the host, and says why on stderr first.
+    // Environment.Exit is not the mapped path, by ruling: it runs the host's shutdown (ProcessExit handlers
+    // and finalizers), and Go's runtime.exit runs none. This is the runtime's own failure path.
     internal static partial void exit(int32 code)
     {
         Architecture arch = RuntimeInformation.ProcessArchitecture;
