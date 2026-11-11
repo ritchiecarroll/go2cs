@@ -276,6 +276,20 @@ The [validated modules](ValidatedModules.md) page is still short.
   own code, reshape the Go. In a dependency, point a `replace` at a patched copy, or fix the generated
   `.cs` and mark the file `[module: go.GoManualConversion]` so the next conversion leaves it alone. New
   ones still turn up: [tell me](#when-you-hit-a-seam).
+* **`unsafe` views of a string's or a slice's bytes are not supported yet.** Go code can read a string or a
+  `[]byte` through its header, `*(*struct{ p unsafe.Pointer; n uint })(unsafe.Pointer(&s))`, and then read bytes at
+  `unsafe.Pointer(uintptr(p) + i)` or through `(*[8]byte)(p)`. Converted, these stop with a named runtime panic,
+  because the string or slice lives in .NET-managed memory with no fixed address to offset. github.com/zeebo/xxh3
+  is the common case; the repository carries an `unsafe`-free copy of it that computes the same hashes, for a
+  `replace github.com/zeebo/xxh3 => <go2cs clone>/src/forks/github.com/zeebo/xxh3@v1.1.0`. The general fix is
+  planned.
+  <!-- C45 (COORD rulings 2026-11-11): option D for 1.26.10.4, the fork src/forks/github.com/zeebo/xxh3@v1.1.0 with
+       its FORK.md and identity/check.sh (16,632 results byte-identical to the original under real Go); option A, the
+       general fix, is a post-1.26.10.4 train, docs/phase4/DESIGN-unsafe-header-views.md on branch
+       claude/c1-c45-header-views. The panics: "cannot read native memory as <header type>: its CLR layout is not its
+       Go layout", "unsafe pointer arithmetic on a managed pointer with no address", and "cannot view native memory as
+       array<Byte>: the address has no managed element storage behind it" (Behavioral UnsafeHeaderViewFamily, parked
+       on that branch). -->
 * **One bad dependency blocks everything above it.** A package that fails to convert is reported and
   skipped, the run still exits 0, and every project that imports it fails to build. Read the summary
   line, `Recursive conversion complete in ...: N/M packages converted (K failed: ...)`, not the exit
