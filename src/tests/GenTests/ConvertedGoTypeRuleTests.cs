@@ -64,6 +64,8 @@ public class ConvertedGoTypeRuleTests
                 // A cgo mirror of a C struct (the converter's cgoMirrors.go), written whole with C's layout; never a Go type.
                 [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit, Size = 4)]
                 internal struct _Ctype_struct_pointᴍ { [System.Runtime.InteropServices.FieldOffset(0)] public int x; }
+                // Its inline-array helper, named with the mirror marker as a prefix.
+                [System.Runtime.CompilerServices.InlineArray(4)] internal struct ᴍarray4_byte { private byte element; }
 
                 public delegate int Fn(int x);
 
@@ -180,6 +182,7 @@ public class ConvertedGoTypeRuleTests
         Assert.IsNull(PartFor(generated, "struct", "Manual"), "a [module: GoManualConversion] file is not converted code");
         Assert.IsNull(PartFor(generated, "interface", "Tokenᴅ"), "a descriptor carrier draws no generated output");
         Assert.IsNull(PartFor(generated, "struct", "_Ctype_struct_pointᴍ"), "a cgo mirror draws no generated output");
+        Assert.IsNull(PartFor(generated, "struct", "ᴍarray4_byte"), "a cgo mirror's inline-array helper draws no generated output");
         Assert.IsNull(PartFor(generated, "struct", "Nested"), "only a type declared DIRECTLY in the package class is a Go type");
         Assert.IsFalse(generated.Any(text => text.Contains(" Fn(")), "a delegate is never a Go type for the generators");
         Assert.AreEqual(1, generated.Count(text => text.Contains(" partial struct Plain")), "the package_info.cs accessibility part is not a second definition");
