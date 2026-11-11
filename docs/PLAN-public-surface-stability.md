@@ -1,6 +1,6 @@
 # PLAN: public-surface stability before outside use
 
-Status: **PROPOSED, 2026-11-11 (COORD).** The owner rules each OQ below; rulings are added as dated blocks.
+Status: **RULED, 2026-11-11 (owner), all five OQs as recommended.** See the ruling block at the end.
 
 ## Why this plan exists
 
@@ -158,3 +158,31 @@ on a separate hidden interface, never as an abstract member on the Go-named inte
    Each lands as its own seat.
 3. **OQ2:** the scout first, then a ruling. A holder-class move would be the largest break, so it is best taken while no outside code exists.
 4. **M:N:** its consumer-visible list from G's spike folds into this plan when it lands.
+
+## RULING, 2026-11-11 (owner)
+
+The owner, verbatim (typos fixed): *"The recommendations are sound and reasonable. Go makes several assertions
+like these as public language doctrine, this feels similar and appropriate. Let's make good on these now, as
+much 'break' handled now as possible with a strong set of rules to lean on."*
+
+All five OQs are RULED as recommended, and the "freeze and document" items with them:
+- **OQ1:** Go `internal` and `vendor` packages stay public to .NET, are marked (an assembly attribute with the internal root, `[EditorBrowsable(Never)]` on the package class) and warned on by an analyzer now, documented as having no compatibility promise. Unlisting is to be checked against the publishing workflow.
+- **OQ2:** the methods-to-holder-class move is TAKEN now, so exported Go names never take a `Δ` because of a method. Scout first for the footprint and the exact shape, then the move. A large break, deliberately taken before outside use.
+- **OQ3:** the three-tier contract is adopted. Generated plumbing and golib's emitted-code API carry `[EditorBrowsable(Never)]`; new non-Go golib names go in `go.golib`; a golib public-API baseline file plus its test.
+- **OQ4:** assemblies are RENAMED to match their package ID (`go.fmt.dll`), before outside use. COORD's lean is adopted as the ruling.
+- **OQ5:** a generated addition to a Go interface is default-implemented or lives on a separate hidden interface, never an abstract member of the Go-named interface. This binds the M:N design.
+- The standing mechanism (the PublicSurface.md contract page, a source-compatibility gate, the golib baseline, the hop report, the single deprecation path) is adopted.
+
+## Seats (COORD, 2026-11-11)
+
+| Item | Owner | Order |
+|---|---|---|
+| OQ3 contract page + EditorBrowsable pass on generator templates + golib baseline and test + the freeze-and-document items | C1, after its xxh3 fork | first: every other seat cites the page |
+| OQ1 marking + analyzer warning (a new GO2CS0xxx) + unlisting check | C2, after C47 | after the page |
+| OQ5 rule + its guard (a generator test that no Go-named interface gains an abstract member) | C1, inside the OQ3 seat | with the page |
+| OQ4 assembly rename (AssemblyName, ProjectReferences, friend grants, nugetgo, the consumer test) | R, after -warn and the -recurse skip | its own batch |
+| OQ2 scout, then the holder-class move | P1, after C48 | scout first; the move is its own batch |
+| M:N's consumer-visible list folds in here | G (R5b spike, B6) | when the spike reports |
+
+The two large emission changes (OQ2, OQ4) each land as their own batch, never stacked with other converter
+seats, and each is measured by the two-seeded four-target reconvert, with its CNR and golden moves predicted.
