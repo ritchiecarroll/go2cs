@@ -1361,9 +1361,37 @@ Assert-Equal 'link resolution: a missing path, a file spelled as a directory and
 Assert-Equal 'link resolution: an EMPTY tracked list resolves nothing (the check fails closed)' 1 `
     @(Get-UnresolvedRelativeLinks -Targets @('phase4/list.txt') -TrackedPaths @()).Count
 
-# RED STUB (S7-a piece 2): the per-RID linux population does not exist yet; the fix replaces this. Its -2 is not
-# Get-HeaderNumber's -1 (a clause the header lacks), so an absent clause cannot pass against it.
-function Get-LinuxHeaderPopulation { param($Rows) return [PSCustomObject]@{ X64Matched = 0; X64Disclosed = 0; ArmBanked = -2; ArmPending = -2; Applicable = -2; NoX64 = @('unimplemented') } }
+# The roster's linux-x64 reading in a linux segment: the headline when the headline is linux-x64's (or the segment has no
+# note), else the note's. $null when the segment names no linux-x64 reading.
+function Get-LinuxX64Reading {
+    param($Segment)
+
+    $other = if ($Segment.PSObject.Properties['Other']) { $Segment.Other } else { $null }
+    $rid = if ($Segment.PSObject.Properties['Rid']) { $Segment.Rid } else { $null }
+    if ((-not $rid) -or ($rid -ceq 'linux-x64')) { return [PSCustomObject]@{ Expected = [int]$Segment.Expected; Disclosed = [int]$Segment.Disclosed } }
+    if (($null -ne $other) -and ($other.Rid -ceq 'linux-x64') -and -not $other.Pending) { return [PSCustomObject]@{ Expected = [int]$other.Expected; Disclosed = [int]$other.Disclosed } }
+    return $null
+}
+
+# The Linux line's two populations (ONE POPULATION PER RID, below): the linux-x64 counts summed from each applicable
+# segment's linux-x64 reading, and how many applicable rows carry a linux-arm64 reading (banked) or do not (pending: a
+# pending note, or no note yet). NoX64 names a segment with no linux-x64 reading, which the parser never yields.
+function Get-LinuxHeaderPopulation {
+    param($Rows)
+
+    $population = [PSCustomObject]@{ X64Matched = 0; X64Disclosed = 0; ArmBanked = 0; ArmPending = 0; Applicable = 0; NoX64 = @() }
+    foreach ($row in $Rows) {
+        if (-not $row.OS.ContainsKey('linux') -or -not $row.OS['linux'].Applicable) { continue }
+        $segment = $row.OS['linux']
+        $population.Applicable++
+        $x64 = Get-LinuxX64Reading $segment
+        if ($null -eq $x64) { $population.NoX64 += $row.Package } else { $population.X64Matched += $x64.Expected; $population.X64Disclosed += $x64.Disclosed }
+        $other = if ($segment.PSObject.Properties['Other']) { $segment.Other } else { $null }
+        $armRead = ($null -ne $other) -and (-not $other.Pending) -and (@($segment.Rid, $other.Rid) -ccontains 'linux-arm64')
+        if ($armRead) { $population.ArmBanked++ } else { $population.ArmPending++ }
+    }
+    return $population
+}
 
 # The Linux progress line is summed from the annotations exactly as the header above it is summed
 # from the columns -- derived on both sides, so neither can drift from the table it describes.
@@ -2888,18 +2916,6 @@ function Get-ArchCombinedReading {
         }
     }
     return [PSCustomObject]@{ Text = $text; Disclosed = $lg; Refusal = $refusal }
-}
-
-# The roster's linux-x64 reading in a linux segment: the headline when the headline is linux-x64's (or the segment has no
-# note), else the note's. $null when the segment names no linux-x64 reading.
-function Get-LinuxX64Reading {
-    param($Segment)
-
-    $other = if ($Segment.PSObject.Properties['Other']) { $Segment.Other } else { $null }
-    $rid = if ($Segment.PSObject.Properties['Rid']) { $Segment.Rid } else { $null }
-    if ((-not $rid) -or ($rid -ceq 'linux-x64')) { return [PSCustomObject]@{ Expected = [int]$Segment.Expected; Disclosed = [int]$Segment.Disclosed } }
-    if (($null -ne $other) -and ($other.Rid -ceq 'linux-x64') -and -not $other.Pending) { return [PSCustomObject]@{ Expected = [int]$other.Expected; Disclosed = [int]$other.Disclosed } }
-    return $null
 }
 
 # One row's two-RID linux reading: Form equal / arch-strict / arch-count / combined (Text is the derived segment),

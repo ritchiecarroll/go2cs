@@ -22,7 +22,12 @@ says what that proves and what it does not.
 > reason, under [Excluded packages](#excluded-packages). Every row's columns are its own Go 1.26.10 Windows
 > measurement.
 >
-> **Linux: 236 of 236 applicable rows validated at their Linux counts** — 77,507 matching verdicts · 404 disclosed · 2 rows platform-exclusive (`linux: n/a`). (They are `internal/syscall/windows` and its child `internal/syscall/windows/registry`; the parent is Windows-exclusive by its own name, every source file is `*_windows.go`, and its layout-L3 csproj compiles nothing under `GoTargetOS=linux`.)
+> **Linux: 236 of 236 applicable rows validated at their linux-x64 counts** — 77,507 matching verdicts · 404 disclosed · linux-arm64: 0 of 236 banked, 236 pending · 2 rows platform-exclusive (`linux: n/a`). (They are `internal/syscall/windows` and its child `internal/syscall/windows/registry`; the parent is Windows-exclusive by its own name, every source file is `*_windows.go`, and its layout-L3 csproj compiles nothing under `GoTargetOS=linux`.)
+
+<!-- Updated 2026-11-11 (S7-a, the linux two-RID grammar; COORD 2026-11-11, DATA-la64-s7-bank-plan.md 2.4): the Linux
+     line states one population per RID. Its counts are the linux-x64 bank's, named so ("at their linux-x64 counts"
+     replaces "at their Linux counts"), and linux-arm64 has its own clause, derived by the roster guard from the
+     segments' per-RID notes: no row carries a linux-arm64 reading yet, so 0 of 236 banked, 236 pending. -->
 
 <!-- Updated 2026-11-08 (the 1.26.10.3 bank, windows): crypto/tls moves 1393 + 2 -> 4920 + 1, its full-count read
      on R-LAPTOP at 30ad20e17e (claude/r-rebank-1263-tlswin @ 473cc4d8e9: TestBogoSuite pass|pass with its 3,527-name
