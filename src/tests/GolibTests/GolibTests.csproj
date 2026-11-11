@@ -99,6 +99,8 @@
 
     <!-- GoEpollKernelProbe (internal/poll/linux/runtime_netpoll_impl.cs): S3 site 1's per-arch epoll contract. -->
     <Compile Remove="LinuxNetpollEpollKernelTests.cs" />
+    <!-- S3 site 1's admission reading: the epoll mapping proven live, and the os paths the X64 guard broke. -->
+    <Compile Remove="LinuxEpollLiveTests.cs" />
 
     <!-- GetRandom (and its runtime.vgetrandom pull) is declared by getrandom.go, whose build tags
          select only the linux flavour of internal/syscall/unix. -->
