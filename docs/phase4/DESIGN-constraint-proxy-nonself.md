@@ -221,3 +221,23 @@ design:
    SWITCH on the result; `(O, error)` deconstruction; a discarded result.
 
 No second review unless the shape changes. Next: push this section, then cut code.
+
+## 10. Points the struct-proxy scout will revisit (2026-11-11)
+
+COORD relayed (00:01Z) a post-.4 scout the owner queued: the constraint proxy as a one-field `readonly struct` holding
+the box, layout-identical to the box, so a slice of boxes reinterprets in place as a slice of proxies (writes and
+append aliasing as in Go) and `default(proxy)` becomes Go's typed nil. C35 generalizes the same machinery and assumes
+the proxy is a CLASS in exactly these places, beyond what the self route already did:
+
+1. **The null-proxy operator** (template `ConstraintProxyImplTemplate`, section 4): `proxy is null ? null! : proxy.m_box`
+   maps the class's null zero value to a nil box. Under a struct, `default(proxy)` holds a null box and this
+   arm disappears.
+2. **The zero-value refusals** (ruling 2, `zeroValueMisuses`: zero-call and zero-any) exist BECAUSE the class's zero
+   value is a null reference, which cannot run a nil-receiver method or box as a typed nil. Under a struct whose
+   zero is a typed nil they can be lifted, with their red arms kept as the positive rows that prove it.
+3. **The aliasing refusal** (section 5) for `[]O`/`[N]O` positions is the copy the struct scout removes; `map`, `chan`
+   and `*O` stay refused under either shape.
+
+Not class-dependent, so unchanged by the scout: the name `EжIᴾ`, the result cast back to the box (an implicit operator
+either way), the tuple rebuild, the gate (function, direct position, emitted clause), and the refusals for named
+types, union-plus-methods, siblings and onward generics.
