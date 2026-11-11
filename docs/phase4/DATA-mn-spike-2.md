@@ -207,3 +207,23 @@ printed by the runtime itself (carriers and OS threads), which does not depend o
 
 The hosted readings (osx-arm64, osx-x64, linux-x64, linux-arm64) follow in a dated block below once the legs
 have run on this branch.
+
+### 2.5 Hosted readings on today's runtime (2026-11-11, branch `claude/g-mn-spike2-b0` at `b6165f507b`)
+
+Dispatched as `os-matrix.yml`, `stage=behavioral-smoke`, `filter=MnMixedStorm`, default n (100,000). Transpile,
+Compile and Target pass on every leg that ran; the Output phase is where each one is red.
+
+| leg | run | Output phase | runner wall |
+|---|---|---|---|
+| linux-x64 | 43062197012 | FAIL: `exit code mismatch: C# 2 vs Go 0`, C# stderr `System.OutOfMemoryException` | 213.7 s |
+| osx-arm64 | 43062191279 | FAIL: the same line | 337.3 s |
+| osx-x64 | 43062191279 | FAIL: the same line | 1,103.2 s |
+| linux-arm64 | not read | the workflow refuses the behavioral stages on the arm leg until seat S3 lands | |
+
+- Every hosted leg dies the same way: thread creation fails, the process reports `OutOfMemoryException` and exits 2
+  where Go exits 0. Windows (2.3) is the only host where the 100,000 run survives, and it needs 115 s.
+- The failure line carries no thread count, so these legs confirm the mode and not the cap. The counts on file
+  (2,028 on osx-arm64, 3,052 on osx-x64) come from the phase-1 record (`DATA-mn-spike.md`), not from this run.
+- The first dispatch failed at `plan` on both workflows and read nothing: the darwin one was sent with an `arch`
+  input it does not take, and the linux one asked for the arm leg. The runs above are the re-dispatch.
+- B3 re-runs the three legs that ran on a ref carrying generated twins. Green there is P4.
