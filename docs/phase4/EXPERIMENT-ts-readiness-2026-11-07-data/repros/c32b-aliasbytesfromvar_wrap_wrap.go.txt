@@ -1,0 +1,6 @@
+package wrap
+
+import "repro/c32b-aliasbytesfromvar/lib"
+
+// The shape of TS internal/json: Value = jsontext.Value.
+type Value = lib.Value

@@ -1,0 +1,166 @@
+# Repro runs at go2cs master 38caf3558a (batch 282), unpatched: Go oracle -> go2cs -recurse -> dotnet build -> run ->
+# compare (the steps of rerun-repro.sh.txt, with GO2CS_EXE and go2cspath at a detached worktree of 38caf3558a).
+# C33-C42 are the rows found by the DIAGNOSTIC closure builds (rerun-diag-38caf3558a-layers.txt). Each red reproduces
+# the TS site's error code; each green control differs on one axis:
+#   C33 c33twoinstsameiface RED (CS0579/CS0102/CS0111/CS8646) / c33ctl-twoinsttwoifaces GREEN: each instantiation to a
+#       different interface.
+#   C34 c34promotedbuiltinreturn RED (CS1929) / c34ctl-promotednamedreturn GREEN: the promoted method returns an exported
+#       named type, not a builtin.
+#   C35 c35ptrtypeargconstraint RED (CS0311) / c35ctl-ifacetypearg GREEN: the generic instantiated with the interface.
+#   C36 c36floattotypeparam RED (CS1503 double -> ulong) / c36ctl-inttotypeparam GREEN: an int64 operand.
+#   C37 c37variadicanoniface RED (CS0246) / c37ctl-sliceanoniface GREEN: a slice parameter, not variadic.
+#   C38 c38parentypeswitchcase RED (CS0103) / c38ctl-plaintypeswitchcase GREEN: the case type without parentheses.
+#   C39 c39funcfieldtypeparam RED (CS1503 object -> Func) / c39ctl-methodvaluetypeparam GREEN: a method value, which gets
+#       explicit type arguments. c39b-funcvartypeparam is also RED: a func-typed VARIABLE is boxed the same way. The
+#       first draft had these inverted (a method value as the red); the TS site's operand is a func-typed FIELD.
+#   C40 c40funcmethodsamename RED (CS0111) / c40ctl-funcmethoddiffname GREEN: the func renamed.
+#   C41 c41ptrvardeclparam RED (CS0029) / c41ctl-ptrshortdeclparam GREEN: `current := node`.
+#   C42 c42ifacediamondmethod RED (CS0121) / c42ctl-ifacesinglemethod GREEN: the method declared by one embedded
+#       interface only.
+
+repro c33twoinstsameiface  go2cs=38caf3558a
+GO   rc=0: true false
+CONV rc=0  WARNING: Package license is unspecified for repro\c33twoinstsameiface\lib\repro.c33twoinstsameiface.lib.csproj (reported once per module); add a |
+BUILD rc=1  go.repro.main_package.Expected_IntPtr_-global__go.repro.c33twoinstsameiface.lib_package.TypeValidatedField-ptr.g.cs(25,6) CS0579: Duplicate 'global::System.Diagnostics.DebuggerNonUserCode' attribute|go.repro.main_package.Expected_IntPtr_-global__go.repro.c33twoinstsameiface.lib_package.TypeValidatedField-ptr.g.cs(26,25) CS0102: The type 'main_package' already contains a definition for 'lib_Expected╨╢TypeValidate|go.repro.main_package.Expected_IntPtr_-global__go.repro.c33twoinstsameiface.lib_package.TypeValidatedField-ptr.g.cs(40,30) CS0111: Type 'main_package.lib_Expected╨╢TypeValidatedField' already defines a member called |go.repro.main_package.Expected_IntPtr_-global__go.repro.c33twoinstsameiface.lib_package.TypeValidatedField-ptr.g.cs(43,82) CS0111: Type 'main_package.lib_Expected╨╢TypeValidatedField' already defines a member called |
+RUN  rc=-1: 
+MATCH NO
+
+repro c33ctl-twoinsttwoifaces  go2cs=38caf3558a
+GO   rc=0: true false
+CONV rc=0  WARNING: Package license is unspecified for repro\c33ctl-twoinsttwoifaces\lib\repro.c33ctl-twoinsttwoifaces.lib.csproj (reported once per mod|
+BUILD rc=0  
+RUN  rc=0: true false
+MATCH YES
+
+repro c34promotedbuiltinreturn  go2cs=38caf3558a
+GO   rc=0: ./index.js
+CONV rc=0  WARNING: Package license is unspecified for repro\c34promotedbuiltinreturn\lib\repro.c34promotedbuiltinreturn.lib.csproj (reported once per |
+BUILD rc=1  main.cs(14,17) CS1929: 'lib_package.ExportsOrImports' does not contain a definition for 'AsString' and the best extension method overload 'lib_package.AsString(lib_package.JSONValue)' requires a receiver of type 'go.repr|
+RUN  rc=-1: 
+MATCH NO
+
+repro c34ctl-promotednamedreturn  go2cs=38caf3558a
+GO   rc=0: ./index.js
+CONV rc=0  WARNING: Package license is unspecified for repro\c34ctl-promotednamedreturn\lib\repro.c34ctl-promotednamedreturn.lib.csproj (reported onc|
+BUILD rc=0  
+RUN  rc=0: ./index.js
+MATCH YES
+
+repro c35ptrtypeargconstraint  go2cs=38caf3558a
+GO   rc=0: 1 true
+CONV rc=0  
+BUILD rc=1  main.cs(30,16) CS0311: The type 'go.ж<go.repro.main_package.compilerOptionsParser>' cannot be used as type parameter 'O' in the generic type or method 'main_package.convertMapToOptions<O>(map<@string, object>, O)'. Ther|
+RUN  rc=-1: 
+MATCH NO
+
+repro c35ctl-ifacetypearg  go2cs=38caf3558a
+GO   rc=0: 1 true
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: 1 true
+MATCH YES
+
+repro c36floattotypeparam  go2cs=38caf3558a
+GO   rc=0: 3 5 -2
+CONV rc=0  
+BUILD rc=1  main.cs(15,29) CS1503: Argument 1: cannot convert from 'double' to 'ulong'|
+RUN  rc=-1: 
+MATCH NO
+
+repro c36ctl-inttotypeparam  go2cs=38caf3558a
+GO   rc=0: 3 5 -2
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: 3 5 -2
+MATCH YES
+
+repro c37variadicanoniface  go2cs=38caf3558a
+GO   rc=0: 4 7
+CONV rc=0  
+BUILD rc=1  go.repro.main_package.End.global__go.repro.main_package.span.value.g.cs(14,50) CS0246: The type or namespace name 'greatestEnd_nodes' could not be found (are you missing a using directive or an assembly reference?)|go.repro.main_package.greatestEnd_nodes.g.cs(18,50) CS0246: The type or namespace name 'greatestEnd_nodes' could not be found (are you missing a using directive or an assembly reference?)|go.repro.main_package.span.g.cs(14,50) CS0246: The type or namespace name 'greatestEnd_nodes' could not be found (are you missing a using directive or an assembly reference?)|main.cs(4,35) CS0246: The type or namespace name 'greatestEnd_nodes' could not be found (are you missing a using directive or an assembly reference?)|
+RUN  rc=-1: 
+MATCH NO
+
+repro c37ctl-sliceanoniface  go2cs=38caf3558a
+GO   rc=0: 4 7
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: 4 7
+MATCH YES
+
+repro c38parentypeswitchcase  go2cs=38caf3558a
+GO   rc=0: 3 true 5 true
+CONV rc=0  
+BUILD rc=1  main.cs(25,20) CS0103: The name 'v' does not exist in the current context|main.cs(26,13) CS0103: The name 'v' does not exist in the current context|main.cs(27,21) CS0103: The name 'v' does not exist in the current context|
+RUN  rc=-1: 
+MATCH NO
+
+repro c38ctl-plaintypeswitchcase  go2cs=38caf3558a
+GO   rc=0: 3 true 5 true
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: 3 true 5 true
+MATCH YES
+
+repro c39funcfieldtypeparam  go2cs=38caf3558a
+GO   rc=0: x_1 x
+CONV rc=0  
+BUILD rc=1  main.cs(29,129) CS1503: Argument 2: cannot convert from 'object' to 'System.Func<go.@string, bool, bool>'|main.cs(29,31) CS1503: Argument 2: cannot convert from 'object' to 'System.Func<go.@string, bool, bool>'|
+RUN  rc=-1: 
+MATCH NO
+
+repro c39b-funcvartypeparam  go2cs=38caf3558a
+GO   rc=0: x_1 x
+CONV rc=0  
+BUILD rc=1  main.cs(30,120) CS1503: Argument 2: cannot convert from 'object' to 'System.Func<go.@string, bool, bool>'|main.cs(30,31) CS1503: Argument 2: cannot convert from 'object' to 'System.Func<go.@string, bool, bool>'|
+RUN  rc=-1: 
+MATCH NO
+
+repro c39ctl-methodvaluetypeparam  go2cs=38caf3558a
+GO   rc=0: x_1 x
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: x_1 x
+MATCH YES
+
+repro c40funcmethodsamename  go2cs=38caf3558a
+GO   rc=0: true true false
+CONV rc=0  
+BUILD rc=1  main.cs(15,20) CS0111: Type 'main_package' already defines a member called 'IsTupleType' with the same parameter types|
+RUN  rc=-1: 
+MATCH NO
+
+repro c40ctl-funcmethoddiffname  go2cs=38caf3558a
+GO   rc=0: true true false
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: true true false
+MATCH YES
+
+repro c41ptrvardeclparam  go2cs=38caf3558a
+GO   rc=0: 3 3
+CONV rc=0  
+BUILD rc=1  main.cs(21,23) CS0029: Cannot implicitly convert type 'go.repro.main_package.Node' to 'go.ж<go.repro.main_package.Node>'|
+RUN  rc=-1: 
+MATCH NO
+
+repro c41ctl-ptrshortdeclparam  go2cs=38caf3558a
+GO   rc=0: 3 3
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: 3 3
+MATCH YES
+
+repro c42ifacediamondmethod  go2cs=38caf3558a
+GO   rc=0: ref:a.ts ref:b.ts /src
+CONV rc=0  
+BUILD rc=1  go.repro.main_package.EmitHost-global__go.repro.main_package.MayBeEmittedHost-iface.g.cs(33,128) CS0121: The call is ambiguous between the following methods or properties: 'go.repro.main_package.PrinterHost.Ref(go.repro.|
+RUN  rc=-1: 
+MATCH NO
+
+repro c42ctl-ifacesinglemethod  go2cs=38caf3558a
+GO   rc=0: ref:a.ts ref:b.ts /src
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: ref:a.ts ref:b.ts /src
+MATCH YES

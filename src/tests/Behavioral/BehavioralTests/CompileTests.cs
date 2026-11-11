@@ -1963,6 +1963,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPromotedMethodExpr() => CheckTarget("PromotedMethodExpr");
 
     [TestMethod]
+    public void CheckPromotedMethodFrames() => CheckTarget("PromotedMethodFrames");
+
+    [TestMethod]
     public void CheckPromotedPtrMethodValueSet() => CheckTarget("PromotedPtrMethodValueSet");
 
     [TestMethod]
@@ -2570,6 +2573,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTypeParamFloatConversion() => CheckTarget("TypeParamFloatConversion");
+
+    [TestMethod]
+    public void CheckTypeParamFuncArgNoBox() => CheckTarget("TypeParamFuncArgNoBox");
 
     [TestMethod]
     public void CheckTypeParamTypedNil() => CheckTarget("TypeParamTypedNil");

@@ -52,6 +52,28 @@ public class SystemGoroutineTests
         Assert.IsFalse(Goroutine.IsSystemCreator(null), "no creator is a user goroutine, as runtime.main is in Go");
     }
 
+    // From 1.26.10.4 a struct's same-package promoted methods are forwarders in a class of the struct's own
+    // (`<pkg>ᴛ<Struct>ᴛpkg`), and Go names such a wrapper by the struct's package. The forwarder is the creator a
+    // stack walk finds when the JIT inlines the promoted method that holds the `go` into it.
+    [TestMethod]
+    public void APromotedMethodClassOfPackageRuntimeIsARuntimeCreator()
+    {
+        Assert.IsTrue(Goroutine.IsSystemCreator(typeof(runtimeᴛheldᴛpkg).GetMethod("Raise", BindingFlags.NonPublic | BindingFlags.Static)),
+            "a creator on package runtime's promoted-method class must classify as system");
+    }
+
+    // The control: another package's promoted-method class classifies as its package class does.
+    [TestMethod]
+    public void AnotherPackagesPromotedMethodClassIsAUserCreator()
+    {
+        Assert.IsFalse(Goroutine.IsSystemCreator(typeof(runtime_testᴛheldᴛpkg).GetMethod("Raise", BindingFlags.NonPublic | BindingFlags.Static)),
+            "a creator on package runtime_test's promoted-method class must classify as user");
+        Assert.AreEqual(
+            Goroutine.IsSystemCreator(typeof(runtime_internal_test_package).GetMethod("Raise", BindingFlags.NonPublic | BindingFlags.Static)),
+            Goroutine.IsSystemCreator(typeof(runtime_internal_testᴛheldᴛpkg).GetMethod("Raise", BindingFlags.NonPublic | BindingFlags.Static)),
+            "the bridge's promoted-method class classifies as the bridge's own class does");
+    }
+
     // THE BASIS IS THE START FUNCTION, not the creator: Go's isSystemGoroutine reads gp.startpc. The
     // creator is found by walking the launching thread's stack, and under a full-opt JIT (TC0) the
     // runtime frame that executed the `go` can be elided -- inlined or tail-called away -- so the walk

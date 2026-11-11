@@ -1,0 +1,13 @@
+package lib
+
+// The shape of TS internal/packagejson: Expected[T] implements TypeValidatedField through a pointer receiver.
+type TypeValidatedField interface {
+	IsPresent() bool
+}
+
+type Expected[T any] struct {
+	Value T
+	Valid bool
+}
+
+func (e *Expected[T]) IsPresent() bool { return e.Valid }

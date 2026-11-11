@@ -1,0 +1,18 @@
+package main
+
+import "fmt"
+
+// TS site: internal/tsoptions floatOrInt32ToFlag[T ~int32](value any) T { ...; return T(value.(float64)) } (C36):
+// a float64 converted to an integer-constrained type parameter.
+type flag int32
+
+func floatOrInt32ToFlag[T ~int32](value any) T {
+	if v, ok := value.(T); ok {
+		return v
+	}
+	return T(value.(float64))
+}
+
+func main() {
+	fmt.Println(floatOrInt32ToFlag[flag](3.0), floatOrInt32ToFlag[flag](flag(5)), floatOrInt32ToFlag[int32](-2.75)) // Go: 3 5 -2
+}

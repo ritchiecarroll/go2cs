@@ -208,7 +208,7 @@ public class PromotedMetadataEmbedTests
 
         // The [GoRecv]-style ref-receiver methods forward through the deref'd embed hop; the
         // direct-ж (box) primary binds the embed's box itself, no `.Value`.
-        StringAssert.Contains(generated, "tryAcquireSema(this ref resolvConfTest target",
+        StringAssert.Contains(generated, "tryAcquireSema(this ref global::go.net_internal_test_package.resolvConfTest target",
             "an internal ref-receiver method of the same-Go-package metadata embed must promote a value forwarder");
         StringAssert.Contains(generated, "target.resolverConfig.Value.tryAcquireSema()",
             "the ref-receiver forwarder descends through the pointer embed's deref'd hop");
@@ -240,9 +240,9 @@ public class PromotedMetadataEmbedTests
         // the value forwarder is not.
         Assert.IsFalse(generated.Contains("AMBIGUOUS inside the embed"),
             "a method and its RecvGenerator pointer twin are one Go method, never an annihilated pair");
-        StringAssert.Contains(generated, "tryAcquireSema(this ref resolvConfTest target",
+        StringAssert.Contains(generated, "tryAcquireSema(this ref global::go.net_internal_test_package.resolvConfTest target",
             "the ref-receiver method must promote despite its pointer twin in metadata");
-        StringAssert.Contains(generated, "releaseSema(this ref resolvConfTest target",
+        StringAssert.Contains(generated, "releaseSema(this ref global::go.net_internal_test_package.resolvConfTest target",
             "the ref-receiver method must promote despite its pointer twin in metadata");
         StringAssert.Contains(generated, "target.resolverConfig.init()",
             "the box primary (no twin) keeps promoting as before");

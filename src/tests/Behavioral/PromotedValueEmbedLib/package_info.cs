@@ -49,7 +49,7 @@ using static go.PromotedValueEmbedLib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAgsggAGEoIABhSCqII=")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAgsggAGEoIABhSCqIIABxqUlJigAAcSgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -65,7 +65,9 @@ public static partial class PromotedValueEmbedLib_package
 
     // <TypeAccessibility>
     internal partial struct common {}
+    public partial struct Badge {}
     public partial struct Gadget {}
+    public partial struct Meta {}
     public partial struct Widget {}
     // </TypeAccessibility>
 

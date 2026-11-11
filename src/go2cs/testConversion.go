@@ -5114,8 +5114,18 @@ func scanReferenceImports(infoFiles []string, targetsOf func(line string) []stri
 			continue
 		}
 
+		// The namespace an unrooted target resolves from. A line before the file-scoped `namespace`
+		// declaration (an assembly record, a `global using`) sits at compilation-unit level and
+		// resolves from the root.
+		namespace := RootNamespace
+
 		for _, line := range strings.Split(string(data), "\n") {
 			trimmed := strings.TrimSpace(strings.TrimSuffix(line, "\r"))
+
+			if declared, ok := fileScopedNamespace(trimmed); ok {
+				namespace = declared
+				continue
+			}
 
 			for _, target := range targetsOf(trimmed) {
 				for token, paths := range tokens {
@@ -5124,16 +5134,20 @@ func scanReferenceImports(infoFiles []string, targetsOf func(line string) []stri
 					//   HasSuffix(target, token)      — target ends with the fully-ROOTED token,
 					//                                    e.g. `go.os.exec_package` or `global::go.os.exec_package`
 					//                                    (math/rand's default_test.cs, emitted from namespace go.math).
-					//   HasSuffix(token, "."+target)  — target is the UNROOTED tail of the rooted token,
-					//                                    e.g. `os.exec_package` matching token `go.os.exec_package`.
-					//                                    A test emitted inside a namespace that SHADOWS the root
-					//                                    `go` (go/doc/comment's std_test.cs in namespace go.go.doc,
-					//                                    internal/abi's abi_test.cs in go.@internal) emits the alias
-					//                                    unrooted and relies on C# outward lookup; the single-segment
-					//                                    bareTokens path below never covers a multi-segment tail.
-					//                                    Anchored on the leading "." so `os.exec_package` cannot
-					//                                    match an unrelated `go.xos.exec_package`.
-					if rootedQualifierMatch(target, token) {
+					//   token == scope+"."+target    — target is UNROOTED and C# outward lookup resolves it from
+					//                                    the file's namespace: scope is that namespace or one that
+					//                                    encloses it. e.g. `os.exec_package` matching token
+					//                                    `go.os.exec_package`. A test emitted inside a namespace that
+					//                                    SHADOWS the root `go` (go/doc/comment's std_test.cs in
+					//                                    namespace go.go.doc, internal/abi's abi_test.cs in
+					//                                    go.@internal) emits the alias unrooted; internal/godebug's
+					//                                    godebug.cs writes `using bisect = bisect_package;` inside
+					//                                    go.@internal, a SINGLE-segment target naming a
+					//                                    multi-segment package. Anchored on segments at both ends,
+					//                                    so `os.exec_package` cannot match `go.xos.exec_package`
+					//                                    and fmt's `strconv_package` (namespace go) cannot match
+					//                                    go.@internal.strconv_package.
+					if rootedQualifierMatch(target, token, namespace) {
 						sort.Strings(paths)
 						found.Add(paths[0])
 					}
@@ -5155,11 +5169,39 @@ func scanReferenceImports(infoFiles []string, targetsOf func(line string) []stri
 	return result
 }
 
-// rootedQualifierMatch reports whether a rendered qualifier TARGET names the package class spelled
-// by a fully-ROOTED token (`go.os.exec_package`). Three shapes, all of them observed in emitted
-// output — see the call site in aliasReferenceImports for which emission produces each.
-func rootedQualifierMatch(target, token string) bool {
-	return strings.Contains(target, token+".") || strings.HasSuffix(target, token) || strings.HasSuffix(token, "."+target)
+// rootedQualifierMatch reports whether a rendered qualifier TARGET, emitted inside NAMESPACE, names
+// the package class spelled by a fully-ROOTED token (`go.os.exec_package`). Three shapes, all of
+// them observed in emitted output — see the call site in aliasReferenceImports for which emission
+// produces each.
+func rootedQualifierMatch(target, token, namespace string) bool {
+	return strings.Contains(target, token+".") || strings.HasSuffix(target, token) || enclosingNamespaceTail(target, token, namespace)
+}
+
+// enclosingNamespaceTail reports whether an UNROOTED target names token the way C# outward lookup
+// resolves it from namespace: token is scope+"."+target, where scope is namespace itself or a
+// namespace that encloses it. The test was HasSuffix(token, "."+target), which takes ANY scope:
+// fmt's `strconv_package`, emitted in namespace go, matched go.@internal.strconv_package and gave
+// fmt.tests a reference to internal/strconv that nothing uses (the same leaf, a different package).
+// Bounded on a segment the way bareQualifierMatch is.
+//
+// Lookup binds the INNERMOST scope that declares the name; this accepts every enclosing scope that
+// spells a known package. The two never differ over the corpus (12,798 unrooted targets measured
+// when this rule landed), since no emitted target is a tail of two packages on one namespace chain.
+func enclosingNamespaceTail(target, token, namespace string) bool {
+	scope, ok := strings.CutSuffix(token, "."+target)
+
+	return ok && (namespace == scope || strings.HasPrefix(namespace, scope+"."))
+}
+
+// fileScopedNamespace returns the namespace a file-scoped declaration (`namespace go.@internal;`)
+// names. The converter emits no block-bodied namespace, so the declaration covers the rest of the file.
+func fileScopedNamespace(line string) (string, bool) {
+	rest, ok := strings.CutPrefix(line, "namespace ")
+	if !ok || !strings.HasSuffix(rest, ";") {
+		return "", false
+	}
+
+	return strings.TrimSpace(strings.TrimSuffix(rest, ";")), true
 }
 
 // bareQualifierMatch is the same test for a SINGLE-SEGMENT package, whose alias is emitted
@@ -5173,10 +5215,12 @@ func bareQualifierMatch(target, token string) bool {
 // package class, in either spelling. The inverse direction of aliasReferenceImports' index: there
 // the target is matched against every known import path, here against ONE already in hand (the
 // closure walk knows its candidate interface's package and only asks whether a record named it).
+// Its targets come from `[assembly: GoImplement<…>]` records, which sit at compilation-unit level,
+// so an unrooted one resolves from the root namespace.
 func qualifierTargetNamesPackage(target, importPath string) bool {
 	namespace := convertImportPathToNamespace(importPath, PackageSuffix)
 
-	if rootedQualifierMatch(target, RootNamespace+"."+namespace) {
+	if rootedQualifierMatch(target, RootNamespace+"."+namespace, RootNamespace) {
 		return true
 	}
 

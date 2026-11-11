@@ -1,0 +1,3 @@
+module repro/c34ctl-promotednamedreturn
+
+go 1.26

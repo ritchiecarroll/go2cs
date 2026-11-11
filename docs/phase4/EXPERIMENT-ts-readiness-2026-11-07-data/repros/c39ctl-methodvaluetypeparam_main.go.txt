@@ -1,0 +1,28 @@
+package main
+
+import "fmt"
+
+// C39 green control (GREEN at 38caf3558a): a METHOD VALUE as the argument of the type parameter T. The converter gives
+// IfElse explicit type arguments here, so T is the func type.
+func IfElse[T any](b bool, whenTrue T, whenFalse T) T {
+	if b {
+		return whenTrue
+	}
+	return whenFalse
+}
+
+type gen struct{ used map[string]bool }
+
+func (g *gen) isUnique(name string, private bool) bool { return !g.used[name] }
+
+func makeName(base string, check func(name string, private bool) bool) string {
+	if check == nil || check(base, false) {
+		return base
+	}
+	return base + "_1"
+}
+
+func main() {
+	g := &gen{used: map[string]bool{"x": true}}
+	fmt.Println(makeName("x", IfElse(true, g.isUnique, nil)), makeName("x", IfElse(false, g.isUnique, nil))) // Go: x_1 x
+}

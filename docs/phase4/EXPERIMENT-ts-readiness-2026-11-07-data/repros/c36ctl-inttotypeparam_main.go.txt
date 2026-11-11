@@ -1,0 +1,17 @@
+package main
+
+import "fmt"
+
+// C36 green control: the same function, converting an int64 (an integer, not a float) to the type parameter.
+type flag int32
+
+func intOrInt32ToFlag[T ~int32](value any) T {
+	if v, ok := value.(T); ok {
+		return v
+	}
+	return T(value.(int64))
+}
+
+func main() {
+	fmt.Println(intOrInt32ToFlag[flag](int64(3)), intOrInt32ToFlag[flag](flag(5)), intOrInt32ToFlag[int32](int64(-2))) // Go: 3 5 -2
+}

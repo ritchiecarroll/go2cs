@@ -1,0 +1,38 @@
+# methodcount.ps1 and methodnames.ps1 on the ast assembly of the same build
+github.com.microsoft.TypeScript.tsc.internal.ast.dll: 59209 types, 256275 methods total
+   116102  go.github.com.microsoft.TypeScript.tsc.internal.ast_package
+     2776  go.GoFieldAccess
+      236  .<>c
+      121  .<G>$6AD11BABC6041BB346195FC25BBE33E1
+      102  .<G>$9E37BE32A01BF596C046353EF5B5FC7E
+116102 methods, 2244 distinct names
+names with >1 overload: 710 names covering 114568 methods
+top names by overload count:
+     434  Pos
+     434  End
+     434  SetModifiers
+     434  Modifiers
+     432  Name
+     432  computeSubtreeFacts
+     430  propagateSubtreeFacts
+     428  AsSpreadAssignment
+     428  AsSourceFile
+     428  AsShorthandPropertyAssignment
+overload-count histogram (overloads per name -> names):
+    242 -> 1
+    355 -> 1
+    373 -> 1
+    382 -> 1
+    403 -> 1
+    414 -> 1
+    416 -> 1
+    420 -> 1
+    421 -> 1
+    425 -> 1
+    427 -> 2
+    428 -> 244
+    430 -> 1
+    432 -> 2
+    434 -> 4
+# TypeGenerator [GoPromoted] extension declarations in the ast package's generated files:
+107835

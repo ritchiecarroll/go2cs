@@ -1,0 +1,32 @@
+# toptypes.ps1 <bin dir> <closure list file> [top N] : the N types with the most method definitions across every built assembly
+# whose name is a package in the closure list (one Go import path per line; a cmd/<name> package also matches <name>.dll).
+# Metadata only. Also prints the closure packages with no built assembly.
+param([string]$Bin, [string]$List, [int]$Top = 10)
+Add-Type -AssemblyName System.Reflection.Metadata
+$want = Get-Content $List | Where-Object { $_ }
+$dlls = Get-ChildItem $Bin -Recurse -Filter *.dll | Where-Object { $_.FullName -like '*\Release\*' }
+$rows = @(); $missing = @(); $built = 0
+foreach ($p in $want) {
+    $dotted = $p -replace '/', '.'; $leaf = ($p -split '/')[-1]
+    $f = $dlls | Where-Object { $_.BaseName -eq $dotted } | Select-Object -First 1
+    if (-not $f -and $p -match '/cmd/') { $f = $dlls | Where-Object { $_.BaseName -eq $leaf } | Select-Object -First 1 }
+    if (-not $f) { $missing += $p; continue }
+    $built++
+    $fs = [System.IO.File]::OpenRead($f.FullName)
+    try {
+        $md = [System.Reflection.Metadata.PEReaderExtensions]::GetMetadataReader([System.Reflection.PortableExecutable.PEReader]::new($fs))
+        foreach ($h in $md.TypeDefinitions) {
+            $t = $md.GetTypeDefinition($h)
+            $rows += [pscustomobject]@{ Methods = $t.GetMethods().Count; Type = ($md.GetString($t.Namespace) + "." + $md.GetString($t.Name)); Asm = $f.BaseName }
+        }
+    } finally { $fs.Dispose() }
+}
+# The per-type method limit, P1's ruled form (measured: methodcap-repro/README.md): a type loads while its method
+# definitions <= min(65,524, 65,525 - inherited virtual slots + overrides). A go2cs package class is a static class: it
+# inherits System.Object's 4 virtual slots and overrides none, so its limit is 65,521. Rows over that are marked OVER;
+# for any other type the mark is only a hint, since its inherited slots are not read here.
+$limit = [Math]::Min(65524, 65525 - 4 + 0)
+"built {0} of {1} closure packages; per-type method limit for a package class {2:N0} = min(65,524, 65,525 - 4 inherited slots + 0 overrides)" -f $built, $want.Count, $limit
+$rows | Sort-Object Methods -Descending | Select-Object -First $Top | ForEach-Object { "  {0,7}  {1}  [{2}]{3}" -f $_.Methods, $_.Type, $_.Asm, $(if ($_.Methods -gt $limit) { "  OVER" } else { "" }) }
+"not built ({0}):" -f $missing.Count
+$missing | ForEach-Object { "  $_" }

@@ -1,0 +1,3 @@
+module repro/c32b-aliasbytesfromvar
+
+go 1.26

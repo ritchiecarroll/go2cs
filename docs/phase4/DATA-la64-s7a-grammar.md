@@ -115,3 +115,21 @@ The rule of piece 6 was measured before its edit: with the rule in place and the
 - **Not changed.** Three scripts of the closed 1.26.10.2 re-bank (`legs_check.py`, `closing_checks.py`,
   `repass_cut.py`) read a bare linux segment. They are records and were not re-pointed; a new re-bank's tools read the
   noted form.
+
+## 8. Amendment, 2026-11-11: G's second read, and the fixups seat
+
+S7-a seated in the batch-284 union. G's second read found no defect that banks a wrong number, and COORD relayed three
+follow-ups for before the first combined bank. Branch `claude/p2-la64-s7a-fixups`, cut on the union at `51c6a3aa4f`:
+red `d91591a106` (guard 8 of 2504 checks, annotator 3 of 55 cases), fix `221bdaf7f9`.
+
+1. **A combined pair where one RID discloses nothing.** Section 3's combined example above held, but its zero case did
+   not: the guard read a `-` in `divergent_names` as a missing column (PowerShell unrolls an empty list to `$null` at
+   the caller), so it refused what the annotator banked. It failed closed. Column presence is now read from the line.
+2. **The host-difference clauses had no test.** Each of the four is now pinned alone in both suites. Removing any
+   one reds 1 of 2504 guard checks, or 1 to 2 of 55 annotator cases.
+3. **Smaller items.** A non-numeric count cell is refused, not a crash. Equal requires linux-arm64 `new` 0. A combined
+   pair with no `absent` column is refused for that reason. A malformed per-RID note is refused by name: a separator,
+   a key, a count and a parenthesis opening on a RID that the segment pattern did not read. Words after a count stay
+   prose, as ruled before S7-a. One arm of section 2 changes with this: `darwin: 3 (osx-arm64; win-arm64: 4)` read as
+   prose and is now refused. A duplicate RID line and the self-test's agree and longer-RID cases are now pinned. An
+   empty ledger reason was already refused by the guard; the new fixtures show it through the reader.

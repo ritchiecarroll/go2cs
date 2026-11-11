@@ -199,12 +199,28 @@ _Expected output:_
 
 ## Build tags for a module
 
-go2cs converts a module, and validates it against its own tests, as Go builds it with the `safe` build tag.
-Some libraries reach into Go's runtime internals with unsafe pointer arithmetic, which converted code cannot
-do, and ship a fallback for builds tagged `safe`; with the tag, that fallback is the code you get. The visible
-difference is small: testify's assertion messages, for example, do not print the unexported fields of a struct.
-When a module is validated, Go's own `go test` run uses the same tag, so both sides are compared on the same
-code. To convert the files a plain `go build` selects instead, pass `-module-safe-tag=false`.
+go2cs converts a module, and validates it against its own tests, as Go builds it with the build tags `safe`,
+`purego` and `noasm`. The run prints them at its start:
+
+```text
+Applying build tags: safe,purego,noasm (default; pass -tags to override)
+```
+
+Each tag selects a fallback a library ships for something converted code cannot do:
+
+- `safe`: some libraries reach into Go's runtime internals with unsafe pointer arithmetic and ship a fallback
+  for builds tagged `safe`. The visible difference is small: testify's assertion messages, for example, do
+  not print the unexported fields of a struct.
+- `purego` and `noasm`: some libraries ship hand-written assembly for a fast path and a pure-Go version for
+  builds tagged `purego` or `noasm`. Assembly converts only to methods that throw when called, so without the
+  tags a program can fail as soon as it starts. github.com/klauspost/cpuid/v2, for example, runs its assembly
+  CPU detection when the package loads; with `noasm` it uses its pure-Go version, which reports no CPU
+  features, and libraries built on it, such as github.com/zeebo/xxh3, take their portable code paths.
+
+When a module is validated, Go's own `go test` run uses the same tags, so both sides are compared on the same
+code (with `-tests` they are `purego,math_big_pure_go,safe,noasm`, the standard library's two tags first). An
+explicit `-tags` replaces the default entirely. To convert the files a plain `go build` selects instead, pass
+`-module-safe-tag=false`.
 
 ## Validate a converted module's tests
 
