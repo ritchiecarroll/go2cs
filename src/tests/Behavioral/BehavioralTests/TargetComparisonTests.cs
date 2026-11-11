@@ -43,6 +43,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAliasNamespaceShadow() => CheckTarget("AliasNamespaceShadow");
 
     [TestMethod]
+    public void CheckAliasReceiverForms() => CheckTarget("AliasReceiverForms");
+
+    [TestMethod]
     public void CheckAliasStructComposite() => CheckTarget("AliasStructComposite");
 
     [TestMethod]
