@@ -121,23 +121,43 @@ func TestAOneByteEditOfTheIndexChangesThePins(t *testing.T) {
 	}
 }
 
-// llvm-mingw's pin is held as constants (no index to read), so it is checked against the instrument that verified it
-// on hosted runners: the converter-cgo step's pin table in os-matrix.yml.
-func TestTheLLVMMingwPinIsTheInstruments(t *testing.T) {
-	data, err := os.ReadFile(filepath.Join("..", "..", "..", "..", ".github", "workflows", "os-matrix.yml"))
+// The instrument that verified the pins on hosted runners keeps its pin table in .github/cgo-toolchain.ps1 (shared by
+// os-matrix's converter-cgo step and golib-tests' cgo probe). llvm-mingw's pin is held here as constants, with no
+// index to read, and zig's four instrument hashes are written into this test, so both are checked against that table:
+// a pin that moves on one side only fails here.
+func instrumentPinLine(t *testing.T, key string) string {
+	t.Helper()
+
+	data, err := os.ReadFile(filepath.Join("..", "..", "..", "..", ".github", "cgo-toolchain.ps1"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	for _, line := range strings.Split(string(data), "\n") {
-		if strings.Contains(line, "'llvm-mingw|win-x64'") {
-			if !strings.Contains(line, "/"+llvmMingwFile+"\"") || !strings.Contains(line, "sha256 = '"+llvmMingwSHA256+"'") {
-				t.Fatalf("the instrument pins %q; genccpins pins %s %s", strings.TrimSpace(line), llvmMingwFile, llvmMingwSHA256)
-			}
-
-			return
+		if strings.Contains(line, "'"+key+"'") {
+			return line
 		}
 	}
 
-	t.Fatal("os-matrix.yml has no llvm-mingw|win-x64 pin; the guard proves nothing")
+	t.Fatalf(".github/cgo-toolchain.ps1 has no %s pin; the guard proves nothing", key)
+
+	return ""
+}
+
+func TestTheLLVMMingwPinIsTheInstruments(t *testing.T) {
+	line := instrumentPinLine(t, "llvm-mingw|win-x64")
+
+	if !strings.Contains(line, "/"+llvmMingwFile+"\"") || !strings.Contains(line, "sha256 = '"+llvmMingwSHA256+"'") {
+		t.Fatalf("the instrument pins %q; genccpins pins %s %s", strings.TrimSpace(line), llvmMingwFile, llvmMingwSHA256)
+	}
+}
+
+func TestTheZigPinsAreTheInstruments(t *testing.T) {
+	rids := map[string]string{"windows-amd64": "win-x64", "linux-amd64": "linux-x64", "darwin-amd64": "osx-x64", "darwin-arm64": "osx-arm64"}
+
+	for platform, sha := range instrumentPins {
+		if line := instrumentPinLine(t, "zig|"+rids[platform]); !strings.Contains(line, "sha256 = '"+sha+"'") {
+			t.Fatalf("%s: the instrument pins %q; this test holds %s", platform, strings.TrimSpace(line), sha)
+		}
+	}
 }

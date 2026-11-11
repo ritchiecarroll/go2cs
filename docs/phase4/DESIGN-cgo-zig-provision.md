@@ -141,7 +141,9 @@ or KERNEL32 DLLs, and a cold capture took 0.31 s against zig's 140 s. Increment 
 - genzigpins became genccpins. zig's pins still come from the saved index. llvm-mingw 20261020 ucrt-x86_64
   (sha256 fd5462b7f5d93b2ff981fcd3f9c7e427e47f3203c64ea91c27bcc444eebd74cd, 190,612,575 bytes) is held as constants,
   because it has no index and NO publisher signature: the pin is the GitHub asset digest alone. Its test reads the
-  converter-cgo instrument's pin table in os-matrix.yml and fails if the two disagree.
+  instrument's pin table and fails if the two disagree. Batch 284 (H's 4d) moved that table from os-matrix.yml into
+  .github/cgo-toolchain.ps1; the test caught the move on the merge, now reads the new file, and checks zig's four
+  instrument hashes against it too.
 - llvm-mingw's archive is a zip, so it takes archive/zip and needs no xz check.
 - `go2cs toolchain install -cc [-pin zig|llvm-mingw] [-from FILE]`.
 - docs/DotnetTool.md carries the per-OS table, says llvm-mingw is pinned by digest alone, and keeps the APSL paragraph

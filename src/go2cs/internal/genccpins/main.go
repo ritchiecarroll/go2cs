@@ -13,7 +13,7 @@
 //     reaches ziglang.org, or with -index naming a saved copy.
 //   - llvm-mingw, the default on windows (owner ruling, PLAN-cgo-interop §5.1), for windows-amd64: its publisher signs
 //     nothing and publishes no index, so the pin is the GitHub release asset's SHA-256 digest, held below as
-//     constants. It is the hash the converter-cgo instrument verified on hosted runners (.github/workflows/os-matrix.yml),
+//     constants. It is the hash the converter-cgo instrument verified on hosted runners (.github/cgo-toolchain.ps1),
 //     and main_test.go fails when the two disagree.
 //
 // main_test.go also fails while ccToolchainPins.go is not what this writes from testdata/cctoolchain's saved index.
