@@ -2775,6 +2775,124 @@ if (Test-Path -LiteralPath $darwinEvidenceDir) {
 # Printed UNCONDITIONALLY: a gate whose reach is never shown cannot be told apart from one that reached nothing.
 Write-Host ('darwin segments against {0} (pin go{1}): {2} rows read at the pin, {3} not yet read (not gated), {4} refused, {6} superseded (manifest ceiling below the reading; the re-pass owes them), {7} of {8} ruled count(s) banked{5}' -f $darwinEvidenceAt.Relative, $goPin, $darwinRowsGated, $darwinRowsUnread, $darwinRefused, $(if (Test-Path -LiteralPath $darwinEvidenceDir) { '' } else { ' -- no darwin evidence there yet, so nothing is gated' }), $darwinSuperseded, $darwinRuledBanked, $DarwinRuledCounts.Count) -ForegroundColor Cyan
 
+# ---- 2i. a linux segment names both RIDs, DERIVED from the two-RID evidence (S7-a; COORD 2026-11-10/11) ----------
+# DATA-la64-s7-bank-plan.md 2.4: the bank reads every linux row on linux-x64 AND linux-arm64, and each row's segment is
+# derived from its two evidence lines, never typed: EQUAL (both RIDs written out), ARCH-STRICT, ARCH-COUNT, or the
+# COMBINED form (verdicts and disclosed-divergent both differ, both deltas named), else (linux-x64; linux-arm64:
+# pending). annotate_linux.py --rids applies the same rules.
+# RED STUBS (S7-a piece 3): the two-RID linux functions do not exist yet, so each answers a fixed value and the
+# fixtures below fail by assertion. The fix replaces these four with the real ones.
+function Get-ArchCombinedReading { param($A, $X) return $null }
+function Get-LinuxPairReading { param($Records, $Segment) return [PSCustomObject]@{ Form = 'unimplemented'; Text = $null; Reason = $null } }
+function Get-LinuxSegmentRefusal { param($Records, $Segment) return 'unimplemented' }
+function Get-LinuxUnreadRefusal { param($Segment) return 'unimplemented' }
+
+# The two-RID linux segment's contract, against fixtures. Evidence lines carry the mac form's columns (verdicts, matched,
+# divergent, new, status, agree, absent) plus divergent_names (S7-a Q2: the disclosed-divergent verdict names, ';'-
+# separated, '-' for none). Each fixture's roster linux-x64 reading is the same dispatch's linux-x64 line unless the
+# case is a host difference.
+function New-LinuxPairRecord([string] $rid, [string] $status, [int] $verdicts, [int] $matched, [int] $divergent, [int] $new = 0, [string] $agree = 'no', $absent = '-', $names = $null) {
+    $record = [PSCustomObject]@{ RID = $rid; status = $status; agree = $agree; verdicts = "$verdicts"; matched = "$matched"; disclosed = "$divergent"; divergent = "$divergent"; new = "$new" }
+    if ($null -ne $absent) { $record | Add-Member -NotePropertyName absent -NotePropertyValue $absent }
+    if ($null -ne $names) { $record | Add-Member -NotePropertyName divergent_names -NotePropertyValue $names }
+    return $record
+}
+$linSeg = { param($n, $d, $rid, $orid, $on, $od)
+    [PSCustomObject]@{ Applicable = $true; Expected = $n; Disclosed = $d; Rid = $rid
+        Other = $(if ($orid) { [PSCustomObject]@{ Rid = $orid; Expected = $on; Disclosed = $od; Pending = $false } } else { $null }) } }
+$linPendingSeg = { param($n, $d)
+    [PSCustomObject]@{ Applicable = $true; Expected = $n; Disclosed = $d; Rid = 'linux-x64'
+        Other = [PSCustomObject]@{ Rid = 'linux-arm64'; Expected = $null; Disclosed = $null; Pending = $true } } }
+
+# EQUAL: both RIDs validated and agreeing, the same counts. The segment writes both RIDs out, because once the bank is
+# open a bare segment is refused.
+$linEqual = @((New-LinuxPairRecord 'linux-x64' 'validated' 3842 3840 2 0 'yes' '-' 'a;b'), (New-LinuxPairRecord 'linux-arm64' 'validated' 3842 3840 2 0 'yes' '-' 'a;b'))
+$r = Get-LinuxPairReading -Records $linEqual -Segment (& $linPendingSeg 3840 2)
+Assert-Equal 'linux pair: equal readings write both RIDs out' 'equal/3840 + 2 (linux-x64; linux-arm64: 3840 + 2)' "$($r.Form)/$($r.Text)"
+Assert-Equal 'linux pair: the equal segment banks (not refused)' $null (Get-LinuxSegmentRefusal -Records $linEqual -Segment (& $linSeg 3840 2 'linux-x64' 'linux-arm64' 3840 2))
+Assert-Equal 'linux pair: banked on both RIDs but still pending is refused' $true ((Get-LinuxSegmentRefusal -Records $linEqual -Segment (& $linPendingSeg 3840 2)) -match [regex]::Escape('linux: 3840 + 2 (linux-x64; linux-arm64: 3840 + 2)'))
+Assert-Equal 'linux pair: banked on both RIDs with a BARE segment is refused' $true ($null -ne (Get-LinuxSegmentRefusal -Records $linEqual -Segment (& $linSeg 3840 2 $null $null 0 0)))
+Assert-Equal 'linux pair: a hand-set note the evidence does not produce is refused' $true ($null -ne (Get-LinuxSegmentRefusal -Records $linEqual -Segment (& $linSeg 3840 2 'linux-x64' 'linux-arm64' 3839 3)))
+Assert-Equal 'linux pair: equal counts that DISAGREE (agree no) do not bank equal' $true ((Get-LinuxPairReading -Records @((New-LinuxPairRecord 'linux-x64' 'validated' 3842 3840 2), (New-LinuxPairRecord 'linux-arm64' 'validated' 3842 3840 2)) -Segment (& $linPendingSeg 3840 2)).Form -cne 'equal')
+$r = Get-LinuxPairReading -Records @((New-LinuxPairRecord 'linux-x64' 'validated' 16 16 0 0 'yes'), (New-LinuxPairRecord 'linux-arm64' 'validated' 16 16 0 0 'yes')) -Segment (& $linPendingSeg 16 0)
+Assert-Equal 'linux pair: an equal reading with nothing disclosed' '16 (linux-x64; linux-arm64: 16)' $r.Text
+
+# ARCH-STRICT (Get-DarwinArchStrictReading, RID-generic): equal verdicts, the difference wholly disclosed on one RID.
+$linStrict = @((New-LinuxPairRecord 'linux-x64' 'validated' 11 11 0), (New-LinuxPairRecord 'linux-arm64' 'DISC' 11 8 3))
+$r = Get-LinuxPairReading -Records $linStrict -Segment (& $linPendingSeg 11 0)
+Assert-Equal 'linux pair: arch-strict headlines the RID carrying the disclosures' 'arch-strict/8 + 3 (linux-arm64; linux-x64: 11)' "$($r.Form)/$($r.Text)"
+Assert-Equal 'linux pair: the arch-strict segment banks' $null (Get-LinuxSegmentRefusal -Records $linStrict -Segment (& $linSeg 8 3 'linux-arm64' 'linux-x64' 11 0))
+
+# ARCH-COUNT (C1's Get-ArchCountReading): unequal verdicts, equal disclosed share, every missing verdict named.
+$linCount = @((New-LinuxPairRecord 'linux-x64' 'validated' 9 9 0 0 'no' '-'), (New-LinuxPairRecord 'linux-arm64' 'validated' 2 2 0 0 'no' 'a;b;c;d;e;f;g'))
+$r = Get-LinuxPairReading -Records $linCount -Segment (& $linPendingSeg 9 0)
+Assert-Equal 'linux pair: arch-count headlines the longer RID' 'arch-count/9 (linux-x64; linux-arm64: 2)' "$($r.Form)/$($r.Text)"
+Assert-Equal 'linux pair: the arch-count segment banks' $null (Get-LinuxSegmentRefusal -Records $linCount -Segment (& $linSeg 9 0 'linux-x64' 'linux-arm64' 2 0))
+$linCountShort = @((New-LinuxPairRecord 'linux-x64' 'validated' 9 9 0 0 'no' '-'), (New-LinuxPairRecord 'linux-arm64' 'validated' 2 2 0 0 'no' 'a;b'))
+$r = Get-LinuxPairReading -Records $linCountShort -Segment (& $linPendingSeg 9 0)
+Assert-Equal 'linux pair: an arch-count shape naming 2 of the 7 missing verdicts is refused by name' $true (($r.Form -ceq 'refused') -and ($r.Reason -match 'names 2 of the 7'))
+Assert-Equal 'linux pair: that refusal is reported while the row is pending' $true ($null -ne (Get-LinuxSegmentRefusal -Records $linCountShort -Segment (& $linPendingSeg 9 0)))
+
+# COMBINED (COORD 2026-11-10, G's Q1 for runtime): verdicts AND disclosed-divergent both differ. new 0 on both, matched +
+# divergent = verdicts on each, the shorter RID names exactly the missing verdicts and the longer none, and each RID
+# names its disclosed-divergent verdicts in full, so both deltas are named. The longer RID headlines.
+$linCombined = @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;a3' 'd1;d2'))
+$r = Get-ArchCombinedReading $linCombined[0] $linCombined[1]
+Assert-Equal 'combined: the reading headlines the longer RID, each RID with its own disclosed share' '17 + 3 (linux-x64; linux-arm64: 15 + 2)' "$($r.Text)"
+Assert-Equal 'combined: no refusal when both deltas are named in full' $null "$($r.Refusal)".Trim()
+Assert-Equal 'combined: the order of the two lines does not matter' '17 + 3 (linux-x64; linux-arm64: 15 + 2)' "$((Get-ArchCombinedReading $linCombined[1] $linCombined[0]).Text)"
+$r = Get-LinuxPairReading -Records $linCombined -Segment (& $linPendingSeg 17 3)
+Assert-Equal 'linux pair: the combined form is the fourth form' 'combined/17 + 3 (linux-x64; linux-arm64: 15 + 2)' "$($r.Form)/$($r.Text)"
+Assert-Equal 'linux pair: the combined segment banks' $null (Get-LinuxSegmentRefusal -Records $linCombined -Segment (& $linSeg 17 3 'linux-x64' 'linux-arm64' 15 2))
+$r = Get-ArchCombinedReading (New-LinuxPairRecord 'linux-arm64' 'validated' 9 9 0 0 'no' '-' '-') (New-LinuxPairRecord 'linux-x64' 'DISC' 8 7 1 0 'no' 'z' 'q')
+Assert-Equal 'combined: either RID can be the longer, and a RID with nothing disclosed reads bare' '9 (linux-arm64; linux-x64: 7 + 1)' "$($r.Text)"
+foreach ($case in @(
+        @('names 2 of the 3 missing verdicts', 'names 2 of the 3', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2' 'd1;d2'))),
+        @('names a missing verdict twice', 'names 2 of the 3', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a1;a2' 'd1;d2'))),
+        @('names absent verdicts on the LONGER RID', 'the LONGER RID', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' 'z' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;a3' 'd1;d2'))),
+        @('has no divergent_names column on one RID', 'names no disclosed-divergent verdicts on linux-arm64', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;a3'))),
+        @('names 1 of the 2 disclosed-divergent verdicts', 'names 1 of the 2 disclosed-divergent', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;a3' 'd1'))),
+        @('names a disclosed verdict twice', 'names 1 of the 2 disclosed-divergent', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;a3' 'd1;d1'))),
+        @('names more disclosed verdicts than it diverges', 'names 4 of the 3 disclosed-divergent', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3;d4'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;a3' 'd1;d2'))),
+        @('names one verdict as both absent and disclosed', 'both absent and disclosed', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;d2' 'd1;d2'))))) {
+    $reading = Get-ArchCombinedReading $case[2][0] $case[2][1]
+    Assert-Equal "combined refuses a row that $($case[0]): refused by name" $true (($null -ne $reading) -and ("$($reading.Refusal)" -match [regex]::Escape($case[1])))
+    Assert-Equal "combined refuses a row that $($case[0]): the pair reading says refused" 'refused' (Get-LinuxPairReading -Records $case[2] -Segment (& $linPendingSeg 17 3)).Form
+    Assert-Equal "combined refuses a row that $($case[0]): refused while pending" $true ($null -ne (Get-LinuxSegmentRefusal -Records $case[2] -Segment (& $linPendingSeg 17 3)))
+    Assert-Equal "combined refuses a row that $($case[0]): refused with the would-be segment" $true ($null -ne (Get-LinuxSegmentRefusal -Records $case[2] -Segment (& $linSeg 17 3 'linux-x64' 'linux-arm64' 15 2)))
+}
+foreach ($case in @(
+        @('an undisclosed divergence (new 1)', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 1 'no' '-' 'd1;d2'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;a3' 'd1;d2'))),
+        @('equal disclosed shares (arch-count decides)', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 18 2 0 'no' '-' 'd1;d2'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;a3' 'd1;d2'))),
+        @('equal verdicts (arch-strict decides)', @((New-LinuxPairRecord 'linux-x64' 'validated' 17 14 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' '-' 'd1;d2'))),
+        @('a FAIL status', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 17 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'FAIL' 17 15 2 0 'no' 'a1;a2;a3' 'd1;d2'))),
+        @('a count not wholly matched or divergent', @((New-LinuxPairRecord 'linux-x64' 'validated' 20 16 3 0 'no' '-' 'd1;d2;d3'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 17 15 2 0 'no' 'a1;a2;a3' 'd1;d2'))))) {
+    Assert-Equal "combined is not $($case[0]): no combined reading" $null (Get-ArchCombinedReading $case[1][0] $case[1][1])
+}
+
+# NOT BANKED: no form fits, so the row stays (linux-x64; linux-arm64: pending) and any reading it carries is refused.
+$linNoForm = @((New-LinuxPairRecord 'linux-x64' 'validated' 10 10 0), (New-LinuxPairRecord 'linux-arm64' 'FAIL' 10 9 1 1))
+Assert-Equal 'linux pair: no form fits, so pending' 'pending' (Get-LinuxPairReading -Records $linNoForm -Segment (& $linPendingSeg 10 0)).Form
+Assert-Equal 'linux pair: a pending row that does not bank is not refused' $null (Get-LinuxSegmentRefusal -Records $linNoForm -Segment (& $linPendingSeg 10 0))
+Assert-Equal 'linux pair: a row that does not bank but carries a linux-arm64 reading is refused' $true ((Get-LinuxSegmentRefusal -Records $linNoForm -Segment (& $linSeg 10 0 'linux-x64' 'linux-arm64' 10 0)) -match 'pending')
+
+# A HOST DIFFERENCE (COORD 2026-11-10: differing x64 readings are recorded, not written): the same dispatch's linux-x64
+# line is not the roster's linux-x64 reading, so no form is derived and linux-arm64 stays pending.
+$linHost = @((New-LinuxPairRecord 'linux-x64' 'COUNT' 52 51 1 0 'yes' '-' 'x'), (New-LinuxPairRecord 'linux-arm64' 'COUNT' 52 51 1 0 'yes' '-' 'x'))
+Assert-Equal 'linux pair: a hosted linux-x64 reading that is not the roster''s is a host difference' 'host-difference' (Get-LinuxPairReading -Records $linHost -Segment (& $linPendingSeg 52 0)).Form
+Assert-Equal 'linux pair: a host-difference row that stays pending is not refused' $null (Get-LinuxSegmentRefusal -Records $linHost -Segment (& $linPendingSeg 52 0))
+Assert-Equal 'linux pair: a host difference never writes the hosted linux-x64 reading' $true ((Get-LinuxSegmentRefusal -Records $linHost -Segment (& $linSeg 52 0 'linux-x64' 'linux-arm64' 51 1)) -match 'host difference')
+
+# THE RECORDS: one line per RID, and a numeric segment to compare against.
+Assert-Equal 'linux pair: one RID alone is refused, never read as pending' $true ((Get-LinuxSegmentRefusal -Records @($linEqual[0]) -Segment (& $linPendingSeg 3840 2)) -match 'not one of each')
+Assert-Equal 'linux pair: a row the evidence names with no linux segment is refused' $true ($null -ne (Get-LinuxSegmentRefusal -Records $linEqual -Segment $null))
+
+# UNREAD: a linux-arm64 reading on a row no declared evidence names cannot have been derived.
+Assert-Equal 'linux unread: a linux-arm64 reading with no evidence behind it is refused' $true ($null -ne (Get-LinuxUnreadRefusal -Segment (& $linSeg 3840 2 'linux-x64' 'linux-arm64' 3840 2)))
+Assert-Equal 'linux unread: a pending row needs no evidence' $null (Get-LinuxUnreadRefusal -Segment (& $linPendingSeg 3840 2))
+Assert-Equal 'linux unread: a bare segment is not this check''s (the format rule owns it)' $null (Get-LinuxUnreadRefusal -Segment (& $linSeg 3840 2 $null $null 0 0))
+Assert-Equal 'linux format: a pending segment spells its note' '3840 + 2 (linux-x64; linux-arm64: pending)' (Format-DarwinSegment (& $linPendingSeg 3840 2))
+
 # ---- 3. the RENDERED table's column integrity -----------------------------------------------------
 # Everything above guards what the roster MEANS to the parser. This guards what it LOOKS LIKE to a
 # reader, which nothing else does -- and the two can disagree silently.
