@@ -1646,6 +1646,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNilPointerValueReceiverCall() => CheckTarget("NilPointerValueReceiverCall");
 
     [TestMethod]
+    public void CheckNilPtrIdentity() => CheckTarget("NilPtrIdentity");
+
+    [TestMethod]
     public void CheckNilReceiverMethods() => CheckTarget("NilReceiverMethods");
 
     [TestMethod]
