@@ -339,6 +339,13 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			log.Fatalf("Refusing to convert: %s\n", refusal)
 		}
 
+		// ...and a []*T handed as an element-wise copy to a callee that may write the slice
+		// (sliceWideningWriteRefusals.go). Last, so the gates above refuse exactly as before.
+		if refusal := refuseSliceWideningWrites(pkg); refusal != nil {
+			refusal.report()
+			log.Fatalf("Refusing to convert: %s\n", refusal)
+		}
+
 		var projectName, projectFileName, projectFileContents string
 		projectName, packageNamespace = getProjectName(packageInputPath, options)
 		packageNamespace = namespaceWithDirectorySegment(packageNamespace, pkg.PkgPath, pkg.Name)

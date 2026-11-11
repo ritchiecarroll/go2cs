@@ -5598,7 +5598,10 @@ public static float64 Area(this ref Circle c) {
 `Ꮡ(…)` takes an address, as Go's `&` does, and `.slice()` turns a C# array into a golib slice
 ([Slices and Arrays](#slices-and-arrays)). The ᴛ in `elemᴛ0` marks a name the converter makes up, here the
 adapter lambda's parameter ([Reading Converted Code](#reading-converted-code-names-and-glyphs)). Each
-adapter holds the original box, so a method called through it acts on the same `Circle`. A `[]Shape`
+adapter holds the original box, so a method called through it acts on the same `Circle`. The adapters
+sit in a new slice, though, so a callee that writes the slice itself (assigns an element, appends, sorts)
+would write the copy: go2cs refuses such a call by name with
+[`GO2CS2006`](DiagnosticCodes.md) instead of converting it. A `[]Shape`
 argument already satisfies the constraint, so `totalArea(shapes)` stays as Go writes it.
 
 **An operator type set becomes `System.Numerics` operator interfaces**, so `+`, `==` and `<` compile on

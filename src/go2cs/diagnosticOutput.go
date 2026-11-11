@@ -140,6 +140,10 @@ const (
 	// instantiated generic type (`type Q pair[int]`, `type P[T any] pair[T]`), which now converts (visitTypeSpec.go).
 	// The code stays registered so its number is not given to another refusal.
 	diagnosticGenericInstantiationRefused = "GO2CS2004"
+
+	// diagnosticSliceWideningRefused: a []*T passed as an element-wise copy to a generic []N parameter whose callee
+	// may write the slice, so its writes would reach the copy and not the caller (sliceWideningWriteRefusals.go).
+	diagnosticSliceWideningRefused = "GO2CS2006"
 )
 
 // diagnosticPositionPattern splits "file:line[:col]". The file part is matched lazily up to the LAST
