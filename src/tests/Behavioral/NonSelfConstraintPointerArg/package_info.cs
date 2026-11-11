@@ -36,6 +36,7 @@ using static go.main_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Node, Chain<Node>>(ConstraintProxy = true)]
 [assembly: GoImplement<compilerOptionsParser, optionParser>(ConstraintProxy = true)]
 [assembly: GoImplement<impl, Cloner<impl>>(ConstraintProxy = true)]
 [assembly: GoImplement<label, go.fmt_package.Stringer>(ConstraintProxy = true)]
@@ -49,6 +50,7 @@ using static go.main_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Node))]
 [assembly: GoFieldAccess(typeof(compilerOptionsParser))]
 [assembly: GoFieldAccess(typeof(impl))]
 [assembly: GoFieldAccess(typeof(label))]
@@ -62,7 +64,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABIsgoKmlKKCgqaogoKClKiigpSogoL+gv6ggKSggOraggAJDpSQlIKCgpaClpaCgoKCgpaAkpaCgpTEuIKCloKClpY=", "118-118:1")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABIsgoKmlKKCgqaogoKClKiigpSogoL+gv6ggKSggOraggAJDpSQlIKCgpaClpaCgoKCgpaAkpaCgpTEuIKCloKClpYADCCClKKClKaigoKClKaUlIKClIKUgpSClIKClII=", "118-118:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -85,7 +87,9 @@ public static partial class main_package
     internal partial struct label {}
     internal partial struct plain {}
     internal partial struct temp {}
+    public partial interface Chain<T> {}
     public partial interface Cloner<T> {}
+    public partial struct Node {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

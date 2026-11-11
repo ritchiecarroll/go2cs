@@ -159,4 +159,62 @@ internal static void Main() {
     fmt.Println("self route:", ((ж<impl>)(dup<implжCloner>(Ꮡ(new impl(n: 1))))).n);
 }
 
+partial interface Chain<T> {
+    T Next();
+    bool IsEnd();
+}
+
+partial struct Node {
+    public @string Name;
+    internal ж<Node> next;
+}
+
+public static ж<Node> Next(this ref Node n) { return n.next; }
+public static bool IsEnd(this ref Node n) { return n.next == nil; }
+
+public static N Last<N>(N n)
+    where N : Chain<N>
+{
+    while (!n.IsEnd()) {
+        n = n.Next();
+    }
+    return n;
+}
+
+public static (N, nint) LastAndDepth<N>(N n)
+    where N : Chain<N>
+{
+    nint d = 0;
+    while (!n.IsEnd()) {
+        n = n.Next();
+        d++;
+    }
+    return (n, d);
+}
+
+internal static @string describeNode(ref Node n) { return "node "u8 + n.Name; }
+
+internal static ж<Node> lastOf(ж<Node> a) { return ((ж<Node>)(Last<NodeжChain>(a))); }
+
+[GoInit] internal static void init() {
+    var c = Ꮡ(new Node(Name: "c"));
+    var a = Ꮡ(new Node(Name: "a", next: Ꮡ(new Node(Name: "b", next: c))));
+
+    var last = ((ж<Node>)(Last<NodeжChain>(a)));
+    fmt.Println("chain:", last.Name, last == c);
+
+    ж<Node> viaVar = ((ж<Node>)(Last<NodeжChain>(a)));
+    fmt.Println("chain var:", viaVar.Name, viaVar == c);
+
+    var (end, depth) = (LastAndDepth<NodeжChain>(a) switch { var ᴛr => ((ж<Node>)ᴛr.Item1, ᴛr.Item2) });
+    fmt.Println("chain tuple:", end.Name, depth, end == c);
+
+    fmt.Println("chain field on call:", ((ж<Node>)(Last<NodeжChain>(a))).Name);
+    fmt.Println("chain non-generic param:", describeNode(ref (((ж<Node>)(Last<NodeжChain>(a)))).DerefOrNull()));
+    fmt.Println("chain returned:", lastOf(a) == c);
+
+    ((ж<Node>)(Last<NodeжChain>(a))).Name = "C";
+    fmt.Println("chain write through:", c.Name);
+}
+
 } // end main_package

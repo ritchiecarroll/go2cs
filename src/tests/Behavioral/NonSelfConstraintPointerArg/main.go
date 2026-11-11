@@ -144,3 +144,60 @@ func main() {
 	// The self-referential route: a field of the result.
 	fmt.Println("self route:", dup(&impl{n: 1}).n)
 }
+
+// COORD's proxy-RESULT repro (00:31Z), on the SELF-referential route: a generic result typed as the proxy made a field
+// read on it CS1929. Each Go position of the result: `:=` with an explicit instantiation, `var x =`, a multi-value
+// result, a field read on the call, a non-generic parameter, a return, and a write through the result.
+type Chain[T any] interface {
+	Next() T
+	IsEnd() bool
+}
+
+type Node struct {
+	Name string
+	next *Node
+}
+
+func (n *Node) Next() *Node { return n.next }
+func (n *Node) IsEnd() bool { return n.next == nil }
+
+func Last[N Chain[N]](n N) N {
+	for !n.IsEnd() {
+		n = n.Next()
+	}
+	return n
+}
+
+func LastAndDepth[N Chain[N]](n N) (N, int) {
+	d := 0
+	for !n.IsEnd() {
+		n = n.Next()
+		d++
+	}
+	return n, d
+}
+
+func describeNode(n *Node) string { return "node " + n.Name }
+
+func lastOf(a *Node) *Node { return Last(a) }
+
+func init() {
+	c := &Node{Name: "c"}
+	a := &Node{Name: "a", next: &Node{Name: "b", next: c}}
+
+	last := Last[*Node](a)
+	fmt.Println("chain:", last.Name, last == c)
+
+	var viaVar = Last(a)
+	fmt.Println("chain var:", viaVar.Name, viaVar == c)
+
+	end, depth := LastAndDepth(a)
+	fmt.Println("chain tuple:", end.Name, depth, end == c)
+
+	fmt.Println("chain field on call:", Last(a).Name)
+	fmt.Println("chain non-generic param:", describeNode(Last(a)))
+	fmt.Println("chain returned:", lastOf(a) == c)
+
+	Last(a).Name = "C"
+	fmt.Println("chain write through:", c.Name)
+}
