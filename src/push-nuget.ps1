@@ -2221,6 +2221,26 @@ if ($floorFailures.Count -gt 0) {
 }
 Write-Step ("Break floor: CLEAN -- <GoBreakFloor> $breakFloor; " + $(if ($reachableBreaks.Count) { "this release breaks $($reachableBreaks -join ', ')" } else { "no reachable break, baseline go.lib $(if ($golibBaseline) { "$($golibBaseline.Version) states $(if ($golibBaselineFloor) { $golibBaselineFloor } else { 'no floor' })" } else { 'none on this line' })" }))
 
+# --- The pack floor ----------------------------------------------------------------------------------------------------
+# The check above judges the release this run stands for. A consumer judges each package by the version it was packed
+# at: go.lib.targets fails the build, as GO2CS3002, for a go.* package below the floor of the go.lib it restores, a
+# prerelease counting as its release. This pack is consumed with the go.lib it ships, so every go.* package in it must
+# be at or above that go.lib's floor (GoApiCompat.psm1, Test-GoPackFloor). Release-smoke 43000314806 is the failure it
+# names: a 1.26.10.3-ci.<run> pack beside a floor of 1.26.10.4, green here and red in every consumer build. A run that
+# packs to be consumed is checked: a -VersionSuffix rehearsal, or a run that bumps. An unsuffixed pack-only run packs at
+# the PUBLISHED version, for inspection; it is not a pack to consume, and it is not checked.
+if ($VersionSuffix -or -not $dryRun) {
+    $packFloorFailures = @(Test-GoPackFloor -Packages @($pkgs | ForEach-Object { Get-GoNuGetPackageIdentity $_.FullName }) -Floor $breakFloor)
+    if ($packFloorFailures.Count -gt 0) {
+        $packFloorFailures | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+        throw "Pack floor: $($packFloorFailures.Count) failure(s) -- this pack's go.* packages are below the <GoBreakFloor> $breakFloor of the go.lib it ships, so no build can consume it"
+    }
+    Write-Step "Pack floor: CLEAN -- every go.* package packed at $packVersion is at or above the <GoBreakFloor> $breakFloor of the go.lib this pack ships"
+}
+else {
+    Write-Step "Pack floor: not checked -- an unsuffixed pack-only run packs at the published $fullVersion, for inspection; pass -VersionSuffix for a pack to consume"
+}
+
 # --- Push gate ----------------------------------------------------------------------------------
 if (-not $Push) {
     Write-Host ""

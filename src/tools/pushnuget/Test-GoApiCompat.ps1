@@ -300,6 +300,33 @@ try {
         Check 'a packed go.lib states its floor' ((Get-GoBreakFloorFromPackage $nupkg) -ceq '1.26.10.7') "$(Get-GoBreakFloorFromPackage $nupkg)"
     }
 
+    # The floor read from the consumer's side (Test-GoPackFloor): a pack is consumed with the go.lib it ships, whose
+    # targets fail the build for a go.* package below its floor, a prerelease counting as its release. Release-smoke
+    # 43000314806 packed 1.26.10.3-ci.<run> beside a floor of 1.26.10.4 and every consumer build failed GO2CS3002.
+    Write-Host 'a pack passes the floor of the go.lib it ships'
+    $packFloorExported = [bool](Get-Command Test-GoPackFloor -ErrorAction SilentlyContinue)
+    Check 'the module exports Test-GoPackFloor' $packFloorExported 'not exported'
+    if ($packFloorExported) {
+        function Pack([string]$Version, [string[]]$Ids) { @($Ids | ForEach-Object { [pscustomobject]@{ Id = $_; Version = $Version } }) }
+        function PackFloorFailures([object[]]$Packages, [string]$Floor) { @(Test-GoPackFloor -Packages $Packages -Floor $Floor) }
+        $rehearsal = Pack '1.26.10.4-ci.7' @('go.lib', 'go.cmp')
+        Check 'a rehearsal of the release the floor names passes it' ((PackFloorFailures $rehearsal '1.26.10.4').Count -eq 0) ((PackFloorFailures $rehearsal '1.26.10.4') -join '; ')
+        Check 'a release at its floor passes it' ((PackFloorFailures (Pack '1.26.10.4' @('go.lib')) '1.26.10.4').Count -eq 0) ((PackFloorFailures (Pack '1.26.10.4' @('go.lib')) '1.26.10.4') -join '; ')
+        Check 'a pack above the floor passes it' ((PackFloorFailures (Pack '1.26.10.5-ci.1' @('go.lib')) '1.26.10.4').Count -eq 0) ((PackFloorFailures (Pack '1.26.10.5-ci.1' @('go.lib')) '1.26.10.4') -join '; ')
+        $f = @(PackFloorFailures (Pack '1.26.10.3-ci.43000314806' @('go.lib', 'go.cmp')) '1.26.10.4')
+        Check 'a pack labelled with the last-published build reads red, naming its packages, its version, the release it reads as and the floor' (
+            $f.Count -eq 1 -and $f[0].Contains('go.cmp, go.lib') -and $f[0].Contains('packed at 1.26.10.3-ci.43000314806') -and
+            $f[0].Contains('reads as 1.26.10.3,') -and $f[0].Contains('<GoBreakFloor> 1.26.10.4') -and $f[0].Contains('GO2CS3002')) ($f -join '; ')
+        $f = @(PackFloorFailures (Pack '1.26.10.3' @('go.a', 'go.b', 'go.c', 'go.d', 'go.e')) '1.26.10.4')
+        Check 'past three packages the rest are counted' ($f.Count -eq 1 -and $f[0].Contains('go.a, go.b, go.c and 2 more are packed at 1.26.10.3')) ($f -join '; ')
+        $f = @(PackFloorFailures (@(Pack '1.26.10.4-ci.1' @('go.lib')) + @(Pack '1.26.10.3' @('go.bufio'))) '1.26.10.4')
+        Check 'only the versions below the floor are named' ($f.Count -eq 1 -and $f[0].StartsWith('pack floor: go.bufio is packed at 1.26.10.3,')) ($f -join '; ')
+        Check 'a package outside go.* is not read' ((PackFloorFailures (Pack '1.0.0' @('nugetgo.example')) '1.26.10.4').Count -eq 0) ((PackFloorFailures (Pack '1.0.0' @('nugetgo.example')) '1.26.10.4') -join '; ')
+        Check 'go.* is matched as go.lib.targets matches it, ignoring case' ((PackFloorFailures (Pack '1.26.10.3' @('Go.Cmp')) '1.26.10.4').Count -eq 1) 'Go.Cmp was not read'
+        Check 'a version that does not parse counts as below' ((PackFloorFailures (Pack 'unknown' @('go.lib')) '1.26.10.4').Count -eq 1) 'it passed'
+        Check 'a floor that does not parse reads red' ((PackFloorFailures $rehearsal '').Count -eq 1 -and (PackFloorFailures $rehearsal 'x').Count -eq 1) 'it passed'
+    }
+
     Write-Host 'the release path runs it'
     $push = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/push-nuget.ps1'))
     Check 'push-nuget.ps1 restores the pinned tool' ($push.Contains('Initialize-GoApiCompatTool')) 'no restore call'
@@ -312,6 +339,13 @@ try {
     Check 'push-nuget.ps1 checks the floor''s baseline-free cases before -VerifyOnly exits' ($shapeAt -ge 0 -and $verifyExitAt -ge 0 -and $shapeAt -lt $verifyExitAt) "shape check at $shapeAt, -VerifyOnly exit at $verifyExitAt"
     Check 'push-nuget.ps1 reads the floor from the packed go.lib' ($push -match '\$breakFloor = Get-GoBreakFloorFromPackage') 'the floor is not read from the packed go.lib'
     Check 'push-nuget.ps1 compares a pack-only run with what its release would follow' ($push -match '-ReleaseVersion \$guardReleaseVersion' -and $push -match '\$guardReleaseVersion = if \(\$dryRun\) \{ \$wouldBeVersion \} else \{ \$fullVersion \}') 'the guard is not given the would-be version'
+    $packFloorAt = $push.IndexOf('Test-GoPackFloor -Packages')
+    $floorReadAt = $push.IndexOf('$breakFloor = Get-GoBreakFloorFromPackage')
+    $pushGateAt = $push.IndexOf('# --- Push gate')
+    Check 'push-nuget.ps1 checks every packed package against the floor of the go.lib it ships, before the push gate' (
+        $floorReadAt -ge 0 -and $packFloorAt -gt $floorReadAt -and $packFloorAt -lt $pushGateAt -and $push -match 'Test-GoPackFloor -Packages .*-Floor \$breakFloor') "floor read at $floorReadAt, pack floor at $packFloorAt, push gate at $pushGateAt"
+    Check 'push-nuget.ps1 packs a -VersionSuffix rehearsal as a prerelease of the release it rehearses' (
+        $push -match '\$packVersion = if \(\$VersionSuffix\) \{ "\$wouldBeVersion-\$VersionSuffix" \} else \{ \$fullVersion \}') 'a rehearsal is not packed at the would-be version'
     $pack = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/tools/nugetgo/nugetgo-pack.ps1'))
     Check 'nugetgo-pack.ps1 compares a module with its previous revision' ($pack.Contains('Invoke-GoApiCompatGuard')) 'no guard call'
 }

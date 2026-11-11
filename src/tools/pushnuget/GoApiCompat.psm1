@@ -455,6 +455,46 @@ function Test-GoBreakFloorShape {
     @()
 }
 
+<#
+.SYNOPSIS
+    The break floor read from the consumer's side: the reasons a pack's go.* packages fail the floor of the go.lib it ships.
+.DESCRIPTION
+    A pack is consumed with its own go.lib, whose targets fail the build, as GO2CS3002, for each go.* package whose
+    version is below <GoBreakFloor>, a prerelease counting as its release. So a pack with any go.* package below that
+    floor cannot be consumed at all. Release-smoke 43000314806 packed 1.26.10.3-ci.<run> beside a floor of 1.26.10.4:
+    push-nuget's own checks were green, because they judge the release the run stands for, and every consumer build on
+    every RID failed. A -VersionSuffix pack is therefore a prerelease of the release it rehearses (push-nuget.ps1).
+    This applies go.lib.targets' rule as written: the version less everything from its first '-', compared with
+    MSBuild's VersionLessThan; a version that does not parse counts as below. -Packages are identities with Id and
+    Version; IDs that do not start with go. are not read, as go.lib.targets does not read them as go.* packages.
+    Returns one failure per version below the floor, naming its packages; none when no package is below it.
+#>
+function Test-GoPackFloor {
+    param(
+        [Parameter(Mandatory)][AllowEmptyCollection()][object[]]$Packages,
+        [AllowEmptyString()][string]$Floor
+    )
+
+    $floorParsed = $null
+    if (-not $Floor -or -not [version]::TryParse($Floor, [ref]$floorParsed)) {
+        return @("pack floor: the packed go.lib states no <GoBreakFloor> that parses (read '$Floor'), so no consumer build of this pack can be judged")
+    }
+    $failures = [System.Collections.Generic.List[string]]::new()
+    foreach ($group in @($Packages | Where-Object { $_.Id -like 'go.*' } | Group-Object -Property Version | Sort-Object -Property Name)) {
+        $release = ($group.Name -split '-', 2)[0]
+        $parsed = $null
+        if ([version]::TryParse($release, [ref]$parsed) -and $parsed -ge $floorParsed) { continue }
+        $ids = @($group.Group | ForEach-Object { $_.Id } | Sort-Object)
+        $named = ($ids | Select-Object -First 3) -join ', '
+        if ($ids.Count -gt 3) { $named += " and $($ids.Count - 3) more" }
+        $failures.Add("pack floor: $named $(if ($ids.Count -eq 1) { 'is' } else { 'are' }) packed at $($group.Name), which go.lib.targets reads as $release, below the <GoBreakFloor> $Floor of the go.lib this pack ships: every build that consumes the pack fails with GO2CS3002 (a prerelease pack is versioned as the release it rehearses)")
+    }
+    $failures.ToArray()
+}
+
+# A second export line, so this function's export sits beside it rather than in the list at the end. The two accumulate.
+Export-ModuleMember -Function Test-GoPackFloor
+
 # Whether a converted module can bind a package: Go's import rule. A path with an `internal` element, or under
 # `vendor/`, is importable only by the standard library. golib (go.lib) is reachable.
 function Test-GoBreakFloorReachable([Parameter(Mandatory)][string]$Id) {
