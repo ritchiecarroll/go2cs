@@ -1714,6 +1714,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNoinlineDirectiveFrame() => CheckTarget("NoinlineDirectiveFrame");
 
     [TestMethod]
+    public void CheckNonSelfConstraintPointerArg() => CheckTarget("NonSelfConstraintPointerArg");
+
+    [TestMethod]
     public void CheckOpenGenericPointerImplement() => CheckTarget("OpenGenericPointerImplement");
 
     [TestMethod]

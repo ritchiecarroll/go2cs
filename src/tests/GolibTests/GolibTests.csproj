@@ -111,6 +111,10 @@
     <!-- GoDieNumbersProbe and GoSigprocmaskNumberProbe (runtime/linux): S3's per-arch syscall numbers. -->
     <Compile Remove="LinuxRuntimeSyscallNumberTests.cs" />
 
+    <!-- syscall's linux Select and its per-arch selectTrap (S3 site 6); the flavour is told apart by
+         SYS_PSELECT6, which only the linux tables name. -->
+    <Compile Remove="LinuxSelectTimeoutTests.cs" />
+
     <!-- The PATH_MAX removal failure is a Unix one: Windows names long paths natively, so compiled
          there the arms would pass with the defect present and guard nothing. -->
     <Compile Remove="DeepTreeRemovalTests.cs" />
@@ -134,6 +138,20 @@
        linux/arm64 flavour compiles: the file's only (GOOS, GOARCH) pair. An unset $(GoTargetArch) is amd64. -->
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux' or '$(GoTargetArch)' != 'arm64'">
     <Compile Remove="LinuxArm64StatLayoutTests.cs" />
+    <!-- S3 site 1's Arm64 row against the flavour's own SYS_EPOLL_PWAIT and EpollEvent (site 9). -->
+    <Compile Remove="LinuxArm64NetpollFlavourTests.cs" />
+  </ItemGroup>
+
+  <!-- The amd64 flavour's own surface, which an arm64 build does not have (S3 site 9: GolibTests at linux/arm64).
+       - InternalCpuGodebugTests drives internal/cpu's amd64/ hand-owns (cpu_x86_impl.cs, cpu_arm64_process_impl.cs)
+         through their probes. The linux/arm64 flavour starts internal/cpu in linux-arm64/cpu_arm64_hwcap_impl.cs,
+         which has no probe yet.
+       - LinuxAmd64NetpollFlavourTests names SYS_EPOLL_WAIT, which only amd64's table has; it is also linux-only. -->
+  <ItemGroup Condition="'$(GoTargetArch)' == 'arm64'">
+    <Compile Remove="InternalCpuGodebugTests.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(GoTargetOS)' != 'linux' or '$(GoTargetArch)' == 'arm64'">
+    <Compile Remove="LinuxAmd64NetpollFlavourTests.cs" />
   </ItemGroup>
 
   <!-- The netapi32 ptrout gate is the mirror image: it drives windows-flavor-only syscall surface

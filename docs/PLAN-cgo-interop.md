@@ -244,6 +244,26 @@ cross-compilation matrix speculative for this reason.
 > notes the converted output already carries. The overrides above stay (CC, no-download, choose or pin), and
 > converter-cgo's `;cc=zig|llvm-mingw` option keeps llvm-mingw selectable. Implementation is a Phase 2 seat,
 > sequenced with increment 4's library capture.
+>
+> **Owner ruling, later on 2026-11-10 (dated amendment, COORD; it supersedes the single-zig default above):** the
+> default is **per OS**: **zig on linux and darwin, llvm-mingw on windows**. Owner (verbatim): "On cgo, go with per
+> OS default". Measured by increment 4b's per-symbol capture on the hosted windows leg (converter-cgo run 42929174203
+> against zig's 42924536206):
+> - Under zig, windows links `cos` and `strlen` STATICALLY from zig's bundled mingw libraries. Phase 2 converts extern
+>   functions only and compiles no C into the output, so a statically linked symbol has no library to P/Invoke, and
+>   such a package is refused by name.
+> - Under llvm-mingw (UCRT), all four probes are DYNAMIC, with the same names as the host mingw gcc and as Go's own
+>   mingw build: `cos` api-ms-win-crt-math-l1-1-0.dll, `strlen` api-ms-win-crt-string-l1-1-0.dll, `puts`
+>   api-ms-win-crt-stdio-l1-1-0.dll, `GetCurrentProcessId` KERNEL32.dll.
+> - llvm-mingw ships prebuilt UCRT import libraries, so a cold capture took 0.31 s against zig's 140.70 s. Its archive
+>   is about 1.9x zig's (190,612,575 bytes against 100,268,137).
+> - The trade is a second, windows-only pin with no publisher signature (a GitHub asset digest only), where zig's
+>   has minisign. It is pinned by SHA-256 compiled into the converter, as zig is at run time, so a tampered download
+>   can only fail, never substitute.
+>
+> linux and darwin keep zig: it resolves to the system libraries (libm.so.6, libSystem.B.dylib), and on darwin it is
+> the only downloadable toolchain. The overrides are unchanged, so zig stays selectable on windows and llvm-mingw
+> wherever it runs.
 
 ### 5.2 Determinism, and what that forbids
 

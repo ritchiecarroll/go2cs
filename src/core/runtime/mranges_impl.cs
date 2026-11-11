@@ -185,6 +185,8 @@ partial class runtime_package
         ref var a = ref heap(new addrRanges(), out var Ꮡa);
         a.init(Ꮡstat);
 
+        // 4096 here is a range LENGTH in addrRanges' pure arithmetic, never a page: nothing is mapped, so the probe
+        // reads the same at any page size (S3 site 8, judged; mem_linux's mmap probe is the one that reads physPageSize).
         for (int n = 0; n < count; n++)
         {
             nuint @base = 0x10000 + (nuint)n * stride;

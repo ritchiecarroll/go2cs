@@ -28,6 +28,9 @@
 // Syscall6(SYS_FSTATAT, …), 79: the kernel's newfstatat, which amd64's table names SYS_NEWFSTATAT. Both
 // come from this flavour's converted zsysnum_linux_arm64.cs, never a literal.
 //
+// SELECT'S TRAP (S3 site 6) is here too: selectTrap, at the end of this file. arm64 has no select(2), and
+// Select itself is linux/structclass_linux_impl.cs's, shared with amd64 down to the fd_set mirrors.
+//
 // Displaced by `manualConversionFuncs` ("syscall": Fstat, fstatat, goosLinux), like the amd64 pair. The principal
 // is the converted zsyscall_linux_arm64.cs, which only linux/arm64 emits, so the router keeps this file in
 // linux-arm64/.
@@ -177,5 +180,32 @@ partial class syscall_package
         });
 
         static int offsetIn(byte* start, void* field) => (int)((byte*)field - start);
+    }
+
+    // Select's trap at linux/arm64 (S3 site 6; the fd_set mirrors and the rest of Select are in
+    // linux/structclass_linux_impl.cs). Go's arm64 Select (syscall_linux_arm64.go) is
+    //
+    //     var ts *Timespec
+    //     if timeout != nil { ts = &Timespec{Sec: timeout.Sec, Nsec: timeout.Usec * 1000} }
+    //     return pselect(nfd, r, w, e, ts, nil)
+    //
+    // and pselect is Syscall6(SYS_PSELECT6, …), 72, from this flavour's converted zsysnum_linux_arm64.cs.
+    // The Timespec is Go's TEMPORARY. The kernel writes the time not slept into it, and the caller's Timeval
+    // never sees that, unlike amd64's select(2). So nothing is copied back. The converted pselect is not
+    // called: it hands the kernel its ж<FdSet> boxes, not inline fd_sets. A nil timeout stays address 0
+    // ("block forever"), and the sigmask is nil, as in Go.
+    private static unsafe (uintptr r0, Errno e1) selectTrap(uintptr nfd, uintptr r, uintptr w, uintptr e, ж<Timeval> Ꮡtimeout) {
+        NativeTimespecLinuxArm64 ts = default;
+        uintptr tsAddr = 0;
+
+        if (Ꮡtimeout is not null && !Ꮡtimeout.IsNilPointer) {
+            ref var tv = ref Ꮡtimeout.Value;
+            ts.Sec = tv.Sec;
+            ts.Nsec = tv.Usec * 1000;
+            tsAddr = (uintptr)(nint)(&ts);
+        }
+
+        var (r0, _, e1) = Syscall6(SYS_PSELECT6, nfd, r, w, e, tsAddr, 0);
+        return (r0, e1);
     }
 }

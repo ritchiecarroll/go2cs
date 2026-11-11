@@ -12,13 +12,6 @@ internal static partial class cgotestꓸC_package
         public static implicit operator int64(@long value) => value.m_value;
     }
 
-    internal readonly struct @char(int8 value)
-    {
-        private readonly int8 m_value = value;
-        public static implicit operator @char(int8 value) => new(value);
-        public static implicit operator int8(@char value) => value.m_value;
-    }
-
     internal struct struct_in_addr
     {
         public @uint s_addr;

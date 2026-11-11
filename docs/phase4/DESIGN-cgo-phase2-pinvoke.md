@@ -635,6 +635,13 @@ run-time check (§5.3) compares the running OS and architecture against it.
 > windows is refused by name (§11.5). The windows arm takes a symbol that BOTH the host mingw gcc and the pinned zig
 > resolve dynamically (a UCRT string or stdio function, or a kernel32 one), confirmed by increment 4b's own capture on
 > both toolchains before G1 relies on it.
+>
+> **RULED 2026-11-10 (COORD, on H's capture readings, windows converter-cgo jobs 42924514691 gcc and 42924536206 zig):
+> G1's windows arm is `puts`.** It resolves to `api-ms-win-crt-stdio-l1-1-0.dll` under both the host mingw gcc and
+> the pinned zig, and its output is checkable for G2. `GetCurrentProcessId` (`KERNEL32.dll` under both) is the named
+> kernel32 alternative. Rejected, as static under zig: `cos` (libm) and `strlen`, which the host gcc resolves to
+> `api-ms-win-crt-string-l1-1-0.dll`. A cold zig cache cost 140 s per probe target on the hosted windows runner, which
+> goes into G1's leg budget; a pinned cache-warming step on the leg is allowed.
 
 ### 11.11 A resolver miss throws (finding 11)
 
@@ -654,6 +661,22 @@ An install name of `@rpath/…`, `@loader_path/…` or `@executable_path/…` ca
 binary resolves it. **Revised:** record the absolute path the probe's linker resolved, or refuse by name. `-framework
 X` is admitted, with its install name captured. As with a Go binary, a library outside the system loader's path needs
 `LD_LIBRARY_PATH` on linux; the note says so to users and does not paper over it.
+
+> **MANDATORY 2026-11-10 (increment 4d, a SECURITY finding caught before any release shipped it; COORD ruled the fix
+> into 4d itself):** the absolute-name rule binds EVERY darwin load, not only the capture's preference. dyld's search
+> for a BARE name reached the current directory on both hosted darwin RIDs: golib-tests 42936395011 planted a copy of
+> the probe library in the current directory, asked the resolver for it by its bare name, and dyld loaded it (handles
+> 1913759472 on osx-arm64 and 1108903152 on osx-x64), where the arm required a refusal. Both halves now refuse by name
+> any darwin name that is not absolute: the converter's capture (`cgoDarwinInstallName`, red 8dfe7398ee, green
+> 3c4875b988) and golib's resolver, which refuses before dyld sees the name. `ALibraryOnlyInTheCurrentDirectoryIsNotLoaded`
+> stays as the rule's guard. The probe library is built at the fixed absolute install name
+> `/tmp/go2cs-cgo-probe/libgo2csprobe.dylib`.
+>
+> **The portability consequence, and it is the intended trade:** a captured absolute install name is baked into the
+> bindings, as it is into a Go binary's load commands. A library installed at a different path on the consumer's
+> machine, say Homebrew's `/opt/homebrew/lib` on Apple silicon against `/usr/local/lib` on Intel, fails by name, with a
+> DllNotFoundException naming the `-l`, the captured name and the rule. It does not load whatever a search would find.
+> A package that must load from more than one location is converted on, or for, the layout it targets.
 
 ### 11.13 Flexible arrays, bitfields and `_Bool` (findings 13 and 14)
 

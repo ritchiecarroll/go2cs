@@ -50,6 +50,9 @@ func TestCgoLinkFlagsTakeOnlyPlainTokens(t *testing.T) {
 		{"linux", "-framework", "is darwin's"},
 		{"linux", "-Wl,-rpath,/tmp", "is not one Phase 2 passes"},
 		{"linux", "-fplugin=x", "is not one Phase 2 passes"},
+		// The admission of cmd/go's default CGO_LDFLAGS is token-exact (§11.15, as amended).
+		{"linux", "-O3", "is not one Phase 2 passes"},
+		{"linux", "-g3", "is not one Phase 2 passes"},
 	} {
 		if _, err := parseCgoLinkFlags(refused.goos, []string{refused.arg, "x"}, dir); err == nil || !strings.Contains(err.Error(), refused.says) {
 			t.Errorf("%s on %s: %v, want it to say %q", refused.arg, refused.goos, err, refused.says)
@@ -262,6 +265,37 @@ func TestCgoCaptureNamesTheSystemMathLibrary(t *testing.T) {
 	}
 }
 
+// G1's windows arm needs a C runtime symbol that BOTH the host mingw gcc and the pinned zig resolve DYNAMICALLY (§11.10, as
+// amended): cos does not, being static under zig. Each candidate is captured alone, so a static one cannot hide another,
+// and each reading is logged; kernel32's GetCurrentProcessId is held to resolve dynamically under any windows toolchain.
+func TestCgoCaptureReadsWindowsCRuntimeCandidatesOneByOne(t *testing.T) {
+	if runtime.GOOS != "windows" {
+		t.Skip("the windows C runtime candidates for G1: NOT MEASURED off windows")
+	}
+
+	toolchain := cgoCaptureToolchain(t)
+
+	for _, symbol := range []string{"strlen", "puts", "GetCurrentProcessId"} {
+		got, err := captureCgoLibraries(toolchain, runtime.GOOS, cgoLinkFlags{}, []string{symbol}, t.TempDir())
+
+		if err != nil {
+			t.Logf("READING %s: not dynamic under this toolchain: %v", symbol, err)
+
+			if symbol == "GetCurrentProcessId" {
+				t.Errorf("kernel32's GetCurrentProcessId must resolve dynamically: %v", err)
+			}
+
+			continue
+		}
+
+		t.Logf("READING %s: %s", symbol, got[0].name)
+
+		if symbol == "GetCurrentProcessId" && !strings.EqualFold(got[0].name, "kernel32.dll") {
+			t.Errorf("GetCurrentProcessId resolves to %q, want kernel32.dll", got[0].name)
+		}
+	}
+}
+
 // A symbol no library defines is refused by name: Phase 2 binds only what a shared library exports.
 func TestCgoCaptureRefusesASymbolNoLibraryDefines(t *testing.T) {
 	toolchain := cgoCaptureToolchain(t)
@@ -270,5 +304,27 @@ func TestCgoCaptureRefusesASymbolNoLibraryDefines(t *testing.T) {
 
 	if err == nil || !strings.Contains(err.Error(), "go2cs_cgo_nowhere") {
 		t.Errorf("err %v, want a refusal naming go2cs_cgo_nowhere", err)
+	}
+}
+
+// darwin loads a captured library only by an absolute install name (§11.12, mandatory since increment 4d): dyld's search
+// for a bare name reached the current directory on both hosted RIDs (golib-tests 42936395011), and an @ name is one the
+// CLR's loader cannot resolve as dyld does. Both are refused by name; an absolute name is admitted.
+func TestCgoDarwinCaptureAdmitsOnlyAbsoluteInstallNames(t *testing.T) {
+	for _, c := range []struct{ library, refusal string }{
+		{"/usr/lib/libSystem.B.dylib", ""},
+		{"/tmp/go2cs-cgo-probe/libgo2csprobe.dylib", ""},
+		{"@rpath/libfoo.dylib", "cannot resolve as dyld does"},
+		{"libgo2csprobe.dylib", "dyld's search for a bare name reaches the current directory"},
+		{"lib/libfoo.dylib", "dyld's search for a bare name reaches the current directory"},
+	} {
+		err := cgoDarwinInstallName("f", c.library)
+
+		switch {
+		case c.refusal == "" && err != nil:
+			t.Errorf("%s: refused (%v), want it admitted", c.library, err)
+		case c.refusal != "" && (err == nil || !strings.Contains(err.Error(), c.refusal) || !strings.Contains(err.Error(), c.library)):
+			t.Errorf("%s: err %v, want a refusal naming it and saying %q", c.library, err, c.refusal)
+		}
 	}
 }
