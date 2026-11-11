@@ -36260,6 +36260,47 @@ the defect is latent there (per-site census, `claude/r-ts-c35`, all three amd64 
 the slice: an index assignment, an append whose result flows back, a pass to anything not proven read-only. It must
 stay conservative enough that go/ast's four walkList sites still convert; census std's widening sites first. The
 struct-proxy view (the post-.4 scout) is the path to making such writes work rather than refused.
+## 2026-11-11 — R (the -recurse refused-package ruling, COORD 20261111T053529Z): a pointer type argument to a generic NAMED type under a non-self method-set constraint (`MappedSpan[*ast.SourceFile]`) is refused; supporting it is a post-.4 struct-proxy design — OPEN
+
+**What the TS lane hit.** Its module's `-recurse` conversion refuses at [107/142] `internal/ls/lsconv`: six sites of
+`MappedSpan[T Script] struct { Script T; spanmap.MappedSpan }` instantiated as `MappedSpan[*ast.SourceFile]`, where
+`Script`'s `SpanMap()` returns a pointer. C35's ruling 1 (DESIGN-constraint-proxy-nonself) refuses this shape on
+purpose: the type argument would put a constraint proxy in the named type's identity. Reported via COORD as
+GO2CS2002; on `claude/r-warn-option` the non-self refusals are renumbered GO2CS2005, which `-warn` does not accept
+(those sites do not fail loud).
+
+**Repro here** (the shape as reported, not the TS source; converted at `claude/r-warn-option`):
+
+```go
+type SpanMap struct{ n int }
+type Script interface{ SpanMap() *SpanMap }
+type BaseSpan struct{ start, end int }
+type MappedSpan[T Script] struct {
+	Script T
+	BaseSpan
+}
+type SourceFile struct{ m SpanMap }
+
+func (f *SourceFile) SpanMap() *SpanMap { return &f.m }
+
+func main() {
+	f := &SourceFile{m: SpanMap{n: 7}}
+	s := MappedSpan[*SourceFile]{Script: f, BaseSpan: BaseSpan{1, 2}}
+	s.Script.SpanMap().n++
+	fmt.Println(f.m.n, s.start) // Go: 8 1
+}
+```
+
+go2cs: `error GO2CS2005: MappedSpan[T example.com/ms.Script] instantiated with *example.com/ms.SourceFile: a pointer
+type argument to a generic NAMED type under a non-self-referential method-set constraint would put a constraint proxy
+in the type's identity`, exit 1, nothing written.
+
+**What is done instead (.4).** Under `-recurse` a refused package is now skipped, and the run converts everything
+else and ends with exit 1, naming the refused package and its direct importers (`claude/r-warn-option`). So
+`lsconv` no longer blocks the other packages, but `lsconv` itself and its importers still do not build.
+
+**Not in scope, and not verified:** a design that converts this shape (the struct-proxy direction, parked as R's
+scout); how many TS packages import `lsconv`; whether any std package holds the shape (no census has looked).
 
 — R (2026-11-11)
 ## 2026-11-11 — C1 (C46, COORD's ruling): past a thread's stack reservation a converted program ends with .NET's `Stack overflow.` abort, where Go prints a fatal error and exits 2 — OPEN, its own seat
