@@ -44,14 +44,14 @@
     THE FLAVOUR is resolved through the SDK's RID graph ($(RuntimeIdentifierGraphPath)), as the host
     resolves the RUNTIME asset: breadth-first from the RID, nearest first, the first RID a package
     ships a runtimes/<rid>/ folder for. So linux-musl-x64 compiles against linux-x64, and
-    linux-musl-arm64 and linux-bionic-arm64 against linux-arm64 once a package ships it. Only a
+    linux-musl-arm64 and linux-bionic-arm64 against linux-arm64, which the packages ship. Only a
     RID-SPLIT package (one with a runtimes/ folder) is resolved: the platform-neutral go.* packages,
     most of them, ship lib/ alone and have nothing to swap or to refuse. An SDK without the graph
     file resolves the exact RID only.
 
-    A RID NO go.* PACKAGE RESOLVES (linux-arm64, for one) is refused by its own target, which runs
+    A RID NO go.* PACKAGE RESOLVES (linux-riscv64, for one) is refused by its own target, which runs
     whether or not the swap is on. On a platform of another operating system, or of the same one with
-    another system-call ABI (linux-arm64 against the linux-x64 flavour), the program would run code
+    another system-call ABI (linux-riscv64 against the linux-x64 flavour), the program would run code
     that does not describe its host: GO2CS3003, a build error naming the RID and the first package.
     On a Windows platform the packages do not ship (win-arm64), the Windows flavour IS that operating
     system's, so it is GO2CS3004, a warning, and the build goes on. A cross-build for a shipped RID
@@ -194,10 +194,10 @@
     </PropertyGroup>
     <Error Code="$(Go2csDiagnosticUnshippedRid)"
            Condition="'@(_GoRidUnshipped)' != '' and '$(_GoRidWindowsOs)' != 'true'"
-           Text="The go.* packages do not ship the $(GoCompileRuntimeIdentifier) platform: $(_GoRidUnshippedFirst), one of $(_GoRidUnshippedCount) platform-specific go.* package(s) in this build, has no flavour for it, so the program would compile against, and run, the Windows flavour. Build for a RID the packages ship, or pass -p:GoAllowReferenceFlavor=true to compile against the Windows flavour knowingly: the program then runs the Windows flavour. See https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md#the-packages-do-not-ship-linux-arm64" />
+           Text="The go.* packages do not ship the $(GoCompileRuntimeIdentifier) platform: $(_GoRidUnshippedFirst), one of $(_GoRidUnshippedCount) platform-specific go.* package(s) in this build, has no flavour for it, so the program would compile against, and run, the Windows flavour. Build for a RID the packages ship, or pass -p:GoAllowReferenceFlavor=true to compile against the Windows flavour knowingly: the program then runs the Windows flavour. See https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md#platforms-the-packages-do-not-ship" />
     <Warning Code="$(Go2csDiagnosticUnshippedWindowsRid)"
              Condition="'@(_GoRidUnshipped)' != '' and '$(_GoRidWindowsOs)' == 'true'"
-             Text="The go.* packages do not ship the $(GoCompileRuntimeIdentifier) platform: $(_GoRidUnshippedFirst), one of $(_GoRidUnshippedCount) platform-specific go.* package(s) in this build, compiles against, and runs, its Windows flavour. That is this platform's operating system, so the program runs, but what Go decides by architecture when the package was converted follows amd64. Pass -p:GoAllowReferenceFlavor=true to silence this. See https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md#the-packages-do-not-ship-linux-arm64" />
+             Text="The go.* packages do not ship the $(GoCompileRuntimeIdentifier) platform: $(_GoRidUnshippedFirst), one of $(_GoRidUnshippedCount) platform-specific go.* package(s) in this build, compiles against, and runs, its Windows flavour. That is this platform's operating system, so the program runs, but what Go decides by architecture when the package was converted follows amd64. Pass -p:GoAllowReferenceFlavor=true to silence this. See https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md#platforms-the-packages-do-not-ship" />
   </Target>
 
   <!--

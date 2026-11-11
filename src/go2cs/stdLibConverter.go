@@ -53,15 +53,7 @@ func NewStdLibConverter(options Options) *StdLibConverter {
 func (c *StdLibConverter) ScanAndConvertFiltered(packageFilter []string) error {
 	// Announce the effective build tags so the purego default is visible, not magic. A bare
 	// `-stdlib` run reports `purego (default)`; an explicit `-tags` reports exactly what was passed.
-	if len(c.options.buildTags) > 0 {
-		suffix := ""
-		if !c.options.tagsExplicit {
-			suffix = " (default; pass -tags to override)"
-		}
-		fmt.Printf("Applying build tags: %s%s\n", strings.Join(c.options.buildTags, ","), suffix)
-	} else {
-		fmt.Println("Applying build tags: none (-tags= cleared the purego default)")
-	}
+	fmt.Println(c.options.buildTagsAnnouncement("purego"))
 
 	// Step 1: Scan all standard library packages
 	fmt.Println("Scanning Go standard library packages...")

@@ -1,0 +1,17 @@
+package main
+
+import "fmt"
+
+// C40 green control: the same func and method, with the package func given a different name.
+type Type struct{ flags int }
+
+func isTupleType(t *Type) bool { return t.flags&1 != 0 }
+
+func (t *Type) IsTupleType() bool { return isTupleType(t) }
+
+func IsTuple(t *Type) bool { return isTupleType(t) }
+
+func main() {
+	t := &Type{flags: 1}
+	fmt.Println(t.IsTupleType(), IsTuple(t), IsTuple(&Type{})) // Go: true true false
+}

@@ -85,7 +85,7 @@ step alone.
 ## 2. Measured: what happens today
 
 **Instrument.** A minimal cgo fixture plus a `packages.Load` probe using `packages.LoadAllSyntax` —
-the exact mode `conversionDriver.go:89`, `stdLibConverter.go` and `moduleConverter.go:156` all use.
+the exact mode `conversionDriver.go:89`, `stdLibConverter.go` and `moduleConverter.go:160` all use.
 Run on the coordinator machine, 2026-08-28, against `be58eb4aa`.
 
 **Finding 1 — the converting machine cannot run cgo at all.** `go env CGO_ENABLED` → `0`; no `gcc`,
@@ -145,7 +145,7 @@ correctness bug independent of cgo.*
 corpus is wholly `CGO_ENABLED=0` output, so cgo support cannot move an existing golden or CNR verdict.
 
 **Finding 6 — three existing "C" accommodations, all avoidance, none a binding.** The fatal gate
-(`visitImportSpec.go:212-214`), the `classSkip` bucket (`moduleConverter.go:226`), and a type-alias
+(`visitImportSpec.go:212-214`), the `classSkip` bucket (`moduleConverter.go:230`), and a type-alias
 preload skip (`importOperations.go:1027`). Nothing parses a preamble; nothing generates anything.
 
 ## 3. Where this sits in the existing roadmap
@@ -679,7 +679,7 @@ it (`loaderEnvironment.go`). **That falsifies Phase 1's "No go2cs `packages.Conf
 cgo off. Relayed to P1's OQ-1 run.
 
 **Finding 5 HOLDS:** no tracked `.go` file imports `"C"` (count 0 at `30ad20e17e`). **Finding 6 is now eight
-accommodations, not three:** the gate (`visitImportSpec.go:270-274`), `classSkip` (`moduleConverter.go:318-319`),
+accommodations, not three:** the gate (`visitImportSpec.go:270-274`), `classSkip` (`moduleConverter.go:322-323`),
 the preload skip (`importOperations.go:1317-1318`), `noInitPseudoPackages` (`visitImportSpec.go:396`), S3, the
 loader pin, `cgoDynamicImports.go` (`//go:cgo_import_dynamic` binding for darwin trampolines, golib
 `GoCgoDynamicImports`), and `cgoUnsafeArgsLift.go` (Q56's `//go:cgo_unsafe_args` block lift). The last two are
@@ -691,12 +691,12 @@ Content was verified at each new site. "GONE" means the cited code no longer exi
 
 | Cite in the text above | At `30ad20e17e` |
 |---|---|
-| `conversionDriver.go:89` LoadAllSyntax · `moduleConverter.go:156` · `stdLibConverter.go` | `:113` · `:247-251` · `stdLibLoadConfig` `:282` |
+| `conversionDriver.go:89` LoadAllSyntax · `moduleConverter.go:160` · `stdLibConverter.go` | `:113` · `:247-251` · `stdLibLoadConfig` `:282` |
 | `visitImportSpec.go:212-214` | `:270-274` (now also emits GO2CS2001 before `Fatalf`) |
 | `conversionDriver.go:227-228` (the zip) · `:244-246` (marker probe) | **GONE** (`948b9e8998`, §11.1) · `:349-366` |
 | x/tools v0.36.0 `packages.go` `:512` / `:518-519` / `:447-451` | v0.52.0 `:518` / `:524-525` / `:453-456`, text unchanged |
 | `testConversion.go:1183-1187` | `testFileEntries`, `:2055-2066` |
-| `moduleConverter.go:226` · `importOperations.go:1027` | `:318-319` · `:1317-1318` |
+| `moduleConverter.go:230` · `importOperations.go:1027` | `:318-319` · `:1317-1318` |
 | `Roadmap.md:770-784` | the 5A/5B text is `Roadmap.md:402/421`; the completed half moved to `RoadmapHistory.md:307` |
 | `ToDo.md` item 48 · `ToDo.md:49-51` | `ToDo.md:63` (an `xx)` line pointing here) · `:64` |
 | `ж.NativeBox.cs:31/47/79` · `core/unsafe/unsafe.cs:368-380` | `:31/47/63` (+ `RetainedSource` `:202`) · `:361-367`, `FromBox<T>` `:500` |

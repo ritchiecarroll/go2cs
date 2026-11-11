@@ -788,10 +788,10 @@ covers exactly the three files **embedded** at compile time. Its reasoning is so
 
 | Class | Sites | Safe on Linux? |
 |:--|:--|:--|
-| **Write-only** — `WriteString`/`Join` emitting CRLF into new output | `initOrderOperations.go:460-545`, `testConversion.go:935-978`, `:1816-1841`, `projectFileWriter.go:104,142-149,290,294`, `autoSiblingOperations.go:103,137-141`, `readme.go:107`, `moduleConverter.go:587`, `solutionGenerator.go:231,393`, `packageStateOperations.go:175`, `internal/stdlibmeta/generate.go:84-95` | **Yes.** Host-independent by construction — the converter always emits CRLF, which is what makes its output deterministic. Keep them. |
+| **Write-only** — `WriteString`/`Join` emitting CRLF into new output | `initOrderOperations.go:460-545`, `testConversion.go:935-978`, `:1816-1841`, `projectFileWriter.go:104,142-149,290,294`, `autoSiblingOperations.go:103,137-141`, `readme.go:107`, `moduleConverter.go:591`, `solutionGenerator.go:231,393`, `packageStateOperations.go:175`, `internal/stdlibmeta/generate.go:84-95` | **Yes.** Host-independent by construction — the converter always emits CRLF, which is what makes its output deterministic. Keep them. |
 | **Template split** — splits the embedded skeleton | `packageInfoWriter.go:57` | **Yes**, given the `eol=crlf` pin. |
 | **Read-back split** — splits a file read off disk | **`packageInfoWriter.go:52`** | **NO.** |
-| **Read-back, EOL-agnostic** | `adapterNameCollisions.go:121` (splits `"\n"`), `directiveOperations.go:58,467` and `importOperations.go:748` (`bufio.Scanner`, which drops a trailing `\r`), `stdLibConverter.go:445`, `testConversion.go:2691` (split `"\n"`), `readmeValidationBadge.go:172` (`parseProofTotals`, explicitly CRLF-tested at `readmeValidationBadge_test.go:330`) | **Yes.** |
+| **Read-back, EOL-agnostic** | `adapterNameCollisions.go:121` (splits `"\n"`), `directiveOperations.go:58,467` and `importOperations.go:748` (`bufio.Scanner`, which drops a trailing `\r`), `stdLibConverter.go:437`, `testConversion.go:2691` (split `"\n"`), `readmeValidationBadge.go:172` (`parseProofTotals`, explicitly CRLF-tested at `readmeValidationBadge_test.go:330`) | **Yes.** |
 | **Read-back, substring-insert** | `testConversion.go:1583` (`strings.Replace(contents, productionUsing, productionUsing+"\r\n"+testUsing, 1)`) | **Conditionally.** The target `package_test_info.cs` is seeded from the production file in the same run, so it is CRLF in practice; it becomes wrong if a committed LF copy is ever the input. |
 | **Byte-equality** | `projectFileWriter.go:417` `needToWriteFile` | Harmless — an LF-on-disk file simply gets rewritten. Contributes to the dirty-tree symptom (F2), not to a failure. |
 
@@ -837,8 +837,8 @@ read path changes, the write path does not.
 loader:
 
 - `conversionDriver.go:83` — `cfg.Env = append(os.Environ(), "GOOS=…", "GOARCH=…")`
-- `stdLibConverter.go:243-244`, `:332-333`
-- `moduleConverter.go:157`
+- `stdLibConverter.go:235-236`, `:332-333`
+- `moduleConverter.go:161`
 - `testAliasShadowOperations.go:58-59` — `buildContext.GOOS/GOARCH`
 - `testConversion.go:372-373`, `:1010-1011`, `:4389`
 
@@ -997,7 +997,7 @@ raw backslashes returns **zero** platform-coupled hits. The only `Marshal`/`Memo
 `Marshal.SizeOf` for `ж<T>` pinning (`ж.cs:361-375`) and `MemoryMarshal.GetReference`/`GetArrayDataReference`
 (`sstring.cs:94`, `ж.cs:223,270`) — all RID-agnostic managed intrinsics. `builtin.cs:61` sets
 `Console.OutputEncoding = Console.InputEncoding = Encoding.UTF8`, supported on .NET for Linux. `print`/`println`
-go straight to `Console.Error` (`builtin.cs:1629,1638`), so a behavioral program that uses only the Go
+go straight to `Console.Error` (`builtin.cs:1630,1638`), so a behavioral program that uses only the Go
 built-ins — not `fmt` — would in fact run on Linux today.
 
 **`src/gen/go2cs-gen/` is clean.** `netstandard2.0`, `Microsoft.CodeAnalysis.CSharp` 4.10.0, no file I/O, no
@@ -1554,7 +1554,7 @@ Every command below is read-only. Run from the repository root unless noted.
 | P27 | `grep -n 'log.Fatal' src/go2cs/packageInfoWriter.go` | `:120 :175 :381 :528 :586` — one per marker section |
 | P28 | `grep -n 'pathReplace(' src/go2cs/importOperations.go` | `:44 :256 :258 :321`; definition `:458` with the `runtime.GOOS == "windows"` gate |
 | P29 | `sed -n '263p;324p' src/go2cs/importOperations.go` | `filepath.Join(strings.ReplaceAll(targetDir, "/", "\\"), "\\"+packageName+".csproj")` |
-| P30 | <code>grep -n 'GOOS&#92;&#124;GOARCH' src/go2cs/&#42;.go</code> (non-test) | `main.go:98`; `conversionDriver.go:83`; `stdLibConverter.go:243,244,332,333`; `moduleConverter.go:157`; `testAliasShadowOperations.go:58,59`; `testConversion.go:372,373,1010,1011,4389`; `directiveOperations.go:357-408` (`knownGOOS`/`knownGOARCH`) |
+| P30 | <code>grep -n 'GOOS&#92;&#124;GOARCH' src/go2cs/&#42;.go</code> (non-test) | `main.go:98`; `conversionDriver.go:83`; `stdLibConverter.go:235,244,332,333`; `moduleConverter.go:161`; `testAliasShadowOperations.go:58,59`; `testConversion.go:372,373,1010,1011,4389`; `directiveOperations.go:357-408` (`knownGOOS`/`knownGOARCH`) |
 | P31 | `cat src/core/fmt/fmt.csproj` | 10 `<ProjectReference Include="$(go2csPath)core\…\….csproj" />`; `USERPROFILE`→`HOME` fallback present |
 | P32 | `cat src/core/golib/golib.csproj` | `$(USERPROFILE)\go2cs\` **without** the `HOME` fallback |
 | P33 | `grep -n 'Import Project="\$(MSBuild' "$SDK/Microsoft.Common.CurrentVersion.targets"` (SDK 9.0.316) | `:18`, `:27`, `:28`, `:6961`, … — `$(Property)\literal\path` with matching `Exists('$(Property)\…')` conditions |

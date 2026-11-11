@@ -92,7 +92,7 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanupʗp, S arg
 
     // Explicitly force ptr and cleanup to escape to the heap.
     Ꮡptr = abi.Escape(Ꮡptr); ptr = ref Ꮡptr.DerefOrNull();
-    cleanup = abi.Escape((cleanup).OrTypedNilFunc());
+    cleanup = abi.Escape(cleanup);
 
     // The pointer to the object must be valid.
     if (Ꮡptr == nil) {

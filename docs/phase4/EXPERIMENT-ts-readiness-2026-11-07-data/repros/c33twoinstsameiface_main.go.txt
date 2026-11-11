@@ -1,0 +1,17 @@
+package main
+
+import (
+	"fmt"
+
+	"repro/c33twoinstsameiface/lib"
+)
+
+// TS site: internal/module passes both *Expected[string] and *Expected[map[string]string] as a TypeValidatedField (C33).
+// Two instantiations of one generic type, converted to the same interface in one package.
+func present(f lib.TypeValidatedField) bool { return f.IsPresent() }
+
+func main() {
+	name := lib.Expected[string]{Value: "a", Valid: true}
+	count := lib.Expected[int]{Value: 2}
+	fmt.Println(present(&name), present(&count)) // Go: true false
+}

@@ -126,19 +126,36 @@ try {
     # The shapes the 1.26.10.3 census packed (362 packages): lib/ only; lib/ plus build/ (318); lib/ plus buildTransitive/
     # (go.lib); lib/ plus the four RID folders plus build/ (41, the L3 packages); analyzers/ only (go.gen). Each assembly
     # has its .pdb beside it, and the two Mac RIDs carry the same darwin bytes.
-    Write-Host 'the release''s own package shapes: a .pdb beside each assembly, build/ and buildTransitive/, all four RID folders'
+    Write-Host 'the release''s own package shapes: a .pdb beside each assembly, build/ and buildTransitive/, all five RID folders'
     $pdb = [System.Text.Encoding]::ASCII.GetBytes('not compared')
     $release = @{ 'lib/net10.0/Widget.dll' = 'widget-base.dll'; 'lib/net10.0/Widget.pdb' = $pdb; 'build/go.widget.props' = $pdb; 'buildTransitive/go.widget.targets' = $pdb }
-    foreach ($rid in 'win-x64', 'linux-x64', 'osx-x64', 'osx-arm64') { $release["runtimes/$rid/lib/net10.0/Widget.dll"] = 'widget-base.dll'; $release["runtimes/$rid/lib/net10.0/Widget.pdb"] = $pdb }
+    foreach ($rid in 'win-x64', 'linux-x64', 'osx-x64', 'osx-arm64', 'linux-arm64') { $release["runtimes/$rid/lib/net10.0/Widget.dll"] = 'widget-base.dll'; $release["runtimes/$rid/lib/net10.0/Widget.pdb"] = $pdb }
     $releaseBase = New-Package 'release-base' $release
     $darwinBreak = $release.Clone(); $darwinBreak['runtimes/osx-arm64/lib/net10.0/Widget.dll'] = 'widget-internal.dll'
     $releaseRed = New-Package 'release-red' $darwinBreak
     $r = Compare-Fixture $releaseBase $releaseBase $null
-    Check 'the release shape compares its five assemblies and nothing else (no .pdb, no build/)' (
-        $r.Failures.Count -eq 0 -and $r.Compared -eq 5 -and $r.Assets.Count -eq 5) "compared $($r.Compared) of $($r.Assets.Count); $($r.Failures -join '; ')"
+    Check 'the release shape compares its six assemblies and nothing else (no .pdb, no build/)' (
+        $r.Failures.Count -eq 0 -and $r.Compared -eq 6 -and $r.Assets.Count -eq 6) "compared $($r.Compared) of $($r.Assets.Count); $($r.Failures -join '; ')"
     $r = Compare-Fixture $releaseBase $releaseRed $null
     Check 'a break in one RID''s flavor alone reads red and names that RID' (
-        $r.Failures.Count -eq 1 -and $r.Failures[0].Contains('runtimes/osx-arm64/') -and $r.Failures[0].Contains('Fixture.Widget.Instance') -and $r.Compared -eq 5) "compared $($r.Compared); $($r.Failures -join '; ')"
+        $r.Failures.Count -eq 1 -and $r.Failures[0].Contains('runtimes/osx-arm64/') -and $r.Failures[0].Contains('Fixture.Widget.Instance') -and $r.Compared -eq 6) "compared $($r.Compared); $($r.Failures -join '; ')"
+
+    # THE NEW-RID RULE (S6 of DESIGN-linux-arm64-flavour.md): a RID the baseline does not ship has no prior surface to
+    # compare, so its first release admits it as new surface, compared with nothing. The baseline's own assets are all
+    # still compared, so a break on a shipped RID stays red beside it. A package newly RID-split (math gains runtimes/
+    # for every RID) is the same case: its lib/ is compared, its runtimes/ folders are new.
+    Write-Host 'a RID the baseline does not ship (the first linux-arm64) is new surface: admitted, not compared'
+    $fourRid = $release.Clone(); $fourRid.Remove('runtimes/linux-arm64/lib/net10.0/Widget.dll'); $fourRid.Remove('runtimes/linux-arm64/lib/net10.0/Widget.pdb')
+    $fourRidBase = New-Package 'release-four-rid' $fourRid
+    $r = Compare-Fixture $fourRidBase $releaseBase $null
+    Check 'the five-RID release against a four-RID baseline: green, the baseline''s five assets compared, linux-arm64 not' (
+        $r.Failures.Count -eq 0 -and $r.Compared -eq 5 -and $r.Assets.Count -eq 5 -and -not ($r.Assets -match 'linux-arm64')) "compared $($r.Compared) of $($r.Assets.Count); $($r.Failures -join '; ')"
+    $newRidBreak = $release.Clone(); $newRidBreak['runtimes/linux-arm64/lib/net10.0/Widget.dll'] = 'widget-internal.dll'
+    $r = Compare-Fixture $fourRidBase (New-Package 'release-new-rid-differs' $newRidBreak) $null
+    Check 'a new RID''s surface is not held to another RID''s: it is new, not a break' ($r.Failures.Count -eq 0 -and $r.Compared -eq 5) "compared $($r.Compared); $($r.Failures -join '; ')"
+    $flat = New-Package 'release-flat' @{ 'lib/net10.0/Widget.dll' = 'widget-base.dll'; 'lib/net10.0/Widget.pdb' = $pdb }
+    $r = Compare-Fixture $flat $releaseBase $null
+    Check 'a package newly RID-split compares its lib/ and admits its five RID folders' ($r.Failures.Count -eq 0 -and $r.Compared -eq 1 -and $r.Assets.Count -eq 1) "compared $($r.Compared) of $($r.Assets.Count); $($r.Failures -join '; ')"
 
     Write-Host 'a package with no lib/ or runtimes/ asset (go.gen, an analyzer) has no surface to compare, and does not stop the guard'
     $analyzer = New-Package 'analyzer' @{ 'analyzers/dotnet/cs/Widget.dll' = 'widget-base.dll' }
@@ -189,7 +206,9 @@ try {
     # But push-nuget.ps1 -VersionSuffix packs at version.props' build, which is the LAST-PUBLISHED one: the .3
     # rehearsal packed 1.26.10.2-ci.<run>, whose own baseline is .1, so it compared with a revision the release does not
     # follow and read .2's own changes as breaks (release-smoke 42533214613, 2026-11-08). The guard therefore takes the
-    # release version the run stands for, and push-nuget.ps1 passes the would-be version on a pack-only run.
+    # release version the run stands for, and push-nuget.ps1 passes the would-be version on a pack-only run. (A
+    # -VersionSuffix rehearsal now packs a prerelease of the would-be release, release-smoke 43000314806; an unsuffixed
+    # pack-only run still packs at the last-published build, so the arm stays.)
     Check 'a pack at the last-published build, by its own version, would compare with the revision before that' ((Get-GoApiCompatBaselineVersion $published '1.26.10.2-ci.1') -ceq '1.26.10.1') "$(Get-GoApiCompatBaselineVersion $published '1.26.10.2-ci.1')"
     $guardParams = (Get-Command Invoke-GoApiCompatGuard).Parameters
     Check 'the guard takes the release version a run stands for' ($guardParams.ContainsKey('ReleaseVersion')) 'Invoke-GoApiCompatGuard has no -ReleaseVersion'
@@ -330,6 +349,33 @@ try {
         Check 'a packed go.lib states its floor' ((Get-GoBreakFloorFromPackage $nupkg) -ceq '1.26.10.7') "$(Get-GoBreakFloorFromPackage $nupkg)"
     }
 
+    # The floor read from the consumer's side (Test-GoPackFloor): a pack is consumed with the go.lib it ships, whose
+    # targets fail the build for a go.* package below its floor, a prerelease counting as its release. Release-smoke
+    # 43000314806 packed 1.26.10.3-ci.<run> beside a floor of 1.26.10.4 and every consumer build failed GO2CS3002.
+    Write-Host 'a pack passes the floor of the go.lib it ships'
+    $packFloorExported = [bool](Get-Command Test-GoPackFloor -ErrorAction SilentlyContinue)
+    Check 'the module exports Test-GoPackFloor' $packFloorExported 'not exported'
+    if ($packFloorExported) {
+        function Pack([string]$Version, [string[]]$Ids) { @($Ids | ForEach-Object { [pscustomobject]@{ Id = $_; Version = $Version } }) }
+        function PackFloorFailures([object[]]$Packages, [string]$Floor) { @(Test-GoPackFloor -Packages $Packages -Floor $Floor) }
+        $rehearsal = Pack '1.26.10.4-ci.7' @('go.lib', 'go.cmp')
+        Check 'a rehearsal of the release the floor names passes it' ((PackFloorFailures $rehearsal '1.26.10.4').Count -eq 0) ((PackFloorFailures $rehearsal '1.26.10.4') -join '; ')
+        Check 'a release at its floor passes it' ((PackFloorFailures (Pack '1.26.10.4' @('go.lib')) '1.26.10.4').Count -eq 0) ((PackFloorFailures (Pack '1.26.10.4' @('go.lib')) '1.26.10.4') -join '; ')
+        Check 'a pack above the floor passes it' ((PackFloorFailures (Pack '1.26.10.5-ci.1' @('go.lib')) '1.26.10.4').Count -eq 0) ((PackFloorFailures (Pack '1.26.10.5-ci.1' @('go.lib')) '1.26.10.4') -join '; ')
+        $f = @(PackFloorFailures (Pack '1.26.10.3-ci.43000314806' @('go.lib', 'go.cmp')) '1.26.10.4')
+        Check 'a pack labelled with the last-published build reads red, naming its packages, its version, the release it reads as and the floor' (
+            $f.Count -eq 1 -and $f[0].Contains('go.cmp, go.lib') -and $f[0].Contains('packed at 1.26.10.3-ci.43000314806') -and
+            $f[0].Contains('reads as 1.26.10.3,') -and $f[0].Contains('<GoBreakFloor> 1.26.10.4') -and $f[0].Contains('GO2CS3002')) ($f -join '; ')
+        $f = @(PackFloorFailures (Pack '1.26.10.3' @('go.a', 'go.b', 'go.c', 'go.d', 'go.e')) '1.26.10.4')
+        Check 'past three packages the rest are counted' ($f.Count -eq 1 -and $f[0].Contains('go.a, go.b, go.c and 2 more are packed at 1.26.10.3')) ($f -join '; ')
+        $f = @(PackFloorFailures (@(Pack '1.26.10.4-ci.1' @('go.lib')) + @(Pack '1.26.10.3' @('go.bufio'))) '1.26.10.4')
+        Check 'only the versions below the floor are named' ($f.Count -eq 1 -and $f[0].StartsWith('pack floor: go.bufio is packed at 1.26.10.3,')) ($f -join '; ')
+        Check 'a package outside go.* is not read' ((PackFloorFailures (Pack '1.0.0' @('nugetgo.example')) '1.26.10.4').Count -eq 0) ((PackFloorFailures (Pack '1.0.0' @('nugetgo.example')) '1.26.10.4') -join '; ')
+        Check 'go.* is matched as go.lib.targets matches it, ignoring case' ((PackFloorFailures (Pack '1.26.10.3' @('Go.Cmp')) '1.26.10.4').Count -eq 1) 'Go.Cmp was not read'
+        Check 'a version that does not parse counts as below' ((PackFloorFailures (Pack 'unknown' @('go.lib')) '1.26.10.4').Count -eq 1) 'it passed'
+        Check 'a floor that does not parse reads red' ((PackFloorFailures $rehearsal '').Count -eq 1 -and (PackFloorFailures $rehearsal 'x').Count -eq 1) 'it passed'
+    }
+
     Write-Host 'the release path runs it'
     $push = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/push-nuget.ps1'))
     Check 'push-nuget.ps1 restores the pinned tool' ($push.Contains('Initialize-GoApiCompatTool')) 'no restore call'
@@ -342,6 +388,13 @@ try {
     Check 'push-nuget.ps1 checks the floor''s baseline-free cases before -VerifyOnly exits' ($shapeAt -ge 0 -and $verifyExitAt -ge 0 -and $shapeAt -lt $verifyExitAt) "shape check at $shapeAt, -VerifyOnly exit at $verifyExitAt"
     Check 'push-nuget.ps1 reads the floor from the packed go.lib' ($push -match '\$breakFloor = Get-GoBreakFloorFromPackage') 'the floor is not read from the packed go.lib'
     Check 'push-nuget.ps1 compares a pack-only run with what its release would follow' ($push -match '-ReleaseVersion \$guardReleaseVersion' -and $push -match '\$guardReleaseVersion = if \(\$dryRun\) \{ \$wouldBeVersion \} else \{ \$fullVersion \}') 'the guard is not given the would-be version'
+    $packFloorAt = $push.IndexOf('Test-GoPackFloor -Packages')
+    $floorReadAt = $push.IndexOf('$breakFloor = Get-GoBreakFloorFromPackage')
+    $pushGateAt = $push.IndexOf('# --- Push gate')
+    Check 'push-nuget.ps1 checks every packed package against the floor of the go.lib it ships, before the push gate' (
+        $floorReadAt -ge 0 -and $packFloorAt -gt $floorReadAt -and $packFloorAt -lt $pushGateAt -and $push -match 'Test-GoPackFloor -Packages .*-Floor \$breakFloor') "floor read at $floorReadAt, pack floor at $packFloorAt, push gate at $pushGateAt"
+    Check 'push-nuget.ps1 packs a -VersionSuffix rehearsal as a prerelease of the release it rehearses' (
+        $push -match '\$packVersion = if \(\$VersionSuffix\) \{ "\$wouldBeVersion-\$VersionSuffix" \} else \{ \$fullVersion \}') 'a rehearsal is not packed at the would-be version'
     $pack = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/tools/nugetgo/nugetgo-pack.ps1'))
     Check 'nugetgo-pack.ps1 compares a module with its previous revision' ($pack.Contains('Invoke-GoApiCompatGuard')) 'no guard call'
 }

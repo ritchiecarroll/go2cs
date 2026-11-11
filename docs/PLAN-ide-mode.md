@@ -323,7 +323,7 @@ A hybrid, (b) or (c) fed by a richer table that marks statement starts, changes 
 - nugetgo mapping, on by default, with the `-nuget-map*` flags and `go2cs.nuget.lock` (SHA-512 pins). Not yet exercised end to end: a mapped package that itself depends on another third-party package.
 - `Directory.Build.props/targets` with artifacts redirection.
 - The byte-identical skip for non-source outputs (`projectFileWriter.go:750-758`). The `.cs` gap is Phase 2's fix.
-- The `-tests` input-digest pattern (`testConversion.go:6409-6413`) and converter identity (`converterRevision`: exe hash or `vcs.revision`).
+- The `-tests` input-digest pattern (`testConversion.go:6453-6457`) and converter identity (`converterRevision`: exe hash or `vcs.revision`).
 - The hand-own probe on every output path (`conversionDriver.go:313-339`).
 
 **New:** everything on the MSBuild side, plus `go2cs -version`.
@@ -338,7 +338,7 @@ A hybrid, (b) or (c) fed by a richer table that marks statement starts, changes 
    - This is the phase's main design decision. E8 reduces the risk; the wrapper is the guaranteed fallback.
 2. **Go release lock.** Modules must resolve to the corpus release (`docs/README.md:205`, `276-278`). Many current modules and recent `golang.org/x/*` versions need a newer Go. Until the hops land, a build of a modern Go module fails at step 4 with a clear message rather than a mystery.
 3. **Brand risk.** C# compile errors in generated code read as the user's fault; §2 says how each IDE labels them. Worse is a difference at run time: a user stepping through "their Go" that behaves differently will conclude their Go is wrong.
-   - Causes include a converter gap, a throwing stub, or golib's stated residual: an ordinary channel or sync deadlock blocks instead of raising Go's fatal "all goroutines are asleep" error (`Goroutine.cs:850-853`).
+   - Causes include a converter gap, a throwing stub, or golib's stated residual: an ordinary channel or sync deadlock blocks instead of raising Go's fatal "all goroutines are asleep" error (`Goroutine.cs:857-860`).
    - Source-mapped debugging hides the C# layer, which makes this worse.
    - Mitigation: the compare target, the supported-surface link, a bug-report path.
 4. **macOS.** Developers there load the Windows flavour of platform-varying packages until the macOS run layer lands.
@@ -631,11 +631,11 @@ Elapsed time depends more on owner review bandwidth than on lane-weeks. With one
 - `docs/README.md:161-170` (install: clone, `cd src/go2cs`, `go install .`), `:177-213` (modes and options), `:205` (`-recurse=nuget` Go-release lock), `:206-210` (nugetgo mapping on by default, `go2cs.nuget.lock`, transitive case not yet exercised), `:276-290` (Go ≤ 1.24.13 pinning, `GOTOOLCHAIN=local`, silent toolchain download), `:308-362` (output layout, `.slnx`, F5; per-platform flavours and version skew at `:337-345`).
 - `src/go2cs/go.mod:1`: `module go2cs`. Repository tags `nuget-1.24.13.1` to `.3`.
 - `src/go2cs/main.go:255-280`: flag definitions, including `-nuget-map*`; no version flag.
-- `src/go2cs/projectFileWriter.go:16-18, 750-781`: `needToWriteFile`, and `writeOutputFile`, which always calls `os.Create`. Callers of `needToWriteFile`: `projectFileWriter.go:74/601/683`, `moduleConverter.go:779/971`, `solutionGenerator.go:93`, `platformEmit.go:826/894/918`, `embedDirective.go:838`, `readme.go:223`, `testConversion.go` (test-host files). None writes converted `.cs`.
+- `src/go2cs/projectFileWriter.go:16-18, 750-781`: `needToWriteFile`, and `writeOutputFile`, which always calls `os.Create`. Callers of `needToWriteFile`: `projectFileWriter.go:74/601/683`, `moduleConverter.go:783/971`, `solutionGenerator.go:93`, `platformEmit.go:826/894/918`, `embedDirective.go:838`, `readme.go:223`, `testConversion.go` (test-host files). None writes converted `.cs`.
 - `src/go2cs/conversionDriver.go:549`: the normal converted-source write path; `:313-339`: hand-own probe on every output path.
-- `src/go2cs/moduleConverter.go:210-222, 837-915`: per-project `.slnx`, `Directory.Build.props/targets`, `.artifacts` redirection with a 12-character SHA-256 token (`:854-862`), `GoStdLibVersion` floating on `.*` (`:896-905`), platform pin.
+- `src/go2cs/moduleConverter.go:214-226, 837-915`: per-project `.slnx`, `Directory.Build.props/targets`, `.artifacts` redirection with a 12-character SHA-256 token (`:854-862`), `GoStdLibVersion` floating on `.*` (`:896-905`), platform pin.
 - `src/go2cs/nugetMap.go`, `nugetLock.go`, `nugetSubstitution.go`: the nugetgo converter integration.
-- `src/go2cs/testConversion.go:6409-6413`: `-tests` input-digest manifest; `:6573-6600`: `converterRevision` (exe hash, else `vcs.revision`).
+- `src/go2cs/testConversion.go:6453-6457`: `-tests` input-digest manifest; `:6573-6600`: `converterRevision` (exe hash, else `vcs.revision`).
 - `src/go2cs/visitFuncDecl.go:1347-1356`: bodyless Go func → C# `partial` + companion.
 - `src/go2cs/csproj-template.xml:141-143`: every `.cs` in a package folder compiles.
 - `src/core/strings/package_info.cs:78` and `strings.cs:402`: an exported Go function is a public static method on `public static partial class strings_package`.

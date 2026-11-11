@@ -1,0 +1,3 @@
+module repro/c31genericmaparg
+
+go 1.26

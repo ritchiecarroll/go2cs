@@ -10,7 +10,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static go2cs.Common;
-using static go2cs.Symbols;
 
 namespace go2cs;
 
@@ -80,11 +79,15 @@ public class PartialStubGenerator : ISourceGenerator
             if (packageNamespace.Length == 0 || packageClassName.Length == 0)
                 continue;
 
-            // The -tests package-init hook is DESIGNED to erase when unimplemented (a classic
-            // partial method; the production assembly excludes the test-side implementation) —
-            // a stub here would throw from the package class's static ctor for every consumer
-            // of the production assembly. It is go2cs init machinery, never an asm/cgo function.
-            if (identifier == PackageTestInitHookMethod)
+            // A CLASSIC partial method is left to the compiler, as C# does: with no implementing
+            // part C# erases it together with every call to it, and whoever wrote one relies on
+            // exactly that ("only one platform implements this hook; elsewhere the call compiles
+            // to nothing"). A stub here would turn the erased call into a throw. The rule is by
+            // SHAPE, never by name — the -tests package-init hook was the first case and was once
+            // skipped by its name, and hand-written flavour hooks are the same shape. It is never
+            // an asm/cgo function: the converter always emits a bodiless Go function with an
+            // accessibility keyword, which C# requires an implementing part for (CS8795).
+            if (IsClassicPartial(methodSyntax, symbol))
                 continue;
 
             // A partial declaration whose body ANOTHER source generator is contractually obliged to
@@ -158,5 +161,18 @@ public class PartialStubGenerator : ISourceGenerator
 
             context.AddGeneratedSource(GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.{index++}.stub.g.cs"), generatedSource);
         }
+    }
+
+    // The one partial shape C# erases when nothing implements it: no accessibility keyword, a
+    // `void` return and no `out` parameter. Any other shape must have an implementing part.
+    // The Go census walk asks the same of the declaration's line (isClassicPartialDecl in
+    // declaredNotImplemented_test.go); the two predicates move together.
+    private static bool IsClassicPartial(MethodDeclarationSyntax methodSyntax, IMethodSymbol symbol)
+    {
+        return symbol.ReturnsVoid &&
+               symbol.Parameters.All(parameter => parameter.RefKind != RefKind.Out) &&
+               !methodSyntax.Modifiers.Any(modifier => modifier.Kind() is
+                   SyntaxKind.PublicKeyword or SyntaxKind.PrivateKeyword or
+                   SyntaxKind.ProtectedKeyword or SyntaxKind.InternalKeyword);
     }
 }

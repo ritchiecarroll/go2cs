@@ -1,0 +1,3 @@
+module repro/c42ctl-ifacesinglemethod
+
+go 1.26

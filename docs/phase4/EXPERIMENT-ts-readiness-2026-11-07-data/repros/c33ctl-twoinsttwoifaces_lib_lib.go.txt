@@ -1,0 +1,19 @@
+package lib
+
+// C33 green control: the same Expected[T], with a second interface for the second instantiation.
+type TypeValidatedField interface {
+	IsPresent() bool
+}
+
+type Presence interface {
+	IsPresent() bool
+	Kind() string
+}
+
+type Expected[T any] struct {
+	Value T
+	Valid bool
+}
+
+func (e *Expected[T]) IsPresent() bool { return e.Valid }
+func (e *Expected[T]) Kind() string    { return "expected" }

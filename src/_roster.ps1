@@ -384,6 +384,20 @@ function Get-ValidatedRosterRows {
             }
         }
 
+        # A MALFORMED per-RID note never reads as prose (G's second read of S7-a, 2026-11-11): a separator, a known key,
+        # a count and a parenthesis opening on a RID is a note attempt, so it must start a segment the pattern above
+        # read. "linux: 5 (linux-x64; linux-arm64 5)" or a misspelt `pending` is refused by name instead of leaving the
+        # row without its segment. Words after the count are still prose ("linux: 5 subtests skip", ruled above).
+        $readAt = @([regex]::Matches($line, $RosterOsPattern) | ForEach-Object { $_.Index })
+        $noteStart = [regex]::Escape($RosterSegmentSeparator) + '\s*(' + ($RosterOsKeys -join '|') + ')\s*:\s*\d+\s*(?:\+\s*\d+\s*)?\(\s*(?:' + $RosterNoteRidAlternation + ')'
+        foreach ($start in [regex]::Matches($line, $noteStart)) {
+            if ($readAt -notcontains $start.Index) {
+                $snippet = $line.Substring($start.Index, [Math]::Min(60, $line.Length - $start.Index))
+                throw ("Roster row '$rowPackage' carries a '$($start.Groups[1].Value):' per-RID note the parser cannot read: '$snippet'. " +
+                    'A segment reads "key: N[ + d]", with an optional per-RID note "(RID; RID: N[ + d])" or, on linux, "(linux-x64; linux-arm64: pending)".')
+            }
+        }
+
         # The n/a form, with the numeric form's refusals repeated verbatim: a key this loop admits
         # that the one above refuses would make `windows: n/a` a back door, and a row carrying both
         # `linux: N` and `linux: n/a` holds two answers with no rule for which wins.

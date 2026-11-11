@@ -51,7 +51,7 @@ try {
     Write-Go 'internal/cmdonly/cmdonly.go' "package cmdonly`n"
 
     $platforms = @(Get-NugetgoFlavorPlatforms)
-    Check 'the platforms read are the RID map''s goos/goarch pairs' (($platforms -join ',') -ceq 'windows/amd64,linux/amd64,darwin/amd64,darwin/arm64') "read [$($platforms -join ', ')]"
+    Check 'the platforms read are the RID map''s goos/goarch pairs' (($platforms -join ',') -ceq 'windows/amd64,linux/amd64,darwin/amd64,darwin/arm64,linux/arm64') "read [$($platforms -join ', ')]"
     $result = Get-NugetgoTestOnlyPackages -ModuleDir $mod -ModulePath 'example.com/tmod' -Platforms $platforms
     $excluded = @($result.Excluded | Sort-Object) -join ','
     $kept = @($result.Kept | Sort-Object) -join ','

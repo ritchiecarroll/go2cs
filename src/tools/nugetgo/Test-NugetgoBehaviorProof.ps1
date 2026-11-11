@@ -23,8 +23,8 @@ $windowsDll = [System.Text.Encoding]::ASCII.GetBytes('windows flavor bytes')
 $unixDll = [System.Text.Encoding]::ASCII.GetBytes('unix flavor bytes')
 $assembly = 'github.com.inconshreveable.mousetrap.dll'
 # What the package carries for each RID (runtimes/<rid>/lib/<tfm>/, or lib/ for every RID when neutral).
-$packed = @{ 'win-x64' = @{ $assembly = $windowsDll }; 'linux-x64' = @{ $assembly = $unixDll }; 'osx-x64' = @{ $assembly = $unixDll }; 'osx-arm64' = @{ $assembly = $unixDll } }
-$goosOf = @{ 'win-x64' = 'windows'; 'linux-x64' = 'linux'; 'osx-x64' = 'darwin'; 'osx-arm64' = 'darwin' }
+$packed = @{ 'win-x64' = @{ $assembly = $windowsDll }; 'linux-x64' = @{ $assembly = $unixDll }; 'osx-x64' = @{ $assembly = $unixDll }; 'osx-arm64' = @{ $assembly = $unixDll }; 'linux-arm64' = @{ $assembly = $unixDll } }
+$goosOf = @{ 'win-x64' = 'windows'; 'linux-x64' = 'linux'; 'osx-x64' = 'darwin'; 'osx-arm64' = 'darwin'; 'linux-arm64' = 'linux' }
 function Write-Row([string]$rid, [hashtable]$over = @{}) {
     $fields = [ordered]@{
         'module' = $module; 'version' = 'v1.1.0'; 'package' = 'nugetgo.github.com.inconshreveable.mousetrap 1.1.0-int.1'
@@ -41,7 +41,7 @@ function Write-Row([string]$rid, [hashtable]$over = @{}) {
 }
 function Rows([hashtable]$overByRid = @{}) {
     $rows = @{}
-    foreach ($rid in 'win-x64', 'linux-x64', 'osx-x64', 'osx-arm64') {
+    foreach ($rid in 'win-x64', 'linux-x64', 'osx-x64', 'osx-arm64', 'linux-arm64') {
         $o = if ($overByRid.ContainsKey($rid)) { $overByRid[$rid] } else { @{} }
         if ($o -eq 'missing') { continue }
         $rows[$rid] = Read-NugetgoBehaviorRow -Path (Write-Row $rid $o)
@@ -55,7 +55,7 @@ $row = Read-NugetgoBehaviorRow -Path (Write-Row 'win-x64')
 Check 'its fields' ($row -and $row.rid -ceq 'win-x64' -and $row.'outputs-equal' -ceq 'true' -and $row.assembly -like "$assembly sha256-*") "got $($row | Out-String)"
 
 Write-Host 'the four refusals, and the clean set'
-Check 'four rows, outputs equal, bytes bound, each on its own RID: accepted' ((Reasons (Rows)).Count -eq 0) "$((Reasons (Rows)) -join ' | ')"
+Check 'five rows, outputs equal, bytes bound, each on its own RID: accepted' ((Reasons (Rows)).Count -eq 0) "$((Reasons (Rows)) -join ' | ')"
 $why = Reasons (Rows @{ 'osx-arm64' = 'missing' })
 Check 'a missing row for a shipped RID is refused' (@($why | Where-Object { $_ -like '*osx-arm64*' }).Count -ge 1) "$($why -join ' | ')"
 $why = Reasons (Rows @{ 'linux-x64' = @{ 'dotnet-output' = 'sha256-bbbb'; 'outputs-equal' = 'false' } })
@@ -78,11 +78,46 @@ Check 'a row whose recorded GOOS is not its file''s GOOS is refused (COORD: host
 $why = Reasons (Rows @{ 'win-x64' = @{ 'goos' = $null } })
 Check 'a row that records no GOOS is refused' (@($why | Where-Object { $_ -like '*win-x64*goos*' }).Count -ge 1) "$($why -join ' | ')"
 
+Write-Host 'a RID the arm leg cannot run yet is named UNMEASURED on the package (COORD ruling, S6 Q1)'
+$armWhy = 'the os-matrix nugetgo-behavior stage runs no arm64 leg until seat S5c'
+function Unmeasured([string]$rid, [string]$version = 'v1.1.0', [string]$reason = $armWhy) {
+    $path = Join-Path $scratch "$rid.md"
+    [System.IO.File]::WriteAllText($path, "# nugetgo behavioral proof row`nmodule: $module`nversion: $version`npackage: nugetgo.github.com.inconshreveable.mousetrap 1.1.0-int.1`nrid: $rid`nunmeasured: $reason`ndate: 2026-11-10`n")
+    Read-NugetgoBehaviorRow -Path $path
+}
+function RowsWith([string]$rid, $row) { $r = Rows; $r[$rid] = $row; $r }
+$armRows = RowsWith 'linux-arm64' (Unmeasured 'linux-arm64')
+$why = Reasons $armRows
+Check 'four measured rows and linux-arm64 named UNMEASURED with its reason: accepted' ($why.Count -eq 0) "$($why -join ' | ')"
+$why = Reasons (RowsWith 'win-x64' (Unmeasured 'win-x64'))
+Check 'an UNMEASURED row for a RID whose leg runs today is refused, naming it' (@($why | Where-Object { $_ -like '*win-x64*UNMEASURED*' }).Count -ge 1) "$($why -join ' | ')"
+$why = Reasons (RowsWith 'linux-arm64' (Unmeasured 'linux-arm64' 'v1.0.0'))
+Check 'an UNMEASURED row for another module version is refused' (@($why | Where-Object { $_ -like '*linux-arm64*v1.0.0*' }).Count -ge 1) "$($why -join ' | ')"
+$why = Reasons (RowsWith 'linux-arm64' (Unmeasured 'linux-arm64' 'v1.1.0' ' '))
+Check 'an UNMEASURED row with no reason is refused' (@($why | Where-Object { $_ -like '*linux-arm64*' }).Count -ge 1) "$($why -join ' | ')"
+$mixed = Unmeasured 'linux-arm64'; $mixed | Add-Member -NotePropertyName 'outputs-equal' -NotePropertyValue 'true'
+$why = Reasons (RowsWith 'linux-arm64' $mixed)
+Check 'an UNMEASURED row that also records a run is refused (a row is measured or not)' (@($why | Where-Object { $_ -like '*linux-arm64*outputs-equal*' }).Count -ge 1) "$($why -join ' | ')"
+$hasCount = [bool](Get-Command Get-NugetgoMeasuredRowCount -ErrorAction SilentlyContinue)
+Check 'the measured count leaves the UNMEASURED row out' ($hasCount -and (Get-NugetgoMeasuredRowCount -Rows $armRows) -eq 4) "$(if ($hasCount) { "got: $(Get-NugetgoMeasuredRowCount -Rows $armRows)" } else { 'no Get-NugetgoMeasuredRowCount' })"
+$hasText = [bool](Get-Command New-NugetgoUnmeasuredRowText -ErrorAction SilentlyContinue)
+$armText = if ($hasText) { New-NugetgoUnmeasuredRowText -ModulePath $module -GoVersion 'v1.1.0' -Package 'nugetgo.github.com.inconshreveable.mousetrap 1.1.0-int.1' -Rid 'linux-arm64' -Reason $armWhy -Date '2026-11-10' } else { $null }
+# The expected text is spelled out: the fixture file at the row's path has been rewritten by the refusal arms since.
+$armExpected = "# nugetgo behavioral proof row`nmodule: $module`nversion: v1.1.0`npackage: nugetgo.github.com.inconshreveable.mousetrap 1.1.0-int.1`nrid: linux-arm64`nunmeasured: $armWhy`ndate: 2026-11-10`n"
+Check 'New-NugetgoUnmeasuredRowText writes exactly that row' ($hasText -and $armText -ceq $armExpected) "$(if ($hasText) { "got: $armText" } else { 'no New-NugetgoUnmeasuredRowText' })"
+$armPage = New-NugetgoBehaviorPage -ModulePath $module -GoVersion 'v1.1.0' -Rows $armRows
+Check 'the page names the RID UNMEASURED, with the reason, in its table row' (@(("$armPage" -split "`n") | Where-Object { $_ -clike "| linux-arm64 | UNMEASURED: $armWhy |*" }).Count -eq 1) "got:`n$armPage"
+Check 'the page still has one table row per shipped RID' (@(("$armPage" -split "`n") | Where-Object { $_ -match '^\| (win-x64|linux-x64|osx-x64|osx-arm64|linux-arm64) \|' }).Count -eq 5) "got:`n$armPage"
+Check 'the page says a RID marked UNMEASURED ships without a run' ("$armPage" -like '*UNMEASURED ships without a run*') "got:`n$armPage"
+Check 'a page with every row measured says nothing about UNMEASURED' ("$(New-NugetgoBehaviorPage -ModulePath $module -GoVersion 'v1.1.0' -Rows (Rows))" -notlike '*UNMEASURED*') 'it does'
+$armSection = New-NugetgoSampleBehaviorSection -ModulePath $module -GoVersion 'v1.1.0' -Rows $armRows
+Check 'the sample section counts measured RIDs only' ("$armSection" -match '(?m)^## Sample behavior on 4 RIDs$') "got: $(("$armSection" -split "`n")[0])"
+
 Write-Host 'the page says plainly that upstream has no Go tests'
 $page = New-NugetgoBehaviorPage -ModulePath $module -GoVersion 'v1.1.0' -Rows (Rows)
 Check 'its title' ("$page" -match '(?m)^# `github\.com/inconshreveable/mousetrap` -- behavioral proof \(upstream has no Go tests\)$') "got: $(("$page" -split "`n")[0])"
 Check 'it says it is not a test comparison' ("$page" -like '*not a test comparison*') 'missing'
-Check 'one table row per RID, with the assembly sha and the verdict' (@(("$page" -split "`n") | Where-Object { $_ -match '^\| (win-x64|linux-x64|osx-x64|osx-arm64) \|' }).Count -eq 4) "got:`n$page"
+Check 'one table row per RID, with the assembly sha and the verdict' (@(("$page" -split "`n") | Where-Object { $_ -match '^\| (win-x64|linux-x64|osx-x64|osx-arm64|linux-arm64) \|' }).Count -eq 5) "got:`n$page"
 Check 'each row names its host' ("$page" -like '*image 20261005.1*') 'no host in the table'
 
 Write-Host 'a module with Go tests takes the test proof, never this one'
@@ -106,10 +141,10 @@ function New-Nupkg([string]$path, [hashtable]$files) {
 $neutral = New-Nupkg (Join-Path $scratch 'neutral.nupkg') @{ "lib/net10.0/$assembly" = $unixDll; 'README.md' = $unixDll }
 $byRid = Get-NugetgoPackedRidAssemblies -Package $neutral -TargetFramework net10.0
 Check 'a neutral package carries lib/ for every shipped RID' (
-    @('win-x64', 'linux-x64', 'osx-x64', 'osx-arm64' | Where-Object { $byRid -and $byRid[$_] -and [System.Linq.Enumerable]::SequenceEqual([byte[]]$byRid[$_][$assembly], [byte[]]$unixDll) }).Count -eq 4) "got: $($byRid | Out-String)"
+    @('win-x64', 'linux-x64', 'osx-x64', 'osx-arm64', 'linux-arm64' | Where-Object { $byRid -and $byRid[$_] -and [System.Linq.Enumerable]::SequenceEqual([byte[]]$byRid[$_][$assembly], [byte[]]$unixDll) }).Count -eq 5) "got: $($byRid | Out-String)"
 $specific = New-Nupkg (Join-Path $scratch 'specific.nupkg') @{
     "lib/net10.0/$assembly" = $windowsDll; "runtimes/win-x64/lib/net10.0/$assembly" = $windowsDll; "runtimes/linux-x64/lib/net10.0/$assembly" = $unixDll
-    "runtimes/osx-x64/lib/net10.0/$assembly" = $unixDll; "runtimes/osx-arm64/lib/net10.0/$assembly" = $unixDll }
+    "runtimes/osx-x64/lib/net10.0/$assembly" = $unixDll; "runtimes/osx-arm64/lib/net10.0/$assembly" = $unixDll; "runtimes/linux-arm64/lib/net10.0/$assembly" = $unixDll }
 $byRid = Get-NugetgoPackedRidAssemblies -Package $specific -TargetFramework net10.0
 Check 'a RID-specific package carries runtimes/<rid>/ for each RID, never lib/' (
     $byRid -and $byRid['linux-x64'] -and $byRid['win-x64'] -and [System.Linq.Enumerable]::SequenceEqual([byte[]]$byRid['linux-x64'][$assembly], [byte[]]$unixDll) -and
@@ -137,9 +172,9 @@ $alone = Mode @{ ValidationDir = 'v'; ModuleHasGoTests = $true; Release = $true 
 Check '-ValidationDir alone is exactly today''s pack: no sample rows owed' ($alone.Mode -ceq 'validated' -and -not $alone.SampleRows -and -not $alone.Reason) "got: $($alone | Out-String)"
 Check 'rows alone, for a module with Go tests, are refused and name -ValidationDir' ((Mode @{ BehaviorProofDir = 'b'; ModuleHasGoTests = $true; Release = $true }).Reason -like '*has Go tests*-ValidationDir*') 'not refused by name'
 $section = New-NugetgoSampleBehaviorSection -ModulePath $module -GoVersion 'v1.1.0' -Rows (Rows)
-Check 'the sample section is a level-2 heading under the test comparison' ("$section" -match '(?m)^## Sample behavior on 4 RIDs$') "got: $(("$section" -split "`n")[0])"
+Check 'the sample section is a level-2 heading under the test comparison' ("$section" -match '(?m)^## Sample behavior on 5 RIDs$') "got: $(("$section" -split "`n")[0])"
 Check 'it says the rows are in addition to the test comparison, and never that there are no tests' ("$section" -like '*in addition to the test comparison*' -and "$section" -notlike '*not a test comparison*' -and "$section" -notlike '*no Go tests*') "got:`n$section"
-Check 'one table row per RID' (@(("$section" -split "`n") | Where-Object { $_ -match '^\| (win-x64|linux-x64|osx-x64|osx-arm64) \|' }).Count -eq 4) "got:`n$section"
+Check 'one table row per RID' (@(("$section" -split "`n") | Where-Object { $_ -match '^\| (win-x64|linux-x64|osx-x64|osx-arm64|linux-arm64) \|' }).Count -eq 5) "got:`n$section"
 
 Write-Host 'a module of several packages: the row lists every assembly the package carries for its RID'
 $second = 'github.com.example.mod.sub.dll'
@@ -148,7 +183,7 @@ $packedTwo = @{}
 foreach ($rid in $packed.Keys) { $packedTwo[$rid] = @{ $assembly = $packed[$rid][$assembly]; $second = $secondBytes } }
 function RowsTwo([hashtable]$drop = @{}) {
     $o = @{}
-    foreach ($rid in 'win-x64', 'linux-x64', 'osx-x64', 'osx-arm64') {
+    foreach ($rid in 'win-x64', 'linux-x64', 'osx-x64', 'osx-arm64', 'linux-arm64') {
         $list = @("$assembly $(Sha $packed[$rid][$assembly])")
         if (-not $drop.ContainsKey($rid)) { $list += "$second $(Sha $secondBytes)" }
         $o[$rid] = @{ 'assembly' = ($list | Sort-Object) -join '; ' }

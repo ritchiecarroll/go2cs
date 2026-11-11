@@ -196,7 +196,9 @@ function Invoke-GoApiCompatAsset([string]$RepoRoot, [string]$Left, [string]$Righ
       Assets     the baseline's assets
       Failures   one line per reason the package is red, each naming the package and its asset
     Every baseline asset must exist in the current package (a missing one is a break the tool cannot see). An asset only
-    the current package has is new surface, which is compatible, and is not compared. A package with no lib/ or
+    the current package has is new surface, which is compatible, and is not compared. THE NEW-RID RULE: a RID the
+    baseline does not ship (the first linux-arm64, S6) is admitted with no prior baseline, and so is every runtimes/
+    folder of a package newly RID-split; each is compared from the next release on, against this one. A package with no lib/ or
     runtimes/ asset (go.gen, an analyzer) compares nothing and reads green with Compared 0 of 0.
 #>
 function Test-GoApiCompatPackage {
@@ -311,10 +313,13 @@ function Save-GoApiCompatBaseline([System.Net.Http.HttpClient]$Client, [string]$
     A guard that was asked about at least one package with a baseline and compared no asset is itself a failure.
 
     $ReleaseVersion is the version the run stands for, when that is not the version it packed: the baseline is then
-    the revision before the release, not before the pack. push-nuget.ps1 -VersionSuffix packs at version.props' build,
+    the revision before the release, not before the pack. push-nuget.ps1 -VersionSuffix packed at version.props' build,
     which is the LAST-PUBLISHED one, so the 1.26.10.3 rehearsal packed 1.26.10.2-ci.<run>. By its own version that
     compared with .1 and read .2's own changes as breaks the release could never meet (release-smoke 42533214613,
-    2026-11-08). Without it, each package's own version decides, as nugetgo-pack.ps1's real revisions want.
+    2026-11-08). A rehearsal now packs a prerelease of the would-be release (the same root failed the consumer's break
+    floor in release-smoke 43000314806), so its own version gives the same baseline; an unsuffixed pack-only run still
+    packs at the last-published build, and push-nuget passes the would-be version for both. Without it, each package's
+    own version decides, as nugetgo-pack.ps1's real revisions want.
 #>
 function Invoke-GoApiCompatGuard {
     param(
@@ -454,6 +459,46 @@ function Test-GoBreakFloorShape {
     }
     @()
 }
+
+<#
+.SYNOPSIS
+    The break floor read from the consumer's side: the reasons a pack's go.* packages fail the floor of the go.lib it ships.
+.DESCRIPTION
+    A pack is consumed with its own go.lib, whose targets fail the build, as GO2CS3002, for each go.* package whose
+    version is below <GoBreakFloor>, a prerelease counting as its release. So a pack with any go.* package below that
+    floor cannot be consumed at all. Release-smoke 43000314806 packed 1.26.10.3-ci.<run> beside a floor of 1.26.10.4:
+    push-nuget's own checks were green, because they judge the release the run stands for, and every consumer build on
+    every RID failed. A -VersionSuffix pack is therefore a prerelease of the release it rehearses (push-nuget.ps1).
+    This applies go.lib.targets' rule as written: the version less everything from its first '-', compared with
+    MSBuild's VersionLessThan; a version that does not parse counts as below. -Packages are identities with Id and
+    Version; IDs that do not start with go. are not read, as go.lib.targets does not read them as go.* packages.
+    Returns one failure per version below the floor, naming its packages; none when no package is below it.
+#>
+function Test-GoPackFloor {
+    param(
+        [Parameter(Mandatory)][AllowEmptyCollection()][object[]]$Packages,
+        [AllowEmptyString()][string]$Floor
+    )
+
+    $floorParsed = $null
+    if (-not $Floor -or -not [version]::TryParse($Floor, [ref]$floorParsed)) {
+        return @("pack floor: the packed go.lib states no <GoBreakFloor> that parses (read '$Floor'), so no consumer build of this pack can be judged")
+    }
+    $failures = [System.Collections.Generic.List[string]]::new()
+    foreach ($group in @($Packages | Where-Object { $_.Id -like 'go.*' } | Group-Object -Property Version | Sort-Object -Property Name)) {
+        $release = ($group.Name -split '-', 2)[0]
+        $parsed = $null
+        if ([version]::TryParse($release, [ref]$parsed) -and $parsed -ge $floorParsed) { continue }
+        $ids = @($group.Group | ForEach-Object { $_.Id } | Sort-Object)
+        $named = ($ids | Select-Object -First 3) -join ', '
+        if ($ids.Count -gt 3) { $named += " and $($ids.Count - 3) more" }
+        $failures.Add("pack floor: $named $(if ($ids.Count -eq 1) { 'is' } else { 'are' }) packed at $($group.Name), which go.lib.targets reads as $release, below the <GoBreakFloor> $Floor of the go.lib this pack ships: every build that consumes the pack fails with GO2CS3002 (a prerelease pack is versioned as the release it rehearses)")
+    }
+    $failures.ToArray()
+}
+
+# A second export line, so this function's export sits beside it rather than in the list at the end. The two accumulate.
+Export-ModuleMember -Function Test-GoPackFloor
 
 # Whether a converted module can bind a package: Go's import rule. A path with an `internal` element, or under
 # `vendor/`, is importable only by the standard library. golib (go.lib) is reachable.
