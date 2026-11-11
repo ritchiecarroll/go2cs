@@ -443,3 +443,105 @@ Run 42979136871 at `50dd9a065c`, `golib-tests`, the arm leg only:
   and the calibration still read.
 
 The linux-x64 GolibTests leg at the same SHA is green (run 42962618559).
+
+## 10. A-0, read (dated block, 2026-11-11)
+
+Two hosted runs at master `50dd9a065c`, each on both linux legs, each with `headSha` read equal to the tip:
+the proof and calibration run 42982194260 (green), and its red arm 42982976703 (`container/heap;dumpproof=red`,
+red by design). Sections 0 to 9 stand as written; this block moves one gate and scores §3's and §4.3's
+predictions for A-0. **No other shard has been dispatched, and no row is banked by either run.**
+
+### 10.1 The gates
+
+| Gate | State | Read |
+|---|---|---|
+| A-0's proof green and read | **CLEARED** | §10.2, both legs; the proof was made to fail once on the same images, §10.3. |
+| Wave 1's arm64 banking | **HELD** (ruled 2026-11-11) | Unchanged. Until batch 285 lands with the netpoll guard lift (§9.3). |
+
+Two conditions on the first combined bank stand beside the hold: the S7-a fixups land first (§9.1, E4), and the
+"not triaged" ledger rows of the nine floor-set packages are triaged before wave 1 banks.
+
+### 10.2 The proof and the row (run 42982194260)
+
+| Reading | linux-x64 | linux-arm64 |
+|---|---|---|
+| Runner image | `ubuntu-26.04` | `ubuntu-24.04-arm` |
+| `ulimit -c`, soft / hard | unlimited / unlimited | 0 / unlimited |
+| Stock `core_pattern` | a pipe to `systemd-coredump` | a pipe to `systemd-coredump` |
+| apport / systemd-coredump socket | inactive / active | inactive / active |
+| Free bytes on `/` | 92,443,172,864 | 112,946,515,968 |
+| Dump files before the proof | 0 | 0 |
+| Control: SIGSEGV of a one-thread process | 1 new file (2,039,808 bytes) | 1 new file (421,888 bytes) |
+| Control: a 128 MiB write | seen, 134,217,728 bytes | seen, 134,217,728 bytes |
+| Prove, SIGQUIT, 2,000 threads | status 131, 0 new files | status 131, 0 new files |
+| Prove, FailFast, 2,000 threads | status 134, 0 new files | status 134, 0 new files |
+| Largest free-space use in the prove step | 28,672 bytes | 32,768 bytes |
+| Recheck after the sweep | 0 new files, PASS | 0 new files, PASS |
+| `container/heap` | PASS, 7 `(linux)` | PASS, 7 `(linux (linux-arm64 pending))` |
+| Tracked-rewrite diff after the row | 0 bytes | 0 bytes |
+
+The scores:
+
+- **PD1** (the soft limit already reads 0): **HIT on arm64, MISS on x64**, where it reads unlimited.
+- **PD2** (the stock pattern is a pipe to apport): **MISS as worded, on both legs.** The pipe is to
+  `systemd-coredump` and apport is inactive. The part the step depends on holds: the handler is piped, so a limit
+  of 0 does not stop it, and the step replaces the pattern.
+- **PD3** (the control leaves exactly one file): **HIT** on both legs.
+- **PD4** (both crashes leave 0 files and stay under 64 MiB): **HIT** on both legs.
+- **P0** (`container/heap` reads its x64 reading): **HIT.** 7 verdicts on both legs, and the arm leg's roster
+  note is the derived form of §2.4. It is the first converted test host started on the flavour.
+- **§9.3's prediction** (the row's host opens no file, so the guard does not end it): **HIT.**
+
+One difference from §3's text: step 4 names SIGSEGV as the outside crash. The step at master sends SIGQUIT, for
+the reason its own header records, and the status read is 131 on both legs.
+
+A green A-0 clears only the stubs its start path reaches (§4.3). It says nothing about a row that opens a file.
+
+### 10.3 The proof made to fail (run 42982976703)
+
+Four predictions were written to a file before the dispatch. All four **HIT**, on both legs:
+
+- **R1.** Record and control read as in §10.2, and the apply step prints `RED ARM` and applies nothing.
+- **R2.** The prove step fails by name at the first crash: "the sigquit crash of a 2000-thread .NET probe left 1
+  dump file(s); the sweep does not run".
+- **R3.** The sweep never starts and the recheck does not run: 0 verdict lines and 0 recheck lines in either log.
+  The same two greps read 2 and 2 in each log of the green run, which is their control.
+- **R4.** Both jobs and the run conclude `failure`.
+
+| The dump the red arm left | linux-x64 | linux-arm64 |
+|---|---|---|
+| Apparent size | 33,712,996,352 bytes | 33,715,597,312 bytes |
+| On disk | 47,390,720 bytes | 66,560,000 bytes |
+
+Three readings follow from that table:
+
+- **The file census is the detector that fired.** The step fails at the file count, before it evaluates free
+  space. By the on-disk sizes above, the 64 MiB bar (67,108,864 bytes) would not have failed either leg on its
+  own (inferred from the sizes; the bar was not evaluated). The bar still covers a dump that is not sparse and a
+  run that leaves several. A tighter bar is possible, since the prove step used under 33 KiB when suppressed; it
+  is a workflow change and is not made here.
+- **The apparent size is the lane-box number.** 33.7 GB per crash is the order of §3's 211 GB over six aborts. On
+  the runner's filesystem the file is sparse. A filesystem that stores it whole pays the apparent size (an
+  inference from the two sizes, not a measurement of the lane box).
+- **The red arm's scope.** It runs with the control's settings (a file pattern, the limit lifted), not with the
+  stock handler. What the stock `systemd-coredump` pipe does with a 2,000-thread crash is not measured, and S7
+  does not depend on it: every job replaces the pattern.
+
+### 10.4 The calibration
+
+| Seconds | linux-x64 | linux-arm64 | arm / x64 |
+|---|---|---|---|
+| Job wall | 228 | 274 | 1.20 |
+| Before the sweep step (setup and the proof) | 39 | 42 | |
+| The converter build (by subtraction) | 15 | 22 | |
+| The row's wall, as the runner prints it | 168 | 203 | 1.21 |
+| After the row | 6 | 7 | |
+
+- **The ratio is 1.21, under 1.5, so §2.2's re-cut rule does not fire** and no ESTIMATE is recomputed.
+- **The table is a loose upper bound.** A-0's own ESTIMATE was 35 minutes and the arm job took 4.6. The fixed
+  term is 30 minutes per shard, 450 of the table's 1,298 minutes; here everything but the row took 71 seconds.
+  The row's wall includes the first row's corpus build for `container/heap`'s closure, which is small. A larger
+  closure builds more, and A-0 does not measure that. The first shard of wave 1 is the first reading of it.
+- **The two legs are not one image.** x64 runs `ubuntu-26.04` and arm64 runs `ubuntu-24.04-arm`, so the ratio
+  compares image and arch together. One row on one run is one sample; 1.5 stays the planning factor.
+- **Disk.** Both legs start with more than 92 GB free, against the sweep's 25 GB floor.
