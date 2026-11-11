@@ -91,6 +91,8 @@
     <Compile Remove="RuntimeBootstrapConstantsTests.cs" />
     <!-- GoBadOpenProbe/GoPipe2RoundTripProbe/GoMincoreErrorSignProbe (runtime/linux/stubs2_impl.cs). -->
     <Compile Remove="RuntimeFdSyscallTests.cs" />
+    <!-- GoSchedGetaffinityProbe/GoGetCPUCountProbe/GoOsyieldProbe/GoExitProbe (runtime/linux/stubs2_impl.cs). -->
+    <Compile Remove="RuntimeLinuxSchedExitTests.cs" />
     <!-- GoAllThreadsSyscallProbe (runtime/linux/os_linux_impl.cs). -->
     <Compile Remove="LinuxAllThreadsSyscallRefusalTests.cs" />
 
