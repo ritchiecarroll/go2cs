@@ -1,0 +1,3 @@
+module repro/c30ctl-constswitch
+
+go 1.26

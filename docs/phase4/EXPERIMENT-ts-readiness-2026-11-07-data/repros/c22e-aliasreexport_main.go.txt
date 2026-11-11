@@ -1,0 +1,17 @@
+package main
+
+import "repro/c22e-aliasreexport/wrap"
+
+// TS readiness C22, the route its fix leaves: an ALIAS in another package (wrap.Encoder = lib.Encoder) whose target
+// is Δ-renamed in ITS package (a method named Encoder exists in lib), used by a package that does NOT import lib --
+// as tsc's collections uses *json.Encoder, with internal/json's Encoder = jsontext.Encoder, and never imports jsontext.
+type OrderedMap[K comparable, V any] struct{ m map[K]V }
+
+func (o *OrderedMap[K, V]) MarshalTo(enc *wrap.Encoder) int { return len(o.m) }
+
+func plain(enc *wrap.Encoder) int { return 1 }
+
+func main() {
+	o := &OrderedMap[string, int]{m: map[string]int{"a": 1, "b": 2}}
+	println(o.MarshalTo(wrap.NewEncoder(3)), plain(wrap.NewEncoder(4)), wrap.Kind('{') == wrap.Kind(123)) // Go: 2 1 true
+}

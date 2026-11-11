@@ -1,0 +1,112 @@
+// mcexpr: finds method VALUES (x.M) and method EXPRESSIONS (T.M, (*T).M) that are used as values (not called) and whose
+// method is PROMOTED through embedding (the selection's index path is longer than one). Standard library only: each
+// non-std package is parsed and type-checked from source, importing its dependencies from the gc export data that
+// `go list -export -deps -json` names.
+//
+//	cd <module> && go list -export -deps -json <pkgs> | mcexpr
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"go/ast"
+	"go/importer"
+	"go/parser"
+	"go/token"
+	"go/types"
+	"io"
+	"os"
+	"path/filepath"
+	"strings"
+)
+
+type pkg struct {
+	ImportPath string
+	Dir        string
+	GoFiles    []string
+	Export     string
+	Standard   bool
+}
+
+func main() {
+	exports := map[string]string{}
+	var mine []pkg
+	dec := json.NewDecoder(os.Stdin)
+	for {
+		var p pkg
+		if err := dec.Decode(&p); err == io.EOF {
+			break
+		} else if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		exports[p.ImportPath] = p.Export
+		if !p.Standard {
+			mine = append(mine, p)
+		}
+	}
+	fset := token.NewFileSet()
+	imp := importer.ForCompiler(fset, "gc", func(path string) (io.ReadCloser, error) {
+		f, ok := exports[path]
+		if !ok || f == "" {
+			return nil, fmt.Errorf("no export data for %s", path)
+		}
+		return os.Open(f)
+	})
+	total := map[string]int{}
+	for _, p := range mine {
+		var files []*ast.File
+		for _, g := range p.GoFiles {
+			f, err := parser.ParseFile(fset, filepath.Join(p.Dir, g), nil, parser.SkipObjectResolution)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
+			files = append(files, f)
+		}
+		info := &types.Info{Selections: map[*ast.SelectorExpr]*types.Selection{}}
+		conf := types.Config{Importer: imp}
+		if _, err := conf.Check(p.ImportPath, fset, files, info); err != nil {
+			fmt.Fprintln(os.Stderr, p.ImportPath, "type-check:", err)
+			os.Exit(1)
+		}
+		called := map[*ast.SelectorExpr]bool{}
+		for _, f := range files {
+			ast.Inspect(f, func(n ast.Node) bool {
+				if c, ok := n.(*ast.CallExpr); ok {
+					fun := c.Fun
+					for {
+						if pe, ok := fun.(*ast.ParenExpr); ok {
+							fun = pe.X
+							continue
+						}
+						break
+					}
+					if s, ok := fun.(*ast.SelectorExpr); ok {
+						called[s] = true
+					}
+				}
+				return true
+			})
+		}
+		for s, sel := range info.Selections {
+			if sel.Kind() == types.FieldVal || called[s] {
+				continue
+			}
+			kind := map[types.SelectionKind]string{types.MethodVal: "method value", types.MethodExpr: "method expression"}[sel.Kind()]
+			promoted := len(sel.Index()) > 1
+			key := kind + map[bool]string{true: ", PROMOTED", false: ", declared"}[promoted]
+			total[key]++
+			if promoted {
+				pos := fset.Position(s.Pos())
+				rel := pos.Filename
+				if i := strings.Index(rel, "tsc"+string(filepath.Separator)); i >= 0 {
+					rel = rel[i:]
+				}
+				fmt.Printf("%s:%d  %s  %s  (recv %s, embedding depth %d)\n", filepath.ToSlash(rel), pos.Line, kind,
+					types.ExprString(s), sel.Recv(), len(sel.Index())-1)
+			}
+		}
+	}
+	fmt.Printf("packages %d; uncalled method selections: %v\n", len(mine), total)
+}

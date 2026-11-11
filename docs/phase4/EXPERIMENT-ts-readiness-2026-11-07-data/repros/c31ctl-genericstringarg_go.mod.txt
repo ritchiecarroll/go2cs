@@ -1,0 +1,3 @@
+module repro/c31ctl-genericstringarg
+
+go 1.26

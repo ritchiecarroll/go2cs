@@ -1,0 +1,11 @@
+package wrap
+
+import "repro/c22e-aliasreexport/lib"
+
+// tsc internal/json re-exports go-json-experiment's jsontext types by alias: Encoder = jsontext.Encoder.
+type (
+	Encoder = lib.Encoder
+	Kind    = lib.Kind
+)
+
+func NewEncoder(n int) *Encoder { return lib.NewEncoder(n) }

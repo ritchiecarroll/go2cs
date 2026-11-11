@@ -1,0 +1,14 @@
+package main
+
+import (
+	"fmt"
+
+	"repro/c34promotedbuiltinreturn/lib"
+)
+
+// TS site: internal/module calls exports.AsString() on a packagejson.ExportsOrImports, a method promoted from its
+// embedded JSONValue, from ANOTHER package (C34).
+func main() {
+	e := lib.ExportsOrImports{JSONValue: lib.JSONValue{Value: "./index.js"}}
+	fmt.Println(e.AsString()) // Go: ./index.js
+}

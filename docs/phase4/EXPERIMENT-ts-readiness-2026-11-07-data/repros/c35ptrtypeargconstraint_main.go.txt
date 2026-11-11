@@ -1,0 +1,31 @@
+package main
+
+import "fmt"
+
+// TS site: internal/tsoptions convertMapToOptions[O optionParser](..., result O) O, called with
+// &compilerOptionsParser{...}: a POINTER type argument whose pointer-receiver methods satisfy an unexported interface
+// constraint, and the caller reads a field of the returned *T (C35).
+type optionParser interface {
+	ParseOption(key string, value any) []string
+}
+
+type compilerOptionsParser struct {
+	Options map[string]any
+}
+
+func (o *compilerOptionsParser) ParseOption(key string, value any) []string {
+	o.Options[key] = value
+	return nil
+}
+
+func convertMapToOptions[O optionParser](options map[string]any, result O) O {
+	for k, v := range options {
+		result.ParseOption(k, v)
+	}
+	return result
+}
+
+func main() {
+	opts := convertMapToOptions(map[string]any{"strict": true}, &compilerOptionsParser{map[string]any{}}).Options
+	fmt.Println(len(opts), opts["strict"]) // Go: 1 true
+}

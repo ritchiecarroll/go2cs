@@ -1,0 +1,3 @@
+module repro/c22c-genericrecvparam
+
+go 1.26

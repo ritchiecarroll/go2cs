@@ -1,0 +1,3 @@
+module repro/c36floattotypeparam
+
+go 1.26

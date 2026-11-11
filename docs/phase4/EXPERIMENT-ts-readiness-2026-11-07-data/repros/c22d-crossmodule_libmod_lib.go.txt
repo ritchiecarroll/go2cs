@@ -1,0 +1,19 @@
+package lib
+
+// A type and a method of the same name in one package (go-json-experiment/json/jsontext: type Kind beside
+// func (t Token) Kind() Kind; type Encoder beside func (export) Encoder(*Encoder)).
+type Kind byte
+
+type Token struct{ k Kind }
+
+func (t Token) Kind() Kind { return t.k }
+
+func New(k Kind) Token { return Token{k} }
+
+type Encoder struct{ n int }
+
+type export struct{}
+
+func (export) Encoder(e *Encoder) int { return e.n }
+
+func NewEncoder(n int) *Encoder { return &Encoder{n} }

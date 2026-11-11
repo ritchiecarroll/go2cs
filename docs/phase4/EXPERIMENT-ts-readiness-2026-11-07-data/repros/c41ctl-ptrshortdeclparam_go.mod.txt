@@ -1,0 +1,3 @@
+module repro/c41ctl-ptrshortdeclparam
+
+go 1.26

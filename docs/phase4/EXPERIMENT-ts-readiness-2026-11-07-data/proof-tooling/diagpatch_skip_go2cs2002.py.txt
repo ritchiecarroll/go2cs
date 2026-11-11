@@ -1,0 +1,24 @@
+# diagpatch_skip_go2cs2002.py <conversionDriver.go> : DIAGNOSTIC (i7 local preview only, never landed). COORD's ruling 2
+# (2026-11-10): the GO2CS2002 non-self constraint-proxy refusal skips the package and continues instead of log.Fatalf.
+import sys
+p = sys.argv[1]
+s = open(p, encoding="utf-8", newline="").read()
+a = ('\t\tif refusal := refuseNonSelfConstraintProxies(pkg); refusal != nil {\n'
+     '\t\t\trefusal.report()\n'
+     '\t\t\tlog.Fatalf("Refusing to convert: %s\\n", refusal)\n'
+     '\t\t}\n')
+b = ('\t\tif refusal := refuseNonSelfConstraintProxies(pkg); refusal != nil {\n'
+     '\t\t\trefusal.report()\n'
+     '\t\t\t// DIAGNOSTIC (i7 local preview only, never landed): skip the refused package and continue, per COORD\'s\n'
+     '\t\t\t// 2026-11-10 ruling for the TS preview. Its dependents fail at build on the missing project.\n'
+     '\t\t\tlog.Printf("DIAGNOSTIC SKIPPED (refused): %s\\n", refusal)\n'
+     '\t\t\tcontinue\n'
+     '\t\t}\n')
+CR, LF = chr(13), chr(10)
+if CR + LF in s:  # keep the file's own line endings
+    a, b = a.replace(LF, CR + LF), b.replace(LF, CR + LF)
+n = s.count(a)
+if n != 1:
+    sys.exit(f"expected 1 match, found {n}")
+open(p, "w", encoding="utf-8", newline="").write(s.replace(a, b))
+print("patched", p)

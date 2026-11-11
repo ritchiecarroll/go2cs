@@ -1,0 +1,3 @@
+module repro/c39ctl-methodvaluetypeparam
+
+go 1.26
