@@ -1,0 +1,1 @@
+internal/coverage/cmerge,internal/coverage/pods,internal/coverage/slicereader,internal/coverage/slicewriter,internal/coverage/test,internal/cpu,internal/dag,internal/diff,internal/fmtsort,internal/fuzz,internal/godebug,internal/godebugs,internal/gover,internal/pkgbits,internal/platform,internal/poll,internal/profile,internal/reflectlite,internal/runtime/atomic
