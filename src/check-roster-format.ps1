@@ -2371,14 +2371,16 @@ function Get-ArchCountReading {
     return [PSCustomObject]@{ Text = $text; Disclosed = $ga; Refusal = $refusal }
 }
 
-# A segment as the roster spells it, its per-RID note included, for comparison with what the evidence produces.
+# A segment as the roster spells it, its per-RID note included (a linux note may read `pending`), for comparison with
+# what the evidence produces.
 function Format-DarwinSegment {
     param($Segment)
 
     $text = "$($Segment.Expected)" + $(if ($Segment.Disclosed) { " + $($Segment.Disclosed)" } else { '' })
     $other = if ($Segment.PSObject.Properties['Other']) { $Segment.Other } else { $null }
     if ($null -ne $other) {
-        $text += " ($($Segment.Rid); $($other.Rid): $($other.Expected)" + $(if ($other.Disclosed) { " + $($other.Disclosed)" } else { '' }) + ')'
+        $reading = if ($other.PSObject.Properties['Pending'] -and $other.Pending) { 'pending' } else { "$($other.Expected)" + $(if ($other.Disclosed) { " + $($other.Disclosed)" } else { '' }) }
+        $text += " ($($Segment.Rid); $($other.Rid): $reading)"
     }
     return $text
 }
@@ -2465,7 +2467,7 @@ function Resolve-DarwinEvidenceDirectory {
 }
 
 function Read-DarwinEvidence {
-    param([string] $Directory)
+    param([string] $Directory, [string[]] $Waves = $DarwinEvidenceWaves)
 
     # row -> list of records, each tagged with its wave's index. Every TSV's header names its columns, so a column
     # added later never shifts one.
@@ -2475,7 +2477,7 @@ function Read-DarwinEvidence {
     foreach ($file in @(Get-ChildItem -LiteralPath $Directory -Filter '*.tsv' -Recurse -File | Sort-Object FullName)) {
         $relative = [System.IO.Path]::GetRelativePath($root, $file.DirectoryName).Replace('\', '/')
         if ($relative -eq '.') { $relative = '' }
-        $wave = [array]::IndexOf($DarwinEvidenceWaves, $relative)
+        $wave = [array]::IndexOf($Waves, $relative)
         if ($wave -lt 0) {
             if (-not $undeclared.Contains($relative)) { [void]$undeclared.Add($relative) }
             continue
@@ -2780,12 +2782,159 @@ Write-Host ('darwin segments against {0} (pin go{1}): {2} rows read at the pin, 
 # derived from its two evidence lines, never typed: EQUAL (both RIDs written out), ARCH-STRICT, ARCH-COUNT, or the
 # COMBINED form (verdicts and disclosed-divergent both differ, both deltas named), else (linux-x64; linux-arm64:
 # pending). annotate_linux.py --rids applies the same rules.
-# RED STUBS (S7-a piece 3): the two-RID linux functions do not exist yet, so each answers a fixed value and the
-# fixtures below fail by assertion. The fix replaces these four with the real ones.
-function Get-ArchCombinedReading { param($A, $X) return $null }
-function Get-LinuxPairReading { param($Records, $Segment) return [PSCustomObject]@{ Form = 'unimplemented'; Text = $null; Reason = $null } }
-function Get-LinuxSegmentRefusal { param($Records, $Segment) return 'unimplemented' }
-function Get-LinuxUnreadRefusal { param($Segment) return 'unimplemented' }
+# The names one evidence column lists: ';'-separated, '-' or empty for none. $null when the line has no such column.
+function Get-EvidenceNames {
+    param($Record, [string] $Column)
+
+    if (-not $Record.PSObject.Properties[$Column]) { return $null }
+    return @(([string]$Record.$Column).Split(';') | ForEach-Object { $_.Trim() } | Where-Object { $_ -and ($_ -cne '-') })
+}
+
+# COMBINED (COORD 2026-11-10, G's Q1 RULED; DATA-la64-s7-bank-plan.md 4.3 P4, runtime). Two RIDs whose verdict counts
+# AND disclosed-divergent counts both differ: a test that exists on one architecture only, and a disclosure that applies
+# on one only. Neither arch-strict (equal verdicts) nor arch-count (equal disclosed share) covers it. The shape: both
+# lines validated, COUNT or DISC, `new` 0 on both, UNEQUAL verdicts, UNEQUAL disclosed-divergent, and matched +
+# divergent = verdicts on each. It banks the LONGER RID, each RID with its own disclosed share, "17 + 3 (linux-x64;
+# linux-arm64: 15 + 2)", and ONLY when both deltas are named in full:
+#   - the verdict delta: the shorter RID's `absent` names exactly (longer - shorter) distinct verdicts, the longer none
+#     (arch-count's rule);
+#   - the disclosed delta: each RID's `divergent_names` names exactly its divergent - new distinct verdicts, so the two
+#     lists, compared, name every disclosure that applies on one RID only; and no verdict the shorter RID lacks is also
+#     one it discloses.
+# A shape that names less returns a Refusal, reported by name: the row stays pending and nothing is edited to pass it.
+# annotate_linux.py's arch_combined is this function, rule for rule.
+function Get-ArchCombinedReading {
+    param($A, $X)
+
+    $int = { param($record, $name) $v = 0; if ($record.PSObject.Properties[$name] -and [int]::TryParse([string]$record.$name, [ref]$v)) { $v } else { $null } }
+    $statuses = @('validated', 'COUNT', 'DISC')
+    if (($statuses -cnotcontains $A.status) -or ($statuses -cnotcontains $X.status)) { return $null }
+    $va = & $int $A 'verdicts'; $vx = & $int $X 'verdicts'
+    $ma = & $int $A 'matched'; $mx = & $int $X 'matched'
+    $ga = & $int $A 'divergent'; $gx = & $int $X 'divergent'
+    $na = & $int $A 'new'; $nx = & $int $X 'new'
+    if (@($va, $vx, $ma, $mx, $ga, $gx, $na, $nx) -contains $null) { return $null }
+    if (($na -ne 0) -or ($nx -ne 0) -or ($va -eq $vx) -or ($ga -eq $gx) -or (($ma + $ga) -ne $va) -or (($mx + $gx) -ne $vx)) { return $null }
+
+    $long, $short = if ($va -gt $vx) { $A, $X } else { $X, $A }
+    $lv = & $int $long 'verdicts'; $sv = & $int $short 'verdicts'
+    $lm = & $int $long 'matched'; $sm = & $int $short 'matched'
+    $lg = & $int $long 'divergent'; $sg = & $int $short 'divergent'
+    $text = "$lm" + $(if ($lg -ne 0) { " + $lg" } else { '' }) + " ($($long.RID); $($short.RID): $sm" + $(if ($sg -ne 0) { " + $sg" } else { '' }) + ')'
+    $counts = "$($long.RID) $lv verdicts + $lg disclosed, $($short.RID) $sv + $sg"
+
+    $shortAbsent = @(Get-EvidenceNames $short 'absent')
+    $longAbsent = @(Get-EvidenceNames $long 'absent')
+    $gap = $lv - $sv
+    $distinct = @($shortAbsent | Sort-Object -Unique -CaseSensitive).Count
+    $refusal = $null
+    if ($longAbsent.Count -ne 0) {
+        $refusal = "its verdicts and disclosed-divergent both differ by RID ($counts), but the evidence names absent verdicts on $($long.RID), the LONGER RID"
+    } elseif (($distinct -ne $gap) -or ($shortAbsent.Count -ne $gap)) {
+        $refusal = "its verdicts and disclosed-divergent both differ by RID ($counts), but the evidence names $distinct of the $gap missing verdict(s) on $($short.RID) (column ``absent``) -- a combined reading banks only with every missing verdict named once"
+    } else {
+        foreach ($side in @($short, $long)) {
+            $names = Get-EvidenceNames $side 'divergent_names'
+            $want = (& $int $side 'divergent') - (& $int $side 'new')
+            if ($null -eq $names) {
+                $refusal = "its verdicts and disclosed-divergent both differ by RID ($counts), but the evidence names no disclosed-divergent verdicts on $($side.RID) (column ``divergent_names``) -- a combined reading banks only with both RIDs' disclosed verdicts named in full"
+                break
+            }
+            $named = @($names | Sort-Object -Unique -CaseSensitive).Count
+            if (($named -ne $want) -or (@($names).Count -ne $want)) {
+                $refusal = "its verdicts and disclosed-divergent both differ by RID ($counts), but the evidence names $named of the $want disclosed-divergent verdict(s) on $($side.RID) (column ``divergent_names``) -- a combined reading banks only with each disclosed verdict named once"
+                break
+            }
+        }
+        if ($null -eq $refusal) {
+            $both = @(@(Get-EvidenceNames $short 'divergent_names') | Where-Object { $shortAbsent -ccontains $_ })
+            if ($both.Count -ne 0) {
+                $refusal = "its verdicts and disclosed-divergent both differ by RID ($counts), but the evidence names $($both -join ', ') as both absent and disclosed on $($short.RID)"
+            }
+        }
+    }
+    return [PSCustomObject]@{ Text = $text; Disclosed = $lg; Refusal = $refusal }
+}
+
+# The roster's linux-x64 reading in a linux segment: the headline when the headline is linux-x64's (or the segment has no
+# note), else the note's. $null when the segment names no linux-x64 reading.
+function Get-LinuxX64Reading {
+    param($Segment)
+
+    $other = if ($Segment.PSObject.Properties['Other']) { $Segment.Other } else { $null }
+    $rid = if ($Segment.PSObject.Properties['Rid']) { $Segment.Rid } else { $null }
+    if ((-not $rid) -or ($rid -ceq 'linux-x64')) { return [PSCustomObject]@{ Expected = [int]$Segment.Expected; Disclosed = [int]$Segment.Disclosed } }
+    if (($null -ne $other) -and ($other.Rid -ceq 'linux-x64') -and -not $other.Pending) { return [PSCustomObject]@{ Expected = [int]$other.Expected; Disclosed = [int]$other.Disclosed } }
+    return $null
+}
+
+# One row's two-RID linux reading: Form equal / arch-strict / arch-count / combined (Text is the derived segment),
+# pending (no form fits) or host-difference (Reason says why), or refused (Reason: a guard's Refusal, or malformed
+# evidence). $Segment is the row's roster linux segment, which supplies the linux-x64 reading of record.
+function Get-LinuxPairReading {
+    param($Records, $Segment)
+
+    $x64 = @($Records | Where-Object { $_.RID -ceq 'linux-x64' })
+    $arm = @($Records | Where-Object { $_.RID -ceq 'linux-arm64' })
+    if (($x64.Count -ne 1) -or ($arm.Count -ne 1)) {
+        return [PSCustomObject]@{ Form = 'refused'; Text = $null; Reason = "the linux evidence holds $($x64.Count) linux-x64 and $($arm.Count) linux-arm64 line(s) for it, not one of each" }
+    }
+    $x = $x64[0]; $a = $arm[0]
+    $roster = if (($null -ne $Segment) -and $Segment.Applicable) { Get-LinuxX64Reading $Segment } else { $null }
+    if ($null -eq $roster) {
+        return [PSCustomObject]@{ Form = 'refused'; Text = $null; Reason = 'the linux evidence names it, but it carries no numeric linux: segment with a linux-x64 reading' }
+    }
+    $fmt = { param($m, $d) "$m" + $(if ($d -ne 0) { " + $d" } else { '' }) }
+    $xd = Get-DarwinDisclosedDivergent $x; $ad = Get-DarwinDisclosedDivergent $a
+    # THE HOST DIFFERENCE (COORD 2026-11-10: differing x64 readings are recorded, not written). The pair is read in one
+    # dispatch on hosted runners; where its linux-x64 line is not the roster's linux-x64 reading, the comparison is
+    # against a different host, so nothing is derived and linux-arm64 stays pending.
+    if (($x.status -cne 'validated') -or ("$($x.new)" -cne '0') -or ([int]$x.matched -ne $roster.Expected) -or ($xd -ne $roster.Disclosed)) {
+        return [PSCustomObject]@{ Form = 'host-difference'; Text = $null
+            Reason = "the same dispatch's linux-x64 line ($($x.status) $(& $fmt $x.matched $xd), new $($x.new)) is not the roster's linux-x64 reading ($(& $fmt $roster.Expected $roster.Disclosed)): a host difference, recorded and not written, so linux-arm64 stays pending" }
+    }
+    if (($x.status -ceq 'validated') -and ($a.status -ceq 'validated') -and ($x.agree -ceq 'yes') -and ($a.agree -ceq 'yes') -and
+        ("$($x.verdicts)" -ceq "$($a.verdicts)") -and ([int]$x.matched -eq [int]$a.matched) -and ($xd -eq $ad)) {
+        $one = & $fmt $x.matched $xd
+        return [PSCustomObject]@{ Form = 'equal'; Text = "$one (linux-x64; linux-arm64: $one)"; Reason = $null }
+    }
+    $strict = Get-DarwinArchStrictReading $x $a
+    if ($null -ne $strict) { return [PSCustomObject]@{ Form = 'arch-strict'; Text = $strict.Text; Reason = $null } }
+    foreach ($form in @(@('arch-count', (Get-ArchCountReading $x $a)), @('combined', (Get-ArchCombinedReading $x $a)))) {
+        if ($null -eq $form[1]) { continue }
+        if ($form[1].Refusal) { return [PSCustomObject]@{ Form = 'refused'; Text = $null; Reason = $form[1].Refusal } }
+        return [PSCustomObject]@{ Form = $form[0]; Text = $form[1].Text; Reason = $null }
+    }
+    return [PSCustomObject]@{ Form = 'pending'; Text = $null
+        Reason = "no bank form fits (linux-x64 $($x.status) $($x.verdicts) verdicts $(& $fmt $x.matched $xd); linux-arm64 $($a.status) $($a.verdicts) verdicts $(& $fmt $a.matched $ad), new $($a.new), agree $($x.agree)/$($a.agree))" }
+}
+
+# The guard's verdict on one row the linux evidence names: $null, or why its segment is not the evidence's.
+function Get-LinuxSegmentRefusal {
+    param($Records, $Segment)
+
+    $reading = Get-LinuxPairReading -Records $Records -Segment $Segment
+    if ($reading.Form -ceq 'refused') { return $reading.Reason }
+    $other = if ($Segment.PSObject.Properties['Other']) { $Segment.Other } else { $null }
+    $pending = ($null -ne $other) -and $other.Pending
+    $have = Format-DarwinSegment $Segment
+    if ($null -eq $reading.Text) {
+        if ($pending) { return $null }
+        return "it does not bank on both RIDs ($($reading.Reason)), but carries linux: $have -- it stays (linux-x64; linux-arm64: pending)"
+    }
+    if ($have -cne $reading.Text) { return "its linux: $have is not the two-RID reading, linux: $($reading.Text) ($($reading.Form))" }
+    return $null
+}
+
+# A row no declared linux evidence names: a linux-arm64 READING there cannot have been derived. A pending note, and a
+# bare segment (the format rule's, piece 6), are not this check's.
+function Get-LinuxUnreadRefusal {
+    param($Segment)
+
+    if (($null -eq $Segment) -or -not $Segment.PSObject.Properties['Other'] -or ($null -eq $Segment.Other) -or $Segment.Other.Pending) { return $null }
+    if (@($Segment.Rid, $Segment.Other.Rid) -cnotcontains 'linux-arm64') { return $null }
+    return "it carries linux: $(Format-DarwinSegment $Segment), a linux-arm64 reading, but no declared linux evidence names it, so the reading was not derived"
+}
 
 # The two-RID linux segment's contract, against fixtures. Evidence lines carry the mac form's columns (verdicts, matched,
 # divergent, new, status, agree, absent) plus divergent_names (S7-a Q2: the disclosed-divergent verdict names, ';'-
@@ -2892,6 +3041,55 @@ Assert-Equal 'linux unread: a linux-arm64 reading with no evidence behind it is 
 Assert-Equal 'linux unread: a pending row needs no evidence' $null (Get-LinuxUnreadRefusal -Segment (& $linPendingSeg 3840 2))
 Assert-Equal 'linux unread: a bare segment is not this check''s (the format rule owns it)' $null (Get-LinuxUnreadRefusal -Segment (& $linSeg 3840 2 $null $null 0 0))
 Assert-Equal 'linux format: a pending segment spells its note' '3840 + 2 (linux-x64; linux-arm64: pending)' (Format-DarwinSegment (& $linPendingSeg 3840 2))
+
+# THE LINUX EVIDENCE DIRECTORY (S7-a; S7-c fills it). The ONE place the two-RID linux evidence is named, relative to
+# the repository root, `{pin}` standing for the corpus pin: one TSV per shard in the mac form (shard, row, RID,
+# verdicts, matched, disclosed, divergent, new, status, agree, absent, divergent_names), a line per row per RID.
+# EMPTY until the arm leg's first shard is read: then no linux evidence is declared, so no linux-arm64 reading can have
+# been derived and every linux note must read pending. annotate_linux.py --rids reads the same directory.
+# $LinuxRidEvidenceWaves declares its wave subdirectories in order, as $DarwinEvidenceWaves does.
+$LinuxRidEvidenceDirectory = ''
+$LinuxRidEvidenceWaves = @('')
+
+$linuxPairBanked = 0
+$linuxPairPending = 0
+$linuxPairRefused = 0
+$linuxPairUnread = 0
+$linuxEvidenceAt = if ($LinuxRidEvidenceDirectory) { Resolve-DarwinEvidenceDirectory -Repo $repo -Declared $LinuxRidEvidenceDirectory -Pin $goPin } else { $null }
+$linuxEvidence = @{}
+if ($null -ne $linuxEvidenceAt) {
+    if (-not (Test-Path -LiteralPath $linuxEvidenceAt.Path)) {
+        Assert-Equal "linux segments: the declared evidence directory $($linuxEvidenceAt.Relative) (`$LinuxRidEvidenceDirectory) does not exist" $true $false
+    } else {
+        $linuxRead = Read-DarwinEvidence -Directory $linuxEvidenceAt.Path -Waves $LinuxRidEvidenceWaves
+        foreach ($stray in $linuxRead.Undeclared) {
+            Assert-Equal "linux segments: evidence subdirectory '$stray' is not a declared wave (`$LinuxRidEvidenceWaves)" $true $false
+        }
+        $linuxEvidence = $linuxRead.ByRow
+    }
+}
+foreach ($row in $rows) {
+    $segment = if ($row.OS.ContainsKey('linux')) { $row.OS['linux'] } else { $null }
+    if (-not $linuxEvidence.ContainsKey($row.Package)) {
+        if (($null -eq $segment) -or -not $segment.Applicable) { continue }
+        $linuxPairUnread++
+        $refusal = Get-LinuxUnreadRefusal -Segment $segment
+    } else {
+        $refusal = Get-LinuxSegmentRefusal -Records (Select-LatestDarwinWave $linuxEvidence[$row.Package]) -Segment $segment
+        if ($null -eq $refusal) {
+            if ($segment.PSObject.Properties['Other'] -and ($null -ne $segment.Other) -and $segment.Other.Pending) { $linuxPairPending++ } else { $linuxPairBanked++ }
+        }
+    }
+    if ($null -ne $refusal) {
+        $linuxPairRefused++
+        Assert-Equal "linux segments: $($row.Package): $refusal" $true $false
+    }
+}
+if ($linuxEvidence.Count -gt 0) {
+    Assert-Equal 'linux segments: the evidence named at least one roster row (a zero means the rows were never matched)' $true (($linuxPairBanked + $linuxPairPending + $linuxPairRefused) -gt 0)
+}
+# Printed UNCONDITIONALLY, as the darwin line is.
+Write-Host ('linux segments (linux-x64; linux-arm64) against {0}: {1} rows banked on both RIDs, {2} read and pending, {3} not read (not gated), {4} refused' -f $(if ($null -ne $linuxEvidenceAt) { $linuxEvidenceAt.Relative } else { 'no declared evidence ($LinuxRidEvidenceDirectory is empty), so every linux-arm64 reading is refused' }), $linuxPairBanked, $linuxPairPending, $linuxPairUnread, $linuxPairRefused) -ForegroundColor Cyan
 
 # ---- 3. the RENDERED table's column integrity -----------------------------------------------------
 # Everything above guards what the roster MEANS to the parser. This guards what it LOOKS LIKE to a
