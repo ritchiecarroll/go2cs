@@ -695,11 +695,7 @@ public sealed partial class Goroutine
     /// having woken.
     /// </para>
     /// </remarks>
-    public static ParkScope Park(WaitReason reason) => ParkCore(reason, handoff: true);
-
-    // M:N SPIKE: handoff is false for a twin's park (ParkTwin), which gives its carrier back instead of
-    // blocking it.
-    private static ParkScope ParkCore(WaitReason reason, bool handoff)
+    private static ParkScope ParkCore(WaitReason reason, bool handoff) // M:N SPIKE: Park is in Goroutine.Multiplexed.cs
     {
         if (t_current is not { } goroutine)
             return default;
@@ -741,10 +737,7 @@ public sealed partial class Goroutine
             bubble.Idled();
         }
 
-        // M:N SPIKE: a multiplexed goroutine about to block its carrier's thread gives the P away first.
-        bool handedOff = handoff && previous == (int)WaitReason.Zero && goroutine.m_multiplexed && GoScheduler.EnterBlocked();
-
-        return new ParkScope(goroutine, previous, handedOff);
+        return new ParkScope(goroutine, previous, handoff && HandOffBeforeBlocking(goroutine, previous)); // M:N SPIKE
     }
 
     /// <summary>

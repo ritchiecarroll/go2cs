@@ -426,3 +426,53 @@ Written to the prediction file before each measurement.
   3.8 to 4.0 s), once with the switch off and once with it on. On the build as committed it did not (3.8 s).
   Every wall time above follows a discarded warm-up arm.
 - A peak from the 250 ms sampler is a lower bound for a burst; burst arms quote the scheduler's own peak.
+
+### 3.10 After the first repoguard run: the spike's golib members move to their own files (2026-11-11)
+
+Sections 3.1 to 3.9 describe the tree at `1b8cc2658c`, and every reading in them was taken on that build.
+The docs guard was then run on that commit for the first time and was red:
+`TestDocsProvenanceNotesResolve` reported 39 provenance notes (of 934 checked) that no longer pointed at the
+line they describe, and the two tests that plant a stale note on top of a clean tree failed with it. The
+notes cite `src/core/golib/<file>.cs:<line>` with the text of that line. The spike had inserted lines above
+cited lines in four files: `builtin.cs` (7 lines), `GoFrame.cs` (9), `runtime/Goroutine.cs` (7, above its
+last cited line, 1436) and `channel.cs` (190, above one cited line).
+
+The commit on top of `1b8cc2658c` changes no behaviour and moves the insertions out from under the notes:
+
+- `selectꞏtwin` is in a new `golib/builtin.Twins.cs` (21 lines); `builtin.cs` is the base file again.
+- `GoFrame.SwapMounted` is in a new `golib/GoFrame.Mounted.cs` (19 lines); `GoFrame.cs` differs from the
+  base in one line (the declaration, now `public partial struct GoFrame`, no longer a `ref struct`).
+- `Goroutine.Park` and the hand-off test are in `runtime/Goroutine.Multiplexed.cs` (now 238 lines);
+  `Goroutine.cs` changes line for line at 61, 698 and 740, and otherwise only after line 1642.
+- The channel twins stay in `channel.cs`, which needs them beside the private queue. Its one note,
+  in `docs/ConversionStrategies-Reference/maps-and-channels.md`, is re-cited from line 1624 to line 1814,
+  where the quoted line now is.
+
+This replaces the file count in 3.1: nine existing golib and stdlib files change by 332 added and 10 removed
+lines (237 of the additions are the channel twins), and four files are new (842 lines).
+
+The arms of 3.3 and 3.5 were run again on the relocated build (same box, same sampler and hold). Every row
+exits 0 with Go's output hash for its n.
+
+| arm | n | wall | sampler peak threads | peak private | carriers | scheduler peak OS threads | steps | hand-offs | injections | steps over 10 ms | longest step |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| twins | 1,000 | 3.8 s | 24 | 30 MB | 12 | 28 | 3,947 | 0 | 0 | 12 | 13 ms |
+| twins | 10,000 | 4.0 s | 28 | 76 MB | 18 | 31 | 39,988 | 0 | 36 | 87 | 30 ms |
+| twins | 100,000 | 6.9 s | 35 | 609 MB | 24 | 36 | 405,804 | 0 | 445 | 923 | 111 ms |
+| no twin | 1,000 | 3.8 s | 1,012 | 87 MB | 1,000 | 1,012 | 1,000 | 3,975 | 0 | 0 | 1 ms |
+| one untwinned sleep | 10,000 | 4.3 s | 332 | 109 MB | 528 | 550 | 30,243 | 10,000 | 36 | 65 | 42 ms |
+| switch off | 1,000 | 3.9 s | 1,011 | 92 MB | | | | | | | |
+
+These agree with 3.3 and 3.5 inside the spread those sections already show. The 100,000 arm peaks at 36 OS
+threads here against 43 before: the peak is the 12 processors' carriers plus however many P injections
+overlap, so it moves from run to run, and "36 to 43" is the reading. The first arm after this build read
+7.2 s on wall time where its repeat reads 3.8 s: the first-arm effect of 3.9 is back (three builds of four),
+so the warm-up arm stays in every measurement.
+
+GolibTests with the switch unset, on the relocated tree: 0 failed / 2,530 passed / 49 skipped of 2,579 (363 s).
+
+Finding 14 (continuing 3.8). **golib is cited by line.** Any twin that is added to an existing golib file
+moves the lines below it, and the documents cite those lines. A real change of this kind either keeps its
+additions in files of their own (partial types make that cheap, as here) or re-cites every note
+under it in the same commit. The first is the rule B2 follows; the channel twins are the case that cannot
+follow it, and their re-cite is one note today.

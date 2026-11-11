@@ -225,4 +225,14 @@ public sealed partial class Goroutine
     /// not blocked, so nothing is handed off.
     /// </summary>
     public static ParkScope ParkTwin(WaitReason reason) => ParkCore(reason, handoff: false);
+
+    /// <summary>
+    /// Marks the calling goroutine as parked for <paramref name="reason"/>; the remarks are on
+    /// <see cref="ParkCore"/>, which is this with the choice a twin's park makes (no hand-off).
+    /// </summary>
+    public static ParkScope Park(WaitReason reason) => ParkCore(reason, handoff: true);
+
+    // A multiplexed goroutine about to block its carrier's thread gives the P away first.
+    private static bool HandOffBeforeBlocking(Goroutine goroutine, int previous) =>
+        previous == (int)WaitReason.Zero && goroutine.m_multiplexed && GoScheduler.EnterBlocked();
 }

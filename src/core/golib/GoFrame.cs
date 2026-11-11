@@ -51,7 +51,7 @@ namespace go;
 /// Design: <c>docs/Phase4/DESIGN-closure-emission.md</c> §4.
 /// </para>
 /// </remarks>
-public struct GoFrame // M:N SPIKE: not a ref struct, so a twin's frame can live across an await
+public partial struct GoFrame // M:N SPIKE: not a ref struct, so a twin's frame can live across an await
 {
     // Inline slots for the common defer arities; m_overflow is the correctness tail past them.
     // FOUR comes from a census of the Go standard library, not from a guess: of its 1,454 deferring
@@ -571,15 +571,6 @@ public struct GoFrame // M:N SPIKE: not a ref struct, so a twin's frame can live
     internal static void RefuseSplicesOnThisThread() => t_splicesRefused = true;
 
     internal static bool SplicesRefused => t_splicesRefused;
-
-    // M:N SPIKE: exchanges this thread's activation counter, token and refusal with a goroutine's saved
-    // ones (Goroutine.Mount / Unmount).
-    internal static void SwapMounted(ref long activation, ref object? token, ref bool refused)
-    {
-        (activation, t_lastActivation) = (t_lastActivation, activation);
-        (token, t_threadToken) = (t_threadToken, token);
-        (refused, t_splicesRefused) = (t_splicesRefused, refused);
-    }
 
     // A goroutine's thread starts with no sequences and no refusal (GoFuncRoot.ResetThread): the entries and the
     // depth are cleared with the rest of GoThreadState. Run's finally always pops, so this only matters for a
