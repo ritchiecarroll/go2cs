@@ -111,25 +111,40 @@ partial class runtime_package
         return ((uintptr)sysReserveOS(new @unsafe.Pointer(v), n, ""u8)).Value;
     }
 
-    /// <summary>Maps n bytes anonymous read/write, writes a byte pattern, reads it back, advises DONTNEED, unmaps; returns the address and whether the round trip held.</summary>
-    public static unsafe (nuint address, bool roundTrip, nint firstErr, int madviseRc) GoSysMmapProbe(nuint n)
+    /// <summary>
+    /// Maps n bytes anonymous read/write, writes one byte per page, reads them back, advises DONTNEED, and unmaps.
+    /// Returns the address, whether the round trip held, and the page size it strode by: the runtime's physPageSize,
+    /// the OS page size (4 KiB, or 16/64 KiB on such arm64 kernels; S3 site 8), never a literal 4096.
+    /// </summary>
+    public static unsafe (nuint address, bool roundTrip, nint firstErr, int madviseRc, nuint pageSize) GoSysMmapPagedProbe(nuint n)
     {
+        nuint page = (nuint)physPageSize;
         var (p, err) = sysMmap(nil, (uintptr)n, (int32)(_PROT_READ | _PROT_WRITE), (int32)(_MAP_ANON | _MAP_PRIVATE), -1, 0);
         if (err != 0) {
-            return (0, false, err, 0);
+            return (0, false, err, 0, page);
         }
         nuint address = (uintptr)p;
         byte* bytes = (byte*)address;
-        for (nuint i = 0; i < n; i += 4096) {
-            bytes[i] = (byte)(i / 4096 + 1);
+        for (nuint i = 0; i < n; i += page) {
+            bytes[i] = (byte)(i / page + 1);
         }
         bool ok = true;
-        for (nuint i = 0; i < n; i += 4096) {
-            ok &= bytes[i] == (byte)(i / 4096 + 1);
+        for (nuint i = 0; i < n; i += page) {
+            ok &= bytes[i] == (byte)(i / page + 1);
         }
         int rc = (int)madvise(p, (uintptr)n, (int32)_MADV_DONTNEED);
         sysMunmap(p, (uintptr)n);
-        return (address, ok, 0, rc);
+        return (address, ok, 0, rc, page);
+    }
+
+    /// <summary>
+    /// GoSysMmapPagedProbe without the page size: the signature go.runtime 1.26.10.3 shipped, kept so a consumer built
+    /// against it still binds (binary compatibility guard, batch 284). It strides by physPageSize too.
+    /// </summary>
+    public static (nuint address, bool roundTrip, nint firstErr, int madviseRc) GoSysMmapProbe(nuint n)
+    {
+        var (address, roundTrip, firstErr, madviseRc, _) = GoSysMmapPagedProbe(n);
+        return (address, roundTrip, firstErr, madviseRc);
     }
 
     /// <summary>The errno sysMmap answers for an impossible map (a length of zero).</summary>

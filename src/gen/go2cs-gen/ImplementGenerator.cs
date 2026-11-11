@@ -375,9 +375,14 @@ public class ImplementGenerator : ISourceGenerator
             // A FOREIGN interface is never proxied here: a second importer would declare a second
             // proxy, and the proxy is part of the instantiated type's identity. The record then binds
             // the interface package's GENERIC proxy to the element's methods instead.
+            // A NON-generic interface has no generic proxy to bind anywhere, so a foreign one (fmt.Stringer) is proxied here
+            // like a local one, by the concrete non-self proxy (DESIGN-constraint-proxy-nonself 3.1). Its identity is
+            // per-consumer, which is sound because the converter admits the non-self route only at generic FUNCTION calls,
+            // never in a generic named type's identity (the design's ruling 1).
             if (constraintProxy)
             {
-                if (SymbolEqualityComparer.Default.Equals(interfaceType.ContainingAssembly, context.Compilation.Assembly))
+                if (SymbolEqualityComparer.Default.Equals(interfaceType.ContainingAssembly, context.Compilation.Assembly) ||
+                    ((INamedTypeSymbol)interfaceType).OriginalDefinition.TypeParameters.Length == 0)
                     EmitConstraintProxy(context, structType, (INamedTypeSymbol)interfaceType, packageNamespace, packageName, packageClassName, usingStatements, emittedHintNames, emittedGenericPointerAdapters);
                 else
                     EmitConstraintProxyBind(context, attributeSyntax, structType, (INamedTypeSymbol)interfaceType, packageNamespace, packageName, usingStatements, emittedHintNames, emittedGenericPointerAdapters);
@@ -1127,7 +1132,26 @@ public class ImplementGenerator : ISourceGenerator
 
                 if (structType is INamedTypeSymbol { IsGenericType: true } genericStructType)
                 {
-                    if (foreignStruct)
+                    if (foreignStruct && SymbolEqualityComparer.Default.Equals(genericStructType, genericStructType.OriginalDefinition))
+                    {
+                        // A FOREIGN generic's DEFINITION: the converter recorded the open typeof form
+                        // (`GoImplement(typeof(Expected<>), typeof(Field), Pointer = true)`) because every
+                        // member the interface requires is declared without the definition's type
+                        // parameters, so every instantiation satisfies it the same way (the converter's
+                        // foreignGenericAdapterIsOpen). One GENERIC adapter over the open parameters,
+                        // package-qualified like every foreign adapter (`fieldlib_ExpectedжField<T>`),
+                        // and the cast sites instantiate it (`new fieldlib_ExpectedжField<@string>(…)`).
+                        // The closed route below gives two instantiations of one such pair a single
+                        // un-suffixed name, one class twice (tsc's internal/module, C33).
+                        if (!emittedGenericPointerAdapters.Add($"open|{genericStructType.ToDisplayString()}|{interfaceName}"))
+                            continue;
+
+                        adapterBaseName = genericStructType.Name;
+                        foreignClosedStructName = GlobalQualify(genericStructType.ToDisplayString());
+                        adapterTypeParameters = $"<{string.Join(", ", genericStructType.TypeParameters.Select(typeParameter => typeParameter.Name))}>";
+                        adapterConstraintClause = GetGenericConstraintClause(genericStructType.TypeParameters);
+                    }
+                    else if (foreignStruct)
                     {
                         if (!emittedGenericPointerAdapters.Add($"closed|{genericStructType.ToDisplayString()}|{interfaceName}"))
                             continue;
@@ -1772,7 +1796,13 @@ public class ImplementGenerator : ISourceGenerator
     {
         INamedTypeSymbol interfaceDef = interfaceType.OriginalDefinition;
 
-        if (interfaceDef.TypeParameters.Length != 1)
+        // A NON-self-referential constraint (a non-generic method-set interface, tsc's `O optionParser`) takes the same
+        // proxy with NO self parameter: nothing mentions the proxy, so every method forwards as written and nothing is
+        // refused (docs/phase4/DESIGN-constraint-proxy-nonself.md). A generic interface keeps the self-referential form
+        // (its one type parameter is the self); any other arity is not a constraint proxy.
+        bool nonSelf = interfaceDef.TypeParameters.Length == 0;
+
+        if (!nonSelf && interfaceDef.TypeParameters.Length != 1)
             return;
 
         // One proxy per (element, open-interface) pair — the converter records it at every
@@ -1781,17 +1811,20 @@ public class ImplementGenerator : ISourceGenerator
             return;
 
         // Proxy name element-simple + ж + interface-simple — MUST match the converter's
-        // type-argument rendering at the constrained instantiation.
-        string proxyName = $"{elementType.Name}{PointerPrefix}{interfaceDef.Name}";
+        // type-argument rendering at the constrained instantiation. The non-self proxy adds a suffix: the same-package
+        // POINTER ADAPTER is already named element + ж + interface, and the two classes coexist for one pair.
+        string proxyName = $"{elementType.Name}{PointerPrefix}{interfaceDef.Name}{(nonSelf ? NonSelfConstraintProxySuffix : "")}";
 
         // The boxed pointee, fully qualified so a FOREIGN element resolves (nistec.P224Point used
         // from crypto/elliptic).
         string elementName = GlobalQualify(elementType.GetFullTypeName(true));
 
-        // The interface closed over the proxy ITSELF: `nistPoint<P224PointжnistPoint>`.
-        string interfaceRef = $"{StripGenericTypeArguments(GlobalQualify(interfaceDef.ToDisplayString()))}<{proxyName}>";
+        // The interface closed over the proxy ITSELF: `nistPoint<P224PointжnistPoint>`; a non-self interface as it is.
+        string interfaceRef = nonSelf
+            ? GlobalQualify(interfaceDef.ToDisplayString())
+            : $"{StripGenericTypeArguments(GlobalQualify(interfaceDef.ToDisplayString()))}<{proxyName}>";
 
-        ITypeParameterSymbol selfParameter = interfaceDef.TypeParameters[0];
+        ITypeParameterSymbol? selfParameter = nonSelf ? null : interfaceDef.TypeParameters[0];
         ProxyForms forms = new(selfParameter, $"{PointerPrefix}<{elementName}>", proxyName);
         StringBuilder methods = new();
 
@@ -1890,9 +1923,9 @@ public class ImplementGenerator : ISourceGenerator
     // names the constraint proxy there in the element's method as well (`*Graph[*GNode]` is `ж<Graph<…жGraphNode<GNode>>>`),
     // and the box would not satisfy the constraint at all: `Graph<ж<E>>` was CS0311 in the interface's own assembly
     // (behavioral SelfRefGenerics).
-    private static string RenderSlotType(ITypeSymbol type, ITypeParameterSymbol selfParameter, string boxRef, string proxyRef)
+    private static string RenderSlotType(ITypeSymbol type, ITypeParameterSymbol? selfParameter, string boxRef, string proxyRef)
     {
-        if (SymbolEqualityComparer.Default.Equals(type, selfParameter))
+        if (selfParameter is not null && SymbolEqualityComparer.Default.Equals(type, selfParameter))
             return boxRef;
 
         if (!ContainsTypeParameter(type, selfParameter))
@@ -2220,7 +2253,8 @@ public class ImplementGenerator : ISourceGenerator
 
     // The two spellings of the self parameter across a constraint proxy's boundary: the element's Go methods (and a
     // generic proxy's slots) take and return the BOX, the proxy's own signatures the PROXY.
-    private sealed record ProxyForms(ITypeParameterSymbol Self, string BoxRef, string ProxyRef)
+    // Self is null for a NON-self-referential constraint: nothing mentions it, so every type converts as written.
+    private sealed record ProxyForms(ITypeParameterSymbol? Self, string BoxRef, string ProxyRef)
     {
         public string Render(ITypeSymbol type, bool asProxy) => asProxy ? RenderWithProxy(type, Self, ProxyRef) : RenderSlotType(type, Self, BoxRef, ProxyRef);
 
@@ -2336,8 +2370,9 @@ public class ImplementGenerator : ISourceGenerator
     }
 
     // Reports whether a type mentions the interface's self-type parameter anywhere in its shape.
-    private static bool ContainsTypeParameter(ITypeSymbol type, ITypeParameterSymbol typeParameter) => type switch
+    private static bool ContainsTypeParameter(ITypeSymbol type, ITypeParameterSymbol? typeParameter) => type switch
     {
+        _ when typeParameter is null => false,
         _ when SymbolEqualityComparer.Default.Equals(type, typeParameter) => true,
         IArrayTypeSymbol array => ContainsTypeParameter(array.ElementType, typeParameter),
         INamedTypeSymbol named => named.TypeArguments.Any(argument => ContainsTypeParameter(argument, typeParameter)),
@@ -2347,9 +2382,9 @@ public class ImplementGenerator : ISourceGenerator
     // Renders a type for a proxy method signature with the interface's self-type parameter T
     // rewritten to the proxy itself — `T`→proxy, `(T, error)`→`(proxy, error)`, `[]T`→`proxy[]`,
     // `Foo<T>`→`Foo<proxy>`. A type with no T renders exactly as the interface declares it.
-    private static string RenderWithProxy(ITypeSymbol type, ITypeParameterSymbol selfParameter, string proxyName)
+    private static string RenderWithProxy(ITypeSymbol type, ITypeParameterSymbol? selfParameter, string proxyName)
     {
-        if (SymbolEqualityComparer.Default.Equals(type, selfParameter))
+        if (selfParameter is not null && SymbolEqualityComparer.Default.Equals(type, selfParameter))
             return proxyName;
 
         if (!ContainsTypeParameter(type, selfParameter))

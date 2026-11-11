@@ -241,6 +241,14 @@ func loadCgoFixture(t *testing.T, withIncomplete bool) *packages.Package {
 		config.Overlay = map[string][]byte{
 			filepath.Join(goRoot, "src", "runtime", "cgo", "go2cs_incomplete.go"): []byte(cgoIncompleteOverlay),
 		}
+
+		// Go refuses an overlay beneath GOMODCACHE, and a toolchain the go command fetched lives there. The load then
+		// takes a module cache of its own (the fixture's module has no dependencies), pinned to the toolchain whose
+		// GOROOT this resolved, so nothing can switch it.
+		if modCache, err := getGoEnvFrom(dir, "GOMODCACHE"); err == nil && modCache != "" && isPathUnder(goRoot, modCache) {
+			config.Env = append(config.Env, "GOMODCACHE="+t.TempDir(), "GOTOOLCHAIN=local",
+				"PATH="+filepath.Join(goRoot, "bin")+string(os.PathListSeparator)+os.Getenv("PATH"))
+		}
 	}
 
 	pkgs, err := packages.Load(config, ".")
@@ -280,6 +288,29 @@ func TestTheCgoFixtureLoadsAtCgoDisabledMissingOnlyRuntimeCgosIncomplete(t *test
 
 	if overlaid := loadCgoFixture(t, true); len(overlaid.Errors) != 0 {
 		t.Errorf("with the Overlay the fixture reports %v, want none", overlaid.Errors)
+	}
+}
+
+// A toolchain the go command fetched lives INSIDE the module cache (GOROOT is $GOMODCACHE/golang.org/toolchain@…, as
+// cloud lanes get it), and Go refuses an overlay beneath GOMODCACHE, so the Overlay above must still reach runtime/cgo
+// there. The layout is planted by naming GOROOT's parent as the module cache, which needs no second toolchain.
+func TestTheCgoFixtureLoadsWhenGorootIsInsideTheModuleCache(t *testing.T) {
+	dir, err := filepath.Abs(cgoFixtureDir)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	goRoot, err := getGoEnvFrom(dir, "GOROOT")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Setenv("GOMODCACHE", filepath.Dir(goRoot))
+
+	if overlaid := loadCgoFixture(t, true); len(overlaid.Errors) != 0 {
+		t.Errorf("with GOROOT inside the module cache, the Overlay fixture reports %v, want none", overlaid.Errors)
 	}
 }
 

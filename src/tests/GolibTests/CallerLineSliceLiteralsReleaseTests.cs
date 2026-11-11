@@ -43,6 +43,9 @@ public class CallerLineSliceLiteralsReleaseTests
 {
     private const string Switch = "GO2CS_SLICE_LITERAL_LINES";
 
+    // The whole test's budget, as in CallerLineMultiLineDebugTests (see ChildDeadline).
+    private const int BudgetMs = 360_000;
+
     // The literals whose struct elements' first fields must answer Go's own line: value index 0 and 2.
     private static readonly string[] StructGroups = ["structs", "localStructs"];
 
@@ -64,12 +67,13 @@ public class CallerLineSliceLiteralsReleaseTests
 
         string project = Path.Combine(src!, "tests", "Behavioral", "CallerLineSliceLiterals");
         string go2csPath = src!.Replace('\\', '/').TrimEnd('/') + "/";
+        ChildDeadline deadline = new(BudgetMs);
 
         // Built for this host's GOOS, so it runs here (see CallerLineMultiLineDebugTests).
-        (int buildCode, string buildOut) = Run(dotnet!, ["build", Path.Combine(project, "CallerLineSliceLiterals.csproj"), "-c", "Release", "-nologo", "-nodeReuse:false", "-p:go2csPath=" + go2csPath, "-p:GoTargetOS=" + HostGoos()], project, 1_800_000, tiered: true);
+        (int buildCode, string buildOut) = Run(dotnet!, ["build", Path.Combine(project, "CallerLineSliceLiterals.csproj"), "-c", "Release", "-nologo", "-nodeReuse:false", "-p:go2csPath=" + go2csPath, "-p:GoTargetOS=" + HostGoos()], project, deadline.For(300_000), tiered: true);
         Assert.AreEqual(0, buildCode, $"the Release build failed:{Environment.NewLine}{Tail(buildOut)}");
 
-        (int goCode, string goOut) = Run(go!, ["run", "."], project, 600_000, tiered: true);
+        (int goCode, string goOut) = Run(go!, ["run", "."], project, deadline.For(300_000), tiered: true);
         Assert.AreEqual(0, goCode, $"go run failed:{Environment.NewLine}{Tail(goOut)}");
 
         Dictionary<string, int[]> goLines = Parse(goOut);
@@ -83,7 +87,7 @@ public class CallerLineSliceLiteralsReleaseTests
         foreach (bool tiered in new[] { true, false })
         {
             string config = tiered ? "tiered" : "tiering off";
-            (int csCode, string csOut) = Run(dotnet!, [program], project, 120_000, tiered);
+            (int csCode, string csOut) = Run(dotnet!, [program], project, deadline.For(120_000), tiered);
             Assert.AreEqual(0, csCode, $"the converted program failed ({config}):{Environment.NewLine}{Tail(csOut)}");
 
             Dictionary<string, int[]> csLines = Parse(csOut);
@@ -206,8 +210,8 @@ public class CallerLineSliceLiteralsReleaseTests
 
         if (!process.WaitForExit(timeoutMs))
         {
-            process.Kill(entireProcessTree: true);
-            Assert.Fail($"{Path.GetFileName(file)} {string.Join(' ', args)} did not finish in {timeoutMs / 1000} s");
+            string diagnosis = ChildTimeoutDiagnostics.DescribeAndKill(process, stdout, stderr);
+            Assert.Fail($"{Path.GetFileName(file)} {string.Join(' ', args)} did not finish in {timeoutMs / 1000} s{Environment.NewLine}{diagnosis}");
         }
 
         return (process.ExitCode, stdout.Result + stderr.Result);

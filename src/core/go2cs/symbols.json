@@ -238,6 +238,18 @@
       "note": "U+1D20 - value-form foreign interface adapter infix."
     },
     {
+      "name": "NonSelfConstraintProxySuffix",
+      "value": "ᴾ",
+      "csharp": true,
+      "goEscape": true,
+      "goTrailing": "ᴾ - non-self-referential constraint proxy suffix ({Elem}ж{Iface}ᴾ)",
+      "csComment": [
+        "Suffixes the constraint proxy for a NON-self-referential method-set constraint ({Elem}ж{Iface}ᴾ),",
+        "kept distinct from the same-package pointer adapter {Elem}ж{Iface} (DESIGN-constraint-proxy-nonself 3.1)."
+      ],
+      "note": "U+1D3E - non-self-referential constraint proxy suffix."
+    },
+    {
       "name": "OverloadDiscriminator",
       "value": "\uA7F7",
       "goEscape": true,

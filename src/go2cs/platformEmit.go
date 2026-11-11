@@ -1179,10 +1179,13 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 //     (alwaysWriteSources), so "emitted" is exact here, unlike for a README;
 //   - when every flavour agrees, one flat sibling, and the key folders' copies go;
 //   - when they differ, each class of identical flavours goes to the keys the lattice homes it at (one per emitting
-//     GOOS folder over one target per GOOS), and the flat copy goes;
-//   - when they differ and the package has no source folder for some of those keys, the first target's flavour
-//     stays flat and the package is NAMED: a single-target reconvert routes into a key folder only where that folder
-//     is a source folder (isPlatformSourceFolder), so a folder holding only a sibling would never be written.
+//     GOOS folder over one target per GOOS), and the flat copy goes. A sibling is never compiled, so the key folder
+//     need not be a source folder: crypto/internal/fips140/subtle holds no key source at all and keeps
+//     xor_generic.cs.auto in amd64/ and linux-arm64/, folders a single-target reconvert finds again by the sibling
+//     itself (heldReviewSiblingPath). Such a folder adds nothing to the project file, which conditions source
+//     folders only;
+//   - when they differ and one of those keys is a NESTED PACKAGE of the same name (`internal/syscall/windows`), whose
+//     directory is never written into, the first target's flavour stays flat and the package is NAMED.
 //
 // A sibling whose hand-own is not flat in the root (a per-GOOS hand-own's, or one with no hand-own) keeps the
 // per-artifact rule, which already takes a per-GOOS sibling from its own target (perGOOSReviewSiblingOwner).
@@ -1263,7 +1266,7 @@ func mergeReviewSiblings(coreDir string, lattice *platformLattice, emissions []*
 
 			for _, class := range partitionContentClasses(flavourTargets, hashes) {
 				for _, folder := range lattice.homeFolders(class) {
-					splittable = splittable && len(folder) > 0 && isPlatformSourceFolder(packageDir, folder)
+					splittable = splittable && len(folder) > 0 && !isNestedPackageFolder(packageDir, folder)
 					split[filepath.Join(packageDir, folder, name)] = contentsOf[class[0]]
 				}
 			}
@@ -1275,19 +1278,19 @@ func mergeReviewSiblings(coreDir string, lattice *platformLattice, emissions []*
 			destinations[filepath.Join(packageDir, name)] = flavours[0].contents
 
 			if !agree {
-				addResidualNote(residual, pkg, fmt.Sprintf("review sibling %s differs by target, and the package has no "+
-					"source folder for every flavour's key, so %s's was kept flat", name, flavours[0].target))
+				addResidualNote(residual, pkg, fmt.Sprintf("review sibling %s differs by target, and a flavour's key "+
+					"folder is a nested package, so %s's was kept flat", name, flavours[0].target))
 			}
 		} else {
 			destinations = split
 		}
 
-		// Every place the sibling can be: flat, and each key folder that is a source folder (not a nested package
-		// named for a GOOS, internal/syscall/windows).
+		// Every place the sibling can be: flat, and each key folder that is the package's own (not a nested package
+		// named for a GOOS, internal/syscall/windows), whether it holds source or the sibling alone.
 		candidates := []string{filepath.Join(packageDir, name)}
 
 		for _, folder := range lattice.candidateFolders() {
-			if isPlatformSourceFolder(packageDir, folder) {
+			if !isNestedPackageFolder(packageDir, folder) {
 				candidates = append(candidates, filepath.Join(packageDir, folder, name))
 			}
 		}
@@ -1317,6 +1320,12 @@ func mergeReviewSiblings(coreDir string, lattice *platformLattice, emissions []*
 
 			if gone {
 				written++
+
+				// A key folder that held the sibling alone is now empty and goes with it. One holding anything else
+				// is not empty, and this removal fails, as it should.
+				if dir := filepath.Dir(candidate); dir != packageDir {
+					_ = os.Remove(dir)
+				}
 			}
 		}
 	}

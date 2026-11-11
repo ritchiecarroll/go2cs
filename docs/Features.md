@@ -1,7 +1,8 @@
 # go2cs features
 
 What the converter does for you, then how much of Go it covers, then real converted files to judge it
-by. For where it falls short, see [Limitations](Limitations.md).
+by. For where it falls short, see [Limitations](Limitations.md). For a feature-by-feature table of what
+works, what works with limits and what does not yet, see [Go feature support](GoFeatureSupport.md).
 
 ## What the converter does
 

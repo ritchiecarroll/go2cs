@@ -1,0 +1,12 @@
+<Project>
+  <!-- Passed as -p:CustomBeforeMicrosoftCommonTargets by CallerLineMultiLineDebugTests: the program builds Debug and
+       every project it references builds (or reuses) Release. The test needs only the program's own calls mapped
+       per call. A Debug build of the whole closure (golib, fmt, os, runtime and theirs) is cold on every hosted
+       runner, because the suite's own build is Release: it took 245 s on a 4-core linux host, and the test took up
+       to 7 min 21 s on osx-x64. -->
+  <ItemDefinitionGroup>
+    <ProjectReference>
+      <SetConfiguration>Configuration=Release</SetConfiguration>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+</Project>

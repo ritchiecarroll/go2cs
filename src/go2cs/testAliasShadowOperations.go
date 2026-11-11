@@ -802,7 +802,7 @@ func (v *Visitor) whiteboxBridgeMember(ident *ast.Ident) string {
 	switch obj := v.info.ObjectOf(ident).(type) {
 	case *types.Func:
 		name = getSanitizedFunctionName(v.getIdentName(ident))
-		if testMethodRenames[v.info.ObjectOf(ident)] {
+		if testMethodRenames[v.info.ObjectOf(ident)] || funcRenamedForMethodCollision(v.info.ObjectOf(ident), v.fset) {
 			name = ShadowVarMarker + name
 		}
 	case *types.TypeName:

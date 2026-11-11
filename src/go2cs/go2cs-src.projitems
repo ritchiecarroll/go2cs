@@ -82,8 +82,14 @@
     <None Include="$(MSBuildThisFileDirectory)cgoDeclarations_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDynamicImports.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoGateRefusal_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoLibraryCapture.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoLibraryCapture_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoLibraryRegistration.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoLibraryRegistration_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoMirrors.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoMirrors_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoPseudoPackage.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoPseudoPackage_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoWrappers.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoWrappers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoSelectedRefusal_test.go" />
@@ -233,6 +239,7 @@
     <None Include="$(MSBuildThisFileDirectory)foreignConstraintProxy.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignConstraintProxy_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignFieldConsumer_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)foreignGenericAdapter_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases.go" />
@@ -299,6 +306,7 @@
     <None Include="$(MSBuildThisFileDirectory)intrinsicPlaceholders_test.go" />
     <None Include="$(MSBuildThisFileDirectory)interfaceConversion.go" />
     <None Include="$(MSBuildThisFileDirectory)interfaceInheritedMemberDoc_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)interfaceEmbedMergedMethod_test.go" />
     <None Include="$(MSBuildThisFileDirectory)interfaceMethodDiamond_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\census.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\census_test.go" />
@@ -481,6 +489,9 @@
     <None Include="$(MSBuildThisFileDirectory)nilParamBoxTwin_test.go" />
     <None Include="$(MSBuildThisFileDirectory)noinlineDirective_test.go" />
     <None Include="$(MSBuildThisFileDirectory)noInliningPartialUsing_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nonSelfConstraintProxy.go" />
+    <None Include="$(MSBuildThisFileDirectory)nonSelfConstraintProxyRefusals.go" />
+    <None Include="$(MSBuildThisFileDirectory)nonSelfConstraintProxyRefusals_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetFeed.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetFeed_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetLock.go" />
@@ -725,6 +736,7 @@
     <None Include="$(MSBuildThisFileDirectory)valuePun_test.go" />
     <None Include="$(MSBuildThisFileDirectory)variableAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)variadicGlobalAliasElement_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)variadicLiftedElement_test.go" />
     <None Include="$(MSBuildThisFileDirectory)variadicPackView_test.go" />
     <None Include="$(MSBuildThisFileDirectory)versionReport.go" />
     <None Include="$(MSBuildThisFileDirectory)versionReport_test.go" />
@@ -765,6 +777,8 @@
     <None Include="$(MSBuildThisFileDirectory)licensing.go" />
     <None Include="$(MSBuildThisFileDirectory)licensing_test.go" />
     <None Include="$(MSBuildThisFileDirectory)liftedIfaceTestCast_integration_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)funcMethodCollision.go" />
+    <None Include="$(MSBuildThisFileDirectory)funcMethodCollision_test.go" />
     <None Include="$(MSBuildThisFileDirectory)LICENSE" />
     <None Include="$(MSBuildThisFileDirectory)LICENSE-EXCEPTION" />
     <None Include="$(MSBuildThisFileDirectory)rootGoTypeDescriptor_test.go" />

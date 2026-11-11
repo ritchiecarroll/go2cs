@@ -269,6 +269,37 @@ public static class GoMemProfile
         }
     }
 
+    // ---- persistentalloc: the profilers' own objects ----
+    //
+    // Go's profilers allocate their bookkeeping outside mallocgc: a bucket comes from persistentalloc
+    // (mprof.go newBucket) and an event's stack is read into the M's profStack. Neither is a Go allocation,
+    // so neither is sampled or counted, and that is what lets stkbucket allocate a bucket while it holds
+    // profInsertLock. A bucket built through a charged door could be sampled under that lock, and the
+    // recorder's own stkbucket then takes the same lock on the same thread, which never returns.
+    // t_recording does not cover it: it is set only while the memory profile records, and the block and
+    // mutex profiles reach stkbucket without it. These two doors are the only way runtime builds a
+    // profiler's object.
+
+    /// <summary>
+    /// A heap box for one of the profilers' own objects: Go's <c>persistentalloc</c>. Built as
+    /// <c>builtin.Ꮡ</c> builds it, but never charged to the memory profile and never counted as an allocation.
+    /// </summary>
+    internal static ж<T> PersistentBox<T>(T value)
+    {
+        long counted = AllocationCounter.CurrentThreadCount;
+        ж<T> box = BoxShape<T>.Slotted ? new SlottedStandardBox<T>(value) : new StandardBox<T>(value);
+        AllocationCounter.RewindThread(counted);
+
+        return box;
+    }
+
+    /// <summary>
+    /// A slice of <paramref name="length"/> zero values for the profilers' own use: a bucket's stack
+    /// (<c>persistentalloc</c>) or an event's stack buffer (the M's <c>profStack</c>). Never charged to the
+    /// memory profile and never counted as an allocation.
+    /// </summary>
+    internal static slice<T> PersistentSlice<T>(nint length) => new(new T[length]);
+
     // Go's nextSample: 0 at rate 1 (sample every allocation), otherwise an exponential draw with mean
     // `rate` (fastexprand, capped as Go caps it).
     private static long NextSample(nint rate)
