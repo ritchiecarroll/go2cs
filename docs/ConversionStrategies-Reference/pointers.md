@@ -2082,6 +2082,7 @@ func (n *AttrNode) Mode(def int) (int, bool) {
 `Mode` is a method of `Node`, callable on a nil `*Node`. It is emitted exactly as it would be under the
 type's own name, with the alias kept in the signature as Go wrote it:
 
+<!-- source: src/tests/Behavioral/AliasReceiverForms/main.cs:21-28 -->
 ```csharp
 public static (nint, bool) Mode(this ж<AttrNode> Ꮡn, nint def) {
     ref var n = ref Ꮡn.DerefOrNull();
