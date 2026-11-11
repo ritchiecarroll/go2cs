@@ -1702,6 +1702,12 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNilPointerValueReceiverCall() => CheckTarget("NilPointerValueReceiverCall");
 
     [TestMethod]
+    public void CheckNilPtrIdentity() => CheckTarget("NilPtrIdentity");
+
+    [TestMethod]
+    public void CheckNilPtrIdentityLib() => CheckTarget("NilPtrIdentityLib");
+
+    [TestMethod]
     public void CheckNilReceiverMethods() => CheckTarget("NilReceiverMethods");
 
     [TestMethod]

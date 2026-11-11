@@ -4197,6 +4197,17 @@ public static partial class builtin
         if (typeof(T) == typeof(complex64))
             return (complex64)(object)left! == (complex64)(object)right!;
 
+        // A Go pointer type argument: the nil literal's NilBox and a zero's null are ONE nil (PointerNilIdentity),
+        // as ж's own `==` has them. The object overload below must keep them apart, since there they are interface
+        // values: a typed nil in an interface is not the nil interface.
+        if (PointerNilIdentity<T>.IsPointerType)
+        {
+            bool leftNil = PointerNilIdentity<T>.IsNil(left), rightNil = PointerNilIdentity<T>.IsNil(right);
+
+            if (leftNil || rightNil)
+                return leftNil && rightNil;
+        }
+
         return default(T) is null ?
             AreEqual(left, (object?)right) :
             EqualityComparer<T>.Default.Equals(left!, right!);

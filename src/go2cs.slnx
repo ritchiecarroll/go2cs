@@ -904,6 +904,8 @@
     <Project Path="tests/Behavioral/NilPointerParamValueCallTC0/NilPointerParamValueCallTC0.csproj" />
     <Project Path="tests/Behavioral/NilPointerUintptr/NilPointerUintptr.csproj" />
     <Project Path="tests/Behavioral/NilPointerValueReceiverCall/NilPointerValueReceiverCall.csproj" />
+    <Project Path="tests/Behavioral/NilPtrIdentity/NilPtrIdentity.csproj" />
+    <Project Path="tests/Behavioral/NilPtrIdentityLib/NilPtrIdentityLib.csproj" />
     <Project Path="tests/Behavioral/NilReceiverNormalization/NilReceiverNormalization.csproj" />
     <Project Path="tests/Behavioral/NilSliceConversion/NilSliceConversion.csproj" />
     <Project Path="tests/Behavioral/NilVarNamedFuncConv/NilVarNamedFuncConv.csproj" />

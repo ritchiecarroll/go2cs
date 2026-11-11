@@ -1705,6 +1705,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNilPointerValueReceiverCall() => CheckTarget("NilPointerValueReceiverCall");
 
     [TestMethod]
+    public void CheckNilPtrIdentity() => CheckTarget("NilPtrIdentity");
+
+    [TestMethod]
+    public void CheckNilPtrIdentityLib() => CheckTarget("NilPtrIdentityLib");
+
+    [TestMethod]
     public void CheckNilReceiverMethods() => CheckTarget("NilReceiverMethods");
 
     [TestMethod]
