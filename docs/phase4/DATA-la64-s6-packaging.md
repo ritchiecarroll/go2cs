@@ -94,3 +94,30 @@ windows-latest. push-nuget.ps1 exited 1 after 7 minutes with no package.
   are read on a release-smoke dispatch after S3's arm64 sites are in the branch, which COORD's ordering ruling
   (S6 seats with or after S3's last arm64 site) already requires.
 - The pack log is the run's `release-smoke-pack-log` artifact (UTF-16; lines 37-39 and 470-502).
+
+## 8. Amendment, 2026-11-11: the pack after S3 (os-matrix release-smoke run 42983079137)
+
+S3's arm64 sites 6, 8 and 9 landed in batch 284 (master `50dd9a065c`). Master was merged into this branch with no
+rebase and no conflicts (`765904815e`); the merge carries one pack guard, this seat's `.github/pack-flavour-guard.ps1`,
+which replaces S5b's "every flavour packs at amd64" step. COORD approved the plan delta and its predictions before
+the dispatch (mailbox `6cd97d8eee`), with three rulings: fips140/subtle ships RID-split under push-nuget's structure
+rule (Q1); a KnownIssues entry names the 15 throwing stubs (Q2); this seat lands in the first batch that carries
+i9's netpoll guard lift, not before (Q3).
+
+Dispatched on `765904815e` (goos linux, stage release-smoke). Every job succeeded: pack (windows-latest, push-nuget
+exit 0 after 71 minutes, 362 packages) and the four consumer legs win-x64, linux-x64, osx-x64 and osx-arm64.
+
+| Prediction (posted before the dispatch) | Reading | Score |
+|:--|:--|:--|
+| P1 "Layout L3: 55 package(s)": the 54 plus crypto/internal/fips140/subtle | "Layout L3: 55 package(s) carry layout key folders" | MET |
+| P2 the linux-arm64 pass compiles, 0 errors | "[linux-arm64] Building Release at -p:GoTargetOS=linux -p:GoTargetArch=arm64", then "[linux-arm64] Packing"; 0 error lines in the job log | MET |
+| P3 four build passes; 5 RID folders per split package; 55 osx-arm64 twins | passes linux-arm64, osx-x64, linux-x64, win-x64; "Shipped shape: 55 RID-specific package(s) carry all 5 RID folders (win-x64, linux-x64, osx-x64, osx-arm64, linux-arm64); 55 same-flavor twin folder(s) byte-identical"; "Flavor comparison across windows/amd64, linux/amd64, darwin/amd64, linux/arm64: 55 of 55 L3 package(s) differ" | MET |
+| P4 the runtimes/linux-arm64 folders total within 10% of the runtimes/linux-x64 folders, over the 55 | from the `release-smoke-feed` artifact, uncompressed entry sizes: linux-arm64 32,156,440 bytes in 55 packages, linux-x64 32,238,132 bytes in 55 (ratio 0.997); win-x64 32,538,932, osx-x64 and osx-arm64 32,525,004 each | MET |
+| P5 release-smoke's consumer legs stay four RIDs, all PASS | win-x64, linux-x64, osx-x64, osx-arm64, each success; no linux-arm64 consumer leg (S5c, C2's queue) | MET |
+
+The section-5 rows held as "pending" (RID folders per split package, twin folders, size) are read here, at 55 rather
+than 54 because of fips140/subtle.
+
+What the arm64 assets contain is not measured at the pack: they carry S3's 15 throwing stubs (the KnownIssues entry
+added with this amendment), and at master a linux-arm64 program stops at its first `os.Open` until i9's netpoll guard
+lift lands, which is why Q3 holds this seat for that batch.

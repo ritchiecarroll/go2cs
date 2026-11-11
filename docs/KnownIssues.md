@@ -109,6 +109,23 @@ architecture (`linux-x64` run on `linux-arm64`).
      example moved to linux-riscv64, as S0's gate did. The old anchor is kept as an explicit id: go.lib.targets in the
      packages already published links to it. -->
 
+## On linux-arm64, 15 standard-library members throw when called
+
+The linux-arm64 build of the standard library has 15 members that Go implements in arm64 assembly and that have no
+managed body yet, so each throws when called: `getisar0` and `getpfr0` in `internal/cpu`; `getisar0`, `getisar1`,
+`getpfr0` and `getzfr0` in `vendor/golang.org/x/sys/cpu`; `load_g`, `save_g`, `spillArgs`, `unspillArgs`,
+`asmcgocall_no_g`, `emptyfunc`, `panicBounds` and `panicExtend` in `runtime`; and `rawVforkSyscall` in `syscall`.
+Nine of them exist only in the linux-arm64 build; the other six are routines that the other builds also leave
+without a body.
+
+**To avoid it**, do not call these members. All of them are internal to the standard library, so a program reaches
+one only through a standard-library path; if yours does, report the call path.
+<!-- Added 2026-11-11 (P2, seat S6, COORD ruling Q2 of the S6 plan delta): the count and the names are the 15 stubbed
+     rows of the complete linux-arm64 declaration table in docs/phase4/DATA-la64-s3-census.md ("Amendment, 2026-11-10",
+     57 declarations, 42 bodied, 15 stubbed), re-read at master 50dd9a065c by G (docs/phase4/DATA-la64-s7-bank-plan.md
+     section 9.2 on claude/g-la64-s7-e1, member for member). Six of the 15 are each architecture's own assembly and are
+     stubbed at linux/amd64 too; nine exist only at linux/arm64. -->
+
 ## On macOS, a `go` statement past the system's thread limit ends the program
 
 Each goroutine is an operating-system thread, and macOS caps how many threads one process may run. When a
