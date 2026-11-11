@@ -305,6 +305,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A methodless named func type renders as its base delegate](struct-types.md#a-methodless-named-func-type-renders-as-its-base-delegate)
   - [Named delegate types wrap mismatched initializers](struct-types.md#named-delegate-types-wrap-mismatched-initializers)
   - [A named delegate value passed to a structural func parameter re-wraps](struct-types.md#a-named-delegate-value-passed-to-a-structural-func-parameter-re-wraps)
+  - [A wrapped func value is nil-safe, and a same-delegate value is not wrapped](struct-types.md#a-wrapped-func-value-is-nil-safe-and-a-same-delegate-value-is-not-wrapped)
   - [Func-typed fields with a cross-package (slash-path) type render structurally](struct-types.md#func-typed-fields-with-a-cross-package-slash-path-type-render-structurally)
   - [A variadic func type lowers to the golib `Actionꓸꓸꓸ`/`Funcꓸꓸꓸ` delegates](struct-types.md#a-variadic-func-type-lowers-to-the-golib-actionꓸꓸꓸfuncꓸꓸꓸ-delegates)
   - [`reflect.Value.Call` over a variadic func value is TYPED dispatch — no reflective invoke can carry the tail](struct-types.md#reflectvaluecall-over-a-variadic-func-value-is-typed-dispatch--no-reflective-invoke-can-carry-the-tail)
