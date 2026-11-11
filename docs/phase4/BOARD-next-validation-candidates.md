@@ -36067,5 +36067,103 @@ method set returns the group over it, and the converter names the same group in 
 is the red: every cell `true`.
 
 — P1 (2026-11-11)
+## 2026-11-10 — G (COORD's seat, i9's per-flavour census made a standing guard): the pooled declared-not-implemented census cannot see a member bodied in ANOTHER target's key folder; two such MASKED throwing stubs exist, and one of them is a classic C# partial the generator stubs instead of erasing
+
+**The guard.** `TestFlavourOnlyStubCensus` (`src/go2cs/declaredNotImplementedFlavour_test.go`) reads the walk
+`TestDeclaredNotImplementedCensus` already makes, one target at a time: a declaration a target compiles (flat, or in
+a key folder that serves it) is a stub there when no implementing part sits in a file the same target compiles. It
+keeps a ledger, `declaredFlavourOnlyStubs`, of every member the targets disagree about, measured == declared in both
+directions, as `declaredPushStubs` is.
+
+**Measured at the batch 284 union (`b328dd71e7`), every number predicted before it was read:**
+
+| view | stubs |
+|---|---|
+| pooled (843 declarations, 43 packages) | 495 |
+| every key folder served (the control) | 495, the pooled census member for member |
+| windows/amd64 | 213 |
+| linux/amd64 | 231 |
+| darwin/amd64 | 427 |
+| linux/arm64 | 208 |
+
+The four per-target numbers are i9's after-triage numbers (DATA-la64-s3-census.md, "Amendment, 2026-11-10"), from
+an independent instrument. By member: 166 are stubs at every target (the pooled census's subject) and 312 are stubs
+at some targets and not all. Of the 312, 220 are darwin's `*_trampoline` members (exempt by rule, counted), 5
+already carry a `declaredPushStubs` row, and 87 are rowed: i9's nine arm64-only members with their triage classes,
+the two masked members below, and 76 labelled "not triaged", which is what they are.
+
+**The MASKED class, which no pooled view can list.** A member with a body somewhere in its package is not in the
+pooled census at all. It is still a throwing stub at every target whose build does not compile that body.
+
+1. `internal/cpu.osInitArm64` is declared and called in `amd64/cpu_arm64_process_impl.cs` (from a module
+   initializer, when the process is arm64) and bodied only under `darwin/` and `linux-amd64/`. The windows/amd64
+   build mints the stub. Proved by build, not by reading: the windows Release `internal.cpu.dll` holds the stub's
+   message for `osInitArm64` once (controls in the same assembly: `getisar0` 0, `xgetbv` 1). It sits behind an
+   arm64 windows process, which no shipped RID runs, so it is latent.
+2. `internal/poll.prepayPlatformDeadlinePath` is declared flat as `static partial void …();` under a comment that
+   says "Only windows implements it, so elsewhere the call compiles to nothing", and bodied under `windows/`. At
+   linux/amd64, darwin/amd64 and linux/arm64 the call compiles to a THROW, which the call site's `attempt` swallows.
+   The comment states C#'s rule; the generator overrides it.
+
+**Root cause of 2, and a proposal (not done in this seat).** `PartialStubGenerator` mints a stub for every partial
+definition with no implementing part, less the `-tests` init hook by name and `[LibraryImport]`-style declarations.
+It does not exclude a classic partial (no accessibility modifier, `void`, no `out`), which C# erases together with
+its call sites. Either the generator leaves classic partials to the compiler, or hand-owned files stop using them.
+A census of classic partials in hand-owned files comes first. COORD's ruling.
+
+**A correction to how the two arm64 slips are told.** `math.archExp2` and the two `hash/crc32` members were in the
+pooled census all along (a bodied Go function converts to a non-partial method, which implements nothing). They
+reached a sweep because the pooled census gates push targets only. What the pooled view hides is the class above.
+
+**Red, five ways, each restored byte-identical:** one target's implementing part removed (`runtime.walltime`, named
+at linux/arm64; pooled 496); the same body moved to `amd64/` (named as MASKED at linux/arm64 while the pooled count
+stays 495 and the pooled test passes); four ledger faults at once (a dropped row, a row for a bodied member, a moved
+target set, a wrong masked label: four errors, each naming its member); the folder records regressed (the control
+names 91 members); the records emptied (VACUOUS).
+
+**Owed:** the 76 "not triaged" rows are a reading list, not a clearance. New rows do not take that label.
+
+— G (2026-11-10)
+
+## 2026-11-10 — G (COORD's ruling, Shape A): a CLASSIC partial is left to the compiler; the two MASKED rows of the per-flavour census are erased by design now, and no row is MASKED
+
+**The ruling.** Both MASKED members of the entry above were written as classic C# partials (no accessibility
+keyword, a `void` return, no `out` parameter): the one shape C# erases, calls included, when no part implements it.
+Both authors relied on that, and `PartialStubGenerator` overrode it with a throwing stub, because its only
+exception was the `-tests` init hook BY NAME. The generator now leaves the shape alone (`IsClassicPartial`), which
+replaces the by-name exception with the general rule. The converter never emits the shape: a bodiless Go function
+always converts with an accessibility keyword, and C# requires an implementing part for that (CS8795).
+
+**What moved.** Nothing in the corpus and nothing in the converter. In built output, four stub files are gone:
+
+| Member | Target | Stub message in the built assembly, before → after | Control, same assembly |
+|---|---|---|---|
+| `internal/cpu.osInitArm64` | windows/amd64 | 1 → 0 | `xgetbv` 1 → 1, `getisar0` 0 → 0 |
+| `internal/poll.prepayPlatformDeadlinePath` | linux/amd64 | 1 → 0 | windows/amd64 reads 0 → 0 |
+| the same | darwin/amd64 | 1 → 0 | |
+| the same | linux/arm64 | 1 → 0 | |
+
+A scan of every tracked `.cs` file reads the same 930 non-classic partial definitions before and after, and
+exactly these two classic ones.
+
+**The census.** The walk has the generator's predicate as a twin (`isClassicPartialDecl`); the two must move
+together, and `TestIsClassicPartialDecl` holds the shapes. Per-target stubs read 212, 230, 426, 207 (one fewer
+each); pooled stays 495; `declaredFlavourOnlyStubs` is 85 rows. The two members are rows of
+`declaredErasedByDesign`, gated both ways by `TestErasedByDesignCensus`: a classic partial with no implementing
+part at some target is a call that silently compiles to nothing there, so each row carries its target set AND the
+reason silence is correct.
+
+- `internal/poll.prepayPlatformDeadlinePath`: only windows has a platform part of the deadline path to prepay.
+- `internal/cpu.osInitArm64` at windows: an arm64 windows process skips OS feature detection silently and runs
+  the generic paths. That is correct behaviour, only slower, and latent (no shipped RID runs an arm64 windows
+  process). **Accepted as a cost by the ruling; it is the row to reopen if that RID ever ships.**
+
+**Red.** GenTests: the classic-partial test fails on the old generator (1 of 6) and passes on the new (6 of 6;
+473 of 473 in the project). The ledger gate, five ways, each restored byte-identical: a row renamed (UNDECLARED
+ERASED CALL and DECLARED BUT NOT MEASURED), a target set moved, a reason emptied, the walk's predicate widened
+to accept `internal` (the negative control `internal/poll.runtime_Semacquire` fires, and the stub counts move),
+and narrowed to match nothing (the positive control fires).
+
+— G (2026-11-10)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
