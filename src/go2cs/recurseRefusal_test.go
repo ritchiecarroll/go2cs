@@ -170,3 +170,32 @@ func TestRecurseRefusalComposesWithWarn(t *testing.T) {
 		t.Errorf("refused/ has no project; want it converted under -warn GO2CS2002")
 	}
 }
+
+// TestRecurseRunErrorNamesRefusedAndFailedPackages: a -recurse run with a refused or a failed package ends nonzero,
+// naming each, where a failed package used to exit 0; -tests -recurse still goes on past a failed package.
+func TestRecurseRunErrorNamesRefusedAndFailedPackages(t *testing.T) {
+	for _, c := range []struct {
+		name        string
+		refused     []refusedPackage
+		failed      []string
+		testClosure bool
+		want        string // "" = nil
+	}{
+		{"every package converted", nil, nil, false, ""},
+		{"a failed package", nil, []string{"example.com/a"}, false, "1 package failed: example.com/a"},
+		{"a failed package under -tests -recurse", nil, []string{"example.com/a"}, true, ""},
+		{"refused and failed", []refusedPackage{{"example.com/r", diagnosticProxyRefused}}, []string{"example.com/a", "example.com/b"}, false,
+			"1 package refused: example.com/r; 2 packages failed: example.com/a, example.com/b"},
+	} {
+		m := &ModuleConverter{refused: c.refused, failed: c.failed, includeTestClosure: c.testClosure}
+		got := ""
+
+		if err := m.runError(); err != nil {
+			got = err.Error()
+		}
+
+		if got != c.want {
+			t.Errorf("%s: runError() = %q; want %q (\"\" = nil)", c.name, got, c.want)
+		}
+	}
+}

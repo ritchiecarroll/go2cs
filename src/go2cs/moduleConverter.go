@@ -55,6 +55,7 @@ type ModuleConverter struct {
 	lockedModules        map[string]moduleLockEntry // module-cache dependency modules in the convert-set (modulesLock.go)
 	includeTestClosure   bool                       // -tests -recurse: widen the convert-set by the module's test closure (moduleTestsDriver.go)
 	refused              []refusedPackage           // packages refused at a pre-emission gate and skipped (recurseRefusal.go)
+	failed               []string                   // packages that failed to load or panicked, and were skipped (recurseRefusal.go)
 
 	// -nuget-map (nugetMap.go): every third-party module of the closure, converted or only referenced; the
 	// resolver's answer per module; and the source and lock warnings printed with its report.
@@ -229,12 +230,8 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 	//    GoStdLibVersion default for the go.* NuGet PackageReferences under -recurse=nuget.
 	m.generateRecurseBuildFiles()
 
-	// Everything else is written; a refused package still makes the run fail (recurseRefusal.go).
-	if len(m.refused) > 0 {
-		return refusedPackagesError(m.refused)
-	}
-
-	return nil
+	// Everything else is written; a refused or failed package still makes the run fail (recurseRefusal.go).
+	return m.runError()
 }
 
 // loadClosure loads the module at moduleDir and returns its transitive import closure keyed by
@@ -642,6 +639,7 @@ func (m *ModuleConverter) convertAll() {
 
 	fmt.Println()
 
+	m.failed = failed
 	m.reportRefusedPackages(m.refused)
 	reportSlowestPackages(durations)
 }

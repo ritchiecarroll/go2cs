@@ -9,6 +9,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -19,7 +20,9 @@ import (
 // -recurse one refused package used to end the whole run, and every package queued behind it went unconverted. So
 // -recurse skips it instead: its diagnostics print as errors, the rest of the module converts, and the run ends
 // nonzero naming the refused package and each converted package that imports it (those cannot build until it
-// converts). A code downgraded by -warn never reaches a gate, so its package is not refused at all.
+// converts). A code downgraded by -warn never reaches a gate, so its package is not refused at all. A package that
+// fails to load or panics was already skipped; it now makes the run end nonzero too, where it used to exit 0.
+// -tests -recurse keeps both behaviours it had: a refusal is fatal there, and a failed package does not stop it.
 
 // packageRefusal is a pre-emission refusal returned to the -recurse driver instead of ending the process.
 type packageRefusal struct {
@@ -90,15 +93,32 @@ func (m *ModuleConverter) reportRefusedPackages(refused []refusedPackage) {
 	}
 }
 
-// refusedPackagesError is ConvertModule's error when a package was refused: the run's output is complete otherwise.
-func refusedPackagesError(refused []refusedPackage) error {
-	paths := make([]string, len(refused))
+// runError is ConvertModule's error when a package was refused or failed (did not load, or panicked), raised after
+// the rest of the run's output is written; nil when every package converted. -tests -recurse (includeTestClosure)
+// goes on past a failed package, as it always did: its phase A converts the closure for phase B, and a failed
+// third-party package there is not a reason to stop (ruled out of scope with that driver's refusals).
+func (m *ModuleConverter) runError() error {
+	var parts []string
 
-	for i, r := range refused {
-		paths[i] = r.path
+	if len(m.refused) > 0 {
+		paths := make([]string, len(m.refused))
+
+		for i, r := range m.refused {
+			paths[i] = r.path
+		}
+
+		parts = append(parts, fmt.Sprintf("%d %s refused: %s", len(m.refused), plural(len(m.refused), "package", "packages"), strings.Join(paths, ", ")))
 	}
 
-	return fmt.Errorf("%d %s refused: %s", len(refused), plural(len(refused), "package", "packages"), strings.Join(paths, ", "))
+	if len(m.failed) > 0 && !m.includeTestClosure {
+		parts = append(parts, fmt.Sprintf("%d %s failed: %s", len(m.failed), plural(len(m.failed), "package", "packages"), strings.Join(m.failed, ", ")))
+	}
+
+	if len(parts) == 0 {
+		return nil
+	}
+
+	return errors.New(strings.Join(parts, "; "))
 }
 
 func plural(n int, one, many string) string {
