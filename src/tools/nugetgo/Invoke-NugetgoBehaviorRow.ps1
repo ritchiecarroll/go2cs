@@ -61,14 +61,15 @@ if (-not $SampleDir) { $SampleDir = Join-Path $src "tests/ModuleBehavior/$Module
 
 # ---- this host is the RID's own -------------------------------------------------------------------------------------
 $hostName = Get-NugetgoRowHost -Environment @{ ImageOS = $env:ImageOS; ImageVersion = $env:ImageVersion; NUGETGO_RUNNER = $env:NUGETGO_RUNNER } -HostLabel $HostLabel
-$ridGoos = Get-NugetgoRidFlavors
-if (-not $ridGoos.Contains($Rid)) { Refuse "$Rid is not a RID the go.* release ships ($(@($ridGoos.Keys) -join ', '))" }
+$ridFlavors = Get-NugetgoRidFlavors
+if (-not $ridFlavors.Contains($Rid)) { Refuse "$Rid is not a RID the go.* release ships ($(@($ridFlavors.Keys) -join ', '))" }
+$ridGoos = Get-NugetgoFlavorGoos $ridFlavors[$Rid]
 $dotnetInfo = @(& dotnet --info)
 $runtimeRid = @($dotnetInfo | ForEach-Object { if ($_ -match '^\s*RID:\s*(\S+)\s*$') { $Matches[1] } })[0]
 if ($runtimeRid -cne $Rid) { Refuse "this host's dotnet runs $runtimeRid, not ${Rid}: a row is written on a host of its own RID" }
 $goos = (& go env GOOS).Trim()
 $goHostOs = (& go env GOHOSTOS).Trim()
-if ($goos -cne $ridGoos[$Rid] -or $goHostOs -cne $ridGoos[$Rid]) { Refuse "go reports GOOS $goos on GOHOSTOS $goHostOs, not ${Rid}'s $($ridGoos[$Rid])" }
+if ($goos -cne $ridGoos -or $goHostOs -cne $ridGoos) { Refuse "go reports GOOS $goos on GOHOSTOS $goHostOs, not ${Rid}'s $ridGoos" }
 $osName = if ($env:RUNNER_OS) { "$($env:RUNNER_OS) $($env:RUNNER_ARCH)" } else { "$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)" }
 $os = "${osName}: $([System.Runtime.InteropServices.RuntimeInformation]::OSDescription.Trim())"
 

@@ -7,10 +7,11 @@
 
 # PER-OS PROMOTION FOR A NUGETGO PACKAGE (COORD ruling 2026-10-12, for mousetrap and cobra).
 #
-# A converted module can differ by GOOS: mousetrap's StartedByExplorer has a Windows body and an "others" body, and
+# A converted module can differ by platform: mousetrap's StartedByExplorer has a Windows body and an "others" body, and
 # cobra's command_win.go is Windows-only. A -recurse conversion emits ONE target, so nugetgo-pack.ps1 converts and
-# builds the module once per GOOS (its flavors) and asks the go.* release's own question of them: do the flavors'
-# assemblies differ in MEANING? The answer is a measurement, made with the release's material check
+# builds the module once per flavor -- a target of the converted standard library's universe, the pairs the release's
+# RID map ships (windows/amd64, linux/amd64, darwin/amd64, linux/arm64) -- and asks the go.* release's own question of
+# them: do the flavors' assemblies differ in MEANING? The answer is a measurement, made with the release's material check
 # (src/tools/pushnuget/GoAssemblyMaterial.psm1: each assembly hashed with Roslyn's deterministic identity fields zeroed),
 # never a list and never the module author's word.
 #
@@ -18,59 +19,71 @@
 #     a neutral package is byte for byte what the single-flavor pack produced.
 #   * They do: the package takes push-nuget.ps1's RID-specific layout exactly. lib/<tfm>/ carries the REFERENCE flavor
 #     (windows, the release's first RID) as the compile-time asset, and runtimes/<rid>/lib/<tfm>/ carries each shipped
-#     RID's flavor (win-x64, linux-x64, osx-x64 and osx-arm64; the two Mac RIDs the same darwin bytes). The release's
+#     RID's flavor (win-x64, linux-x64, osx-x64, osx-arm64 and linux-arm64; the two Mac RIDs the same darwin bytes,
+#     and linux-arm64 its own linux/arm64 flavor, never linux-x64's). The release's
 #     own comment block above $ridFlavors says why lib/ and not ref/, and why both Mac folders ship explicitly.
 #
 # The RID map is the release's, and Test-NugetgoFlavors.ps1 reads push-nuget.ps1 to hold it so.
 
 Import-Module (Join-Path $PSScriptRoot '../pushnuget/GoAssemblyMaterial.psm1') -Force
 
-# RID -> GOOS, in push-nuget.ps1's order: the first entry is the reference flavor.
+# RID -> the flavor it ships ('goos/goarch', a universe target), in push-nuget.ps1's order: the first entry is the
+# reference flavor. TestRidFlavorMapsShipTheUniverse pins the distinct flavors, in order, to the universe.
 function Get-NugetgoRidFlavors {
     [ordered]@{
-        'win-x64'   = 'windows'
-        'linux-x64' = 'linux'
-        'osx-x64'   = 'darwin'
-        'osx-arm64' = 'darwin'
+        'win-x64'     = 'windows/amd64'
+        'linux-x64'   = 'linux/amd64'
+        'osx-x64'     = 'darwin/amd64'
+        'osx-arm64'   = 'darwin/amd64'
+        'linux-arm64' = 'linux/arm64'
     }
 }
 
-function Get-NugetgoReferenceGoos { @((Get-NugetgoRidFlavors).Values)[0] }
+function Get-NugetgoReferenceFlavor { @((Get-NugetgoRidFlavors).Values)[0] }
 
-# The distinct GOOS values, in map order: one conversion and one build each.
-function Get-NugetgoFlavorGoos { @((Get-NugetgoRidFlavors).Values | Select-Object -Unique) }
+# The distinct flavors, in map order: one conversion and one build each.
+function Get-NugetgoFlavors { @((Get-NugetgoRidFlavors).Values | Select-Object -Unique) }
 
-# The distinct 'goos/goarch' pairs the RID map ships, in map order (x64 is amd64): where a package's imports are read.
-function Get-NugetgoFlavorPlatforms {
-    @((Get-NugetgoRidFlavors).GetEnumerator() | ForEach-Object { "$($_.Value)/$(if ($_.Key -like '*-arm64') { 'arm64' } else { 'amd64' })" } | Select-Object -Unique)
+# The GOOS of a flavor, and the target a RID's own host converts for by default (x64 is amd64): osx-arm64 ships the
+# darwin/amd64 flavor but a Mac arm64 host converts for darwin/arm64.
+function Get-NugetgoFlavorGoos([Parameter(Mandatory)][string]$Flavor) { ($Flavor -split '/', 2)[0] }
+function Get-NugetgoRidTarget([Parameter(Mandatory)][string]$Rid) {
+    "$(Get-NugetgoFlavorGoos (Get-NugetgoRidFlavors)[$Rid])/$(if ($Rid -like '*-arm64') { 'arm64' } else { 'amd64' })"
 }
 
-# Does any flavor's assembly set differ in meaning from the proof's flavor? -Assemblies maps each GOOS of
-# Get-NugetgoFlavorGoos to a hashtable of assembly file name -> bytes. A flavor that is missing is refused rather than
+# Where a package's imports are read: each shipped RID's own target, in map order, which covers every flavor and adds
+# darwin/arm64, so a package a Mac arm64 host's build imports is never read as test-only.
+function Get-NugetgoFlavorPlatforms { @((Get-NugetgoRidFlavors).Keys | ForEach-Object { Get-NugetgoRidTarget $_ } | Select-Object -Unique) }
+
+# A flavor as a folder name: 'linux/arm64' is 'linux-arm64', the layout's own pair spelling.
+function Get-NugetgoFlavorFolder([Parameter(Mandatory)][string]$Flavor) { $Flavor -replace '/', '-' }
+
+# Does any flavor's assembly set differ in meaning from the proof's flavor? -Assemblies maps each flavor of
+# Get-NugetgoFlavors to a hashtable of assembly file name -> bytes. A flavor that is missing is refused rather than
 # read as neutral: the decision is only a measurement when every flavor was measured.
 function Get-NugetgoFlavorDecision {
     [CmdletBinding()]
-    param([Parameter(Mandatory)]$Assemblies, [Parameter(Mandatory)][string]$ProofGoos)
+    param([Parameter(Mandatory)]$Assemblies, [Parameter(Mandatory)][string]$ProofFlavor)
 
-    foreach ($goos in Get-NugetgoFlavorGoos) {
-        if (-not $Assemblies.Contains($goos)) { throw "no $goos flavor was built: every flavor ($((Get-NugetgoFlavorGoos) -join ', ')) is measured before a package is called neutral" }
+    foreach ($each in Get-NugetgoFlavors) {
+        if (-not $Assemblies.Contains($each)) { throw "no $each flavor was built: every flavor ($((Get-NugetgoFlavors) -join ', ')) is measured before a package is called neutral" }
     }
-    if (-not $Assemblies.Contains($ProofGoos)) { throw "the proof's flavor $ProofGoos is not one of $((Get-NugetgoFlavorGoos) -join ', ')" }
+    if (-not $Assemblies.Contains($ProofFlavor)) { throw "the proof's flavor $ProofFlavor is not one of $((Get-NugetgoFlavors) -join ', ')" }
 
-    $proof = $Assemblies[$ProofGoos]
+    $proof = $Assemblies[$ProofFlavor]
     $reasons = New-Object System.Collections.Generic.List[string]
-    foreach ($goos in Get-NugetgoFlavorGoos) {
-        if ($goos -ceq $ProofGoos) { continue }
-        $flavor = $Assemblies[$goos]
+    foreach ($each in Get-NugetgoFlavors) {
+        if ($each -ceq $ProofFlavor) { continue }
+        $flavor = $Assemblies[$each]
         $onlyProof = @($proof.Keys | Where-Object { -not $flavor.ContainsKey($_) } | Sort-Object)
         $onlyFlavor = @($flavor.Keys | Where-Object { -not $proof.ContainsKey($_) } | Sort-Object)
         if ($onlyProof.Count -or $onlyFlavor.Count) {
-            $reasons.Add("[$goos] the assembly set differs from ${ProofGoos}'s (only in ${ProofGoos}: $($onlyProof -join ', '); only in ${goos}: $($onlyFlavor -join ', '))")
+            $reasons.Add("[$each] the assembly set differs from ${ProofFlavor}'s (only in ${ProofFlavor}: $($onlyProof -join ', '); only in ${each}: $($onlyFlavor -join ', '))")
             continue
         }
         foreach ($name in @($proof.Keys | Sort-Object)) {
             $why = Get-GoLibEntryDifference -Name $name -A $proof[$name] -B $flavor[$name]
-            if ($why) { $reasons.Add("[$goos] $why (first: $ProofGoos)") }
+            if ($why) { $reasons.Add("[$each] $why (first: $ProofFlavor)") }
         }
     }
     [pscustomobject]@{ RidSpecific = $reasons.Count -gt 0; Reasons = $reasons.ToArray() }
@@ -99,7 +112,7 @@ function Set-NugetgoRidAssets {
 
     Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
     $rids = Get-NugetgoRidFlavors
-    $reference = $Assemblies[(Get-NugetgoReferenceGoos)]
+    $reference = $Assemblies[(Get-NugetgoReferenceFlavor)]
     $zip = [System.IO.Compression.ZipFile]::Open($Package, 'Update')
     try {
         $lib = @($zip.Entries | Where-Object { $_.FullName -like "lib/$TargetFramework/*.dll" } | ForEach-Object { $_.Name } | Sort-Object)
@@ -115,7 +128,7 @@ function Set-NugetgoRidAssets {
 }
 
 # The read-back of a RID-specific package: lib/ is the reference flavor, every shipped RID carries the full assembly
-# set of its flavor and nothing else, and RIDs that share a GOOS carry the same bytes. No reason means accepted.
+# set of its flavor and nothing else, and RIDs that share a flavor carry the same bytes. No reason means accepted.
 function Test-NugetgoRidLayout {
     [CmdletBinding()]
     param([Parameter(Mandatory)][string]$Package, [Parameter(Mandatory)]$Assemblies, [Parameter(Mandatory)][string]$TargetFramework)
@@ -130,10 +143,10 @@ function Test-NugetgoRidLayout {
     }
     finally { $zip.Dispose() }
 
-    $names = @($Assemblies[(Get-NugetgoReferenceGoos)].Keys | Sort-Object)
+    $names = @($Assemblies[(Get-NugetgoReferenceFlavor)].Keys | Sort-Object)
     $same = { param($a, $b) $null -ne $a -and $null -ne $b -and [System.Linq.Enumerable]::SequenceEqual([byte[]]$a, [byte[]]$b) }
     foreach ($name in $names) {
-        if (-not (& $same $entries["lib/$TargetFramework/$name"] $Assemblies[(Get-NugetgoReferenceGoos)][$name])) { $reasons.Add("lib/$TargetFramework/$name is not the reference ($(Get-NugetgoReferenceGoos)) flavor") }
+        if (-not (& $same $entries["lib/$TargetFramework/$name"] $Assemblies[(Get-NugetgoReferenceFlavor)][$name])) { $reasons.Add("lib/$TargetFramework/$name is not the reference ($(Get-NugetgoReferenceFlavor)) flavor") }
     }
     foreach ($rid in $rids.Keys) {
         $folder = "runtimes/$rid/lib/$TargetFramework/"
@@ -143,11 +156,11 @@ function Test-NugetgoRidLayout {
             if (-not (& $same $entries["$folder$name"] $Assemblies[$rids[$rid]][$name])) { $reasons.Add("$folder$name is not the $($rids[$rid]) flavor") }
         }
     }
-    foreach ($goos in Get-NugetgoFlavorGoos) {
-        $twins = @($rids.Keys | Where-Object { $rids[$_] -ceq $goos })
+    foreach ($each in Get-NugetgoFlavors) {
+        $twins = @($rids.Keys | Where-Object { $rids[$_] -ceq $each })
         foreach ($rid in $twins | Select-Object -Skip 1) {
             foreach ($name in $names) {
-                if (-not (& $same $entries["runtimes/$rid/lib/$TargetFramework/$name"] $entries["runtimes/$($twins[0])/lib/$TargetFramework/$name"])) { $reasons.Add("runtimes/$rid and runtimes/$($twins[0]) share $goos but their $name differs") }
+                if (-not (& $same $entries["runtimes/$rid/lib/$TargetFramework/$name"] $entries["runtimes/$($twins[0])/lib/$TargetFramework/$name"])) { $reasons.Add("runtimes/$rid and runtimes/$($twins[0]) share $each but their $name differs") }
             }
         }
     }
@@ -167,8 +180,8 @@ function Merge-NugetgoFlavorRequires {
     param([Parameter(Mandatory)]$Requires, [string[]]$ThirdPartyPackage = @())
 
     $byModule = [ordered]@{}
-    foreach ($goos in Get-NugetgoFlavorGoos) {
-        foreach ($r in @($Requires[$goos])) {
+    foreach ($each in Get-NugetgoFlavors) {
+        foreach ($r in @($Requires[$each])) {
             if ($null -eq $r) { continue }
             if (-not $byModule.Contains($r.Module)) { $byModule[$r.Module] = $r; continue }
             $seen = $byModule[$r.Module]
@@ -189,11 +202,12 @@ function Merge-NugetgoFlavorRequires {
 # package, whose flavors agree.
 function Get-NugetgoFlavorDisclosure {
     [CmdletBinding()]
-    param([Parameter(Mandatory)][string]$ProofGoos, [switch]$RidSpecific)
+    param([Parameter(Mandatory)][string]$ProofFlavor, [switch]$RidSpecific)
 
     if (-not $RidSpecific) { return $null }
-    $others = @(Get-NugetgoFlavorGoos | Where-Object { $_ -cne $ProofGoos })
-    "Flavors: this package carries RID-specific assemblies; its go2cs/source-metadata.txt describes the $ProofGoos flavor's package metadata, and the $($others -join ' and ') flavors' metadata is not described."
+    $others = @(Get-NugetgoFlavors | Where-Object { $_ -cne $ProofFlavor })
+    $named = if ($others.Count -gt 1) { ($others[0..($others.Count - 2)] -join ', ') + ' and ' + $others[-1] } else { $others[0] }
+    "Flavors: this package carries RID-specific assemblies; its go2cs/source-metadata.txt describes the $ProofFlavor flavor's package metadata, and the $named flavors' metadata is not described."
 }
 
-Export-ModuleMember -Function Get-NugetgoRidFlavors, Get-NugetgoReferenceGoos, Get-NugetgoFlavorGoos, Get-NugetgoFlavorPlatforms, Get-NugetgoFlavorDecision, Set-NugetgoRidAssets, Test-NugetgoRidLayout, Merge-NugetgoFlavorRequires, Get-NugetgoFlavorDisclosure
+Export-ModuleMember -Function Get-NugetgoRidFlavors, Get-NugetgoReferenceFlavor, Get-NugetgoFlavors, Get-NugetgoFlavorPlatforms, Get-NugetgoFlavorGoos, Get-NugetgoRidTarget, Get-NugetgoFlavorFolder, Get-NugetgoFlavorDecision, Set-NugetgoRidAssets, Test-NugetgoRidLayout, Merge-NugetgoFlavorRequires, Get-NugetgoFlavorDisclosure

@@ -10,11 +10,11 @@
     packs src\go2cs.slnx, whose behavioral-test and example projects are not publishable.
 
     MULTIPLATFORM (docs\phase4\DESIGN-multiplatform-corpus.md section 9(a), increment 4). The converted corpus
-    is one tree whose platform-varying packages keep per-GOOS sources selected by $(GoTargetOS), so the
-    solution is built and packed ONCE PER GoTargetOS and the flavors are merged into a single nupkg per
-    package: lib\<tfm> carries the reference (Windows) flavor as the compile-time asset, and
-    runtimes\<rid>\lib\<tfm> carries each shipped RID's runtime assembly (win-x64, linux-x64, osx-x64 and
-    osx-arm64; the two Mac RIDs ship the same darwin build). Package IDs, and everything a
+    is one tree whose platform-varying packages keep platform sources in layout key folders selected by
+    $(GoTargetOS) and $(GoTargetArch), so the solution is built and packed ONCE PER FLAVOR (a universe target)
+    and the flavors are merged into a single nupkg per package: lib\<tfm> carries the reference (Windows)
+    flavor as the compile-time asset, and runtimes\<rid>\lib\<tfm> carries each shipped RID's runtime assembly
+    (win-x64, linux-x64, osx-x64, osx-arm64 and linux-arm64; the two Mac RIDs ship the same darwin build). Package IDs, and everything a
     consumer writes, are unchanged. Platform-neutral packages -- the large majority -- are copied
     verbatim from the reference pass and are byte-for-byte what a single-pass release produced.
 
@@ -54,11 +54,11 @@
 
 .PARAMETER OutDir
     Directory to collect the merged .nupkg files. Defaults to src\artifacts\nupkg. Each flavor's
-    unmerged pack is kept beside them under _flavors\<build RID>\ for inspection (one per GoTargetOS).
+    unmerged pack is kept beside them under _flavors\<build RID>\ for inspection (one per flavor).
 
 .PARAMETER SkipBuild
     NO LONGER SUPPORTED, and rejected with an explanation. A multiplatform release is built once per
-    GoTargetOS with a different $(GoTargetOS) each time, so there is no single on-disk build to pack.
+    flavor with a different $(GoTargetOS)/$(GoTargetArch) each time, so there is no single on-disk build to pack.
 
 .PARAMETER BumpBuild
     Force or suppress the GoBuildNumber increment in src\version.props (then commit it). Defaults to
@@ -915,7 +915,7 @@ if ($VerifyOnly) {
 # here. Verify BEFORE anything is built, so the run fails at second zero rather than after a full
 # Release build. Regenerate with `go generate .` from src\go2cs and commit the result.
 # MSBuild worker nodes PERSIST after a build and are re-entered by the next one. This script runs
-# back-to-back solution builds (one per RID, different $(GoTargetOS) each), which is exactly the
+# back-to-back solution builds (one per flavor, different $(GoTargetOS)/$(GoTargetArch) each), which is exactly the
 # shape the repo's standing rule prescribes this flag for -- and the 1.23.1.7 release's pack race
 # (gen's bin empty at pack time after a SUCCEEDED build, 3/3 in the full script, 0/3 isolated,
 # 0/2 in binlog-armed repro) fits stale node state around the clean/copy file ops better than
@@ -1580,6 +1580,7 @@ Write-Step "Verified $sourceVerified C# Source badge(s) pin $fullVersion and its
 #     runtimes/linux-x64/lib/<tfm>/os.dll     runtime asset, selected on linux-x64
 #     runtimes/osx-x64/lib/<tfm>/os.dll       runtime asset, selected on osx-x64
 #     runtimes/osx-arm64/lib/<tfm>/os.dll     runtime asset, selected on osx-arm64 (the SAME bytes as osx-x64)
+#     runtimes/linux-arm64/lib/<tfm>/os.dll   runtime asset, selected on linux-arm64 (its own linux/arm64 pass)
 #
 # WHY lib/ RATHER THAN ref/, against NuGet's documented asset selection. NuGet gives `lib/{tfm}/` both
 # the `compile` and the `runtime` asset roles; `ref/{tfm}/` gives only `compile`; and
@@ -1592,9 +1593,9 @@ Write-Step "Verified $sourceVerified C# Source badge(s) pin $fullVersion and its
 #     the runtimes/ assets and, when one matches the running RID, uses it INSTEAD of the RID-agnostic
 #     lib/ assembly of the same name -- so a portable framework-dependent app resolves the right
 #     flavor with no RuntimeIdentifier anywhere in the consumer's project. On a RID this release does
-#     not ship, the lib/ assembly is what loads: a Linux-arm64 consumer would silently get Windows
+#     not ship, the lib/ assembly is what loads: before S6 a Linux-arm64 consumer silently got Windows
 #     behaviour. That is the honest cost of this choice and it is why the shipped RID set is stated in
-#     the design rather than inferred.
+#     the design rather than inferred (go.lib.targets refuses an unshipped cross-OS RID at build time, S0).
 #   * ref/ carrying a neutral surface (not chosen). It would turn that silent wrong-flavor fallback
 #     into a loud missing-assembly failure, which is better -- but there IS no neutral surface to put
 #     there: section 6 measures `syscall` at 270 names in common out of 992/2,186/1,899 and `log/syslog` as
@@ -1729,14 +1730,19 @@ function Merge-GoNuspecDependencies([string]$BaseText, [string]$FlavorText, [str
     return ($bom + $baseDoc.OuterXml)
 }
 
-# RID -> $(GoTargetOS). ORDER IS SIGNIFICANT: the first entry is the reference flavor (see above).
+# RID -> the corpus flavor it ships, a target of the converted standard library's universe ($(GoTargetOS)/
+# $(GoTargetArch)). ORDER IS SIGNIFICANT: the first entry is the reference flavor (see above), and the distinct
+# flavors in map order are the universe (TestRidFlavorMapsShipTheUniverse pins both maps that pack go.* packages).
 #
-# TWO RIDS, ONE FLAVOR: macOS (increment 5). The corpus is emitted for darwin/amd64 and the build has no
-# architecture axis -- $(GoTargetOS) is the only property that selects sources -- so the darwin assemblies
-# are AnyCPU IL that is identical for both Mac RIDs, and the build is deterministic. A second darwin pass
-# would therefore compile the same bytes again and test nothing. So the BUILD runs once per distinct
-# GoTargetOS, under the first RID that names it (its "build RID"), and the merge below writes that one
-# flavor into every RID that shares its GoTargetOS.
+# TWO RIDS, ONE FLAVOR: macOS (increment 5). The corpus is emitted for darwin/amd64 alone, so the darwin
+# assemblies are AnyCPU IL that is identical for both Mac RIDs, and the build is deterministic. A second darwin
+# pass would therefore compile the same bytes again and test nothing. So the BUILD runs once per distinct
+# flavor, under the first RID that names it (its "build RID"), and the merge below writes that one flavor into
+# every RID that shares it.
+#
+# linux-arm64 is NOT a twin of linux-x64 (S6 of docs/phase4/DESIGN-linux-arm64-flavour.md): linux/arm64 is a
+# flavor of its own, with its own syscall numbers and layouts, so it gets a pass of its own at
+# -p:GoTargetArch=arm64. That pass is a cross-compile of AnyCPU IL; nothing in it runs on this box.
 #
 # Both Mac folders are shipped EXPLICITLY rather than as one portable runtimes/osx/: go.lib's
 # buildTransitive targets (src/core/golib/buildTransitive/go.lib.targets) build the compile twin's path
@@ -1744,26 +1750,27 @@ function Merge-GoNuspecDependencies([string]$BaseText, [string]$FlavorText, [str
 # A portable folder would never be found there, and a Mac consumer would compile against the Windows
 # surface again.
 $ridFlavors = [ordered]@{
-    'win-x64'   = 'windows'
-    'linux-x64' = 'linux'
-    'osx-x64'   = 'darwin'
-    'osx-arm64' = 'darwin'
+    'win-x64'     = 'windows/amd64'
+    'linux-x64'   = 'linux/amd64'
+    'osx-x64'     = 'darwin/amd64'
+    'osx-arm64'   = 'darwin/amd64'
+    'linux-arm64' = 'linux/arm64'
 }
 $referenceRid = @($ridFlavors.Keys)[0]
 
 # RID -> the build RID whose pack it ships, and the build RIDs themselves, in map order.
 $buildRidOf = [ordered]@{}
-$buildRidByGoos = @{}
+$buildRidByFlavor = @{}
 foreach ($rid in $ridFlavors.Keys) {
-    $goos = $ridFlavors[$rid]
-    if (-not $buildRidByGoos.ContainsKey($goos)) { $buildRidByGoos[$goos] = $rid }
-    $buildRidOf[$rid] = $buildRidByGoos[$goos]
+    $flavor = $ridFlavors[$rid]
+    if (-not $buildRidByFlavor.ContainsKey($flavor)) { $buildRidByFlavor[$flavor] = $rid }
+    $buildRidOf[$rid] = $buildRidByFlavor[$flavor]
 }
 $buildRids = @($ridFlavors.Keys | Where-Object { $buildRidOf[$_] -eq $_ })
 
 if ($SkipBuild) {
     throw ("-SkipBuild cannot produce a multiplatform release. The RID-specific assemblies come from one " +
-           "build pass per GoTargetOS ($(@($buildRids | ForEach-Object { $ridFlavors[$_] }) -join ', ')), " +
+           "build pass per flavor ($(@($buildRids | ForEach-Object { $ridFlavors[$_] }) -join ', ')), " +
            "so no single on-disk build holds them all. Re-run without -SkipBuild.")
 }
 
@@ -1771,35 +1778,41 @@ New-Item -ItemType Directory -Force $OutDir | Out-Null
 Get-ChildItem $OutDir -Filter *.nupkg -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
 
 # --- Which packages need RID-specific assets, derived from the corpus itself ----------------------
-# Never a hardcoded list. Layout L3's own rule, read back off the tree: a directory named after a GOOS
-# that holds NO project file is a per-GOOS SOURCE folder, and its parent is a platform-varying package.
-# The "no project file" test is what keeps `internal/syscall/windows` -- a real package whose own name
-# is a GOOS -- from being read as `internal/syscall`'s Windows variants, exactly as section 8 specifies for
-# the converter's layout-adoption rule.
+# Never a hardcoded list. Layout L3's own rule, read back off the tree: a directory named after a layout
+# key -- a flavor's GOOS (linux/), its GOARCH (amd64/) or the pair (linux-arm64/), derived from the flavors
+# above -- that holds NO project file is a platform SOURCE folder, and its parent is a platform-varying
+# package. The "no project file" test is what keeps `internal/syscall/windows` -- a real package whose own
+# name is a GOOS -- from being read as `internal/syscall`'s Windows variants, exactly as section 8 specifies
+# for the converter's layout-adoption rule. A package whose only key folders are amd64/ and linux-arm64/
+# (math, internal/abi) differs at linux-arm64 and so ships runtimes/ for every RID: S0's refusal reads
+# "RID-split" from that folder's presence, so a partial RID set would misfire it.
 #
 # Every such package ships RID-specific assets whether or not this RID PAIR happens to change its
 # emission (a package varying only on darwin, say, produces identical win/linux assemblies). Shipping
 # by structure rather than by a byte compare keeps the package shape a predictable function of the
 # corpus; the byte compare below is the verification, not the decision.
 $coreDir = Join-Path $src 'core'
-$goosNames = @('windows', 'linux', 'darwin')
+$layoutKeys = @(foreach ($flavor in @($ridFlavors.Values | Select-Object -Unique)) {
+    $goos, $arch = $flavor -split '/', 2
+    $goos; $arch; "$goos-$arch"
+}) | Sort-Object -Unique
 $ridSplitIds = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
 
 foreach ($dir in Get-ChildItem $coreDir -Recurse -Directory) {
-    if ($goosNames -notcontains $dir.Name) { continue }
+    if ($layoutKeys -cnotcontains $dir.Name) { continue }
     if (@(Get-ChildItem $dir.FullName -Filter *.csproj -File).Count -gt 0) { continue }
 
     $projs = @(Get-ChildItem $dir.Parent.FullName -Filter *.csproj -File | Where-Object { $_.Name -notlike '*.tests.csproj' })
-    if ($projs.Count -ne 1) { throw "Expected exactly one library project beside per-GOOS folder $($dir.FullName); found $($projs.Count)" }
+    if ($projs.Count -ne 1) { throw "Expected exactly one library project beside layout key folder $($dir.FullName); found $($projs.Count)" }
 
     $projText = [System.IO.File]::ReadAllText($projs[0].FullName)
     if ($projText -notmatch '<AssemblyName>([^<]+)</AssemblyName>') { throw "No <AssemblyName> in $($projs[0].FullName)" }
     [void]$ridSplitIds.Add("go.$($Matches[1])")
 }
 
-Write-Step "Layout L3: $($ridSplitIds.Count) package(s) carry per-GOOS sources -> RID-specific assemblies"
+Write-Step "Layout L3: $($ridSplitIds.Count) package(s) carry layout key folders ($($layoutKeys -join ', ')) -> RID-specific assemblies"
 
-# --- One build + pack pass per GoTargetOS, under its build RID -----------------------------------
+# --- One build + pack pass per flavor, under its build RID ---------------------------------------
 $flavorRoot = Join-Path $OutDir '_flavors'
 if (Test-Path $flavorRoot) { Remove-Item $flavorRoot -Recurse -Force }
 
@@ -1815,7 +1828,7 @@ $buildOrder = @($buildRids)
 [array]::Reverse($buildOrder)
 
 foreach ($rid in $buildOrder) {
-    $goos = $ridFlavors[$rid]
+    $goos, $arch = $ridFlavors[$rid] -split '/', 2
     $flavorOut = Join-Path $flavorRoot $rid
     New-Item -ItemType Directory -Force $flavorOut | Out-Null
 
@@ -1837,9 +1850,9 @@ foreach ($rid in $buildOrder) {
     # the repository root to /_/, so no package names the pack box's tree. Read 2026-10-06: unmapped, each of the 492
     # assemblies of 1.24.13.4 embedded its .pdb path under the pack tree; mapped, a full pack holds none. PACK builds only:
     # in-tree and -tests builds are unchanged. The path guard below refuses any package that still holds one.
-    Write-Step "[$rid] Building $Configuration at -p:GoTargetOS=$goos (compiles the whole stdlib; several minutes)"
-    & dotnet build $slnx -c $Configuration -p:GoTargetOS=$goos -p:GeneratePackageOnBuild=false --no-incremental -p:UseSharedCompilation=false -p:ContinuousIntegrationBuild=true --nologo -v m
-    if ($LASTEXITCODE -ne 0) { throw "[$rid] dotnet build failed ($LASTEXITCODE) at -p:GoTargetOS=$goos -- fix build errors before packing" }
+    Write-Step "[$rid] Building $Configuration at -p:GoTargetOS=$goos -p:GoTargetArch=$arch (compiles the whole stdlib; several minutes)"
+    & dotnet build $slnx -c $Configuration -p:GoTargetOS=$goos -p:GoTargetArch=$arch -p:GeneratePackageOnBuild=false --no-incremental -p:UseSharedCompilation=false -p:ContinuousIntegrationBuild=true --nologo -v m
+    if ($LASTEXITCODE -ne 0) { throw "[$rid] dotnet build failed ($LASTEXITCODE) at -p:GoTargetOS=$goos -p:GoTargetArch=$arch -- fix build errors before packing" }
 
     # go2cs-gen is GoTargetOS-neutral, yet under the FULL script's solution build its output copy has
     # been observed missing at pack time (3 of 3 release runs, R 2026-08-23) while the identical build
@@ -1855,8 +1868,8 @@ foreach ($rid in $buildOrder) {
         if (-not (Test-Path (Join-Path $genOut 'go2cs-gen.dll'))) { throw "[$rid] go2cs-gen output still missing after a direct build -- investigate before packing" }
     }
 
-    # --no-build packs exactly what the pass above produced; the same -p:GoTargetOS is required here
-    # too, because it selects the conditioned <ProjectReference> groups the .nuspec is derived from.
+    # --no-build packs exactly what the pass above produced; the same -p:GoTargetOS and -p:GoTargetArch are
+    # required here too, because they select the conditioned <ProjectReference> groups the .nuspec is derived from.
     Write-Step "[$rid] Packing -> $flavorOut"
     # A local rehearsal overrides the PACKAGE version only (a global property, so every go.* dependency
     # between the packages carries it too); a release passes nothing extra. The @( ) must wrap the whole `if`:
@@ -1864,7 +1877,7 @@ foreach ($rid in $buildOrder) {
     $packVersionArgs = @(if ($VersionSuffix) { "-p:PackageVersion=$packVersion" })
     # GoPackSymbols=true puts each assembly's .pdb beside it in the package (src/core/Directory.Build.props): pack
     # only, so no build -- in-tree, -tests or behavioral -- ever sees it. The merge below carries every .pdb with its DLL.
-    & dotnet pack $slnx -c $Configuration -o $flavorOut -p:GoTargetOS=$goos -p:GeneratePackageOnBuild=false -p:GoPackSymbols=true --no-build --nologo -v m @packVersionArgs
+    & dotnet pack $slnx -c $Configuration -o $flavorOut -p:GoTargetOS=$goos -p:GoTargetArch=$arch -p:GeneratePackageOnBuild=false -p:GoPackSymbols=true --no-build --nologo -v m @packVersionArgs
     if ($LASTEXITCODE -ne 0) { throw "[$rid] dotnet pack failed ($LASTEXITCODE)" }
 }
 
@@ -2028,7 +2041,7 @@ foreach ($id in @($refFacts.Keys | Sort-Object)) {
 }
 
 Write-Step ("Flavor comparison across {0}: {1} of {2} L3 package(s) differ" -f `
-            (@($buildRids | ForEach-Object { $ridFlavors[$_] }) -join '/'), $variesOnThisPair, $l3Count)
+            (@($buildRids | ForEach-Object { $ridFlavors[$_] }) -join ', '), $variesOnThisPair, $l3Count)
 Write-Step ("  of {0} platform-neutral package(s): {1} differ materially, {2} differ only in the deterministic-identity fields (expected -- see the note above)" -f `
             ($refFacts.Count - $l3Count), $promoted.Count, $identityOnly)
 
@@ -2083,8 +2096,8 @@ foreach ($id in @($refFacts.Keys | Sort-Object)) {
                     $s = $e.Open()
                     try { $s.CopyTo($ms) } finally { $s.Dispose() }
                     $bytes = $ms.ToArray()
-                    # Every RID that shares this flavor's GoTargetOS gets the same bytes (osx-x64 and
-                    # osx-arm64 from the one darwin pack).
+                    # Every RID that shares this flavor gets the same bytes (osx-x64 and osx-arm64 from
+                    # the one darwin/amd64 pack).
                     foreach ($shipRid in @($ridFlavors.Keys | Where-Object { $buildRidOf[$_] -eq $rid })) {
                         Add-GoZipEntry $zip ("runtimes/$shipRid/" + $e.FullName) $bytes
                     }
@@ -2107,7 +2120,7 @@ Write-Step "Merged $merged RID-specific package(s); copied $copied platform-neut
 
 # --- Shipped-shape assert, read back off the MERGED packages --------------------------------------
 # Every RID-specific package must carry a runtimes/<rid>/ folder for EVERY shipped RID, and the RIDs that
-# share a GoTargetOS must carry the same entry set with the same bytes. The second half is true by
+# share a flavor must carry the same entry set with the same bytes. The second half is true by
 # construction today (one pack feeds both Mac folders); it is asserted on the artifacts anyway, so a
 # later edit that gives osx-arm64 a pass or a source of its own cannot ship two different Mac flavors
 # unnoticed.

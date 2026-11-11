@@ -7,7 +7,7 @@
     The witness is internal/goarch: its Compile items carry exactly one zgoarch_<GOARCH>.cs, the file that defines
     the GOARCH every converted package reads. So the item set IS the flavour's architecture, and it is read the way
     the build reads it: from this process's environment (GoTargetOS and GoTargetArch, which MSBuild maps onto the
-    properties) plus any -GoTargetOS given here, as push-nuget passes one per flavour.
+    properties) plus any -GoTargetOS and -GoTargetArch given here, as push-nuget passes them per flavour pair.
 
     An arch-split csproj defaults an EMPTY GoTargetArch to amd64. So a leg that should build linux/arm64 and lost its
     binding still compiles cleanly, at amd64, and reports its results under the arm64 label. This probe is what
@@ -19,6 +19,10 @@
 .PARAMETER GoTargetOS
     The flavour to evaluate, passed as -p:GoTargetOS. Omit it to evaluate the one the environment binds.
 
+.PARAMETER GoTargetArch
+    The architecture to evaluate, passed as -p:GoTargetArch, as push-nuget passes one per flavour pair (seat S6).
+    Omit it to evaluate the one the environment binds.
+
 .PARAMETER Label
     What the reading is for, in the failure and the summary line.
 #>
@@ -26,6 +30,7 @@
 param(
     [Parameter(Mandatory)] [ValidateSet('amd64', 'arm64')] [string] $Expected,
     [string] $GoTargetOS = '',
+    [ValidateSet('', 'amd64', 'arm64')] [string] $GoTargetArch = '',
     [Parameter(Mandatory)] [string] $Label
 )
 
@@ -34,6 +39,7 @@ $ErrorActionPreference = 'Stop'
 $project = Join-Path $PSScriptRoot '../src/core/internal/goarch/internal.goarch.csproj'
 $arguments = @('msbuild', $project, '-getProperty:GoTargetArch', '-getItem:Compile')
 if ($GoTargetOS) { $arguments += "-p:GoTargetOS=$GoTargetOS" }
+if ($GoTargetArch) { $arguments += "-p:GoTargetArch=$GoTargetArch" }
 
 $text = & dotnet @arguments 2>&1 | Out-String
 if ($LASTEXITCODE -ne 0) { throw "${Label}: the flavour probe could not evaluate ${project} (exit $LASTEXITCODE):`n$text" }
