@@ -23,7 +23,9 @@ import (
 // over by address and copied back unconditionally; an element of a Go array and a native box minted from managed storage
 // are refused before the call. A pointer result is C memory, minted native, unless it is a pointer the call was handed.
 // Increment 3b2b adds pointer MEMBERS, checked as cgo checks them, and a pointer to one C scalar, which crosses as a
-// struct pointer does (§7, amended: single scalar pointee; element pointers remain Phase 3).
+// struct pointer does (§7, amended: single scalar pointee; element pointers remain Phase 3). Increment 4d admits the
+// two-result errno form here for a SCALAR result, whose arm is the probe library's strtol (§11.10, COORD's ruling (c));
+// an errno form returning a struct or a pointer waits for a measured arm and is refused by name.
 
 // cgoWrapperSet makes one pseudo-package's members: the wrappers, the mirrors they cross with, and each mirror's copy-in
 // and copy-out functions, every one written once.
@@ -270,16 +272,22 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 	function := declaration.cName
 	scalarTarget := cgoBindingTarget{goos: set.target.goos, library: set.libraryOf(function), crt: set.target.crt}
 
-	// The two-result form and cmd/cgo's own helpers are the scalar binding's to take or refuse: a struct's errno form
-	// waits for a measured arm.
-	if declaration.kind != cgoFunc || cgoBuiltinNames[function] {
+	// cmd/cgo's own helpers, and anything not a C function, are the scalar binding's to take or refuse.
+	errnoForm := declaration.kind == cgoErrnoFunc
+
+	if (declaration.kind != cgoFunc && !errnoForm) || cgoBuiltinNames[function] {
 		return cgoScalarWrapper(declaration, scalarTarget)
 	}
 
 	signature, ok := declaration.object.Type().(*types.Signature)
+	wantResults := 1
 
-	if !ok || signature.Results().Len() != 1 {
-		return "", fmt.Errorf("cgo wrapper: C.%s has no one-result signature", function)
+	if errnoForm {
+		wantResults = 2
+	}
+
+	if !ok || signature.Results().Len() != wantResults {
+		return "", fmt.Errorf("cgo wrapper: C.%s has no %d-result signature", function, wantResults)
 	}
 
 	params := make([]cgoStructParam, signature.Params().Len())
@@ -302,6 +310,10 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 
 	if scalarsOnly && resultStruct == nil && !pointerResult {
 		return cgoScalarWrapper(declaration, scalarTarget)
+	}
+
+	if errnoForm && (resultStruct != nil || pointerResult) {
+		return "", fmt.Errorf("cgo wrapper: C.%s's two-result form returns %s, and an errno form with a struct or pointer result waits for a measured arm", function, resultType)
 	}
 
 	const interop = "global::System.Runtime.InteropServices."
@@ -474,18 +486,35 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 		returned = fmt.Sprintf("%s\n        return %sPointerMemberBack<%s>((nuint)r, null, 0);\n", identity.String(), args, pointee)
 	case resultScalar.isVoid:
 		returned = "\n        return default;\n"
+	case errnoForm && resultScalar.isVoid:
+		returned = "\n" + cgoErrnoReturn("default")
+	case errnoForm:
+		returned = "\n" + cgoErrnoReturn(resultScalar.fromPrimitive("r"))
 	default:
 		returned = fmt.Sprintf("\n        return %s;\n", resultScalar.fromPrimitive("r"))
 	}
 
 	library := set.libraryOf(function)
+	name := getCoreSanitizedIdentifier(function)
+	setLastError := ""
+
+	if errnoForm {
+		native += "errno"
+		name = function + cgoErrnoFormSuffix
+		wrapperResult = fmt.Sprintf("(%s, error)", wrapperResult)
+
+		if set.target.goos != "windows" {
+			setLastError = ", SetLastError = true"
+		}
+	}
+
 	var text strings.Builder
 
 	fmt.Fprintf(&text, "    // C.%s, bound to %s.\n", function, library)
-	fmt.Fprintf(&text, "    [%sLibraryImport(%q, EntryPoint = %q)]\n", interop, library, function)
+	fmt.Fprintf(&text, "    [%sLibraryImport(%q, EntryPoint = %q%s)]\n", interop, library, function, setLastError)
 	fmt.Fprintf(&text, "    [%sUnmanagedCallConv(CallConvs = new[] { typeof(%sCallConvCdecl) })]\n", interop, compiler)
 	fmt.Fprintf(&text, "    private static partial %s %s(%s);\n\n", externResult, native, strings.Join(externParams, ", "))
-	fmt.Fprintf(&text, "    internal static %s %s(%s)\n    {\n", wrapperResult, getCoreSanitizedIdentifier(function), strings.Join(wrapperParams, ", "))
+	fmt.Fprintf(&text, "    internal static %s %s(%s)\n    {\n", wrapperResult, name, strings.Join(wrapperParams, ", "))
 	text.WriteString(strings.TrimPrefix(before.String(), "\n"))
 
 	call := fmt.Sprintf("%s(%s)", native, strings.Join(arguments, ", "))
@@ -497,7 +526,11 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 		text.WriteString("\n")
 	}
 
-	fmt.Fprintf(&text, "        %ssyscallEntersyscall();\n\n        try\n        {\n            %s;\n        }\n", runtime, call)
+	if errnoForm {
+		text.WriteString("        int errno;\n")
+	}
+
+	fmt.Fprintf(&text, "        %ssyscallEntersyscall();\n\n        try\n        {\n%s        }\n", runtime, cgoErrnoCall(call, errnoForm, set.target.goos))
 	fmt.Fprintf(&text, "        finally\n        {\n            %ssyscallExitsyscall();\n        }\n", runtime)
 	text.WriteString(after.String())
 	text.WriteString(returned)

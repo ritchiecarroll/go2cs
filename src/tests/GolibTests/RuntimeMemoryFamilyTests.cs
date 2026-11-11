@@ -23,7 +23,7 @@ public class RuntimeMemoryFamilyTests
     {
         if (!OnLinux) Assert.Inconclusive("the primitives are the linux flavour's");
         // 1 MiB is a whole number of pages at 4, 16 and 64 KiB alike.
-        (nuint address, bool roundTrip, nint firstErr, int madviseRc, nuint pageSize) = GoSysMmapProbe(1 << 20);
+        (nuint address, bool roundTrip, nint firstErr, int madviseRc, nuint pageSize) = GoSysMmapPagedProbe(1 << 20);
         Assert.AreEqual((nuint)Environment.SystemPageSize, pageSize, "the probe strides by physPageSize, the OS page size");
         Assert.AreEqual((nint)0, firstErr, "mmap answered");
         Assert.AreNotEqual((nuint)0, address, "a real address");

@@ -116,7 +116,7 @@ partial class runtime_package
     /// Returns the address, whether the round trip held, and the page size it strode by: the runtime's physPageSize,
     /// the OS page size (4 KiB, or 16/64 KiB on such arm64 kernels; S3 site 8), never a literal 4096.
     /// </summary>
-    public static unsafe (nuint address, bool roundTrip, nint firstErr, int madviseRc, nuint pageSize) GoSysMmapProbe(nuint n)
+    public static unsafe (nuint address, bool roundTrip, nint firstErr, int madviseRc, nuint pageSize) GoSysMmapPagedProbe(nuint n)
     {
         nuint page = (nuint)physPageSize;
         var (p, err) = sysMmap(nil, (uintptr)n, (int32)(_PROT_READ | _PROT_WRITE), (int32)(_MAP_ANON | _MAP_PRIVATE), -1, 0);
@@ -135,6 +135,16 @@ partial class runtime_package
         int rc = (int)madvise(p, (uintptr)n, (int32)_MADV_DONTNEED);
         sysMunmap(p, (uintptr)n);
         return (address, ok, 0, rc, page);
+    }
+
+    /// <summary>
+    /// GoSysMmapPagedProbe without the page size: the signature go.runtime 1.26.10.3 shipped, kept so a consumer built
+    /// against it still binds (binary compatibility guard, batch 284). It strides by physPageSize too.
+    /// </summary>
+    public static (nuint address, bool roundTrip, nint firstErr, int madviseRc) GoSysMmapProbe(nuint n)
+    {
+        var (address, roundTrip, firstErr, madviseRc, _) = GoSysMmapPagedProbe(n);
+        return (address, roundTrip, firstErr, madviseRc);
     }
 
     /// <summary>The errno sysMmap answers for an impossible map (a length of zero).</summary>
