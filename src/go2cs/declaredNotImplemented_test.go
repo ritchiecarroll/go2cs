@@ -63,7 +63,7 @@ func TestDeclaredNotImplementedCensus(t *testing.T) {
 			"read as a clean tree", coreDir, err)
 	}
 
-	census, err := declaredNotImplementedIn(coreDir)
+	census, err := corpusStubCensus()
 
 	if err != nil {
 		t.Fatalf("walking %s: %v", coreDir, err)
@@ -497,6 +497,12 @@ type stubEntry struct {
 type stubCensus struct {
 	declarations, packages, linkname, cgo, other, pushed int
 	stubs                                                []stubEntry
+
+	// parts is every partial declaration, and bodies every implementing part by "<package>.<name>",
+	// each with the layout key folder it sits in ("" is flat). stubs above pools a package's key
+	// folders; these two let TestFlavourOnlyStubCensus read the same walk one target at a time.
+	parts  []flavourDecl
+	bodies map[string][]string
 }
 
 var (
@@ -550,6 +556,7 @@ func declaredNotImplementedIn(coreDir string) (stubCensus, error) {
 		name, file string
 		reason     string
 		key        string
+		folder     string
 	}
 
 	declsByPkg := map[string][]decl{}
@@ -557,6 +564,7 @@ func declaredNotImplementedIn(coreDir string) (stubCensus, error) {
 	fileNamesByPkg := map[string][]string{}
 	defnsByPkg := map[string]map[string]bool{}
 	pushes := map[string]string{}
+	bodies := map[string][]string{}
 
 	err := filepath.Walk(coreDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -584,9 +592,11 @@ func declaredNotImplementedIn(coreDir string) (stubCensus, error) {
 		rel := filepath.ToSlash(mustRel(coreDir, path))
 		dir := filepath.ToSlash(filepath.Dir(rel))
 		pkg := dir
+		folder := ""
 
 		if isLayoutKeyFolderName(filepath.Base(dir)) {
 			pkg = filepath.ToSlash(filepath.Dir(dir))
+			folder = filepath.Base(dir)
 		}
 
 		lines := strings.Split(strings.ReplaceAll(string(content), "\r\n", "\n"), "\n")
@@ -654,6 +664,7 @@ func declaredNotImplementedIn(coreDir string) (stubCensus, error) {
 					file:   rel,
 					reason: reason,
 					key:    pkg + "." + match[1],
+					folder: folder,
 				})
 
 				continue
@@ -664,6 +675,7 @@ func declaredNotImplementedIn(coreDir string) (stubCensus, error) {
 					defnsByPkg[pkg] = map[string]bool{}
 				}
 				defnsByPkg[pkg][match[1]] = true
+				bodies[pkg+"."+match[1]] = append(bodies[pkg+"."+match[1]], folder)
 			}
 		}
 
@@ -690,7 +702,7 @@ func declaredNotImplementedIn(coreDir string) (stubCensus, error) {
 		}
 	}
 
-	census := stubCensus{packages: len(declsByPkg)}
+	census := stubCensus{packages: len(declsByPkg), bodies: bodies}
 
 	if err != nil {
 		return census, err
@@ -699,6 +711,7 @@ func declaredNotImplementedIn(coreDir string) (stubCensus, error) {
 	for pkg, decls := range declsByPkg {
 		for _, d := range decls {
 			census.declarations++
+			census.parts = append(census.parts, flavourDecl{pkg: pkg, name: d.name, file: d.file, folder: d.folder})
 
 			if defnsByPkg[pkg][d.name] {
 				continue
