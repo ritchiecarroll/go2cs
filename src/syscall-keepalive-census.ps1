@@ -39,6 +39,9 @@
     `nativeIdentityOf(Ꮡx)` (2026-11-11), was made to fail the same way: blanking the hold after
     certchain's CertFreeCertificateChain call names that line, and so does replacing it with a
     lookalike `MyGC.KeepAlive(...)`; blanking a ptrout hold still names its `(uintptr)Ꮡx` site.
+    Blanking the hold after CertFreeCertificateContext names that line only since the search
+    stops at the next site passing the same box (see the arm-2 loop); before, the later
+    CertFreeCertificateChain hold covered it and the census read clean.
 #>
 
 param(
@@ -308,9 +311,27 @@ foreach ($relative in $handOwnPinFiles) {
             $keepAlive = [regex]('(?<![\w.])(?:System\.)?GC\.KeepAlive\(' + [regex]::Escape($box) + '\)')
             $held = $false
 
+            # The search stops at the next site that passes the SAME box: each site needs its own
+            # hold before the box is handed over again. A file-wide search let a later call's hold
+            # stand in for an earlier one -- certchain's CertFreeCertificateContext and
+            # CertFreeCertificateChain both pass `Ꮡctx` (different functions, same parameter name),
+            # and blanking the first one's hold read CLEAN because the second's was "later" (measured
+            # 2026-11-11; with this bound it names the first call's line).
             for ($j = $i + 1; $j -lt $lines.Count; $j++) {
                 if ($keepAlive.IsMatch($lines[$j])) {
                     $held = $true
+                    break
+                }
+
+                $passedAgain = $false
+
+                foreach ($later in $handOwnBoxArgPattern.Matches($lines[$j])) {
+                    if ($later.Groups[1].Value -eq $box) {
+                        $passedAgain = $true
+                    }
+                }
+
+                if ($passedAgain) {
                     break
                 }
             }
