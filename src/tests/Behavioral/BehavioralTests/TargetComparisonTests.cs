@@ -1717,6 +1717,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNoinlineDirectiveFrame() => CheckTarget("NoinlineDirectiveFrame");
 
     [TestMethod]
+    public void CheckNonSelfConstraintPointerArg() => CheckTarget("NonSelfConstraintPointerArg");
+
+    [TestMethod]
     public void CheckOpenGenericPointerImplement() => CheckTarget("OpenGenericPointerImplement");
 
     [TestMethod]

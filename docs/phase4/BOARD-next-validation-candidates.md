@@ -35866,4 +35866,28 @@ cannot rely on. Disclosed here, and the census informs .5.
 
 — C1 (2026-11-10)
 
+## 2026-11-10 — R (C35 design ruling 2): the SELF-REFERENTIAL constraint proxy's zero value is a null reference, not Go's typed nil pointer — OPEN, disclosed
+
+Inside a generic body whose type parameter takes the self-referential constraint proxy (`T Namer[T]` instantiated
+with `*node`), `var zero T` is C#'s `default(proxy)`, a null reference. In Go it is a typed nil pointer: a method
+called on it runs with a nil receiver, and boxing it gives a non-nil interface. Measured on a single-package probe
+at `claude/r-ts-c35` (the converter and generator of the C35 seat; the self route itself is unchanged there):
+
+| Row | Go | Converted |
+|---|---|---|
+| `var zero T; var a any = zero; a == nil` | `false` | `true` |
+| `var zero T; zero.Name()` (a nil-receiver method) | `nil-node` | panic: nil pointer dereference |
+
+**Scope.** The NON-self route (C35) refuses both shapes by name (DESIGN-constraint-proxy-nonself ruling 2, the
+zero-call and zero-any refusals), but the self route has no such refusal, and no census has looked for the shape in
+std's self-route instantiations (crypto/internal/nistec, crypto/elliptic, crypto/internal/fips140/ecdsa and their
+tests). C35's template change does make a NULL proxy convert to a nil box (so `return zero` gives Go's nil), but it
+does not make a method call on the zero proxy, or its boxing, match Go.
+
+**Not verified:** whether any std self-route body uses a zero value this way (a census through
+`zeroValueMisuses` over the self route's instantiations would answer it); whether a fix should refuse, as the
+non-self route does, or make the zero value a proxy over a nil box.
+
+— R (2026-11-10)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -35,9 +35,9 @@ internal class ConstraintProxyImplTemplate : TemplateBase
     public override string TemplateBody =>
         $$"""
              /// <summary>
-             /// Self-referential constraint proxy: '{{ElementName}}' satisfies its generic method-set
-             /// constraint interface by wrapping the box 'ж&lt;{{ElementName}}&gt;' and implementing the
-             /// interface over ITSELF, so it can serve as a constrained generic type argument.
+             /// Constraint proxy: '{{ElementName}}' satisfies its method-set constraint interface by
+             /// wrapping the box 'ж&lt;{{ElementName}}&gt;' and implementing the interface (a generic one over
+             /// ITSELF), so it can serve as a constrained generic type argument.
              /// </summary>
              [global::System.Diagnostics.DebuggerNonUserCode]
              {{AdapterScope}} sealed class {{ProxyName}} : {{InterfaceRef}}, IжAdapter
@@ -55,7 +55,8 @@ internal class ConstraintProxyImplTemplate : TemplateBase
                  // unwrap T-typed arguments to the box and rewrap T-typed results back to the proxy.
                  public static implicit operator {{ProxyName}}(ж<{{ElementName}}> box) => new {{ProxyName}}(box);
 
-                 public static implicit operator ж<{{ElementName}}>({{ProxyName}} proxy) => proxy.m_box;
+                 // A NULL proxy is Go's zero value of the type parameter (`var zero O`, default(proxy)): a nil pointer.
+                 public static implicit operator ж<{{ElementName}}>({{ProxyName}} proxy) => proxy is null ? null! : proxy.m_box;
 
                  {{MethodsImplementation}}
 
