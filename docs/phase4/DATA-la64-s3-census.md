@@ -370,3 +370,41 @@ the declaration count equals the census's, and the stubbed subset equals the cen
 | 55 | vendor/golang.org/x/sys/cpu | `getisar1` | `vendor/golang.org/x/sys/cpu/linux-arm64/cpu_gc_arm64.cs` | stubbed | - |
 | 56 | vendor/golang.org/x/sys/cpu | `getpfr0` | `vendor/golang.org/x/sys/cpu/linux-arm64/cpu_gc_arm64.cs` | stubbed | - |
 | 57 | vendor/golang.org/x/sys/cpu | `getzfr0` | `vendor/golang.org/x/sys/cpu/linux-arm64/cpu_gc_arm64.cs` | stubbed | - |
+
+## Amendment, 2026-11-10: design §2.7's stay list, judged (S3, after site 9)
+
+Design §2.7 keeps nine hand-owned files FLAT (or in `linux/`), so they compile unchanged at linux/arm64 against a
+principal that differs there, and asks S3 to judge each one. **Compiling is settled:** GolibTests' whole closure
+compiles at linux/arm64 since 9d. The question is semantic: does the body assume amd64?
+
+**Method.** For each file:
+- the members it bodies were listed from the per-flavour declaration tables (the 57-row table above, and the same
+  table at linux/amd64), and each member's arm64 declaration was compared with its amd64 one;
+- its converted principal was diffed between `amd64/` (or `linux-amd64/`) and `linux-arm64/`, because these principals
+  are PER-ARCH emissions, so S2 found that they differ;
+- the body was read for whether it touches what differs, or anything else arch-bound: registers, sizes, layouts, x86
+  features, syscall numbers.
+
+| file | bodies at arm64 / amd64 | arm64 principal | judgment |
+|---|---|---|---|
+| `internal/bytealg/bytealg_impl.cs` | 9 / 9 (the same members) | `linux-arm64/bytealg.cs` | **Stays.** Go's arm64 assembly covers the same family (compare, count, index, indexbyte). Each body implements the arch-neutral contract for any length. The one per-arch knob, `MaxLen` (32 at arm64), is set by the converted `index_arm64.go` init, and callers check it before calling `Index`. |
+| `internal/chacha8rand/chacha8_impl.cs` | 1 / 1 (`block`) | `linux-arm64/chacha8.cs` | **Stays.** The two assembly headers name different array shapes, but Go's own `TestBlockGeneric` holds `block` equal to `block_generic` on every arch, so the stored layout is the generic one, and that is what this body writes. |
+| `runtime/cpuflags_impl.cs` | 0 (a module initializer) | `linux-arm64/cpuflags.cs` + `cpuflags_arm64.cs` | **Stays.** The per-arch difference is the X86 field offsets, which it never reads. Its `GOARCH == "arm64"` branch is cpuinit's arm64 line (`arm64HasATOMICS = cpu.ARM64.HasATOMICS`), and site 0's initializer fills `cpu.ARM64` first. `arm64UseAlignedLoads` comes from `cpuflags_arm64.go`'s own converted init. |
+| `runtime/mranges_impl.cs` | 0 | `linux-arm64/mranges.cs` | **Stays.** The per-arch difference is `maxOffAddr` (a 47- versus 48-bit address space). The body has no address-space constant and no `offAddr` arithmetic of its own: it builds ranges through the converted `makeAddrRange`. It is addrRanges arithmetic over 16-byte ranges and `goarch.PtrSize`, which is 8 at both arches. Its 4096 is a range length (site 8). |
+| `runtime/panic_impl.cs` | 0 (throw/fatal displaced) | `linux-arm64/panic.cs` | **Stays.** The per-arch difference is one folded `goarch.IsAmd64` condition. It forwards to golib's FatalReport, with no arch content. The arm64 `panic.cs` carries the displacement placeholders, and the 0-error compile rules out a second body. |
+| `runtime/sema_impl.cs` | 0 (semacquire1/semrelease1) | `linux-arm64/sema.cs` | **Stays.** The per-arch difference is the cache-line pad (40 versus 104 bytes), which it never touches. It forwards to golib's RuntimeSemaphore, with no arch content. |
+| `runtime/malloc_impl.cs` | 0 (`zerobase`) | `linux-arm64/malloc.cs` | **Stays.** The per-arch difference is `arenaBaseOffset` (0xffff8… at amd64, 0 at arm64), which `zerobase` does not involve. `zerobase` is a `uintptr` box over golib's GoZeroBase, 8 bytes at both arches. |
+| `runtime/linux/netpoll_epoll_impl.cs` | 0 (`netpollBreak`) | `linux-arm64/netpoll_epoll.cs` | **Stays.** The per-arch difference is `EpollEvent.Data`'s type, which this body never reads. It refuses `netpollBreak` by name (there is no runtime poller) and touches no `epoll_event`, so the 12-versus-16-byte layout never reaches it. The layout-bearing epoll code is internal/poll's (site 1). |
+| `syscall/linux/syscall_linux_impl.cs` | 4 / 4 (the same members) | `linux-arm64/syscall_linux.cs` | **Stays.** The four declarations are byte-identical in both arches' `syscall_linux.cs`. entersyscall and exitsyscall forward to the managed bracket. `rawSyscallNoError` goes through `internal/runtime/syscall/linux.Syscall6` with the trap number its caller takes from that flavour's own table. `doAllThreadsSyscall` answers ENOTSUP. Only its header comment speaks of amd64's `SYSCALL` instruction. |
+
+**Not on the list, but the table shows it serving arm64:** `internal/runtime/atomic/atomic_impl.cs` bodies 26 arm64
+declarations. The member set is identical at both arches (43 names). Its primitives are `Interlocked.*`, which is
+sequentially consistent on arm64, and `Volatile.Read`/`Write`, which emit LDAR/STLR there, the same instructions Go's
+arm64 atomics use. **It stays.**
+- **One latent hazard, NOT arch-specific and NOT S3's:** `Store8` is a plain `Volatile.Write`, while `And8`, `Or8`
+  and `Xchg8` take `s_wideLatch`. A `Store8` landing inside an `And8`'s window on the same byte would be lost.
+- That is the same at amd64; the latch's fences make arm64 no different. It is recorded here and routed, not changed.
+
+**Result: §2.7's stay list needs no code change at linux/arm64.** The arm leg's runs remain the behavioural read of
+every row above. Nothing here substitutes for them. The site 0 reading COORD ruled in rides with this amendment:
+`LinuxArm64CpuStartupTests`, which runs at linux/arm64 only.

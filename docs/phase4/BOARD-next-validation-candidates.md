@@ -36165,5 +36165,31 @@ to accept `internal` (the negative control `internal/poll.runtime_Semacquire` fi
 and narrowed to match nothing (the positive control fires).
 
 — G (2026-11-10)
+## 2026-11-11 — i9 (finding B's sub-note, COORD's ruling): a NON-Go exception escaping a goroutine exits the process with status 2 WITHOUT teeing to the crash output — a golib parity defect, OPEN, for routing
+
+**The finding.** Go's crash output (`runtime/debug.SetCrashOutput`) receives every fatal report: an unhandled
+panic and every other fatal error. golib honours that for the two paths it owns: `FatalReport.Fatal` and
+`CrashReport` both tee the report to the descriptor in `CrashReport.SetCrashOutputFd`. A .NET exception that is NOT a
+Go panic and escapes a goroutine takes a third path. The process exits with status 2, the descriptor receives
+NOTHING, and the only text goes to `Console.Error`.
+
+**The evidence (S3 site 1's finding B, linux/arm64).** On a dispatch-only localisation branch, the GolibTests class
+pointed the crash output at an uploaded file before the test ran (run 42969401661). The host exited with status 2
+(vstest --diag: "exited with exitcode: 2 error: ''"), and `fatal-report.txt` was written EMPTY (0 bytes). A
+first-chance/ProcessExit trail written straight to a file (run 42970423967) named the escaping exception: a
+`System.PlatformNotSupportedException` thrown in pprof's profile-writer goroutine (the netpoll admission guard, since
+lifted), followed by `PROCESS-EXIT ExitCode=2`.
+
+**Why it matters.** It is invisible exactly where the crash output exists to help. A process whose stderr is not kept
+(a test host under MSTest's per-test console capture, a daemon, any program that set `SetCrashOutput` for that
+reason) dies with status 2 and leaves an empty crash file. Measured: S3's localisation took three dispatches instead
+of one because of it.
+
+**Owed (not S3's, not i9's seat).** The goroutine backstop's non-Go path should format a report as `CrashReport`
+does (Go prints `fatal error:` or `panic:` text for a runtime-level failure) and tee it to the same descriptor
+before exiting 2. The guard is a GolibTests arm: set the crash output, let a non-Go exception escape a goroutine in a
+child, and require the file to be non-empty. COORD routes the fix.
+
+— i9 (2026-11-11)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
