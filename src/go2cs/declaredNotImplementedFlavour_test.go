@@ -345,11 +345,22 @@ const (
 const (
 	// i9's class (b): Go itself declares the function for go vet and calls it from assembly only.
 	// There is no Go caller, and no assembly is converted.
+	// The floor-set triage's class (b) (docs/phase4/DATA-la64-s7-bank-plan.md §11.3) is the same class,
+	// and it counts one more case in: Go names the member only to take its address. An address take
+	// does not run the stub.
 	flavourGoSide = "Go-side: called from assembly only"
 
 	// i9's class (c): read, and deliberately left a throwing stub because linux/arm64 never reaches it
 	// (DATA-la64-s3-census.md, triage rows 9 to 15, each with its reach).
+	// The floor-set triage's class (c) (the same §11.3, each row with its reach): Go calls the member,
+	// and this emission does not reach the call at the row's targets. The reach was read, not run, and
+	// the guard does not see it: a change that gives one of those callers a root makes the label wrong
+	// with nothing red.
 	flavourRefused = "refused: read and left; this target does not reach it"
+
+	// Read one by one and not settled: the reading does not exclude a reach at the row's targets
+	// (DATA-la64-s7-bank-plan.md §11.2). The member is owed a body or a proof that nothing reaches it.
+	flavourOpen = "open: read; a reach at these targets is not excluded"
 
 	// A body exists in a key folder the row's targets do not compile. The pooled census cannot see
 	// the member at all. Measured, never asserted: the gate refuses the label on a member that has no
@@ -376,6 +387,12 @@ type flavourRow struct {
 // (runtime/linux/stubs2_impl.cs) and their three rows left. Measured after, with master 742a3dbb24
 // merged in: pooled 492; windows/amd64 212, linux/amd64 227, darwin/amd64 426, linux/arm64 204.
 //
+// 2026-11-11: the rows in the nine floor-set packages took the dispositions their triage settled
+// (docs/phase4/DATA-la64-s7-bank-plan.md §11.3, where each row has its reach): 38 Go-side and 26
+// refused. runtime.time_now and runtime.getlasterror were read and are open (§11.2). The 7 rows still
+// "not triaged" are the ones outside the floor set, the post-hop reading list. A disposition is a
+// reading: the guard measures the member and its targets, and checks no label but MASKED.
+//
 // No row is MASKED today. The two this guard found on its first day (internal/cpu.osInitArm64 and
 // internal/poll.prepayPlatformDeadlinePath) were classic partials, stubbed only because
 // PartialStubGenerator excluded one classic partial by name where the rule is the shape. They are
@@ -393,89 +410,89 @@ var declaredFlavourOnlyStubs = map[string]flavourRow{
 	"vendor/golang.org/x/sys/cpu.getzfr0":  {atLinuxArm64, flavourRefused},
 
 	// Stubbed at both linux targets.
-	"runtime.access":               {atLinux, flavourUntriaged},
-	"runtime.callCgoMmap":          {atLinux, flavourUntriaged},
-	"runtime.callCgoMunmap":        {atLinux, flavourUntriaged},
-	"runtime.callCgoSigaction":     {atLinux, flavourUntriaged},
-	"runtime.connect":              {atLinux, flavourUntriaged},
-	"runtime.exitThread":           {atLinux, flavourUntriaged},
-	"runtime.futex":                {atLinux, flavourUntriaged},
-	"runtime.gettid":               {atLinux, flavourUntriaged},
-	"runtime.raise":                {atLinux, flavourUntriaged},
-	"runtime.raiseproc":            {atLinux, flavourUntriaged},
-	"runtime.rt_sigaction":         {atLinux, flavourUntriaged},
-	"runtime.sbrk0":                {atLinux, flavourUntriaged},
-	"runtime.setitimer":            {atLinux, flavourUntriaged},
-	"runtime.sigaltstack":          {atLinux, flavourUntriaged},
-	"runtime.sigreturn__sigaction": {atLinux, flavourUntriaged},
-	"runtime.socket":               {atLinux, flavourUntriaged},
-	"runtime.timer_create":         {atLinux, flavourUntriaged},
-	"runtime.timer_delete":         {atLinux, flavourUntriaged},
-	"runtime.timer_settime":        {atLinux, flavourUntriaged},
-	"runtime.vgetrandom1":          {atLinux, flavourUntriaged},
-	"syscall.rawVforkSyscall":      {atLinux, flavourUntriaged},
+	"runtime.access":               {atLinux, flavourRefused},
+	"runtime.callCgoMmap":          {atLinux, flavourRefused},
+	"runtime.callCgoMunmap":        {atLinux, flavourRefused},
+	"runtime.callCgoSigaction":     {atLinux, flavourRefused},
+	"runtime.connect":              {atLinux, flavourRefused},
+	"runtime.exitThread":           {atLinux, flavourRefused},
+	"runtime.futex":                {atLinux, flavourRefused},
+	"runtime.gettid":               {atLinux, flavourRefused},
+	"runtime.raise":                {atLinux, flavourRefused},
+	"runtime.raiseproc":            {atLinux, flavourRefused},
+	"runtime.rt_sigaction":         {atLinux, flavourRefused},
+	"runtime.sbrk0":                {atLinux, flavourRefused},
+	"runtime.setitimer":            {atLinux, flavourRefused},
+	"runtime.sigaltstack":          {atLinux, flavourRefused},
+	"runtime.sigreturn__sigaction": {atLinux, flavourGoSide},
+	"runtime.socket":               {atLinux, flavourRefused},
+	"runtime.timer_create":         {atLinux, flavourRefused},
+	"runtime.timer_delete":         {atLinux, flavourRefused},
+	"runtime.timer_settime":        {atLinux, flavourRefused},
+	"runtime.vgetrandom1":          {atLinux, flavourRefused},
+	"syscall.rawVforkSyscall":      {atLinux, flavourRefused},
 
 	// Stubbed at every amd64 target and not at linux/arm64.
-	"internal/cpu.xgetbv":                           {atAmd64, flavourUntriaged},
+	"internal/cpu.xgetbv":                           {atAmd64, flavourRefused},
 	"internal/runtime/gc/scan.ExpandAVX512":         {atAmd64, flavourUntriaged},
 	"internal/runtime/gc/scan.FilterNilAVX512":      {atAmd64, flavourUntriaged},
 	"internal/runtime/gc/scan.scanSpanPackedAVX512": {atAmd64, flavourUntriaged},
-	"runtime.asmcgocall_landingpad":                 {atAmd64, flavourUntriaged},
-	"runtime.gcWriteBarrierBP":                      {atAmd64, flavourUntriaged},
-	"runtime.gcWriteBarrierBX":                      {atAmd64, flavourUntriaged},
-	"runtime.gcWriteBarrierCX":                      {atAmd64, flavourUntriaged},
-	"runtime.gcWriteBarrierDX":                      {atAmd64, flavourUntriaged},
-	"runtime.gcWriteBarrierR8":                      {atAmd64, flavourUntriaged},
-	"runtime.gcWriteBarrierR9":                      {atAmd64, flavourUntriaged},
-	"runtime.gcWriteBarrierSI":                      {atAmd64, flavourUntriaged},
-	"runtime.retpolineAX":                           {atAmd64, flavourUntriaged},
-	"runtime.retpolineBP":                           {atAmd64, flavourUntriaged},
-	"runtime.retpolineBX":                           {atAmd64, flavourUntriaged},
-	"runtime.retpolineCX":                           {atAmd64, flavourUntriaged},
-	"runtime.retpolineDI":                           {atAmd64, flavourUntriaged},
-	"runtime.retpolineDX":                           {atAmd64, flavourUntriaged},
-	"runtime.retpolineR10":                          {atAmd64, flavourUntriaged},
-	"runtime.retpolineR11":                          {atAmd64, flavourUntriaged},
-	"runtime.retpolineR12":                          {atAmd64, flavourUntriaged},
-	"runtime.retpolineR13":                          {atAmd64, flavourUntriaged},
-	"runtime.retpolineR14":                          {atAmd64, flavourUntriaged},
-	"runtime.retpolineR15":                          {atAmd64, flavourUntriaged},
-	"runtime.retpolineR8":                           {atAmd64, flavourUntriaged},
-	"runtime.retpolineR9":                           {atAmd64, flavourUntriaged},
-	"runtime.retpolineSI":                           {atAmd64, flavourUntriaged},
-	"runtime.settls":                                {atAmd64, flavourUntriaged},
-	"runtime.stackcheck":                            {atAmd64, flavourUntriaged},
+	"runtime.asmcgocall_landingpad":                 {atAmd64, flavourGoSide},
+	"runtime.gcWriteBarrierBP":                      {atAmd64, flavourGoSide},
+	"runtime.gcWriteBarrierBX":                      {atAmd64, flavourGoSide},
+	"runtime.gcWriteBarrierCX":                      {atAmd64, flavourGoSide},
+	"runtime.gcWriteBarrierDX":                      {atAmd64, flavourGoSide},
+	"runtime.gcWriteBarrierR8":                      {atAmd64, flavourGoSide},
+	"runtime.gcWriteBarrierR9":                      {atAmd64, flavourGoSide},
+	"runtime.gcWriteBarrierSI":                      {atAmd64, flavourGoSide},
+	"runtime.retpolineAX":                           {atAmd64, flavourGoSide},
+	"runtime.retpolineBP":                           {atAmd64, flavourGoSide},
+	"runtime.retpolineBX":                           {atAmd64, flavourGoSide},
+	"runtime.retpolineCX":                           {atAmd64, flavourGoSide},
+	"runtime.retpolineDI":                           {atAmd64, flavourGoSide},
+	"runtime.retpolineDX":                           {atAmd64, flavourGoSide},
+	"runtime.retpolineR10":                          {atAmd64, flavourGoSide},
+	"runtime.retpolineR11":                          {atAmd64, flavourGoSide},
+	"runtime.retpolineR12":                          {atAmd64, flavourGoSide},
+	"runtime.retpolineR13":                          {atAmd64, flavourGoSide},
+	"runtime.retpolineR14":                          {atAmd64, flavourGoSide},
+	"runtime.retpolineR15":                          {atAmd64, flavourGoSide},
+	"runtime.retpolineR8":                           {atAmd64, flavourGoSide},
+	"runtime.retpolineR9":                           {atAmd64, flavourGoSide},
+	"runtime.retpolineSI":                           {atAmd64, flavourGoSide},
+	"runtime.settls":                                {atAmd64, flavourGoSide},
+	"runtime.stackcheck":                            {atAmd64, flavourRefused},
 	"vendor/golang.org/x/sys/cpu.cpuid":             {atAmd64, flavourUntriaged},
 	"vendor/golang.org/x/sys/cpu.xgetbv":            {atAmd64, flavourUntriaged},
 
 	// Stubbed at windows/amd64 alone.
 	"internal/runtime/syscall/windows.StdCall":    {atWindows, flavourUntriaged},
 	"internal/runtime/syscall/windows.asmstdcall": {atWindows, flavourUntriaged},
-	"runtime.callbackasm":                         {atWindows, flavourUntriaged},
-	"runtime.callbackasm1":                        {atWindows, flavourUntriaged},
-	"runtime.exceptiontramp":                      {atWindows, flavourUntriaged},
-	"runtime.firstcontinuetramp":                  {atWindows, flavourUntriaged},
-	"runtime.getlasterror":                        {atWindows, flavourUntriaged},
-	"runtime.lastcontinuetramp":                   {atWindows, flavourUntriaged},
-	"runtime.osSetupTLS":                          {atWindows, flavourUntriaged},
-	"runtime.sehtramp":                            {atWindows, flavourUntriaged},
-	"runtime.sigFetchGSafe":                       {atWindows, flavourUntriaged},
-	"runtime.sigresume":                           {atWindows, flavourUntriaged},
-	"runtime.tstart_stdcall":                      {atWindows, flavourUntriaged},
-	"runtime.wintls":                              {atWindows, flavourUntriaged},
+	"runtime.callbackasm":                         {atWindows, flavourGoSide},
+	"runtime.callbackasm1":                        {atWindows, flavourGoSide},
+	"runtime.exceptiontramp":                      {atWindows, flavourGoSide},
+	"runtime.firstcontinuetramp":                  {atWindows, flavourGoSide},
+	"runtime.getlasterror":                        {atWindows, flavourOpen},
+	"runtime.lastcontinuetramp":                   {atWindows, flavourGoSide},
+	"runtime.osSetupTLS":                          {atWindows, flavourRefused},
+	"runtime.sehtramp":                            {atWindows, flavourGoSide},
+	"runtime.sigFetchGSafe":                       {atWindows, flavourRefused},
+	"runtime.sigresume":                           {atWindows, flavourGoSide},
+	"runtime.tstart_stdcall":                      {atWindows, flavourGoSide},
+	"runtime.wintls":                              {atWindows, flavourGoSide},
 
 	// Stubbed at darwin/amd64 alone (the trampolines are exempt by rule).
-	"os.readdir_r":         {atDarwin, flavourUntriaged},
-	"runtime.mstart_stub":  {atDarwin, flavourUntriaged},
-	"runtime.syscall_x509": {atDarwin, flavourUntriaged},
+	"os.readdir_r":         {atDarwin, flavourRefused},
+	"runtime.mstart_stub":  {atDarwin, flavourGoSide},
+	"runtime.syscall_x509": {atDarwin, flavourGoSide},
 
 	// Stubbed at every target but windows/amd64.
-	"runtime.cgoSigtramp": {atUnix, flavourUntriaged},
-	"runtime.sigfwd":      {atUnix, flavourUntriaged},
-	"runtime.sigtramp":    {atUnix, flavourUntriaged},
+	"runtime.cgoSigtramp": {atUnix, flavourGoSide},
+	"runtime.sigfwd":      {atUnix, flavourRefused},
+	"runtime.sigtramp":    {atUnix, flavourGoSide},
 
 	// Stubbed at windows/amd64 and linux/amd64.
-	"runtime.time_now": {atWindowsLinuxAmd64, flavourUntriaged},
+	"runtime.time_now": {atWindowsLinuxAmd64, flavourOpen},
 }
 
 // TestErasedByDesignCensus is the ledger of calls that compile to NOTHING (COORD's ruling A1,
