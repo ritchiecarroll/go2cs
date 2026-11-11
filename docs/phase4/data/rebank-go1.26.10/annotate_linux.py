@@ -147,6 +147,9 @@ def arch_combined(a, x):
     counts = f"{long_['RID']} {long_['verdicts']} verdicts + {long_['divergent']} disclosed, {short['RID']} {short['verdicts']} + {short['divergent']}"
     head = f"{a['row']}: combined: its verdicts and disclosed-divergent both differ by RID ({counts}), but the evidence names"
     gap, short_absent, long_absent = abs(va - vx), names(short, 'absent') or [], names(long_, 'absent') or []
+    if short.get('absent') is None:
+        raise Refusal(f"{a['row']}: combined: its verdicts and disclosed-divergent both differ by RID ({counts}), but the evidence for "
+                      f"{short['RID']}, the shorter RID, has no absent column, so its {gap} missing verdict(s) are not named")
     if long_absent:
         raise Refusal(f"{head} absent verdicts on {long_['RID']}, the LONGER RID")
     if len(set(short_absent)) != gap or len(short_absent) != gap:
@@ -185,11 +188,16 @@ def pair_reading(pkg, records, roster):
     if roster is None:
         raise Refusal(f'{pkg}: the linux evidence names it, but it carries no numeric linux: segment with a linux-x64 reading')
     x, a = x64[0], arm[0]
+    # Every count cell the forms read must be a number: a malformed line is refused by name, never a crash.
+    for line in (x, a):
+        for column in ('verdicts', 'matched', 'divergent', 'new'):
+            if not re.fullmatch(r'\d+', line.get(column) or ''):
+                raise Refusal(f"{pkg}: the linux evidence's {line['RID']} line has {column} {line.get(column)!r}, not a number")
     xd, ad = disclosed_divergent(x), disclosed_divergent(a)
     if x['status'] != 'validated' or x.get('new') != '0' or int(x['matched']) != roster[0] or xd != roster[1]:
         return 'host-difference', None, (f"host difference: the same dispatch's linux-x64 line ({x['status']} {fmt(x['matched'], xd)}, new {x.get('new')}) "
                                          f"is not the roster's linux-x64 reading ({fmt(*roster)}), recorded and not written")
-    if (x['status'] == a['status'] == 'validated' and x['agree'] == a['agree'] == 'yes' and x['verdicts'] == a['verdicts']
+    if (x['status'] == a['status'] == 'validated' and x['agree'] == a['agree'] == 'yes' and a['new'] == '0' and x['verdicts'] == a['verdicts']
             and int(x['matched']) == int(a['matched']) and xd == ad):
         one = fmt(x['matched'], xd)
         return 'equal', f'{one} (linux-x64; linux-arm64: {one})', None
