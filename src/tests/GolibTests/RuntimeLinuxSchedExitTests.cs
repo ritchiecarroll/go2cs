@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using go;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -36,6 +35,10 @@ namespace GolibTests;
 //
 // Not constructible here: exit's own caller. Forcing mmap to fail with EACCES or EAGAIN inside a
 // .NET host needs a locked-memory limit that fails the host's own allocations first.
+//
+// The number sched_getaffinity takes is pinned elsewhere: each arch's row in
+// LinuxRuntimeSyscallNumberTests, and the row against the converted flavour's own constant in
+// LinuxAmd64RuntimeSyscallFlavourTests and LinuxArm64RuntimeSyscallFlavourTests.
 //
 // Linux flavour only: the probes live in runtime/linux (GolibTests.csproj excludes this file under
 // every other $(GoTargetOS)).
@@ -99,18 +102,6 @@ public class RuntimeLinuxSchedExitTests
 
         Assert.IsNull(failure, failure);
         Assert.AreEqual(-22, result, "sched_getaffinity over a 1-byte buffer: -EINVAL");
-    }
-
-    // The number the body takes on this host against the converted flavour's own constant, which is the
-    // compiled arch's. A build whose flavour is not the host's arch fails here, as it should: its bodies
-    // would take the other arch's numbers.
-    [TestMethod]
-    public void SchedGetaffinityTakesTheConvertedFlavoursNumber()
-    {
-        Architecture arch = RuntimeInformation.ProcessArchitecture;
-
-        Console.WriteLine($"READING host arch = {arch}, the flavour's SYS_SCHED_GETAFFINITY = {(long)syscall_package.SYS_SCHED_GETAFFINITY}");
-        Assert.AreEqual((long)syscall_package.SYS_SCHED_GETAFFINITY, runtime_package.GoSchedGetaffinityNumberProbe(arch), $"the converted flavour's SYS_SCHED_GETAFFINITY against {arch}'s row");
     }
 
     [TestMethod]
