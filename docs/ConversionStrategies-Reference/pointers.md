@@ -2063,6 +2063,57 @@ both emission shapes — each panic case run through both the direct-ж preamble
 `ref`-receiver bridge. `PointerReceiverNilCompare` and bytes' `TestNil` continue to cover the inline
 guard.)
 
+## A receiver written through an ALIAS takes the form of the type the alias denotes
+Go lets a method name its receiver type through an alias, and the method belongs to the type the alias
+denotes:
+
+```go
+type Node struct{ kind int }
+type AttrNode = Node
+
+func (n *AttrNode) Mode(def int) (int, bool) {
+    if n == nil {
+        return def, false
+    }
+    return n.kind, true
+}
+```
+
+`Mode` is a method of `Node`, callable on a nil `*Node`. It is emitted exactly as it would be under the
+type's own name, with the alias kept in the signature as Go wrote it:
+
+```csharp
+public static (nint, bool) Mode(this ж<AttrNode> Ꮡn, nint def) {
+    ref var n = ref Ꮡn.DerefOrNull();
+
+    if (Ꮡn == nil) {
+        return (def, false);
+    }
+    return (n.kind, true);
+}
+```
+
+The receiver is the box when the body observes it as a pointer (a comparison with nil, a return, a store,
+a capture, the address of one of its fields), and `this ref AttrNode n` otherwise: the by-reference
+receiver rule is the same one, read through the alias. Both places that read the receiver's element type
+for that decision resolve an alias first (`scanFileForCaptureModeMethods`, and
+`receiverFieldChainAddressForm` for `&n.kind`). <!-- history: C48, 2026-11-11. The selection kept a method
+only when the receiver pointer's element was a *types.Named; for `*AttrNode` it is a *types.Alias, so the
+method was dropped before its body was read and emitted `this ref AttrNode n`. The nil guard then compiled
+against the struct's own comparison with nil and read the struct through the nil reference (one unit of
+the TypeScript-Go type-check slice panicked in ast.(*Node).GetResolutionModeOverride); every other pointer
+use of such a receiver was a compile error. Census at master 742a3dbb24: 0 alias-typed receivers in the
+standard library on four targets and in the behavioral tree. docs/phase4/DESIGN-alias-receiver-form.md. -->
+
+A receiver that is an alias of the POINTER type (`type P = *T`, `func (p P) M()`) is not covered: such a
+program does not compile after conversion.
+
+(Guarded by the `AliasReceiverForms` behavioral test, output-compared vs `go run`: fifteen receiver
+shapes through aliases, each called on a nil and on a real pointer, with a named-receiver control and a
+value-receiver control; and by the converter tests `TestAliasReceiverTakesTheNamedForm` and
+`TestAliasReceiverEmitsAsNamedReceiver`, the second of which converts one source with alias-typed and
+with named receivers and requires the same emission.)
+
 ## A pointer PARAMETER is nil-deferring for exactly the reason a receiver is
 Go's nil rule does not distinguish the two. Passing a nil `*T` to a function is as legal as calling a
 method through one: the body RUNS, and the nil-pointer panic happens only where the body actually
