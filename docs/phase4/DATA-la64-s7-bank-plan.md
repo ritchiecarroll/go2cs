@@ -545,3 +545,198 @@ Three readings follow from that table:
 - **The two legs are not one image.** x64 runs `ubuntu-26.04` and arm64 runs `ubuntu-24.04-arm`, so the ratio
   compares image and arch together. One row on one run is one sample; 1.5 stays the planning factor.
 - **Disk.** Both legs start with more than 92 GB free, against the sweep's 25 GB floor.
+
+## 11. The floor-set ledger rows, triaged (dated block, 2026-11-11)
+
+**Why.** The flavour census guard's ledger (`declaredFlavourOnlyStubs` in
+`src/go2cs/declaredNotImplementedFlavour_test.go`, on `claude/g-flavour-census-guard` at `d740c1a31a`) carries 76
+rows whose disposition reads "not triaged: stubbed before this guard (2026-11-10)". Each row is a bodyless
+`partial` that PartialStubGenerator bodies with a throw: the project compiles and the member dies at its first
+call. A standing ruling (§10.1) orders the rows in the nine floor-set packages triaged before wave 1 banks. This
+block is that triage. It is a reading. It changes no code and no ledger row.
+
+**Read at.** `34d303270c` (`claude/g-la64-s7-e1`). Its `src/core` is byte-equal to master `50dd9a065c`
+(`git diff --quiet` between the two over `src/core` exits 0). Go's side is read in GOROOT at go1.26.10.
+
+**The population.** 76 untriaged rows. 69 sit in floor-set packages: runtime 66, syscall 1, os 1, internal/cpu 1.
+The other five floor-set packages (net, internal/poll, internal/runtime/atomic, sync/atomic, math) hold no
+untriaged row. 27 of the 69 are stubs at linux/arm64: the ledger's `atLinux` 24 and `atUnix` 3. The 7 rows outside
+the floor set are the post-hop reading list and are not read here: internal/runtime/gc/scan `ExpandAVX512`,
+`FilterNilAVX512`, `scanSpanPackedAVX512`; vendor/golang.org/x/sys/cpu `cpuid`, `xgetbv`;
+internal/runtime/syscall/windows `StdCall`, `asmstdcall`.
+
+**The method.** Five instruments, all static.
+
+1. A reference census: every line in the package's flat files and key folders that names the member, classed as
+   declaration, definition, reference, qualified reference or comment.
+2. A reverse call closure over names, per target view (the flat files plus that target's goos, arch and goos-arch
+   folders, the set its project compiles). Two modes. "all": any unqualified occurrence of a function's name in a
+   body is an edge. "calls": only a call spelling is an edge. Roots are public functions, public functions in
+   `*_impl.cs`, functions in test files, and each file's top-level initialisers.
+3. A hand read of the emitted lines wherever the closure does not settle a row.
+4. A cross-package check: every closure of 60 names or fewer, intersected with the names other packages call as
+   `<package>_package.NAME(` across `src/core` and `src/gen`.
+5. Go's own declaration and Go's own call sites for each member.
+
+**Controls.** Closure: `emptyfunc` (no emitted caller) reads 0 direct callers; `walltime` reads reached, through
+`time_now`, at linux/arm64; a name that does not exist reads ABSENT. Cross-package: runtime has 40 distinct names
+called from other packages, in 76 calls over 4,180 files, and exactly one of the 28 small closures is entered:
+`vgetrandom`, from `internal/syscall/unix/linux/getrandom.cs:17`, which is the entry already known to be live. The
+other 27 read no entry. Syscall has 4 such names in 5 calls, and `rawVforkSyscall`'s closure is not entered.
+
+**The limit.** The graph holds names, not receivers. Method names shared across types (`start`, `find`, `init`,
+`write`, `alloc`, `push`, `next`, `schedule`) weld most of runtime into one component: at linux/arm64, 2,411
+names with 1,002 roots in "calls" mode and 3,894 names with 1,770 roots in "all" mode. So "no root reaches it" is
+the strong reading, and "a root reaches it" is only a lead, which a hand read then settles or does not. "calls"
+mode misses a function taken as a value; "all" mode covers that and over-counts: it takes a string literal, a
+local or a tuple element of the same name as an edge. Each such edge met below was read by hand and is named in
+its row. Nothing here was executed. No row was run to its stub.
+
+**The classes.**
+
+- **(a) reached.** A path from a root to the stub was read line by line. The guard's own rule then applies: a
+  member that is reached at its target is bodied, not rowed.
+- **(b) Go-side.** Go has no Go call of the member. Assembly owns the symbol, or Go names it only to take its
+  address. An address take does not run the stub. This is the ledger's "Go-side" disposition.
+- **(c) refused.** Go calls the member and this emission does not reach the call. Three reasons, named per row:
+  *no call* (the emission holds no call site at the row's targets), *guard* (the call sits behind a test that no
+  code lifts), *no root* (callers exist and no root reaches them). This is the ledger's "refused" disposition.
+- **open.** The reading does not exclude a reach.
+
+| | (a) reached | (b) Go-side | (c) refused | open | rows |
+|---|---|---|---|---|---|
+| All floor-set rows | 2 | 38 | 26 | 3 | 69 |
+| The rows at linux/arm64 | 2 | 3 | 21 | 1 | 27 |
+
+Of the 26 refused: 7 *no call*, 4 *guard*, 15 *no root*. Every linux row reads the same at linux/amd64 and at
+linux/arm64.
+
+### 11.1 The two reached rows
+
+**`sched_getaffinity` is reached from a public function, with no branch before the stub.**
+`runtime.SetDefaultGOMAXPROCS()` (`src/core/runtime/debug.cs:23`) calls `defaultGOMAXPROCS(0)` at `:28`, before
+it takes the scheduler lock. `defaultGOMAXPROCS` (`linux/cgroup_linux.cs:83`) calls `getCPUCount()` at `:96`
+whenever its argument is not positive. `getCPUCount` (`linux/os_linux.cs:97`) calls the stub at `:107`. So a call
+of `runtime.SetDefaultGOMAXPROCS()` at either linux target throws.
+
+- Who calls it: nothing in `src/core`. The name occurs once, at its definition. Only user code reaches it. Go's
+  own tests of it are `runtime/cgroup_linux_test.go` and `testdata/testprog/gomaxprocs.go`.
+- The other callers of `getCPUCount` are `osinit` (`linux/os_linux.cs:369`) and `defaultGOMAXPROCSInit`
+  (`linux/cgroup_linux.cs:61`); no root reaches either.
+- For the fix seat: Go's raw syscall returns the number of bytes written, and `getCPUCount` slices its buffer by
+  that count. The C library's wrapper returns 0 on success. A body that forwards the wrapper's return reads zero
+  CPUs. The seat owes a guard that is red first.
+
+**`exit` is reached on a failure path only.** `sysAllocOS` (`linux/mem_linux.cs:19`) calls `exit(2)` at `:24` and
+`:28`, when `mmap` fails with EACCES or EAGAIN. `sysAllocOS` is live: the hand-owned persistent allocator calls
+`sysAlloc` (`mem_persistent_impl.cs:96`, `:108`), and `linux/mem_linux_impl.cs:101` calls `sysAllocOS` directly.
+In that state the process throws from the stub after printing Go's message, where Go exits with status 2. The
+other 11 functions that call `exit` at linux are not reached: `Main`, `syscall_Exit`, `fatalthrow`, `fatalpanic`,
+`startpanic_m`, `cgocallbackg`, `newosproc0`, `needm`, `sighandler`, `fatalsignal`, `badsignal`. windows and
+darwin carry converted bodies of `exit`; linux is the only target where it is a stub.
+
+### 11.2 The three open rows
+
+**`osyield` (linux/amd64, linux/arm64).** 12 functions call it. Read and excluded:
+
+- `addNonGo`, `osyield_no_g`, `traceCPUSample`, the profiler's `add` and `syscall_runtime_BeforeExec` have no
+  reached caller.
+- `setcpuprofilerate` is live, and its spin (`linux/proc.cs:5575`) waits on `prof.signalLock`, which the opt-in
+  sampler never takes.
+- `runqgrab` (`linux/proc.cs:7463`) calls it only in the `else` of `if (!osHasLowResTimer)` (`:7457`), and
+  `osHasLowResTimer` is the constant `false` at linux (`linux/proc.cs:1173`).
+- `ensureSwept` through `addfinalizer`: `addfinalizer` has no caller, because `SetFinalizer` and `AddCleanup` are
+  hand-owned whole files (`mfinal.cs`, `mcleanup.cs`) that bind the host's own finalizers.
+
+Not excluded: `casgstatus`, `getGCMaskOnDemand`, `suspendG`, `traceAdvance`, and `ensureSwept`'s other callers.
+All sit in the welded component. Each call is a spin taken under contention, so a quiet run does not show it.
+windows and darwin carry converted bodies of `osyield`; linux is the outlier. Go's body is one `sched_yield`
+system call. Bodying it is cheaper than proving that it is never reached.
+
+**`time_now` (windows/amd64, linux/amd64).** Three callers: `time_runtimeNow` (no caller; `time.now` is
+hand-bodied in `time/time_impl.cs:80`), `gcMarkTermination` and `traceSyncBatch`. The last two sit in the welded
+component, behind `gcStart` and `traceAdvance`. `GC`, `StartTrace` and `StopTrace` are replaced by hand-owned
+bodies, which removes the public entries, and the remaining callers of `gcStart` are the allocator's. Not
+excluded. It is not a wave 1 question: at linux/arm64 the member is bodied (`linux-arm64/timestub2_impl.cs`).
+
+**`getlasterror` (windows/amd64).** One call is on a normal path: the poller's timeout test
+(`windows/netpoll_windows.cs:201`). It sits behind the `iocphandle` guard at `:153-156`, and `iocphandle` starts
+invalid (`:97`) with one writer (`:107`), in `netpollinit`, which has no caller. Every other call prints the
+error number on a branch that then throws. Of the functions holding those, `initHighResTimer`, `minit`,
+`netpollinit`, `netpollopen`, `profileLoop`, `semasleep` and `semawakeup` are not reached; `newosproc`, `preemptM`
+and `semacreate` sit in the welded component. So the open part is a failure path whose next statement is a throw.
+
+### 11.3 The table
+
+Paths in the last column are under `src/core/runtime/` unless the row names another package. "Closure N" is the
+"all"-mode reverse closure at the row's targets.
+
+| # | member | Go's declaration | class | reach and disposition |
+|---|---|---|---|---|
+| 1 | `access` | stubs_linux.go:18 | (c) no call | Go's one caller is write_err_android.go, which no target compiles. The emission holds the declaration (`linux/stubs_linux.cs:18`) and no call. The two "all" hits are the word inside string literals. |
+| 2 | `callCgoMmap` | cgo_mmap.go:63 | (c) guard | One caller, `mmap`, behind `_cgo_mmap != nil` (`linux/cgo_mmap.cs:31`). `_cgo_mmap` is declared at `:16`; nothing in `src/core` or `src/gen` writes it. |
+| 3 | `callCgoMunmap` | cgo_mmap.go:70 | (c) guard | The same for `munmap` and `_cgo_munmap` (declared `:22`, guard `:50`). |
+| 4 | `callCgoSigaction` | cgo_sigaction.go:98 | (c) guard | One caller, `sigaction`, which returns early while `_cgo_sigaction == nil` (`linux/cgo_sigaction.cs:37`); nothing writes it. `sigaction` is called only from `setsig`, `setsigstack` and `getsig` (`linux/os_linux.cs:513-532`), and no root reaches those (closures 12, 5, 6). |
+| 5 | `connect` | stubs_linux.go:19 | (c) no call | As row 1. No reference at all in the emission. |
+| 6 | `exit` | stubs2.go:20 | (a) reached | On a failure path only. §11.1. |
+| 7 | `exitThread` | stubs2.go:44 | (c) no root | One call, in `mexit` (`linux/proc.cs:2149`). Closure 2, no root. |
+| 8 | `futex` | os_linux64.go:16 | (c) no root | Callers `futexsleep` and `futexwakeup`. Closure 4, no root: the lock and note primitives above them are hand-owned. |
+| 9 | `gettid` | os_linux.go:392 | (c) no root | One call, in `minit` (`linux/os_linux.cs:420`). `minit`'s closure is 7, no root. The other "all" hits are a tuple element of the same name (`linux/signal_posix_impl.cs:706,717`). |
+| 10 | `osyield` | os_linux.go:456 | open | §11.2. |
+| 11 | `raise` | os_linux.go:451 | (c) no root | One call, in `raisebadsignal` (`linux/signal_unix.cs:981`). Closure 3, no root. |
+| 12 | `raiseproc` | os_linux.go:452 | (c) no root | One call, in `sighandler` (`linux/signal_unix.cs:756`). Closure 14, no root. |
+| 13 | `rt_sigaction` | os_linux.go:559 | (c) no root | One caller, `sysSigaction`, called only by `sigaction`; row 4 names `sigaction`'s three callers. The "all" mode joins the welded component through the string `"sigaction"` in two native entry-point attributes. |
+| 14 | `sbrk0` | stubs_linux.go:11 | (c) no root | One call, in `mallocinit` (`linux-arm64/malloc.cs:717`, and its amd64 twin). Closure 2, no root. |
+| 15 | `sched_getaffinity` | os_linux.go:455 | (a) reached | From `runtime.SetDefaultGOMAXPROCS()`. §11.1. |
+| 16 | `setitimer` | os_linux.go:434 | (c) no root | One caller, `setProcessCPUProfilerTimer`. Closure 16, no root. The second "all" hit is a local of the same name. |
+| 17 | `sigaltstack` | os_linux.go:431 | (c) no root | Closure 17, no root. |
+| 18 | `sigreturn__sigaction` | os_linux.go:426 | (b) Go-side | Go has no call; `setsig` takes its address. The emission does the same, and no root reaches `setsig` (closure 13). |
+| 19 | `socket` | stubs_linux.go:20 | (c) no call | As row 1. The one "all" hit is the word inside a signal-table string. |
+| 20 | `timer_create` | os_linux.go:437 | (c) no call | Go's callers are all in `setThreadCPUProfiler` (os_linux.go:648-697). Its converted body is replaced by `linux/cpuprof_linux_impl.cs:47`, which holds no call. The "all" hits are a local of the same name in `validSIGPROF` (`linux/os_linux.cs:618`). |
+| 21 | `timer_delete` | os_linux.go:440 | (c) no call | As row 20. No reference at all in the emission. |
+| 22 | `timer_settime` | os_linux64.go:19 | (c) no call | As row 20. No reference at all in the emission. |
+| 23 | `vgetrandom1` | vgetrandom_linux.go:16 | (c) guard | `vgetrandom` is live across packages and returns at `vgetrandomAlloc.stateSize == 0` (`linux/vgetrandom_linux.cs:102`) before the call. The one writer of `stateSize` (`:43`) is in `vgetrandomInit`, called from `osinit`, which has no caller. |
+| 24 | syscall `rawVforkSyscall` | syscall_linux.go:103 | (c) no root | Calls in `forkAndExecInChild1` (`src/core/syscall/linux/exec_linux.cs:345,351,353`) and `doCheckClonePidfd` (`:931,933`). `forkAndExecInChild` has no caller. `os.checkClonePidfd` is hand-bodied (`src/core/os/linux/pidfd_linux_impl.cs:50`) and returns without the probe. No cross-package call enters. |
+| 25 | `cgoSigtramp` | os_linux.go:428, os_darwin.go:418 | (b) Go-side | Go has no call; `setsig` takes its address. The emission does the same at linux and at darwin. |
+| 26 | `sigtramp` | os_linux.go:427, os_darwin.go:417 | (b) Go-side | As row 25. |
+| 27 | `sigfwd` | signal_unix.go:1159 | (c) no root | One caller, `sigfwdgo`. Closure 2, no root, at linux and at darwin. |
+| 28 | internal/cpu `xgetbv` | cpu_x86.go:15 | (c) no root | One call, in `doinit` (`src/core/internal/cpu/amd64/cpu_x86.cs:141`), under `Initialize` (`src/core/internal/cpu/cpu.cs:202`), under runtime's `cpuinit` (`proc.cs:795` in each goos folder), under `schedinit`, which has no caller at any amd64 target. `amd64/cpu_x86_impl.cs:33-36` fills `X86` natively instead. |
+| 29 | `asmcgocall_landingpad` | stubs_amd64.go:45 | (b) Go-side | No Go call in Go. No reference in the emission. |
+| 30 | `gcWriteBarrierBP`, `BX`, `CX`, `DX`, `R8`, `R9`, `SI` (7 rows) | stubs_amd64.go:10-16 | (b) Go-side | The compiler's write-barrier entries; assembly only. The reference census reads 0 references for all 7. |
+| 31 | `retpolineAX`, `BP`, `BX`, `CX`, `DI`, `DX`, `R8` to `R15`, `SI` (15 rows) | stubs_amd64.go:25-39 | (b) Go-side | The compiler's retpoline thunks; assembly only. The reference census reads 0 references for all 15. |
+| 32 | `settls` | stubs_amd64.go:22 | (b) Go-side | Go's own comment says it is called from assembly only. No reference in the emission. |
+| 33 | `stackcheck` | stubs_amd64.go:19 | (c) no root | One caller, at windows only: `minit`. Closure 5, no root. No call at linux or darwin. |
+| 34 | `time_now` | timeasm.go:14 | open | windows/amd64 and linux/amd64 only. §11.2. |
+| 35 | `callbackasm` | syscall_windows.go:226 | (b) Go-side | Go takes its address in `callbackasmAddr`; its only call spellings are text printed by the generator wincallback.go. The emission holds the one take. Closure 8; the one "all" root is the word inside a position-map attribute string. |
+| 36 | `callbackasm1` | os_windows.go:1040 | (b) Go-side | No reference in the emission. |
+| 37 | `exceptiontramp` | signal_windows.go:36 | (b) Go-side | One address take. Closure 2, no root. |
+| 38 | `firstcontinuetramp` | signal_windows.go:37 | (b) Go-side | As row 37. |
+| 39 | `lastcontinuetramp` | signal_windows.go:38 | (b) Go-side | As row 37. |
+| 40 | `getlasterror` | os_windows.go:352 | open | Failure paths only. §11.2. |
+| 41 | `osSetupTLS` | tls_windows_amd64.go:10 | (c) no root | One caller, `needm`. Closure 2, no root. |
+| 42 | `sehtramp` | signal_windows.go:39 | (b) Go-side | No reference in the emission. |
+| 43 | `sigFetchGSafe` | signal_windows.go:113 | (c) no root | One caller, `sigFetchG`. Closure 2, no root. |
+| 44 | `sigresume` | signal_windows.go:40 | (b) Go-side | One address take. Closure 1, no root. |
+| 45 | `tstart_stdcall` | os_windows.go:156 | (b) Go-side | One address take, in `newosproc`. |
+| 46 | `wintls` | os_windows.go:159 | (b) Go-side | No reference in the emission. |
+| 47 | os `readdir_r` | dir_darwin.go:148 | (c) no call | The hand-owned `readdir` binds the C library's `readdir_r` natively (`src/core/os/darwin/dir_darwin_impl.cs:103-107`). The converted declaration (`src/core/os/darwin/dir_darwin.cs:63`) has no caller; the one "all" hit is the name inside that binding's string. |
+| 48 | `mstart_stub` | os_darwin.go:268 | (b) Go-side | One address take, in `newosproc`. |
+| 49 | `syscall_x509` | sys_darwin.go:88 | (b) Go-side | One address take, in `crypto_x509_syscall`, which has no caller in the package or across packages. |
+
+Rows 1 to 27 are the 27 at linux/arm64 (1 to 24 `atLinux`, 25 to 27 `atUnix`). Rows 28 to 33 are `atAmd64`, 34
+is `atWindowsLinuxAmd64`, 35 to 46 are `atWindows`, 47 to 49 are `atDarwin`. 49 table rows hold 69 ledger rows.
+
+### 11.4 What this block does not do
+
+- **It bodies nothing.** The two reached rows and `osyield` need a fix seat. Until one lands, the ledger's
+  "not triaged" text is still the true description of those three.
+- **It edits no ledger row.** The guard's branch takes no more commits, so the 64 dispositions that are settled
+  here (38 Go-side, 26 refused) reach the ledger in a later seat, after the guard lands.
+- **It does not read the 7 rows outside the floor set.**
+- **It proves no absence by running.** A row classed (c) *no root* rests on the "all" closure and the hand reads
+  named in its row. A change that gives one of those islands a caller moves the row; the guard does not see that,
+  because it reads declarations, not reach.
+
+One instrument note for the next reader: whole-file hand-owned files carry `[module: go.GoManualConversion]`, with
+the `go.` prefix. A search anchored on the attribute name without the prefix misses them, and missed `mfinal.cs`
+and `mcleanup.cs` here until their headers were read.
