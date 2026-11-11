@@ -3099,6 +3099,19 @@ Assert-Equal 'linux unread: a pending row needs no evidence' $null (Get-LinuxUnr
 Assert-Equal 'linux unread: a bare segment is not this check''s (the format rule owns it)' $null (Get-LinuxUnreadRefusal -Segment (& $linSeg 3840 2 $null $null 0 0))
 Assert-Equal 'linux format: a pending segment spells its note' '3840 + 2 (linux-x64; linux-arm64: pending)' (Format-DarwinSegment (& $linPendingSeg 3840 2))
 
+# THE NOTE IS MANDATORY (S7-a piece 6): from the commit that writes "(linux-x64; linux-arm64: pending)" on every numeric
+# linux segment, a numeric linux segment with no per-RID note is refused: it would read as banked on a RID it never ran
+# on. n/a is not numeric, and is not this check's.
+# RED STUB (S7-a piece 6): the fix replaces this.
+function Get-LinuxNoteRefusal { param($Segment) return $null }
+$noteBare = [PSCustomObject]@{ Applicable = $true; Expected = 7; Disclosed = 0; Rid = $null; Other = $null }
+Assert-Equal 'linux note mandatory: a bare numeric segment is refused by name' $true ("$(Get-LinuxNoteRefusal -Segment $noteBare)" -match 'no per-RID note')
+Assert-Equal 'linux note mandatory: a bare segment with disclosures is refused too' $true ($null -ne (Get-LinuxNoteRefusal -Segment ([PSCustomObject]@{ Applicable = $true; Expected = 7; Disclosed = 2 })))
+Assert-Equal 'linux note mandatory: a pending note is accepted' $null (Get-LinuxNoteRefusal -Segment (& $linPendingSeg 7 0))
+Assert-Equal 'linux note mandatory: a two-RID reading is accepted' $null (Get-LinuxNoteRefusal -Segment (& $linSeg 7 0 'linux-x64' 'linux-arm64' 7 0))
+Assert-Equal 'linux note mandatory: n/a is not this check''s' $null (Get-LinuxNoteRefusal -Segment ([PSCustomObject]@{ Applicable = $false; Expected = 0; Disclosed = 0 }))
+Assert-Equal 'linux note mandatory: no linux segment is not this check''s' $null (Get-LinuxNoteRefusal -Segment $null)
+
 
 # The UNMEASURED ledger's reader: its records, each with its line number, and HeaderError when the header is not exactly
 # row / reason / shard / run.
