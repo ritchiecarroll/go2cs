@@ -1781,6 +1781,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPlainSendOperandOrder() => CheckTarget("PlainSendOperandOrder");
 
     [TestMethod]
+    public void CheckPointerAliasForms() => CheckTarget("PointerAliasForms");
+
+    [TestMethod]
     public void CheckPointerArrayRange() => CheckTarget("PointerArrayRange");
 
     [TestMethod]

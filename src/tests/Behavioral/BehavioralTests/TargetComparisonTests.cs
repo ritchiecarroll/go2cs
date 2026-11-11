@@ -1834,6 +1834,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPlainSendOperandOrder() => CheckTarget("PlainSendOperandOrder");
 
     [TestMethod]
+    public void CheckPointerAliasForms() => CheckTarget("PointerAliasForms");
+
+    [TestMethod]
     public void CheckPointerArrayRange() => CheckTarget("PointerArrayRange");
 
     [TestMethod]

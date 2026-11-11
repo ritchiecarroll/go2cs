@@ -1831,6 +1831,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPlainSendOperandOrder() => CheckTarget("PlainSendOperandOrder");
 
     [TestMethod]
+    public void CheckPointerAliasForms() => CheckTarget("PointerAliasForms");
+
+    [TestMethod]
     public void CheckPointerArrayRange() => CheckTarget("PointerArrayRange");
 
     [TestMethod]

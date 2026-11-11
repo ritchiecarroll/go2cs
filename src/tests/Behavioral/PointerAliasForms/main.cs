@@ -18,8 +18,10 @@ partial struct List /*[]nint*/;
 
 internal static slice<ж<Node>> registry;
 
-public static (nint, bool) Mode(this NodePtr p, nint def) {
-    if (p == nil) {
+public static (nint, bool) Mode(this NodePtr Ꮡp, nint def) {
+    ref var p = ref Ꮡp.DerefOrNull();
+
+    if (Ꮡp == nil) {
         return (def, false);
     }
     return (p.kind, true);
@@ -34,7 +36,7 @@ public static (nint, bool) ModeNamed(this ж<Node> Ꮡnode, nint def) {
     return (node.kind, true);
 }
 
-public static ж<Node> Self(this NodePtr p) { return p; }
+public static ж<Node> Self(this NodePtr Ꮡp) { return Ꮡp; }
 
 internal static @string describe(ж<Node> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
@@ -45,63 +47,68 @@ internal static @string describe(ж<Node> Ꮡn) {
     return n.name;
 }
 
-public static @string Describe(this NodePtr p) { return describe(p); }
+public static @string Describe(this NodePtr Ꮡp) { return describe(Ꮡp); }
 
-public static void Register(this NodePtr p) { registry = append(registry, p); }
+public static void Register(this NodePtr Ꮡp) { registry = append(registry, Ꮡp); }
 
-public static ж<nint> KindPtr(this NodePtr p) { return p.Ꮡkind; }
+public static ж<nint> KindPtr(this NodePtr Ꮡp) { return Ꮡp.Ꮡkind; }
 
-public static void LinkFrom(this NodePtr p, ж<Node> Ꮡother) {
+public static void LinkFrom(this NodePtr Ꮡp, ж<Node> Ꮡother) {
     ref var other = ref Ꮡother.DerefOrNull();
 
-    other.next = p;
+    other.next = Ꮡp;
 }
 
-public static Func<@string> Namer(this NodePtr p) { return () => p.name; }
+public static Func<@string> Namer(this NodePtr Ꮡp) { return () => Ꮡp.Value.name; }
 
-public static Func<nint, (nint, bool)> ModeFunc(this NodePtr p) {
-    var pʗ1 = p;
-    return (nint p1) => pʗ1.Mode(p1);
-}
+public static Func<nint, (nint, bool)> ModeFunc(this NodePtr Ꮡp) { return Ꮡp.Mode; }
 
-public static @string Announce(this NodePtr p) {
+public static @string Announce(this ref Node p) {
     fmt.Println("  side effect ran");
     return p.name;
 }
 
-public static void SetKind(this NodePtr p, nint kind) { p.kind = kind; }
+public static void SetKind(this ref Node p, nint kind) { p.kind = kind; }
 
-public static @string SafeName(this NodePtr p) {
-    var (_, ok) = p.Mode(0); if (!ok) {
+public static @string SafeName(this NodePtr Ꮡp) {
+    ref var p = ref Ꮡp.DerefOrNull();
+
+    var (_, ok) = Ꮡp.Mode(0); if (!ok) {
         return "none";
     }
     return p.name;
 }
 
-public static bool IsNil(this ChainPtr p) { return p == nil; }
+public static bool IsNil(this ChainPtr Ꮡp) { return Ꮡp == nil; }
 
-public static ж<Node> Tail(this NodePtr p) {
-    while (p != nil && p.next != nil) {
-        p = p.next;
+public static ж<Node> Tail(this NodePtr Ꮡp) {
+    ref var p = ref Ꮡp.DerefOrNull();
+
+    while (Ꮡp != nil && p.next != nil) {
+        Ꮡp = p.next; p = ref Ꮡp.DerefOrNull();
     }
-    return p;
+    return Ꮡp;
 }
 
 public static nint Kind(this Node n) { return n.kind; }
 
-public static void Push(this ListPtr l, nint v) { l.ValueSlot = append(l.ValueSlot, v); }
+public static void Push(this ref List l, nint v) { l = append(l, v); }
 
-public static nint Len(this ListPtr l) {
-    if (l == nil) {
+public static nint Len(this ListPtr Ꮡl) {
+    ref var l = ref Ꮡl.DerefOrNull();
+
+    if (Ꮡl == nil) {
         return -1;
     }
-    return len(l.ValueSlot);
+    return len(l);
 }
 
-public static @string /*s*/ Deferred(this NodePtr p) {
+public static @string /*s*/ Deferred(this NodePtr Ꮡp) {
     @string s = default;
     GoFrame ᒐ = default;
     try {
+        ref var p = ref Ꮡp.DerefOrNull();
+
         defer(() => {
             var r = recover(); if (r != nil) {
                 s = "recovered";
@@ -114,19 +121,23 @@ public static @string /*s*/ Deferred(this NodePtr p) {
     return s;
 }
 
-public static @string String(this NodePtr p) {
-    if (p == nil) {
+public static @string String(this NodePtr Ꮡp) {
+    ref var p = ref Ꮡp.DerefOrNull();
+
+    if (Ꮡp == nil) {
         return "Node(nil)";
     }
     return "Node("u8 + p.name + ")"u8;
 }
 
-internal static nint viaParam(NodePtr q) {
-    if (q == nil) {
+internal static nint viaParam(NodePtr Ꮡq) {
+    ref var q = ref Ꮡq.DerefOrNull();
+
+    if (Ꮡq == nil) {
         return -1;
     }
     q.kind++;
-    return q.kind + q.Kind();
+    return q.kind + Ꮡq.Kind();
 }
 
 internal static @string viaLocal(ж<Node> n) {
@@ -137,18 +148,20 @@ internal static @string viaLocal(ж<Node> n) {
     return q.Describe() + "/"u8 + q.name;
 }
 
-internal static nint walk(NodePtr q) {
+internal static nint walk(NodePtr Ꮡq) {
+    ref var q = ref Ꮡq.DerefOrNull();
+
     nint count = 0;
-    while (q != nil) {
+    while (Ꮡq != nil) {
         count++;
-        q = q.next;
+        Ꮡq = q.next; q = ref Ꮡq.DerefOrNull();
     }
     return count;
 }
 
-internal static ж<nint> kindOf(NodePtr q) { return Ꮡq.Ꮡkind; }
+internal static ж<nint> kindOf(NodePtr q) { return q.Ꮡkind; }
 
-internal static Node copyOf(NodePtr q) { return q.Value; }
+internal static Node copyOf(ref Node q) { return q; }
 
 internal static void elements(ж<Node> n) {
     var nodes = slice<NodePtr>([n, default, Ꮡ(new Node(kind: 8, name: "lit"))]);
@@ -165,7 +178,7 @@ internal static void elements(ж<Node> n) {
     fmt.Println(ᐸꟷ(ch) == n);
 
     NodePtr typedNil = default;
-    any boxed = typedNil;
+    any boxed = typedNil.OrTypedNil();
     fmt.Println(boxed == nil, boxed._<NodePtr>() == nil);
 
     switch (boxed.type()) {
@@ -180,17 +193,25 @@ internal static void elements(ж<Node> n) {
     }}
 }
 
-internal static void setKind<P>(P p, nint kind)
-    where P : /* go2cs/PointerAliasForms.NodePtr */ new()
-{ (p.Value).kind = kind; }
+internal static void setKind(ж<Node> Ꮡp, nint kind)
+    /* where P : *Node (erased: P renders as ж<Node>) */
+{
+    ref var p = ref Ꮡp.DerefOrNull();
 
-internal static bool isNilOf<P>(P p)
-    where P : /* go2cs/PointerAliasForms.NodePtr */ new()
-{ return p == default; }
+    (p).kind = kind;
+}
 
-internal static nint kindVia<P>(P p)
-    where P : /* interface{go2cs/PointerAliasForms.NodePtr} */ new()
-{ return (p.Value).kind; }
+internal static bool isNilOf(ж<Node> p)
+    /* where P : *Node (erased: P renders as ж<Node>) */
+{ return p == nil; }
+
+internal static nint kindVia(ж<Node> Ꮡp)
+    /* where P : *Node (erased: P renders as ж<Node>) */
+{
+    ref var p = ref Ꮡp.DerefOrNull();
+
+    return (p).kind;
+}
 
 internal static void @try(@string label, Action fn) {
     GoFrame ᒐ = default;
@@ -218,7 +239,7 @@ internal static void run(@string tag, ж<holder> h) {
         fmt.Println(ᴛ1, ᴛ2);
     });
     @try("ModeNamed", () => {
-        var (ᴛ3, ᴛ4) = h.Ꮡattrs.ModeNamed(7);
+        var (ᴛ3, ᴛ4) = h.Value.attrs.ModeNamed(7);
         fmt.Println(ᴛ3, ᴛ4);
     });
     @try("Self", () => {
@@ -284,7 +305,7 @@ internal static void run(@string tag, ж<holder> h) {
         fmt.Println(h.Value.attrs.String());
     });
     @try("Stringer", () => {
-        fmt.Println(h.Value.attrs);
+        fmt.Println(h.Value.attrs.OrTypedNil());
     });
     @try("expression", () => {
         var f = ((Func<ж<Node>, nint, (nint, bool)>)(Mode));
@@ -300,18 +321,16 @@ internal static void Main() {
 
     ref var v = ref heap(new Node(), out var Ꮡv);
     v.SetKind(5);
-    var (ᴛ9, ᴛ10) = v.Mode(0);
+    var (ᴛ9, ᴛ10) = Ꮡv.Mode(0);
     fmt.Println(ᴛ9, ᴛ10);
-    fmt.Println(v.Announce(), v.Tail() == Ꮡv, v.Kind());
+    fmt.Println(v.Announce(), Ꮡv.Tail() == Ꮡv, v.Kind());
 
     var linked = Ꮡ(new Node(name: "head", next: Ꮡ(new Node(name: "tail"))));
     NodePtr q = linked;
-    fmt.Println((~linked).Tail().name, q.Tail() == linked.next);
-
-    var recvʗ1 = ~q;
+    fmt.Println(linked.Tail().name, q.Tail() == linked.next);
     
     var qʗ1 = q;
-    var mode = (nint p1) => recvʗ1.Mode(p1);
+    var mode = (nint p1) => qʗ1.Mode(p1);
     var (ᴛ11, ᴛ12) = mode(11);
     fmt.Println(ᴛ11, ᴛ12);
 
@@ -326,7 +345,7 @@ internal static void Main() {
     elements(linked);
 
     setKind(linked, 21);
-    fmt.Println(linked.kind, isNilOf(linked), isNilOf<NodePtr>(nil), kindVia(linked));
+    fmt.Println(linked.kind, isNilOf(linked), isNilOf(nil), kindVia(linked));
 }
 
 } // end main_package
