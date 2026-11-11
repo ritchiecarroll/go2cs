@@ -361,6 +361,10 @@ function Get-ValidatedRosterRows {
                     throw ("Roster row '$rowPackage' carries a $key per-RID note reading 'pending'. Only linux, whose " +
                         'two RIDs are two flavours read in separate banks, has a pending RID; a darwin note carries a reading.')
                 }
+                if ($pending -and ($otherRid -cne 'linux-arm64')) {
+                    throw ("Roster row '$rowPackage' carries a linux per-RID note with $otherRid pending: only linux-arm64 is " +
+                        'pending. linux-x64 is the banked flavour, so the segment headlines its reading.')
+                }
 
                 $noteRid = $bankRid
                 $noteOther = [PSCustomObject]@{
