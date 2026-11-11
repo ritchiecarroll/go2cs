@@ -1813,7 +1813,7 @@ that imports `fmt` gets these lines in its `.csproj`:
 **`$(GoStdLibVersion)` follows the Go minor doing the conversion.** go2cs writes a
 `Directory.Build.props` beside the converted projects that sets it to that minor with a float. For
 example, Go 1.N.P gives `1.N.*`, and restore takes the newest published `1.N.x.y` package. Set
-the property yourself, for example with `-p:GoStdLibVersion=…`, to pin one exact version. <!-- default + override: src/go2cs/moduleConverter.go:909-910 (`to the converter's Go minor, floating on the patch and revision (e.g.…1.26.*), so a freshly converted project restores the newest release of that minor`); the float: src/go2cs/toolchainResolution.go:525 (`return strings.TrimPrefix(minor, "go") + ".*"`); version = the converting toolchain's GOVERSION (src/go2cs/readme.go:157-165#813dcf); test: src/go2cs/moduleConverter_integration_test.go:277 (`if want := "<GoStdLibVersion>" + minorFloatOf(base) + "</GoStdLibVersion>"`). Why the minor and not the patch: NuGet resolves a float that matches nothing published to the OLDEST package above it, so a 1.N.P.* default left a consumer on an old patch below every published base pinned to that minor's first release (measured 2026-10-24, linux-x64, .NET SDK 10.0.112; docs/PLAN-version-lines.md §4). -->
+the property yourself, for example with `-p:GoStdLibVersion=…`, to pin one exact version. <!-- default + override: src/go2cs/moduleConverter.go:913-914 (`to the converter's Go minor, floating on the patch and revision (e.g.…1.26.*), so a freshly converted project restores the newest release of that minor`); the float: src/go2cs/toolchainResolution.go:525 (`return strings.TrimPrefix(minor, "go") + ".*"`); version = the converting toolchain's GOVERSION (src/go2cs/readme.go:157-165#813dcf); test: src/go2cs/moduleConverter_integration_test.go:277 (`if want := "<GoStdLibVersion>" + minorFloatOf(base) + "</GoStdLibVersion>"`). Why the minor and not the patch: NuGet resolves a float that matches nothing published to the OLDEST package above it, so a 1.N.P.* default left a consumer on an old patch below every published base pinned to that minor's first release (measured 2026-10-24, linux-x64, .NET SDK 10.0.112; docs/PLAN-version-lines.md §4). -->
 
 **`-recurse=nuget` refuses a mismatched Go release.** The published packages match one Go release, by
 major and minor version. When the converting Go toolchain is a different release, the conversion stops
@@ -12488,22 +12488,26 @@ conversion ([Converted Tests](#converted-tests)) applies `purego,math_big_pure_g
 names its portable fallback `math_big_pure_go` rather than `purego`, so both tags are needed.
 
 **Your own tags always win.** Passing go2cs's `-tags` option replaces the default, and `-tags=` clears it.
-A `go2cs -recurse` conversion of your own module adds only `safe`, for the reason given at the end of this
-section, unless you pass `-tags` or `-module-safe-tag=false`. Other conversions apply exactly the tags you
+A `go2cs -recurse` conversion of your own module applies `safe,purego,noasm`, for the reasons given at the end
+of this section, unless you pass `-tags` or `-module-safe-tag=false`. Other conversions apply exactly the tags you
 pass and nothing else.
-<!-- src/go2cs/commandLineOptions.go:290 (`var defaultModuleBuildTags = []string{"safe"}`),
-     :300-310 (`if tagsExplicit {` … `if recurse && moduleSafeTag {`). -->
+<!-- src/go2cs/commandLineOptions.go:302 (`var defaultModuleBuildTags = []string{"safe", "purego", "noasm"}`),
+     :318-328 (`if tagsExplicit {` … `if recurse && moduleSafeTag {`). -->
 
 <!-- The math_big_pure_go member: arith_decl.go (`!math_big_pure_go`) declares eight bodyless
      functions whose bodies are arith_$GOARCH.s; arith_decl_pure.go (`math_big_pure_go`) forwards each
      to the `_g` pure-Go implementation in arith.go. With purego alone, every big.Int/Float/Rat
      arithmetic path compiled and threw on first use (surfaced as time.TestTruncateRound -> big.Int.Mul
-     -> mulAddVWW). Default set: ../src/go2cs/commandLineOptions.go:279#3fe3c3 (defaultStdLibBuildTags);
-     resolveBuildTags (commandLineOptions.go:303#0885a6) keys the default on the -stdlib and -tests flags, not on
+     -> mulAddVWW). Default set: ../src/go2cs/commandLineOptions.go:281#3fe3c3 (defaultStdLibBuildTags);
+     resolveBuildTags (commandLineOptions.go:317#0885a6) keys the default on the -stdlib and -tests flags, not on
      the package being standard library, so a -tests run on any package gets it. `-tags=` clears the
      default. A -stdlib run prints the tags it applies, e.g.
      `Applying build tags: purego,math_big_pure_go (default; pass -tags to override)`
-     (../src/go2cs/stdLibConverter.go:61#89a7a5); -tests shares the default but does not print it. -->
+     (../src/go2cs/stdLibConverter.go:56 (`fmt.Println(c.options.buildTagsAnnouncement("purego"))`), the line built at
+     ../src/go2cs/commandLineOptions.go:513 (`return "Applying build tags: " + strings.Join(o.buildTags, ",") + suffix`));
+     a -recurse run prints its own the same way (../src/go2cs/moduleConverter.go:84
+     (`fmt.Println(m.options.buildTagsAnnouncement("module"))`)); -tests shares the stdlib default and prints it only
+     with -recurse. -->
 
 **An assembly-backed declaration ends in one of three ways:**
 
@@ -12603,14 +12607,18 @@ result is unpacked with `var (p, err) = …`. `crypto/elliptic`'s `ScalarBaseMul
      literal is deliberate: the converter exempts `panic`'s argument from literal hoisting
      (src/go2cs/hoistedLiteralOperations.go:964-966#0b8d4e), since it costs nothing until a panic fires. -->
 
-**A module converts with `-tags safe`, for a different reason.** Some libraries reach into Go's runtime with
-unsafe pointer arithmetic, adding a byte offset to a value to read one of its private fields. Converted code
-keeps its values in .NET's own layout, so golib refuses that arithmetic rather than read the wrong memory.
-Libraries that do this usually ship a fallback for builds tagged `safe`, so a `-recurse` conversion adds the
-tag and the fallback is what converts. When a module is validated, Go's own `go test` run gets the same tags,
-so the two sides compile the same files. The tag `appengine`, which some libraries read the same way, is not
-added, because it also changes unrelated behavior. `-module-safe-tag=false` turns `safe` off. See
-[Reference → Default build tags](ConversionStrategies-Reference/package-conversion.md#default-build-tags-purego-for-the-standard-library-safe-for-modules).
+**A module converts with `-tags safe,purego,noasm`.** `purego` and `noasm` are the module-side twin of the
+standard library's `purego`: libraries name their pure-Go fallback for hand-written assembly with one or the
+other, and klauspost/cpuid/v2, for one, runs its assembly CPU detection from its package `init` unless built
+with `noasm`. `safe` is for a different reason. Some libraries reach into Go's runtime with unsafe pointer
+arithmetic, adding a byte offset to a value to read one of its private fields. Converted code keeps its values
+in .NET's own layout, so golib refuses that arithmetic rather than read the wrong memory. Libraries that do
+this usually ship a fallback for builds tagged `safe`, so with the tag the fallback is what converts. A
+`-recurse` run prints the tags it applies at its start. When a module is validated, Go's own `go test` run
+gets the same tags, so the two sides compile the same files. The tag `appengine`, which some libraries read
+the same way as `safe`, is not added, because it also changes unrelated behavior. `-module-safe-tag=false`
+turns all three off. See
+[Reference → Default build tags](ConversionStrategies-Reference/package-conversion.md#default-build-tags-purego-for-the-standard-library-safe-purego-and-noasm-for-modules).
 
 **Full detail:** [Reference → The standard-library conversion applies `-tags purego`](ConversionStrategies-Reference/purego.md#the-standard-library-conversion-applies--tags-purego) — why the tag is on by default and the alternatives weighed, how `-tests` shares it, the `math/big` fallback tag, the three outcomes with more packages named, and the `crypto/elliptic` gating in full.
 
@@ -13131,7 +13139,7 @@ This matters because an importer reads each dependency's converted `package_info
 records package-wide names, such as the aliases for renamed types ([Package Conversion](#package-conversion)).
 So the dependency must be finished first. Packages with no dependency between them go in sorted
 import-path order, so the queue is the same every run.
-<!-- one shared graph orders both the -stdlib and -recurse drivers: src/go2cs/dependencyGraph.go:9-14#2a824f (shared core), :160-218#25adb6 (no-dependency roots sorted first, then a depth-first visit from sorted roots); src/go2cs/moduleConverter.go:9-13#b61ae9, :177#ad5739. -->
+<!-- one shared graph orders both the -stdlib and -recurse drivers: src/go2cs/dependencyGraph.go:9-14#2a824f (shared core), :160-218#25adb6 (no-dependency roots sorted first, then a depth-first visit from sorted roots); src/go2cs/moduleConverter.go:9-13#b61ae9, :181#ad5739. -->
 
 **Names the converter collects in a map are sorted before they are written.** Go's map iteration order
 changes from run to run. Anything the converter gathers in a map is sorted first. Without this, two lines

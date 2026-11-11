@@ -105,3 +105,29 @@ func TestDefaultStdLibBuildTagsContent(t *testing.T) {
 		}
 	}
 }
+
+// TestBuildTagsAnnouncement pins the run-start line a -stdlib or -recurse run prints. The -stdlib text is
+// parsed by src/reconvert-deletions.ps1, so its default and cleared forms must not change; an empty set
+// nobody passed (-recurse with -module-safe-tag=false) must not claim that -tags= cleared anything.
+func TestBuildTagsAnnouncement(t *testing.T) {
+	tests := []struct {
+		name        string
+		options     Options
+		defaultName string
+		want        string
+	}{
+		{"stdlib default", Options{buildTags: defaultStdLibBuildTags}, "purego", "Applying build tags: purego,math_big_pure_go (default; pass -tags to override)"},
+		{"stdlib -tags= cleared", Options{tagsExplicit: true}, "purego", "Applying build tags: none (-tags= cleared the purego default)"},
+		{"recurse default", Options{buildTags: defaultModuleBuildTags}, "module", "Applying build tags: safe,purego,noasm (default; pass -tags to override)"},
+		{"recurse explicit", Options{buildTags: []string{"safe"}, tagsExplicit: true}, "module", "Applying build tags: safe"},
+		{"recurse -module-safe-tag=false", Options{}, "module", "Applying build tags: none"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.options.buildTagsAnnouncement(tt.defaultName); got != tt.want {
+				t.Fatalf("buildTagsAnnouncement(%q) = %q, want %q", tt.defaultName, got, tt.want)
+			}
+		})
+	}
+}

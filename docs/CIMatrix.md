@@ -159,7 +159,7 @@ every arm restoring into a fresh cache with `go.*` mapped to the feed alone:
 - **B** a small generated stdlib program converted with `-recurse=nuget`, its stdout compared with `go run`
   (it prints `runtime.GOOS`, so a wrong-flavor load is a visible mismatch, and it calls every `sort` form, so a
   self-recursive converted body fails the release as a named stack overflow; its `BuildTag =`
-  line fails it when the converter's default tags and the baseline's `go run -tags safe` disagree);
+  line fails it when the converter's default tags and the baseline's `go run -tags safe,purego,noasm` disagree);
 - **C** `Behavioral/StatLayoutTruth`, converted and compared the same way;
 - **D** the README walkthrough (`fatih/color`), compared the same way — it **gates on every leg**, darwin
   included, since `x/sys/unix` reaches libc on a Mac.
