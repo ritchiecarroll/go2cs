@@ -35924,4 +35924,45 @@ names 91 members); the records emptied (VACUOUS).
 
 — G (2026-11-10)
 
+## 2026-11-10 — G (COORD's ruling, Shape A): a CLASSIC partial is left to the compiler; the two MASKED rows of the per-flavour census are erased by design now, and no row is MASKED
+
+**The ruling.** Both MASKED members of the entry above were written as classic C# partials (no accessibility
+keyword, a `void` return, no `out` parameter): the one shape C# erases, calls included, when no part implements it.
+Both authors relied on that, and `PartialStubGenerator` overrode it with a throwing stub, because its only
+exception was the `-tests` init hook BY NAME. The generator now leaves the shape alone (`IsClassicPartial`), which
+replaces the by-name exception with the general rule. The converter never emits the shape: a bodiless Go function
+always converts with an accessibility keyword, and C# requires an implementing part for that (CS8795).
+
+**What moved.** Nothing in the corpus and nothing in the converter. In built output, four stub files are gone:
+
+| Member | Target | Stub message in the built assembly, before → after | Control, same assembly |
+|---|---|---|---|
+| `internal/cpu.osInitArm64` | windows/amd64 | 1 → 0 | `xgetbv` 1 → 1, `getisar0` 0 → 0 |
+| `internal/poll.prepayPlatformDeadlinePath` | linux/amd64 | 1 → 0 | windows/amd64 reads 0 → 0 |
+| the same | darwin/amd64 | 1 → 0 | |
+| the same | linux/arm64 | 1 → 0 | |
+
+A scan of every tracked `.cs` file reads the same 930 non-classic partial definitions before and after, and
+exactly these two classic ones.
+
+**The census.** The walk has the generator's predicate as a twin (`isClassicPartialDecl`); the two must move
+together, and `TestIsClassicPartialDecl` holds the shapes. Per-target stubs read 212, 230, 426, 207 (one fewer
+each); pooled stays 495; `declaredFlavourOnlyStubs` is 85 rows. The two members are rows of
+`declaredErasedByDesign`, gated both ways by `TestErasedByDesignCensus`: a classic partial with no implementing
+part at some target is a call that silently compiles to nothing there, so each row carries its target set AND the
+reason silence is correct.
+
+- `internal/poll.prepayPlatformDeadlinePath`: only windows has a platform part of the deadline path to prepay.
+- `internal/cpu.osInitArm64` at windows: an arm64 windows process skips OS feature detection silently and runs
+  the generic paths. That is correct behaviour, only slower, and latent (no shipped RID runs an arm64 windows
+  process). **Accepted as a cost by the ruling; it is the row to reopen if that RID ever ships.**
+
+**Red.** GenTests: the classic-partial test fails on the old generator (1 of 6) and passes on the new (6 of 6;
+473 of 473 in the project). The ledger gate, five ways, each restored byte-identical: a row renamed (UNDECLARED
+ERASED CALL and DECLARED BUT NOT MEASURED), a target set moved, a reason emptied, the walk's predicate widened
+to accept `internal` (the negative control `internal/poll.runtime_Semacquire` fires, and the stub counts move),
+and narrowed to match nothing (the positive control fires).
+
+— G (2026-11-10)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

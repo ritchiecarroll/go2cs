@@ -503,6 +503,11 @@ type stubCensus struct {
 	// folders; these two let TestFlavourOnlyStubCensus read the same walk one target at a time.
 	parts  []flavourDecl
 	bodies map[string][]string
+
+	// erased is every CLASSIC partial declaration (isClassicPartialDecl). PartialStubGenerator leaves
+	// those to the compiler, which erases an unimplemented one together with its calls, so they are
+	// not parts and can never be stubs. TestErasedByDesignCensus reads them one target at a time.
+	erased []flavourDecl
 }
 
 var (
@@ -530,6 +535,12 @@ var (
 	// semicolon. Checked at the tree: every partial line in the corpus that ends in neither is a
 	// partial PROPERTY (`partial ref T X { get; }`, 579 of them), never a multi-line signature.
 	partialDefnRe = regexp.MustCompile(`^\s*(?:internal|public|private|protected)?\s*(?:static\s+)?(?:unsafe\s+)?partial\s+.*\b([A-Za-z_@][A-Za-z0-9_@]*)\s*(?:<[^>]*>)?\s*\([^()]*\)\s*(?:\{.*|=>.*)?\s*$`)
+
+	// The two halves of isClassicPartialDecl, asked of a line partialDeclRe has already matched:
+	// nothing but `static`/`unsafe` ahead of `partial` (so no accessibility keyword), a `void` return
+	// (`void*` is a pointer, hence the whitespace), and no `out` parameter.
+	classicPartialRe = regexp.MustCompile(`^\s*(?:static\s+)?(?:unsafe\s+)?partial\s+void\s`)
+	outParameterRe   = regexp.MustCompile(`[(,]\s*out\s`)
 
 	// ⚠ ANCHORED TO THE START OF THE COMMENT, and to the end of the line. A directive is a whole
 	// comment line by Go's own rule, and an UNANCHORED pattern matches the token inside ordinary
@@ -565,6 +576,7 @@ func declaredNotImplementedIn(coreDir string) (stubCensus, error) {
 	defnsByPkg := map[string]map[string]bool{}
 	pushes := map[string]string{}
 	bodies := map[string][]string{}
+	var erased []flavourDecl
 
 	err := filepath.Walk(coreDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -644,7 +656,15 @@ func declaredNotImplementedIn(coreDir string) (stubCensus, error) {
 				// different kind, and a comment-only window silently stops excluding it —
 				// measured, the population read 775 instead of 745 the moment the window
 				// narrowed to comments.
-				if strings.Contains(attributes, "LibraryImport") || match[1] == PackageTestInitHookMethod {
+				if strings.Contains(attributes, "LibraryImport") {
+					continue
+				}
+
+				// The second is by SHAPE, not by name: a classic partial is never stubbed. It is
+				// kept, apart from the parts, so that the targets where nothing implements it are
+				// a ledger (declaredErasedByDesign) and not a silence.
+				if isClassicPartialDecl(line) {
+					erased = append(erased, flavourDecl{pkg: pkg, name: match[1], file: rel, folder: folder})
 					continue
 				}
 
@@ -702,7 +722,7 @@ func declaredNotImplementedIn(coreDir string) (stubCensus, error) {
 		}
 	}
 
-	census := stubCensus{packages: len(declsByPkg), bodies: bodies}
+	census := stubCensus{packages: len(declsByPkg), bodies: bodies, erased: erased}
 
 	if err != nil {
 		return census, err
@@ -820,6 +840,22 @@ func leadingTrivia(lines []string, i int) (comments, attributes string) {
 	}
 
 	return strings.Join(commentLines, "\n"), strings.Join(attributeLines, "\n")
+}
+
+// isClassicPartialDecl is the twin of PartialStubGenerator's IsClassicPartial, read off a bodiless
+// partial declaration's line: no accessibility keyword, a `void` return and no `out` parameter.
+//
+// That is the one partial shape C# ERASES when no part implements it, calls included, where any other
+// shape is an error without an implementing part (CS8795). The generator therefore leaves it alone,
+// and whoever writes one is relying on the erasure: "only one platform implements this hook, so
+// elsewhere the call compiles to nothing". The converter never emits the shape; a bodiless Go
+// function always converts with an accessibility keyword.
+//
+// ⚠ The two predicates must move together. This one decides which declarations the census counts as
+// stubs, that one which declarations get a stub: a shape only one of them calls classic is a member
+// this census reports and no build mints, or the reverse.
+func isClassicPartialDecl(line string) bool {
+	return classicPartialRe.MatchString(line) && !outParameterRe.MatchString(line)
 }
 
 func mustRel(base, path string) string {

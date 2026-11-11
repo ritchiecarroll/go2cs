@@ -28,7 +28,9 @@ import (
 //     the hundreds of assembly stubs every target shares. linux/arm64 arrived with nine of those.
 //   - a member whose only body sits in another target's key folder is not in the pooled census AT
 //     ALL, and still throws at every target that folder does not serve. This is the MASKED class.
-//     Measured on the day this guard was written: two members, neither known before it.
+//     Measured on the day this guard was written: two members, neither known before it. Both were
+//     classic partials the generator should never have stubbed, and left the class the same day
+//     (declaredErasedByDesign below); the class and its gate stay for the next one.
 //
 // So this test reads the SAME walk one target at a time and keeps a ledger of every member the
 // targets DISAGREE about. Like declaredPushStubs it is measured == declared, in both directions: a
@@ -257,13 +259,25 @@ var corpusStubCensus = sync.OnceValues(func() (stubCensus, error) {
 // compiles (flat, or in a key folder that serves it) for which no implementing part sits in a file the
 // same target compiles. An empty target serves every folder, which is the pooled census.
 func (census stubCensus) stubbedAt(target string) []flavourDecl {
+	return census.unimplementedAt(census.parts, target)
+}
+
+// erasedAt reports the CLASSIC partial declarations that one target's build compiles and no part it
+// compiles implements. C# erases each of those there, together with every call to it.
+func (census stubCensus) erasedAt(target string) []flavourDecl {
+	return census.unimplementedAt(census.erased, target)
+}
+
+// unimplementedAt is the one reading stubbedAt and erasedAt share: of the declarations given, those
+// the target compiles for which no implementing part sits in a file the same target compiles.
+func (census stubCensus) unimplementedAt(parts []flavourDecl, target string) []flavourDecl {
 	serves := func(folder string) bool {
 		return len(folder) == 0 || len(target) == 0 || layoutFolderServes(folder, target)
 	}
 
 	var stubs []flavourDecl
 
-	for _, part := range census.parts {
+	for _, part := range parts {
 		if !serves(part.folder) {
 			continue
 		}
@@ -355,18 +369,13 @@ type flavourRow struct {
 // declaredFlavourOnlyStubs is the DECLARED set: every member the targets disagree about (a throwing
 // stub in some targets' builds and not in all), plus every masked member, less the two classes the
 // gate exempts by rule. Measured at the batch 284 union (b328dd71e7): pooled 495; per target
-// windows/amd64 213, linux/amd64 231, darwin/amd64 427, linux/arm64 208.
+// windows/amd64 213, linux/amd64 231, darwin/amd64 427, linux/arm64 208. Each target reads one fewer
+// (212, 230, 426, 207) since the two masked members stopped being stubs.
 //
-// The two MASKED rows are findings of this guard, not triage results:
-//
-//   - internal/cpu.osInitArm64 is declared and CALLED in amd64/cpu_arm64_process_impl.cs (from a
-//     module initializer, when the process is arm64) and bodied only under darwin/ and linux-amd64/.
-//     The windows/amd64 build mints the throwing stub; it sits behind an arm64 windows process, which
-//     no shipped RID runs.
-//   - internal/poll.prepayPlatformDeadlinePath is declared flat as a classic C# partial ("only
-//     windows implements it, so elsewhere the call compiles to nothing") and bodied under windows/.
-//     PartialStubGenerator mints a stub for a classic partial too, so elsewhere the call compiles to
-//     a THROW, which the call site's catch-all swallows.
+// No row is MASKED today. The two this guard found on its first day (internal/cpu.osInitArm64 and
+// internal/poll.prepayPlatformDeadlinePath) were classic partials, stubbed only because
+// PartialStubGenerator excluded one classic partial by name where the rule is the shape. They are
+// rows of declaredErasedByDesign now.
 var declaredFlavourOnlyStubs = map[string]flavourRow{
 	// Stubbed at linux/arm64 alone: i9's triage rows 7 to 15.
 	"internal/cpu.getisar0":                {atLinuxArm64, flavourRefused},
@@ -439,7 +448,6 @@ var declaredFlavourOnlyStubs = map[string]flavourRow{
 	"vendor/golang.org/x/sys/cpu.xgetbv":            {atAmd64, flavourUntriaged},
 
 	// Stubbed at windows/amd64 alone.
-	"internal/cpu.osInitArm64":                    {atWindows, flavourMasked},
 	"internal/runtime/syscall/windows.StdCall":    {atWindows, flavourUntriaged},
 	"internal/runtime/syscall/windows.asmstdcall": {atWindows, flavourUntriaged},
 	"runtime.callbackasm":                         {atWindows, flavourUntriaged},
@@ -461,11 +469,166 @@ var declaredFlavourOnlyStubs = map[string]flavourRow{
 	"runtime.syscall_x509": {atDarwin, flavourUntriaged},
 
 	// Stubbed at every target but windows/amd64.
-	"internal/poll.prepayPlatformDeadlinePath": {atUnix, flavourMasked},
-	"runtime.cgoSigtramp":                      {atUnix, flavourUntriaged},
-	"runtime.sigfwd":                           {atUnix, flavourUntriaged},
-	"runtime.sigtramp":                         {atUnix, flavourUntriaged},
+	"runtime.cgoSigtramp": {atUnix, flavourUntriaged},
+	"runtime.sigfwd":      {atUnix, flavourUntriaged},
+	"runtime.sigtramp":    {atUnix, flavourUntriaged},
 
 	// Stubbed at windows/amd64 and linux/amd64.
 	"runtime.time_now": {atWindowsLinuxAmd64, flavourUntriaged},
+}
+
+// TestErasedByDesignCensus is the ledger of calls that compile to NOTHING (COORD's ruling A1,
+// 2026-11-10): every classic partial method, at every target whose build compiles the declaration
+// and no implementing part.
+//
+// A classic partial (isClassicPartialDecl) is the one shape C# erases when nothing implements it, and
+// PartialStubGenerator leaves it to the compiler. So nothing throws at those targets, and nothing
+// runs either: the call site is gone from the assembly. That is what its author asked for, and it is
+// still a difference between targets that no build log and no test states. The ledger states it,
+// measured == declared in both directions, with the reason somebody gave for accepting the silence.
+//
+// ⚠ A ROW IS A DECISION THAT SILENCE IS CORRECT AT THOSE TARGETS. A hook whose absence would change
+// behaviour there is not a row; it is a missing implementing part.
+func TestErasedByDesignCensus(t *testing.T) {
+	census, err := corpusStubCensus()
+
+	if err != nil {
+		t.Fatalf("walking ../core: %v", err)
+	}
+
+	measured := map[string][]string{}
+
+	for _, target := range platformUniverse {
+		seen := map[string]bool{}
+
+		for _, part := range census.erasedAt(target) {
+			member := memberKey(part.file, part.name)
+
+			if !seen[member] {
+				seen[member] = true
+				measured[member] = append(measured[member], target)
+			}
+		}
+	}
+
+	// ⚠ THE CONTROLS, by name. The classic rule is three conditions, and the walk applies it to every
+	// bodiless partial in the corpus: read too wide, it would take real stubs out of both stub
+	// censuses without a sound.
+	//   + internal/poll.prepayPlatformDeadlinePath is `static partial void` and must read classic.
+	//   - internal/poll.runtime_Semacquire is `internal static partial void` in the same package: void,
+	//     no out parameter, and NOT classic, because it carries an accessibility keyword.
+	classic := map[string]bool{}
+	parts := map[string]bool{}
+
+	for _, part := range census.erased {
+		classic[memberKey(part.file, part.name)] = true
+	}
+
+	for _, part := range census.parts {
+		parts[memberKey(part.file, part.name)] = true
+	}
+
+	if !classic["internal/poll.prepayPlatformDeadlinePath"] || parts["internal/poll.prepayPlatformDeadlinePath"] {
+		t.Errorf("POSITIVE CONTROL: internal/poll.prepayPlatformDeadlinePath must read as a classic partial " +
+			"and as nothing else; pick another classic member if it was removed, do not delete the control")
+	}
+
+	if classic["internal/poll.runtime_Semacquire"] || !parts["internal/poll.runtime_Semacquire"] {
+		t.Errorf("NEGATIVE CONTROL: internal/poll.runtime_Semacquire carries an accessibility keyword and " +
+			"must read as an ordinary partial declaration, never as a classic one")
+	}
+
+	for _, member := range sortedMembers(measured) {
+		targets := strings.Join(measured[member], ",")
+		row, rowed := declaredErasedByDesign[member]
+
+		switch {
+		case !rowed:
+			t.Errorf("UNDECLARED ERASED CALL: %s at %s\n"+
+				"\ta classic partial (no accessibility keyword, void, no out parameter) that the build "+
+				"of each target named compiles with no implementing part, so every call to it compiles "+
+				"to nothing there. If the hook is optional at those targets, add the row to "+
+				"declaredErasedByDesign WITH its target set and the reason silence is correct; if it "+
+				"is not, those targets are missing a body.", member, targets)
+		case row.targets != targets:
+			t.Errorf("TARGET SET MOVED: %s is declared erased at %s and measured at %s\n"+
+				"\tread why before editing the row: a target that lost its implementing part now "+
+				"skips the call without a word.", member, row.targets, targets)
+		case len(strings.TrimSpace(row.reason)) == 0:
+			t.Errorf("NO REASON: %s is rowed as erased by design at %s and the row does not say why "+
+				"silence is correct there", member, targets)
+		}
+	}
+
+	for _, member := range sortedMembers(declaredErasedByDesign) {
+		if measured[member] == nil {
+			t.Errorf("DECLARED BUT NOT MEASURED: %s\n"+
+				"\tno target erases this call now: it gained an implementing part everywhere, stopped "+
+				"being a classic partial, or was removed. Delete the row in the same commit.", member)
+		}
+	}
+
+	t.Logf("classic partial declarations %d · erased at some target %d (declared %d)",
+		len(census.erased), len(measured), len(declaredErasedByDesign))
+}
+
+// TestIsClassicPartialDecl pins the classic rule one condition at a time, on lines of the shapes the
+// corpus holds. Each line is first shown to be a declaration the walk sees at all.
+func TestIsClassicPartialDecl(t *testing.T) {
+	cases := []struct {
+		line    string
+		classic bool
+	}{
+		{"    static partial void osInitArm64();", true},
+		{"static partial void prepayPlatformDeadlinePath();", true},
+		{"    partial void hook(int count, ref int total);", true},
+		{"    static unsafe partial void hook(byte* buffer);", true},
+		{"    static partial void layout(int about);", true},
+
+		// An accessibility keyword: C# demands an implementing part, so the generator stubs it.
+		{"internal static partial void runtime_Semacquire(ж<uint32> sema);", false},
+		{"    private static partial void hook();", false},
+		{"public static partial void hook();", false},
+		{"    protected partial void hook();", false},
+
+		// Not void.
+		{"    static partial int64 runtimeNano();", false},
+		{"    static unsafe partial void* hook();", false},
+		{"    static partial (uintptr, nint) hook(uintptr fd);", false},
+
+		// An out parameter.
+		{"    static partial void hook(out int value);", false},
+		{"    static partial void hook(int count, out int value);", false},
+	}
+
+	for _, tc := range cases {
+		if !partialDeclRe.MatchString(tc.line) {
+			t.Errorf("%q is not a partial declaration to the walk, so the case tests nothing", tc.line)
+			continue
+		}
+
+		if got := isClassicPartialDecl(tc.line); got != tc.classic {
+			t.Errorf("isClassicPartialDecl(%q) = %v, want %v", tc.line, got, tc.classic)
+		}
+	}
+}
+
+type erasedRow struct {
+	targets, reason string
+}
+
+// declaredErasedByDesign is the DECLARED set of TestErasedByDesignCensus: each classic partial that
+// some target leaves unimplemented, the targets where its calls compile to nothing, and why that is
+// correct there. Until 2026-11-10 both members were throwing stubs at these targets, rowed MASKED in
+// declaredFlavourOnlyStubs.
+var declaredErasedByDesign = map[string]erasedRow{
+	// Declared and called in amd64/cpu_arm64_process_impl.cs, from a module initializer and only
+	// when the process is arm64; bodied under darwin/ and linux-amd64/.
+	"internal/cpu.osInitArm64": {atWindows, "an arm64 windows process skips OS feature detection " +
+		"silently and runs the generic paths: correct behaviour, only slower, and latent (no shipped " +
+		"RID runs an arm64 windows process)"},
+
+	// Declared flat in deadline_prepay_impl.cs; bodied under windows/.
+	"internal/poll.prepayPlatformDeadlinePath": {atUnix, "the part of the deadline path only one " +
+		"flavour has: only windows implements it, and elsewhere the shared part is all there is to prepay"},
 }
