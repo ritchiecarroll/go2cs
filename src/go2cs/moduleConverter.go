@@ -14,6 +14,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -53,6 +54,7 @@ type ModuleConverter struct {
 	referencedThirdParty []string                   // -recurse=module: third-party import paths left OUT of the convert-set
 	lockedModules        map[string]moduleLockEntry // module-cache dependency modules in the convert-set (modulesLock.go)
 	includeTestClosure   bool                       // -tests -recurse: widen the convert-set by the module's test closure (moduleTestsDriver.go)
+	refused              []refusedPackage           // packages refused at a pre-emission gate and skipped (recurseRefusal.go)
 
 	// -nuget-map (nugetMap.go): every third-party module of the closure, converted or only referenced; the
 	// resolver's answer per module; and the source and lock warnings printed with its report.
@@ -226,6 +228,11 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 	//    scheme was emitted — the go2csPath runtime-root pin under local project references, or the
 	//    GoStdLibVersion default for the go.* NuGet PackageReferences under -recurse=nuget.
 	m.generateRecurseBuildFiles()
+
+	// Everything else is written; a refused package still makes the run fail (recurseRefusal.go).
+	if len(m.refused) > 0 {
+		return refusedPackagesError(m.refused)
+	}
 
 	return nil
 }
@@ -587,12 +594,25 @@ func (m *ModuleConverter) convertAll() {
 			packageOptions.packageImportPath = pkgPath
 			packageOptions.programDependencies = m.sortedThirdPartyModules()
 
+			// A refused package is skipped and the run goes on (recurseRefusal.go). Not under -tests -recurse, whose
+			// phase A stays fatal at a refusal, as before.
+			packageOptions.skipRefusedPackages = !m.includeTestClosure
+
 			return processConversion(pkg.Dir, true, outputDir, packageOptions)
 		})
 
 		// Recorded for FAILED packages too: one that burns minutes before failing is exactly the row
 		// worth seeing, and the error path below skips the rest of this iteration.
 		durations = append(durations, packageDuration{path: pkgPath, elapsed: time.Since(start)})
+
+		var refusal *packageRefusal
+
+		if errors.As(err, &refusal) {
+			// Its diagnostics are printed above as errors; it gets no project.
+			log.Printf("%v; skipped, no project written", refusal)
+			m.refused = append(m.refused, refusedPackage{path: pkgPath, code: refusal.code})
+			continue
+		}
 
 		if err != nil {
 			log.Printf("WARNING: %v", err)
@@ -610,7 +630,11 @@ func (m *ModuleConverter) convertAll() {
 	}
 
 	fmt.Printf("\nRecursive conversion complete in %s: %d/%d packages converted",
-		formatDuration(time.Since(m.startTime)), total-len(failed), total)
+		formatDuration(time.Since(m.startTime)), total-len(failed)-len(m.refused), total)
+
+	if len(m.refused) > 0 {
+		fmt.Printf(" (%d refused)", len(m.refused))
+	}
 
 	if len(failed) > 0 {
 		fmt.Printf(" (%d failed: %s)", len(failed), strings.Join(failed, ", "))
@@ -618,6 +642,7 @@ func (m *ModuleConverter) convertAll() {
 
 	fmt.Println()
 
+	m.reportRefusedPackages(m.refused)
 	reportSlowestPackages(durations)
 }
 

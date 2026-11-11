@@ -316,7 +316,8 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				}
 			}
 
-			log.Fatalf("Refusing to convert: %s\n", err)
+			// Fatal for a single package; under -recurse the package is skipped and the run goes on (recurseRefusal.go).
+			return refusePackage(options, diagnosticCgoRefused, err)
 		}
 
 		// Refuse, before any file is written as well, an instantiation whose constraint proxy could not
@@ -328,21 +329,21 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				recordDowngradedRefusals(diagnosticProxyRefused, refusal.sites)
 			} else {
 				refusal.report()
-				log.Fatalf("Refusing to convert: %s\n", refusal)
+				return refusePackage(options, diagnosticProxyRefused, refusal)
 			}
 		}
 
 		// ...and a pointer type argument the NON-self constraint proxy cannot carry (nonSelfConstraintProxyRefusals.go).
 		if refusal := refuseNonSelfConstraintProxies(pkg); refusal != nil {
 			refusal.report()
-			log.Fatalf("Refusing to convert: %s\n", refusal)
+			return refusePackage(options, diagnosticNonSelfProxyRefused, refusal)
 		}
 
 		// ...and a manual-type conversion of a pointer receiver, which has no box to pass
 		// (manualTypeReceiverRefusal.go).
 		if refusal := refuseManualTypeReceiverOperands(pkg, goosOfTarget(options.targetPlatform)); refusal != nil {
 			refusal.report()
-			log.Fatalf("Refusing to convert: %s\n", refusal)
+			return refusePackage(options, diagnosticManualTypeReceiverRefused, refusal)
 		}
 
 		var projectName, projectFileName, projectFileContents string
