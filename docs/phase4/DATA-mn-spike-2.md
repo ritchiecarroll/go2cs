@@ -842,3 +842,17 @@ The scheduler and the tooling.
 - Generator time and IL size on a large package beyond the one pair in 4.8; B4 prices them on `net/http`.
 - The TypeScript closure (B5).
 - Instance methods (62 refused, none blocked here) and generic functions were not given their own arm.
+
+### 4.11 Ruling on the interface twin shape (2026-11-11, after B2 was posted)
+
+The coordinator ruled the OQ5 shape on the readings of 4.4: **the hidden twin interface**.
+
+- A default-bodied member makes a Go-named interface report 2 methods to `reflect`'s `NumMethod` and to C#
+  `GetMethods()` where Go has 1. That is a change to what a consumer observes on a tier-1 surface, and the hidden
+  shape does not make it.
+- The guard the public-surface plan names (no Go-named interface gains an abstract member) fits the hidden shape
+  as it stands: the Go-named interface gains no member at all.
+- The default shape stays in the spike's generator as a measured arm (`GoTwinsIface=default`) and is not carried
+  forward. From B3 on, every build that twins interfaces uses the hidden shape (`GoTwinsIface=hidden`).
+- The build-wall cost of 4.8 (+91% on `runtime`, outside B1's bar) is noted by the coordinator; the nested-driver
+  lever is priced in B4.
