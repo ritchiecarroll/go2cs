@@ -36456,4 +36456,31 @@ without `zstd`, where `TestAlloc` and `TestLarge` skip on both sides.
 same count, inside one wave's budget; the arm and x64 legs count separately), keeping its retirement plan. Until the
 ten reads land the row is pending at linux-arm64.
 
+## 2026-11-12 — P2 (S7 wave 1, A-7R): `internal/poll` read at a 30m budget shows the disclosed signature at 12 + 1 on both legs — the defect claim is CLOSED; it was the instrument
+
+**The reading.** W1-A7R (run 43161387949, `internal/poll;timeout=30m`, the `sweep-shard` filter option added for it)
+read PASS 12 + 1 on both hosted legs: `TestSplicePipePool` diverges with its disclosed `codegen-liveness` signature,
+inside the row's 30m per-test floor. Row walls 1,791 s (linux-x64) and 1,839 s (linux-arm64). The prediction (the
+disclosed signature at 12 + 1) is a HIT. 30m, not the approved 25m: the row's `$longTimeouts` floor is 30m and a smaller
+budget loses to it, so 30m makes the asked value the effective one. The test waits 27 minutes (0.9 of 30m) and prints
+its signature before the 30m deadline.
+
+**Result.** The A-7 red was the 45m budget (the entry above), not a hang. `internal/poll` banks at linux-arm64, EQUAL
+12 + 1 (evidence W1-A7R.tsv, which supersedes W1-A7 for the row). The ref, claude/p2-s7-sweep-timeout a31cb64783, carries
+master 06610aaa65's converted tree; it changes only the workflow and the zstd pin.
+
+## 2026-11-12 — P2 (S7 wave 1, the ten reads): `internal/zstd`'s TestAlloc with the deferred pin scoped to linux reads 274,495 allocations on all 20 leg-reads — the pin holds on linux; the row banks HOST-EQUAL (host-tool)
+
+**The reading.** Ten one-row dispatches, Z01 to Z10 (runs 43161391741, 43161395278, 43161398705, 43161402038,
+43161405088, 43161416746, 43161420090, 43161423429, 43161426535, 43161429556), at claude/p2-s7-sweep-timeout a31cb64783,
+where the pin's platforms are darwin and linux. Every one of the 20 leg-reads (10 linux-x64, 10 linux-arm64) read DISC
+535 + 1, new 0, with `TestAlloc` absorbed by the pin, and printed `got 274495 allocs, want 0`, the darwin count. All 60
+dump-proof lines PASS. The prediction (274,495 on every read, both legs) is a HIT. The jobs end red only because the
+roster's linux expectation is 536 + 0: the counts are a host difference from that roster host, which has no `zstd`.
+
+**Result.** The pin's linux scope has its ten reads. COORD ruled (2026-11-12) that the row banks by a
+`$LinuxRidHostEqual` line, class host-tool (a new class beside host-privilege: a test runs only where a tool the roster's
+host lacks is on `PATH`), not by moving the roster's linux-x64 536, which stays the reading of a host with no `zstd`.
+linux-arm64 banks 536 (linux-x64; linux-arm64: 535 + 1). The open item is the pin's own retirement plan, unchanged.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

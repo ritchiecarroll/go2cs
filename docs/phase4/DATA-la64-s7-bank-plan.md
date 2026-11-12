@@ -841,3 +841,45 @@ COORD's direction counted "the 111 rows plus runtime = 112" and then named gc/sc
 wave 1 leg the job wall less the summed row walls is 48 to 72 seconds. The first row's corpus build is inside its row
 wall, so that is not all of the 30 minutes, but no shard came near its ESTIMATE: the longest arm job is 42 of 113
 minutes, and the next longest 26 of 123. The ESTIMATE stays as a bound; wave 2's plan should not size its shards by it.
+
+### 12.8 The re-reads: A-7R and the ten zstd reads (dated, 2026-11-12, P2)
+
+Both ran at claude/p2-s7-sweep-timeout a31cb64783 from tip refs claude/p2-tip-a31cb64783-<k>, goos linux, sweep-shard, arch
+both. That ref's converted tree is master 06610aaa65's: the seat changes only the workflow (the `timeout=Nm` filter
+option) and the zstd pin (platforms darwin and linux). So `internal/poll`'s reading is master's, and `internal/zstd`'s
+is master's with the pin scoped to linux. Every dispatch's dump proofs passed on both legs (control, prove, recheck).
+
+**A-7R, `internal/poll;timeout=30m`, run 43161387949.** The plan log reads `sweep-shard: -TestTimeout 30m`. PASS 12 + 1
+on both legs, `TestSplicePipePool` diverging with its disclosed signature; walls 1,791 s (x64) and 1,839 s (arm64).
+PREDICTION (COORD R4): the disclosed signature at 12 + 1. **HIT.** 30m rather than 25m because the row's `$longTimeouts`
+floor is 30m and a smaller budget loses to it, so the asked and effective values are equal. The row banks EQUAL,
+12 + 1 (linux-x64; linux-arm64: 12 + 1); evidence W1-A7R.tsv supersedes W1-A7 for it. The defect claim is closed.
+
+**Z01-Z10, `internal/zstd`.** PREDICTION: `got 274495 allocs, want 0` on every read, both legs. **HIT**, 20 of 20:
+
+| Read | Run | linux-x64 | linux-arm64 |
+|---|---|---|---|
+| Z01 | 43161391741 | DISC 535 + 1, 295 s | DISC 535 + 1, 227 s |
+| Z02 | 43161395278 | DISC 535 + 1, 176 s | DISC 535 + 1, 242 s |
+| Z03 | 43161398705 | DISC 535 + 1, 281 s | DISC 535 + 1, 244 s |
+| Z04 | 43161402038 | DISC 535 + 1, 224 s | DISC 535 + 1, 232 s |
+| Z05 | 43161405088 | DISC 535 + 1, 222 s | DISC 535 + 1, 241 s |
+| Z06 | 43161416746 | DISC 535 + 1, 266 s | DISC 535 + 1, 253 s |
+| Z07 | 43161420090 | DISC 535 + 1, 229 s | DISC 535 + 1, 230 s |
+| Z08 | 43161423429 | DISC 535 + 1, 221 s | DISC 535 + 1, 239 s |
+| Z09 | 43161426535 | DISC 535 + 1, 310 s | DISC 535 + 1, 240 s |
+| Z10 | 43161429556 | DISC 535 + 1, 293 s | DISC 535 + 1, 260 s |
+
+Each leg also has new 0, `TestAlloc` the one disclosed verdict. The jobs are red only against the roster's linux
+expectation (536 + 0, read on a host without `zstd`). The ten reads are kept whole in
+docs/phase4/la64-s7/w1-reads/zstd-ten-reads.tsv. The evidence folder takes one of them, Z01, as W1-A9R.tsv (superseding
+W1-A9 for the row): the guard reads one line per RID for a row, and eleven stems that do not extend each other would be
+refused as "not one of each". The ten counts are identical, so Z01 stands for them. COORD ruled (06:04Z) that the row
+banks by a `$LinuxRidHostEqual` line, class host-tool, a new class beside host-privilege, and that the roster's
+linux-x64 536 stays the reading of a host with no `zstd`: 536 (linux-x64; linux-arm64: 535 + 1). TestAlloc prints
+274,495 allocations per run; 2,744,950 is the total over the 10 runs `AllocsPerRun` makes.
+
+**The scores, both kept.** internal/poll: wave 1's W6 MISS stands at W1 (12.6), and A-7R is a HIT. internal/zstd: the
+ten-read prediction is a HIT.
+
+**The count.** 114 + `internal/poll` + `internal/zstd` = 116 banked at linux-arm64; 120 pending.

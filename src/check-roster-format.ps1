@@ -3516,8 +3516,11 @@ foreach ($ruledRow in $LinuxRidRuledArchCount.Keys) {
 
 # HOST-EQUAL ROWS (Get-LinuxHostEqualReading): row -> '<class> -- <citations>'. KEYED by COORD F2 (2026-11-12, on P5's
 # review of the wave 1 bank): a row takes the host-equal form only with a COORD ruling and a line here. annotate_linux.py
-# --rids reads this table from here.
+# --rids reads this table from here. The CLASS names why the hosted legs differ from the roster's host: host-privilege
+# (the hosted runner's privileges change which tests run or how they read; syscall) or host-tool (a test runs only where
+# a tool the roster's host lacks is on PATH; internal/zstd's TestAlloc needs a zstd binary, COORD 2026-11-12).
 $LinuxRidHostEqual = @{
+    'internal/zstd' = 'host-tool -- COORD 2026-11-12 (Z01-Z10, ten reads per RID, runs 43161391741 to 43161429556: DISC 535 + 1 on 20/20 legs, TestAlloc printing got 274495 allocs, want 0, 2,744,950 over its 10 runs); TestAlloc runs only where a zstd binary is on PATH; deferred pin darwin+linux (a31cb64783); DATA-la64-s7-bank-plan.md 12.8'
     'syscall' = 'host-privilege -- COORD R3 2026-11-12 (wave 1 read, run 43151896336: both hosted legs read 50 + 9 with the same 9 disclosed names); the host-privilege class of the G-WSL 40 + 19 ruling (2026-11-10); DATA-la64-s7-bank-plan.md section 12'
 }
 foreach ($hostEqualRow in $LinuxRidHostEqual.Keys) {
