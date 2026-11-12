@@ -1767,3 +1767,17 @@ floor kernel of a copy loop, carried as the worst case).
   counted function), and the difference between this closure's 48 TS packages with counted functions and the
   TS session's own package count for `checkdemo`.
 - **Any other `GOOS`.** The closure and the leaves were read for windows.
+
+### 7.13 Gates (Windows x64, dotnet SDK 10.0.400 / runtime 10.0.11, go1.26.10; M:N switches unset)
+
+B5 changes two files, both under `docs/` (the BOARD rows of `85989b9947` and this section), so its gates are the
+docs guards. Run on the tree as committed with 7.1 to 7.12 (`5370328e35`), 23:45 to 00:01 CST.
+
+| gate | reading |
+|---|---|
+| `go test ./...` in `src/go2cs` (the converter suite and the repo guards) | 11 packages ok, 0 failed (986 s) |
+
+- GenTests, GolibTests and the solution-integrity gate were not run again: no file they read changes after the
+  readings of 6.11.
+- The repo guards ran once more after this subsection was placed. That reading is in the phase's DONE post,
+  since writing it here would change the file they read.
