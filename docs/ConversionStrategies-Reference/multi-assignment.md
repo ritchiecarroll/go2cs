@@ -158,6 +158,103 @@ The scope is as much of the rule as the spill is: a rule that spilled every call
 
 (Guarded by the `MultiValueReturnOrder` behavioral test — all five hazard shapes, a three-operand call-order case, and the four controls, output-compared vs `go run`; before the fix every hazard reports the pre-mutation value. `returnOperandOrder.go` owns the analysis and `returnOperandOrder_test.go` pins the emission against three neuters: the rule forced off, the rule forced on everywhere, and `pathsConflict` reduced to the root-plus-indirect model — the last reporting exactly the two controls the access path exists to separate.)
 
+## Any statement reads a local AFTER the calls that can write it
+
+The return spill above is one case of a wider rule. gc's order pass works on the whole **statement**: it copies every call in the statement into a temporary ahead of it, in source order, and leaves the plain reads where they are, so they run after all of those calls. A call argument, a binary operand, a composite-literal element, a compound assignment's left side, a send's value and an assignment's target slice all follow the same order. C# evaluates each of them left to right, so a plain read written before a call sees the value from BEFORE the call. The scout that measured gc against the converter, form by form, is `docs/phase4/SCOUT-evaluation-order.md`.
+
+The converter emits gc's rewrite where the statement itself shows that a later call can reach an earlier read of a local variable:
+
+<!-- source: src/tests/Behavioral/StatementCallOrder/main.go:49-55 -->
+```go
+	p := pair{1, 2}
+	fmt.Println("args-addr", scaled(p, mutate(&p)))
+
+	// a binary operand, beside a closure that assigns it
+	n := int32(1)
+	bump := func() int32 { n = 50; return 3 }
+	fmt.Println("binary-closure", n+bump())
+```
+<!-- source: src/tests/Behavioral/StatementCallOrder/main.cs.target:74-84 -->
+```csharp
+    var p = new pair(1, 2);
+    var ᴛ1 = mutate(ref p);
+    fmt.Println("args-addr", scaled(p, ᴛ1));
+
+    var n = (int32)1;
+    int32 bump() {
+        n = 50;
+        return 3;
+    }
+    var ᴛ2 = bump();
+    fmt.Println("binary-closure", n + ᴛ2);
+```
+
+gc prints `args-addr 200004` and `binary-closure 53`. Without the temporaries, the C# prints `2004` and `4`: `scaled` receives `p` as it was before `mutate`, and `n + bump()` adds the old `n`.
+
+**When a call spills.** The read is of local storage, the call comes after it in C#'s order and runs (in gc) before the read, and the statement shows one of these links between them:
+
+| Link | Example | Spills when |
+|---|---|---|
+| the call takes the storage by address | `scaled(p, mutate(&p))`, `sum3(t.n, t.bump(), t.n)` | the callee's body writes what is read, or the callee is in another package or has no Go body |
+| the call receives the reference the read goes through | `pt.n + pt.bump()`, `sl[0] + fill(sl)` | as above |
+| the call is a closure that assigns the variable | `n + bump()`, `bump` bound once to a literal | always |
+
+The callee's body is read one level deep, and only in the package being converted. Each use of the parameter that receives the storage is followed along its field, index and deref chain: an assignment through it, an increment, `&`, a pointer method on it, or `copy`/`append` into it is a write; a pointer, slice or map reached from it and handed on to anything else counts as a write too, since the body cannot see what happens next. A callee that only reads keeps the call in place, and so does one that writes a different field:
+
+<!-- source: src/tests/Behavioral/StatementCallOrder/main.go:121-122 -->
+```go
+	p3 := pair{1, 2}
+	fmt.Println("neg-otherfield", p3.a+writeB(&p3))
+```
+<!-- source: src/tests/Behavioral/StatementCallOrder/main.cs.target:169-170 -->
+```csharp
+    var p3 = new pair(1, 2);
+    fmt.Println("neg-otherfield", p3.a + writeB(ref p3));
+```
+
+The read and the write are compared by access path, as in the return spill, but in one direction. A write at or above the read's storage reaches the read even through pointers stored there, so reassigning a pointer (`rp.a + repoint(&rp)`) spills. A write below the read reaches it only when no deref separates them, so a call that writes through a pointer whose VALUE is read (`h.p == nil, h.touch()`) keeps its place.
+
+**Every call up to the last hazardous one spills**, in evaluation order, so the calls keep their order among themselves. The spill renders through the statement's pre-statement sink, the same one a function literal's capture declarations use, and a nested call lands before the call that contains it, which is gc's post-order.
+
+**An operand gc copies in place keeps its reads in place.** gc passes two kinds of operand to a runtime routine by address, through `addrTemp` in its order pass: an operand converted to an interface whose conversion helper takes its address (anything but a 2-, 4- or 8-byte word without pointers, a lone string or a lone slice), and a map key that gc hashes on its slow path (anything but a 4- or 8-byte plain-memory key or a string, or any key of a map whose element is over 128 bytes). `addrTemp` copies the operand into a temporary at its own position, after the calls inside it and before the calls after it, in two cases: the operand is not addressable (`s.f+1`, `int8(x)`, a composite-literal key), or it is a local of the function that is SSA-able (a struct of at most four fields within four words, an array of at most one element, any other type within four words) and never has its address taken. A read inside such an operand sees only the calls inside it, so a later call does not spill for it:
+
+<!-- source: src/tests/Behavioral/StatementCallOrder/main.go:134-135 -->
+```go
+	se := small{1, 1}
+	fmt.Println("inplace-iface-expr", se.f+1, se.poke())
+```
+<!-- source: src/tests/Behavioral/StatementCallOrder/main.cs.target:178-179 -->
+```csharp
+    var se = new small(1, 1);
+    fmt.Println("inplace-iface-expr", (int8)(se.f + 1), se.poke());
+```
+
+`se.f` is an `int8`, so `se.f+1` becomes an interface through a helper that takes its address, and gc prints `inplace-iface-expr 2 1` under every flag. Where the conversion takes the operand by value, or the local has its address taken, gc reads after the call, and the call spills as usual:
+
+<!-- source: src/tests/Behavioral/StatementCallOrder/main.go:148-149 -->
+```go
+	sa := small{1, 1}
+	fmt.Println("inplace-neg-addr", sa, sa.poke())
+```
+<!-- source: src/tests/Behavioral/StatementCallOrder/main.cs.target:196-198 -->
+```csharp
+    var sa = new small(1, 1);
+    var ᴛ14 = sa.poke();
+    fmt.Println("inplace-neg-addr", sa, ᴛ14);
+```
+
+**Residue: a closure gc does not inline.** The second case depends on gc's inliner. A local whose only writer is a closure keeps its address taken while the closure captures it by reference, and is copied in place only once gc inlines the closure. The converter follows the default `go build`, where a small closure called directly is inlined, so `fmt.Println(sc, setSc())` keeps `sc` in place and prints `{1 1} 1`. A closure that gc does not inline (a large one, or one that escapes) makes gc read the local after the call, while the converter still reads it before. The language leaves this order unspecified. It touches only locals that are small structs, 1-byte scalars, complex values or pointer-shaped (pointers, maps, channels, funcs), written only by such a closure, in one of the two contexts above. `go build -gcflags=-l` reads after the call in every such case.
+
+**A type-parameter operand is read after the calls.** gc compiles a generic function once per shape, and whether its conversion helper takes the operand's address depends on that shape. A single C# generic method cannot follow it, so an operand whose type involves a type parameter is never treated as copied in place, and the statement keeps the read-after order.
+
+**Scope.** This covers expression statements, assignments (`=`, `:=`, `op=`), sends and single-value returns; a multi-value return keeps the spill above. Not covered yet:
+
+- package-level variables, which need the callee walk across functions;
+- contexts with no statement boundary: a `for` condition or post statement, and the right side of `&&` or `||`. A hazard there leaves the statement as written, rather than move a conditional call ahead of it;
+- `var` declarations and `if`/`switch` headers.
+
+(Guarded by the `StatementCallOrder` behavioral test: 14 hazard arms, one per form, 5 controls, 4 copied-in-place arms (an expression and a closure-only local, in each of the two contexts) and their 2 controls, output-compared vs `go run`. Before the change 13 of the hazard lines print the pre-call value; with the spill but without the in-place rule, all 4 in-place lines print the post-call value. `evalOrderSpill.go` owns the analysis and `evalOrderInPlace.go` the in-place rule. `evalOrderSpill_test.go` pins the emission against seven neuters: no hazard ever, no callee read, the symmetric path comparison, no in-place copy, no address-taken scan, every conversion taking an address, and an operation nested in itself.)
+
 ## A SELECTOR left-hand side counts as a reassignment — a field swap must stay simultaneous
 
 The paren-deref fix above closed the *index* form of the target-classification gap; the **selector** form (`x.f, y.g = …`) had the same hole. The classifier deliberately drops a selector LHS's root identifier (`getIdentifier` would return the *base* — a package name, or a struct local — which, not itself being reassigned, would wrongly be counted as a new declaration and take a `var` prefix), and then counted it as **neither** reassigned nor declared. A parallel assignment whose targets are *all* selectors therefore satisfied no tuple-path gate — not `lhsLen == reassignedCount`, not `lhsLen == declaredCount`, and (with no single-call RHS) not `tupleResult` — and shattered into sequential stores, losing the swap's implicit temporary:

@@ -36631,4 +36631,94 @@ readers (ELF, Mach-O, COFF).
 
 — H (2026-11-12)
 
+## 2026-11-12 — C2 (found by the eval-order step-1 footprint, COORD's routing): a converter run that drops a file on a recovered panic still EXITS 0 — OPEN, a .4 robustness item, its own seat after eval-order step 1
+
+The visitor recovers a panic per file (`conversionDriver.go`, and `autoSiblingOperations.go` for a
+`.cs.auto` sibling), prints
+
+    WARNING: visit file error: runtime error: invalid memory address or nil pointer dereference in "byteorder.go"
+
+and skips that file's emission. The package's metadata is then rendered without the file, and the run
+exits 0. A user's conversion can silently lose a source file: its `.cs` is missing, and its interface
+implementations and position map are gone from `package_info.cs`. When the file was the only one
+importing a package, the reference goes from the `.csproj` too.
+
+Measured instance: footprint run 3 of the eval-order step-1 seat (`claude/c2-eval-order`). An
+intermediate build of `evalOrderInPlace.go` asked `types.IsInterface` of a blank target's type
+(`_ = b[1]`) and crashed on **61 files** in `-stdlib -platforms windows/amd64`, with rc=0. The base arm
+logged 0. The diff against the base read 132 files, where the run before read 53: 53
+`package_info.cs` losing a file's records, and 25 `.csproj` losing references. The cause was fixed
+red first in that seat. The run is void and was not scored.
+
+WHAT ALREADY GUARDS IT, and what does not:
+- Guarded: the behavioral harnesses. `src/tests/BestEffortConversion.cs` (linked into BehavioralRunner
+  and BehavioralTestBase) and `check-no-regression.ps1` classify "visit file error" as NOT MEASURED.
+  `bestEffortTranspile_test.go` pins the marker strings on both sides.
+- Not guarded: `-stdlib` reconverts (corpus regen and footprint runs), the `-tests` pipeline, and any
+  user conversion. None of them reads stderr, and the exit code says success.
+
+PROPOSED FIX:
+- any recovered visit panic makes the run exit non-zero;
+- a closing summary line names each dropped file;
+- the existing `-warn` convention may downgrade it to a warning, but only explicitly;
+- a red test plants a file that panics the visitor, and asserts a non-zero exit plus the named file.
+The behavioral harnesses keep their stderr classification, which stays correct either way.
+
+— C2 (2026-11-12)
+
+## 2026-11-12 — C2 (eval-order step 1, COORD's rulings A at gate A1 and B): a statement's calls now run before its plain reads of a local, as gc runs them — LANDS with `claude/c2-eval-order`; corpus regen at batch time
+
+**The divergence.** H's G1 row above ("gc runs the calls in an operand list before it reads a plain variable there") and
+the scout `docs/phase4/SCOUT-evaluation-order.md`: `scaled(p, mutate(&p))` prints gc's `200004` and go2cs's `2004`.
+`evalOrderSpill.go` now plans each expression statement, assignment, send and single-value return. Every call up to the
+last one that can reach an earlier read of a local spills into a `var ᴛN` ahead of the statement, in gc's post-order.
+
+**Gate A1, as ruled.** The call takes the local by address, receives the reference the read goes through, or is a
+closure that assigns it. A same-package callee is read one level deep. Paths are compared in one direction.
+
+**Operands gc copies in place (`evalOrderInPlace.go`).** gc's `addrTemp` (order.go) copies an interface-conversion
+operand whose helper takes its address, and a slow-path map key, at its own position. It does this when the operand is
+not addressable, and (ruling B) when the operand is a local of the function that is SSA-able and never address-taken.
+Such an operand is the context of the reads inside it. The type tests are gc's own, read from the 1.26 source:
+`dataWordFuncName` needsaddr, `ssa.CanSSA`, `mapfast` and AlgType. DISCLOSED in ConversionStrategies:
+- a closure gc does not inline reads such a local after the call under gc and before it under go2cs (`-gcflags=-l`
+  takes the after order everywhere);
+- an operand whose type involves a type parameter keeps the read-after order (gc's order there depends on each
+  instantiation's shape).
+
+**Guards.** `StatementCallOrder`: 14 hazard arms, 5 controls, 4 in-place arms and 2 in-place controls, output-compared
+with `go run`. `evalOrderSpill_test.go`: 14 hazards and 15 controls against seven neuters, each red only at its own
+arms. Red first throughout: the 4 in-place arms differed from gc on the converter without the rule.
+
+**Three defects of my own, found by the footprint runs and fixed red first before anything was committed:**
+- run 3 VOID: a blank target `_ = b[1]` has no type, and the in-place mark asked `types.IsInterface(nil)`. 61 files
+  were dropped with exit 0 (the dropped-file row below);
+- run 4 ABORTED by the new file-error gate: `gcSizes` asserts on a type parameter. Two files were dropped;
+- run 5, P6 MISSED: 15 new spill lines, each a call that is itself an interface argument, nested in its own `within`
+  list by the in-place mark. Fix: an operation is never nested in itself.
+
+**Footprint, run 6 (two seeded -stdlib reconverts, base 4490a52244, windows/linux/darwin amd64, file-error gate on):**
+Every arm converted 360/360 packages with rc=0, 0 unrendered plans and 0 file errors, base and new alike. On each target,
+65 spill lines in 32 `.cs` files plus 21 `package_info.cs` (62 `GoPositionMap` lines, re-encodes). The whole diff is
+byte-identical to run 2's (1,006 lines on each target). Scores, as posted before the run: P6 (the spill set is within
+run 2's) MET; P7 and P8 (the in-place rule moves 0 lines) MET; P5 (0 unrendered) MET. P1 and P2 kind stay MISSED as
+scored at run 1. P6 stays MISSED at run 5, which is a separate measurement. The 65 lines carry run 2's attribution,
+unchanged (posted ace85f356). They hold all 19 of P1's sites. 17 lines are function or interface values in fields,
+which gc reads after the argument calls. The rest are same-root lines whose callee the one-level read cannot clear.
+No real divergence is known among them: they are parity spills.
+
+**Behavioral.** Eight goldens move, each a spill of a call whose callee the one-level read cannot clear, and each
+project passes the four phases: EmbeddedPointerNilAssign, NamedArrayWrapper, NamedTypeOverStruct, NamedValueTypeClash,
+NestedFieldElementAddr, PromotedEmbedUser, UintptrUnsafePointerIdiom, ValueReceiverArgumentOrder. The disk preflight
+was overridden (`-IgnoreDiskPreflight`, about 9 GB free on this box against the 25 GB floor). Every run was read whole,
+and none showed a write failure.
+
+**Predicted for batch time.** G1's cgo-e2e `ordered` arm moves from `2004` to gc's `200004`. It is scored on the
+cgo-e2e leg, and G1's named divergence is then updated in H's record by a dated block.
+
+**Not measured here:** a std compile of the touched packages, and std tests (P3). Step 2 (package-level variables) and
+step 3 (contexts with no statement boundary) follow as their own seats.
+
+— C2 (2026-11-12)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
