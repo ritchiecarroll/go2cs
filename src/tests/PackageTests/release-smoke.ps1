@@ -371,27 +371,8 @@ if ($gVerdict -like 'PASS*') {
 $verdicts += $gVerdict
 
 # ---- H: source compatibility: the previous release's consumer, unchanged -----------------------------
-# The newest nuget-<a.b.c.d> release tag below the version under test. A prerelease (1.26.10.4-ci.7) is below its own
-# release, so it compares by its numeric part; a published version's own tag is not below it and is skipped.
-function Resolve-ConsumerRef([string]$UnderTest) {
-    $base = [version](($UnderTest -split '-', 2)[0])
-    $ErrorActionPreference = 'Continue'
-    $lines = @(& git -C $repoRoot ls-remote --tags origin 'refs/tags/nuget-*' 2>$null)
-    $code = $LASTEXITCODE
-    $ErrorActionPreference = 'Stop'
-    if ($code -ne 0) { return $null }
-    $best = $null
-    $bestVersion = $null
-    foreach ($line in $lines) {
-        if ($line -notmatch 'refs/tags/nuget-(\d+\.\d+\.\d+\.\d+)$') { continue }
-        $tagVersion = [version]$Matches[1]
-        if ($tagVersion -lt $base -and (-not $bestVersion -or $tagVersion -gt $bestVersion)) {
-            $best = "nuget-$($Matches[1])"
-            $bestVersion = $tagVersion
-        }
-    }
-    return $best
-}
+# The ref logic (the tag choice, and a fetch that never changes the repository's depth) is shared with its self-test.
+. (Join-Path $PSScriptRoot 'SourceCompat/ConsumerRef.ps1')
 
 function Invoke-SourceCompatArm {
     $name = 'H-source-compat'
@@ -402,15 +383,15 @@ function Invoke-SourceCompatArm {
     $ref = $ConsumerRef
     $how = 'the -ConsumerRef override'
     if (-not $ref) {
-        $ref = Resolve-ConsumerRef $Version
+        $ref = Resolve-ConsumerRef $repoRoot $Version
         $how = "the newest nuget-* release tag below $Version"
     }
     if (-not $ref) { return "FAIL ($name): found no nuget-<version> release tag below $Version on origin" }
 
-    # Exactly that ref, shallow, so a shallow checkout has its tree too.
-    $code = Invoke-Logged (Join-Path $arm 'fetch.log') { & git -C $repoRoot fetch --depth 1 --no-tags origin $ref }
-    if ($code -ne 0) { return "FAIL ($name): git fetch origin $ref exited $code$(Get-FirstError (Join-Path $arm 'fetch.log'))" }
-    $commit = (& git -C $repoRoot rev-parse FETCH_HEAD).Trim()
+    # Exactly that ref. A tag already here is read with no fetch, and --depth is used only where the repository is
+    # already shallow, so a full clone is never truncated (SourceCompat/ConsumerRef.ps1, test-consumer-ref.ps1).
+    $commit = Get-ConsumerCommit $repoRoot $ref (Join-Path $arm 'fetch.log')
+    if (-not $commit) { return "FAIL ($name): git fetch origin $ref failed$(Get-FirstError (Join-Path $arm 'fetch.log'))" }
     Write-Host "release smoke: H builds the CSharpConsumer of $ref ($commit), chosen as $how"
 
     $tar = Join-Path $arm 'consumer.tar'
