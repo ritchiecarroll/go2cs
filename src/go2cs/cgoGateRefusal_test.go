@@ -361,8 +361,12 @@ func TestTheCgoFlagNamesAMixedPackagesPlainFileAsPlainSource(t *testing.T) {
 	requireCgoRefusal(t, stderr, err, output, "fixture.go", "cgogatefixture")
 	requireCgoPhase1UsesRefused(t, stderr)
 
-	if strings.Contains(stderr, "plain.go") {
-		t.Errorf("the refusal names the plain file, which uses no C\n%s", stderr)
+	// The plain file's Twice also collides with the fixture's, a type error that names plain.go; only the cgo refusal
+	// lines are the route's verdict.
+	for _, line := range strings.Split(strings.ReplaceAll(stderr, "\r\n", "\n"), "\n") {
+		if strings.Contains(line, "error "+diagnosticCgoRefused+": ") && strings.Contains(line, "plain.go") {
+			t.Errorf("the refusal names the plain file, which uses no C: %s", line)
+		}
 	}
 }
 

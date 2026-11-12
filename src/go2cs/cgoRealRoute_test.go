@@ -184,12 +184,24 @@ func TestTheCgoRouteConvertsTheFixtureOnARealHost(t *testing.T) {
 			forbidden = append(forbidden, filepath.Dir(cc[0]))
 		}
 
+		// A captured library's own name is its identity wherever the bindings write it (the table's row, its binding's
+		// [LibraryImport], the comment above), so each is taken out of a line before the line is searched.
+		var captured []string
+
+		for _, line := range strings.Split(bindings, "\n") {
+			if _, row, found := strings.Cut(line, "new global::go.golib.GoCgoLibrary("); found {
+				if fields := strings.Split(row, `"`); len(fields) >= 4 {
+					captured = append(captured, fields[3])
+				}
+			}
+		}
+
 		found := 0
 
 		for _, file := range emittedProjectFiles(t, output) {
 			for _, line := range strings.Split(readConverted(t, output, file), "\n") {
-				if strings.Contains(line, "new global::go.golib.GoCgoLibrary(") {
-					continue
+				for _, name := range captured {
+					line = strings.ReplaceAll(line, name, "")
 				}
 
 				for _, path := range forbidden {
