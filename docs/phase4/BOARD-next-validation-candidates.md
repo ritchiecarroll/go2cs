@@ -36843,4 +36843,63 @@ tracked one needs its golden and its entries in the four test lists, which belon
 
 — G (2026-11-12)
 
+## 2026-11-12 — G (COORD's order on a finding of the M:N prototype's stage A4): one instantiation of a local generic type assigned to a non-generic interface does not compile when the interface's method names the type argument — OPEN
+
+**The defect.** A generic struct has a method whose signature names its type parameter, `func (b box[T]) val() T`.
+A non-generic interface asks for that method at one type, `val() point`. Go accepts `box[point]` for the
+interface, and only that instantiation. The converted program does not compile.
+
+**Measured on master `6869ec2b54`** (Windows x64, go1.26.10, SDK 10.0.400, runtime 10.0.11) with four programs of
+about 25 lines, each run under Go and through the behavioral runner by filter, and a tracked program as the
+control. Each declares `type box[T any] struct`, one method and one interface in package `main`, assigns a
+`box[point]` (or its address) to the interface and calls the method through it.
+
+| Program | Method | The interface asks | Go prints | Transpile | Compile |
+|---|---|---|---|---|---|
+| `GenericFuncDecl` (tracked; the control) | — | — | — | pass | pass |
+| the result is the type parameter | `func (b box[T]) val() T` | `val() point` | `1 2` | pass | fail, CS0029 |
+| the same on a pointer receiver | `func (b *box[T]) val() T` | `val() point` | `3 4` | pass | fail, CS0029 |
+| a parameter is the type parameter | `func (b box[T]) take(v T) int` | `take(v point) int` | `5` | pass | fail, CS1929 |
+| the signature does not name it | `func (b box[T]) size() int` | `size() int` | `7` | pass | pass |
+
+The control's Target and Output rows read pass too. The four programs have no golden and no entry in the test
+lists, so their Target row reads fail by construction and Output reads skip. The last program's built executable
+was run by hand and prints `7`, as Go does.
+
+**The emission, read.** The converter's part is right: it records the CLOSED instantiation,
+`[assembly: GoImplement<box<point>, valuer>]`, and converts the assignment to `valuer v = new box<point>(…)`.
+The source generator that reads the record writes the implementation over the OPEN type. For a value it is
+`partial struct box<T> : valuer` holding `point valuer.val() => this.val();`, and for a pointer it is an adapter
+class generic over `T` holding `point valuer.val() => m_box.val();`. Both forwarded calls return a `T`, so the
+compiler reads "Cannot implicitly convert type 'T' to 'go.main_package.point'". With the type parameter in a
+parameter the forwarded call passes a `point` where a `T` is asked and reads CS1929. Where the signature does not
+name the type parameter the open implementation is true of every instantiation, as it is in Go, and it compiles.
+
+So the root reads in go2cs-gen's ImplementGenerator, in its branch for a generic type of the SAME package. Its
+own comments state the rule: when a non-generic interface mentions the type arguments, exactly one instantiation
+can satisfy it, and a per-instantiation adapter is what the semantics describe. By the same comments that
+adapter exists today for a generic type of ANOTHER package behind a pointer, and the same-package branch stays
+generic on the ground that the interface does not mention the arguments. This row is the case where it does.
+NOT DESIGNED here: the value form has no closed carrier today, because a partial declaration can only extend the
+open definition.
+
+**Who meets it.** Go code that hands one instantiation of its own generic type to a non-generic interface whose
+method returns or takes the element. The tracked corpus builds, so it cannot hold the failing shape. Of 2,235
+`GoImplement` records in tracked `package_info.cs` files, 22 name a generic instantiation first: 9 in the
+converted standard library and 13 in behavioral programs. NOT MEASURED: the module wave's packages, a generic
+interface, two instantiations of one generic type against one interface, an embedded generic field that promotes
+the method, and Native AOT.
+
+**How it was met.** The prototype's stage A4 builds generic instantiations of the task type under Native AOT. Its
+fixture read CS0029 in a generated implementation file with twins OFF, and that was reported as not measured on
+master. COORD ordered it measured there with a minimal program. It is on master, it is independent of M:N, and
+the prototype does not fix it.
+
+**Owed (not taken here).** A tracked behavioral program with the three failing shapes and the passing one, red
+first against Go's output, then the fix in the generator's same-package branch. The four programs of this
+measurement are not tracked: a tracked one needs its golden and its entries in the four test lists, which belong
+with the fix.
+
+— G (2026-11-12)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
