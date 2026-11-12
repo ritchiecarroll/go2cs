@@ -16,7 +16,10 @@ namespace go2cs.Tests;
 /// Generated plumbing is hidden from IntelliSense and the Go surface is not (docs/PublicSurface.md, tier 2): every public
 /// type a generator declares, and the generated members no Go declaration names, carry
 /// <c>[EditorBrowsable(EditorBrowsableState.Never)]</c>; no Go-declared type or member does. A generated internal type
-/// (an interface shell) is outside the rule, since no consumer can name it.
+/// (an interface shell) is outside the rule, since no consumer can name it. A GENERATED public member of a Go-declared
+/// type is hidden or is a contract member (<see cref="ContractNames"/> and <see cref="IsContractMember"/>): an overload
+/// of a Go-declared name, the value contract (constructors, operators, Equals, GetHashCode, ToString), or a named
+/// contract member such as a field accessor or a named pointer's view.
 /// </summary>
 /// <remarks>
 /// Every <c>[Generator]</c> in go2cs-gen runs (<see cref="GoInterfaceMemberGuardTests.AllGenerators"/>), so a generator
@@ -119,6 +122,21 @@ public class HiddenPlumbingTests
         return true;
     }
 
+    // The CONTRACT members: generated, consumer-visible, and part of what a C# caller binds to, so never hidden.
+    // - an overload of a name the Go declaration has (a receiver forwarder, a box-receiver overload, an @string twin);
+    // - the value contract of a Go type: constructors, operators and conversions, Equals, GetHashCode and ToString;
+    // - the named contract members: a field accessor (Ꮡfield), a named pointer's Value, ValueSlot, IsNull and
+    //   IsNilPointer, its field and element views of and at, and ΔClone, Make, Wrap and Source.
+    // A name outside these is a new kind of generated member: hide it, or add it here with the reason.
+    private static readonly HashSet<string> ContractNames =
+        ["Equals", "GetHashCode", "ToString", "Value", "ValueSlot", "IsNull", "IsNilPointer", "of", "at", "ΔClone", "Make", "Wrap", "Source"];
+
+    private static bool IsContractMember(ISymbol member, HashSet<string> goNames) =>
+        goNames.Contains(member.Name) ||
+        member is IMethodSymbol { MethodKind: MethodKind.Constructor or MethodKind.UserDefinedOperator or MethodKind.Conversion } ||
+        ContractNames.Contains(member.Name) ||
+        member.Name.StartsWith('Ꮡ');
+
     // A symbol declared only in generated sources, never in the fixture.
     private static bool IsGenerated(ISymbol symbol, HashSet<SyntaxTree> fixture) =>
         symbol.DeclaringSyntaxReferences.Length > 0 &&
@@ -197,6 +215,23 @@ public class HiddenPlumbingTests
                 else
                     violations.Add($"{member.ToDisplayString()}: a Go-declared member is hidden");
             }
+
+            // A Go-declared type's GENERATED members that a consumer can see: each is hidden, or is a contract member.
+            if (!IsConsumerVisible(type))
+                continue;
+
+            HashSet<string> goNames = type.GetMembers().Where(member => !IsGenerated(member, fixture)).Select(member => member.Name).ToHashSet();
+
+            foreach (ISymbol member in type.GetMembers())
+            {
+                if (member is INamedTypeSymbol || member.IsImplicitlyDeclared || !IsGenerated(member, fixture) || IsHidden(member) ||
+                    member is IMethodSymbol { AssociatedSymbol: not null } ||
+                    member.DeclaredAccessibility is not (Accessibility.Public or Accessibility.Protected or Accessibility.ProtectedOrInternal))
+                    continue;
+
+                if (!IsContractMember(member, goNames))
+                    violations.Add($"{member.ToDisplayString()}: a generated public member of a Go type is neither hidden nor a contract member");
+            }
         }
 
         return (violations, listing);
@@ -227,8 +262,8 @@ public class HiddenPlumbingTests
             Assert.IsTrue(listing.Contains(kind), $"the fixture no longer reaches '{kind}'; hidden were:\n" + string.Join("\n", listing));
     }
 
-    // The negative control: a generator that declares a visible type without the attribute, and one that hides a Go
-    // type, are each named.
+    // The negative control: a generator that declares a visible type without the attribute, one that hides a Go type,
+    // and one that adds a public helper member to a Go type, are each named.
     [TestMethod]
     public void APlantedVisibleTypeAndAHiddenGoTypeAreCaught()
     {
@@ -237,8 +272,9 @@ public class HiddenPlumbingTests
         CollectionAssert.AreEquivalent(new[]
         {
             "go.hide_package.ᴛPlanted: a generated type a consumer can see is not hidden",
-            "go.hide_package.Buffer: a Go-declared type is hidden"
-        }, violations);
+            "go.hide_package.Buffer: a Go-declared type is hidden",
+            "go.hide_package.ᴛPlantedHelper(): a generated public member of a Go type is neither hidden nor a contract member"
+        }, violations, string.Join("; ", violations));
     }
 
     private sealed class Planter : IIncrementalGenerator
@@ -251,6 +287,8 @@ public class HiddenPlumbingTests
                 public static partial class hide_package
                 {
                     public static class ᴛPlanted { }
+
+                    public static void ᴛPlantedHelper() { }
 
                     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
                     public partial struct Buffer { }
