@@ -112,9 +112,44 @@ public class RuntimePanicCheckTests
         Assert.AreEqual("go.runtime_testᴛheldᴛpkg.Raise", frame);
 
         Assert.IsFalse(IsRuntimePackageTypeName("go.runtime.debugᴛBuildInfoᴛpkg"), "runtime/debug is another package");
-        Assert.IsFalse(IsRuntimePackageTypeName("go.runtimeᴛheld"), "the ending is part of the form");
-        Assert.IsFalse(IsRuntimePackageTypeName("go.runtimeᴛpkg"), "a struct name is part of the form");
         Assert.IsFalse(IsRuntimePackageTypeName("go.syncᴛheldᴛpkg"), "another package's class is not runtime");
+    }
+
+    // The methods a type declares are in a class of the type's own, `<pkg>ᴛ<Type>`, and no longer in the package
+    // class. Go names a method runtime.* by its receiver type's package, so a bounds panic in a method of a runtime
+    // type is panicCheck1's as it was when the method was in `runtime_package`. The reader has names only, so the
+    // class is read by its name's form, as the promoted-method class is.
+    [TestMethod]
+    public void AMethodHolderOfPackageRuntimeIsTheMarkerToo()
+    {
+        Assert.IsTrue(IsRuntimePackageType(typeof(runtimeᴛheld)), "the method holder of a type of package runtime is runtime");
+        Assert.IsTrue(IsRuntimePackageType(typeof(runtime_internal_testᴛheld)), "and of a type of package runtime's own _test.go files");
+        Assert.IsTrue(IsRuntimePackageTypeName("go.runtimeᴛmheap"), "the form, as the converted runtime's own class is named");
+        Assert.IsTrue(IsRuntimePackageTypeName("go.runtimeᴛpkg"), "a type may be named as the promoted-method class ends");
+        Assert.IsTrue(IsRuntimePackageTypeName("go.runtimeᴛmheapᴛtest"), "the holder of the methods a _test.go file declares on a runtime type");
+
+        Assert.IsTrue(RaisedInRuntimePackage(runtimeᴛheld.Raise(), out string frame), "a panic raised in a method of a runtime type must HIT");
+        Assert.AreEqual("go.runtimeᴛheld.Raise", frame);
+
+        Assert.IsTrue(RaisedInRuntimePackage(runtime_internal_testᴛheld.Raise(), out frame), "a panic raised in a method the bridge declares must HIT");
+        Assert.AreEqual("go.runtime_internal_testᴛheld.Raise", frame);
+    }
+
+    // The control for the test above: another package's holder is not runtime's, a cross-package forwarder class
+    // (`<pkg>ᴛ<Type>ᴛxpkg`, go2cs-gen's forwarders for methods of ANOTHER package) is not, and the marker is a part
+    // of the form.
+    [TestMethod]
+    public void AnotherPackagesMethodHolderIsNotTheMarker()
+    {
+        Assert.IsFalse(IsRuntimePackageType(typeof(runtime_testᴛheld)), "package runtime_test's method holder is not runtime.*");
+        Assert.IsFalse(RaisedInRuntimePackage(runtime_testᴛheld.Raise(), out string frame), "a panic raised on it must MISS");
+        Assert.AreEqual("go.runtime_testᴛheld.Raise", frame);
+
+        Assert.IsFalse(IsRuntimePackageTypeName("go.runtime.debugᴛBuildInfo"), "runtime/debug is another package");
+        Assert.IsFalse(IsRuntimePackageTypeName("go.syncᴛMutex"), "another package's holder is not runtime");
+        Assert.IsFalse(IsRuntimePackageTypeName("go.runtimeᴛheldᴛxpkg"), "a cross-package forwarder class holds another package's methods");
+        Assert.IsFalse(IsRuntimePackageTypeName("go.runtimeᴛ"), "a type name is part of the form");
+        Assert.IsFalse(IsRuntimePackageTypeName("go.runtimeheld"), "the marker is part of the form");
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]

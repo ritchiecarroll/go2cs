@@ -132,3 +132,56 @@ internal static class runtime_testᴛheldᴛpkg
         }
     }
 }
+
+// The method holder of a type of package runtime, named as the converter names it (`<pkg>ᴛ<Type>`, beside the
+// package class): the class that declares the type's methods. Go names a method by its receiver type's package,
+// so a frame here is a frame of package runtime.
+internal static class runtimeᴛheld
+{
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    internal static Exception Raise()
+    {
+        try
+        {
+            throw RuntimeErrorPanic.IndexOutOfRange(1L, 0L);
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
+    }
+}
+
+// The same class for a type that package runtime's own _test.go files declare.
+internal static class runtime_internal_testᴛheld
+{
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    internal static Exception Raise()
+    {
+        try
+        {
+            throw RuntimeErrorPanic.IndexOutOfRange(1L, 0L);
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
+    }
+}
+
+// The same class for a type of package runtime_test, which panicCheck1's prefix excludes.
+internal static class runtime_testᴛheld
+{
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    internal static Exception Raise()
+    {
+        try
+        {
+            throw RuntimeErrorPanic.IndexOutOfRange(1L, 0L);
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
+    }
+}
