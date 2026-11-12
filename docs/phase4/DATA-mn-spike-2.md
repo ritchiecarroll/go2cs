@@ -1452,3 +1452,318 @@ other, 22:31 to 23:02 CST.
 - The repo guards ran once more after this section was placed. That reading is in the phase's DONE post, since
   writing it here would change the file they read.
 - The behavioral suite as a whole was not run; no file under it changes in this phase.
+
+## 7. B5: how much of a real program can park (2026-11-11)
+
+Branch `claude/g-mn-spike2-b5`, on B4's `fcdcdf76fc`. B5 is the plan's closure question: on a large real program,
+what share of the functions would the twin rule mark, and what does the generator refuse. The program is the
+TypeScript compiler's Go port, the one the fleet already converts. The coordinator asked for a lean phase: measure
+what the verdict needs, no more. So B5 is a census of Go source and adds no code to the tree; the run under twins
+that the plan allowed "if coverage allows" was not attempted (7.12 says why).
+
+The branch's first commit (`85989b9947`) is not B5's measurement: it writes the three product findings of 6.9,
+item 9, as BOARD rows, as the coordinator routed them.
+
+### 7.1 What was read, and with what
+
+- **The program.** `microsoft/TypeScript` at commit `ba29a56299`, module `github.com/microsoft/TypeScript/tsc`,
+  with the TS session's `cmd/checkdemo` entry (parse, bind and type-check a project). `go list -deps` gives its
+  closure as 200 packages. The census counts named functions and methods with bodies (no closures, no synthetic
+  wrappers) outside the runtime family: **16,923 functions in 173 packages**, of which the TS module holds 9,395
+  in 48 packages, third-party modules 1,824 in 18, and the standard library 5,704 in 107. `GOOS=windows`,
+  go1.26.10.
+- **The tool.** Phase 1's `canpark` (`src/tools/mnspike/canpark` at `b328b55d08`): go/ssa and a VTA call graph;
+  a function can park when it holds a park point of Go's (a channel operation, `select`, `time.Sleep`, a
+  `WaitGroup` or `Cond` wait, the poller's wait, and, unless `-long-only`, the contention path of a `Mutex`,
+  `RWMutex` or the file-descriptor lock) or calls a function that can. The runtime family neither parks nor
+  propagates.
+- **Two flags added for B5**, 31 added lines, kept in the lane's scratch and on no branch. `-no-func-values`: an edge
+  whose call site has no static callee and is not an interface invoke does not propagate (in the marking loop and
+  in the witness search). `-cut a,b`: a function named in the list is never marked, so no caller is marked
+  through it.
+- **Three reaches.** *Upper*: every VTA edge (static calls, interface invokes, calls of a func value). *Middle*:
+  static calls and interface invokes, which is the reach of the generator of section 4, where a func value holds
+  the plain body (6.9, item 3). *Lower*: static calls only.
+- **What the middle arm is and is not.** It is an estimate of the generator's marking, not a bound on it. VTA
+  resolves an interface call to the implementers that can reach that site; the generator twins an interface member
+  when its own project holds a parking implementer (4.4, 4.9 item 12), which is coarser inside a project and blind
+  across projects. And the census reads Go's park points, the leaves a complete twin set would have; the spike's
+  own leaves are fewer (channels, `select`, `time.Sleep`, `Mutex.Lock`, 3.1), so the generator as built would
+  mark less than any arm here.
+- **Site tallies** (closures, `go` statements, interface and func-value call sites) are printed by the tool for
+  the whole closure and are not split by module.
+
+### 7.2 The arms
+
+Can-park functions and their share of the functions counted, by reach, leaf set and cut.
+
+| arm | whole closure (16,923) | TS module (9,395) | third-party (1,824) | standard library (5,704) |
+|---|---|---|---|---|
+| upper, long parks only | 7,106 (42.0%) | 5,096 (54.2%) | 1,023 (56.1%) | 987 (17.3%) |
+| upper, lock leaves too | 7,182 (42.4%) | 5,126 (54.6%) | 1,024 (56.1%) | 1,032 (18.1%) |
+| upper, long only, the two `fmt` cuts of 7.4 | 6,099 (36.0%) | 4,320 (46.0%) | | |
+| **middle, long only** | 4,867 (28.8%) | **3,981 (42.4%)** | 216 (11.8%) | 670 (11.7%) |
+| middle, lock leaves too | 5,042 (29.8%) | 4,075 (43.4%) | 217 (11.9%) | 750 (13.1%) |
+| middle, long only, cut 1 | 3,264 (19.3%) | 2,579 (27.5%) | | |
+| **middle, long only, cuts 1 and 2** | 809 (4.8%) | **181 (1.9%)** | | |
+| middle, lock leaves too, cuts 1 and 2 | 3,332 (19.7%) | 2,598 (27.7%) | | |
+| lower, long only | 311 (1.8%) | 11 (0.1%) | 39 (2.1%) | 261 (4.6%) |
+| lower, lock leaves too | 2,652 (15.7%) | 2,229 (23.7%) | 40 (2.2%) | 383 (6.7%) |
+| lower, lock leaves too, `(*ast.Node).EagerJSDoc` cut | 2,444 (14.4%) | 2,021 (21.5%) | | |
+
+- **Over half of the TS module can park by the upper rule (54.2%)**, and 42.4% in the generator's reach.
+- **Three edges carry almost all of it.** With the lock leaves dropped and two `fmt` edges cut, the generator's
+  reach marks 181 functions, 1.9% of the module. The lock leaves alone put 23.7% of the module on a path of
+  static calls; cut 1 takes 15 points off the middle arm and cut 2 the next 26.
+- **The functions that park on a path of static calls to a long park are 11** (0.1%): the five direct parkers of
+  7.6 and six callers in `core` and `ipc`.
+- The func-value edges are worth 11.8 points on the TS module (54.2 against 42.4) and 44 points on the
+  third-party modules.
+
+### 7.3 The TS module by package
+
+Can-park functions per package (`internal/` dropped from the names); 44 of the 48 packages have at least one in
+the upper arm. Columns: upper long-only; middle long-only; middle with lock leaves; middle long-only with cut 1;
+with cuts 1 and 2; cuts 1 and 2 with lock leaves; lower with lock leaves; lower long-only.
+
+| package | functions | upper | middle | middle, locks | cut 1 | cuts 1, 2 | cuts 1, 2, locks | lower, locks | lower |
+|---|---|---|---|---|---|---|---|---|---|
+| `checker` | 2,881 | 2,076 | 1,881 | 1,883 | 1,782 | 1 | 1,759 | 1,729 | 0 |
+| `ast` | 2,226 | 616 | 197 | 206 | 2 | 2 | 12 | 10 | 0 |
+| `printer` | 768 | 454 | 344 | 401 | 0 | 0 | 307 | 279 | 0 |
+| `parser` | 514 | 429 | 377 | 377 | 343 | 0 | 3 | 3 | 0 |
+| `transformers/estransforms` | 406 | 318 | 276 | 276 | 0 | 0 | 0 | 0 | 0 |
+| `compiler` | 339 | 174 | 121 | 124 | 49 | 45 | 63 | 15 | 0 |
+| `binder` | 195 | 121 | 90 | 90 | 76 | 0 | 73 | 73 | 0 |
+| `transformers/declarations` | 180 | 118 | 90 | 90 | 77 | 0 | 78 | 47 | 0 |
+| `transformers/tstransforms` | 141 | 110 | 98 | 98 | 31 | 0 | 31 | 0 | 0 |
+| `transformers/moduletransforms` | 124 | 102 | 81 | 81 | 45 | 0 | 45 | 0 | 0 |
+| `tsoptions` | 192 | 87 | 58 | 58 | 33 | 23 | 28 | 11 | 0 |
+| `scanner` | 157 | 68 | 38 | 46 | 9 | 0 | 11 | 3 | 0 |
+| `contentmapper` | 78 | 55 | 45 | 46 | 27 | 25 | 29 | 13 | 0 |
+| `module` | 105 | 54 | 44 | 44 | 26 | 26 | 36 | 0 | 0 |
+| `ipc` | 44 | 20 | 20 | 20 | 15 | 15 | 15 | 4 | 4 |
+| `core` | 166 | 12 | 8 | 8 | 8 | 8 | 8 | 7 | 7 |
+| the other 32 | 879 | 282 | 213 | 227 | 56 | 36 | 100 | 35 | 0 |
+| total | 9,395 | 5,096 | 3,981 | 4,075 | 2,579 | 181 | 2,598 | 2,229 | 11 |
+
+- **The checker is 65% marked in the generator's reach (1,881 of 2,881) and the parser 73%.** These are the hot
+  paths of a compiler. In a run their functions park on a contended `SourceFile` lock or a blocked output pipe,
+  and nowhere else.
+- **With the three edges out, one function of the checker is left** (`NewChecker`) and none of the parser,
+  binder, scanner or printer. What stays marked is the program driver (`compiler`: `BindSourceFiles`, `Emit`,
+  `ForEachCheckerParallel` and the like), the module resolver, the configuration and response-file readers
+  (`tsoptions`), the file layer (`vfs`, `bundled`, `contentmapper`'s host), `ipc`, and `core`'s parallel helpers.
+- Of the 3,981 functions of the middle arm, 3,586 are pointer-receiver methods, 9 value-receiver methods and 386
+  plain functions; of the 181, 121, 2 and 58.
+
+### 7.4 The three edges
+
+Each was named by the tool's shortest-path witness (`-why`), read on the checker's, the parser's and the binder's
+entry functions.
+
+1. **Locks on static paths.** `(*checker.Checker).checkSourceFile` reaches `(*ast.Node).EagerJSDoc` through
+   `checkSourceElements`, `checkSourceElement` and `checkSourceElementWorker`, all static calls, and that function
+   takes `file.jsdocMu.RLock()` when the file has lazy JSDoc (in `internal/ast/ast.go`). `getTypeOfSymbol` reaches the same lock through the checker's `error` method and the scanner's
+   error-range helper. It is not one lock: with `EagerJSDoc` cut the lower arm still reads 2,021 for the module
+   (1,644 in the checker), and the next witnesses are `(*ast.SourceFile).resolveJSDoc` under the scanner's
+   token-position helper and `(*ast.SourceFile).ECMALineMap` under the printer's comment writer. `ast.SourceFile`
+   keeps its lazily built tables behind several locks, and the checker and the printer read them everywhere: 60% of
+   the checker (1,729 functions) is on a path of static calls to one of them. The parser is not:
+   `parseStatement` cannot park in the lower arm.
+2. **`fmt`'s method hook (cut 1).** `debug.Assert` calls `fmt.Sprint` on its slow path;
+   `(*fmt.pp).handleMethods` calls `Error`, `String`, `Format` or `GoString` on the operand through an
+   interface; a `String` method in the closure (the witness is `glob.group`'s, through `(*glob.Glob).String`)
+   calls `fmt.Fprint`, which writes to an `io.Writer`; one `io.Writer` is `*os.File`; and its `Write` ends in
+   the poller's wait. The parser and the binder reach the same hub through `(*ast.Node).Text`, which calls
+   `fmt.Sprintf`. So every function that formats a value is marked, because some `String` method somewhere
+   prints.
+3. **`fmt`'s rune reader under `math/big` (cut 2).** `(*scanner.Scanner).Scan` reads a BigInt literal with
+   `(*big.Int).SetString`; `math/big` scans through an `io.ByteScanner`; one implementer is its own
+   `byteReader`, the adapter over `fmt.ScanState` that `big.Int`'s `Scan` method uses; that calls
+   `(*fmt.ss).ReadRune` and `(*fmt.readRune).ReadRune`, which read an `io.Reader`, one of which is `*os.File`.
+   So the scanner, and with it the parser and the checker, is marked through an adapter that `SetString`
+   never builds (it scans a `strings.Reader`). After cut 1, `fmt.Sprintf` cannot park and `fmt.Fprintf` can
+   (through the writer), which is the right pair.
+
+In the upper arm two more merges show: a generic helper that calls its callback (`core.Find` reaches every
+callback handed to it anywhere), and `(*sync.Once).doSlow`, which reaches every function ever passed to a `Once`,
+the checker pool's parallel `createCheckers` among them. Those are func-value edges and are outside the
+generator's reach.
+
+**The poller's wait has no twin in the spike.** Edges 2 and 3 end in it. On Windows a blocking file or console
+write is a native call that the seam brackets (5.10); the monitor takes the carrier back (5.5), and nothing
+awaits. So the long park at the end of edges 2 and 3 is not a leaf for the generator as built. Whether it marks
+the same paths through a lock on the way (`(*poll.FD).Write` takes a `Mutex` for a file) was not read. A
+landing form that twins the poller, which is what the thread cost of 3.5 asks of sockets, meets both edges in
+full.
+
+### 7.5 The cut list: a requirement of R2 on a program of this size
+
+Without a cut, the twin rule marks the hot path of the program for parks that do not happen. The measured price
+of a marked function that never parks is small per call (6 ns from one twin into another, about 20 ns for an
+interface call on an implementer without a twin, no allocation, 6.4) and real in size (the assembly of
+`net/http` grows 14.3% with 21% of its candidates twinned, 6.3); neither was read on this program. A cut removes
+the marking at its source. It is a declaration that an edge is not a park for the generator's purposes:
+
+| cut | what it declares | what it costs when the edge does park |
+|---|---|---|
+| lock leaves (`Mutex`, `RWMutex`, the file-descriptor lock) | a lock is not a twin leaf: a caller of `Lock` is not marked for that call | a goroutine that finds the lock held blocks its thread and hands its P off, as any untwinned blocking call does (3.5); one thread per goroutine blocked on a lock at the same instant |
+| `(*fmt.pp).handleMethods` | `fmt` calling an operand's `Error`, `String`, `Format` or `GoString` is not a park | a `String` method that parks (it sends on a channel, or prints to a pipe that is full) runs its plain body and holds its carrier for that long: the untwinned-dependency case of 5.6, Go's output, one more thread |
+| `(*fmt.ss).ReadRune`, `(*fmt.readRune).ReadRune` | `fmt`'s scanner reading its source is not a park | `fmt.Fscan` on a reader that parks (a pipe, a socket, standard input) holds its carrier while it waits |
+
+- **A cut is safe by construction.** Behind a cut the plain body runs. The program prints what Go prints; the
+  cost is a held carrier while the edge is blocked, and the monitor's retake (5.5) covers the starvation case.
+- **A cut is not consumer-visible.** It changes no signature and no emitted file outside the twins; its one
+  observable effect is the thread count of a program that does park behind it.
+- **The form of the declaration was not designed.** The two `fmt` cuts are functions of the standard library and
+  could be refused through the refuse file of 4.6 as it stands (a row inside a function refuses it, and a
+  refused candidate has no twin for a caller to await); that was not tried. The lock cut is a
+  choice of leaf set in golib. A consumer's module needs a way to add its own; the three found here took one
+  witness each to name, and the tool's `-cut` arm with a negative control (7.8) is the method.
+- **Contended locks behind the cut were not measured**, and the lock cut is the one with a real cost: a program
+  that parks many goroutines on one mutex holds a thread for each. Go treats a contended mutex as a park. A
+  sharper rule than a cut (await a lock's twin only in a function that is a twin for another reason) keeps
+  6.4's try-first path in twins and adds nothing to the marking. It was not built.
+
+### 7.6 Park points, `go` statements, closures and func values
+
+| reading | count |
+|---|---|
+| functions that hold a long park point, whole closure | 45 (channel receive 31, send 21, `select` 20, the poller's wait 2, `time.Sleep` 2, `Cond` 1, `WaitGroup` 1; a function can hold several) |
+| the same with lock leaves | 49 (2 on a `sync` lock, 2 on the file-descriptor lock) |
+| of them in the TS module | 5: `(*ipc.AsyncConn).Call`, `.handleResponse`, `.recordRequestError`, `(*core.LimitedSemaphore).Acquire`, `.TryAcquire` |
+
+| whole closure, sites that can reach a park | of | upper | middle | middle, cut 1 | middle, cuts 1 and 2 | lower |
+|---|---|---|---|---|---|---|
+| closures (func literals) | 1,466 | 670 | 499 | 386 | 127 | 38 |
+| `go` statements | 29 | 26 | 25 | 24 | 24 | 24 |
+| interface call sites | 2,453 | 597 | 426 | 229 | 110 | 67 |
+| func-value call sites | 2,197 | 958 | 666 | 419 | 124 | 12 |
+
+(All long-only. VTA leaves 239 interface sites and 302 func-value sites without a callee.)
+
+- **The long parks of the whole closure sit in 45 functions**, and all but six at most are channel operations and
+  `select`, the leaves the spike twinned first (3.1). The two `sync` waits and the poller's wait are the leaf
+  kinds it did not twin by hand. This is the count 3.5 asked B5 for: the calls that park for long are few.
+- **The func-value gap of 6.9 on this program**: with the cuts, 127 of 1,466 func literals can reach a park and
+  124 of 2,197 calls through a func value can call a parker. The TS module's own parallelism is this shape: its
+  work items are func literals handed to `core`'s work group, which starts each through `sync.WaitGroup.Go`.
+  The `go` statement is in `sync`, on a func value. A `go` on a literal is twinned at the site (4.1); a literal
+  handed to a helper and started there runs the plain body.
+- At least 24 of the 29 `go` statements start something that can park, in every arm.
+
+### 7.7 The exported names, for the list of section 1
+
+Every package of the TS module is under `internal/`, so the module has no surface a consumer can import; the
+counts below are names exported across its own packages (an exported function, or an exported method of an
+exported type) inside each can-park set. They are what 1.7 owed for a real module.
+
+| can-park set, TS module | functions | exported methods | exported functions |
+|---|---|---|---|
+| upper, long only | 5,096 | 808 | 240 |
+| middle, long only | 3,981 | 367 | 168 |
+| middle, cuts 1 and 2 | 181 | 48 | 28 |
+
+Under R2 with the hidden interface twin none of these changes shape. Under a path that makes parking visible
+in a signature (row S1 of section 1), these are the signatures that turn task-shaped: 535 in the generator's
+reach, 76 with the cuts.
+
+### 7.8 Controls
+
+| control | reading |
+|---|---|
+| positive: `(*core.LimitedSemaphore).Acquire`, `(*sync.WaitGroup).Wait` | CAN PARK (channel send; `WaitGroup` wait), each with its path |
+| negative: `strings.ToUpper` | CANNOT PARK |
+| the patched tool with no new flag | 7,106 and 7,182, the unpatched tool's counts |
+| `-static-only` with `-no-func-values` | 311 and 2,652, the lower arm's counts |
+| the tool with `-cut` built in, no cut named | 7,106 (upper) and 4,867 (middle) |
+| negative cut: `-cut strings.ToUpper` on the middle arm | 4,867 and 3,981, unchanged |
+| after cut 1 | `fmt.Sprintf` CANNOT PARK; `fmt.Fprintf` CAN PARK |
+| after cuts 1 and 2 | `checkSourceFile`, `getTypeOfSymbol`, `parseStatement`, `(*binder.Binder).bind`: CANNOT PARK |
+| the lock edge is not one lock: the lower arm with lock leaves, `(*ast.Node).EagerJSDoc` cut | 2,021 for the module, from 2,229; the checker 1,644, from 1,729 |
+
+### 7.9 The generator's refusals: the readings in hand
+
+B5 ran no generator. The refusal rate the plan asks for stands on B2's and B4's reports:
+
+| reading | candidates | twins | refused candidates that reach a park | share of the parkers refused |
+|---|---|---|---|---|
+| the standard-library scout, 55 packages (4.6) | 5,333 | 372 | 49 | 11.6% (49 of 421) |
+| `net/http` (6.3) | 1,209 | 255 | 39 | 13.3% (39 of 294) |
+
+- In `net/http` 32 of the 39 are by-ref receivers and 4 are by-ref parameters; 359 of its 1,209 candidates take
+  their receiver by reference. In the scout 39 of the 49 are unsafe functions and 9 are by-ref; 43 of the 49
+  are in `syscall` and 6 in `runtime`.
+- On the TS module 90% of the middle arm is pointer-receiver methods (7.3). Which of them the converter emits
+  with a by-ref receiver is a property of the emitted C#, not of the Go source, and was not read.
+- The count of refused parkers across the whole corpus, which 6.3 left to B5, was not run.
+
+### 7.10 Predictions and verdicts
+
+P6 and P7 are the plan's lines; the others were written before each run and are in the lane's prediction file
+with their times.
+
+| id | prediction | reading | verdict |
+|---|---|---|---|
+| P7 | the can-park upper share on the TS closure is under 15% | 54.2% of the TS module, 42.0% of the closure | MISS |
+| P7 | 50% that the run under twins fits the spike | not attempted (7.12) | did not fit |
+| P6 | the generator's hard refusals are at most 2% | 11.6% and 13.3% of the functions that reach a park (7.9) | MISS on the readings in hand |
+| B5-C1 | upper, long only, TS module: 20 to 45%; 60% that P7 reads MISS | 54.2% | MISS, high; the P7 line HIT |
+| B5-C2 | lower, long only, TS module: under 3% | 0.1% (11 functions) | HIT; the lower arm with lock leaves (23.7%) was not predicted |
+| B5-C3 | 15 to 80 direct parkers in the TS module | 5 | MISS, low |
+| B5-C4 | middle, long only: 25 to 50%; 60% within 15 points of the upper | 42.4%; 11.8 points under | HIT, both |
+| B5-C5 | middle with lock leaves: 40 to 55% | 43.4% | HIT |
+| B5-C6 | middle with cut 1: 10 to 30%; 50% under 15%; at most two more cuts | 27.5%; not under 15%; one more cut reads 1.9% | HIT; the 15% line did not come in |
+| tool controls | the counts of 7.8 | as predicted | HIT |
+| B5-G1, B5-G2, B5-R1 | the generator on the converted TS closure, and its run | not run | no verdict |
+
+Stop lines: none is keyed on these shares, and none fired. K1, K2 and K4 were settled in sections 4 to 6, K3 by
+the coordinator's ruling on B4 (not fired: the bar is a program over 2 times, and the 3.0 times of 6.4 is the
+floor kernel of a copy loop, carried as the worst case).
+
+### 7.11 Findings
+
+1. **The twin rule as built marks the hot path of a large program.** 42% of the TypeScript module is in the
+   generator's reach of a park, 65% of its checker and 73% of its parser. P7 expected under 15%.
+2. **Three edges do it, and none is a park in practice**: lock leaves, `fmt` calling an operand's methods, and
+   `fmt`'s rune reader under `math/big`. Without them the rule marks 1.9% of the module: the driver, the
+   resolver, the configuration and file layer, and none of the bodies that do the compiling.
+3. **R2 on a program of this size needs a declared does-not-park set, or a sharper rule for locks** (7.5). The
+   set is short here (three entries, one witness each), safe by construction, and not consumer-visible. Its
+   form is not designed, and a consumer's own module needs a way to add to it.
+4. **The edges are in the standard library, so the set travels**: every program that formats a value meets
+   cut 1, and every program that calls `(*big.Int).SetString` or `fmt.Sscan` meets cut 2. A set shipped with
+   the converted `fmt` covers them for everyone.
+5. **The long park at the end of two of the three edges has no twin in the spike** (the poller's wait, 7.4).
+   A landing form that twins the poller meets both in full. The lock edge is a leaf today for `Mutex`.
+6. **The parks that last are few**: 45 functions in a closure of 16,923 hold one, 5 of them in the TS module,
+   and channel operations and `select` are nearly all of them.
+7. **The func-value gap on this program is 127 literals and 124 call sites** with the cuts (7.6), and the
+   module's own parallel work is queued as func literals.
+8. **The refusal rate is 12 to 13% of the functions that reach a park, against a 2% line** (7.9). By-ref
+   receivers and parameters are 36 of the 39 in `net/http`. This, and not the cut list, is the generator's own
+   open cost. Closing it asks for a twin over the box where the plain form takes the reference, as B1's hand
+   twin did (3.8); the generator does that for a `ref` local derived from a box (4.1) and not for a receiver or
+   a parameter.
+
+### 7.12 What B5 did not measure
+
+- **The TS closure converted, built and run under twins** (B5-G1, B5-G2, B5-R1, and P7's second line). The
+  converted tree builds only with the TS session's hand patches over dozens of emitted files, and those are on
+  that session's branch and box, not here. The generator's own counts on this program (twins, awaits, refusals
+  by reason, build wall, assembly size) and the type-check wall with and without twins need that tree. It is an
+  open item for the final answer, and a job for the TS session if the coordinator wants it.
+- **The middle arm with the generator's own interface rule** (by interface type, per project) and with the
+  spike's own leaf set.
+- **The cost of the marking on this program**: the twin-call adder on the checker's path and the growth of its
+  assembly without cuts.
+- **A contended lock behind the lock cut**, on any platform.
+- **`GoTwinsIfaceAll` on a real closure** (4.9, item 12). The census gives a proxy only: of 2,453 interface
+  call sites, 426 can reach a parker in the generator's reach and 110 with the cuts. Those are sites, not
+  interface members.
+- **The refused parkers across the corpus** (6.3), and the refusal classes on the TS module.
+- **The 27 packages of the closure that the census does not count** (the runtime family, and packages without a
+  counted function), and the difference between this closure's 48 TS packages with counted functions and the
+  TS session's own package count for `checkdemo`.
+- **Any other `GOOS`.** The closure and the leaves were read for windows.
