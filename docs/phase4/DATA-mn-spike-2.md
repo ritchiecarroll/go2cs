@@ -856,3 +856,262 @@ The coordinator ruled the OQ5 shape on the readings of 4.4: **the hidden twin in
   forward. From B3 on, every build that twins interfaces uses the hidden shape (`GoTwinsIface=hidden`).
 - The build-wall cost of 4.8 (+91% on `runtime`, outside B1's bar) is noted by the coordinator; the nested-driver
   lever is priced in B4.
+
+## 5. B3: the shapes under generated twins (2026-11-11)
+
+Branch `claude/g-mn-spike2-b3`, on B2's `d221a1182a`. B3 asks whether the programs that park in Go's ways print
+Go's output when the generator of section 4 writes their twins, on this box and on the hosted runners, and what a
+goroutine blocked outside golib (a native call, a park in an untwinned package) costs. The coordinator asked for a
+lean phase: no run beyond what these questions need.
+
+### 5.1 What was run
+
+- **The 19 programs**: the 18 shapes of B0 and MnMixedStorm, each through `run-behavioral.ps1` with
+  `GoTwinsFor=<name>` in the environment and `GO2CS_MN=1`. The runner compares stdout and the exit code with Go's.
+  The control that twins were on is each program's twin report; a direct run of the built program gives the
+  scheduler's reading.
+- **MnBlockedIO**, a new Behavioral project (registered beside MnMixedStorm; golden and Go reference taken the
+  same way). K goroutines sit in a read that cannot finish until main writes: first on OS pipes (the read blocks
+  its thread inside a native call), then on `io.Pipe` (the read parks inside package `io`). While they are blocked,
+  50 pairs of goroutines pass a counter over channels 100 times each; only then does main feed the readers.
+  Sizes come from the environment (`MN_IO_KIND`, `MN_IO_K`, `MN_IO_ROUNDS`, `MN_IO_PAIRS`); the defaults (K 8) are
+  what the behavioral suite runs.
+- **Hosted**: the `behavioral-smoke` stage of `os-matrix.yml` on this branch builds the filtered program with
+  generated twins and then runs it directly beside Go's build of the same source, printing `READING mn-direct`
+  lines (commit `c1494b9d84`). One dispatch per host family, `filter=MnMixedStorm`.
+
+### 5.2 The 19 programs (Windows x64, 12 processors)
+
+| program | twins / candidates | await sites | runner | peak OS threads | parks | hand-offs |
+|---|---|---|---|---|---|---|
+| MnMixedStorm | 2 / 8 | 9 | PASS | 43 | 406,484 | 3 |
+| ChannelRendezvous | 1 / 2 | 8 | PASS | 23 | 8 | 1 |
+| CloseWakesBlocked | 1 / 3 | 14 | PASS | 23 | 4 | 1 |
+| ChannelReceiveFromClosed | 1 / 2 | 4 | **FAIL**, then PASS (5.3) | 23 | 0 | 1 |
+| SelectStatement | 11 / 15 | 27 | PASS (not compared) | 24 | 171 | 148 |
+| SelectRandomFairness | 1 / 2 | 4 | PASS | 23 | 0 | 1 |
+| SelectSendDefault | 8 / 13 | 27 | PASS | 24 | 6 | 1 |
+| SelectSendRecvMix | 1 / 2 | 7 | PASS | 23 | 0 | 1 |
+| NilChannelInSelect | 1 / 2 | 6 | PASS | 23 | 1 | 1 |
+| DeepSelectRecursion | 3 / 4 | 5 | PASS | 23 | 0 | 1 |
+| SyncTimerChannel | 1 / 4 | 11 | PASS | 25 | 738 | 4 |
+| GoroutineWaitState | 2 / 9 | 12 | PASS | 27 | 2,004 | 2 |
+| GoroutineParkStorm | 1 / 3 | 2 | PASS | **175** | 1 | 2 |
+| GoexitDefers | 2 / 4 | 7 | PASS | 23 | 2 | 1 |
+| GoroutinePanicExitCode | 1 / 2 | 1 | PASS (exit 2) | 23 | 1 | 1 |
+| GoroutinePanicAfterDeferredDone | 1 / 4 | 0 | PASS (exit 2) | 23 | 0 | 2 |
+| PanicRecover | 0 / 6 | 0 | PASS | no reading | | |
+| GoroutineRecoveringWhenMainReturns | 1 / 5 | 0 | PASS | 24 | 0 | 4 |
+| CrashGoroutineCreatedBy | 2 / 13 | 2 | **FAIL** (5.3) | 24 | 0 | 26 |
+
+First battery: **17 of 19 PASS** by the runner's verdict. After the two generator-side fixes of 5.3: **18 of 19**,
+and the last red is one token of one trace line. The runner compares 18 of the 19 with Go on stdout and exit code;
+SelectStatement is not compared (2.2), so the claim for it is that it builds with twins, matches its golden and
+its direct run exits 0. Compared with Go, the count is 17 of 18. `Main` has a twin in 18 of the 19 (PanicRecover parks nowhere, so it has no twin and never
+starts the scheduler). One hand-off is the base line of every program with a main twin: the main thread waits for
+the main twin outside the scheduler.
+
+**Confirmation battery (20:04 to 20:23 CST, the generator, golib and runtime as committed):** the 19 programs and
+MnBlockedIO again in one run. 19 PASS and 1 FAIL, the FAIL being CrashGoroutineCreatedBy on the goroutine id of
+5.3 (`created by main.child in goroutine 3`). Twin and await-site counts equal the table's; the reports read
+`ref-spills=1` for ChannelReceiveFromClosed and `ref-spills=0 ref-blocked=0` for the other 18. Two cautions on
+that run: SelectStatement's Output phase reads `skip 1`, as above; and MnBlockedIO's build was up to
+date, so its twin report was not rewritten. The control used for it is the binary: it names `Mainꞏtwin` and
+`ioReaderꞏtwin`, and PanicRecover's binary (no twin) names neither.
+
+Two rows are levers for B4 and not defects:
+
+- **GoroutineParkStorm reads 175 OS threads**: its goroutines start from a `go` literal (it takes an argument
+  and defers) that the spike's generator left on the launcher (the report reads `go-other=1 closure-parks=2`).
+  Both parks of that body (a `sync.WaitGroup` wait and an unbuffered send) therefore hold a thread. The reach of the
+  generator over `go` literals, and a twin for `sync`'s waits (5.6 shows that step for `io`), are what lower it.
+- **SelectStatement reads 148 hand-offs in 171 parks**: every `go` site is a twin start (11), but the report
+  counts 6 park calls in the 4 functions that got no twin and 1 inside a closure, and a park through one of those
+  is a thread park that hands its P off. Output is Go's either way; the cost is threads and context switches.
+  Why those 4 functions were refused was not chased.
+
+### 5.3 The two reds
+
+**ChannelReceiveFromClosed: CS4007 in the Main twin.** The statement is `fmt.Printf("%d "u8, <-c)`. Its twin
+awaited the receive in place, after the u8 literal (a ref struct) had been evaluated, and the compiler refuses a
+ref struct that lives across an await. The generator now applies **rule S (spill)**: when a ref struct value is
+evaluated before an awaited call inside one statement, and everything evaluated earlier is inert (constants, u8
+literals, static method names, calls already moved), the awaited call moves ahead of its statement into a
+`var ᴛtwinN = await …;` on the statement's own line. Anywhere else the call is left as a blocking call, which
+hands its P off as a thread park does. The twin report counts both (`ref-spills=`, `ref-blocked=`). After the
+change the program passes with `ref-spills=1 ref-blocked=0`; the generated line reads
+`var ᴛtwin1 = await ᐸꟷꞏtwin(c); fmt.Printf("%d "u8, ᴛtwin1);`. No other program of the 19 has a spill or a
+blocked site, and the visible `.cs` is untouched (K4 holds).
+
+**CrashGoroutineCreatedBy: one trace line.** Go prints `created by main.child in goroutine 1`. The first run
+printed `created by main.MoveNext in goroutine 3`. Two separate causes:
+
+1. *The name.* A twin runs as its state machine's `MoveNext`, on a compiler-generated nested type named
+   `<childꞏtwin>d__N`. The runtime's frame namer (`goFrameName` in `runtime/managed_impl.cs`) now maps such a
+   frame to the function the twin was generated from, and drops the IL offset (it belongs to the state machine).
+   After the change the line reads `created by main.child in goroutine 3`. golib has a second reader that derives
+   Go names from methods (`GoSyntheticPC.GoNameOf`); no program of this battery reaches it through a twin, so it
+   is left as it was and needs the same mapping in a real build.
+2. *The goroutine id.* The main twin is not goroutine 1. `RunMainꞏtwin` registers the twin as a new goroutine
+   (id 3 here) while goroutine 1 stays the waiting main thread. That is the item B1 recorded as unsettled,
+   together with "a `Goexit` on main waits for ever" (3.9): the registry's main entry is read by the exit path,
+   by the deadlock detector and by `Goexit`, so making the twin goroutine 1 changes all three and was not done
+   under a lean B3. **It stays open and is priced in the final answer.** It is not a K1 stop: the id is a registry
+   number golib assigns, and the twin shape does not prevent golib assigning 1 to the main twin.
+
+### 5.4 The storm on hosted runners (generated twins, `GO2CS_MN=1`, ref `c1494b9d84`)
+
+Every output equals Go's. Walls in seconds; threads are the scheduler's own `peak-os-threads`.
+
+| host | Go, 1,000 / 10,000 / 100,000 | C# on threads, 1,000 | twins 1,000 | twins 10,000 | twins 100,000 |
+|---|---|---|---|---|---|
+| linux-x64 (4 P) | 3.1 / 3.1 / 3.4 s, 6 threads | 3.9 s, 1,011 threads | 3.6 s, 22 | 4.2 s, 23 | 7.3 s, 29 |
+| osx-arm64 (3 P) | 3.4 / 3.2 / 3.4 s, 4 to 5 | 7.2 s, 1,012 | 4.1 s, 20 | 8.5 s, 26 | 29.6 s, 30 |
+| osx-x64 (4 P) | 3.2 / 3.2 / 3.7 s, 5 | 5.9 s, 1,012 | 4.7 s, 24 | 5.6 s, 34 | 18.1 s, 33 |
+
+B0 read OutOfMemory on all three hosts at 100,000 goroutines on the thread path. Under generated twins the
+program finishes on all three with at most 34 OS threads. The wall at 100,000 is 2.1 times Go's on linux-x64, 4.9
+times on osx-x64 and **8.7 times on osx-arm64** (the 3-processor runner; 54 injections). The storm holds each
+goroutine for a fixed time, so Go's wall is flat and ours grows with the per-goroutine cost; B4 prices that cost.
+
+### 5.5 A goroutine blocked in a native call (MnBlockedIO, `MN_IO_KIND=os`; Windows x64, 12 P)
+
+B1's scheduler hands a P off only for golib's own parks. A goroutine blocked inside a native call holds its
+carrier and its P, and the monitor's answer (a P injected beside a long step) is capped at the P count. Go's
+sysmon retakes the P of a goroutine it finds in a syscall. The spike adds that retake to the scheduler's monitor:
+a carrier whose mounted goroutine reads an odd native-call depth (the seam's own field) on two ticks in a row,
+while work waits, has its P taken back outside the injection budget; the carrier settles the account when the
+step parks or ends. All of it is in `GoScheduler.cs` behind `GO2CS_MN=1`; `GO2CS_MN_RETAKE=0` turns it off (the
+red arm). **The native-call seam's files are not edited.** What a real build would ask of the seam went to the
+coordinator before this change (5.9, item 4).
+
+| K readers | Go | scheduler as B2 left it (retake off) | with the retake | C# on threads |
+|---|---|---|---|---|
+| 8 | 0.1 s | 0.7 s, Go's output, 31 threads | 0.7 s, Go's output, 26 threads, 0 retakes | |
+| 40 | 0.1 s | **hangs** (60 s bound); output stops after the first line | 0.7 s, Go's output, 59 threads, 36 retakes | |
+| 1,000 | 0.3 s | **hangs** (60 s bound); no output | 3.4 s, Go's output, 1,017 threads, 994 retakes | 0.9 s |
+
+- **The gap is real and it is a hang, not a slow-down**: with 40 natively blocked goroutines on 12 P (more than
+  the carriers the injection budget allows), every runnable goroutine waits for ever. Without the retake, hidden
+  twins would turn a program that runs today into one that stalls.
+- **The retake restores Go's behaviour, not Go's cost.** Each natively blocked goroutine still holds one OS thread
+  (1,017 at K 1,000, the thread path's own count). And because the monitor finds the call only by polling, each
+  retake waits two ticks: 974 injections, a longest step of 2.7 s, and a wall 3.8 times the thread path's on this
+  arm. A hand-off made at the seam's entry (requests 1 and 2 of 5.9, item 4) removes the wait.
+- **Reach**: only the Windows syscall funnel is bracketed by the seam today. On linux and darwin `os.File.Read`
+  is not, so the retake cannot see it there, and this arm was not run hosted. Coverage of the seam is what M:N
+  rests on for native calls.
+
+### 5.6 A park inside an untwinned package, and the same package twinned (`MN_IO_KIND=io`)
+
+`io.Pipe`'s read parks on channels and a mutex inside package `io`. With `io` built as it is today, the fixture's
+own twins end at the call into `io`, and every blocked reader holds a thread. Building `io` with generated twins
+(`GoTwinsFor` naming both projects) takes one build and no refuse row: 14 of its 54 candidates get twins, the
+pipe's `read`, `write`, `Read` and `Write` among them.
+
+| `io` | K | wall | Go's output | peak OS threads | parks | hand-offs |
+|---|---|---|---|---|---|---|
+| as today | 1,000 | 0.8 s | yes | 1,012 | 10,071 | 9,002 |
+| twinned | 8 | 1.2 s | yes | 23 | 10,122 | 2 |
+| twinned | 40 | 0.6 s | yes | 24 | 10,296 | 2 |
+| twinned | 1,000 | 0.7 s | yes | **35** | 16,083 | 2 |
+
+The fixture's twin report gains one await site in `ioReader` (the `Read` in the other assembly) and one in `Main`
+(the `Write`): a twin in a referenced package is found and awaited by B2's rules as they stand. Output is Go's
+either way, so a missing twin in a dependency costs threads and never correctness; that is the property that lets
+packages gain twins one at a time. After the arm `io` was rebuilt without twins and the 1,012-thread reading came
+back.
+
+### 5.7 Census: what an interceptor would have served in the twin copies
+
+An interceptor is keyed on the position of the call it was written for and does not reach the generator's copy.
+
+- **String literals in an object slot**: the twin files of the 19 programs hold **123** such literals in 15
+  programs, each given its Go type by the generator's cast (B2). Controls: MnBlockedIO's twins hold 9, the count
+  of its `fmt.Println` literals read from the Go source; ChannelReceiveFromClosed (u8 formats only) and
+  PanicRecover (no twin) hold 0. None of the 18 compared programs prints differently from Go for a `System.String` handed
+  where Go has a `string`.
+- **`[GoBoundedGoroutine]` records**: 26 across 11 of the 19 programs. A `go` site the generator routes to a twin
+  start does not use the launcher the record intercepts; a site left on the launcher inside a twin copy runs
+  without its record. No output differs, and what the record saves was not priced here.
+
+### 5.8 Predictions and verdicts
+
+Every line was written before its run; the dated blocks are in the lane's prediction file.
+
+| id | prediction | reading | verdict |
+|---|---|---|---|
+| B3-S1 | at least 15 of 19 PASS; all 19: 45% | 17 of 19, then 18 after two generator-side fixes (one of the 18 is not compared with Go, 5.2) | HIT; the 45% line MISS |
+| B3-S2 | `Main` twinned in at least 16; at least 3 programs keep an untwinned park; no stdout differs for it | 18; 8 programs above the base line of 1 hand-off; none differs | HIT |
+| B3-C1 | at least 30 literals in object slots across at least 12 programs; 0 to 3 bounded-goroutine records | 123 in 15; 26 records in 11 | HIT; the record count MISS (predicted without reading a `package_info.cs`) |
+| B3-C2 | 60% that a shape differs from Go for a `System.String` in a twin | none differs; the cast covers these 19 | MISS |
+| B3-H1 | PASS on three hosts; at most 60 threads; walls at most 30 / 30 / 90 s | PASS; 29 / 30 / 33 threads; 7.3 / 29.6 / 18.1 s | HIT (osx-arm64 by 0.4 s) |
+| B3-N1 | as it stands K 8 passes and K 40 hangs; with a retake K 40 and K 1,000 print Go's output within K + 40 threads | as predicted; 59 and 1,017 threads | HIT |
+| B3-X1 | Go's output either way; 60% that the pipe's read and write both get twins and the run stays under 60 threads | both twinned; 35 threads against 1,012 | HIT |
+
+Stop lines: **K1 not fired** (no shape whose twin cannot keep Go's behaviour; the one red token is a registry
+number, 5.3). **K4 not fired** (no visible `.cs` changes; both generator changes are in twin text). K3 is
+B4's.
+
+### 5.9 Findings
+
+1. **R2 holds over the shapes B0 chose**: 17 of the 18 programs compared with Go print its output and exit code
+   under generated twins on the M:N scheduler (the 19th, SelectStatement, is not compared and runs to exit 0), the storm finishes on three hosted hosts where the thread path ran out of memory, and
+   the one red is one token with a known cause.
+2. **Twins needed two rules B2 did not have**, both outside the visible emission: the spill of an awaited call
+   past a live ref struct (rule S), and the mapping of a state machine's frame back to its Go function name.
+   Each was found by one program of the battery; a wider corpus will find more of this kind, and each is local to
+   the generator or the runtime's frame namer.
+3. **Two additions to the consumer-visible list of section 1** (folded into the public-surface plan with the
+   final answer):
+   - *.NET-side stack frames.* Wherever a twin runs, `Exception.StackTrace`, a debugger's call stack, a profiler
+     and a crash dump show `<nameꞏtwin>d__N.MoveNext` and the async method builder's frames where they show the
+     Go-named method today. Go-format tracebacks are mapped back (5.3); .NET-format ones cannot be.
+   - *Goroutine ids under a main twin.* Until the open item of 5.3 is settled, main's work runs on a goroutine
+     whose id is not 1, and a trace names it as the parent of the goroutines main starts.
+4. **Native calls need the seam** (posted to the coordinator before the retake was written; nothing changes in
+   the seam during the spike). A real build asks: (1) `Enter` passes its hint to the scheduler, so a call marked
+   as blocking hands its P off at once; (2) `Exit` tells the scheduler the call is over, so a retaken goroutine
+   takes a P or queues before it runs managed code again; (3) coverage is the contract, since an unbracketed
+   native call is invisible to the retake and falls back to the capped injection; (4) a callback on a foreign
+   thread still has no goroutine identity (the design's gap M7), which matters more under M:N.
+5. **The cost lever is how far the twins reach**, not the twin mechanism: the pipe's 1,012 threads are parks
+   inside an untwinned `io`, and `io` twinned reads 35; GoroutineParkStorm's 175 are parks in a `go` literal the
+   generator does not twin yet. B4 prices the standard library's share (build wall and size) against this.
+6. **The slowest hosted reading is 8.7 times Go's wall** (osx-arm64, 100,000 goroutines, 3 P). It is inside the
+   bar set before the run and far from Go; B4's per-goroutine cost table says where it goes.
+
+### 5.10 What B3 did not measure
+
+- **The main twin as goroutine 1** (5.3) and the `Goexit`-on-main wait of 3.9: open, priced in the final answer.
+- **golib's second name reader** (`GoSyntheticPC.GoNameOf`) under a twin frame: no program here reaches it.
+- **Go's own thread count on the native arm**: the Go reference was read for output and wall only.
+- **The native arm on linux and darwin**: the seam does not bracket `os.File.Read` there, so there is nothing for
+  the retake to see.
+- **Native AOT for B3's additions** (rule S, the retake, the frame-name mapping): B2's AOT arm was not repeated.
+- **Why 4 of SelectStatement's 15 candidates got no twin**, and what a `[GoBoundedGoroutine]` record saves at a
+  site whose twin copy runs without it.
+- **Any standard-library package other than `io` under twins at run time**: B2 built four; B3 ran one.
+
+### 5.11 Gates (Windows x64, dotnet SDK 10.0.400 / runtime 10.0.11, go1.26.10; M:N switches unset)
+
+Run on the tree as committed with this section's code (rule S, the retake, the frame names, MnBlockedIO), one
+after the other, 20:24 to 20:48 CST.
+
+| gate | reading |
+|---|---|
+| GenTests | 0 failed, 496 passed of 496 (71 s) |
+| GolibTests | 0 failed, 2,534 passed, 45 skipped of 2,579 (414 s) |
+| `go test ./...` in `src/go2cs` (the converter suite and the repo guards) | 11 packages ok, 0 failed (968 s) |
+| solution integrity (`check-solution-integrity.ps1`) | **FAILED on one row**: `MnIfaceTwin` is not registered in `go2cs.slnx` |
+
+- **The integrity red is B2's, not B3's.** `MnIfaceTwin` is the interface-twin fixture of section 4 (it carries a
+  hand-written file and is built by name); B2 did not run this gate, so B3 is the first to read it. MnBlockedIO,
+  the project this phase adds, is registered and is not named; the project graph reads 0 cycles across 363
+  projects on all four targets. The fixture is left unregistered: the branch never lands, and registering a
+  program with a hand file would put it under the suite's golden rules.
+- GolibTests read 2,530 passed and 49 skipped in B2. The 4 tests that moved from skipped to passed were not
+  identified.
+- The repo guards ran once more after this section was placed. That reading is in the phase's DONE post, since
+  writing it here would change the file they read.
+- The behavioral suite as a whole was not run: the 20 programs of 5.2 ran one by one through the same runner.
