@@ -144,7 +144,7 @@ func TestTrailingCommentsAlignAsGofmtAlignedThem(t *testing.T) {
 
 	// The converter's own trailing comments are never padded.
 	for _, want := range []string{
-		"        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?",
+		"    var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?",
 		"} // end main_package",
 	} {
 		found := false

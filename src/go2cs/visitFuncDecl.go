@@ -827,8 +827,9 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		// In namedReturnDeferMode the func() wrapper is nested inside an extra block body, so
 		// the lambda body sits one level deeper. Bump the indent across the body visit so the
 		// statements (and the closing `}` that the `);` attaches to) align under `func(…`. The
-		// frame form nests the same way: its body is the `try` block inside the method's own block.
-		bodyInBlockForm := v.namedReturnDeferMode || useGoFrame
+		// frame form does NOT: its `try` opens on the signature line and its body sits at Go's own
+		// indentation (goFrameHead).
+		bodyInBlockForm := v.namedReturnDeferMode && !useGoFrame
 
 		if bodyInBlockForm {
 			v.indentLevel++
@@ -1595,10 +1596,6 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	}
 
 	v.replaceMarker(functionExecContextMarker, funcExecutionContext)
-	if useGoFrame {
-		blockPrefix = v.reindentGoFrameBlock(blockPrefix)
-	}
-
 	v.replaceMarker(functionBlockPrefixMarker, blockPrefix)
 
 	if v.currentFuncPrefix.Len() > 0 {
@@ -1608,8 +1605,9 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.replaceMarker(functionPrefixMarker, v.currentFuncPrefix.String())
 
 	if useGoFrame {
-		// Close the frame: the catch that parks a panic where recover() can read it, the finally
-		// that drains the defers on every exit path, and the method's own closing brace.
+		// Close the frame, on the line of the try block's closing brace: the catch that parks a
+		// panic where recover() can read it, the finally that drains the defers on every exit path,
+		// the named-result exit, and the method's own closing brace.
 		//
 		// The catch arm of a value-returning function ends with Go's zero results. A panic a
 		// deferred call RECOVERED leaves the function returning those (Go's rule), and one no
@@ -1647,9 +1645,9 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 				exitLabel = v.goFrameExitLabel() + ": "
 			}
 
-			v.writeOutputLn("%s%s%s%sreturn %s;%s%s}", v.goFrameTail(savedIndent, catchReturn, deferEpilogueEndPos(funcDecl.Body)), v.newline, v.indent(savedIndent+1), exitLabel, returnExpr, v.newline, v.indent(savedIndent))
+			v.writeOutputLn("%s %sreturn %s; }", v.goFrameTail(savedIndent, catchReturn, deferEpilogueEndPos(funcDecl.Body)), exitLabel, returnExpr)
 		} else {
-			v.writeOutputLn("%s%s%s}", v.goFrameTail(savedIndent, catchReturn, deferEpilogueEndPos(funcDecl.Body)), v.newline, v.indent(savedIndent))
+			v.writeOutputLn("%s }", v.goFrameTail(savedIndent, catchReturn, deferEpilogueEndPos(funcDecl.Body)))
 		}
 
 		v.indentLevel = savedIndent

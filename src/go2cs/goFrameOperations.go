@@ -20,15 +20,15 @@ import (
 // A Go function that defers or recovers is emitted with its body INLINE inside try/catch/finally,
 // beside a GoFrame local that holds this call's defer list:
 //
-//	internal static void main() {
-//	    GoFrame ᒐ = default;
-//	    try {
-//	        fmt.Println(openFileˢ);
-//	        deferǃ(fmt.Println, closeFileˢ, ref ᒐ);
-//	    }
-//	    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-//	    finally { ᒐ.Run(); }
-//	}
+//	internal static void main() { GoFrame ᒐ = default; try {
+//	    fmt.Println(openFileˢ);
+//	    deferǃ(fmt.Println, closeFileˢ, ref ᒐ);
+//	} catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); } finally { ᒐ.Run(); } }
+//
+// The frame opens on the signature line and closes on the last line, and the body sits at Go's
+// indentation, one Go line to one C# line: a Go reader sees the function they wrote, with the frame
+// at its two edges. The layout is whitespace only; the statements, and so the IL, are the same as a
+// frame laid out over its own lines (docs/phase4/SCOUT-defer-emission-parity.md, option 4).
 //
 // It replaces the `func<T>((defer, recover) => …)` execution context, which modelled a catch, a
 // finally and a defer list as an OBJECT owning the body. Owning the body forced the body to be a
@@ -113,47 +113,56 @@ func (v *Visitor) litGoFrameEligible(litSig *types.Signature, hasDefer, hasRecov
 	return hasDefer || hasRecover
 }
 
-// reindentGoFrameBlock shifts an already-rendered block-prefix fragment one indent level deeper.
-//
-// The function preamble — parameter deref aliases, array clones, implicit pointers, entry-time heap
-// boxes, named-result aliases — is composed BEFORE the body is visited, at the level the body would
-// have had with no frame around it. The frame nests the body one level further (it is the `try`
-// block inside the method's own block), so the preamble has to follow it, or the first statements of
-// nearly every deferring method with a pointer receiver sit a level out from the rest of the body.
-// Each fragment is a run of newline-led lines, so the shift is one insertion per line with content.
-func (v *Visitor) reindentGoFrameBlock(block string) string {
-	if block == "" {
-		return block
+// joinGoFrameLines puts a run of newline-led declaration lines (the named results, the reached
+// flags) onto the frame's opening line, each after one space. A line that carries a `//` comment
+// cannot be followed on its line, so it and every line after it keep their own lines: correct C#
+// either way, and no declaration the frame emits today carries one.
+func (v *Visitor) joinGoFrameLines(lines string) string {
+	if lines == "" {
+		return lines
 	}
 
-	lines := strings.Split(block, v.newline)
-	indent := v.indent(1)
+	parts := strings.Split(lines, v.newline)
+	result := strings.Builder{}
 
-	for i, line := range lines {
-		if strings.TrimSpace(line) != "" {
-			lines[i] = indent + line
+	for i, part := range parts {
+		trimmed := strings.TrimSpace(part)
+
+		if trimmed == "" {
+			continue
 		}
+
+		if strings.Contains(trimmed, "//") {
+			result.WriteString(v.newline)
+			result.WriteString(strings.Join(parts[i:], v.newline))
+			break
+		}
+
+		result.WriteString(" ")
+		result.WriteString(trimmed)
 	}
 
-	return strings.Join(lines, v.newline)
+	return result.String()
 }
 
 // goFrameHead renders the text that replaces the execution-context marker — everything between the
-// signature's closing paren and the body block, which the body then opens with ` {`.
+// signature's closing paren and the body block, which the body then opens with ` {`. It is one
+// line: ` { <named results> GoFrame ᒐ = default; <reached flags> try`.
 // namedResultDecls is the named-result declaration block (§4.4), each line already newline-led, or
 // empty for the unnamed-result form: those results are declared BEFORE the try because deferred
 // code mutates them and the exit after the finally reads them back.
 func (v *Visitor) goFrameHead(indentLevel int, namedResultDecls string) string {
 	// Any defer→finally lowered site's reached-flag is declared alongside the frame, before the
 	// try: the finally reads it, and a local declared inside a try is not in scope there.
-	return fmt.Sprintf(" {%s%s%sGoFrame %s = default;%s%s%stry",
-		namedResultDecls,
-		v.newline, v.indent(indentLevel+1), v.goFrameName(),
-		v.goFrameLoweredFlagDecls(indentLevel+1),
-		v.newline, v.indent(indentLevel+1))
+	return fmt.Sprintf(" {%s GoFrame %s = default;%s try",
+		v.joinGoFrameLines(namedResultDecls),
+		v.goFrameName(),
+		v.joinGoFrameLines(v.goFrameLoweredFlagDecls(indentLevel+1)))
 }
 
-// goFrameTail renders the catch, the finally and the closing brace of a frame-form function body.
+// goFrameTail renders the catch and the finally of a frame-form function body, on the line of the
+// try block's closing brace: ` catch (…) { … } finally { … }`. The caller appends the named-result
+// exit, if any, and the method's own closing brace to the same line.
 // resultsZeroValue is the `return` the catch arm ends with for a value-returning function whose
 // results are UNNAMED: a recovered panic returns Go's zero results, and an UNrecovered one never
 // reaches the return because Run() re-throws from the finally. It is empty for a void function and
@@ -167,8 +176,7 @@ func (v *Visitor) goFrameTail(indentLevel int, catchReturn string, endPos token.
 
 	// Lowered defers run BEFORE Run(): Run() re-throws an unrecovered panic, which would leave
 	// anything after it in the finally unexecuted. They are already in Go's LIFO order.
-	return fmt.Sprintf("%s%scatch (Exception %s) when (GoFrame.IsPanic(%s, out PanicException? %s)) { GoFrame.Capture(%s);%s }%s%s%sfinally { %s%s.Run(); }",
-		v.newline, v.indent(indentLevel+1),
+	return fmt.Sprintf(" catch (Exception %s) when (GoFrame.IsPanic(%s, out PanicException? %s)) { GoFrame.Capture(%s);%s } finally { %s%s%s.Run(); }",
 		v.goFrameExceptionName(), v.goFrameExceptionName(), v.goFramePanicName(), v.goFramePanicName(), catchReturn,
-		v.newline, v.indent(indentLevel+1), v.positionSentinelText(endPos), v.goFrameLoweredFinallyCalls(), v.goFrameName())
+		v.positionSentinelText(endPos), v.goFrameLoweredFinallyCalls(), v.goFrameName())
 }

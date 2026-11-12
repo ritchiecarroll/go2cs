@@ -302,7 +302,8 @@ func initScopeBodies(t *testing.T) map[string]string {
 		name := line[strings.LastIndex(line[:open], " ")+1 : open]
 		end := i
 
-		for end < len(lines) && lines[end] != "}" {
+		// A frame-form function closes on `} catch … }`, the try block's brace (goFrameTail).
+		for end < len(lines) && !strings.HasPrefix(lines[end], "}") {
 			end++
 		}
 
@@ -560,21 +561,14 @@ func TestInitScopeKeepsTheBlockForEachRefusal(t *testing.T) {
     }
     return fns;
 }`,
-		"refuseDefer": `internal static nint /*r*/ refuseDefer() {
-    nint r = default;
-    GoFrame ᒐ = default;
-    try {
-        {
-            nint x = h(); if (x > 0) {
-                defer(ᴛ1 => fmt.Println(ᴛ1), x, ref ᒐ);
-            }
+		"refuseDefer": `internal static nint /*r*/ refuseDefer() { nint r = default; GoFrame ᒐ = default; try {
+    {
+        nint x = h(); if (x > 0) {
+            defer(ᴛ1 => fmt.Println(ᴛ1), x, ref ᒐ);
         }
-        r = 1;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-    finally { ᒐ.Run(); }
-    return r;
-}`,
+    r = 1;
+} catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); } finally { ᒐ.Run(); } return r; }`,
 		"refuseMethodValue": `internal static Func<nint> refuseMethodValue() {
     {
         var t = (new T()); if (t.M() > 0) {

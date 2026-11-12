@@ -740,9 +740,9 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 	blockStatementContext.format.useNewLine = false
 
 	// In namedReturnDefer mode the literal's body sits inside an extra block + func() wrapper, so
-	// indent it one level deeper. A frame-form literal nests the same way — its body is the `try`
-	// block inside the lambda's own block.
-	if litNamedDefer || useLitFrame {
+	// indent it one level deeper. A frame-form literal does NOT: its `try` opens on the lambda's
+	// first line and its body sits at Go's own indentation (goFrameHead).
+	if litNamedDefer && !useLitFrame {
 		v.indentLevel++
 	}
 
@@ -783,19 +783,14 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 
 	v.hoistedDecls = savedHoist
 
-	if litNamedDefer || useLitFrame {
+	if litNamedDefer && !useLitFrame {
 		v.indentLevel--
 	}
 
 	// The prologues below (boxed value params, the variadic slice binding, plain named-result
-	// declarations) are composed AFTER the body visit restored the indent, so under a frame they
-	// need the extra level the frame's 	ry block added — same correction visitFuncDecl applies to
-	// its own block prefix (reindentGoFrameBlock).
+	// declarations) are composed AFTER the body visit restored the indent, at the body's level: a
+	// frame adds none, since its `try` opens on the lambda's first line.
 	bodyIndent := v.indentLevel + 1
-
-	if useLitFrame {
-		bodyIndent++
-	}
 
 	// A boxed VALUE parameter (see funcLitHeapBoxParamIdents) arrives under the `ʗp` name; the
 	// literal's first statements re-declare the Go name as the boxed ref alias — the exact
@@ -1056,7 +1051,7 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		}
 
 		namedDecls := ""
-		exitAndClose := fmt.Sprintf("%s%s}", v.newline, v.indent(v.indentLevel))
+		exitAndClose := " }"
 
 		if litNamedDefer {
 			// §4.4 in a literal: results declared before the try, mutated by the deferred calls,
@@ -1078,17 +1073,16 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 				exitLabel = v.goFrameExitLabel() + ": "
 			}
 
-			if aliases := v.namedResultBoxAliasLines(litSig, v.indentLevel+2); aliases != "" && strings.HasPrefix(body, "{") {
+			if aliases := v.namedResultBoxAliasLines(litSig, v.indentLevel+1); aliases != "" && strings.HasPrefix(body, "{") {
 				body = "{" + aliases + strings.TrimPrefix(body, "{")
 			}
 
-			exitAndClose = fmt.Sprintf("%s%s%sreturn %s;%s%s}", v.newline, v.indent(v.indentLevel+1), exitLabel, returnExpr, v.newline, v.indent(v.indentLevel))
+			exitAndClose = fmt.Sprintf(" %sreturn %s; }", exitLabel, returnExpr)
 		}
 
-		inner = fmt.Sprintf("{%s%s%sGoFrame %s = default;%s%stry %s%s%s",
-			namedDecls,
-			v.newline, v.indent(v.indentLevel+1), v.goFrameName(),
-			v.newline, v.indent(v.indentLevel+1), body,
+		// One opening line and one closing line around a body at Go's indentation (goFrameHead).
+		inner = fmt.Sprintf("{%s GoFrame %s = default; try %s%s%s",
+			v.joinGoFrameLines(namedDecls), v.goFrameName(), body,
 			v.goFrameTail(v.indentLevel, catchReturn, deferEpilogueEndPos(funcLit.Body)), exitAndClose)
 	default:
 		inner = body
