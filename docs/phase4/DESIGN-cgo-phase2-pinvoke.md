@@ -1276,3 +1276,28 @@ running the bare name `gcc`, where the route runs the resolved file. Every pinne
 toolchain's CC is already a full path; the runner's own gcc did not (run 43202800197, read by COORD at batch 288's
 union). The class, restated: an expectation computed by a different invocation than the route's own is a stand-in,
 and only the configuration that separates the two shows it. The test now resolves the name as the route does.
+
+**The battery (2026-11-12, at `f5351ca53f`, on H, one stage at a time, exit 0).** It covers the converter code and
+go2cs-gen, as ruled. The tree read clean after every stage.
+
+| Stage | Reading |
+|---|---|
+| `go test ./...` | 11 ok, 0 FAIL (`go2cs` 1,426 s; repoguard 371 s). No truncated record |
+| GolibTests, unfiltered | 2,556 passed, 0 failed, 43 skipped. Its TRX against the TRX at `db5e34a189`: 2,613 rows each, the same outcome on every row |
+| GenTests | 507 passed, 0 failed (506 before, plus `AConversionBetweenCTypesCompiles`) |
+| `check-no-regression.ps1` | byte-identical across all 1,035 behavioral packages (8 platform-exclusive skipped) |
+| The full behavioral suite | PASS, 951 projects: Transpile, Compile and Target 951 of 951; Output 921 pass, 0 fail, 30 skip, 0 timeout. No NOT MEASURED line |
+| Corpus comparison, two seeded `-stdlib` roots (A = `db5e34a189`, B = `f5351ca53f`) | 0 files differ on windows/amd64, on linux/amd64, on darwin/amd64 and on linux/arm64. Every conversion exited 0, none degraded |
+
+**G1-P6 is MET:** the corpus is unchanged on all four targets and the behavioral corpus is byte-identical.
+
+- **A disclosed overlap.** The repoguard gate for batch 288's one-file fix ran on this box while this battery was in
+  its `go test` stage, so that stage's wall times are slower than a solo run (repoguard 371 s here, about 205 s
+  alone). The stage passed; nothing in it reads as a timing failure.
+- **Past the battery's tip** this branch carries one Go test file (`cgoRealRoute_test.go`, the compiler resolved as
+  the route resolves it) and documents. They are gated by repoguard, the comment census and the cgo tests of the
+  converter suite, not by a second battery.
+
+**G1 is GREEN:** the hosted gate on four target rows, and the battery behind it.
+
+— H (2026-11-12)
