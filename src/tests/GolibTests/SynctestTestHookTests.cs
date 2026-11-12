@@ -59,7 +59,7 @@ public class SynctestTestHookTests
                 // A bubble member's sleep advances the bubble's fake clock, not the wall clock. A thread
                 // outside the bubble would really sleep the hour.
                 time_package.Time start = time_package.Now();
-                time_package.Sleep(time_package.ΔHour);
+                time_package.Sleep(time_package.Hour);
                 s_fakeElapsed = (long)time_package.Since(start);
             }));
         }, "synctest_guard_test.go", 1);
@@ -70,7 +70,7 @@ public class SynctestTestHookTests
 
         Assert.IsTrue(s_ok, "a passing child reports ok");
         Assert.AreEqual("TestBubbleChild", s_childName, "the child carries its caller's name (testing.go:2140)");
-        Assert.AreEqual((long)time_package.ΔHour, s_fakeElapsed, "the child's Sleep ran on the bubble's fake clock");
+        Assert.AreEqual((long)time_package.Hour, s_fakeElapsed, "the child's Sleep ran on the bubble's fake clock");
         Assert.IsTrue(wall.Elapsed < TimeSpan.FromSeconds(60.0D), $"a bubble member does not really sleep; the run took {wall.Elapsed}");
         Assert.AreEqual(1, reporter.Events.Count(e => e.Test == "TestBubbleChild" && e.Action == "run"), "no === RUN for the child");
         Assert.AreEqual(1, reporter.Events.Count(e => e.Test == "TestBubbleChild" && e.Action is "pass" or "fail" or "skip"),

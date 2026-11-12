@@ -35,7 +35,7 @@ public class ReflectSetterTests
         return AllocationCounter.CurrentThreadCount - before;
     }
 
-    private static reflect_package.ΔValue Settable(object zero) =>
+    private static reflect_package.Value Settable(object zero) =>
         reflect_package.New(reflect_package.TypeOf(zero)).Elem();
 
     [TestMethod]
@@ -49,12 +49,12 @@ public class ReflectSetterTests
     [TestMethod]
     public void ASuccessfulKindedSetChargesNoCountedObject()
     {
-        reflect_package.ΔValue b = Settable(false);
-        reflect_package.ΔValue i = Settable((nint)0);
-        reflect_package.ΔValue u = Settable((nuint)0);
-        reflect_package.ΔValue f = Settable(0.0);
-        reflect_package.ΔValue c = Settable(new complex128(0, 0));
-        reflect_package.ΔValue s = Settable((@string)"");
+        reflect_package.Value b = Settable(false);
+        reflect_package.Value i = Settable((nint)0);
+        reflect_package.Value u = Settable((nuint)0);
+        reflect_package.Value f = Settable(0.0);
+        reflect_package.Value c = Settable(new complex128(0, 0));
+        reflect_package.Value s = Settable((@string)"");
         @string text = "go";
 
         long setBool = Charge(() => b.SetBool(true));
@@ -75,7 +75,7 @@ public class ReflectSetterTests
     [TestMethod]
     public void SetUintOnAnIntValuePanicsWithGosText()
     {
-        reflect_package.ΔValue v = Settable((nint)0);
+        reflect_package.Value v = Settable((nint)0);
         string? text = null;
 
         try { v.SetUint(5); }
@@ -89,7 +89,7 @@ public class ReflectSetterTests
     public void SetIntOnAUintValuePanicsWithGosText()
     {
         // CONTROL: the sibling that already checks, in the same text shape.
-        reflect_package.ΔValue v = Settable((nuint)0);
+        reflect_package.Value v = Settable((nuint)0);
         string? text = null;
 
         try { v.SetInt(5); }

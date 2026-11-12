@@ -1,3 +1,4 @@
+using go.@internal;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -34,12 +35,12 @@ public class DefinedArrayDescriptorTests
         Assert.AreEqual(abi.Array, descriptor.Value.Kind(), "abi.TypeFor[A]() is not an array descriptor");
         Assert.AreEqual((uintptr)(4 * IntPtr.Size), descriptor.Value.Size_, "abi.TypeFor[A]().Size_ for type A [4]int");
 
-        ж<abi.ΔArrayType> array = abi.ArrayType(descriptor);
+        ж<abi.ArrayType> array = descriptor.ArrayType();
 
         Assert.IsNotNull(array, "ArrayType() of a defined array descriptor answered nil");
         Assert.AreEqual((uintptr)4, array.Value.Len, "ArrayType().Len for type A [4]int");
 
-        reflect.ΔType t = reflect.TypeFor<DefinedIntArray4>();
+        reflect.Type t = reflect.TypeFor<DefinedIntArray4>();
 
         Assert.AreEqual(reflect.Array, t.Kind(), "reflect.TypeFor[A]().Kind()");
         Assert.AreEqual((nint)4, t.Len(), "reflect.TypeFor[A]().Len() with no value in hand");
@@ -51,20 +52,20 @@ public class DefinedArrayDescriptorTests
     {
         // type E [3]int; type N [2]E -- N's own length is 2, and E answers its 3 from its own marker.
         ж<abi.Type> descriptor = abi.TypeFor<DefinedNestedArray2>();
-        ж<abi.ΔArrayType> array = abi.ArrayType(descriptor);
+        ж<abi.ArrayType> array = descriptor.ArrayType();
 
         Assert.IsNotNull(array, "ArrayType() of type N [2]E answered nil");
         Assert.AreEqual((uintptr)2, array.Value.Len, "N's own length");
         Assert.AreEqual((uintptr)(2 * 3 * IntPtr.Size), descriptor.Value.Size_, "N's size is 2 x 3 x sizeof(int)");
 
-        ж<abi.ΔArrayType> element = abi.ArrayType(array.Value.Elem);
+        ж<abi.ArrayType> element = array.Value.Elem.ArrayType();
 
         Assert.IsNotNull(element, "ArrayType() of N's element E answered nil");
         Assert.AreEqual((uintptr)3, element.Value.Len, "E's own length, read from E");
 
         // A carried chain that reaches into the named element agrees on dims[0], which is all the
         // declared length decides; the element's 3 comes from E itself either way.
-        ж<abi.ΔArrayType> carried = abi.ArrayType(abi.synthType(typeof(DefinedNestedArray2), new nint[] { 2, 3 }));
+        ж<abi.ArrayType> carried = abi.synthType(typeof(DefinedNestedArray2), new nint[] { 2, 3 }).ArrayType();
 
         Assert.IsNotNull(carried, "a carried [2,3] chain for N was refused");
         Assert.AreEqual((uintptr)2, carried.Value.Len, "N's length under a carried [2,3] chain");
@@ -80,18 +81,18 @@ public class DefinedArrayDescriptorTests
         // type M [2][3]int -- the inner array is UNNAMED, so its 3 has no type of its own to answer from:
         // the marker's whole leading [2][3] chain is M's declaration.
         ж<abi.Type> descriptor = abi.TypeFor<DefinedIntMatrix2x3>();
-        ж<abi.ΔArrayType> array = abi.ArrayType(descriptor);
+        ж<abi.ArrayType> array = descriptor.ArrayType();
 
         Assert.IsNotNull(array, "ArrayType() of type M [2][3]int answered nil");
         Assert.AreEqual((uintptr)2, array.Value.Len, "M's own length");
         Assert.AreEqual((uintptr)(2 * 3 * IntPtr.Size), descriptor.Value.Size_, "M's size is 2 x 3 x sizeof(int)");
 
-        ж<abi.ΔArrayType> element = abi.ArrayType(array.Value.Elem);
+        ж<abi.ArrayType> element = array.Value.Elem.ArrayType();
 
         Assert.IsNotNull(element, "ArrayType() of M's unnamed element [3]int answered nil");
         Assert.AreEqual((uintptr)3, element.Value.Len, "M's element length, read from M's marker");
 
-        reflect.ΔType t = reflect.TypeFor<DefinedIntMatrix2x3>();
+        reflect.Type t = reflect.TypeFor<DefinedIntMatrix2x3>();
 
         Assert.AreEqual((nint)2, t.Len(), "reflect.TypeFor[M]().Len()");
         Assert.AreEqual((uintptr)(2 * 3 * IntPtr.Size), t.Size(), "reflect.TypeFor[M]().Size()");
@@ -99,7 +100,7 @@ public class DefinedArrayDescriptorTests
 
         // The converter's own spelling of the same declaration -- a [GoArrayDims(2, 3)] stamp beside a
         // marker that keeps only the outer [2] -- answers identically.
-        reflect.ΔType stamped = reflect.TypeFor<StampedIntMatrix2x3>();
+        reflect.Type stamped = reflect.TypeFor<StampedIntMatrix2x3>();
 
         Assert.AreEqual((nint)2, stamped.Len(), "the stamped spelling's Len()");
         Assert.AreEqual((uintptr)(2 * 3 * IntPtr.Size), stamped.Size(), "the stamped spelling's Size()");
@@ -107,7 +108,7 @@ public class DefinedArrayDescriptorTests
 
         // Carried cargo is compared on every position the marker declares: [2,3] agrees, and a carried
         // inner length that contradicts the declared 3 is refused by name.
-        ж<abi.ΔArrayType> carried = abi.ArrayType(abi.synthType(typeof(DefinedIntMatrix2x3), new nint[] { 2, 3 }));
+        ж<abi.ArrayType> carried = abi.synthType(typeof(DefinedIntMatrix2x3), new nint[] { 2, 3 }).ArrayType();
 
         Assert.IsNotNull(carried, "a carried [2,3] chain for M was refused");
         Assert.AreEqual((uintptr)2, carried.Value.Len, "M's length under a carried [2,3] chain");

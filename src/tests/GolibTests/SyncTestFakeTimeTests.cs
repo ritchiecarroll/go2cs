@@ -50,7 +50,7 @@ public class SyncTestFakeTimeTests
     private static void AssertNoFailure(Exception? escaped) =>
         Assert.IsNull(escaped, $"escaped: {escaped}");
 
-    private static time.Duration Seconds(long n) => n * time.ΔSecond;
+    private static time.Duration Seconds(long n) => n * time.Second;
 
     [TestMethod]
     public void NowInABubbleIsMidnight2000Utc()

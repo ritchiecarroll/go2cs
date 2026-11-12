@@ -141,8 +141,8 @@ public class GenericMethodSourceTests
     [TestMethod]
     public void TypeMethodLeavesFuncUnboundUntilItsUse()
     {
-        reflect_package.ΔType t = reflect_package.TypeOf(new genmeth_package.Pair<@string, nint>("z", 26));
-        reflect_package.ΔMethod m = t.Method(1);
+        reflect_package.Type t = reflect_package.TypeOf(new genmeth_package.Pair<@string, nint>("z", 26));
+        reflect_package.Method m = t.Method(1);
 
         Assert.AreEqual((@string)"String", m.Name);
         Assert.IsTrue(t.MethodByName("String").Item2);
@@ -153,8 +153,8 @@ public class GenericMethodSourceTests
         Assert.AreEqual((@string)"z=26", func.DynamicInvoke(new genmeth_package.Pair<@string, nint>("z", 26)));
     }
 
-    private static object? Boxed(reflect_package.ΔValue v) =>
-        typeof(reflect_package.ΔValue).GetField("boxed", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(v);
+    private static object? Boxed(reflect_package.Value v) =>
+        typeof(reflect_package.Value).GetField("boxed", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(v);
 }
 
 public static class genmeth_package

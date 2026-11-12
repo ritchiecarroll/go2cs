@@ -78,7 +78,7 @@ public class PrintFloatArgumentTests
     public void ANamedBasicTypePrintsItsUnderlyingValueNeverItsStringMethod()
     {
         // println(time.Second): the runtime printer never calls String(), so Go prints the int64, not "1s".
-        AssertPrintln("1000000000", time_package.ΔSecond, "time.Second");
+        AssertPrintln("1000000000", time_package.Second, "time.Second");
         AssertPrintln("1.234567e+06", (main_package.myFloat)1234567.0, "myFloat(1234567)");
         AssertPrintln("true", (main_package.myBool)true, "myBool(true)");
         AssertPrintln("x", (main_package.myStr)(@string)"x", "myStr(\"x\")");

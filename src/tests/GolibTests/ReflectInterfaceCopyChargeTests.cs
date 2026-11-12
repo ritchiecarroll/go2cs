@@ -7,7 +7,7 @@
 using System;
 using go;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ΔValue = go.reflect_package.ΔValue;
+using Value = go.reflect_package.Value;
 
 namespace GolibTests;
 
@@ -36,7 +36,7 @@ public class ReflectInterfaceCopyChargeTests
     [TestMethod]
     public void AnAddressableCopyIsChargedAsOneAllocation()
     {
-        ΔValue v = reflect_package.ValueOf(new StandardBox<nint>(123)).Elem();
+        Value v = reflect_package.ValueOf(new StandardBox<nint>(123)).Elem();
 
         Assert.AreEqual(1L, Charged(() => _ = v.Interface()), "Interface() of an addressable int");
         Assert.AreEqual(1L, Charged(() => _ = reflect_package.TypeAssert<object>(v)), "TypeAssert[any] of an addressable int");
@@ -45,18 +45,18 @@ public class ReflectInterfaceCopyChargeTests
     [TestMethod]
     public void ThePathsGoDoesNotAllocateOnChargeNothing()
     {
-        ΔValue addressable = reflect_package.ValueOf(new StandardBox<nint>(123)).Elem();
+        Value addressable = reflect_package.ValueOf(new StandardBox<nint>(123)).Elem();
         Assert.AreEqual(0L, Charged(() => _ = reflect_package.TypeAssert<nint>(addressable)), "TypeAssert[int] reads the slot");
         Assert.AreEqual(0L, Charged(() => _ = addressable.Int()), "Int() reads the slot");
 
-        ΔValue plain = reflect_package.ValueOf((nint)123);
+        Value plain = reflect_package.ValueOf((nint)123);
         Assert.AreEqual(0L, Charged(() => _ = plain.Interface()), "Interface() of a non-addressable int");
 
         ж<nint> target = new StandardBox<nint>(5);
-        ΔValue pointerSlot = reflect_package.ValueOf(new StandardBox<ж<nint>>(target)).Elem();
+        Value pointerSlot = reflect_package.ValueOf(new StandardBox<ж<nint>>(target)).Elem();
         Assert.AreEqual(0L, Charged(() => _ = pointerSlot.Interface()), "Interface() of an addressable *int (pointer-shaped)");
 
-        ΔValue interfaceSlot = reflect_package.ValueOf(new StandardBox<object>((nint)7)).Elem();
+        Value interfaceSlot = reflect_package.ValueOf(new StandardBox<object>((nint)7)).Elem();
         Assert.AreEqual(0L, Charged(() => _ = interfaceSlot.Interface()), "Interface() of an addressable interface slot");
     }
 }

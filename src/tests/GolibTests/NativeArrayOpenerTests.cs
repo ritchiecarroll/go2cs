@@ -79,8 +79,8 @@ public unsafe class NativeArrayOpenerTests
 
         try
         {
-            reflect.ΔType type = reflect.ArrayOf(2, reflect.PointerTo(reflect.TypeFor<int>()));
-            reflect.ΔValue words = reflect.NewAt(type, (uintptr)(nuint)block).Elem();
+            reflect.Type type = reflect.ArrayOf(2, reflect.PointerTo(reflect.TypeFor<int>()));
+            reflect.Value words = reflect.NewAt(type, (uintptr)(nuint)block).Elem();
 
             Assert.AreEqual(3L, words.Index(0).Elem().Int(), "reflect.NewAt(ArrayOf(2, PointerTo(int32)), p) reads word 0's int32");
             Assert.AreEqual(5L, words.Index(1).Elem().Int(), "and word 1's");
@@ -98,7 +98,7 @@ public unsafe class NativeArrayOpenerTests
 
         try
         {
-            reflect.ΔType type = reflect.ArrayOf(2, reflect.PointerTo(reflect.TypeFor<double>()));
+            reflect.Type type = reflect.ArrayOf(2, reflect.PointerTo(reflect.TypeFor<double>()));
             PanicException refusal = Assert.ThrowsException<PanicException>(() => reflect.NewAt(type, (uintptr)(nuint)block));
 
             StringAssert.StartsWith(refusal.Message, "go2cs: native pointer array: ", "a refusal Go never raises carries go2cs:");

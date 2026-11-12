@@ -191,12 +191,12 @@ public class RuntimePanicCheckTests
     {
         ж<Δruntime.Func> f = null!;
 
-        PanicException entry = Assert.ThrowsException<PanicException>(() => Δruntime.Entry(f));
+        PanicException entry = Assert.ThrowsException<PanicException>(() => f.Entry());
         StringAssert.Contains(entry.Message, "invalid memory address or nil pointer dereference");
 
-        PanicException fileLine = Assert.ThrowsException<PanicException>(() => Δruntime.FileLine(f, 0));
+        PanicException fileLine = Assert.ThrowsException<PanicException>(() => f.FileLine(0));
         StringAssert.Contains(fileLine.Message, "invalid memory address or nil pointer dereference");
 
-        Assert.AreEqual("", (string)Δruntime.Name(f), "Name() on a nil *Func answers \"\"");
+        Assert.AreEqual("", (string)f.Name(), "Name() on a nil *Func answers \"\"");
     }
 }

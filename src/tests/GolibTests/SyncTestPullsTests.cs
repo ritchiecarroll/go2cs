@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
+using go.@internal;
 using go.golib;
 using go.testing_runtime;
 using static go.builtin;
@@ -85,8 +86,8 @@ public class SyncTestPullsTests
             ж<synctest.Bubble> b = synctest.Acquire();
             Assert.IsTrue(b == nil, "Acquire outside a bubble returns nil");
 
-            synctest.Release(b);
-            synctest.Run(b, () => { ran = true; during = SyncTestBubble.Current; });
+            b.Release();
+            b.Run(() => { ran = true; during = SyncTestBubble.Current; });
         }));
 
         Assert.IsTrue(ran, "a nil Bubble's Run calls f directly");
@@ -111,7 +112,7 @@ public class SyncTestPullsTests
                 acquired.Wait();
                 Thread.Sleep(300);
                 releasedAt = clock.ElapsedTicks;
-                synctest.Release(held!);
+                held!.Release();
             }
             catch (Exception ex)
             {
@@ -161,14 +162,14 @@ public class SyncTestPullsTests
             {
                 acquired.Wait();
 
-                synctest.Run(held!, () =>
+                held!.Run(() =>
                 {
                     inside = SyncTestBubble.Current;
                     made = new channel<int>(1);
 
                     try
                     {
-                        synctest.Run(held!, () => { });
+                        held!.Run(() => { });
                     }
                     catch (PanicException ex)
                     {
@@ -177,7 +178,7 @@ public class SyncTestPullsTests
                 });
 
                 after = SyncTestBubble.Current;
-                synctest.Release(held!);
+                held!.Release();
             }
             catch (Exception ex)
             {

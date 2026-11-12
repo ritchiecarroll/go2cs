@@ -53,7 +53,7 @@ public class RuntimeErrorClassesTests
         Assert.IsNotNull(recovered, $"{site}: did not panic");
         Assert.AreEqual(goType, recovered.GetType().Name, $"{site}: the recovered value's Go type");
 
-        Assert.IsTrue(recovered._<Δruntime.ΔError>(out Δruntime.ΔError? error),
+        Assert.IsTrue(recovered._<Δruntime.Error>(out Δruntime.Error? error),
             $"{site}: recovered value {recovered} (type {recovered.GetType().FullName}) does not implement runtime.Error");
 
         Assert.AreEqual(want, error!.Error().ToString(), $"{site}: runtime.Error text");

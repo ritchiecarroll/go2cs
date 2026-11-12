@@ -1,3 +1,4 @@
+using go.@internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
 using abi = go.@internal.abi_package;
@@ -30,7 +31,7 @@ public class AbiTypeForTests
     [TestMethod]
     public void ReflectTypeForAStructNamesTheType()
     {
-        reflect.ΔType t = reflect.TypeFor<time_package.Time>();
+        reflect.Type t = reflect.TypeFor<time_package.Time>();
 
         Assert.AreEqual(reflect.Struct, t.Kind(), "reflect.TypeFor[time.Time]().Kind()");
         Assert.AreEqual("Time", t.Name().ToString(), "reflect.TypeFor[time.Time]().Name()");
@@ -45,12 +46,12 @@ public class AbiTypeForTests
         Assert.IsNotNull(descriptor, "abi.TypeFor[error]() answered nil");
         Assert.AreEqual(abi.Interface, descriptor.Value.Kind(), "abi.TypeFor[error]() is not an interface descriptor");
 
-        ж<abi.ΔInterfaceType> iface = abi.InterfaceType(descriptor);
+        ж<abi.InterfaceType> iface = descriptor.InterfaceType();
 
         Assert.IsNotNull(iface, "InterfaceType() of an interface descriptor answered nil");
         Assert.AreEqual(1, (int)iface.NumMethod(), "error's interface descriptor does not carry its one method");
 
         // Go's own "or nil if its tag does not match": a struct descriptor has no InterfaceType.
-        Assert.IsNull(abi.InterfaceType(abi.TypeFor<time_package.Time>()), "InterfaceType() of a struct descriptor is not nil");
+        Assert.IsNull(abi.TypeFor<time_package.Time>().InterfaceType(), "InterfaceType() of a struct descriptor is not nil");
     }
 }

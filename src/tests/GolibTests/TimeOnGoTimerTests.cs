@@ -23,7 +23,7 @@ public class TimeOnGoTimerTests
     {
         int before = GoTimer.Count;
 
-        ж<time_package.Timer> timer = time_package.NewTimer(time_package.ΔHour);
+        ж<time_package.Timer> timer = time_package.NewTimer(time_package.Hour);
 
         Assert.AreEqual(before + 1, GoTimer.Count, "an armed time.Timer is not on GoTimer's heap");
         Assert.IsTrue(timer.Stop(), "Stop of an armed timer reported it unarmed");
@@ -35,10 +35,10 @@ public class TimeOnGoTimerTests
     {
         int before = GoTimer.Count;
 
-        ж<time_package.Timer> timer = time_package.NewTimer(time_package.ΔHour);
+        ж<time_package.Timer> timer = time_package.NewTimer(time_package.Hour);
 
         for (int i = 0; i < 1_000; i++)
-            timer.Reset(time_package.ΔHour);
+            timer.Reset(time_package.Hour);
 
         Assert.AreEqual(before + 1, GoTimer.Count, "a reset time.Timer is not on GoTimer's heap exactly once");
         timer.Stop();

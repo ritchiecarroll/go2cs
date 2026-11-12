@@ -194,6 +194,7 @@ var golibFriendNamespaceTypes = nameSet(
 	"INativeRooted",
 	"INativeWordElements",
 	"IPackageLevelStorage",
+	"IPlainHeapRoot",
 	"IPrintPointer",
 	"IReinterpretSource",
 	"IReinterpretView",

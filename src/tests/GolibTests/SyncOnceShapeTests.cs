@@ -20,14 +20,14 @@ public class SyncOnceShapeTests
     [TestMethod]
     public void TheFieldsAreGos()
     {
-        reflect.ΔType t = reflect.TypeOf(new sync.Once());
+        reflect.Type t = reflect.TypeOf(new sync.Once());
 
         Assert.AreEqual(3, (int)t.NumField(), "_, done, m");
         Assert.AreEqual("_ sync.noCopy", Field(t, 0));
         Assert.AreEqual("done atomic.Bool", Field(t, 1));
         Assert.AreEqual("m sync.Mutex", Field(t, 2));
 
-        static string Field(reflect.ΔType t, int i)
+        static string Field(reflect.Type t, int i)
         {
             reflect.StructField field = t.Field(i);
             return $"{field.Name} {field.Type.String()}";

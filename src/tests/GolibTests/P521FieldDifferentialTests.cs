@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
+using go.crypto.@internal.fips140.nistec;
 using static go.crypto.@internal.fips140.nistec.fiat_package;
 using fiat = go.crypto.@internal.fips140.nistec.fiat_package;
 

@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
+using go.runtime;
 using go.testing_runtime;
 using Δdebug = go.runtime.debug_package;
 
@@ -80,7 +81,7 @@ public class GoModInfoComposeTests
 
         // BuildInfo.String() is the inverse ParseBuildInfo documents; with no GoVersion it reproduces the text.
         Assert.AreEqual(Modules + "build\tDefaultGODEBUG=panicnil=1,x509sha1=1\nbuild\tCGO_ENABLED=1\nbuild\tGOARCH=arm64\nbuild\tGOOS=linux\n",
-            Δdebug.String(ref info).ToString());
+            info.String().ToString());
     }
 
     // An assembly holding exactly one converted package class, the way a test host's entry assembly holds the

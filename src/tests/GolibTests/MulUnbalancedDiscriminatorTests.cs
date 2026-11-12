@@ -93,8 +93,8 @@ public class MulUnbalancedDiscriminatorTests
 
         try
         {
-            ж<big.ΔInt> x = @new<big.ΔInt>().SetBits(Words(XWords, 0x9E3779B97F4A7C15UL));
-            ж<big.ΔInt> y = @new<big.ΔInt>().SetBits(Words(YWords, 0xD1B54A32D192ED03UL));
+            ж<big.Int> x = @new<big.Int>().SetBits(Words(XWords, 0x9E3779B97F4A7C15UL));
+            ж<big.Int> y = @new<big.Int>().SetBits(Words(YWords, 0xD1B54A32D192ED03UL));
 
             Console.WriteLine($"[S0 §5.4] operands: x={XWords} words, y={YWords} words, inputSize={InputSize} B, bound={GoBound}x");
             Console.WriteLine($"[S0 §5.4] GC: server={System.Runtime.GCSettings.IsServerGC}, latency={System.Runtime.GCSettings.LatencyMode}, procs={Environment.ProcessorCount}");
@@ -109,7 +109,7 @@ public class MulUnbalancedDiscriminatorTests
                 long t0 = GC.GetAllocatedBytesForCurrentThread();
                 long c0 = AllocationCounter.CurrentThreadCount;
 
-                ж<big.ΔInt> z = @new<big.ΔInt>().Mul(x, y);
+                ж<big.Int> z = @new<big.Int>().Mul(x, y);
 
                 long c1 = AllocationCounter.CurrentThreadCount;
                 long t1 = GC.GetAllocatedBytesForCurrentThread();
@@ -149,15 +149,15 @@ public class MulUnbalancedDiscriminatorTests
         // Root (2) needs OTHER threads to allocate INSIDE the window, so the window's duration is
         // part of the evidence: a window measured in milliseconds can only catch milliseconds of
         // another thread's allocation. Reported, never asserted.
-        ж<big.ΔInt> x = @new<big.ΔInt>().SetBits(Words(XWords, 0x9E3779B97F4A7C15UL));
-        ж<big.ΔInt> y = @new<big.ΔInt>().SetBits(Words(YWords, 0xD1B54A32D192ED03UL));
+        ж<big.Int> x = @new<big.Int>().SetBits(Words(XWords, 0x9E3779B97F4A7C15UL));
+        ж<big.Int> y = @new<big.Int>().SetBits(Words(YWords, 0xD1B54A32D192ED03UL));
 
-        _ = @new<big.ΔInt>().Mul(x, y);
+        _ = @new<big.Int>().Mul(x, y);
 
         Stopwatch sw = Stopwatch.StartNew();
 
         for (int i = 0; i < 10; i++)
-            GC.KeepAlive(@new<big.ΔInt>().Mul(x, y));
+            GC.KeepAlive(@new<big.Int>().Mul(x, y));
 
         sw.Stop();
 

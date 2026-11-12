@@ -47,7 +47,7 @@ public class RuntimeTypeAssertionTests
         Assert.IsNotNull(recovered, $"{site}: did not panic");
         Assert.AreEqual("*runtime.TypeAssertionError", GetGoTypeName(recovered), $"{site}: the recovered value's Go type");
 
-        Assert.IsTrue(recovered._<Δruntime.ΔError>(out Δruntime.ΔError? runtimeError),
+        Assert.IsTrue(recovered._<Δruntime.Error>(out Δruntime.Error? runtimeError),
             $"{site}: recovered value {recovered} (type {recovered.GetType().FullName}) does not implement runtime.Error");
 
         Assert.AreEqual(want, runtimeError!.Error().ToString(), $"{site}: runtime.Error text");
@@ -114,7 +114,7 @@ public class RuntimeTypeAssertionTests
     public void AnAssertionToAnInterfaceNamesTheMissingMethod()
     {
         object boxed = (nint)7;
-        AssertTypeAssertionError(PanicValue(() => boxed._<Δruntime.ΔError>()),
+        AssertTypeAssertionError(PanicValue(() => boxed._<Δruntime.Error>()),
             "interface conversion: int is not runtime.Error: missing method Error", "int asserted to runtime.Error");
     }
 
@@ -123,7 +123,7 @@ public class RuntimeTypeAssertionTests
     public void ANilSourceToAnInterfaceHasNoSourceType()
     {
         object? nothing = null;
-        AssertTypeAssertionError(PanicValue(() => nothing!._<Δruntime.ΔError>()),
+        AssertTypeAssertionError(PanicValue(() => nothing!._<Δruntime.Error>()),
             "interface conversion: interface is nil, not runtime.Error", "nil asserted to runtime.Error");
     }
 
