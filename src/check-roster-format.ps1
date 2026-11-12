@@ -3506,8 +3506,12 @@ $LinuxRidEvidenceWaves = @('')
 $LinuxRidRuledArchCount = @{
     'internal/runtime/gc/scan' = 'TestExpandAVX512;TestFilterNilAVX512;TestScanSpanPackedAVX512 -- COORD R2 2026-11-12 (wave 1 read, run 43151882036: the hosted x64 runs the AVX-512 tests the roster''s host skipped); DATA-la64-s7-bank-plan.md 4.2 and section 12'
 }
+# A @{} table matches its keys case-INSENSITIVELY while annotate_linux.py's dicts are case-sensitive, so a 'Syscall' key
+# would be read by one tool and not the other. Every key must therefore be its row's lower-case Go import path (P5's
+# minor finding on the F1/F2 fix, COORD 2026-11-12); both tools refuse any other key by name.
 foreach ($ruledRow in $LinuxRidRuledArchCount.Keys) {
     Assert-Equal "linux ruled arch-count: $ruledRow's entry reads '<names> -- <citations>'" $true ($LinuxRidRuledArchCount[$ruledRow] -cmatch '^\S+ -- \S')
+    Assert-Equal "linux ruled arch-count: the key '$ruledRow' is its lower-case Go import path" $true ($ruledRow -ceq $ruledRow.ToLowerInvariant())
 }
 
 # HOST-EQUAL ROWS (Get-LinuxHostEqualReading): row -> '<class> -- <citations>'. KEYED by COORD F2 (2026-11-12, on P5's
@@ -3518,6 +3522,7 @@ $LinuxRidHostEqual = @{
 }
 foreach ($hostEqualRow in $LinuxRidHostEqual.Keys) {
     Assert-Equal "linux host-equal: $hostEqualRow's entry reads '<class> -- <citations>'" $true ($LinuxRidHostEqual[$hostEqualRow] -cmatch '^\S+ -- \S')
+    Assert-Equal "linux host-equal: the key '$hostEqualRow' is its lower-case Go import path" $true ($hostEqualRow -ceq $hostEqualRow.ToLowerInvariant())
 }
 
 # THE UNMEASURED LEDGER (S7-a; DATA-la64-s7-bank-plan.md 5.3): the release's linux-arm64 rows that do not bank, each

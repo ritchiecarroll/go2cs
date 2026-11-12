@@ -234,6 +234,16 @@ try:
         body = "$LinuxRidHostEqual = @{\n" + (f"    'f/pkg' = {entry}\n" if entry else '') + '}'
         write(os.path.join(root, 'src/check-roster-format.ps1'), host_table.sub(lambda m: body, guard_now, count=1))
         rids_case(f'linux --rids: {name}', '42 + 17', lines_, want, refused=refused)
+    # The guard's @{} tables match keys case-insensitively and the annotator's dicts do not, so a key that is not its
+    # row's lower-case import path is refused by name, in either table (P5's minor finding, COORD 2026-11-12).
+    for table_name in ('LinuxRidHostEqual', 'LinuxRidRuledArchCount'):
+        table_re = re.compile(r'^\$' + table_name + r' = @\{\n.*?^\}', re.M | re.S)
+        write(os.path.join(root, 'src/check-roster-format.ps1'),
+              table_re.sub(lambda m: "$" + table_name + " = @{\n    'F/pkg' = 'x -- fixture'\n}", guard_now, count=1))
+        write(os.path.join(root, RIDS, 'W1-1.tsv'), RIDS_HEADER + '\n' + ''.join(host_same))
+        rc, out, err = run('annotate_linux.py', root, '--rids', '--evidence', RIDS)
+        case(f'linux --rids: a ${table_name} key that is not lower-case (F/pkg) is refused by name',
+             rc != 0 and 'F/pkg' in err and 'lower-case' in err, f'rc {rc}, out {out!r}, err {err.strip()!r}')
     write(os.path.join(root, 'src/check-roster-format.ps1'), guard_now)
     ruled_table = re.compile(r'^\$LinuxRidRuledArchCount = @\{\n.*?^\}', re.M | re.S)
     ruled_x64 = rids_line('linux-x64', 'FAIL', 20, 5, 15, new='15')

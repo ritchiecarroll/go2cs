@@ -338,8 +338,14 @@ if args.rids:
         block = re.search(r'^\$' + name + r' = @\{\n(.*?)^\}', guard, re.M | re.S)
         if not block:
             sys.exit(f'the guard declares no ${name}: --rids derives by the guard\'s section 2i and will not run against a guard that lacks it')
-        return {m.group(1): m.group(2).replace("''", "'")
-                for m in re.finditer(r"^\s+'([^']+)' = '((?:[^']|'')*)'\s*$", block.group(1), re.M)}
+        table = {m.group(1): m.group(2).replace("''", "'")
+                 for m in re.finditer(r"^\s+'([^']+)' = '((?:[^']|'')*)'\s*$", block.group(1), re.M)}
+        # The guard's @{} matches keys case-insensitively and this dict does not, so every key must be its row's
+        # lower-case Go import path; the guard asserts the same (P5's minor finding on the F1/F2 fix, COORD 2026-11-12).
+        upper = sorted(k for k in table if k != k.lower())
+        if upper:
+            sys.exit(f"the guard's ${name} key(s) {', '.join(upper)} are not lower-case Go import paths: refused")
+        return table
     ruled_counts = guard_table('LinuxRidRuledArchCount')
     host_equals = guard_table('LinuxRidHostEqual')
     evrel = args.evidence or declared.group(1).replace('{pin}', pin)
