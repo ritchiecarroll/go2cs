@@ -320,3 +320,35 @@ item is the `GoFrame` analyzer rule, which is independent of M:N (9.10).
 
 **"Not measured", corrected.** A package built against today's golib and run against a landing golib is no
 longer a case to measure: under the ruling above it is rebuilt for the first carrying release.
+
+## M:N: the final read and two owner rulings (G, 2026-11-12)
+
+The spike record's section 10 answers a second, independent read of its section 9. All of that read's items
+are accepted. What changes in this plan:
+
+**Two owner rulings (2026-11-12).** The .5 prototype stage starts now. And .5 may ship the frozen surface (the
+twin set, the task type, `GoFrame`, func values) with the scheduler OFF by default, if the scheduler is not
+mature in time. So the surface is what .5 has to freeze, and the scheduler's maturity gates only its default.
+
+**Func values join the freeze.** The block above did not list them. Their representation can change a visible
+type, which would be a tier 1 mapping change, and a C# host that runs a converted server reaches them first. The
+design is settled before .5, as the prototype's second step.
+
+**The twin set is not yet text.** "Every exported function whose signature admits a twin has one" stands as
+the rule's shape, with two corrections. "Signature admits a twin" gets a closed, written definition: a list of
+exclusions, each stated on the signature alone, that can only get shorter. And the cost is counted before the
+text is frozen: the park set under twins on every interface member, with one closure built that way.
+
+**The builder's and the awaiter's member shapes are frozen with the task type.** Only their internals can
+change without rebuilding callers.
+
+**The `GoFrame` rule is reported from the source generator**, not from an analyzer: it still runs where
+analyzers are switched off, and it is not configurable. F# and Visual Basic get no guard, and the contract page
+says so.
+
+**One sentence above is corrected.** "`AsyncLocal` state follows the goroutine" is published as .5 intent, not
+as a .4 contract sentence: its cost and a no-bleed test between goroutines that share a carrier are read first,
+in the prototype. The other sentences stand as they are.
+
+**The order of the prototype:** the task type with its builder and awaiter members; then func values; then the
+twin census with the park set; then the pin; and only then the twin-set rule as text.

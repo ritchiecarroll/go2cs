@@ -9,6 +9,7 @@
 > never lands. Sections are added as phases report; each is a dated block and none is rewritten.
 > Host for local readings: lane G's box (Windows x64); go1.26.10; .NET SDK 10.0.400, runtime 10.0.11.
 > **Amended 2026-11-12: section 9 answers the adversarial review of section 8 and corrects rows of 8.1 to 8.9.**
+> **Amended 2026-11-12: section 10 answers the final read of section 9, and records the prototype's first increment.**
 
 ## 1. B6: what a C# consumer sees change (2026-11-11, first reading)
 
@@ -2496,3 +2497,254 @@ None of these is started except item 6, and landing-shaped work stays held until
 - This section adds text to this record and a dated block to the public-surface plan. No spike code changed.
 - The repo guards and the full converter test suite were run on the branch that carries it; their readings are
   in the DONE post, since writing them here would change the file they read.
+
+## 10. The final read of section 9, answered; the prototype stage opens (2026-11-12)
+
+A second, independent read of section 9 (code read at the spike's final tip `58e10f967d`) returned two items
+that must be addressed, four that should be, one note, and an order for the work. **All of them are accepted.**
+Each code cite the read makes was checked at that tip and holds. Section 9 stays as written; this section
+corrects it where it says so.
+
+### 10.1 The frame: two owner rulings (2026-11-12)
+
+1. The .5 prototype stage starts now, with the task-type prototype first.
+2. .5 may ship the frozen surface (the twin set, the task type, `GoFrame`, func values) with the scheduler OFF
+   by default, if the scheduler is not mature in time. MQ3 makes that a host switch.
+
+What follows from them:
+
+- The surface has to be frozen by .5. The scheduler's maturity is no longer on the path of that freeze.
+- 9.11's closing sentence held landing-shaped work until MQ1 to MQ3 were ruled. For the prototype it is
+  superseded: prototype code is written now, on prototype branches. Nothing from it lands on master as it is;
+  the landing train is cut later from what the prototype freezes.
+- The prototype's base is the final tip, which is master with the whole spike merged: the task type is driven
+  by the spike's scheduler and written by its generator.
+
+### 10.2 MUST-1, func values: ACCEPTED
+
+9.11 and the table of 9.10 left N3 out. That was wrong, for two reasons the read names:
+
+- The representation of a func value can force a VISIBLE break. 8.4 says of N3 that it is the widest gap in the
+  generator's reach, that it is not designed, and that changing the type of a func value would be a tier 1
+  mapping change. A visible type is the one thing the freeze cannot take back.
+- A C# host that runs a converted HTTP server still gets a thread for each parked handler, because a handler
+  is registered as a func value (6.9). The library case of M3 is not answered while this is open.
+
+So the func-value representation is settled BEFORE .5, as step (b) of the order in 10.9, and it is a row of the
+freeze table there. What the design has to answer (nothing here is designed or built):
+
+- whether the visible type of a Go func value changes at all, and if it does, to what;
+- the cost at the literal and at the call, both read (phase 1 read only a registration at the literal, +609 ns);
+- what a C# lambda does when a host passes it where converted code expects a func value (it has no twin);
+- method values, method expressions and func values that cross an assembly.
+
+**N1, N2 and N5 still stand.** 9.11 dropped them without saying so:
+
+| item | still stands? | on the path of the freeze? |
+|---|---|---|
+| N1, a does-not-park set or a sharper lock rule | yes, with a different weight | no. Under M1 the exported surface no longer follows the park analysis, so N1 decides which twins are state machines and which are forwarders: size and carriers held, not surface. Its consumer form would be an addition. It is the same mechanism as the park mark of 10.3 |
+| N2, the box twin for by-ref receivers and parameters | yes | through SHOULD-1 only: whether a by-ref signature "admits a twin" is part of the closed definition. Excluding it at the freeze and lifting it later is safe (10.4); the 12 to 13% of real parkers it refuses stay threads until then |
+| N5, blocking the scheduler cannot see | yes, unchanged | no. It is scheduler policy. Under ruling 2 it gates the default, not the surface. The pin of step (d) touches it |
+
+### 10.3 MUST-2, the park set under all-interface twins: ACCEPTED
+
+9.4 said of the cost of M1 that the number of members that would gain a twin "was not counted", and offered the
++14.3% of `net/http` (6.3) beside it. The read shows why that is not a position:
+
+- The generator marks an interface member that is twinned under the all-members arm as PARKING. So every
+  function that calls any interface method becomes a real state-machine twin, not a forwarder.
+- Across assemblies the generator reads "has a twin member" as "can park". The forwarder mark of 9.4 repairs
+  direct calls only; a call through an interface never sees it.
+- 6.3's +14.3% was read with 12 interface members twinned. It is not a proxy for the all-members rule.
+
+So the census of step (c) counts the PARK SET under the all-members rule, not the surface alone, and one
+closure is built that way and its size read. "Uncounted" is withdrawn.
+
+The design it will price (from reading; nothing built): **the surface and the park set are two different
+sets, and only the surface is frozen.**
+
+- The SURFACE is M1's: every exported interface member whose signature admits a twin has its twin slot, always.
+- The PARK SET is what the generator awaits. An interface member is awaited where it carries a park mark, and
+  called plain where it does not. The mark is data beside the interface, the same kind of data as N1's set.
+- A member without the mark whose implementer does park is still correct: the plain call holds its carrier, and
+  the hand-off and the retake answer it, as for any block the scheduler sees late. It costs a thread, never an
+  answer. So a wrong or stale mark is a cost, not a break, in both directions.
+- The census therefore reads two numbers for each closure: the park set with every interface member marked (the
+  rule as the generator stands), and the park set with a declared short list unmarked (`error.Error` and
+  `fmt.Stringer.String` are the obvious first entries; judgement, not measured).
+
+### 10.4 SHOULD-1, a closed definition of "signature admits a twin": ACCEPTED
+
+M1 rests on that phrase and 9.4 never defined it. At the final tip the generator's signature refusals are, by
+its own reason names: an instance method, a by-ref return, a by-ref receiver or parameter, a ref-like type, a
+pointer, `params`, a generic interface, a generic interface method, and a generic host type. The read counts
+386 of 1,209 `net/http` candidates outside the definition as built, and N2's 12 to 13% of real parkers.
+Generic functions never had an arm at all (4.10).
+
+- **The asymmetry that shapes the text.** Lifting an exclusion later ADDS twins, which is safe. Narrowing the
+  definition REMOVES twins, which is the break M1 exists to prevent. So the frozen text is a closed list of
+  exclusions, each stated on the signature alone, with one rule beside it: the list can only get shorter.
+- **Generic functions** are decided before the freeze: in, with an arm built, or out by a named exclusion.
+- **It is written last.** The task type (a), the func-value form (b) and the census (c) can each move it, so
+  the definition is frozen as text only after (a) to (d) of 10.9.
+
+### 10.5 SHOULD-2, the builder's and the awaiter's members: ACCEPTED
+
+M2 said the builder's internals can change without rebuilding callers. That is true of the internals and not of
+the member shape: a twin's state machine binds to the task type, to its builder's members and to its awaiter's
+members, and all three are public metadata. So the prototype freezes all three, and:
+
+- the frozen list is READ from the member references of a built twin assembly, not written by hand, and read
+  again from a second, different program (a member the second binds that the first did not is a stop line);
+- the Native AOT reading runs on generic instantiations (value-type and tuple results), in the plain publish
+  form too;
+- the swap is run: golib's builder internals changed, the caller not rebuilt.
+
+### 10.6 SHOULD-3, where the `GoFrame` rule is reported from: ACCEPTED
+
+9.8 said "an analyzer rule in go2cs-gen". Corrected:
+
+- The rule is reported from the SOURCE GENERATOR, so it still runs in a project that sets `RunAnalyzers` to
+  false. It is an error and it is not configurable.
+- The generator is a C# generator. F# and Visual Basic code that uses golib gets no guard, and the contract
+  page says so in words: there a `GoFrame` is never copied, stored or captured, by rule alone.
+
+### 10.7 SHOULD-4, the `AsyncLocal` sentence: ACCEPTED
+
+"`AsyncLocal` state follows the goroutine" matches Go's model, and its cost was never read.
+
+- The prototype reads the cost of the rule for each park.
+- It adds a no-bleed test: goroutines that share a carrier must never see each other's ambient state, with
+  scheduler-injected threads among the carriers. A bleed would be a security defect, so it stops the prototype
+  STAGE, not one increment.
+- The sentence is published as .5 INTENT, not as a .4 contract sentence. That corrects the first row of 9.10's
+  table, which called every consumer-facing sentence freezable the day it is published. The thread-affinity
+  sentence, the reserved-names sentence and the `GoFrame` sentence stay as that row has them.
+
+### 10.8 The note, M1 against M5: who emits a forwarder for a hand-owned file
+
+M5 says a hand-written file in a converted project is never twinned. M1 says every exported function whose
+signature admits a twin has one. Both hold, and the answer is: **the generator emits the forwarder.**
+
+- A forwarder needs the signature and nothing of the body, so the generator can write it for a symbol it did
+  not convert. It sees every exported member of the project's compilation, hand-owned files included.
+- The author of a hand-owned file who wants a real twin writes one by hand, as golib does for its own parks.
+  The generator then emits nothing for that member.
+- A forwarder over a hand-owned function that blocks holds its carrier. That is the behaviour of 10.3's
+  unmarked member: a thread, not a wrong answer.
+- Not known, and counted in step (c): hand-owned exported members whose containing type the generator cannot
+  extend (a type that is not partial).
+
+### 10.9 The order of the prototype, and the freeze table as it now stands
+
+The order, from the final read, accepted as given:
+
+| step | what | freezes |
+|---|---|---|
+| (a) | the golib-owned task type, with its builder's and awaiter's members; M4's parent link; the context rule of 10.7 with its no-bleed test; the Native AOT reading on generic instantiations | the member shape every state machine binds to |
+| (b) | the func-value design (N3) | the visible type of a func value, changed or kept |
+| (c) | the twin census with the park set under all-interface twins, and one closure built so | the size of M1, read |
+| (d) | the pin design (N7), priced | what `LockOSThread` means on the scheduler |
+| then | the twin-set rule as text, with the closed definition of 10.4 | the twin set |
+
+The table of 9.10, amended (rows not listed here stand):
+
+| part | can be frozen now? | waits for |
+|---|---|---|
+| the `AsyncLocal` sentence | as .5 intent only | step (a)'s cost reading and no-bleed test (10.7) |
+| the twin set | not as text yet | step (c), and the closed definition (10.4) |
+| the twin task type, its builder and its awaiter | not yet | step (a) |
+| the func-value representation (new row) | not yet | step (b) |
+| `GoFrame` | yes, as text, with the rule reported from the generator (10.6) | the owed build of 9.8 |
+
+The owed list of 9.11, as it stands after this section: steps (a) to (d) and the rule text come first, in that
+order. 9.11's items 2, 5 and 7 to 9 follow unchanged. Its item 6, the goroutine-1 increment, is done as the
+prototype's first increment (10.10). Each step is written with predictions and stop lines before its code.
+
+### 10.10 Increment A0: the twin entry, and main as goroutine 1 (measured)
+
+**A finding first, because it moves what the final tip can be said to show.** At `58e10f967d` a freshly
+converted program does not BUILD with twins: CS0122, in the entry point the twin generator writes.
+
+- Cause: on master the program entry is generated. The converter keeps Go's `main` as written, and the entry
+  generator in go2cs-gen writes a private `Main` that hands `main` to golib's main-thread runner. The twin
+  generator still looked for a converted `Main`, found the generated private one, and named it.
+- That entry generator came in with the master merge. It is absent at the b5 tip (`04f2589a0b`).
+- The final tip is that merge. Its gates were the converter suite and the repo guards, with the M:N switches
+  unset as in every gates subsection of this record, and no program was built with twins there after the merge.
+  The same merge left the goldens of the spike's own fixtures one line stale (`Main` where the converter now
+  writes `main`); those gates do not run the behavioral runner, so it did not show.
+- **What this does NOT touch.** Every reading of sections 3 to 7 (B1 to B5) was taken at a spike tip before the
+  merge, where the converter wrote `Main` itself; the last is the b5 tip. Probe RV-B of 9.3 is hand-written C#
+  with its own entry and does not go through the generated one. The census of 9.8 reads source text.
+- **What it does touch.** Nothing in sections 8 or 9 is a twins reading taken at the final tip, so no number
+  changes. But the final tip is not a tree on which a converted program builds with twins, and it was cut for
+  exactly that use (the TypeScript run of 8.8). That run starts from the prototype's repair below, not from it.
+
+**The repair** (prototype branch; generator only): the twin entry finds Go's `main` in the program's main
+package, as the entry generator does, and hands it to golib. A `main` with no twin goes to the same main-thread
+runner master uses.
+
+**Goroutine 1.** The spike ran main's twin on a fresh goroutine while the startup thread waited (N9): a
+`runtime.Goexit` on main waited for ever, and a trace named the wrong goroutine. The prototype's form:
+
+- With the scheduler on, goroutine 1 itself leaves the startup thread and runs main's twin on the carriers.
+  When the twin ends, the startup thread takes goroutine 1 back, and whatever ended main (a return, an
+  unrecovered panic, a `runtime.Goexit`) leaves from there, through the exit paths master already has.
+- With the scheduler off, or when an `init` function locked main to its thread, it is exactly master's entry.
+- It is golib only: one launcher beside the scheduler. No converter change, and no change to a plain copy.
+
+Fixture `MnMainExit`: nine arms, each ending main a different way after main has parked; the program re-runs
+itself once for each arm. Predictions were written before the code. Red was read on the base with the repair
+only; green on the launcher. Both with twins generated and the scheduler on:
+
+| arm | Go | red | green |
+|---|---|---|---|
+| a: main returns while two goroutines are parked | exit 0 | exit 0 | exit 0 |
+| b: main calls `Goexit`, a goroutine finishes, none are left | "no goroutines (main called runtime.Goexit) - deadlock!", exit 2 | TIMEOUT | as Go |
+| c: a goroutine calls `os.Exit(0)` after main's `Goexit` | exit 0 | exit 0 | exit 0 |
+| d: a goroutine panics after main's `Goexit` | the panic, exit 2 | as Go | as Go |
+| e: the `Goexit` is raised two parking frames below main | as b | TIMEOUT | as Go |
+| f: main and the last goroutine both block for ever | "all goroutines are asleep - deadlock!", exit 2 | TIMEOUT | as Go |
+| g: main panics after it parked | the panic under "goroutine 1 [running]:", exit 2 | names goroutine 3 | as Go |
+| h: main blocks for ever with no goroutine left | as f | TIMEOUT | as Go |
+| i: `init` locked main to its thread; main parks and returns | exit 0 | exit 0, but main ran on the carriers | exit 0, on its thread |
+
+- The reds are the predicted ones (b, e, f, h, g). Arm i agreed with Go on its output, as predicted, but its
+  reading showed main on the carriers: the old entry ignored the lock. That was not predicted.
+- Green: the program's whole output is equal to Go's with the scheduler on and with it off (0 lines differ in
+  each), and the behavioral runner passes all four phases, built with twins and built plain. The scheduler's
+  reading names main as multiplexed in arms a to h. In arm i the scheduler never starts, so it prints no
+  reading (predicted: a reading that names main as a thread).
+- The regression set, built with twins and run with the scheduler on: the 19 programs of 5.2 with
+  `MnBlockedIO`, and the four programs master has since added about how main ends (24 in all).
+  - `CrashGoroutineCreatedBy`, the one failure of 5.2, now passes: the trace it reads names goroutine 1.
+  - Master's four pass: main in `select {}` twice, main returning over workers that wait for ever, and a
+    `Goexit` on main. Where main has a twin, the scheduler's reading names it as multiplexed.
+  - 17 others read as in 5.2.
+  - The last two are the spike's own `MnBlockedIO` and `MnMixedStorm`: output equal to Go's, and the golden
+    comparison failing on the stale entry line alone. With that line re-baselined they pass all four phases.
+    The third spike fixture, `MnIfaceTwin`, carried the same stale line and is re-baselined with them.
+
+**One prediction failed, and it is a finding about plain code.** The scheduler-off control was predicted to
+agree with Go on the first run. It differed on two lines: under a deadlock Go prints its goroutine blocks
+("goroutine 1 [select (no cases)]:"), and converted code prints the fatal line alone. From reading, golib's
+deadlock exits write that one line and no goroutine block, and that file is the same on master. So it is a gap
+of plain converted code, not of M:N. The fixture reads the goroutine header for the panic arm only, and the gap
+is routed as a ledger row of its own.
+
+**Limits of A0, disclosed.**
+
+- Main's twin runs on a carrier's stack (1 MiB as the spike sets it), not on the large main-thread reserve
+  master gives `main`. A deep recursion on main that never parks has less room with the scheduler on. Not
+  measured; it belongs to the task type's stack story (a).
+- In arm i the goroutines main starts are threads: main runs its plain copy, and a `go` in a plain copy does
+  not reach the scheduler. That is M3 again, and a program that locks main in `init` is its common case.
+- Only Windows x64 was read.
+
+### 10.11 Gates
+
+- This section adds text to this record and a dated block to the public-surface plan. The prototype's code is
+  on its own branch and is not part of this change.
+- The repo guards and the full converter test suite were run on the branch that carries this section; their
+  readings are in the DONE post, since writing them here would change the file they read.
