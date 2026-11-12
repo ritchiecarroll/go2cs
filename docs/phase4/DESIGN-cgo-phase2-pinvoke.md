@@ -949,6 +949,22 @@ toolchain and committed as Phase 1's were.
 - Four of §11.16's five divergences have a fixture function each. The fifth, `GODEBUG=cgocheck=0`, is an environment
   setting.
 
+**Seam coverage, a standing property (COORD, for M:N; increment 5b).** Every native call a binding makes is inside
+runtime's `syscallEntersyscall`/`syscallExitsyscall` bracket (§11.4), so a scheduler that watches the bracket sees every C
+call. Each extern belongs to one wrapper with one bracket. The single exception is windows' `_errno` slot, which only
+the errno form calls, inside its own bracket. golib's resolver loads a library only when a bracketed call first binds
+its import, and the module initializer makes no native call. `TestCgoBindingsCrossTheSeamOnEveryNativeCall` holds this
+over the goldens: the externs equal the brackets plus the errno slot (linux 15/15, darwin 15/15, windows 17 = 16 + 1 at
+increment 5b), and no extern call sits outside a bracket. Its own negative control removes one bracket's opening and
+must name the call.
+
+**The host rule (increment 5b; S3).** `-cgo` converts for the host's own target, read before the load as `go env
+GOHOSTOS`/`GOHOSTARCH` in the load's environment, and any other target refuses naming both sides. golib's resolver
+holds converted bindings to the target they record (`GoCgoLibraries.Register`'s additive target overload;
+`TargetMismatch` compares the running GOOS and the PROCESS architecture). So the GolibTests goldens are per
+architecture where a leg's process differs: darwin's arm64 leg compiles `GoCgoWrappers.darwin-arm64.golden.cs`, which
+the generator writes for darwin/arm64 like the others.
+
 Each divergence is a tested decision, not an accident (COORD's condition on the M1 ruling). In 5a, each of the four
 fixture functions converts, and the converted call is asserted. Their run-time behaviour is G1's, and goes on **G1's
 checklist** as these run-time arms, each asserting go2cs's actual behaviour beside `go run`'s:

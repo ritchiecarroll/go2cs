@@ -13,7 +13,8 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 `unsafe`, assembly fast paths, or tests that pull in testify.
 
 * **Your code must build with the Go release go2cs tracks**, the one in
-  [Requirements](README.md#requirements), which the go2cs dotnet tool downloads for you, and **cgo is refused**.
+  [Requirements](README.md#requirements), which the go2cs dotnet tool downloads for you, and **cgo converts only
+  through `-cgo`, and only C functions a shared library defines** ([below](#what-wont-make-the-trip)).
 * **Assembly, `//go:linkname` and deep `unsafe` tricks compile clean, then fail at run time.** Many
   libraries ship a pure-Go fallback behind a build tag, and you have to pass that tag yourself.
 * **Each live goroutine holds an operating-system thread.** Thousands alive at once are fine. A hundred
@@ -26,9 +27,21 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 
 ## What won't make the trip
 
-* **cgo.** A package whose build selects a file with `import "C"` stops the whole run:
-  `error GO2CS2001: ... cgo has no C# conversion yet`. With no pure-Go path it is out of reach today
-  ([Roadmap](Roadmap.md#cgo)). <!-- [plan](PLAN-cgo-interop.md) (internal record, unlinked 2026-10-26, OQ-1) -->
+* **cgo, beyond the C functions a shared library defines.** Without `-cgo`, a package whose build
+  selects a file with `import "C"` stops the run with `error GO2CS2001`. With `-cgo`, on a machine with a
+  C compiler, a package converts when every C use it makes is a call of a C function a shared library
+  defines, passing integers, floating-point numbers and pointers, structs of integers and pointers by
+  value, or one struct or one scalar by pointer. Its C types and constants convert with it. It converts
+  for the machine's own operating system and architecture, and the converted package refuses to call C
+  anywhere else. Anything else is refused by name, with the phase that will cover it:
+  - `C.CString`, `C.GoString`, `C.GoBytes`, `C.malloc`, and a pointer into a slice or an array (Phase 3);
+  - a function the preamble itself defines, and a `#define` that is not a constant, both of which need
+    compiled C (Phase 4);
+  - `//export` (Phase 5);
+  - a C variable, a C function used as a value, and a deferred or `go` call that passes a pointer cmd/cgo
+    checks (later in Phase 2).
+
+  [Roadmap](Roadmap.md#cgo). <!-- [plan](PLAN-cgo-interop.md) (internal record, unlinked 2026-10-26, OQ-1); docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.20 -->
 * **A self-referential constraint over a pointer, when a method shares the element's storage.**
   `Walk[*Node]` under `Walk[N Tree[N]]` with `Children() []N` stops the run with `error GO2CS2002`,
   naming the site and the method. A pointer element reaches the generic code through a proxy object, and
@@ -54,6 +67,19 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 
 ## What converts, but doesn't behave exactly like Go
 
+* **cgo's pointer check differs from Go's in five places, all of them where a program breaks or bends
+  cgo's pointer rules.** go2cs never hands C a pointer into Go's memory: it hands C a copy of the one
+  struct a pointer points at, and copies it back after the call.
+  - Go checks a pointer held in a variable against the whole object it points into, and panics when
+    that object also holds a Go pointer, or lives in package-level memory. go2cs proceeds, since C only
+    ever sees the copy. This is the check most cgo code takes: across the Go toolchain's own cgo
+    packages, 50 of the 81 checked calls that pass no element of a slice or an array.
+  - Go accepts a struct member that points at memory pinned with `runtime.Pinner`, any pointer under
+    `GODEBUG=cgocheck=0`, and a struct passed by value whose pointer member points into Go memory that
+    holds no pointer. go2cs refuses all three when the call is made.
+  <!-- docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.16 and §11.20 (COORD's M1 ruling, 2026-11-11); the census is
+       TestCgoCheckClosureFormsAcrossGorootsCgoPackages, hosted run 42973745743: address 31, variable 50, index 22,
+       slice 0, defer 9, go 0 over GOROOT's 29 cgo packages. -->
 * **Goroutines are operating-system threads** ([why](ConversionStrategies.md#goroutines)). A goroutine
   holds its thread for as long as it lives. When it ends, the thread waits to run the next `go` statement,
   so starting goroutines one after another is cheap; holding many alive at once is not. Measured on one
