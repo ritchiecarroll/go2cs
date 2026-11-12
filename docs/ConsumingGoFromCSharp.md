@@ -707,6 +707,11 @@ Each item is a first surprise, and what to write instead.
   for uuid ([Imports](#imports)).
 - **Warning CS8981 on each alias.** The NuGet packages switch it off for you. With a conversion you reference as
   projects, or with `GoConsumerUsings` set to `false`, add `<NoWarn>$(NoWarn);CS8981</NoWarn>` to the project.
+- **Warning GO2CS0014 on a `go.internal.*` or `go.vendor.*` name.** Go lets only the standard library, or code
+  under the package's own root, import an `internal` or `vendor` package, and Go changes those packages without
+  notice between releases, so they carry no compatibility promise ([Public surface](PublicSurface.md#tier-3-no-promise)).
+  Use the public package that wraps what you need. A value of an internal type that a public function returns is
+  fine: `var` and its methods do not name the package.
 - **`int n = len(s)` does not compile.** Go's `int` is `nint`: use `var`, `nint`, or a cast ([Numbers](#numbers)).
 - **`error e = nil;` does not compile.** Compare with `nil`, but produce a nil error with `null` or `default`.
 - **`foreach (var (i, v) in s)` does not compile.** `foreach` over a slice or an array gives its values; Go's

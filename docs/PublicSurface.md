@@ -70,10 +70,13 @@ public member that is neither hidden nor one of these.
 
 ## Tier 3: no promise
 
-These can change in any release. At this release no package marks them and no build warning names a use of them.
+These can change in any release. Only the first item is marked in the packages.
 
 - **Go `internal` and `vendor` packages.** They are public to .NET, as Go's import rule has no .NET equivalent, but
-  Go changes them freely between releases. Do not reference them.
+  Go changes them freely between releases. Do not reference them. Each one's assembly records the root Go allows to
+  import it (`[assembly: GoInternalRoot]`), its package class is hidden from IntelliSense, and C# that names one of
+  its types from outside that root gets warning [`GO2CS0014`](DiagnosticCodes.md). The warning may become an error
+  at a release whose notes say so.
 - **Glyph-named temporaries** in converted code, and everything a build writes under `obj/`.
 - **Tuple element names.** A Go result rename changes them. Use positional deconstruction when it matters.
 - **Thread identity.** Which OS thread runs a goroutine, and whether code after a blocking call resumes on the same
@@ -104,6 +107,7 @@ For a project that references `go.*` or `nugetgo.*` packages:
 | `GoAllowReferenceFlavor` | off | As a global property only (`-p:`): runs the Windows build on a platform the packages do not ship, instead of `GO2CS3003`/`GO2CS3004`. |
 | `GoCopyPackageSymbols` | on | Copies the packages' `.pdb` files to the output, so a Go traceback prints file and line. |
 | `GoKeepSymbolsLoose` | on | Keeps those `.pdb` files beside a single-file publish. |
+| `GoInternalPackageWarning` | on | Warning [`GO2CS0014`](DiagnosticCodes.md) where C# names a type of a Go `internal` or `vendor` package. `false` turns it off. |
 
 For a converted project that builds against a local standard library: `GoTargetOS` (`windows`, `linux` or `darwin`)
 picks the platform build of each package.
