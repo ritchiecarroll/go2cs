@@ -61,6 +61,9 @@ type FileEntry struct {
 	// redirected to the non-compiled `<name>.cs.auto` review sibling instead of overwriting
 	// the hand-owned `<name>.cs`.
 	manualConversion bool
+	// handOwnedTypeNames is, for a manualConversion file, the set of type names the package's C# sources
+	// declare (csharpDeclaredTypeNames); nil for any other file.
+	handOwnedTypeNames map[string]bool
 	// emissionExcluded marks a `-tests` variant file the Phase-4D file-exclusion ruling drops from
 	// emission entirely (an Example/Benchmark-only `_test.go`, selectCompileExcludedTestFiles). It
 	// stays in the variant's analysis entry list — pkg.Syntax feeds the shared passes — but no C#
@@ -520,6 +523,9 @@ type Visitor struct {
 	// the non-compiled `.cs.auto` review sibling. Consulted by recordTypeAccessibility, which must
 	// not declare the accessibility of types the hand-written file owns.
 	manualConversion bool
+	// handOwnedTypeNames mirrors the file entry's set: for a hand-owned file, the type names the package's
+	// C# sources declare (funcDeclClass writes a holder only for one of them); nil for any other file.
+	handOwnedTypeNames map[string]bool
 	// sourceFilePath is the ABSOLUTE-able path of the Go file this visitor is converting, kept so
 	// the position map can record the source identity Go itself would have baked for the same build
 	// (goSourceIdentity). Mirrors the file entry, which the driver does not hand back to the writer.

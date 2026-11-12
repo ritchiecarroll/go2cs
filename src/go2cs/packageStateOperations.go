@@ -241,6 +241,7 @@ func newFileVisitor(fset *token.FileSet, packageTypes *types.Package, info *type
 		globalScope:               globalScope,
 		blocks:                    Stack[*strings.Builder]{},
 		manualConversion:          fileEntry.manualConversion,
+		handOwnedTypeNames:        fileEntry.handOwnedTypeNames,
 		sourceFilePath:            fileEntry.filePath,
 		identEscapesHeap:          fileEntry.identEscapesHeap,
 		sstringEligible:           fileEntry.sstringEligible,

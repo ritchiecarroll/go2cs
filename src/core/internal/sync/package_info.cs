@@ -102,7 +102,4 @@ public static partial class sync_package
 // <MethodHolders>
 [GoMethodHost(typeof(sync_package.HashTrieMap<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛHashTrieMap;
 [GoMethodHost(typeof(sync_package.Mutex)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛMutex;
-[GoMethodHost(typeof(sync_package.entry<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛentry;
-[GoMethodHost(typeof(sync_package.indirect<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛindirect;
-[GoMethodHost(typeof(sync_package.node<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛnode;
 // </MethodHolders>

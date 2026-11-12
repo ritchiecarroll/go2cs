@@ -29,6 +29,9 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
+	"os"
+	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -152,10 +155,17 @@ func (v *Visitor) testHolderSuffix(method types.Object, typeObj types.Object) st
 // funcDeclClass names the class funcDecl is emitted into: its receiver type's method holder, or the
 // file's own class for a function.
 func (v *Visitor) funcDeclClass(funcDecl *ast.FuncDecl) string {
-	if holder, typeofTarget := v.methodHolderClass(receiverNamed(v.info, funcDecl), v.info.Defs[funcDecl.Name]); holder != "" {
-		packageLock.Lock()
-		packageMethodHolders[holder] = typeofTarget
-		packageLock.Unlock()
+	named := receiverNamed(v.info, funcDecl)
+
+	if holder, typeofTarget := v.methodHolderClass(named, v.info.Defs[funcDecl.Name]); holder != "" {
+		// A hand-owned file's Go source may declare a type its C# replacement drops (internal/sync's
+		// hashtriemap.cs keeps HashTrieMap and drops entry, indirect and node). The holder's declaration names
+		// its type in `typeof`, so it is written only where the package's C# sources declare the type.
+		if v.handOwnedTypeNames == nil || v.handOwnedTypeNames[named.Obj().Name()] {
+			packageLock.Lock()
+			packageMethodHolders[holder] = typeofTarget
+			packageLock.Unlock()
+		}
 
 		v.fileHasMethodHolder = true
 
@@ -163,6 +173,44 @@ func (v *Visitor) funcDeclClass(funcDecl *ast.FuncDecl) string {
 	}
 
 	return v.fileClassName
+}
+
+// csharpTypeDeclaration matches a C# type declaration and captures its name: a struct, class, interface,
+// record or enum, or a delegate (the name before its parameter list).
+var csharpTypeDeclaration = regexp.MustCompile(`\b(?:struct|class|interface|record|enum)\s+@?(\w+)|\bdelegate\s+[^;(]*?\s@?(\w+)\s*(?:<[^>(]*>)?\s*\(`)
+
+// csharpDeclaredTypeNames answers the names of the types the C# sources of a package declare for target:
+// its directory and the key folders layout L3 compiles for the target. Review siblings and the package
+// information files are not read: the latter declare the accessibility of the converted files' types and
+// may still carry a line a hand-owned file has since taken over. A name the converter renamed for a
+// collision is answered under its Go name as well.
+func csharpDeclaredTypeNames(packageOutputPath string, target string) map[string]bool {
+	names := map[string]bool{}
+	folders := append([]string{"."}, platformLayoutFolders(target)...)
+
+	for _, folder := range folders {
+		paths, _ := filepath.Glob(filepath.Join(packageOutputPath, folder, "*.cs"))
+
+		for _, path := range paths {
+			if base := filepath.Base(path); base == "package_info.cs" || strings.HasPrefix(base, "package_test_info") {
+				continue
+			}
+
+			content, err := os.ReadFile(path)
+
+			if err != nil {
+				continue
+			}
+
+			for _, match := range csharpTypeDeclaration.FindAllStringSubmatch(string(content), -1) {
+				name := match[1] + match[2]
+				names[name] = true
+				names[strings.TrimPrefix(name, ShadowVarMarker)] = true
+			}
+		}
+	}
+
+	return names
 }
 
 // switchClass answers the line that closes the class block open in the file and opens name's, followed by
