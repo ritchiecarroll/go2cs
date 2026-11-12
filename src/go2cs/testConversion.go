@@ -3906,6 +3906,17 @@ func splitWhiteboxVariantRecords(bridgeTypeNames hashset.HashSet[string], bridge
 func writeWhiteboxVariantMetadata(testInfoPath, outputPath, productionClassName, bridgeClassName, goPackageName, internalAnchor, testAnchor string, bridgeTypeNames hashset.HashSet[string], bridgeVariant bool) (string, error) {
 	bridgeAnchored, testAnchored := splitWhiteboxVariantRecords(bridgeTypeNames, bridgeVariant)
 
+	// Both info files compile into the one tests assembly, so each method holder is declared in exactly one
+	// of them (a second declaration is CS0579, a duplicate [GoMethodHost]): the bridge variant's holders, of
+	// types the bridge class declares, in the bridge unit; the other variant's in package_test_info.cs.
+	variantHolders, bridgeHolders, testHolders := packageMethodHolders, map[string]string{}, map[string]string{}
+
+	if bridgeVariant {
+		bridgeHolders = variantHolders
+	} else {
+		testHolders = variantHolders
+	}
+
 	// Both anchored writes below are reference-model files: their anchor class IS the local
 	// type scope, and the production class is a referenced assembly.
 	metadataAnchorLocalTypes = true
@@ -3952,6 +3963,7 @@ func writeWhiteboxVariantMetadata(testInfoPath, outputPath, productionClassName,
 
 		bridgeAnchored.install()
 		metadataAnchorClassPrefix = internalAnchor
+		packageMethodHolders = bridgeHolders
 		writePackageInfoFile(unitPath, true)
 
 		importedTypeAliases, exportedTypeAliases = savedImported, savedExported
@@ -3961,7 +3973,9 @@ func writeWhiteboxVariantMetadata(testInfoPath, outputPath, productionClassName,
 
 	testAnchored.install()
 	metadataAnchorClassPrefix = testAnchor
+	packageMethodHolders = testHolders
 	writePackageInfoFile(testInfoPath, true)
+	packageMethodHolders = variantHolders
 
 	return unitName, nil
 }
