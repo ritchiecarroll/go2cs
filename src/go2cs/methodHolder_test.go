@@ -1,0 +1,516 @@
+// methodHolder_test.go - Gbtc
+// Copyright © 2026 The go2cs Authors. All rights reserved.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+// Use of this source code is governed by the GNU Affero General Public License
+// version 3 only, which can be found in the LICENSE file.
+// Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
+
+package main
+
+import (
+	"go/build"
+	"path/filepath"
+	"runtime"
+	"strings"
+	"testing"
+)
+
+// convertMethodHolderFixture converts a single package made of the given Go files and returns every
+// emitted `.cs` file by name, with line endings normalized. A `_test.go` file is written beside the
+// others and is not converted: the conversion is the production one.
+func convertMethodHolderFixture(t *testing.T, files map[string]string) map[string]string {
+	t.Helper()
+	isolateConverterPathGlobals(t)
+
+	root := t.TempDir()
+	pkgDir := filepath.Join(root, "app")
+
+	writeModuleFile(t, filepath.Join(pkgDir, "go.mod"), "module example.com/app\n\ngo 1.23\n")
+
+	for name, source := range files {
+		writeModuleFile(t, filepath.Join(pkgDir, name), source)
+	}
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{
+		goRoot:              goRoot,
+		goPath:              build.Default.GOPATH,
+		go2csPath:           filepath.Join(root, "runtime"),
+		targetPlatform:      runtime.GOOS + "/" + runtime.GOARCH,
+		indentSpaces:        4,
+		preferVarDecl:       true,
+		useChannelOperators: true,
+	}
+
+	build.Default.GOROOT = options.goRoot
+	build.Default.GOPATH = options.goPath
+
+	outDir := filepath.Join(root, "out")
+
+	if err := processConversion(pkgDir, true, outDir, options); err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
+
+	emitted := map[string]string{"package_info.cs": strings.ReplaceAll(readGenerated(t, filepath.Join(outDir, "package_info.cs")), "\r", "")}
+
+	for name := range files {
+		if strings.HasSuffix(name, "_test.go") {
+			continue
+		}
+
+		csName := strings.TrimSuffix(name, ".go") + ".cs"
+		emitted[csName] = strings.ReplaceAll(readGenerated(t, filepath.Join(outDir, csName)), "\r", "")
+	}
+
+	return emitted
+}
+
+// requireEmitted fails the test for each wanted text the emitted file does not hold, and for each
+// refused text it does.
+func requireEmitted(t *testing.T, name string, emitted string, wanted []string, refused []string) {
+	t.Helper()
+
+	for _, text := range wanted {
+		if !strings.Contains(emitted, text) {
+			t.Errorf("%s does not hold %q\n%s", name, text, emitted)
+		}
+	}
+
+	for _, text := range refused {
+		if strings.Contains(emitted, text) {
+			t.Errorf("%s holds %q\n%s", name, text, emitted)
+		}
+	}
+}
+
+const methodHolderSource = `package main
+
+import "fmt"
+
+const Limit = 7
+
+var Count = 3
+
+type Kind int
+
+func Scale(n int) int { return n * 10 }
+
+type Box struct{ n int }
+
+func (b Box) Limit() int { return b.n + Limit }
+
+func (b *Box) Count() int {
+	Count++
+	return b.n + Count
+}
+
+func (b Box) Kind() Kind { return Kind(b.n) }
+
+func (b Box) Scale() int {
+	f := Scale
+	return Scale(b.n) + f(1)
+}
+
+func (b Box) Plain() int { return b.n + other }
+
+const other = 1
+
+func main() {
+	b := Box{n: 1}
+	limit := Box.Limit
+	count := (*Box).Count
+	fmt.Println(b.Limit(), b.Count(), b.Kind(), b.Scale(), b.Plain(), limit(b), count(&b), Limit, Count, Scale(1))
+}
+`
+
+// A method is a member of its receiver type's holder, a class beside the package class that the file
+// switches into in place, and the holder is declared once in package_info.cs with the type it holds.
+func TestMethodsAreEmittedInTheirReceiverTypesHolder(t *testing.T) {
+	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": methodHolderSource})
+
+	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
+		"using static main_package;\n",
+		"partial class main_package {\n",
+		"\n} partial class mainᴛBox {\n\npublic static nint Limit(this Box b)",
+		"\n} partial class main_package {\n\ninternal static UntypedInt other => 1;",
+		"} // end main_package\n",
+	}, []string{
+		"Δ",
+	})
+
+	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
+		"// <MethodHolders>\n",
+		"[GoMethodHost(typeof(main_package.Box)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛBox;\n",
+		"// </MethodHolders>\n",
+	}, nil)
+}
+
+// A constant, a variable and a function named like a method of the holder are written through the
+// file's alias of its own package class; a name no method of the holder shares stays bare; and no
+// declaration takes a rename because a method shares its name.
+func TestHolderQualifiesThePackageNamesItsMethodsShare(t *testing.T) {
+	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": methodHolderSource})
+
+	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
+		"using main = main_package;\n",
+		"{ return b.n + (nint)main.Limit; }",
+		"main.Count++;",
+		"return b.n + main.Count;",
+		"var f = main.Scale;",
+		"return main.Scale(b.n) + f(1);",
+		"{ return b.n + (nint)other; }",
+		"public static UntypedInt Limit => 7;",
+		"public static nint Count = 3;",
+		"public static nint Scale(nint n)",
+		"public static Kind Kind(this Box b) { return (Kind)b.n; }",
+	}, []string{
+		"main.other",
+		"main_package.Limit",
+	})
+}
+
+// A method expression names the method's static form in the holder.
+func TestMethodExpressionNamesTheHolder(t *testing.T) {
+	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": methodHolderSource})
+
+	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
+		"((Func<Box, nint>)(mainᴛBox.Limit))",
+		"((Func<ж<Box>, nint>)(mainᴛBox.Count))",
+	}, nil)
+}
+
+// A file whose methods share no package name takes no alias line, and a file without a method takes
+// neither line.
+func TestSelfAliasIsDeclaredOnlyWhereAHolderUsesIt(t *testing.T) {
+	emitted := convertMethodHolderFixture(t, map[string]string{
+		"main.go": `package main
+
+import "fmt"
+
+type Box struct{ n int }
+
+func (b Box) Size() int { return b.n + unit }
+
+func main() { fmt.Println(Box{1}.Size(), double(2)) }
+`,
+		"plain.go": `package main
+
+const unit = 1
+
+func double(n int) int { return n * 2 }
+`,
+	})
+
+	requireEmitted(t, "main.cs", emitted["main.cs"], []string{"using static main_package;\n"}, []string{"using main = "})
+	requireEmitted(t, "plain.cs", emitted["plain.cs"], nil, []string{"using main = ", "using static main_package;", "partial class mainᴛ"})
+}
+
+// Where the alias's name means something else, the package class is written out: for a function that
+// declares a variable of that name, and for a holder that declares a method of that name. A function
+// named like its package (Go's main) does not take the name from the alias.
+func TestHolderFallsBackToThePackageClassWhereTheAliasIsShadowed(t *testing.T) {
+	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": `package main
+
+import "fmt"
+
+const Limit = 7
+
+type meter struct{ main int }
+
+func (m meter) Limit() int {
+	main := m.main + 1
+	return main + Limit
+}
+
+func (m meter) Scale(main int) int { return main + Limit }
+
+func (m meter) Count() int { return Limit + m.main }
+
+type odd struct{}
+
+func (o odd) main() int { return 1 }
+
+func (o odd) Limit() int { return Limit + o.main() }
+
+func main() {
+	m := meter{main: 2}
+	fmt.Println(m.Limit(), m.Scale(3), m.Count(), odd{}.Limit())
+}
+`})
+
+	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
+		"return main + (nint)main_package.Limit;",
+		"internal static nint Scale(this meter m, nint main) { return main + (nint)main_package.Limit; }",
+		"internal static nint Count(this meter m) { return (nint)main.Limit + m.main; }",
+		"internal static nint Limit(this odd o) { return (nint)main_package.Limit + o.main(); }",
+	}, nil)
+}
+
+// A package that declares a type of its own name takes no alias: the alias would take the type's name
+// in every holder of the file.
+func TestPackageWithATypeOfItsOwnNameTakesNoSelfAlias(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	root := t.TempDir()
+	pkgDir := filepath.Join(root, "tone")
+
+	writeModuleFile(t, filepath.Join(pkgDir, "go.mod"), "module example.com/tone\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(pkgDir, "tone.go"), `package tone
+
+type tone int
+
+const Base = 100
+
+func (t tone) Base() int { return Base * 2 }
+
+func Play(n int) int { return tone(n).Base() }
+`)
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{
+		goRoot:              goRoot,
+		goPath:              build.Default.GOPATH,
+		go2csPath:           filepath.Join(root, "runtime"),
+		targetPlatform:      runtime.GOOS + "/" + runtime.GOARCH,
+		indentSpaces:        4,
+		preferVarDecl:       true,
+		useChannelOperators: true,
+	}
+
+	build.Default.GOROOT = options.goRoot
+	build.Default.GOPATH = options.goPath
+
+	outDir := filepath.Join(root, "out")
+
+	if err := processConversion(pkgDir, true, outDir, options); err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
+
+	emitted := strings.ReplaceAll(readGenerated(t, filepath.Join(outDir, "tone.cs")), "\r", "")
+
+	requireEmitted(t, "tone.cs", emitted, []string{
+		"} partial class toneᴛtone {",
+		"{ return tone_package.Base * 2; }",
+	}, []string{"using tone = "})
+}
+
+const narrowedRulesSource = `package main
+
+import (
+	"fmt"
+	"math/bits"
+	"sort"
+)
+
+type words []uint64
+
+func (w words) Len() int           { return len(w) }
+func (w words) Less(i, j int) bool { return w[i] < w[j] }
+func (w words) Swap(i, j int)      { w[i], w[j] = w[j], w[i] }
+
+func (w words) cap() int  { return cap(w) + 1 }
+func (w words) bits() int { return bits.Len64(w[0]) }
+func (w words) Sort()     { Sort(w) }
+func (w words) Run() int  { return len(w) }
+
+type other struct{ n int }
+
+func (o other) size(w words) int { return cap(w) + bits.Len64(uint64(o.n)) }
+
+func Sort(data sort.Interface) { sort.Sort(data) }
+
+func Run() int { return 4 }
+
+func main() {
+	w := words{3, 1, 2}
+	w.Sort()
+	run := Run
+	var boxed any = Run
+	_, isFunc := boxed.(func() int)
+	fmt.Println(w, w.cap(), cap(w), w.bits(), bits.Len64(w[0]), other{n: 5}.size(w), run(), isFunc, w.Run())
+}
+`
+
+// The four rules below existed package-wide while every method stood in the package class. Each now
+// holds only inside the holder that declares the method, and two of them hold nowhere.
+
+// A built-in is written through `builtin` only inside the holder that declares a method of its name.
+func TestBuiltinIsQualifiedOnlyInTheHolderThatDeclaresItsName(t *testing.T) {
+	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": narrowedRulesSource})["main.cs"]
+
+	requireEmitted(t, "main.cs", emitted, []string{
+		"internal static nint cap(this words w) { return builtin.cap(w) + 1; }",
+		"internal static nint size(this other o, words w) { return cap(w) + ",
+		"w.cap(), cap(w), ",
+	}, nil)
+
+	if got := strings.Count(emitted, "builtin.cap("); got != 1 {
+		t.Errorf("main.cs qualifies cap through builtin %d times, want 1: only in the holder of words\n%s", got, emitted)
+	}
+}
+
+// An import is written through its package class only inside the holder that declares a method of
+// its name; every other class of the package keeps the alias.
+func TestImportIsQualifiedOnlyInTheHolderThatDeclaresItsName(t *testing.T) {
+	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": narrowedRulesSource})["main.cs"]
+
+	requireEmitted(t, "main.cs", emitted, []string{
+		"internal static nint bits(this words w) { return math.bits_package.Len64(w[0]); }",
+		"cap(w) + bits.Len64((uint64)o.n); }",
+		"w.bits(), bits.Len64(w[0]), ",
+	}, nil)
+
+	if got := strings.Count(emitted, "bits_package.Len64("); got != 1 {
+		t.Errorf("main.cs qualifies bits through its package class %d times, want 1: only in the holder of words\n%s", got, emitted)
+	}
+}
+
+// A method a test file declares stands in a holder of its own, so it changes no production reference:
+// the production file keeps the import's alias and carries no comment about the test.
+func TestATestFilesMethodLeavesTheProductionImportAliasAlone(t *testing.T) {
+	emitted := convertMethodHolderFixture(t, map[string]string{
+		"main.go": `package main
+
+import (
+	"fmt"
+	"math/bits"
+)
+
+type key struct{ b []byte }
+
+func (k key) size() uint64 {
+	hi, lo := bits.Mul64(uint64(len(k.b)), 8)
+	return hi ^ lo
+}
+
+func mix(a, b uint64) uint64 {
+	hi, lo := bits.Mul64(a, b)
+	return hi ^ lo
+}
+
+func main() { fmt.Println(mix(3, 4), key{}.size()) }
+`,
+		"key_test.go": `package main
+
+func (k key) bits() int { return len(k.b) * 8 }
+`,
+	})["main.cs"]
+
+	requireEmitted(t, "main.cs", emitted, []string{"= bits.Mul64(a, b);"}, []string{"bits_package.Mul64", "Fully qualified"})
+
+	if got := strings.Count(emitted, "= bits.Mul64("); got != 2 {
+		t.Errorf("main.cs reads bits through its alias %d times, want 2\n%s", got, emitted)
+	}
+}
+
+// A function named like a method is the only member of its name in the package class, so its value
+// is a plain method group: no delegate type is named for a local, and none is cast to for a box.
+func TestFunctionNamedLikeAMethodIsAPlainMethodGroup(t *testing.T) {
+	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": narrowedRulesSource})["main.cs"]
+
+	requireEmitted(t, "main.cs", emitted, []string{"var run = Run;", "any boxed = Run;"}, []string{"(Func<nint>)(Run)", "Func<nint> run"})
+}
+
+// A call of a function whose argument's type declares a method of the function's name binds the
+// function: the method is no member of the class the call names, so the argument takes no cast.
+func TestCallOfAFunctionNamedLikeItsArgumentsMethodTakesNoCast(t *testing.T) {
+	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": narrowedRulesSource})["main.cs"]
+
+	requireEmitted(t, "main.cs", emitted, []string{"internal static void Sort(this words w) { main.Sort(w); }"}, []string{"(sort.Interface)(w)"})
+}
+
+// A type named like a METHOD of the holder a body stands in. A C# type position reads only types,
+// so the type keeps its bare name in every declaration, literal, conversion and type argument. Two
+// forms read the name as an EXPRESSION first, where the holder's method group binds: a box
+// accessor (`Tag.ᏑValue`, CS0119) and a type-switch label with no binding (`case Tag:`, CS8917).
+// The accessor names the package class, and the label takes the discard form, which is a type
+// position. Outside the holder both forms stay as they were.
+const typeNamedLikeMethodSource = `package main
+
+import "fmt"
+
+type Tag struct {
+	id    int
+	Value int
+}
+
+type Chest struct{ tag Tag }
+
+func (c *Chest) Tag() Tag { return c.tag }
+
+func (c *Chest) Forms(v any) string {
+	ptr := &Tag{id: 3}
+	valueAddr := &ptr.Value
+	*valueAddr += 4
+
+	kind := "other"
+
+	switch v.(type) {
+	case Tag:
+		kind = "tag"
+	case *Tag, []Tag:
+		kind = "tags"
+	}
+
+	return fmt.Sprint(ptr.Value, kind, len([]Tag{*ptr}))
+}
+
+func outside(v any) string {
+	ptr := &Tag{id: 3}
+	valueAddr := &ptr.Value
+	*valueAddr += 4
+
+	switch v.(type) {
+	case Tag:
+		return "tag"
+	}
+
+	return fmt.Sprint(ptr.Value)
+}
+
+func main() {
+	c := &Chest{}
+	fmt.Println(c.Forms(Tag{}), c.Forms(&Tag{}), c.Forms(1), outside(Tag{}), outside(1), c.Tag().id)
+}
+`
+
+func TestTypeNamedLikeAMethodOfItsHolderIsReadAsAType(t *testing.T) {
+	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": typeNamedLikeMethodSource})["main.cs"]
+
+	inside, outside, found := strings.Cut(emitted, "} partial class main_package {")
+
+	if !found {
+		t.Fatalf("main.cs does not return to the package class after the holder:\n%s", emitted)
+	}
+
+	requireEmitted(t, "the holder of Chest", inside, []string{
+		"public static Tag Tag(this ref Chest c) { return c.tag; }",
+		"var ptr = Ꮡ(new Tag(id: 3));",
+		"var valueAddr = ptr.of(main_package.Tag.ᏑValue);",
+		"case Tag _: {",
+		"case ж<Tag> _:",
+		"slice<Tag>(",
+	}, []string{
+		"ptr.of(Tag.ᏑValue)",
+		"case Tag: {",
+	})
+
+	requireEmitted(t, "the package class", outside, []string{
+		"var valueAddr = ptr.of(Tag.ᏑValue);",
+		"case Tag: {",
+	}, []string{
+		"main_package.Tag",
+		"case Tag _:",
+	})
+}
