@@ -375,8 +375,8 @@ func getSanitizedFunctionName(funcName string) string {
 
 	// Handle special exceptions
 	if funcName == "Main" {
-		// C# "Main" method name is reserved, so we need to
-		// shadow it if Go code has a function named "Main"
+		// C# "Main" is the entry point go2cs-gen generates for a program (MainEntryGenerator), so a Go
+		// function named "Main" is shadowed rather than allowed to collide with it.
 		return ShadowVarMarker + "Main"
 	}
 

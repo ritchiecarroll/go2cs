@@ -1,0 +1,21 @@
+package main
+
+import "fmt"
+
+// TS site: internal/core OrElse[T comparable](value, defaultValue T) T { if value != *new(T) { return value }; return
+// defaultValue }, called with a nil pointer (checker.go:9410 headMessage, :11180 node.Expression() of a bare `yield`) (C49).
+func OrElse[T comparable](value T, defaultValue T) T {
+	if value != *new(T) {
+		return value
+	}
+	return defaultValue
+}
+
+type Message struct{ text string }
+
+func main() {
+	var nilMsg *Message
+	def := &Message{"does not satisfy the constraint"}
+	got := OrElse(nilMsg, def)
+	fmt.Println(got == def, got != nil, OrElse(0, 7), OrElse("", "d")) // Go: true true 7 d
+}

@@ -14,7 +14,7 @@ internal static uint32 compute(uint32 p) {
     return r;
 }
 
-internal static partial void Main() {
+internal static partial void main() {
     goǃ(() => compute(poly));
     var stored = ᐸꟷ(done);
     fmt.Printf("%#x\n"u8, stored);

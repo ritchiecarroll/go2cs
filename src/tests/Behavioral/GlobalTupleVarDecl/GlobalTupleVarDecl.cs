@@ -24,7 +24,7 @@ internal static (nint, @string) tupleᴛ1ʗ = pair();
 internal static nint n = tupleᴛ1ʗ.Item1;
 internal static @string s = tupleᴛ1ʗ.Item2;
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(defaultBox.v);
     fmt.Println(n, s);
     fmt.Println(calls);

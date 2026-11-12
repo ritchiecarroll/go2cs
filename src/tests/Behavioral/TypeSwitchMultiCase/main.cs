@@ -96,7 +96,7 @@ internal static @string tag(any x) {
     return "rare";
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(describe(new circle(1)));
     fmt.Println(describe(new square(2)));
     fmt.Println(describe(new dot()));

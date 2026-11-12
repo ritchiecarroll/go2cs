@@ -16,7 +16,7 @@ partial struct Deep {
     internal bufpkg.Nested nested;
 }
 
-internal static void Main() {
+internal static void main() {
     var h = @new<Holder>();
 
     h.state.Buf[2] = 42;

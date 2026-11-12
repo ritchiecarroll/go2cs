@@ -13,7 +13,7 @@ partial struct Pair<A, B> {
     internal B b;
 }
 
-internal static void Main() {
+internal static void main() {
     Box<Box<nint>> nested = default;
     nested.v.v = 42;
     fmt.Println(nested.v.v);

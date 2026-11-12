@@ -142,7 +142,7 @@ partial struct Outer {
     internal ж<ж<Inner>> ptr;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var e = ref heap<MyError>(new MyError(time.Now(), "Hello"), out var Ꮡe);
     var a = new MyCustomError("New One", default, Ꮡe);
 

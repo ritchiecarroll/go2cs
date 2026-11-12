@@ -53,7 +53,7 @@ internal static void direct(any v) {
         fmt.Println("no direct");
     }
 }
-internal static void Main() {
+internal static void main() {
     commandContext(new harness(name: "cmd", deadline: 100));
 
     direct(new gate(name: "v"));

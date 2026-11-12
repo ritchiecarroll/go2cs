@@ -18,7 +18,7 @@ partial struct Outer {
     internal @string tag;
 }
 
-internal static void Main() {
+internal static void main() {
     var o = Ꮡ(new Outer(Inner: Ꮡ(new Inner()), tag: "t"));
     o.Add(5);
     o.Add(3);

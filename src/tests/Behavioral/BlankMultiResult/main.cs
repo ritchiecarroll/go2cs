@@ -18,7 +18,7 @@ internal static (nint lo, nint) keyed(nint x, nint y) {
     return (y, x);
 }
 
-internal static void Main() {
+internal static void main() {
     var (a, b) = match(5, 2);
     fmt.Println(a, b);
     var (c, d) = match(1, 9);

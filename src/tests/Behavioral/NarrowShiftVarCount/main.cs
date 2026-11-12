@@ -10,7 +10,7 @@ internal const uint16 tcw = 40000;
 
 partial struct nb /*num:byte*/;
 
-internal static void Main() {
+internal static void main() {
     nuint k = 1;
     nint ki = 9;
     byte b = 1;

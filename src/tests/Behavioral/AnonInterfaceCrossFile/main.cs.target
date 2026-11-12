@@ -17,7 +17,7 @@ internal static @string Name(this ref box b) {
     return b.label;
 }
 
-internal static void Main() {
+internal static void main() {
     var b = Ꮡ(new box(label: "widget", n: 42));
     fmt.Println(describe(new boxжdescribe_thing(b)));
 

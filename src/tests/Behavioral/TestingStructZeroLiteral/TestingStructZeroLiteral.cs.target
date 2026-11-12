@@ -5,7 +5,7 @@ using testing = testing_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var t = Ꮡ(new testing.T());
     var m = Ꮡ(new testing.M());
     var f = Ꮡ(new testing.F());

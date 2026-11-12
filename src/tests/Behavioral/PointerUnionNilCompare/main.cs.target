@@ -64,7 +64,7 @@ partial struct holderOf<P, T> {
 
 internal static bool empty<P, T>(this holderOf<P, T> h) { return GoReflect.IsNilGoValue(h.p); }
 
-internal static void Main() {
+internal static void main() {
     var n = Ꮡ(new ast.Node(Kind: 4));
     fmt.Println(describe(n), describe(Ꮡ(new ast.Symbol(Name: "x"))), describe(Ꮡ(new Type(ID: 9))));
     fmt.Println(describe(zero<ж<Type>>()), describe<ж<ast.Node>>(nil), present(n), present<ж<ast.Symbol>>(nil));

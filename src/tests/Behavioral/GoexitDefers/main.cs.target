@@ -21,7 +21,7 @@ internal static void exitFromHelper(channel/*<-*/<@string> log) {
     finally { ᒐ.Run(); }
 }
 
-internal static partial void Main() {
+internal static partial void main() {
     var log = new channel<@string>(16);
     var done = new channel<EmptyStruct>(0);
 

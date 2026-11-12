@@ -67,7 +67,7 @@ internal static void signalDone(params Span<channel<EmptyStruct>> chansʗp) {
     }
 }
 
-internal static partial void Main() {
+internal static partial void main() {
     var c = run();
     foreach (var (_, s) in range(order)) {
         fmt.Println(s);

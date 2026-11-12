@@ -90,7 +90,7 @@ public static @string IfaceShadowEmbed(this ref Box b, ж<Box> other) {
     return name;
 }
 
-internal static void Main() {
+internal static void main() {
     var recv = Ꮡ(new Thing(val: 5, inner: new Inner(n: 3)));
     var other = Ꮡ(new Thing(val: 4, inner: new Inner(n: 2)));
 

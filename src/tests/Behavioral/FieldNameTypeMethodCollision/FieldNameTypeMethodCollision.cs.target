@@ -22,7 +22,7 @@ internal static @string describe(this ΔLabel l) {
     return fmt.Sprintf("%s@%d"u8, l.ΔΔLabel, l.Resource);
 }
 
-internal static void Main() {
+internal static void main() {
     var e = new @event(kind: 7, label: "cpu");
     var l = e.Label();
     fmt.Println(l.ΔΔLabel, l.Resource);

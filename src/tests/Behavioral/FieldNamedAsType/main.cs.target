@@ -27,7 +27,7 @@ internal static slice<ж<Node>> buildList() {
     ];
 }
 
-internal static void Main() {
+internal static void main() {
     var root = new Node(value: 1);
     ref var a = ref heap<Node>(new Node(value: 2), out var Ꮡa);
     ref var b = ref heap<Node>(new Node(value: 3), out var Ꮡb);

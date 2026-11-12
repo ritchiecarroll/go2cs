@@ -438,10 +438,12 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
     // a value-type key — the overwhelmingly common shape, and the one PerfMap measures — this test
     // and every nil-slot branch it guards are folded away entirely: those instantiations compile to
     // exactly the code they had before nil keys were supported. Only a reference-typed key (`any`,
-    // an interface, `*T`, a func/map/slice-typed key) pays a null check.
+    // an interface, `*T`, a func/map/slice-typed key) pays a null check. A POINTER key type also routes
+    // the nil literal's NilBox to the slot: it and a zero's null are one Go nil (PointerNilIdentity), so a
+    // `map[*T]V` holds one nil key however the nil was made. An interface key type keeps them apart.
     private static bool isNilKey(TKey key)
     {
-        return !typeof(TKey).IsValueType && (object?)key is null;
+        return !typeof(TKey).IsValueType && ((object?)key is null || PointerNilIdentity<TKey>.IsPointerType && PointerNilIdentity<TKey>.IsNil(key));
     }
 
     /// <inheritdoc />

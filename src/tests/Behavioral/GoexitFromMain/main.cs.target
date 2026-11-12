@@ -27,7 +27,7 @@ partial struct armsᴛ1 /*dyn*/ {
     new("f: the Goexit reaches main through iter.Pull's next", armF)
 ]; }
 
-internal static void Main() {
+internal static void main() {
     @string arm = Δos.Getenv("GOEXIT_MAIN_ARM"); if (arm != ""u8) {
         foreach (var (_, a) in range(arms)) {
             if (a.name[..1] == arm) {

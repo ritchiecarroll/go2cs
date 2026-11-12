@@ -44,7 +44,7 @@ internal static partial (uint32, @unsafe.Pointer) advance(@unsafe.Pointer fd, ui
 
 internal static partial ж<uintptr> same(ж<uintptr> p) { return p; }
 
-internal static void Main() {
+internal static void main() {
     ref var x = ref heap(new uintptr(), out var Ꮡx);
     x = 42;
     fmt.Println(readViaParam(Ꮡx));

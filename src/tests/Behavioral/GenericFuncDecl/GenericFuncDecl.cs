@@ -8,7 +8,7 @@ public static (T, T) Swap<T>(T a, T b) {
     return (b, a);
 }
 
-internal static void Main() {
+internal static void main() {
     nint a = 10;
     nint b = 20;
     (a, b) = Swap<nint>(a, b);

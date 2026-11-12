@@ -21,7 +21,7 @@ internal static (nint, nint) sieve(nint n) {
     return (count, sum);
 }
 
-internal static void Main() {
+internal static void main() {
     var start = time.Now().UnixNano();
 
     nint count = 0;

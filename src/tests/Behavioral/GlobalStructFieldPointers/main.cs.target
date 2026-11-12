@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var options = slice<option>([
         new("fast", ᏑFeatures.of(Featuresᴛ1.ᏑHasFast)),
         new("wide", ᏑFeatures.of(Featuresᴛ1.ᏑHasWide))

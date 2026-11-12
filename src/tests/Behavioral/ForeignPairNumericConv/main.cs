@@ -8,7 +8,7 @@ partial class main_package {
 
 partial struct LocalID /*num:uintptr*/;
 
-internal static void Main() {
+internal static void main() {
     var tok = convlib.NewToken(0x2A);
 
     var h = (convlib.Handle)(uintptr)tok;

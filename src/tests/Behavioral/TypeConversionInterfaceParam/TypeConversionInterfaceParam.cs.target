@@ -21,7 +21,7 @@ public static void Process(this Processor p, DataProcessor_data data) {
     fmt.Printf("Processing ID: %d, Name: %s, Valid: %t\n"u8, data.ID, data.Name, data.Valid);
 }
 
-internal static void Main() {
+internal static void main() {
     DataProcessor p = default;
     p = new Processor();
 

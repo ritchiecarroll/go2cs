@@ -101,7 +101,7 @@ internal static partial void deferred() {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     siblings();
     nested();
     second();

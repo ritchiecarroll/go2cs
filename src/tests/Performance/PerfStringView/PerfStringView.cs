@@ -34,7 +34,7 @@ internal static slice<byte> keyword() {
     return b;
 }
 
-internal static void Main() {
+internal static void main() {
     var start = time.Now().UnixNano();
 
     nint total = run(20000000);

@@ -17,7 +17,7 @@ partial struct pix {
     public uint8 A;
 }
 
-internal static void Main() {
+internal static void main() {
     uint8 a = 200;
     uint8 b = 100;
 

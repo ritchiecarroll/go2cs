@@ -399,6 +399,27 @@ if ($skippedExclusive.Count -gt 0) {
     $skippedExclusive | ForEach-Object { Write-Host "    $($_.Name) [$($_.Platforms)]" -ForegroundColor DarkCyan }
 }
 
+# go2cs.options: a behavioral project's EXTRA converter arguments, one per line, mirrored from the C# instruments' one
+# shared reader (tests/BehavioralPackages.cs, ConverterOptions). It may carry -warn=<codes> and nothing else; any other
+# line stops the run by name. A nested sub-library takes its PROJECT's options (the file sits at the project root).
+# repoguard's TestBehavioralHarnessReadsConverterOptions fails by name if this call site stops reading it.
+function Get-ConverterOptions([string]$packageDir) {
+    $relative = [IO.Path]::GetRelativePath($behavioral, $packageDir)
+    $projectDir = Join-Path $behavioral (($relative -split '[\\/]')[0])
+    $file = Join-Path $projectDir 'go2cs.options'
+    $options = [System.Collections.Generic.List[string]]::new()
+    if (-not (Test-Path -LiteralPath $file)) { return ,$options }
+    foreach ($raw in Get-Content -LiteralPath $file) {
+        $line = $raw.Trim()
+        if ($line.Length -eq 0) { continue }
+        if ($line -notmatch '^-warn=GO2CS\d{4}(,GO2CS\d{4})*$') {
+            throw "${file}: `"$line`" is not an allowed converter option (only -warn=<code>[,<code>...])"
+        }
+        $options.Add($line)
+    }
+    return ,$options
+}
+
 $savedEAP = $ErrorActionPreference
 $ErrorActionPreference = 'Continue'
 $unmeasured = @()
@@ -408,7 +429,8 @@ try {
     # working tree a REAL run has already dirtied, which is what makes controlling it cheap.
     if ($AliasDriftCheckOnly) { $measurable = @() }
     foreach ($proj in $measurable) {
-        $lines = @(& $go2csExe -go2cspath $go2csRoot $proj.FullName 2>&1 | ForEach-Object { "$_" })
+        $converterOptions = Get-ConverterOptions $proj.FullName
+        $lines = @(& $go2csExe @converterOptions -go2cspath $go2csRoot $proj.FullName 2>&1 | ForEach-Object { "$_" })
         # Report the path relative to the behavioral root: a bare .Name is ambiguous for nested
         # sub-libraries (three of them are called "inner", two "latelib").
         $rel = Get-RelativeDisplayPath $proj.FullName $behavioral

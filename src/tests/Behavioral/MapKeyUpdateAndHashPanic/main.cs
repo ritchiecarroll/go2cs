@@ -279,7 +279,7 @@ internal static void reflectSide() {
     }
 }
 
-internal static void Main() {
+internal static void main() {
     keyUpdate();
     nanKeys();
     rangeUnderOverwrite();

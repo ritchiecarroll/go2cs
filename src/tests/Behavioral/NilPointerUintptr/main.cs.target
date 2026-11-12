@@ -14,7 +14,7 @@ internal static ref T global => ref ((StaticBox<T>)Ꮡglobal).ValueSlot;
 internal static uintptr gPtr = (uintptr)Ꮡglobal;
 internal static uintptr gNil = (uintptr)(@unsafe.Pointer)default;
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(gPtr != 0);
     fmt.Println(gNil == 0);
 

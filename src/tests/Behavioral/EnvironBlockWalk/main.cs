@@ -25,7 +25,7 @@ internal static readonly @string prefix = "GO2CS_ENVPROBE_"u8;
 
 internal static readonly @string hiddenName = "=GO2CSENVPROBEHIDDEN"u8;
 
-internal static void Main() {
+internal static void main() {
     var hiddenSet = os.Setenv(hiddenName, "hid") == nil;
 
     var before = syscall.Environ();

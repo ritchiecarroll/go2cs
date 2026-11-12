@@ -76,7 +76,7 @@ internal static void viaPointer(ж<path> Ꮡp) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     var s = Ꮡ(new state(cur: new path("orig")));
     s.fieldOfPointer(1);
     s.cur = new path("orig");

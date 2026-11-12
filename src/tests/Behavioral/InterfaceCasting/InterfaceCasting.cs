@@ -112,7 +112,7 @@ internal static (Animal, @string) pick(nint kind) {
 
 public static Animal Self(this ж<Cat> Ꮡc) { return new CatжAnimal(Ꮡc); }
 
-internal static void Main() {
+internal static void main() {
     var packᴷ = new stackAppend<Animal>();
 
     error err = default;

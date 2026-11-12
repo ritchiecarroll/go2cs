@@ -23,7 +23,7 @@ internal static (@string, @string) pick(slice<@string> spans, PID p) {
     return (spans[(nint)(p)], spans[(nint)(p - 1)]);
 }
 
-internal static void Main() {
+internal static void main() {
     var dense = slice<@string>(["a", "b", "c", "d", "e", "f"]);
     var (x, y) = lookup(dense, (uint64)5);
     fmt.Println(x, y);

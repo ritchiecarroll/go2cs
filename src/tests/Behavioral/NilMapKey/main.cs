@@ -10,7 +10,7 @@ partial struct myErr {
 
 internal static @string Error(this ref myErr e) { return e.msg; }
 
-internal static void Main() {
+internal static void main() {
     var m = new map<any, @string>();
 
     m[default] = "nil-key";

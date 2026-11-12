@@ -41,7 +41,7 @@ internal static Alias viaAlias(bool ok) {
     return aliasedˢ;
 }
 
-internal static void Main() {
+internal static void main() {
     var (p0, net0) = lookup(false);
     var (p1, net1) = lookup(true);
 

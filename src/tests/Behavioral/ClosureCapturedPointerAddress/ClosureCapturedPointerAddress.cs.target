@@ -13,7 +13,7 @@ internal static void run(Action f) {
     f();
 }
 
-internal static void Main() {
+internal static void main() {
     var head = Ꮡ(new node(v: 1, next: Ꮡ(new node(v: 2, next: Ꮡ(new node(v: 3, next: nil))))));
     ref var mToFlush = ref heap<ж<node>>(head, out var ᏑmToFlush);
 

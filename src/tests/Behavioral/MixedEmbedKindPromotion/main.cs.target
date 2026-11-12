@@ -50,7 +50,7 @@ partial interface greetExtra {
     nint Extra();
 }
 
-internal static void Main() {
+internal static void main() {
     var c = Ꮡ(new counter());
     var m = Ꮡ(new mixed(c, new hello("world")));
 

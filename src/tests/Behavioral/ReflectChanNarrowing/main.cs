@@ -29,7 +29,7 @@ internal static channel<nint> returnsBoth() {
     return new channel<nint>(0);
 }
 
-internal static void Main() {
+internal static void main() {
     /*<-*/channel<nint> vr = new channel<nint>(0).AsRecvOnly();
     channel/*<-*/<nint> vs = new channel<nint>(0).AsSendOnly();
     fmt.Println("var-init recv:", dirOf(vr), "| send:", dirOf(vs));

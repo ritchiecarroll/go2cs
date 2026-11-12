@@ -86,7 +86,7 @@ internal static partial nint constVarInitShadow() {
 
 internal static partial nint constUnshadowedElsewhere() { return mlkemQ; }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(constSelfInitShadow(), constNestedInitShadow(), constVarInitShadow(), constUnshadowedElsewhere());
     fmt.Println(collisionGlobalShadow());
     fmt.Println(plainGlobalShadow());

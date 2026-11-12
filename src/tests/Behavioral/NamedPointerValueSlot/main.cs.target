@@ -44,7 +44,7 @@ internal static void pointer() {
     fmt.Println("pointer set:", (pp.ValueSlot).Value, ip.Value);
 }
 
-internal static void Main() {
+internal static void main() {
     namedMap();
     unnamedMap();
     Δslice();

@@ -9,7 +9,7 @@ partial struct arenaIdx /*num:nuint*/;
 partial struct nameOff /*num:int32*/;
 partial struct idx /*num:nuint*/;
 
-internal static void Main() {
+internal static void main() {
     int32 procs = 5;
     var a = (traceArg)(uint64)procs;
     fmt.Println((uint64)a);

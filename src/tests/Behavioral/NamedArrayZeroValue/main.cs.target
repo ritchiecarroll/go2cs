@@ -29,7 +29,7 @@ internal static (nn r, ns s) namedResult() {
     return (r, s);
 }
 
-internal static void Main() {
+internal static void main() {
     nn d = default;
     ns sv = default;
     nb b = default;

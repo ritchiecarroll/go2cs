@@ -149,7 +149,7 @@ internal static void panicky() {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     spawned();
     deferred();
     panicky();

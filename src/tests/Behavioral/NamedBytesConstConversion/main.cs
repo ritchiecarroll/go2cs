@@ -21,7 +21,7 @@ internal static void show(@string name, slice<byte> b) { fmt.Printf("%s: %q len=
 
 internal static lib.Value ret() { return (lib.Value)slice<byte>((@string)"returned"u8); }
 
-internal static void Main() {
+internal static void main() {
     show("local literal", (Value)slice<byte>((@string)"null"u8));
     show("local const", (Value)slice<byte>(@null));
     show("local concat", (Value)slice<byte>("nu"u8 + "ll"u8));

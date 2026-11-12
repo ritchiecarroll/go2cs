@@ -30,7 +30,7 @@ internal static ж<node> firstOr(this ж<node> Ꮡc, slice<ж<node>> chain) {
     return Ꮡc;
 }
 
-internal static void Main() {
+internal static void main() {
     var root = Ꮡ(new node(name: "root"));
     var a = Ꮡ(new node(name: "a"));
     var b = Ꮡ(new node(name: "b"));

@@ -25,7 +25,7 @@ internal static partial (nint n, bool ok) run() {
     return (n, ok);
 }
 
-internal static void Main() {
+internal static void main() {
     var (n, ok) = run();
     fmt.Println(n, ok);
 }

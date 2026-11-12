@@ -9,7 +9,7 @@ internal static map<@string, any> registry() {
     return new map<@string, any>{["w"] = PromotedValueEmbedLib.New("boxed").OrTypedNil()};
 }
 
-internal static void Main() {
+internal static void main() {
     var m = registry();
     fmt.Println(m["w"]._<ж<PromotedValueEmbedLib.Widget>>().Name());
     fmt.Println(PromotedValueEmbedLib.New("direct").Name());

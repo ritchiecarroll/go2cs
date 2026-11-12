@@ -26,7 +26,7 @@ internal partial interface report_r /*dyn*/ {
 
 internal static @string report(report_r r) { return r.Label(); }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(Report(new named("a")));
     fmt.Println(report(new named("b")));
 }

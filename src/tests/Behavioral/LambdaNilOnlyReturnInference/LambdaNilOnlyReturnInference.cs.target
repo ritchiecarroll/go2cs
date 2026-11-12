@@ -20,7 +20,7 @@ internal static Func<nint, nint> applyFunc(Func<Func<nint, nint>> f) { return f(
 
 internal static error applyErr(Func<nint, error> f) { return f(1); }
 
-internal static void Main() {
+internal static void main() {
     var g = slice<Value> (slice<Value> @in) => default;
     fmt.Println("A1 slice result:", g(default) == nil, len(g(default)));
 

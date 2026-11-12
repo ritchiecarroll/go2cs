@@ -71,7 +71,7 @@ internal static array<byte> resetVia(ж<DeepHash> p) {
     return acc.Clone();
 }
 
-internal static void Main() {
+internal static void main() {
     var h = Ꮡ(new Hash());
     h.Write(slice<byte>("go2cs"u8));
     fmt.Println(h.Sum(default));

@@ -52,7 +52,7 @@ internal static slice<slice<@string>> sparseRows = [
     new golib.SparseArray<@string>{[1] = "one"}.slice()
 ];
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(len(order[rA]), len(order[rB]), len(order[rC]));
     fmt.Println(order[rC][0], order[rC][1]);
     fmt.Println(grid[0][1], grid[1][0]);

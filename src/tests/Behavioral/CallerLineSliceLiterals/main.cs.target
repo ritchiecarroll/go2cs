@@ -54,7 +54,7 @@ internal static void show(@string label, params ꓸꓸꓸnint valuesʗp) {
     }
 }
 
-internal static void Main() {
+internal static void main() {
     var local = slice<nint>([line(),
         line()
     ]);

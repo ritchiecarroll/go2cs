@@ -23,7 +23,7 @@ partial struct age /*num:nint*/;
 
 internal static bool Less(this age a, age b) { return a < b; }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(new lib.Ord2<age>(V: 3).Below(5), new lib.Ord<age>(V: 3).Below(2));
     fmt.Println(new lib.Ord2<lib.жLesser<mnode>>(V: Ꮡ(new mnode(1))).Below(Ꮡ(new mnode(0))), new lib.Ord<lib.жOrd_T<mnode>>(V: Ꮡ(new mnode(1))).Below(Ꮡ(new mnode(4))));
 

@@ -66,7 +66,7 @@ internal static void nonCaptureControl() {
     fmt.Println("control:", w.c.n);
 }
 
-internal static void Main() {
+internal static void main() {
     localStruct();
     valueParam(new holder());
     typeSwitchCase(new holder());

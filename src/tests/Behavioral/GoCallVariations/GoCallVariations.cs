@@ -5,7 +5,7 @@ using time = time_package;
 
 partial class main_package {
 
-internal static partial void Main() {
+internal static partial void main() {
     goǃ(() => fmt.Println("First"));
     goǃ(() => fmt.Println("Second"));
     goǃ(() => fmt.Println("Third"));

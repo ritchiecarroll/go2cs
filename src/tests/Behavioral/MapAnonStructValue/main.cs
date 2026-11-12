@@ -17,7 +17,7 @@ partial struct kindsᴛ1 /*dyn*/ {
 
 internal static nint triple(nint n) { return n * 3; }
 
-internal static void Main() {
+internal static void main() {
     var a = kinds[0x0001];
     fmt.Println(a.name, a.size, a.scale(a.size));
 

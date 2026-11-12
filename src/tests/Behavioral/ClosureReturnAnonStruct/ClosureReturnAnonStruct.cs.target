@@ -18,7 +18,7 @@ internal static void closureReturningAnonStruct() {
     fmt.Printf("entries: %s=%d %s=%d total=%d\n"u8, e1.name, e1.size, e2.name, e2.size, e1.size + e2.size);
 }
 
-internal static void Main() {
+internal static void main() {
     closureReturningAnonStruct();
 }
 

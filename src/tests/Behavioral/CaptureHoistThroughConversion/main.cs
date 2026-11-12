@@ -27,7 +27,7 @@ internal static Handler makeHandler(slice<@string> g) {
     });
 }
 
-internal static partial void Main() {
+internal static partial void main() {
     var a = slice<@string>(["a="]);
     var aʗ1 = a;
     goǃ(ᴛ1 => serve(ᴛ1, 10), new HandlerᴠIface(new Handler((nint i) => {

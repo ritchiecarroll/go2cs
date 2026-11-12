@@ -56,7 +56,7 @@ internal static @string describe(this ж<ledger> Ꮡl) {
     return "ledger:"u8 + l.tag;
 }
 
-internal static void Main() {
+internal static void main() {
     var person = new Person(name: "Dr. Michał", age: 29);
     fmt.Println(person);
     fmt.Println(person.IsDr());

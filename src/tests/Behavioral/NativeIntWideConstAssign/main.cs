@@ -16,7 +16,7 @@ internal static partial (uintptr, nuint, nint) run() {
     return (p, u, n);
 }
 
-internal static void Main() {
+internal static void main() {
     var (p, u, n) = run();
     fmt.Println(p);
     fmt.Println(u);

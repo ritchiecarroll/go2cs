@@ -9,7 +9,7 @@ partial struct node {
     internal nint y;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var v = ref heap<node>(new node(x: 5, y: 6), out var Ꮡv);
     var node = Ꮡv;
 

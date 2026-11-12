@@ -31,7 +31,7 @@ internal static void report(@string label, @string s, bool ok) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string rootˢ = "root"u8;
 
-internal static void Main() {
+internal static void main() {
     ref var d = ref heap(new dirLike(), out var Ꮡd);
     d = rootˢ;
 

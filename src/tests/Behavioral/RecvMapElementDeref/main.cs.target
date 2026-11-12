@@ -20,7 +20,7 @@ internal static registry clone(this ref registry r) {
     return r;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var a = ref heap<nint>(out var Ꮡa);
     a = 1;
     ref var b = ref heap<nint>(out var Ꮡb);

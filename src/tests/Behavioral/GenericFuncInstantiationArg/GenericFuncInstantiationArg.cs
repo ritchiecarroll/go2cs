@@ -25,7 +25,7 @@ internal static any returned() {
     return pick<@string>;
 }
 
-internal static void Main() {
+internal static void main() {
     var pf = pick<@string>;
     fmt.Println("control:", reflect.TypeOf((pf).OrTypedNilFunc()).String(), pf(["a", "b", "c"]));
 

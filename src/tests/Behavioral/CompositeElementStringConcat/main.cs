@@ -10,7 +10,7 @@ internal partial struct main_rec /*dyn*/ {
     internal @string a, b;
 }
 
-internal static void Main() {
+internal static void main() {
     @string prefix = "go";
 
     var typedSlice = slice<@string>([prefix + "-a"u8, prefix + "-b"u8]);

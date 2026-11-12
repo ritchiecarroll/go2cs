@@ -8,7 +8,7 @@ partial struct Size /*num:nuint*/;
 
 internal static Size total => 3;
 
-internal static void Main() {
+internal static void main() {
     var s = new slice<nint>((nint)(total));
     foreach (var i in range(len(s))) {
         s[i] = i * i;

@@ -73,7 +73,7 @@ internal static void selectEscapeMixed() {
     }}
 }
 
-internal static void Main() {
+internal static void main() {
     selectEscape();
     selectEscapeCommaOk();
     selectEscapeMixed();

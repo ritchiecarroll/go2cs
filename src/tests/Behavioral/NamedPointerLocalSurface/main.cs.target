@@ -20,7 +20,7 @@ partial struct holder {
 
 internal static uint8 first(ref flagSet o) { return o[0]; }
 
-internal static void Main() {
+internal static void main() {
     var p = new PP(Ꮡ(new point(x: 4)));
     p.y = p.x + 1;
     fmt.Println(p.x, p.y);

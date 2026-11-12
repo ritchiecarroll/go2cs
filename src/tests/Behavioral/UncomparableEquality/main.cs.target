@@ -86,7 +86,7 @@ internal partial struct main_nestedComparable /*dyn*/ {
     public array<nint> A = new(2);
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("== uncomparable dynamic types: Go panics ==");
 
     any m = new map<@string, nint>{["a"] = 1};

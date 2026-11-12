@@ -23,7 +23,7 @@ internal static partial nint run() {
     return total;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(run());
 }
 

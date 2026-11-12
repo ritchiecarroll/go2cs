@@ -11,7 +11,7 @@ internal static UntypedInt letter => /* 'c' */ 99;
 
 internal static (rune, bool) pair() { return ('p', true); }
 
-internal static void Main() {
+internal static void main() {
     var noArgs = () => {
     };
     var square = (int32 x) => x * x;
