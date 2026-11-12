@@ -185,6 +185,7 @@ public sealed partial class TwinGenerator
                 .Append(" unbound=").Append(elsewhere.Count(site => site.Unbound))
                 .Append(" calls=").Append(elsewhere.Count).Append("\r\n");
             ReportIface(report);
+            ReportSiblings(report);
 
             foreach (IGrouping<string, Candidate> reason in m_ordered.Where(candidate => candidate.Refusal is not null).GroupBy(candidate => candidate.Refusal!).OrderBy(group => group.Key, StringComparer.Ordinal))
                 report.Append("// refused ").Append(reason.Key).Append('=').Append(reason.Count()).Append(" blocked=").Append(reason.Count(candidate => candidate.Parks)).Append("\r\n");

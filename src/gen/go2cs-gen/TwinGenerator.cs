@@ -52,11 +52,18 @@ public sealed partial class TwinGenerator : ISourceGenerator
     {
     }
 
-    public void Execute(GeneratorExecutionContext context)
+    public void Execute(GeneratorExecutionContext context) =>
+        Execute(context, typeof(TwinGenerator));
+
+    // GoTwinsSiblings=last (B4) hands the work to ZTwinGenerator, which the compiler runs after every sibling.
+    internal static void Execute(GeneratorExecutionContext context, Type self)
     {
         AnalyzerConfigOptions options = context.AnalyzerConfigOptions.GlobalOptions;
 
         if (!options.TryGetValue("build_property.GoTwins", out string? on) || !string.Equals(on, "true", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        if (SiblingMemo.Last(options) != (self == typeof(ZTwinGenerator)))
             return;
 
         bool goSites = !(options.TryGetValue("build_property.GoTwinsGo", out string? go) && string.Equals(go, "false", StringComparison.OrdinalIgnoreCase));
@@ -69,7 +76,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         bool ifaceAll = options.TryGetValue("build_property.GoTwinsIfaceAll", out string? all) && string.Equals(all, "true", StringComparison.OrdinalIgnoreCase);
 
-        new Run(context, goSites, ifaceShape, ifaceAll).Execute();
+        new Run(context, goSites, ifaceShape, ifaceAll) { Self = self }.Execute();
     }
 
     internal sealed partial class Run(GeneratorExecutionContext context, bool goSites, IfaceShape ifaceShape, bool ifaceAll)
@@ -93,17 +100,16 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         internal void Execute()
         {
-            // The sibling generators run first, nested, so that a call to a member they add (a receiver overload,
-            // an interface implementation) binds: a generator never sees another generator's output otherwise.
-            ISourceGenerator[] siblings = typeof(TwinGenerator).Assembly.GetTypes()
-                .Where(type => type != typeof(TwinGenerator) && !type.IsAbstract && typeof(ISourceGenerator).IsAssignableFrom(type) &&
-                               type.GetCustomAttribute<GeneratorAttribute>() is not null)
-                .OrderBy(type => type.FullName, StringComparer.Ordinal)
-                .Select(type => (ISourceGenerator)Activator.CreateInstance(type))
-                .ToArray();
+            // A call to a member a sibling generator adds (a receiver overload, an interface implementation) must
+            // bind, and a generator never sees another generator's output. Two ways to get it (B4): the siblings'
+            // own output of this run, kept by SiblingMemo (GoTwinsSiblings=memo), or a second run of them in a
+            // nested driver (the form B2 and B3 measured, and the fallback when the memo holds nothing).
+            m_watch = System.Diagnostics.Stopwatch.StartNew();
 
-            GeneratorDriver driver = CSharpGeneratorDriver.Create(siblings, Context.AdditionalFiles, (CSharpParseOptions)Context.ParseOptions, Context.AnalyzerConfigOptions);
-            driver.RunGeneratorsAndUpdateCompilation(Context.Compilation, out m_augmented, out _, Context.CancellationToken);
+            if (!AddSiblingsFromMemo())
+                AddSiblingsNested();
+
+            m_siblingMs = m_watch.ElapsedMilliseconds;
 
             ReadRefusals();
 
@@ -137,6 +143,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
             foreach (Candidate candidate in m_ordered)
                 candidate.GoOnly = candidate.Parks && !candidate.Sites.Any(site => site.Direct && ShouldAwait(site));
 
+            m_analysisMs = m_watch.ElapsedMilliseconds - m_siblingMs;
             Emit();
         }
 

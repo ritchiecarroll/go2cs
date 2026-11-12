@@ -31,7 +31,7 @@ public static class GeneratedSource
     /// Adds <paramref name="source"/> as <paramref name="hintName"/>, normalized by <see cref="Normalize"/>.
     /// </summary>
     public static void AddGeneratedSource(this GeneratorExecutionContext context, string hintName, string source) =>
-        context.AddSource(hintName, Normalize(source));
+        context.AddSource(hintName, TwinGenerator.SiblingMemo.Record(context, hintName, Normalize(source)));
 
     /// <summary>
     /// Adds <paramref name="source"/> as <paramref name="hintName"/>, normalized by <see cref="Normalize"/>.

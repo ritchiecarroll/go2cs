@@ -37,7 +37,10 @@
     interface twin shape and GoTwinsIfaceAll=true twins every interface member; from the command line they are
     given as GoTwinsForIface and GoTwinsForIfaceAll, which reach only the projects GoTwinsFor names. GoAotFor
     publishes the named projects with Native AOT: a PublishAot on the command line reaches the netstandard2.0
-    generator project and fails it.
+    generator project and fails it. GoTwinsSiblings (B4) picks how the twin generator sees its siblings' output:
+    unset runs them a second time in a nested driver, memo reads what they wrote and nests the late ones, last
+    does the twin work under ZTwinGenerator, after every sibling, and runs nothing twice. GoTwinsTiming=true
+    adds the generator's stopwatch to its report. Both are read from the environment as well.
   -->
   <PropertyGroup Condition="'$(GoAotFor)' != '' and $([System.String]::Copy(';$(GoAotFor);').Contains(';$(MSBuildProjectName);'))">
     <PublishAot>true</PublishAot>
@@ -54,6 +57,8 @@
     <CompilerVisibleProperty Include="GoTwinsGo" />
     <CompilerVisibleProperty Include="GoTwinsIface" />
     <CompilerVisibleProperty Include="GoTwinsIfaceAll" />
+    <CompilerVisibleProperty Include="GoTwinsSiblings" />
+    <CompilerVisibleProperty Include="GoTwinsTiming" />
   </ItemGroup>
   <ItemGroup Condition="'$(GoTwinsRefuse)' != ''">
     <AdditionalFiles Include="$(GoTwinsRefuse)" />
