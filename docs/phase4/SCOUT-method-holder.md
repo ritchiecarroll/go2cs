@@ -691,3 +691,56 @@ re-baseline across a change to exported names therefore converts each dependency
 or runs the whole set twice. Depth of directory is not the order: two sibling packages can depend on each
 other's output (`RenamedTypeAliasReexport`). Four behavioral projects failed the first runner for this
 reason alone and built clean in dependency order.
+
+## Amendment 2026-11-12 (fifth) — the fixed cut scored on linux/amd64; predictions for the other three targets
+
+> Appended, not rewritten. The cut is `claude/p1-oq2-method-holder` at `9d2aad5f02`, on master `06610aaa65`
+> (batch 286). Written after the linux/amd64 footprint of the fixed cut and before any other target runs.
+
+### 31. linux/amd64 at the fixed cut, scored against section 29
+
+Two seeded `-stdlib` reconverts, master's converter against the cut's, both exit 0, attributed by the same
+classifier as section 28's re-read.
+
+| | predicted (section 29) | measured | score |
+|---|---|---|---|
+| files | 1,235 | 1,235 | MET |
+| h, import alias restored | 116 | 116 (79 + 37 by dotted path) | MET |
+| references through the alias | 189 | 189 | MET |
+| fallbacks | 11 | 11 | MET |
+| g, `builtin.` removed | 1,028 | 1,028 | MET |
+| `using static` lines | 843 | 843 | MET |
+| switch lines | 6,048 | 6,048 | MET |
+| holder declarations | 1,975 | 1,975 | MET |
+| kinds n to u | unchanged | unchanged | MET |
+
+- Against the first footprint (section 25), file for file, two lines differ. `flag/flag.go`'s `Usage` loses
+  its fallback: C2's only site in `std`, as section 28 read. One line of `go/parser/parser.go` no longer
+  differs because master's C47 (batch 286) changed it in BOTH arms (the delegate wrap of a func value of its
+  own type is gone); it is base movement, not the cut's.
+- The falsifier stayed silent: no count moved by more than the `flag.go` line, and no line of an unnamed kind.
+
+### 32. Predictions for windows/amd64, darwin/amd64, linux/arm64
+
+Each number is the linux/amd64 measurement of section 31 plus the difference between that target's census row
+and linux/amd64's (sections 11, 18 and 20). That carries the census's own offsets, which section 25 measured.
+
+| | windows/amd64 | darwin/amd64 | linux/arm64 |
+|---|---|---|---|
+| converted files (`.cs` and `.cs.auto`) | 990 | 989 | 983 |
+| `package_info.cs` | 252 | 251 | 251 |
+| files | 1,242 | 1,240 | 1,234 |
+| switch lines | 6,072 | 6,053 | 6,047 |
+| holder declarations | 1,979 | 1,984 | 1,974 |
+| `using static` lines | 833 | 849 | 842 |
+| method expressions that name a holder | 81 | 81 | 81 |
+| g, `builtin.` removed | 1,036 | 1,028 | 1,028 |
+| h, import alias restored | 116 | 116 | 116 |
+| references through the alias | 191 | 189 | 189 |
+| fallbacks | 11 | 11 | 11 |
+
+- Kinds n to u are predicted present on each target with counts within the target's own files; they are
+  counted, not predicted.
+- **Falsifier**: a line of no named kind; a count off its prediction by more than the census's linux/amd64
+  offset for that count (section 25: files 30, switch lines 48, holder declarations 18, `using static` 5).
+- One target per run, in the order of the table.
