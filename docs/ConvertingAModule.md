@@ -355,7 +355,7 @@ conversion.
 
 The pack still owns one block in it, between the lines `[//]: # (nugetgo:generated:begin)` and
 `[//]: # (nugetgo:generated:end)`. That block states the facts: where the C# came from and a link back to the Go
-source, the security caveat, the test badge, the versions, and the license. Every pack rewrites the block from what it
+source, the security caveat, the converted-by badge, the test badge, the versions, and the license. Every pack rewrites the block from what it
 measured, says so, and leaves everything outside it alone. Keep both marker lines, each on its own line with a blank
 line before and after, and put no link above the block. The pack refuses the file, by name, otherwise.
 
