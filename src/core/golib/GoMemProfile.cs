@@ -97,7 +97,7 @@ namespace go;
     /// </remarks>
     public static readonly bool PprofReachable = PprofReachableFrom(AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") as string, findPprofPackage);
 
-    private const string PprofAssemblyName = "runtime.pprof";
+    private const string PprofAssemblyName = "go.runtime.pprof";
 
     // The type question is asked by name, not by walking references: under native AOT the compiler
     // resolves a constant Type.GetType name against the assemblies it was given, so the answer is the
@@ -110,7 +110,7 @@ namespace go;
                         "which calls pprof_package and so keeps it; missing, the answer is 'not linked', Go's own answer " +
                         "for a program without pprof (trim stage 1, docs/PLAN-golib-full-trim.md).")]
     private static Type? findPprofPackage() =>
-        Type.GetType("go.runtime.pprof_package, runtime.pprof", throwOnError: false) ??
+        Type.GetType("go.runtime.pprof_package, go.runtime.pprof", throwOnError: false) ??
         System.Reflection.Assembly.GetEntryAssembly()?.GetType("go.runtime.pprof_package", throwOnError: false);
 
     /// <summary>

@@ -538,13 +538,14 @@ func (v *Visitor) recordTypeAccessibility(kind string, identifier string, typePa
 		return ""
 	}
 
-	if access == "" {
-		access = generatedTypeScope(identifier) + " "
-	}
-
 	// A C type's record belongs to the C pseudo-package's class in package_info.cs, not the package class, where it
 	// would declare a second type of the same name. It is internal whatever the case of its C name (DWORD, FILE): cgo
 	// keeps C types out of a package's exported surface, unless an exported Go declaration publicizes one.
+	//
+	// So the NAME rule below never reads a C name. It used to run first, and its "public" for an upper-case C name
+	// then passed the test here as if the type had been publicized: windows.h's LPSYSTEMTIME was public while the
+	// struct it points to was internal, and the pointer type's generated members did not compile (CS0050 to CS0057).
+	// The only "public" a C type arrives with is the publicized one its emitter was handed.
 	records := packageEmittedTypeAccess
 
 	if cgoEmittingPseudoPackage {
@@ -553,6 +554,8 @@ func (v *Visitor) recordTypeAccessibility(kind string, identifier string, typePa
 		if access != "public " {
 			access = "internal "
 		}
+	} else if access == "" {
+		access = generatedTypeScope(identifier) + " "
 	}
 
 	line := fmt.Sprintf("%s%spartial %s %s%s {}", attrs, access, kind, identifier, typeParams)

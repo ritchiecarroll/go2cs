@@ -135,4 +135,116 @@ public class CgoBindingsGeneratorTests
 
         Assert.AreEqual(0, added.Length, $"go2cs-gen adds {added.Length} error(s) to the {goos} bindings:\n{string.Join("\n", added.Take(20))}");
     }
+
+    // A converted program that converts between C numeric types, as the converter writes it: `C.ushort(d)` with d a
+    // C.DWORD, and a Go type `count` to and from C.DWORD. The files are the converter's own output for that program,
+    // comments removed. Its conversion records name C types, which live in the pseudo-package class.
+    private const string ConversionsPackageInfo =
+        """
+        using go;
+        using static go.example.com.main_package;
+        using C = go.example.com.mainꓸC_package;
+
+        [assembly: GoImplicitConv<C.@ushort, C.DWORD>(Inverted = false, ValueType = "uint32")]
+        [assembly: GoImplicitConv<count, C.DWORD>(Inverted = true, ValueType = "uint32")]
+
+        namespace go.example.com;
+
+        [GoPackage("main", ImportPath = "main")]
+        public static partial class main_package
+        {
+            internal partial struct count {}
+        }
+
+        [GoPackage("main", ImportPath = "main")]
+        partial class mainꓸC_package
+        {
+            [GoLocalName("_Ctype_int")] internal partial struct @int {}
+            [GoLocalName("_Ctype_ulong")] internal partial struct @ulong {}
+            [GoLocalName("_Ctype_ushort")] internal partial struct @ushort {}
+            [GoLocalName("_Ctype_DWORD")] internal partial struct DWORD {}
+        }
+        """;
+
+    private const string ConversionsTypes =
+        """
+        global using Cꓸsize_t = go.example.com.mainꓸC_package.@ulong;
+
+        namespace go.example.com;
+
+        using C = mainꓸC_package;
+
+        partial class main_package {
+        }
+
+        partial class mainꓸC_package {
+
+        partial struct @int /*num:int32*/;
+        partial struct @ulong /*num:uint64*/;
+        partial struct @ushort /*num:uint16*/;
+        internal partial struct DWORD /*num:uint32*/;
+
+        }
+        """;
+
+    private const string ConversionsProgram =
+        """
+        namespace go.example.com;
+
+        using C = mainꓸC_package;
+
+        partial class main_package {
+
+        partial struct count /*num:uint32*/;
+
+        internal static void main() {
+            var n = (C.@int)7;
+            var size = (Cꓸsize_t)(uint64)n;
+            C.DWORD d = 70000;
+            var narrow = (C.@ushort)(uint16)d;
+            var c = (count)(uint32)d;
+            var back = (C.DWORD)(uint32)c;
+            println((uint64)size, (uint16)narrow, (uint32)c, (uint32)back);
+        }
+
+        }
+        """;
+
+    /// <summary>
+    /// A conversion between two C numeric types, and between a C type and a Go one, compiles. The implicit-conversion
+    /// generator hosted each operator in a part of the source type declared inside the PACKAGE class, where a C type is
+    /// not: it declared a second, empty <c>main_package.@ushort</c>, and the build failed on CS1061 (first read by
+    /// building a converted program for cgo Phase 2's exit gate, docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.22). A C
+    /// type named from the package class by its bare name does not resolve there either.
+    /// </summary>
+    [TestMethod]
+    public void AConversionBetweenCTypesCompiles()
+    {
+        CSharpParseOptions options = new(LanguageVersion.Preview);
+
+        SyntaxTree[] trees =
+        [
+            CSharpSyntaxTree.ParseText(ConversionsPackageInfo, options, path: @"C:\go2cs\src\conversions\package_info.cs"),
+            CSharpSyntaxTree.ParseText(ConversionsTypes, options, path: @"C:\go2cs\src\conversions\cgo_gotypes.cs"),
+            CSharpSyntaxTree.ParseText(ConversionsProgram, options, path: @"C:\go2cs\src\conversions\main.cs"),
+            CSharpSyntaxTree.ParseText(TemplateUsings, options, path: @"C:\go2cs\src\conversions\obj\conversions.GlobalUsings.g.cs")
+        ];
+
+        CSharpCompilation compilation = CSharpCompilation.Create("conversions", trees, References(),
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+
+        CSharpGeneratorDriver.Create(Generators(), parseOptions: options)
+            .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out _);
+
+        string[] errors = Errors(output);
+
+        Assert.AreEqual(0, errors.Length, $"the converted program has {errors.Length} error(s) with go2cs-gen run over it:\n{string.Join("\n", errors.Take(20))}");
+
+        // The C-to-C operator is a member of the C type itself, in the class that holds it.
+        INamedTypeSymbol narrow = output.GetTypeByMetadataName("go.example.com.mainꓸC_package+ushort")!;
+
+        Assert.IsNotNull(narrow, "the pseudo-package class holds C.ushort");
+        Assert.IsTrue(narrow.GetMembers(WellKnownMemberNames.ImplicitConversionName).Any(), "C.ushort declares the conversion from C.DWORD");
+        Assert.IsNull(output.GetTypeByMetadataName("go.example.com.main_package+ushort"), "no second ushort is declared in the package class");
+    }
 }

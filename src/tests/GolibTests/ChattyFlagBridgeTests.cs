@@ -198,7 +198,7 @@ public class ChattyFlagBridgeTests
     public void TheTestHostStillCarriesNoCompileTimeFlagReference()
     {
         // The constraint the whole late-binding design exists for, pinned mechanically: a
-        // testing -> flag ProjectReference does not deploy flag.dll beside the test hosts whose
+        // testing -> flag ProjectReference does not deploy go.flag.dll beside the test hosts whose
         // own package does not import flag, and costs every test project's build a measured +33%.
         // Building the tri-state Value through golib rather than declaring it must not have
         // quietly reintroduced that edge.
@@ -207,7 +207,11 @@ public class ChattyFlagBridgeTests
             .Select(name => name.Name ?? "")
             .ToArray();
 
-        Assert.IsFalse(referenced.Contains("flag"),
+        // The name looked for must be the one flag's assembly answers to, or the check passes on any name.
+        Assert.AreEqual("go.flag", typeof(flag_package).Assembly.GetName().Name,
+            "control: the converted flag package is not in an assembly named \"go.flag\", so the check below would prove nothing");
+
+        Assert.IsFalse(referenced.Contains("go.flag"),
             "the test host now references the converted flag package at compile time — the late-binding contract in TestFlagBridge's remarks is broken");
     }
 }

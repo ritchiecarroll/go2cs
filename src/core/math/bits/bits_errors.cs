@@ -9,9 +9,9 @@ namespace go.math;
 partial class bits_package {
 
 //go:linkname overflowError runtime.overflowError
-internal static error overflowError { [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields, "go.runtime_package", "runtime")] get => global::go.LinknameVar<error>.Get("go.runtime_package, runtime", "overflowError"); set => global::go.LinknameVar<error>.Set("go.runtime_package, runtime", "overflowError", value); }
+internal static error overflowError { [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields, "go.runtime_package", "go.runtime")] get => global::go.LinknameVar<error>.Get("go.runtime_package, go.runtime", "overflowError"); set => global::go.LinknameVar<error>.Set("go.runtime_package, go.runtime", "overflowError", value); }
 
 //go:linkname divideError runtime.divideError
-internal static error divideError { [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields, "go.runtime_package", "runtime")] get => global::go.LinknameVar<error>.Get("go.runtime_package, runtime", "divideError"); set => global::go.LinknameVar<error>.Set("go.runtime_package, runtime", "divideError", value); }
+internal static error divideError { [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields, "go.runtime_package", "go.runtime")] get => global::go.LinknameVar<error>.Get("go.runtime_package, go.runtime", "divideError"); set => global::go.LinknameVar<error>.Set("go.runtime_package, go.runtime", "divideError", value); }
 
 } // end bits_package

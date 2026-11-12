@@ -337,6 +337,43 @@ public class ImplicitConvGenerator : ISourceGenerator
             if (!emittedConversions.Add($"{sourceTypeName}->{targetTypeName}|{inverted}"))
                 continue;
 
+            // A C type of a cgo package lives in the package's C pseudo-package class, a second class beside the
+            // package's own. So an operator hosted in a C type is declared in THAT class: declared in the package
+            // class, as every Go type's is, the host was a second, empty type of the same name, and the operator's
+            // body did not compile against it (CS1061; cgo Phase 2's exit gate). And a C type named from any other
+            // class is named through its class, since its bare name resolves only inside its own.
+            if (genericHost is null)
+            {
+                bool hostIsTarget = hostTypeNameOverride is not null && hostTypeNameOverride == targetType.Name;
+                ITypeSymbol hostType = hostIsTarget ? targetType : sourceType;
+                INamedTypeSymbol? hostHolder = hostType.ContainingType;
+
+                if (IsCgoPseudoPackageClass(hostHolder))
+                {
+                    packageName = hostHolder!.Name[..^PackageSuffix.Length];
+                    hostTypeNameOverride = EscapeCsKeyword(hostType.GetFullTypeName());
+                }
+
+                // A name an earlier arm already qualified (a foreign target's display string) is left as it is.
+                string CgoName(ITypeSymbol type, string name) =>
+                    IsCgoPseudoPackageClass(type.ContainingType) && !SymbolEqualityComparer.Default.Equals(type.ContainingType, hostHolder) && !name.Contains('.')
+                        ? $"{type.ContainingType!.Name}.{name}"
+                        : name;
+
+                (ITypeSymbol lhType, string lhName) = inverted ? (sourceType, sourceTypeName) : (targetType, targetTypeName);
+                (ITypeSymbol rhType, string rhName) = inverted ? (targetType, targetTypeName) : (sourceType, sourceTypeName);
+                string lhQualified = CgoName(lhType, lhName), rhQualified = CgoName(rhType, rhName);
+
+                if (lhQualified != lhName && lhTypeNameOverride is null)
+                {
+                    lhTypeNameOverride = lhQualified;
+                    convExprOverride = convExprOverride?.Replace($"new {lhName}(", $"new {lhQualified}(");
+                }
+
+                if (rhQualified != rhName && rhTypeNameOverride is null)
+                    rhTypeNameOverride = rhQualified;
+            }
+
             string generatedSource = new ImplicitConvTemplate
             {
                 PackageNamespace = packageNamespace,

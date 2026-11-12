@@ -692,7 +692,7 @@ public static class TestHost
     // DisableTransitiveProjectReferences, so a `testing` -> `syscall` reference would not deploy
     // syscall.dll beside a host whose own package does not import it. INTERNAL for PackageAncestry's
     // toolchain-child composer, which reaches the same package the same way.
-    internal const string SyscallPackageTypeName = "go.syscall_package, syscall";
+    internal const string SyscallPackageTypeName = "go.syscall_package, go.syscall";
 
     /// <summary>
     /// Publishes the sandbox marker so a re-exec'd HELPER of this run can recognize itself.

@@ -509,6 +509,18 @@ public static class Common
     public const string CgoMirrorArrayPrefix = "ᴍarray";
 
     /// <summary>
+    /// What the name of a cgo package's C pseudo-package class ends with, ahead of the package suffix: the class
+    /// <c>&lt;pkg&gt;ꓸC_package</c> holds the package's C types, constants and bindings (the converter's
+    /// cgoPseudoPackageClass). It is a second class beside the package's own, so a C type is not nested where a Go
+    /// type of the same package is.
+    /// </summary>
+    public const string CgoPseudoPackageMarker = "ꓸC";
+
+    /// <summary>Whether <paramref name="holder"/> is a cgo package's C pseudo-package class.</summary>
+    public static bool IsCgoPseudoPackageClass(INamedTypeSymbol? holder) =>
+        holder is not null && holder.Name.EndsWith(CgoPseudoPackageMarker + PackageSuffix, StringComparison.Ordinal);
+
+    /// <summary>
     /// Simple name of the assembly-level attribute a hand-owned package carries to opt out of the
     /// converted-Go-type rule (see <see cref="IsConvertedGoTypeDeclaration"/>).
     /// </summary>
