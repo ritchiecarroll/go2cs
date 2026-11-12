@@ -71,14 +71,14 @@ call-argument path under builtin `new`'s UNNAMED parameter — an EMPTY lift nam
 (mirroring the composite-literal and hpke map-value lifts), so the declaration, the `@new<…>` type
 argument, the `GoImplement` recordings, and the pointer-adapter names all resolve through
 `liftedTypeMap`:
-<!-- source: src/core/go/internal/gccgoimporter/parser.cs:531-534, 554 -->
+<!-- source: src/core/go/internal/gccgoimporter/parser.cs:546-549, 571 -->
 ```csharp
 partial struct reservedᴛ1 /*dyn*/ {
-    /*embed*/ public global::go.go.types_package.ΔType Type;
+    /*embed*/ public global::go.go.types_package.Type Type;
 }
 internal static ж<reservedᴛ1> reserved = @new<reservedᴛ1>();
 …
-        p.typeList[n] = new reservedᴛ1жΔType(reserved);
+        p.typeList[n] = new reservedᴛ1жType(reserved);
 ```
 and `visitStructType` itself falls back to the generic `"type"` when a lift arrives with an empty
 name (the FUNCTION-LOCAL `x := new(struct{…})` form still reaches it through the unnamed-parameter
@@ -738,8 +738,8 @@ method would forward to `recvᴛ.<Func>_<name>.F()` (CS0120/CS1061, met in Burnt
 `TestEncodeAnonymousNoStructField`). The interface lift therefore records its stamp exactly as the struct lift does:
 
 <!-- illustration: the two strings the guard asserts, the declaration and its record:
-     src/go2cs/internalTestLocalInterfaceStamp_test.go:85 `internal partial interface TestLocalEmbeddedInterface_Inner`
-     and :99 `[GoLocalName("Inner")] partial interface TestLocalEmbeddedInterface_Inner {}` -->
+     src/go2cs/internalTestLocalInterfaceStamp_test.go:84 `internal partial interface TestLocalEmbeddedInterface_Inner`
+     and :98 `[GoLocalName("Inner")] partial interface TestLocalEmbeddedInterface_Inner {}` -->
 ```csharp
 internal partial interface TestLocalEmbeddedInterface_Inner /*dyn*/ {
 …
@@ -1131,9 +1131,9 @@ type Config struct {
     Values func([]reflect.Value, *rand.Rand)   // rand is math/rand
 }
 ```
-<!-- source: src/core/testing/quick/quick.cs:247 -->
+<!-- source: src/core/testing/quick/quick.cs:248 -->
 ```csharp
-public Action<slice<reflectꓸValue>, ж<rand.Rand>> Values;
+public Action<slice<reflect.Value>, ж<rand.Rand>> Values;
 ```
 
 The re-routing is gated on the signature string containing `/` **or the signature being variadic**:

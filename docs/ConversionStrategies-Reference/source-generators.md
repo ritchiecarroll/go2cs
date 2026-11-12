@@ -210,7 +210,7 @@ generator writes the overload that takes a pointer (`ж<Reader>`), and the runti
 to `Reader` and which to `*Reader`. A Go reader sees a receiver and whether it is a pointer, which is what the
 Go line showed.
 
-<!-- source: src/core/bufio/bufio.cs:218 -->
+<!-- source: src/core/bufio/bufio.cs:225 -->
 ```csharp
 public static (nint n, error err) Read(this ref Reader b, slice<byte> p) {
 ```
@@ -224,7 +224,7 @@ generator builds one from the comment. `num:int64` says "a number over `int64`",
 slice, a map, a channel, a pointer or another named type the same way. If the comment is deleted the type loses
 its arithmetic and conversions, and the build fails rather than running wrong.
 
-<!-- source: src/core/time/time.cs:936 -->
+<!-- source: src/core/time/time.cs:976 -->
 ```csharp
 partial struct Duration /*num:int64*/;
 ```
@@ -286,7 +286,7 @@ public static (rune r, nint size) DecodeRuneInString(sstring s) {
 a wrapper over golib's `channel<bool>`, which has no direction in its type. The comment after the name spells
 the type as Go does, arrow included, and the generator records the direction from it.
 
-<!-- source: src/tests/Behavioral/ReflectFuncChanDir/main.cs.target:25 -->
+<!-- source: src/tests/Behavioral/ReflectFuncChanDir/main.cs.target:34 -->
 ```csharp
 partial struct AssignD /*<-chan bool*/;
 ```
@@ -357,7 +357,7 @@ are the only way to say those things there.
 
 <!-- source: src/core/internal/poll/fd_mutex_impl.cs:150 -->
 <!-- attribute-shown: a hand-written file keeps the attribute -->
-<!-- source: src/core/internal/poll/fd_mutex_impl.cs:150 -->
+<!-- source: src/core/internal/poll/fd_mutex_impl.cs:154 -->
 ```csharp
 [GoRecv] internal static bool rwlock(this ref fdMutex mu, bool read) {
 ```
@@ -483,7 +483,7 @@ queued after a run is run by the next miss.
 <!-- The queueing initializer: src/gen/go2cs-gen/DeferredRegistration.cs:22
      (`public static string Initializer(string registry, string name)`). Its callers:
      src/gen/go2cs-gen/ImplementGenerator.cs:1578 (`DeferredRegistration.Initializer("Adapters", "Adapters")`),
-     src/gen/go2cs-gen/TypeGenerator.cs:665 (`DeferredRegistration.Initializer("ZeroFactories", "GoZeroFactories")`),
+     src/gen/go2cs-gen/TypeGenerator.cs:667 (`DeferredRegistration.Initializer("ZeroFactories", "GoZeroFactories")`),
      src/gen/go2cs-gen/EscapeRegistryGenerator.cs:406 (`DeferredRegistration.Initializer("EscapeRegistry", "EscapingContainers")`),
      src/gen/go2cs-gen/NativeArrayOpenerGenerator.cs:221
      (`DeferredRegistration.Initializer("NativeArrayOpeners", "NativeArrayOpeners")`).

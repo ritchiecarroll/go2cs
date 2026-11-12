@@ -121,7 +121,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A pointer-receiver METHOD VALUE heap-boxes its receiver — the implicit `(&x).M`](multi-assignment.md#a-pointer-receiver-method-value-heap-boxes-its-receiver--the-implicit-xm)
 - **[Short Variable Redeclaration (Shadowing)](shadowing.md)**
   - [Type-vs-Method Name Collisions](shadowing.md#type-vs-method-name-collisions)
-  - [Test-variant name coherence: production names are pinned, test-side method declarators Δ-rename](shadowing.md#test-variant-name-coherence-production-names-are-pinned-test-side-method-declarators-δ-rename)
+  - [Test-variant names: a test file's method needs no rename](shadowing.md#test-variant-names-a-test-files-method-needs-no-rename)
   - [A NESTED package's production `GoImplement` record anchors to the production metadata file](shadowing.md#a-nested-packages-production-goimplement-record-anchors-to-the-production-metadata-file)
   - [Test suites REFERENCE the production project instead of recompiling it](shadowing.md#test-suites-reference-the-production-project-instead-of-recompiling-it)
   - [Under the RECOMPILE model the test half CONTINUES the production emission (the `productionSeed`)](shadowing.md#under-the-recompile-model-the-test-half-continues-the-production-emission-the-productionseed)
@@ -138,7 +138,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A module hosted under `go.` shadows the root namespace the way a `go/*` import does](shadowing.md#a-module-hosted-under-go-shadows-the-root-namespace-the-way-a-go-import-does)
   - [A file that reaches Go names through `using static` binds .NET types by alias, never by namespace](shadowing.md#a-file-that-reaches-go-names-through-using-static-binds-net-types-by-alias-never-by-namespace)
   - [A dot-imported package's type is qualified by its class when another import has the package's name](shadowing.md#a-dot-imported-packages-type-is-qualified-by-its-class-when-another-import-has-the-packages-name)
-  - [A function called with a value whose type has a same-named method is cast to its parameter type](shadowing.md#a-function-called-with-a-value-whose-type-has-a-same-named-method-is-cast-to-its-parameter-type)
+  - [A function called inside a holder with a method of its name is written through the package alias](shadowing.md#a-function-called-inside-a-holder-with-a-method-of-its-name-is-written-through-the-package-alias)
 - **[Multi-Result Values and Comma-Ok Forms](multi-result-and-comma-ok.md)**
   - [A grouped var spec with one multi-result call deconstructs](multi-result-and-comma-ok.md#a-grouped-var-spec-with-one-multi-result-call-deconstructs)
 - **[Slices and Arrays](slices-and-arrays.md)**

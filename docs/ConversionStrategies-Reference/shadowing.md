@@ -102,7 +102,7 @@ func dropped(n int) string {
 }
 ```
 
-<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:36-49 -->
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:45-58 -->
 ```csharp
 internal static @string dropped(nint n) {
     nint m = next(n); if (m > 3) {
@@ -162,7 +162,7 @@ func classify(x any) string {
 }
 ```
 
-<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:63-87 -->
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:72-96 -->
 ```csharp
 internal static @string classify(any x) {
     if (x._<Shape>(out var s)) {
@@ -219,7 +219,7 @@ func chain(x any, m map[string]int, n int) string {
 }
 ```
 
-<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:89-102 -->
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:98-111 -->
 ```csharp
 internal static @string chain(any x, map<@string, nint> m, nint n) {
     if (x == nil) {
@@ -258,7 +258,7 @@ func rebinding() int {
 }
 ```
 
-<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:104-111 -->
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:113-120 -->
 ```csharp
 internal static nint rebinding() {
     {
@@ -274,7 +274,7 @@ The closure case: each pass of the backward `goto` loop captures its own `x` bec
 scope each time it is entered. Siblings declaring the same name keep their blocks too, rather than
 renaming one of them.
 
-<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:113-147 -->
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:122-156 -->
 ```csharp
 internal static slice<nint> captures() {
     var fnsᴷ = new stackAppend<Func<nint>>();
@@ -324,53 +324,104 @@ output matches Go for every shape and for the rebinding and closure cases.
 
 ## Type-vs-Method Name Collisions
 
-Go keeps types and methods in separate namespaces, so a package may legally declare both a type `foo` and a method `foo` on some receiver. In C# both land in the same package class — the nested type and the `this ref` extension method — where a type and a method cannot share a name (CS0102). The converter resolves this by `Δ`-prefixing the **type** (`Δfoo`) while the method keeps its core-sanitized name (`foo`), so they do not collide.
+Go keeps types and methods in separate namespaces, so a package may legally declare both a type `foo` and a method `foo` on some receiver. In C# the type is a member of the package class and the method is a member of its receiver type's **method holder**, one static class per receiver type (`mainᴛbuilder` holds the methods of `builder`; see [Functions and Methods](../ConversionStrategies.md#functions-and-methods)). The two never share a class, so neither is renamed. A golib reserved word (`slice`, `array`, `channel`, `map`, …) takes its one reserved spelling, `Δslice`, on the type and on the method alike:
 
-This needs an extra step when the colliding name is also a **golib reserved word** (`slice`, `array`, `channel`, `map`, …). Such a name is `Δ`-prefixed *anyway* — to avoid the golib runtime type (`slice<T>` etc.) — so the method too becomes `Δslice`, and the plain `Δ` does not separate type from method. In that case the converter appends the type marker `ᴛ` to the **type** only, giving it a name distinct from the method:
-
-<!-- illustration: not converter output -->
+<!-- source: src/tests/Behavioral/ReservedTypeMethodCollision/main.cs.target:8-10, 18-26 -->
 ```csharp
-partial struct Δsliceᴛ { … }                          // Go `type slice struct{…}`
-internal static Δsliceᴛ Δslice(this ref builder b, …) // Go `func (*builder) slice(…)`
+partial struct Δslice {
+    internal nint lo, hi;
+}
+…
+partial struct builder {
+    internal nint @base;
+}
+
+} partial class mainᴛbuilder {
+
+internal static Δslice Δslice(this ref builder b, nint n) {
+    return new Δslice(lo: b.@base, hi: b.@base + n);
+}
 ```
 
-Only the type side is renamed; the method (and every call site and go2cs-gen-generated pointer-receiver overload) stays `Δslice`. This is deliberate: the go2cs-gen generators compute method names independently, so renaming the *method* would desync them — renaming the *type* keeps the converter and generators in agreement (the generators read the type name from the emitted C# syntax/attributes). This mirrors the Go runtime's `type slice struct{…}` (the GC slice header) versus `func (*userArena) slice(…)`.
+Inside the holder the method `Δslice` stands beside the type `Δslice`. C# reads only types in a type position (the return type, `new Δslice(…)`), so those spellings bind the type with no qualifier. In an expression position the holder's method group binds first, so where the converter must name a package member there it qualifies it, and only inside the holder that declares the method of that name:
 
-A **struct field** named like a colliding package-level identifier is *not* renamed: a field is struct-scoped (`g.trace` does not collide with a package type/method `trace` in C#), so the field declaration keeps its core-sanitized name (`trace`). The box-field accessor static the `TypeGenerator` emits for it is therefore `g.Ꮡtrace` (the `Ꮡ`-prefixed declared member name). The converter's `&g.field` address form (`Ꮡg.of(g.Ꮡtrace)`) must use that **declared** field name — it derives the accessor member from `getCoreSanitizedIdentifier` plus the type-colliding rename, *not* from the general identifier path that applies the package-level collision `Δ`-rename. Using the latter would emit `g.ᏑΔtrace`, which has no matching generated static (CS0117). Reserved-word fields keep their `Δ` (the field really is declared `Δarray` for a field named `array`), so the accessor is `Ꮡ`+the declared name in every case. (Guarded by the `CollisionFieldBoxAccessor` behavioral test; runtime has the shape on `g`/`m`/`p`'s `trace`/`stack`/`p` fields.) The generated accessor's **accessibility** matches the *field's* (its exportedness), not the field type's name — an exported field `Fun [1]uintptr` (C# `array<nuint> Fun`) yields a **public** `ᏑFun`, so another package's `other.of(ITab.ᏑFun)` can reach it; deriving the scope from the type's simple name (`array` → lowercase → `internal`) would make the cross-package accessor unreachable (CS0117 in runtime's `iface.go` walking `abi.ITab.Fun`).
+- a call of a Go built-in is written `builtin.<name>(…)`;
+- a reference through an import named like the method is written through the import's package class (`math.bits_package.Len64`);
+- a package function or value named like the method is written through the package's own alias (`main.Sort(w)`), or through `<pkg>_package` when a local takes the alias's name;
+- a box accessor names its owner type through the package class (below).
 
-One case *does* rename the field: when its name equals its **enclosing type's** name *and* that type is itself `Δ`-renamed for a type-vs-method collision. internal/trace's `type Label struct{ Label string }` sits alongside `func (e Event) Label() Label`, so the type becomes `ΔLabel`; the field, whose name equals the type, is renamed to differ (CS0542 — a member cannot share its type's name). A single `Δ` would yield `ΔLabel` — *equal* to the renamed type — so `typeCollidingFieldName` **doubles** the marker (`ΔΔLabel`) when the name is a package-level collision, exactly as it does for the keyword-family case (a reserved-word type is `Δ`-renamed too). Deterministic from the name, so the field declaration, the keyed composite-literal key, and every access site all agree:
+Everywhere else the plain spelling stands. A holder for `words` that declares `cap`, `bits` and `Sort`, and a holder for `gauge` beside it that declares none of them:
 
-Go's `type Label struct{ Label string }` keeps its field under a doubled name, which the composite
+<!-- source: src/tests/Behavioral/MethodHolderNames/others.cs.target:14, 20-23, 33-35 -->
+```csharp
+} partial class mainᴛwords {
+…
+internal static nint cap(this words w) { return builtin.cap(w) + 1; }
+internal static nint bits(this words w) { return math.bits_package.Len64(w[0]); }
+
+internal static void Sort(this words w) { main.Sort(w); }
+…
+} partial class mainᴛgauge {
+
+internal static nint size(this gauge g, words w) { return cap(w) + bits.Len64((uint64)g.n); }
+```
+(Guarded by the `MethodHolderNames` behavioral test, output-compared against `go run`, and by the `GO2CS0013` analyzer, which reports a name in a holder that binds another member than the package's ([Diagnostic Codes](../DiagnosticCodes.md)).)
+
+The package-level rename that remains (`nameCollisions`) covers a type named as the emitter spells one of its own (`any`, `rune`, `nint`, `nuint`) and a type named after a C# 15 reserved type-position keyword (`closed`, `union`), with every package-level declaration that shares such a name. The rules below that speak of a "colliding" or "collision-renamed" name are about those renames.
+<!-- Until 2026-11-11 (OQ2, the method holders) every method was a member of the package class, beside the package's types, constants and variables. A type and a same-named method could not share that class (CS0102), so the converter Δ-prefixed the TYPE (`Δfoo`) and kept the method's name; the generators read the type name from the emitted syntax, so renaming the type kept them in agreement. For a golib reserved word, already Δ-prefixed on both sides, the converter appended the type marker to the type only: Go `type slice struct{…}` became `partial struct Δsliceᴛ` beside `internal static Δsliceᴛ Δslice(this ref builder b, …)`, the Go runtime's GC slice header beside `func (*userArena) slice(…)`. The rename is gone: src/go2cs/nameCollisionAnalysisOperations.go no longer records a name for a method, and getCollisionAvoidanceIdentifier's marker branch is reached only by a remaining rename. -->
+
+A **struct field** named like a renamed package-level identifier is *not* renamed: a field is struct-scoped (a field `any` does not collide with a package type `any` in C#), so the field declaration keeps its core-sanitized name (`trace`). The box-field accessor static the `TypeGenerator` emits for it is therefore `g.Ꮡtrace` (the `Ꮡ`-prefixed declared member name). The converter's `&g.field` address form (`Ꮡg.of(g.Ꮡtrace)`) must use that **declared** field name — it derives the accessor member from `getCoreSanitizedIdentifier` plus the type-colliding rename, *not* from the general identifier path that applies the package-level collision `Δ`-rename. Using the latter would emit `g.ᏑΔtrace`, which has no matching generated static (CS0117). Reserved-word fields keep their `Δ` (the field really is declared `Δarray` for a field named `array`), so the accessor is `Ꮡ`+the declared name in every case. (Guarded by the `CollisionFieldBoxAccessor` behavioral test. Its field `mark` shared its name with a renamed type until 2026-11-11, when the type-vs-method rename ended; the test now pins the plain `mark` accessor beside a type `mark` and a method `mark`. Runtime's `g`/`m`/`p` fields `trace`/`stack`/`p` had the shape for the same reason.) The generated accessor's **accessibility** matches the *field's* (its exportedness), not the field type's name — an exported field `Fun [1]uintptr` (C# `array<nuint> Fun`) yields a **public** `ᏑFun`, so another package's `other.of(ITab.ᏑFun)` can reach it; deriving the scope from the type's simple name (`array` → lowercase → `internal`) would make the cross-package accessor unreachable (CS0117 in runtime's `iface.go` walking `abi.ITab.Fun`).
+
+One case *does* rename the field: when its name equals its **enclosing type's** name. C# forbids a member that shares its type's name (CS0542), so the field takes one `Δ`. internal/trace's `type Label struct{ Label string }` sits alongside `func (e Event) Label() Label`; the method stands in `Event`'s holder, the type keeps its name `Label`, and the field becomes `ΔLabel`. When the enclosing type is itself `Δ`-renamed (a remaining package-level rename, `type union struct{ union int }`, or the keyword family, whose type is `Δ`-renamed too), a single `Δ` would make the field *equal* to the type, so `typeCollidingFieldName` **doubles** the marker (`ΔΔunion`). Deterministic from the name, so the field declaration, the keyed composite-literal key, and every access site all agree:
+
+Go's `type Label struct{ Label string }` keeps its field under one marker, which the composite
 literal's key and each access then use:
 
-<!-- source: src/tests/Behavioral/FieldNameTypeMethodCollision/FieldNameTypeMethodCollision.cs.target:13, 16-17, 19, 22 -->
+<!-- source: src/tests/Behavioral/FieldNameTypeMethodCollision/FieldNameTypeMethodCollision.cs.target:13, 15-16, 21-22, 24, 29 -->
 ```csharp
-    return new ΔLabel(ΔΔLabel: e.label, Resource: e.kind);
+} partial class mainᴛevent {
 …
-partial struct ΔLabel {
-    public @string ΔΔLabel;
+internal static Label Label(this @event e) {
+    return new Label(ΔLabel: e.label, Resource: e.kind);
+…
+partial struct Label {
+    public @string ΔLabel;
 …
 }
 …
-    return fmt.Sprintf("%s@%d"u8, l.ΔΔLabel, l.Resource);
+    return fmt.Sprintf("%s@%d"u8, l.ΔLabel, l.Resource);
 ```
-(Guarded by `FieldNameTypeMethodCollision` — a `Label` field in a `Label` struct with a colliding `Label()` method, read/written through a value, the method result, and a composite literal.)
+(Guarded by `FieldNameTypeMethodCollision` — a `Label` field in a `Label` struct beside a `Label()` method, read/written through a value, the method result, and a composite literal.)
+<!-- Until 2026-11-11 the type-vs-method rename made the type `ΔLabel`, so this field doubled to `ΔΔLabel`; read at master 4efe149858. -->
 
-The double must also apply **across packages**. `typeCollidingFieldName` keys the double on the current package's `nameCollisions` map, which is populated only for the package being converted — so a **cross-package** access of such a field (internal/trace/testtrace reading a `Label`'s field) would emit the SINGLE-marker `l.ΔLabel` against the declaration's double `ΔΔLabel` — CS1061. The access site therefore consults the FIELD'S OWN package: `fieldTypeIsRenamed` derives the enclosing named type from the selector and asks `packageHasMethodNamed(type.pkg, type.name)` (a cached per-package scan of every func/method name — a type-vs-method collision Δ-renames the type), threading the result through the `fieldTypeIsRenamed` ident context so `convIdent` upgrades the single marker to the double for the foreign case (the in-package case doubles via `nameCollisions`).<!-- at the fix: CNR byte-identical; the pattern is absent from the single-package corpus except the guard. --> This is the FIELD-access counterpart to the cross-package renamed **type-reference** substitution (getCSharpTypeName / getScopeCheckedTypeName, further below) — that one covers naming the renamed *type*, this covers accessing its *field*; internal/trace/testtrace needs both. (The type-reference half — `trace.Time`/`Event`/`Stack` in a func signature, or `*time.Location` as a box element — renders `traceꓸTime`/`ж<timeꓸLocation>` through the `convertToCSFullTypeName`→`getAliasedTypeName` path, which records each foreign renamed type's imported-type alias.)<!-- history: once mis-diagnosed as a still-open root off a stale overlay whose importedTypeAliases were not populated. --> (Guarded by the `CrossPkgUser`/`CrossPkgLib` extension — `CrossPkgLib.Marker`, a `Marker` field in a `Marker` struct alongside a `Sensor.Marker()` method, its field read across the assembly boundary through an inferred-type value; vs Go.)
+A field whose name equals its type's is spelled the same way **across packages**: a consumer reads the single-marker field (`mk.ΔMarker`) that the producer declares. Both sides derive it from the name and the field's own struct, and since the type is no longer renamed for a method there is no second marker for a consumer to learn from the producer's package. (Guarded by the `CrossPkgUser`/`CrossPkgLib` extension — `CrossPkgLib.Marker`, a `Marker` field in a `Marker` struct alongside a `Sensor.Marker()` method, its field read across the assembly boundary through an inferred-type value; vs Go.)
+<!-- Until 2026-11-11 the type was Δ-renamed (`ΔMarker`) and the field doubled (`ΔΔMarker`). typeCollidingFieldName keyed the double on the current package's nameCollisions map, so a cross-package access would have emitted the single marker (CS1061); the access site asked the field's own package (fieldTypeIsRenamed, packageHasMethodNamed: a cached per-package scan of every func/method name) and convIdent upgraded the marker. Both helpers are gone with the rename. The type-reference half (getCSharpTypeName / getScopeCheckedTypeName, the imported-type alias for a foreign renamed type) still serves Go type aliases and the remaining renames: golib-namespace.md. Original paragraph read at master 4efe149858. At that fix: CNR byte-identical; the pattern is absent from the single-package corpus except the guard. History: once mis-diagnosed as a still-open root off a stale overlay whose importedTypeAliases were not populated. -->
 
-The same struct-scoped rule applies to a **keyed composite-literal field name**. `Frame{funcInfo: f}`, where the field `funcInfo` is named like a colliding package type/method (declared unrenamed as `funcInfo`), must emit the C# initializer key `funcInfo:` — the package-level `Δ`-rename that `convExpr` would apply yields `ΔfuncInfo:`, which is not a parameter name of the generated constructor (CS1739). `convKeyValueExpr` therefore emits a struct-field key whose name collides at package level via `getCoreSanitizedIdentifier` (the declared name), not the general identifier path. (Same `CollisionFieldBoxAccessor` test; runtime hit this on `Frame{funcInfo: …}` in `symtab`.)
+The same struct-scoped rule applies to a **keyed composite-literal field name**. A field named like a renamed package-level type is declared unrenamed, so `T{any: v}` must emit the C# initializer key `any:` — the package-level `Δ`-rename that `convExpr` would apply yields `Δany:`, which is not a parameter name of the generated constructor (CS1739). `convKeyValueExpr` therefore emits a struct-field key whose name collides at package level via `getCoreSanitizedIdentifier` (the declared name), not the general identifier path. (Runtime hit this on `Frame{funcInfo: …}` in `symtab` while the type `funcInfo` was renamed for the method `(*Func).funcInfo`, before 2026-11-11; `CollisionFieldBoxAccessor` pinned it then and no behavioral test reaches the rename now.)
 
 The *type* half of the same accessor (`receiver.of(Type.Ꮡfield)`) needs care too. Go code routinely names a local after its own type — `m := getg().m`, where `m` is a `*m` — so taking the address of one of its fields (`&m.park`) emits `m.of(m.Ꮡpark)`, in which the bare type reference `m` binds to the **variable** `m` (a `ж<m>`, which has no `Ꮡpark`) instead of the type (CS1061). Because a converted struct is nested in its package's static class, the converter qualifies the type with that class — `m.of(runtime_package.m.Ꮡpark)` — which a same-named local cannot shadow. A bare `m` (binds the variable) and a `go.m` (the struct is not a direct member of the `go` namespace) both fail; the package-class qualifier is the correct form. This is applied **only on a collision** (the `.of()` receiver variable's name equals the type's simple name), so every other box accessor keeps its un-namespaced, Go-like form — no golden churn. (Guarded by the `VarNamedAsType` behavioral test; runtime has the shape on `m`/`Δp` locals taking field addresses.)
 
 The same collision fires when the receiver is that variable's **lambda capture**. Inside a closure the captured variable renames to its capture copy (`mʗ1`), so the receiver-equality check alone misses it — but the *enclosing* local `m` is still visible to the C# lambda, so the accessor's bare owning-type reference binds to it all the same: runtime `rwmutex.lockSlow`'s `systemstack(func() { …; notesleep(&m.park) })` would emit `mʗ1.of(m.Ꮡpark)` → CS1061. `boxAccessorType` therefore also qualifies when the receiver is the type name plus the capture marker (`typeName + ʗ…`), yielding `mʗ1.of(runtime_package.m.Ꮡpark)`. (Guarded by a further extension to `CollisionFieldBoxAccessor` — `capturedLocalNamedAfterType`, a type-named local field-addressed inside a capturing closure, write-through verified vs Go.)
 
-The type half also needs the **type-vs-method collision rename** (above). When the accessor's owning type is itself a colliding name — `type funcInfo` versus a method `func (f *Func) funcInfo()`, so the type is declared `ΔfuncInfo` — taking the address of one of its fields must use the renamed type (`Ꮡ(f).of(ΔfuncInfo.Ꮡnfuncdata)`); a bare `funcInfo.Ꮡnfuncdata` binds to the package's static `funcInfo` method group (CS0119). The `boxAccessorType` helper applies the `Δ`-rename to a bare same-package collision name before its receiver-shadow check (the renamed name does not match a raw-named local, so the two disambiguations compose). (Guarded by an extension to `CollisionFieldBoxAccessor` — a global whose type is the collision type; runtime hit this in `symtab`'s `pcdatastart`/`funcdata`.)
+The type half also matters **inside a method holder**. When the holder declares a method named like the accessor's owning type — `type Tag` beside `func (c *Chest) Tag() Tag` — the accessor names the type in expression position, where the holder's `Tag` method group binds first (CS0119). `boxAccessorType` qualifies the owner type with its package class there (`holderDeclaresTypeName`); a type position reads only types, so every other spelling of `Tag` in the holder stays bare:
 
-A **collision-renamed owning type is qualified unconditionally**, not just when it equals the `.of()` receiver — because a Go local named after its type is renamed to the *same* `Δ`-name, so such a local **anywhere in the function** shadows a bare `Δp.Ꮡfield` (C# locals are function-scoped). Runtime's malloc `persistentalloc1` does `persistent = &mp.p.ptr().palloc` and then declares a local `p` further down (renamed `Δp`); a bare accessor `(~mp).p.ptr().of(Δp.Ꮡpalloc)` would bind its `Δp` to that later local — CS0841 (use-before-declaration), and CS1061 regardless (the local's type has no `Ꮡpalloc`). The receiver (`(~mp).p.ptr()`) is not the colliding local, so the receiver-name check cannot catch it, and `boxAccessorType` qualifies whenever the type name is `Δ`-prefixed (a type is never shadow-renamed — types are package-level — so a `Δ`-prefixed accessor type is always a collision rename), emitting `(~mp).p.ptr().of(runtime_package.Δp.Ꮡpalloc)`. Qualifying is value-identical to the bare form when nothing shadows, so it is safe to apply to every collision-type accessor. (Guarded by a further extension to `CollisionFieldBoxAccessor` — `localShadowsCollisionType`, a local named after the collision type declared after the accessor; runtime's malloc and mheap (`Δp.Ꮡgcw`) have the shape.)
+<!-- source: src/tests/Behavioral/MethodHolderNames/forms.cs.target:23, 32-33, 44 -->
+```csharp
+} partial class mainᴛChest {
+…
+    var lit = new Tag(id: 1, Value: 2);
+    var ptr = Ꮡ(new Tag(id: 3));
+…
+    var valueAddr = ptr.of(main_package.Tag.ᏑValue);
+```
+(Guarded by the `MethodHolderNames` behavioral test, whose `Chest.Forms` writes `Tag` in each position Go allows.)
+<!-- Until 2026-11-11 the type itself was renamed (`type funcInfo` versus `func (f *Func) funcInfo()`, declared `ΔfuncInfo`), and boxAccessorType applied the Δ-rename to a bare same-package collision name before its receiver-shadow check, emitting `Ꮡ(f).of(ΔfuncInfo.Ꮡnfuncdata)`; a bare `funcInfo.Ꮡnfuncdata` bound the package's static `funcInfo` method group (CS0119). Guarded then by an extension to CollisionFieldBoxAccessor (a global whose type is the collision type); runtime hit it in symtab's pcdatastart/funcdata. Read at master 4efe149858. -->
+
+A **collision-renamed owning type is qualified unconditionally**, not just when it equals the `.of()` receiver — because a Go local named after its type is renamed to the *same* `Δ`-name, so such a local **anywhere in the function** shadows a bare `Δp.Ꮡfield` (C# locals are function-scoped). Runtime's malloc `persistentalloc1` does `persistent = &mp.p.ptr().palloc` and then declares a local `p` further down (renamed `Δp`); a bare accessor `(~mp).p.ptr().of(Δp.Ꮡpalloc)` would bind its `Δp` to that later local — CS0841 (use-before-declaration), and CS1061 regardless (the local's type has no `Ꮡpalloc`). The receiver (`(~mp).p.ptr()`) is not the colliding local, so the receiver-name check cannot catch it, and `boxAccessorType` qualifies whenever the type name is `Δ`-prefixed (a type is never shadow-renamed — types are package-level — so a `Δ`-prefixed accessor type is always a collision rename), emitting `(~mp).p.ptr().of(runtime_package.Δp.Ꮡpalloc)`. Qualifying is value-identical to the bare form when nothing shadows, so it is safe to apply to every collision-type accessor. (Guarded by a further extension to `CollisionFieldBoxAccessor` — `localShadowsCollisionType`, a local named after the collision type declared after the accessor; runtime's malloc and mheap (`Δp.Ꮡgcw`) had the shape.) Since 2026-11-11 the type-vs-method rename is gone, so runtime's `p` keeps its name and those sites are qualified by the general rule below, a variable of the type's name declared in the function (`p.of(runtime_package.p.Ꮡgcw)` in `mgc.cs`); `localShadowsCollisionType` no longer emits an accessor, and the Δ-prefix arm is reached only by the remaining renames.
 
 The three receiver-shadow arms above (`.of()` receiver equals the type, its capture, its box) and the collision-rename arm are all **special cases of one general rule**: a box accessor's bare owning-type spelling `Type.Ꮡfield` binds to **any** same-named variable that C# has in scope, and C# scopes a local to its whole enclosing block regardless of where it is declared or whether it participates in this accessor at all. So `boxAccessorType` also qualifies whenever a variable of the type's name is declared **anywhere in the current function** — receiver, parameters, results, or a local at any nesting depth (func literals included), collected into `funcScopeVarNames` during variable analysis. The general case, unrelated to any type-vs-method collision, is vendored poly1305 under `-tags purego`: `mac_noasm.go` declares `type mac struct{ macGeneric }`, and `func (h *MAC) Sum(b []byte)` declares `var mac [TagSize]byte`, so reaching the promoted-embed method `h.mac.Sum(&mac)` bare would spell `Ꮡ(h.mac).of(mac.ᏑmacGeneric)`, in which `mac` binds to the `array<byte>` local (CS1061) — in `Sum`/`Verify`, which declare that local, and **not** in `Write`, which does not. Qualifying is always value-correct: Go guarantees the reference is unambiguous, and inside a scope that shadows the type the type is simply unreachable by that bare name, so every bare occurrence the emitter produces is meant as the type. Emitted forms (from the `LocalShadowsEmbedHopType` guard; a method whose receiver is a `ref` reaches the promoted method through the plain field path, `h.acc.inner.Store(Ꮡacc)`, and needs no accessor, so the accessor appears where the receiver is a pointer):
 
-<!-- source: src/tests/Behavioral/LocalShadowsEmbedHopType/LocalShadowsEmbedHopType.cs.target:70, 83 -->
+<!-- source: src/tests/Behavioral/LocalShadowsEmbedHopType/LocalShadowsEmbedHopType.cs.target:81, 94 -->
 ```csharp
     p.Ꮡdeep.of(deep.Ꮡacc).of(main_package.acc.Ꮡinner).Store(Ꮡacc);
     …
@@ -381,13 +432,13 @@ The first is `resetVia`, whose `var acc [4]byte` shadows the type `acc`, so only
 
 The standard-library conversion's `-tags purego` is what reaches the poly1305 code with this shape, and poly1305's dependents (`chacha20poly1305` → `crypto/tls` → `net/http`, `net/rpc`, `net/smtp`, `expvar`) build on it. (Guarded by `LocalShadowsEmbedHopType`, whose `resetVia` and `main` discriminate qualified-vs-bare by whether the function declares the shadowing local; `CollisionFieldBoxAccessor`'s `boxRefCapturedValueNamedAfterType` qualifies uniformly like every other shadowed accessor; a bare `Ꮡw.of(w.Ꮡpark)` would compile there only because C#'s identical-simple-name rule happens to bind the type.)
 
-A related case is the **box name of a shadow-renamed receiver/parameter**. A deref-aliased pointer (a receiver or a `*T` parameter) is emitted as `ref var <name> = ref Ꮡ<raw>.DerefOrNull()` — the `Ꮡ` companion always keeps the **raw** Go name, even when the value alias is shadow-renamed for a collision (`func (p *cpuProfile) add()` where `p` collides with the type `p` → `ref var Δp = ref Ꮡp.DerefOrNull()`). When a pointer-receiver (capture-mode) method is then called on that receiver/parameter, the call routes through the box, and that box reference must use the raw name `Ꮡp` — the value alias `Δp` would yield `ᏑΔp`, which is not in scope (CS0103). The converter builds the box from the raw identifier name (not the shadow-renamed value form), but only when they differ — so non-renamed receivers are unaffected (no churn).
+A related case is the **box name of a shadow-renamed receiver/parameter**. A deref-aliased pointer (a receiver or a `*T` parameter) is emitted as `ref var <name> = ref Ꮡ<raw>.DerefOrNull()` — the `Ꮡ` companion always keeps the **raw** Go name, even when the value alias is shadow-renamed for a collision (`func (p *cpuProfile) add()` where `p` collides with the type `p` → `ref var Δp = ref Ꮡp.DerefOrNull()`). When a pointer-receiver (capture-mode) method is then called on that receiver/parameter, the call routes through the box, and that box reference must use the raw name `Ꮡp` — the value alias `Δp` would yield `ᏑΔp`, which is not in scope (CS0103). The converter builds the box from the raw identifier name (not the shadow-renamed value form), but only when they differ — so non-renamed receivers are unaffected (no churn). Since 2026-11-11 a receiver or local is collision-renamed only when it is named like a type of a remaining package-level rename (`any`, `rune`, `nint`, `nuint`, `closed`, `union`); the `p` examples here and below date from the type-vs-method rename, and their guards now emit `p` unrenamed.
 
 The same raw-box-name rule applies when such a shadow-renamed pointer is **captured by a closure** (where the value alias is referenced through its box, since the `ref`-local can't be captured — see the *box-ref* section below). A value use inside the closure becomes `Ꮡp.Value.n` and a field-address use `Ꮡp.of(T.Ꮡn)` — both rooted at the raw box name `Ꮡp`, never the renamed `ᏑΔp`. The field-address form (`&p.field`) routes through the box-ref address path rather than the generic pointer-variable path: that generic path would prepend `Ꮡ` onto the closure's box-deref read (`Ꮡp.Value`), yielding a double-boxed `ᏑᏑp.Value` (CS0103). Because the captured pointer's box `Ꮡp` *is* the `ж<T>`, the field address is simply `Ꮡp.of(T.Ꮡfield)` — the same form as a captured value struct. (Guarded by the `RenamedReceiverBox` behavioral test, which exercises a shadow-renamed receiver calling a capture-mode method, plus a shadow-renamed pointer parameter both read through and field-addressed inside a closure; runtime has the shape on `p`/`Δp` receivers calling methods like `p.addExtra()` and on closures capturing such pointers.)
 
 A closure that captures an outer variable is emitted with a snapshot copy declared before the lambda — `var sʗ1 = s;` — and uses of the captured variable inside the lambda are rewritten to that capture name `sʗ1`. The capture-name mapping is keyed by **name**, which breaks on a **self-shadowing initializer inside the closure**: runtime `mgcsweep`'s `systemstack(func() { s := spanOf(uintptr(unsafe.Pointer(s.largeType))); … })` declares an inner `s` whose initializer reads the *outer* captured `s`. Mapping both the captured use (the RHS `s.largeType`) and the distinct inner binding to the same `sʗ3` would emit `var sʗ3 = …(~sʗ3)…` — its RHS binding to the not-yet-initialized inner variable (CS0841). The capture map therefore records the captured **object** alongside the name, and applies the capture name only when an ident resolves to that exact outer object; the inner binding falls through to its own (shadow-renamed) name. The emission is `var sΔ1 = spanOf(…(~sʗ3)…)` — the inner `s` shadow-renamed to `sΔ1` (distinct from the capture `sʗ3`), its RHS correctly reading the captured `sʗ3`, and later uses of the inner `s` using `sΔ1`. Because the object check passes for every non-shadowing capture (the ident *is* the captured variable), it changes nothing outside this self-shadow case. (Guarded by the `ClosureSelfShadowCapture` behavioral test — a captured pointer with an inner `s := f(s)` in a `systemstack`-shaped call-argument closure, output verified vs Go.)
 
-The same rule applies to an **escaping local** whose address is taken — `var p _panic; … preprintpanics(&p)` in runtime's `gopanic`, where `p` collides with the type `p`. The heap allocation is `ref var Δp = ref heap(new _panic(), out var Ꮡp)`, so the box is `Ꮡp` (raw) and `&p` must emit `Ꮡp`, not `ᏑΔp`. **Crucially, the box-name rule is keyed to the rename *kind*, because the two kinds name their boxes differently:** a type-**collision** rename prepends the marker (`p` → `Δp`) but keeps the raw box (`Ꮡp`), whereas a nested-scope **shadow** rename appends the marker plus a counter (`i` → `iΔ1`, `iΔ2`) and keeps the *shadow* box (`ref var iΔ1 = ref heap<nint>(out var ᏑiΔ1)`, so `&i` correctly emits `ᏑiΔ1`). The converter therefore rewrites to the raw name *only* when the alias is exactly `Δ`+rawname (the collision form); a shadow-renamed or non-renamed var keeps its existing box name. (Guarded by the `CollisionRenamedLocalBox` behavioral test, with `ForVariants`/`NestedVarShadow` covering the shadow-rename form left unchanged.)
+The same rule applies to an **escaping local** whose address is taken — `var p _panic; … preprintpanics(&p)` in runtime's `gopanic`, where `p` collides with the type `p`. The heap allocation is `ref var Δp = ref heap(new _panic(), out var Ꮡp)`, so the box is `Ꮡp` (raw) and `&p` must emit `Ꮡp`, not `ᏑΔp`. **Crucially, the box-name rule is keyed to the rename *kind*, because the two kinds name their boxes differently:** a type-**collision** rename prepends the marker (`p` → `Δp`) but keeps the raw box (`Ꮡp`), whereas a nested-scope **shadow** rename appends the marker plus a counter (`i` → `iΔ1`, `iΔ2`) and keeps the *shadow* box (`ref var iΔ1 = ref heap<nint>(out var ᏑiΔ1)`, so `&i` correctly emits `ᏑiΔ1`). The converter therefore rewrites to the raw name *only* when the alias is exactly `Δ`+rawname (the collision form); a shadow-renamed or non-renamed var keeps its existing box name. (Guarded by the `CollisionRenamedLocalBox` behavioral test, with `ForVariants`/`NestedVarShadow` covering the shadow-rename form left unchanged. Since 2026-11-11 `CollisionRenamedLocalBox` declares the type `p` and its locals unrenamed, `ref var p = ref heap<box>(new box(n: 0), out var Ꮡp)`, so it pins the plain form and no behavioral test reaches the collision form.)
 
 ### A nested closure must not clobber the enclosing closure's capture state
 The per-lambda conversion state — `conversionInLambda` (are we inside a closure body?) plus the capture-name maps (`currentLambdaVars`/`currentLambdaVarObjs`) — is what makes closure-body emission rewrite captured references to their box/copy forms: a captured local `s` reads as `sʗ1`, and the current method's **direct-ж receiver** (`func (s *Stmt) …` emitted `this ж<Stmt> Ꮡs`, whose body alias `ref var s = ref Ꮡs.DerefOrNull()` is a `ref`-local that **cannot** be captured by a C# closure) reads through its box as `Ꮡs.Value`. `enterLambdaConversion`/`exitLambdaConversion` are a **LIFO save/restore stack** (`conversionStack`): entering pushes the current state and installs fresh state; exiting **restores the enclosing closure's** state rather than resetting it. Reset on exit, a closure containing an **inner** closure would lose its state the moment the inner one finished, and every reference in the *outer* body **after** it would fall back to the bare, un-rewritten name: `database/sql (*Stmt).QueryContext`'s `s.db.retry(func(){ …; rows.releaseConn = func(err){…}; if s.cg != nil { … } })`, where `s.cg` sits after the inner `releaseConn` closure, would emit `s.cg` (CS8175, "cannot use ref local `s` inside an anonymous method/lambda"), and a captured local would silently split between its bare form and its `ʗ1` copy. A closure at top level restores to `false`/empty, so the stack matters only where a closure body continues after a nested closure — there the receiver box-read (`Ꮡs.Value.cg`, `Ꮡs.Value.cg.txCtx()`) and the captured-local copy name apply consistently across the whole body. (Guarded by the `NestedLambdaReceiverField` behavioral test — a direct-ж receiver method whose closure holds a nested closure followed by a non-call receiver field read, a field-method call, and another field read, all verified to render `Ꮡs.Value.<field>` and output-compared vs Go; `DeferValueFieldPtrReceiver`'s defer-then-body sequence exercises the same restore.)
@@ -428,72 +479,49 @@ interface-element send, plain call, return and assignment positions, wrapped and
 output-compared against `go run`; seven of the shapes reproduce the CS1003/CS1026/CS1002
 cluster with the rule reverted.)
 
-## Test-variant name coherence: production names are pinned, test-side method declarators Δ-rename
+## Test-variant names: a test file's method needs no rename
 
-The `-tests` pipeline re-analyzes the package over the **whole variant universe** (production files + `_test.go` files) but only **emits** the test files — the production `.cs` on disk were converted from the production-only universe and recompile into the test assembly as-is. Production symbol names are therefore **immutable** in a test-variant analysis: any collision a test file introduces must resolve by `Δ`-renaming the **test-side declarator**, never the production element. Two shapes, both resolved in `performNameCollisionAnalysis`:
+The `-tests` pipeline re-analyzes the package over the **whole variant universe** (production files + `_test.go` files) but only **emits** the test files — the production `.cs` on disk were converted from the production-only universe and recompile into the test assembly as-is. Production symbol names are therefore **immutable** in a test-variant analysis. A method a `_test.go` file declares on a production type stands in that type's second, test holder (`pinnedᴛReplacerᴛtest`), and a method on a test-declared type stands in that type's holder, so a test method shares no class with a production element and no name on either side changes:
 
-- **A test-file METHOD over a production element's name.** strings' export_test.go declares `func (r *Replacer) Replacer() any` — the ordinary type-vs-method resolution (above) would Δ-rename the *type*, but the production `replace.cs` on disk keeps `Replacer`, so renaming the type would split the assembly into two disagreeing halves (CS0102 `strings_package` already contains `Replacer` + CS0246 `ΔReplacer`). When the colliding method declarators are **all** test-declared and the element is production-declared, the element keeps its bare name (and no exported alias is registered) and the **method** Δ-renames instead; a FuncDecl colliding with a same-package element is necessarily a method (Go keeps method names in a separate namespace — any other same-scope reuse is a Go compile error). When a *production* method also carries the name, the production universe had the same collision and already renamed the element on disk, so the normal path stays consistent.
-- **A test-file METHOD shadowing a dot-imported function the variant calls unqualified.** Go keeps method names and dot-imported function names in separate namespaces, but both land in the C# package class's member-lookup scope, and an enclosing class's method group always wins over `using static` imports — sort_test.go's dot-imported `Sort(data)` would bind example_keys_test.go's `By.Sort` extension (CS1501, with method-group CS1503s downstream). A test-declared method whose name matches a foreign function the variant references **unqualified** (only unqualified sites conflict — SelectorExpr Sels are excluded, so a qualified `sort.Sort(ps)` never triggers; an unqualified foreign-function reference can only come from a dot-import) Δ-renames, and the dot-imported call keeps its bare emission, binding through `using static`.
+- **A test-file METHOD named like a production element.** strings' export_test.go declares `func (r *Replacer) Replacer() any`. The method is a member of the test holder for `Replacer`, the type stays a member of `strings_package`, and both keep the name `Replacer`; internal- and EXTERNAL-variant call sites are ordinary method calls (`r.Replacer()`).
+- **A test-file METHOD named like a dot-imported function the variant calls unqualified.** sort_test's example_keys_test.go declares `By.Sort` beside a dot-imported `Sort(data)`. The holder's method group reaches only the holder's own bodies: inside `By`'s holder the dot-imported call is written through the production package class (`example.value_package.Sort(by)` in the guard), and everywhere else it stays bare, bound through `using static`.
+- **A test-file FREE FUNCTION whose emitted signature matches a production METHOD's.** A method emits as a C# extension method whose receiver is the leading `this` parameter, and `this` does not count in C# signature identity, so math/big's `func (z nat) norm() nat` (nat.go) and `func norm(x nat) nat` (int_test.go) emit the same `norm(nat)` signature. The method stands in `nat`'s holder and the function in the package class, so the two signatures never meet in one class.
 
-- **A test-file FREE FUNCTION whose emitted signature matches a production METHOD's receiver.** A method emits as a C# extension method, so its receiver becomes the leading `this` parameter — and `this` does **not** participate in C# signature identity. math/big's `func (z nat) norm() nat` (nat.go) and `func norm(x nat) nat` (int_test.go) are legal Go in separate namespaces, but both emit as `norm(nat)` in `big_package`: CS0111. `resolveReceiverParameterCollisions` compares each same-named pair's *emitted* parameter list — the method's receiver type followed by its parameters, against the free function's parameters — and Δ-renames the test-side declarator. Discrimination is exact: an extra parameter (`func trim(x nat, n int)`) or a different first parameter (`func keep(n int)`) emits distinctly and keeps its plain name, as do generic declarations (type parameters keep the C# signatures distinct) and a variadic/non-variadic mismatch. Two methods can never collide this way (Go forbids redeclaring one method on one type) and two free functions cannot share a package scope, so a method/free-function pair is the only shape. When *both* sides are test-declared the FREE FUNCTION is the one renamed, so the outcome does not depend on declaration order and two colliding declarators never both become `Δ`-prefixed. A collision between two **production** declarators breaks the production-only conversion too, and takes its own rule ([below](#a-production-free-function-and-a-same-named-method-the-function-δ-renames)). <!-- at landing: the 302-package converted corpus compiled clean, so no production instance existed; tsc's internal/checker (C40) is the first. -->
+Production conversions have no `_test.go` files in their universe, so none of this reaches them. (Guarded by `TestTestVariantPinsProductionTypeAgainstTestMethodCollision`, `TestTestVariantRenamesTestMethodShadowingDotImportedFunction` and `TestTestVariantRenamesTestFuncCollidingWithProductionMethodReceiver`, which keep the names the records cite and state that nothing is renamed.)
+<!-- Until 2026-11-11 (OQ2, the method holders) every method was a member of the package class, and this section's title was "Test-variant name coherence: production names are pinned, test-side method declarators Δ-rename". performNameCollisionAnalysis pinned the production element and Δ-renamed the TEST-side declarator in each of the three shapes above (strings' `ΔReplacer`, CS0102 + CS0246 otherwise; sort's `ΔSort`, CS1501 with method-group CS1503s otherwise; math/big's free `Δnorm`, CS0111 otherwise, resolveReceiverParameterCollisions comparing emitted parameter lists, the FREE function renamed when both sides were test-declared). The rename registry was object-keyed (testMethodRenames map[types.Object]bool) and session-scoped across both variant passes. At landing the behavioral regression check was byte-identical (×402). The full text is at master 4efe149858. -->
 
-The rename registry is **object-keyed** (`testMethodRenames map[types.Object]bool`) — the same-named production type/function keeps its plain emission at every other site — and **session-scoped**, initialized once per `-tests` conversion rather than per variant: both variants come from one `go/packages` load, so the external variant's references to an internal-variant method (the export_test pattern) resolve by object identity to entries registered during the internal pass. The declaration renames in `visitFuncDecl`, and every reference follows through `convIdent` — a METHOD name through its isMethod arm (all selector emissions funnel there), and a package-level **free function** referenced as a call target or function value through the trailing identifier path, which the receiver/first-parameter case above reaches (without it the declarator would rename while its call sites emit the bare name: CS0103). The go2cs-gen `RecvGenerator` reads the emitted name, so generated `ж`-receiver overloads follow automatically. Real emissions from the probes:
+## A production free function and a same-named method keep their names
 
-<!-- illustration: not converter output -->
+tsc's internal/checker declares `func (t *Type) IsTupleType() bool` and `func IsTupleType(t *Type) bool`.
+Both emit as `IsTupleType(ж<Type>)`, because a method's receiver is the extension method's leading `this`
+parameter, which does not count in C# signature identity. The method stands in `Type`'s holder and the
+function in the package class, so the two never meet in one class and both keep the Go name:
+
+<!-- source: src/tests/Behavioral/FuncMethodSameNameCollision/shapes/shapes.cs:13-19 -->
 ```csharp
-internal static any ΔReplacer(this ж<global::go.strings_package.Replacer> Ꮡr) { … } // strings export_test.go `func (r *Replacer) Replacer() any` — type keeps its name
-@string got = fmt.Sprintf("%T"u8, tc.r.ΔReplacer());     // EXTERNAL-variant call site (replace_test.cs) follows the internal rename
+} partial class shapesᴛType {
 
-public static void ΔSort(this By by, slice<Planet> planets) { … } // sort example_keys_test.go `func (by By) Sort(planets []Planet)`
-NilSafeDelegateConversion<By, Func<ж<Planet>, ж<Planet>, bool>>(mass).ΔSort(planets); // test-method call sites follow
-Sort((sort.Interface)((sort.IntSlice)data));                       // dot-imported production call keeps its bare name
-```
-
-Production conversions have no `_test.go` files in their universe, so the analysis is inert there (the behavioral regression check is byte-identical<!-- [CNR](../Glossary.md#cnr) -->). <!-- at landing: ×402. --> (Guarded by `TestTestVariantPinsProductionTypeAgainstTestMethodCollision` — declaration, internal call site, external call site, and the pinned type — and `TestTestVariantRenamesTestMethodShadowingDotImportedFunction` — rename + bare dot-imported call, with never-referenced and qualified-only same-named methods as discrimination controls.)
-
-## A production free function and a same-named method: the function Δ-renames
-
-The same receiver-as-`this` collision between two **production** declarators: tsc's internal/checker declares
-`func (t *Type) IsTupleType() bool` and `func IsTupleType(t *Type) bool`, both `IsTupleType(ж<Type>)` in the
-package class (CS0111). The free function takes the `Δ`, the side the test-variant rule above picks when both
-are test-declared, and the method keeps its name:
-
-<!-- source: src/tests/Behavioral/FuncMethodSameNameCollision/shapes/shapes.cs:11-13 -->
-```csharp
 public static bool IsTupleType(this ж<Type> Ꮡt) { return isTupleType(ref (Ꮡt).DerefOrNull()); }
 
-public static bool ΔIsTupleType(ж<Type> t) { return isTupleType(ref (t).DerefOrNull()); }
+} partial class shapes_package {
+
+public static bool IsTupleType(ж<Type> t) { return isTupleType(ref (t).DerefOrNull()); }
 ```
 
-`funcRenamedForMethodCollision` decides from go/types alone: a production free function whose signature
-collides (`emittedSignaturesCollide`, the test above) with a production method of a type its own package
-declares. A package that calls the function asks the same `*types.Func` and reaches the same answer, so its
-call sites and function values follow with no metadata between the packages:
+A package that calls either reaches it the way Go does: a method call binds the extension, and a qualified
+call or a function value names the package class's function:
 
-<!-- source: src/tests/Behavioral/FuncMethodSameNameCollision/main.cs.target:29 -->
+<!-- source: src/tests/Behavioral/FuncMethodSameNameCollision/main.cs.target:34, 38 -->
 ```csharp
-    fmt.Println("foreign", t.IsTupleType(), shapes.ΔIsTupleType(t), shapes.ΔIsTupleType(Ꮡ(new shapes.Type())));
+    fmt.Println("foreign", t.IsTupleType(), shapes.IsTupleType(t), shapes.IsTupleType(Ꮡ(new shapes.Type())));
+…
+    var isTuple = shapes.IsTupleType;
 ```
 
-Two properties of the rule are deliberate:
-
-- **It is decided at the Go level, so it can over-approximate.** A pointer-receiver method emits as `this ж<T>`
-  or as `this ref T` depending on how its body uses the receiver, and only the `ж<T>` form collides in C#. A
-  rule that followed the body would change an exported function's C# name whenever an unrelated body edit
-  moved the receiver form, breaking every other package's callers; the Go-level rule names it the same way for
-  as long as the signatures are what they are. A pair whose method emits `this ref T` is renamed without
-  needing it (the guard's `Deep` and `Combine`).
-- **Only production declarations count.** A method or function declared in a `_test.go` file never renames a
-  production function: the production `.cs` keeps the bare name, and the test-variant rule above renames the
-  test side instead. The decision reads each declaration's file from the load's file set.
-
-A function a whole-file hand-own declares keeps the hand-own's spelling: std's one production pair,
-`testing.checkParallel`, lives in `testing.cs`, which `-stdlib` does not emit, and its only external caller,
-testing/cryptotest's `//go:linkname` push, composes the target from the directive's text. (Guarded by the
-`FuncMethodSameNameCollision` behavioral test — a local pair, a function value, a cross-package pair called and
-taken as a value, a pair with a further parameter, and a non-colliding control, output-compared against `go run`
-— and by `TestProductionFuncMethodCollisionRename`, which pins the colliding shapes, the control, a generic free
-function, and a method declared in a `_test.go` file.)
+(Guarded by the `FuncMethodSameNameCollision` behavioral test — a local pair, a function value, a cross-package
+pair called and taken as a value, a pair with a further parameter, and a non-colliding control,
+output-compared against `go run`.)
+<!-- Until 2026-11-11 this section was "A production free function and a same-named method: the function Δ-renames". Both declarations were members of the package class (CS0111), so funcRenamedForMethodCollision Δ-prefixed the free function (`ΔIsTupleType`), deciding from go/types alone (emittedSignaturesCollide) so every importer reached the same answer with no metadata between packages. It was decided at the Go level and over-approximated: a pointer-receiver method emitted as `this ref T` was renamed without needing it (the guard's Deep and Combine). Only production declarations counted; a whole-file hand-own kept its spelling (std's one production pair, testing.checkParallel, lives in testing.cs, which -stdlib does not emit; its only external caller, testing/cryptotest's go:linkname push, composes the target from the directive's text). Guarded then also by TestProductionFuncMethodCollisionRename. The full text is at master 4efe149858. -->
 
 ## A NESTED package's production `GoImplement` record anchors to the production metadata file
 
@@ -652,7 +680,7 @@ to `_test.go` files for the member-access edge's reason. `math/rand/v2`'s `*p = 
 `var l Logger` are one rule.
 
 *`go/scanner` — the recorded interface base.* A converted **concrete** type names no interface in its own
-emitted declaration — `partial struct ErrorList /*[]ж<ΔError>*/;` names none at all. Its bases arrive
+emitted declaration — `partial struct ErrorList /*[]ж<Error>*/;` names none at all. Its bases arrive
 as the **VALUE-form `[assembly: GoImplement<T, I>]` records** its package emits, which the go2cs-gen
 `ImplementGenerator` realizes as `partial struct ErrorList : global::go.sort_package.Interface` **inside the
 declaring assembly**. The metadata type therefore *declares* that base, and binding **any** member on it makes
@@ -892,9 +920,11 @@ Four places read the property by name, and all four apply the one rule:
 - the converter's unwrap sites, through `wrapperValueMember`. A named array's pointer receiver (or deref-aliased
   pointer parameter) that is indexed, ranged or sliced emits `v.Value‿[i]`, `range(v.Value‿)` and `v.Value‿[..2]`.
 
-A `Value` type the converter collision-renames to `ΔValue` (a same-package method or function named `Value`) no
-longer clashes, so it keeps the plain property; the converter's rule reads `nameCollisions` for that, as the
-generator reads the declared C# name.
+A `Value` type whose package also declares a method named `Value` keeps its name too: the method stands in its
+receiver's holder, so the type is declared `Value` and takes `Value‿` like any other. The generator reads the
+declared C# name, and the converter's rule (`wrapperValueMember`) asks `nameCollisions` for a renamed `Value`, which
+no remaining rename produces.
+<!-- Until 2026-11-11 such a type was collision-renamed to `ΔValue`, no longer clashed, and kept the plain property. -->
 
 Out of scope, and measured: a named POINTER type named `Value` (its `Value` is the ref accessor every dereference
 emits), and the interface-member names the wrappers also declare. `type Wrap []int` (ISliceWrap's static `Wrap`) and
@@ -954,10 +984,10 @@ paths shared the hole and were closed the same way: `isTerminatingStmt` treated 
 `panic(…)` as terminating (mis-deciding a switch case's `break`), and the capture-mode scan treated
 a shadowed `recover(…)` as forcing the function's defer frame.
 
-Note this is the **opposite** direction from `packageBuiltinShadows` (see *Type-vs-Method Name
-Collisions*): there the call genuinely *is* the built-in and a same-named package method shadows the
-C# `using static go.builtin`, so the call is emitted **qualified** as `builtin.<name>(…)`. Here the
-call is not a built-in at all. (Guarded by the `BuiltinShadowLocal` behavioral test.)
+Note this is the **opposite** direction from a method named like a built-in (see
+[Type-vs-Method Name Collisions](#type-vs-method-name-collisions)): there the call genuinely *is* the
+built-in and the method shadows the C# `using static go.builtin` inside its own holder, so a call there
+is emitted **qualified** as `builtin.<name>(…)`. Here the call is not a built-in at all. (Guarded by the `BuiltinShadowLocal` behavioral test.)
 
 ## A declaration named `heap` qualifies the boxing intrinsic
 
@@ -1028,7 +1058,10 @@ QUALIFIED-NAME resolver, would be wrong. That function reads its argument as `<p
 half — a collision-renamed foreign member (`time.Second` → `time.ΔSecond`), a Δ-shadowed import
 qualifier (`color.RGBA` → `Δcolor.RGBA`), or a type alias (`color.RGBA` → `colorꓸRGBA`). Applied to a
 rendered *expression*, it fires on any base that merely **shares a name** with an imported package, so
-one function would produce three different wrong answers depending only on which rewrite matched the member:
+one function would produce three different wrong answers depending only on which rewrite matched the member.
+The example is time's test code from before 2026-11-11, when `Month` and `Hour` were renamed because `Time`
+methods shared their names; today only the import-alias and type-alias rewrites can fire there, and the gate is
+the same:
 
 ```go
 func checkTime(time Time, test *ParseTest, t *testing.T) {
@@ -1053,6 +1086,12 @@ time's converted test suite alone. --> (Guarded by the `PackageNameShadowing` be
 `describe(time time.Time)` calls all three member kinds on the shadowing parameter.)
 
 ## A collision-renamed member keeps the file's RENAMED qualifier
+
+Since 2026-11-11 no constant or variable is renamed because a method shares its name: methods stand in their
+receiver's holder. `time` now declares `Second`, `Nanosecond`, `UTC` and `Local` under their Go names, and the
+examples in this section and the next show the shapes from before that date. The rules still hold for a member that
+a remaining package-level rename reaches (one that shares a name with a type named `any`, `rune`, `nint`, `nuint`,
+`closed` or `union`).
 
 A package that collision-renames an exported const or var publishes it with the `const:` marker, which
 tells a consumer to keep the reference **qualified through the package** (`time.ΔSecond`) rather than
@@ -1084,8 +1123,8 @@ already `_package`- or `global::`-qualified spelling is untouched.
 `import . "time"` makes every exported member a bare identifier, which is what `time`'s external test
 files use. A foreign **type** still resolves correctly in that form, because `foreignAliasedTypeName`
 works from `go/types` rather than from the source spelling. A **const or var** needs the same: `Second`,
-`Minute`, `Hour`, `Nanosecond`, `UTC` and `Local` — every one Δ-renamed in `time` because a `Time` method
-shares its name — would otherwise emit raw and bind nothing (CS0103).<!-- at the fix: CS0103 x176 across five files. -->
+`Minute`, `Hour`, `Nanosecond`, `UTC` and `Local` — every one Δ-renamed in `time` until 2026-11-11 because a
+`Time` method shared its name — would otherwise have emitted raw and bound nothing (CS0103).<!-- at the fix: CS0103 x176 across five files. -->
 `convIdent` resolves such a reference through the same recorded `GoTypeAlias` entries the qualified
 path uses (`dotImportedRenamedMember`), and emits the renamed member **bare**: a dot import renders as
 `using static <pkg>_package`, which exposes it under exactly that name. Only `const:`-marked entries are
@@ -1201,31 +1240,31 @@ does not move), and `cmd/compile/internal/types2`. Guarded by the behavioral pro
 argument and a generic type.
 <!-- census figures: 6497 files, 292 with a dot-import, 12 whose name another import also binds, 10 of those importing the same path both ways. -->
 
-## A function called with a value whose type has a same-named method is cast to its parameter type
+## A function called inside a holder with a method of its name is written through the package alias
 
 Go resolves `Sort(x)` to the package function `Sort(data Interface)` even when `x`'s type has a method
-named `Sort`. In C# that method is the extension `Sort(this StringSlice x)`, an ordinary static member of
-the same package class as the function. A bare `StringSlice` argument makes the extension the better
-overload, because an exact match beats the boxing conversion to `Interface`, so the call binds the method.
-sort's own convenience methods are exactly this shape, and they called themselves:
+named `Sort`. In C# that method is the extension `Sort(this StringSlice x)`, a member of `StringSlice`'s method
+holder, and the function is a member of the package class. Inside the holder a bare `Sort` names the holder's
+method group first, so the call would bind the method and call itself. sort's own convenience methods are exactly
+this shape:
 
 ```go
 func (x StringSlice) Sort() { Sort(x) }
 ```
-<!-- source: src/core/sort/sort.cs:159 -->
+<!-- source: src/core/sort/sort.cs:183 -->
 ```csharp
-public static void Sort(this StringSlice x) { Sort((Interface)(x)); }
+public static void Sort(this StringSlice x) { sort.Sort(x); }
 ```
 
-The converter casts the first argument to the function's interface parameter type wherever the argument's
-type, or a named type in the function's package whose underlying type it is, declares a method of the same
-name taking one fewer parameter. An argument emitted through an interface adapter (`new …ᴠInterface(x)`)
-already binds the function and is left alone. So is a simple-name call reached through `using static`,
-because C# does not import extension methods as simple names. Before the change, every `.Sort()` on
-`IntSlice`, `Float64Slice` or `StringSlice` overflowed the stack, which is how pflag's flag sorting, and
-cobra through it, failed. A bare `sort.Sort(sort.StringSlice(v))` in user code did too. (Guarded by the
-`SortMethodSelfCapture` behavioral project: the three methods, the bare qualified call, and a user package's
-own `Sort` function beside a `words.Sort()` method. It overflowed on the first arm before the change.)
+Inside a holder that declares a method of the function's name, the converter writes the function through the
+package's own alias (`sort.Sort(x)`; `main.Sort(w)` in the guard). Member lookup on the package class finds only the
+function, so the call binds it as Go does and needs no cast. Everywhere else the call keeps its plain form: a bare
+`sort.Sort(sort.StringSlice(v))` names the package class too. Before methods moved to their holders, every
+`.Sort()` on `IntSlice`, `Float64Slice` or `StringSlice` overflowed the stack, which is how pflag's flag sorting,
+and cobra through it, failed. (Guarded by the `SortMethodSelfCapture` behavioral project: the three methods, the
+bare qualified call, and a user package's own `Sort` function beside a `words.Sort()` method. It overflowed on the
+first arm before the first fix.)
+<!-- Until 2026-11-11 the method and the function were members of the same package class, and a bare `StringSlice` argument made the extension the better overload (an exact match beats the boxing conversion to `Interface`). The converter then cast the first argument to the function's interface parameter type wherever the argument's type, or a named type in the function's package whose underlying type it is, declared a method of the same name taking one fewer parameter (`Sort((Interface)(x))`); an argument emitted through an interface adapter, and a simple-name call reached through `using static`, were left alone. The cast is no longer written (kind j of the method-holder scout record, three sites, all in sort). Read at master 4efe149858. -->
 
 ---
 

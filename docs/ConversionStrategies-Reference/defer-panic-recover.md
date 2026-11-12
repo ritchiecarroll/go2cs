@@ -178,7 +178,7 @@ or `defer` beside the thunk, numbered `ᴛ1`, `ᴛ2`, … in order:
 	f := report
 	go f("via func value")
 ```
-<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.cs.target:110-122 -->
+<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.cs.target:115-127 -->
 ```csharp
     nint n = 3;
     goǃ(ᴛ1 => pair("square:", ᴛ1), n * n);
@@ -220,7 +220,7 @@ effects included:
 	x = 2
 	seq = 100
 ```
-<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.cs.target:129-136 -->
+<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.cs.target:134-141 -->
 ```csharp
         nint x = 1;
         defer(ᴛ1 => showPair("x was", ᴛ1), x, ref ᒐ);
@@ -258,7 +258,7 @@ func (x *box) two() {
 
 converts to:
 
-<!-- source: src/tests/Behavioral/DeferFinallyLowering/main.cs.target:24-39 -->
+<!-- source: src/tests/Behavioral/DeferFinallyLowering/main.cs.target:31-46 -->
 ```csharp
 internal static void two(this ж<box> Ꮡx) {
     GoFrame ᒐ = default;
@@ -460,7 +460,7 @@ func two() (int, string)              //  Go:
 defer show(two())                     //      two() runs at the defer; show runs at unwind
 ```
 
-<!-- source: src/tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.cs.target:65 -->
+<!-- source: src/tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.cs.target:70 -->
 ```csharp
 defer(ᴛ1 => show(ᴛ1.Item1, ᴛ1.Item2), two(), ref ᒐ);
 ```
@@ -620,7 +620,7 @@ function depends on how it was called, not where it was written: `defer catchErr
 `defer func() { catchError(&err) }()` reads nil in `catchError` and the panic continues. So the decision is made at
 run time, and the converter marks its two ends:
 
-<!-- source: src/tests/Behavioral/RecoverInHelper/RecoverInHelper.cs.target:76-82 -->
+<!-- source: src/tests/Behavioral/RecoverInHelper/RecoverInHelper.cs.target:77-83 -->
 ```csharp
 internal static void catchError(ж<error> Ꮡerr) {
     GoFrame ᒐ = default;
@@ -631,7 +631,7 @@ internal static void catchError(ж<error> Ꮡerr) {
         var e = recover(calledByDefer); if (e != nil) {
 ```
 
-<!-- source: src/tests/Behavioral/RecoverInHelper/RecoverInHelper.cs.target:96 -->
+<!-- source: src/tests/Behavioral/RecoverInHelper/RecoverInHelper.cs.target:97 -->
 ```csharp
         defer(catchError, Ꮡerr, ref ᒐ, recovers: true);
 ```
@@ -704,7 +704,7 @@ with **exit code 2**. The report is the one Go prints (golib's `CrashReport`):
   ([Limitations](../Limitations.md#what-converts-but-doesnt-behave-exactly-like-go)).
 <!-- src/core/golib/runtime/CrashReport.cs:192 `oldest first, each after the first on a TAB, with <c> [recovered]</c>`;
      :275 `text.Append(repanicked[i] ? " [recovered, repanicked]" : " [recovered]");`. The traceback renderer is the
-     converted runtime's (src/core/runtime/managed_impl.cs:171 `CrashReport.TracebackRenderer = crashTraceback;`).
+     converted runtime's (src/core/runtime/managed_impl.cs:174 `CrashReport.TracebackRenderer = crashTraceback;`).
      Guards: GolibTests CrashReportTests and CrashReportChainTests. Design record: docs/phase4/DESIGN-crash-report.md.
      history: the backstop once printed to stdout and called Environment.Exit(0), which polluted compared output and
      signaled false success to every caller; later it printed the first line alone, without the traceback. -->
@@ -816,7 +816,7 @@ is **inverted**: golib exposes `RuntimeErrorPanic.IntegerDivideByZeroValue` and 
 registers its own canonical value through a `[ModuleInitializer]` in the hand-owned
 `runtime/panicvalues_impl.cs` bridge. An implicit (trapped) divide-by-zero then carries the *same*
 value an explicit `panicdivide()` would — which is precisely Go's own invariant — and
-`err.(runtime.Error)` resolves through the generated `errorString`→`ΔError` adapter. A converted
+`err.(runtime.Error)` resolves through the generated `errorString`→`Error` adapter. A converted
 program that never links `runtime` keeps the plain-message fallback, which reads and prints
 identically and loses only the assertion.
 
@@ -959,7 +959,7 @@ not only for the func-literal-callee case, so `convFuncLit` (reached via convCal
 the argument's `LambdaContext`) routes any argument literal's captures to it, and they are emitted before
 the call — the guard's `defer run(func(){ pf.x = 77 })` shape:
 
-<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:69-72 -->
+<!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:75-78 -->
 ```csharp
 var pfʗ1 = pf;
 defer(run, () => {
@@ -984,7 +984,7 @@ literal's capture copies were then written inside the call (`goǃ((` `var doneʗ
 CS1002/CS1003/CS1026/CS1513, with `doneʗ1` never declared). All three unwrap the parentheses, so
 the copy is a statement before the call and the deferred literal reads its variables by reference:
 
-<!-- source: src/tests/Behavioral/ParenFuncLitGoDefer/ParenFuncLitGoDefer.cs.target:15-27 -->
+<!-- source: src/tests/Behavioral/ParenFuncLitGoDefer/ParenFuncLitGoDefer.cs.target:18-30 -->
 ```csharp
     var doneʗ1 = done;
     goǃ(() => {
@@ -1018,7 +1018,7 @@ every other read in that body uses. `visitDeferStmt`/`visitGoStmt` enter through
 variant (`enterDeferGoLambdaConversion`) that copies the enclosing lambda's renames into the fresh
 state, so the arguments render exactly like any other expression in the enclosing body:
 
-<!-- source: src/tests/Behavioral/DeferArgEnclosingCapture/main.cs:37-47 -->
+<!-- source: src/tests/Behavioral/DeferArgEnclosingCapture/main.cs:43-53 -->
 ```csharp
 var baseʗ1 = @base;
 func(() => {
@@ -1089,7 +1089,7 @@ a 4-error cascade in traceviewer). `visitReturnStmt` provides the same hoist buf
 `visitExprStmt`/`visitIfStmt`/`visitForStmt` and splices it before the `return` through its existing
 `DeferredDeclsMarker` slot (ahead of any deferred tuple-deconstruction temps):
 
-<!-- source: src/tests/Behavioral/ReturnTupleFuncLitArg/main.cs.target:15-18 -->
+<!-- source: src/tests/Behavioral/ReturnTupleFuncLitArg/main.cs.target:20-23 -->
 ```csharp
     var allowedʗ1 = allowed;
     return (new handler((@string msg) => {
@@ -1211,7 +1211,7 @@ internal static (ж<Regexp>, error err) parse(@string s, Flags flags) {
     error err = default!;
     GoFrame ᒐ = default;
     try {
-        defer(() => { … err = new ΔErrorжerror(…); … }, ref ᒐ);   // recover assigns the named result
+        defer(() => { … err = new Errorжerror(…); … }, ref ᒐ);   // recover assigns the named result
         …
         (_ᴛ1, err) = (literalRegexp(s, flags), default!); goto ᒐdone;   // `return literalRegexp(s, flags), nil`
     }
@@ -1231,7 +1231,7 @@ Because a named result lives in the literal's OWN scope, a reference to it in th
 
 ## Deferred calls whose callee returns a value take the lambda form
 The no-arg defer arm passes a bare method group (`defer(k.Close, ref ᒐ)`) only when the callee returns VOID -- an error-returning method (`defer k.Close()`, registry `Key.Close`) is a `Func<error>` method group that cannot bind the golib `defer(Action, ref GoFrame)` (CS1503). The lambda form discards the result, exactly Go's deferred-call semantics:
-<!-- source: src/tests/Behavioral/DeferTypelessReturns/DeferTypelessReturns.cs:68 -->
+<!-- source: src/tests/Behavioral/DeferTypelessReturns/DeferTypelessReturns.cs:73 -->
 ```csharp
 defer(() => hʗ1.close(), ref ᒐ);
 ```
@@ -1245,7 +1245,7 @@ defer(Ꮡs.release, ref ᒐ);                 // DeferCallOrder's acquireAndWork
 ```
 (net's own `defer conf.releaseSema()` sites take the receiver-call lowering into the `finally`, described above, when its gates pass.) The `ж<T>` overload is class-typed and delegate-legal, and the method-group conversion captures the receiver when the delegate is created — exactly Go's binding time. Mirrored in the go-statement arm. Gated to methods declared DIRECTLY on the pointee — a PROMOTED method (net interface.go's `defer zc.Unlock()`, declared on the embedded `sync.RWMutex`) has no extension on the outer box (CS1061) and keeps the lambda emission — and to void results (a `Func<>` group binds neither `defer(Action)` nor `go(Action)`). (Guarded by `DeferCallOrder`'s `acquireAndWork`, output-compared.)
 
-The same box-method-group emission also covers a **value receiver** whose type is exactly the pointer-receiver's pointee — `defer b.deck.reset()` (runtime/pprof; also database/sql, log/slog), where `deck pcDeck` is a value FIELD reached through a nested selector and `reset` has a `*pcDeck` receiver, so Go auto-takes `&b.deck`. The original arm required the receiver be an already-pointer *ident*; the value case renders `&receiver` through the shared address machinery (the same `&ast.UnaryExpr{AND}` → `convUnaryExpr` synthesis used elsewhere) — a boxed base gives the aliasing field-ref `Ꮡb.of(profileBuilder.Ꮡdeck)`, an escaping value local gives its box `Ꮡx`, a plain value gives the `Ꮡ(value)` copy — then binds the method: `defer(Ꮡb.of(builder.Ꮡc).reset, ref ᒐ)` for `defer b.c.reset()`, the `ж<T>` overload captured at defer time and mutating the real field. (pprof's own `defer b.deck.reset()` passes the gates of the [receiver-call lowering](#a-deferred-receiver-field-call-with-no-arguments-is-lowered-into-the-frames-finally) and is emitted into the frame's `finally` instead.) <!-- src/tests/Behavioral/DeferValueFieldPtrReceiver/main.cs.target:23 `defer(Ꮡb.Ꮡc.reset, ref ᒐ);`; src/core/runtime/pprof/proto.cs:684 `finally { if (ᒐd1) Ꮡb.DerefOrNull().deck.reset(); ᒐ.Run(); }` --> Gated the same way (void result, a NAMED value type whose RecvGenerator box overload exists, matching the pointee exactly so a promoted/embedded method is excluded). (Guarded by the `DeferValueFieldPtrReceiver` behavioral test — a pointer receiver deferring `b.c.reset()` on a value field, and a pointer local deferring the same in a closure, with the reset observed through the same box after return, output-compared vs Go.)
+The same box-method-group emission also covers a **value receiver** whose type is exactly the pointer-receiver's pointee — `defer b.deck.reset()` (runtime/pprof; also database/sql, log/slog), where `deck pcDeck` is a value FIELD reached through a nested selector and `reset` has a `*pcDeck` receiver, so Go auto-takes `&b.deck`. The original arm required the receiver be an already-pointer *ident*; the value case renders `&receiver` through the shared address machinery (the same `&ast.UnaryExpr{AND}` → `convUnaryExpr` synthesis used elsewhere) — a boxed base gives the aliasing field-ref `Ꮡb.of(profileBuilder.Ꮡdeck)`, an escaping value local gives its box `Ꮡx`, a plain value gives the `Ꮡ(value)` copy — then binds the method: `defer(Ꮡb.of(builder.Ꮡc).reset, ref ᒐ)` for `defer b.c.reset()`, the `ж<T>` overload captured at defer time and mutating the real field. (pprof's own `defer b.deck.reset()` passes the gates of the [receiver-call lowering](#a-deferred-receiver-field-call-with-no-arguments-is-lowered-into-the-frames-finally) and is emitted into the frame's `finally` instead.) <!-- src/tests/Behavioral/DeferValueFieldPtrReceiver/main.cs.target:30 `defer(Ꮡb.Ꮡc.reset, ref ᒐ);`; src/core/runtime/pprof/proto.cs:703 `finally { if (ᒐd1) Ꮡb.DerefOrNull().deck.reset(); ᒐ.Run(); }` --> Gated the same way (void result, a NAMED value type whose RecvGenerator box overload exists, matching the pointee exactly so a promoted/embedded method is excluded). (Guarded by the `DeferValueFieldPtrReceiver` behavioral test — a pointer receiver deferring `b.c.reset()` on a value field, and a pointer local deferring the same in a closure, with the reset observed through the same box after return, output-compared vs Go.)
 
 ## A deferred VALUE-receiver method passes its receiver as the thunk's first eager argument
 
@@ -1332,7 +1332,7 @@ defer(Ꮡstate.free, ref ᒐ);          // binds the live variable's box
 This is not merely a compile fix — a value snapshot is taken at defer time, so it would miss any mutation the body makes to `state` before the deferred call runs; binding `Ꮡstate` matches Go's semantics of deferring against the *live* variable. Gated to an escaping local (a non-escaping one has no `Ꮡ` box and keeps the compiling `Ꮡ(copy)` form) used as a value receiver whose type is exactly the method's pointer-receiver pointee (an already-pointer receiver's box group is the pointer variable itself, whose snapshot name IS declared, so it is excluded). The same generalization silently corrects the closure form (`func(){ x.mutate() }` on an escaping value local previously mutated a lost copy — go/types conversions.go/typeset.go) and removes now-dead `var xʗ1 = x;` snapshots wherever the box was already used. (Guarded by the `DeferHeapLocalPtrMethod` behavioral test — a value local deferring a pointer-receiver method, mutated after the defer, with the deferred method observing the final value, output-compared vs Go.)
 
 The same box-ref treatment covers a **promoted** pointer-receiver method reached through **value embeds** — `lazyCert.Do(…)` on `var lazyCert struct { sync.Once; v *Certificate }` (crypto/x509 `AppendCertsFromPEM`): Go takes `&lazyCert.Once`, an address into the variable's own storage, so the closure must share the original variable. The detection resolves the call through `info.Selections` and walks the selection's embedded-field index path — only **value** embeds along the path root the address at the variable (a **pointer** embed re-roots it at that pointer's target, where the snapshot, which copies the pointer, stays sound). Emission then renders the promoted call through the box's field projection and field uses through the box read; the snapshot form had referenced a never-declared snapshot box (`ᏑlazyCertʗ1`, CS0103) *and* divorced the closure's writes from the original:
-<!-- source: src/core/crypto/x509/cert_pool.cs:262-267 -->
+<!-- source: src/core/crypto/x509/cert_pool.cs:273-278 -->
 ```csharp
 ᏑlazyCert.of(AppendCertsFromPEM_lazyCert.ᏑOnce).Do(() => {
     // This can't fail, as the same bytes already parsed above.
@@ -1350,7 +1350,7 @@ var prʗ1 = pr;                                 // snapshot copy — WRONG
 defer(Ꮡprʗ1.of(pkgReader.Ꮡfake).setLines, ref ᒐ);    // Ꮡprʗ1 never declared → CS0103
 ```
 The capture analysis matches the single field-projection receiver (a FIELD selected on the var's own value-struct storage — the same `&m.field` form `lambdaBoxRefAddressForm` emits — whose type is exactly the method's pointer-receiver pointee and NAMED) as the same implicit address-of, marks the local box-ref, and the defer binds the live box's field view:
-<!-- source: src/core/go/internal/gcimporter/ureader.cs:65 -->
+<!-- source: src/core/go/internal/gcimporter/ureader.cs:70 -->
 ```csharp
 defer(Ꮡpr.Ꮡfake.setLines, ref ᒐ);
 ```

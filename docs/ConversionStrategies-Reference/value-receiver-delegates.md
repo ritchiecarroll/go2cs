@@ -20,7 +20,7 @@ The **method-group** go statement needs the receiver box too. A void, non-variad
 
 A conversion to a **named func type** — `metricReader(read)` where `type metricReader func() uint64` — targets a C# **delegate declaration** (`internal delegate uint64 metricReader();`). Distinct delegate types have no cast conversion (a `(metricReader)read` from `Func<ulong>` is CS0030); C# converts via **delegate creation**: `new metricReader(read)`, which accepts a compatible delegate or method group. The general conversion branch special-cases a named target whose underlying is a `*types.Signature`. Delegate creation is used where the operand cannot be nil — a function literal or a package-level function; any other operand (a func-typed parameter or variable, which can be nil at run time) routes through golib's `NilSafeDelegateConversion<TTarget, TSource>`, so a nil source converts to nil as in Go instead of throwing in the delegate constructor, and `T(nil)` emits `default(T)!`. Composed with the bound-value lambda this renders the full runtime `metrics.go` registration, where `read` is a parameter (guarded by the `MethodExpression` extension — a named-func-type conversion with a bound method invoked through a func field, values vs Go):
 
-<!-- source: src/core/runtime/metrics.cs:565-566 -->
+<!-- source: src/core/runtime/metrics.cs:570-571 -->
 ```csharp
     var recvʗ1 = NilSafeDelegateConversion<metricReader, Func<uint64>>(read);
     d.compute = (ж<statAggregate> p1, ж<metricValue> p2) => recvʗ1.compute(p1, p2);
@@ -60,7 +60,7 @@ The receiver-snapshot decl above is emitted as a full statement (`var dʗ1 = d;`
 var checker func(*driver.NamedValue) error
 checker = nvc.CheckNamedValue   // reassign a method value
 ```
-<!-- source: src/core/database/sql/convert.cs:182-183 -->
+<!-- source: src/core/database/sql/convert.cs:187-188 -->
 ```csharp
 var nvcʗ1 = nvc;
             checker = nvcʗ1.CheckNamedValue;
@@ -325,7 +325,7 @@ _ = sink          // func(int)
 _ = lexText       // matches the named func type stateFn
 _ = c.bump        // method value
 ```
-<!-- source: src/tests/Behavioral/BlankIdentifierCollision/main.cs:68-69, 71, 79 -->
+<!-- source: src/tests/Behavioral/BlankIdentifierCollision/main.cs:73-74, 76, 84 -->
 ```csharp
 _ = (Func<@string, nint, (@string, error)>)(pair);
 _ = (Action<nint>)(sink);

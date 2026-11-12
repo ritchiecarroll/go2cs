@@ -41,7 +41,7 @@ frames run their deferred calls during the unwind, and the goroutine root swallo
 goroutine, `runtime.Goexit` throws `NotSupportedException` naming the Goexit design record, and the program exits 2
 with that message instead of Go's.
 
-<!-- src/core/runtime/managed_impl.cs:1517 (`if (!Goroutine.OnGoroutine)`), :1528 (`throw new GoexitException();`).
+<!-- src/core/runtime/managed_impl.cs:1524 (`if (!Goroutine.OnGoroutine)`), :1535 (`throw new GoexitException();`).
 The goroutine root: src/core/golib/runtime/Goroutine.cs:518 (`public static bool OnGoroutine => t_current is { IsMain: false };`). -->
 
 ## Why the goroutine shape does not carry over
@@ -60,8 +60,8 @@ Every converted function that defers already has such a frame. Its emitted shape
 by `GoFrame.IsPanic` and whose `finally` ends in `ᒐ.Run()`, the call that runs the frame's deferred calls. A deferred
 receiver-field call that the converter lowers into plain code sits in that same `finally`, so it is covered too.
 
-<!-- src/tests/Behavioral/DeferFinallyLowering/main.cs.target:37 (`catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }`),
-:38 (`finally { if (ᒐd2) Ꮡx.DerefOrNull().b.done(); if (ᒐd1) Ꮡx.DerefOrNull().a.done(); ᒐ.Run(); }`). -->
+<!-- src/tests/Behavioral/DeferFinallyLowering/main.cs.target:44 (`catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }`),
+:45 (`finally { if (ᒐd2) Ꮡx.DerefOrNull().b.done(); if (ᒐd1) Ꮡx.DerefOrNull().a.done(); ᒐ.Run(); }`). -->
 
 The design uses those frames as the chain of catch points:
 

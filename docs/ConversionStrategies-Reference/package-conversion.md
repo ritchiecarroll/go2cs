@@ -970,7 +970,7 @@ Resolving *where* an imported package lives is **module-aware**: the standard li
 
 **Exported type aliases cross packages.** A package-level Go type alias that is exported — `type Temperature = Celsius` — is recorded in that package's `package_info.cs` as an assembly attribute in its `<ExportedTypeAliases>` block:
 
-<!-- source: src/tests/Behavioral/CrossPkgLib/package_info.cs:29, 33, 36 -->
+<!-- source: src/tests/Behavioral/CrossPkgLib/package_info.cs:29, 30, 32 -->
 ```csharp
 // <ExportedTypeAliases>
 …
@@ -981,7 +981,7 @@ Resolving *where* an imported package lives is **module-aware**: the standard li
 
 A consumer that imports the package and names `CrossPkgLib.Temperature` cannot use a C# member-access for it (C# has no namespace-level type alias). Instead, the converter parses the imported package's `package_info.cs`, reads its `[GoTypeAlias]` attributes, and, for each alias an emitted reference resolves through, emits a corresponding `global using` into the consumer's own `<ImportedTypeAliases>` block — keyed by a package-qualified name whose `.` separator is the extended-Unicode dot `ꓸ` (`ꓸ`, a valid C# identifier character), since `CrossPkgLib.Temperature` is not a legal C# identifier:
 
-<!-- source: src/tests/Behavioral/CrossPkgUser/package_info.cs:12, 15, 18 -->
+<!-- source: src/tests/Behavioral/CrossPkgUser/package_info.cs:12, 13, 16 -->
 ```csharp
 // <ImportedTypeAliases>
 …
@@ -992,21 +992,34 @@ global using CrossPkgLibꓸTemperature = go.CrossPkgLib_package.Celsius;
 
 The consumer's converted code then refers to the alias as `CrossPkgLibꓸTemperature`. (This round-trip depends on the module-aware resolution above to locate the imported package's `package_info.cs`; a stdlib dependency is found under the `core` output tree, a local module via its `go/packages` directory.) Guarded by the `CrossPkgLib`/`CrossPkgUser` cross-package behavioral test pair.
 
-**A collision-renamed alias chain resolves to its concrete target.** When an exported type's name *collides* with a method name it is `Δ`-renamed (see [Type-vs-Method Name Collisions](shadowing.md#type-vs-method-name-collisions)); and when that type is *also* an empty interface — `type Token any` colliding with a `Token()` method, encoding/json's shape — the producer's `package_info.cs` carries a **two-hop chain**. The collision analysis records `Token → ΔToken`, and `visitTypeSpec` (which renders an empty-interface target as `object`) records the renamed declaration `ΔToken → object`:
+**An empty-interface type's alias resolves to `object`.** encoding/json's `type Token any` is exported as an
+alias of `object`, the C# spelling of an empty interface, and a consumer imports that target bare:
 
-<!-- source: src/core/encoding/json/package_info.cs:32-33 -->
+<!-- source: src/core/encoding/json/package_info.cs:30 -->
 ```csharp
-[assembly: GoTypeAlias("Token", "ΔToken")]
-[assembly: GoTypeAlias("ΔToken", "object")]
+[assembly: GoTypeAlias("Token", "object")]
 ```
 
-A consumer that resolves only the FIRST hop and then qualifies the intermediate `Δ`-name as a package member emits `global using jsonꓸToken = go.encoding.json_package.ΔToken;` — but `ΔToken` is an assembly-scoped `global using`, **not** a namespace member of `json_package`, so it is CS0426 (encoding/json's `Token` consumed by html/template, internal/coverage/cfile, expvar, log/slog, internal/fuzz, …). The imported-alias loader (`loadImportedTypeAliases`) therefore follows the chain within the producer's OWN exported aliases to its **concrete** target, emitting `global using jsonꓸToken = object;`. A chain whose final target is a real `Δ`-renamed member (a delegate/struct such as `ΔFilter`, which is *not* itself an exported alias) stops there and stays package-qualified, unchanged. Guarded by the `CrossPkgLib`/`CrossPkgUser` pair — an empty-interface `Token` colliding with a `Sensor.Token()` method, named as a `var` type in the consumer and its boxed value read back, output-compared vs Go.
+<!-- source: src/tests/Behavioral/CrossPkgUser/package_info.cs:14 -->
+```csharp
+global using CrossPkgLibꓸToken = object;
+```
+
+json also has a `Token()` method on `*Decoder`; the method stands in `Decoder`'s holder, so the type keeps its name
+and the record is one hop. The imported-alias loader (`loadImportedTypeAliases`) still follows a chain within the
+producer's OWN exported aliases to its **concrete** target, for a type a remaining package-level rename reaches; a
+chain whose final target is a real `Δ`-renamed member (a delegate or struct that is *not* itself an exported alias)
+stops there and stays package-qualified. Guarded by the `CrossPkgLib`/`CrossPkgUser` pair — an empty-interface
+`Token` beside a `Sensor.Token()` method, named as a `var` type in the consumer and its boxed value read back,
+output-compared vs Go.
+<!-- Until 2026-11-11 (OQ2, the method holders) a type sharing a method's name was Δ-renamed, and `type Token any` beside `Token()` gave a TWO-HOP chain in the producer's package_info.cs: the collision analysis recorded `Token → ΔToken` and visitTypeSpec recorded `ΔToken → object`. A consumer that resolved only the first hop emitted `global using jsonꓸToken = go.encoding.json_package.ΔToken;`, CS0426 because `ΔToken` is an assembly-scoped global using, not a member of json_package (encoding/json's Token consumed by html/template, internal/coverage/cfile, expvar, log/slog, internal/fuzz, …); the loader followed the chain to emit `global using jsonꓸToken = object;`. The paragraph was titled "A collision-renamed alias chain resolves to its concrete target"; full text at master 4efe149858. -->
 
 **Imported stdlib alias metadata loads from the tree the assembly is COMPILED from.** The alias round-trip reads the
 imported package's `package_info.cs` at `$(go2csPath)core/<pkg>`, which is also where every stdlib `<ProjectReference>`
 compiles from, so the alias-load path and the compile path are one path by construction. Read from anywhere else, a
-cross-package reference to a collision-renamed stdlib type would render the raw, undefined qualified name:
-`err.(runtime.Error)` as `runtime.Error` (CS0426) instead of `runtimeꓸError` → `runtime_package.ΔError`. *Metadata must
+cross-package reference to a renamed or aliased stdlib type would render the raw, undefined qualified name (while
+`runtime.Error` was renamed for a method, until 2026-11-11: `err.(runtime.Error)` as `runtime.Error`, CS0426, instead
+of `runtimeꓸError` → `runtime_package.ΔError`). *Metadata must
 be read from the tree the code is compiled from, never from a parallel one that merely looks like it.* <!-- history:
 while the converted standard library lived in a second tree (go-src-converted, until 2026-08-01), a -tests build
 compiled stdlib dependencies from it while loadImportedTypeAliases read package_info.cs from the baseline core stub,
@@ -1053,7 +1066,7 @@ A pull whose direct reference would close a project cycle is instead reached **l
 golib's `LinknameVar<T>` — the same storage, with no `ProjectReference`. math/bits is that case at Go 1.26,
 because `runtime` imports `math/bits`:
 
-<!-- source: src/core/runtime/amd64/panic.cs:342 -->
+<!-- source: src/core/runtime/amd64/panic.cs:343 -->
 ```csharp
 public static error overflowError = ((error)((errorString)(@string)"integer overflow"));
 ```
@@ -1135,7 +1148,7 @@ import (
 )
 type fsOnly struct{ fs.FS }
 ```
-<!-- source: src/core/testing/fstest/mapfs.cs:7, 217 -->
+<!-- source: src/core/testing/fstest/mapfs.cs:7, 229 -->
 ```csharp
 using fs = go.io.fs_package;
 …
@@ -1687,7 +1700,8 @@ dependency's own Go declarations and **no implement records at all**. Two things
 the CONSUMING package:
 
 * its `<ImportedTypeAliases>` block would lose the dependency's exported aliases
-  (`global using syscallꓸHandle = go.syscall_package.ΔHandle`, `netꓸAddr`, `timeꓸLocation`, …); and
+  (`global using syscallꓸHandle = go.syscall_package.ΔHandle`, `netꓸAddr`, `timeꓸLocation`, … while those types were
+  renamed for a method, until 2026-11-11; a Go type alias is exported the same way today); and
 * not knowing that `syscall`'s assembly already implements `error` on `syscall.Errno`, it would
   **re-declare the pair locally** — `[assembly: GoImplement<syscall_package.Errno, error>]` — and wrap the
   value at the cast site in a locally-generated adapter (`new syscall_Errnoᴠerror(e)`) instead of
@@ -1752,7 +1766,8 @@ takes the conversion's target GOOS, reads the flavor section when one is recorde
 unqualified one. The flavors matter because a NuGet consumer compiles against the flavor go.lib's
 RID-selected compile asset (`buildTransitive/go.lib.targets`) selects: a linux conversion that read the
 windows record would import `syscallꓸHandle = go.syscall_package.ΔHandle` (a windows-only type, CS0426) and
-the windows flavor's Δ-renamed `Sockaddr` (CS0305 against the linux flavor's own).
+the windows flavor's Δ-renamed `Sockaddr` (CS0305 against the linux flavor's own). Those two records date from the
+type-vs-method rename, which ended 2026-11-11; any per-flavor record has the same exposure.
 
 The two halves must name the SAME platform, so `-recurse=nuget` writes that platform into the output
 root's `Directory.Build.props` as a conditioned `GoCompileRuntimeIdentifier` default (windows → `win-x64`,
@@ -1778,6 +1793,11 @@ The record scraped above answers one question at a cast site: *does the dependen
 already implement this pair?* If it does, the bare value converts implicitly and a local
 `<pkg>_<T>ᴠ<Iface>` value adapter is dead machinery. Getting the answer wrong in either direction is
 expensive, so both halves — the KEY and the TRUST — are stated precisely here.
+
+The `Δ` type spellings in this section and the next two (`ΔRGBA`, `ΔSignal`, `ΔHandler`, `ΔType`, `ΔError`,
+`ΔSockaddr`) are type-vs-method renames measured before 2026-11-11. Those types now keep their Go names, because
+methods stand in their receiver's holder; the rules key on the EMITTED name, so they hold unchanged, and the counts
+are the measurements of their dates.
 
 **The key.** `implementRecordKey` composes `<declaring package>|<C# simple type>|<pkg>_package.<Iface>`
 and is called by BOTH sides of BOTH record sets: `loadPackageImplementLines`, over records parsed from a
@@ -1911,7 +1931,7 @@ and every consumer would mint its own `binary_bigEndianᴠByteOrder` adapter. Th
 the file visits and before `writePackageInfoFile`) walks the package scope and records the VALUE-form
 pairs the package satisfies. `encoding/binary`'s metadata carries:
 
-<!-- source: src/core/encoding/binary/package_info.cs:40-47 -->
+<!-- source: src/core/encoding/binary/package_info.cs:38-45 -->
 ```csharp
 // <InterfaceImplementations>
 [assembly: GoImplement<bigEndian, AppendByteOrder>]

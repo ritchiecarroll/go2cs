@@ -59,7 +59,7 @@ These are the go1.26.10 deferred entries that cite this record as their retireme
 NewInt and mldsa rows is C2's sizing census (mailbox, COORD inbox, 2026-10-21T13:07:46Z, go1.26.10, three amd64
 targets); the karatsuba rows are R's (COORD inbox, 2026-10-21T07:59:24Z, windows) and G's (math/big's disclosure
 plan, docs/phase4/DATA-hop126-deferred-allocs.md:150 (`INCREMENT 1 (queued post-publish, COORD 2026-10-25)`)). The
-TestReplace attribution is read at the emission, src/core/strings/strings.cs:1179
+TestReplace attribution is read at the emission, src/core/strings/strings.cs:1184
 (`ref var b = ref heap(new Builder(), out var Ꮡb);`). -->
 
 ## The shapes and their counts
@@ -101,7 +101,7 @@ positions split into `&T{}` 422, `make` 282, `new` 118, slice literal 34 and `ma
   that does not. The population is therefore every `heap(` site minus Go's `moved to heap` lines. It is not yet
   counted.
 - **`&T{}` temporaries handed to a method with a pointer receiver.** Examples are `karatsuba`'s nine `Int`
-  temporaries and `karatsubaSqr`'s six, each emitted as `Ꮡ(new ΔInt(...))`. This shape sits inside the `&T{}` rows.
+  temporaries and `karatsubaSqr`'s six, each emitted as `Ꮡ(new Int(...))`. This shape sits inside the `&T{}` rows.
   Phase A's ref-lowering never lowers a method's pointer receiver or parameter (the §10.1 boundary), so these stay
   boxed.
 - **Element address-of used only for an identity compare.** `alias()` compares `&x[cap(x)-1] == &y[cap(y)-1]` and
@@ -110,9 +110,10 @@ positions split into `&T{}` 422, `make` 282, `new` 118, slice literal 34 and `ma
   TestMulUnbalanced's excess. Done in 1.26.10.2 seat #10: a compare of two element address-ofs takes golib's
   `Ꮡelem`, which allocates nothing.
 
-<!-- src/core/math/big/natmul.cs:228-237 (`var (x0, x1) = (Ꮡ(new ΔInt(abs: x.slice(0, n2).norm()))`…`var ty =
-Ꮡ(new ΔInt(abs: z.slice(n2, 2 * n2)));`), :324-331 (`var z0 = Ꮡ(new ΔInt(abs: z.slice(0, 2 * n2)));`…`var tx =
-Ꮡ(new ΔInt(abs: z.slice(0, n2)));`). src/core/math/big/nat.cs:238
+<!-- src/core/math/big/natmul.cs:242-251 (`var (x0, x1) = (Ꮡ(new Int(abs: x.slice(0, n2).norm()))`…`var ty =
+Ꮡ(new Int(abs: z.slice(n2, 2 * n2)));`), :338-344 (`var z0 = Ꮡ(new Int(abs: z.slice(0, 2 * n2)));`…`var tx =
+Ꮡ(new Int(abs: z.slice(0, n2)));`). Until 2026-11-11 the type read `ΔInt` (the type-vs-method rename, retired
+when methods moved to their receiver's holder), read at master 4efe149858. src/core/math/big/nat.cs:243
 (`Ꮡelem<Word>(x.slice(0, cap(x)), cap(x) - 1) == Ꮡelem<Word>(y.slice(0, cap(y)), cap(y) - 1)`). src/core/math/big/arith.cs:116 (`if (Ꮡelem(z, 0) != Ꮡelem(x, 0)) {`).
 Both read `Ꮡ(…)` until 1.26.10.2 seat #10 gave the compare `Ꮡelem` (docs/phase4/DESIGN-element-address-compare.md).
 src/core/golib/builtin.cs:2520-2521 (`AllocationCounter.Count();`…`return new ElemRefBox<T>(target, index);`).
@@ -354,5 +355,5 @@ GOROOT/src/math/big/escape_test.go:43-50 (TestSqrAlloc's three sizes), GOROOT/sr
 GOROOT/src/crypto/internal/fips140/sha256/sha256.go:149-153 (New), GOROOT/src/crypto/internal/fips140/mldsa/mldsa.go:451-540
 (the signing loop's constant-cap makes), GOROOT/src/log/slog/logger_test.go:358-367, GOROOT/src/strings/strings.go:1151
 (`var b Builder`). The sha256 attribution of four (one Digest box, its two field arrays, one make) is an inference
-from the shapes and the 800 B reading; the per-site split is owed. src/core/crypto/internal/fips140/sha256/sha256.cs:155-156
+from the shapes and the 800 B reading; the per-site split is owed. src/core/crypto/internal/fips140/sha256/sha256.cs:164-165
 (`public static ж<Digest> New() {`…`var d = @new<Digest>();`). -->

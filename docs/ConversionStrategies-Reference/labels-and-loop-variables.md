@@ -237,8 +237,8 @@ for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
     defer(ᴛ0 => ᴛ0.Close(), cʗ1[i], ref ᒐ);  // the element is read at the defer statement
 }
 ```
-<!-- shape: src/tests/Behavioral/DeferLoopCapture/main.cs.target:69 `defer(ᴛ0 => ᴛ0.Close(), cʗ1[i], ref ᒐ);`
-(deferIndexedReceiverInLoop, :65 `for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {`), the fixture's conn construction written
+<!-- shape: src/tests/Behavioral/DeferLoopCapture/main.cs.target:82 `defer(ᴛ0 => ᴛ0.Close(), cʗ1[i], ref ᒐ);`
+(deferIndexedReceiverInLoop, :78 `for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {`), the fixture's conn construction written
 as dial(i). -->
 
 net's `TestConcurrentSetDeadline` is the witness: with the variable shared, `defer c[i].Close()` over a
@@ -300,7 +300,7 @@ for range atyp.Len {
 ```csharp
 foreach (var _ᴛ1 in range<uintptr>((~atyp).Len)) {
     var exprᴛ1 = etyp.Kind();
-    if (exprᴛ1 == abi.ΔString) {
+    if (exprᴛ1 == abi.String) {
         seq.stringOffsets = append(seq.stringOffsets, offset);
     }
     …

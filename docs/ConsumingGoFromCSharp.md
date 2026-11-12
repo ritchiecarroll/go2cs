@@ -138,7 +138,7 @@ using hashset = go.github.com.ritchiecarroll.hashset_package;
 
 **Go methods come through the namespace, not the alias.** An alias names the package class, which reaches the
 package's functions and types. Go methods are C# extension methods, and C# finds those only through a namespace
-import (or `using static` on the class). Every standard-library package whose import path has no slash (`strings`,
+import (or `using static` on the type's method holder class, such as `timeᴛDuration`). Every standard-library package whose import path has no slash (`strings`,
 `fmt`, `time`, `bytes`, `sync`, `strconv`, `errors` and the rest) lives in the namespace `go`, so `using go;` brings
 all of their methods. A package whose path has a slash needs its own namespace as well: `encoding/hex` needs
 `using go.encoding;`, `io/fs` needs `using go.io;`, and `github.com/google/uuid` needs `using go.github.com.google;`.
@@ -147,7 +147,7 @@ Without it, a method call such as `id.String()` does not compile, and the error 
 
 <!-- source: src/tests/CSharpConsumer/Program.cs:78-79 -->
 ```csharp
-time.Duration timeout = 90 * time.ΔSecond;
+time.Duration timeout = 90 * time.Second;
 @string shown = timeout.String();   // a Go method: found through `using go;`
 ```
 
@@ -169,10 +169,11 @@ projects, or in a project that sets `GoConsumerUsings` to `false`, turn the warn
 <NoWarn>$(NoWarn);CS8981</NoWarn>
 ```
 
-**Two other forms work too.** `using static` on a package class gives bare names, and brings the methods the
-package's types declare as well. It does not bring a method a struct promotes from an embedded field: since
-1.26.10.4 those are extension methods of a class of the struct's own beside the package class, which the
-namespace brings (`using go;`, or the package's own namespace, both of which the packages add for you). Several
+**Two other forms work too.** `using static` on a package class gives bare names for the package's functions,
+types, constants and variables. It does not bring methods. Since 2026-11-11 the methods a type declares are
+extension methods of one class per receiver type beside the package class (`timeᴛDuration`), as a method a struct
+promotes from an embedded field has been since 1.26.10.4, and the namespace brings them (`using go;`, or the
+package's own namespace, both of which the packages add for you). Several
 `using static` lines can collide, though: `Contains` is in `strings`, `bytes` and `slices`, and
 `Reader` is a type in both `strings` and `bytes`. It suits a file that leans on one package. The package class
 itself, through `using go;`, always works and reads a little noisier:
@@ -192,16 +193,17 @@ itself, through `using go;`, always works and reads a little noisier:
 | `func (b *Builder) WriteString(s string) (int, error)` | `public static (nint, error) WriteString(this ж<Builder> Ꮡb, @string s)` |
 | `func (uuid *UUID) UnmarshalText(data []byte) error` | `public static error UnmarshalText(this ref UUID uuid, slice<byte> data)` |
 | `type Duration int64` | `partial struct Duration` |
-| `const Second Duration = 1000 * Millisecond` | `public static Duration ΔSecond => 1000000000` |
+| `const Second Duration = 1000 * Millisecond` | `public static Duration Second => 1000000000` |
 | `var ErrSyntax = errors.New("invalid syntax")` | `public static error ErrSyntax` |
 | `type Writer interface { Write(p []byte) (n int, err error) }` | `partial interface Writer { (nint n, error err) Write(slice<byte> p); }` |
 
-Each sits in its package class, so the C# caller writes `strconv.Atoi(..)`, `time.ΔSecond` and `io.Writer`. A
-value method extends `T`; a pointer method extends `ж<T>` or `ref T` ([Pointers](#pointers)).
+Each function, type, constant and variable sits in its package class, so the C# caller writes `strconv.Atoi(..)`,
+`time.Second` and `io.Writer`. Each method sits in its receiver type's method holder (`timeᴛDuration`), and a call
+reads `d.String()`. A value method extends `T`; a pointer method extends `ж<T>` or `ref T` ([Pointers](#pointers)).
 
-A name that would clash with another in the same class gets a `Δ` prefix. `time.Second` is `time.ΔSecond`,
-because `time_package` also holds `Time`'s `Second()` method; `time.Millisecond`, with no such clash, keeps its
-name.
+Because methods are not in the package class, a constant may share a method's name as it does in Go: `time.Second`
+keeps its name beside `Time`'s `Second()` method.
+<!-- Until 2026-11-11 every method was a member of the package class, and a clashing name took a `Δ` prefix: `time.Second` was `time.ΔSecond`. -->
 
 A Go interface is a C# interface, so a C# class can implement one and hand it to Go:
 
@@ -659,13 +661,14 @@ them, so both variables would share the bytes; `Clone()` makes the copy Go makes
 uuid.UUID copied = parsed.Clone();  // Go: copied := parsed
 ```
 
-uuid's `Version` type is `uuid.ΔVersion`, because the package class also holds the `Version` method:
+uuid's `Version` type keeps its Go name beside the `Version` method, because the method stands in the
+`UUID` type's method holder, not in the package class:
 
-<!-- illustration: adapted, owed a real excerpt -->
+<!-- source: src/tests/CSharpConsumer/Program.cs:298 -->
 ```csharp
-uuid.ΔVersion version = parsed.Version();   // Go: uuid.Version
-// version.String() == "VERSION_1"
+uuid.Version version = parsed.Version();    // the type and the method keep the name Version
 ```
+<!-- Until 2026-11-11 the type was `uuid.ΔVersion`, because the package class also held the `Version` method. -->
 
 `MustParse`, like other Go `Must` functions, panics on bad input; see [Panics and exceptions](#panics-and-exceptions).
 
@@ -739,7 +742,7 @@ Each item is a first surprise, and what to write instead.
        does not. -->
 - **Glyphs.** Consumer code rarely types one: `var` hides `ж<T>`, `@new<T>()` stands in for `Ꮡ`, channels have
   `Send` and `Receive`, and aliases keep call sites Go-shaped. What remains is `goǃ`, which completion lists when
-  you type `go`, `ꟷ` in a map's comma-ok read, and the occasional `Δ` name such as `time.ΔSecond`. Every glyph
+  you type `go`, `ꟷ` in a map's comma-ok read, and the occasional `Δ` name, such as a field named like its own struct (`l.ΔLabel`). Every glyph
   is in the table at
   [Reading Converted Code: Names and Glyphs](ConversionStrategies.md#reading-converted-code-names-and-glyphs).
 

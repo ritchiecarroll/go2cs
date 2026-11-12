@@ -47,9 +47,9 @@ freshly `make`d slice's elements) runs no constructor, so a value embed whose ty
 null backing and a pointer embed holds a null reference rather than a nil box; golib cannot run a constructor
 generically there. (Guarded by the `NamedTypeOverStruct` behavioral test — `var s shadowed` with explicit
 `s.ctxt.fn` and promoted `s.fn` access, plus `new(shadowed)`, vs Go.)
-<!-- The declared embed fields: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:40 `/*embed*/ public Padded Padded;`; src/tests/Behavioral/StructPointerPromotionWithInterface/StructPointerPromotionWithInterface.cs.target:20 `/*embed*/ public ж<MyError> MyError;`. The generator reads them: src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:50 `private HashSet<string> DeclaredEmbedFields => m_declaredEmbedFields ??=`, and builds each in both zero-value constructors: :2377 `result.Append($"{EmbedStorage(memberName)} = new {PointerConstructedTypeName(typeName)}(nil);\r\n");` (a pointer type maps to `new StandardBox<T>(nil)`, the nil box). The declaration: src/tests/Behavioral/NamedTypeOverStruct/NamedTypeOverStruct.cs.target:92 `shadowed z = new(nil);`. Detection: src/go2cs/visitStructType.go:1112 `func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {`. -->
+<!-- The declared embed fields: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:40 `/*embed*/ public Padded Padded;`; src/tests/Behavioral/StructPointerPromotionWithInterface/StructPointerPromotionWithInterface.cs.target:21 `/*embed*/ public ж<MyError> MyError;`. The generator reads them: src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:50 `private HashSet<string> DeclaredEmbedFields => m_declaredEmbedFields ??=`, and builds each in both zero-value constructors: :2377 `result.Append($"{EmbedStorage(memberName)} = new {PointerConstructedTypeName(typeName)}(nil);\r\n");` (a pointer type maps to `new StandardBox<T>(nil)`, the nil box). The declaration: src/tests/Behavioral/NamedTypeOverStruct/NamedTypeOverStruct.cs.target:101 `shadowed z = new(nil);`. Detection: src/go2cs/visitStructType.go:1112 `func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {`. -->
 
-**A C#-keyword-named embed composes generated names from the unescaped member name.** A Go struct named for a C# keyword (`type base struct{…}`) is emitted with the `@` escape (`@base`), and embedding it makes `@base` the member name. Standalone identifier positions keep the escape (the declared embed field `/*embed*/ internal @base @base;`, the constructor parameter, member accesses like `instance.@base.id`), but every *composed* generated name must strip it, because `@` is only valid leading an identifier: the `Ꮡ`-prefixed field-reference statics, the converter's `structFieldBoxName`, and the generator-owned backing field of the property form that hand-owned files may still spell (`ʗbase`; `ʗ@base` is CS1002). <!-- src/tests/Behavioral/NamedTypeOverStruct/NamedTypeOverStruct.cs.target:44 `/*embed*/ internal @base @base;` --> (Guarded by the `NamedTypeOverStruct` extension — a keyword-named embed with promoted field/method access, a keyword-keyed composite literal, and a write through `&p.id` promoted through the embed, all vs Go.)
+**A C#-keyword-named embed composes generated names from the unescaped member name.** A Go struct named for a C# keyword (`type base struct{…}`) is emitted with the `@` escape (`@base`), and embedding it makes `@base` the member name. Standalone identifier positions keep the escape (the declared embed field `/*embed*/ internal @base @base;`, the constructor parameter, member accesses like `instance.@base.id`), but every *composed* generated name must strip it, because `@` is only valid leading an identifier: the `Ꮡ`-prefixed field-reference statics, the converter's `structFieldBoxName`, and the generator-owned backing field of the property form that hand-owned files may still spell (`ʗbase`; `ʗ@base` is CS1002). <!-- src/tests/Behavioral/NamedTypeOverStruct/NamedTypeOverStruct.cs.target:49 `/*embed*/ internal @base @base;` --> (Guarded by the `NamedTypeOverStruct` extension — a keyword-named embed with promoted field/method access, a keyword-keyed composite literal, and a write through `&p.id` promoted through the embed, all vs Go.)
 
 **Cross-package embeds resolve through the semantic model.** The member-collection above resolves the embedded struct's *syntax* (`GetStructDeclaration`) — same-package or via `CompilationReference`s. In a real [MSBuild](../Glossary.md#msbuild) build, project references arrive as **metadata** references (never `CompilationReference`), so a cross-package embed — `type rtype struct { *abi.Type }` (runtime `type.go`) or a user package embedding a library struct — silently promoted **nothing**: the generated "Promoted Struct Field Accessors" section was empty and every `t.TFlag`/`t.Str`/`t.Kind_` was CS1061. The field collection therefore falls back to the **type's metadata symbol** (`GetTypeByMetadataName` on the normalized nested name, e.g. `go.internal.abi_package+Type`) and enumerates its public instance fields; the emitted accessors are unchanged in form — true refs through the embed (`public ref abi.TFlag TFlag => ref Type.Value.TFlag;` for a pointer embed), so writes through a promoted name reach the embedded target. Transitive promotion through a *metadata* type's own embeds is not chased (no corpus site needs it). **Promoted POINTER-RECEIVER method calls through a cross-package *pointer* embed are routed at the call site**: the generator emits no method forwarder for a metadata embed (method promotion is syntax-resolved), so `t.Uncommon()` on `Δrtype` (embeds `*abi.Type`, runtime `type.go`) would be CS1929; the converter emits the explicit hop through the embed field's box — `t.Type.Value.Kind()` (runtime `type.go`), where the deref'd `.Value` is a ref return, binding the `ref` extension addressably; a method the converter emits with a box receiver binds the held `ж<T>` directly (`t.Type.Uncommon()`, since `abi.Type.Uncommon` is `this ж<Type>`). A *same-package* pointer embed keeps its generated forwarder (no churn). A promoted **value-receiver** method call takes the same explicit hop: `p.Hot()` through a cross-package pointer embed emits `p.Sensor.Value.Hot()`, and through a cross-package value embed `r.Sensor.Hot()`; no behavioral test calls that promoted form. (Guarded by the `CrossPkgUser` Phase-4b extension — a promoted pointer-receiver `Calibrate` through the cross-assembly pointer embed, write-through observed via the target.) (Guarded by the `CrossPkgUser` extension that covers pointer-embed and value-embed field promotion across the assembly boundary, write-through observed via the embedded target, vs Go.) <!-- the fix cleared runtime type.go's 4 CS1061, 68 → 64. -->
 
@@ -166,7 +166,7 @@ public partial struct Var
     private @object ʗobject;                                       // was: private readonly ж<@object> Ꮡʗobject;
 
     [UnscopedRef] internal partial ref @object @object => ref ʗobject;
-    [UnscopedRef] internal ref ΔType typ => ref @object.typ;       // promotion chains the same way
+    [UnscopedRef] internal ref Type typ => ref @object.typ;        // promotion chains the same way
 
     internal static ref @object Ꮡobject(ref Var instance) => ref instance.@object;   // unchanged
 }
@@ -253,7 +253,7 @@ still-virgin wrapper the backing materialized on the call site's boxing temp and
 storage was never written** — see *The element address of a VIRGIN named array must materialize
 through the receiver* below, which is why the emission carries `.Value`:
 
-<!-- source: src/tests/Behavioral/NamedArrayAnonElement/main.cs.target:18-20 -->
+<!-- source: src/tests/Behavioral/NamedArrayAnonElement/main.cs.target:21-23 -->
 ```csharp
 internal static ж<semaRoot> rootFor(this ref semTable t, nint i) {
     return Ꮡ(t.Value, i).of(semTableᴛ1.Ꮡroot);
@@ -535,7 +535,7 @@ type (
     holder struct{ myInt; MyInt }
 )
 ```
-<!-- source: src/tests/Behavioral/LiftedLocalTypes/main.cs.target:46-50 -->
+<!-- source: src/tests/Behavioral/LiftedLocalTypes/main.cs.target:47-51 -->
 ```csharp
 internal partial struct embeddedLocalTypes_holder /*dyn*/ {
     /*embed*/ internal embeddedLocalTypes_myInt myInt;
@@ -654,7 +654,7 @@ literal keyed by the embedded field and a `new(T)` zero value, values vs Go).
 
 ## Promoted pointer methods descend multi-hop value-embed chains
 A pointer-receiver method promoted through two or more embedded VALUE structs descends hop by hop. Reached through a pointer, the first hop goes through the `&`-machinery (box-vs-parameter distinction), then one `.of(<Owner>.<field-box>)` view per additional hop -- the `ж<T>` field views compose onto the method's receiver box (reflect's `sliceType` embeds `abi.SliceType` embeds `abi.Type`, whose `Common()` extension binds `ж<abi.Type>` -- CS1929): `Ꮡp.of(rig.ᏑDevice).of(CrossPkgLib.Device.ᏑSensor).Calibrate(…)`. An addressable value (the enclosing `ref` receiver, or a local) takes the bare field path instead, which binds the `ref` overload directly -- `CrossPkgUser`'s local `rg`:
-<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs.target:201 -->
+<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs.target:226 -->
 ```csharp
 rg.Device.Sensor.Calibrate(3D);
 ```
