@@ -12265,8 +12265,8 @@ statement, which converted code writes as golib's `goǃ(…)` ([Goroutines](#gor
 that starts a goroutine carries its own record, kept by hand, that maps each `goǃ(` line to the Go `go`
 statement it replaces and no other line. A traceback's `created by` line then names the Go position, as
 Go's does.
-<!-- the converter's record: src/go2cs/positionMapOperations.go:674 (`Go source positions are recorded here, one`)
-     and :679 (`or has none - golib, the BCL and hand-written conversions - and reports its own C# position.`).
+<!-- the converter's record: src/go2cs/positionMapOperations.go:673 (`Go source positions are recorded here, one`)
+     and :678 (`or has none - golib, the BCL and hand-written conversions - and reports its own C# position.`).
      A hand-kept record: src/core/sync/waitgroup.cs:28 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "APUB3AMAANsD")]`),
      for its goǃ( at :246 (`goǃ(() => {`). Guard: src/go2cs/internal/repoguard/handOwnedGoStatementPositions_test.go:283
      (`func TestHandOwnedGoStatementsMapToGo(t *testing.T) {`), which requires one record per
