@@ -34,7 +34,7 @@ internal static ж<frame> makePtr() {
     return Ꮡ(new frame(Name: "madeptr"));
 }
 
-internal static void Main() {
+internal static void main() {
     var s10ᴷ = new stackAppend<frame>();
     var s11ᴷ = new stackAppend<frame>();
 

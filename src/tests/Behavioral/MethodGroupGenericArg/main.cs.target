@@ -82,7 +82,7 @@ internal static bool rowsEqual(slice<row> a, slice<row> b) {
     return pairEqual<slice<row>, slice<row>, row, row>(a, b, sliceEq<row, nint>);
 }
 
-internal static void Main() {
+internal static void main() {
     var nums = slice<nint>([1, 2, 3, 4]);
     nint sum = foldSlice<slice<nint>, nint>(nums, addInt);
     fmt.Println(sum);

@@ -20,7 +20,7 @@ import (
 // A Go function that defers or recovers is emitted with its body INLINE inside try/catch/finally,
 // beside a GoFrame local that holds this call's defer list:
 //
-//	internal static void Main() {
+//	internal static void main() {
 //	    GoFrame ᒐ = default;
 //	    try {
 //	        fmt.Println(openFileˢ);

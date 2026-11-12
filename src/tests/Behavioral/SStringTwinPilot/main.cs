@@ -17,7 +17,7 @@ internal static @string apply(Funcꓸꓸꓸ<@string, any, @string> f, @string fo
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string hLloˢ = "héllo, 世界"u8;
 
-internal static void Main() {
+internal static void main() {
     GoFrame ᒐ = default;
     try {
         fmt.Println(fmt.Sprintf("xxx"u8));

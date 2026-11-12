@@ -41,7 +41,7 @@ internal partial interface main_type /*dyn*/ {
     @string Mixed(@string name, bool flag, nint n);
 }
 
-internal static void Main() {
+internal static void main() {
     var values = slice<any>([(calc)7]);
 
     var (v, ok) = values[0]._<main_type>(ᐧ);

@@ -28,7 +28,7 @@ internal static @string viaClosure2 = func([MethodImpl(MethodImplOptions.NoInlin
     fmt.Println("main.go init 2:", here(), "literal:", literal());
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("direct:", direct);
     fmt.Println("viaClosure:", viaClosure);
     fmt.Println("viaClosure2:", viaClosure2);

@@ -12,7 +12,7 @@ internal static @string encComplex(nint i, complex128 c) {
     return "zero";
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(encComplex(1, complex(0D, 0D)));
     fmt.Println(encComplex(2, complex(3D, -4D)));
     fmt.Println(encComplex(3, 5D.i()));

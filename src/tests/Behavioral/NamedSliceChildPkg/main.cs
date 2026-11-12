@@ -7,7 +7,7 @@ using NamedSliceChildPkg;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(netlike.Describe());
 
     var infos = netlike.Build();

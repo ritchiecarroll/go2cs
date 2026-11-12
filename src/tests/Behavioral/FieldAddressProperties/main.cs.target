@@ -70,7 +70,7 @@ internal static ж<nint> keep(ж<nint> p) {
 
 internal static void bump(ref nint p) { p++; }
 
-internal static void Main() {
+internal static void main() {
     var l = @new<List>().Init();
     for (nint i = 1; i <= 3; i++) {
         l.PushBack(i);

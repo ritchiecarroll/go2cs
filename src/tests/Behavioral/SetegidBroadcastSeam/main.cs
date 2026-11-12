@@ -21,7 +21,7 @@ internal static @string gidLine(nint tid) {
     return "no Gid line";
 }
 
-internal static partial void Main() {
+internal static partial void main() {
     if (runtime.GOOS != "linux"u8) {
         fmt.Println("not linux; nothing to observe");
         return;

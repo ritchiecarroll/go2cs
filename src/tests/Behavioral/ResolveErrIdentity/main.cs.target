@@ -17,7 +17,7 @@ internal partial struct main_rows /*dyn*/ {
     internal error want;
 }
 
-internal static void Main() {
+internal static void main() {
     var rows = slice<main_rows>([
         new("l2tp", "127.0.0.1", new net_UnknownNetworkErrorᴠerror(((Δnet.UnknownNetworkError)(@string)l2tpˢ))),
         new("l2tp:gre", "127.0.0.1", new net_UnknownNetworkErrorᴠerror(((Δnet.UnknownNetworkError)(@string)l2tpGreˢ))),

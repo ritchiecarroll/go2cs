@@ -30,7 +30,7 @@ internal partial struct makers_type /*dyn*/ {
     new("embedded", (@string s) => new makers_type(new namedGreeter(s)))
 ]; }
 
-internal static void Main() {
+internal static void main() {
     foreach (var (_, m) in range(makers)) {
         fmt.Println(m.label, m.build("world").Greet());
     }

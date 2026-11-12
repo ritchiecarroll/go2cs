@@ -75,7 +75,7 @@ internal static C128 retC128() { return 3D; }
 internal static C64 retC64() { return 2.5F; }
 internal static (C128, C64) retMulti() { return (1D, 2F); }
 
-internal static void Main() {
+internal static void main() {
     C128 a = 0D;
     a = 1D;
     C64 b = 4F;

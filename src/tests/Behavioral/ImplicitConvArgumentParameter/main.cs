@@ -35,7 +35,7 @@ internal partial struct main_b /*dyn*/ {
     public nint A;
 }
 
-internal static void Main() {
+internal static void main() {
     var (s, u) = (Ꮡ(new S(A: 1)), Ꮡ(new U(B: "xy")));
     fmt.Println("two:", two(ref (s).DerefOrNull(), ref (u).DerefOrNull()));
     fmt.Println("pair, unnamed struct into the second parameter:", pair(new S(1), new main_b(2)));

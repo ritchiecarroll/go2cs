@@ -18,7 +18,7 @@ internal static void typ(this ref writer w, @string typ) {
     }
 }
 
-internal static void Main() {
+internal static void main() {
     var w = Ꮡ(new writer());
     w.typ("top");
 

@@ -16,7 +16,7 @@ internal static (nint, error) @double(nint x) {
     return (x * 2, default);
 }
 
-internal static void Main() {
+internal static void main() {
     var m = new machine(
         apply: (nint seed, Func<nint, (nint, error)> op) => {
             var (v, err) = op(seed);

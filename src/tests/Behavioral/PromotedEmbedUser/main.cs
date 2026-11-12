@@ -9,7 +9,7 @@ internal static void bump(ж<PromotedEmbedLib.Counter> c, nint n) {
     c.Add(n);
 }
 
-internal static void Main() {
+internal static void main() {
     var c = PromotedEmbedLib.New("widget");
     c.Add(3);
     bump(c, 4);

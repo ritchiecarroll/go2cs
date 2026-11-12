@@ -35,7 +35,7 @@ ends with a newline
 
 """u8.Raw();
 
-internal static void Main() {
+internal static void main() {
     @string plain = lineOneLineTwoˢ;
     @string trailing = endsWithANewlineˢ;
     @string chain = """

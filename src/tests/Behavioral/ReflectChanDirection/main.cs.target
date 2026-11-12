@@ -73,7 +73,7 @@ internal static @string /*msg*/ recovered(Action fn) {
     return msg;
 }
 
-internal static partial void Main() {
+internal static partial void main() {
     var send = new channel/*<-*/<nint>(0, GoChanDir.Send);
     var recv = new /*<-*/channel<nint>(2, GoChanDir.Recv);
     var both = new channel<nint>(0);

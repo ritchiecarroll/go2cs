@@ -31,7 +31,7 @@ internal static void show(@string label, slice<item> items) {
     fmt.Println();
 }
 
-internal static void Main() {
+internal static void main() {
     var items = slice<item>([new("a", 1), new("b", 2), new("c", 3)]);
 
     var g = newGroup(items);

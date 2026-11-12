@@ -25,7 +25,7 @@ internal static void show(@string name, reflectꓸType a, reflectꓸType b) {
     fmt.Printf("%-28s == %v  deep %v  (%v / %v)\n"u8, name, AreEqual(a, b), reflect.DeepEqual(a, b), a, b);
 }
 
-internal static void Main() {
+internal static void main() {
     ref var s = ref heap(new T(), out var Ꮡs);
     ref var p = ref heap<ж<T>>(out var Ꮡp);
     ref var a = ref heap(new Arr(), out var Ꮡa);

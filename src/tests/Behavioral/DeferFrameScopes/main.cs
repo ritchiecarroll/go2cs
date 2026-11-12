@@ -144,7 +144,7 @@ internal static @string /*msg*/ guarded(bool boom) {
     return msg;
 }
 
-internal static void Main() {
+internal static void main() {
     manyDefers();
     loopDefers(3);
     loopDefers(0);

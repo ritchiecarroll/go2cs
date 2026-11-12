@@ -80,7 +80,7 @@ internal static error /*err*/ cls(nint n) {
     return err;
 }
 
-internal static void Main() {
+internal static void main() {
     var (w, e) = send(3);
     fmt.Println("send:", w, e);
     (w, e) = send(-1);

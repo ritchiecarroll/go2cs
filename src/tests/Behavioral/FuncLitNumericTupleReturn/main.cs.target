@@ -104,7 +104,7 @@ internal static @string mixedIntArms(slice<byte> data, bool atEOF) {
     return takeSplit(onComma, data, atEOF);
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("sizeFuncShape(true):", sizeFuncShape(true));
     fmt.Println("sizeFuncShape(false):", sizeFuncShape(false));
     fmt.Println("negatedArm(true):", negatedArm(true));

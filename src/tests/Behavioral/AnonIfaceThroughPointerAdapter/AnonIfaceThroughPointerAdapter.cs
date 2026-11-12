@@ -28,7 +28,7 @@ internal partial interface main_typeᴛ2 /*dyn*/ {
     void Quit();
 }
 
-internal static void Main() {
+internal static void main() {
     speaker s = new thingжspeaker(Ꮡ(new thing(7)));
 
     if (s._<main_type>(out var p)) {

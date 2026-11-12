@@ -45,7 +45,7 @@ partial struct outer {
     /*embed*/ internal inner inner;
 }
 
-internal static void Main() {
+internal static void main() {
     var t = reflect.TypeOf(new record());
 
     for (nint i = 0; i < t.NumField(); i++) {

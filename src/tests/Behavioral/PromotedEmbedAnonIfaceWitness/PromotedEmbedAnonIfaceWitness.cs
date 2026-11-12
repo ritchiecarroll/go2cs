@@ -43,7 +43,7 @@ internal partial interface main_type /*dyn*/ {
     ж<Base> Basic();
 }
 
-internal static void Main() {
+internal static void main() {
     var u = Ꮡ(new Uint());
     u.Label = "uint";
     Node n = new UintжNode(u);

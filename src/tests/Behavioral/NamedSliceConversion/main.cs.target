@@ -25,7 +25,7 @@ internal static nint /*total*/ sum(slice<nint> s) {
     return total;
 }
 
-internal static void Main() {
+internal static void main() {
     var special = new SpecialCase(new CaseRange[]{new(1, 2), new(3, 4), new(5, 6)}.slice());
     fmt.Println(count((slice<CaseRange>)special));
 

@@ -8,7 +8,7 @@ using path;
 
 partial class main_package {
 
-internal static partial void Main() {
+internal static partial void main() {
     GoFrame ᒐ = default;
     try {
         var (dir, err) = os.MkdirTemp("", "abstractaddr");

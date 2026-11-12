@@ -8,7 +8,7 @@ using runtime;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     @string dir = os.TempDir();
     fmt.Println("WriteCounters:", coverage.WriteCounters(Δio.Discard));
     fmt.Println("WriteCountersDir:", coverage.WriteCountersDir(dir));

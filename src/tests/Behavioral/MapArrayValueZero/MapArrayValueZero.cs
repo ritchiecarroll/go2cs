@@ -65,7 +65,7 @@ internal static void storeThenRead() {
     fmt.Println("other:", len(m["other", () => new array<rune>(2)]), m["other", () => new array<rune>(2)][0]);
 }
 
-internal static void Main() {
+internal static void main() {
     mapMiss();
     mapMissNested();
     namedMap();

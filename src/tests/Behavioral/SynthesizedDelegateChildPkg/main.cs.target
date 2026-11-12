@@ -12,7 +12,7 @@ partial struct registry {
     internal map<@string, Action<ж<inner.Record>, @string>> notify;
 }
 
-internal static void Main() {
+internal static void main() {
     var r = new registry(
         cache: new map<@string, ж<inner.Record>>{},
         load: (map<@string, ж<inner.Record>> cache, @string name, Func<@string, (@string, error)> lookup) => {

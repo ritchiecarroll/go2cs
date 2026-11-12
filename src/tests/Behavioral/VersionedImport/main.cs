@@ -10,7 +10,7 @@ partial struct wrapper {
     internal ж<Δvlib.Rand> r;
 }
 
-internal static void Main() {
+internal static void main() {
     var w = new wrapper(r: Δvlib.New(new Δvlib.PCGжSource(Δvlib.NewPCG(42))));
 
     for (nint i = 0; i < 3; i++) {

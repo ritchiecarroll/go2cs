@@ -41,7 +41,7 @@ internal static void z(@string label, any v) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string valˢ = "val"u8;
 
-internal static void Main() {
+internal static void main() {
     z("string non-empty", "val");
     z("string empty", "");
     z("NS non-empty", (NS)(@string)valˢ);

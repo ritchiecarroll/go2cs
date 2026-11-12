@@ -13,7 +13,7 @@ internal static @string labelOf(localLabel l) {
     return l.Label();
 }
 
-internal static void Main() {
+internal static void main() {
     CrossPkgLib.Labeled foreign = new CrossPkgLib.Sensor(Name: "adapter", Temp: 21D);
     localLabel local = new CrossPkgLib_LabeledᴠlocalLabel(foreign);
 

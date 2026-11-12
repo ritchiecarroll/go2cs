@@ -14,7 +14,7 @@ internal static @string escaper(params ꓸꓸꓸany argsʗp) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object plainˢ = (@string)"plain"u8;
 
-internal static void Main() {
+internal static void main() {
     Actionꓸꓸꓸ<@string, any> fn = (@string format, params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp.sslice();
         fmt.Printf(format + "\n"u8, args.ꓸꓸꓸ);

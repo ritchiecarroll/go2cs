@@ -18,7 +18,7 @@ internal static error mustOpen(@string path) {
     return new openErrжerror(Ꮡ(new openErr(path: path, code: 13)));
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("recovered:", recoverText(() => {
         throw panic(mustOpen("a.txt"));
     }));

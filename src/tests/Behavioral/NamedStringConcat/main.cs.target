@@ -17,7 +17,7 @@ internal partial struct main_rec /*dyn*/ {
     internal version v;
 }
 
-internal static void Main() {
+internal static void main() {
     version @base = (version)(@string)go121ˢ;
 
     version @short = @base + "-rc"u8;

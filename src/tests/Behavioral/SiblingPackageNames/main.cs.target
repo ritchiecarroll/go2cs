@@ -9,7 +9,7 @@ using foo = SiblingPackageNames.teststructs.foo1.foo_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(foo1.Name(), foo2.Name());
 
     foo1.Pair a = new foo1.Pair(Left: 1, Right: 2);

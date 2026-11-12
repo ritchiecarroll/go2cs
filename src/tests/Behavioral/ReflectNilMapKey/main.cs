@@ -23,7 +23,7 @@ internal static void show(@string label, map<any, any> m) {
     fmt.Println(label, len(m), keys);
 }
 
-internal static void Main() {
+internal static void main() {
     var m = new map<any, any>{};
     var v = reflect.ValueOf(m);
     var keyType = v.Type().Key();

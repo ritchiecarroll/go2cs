@@ -23,7 +23,7 @@ internal static channel<nint> chanFor(channel<nint> ch) {
     return ch;
 }
 
-internal static void Main() {
+internal static void main() {
     var ch = new channel<nint>(4);
 
     var selᴛ1 = ch;

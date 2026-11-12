@@ -19,7 +19,7 @@ internal static (ж<Node> pkg, error err) lookup(map<@string, ж<Node>> imports,
     return (imports["a"], default);
 }
 
-internal static void Main() {
+internal static void main() {
     var files = new map<@string, ж<Node>>{["a"] = Ꮡ(new Node(name: "alpha"))};
     var pkg = newPackage(new Func<map<@string, ж<Node>>, @string, (ж<Node>, error)>(lookup), files);
     fmt.Println(pkg.name);

@@ -62,7 +62,7 @@ internal static uint16 readA(this ж<outer> Ꮡo) {
     return p.Value;
 }
 
-internal static void Main() {
+internal static void main() {
     var o = Ꮡ(new outer(name: "x", ptr: Ꮡ(new inner())));
 
     o.bumpA();

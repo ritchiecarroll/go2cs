@@ -5,7 +5,7 @@ using Δmath = math_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     complex128 c128 = 2D + 3D.i();
     complex128 neg = 2D + -3D.i();
     complex128 frac = complex(2.5D, -1.25D);

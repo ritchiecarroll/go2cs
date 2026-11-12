@@ -18,7 +18,7 @@ partial struct holder {
 
 internal static partial ж<holder> get(ж<holder> h) { return h; }
 
-internal static void Main() {
+internal static void main() {
     var @base = Ꮡ(new holder());
     var h = get(@base);
 

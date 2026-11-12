@@ -16,7 +16,7 @@ internal static ΔHeader Header(this ref response r) { return r.hdr; }
 
 internal static ж<response> newResponse() { return Ꮡ(new response(hdr: new ΔHeader(new map<@string, slice<@string>>{}))); }
 
-internal static void Main() {
+internal static void main() {
     var r = newResponse();
 
     r.Header()["Content-Type"] = ["text/plain"];

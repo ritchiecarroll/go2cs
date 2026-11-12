@@ -69,7 +69,7 @@ internal static nint localChain() {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     var a = Ꮡ(new Root(root: Ꮡ(new root(fd: 3))));
     fmt.Println(deferChain<nint>(ref (a).DerefOrNull(), 0), a.root.fd);
 

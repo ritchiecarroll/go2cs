@@ -10,7 +10,7 @@ partial struct B /*map[@string, nint]*/;
 partial struct S1 /*[]nint*/;
 partial struct S2 /*[]nint*/;
 
-internal static void Main() {
+internal static void main() {
     var a = new A(new map<@string, nint>{["x"] = 1, ["y"] = 2});
     var b = (B)(map<@string, nint>)a;
     fmt.Println(b["x"], b["y"], len(b));

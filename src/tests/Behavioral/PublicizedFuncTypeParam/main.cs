@@ -26,7 +26,7 @@ internal static nint apply(params Span<Action<ж<options>>> optsʗp) {
     return o.level;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(apply(withLevel(5), withLevel(9)));
 }
 

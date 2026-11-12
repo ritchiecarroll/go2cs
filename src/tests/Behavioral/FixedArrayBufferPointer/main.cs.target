@@ -5,7 +5,7 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     ref var buf = ref heap(new array<uint16>(8), out var Ꮡbuf);
     buf[0] = 0x3412;
     buf[1] = 0x7856;

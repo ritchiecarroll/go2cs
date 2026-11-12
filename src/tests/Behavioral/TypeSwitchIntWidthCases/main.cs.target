@@ -20,7 +20,7 @@ internal static @string whatAmI(any i) {
 
 internal static UntypedInt c => 5;
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("int(5):", whatAmI((nint)5));
     fmt.Println("int32(5):", whatAmI((int32)5));
     fmt.Println("int64(5):", whatAmI((int64)5));

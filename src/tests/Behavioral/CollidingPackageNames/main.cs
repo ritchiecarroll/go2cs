@@ -8,7 +8,7 @@ using collideb;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(dupmeta.Greeting());
     fmt.Println(dup.Marker());
 

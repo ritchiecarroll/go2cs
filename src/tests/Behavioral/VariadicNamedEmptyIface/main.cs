@@ -13,7 +13,7 @@ internal static nint compose(params ꓸꓸꓸHook hsʗp) {
     return len(hs);
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(compose((nint)1, "two", 3.0D));
 }
 

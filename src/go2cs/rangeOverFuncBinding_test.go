@@ -317,8 +317,10 @@ func TestGenericNamedDelegateParamWrapsWithItsInstantiation(t *testing.T) {
 
 	implicit := emittedFuncBody(t, mainCs, "pullImplicit")
 
-	if !strings.Contains(implicit, "iter.Pull(new iter.Seq<stamp>(seq))") {
-		t.Errorf("pullImplicit: expected the substituted delegate wrap `new iter.Seq<stamp>(seq)` (without it C# infers no type argument, CS0411):\n%s", implicit)
+	// seq is a func VALUE, which can be nil, so the wrap is the nil-safe conversion (delegateArgWrap.go, TS C47);
+	// its explicit target is still the substituted iter.Seq<stamp>, which is what lets C# infer Pull's type argument.
+	if !strings.Contains(implicit, "iter.Pull(NilSafeDelegateConversion<iter.Seq<stamp>, Action<Func<stamp, bool>>>(seq))") {
+		t.Errorf("pullImplicit: expected the substituted nil-safe delegate wrap `NilSafeDelegateConversion<iter.Seq<stamp>, ...>(seq)` (without the substitution C# infers no type argument, CS0411):\n%s", implicit)
 	}
 
 	// CONTROL - a func literal converts natively; wrapping it would be redundant construction.
@@ -331,14 +333,14 @@ func TestGenericNamedDelegateParamWrapsWithItsInstantiation(t *testing.T) {
 	// CONTROL - the value already has the parameter's type, so nothing is wrapped.
 	typed := emittedFuncBody(t, mainCs, "pullTyped")
 
-	if strings.Contains(typed, "new iter.Seq<stamp>(seq)") {
+	if strings.Contains(typed, "new iter.Seq<stamp>(seq)") || strings.Contains(typed, "NilSafeDelegateConversion<") {
 		t.Errorf("pullTyped: a value already of the parameter's type was wrapped anyway:\n%s", typed)
 	}
 
 	// CONTROL - the substituted parameter is still open (T), so the rule declines.
 	forwarded := emittedFuncBody(t, mainCs, "pullForwarded")
 
-	if strings.Contains(forwarded, "new iter.Seq<T>(") {
+	if strings.Contains(forwarded, "new iter.Seq<T>(") || strings.Contains(forwarded, "NilSafeDelegateConversion<iter.Seq<T>") {
 		t.Errorf("pullForwarded: an unsubstituted type parameter was rendered into a wrap:\n%s", forwarded)
 	}
 }

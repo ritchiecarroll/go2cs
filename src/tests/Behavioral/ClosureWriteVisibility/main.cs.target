@@ -263,7 +263,7 @@ internal static void probeQ2() {
     fmt.Println("Q2:", even(8), odd(8));
 }
 
-internal static void Main() {
+internal static void main() {
     probeA1();
     probeA2();
     probeA3();

@@ -39,7 +39,7 @@ partial struct valueSender {
 internal static void send(this valueSender v, nint n) { v.c.ᐸꟷ(n); }
 internal static void ping(this valueSender v) { v.c.ᐸꟷ(99); }
 
-internal static partial void Main() {
+internal static partial void main() {
     var e = Ꮡ(new engine(tally: Ꮡ(new counter(done: new channel<bool>(1)))));
 
     e.start(5);

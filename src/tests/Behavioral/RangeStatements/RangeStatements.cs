@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var nums = slice<nint>([2, 3, 4]);
     nint sum = 0;
 

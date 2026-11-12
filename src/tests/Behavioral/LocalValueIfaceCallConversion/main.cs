@@ -47,7 +47,7 @@ partial interface valued {
     nint Value();
 }
 
-internal static void Main() {
+internal static void main() {
     var k = (LocalKey)slice<byte>((@string)"abc"u8);
     var s = ((fmt.Stringer)k);
     fmt.Println("foreign-slice:", s.String());

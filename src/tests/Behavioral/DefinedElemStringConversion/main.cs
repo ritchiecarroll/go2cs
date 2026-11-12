@@ -21,7 +21,7 @@ internal static nint takesNamedBytes(slice<namedByte> b) { return len(b); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string hLloˢ = "héllo"u8;
 
-internal static void Main() {
+internal static void main() {
     ref var ns = ref heap(new namedString(), out var Ꮡns);
     ns = (@string)"hi";
     fmt.Println(slice<byte>((@string)ns));

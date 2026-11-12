@@ -20,14 +20,14 @@ partial struct sink {
 
 internal static nint sum(Funcꓸꓸꓸ<nint, nint> add) { return add(1, 2, 3); }
 
-internal static void Main() {
+internal static void main() {
     @string @out = "";
     Actionꓸꓸꓸ<@string, any> writeFormat = (@string format, params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp.sslice();
         @out += fmt.Sprintf(format, args.ꓸꓸꓸ) + ";"u8;
     };
     header(writeFormat, 2);
-    headerNamed(new Actionꓸꓸꓸ<@string, any>(writeFormat), 3);
+    headerNamed(writeFormat, 3);
     var s = new sink(write: writeFormat);
     s.write("field %s", (@string)"ok");
     writeFormat("direct %d %d", (nint)4, (nint)5);

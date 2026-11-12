@@ -21,7 +21,7 @@ converts to:
 
 <!-- illustration: not converter output -->
 ```csharp
-internal static void Main() {
+internal static void main() {
     var primes = new nint[]{2, 3, 5, 7, 11, 13}.array();
     var nums = slice<nint>([10, 20, 30]);
     var buf = new slice<byte>(4);

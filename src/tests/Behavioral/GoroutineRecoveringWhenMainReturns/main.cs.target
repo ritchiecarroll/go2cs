@@ -7,7 +7,7 @@ using time = time_package;
 
 partial class main_package {
 
-internal static partial void Main() {
+internal static partial void main() {
     runtime.GOMAXPROCS(1);
 
     fmt.Println("before goroutine panic");

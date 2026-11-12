@@ -18,7 +18,7 @@ internal partial struct main_point /*dyn*/ {
     public nint X, Y;
 }
 
-internal static void Main() {
+internal static void main() {
     var a = new main_a(X: 1);
     main_a b = default;
     b = a;

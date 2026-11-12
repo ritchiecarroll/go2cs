@@ -1,0 +1,75 @@
+# The C46 arm and the owner's type-check RUN-AHEAD, 2026-11-11, i7. DIAGNOSTIC: NOT a gate result, never pushed as code.
+#
+# Arms (local commits, unsigned, never pushed; docs cites unresolved per COORD's preview-tree ruling):
+#   A = the 1714f5de61 converted sources (rerun-preview-284p1-readings.txt), parsedemo REBUILT with no reconvert.
+#   B = f0ccd9de0d = 1714f5de61 + C1's C46 claude/c1-c46-main-stack 0f5cb8e0d1 (a converted program's main runs on a 1 GiB
+#       thread), converted "-tags safe,noasm, DIAGNOSTIC" with the diagnostic GO2CS2002 skip. Merge conflicts: 4 docs files
+#       only (cites, and C1's own Limitations.md prose); C1's side taken.
+# A and B differ only by C1's change. Every converted run goes through the apphost (.exe): under `dotnet <dll>` Windows
+# os.Args carries the dll (C44).
+#
+# C46 arm (predictions posted beforehand):
+#   T1 MET  convert rc 0; parsedemo and the checkdemo closure build with 0 errors.
+#   T2 MET  units 00770 binderBinaryExpressionStress.ts and 00771 binderBinaryExpressionStressJs.ts: rc 0, their
+#           81,094,755-byte -unit dumps IDENTICAL to native (3,778 / 3,338 ms). Arm A, same session: "Stack overflow.",
+#           rc 0xC00000FD on both (the control).
+#   T3 MET  the demo (good.ts + bad.ts) identical to native.
+#   T4 MET  unit 00100 -unit, n=7 after a warm-up: A median 2,212 ms (IQR 17), B 2,230 ms (IQR 57); |B-A| = 18 ms, inside
+#           the spread. Start-up dominates (native 29-86 ms for the same unit). Tool: proof-tooling/unittime.py.txt.
+#   T5 MET  the full parse corpus on B: 17,422 of 17,422 units MATCH native (compare.py rc 0; no crash, no re-check).
+#
+# CORRECTION (2026-11-11) to rerun-preview-284p1-readings.txt: FIVE packages are refused (GO2CS2002) and skipped in every
+# preview convert, not four: internal/ls/lsconv, internal/ls/autoimport, internal/ls, internal/project AND
+# internal/fourslash (fourslash.go:2665, :4129, FromLSPRange[T lsconv.Script] over *fourslash.scriptInfo). The first
+# count read the skip lines through `| head`, which cut the fifth (safety floor 16). The affected set is the same 15
+# packages; fourslash is refused, not a dependent: 5 refused, 10 dependents (cmd/tsc, api, api/requestfilesystem,
+# fourslash/tests/util, ls/change, lsp, lsp/lspwatcher, testutil/autoimporttestutil, testutil/lsptestutil,
+# testutil/projecttestutil), of which 8 import a refused package directly (all but cmd/tsc and testutil/lsptestutil).
+# None is in any stage closure or the 68.
+#
+# The type-check run-ahead, on arm B (checkdemo.exe, check.ts + good.ts, native 318 bytes):
+#   R0  baseline: 26 bytes, rc 2, C45 (xxh3.str layout panic at checker init, checker.go:177). As predicted.
+#   R1  + C45 patch (proof-tooling/diagpatch_c45_xxh3.py.txt: xxh3's Hash128/HashString128/Hash/HashString over
+#       System.IO.Hashing 10.0.0, XxHash128/XxHash3 seed 0, VERIFIED identical to native zeebo/xxh3 v1.1.0 on 19 inputs
+#       covering every length branch: scratch/xxh3check). Checker init passes; checking runs; 26 bytes, rc 2:
+#       System.ArgumentException: Delegate to an instance method cannot have null 'this'. at isRelatedToEx (relater.cs:2729)
+#       -> C47: relater.go:2694 passes core.IfElse(reportErrors, r.reportError, nil) as an ErrorReporter; the emission
+#       wraps that delegate in `new Actionꓸꓸꓸ<ж<diagnostics.Message>, any>(...)`, and a nil inner value throws.
+#   R2  + C47 patch (proof-tooling/diagpatch_runahead.py.txt: the redundant wrapper dropped at relater.cs:2683, :2729):
+#       318 of 318 bytes, rc 0: MATCHES NATIVE byte for byte (three TS2322 diagnostics on check.ts; 83 files each).
+#   Slice  (proof-tooling/typecheck_slice.py.txt) every 37th of the 7,404 single-file .ts units from tests/cases/compiler
+#       in the parse corpus manifest = 201 units, each type-checked by checkdemo as /main.ts in its own program, batches
+#       of 20 per process, per-file blocks compared: 200 of 201 MATCH (native 9.3 s, converted 337.5 s). The 1:
+#       02478 declarationEmitTripleSlashReferenceAmbientModule.ts (`import { parse } from "url"; export const thing:
+#       import("url").Url = parse();`), converted panic "invalid memory address or nil pointer dereference" at
+#       ast.(*Node).GetResolutionModeOverride (ast.go:2218) <- compiler.getModeForUsageLocation (fileloader.go:1038)
+#       -> C48: a pointer method that guards its own nil receiver (`if node == nil`) is emitted as `this ref T`, so a
+#       call on a nil pointer (an import type's nil Attributes) dereferences before the guard. Not patched.
+#   Stop rule (5 new blockers after xxh3, a day, or a non-small patch): not reached; 2 blockers (C47, C48), both small.
+#
+# 285's reading of record (master 742a3dbb24, unpatched, -recurse local): convert rc 1 at [107/142] internal/ls/lsconv,
+# GO2CS2002 x6, nothing built ("Applying build tags: safe,purego,noasm (default ...)": C43's default is in). As predicted.
+#
+# FULL TYPE-CHECK PASS (2026-11-11 08:50-13:30, arm B + the C45 and C47 patches): all 7,404 single-file .ts units from
+# tests/cases/compiler, batches of 20 (proof-tooling/typecheck_slice.py.txt), classes by typecheck_classes.py.txt.
+# Wall: native 357 s, converted 16,451 s (~46x). Raw reading 7,362 matched; corrected by solo re-runs on both sides:
+#   - 11 "native missing" (07210-07233, pathMappingBasedModuleResolution*) were an INSTRUMENT GAP: a NATIVE process died in
+#     their batch and the tool re-ran missing units on the converted side only. Alone, all 11 are byte-identical. (The
+#     tool now re-runs the native side too; that change is untested by a rerun.)
+#   - 07208 ..._differentRootTypes.ts PANICS IDENTICALLY on both sides (`vfs: failed to create sub file system for
+#     "//server": sub //server: invalid argument`, rc 2, same 27 stdout bytes): Go's own behaviour, counted as a match.
+#   => 7,374 of 7,404 (99.59%) behave exactly as native; 30 misses in 3 classes (full-pass-classes.json):
+#   C48  24  nil-guarding pointer method emitted `this ref T`; a call on a nil pointer dereferences before the guard.
+#            panic: invalid memory address or nil pointer dereference @ ast.(*Node).GetResolutionModeOverride()
+#            first: 00701 tests/cases/compiler/automaticTypeDirectiveResolutionBundler.ts
+#   C49   5  a pointer nil passed as `nil` (golib: ж<T>.NilBox, non-null) compares UNEQUAL to T's zero (@new<T>().ValueSlot:
+#            null) in the generic AreEqual, so Go's `value != *new(T)` (core.OrElse) fails for a nil argument.
+#            4 units TS2322 where native TS2344 (checker.go:9410 headMessage): 04150 genericConstraint1.ts, 05077
+#            invalidConstraint1.ts, 07291 primitiveConstraints1.ts, 07292 primitiveConstraints2.ts; 1 unit, 09360
+#            yieldExpression1.ts, misses native's TS2322 on a bare `yield` (checker.go:11180 error node).
+#            Repro pair at master 742a3dbb24: repros/c49b-orelsecrosspkg RED (Go `2344 true`, converted `0 true`) /
+#            repros/c49orelsenilptr GREEN (a nil local) -- rerun-repro-results-742a3dbb24-c49.txt.
+#   C51   1  05056 intersectionConstructorReductionCrash.ts does not finish: timeout at 1,800 s (pass) and 1,200 s (alone,
+#            rc 124) where native takes 20.4 s (>59x); a hang and a superlinear slowdown are not told apart here.
+# Predictions (posted before): F1 ~0.5% (5-200) MET (0.41%); F2 3-8 classes MET (3); F3 "C48 under half" MISSED (80%);
+# F4 "no hang" MISSED (C51).

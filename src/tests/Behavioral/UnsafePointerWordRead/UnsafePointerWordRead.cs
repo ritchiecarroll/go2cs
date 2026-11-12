@@ -5,7 +5,7 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     ref var u = ref heap<uintptr>((uintptr)0xC0FFEE, out var Ꮡu);
     @unsafe.Pointer q = ~Ꮡ(new @unsafe.Pointer(~Ꮡu));
     fmt.Println("uintptr word round-trips:", (uintptr)q == 0xC0FFEE);

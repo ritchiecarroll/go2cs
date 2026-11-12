@@ -22,7 +22,7 @@ partial struct wrapper {
     /*embed*/ internal ж<holder> holder;
 }
 
-internal static void Main() {
+internal static void main() {
     var o = Ꮡ(new outer());
     fmt.Println("depth1:", o.Ꮡin == o.Ꮡin);
     fmt.Println("depth2:", o.Ꮡin.Ꮡv == o.Ꮡin.Ꮡv);

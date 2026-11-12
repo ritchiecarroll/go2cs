@@ -136,7 +136,7 @@ internal static void fieldAddress() {
     fmt.Println("field address, write through converted:", pr.Second.Name);
 }
 
-internal static void Main() {
+internal static void main() {
     named();
     nilPointer();
     viaUnsafe();

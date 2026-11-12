@@ -7,7 +7,7 @@ partial class main_package {
 
 partial struct opTable /*map[CrossPkgLib.Ticks, Func<nint, nint, nint>]*/;
 
-internal static void Main() {
+internal static void main() {
     var ops = new opTable(new map<CrossPkgLib.Ticks, Func<nint, nint, nint>>{
         [((CrossPkgLib.Ticks)2)] = (nint a, nint b) => a + b,
         [((CrossPkgLib.Ticks)3)] = (nint a, nint b) => a * b

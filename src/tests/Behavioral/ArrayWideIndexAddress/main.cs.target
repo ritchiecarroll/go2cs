@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     ref var a = ref heap<array<nint>>(new nint[]{10, 20, 30, 40}.array(), out var Ꮡa);
 
     uintptr i = 2;

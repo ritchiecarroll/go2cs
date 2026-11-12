@@ -48,7 +48,7 @@ internal static void close(this ж<conn> Ꮡc, ж<tracker> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     var a = Ꮡ(new conn(id: 1));
     var b = Ꮡ(new conn(id: 2));
     var t = Ꮡ(new tracker(m: new map<ж<conn>, @string>{[a] = "idle"}));

@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var z = 1.0D;
     float64 x = 3D;
     while (x >= 1D) {

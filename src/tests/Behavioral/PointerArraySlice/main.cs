@@ -24,7 +24,7 @@ internal static nint sumParam(ж<grid> Ꮡp) {
     return total;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var arr = ref heap<array<nint>>(new nint[]{10, 20, 30, 40, 50}.array(), out var Ꮡarr);
     var p = Ꮡarr;
 

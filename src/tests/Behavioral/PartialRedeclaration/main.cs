@@ -22,7 +22,7 @@ internal static nint redeclareLocal() {
     return c + d;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(redeclareParam(3));
     fmt.Println(redeclareLocal());
 }

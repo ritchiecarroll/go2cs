@@ -8,7 +8,7 @@ using go.os;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     if (Δos.Getenv("SPAWN_BASICS_CHILD") == "1"u8) {
         fmt.Println("child: hello from the spawned image");
         fmt.Println("child: marker =", Δos.Getenv("SPAWN_BASICS_MARKER"));

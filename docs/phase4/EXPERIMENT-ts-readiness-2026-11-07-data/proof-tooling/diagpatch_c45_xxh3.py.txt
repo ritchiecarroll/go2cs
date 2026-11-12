@@ -1,0 +1,47 @@
+# diagpatch_c45_xxh3.py <converted xxh3 dir> [--restore] : DIAGNOSTIC (i7 local preview only, never landed), the owner's
+# 2026-11-11 type-check run-ahead. C45: zeebo/xxh3 reinterprets a string/slice header as struct{p unsafe.Pointer; l uint}
+# and reads at uintptr offsets, which golib refuses. Replace the four one-shot entry points' bodies with .NET's own XXH3
+# (System.IO.Hashing XxHash128 / XxHash3, seed 0): verified identical to zeebo/xxh3 v1.1.0 on 19 inputs covering every
+# length branch (scratch/xxh3check). The streaming Hasher (New) is NOT patched. Each file is backed up to <f>.diag-orig.
+import os, shutil, sys
+
+root = sys.argv[1]
+CR, LF = chr(13), chr(10)
+H128 = ("global::System.IO.Hashing.XxHash128.HashToUInt128({src}); "
+        "return new Uint128 {{ Hi = (ulong)(ᴛh >> 64), Lo = (ulong)ᴛh }};")
+P = [
+    ("hash128.cs",
+     "public static Uint128 Hash128(slice<byte> bʗp) {\n    ref var b = ref heap(bʗp, out var Ꮡb);\n\n    return hashAny128(~Ꮡb.Reinterpret<slice<byte>, str>());\n}",
+     "public static Uint128 Hash128(slice<byte> bʗp) {\n    // DIAGNOSTIC C45 (i7 run-ahead): .NET's XXH3-128, verified equal to zeebo/xxh3\n    var ᴛh = " + H128.format(src="bʗp.ToSpan()") + "\n}"),
+    ("hash128.cs",
+     "public static Uint128 HashString128(@string sʗp) {\n    ref var s = ref heap(sʗp, out var Ꮡs);\n\n    return hashAny128(~Ꮡs.Reinterpret<@string, str>());\n}",
+     "public static Uint128 HashString128(@string sʗp) {\n    // DIAGNOSTIC C45 (i7 run-ahead): .NET's XXH3-128, verified equal to zeebo/xxh3\n    var ᴛh = " + H128.format(src="sʗp.ToSpan()") + "\n}"),
+    ("hash64.cs",
+     "public static uint64 Hash(slice<byte> bʗp) {\n    ref var b = ref heap(bʗp, out var Ꮡb);\n\n    return hashAny(~Ꮡb.Reinterpret<slice<byte>, str>());\n}",
+     "public static uint64 Hash(slice<byte> bʗp) {\n    // DIAGNOSTIC C45 (i7 run-ahead): .NET's XXH3-64, verified equal to zeebo/xxh3\n    return global::System.IO.Hashing.XxHash3.HashToUInt64(bʗp.ToSpan());\n}"),
+    ("hash64.cs",
+     "public static uint64 HashString(@string sʗp) {\n    ref var s = ref heap(sʗp, out var Ꮡs);\n\n    return hashAny(~Ꮡs.Reinterpret<@string, str>());\n}",
+     "public static uint64 HashString(@string sʗp) {\n    // DIAGNOSTIC C45 (i7 run-ahead): .NET's XXH3-64, verified equal to zeebo/xxh3\n    return global::System.IO.Hashing.XxHash3.HashToUInt64(sʗp.ToSpan());\n}"),
+    ("github.com.zeebo.xxh3.csproj",
+     '    <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />\n',
+     '    <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />\n'
+     '    <PackageReference Include="System.IO.Hashing" Version="10.0.0" /><!-- DIAGNOSTIC C45 (i7 run-ahead) -->\n'),
+]
+for rel, a, b in P:
+    f = os.path.join(root, rel); o = f + ".diag-orig"
+    if "--restore" in sys.argv:
+        if os.path.exists(o):
+            shutil.move(o, f); os.utime(f, None); print("restored (and touched)", rel)
+        continue
+    s = open(f, encoding="utf-8-sig", newline="").read()
+    if CR + LF in s:
+        a, b = a.replace(LF, CR + LF), b.replace(LF, CR + LF)
+    if s.count(a) == 0 and s.count(b) == 1:
+        print("already patched", rel); continue
+    if s.count(a) != 1:
+        sys.exit(f"{rel}: expected 1 match, found {s.count(a)}")
+    if not os.path.exists(o):
+        shutil.copy2(f, o)
+    bom = open(f, "rb").read(3) == b"\xef\xbb\xbf"
+    open(f, "w", encoding="utf-8-sig" if bom else "utf-8", newline="").write(s.replace(a, b))
+    print("patched", rel)

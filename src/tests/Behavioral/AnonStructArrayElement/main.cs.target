@@ -79,7 +79,7 @@ internal static nint localHeapAnon() {
     return firstFree.@base + firstFree.bound;
 }
 
-internal static void Main() {
+internal static void main() {
     pool[0].item = 5;
     pool[1].item = 6;
 

@@ -21,7 +21,7 @@ public static any GetValue(nint index) {
     return default;
 }
 
-internal static void Main() {
+internal static void main() {
     var value = GetValue(0);
 
     if (value._<Box<nint>>(out var intBox)) {

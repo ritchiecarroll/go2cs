@@ -18,7 +18,7 @@ internal static uint32 Load(this ж<counter> Ꮡc) { return (Ꮡc.Reinterpret<co
 internal static void Store(this ж<counter> Ꮡc, uint32 v) { (Ꮡc.Reinterpret<counter, atomic.Uint32>()).Store(v); }
 internal static uint32 Add(this ж<counter> Ꮡc, uint32 d) { return (Ꮡc.Reinterpret<counter, atomic.Uint32>()).Add(d); }
 
-internal static void Main() {
+internal static void main() {
     handler = other;
     fmt.Println(handler == other);
 

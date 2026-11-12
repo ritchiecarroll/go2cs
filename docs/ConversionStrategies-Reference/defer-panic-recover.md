@@ -11,7 +11,7 @@ holds this call's defer list and nothing else:
 
 <!-- source: src/tests/Behavioral/DeferSimple/DeferSimple.cs:7-16 -->
 ```csharp
-internal static void Main() {
+internal static void main() {
     GoFrame ᒐ = default;
     try {
         fmt.Println("Open file");

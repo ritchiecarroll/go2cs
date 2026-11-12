@@ -11,7 +11,7 @@ partial struct gauge {
 
 internal static nint ShadowedImportConstLib(this gauge g) { return g.level; }
 
-internal static void Main() {
+internal static void main() {
     var g = new gauge(level: 3);
 
     var span = ((ShadowedImportConstLib.Span)2) * ShadowedImportConstLib_package.ΔPeak;

@@ -44,7 +44,7 @@ internal static slice<@string> names(reflectꓸType t) {
     return @out;
 }
 
-internal static void Main() {
+internal static void main() {
     var c = Ꮡ(new counter());
     var pv = reflect.ValueOf(c.OrTypedNil());
     var pt = pv.Type();

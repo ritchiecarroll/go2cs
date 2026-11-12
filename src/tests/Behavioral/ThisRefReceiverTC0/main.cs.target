@@ -50,7 +50,7 @@ internal static void @try(@string name, Func<@string> f) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     ж<T> p = default;
     var pʗ1 = p;
     @try("nil, callee ignores its receiver", () => pʗ1.Via());

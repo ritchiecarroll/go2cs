@@ -12,7 +12,7 @@ internal static nint fib(nint n) {
     return fib(n - 1) + fib(n - 2);
 }
 
-internal static void Main() {
+internal static void main() {
     var start = time.Now().UnixNano();
 
     nint sum = 0;

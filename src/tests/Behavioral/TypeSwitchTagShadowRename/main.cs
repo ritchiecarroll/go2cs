@@ -62,7 +62,7 @@ internal static (@string, @string) classifyVia(any v) {
     return (pick(v), pick(other.OrTypedNil()));
 }
 
-internal static void Main() {
+internal static void main() {
     @string hi = "hi";
     var sn = Ꮡ(new node());
     sn.inner = hi;

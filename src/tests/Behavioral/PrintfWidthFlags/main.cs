@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     foreach (var (_, v) in range(slice<nint>([5, 99, 999, 1234, -5, -999]))) {
         fmt.Printf("k =% 4d;\n"u8, v);
     }

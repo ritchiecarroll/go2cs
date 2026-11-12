@@ -138,7 +138,7 @@ internal static partial void spawned(ж<Δsync.WaitGroup> wg, @string tag) {
     finally { ᒐ.Run(); }
 }
 
-internal static partial void Main() {
+internal static partial void main() {
     constArg();
     varArg();
     valueMethod();

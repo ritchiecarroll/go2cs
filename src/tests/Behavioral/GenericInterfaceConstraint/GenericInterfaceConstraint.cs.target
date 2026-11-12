@@ -88,7 +88,7 @@ internal static Figure newFigure() {
     return new SquareжFigure(Ꮡ(new Square(S: 2D)));
 }
 
-internal static void Main() {
+internal static void main() {
     var circles = slice<ж<Circle>>([Ꮡ(new Circle(R: 1D)), Ꮡ(new Circle(R: 2D))]);
     var squares = slice<ж<Square>>([Ꮡ(new Square(S: 3D))]);
     var shapes = slice<Shape>([new CircleжShape(Ꮡ(new Circle(R: 1D))), new SquareжShape(Ꮡ(new Square(S: 2D)))]);
