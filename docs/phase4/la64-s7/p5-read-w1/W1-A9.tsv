@@ -1,0 +1,39 @@
+shard	row	RID	verdicts	cs_verdicts	matched	disclosed	new	other_errors	status	word	note	agree	absent	diff_names	run	wall_s
+A-9	internal/xcoff	linux-arm64	3	3	3	0	0	0	validated	PASS	3 (linux (linux-arm64 pending))	yes	-	-	43151886546	212
+A-9	internal/xcoff	linux-x64	3	3	3	0	0	0	validated	PASS	3 (linux)	yes	-	-	43151886546	205
+A-9	internal/zstd	linux-arm64	536	536	535	0	1	1	failing	FAIL		yes	-	TestAlloc	43151886546	38
+A-9	internal/zstd	linux-x64	536	536	535	0	1	1	failing	FAIL		yes	-	TestAlloc	43151886546	42
+A-9	io	linux-arm64	61	61	60	1	0	0	validated	PASS	60 (linux (linux-arm64 pending))	yes	-	TestPipeAllocations	43151886546	33
+A-9	io	linux-x64	61	61	60	1	0	0	validated	PASS	60 (linux)	yes	-	TestPipeAllocations	43151886546	34
+A-9	io/fs	linux-arm64	21	21	21	0	0	0	validated	PASS	21 (linux (linux-arm64 pending))	yes	-	-	43151886546	22
+A-9	io/fs	linux-x64	21	21	21	0	0	0	validated	PASS	21 (linux)	yes	-	-	43151886546	21
+A-9	io/ioutil	linux-arm64	28	28	28	0	0	0	validated	PASS	28 (linux (linux-arm64 pending))	yes	-	-	43151886546	18
+A-9	io/ioutil	linux-x64	28	28	28	0	0	0	validated	PASS	28 (linux)	yes	-	-	43151886546	17
+A-9	iter	linux-arm64	28	28	28	0	0	0	validated	PASS	28 (linux (linux-arm64 pending))	yes	-	-	43151886546	15
+A-9	iter	linux-x64	28	28	28	0	0	0	validated	PASS	28 (linux)	yes	-	-	43151886546	14
+A-9	log	linux-arm64	24	24	24	0	0	0	validated	PASS	24 (linux (linux-arm64 pending))	yes	-	-	43151886546	36
+A-9	log	linux-x64	24	24	24	0	0	0	validated	PASS	24 (linux)	yes	-	-	43151886546	32
+A-9	log/slog	linux-arm64	249	249	228	21	0	0	validated	PASS	228 (linux (linux-arm64 pending))	yes	-	TestAlloc;TestAlloc/2_pairs;TestAlloc/2_pairs_disabled_inline;TestAlloc/9_kvs;TestAlloc/Error;TestAlloc/Info;TestAlloc/attrs1;TestAlloc/attrs3;TestAlloc/attrs3_disabled;TestAlloc/attrs6;TestAlloc/attrs9;TestAlloc/logger.Info	43151886546	73
+A-9	log/slog	linux-x64	249	249	228	21	0	0	validated	PASS	228 (linux)	yes	-	TestAlloc;TestAlloc/2_pairs;TestAlloc/2_pairs_disabled_inline;TestAlloc/9_kvs;TestAlloc/Error;TestAlloc/Info;TestAlloc/attrs1;TestAlloc/attrs3;TestAlloc/attrs3_disabled;TestAlloc/attrs6;TestAlloc/attrs9;TestAlloc/logger.Info	43151886546	72
+A-9	log/slog/internal/benchmarks	linux-arm64	3	3	3	0	0	0	validated	PASS	3 (linux (linux-arm64 pending))	yes	-	-	43151886546	18
+A-9	log/slog/internal/benchmarks	linux-x64	3	3	3	0	0	0	validated	PASS	3 (linux)	yes	-	-	43151886546	16
+A-9	log/slog/internal/buffer	linux-arm64	2	2	1	1	0	0	validated	PASS	1 (linux (linux-arm64 pending))	yes	-	TestAlloc	43151886546	16
+A-9	log/slog/internal/buffer	linux-x64	2	2	1	1	0	0	validated	PASS	1 (linux)	yes	-	TestAlloc	43151886546	15
+A-9	maps	linux-arm64	14	14	14	0	0	0	validated	PASS	14 (linux (linux-arm64 pending))	yes	-	-	43151886546	16
+A-9	maps	linux-x64	14	14	14	0	0	0	validated	PASS	14 (linux)	yes	-	-	43151886546	15
+A-9	math	linux-arm64	76	76	76	0	0	0	validated	PASS	76 (linux (linux-arm64 pending))	yes	-	-	43151886546	27
+A-9	math	linux-x64	76	76	76	0	0	0	validated	PASS	76 (linux)	yes	-	-	43151886546	27
+A-9	math/big	linux-arm64	251	251	249	2	0	0	validated	PASS	249 (linux (linux-arm64 pending))	yes	-	TestNewIntAllocs;TestSqrAlloc	43151886546	84
+A-9	math/big	linux-x64	251	251	249	2	0	0	validated	PASS	249 (linux)	yes	-	TestNewIntAllocs;TestSqrAlloc	43151886546	84
+A-9	math/big/internal/asmgen	linux-arm64	11	11	11	0	0	0	validated	PASS	11 (linux (linux-arm64 pending))	yes	-	-	43151886546	17
+A-9	math/big/internal/asmgen	linux-x64	11	11	11	0	0	0	validated	PASS	11 (linux)	yes	-	-	43151886546	16
+A-9	math/bits	linux-arm64	26	26	26	0	0	0	validated	PASS	26 (linux (linux-arm64 pending))	yes	-	-	43151886546	20
+A-9	math/bits	linux-x64	26	26	26	0	0	0	validated	PASS	26 (linux)	yes	-	-	43151886546	20
+A-9	math/cmplx	linux-arm64	24	24	24	0	0	0	validated	PASS	24 (linux (linux-arm64 pending))	yes	-	-	43151886546	15
+A-9	math/cmplx	linux-x64	24	24	24	0	0	0	validated	PASS	24 (linux)	yes	-	-	43151886546	14
+A-9	math/rand	linux-arm64	47	47	47	0	0	0	validated	PASS	47 (linux (linux-arm64 pending))	yes	-	-	43151886546	31
+A-9	math/rand	linux-x64	47	47	47	0	0	0	validated	PASS	47 (linux)	yes	-	-	43151886546	30
+A-9	math/rand/v2	linux-arm64	36	36	36	0	0	0	validated	PASS	36 (linux (linux-arm64 pending))	yes	-	-	43151886546	42
+A-9	math/rand/v2	linux-x64	36	36	36	0	0	0	validated	PASS	36 (linux)	yes	-	-	43151886546	41
+A-9	mime	linux-arm64	19	19	18	1	0	0	validated	PASS	18 (linux (linux-arm64 pending))	yes	-	TestLookupMallocs	43151886546	18
+A-9	mime	linux-x64	19	19	18	1	0	0	validated	PASS	18 (linux)	yes	-	TestLookupMallocs	43151886546	17

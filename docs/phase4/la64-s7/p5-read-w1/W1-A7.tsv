@@ -1,0 +1,39 @@
+shard	row	RID	verdicts	cs_verdicts	matched	disclosed	new	other_errors	status	word	note	agree	absent	diff_names	run	wall_s
+A-7	internal/coverage/cmerge	linux-arm64	2	2	2	0	0	0	validated	PASS	2 (linux (linux-arm64 pending))	yes	-	-	43151877722	187
+A-7	internal/coverage/cmerge	linux-x64	2	2	2	0	0	0	validated	PASS	2 (linux)	yes	-	-	43151877722	155
+A-7	internal/coverage/pods	linux-arm64	1	1	1	0	0	0	validated	PASS	1 (linux (linux-arm64 pending))	yes	-	-	43151877722	34
+A-7	internal/coverage/pods	linux-x64	1	1	1	0	0	0	validated	PASS	1 (linux)	yes	-	-	43151877722	33
+A-7	internal/coverage/slicereader	linux-arm64	1	1	1	0	0	0	validated	PASS	1 (linux (linux-arm64 pending))	yes	-	-	43151877722	22
+A-7	internal/coverage/slicereader	linux-x64	1	1	1	0	0	0	validated	PASS	1 (linux)	yes	-	-	43151877722	21
+A-7	internal/coverage/slicewriter	linux-arm64	1	1	1	0	0	0	validated	PASS	1 (linux (linux-arm64 pending))	yes	-	-	43151877722	14
+A-7	internal/coverage/slicewriter	linux-x64	1	1	1	0	0	0	validated	PASS	1 (linux)	yes	-	-	43151877722	13
+A-7	internal/coverage/test	linux-arm64	6	6	6	0	0	0	validated	PASS	6 (linux (linux-arm64 pending))	yes	-	-	43151877722	19
+A-7	internal/coverage/test	linux-x64	6	6	6	0	0	0	validated	PASS	6 (linux)	yes	-	-	43151877722	18
+A-7	internal/cpu	linux-arm64	2	2	2	0	0	0	validated	?		no	TestDataCacheSizes;TestDisableSSE3;TestSSE3DebugOption;TestX86ifAVX2hasAVX;TestX86ifAVX512BWhasAVX512F;TestX86ifAVX512FhasAVX2;TestX86ifAVX512VLhasAVX512F	-	43151877722	?
+A-7	internal/cpu	linux-x64	9	9	9	0	0	0	validated	PASS	9 (linux)	no	-	-	43151877722	21
+A-7	internal/dag	linux-arm64	6	6	6	0	0	0	validated	PASS	6 (linux (linux-arm64 pending))	yes	-	-	43151877722	14
+A-7	internal/dag	linux-x64	6	6	6	0	0	0	validated	PASS	6 (linux)	yes	-	-	43151877722	12
+A-7	internal/diff	linux-arm64	13	13	13	0	0	0	validated	PASS	13 (linux (linux-arm64 pending))	yes	-	-	43151877722	15
+A-7	internal/diff	linux-x64	13	13	13	0	0	0	validated	PASS	13 (linux)	yes	-	-	43151877722	13
+A-7	internal/fmtsort	linux-arm64	3	3	3	0	0	0	validated	PASS	3 (linux (linux-arm64 pending))	yes	-	-	43151877722	15
+A-7	internal/fmtsort	linux-x64	3	3	3	0	0	0	validated	PASS	3 (linux)	yes	-	-	43151877722	13
+A-7	internal/fuzz	linux-arm64	52	52	52	0	0	0	validated	PASS	52 (linux (linux-arm64 pending))	yes	-	-	43151877722	35
+A-7	internal/fuzz	linux-x64	52	52	52	0	0	0	validated	PASS	52 (linux)	yes	-	-	43151877722	32
+A-7	internal/godebug	linux-arm64	6	6	6	0	0	0	validated	PASS	6 (linux (linux-arm64 pending))	yes	-	-	43151877722	55
+A-7	internal/godebug	linux-x64	6	6	6	0	0	0	validated	PASS	6 (linux)	yes	-	-	43151877722	43
+A-7	internal/godebugs	linux-arm64	2	2	2	0	0	0	validated	PASS	2 (linux (linux-arm64 pending))	yes	-	-	43151877722	65
+A-7	internal/godebugs	linux-x64	2	2	2	0	0	0	validated	PASS	2 (linux)	yes	-	-	43151877722	51
+A-7	internal/gover	linux-arm64	5	5	5	0	0	0	validated	PASS	5 (linux (linux-arm64 pending))	yes	-	-	43151877722	13
+A-7	internal/gover	linux-x64	5	5	5	0	0	0	validated	PASS	5 (linux)	yes	-	-	43151877722	11
+A-7	internal/pkgbits	linux-arm64	2	2	2	0	0	0	validated	PASS	2 (linux (linux-arm64 pending))	yes	-	-	43151877722	22
+A-7	internal/pkgbits	linux-x64	2	2	2	0	0	0	validated	PASS	2 (linux)	yes	-	-	43151877722	20
+A-7	internal/platform	linux-arm64	1	1	1	0	0	0	validated	PASS	1 (linux (linux-arm64 pending))	yes	-	-	43151877722	22
+A-7	internal/platform	linux-x64	1	1	1	0	0	0	validated	PASS	1 (linux)	yes	-	-	43151877722	19
+A-7	internal/poll	linux-arm64	13	13	12	0	1	1	failing	FAIL		yes	-	TestSplicePipePool	43151877722	1838
+A-7	internal/poll	linux-x64	13	13	12	0	1	1	failing	FAIL		yes	-	TestSplicePipePool	43151877722	1835
+A-7	internal/profile	linux-arm64	1	1	1	0	0	0	validated	PASS	1 (linux (linux-arm64 pending))	yes	-	-	43151877722	27
+A-7	internal/profile	linux-x64	1	1	1	0	0	0	validated	PASS	1 (linux)	yes	-	-	43151877722	22
+A-7	internal/reflectlite	linux-arm64	30	30	30	0	0	0	validated	PASS	30 (linux (linux-arm64 pending))	yes	-	-	43151877722	23
+A-7	internal/reflectlite	linux-x64	30	30	30	0	0	0	validated	PASS	30 (linux)	yes	-	-	43151877722	22
+A-7	internal/runtime/atomic	linux-arm64	16	16	16	0	0	0	validated	PASS	16 (linux (linux-arm64 pending))	yes	-	-	43151877722	20
+A-7	internal/runtime/atomic	linux-x64	16	16	16	0	0	0	validated	PASS	16 (linux)	yes	-	-	43151877722	18

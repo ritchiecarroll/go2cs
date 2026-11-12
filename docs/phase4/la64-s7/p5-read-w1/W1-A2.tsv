@@ -1,0 +1,41 @@
+shard	row	RID	verdicts	cs_verdicts	matched	disclosed	new	other_errors	status	word	note	agree	absent	diff_names	run	wall_s
+A-2	crypto/ecdsa	linux-arm64	125	125	125	0	0	0	validated	PASS	125 (linux (linux-arm64 pending))	yes	-	-	43151902079	235
+A-2	crypto/ecdsa	linux-x64	125	125	125	0	0	0	validated	PASS	125 (linux)	yes	-	-	43151902079	312
+A-2	crypto/ed25519	linux-arm64	10	10	9	1	0	0	validated	PASS	9 (linux (linux-arm64 pending))	yes	-	TestAllocations	43151902079	28
+A-2	crypto/ed25519	linux-x64	10	10	9	1	0	0	validated	PASS	9 (linux)	yes	-	TestAllocations	43151902079	36
+A-2	crypto/elliptic	linux-arm64	81	81	81	0	0	0	validated	PASS	81 (linux (linux-arm64 pending))	yes	-	-	43151902079	47
+A-2	crypto/elliptic	linux-x64	81	81	81	0	0	0	validated	PASS	81 (linux)	yes	-	-	43151902079	65
+A-2	crypto/fips140	linux-arm64	2	2	2	0	0	0	validated	PASS	2 (linux (linux-arm64 pending))	yes	-	-	43151902079	21
+A-2	crypto/fips140	linux-x64	2	2	2	0	0	0	validated	PASS	2 (linux)	yes	-	-	43151902079	26
+A-2	crypto/hkdf	linux-arm64	3	3	3	0	0	0	validated	PASS	3 (linux (linux-arm64 pending))	yes	-	-	43151902079	20
+A-2	crypto/hkdf	linux-x64	3	3	3	0	0	0	validated	PASS	3 (linux)	yes	-	-	43151902079	25
+A-2	crypto/hmac	linux-arm64	202	202	202	0	0	0	validated	PASS	202 (linux (linux-arm64 pending))	yes	-	-	43151902079	23
+A-2	crypto/hmac	linux-x64	202	202	202	0	0	0	validated	PASS	202 (linux)	yes	-	-	43151902079	27
+A-2	crypto/hpke	linux-arm64	231	231	231	0	0	0	validated	PASS	231 (linux (linux-arm64 pending))	yes	-	-	43151902079	42
+A-2	crypto/hpke	linux-x64	231	231	231	0	0	0	validated	PASS	231 (linux)	yes	-	-	43151902079	52
+A-2	crypto/internal/boring	linux-arm64	3	3	3	0	0	0	validated	PASS	3 (linux (linux-arm64 pending))	yes	-	-	43151902079	19
+A-2	crypto/internal/boring	linux-x64	3	3	3	0	0	0	validated	PASS	3 (linux)	yes	-	-	43151902079	23
+A-2	crypto/internal/boring/bcache	linux-arm64	1	1	1	0	0	0	validated	PASS	1 (linux (linux-arm64 pending))	yes	-	-	43151902079	15
+A-2	crypto/internal/boring/bcache	linux-x64	1	1	1	0	0	0	validated	PASS	1 (linux)	yes	-	-	43151902079	19
+A-2	crypto/internal/fips140/aes	linux-arm64	5	5	5	0	0	0	validated	PASS	5 (linux (linux-arm64 pending))	yes	-	-	43151902079	18
+A-2	crypto/internal/fips140/aes	linux-x64	5	5	5	0	0	0	validated	PASS	5 (linux)	yes	-	-	43151902079	23
+A-2	crypto/internal/fips140/bigmod	linux-arm64	79	79	79	0	0	0	validated	PASS	79 (linux (linux-arm64 pending))	yes	-	-	43151902079	23
+A-2	crypto/internal/fips140/bigmod	linux-x64	79	79	79	0	0	0	validated	PASS	79 (linux)	yes	-	-	43151902079	29
+A-2	crypto/internal/fips140/ecdh	linux-arm64	1	1	1	0	0	0	validated	PASS	1 (linux (linux-arm64 pending))	yes	-	-	43151902079	17
+A-2	crypto/internal/fips140/ecdh	linux-x64	1	1	1	0	0	0	validated	PASS	1 (linux)	yes	-	-	43151902079	22
+A-2	crypto/internal/fips140/ecdsa	linux-arm64	10	10	10	0	0	0	validated	PASS	10 (linux (linux-arm64 pending))	yes	-	-	43151902079	20
+A-2	crypto/internal/fips140/ecdsa	linux-x64	10	10	10	0	0	0	validated	PASS	10 (linux)	yes	-	-	43151902079	26
+A-2	crypto/internal/fips140/edwards25519	linux-arm64	54	54	54	0	0	0	validated	PASS	54 (linux (linux-arm64 pending))	yes	-	-	43151902079	80
+A-2	crypto/internal/fips140/edwards25519	linux-x64	54	54	54	0	0	0	validated	PASS	54 (linux)	yes	-	-	43151902079	92
+A-2	crypto/internal/fips140/edwards25519/field	linux-arm64	15	15	15	0	0	0	validated	PASS	15 (linux (linux-arm64 pending))	yes	-	-	43151902079	32
+A-2	crypto/internal/fips140/edwards25519/field	linux-x64	15	15	15	0	0	0	validated	PASS	15 (linux)	yes	-	-	43151902079	40
+A-2	crypto/internal/fips140/mldsa	linux-arm64	46	46	46	0	0	0	validated	PASS	46 (linux (linux-arm64 pending))	yes	-	-	43151902079	27
+A-2	crypto/internal/fips140/mldsa	linux-x64	46	46	46	0	0	0	validated	PASS	46 (linux)	yes	-	-	43151902079	33
+A-2	crypto/internal/fips140/mlkem	linux-arm64	11	11	11	0	0	0	validated	PASS	11 (linux (linux-arm64 pending))	yes	-	-	43151902079	21
+A-2	crypto/internal/fips140/mlkem	linux-x64	11	11	11	0	0	0	validated	PASS	11 (linux)	yes	-	-	43151902079	27
+A-2	crypto/internal/fips140/nistec	linux-arm64	44	44	44	0	0	0	validated	PASS	44 (linux (linux-arm64 pending))	yes	-	-	43151902079	21
+A-2	crypto/internal/fips140/nistec	linux-x64	44	44	44	0	0	0	validated	PASS	44 (linux)	yes	-	-	43151902079	26
+A-2	crypto/internal/fips140/rsa	linux-arm64	123	123	123	0	0	0	validated	PASS	123 (linux (linux-arm64 pending))	yes	-	-	43151902079	21
+A-2	crypto/internal/fips140/rsa	linux-x64	123	123	123	0	0	0	validated	PASS	123 (linux)	yes	-	-	43151902079	26
+A-2	crypto/internal/fips140/subtle	linux-arm64	1	1	1	0	0	0	validated	PASS	1 (linux (linux-arm64 pending))	yes	-	-	43151902079	16
+A-2	crypto/internal/fips140/subtle	linux-x64	1	1	1	0	0	0	validated	PASS	1 (linux)	yes	-	-	43151902079	20

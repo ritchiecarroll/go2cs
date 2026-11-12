@@ -1,0 +1,39 @@
+shard	row	RID	verdicts	cs_verdicts	matched	disclosed	new	other_errors	status	word	note	agree	absent	diff_names	run	wall_s
+A-12	sync	linux-arm64	57	57	48	9	0	0	validated	PASS	48 (linux (linux-arm64 pending))	yes	-	TestMapClearOneAllocation;TestMapRangeNoAllocations;TestOnceXGC;TestOnceXGC/OnceFunc;TestOnceXGC/OnceFunc_panic;TestOnceXGC/OnceValue;TestOnceXGC/OnceValue_panic;TestOnceXGC/OnceValues;TestOnceXGC/OnceValues_panic	43151896336	231
+A-12	sync	linux-x64	57	57	48	9	0	0	validated	PASS	48 (linux)	yes	-	TestMapClearOneAllocation;TestMapRangeNoAllocations;TestOnceXGC;TestOnceXGC/OnceFunc;TestOnceXGC/OnceFunc_panic;TestOnceXGC/OnceValue;TestOnceXGC/OnceValue_panic;TestOnceXGC/OnceValues;TestOnceXGC/OnceValues_panic	43151896336	205
+A-12	syscall	linux-arm64	59	59	50	9	0	0	validated	DISC	50, disclosed 9 vs the linux (linux-arm64 pending) expectation 17	yes	-	TestAllThreadsSyscall;TestAllThreadsSyscallBlockedSyscall;TestAllThreadsSyscallError;TestCloneNEWUSERAndRemap/setgroups=false;TestCloneNEWUSERAndRemap/setgroups=true;TestEmptyCredGroupsDisableSetgroups;TestExecPtrace;TestPidFDWithUserNS;TestPrlimitFileLimit	43151896336	57
+A-12	syscall	linux-x64	59	59	50	9	0	0	validated	DISC	50, disclosed 9 vs the linux expectation 17	yes	-	TestAllThreadsSyscall;TestAllThreadsSyscallBlockedSyscall;TestAllThreadsSyscallError;TestCloneNEWUSERAndRemap/setgroups=false;TestCloneNEWUSERAndRemap/setgroups=true;TestEmptyCredGroupsDisableSetgroups;TestExecPtrace;TestPidFDWithUserNS;TestPrlimitFileLimit	43151896336	52
+A-12	testing	linux-arm64	85	85	82	3	0	0	validated	PASS	82 (linux (linux-arm64 pending))	yes	-	TestAllocsPerRun;TestMorePanic;TestTBHelper	43151896336	53
+A-12	testing	linux-x64	85	85	82	3	0	0	validated	PASS	82 (linux)	yes	-	TestAllocsPerRun;TestMorePanic;TestTBHelper	43151896336	41
+A-12	testing/cryptotest	linux-arm64	10	10	10	0	0	0	validated	PASS	10 (linux (linux-arm64 pending))	yes	-	-	43151896336	36
+A-12	testing/cryptotest	linux-x64	10	10	10	0	0	0	validated	PASS	10 (linux)	yes	-	-	43151896336	34
+A-12	testing/fstest	linux-arm64	8	8	8	0	0	0	validated	PASS	8 (linux (linux-arm64 pending))	yes	-	-	43151896336	23
+A-12	testing/fstest	linux-x64	8	8	8	0	0	0	validated	PASS	8 (linux)	yes	-	-	43151896336	20
+A-12	testing/iotest	linux-arm64	18	18	18	0	0	0	validated	PASS	18 (linux (linux-arm64 pending))	yes	-	-	43151896336	15
+A-12	testing/iotest	linux-x64	18	18	18	0	0	0	validated	PASS	18 (linux)	yes	-	-	43151896336	13
+A-12	testing/quick	linux-arm64	8	8	8	0	0	0	validated	PASS	8 (linux (linux-arm64 pending))	yes	-	-	43151896336	16
+A-12	testing/quick	linux-x64	8	8	8	0	0	0	validated	PASS	8 (linux)	yes	-	-	43151896336	14
+A-12	testing/slogtest	linux-arm64	18	18	18	0	0	0	validated	PASS	18 (linux (linux-arm64 pending))	yes	-	-	43151896336	27
+A-12	testing/slogtest	linux-x64	18	18	18	0	0	0	validated	PASS	18 (linux)	yes	-	-	43151896336	25
+A-12	testing/synctest	linux-arm64	18	18	18	0	0	0	validated	PASS	18 (linux (linux-arm64 pending))	yes	-	-	43151896336	105
+A-12	testing/synctest	linux-x64	18	18	18	0	0	0	validated	PASS	18 (linux)	yes	-	-	43151896336	84
+A-12	text/scanner	linux-arm64	18	18	18	0	0	0	validated	PASS	18 (linux (linux-arm64 pending))	yes	-	-	43151896336	16
+A-12	text/scanner	linux-x64	18	18	18	0	0	0	validated	PASS	18 (linux)	yes	-	-	43151896336	13
+A-12	text/tabwriter	linux-arm64	3	3	3	0	0	0	validated	PASS	3 (linux (linux-arm64 pending))	yes	-	-	43151896336	16
+A-12	text/tabwriter	linux-x64	3	3	3	0	0	0	validated	PASS	3 (linux)	yes	-	-	43151896336	13
+A-12	text/template	linux-arm64	53	53	53	0	0	0	validated	PASS	53 (linux (linux-arm64 pending))	yes	-	-	43151896336	27
+A-12	text/template	linux-x64	53	53	53	0	0	0	validated	PASS	53 (linux)	yes	-	-	43151896336	23
+A-12	text/template/parse	linux-arm64	52	52	52	0	0	0	validated	PASS	52 (linux (linux-arm64 pending))	yes	-	-	43151896336	17
+A-12	text/template/parse	linux-x64	52	52	52	0	0	0	validated	PASS	52 (linux)	yes	-	-	43151896336	14
+A-12	time	linux-arm64	176	176	176	0	0	0	validated	PASS	176 (linux (linux-arm64 pending))	yes	-	-	43151896336	162
+A-12	time	linux-x64	176	176	176	0	0	0	validated	PASS	176 (linux)	yes	-	-	43151896336	115
+A-12	unicode	linux-arm64	28	28	28	0	0	0	validated	PASS	28 (linux (linux-arm64 pending))	yes	-	-	43151896336	17
+A-12	unicode	linux-x64	28	28	28	0	0	0	validated	PASS	28 (linux)	yes	-	-	43151896336	14
+A-12	unicode/utf16	linux-arm64	9	9	8	1	0	0	validated	PASS	8 (linux (linux-arm64 pending))	yes	-	TestAllocationsDecode	43151896336	16
+A-12	unicode/utf16	linux-x64	9	9	8	1	0	0	validated	PASS	8 (linux)	yes	-	TestAllocationsDecode	43151896336	13
+A-12	unicode/utf8	linux-arm64	15	15	14	1	0	0	validated	PASS	14 (linux (linux-arm64 pending))	yes	-	TestRuneCountNonASCIIAllocation	43151896336	14
+A-12	unicode/utf8	linux-x64	15	15	14	1	0	0	validated	PASS	14 (linux)	yes	-	TestRuneCountNonASCIIAllocation	43151896336	12
+A-12	unique	linux-arm64	39	39	27	12	0	0	validated	PASS	27 (linux (linux-arm64 pending))	yes	-	TestCanonMap;TestCanonMap/LoadOrStore;TestCanonMap/LoadOrStore/Sequential;TestCanonMapBadHash;TestCanonMapBadHash/LoadOrStore;TestCanonMapBadHash/LoadOrStore/Sequential;TestCanonMapTruncHash;TestCanonMapTruncHash/LoadOrStore;TestCanonMapTruncHash/LoadOrStore/Sequential;TestMakeAllocs;TestMakeClonesStrings;TestNestedHandle	43151896336	36
+A-12	unique	linux-x64	39	39	27	12	0	0	validated	PASS	27 (linux)	yes	-	TestCanonMap;TestCanonMap/LoadOrStore;TestCanonMap/LoadOrStore/Sequential;TestCanonMapBadHash;TestCanonMapBadHash/LoadOrStore;TestCanonMapBadHash/LoadOrStore/Sequential;TestCanonMapTruncHash;TestCanonMapTruncHash/LoadOrStore;TestCanonMapTruncHash/LoadOrStore/Sequential;TestMakeAllocs;TestMakeClonesStrings;TestNestedHandle	43151896336	31
+A-12	weak	linux-arm64	9	9	9	0	0	0	validated	PASS	9 (linux (linux-arm64 pending))	yes	-	-	43151896336	16
+A-12	weak	linux-x64	9	9	9	0	0	0	validated	PASS	9 (linux)	yes	-	-	43151896336	14
