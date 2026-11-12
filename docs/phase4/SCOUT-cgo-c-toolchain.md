@@ -204,3 +204,21 @@ Read at go1.26.10:
 - arm64 windows and arm64 linux hosts;
 - offline installation from a copied archive;
 - zig releases other than 0.17.0.
+
+## 8. Amendment 2026-11-12: `go build` with the pinned zig on macOS needs DWARF off
+
+Found by cgo Phase 2's exit gate (DESIGN-cgo-phase2-pinvoke §11.22), on both macOS RIDs, run 43207288962. It is go
+and the C toolchain, before go2cs is involved:
+
+- `go build` of a cgo PROGRAM links externally. On darwin go's linker then runs Apple's `strip -S` on the result,
+  unless DWARF is off.
+- With the pinned zig 0.17.0 as CC, `strip` refuses the binary: `fatal error: the __LLVM segment too small (less than
+  sizeof(struct xar_header))`.
+- `go build -ldflags=-w` builds and runs. The gate builds go's side that way on darwin.
+- `go list`, which is all a conversion runs, is unaffected: the gate program converted on both RIDs at the same
+  runs.
+
+So the pinned zig is sound as the conversion's compiler on macOS, and a user who also builds the Go program with it
+there needs `-ldflags=-w`. Not measured: Apple's own clang as CC, and other zig releases.
+
+— H (2026-11-12)
