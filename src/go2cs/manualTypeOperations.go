@@ -1259,18 +1259,18 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// word through unsafe: a fabricated eface for an interface T, a `*(*T)(v.ptr)` read for a concrete one.
 		// Neither can be honored in managed storage, and the eface read panicked on every json/asn1/gob/xml
 		// marshal path at Go 1.26. The hand-own answers Go's definition from the managed value.
-		"TypeAssert":      goosAny,
-		"Value.Bool":      goosAny,
-		"Value.Int":       goosAny,
-		"Value.Uint":      goosAny,
-		"Value.Float":     goosAny,
-		"Value.Complex":   goosAny,
-		"Value.String":    goosAny,
-		"Value.IsNil":     goosAny,
-		"Value.Len":       goosAny,
-		"Value.Index":     goosAny,
-		"Value.Elem":      goosAny,
-		"Value.Bytes":     goosAny,
+		"TypeAssert":    goosAny,
+		"Value.Bool":    goosAny,
+		"Value.Int":     goosAny,
+		"Value.Uint":    goosAny,
+		"Value.Float":   goosAny,
+		"Value.Complex": goosAny,
+		"Value.String":  goosAny,
+		"Value.IsNil":   goosAny,
+		"Value.Len":     goosAny,
+		"Value.Index":   goosAny,
+		"Value.Elem":    goosAny,
+		"Value.Bytes":   goosAny,
 		// Two defects in ONE auto body, which is why it is here: the `v.ptr` data-word read below
 		// AND the `Reinterpret<abi.Type, sliceType>` descriptor prefix-downcast. A hand-own needs
 		// neither — a slice's elements and a map's entries are ordinary managed containers at this

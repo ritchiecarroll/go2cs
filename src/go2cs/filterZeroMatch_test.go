@@ -275,7 +275,6 @@ func TestAnUnchangedJSONFileOtherThanTheRecordKeepsItsTime(t *testing.T) {
 	}
 }
 
-
 // THE RUN ACTION'S FILTER. `-test-filter` was honoured by `compare` and SILENTLY IGNORED by
 // `run`: the run action built its own argv of `--json -timeout` and never passed `--run`, so a
 // caller asking for a gated single-test run got the WHOLE package and no diagnostic said

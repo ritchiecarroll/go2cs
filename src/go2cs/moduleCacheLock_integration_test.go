@@ -6,7 +6,6 @@
 // version 3 only, which can be found in the LICENSE file.
 // Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
-
 package main
 
 import (

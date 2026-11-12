@@ -24,6 +24,7 @@ import (
 //   - instantiatedParamType answers the type go/types inferred for that parameter;
 //   - an EXPLICIT instantiation's signature is already instantiated, so its parameter is NOT a type
 //     parameter and the rule never fires (its emitted type arguments already bind the nil).
+//
 // A variadic tail and a non-generic nil complete the positive and negative sides.
 const typeParamNilFixture = `package tpnil
 

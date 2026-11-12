@@ -92,7 +92,7 @@ func main() {
 	for _, want := range []string{
 		`slice<slice<nint>>([[1, 2]])`,
 		`slice<slice<@string>>([["x"]])`, // a `string` element takes the plain literal (hoistedLiteralOperations.go)
-		`slice<any>([flatˢ, (nint)3])`, // a healthy slug's any element takes the pre-boxed field (seat #51)
+		`slice<any>([flatˢ, (nint)3])`,   // a healthy slug's any element takes the pre-boxed field (seat #51)
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("control: want %q unchanged:\n%s", want, mainCs)

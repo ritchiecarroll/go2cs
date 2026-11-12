@@ -268,7 +268,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 			}
 
 			if !handled {
-				v.showWarning("%s", "@visitSelectStmt - unexpected Stmt type \"" + v.getPrintedNode(comClause.Comm) + "\" encountered in SelectStmt")
+				v.showWarning("%s", "@visitSelectStmt - unexpected Stmt type \""+v.getPrintedNode(comClause.Comm)+"\" encountered in SelectStmt")
 			}
 		}
 	}

@@ -697,29 +697,29 @@ type testSource struct {
 }
 
 type testManifest struct {
-	SchemaVersion           int               `json:"schemaVersion"`
-	CapabilitiesVersion     int               `json:"capabilitiesVersion"`
-	PackageImportPath       string            `json:"packageImportPath"`
-	ModulePath              string            `json:"modulePath,omitempty"`
-	ProjectName             string            `json:"projectName"`
-	TestProject             string            `json:"testProject"`
-	GoVersion               string            `json:"goVersion"`
-	TargetGOOS              string            `json:"targetGOOS"`
-	TargetGOARCH            string            `json:"targetGOARCH"`
-	SourceRevision          string            `json:"sourceRevision,omitempty"`
-	ConverterRevision       string            `json:"converterRevision"`
-	InputDigest             string            `json:"inputDigest"`
-	TestProjectModel        string            `json:"testProjectModel,omitempty"`
-	ProductionFiles         []string          `json:"productionFiles"`
-	TestSources             []testSource      `json:"testSources"`
-	Fixtures                []string          `json:"fixtures"`
-	FixtureDirectories      []string          `json:"fixtureDirectories"`
+	SchemaVersion       int          `json:"schemaVersion"`
+	CapabilitiesVersion int          `json:"capabilitiesVersion"`
+	PackageImportPath   string       `json:"packageImportPath"`
+	ModulePath          string       `json:"modulePath,omitempty"`
+	ProjectName         string       `json:"projectName"`
+	TestProject         string       `json:"testProject"`
+	GoVersion           string       `json:"goVersion"`
+	TargetGOOS          string       `json:"targetGOOS"`
+	TargetGOARCH        string       `json:"targetGOARCH"`
+	SourceRevision      string       `json:"sourceRevision,omitempty"`
+	ConverterRevision   string       `json:"converterRevision"`
+	InputDigest         string       `json:"inputDigest"`
+	TestProjectModel    string       `json:"testProjectModel,omitempty"`
+	ProductionFiles     []string     `json:"productionFiles"`
+	TestSources         []testSource `json:"testSources"`
+	Fixtures            []string     `json:"fixtures"`
+	FixtureDirectories  []string     `json:"fixtureDirectories"`
 	// Fixture directories staged as a LINK into the real GOROOT directory rather than as file
 	// copies, so the Go toolchain accepts their `internal/…` imports (linkStagedFixtureDirs).
 	// Their files appear in NEITHER Fixtures nor the csproj: the host creates one link each at
 	// sandbox construction. `omitempty` keeps every package that has none byte-identical to what a
 	// converter without this capability wrote.
-	FixtureLinks            []string          `json:"fixtureLinks,omitempty"`
+	FixtureLinks []string `json:"fixtureLinks,omitempty"`
 	// The //go:embed payloads the convert hashed into InputDigest (testEmbedPayloads), so validation in a
 	// process that does not convert hashes the same paths. `omitempty`: a package with none writes the
 	// manifest a converter without this field wrote.
@@ -1359,7 +1359,7 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 		dynamicTypeNames:     packageDynamicTypeNames,
 		hoistedConstOrdinals: packageHoistedConstOrdinals,
 		globalTempVarCounts:  globalTempVarCount,
-		importForces:    packageImportForces,
+		importForces:         packageImportForces,
 		initFuncs:            initFuncCounter,
 	}
 
@@ -7479,7 +7479,7 @@ func executeTestAction(inputPath, outputPath string, options Options) error {
 // host is removed first, and it has to (see removePublishedTestHost).
 //
 // options.testConfig == "Release" takes the OTHER honest seam instead: the template's
-// Debug-conditional default is inside a `Condition="'$(go2csPath)'==''"` guard
+// Debug-conditional default is inside a `Condition="'$(go2csPath)'==”"` guard
 // (test-csproj-template.xml), so passing `-p:go2csPath` explicitly on the command line skips that
 // guard entirely regardless of configuration — the same escape CLAUDE.md documents for a
 // hand-invoked Release build elsewhere. Forward slashes and a trailing slash, matching that
@@ -8315,7 +8315,6 @@ const platformSkipClass = "platform-skip"
 // (coordinator ruling, mailbox 82ec6654c).
 const cgoConfigurationClass = "cgo-configuration"
 
-
 // deferredClass and structuralClass are the TWO labels every allocation-count disclosure resolves
 // into (coordinator ruling 2026-09-05, owner-ratified the same day, mailbox bd08f67c6 / 7c2d7ee44 /
 // 6087c58c7). They exist because `alloc-profile` had come to carry two different claims under one
@@ -8324,17 +8323,17 @@ const cgoConfigurationClass = "cgo-configuration"
 // behavioural property, so such an assertion is never disclosed as CLR-STRUCTURAL merely because it
 // fails today, but it MAY be deferred against a named plan to reach it.
 //
-//   deferred   -- the CLR CAN meet the assertion in principle; the entry names the retirement plan
-//                 that will. One plan may cover MANY entries by MECHANISM FAMILY (a box minted per
-//                 address-take, an element take, an out-parameter, an intermediate buffer in a
-//                 string conversion), so the requirement is met by family rather than by a bespoke
-//                 design per entry. It is a COMMITMENT, not an excuse: the owner's strengthening
-//                 makes the plan a hard requirement, and a plan whose design record is retired
-//                 without a replacement fails the row at its next sweep exactly as a regression
-//                 would.
-//   structural -- the entry carries a PROOF, stated in its reason, that no managed implementation
-//                 can meet the assertion, with the object Go keeps off the heap NAMED. Expected to
-//                 be rare, and each one is a claim the next reader may falsify.
+//	deferred   -- the CLR CAN meet the assertion in principle; the entry names the retirement plan
+//	              that will. One plan may cover MANY entries by MECHANISM FAMILY (a box minted per
+//	              address-take, an element take, an out-parameter, an intermediate buffer in a
+//	              string conversion), so the requirement is met by family rather than by a bespoke
+//	              design per entry. It is a COMMITMENT, not an excuse: the owner's strengthening
+//	              makes the plan a hard requirement, and a plan whose design record is retired
+//	              without a replacement fails the row at its next sweep exactly as a regression
+//	              would.
+//	structural -- the entry carries a PROOF, stated in its reason, that no managed implementation
+//	              can meet the assertion, with the object Go keeps off the heap NAMED. Expected to
+//	              be rare, and each one is a claim the next reader may falsify.
 //
 // The bare `alloc-profile` label is LEGACY and retires per row as rows re-sweep; it is still
 // accepted here so a row that has not re-swept keeps comparing, and its entries re-classify at
@@ -9130,7 +9129,6 @@ func signatureMismatchDetail(name, verb string, disclosure testDisclosure, csOut
 	return fmt.Sprintf("%s carries every half of the disclosed %s entry, but they cannot each be matched in a record of their own: %s",
 		verb, disclosure.classLabel(), disclosure.signatureLabel())
 }
-
 
 // leadingInteger reads the integer a disclosure's `want` leads with ("0 allocations" -> 0), which is
 // what a floor is compared against. Deliberately strict: it does not hunt for a number anywhere in

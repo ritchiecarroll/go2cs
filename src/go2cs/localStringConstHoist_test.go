@@ -116,7 +116,7 @@ func TestLocalStringConstHoistsUnderItsOwnName(t *testing.T) {
 		"internal static @string atoi(":         "@string fnAtoi = fnAtoiᶜ;",
 		"internal static @string twice(":        "@string fnAtoi = fnAtoiᶜ1;",
 		"internal static @string makeGreeting(": "@string hello = helloᶜ;",
-		"internal static nint empty(":           "@string e = \"\"u8;", // empty: not hoisted
+		"internal static nint empty(":           "@string e = \"\"u8;",           // empty: not hoisted
 		"internal static void init(":            "@string once = \"init-only\";", // init claims no field: the hybrid's plain local
 	} {
 		if body := liftFunctionBody(t, emitted, decl); !strings.Contains(body, want) {
