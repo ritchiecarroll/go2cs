@@ -235,8 +235,8 @@ func TestEveryFileOfAReferenceModelTestProjectBindsByAlias(t *testing.T) {
 	dir := t.TempDir()
 
 	writeModuleFiles(t, dir, map[string]string{
-		"go.mod":    "module example/aliasvariant\n\ngo 1.23\n",
-		"lib.go":    "package aliasvariant\n\nvar Unsafe = \"unsafe\"\n\nfunc Name() string { return Unsafe }\n",
+		"go.mod": "module example/aliasvariant\n\ngo 1.23\n",
+		"lib.go": "package aliasvariant\n\nvar Unsafe = \"unsafe\"\n\nfunc Name() string { return Unsafe }\n",
 		"inner_test.go": "package aliasvariant\n\n" +
 			"func innerProbe(done chan string) {\n\tgo func() { done <- Unsafe }()\n}\n\n" +
 			"func innerLauncher(done chan string) func() {\n\treturn func() { go func() { done <- Unsafe }() }\n}\n",

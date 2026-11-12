@@ -173,7 +173,6 @@ func TestTestLocalTypeShadowRootsForcingHook(t *testing.T) {
 	options.testInlineTypeAccess = true
 	options.testProductionPath = "example/shad"
 
-
 	if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", productionSeed{}, options); err != nil {
 		t.Fatal(err)
 	}

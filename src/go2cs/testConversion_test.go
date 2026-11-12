@@ -483,8 +483,6 @@ func TestPlatformSkipDisclosureOracle(t *testing.T) {
 	}
 }
 
-
-
 // The FLOOR's guards (ruling 2026-09-05). A floor lets one entry carry a structural part and a
 // deferrable excess at once, so its arms test the pairings that would let either half hide: a floor
 // on the label that claims nothing is reducible, a floor with no falsifiable sketch, a floor that
@@ -5282,7 +5280,6 @@ func TestFunctionLocalTypesShareOneAccessibility(t *testing.T) {
 	// that writes accessibility inline, and therefore the one this rule lives in.
 	options.testClassNameOverride = getSanitizedImport("localaccess_internal_test" + PackageSuffix)
 	options.testInlineTypeAccess = true
-
 
 	if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", productionSeed{}, options); err != nil {
 		t.Fatal(err)

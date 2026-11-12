@@ -209,7 +209,6 @@ func TestWhiteboxProductionNumericConvNotRecorded(t *testing.T) {
 	options.testInlineTypeAccess = true
 	options.testProductionPath = "example/wbnum"
 
-
 	if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", productionSeed{}, options); err != nil {
 		t.Fatal(err)
 	}
@@ -240,6 +239,7 @@ func TestWhiteboxProductionNumericConvNotRecorded(t *testing.T) {
 		t.Errorf("a numeric pair with a TEST-LOCAL operand must still record (it relocates there); got %v", numericConversions)
 	}
 }
+
 // TestPointerBoxConversionRecordShape pins the ONE definition of the pointer-boxing route both
 // conversionRecordHasLocalOperand and recordsRequireProductionMutation read. The `global::` trim is
 // load-bearing: a whitebox-production operand renders class-qualified while the box wraps that same
@@ -318,7 +318,6 @@ func TestWhiteboxArgumentOfItsParameterTypeRecordsNoBox(t *testing.T) {
 	options.testWhiteboxReference = true
 	options.testInlineTypeAccess = true
 	options.testProductionPath = "example/wbbox"
-
 
 	if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", productionSeed{}, options); err != nil {
 		t.Fatal(err)

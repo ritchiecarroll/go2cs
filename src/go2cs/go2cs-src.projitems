@@ -371,6 +371,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsFragmentLinks_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsSamplesHoldTheirLines_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\certContextReachGuard_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\converterGofmt_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\coreReferencesResolve_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\darwinLinknamePulls_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\elidedConstraints_test.go" />
@@ -799,6 +800,7 @@
     <None Include="$(MSBuildThisFileDirectory)warningClearEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)warningEntries.go" />
     <None Include="$(MSBuildThisFileDirectory)warningEntries_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)warningEntriesFixedPoint_test.go" />
     <None Include="$(MSBuildThisFileDirectory)warnOption.go" />
     <None Include="$(MSBuildThisFileDirectory)warnOption_test.go" />
     <None Include="$(MSBuildThisFileDirectory)writeOperations.go" />

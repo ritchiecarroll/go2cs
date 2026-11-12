@@ -1,0 +1,1 @@
+flag,fmt,go/ast,go/build,go/build/constraint,go/constant,go/doc,go/doc/comment,go/format,go/importer,go/internal/gccgoimporter,go/internal/gcimporter,go/internal/srcimporter,go/parser,go/printer,go/scanner,go/token,go/types,go/version,hash

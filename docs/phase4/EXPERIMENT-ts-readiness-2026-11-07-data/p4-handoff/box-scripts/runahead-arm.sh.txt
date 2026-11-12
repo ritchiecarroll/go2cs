@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# runahead.sh <label> : apply diagpatch_runahead.py to arm B's converted tree, rebuild cmd/checkdemo (pinned), run it on
+# check.ts + good.ts through the apphost, and compare with native. DIAGNOSTIC (the owner's type-check run-ahead).
+R=/h/go2cs-ts-exp; T=${ARM_TAG:-diag-f0ccd9de0d-local-tags-safe-noasm}; OUT=$R/out/$T; I=$OUT/src/github.com/microsoft/TypeScript/tsc/internal
+lab="$1"; source $R/scripts/env.sh
+python -I $R/scratch/proof/diagpatch_c45_xxh3.py "$(cygpath -w $OUT/pkg/github.com/zeebo/xxh3)" && python -I $R/scratch/proof/diagpatch_runahead.py "$(cygpath -w $I)"; prc=$?
+[ $prc -eq 0 ] || { echo "patch rc=$prc"; exit 1; }
+echo "$(date '+%Y-%m-%d %H:%M') DIAGNOSTIC run-ahead patches (not a gate result): $lab" >> $R/logs/$T.txt
+s=$(date +%s)
+bash $R/scripts/aff.sh "$R/logs/$T-$lab.build.txt" dotnet build "$(cygpath -w $OUT/src/github.com/microsoft/TypeScript/tsc/cmd/checkdemo/checkdemo.csproj)" -c Release -m:6 -p:UseSharedCompilation=false -nodeReuse:false -v:m -clp:Summary
+brc=$?; echo "$lab build rc=$brc t=$(( $(date +%s)-s ))s"
+[ $brc -eq 0 ] || { grep -E 'error [A-Z]+[0-9]+' "$R/logs/$T-$lab.build.txt" | sort -u | head -5 | cut -c1-300; exit 1; }
+C=$R/$(cd $R && find out/$T/.artifacts/bin -path '*Release*' -name checkdemo.exe | head -1)
+cd $R/scratch/proof/samples
+timeout 1800 "$C" check.ts good.ts > /tmp/$lab.txt 2>/tmp/$lab.err; rrc=$?
+echo "$lab run rc=$rrc bytes=$(wc -c < /tmp/$lab.txt) (native 318)"
+cmp /tmp/cd.go.txt /tmp/$lab.txt && echo "$lab MATCHES NATIVE"
+head -c 3500 /tmp/$lab.err

@@ -181,8 +181,6 @@ func (v *Visitor) planDeferFinallyLowering(funcDecl *ast.FuncDecl) {
 		}
 	}
 
-
-
 	v.loweredDefers = make([]*loweredDefer, 0, len(lowerable))
 	v.loweredDeferIndex = make(map[*ast.DeferStmt]int, len(lowerable))
 
@@ -596,7 +594,6 @@ func provablyBeforeInCases(body *ast.BlockStmt, deferStmt *ast.DeferStmt) []ast.
 
 	return nil
 }
-
 
 // reRootOnEntryBox re-roots a lowered call on the receiver's BOX when the receiver is reached
 // through an entry deref alias.

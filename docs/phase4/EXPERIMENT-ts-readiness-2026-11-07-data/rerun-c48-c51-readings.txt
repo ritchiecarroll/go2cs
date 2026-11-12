@@ -1,0 +1,36 @@
+# C48's confirming arm and C51's localization, 2026-11-11, i7. DIAGNOSTIC: NOT a gate result, never pushed as code.
+#
+# ARM C = 2dad0de3b5 = arm B f0ccd9de0d + ONLY P1's converter fix 7c38e4418d (cherry-picked -x; claude/p1-c48-alias-receiver
+# @ 47069bdd0e; 2 files, +8/-2), "-tags safe,noasm, DIAGNOSTIC", the same C45 and C47 runtime patches. One axis vs arm B.
+# (Local commit; in logs/i7-preview-local-commits-2026-11-11.bundle's successor ref refs/i7-preview/c48arm.)
+#   P48-1 MET  cherry-pick clean; convert rc 0, the same 5 refused packages skipped; parsedemo and the checkdemo closure
+#              build with 0 errors.
+#   P48-2 MET  24 of 24 C48 units MATCH native, each alone through the apphost (stdout and rc identical): 00701 02396 02456
+#              02478 02535 02549 02572 03069 03153 04639 04645 04650 05185 05186 05191 05194 05868 06260 06544 08137
+#              08902 09058 09304 09305. (02478 is one of the 24.)
+#   P48-3 MET  guards: the demo 318/318 identical; units 00100 00000 01000 03000 05000 07000 match, 6 of 6.
+#   P48-4 MET  control: the 5 C49 units still differ (0 of 5), as they must; the fix does not touch AreEqual.
+#   Observed, not explained: ast_package 4,084 methods on arm C vs 4,085 on arm B.
+#   Projection (NOT measured): the full pass on this arm, 7,374 + 24 = 7,398 of 7,404.
+#
+# C51, unit 05056 tests/cases/compiler/intersectionConstructorReductionCrash.ts (22,196 bytes), on arm C's build:
+#   Trace (proof-tooling/c51trace/: EventPipe, Microsoft-DotNETCore-SampleProfiler plus Microsoft-Windows-DotNETRuntime
+#   0x18 for JIT and loader names, streamed; read with Microsoft.Diagnostics.Tracing.TraceEvent 3.1.30, scratch only;
+#   process killed at 300 s): on the checking thread (the C46 1 GiB main), after init, 100% of samples under
+#   checker.getBaseTypes -> the hasBaseType closure, median stack depth 39-42 in every window (no growth); leaves:
+#   CastHelpers.IsInstanceOfInterface ~21%, the closure ~15%, FieldRefBox<T>.GoFieldOffsetOf ~35% and
+#   FieldRefBox<T>.Equals ~15% over TypeReference/ObjectType/StructuredType/ConstrainedType/TypeBase/Type,
+#   ManagedPointerTokens.AllocationIdOf and IsNativeRooted ~4%. Go's `target == checkBase` (checker.go:19878) lands in
+#   golib's field-reference-box pointer equality.
+#   Call count (proof-tooling/c51count/): a counter in checker.getBaseTypes.
+#     native  (go build -overlay; the TS source tree untouched; stdout identical to the plain build):
+#             1,552,219,830 calls over the full unit in ~21 s (~74M calls/s).
+#     converted (the same counter in the emitted checker.cs, printed every 2^24 calls; the edit reverted after): a steady
+#             ~674,000 calls/s; run to completion it took 2,115 s (35.3 min; projected ~38) with rc 0 and stdout
+#             BYTE-IDENTICAL to native ("file 05056.txt (22196 bytes)" / "files 83"); the last checkpoint 1,543,503,872
+#             at 2,096.9 s, the next would be 1,560,281,088, so the total brackets native's 1,552,219,830.
+#   => C51 is a PER-CALL CONSTANT FACTOR (~110x), NOT a memoization divergence and NOT a hang; the converted result is
+#      correct. A performance row (P2: field-view equality is quadratic in embed depth), not a correctness row.
+#   Revert: checker.cs restored and touched, the checker rebuilt; the rebuilt dll contains neither the counter field nor
+#   the counter's literal (searched as UTF-8 and UTF-16), with a UTF-8 identifier and a UTF-16 literal known to be in the
+#   binary found as controls.

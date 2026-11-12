@@ -3,5 +3,5 @@
 # derived from the Go source; the comment above it names the GOOS flavours that hold it.
 
 [/main.cs]
-# CS0219: windows
+# CS0219: darwin linux windows
 dotnet_diagnostic.CS0219.severity = none

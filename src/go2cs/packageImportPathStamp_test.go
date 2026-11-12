@@ -55,7 +55,7 @@ func TestConvergeGoPackageStampsReplacesAStalePathAndAddsAMissingOne(t *testing.
 	withPackage(t, "dotted", "example.com/dotted/v2")
 
 	for _, stale := range []string{
-		`[GoPackage("dotted")]`,                                // written before the stamp existed
+		`[GoPackage("dotted")]`, // written before the stamp existed
 		`[GoPackage("dotted", ImportPath = "example/com/dotted")]`, // a stale path from an older rule
 	} {
 		lines := []string{"namespace go.example.com;", "", stale, "public static partial class dotted_package", "{", "}"}

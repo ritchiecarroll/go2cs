@@ -148,7 +148,6 @@ func convertCrossAssemblyVariant(t *testing.T, pkg *packages.Package, candidate 
 
 	seed := productionSeed{dynamicTypeNames: map[string]string{crossAssemblyUnwrapSignature: candidate}}
 
-
 	if _, _, err := convertTestVariant(pkg, testFileEntries(pkg), outputPath, "go", seed, options); err != nil {
 		t.Fatalf("convertTestVariant: %v", err)
 	}

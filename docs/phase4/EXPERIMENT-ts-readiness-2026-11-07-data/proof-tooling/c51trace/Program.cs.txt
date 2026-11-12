@@ -1,0 +1,55 @@
+// c51trace analyze <trace.nettrace> <window seconds, comma-separated, e.g. 30,120,600> [top N]
+// Reads an EventPipe trace taken with the sample profiler plus the runtime's JIT method-load events (names resolve
+// even when the process was killed, without rundown), and for each time window prints the top LEAF frames and the top
+// INCLUSIVE frames of the main thread's samples. Scratch only (C51 localization); never part of the product.
+using Microsoft.Diagnostics.Tracing;
+using Microsoft.Diagnostics.Tracing.Etlx;
+using Microsoft.Diagnostics.Tracing.Parsers.Clr;
+
+string path = args[0];
+double[] edges = args[1].Split(',').Select(double.Parse).ToArray();
+int top = args.Length > 2 ? int.Parse(args[2]) : 15;
+
+// The process is killed at the time limit, so the streamed trace ends mid-block: read everything before the cut.
+string etlx = TraceLog.CreateFromEventPipeDataFile(path, null, new TraceLogOptions { ContinueOnError = true });
+using var log = new TraceLog(etlx);
+var samples = new List<(double t, int thread, string[] frames)>();
+foreach (TraceEvent e in log.Events)
+{
+    if (e.ProviderName != "Microsoft-DotNETCore-SampleProfiler" || e.EventName != "Thread/Sample") continue;
+    TraceCallStack? cs = e.CallStack();
+    var frames = new List<string>();
+    for (TraceCallStack? s = cs; s != null; s = s.Caller)
+    {
+        string m = s.CodeAddress.FullMethodName;
+        frames.Add(string.IsNullOrEmpty(m) ? $"?{s.CodeAddress.Address:x}" : m);
+    }
+    if (frames.Count > 0) samples.Add((e.TimeStampRelativeMSec / 1000.0, e.ThreadID, frames.ToArray()));
+}
+Console.WriteLine($"{samples.Count} samples, {samples.Select(s => s.thread).Distinct().Count()} threads, " +
+                  $"span {(samples.Count > 0 ? samples.Max(s => s.t) : 0):F1} s");
+// The checking thread is NOT the busiest by sample count: under C46 the converted main runs on its own 1 GiB thread
+// while the process's first thread waits in MainThread.Run. Pick the thread whose samples carry the most go.* frames.
+foreach (var g in samples.GroupBy(s => s.thread).OrderByDescending(g => g.Count()))
+    Console.WriteLine($"  thread {g.Key}: {g.Count()} samples, median depth {g.Select(s => s.frames.Length).OrderBy(x => x).ElementAt(g.Count() / 2)}, " +
+                      $"go frames per sample {g.Average(s => s.frames.Count(f => f.StartsWith("go."))):F1}");
+int main = samples.GroupBy(s => s.thread).OrderByDescending(g => g.Average(s => s.frames.Count(f => f.StartsWith("go.")))).First().Key;
+double lo = 0;
+foreach (double hi in edges.Append(double.MaxValue))
+{
+    var w = samples.Where(s => s.thread == main && s.t >= lo && s.t < hi).ToList();
+    if (w.Count == 0) { lo = hi; continue; }
+    Console.WriteLine($"\n== window {lo:F0}-{(hi == double.MaxValue ? "end" : hi.ToString("F0"))} s: {w.Count} samples on thread {main}");
+    Console.WriteLine("  LEAF:");
+    foreach (var g in w.GroupBy(s => s.frames[0]).OrderByDescending(g => g.Count()).Take(top))
+        Console.WriteLine($"    {100.0 * g.Count() / w.Count,5:F1}%  {g.Key}");
+    Console.WriteLine("  INCLUSIVE (go.* frames):");
+    var incl = new Dictionary<string, int>();
+    foreach (var s in w)
+        foreach (string f in s.frames.Where(f => f.StartsWith("go.")).Distinct())
+            incl[f] = incl.GetValueOrDefault(f) + 1;
+    foreach (var kv in incl.OrderByDescending(kv => kv.Value).Take(top))
+        Console.WriteLine($"    {100.0 * kv.Value / w.Count,5:F1}%  {kv.Key}");
+    Console.WriteLine($"  max stack depth {w.Max(s => s.frames.Length)}, median {w.Select(s => s.frames.Length).OrderBy(x => x).ElementAt(w.Count / 2)}");
+    lo = hi;
+}

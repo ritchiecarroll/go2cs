@@ -62,7 +62,6 @@ func TestAnInternalTestLocalInterfaceCarriesItsLocalNameStamp(t *testing.T) {
 	options.testInlineTypeAccess = true
 	options.testProductionPath = "example/lif"
 
-
 	if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", productionSeed{}, options); err != nil {
 		t.Fatal(err)
 	}
