@@ -75,7 +75,9 @@ func convertAliasReceiverFixture(t *testing.T, fixture aliasReceiverFixture, nam
 		t.Fatalf("read the fixture: %v", err)
 	}
 
-	source := string(data)
+	// A checkout that converts line endings hands the fixture over with CRLF; the declaration patterns
+	// are written against LF.
+	source := strings.ReplaceAll(string(data), "\r\n", "\n")
 
 	if named {
 		if got := len(fixture.decls.FindAllString(source, -1)); got != fixture.declCount {
