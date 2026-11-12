@@ -563,3 +563,131 @@ that type's name in an expression position, and C# binds the method group (CS891
 - Open in the generators: `GoMethodHosts` reads a type's holders from the type's own assembly. A holder a
   `_test.go` file declares for a production type is in the test assembly. The `-tests` run of this cut
   measures it.
+
+## Amendment 2026-11-12 (fourth) — the first footprint scored, seven defects of the cut, eight more line kinds
+
+> Appended, not rewritten. Written after the linux/amd64 footprint of the cut at `c07e0b7671` and the full
+> behavioral runner at that commit, and BEFORE the footprint of the fixed cut is run. The fixes and the merge
+> of master `06610aaa65` (batch 286) are local commits on `claude/p1-oq2-method-holder`.
+
+### 25. The first footprint, linux/amd64, scored (cut `c07e0b7671` against master `742a3dbb24`)
+
+Two seeded `-stdlib` reconverts, one per converter, both seeded from the cut tree, both exit 0. 965 converted
+`.cs`, 19 `.cs.auto` and 251 `package_info.cs` differ: 1,235 files.
+
+| | predicted | measured | score |
+|---|---|---|---|
+| converted files + `package_info.cs` | 952 + 253 | 984 + 251 | MISSED, 30 more files |
+| switch lines | 6,000 | 6,048 | MISSED, 48 more |
+| `using static` lines | 848 | 843 | MET in attribution |
+| files with the self-alias (renamed) | 46 (4) | 47 (4) | MISSED by 1 |
+| holder declarations | 1,993 | 1,975 | MISSED, 18 fewer |
+| method expressions that name a holder | 81 | 81 | MET |
+| g, `builtin.` removed | at most 1,034 | 1,028 | MET |
+| h, import alias restored | 115 in 32 files | 79 in 27 | MISSED, low; re-read in section 28 |
+| j, cast removed | 3 | 3 | MET |
+| references through the alias | 249 | 189 | MISSED, low; re-read in section 28 |
+| fallbacks | 11 | 12 | the falsifier FIRED (section 26, C2) |
+| `Δsliceᴛ` becomes `Δslice` (section 22) | | | MET |
+
+- The 30 extra files hold only named kinds, mostly a consumer's spelling of a foreign type that lost its `Δ`.
+- `using static`: the census read 9 files the corpus does not convert under its tags or owns by hand (5 of
+  `testing`) and missed 4 it converts.
+- Every changed line was attributed to a kind; 24 lines were read by eye.
+
+### 26. Seven defects of the cut (none is in master), each fixed red-first
+
+The full behavioral runner ran at `c07e0b7671` AFTER that commit was pushed. A seat that moves generated
+members owes the runner before its first push; here it came second. It read 943 projects: 21 did not
+compile, and no project that compiled printed anything other than Go's output.
+
+| class | where | what was wrong | projects |
+|---|---|---|---|
+| C1 | converter | inside a holder, a package TYPE named like a direct child namespace of the package's namespace, or like a non-generic golib root type, binds that namespace or type (CS0118) | 1 |
+| C2 | converter | the holder state was not cleared when its method ended, so a later package-level declaration was qualified as if it stood in that holder | 0; found by section 25's fallback falsifier in `flag/flag.go` |
+| C3 | converter | a defined type over the empty interface is a `global using` in its package; a file that reaches it only through another package's alias spelled it as a member of the package class (CS0426) | 1 |
+| G1 | `ImplementGenerator`, value adapter | called a wrapped type's method on the package class | 10 |
+| G2 | `ImplementGenerator`, value embed hop | named a foreign embed's package class for a promoted method | 2 |
+| G3 | `RecvGenerator` | the twin it writes into a holder could not bind a type another generator declares in the package class (CS0246) | 1 |
+| G4 | `BoundedGoroutineInterceptorGenerator` | its name lookup read one class and missed methods of other holders (GO2CS0010) | 1 |
+
+- The fixes: the holder state ends with its method (C2); a type the namespace hides is written through the
+  package class inside a holder, decided from the names in view, never from a compile error (C1); the type
+  takes its target's spelling where no alias of it is loaded (C3; master covered only the form that
+  collided with a method, through the rename section 22 retired); the four generator readers ask
+  `GoMethodHosts` for the class that holds the method.
+- C1 applies only where the package's own namespace has such a child. A behavioral project is in the root
+  namespace `go`, where every top-level package is a child namespace; a package under a dotted module path
+  is not. A read of `std`'s Go source (every non-test file, every build tag) finds no package type named
+  like a child namespace of its package's namespace and none named like a golib root type, so the fix is
+  predicted to change no line of `src/core`.
+- Of the other five projects, four failed only because a consumer was converted before its dependency
+  (section 30), and `FuncValueMethodClash` waits on the `src/core` regen (section 24).
+- After the fixes 20 of the 21 convert, build and print Go's output.
+
+### 27. Line kinds n to u: what the first footprint held that no section named
+
+Counts are linux/amd64 at `c07e0b7671`.
+
+| kind | what changes | count |
+|---|---|---|
+| n | the closing `} // end <class>` names the holder where a file ends inside one | 413 files |
+| o | in `package_info.cs`, a list sorted by name reorders once a name has no `Δ` | 217 lines change position in 57 files |
+| p | in `package_info.cs`, a name that would equal a .NET type in view without its `Δ` is written through its package class | 38 sites in 6 files |
+| q | where master spelled a foreign renamed type by its exported alias (`abiꓸName`), the package's own Go alias of that type is written (`name`) | 13 sites |
+| r | a foreign method expression names the holder from the global namespace (`global::go.net.httpᴛRequest.Write`) | 2 sites |
+| s | the rename's exports go: `GoTypeAlias` records and `global using pkgꓸName` lines | 167 and 188 lines |
+| t | a `GoBoundedGoroutine` record carries the moved line number of its `go` statement | 1 line |
+| u | the comment column of a declaration block moves when a name in it loses its `Δ` | 40 lines in 17 files |
+
+- **Named in sections 17, 18 and 22 without a count, now counted**: the `GoPositionMap` records of files
+  whose lines move (798 re-encoded in 234 files, 35 added, 35 removed); the per-type .NET alias lines (28
+  added and 20 replacing a using, in 20 files); the `<MethodHolders>` section (1,975 declarations and 1,694
+  other lines in 242 files); a lifted type's lines standing ahead of its method's switch line (44 lines in
+  13 files); one hoisted literal field per class (569 lines added and 1 removed, in 90 files); a consumer's
+  spelling of a foreign type that lost its `Δ` (`timeꓸMonth` becomes `time.Month`: 2,555 lines in 202
+  files).
+- One line fits no kind and is correct: in `go/types/format.go` a hoisted literal changes its field type,
+  because the class that now holds it uses it only as an interface value.
+- The comment "Fully qualified to avoid alias shadowing…" in `hash/maphash/maphash_purego.cs` is gone, as
+  section 20 expected.
+
+### 28. The two low counts, read again on the same two arms (no reconvert)
+
+- **h, 79 of 115.** The classifier's miss, not the cut's and not the census's. Where master wrote an import
+  through its package class by a DOTTED path (`text.template_package.HTMLEscape`), the classifier filed the
+  change under the consumer side of kind a. Counted as h, the arm reads 116 sites in 32 files against 115
+  in 32. Five files differ by one or two in either direction; one of them is `maphash_purego.cs`, the file
+  outside the census's load. Scored against the original prediction: MISSED as posted (79), MET within one
+  as re-read.
+- **References through the alias, 189 of 249.** 63 of the census's sites stand in methods the corpus
+  implements by hand (`reflect` `value.go` 59, `map.go` 4). The converter writes a placeholder for such a
+  method, so the site is not emitted. They belong to the hand-owned leg, which section 14 named as the arm
+  most likely to miss. Every other file agrees with the census, file for file. Scored against the original
+  prediction: MISSED; the census counted Go source and not what the converter emits.
+- **C2's reach in `std`**, by a text read of the cut arm: one line, `flag.go`'s `Usage`. The stale state
+  could reach any package-level declaration that follows a method; no kept `builtin.` or import
+  qualification was found in such a declaration.
+
+### 29. Predictions for the fixed cut
+
+- **linux/amd64 again, on merged master `06610aaa65`**: h 116; references through the alias 189; fallbacks
+  11; g 1,028; `using static` 843; switch lines 6,048; holder declarations 1,975; 1,235 files. Kinds n to u
+  keep their counts. **Falsifier**: a count that moves by more than the one `flag.go` line, or a line of no
+  named kind.
+- **windows/amd64, darwin/amd64, linux/arm64**, one run each, in that order: each count is the fixed
+  linux/amd64 count plus the difference between that target's census row and linux/amd64's (sections 11,
+  18, 20). The census differs only by target-specific files: files with a holder 848 | 838 | 854 | 847,
+  methods 10,284 | 10,287 | 10,297 | 10,296, method expressions 81 on each, g sites 1,097 | 1,106 | 1,098 |
+  1,097, h and j equal on each. The numbers are written into this record before each run. **Falsifier**: a
+  kind outside a to u, or a changed line in a file common to two targets that differs between them.
+
+### 30. Procedure: a golden re-baseline across a rename converts dependencies first
+
+A converted package records the names it exports (`GoTypeAlias`, `global using`) in its own output, and a
+consumer reads them from the dependency's emitted files. A consumer converted BEFORE its dependency reads
+the dependency's old records and keeps a name that no longer exists (CS0426 on `CrossPkgBox`). Any
+re-baseline across a change to exported names therefore converts each dependency before its consumers,
+or runs the whole set twice. Depth of directory is not the order: two sibling packages can depend on each
+other's output (`RenamedTypeAliasReexport`). Four behavioral projects failed the first runner for this
+reason alone and built clean in dependency order.
