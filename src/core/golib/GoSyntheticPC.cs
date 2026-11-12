@@ -196,6 +196,12 @@ public static class GoSyntheticPC
         // inside a segment, a major-version directory, or a name that differs from its directory
         // (GoPackageAttribute.ImportPath). The converter stamps each test variant with the path Go
         // gives it, so neither suffix rule below applies to a stamped class.
+        //
+        // A method is declared in the holder of its receiver type, a class beside the package class
+        // ([GoMethodHost]); Go names it by the type's package, so the holder is read through first.
+        if (owner.DeclaringType is null)
+            owner = GoMethodHostAttribute.PackageClassOf(owner);
+
         if (GoReflect.GoPackageImportPathOf(owner) is { } verbatim)
             return $"{verbatim}.{name}";
 

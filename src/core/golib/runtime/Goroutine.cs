@@ -418,8 +418,9 @@ public sealed class Goroutine
         // The forwarders of a runtime struct's same-package promoted methods are on `go.runtimeᴛ<Struct>ᴛpkg` from
         // 1.26.10.4, and Go names such a wrapper `runtime.*` too. The forwarder is the start function of `go s.M()`
         // for a promoted M, and the creator the walk finds when the JIT inlines a promoted method that holds a `go`
-        // into it. Read by the name's form, as the line above is.
-        return RuntimePanicCheck.IsPromotedMethodClassOf(name, "go.runtime");
+        // into it. A method of a runtime type is on the type's holder `go.runtimeᴛ<Type>`, and `go t.M()` starts
+        // there. Both are read by the name's form, as the line above is.
+        return RuntimePanicCheck.IsMethodClassOf(name, "go.runtime");
     }
 
     // Running until a park-accounting scope says otherwise — DERIVED, never stored, so it cannot

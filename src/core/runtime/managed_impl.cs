@@ -2158,10 +2158,8 @@ partial class runtime_package
         if (start <= 0 || record.StatementItems(start, end) is not { Count: > 0 } items)
             return null;
 
-        Type? packageClass = lambda.DeclaringType;
-
-        while (packageClass is not null && !packageClass.Name.EndsWith("_package", StringComparison.Ordinal))
-            packageClass = packageClass.DeclaringType;
+        // The class the outer function is declared in: a method's lambdas are nested in its holder.
+        Type? packageClass = goTopLevelClassOf(lambda.DeclaringType);
 
         if (packageClass is null)
             return null;
@@ -2355,22 +2353,38 @@ partial class runtime_package
         if (outer != "Main")
             return outer;
 
-        Type? packageClass = literal.DeclaringType;
-
-        while (packageClass is not null && !packageClass.Name.EndsWith("_package", StringComparison.Ordinal))
-            packageClass = packageClass.DeclaringType;
+        Type? packageClass = goTopLevelClassOf(literal.DeclaringType);
 
         const System.Reflection.BindingFlags anyStatic = System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.DeclaredOnly;
 
         return packageClass?.GetMethod("Main", anyStatic, Type.EmptyTypes) is { } main ? goFunctionName(main) : outer;
     }
 
+    // The top-level class a converted Go declaration stands under: its package class, or for a method and
+    // the function literals inside one the holder of the method's receiver type ([GoMethodHost], the class
+    // `<pkg>ᴛ<Type>` beside the package class). Null outside converted Go code (golib, the BCL).
+    private static Type? goTopLevelClassOf(Type? declaring)
+    {
+        while (declaring?.DeclaringType is not null)
+            declaring = declaring.DeclaringType;
+
+        return declaring is not null && (declaring.Name.EndsWith("_package", StringComparison.Ordinal) || GoMethodHostAttribute.IsHost(declaring)) ? declaring : null;
+    }
+
+    // The package class a converted Go declaration belongs to: goTopLevelClassOf, read through a method
+    // holder to the package class of its receiver type. Go names a method by that package.
+    private static Type? goPackageClassOf(Type? declaring) =>
+        goTopLevelClassOf(declaring) is Type topLevel ? GoMethodHostAttribute.PackageClassOf(topLevel) : null;
+
     // The Go import path of a converted Go type's package -- the package class itself, a struct or
-    // interface nested in it, or a function literal's display class -- or null for a type outside any
-    // Go package class (golib, the BCL).
+    // interface nested in it, a function literal's display class, or a type's method holder -- or null for
+    // a type outside any Go package class (golib, the BCL).
     private static string? goImportPathOf(Type declaring)
     {
-        string typeName = declaring.FullName ?? declaring.Name;
+        // A closure class is nested in the class of its function, and a method's class is the holder of
+        // its receiver type, so the package class is found by walking out and reading through a holder.
+        Type? packageClass = goPackageClassOf(declaring);
+        string typeName = (packageClass ?? declaring).FullName ?? declaring.Name;
 
         // LastIndexOf, not IndexOf: a Go package whose own name ends in `_package` would produce
         // `go.x_package_package`, and the FIRST match would truncate the import path.
@@ -2386,13 +2400,7 @@ partial class runtime_package
         // which the converter stamps exactly where the line above cannot reproduce it: a '.' inside a
         // segment (`example.com/x`), a major-version directory, a name that differs from its directory.
         // The stamp is final, test variants included (each is stamped with the path Go gives it), so
-        // the internal-test suffix rule below does not apply to it. The frame may be a closure class
-        // nested in the package class, so the class is found by walking out to the `_package` level.
-        Type? packageClass = declaring;
-
-        while (packageClass is not null && !packageClass.Name.EndsWith("_package", StringComparison.Ordinal))
-            packageClass = packageClass.DeclaringType;
-
+        // the internal-test suffix rule below does not apply to it.
         bool stamped = go.GoReflect.GoPackageImportPathOf(packageClass) is { } verbatim && (importPath = verbatim) is not null;
 
         // An INTERNAL test file (`package slog`, in logger_test.go) is compiled INTO the package
@@ -4486,7 +4494,8 @@ partial class runtime_package
         if (ns is null || (ns != "go" && !ns.StartsWith("go.", StringComparison.Ordinal)))
             return false;
 
-        if (!topLevel.Name.EndsWith("_package", StringComparison.Ordinal))
+        // A method's frame is declared in the holder of its receiver type, beside the package class.
+        if (!topLevel.Name.EndsWith("_package", StringComparison.Ordinal) && !GoMethodHostAttribute.IsHost(topLevel))
             return false;
 
         // A go/defer THUNK is elided as a wrapper is: Go's deferwrap/gowrap closure (isRecordedThunk).

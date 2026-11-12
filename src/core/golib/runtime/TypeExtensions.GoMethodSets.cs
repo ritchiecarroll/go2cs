@@ -239,6 +239,10 @@ public static partial class TypeExtensions
     // net's `w.(buffersWriter)` over a `*TCPConn` that promotes `writeBuffers` from its embedded `conn`
     // must hold (behavioral UnexportedIfaceDynamicAssert took the per-chunk fallback while this method
     // read the forwarder's own class). The class is found by its attribute, never by its name.
+    //
+    // A method a type DECLARES is in the type's method holder (`<pkg>ᴛ<Type>`, marked [GoMethodHost(typeof(Type))])
+    // and no longer in the package class. Its package is the type's, read through the attribute in the same way:
+    // go/ast's `*BadExpr` satisfies `Expr` through the `exprNode` its own holder declares.
     private static bool UnexportedMethodPackageMatches(MethodInfo interfaceMethod, MethodInfo candidate)
     {
         string goName = interfaceMethod.Name;
@@ -257,12 +261,14 @@ public static partial class TypeExtensions
         return string.Equals(interfacePackage, GoReflect.GoPackageClassPath(MethodPackageClass(candidate)), StringComparison.Ordinal);
     }
 
-    // The package class a candidate extension method is declared in: its own class, or for a forwarder in a
-    // struct's promoted-method class the class that struct is nested in.
+    // The package class a candidate extension method is declared in: its own class, or for a method in its receiver
+    // type's method holder, or a forwarder in a struct's promoted-method class, the class that type is nested in.
     private static Type? MethodPackageClass(MethodInfo candidate) =>
         candidate.DeclaringType is { } declaring
             ? s_promotedHostPackages.GetOrAdd(declaring, static type =>
-                type.GetCustomAttributes(typeof(GoPromotedHostAttribute), inherit: false) is [GoPromotedHostAttribute host] ? host.Struct.DeclaringType : type)
+                type.GetCustomAttributes(typeof(GoPromotedHostAttribute), inherit: false) is [GoPromotedHostAttribute host]
+                    ? host.Struct.DeclaringType
+                    : GoMethodHostAttribute.PackageClassOf(type))
             : null;
 
     private static readonly ConcurrentDictionary<Type, Type?> s_promotedHostPackages = [];
