@@ -8,7 +8,7 @@ using go;
 
 // A Go-source fixture (namespace go, a *_package class) that captures program counters from INSIDE the
 // converted `sort` package: sort.Slice calls back into less, so sort's own frames are on the stack at
-// every capture, and nothing else in this test assembly ever symbolizes a frame of sort.dll. That makes
+// every capture, and nothing else in this test assembly ever symbolizes a frame of go.sort.dll. That makes
 // sort's symbol file an untouched witness: whoever opens it, opened it because of this fixture.
 namespace go
 {
@@ -76,7 +76,7 @@ namespace GolibTests
         private static string[] Opens() =>
             (string[]?)typeof(runtime_package).GetMethod("symbolFileOpens", BindingFlags.NonPublic | BindingFlags.Static)?.Invoke(null, null) ?? [];
 
-        private static string WitnessPdb => Path.Combine(AppContext.BaseDirectory, "sort.pdb");
+        private static string WitnessPdb => Path.Combine(AppContext.BaseDirectory, "go.sort.pdb");
 
         // Whether ANY reader in this process holds the witness open: the runtime's, or the CLR's own
         // (which a capture with file info would have used). An exclusive open succeeds only if nobody does.
@@ -97,11 +97,11 @@ namespace GolibTests
         public void ACaptureOpensNoSymbolFileAndSymbolizingOpensTheAssembliesItNames()
         {
             Assert.IsTrue(File.Exists(WitnessPdb), "control: sort's symbol file must sit beside the test assembly, or the witness proves nothing");
-            Assert.AreEqual("sort", typeof(sort_package).Assembly.GetName().Name,
-                "control: sort's frames are not in an assembly named \"sort\", the name the opens are counted by and the witness is named for");
+            Assert.AreEqual("go.sort", typeof(sort_package).Assembly.GetName().Name,
+                "control: sort's frames are not in an assembly named \"go.sort\", the name the opens are counted by and the witness is named for");
 
-            if (Opens().Contains("sort") || WitnessIsHeld())
-                Assert.Inconclusive("another test already symbolized a frame of sort.dll in this process; the witness is spent");
+            if (Opens().Contains("go.sort") || WitnessIsHeld())
+                Assert.Inconclusive("another test already symbolized a frame of go.sort.dll in this process; the witness is spent");
 
             string[] before = Opens();
             slice<uintptr> pcs = new uintptr[32];
@@ -130,7 +130,7 @@ namespace GolibTests
                 // fixture's own package lives in this test assembly.
                 string function = (string)frame.Function;
                 string package = function.Split('.')[0];
-                named.Add(package == "lazycallers" ? "GolibTests" : package);
+                named.Add(package == "lazycallers" ? "GolibTests" : "go." + package);
 
                 if (package == "sort")
                 {
@@ -143,7 +143,7 @@ namespace GolibTests
 
             string[] opened = Opens().Skip(before.Length).ToArray();
 
-            CollectionAssert.Contains(opened, "sort", "symbolizing a sort frame must open sort's symbol file");
+            CollectionAssert.Contains(opened, "go.sort", "symbolizing a sort frame must open sort's symbol file");
             CollectionAssert.IsSubsetOf(opened, named.ToArray(), $"symbolizing opened an assembly no frame names: opened [{string.Join(",", opened)}], named [{string.Join(",", named)}]");
             Assert.IsTrue(WitnessIsHeld(), "control: the probe must see the runtime's own reader holding the file it just opened");
         }

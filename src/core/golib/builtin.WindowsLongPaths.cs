@@ -87,7 +87,7 @@ public static partial class builtin
     /// It answers false off Windows, below 10.0.15063, and on any host where the write did not take
     /// - so a consumer needs no platform test of its own, and the conservative <c>\\?\</c>-prefix
     /// behavior is what a false answer produces. Visible to the converted <c>runtime</c> assembly
-    /// through this assembly's existing <c>InternalsVisibleTo("runtime")</c>.
+    /// through this assembly's existing <c>InternalsVisibleTo("go.runtime")</c>.
     /// </para>
     /// </remarks>
     internal static bool WindowsLongPathsEnabled { get; private set; }

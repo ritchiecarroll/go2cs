@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework Condition="'$(TargetFramework)'==''">net10.0</TargetFramework>
     <RootNamespace>go</RootNamespace>
-    <AssemblyName>testing_package</AssemblyName>
+    <AssemblyName>go.testing</AssemblyName>
     <Product>go2cs</Product>
     <Authors>$(Product) Authors</Authors>
     <Company>The $(Authors)</Company>
@@ -25,7 +25,7 @@
        slogtest, internal/testdeps) declaring their dependency on that off-convention id. -->
   <PropertyGroup>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <PackageId>go.testing</PackageId>
+    <PackageId>$(AssemblyName)</PackageId>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageDescription>testing ($(TargetFramework) - $(Configuration)) -- hand-implemented C# counterpart of Go's testing package; the go2cs Phase-4 test host</PackageDescription>
     <PackageProjectUrl>https://github.com/ritchiecarroll/go2cs</PackageProjectUrl>
