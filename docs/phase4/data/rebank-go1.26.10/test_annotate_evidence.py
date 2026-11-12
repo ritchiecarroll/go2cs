@@ -205,6 +205,39 @@ try:
               [rids_line('linux-x64', 'validated', 5, 5, 0, agree='yes').replace('f/pkg', 'g/other')], '5 (linux-x64; linux-arm64: pending)')
     rids_case('linux --rids: a linux-arm64 reading no evidence names is put back to pending, the linux-x64 reading kept', '7 + 1 (linux-arm64; linux-x64: 9)',
               [rids_line('linux-x64', 'validated', 5, 5, 0, agree='yes').replace('f/pkg', 'g/other')], '9 (linux-x64; linux-arm64: pending)')
+    # COORD's wave 1 rulings (2026-11-12), each the guard's function: ARCH-NAMES (R1, names absent both ways, every one
+    # Go's own: the collector's same_names column reads yes on both legs), HOST-EQUAL (R3, the hosted legs read alike off
+    # the roster's linux-x64 reading) and the RULED ARCH-COUNT of the guard's $LinuxRidRuledArchCount table (R2).
+    names_header = RIDS_HEADER + '\tsame_names'
+    def names_line(rid, status, verdicts, matched, divergent, absent, names, same='yes', new='0', agree='no'):
+        return rids_line(rid, status, verdicts, matched, divergent, new=new, agree=agree, absent=absent, names=names).rstrip('\n') + f'\t{same}\n'
+    rids_case('linux --rids: arch-names writes linux-x64 first, each RID with its own reading (R1)', '10 + 2',
+              [names_line('linux-x64', 'validated', 12, 10, 2, 'k1', 'd1;d2'), names_line('linux-arm64', 'DISC', 11, 10, 1, 'v1;v2', 'd1')],
+              '10 + 2 (linux-x64; linux-arm64: 10 + 1)', header=names_header)
+    rids_case('linux --rids: arch-names refuses a leg whose C# reports a name Go does not', '10 + 2',
+              [names_line('linux-x64', 'validated', 12, 10, 2, 'k1', 'd1;d2'), names_line('linux-arm64', 'DISC', 11, 10, 1, 'v1;v2', 'd1', same='no')],
+              refused='do not report the same verdict names', header=names_header)
+    rids_case('linux --rids: arch-names refuses absent lists that do not account for the counts', '10 + 2',
+              [names_line('linux-x64', 'validated', 12, 10, 2, 'k1', 'd1;d2'), names_line('linux-arm64', 'DISC', 11, 10, 1, 'v1', 'd1')],
+              refused='do not account for the verdict counts', header=names_header)
+    nine = ';'.join(f'n{i}' for i in range(1, 10))
+    rids_case('linux --rids: host-equal banks linux-arm64 at its own reading, the roster\'s linux-x64 reading kept (R3)', '42 + 17',
+              [rids_line('linux-x64', 'DISC', 59, 50, 9, agree='yes', names=nine), rids_line('linux-arm64', 'DISC', 59, 50, 9, agree='yes', names=nine)],
+              '42 + 17 (linux-x64; linux-arm64: 50 + 9)')
+    rids_case('linux --rids: host-equal is not banked when the disclosed names differ', '42 + 17',
+              [rids_line('linux-x64', 'DISC', 59, 50, 9, agree='yes', names=nine), rids_line('linux-arm64', 'DISC', 59, 50, 9, agree='yes', names=nine.replace('n9', 'm9'))],
+              '42 + 17 (linux-x64; linux-arm64: pending)')
+    ruled_table = re.compile(r'^\$LinuxRidRuledArchCount = @\{\n.*?^\}', re.M | re.S)
+    guard_now = open(os.path.join(root, 'src/check-roster-format.ps1'), encoding='utf-8', newline='').read()
+    ruled_x64 = rids_line('linux-x64', 'FAIL', 20, 5, 15, new='15')
+    for entry, arm_absent, want, refused, name in (
+            ("'r1;r2 -- fixture'", 'r1;r2;s1', '7 (linux-x64; linux-arm64: 5)', None, 'a ruled arch-count banks linux-arm64 less the ruled verdicts (R2)'),
+            (None, 'r1;r2;s1', '7 (linux-x64; linux-arm64: pending)', None, 'with no ruling the same pair is a host difference, written pending'),
+            ("'r1;r2 -- fixture'", 'r1;s1', None, 'does not name r2', 'a ruled arch-count whose linux-arm64 does not name a ruled verdict is refused')):
+        body = "$LinuxRidRuledArchCount = @{\n" + (f"    'f/pkg' = {entry}\n" if entry else '') + '}'
+        write(os.path.join(root, 'src/check-roster-format.ps1'), ruled_table.sub(lambda m: body, guard_now, count=1))
+        rids_case(f'linux --rids: {name}', '7', [ruled_x64, rids_line('linux-arm64', 'COUNT', 5, 5, 0, absent=arm_absent, names='-')], want, refused=refused)
+    write(os.path.join(root, 'src/check-roster-format.ps1'), guard_now)
     # The guard's declared $LinuxRidEvidenceDirectory is the default, as $DarwinEvidenceDirectory is darwin's; while it is
     # empty, no evidence is read and every numeric linux segment is written pending (the S7-a mechanical commit).
     rids_line_eq = [rids_line('linux-x64', 'validated', 5, 5, 0, agree='yes'), rids_line('linux-arm64', 'validated', 5, 5, 0, agree='yes')]

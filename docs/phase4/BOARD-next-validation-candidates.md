@@ -36410,4 +36410,50 @@ asserts with that fix. Until then this is a silent divergence on a public API, a
 
 — G (2026-11-11)
 
+## 2026-11-12 — P2 (S7 wave 1, COORD R2): the converted gc/scan skips the AVX-512 tests on an x64 host that HAS AVX-512, where Go runs and passes them — OPEN, a finding
+
+**The reading.** Wave 1's shard A-8 (run 43151882036, master 06610aaa65) read `internal/runtime/gc/scan` on both
+hosted legs. The hosted linux-x64 runner offers AVX-512, so Go runs `TestExpandAVX512`, `TestScanSpanPackedAVX512`
+and `TestFilterNilAVX512` and passes the three parents and their 6,166 subtests (9,261 verdicts). The converted side
+reports the three parents as `skip` and none of the subtests: matched 3,092, divergent 6,169, all undisclosed. The
+roster's 3,095 was read on a host without AVX-512, where both sides skip the three.
+
+**What it is not.** It is not an arm64 difference: the arm64 leg reads 3,092, exactly the roster less the three
+x86-only names, and banks by COORD's R2 (a ruled arch-count, `$LinuxRidRuledArchCount`). It is not noise: the Go side
+takes the AVX-512 path the CPU offers and the converted side does not.
+
+**Where to look.** The converted side's feature detection or gating: `internal/cpu`'s x86 flags (`cpu_x86.cs`,
+`doinit`, the `xgetbv` row of the bank plan's section 11.3) or the scan package's own gate on them. The kernels'
+bodies are the post-hop reading list's `ExpandAVX512`, `FilterNilAVX512`, `scanSpanPackedAVX512` (section 11), so a
+fix that turns detection on may reach unbodied kernels. Measure on a hosted x64 with AVX-512 (the os-matrix
+`sweep-shard` leg is one).
+
+## 2026-11-12 — P2 (S7 wave 1, COORD R4 amended): `internal/poll`'s TestSplicePipePool is cut by the host's 30-minute per-test deadline when the sweep budget is 45 minutes — an INSTRUMENT artifact, not a hang
+
+**The reading.** Wave 1's shard A-7 (run 43151877722) read `internal/poll` FAIL on both hosted legs, identically:
+12 matched, and `TestSplicePipePool` Go pass / C# fail, "abandoned: did not finish within the per-test deadline 30m0s",
+the disclosed `codegen-liveness` signature ("leaked descriptors: ") not printed. Row walls 1,835 s and 1,838 s.
+
+**The cause.** The test sizes its own wait from `t.Deadline()`: 0.9 of the remaining budget (the 2026-09-03 entry
+measured 15m -> 805 s and 60m -> 3,235 s). Its pipes are never collected in the converted run (the disclosed leak), so
+it waits the whole of that. The os-matrix `sweep-shard` stage passes `SWEEP_TEST_TIMEOUT` 45m, so the test waits
+40.5 minutes, and the converted host's 30-minute per-test deadline abandons it first. The roster's 12 + 1 was read at
+the sweep's default 10m, where the wait is 9 minutes and the disclosed signature prints.
+
+**Next.** A one-row workflow seat (a per-row timeout input for `sweep-shard`), then W1-A7R: `internal/poll` alone at a
+budget of 33m or less (25m approved). The defect claim closes if A7R reads the disclosed signature at 12 + 1. Until
+then the row is pending at linux-arm64.
+
+## 2026-11-12 — P2 (S7 wave 1, COORD R4): `internal/zstd`'s TestAlloc runs and fails on hosted linux, where the runner has a `zstd` binary — OPEN, the deferred pin moves to linux under the ten-read rule
+
+**The reading.** Wave 1's shard A-9 (run 43151886546) read `internal/zstd` FAIL on both hosted legs, identically:
+535 matched, `TestAlloc` Go pass / C# fail, undisclosed on linux. The test needs a `zstd` binary on `PATH`; the hosted
+images have one. Its zero-allocation assert (`testing.AllocsPerRun`) fails in the converted run. The deferred pin for
+it is scoped to darwin, where the same reading was first made (2026-10-13). The roster's linux 536 was read on a host
+without `zstd`, where `TestAlloc` and `TestLarge` skip on both sides.
+
+**Next.** COORD's ruling: extend the deferred pin to linux under the ten-read rule (ten hosted reads, both legs, the
+same count, inside one wave's budget; the arm and x64 legs count separately), keeping its retirement plan. Until the
+ten reads land the row is pending at linux-arm64.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

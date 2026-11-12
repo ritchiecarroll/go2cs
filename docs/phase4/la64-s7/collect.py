@@ -10,6 +10,8 @@
 #   status     the sweep's per-row word: PASS -> validated; anything else verbatim
 #   agree      yes when both legs print the same word and the same count for the row
 #   absent     the verdict names this RID lacks against the other RID's set
+#   same_names yes when this leg's Go and C# report the same verdict names (a name only one side reports is no); COORD's
+#              R1 (2026-11-12) admits names absent in both directions only where both legs read yes
 # A row whose log count disagrees with `matched` is refused by name: the collector and the sweep must read one record.
 import json, os, re, sys
 
@@ -37,7 +39,7 @@ def leg(rid, root):
 
 read = {rid: leg(rid, root) for rid, root in legs.items()}
 names = sorted(set(read['linux-x64'][0]) | set(read['linux-arm64'][0]))
-cols = 'shard row RID verdicts matched disclosed divergent new status agree absent divergent_names run wall_s cells'.split()
+cols = 'shard row RID verdicts matched disclosed divergent new status agree absent divergent_names run wall_s cells same_names'.split()
 print('\t'.join(cols))
 failed = 0
 for row in names:
@@ -55,7 +57,7 @@ for row in names:
         agree = 'yes' if (word, count) == other[:2] else 'no'
         doc = docs.get(row)
         if doc is None:
-            out[rid] = [shard, row, rid, '-', str(count), '-', '-', '-', word if word != 'PASS' else 'validated', agree, '-', '-', run, str(wall), 'read']
+            out[rid] = [shard, row, rid, '-', str(count), '-', '-', '-', word if word != 'PASS' else 'validated', agree, '-', '-', run, str(wall), 'read', '-']
             continue
         go, cs = doc.get('go') or {}, doc.get('csharp') or {}
         verdict_names = set(go) | set(cs)
@@ -71,7 +73,7 @@ for row in names:
         absent = sorted(osets - verdict_names) if osets is not None else []
         out[rid] = [shard, row, rid, str(len(verdict_names)), str(matched), str(len(doc.get('disclosed') or [])), str(len(div)),
                     str(len(new)), 'validated' if word == 'PASS' else word, agree, ';'.join(absent) or '-', ';'.join(named) or '-',
-                    run, str(wall), 'read']
+                    run, str(wall), 'read', 'yes' if set(go) == set(cs) else 'no']
     for rid in legs:
         print('\t'.join(out[rid]))
 sys.exit(failed)
