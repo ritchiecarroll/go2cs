@@ -37,6 +37,11 @@ func (v *Visitor) visitSendStmt(sendStmt *ast.SendStmt, format FormattingContext
 
 	defer func() { v.hoistedDecls = savedHoist }()
 
+	// gc runs the statement's calls before its plain reads (evalOrderSpill.go).
+	if hoistBuf != nil {
+		defer v.planEvalOrderSpills(sendStmt.Chan, sendStmt.Value)()
+	}
+
 	var channelOperation string
 
 	if v.options.useChannelOperators {

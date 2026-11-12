@@ -165,6 +165,17 @@ type Visitor struct {
 	globalScope        map[string]*types.Var // Global variable scope
 	needsNoInlining    map[types.Object]bool // package-wide computeNoInliningClosure result — see callerInliningAnalysis.go
 
+	// The package's function declarations, for evalOrderSpill.go's one-level callee read; and the
+	// operations the statement being converted spills, with the temporaries already rendered.
+	packageFuncDecls map[*types.Func]*ast.FuncDecl
+	evalOrderSpill   map[ast.Expr]bool
+	evalOrderTemp    map[ast.Expr]string
+	// evalOrderInPlace.go's per-declaration facts: each function scope's signature, and which locals
+	// have their address taken.
+	evalOrderFuncScopesDecl *ast.FuncDecl
+	evalOrderFuncScopes     map[*types.Scope]*types.Signature
+	evalOrderAddrTaken      map[*types.Var]bool
+
 	// pendingSyscallKeepAlive names the temps a syscall-funnel call's pointer-derived arguments
 	// were routed through (see convSyscallFunnelCall, syscallKeepAliveAnalysis.go) — populated
 	// while converting the call expression itself, and drained by the enclosing statement

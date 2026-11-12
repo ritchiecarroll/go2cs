@@ -615,6 +615,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 	defer func() { v.hoistedDecls = savedHoist }()
 
+	// gc runs the statement's calls before its plain reads (evalOrderSpill.go).
+	if hoistBuf != nil {
+		defer v.planEvalOrderAssignSpills(assignStmt)()
+	}
+
 	lhsExprs := assignStmt.Lhs
 	rhsExprs := assignStmt.Rhs
 

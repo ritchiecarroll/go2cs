@@ -591,6 +591,12 @@ func (v *Visitor) typeParamConstType(expr ast.Expr) *types.TypeParam {
 
 // convExprCore is convExpr without the type-parameter constant materialization.
 func (v *Visitor) convExprCore(expr ast.Expr, contexts []ExprContext) string {
+	// A call the statement spills to keep gc's evaluation order (evalOrderSpill.go) renders as its
+	// temporary.
+	if temp, spilled := v.renderEvalOrderSpill(expr, contexts); spilled {
+		return temp
+	}
+
 	switch exprType := expr.(type) {
 	case *ast.ArrayType:
 		context := getExprContext[ArrayTypeContext](contexts)

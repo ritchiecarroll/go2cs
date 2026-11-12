@@ -222,6 +222,9 @@
     <None Include="$(MSBuildThisFileDirectory)elseIfPositionRecord_test.go" />
     <None Include="$(MSBuildThisFileDirectory)escapeAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)escapingAnonStructPointerLift_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)evalOrderInPlace.go" />
+    <None Include="$(MSBuildThisFileDirectory)evalOrderSpill.go" />
+    <None Include="$(MSBuildThisFileDirectory)evalOrderSpill_test.go" />
     <None Include="$(MSBuildThisFileDirectory)escapedArrayElementAddress_test.go" />
     <None Include="$(MSBuildThisFileDirectory)eventFraming_test.go" />
     <None Include="$(MSBuildThisFileDirectory)expressionComments_test.go" />

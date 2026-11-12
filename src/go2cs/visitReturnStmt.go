@@ -218,6 +218,12 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 
 	defer func() { v.hoistedDecls = savedHoist }()
 
+	// gc runs the statement's calls before its plain reads (evalOrderSpill.go). A multi-value return
+	// keeps its own spill (returnOperandOrder.go).
+	if len(returnStmt.Results) == 1 {
+		defer v.planEvalOrderSpills(returnStmt.Results[0])()
+	}
+
 	// In namedReturnDeferMode a `return e1, e2` assigns the named result params and then returns
 	// (via the void func() wrapper); the wrapper's caller side emits the actual `return <named>`
 	// after the defers run. So here we emit `(named1, named2) = (e1, e2); return;` for an explicit

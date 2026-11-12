@@ -556,6 +556,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// callerInliningAnalysis.go. Must run after `files` is fully populated (it walks every
 		// file's declarations) but has no other ordering dependency on the analyses above/below it.
 		needsNoInlining := computeNoInliningClosure(files, packageTypes, info, fixedSkipClosureApplies(packageInputPath, options.goRoot))
+		packageFuncDecls := indexPackageFuncDecls(files, info)
 
 		// Go's direct-call rule for recover: which recover() calls take the deferred-call mark and which defers
 		// set it (recoverForms.go). Package-wide, before any file is visited.
@@ -670,6 +671,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				}()
 
 				visitor := newFileVisitor(fset, packageTypes, info, options, globalIdentNames, globalScope, needsNoInlining, fileEntry)
+				visitor.packageFuncDecls = packageFuncDecls
 
 				visitor.visitFile(fileEntry.file)
 

@@ -3203,6 +3203,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	// (io/multi_test.go's flatten-depth assertions are the measured case) and needs the same
 	// protection production code does — see callerInliningAnalysis.go.
 	needsNoInlining := computeNoInliningClosure(allEntries, pkg.Types, pkg.TypesInfo, fixedSkipClosureApplies(pkg.Dir, options.goRoot))
+	packageFuncDecls := indexPackageFuncDecls(allEntries, pkg.TypesInfo)
 
 	// Go's direct-call rule for recover, over the test files as well (recoverForms.go).
 	collectRecoverForms(allEntries, pkg.Types, pkg.TypesInfo)
@@ -3305,6 +3306,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 		}
 
 		visitor := newFileVisitor(pkg.Fset, pkg.Types, pkg.TypesInfo, options, globalIdentNames, globalScope, needsNoInlining, entry)
+		visitor.packageFuncDecls = packageFuncDecls
 		visitor.visitFile(entry.file)
 
 		baseName := strings.TrimSuffix(filepath.Base(entry.filePath), ".go")
