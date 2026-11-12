@@ -1408,6 +1408,10 @@ jobs:
         shell: pwsh
         env:
           SMOKE_FILTER: ${{ needs.plan.outputs.filter }}
+          # M:N spike (this branch never lands): the filtered program is built with generated twins (the
+          # property reaches MSBuild from the environment) and every program the smoke runs is on the scheduler.
+          GoTwinsFor: ${{ needs.plan.outputs.filter }}
+          GO2CS_MN: '1'
           # BehavioralRunner's OWN budgets, in seconds: no timeout the caller sets can influence
           # them, so a generous job budget alone would be worthless if the runner killed its child
           # first. Sized for a cold 4-core hosted runner, where the shared core closure is built
@@ -1488,6 +1492,58 @@ jobs:
           & ./.github/annotate-summary.ps1 -Title "behavioral-smoke $goos/$rid" -Lines $summary
 
           exit $runExit
+
+      # -------------------------------------------------------------------------------------
+      # M:N spike (this branch never lands). After the smoke has built MnMixedStorm with generated twins, run the
+      # program directly: Go's build for the reference output, then the C# build on the thread path (the sampler's
+      # control) and on the scheduler at three sizes. A sampler outside the process counts its OS threads, and the
+      # scheduler prints its own reading.
+      # -------------------------------------------------------------------------------------
+      - name: M:N spike — direct runs of the twinned storm
+        if: always() && needs.plan.outputs.stage == 'behavioral-smoke' && needs.plan.outputs.filter == 'MnMixedStorm'
+        timeout-minutes: 30
+        shell: bash
+        run: |
+          set +e
+          set +o pipefail
+          dir=src/tests/Behavioral/MnMixedStorm
+          dll=$dir/bin/Release/net10.0/MnMixedStorm.dll
+          if [ ! -f "$dll" ]; then echo "READING mn-direct no build output at $dll"; exit 0; fi
+          ls "$dir/Generated/go2cs-gen/go2cs.TwinGenerator/" 2>/dev/null | sed 's/^/READING mn-direct generated: /'
+          grep -E '^// (candidates|await-sites|T )' "$dir/Generated/go2cs-gen/go2cs.TwinGenerator/go2cs.twins.report.g.cs" 2>/dev/null | tr -d '\r' | sed 's/^/READING mn-direct report: /'
+          (cd "$dir" && go build -o "$RUNNER_TEMP/mnstorm-go" .) || echo "READING mn-direct go build failed"
+          now() { python3 -c 'import time; print(time.time())'; }
+          one() {
+            label=$1; n=$2; mn=$3; shift 3
+            export MN_STORM_N=$n MN_STORM_HOLD_MS=3000 GO2CS_MN_READING=1
+            if [ "$mn" = "1" ]; then export GO2CS_MN=1; else unset GO2CS_MN; fi
+            start=$(now)
+            "$@" > "$RUNNER_TEMP/mn-out.txt" 2> "$RUNNER_TEMP/mn-err.txt" &
+            pid=$!
+            peak=0
+            while kill -0 $pid 2>/dev/null; do
+              if [ -d /proc/$pid/task ]; then t=$(ls /proc/$pid/task 2>/dev/null | wc -l); else t=$(ps -M -p $pid 2>/dev/null | tail -n +2 | wc -l); fi
+              t=$(echo $t)
+              if [ -n "$t" ] && [ "$t" -gt "$peak" ]; then peak=$t; fi
+              sleep 0.25
+            done
+            wait $pid
+            code=$?
+            wall=$(python3 -c "print(round($(now) - $start, 1))")
+            out=$(tr -d '\r' < "$RUNNER_TEMP/mn-out.txt" | tr '\n' ';')
+            reading=$(grep -a 'READING go-scheduler' "$RUNNER_TEMP/mn-err.txt" | tail -n 1 | tr -d '\r')
+            errs=$(grep -a -c -i 'exception\|panic\|fatal' "$RUNNER_TEMP/mn-err.txt")
+            echo "READING mn-direct arm=$label n=$n exit=$code wall=${wall}s sampled-peak-threads=$peak err-lines=$errs out=[$out] | $reading"
+            if [ "$code" != "0" ]; then head -n 5 "$RUNNER_TEMP/mn-err.txt" | cut -c1-300 | sed 's/^/READING mn-direct stderr: /'; fi
+          }
+          for n in 1000 10000 100000; do
+            if [ -x "$RUNNER_TEMP/mnstorm-go" ]; then one go $n 0 "$RUNNER_TEMP/mnstorm-go"; fi
+          done
+          one cs-threads 1000 0 dotnet "$dll"
+          for n in 1000 10000 100000; do
+            one cs-twins $n 1 dotnet "$dll"
+          done
+          exit 0
 
       - name: Behavioral stderr — run named projects directly and keep the WHOLE stderr
         if: needs.plan.outputs.stage == 'behavioral-stderr'
