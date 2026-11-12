@@ -27,7 +27,7 @@ namespace go;
 /// </remarks>
 /// <param name="receiver">The type whose declared methods the class holds.</param>
 [AttributeUsage(AttributeTargets.Class)]
-public sealed class GoMethodHostAttribute(Type receiver) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoMethodHostAttribute(Type receiver) : Attribute
 {
     /// <summary>
     /// Gets the type whose declared methods the class holds.
