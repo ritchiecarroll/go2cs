@@ -296,6 +296,11 @@ func identIsUntypedConst(info *types.Info, ident *ast.Ident) bool {
 }
 
 func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) string {
+	// A call through cmd/cgo's pointer-check closure converts as the call it makes (cgoRoute.go).
+	if closure, found := cgoCheckClosures[callExpr]; found {
+		return v.convCgoCheckClosure(closure, context)
+	}
+
 	// The call's `)` bounds the comments its argument list writes after its last argument (convExprList).
 	firstArg := token.NoPos
 

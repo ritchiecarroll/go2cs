@@ -106,19 +106,24 @@ internal static SemaphoreSlim gateOf(ref Mutex m) {
 // Lock locks m.
 // If the lock is already in use, the calling goroutine blocks until the mutex is available.
 //
+// FAST PATH: Lock first tries the free lock (Wait(0)), Go's CompareAndSwap(0, mutexLocked) ahead of
+// lockSlow, and returns on success with no park, no profile read and no allocation. An uncontended
+// pair parked anyway before: 230 ns and 64 B on Windows x64 and 322 ns and 64 B on linux-x64, where Go
+// reads 3.8 ns and 0 B (BOARD 2026-11-11, G). The try adds no new barging: SemaphoreSlim.Wait() already
+// takes any free count ahead of queued or pulsed waiters, and a failed Wait(0) has no side effect, so a
+// try-then-Wait grants in exactly the cases Wait does.
+// (An earlier arc declined this try as "a newcomer barging ahead of the queue"; that premise was wrong
+// for the same reason.)
+//
 // The park scope is ACCOUNTING ONLY (DESIGN-cooperative-scheduler.md §5.3): it names the wait for a
-// traceback and touches neither the gate nor the order in which waiters reach it. With every profile
-// rate at zero it wraps the whole Wait, contended or not: two volatile stores on every Lock, measured
-// by the cost canary named in that arc's commit. (That arc declined a Wait(0) fast path as "a newcomer
-// barging ahead of the queue". The premise was wrong: SemaphoreSlim.Wait() already takes any free count
-// ahead of queued or pulsed waiters, and a failed Wait(0) has no side effect, so a try-then-Wait grants
-// in exactly the cases Wait does. The profiling path below uses one; the rate-off path is unchanged.)
+// traceback and touches neither the gate nor the order in which waiters reach it. It wraps only a Wait
+// that follows a failed try, as Go parks only a contended Lock.
 //
 // PROFILING (class F; DESIGN-managed-profiling I4 and the Mutex slice of I3). Go records a contended
 // acquire in semacquire1 -- a block event on the waiter, and the waiter's acquire time for the mutex
 // event its unlocker records -- and an uncontended one not at all, because cansemacquire returns first.
 // This gate never reaches semacquire1, so Lock does the same accounting itself, and only while a
-// profile rate is on (Go stamps t0 only then): the rate-off path adds two static reads. "Contended"
+// profile rate is on (Go stamps t0 only then): a failed try with rates off adds two static reads. "Contended"
 // is Go's own test: the fast-path try (Wait(0), cansemacquire's counterpart) FAILED, so a Lock that
 // blocks has always stamped. The stamp precedes the park, and a successful try returns with no stamp,
 // no park and no event. STATED DEVIATIONS from Go's accounting (dated amendment 2026-09-28 in
@@ -134,23 +139,23 @@ internal static SemaphoreSlim gateOf(ref Mutex m) {
 //   actually wakes;
 // - a blocked waiter that stamped nothing is invisible to both profiles; with the try that narrows to
 //   a rate turned on mid-wait;
-// - an uncontended Lock with a rate on skips the park scope, so tracer and traceback output differ by
-//   rate (closer to Go, which parks only a contended waiter);
 // - the try's equivalence to Wait() rests on SemaphoreSlim internals, re-verified at each .NET major hop.
 //
 // NoInlining: GoSyncBlockEvent's skip counts this method's frame as the block event's top frame (Go's
 // sync.(*Mutex).Lock), and .NET 10 can inline a method with try/finally.
 [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Lock(this ref Mutex m) {
     SemaphoreSlim gate = gateOf(ref m);
+    // The fast path, Go's CompareAndSwap(0, mutexLocked) before lockSlow: a free lock is taken before
+    // any wait accounting, so an uncontended Lock parks nowhere and allocates nothing.
+    if (gate.Wait(0)) {
+        return;
+    }
     bool block = runtime_package.GoBlockProfileOn;
     bool mutex = runtime_package.GoMutexProfileOn;
     if (!(block || mutex)) {
         using (Goroutine.Park(WaitReason.SyncMutexLock)) {
             gate.Wait();
         }
-        return;
-    }
-    if (gate.Wait(0)) {
         return;
     }
     int64 t0 = runtime_package.GoCputicks();

@@ -748,6 +748,8 @@ Each item is a first surprise, and what to write instead.
 
 ## Further reading
 
+- [The public surface](PublicSurface.md): which converted names are a promise, which are not, and how a promised
+  name changes.
 - [Limitations](Limitations.md): where converted Go differs from Go, and what to do about it.
 - [Frequently asked questions](FAQ.md): short answers for Go and C# developers meeting go2cs.
 - [Conversion Strategies](ConversionStrategies.md): how each Go construct is converted, and why.

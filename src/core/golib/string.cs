@@ -1010,7 +1010,7 @@ public readonly struct @string :
 /// <c>ReadOnlySpan&lt;byte&gt;</c> to <see cref="@string"/> conversion.
 /// </para>
 /// </remarks>
-public static class RawStringLiteral
+[EditorBrowsable(EditorBrowsableState.Never)] public static class RawStringLiteral
 {
     /// <summary>
     /// Returns the Go string a multi-line raw literal denotes: its UTF-8 bytes with every CR removed.

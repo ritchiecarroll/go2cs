@@ -43,6 +43,11 @@ func (v *Visitor) exprIsUniverseNil(expr ast.Expr) bool {
 }
 
 func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
+	// A variable of an unwrapped cmd/cgo check closure renders what it stands for (cgoRoute.go).
+	if argument, found := v.cgoClosureArguments[v.info.Uses[ident]]; found && v.info.Uses[ident] != nil {
+		return v.convCgoClosureArgument(argument, context)
+	}
+
 	// Inside a lazy package var's initializer, an exported lazy var reads its holder's INITIAL value: an importer may have
 	// assigned the var before this initializer runs, where Go's init-time build saw the initial one (lazyVarFacts).
 	if v.inLazyInitializer {

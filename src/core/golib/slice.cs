@@ -32,7 +32,7 @@ internal interface ISliceBacking
     Array? Backing { get; }
 }
 
-public interface ISlice : IArray
+[EditorBrowsable(EditorBrowsableState.Never)] public interface ISlice : IArray
 {
     /// <summary>
     /// Gets a flag indicating whether this slice is the NIL slice — structurally, the same question
@@ -65,7 +65,7 @@ public interface ISlice : IArray
     ISlice? Append(object[] elems);
 }
 
-public interface ISlice<T> : IArray<T>, ISlice, IGoReflectSlice
+[EditorBrowsable(EditorBrowsableState.Never)] public interface ISlice<T> : IArray<T>, ISlice, IGoReflectSlice
 {
     ISlice<T> Append(params T[] elems);
 
@@ -1057,7 +1057,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     /// <c>range s</c>, for <c>foreach (var (i, v) in range(s))</c>. The slice header is copied once, when the loop
     /// starts, so the loop reads the length Go reads once; the elements are read live, as Go's are.
     /// </summary>
-    public readonly struct RangeOver
+    [EditorBrowsable(EditorBrowsableState.Never)] public readonly struct RangeOver
     {
         private readonly slice<T> m_slice;
 
@@ -1079,7 +1079,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     /// <see cref="IEnumerator{T}"/> so interface-typed consumers still bind; those paths box the struct.
     /// </remarks>
     [Serializable]
-    public struct RangeEnumerator : IEnumerator<(nint, T)>
+    [EditorBrowsable(EditorBrowsableState.Never)] public struct RangeEnumerator : IEnumerator<(nint, T)>
     {
         private readonly T[] m_array;
         private readonly nuint m_nativeBase; // 0 = managed backing; else the aliased memory's base
@@ -1839,7 +1839,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     }
 }
 
-public static class SliceExtensions
+[EditorBrowsable(EditorBrowsableState.Never)] public static class SliceExtensions
 {
     // slice of a slice helper function — bounds are RELATIVE to the slice (Go semantics; the source
     // slice may itself be an offset view over its backing array), and the result SHARES the backing array:

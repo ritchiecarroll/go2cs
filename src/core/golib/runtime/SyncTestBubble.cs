@@ -61,7 +61,7 @@ namespace go.golib;
 /// <c>throw</c>s (<c>active &lt; 0</c> and the like) stay plain <see cref="PanicException"/>s.
 /// </para>
 /// </remarks>
-public sealed class SyncTestBubble
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class SyncTestBubble
 {
     /// <summary>Go's <c>synctestBaseTime</c>: midnight UTC 2000-01-01, in nanoseconds.</summary>
     public const long BaseTime = 946684800000000000;

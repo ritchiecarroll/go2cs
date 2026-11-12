@@ -11,7 +11,7 @@ namespace go;
 /// <summary>
 /// The Go facts a member record can carry.
 /// </summary>
-public enum GoMemberFact : byte
+[EditorBrowsable(EditorBrowsableState.Never)] public enum GoMemberFact : byte
 {
     /// <summary>The named field is a Go EMBEDDED field (what <see cref="GoEmbeddedAttribute"/> says).</summary>
     Embedded = 1,
@@ -66,7 +66,7 @@ public enum GoMemberFact : byte
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true, Inherited = false)]
-public sealed class GoMemberRecordAttribute : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoMemberRecordAttribute : Attribute
 {
     /// <summary>Records a fact that carries no value.</summary>
     public GoMemberRecordAttribute(string member, GoMemberFact fact)

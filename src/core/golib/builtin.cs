@@ -1464,7 +1464,7 @@ public static partial class builtin
     /// Only <see cref="makeꓸꓸꓸ{T}(nint)"/> constructs one, and only the appendꓸꓸꓸ overloads below
     /// consume it, so converted code never names the type.
     /// </summary>
-    public readonly struct ZeroElements<T>
+    [EditorBrowsable(EditorBrowsableState.Never)] public readonly struct ZeroElements<T>
     {
         internal readonly nint Length;
 

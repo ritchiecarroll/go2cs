@@ -58,7 +58,7 @@ namespace go.golib;
 /// smaller than the one it replaces.
 /// </para>
 /// </remarks>
-public sealed class Goroutine
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class Goroutine
 {
     /// <summary>
     /// Environment variable overriding <see cref="StackReserve"/>.
@@ -1844,7 +1844,7 @@ internal enum GoroutineState
 /// rather than inventing a frame for. <see cref="Labels"/> is Go's <c>gp.labels</c> and is opaque
 /// here by design; the caller that set it is the caller that understands it.
 /// </remarks>
-public readonly struct GoroutineProfileEntry
+[EditorBrowsable(EditorBrowsableState.Never)] public readonly struct GoroutineProfileEntry
 {
     internal GoroutineProfileEntry(System.Reflection.MethodBase? function, object? labels)
     {

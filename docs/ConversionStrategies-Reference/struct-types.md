@@ -1164,9 +1164,9 @@ and the `ꓸꓸꓸ` suffix reads as Go's `...`):
 
 <!-- source: src/core/golib/variadic.cs:26, 53 -->
 ```csharp
-public delegate void Actionꓸꓸꓸ<T1, TArg>(T1 arg1, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate void Actionꓸꓸꓸ<T1, TArg>(T1 arg1, params Span<TArg> args);
 …
-public delegate TResult Funcꓸꓸꓸ<T1, TArg, out TResult>(T1 arg1, params Span<TArg> args);
+[EditorBrowsable(EditorBrowsableState.Never)] public delegate TResult Funcꓸꓸꓸ<T1, TArg, out TResult>(T1 arg1, params Span<TArg> args);
 ```
 
 `iifeDelegateType` — the single structural lowering every `getCSharpTypeName(*types.Signature)` and

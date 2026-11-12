@@ -64,7 +64,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class)]
-public class GoPlatformExclusiveAttribute : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public class GoPlatformExclusiveAttribute : Attribute
 {
     /// <summary>
     /// Creates a new <see cref="GoPlatformExclusiveAttribute"/>.

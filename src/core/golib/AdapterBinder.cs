@@ -81,7 +81,7 @@ namespace go;
 /// value-receiver methods and can never widen a Go method set.
 /// </para>
 /// </remarks>
-public static class AdapterBinder
+[EditorBrowsable(EditorBrowsableState.Never)] public static class AdapterBinder
 {
     private static readonly ConcurrentDictionary<Type, GoInterfaceShellAttribute?> s_shellSpecs = [];
 
@@ -487,7 +487,7 @@ public static class AdapterBinder
 /// of <see cref="GoInterfaceShellAttribute.MethodNames"/>, which is the order the generated shell's
 /// forwarders were emitted in.
 /// </remarks>
-public sealed class GoShellBinding
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoShellBinding
 {
     private readonly MethodInvoker?[] m_invokers;
     private readonly bool[] m_dereference;

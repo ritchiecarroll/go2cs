@@ -24,7 +24,7 @@ namespace go;
 /// the twin by its priority. Nothing reads the attribute by reflection.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-public sealed class GoSStringTwinAttribute(string functionName) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoSStringTwinAttribute(string functionName) : Attribute
 {
     /// <summary>
     /// Gets the Go name of the function.

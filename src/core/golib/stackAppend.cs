@@ -43,7 +43,7 @@ namespace go;
 /// appends grow inside the buffer a size class at a time.
 /// </para>
 /// </remarks>
-public struct stackAppend<T>
+[EditorBrowsable(EditorBrowsableState.Never)] public struct stackAppend<T>
 {
     // The bytes Go reserves: the default of base.Debug.VariableMakeThreshold (cmd/compile/internal/base/flag.go).
     private const nuint StoreBytes = 32;

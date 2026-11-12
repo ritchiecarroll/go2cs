@@ -81,7 +81,7 @@ namespace go.golib;
 /// return.
 /// </para>
 /// </remarks>
-public static class MainExit
+[EditorBrowsable(EditorBrowsableState.Never)] public static class MainExit
 {
     /// <summary>
     /// The longest <c>main</c>'s return waits, by the wall clock, for a goroutine running a panic's deferred calls

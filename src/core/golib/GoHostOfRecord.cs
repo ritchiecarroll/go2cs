@@ -45,7 +45,7 @@ namespace go;
 /// constant it passes does.
 /// </para>
 /// </remarks>
-public static class GoHostOfRecord
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoHostOfRecord
 {
     private static int s_announced;
 
@@ -130,7 +130,7 @@ public static class GoHostOfRecord
     /// <summary>
     /// A process architecture named as Go's GOARCH names it, or <c>""</c> when there is no single name for it.
     /// </summary>
-    private static string GoArchOf(Architecture architecture) => architecture switch
+    internal static string GoArchOf(Architecture architecture) => architecture switch
     {
         Architecture.X64 => "amd64",
         Architecture.X86 => "386",
@@ -147,7 +147,7 @@ public static class GoHostOfRecord
     /// The running operating system named as Go names it, or <c>""</c> when it is one this build does
     /// not recognize.
     /// </summary>
-    private static string HostGOOS()
+    internal static string HostGOOS()
     {
         if (OperatingSystem.IsWindows())
         {

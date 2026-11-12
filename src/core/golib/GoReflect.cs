@@ -58,7 +58,7 @@ namespace go;
 /// the same type.
 /// </para>
 /// </remarks>
-public static partial class GoReflect
+[EditorBrowsable(EditorBrowsableState.Never)] public static partial class GoReflect
 {
     // Go reflect.Kind numbering (internal/abi and reflect define these identically, 0..26).
     public const int Invalid = 0, Bool = 1, Int = 2, Int8 = 3, Int16 = 4, Int32 = 5, Int64 = 6;

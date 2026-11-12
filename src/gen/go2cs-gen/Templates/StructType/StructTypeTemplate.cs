@@ -2038,7 +2038,7 @@ internal class StructTypeTemplate : TemplateBase
 
                 footer += $$"""
 
-                    [global::go.GoPromotedHost(typeof({{UnboundQualifiedStructName}})), {{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
+                    [global::go.GoPromotedHost(typeof({{UnboundQualifiedStructName}})), {{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}, {{HiddenAttribute}}]
                     {{Scope ?? "public"}} static class {{DeclareExtensionHost(PromotedHostClassName)}}
                     {{{promoted}}
                     }
@@ -2051,7 +2051,7 @@ internal class StructTypeTemplate : TemplateBase
 
             return footer + $$"""
 
-                [{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
+                [{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}, {{HiddenAttribute}}]
                 public static class {{DeclareExtensionHost(XpkgClassName($"{PackageName}_package", NonGenericStructName))}}
                 {{{m_xpkg}}
                 }
@@ -2278,7 +2278,7 @@ internal class StructTypeTemplate : TemplateBase
             // letter, so no owning type runs into a number.
             if (tokens.Count > 0)
             {
-                result.Append($"\r\n\r\n{TypeElemIndent}public static class {FieldAccessTokenHolder}\r\n{TypeElemIndent}{{");
+                result.Append($"\r\n\r\n{TypeElemIndent}[{HiddenAttribute}]\r\n{TypeElemIndent}public static class {FieldAccessTokenHolder}\r\n{TypeElemIndent}{{");
 
                 foreach (string token in tokens)
                     result.Append($"\r\n{TypeElemIndent}    {token}");

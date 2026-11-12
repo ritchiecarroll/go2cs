@@ -29,4 +29,4 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Parameter)]
-public sealed class GoTakesCSharpStringAttribute : Attribute;
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoTakesCSharpStringAttribute : Attribute;

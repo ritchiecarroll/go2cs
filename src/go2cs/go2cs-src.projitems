@@ -78,9 +78,11 @@
     <None Include="$(MSBuildThisFileDirectory)tailCalledFuncValue_test.go" />
     <None Include="$(MSBuildThisFileDirectory)syscallFunnelSet_test.go" />
     <None Include="$(MSBuildThisFileDirectory)captureModeOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoCheckClosureForms_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoConfigurationClass_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDeclarations.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDeclarations_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoDriver_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDynamicImports.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoGateRefusal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoLibraryCapture.go" />
@@ -91,6 +93,8 @@
     <None Include="$(MSBuildThisFileDirectory)cgoMirrors_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoPseudoPackage.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoPseudoPackage_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoRealRoute_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoRoute.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoWrappers.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoWrappers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoSelectedRefusal_test.go" />
@@ -685,6 +689,9 @@
     <None Include="$(MSBuildThisFileDirectory)testHostGoTargetOS_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testHostLaunchDir_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\README.md" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase2\cgo_gotypes.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase2\fixture.cgo1.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase2\fixture.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\cgo_gotypes.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\cgo_import.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\fixture.cgo1.go" />

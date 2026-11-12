@@ -18,7 +18,7 @@ namespace go;
 /// formatting the argument. The call happens with the runtime's printlock already held, which is
 /// recursive, so the implementation writes through the runtime's own print primitives.
 /// </remarks>
-public interface IRuntimePrintable
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IRuntimePrintable
 {
     /// <summary>Writes this value as the runtime's printer would, under the caller's printlock.</summary>
     void RuntimePrint();

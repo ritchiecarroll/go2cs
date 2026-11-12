@@ -105,7 +105,7 @@ public static partial class builtin
 /// a type parameter's sequence.
 /// </summary>
 /// <typeparam name="T">Element type.</typeparam>
-public readonly struct SequenceRange<T>
+[EditorBrowsable(EditorBrowsableState.Never)] public readonly struct SequenceRange<T>
 {
     private readonly IArray<T> m_sequence;
 

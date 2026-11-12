@@ -28,4 +28,4 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Method)]
-public sealed class GoStrAttribute : Attribute;
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoStrAttribute : Attribute;

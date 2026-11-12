@@ -137,8 +137,9 @@ func cgoLinkerDirectives(file *ast.File) ([]string, error) {
 // cgoToolchain is the C compiler a capture links with: the command (which may carry arguments, as "zig cc" does) and the
 // environment it runs in.
 type cgoToolchain struct {
-	cc  []string
-	env []string
+	cc   []string
+	env  []string
+	arch []string // the target's architecture flags, as cmd/go hands them to CC (cgoArchFlags)
 }
 
 // cgoSymbolLibrary is one bound symbol and the load-time name of the library that defines it.
@@ -192,7 +193,7 @@ func linkCgoProbe(toolchain cgoToolchain, goos string, flags cgoLinkFlags, symbo
 		return "", "", err
 	}
 
-	args := append(append([]string{}, toolchain.cc[1:]...), "-shared", "-w", "-o", output, source)
+	args := append(append(append([]string{}, toolchain.cc[1:]...), toolchain.arch...), "-shared", "-w", "-o", output, source)
 
 	if goos != "windows" {
 		args = append(args, "-fPIC")
@@ -277,6 +278,15 @@ func captureCgoLibraries(toolchain cgoToolchain, goos string, flags cgoLinkFlags
 	return cgoSymbolLibraries(symbols, resolved)
 }
 
+// cgoUnboundSymbols names the symbols a capture found in no shared library: resolved statically, or not at all.
+type cgoUnboundSymbols struct {
+	symbols []string
+}
+
+func (unbound *cgoUnboundSymbols) Error() string {
+	return fmt.Sprintf("cgo: %s resolved to no shared library (statically, or not at all), and Phase 2 binds only a symbol a shared library exports", strings.Join(unbound.symbols, ", "))
+}
+
 // cgoSymbolLibraries orders the answer by symbol and refuses each symbol with no library.
 func cgoSymbolLibraries(symbols []string, resolved map[string]string) ([]cgoSymbolLibrary, error) {
 	var answer []cgoSymbolLibrary
@@ -294,7 +304,7 @@ func cgoSymbolLibraries(symbols []string, resolved map[string]string) ([]cgoSymb
 	}
 
 	if len(missing) > 0 {
-		return nil, fmt.Errorf("cgo: %s resolved to no shared library (statically, or not at all), and Phase 2 binds only a symbol a shared library exports", strings.Join(missing, ", "))
+		return nil, &cgoUnboundSymbols{symbols: missing}
 	}
 
 	sort.Slice(answer, func(i, j int) bool { return answer[i].symbol < answer[j].symbol })
@@ -562,46 +572,65 @@ func elfProbeLoadNames(toolchain cgoToolchain, flags cgoLinkFlags, symbols []str
 	return resolved, nil
 }
 
-// splitCgoCommand splits a CC command the way cmd/go does (cmd/internal/quoted): fields separated by spaces, a field may
-// be quoted with ' or " to hold spaces, so a pinned zig under a profile path with a space survives.
+// splitCgoCommand splits a CC command into its fields (cgoQuotedSplit), and refuses an empty one.
 func splitCgoCommand(command string) ([]string, error) {
-	var fields []string
-	var field strings.Builder
-	var quote rune
-	inField := false
+	fields, err := cgoQuotedSplit(command)
 
-	for _, r := range command {
-		switch {
-		case quote != 0:
-			if r == quote {
-				quote = 0
-			} else {
-				field.WriteRune(r)
-			}
-		case r == '\'' || r == '"':
-			quote, inField = r, true
-		case r == ' ' || r == '\t' || r == '\n' || r == '\r':
-			if inField {
-				fields = append(fields, field.String())
-				field.Reset()
-				inField = false
-			}
-		default:
-			field.WriteRune(r)
-			inField = true
-		}
-	}
-
-	if quote != 0 {
-		return nil, fmt.Errorf("cgo: the C compiler command %q has an unterminated quote", command)
-	}
-
-	if inField {
-		fields = append(fields, field.String())
+	if err != nil {
+		return nil, fmt.Errorf("cgo: the C compiler command %q: %w", command, err)
 	}
 
 	if len(fields) == 0 {
 		return nil, errors.New("cgo: the C compiler command is empty")
+	}
+
+	return fields, nil
+}
+
+// cgoQuotedSplit splits a command into fields as cmd/go splits CC (cmd/internal/quoted, Split, go1.26.10, ported): the
+// fields are separated by spaces, and a field that BEGINS with ' or " runs to the matching quote, with no unescaping
+// inside, so a pinned zig under a path with a space survives. A quote further inside a field is an ordinary character.
+func cgoQuotedSplit(command string) ([]string, error) {
+	isSpace := func(c byte) bool { return c == ' ' || c == '\t' || c == '\n' || c == '\r' }
+
+	var fields []string
+
+	for len(command) > 0 {
+		for len(command) > 0 && isSpace(command[0]) {
+			command = command[1:]
+		}
+
+		if len(command) == 0 {
+			break
+		}
+
+		if command[0] == '"' || command[0] == '\'' {
+			quote := command[0]
+			command = command[1:]
+			i := 0
+
+			for i < len(command) && command[i] != quote {
+				i++
+			}
+
+			if i >= len(command) {
+				return nil, fmt.Errorf("unterminated %c string", quote)
+			}
+
+			fields = append(fields, command[:i])
+			command = command[i+1:]
+
+			continue
+		}
+
+		i := 0
+
+		for i < len(command) && !isSpace(command[i]) {
+			i++
+		}
+
+		fields = append(fields, command[:i])
+		command = command[i:]
 	}
 
 	return fields, nil
