@@ -39,7 +39,13 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
     compiled C (Phase 4);
   - `//export` (Phase 5);
   - a C variable, a C function used as a value, and a deferred or `go` call that passes a pointer cmd/cgo
-    checks (later in Phase 2).
+    checks (later in Phase 2);
+  - a C function Go's own cgo build does not import by its C name. That is a function a header renames
+    (macOS on x64 makes `fstat` the symbol `fstat$INODE64`), and also one the C compiler inlines, which
+    includes `abs` and `labs`. go2cs cannot tell the two apart, so it refuses both rather than bind a
+    function C would not call:
+    `error GO2CS2001: C.abs: cmd/cgo's own binary does not import a symbol named abs, ...` (later in
+    Phase 2).
 
   [Roadmap](Roadmap.md#cgo). <!-- [plan](PLAN-cgo-interop.md) (internal record, unlinked 2026-10-26, OQ-1); docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.20 -->
 * **A self-referential constraint over a pointer, when a method shares the element's storage.**

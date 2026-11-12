@@ -974,6 +974,10 @@ go list selected their source, and a cgo package whose bindings file was not wri
 The general rule: where an offline seam stands in for a real route, any property of the real inputs the seam changes
 (here, a file's name) is a gap only the real route closes, so the real-route legs are part of the gate.
 
+A second member of the class, from the review below (M1): the offline seam loads cgo-off, so `go list` never selected a
+plain file under `//go:build cgo`, and no offline test could see the driver drop one. The seam's load now carries
+`-tags=cgo`, which selects such a file as a cgo-on load does and still leaves an `import "C"` source out.
+
 **The first real-route readings (converter-cgo, increment 5b).**
 - The Phase 2 fixture's own refusal (its deferred and goroutine calls) passed on real cmd/cgo output first at
   43147447241 (linux, zig).
@@ -1005,3 +1009,64 @@ checklist** as these run-time arms, each asserting go2cs's actual behaviour besi
 linked from the preamble, and nothing here defines the four probe functions. 5b PREDICTS that once `probe.c` defines
 them and the fixture links the probe library, `-dynimport` writes `_cgo_import.go` again. If it does not, that is a
 finding.
+
+### 11.21 Amendment 2026-11-12: the adversarial review of increment 5b
+
+COORD had 5b reviewed adversarially at `568fde8424` and held it from batch 287 until three MUST-FIX items closed, each
+red first (`c1ec22f56a`). This section records each item as fixed.
+
+**M1: a plain file under `//go:build cgo`.** The driver's build-constraint re-check skipped only cmd/cgo's trees, so a
+plain sibling the cgo tag selects was dropped with exit 0 and its declarations dangled. The re-check now carries the
+`cgo` tag for every plain file of a cgo package, as `refuseCgoOnlyPackage` already did.
+
+**M2: a stale bindings file.** The "bindings file was not written" gate was a bare `os.Stat`, which an earlier
+conversion's file satisfies when this conversion's write fails. The gate now reads a flag that only this conversion's
+own successful write sets.
+
+**M3: a name a header renames (RULED: the verified-names rule).** The capture's probe declares each symbol with no
+header, so it finds a renamed function under its plain name: darwin/amd64's `fstat` is `fstat$INODE64`, a different
+function over a different `struct stat`, and glibc may make `strtol` the symbol `__isoc23_strtol`. A binding to the
+plain name would call a function C never calls, silently.
+
+- **The rule:** a symbol binds only when cmd/cgo's own binary imports it under its plain C name. The names are the
+  local names of `_cgo_import.go`'s `//go:cgo_import_dynamic` lines (`cgoImportedByCmdCgo`). Any other symbol is
+  refused at its use, naming what the binary imports that contains its name.
+- A package with symbols to bind and no `_cgo_import.go` is refused too: its C does not link as go builds it, so
+  nothing verifies a name.
+- The capture stays the library oracle and runs first, so the static and Phase 4 refusals keep their text.
+- **The cost, accepted for .4:** cmd/cgo compiles its wrappers at `-O2`, so a call the C compiler inlines as a builtin
+  imports nothing and is refused like a rename. `abs` and `labs` are the fixture's. The refusal a user sees:
+  `C.abs: cmd/cgo's own binary does not import a symbol named abs, so nothing shows that name is the function C calls
+  here: a header renames it, or the C compiler inlined the call as a builtin. Binding the plain name could call a
+  different function, so it is refused; Phase 2 later`. A refusal by name is a disclosed limit; a silent wrong binding
+  is a defect. The real-route test reads which calls each host refuses this way and fails on any outside
+  `{abs, labs}`.
+- **NAMED DEFERRAL (post-.4, a BOARD row):** a probe compiled WITH the package's preamble, reading each reference's real
+  symbol from the object. It lifts the builtin refusals and binds a renamed name soundly. It needs the package's
+  `CgoCFLAGS` and three object readers (ELF, Mach-O, COFF).
+
+**SHOULD items, all fixed in 5b.**
+
+- **S1:** when the probe does not link, a probe that references nothing is linked first. If that fails too, the fault
+  is the link line or the compiler, and the linker's own error is the refusal. No symbol is blamed as Phase 4's.
+- **S2:** the probe carries the target's architecture flags as cmd/go hands them to CC (`gccArchArgs`, mirrored in
+  `cgoArchFlags` for amd64 and arm64), so a compiler whose default architecture differs cannot answer for another.
+- **S4:** the header's toolchain line keeps printable ASCII only and is capped at 120 characters
+  (`cgoToolchainLine`). A bare CR, U+0085, U+2028 and U+2029 each end a C# line, and the text is whatever CC printed.
+- **S5:** golib's resolver holds the target for every import the assembly makes, before the table is searched, so a
+  hand-owned import beside bindings for another target is refused too.
+- **S6:** the real-route test reads `GO2CS_REQUIRE_CGO_PROBE` first and checks the compiler go itself would use
+  (`go env CC`), so a leg that loses its compiler fails rather than skips
+  (`TestTheRealRouteTestFailsWhenARequiredCompilerIsMissing`, shown red against the old ordering).
+
+**Notes.**
+
+- **N1:** CC is split by a port of cmd/go's `quoted.Split` (`cgoQuotedSplit`), held by quoted's own test table. The
+  earlier splitter treated a quote inside a field as a quote, which cmd/go does not.
+- **N2:** CC is resolved once to one program before its `--version` and the probe's link: a relative path against the
+  package directory, a bare name on PATH.
+- **N3:** `GoCgoLibraries.Register`'s target overload is additive, so compiled callers are unaffected. At source,
+  `Register(assembly, null)` is now ambiguous (CS0121). No hand caller exists; the release notes name it.
+- **N5:** each bindings golden's header names its architecture.
+- **N6, INTENDED:** the host rule fires on every `-cgo` run, a package with no C in it included. `-cgo` is a cgo-on
+  load, and a cgo-on load for another target needs that target's C toolchain. The help text says so.

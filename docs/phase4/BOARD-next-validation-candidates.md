@@ -36453,4 +36453,26 @@ Increment 5b predicts the file returns once `probe.c` defines them.
 
 — H (2026-11-11)
 
+## 2026-11-12 — H (cgo Phase 2 increment 5b, the review's M3): a header can rename a C function behind its name, so a binding is verified against cmd/cgo's own imports, and compiler builtins are refused with it — OPEN for post-.4
+
+**The defect the review found.** The converter's library capture asks a library for each PLAIN C name, with no header
+in sight. A header may rename a function: on darwin/amd64 `<sys/stat.h>` makes `fstat` the symbol `fstat$INODE64`, a
+different function over a different `struct stat`, and glibc may make `strtol` the symbol `__isoc23_strtol`. The plain
+name still exists in the library, so the capture found it, and the binding would have called a function C never calls,
+with no error. Caught by COORD's adversarial review of increment 5b before 5b seated in any batch.
+
+**The fix in 5b (DESIGN-cgo-phase2-pinvoke §11.21).** A symbol binds only when cmd/cgo's own binary imports it under
+its plain C name (`_cgo_import.go`). Anything else is refused by name at its use.
+
+**The limit this leaves, disclosed.** cmd/cgo compiles its wrappers at `-O2`, so a call the C compiler inlines as a
+builtin imports nothing, and the rule cannot tell it from a rename. `C.abs` and `C.labs` are refused on a real host:
+`C.abs: cmd/cgo's own binary does not import a symbol named abs, ...; Phase 2 later`. COORD ruled the over-refusal
+acceptable for .4: a refusal by name is a disclosed limit, and a silent wrong binding is a defect.
+
+**OPEN, post-.4:** a probe compiled WITH the package's preamble, reading each reference's real symbol from the object.
+It lifts the builtin refusals and binds a renamed name soundly. It needs the package's `CgoCFLAGS` and three object
+readers (ELF, Mach-O, COFF).
+
+— H (2026-11-12)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
