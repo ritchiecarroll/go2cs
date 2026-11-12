@@ -221,3 +221,22 @@ cgo off, by ruling, and that stays.
   once per green.
 
 — H (2026-11-12)
+
+## 12. Amendment 2026-11-12: COORD's rulings on section 11
+
+COORD ruled on the five questions the day the plan was posted. A design review of the plan is running, and code
+waits for its verdict. Sections 1 to 11 stand as written; where a ruling changes one, this block governs.
+
+- **Q-A, RULED: G1 first.** G1 is dated and is the .4 release's. Phase 3's code follows it.
+- **Q-B, RULED, and WIDENED from the scout's ruling (RECON section 7, item 1):** cmd/cgo's deferred check closure is
+  accepted for ANY function the route already binds, not only `C.free`. Recognition is by shape, and deferring a
+  bound C function is the same closure as `defer C.free`. A `go` statement with a checked pointer stays refused.
+- **Q-C, RULED: the slice door is its own seat, early, and H cuts it.** It is a converter seat: a seeded footprint
+  on all four targets, and the no-regression check over the behavioral corpus. The second consumer's repros, once
+  that project pushes them, are reds beside H's own, with the allocator's realloc as the named one.
+  **Sequencing:** seats that move corpus bytes land one at a time. Two other lanes' seats land first, then the slice
+  door, so no two large regenerations meet.
+- **Q-D, RULED: the package's own bound `malloc` and `free`.**
+- **Q-E, RULED: an on-demand linux stage on the existing workflow.**
+
+— H (2026-11-12)
