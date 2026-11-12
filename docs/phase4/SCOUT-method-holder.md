@@ -744,3 +744,31 @@ and linux/amd64's (sections 11, 18 and 20). That carries the census's own offset
 - **Falsifier**: a line of no named kind; a count off its prediction by more than the census's linux/amd64
   offset for that count (section 25: files 30, switch lines 48, holder declarations 18, `using static` 5).
 - One target per run, in the order of the table.
+
+## Amendment 2026-11-12 (sixth) — windows/amd64, darwin/amd64 and linux/arm64 scored
+
+> Appended, not rewritten. Same cut (`9d2aad5f02`), same base (`06610aaa65`), one target per run.
+
+### 33. The three other targets, scored against section 32
+
+| | windows/amd64 predicted / measured | darwin/amd64 | linux/arm64 |
+|---|---|---|---|
+| files | 1,242 / 1,230 | 1,240 / 1,237 | 1,234 / 1,235 |
+| converted files | 990 / 978 | 989 / 986 | 983 / 984 |
+| `package_info.cs` | 252 / 252 | 251 / 251 | 251 / 251 |
+| switch lines | 6,072 / 6,066 | 6,053 / 6,060 | 6,047 / 6,049 |
+| holder declarations | 1,979 / 1,978 | 1,984 / 1,984 | 1,974 / 1,975 |
+| `using static` lines | 833 / 832 | 849 / 849 | 842 / 843 |
+| method expressions | 81 / 81 | 81 / 81 | 81 / 81 |
+| g, `builtin.` removed | 1,036 / 1,037 | 1,028 / 1,029 | 1,028 / 1,028 |
+| h, import alias restored | 116 / 116 | 116 / 116 | 116 / 116 |
+| references through the alias | 191 / 191 | 189 / 189 | 189 / 189 |
+| fallbacks | 11 / 11 | 11 / 11 | 11 / 11 |
+
+- Every miss is inside the band section 32 stated for its count. g has no band; its two misses by one are
+  scored MISSED as they stand.
+- The fallbacks are the same eleven sites on every target.
+- **Kinds.** On darwin/amd64 and linux/arm64 the lines no pattern classifies are, line for line, the
+  linux/amd64 list of section 27. windows/amd64 adds 26 lines of kind q in `os` (`removeall_at.go`,
+  `root_openat.go`, `root_windows.go`): `syscallꓸHandle` becomes `sysfdType`, the package's own Go alias of
+  that type. The falsifier stayed silent on all three targets.
