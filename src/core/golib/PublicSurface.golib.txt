@@ -136,6 +136,9 @@ go.GoRecvAttribute
 go.GoRefPrimaryAttribute
 go.GoReflect
 go.GoReflectCompanionAttribute
+# go.GoRefusalDowngradedAttribute: added 2026-11-12 on COORD's ruling (the public-surface review). A converter-emitted
+# assembly attribute, like the other Go* attributes here; it stays in namespace go, so emission does not move.
+go.GoRefusalDowngradedAttribute
 go.GoRequiresUnsafeAttribute
 go.GoSStringTwinAttribute
 go.GoShellBinding
