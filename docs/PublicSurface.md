@@ -3,7 +3,8 @@
 A C# project that references a `go.*` or `nugetgo.*` package, or calls code go2cs converted, binds to names that go2cs
 chose. This page says which of those names are a promise and which are not, and how a promised name may change.
 
-There are three tiers. Every consumer-visible name is in exactly one.
+There are three tiers. Every consumer-visible name is in one of them, or is a [contract member](#contract-members) of
+a type, which goes with that type.
 
 ## Tier 1: frozen
 
@@ -44,15 +45,32 @@ not name them, and IntelliSense hides them: each carries `[EditorBrowsable(Edito
   fields (`Fᶠ`), and a named pointer type's `DerefOrNull`.
 - **golib's emitted-code API**: the `Go…` attributes (`GoImplement`, `GoRecv`, `GoPromoted`, `GoType` and the rest),
   the adapter and type registries, `StandardBox<T>` and the other box classes, `GoFrame`, `sstring`, `UntypedInt`,
-  and the runtime classes in namespace `go.golib`.
+  and the runtime classes in namespace `go.golib`. Those that live in namespace `go` are listed in the baseline's
+  `[go-tier2]` section. Adding one there needs a COORD ruling, cited beside it; any other new golib name goes in
+  `go.golib`.
 - **`GoexitException`**: `runtime.Goexit` unwinds with it. Catching it is not supported.
 
 A type in a generated host is plumbing, but its methods are not. The promoted methods a host carries are part of the
 Go method set, so they stay visible in member completion; only the host's own name is hidden.
 
+## Contract members
+
+go2cs-gen also writes public members onto the Go types themselves. Those a C# caller binds to are contract members:
+they stay visible and go with the tier of the type they belong to. They are:
+
+- the value contract of a Go type: its constructors, its operators and conversions (`==` against `nil`, `implicit`
+  from `nil`), `Equals`, `GetHashCode` and `ToString`;
+- overloads of a name the Go declaration has: the `ж<T>` form of a method, and the `@string` form of a function that
+  takes `sstring`;
+- field accessors (`Ꮡfield`), a named pointer type's `Value`, `ValueSlot`, `IsNull` and `IsNilPointer` and its `of`
+  and `at` views, and `ΔClone`, `Make`, `Wrap` and `Source`.
+
+Any other generated public member is hidden. The list is checked: GenTests' `HiddenPlumbingTests` fails on a generated
+public member that is neither hidden nor one of these.
+
 ## Tier 3: no promise
 
-These can change in any release, and nothing is done to warn about them.
+These can change in any release. At this release no package marks them and no build warning names a use of them.
 
 - **Go `internal` and `vendor` packages.** They are public to .NET, as Go's import rule has no .NET equivalent, but
   Go changes them freely between releases. Do not reference them.
