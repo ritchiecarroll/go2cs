@@ -741,3 +741,22 @@ func TestTypeItsPackageEmitsAsAUsingIsSpelledByItsTargetWhereNoAliasIsLoaded(t *
 		"lib.Plain",
 	})
 }
+
+// golib names its friend assemblies in InternalsVisibleTo by assembly name, and a standard-library assembly is
+// go.<import path> (assemblyIdentity.go). An internal golib type of namespace `go` is golib's inside a method holder
+// of runtime, whose assembly is a friend, and not of fmt, whose assembly is not.
+func TestGolibFriendTypesFollowTheAssemblyName(t *testing.T) {
+	const friendType = "Waiter"
+
+	if !golibFriendNamespaceTypes[friendType] {
+		t.Fatalf("golib no longer declares the internal type %s in namespace go; pick another from golibNamespaceNames.go", friendType)
+	}
+
+	if !golibNamespaceType(friendType, "runtime") {
+		t.Errorf("runtime's assembly go.runtime is golib's friend, so %s is golib's there", friendType)
+	}
+
+	if golibNamespaceType(friendType, "fmt") {
+		t.Errorf("fmt's assembly go.fmt is not golib's friend, so %s is not golib's there", friendType)
+	}
+}

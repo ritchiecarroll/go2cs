@@ -204,7 +204,7 @@ public class GolibNamespaceNamesTests
         StringAssert.Contains(section("golibGenericNamespaceTypes"), "\t\"slice\",\n", "slice<T> is declared only with a type parameter");
         Assert.IsFalse(section("golibNamespaceTypes").Contains("\t\"slice\",\n", StringComparison.Ordinal), "and so is on no list of plain types");
         StringAssert.Contains(section("golibChildNamespaces"), "\t\"golib\",\n", "namespace go.golib");
-        StringAssert.Contains(section("golibFriendAssemblies"), "\t\"runtime\",\n", "golib grants package runtime its internals");
+        StringAssert.Contains(section("golibFriendAssemblies"), "\t\"go.runtime\",\n", "golib grants package runtime's assembly its internals");
         Assert.IsFalse(rendered.Contains('<'), "no compiler-generated type is named");
     }
 }

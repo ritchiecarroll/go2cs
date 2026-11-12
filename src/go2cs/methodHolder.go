@@ -574,10 +574,11 @@ func holderHiddenTypeName(typeName string) string {
 
 // golibNamespaceType reports whether golib declares, in namespace `go`, a type named name that takes no
 // type parameter and that the package at importPath can name: a public one, or an internal one where
-// golib names the package's assembly in InternalsVisibleTo. A package directly below `go` is the assembly
-// of its own import path, and the lists are golib's own (golibNamespaceNames.go, generated).
+// golib names the package's assembly in InternalsVisibleTo. The package's assembly is named as the converter
+// names it (go.runtime for runtime, assemblyIdentity.go), and the lists are golib's own (golibNamespaceNames.go,
+// generated).
 func golibNamespaceType(name, importPath string) bool {
-	return golibNamespaceTypes[name] || (golibFriendNamespaceTypes[name] && golibFriendAssemblies[importPath])
+	return golibNamespaceTypes[name] || (golibFriendNamespaceTypes[name] && golibFriendAssemblies[linknameAssemblyName(importPath)])
 }
 
 // golibNamespaceName reports whether golib declares anything named name in namespace `go`: a type, with

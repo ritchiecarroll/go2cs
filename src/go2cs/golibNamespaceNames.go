@@ -219,8 +219,8 @@ var golibFriendNamespaceTypes = nameSet(
 // golibFriendAssemblies holds the assemblies golib names in InternalsVisibleTo.
 var golibFriendAssemblies = nameSet(
 	"GolibTests",
-	"runtime",
-	"unsafe",
+	"go.runtime",
+	"go.unsafe",
 )
 
 // golibGenericNamespaceTypes holds the names golib declares in namespace `go` only with type
