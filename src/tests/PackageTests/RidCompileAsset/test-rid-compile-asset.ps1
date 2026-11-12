@@ -155,8 +155,8 @@ $verdicts += Invoke-PublishArm
 
 if ($isReferencePlatform) {
     $pkg = Join-Path $env:NUGET_PACKAGES "go.syscall/$Version"
-    $lib = Get-FileHash (Join-Path $pkg 'lib/net10.0/syscall.dll')
-    $twin = Get-FileHash (Join-Path $pkg "runtimes/$rid/lib/net10.0/syscall.dll")
+    $lib = Get-FileHash (Join-Path $pkg 'lib/net10.0/go.syscall.dll')
+    $twin = Get-FileHash (Join-Path $pkg "runtimes/$rid/lib/net10.0/go.syscall.dll")
     Write-Host "  [CONTROL no-op] lib/ $($lib.Hash.Substring(0, 16)) vs runtimes/$rid $($twin.Hash.Substring(0, 16))"
     $verdicts += if ($lib.Hash -eq $twin.Hash) { 'PASS (CONTROL no-op): the reference-platform twin is byte-identical to lib/' } else { 'FAIL (CONTROL no-op): the twin differs from lib/ on the reference platform' }
 }

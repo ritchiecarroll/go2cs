@@ -1,0 +1,259 @@
+# OQ4 rename census — sections G2, G3, H1, K1, C3 classified (census at 742a3dbb24)
+
+Classes: RENAME (names/computes a converted std-library assembly file or simple name), GOLIB-GEN (golib.dll / go.lib / go2cs-gen / go.gen asset files; depends on the open question), EXE-OR-TEST (a converted program, behavioral/perf/test project, or a `.tests` assembly), GENERIC (handles .dll generically, system/native/.NET assembly, fixture, or unrelated).
+K1 RENAME notes carry a tag: **LIVE doc** (must change), **plan/design** (states the current rule; amend with a dated note if still governing), **point-in-time record** (never rewritten per CLAUDE.md; no edit needed).
+Hits that appear in two sections (push-nuget.ps1 1589-1593, test-rid-compile-asset.ps1 148/158/159, release-smoke.ps1 352, GoApiCompat.psm1 33/47, Test-GoApiCompat.ps1 229, the nugetgo/pushnuget fixtures, the perf ps1 lines) are counted in EACH section, as the census lists them.
+
+## Summary
+
+| section | hits | RENAME | GOLIB-GEN | EXE-OR-TEST | GENERIC | sum |
+|---|---|---|---|---|---|---|
+| G2 | 111 | 10 | 8 | 5 | 88 | 111 |
+| G3 | 175 | 10 | 5 | 12 | 148 | 175 |
+| H1 | 131 | 11 | 3 | 0 | 117 | 131 |
+| K1 | 198 | 63 | 12 | 42 | 81 | 198 |
+| C3 | 631 | 0 | 0 | 195 | 436 | 631 |
+
+Total RENAME across the five sections: **94** (84 distinct path:line after removing cross-section duplicates).
+K1's 63 RENAME split: LIVE 3, plan/design 14, point-in-time record 46. Code/tooling RENAME (G2+G3+H1, distinct lines): 21.
+
+
+## G2 .dll paths: release/nugetgo tooling  [\.dll]
+
+Hits: **111**. RENAME 10 + GOLIB-GEN 8 + EXE-OR-TEST 5 + GENERIC 88 = 111.
+
+### RENAME (10)
+
+- `src/push-nuget.ps1:1588` — comment (layout L3 diagram): `os.dll` -> `go.os.dll`
+- `src/push-nuget.ps1:1589` — comment (layout L3 diagram): `os.dll` -> `go.os.dll`
+- `src/push-nuget.ps1:1590` — comment (layout L3 diagram): `os.dll` -> `go.os.dll`
+- `src/push-nuget.ps1:1591` — comment (layout L3 diagram): `os.dll` -> `go.os.dll`
+- `src/push-nuget.ps1:1592` — comment (layout L3 diagram): `os.dll` -> `go.os.dll`
+- `src/push-nuget.ps1:1593` — comment (layout L3 diagram): `os.dll` -> `go.os.dll`
+- `src/push-nuget.ps1:1618` — comment quoting DESIGN-multiplatform-corpus: `lib/<tfm>/syscall.dll` -> `go.syscall.dll` (or mark it as the pre-rename quotation)
+- `src/tests/PackageTests/RidCompileAsset/test-rid-compile-asset.ps1:158` — `lib/net10.0/syscall.dll` -> `lib/net10.0/go.syscall.dll` (hash of the restored go.syscall compile asset; the arm FAILS to find the file otherwise)
+- `src/tests/PackageTests/RidCompileAsset/test-rid-compile-asset.ps1:159` — `runtimes/$rid/lib/net10.0/syscall.dll` -> `.../go.syscall.dll` (same arm, the RID twin)
+- `src/tests/PackageTests/release-smoke.ps1:352` — `Dll = 'internal.coverage.decodemeta.dll'` -> `'go.internal.coverage.decodemeta.dll'` and `'runtime.debug.dll'` -> `'go.runtime.debug.dll'` (Get-GAssetVerdict -Filter $Dll finds 0 assets and FAILs otherwise); simplest: derive Dll as "$($pkg.Id).dll"
+
+### GOLIB-GEN (8)
+
+- `src/push-nuget.ps1:1874` — `go2cs-gen.dll` existence check on the analyzer build output -- changes only if go2cs-gen's AssemblyName becomes go.gen
+- `src/push-nuget.ps1:1878` — same check, after the direct rebuild
+- `src/tests/sweep-oracle-rerun-selftest.ps1:355` — fixture text of a CS8034 analyzer-load error naming go2cs-gen.dll; Test-GeneratedTypeMissingFailure keys on the CS code, not the file name, so cosmetic only
+- `src/tests/sweep-oracle-rerun-selftest.ps1:362` — same fixture, warning arm; cosmetic only
+- `src/tools/crosspkg-census/README.md:47` — README: the global-using list was read by reflection from golib.dll
+- `src/tools/pushnuget/GoApiCompat.psm1:33` — help text example `lib/net10.0/golib.dll` (package-relative ApiCompat asset)
+- `src/tools/pushnuget/GoApiCompat.psm1:47` — comment example `lib/net10.0/golib.dll`
+- `src/tools/pushnuget/Test-GoApiCompat.ps1:229` — asserts every golib CompatibilitySuppressions.xml entry names `lib/net10.0/golib.dll` -- must follow golib's asset name if golib is renamed (and the suppression file's Left/Right too)
+
+### EXE-OR-TEST (5) — 3 examples
+
+- `src/tests/Behavioral/run-behavioral-tests.ps1:8` — BehavioralTests.dll (MSTest host assembly)
+- `src/tests/PackageTests/RidCompileAsset/test-rid-compile-asset.ps1:148` — RidCompileAsset.dll (the probe program)
+- `src/tests/Performance/run-fieldview-aot-bound.ps1:82` — "$row.dll" = the perf row's program
+
+### GENERIC (88) — 3 examples
+
+- `src/_paths.ps1:86` — # initializer faults on `DllImport("kernel32.dll")` the moment a program touches it (measured: the
+- `src/tools/nugetgo/Test-NugetgoFlavors.ps1:118` — Check 'a package whose lib/ is not the flavors'' assembly set is refused' ($wrongSet -like '*Other.dll*') "got: $wrongSet"
+- `src/tools/pushnuget/Test-GoAssemblyMaterial.ps1:53` — [bool](Get-GoLibEntryDifference -Name 'lib/net10.0/App.dll' -A $alpha -B $padded)) 'no reason for a length difference'
+
+## G3 .dll paths: test harnesses  [\.dll]
+
+Hits: **175**. RENAME 10 + GOLIB-GEN 5 + EXE-OR-TEST 12 + GENERIC 148 = 175.
+
+### RENAME (10)
+
+- `src/tests/GolibTests/ChattyFlagBridgeTests.cs:201` — comment `flag.dll` -> `go.flag.dll`; NOTE the assertion at :210 `referenced.Contains("flag")` keys on the simple name and must become "go.flag" or the guard goes vacuous (not a .dll hit, so not in the census)
+- `src/tests/GolibTests/LazyCallersTests.cs:11` — comment `sort.dll` -> `go.sort.dll`; NOTE the code it describes (`Opens().Contains("sort")` at :101 and the WitnessPdb sort.pdb path) keys on the simple name too
+- `src/tests/GolibTests/LazyCallersTests.cs:102` — Inconclusive message `sort.dll` -> `go.sort.dll` (same test; see :101 Contains("sort"))
+- `src/tests/GolibTests/MemProfileReachabilityTests.cs:39` — closure `runtime.dll`, `fmt.dll` -> `go.runtime.dll`, `go.fmt.dll` (`golib.dll` follows the open question). Driven by golib GoMemProfile.cs:100 `PprofAssemblyName = "runtime.pprof"` and :113 `Type.GetType("go.runtime.pprof_package, runtime.pprof")`, which must become go.runtime.pprof
+- `src/tests/GolibTests/MemProfileReachabilityTests.cs:43` — closure `runtime.pprof.dll` -> `go.runtime.pprof.dll` (the positive arm; stays green only if GoMemProfile's constant moves with it), `runtime.dll` -> `go.runtime.dll`
+- `src/tests/GolibTests/MemProfileReachabilityTests.cs:49` — closure `runtime.dll` -> `go.runtime.dll`; `runtime.pprof.tests.dll` is the test binary (follows the .tests naming decision)
+- `src/tests/GolibTests/MemProfileReachabilityTests.cs:53` — negative arm: `runtime.dll` -> `go.runtime.dll`, `runtime.pprof.extra.dll` -> `go.runtime.pprof.extra.dll` (keep it a near-miss of the NEW name)
+- `src/tests/PackageTests/RidCompileAsset/test-rid-compile-asset.ps1:158` — `lib/net10.0/syscall.dll` -> `lib/net10.0/go.syscall.dll` (hash of the restored go.syscall compile asset; the arm FAILS to find the file otherwise)
+- `src/tests/PackageTests/RidCompileAsset/test-rid-compile-asset.ps1:159` — `runtimes/$rid/lib/net10.0/syscall.dll` -> `.../go.syscall.dll` (same arm, the RID twin)
+- `src/tests/PackageTests/release-smoke.ps1:352` — `Dll = 'internal.coverage.decodemeta.dll'` -> `'go.internal.coverage.decodemeta.dll'` and `'runtime.debug.dll'` -> `'go.runtime.debug.dll'` (Get-GAssetVerdict -Filter $Dll finds 0 assets and FAILs otherwise); simplest: derive Dll as "$($pkg.Id).dll"
+
+### GOLIB-GEN (5)
+
+- `src/tests/Performance/PerformanceRunner/AotPublishReuse.cs:204` — comment: `bin/Release/.../go2cs-gen.dll` mtime
+- `src/tests/Performance/PerformanceRunner/ReleaseRun.cs:347` — `Path.Combine(outDir, "golib.dll")` passed to the ReadyToRun shape check (the program `.dll` beside it is AssemblyName-derived)
+- `src/tests/Performance/PerformanceRunner/ReleaseRun.cs:395` — same `golib.dll` shape-check path, second leg
+- `src/tests/Performance/PerformanceRunnerTests/AotPublishReuseTests.cs:177` — fixture tree path `core/golib/bin/Release/net10.0/golib.dll` (mirrors the real output path the reuse stamp reads)
+- `src/tests/Performance/PerformanceRunnerTests/AotPublishReuseTests.cs:179` — fixture tree path `gen/go2cs-gen/bin/Release/netstandard2.0/go2cs-gen.dll`
+
+### EXE-OR-TEST (12) — 3 examples
+
+- `src/tests/Behavioral/BehavioralRunner/Program.cs:913` — `{p}.dll` = behavioral test project program
+- `src/tests/Behavioral/BehavioralTests/AssemblySetup.cs:24` — BehavioralTests.dll
+- `src/tests/Behavioral/BehavioralTests/BehavioralTestBase.cs:100` — BehavioralTests.dll
+
+### GENERIC (148) — 3 examples
+
+- `src/tests/Behavioral/BehavioralRunner/Program.cs:1317` — foreach (string dll in Directory.EnumerateFiles(depBin, "*.dll", SearchOption.AllDirectories))
+- `src/tests/GolibTests/CgoScalarWrapperTests.cs:117` — [LibraryImport("ucrtbase.dll", EntryPoint = "_errno")]
+- `Binary file 742a3dbb24:src/utilities/ReplaceInFiles/ReplaceInFiles.exe matches` — Binary file 742a3dbb24:src/utilities/ReplaceInFiles/ReplaceInFiles.exe matches
+
+## H1 package asset paths  [lib/net10\.0|runtimes/]
+
+Hits: **131**. RENAME 11 + GOLIB-GEN 3 + EXE-OR-TEST 0 + GENERIC 117 = 131.
+
+### RENAME (11)
+
+- `src/core/golib/buildTransitive/go.lib.targets:16` — comment (layout L3 diagram): `syscall.dll` -> `go.syscall.dll` (line 15, `lib/<tfm>/syscall.dll`, needs the same edit but matched neither H1 pattern)
+- `src/core/golib/buildTransitive/go.lib.targets:17` — comment (layout L3 diagram): `syscall.dll` -> `go.syscall.dll` (line 15, `lib/<tfm>/syscall.dll`, needs the same edit but matched neither H1 pattern)
+- `src/core/golib/buildTransitive/go.lib.targets:18` — comment (layout L3 diagram): `syscall.dll` -> `go.syscall.dll` (line 15, `lib/<tfm>/syscall.dll`, needs the same edit but matched neither H1 pattern)
+- `src/core/golib/buildTransitive/go.lib.targets:19` — comment (layout L3 diagram): `syscall.dll` -> `go.syscall.dll` (line 15, `lib/<tfm>/syscall.dll`, needs the same edit but matched neither H1 pattern)
+- `src/push-nuget.ps1:1589` — comment (layout L3 diagram): `os.dll` -> `go.os.dll` (duplicate of the G2 hit)
+- `src/push-nuget.ps1:1590` — comment (layout L3 diagram): `os.dll` -> `go.os.dll` (duplicate of the G2 hit)
+- `src/push-nuget.ps1:1591` — comment (layout L3 diagram): `os.dll` -> `go.os.dll` (duplicate of the G2 hit)
+- `src/push-nuget.ps1:1592` — comment (layout L3 diagram): `os.dll` -> `go.os.dll` (duplicate of the G2 hit)
+- `src/push-nuget.ps1:1593` — comment (layout L3 diagram): `os.dll` -> `go.os.dll` (duplicate of the G2 hit)
+- `src/tests/PackageTests/RidCompileAsset/test-rid-compile-asset.ps1:158` — `lib/net10.0/syscall.dll` -> `lib/net10.0/go.syscall.dll` (hash of the restored go.syscall compile asset; the arm FAILS to find the file otherwise)
+- `src/tests/PackageTests/RidCompileAsset/test-rid-compile-asset.ps1:159` — `runtimes/$rid/lib/net10.0/syscall.dll` -> `.../go.syscall.dll` (same arm, the RID twin)
+
+### GOLIB-GEN (3)
+
+- `src/tools/pushnuget/GoApiCompat.psm1:33` — help text example `lib/net10.0/golib.dll` (package-relative ApiCompat asset)
+- `src/tools/pushnuget/GoApiCompat.psm1:47` — comment example `lib/net10.0/golib.dll`
+- `src/tools/pushnuget/Test-GoApiCompat.ps1:229` — asserts every golib CompatibilitySuppressions.xml entry names `lib/net10.0/golib.dll` -- must follow golib's asset name if golib is renamed (and the suppression file's Left/Right too)
+
+### EXE-OR-TEST (0) — 3 examples
+
+
+### GENERIC (117) — 3 examples
+
+- `src/core/Directory.Build.props:69` — merge every runtimes/<rid>/lib/ too), so a NuGet consumer's std frames resolve to their Go file:line (go.lib's
+- `src/tools/nugetgo/NugetgoFlavors.psm1:124` — foreach ($name in $want) { Write-NugetgoZipEntry $zip "runtimes/$rid/lib/$TargetFramework/$name" $flavor[$name] }
+- `src/tools/pushnuget/Test-GoAssemblyMaterial.ps1:53` — [bool](Get-GoLibEntryDifference -Name 'lib/net10.0/App.dll' -A $alpha -B $padded)) 'no reason for a length difference'
+
+## K1 docs mentioning dll/assembly names  [\.dll|AssemblyName]
+
+Hits: **198**. RENAME 63 + GOLIB-GEN 12 + EXE-OR-TEST 42 + GENERIC 81 = 198.
+
+### RENAME (63)
+
+- `docs/ConversionStrategies-Reference/package-conversion.md:26` — LIVE doc, must change: "library assemblies keep the full dotted <AssemblyName> -- their DLL and NuGet PackageId (go.$(AssemblyName))": restate as stdlib assembly name = package ID `go.<dotted path>`, and say what a non-std library (e.g. github.com.fatih.color) is named
+- `docs/ConversionStrategies-Reference/package-conversion.md:32` — LIVE doc, must change: "the name is the .csproj filename, the library <AssemblyName>, the NuGet PackageId": for the stdlib the AssemblyName becomes the go.-prefixed package ID, no longer the bare project name
+- `docs/ConversionStrategies-Reference/shadowing.md:560` — LIVE doc, must change: `flag.dll` -> `go.flag.dll`
+- `docs/PLAN-linux-operation.md:1045` — plan/design text stating the current rule: amend with a dated note if still governing: `PackageId = go.$(AssemblyName)`
+- `docs/PLAN-nugetgo.md:93` — plan/design text stating the current rule: amend with a dated note if still governing: "mirroring the stdlib's `go.$(AssemblyName)` rule"
+- `docs/PLAN-rebank-go126.md:922` — plan/design text stating the current rule: amend with a dated note if still governing: "packs as `go.<AssemblyName>`"
+- `docs/PLAN-rebank-go126.md:987` — plan/design text stating the current rule: amend with a dated note if still governing: `go.<AssemblyName>` ID derivation
+- `docs/PLAN-rebank-go126.md:989` — plan/design text stating the current rule: amend with a dated note if still governing: IDs computed from the AssemblyNames at nuget-1.24.13.7 (the derivation inverts after the rename)
+- `docs/doctrine/JOURNAL-2026-09-12.md:352` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll` locked by an orphaned child
+- `docs/doctrine/JOURNAL-2026-09-12.md:2035` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll` locked
+- `docs/doctrine/JOURNAL-2026-09-12.md:2524` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll` locked (MSB3027/MSB3021)
+- `docs/phase3/DESIGN-recursive-enduser-conversion.md:79` — plan/design text stating the current rule: amend with a dated note if still governing: `PackageId=go.$(AssemblyName)`
+- `docs/phase4/BOARD-next-validation-candidates.md:3273` — point-in-time record, never rewritten (no edit; a dated amendment at most): "filename, the library <AssemblyName>, the NuGet PackageId" (same rule as package-conversion.md:32)
+- `docs/phase4/BOARD-next-validation-candidates.md:4189` — point-in-time record, never rewritten (no edit; a dated amendment at most): `go.scanner.dll` (go/scanner's AssemblyName is already `go.scanner`; renamed it is `go.go.scanner.dll`)
+- `docs/phase4/BOARD-next-validation-candidates.md:7029` — point-in-time record, never rewritten (no edit; a dated amendment at most): `flag.dll`
+- `docs/phase4/BOARD-next-validation-candidates.md:7307` — point-in-time record, never rewritten (no edit; a dated amendment at most): `internal.syscall.windows.dll`
+- `docs/phase4/BOARD-next-validation-candidates.md:8956` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll` locked
+- `docs/phase4/BOARD-next-validation-candidates.md:10121` — point-in-time record, never rewritten (no edit; a dated amendment at most): `encoding.json.dll`
+- `docs/phase4/BOARD-next-validation-candidates.md:10961` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll` locked
+- `docs/phase4/BOARD-next-validation-candidates.md:13831` — point-in-time record, never rewritten (no edit; a dated amendment at most): `crypto.tls.dll`
+- `docs/phase4/BOARD-next-validation-candidates.md:20054` — point-in-time record, never rewritten (no edit; a dated amendment at most): built linux `syscall.dll`
+- `docs/phase4/BOARD-next-validation-candidates.md:24631` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll` read by reflection
+- `docs/phase4/BOARD-next-validation-candidates.md:24672` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll`
+- `docs/phase4/BOARD-next-validation-candidates.md:36106` — point-in-time record, never rewritten (no edit; a dated amendment at most): `internal.cpu.dll`
+- `docs/phase4/CENSUS-runtime-g6-full-depth.md:145` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll`, 2,446,336 bytes
+- `docs/phase4/DESIGN-binary-compat-guard.md:106` — point-in-time record, never rewritten (no edit; a dated amendment at most): `syscall.dll` cost measurement
+- `docs/phase4/DESIGN-managed-profiling.md:608` — plan/design text stating the current rule: amend with a dated note if still governing: `runtime.dll` (size budget of the profiling seam)
+- `docs/phase4/DESIGN-managed-profiling.md:609` — plan/design text stating the current rule: amend with a dated note if still governing: `runtime.dll` grows by the seam's IL
+- `docs/phase4/DESIGN-managed-profiling.md:610` — plan/design text stating the current rule: amend with a dated note if still governing: measured delta of `runtime.dll` owed
+- `docs/phase4/DESIGN-managed-profiling.md:612` — plan/design text stating the current rule: amend with a dated note if still governing: zero bytes in `runtime.dll`
+- `docs/phase4/DESIGN-managed-profiling.md:682` — plan/design text stating the current rule: amend with a dated note if still governing: `runtime.dll` size delta
+- `docs/phase4/DESIGN-multi-package-modules.md:83` — plan/design text stating the current rule: amend with a dated note if still governing: "AssemblyName = the dotted import path, and PackageId go.$(AssemblyName)"
+- `docs/phase4/DESIGN-multi-package-modules.md:157` — plan/design text stating the current rule: amend with a dated note if still governing: "The per-project PackageId go.$(AssemblyName) stays for the stdlib's per-package packages"
+- `docs/phase4/DESIGN-multiplatform-corpus.md:581` — point-in-time record, never rewritten (no edit; a dated amendment at most): L3 layout sketch at net9.0, `os.dll`
+- `docs/phase4/DESIGN-multiplatform-corpus.md:582` — point-in-time record, never rewritten (no edit; a dated amendment at most): L3 layout sketch at net9.0, `os.dll`
+- `docs/phase4/DESIGN-multiplatform-corpus.md:583` — point-in-time record, never rewritten (no edit; a dated amendment at most): L3 layout sketch at net9.0, `os.dll`
+- `docs/phase4/DESIGN-multiplatform-corpus.md:584` — point-in-time record, never rewritten (no edit; a dated amendment at most): L3 layout sketch at net9.0, `os.dll`
+- `docs/phase4/DESIGN-multiplatform-corpus.md:619` — point-in-time record, never rewritten (no edit; a dated amendment at most): `lib/net9.0/syscall.dll` host-of-record option (quoted by push-nuget.ps1:1618)
+- `docs/phase4/DESIGN-multiplatform-corpus.md:738` — point-in-time record, never rewritten (no edit; a dated amendment at most): `lib/net9.0/syscall.dll` option (i)
+- `docs/phase4/DESIGN-multiplatform-corpus.md:1192` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll` surface digest
+- `docs/phase4/DESIGN-multiplatform-corpus.md:1196` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll` digest
+- `docs/phase4/DESIGN-multiplatform-corpus.md:1235` — point-in-time record, never rewritten (no edit; a dated amendment at most): measured go.os package layout, `os.dll`
+- `docs/phase4/DESIGN-multiplatform-corpus.md:1236` — point-in-time record, never rewritten (no edit; a dated amendment at most): measured go.os package layout, `os.dll`
+- `docs/phase4/DESIGN-multiplatform-corpus.md:1237` — point-in-time record, never rewritten (no edit; a dated amendment at most): measured go.os package layout, `os.dll`
+- `docs/phase4/DESIGN-promoted-forwarder-placement.md:13` — point-in-time record, never rewritten (no edit; a dated amendment at most): `ast.dll` (informal; go/ast's real assembly is `go.ast.dll`, renamed `go.go.ast.dll`)
+- `docs/phase4/DESIGN-promoted-forwarder-placement.md:25` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll`'s GoFieldAccess
+- `docs/phase4/DESIGN-promoted-forwarder-placement.md:178` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll`
+- `docs/phase4/DESIGN-promoted-forwarder-placement.md:240` — point-in-time record, never rewritten (no edit; a dated amendment at most): `ast.dll` method count
+- `docs/phase4/INVESTIGATION-element-aliasing.md:118` — point-in-time record, never rewritten (no edit; a dated amendment at most): `sync.atomic.dll` (the same line's `golib.dll` follows the open question)
+- `docs/phase4/MILESTONE-75pct-prep.md:631` — point-in-time record, never rewritten (no edit; a dated amendment at most): go.os layout `lib/net9.0/os.dll`
+- `docs/phase4/MILESTONE-75pct-prep.md:632` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtimes/*/lib/net9.0/os.dll`
+- `docs/phase4/MILESTONE-75pct-prep.md:641` — point-in-time record, never rewritten (no edit; a dated amendment at most): `os.dll` on disk
+- `docs/phase4/NOTES-next-hop.md:186` — plan/design text stating the current rule: amend with a dated note if still governing: `PackageId` = `go.$(AssemblyName)`, so `go.testing.synctest`
+- `docs/phase4/NOTES-next-hop.md:246` — point-in-time record, never rewritten (no edit; a dated amendment at most): HTML-comment provenance quoting `<PackageId>go.$(AssemblyName)</PackageId>` at a1f133c3a9
+- `docs/phase4/REHEARSAL-h5-go124.md:589` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll` (rung table/prose)
+- `docs/phase4/REHEARSAL-h5-go124.md:655` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll` (rung table/prose)
+- `docs/phase4/REHEARSAL-h5-go124.md:680` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll` (rung table/prose)
+- `docs/phase4/REHEARSAL-h5-go124.md:741` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll` (rung table/prose)
+- `docs/phase4/REHEARSAL-h5-go124.md:750` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll` (rung table/prose)
+- `docs/phase4/REHEARSAL-h5-go124.md:767` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll` (rung table/prose)
+- `docs/phase4/REHEARSAL-h5-go124.md:787` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll` (rung table/prose)
+- `docs/phase4/REHEARSAL-h5-go124.md:844` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll`, `sync.dll`, `internal.sync.dll`
+- `docs/phase4/briefs/slog-firstlaunch-union-2026-10-02.md:84` — point-in-time record, never rewritten (no edit; a dated amendment at most): `runtime.dll`
+
+### GOLIB-GEN (12)
+
+- `docs/ConversionStrategies-Reference/pointers.md:2324` — historical measurement sentence: `golib.dll` verified to lack the fix
+- `docs/phase4/BOARD-next-validation-candidates.md:18773` — point-in-time record, never rewritten (no edit; a dated amendment at most): `go2cs-gen.dll` at its expected path
+- `docs/phase4/BOARD-next-validation-candidates.md:30470` — point-in-time record, never rewritten (no edit; a dated amendment at most): `golib.dll`
+- `docs/phase4/CENSUS-gen-format-seat1.md:50` — point-in-time record, never rewritten (no edit; a dated amendment at most): `go2cs-gen.dll`
+- `docs/phase4/CENSUS-gen-format-seat2.md:62` — point-in-time record, never rewritten (no edit; a dated amendment at most): `go2cs-gen.dll`
+- `docs/phase4/DATA-hop126-perf.md:267` — point-in-time record, never rewritten (no edit; a dated amendment at most): "program and golib `.dll`s"
+- `docs/phase4/DATA-hop126-perf.md:321` — point-in-time record, never rewritten (no edit; a dated amendment at most): `golib.dll` differs from its cached twin
+- `docs/phase4/DATA-hop126-perf.md:341` — point-in-time record, never rewritten (no edit; a dated amendment at most): only `golib.dll` is swapped
+- `docs/phase4/DESIGN-binary-compat-guard.md:34` — point-in-time record, never rewritten (no edit; a dated amendment at most): go.gen holds only `analyzers/dotnet/cs/go2cs-gen.dll`
+- `docs/phase4/DESIGN-iface-shell-caching.md:1026` — point-in-time record, never rewritten (no edit; a dated amendment at most): `golib.dll`'s .text size
+- `docs/phase4/DESIGN-reflect-structof.md:5` — point-in-time record, never rewritten (no edit; a dated amendment at most): probes on `golib.dll`
+- `docs/phase4/DESIGN-reflect-structof.md:766` — point-in-time record, never rewritten (no edit; a dated amendment at most): probes on `golib.dll`
+
+### EXE-OR-TEST (42) — 3 examples
+
+- `docs/ConversionStrategies-Reference/manual-conversions.md:1850` — `dotnet prog.dll`
+- `docs/ConversionStrategies-Reference/shadowing.md:524` — `InternalsVisibleTo $(AssemblyName).tests`
+- `docs/ConversionStrategies.md:1530` — `InternalsVisibleTo $(AssemblyName).tests`
+
+### GENERIC (81) — 3 examples
+
+- `docs/Background.md:47` — Need Go's own speed? You can [export Go functions](https://pkg.go.dev/cmd/cgo#hdr-C_references_to_Go) as C, build them into a native library…
+- `docs/phase4/DESIGN-cgo-phase2-pinvoke.md:309` — The alternative is to resolve `foo` at run time by searching for `libfoo.so*` or `*foo*.dll`. That is a glob over
+- `docs/validation/1.26.10.3/ValidatedTestPackages.md:605` — | [`debug/pe`](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.26.10.3/src/core/debug/pe) | 10 |  | PE executables and objects — header…
+
+## C3 friend grants: converted csproj (by kind)  [InternalsVisibleTo]
+
+Hits: **631**, 4 distinct shapes (package name normalized; the SynthesizedStructs shape split by project kind).
+
+| shape | count | example | class | reason |
+|---|---|---|---|---|
+| `<InternalsVisibleTo Include="$(AssemblyName).tests" />` | 194 | `src/core/archive/tar/archive.tar.csproj:40` | EXE-OR-TEST | friend grant to the package's `.tests` assembly, computed from $(AssemblyName): COUPLED -- if the production AssemblyName becomes go.<pkg>, this resolves to go.<pkg>.tests, so each <pkg>.tests.csproj's explicit AssemblyName must move to go.<pkg>.tests in lockstep, or the grant must be rewritten to the literal test name (no edit needed in this line if the test assemblies follow) |
+| `<InternalsVisibleTo Include="go2cs.SynthesizedStructs" />  [production csproj]` | 194 | `src/core/archive/tar/archive.tar.csproj:42` | GENERIC | grant to golib's reflect.StructOf DYNAMIC assembly, a fixed literal (GoStructSynthesis.cs:158 `DynamicAssemblyName = "go2cs.SynthesizedStructs"`); names no converted assembly and no golib/gen file; unchanged by the rename |
+| `<InternalsVisibleTo Include="go2cs.SynthesizedStructs" />  [tests.csproj]` | 242 | `src/core/archive/tar/archive.tar.tests.csproj:65` | GENERIC | grant to golib's reflect.StructOf DYNAMIC assembly, a fixed literal (GoStructSynthesis.cs:158 `DynamicAssemblyName = "go2cs.SynthesizedStructs"`); names no converted assembly and no golib/gen file; unchanged by the rename |
+| `<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">` | 1 | `src/core/testing/testing.csproj:51` | EXE-OR-TEST | testing.csproj:51 opens a hand-written `InternalsVisibleToAttribute` item whose `_Parameter1` (:52) is `GolibTests`, the MSTest project; names no converted assembly. (Separately: testing's own AssemblyName is `testing_package` with an explicit PackageId go.testing -- outside C3, but the rename rule must say whether it becomes go.testing.) |
+
+C3 totals: RENAME 0 + GOLIB-GEN 0 + EXE-OR-TEST 195 + GENERIC 436 = 631. No C3 grant names a converted std assembly by simple name.
+
+## Unsure, with reasons
+
+1. **C3 `$(AssemblyName).tests` (194 production csprojs, plus the same shape quoted in K1: shadowing.md:524, ConversionStrategies.md:1530, JOURNAL:1275, BOARD:33384, CENSUS-runtime-first-contact:395, DESIGN-multiplatform-corpus:1089/1098).** Classed EXE-OR-TEST because the grant names a `.tests` assembly. But it is COMPUTED from the production AssemblyName: renaming `fmt` to `go.fmt` makes it grant `go.fmt.tests`, while each `<pkg>.tests.csproj` sets its AssemblyName explicitly to `fmt.tests`. Either the test assemblies are renamed in lockstep, or every grant breaks silently and test sources lose internal access (CS0122). That is a decision for the rule, not something this classification settles.
+2. **The `go2cs.SynthesizedStructs` grants (436 in C3)** are GENERIC: the name is a fixed literal for golib's dynamic assembly (GoStructSynthesis.cs:158). They change only if someone also renames that dynamic assembly, which the ruling does not ask for.
+3. **Third-party / nugetgo assemblies** (Test-NugetgoBehaviorProof.ps1:24 `github.com.inconshreveable.mousetrap.dll`, :180, and every nugetgo glob) are GENERIC. The ruling covers the converted std library only, and PLAN-nugetgo's 2026-10-02 amendment gives modules the `nugetgo.` ID. If the rename is meant to cover nugetgo too, these fixtures and package-conversion.md:156/195 (the `-recurse` user-conversion naming, classed GENERIC) move to RENAME.
+4. **Fixtures that borrow std/golib names** are GENERIC per the brief: FieldAccessGeneratorTests.cs:711/716/733 (`runtime.dll`), :1113/1114/1118 (`golib.dll`, `tls.dll`, `httptest.dll`), pack-paths-selftest.ps1 `go.clean`/`clean.dll`, ModuleAncestryTests.cs:58 `parse.dll`. They are temp-dir compilations whose names nothing keys on. Renaming them would be cosmetic only. Caveat: go2cs-gen DOES key on the assembly name `golib` (EscapeRegistryGenerator.cs:69/162/240/386, ExtensionHostListGenerator.cs:57, GeneratedSource.cs:112, NativeArrayOpenerGenerator.cs:57/170/174, StructDeclarationSyntaxExtensions.cs:37). So if golib is renamed, any fixture assembly literally named `golib` that a generator test relies on must follow.
+5. **Mentions of go.gen / go.lib as packages, with no file named** (GoApiCompat.psm1:202/310, Test-GoApiCompat.ps1:123/160 "go.gen, an analyzer, has no lib/ or runtimes/ asset"; push-nuget.ps1:1757 "go.lib's"; Directory.Build.props:69 "go.lib's packed targets"; CENSUS-stdlib-warnings:13 "golib, the go2cs-gen generator") are GENERIC. They stay true whatever golib and gen are named. Reclass them GOLIB-GEN if every golib/gen mention should be counted.
+6. **The K1 record/plan split is a judgment call.** CLAUDE.md names RECON/REHEARSAL/CENSUS/DATA/STAGE0 and the BOARD as records. DESIGN-* files are not named there. DESIGN files describing a past measurement (multiplatform-corpus, promoted-forwarder, binary-compat:106) are tagged record. DESIGN-managed-profiling 608-682 (budgets for a seam not yet built) and DESIGN-multi-package-modules 83/157 are tagged plan/design.
+7. **DESIGN-managed-profiling.md:580 `go2cs.CpuProfiler.dll`** is GENERIC: it is hand-written, `IsPackable=false`, ships no go.* package, and is neither golib nor gen.
+8. **testing.csproj:51** is EXE-OR-TEST: the grant goes to the GolibTests MSTest project. The package itself is hand-owned with `AssemblyName testing_package` and an explicit `PackageId go.testing`. The rule must say whether that assembly becomes `go.testing`. If it does, its sibling test project and any `typeof(testing_package).Assembly` name checks are affected.
+
+## Found while reading context (outside these five sections, not counted above)
+
+- `src/core/golib/GoMemProfile.cs:100` `PprofAssemblyName = "runtime.pprof"` and `:113` `Type.GetType("go.runtime.pprof_package, runtime.pprof")`. This code keys on the std assembly simple name and must become `go.runtime.pprof`, or memory profiling silently turns off for every program. MemProfileReachabilityTests (G3 RENAME) is its guard.
+- `src/tests/GolibTests/ChattyFlagBridgeTests.cs:210` `referenced.Contains("flag")`: after the rename this goes vacuous (it stays green even if the reference comes back). It must become `"go.flag"`.
+- `src/tests/GolibTests/LazyCallersTests.cs:79` WitnessPdb `"sort.pdb"`, `:101` `Opens().Contains("sort")`, `:133` `package == "sort"`, `:144` `CollectionAssert.Contains(opened, "sort", ...)`: all keyed on the simple name.
+- Every std csproj, e.g. `src/core/go/scanner/go.scanner.csproj`, also carries `<PackageId>go.$(AssemblyName)</PackageId>`, `<PackageTags>$(AssemblyName);...`, `<Description>$(AssemblyName) ...` and `<PublishReadyToRunExclude Include="$(AssemblyName).dll" />`. If AssemblyName itself becomes the ID, PackageId must stop prefixing or it yields `go.go.fmt`.
+- The `go/*` packages already carry a `go.` AssemblyName (`go.ast`, `go.scanner`; packages `go.go.ast`, `go.go.scanner`). Renamed, they become `go.go.ast.dll`. So BOARD:4189's `go.scanner.dll` is today's real name, and DESIGN-promoted-forwarder's `ast.dll` is shorthand.
+- `src/core/golib/buildTransitive/go.lib.targets:15` (`lib/<tfm>/syscall.dll`) needs the same comment edit as :16-19 but matched no H1 pattern.

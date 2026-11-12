@@ -43,7 +43,7 @@ public class WindowsCommandLineTests
             "<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup><OutputType>Exe</OutputType>" +
             "<TargetFramework>net10.0</TargetFramework><Nullable>disable</Nullable><ImplicitUsings>disable</ImplicitUsings>" +
             "<AssemblyName>probe</AssemblyName><UseAppHost>true</UseAppHost></PropertyGroup><ItemGroup>" +
-            Ref("os") + Ref("syscall") + Ref("golib") + "</ItemGroup></Project>");
+            Ref("go.os") + Ref("go.syscall") + Ref("golib") + "</ItemGroup></Project>");
 
         File.WriteAllText(Path.Combine(dir, "Program.cs"),
             "public static class Program { public static void Main() {" +
