@@ -15,7 +15,7 @@ public static @string Renamed(Buffer b) {
     return fmt.Sprintf("%s/%s/%d"u8, b.Tag, b.ΔBuffer.Data, b.ΔBuffer.N);
 }
 
-internal static void Main() {
+internal static void main() {
     ref var b = ref heap<Buffer>(new Buffer(ΔBuffer: inner.NewBuffer("alpha", 3), Tag: "tagged"), out var Ꮡb);
 
     fmt.Println(b.ΔBuffer.Data, b.ΔBuffer.N);

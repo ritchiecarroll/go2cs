@@ -39,7 +39,7 @@ internal static void sortSeq<S, E>(S x, Func<E, E, bool> less)
 partial struct numbers /*[]nint*/;
 partial struct sortedMap /*[]nint*/;
 
-internal static void Main() {
+internal static void main() {
     var a = slice<nint>([1, 2, 3, 4, 5]);
     reverseSeq<slice<nint>, nint>(a);
     fmt.Println(a);

@@ -53,7 +53,7 @@ internal static @string readThrough(ref @string p) {
     return p;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(single);
     fmt.Println(cwd, cwdErr);
     fmt.Println(head, tail);

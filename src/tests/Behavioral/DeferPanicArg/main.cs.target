@@ -111,7 +111,7 @@ internal static void multiple() {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     valueCapture();
     reassignedAfterDefer();
     computedExpr();

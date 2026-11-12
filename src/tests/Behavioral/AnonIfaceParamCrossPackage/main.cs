@@ -28,7 +28,7 @@ internal partial interface local_n /*dyn*/ {
 
 internal static @string local(local_n n) { return "local:"u8 + n.KindString(); }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(local(new nodeжlocal_n(Ꮡ(new node(k: "l")))));
 
     fmt.Println(dbg.Fail(new nodeжFail_n(Ꮡ(new node(k: "x")))));

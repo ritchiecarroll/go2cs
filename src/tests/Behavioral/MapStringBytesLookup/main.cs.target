@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var interned = new map<@string, @string>{
         ["Content-Length"] = "len",
         ["Host"] = "host"

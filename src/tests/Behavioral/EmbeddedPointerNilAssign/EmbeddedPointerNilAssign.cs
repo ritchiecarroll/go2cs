@@ -27,7 +27,7 @@ public static ж<Setting> New(@string tag) {
     return Ꮡ(new Setting(tag: tag));
 }
 
-internal static void Main() {
+internal static void main() {
     var s = New("debug");
 
     fmt.Println(s.setting == nil);

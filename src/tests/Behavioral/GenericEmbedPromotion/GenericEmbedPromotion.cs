@@ -64,7 +64,7 @@ partial struct p224Curve {
     /*embed*/ internal curve<p224жpoint> curve;
 }
 
-internal static void Main() {
+internal static void main() {
     var pc = Ꮡ(new p224Curve(new curve<p224жpoint>(name: "p224c", newPoint: () => newP224(), seed: Ꮡ(new p224(v: 3)))));
 
     fmt.Println(pc.name);

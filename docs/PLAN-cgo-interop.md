@@ -85,7 +85,7 @@ step alone.
 ## 2. Measured: what happens today
 
 **Instrument.** A minimal cgo fixture plus a `packages.Load` probe using `packages.LoadAllSyntax` —
-the exact mode `conversionDriver.go:89`, `stdLibConverter.go` and `moduleConverter.go:160` all use.
+the exact mode `conversionDriver.go:89`, `stdLibConverter.go` and `moduleConverter.go:163` all use.
 Run on the coordinator machine, 2026-08-28, against `be58eb4aa`.
 
 **Finding 1 — the converting machine cannot run cgo at all.** `go env CGO_ENABLED` → `0`; no `gcc`,
@@ -145,7 +145,7 @@ correctness bug independent of cgo.*
 corpus is wholly `CGO_ENABLED=0` output, so cgo support cannot move an existing golden or CNR verdict.
 
 **Finding 6 — three existing "C" accommodations, all avoidance, none a binding.** The fatal gate
-(`visitImportSpec.go:212-214`), the `classSkip` bucket (`moduleConverter.go:230`), and a type-alias
+(`visitImportSpec.go:212-214`), the `classSkip` bucket (`moduleConverter.go:233`), and a type-alias
 preload skip (`importOperations.go:1027`). Nothing parses a preamble; nothing generates anything.
 
 ## 3. Where this sits in the existing roadmap
@@ -297,7 +297,7 @@ open half, and the word "deterministic" is deliberately *not* claimed for the co
 their own pinned commit, and the correction changes the conclusion.** Goroutines have not been
 `ThreadPool` work items since `4f06d78ae` (2026-08-13, *"SCHED-S1: goroutines get their own threads —
 the runtime owns capacity, and the pool floor retires"*), which is an **ancestor of `be58eb4aa`**.
-`Goroutine.Start` (`golib/runtime/Goroutine.cs:202-209`) is now `new Thread(() => Run(body),
+`Goroutine.Start` (`golib/runtime/Goroutine.cs:225-232`) is now `new Thread(() => Run(body),
 s_stackReserve)`, one dedicated thread per goroutine; the source says so directly at `:26` —
 *"Goroutines **used to be** `ThreadPool.QueueUserWorkItem` work items."* The 28.7-minute
 `internal/singleflight` ladder that
@@ -665,21 +665,21 @@ Finding 1, unchanged. **Predictions were written before any arm ran**, and are s
 | P3′ the same, `-cgo=true` | exit 1 too: the driver's refusal does not read the flag | **exit 0**. It emits `add.cs` + csproj + `package_info.cs`, and `add.cs` reads `using C = C_package;` / `C.add_ints(C.@int(a), C.@int(b))`: a package that does not exist, with the preamble dropped | **FALSIFIED.** "The flag is inert" (Finding 3, OQ-5) was false: `-cgo` was a **bypass** turning the gate's exit 1 into an exit-0 untyped emission |
 
 **Finding 4: FIXED at master.** `948b9e8998` (2026-08-29, red-first in `conversionDriver_test.go`) replaced the
-`pkg.GoFiles[i]` walk with `syntaxSourceFiles` (`conversionDriver.go:782-830`), which derives each tree's path
+`pkg.GoFiles[i]` walk with `syntaxSourceFiles` (`conversionDriver.go:796-844`), which derives each tree's path
 from its own UNADJUSTED token position and filters by `GoFiles` membership. It removes index pairing rather than
 bounds-patching it. The one residual index pairing is `testFileEntries` (`testConversion.go:2055-2066`), against
 `CompiledGoFiles` and bounds-guarded. That pairing is correct by the API's own contract, and is exposed only to the
 nil-drop caveat (`packages.go:524-525`), for which no red is constructible. It is recorded and not proposed.
 
 **Phase 1 step 2 ("fail loudly"): half landed.** S3 (`80ea656006`, 2026-09-30; owner ruling 578 item 7) refuses a
-SELECTED cgo source by name before any output (`refuseSelectedCgoSources`, `conversionDriver.go:870-905`,
+SELECTED cgo source by name before any output (`refuseSelectedCgoSources`, `conversionDriver.go:884-919`,
 GO2CS2001). `d3071b1fe7` (2026-11-05) pins every go/packages load to `CGO_ENABLED=0` unless the environment SETS
 it (`loaderEnvironment.go`). **That falsifies Phase 1's "No go2cs `packages.Config` call site overrides
 `CGO_ENABLED`".** A cgo-capable probe through go2cs must set `CGO_ENABLED=1` explicitly, or it silently measures
 cgo off. Relayed to P1's OQ-1 run.
 
 **Finding 5 HOLDS:** no tracked `.go` file imports `"C"` (count 0 at `30ad20e17e`). **Finding 6 is now eight
-accommodations, not three:** the gate (`visitImportSpec.go:270-274`), `classSkip` (`moduleConverter.go:322-323`),
+accommodations, not three:** the gate (`visitImportSpec.go:270-274`), `classSkip` (`moduleConverter.go:326-327`),
 the preload skip (`importOperations.go:1317-1318`), `noInitPseudoPackages` (`visitImportSpec.go:396`), S3, the
 loader pin, `cgoDynamicImports.go` (`//go:cgo_import_dynamic` binding for darwin trampolines, golib
 `GoCgoDynamicImports`), and `cgoUnsafeArgsLift.go` (Q56's `//go:cgo_unsafe_args` block lift). The last two are
@@ -691,19 +691,19 @@ Content was verified at each new site. "GONE" means the cited code no longer exi
 
 | Cite in the text above | At `30ad20e17e` |
 |---|---|
-| `conversionDriver.go:89` LoadAllSyntax · `moduleConverter.go:160` · `stdLibConverter.go` | `:113` · `:247-251` · `stdLibLoadConfig` `:282` |
+| `conversionDriver.go:89` LoadAllSyntax · `moduleConverter.go:163` · `stdLibConverter.go` | `:113` · `:247-251` · `stdLibLoadConfig` `:282` |
 | `visitImportSpec.go:212-214` | `:270-274` (now also emits GO2CS2001 before `Fatalf`) |
 | `conversionDriver.go:227-228` (the zip) · `:244-246` (marker probe) | **GONE** (`948b9e8998`, §11.1) · `:349-366` |
 | x/tools v0.36.0 `packages.go` `:512` / `:518-519` / `:447-451` | v0.52.0 `:518` / `:524-525` / `:453-456`, text unchanged |
 | `testConversion.go:1183-1187` | `testFileEntries`, `:2055-2066` |
-| `moduleConverter.go:230` · `importOperations.go:1027` | `:318-319` · `:1317-1318` |
+| `moduleConverter.go:233` · `importOperations.go:1027` | `:318-319` · `:1317-1318` |
 | `Roadmap.md:770-784` | the 5A/5B text is `Roadmap.md:402/421`; the completed half moved to `RoadmapHistory.md:307` |
 | `ToDo.md` item 48 · `ToDo.md:49-51` | `ToDo.md:63` (an `xx)` line pointing here) · `:64` |
 | `ж.NativeBox.cs:31/47/79` · `core/unsafe/unsafe.cs:368-380` | `:31/47/63` (+ `RetainedSource` `:202`) · `:361-367`, `FromBox<T>` `:500` |
 | `slice.cs:430-431` | `:660-661`, the same throw text |
 | `internal/runtime/syscall/linux/syscall_linux_impl.cs:105-119` | **moved under layout L3** to `internal/runtime/syscall/linux/linux/syscall_linux_impl.cs:116-124`; it now cites the converter's own funnel hold (`convSyscallFunnelCall`, `syscallKeepAliveAnalysis.go`) |
 | `PinnedBuffer.Clone` (`1d01200a9`) | `golib/runtime/PinnedBuffer.cs:174` |
-| `Goroutine.cs:202-209` `new Thread(…)` | **GONE**: `Start` (`:1126-1172`) hands off to `GoroutineThreadPool` (`ded04dbdca`, 2026-10-23: threads REUSED, thread-statics reset per body under the `GoroutineThreadState` census, never multiplexed) |
+| `Goroutine.cs:225-232` `new Thread(…)` | **GONE**: `Start` (`:1126-1172`) hands off to `GoroutineThreadPool` (`ded04dbdca`, 2026-10-23: threads REUSED, thread-statics reset per body under the `GoroutineThreadState` census, never multiplexed) |
 | `Goroutine.cs:26` · `:83-84` · `:138` · `:176` · `:68` | `:38` · `t_current` `:122` · `OnGoroutine` `:465` · `Enter()` `:516` · `DefaultStackReserve` `:85` (plus `BoundedStackReserve`, 16 MiB, `b8587f92c5`) |
 | `sync/runtime_impl.cs:273` `t_procId` | `:250` |
 | `test-csproj-template.xml:81-85` | `:101-103`, plus a `TEST_READY_TO_RUN` marker. NEW: the production `csproj-template.xml:58-59` sets `PublishReadyToRun` **and `PublishTrimmed=True`** |

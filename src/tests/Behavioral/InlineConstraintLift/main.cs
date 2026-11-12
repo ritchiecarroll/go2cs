@@ -118,7 +118,7 @@ public static T Min<T>(T a, T b)
     return a;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(Show(new namer("x")));
     fmt.Println(show(new namer("y")));
     fmt.Println(Label(new tagged("t", 7)));

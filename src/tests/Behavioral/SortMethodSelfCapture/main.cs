@@ -15,7 +15,7 @@ public static void Sort(sort.Interface data) { sort.Sort(data); }
 
 internal static void Sort(this words w) { Sort((sort.Interface)(w)); }
 
-internal static void Main() {
+internal static void main() {
     var ints = new sort.IntSlice(new nint[]{3, 1, 2}.slice());
     ints.Sort();
     fmt.Println("IntSlice.Sort:", ints);

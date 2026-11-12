@@ -19,7 +19,7 @@ internal static T square<T>(T v)
     where T : /* ~int | ~float64 */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 { return v * v; }
 
-internal static void Main() {
+internal static void main() {
     nint n = 3;
 
     var small = (nint v) => v < n;

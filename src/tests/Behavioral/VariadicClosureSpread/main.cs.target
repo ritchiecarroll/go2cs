@@ -6,7 +6,7 @@ using ꓸꓸꓸnint = Span<nint>;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     @string format(@string f, params ꓸꓸꓸany aʗp) {
         var a = aʗp.sslice();
         return fmt.Sprintf(f, a.ꓸꓸꓸ);

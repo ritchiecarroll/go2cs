@@ -104,7 +104,7 @@ internal static ж<ValueSpec> newSpec() {
     ));
 }
 
-internal static void Main() {
+internal static void main() {
     var spec = newSpec();
     fixSpec(new ValueSpecжNode(spec));
     fmt.Println("fixSpec:", spec.Values[0]._<ж<Lit>>().Len);

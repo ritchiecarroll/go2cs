@@ -194,7 +194,7 @@ synthesized types only.
 
 | Site | Use |
 |---|---|
-| `GoFrame.cs:443`, `runtime/Goroutine.cs:1117`, `runtime/RuntimePanicCheck.cs:92` | `StackFrame.GetMethod()`: which Go function a frame belongs to (`runtime.Caller`, the panic and recover machinery) |
+| `GoFrame.cs:443`, `runtime/Goroutine.cs:1140`, `runtime/RuntimePanicCheck.cs:92` | `StackFrame.GetMethod()`: which Go function a frame belongs to (`runtime.Caller`, the panic and recover machinery) |
 
 Under Native AOT `GetMethod()` answers only for methods whose metadata was kept. The windows `MetadataToken` failure
 recorded in docs/KnownIssues.md (fixed on `claude/i9-aot-metadata-token`) is the same family. These sites need

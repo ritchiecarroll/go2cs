@@ -21,7 +21,7 @@ internal static nint use(ж<lib.ΔEncoder> Ꮡe) {
 
 internal static lib.ΔKind makeKind(nint n) { return (lib.ΔKind)(byte)n; }
 
-internal static void Main() {
+internal static void main() {
     var s = new state(enc: wrap.NewEncoder(2), byKey: new map<@string, lib.Tok>{});
     s.enc.Bump();
     s.kinds = append(s.kinds, makeKind(1), (lib.ΔKind)4);

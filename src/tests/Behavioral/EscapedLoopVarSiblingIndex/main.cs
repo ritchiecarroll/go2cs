@@ -85,7 +85,7 @@ internal static partial nint caseSiblings(nint kind) {
     return total;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(process(5));
     fmt.Println(mapShadow(2));
     fmt.Println(parenIndex());

@@ -35,7 +35,7 @@ internal static void tagsOnly() {
     fmt.Println("tags only, write through converted:", (~t).Age);
 }
 
-internal static void Main() {
+internal static void main() {
     toAnonymous();
     tagsOnly();
 }

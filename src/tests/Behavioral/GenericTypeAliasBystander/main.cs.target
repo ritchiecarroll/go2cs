@@ -5,7 +5,7 @@ using GenericTypeAliasLib = GenericTypeAliasLib_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var b = GenericTypeAliasLib.NewBox<nint>(41);
     b.Set(b.Get() + 1);
     fmt.Println(b.Get(), GenericTypeAliasLib.Label("bystander"));

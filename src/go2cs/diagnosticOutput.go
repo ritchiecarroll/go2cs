@@ -128,9 +128,15 @@ const (
 	diagnosticTypeError  = "GO2CS1003"
 	diagnosticCgoRefused = "GO2CS2001"
 
-	// diagnosticProxyRefused: an instantiation needing a constraint proxy that cannot forward its constraint
-	// without breaking Go's aliasing (constraintProxyForwarding.go).
+	// diagnosticProxyRefused: an instantiation needing a SELF-REFERENTIAL constraint proxy that cannot forward its
+	// constraint without breaking Go's aliasing (constraintProxyForwarding.go). Its forwarder panics when reached, so
+	// -warn may downgrade it (warnOption.go).
 	diagnosticProxyRefused = "GO2CS2002"
+
+	// diagnosticNonSelfProxyRefused: a pointer type argument the NON-self constraint proxy cannot carry with Go's
+	// semantics (nonSelfConstraintProxyRefusals.go). Split from GO2CS2002 because its downgraded sites are not loud
+	// (most do not compile; a zero value boxed to an interface would be silently wrong), so -warn may not downgrade it.
+	diagnosticNonSelfProxyRefused = "GO2CS2005"
 
 	// diagnosticManualTypeReceiverRefused: a conversion to a manual type whose operand is the method's own pointer
 	// receiver, which has no box to pass (manualTypeReceiverRefusal.go).
@@ -140,6 +146,10 @@ const (
 	// instantiated generic type (`type Q pair[int]`, `type P[T any] pair[T]`), which now converts (visitTypeSpec.go).
 	// The code stays registered so its number is not given to another refusal.
 	diagnosticGenericInstantiationRefused = "GO2CS2004"
+
+	// diagnosticSliceWideningRefused: a []*T passed as an element-wise copy to a generic []N parameter whose callee
+	// may write the slice, so its writes would reach the copy and not the caller (sliceWideningWriteRefusals.go).
+	diagnosticSliceWideningRefused = "GO2CS2006"
 )
 
 // diagnosticPositionPattern splits "file:line[:col]". The file part is matched lazily up to the LAST
@@ -152,6 +162,12 @@ var diagnosticLineBreaks = regexp.MustCompile(`\s*[\r\n]+\s*`)
 // "file:line:col", "file:line" or "file"; empty or "-" names no file, and the origin is then the tool.
 // A multi-line text is joined onto one line, since a matcher reads one line per diagnostic.
 func canonicalDiagnostic(position, code, text string) string {
+	return canonicalDiagnosticAs("error", position, code, text)
+}
+
+// canonicalDiagnosticAs is canonicalDiagnostic with the severity named: "error", or "warning" for a refusal -warn
+// downgraded (warnOption.go). The two lines differ in that one word only, so a matcher reads both.
+func canonicalDiagnosticAs(severity, position, code, text string) string {
 	origin := "go2cs"
 
 	if position != "" && position != "-" {
@@ -168,13 +184,18 @@ func canonicalDiagnostic(position, code, text string) string {
 		}
 	}
 
-	return fmt.Sprintf("%s: error %s: %s", origin, code, diagnosticLineBreaks.ReplaceAllString(strings.TrimSpace(text), " "))
+	return fmt.Sprintf("%s: %s %s: %s", origin, severity, code, diagnosticLineBreaks.ReplaceAllString(strings.TrimSpace(text), " "))
 }
 
 // reportDiagnostic prints one canonical diagnostic on stderr, without the log package's timestamp,
 // which would put text before the origin a matcher anchors on.
 func reportDiagnostic(position, code, text string) {
 	os.Stderr.WriteString(canonicalDiagnostic(position, code, text) + "\n")
+}
+
+// reportWarningDiagnostic prints one canonical WARNING on stderr: a refusal -warn downgraded (warnOption.go).
+func reportWarningDiagnostic(position, code, text string) {
+	os.Stderr.WriteString(canonicalDiagnosticAs("warning", position, code, text) + "\n")
 }
 
 // loadErrorCode is the GO2CS1xxx code for a go/packages error kind.

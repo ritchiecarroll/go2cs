@@ -25,7 +25,7 @@ internal static (slice<nint> evens, slice<nint> odds, error err) parse(slice<nin
     return classify(items);
 }
 
-internal static void Main() {
+internal static void main() {
     var (e, o, err) = parse([1, 2, 3, 4, 5, 6]);
     fmt.Println(e, o, err);
 }

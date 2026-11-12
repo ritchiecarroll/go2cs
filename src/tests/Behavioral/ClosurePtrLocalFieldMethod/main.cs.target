@@ -56,7 +56,7 @@ internal static nint namedAfterType() {
     return gauge.Ꮡv.get();
 }
 
-internal static void Main() {
+internal static void main() {
     var (a, b) = allocShape();
     fmt.Println(a, b);
     fmt.Println(namedAfterType());

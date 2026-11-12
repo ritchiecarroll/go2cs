@@ -28,7 +28,7 @@ private static readonly object keepˢ = (@string)"keep"u8;
 private static readonly object missingˢ = (@string)"<missing>"u8;
 private static readonly object fieldˢ = (@string)"field"u8;
 
-internal static void Main() {
+internal static void main() {
     any arg = default;
     arg = nilˢ;
     fmt.Println(sprint(arg));

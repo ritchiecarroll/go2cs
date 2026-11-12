@@ -16,7 +16,7 @@ partial interface message {
 
 internal static void show(message m) { fmt.Println(m.describe()); }
 
-internal static void Main() {
+internal static void main() {
     message m = new ValueType(unit: "cpu in nanoseconds");
     show(m);
 

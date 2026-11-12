@@ -112,7 +112,7 @@ internal static T convert<T>()
     where T : /* integer */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 { return ConvertToType<T>(4); }
 
-internal static void Main() {
+internal static void main() {
     arm("return constant", () => fmt.Sprint(one<uint8>(), " ", one<int64>()));
     arm("named constant", () => fmt.Sprint(named<uint32>(), " ", named<int8>()));
     arm("constant shift", () => fmt.Sprint(constShift<uint8>(), " ", constShift<int64>()));

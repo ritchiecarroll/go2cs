@@ -32,7 +32,7 @@ internal static @string describe(relationship r) {
 private static readonly @string opLoadˢ = "opLoad"u8;
 private static readonly @string opLocalˢ = "opLocal"u8;
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(describe(equivalent));
     fmt.Println(describe(moreGeneral));
     fmt.Println(describe((relationship)(@string)"x"));

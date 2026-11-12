@@ -23,7 +23,7 @@ internal static @string Name(this ref cached c) {
     return fmt.Sprintf("cached(%d):%s"u8, c.hits, c.Host.Name());
 }
 
-internal static void Main() {
+internal static void main() {
     var c = Ꮡ(new cached(Host: new host.BaseжHost(Ꮡ(new host.Base(Tag: "t")))));
     fmt.Println(host.Use(new cachedжHost(c)));
     fmt.Println((~c).Host.Trace("direct %v", true));

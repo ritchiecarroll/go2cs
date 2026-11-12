@@ -98,7 +98,7 @@ internal static nint noted(/*[4]*/ array<byte> a, nint b) {
 
 internal static void put(this ref holder h, /*[3]*/ array<nint> v) { v = v.Clone(); }
 
-internal static void Main() {
+internal static void main() {
     var lambda = ([GoArrayDims(32)] array<byte> x) => {
         x = x.Clone();
         return len(x);

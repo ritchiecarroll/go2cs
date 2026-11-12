@@ -18,7 +18,7 @@ using Δio = io_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var (key, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
     if (err != nil) {
         fmt.Println("generate key error:", err);

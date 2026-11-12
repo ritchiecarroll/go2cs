@@ -15,7 +15,7 @@ internal static slice<byte> capabilitiesJson = go.embed_package.ΔEmbedBytes<byt
 
 internal static @string testfpAgain = go.embed_package.ΔEmbedString(typeof(main_package).Assembly, "go.embed/go2cs/EmbedDirectiveForms/", "testdata/testfp.txt");
 
-internal static void Main() {
+internal static void main() {
     fmt.Printf("testfp: %d bytes, %d lines\n"u8, len(testfp), strings.Count(testfp, "\n"));
     foreach (var (i, line) in range(strings.Split(strings.TrimSuffix(testfp, "\n"), "\n"))) {
         fmt.Printf("  %d: %q\n"u8, i, line);

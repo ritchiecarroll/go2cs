@@ -33,7 +33,7 @@ internal static void @try(@string label, Action f) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     @try("equality", () => {
         var (a, b) = (wrap(default), wrap(default));
         fmt.Println("a == b:", AreEqual(a, b));

@@ -17,7 +17,7 @@ internal static Outer build() {
     return o;
 }
 
-internal static void Main() {
+internal static void main() {
     var o = build();
     fmt.Println(len(o));
     foreach (var (_, inner) in range<Inner>(o)) {

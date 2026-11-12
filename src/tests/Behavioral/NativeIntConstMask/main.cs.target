@@ -18,7 +18,7 @@ internal static UntypedInt ptrWords => 8;
 
 internal static uintptr fieldAddr(uintptr @base) { return @base + (uintptr)(4 * ptrWords); }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println((uint64)low(0b1011));
     fmt.Println((uint64)align(0b1011));
     fmt.Println((uint64)align(0b11011));

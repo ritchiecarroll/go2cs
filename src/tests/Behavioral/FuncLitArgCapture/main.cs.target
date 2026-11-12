@@ -99,7 +99,7 @@ internal static nint nestedArgLiteralCapture() {
     return ᐸꟷ(total);
 }
 
-internal static void Main() {
+internal static void main() {
     ref var m = ref heap(new box(), out var Ꮡm);
     run(() => {
         set(ref (Ꮡm).DerefOrNull());

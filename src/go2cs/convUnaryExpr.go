@@ -360,7 +360,8 @@ func (v *Visitor) receiverFieldChainAddressForm(recv *types.Var, recvName string
 			ownerType = pointer.Elem()
 		}
 
-		if _, ok := ownerType.(*types.Named); !ok {
+		// The owner may be written through an alias, as a receiver `*AttrNode` is.
+		if _, ok := types.Unalias(ownerType).(*types.Named); !ok {
 			return "", false
 		}
 

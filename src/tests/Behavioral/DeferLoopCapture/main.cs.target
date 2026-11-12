@@ -214,7 +214,7 @@ internal static void plainArgs() {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     receiverReassignedNoLoop();
     goIndexedReceiverInLoop();
     deferIndexedReceiverInLoop();

@@ -37,7 +37,7 @@ internal static (nint, @string) bump(Tally tʗp, nint n) {
     return (t.total, t.log);
 }
 
-internal static void Main() {
+internal static void main() {
     var t = new Tally(total: 5, log: "start");
     var (total, log) = bump(t, 3);
     fmt.Println("bumped:", total, log);

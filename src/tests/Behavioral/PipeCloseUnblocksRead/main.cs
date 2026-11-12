@@ -6,7 +6,7 @@ using time = time_package;
 
 partial class main_package {
 
-internal static partial void Main() {
+internal static partial void main() {
     var (r, w, err) = os.Pipe();
     if (err != nil) {
         fmt.Println("pipe error:", err);

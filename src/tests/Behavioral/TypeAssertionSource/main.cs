@@ -49,7 +49,7 @@ internal partial interface main_anon /*dyn*/ {
     @string name();
 }
 
-internal static void Main() {
+internal static void main() {
     namer n = new aжnamer(Ꮡ(new a()));
     var nʗ1 = n;
     @catch("namer-to-*b", () => {

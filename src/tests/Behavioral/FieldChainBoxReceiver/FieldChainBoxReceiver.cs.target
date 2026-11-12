@@ -40,7 +40,7 @@ partial struct deep {
 
 internal static void bumpDeep(this ж<deep> Ꮡd) { Ꮡd.Ꮡmid.Ꮡc.inc(); }
 
-internal static void Main() {
+internal static void main() {
     var b = Ꮡ(new box());
     viaParam(b);
     viaParam(b);

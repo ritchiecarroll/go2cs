@@ -74,7 +74,7 @@ internal static ж<nint> returnPos() {
     return Ꮡx.Ꮡval;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(plainFunc());
     fmt.Println(nestedChain());
     fmt.Println(pointerHop());

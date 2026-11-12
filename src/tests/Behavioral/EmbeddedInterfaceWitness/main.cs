@@ -44,7 +44,7 @@ internal static void check(@string label, any value) {
     fmt.Println(label, "NumMethod:", reflect.TypeOf(value).NumMethod());
 }
 
-internal static void Main() {
+internal static void main() {
     check("wrapper", new wrapper(Reader: new iolike.Base(Tag: "base"), prefix: "w:"));
     check("plain", new plain(tag: "p"));
     check("holder", new holder(Reader: new iolike.Base(Tag: "held"), prefix: "h:"));

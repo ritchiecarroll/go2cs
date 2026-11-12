@@ -1,0 +1,139 @@
+[
+ {
+  "key": "panic: runtime error: invalid memory address or nil pointer dereference @ github.com/microsoft/TypeScript/tsc/internal/ast.(*Node).GetResolutionModeOverride()",
+  "kind": "converted crashed",
+  "count": 24,
+  "first": {
+   "index": "00701",
+   "source": "tests/cases/compiler/automaticTypeDirectiveResolutionBundler.ts",
+   "error": "panic: runtime error: invalid memory address or nil pointer dereference",
+   "frame": "github.com/microsoft/TypeScript/tsc/internal/ast.(*Node).GetResolutionModeOverride()"
+  },
+  "units": [
+   "00701",
+   "02396",
+   "02456",
+   "02478",
+   "02535",
+   "02549",
+   "02572",
+   "03069",
+   "03153",
+   "04639",
+   "04645",
+   "04650",
+   "05185",
+   "05186",
+   "05191",
+   "05194",
+   "05868",
+   "06260",
+   "06544",
+   "08137",
+   "08902",
+   "09058",
+   "09304",
+   "09305"
+  ]
+ },
+ {
+  "key": "DIFF go:  || cs: file #.txt (# bytes)\nsemantic TS# /main.ts [#,+#] Cannot find module '\u2026' or its corresponding type declarations.\nsemantic TS# /main.ts [#,+#",
+  "kind": "native missing",
+  "count": 6,
+  "first": {
+   "index": "07212",
+   "source": "tests/cases/compiler/pathMappingBasedModuleResolution_rootImport_aliasWithRoot_multipleAliases.ts",
+   "go": "",
+   "cs": "file 07212.txt (70 bytes)\nsemantic TS2307 /main.ts [20,+13] Cannot find module '/import/foo' or its corresponding type declarations.\nsemantic TS2307 /main.ts [55,+13] Cannot find module '/client/bar' or its corresponding type declarations.\nfiles 83\n",
+   "line": null
+  },
+  "units": [
+   "07212",
+   "07216",
+   "07220",
+   "07224",
+   "07228",
+   "07233"
+  ]
+ },
+ {
+  "key": "DIFF go:  || cs: file #.txt (# bytes)\nfiles #",
+  "kind": "native missing",
+  "count": 5,
+  "first": {
+   "index": "07210",
+   "source": "tests/cases/compiler/pathMappingBasedModuleResolution_rootImport_aliasWithRoot_multipleAliases.ts",
+   "go": "",
+   "cs": "file 07210.txt (25 bytes)\nfiles 83\n",
+   "line": null
+  },
+  "units": [
+   "07210",
+   "07214",
+   "07218",
+   "07222",
+   "07226"
+  ]
+ },
+ {
+  "key": "DIFF go: semantic TS# /main.ts [#,+#] Type '\u2026' does not satisfy the constraint '\u2026'. || cs: semantic TS# /main.ts [#,+#] Type '\u2026' is not assignable to type '\u2026'.",
+  "kind": "output differs",
+  "count": 4,
+  "first": {
+   "index": "04150",
+   "source": "tests/cases/compiler/genericConstraint1.ts",
+   "go": "semantic TS2344 /main.ts [121,+6] Type 'string' does not satisfy the constraint 'number'.",
+   "cs": "semantic TS2322 /main.ts [121,+6] Type 'string' is not assignable to type 'number'.",
+   "line": 3
+  },
+  "units": [
+   "04150",
+   "05077",
+   "07291",
+   "07292"
+  ]
+ },
+ {
+  "key": " @ ",
+  "kind": "converted crashed",
+  "count": 1,
+  "first": {
+   "index": "05056",
+   "source": "tests/cases/compiler/intersectionConstructorReductionCrash.ts",
+   "error": "",
+   "frame": ""
+  },
+  "units": [
+   "05056"
+  ]
+ },
+ {
+  "key": "panic: vfs: failed to create sub file system for \"\u2026\": sub //server: invalid argument @ github.com/microsoft/TypeScript/tsc/internal/vfs/iovfs.From.func13()",
+  "kind": "converted crashed",
+  "count": 1,
+  "first": {
+   "index": "07208",
+   "source": "tests/cases/compiler/pathMappingBasedModuleResolution_rootImport_aliasWithRoot_differentRootTypes.ts",
+   "error": "panic: vfs: failed to create sub file system for \"//server\": sub //server: invalid argument",
+   "frame": "github.com/microsoft/TypeScript/tsc/internal/vfs/iovfs.From.func13()"
+  },
+  "units": [
+   "07208"
+  ]
+ },
+ {
+  "key": "DIFF go: semantic TS# /main.ts [#,+#] Type '\u2026' is not assignable to type '\u2026'. || cs: files #",
+  "kind": "output differs",
+  "count": 1,
+  "first": {
+   "index": "09360",
+   "source": "tests/cases/compiler/yieldExpression1.ts",
+   "go": "semantic TS2322 /main.ts [89,+5] Type 'undefined' is not assignable to type 'number'.",
+   "cs": "files 83",
+   "line": 1
+  },
+  "units": [
+   "09360"
+  ]
+ }
+]

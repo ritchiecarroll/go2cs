@@ -50,7 +50,7 @@ internal static void fromNil() {
     fmt.Println("from nil:", dps == nil);
 }
 
-internal static void Main() {
+internal static void main() {
     topLevel();
     inClosure();
     fromNil();

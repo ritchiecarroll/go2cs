@@ -11,7 +11,7 @@ internal partial struct main_point /*dyn*/ {
     public nint Y; /*`json:"y"`*/
 }
 
-internal static void Main() {
+internal static void main() {
     ref var a = ref heap(new array<any>(1), out var Ꮡa);
     fmt.Println("iface1:", unmarshal("[42]", Ꮡa), a);
 

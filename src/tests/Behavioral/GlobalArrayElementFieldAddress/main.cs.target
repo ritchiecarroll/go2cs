@@ -25,7 +25,7 @@ internal static ref array<gridᴛ1> grid => ref ((StaticBox<array<gridᴛ1>>)Ꮡ
 
 internal static partial void setInt(ref nint p) { p = 7; }
 
-internal static void Main() {
+internal static void main() {
     pool[1].inner.n = 5;
     setInt(ref pool[1].inner.mu);
     setInt(ref pool[2].inner.mu);

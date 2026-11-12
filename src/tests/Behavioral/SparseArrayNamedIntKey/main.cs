@@ -44,7 +44,7 @@ internal static slice<@string> errNames = new golib.SparseArray<@string>{
     [2] = "acces"
 }.slice();
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(rankNames[rankLow], rankNames[rankMid], rankNames[rankHigh]);
     fmt.Println(codeNames[codeA], codeNames[codeB]);
     fmt.Println(len(rankNames));

@@ -59,7 +59,7 @@ internal static nint Zed(this zed z) { return z.v; }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object twoˢ = (@string)"two"u8;
 
-internal static void Main() {
+internal static void main() {
     names a = slice<@string>(["x", "y"]);
     sizes b = new sizes{["k"] = 7};
     grid c = slice<slice<@string>>([["g"]]);

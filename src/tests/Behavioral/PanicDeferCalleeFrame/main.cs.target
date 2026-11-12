@@ -122,7 +122,7 @@ internal static void calleeDeferPanicsDuringPanic() {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     open = true;
     raw(() => {
         note("callback ok");

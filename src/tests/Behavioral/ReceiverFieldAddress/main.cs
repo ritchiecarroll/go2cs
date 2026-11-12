@@ -22,7 +22,7 @@ public static int32 Add(this ж<Counter> Ꮡc, int32 delta) {
 public static void Set(this ж<Counter> Ꮡc, int32 v) { (Ꮡc.Ꮡn).Value = v; }
 public static int32 Get(this ref Counter c) { return c.n; }
 
-internal static void Main() {
+internal static void main() {
     ref var c = ref heap(new Counter(), out var Ꮡc);
     Ꮡc.Set(100);
     fmt.Println("after Set:", c.Get());

@@ -19,7 +19,7 @@ partial struct entry {
 internal static readonly ж<entry> Ꮡhead = new StaticBox<entry>(default(entry));
 internal static ref entry head => ref ((StaticBox<entry>)Ꮡhead).ValueSlot;
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(lookup("a"));
 
     lookup = @string (@string key) => "swapped:"u8 + key;

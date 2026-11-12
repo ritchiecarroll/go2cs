@@ -26,7 +26,7 @@ internal static @string Str(this ref other o) { return "other"; }
 
 internal static Stringish newStringish(nint n) { return new widgetжStringish(Ꮡ(new widget(n))); }
 
-internal static void Main() {
+internal static void main() {
     var s = newStringish(7);
     fmt.Println(s.Str());
 

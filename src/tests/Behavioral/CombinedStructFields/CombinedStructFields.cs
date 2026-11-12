@@ -17,7 +17,7 @@ partial struct mixed {
     internal @string label;
 }
 
-internal static void Main() {
+internal static void main() {
     var p = new point(x: 1, y: 2, a: "h", b: "i", wide: 3.5D, tall: 4.5D);
     fmt.Println(p.x, p.y, p.a, p.b, p.wide, p.tall);
 

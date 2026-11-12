@@ -48,7 +48,7 @@ internal static @string viaLocal(Reader r) {
     return fmt.Sprintf("%d|%s|%d"u8, before, (@string)(buf.slice(0, n)), r.Remaining());
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(viaLocal(new srcжReader(Ꮡ(new src(data: slice<byte>("abcd"u8))))));
     fmt.Println(viaForeign(new srcжio_Reader(Ꮡ(new src(data: slice<byte>("wxyz"u8))))));
 

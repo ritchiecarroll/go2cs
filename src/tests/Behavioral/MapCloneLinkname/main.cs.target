@@ -9,7 +9,7 @@ partial class main_package {
     return mapclone(m);
 }
 
-internal static void Main() {
+internal static void main() {
     var m = new map<@string, nint>{["a"] = 1, ["b"] = 2, ["c"] = 3};
 
     var mc = clone(m)._<map<@string, nint>>();

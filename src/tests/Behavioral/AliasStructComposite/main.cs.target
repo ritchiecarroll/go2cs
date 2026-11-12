@@ -38,7 +38,7 @@ internal static uint64 rangeSum(/*[4]*/ words w) {
 
 internal static words gw = new(4);
 
-internal static void Main() {
+internal static void main() {
     var a = keyed();
     var b = empty();
     var c = positional();

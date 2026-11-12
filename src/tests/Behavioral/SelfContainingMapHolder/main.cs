@@ -160,7 +160,7 @@ internal static void reflection() {
     fmt.Println("finalizer:", p != nil, len(d));
 }
 
-internal static void Main() {
+internal static void main() {
     direct();
     directStr();
     viaStruct();

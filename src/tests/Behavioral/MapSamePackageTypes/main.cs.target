@@ -31,7 +31,7 @@ internal static Description describe() {
     return new Description(Name: "c", ΔDescription: "third");
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(table[new OSArch("linux", "amd64")].supported);
     fmt.Println(table[new OSArch("windows", "386")].supported);
     fmt.Println(len(table));

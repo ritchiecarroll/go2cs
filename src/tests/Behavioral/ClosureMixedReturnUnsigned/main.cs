@@ -54,7 +54,7 @@ internal static partial void run() {
     fmt.Println(pick(true), pick(false));
 }
 
-internal static void Main() {
+internal static void main() {
     run();
 }
 

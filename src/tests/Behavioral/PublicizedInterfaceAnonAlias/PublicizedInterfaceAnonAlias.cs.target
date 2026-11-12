@@ -28,7 +28,7 @@ public static entry Run(deps d) {
     return d.Process(new entry(ID: 1, Name: "seed"));
 }
 
-internal static void Main() {
+internal static void main() {
     var r = Run(new impl());
     fmt.Println(r.ID, r.Name);
 }

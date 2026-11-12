@@ -20,7 +20,7 @@ public static @string Show(describer d) {
     return d.Describe();
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(Show(new Label(text: "A")));
     fmt.Println(Show(new Label(text: "B")));
 }

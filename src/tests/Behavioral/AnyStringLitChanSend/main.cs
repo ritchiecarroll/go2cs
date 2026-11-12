@@ -46,7 +46,7 @@ private static readonly object textˢ = (@string)"text"u8;
 private static readonly object selˢ = (@string)"sel"u8;
 private static readonly object assertˢ = (@string)"assert"u8;
 
-internal static void Main() {
+internal static void main() {
     var ch = new channel<any>(2);
     ch.ᐸꟷ(textˢ);
     ch.ᐸꟷ((nint)42);

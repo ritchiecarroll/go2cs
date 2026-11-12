@@ -78,7 +78,7 @@ List<string> platformExclusive = targetTests
     ("TranspileTests", null),                       // Tests transpilation of Go code to C# code
     ("CompileTests", null),                         // Tests compilation of transpiled C# code
     ("TargetComparisonTests", null),                // Tests comparison of transpiled C# code to expected target
-    ("OutputComparisonTests", MatchConsoleOutput)   // Tests comparison of console output to expected output
+    ("OutputComparisonTests", MatchesOutput)        // Tests comparison of console output to expected output (Go's, or expected-output.txt)
 ];
 
 foreach ((string testClass, Func<string, bool>? filter) in testClasses)
@@ -341,13 +341,23 @@ if (args.Contains("--createTargetFiles"))
 
         string projPath = Path.GetFullPath(Path.Combine(behavioralRoot, targetTest));
 
+        // The project's go2cs.options (extra converter arguments; only -warn=<codes>), read through the shared reader as
+        // at the other three converter call sites (TestBehavioralHarnessReadsConverterOptions).
+        (string options, string? optionsError) = BehavioralPackages.ConverterOptions(projPath);
+
+        if (optionsError is not null)
+        {
+            refused[targetTest] = optionsError;
+            continue;
+        }
+
         // DEEPEST-FIRST, from the shared walk: a nested sub-library's generated package_info.cs is an
         // INPUT to its parent's transpile, so converting the parent first feeds it stale sibling
         // records -- and a golden minted from that cannot fail on a regression in exactly that area
         // (false-green route #3). Not re-derived here; three copies of this rule is how it broke.
         foreach (string pkgPath in BehavioralPackages.GoPackageDirs(projPath))
         {
-            (int exit, _, string stdErr, bool timedOut) = Run(go2csExe, $"-go2cspath \"{srcRoot}\" \"{pkgPath}\"", pkgPath, transpileTimeoutMs);
+            (int exit, _, string stdErr, bool timedOut) = Run(go2csExe, $"{options}-go2cspath \"{srcRoot}\" \"{pkgPath}\"", pkgPath, transpileTimeoutMs);
 
             if (exit != 0)
             {
@@ -496,6 +506,13 @@ static (int ExitCode, string StdOut, string StdErr, bool TimedOut) Run(string ap
 
     return (process.ExitCode, outBuf.ToString(), errBuf.ToString(), false);
 }
+
+// An Output test is generated for a project compared with Go ([GoTestMatchingConsoleOutput]) and for an EXPECTED-OUTPUT
+// project (BehavioralPackages.ExpectedOutputFile), converted under go2cs.options' -warn and compared with its recorded
+// stdout and refusal panic instead.
+static bool MatchesOutput(string targetTest) =>
+    MatchConsoleOutput(targetTest) ||
+    BehavioralPackages.HasExpectedOutput(Path.GetFullPath(Path.Combine("..", "..", "..", "..", "..", "tests", "Behavioral", targetTest)));
 
 static bool MatchConsoleOutput(string targetTest)
 {

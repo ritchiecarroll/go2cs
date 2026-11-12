@@ -19,7 +19,7 @@ partial struct reservedᴛ1 /*dyn*/ {
 }
 internal static ж<reservedᴛ1> reserved = @new<reservedᴛ1>();
 
-internal static void Main() {
+internal static void main() {
     badge b = new reservedᴛ1жbadge(reserved);
     fmt.Println(b != nil);
 

@@ -28,7 +28,7 @@ internal static void dump(@string label, @string s) {
     fmt.Println();
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(len(data));
     for (nint i = 0; i < len(data); i++) {
         fmt.Printf("%d "u8, data[i]);

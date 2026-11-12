@@ -33,7 +33,7 @@ internal static Func<@string, nint> pickSizer(this ref config c) {
     return f;
 }
 
-internal static void Main() {
+internal static void main() {
     var c = Ꮡ(new config(s: new flat(n: 10)));
     var f = c.pickSizer();
     fmt.Println(f("abc"));

@@ -18,7 +18,7 @@ public partial struct grid {
 
 partial struct Grid /*grid*/;
 
-internal static void Main() {
+internal static void main() {
     Counts c = new();
     c.vals[1] = 5;
     var b = (counts)c;

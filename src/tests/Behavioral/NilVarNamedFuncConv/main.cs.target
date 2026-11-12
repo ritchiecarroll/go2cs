@@ -18,7 +18,7 @@ internal static Greetable wrap(Action<@string> handler) {
     return new GreeterᴠGreetable(NilSafeDelegateConversion<Greeter, Action<@string>>(handler));
 }
 
-internal static void Main() {
+internal static void main() {
     var nilGreetable = wrap(default);
     var (nilGreeter, nilOk) = nilGreetable._<Greeter>(ᐧ);
     fmt.Println(nilOk, nilGreeter == nil);

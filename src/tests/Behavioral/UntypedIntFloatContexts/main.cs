@@ -7,7 +7,7 @@ partial class main_package {
 internal static UntypedInt pkgConst => 1000;
 internal static UntypedInt hugeConst => /* 1 << 63 */ 9223372036854775808;
 
-internal static void Main() {
+internal static void main() {
     UntypedInt m = 3;
     nint i = m;
     float64 fl = m;

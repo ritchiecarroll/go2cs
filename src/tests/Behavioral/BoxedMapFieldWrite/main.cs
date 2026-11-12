@@ -12,7 +12,7 @@ partial struct Request {
     public slice<@string> Body;
 }
 
-internal static void Main() {
+internal static void main() {
     var req = Ꮡ(new Request(Header: new Header(new map<@string, slice<@string>>{}), Count: new map<@string, nint>{}, Body: ["a", "b"]));
 
     req.Header["Accept"] = ["text/html", "text/plain"];

@@ -31,7 +31,7 @@ partial struct wrapper {
 
 internal static @string Handle(this wrapper w, @string msg) { return w.prefix + w.Handler.Handle(msg); }
 
-internal static void Main() {
+internal static void main() {
     var l = new Logger(name: "test");
     fmt.Println(l.Handler());
 

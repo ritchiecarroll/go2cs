@@ -14,7 +14,7 @@ internal static slice<vector> vectors = [
     new("plain", slice<byte>("single"u8))
 ];
 
-internal static void Main() {
+internal static void main() {
     var bs = slice<byte>("hello"u8);
     var rs = slice<rune>((@string)"héllo");
 

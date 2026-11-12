@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var m = new map<@string, nint>{["a"] = 1, ["b"] = 2};
 
     var (v, ok) = m["a", ꟷ];

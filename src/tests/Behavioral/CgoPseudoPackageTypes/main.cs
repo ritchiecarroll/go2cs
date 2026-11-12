@@ -37,7 +37,7 @@ internal static @string colorName(C.enum_color c) {
     return "other";
 }
 
-internal static void Main() {
+internal static void main() {
     Cꓸdiv_t d = default;
     d.quot = (C.@int)C.LIMIT;
     d.rem = 3;

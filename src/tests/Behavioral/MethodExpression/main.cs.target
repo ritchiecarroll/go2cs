@@ -15,7 +15,7 @@ internal static nint add(this ref counter c, nint d) {
 
 internal static nint get(this counter c) { return c.n; }
 
-internal static void Main() {
+internal static void main() {
     var f = ((Func<ж<counter>, nint, nint>)(add));
     var c = Ꮡ(new counter(n: 10));
     fmt.Println(f(c, 5));

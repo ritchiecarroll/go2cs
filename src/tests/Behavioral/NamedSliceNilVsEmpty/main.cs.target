@@ -12,7 +12,7 @@ internal static void probe(@string name, bool isNil) {
     fmt.Println(name, isNil);
 }
 
-internal static void Main() {
+internal static void main() {
     IntSlice zeroSlice = default;
     probe("sliceZero", zeroSlice == nil);
 

@@ -52,7 +52,7 @@ partial struct namedString /*@string*/;
 
 internal static partial void setStr(ref namedString s, @string v) { s = (namedString)v; }
 
-internal static void Main() {
+internal static void main() {
     ref var a = ref heap(new lfstack(), out var Ꮡa);
     a = 0xDEADBEEF01UL;
     ref var b = ref heap(new sweepClass(), out var Ꮡb);

@@ -5,7 +5,7 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-internal static unsafe void Main() {
+internal static unsafe void main() {
     var data = slice<byte>([0x68, 0, 0x69, 0, 0x21, 0, 0, 0]);
     var u = new slice<uint16>(new ReadOnlySpan<uint16>((uint16*)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡ(data, 0))), (int)(len(data) / 2)));
     fmt.Println(len(u), u[0], u[1], u[2], u[3]);

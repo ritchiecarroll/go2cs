@@ -92,7 +92,7 @@ internal static partial void goCapture(nint n) {
     Ꮡwg.Wait();
 }
 
-internal static void Main() {
+internal static void main() {
     var c = Ꮡ(new compiler());
     c.scopes = append(c.scopes, c.newScope());
     c.define(false, nil);

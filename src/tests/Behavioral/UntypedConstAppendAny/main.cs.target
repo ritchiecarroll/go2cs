@@ -27,7 +27,7 @@ internal static @string kind(any v) {
     return fmt.Sprintf("other %T"u8, v);
 }
 
-internal static void Main() {
+internal static void main() {
     var pathᴷ = new stackAppend<any>();
 
     var path = slice<any>([(@string)"a"]);

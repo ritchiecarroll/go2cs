@@ -140,7 +140,7 @@ internal static void p10() {
     fmt.Println("P10:", sum);
 }
 
-internal static void Main() {
+internal static void main() {
     p1();
     p2();
     p3();

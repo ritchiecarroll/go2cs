@@ -47,7 +47,7 @@ internal static void scale(this ж<node> Ꮡn, nint factor) {
     }
 }
 
-internal static void Main() {
+internal static void main() {
     var c = Ꮡ(new node(val: 3));
     var b = Ꮡ(new node(val: 2, next: c));
     var a = Ꮡ(new node(val: 1, next: b));

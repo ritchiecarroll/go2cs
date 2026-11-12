@@ -30,7 +30,7 @@ private static readonly @string helloWorldˢ = "hello world"u8;
 private static readonly @string x9876ˢ = "x98:76"u8;
 private static readonly @string abcdeˢ = "abcde"u8;
 
-internal static void Main() {
+internal static void main() {
     @string str = "hello";
     var bs = slice<byte>(str);
     @string hel = "hel";

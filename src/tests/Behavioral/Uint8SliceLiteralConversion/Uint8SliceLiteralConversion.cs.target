@@ -12,7 +12,7 @@ internal static nint take(slice<uint8> b) { return len(b); }
 
 internal static slice<uint8> g = slice<uint8>("glob"u8);
 
-internal static void Main() {
+internal static void main() {
     var a = slice<uint8>("foo"u8);
     var b = slice<byte>("bar"u8);
     buf c = ((buf)slice<uint8>((@string)"baz"u8));

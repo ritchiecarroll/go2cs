@@ -38,7 +38,7 @@ partial struct Snapshot {
     internal ж<Expected<@string>> named;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var f = ref heap<Fields>(new Fields(), out var Ꮡf);
     f.Name = new Expected<@string>(Value: "pkg", Valid: true);
     f.Imports = new Expected<map<@string, @string>>(Value: new map<@string, @string>{["a"] = "b"}, Valid: true);

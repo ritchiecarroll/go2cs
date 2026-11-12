@@ -45,7 +45,7 @@ internal static void run(this ж<guard> Ꮡg) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     var s = slice<nint>([1, 2, 3]);
     builtin.clear(s);
     fmt.Println(s[0], s[1], s[2]);

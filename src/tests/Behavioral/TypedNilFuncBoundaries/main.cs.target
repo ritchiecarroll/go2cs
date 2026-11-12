@@ -19,7 +19,7 @@ internal static any take(any v) { return v; }
 
 internal static nint declared(nint x) { return x; }
 
-internal static void Main() {
+internal static void main() {
     Func<nint, nint> zero = default;
 
     var argSlot = take((zero).OrTypedNilFunc());
