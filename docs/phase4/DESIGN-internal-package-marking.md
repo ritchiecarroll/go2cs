@@ -288,7 +288,9 @@ and declares `<CompilerVisibleProperty Include="GoStandardLibrary" />`**, beside
 items it already declares for the escape registry. Every standard-library project imports that file; a `-stdlib`
 reconvert into a seeded temp root carries it; no converted file changes. Two lines, hand-owned.
 
-A consumer who sets `GoStandardLibrary=true` in its own project has opted out on purpose, exactly as a NoWarn would.
+~~A consumer who sets `GoStandardLibrary=true` in its own project has opted out on purpose, exactly as a NoWarn would.~~
+(Struck by the 2026-11-12 amendment, S4: go.lib's targets declare no `CompilerVisibleProperty`, so for a pure consumer
+the property never reaches the analyzer.)
 
 ## 7. The analyzer
 
@@ -512,3 +514,58 @@ read the four-target stdlib builds at zero.
 6. Gates: `go test ./...` (the converter suite, `-timeout 60m`), repoguard, GenTests, GolibTests, CNR, the footprint, the
    planted-violation stdlib gate then the clean four-target stdlib builds, the PackageTests fixture, ApiCompat. Its own
    batch; not stacked with OQ2 or OQ4.
+
+## Amendment, 2026-11-12: COORD's review, folded in before the cut (C2)
+
+COORD reviewed this design (inbox/R `20261112T064347Z`, verdict APPROVE-WITH-FIXES) and ruled every recommendation
+in section 12 as recommended. The implementing lane is C2, branch `claude/c2-oq1-internal-marking`, cut on master
+`6869ec2b54`, which contains OQ4's merge (batch 289). The design above is the record. This block states what the
+review changed, and section 13's order runs with it.
+
+**M1. A `main` package takes its path from its module.** A main package's class is `[GoPackage("main")]` with no
+`ImportPath` (`src/tests/Behavioral/RootedUsingCapture/package_info.cs`), so the section 6.2 decode yields no path,
+and a hand `*_impl.cs` in a module's main naming `M/internal/x` would be flagged, though Go allows it. The consumer
+path of a compilation whose package is `main` is the module path, read from the compilation's own
+`GoModInfoAttribute` assembly attribute (its `mod` line), which every converted executable carries. No `ImportPath` is
+stamped on main packages: that would move every behavioral `package_info.cs`. If GoModInfo is absent, there is no
+path. A main's directory inside its module is not recorded, so a main is allowed every root INSIDE its module: the
+root is `M`, or begins with `M/`. That gives no false positive on correct Go. The accepted gap, documented in the
+diagnostic's row, is the false negative this leaves: a main outside a deeper internal root (`M/a/internal/x` named
+from `M/cmd/foo`) is not flagged. A red case covers M1, and a control covers the gap.
+
+**M2. An external test's stamp carries `_test` in the path too.** `src/core/math/rand/v2/package_test_info.cs` stamps
+`[GoPackage("rand_test", ImportPath = "math/rand/v2_test")]`. The decode drops a trailing `_test` from the stamped
+path as well as from the name (the converter's `packageInfoBelongsHere` does the same), so the internal and external
+test classes of one test compilation agree. A decode-table row covers it.
+
+**S1. The two analyzer copies are disjoint in code, not by file name.** go2cs-gen's copy acts only in a compilation
+that declares a `[GoPackage]` class; the consumer copy, packed in go.lib, acts only in one that declares none. Two
+copies in one compilation therefore never both report, and an older go.gen beside a newer go.lib still leaves one
+check. go.lib's `<Analyzer>` item is conditioned on the project being C# and on `GoInternalPackageWarning`, with no
+file-name test. PackageTests case (D) exercises this.
+
+**S2. The two `package_info.cs` lines are regenerated in place.** Persisted info files are patched, not rewritten from
+the template, so both lines get an idempotent update: the assembly line is removed and rewritten on every write, like
+`GoHoistedLiterals`, and spelled through `rootAttributeName`. The `EditorBrowsable` line is inserted above the
+package's `[GoPackage]` stamp when it is missing, kept when present, and removed when the package is no longer
+internal or vendored. A converter test reconverts twice and reads identical bytes.
+
+**S3. The prediction is the exact block, not "+2 lines".** Every assembly stamp is written with its prose and a blank
+line. The footprint prediction quotes the block the probe emits, line for line, and is posted before the run.
+
+**S4.** Section 6.3's sentence about a consumer setting `GoStandardLibrary=true` is struck: for a pure consumer the
+property never reaches the analyzer. The opt-outs are `GoInternalPackageWarning=false` and `NoWarn`.
+
+**S5. Deduplication is deterministic.** The analyzer makes one semantic-model pass per tree, in a semantic-model
+action, never concurrent node actions racing on a shared set. So "one diagnostic per (tree, forbidden assembly), at the
+first naming use" means the first in source order, on every run. The row documents that a `#pragma` at that first
+site silences the warning for the whole file.
+
+**For the diagnostic's row (review notes).** The accepted false negatives are a static `<Using>` in a csproj and a
+target-typed `new()` into an internal-typed parameter. Q3's gap (a differently named partial in a converted project)
+widens if the warning ever becomes an error. `RunAnalyzers=false` silences it.
+
+**Taken as proposed, with no contrary ruling.** (i) A main package's path comes from GoModInfo only, not also from a
+csproj property. (ii) The consumer DLL keeps the name `go2cs-consumer-analyzers.dll` (Q8). After S1 the name is no
+longer load-bearing.
+
