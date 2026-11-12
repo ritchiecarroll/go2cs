@@ -255,7 +255,7 @@ internal static partial (slice<byte>, slice<int16>) movedPair(nint n) {
     return (a, w);
 }
 
-internal static void Main() {
+internal static void main() {
     loopCaps();
     resetCaps();
     addressTakenCap();

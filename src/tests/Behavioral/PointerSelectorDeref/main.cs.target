@@ -23,7 +23,7 @@ internal static partial nint readN(ж<view> p) {
     return viewOf(p.Reinterpret<view, header>()).n;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var h = ref heap<view>(new view(tag: 7, n: 5), out var Ꮡh);
     fmt.Println(readN(Ꮡh));
 

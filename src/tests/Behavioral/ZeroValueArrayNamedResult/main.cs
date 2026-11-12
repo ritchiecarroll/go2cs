@@ -78,7 +78,7 @@ internal static partial (nint n, @string s) scalars() {
     return (n, s);
 }
 
-internal static void Main() {
+internal static void main() {
     var a = as16(0x0102030405060708UL, 0x090a0b0c0d0e0f10UL);
     fmt.Println(len(a), a[0], a[7], a[8], a[15]);
 

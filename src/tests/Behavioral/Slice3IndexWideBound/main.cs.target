@@ -25,7 +25,7 @@ internal static partial void run() {
     fmt.Println(len(e), cap(e));
 }
 
-internal static void Main() {
+internal static void main() {
     run();
 }
 

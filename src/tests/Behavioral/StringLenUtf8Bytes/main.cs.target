@@ -16,7 +16,7 @@ partial struct testsᴛ1 /*dyn*/ {
     new("astral", len("z\U0001d56b"))
 ]); }
 
-internal static void Main() {
+internal static void main() {
     foreach (var (_, t) in range(tests)) {
         fmt.Println(t.name, t.n);
     }

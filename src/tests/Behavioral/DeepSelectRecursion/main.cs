@@ -24,7 +24,7 @@ internal static nint rec(nint n) {
     return n;
 }
 
-internal static void Main() {
+internal static void main() {
     f(100);
 
     nint sum = 0;

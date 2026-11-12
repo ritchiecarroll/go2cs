@@ -129,7 +129,7 @@ internal static void report(@string label, ref sink s, int64 n, error err) {
     fmt.Println(label, n, err, s.mode, (@string)s.bytes);
 }
 
-internal static void Main() {
+internal static void main() {
     ref var bufs = ref heap<Buffers>(new Buffers(new slice<byte>[]{slice<byte>("go"u8), slice<byte>("2"u8), slice<byte>("cs"u8)}.slice()), out var Ꮡbufs);
 
     var tcpSink = Ꮡ(new sink());

@@ -54,7 +54,7 @@ internal static partial void run() {
     fmt.Println(@base[3], grown[2], len(grown), cap(grown));
 }
 
-internal static void Main() {
+internal static void main() {
     run();
 }
 

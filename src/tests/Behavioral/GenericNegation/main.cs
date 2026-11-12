@@ -32,7 +32,7 @@ internal static T negateNamedSigned<T>(T x)
     return -x;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(negate<nint>(5));
     fmt.Println(negate((int32)(-7)));
     fmt.Println(negate((int64)(1099511627776L)));

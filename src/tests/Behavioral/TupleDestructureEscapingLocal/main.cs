@@ -19,7 +19,7 @@ internal static (nint, nint) run() {
     return (list.n, delta);
 }
 
-internal static void Main() {
+internal static void main() {
     var (n, delta) = run();
     fmt.Println(n, delta);
 }

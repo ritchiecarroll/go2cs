@@ -21,7 +21,7 @@ partial struct top {
     internal nint t;
 }
 
-internal static void Main() {
+internal static void main() {
     var x = new top();
     x.n = 1;
     x.p = 9;

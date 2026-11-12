@@ -1,0 +1,33 @@
+# unittime.py --exe <parsedemo.exe> --native <parsedemo-go.exe> --corpus <dir> --match <idx,idx,...> --time <idx> [--n 7]
+# For each --match unit: run `-unit <idx>` on both sides, report rc and whether the dumps are byte-identical.
+# For --time: run the converted `-unit <idx>` n times (after one warm-up run) and report the median wall time and the
+# interquartile range, in milliseconds. Wall time is the whole process, start-up included.
+import argparse, statistics, subprocess, sys, time
+
+sys.stdout.reconfigure(encoding="utf-8")
+ap = argparse.ArgumentParser()
+for a in ("exe", "native", "corpus", "match", "time"):
+    ap.add_argument("--" + a, required=True)
+ap.add_argument("--n", type=int, default=7)
+A = ap.parse_args()
+
+
+def run(cmd):
+    t = time.perf_counter()
+    p = subprocess.run(cmd, capture_output=True, timeout=1800)
+    return p.returncode, p.stdout, p.stderr, (time.perf_counter() - t) * 1000.0
+
+
+for idx in [x for x in A.match.split(",") if x]:
+    crc, cout, cerr, cms = run([A.exe, "-unit", A.corpus, idx])
+    grc, gout, _, gms = run([A.native, "-unit", A.corpus, idx])
+    tail = cerr.decode("utf-8", "replace").strip().splitlines()[:1]
+    print(f"unit {idx}: converted rc={crc} ({cms:.0f} ms), native rc={grc} ({gms:.0f} ms), "
+          f"dump {'IDENTICAL' if crc == 0 and grc == 0 and cout == gout else 'DIFFERS'} "
+          f"({len(cout)} / {len(gout)} bytes){'  stderr: ' + tail[0][:160] if tail and crc != 0 else ''}")
+
+run([A.exe, "-unit", A.corpus, A.time])  # warm-up (file cache, JIT-less first start)
+ms = sorted(run([A.exe, "-unit", A.corpus, A.time])[3] for _ in range(A.n))
+q = statistics.quantiles(ms, n=4)
+print(f"time unit {A.time}: n={A.n} median {statistics.median(ms):.0f} ms, IQR {q[2] - q[0]:.0f} ms "
+      f"(q1 {q[0]:.0f}, q3 {q[2]:.0f}), min {ms[0]:.0f}, max {ms[-1]:.0f}")

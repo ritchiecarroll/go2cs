@@ -10,7 +10,7 @@ partial struct item {
 
 partial class itemPtr /*ж<item>*/;
 
-internal static void Main() {
+internal static void main() {
     var pi = Ꮡ(new item(2));
     var ip = new itemPtr(pi);
     var other = new itemPtr(Ꮡ(new item(2)));

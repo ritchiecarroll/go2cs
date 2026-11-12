@@ -9,7 +9,7 @@ using global::go.math;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(nsshadow.Add(Δmath.MaxInt8, rand.Intn(1)));
     fmt.Println(nsshadow.Max8() + nsshadow.Pad());
 }

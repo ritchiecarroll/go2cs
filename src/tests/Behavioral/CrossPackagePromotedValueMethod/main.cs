@@ -33,7 +33,7 @@ partial struct Wrap {
 
 internal static time.Time @base = time.Date(2026, 9, 30, 12, 34, 56, 789000000, time.ΔUTC);
 
-internal static void Main() {
+internal static void main() {
     var s = new Stamp(@base);
     var p = Ꮡ(new Stamp(@base));
 

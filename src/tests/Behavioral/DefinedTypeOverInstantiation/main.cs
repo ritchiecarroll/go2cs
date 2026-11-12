@@ -55,7 +55,7 @@ partial struct S {
     public nint B;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var q = ref heap<Q>(new Q(new pair<nint>(A: 3, B: 4)), out var Ꮡq);
     q.B++;
     var qs = slice<Q>([new(new pair<nint>(A: 5)), new(new pair<nint>(B: 6))]);

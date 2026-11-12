@@ -72,7 +72,7 @@ internal static @string fromChan(channel<any> ch) {
     }}
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(classify((nint)7));
     fmt.Println(classify("hi"));
     fmt.Println(classify(true));

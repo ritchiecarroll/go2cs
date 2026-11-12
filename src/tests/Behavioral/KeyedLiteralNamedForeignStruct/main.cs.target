@@ -14,7 +14,7 @@ partial class main_package {
     Data4: new byte[]{0x8e, 0xe9, 0x76, 0xe5, 0x8c, 0x74, 0x06, 0x3e}.array()
 )); }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(id.Data1, id.Data2, id.Data3, id.Data4[1], id.First());
 
     var partial = new guid.GUID(new win.GUID(Data2: 9));

@@ -37,7 +37,7 @@ internal static void runDeferred(Tally @base) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     (nint, @string) f(Tally tʗp, nint m) {
         ref var t = ref heap(tʗp, out var Ꮡt);
         t.total++;

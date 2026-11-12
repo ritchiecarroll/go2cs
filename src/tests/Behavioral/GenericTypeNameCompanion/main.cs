@@ -23,7 +23,7 @@ internal static void sizeOf<T>(@string label, T v) {
     fmt.Printf("%-11s dynamic=%T\n"u8, label, (v).OrTypedNilOf());
 }
 
-internal static void Main() {
+internal static void main() {
     nameOf<eface, efaceᴅ>("eface");
     nameOf<namedIface, namedIfaceᴅ>("namedIface");
     nameOf<any, any>("any");

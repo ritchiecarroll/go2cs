@@ -59,7 +59,7 @@ private static readonly @string helloˢ = "hello"u8;
 private static readonly @string worldˢ = "world"u8;
 private static readonly @string fourˢ = "four"u8;
 
-internal static void Main() {
+internal static void main() {
     var intStack = new Stack<nint>();
     intStack.Push(10);
     intStack.Push(20);

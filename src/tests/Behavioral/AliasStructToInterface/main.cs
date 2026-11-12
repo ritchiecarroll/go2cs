@@ -23,7 +23,7 @@ internal static storer newDirect() {
     return new sync_Mapжstorer(Ꮡ(new Δsync.Map()));
 }
 
-internal static void Main() {
+internal static void main() {
     var m = newMap();
     m.Store("a", (nint)1);
     var (v, ok) = m.Load("a");

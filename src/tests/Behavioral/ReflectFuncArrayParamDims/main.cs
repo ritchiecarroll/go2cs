@@ -35,7 +35,7 @@ internal static nint declared(/*[16]*/ array<byte> @in) {
     return len(@in);
 }
 
-internal static void Main() {
+internal static void main() {
     var f32 = ([GoArrayDims(32)] array<byte> @in) => {
         @in = @in.Clone();
         return len(@in) == 32;

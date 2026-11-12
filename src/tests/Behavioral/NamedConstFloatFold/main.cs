@@ -9,7 +9,7 @@ internal static UntypedFloat myLn10 => 2.302585092994045684017991454684364207601
 
 internal static float64 f64(float64 x) { return x; }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(/* 100000 * myPi */ 314159.26535897935D);
     fmt.Println(/* float32(100000 * myPi) */ 314159.25D);
     fmt.Println(f64(2D) * /* (1 / myLn10) */ 0.4342944819032518D);

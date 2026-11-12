@@ -13,7 +13,7 @@ internal static uint64 clearLow(uint64 x) { return x & ~(uint64)1; }
 
 internal static uint32 clearLow32(uint32 u) { return (uint32)(u & ~1); }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(copysign(0xFF, 0x8000000000000000UL));
     fmt.Println(copysign(0x8000000000000042UL, 0));
     fmt.Println(clearLow(0xFFFFFFFFFFFFFFFFUL));

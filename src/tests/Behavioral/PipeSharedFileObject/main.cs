@@ -87,7 +87,7 @@ internal partial struct main_type /*dyn*/ {
     internal @string text;
 }
 
-internal static void Main() {
+internal static void main() {
     var (server, client) = pipe();
 
     ref var dup = ref heap(new syscallꓸHandle(), out var Ꮡdup);

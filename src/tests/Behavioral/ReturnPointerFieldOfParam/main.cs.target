@@ -17,7 +17,7 @@ internal static ж<node> self(ж<node> n) {
     return n;
 }
 
-internal static void Main() {
+internal static void main() {
     var c = Ꮡ(new node(val: 3));
     var b = Ꮡ(new node(next: c, val: 2));
     var a = Ꮡ(new node(next: b, val: 1));

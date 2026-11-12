@@ -45,7 +45,7 @@ internal static void run(@string name, Action f) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     @string only = "";
     if (len(os.Args) > 1) {
         only = os.Args[1];

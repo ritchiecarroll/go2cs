@@ -15,7 +15,7 @@ internal static partial @unsafe.Pointer add(@unsafe.Pointer p, uintptr x) {
     return (@unsafe.Pointer)((uintptr)p + x);
 }
 
-internal static void Main() {
+internal static void main() {
     ref var @base = ref heap(new int64(), out var Ꮡbase);
     @base = 100;
     @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡbase);

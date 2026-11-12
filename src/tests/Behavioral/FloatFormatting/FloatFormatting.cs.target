@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var q = 1.0D;
     for (nint i = 0; i < 10; i++) {
         q = q * 10.0D;

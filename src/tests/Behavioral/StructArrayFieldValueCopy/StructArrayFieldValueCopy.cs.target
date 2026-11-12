@@ -137,7 +137,7 @@ internal static void valueReceiver() {
     fmt.Println("receiver:   ", before, "|", after);
 }
 
-internal static void Main() {
+internal static void main() {
     derefCopy();
     identCopy();
     selectorCopy();

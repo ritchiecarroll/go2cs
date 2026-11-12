@@ -162,7 +162,7 @@ internal static ref readonly @string setCrosscall2Missingˢ => ref setCrosscall2
 private static readonly @string setCrosscall2Missingˢᵇ = "set_crosscall2 missing"u8;
 
 // The main goroutine.
-internal static void Main() {
+internal static void main() {
     GoFrame ᒐ = default;
     try {
         var mp = getg().Value.m;

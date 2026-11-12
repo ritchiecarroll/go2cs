@@ -315,27 +315,41 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				}
 			}
 
-			log.Fatalf("Refusing to convert: %s\n", err)
+			// Fatal for a single package; under -recurse the package is skipped and the run goes on (recurseRefusal.go).
+			return refusePackage(options, diagnosticCgoRefused, err)
 		}
 
 		// Refuse, before any file is written as well, an instantiation whose constraint proxy could not
 		// forward its constraint without breaking Go's aliasing (constraintProxyForwarding.go).
 		if refusal := refuseUnforwardableConstraintProxies(pkg); refusal != nil {
-			refusal.report()
-			log.Fatalf("Refusing to convert: %s\n", refusal)
+			// Under -warn GO2CS2002 each site is a WARNING, recorded for package_info.cs, and the conversion goes on:
+			// go2cs-gen emits the unforwardable method as a forwarder that panics with the refusal text (warnOption.go).
+			if options.warnCodes[diagnosticProxyRefused] {
+				recordDowngradedRefusals(diagnosticProxyRefused, refusal.sites)
+			} else {
+				refusal.report()
+				return refusePackage(options, diagnosticProxyRefused, refusal)
+			}
 		}
 
 		// ...and a pointer type argument the NON-self constraint proxy cannot carry (nonSelfConstraintProxyRefusals.go).
 		if refusal := refuseNonSelfConstraintProxies(pkg); refusal != nil {
 			refusal.report()
-			log.Fatalf("Refusing to convert: %s\n", refusal)
+			return refusePackage(options, diagnosticNonSelfProxyRefused, refusal)
 		}
 
 		// ...and a manual-type conversion of a pointer receiver, which has no box to pass
 		// (manualTypeReceiverRefusal.go).
 		if refusal := refuseManualTypeReceiverOperands(pkg, goosOfTarget(options.targetPlatform)); refusal != nil {
 			refusal.report()
-			log.Fatalf("Refusing to convert: %s\n", refusal)
+			return refusePackage(options, diagnosticManualTypeReceiverRefused, refusal)
+		}
+
+		// ...and a []*T handed as an element-wise copy to a callee that may write the slice
+		// (sliceWideningWriteRefusals.go). Last, so the gates above refuse exactly as before.
+		if refusal := refuseSliceWideningWrites(pkg); refusal != nil {
+			refusal.report()
+			return refusePackage(options, diagnosticSliceWideningRefused, refusal)
 		}
 
 		var projectName, projectFileName, projectFileContents string

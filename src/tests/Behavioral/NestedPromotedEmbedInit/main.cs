@@ -18,7 +18,7 @@ partial struct printer {
     internal formatter f;
 }
 
-internal static void Main() {
+internal static void main() {
     var p = @new<printer>();
     p.f.width = 7;
     p.f.name = "hi";

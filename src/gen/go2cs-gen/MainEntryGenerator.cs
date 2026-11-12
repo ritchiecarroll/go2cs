@@ -1,0 +1,102 @@
+// MainEntryGenerator.cs - Gbtc
+// Copyright © 2026 The go2cs Authors. All rights reserved.
+//
+// Use of this source code is governed by an MIT-style license
+// that can be found in the LICENSE file.
+
+using System.Linq;
+using Microsoft.CodeAnalysis;
+
+namespace go2cs;
+
+/// <summary>
+/// Gives a converted Go program its C# entry point: <c>Main</c>, which runs Go's <c>main</c> through golib's
+/// <c>MainThread.Run</c>.
+/// </summary>
+/// <remarks>
+/// <para>
+/// The converter emits Go's <c>func main</c> under its own name, <c>main</c>, like every other Go function, so the
+/// visible C# reads as the Go does. The entry point the C# compiler needs is generated here instead, because it is
+/// plumbing: Go runs <c>main</c> as the main goroutine, whose stack grows to 1 GB, and the process's startup thread
+/// has the operating system's default stack (1 MiB on Windows, 8 MiB on linux and macOS). <c>MainThread.Run</c>
+/// runs <c>main</c> on a thread reserving Go's headroom (C46; see golib's MainThread).
+/// </para>
+/// <para>
+/// Generated only for an executable whose <c>main_package</c> declares a static, parameterless <c>main</c> (in namespace
+/// <c>go</c>, or in the namespace a dotted module path gives it in a <c>-recurse</c> conversion), when
+/// golib has <c>MainThread</c>, and when nothing in the compilation already declares a <c>Main</c>: the converted-test
+/// host brings its own (<c>Go2CsTestHost.Main</c>), and a program converted before <c>main</c> kept its name declares
+/// <c>main_package.Main</c> itself.
+/// </para>
+/// </remarks>
+[Generator]
+public class MainEntryGenerator : ISourceGenerator
+{
+    public void Initialize(GeneratorInitializationContext context) { }
+
+    public void Execute(GeneratorExecutionContext context)
+    {
+        Compilation compilation = context.Compilation;
+
+        if (compilation.Options.OutputKind is not (OutputKind.ConsoleApplication or OutputKind.WindowsApplication))
+            return;
+
+        // The program's own package class, declared in this compilation and holding Go's main. Its namespace is `go`
+        // for a package converted on its own, and the one a module's path gives it in a -recurse conversion of a
+        // module whose path has a dot (example.com/relsmoke -> go.example.com), so it is found by name, not by the
+        // metadata name go.main_package. Exactly one, or the program is not one this generator can read.
+        INamedTypeSymbol[] mainPackages = compilation.GetSymbolsWithName(MainPackageClass, SymbolFilter.Type)
+            .OfType<INamedTypeSymbol>()
+            .Where(type => type.ContainingType is null && IsGoNamespace(type.ContainingNamespace) && DeclaresGoMain(type))
+            .Distinct<INamedTypeSymbol>(SymbolEqualityComparer.Default)
+            .ToArray();
+
+        if (mainPackages.Length != 1)
+            return;
+
+        // A golib old enough to have no MainThread gets no entry point.
+        if (compilation.GetTypeByMetadataName("go.golib.MainThread") is null)
+            return;
+
+        // An entry point already declared anywhere in the program wins: the test host's, or an older conversion's. Only
+        // a method C# could take as the entry point counts: a Go METHOD named Main is a static extension method here,
+        // which is not one, and must not leave the program without an entry point.
+        if (compilation.GetSymbolsWithName("Main", SymbolFilter.Member).OfType<IMethodSymbol>().Any(IsEntryPointCandidate))
+            return;
+
+        context.AddGeneratedSource("go2cs.main-entry.g.cs", Source(mainPackages[0].ContainingNamespace));
+    }
+
+    private const string MainPackageClass = "main_package";
+
+    // `go`, or a namespace under it: every namespace the converter writes a package into.
+    private static bool IsGoNamespace(INamespaceSymbol ns)
+    {
+        INamespaceSymbol? root = ns;
+
+        while (root is { ContainingNamespace.IsGlobalNamespace: false })
+            root = root.ContainingNamespace;
+
+        return root is { IsGlobalNamespace: false, Name: "go" };
+    }
+
+    // Go's main: static, parameterless, returning nothing.
+    private static bool DeclaresGoMain(INamedTypeSymbol type) =>
+        type.GetMembers("main").OfType<IMethodSymbol>().Any(method =>
+            method is { IsStatic: true, Parameters.Length: 0, ReturnsVoid: true, IsGenericMethod: false });
+
+    // C#'s entry-point shape: static, not an extension, not generic, and either no parameters or one string[].
+    private static bool IsEntryPointCandidate(IMethodSymbol method) =>
+        method is { IsStatic: true, IsExtensionMethod: false, IsGenericMethod: false } &&
+        (method.Parameters.Length == 0 ||
+         method.Parameters is [{ Type: IArrayTypeSymbol { ElementType.SpecialType: SpecialType.System_String } }]);
+
+    // The namespace is spelled as C# reads it (a keyword segment escaped), without the global:: prefix.
+    private static string Source(INamespaceSymbol ns) =>
+        "// <auto-generated/>\r\n" +
+        $"namespace {ns.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))};\r\n\r\n" +
+        $"partial class {MainPackageClass}\r\n" +
+        "{\r\n" +
+        "    private static void Main() => global::go.golib.MainThread.Run(main);\r\n" +
+        "}\r\n";
+}

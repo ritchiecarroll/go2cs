@@ -14,7 +14,7 @@ partial struct PublicNestedShapeᴛ1 /*dyn*/ {
 }
 [GoLazy] partial class lazyᴛPublicNestedShape { public static PublicNestedShapeᴛ1 PublicNestedShape = new PublicNestedShapeᴛ1(A: new PublicNestedShapeᴛ1_A(X: 7)); }
 
-internal static void Main() {
+internal static void main() {
     RegisterInternalShape();
     fmt.Println("public nested:", PublicNestedShape.A.X);
 }

@@ -85,7 +85,7 @@ func main() {
 		t.Errorf("a foreign field of an unimported type does not read through the property:\n%s", body)
 	}
 
-	if main := funcBody(t, cs, "void Main("); !strings.Contains(main, "srv.New(true).TLS != nil") {
+	if main := funcBody(t, cs, "void main("); !strings.Contains(main, "srv.New(true).TLS != nil") {
 		t.Errorf("a call result's foreign field does not read through the property:\n%s", main)
 	}
 

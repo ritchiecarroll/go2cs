@@ -39,7 +39,7 @@ internal static void run() {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     run();
 }
 

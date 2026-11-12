@@ -28,7 +28,7 @@ partial struct Key /*num:uint32*/;
 
 public delegate void Seq<K>(Func<K, bool> yield);
 
-internal static void Main() {
+internal static void main() {
     var m = new MA(0);
     fmt.Println("make alias:", m == nil, len(m));
     m["a"] = 1;

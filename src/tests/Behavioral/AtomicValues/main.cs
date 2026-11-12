@@ -13,7 +13,7 @@ partial struct holder {
 internal static readonly ж<holder> ᏑgHolder = new StaticBox<holder>(default(holder));
 internal static ref holder gHolder => ref ((StaticBox<holder>)ᏑgHolder).ValueSlot;
 
-internal static void Main() {
+internal static void main() {
     ref var n = ref heap(new atomic.Int32(), out var Ꮡn);
     Ꮡn.Store(10);
     fmt.Println("add:", Ꮡn.Add(5));

@@ -71,7 +71,7 @@ internal static ж<uint8> key8Last(ж<uintptr> p) {
     return ((ж<array<uint8>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(p))).at<uint8>(ptrSize - 1);
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(classify(Ꮡsentinel));
 
     fmt.Println(classify(nil));

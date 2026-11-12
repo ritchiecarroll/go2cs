@@ -23,7 +23,7 @@ internal static void @try(@string name, Func<ж<nint>> f) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     ref var arr = ref heap(new array<nint>(3), out var Ꮡarr);
     var p = Ꮡarr;
     var ps = Ꮡ(new S());

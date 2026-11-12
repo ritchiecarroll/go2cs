@@ -19,7 +19,7 @@ partial class pubPtr /*ж<pub>*/;
 
 /*[3]*/ partial class arrPtr /*ж<array<nint>>*/;
 
-internal static void Main() {
+internal static void main() {
     var ps = Ꮡ(new s(1));
     var dps = new sPtr(ps);
     fmt.Println(fmt.Sprintf("%#v"u8, dps));

@@ -126,6 +126,10 @@ type CallExprContext struct {
 	// wrapArgWithNew wraps the indexed argument in a constructor call (`new slice<E>(arg)`) — the
 	// S-where-[]E-expected materialization (see convExprList).
 	wrapArgWithNew map[int]string
+	// nilSafeDelegateArgs passes the indexed func-value argument to a slot of a DIFFERENT delegate type through
+	// `NilSafeDelegateConversion<Target, Source>(arg)`, whose value is the two type arguments: the delegate-copy
+	// constructor would throw for a nil value, where Go passes nil (delegateArgWrap.go).
+	nilSafeDelegateArgs map[int]string
 	// wrapArgWithLambda re-wraps a FUNC-typed argument (a method group / func value) as a lambda
 	// `(p0, p1) => value(p0, p1)` so the enclosing delegate's return/param positions can apply the
 	// user-defined implicit conversion a C# method-group conversion won't (a constraint-proxy

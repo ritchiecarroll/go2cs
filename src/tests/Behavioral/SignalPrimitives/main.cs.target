@@ -7,7 +7,7 @@ using go.os;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("initially ignored:", signal.Ignored(Δos.Interrupt));
 
     signal.Ignore(Δos.Interrupt);

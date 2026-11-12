@@ -28,7 +28,7 @@ internal static reflectꓸValue field(reflectꓸValue v, nint i) {
     return reflect.NewAt(f.Type, (@unsafe.Pointer)((uintptr)(@unsafe.Pointer)v.UnsafeAddr() + f.Offset)).Elem();
 }
 
-internal static void Main() {
+internal static void main() {
     ref var n = ref heap<nint>(7, out var Ꮡn);
     ref var x = ref heap<P>(new P(1, 2, new inner("x"), Ꮡn), out var Ꮡx);
     var v = reflect.ValueOf(Ꮡx).Elem();

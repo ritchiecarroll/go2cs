@@ -5,7 +5,7 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var byteT = reflect.TypeOf((uint8)0);
     var (arr3, arr4) = (reflect.ArrayOf(3, byteT), reflect.ArrayOf(4, byteT));
 

@@ -86,7 +86,7 @@ var topLevelSeparationCases = []struct {
 	{"nint M() {", false, "Go writes M under K"},
 	{"nint N() {", false, "Go writes two multi-line functions adjacent"},
 	{"void O() { }", false, "Go writes O under N's closing brace"},
-	{"void Main() {", true, "Go has a blank line before main"},
+	{"void main() {", true, "Go has a blank line before main"},
 }
 
 func checkTopLevelSeparation(t *testing.T, lines []string) {

@@ -56,7 +56,7 @@ internal static nint plusOne() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string sevenˢ = "seven"u8;
 
-internal static void Main() {
+internal static void main() {
     nint v = func(nint () => {
         return 42;
     })();

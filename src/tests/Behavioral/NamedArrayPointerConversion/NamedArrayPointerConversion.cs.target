@@ -9,7 +9,7 @@ partial struct MyEmptyArray /*[0]byte*/;
 partial struct MyInts /*[3]nint*/;
 partial struct MyBytes /*[]byte*/;
 
-internal static void Main() {
+internal static void main() {
     var q = Ꮡ(new MyArray(new array<byte>(4)));
     q.Value[0] = 7;
     q.Value[3] = 8;

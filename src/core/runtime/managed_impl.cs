@@ -3765,6 +3765,10 @@ partial class runtime_package
             throw panic("LockOSThread nesting overflow");
         }
         dolockOSThread();
+
+        // golib's copy of lockedExt, which it reads to keep main on the startup thread after an init locked it
+        // there (golib MainThread; Go runs main on that thread).
+        go.golib.Goroutine.NoteLockOSThread();
     }
 
     // UnlockOSThread undoes an earlier call to LockOSThread.
@@ -3775,6 +3779,7 @@ partial class runtime_package
             return;
         gp.Value.m.Value.lockedExt--;
         dounlockOSThread();
+        go.golib.Goroutine.NoteUnlockOSThread();
     }
 
     // The runtime-internal variants, reached through syscall and startTemplateThread.

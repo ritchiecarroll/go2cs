@@ -6,7 +6,7 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     GoFrame ᒐ = default;
     try {
         ref var data = ref heap(new syscall.WSAData(), out var Ꮡdata);

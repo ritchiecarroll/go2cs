@@ -1,0 +1,17 @@
+# Repro runs at go2cs master 742a3dbb24 (batch 285): Go oracle -> go2cs -recurse -> dotnet build -> run -> compare (repro-at.sh.txt).
+# C49: c49b-orelsecrosspkg RED (core.OrElse in another package, nil passed as an argument) / c49orelsenilptr GREEN (a nil local).
+
+repro c49b-orelsecrosspkg  go2cs=742a3dbb24
+GO   rc=0: 2344 true
+CONV rc=0  WARNING: Package license is unspecified for  (reported once per module)|
+BUILD rc=0  
+RUN  rc=0: 0 true
+MATCH NO
+
+repro c49orelsenilptr  go2cs=742a3dbb24
+GO   rc=0: true true 7 d
+CONV rc=0  
+BUILD rc=0  
+RUN  rc=0: true true 7 d
+MATCH YES
+

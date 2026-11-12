@@ -642,6 +642,12 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 			}
 		}
 
+		// A refused site converted under -warn (warnOption.go): go2cs-gen reports each record as GO2CS0011 in every
+		// C# build of the package, so a project nobody reconverts still shows it carries a known-broken path.
+		for _, record := range downgradedRefusalRecords() {
+			lines.Add(record)
+		}
+
 		// Add self-referential constraint proxies (nistCurve[*P224Point]'s Point). Each is a
 		// `GoImplement<element, iface<element>>(ConstraintProxy = true)` — the interface's own
 		// type argument is a PLACEHOLDER (the generator closes it over the emitted proxy itself),

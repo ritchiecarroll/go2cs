@@ -1040,10 +1040,11 @@ multi-segment producer like go/ast, verified by the go/parser source A/B.)
 A NAMED func-type field initialized with a value of a DIFFERENT delegate type has no implicit
 C# conversion: Go 1.23's internal/concurrent `keyHash: mapType.Hasher` fed a `hashFunc` field from a
 `Func<…>` field. The composite-literal walk resolves each element's field BY NAME (keyed-aware)
-and wraps mismatched delegate values in the target delegate's constructor —
-`keyHash: new hashFunc((~mapType).Hasher)` (the wrap splits a C# named-argument label first).
-FuncLit and nil initializers stay bare. Guarded by `FirstClassFunctions`
-(`handler`/`provider`/`registry`).
+and wraps a mismatched delegate value for the target delegate — the delegate constructor for a method
+group, `keyHash: new hashFunc((~mapType).Hasher)`, and the nil-safe conversion for any other value (see
+[A wrapped func value is nil-safe](#a-wrapped-func-value-is-nil-safe-and-a-same-delegate-value-is-not-wrapped));
+the wrap splits a C# named-argument label first. FuncLit and nil initializers stay bare. Guarded by
+`FirstClassFunctions` (`handler`/`provider`/`registry`).
 
 ## A named delegate value passed to a structural func parameter re-wraps
 The MIRROR of the argument-position named-delegate wrap: a **structural** (written-anonymous) func
@@ -1060,7 +1061,7 @@ invoke(h, 1, "a")
 ```
 <!-- illustration: not converter output -->
 ```csharp
-invoke(new Func<nint, @string, @string>(h), 1, "a");
+invoke(NilSafeDelegateConversion<Func<nint, @string, @string>, Handler>(h), 1, "a");
 ```
 
 Two argument shapes render named and take the wrap: a value whose **Go type** is a named func type
@@ -1080,10 +1081,40 @@ direction, so GOROOT sort example_keys_test's `planetSorter{planets: planets, by
 value (named, with a `Sort` method) initializing the written structural field `by func(p1, p2
 *Planet) bool` — emitted the bare `by: by` against the `Func<ж<Planet>, ж<Planet>, bool>`
 constructor parameter (CS1503). <!-- 2026-07-17; the Phase-4 blocker-map row B10b. --> The structural-field arm
-applies the identical named-rendering test and wrap: `by: new Func<ж<Planet>, ж<Planet>,
-bool>(by)`. Method groups, func literals, and nil stay bare, and generic fields stay native, as
+applies the identical named-rendering test and wrap: `by: NilSafeDelegateConversion<Func<ж<Planet>,
+ж<Planet>, bool>, By>(by)`. Method groups, func literals, and nil stay bare, and generic fields stay native, as
 at call sites. (Guarded by the `NamedFuncTypeStructuralField` behavioral test — the By-with-method
 sorter pattern wrapped, a method-group field initializer control bare, values vs Go.)
+
+## A wrapped func value is nil-safe, and a same-delegate value is not wrapped
+The three wraps above (a named func-type argument, its structural mirror, and a composite-literal field)
+share one classifier (`delegateWrap`, delegateArgWrap.go). Go's assignment of a func value never panics,
+and a nil func value arrives nil; the .NET delegate-copy constructor `new D(x)` throws "Delegate to an
+instance method cannot have null 'this'" when `x` is null. So the classifier distinguishes three cases:
+
+- **A method group or func literal** keeps `new D(x)`. It is never null, and it has no delegate type of
+  its own to compare.
+- **A value that already renders as the target delegate** passes unwrapped. A methodless named func
+  type renders as the structural delegate of its signature
+  ([A methodless named func type renders as its base delegate](#a-methodless-named-func-type-renders-as-its-base-delegate)),
+  so a value of the unnamed signature, or of another methodless named type with the identical
+  signature, is already the target's C# type. typescript-go's relater is the shape:
+  `core.IfElse(reportErrors, r.reportError, nil)` passed to an `ErrorReporter func(*Message, ...any)`
+  parameter is an `Actionꓸꓸꓸ<ж<Message>, any>` reaching an `Actionꓸꓸꓸ<ж<Message>, any>` parameter.
+- **Any other value** converts through golib's `NilSafeDelegateConversion<TTarget, TSource>`, the
+  helper the explicit `T(x)` conversion already uses
+  ([value-receiver-delegates.md](value-receiver-delegates.md)): null in, null out.
+
+<!-- illustration: not converter output -->
+```csharp
+check(IfElse<Actionꓸꓸꓸ<ж<Message>, any>>(false, r.reportError, (Actionꓸꓸꓸ<ж<Message>, any>)(default)));  // no wrapper
+check(new Actionꓸꓸꓸ<ж<Message>, any>(r.reportError));                    // a method group keeps the constructor
+serve(NilSafeDelegateConversion<Handler, Func<nint, @string>>(g));          // g may be nil
+```
+
+(Guarded by the `NilFuncNamedDelegateArg` behavioral test — the nil and non-nil `IfElse` results, a
+method value, a literal, nil locals of the unnamed and the named type, a nil value passed to a named
+type with methods, the structural mirror and the composite-literal fields, values vs Go; TS C47.)
 
 ## Func-typed fields with a cross-package (slash-path) type render structurally
 A func-typed struct field whose signature names a type from a **multi-segment** import path —

@@ -27,7 +27,7 @@ internal static (Δtime.Duration, float64, nint) foldedConstant() {
     return (d, d.Seconds(), (nint)((Δtime.Duration)(28800000000000L)).Seconds());
 }
 
-internal static void Main() {
+internal static void main() {
     var stamp = Δtime.Date(2009, Δtime.February, 4, 21, 0, 57, 12345600, Δtime.ΔUTC);
 
     fmt.Println("1:", describe(stamp));

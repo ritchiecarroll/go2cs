@@ -27,7 +27,7 @@ internal static ref tracer tr => ref ((StaticBox<tracer>)Ꮡtr).ValueSlot;
 
 internal static partial void keep(ж<tracer> t) { _ = t; }
 
-internal static void Main() {
+internal static void main() {
     keep(Ꮡtr);
     tr.tabs = new slice<buf>(2);
 

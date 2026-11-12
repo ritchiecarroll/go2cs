@@ -94,7 +94,7 @@ internal static @string ratioString(params ꓸꓸꓸnint valsʗp) {
     return s;
 }
 
-internal static void Main() {
+internal static void main() {
     var strategies = new slice<strategy>(win);
     foreach (var kΔ1 in range(len(strategies))) {
         strategies[kΔ1] = stayAtK(kΔ1 + 1);
@@ -117,7 +117,7 @@ internal static void Main() {
     fmt.Println(n, @out, serr == nil);
 
     var p = new provider(produce: (nint x) => x * 2);
-    var r = new registry(h: new handler(p.produce));
+    var r = new registry(h: NilSafeDelegateConversion<handler, Func<nint, nint>>(p.produce));
     fmt.Println(r.h(21));
 
     tagged tg = new handlerᴠtagged(r.h);

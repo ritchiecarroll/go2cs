@@ -28,7 +28,7 @@ internal static @string describe(any x) {
     return "not a string getter";
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(describe(new box<@string>(v: "hello")));
     fmt.Println(describe(new box<nint>(v: 5)));
 

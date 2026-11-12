@@ -1,0 +1,8 @@
+package diagnostics
+
+type Message struct{ code int }
+
+func (m *Message) Code() int { return m.code }
+
+// The shape of TS internal/diagnostics: package-level *Message values.
+var Type_0_does_not_satisfy_the_constraint_1 = &Message{2344}

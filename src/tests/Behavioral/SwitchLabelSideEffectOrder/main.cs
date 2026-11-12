@@ -145,7 +145,7 @@ internal static void loop() {
     flush("loop", "end");
 }
 
-internal static void Main() {
+internal static void main() {
     foreach (var (_, t) in range(slice<nint>([1, 2, 3, 4, 5, 9]))) {
         leading(t);
     }

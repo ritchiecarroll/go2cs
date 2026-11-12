@@ -21,7 +21,7 @@ internal static void arm(@string name, Action f) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     uint64 wideU = (uint64)(4294967296L + 5);
     int64 wideI = 4294967301L;
     nint wideInt = unchecked((nint)(4294967301L));

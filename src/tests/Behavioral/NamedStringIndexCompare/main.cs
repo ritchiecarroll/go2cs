@@ -12,7 +12,7 @@ partial struct S {
 
 internal static Kind get() { return (@string)"x"; }
 
-internal static void Main() {
+internal static void main() {
     var vals = new map<@string, Kind>{["a"] = (@string)"x", ["b"] = (@string)"y"};
     var s = slice<Kind>([(@string)"x", (@string)"y"]);
     var a = new Kind[]{(@string)"x", (@string)"y"}.array();

@@ -14,7 +14,7 @@ internal static args positional(uint64 w, uint64 x, uint64 y, uint64 z) {
     return new args(new uint64[]{w, x, y, z}.array());
 }
 
-internal static void Main() {
+internal static void main() {
     var k = keyed(11, 22);
     fmt.Println(k[0], k[1], k[2], k[3]);
 

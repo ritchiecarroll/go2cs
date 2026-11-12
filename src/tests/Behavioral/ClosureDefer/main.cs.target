@@ -16,7 +16,7 @@ internal static Action makeGreeter(@string name) {
     };
 }
 
-internal static void Main() {
+internal static void main() {
     void f() {
         GoFrame ᒐ = default;
         try {

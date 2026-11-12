@@ -242,7 +242,7 @@ internal static partial void deadlineVersusData() {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     deadlineLifecycle();
     pastDeadline();
     replacedWhileBlocked();

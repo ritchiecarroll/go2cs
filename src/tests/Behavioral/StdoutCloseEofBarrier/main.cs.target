@@ -8,7 +8,7 @@ using go.os;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     if (Δos.Getenv("EOF_BARRIER_CHILD") == "1"u8) {
         child();
         return;

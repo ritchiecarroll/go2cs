@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 using go;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -33,5 +34,14 @@ public class LinuxAmd64RuntimeSyscallFlavourTests
     {
         Assert.AreEqual((long)syscall_package.SYS_RT_SIGPROCMASK, runtime_package.GoSigprocmaskNumberProbe(Architecture.X64),
             "the converted flavour's SYS_RT_SIGPROCMASK");
+    }
+
+    // sched_getaffinity's X64 row (runtime/linux/stubs2_impl.cs), the same way. At linux/arm64 the constant is 123.
+    [TestMethod]
+    public void TheAmd64SchedGetaffinityNumberAgreesWithTheConvertedFlavour()
+    {
+        Console.WriteLine($"READING the linux/amd64 flavour's SYS_SCHED_GETAFFINITY = {(long)syscall_package.SYS_SCHED_GETAFFINITY}");
+        Assert.AreEqual((long)syscall_package.SYS_SCHED_GETAFFINITY, runtime_package.GoSchedGetaffinityNumberProbe(Architecture.X64),
+            "the converted flavour's SYS_SCHED_GETAFFINITY");
     }
 }

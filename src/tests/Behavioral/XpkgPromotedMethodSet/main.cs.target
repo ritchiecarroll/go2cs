@@ -185,7 +185,7 @@ internal partial interface main_typeᴛ4 /*dyn*/ {
     nint Ping();
 }
 
-internal static void Main() {
+internal static void main() {
     report("Direct", new Direct());
     report("PtrDirect", new PtrDirect());
     report("Outer", new Outer());

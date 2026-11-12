@@ -153,7 +153,7 @@ internal static nint checksum(ref frame f) {
     return s;
 }
 
-internal static void Main() {
+internal static void main() {
     testTypeSwitch(new fakeError());
     testTypeAssertion(new fakeError());
     takesReader(new fakeReader());

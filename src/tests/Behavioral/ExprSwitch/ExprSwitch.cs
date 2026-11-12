@@ -32,7 +32,7 @@ public static nint Foo(nint n) {
     return n;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(getStr("test"));
     fmt.Println(getStr2("hello, ", "world"));
     fmt.Println(getStr3("hello, %s", "world"));

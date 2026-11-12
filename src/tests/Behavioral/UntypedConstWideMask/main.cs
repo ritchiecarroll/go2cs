@@ -57,7 +57,7 @@ internal static uintptr nativeWidth(byte c) {
     return (uintptr)((uintptr)((((uintptr)1).Lsh((uint64)(c))) & (uintptr)((nuint)(128UL))) | (uintptr)((((uintptr)1).Lsh((uint64)((byte)(c - 64)))) & (uintptr)(unchecked((nuint)(4611686018427387906UL)))));
 }
 
-internal static void Main() {
+internal static void main() {
     nint hosts = 0;
     nint values = 0;
     for (nint i = 0; i < 256; i++) {

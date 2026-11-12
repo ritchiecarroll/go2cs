@@ -39,7 +39,7 @@ internal static deep derefCopy(ref deep p) {
     return c;
 }
 
-internal static void Main() {
+internal static void main() {
     var a = new mid(inner: new inner(n: 1, tag: "a"), extra: 10);
     var b = a;
     b.n = 2;

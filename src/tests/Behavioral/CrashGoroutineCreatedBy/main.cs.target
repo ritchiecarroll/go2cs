@@ -15,7 +15,7 @@ using Δio = io_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     if (Δos.Getenv("CRASH_GOROUTINE_CHILD") == "1"u8) {
         child();
         return;

@@ -17,7 +17,7 @@ internal static void push(this ref grid g, nint v) {
     row.ValueSlot = append(row.ValueSlot, v);
 }
 
-internal static void Main() {
+internal static void main() {
     grid g = default;
     g.addLine();
     g.push(1);

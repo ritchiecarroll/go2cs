@@ -65,7 +65,7 @@ internal static (T, bool) check<T, V>(constraints<T, V> c, V s) {
     return (zero, false);
 }
 
-internal static void Main() {
+internal static void main() {
     var d = new constraints<@string, @string>("dns", newDNS("a"), newDNS("x"));
     var (ᴛ1, ᴛ2) = check(d, (@string)"a");
     fmt.Println(ᴛ1, ᴛ2);

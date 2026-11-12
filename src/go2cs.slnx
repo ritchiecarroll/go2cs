@@ -291,6 +291,7 @@
     <Project Path="tests/Behavioral/AliasNamespaceShadow/inner/AliasNamespaceShadow.inner.csproj" />
     <Project Path="tests/Behavioral/AliasNamespaceShadow/sort/AliasNamespaceShadow.sort.csproj" />
     <Project Path="tests/Behavioral/AliasNamedTargetForms/AliasNamedTargetForms.csproj" />
+    <Project Path="tests/Behavioral/AliasReceiverForms/AliasReceiverForms.csproj" />
     <Project Path="tests/Behavioral/AliasStructComposite/AliasStructComposite.csproj" />
     <Project Path="tests/Behavioral/AndNotAssignNarrow/AndNotAssignNarrow.csproj" />
     <Project Path="tests/Behavioral/AnonIfaceMethodSetWidening/AnonIfaceMethodSetWidening.csproj" />
@@ -731,6 +732,7 @@
     <Project Path="tests/Behavioral/LocalTypeSliceElement/LocalTypeSliceElement.csproj" />
     <Project Path="tests/Behavioral/LongPathRoundTrip/LongPathRoundTrip.csproj" />
     <Project Path="tests/Behavioral/LookupServicePort/LookupServicePort.csproj" />
+    <Project Path="tests/Behavioral/MainDeepRecursion/MainDeepRecursion.csproj" />
     <Project Path="tests/Behavioral/MainSelectForeverAfterFunc/MainSelectForeverAfterFunc.csproj" />
     <Project Path="tests/Behavioral/MainSelectForeverWorkerExits/MainSelectForeverWorkerExits.csproj" />
     <Project Path="tests/Behavioral/MakeLenNamedNumeric/MakeLenNamedNumeric.csproj" />
@@ -893,6 +895,7 @@
     <Project Path="tests/Behavioral/NilChannelSelectDefault/NilChannelSelectDefault.csproj" />
     <Project Path="tests/Behavioral/NilCompareShapes/NilCompareShapes.csproj" />
     <Project Path="tests/Behavioral/NilFuncIfaceMethodValue/NilFuncIfaceMethodValue.csproj" />
+    <Project Path="tests/Behavioral/NilFuncNamedDelegateArg/NilFuncNamedDelegateArg.csproj" />
     <Project Path="tests/Behavioral/NilMapKey/NilMapKey.csproj" />
     <Project Path="tests/Behavioral/NilMapOperations/NilMapOperations.csproj" />
     <Project Path="tests/Behavioral/NilPointerPanic/NilPointerPanic.csproj" />
@@ -902,6 +905,8 @@
     <Project Path="tests/Behavioral/NilPointerParamValueCallTC0/NilPointerParamValueCallTC0.csproj" />
     <Project Path="tests/Behavioral/NilPointerUintptr/NilPointerUintptr.csproj" />
     <Project Path="tests/Behavioral/NilPointerValueReceiverCall/NilPointerValueReceiverCall.csproj" />
+    <Project Path="tests/Behavioral/NilPtrIdentity/NilPtrIdentity.csproj" />
+    <Project Path="tests/Behavioral/NilPtrIdentityLib/NilPtrIdentityLib.csproj" />
     <Project Path="tests/Behavioral/NilReceiverNormalization/NilReceiverNormalization.csproj" />
     <Project Path="tests/Behavioral/NilSliceConversion/NilSliceConversion.csproj" />
     <Project Path="tests/Behavioral/NilVarNamedFuncConv/NilVarNamedFuncConv.csproj" />
@@ -1026,6 +1031,7 @@
     <Project Path="tests/Behavioral/RefPrimaryFieldReceiver/RefPrimaryFieldReceiver.csproj" />
     <Project Path="tests/Behavioral/ReflectNamedFuncAssign/ReflectNamedFuncAssign.csproj" />
     <Project Path="tests/Behavioral/ReflectNewAtField/ReflectNewAtField.csproj" />
+    <Project Path="tests/Behavioral/RefusalDowngradeProxy/RefusalDowngradeProxy.csproj" />
     <Project Path="tests/Behavioral/ReflectArrayOf/ReflectArrayOf.csproj" />
     <Project Path="tests/Behavioral/ReflectAssignabilityNamed/ReflectAssignabilityNamed.csproj" />
     <Project Path="tests/Behavioral/ReflectBridgeClosure/ReflectBridgeClosure.csproj" />

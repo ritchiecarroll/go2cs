@@ -14,7 +14,7 @@ partial struct duration /*num:int64*/;
 
 internal static int64 advance(duration d) { return (int64)d; }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println((uint64)(/* 1.0 / (retainExtraPercent / 100.0) */ 10UL));
     fmt.Println((nint)((nint)(/* 1.2 * baseline */ 125829120L)), (int64)(/* 1.5 * baseline */ 157286400L), (nint)((nint)(/* 0.2 * baseline */ 20971520L)));
     fmt.Println((uint64)(/* pct / 100.0 * 100 */ 29UL));

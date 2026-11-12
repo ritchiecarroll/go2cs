@@ -28,7 +28,7 @@ internal static Value binary(@string op, Value x, Value y) {
     return ((boolVal)((bool)a  ||  (bool)b));
 }
 
-internal static void Main() {
+internal static void main() {
     Value t = ((boolVal)true);
     Value f = ((boolVal)false);
 

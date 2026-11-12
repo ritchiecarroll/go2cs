@@ -41,7 +41,7 @@ public static T Or<T>(params Span<T> valsʗp) {
     return zero;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(First<nint>(10, 20, 30));
     fmt.Println(First(1.5D, 2.5D));
     fmt.Println(Count<nint>(1, 2, 3, 4));

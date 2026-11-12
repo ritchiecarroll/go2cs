@@ -777,10 +777,11 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	isModuleInitializer := false
 
 	if funcDecl.Recv == nil {
-		// Handle Go "main" function as a special case, in C# this should be capitalized "Main"
-		if csFunctionName == "main" {
-			csFunctionName = "Main"
-		} else if csFunctionName == "init" {
+		// Go's `main` keeps its own name, like every other Go function. The C# entry point is GENERATED
+		// (go2cs-gen's MainEntryGenerator: `static void Main() => MainThread.Run(main);`), which runs it as
+		// the main goroutine on a thread with Go's stack headroom (C46, golib MainThread). A Go function
+		// that is itself named `Main` is shadowed (getSanitizedFunctionName), so it cannot collide.
+		if csFunctionName == "init" {
 			isModuleInitializer = true
 
 			// C# module initializer functions should have internal scope

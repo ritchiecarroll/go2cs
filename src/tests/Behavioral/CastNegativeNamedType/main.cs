@@ -14,7 +14,7 @@ internal static int64 negWide(nint n) {
     return (int64)(-2) * (int64)n;
 }
 
-internal static void Main() {
+internal static void main() {
     var lvl = (level)(-1);
     fmt.Println((nint)lvl);
     fmt.Println((nint)neg());

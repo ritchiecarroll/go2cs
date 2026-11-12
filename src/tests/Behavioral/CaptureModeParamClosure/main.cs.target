@@ -83,7 +83,7 @@ internal static (nint total, @string log) deferMethodValue(Tally tʗp, nint n) {
     return (total, log);
 }
 
-internal static void Main() {
+internal static void main() {
     var t = new Tally(total: 5, log: "start");
 
     var (before, after, log) = closureRead(t, 3);

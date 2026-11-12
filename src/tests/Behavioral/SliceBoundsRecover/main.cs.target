@@ -38,7 +38,7 @@ internal partial struct main_cases /*dyn*/ {
     internal Action f;
 }
 
-internal static void Main() {
+internal static void main() {
     var s = new slice<nint>(3, 10);
     ref var a = ref heap(new array<nint>(3), out var Ꮡa);
     var p = Ꮡa;

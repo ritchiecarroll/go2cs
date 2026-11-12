@@ -15,7 +15,7 @@ internal static void mutate(ref @string s) {
     s = s + "-mutated"u8;
 }
 
-internal static void Main() {
+internal static void main() {
     version fileVersion = asVersion("go1.21");
     if (fileVersion.isValid()) {
         fmt.Println(fileVersion.tag());

@@ -35,7 +35,7 @@ internal static I pick(nint which) {
 private static readonly object threeˢ = (@string)"three"u8;
 private static readonly object oneˢ = (@string)"one"u8;
 
-internal static void Main() {
+internal static void main() {
     any a = (int8)(-5);
     any b = (nint)42;
     any c = (@string)"go";
