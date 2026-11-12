@@ -40,6 +40,13 @@ public static class GeneratedSource
         context.AddSource(hintName, Normalize(source));
 
     /// <summary>
+    /// M:N SPIKE (R5b, B2), never lands. Adds <paramref name="source"/> exactly as written: a twin is a copy of a
+    /// source method under a <c>#line</c> directive, and it keeps the source's line count only if no blank run is folded.
+    /// </summary>
+    public static void AddLineExactSource(this GeneratorExecutionContext context, string hintName, string source) =>
+        context.AddSource(hintName, source);
+
+    /// <summary>
     /// The metadata name of golib's <c>GoExtensionHostAttribute</c>; a compilation that cannot resolve it gets no list.
     /// </summary>
     public const string ExtensionHostAttributeMetadataName = "go.GoExtensionHostAttribute";

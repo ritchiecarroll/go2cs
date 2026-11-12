@@ -1988,6 +1988,13 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
         return m_core.RecvTwin();
     }
 
+    // The hidden twin of the send operator method, which a generated twin awaits (B2).
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public ValueTask ᐸꟷꞏtwin(T value)
+    {
+        return Sendꞏtwin(value);
+    }
+
     /// <summary>
     /// Gets the select-case descriptor registering a SEND of <paramref name="value"/> on this
     /// channel with <c>builtin.select</c>.

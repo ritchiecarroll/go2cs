@@ -61,6 +61,10 @@ public class ImplementGenerator : ISourceGenerator
         // ALL interface implementations for the package).
         HashSet<string> emittedHintNames = new(StringComparer.OrdinalIgnoreCase);
 
+        // Under the M:N twins a pointer adapter is partial: the twin generator adds its forwarders in a second part.
+        string adapterPartialKeyword = context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.GoTwins", out string? twins) &&
+                                       string.Equals(twins, "true", StringComparison.OrdinalIgnoreCase) ? "partial " : "";
+
         // The pointer adapters of each package class that register with golib's AdapterRegistry (EmitAdapterRegistrations).
         Dictionary<(string packageNamespace, string packageName), List<string>> adapterRegistrations = new();
 
@@ -1339,6 +1343,7 @@ public class ImplementGenerator : ISourceGenerator
                     TypeParameters = adapterTypeParameters,
                     ConstraintClause = adapterConstraintClause,
                     AdapterScope = adapterScope,
+                    PartialKeyword = adapterPartialKeyword,
                     Methods = methods,
                     ForwardReceivers = forwardReceivers,
                     ForwardStaticCalls = forwardStaticCalls,

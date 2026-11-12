@@ -44,6 +44,10 @@ internal class AdapterImplTemplate : TemplateBase
     public string TypeParameters = "";
     public string ConstraintClause = "";
 
+    // "partial " under the M:N twins (the twin generator adds the interface twin's forwarder to the adapter in
+    // a second part), empty otherwise: a build without twins keeps the adapter's bytes.
+    public string PartialKeyword = "";
+
     // `<Point>` as an open generic's `<>`, `<K, V>` as `<,>`: the adapter's own definition, for typeof.
     private string OpenTypeParameters => TypeParameters.Length == 0 ? "" : $"<{new string(',', TypeParameters.Split(',').Length - 1)}>";
 
@@ -75,7 +79,7 @@ internal class AdapterImplTemplate : TemplateBase
              /// the interface value aliases the wrapped receiver box exactly as Go's interface holds the '*T'.
              /// </summary>
              [{{NonUserCodeAttribute}}]
-             {{AdapterScope}} sealed class {{AdapterName}}{{TypeParameters}} : {{InterfaceName}}, IжAdapter{{ConstraintClause}}
+             {{AdapterScope}} sealed {{PartialKeyword}}class {{AdapterName}}{{TypeParameters}} : {{InterfaceName}}, IжAdapter{{ConstraintClause}}
              {
                  private readonly ж<{{StructName}}> m_box;
 

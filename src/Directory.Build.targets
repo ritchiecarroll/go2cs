@@ -26,4 +26,39 @@
   -->
   <Import Project="$(MSBuildThisFileDirectory)core/golib/buildTransitive/go.lib.pack.targets"
           Condition="'$(GoLibPackTargetsImported)' != 'true' and Exists('$(MSBuildThisFileDirectory)core/golib/buildTransitive/go.lib.pack.targets')" />
+
+  <!--
+    M:N SPIKE (R5b, B2). Spike code: it stays on the spike branch and never lands.
+    GoTwins=true switches go2cs-gen's TwinGenerator on for a project; GoTwinsGo=false stops a go statement from
+    making its function a twin; GoTwinsRefuse names a file of path|line|id rows the generator refuses by. An
+    executable built with twins starts at the generated go.GoTwinEntry, which runs main's twin. GoTwinsFor is
+    the way to switch twins on from the command line: a list of project names, since a GoTwins given there is a
+    global property and would reach every referenced package. GoTwinsIface (hidden or default) picks the
+    interface twin shape and GoTwinsIfaceAll=true twins every interface member; from the command line they are
+    given as GoTwinsForIface and GoTwinsForIfaceAll, which reach only the projects GoTwinsFor names. GoAotFor
+    publishes the named projects with Native AOT: a PublishAot on the command line reaches the netstandard2.0
+    generator project and fails it.
+  -->
+  <PropertyGroup Condition="'$(GoAotFor)' != '' and $([System.String]::Copy(';$(GoAotFor);').Contains(';$(MSBuildProjectName);'))">
+    <PublishAot>true</PublishAot>
+    <PublishReadyToRun>false</PublishReadyToRun>
+    <SelfContained>true</SelfContained>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(GoTwinsFor)' != '' and $([System.String]::Copy(';$(GoTwinsFor);').Contains(';$(MSBuildProjectName);'))">
+    <GoTwins>true</GoTwins>
+    <GoTwinsIface Condition="'$(GoTwinsIface)' == ''">$(GoTwinsForIface)</GoTwinsIface>
+    <GoTwinsIfaceAll Condition="'$(GoTwinsIfaceAll)' == ''">$(GoTwinsForIfaceAll)</GoTwinsIfaceAll>
+  </PropertyGroup>
+  <ItemGroup>
+    <CompilerVisibleProperty Include="GoTwins" />
+    <CompilerVisibleProperty Include="GoTwinsGo" />
+    <CompilerVisibleProperty Include="GoTwinsIface" />
+    <CompilerVisibleProperty Include="GoTwinsIfaceAll" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(GoTwinsRefuse)' != ''">
+    <AdditionalFiles Include="$(GoTwinsRefuse)" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(GoTwins)' == 'true' and '$(OutputType)' == 'Exe'">
+    <StartupObject>go.GoTwinEntry</StartupObject>
+  </PropertyGroup>
 </Project>
