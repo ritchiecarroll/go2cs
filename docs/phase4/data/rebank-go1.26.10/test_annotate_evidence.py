@@ -222,7 +222,7 @@ try:
               refused='do not account for the verdict counts', header=names_header)
     nine = ';'.join(f'n{i}' for i in range(1, 10))
     # HOST-EQUAL is KEYED (COORD F2): the fixture row takes it only through a $LinuxRidHostEqual entry.
-    host_table = re.compile(r'^\$LinuxRidHostEqual = @\{\n.*?^\}', re.M | re.S)
+    host_table = re.compile(r'^\$LinuxRidHostEqual = @\{\r?\n.*?^\}', re.M | re.S)
     guard_now = open(os.path.join(root, 'src/check-roster-format.ps1'), encoding='utf-8', newline='').read()
     host_same = [rids_line('linux-x64', 'DISC', 59, 50, 9, agree='yes', names=nine), rids_line('linux-arm64', 'DISC', 59, 50, 9, agree='yes', names=nine)]
     for entry, lines_, want, refused, name in (
@@ -237,7 +237,7 @@ try:
     # The guard's @{} tables match keys case-insensitively and the annotator's dicts do not, so a key that is not its
     # row's lower-case import path is refused by name, in either table (P5's minor finding, COORD 2026-11-12).
     for table_name in ('LinuxRidHostEqual', 'LinuxRidRuledArchCount'):
-        table_re = re.compile(r'^\$' + table_name + r' = @\{\n.*?^\}', re.M | re.S)
+        table_re = re.compile(r'^\$' + table_name + r' = @\{\r?\n.*?^\}', re.M | re.S)
         write(os.path.join(root, 'src/check-roster-format.ps1'),
               table_re.sub(lambda m: "$" + table_name + " = @{\n    'F/pkg' = 'x -- fixture'\n}", guard_now, count=1))
         write(os.path.join(root, RIDS, 'W1-1.tsv'), RIDS_HEADER + '\n' + ''.join(host_same))
@@ -245,7 +245,7 @@ try:
         case(f'linux --rids: a ${table_name} key that is not lower-case (F/pkg) is refused by name',
              rc != 0 and 'F/pkg' in err and 'lower-case' in err, f'rc {rc}, out {out!r}, err {err.strip()!r}')
     write(os.path.join(root, 'src/check-roster-format.ps1'), guard_now)
-    ruled_table = re.compile(r'^\$LinuxRidRuledArchCount = @\{\n.*?^\}', re.M | re.S)
+    ruled_table = re.compile(r'^\$LinuxRidRuledArchCount = @\{\r?\n.*?^\}', re.M | re.S)
     ruled_x64 = rids_line('linux-x64', 'FAIL', 20, 5, 15, new='15')
     for entry, arm_absent, want, refused, name in (
             ("'r1;r2 -- fixture'", 'r1;r2;r1/s1', '7 (linux-x64; linux-arm64: 5)', None, 'a ruled arch-count banks linux-arm64 less the ruled verdicts (R2)'),
