@@ -19,6 +19,7 @@ import (
 	"go/types"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -606,7 +607,7 @@ func cgoCalledFunction(node ast.Node, declarations map[types.Object]cgoDeclarati
 // planCgoRoute plans a package's conversion through the cgo route: the trees that convert and the bindings. It returns
 // nil when the package holds no cmd/cgo output (cmd/cgo did not run), so the caller's own refusal stands, and refuses,
 // exiting before anything is written, when any C use is outside Phase 2's set.
-func planCgoRoute(pkg *packages.Package, options Options) *cgoRoute {
+func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRoute {
 	sources, typesFile, refusals := cgoTreeRoles(pkg)
 
 	if typesFile == nil && len(refusals) == 0 {
@@ -804,15 +805,39 @@ func planCgoRoute(pkg *packages.Package, options Options) *cgoRoute {
 		refuseCgoRoute(pkg, refusals)
 	}
 
+	// The link flags cmd/cgo recorded, each a plain token (§11.15): the capture links with them.
+	args, err := cgoLinkerDirectives(typesFile)
+	var flags cgoLinkFlags
+
+	if err == nil {
+		flags, err = parseCgoLinkFlags(goos, args, pkg.Dir)
+	}
+
+	if err != nil {
+		refuseCgoRoute(pkg, []cgoUseRefusal{{position: pkg.Fset.PositionFor(typesFile.Package, false), text: err.Error()}})
+	}
+
 	// The library each symbol loads from (§6.1, §11.5), and the C toolchain that answered.
 	var captured []cgoSymbolLibrary
 	var toolchain string
-	var err error
 
 	if cgoCaptureOverride != nil {
 		captured, toolchain, err = cgoCaptureOverride(symbols)
 	} else {
-		err = fmt.Errorf("capturing each C symbol's library through the C toolchain is increment 5b's, and has not landed")
+		symbolUses := map[string]token.Position{}
+
+		for _, declaration := range used {
+			if _, seen := symbolUses[declaration.cName]; !seen {
+				symbolUses[declaration.cName] = usedAt[declaration.object]
+			}
+		}
+
+		var undefined []cgoUseRefusal
+		captured, toolchain, undefined, err = cgoCapture(load, goos, flags, symbols, symbolUses)
+
+		if len(undefined) > 0 {
+			refuseCgoRoute(pkg, undefined)
+		}
 	}
 
 	if err != nil {
@@ -836,17 +861,6 @@ func planCgoRoute(pkg *packages.Package, options Options) *cgoRoute {
 		members[declaration.cName+cgoKindMemberLabel(declaration.kind)] = text
 	}
 
-	args, err := cgoLinkerDirectives(typesFile)
-	var flags cgoLinkFlags
-
-	if err == nil {
-		flags, err = parseCgoLinkFlags(goos, args, pkg.Dir)
-	}
-
-	if err != nil {
-		refuseCgoRoute(pkg, []cgoUseRefusal{{position: pkg.Fset.PositionFor(typesFile.Package, false), text: err.Error()}})
-	}
-
 	if errnoForm && target.crt != "" {
 		members[cgoMirrorSuffix+"errno"] = cgoErrnoLocationBinding(target.crt)
 	}
@@ -855,7 +869,7 @@ func planCgoRoute(pkg *packages.Package, options Options) *cgoRoute {
 		members[name] = text
 	}
 
-	members[cgoMirrorSuffix+"0 libraries"] = cgoLibrariesRegistration(pkg.Name, cgoLibraryTable(flags, captured))
+	members[cgoMirrorSuffix+"0 libraries"] = cgoLibrariesRegistration(pkg.Name, options.targetPlatform, cgoLibraryTable(flags, captured))
 
 	reduced := cgoTypesDeclarations(typesFile, declarations, info)
 
@@ -1062,4 +1076,106 @@ func cgoTargetDefaults(projectFileContents, targetPlatform string) string {
 	}
 
 	return projectFileContents
+}
+
+// cgoLoad is the environment and directory go list loaded the package in: the real route reads go env and runs the C
+// compiler under the same ones, so the compiler that captures each library is the one cmd/cgo used.
+type cgoLoad struct {
+	env []string
+	dir string
+}
+
+// cgoGoEnv reads go env values in the load's own environment, one per key, in order.
+func cgoGoEnv(load cgoLoad, keys ...string) ([]string, error) {
+	cmd := exec.Command("go", append([]string{"env"}, keys...)...)
+	cmd.Env = load.env
+	cmd.Dir = load.dir
+	out, err := cmd.Output()
+
+	if err != nil {
+		return nil, fmt.Errorf("cgo: go env %s in the package's load: %w", strings.Join(keys, " "), err)
+	}
+
+	values := strings.Split(strings.TrimRight(strings.ReplaceAll(string(out), "\r\n", "\n"), "\n"), "\n")
+
+	if len(values) != len(keys) {
+		return nil, fmt.Errorf("cgo: go env %s read %d values", strings.Join(keys, " "), len(values))
+	}
+
+	return values, nil
+}
+
+// cgoHostTarget refuses a -cgo conversion for any target but the host's own (§11.20, S3): cmd/cgo lays out C types with
+// the host's C compiler, so bindings for another target need that target's toolchain, which is Phase 2 later. The host
+// is what go env reads in the load's own environment (GOHOSTOS/GOHOSTARCH), never go2cs's own runtime.GOOS, and the
+// refusal names both sides.
+func cgoHostTarget(load cgoLoad, target string) error {
+	host, err := cgoGoEnv(load, "GOHOSTOS", "GOHOSTARCH")
+
+	if err != nil {
+		return err
+	}
+
+	if hostTarget := host[0] + "/" + host[1]; hostTarget != target {
+		return fmt.Errorf("cgo: -cgo converts for the host's own target only: this conversion asks for %s, and go env in its load reads the host as %s (GOHOSTOS/GOHOSTARCH); converting cgo for another target is Phase 2 later", target, hostTarget)
+	}
+
+	return nil
+}
+
+// cgoCapture answers each symbol's library through the C compiler the load used (go env CC, split as cmd/go splits it),
+// and the first line that compiler prints for --version, which the bindings' header records: never the CC value,
+// whose path would name the converting machine (§11.20, M4). A symbol no library defines, a function the preamble
+// itself defines among them, is refused by name at its use, as Phase 4's: the probe links each symbol alone to name them.
+func cgoCapture(load cgoLoad, goos string, flags cgoLinkFlags, symbols []string, usedAt map[string]token.Position) ([]cgoSymbolLibrary, string, []cgoUseRefusal, error) {
+	values, err := cgoGoEnv(load, "CC")
+
+	if err != nil {
+		return nil, "", nil, err
+	}
+
+	command, err := splitCgoCommand(values[0])
+
+	if err != nil {
+		return nil, "", nil, err
+	}
+
+	toolchain := cgoToolchain{cc: command, env: load.env}
+	versionCommand := exec.Command(command[0], append(append([]string{}, command[1:]...), "--version")...)
+	versionCommand.Env = append(os.Environ(), load.env...)
+	version, err := versionCommand.Output()
+
+	if err != nil {
+		return nil, "", nil, fmt.Errorf("cgo: the C compiler cmd/cgo used does not report its version (--version): %w", err)
+	}
+
+	toolchainLine := strings.TrimSpace(strings.SplitN(strings.ReplaceAll(string(version), "\r\n", "\n"), "\n", 2)[0])
+	workDir, err := os.MkdirTemp("", "go2cs-cgo-capture-")
+
+	if err != nil {
+		return nil, "", nil, err
+	}
+
+	defer os.RemoveAll(workDir)
+
+	captured, err := captureCgoLibraries(toolchain, goos, flags, symbols, workDir)
+
+	if err == nil {
+		return captured, toolchainLine, nil, nil
+	}
+
+	// A probe that does not link names no symbol; each symbol linked alone names the ones no library defines.
+	var refusals []cgoUseRefusal
+
+	for _, symbol := range symbols {
+		if _, _, linkErr := linkCgoProbe(toolchain, goos, flags, []string{symbol}, workDir, nil); linkErr != nil {
+			refusals = append(refusals, cgoUseRefusal{position: usedAt[symbol], text: fmt.Sprintf("C.%s: no shared library the package links defines it; a function the preamble defines is compiled C, Phase 4's (or name its library with #cgo LDFLAGS)", symbol)})
+		}
+	}
+
+	if len(refusals) > 0 {
+		return nil, "", refusals, nil
+	}
+
+	return nil, "", nil, err
 }

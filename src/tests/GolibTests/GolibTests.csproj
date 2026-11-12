@@ -58,8 +58,17 @@
   <ItemGroup Condition="'$(GoTargetOS)' != 'linux'">
     <Compile Remove="GoCgoWrappers.linux.golden.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(GoTargetOS)' != 'darwin'">
+  <!-- darwin's golden is per architecture (increment 5b): golib's resolver holds bindings to the target they were
+       converted for (§5.3, §11.20), and Apple silicon runs an arm64 process. The legs build natively, so the build's
+       own process architecture names the golden. -->
+  <PropertyGroup>
+    <GoCgoGoldenArch>$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture)</GoCgoGoldenArch>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(GoTargetOS)' != 'darwin' or '$(GoCgoGoldenArch)' == 'Arm64'">
     <Compile Remove="GoCgoWrappers.darwin.golden.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(GoTargetOS)' != 'darwin' or '$(GoCgoGoldenArch)' != 'Arm64'">
+    <Compile Remove="GoCgoWrappers.darwin-arm64.golden.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(GoTargetOS)' != '' and '$(GoTargetOS)' != 'windows'">
     <Compile Remove="GoCgoWrappers.windows.golden.cs" />

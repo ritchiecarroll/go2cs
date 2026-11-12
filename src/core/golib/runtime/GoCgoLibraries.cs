@@ -49,9 +49,22 @@ public static class GoCgoLibraries
 
     /// <summary>
     /// Why bindings converted for <paramref name="target"/> cannot run on <paramref name="hostGOOS"/> with
-    /// <paramref name="processArchitecture"/>, or <see langword="null"/> when they can.
+    /// <paramref name="processArchitecture"/>, or <see langword="null"/> when they can (§5.3, as amended by §11.20). The
+    /// architecture is the PROCESS's, not the machine's: an x64 process under Rosetta or on Windows on Arm runs amd64
+    /// code, with amd64's C layouts. Bindings registered with no target (the original overload) are not checked.
     /// </summary>
-    internal static string? TargetMismatch(string target, string hostGOOS, Architecture processArchitecture) => null;
+    internal static string? TargetMismatch(string target, string hostGOOS, Architecture processArchitecture)
+    {
+        if (target.Length == 0)
+            return null;
+
+        string running = $"{hostGOOS}/{GoHostOfRecord.GoArchOf(processArchitecture)}";
+
+        if (string.Equals(target, running, StringComparison.Ordinal))
+            return null;
+
+        return $"cgo: these C bindings were converted for {target}, and this process runs as {running}: their C structs cross with {target}'s layouts and C library, which {running} does not share, so they are refused rather than called (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §5.3, §11.20)";
+    }
 
     // Where a library the table owns may load from: where a Go binary's own loader would look for it, and never the
     // current directory (the DLL-planting surface, §5.4).
@@ -77,6 +90,9 @@ public static class GoCgoLibraries
         {
             if (library.Name != name)
                 continue;
+
+            if (TargetMismatch(target, GoHostOfRecord.HostGOOS(), RuntimeInformation.ProcessArchitecture) is { } mismatch)
+                throw new PlatformNotSupportedException(mismatch);
 
             if (OperatingSystem.IsMacOS() && !name.StartsWith('/'))
                 throw new DllNotFoundException($"cgo: {library.Flag} binds {name}, which is not an absolute install name: darwin loads a captured library only by its absolute path, since dyld's search for a bare name reaches the current directory; the current directory is never searched (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.12)");
