@@ -494,3 +494,72 @@ after the move a `-tests` pass writes a test file's methods into holders too. As
 whether the batch regenerates production only (a row's test files then take the new shape at its next bank)
 or re-emits every banked row's test files. The generators and the run-time library read both shapes: the
 behavioral projects of the cut run in the new shape against a `src/core` still in the old one.
+
+## Amendment 2026-11-12 (third) — the cut's first commits, a fifth rule retired, two more line kinds
+
+> Appended, not rewritten. Written while the first two-arm reconvert of the cut (linux/amd64) runs and
+> before its diff is read. The cut is `claude/p1-oq2-method-holder` at `c07e0b7671` on master `742a3dbb24`.
+
+### 22. A fifth rule re-derived: the rename of a name a method shares (line kind a)
+
+Section 19 re-derived four rules. The fifth is the one section 14 predicts as line kind a. Go keeps a
+method in the scope of its receiver type, so a package-level type, constant or variable may share a
+method's name. While every method stood in the package class, C# saw two members of one name there, and
+the converter renamed the package-level declaration with `Δ`. A method now stands in its holder, so the
+package class holds one member of that name and the rename has no cause.
+
+- Removed with it: the export of each rename as a `GoTypeAlias` entry, the derivation of the same rename
+  for an unconverted dependency (`foreignNameCollisions.go`), the generic and aliased spellings of a
+  foreign renamed type, and the second marker on a field named like a renamed foreign type.
+- What the rename table still holds: a type named `any`, `rune`, `nint` or `nuint`, and a declaration
+  named `closed`, `union` or `safe`, which C# reads as a keyword in a type position. All seven are
+  lower case, so no exported Go name is renamed by the table.
+- The test-variant arms that follow a renamed production variable or constant into a `_test.go` file are
+  kept. Only an unexported production name can reach them now (`closed`, `union`, `safe`), and the type arm
+  is still reached where the emission writes out an inferred type.
+- **Prediction added**: runtime's `type slice` stands beside the method `(*userArena).slice` and is also a
+  golib reserved word. It was written `Δsliceᴛ`; it is predicted to take the reserved-word spelling
+  `Δslice`. Falsifier: any other spelling of it, or a `ᴛ` type mark that remains on a name of the 228-row
+  list of kind a.
+
+### 23. Line kinds l and m: a type's name in an expression position inside a holder
+
+C# reads a simple name in an expression position as a member of the enclosing class before it reads it as
+a type. Inside a holder that declares a method named like a type of the package, two emitted forms put
+that type's name in an expression position, and C# binds the method group (CS8917):
+
+| kind | form | emitted outside such a holder | emitted inside it |
+|---|---|---|---|
+| l | the box accessor of a field | `T.Ꮡf` | `<pkg>_package.T.Ꮡf` |
+| m | a type-switch label with no binding | `case T:` | `case T _:` |
+
+- Kind l names the package class and not the file's alias of its own package. Every box accessor that
+  qualifies its type already names the package class, and the alias exists only in files whose holder
+  qualifies a value.
+- Kind m uses the discard pattern because a pattern's type position reads only types.
+- Counts: not taken; the typed census of section 20 does not read these two forms. **Falsifier**: a line
+  of kind l or m outside a holder that declares a method of that type's name, or a CS8917 at such a site
+  in the compile arm.
+
+### 24. Found while writing the cut (measured 2026-11-12 at `c07e0b7671`)
+
+- Gates at the tip: full `go test` in `src/go2cs` ok; GenTests 518 of 518; GolibTests 2,574 pass, 61
+  skipped. Each red commit was read red first: 6 generator tests and 3 run-time tests at the first, 12 of
+  12 converter tests at the second (on an archive copy of that commit).
+- `MemberRecordGenerator` writes its trimming keep-alive once per OUTERMOST class. A holder is an outermost
+  class, so a package with a recorded method in a holder gets two keep-alives. That is correct: golib finds
+  a recorded method through its declaring type. The GenTests test that required exactly one tree now
+  requires one per class.
+- The behavioral project `FuncValueMethodClash` does not build on the cut before the `src/core` regen:
+  `time.After` is read beside the method `Time.After` while `core/time` is in the old layout (CS8917). It is
+  expected to build once `time`'s methods stand in holders. The same holds for any hand-owned package: where
+  a function and a method share a name, the method has to move for a caller's method group to be unambiguous.
+- Two gaps that predate the cut and are not chased in it (BOARD candidates): a foreign UNEXPORTED renamed
+  type (`union`) spelled through inference in an external test package, and the descriptor carrier's name
+  for such a type.
+- A consequence of the cut still to be measured: a `private` member of the package class is not reachable
+  from a holder (CS0122). The converter's own private members (hoisted literals) go with the method that
+  uses them; a hand-owned file may hold one that a holder reaches. The compile arm will show each.
+- Open in the generators: `GoMethodHosts` reads a type's holders from the type's own assembly. A holder a
+  `_test.go` file declares for a production type is in the test assembly. The `-tests` run of this cut
+  measures it.
