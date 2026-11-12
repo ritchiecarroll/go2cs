@@ -957,6 +957,8 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 	// assembly, whose compile set excludes package_info.cs in favor of the seeded test-info file.
 	packageInfoLines = applyGoSourcePositionMaps(packageInfoLines, packageInfoFileName, mergeExisting)
 	packageInfoLines = applyHoistedLiteralsStamp(packageInfoLines, packageInfoFileName)
+	packageInfoLines = applyInternalRootStamp(packageInfoLines, packageInfoFileName)
+	packageInfoLines = applyInternalPackageBrowsable(packageInfoLines, packageInfoFileName)
 	packageInfoLines = applyFieldAccessRecords(packageInfoLines, packageInfoFileName, mergeExisting, qualifyLocalTypeRef)
 	packageInfoLines = applyBoundedGoRecords(packageInfoLines, packageInfoFileName, mergeExisting)
 	packageInfoLines = applyCgoDynamicImports(packageInfoLines, packageInfoFileName, mergeExisting)
