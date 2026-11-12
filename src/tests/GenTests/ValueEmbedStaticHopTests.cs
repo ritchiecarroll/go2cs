@@ -52,6 +52,11 @@ public class ValueEmbedStaticHopTests
             {
                 public GoPromotedHostAttribute(System.Type @struct) { }
             }
+
+            public class GoMethodHostAttribute(System.Type receiver) : System.Attribute
+            {
+                public System.Type Receiver { get; } = receiver;
+            }
         }
 
         namespace go.example.com
@@ -68,6 +73,18 @@ public class ValueEmbedStaticHopTests
                 }
 
                 public partial struct Mid { public Base ʗBase; }
+
+                public partial struct Held { public int N; }
+
+                // A package function named like Held's method, which is why the method stands in a holder.
+                public static string Name(int n, int m) => "func";
+            }
+
+            // Held declares Name: the method stands in Held's method holder, beside the package class.
+            [GoMethodHost(typeof(lib_package.Held))]
+            public static partial class libᴛHeld
+            {
+                public static string Name(this lib_package.Held h) => "held";
             }
 
             // Mid promotes Base's Name: its forwarder is in Mid's promoted-method class, found by the attribute.
@@ -88,6 +105,9 @@ public class ValueEmbedStaticHopTests
         [assembly: GoImplement<global::go.example.com.lib_test_package.outer, global::go.example.com.lib_package.Namer>]
         [assembly: GoImplement<global::go.example.com.lib_test_package.relative, global::go.example.com.lib_package.Namer>]
         [assembly: GoImplement<global::go.example.com.lib_test_package.viaMid, global::go.example.com.lib_package.Namer>]
+        [assembly: GoImplement<global::go.example.com.lib_test_package.viaHolder, global::go.example.com.lib_package.Namer>]
+        [assembly: GoImplement<global::go.example.com.lib_package.Held, global::go.example.com.lib_package.Namer>]
+        [assembly: GoImplement<global::go.example.com.lib_test_package.handler, global::go.example.com.lib_package.Namer>]
 
         namespace go.example.com
         {
@@ -115,6 +135,23 @@ public class ValueEmbedStaticHopTests
                 {
                     public partial ref go.example.com.lib_package.Mid Mid { get; }
                 }
+
+                public partial struct viaHolder
+                {
+                    public partial ref go.example.com.lib_package.Held Held { get; }
+                }
+
+                // A named func type: a delegate, which takes the value adapter as a foreign struct does.
+                public delegate void handler(int n);
+
+                // A package function named like handler's method.
+                public static string Name(int n) => "func";
+            }
+
+            [GoMethodHost(typeof(lib_test_package.handler))]
+            public static partial class lib_testᴛhandler
+            {
+                public static string Name(this lib_test_package.handler h) => "handler";
             }
         }
         """;
@@ -194,5 +231,47 @@ public class ValueEmbedStaticHopTests
 
         StringAssert.Contains(implementation, "=> global::go.example.com.forwardersOfMid.Name(this.Mid);");
         Assert.IsFalse(implementation.Contains("lib_package.Name("), "the package class holds no Name over Mid: " + implementation);
+    }
+
+    // The embed's method stands in the embed type's method holder, where the converter declares a type's methods:
+    // the call names the holder. The package class holds a FUNCTION of that name here, so naming it binds the wrong
+    // member or none (CS1501 in the behavioral project CrossPkgUser; CS0117 where no such function exists).
+    [TestMethod]
+    public void AMethodInTheEmbedTypesHolderIsCalledOnTheHolder()
+    {
+        string implementation = ValueImplementation(RunImplementGenerator(), "viaHolder");
+
+        StringAssert.Contains(implementation, "=> global::go.example.com.libᴛHeld.Name(this.Held);");
+        Assert.IsFalse(implementation.Contains("lib_package.Name("), "the package class holds no Name over Held: " + implementation);
+    }
+
+    private static string ValueAdapter(Dictionary<string, string> sources, string wrapped)
+    {
+        List<string> matches = sources
+            .Where(entry => entry.Key.EndsWith("-val.g.cs") && entry.Value.Contains($"{wrapped} m_value;"))
+            .Select(entry => entry.Value)
+            .ToList();
+
+        Assert.AreEqual(1, matches.Count, $"one value adapter over {wrapped} — saw {matches.Count} of: {string.Join(" | ", sources.Keys)}");
+        return matches[0];
+    }
+
+    // The value adapter (a class around a copy of a foreign struct, or around a delegate) forwards each method as a
+    // static call. It named the class the wrapped type nests in, the package class, where a method of a type with a
+    // holder no longer stands: CS1501 or CS0117 in ten behavioral projects (NilFuncIfaceMethodValue among them).
+    [TestMethod]
+    public void AValueAdapterCallsAMethodOnTheWrappedTypesHolder()
+    {
+        Dictionary<string, string> sources = RunImplementGenerator();
+
+        string foreign = ValueAdapter(sources, "global::go.example.com.lib_package.Held");
+
+        StringAssert.Contains(foreign, "=> global::go.example.com.libᴛHeld.Name(m_value);", "a foreign struct's method");
+        Assert.IsFalse(foreign.Contains("lib_package.Name("), "the package class holds no Name over Held: " + foreign);
+
+        string @delegate = ValueAdapter(sources, "global::go.example.com.lib_test_package.handler");
+
+        StringAssert.Contains(@delegate, "=> global::go.example.com.lib_testᴛhandler.Name(m_value);", "a local named func type's method");
+        Assert.IsFalse(@delegate.Contains("lib_test_package.Name("), "the package class holds no Name over handler: " + @delegate);
     }
 }

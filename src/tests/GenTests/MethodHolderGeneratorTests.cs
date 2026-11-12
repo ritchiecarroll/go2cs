@@ -262,6 +262,61 @@ public class MethodHolderGeneratorTests
         Assert.AreEqual("7 6 2 30 30 30 26 7 htestᴛPair 8 9 9", probe.Invoke(null, null));
     }
 
+    // A method whose signature names a type another generator declares in the package class (the constraint proxy
+    // `gnodeжGraphNode` of the behavioral project SelfRefGenerics). To RecvGenerator the name is unbound, so the twin
+    // repeats it as written: bare. The converted file reads it through `using static <package class>`, and the twin's
+    // own file has to as well once it stands in a holder, outside the package class (CS0246 otherwise).
+    private const string LateType =
+        """
+        namespace go;
+
+        using static late_package;
+
+        [GoPackage("late")]
+        public static partial class late_package
+        {
+            public partial struct node { public nint n; }
+            public partial struct plain { public nint n; }
+            public partial struct Graph<T> { public T first; }
+
+            // Control: a type without a holder keeps its method, and the twin, in the package class.
+            internal static Graph<nodeжProxy> Owner(this ref plain p) => default;
+        }
+
+        [GoMethodHost(typeof(late_package.node))]
+        public static partial class lateᴛnode
+        {
+            internal static Graph<nodeжProxy> Owner(this ref node n) => default;
+        }
+        """;
+
+    private const string LateTypeDeclaration = "namespace go; partial class late_package { public partial struct nodeжProxy { } }";
+
+    [TestMethod]
+    public void ATwinInAHolderReadsATypeAnotherGeneratorDeclaresInThePackageClass()
+    {
+        CSharpParseOptions options = new(LanguageVersion.Preview);
+
+        CSharpCompilation compilation = CSharpCompilation.Create("late",
+            [CSharpSyntaxTree.ParseText(LateType, options, path: @"C:\go2cs\src\core\late\late.cs"), CSharpSyntaxTree.ParseText(TemplateUsings, options, path: @"C:\go2cs\src\core\late\obj\late.GlobalUsings.g.cs")],
+            References(),
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+
+        CSharpGeneratorDriver.Create(new RecvGenerator())
+            .WithUpdatedParseOptions(options)
+            .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out _);
+
+        SyntaxTree[] generated = [.. output.SyntaxTrees.Except(compilation.SyntaxTrees)];
+
+        CollectionAssert.AreEqual(new[] { "late_package", "lateᴛnode" }, TwinClasses(generated, "Owner"), "one twin per class that declares Owner");
+
+        // The other generator's output arrives beside RecvGenerator's.
+        Compilation complete = output.AddSyntaxTrees(CSharpSyntaxTree.ParseText(LateTypeDeclaration, options, path: @"C:\go2cs\src\core\late\obj\late.proxy.g.cs"));
+        Diagnostic[] errors = [.. complete.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)];
+
+        Assert.AreEqual(0, errors.Length, "both twins bind once the type exists: " + string.Join("; ", errors.Take(3)));
+    }
+
     // TypeGenerator.GoMethodNames: a wrapper yields a member name to a Go method of the type (WrapperMemberYieldTests),
     // wherever the type's methods are declared.
     private const string Wrappers =

@@ -281,6 +281,85 @@ public class BoundedGoroutineInterceptorGeneratorTests
         Assert.AreEqual($"bounded:{rung}@{site.line}", Execute(run.Updated));
     }
 
+    // The package with its methods in holders, as the converter declares them: Body() runs `inPackage` in the package
+    // class and then tracker's method run, which runs `inHolder` in tracker's holder. inbox's methods are in inbox's.
+    private static string HolderSource(string inPackage, string inHolder) =>
+        $$"""
+        using static go.builtin;
+
+        namespace go
+        {
+            using static main_package;
+
+            public class GoMethodHostAttribute(System.Type receiver) : System.Attribute
+            {
+                public System.Type Receiver { get; } = receiver;
+            }
+
+            public static partial class main_package
+            {
+                internal struct inbox { public int n; }
+                internal struct tracker { public inbox @in; }
+
+                public static string Body()
+                {
+                    builtin.Trace = "";
+                    {{inPackage}}
+                    tracker t = new();
+                    t.run();
+                    return builtin.Trace;
+                }
+            }
+
+            [GoMethodHost(typeof(main_package.inbox))]
+            public static partial class mainᴛinbox
+            {
+                internal static void send(this ref inbox i, int v) => i.n = v;
+                internal static void tick(this ref inbox i) => i.n++;
+            }
+
+            [GoMethodHost(typeof(main_package.tracker))]
+            public static partial class mainᴛtracker
+            {
+                internal static void run(this ref tracker t)
+                {
+                    {{inHolder}}
+                }
+            }
+        }
+        """;
+
+    // The box overloads go2cs-gen writes into inbox's holder, and a box only a sibling supplies.
+    private sealed class AddsAHolderBoxOverload : IIncrementalGenerator
+    {
+        public void Initialize(IncrementalGeneratorInitializationContext context) =>
+            context.RegisterSourceOutput(context.CompilationProvider, static (production, _) =>
+                production.AddSource("holderbox.g.cs",
+                    "namespace go { public static partial class main_package { internal static ж<inbox> AddedInbox => new(); } " +
+                    "public static partial class mainᴛinbox { " +
+                    "internal static void send(this ж<main_package.inbox> i, int v) => i.val.n = v; " +
+                    "internal static void tick(this ж<main_package.inbox> i) => i.val.n++; } }"));
+    }
+
+    // AMethodGroupOnlyASiblingResolvesIsInterceptedByWhatItsNameMeans, with the methods where the converter declares
+    // them: in the receiver type's holder, which neither the package class nor another type's holder has in scope by
+    // name. RED before the holders of the package were read: GO2CS0010 on a valid build, at the behavioral project
+    // GoStmtReceiverBoxGroup's `goǃ(Ꮡt.Ꮡin.send)`.
+    [TestMethod]
+    [DataRow("", "goǃ(AddedInbox.send, 7);", "Action1", DisplayName = "from another type's holder")]
+    [DataRow("", "goǃ(AddedInbox.tick);", "Action", DisplayName = "from another type's holder, parameterless")]
+    [DataRow("goǃ(AddedInbox.send, 7);", "", "Action1", DisplayName = "from the package class")]
+    [DataRow("goǃ(AddedInbox.tick);", "", "Action", DisplayName = "from the package class, parameterless")]
+    public void AMethodGroupNamingAMethodOfAnotherHolderIsInterceptedByWhatItsNameMeans(string inPackage, string inHolder, string rung)
+    {
+        string source = HolderSource(inPackage, inHolder);
+        (int line, int column) site = Site(source, 0);
+        Run run = Generate(source, [Record("main.cs", site)], sibling: new AddsAHolderBoxOverload());
+
+        Assert.AreEqual(0, run.GeneratorDiagnostics.Length, string.Join("; ", run.GeneratorDiagnostics));
+        Assert.AreEqual($"bounded:{rung}@{site.line}", Execute(run.Updated));
+    }
+
     // Methods of that name that disagree on returning a value leave the rung undecided: an error, never a guess.
     [TestMethod]
     public void AMethodGroupWhoseNameMeansMethodsThatDisagreeFailsTheBuild()
