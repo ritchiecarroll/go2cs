@@ -1225,3 +1225,54 @@ program has a `conv` arm, and a program of such conversions builds and prints wh
 
 **Scores at these legs, as worded** (darwin pending): G1-P2 MISSED on `Ordered` and MET on the other arms it names;
 G1-P3 MET except `Reinterpreted`, MISSED; G1-P5 MET.
+
+**The third hosted legs (2026-11-12, at `f5351ca53f`; runs 43218540465 linux, 43218554704 darwin, 43218567730
+windows): GREEN on all four target rows.** On linux/amd64, darwin/amd64, darwin/arm64 and windows/amd64 the gate
+program converts on the real route, builds with 0 errors, and every arm passes.
+
+- **The three arms not yet measured:**
+  - `conv` is EQUAL to go on all four (`conv 7 7 4464`);
+  - `reinterpretedwrite` prints 1 on both sides on all four, so C's write through the reinterpreted pointer reaches
+    the Go struct. **The prediction is MET**;
+  - the decoy arm passes on all four. Its control (go's own binary with the decoy as the library its loader finds)
+    prints the decoy's answer, 14001, and the converted program run from the decoy's directory prints the probe's,
+    1. On darwin a loader search path does override the probe's absolute install name, so the control works there.
+- `ordered` reads as ruled, a named divergence: go 200004, go2cs 2004.
+- **Wall times of the legs:** linux 7 min, darwin/arm64 12 min, windows 11 min, darwin/amd64 24 min (39 min at the
+  second legs). The gate program's own build: 95 s, 274 s, 277 s and 459 s.
+
+**The windows zig override, a labelled READING (run 43218579321), not a leg of the gate.** Under the pinned zig in
+place of llvm-mingw, the conversion refuses the gate program by name, at `C.cos` AND at `C.exp`: zig's mingw links
+both statically, so no shared library exports them (§11.5). Nothing is written. The Phase 2 fixture's offline build
+passes there. The owner's default for windows, llvm-mingw, is what makes these calls bind.
+
+**G1's predictions, scored as worded.**
+
+| | Prediction | Score |
+|---|---|---|
+| G1-P1 | The first hosted build of the converted program is RED, with a compile error no offline test showed | MET on windows/amd64 (the pointer typedef's accessibility). MISSED on linux/amd64 (0 errors). NOT MEASURED on darwin at the first legs (go's own build failed first); at the second it built with 0 errors |
+| G1-P2 | cos, div, the copy-back arm, both errno arms, Ordered, Nested, TwoResults and Statement are EQUAL on the four rows | MISSED on Ordered, on all four (a ruled divergence since). MET on the other eight |
+| G1-P3 | The divergences read as §11.20 rules them | MET for PackageLevel, Sibling, Pinned, Pinned under `cgocheck=0` and ByValue. MISSED for Reinterpreted: it proceeds (the checklist line is corrected above) |
+| G1-P4 | The decoy changes nothing on any RID | MET on all four |
+| G1-P5 | `puts`'s result is equal on windows; its line is missing from, or out of order in, a captured stdout on at least one side | MET: equal, and the line follows Go's own on both sides. On linux it is missing from go's side only |
+| G1-P6 | Corpus 0; every fix stays behind `-cgo` | The wording was loose: both fixes are keyed on the C pseudo-package, which no corpus package has. Scored by the corpus comparison in the battery |
+| G1-P7 | The windows zig override refuses `cos` by name and nothing else new | MISSED by one: it refuses `exp` too |
+| G1-P8 | Each leg finishes inside 30 minutes | MISSED on darwin/amd64 at the second legs (39 min). All four inside 30 at the third |
+
+**G2** (build and RUN against the C runtime on the four RIDs) is the same legs: MET on linux-x64, osx-x64, osx-arm64
+and win-x64.
+
+**What the gate found that no earlier test could.** Two compile defects in what the route writes (a C name's first
+letter deciding its type's accessibility; a conversion between C numeric types hosted in the wrong class), both
+fixed here red first. One general divergence that is not cgo's (the evaluation order of a variable read against a
+call). Two lines of this document's own checklist that were wrong, one about go and one about go2cs.
+
+**A note on §11.21's S4, from batch 288's gate.** The header's toolchain line names the compiler as the compiler names
+itself, and that is the name it was run by. The route runs CC by its full path, so a `gcc` found on PATH on windows
+is recorded as `gcc.exe (...)`. The line carries no directory, and one install always gives one line.
+
+**A third member of §11.20's offline-seam class.** The real-route test computed the header line it expected by
+running the bare name `gcc`, where the route runs the resolved file. Every pinned leg agreed, because a pinned
+toolchain's CC is already a full path; the runner's own gcc did not (run 43202800197, read by COORD at batch 288's
+union). The class, restated: an expectation computed by a different invocation than the route's own is a stand-in,
+and only the configuration that separates the two shows it. The test now resolves the name as the route does.
