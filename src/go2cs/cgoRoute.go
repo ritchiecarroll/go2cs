@@ -1093,7 +1093,8 @@ func (v *Visitor) convCgoClosureArgument(argument cgoClosureArgument, context Id
 }
 
 // cgoTargetDefaults makes a cgo package's project default to the one target its bindings were converted for: layout
-// L3's own defaults are the corpus's (windows, amd64), and a build of another target would compile no bindings.
+// L3's own defaults are the corpus's (windows, amd64), and a build of another target would compile no bindings. It
+// also makes the project hold to that target (cgoTargetBlocks).
 func cgoTargetDefaults(projectFileContents, targetPlatform string) string {
 	goos, goarch, _ := strings.Cut(targetPlatform, "/")
 
@@ -1102,7 +1103,45 @@ func cgoTargetDefaults(projectFileContents, targetPlatform string) string {
 			ReplaceAllLiteralString(projectFileContents, "<"+property+">"+value+"</"+property+"> <!-- the one target of this package's cgo bindings -->")
 	}
 
-	return projectFileContents
+	closeAt := strings.LastIndex(projectFileContents, "</Project>")
+
+	if closeAt < 0 || strings.Contains(projectFileContents, cgoTargetCheckName) {
+		return projectFileContents
+	}
+
+	return projectFileContents[:closeAt] + cgoTargetBlocks(goos, goarch) + projectFileContents[closeAt:]
+}
+
+// cgoTargetCheckName is the MSBuild target that refuses a cgo project's build for another target.
+const cgoTargetCheckName = "GoCheckCgoTarget"
+
+// cgoTargetBlocks are the two things that hold a cgo package's project to the one target of its bindings.
+//
+// A build for another target is refused by name, before any reference is built or the compiler runs: it would
+// compile no bindings file, and fail on the first C type in an exported signature (CS0051), far from the cause.
+//
+// And the project hands its target to the projects it references. Its default reaches only itself; the standard
+// library's own default is the corpus's, so a build that names no target would compile these bindings beside the
+// windows standard library, and say nothing.
+func cgoTargetBlocks(goos, goarch string) string {
+	target := goos + "/" + goarch
+	build := "$(" + platformTargetOSProperty + ")/$(" + platformTargetArchProperty + ")"
+
+	return "  <!-- This package's cgo bindings were converted for " + target + ", and are for no other target. A build for\r\n" +
+		"       another would compile no bindings file and fail far from the cause, so it is refused here by name. -->\r\n" +
+		"  <Target Name=\"" + cgoTargetCheckName + "\" BeforeTargets=\"BeforeBuild;CoreCompile\">\r\n" +
+		"    <Error Condition=\"'" + build + "'!='" + target + "'\"\r\n" +
+		"           Text=\"go2cs: this package's cgo bindings were converted for " + target + ", and this build is for " + build +
+		". A cgo package builds only for the target it was converted for: build it for " + target +
+		", or convert it again with -cgo on a " + build + " host.\" />\r\n" +
+		"  </Target>\r\n\r\n" +
+		"  <!-- The projects this package references are built for the same one target. The standard library's own\r\n" +
+		"       default is windows/amd64, and a build that names no target would put that one beside these bindings. -->\r\n" +
+		"  <ItemDefinitionGroup>\r\n" +
+		"    <ProjectReference>\r\n" +
+		"      <AdditionalProperties>" + platformTargetOSProperty + "=" + goos + ";" + platformTargetArchProperty + "=" + goarch + "</AdditionalProperties>\r\n" +
+		"    </ProjectReference>\r\n" +
+		"  </ItemDefinitionGroup>\r\n\r\n"
 }
 
 // cgoLoad is the environment and directory go list loaded the package in: the real route reads go env and runs the C
@@ -1216,7 +1255,9 @@ func cgoCapture(load cgoLoad, goos, goarch string, flags cgoLinkFlags, symbols [
 		// compiler itself (a library that is not there, a directory for another architecture), and no symbol is to
 		// blame: the linker's own words are the refusal.
 		if _, _, baselineErr := linkCgoProbe(toolchain, goos, flags, nil, workDir, nil); baselineErr != nil {
-			return nil, "", nil, err
+			// The baseline's own error, never the first probe's: that one referenced every symbol, and a linker
+			// that traces symbols names each of them beside the library that is not there.
+			return nil, "", nil, baselineErr
 		}
 
 		for _, symbol := range symbols {

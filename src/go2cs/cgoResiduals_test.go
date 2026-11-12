@@ -26,7 +26,7 @@ import (
 // references nothing to tell the two apart, and then returned the FIRST probe's error, the one that references every
 // symbol: on a linker that traces symbols, that text names each of them beside the library that is not there. The
 // refusal is the baseline probe's own error, the linker's words about the link line.
-func TestALinkLineThatDoesNotLinkIsRefusedWithoutNamingASymbol(t *testing.T) {
+func TestACgoLinkLineThatDoesNotLinkIsRefusedWithoutNamingASymbol(t *testing.T) {
 	cgoRealProbeDir(t)
 
 	load := cgoLoad{env: append(os.Environ(), "GOWORK=off", "GOFLAGS=", "CGO_ENABLED=1"), dir: t.TempDir()}
@@ -56,7 +56,7 @@ func TestALinkLineThatDoesNotLinkIsRefusedWithoutNamingASymbol(t *testing.T) {
 // (strtol to an __isoc23_ symbol), and each such call is refused by name. Which ones is the C library's and the
 // compiler's to decide, so this asserts only the rule's invariant, per function: the call is bound, or it is refused
 // by name with nothing written. It prints the set, which docs/Limitations.md records as measured.
-func TestTheVerifiedNamesRuleBindsOrRefusesEachLibcCallByName(t *testing.T) {
+func TestTheCgoVerifiedNamesRuleBindsOrRefusesEachLibcCallByName(t *testing.T) {
 	probeDir := cgoRealProbeDir(t)
 
 	if runtime.GOOS != "linux" {
