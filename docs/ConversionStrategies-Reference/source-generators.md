@@ -483,7 +483,7 @@ queued after a run is run by the next miss.
 <!-- The queueing initializer: src/gen/go2cs-gen/DeferredRegistration.cs:22
      (`public static string Initializer(string registry, string name)`). Its callers:
      src/gen/go2cs-gen/ImplementGenerator.cs:1578 (`DeferredRegistration.Initializer("Adapters", "Adapters")`),
-     src/gen/go2cs-gen/TypeGenerator.cs:667 (`DeferredRegistration.Initializer("ZeroFactories", "GoZeroFactories")`),
+     src/gen/go2cs-gen/TypeGenerator.cs:692 (`DeferredRegistration.Initializer("ZeroFactories", "GoZeroFactories")`),
      src/gen/go2cs-gen/EscapeRegistryGenerator.cs:406 (`DeferredRegistration.Initializer("EscapeRegistry", "EscapingContainers")`),
      src/gen/go2cs-gen/NativeArrayOpenerGenerator.cs:221
      (`DeferredRegistration.Initializer("NativeArrayOpeners", "NativeArrayOpeners")`).
