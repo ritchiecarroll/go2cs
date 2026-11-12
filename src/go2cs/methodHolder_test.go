@@ -21,12 +21,21 @@ import (
 // others and is not converted: the conversion is the production one.
 func convertMethodHolderFixture(t *testing.T, files map[string]string) map[string]string {
 	t.Helper()
+
+	return convertMethodHolderModule(t, "example.com/app", files)
+}
+
+// convertMethodHolderModule is convertMethodHolderFixture for a module of the given path. The path
+// decides the namespace of the package: `example.com/app` is converted into `go.example.com`, and
+// `go2cs/app`, the shape of a behavioral test's module, into the root namespace `go`.
+func convertMethodHolderModule(t *testing.T, modulePath string, files map[string]string) map[string]string {
+	t.Helper()
 	isolateConverterPathGlobals(t)
 
 	root := t.TempDir()
 	pkgDir := filepath.Join(root, "app")
 
-	writeModuleFile(t, filepath.Join(pkgDir, "go.mod"), "module example.com/app\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(pkgDir, "go.mod"), "module "+modulePath+"\n\ngo 1.23\n")
 
 	for name, source := range files {
 		writeModuleFile(t, filepath.Join(pkgDir, name), source)
@@ -512,5 +521,146 @@ func TestTypeNamedLikeAMethodOfItsHolderIsReadAsAType(t *testing.T) {
 	}, []string{
 		"main_package.Tag",
 		"case Tag _:",
+	})
+}
+
+const holderEndsWithItsMethodSource = `package main
+
+import "fmt"
+
+type Box struct{ n int }
+
+func Limit() int { return 7 }
+
+func (b Box) Limit() int { return b.n + Limit() }
+
+var Use = func() int { return Limit() }
+
+type words []string
+
+func (w words) len() int { return len(w) }
+
+var Count = func(w words) int { return len(w) }
+
+func main() {
+	fmt.Println(Box{1}.Limit(), Use(), words{"a"}.len(), Count(words{"a", "b"}))
+}
+`
+
+// A package-level variable that follows a method in file order stands in the package class, where a
+// method's name hides nothing: its function literal names the package's function and the built-in
+// bare. Only the bodies of the two methods are qualified.
+func TestDeclarationAfterAMethodIsNotReadAsInsideItsHolder(t *testing.T) {
+	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": holderEndsWithItsMethodSource})
+	main := emitted["main.cs"]
+
+	requireEmitted(t, "main.cs", main, []string{
+		"return b.n + main.Limit();",
+		"return builtin.len(w);",
+	}, []string{
+		"main_package.Limit()",
+	})
+
+	if got := strings.Count(main, "main.Limit()"); got != 1 {
+		t.Errorf("main.cs qualifies Limit() %d times, want 1 (inside the holder of Box only)\n%s", got, main)
+	}
+
+	if got := strings.Count(main, "builtin.len("); got != 1 {
+		t.Errorf("main.cs qualifies len( %d times, want 1 (inside the holder of words only)\n%s", got, main)
+	}
+}
+
+const holderHiddenTypeSource = `package main
+
+import (
+	"fmt"
+	"sync/atomic"
+)
+
+type sync struct {
+	label string
+	hits  int32
+}
+
+func (s *sync) bump(c *atomic.Int32) { s.hits = c.Add(1) }
+
+func (s sync) again() sync { return sync{label: s.label, hits: s.hits + 1} }
+
+func (s sync) all() []sync { return []sync{s, sync(s)} }
+
+func (s sync) same(other any) bool {
+	o, ok := other.(sync)
+	return ok && o == s
+}
+
+func fresh() sync { return sync{label: "fresh"} }
+
+func each(all []sync) int { return len(all) }
+
+func main() {
+	var c atomic.Int32
+	s := fresh()
+	s.bump(&c)
+	fmt.Println(s.again().hits, each(s.all()), s.same(s), c.Load())
+}
+`
+
+// A type of the package named like a child namespace of the package's own namespace (`go.sync`, in view
+// here through the import of sync/atomic, for a package in the root namespace) is hidden by that
+// namespace inside a method holder, in a type position as in any other: a holder is not nested in the
+// package class, and the namespace's own members are read before the file's `using static`. The holder
+// names the type through the package class; the package class, where the nested type is read first,
+// keeps the bare name. A package in any other namespace (TestHolderKeepsATypeNoNamespaceHidesBare) has
+// no such child, and its holder keeps the bare name too.
+func TestHolderNamesATypeANamespaceHidesThroughThePackageClass(t *testing.T) {
+	emitted := convertMethodHolderModule(t, "go2cs/app", map[string]string{"main.go": holderHiddenTypeSource})
+	main := emitted["main.cs"]
+
+	if !strings.HasPrefix(main, "namespace go;") {
+		t.Fatalf("main.cs is not in the root namespace, where `go.sync` is a child of the package's own\n%s", main)
+	}
+
+	holderStart := strings.Index(main, "partial class mainᴛsync {")
+	holderEnd := strings.LastIndex(main, "} partial class main_package {")
+
+	if holderStart == -1 || holderEnd == -1 || holderEnd < holderStart {
+		t.Fatalf("main.cs has no holder of sync followed by the package class\n%s", main)
+	}
+
+	holder, outside := main[holderStart:holderEnd], main[:holderStart]+main[holderEnd:]
+
+	requireEmitted(t, "the holder of sync", holder, []string{
+		"bump(this ref main_package.sync s, ",
+		"main_package.sync again(this main_package.sync s)",
+		"new main_package.sync(label: s.label",
+		"slice<main_package.sync> all(this main_package.sync s)",
+		"other._<main_package.sync>(",
+	}, []string{
+		" sync s",
+		"<sync>",
+		"new sync(",
+		"(sync)",
+	})
+
+	requireEmitted(t, "the package class", outside, []string{
+		"partial struct sync {",
+		"internal static sync fresh()",
+		"new sync(label: \"fresh\")",
+		"each(slice<sync> all)",
+	}, []string{
+		"main_package.sync",
+	})
+}
+
+func TestHolderKeepsATypeNoNamespaceHidesBare(t *testing.T) {
+	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": holderHiddenTypeSource})
+	main := emitted["main.cs"]
+
+	requireEmitted(t, "main.cs", main, []string{
+		"namespace go.example.com;",
+		"bump(this ref sync s, ",
+		"internal static sync again(this sync s)",
+	}, []string{
+		"main_package.sync",
 	})
 }
