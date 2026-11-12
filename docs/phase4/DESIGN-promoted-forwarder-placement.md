@@ -577,3 +577,101 @@ projects, all pass (its Output phase: 903 pass, 29 skipped, 0 fail), where `e897
   the tip follows this section as a dated block.
 - `go test ./...` is read with this section in place (the repository guard reads its cites) and is in the seat's
   DONE post.
+
+## Amendment 2026-11-11 — the seat merged with batch 284: gates, Native AOT and the conversion footprint
+
+Tip: `c05dd26ae1`, one merge commit whose parents are the seat's `2ad04c9983` (section H's commit) and master
+`50dd9a065c` (batch 284). This block is the one commit above it and changes this document only. It is the dated
+block that section H says follows it. Batch 285 was frozen with the seat at `c05dd26ae1` before this block was
+written, so the block rides a later batch.
+
+### I. The merge
+
+The coordinator ordered a merge of master, not a rebase, into every in-flight branch when batch 284 landed. Three
+files conflicted, all of them documents.
+
+- **The BOARD.** Both sides had appended rows at its end. Both are kept, master's five rows first and the seat's
+  four after them. The merged file has 36,071 lines: master's 35,917 and the seat's 154.
+- **Two reference pages** (`source-generators.md` and `struct-embedding.md`). Each holds one provenance note that
+  both sides had re-cited, for different shifts of the file it cites. Each is re-cited at the line that holds its
+  quote in the merged file, read there and taken from neither side. The repository guard named both cites as stale
+  before that and passes after it.
+
+The files that merged without a conflict were read as well. `ImplementGenerator.cs` takes hunks from both sides;
+master's (constraint proxies of a non-generic interface, pointer adapters for an open generic foreign struct) read
+no member of a package class, so none of them needs a struct's class. A census of the lines batch 284 adds under
+`src/gen`, `src/core/golib` and `src/go2cs` found no new reader of a forwarder's class. `go2cs.slnx` and the four
+behavioral test lists hold each side's additions once.
+
+### J. Gates, each read at `c05dd26ae1`
+
+- GenTests: 493 of 493. `go test ./...` in `src/go2cs`: 11 packages ok, the repository guard among them.
+- `go2cs.slnx` Debug at `-p:GoTargetOS=windows`: 0 errors.
+- GolibTests, 2,616 tests: Debug 2,555 passed and 61 skipped, Release 2,580 passed and 36 skipped, 0 failed.
+- `Test-GoApiCompat.ps1` ran 99, failed 0; `Test-GoApiCompatMoves.ps1` ran 33, failed 0. `push-nuget.ps1
+  -VerifyOnly`: `20 suppression file(s), 900 announced break(s)`, the floor 1.26.10.4 on the line of the next
+  release and not above it. The pack rehearsal was not repeated on the merged tree, by the coordinator's ruling:
+  the batch's own gate runs the release check.
+- The behavioral runner, five slices: 940 projects, all pass (its Output phase: 911 pass, 29 skipped, 0 fail).
+  Section H read 932; the eight more are master's.
+- Go's own tests (`-tests`, action `all`, Release, linux, a scratch worktree at the tip), each row rc 0: `reflect`
+  445 validated with 21 disclosed, its banked counts; `encoding/binary` 143, `archive/zip` 101, `bufio` 81,
+  `debug/dwarf` 41, `net/textproto` 27, the counts section H read; `net`'s tests convert and build with 0 errors.
+- **`check-no-regression.ps1` exits 1, on one file that is not the seat's.** It transpiles 1,036 packages and one
+  file changes: `CgoPseudoPackageTypes/.editorconfig`, where `# CS0219: windows` becomes `# CS0219: linux
+  windows`. The control: master `50dd9a065c`'s converter and the seat's each converted a copy of that project on
+  this linux host, both emit that line, and the two outputs are identical in every file. The golden is batch
+  284's and was captured on windows; the line depends on the host that converts. The coordinator routed it to the
+  cgo lane. The runner's own transpile moves the same file and no other. Not measured: a whole
+  `check-no-regression.ps1` at master on linux.
+- Not repeated on the merged tree, and read in section H at `02d843fe97`: the probe of method expressions
+  written in test files, and the compile of `runtime` for three targets.
+
+### K. Native AOT, at `c05dd26ae1`
+
+Both programs of section H, published as section H describes (`PublishAot` added to the project file after the
+conversion, `-r linux-x64`), each to one native image with no assembly beside it: 159 MB and 162 MB. The program
+whose promoted methods are reached only at run time prints Go's 5 lines. `PromotedMethodFrames` prints Go's 13
+lines; the two that name an unbound forwarder read as Go prints them:
+
+    method expr name: main.outer.Val main.(*outer).Ptr
+    method table name: main.outer.Val main.(*outer).Ptr
+
+### L. The standard-library conversion footprint, at `c05dd26ae1`
+
+**Prediction, stated before the runs: 0 files on every target.** The seat's converter differs from master
+`50dd9a065c`'s in three files (167 lines added, 3 removed), one of them a test; both emitting changes apply only
+to the method expression of a same-package promoted method, and section G read 0 files for that arm's first
+change.
+
+**Instrument.** Two seeded `-stdlib -comments` reconverts diffed against each other (`diff -rq`, build output
+excluded): arm A is master `50dd9a065c`'s converter, arm B the tip's. Each seed is the tip's tracked `src/core`
+and `src/version.props` (4,662 `.cs` files, counted against `git ls-files` before each run). The runs are ONE
+TARGET EACH, four pairs. A run that names all four targets was killed by the kernel for memory on the 15 GB
+machine this was measured on (13.9 GB resident), and the converter at master refuses a multi-target run that
+names fewer than the four declared targets. So each pair measures the change on one target's own file set, in
+that target's single-target layout; a four-target run in one process is not measured.
+
+| Target | Packages converted, each arm | Files that differ |
+|---|---|---|
+| linux/arm64 | 356 | 0 |
+| windows/amd64 | 360 | 0 |
+| linux/amd64 | 358 | 0 |
+| darwin/amd64 | 358 | 0 |
+
+**Read: 0 files differ on each of the four targets, as predicted.** Every run exits 0 and converts all of its
+packages. Neither arm's log holds an unresolved lift marker.
+
+**The instrument was made to fail.** A third converter, the tip's with one space added inside the cast that the
+plain method-expression arm emits, converted a third seed for linux/arm64. Against arm B, 15 files differ, each a
+file that holds a plain method expression: `compress/flate/deflate.cs` and `inflate.cs`, `compress/lzw/reader.cs`
+and `writer.cs`, `internal/trace/order.cs` and `reader.cs`, `internal/zstd/block.cs`, `log/slog/value.cs`,
+`net/http/httputil/persist.cs`, `net/linux/fd_posix.cs`, `os/linux/exec.cs`, `file_unix.cs` and `root_unix.cs`,
+`regexp/syntax/regexp.cs`, and `runtime/time.cs`. For example, in `deflate.cs`:
+
+    <         d.fill = ((Func<ж<compressor>, slice<byte>, nint>)(fillStore));
+    >         d.fill = ((Func<ж<compressor>, slice<byte>, nint>)( fillStore));
+
+The plant is in the arm beside the seat's, not in the seat's arm: the readings above say no standard-library file
+reaches the seat's arm, so a plant there would also read 0 files. What the control shows is that this instrument
+reports a converter whose emission differs. It was run for one target.

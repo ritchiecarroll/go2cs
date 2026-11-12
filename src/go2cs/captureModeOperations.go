@@ -496,7 +496,12 @@ func scanFileForCaptureModeMethods(file *ast.File, info *types.Info) {
 			return true
 		}
 
-		if _, ok := pointer.Elem().(*types.Named); !ok {
+		// A receiver written through an alias (`type AttrNode = Node`, `func (n *AttrNode) M()`) is the
+		// method of the type the alias denotes, and its element here is a `*types.Alias`. Resolve it, or
+		// the method is dropped before its body is read and is taken by reference whatever it does with
+		// its receiver: a nil guard then reads the struct through a nil reference
+		// (docs/phase4/DESIGN-alias-receiver-form.md).
+		if _, ok := types.Unalias(pointer.Elem()).(*types.Named); !ok {
 			return true
 		}
 

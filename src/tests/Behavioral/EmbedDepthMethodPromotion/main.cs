@@ -353,7 +353,7 @@ internal static ж<gNode> newNode(nint kind, gData data) {
     return n;
 }
 
-internal static void Main() {
+internal static void main() {
     var @as = Ꮡ(new aStmt());
     (@as.k, @as.f) = (2, 7);
     var ai = Ꮡ(new aIf());

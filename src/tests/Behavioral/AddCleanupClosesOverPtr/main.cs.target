@@ -43,7 +43,7 @@ internal static void nothing(nint _) { }
 
 internal static void release(this ref T t, nint _) { }
 
-internal static void Main() {
+internal static void main() {
     @try("captures ptr", () => {
         var v = Ꮡ(new T(f: 1));
         var vʗ1 = v;

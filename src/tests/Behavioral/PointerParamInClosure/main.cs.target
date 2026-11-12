@@ -37,7 +37,7 @@ internal static void mixed(ж<nint> Ꮡp) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     ref var a = ref heap(new nint(), out var Ꮡa);
     setViaDefer(Ꮡa);
     fmt.Println(a);

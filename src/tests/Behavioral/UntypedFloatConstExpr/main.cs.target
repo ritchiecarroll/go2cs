@@ -38,7 +38,7 @@ internal static void bits32(@string label, uint32 got, uint32 want) {
     fmt.Println(label, got, got == want);
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("-- named float conversion --");
     var f = (MyFloat)(/* -math.Sqrt2 */ -1.4142135623730951D);
     fmt.Println(f.Abs());

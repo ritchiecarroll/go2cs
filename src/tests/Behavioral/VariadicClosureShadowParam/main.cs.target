@@ -19,7 +19,7 @@ internal static void add(@string verb, slice<@string> args) {
     errorf("%s: %s", verb, args[0]);
 }
 
-internal static void Main() {
+internal static void main() {
     add("go", ["1.23.0"]);
     add("go", default);
 }

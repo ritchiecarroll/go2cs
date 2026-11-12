@@ -37,7 +37,7 @@ internal static nint count(params ꓸꓸꓸnint xsʗp) {
     return len(xs);
 }
 
-internal static void Main() {
+internal static void main() {
     var x = slice<nint>([1, 2, 3]);
     slice<@string> y = slice<@string>(["a", "b"]);
     fmt.Println(x, len(x), cap(x), y);

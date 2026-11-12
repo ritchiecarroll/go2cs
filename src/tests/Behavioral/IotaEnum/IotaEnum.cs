@@ -214,7 +214,7 @@ internal static @string stateMachine(nint step) {
     return "unknown";
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Printf("Slice Kind Value: %s [%d]\n"u8, Slice.String(), (nint)Slice);
     fmt.Println((nint)(seqFirst), (nint)(seqSecond), (nint)(seqAgain));
     fmt.Println(wideFirst, wideNext);

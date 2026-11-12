@@ -51,7 +51,7 @@ internal static @string fromInit;
     fromInit = runtime.FuncForPC(pc).Name();
 }
 
-internal static partial void Main() {
+internal static partial void main() {
     var c = Ꮡ(new counter());
     var b = Ꮡ(new box<nint>(v: 1));
 

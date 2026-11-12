@@ -38,7 +38,7 @@ internal static @string join(this ref Context c, params ꓸꓸꓸstring elemʗp)
     return slashJoin(elem.ꓸꓸꓸ);
 }
 
-internal static void Main() {
+internal static void main() {
     var ctxt = new Context(
         Name: "demo",
         JoinPath: slashJoin,

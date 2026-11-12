@@ -10,7 +10,7 @@ internal partial struct main_queries /*dyn*/ {
     internal @string service;
 }
 
-internal static void Main() {
+internal static void main() {
     var queries = slice<main_queries>([
         new("tcp", "http"),
         new("tcp", "https"),

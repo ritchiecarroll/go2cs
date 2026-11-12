@@ -70,7 +70,7 @@ internal static error /*err*/ recoverResult() {
     return Ꮡerr.ValueSlot;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(errResult(false));
     fmt.Println(errResult(true));
     fmt.Println(intResult());

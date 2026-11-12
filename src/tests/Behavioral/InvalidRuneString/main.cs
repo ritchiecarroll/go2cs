@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var rs = slice<rune>(['a', 0xD800, 0xDFFF, 0x110000, -1, 0x4E16]);
 
     @string s = (@string)rs;

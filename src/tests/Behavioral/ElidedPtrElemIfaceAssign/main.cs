@@ -49,7 +49,7 @@ public static @string Describe(this List l) {
 
 internal static @string take(Describer d) { return d.Describe(); }
 
-internal static void Main() {
+internal static void main() {
     Describer d = new Reg(new map<@string, ж<Item>>{["a"] = Ꮡ(new Item(Name: "alpha", N: 1))});
     fmt.Println("decl:", d.Describe());
 

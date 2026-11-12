@@ -46,7 +46,7 @@ private static readonly @string omegaˢ = "omega"u8;
 private static readonly @string betaˢ = "beta"u8;
 private static readonly @string mixedˢ = "mixed"u8;
 
-internal static void Main() {
+internal static void main() {
     var ps = slice<Path>([(@string)"b/c", (@string)"a/z", (@string)"c", (@string)"a/b"]);
     slices.Sort<slice<Path>, Path>(ps);
     fmt.Println(ps);

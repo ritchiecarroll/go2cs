@@ -11,7 +11,7 @@ using path;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var (p, err) = exec.LookPath("go");
     if (err != nil) {
         fmt.Println("LookPath(go): error:", err);

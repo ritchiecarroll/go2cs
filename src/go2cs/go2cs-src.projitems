@@ -17,6 +17,7 @@
     <None Include="$(MSBuildThisFileDirectory)addressTakenPredicates_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasDocComments_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasPublicization_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)aliasReceiverForm_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasReferenceImports_test.go" />
     <None Include="$(MSBuildThisFileDirectory)allocInliningFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)bridgeTypeAccess_test.go" />
@@ -183,6 +184,7 @@
     <None Include="$(MSBuildThisFileDirectory)deferFinallyDeadReceiverAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deferFinallyLowering.go" />
     <None Include="$(MSBuildThisFileDirectory)deferValueReceiverSnapshot_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)delegateArgWrap.go" />
     <None Include="$(MSBuildThisFileDirectory)deferLambdaReceiverCopy_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deferReceiverCopy_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deferredMarkerOperations.go" />
@@ -355,6 +357,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\relocscan\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\relocscan\main_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\annotatorSelfTest_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\behavioralHarnessOptions_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\breakFloorGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\contextBudget_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\diagnosticCodeRegistry_test.go" />
@@ -605,6 +608,8 @@
     <None Include="$(MSBuildThisFileDirectory)reconvertDeletionsSkipList_test.go" />
     <None Include="$(MSBuildThisFileDirectory)recoverForms.go" />
     <None Include="$(MSBuildThisFileDirectory)recurseDefaultTags_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)recurseRefusal.go" />
+    <None Include="$(MSBuildThisFileDirectory)recurseRefusal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)recurseTrimpath_test.go" />
     <None Include="$(MSBuildThisFileDirectory)recvRefLowering_test.go" />
     <None Include="$(MSBuildThisFileDirectory)refLoweringAnalysisOperations.go" />
@@ -643,6 +648,8 @@
     <None Include="$(MSBuildThisFileDirectory)siblingPackageNamespace_test.go" />
     <None Include="$(MSBuildThisFileDirectory)signedDivisionOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)sliceBoundsMethodEmission_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)sliceWideningWriteRefusals.go" />
+    <None Include="$(MSBuildThisFileDirectory)sliceWideningWriteRefusals_test.go" />
     <None Include="$(MSBuildThisFileDirectory)solutionGenerator.go" />
     <None Include="$(MSBuildThisFileDirectory)solutionGenerator_test.go" />
     <None Include="$(MSBuildThisFileDirectory)sstringHoistOperations.go" />
@@ -794,6 +801,8 @@
     <None Include="$(MSBuildThisFileDirectory)warningClearEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)warningEntries.go" />
     <None Include="$(MSBuildThisFileDirectory)warningEntries_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)warnOption.go" />
+    <None Include="$(MSBuildThisFileDirectory)warnOption_test.go" />
     <None Include="$(MSBuildThisFileDirectory)writeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)wsaSendtoNoCallers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)xsysDarwinLibc_test.go" />

@@ -19,7 +19,7 @@ partial struct Target {
     public /*[2]*/ slice<array<nint>> SlcArr;
 }
 
-internal static void Main() {
+internal static void main() {
     var t = reflect.TypeOf(new Target());
 
     fmt.Println("-- field types --");

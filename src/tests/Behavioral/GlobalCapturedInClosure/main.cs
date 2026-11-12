@@ -28,7 +28,7 @@ internal static partial nint boxedLocal() {
     return h.count;
 }
 
-internal static void Main() {
+internal static void main() {
     keep(Ꮡmheap);
     nint got = default;
     run(() => {

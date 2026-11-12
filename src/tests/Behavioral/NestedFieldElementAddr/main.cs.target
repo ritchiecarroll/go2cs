@@ -29,7 +29,7 @@ internal static partial void bump(ref uintptr p) { p = p + 7; }
 
 internal static partial void bumpInt(ref nint p) { p = p + 3; }
 
-internal static void Main() {
+internal static void main() {
     var pp = Ꮡ(new pstate(wbBuf: new wbBuf(buf: new uintptr[]{10, 20, 30, 40}.array())));
     bump(ref (pp.ᏑwbBuf.at(wbBuf.Ꮡbuf, 0)).DerefOrNull());
     fmt.Println(pp.wbBuf.buf[0], pp.wbBuf.buf[1]);

@@ -106,7 +106,7 @@ internal static iter.Seq<nint> doubleNext() {
     };
 }
 
-internal static void Main() {
+internal static void main() {
     var (next, stop) = iter.Pull(count(3));
 
     for (;;) {

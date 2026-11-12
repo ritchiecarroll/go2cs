@@ -19,7 +19,7 @@ internal static void with(ж<sink> s, Action<ж<sink>> f) {
     f(s);
 }
 
-internal static void Main() {
+internal static void main() {
     var s = Ꮡ(new sink());
     with(s, (ж<sink> c) => {
         c.add(0xff);

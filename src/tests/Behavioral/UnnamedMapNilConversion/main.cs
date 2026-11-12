@@ -8,7 +8,7 @@ partial class main_package {
 partial struct myMap /*map[@string, nint]*/;
 partial struct mySlice /*[]byte*/;
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(reflect.TypeOf((map<@string, nint>)default));
     fmt.Println(reflect.TypeOf((map<nint, byte>)default));
     fmt.Println(reflect.TypeOf((map<@string, slice<Header>>)default));

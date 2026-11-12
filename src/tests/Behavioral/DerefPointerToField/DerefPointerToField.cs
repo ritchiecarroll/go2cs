@@ -21,7 +21,7 @@ internal static nint readVal(ref holder h) {
     return h.cnt.Value;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var xs = ref heap<slice<nint>>(slice<nint>([10, 20, 30]), out var Ꮡxs);
     ref var c = ref heap<nint>(7, out var Ꮡc);
     var h = Ꮡ(new holder(xs: Ꮡxs, cnt: Ꮡc));

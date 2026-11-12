@@ -28,7 +28,7 @@ internal static nint valInt(nint v, @string tag) {
     return v;
 }
 
-internal static void Main() {
+internal static void main() {
     var full = new channel<nint>(1);
     full.ᐸꟷ(1);
     var ready = new channel<nint>(1);

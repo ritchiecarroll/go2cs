@@ -7,7 +7,7 @@ partial class main_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object heyˢ = (@string)"hey"u8;
 
-internal static void Main() {
+internal static void main() {
     void whatAmI(any i) {
         switch (i.type()) {
         case null: {

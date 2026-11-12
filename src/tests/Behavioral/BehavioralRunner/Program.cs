@@ -480,9 +480,20 @@ namespace BehavioralRunner
 
                 bool ok = true, hitTimeout = false, hitBestEffort = false;
 
+                // A project's go2cs.options (extra converter arguments; only -warn=<codes>) is read here as it is
+                // at the other three converter call sites (TestBehavioralHarnessReadsConverterOptions).
+                (string options, string? optionsError) = BehavioralPackages.ConverterOptions(projPath);
+
+                if (optionsError is not null)
+                {
+                    results[p].Phases[Phase.Transpile] = Status.Fail;
+                    results[p].Messages.Add(optionsError);
+                    continue;
+                }
+
                 foreach (string pkgPath in GoPackageDirs(projPath))
                 {
-                    ProcResult r = Exec(s_go2csExe, $"-go2cspath \"{s_srcRoot}\" \"{pkgPath}\"", pkgPath, s_transpileTimeoutMs);
+                    ProcResult r = Exec(s_go2csExe, $"{options}-go2cspath \"{s_srcRoot}\" \"{pkgPath}\"", pkgPath, s_transpileTimeoutMs);
 
                     if (r.ExitCode == 0)
                     {
@@ -627,6 +638,12 @@ namespace BehavioralRunner
 
         private static bool UpToDate(string projPath)
         {
+            // A project converted only under go2cs.options (an expected-output project) is always re-transpiled: the
+            // options file's REMOVAL leaves no newer file behind, and a skipped transpile would keep the -warn output of
+            // a run that no longer asks for it (the negative control: no options file, the refusal reds Transpile).
+            if (BehavioralPackages.HasExpectedOutput(projPath))
+                return false;
+
             DateTime exe = File.GetLastWriteTimeUtc(s_go2csExe);
 
             // Nested sub-library packages count: if one of them is out of date the project must be
@@ -1020,6 +1037,70 @@ namespace BehavioralRunner
 
             foreach (string p in projects)
             {
+                // An EXPECTED-OUTPUT project (converted under go2cs.options' -warn) has no Go oracle: Go runs to the
+                // end, while the converted program must panic at its refused site. Its C# run is compared with the
+                // recorded expectation instead: stdout exactly expected-output.txt, exit code 2, and stderr's first
+                // line a "panic: go2cs:" refusal (go2cs-gen's refused forwarder).
+                if (HasExpectedOutput(p))
+                {
+                    if (!results[p].Phases.TryGetValue(Phase.Compile, out Status ec) || ec != Status.Pass)
+                    {
+                        results[p].Phases[Phase.Output] = Status.Skip;
+                        continue;
+                    }
+
+                    string expectedDir = Path.Combine(s_behavioralDir, p);
+                    string expectedExe = Path.Combine(expectedDir, "bin", Config, NetVersion, $"{p}{s_exeSuffix}");
+
+                    if (!File.Exists(expectedExe))
+                    {
+                        results[p].Phases[Phase.Output] = Status.Fail;
+                        results[p].Messages.Add($"nothing to run -- no C# binary at {expectedExe} (its compile passed, so the artifact should exist)");
+                        failed++;
+                        continue;
+                    }
+
+                    ProcResult run = Exec(expectedExe, null, Path.GetDirectoryName(expectedDir)!, s_runTimeoutMs);
+
+                    if (TimedOut(run))
+                    {
+                        results[p].Phases[Phase.Output] = Status.Timeout;
+                        results[p].Messages.Add($"run NOT MEASURED: timed out after {Seconds(s_runTimeoutMs)} (C# side); raise --run-timeout");
+                        timeouts++;
+                        continue;
+                    }
+
+                    compared++;
+
+                    string expected = File.ReadAllText(Path.Combine(expectedDir, BehavioralPackages.ExpectedOutputFile)).Replace("\r\n", "\n");
+                    string actual = run.StdOut.Replace("\r\n", "\n");
+
+                    if (run.ExitCode != 2)
+                    {
+                        results[p].Phases[Phase.Output] = Status.Fail;
+                        results[p].Messages.Add($"expected a refusal panic (exit 2), got exit {run.ExitCode}; stderr: \"{Truncate(StdErrSummary(run.StdErr), MismatchStdErrBudget)}\"");
+                        failed++;
+                    }
+                    else if (!string.Equals(actual, expected, StringComparison.Ordinal))
+                    {
+                        results[p].Phases[Phase.Output] = Status.Fail;
+                        results[p].Messages.Add($"stdout differs from {BehavioralPackages.ExpectedOutputFile}");
+                        failed++;
+                    }
+                    else if (!FirstLine(run.StdErr).StartsWith("panic: go2cs:", StringComparison.Ordinal))
+                    {
+                        results[p].Phases[Phase.Output] = Status.Fail;
+                        results[p].Messages.Add($"stderr's first line is not a go2cs refusal panic: \"{FirstLine(run.StdErr)}\"");
+                        failed++;
+                    }
+                    else
+                    {
+                        results[p].Phases[Phase.Output] = Status.Pass;
+                    }
+
+                    continue;
+                }
+
                 if (!MatchConsoleOutput(p))
                 {
                     results[p].Phases[Phase.Output] = Status.Skip;
@@ -1397,6 +1478,10 @@ namespace BehavioralRunner
             File.WriteAllText(solutionFile, sb.ToString());
             return solutionFile;
         }
+
+        // An expected-output project (BehavioralPackages.ExpectedOutputFile): converted under go2cs.options' -warn, it
+        // must panic at its refused site, and its C# run is compared with the recorded expectation, not a Go run.
+        private static bool HasExpectedOutput(string project) => BehavioralPackages.HasExpectedOutput(Path.Combine(s_behavioralDir, project));
 
         private static bool MatchConsoleOutput(string project)
         {

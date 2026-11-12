@@ -147,6 +147,18 @@ internal static class GeneratorDiagnostics
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
+    // RefusalDowngradedAnalyzer reports each [GoRefusalDowngraded] record the converter wrote under -warn: the package
+    // converted although it holds a refused site, which panics with the refusal text when reached. A warning, in every
+    // build, so a project that is never converted again still shows that it carries a known-broken path.
+    public static readonly DiagnosticDescriptor RefusalDowngraded = new(
+        id: "GO2CS0011",
+        title: "The assembly was converted with a converter refusal downgraded to a warning (-warn)",
+        messageFormat: "Converted with -warn {0}: the refused site {1} panics when reached: {2}",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        customTags: [WellKnownDiagnosticTags.CompilationEnd]);
+
     // GO2CS0012, MethodLimitAnalyzer: CoreCLR's method-table builder refuses a type that needs more than 65,525 slots
     // (MAX_SLOT_INDEX, methodtablebuilder.h; 65,521 methods on a static class, measured) or declares more than
     // 65,524 methods (measured), and the refusal is a TypeLoadException at the first use of the type, in a program

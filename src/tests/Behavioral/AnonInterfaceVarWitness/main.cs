@@ -46,7 +46,7 @@ partial struct originᴛ1 /*dyn*/ {
 }
 internal static originᴛ1 origin = new originᴛ1(x: 3, y: 4);
 
-internal static void Main() {
+internal static void main() {
     var a = Ꮡ(new thing(n: 7));
     var b = Ꮡ(new thing(n: 7));
     var c = Ꮡ(new thing(n: 8));

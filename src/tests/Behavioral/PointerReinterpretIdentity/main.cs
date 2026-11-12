@@ -34,7 +34,7 @@ internal static void write(this ж<builder> Ꮡb, @string s) {
 
 internal static @string String(this ref builder b) { return (@string)b.buf; }
 
-internal static void Main() {
+internal static void main() {
     ref var b = ref heap(new builder(), out var Ꮡb);
     Ꮡb.write("hello");
     Ꮡb.write(", ");

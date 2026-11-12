@@ -8,7 +8,7 @@ partial struct @base /*[4]uint64*/;
 partial struct one /*@base*/;
 partial struct two /*one*/;
 
-internal static void Main() {
+internal static void main() {
     var a = @new<@base>();
     a.Value[..][1] = 5;
     var b = @new<one>();

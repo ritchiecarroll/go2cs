@@ -86,7 +86,7 @@ partial struct registryᴛ1 /*dyn*/ {
 internal static readonly ж<Set<registryᴛ1>> Ꮡregistry = new StaticBox<Set<registryᴛ1>>(default(Set<registryᴛ1>));
 internal static ref Set<registryᴛ1> registry => ref ((StaticBox<Set<registryᴛ1>>)Ꮡregistry).ValueSlot;
 
-internal static void Main() {
+internal static void main() {
     symbols();
     again();
     composed();

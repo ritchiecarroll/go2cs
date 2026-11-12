@@ -13,7 +13,7 @@ partial struct Rows /*[]array<nint>*/;
 
 partial struct Names /*[]@string*/;
 
-internal static void Main() {
+internal static void main() {
     UUIDs u = GoReflect.WithElemDims(new UUID[]{}.slice(), 16);
     Rows r = GoReflect.WithElemDims(new array<nint>[]{}.slice(), 3);
     fmt.Println("named empty:", reflect.TypeOf(u).Elem().Len(), reflect.TypeOf(r).Elem().Len());

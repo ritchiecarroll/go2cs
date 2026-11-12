@@ -8,7 +8,7 @@ internal static UntypedInt bias => 1023;
 
 internal static UntypedInt bits => 0x7FF8000000000000;
 
-internal static void Main() {
+internal static void main() {
     var s = slice<nint>([52, 40, 33]);
 
     fmt.Println((uint64)((bias - 1) << (int)(s[0])));

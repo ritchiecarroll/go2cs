@@ -38,7 +38,7 @@ internal static hashKind hSquare => 6;
 internal static array<shape> byKind = new golib.SparseArray<shape>{[(int)((nuint)hCircle)] = new circle(), [(int)((nuint)hSquare)] = new square()
 }.array(7);
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(lookup(kCircle).name());
     fmt.Println(lookup(kSquare).name());
     fmt.Println(lookup(0) == nil);

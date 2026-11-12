@@ -28,7 +28,7 @@ partial struct ptrEmbed {
     internal uint32 d;
 }
 
-internal static void Main() {
+internal static void main() {
     var buf = new slice<byte>(16);
 
     var o = Ꮡ(buf, 0).Reinterpret<byte, ordered>();

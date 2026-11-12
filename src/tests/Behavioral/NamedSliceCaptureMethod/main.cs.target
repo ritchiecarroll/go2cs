@@ -19,7 +19,7 @@ internal static nint pop(this ж<stack> Ꮡs) {
     return v;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var st = ref heap<stack>(out var Ꮡst);
     Ꮡst.push(10);
     Ꮡst.push(20);

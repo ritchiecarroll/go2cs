@@ -22,7 +22,7 @@ internal partial struct main_anon /*dyn*/ {
     internal nint v;
 }
 
-internal static void Main() {
+internal static void main() {
     var keepᴷ = new stackAppend<ж<nint>>();
 
     ref var a = ref heap<nint>(10, out var Ꮡa);

@@ -23,7 +23,7 @@ internal static partial void launch(channel<@string> done) {
     });
 }
 
-internal static void Main() {
+internal static void main() {
     var done = new channel<@string>(0);
     launch(done);
     fmt.Println(ᐸꟷ(done));

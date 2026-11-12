@@ -21,7 +21,7 @@ internal static nint bump(this ref counter c, nint by) {
     return c.n;
 }
 
-internal static void Main() {
+internal static void main() {
     Func<nint, nint> fn = default;
 
     var v = new validator(@base: 100);

@@ -14,7 +14,7 @@ internal static slice<slice<ж<Node>>> group(this ж<Node> Ꮡn) {
     return [[Ꮡn]];
 }
 
-internal static void Main() {
+internal static void main() {
     var n = Ꮡ(new Node(val: 42));
     var groups = n.group();
     fmt.Println(len(groups), len(groups[0]), groups[0][0].Value());

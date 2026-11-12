@@ -28,7 +28,7 @@ internal static partial void churn() {
     }
 }
 
-internal static void Main() {
+internal static void main() {
     var h = Ꮡ(new header(kind: 24, size: 16, name: "string"));
     var v = asView(h);
     v.kind = 25;

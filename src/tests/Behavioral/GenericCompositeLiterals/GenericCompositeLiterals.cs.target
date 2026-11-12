@@ -27,7 +27,7 @@ public static nint Size<T>(this ref Queue<T> q) {
     return len(q.items);
 }
 
-internal static void Main() {
+internal static void main() {
     var intQueue = new Queue<nint>();
     intQueue.Enqueue(10);
     intQueue.Enqueue(20);

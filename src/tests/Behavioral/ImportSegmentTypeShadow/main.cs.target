@@ -15,7 +15,7 @@ internal static void bump(this ref sync s, ж<atomic.Int32> c) {
     s.hits = c.Add(1);
 }
 
-internal static void Main() {
+internal static void main() {
     ref var c = ref heap(new atomic.Int32(), out var Ꮡc);
     var s = new sync(label: "shadowed");
 

@@ -48,7 +48,7 @@ internal static nint mutableBytes() {
 private static readonly @string namedStringConversionˢ = "named string conversion"u8;
 private static readonly object anyCompositeElementˢ = (@string)"any composite element"u8;
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(kind(0), kind(1));
 
     fmt.Println(echo("shared across files"));

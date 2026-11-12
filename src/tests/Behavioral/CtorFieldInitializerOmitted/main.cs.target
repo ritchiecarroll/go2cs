@@ -10,7 +10,7 @@ partial struct Holder {
     public /*<-*/channel<EmptyStruct> Done = /*<-*/channel<EmptyStruct>.RecvOnly;
 }
 
-internal static void Main() {
+internal static void main() {
     var a = new Holder(Name: "a");
     var b = @new<Holder>();
     b.Name = "a";

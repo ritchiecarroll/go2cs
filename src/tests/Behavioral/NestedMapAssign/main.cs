@@ -11,7 +11,7 @@ internal static void addEdge(map<@string, map<@string, bool>> g, @string from, @
     g[from].Set(to, true);
 }
 
-internal static void Main() {
+internal static void main() {
     var g = new map<@string, map<@string, bool>>{};
     addEdge(g, "a", "b");
     addEdge(g, "a", "c");

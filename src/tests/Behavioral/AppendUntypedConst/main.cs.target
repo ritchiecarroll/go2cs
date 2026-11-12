@@ -8,7 +8,7 @@ internal static UntypedInt marker => 0xFFFD;
 
 partial struct words /*[]uint16*/;
 
-internal static void Main() {
+internal static void main() {
     var aᴷ = new stackAppend<uint16>();
     var wᴷ = new stackAppend<uint16>();
     var intsᴷ = new stackAppend<nint>();

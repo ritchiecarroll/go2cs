@@ -10,7 +10,7 @@ partial struct big /*num:uint64*/;
 
 internal static UntypedInt bits => 6;
 
-internal static void Main() {
+internal static void main() {
     arenaIdx a = (arenaIdx)((nuint)1 << (int)(bits));
     tag t = (tag)(uint8)(1 << 3);
     big b = (big)((uint64)1 << 40);

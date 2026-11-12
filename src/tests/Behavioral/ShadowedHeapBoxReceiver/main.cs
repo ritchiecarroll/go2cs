@@ -38,7 +38,7 @@ internal static nint compute() {
     return b.Sum();
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(compute());
 }
 

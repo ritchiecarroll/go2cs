@@ -23,7 +23,7 @@ internal static partial void churn() {
     }
 }
 
-internal static void Main() {
+internal static void main() {
     var b = new slice<byte>(8);
     var h = asHdr(b);
 

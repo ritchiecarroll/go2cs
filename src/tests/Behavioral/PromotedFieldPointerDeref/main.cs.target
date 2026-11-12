@@ -18,7 +18,7 @@ partial struct list {
     internal ж<node> head;
 }
 
-internal static void Main() {
+internal static void main() {
     var a = Ꮡ(new node(val: 1));
     a.tag = 7;
     var b = Ꮡ(new node(val: 2));

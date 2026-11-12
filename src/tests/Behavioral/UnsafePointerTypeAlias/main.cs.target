@@ -26,7 +26,7 @@ internal static uint8 next(this ref cursor c) {
     return b;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var x = ref heap<uint64>((uint64)42, out var Ꮡx);
     ptr p = @unsafe.Pointer.FromPinnedBox(Ꮡx);
     fmt.Println(~(ж<uint64>)(uintptr)(p));

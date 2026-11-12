@@ -12,7 +12,7 @@ public partial struct item {
 public delegate bool By(ж<item> a, ж<item> b);
 
 public static void Sort(this By by, slice<item> items) {
-    var s = Ꮡ(new sorter(items: items, by: new Func<ж<item>, ж<item>, bool>(by)));
+    var s = Ꮡ(new sorter(items: items, by: NilSafeDelegateConversion<Func<ж<item>, ж<item>, bool>, By>(by)));
     s.run();
 }
 
@@ -43,7 +43,7 @@ partial struct comparer {
     internal Func<ж<item>, ж<item>, bool> cmp;
 }
 
-internal static void Main() {
+internal static void main() {
     var items = slice<item>([new("delta", 4), new("alpha", 1), new("charlie", 3), new("bravo", 2)]);
 
     new By((ж<item> a, ж<item> b) => a.rank < b.rank).Sort(items);

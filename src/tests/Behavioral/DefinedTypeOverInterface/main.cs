@@ -31,7 +31,7 @@ internal static @string describe(Token t) {
     return "?";
 }
 
-internal static void Main() {
+internal static void main() {
     any t = (nint)42;
     fmt.Println(describe(t));
 

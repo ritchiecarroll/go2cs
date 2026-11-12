@@ -18,7 +18,7 @@ internal partial interface main_type /*dyn*/ {
     nint Len();
 }
 
-internal static void Main() {
+internal static void main() {
     fn none = default;
     var seven = new fn(() => 7);
     var eight = new fn(() => 8);

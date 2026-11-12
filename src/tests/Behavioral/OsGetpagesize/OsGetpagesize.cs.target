@@ -6,7 +6,7 @@ using syscall = syscall_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     nint size = os.Getpagesize();
     fmt.Println("page size:", size);
     fmt.Println("matches syscall.Getpagesize:", size == syscall.Getpagesize());

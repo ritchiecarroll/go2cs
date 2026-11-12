@@ -37,7 +37,7 @@ internal static int32 localAtomicDefer() {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("while locked:", lockUnlock(7));
     fmt.Println("after unlock:", Ꮡlocked.Load());
     fmt.Println("runGoid:", ᏑrunGoid.Load());

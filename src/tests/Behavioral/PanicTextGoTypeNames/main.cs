@@ -46,7 +46,7 @@ internal static void hashKey(@string label, any k) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     pin("pin int32", (int32)5);
     pin("pin rune", (rune)'a');
     pin("pin uint8", (uint8)1);

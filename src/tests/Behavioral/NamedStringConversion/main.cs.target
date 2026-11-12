@@ -15,7 +15,7 @@ private static readonly @string kaboomˢ = "kaboom"u8;
 private static readonly @string tagˢ = "tag"u8;
 private static readonly @string jsonOmitemptyˢ = "json,omitempty"u8;
 
-internal static void Main() {
+internal static void main() {
     error e = ((errorString)(@string)kaboomˢ);
     fmt.Println(e.Error());
 

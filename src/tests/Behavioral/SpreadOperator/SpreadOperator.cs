@@ -15,7 +15,7 @@ internal static nint sum(params ꓸꓸꓸnint numsʗp) {
     return total;
 }
 
-internal static void Main() {
+internal static void main() {
     var values = slice<nint>([1, 2, 3]);
 
     fmt.Println(sum(values.ꓸꓸꓸ));

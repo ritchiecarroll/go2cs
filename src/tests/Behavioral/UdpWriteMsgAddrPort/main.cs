@@ -10,7 +10,7 @@ partial class main_package {
 
 internal static UntypedInt rounds => 200;
 
-internal static void Main() {
+internal static void main() {
     writeMsgAddrPortRoundTrip("udp4", "127.0.0.1");
     writeMsgAddrPortRoundTrip("udp6", "::1");
     writeMsgUDPRoundTrip("udp4", "127.0.0.1");

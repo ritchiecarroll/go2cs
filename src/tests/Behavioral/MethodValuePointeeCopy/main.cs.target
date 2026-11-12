@@ -35,7 +35,7 @@ internal static Func<@string> viaParam(ж<frame> Ꮡp) {
     return () => recvʗ1.label();
 }
 
-internal static void Main() {
+internal static void main() {
     var h1 = new holder(p: Ꮡ(new frame(Name: "a")));
     var recvʗ1 = ~h1.p;
     

@@ -110,7 +110,7 @@ internal static ж<gnode> Next(this ref gnode n) { return n.next; }
 internal static ж<Graph<gnodeжGraphNode>> Owner(this ref gnode n) { return n.g; }
 internal static @string Label(this ref gnode n) { return n.name; }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(Sum(new vec(1, 2), new vec(3, 4), new vec(5, 6)));
     fmt.Println(Sum<num>(1, 2, 3, 4));
     fmt.Println(Min((age)7, (age)3));

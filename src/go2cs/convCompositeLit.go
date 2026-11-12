@@ -681,11 +681,7 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 				continue
 			}
 
-			if callContext.wrapArgWithNew == nil {
-				callContext.wrapArgWithNew = make(map[int]string)
-			}
-
-			callContext.wrapArgWithNew[i] = v.getCSharpTypeName(fieldVar.Type())
+			v.recordDelegateArgWrap(callContext, i, fieldVar.Type(), valueExpr, valueType)
 		}
 	}
 

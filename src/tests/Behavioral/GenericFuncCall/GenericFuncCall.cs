@@ -55,7 +55,7 @@ internal static ж<nint> renew(ж<nint> Ꮡp) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string helloˢ = "hello"u8;
 
-internal static void Main() {
+internal static void main() {
     nint minValue = Min<nint>(42, 17);
     fmt.Printf("Min value: %d\n"u8, minValue);
 

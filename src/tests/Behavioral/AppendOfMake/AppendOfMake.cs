@@ -34,7 +34,7 @@ internal static slice<nint> named(slice<nint> s, nint n) {
 
 internal static slice<array<nint>> arrays(slice<array<nint>> s, nint n) { return appendꓸꓸꓸ(s, GoReflect.WithElemDims(new slice<array<nint>>(n, () => new(2)), 2)); }
 
-internal static void Main() {
+internal static void main() {
     var s = new slice<nint>(2, 4);
     (s[0], s[1]) = (1, 2);
     var stale = s[..4];

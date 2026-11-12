@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var s = append(slice<@string>(default), (@string)"x", (@string)"y");
     fmt.Println(len(s), cap(s), s == nil);
 

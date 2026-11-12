@@ -21,7 +21,7 @@ internal static nint accumulate(ж<nint> Ꮡcounter, slice<nint> vals) {
     return counter;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var n = ref heap<nint>(0, out var Ꮡn);
     fmt.Println(accumulate(Ꮡn, [1, 2, 3, 4]));
     fmt.Println(n);

@@ -16,7 +16,7 @@ internal static void show(@string label, reflectꓸValue v) {
     fmt.Printf("%s: kind=%v type=%v len=%d val=%v\n"u8, label, v.Kind(), v.Type(), v.Len(), v.Interface());
 }
 
-internal static void Main() {
+internal static void main() {
     ref var s = ref heap<reflectꓸValue>(reflect.ValueOf("héllo"), out var Ꮡs);
     for (nint i = 0; i < s.Len(); i++) {
         var e = s.Index(i);

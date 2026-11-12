@@ -26,7 +26,7 @@ partial struct holder {
     internal named n;
 }
 
-internal static void Main() {
+internal static void main() {
     var b = new box((myErr)7);
     fmt.Println(b.err.Error());
 

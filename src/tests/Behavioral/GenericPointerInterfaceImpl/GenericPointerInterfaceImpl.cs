@@ -93,7 +93,7 @@ internal static @string build<P>(Func<P> newPoint, @string tag)
     return tag + ":"u8 + r.label();
 }
 
-internal static void Main() {
+internal static void main() {
     Curve c1 = new curveжCurve<p224жpoint>(Ꮡ(new curve<p224жpoint>(name: "c224", newPoint: () => newP224(), @base: Ꮡ(new p224(v: 3)))));
     Curve c2 = new curveжCurve<p384жpoint>(Ꮡ(new curve<p384жpoint>(name: "c384", newPoint: () => newP384(), @base: Ꮡ(new p384(v: 5)))));
 

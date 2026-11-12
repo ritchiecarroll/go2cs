@@ -7,7 +7,7 @@ using ForeignPointerImplementSuppression;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var t = Ꮡ(new toneꓸTone(D: 3));
     tone.Level l = new tone.ΔToneжLevel(t);
 

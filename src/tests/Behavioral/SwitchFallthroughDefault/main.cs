@@ -25,7 +25,7 @@ internal static @string classify(nint n) {
     return @out;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(classify(1));
     fmt.Println(classify(2));
     fmt.Println(classify(3));

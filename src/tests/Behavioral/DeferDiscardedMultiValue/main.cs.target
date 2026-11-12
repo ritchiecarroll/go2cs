@@ -21,7 +21,7 @@ internal static (uintptr, uintptr, error) quad(uintptr a, uintptr b, uintptr c, 
     return (a, b, default);
 }
 
-internal static void Main() {
+internal static void main() {
     GoFrame ᒐ = default;
     try {
         nint n = 1;

@@ -34,7 +34,7 @@ internal static (nint, error) Write(this ж<conn> Ꮡc, slice<byte> b) {
     finally { if (ᒐd1) Ꮡc.DerefOrNull().state.of(state.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     var s = Ꮡ(new state());
     var c = Ꮡ(new conn(name: "c1", state: s));
 

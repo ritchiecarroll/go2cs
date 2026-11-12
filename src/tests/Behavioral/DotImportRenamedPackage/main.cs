@@ -10,7 +10,7 @@ internal static bool ready(ж<Δsync.Mutex> mu) {
     return mu != nil;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var mu = ref heap(new Δsync.Mutex(), out var Ꮡmu);
     fmt.Println("mutex ready:", ready(Ꮡmu));
 }

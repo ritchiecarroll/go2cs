@@ -27,7 +27,7 @@ internal partial struct main_named /*dyn*/ {
     internal Addr got;
 }
 
-internal static void Main() {
+internal static void main() {
     var ta = Ꮡ(new UnixAddr(Name: "/tmp/sock", Net: "unix"));
 
     array<main_type> connAddrs = new main_type[]{

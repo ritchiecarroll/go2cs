@@ -149,7 +149,7 @@ public static void DropKey<M, K, V>(M m, K key)
     delete(m, key);
 }
 
-internal static void Main() {
+internal static void main() {
     Point p = default;
     p = slice<int32>([1, 2, 3]);
     ScaleAndPrint(p);

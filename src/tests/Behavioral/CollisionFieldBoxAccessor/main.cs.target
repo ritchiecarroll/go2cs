@@ -63,7 +63,7 @@ internal static partial nint boxRefCapturedValueNamedAfterType() {
     return got + w.park + w.other;
 }
 
-internal static void Main() {
+internal static void main() {
     var p = Ꮡh.Ꮡmark;
     p.Value = 42;
 

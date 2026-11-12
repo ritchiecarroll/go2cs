@@ -18,7 +18,7 @@ internal static K mix<K>(K id, K step)
     return h;
 }
 
-internal static void Main() {
+internal static void main() {
     stringID a = 12345;
     stringID b = 11;
     fmt.Println(mix(a, b));

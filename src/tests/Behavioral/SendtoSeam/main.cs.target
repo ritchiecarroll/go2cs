@@ -12,7 +12,7 @@ internal static void fatal(@string what, error err) {
     }
 }
 
-internal static void Main() {
+internal static void main() {
     GoFrame ᒐ = default;
     try {
         ref var receiverAddr = ref heap<array<byte>>(new byte[]{127, 0, 0, 2}.array(), out var ᏑreceiverAddr);

@@ -14,7 +14,7 @@ internal static (@string, @string) render(CaptureModeValueParamLib.Config cfgʗp
     return (s1 + "," + s2, cfg.Trace());
 }
 
-internal static void Main() {
+internal static void main() {
     var cfg = new CaptureModeValueParamLib.Config(Indent: 3);
     var (@out, trace) = render(cfg, "go");
     fmt.Println("rendered:", @out);
