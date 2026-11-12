@@ -1,0 +1,1214 @@
+# PublicSurface.golib.txt - golib's public surface (docs/PublicSurface.md).
+#
+# GolibTests' PublicSurfaceTests reads this file; a line starting with # is a comment. A name is a type's
+# full metadata name: generic arity after a backquote, a nested type after a plus sign (go.slice`1+Enumerator).
+#
+# [tier1] The golib types a C# program uses directly. They stay visible to IntelliSense and change only by the
+# deprecation path on the page. Every other public golib type is tier 2 and carries
+# [EditorBrowsable(EditorBrowsableState.Never)], on itself or on the type that contains it.
+#
+# [go-tier2] The tier-2 types that live in namespace go today. A new public type that is not a Go name belongs in
+# namespace go.golib; the test refuses one added here.
+#
+# [builtin] The public member names of go.builtin, which `using static go.builtin` brings into scope. A new name
+# fails the test until it is added here.
+#
+# [tier1-members] The signature of every public or protected member of a [tier1] type, builtin included, that is not
+# itself hidden: "<type> :: <kind> <signature>", with the parameter types and modifiers, an optional parameter's
+# default, the return type, and static or instance (no parameter names, no generic constraints). Removing or changing
+# one reads red by the line; adding one reads red until its line is added. GolibTests writes the lines with
+# GO2CS_PUBLIC_SURFACE_MEMBERS=<path>.
+#
+# A [go-tier2] addition, and any change to [tier1] or [tier1-members] outside the deprecation path, needs a COORD
+# ruling, cited in a comment line beside it.
+
+[tier1]
+go.array`1
+go.array`1+Enumerator
+go.builtin
+go.channel`1
+go.complex64
+go.EmptyStruct
+go.error
+go.GoErrorException
+go.map`2
+go.NilType
+go.PanicException
+go.SelectOp
+go.slice`1
+go.slice`1+Enumerator
+go.string
+go.uintptr
+go.ж`1
+
+[go-tier2]
+go.Action`17
+go.Action`18
+go.Action`19
+go.Action`20
+go.Action`21
+go.Action`22
+go.Action`23
+go.Action`24
+go.Actionꓸꓸꓸ`1
+go.Actionꓸꓸꓸ`2
+go.Actionꓸꓸꓸ`3
+go.Actionꓸꓸꓸ`4
+go.Actionꓸꓸꓸ`5
+go.Actionꓸꓸꓸ`6
+go.Actionꓸꓸꓸ`7
+go.Actionꓸꓸꓸ`8
+go.Actionꓸꓸꓸ`9
+go.AdapterBinder
+go.AdapterRegistry
+go.AllocationCounter
+go.ArrayExtensions
+go.BoxShape`1
+go.ByteSeqExtensions
+go.ChanCargo
+go.ElemRefBox`1
+go.ElementAddress`1
+go.FieldPtrFunc`2
+go.FieldRefBox`1
+go.FieldRefFunc`1
+go.FieldRefFunc`2
+go.FieldRef`1
+go.FieldViewCache
+go.Func`18
+go.Func`19
+go.Func`20
+go.Func`21
+go.Func`22
+go.Func`23
+go.Func`24
+go.Func`25
+go.Funcꓸꓸꓸ`10
+go.Funcꓸꓸꓸ`2
+go.Funcꓸꓸꓸ`3
+go.Funcꓸꓸꓸ`4
+go.Funcꓸꓸꓸ`5
+go.Funcꓸꓸꓸ`6
+go.Funcꓸꓸꓸ`7
+go.Funcꓸꓸꓸ`8
+go.Funcꓸꓸꓸ`9
+go.GoAllocEntry
+go.GoArchExclusiveAttribute
+go.GoArrayDimsAttribute
+go.GoArrayZero
+go.GoBoundedGoroutineAttribute
+go.GoBoxViewsAttribute
+go.GoCgoDynamicImports
+go.GoCgoImportDynamicAttribute
+go.GoChanDir
+go.GoChanDirAttribute
+go.GoCopyBoundAttribute
+go.GoDefaultGodebugAttribute
+go.GoDeferredRegistrations
+go.GoDescriptorTypeAttribute
+go.GoDynamicTypeLiftAttribute
+go.GoEmbeddedAttribute
+go.GoExtensionHostAttribute
+go.GoExtensionHostListAttribute
+go.GoExternalStubAttribute
+go.GoFieldAccessAttribute
+go.GoForeignMemory
+go.GoFrame
+go.GoFuncCookie
+go.GoFuncRoot
+go.GoHandOwnedPackageAttribute
+go.GoHoistedLiteralsAttribute
+go.GoHostOfRecord
+go.GoImage`1
+go.GoImplementAttribute
+go.GoImplementAttribute`2
+go.GoImplicitConvAttribute`2
+go.GoInlineConstraintLiftAttribute
+go.GoInterfaceShellAttribute
+go.GoLazyAttribute
+go.GoLibcCall
+go.GoLibcErrnoRule
+go.GoLocalNameAttribute
+go.GoManualConversionAttribute
+go.GoMapKeyDimsAttribute
+go.GoMemProfile
+go.GoMemberFact
+go.GoMemberRecordAttribute
+go.GoMethodText
+go.GoModInfoAttribute
+go.GoPackageAttribute
+go.GoParamDimsAttribute
+go.GoPlatformExclusiveAttribute
+go.GoPositionMapAttribute
+go.GoPromotedAttribute
+go.GoPromotedHostAttribute
+go.GoRecvAttribute
+go.GoRefPrimaryAttribute
+go.GoReflect
+go.GoReflectCompanionAttribute
+# go.GoRefusalDowngradedAttribute: added 2026-11-12 on COORD's ruling (the public-surface review). A converter-emitted
+# assembly attribute, like the other Go* attributes here; it stays in namespace go, so emission does not move.
+go.GoRefusalDowngradedAttribute
+go.GoRequiresUnsafeAttribute
+go.GoSStringTwinAttribute
+go.GoShellBinding
+go.GoShift
+go.GoSigChanDirAttribute
+go.GoSizeClasses
+go.GoSliceLimit
+go.GoStack
+go.GoStrAttribute
+go.GoStructSynthesis
+go.GoSynthField
+go.GoSyntheticPC
+go.GoTakesCSharpStringAttribute
+go.GoTestMatchingConsoleOutputAttribute
+go.GoTwinForwarderAttribute
+go.GoTypeAliasAttribute
+go.GoTypeAttribute
+go.GoTypeOps
+go.GoTypeOps`1
+go.GoTypeRegistry
+go.GoValueCloneAttribute
+go.GoWrapperAttribute
+go.GoZeroFactory`1
+go.GoZeroSizeSlot`1
+go.GoexitException
+go.IArray
+go.IArray`1
+go.IByteSeq
+go.IByteSeq`1
+go.IByteSeq`2
+go.IChannel
+go.IChannelTimer
+go.IChannel`1
+go.IGoAdapter
+go.IGoArrayDims
+go.IGoEquatable
+go.IGoFieldBoxSource
+go.IGoMethodSet
+go.IGoMethodSource
+go.IGoReflectMake
+go.IGoReflectMap
+go.IGoReflectPointer
+go.IGoReflectSequence
+go.IGoReflectSlice
+go.IGoTypeOps
+go.IGoTypeOpsSource
+go.IGoValueClone
+go.IGoZeroConstructed
+go.IGoZeroShaped
+go.IInterfaceAdapter
+go.IMap
+go.IMap`2
+go.INilPointer
+go.IPointer`1
+go.IRuntimePrintable
+go.ISlice
+go.ISliceWrap`2
+go.ISlice`1
+go.ISupportMake`1
+go.IUnsafePointer
+go.IValueAdapter
+go.IжAdapter
+go.LinknameVar`1
+go.ManagedPointerTokens
+go.MapExtensions
+go.MapKeySet`2
+go.MustExtensions
+go.NativeArrayOpeners
+go.NativeBox`1
+go.NativeStructMarshal
+go.NilFuncExtensions
+go.NilFuncValue
+go.PackageLevelStorage
+go.PointerExtensions
+go.PointerStorage
+go.PrefixProjection`2
+go.RangeOverInt`1
+go.RawStringLiteral
+go.SSliceExtensions
+go.SequenceRange`1
+go.SliceBuilder
+go.SliceExtensions
+go.SlottedStandardBox`1
+go.StandardBox`1
+go.StaticBox`1
+go.TypedNilOfExtensions
+go.UntypedComplex
+go.UntypedFloat
+go.UntypedInt
+go.channel
+go.comparable`1
+go.errorExtensions
+go.error`1
+go.sslice`1
+go.sstring
+go.stackAppend`1
+go.ᴀnone
+
+[builtin]
+_
+append
+appendꓸꓸꓸ
+AreEqual
+bitcast
+cap
+clear
+close
+complex
+ConvertToFloat32
+ConvertToFloat64
+ConvertToType
+ConvertToUInt64
+copy
+defer
+delete
+ElementAddressUnchecked
+fallthrough
+fatal
+func
+GetGoTypeName
+GoZero
+goǃ
+heap
+i
+imag
+Implements
+initPackage
+iota
+ꟷ
+len
+LiteralByteAt
+make
+makeǃ
+makeꓸꓸꓸ
+mapclone
+max
+min
+move2heap
+NativeArrayPointer
+NativeFieldArrayPointer
+new
+nil
+NilPanicValue
+NilSafeDelegateConversion
+nonnil
+panic
+panicwrapRecv
+print
+println
+quo
+QuoAssign
+range
+real
+recover
+recoverChecked
+rem
+RemAssign
+select
+slice
+StackAllocThreshold
+str
+subslice
+subslice3
+tmpstring
+ToUTF8Bytes
+trySelect
+TryTypeAssert
+type
+TypeImplements
+widen
+widenResult
+wrapperRecv
+zero
+ж
+Ꮡ
+Ꮡelem
+ᐧ
+ᐧᐧ
+ᐸꟷ
+ꓸꓸꓸ
+
+[tier1-members]
+go.EmptyStruct :: ctor (go.NilType)
+go.EmptyStruct :: method System.Boolean Equals(System.Object)
+go.EmptyStruct :: method System.Boolean Equals(go.EmptyStruct)
+go.EmptyStruct :: method System.Int32 GetHashCode()
+go.EmptyStruct :: method System.String ToString()
+go.EmptyStruct :: method static System.Boolean op_Equality(go.EmptyStruct, go.EmptyStruct)
+go.EmptyStruct :: method static System.Boolean op_Equality(go.EmptyStruct, go.NilType)
+go.EmptyStruct :: method static System.Boolean op_Equality(go.NilType, go.EmptyStruct)
+go.EmptyStruct :: method static System.Boolean op_Inequality(go.EmptyStruct, go.EmptyStruct)
+go.EmptyStruct :: method static System.Boolean op_Inequality(go.EmptyStruct, go.NilType)
+go.EmptyStruct :: method static System.Boolean op_Inequality(go.NilType, go.EmptyStruct)
+go.EmptyStruct :: method static go.EmptyStruct op_Implicit(go.NilType)
+go.GoErrorException :: ctor (go.error)
+go.GoErrorException :: property go.error Err { get; }
+go.NilType :: ctor ()
+go.NilType :: field static go.NilType Default
+go.NilType :: method System.Boolean Equals(System.Object)
+go.NilType :: method System.Int32 GetHashCode()
+go.NilType :: method System.String ToString()
+go.NilType :: method static System.Boolean op_Equality(System.Object, go.NilType)
+go.NilType :: method static System.Boolean op_Equality(System.String, go.NilType)
+go.NilType :: method static System.Boolean op_Equality(go.IArray, go.NilType)
+go.NilType :: method static System.Boolean op_Equality(go.IChannel, go.NilType)
+go.NilType :: method static System.Boolean op_Equality(go.ISlice, go.NilType)
+go.NilType :: method static System.Boolean op_Equality(go.NilType, System.Object)
+go.NilType :: method static System.Boolean op_Equality(go.NilType, System.String)
+go.NilType :: method static System.Boolean op_Equality(go.NilType, go.IArray)
+go.NilType :: method static System.Boolean op_Equality(go.NilType, go.IChannel)
+go.NilType :: method static System.Boolean op_Equality(go.NilType, go.ISlice)
+go.NilType :: method static System.Boolean op_Inequality(System.Object, go.NilType)
+go.NilType :: method static System.Boolean op_Inequality(System.String, go.NilType)
+go.NilType :: method static System.Boolean op_Inequality(go.IArray, go.NilType)
+go.NilType :: method static System.Boolean op_Inequality(go.IChannel, go.NilType)
+go.NilType :: method static System.Boolean op_Inequality(go.ISlice, go.NilType)
+go.NilType :: method static System.Boolean op_Inequality(go.NilType, System.Object)
+go.NilType :: method static System.Boolean op_Inequality(go.NilType, System.String)
+go.NilType :: method static System.Boolean op_Inequality(go.NilType, go.IArray)
+go.NilType :: method static System.Boolean op_Inequality(go.NilType, go.IChannel)
+go.NilType :: method static System.Boolean op_Inequality(go.NilType, go.ISlice)
+go.NilType :: method static System.String op_Implicit(go.NilType)
+go.PanicException :: ctor (System.Object, System.Exception = null)
+go.PanicException :: method static System.String PanicText(System.Object)
+go.PanicException :: property System.Diagnostics.StackTrace PanicTrace { get; }
+go.PanicException :: property System.Object State { get; }
+go.PanicException :: property System.String Message { get; }
+go.PanicException :: property System.String StackTrace { get; }
+go.array<T> :: ctor ()
+go.array<T> :: ctor (System.Int32)
+go.array<T> :: ctor (System.Int32, System.Func<T>)
+go.array<T> :: ctor (System.IntPtr)
+go.array<T> :: ctor (System.IntPtr, System.Func<T>)
+go.array<T> :: ctor (System.Memory<T>)
+go.array<T> :: ctor (System.ReadOnlyMemory<T>)
+go.array<T> :: ctor (System.ReadOnlySpan<T>)
+go.array<T> :: ctor (System.Span<T>)
+go.array<T> :: ctor (System.UInt64)
+go.array<T> :: ctor (System.UInt64, System.Func<T>)
+go.array<T> :: ctor (T[])
+go.array<T> :: ctor (go.slice<T>, System.IntPtr)
+go.array<T> :: method System.Boolean Contains(in T)
+go.array<T> :: method System.Boolean Equals(System.Object)
+go.array<T> :: method System.Boolean Equals(go.IArray)
+go.array<T> :: method System.Boolean Equals(go.IArray<T>)
+go.array<T> :: method System.Boolean Equals(go.array<T>)
+go.array<T> :: method System.Int32 GetHashCode()
+go.array<T> :: method System.Int32 IndexOf(in T)
+go.array<T> :: method System.Span<T> ToSpan()
+go.array<T> :: method System.String ToString()
+go.array<T> :: method System.Void CopyTo(T[], System.Int32)
+go.array<T> :: method T[] ToArray()
+go.array<T> :: method go.array<T> Clone()
+go.array<T> :: method go.array<T> ΔClone()
+go.array<T> :: method go.array<T>.Enumerator GetEnumerator()
+go.array<T> :: method go.array<T>.RangeSnapshot ΔRangeSnapshot()
+go.array<T> :: method go.slice<T> Slice(System.Int32, System.Int32)
+go.array<T> :: method go.slice<T> Slice(System.IntPtr, System.IntPtr)
+go.array<T> :: method static System.Boolean op_Equality(go.IArray, go.array<T>)
+go.array<T> :: method static System.Boolean op_Equality(go.NilType, go.array<T>)
+go.array<T> :: method static System.Boolean op_Equality(go.array<T>, go.IArray)
+go.array<T> :: method static System.Boolean op_Equality(go.array<T>, go.NilType)
+go.array<T> :: method static System.Boolean op_Equality(go.array<T>, go.array<T>)
+go.array<T> :: method static System.Boolean op_Inequality(go.IArray, go.array<T>)
+go.array<T> :: method static System.Boolean op_Inequality(go.NilType, go.array<T>)
+go.array<T> :: method static System.Boolean op_Inequality(go.array<T>, go.IArray)
+go.array<T> :: method static System.Boolean op_Inequality(go.array<T>, go.NilType)
+go.array<T> :: method static System.Boolean op_Inequality(go.array<T>, go.array<T>)
+go.array<T> :: method static T[] op_Implicit(go.array<T>)
+go.array<T> :: method static go.array<T> Alias(go.slice<T>, System.IntPtr)
+go.array<T> :: method static go.array<T> op_Implicit(System.Memory<T>)
+go.array<T> :: method static go.array<T> op_Implicit(System.ReadOnlyMemory<T>)
+go.array<T> :: method static go.array<T> op_Implicit(System.ReadOnlySpan<T>)
+go.array<T> :: method static go.array<T> op_Implicit(System.Span<T>)
+go.array<T> :: method static go.array<T> op_Implicit(T[])
+go.array<T> :: method static go.array<T> op_Implicit(go.NilType)
+go.array<T> :: method static go.ж<go.array<T>> AliasPointer(go.ж<T>, System.IntPtr)
+go.array<T> :: property System.IntPtr Length { get; }
+go.array<T> :: property System.IntPtr Low { get; }
+go.array<T> :: property System.Span<T> ꓸꓸꓸ { get; }
+go.array<T> :: property T& Item[System.Int32] { get; }
+go.array<T> :: property T& Item[System.IntPtr] { get; }
+go.array<T> :: property T& Item[System.UInt64] { get; }
+go.array<T> :: property T[] Source { get; }
+go.array<T> :: property go.slice<T> Item[System.Range] { get; }
+go.array<T>.Enumerator :: method System.Boolean MoveNext()
+go.array<T>.Enumerator :: method System.Void Dispose()
+go.array<T>.Enumerator :: property T Current { get; }
+go.builtin :: field const System.Boolean ᐧ
+go.builtin :: field const System.Boolean ꟷ
+go.builtin :: field const System.Int32 StackAllocThreshold
+go.builtin :: field const System.IntPtr iota
+go.builtin :: field static readonly System.Boolean ᐧᐧ
+go.builtin :: field static readonly go.NilType nil
+go.builtin :: field static readonly go.NilType ꓸꓸꓸ
+go.builtin :: method static S append<S, T>(S, params System.ReadOnlySpan<T>)
+go.builtin :: method static S append<S, T>(S, params System.Span<T>)
+go.builtin :: method static S appendꓸꓸꓸ<S, T>(S, go.ISlice<T>)
+go.builtin :: method static S appendꓸꓸꓸ<S, T>(S, go.builtin.ZeroElements<T>)
+go.builtin :: method static S appendꓸꓸꓸ<S, T>(S, in go.sslice<T>)
+go.builtin :: method static S subslice3<S, T>(S, System.IntPtr, System.IntPtr, System.IntPtr)
+go.builtin :: method static S subslice<S, T>(S, System.IntPtr)
+go.builtin :: method static S subslice<S, T>(S, System.IntPtr, System.IntPtr)
+go.builtin :: method static System.Action func(System.Action)
+go.builtin :: method static System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>)
+go.builtin :: method static System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>)
+go.builtin :: method static System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>)
+go.builtin :: method static System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>)
+go.builtin :: method static System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>)
+go.builtin :: method static System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>)
+go.builtin :: method static System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>)
+go.builtin :: method static System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9> func<T1, T2, T3, T4, T5, T6, T7, T8, T9>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9>)
+go.builtin :: method static System.Action<T1, T2, T3, T4, T5, T6, T7, T8> func<T1, T2, T3, T4, T5, T6, T7, T8>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8>)
+go.builtin :: method static System.Action<T1, T2, T3, T4, T5, T6, T7> func<T1, T2, T3, T4, T5, T6, T7>(System.Action<T1, T2, T3, T4, T5, T6, T7>)
+go.builtin :: method static System.Action<T1, T2, T3, T4, T5, T6> func<T1, T2, T3, T4, T5, T6>(System.Action<T1, T2, T3, T4, T5, T6>)
+go.builtin :: method static System.Action<T1, T2, T3, T4, T5> func<T1, T2, T3, T4, T5>(System.Action<T1, T2, T3, T4, T5>)
+go.builtin :: method static System.Action<T1, T2, T3, T4> func<T1, T2, T3, T4>(System.Action<T1, T2, T3, T4>)
+go.builtin :: method static System.Action<T1, T2, T3> func<T1, T2, T3>(System.Action<T1, T2, T3>)
+go.builtin :: method static System.Action<T1, T2> func<T1, T2>(System.Action<T1, T2>)
+go.builtin :: method static System.Action<T1> func<T1>(System.Action<T1>)
+go.builtin :: method static System.Boolean AreEqual(System.Object, System.Object)
+go.builtin :: method static System.Boolean AreEqual<T>(T, T)
+go.builtin :: method static System.Boolean Implements<TInterface>(System.Object)
+go.builtin :: method static System.Boolean TryTypeAssert(System.Object, System.Type, out System.Object)
+go.builtin :: method static System.Boolean TypeImplements<TInterface>(System.Type)
+go.builtin :: method static System.Boolean _<T>(System.Object, out T)
+go.builtin :: method static System.Byte LiteralByteAt(System.ReadOnlySpan<System.Byte>, System.IntPtr)
+go.builtin :: method static System.Byte LiteralByteAt(System.ReadOnlySpan<System.Byte>, System.UInt64)
+go.builtin :: method static System.Byte[] ToUTF8Bytes(in System.ReadOnlySpan<System.Int32>)
+go.builtin :: method static System.Collections.Generic.IEnumerable<System.Object> range(System.Action<System.Func<System.Boolean>>)
+go.builtin :: method static System.Collections.Generic.IEnumerable<System.ValueTuple<T1, T2>> range<T1, T2>(System.Action<System.Func<T1, T2, System.Boolean>>)
+go.builtin :: method static System.Collections.Generic.IEnumerable<T> range<T>(System.Action<System.Func<T, System.Boolean>>)
+go.builtin :: method static System.Double ConvertToFloat64<T>(T)
+go.builtin :: method static System.Double imag(System.Numerics.Complex)
+go.builtin :: method static System.Double real(System.Numerics.Complex)
+go.builtin :: method static System.Func<A, System.ValueTuple<TWide, go.error>> widen<A, T, TWide>(System.Func<A, System.ValueTuple<T, go.error>>, System.Func<T, TWide>)
+go.builtin :: method static System.Func<System.ValueTuple<TWide, go.error>> widenResult<T, TWide>(System.Func<System.ValueTuple<T, go.error>>, System.Func<T, TWide>)
+go.builtin :: method static System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>)
+go.builtin :: method static System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>)
+go.builtin :: method static System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>)
+go.builtin :: method static System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>)
+go.builtin :: method static System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>)
+go.builtin :: method static System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>)
+go.builtin :: method static System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>)
+go.builtin :: method static System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>)
+go.builtin :: method static System.Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> func<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult>)
+go.builtin :: method static System.Func<T1, T2, T3, T4, T5, T6, T7, TResult> func<T1, T2, T3, T4, T5, T6, T7, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, TResult>)
+go.builtin :: method static System.Func<T1, T2, T3, T4, T5, T6, TResult> func<T1, T2, T3, T4, T5, T6, TResult>(System.Func<T1, T2, T3, T4, T5, T6, TResult>)
+go.builtin :: method static System.Func<T1, T2, T3, T4, T5, TResult> func<T1, T2, T3, T4, T5, TResult>(System.Func<T1, T2, T3, T4, T5, TResult>)
+go.builtin :: method static System.Func<T1, T2, T3, T4, TResult> func<T1, T2, T3, T4, TResult>(System.Func<T1, T2, T3, T4, TResult>)
+go.builtin :: method static System.Func<T1, T2, T3, TResult> func<T1, T2, T3, TResult>(System.Func<T1, T2, T3, TResult>)
+go.builtin :: method static System.Func<T1, T2, TResult> func<T1, T2, TResult>(System.Func<T1, T2, TResult>)
+go.builtin :: method static System.Func<T1, TResult> func<T1, TResult>(System.Func<T1, TResult>)
+go.builtin :: method static System.Func<TResult> func<TResult>(System.Func<TResult>)
+go.builtin :: method static System.Func<TWide> widen<T, TWide>(System.Func<T>, System.Func<T, TWide>)
+go.builtin :: method static System.Int32 quo(System.Int32, System.Int32)
+go.builtin :: method static System.Int32 rem(System.Int32, System.Int32)
+go.builtin :: method static System.Int32 select(params go.SelectOp[])
+go.builtin :: method static System.Int32 trySelect(params go.SelectOp[])
+go.builtin :: method static System.Int64 quo(System.Int64, System.Int64)
+go.builtin :: method static System.Int64 rem(System.Int64, System.Int64)
+go.builtin :: method static System.IntPtr cap(go.IArray)
+go.builtin :: method static System.IntPtr cap(go.IChannel)
+go.builtin :: method static System.IntPtr cap(go.ISlice)
+go.builtin :: method static System.IntPtr cap<T>(in go.array<T>)
+go.builtin :: method static System.IntPtr cap<T>(in go.channel<T>)
+go.builtin :: method static System.IntPtr cap<T>(in go.slice<T>)
+go.builtin :: method static System.IntPtr cap<T>(in go.sslice<T>)
+go.builtin :: method static System.IntPtr cap<TSlice>(in TSlice)
+go.builtin :: method static System.IntPtr copy(go.ISlice<System.Byte>, in go.string)
+go.builtin :: method static System.IntPtr copy(in go.slice<System.Byte>, in go.string)
+go.builtin :: method static System.IntPtr copy(in go.ж<go.slice<System.Byte>>, in go.string)
+go.builtin :: method static System.IntPtr copy<S>(go.GoImage<S>, in go.slice<System.Byte>)
+go.builtin :: method static System.IntPtr copy<S>(go.GoImage<S>, in go.string)
+go.builtin :: method static System.IntPtr copy<S>(in go.slice<System.Byte>, go.GoImage<S>)
+go.builtin :: method static System.IntPtr copy<T1, T2>(go.ISlice<T1>, go.ISlice<T2>)
+go.builtin :: method static System.IntPtr copy<T1, T2>(in go.array<T1>, in go.array<T2>)
+go.builtin :: method static System.IntPtr copy<T1, T2>(in go.array<T1>, in go.ж<go.array<T2>>)
+go.builtin :: method static System.IntPtr copy<T1, T2>(in go.slice<T1>, go.ISlice<T2>)
+go.builtin :: method static System.IntPtr copy<T1, T2>(in go.slice<T1>, in go.slice<T2>)
+go.builtin :: method static System.IntPtr copy<T1, T2>(in go.slice<T1>, in go.ж<go.slice<T2>>)
+go.builtin :: method static System.IntPtr copy<T1, T2>(in go.ж<go.array<T1>>, in go.array<T2>)
+go.builtin :: method static System.IntPtr copy<T1, T2>(in go.ж<go.array<T1>>, in go.ж<go.array<T2>>)
+go.builtin :: method static System.IntPtr copy<T1, T2>(in go.ж<go.slice<T1>>, in go.slice<T2>)
+go.builtin :: method static System.IntPtr copy<T1, T2>(in go.ж<go.slice<T1>>, in go.ж<go.slice<T2>>)
+go.builtin :: method static System.IntPtr copy<T>(go.ISlice<T>, in go.sslice<T>)
+go.builtin :: method static System.IntPtr copy<T>(in go.slice<T>, in go.sslice<T>)
+go.builtin :: method static System.IntPtr len(System.String)
+go.builtin :: method static System.IntPtr len(go.IArray)
+go.builtin :: method static System.IntPtr len(go.IChannel)
+go.builtin :: method static System.IntPtr len(go.IMap)
+go.builtin :: method static System.IntPtr len(go.ISlice)
+go.builtin :: method static System.IntPtr len(in System.ReadOnlySpan<System.Byte>)
+go.builtin :: method static System.IntPtr len(in go.sstring)
+go.builtin :: method static System.IntPtr len(in go.string)
+go.builtin :: method static System.IntPtr len(in go.ж<go.string>)
+go.builtin :: method static System.IntPtr len<T>(T[])
+go.builtin :: method static System.IntPtr len<T>(in go.array<T>)
+go.builtin :: method static System.IntPtr len<T>(in go.channel<T>)
+go.builtin :: method static System.IntPtr len<T>(in go.slice<T>)
+go.builtin :: method static System.IntPtr len<T>(in go.sslice<T>)
+go.builtin :: method static System.IntPtr len<T>(in go.ж<go.array<T>>)
+go.builtin :: method static System.IntPtr len<T>(in go.ж<go.channel<T>>)
+go.builtin :: method static System.IntPtr len<T>(in go.ж<go.slice<T>>)
+go.builtin :: method static System.IntPtr len<TKey, TValue>(in go.map<TKey, TValue>)
+go.builtin :: method static System.IntPtr len<TKey, TValue>(in go.ж<go.map<TKey, TValue>>)
+go.builtin :: method static System.IntPtr len<TSeq>(TSeq)
+go.builtin :: method static System.IntPtr len<TSlice>(in TSlice)
+go.builtin :: method static System.IntPtr quo(System.IntPtr, System.IntPtr)
+go.builtin :: method static System.IntPtr rem(System.IntPtr, System.IntPtr)
+go.builtin :: method static System.Numerics.Complex complex(System.Double, System.Double)
+go.builtin :: method static System.Numerics.Complex i(System.Double)
+go.builtin :: method static System.Object mapclone(System.Object)
+go.builtin :: method static System.Object recover()
+go.builtin :: method static System.Object recover(System.Boolean)
+go.builtin :: method static System.Object recoverChecked()
+go.builtin :: method static System.Object type(System.Object)
+go.builtin :: method static System.Single ConvertToFloat32<T>(T)
+go.builtin :: method static System.Single imag(go.complex64)
+go.builtin :: method static System.Single real(go.complex64)
+go.builtin :: method static System.String GetGoTypeName(System.Object)
+go.builtin :: method static System.String GetGoTypeName(System.Type)
+go.builtin :: method static System.String GetGoTypeName<T>()
+go.builtin :: method static System.UInt64 ConvertToUInt64<T>(T)
+go.builtin :: method static System.ValueTuple<T, System.Boolean> _<T>(System.Object, System.Boolean)
+go.builtin :: method static System.ValueTuple<T, System.Boolean> ᐸꟷ<T>(go.channel<T>, System.Boolean)
+go.builtin :: method static System.Void QuoAssign(ref System.Int32, System.Int32)
+go.builtin :: method static System.Void QuoAssign(ref System.Int64, System.Int64)
+go.builtin :: method static System.Void QuoAssign(ref System.IntPtr, System.IntPtr)
+go.builtin :: method static System.Void QuoAssign<TKey>(go.IMap<TKey, System.Int32>, TKey, System.Int32)
+go.builtin :: method static System.Void QuoAssign<TKey>(go.IMap<TKey, System.Int64>, TKey, System.Int64)
+go.builtin :: method static System.Void QuoAssign<TKey>(go.IMap<TKey, System.IntPtr>, TKey, System.IntPtr)
+go.builtin :: method static System.Void RemAssign(ref System.Int32, System.Int32)
+go.builtin :: method static System.Void RemAssign(ref System.Int64, System.Int64)
+go.builtin :: method static System.Void RemAssign(ref System.IntPtr, System.IntPtr)
+go.builtin :: method static System.Void RemAssign<TKey>(go.IMap<TKey, System.Int32>, TKey, System.Int32)
+go.builtin :: method static System.Void RemAssign<TKey>(go.IMap<TKey, System.Int64>, TKey, System.Int64)
+go.builtin :: method static System.Void RemAssign<TKey>(go.IMap<TKey, System.IntPtr>, TKey, System.IntPtr)
+go.builtin :: method static System.Void clear<T>(System.Span<T>)
+go.builtin :: method static System.Void clear<T>(go.ISlice<T>)
+go.builtin :: method static System.Void clear<T>(go.slice<T>)
+go.builtin :: method static System.Void clear<TKey, TValue>(go.IMap<TKey, TValue>)
+go.builtin :: method static System.Void clear<TKey, TValue>(go.map<TKey, TValue>)
+go.builtin :: method static System.Void close<T>(in go.channel<T>)
+go.builtin :: method static System.Void defer(System.Action, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T, TResult>(System.Func<T, TResult>, T, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7, T8, T9>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9>, T1, T2, T3, T4, T5, T6, T7, T8, T9, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7, T8>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8>, T1, T2, T3, T4, T5, T6, T7, T8, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, TResult>, T1, T2, T3, T4, T5, T6, T7, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, T7>(System.Action<T1, T2, T3, T4, T5, T6, T7>, T1, T2, T3, T4, T5, T6, T7, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6, TResult>(System.Func<T1, T2, T3, T4, T5, T6, TResult>, T1, T2, T3, T4, T5, T6, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, T6>(System.Action<T1, T2, T3, T4, T5, T6>, T1, T2, T3, T4, T5, T6, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5, TResult>(System.Func<T1, T2, T3, T4, T5, TResult>, T1, T2, T3, T4, T5, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, T5>(System.Action<T1, T2, T3, T4, T5>, T1, T2, T3, T4, T5, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4, TResult>(System.Func<T1, T2, T3, T4, TResult>, T1, T2, T3, T4, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, T4>(System.Action<T1, T2, T3, T4>, T1, T2, T3, T4, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3, TResult>(System.Func<T1, T2, T3, TResult>, T1, T2, T3, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, T3>(System.Action<T1, T2, T3>, T1, T2, T3, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2, TResult>(System.Func<T1, T2, TResult>, T1, T2, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T1, T2>(System.Action<T1, T2>, T1, T2, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void defer<T>(System.Action<T>, T, ref go.GoFrame, System.Boolean = False)
+go.builtin :: method static System.Void delete<TKey, TValue>(go.IMap<TKey, TValue>, TKey)
+go.builtin :: method static System.Void delete<TKey, TValue>(go.map<TKey, TValue>, TKey)
+go.builtin :: method static System.Void fatal(System.String, System.IntPtr = 1)
+go.builtin :: method static System.Void goǃ(System.Action, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ(System.Action, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ(System.Threading.WaitCallback, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ(System.Threading.WaitCallback, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T, TResult>(System.Func<T, TResult>, T, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T, TResult>(System.Func<T, TResult>, T, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, T9, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9>, T1, T2, T3, T4, T5, T6, T7, T8, T9, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9>, T1, T2, T3, T4, T5, T6, T7, T8, T9, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult>, T1, T2, T3, T4, T5, T6, T7, T8, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8>, T1, T2, T3, T4, T5, T6, T7, T8, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, T8>(System.Action<T1, T2, T3, T4, T5, T6, T7, T8>, T1, T2, T3, T4, T5, T6, T7, T8, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, TResult>, T1, T2, T3, T4, T5, T6, T7, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7, TResult>(System.Func<T1, T2, T3, T4, T5, T6, T7, TResult>, T1, T2, T3, T4, T5, T6, T7, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7>(System.Action<T1, T2, T3, T4, T5, T6, T7>, T1, T2, T3, T4, T5, T6, T7, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, T7>(System.Action<T1, T2, T3, T4, T5, T6, T7>, T1, T2, T3, T4, T5, T6, T7, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, TResult>(System.Func<T1, T2, T3, T4, T5, T6, TResult>, T1, T2, T3, T4, T5, T6, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6, TResult>(System.Func<T1, T2, T3, T4, T5, T6, TResult>, T1, T2, T3, T4, T5, T6, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6>(System.Action<T1, T2, T3, T4, T5, T6>, T1, T2, T3, T4, T5, T6, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, T6>(System.Action<T1, T2, T3, T4, T5, T6>, T1, T2, T3, T4, T5, T6, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, TResult>(System.Func<T1, T2, T3, T4, T5, TResult>, T1, T2, T3, T4, T5, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5, TResult>(System.Func<T1, T2, T3, T4, T5, TResult>, T1, T2, T3, T4, T5, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5>(System.Action<T1, T2, T3, T4, T5>, T1, T2, T3, T4, T5, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, T5>(System.Action<T1, T2, T3, T4, T5>, T1, T2, T3, T4, T5, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, TResult>(System.Func<T1, T2, T3, T4, TResult>, T1, T2, T3, T4, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4, TResult>(System.Func<T1, T2, T3, T4, TResult>, T1, T2, T3, T4, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4>(System.Action<T1, T2, T3, T4>, T1, T2, T3, T4, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, T4>(System.Action<T1, T2, T3, T4>, T1, T2, T3, T4, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, TResult>(System.Func<T1, T2, T3, TResult>, T1, T2, T3, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3, TResult>(System.Func<T1, T2, T3, TResult>, T1, T2, T3, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3>(System.Action<T1, T2, T3>, T1, T2, T3, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, T3>(System.Action<T1, T2, T3>, T1, T2, T3, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, TResult>(System.Func<T1, T2, TResult>, T1, T2, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2, TResult>(System.Func<T1, T2, TResult>, T1, T2, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2>(System.Action<T1, T2>, T1, T2, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T1, T2>(System.Action<T1, T2>, T1, T2, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T>(System.Action<T>, T, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void goǃ<T>(System.Action<T>, T, go.GoStack, System.String = , System.Int32 = 0)
+go.builtin :: method static System.Void initPackage(System.Type)
+go.builtin :: method static System.Void print(params System.Object[])
+go.builtin :: method static System.Void println(params System.Object[])
+go.builtin :: method static T ConvertToType<T>(System.Double)
+go.builtin :: method static T ConvertToType<T>(System.Int64)
+go.builtin :: method static T ConvertToType<T>(System.UInt64)
+go.builtin :: method static T GoZero<T>()
+go.builtin :: method static T GoZero<T>(T)
+go.builtin :: method static T _<T>(System.Object)
+go.builtin :: method static T _<TSource, T>(TSource)
+go.builtin :: method static T make<T>(System.IntPtr = 0, System.IntPtr = -1)
+go.builtin :: method static T makeǃ<T>(System.IntPtr = 0, System.IntPtr = -1)
+go.builtin :: method static T max<T>(T, T)
+go.builtin :: method static T max<T>(T, params System.ReadOnlySpan<T>)
+go.builtin :: method static T min<T>(T, T)
+go.builtin :: method static T min<T>(T, params System.ReadOnlySpan<T>)
+go.builtin :: method static T quo<T>(T, T)
+go.builtin :: method static T rem<T>(T, T)
+go.builtin :: method static T wrapperRecv<T>(T)
+go.builtin :: method static T ж<T>(in go.ж<T>)
+go.builtin :: method static T ᐸꟷ<T>(go.channel<T>)
+go.builtin :: method static TDst bitcast<TSrc, TDst>(TSrc)
+go.builtin :: method static TTarget NilSafeDelegateConversion<TTarget, TSource>(TSource)
+go.builtin :: method static go.ElementAddress<T> Ꮡelem<T>(go.array<T>, System.Int32)
+go.builtin :: method static go.ElementAddress<T> Ꮡelem<T>(go.array<T>, System.IntPtr)
+go.builtin :: method static go.ElementAddress<T> Ꮡelem<T>(go.array<T>, System.UInt64)
+go.builtin :: method static go.ElementAddress<T> Ꮡelem<T>(go.slice<T>, System.Int32)
+go.builtin :: method static go.ElementAddress<T> Ꮡelem<T>(go.slice<T>, System.IntPtr)
+go.builtin :: method static go.ElementAddress<T> Ꮡelem<T>(go.slice<T>, System.UInt64)
+go.builtin :: method static go.PanicException panic(System.Object)
+go.builtin :: method static go.RangeOverInt<System.IntPtr> range(System.Int32)
+go.builtin :: method static go.RangeOverInt<System.IntPtr> range(System.IntPtr)
+go.builtin :: method static go.RangeOverInt<System.IntPtr> range<TArray>(go.ж<TArray>, System.IntPtr)
+go.builtin :: method static go.RangeOverInt<T> range<T>(T)
+go.builtin :: method static go.SelectOp ᐸꟷ<T>(go.channel<T>, go.NilType)
+go.builtin :: method static go.SequenceRange<T> range<T>(go.IArray<T>)
+go.builtin :: method static go.array<T>.RangeOver range<T>(go.array<T>)
+go.builtin :: method static go.array<T>.RangeOver range<T>(go.ж<go.array<T>>)
+go.builtin :: method static go.array<T>.RangeSnapshot range<T>(go.array<T>.RangeSnapshot)
+go.builtin :: method static go.builtin.ZeroElements<T> makeꓸꓸꓸ<T>(System.IntPtr)
+go.builtin :: method static go.complex64 complex(System.Single, System.Single)
+go.builtin :: method static go.complex64 i(System.Single)
+go.builtin :: method static go.slice<System.Byte> append(go.slice<System.Byte>, params System.ReadOnlySpan<System.Int32>)
+go.builtin :: method static go.slice<T> append<T>(go.ISlice, params T[])
+go.builtin :: method static go.slice<T> append<T>(go.slice<T>, params System.ReadOnlySpan<T>)
+go.builtin :: method static go.slice<T> append<T>(go.slice<T>, params System.Span<T>)
+go.builtin :: method static go.slice<T> append<T>(go.slice<T>, params T[])
+go.builtin :: method static go.slice<T> append<T>(in go.slice<T>, params T[])
+go.builtin :: method static go.slice<T> append<T>(in go.stackAppend<T>, go.slice<T>, params System.ReadOnlySpan<T>)
+go.builtin :: method static go.slice<T> appendꓸꓸꓸ<T>(go.slice<T>, go.ISlice<T>)
+go.builtin :: method static go.slice<T> appendꓸꓸꓸ<T>(go.slice<T>, go.builtin.ZeroElements<T>)
+go.builtin :: method static go.slice<T> appendꓸꓸꓸ<T>(go.slice<T>, in go.slice<T>)
+go.builtin :: method static go.slice<T> appendꓸꓸꓸ<T>(go.slice<T>, in go.sslice<T>)
+go.builtin :: method static go.slice<T> move2heap<T>(in go.stackAppend<T>, go.slice<T>)
+go.builtin :: method static go.slice<T> slice<T>(System.ReadOnlySpan<T>)
+go.builtin :: method static go.slice<T> slice<T>(T[])
+go.builtin :: method static go.slice<T>.RangeOver range<T>(go.slice<T>)
+go.builtin :: method static go.slice<TWide> widen<T, TWide>(go.slice<T>, System.Func<T, TWide>)
+go.builtin :: method static go.sslice<T>.RangeOver range<T>(go.sslice<T>)
+go.builtin :: method static go.string str(System.ReadOnlySpan<System.Byte>)
+go.builtin :: method static go.string str(go.sstring)
+go.builtin :: method static go.string tmpstring(in go.slice<System.Byte>)
+go.builtin :: method static go.ж<T> ElementAddressUnchecked<T>(go.slice<T>, System.Int32)
+go.builtin :: method static go.ж<T> new<T>()
+go.builtin :: method static go.ж<T> new<T>(params System.Object[])
+go.builtin :: method static go.ж<T> panicwrapRecv<T>(go.ж<T>, System.String)
+go.builtin :: method static go.ж<T> wrapperRecv<T>(go.ж<T>)
+go.builtin :: method static go.ж<T> Ꮡ<T>(T)
+go.builtin :: method static go.ж<T> Ꮡ<T>(go.IArray<T>, System.Int32)
+go.builtin :: method static go.ж<T> Ꮡ<T>(go.IArray<T>, System.IntPtr)
+go.builtin :: method static go.ж<T> Ꮡ<T>(go.IArray<T>, System.UInt64)
+go.builtin :: method static go.ж<T> Ꮡ<T>(go.array<T>, System.Int32)
+go.builtin :: method static go.ж<T> Ꮡ<T>(go.array<T>, System.IntPtr)
+go.builtin :: method static go.ж<T> Ꮡ<T>(go.array<T>, System.UInt64)
+go.builtin :: method static go.ж<T> Ꮡ<T>(go.slice<T>, System.Int32)
+go.builtin :: method static go.ж<T> Ꮡ<T>(go.slice<T>, System.IntPtr)
+go.builtin :: method static go.ж<T> Ꮡ<T>(go.slice<T>, System.UInt64)
+go.builtin :: method static go.ж<go.array<T>> NativeArrayPointer<T>(System.UIntPtr, System.IntPtr)
+go.builtin :: method static go.ж<go.array<T>> NativeFieldArrayPointer<T>(go.INilPointer, System.IntPtr)
+go.builtin :: method static ref T heap<T>(T, out go.ж<T>)
+go.builtin :: method static ref T heap<T>(out go.ж<T>)
+go.builtin :: method static ref T nonnil<T>(ref T)
+go.builtin :: method static ref T zero<T>()
+go.builtin :: property static System.Boolean fallthrough { get; set; }
+go.builtin :: property static System.Func<System.Object> NilPanicValue { get; set; }
+go.channel<T> :: ctor (System.IntPtr)
+go.channel<T> :: ctor (System.IntPtr, go.ChanCargo)
+go.channel<T> :: ctor (System.IntPtr, go.GoChanDir)
+go.channel<T> :: method System.Boolean DrainBuffer()
+go.channel<T> :: method System.Boolean Equals(System.Object)
+go.channel<T> :: method System.Boolean Received(out T)
+go.channel<T> :: method System.Boolean Received(out T, out System.Boolean)
+go.channel<T> :: method System.Boolean Sent(in T)
+go.channel<T> :: method System.Boolean TryReceive(out T)
+go.channel<T> :: method System.Boolean TrySend(in T)
+go.channel<T> :: method System.Boolean ᐸꟷ(in T, System.Boolean)
+go.channel<T> :: method System.Boolean ꟷᐳ(out T)
+go.channel<T> :: method System.Boolean ꟷᐳ(out T, out System.Boolean)
+go.channel<T> :: method System.Collections.Generic.IEnumerator<T> GetEnumerator()
+go.channel<T> :: method System.Int32 GetHashCode()
+go.channel<T> :: method System.String ToString()
+go.channel<T> :: method System.Threading.Tasks.Task SendAsync(T, System.Threading.CancellationToken = null)
+go.channel<T> :: method System.Threading.Tasks.Task<System.ValueTuple<T, System.Boolean>> ReceiveAsync(System.Boolean, System.Threading.CancellationToken = null)
+go.channel<T> :: method System.Threading.Tasks.Task<T> ReceiveAsync(System.Threading.CancellationToken = null)
+go.channel<T> :: method System.ValueTuple<T, System.Boolean> Receive(System.Boolean)
+go.channel<T> :: method System.Void AttachTimer(go.IChannelTimer)
+go.channel<T> :: method System.Void Close()
+go.channel<T> :: method System.Void Send(in T)
+go.channel<T> :: method System.Void ᐸꟷ(in T)
+go.channel<T> :: method T Receive()
+go.channel<T> :: method go.SelectOp Sending(in T)
+go.channel<T> :: method go.SelectOp ᐸꟷ(in T, go.NilType)
+go.channel<T> :: method go.channel<T> AsRecvOnly()
+go.channel<T> :: method go.channel<T> AsSendOnly()
+go.channel<T> :: method go.channel<T> WithCargo(go.ChanCargo)
+go.channel<T> :: method go.channel<T> WithDirection(go.GoChanDir)
+go.channel<T> :: method static System.Boolean op_Equality(go.NilType, go.channel<T>)
+go.channel<T> :: method static System.Boolean op_Equality(go.channel<T>, go.NilType)
+go.channel<T> :: method static System.Boolean op_Equality(go.channel<T>, go.channel<T>)
+go.channel<T> :: method static System.Boolean op_Inequality(go.NilType, go.channel<T>)
+go.channel<T> :: method static System.Boolean op_Inequality(go.channel<T>, go.NilType)
+go.channel<T> :: method static System.Boolean op_Inequality(go.channel<T>, go.channel<T>)
+go.channel<T> :: method static go.channel<T> Make(System.IntPtr = 0, System.IntPtr = -1)
+go.channel<T> :: method static go.channel<T> Nil(go.ChanCargo)
+go.channel<T> :: method static go.channel<T> op_Implicit(go.NilType)
+go.channel<T> :: method static go.channel<T> op_LeftShift(go.channel<T>, T)
+go.channel<T> :: property System.Boolean IsClosed { get; }
+go.channel<T> :: property System.Boolean IsUnbuffered { get; }
+go.channel<T> :: property System.IntPtr Capacity { get; }
+go.channel<T> :: property System.IntPtr Length { get; }
+go.channel<T> :: property System.UIntPtr PointerOrderToken { get; }
+go.channel<T> :: property go.ChanCargo Cargo { get; }
+go.channel<T> :: property go.GoChanDir Direction { get; }
+go.channel<T> :: property go.SelectOp Receiving { get; }
+go.channel<T> :: property static go.channel<T> RecvOnly { get; }
+go.channel<T> :: property static go.channel<T> SendOnly { get; }
+go.complex64 :: ctor (System.Single, System.Single)
+go.complex64 :: field static readonly go.complex64 ImaginaryOne
+go.complex64 :: field static readonly go.complex64 One
+go.complex64 :: field static readonly go.complex64 Zero
+go.complex64 :: method System.Boolean Equals(System.Object)
+go.complex64 :: method System.Boolean Equals(go.complex64)
+go.complex64 :: method System.Int32 GetHashCode()
+go.complex64 :: method System.String ToString()
+go.complex64 :: method System.String ToString(System.IFormatProvider)
+go.complex64 :: method System.String ToString(System.String)
+go.complex64 :: method System.String ToString(System.String, System.IFormatProvider)
+go.complex64 :: method static System.Boolean op_Equality(go.NilType, go.complex64)
+go.complex64 :: method static System.Boolean op_Equality(go.complex64, go.NilType)
+go.complex64 :: method static System.Boolean op_Equality(go.complex64, go.complex64)
+go.complex64 :: method static System.Boolean op_Inequality(go.NilType, go.complex64)
+go.complex64 :: method static System.Boolean op_Inequality(go.complex64, go.NilType)
+go.complex64 :: method static System.Boolean op_Inequality(go.complex64, go.complex64)
+go.complex64 :: method static System.Numerics.Complex op_Implicit(go.complex64)
+go.complex64 :: method static System.Single Abs(go.complex64)
+go.complex64 :: method static go.complex64 Acos(go.complex64)
+go.complex64 :: method static go.complex64 Add(go.complex64, go.complex64)
+go.complex64 :: method static go.complex64 Asin(go.complex64)
+go.complex64 :: method static go.complex64 Atan(go.complex64)
+go.complex64 :: method static go.complex64 Conjugate(go.complex64)
+go.complex64 :: method static go.complex64 Cos(go.complex64)
+go.complex64 :: method static go.complex64 Cosh(go.complex64)
+go.complex64 :: method static go.complex64 Divide(go.complex64, go.complex64)
+go.complex64 :: method static go.complex64 Exp(go.complex64)
+go.complex64 :: method static go.complex64 FromPolarCoordinates(System.Single, System.Single)
+go.complex64 :: method static go.complex64 Log(go.complex64)
+go.complex64 :: method static go.complex64 Log(go.complex64, System.Single)
+go.complex64 :: method static go.complex64 Log10(go.complex64)
+go.complex64 :: method static go.complex64 Multiply(go.complex64, go.complex64)
+go.complex64 :: method static go.complex64 Negate(go.complex64)
+go.complex64 :: method static go.complex64 Pow(go.complex64, System.Single)
+go.complex64 :: method static go.complex64 Pow(go.complex64, go.complex64)
+go.complex64 :: method static go.complex64 Reciprocal(go.complex64)
+go.complex64 :: method static go.complex64 Sin(go.complex64)
+go.complex64 :: method static go.complex64 Sinh(go.complex64)
+go.complex64 :: method static go.complex64 Sqrt(go.complex64)
+go.complex64 :: method static go.complex64 Subtract(go.complex64, go.complex64)
+go.complex64 :: method static go.complex64 Tan(go.complex64)
+go.complex64 :: method static go.complex64 Tanh(go.complex64)
+go.complex64 :: method static go.complex64 op_Addition(go.complex64, go.complex64)
+go.complex64 :: method static go.complex64 op_Division(go.complex64, go.complex64)
+go.complex64 :: method static go.complex64 op_Explicit(System.Decimal)
+go.complex64 :: method static go.complex64 op_Explicit(System.Double)
+go.complex64 :: method static go.complex64 op_Explicit(System.Numerics.BigInteger)
+go.complex64 :: method static go.complex64 op_Explicit(System.Numerics.Complex)
+go.complex64 :: method static go.complex64 op_Implicit(System.Byte)
+go.complex64 :: method static go.complex64 op_Implicit(System.Int16)
+go.complex64 :: method static go.complex64 op_Implicit(System.Int32)
+go.complex64 :: method static go.complex64 op_Implicit(System.Int64)
+go.complex64 :: method static go.complex64 op_Implicit(System.SByte)
+go.complex64 :: method static go.complex64 op_Implicit(System.Single)
+go.complex64 :: method static go.complex64 op_Implicit(System.UInt16)
+go.complex64 :: method static go.complex64 op_Implicit(System.UInt32)
+go.complex64 :: method static go.complex64 op_Implicit(System.UInt64)
+go.complex64 :: method static go.complex64 op_Implicit(go.NilType)
+go.complex64 :: method static go.complex64 op_Multiply(go.complex64, go.complex64)
+go.complex64 :: method static go.complex64 op_Subtraction(go.complex64, go.complex64)
+go.complex64 :: method static go.complex64 op_UnaryNegation(go.complex64)
+go.complex64 :: property System.Single Imaginary { get; }
+go.complex64 :: property System.Single Magnitude { get; }
+go.complex64 :: property System.Single Phase { get; }
+go.complex64 :: property System.Single Real { get; }
+go.error :: method go.string Error()
+go.error :: method static go.error As<T>(T)
+go.error :: method static go.error As<T>(go.ж<T>)
+go.map<TKey, TValue> :: ctor ()
+go.map<TKey, TValue> :: ctor (System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>>)
+go.map<TKey, TValue> :: ctor (System.IntPtr)
+go.map<TKey, TValue> :: method System.Boolean ContainsKey(TKey)
+go.map<TKey, TValue> :: method System.Boolean Equals(System.Object)
+go.map<TKey, TValue> :: method System.Boolean Equals(go.map<TKey, TValue>)
+go.map<TKey, TValue> :: method System.Boolean Remove(TKey)
+go.map<TKey, TValue> :: method System.Boolean TryGetValue(TKey, out TValue)
+go.map<TKey, TValue> :: method System.Int32 GetHashCode()
+go.map<TKey, TValue> :: method System.String ToString()
+go.map<TKey, TValue> :: method System.Void Add(TKey, TValue)
+go.map<TKey, TValue> :: method System.Void Clear()
+go.map<TKey, TValue> :: method System.Void Set(TKey, TValue)
+go.map<TKey, TValue> :: method static System.Boolean op_Equality(go.IMap, go.map<TKey, TValue>)
+go.map<TKey, TValue> :: method static System.Boolean op_Equality(go.NilType, go.map<TKey, TValue>)
+go.map<TKey, TValue> :: method static System.Boolean op_Equality(go.map<TKey, TValue>, go.IMap)
+go.map<TKey, TValue> :: method static System.Boolean op_Equality(go.map<TKey, TValue>, go.NilType)
+go.map<TKey, TValue> :: method static System.Boolean op_Equality(go.map<TKey, TValue>, go.map<TKey, TValue>)
+go.map<TKey, TValue> :: method static System.Boolean op_Inequality(go.IMap, go.map<TKey, TValue>)
+go.map<TKey, TValue> :: method static System.Boolean op_Inequality(go.NilType, go.map<TKey, TValue>)
+go.map<TKey, TValue> :: method static System.Boolean op_Inequality(go.map<TKey, TValue>, go.IMap)
+go.map<TKey, TValue> :: method static System.Boolean op_Inequality(go.map<TKey, TValue>, go.NilType)
+go.map<TKey, TValue> :: method static System.Boolean op_Inequality(go.map<TKey, TValue>, go.map<TKey, TValue>)
+go.map<TKey, TValue> :: method static System.Collections.Generic.Dictionary<TKey, TValue> op_Implicit(go.map<TKey, TValue>)
+go.map<TKey, TValue> :: method static go.map<TKey, TValue> Make(System.IntPtr = 0, System.IntPtr = -1)
+go.map<TKey, TValue> :: method static go.map<TKey, TValue> op_Implicit(System.Collections.Generic.Dictionary<TKey, TValue>)
+go.map<TKey, TValue> :: method static go.map<TKey, TValue> op_Implicit(go.NilType)
+go.map<TKey, TValue> :: property System.Boolean IsNil { get; }
+go.map<TKey, TValue> :: property System.Int32 Count { get; }
+go.map<TKey, TValue> :: property System.ValueTuple<TValue, System.Boolean> Item[TKey, System.Boolean] { get; }
+go.map<TKey, TValue> :: property System.ValueTuple<TValue, System.Boolean> Item[TKey, System.Func<TValue>, System.Boolean] { get; }
+go.map<TKey, TValue> :: property TValue Item[TKey, System.Func<TValue>] { get; }
+go.map<TKey, TValue> :: property TValue Item[TKey] { get; set; }
+go.slice<T> :: ctor ()
+go.slice<T> :: ctor (System.IntPtr, System.Func<T>, System.IntPtr = -1, System.IntPtr = 0)
+go.slice<T> :: ctor (System.IntPtr, System.IntPtr = -1, System.IntPtr = 0)
+go.slice<T> :: ctor (System.Memory<T>)
+go.slice<T> :: ctor (System.ReadOnlyMemory<T>)
+go.slice<T> :: ctor (System.ReadOnlySpan<T>)
+go.slice<T> :: ctor (System.Span<T>)
+go.slice<T> :: ctor (T[])
+go.slice<T> :: ctor (T[], System.IntPtr = 0, System.IntPtr = -1)
+go.slice<T> :: ctor (T[], System.IntPtr, System.IntPtr, System.IntPtr)
+go.slice<T> :: ctor (go.IByteSeq<T>)
+go.slice<T> :: ctor (go.ISlice<T>)
+go.slice<T> :: ctor (go.array<T>)
+go.slice<T> :: ctor (go.array<T>, System.IntPtr = 0, System.IntPtr = -1)
+go.slice<T> :: method System.Boolean Contains(in T)
+go.slice<T> :: method System.Boolean Equals(System.Object)
+go.slice<T> :: method System.Boolean Equals(go.IArray)
+go.slice<T> :: method System.Boolean Equals(go.IArray<T>)
+go.slice<T> :: method System.Boolean Equals(go.ISlice)
+go.slice<T> :: method System.Boolean Equals(go.ISlice<T>)
+go.slice<T> :: method System.Boolean Equals(go.slice<T>)
+go.slice<T> :: method System.Boolean Overlaps(go.slice<T>)
+go.slice<T> :: method System.Int32 GetHashCode()
+go.slice<T> :: method System.IntPtr IndexOf(in T)
+go.slice<T> :: method System.Span<T> ToSpan()
+go.slice<T> :: method System.String ToString()
+go.slice<T> :: method System.Void CopyTo(T[], System.Int32)
+go.slice<T> :: method T[] ToArray()
+go.slice<T> :: method go.slice<T> Append(T[])
+go.slice<T> :: method go.slice<T> Clone()
+go.slice<T> :: method go.slice<T> Slice(System.Int32, System.Int32)
+go.slice<T> :: method go.slice<T> Slice(System.IntPtr, System.IntPtr)
+go.slice<T> :: method go.slice<T>.Enumerator GetEnumerator()
+go.slice<T> :: method static System.Boolean op_Equality(go.ISlice, go.slice<T>)
+go.slice<T> :: method static System.Boolean op_Equality(go.NilType, go.slice<T>)
+go.slice<T> :: method static System.Boolean op_Equality(go.slice<T>, go.ISlice)
+go.slice<T> :: method static System.Boolean op_Equality(go.slice<T>, go.NilType)
+go.slice<T> :: method static System.Boolean op_Equality(go.slice<T>, go.slice<T>)
+go.slice<T> :: method static System.Boolean op_Inequality(go.ISlice, go.slice<T>)
+go.slice<T> :: method static System.Boolean op_Inequality(go.NilType, go.slice<T>)
+go.slice<T> :: method static System.Boolean op_Inequality(go.slice<T>, go.ISlice)
+go.slice<T> :: method static System.Boolean op_Inequality(go.slice<T>, go.NilType)
+go.slice<T> :: method static System.Boolean op_Inequality(go.slice<T>, go.slice<T>)
+go.slice<T> :: method static T[] op_Implicit(go.slice<T>)
+go.slice<T> :: method static go.array<T> op_Implicit(go.slice<T>)
+go.slice<T> :: method static go.slice<T> Append(in go.slice<T>, go.ISlice<T>)
+go.slice<T> :: method static go.slice<T> Append(in go.slice<T>, params System.ReadOnlySpan<T>)
+go.slice<T> :: method static go.slice<T> Append(in go.slice<T>, params T[])
+go.slice<T> :: method static go.slice<T> From<TSource>(TSource[])
+go.slice<T> :: method static go.slice<T> Make(System.IntPtr = 0, System.IntPtr = -1)
+go.slice<T> :: method static go.slice<T> Wrap(in go.slice<T>)
+go.slice<T> :: method static go.slice<T> op_Implicit(System.Memory<T>)
+go.slice<T> :: method static go.slice<T> op_Implicit(System.ReadOnlyMemory<T>)
+go.slice<T> :: method static go.slice<T> op_Implicit(System.ReadOnlySpan<T>)
+go.slice<T> :: method static go.slice<T> op_Implicit(System.Span<T>)
+go.slice<T> :: method static go.slice<T> op_Implicit(T[])
+go.slice<T> :: method static go.slice<T> op_Implicit(go.NilType)
+go.slice<T> :: method static go.slice<T> op_Implicit(go.array<T>)
+go.slice<T> :: property System.Boolean IsNil { get; }
+go.slice<T> :: property System.IntPtr Available { get; }
+go.slice<T> :: property System.IntPtr Capacity { get; }
+go.slice<T> :: property System.IntPtr High { get; }
+go.slice<T> :: property System.IntPtr Length { get; }
+go.slice<T> :: property System.IntPtr Low { get; }
+go.slice<T> :: property System.Span<T> ꓸꓸꓸ { get; }
+go.slice<T> :: property T& Item[System.Int32] { get; }
+go.slice<T> :: property T& Item[System.IntPtr] { get; }
+go.slice<T> :: property T& Item[System.UInt64] { get; }
+go.slice<T> :: property T[] Source { get; }
+go.slice<T> :: property go.slice<T> Item[System.Range] { get; }
+go.slice<T>.Enumerator :: method System.Boolean MoveNext()
+go.slice<T>.Enumerator :: method System.Void Dispose()
+go.slice<T>.Enumerator :: property T Current { get; }
+go.string :: ctor ()
+go.string :: ctor (System.Byte[])
+go.string :: ctor (System.Char[])
+go.string :: ctor (System.String)
+go.string :: ctor (go.IByteSeq<System.Byte>)
+go.string :: ctor (go.string)
+go.string :: ctor (in System.ReadOnlySpan<System.Byte>)
+go.string :: ctor (in System.ReadOnlySpan<System.Int32>)
+go.string :: ctor (in go.IArray<System.Byte>)
+go.string :: ctor (in go.slice<System.Byte>)
+go.string :: ctor (in go.slice<System.Char>)
+go.string :: ctor (in go.slice<System.Int32>)
+go.string :: method System.Boolean Equals(System.Object)
+go.string :: method System.Boolean Equals(go.string)
+go.string :: method System.Collections.Generic.IEnumerator<System.ValueTuple<System.IntPtr, System.Int32>> GetEnumerator()
+go.string :: method System.Int32 CompareTo(go.string)
+go.string :: method System.Int32 GetHashCode()
+go.string :: method System.Int32[] ToRunes()
+go.string :: method System.ReadOnlySpan<System.Byte> Slice(System.Int32, System.Int32)
+go.string :: method System.ReadOnlySpan<System.Byte> Slice(System.IntPtr, System.IntPtr)
+go.string :: method System.ReadOnlySpan<System.Byte> ToSpan()
+go.string :: method System.String ToString()
+go.string :: method System.String ToString(System.IFormatProvider)
+go.string :: method System.TypeCode GetTypeCode()
+go.string :: method go.string Clone()
+go.string :: method go.string slice(System.IntPtr)
+go.string :: method go.string slice(System.IntPtr, System.IntPtr)
+go.string :: method static System.Boolean op_Equality(System.ReadOnlySpan<System.Byte>, go.string)
+go.string :: method static System.Boolean op_Equality(go.NilType, go.string)
+go.string :: method static System.Boolean op_Equality(go.string, System.ReadOnlySpan<System.Byte>)
+go.string :: method static System.Boolean op_Equality(go.string, go.NilType)
+go.string :: method static System.Boolean op_Equality(go.string, go.string)
+go.string :: method static System.Boolean op_GreaterThan(System.ReadOnlySpan<System.Byte>, go.string)
+go.string :: method static System.Boolean op_GreaterThan(go.string, System.ReadOnlySpan<System.Byte>)
+go.string :: method static System.Boolean op_GreaterThan(go.string, go.string)
+go.string :: method static System.Boolean op_GreaterThanOrEqual(System.ReadOnlySpan<System.Byte>, go.string)
+go.string :: method static System.Boolean op_GreaterThanOrEqual(go.string, System.ReadOnlySpan<System.Byte>)
+go.string :: method static System.Boolean op_GreaterThanOrEqual(go.string, go.string)
+go.string :: method static System.Boolean op_Inequality(System.ReadOnlySpan<System.Byte>, go.string)
+go.string :: method static System.Boolean op_Inequality(go.NilType, go.string)
+go.string :: method static System.Boolean op_Inequality(go.string, System.ReadOnlySpan<System.Byte>)
+go.string :: method static System.Boolean op_Inequality(go.string, go.NilType)
+go.string :: method static System.Boolean op_Inequality(go.string, go.string)
+go.string :: method static System.Boolean op_LessThan(System.ReadOnlySpan<System.Byte>, go.string)
+go.string :: method static System.Boolean op_LessThan(go.string, System.ReadOnlySpan<System.Byte>)
+go.string :: method static System.Boolean op_LessThan(go.string, go.string)
+go.string :: method static System.Boolean op_LessThanOrEqual(System.ReadOnlySpan<System.Byte>, go.string)
+go.string :: method static System.Boolean op_LessThanOrEqual(go.string, System.ReadOnlySpan<System.Byte>)
+go.string :: method static System.Boolean op_LessThanOrEqual(go.string, go.string)
+go.string :: method static System.Byte[] op_Implicit(go.string)
+go.string :: method static System.Char[] op_Explicit(go.string)
+go.string :: method static System.Int32 op_Explicit(go.string)
+go.string :: method static System.Int32[] op_Implicit(go.string)
+go.string :: method static System.ReadOnlySpan<System.Int32> op_Implicit(go.string)
+go.string :: method static System.String op_Implicit(go.string)
+go.string :: method static go.slice<System.Byte> op_Implicit(go.string)
+go.string :: method static go.slice<System.Char> op_Implicit(go.string)
+go.string :: method static go.slice<System.Int32> op_Implicit(go.string)
+go.string :: method static go.string op_Addition(System.ReadOnlySpan<System.Byte>, go.string)
+go.string :: method static go.string op_Addition(go.string, System.ReadOnlySpan<System.Byte>)
+go.string :: method static go.string op_Addition(go.string, go.string)
+go.string :: method static go.string op_Implicit(System.Byte[])
+go.string :: method static go.string op_Implicit(System.Char[])
+go.string :: method static go.string op_Implicit(System.Int32)
+go.string :: method static go.string op_Implicit(System.Int32[])
+go.string :: method static go.string op_Implicit(System.ReadOnlySpan<System.Byte>)
+go.string :: method static go.string op_Implicit(System.ReadOnlySpan<System.Int32>)
+go.string :: method static go.string op_Implicit(System.String)
+go.string :: method static go.string op_Implicit(go.NilType)
+go.string :: method static go.string op_Implicit(go.slice<System.Byte>)
+go.string :: method static go.string op_Implicit(go.slice<System.Char>)
+go.string :: method static go.string op_Implicit(go.slice<System.Int32>)
+go.string :: property System.Byte Item[System.Int32] { get; }
+go.string :: property System.Byte Item[System.IntPtr] { get; }
+go.string :: property System.Byte Item[System.UInt64] { get; }
+go.string :: property System.Int32 Length { get; }
+go.string :: property System.ReadOnlySpan<System.Byte> ꓸꓸꓸ { get; }
+go.string :: property go.string Item[System.Range] { get; }
+go.string :: property static go.string Default { get; }
+go.uintptr :: ctor (System.UIntPtr)
+go.uintptr :: field System.UIntPtr Value
+go.uintptr :: method System.Boolean Equals(System.Object)
+go.uintptr :: method System.Boolean Equals(go.uintptr)
+go.uintptr :: method System.Int32 CompareTo(System.Object)
+go.uintptr :: method System.Int32 CompareTo(go.uintptr)
+go.uintptr :: method System.Int32 GetHashCode()
+go.uintptr :: method System.String ToString()
+go.uintptr :: method System.String ToString(System.String, System.IFormatProvider)
+go.uintptr :: method static System.Boolean op_Equality(go.NilType, go.uintptr)
+go.uintptr :: method static System.Boolean op_Equality(go.uintptr, go.NilType)
+go.uintptr :: method static System.Boolean op_Equality(go.uintptr, go.uintptr)
+go.uintptr :: method static System.Boolean op_GreaterThan(go.uintptr, go.uintptr)
+go.uintptr :: method static System.Boolean op_GreaterThanOrEqual(go.uintptr, go.uintptr)
+go.uintptr :: method static System.Boolean op_Inequality(go.NilType, go.uintptr)
+go.uintptr :: method static System.Boolean op_Inequality(go.uintptr, go.NilType)
+go.uintptr :: method static System.Boolean op_Inequality(go.uintptr, go.uintptr)
+go.uintptr :: method static System.Boolean op_LessThan(go.uintptr, go.uintptr)
+go.uintptr :: method static System.Boolean op_LessThanOrEqual(go.uintptr, go.uintptr)
+go.uintptr :: method static System.Byte op_Explicit(go.uintptr)
+go.uintptr :: method static System.Double op_Explicit(go.uintptr)
+go.uintptr :: method static System.Int16 op_Explicit(go.uintptr)
+go.uintptr :: method static System.Int32 op_Explicit(go.uintptr)
+go.uintptr :: method static System.Int64 op_Explicit(go.uintptr)
+go.uintptr :: method static System.IntPtr op_Explicit(go.uintptr)
+go.uintptr :: method static System.SByte op_Explicit(go.uintptr)
+go.uintptr :: method static System.Single op_Explicit(go.uintptr)
+go.uintptr :: method static System.UInt16 op_Explicit(go.uintptr)
+go.uintptr :: method static System.UInt32 op_Explicit(go.uintptr)
+go.uintptr :: method static System.UInt64 op_Explicit(go.uintptr)
+go.uintptr :: method static System.UIntPtr op_Implicit(go.uintptr)
+go.uintptr :: method static System.Void* op_Explicit(go.uintptr)
+go.uintptr :: method static go.uintptr op_Addition(go.uintptr, go.uintptr)
+go.uintptr :: method static go.uintptr op_BitwiseAnd(go.uintptr, go.uintptr)
+go.uintptr :: method static go.uintptr op_BitwiseOr(go.uintptr, go.uintptr)
+go.uintptr :: method static go.uintptr op_Decrement(go.uintptr)
+go.uintptr :: method static go.uintptr op_Division(go.uintptr, go.uintptr)
+go.uintptr :: method static go.uintptr op_ExclusiveOr(go.uintptr, go.uintptr)
+go.uintptr :: method static go.uintptr op_Explicit(System.Double)
+go.uintptr :: method static go.uintptr op_Explicit(System.Int16)
+go.uintptr :: method static go.uintptr op_Explicit(System.Int32)
+go.uintptr :: method static go.uintptr op_Explicit(System.Int64)
+go.uintptr :: method static go.uintptr op_Explicit(System.IntPtr)
+go.uintptr :: method static go.uintptr op_Explicit(System.SByte)
+go.uintptr :: method static go.uintptr op_Explicit(System.Single)
+go.uintptr :: method static go.uintptr op_Explicit(System.UInt64)
+go.uintptr :: method static go.uintptr op_Explicit(System.Void*)
+go.uintptr :: method static go.uintptr op_Implicit(System.Byte)
+go.uintptr :: method static go.uintptr op_Implicit(System.Char)
+go.uintptr :: method static go.uintptr op_Implicit(System.UInt16)
+go.uintptr :: method static go.uintptr op_Implicit(System.UInt32)
+go.uintptr :: method static go.uintptr op_Implicit(System.UIntPtr)
+go.uintptr :: method static go.uintptr op_Implicit(go.NilType)
+go.uintptr :: method static go.uintptr op_Implicit(go.UntypedInt)
+go.uintptr :: method static go.uintptr op_Increment(go.uintptr)
+go.uintptr :: method static go.uintptr op_LeftShift(go.uintptr, System.Int32)
+go.uintptr :: method static go.uintptr op_Modulus(go.uintptr, go.uintptr)
+go.uintptr :: method static go.uintptr op_Multiply(go.uintptr, go.uintptr)
+go.uintptr :: method static go.uintptr op_OnesComplement(go.uintptr)
+go.uintptr :: method static go.uintptr op_RightShift(go.uintptr, System.Int32)
+go.uintptr :: method static go.uintptr op_Subtraction(go.uintptr, go.uintptr)
+go.uintptr :: method static go.uintptr op_UnaryNegation(go.uintptr)
+go.uintptr :: method static go.uintptr op_UnaryPlus(go.uintptr)
+go.uintptr :: method static go.uintptr op_UnsignedRightShift(go.uintptr, System.Int32)
+go.ж<T> :: method System.Boolean CompareExchangePointerWord(System.UIntPtr, System.UIntPtr)
+go.ж<T> :: method System.Boolean Equals(System.Object)
+go.ж<T> :: method System.Boolean Equals(go.ж<T>)
+go.ж<T> :: method System.Boolean IsOrderTokenAt(System.UIntPtr)
+go.ж<T> :: method System.Boolean IsPinnedAt(System.UIntPtr)
+go.ж<T> :: method System.Int32 GetHashCode()
+go.ж<T> :: method System.String ToString()
+go.ж<T> :: method System.UIntPtr ExchangePointerWord(System.UIntPtr)
+go.ж<T> :: method System.UIntPtr ReadPointerWord()
+go.ж<T> :: method System.Void OnHeaderStore()
+go.ж<T> :: method go.ElementAddress<Telem> Ꮡelem<Telem>(System.Int32)
+go.ж<T> :: method go.ElementAddress<Telem> Ꮡelem<Telem>(System.IntPtr)
+go.ж<T> :: method go.ElementAddress<Telem> Ꮡelem<Telem>(System.UInt64)
+go.ж<T> :: method go.ж<TElem> at<TElem>(go.FieldPtrFunc<T, go.array<TElem>>, System.Int32)
+go.ж<T> :: method go.ж<TElem> at<TElem>(go.FieldPtrFunc<T, go.array<TElem>>, System.IntPtr)
+go.ж<T> :: method go.ж<TElem> at<TElem>(go.FieldPtrFunc<T, go.array<TElem>>, System.UInt64)
+go.ж<T> :: method go.ж<TElem> at<TElem>(go.FieldPtrFunc<T, go.slice<TElem>>, System.Int32)
+go.ж<T> :: method go.ж<TElem> at<TElem>(go.FieldPtrFunc<T, go.slice<TElem>>, System.IntPtr)
+go.ж<T> :: method go.ж<TElem> at<TElem>(go.FieldPtrFunc<T, go.slice<TElem>>, System.UInt64)
+go.ж<T> :: method go.ж<TElem> at<TElem>(go.FieldRefFunc<T, go.array<TElem>>, System.Int32)
+go.ж<T> :: method go.ж<TElem> at<TElem>(go.FieldRefFunc<T, go.array<TElem>>, System.IntPtr)
+go.ж<T> :: method go.ж<TElem> at<TElem>(go.FieldRefFunc<T, go.array<TElem>>, System.UInt64)
+go.ж<T> :: method go.ж<TElem> at<TElem>(go.FieldRefFunc<T, go.slice<TElem>>, System.Int32)
+go.ж<T> :: method go.ж<TElem> at<TElem>(go.FieldRefFunc<T, go.slice<TElem>>, System.IntPtr)
+go.ж<T> :: method go.ж<TElem> at<TElem>(go.FieldRefFunc<T, go.slice<TElem>>, System.UInt64)
+go.ж<T> :: method go.ж<TElem> at<TElem>(go.FieldRefFunc<go.array<TElem>>, System.Int32)
+go.ж<T> :: method go.ж<TElem> at<TElem>(go.FieldRefFunc<go.array<TElem>>, System.IntPtr)
+go.ж<T> :: method go.ж<TElem> at<TElem>(go.FieldRefFunc<go.array<TElem>>, System.UInt64)
+go.ж<T> :: method go.ж<TElem> at<TElem>(go.FieldRefFunc<go.slice<TElem>>, System.Int32)
+go.ж<T> :: method go.ж<TElem> at<TElem>(go.FieldRefFunc<go.slice<TElem>>, System.IntPtr)
+go.ж<T> :: method go.ж<TElem> at<TElem>(go.FieldRefFunc<go.slice<TElem>>, System.UInt64)
+go.ж<T> :: method go.ж<TElem> of<TElem>(go.FieldPtrFunc<T, TElem>)
+go.ж<T> :: method go.ж<TElem> of<TElem>(go.FieldRefFunc<T, TElem>)
+go.ж<T> :: method go.ж<TElem> of<TElem>(go.FieldRefFunc<TElem>)
+go.ж<T> :: method go.ж<Telem> at<Telem>(System.Int32)
+go.ж<T> :: method go.ж<Telem> at<Telem>(System.IntPtr)
+go.ж<T> :: method go.ж<Telem> at<Telem>(System.UInt64)
+go.ж<T> :: method ref TF field<TF>(go.FieldRefFunc<T, TF>)
+go.ж<T> :: method static System.Boolean op_Equality(go.NilType, go.ж<T>)
+go.ж<T> :: method static System.Boolean op_Equality(go.ж<T>, go.NilType)
+go.ж<T> :: method static System.Boolean op_Equality(go.ж<T>, go.ж<T>)
+go.ж<T> :: method static System.Boolean op_Inequality(go.NilType, go.ж<T>)
+go.ж<T> :: method static System.Boolean op_Inequality(go.ж<T>, go.NilType)
+go.ж<T> :: method static System.Boolean op_Inequality(go.ж<T>, go.ж<T>)
+go.ж<T> :: method static System.Void* op_Implicit(go.ж<T>)
+go.ж<T> :: method static T op_OnesComplement(go.ж<T>)
+go.ж<T> :: method static go.uintptr op_Implicit(go.ж<T>)
+go.ж<T> :: method static go.ж<T> NilBoxOfDims(params System.Int64[])
+go.ж<T> :: method static go.ж<T> op_Explicit(go.uintptr)
+go.ж<T> :: method static go.ж<T> op_Implicit(System.Void*)
+go.ж<T> :: method static go.ж<T> op_Implicit(go.NilType)
+go.ж<T> :: property System.Boolean IsNative { get; }
+go.ж<T> :: property System.Boolean IsNilPointer { get; }
+go.ж<T> :: property System.Boolean IsNull { get; }
+go.ж<T> :: property System.Object PinnableStorage { get; }
+go.ж<T> :: property System.Object ReferentObject { get; }
+go.ж<T> :: property System.UIntPtr NativeAddress { get; }
+go.ж<T> :: property System.UIntPtr PointerOrderToken { get; }
+go.ж<T> :: property T& Value { get; }
+go.ж<T> :: property T& ValueSlot { get; }
+go.ж<T> :: property go.PointerStorage StorageKind { get; }
+go.ж<T> :: property static go.ж<T> NilBox { get; }

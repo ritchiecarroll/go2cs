@@ -11,7 +11,7 @@ namespace go;
 /// <summary>
 /// C#-side views of a Go map, for C# code that calls converted Go. The converter never emits these.
 /// </summary>
-public static class MapExtensions
+[EditorBrowsable(EditorBrowsableState.Never)] public static class MapExtensions
 {
     /// <summary>
     /// Returns a read-only, live <see cref="IReadOnlySet{T}"/> view of a Go map's keys, the C# face of

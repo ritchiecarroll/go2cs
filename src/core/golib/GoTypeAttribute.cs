@@ -25,7 +25,7 @@ namespace go;
 /// </remarks>
 /// <param name="definition">Type definition string.</param>
 [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Interface | AttributeTargets.Class)]
-public class GoTypeAttribute(string definition = "") : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public class GoTypeAttribute(string definition = "") : Attribute
 {
     /// <summary>
     /// Gets the type definition string.

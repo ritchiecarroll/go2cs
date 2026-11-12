@@ -19,7 +19,7 @@ using go.golib;
 
 namespace go;
 
-public interface IChannel : IEnumerable
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IChannel : IEnumerable
 {
     nint Capacity { get; }
 
@@ -119,7 +119,7 @@ internal interface IGoReflectChannel
     object ReflectWithCargo(ChanCargo? cargo);
 }
 
-public interface IChannel<T> : IChannel
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IChannel<T> : IChannel
 {
     void Send(in T value);
 
@@ -148,7 +148,7 @@ public interface IChannel<T> : IChannel
 /// setting on every call.
 /// </para>
 /// </remarks>
-public interface IChannelTimer
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IChannelTimer
 {
     /// <summary>
     /// Gets whether the channel must currently PRESENT as unbuffered: <c>cap()</c> and <c>len()</c>
@@ -2250,7 +2250,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     }
 }
 
-public static class channel
+[EditorBrowsable(EditorBrowsableState.Never)] public static class channel
 {
     public const int DeadLockDetectionTimeout = 200;
 

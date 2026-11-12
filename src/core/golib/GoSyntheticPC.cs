@@ -47,7 +47,7 @@ namespace go;
 /// <summary>
 /// Mints and resolves synthetic program counters for converted Go functions.
 /// </summary>
-public static class GoSyntheticPC
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoSyntheticPC
 {
     // 4 KiB per function. Large enough that no caller's PC arithmetic (`+1`, `+PCQuantum`) leaves
     // the function's own span; small enough that the 64-bit space holds 2^35 of them.

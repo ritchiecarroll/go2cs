@@ -9,7 +9,7 @@ using System;
 namespace go.golib;
 
 /// <summary>What a cgo wrapper hands C for one pointer to a C struct (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.1).</summary>
-public enum GoCgoStructPointer
+[EditorBrowsable(EditorBrowsableState.Never)] public enum GoCgoStructPointer
 {
     /// <summary>A nil pointer: C receives 0.</summary>
     Nil,
@@ -29,7 +29,7 @@ public enum GoCgoStructPointer
 /// The one place a generated cgo wrapper asks what a pointer argument is (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §5.2,
 /// read through §11.1). Every refusal names the C function, so a program that reaches one learns which call and why.
 /// </summary>
-public static class GoCgoArgs
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoCgoArgs
 {
     /// <summary>
     /// How to hand C a pointer to a C struct. A whole struct in managed memory is mirrored: a standard box, or a field

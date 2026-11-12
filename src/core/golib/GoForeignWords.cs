@@ -187,7 +187,7 @@ internal static class GoForeignWords
 /// The release seam for memory a producer outside the Go runtime handed to Go code: a system call's result
 /// buffer, a DNS record list, an address list.
 /// </summary>
-public static class GoForeignMemory
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoForeignMemory
 {
     /// <summary>
     /// Called by a producer's release hand-own (DnsRecordListFree, FreeAddrInfoW, any transcription seam) before

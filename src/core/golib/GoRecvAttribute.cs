@@ -23,7 +23,7 @@ namespace go;
 /// </remarks>
 /// <param name="options">Receiver options string.</param>
 [AttributeUsage(AttributeTargets.Method)]
-public class GoRecvAttribute(string options = "") : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public class GoRecvAttribute(string options = "") : Attribute
 {
     /// <summary>
     /// Gets the receiver options string.

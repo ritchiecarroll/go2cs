@@ -45,7 +45,7 @@ namespace go;
 /// </para>
 /// </remarks>
 /// <typeparam name="T">The var's type.</typeparam>
-public static class LinknameVar<T>
+[EditorBrowsable(EditorBrowsableState.Never)] public static class LinknameVar<T>
 {
     private static readonly ConcurrentDictionary<(string Type, string Field), FieldInfo> s_fields = new();
 

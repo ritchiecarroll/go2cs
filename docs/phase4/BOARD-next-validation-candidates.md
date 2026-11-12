@@ -36482,5 +36482,153 @@ roster's linux expectation is 536 + 0: the counts are a host difference from tha
 `$LinuxRidHostEqual` line, class host-tool (a new class beside host-privilege: a test runs only where a tool the roster's
 host lacks is on `PATH`), not by moving the roster's linux-x64 536, which stays the reading of a host with no `zstd`.
 linux-arm64 banks 536 (linux-x64; linux-arm64: 535 + 1). The open item is the pin's own retirement plan, unchanged.
+## 2026-11-12 — C2 (found by the try-first fast path, COORD's ruling): golib's `sync.Mutex` has no starvation mode — OPEN, a parity item, post-.4 unless a workload shows starvation
+
+Go bounds barging with starvation mode: a waiter blocked for more than 1 ms gets a direct handoff, and new arrivals
+queue behind it. golib's `sync.Mutex` is a `SemaphoreSlim(1,1)` gate (`src/core/sync/mutex.cs`), which hands a
+released count to whichever thread takes it first. So it has no such mode. That was true at base. The try-first
+fast path (`claude/c2-mutex-fastpath`, ruled (a)) makes it more visible: an Unlock followed by an immediate Lock no
+longer spends about 300 ns in the park bracket, and that gap was where the woken waiter took the count.
+
+`TestMutexFairness` (Go's `sync/mutex_test.go`), linux-x64, Release, the `sync.tests` app host, wall per run:
+
+| run | base `06610aaa65` | with the fast path |
+|---|---|---|
+| alone, `-test.count=20` | worst 0.04 s | worst 0.04 s |
+| with `TestMutex` and `TestMutexMisuse`, `-test.count=10` | median 0.015 s, worst 0.34 s | median 0.14 s, worst 0.59 s |
+| the full suite, 3 runs | 0.05, 0.01, 0.01 s | 0.51, 0.02, 0.19 s |
+
+Every run passes. The test's bound is 10 s, so the worst run is 17 times inside it. The gap to Go is the missing
+mode, not the fast path. Go's own Lock fast path is a CompareAndSwap that barges the same way in normal mode.
+
+A seat would add starvation mode to the gate: a waiter that has waited past 1 ms takes the next Unlock by direct
+handoff, and the fast path declines while one is waiting. Its red is a fairness probe with a holder that releases
+and re-takes the lock in a tight loop.
+
+— C2 (2026-11-12)
+## 2026-11-11 — G (found by the M:N spike's cost table, COORD's routing): `TypeGenerator` is 93% of the generator time on `runtime` — OPEN, post-.4 perf queue
+
+The compiler's own generator report for a rebuild of `runtime` with no M:N switch set (95 s wall, Windows x64,
+SDK 10.0.400): generators 85.8 s in all, of which `go2cs.TypeGenerator` 80.6 s (93%), `EscapeRegistryGenerator`
+2.5 s, `ImplementGenerator` 1.2 s, `ImplicitConvGenerator` 0.7 s, `RecvGenerator` 0.3 s, every other under 0.1 s.
+`TypeGenerator` writes 417 files there, about 190 ms a file. On `net/http` the generators take 30.0 s of a 42.6 s
+build, `TypeGenerator` 13.6 s and `ImplementGenerator` 12.9 s of it (88% between them).
+
+This is today's product and has nothing to do with M:N: the spike read it because a nested generator run doubled
+it. The reason for the 190 ms a file was not looked for. A seat starts by timing the generator's steps on
+`runtime` (the report above is a rebuild with `-p:ReportAnalyzer=true -v d`) and by asking whether its per-file
+work re-reads the whole compilation.
+
+Record: `docs/phase4/DATA-mn-spike-2.md` 6.2 and 6.3 (`claude/g-mn-spike2-b4`).
+
+— G (2026-11-11)
+
+## 2026-11-11 — G (found by the M:N spike's cost table, COORD's routing): `sync.Mutex.Lock` has no try-first step: 230 ns and 64 bytes for an uncontended pair — OPEN, a .4 quality candidate, golib only
+
+An uncontended `Lock` and `Unlock` pair, one goroutine, Windows x64, JIT, runtime 10.0.11, median of 8:
+
+| build | per pair |
+|---|---|
+| Go 1.26.10 | 3.8 ns, 0 B |
+| today's product | 230 ns, 64 B |
+| the spike's hand twin of `Lock` (tries the free lock first) | 27.9 ns, 0 B |
+
+With profiling off, the plain `Lock` enters the park bracket before it tries the lock
+(`using (Goroutine.Park(...)) { gate.Wait(); }`); the bracket is where the 200 ns and the 64 bytes go. The twin
+does `gate.Wait(0)` first and enters the bracket only when that fails. The same first step in the plain `Lock`
+needs no M:N and is measurable with the spike's fixture (`src/tools/mnspike2/MnCost`, `MN_COST_MODE=mutex`).
+A seat checks the other bracketed waits in golib's `sync` for the same order (`RWMutex`, `WaitGroup.Wait`,
+`Cond`), and keeps the profiling-on path, which must still record the block.
+
+Record: `docs/phase4/DATA-mn-spike-2.md` 6.4 (`claude/g-mn-spike2-b4`).
+
+— G (2026-11-11)
+
+## 2026-11-11 — G (found by the M:N spike's cost table, COORD's routing): a deferred closure costs 24.7 ns and 88 bytes, and converted SHA-256 reads 17 times Go's — OPEN, post-.4 perf queue, two rows
+
+Both read on today's product with no M:N switch set (Windows x64, JIT, runtime 10.0.11, medians of 8), beside
+Go 1.26.10's own build of the same source.
+
+| row | Go | today's product |
+|---|---|---|
+| a call into a function that defers one closure | 4.6 ns, 0 B | 24.7 ns, 88 B |
+| `io.CopyBuffer` of one 512-byte chunk into `crypto/sha256` | 254 ns | 4,429 ns |
+
+1. **The defer.** Go's open-coded defer allocates nothing; the converted frame allocates 88 bytes a call. The
+   spike did not read which objects those are. A seat reads them first, and then what a frame with one defer
+   and no `recover` can do without.
+2. **SHA-256.** Go's figure uses the CPU's SHA instructions; the converted package runs the generic block
+   function (`sha256block_noasm.cs`; the corpus is converted without Go's assembly bodies). The gap is the
+   size of what a hand-owned block function over the platform intrinsics would return, and other hashes and
+   ciphers with an assembly body in Go are the same shape.
+
+Fixture: `src/tools/mnspike2/MnCost`, `MN_COST_MODE=defer` and `MN_COST_MODE=hash`. Record:
+`docs/phase4/DATA-mn-spike-2.md` 6.4 (`claude/g-mn-spike2-b4`).
+
+— G (2026-11-11)
+## 2026-11-11 — H (cgo Phase 2 increment 5, converter-cgo 42973745743): cmd/cgo's pointer check has two forms, and Phase 2 admits both, with five divergences from Go DISCLOSED
+
+**The measurement.** cmd/cgo wraps a C call whose argument can hold a Go pointer in a closure that calls
+`_cgoCheckPointer` first. The closure has two forms that check different things:
+
+- the ADDRESS form (`&x`) checks the pointee's members only, which is what Phase 2's wrapper checks too;
+- the VARIABLE form (a pointer held in a variable, or a struct passed by value) scans the whole heap object, and
+  panics for any pointer into data or bss.
+
+`TestCgoCheckClosureFormsAcrossGorootsCgoPackages` counted each form in the generated trees of GOROOT's 29 cgo packages
+(hosted linux, go1.26.10):
+
+| Form | Count |
+|---|---|
+| address | 31 |
+| variable | 50 |
+| index | 22 |
+| slice | 0 |
+| defer | 9 |
+| go | 0 |
+
+The variable form is the majority among closures that do not take element memory (50 of 81).
+
+**The ruling (COORD, on H's proposal; DESIGN-cgo-phase2-pinvoke §11.20).** Phase 2 admits the variable form. C is
+handed a stack mirror of the pointee alone, so what Go's wider scan guards is unreachable from C. Only a program that
+already breaks cgo's pointer rules can see the difference. The five divergences are disclosed in §11.16 and in
+`Limitations.md`, each with an arm in `src/go2cs/testdata/cgo/phase2/fixture.go`:
+
+- Go panics and go2cs proceeds: package-level memory, and a field whose object holds another Go pointer;
+- Go proceeds and go2cs refuses: a pinned member, any check under `GODEBUG=cgocheck=0`, and a by-value struct pointing
+  into pointer-free Go memory.
+
+A run-time equivalent of the scan is a named deferral (Phase 2 later), not a promise.
+
+**A correction to the design review, measured.** cmd/cgo DOES write a closure, in the variable form, for a struct
+passed by value with a pointer member (`fixture.cgo1.go`, `ByValue`). The review had read `gcc.go` as writing none.
+
+**Not measured:** why `go list -compiled` handed back no `_cgo_import.go` for the Phase 2 fixture. The likely cause
+is that `-dynimport` reads a binary linked from the preamble, and nothing in it defines the four probe functions.
+Increment 5b predicts the file returns once `probe.c` defines them.
+
+— H (2026-11-11)
+
+## 2026-11-12 — H (cgo Phase 2 increment 5b, the review's M3): a header can rename a C function behind its name, so a binding is verified against cmd/cgo's own imports, and compiler builtins are refused with it — OPEN for post-.4
+
+**The defect the review found.** The converter's library capture asks a library for each PLAIN C name, with no header
+in sight. A header may rename a function: on darwin/amd64 `<sys/stat.h>` makes `fstat` the symbol `fstat$INODE64`, a
+different function over a different `struct stat`, and glibc may make `strtol` the symbol `__isoc23_strtol`. The plain
+name still exists in the library, so the capture found it, and the binding would have called a function C never calls,
+with no error. Caught by COORD's adversarial review of increment 5b before 5b seated in any batch.
+
+**The fix in 5b (DESIGN-cgo-phase2-pinvoke §11.21).** A symbol binds only when cmd/cgo's own binary imports it under
+its plain C name (`_cgo_import.go`). Anything else is refused by name at its use.
+
+**The limit this leaves, disclosed.** cmd/cgo compiles its wrappers at `-O2`, so a call the C compiler inlines as a
+builtin imports nothing, and the rule cannot tell it from a rename. `C.abs` and `C.labs` are refused on a real host:
+`C.abs: cmd/cgo's own binary does not import a symbol named abs, ...; Phase 2 later`. COORD ruled the over-refusal
+acceptable for .4: a refusal by name is a disclosed limit, and a silent wrong binding is a defect.
+
+**OPEN, post-.4:** a probe compiled WITH the package's preamble, reading each reference's real symbol from the object.
+It lifts the builtin refusals and binds a renamed name soundly. It needs the package's `CgoCFLAGS` and three object
+readers (ELF, Mach-O, COFF).
+
+— H (2026-11-12)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

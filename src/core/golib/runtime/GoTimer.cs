@@ -63,7 +63,7 @@ namespace go.golib;
 /// reads <see cref="AnyPending"/>, Go's <c>checkdead</c> timer scan.
 /// </para>
 /// </remarks>
-public sealed partial class GoTimer
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed partial class GoTimer
 {
     private readonly Action<object?> m_callback;
     private readonly object? m_state;

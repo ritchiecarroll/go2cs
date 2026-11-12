@@ -47,7 +47,7 @@ namespace go;
 /// afterwards. docs/phase4/DESIGN-recover-model.md.</item>
 /// </list>
 /// </remarks>
-public class GoFuncRoot
+[EditorBrowsable(EditorBrowsableState.Never)] public class GoFuncRoot
 {
     /// <summary>
     /// Clears this thread's panic slots before a pooled thread runs its next goroutine. Each is

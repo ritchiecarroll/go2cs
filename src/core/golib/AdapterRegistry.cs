@@ -32,7 +32,7 @@ namespace go;
 /// are behaviorally identical, forwarding to the same receiver methods.
 /// </para>
 /// </remarks>
-public static class AdapterRegistry
+[EditorBrowsable(EditorBrowsableState.Never)] public static class AdapterRegistry
 {
     private static readonly ConcurrentDictionary<(Type, Type), Func<object, object>> s_factories = new();
 

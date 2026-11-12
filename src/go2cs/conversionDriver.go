@@ -146,6 +146,17 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 	// so it wins; checkCgoFlag has already refused an environment asking for the opposite.
 	if options.parseCgoTargets {
 		cfg.Env = append(cfg.Env, "CGO_ENABLED=1")
+
+		// A test's checked-in cmd/cgo output loads as plain files, cgo-off (cgoRoute.go, cgoOfflineTrees). The cgo tag
+		// is set by hand, so the load still selects a plain file under //go:build cgo, as a cgo-on load does, while
+		// an import "C" source stays out.
+		if cgoOfflineTrees {
+			cfg.Env = append(cfg.Env, "CGO_ENABLED=0")
+			cfg.BuildFlags = append(cfg.BuildFlags, "-tags=cgo")
+			cfg.Overlay = map[string][]byte{
+				filepath.Join(options.goRoot, "src", "runtime", "cgo", "go2cs_incomplete.go"): []byte(cgoIncompleteOverlay),
+			}
+		}
 	}
 
 	// A MODULE-CACHE package is loaded from the MAIN MODULE's directory, by import path — not from
@@ -208,6 +219,14 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 	// a GOPATH input and every one of them loaded its subtree, while on a box with an ordinary GOROOT
 	// install the branch never fired at all. The same command emitted a different corpus on the two
 	// boxes, and neither run said so. (C2 mailbox 1257a20bad; COORD ruling 3d0c7cd5d.)
+	// -cgo converts for the host's own target only (cgoRoute.go): refused before the load, naming both sides.
+	if options.parseCgoTargets && !cgoOfflineTrees {
+		if err := cgoHostTarget(cgoLoad{env: cfg.Env, dir: cfg.Dir}, options.targetPlatform); err != nil {
+			reportDiagnostic("-", diagnosticCgoRefused, err.Error())
+			log.Fatalf("Refusing to convert: %s\n", err)
+		}
+	}
+
 	if loadsPackageSubtree(inputFilePath, options) {
 		pkgs, err = packages.Load(cfg, "./...")
 	} else {
@@ -296,10 +315,24 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// converted faithfully, and a refused conversion should leave the output tree untouched.
 		paired, skippedGenerated := syntaxSourceFiles(pkg)
 
-		err := refuseSelectedCgoSources(pkg, paired)
+		// Under -cgo, a package holding cmd/cgo's output converts through the cgo route, or is refused there with
+		// each C use outside Phase 2's set, before anything is written (cgoRoute.go).
+		var route *cgoRoute
 
-		if err == nil {
-			err = refuseCgoOnlyPackage(pkg, options.targetPlatform, options.buildTags, cfg.Dir, options.goRoot)
+		if options.parseCgoTargets {
+			route = planCgoRoute(pkg, options, cgoLoad{env: cfg.Env, dir: cfg.Dir})
+		}
+
+		var err error
+
+		if route != nil {
+			paired, skippedGenerated = route.trees, nil
+		} else {
+			err = refuseSelectedCgoSources(pkg, paired)
+
+			if err == nil {
+				err = refuseCgoOnlyPackage(pkg, options.targetPlatform, options.buildTags, cfg.Dir, options.goRoot)
+			}
 		}
 
 		if err != nil {
@@ -375,12 +408,26 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 				// cfg.Dir is the directory the loader ran the go command in, so it is also the
 				// directory whose GOTOOLCHAIN resolution decides which Go release tags the
-				// constraint re-check must agree with.
-				if match, err := CheckBuildConstraints(path, options.targetPlatform, options.buildTags, cfg.Dir); err != nil {
-					showWarning("Failed to evaluate build constraints for file \"%s\": %s", path, err)
-				} else if !match {
-					// Skipping file due to non-matching build constraints
-					continue
+				// constraint re-check must agree with. A tree cmd/cgo wrote (the cgo route's) is not
+				// re-checked: go list selected its import "C" source under these constraints already,
+				// and on a real host its file is a build-cache name with no .go suffix, which the
+				// file-name check refuses, so the re-check would drop every one of them silently.
+				if pair.output == "" && !pair.bindings {
+					// A plain file of a cgo package was selected by a cgo-on load, so the re-check carries the
+					// cgo tag, as refuseCgoOnlyPackage's does: without it a file under //go:build cgo is dropped
+					// here with exit 0, and every reference to what it declares dangles.
+					tags := options.buildTags
+
+					if route != nil {
+						tags = append(append([]string{}, options.buildTags...), "cgo")
+					}
+
+					if match, err := CheckBuildConstraints(path, options.targetPlatform, tags, cfg.Dir); err != nil {
+						showWarning("Failed to evaluate build constraints for file \"%s\": %s", path, err)
+					} else if !match {
+						// Skipping file due to non-matching build constraints
+						continue
+					}
 				}
 
 				// See if output already exists and has been marked as manually converted. The
@@ -389,6 +436,12 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				// miss the marker and convert over it.
 				outputFileName := platformLayoutPath(packageOutputPath, options.targetPlatform,
 					strings.TrimSuffix(filepath.Base(path), ".go")+".cs")
+
+				if pair.output != "" {
+					outputFileName = platformLayoutPath(packageOutputPath, options.targetPlatform, pair.output+".cs")
+				} else if pair.bindings {
+					outputFileName = route.bindingsPath(packageOutputPath, pkg.Name)
+				}
 
 				if !isDir && isSingleFileInput(path, options) {
 					outputFileName = options.singleFileOutput
@@ -401,7 +454,9 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				}
 
 				if !manualConv {
-					files = append(files, newFileEntry(file, path, false))
+					entry := newFileEntry(file, path, false)
+					entry.outputBase, entry.cgoBindings = pair.output, pair.bindings
+					files = append(files, entry)
 					unmarkedFileCount++
 				} else if isDir {
 					// Manually-converted destination: the hand-owned `.cs` is never overwritten,
@@ -621,6 +676,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				var outputFileName string
 				baseName := strings.TrimSuffix(filepath.Base(fileEntry.filePath), ".go")
 
+				if fileEntry.outputBase != "" {
+					baseName = fileEntry.outputBase
+				}
+
 				if !isDir {
 					// A single-file conversion writes the ONE file the user named. The package's other files were
 					// visited above for the package-wide state the named file's emission reads, and are not written;
@@ -637,6 +696,18 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 					// The `.cs.auto` review sibling follows its hand-owned `.cs` into whichever
 					// folder layout L3 put that file in, so the pair stays together.
 					outputFileName = reviewSiblingLayoutPath(packageOutputPath, options.targetPlatform, baseName)
+				} else if fileEntry.cgoBindings {
+					// The bindings file: its converted C declarations completed with the bindings (cgoRoute.go).
+					outputFileName = route.bindingsPath(packageOutputPath, packageName)
+					usesUnsafeCode = true
+
+					if err := os.MkdirAll(filepath.Dir(outputFileName), 0o755); err != nil {
+						log.Fatalf("Failed to create the bindings file's folder \"%s\": %s\n", filepath.Dir(outputFileName), err)
+					}
+
+					completed := route.bindingsText(visitor.outputBuilder.String())
+					visitor.outputBuilder.Reset()
+					visitor.outputBuilder.WriteString(completed)
 				} else {
 					outputFileName = platformLayoutPath(packageOutputPath, options.targetPlatform, baseName+".cs")
 				}
@@ -653,6 +724,8 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 					}
 				} else if err := visitor.writeOutputFile(outputFileName); err != nil {
 					log.Printf("%s\n", err)
+				} else if fileEntry.cgoBindings {
+					cgoBindingsWritten = true
 				}
 
 				packageLock.Lock()
@@ -669,6 +742,13 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 				packageLock.Unlock()
 			}(fileEntry)
+		}
+
+		// A cgo package whose bindings file was not written cannot build, so its conversion fails here, loudly, rather
+		// than exit 0 with converted files that name C members nothing declares (cgoRoute.go). The verdict is THIS
+		// conversion's own write: a file on disk may be an earlier conversion's, which a failed write leaves standing.
+		if route != nil && !cgoBindingsWritten {
+			log.Fatalf("Refusing to convert: cgo: package %s's bindings file was not written by this conversion (%s); see the errors above\n", pkg.PkgPath, route.bindingsPath(packageOutputPath, packageName))
 		}
 
 		// Record the [assembly: GoImplement] pairs this package SATISFIES but never WITNESSES —
@@ -810,10 +890,14 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 	return nil
 }
 
-// syntaxSourceFile pairs one parsed file with the on-disk source path it was parsed from.
+// syntaxSourceFile pairs one parsed file with the on-disk source path it was parsed from. On the cgo route
+// (cgoRoute.go) a tree cmd/cgo rewrote converts under its import "C" source's name (output), and cmd/cgo's types file
+// hosts the package's bindings file (bindings).
 type syntaxSourceFile struct {
-	file *ast.File
-	path string
+	file     *ast.File
+	path     string
+	output   string
+	bindings bool
 }
 
 // syntaxSourceFiles pairs pkg.Syntax with the source path each syntax tree was parsed from, in

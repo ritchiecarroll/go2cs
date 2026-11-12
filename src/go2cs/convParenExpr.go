@@ -26,6 +26,14 @@ import (
 // now says so through its own per-element gate in convCompositeLit rather than by relying on
 // this context being dropped.
 func (v *Visitor) convParenExpr(parenExpr *ast.ParenExpr, context LambdaContext, litContext BasicLitContext) string {
+	// cmd/cgo writes each C name it rewrites in parentheses, `(_Cfunc_add)(x)`, and C# reads `(C.add)(x)` as a cast:
+	// on the cgo route, parentheses around a pseudo-package reference are cmd/cgo's, not the source's (cgoRoute.go).
+	if ident, ok := parenExpr.X.(*ast.Ident); ok && cgoRouteActive {
+		if _, isCgo := cgoPseudoPackageNames[ident.Name]; isCgo {
+			return v.convExpr(ident, []ExprContext{litContext})
+		}
+	}
+
 	starContext := DefaultStarExprContext()
 	starContext.inParenExpr = true
 	expr := v.convExpr(parenExpr.X, []ExprContext{starContext, litContext})

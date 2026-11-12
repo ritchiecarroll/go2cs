@@ -13,7 +13,7 @@ namespace go;
 /// </summary>
 /// <param name="packageName">Defines the package name.</param>
 [AttributeUsage(AttributeTargets.Class)]
-public class GoPackageAttribute(string packageName) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public class GoPackageAttribute(string packageName) : Attribute
 {
     /// <summary>
     /// Gets the package name.

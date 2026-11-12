@@ -31,7 +31,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly)]
-public sealed class GoModInfoAttribute(string value) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoModInfoAttribute(string value) : Attribute
 {
     /// <summary>The <c>path</c>, <c>mod</c> and <c>dep</c> lines, each ending in <c>\n</c>.</summary>
     public string Value { get; } = value;

@@ -17,7 +17,7 @@ namespace go;
 /// the pair, and one adapter serves both.
 /// </summary>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-public class GoImplementAttribute : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public class GoImplementAttribute : Attribute
 {
     /// <summary>
     /// Creates a record that the generic type definition <paramref name="structDefinition"/> implements
@@ -63,7 +63,7 @@ public class GoImplementAttribute : Attribute
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-public class GoImplementAttribute<TStruct, TInterface> : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public class GoImplementAttribute<TStruct, TInterface> : Attribute
 {
     /// <summary>
     /// Gets or sets flag that determines if interface is a promoted
@@ -140,7 +140,7 @@ public class GoImplementAttribute<TStruct, TInterface> : Attribute
 /// map) where a failing class test is free. A type switch and a type assert each pay it per
 /// evaluation: probing both kinds separately was ~11.6 ns per iteration of the PerfIface benchmark.
 /// </remarks>
-public interface IGoAdapter;
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IGoAdapter;
 
 /// <summary>
 /// Implemented by generated interface-implementation adapters that wrap the receiver box
@@ -151,7 +151,7 @@ public interface IGoAdapter;
 /// assert machinery unwraps the adapter through <see cref="Box"/>. Adapter equality also
 /// delegates to box identity, matching Go pointer-interface equality.
 /// </remarks>
-public interface IжAdapter : IGoAdapter
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IжAdapter : IGoAdapter
 {
     /// <summary>
     /// Gets the wrapped receiver box (a <c>ж&lt;T&gt;</c>).
@@ -166,7 +166,7 @@ public interface IжAdapter : IGoAdapter
 /// Go interface-to-interface assignment preserves the original dynamic value. The runtime unwraps
 /// these adapters through <see cref="Value"/> for type assertions and interface equality.
 /// </remarks>
-public interface IInterfaceAdapter : IGoAdapter
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IInterfaceAdapter : IGoAdapter
 {
     /// <summary>
     /// Gets the wrapped source interface value.
@@ -189,7 +189,7 @@ public interface IInterfaceAdapter : IGoAdapter
 /// silently diverged; the value-boxing partial-struct implementation used for a LOCAL struct has no
 /// wrapper and never had the problem, which is why only the cross-assembly shape reproduces it.
 /// </remarks>
-public interface IValueAdapter : IGoAdapter
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IValueAdapter : IGoAdapter
 {
     /// <summary>
     /// Gets the wrapped value copy — the Go dynamic value this adapter stands in for.

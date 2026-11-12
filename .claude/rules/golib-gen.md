@@ -22,6 +22,8 @@ paths:
      (24bfc8304 / c5e17217b / e9e56b657) that the extraction map routes to this file were
      integrated here — most as further evidence inside an existing rule's comment, a few as new
      visible rules where the trap was genuinely new. Nothing from that branch was dropped. -->
+**A change to golib's public API or go2cs-gen output states its tier** ([`docs/PublicSurface.md`](docs/PublicSurface.md)): a new public golib type is either in `PublicSurface.golib.txt` or `[EditorBrowsable(Never)]`, new non-Go names go in `go.golib`, generated plumbing is `[EditorBrowsable(Never)]`, and no generator adds an abstract member to a Go-named interface.
+
 ## Build the solution after any golib/runtime API change
 **Nothing routinely builds `src/go2cs.slnx` end to end, so a broken member rots invisibly** — every harness (`BehavioralRunner`, MSTest, `check-no-regression.ps1`, `run-validated-sweep.ps1`) builds each `.csproj` **by path** (the habit `check-solution-integrity.ps1` polices from the other direction). **After a golib/runtime API change, build `src/go2cs.slnx` once before banking** — ~90 s, no other gate covers it.
 <!-- The same by-path habit `check-solution-integrity.ps1` polices from the other direction. The

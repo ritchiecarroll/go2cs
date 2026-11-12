@@ -49,7 +49,7 @@ namespace go.golib;
 /// remark is the record that they were meant to be one clock.
 /// </para>
 /// </remarks>
-public static class MonotonicClock
+[EditorBrowsable(EditorBrowsableState.Never)] public static class MonotonicClock
 {
     /// <summary>
     /// Gets a monotonic reading in nanoseconds. The epoch is arbitrary; only differences between

@@ -18,6 +18,6 @@ namespace go;
 /// between Go and C# for improved regression testing.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class)]
-public class GoTestMatchingConsoleOutputAttribute : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public class GoTestMatchingConsoleOutputAttribute : Attribute
 {
 }

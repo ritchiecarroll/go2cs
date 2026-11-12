@@ -23,7 +23,7 @@ namespace go;
 /// identifier of its own.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-public class GoDynamicTypeLiftAttribute(string signature, string typeName) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public class GoDynamicTypeLiftAttribute(string signature, string typeName) : Attribute
 {
     /// <summary>
     /// Gets the anonymous type's structural signature.

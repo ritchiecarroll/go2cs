@@ -26,7 +26,7 @@ namespace go;
 /// embed is the one named residue of this attribute's class.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Struct)]
-public sealed class GoValueCloneAttribute(params string[] fields) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoValueCloneAttribute(params string[] fields) : Attribute
 {
     /// <summary>Names of the fields a by-value copy must re-clone.</summary>
     public string[] Fields { get; } = fields;

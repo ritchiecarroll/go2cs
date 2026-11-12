@@ -26,7 +26,7 @@ namespace go;
 /// checks, over every converted assembly the host loads, that every struct whose constructor builds something carries it.
 /// </para>
 /// </remarks>
-public interface IGoZeroConstructed
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IGoZeroConstructed
 {
     /// <summary>A new Go zero value of this struct, built by its parameterless constructor.</summary>
     object GoZeroNew();

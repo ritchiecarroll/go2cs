@@ -375,6 +375,7 @@ public class ExtensionHostListTests
         ["TemplateBase:TemplateHeader"] = (1, ListedByWriterOne + ": " + nameof(TheHostListGeneratorListsEveryStaticClassOfTheSources)),
         ["TypeGenerator:EmitGoTypeRegistrations"] = (1, ListedByWriterOne),
         ["TypeGenerator:EmitGoZeroFactories"] = (1, ListedByWriterOne),
+        ["TypeGenerator:EmitAssertHostAttributes"] = (1, NoExtensionMethod + ": it carries the asserts class's hiding attribute, and the class is listed by " + nameof(TheInterfaceAssertsClassIsListed)),
         ["ImplementGenerator:EmitAdapterRegistrations"] = (1, ListedByWriterOne),
         ["StructTypeTemplate:FieldReferences"] = (1, "a holder nested in the struct: not top-level, and " + NoExtensionMethod),
         ["BoundedGoroutineInterceptorGenerator:Emit"] = (1, NoExtensionMethod),

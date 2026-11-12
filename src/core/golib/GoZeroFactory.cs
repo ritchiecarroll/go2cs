@@ -21,7 +21,7 @@ namespace go;
 /// Read by <see cref="builtin.GoZero{T}()"/>. A static generic field is one load per closed <typeparamref name="T"/>,
 /// with no reflection, so nothing here needs a trimming annotation.
 /// </remarks>
-public static class GoZeroFactory<T>
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoZeroFactory<T>
 {
     /// <summary>
     /// Constructs the Go zero value of <typeparamref name="T"/>, or null when <c>default(T)</c> already is one.

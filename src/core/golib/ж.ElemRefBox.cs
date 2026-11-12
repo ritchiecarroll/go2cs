@@ -39,7 +39,7 @@ namespace go;
 /// canonicalization that halved the token/hash workloads in the design's §2.2 measurement.
 /// </para>
 /// </remarks>
-public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun
 {
     // The FAST arm: canonical backing + ABSOLUTE index, deref-equivalent by the indexer
     // definitions of the three arms that populate it. Null when the foreign arm is in effect.

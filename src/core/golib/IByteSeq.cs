@@ -18,13 +18,13 @@ namespace go;
 // It is generic so the generic slice<T> can implement it (a byte-specific interface could not be
 // conditionally implemented only when T is byte). @string implements IByteSeq<byte>; slice<T>
 // implements IByteSeq<T>, so slice<byte> satisfies the IByteSeq<byte> constraint as well.
-public interface IByteSeq
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IByteSeq
 {
     // Length is the element count (Go's len). nint so it matches the indexer/slice domain.
     nint Length { get; }
 }
 
-public interface IByteSeq<T> : IByteSeq
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IByteSeq<T> : IByteSeq
 {
     // Read-only element access (Go's s[i]). A ref-returning indexer (e.g. slice<T>'s) satisfies
     // this through an explicit implementation that reads the element by value.
@@ -91,7 +91,7 @@ public interface IByteSeq<T> : IByteSeq
 // Sub-slicing is the only member that needs TSelf, so it lives alone on this interface and
 // IByteSeq<T> keeps the members whose signatures do not mention the sequence type. Consumers
 // that legitimately hold a byte sequence as an interface continue to bind IByteSeq<T> unchanged.
-public interface IByteSeq<TSelf, T> : IByteSeq<T> where TSelf : IByteSeq<TSelf, T>
+[EditorBrowsable(EditorBrowsableState.Never)] public interface IByteSeq<TSelf, T> : IByteSeq<T> where TSelf : IByteSeq<TSelf, T>
 {
     // Sub-slice (Go's s[lo:hi]), returned as the implementing type so a chain stays concrete.
     // For @string this is an @string, for slice<T> a slice<T> — both already return exactly
@@ -124,7 +124,7 @@ public interface IByteSeq<TSelf, T> : IByteSeq<T> where TSelf : IByteSeq<TSelf, 
 //
 // Both keep Go's per-instantiation conversion semantics exactly: `[]byte([]byte)` is the same
 // slice, `[]byte(string)` copies, `string(string)` is free, `string([]byte)` copies.
-public static class ByteSeqExtensions
+[EditorBrowsable(EditorBrowsableState.Never)] public static class ByteSeqExtensions
 {
     // Go's `[]byte(s)` over a `string | []byte`-constrained value — time's parseRFC3339 ranges
     // `[]byte(s)` inside parseUint, six times per parse.
