@@ -349,7 +349,7 @@ if ($gVerdict -like 'PASS*') {
     $want, $refuse = if ($assetRid -like 'win-*') { 'WSABuf', 'Iovec' } else { 'Iovec', 'WSABuf' }
     $cache = Join-Path $WorkRoot 'G-coverage-debug/nuget-cache'
     $notes = @()
-    foreach ($pkg in @(@{ Id = 'go.internal.coverage.decodemeta'; Dll = 'internal.coverage.decodemeta.dll' }, @{ Id = 'go.runtime.debug'; Dll = 'runtime.debug.dll' })) {
+    foreach ($pkg in @(@{ Id = 'go.internal.coverage.decodemeta'; Dll = 'go.internal.coverage.decodemeta.dll' }, @{ Id = 'go.runtime.debug'; Dll = 'go.runtime.debug.dll' })) {
         $result = Get-GAssetVerdict -PackageRoot (Join-Path $cache "$($pkg.Id)/$($Version.ToLowerInvariant())") -AssetRid $assetRid -Dll $pkg.Dll -Want $want -Refuse $refuse
         if ($result.Fail) { $gVerdict = "FAIL (G-coverage-debug): $($pkg.Id) $Version $($result.Text)"; break }
         $notes += "$($pkg.Id) $($result.Text)"

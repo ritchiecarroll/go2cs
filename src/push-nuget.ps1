@@ -1585,12 +1585,12 @@ Write-Step "Verified $sourceVerified C# Source badge(s) pin $fullVersion and its
 # single nupkg per package:
 #
 #   go.os/
-#     lib/<tfm>/os.dll                        compile-time asset + RID-agnostic runtime fallback
-#     runtimes/win-x64/lib/<tfm>/os.dll       runtime asset, selected on win-x64
-#     runtimes/linux-x64/lib/<tfm>/os.dll     runtime asset, selected on linux-x64
-#     runtimes/osx-x64/lib/<tfm>/os.dll       runtime asset, selected on osx-x64
-#     runtimes/osx-arm64/lib/<tfm>/os.dll     runtime asset, selected on osx-arm64 (the SAME bytes as osx-x64)
-#     runtimes/linux-arm64/lib/<tfm>/os.dll   runtime asset, selected on linux-arm64 (its own linux/arm64 pass)
+#     lib/<tfm>/go.os.dll                     compile-time asset + RID-agnostic runtime fallback
+#     runtimes/win-x64/lib/<tfm>/go.os.dll    runtime asset, selected on win-x64
+#     runtimes/linux-x64/lib/<tfm>/go.os.dll  runtime asset, selected on linux-x64
+#     runtimes/osx-x64/lib/<tfm>/go.os.dll    runtime asset, selected on osx-x64
+#     runtimes/osx-arm64/lib/<tfm>/go.os.dll  runtime asset, selected on osx-arm64 (the SAME bytes as osx-x64)
+#     runtimes/linux-arm64/lib/<tfm>/go.os.dll runtime asset, selected on linux-arm64 (its own linux/arm64 pass)
 #
 # WHY lib/ RATHER THAN ref/, against NuGet's documented asset selection. NuGet gives `lib/{tfm}/` both
 # the `compile` and the `runtime` asset roles; `ref/{tfm}/` gives only `compile`; and
