@@ -52,6 +52,11 @@ using static go.@internal.xcoff_package;
 // the assembly.
 [assembly: GoHoistedLiterals]
 
+// This is a Go internal or vendored package: Go lets only code at or below the root named
+// below import it. It stays public to .NET, so go2cs-gen and go.lib's analyzer warn
+// (GO2CS0014) on hand-written C# that names its types from outside that root.
+[assembly: GoInternalRoot("", Standard = true)]
+
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(Archive))]
@@ -90,6 +95,7 @@ using static go.@internal.xcoff_package;
 
 namespace go.@internal;
 
+[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
 [GoPackage("xcoff")]
 public static partial class xcoff_package
 {

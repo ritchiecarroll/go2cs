@@ -50,6 +50,11 @@ using static go.net.http.internal_package;
 // the assembly.
 [assembly: GoHoistedLiterals]
 
+// This is a Go internal or vendored package: Go lets only code at or below the root named
+// below import it. It stays public to .NET, so go2cs-gen and go.lib's analyzer warn
+// (GO2CS0014) on hand-written C# that names its types from outside that root.
+[assembly: GoInternalRoot("net/http", Standard = true)]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -63,6 +68,7 @@ using static go.net.http.internal_package;
 
 namespace go.net.http;
 
+[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
 [GoPackage("internal")]
 public static partial class internal_package
 {

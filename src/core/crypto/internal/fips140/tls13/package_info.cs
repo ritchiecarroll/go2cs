@@ -51,6 +51,11 @@ using static go.crypto.@internal.fips140.tls13_package;
 // the assembly.
 [assembly: GoHoistedLiterals]
 
+// This is a Go internal or vendored package: Go lets only code at or below the root named
+// below import it. It stays public to .NET, so go2cs-gen and go.lib's analyzer warn
+// (GO2CS0014) on hand-written C# that names its types from outside that root.
+[assembly: GoInternalRoot("crypto", Standard = true)]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -65,6 +70,7 @@ using static go.crypto.@internal.fips140.tls13_package;
 
 namespace go.crypto.@internal.fips140;
 
+[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
 [GoPackage("tls13")]
 public static partial class tls13_package
 {
