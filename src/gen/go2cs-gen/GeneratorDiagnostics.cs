@@ -173,5 +173,18 @@ internal static class GeneratorDiagnostics
         category: "go2cs-gen",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    // GO2CS0014, InternalPackageAnalyzer: Go lets only code at or below an internal or vendored package's root import
+    // it, and .NET has no such rule, so the converted package stays public and is marked ([GoInternalRoot]) instead.
+    // Hand-written C# that names one of its types from outside the root is warned on, once per file and package, at
+    // the first naming use. The ruled wording says what the package is owed: no compatibility promise, and a warning
+    // that may become an error at a release whose notes say so.
+    public static readonly DiagnosticDescriptor InternalPackageUse = new(
+        id: "GO2CS0014",
+        title: "Hand-written C# names a type of a Go internal or vendored package from outside its root",
+        messageFormat: "'{0}' is in Go package '{1}', which only Go code under {2} may import. Go internal and vendored packages are not covered by any compatibility promise; this warning may become an error.",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
 #pragma warning restore RS2008
 }
