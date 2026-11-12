@@ -186,3 +186,76 @@ All five OQs are RULED as recommended, and the "freeze and document" items with 
 
 The two large emission changes (OQ2, OQ4) each land as their own batch, never stacked with other converter
 seats, and each is measured by the two-seeded four-target reconvert, with its CNR and golden moves predicted.
+
+## M:N: the consumer-visible list, folded in (G, 2026-11-12)
+
+This block answers the last row of the Seats table and item 4 of the proposed order. Source: the R5b spike's
+record, [DATA-mn-spike-2](phase4/DATA-mn-spike-2.md), section 8.5, which holds every row with how it is known.
+Here the rows are sorted by this plan's tiers. The path is R2 (hidden async twins), the ruled one. Nothing of the
+spike's code lands; this is what a landing form would bring, so that the contract page can say it first.
+
+**Tier 1 holds under R2. Nothing frozen changes.**
+- Exported Go functions and methods keep their signatures. The spike's converter diff is 0 files.
+- A Go-named interface gains no member (OQ5, kept): the twin lives on a separate hidden nested interface. A
+  hand-written C# implementer compiles and runs unchanged, as class and as struct, under the JIT and under
+  Native AOT.
+- The type mapping, golib's channel API and the three exception types do not change.
+- A synchronous call from a plain C# thread behaves as today: it runs the visible body and blocks at a park.
+- `defer`, `recover`, `Goexit` and the process exit on an unrecovered panic print Go's output on the shapes
+  measured.
+
+**Tier 2 grows. Hidden additions, binary-stable within a Go minor.**
+- One public `<name>ꞏtwin` beside each public function that can park, hidden from editors, listed by
+  reflection.
+- One public nested interface for each Go interface that gets a twin, and one more base-list entry on each
+  implementer that gets one. Go's `reflect` does not see either.
+- Hidden twins of golib's parking operations.
+- A generated entry class in a converted program whose `main` is twinned. `Main` stays.
+- These fall under the OQ3 `[EditorBrowsable(Never)]` pass and the golib baseline. The OQ5 guard (no Go-named
+  interface gains an abstract member) is the guard that keeps the second item honest.
+
+**Tier 3 behaviour that changes. No source or binary break.**
+- **Thread identity.** Inside one C# method body the thread never changes. Between two calls into C# from the
+  same converted goroutine it may. This is already declared non-contract above.
+- **A goroutine is not a thread.** The published sentence "Each goroutine runs on its own thread for as long as
+  it runs" becomes false for a goroutine that runs as a twin. The doc edit is owed with the landing.
+- **Threads at rest and start-up**: one carrier for each processor and a monitor (13 more threads on 12
+  processors), 11 to 16 ms.
+- **`runtime.GOMAXPROCS` becomes real**: at most that many goroutines run converted code at once.
+- **C# code that blocks inside a goroutine holds a carrier.** The spike does not establish "never a deadlock"
+  for blocking the scheduler cannot see; that policy is a design still owed (the record's N5).
+- **A long step that never parks is not preempted.**
+- **.NET-format stack frames** (an exception's stack trace, a debugger's call stack, a profiler, a crash dump)
+  show compiler-generated state-machine frames where a twin runs. Go-format tracebacks keep the Go names.
+- **Goroutine ids**: until the main twin is made goroutine 1 (priced, not built), main's work shows another id.
+- **Package size and build time**: +14% on the heaviest parking package measured, +5 to +7% build wall, nothing
+  for a package that cannot park.
+
+**What the contract page should say now**, so that a consumer who starts before M:N is not surprised by it:
+1. thread identity between two calls from converted code is not a contract (already listed);
+2. a goroutine is not promised a thread of its own;
+3. .NET-format stack frames of converted code are tier 3;
+4. ambient thread state seen from converted code (name, priority, culture, `AsyncLocal<T>`) is not a contract
+   until MQ2 is ruled;
+5. `runtime.LockOSThread` is named as the opt-out for thread identity. The spike did not build the pin: today
+   the call only counts, and under 1:1 it has nothing to do. The landing form owes it.
+
+**New questions for the owner, from the spike.** Each has G's recommendation; none is ruled.
+- **MQ1. May a consumer implement the nested twin interface by hand?** Without it a hand implementer works and
+  costs a thread for each parked call through it. *Recommendation*: tier 2 for now, so not for hand use; open
+  it as tier 1 optional surface only when the task shape it exposes is itself settled.
+- **MQ2. Ambient state per goroutine.** The spike flows no execution context, and the cost of flowing one was
+  not read. *Recommendation*: declare it non-contract (item 4 above), with the pin as the answer for code that
+  needs a thread's own state.
+- **MQ3. How M:N is switched on.** A build with twins and the scheduler off reads as today's build (measured).
+  *Recommendation*: opt-in for the first release that carries it, with the default changed later as an
+  announced tightening.
+
+**If R3 (visible async) were ever taken instead**, tier 1 breaks by construction: at least 1,370 exported
+functions in 116 non-internal standard library packages change shape, every hand implementer of an affected
+interface breaks, and the mapping changes for functions with `ref` or span parameters. That is the full
+deprecation set of this plan and a flag day for every published package. Nothing the spike read calls for it.
+
+**Not measured, and able to move a row**: a package built against today's golib run against a landing golib
+(the spike changes the frame's layout and rebuilt everything); Visual Basic, F# and explicit-interface
+implementers; the manual check in a debugger.
