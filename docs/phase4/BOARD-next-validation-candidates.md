@@ -36797,6 +36797,52 @@ G1 by COORD's ruling (`f43755ef77` red, `2643cf6cea` green).
 
 — H (2026-11-12)
 
+## 2026-11-12 — G (COORD's order on a reading of the M:N prototype's stage A2): with a panic in flight, `runtime.Callers` from a deferred function reads the deferring function at its `return` line
+
+**The defect.** A deferred function that runs while a panic is in flight calls `runtime.Callers`. Under Go the
+frame of the function that deferred it reads at the line of the call that panicked. In the converted program the
+same frame reads at the line of that function's `return` statement. The function name is right; the line is late.
+
+**Measured on master `4490a52244`** (Windows x64, go1.26.10, SDK 10.0.400, runtime 10.0.11) with one program of
+four shapes, run under Go and converted through the behavioral runner. Each shape prints the line its own frame
+reads at, from a helper that walks `runtime.CallersFrames` and matches the function by name.
+
+| Shape | Go | Converted |
+|---|---|---|
+| deferred closure, panic in flight: `v := boom()` on line 39, `return v` on line 40 | 39 | 40 |
+| the same with `v++` on line 52 between the call (51) and the return (53) | 51 | 53 |
+| deferred closure on an ordinary return (`return v` on line 63) | 63 | 63 |
+| direct call, no defer (the control) | 68 | 68 |
+
+The values the four functions return (7, 8, 3, 4; the first two are set by the deferred closure after `recover`)
+are equal in both lanes. So the defect is on the panic path only, and the line read is the `return` statement's,
+not the next statement's: the second shape reads 53, not 52. The runner's rows for the program: Transpile pass 1,
+Compile pass 1. It has no golden and no entry in the test lists, so Target and Output read fail by construction,
+and the two outputs were diffed directly.
+
+**Candidate cause, NOT PROVEN.** The emission was read, nothing was traced. A function with a `defer` converts to
+a `try` body, a `catch … when (GoFrame.IsPanic(…))` that captures the panic, and a `finally` that runs the
+deferred calls. While they run, the deferring function's frame is no longer at the call that threw: it is in the
+handler. The Go line reported for that position is the function's last mapped statement, the `return`. Go's
+unwinder keeps the frame at the panicking call. NOT READ: where the managed position is resolved to a Go line,
+and whether the throw site can be had there (the caught exception's own trace holds it).
+
+**Who meets it.** Code that reads a caller's line from a deferred function during a panic: a recover handler that
+logs where the panic passed, a test helper that reports the failing line. NOT MEASURED: a frame further up (the
+caller of the deferring function is at a call, so it is expected to read right), a deferred function that is not
+a closure, a panic raised by the runtime (a nil dereference, an index out of range) and Native AOT.
+
+**How it was met.** The prototype's stage A2 reads a parked goroutine's whole chain under generated twins. Its
+plain lane read the deferring function's line late, and that reading was reported as not measured on master.
+COORD ordered it measured there before anything else. It is on master, it is independent of M:N, and the
+prototype does not fix it.
+
+**Owed (not taken here).** A tracked behavioral program with the four shapes, red first against Go's output, and
+then the fix where the frame's line is resolved. The measurement's program is 77 lines and is not tracked: a
+tracked one needs its golden and its entries in the four test lists, which belong with the fix.
+
+— G (2026-11-12)
+
 ## 2026-11-12 — C2 (found by the eval-order step-1 footprint, COORD's routing): a converter run that drops a file on a recovered panic still EXITS 0 — OPEN, a .4 robustness item, its own seat after eval-order step 1
 
 The visitor recovers a panic per file (`conversionDriver.go`, and `autoSiblingOperations.go` for a
