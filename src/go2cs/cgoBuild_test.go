@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"slices"
 	"strings"
 	"testing"
@@ -49,6 +50,43 @@ func cgoCompilerErrors(output string) []string {
 	return lines
 }
 
+// cgoBuildDir is dir with its symbolic links resolved. macOS's temporary directory is one (/var for /private/var),
+// and MSBuild reaches go2csPath from the project by a relative path: counted from the link and walked from the real
+// directory, that path ends one level short, and every referenced project is "not found" (MSB3202).
+func cgoBuildDir(t *testing.T, dir string) string {
+	t.Helper()
+
+	resolved, err := filepath.EvalSymlinks(dir)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return resolved
+}
+
+// cgoBuildArgs are dotnet's arguments to build one converted project against this tree, for goos and, when goarch is
+// not empty, that architecture. A converted project finds golib, go2cs-gen and the standard library through
+// go2csPath, as every converted project does; here it is this tree.
+func cgoBuildArgs(t *testing.T, project, goos, goarch string) []string {
+	t.Helper()
+
+	treeSrc, err := filepath.Abs("..")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	args := []string{"build", project, "-nologo", "--disable-build-servers", "-nodeReuse:false", "-p:UseSharedCompilation=false", "-v:q",
+		"-p:go2csPath=" + cgoBuildDir(t, treeSrc) + string(filepath.Separator), "-p:GoTargetOS=" + goos}
+
+	if goarch != "" {
+		args = append(args, "-p:GoTargetArch="+goarch)
+	}
+
+	return args
+}
+
 func TestTheCgoRoutesOutputBuildsAsAProject(t *testing.T) {
 	if os.Getenv(cgoBuildEnv) != "1" {
 		t.Skipf("NOT RUN: set %s=1 to build the converted fixture with the .NET SDK (Inconclusive, not a pass)", cgoBuildEnv)
@@ -61,7 +99,7 @@ func TestTheCgoRoutesOutputBuildsAsAProject(t *testing.T) {
 	}
 
 	dotnet := requireDotnetSdk(t, framework[1])
-	output := t.TempDir()
+	output := cgoBuildDir(t, t.TempDir())
 
 	// A directory the caller names keeps the converted project for reading after the run.
 	if kept := os.Getenv("GO2CS_CGO_BUILD_DIR"); kept != "" {
@@ -69,7 +107,7 @@ func TestTheCgoRoutesOutputBuildsAsAProject(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		output = kept
+		output = cgoBuildDir(t, kept)
 	}
 
 	combined, _, err := convertCgoOfflineInto(t, cgoPhase2Admitted(t), output)
@@ -86,14 +124,10 @@ func TestTheCgoRoutesOutputBuildsAsAProject(t *testing.T) {
 
 	// A converted project finds golib, go2cs-gen and the standard library through go2csPath, as every converted
 	// project does; here it is this tree.
-	treeSrc, err := filepath.Abs("..")
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	build := exec.Command(dotnet, "build", projects[0], "-nologo", "--disable-build-servers", "-nodeReuse:false", "-p:UseSharedCompilation=false", "-v:q",
-		"-p:go2csPath="+treeSrc+string(filepath.Separator))
+	// The fixture is converted for linux/amd64 on every host, so the build is told that target. A leg's own
+	// GoTargetOS (MSBuild reads the environment as properties) would otherwise select another OS's source folders,
+	// leave the bindings file out, and fail far from the cause: CS0051 on the first C type in an exported signature.
+	build := exec.Command(dotnet, cgoBuildArgs(t, projects[0], "linux", "amd64")...)
 	build.Env = append(os.Environ(), "DOTNET_CLI_TELEMETRY_OPTOUT=1", "DOTNET_NOLOGO=1", "MSBUILDDISABLENODEREUSE=1")
 	built, err := build.CombinedOutput()
 	errors := cgoCompilerErrors(string(built))
@@ -106,5 +140,66 @@ func TestTheCgoRoutesOutputBuildsAsAProject(t *testing.T) {
 
 	if err != nil {
 		t.Fatalf("the cgo route's output does not build as a project: %v\n%s", err, lastLines(strings.ReplaceAll(string(built), "\r\n", "\n"), 40))
+	}
+}
+
+// The compile half of TestACNamesFirstLetterDoesNotMakeItsTypePublic: cmd/cgo's types for C names that begin with an
+// upper-case letter, as plain Go, in a program that names them only from unexported code. With the pointer typedef
+// public and its struct internal, go2cs-gen's members for the pointer type did not compile (CS0050 to CS0057, the
+// hosted windows leg of the exit gate, run 43207294212). It needs no C compiler.
+func TestACPointerTypedefBuildsWithTheStructItNames(t *testing.T) {
+	if os.Getenv(cgoBuildEnv) != "1" {
+		t.Skipf("NOT RUN: set %s=1 to build the converted program with the .NET SDK (Inconclusive, not a pass)", cgoBuildEnv)
+	}
+
+	framework := regexp.MustCompile(`<TargetFramework Condition="[^"]*">([^<]+)</TargetFramework>`).FindStringSubmatch(renderCsprojTemplate("Exe", "", ""))
+
+	if framework == nil {
+		t.Fatal("the rendered template names no TargetFramework")
+	}
+
+	dotnet := requireDotnetSdk(t, framework[1])
+
+	dir := writeCgoGateModule(t, map[string]string{
+		"cgo_gotypes.go": "package main\n" + cgoNamedCTypes,
+		"main.go": `package main
+
+func fill(p _Ctype_LPSYSTEMTIME, n _Ctype_DWORD) _Ctype_DWORD {
+	p.wYear = 2026
+	return n + 1
+}
+
+func main() {
+	var st _Ctype_SYSTEMTIME
+	println(fill(&st, 1), st.wYear)
+}
+`})
+
+	stderr, output, err := convertCgoGateFixture(t, dir, nil)
+
+	if err != nil {
+		t.Fatalf("conversion failed: %v\n%s", err, stderr)
+	}
+
+	output = cgoBuildDir(t, output)
+	projects, err := filepath.Glob(filepath.Join(output, "*.csproj"))
+
+	if err != nil || len(projects) != 1 {
+		t.Fatalf("the conversion wrote %d project files in %s, want 1 (%v)", len(projects), output, err)
+	}
+
+	build := exec.Command(dotnet, cgoBuildArgs(t, projects[0], runtime.GOOS, "")...)
+	build.Env = append(os.Environ(), "DOTNET_CLI_TELEMETRY_OPTOUT=1", "DOTNET_NOLOGO=1", "MSBUILDDISABLENODEREUSE=1")
+	built, err := build.CombinedOutput()
+	errors := cgoCompilerErrors(string(built))
+
+	t.Logf("READING the pointer typedef program's build: %d distinct error(s)", len(errors))
+
+	for _, line := range errors {
+		t.Logf("READING build error %s", line)
+	}
+
+	if err != nil {
+		t.Fatalf("a program naming a C pointer typedef does not build: %v\n%s", err, lastLines(strings.ReplaceAll(string(built), "\r\n", "\n"), 40))
 	}
 }

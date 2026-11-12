@@ -242,7 +242,16 @@ func TestG1TheConvertedCgoProgramResolvesAndRunsAsGoDoes(t *testing.T) {
 		goProgram += ".exe"
 	}
 
-	build := exec.Command("go", "build", "-o", goProgram, ".")
+	// On darwin go's linker runs Apple's strip on an externally linked binary unless DWARF is off (-w), and strip
+	// refuses what the pinned zig links ("the __LLVM segment too small"; first read on run 43207288962). That is go
+	// and the C toolchain, before go2cs is involved, so the gate builds without DWARF there.
+	goBuild := []string{"build", "-o", goProgram}
+
+	if runtime.GOOS == "darwin" {
+		goBuild = append(goBuild, "-ldflags=-w")
+	}
+
+	build := exec.Command("go", append(goBuild, ".")...)
 	build.Dir = module
 	build.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=", "CGO_ENABLED=1", "CGO_LDFLAGS=-L"+probeDir+" -lgo2csprobe")
 
@@ -250,22 +259,18 @@ func TestG1TheConvertedCgoProgramResolvesAndRunsAsGoDoes(t *testing.T) {
 		t.Fatalf("go did not build the gate program: %v\n%s", err, lastLines(string(out), 30))
 	}
 
-	// The converted program, built as a project: this is "compiles".
+	// The converted program, built as a project: this is "compiles". The OS is stated; the architecture is left to
+	// the project, whose own default is its bindings' (there is no darwin/arm64 flavour of the standard library to
+	// ask for by name, and its darwin flavour serves both).
+	output = cgoBuildDir(t, output)
 	projects, err := filepath.Glob(filepath.Join(output, "*.csproj"))
 
 	if err != nil || len(projects) != 1 {
 		t.Fatalf("the conversion wrote %d project files in %s, want 1 (%v)", len(projects), output, err)
 	}
 
-	treeSrc, err := filepath.Abs("..")
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	started := time.Now()
-	dotnetBuild := exec.Command(dotnet, "build", projects[0], "-nologo", "--disable-build-servers", "-nodeReuse:false", "-p:UseSharedCompilation=false", "-v:q",
-		"-p:go2csPath="+treeSrc+string(filepath.Separator))
+	dotnetBuild := exec.Command(dotnet, cgoBuildArgs(t, projects[0], runtime.GOOS, "")...)
 	dotnetBuild.Env = append(os.Environ(), "DOTNET_CLI_TELEMETRY_OPTOUT=1", "DOTNET_NOLOGO=1", "MSBUILDDISABLENODEREUSE=1")
 	built, err := dotnetBuild.CombinedOutput()
 	buildErrors := cgoCompilerErrors(string(built))
@@ -280,10 +285,33 @@ func TestG1TheConvertedCgoProgramResolvesAndRunsAsGoDoes(t *testing.T) {
 		t.Fatalf("the converted gate program does not build: %v\n%s", err, lastLines(strings.ReplaceAll(string(built), "\r\n", "\n"), 40))
 	}
 
-	assemblies, err := filepath.Glob(filepath.Join(output, "bin", "Debug", "*", strings.TrimSuffix(filepath.Base(projects[0]), ".csproj")+".dll"))
+	// The assembly is named by the project's AssemblyName, which is not always its file's name, and its directory is
+	// the build configuration's, which a leg's environment may set. So it is found, not assumed.
+	project, err := os.ReadFile(projects[0])
 
-	if err != nil || len(assemblies) != 1 {
-		t.Fatalf("the build left %d assemblies for the gate program, want 1 (%v)", len(assemblies), err)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assemblyName := declaredAssemblyName(string(project)) + ".dll"
+	var assemblies, left []string
+
+	_ = filepath.WalkDir(filepath.Join(output, "bin"), func(path string, entry os.DirEntry, err error) error {
+		if err == nil && !entry.IsDir() {
+			if entry.Name() == assemblyName {
+				assemblies = append(assemblies, path)
+			}
+
+			if relative, relErr := filepath.Rel(output, path); relErr == nil && len(left) < 40 {
+				left = append(left, relative)
+			}
+		}
+
+		return nil
+	})
+
+	if len(assemblies) != 1 {
+		t.Fatalf("the build left %d assemblies named %s for the gate program, want 1; under bin: %v", len(assemblies), assemblyName, left)
 	}
 
 	csProgram := []string{dotnet, assemblies[0]}
