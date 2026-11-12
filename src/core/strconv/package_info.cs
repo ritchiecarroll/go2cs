@@ -58,7 +58,7 @@ using static go.strconv_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("strconv/bytealg.go", "bytealg.cs", "AAsYkg==")]
 [assembly: GoPositionMap("strconv/isprint.go", "isprint.cs", "AAkWANYBrgMAhwGQAgCAAoIEAHPoAQ==")]
-[assembly: GoPositionMap("strconv/number.go", "number.cs", "ABMmsoKClKiSqqIABi4AFAKCgpQABjwAGwKCgpTssoKClAAGOAAbAoKClOiSgoKUAAIU8gACNgAYAqqirLKssqiSqqKqoqiSlKSkpJS4pgAIEoKmAAEU8qaCpoKmgg==")]
+[assembly: GoPositionMap("strconv/number.go", "number.cs", "ABQmsoKClKiSqqIABi4AFAKCgpQABjwAGwKCgpTssoKClAAGOAAbAoKClOiSgoKUAAIU8gACNgAYAqqirLKssqiSqqKqoqiSlKSkpJS4pgAKEoKmAAMU8qaCpoKmgg==")]
 [assembly: GoPositionMap("strconv/quote.go", "quote.cs", "ABAmkqaCpoKmpoKCgpSCgoKCgoKClJSCpoKCgpSCgqaCgoKClIKCgpSClJS0tLS0tLS0lIKCpIKkgoK2goLIrsKqoqyyqqKuwqqiAAIQ0qqiAAIS4qqiAAIS4qqirLKCgoKCgpSUgpSCpqaygpSkpJQAAiIAFASCgpSkgqSCpLiCgpSClJS0tLS0tLS0gpS0tKSCgoKUgoKCgpSUgpSClIKClIK0goKClIKCgoKUlIKCgpS0tIKClLSClIKqooIAAhLigoKUrgAJBIKUgoKClJSUlLTYgoKCpv62goKUtIKkgoKClLqSgoKClKaCgpSmgoKUyoLKgpSUgpSkvNKCkoKCgpSmAAIYAAoEgpSUlJQACBKCgoKClIKmgoKClIKUgoKssoKUrMSClII=")]
 // </GoSourcePositionMaps>
 
@@ -91,3 +91,13 @@ public static partial class strconv_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(strconv_package.NumError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class strconvᴛNumError;
+// </MethodHolders>

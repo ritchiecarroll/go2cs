@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using tokenꓸPos = go.go.token_package.ΔPos;
 // </ImportedTypeAliases>
 
 using go;

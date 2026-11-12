@@ -9,6 +9,8 @@ using fmt = fmt_package;
 using coverage = go.@internal.coverage_package;
 using math = math_package;
 using go.@internal;
+using cmerge = cmerge_package;
+using static cmerge_package;
 
 partial class cmerge_package {
 
@@ -27,6 +29,8 @@ partial struct Merger {
     internal ModeMergePolicy policy;
     internal bool overflow;
 }
+
+} partial class cmergeᴛMerger {
 
 public static void SetModeMergePolicy(this ref Merger cm, ModeMergePolicy policy) {
     cm.policy = policy;
@@ -58,12 +62,14 @@ public static (error, bool) MergeCounters(this ref Merger m, slice<uint32> dst, 
 // returning added value or math.MaxUint32 if there is an overflow.
 // Overflows are recorded in case the client needs to track them.
 public static uint32 SaturatingAdd(this ref Merger m, uint32 dst, uint32 src) {
-    var (result, overflow) = SaturatingAdd(dst, src);
+    var (result, overflow) = cmerge.SaturatingAdd(dst, src);
     if (overflow) {
         m.overflow = true;
     }
     return result;
 }
+
+} partial class cmerge_package {
 
 // SaturatingAdd does a saturating addition of 'dst' and 'src',
 // returning added value or math.MaxUint32 plus an overflow flag.
@@ -77,6 +83,8 @@ public static (uint32, bool) SaturatingAdd(uint32 dst, uint32 src) {
     }
     return ((uint32)sum, overflow);
 }
+
+} partial class cmergeᴛMerger {
 
 // SetModeAndGranularity records the counter mode and granularity for
 // the current merge. In the specific case of merging across coverage
@@ -123,4 +131,4 @@ public static coverage.CounterGranularity Granularity(this ref Merger cm) {
     return cm.cgran;
 }
 
-} // end cmerge_package
+} // end cmergeᴛMerger

@@ -10,8 +10,11 @@ using bytes = bytes_package;
 using fmt = fmt_package;
 using strconv = strconv_package;
 using io = io_package;
+using static big_package;
 
 partial class big_package {
+
+} partial class bigᴛFloat {
 
 // Text converts the floating-point number x to a string according
 // to the given format and precision prec. The format is one of:
@@ -181,6 +184,8 @@ public static slice<byte> Append(this ж<Float> Ꮡx, slice<byte> buf, byte fmt,
     return append(buf, (byte)'%', fmt);
 }
 
+} partial class big_package {
+
 internal static void roundShortest(ж<@decimal> Ꮡd, ref Float x) {
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -200,7 +205,7 @@ internal static void roundShortest(ж<@decimal> Ꮡd, ref Float x) {
     // 1) Compute normalized mantissa mant and exponent exp for x such
     // that the lsb of mant corresponds to 1/2 ulp for the precision of
     // x (i.e., for mant we want x.prec + 1 bits).
-    var mant = ((Δnat)default).set(x.mant);
+    var mant = ((nat)default).set(x.mant);
     nint exp = (nint)x.exp - mant.bitLen();
     nint s = mant.bitLen() - (nint)(x.prec + 1);
     switch (ᐧ) {
@@ -217,7 +222,7 @@ internal static void roundShortest(ж<@decimal> Ꮡd, ref Float x) {
 
     // 2) Compute lower bound by subtracting 1/2 ulp.
     ref var lower = ref heap(new @decimal(), out var Ꮡlower);
-    Δnat tmp = default;
+    nat tmp = default;
     Ꮡlower.init(tmp.sub(mant, natOne), exp);
 
     // 3) Compute upper bound by adding 1/2 ulp.
@@ -330,6 +335,8 @@ internal static slice<byte> fmtF(slice<byte> buf, nint prec, @decimal d) {
     return buf;
 }
 
+} partial class bigᴛFloat {
+
 // fmtB appends the string of x in the format mantissa "p" exponent
 // with a decimal mantissa and a binary exponent, or "0" if x is zero,
 // and returns the extended buffer.
@@ -352,11 +359,11 @@ internal static slice<byte> fmtB(this ref Float x, slice<byte> buf) {
     var w = (uint32)len(x.mant) * (uint32)_W;
     switch (ᐧ) {
     case {} when w < x.prec: {
-        m = ((Δnat)default).lsh(m, (nuint)(x.prec - w));
+        m = ((nat)default).lsh(m, (nuint)(x.prec - w));
         break;
     }
     case {} when w > x.prec: {
-        m = ((Δnat)default).rsh(m, (nuint)(w - x.prec));
+        m = ((nat)default).rsh(m, (nuint)(w - x.prec));
         break;
     }}
 
@@ -409,11 +416,11 @@ internal static slice<byte> fmtX(this ж<Float> Ꮡx, slice<byte> buf, nint prec
     nuint w = (nuint)len(x.mant) * (nuint)_W;
     switch (ᐧ) {
     case {} when w < n: {
-        m = ((Δnat)default).lsh(m, n - w);
+        m = ((nat)default).lsh(m, n - w);
         break;
     }
     case {} when w > n: {
-        m = ((Δnat)default).rsh(m, w - n);
+        m = ((nat)default).rsh(m, w - n);
         break;
     }}
     var exp64 = (int64)x.exp - 1; // avoid wrap-around
@@ -468,7 +475,7 @@ internal static slice<byte> fmtP(this ref Float x, slice<byte> buf) {
     m = m.slice(i);
 
     buf = append(buf, ((@string)"0x.").ꓸꓸꓸ);
-    buf = appendꓸꓸꓸ(buf, bytes_package.TrimRight(m.utoa(16), "0"));
+    buf = appendꓸꓸꓸ(buf, bytes.TrimRight(m.utoa(16), "0"));
     buf = append(buf, (byte)'p');
     if (x.exp >= 0) {
         buf = append(buf, (byte)'+');
@@ -476,7 +483,11 @@ internal static slice<byte> fmtP(this ref Float x, slice<byte> buf) {
     return strconv.AppendInt(buf, (int64)x.exp, 10);
 }
 
+} partial class big_package {
+
 internal static fmt.Formatter _ᴛ3ʗ = new FloatжFormatter(ᏑfloatZero); // *Float must implement fmt.Formatter
+
+} partial class bigᴛFloat {
 
 // Format implements [fmt.Formatter]. It accepts all the regular
 // formats for floating-point numbers ('b', 'e', 'E', 'f', 'F',
@@ -579,4 +590,4 @@ public static void Format(this ж<Float> Ꮡx, fmt.State s, rune format) {
     }}
 }
 
-} // end big_package
+} // end bigᴛFloat

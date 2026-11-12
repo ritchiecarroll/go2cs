@@ -48,6 +48,10 @@ public static error errNilAssign;
 internal static readonly ж<array<byte>> ᏑzeroVal = new StaticBox<array<byte>>(new array<byte>(1024));
 internal static ref array<byte> zeroVal => ref ((StaticBox<array<byte>>)ᏑzeroVal).ValueSlot;
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string concurrentMapReadAndMapˢ => ref concurrentMapReadAndMapˢᵇ;
+private static readonly @string concurrentMapReadAndMapˢᵇ = "concurrent map read and map write"u8;
+
 // mapaccess1 returns a pointer to h[key].  Never returns nil, instead
 // it will return a reference to the zero object for the elem type if
 // the key is not in the map.
@@ -55,7 +59,7 @@ internal static ref array<byte> zeroVal => ref ((StaticBox<array<byte>>)ᏑzeroV
 // hold onto it for very long.
 //
 //go:linkname runtime_mapaccess1 runtime.mapaccess1
-internal static @unsafe.Pointer runtime_mapaccess1(ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, @unsafe.Pointer key) {
+internal static @unsafe.Pointer runtime_mapaccess1(ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -133,7 +137,7 @@ internal static @unsafe.Pointer runtime_mapaccess1(ж<abiꓸMapType> Ꮡtyp, ж<
 }
 
 //go:linkname runtime_mapaccess2 runtime.mapaccess2
-internal static (@unsafe.Pointer, bool) runtime_mapaccess2(ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, @unsafe.Pointer key) {
+internal static (@unsafe.Pointer, bool) runtime_mapaccess2(ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -210,8 +214,12 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2(ж<abiꓸMapType> Ꮡ
     }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string concurrentMapWritesˢ => ref concurrentMapWritesˢᵇ;
+private static readonly @string concurrentMapWritesˢᵇ = "concurrent map writes"u8;
+
 //go:linkname runtime_mapassign runtime.mapassign
-internal static @unsafe.Pointer runtime_mapassign(ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, @unsafe.Pointer key) {
+internal static @unsafe.Pointer runtime_mapassign(ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 

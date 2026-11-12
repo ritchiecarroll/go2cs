@@ -13,7 +13,7 @@ partial class abi_package {
 //
 // allocated in non-garbage-collected memory
 partial struct ITab {
-    public ж<ΔInterfaceType> Inter;
+    public ж<InterfaceType> Inter;
     public ж<Type> Type;
     public uint32 Hash;                 // copy of Type.Hash. Used for type switches.
     public array<uintptr> Fun = new(1); // variable sized. fun[0]==0 means Type does not implement Inter.

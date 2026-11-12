@@ -13,7 +13,7 @@ partial struct InterfaceSwitch {
     public nint NCases;
     // Array of NCases elements.
     // Each case must be a non-empty interface type.
-    public array<ж<ΔInterfaceType>> Cases = new(1);
+    public array<ж<InterfaceType>> Cases = new(1);
 }
 
 partial struct InterfaceSwitchCache {
@@ -44,7 +44,7 @@ public static bool UseInterfaceSwitchCache(goarch.ArchFamilyType arch) {
 
 partial struct TypeAssert {
     public ж<TypeAssertCache> Cache;
-    public ж<ΔInterfaceType> Inter;
+    public ж<InterfaceType> Inter;
     public bool CanFail;
 }
 partial struct TypeAssertCache {

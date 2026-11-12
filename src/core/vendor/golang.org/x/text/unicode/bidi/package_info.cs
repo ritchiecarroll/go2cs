@@ -27,9 +27,6 @@ using static go.vendor.golang.org.x.text.unicode.bidi_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Class", "ΔClass")]
-[assembly: GoTypeAlias("Direction", "ΔDirection")]
-[assembly: GoTypeAlias("Run", "ΔRun")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -65,11 +62,11 @@ using static go.vendor.golang.org.x.text.unicode.bidi_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bidi.go", "bidi.cs", "ADaKAQALAoIADzIACQKClIKClIKCgoKClIKCgoKmgpSCpgACEPKCggACEPKCgqyyrLIAAhDSgoKCgoKmpoKUgpSmgoKUlIKCgoKUgqaCgoKosoKmgpSCgpSCgqaUgqqigoKClIKCAAsesqiSqJLKABAkkqiSAAIS4qqirLKCgpSCgoK4gpSUrLKCgoKCgoKUpg==", "70-72:1")]
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bracket.go", "bracket.cs", "ADVwgtyCggABFAAIAtyCgpSCABxKogAEFPaWlJSmgoKmyIKCgoKUlIKUpgAHfAA3AqakpAADFvKCgoKClIKUpqqigoK4qKTcgqaUgpQABxCmgoKUgoKClKaCgoKUupKC", "", "", "74=New/1/1/2")]
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/core.go", "core.cs", "ADt6soKCpgAXSPKCgpSClIKUgqYACBKCppjC3IK4grgACRSmuLi4ptwAAiQADwKClIKmgpSCgoKCgoKCgoK4ggAIFtKmgoKCgoKCgsqmpKQADh6CgpSCgoKCpoKmgqaCqJKCxpSUlIKmgpSCgoK4gpSmpoKC3JS0tLaCyoKUgv6CgqaCgpSClNqUlIKCggAIEIKCgoK2goIADyKYwoKCgriCgpSCgqaCgoKmgpaCgqaCAAkc1riCgoLK3IKCgoKClO6CggAQIoKCgoKCgoKC3KKUgqaCgpSCgoKmgqbKgoLKopSCgoKCgqaC3qaUoqaCltiClIKCpoKUgoK4gpTKpqbagoK4goK6ppSClIKUlIKUuJSmAAUQooKCvtKCgoKCgqa0qsKCgoKCpgAFFOKCgpSCgpSCgqaUuIKUqMKmgoKCuJSUooKClJSUgoKClKamvsKCgoLugpSCggAGIgAVGJTKgpSmgoKU7oKCgoKUpqYAAiQADwKUqqKUgoKClIKUlKyylILcgoKCgpSCuIKClIKCgqaCpsqqopSUqJKUlKiSgpSmgoKUgoKmpoKGlKaCgoKClJSClKaCgpSCxqamgoKUgpQ=", "", "", "480=typeForLevel/1/2/5,typeForLevel/2/2/6")]
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/prop.go", "prop.cs", "ABAeAAEaAAsCgoKUqICYkJaSpgALGpKCggACKgASAoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKassoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKY=")]
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/tables15.0.0.go", "tables15.0.0.cs", "AAwYvrKClKSkgpSCgoKUpIKUgoKClIKCgoKUpIKUgoKClIKCgoKUgoKCgpSmqqKCgpSCgpSCgpSCgpSssoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKaqooKClIKClIKClIKClOyCqJKU3ACwDeIa")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bidi.go", "bidi.cs", "ADeKAQALAoIAETIACQKClIKClIKCgoKClIKCgoKmgpSCpgACEPKCggACEPKCgqyyrLIAAhDSgoKCgoKmxoKUgpSmgoKUlIKCgoKUgqaCgoLIsoKmgpSCgpSCgqaUgqqigoKClIKCAA8esqiSqJLKABQkkqiSAAIS4qqizLKCgpSCgoK4gpSUrLKCgoKCgoKUpg==", "70-72:1")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/bracket.go", "bracket.cs", "ADhwggAJDIKCAAMUAAgC3IKClIIAHkqiAAgU9paUlKaCgqbIgoKCgpSUgpSmAAd8ADcCpqSkAAMW8oKCgoKUgpSmqqKCgriopNyCppSClAAHEKaCgpSCgoKUpoKCgpS6koI=", "", "", "83=New/1/1/2")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/core.go", "core.cs", "AD56soKCpgAZSPKCgpSClIKUgqYACBKCxpjC3IK4grgACRSmuLi4ptwAAiQADwKClIKmgpSCgoKCgoKCgoK4ggAIFtKmgoKCgoKCgsqmpKQAEh6CgpSCgoKCpoKmgqaCyJKCxpSUlIKmgpSCgoK4gpSmpoKC3JS0tLaCyoKUgv6CgqaCgpSClNqUlIKCggAIEIKCgoK2goIAEyK4woKCgriCgpSCgqaCgoKmgpaCgqaCAAsc1riCgoLK3IKCgoKClO6CggAQIoKCgoKCgoKC3KKUgqaCgpSCgoKmgqbKgoLKopSCgoKCgqaC3qaUoqaCltiClIKCpoKUgoK4gpTKpqb6goK4goLappSClIKUlIKUuJSmAAUQooKCvtKCgoKCgqa0qsKCgoKCpgAHFOKCgpSCgpSCgqaUuIKUqMKmgoKCuJSUooKClJSUgoKClKamvsKCgoLugpSCggAGIgAVGJTKgpSmgoKU7oKCgoKUpqYAAiQADwKUyqKUgoKClIKUlKyylILcgoKCgpSCuIKClIKCgqaCpsqqopSUqJKUlKiSgpSmgoKUgoKmpoKGlKaCgoKClJSClKaCgpSCxqamgoKUgpQ=", "", "", "499=typeForLevel/1/2/5,typeForLevel/2/2/6")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/prop.go", "prop.cs", "ABEeAAMaAAsCgoKUqICYkJaSxgALGpKCggACKgASAoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKassoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKY=")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/bidi/tables15.0.0.go", "tables15.0.0.cs", "AA4Y3rKClKSkgpSCgoKUpIKUgoKClIKCgoKUpIKUgoKClIKCgoKUgoKCgpSmqqKCgpSCgpSCgpSCgpSssoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKaqooKClIKClIKClIKClAAIDILIkpT8ALAN4ho=")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.text.unicode;
@@ -90,16 +87,16 @@ public static partial class bidi_package
     internal partial struct bracketPairs {}
     internal partial struct bracketType {}
     [GoValueClone("embeddingLevelStack", "overrideStatusStack", "isolateStatusStack")] internal partial struct directionalStatusStack {}
+    internal partial struct isolatingRunSequence {}
     internal partial struct level {}
     internal partial struct paragraph {}
-    internal partial struct ΔisolatingRunSequence {}
+    public partial struct Class {}
+    public partial struct Direction {}
     public partial struct Ordering {}
     public partial struct Paragraph {}
     public partial struct Properties {}
+    public partial struct Run {}
     public partial struct options {}
-    public partial struct ΔClass {}
-    public partial struct ΔDirection {}
-    public partial struct ΔRun {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -116,3 +113,24 @@ public static partial class bidi_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(bidi_package.Class)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛClass;
+[GoMethodHost(typeof(bidi_package.Ordering)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛOrdering;
+[GoMethodHost(typeof(bidi_package.Paragraph)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛParagraph;
+[GoMethodHost(typeof(bidi_package.Properties)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛProperties;
+[GoMethodHost(typeof(bidi_package.Run)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛRun;
+[GoMethodHost(typeof(bidi_package.bidiTrie)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛbidiTrie;
+[GoMethodHost(typeof(bidi_package.bracketPair)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛbracketPair;
+[GoMethodHost(typeof(bidi_package.bracketPairer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛbracketPairer;
+[GoMethodHost(typeof(bidi_package.bracketPairs)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛbracketPairs;
+[GoMethodHost(typeof(bidi_package.directionalStatusStack)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛdirectionalStatusStack;
+[GoMethodHost(typeof(bidi_package.isolatingRunSequence)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛisolatingRunSequence;
+[GoMethodHost(typeof(bidi_package.paragraph)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiᴛparagraph;
+// </MethodHolders>

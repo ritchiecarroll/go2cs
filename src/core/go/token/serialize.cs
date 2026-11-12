@@ -6,6 +6,7 @@ namespace go.go;
 using slices = slices_package;
 using global::go.sync;
 using iter = iter_package;
+using static token_package;
 
 partial class token_package {
 
@@ -23,6 +24,8 @@ partial struct serializedFileSet {
     public slice<serializedFile> Files;
 }
 
+} partial class tokenᴛFileSet {
+
 // Read calls decode to deserialize a file set into s; s must not be nil.
 public static error Read(this ж<FileSet> Ꮡs, Func<any, error> decode) {
     ref var s = ref Ꮡs.DerefOrNull();
@@ -35,7 +38,7 @@ public static error Read(this ж<FileSet> Ꮡs, Func<any, error> decode) {
     Ꮡs.Ꮡmutex.Lock();
     s.@base = ss.Base;
     foreach (var (_, f) in range(ss.Files)) {
-        Ꮡs.Ꮡtree.add(Ꮡ(new ΔFile(
+        Ꮡs.Ꮡtree.add(Ꮡ(new File(
             name: f.Name,
             @base: f.Base,
             size: f.Size,
@@ -58,7 +61,7 @@ public static error Write(this ж<FileSet> Ꮡs, Func<any, error> encode) {
     Ꮡs.Ꮡmutex.Lock();
     ss.Base = s.@base;
     slice<serializedFile> files = default;
-    foreach (var f in range<ж<ΔFile>>(Ꮡs.Ꮡtree.all().Invoke)) {
+    foreach (var f in range<ж<File>>(Ꮡs.Ꮡtree.all().Invoke)) {
         f.Ꮡmutex.Lock();
         files = append(files, new serializedFile(
             Name: f.name,
@@ -75,4 +78,4 @@ public static error Write(this ж<FileSet> Ꮡs, Func<any, error> encode) {
     return encode(ss);
 }
 
-} // end token_package
+} // end tokenᴛFileSet

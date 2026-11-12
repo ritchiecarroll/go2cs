@@ -7,11 +7,12 @@ using fmt = fmt_package;
 using parse = text.template.parse_package;
 using text.template;
 using ꓸꓸꓸany = Span<any>;
+using static template_package;
 
 partial class template_package {
 
 // Error describes a problem encountered during template Escaping.
-partial struct ΔError {
+partial struct Error {
     // ErrorCode describes the kind of error.
     public ErrorCode ErrorCode;
     // Node is the node that caused the problem, if known.
@@ -230,7 +231,9 @@ public static ErrorCode ErrPredefinedEscaper => 11;
 // escaped as expected.
 public static ErrorCode ErrJSTemplate => 12;
 
-public static @string Error(this ref ΔError e) {
+} partial class templateᴛError {
+
+public static @string Error(this ref Error e) {
     switch (ᐧ) {
     case {} when e.Node != nil: {
         var (loc, _) = (((ж<parse.Tree>)nil)).ErrorContext(e.Node);
@@ -245,12 +248,14 @@ public static @string Error(this ref ΔError e) {
     return "html/template: "u8 + e.Description;
 }
 
+} partial class template_package {
+
 // errorf creates an error given a format string f and args.
 // The template Name still needs to be supplied.
-internal static ж<ΔError> errorf(ErrorCode k, parse.Node node, nint line, @string f, params ꓸꓸꓸany argsʗp) {
+internal static ж<Error> errorf(ErrorCode k, parse.Node node, nint line, @string f, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    return Ꮡ(new ΔError(k, node, "", line, fmt.Sprintf(f, args.ꓸꓸꓸ)));
+    return Ꮡ(new Error(k, node, "", line, fmt.Sprintf(f, args.ꓸꓸꓸ)));
 }
 
 } // end template_package

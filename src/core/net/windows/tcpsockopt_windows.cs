@@ -30,7 +30,7 @@ internal static error setKeepAliveIdle(ж<netFD> fd, time.Duration d) {
         return default;
     }
     // The kernel expects seconds so round to next highest second.
-    nint secs = (nint)roundDurationUp(d, time.ΔSecond);
+    nint secs = (nint)roundDurationUp(d, time.Second);
     var err = fd.Ꮡpfd.SetsockoptInt(syscall.IPPROTO_TCP, windows.TCP_KEEPIDLE, secs);
     runtime.KeepAlive(fd.OrTypedNil());
     return os.NewSyscallError(setsockoptˢ, err);
@@ -47,7 +47,7 @@ internal static error setKeepAliveInterval(ж<netFD> fd, time.Duration d) {
         return default;
     }
     // The kernel expects seconds so round to next highest second.
-    nint secs = (nint)roundDurationUp(d, time.ΔSecond);
+    nint secs = (nint)roundDurationUp(d, time.Second);
     var err = fd.Ꮡpfd.SetsockoptInt(syscall.IPPROTO_TCP, windows.TCP_KEEPINTVL, secs);
     runtime.KeepAlive(fd.OrTypedNil());
     return os.NewSyscallError(setsockoptˢ, err);
@@ -64,6 +64,10 @@ internal static error setKeepAliveCount(ж<netFD> fd, nint n) {
     runtime.KeepAlive(fd.OrTypedNil());
     return os.NewSyscallError(setsockoptˢ, err);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string wsaioctlˢ => ref wsaioctlˢᵇ;
+private static readonly @string wsaioctlˢᵇ = "wsaioctl"u8;
 
 // setKeepAliveIdleAndInterval serves for kernels prior to Windows 10, version 1709.
 internal static error setKeepAliveIdleAndInterval(ж<netFD> fd, time.Duration idle, time.Duration interval) {

@@ -15,6 +15,7 @@ using fmt = fmt_package;
 using hash = hash_package;
 using go.crypto;
 using go.crypto.@internal.fips140;
+using static tls_package;
 
 partial class tls_package {
 
@@ -168,7 +169,7 @@ internal static (slice<byte> clientMAC, slice<byte> serverMAC, slice<byte> clien
     return (clientMAC, serverMAC, clientKey, serverKey, clientIV, serverIV);
 }
 
-internal static ΔfinishedHash newFinishedHash(uint16 version, ref cipherSuite cipherSuite) {
+internal static finishedHash newFinishedHash(uint16 version, ref cipherSuite cipherSuite) {
     slice<byte> buffer = default;
     if (version >= VersionTLS12) {
         buffer = [];
@@ -176,15 +177,15 @@ internal static ΔfinishedHash newFinishedHash(uint16 version, ref cipherSuite c
 
     var (prf, hash) = prfAndHashForVersion(version, ref cipherSuite);
     if (hash != 0) {
-        return new ΔfinishedHash(hash.New(), hash.New(), default, default, buffer, version, prf);
+        return new finishedHash(hash.New(), hash.New(), default, default, buffer, version, prf);
     }
 
-    return new ΔfinishedHash(sha1.New(), sha1.New(), md5.New(), md5.New(), buffer, version, prf);
+    return new finishedHash(sha1.New(), sha1.New(), md5.New(), md5.New(), buffer, version, prf);
 }
 
 // A finishedHash calculates the hash of a set of handshake messages suitable
 // for including in a Finished message.
-partial struct ΔfinishedHash {
+partial struct finishedHash {
     internal hash.Hash client;
     internal hash.Hash server;
     // Prior to TLS 1.2, an additional MD5 hash is required.
@@ -196,7 +197,9 @@ partial struct ΔfinishedHash {
     internal Func<slice<byte>, @string, slice<byte>, nint, slice<byte>> prf;
 }
 
-internal static (nint n, error err) Write(this ref ΔfinishedHash h, slice<byte> msg) {
+} partial class tlsᴛfinishedHash {
+
+internal static (nint n, error err) Write(this ref finishedHash h, slice<byte> msg) {
     h.client.Write(msg);
     h.server.Write(msg);
 
@@ -212,31 +215,31 @@ internal static (nint n, error err) Write(this ref ΔfinishedHash h, slice<byte>
     return (len(msg), default);
 }
 
-internal static slice<byte> Sum(this ΔfinishedHash h) {
+internal static slice<byte> Sum(this finishedHash h) {
     if (h.version >= VersionTLS12) {
         return h.client.Sum(default);
     }
 
-    var @out = new slice<byte>(0, md5.ΔSize + sha1.ΔSize);
+    var @out = new slice<byte>(0, md5.Size + sha1.Size);
     @out = h.clientMD5.Sum(@out);
     return h.client.Sum(@out);
 }
 
 // clientSum returns the contents of the verify_data member of a client's
 // Finished message.
-internal static slice<byte> clientSum(this ΔfinishedHash h, slice<byte> masterSecret) {
+internal static slice<byte> clientSum(this finishedHash h, slice<byte> masterSecret) {
     return h.prf(masterSecret, clientFinishedLabel, h.Sum(), finishedVerifyLength);
 }
 
 // serverSum returns the contents of the verify_data member of a server's
 // Finished message.
-internal static slice<byte> serverSum(this ΔfinishedHash h, slice<byte> masterSecret) {
+internal static slice<byte> serverSum(this finishedHash h, slice<byte> masterSecret) {
     return h.prf(masterSecret, serverFinishedLabel, h.Sum(), finishedVerifyLength);
 }
 
 // hashForClientCertificate returns the handshake messages so far, pre-hashed,
 // suitable for signing by a TLS 1.0 and 1.1 client certificate.
-internal static slice<byte> hashForClientCertificate(this ΔfinishedHash h, uint8 sigType) {
+internal static slice<byte> hashForClientCertificate(this finishedHash h, uint8 sigType) {
     if (sigType == signatureECDSA) {
         return h.server.Sum(default);
     }
@@ -246,9 +249,11 @@ internal static slice<byte> hashForClientCertificate(this ΔfinishedHash h, uint
 
 // discardHandshakeBuffer is called when there is no more need to
 // buffer the entirety of the handshake messages.
-internal static void discardHandshakeBuffer(this ref ΔfinishedHash h) {
+internal static void discardHandshakeBuffer(this ref finishedHash h) {
     h.buffer = default;
 }
+
+} partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cryptoTlsˢ => ref cryptoTlsˢᵇ;

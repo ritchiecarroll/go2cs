@@ -57,7 +57,7 @@ internal static void startCheckmarks() {
             arena.checkmarks = bitmap;
         } else {
             // Otherwise clear the existing bitmap.
-            builtin.clear(bitmap.b[..]);
+            clear(bitmap.b[..]);
         }
     }
     foreach (var (_, ai) in range(mheap_.heapArenas)) {
@@ -97,8 +97,8 @@ private static readonly @string checkmarkFoundUnmarkedˢᵇ = "checkmark found u
 internal static bool setCheckmark(uintptr obj, uintptr @base, uintptr off, markBits mbits) {
     if (!mbits.isMarked()) {
         printlock();
-        print((@string)"runtime: checkmarks found unexpected unmarked object obj=", (Δhex)(uint64)obj, (@string)"\n");
-        print((@string)"runtime: found obj at *(", (Δhex)(uint64)@base, (@string)"+", (Δhex)(uint64)off, (@string)")\n");
+        print((@string)"runtime: checkmarks found unexpected unmarked object obj=", (hex)(uint64)obj, (@string)"\n");
+        print((@string)"runtime: found obj at *(", (hex)(uint64)@base, (@string)"+", (hex)(uint64)off, (@string)")\n");
 
         // Dump the source (base) object
         gcDumpObject(baseˢ, @base, off);
@@ -154,7 +154,7 @@ internal static void runCheckmark(Action<ж<gcWork>> prepareRootSet) {
     Ꮡsched.of(schedt.Ꮡgcwaiting).Store(false);
     startCheckmarks();
     gcResetMarkState();
-    var gcw = (~(~getg()).m).p.ptr().of(runtime_package.Δp.Ꮡgcw);
+    var gcw = (~(~getg()).m).p.ptr().of(p.Ꮡgcw);
     prepareRootSet(gcw);
     gcDrain(gcw, 0);
     wbBufFlush1((~(~getg()).m).p.ptr());
@@ -190,7 +190,7 @@ internal static void checkFinalizersAndCleanups() {
     bool more = default;
     uintptr lastTinyBlock = default;
 
-    forEachSpecial((uintptr Δp, ж<mspan> s, ж<special> sp) => {
+    forEachSpecial((uintptr p, ж<mspan> s, ж<special> sp) => {
         // N.B. The tiny block specials are sorted first in the specials list.
         if (sp.kind == _KindSpecialTinyBlock) {
             lastTinyBlock = s.@base() + sp.offset;
@@ -204,7 +204,7 @@ internal static void checkFinalizersAndCleanups() {
 
         // Run a checkmark GC using this cleanup and/or finalizer as a root.
         if (debug.checkfinalizers > 1) {
-            print((@string)"Scan trace for cleanup/finalizer on ", (Δhex)(uint64)Δp, (@string)":\n");
+            print((@string)"Scan trace for cleanup/finalizer on ", (hex)(uint64)p, (@string)":\n");
         }
         runCheckmark((ж<gcWork> gcw) => {
             switch (sp.kind) {
@@ -225,7 +225,7 @@ internal static void checkFinalizersAndCleanups() {
         // The roots above do not directly mark p, so if it is marked, then p
         // must be reachable from the finalizer and/or cleanup, preventing
         // reclamation.
-        var (bytep, mask) = getCheckmark(Δp);
+        var (bytep, mask) = getCheckmark(p);
         if (bytep == nil) {
             return true;
         }
@@ -233,7 +233,7 @@ internal static void checkFinalizersAndCleanups() {
         if ((uint8)(atomic.Load8(bytep) & mask) != 0) {
             issues |= (nint)(reportCycle);
         }
-        if (Δp >= lastTinyBlock && Δp < lastTinyBlock + (uintptr)maxTinySize) {
+        if (p >= lastTinyBlock && p < lastTinyBlock + (uintptr)maxTinySize) {
             issues |= (nint)(reportTiny);
         }
         if (issues != 0) {
@@ -241,7 +241,7 @@ internal static void checkFinalizersAndCleanups() {
                 more = true;
                 return false;
             }
-            Ꮡreports.Value[nreports] = new checkFinalizersAndCleanups_report(issues, Δp, sp);
+            Ꮡreports.Value[nreports] = new checkFinalizersAndCleanups_report(issues, p, sp);
             nreports++;
         }
         return true;
@@ -268,7 +268,7 @@ internal static void checkFinalizersAndCleanups() {
                 if (lastPtr != 0) {
                     println();
                 }
-                print((@string)"Value of type ", toRType(ctx.ptrType).@string(), (@string)" at ", (Δhex)(uint64)r.ptr, (@string)"\n");
+                print((@string)"Value of type ", toRType(ctx.ptrType).@string(), (@string)" at ", (hex)(uint64)r.ptr, (@string)"\n");
                 if ((nint)(r.issues & reportCycle) != 0) {
                     if (r.sp.kind == _KindSpecialFinalizer) {
                         println((@string)"  is reachable from finalizer");
@@ -289,14 +289,14 @@ internal static void checkFinalizersAndCleanups() {
             }
             println();
 
-            println((@string)"Has", kind, (@string)"at", (Δhex)(uint64)(uintptr)r.sp);
-            var ΔfuncInfo = findfunc(ctx.funcPC);
-            if (ΔfuncInfo.valid()) {
-                var (@file, line) = funcline(ΔfuncInfo, ctx.funcPC);
-                print((@string)"  ", funcname(ΔfuncInfo), (@string)"()\n");
-                print((@string)"      ", @file, (@string)":", line, (@string)" +", (Δhex)(uint64)(ctx.funcPC - ΔfuncInfo.entry()), (@string)"\n");
+            println((@string)"Has", kind, (@string)"at", (hex)(uint64)(uintptr)r.sp);
+            var funcInfo = findfunc(ctx.funcPC);
+            if (funcInfo.valid()) {
+                var (@file, line) = funcline(funcInfo, ctx.funcPC);
+                print((@string)"  ", funcname(funcInfo), (@string)"()\n");
+                print((@string)"      ", @file, (@string)":", line, (@string)" +", (hex)(uint64)(ctx.funcPC - funcInfo.entry()), (@string)"\n");
             } else {
-                print((@string)"  <bad pc ", (Δhex)(uint64)ctx.funcPC, (@string)">\n");
+                print((@string)"  <bad pc ", (hex)(uint64)ctx.funcPC, (@string)">\n");
             }
 
             println((@string)"created at: ");
@@ -304,9 +304,9 @@ internal static void checkFinalizersAndCleanups() {
             if (createInfo.valid()) {
                 var (@file, line) = funcline(createInfo, ctx.createPC);
                 print((@string)"  ", funcname(createInfo), (@string)"()\n");
-                print((@string)"      ", @file, (@string)":", line, (@string)" +", (Δhex)(uint64)(ctx.createPC - createInfo.entry()), (@string)"\n");
+                print((@string)"      ", @file, (@string)":", line, (@string)" +", (hex)(uint64)(ctx.createPC - createInfo.entry()), (@string)"\n");
             } else {
-                print((@string)"  <bad pc ", (Δhex)(uint64)ctx.createPC, (@string)">\n");
+                print((@string)"  <bad pc ", (hex)(uint64)ctx.createPC, (@string)">\n");
             }
 
             lastPtr = r.ptr;

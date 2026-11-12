@@ -75,7 +75,7 @@ internal static Flags linkFlags(nint rawFlags) {
 // If the ifi is nil, interfaceAddrTable returns addresses for all
 // network interfaces. Otherwise it returns addresses for a specific
 // interface.
-internal static (slice<ΔAddr>, error) interfaceAddrTable(ж<Interface> Ꮡifi) {
+internal static (slice<Addr>, error) interfaceAddrTable(ж<Interface> Ꮡifi) {
     ref var ifi = ref Ꮡifi.DerefOrNull();
 
     nint index = 0;
@@ -86,7 +86,7 @@ internal static (slice<ΔAddr>, error) interfaceAddrTable(ж<Interface> Ꮡifi) 
     if (err != nil) {
         return (default, err);
     }
-    var ifat = new slice<ΔAddr>(0, len(msgs));
+    var ifat = new slice<Addr>(0, len(msgs));
     foreach (var (_, m) in range(msgs)) {
         switch (m.type()) {
         case ж<routebsd.InterfaceAddrMessage> mΔ1: {
@@ -120,7 +120,7 @@ internal static (slice<ΔAddr>, error) interfaceAddrTable(ж<Interface> Ꮡifi) 
                 break;
             }}
             if (ip != nil && mask != nil) { // NetBSD may contain routebsd.LinkAddr
-                ifat = append(ifat, (ΔAddr)(new IPNetжΔAddr(Ꮡ(new IPNet(IP: ip, Mask: mask)))));
+                ifat = append(ifat, (Addr)(new IPNetжAddr(Ꮡ(new IPNet(IP: ip, Mask: mask)))));
             }
             break;
         }}

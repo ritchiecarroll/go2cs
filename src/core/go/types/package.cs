@@ -7,6 +7,7 @@ namespace go.go;
 
 using fmt = fmt_package;
 using token = global::go.go.token_package;
+using static types_package;
 
 partial class types_package {
 
@@ -14,7 +15,7 @@ partial class types_package {
 partial struct Package {
     internal @string path;
     internal @string name;
-    internal ж<ΔScope> scope;
+    internal ж<Scope> scope;
     internal slice<ж<Package>> imports;
     internal bool complete;
     internal bool fake;         // scope lookup errors are silently dropped if package is fake (internal use only)
@@ -28,6 +29,8 @@ public static ж<Package> NewPackage(@string path, @string name) {
     var scope = NewScope(Universe, nopos, nopos, fmt.Sprintf("package %q"u8, path));
     return Ꮡ(new Package(path: path, name: name, scope: scope));
 }
+
+} partial class typesᴛPackage {
 
 // Path returns the package path.
 public static @string Path(this ref Package pkg) { return pkg.path; }
@@ -48,7 +51,7 @@ public static @string GoVersion(this ref Package pkg) { return pkg.goVersion; }
 // holding the objects declared at package level (TypeNames,
 // Consts, Vars, and Funcs).
 // For a nil pkg receiver, Scope returns the Universe scope.
-public static ж<ΔScope> Scope(this ж<Package> Ꮡpkg) {
+public static ж<Scope> Scope(this ж<Package> Ꮡpkg) {
     ref var pkg = ref Ꮡpkg.DerefOrNull();
 
     if (Ꮡpkg != nil) {
@@ -83,4 +86,4 @@ public static @string String(this ref Package pkg) {
     return fmt.Sprintf("package %s (%q)"u8, pkg.name, pkg.path);
 }
 
-} // end types_package
+} // end typesᴛPackage

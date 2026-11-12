@@ -27,7 +27,6 @@ using static go.crypto.@internal.fips140.ed25519_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("PublicKey", "ΔPublicKey")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -51,7 +50,7 @@ using static go.crypto.@internal.fips140.ed25519_package;
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(PrivateKey))]
-[assembly: GoFieldAccess(typeof(ΔPublicKey))]
+[assembly: GoFieldAccess(typeof(PublicKey))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -62,7 +61,7 @@ using static go.crypto.@internal.fips140.ed25519_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/ed25519/cast.go", "cast.cs", "ABIegq7CgriCgpSmgoKmgraCgtyCAAkUgoKCgpSCgpQ=", "16-18:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/ed25519/ed25519.go", "ed25519.cs", "ACBGgoKCgqaCgqaCggAHEIKCqJKCpqKCgoKCpoKCpqKCgpSCgqaigoKUgoKUgpSmgoKmooKCppSCgpSCypSUpoKC5qKCpoKUggAQIKaCpoKCgqamgqaCgoKAgqSAgqSmpoKmgpSUgpSmooKCgoKUgoKCgoKCppSCgoKClIKCgoKCgoKmlIKUpoKmgoKCpoKCgoCCpICCpKaClIKClOaigqaCpoKCgoKUgoKCgoKCgqaCgriClIKU")]
+[assembly: GoPositionMap("crypto/internal/fips140/ed25519/ed25519.go", "ed25519.cs", "ACNGgoKCgqaCgqaCggALEIKCyJKCpqKCgoKCpoKCpqKCgpSCgqaigoKUgoKUgpSmgoKmooKCppSCgpSCypSUpoKC5qKCpoKUggAQIKaCpoKCgqamgqaCgoKAgqSAgqSmpoKmgpSUgpSmooKCgoKUgoKCgoKCppSCgoKClIKCgoKCgoKmlIKUpoKmgoKCpoKCgoCCpICCpKaClIKClOaigqaCpoKCgoKUgoKCgoKCgqaCgriClIKU")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -78,7 +77,7 @@ public static partial class ed25519_package
 
     // <TypeAccessibility>
     [GoValueClone("seed", "pub", "s", "prefix")] public partial struct PrivateKey {}
-    [GoValueClone("aBytes")] public partial struct ΔPublicKey {}
+    [GoValueClone("aBytes")] public partial struct PublicKey {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -99,3 +98,14 @@ public static partial class ed25519_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(ed25519_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ed25519ᴛPrivateKey;
+[GoMethodHost(typeof(ed25519_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ed25519ᴛPublicKey;
+// </MethodHolders>

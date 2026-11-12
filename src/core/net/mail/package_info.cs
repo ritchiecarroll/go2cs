@@ -62,7 +62,7 @@ using static go.net.mail_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/mail/message.go", "message.cs", "AClOooIACRrSlIKCpgAFGgAJAqaAgoKClLaCgoK4goKUpoK4lJSC7qaCgoKUlIKUgoKCgoKC7gAKCKSCgqaCuIKClILKgoK4poKmgpSCgoKmAAUY4qbWkoKClKiSgoKUAAoYkqiSAAgWoqqi7MSCkqaUuIKCgpS4gqaClIKolIK4gqaCgqaC3IKUAAsQooKCpoKmgoKUlIKUgpSCuIKUgqYACAaigoKUgpSClIKUgpQADAiygoKCAAkUgoKCgoKCgrjKgpaSgoKCppSCgoK4goKCgoKmpsqUgoKUgpSU3KKUgoKClKaClIKClJSClIKClJSCpgAMCPKUgpKCupKCgpSUgoKCuIKUgoKmgqiSgoKmlIKCuIKCuOjShKiUgoKokoKClIKUyoKCuIKUgpS0goK0yIK4goKUgujEgpSUgoKUlKbKgqaC2ra2tqi0ggAMDuKUgoKClKa26oKUgoKClIKUgqYACAikgriCgoKClIKmgoKUgqaClKaCuIKm5oKClIKCuIKCgoKUgrimgoKUgqiSpoKmgqaCqJKUgoKmgqamppSUgoKCpoKCgoKClIKUpqaygoIACBKCgpKCgpSCgpSUgoIABxCCuKYABhCCqqKUuJSopIKUqJKCgoKCgoKCpoKopKqiqqKopIKU", "517-521:1;784-784:1;882-892:1", "", "", "", "589:21,590:13")]
+[assembly: GoPositionMap("net/mail/message.go", "message.cs", "ACxOooIACxrSlIKCpgAFGgAJAqaAgoKClLaCgoK4goKUpoK4lJSC7qaCgoKUlIKUgoKCgoKC7gAKCKSCgqaCuIKClILKgoK4poKmgpSCgoKmAAcY4sb2koKClKiSgoKUAAwYkqiSAAoWoqqiAAgMxIKSppS4goKClLiCpoKUgqiUgriCpoKCpoLcgpQAERCigoKmgqaCgpSUgpSClIK4gpSCpgAIBqKCgpSClIKUgpSClAAMCLKCgoIACRSCgoKCgoKCuMqClpKCgoKmlIKCgriCgoKCgqamypSCgpSClJTcopSCgoKUpoKUgoKUlIKUgoKUlIKmAAwI8pSCkoK6koKClJSCgoK4gpSCgqaCqJKCgqaUgoK4goK46NKEqJSCgqiSgoKUgpTKgoK4gpSClLSCgrTIgriCgpSC6MSClJSCgpSUpsqCpoLatra2qLSCAAwO4pSCgoKUprbqgpSCgoKUgpSCpgAICKSCuIKCgoKUgqaCgpSCpoKUpoK4gqbmgoKUgoK4goKCgpSCuKaCgpSCqJKmgqaCpoKokpSCgqaCpqamlJSCgoKmgoKCgoKUgpSmprKCggAIEoKCkoKClIKClJSCggAHEIK4xgAIEILKopS4lKikgpSokoKCgoKCgoKmgqikqqKqoqikgpQ=", "517-521:1;784-784:1;882-892:1", "", "", "", "612:21,613:13")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
@@ -107,3 +107,18 @@ public static partial class mail_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(mail_package.Address)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mailᴛAddress;
+[GoMethodHost(typeof(mail_package.AddressParser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mailᴛAddressParser;
+[GoMethodHost(typeof(mail_package.Header)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mailᴛHeader;
+[GoMethodHost(typeof(mail_package.addrParser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mailᴛaddrParser;
+[GoMethodHost(typeof(mail_package.charsetError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mailᴛcharsetError;
+[GoMethodHost(typeof(mail_package.debugT)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mailᴛdebugT;
+// </MethodHolders>

@@ -136,30 +136,30 @@ internal static void vdsoInitFromSysinfoEhdr(ref vdsoInfo info, ж<elfEhdr> Ꮡh
     info.verdef = default;
     for (nint i = 0; dyn.Value[i].d_tag != _DT_NULL; i++) {
         var dt = dyn.at<elfDyn>(i);
-        var Δp = info.loadOffset + (uintptr)dt.d_val;
+        var p = info.loadOffset + (uintptr)dt.d_val;
         switch (dt.d_tag) {
         case var ᴛ when ᴛ == _DT_STRTAB: {
-            info.symstrings = (ж<array<byte>>)(uintptr)((@unsafe.Pointer)Δp);
+            info.symstrings = (ж<array<byte>>)(uintptr)((@unsafe.Pointer)p);
             break;
         }
         case var ᴛ when ᴛ == _DT_SYMTAB: {
-            info.symtab = (ж<array<elfSym>>)(uintptr)((@unsafe.Pointer)Δp);
+            info.symtab = (ж<array<elfSym>>)(uintptr)((@unsafe.Pointer)p);
             break;
         }
         case var ᴛ when ᴛ == _DT_HASH: {
-            hash = (ж<array<uint32>>)(uintptr)((@unsafe.Pointer)Δp);
+            hash = (ж<array<uint32>>)(uintptr)((@unsafe.Pointer)p);
             break;
         }
         case var ᴛ when ᴛ == _DT_GNU_HASH: {
-            gnuhash = (ж<array<uint32>>)(uintptr)((@unsafe.Pointer)Δp);
+            gnuhash = (ж<array<uint32>>)(uintptr)((@unsafe.Pointer)p);
             break;
         }
         case var ᴛ when ᴛ == _DT_VERSYM: {
-            info.versym = (ж<array<uint16>>)(uintptr)((@unsafe.Pointer)Δp);
+            info.versym = (ж<array<uint16>>)(uintptr)((@unsafe.Pointer)p);
             break;
         }
         case var ᴛ when ᴛ == _DT_VERDEF: {
-            info.verdef = (ж<elfVerdef>)(uintptr)((@unsafe.Pointer)Δp);
+            info.verdef = (ж<elfVerdef>)(uintptr)((@unsafe.Pointer)p);
             break;
         }}
     }

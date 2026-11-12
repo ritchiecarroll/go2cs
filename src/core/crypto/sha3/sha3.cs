@@ -11,6 +11,7 @@ using sha3 = go.crypto.@internal.fips140.sha3_package;
 using hash = hash_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using go.crypto.@internal.fips140;
+using static sha3_package;
 
 partial class sha3_package {
 
@@ -128,6 +129,8 @@ public static ж<SHA3> New512() {
     return Ꮡ(new SHA3(sha3.New512().Value.ΔClone()));
 }
 
+} partial class sha3ᴛSHA3 {
+
 internal static void init(this ref SHA3 s) {
     if (s.s.Size() == 0) {
         s = New256().Value.ΔClone();
@@ -190,17 +193,23 @@ public static (hash.Cloner, error) Clone(this ref SHA3 d) {
     return (new SHA3жCloner(Ꮡr), default);
 }
 
+} partial class sha3_package {
+
 // SHAKE is an instance of a SHAKE extendable output function.
 // The zero value is a usable SHAKE256 hash.
 partial struct SHAKE {
     internal sha3.SHAKE s;
 }
 
+} partial class sha3ᴛSHAKE {
+
 internal static void init(this ref SHAKE s) {
     if (s.s.Size() == 0) {
         s = NewSHAKE256().Value.ΔClone();
     }
 }
+
+} partial class sha3_package {
 
 // NewSHAKE128 creates a new SHAKE128 XOF.
 public static ж<SHAKE> NewSHAKE128() {
@@ -229,6 +238,8 @@ public static ж<SHAKE> NewCSHAKE128(slice<byte> N, slice<byte> S) {
 public static ж<SHAKE> NewCSHAKE256(slice<byte> N, slice<byte> S) {
     return Ꮡ(new SHAKE(sha3.NewCShake256(N, S).Value.ΔClone()));
 }
+
+} partial class sha3ᴛSHAKE {
 
 // Write absorbs more data into the XOF's state.
 //
@@ -282,4 +293,4 @@ public static error UnmarshalBinary(this ref SHAKE s, slice<byte> data) {
     return s.s.UnmarshalBinary(data);
 }
 
-} // end sha3_package
+} // end sha3ᴛSHAKE

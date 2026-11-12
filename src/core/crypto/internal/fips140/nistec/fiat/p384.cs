@@ -9,6 +9,7 @@ namespace go.crypto.@internal.fips140.nistec;
 using subtle = go.crypto.@internal.fips140.subtle_package;
 using errors = errors_package;
 using go.crypto.@internal.fips140;
+using static fiat_package;
 
 partial class fiat_package {
 
@@ -22,6 +23,8 @@ partial struct P384Element {
 }
 
 internal static UntypedInt p384ElementLen => 48;
+
+} partial class fiatᴛP384Element {
 
 // One sets e = 1, and returns e.
 public static ж<P384Element> One(this ж<P384Element> Ꮡe) {
@@ -160,6 +163,8 @@ public static ж<P384Element> Select(this ж<P384Element> Ꮡv, ж<P384Element> 
         ref ᴛ4, ref ᴛ5);
     return Ꮡv;
 }
+
+} partial class fiat_package {
 
 internal static void p384InvertEndianness(slice<byte> v) {
     for (nint i = 0; i < len(v) / 2; i++) {

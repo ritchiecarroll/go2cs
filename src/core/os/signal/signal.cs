@@ -7,15 +7,17 @@ using context = context_package;
 using os = os_package;
 using slices = slices_package;
 using sync = sync_package;
-using System.Runtime.CompilerServices;
-using ꓸꓸꓸosꓸSignal = Span<osꓸSignal>;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using ꓸꓸꓸosꓸSignal = Span<os_package.Signal>;
+using static signal_package;
 
 partial class signal_package {
 
 partial struct handlersᴛ1 /*dyn*/ {
     /*embed*/ public sync_package.Mutex Mutex;
     // Map a channel to the signals that should be sent to it.
-    internal map<channel/*<-*/<osꓸSignal>, ж<handler>> m;
+    internal map<channel/*<-*/<os.Signal>, ж<handler>> m;
     // Map a signal to the number of channels receiving it.
     internal array<int64> @ref = new(65);
     // Map channels to signals while the channel is being stopped.
@@ -29,13 +31,15 @@ internal static readonly ж<handlersᴛ1> Ꮡhandlers = new StaticBox<handlers�
 internal static ref handlersᴛ1 handlers => ref ((StaticBox<handlersᴛ1>)Ꮡhandlers).ValueSlot;
 
 partial struct stopping {
-    internal channel/*<-*/<osꓸSignal> c = channel/*<-*/<osꓸSignal>.SendOnly;
+    internal channel/*<-*/<os.Signal> c = channel/*<-*/<os.Signal>.SendOnly;
     internal ж<handler> h;
 }
 
 partial struct handler {
     internal array<uint32> mask = new((numSig + 31) / 32);
 }
+
+} partial class signalᴛhandler {
 
 internal static bool want(this ref handler h, nint sig) {
     return ((h.mask[sig / 32].Rsh((nuint)(sig & 31))) & 1) != 0;
@@ -49,10 +53,12 @@ internal static void clear(this ref handler h, nint sig) {
     h.mask[sig / 32] &= unchecked((uint32)~(uint32)(((uint32)1).Lsh((nuint)(sig & 31))));
 }
 
+} partial class signal_package {
+
 // Stop relaying the signals, sigs, to any channels previously registered to
 // receive them and either reset the signal handlers to their original values
 // (action=disableSignal) or ignore the signals (action=ignoreSignal).
-internal static void cancel(slice<osꓸSignal> sigs, Action<nint> action) {
+internal static void cancel(slice<os.Signal> sigs, Action<nint> action) {
     GoFrame ᒐ = default;
     try {
         Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Lock();
@@ -99,7 +105,7 @@ public static void Ignore(params ꓸꓸꓸosꓸSignal sigʗp) {
 }
 
 // Ignored reports whether sig is currently ignored.
-public static bool Ignored(osꓸSignal sig) {
+public static bool Ignored(os.Signal sig) {
     nint sn = signum(sig);
     return sn >= 0 && signalIgnored(sn);
 }
@@ -128,7 +134,7 @@ internal static Action watchSignalLoop;
 // It is allowed to call Notify multiple times with different channels
 // and the same signals: each channel receives copies of incoming
 // signals independently.
-public static void Notify(channel/*<-*/<osꓸSignal> c, params ꓸꓸꓸosꓸSignal sigʗp) {
+public static void Notify(channel/*<-*/<os.Signal> c, params ꓸꓸꓸosꓸSignal sigʗp) {
     GoFrame ᒐ = default;
     try {
         var sig = sigʗp.sslice();
@@ -143,7 +149,7 @@ public static void Notify(channel/*<-*/<osꓸSignal> c, params ꓸꓸꓸosꓸSig
         var h = handlers.m[c];
         if (h == nil) {
             if (handlers.m == nil) {
-                handlers.m = new map<channel/*<-*/<osꓸSignal>, ж<handler>>();
+                handlers.m = new map<channel/*<-*/<os.Signal>, ж<handler>>();
             }
             h = @new<handler>();
             handlers.m[c] = h;
@@ -197,7 +203,7 @@ public static void Reset(params ꓸꓸꓸosꓸSignal sigʗp) {
 // Stop causes package signal to stop relaying incoming signals to c.
 // It undoes the effect of all prior calls to [Notify] using c.
 // When Stop returns, it is guaranteed that c will receive no more signals.
-public static void Stop(channel/*<-*/<osꓸSignal> c) {
+public static void Stop(channel/*<-*/<os.Signal> c) {
     Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Lock();
 
     var h = handlers.m[c];
@@ -251,7 +257,7 @@ public static void Stop(channel/*<-*/<osꓸSignal> c) {
     go.runtime_package.signalWaitUntilIdle();
 }
 
-internal static void process(osꓸSignal sig) {
+internal static void process(os.Signal sig) {
     GoFrame ᒐ = default;
     try {
         nint n = signum(sig);
@@ -322,7 +328,7 @@ public static partial (context.Context ctx, Action stop) NotifyContext(context.C
         cancel: cancel,
         signals: signals
     ));
-    c.ch = new channel<osꓸSignal>(1);
+    c.ch = new channel<os.Signal>(1);
     Notify(c.ch.AsSendOnly(), c.signals.ꓸꓸꓸ);
     if (ctx.Err() == nil) {
         var cʗ1 = c;
@@ -345,18 +351,24 @@ public static partial (context.Context ctx, Action stop) NotifyContext(context.C
 partial struct signalCtx {
     /*embed*/ public context_package.Context Context;
     internal Action<error> cancel;
-    internal slice<osꓸSignal> signals;
-    internal channel<osꓸSignal> ch;
+    internal slice<os.Signal> signals;
+    internal channel<os.Signal> ch;
 }
+
+} partial class signalᴛsignalCtx {
 
 internal static void stop(this ref signalCtx c) {
     c.cancel(default);
     Stop(c.ch.AsSendOnly());
 }
 
+} partial class signal_package {
+
 partial interface stringer {
     @string String();
 }
+
+} partial class signalᴛsignalCtx {
 
 internal static @string String(this ref signalCtx c) {
     var bufᴷ = new stackAppend<byte>();
@@ -381,7 +393,11 @@ internal static @string String(this ref signalCtx c) {
     return (@string)buf;
 }
 
+} partial class signal_package {
+
 partial struct signalError /*@string*/;
+
+} partial class signalᴛsignalError {
 
 internal static @string Error(this signalError s) {
     return (@string)s;
@@ -394,4 +410,4 @@ internal static bool Is(this signalError s, error target) {
     return false;
 }
 
-} // end signal_package
+} // end signalᴛsignalError

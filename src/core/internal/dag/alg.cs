@@ -3,7 +3,11 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal;
 
+using static dag_package;
+
 partial class dag_package {
+
+} partial class dagᴛGraph {
 
 // Transpose reverses all edges in g.
 public static void Transpose(this ref Graph g) {
@@ -66,4 +70,4 @@ public static void TransitiveReduction(this ref Graph g) {
     }
 }
 
-} // end dag_package
+} // end dagᴛGraph

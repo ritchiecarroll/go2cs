@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
 // </ImportedTypeAliases>
 
 using go;

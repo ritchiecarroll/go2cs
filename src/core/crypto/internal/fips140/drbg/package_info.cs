@@ -60,7 +60,7 @@ using static go.crypto.@internal.fips140.drbg_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/drbg/cast.go", "cast.cs", "AA0cuIIABxAABxAABxDcgoKCgoKU", "18-57:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/drbg/ctrdrbg.go", "ctrdrbg.cs", "AC1clJSCuJSCgqaCgoKCptaCgoKmlIKClKaigoKCgoKm1JSCgoKo1JSCuIK4gsq4goKmpqY=")]
+[assembly: GoPositionMap("crypto/internal/fips140/drbg/ctrdrbg.go", "ctrdrbg.cs", "AC5clJSCuJSCgqaCgoKCxtaCgoKmlIKClMaigoKCgoLG1JSCgoKo1JSCuIK4gsq4goKmpqY=")]
 [assembly: GoPositionMap("crypto/internal/fips140/drbg/entropy_fips140.go", "entropy_fips140.cs", "AB48goKS7oKUlA==")]
 [assembly: GoPositionMap("crypto/internal/fips140/drbg/rand.go", "rand.cs", "ABwwAAMS0oKUgoKCpoKCAAcQgpSCgpSSgriCgsqCgpS0AAQS0gAMGqKCgqaCgg==", "60-64:1", "", "", "", "66:21,67:13")]
 // </GoSourcePositionMaps>
@@ -102,3 +102,13 @@ public static partial class drbg_package
     [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(go.sync.atomic_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(drbg_package.Counter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class drbgᴛCounter;
+// </MethodHolders>

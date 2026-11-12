@@ -14,11 +14,11 @@ private static readonly @string checkptrMisalignedˢᵇ = "checkptr: misaligned 
 internal static ref readonly @string checkptrConvertedPointerˢ => ref checkptrConvertedPointerˢᵇ;
 private static readonly @string checkptrConvertedPointerˢᵇ = "checkptr: converted pointer straddles multiple allocations"u8;
 
-internal static void checkptrAlignment(@unsafe.Pointer Δp, ж<_type> Ꮡelem, uintptr n) {
+internal static void checkptrAlignment(@unsafe.Pointer p, ж<_type> Ꮡelem, uintptr n) {
     ref var elem = ref Ꮡelem.DerefOrNull();
 
     // nil pointer is always suitably aligned (#47430).
-    if (Δp == nil) {
+    if (p == nil) {
         return;
     }
 
@@ -26,13 +26,13 @@ internal static void checkptrAlignment(@unsafe.Pointer Δp, ж<_type> Ꮡelem, u
     // Note that we allow unaligned pointers if the types they point to contain
     // no pointers themselves. See issue 37298.
     // TODO(mdempsky): What about fieldAlign?
-    if (elem.Pointers() && (uintptr)((uintptr)Δp & ((uintptr)elem.Align_ - 1)) != 0) {
+    if (elem.Pointers() && (uintptr)((uintptr)p & ((uintptr)elem.Align_ - 1)) != 0) {
         @throw(checkptrMisalignedˢ);
     }
 
     // Check that (*[n]elem)(p) doesn't straddle multiple heap objects.
     // TODO(mdempsky): Fix #46938 so we don't need to worry about overflow here.
-    if (checkptrStraddles(Δp, n * elem.Size_)) {
+    if (checkptrStraddles(p, n * elem.Size_)) {
         @throw(checkptrConvertedPointerˢ);
     }
 }
@@ -63,15 +63,15 @@ private static readonly @string checkptrPointerˢᵇ = "checkptr: pointer arithm
 internal static ref readonly @string checkptrPointerˢ2 => ref checkptrPointerˢ2ᵇ;
 private static readonly @string checkptrPointerˢ2ᵇ = "checkptr: pointer arithmetic result points to invalid allocation"u8;
 
-internal static void checkptrArithmetic(@unsafe.Pointer Δp, slice<@unsafe.Pointer> originals) {
-    if (0 < (uintptr)Δp && (uintptr)Δp < minLegalPointer) {
+internal static void checkptrArithmetic(@unsafe.Pointer p, slice<@unsafe.Pointer> originals) {
+    if (0 < (uintptr)p && (uintptr)p < minLegalPointer) {
         @throw(checkptrPointerˢ);
     }
 
     // Check that if the computed pointer p points into a heap
     // object, then one of the original pointers must have pointed
     // into the same object.
-    var @base = checkptrBase(Δp);
+    var @base = checkptrBase(p);
     if (@base == 0) {
         return;
     }
@@ -102,9 +102,9 @@ internal static void checkptrArithmetic(@unsafe.Pointer Δp, slice<@unsafe.Point
 // See go.dev/issue/67401.
 //
 //go:linkname checkptrBase
-internal static uintptr checkptrBase(@unsafe.Pointer Δp) {
+internal static uintptr checkptrBase(@unsafe.Pointer p) {
     // stack
-    var gp = getg(); if ((~gp).stack.lo <= (uintptr)Δp && (uintptr)Δp < (~gp).stack.hi) {
+    var gp = getg(); if ((~gp).stack.lo <= (uintptr)p && (uintptr)p < (~gp).stack.hi) {
         // TODO(mdempsky): Walk the stack to identify the
         // specific stack frame or even stack object that p
         // points into.
@@ -117,16 +117,16 @@ internal static uintptr checkptrBase(@unsafe.Pointer Δp) {
     }
 
     // heap (must check after stack because of #35068)
-    var (@base, _, _) = findObject((uintptr)Δp, 0, 0); if (@base != 0) {
+    var (@base, _, _) = findObject((uintptr)p, 0, 0); if (@base != 0) {
         return @base;
     }
 
     // data or bss
     foreach (var (_, datap) in range(activeModules())) {
-        if (datap.data <= (uintptr)Δp && (uintptr)Δp < datap.edata) {
+        if (datap.data <= (uintptr)p && (uintptr)p < datap.edata) {
             return datap.data;
         }
-        if (datap.bss <= (uintptr)Δp && (uintptr)Δp < datap.ebss) {
+        if (datap.bss <= (uintptr)p && (uintptr)p < datap.ebss) {
             return datap.bss;
         }
     }

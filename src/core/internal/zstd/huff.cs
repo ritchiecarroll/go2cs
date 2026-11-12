@@ -6,11 +6,14 @@ namespace go.@internal;
 using io = io_package;
 using bits = math.bits_package;
 using math;
+using static zstd_package;
 
 partial class zstd_package {
 
 // maxHuffmanBits is the largest possible Huffman table bits.
 internal static UntypedInt maxHuffmanBits => 11;
+
+} partial class zstdᴛReader {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string huffmanCountOverflowˢ => ref huffmanCountOverflowˢᵇ;
@@ -34,7 +37,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
     nint tableBits = default;
     ref var r = ref Ꮡr.DerefOrNull();
 
-    if (off >= builtin.len(data)) {
+    if (off >= len(data)) {
         return (0, 0, r.makeEOFError(off));
     }
 
@@ -45,7 +48,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
     nint count = default;
     if (hdr < 128) {
         // The table is compressed using an FSE. RFC 4.2.1.2.
-        if (builtin.len(r.fseScratch) < 1 << 6) {
+        if (len(r.fseScratch) < 1 << 6) {
             r.fseScratch = new slice<fseEntry>((1 << 6));
         }
         var (fseBits, noff, errΔ1) = Ꮡr.readFSE(data, off, 255, 6, r.fseScratch);
@@ -54,7 +57,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
         }
         var fseTable = r.fseScratch;
 
-        if (off + (nint)hdr > builtin.len(data)) {
+        if (off + (nint)hdr > len(data)) {
             return (0, 0, r.makeEOFError(off));
         }
 
@@ -132,7 +135,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
         // The table is not compressed. Each weight is 4 bits.
 
         count = (nint)hdr - 127;
-        if (off + ((count + 1) / 2) >= builtin.len(data)) {
+        if (off + ((count + 1) / 2) >= len(data)) {
             return (0, 0, io.ErrUnexpectedEOF);
         }
         for (nint i = 0; i < count; i += 2) {
@@ -165,7 +168,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
         return (0, 0, r.makeError(off, badHuffmanWeightsˢ));
     }
 
-    if (builtin.len(table) < ((nint)1).Lsh((int64)(tableBits))) {
+    if (len(table) < ((nint)1).Lsh((int64)(tableBits))) {
         return (0, 0, r.makeError(off, huffmanTableTooSmallˢ));
     }
 
@@ -216,4 +219,4 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
     return (tableBits, off, default);
 }
 
-} // end zstd_package
+} // end zstdᴛReader

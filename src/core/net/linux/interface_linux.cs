@@ -143,7 +143,7 @@ internal static Flags linkFlags(uint32 rawFlags) {
 // If the ifi is nil, interfaceAddrTable returns addresses for all
 // network interfaces. Otherwise it returns addresses for a specific
 // interface.
-internal static (slice<ΔAddr>, error) interfaceAddrTable(ж<Interface> ifi) {
+internal static (slice<Addr>, error) interfaceAddrTable(ж<Interface> ifi) {
     var (tab, err) = syscall.NetlinkRIB(syscall.RTM_GETADDR, syscall.AF_UNSPEC);
     if (err != nil) {
         return (default, os.NewSyscallError(netlinkribˢ, err));
@@ -159,11 +159,11 @@ internal static (slice<ΔAddr>, error) interfaceAddrTable(ж<Interface> ifi) {
     return (ifat, default);
 }
 
-internal static (slice<ΔAddr>, error) addrTable(ж<Interface> Ꮡifi, slice<syscall.NetlinkMessage> msgs) {
+internal static (slice<Addr>, error) addrTable(ж<Interface> Ꮡifi, slice<syscall.NetlinkMessage> msgs) {
     ref var ifi = ref Ꮡifi.DerefOrNull();
-    var ifatᴷ = new stackAppend<ΔAddr>(moves: true);
+    var ifatᴷ = new stackAppend<Addr>(moves: true);
 
-    slice<ΔAddr> ifat = default;
+    slice<Addr> ifat = default;
 loop:
     foreach (var (_, vᴛ1) in range(msgs)) {
         ref var m = ref heap(new syscall.NetlinkMessage(), out var Ꮡm);
@@ -195,7 +195,7 @@ break_loop:;
     return (ifat, default);
 }
 
-internal static ΔAddr newAddr(ref syscall.IfAddrmsg ifam, slice<syscall.NetlinkRouteAttr> attrs) {
+internal static Addr newAddr(ref syscall.IfAddrmsg ifam, slice<syscall.NetlinkRouteAttr> attrs) {
     bool ipPointToPoint = default;
     // Seems like we need to make sure whether the IP interface
     // stack consists of IP point-to-point numbered or unnumbered
@@ -212,12 +212,12 @@ internal static ΔAddr newAddr(ref syscall.IfAddrmsg ifam, slice<syscall.Netlink
         }
         switch (ifam.Family) {
         case var ᴛ when ᴛ == syscall.AF_INET: {
-            return new IPNetжΔAddr(Ꮡ(new IPNet(IP: IPv4(a.Value[0], a.Value[1], a.Value[2], a.Value[3]), Mask: CIDRMask((nint)ifam.Prefixlen, 8 * IPv4len))));
+            return new IPNetжAddr(Ꮡ(new IPNet(IP: IPv4(a.Value[0], a.Value[1], a.Value[2], a.Value[3]), Mask: CIDRMask((nint)ifam.Prefixlen, 8 * IPv4len))));
         }
         case var ᴛ when ᴛ == syscall.AF_INET6: {
             var ifa = Ꮡ(new IPNet(IP: new IP(IPv6len), Mask: CIDRMask((nint)ifam.Prefixlen, 8 * IPv6len)));
             copy(ifa.IP, a.Value[..]);
-            return new IPNetжΔAddr(ifa);
+            return new IPNetжAddr(ifa);
         }}
     }
     return default;
@@ -231,17 +231,17 @@ private static readonly @string procNetIgmp6ˢᵇ = "/proc/net/igmp6"u8;
 
 // interfaceMulticastAddrTable returns addresses for a specific
 // interface.
-internal static (slice<ΔAddr>, error) interfaceMulticastAddrTable(ж<Interface> ifi) {
+internal static (slice<Addr>, error) interfaceMulticastAddrTable(ж<Interface> ifi) {
     var ifmat4 = parseProcNetIGMP(procNetIgmpˢ, ifi);
     var ifmat6 = parseProcNetIGMP6(procNetIgmp6ˢ, ifi);
     return (appendꓸꓸꓸ(ifmat4, ifmat6), default);
 }
 
-internal static slice<ΔAddr> parseProcNetIGMP(@string path, ж<Interface> Ꮡifi) {
+internal static slice<Addr> parseProcNetIGMP(@string path, ж<Interface> Ꮡifi) {
     GoFrame ᒐ = default;
     try {
         ref var ifi = ref Ꮡifi.DerefOrNull();
-        var ifmatᴷ = new stackAppend<ΔAddr>(moves: true);
+        var ifmatᴷ = new stackAppend<Addr>(moves: true);
 
         var (fd, err) = open(path);
         if (err != nil) {
@@ -249,7 +249,7 @@ internal static slice<ΔAddr> parseProcNetIGMP(@string path, ж<Interface> Ꮡif
         }
         var fdʗ1 = fd;
         defer(fdʗ1.close, ref ᒐ);
-        slice<ΔAddr> ifmat = default;
+        slice<Addr> ifmat = default;
         @string name = default;
         fd.readLine(); // skip first line
         var b = new slice<byte>(IPv4len);
@@ -273,7 +273,7 @@ internal static slice<ΔAddr> parseProcNetIGMP(@string path, ж<Interface> Ꮡif
                     }
                     var i = ~Ꮡ(b[..4], 0).Reinterpret<byte, uint32>();
                     var ifma = Ꮡ(new IPAddr(IP: IPv4((byte)(i >> 24), (byte)(i >> 16), (byte)(i >> 8), (byte)i)));
-                    ifmat = append(ifmatᴷ, ifmat, (ΔAddr)(new IPAddrжΔAddr(ifma)));
+                    ifmat = append(ifmatᴷ, ifmat, (Addr)(new IPAddrжAddr(ifma)));
                 }
                 break;
             }}
@@ -285,11 +285,11 @@ internal static slice<ΔAddr> parseProcNetIGMP(@string path, ж<Interface> Ꮡif
     finally { ᒐ.Run(); }
 }
 
-internal static slice<ΔAddr> parseProcNetIGMP6(@string path, ж<Interface> Ꮡifi) {
+internal static slice<Addr> parseProcNetIGMP6(@string path, ж<Interface> Ꮡifi) {
     GoFrame ᒐ = default;
     try {
         ref var ifi = ref Ꮡifi.DerefOrNull();
-        var ifmatᴷ = new stackAppend<ΔAddr>(moves: true);
+        var ifmatᴷ = new stackAppend<Addr>(moves: true);
 
         var (fd, err) = open(path);
         if (err != nil) {
@@ -297,7 +297,7 @@ internal static slice<ΔAddr> parseProcNetIGMP6(@string path, ж<Interface> Ꮡi
         }
         var fdʗ1 = fd;
         defer(fdʗ1.close, ref ᒐ);
-        slice<ΔAddr> ifmat = default;
+        slice<Addr> ifmat = default;
         var b = new slice<byte>(IPv6len);
         for (var (l, ok) = fd.readLine(); ok; (l, ok) = fd.readLine()) {
             var f = splitAtBytes(l, " \r\t\n");
@@ -309,7 +309,7 @@ internal static slice<ΔAddr> parseProcNetIGMP6(@string path, ж<Interface> Ꮡi
                     (b[i / 2], _) = xtoi2(f[2].slice(i, i + 2), 0);
                 }
                 var ifma = Ꮡ(new IPAddr(IP: new IP(new byte[]{b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15]}.slice())));
-                ifmat = append(ifmatᴷ, ifmat, (ΔAddr)(new IPAddrжΔAddr(ifma)));
+                ifmat = append(ifmatᴷ, ifmat, (Addr)(new IPAddrжAddr(ifma)));
             }
         }
         ifmat = move2heap(ifmatᴷ, ifmat);

@@ -10,6 +10,7 @@ using strconv = strconv_package;
 using strings = strings_package;
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
+using static user_package;
 
 partial class user_package {
 
@@ -145,6 +146,8 @@ partial struct bufferKind /*num:int32*/;
 internal static bufferKind userBuffer = ((bufferKind)_C__SC_GETPW_R_SIZE_MAX);
 internal static bufferKind groupBuffer = ((bufferKind)_C__SC_GETGR_R_SIZE_MAX);
 
+} partial class userᴛbufferKind {
+
 internal static _C_size_t initialSize(this bufferKind k) {
     var sz = _C_sysconf((_C_int)k);
     if (sz == -1) {
@@ -159,6 +162,8 @@ internal static _C_size_t initialSize(this bufferKind k) {
     }
     return (_C_size_t)sz;
 }
+
+} partial class user_package {
 
 // retryWithBuffer repeatedly calls f(), increasing the size of the
 // buffer each time, until f succeeds, fails with a non-ERANGE error,

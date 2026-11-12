@@ -14,6 +14,7 @@ using @internal;
 using @unsafe = unsafe_package;
 using unicode;
 using ꓸꓸꓸany = Span<any>;
+using static fmt_package;
 
 partial class fmt_package {
 
@@ -122,6 +123,8 @@ public static @string FormatString(State state, rune verb) {
 // Use simple []byte instead of bytes.Buffer to avoid large dependency.
 partial struct buffer /*[]byte*/;
 
+} partial class fmtᴛbuffer {
+
 internal static void write(this ref buffer b, slice<byte> p) {
     b = appendꓸꓸꓸ(b, p);
 }
@@ -138,13 +141,15 @@ internal static void writeRune(this ref buffer b, rune r) {
     b = utf8.AppendRune(b, r);
 }
 
+} partial class fmt_package {
+
 // pp is used to store a printer's state and is reused with sync.Pool to avoid allocations.
 partial struct pp {
     internal buffer buf;
     // arg holds the current item, as an interface{}.
     internal any arg;
     // value is used instead of arg for reflect values.
-    internal reflectꓸValue value;
+    internal reflect.Value value;
     // fmt is used to format basic items such as integers or strings.
     internal fmt fmt;
     // reordered records whether the format string used argument reordering.
@@ -176,6 +181,8 @@ internal static ж<pp> newPrinter() {
     return p;
 }
 
+} partial class fmtᴛpp {
+
 // free saves used pp structs in ppFree; avoids an allocation per invocation.
 internal static void free(this ж<pp> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -197,7 +204,7 @@ internal static void free(this ж<pp> Ꮡp) {
     }
 
     p.arg = default;
-    p.value = new reflectꓸValue();
+    p.value = new reflect.Value();
     p.wrappedErrs = p.wrappedErrs[..0];
     ᏑppFree.Put(Ꮡp.OrTypedNil());
 }
@@ -239,6 +246,8 @@ internal static (nint ret, error err) WriteString(this ref pp p, @string s) {
     p.buf.writeString(s);
     return (len(s), default);
 }
+
+} partial class fmt_package {
 
 // These routines end in 'f' and take a format string.
 
@@ -394,9 +403,9 @@ public static slice<byte> Appendln(slice<byte> b, params ꓸꓸꓸany aʗp) {
 // getField gets the i'th field of the struct value.
 // If the field itself is a non-nil interface, return a value for
 // the thing inside the interface, not the interface itself.
-internal static reflectꓸValue getField(reflectꓸValue v, nint i) {
+internal static reflect.Value getField(reflect.Value v, nint i) {
     var val = v.Field(i);
-    if (val.Kind() == reflect.ΔInterface && !val.IsNil()) {
+    if (val.Kind() == reflect.Interface && !val.IsNil()) {
         val = val.Elem();
     }
     return val;
@@ -428,7 +437,9 @@ internal static (nint num, bool isnum, nint newi) parsenum(sstring s, nint start
     return (num, isnum, newi);
 }
 
-internal static void unknownType(this ref pp p, reflectꓸValue v) {
+} partial class fmtᴛpp {
+
+internal static void unknownType(this ref pp p, reflect.Value v) {
     if (!v.IsValid()) {
         p.buf.writeString(nilAngleString);
         return;
@@ -681,12 +692,12 @@ internal static void fmtBytes(this ж<pp> Ꮡp, slice<byte> v, rune verb, sstrin
     }}
 }
 
-internal static void fmtPointer(this ж<pp> Ꮡp, reflectꓸValue value, rune verb) {
+internal static void fmtPointer(this ж<pp> Ꮡp, reflect.Value value, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     uintptr u = default;
     switch (value.Kind()) {
-    case var ᴛ when ᴛ == reflect.Chan || ᴛ == reflect.Func || ᴛ == reflect.Map || ᴛ == reflect.ΔPointer || ᴛ == reflect.ΔSlice || ᴛ == reflect.ΔUnsafePointer: {
+    case var ᴛ when ᴛ == reflect.Chan || ᴛ == reflect.Func || ᴛ == reflect.Map || ᴛ == reflect.Pointer || ᴛ == reflect.Slice || ᴛ == reflect.UnsafePointer: {
         u = (uintptr)(uintptr)value.UnsafePointer();
         break;
     }
@@ -744,7 +755,7 @@ internal static void catchPanic(this ж<pp> Ꮡp, any arg, rune verb, @string me
             // If it's a nil pointer, just say "<nil>". The likeliest causes are a
             // Stringer that fails to guard against nil or a nil pointer for a
             // value receiver, and in either case, "<nil>" is a nice result.
-            var v = reflect.ValueOf(arg); if (v.Kind() == reflect.ΔPointer && v.IsNil()) {
+            var v = reflect.ValueOf(arg); if (v.Kind() == reflect.Pointer && v.IsNil()) {
                 p.buf.writeString(nilAngleString);
                 return;
             }
@@ -868,7 +879,7 @@ internal static void printArg(this ж<pp> Ꮡp, any arg, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.arg = arg;
-    p.value = new reflectꓸValue();
+    p.value = new reflect.Value();
 
     if (arg == nil) {
         switch (verb) {
@@ -969,7 +980,7 @@ internal static void printArg(this ж<pp> Ꮡp, any arg, rune verb) {
         Ꮡp.fmtBytes(f, verb, byteˢ);
         break;
     }
-    case reflectꓸValue f: {
+    case reflect.Value f: {
         // Handle extractable values with special methods
         // since printValue does not handle them at depth 0.
         if (f.IsValid() && f.CanInterface()) {
@@ -995,7 +1006,7 @@ internal static void printArg(this ж<pp> Ꮡp, any arg, rune verb) {
 
 // printValue is similar to printArg but starts with a reflect value, not an interface{} value.
 // It does not handle 'p' and 'T' verbs because these should have been already handled by printArg.
-internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune verb, nint depth) {
+internal static void printValue(this ж<pp> Ꮡp, reflect.Value value, rune verb, nint depth) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // Handle values with special methods if not already handled by printArg (depth == 0).
@@ -1026,13 +1037,13 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
             }}
         }
     }
-    else if (exprᴛ1 == reflect.ΔBool) { matchᴛ1 = true;
+    else if (exprᴛ1 == reflect.Bool) { matchᴛ1 = true;
         Ꮡp.fmtBool(f.Bool(), verb);
     }
-    else if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) { matchᴛ1 = true;
+    else if (exprᴛ1 == reflect.Int || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) { matchᴛ1 = true;
         Ꮡp.fmtInteger((uint64)f.Int(), signed, verb);
     }
-    else if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) { matchᴛ1 = true;
+    else if (exprᴛ1 == reflect.Uint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) { matchᴛ1 = true;
         Ꮡp.fmtInteger(f.Uint(), unsigned, verb);
     }
     else if (exprᴛ1 == reflect.Float32) { matchᴛ1 = true;
@@ -1047,7 +1058,7 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
     else if (exprᴛ1 == reflect.Complex128) { matchᴛ1 = true;
         Ꮡp.fmtComplex(f.Complex(), 128, verb);
     }
-    else if (exprᴛ1 == reflect.ΔString) { matchᴛ1 = true;
+    else if (exprᴛ1 == reflect.String) { matchᴛ1 = true;
         Ꮡp.fmtString(f.String(), verb);
     }
     else if (exprᴛ1 == reflect.Map) { matchᴛ1 = true;
@@ -1103,7 +1114,7 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
         }
         p.buf.writeByte((byte)'}');
     }
-    else if (exprᴛ1 == reflect.ΔInterface) { matchᴛ1 = true;
+    else if (exprᴛ1 == reflect.Interface) { matchᴛ1 = true;
         var valueΔ2 = f.Elem();
         if (!valueΔ2.IsValid()) {
             if (p.fmt.sharpV) {
@@ -1116,14 +1127,14 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
             Ꮡp.printValue(valueΔ2, verb, depth + 1);
         }
     }
-    else if (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.ΔSlice) { matchᴛ1 = true;
+    else if (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.Slice) { matchᴛ1 = true;
         switch (verb) {
         case 's' or 'q' or 'x' or 'X': {
             // Handle byte and uint8 slices and arrays special for the above verbs.
             var t = f.Type();
             if (t.Elem().Kind() == reflect.Uint8) {
                 slice<byte> bytes = default;
-                if (f.Kind() == reflect.ΔSlice || f.CanAddr()) {
+                if (f.Kind() == reflect.Slice || f.CanAddr()) {
                     bytes = f.Bytes();
                 } else {
                     // We have an array, but we cannot Bytes() a non-addressable array,
@@ -1141,7 +1152,7 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
         }}
         if (p.fmt.sharpV) {
             p.buf.writeString(f.Type().String());
-            if (f.Kind() == reflect.ΔSlice && f.IsNil()) {
+            if (f.Kind() == reflect.Slice && f.IsNil()) {
                 p.buf.writeString(nilParenString);
                 return;
             }
@@ -1164,13 +1175,13 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
             p.buf.writeByte((byte)']');
         }
     }
-    else if (exprᴛ1 == reflect.ΔPointer) { matchᴛ1 = true;
+    else if (exprᴛ1 == reflect.Pointer) { matchᴛ1 = true;
         // pointer to array or slice or struct? ok at top level
         // but not embedded (avoid loops)
         if (depth == 0 && (uintptr)f.UnsafePointer() != nil) {
             var a = f.Elem();
             switch (a.Kind()) {
-            case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.ΔSlice || ᴛ == reflect.Struct || ᴛ == reflect.Map: {
+            case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.Slice || ᴛ == reflect.Struct || ᴛ == reflect.Map: {
                 p.buf.writeByte((byte)'&');
                 Ꮡp.printValue(a, verb, depth + 1);
                 return;
@@ -1178,13 +1189,15 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
         }
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func || exprᴛ1 == reflect.ΔUnsafePointer)) {
+    if (fallthrough || !matchᴛ1 && (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func || exprᴛ1 == reflect.UnsafePointer)) {
         Ꮡp.fmtPointer(f, verb);
     }
     else if (!matchᴛ1) { /* default: */
         p.unknownType(f);
     }
 }
+
+} partial class fmt_package {
 
 // intFromArg gets the argNumth element of a. On return, isInt reports whether the argument has integer type.
 internal static (nint num, bool isInt, nint newArgNum) intFromArg(slice<any> a, nint argNum) {
@@ -1199,7 +1212,7 @@ internal static (nint num, bool isInt, nint newArgNum) intFromArg(slice<any> a, 
             // Work harder.
             var v = reflect.ValueOf(a[argNum]);
             switch (v.Kind()) {
-            case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+            case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
                 var n = v.Int();
                 if ((int64)(nint)n == n) {
                     num = (nint)n;
@@ -1207,7 +1220,7 @@ internal static (nint num, bool isInt, nint newArgNum) intFromArg(slice<any> a, 
                 }
                 break;
             }
-            case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+            case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
                 var n = v.Uint();
                 if ((int64)n >= 0 && (uint64)(nint)n == n) {
                     num = (nint)n;
@@ -1253,6 +1266,8 @@ internal static (nint index, nint wid, bool ok) parseArgNumber(sstring format) {
     }
     return (0, 1, false);
 }
+
+} partial class fmtᴛpp {
 
 // argNumber returns the next argument to evaluate, which is either the value of the passed-in
 // argNum or the value of the bracketed integer that begins format[i:]. It also returns
@@ -1489,7 +1504,7 @@ internal static void doPrint(this ж<pp> Ꮡp, slice<any> a) {
 
     var prevString = false;
     foreach (var (argNum, arg) in range(a)) {
-        var isString = arg != nil && reflect.TypeOf(arg).Kind() == reflect.ΔString;
+        var isString = arg != nil && reflect.TypeOf(arg).Kind() == reflect.String;
         // Add a space between two non-string arguments.
         if (argNum > 0 && !isString && !prevString) {
             p.buf.writeByte((byte)' ');
@@ -1513,4 +1528,4 @@ internal static void doPrintln(this ж<pp> Ꮡp, slice<any> a) {
     p.buf.writeByte((byte)'\n');
 }
 
-} // end fmt_package
+} // end fmtᴛpp

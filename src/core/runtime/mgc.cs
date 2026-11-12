@@ -131,6 +131,7 @@ using gc = @internal.runtime.gc_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -180,7 +181,7 @@ internal static void gcinit() {
         @throw(sizeOfWorkbufIsˢ);
     }
     // No sweep on the first cycle.
-    ᏑΔsweep.Ꮡactive.Ꮡstate.Store(sweepDrainedMask);
+    Ꮡsweep.Ꮡactive.Ꮡstate.Store(sweepDrainedMask);
 
     // Initialize GC pacer state.
     // Use the environment variable GOGC for the initial gcPercent value.
@@ -313,8 +314,8 @@ internal static bool pollFractionalWorkerExit() {
     if (delta <= 0) {
         return true;
     }
-    var Δp = (~(~getg()).m).p.ptr();
-    var selfTime = Δp.of(runtime_package.Δp.ᏑgcFractionalMarkTime).Load() + (now - (~Δp).gcMarkWorkerStartTime);
+    var p = (~(~getg()).m).p.ptr();
+    var selfTime = p.of(runtime_package.p.ᏑgcFractionalMarkTime).Load() + (now - (~p).gcMarkWorkerStartTime);
     // Add some slack to the utilization goal so that the
     // fractional worker isn't behind again the instant it exits.
     return (float64)selfTime / (float64)delta > 1.2D * gcController.fractionalUtilizationGoal;
@@ -611,6 +612,8 @@ internal static gcTriggerKind gcTriggerTime => 1;
 // to work.cycles).
 internal static gcTriggerKind gcTriggerCycle => 2;
 
+} partial class runtimeᴛgcTrigger {
+
 // test reports whether the trigger condition is satisfied, meaning
 // that the exit condition for the _GCoff phase has been met. The exit
 // condition should be tested when allocating.
@@ -636,6 +639,8 @@ internal static bool test(this gcTrigger t) {
     }}
     return true;
 }
+
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string pMcacheNotFlushedˢ => ref pMcacheNotFlushedˢᵇ;
@@ -720,22 +725,22 @@ internal static void gcStart(gcTrigger trigger) {
         // Update it under gcsema to avoid gctrace getting wrong values.
         work.userForced = trigger.kind == gcTriggerCycle;
 
-        var Δtrace = traceAcquire();
-        if (Δtrace.ok()) {
-            Δtrace.GCStart();
-            traceRelease(Δtrace);
+        var trace = traceAcquire();
+        if (trace.ok()) {
+            trace.GCStart();
+            traceRelease(trace);
         }
 
         // Check and setup per-P state.
-        foreach (var (_, Δp) in range(allp)) {
+        foreach (var (_, p) in range(allp)) {
             // Check that all Ps have finished deferred mcache flushes.
-            var fg = (~Δp).mcache.ᏑflushGen.Load(); if (fg != mheap_.sweepgen) {
-                println((@string)"runtime: p", (~Δp).id, (@string)"flushGen", fg, (@string)"!= sweepgen", mheap_.sweepgen);
+            var fg = (~p).mcache.ᏑflushGen.Load(); if (fg != mheap_.sweepgen) {
+                println((@string)"runtime: p", (~p).id, (@string)"flushGen", fg, (@string)"!= sweepgen", mheap_.sweepgen);
                 @throw(pMcacheNotFlushedˢ);
             }
             // Initialize ptrBuf if necessary.
-            if (goexperiment.GreenTeaGC && (~Δp).gcw.ptrBuf == nil) {
-                Δp.Value.gcw.ptrBuf = (ж<array<uintptr>>)(uintptr)(persistentalloc(gc.PageSize, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys));
+            if (goexperiment.GreenTeaGC && (~p).gcw.ptrBuf == nil) {
+                p.Value.gcw.ptrBuf = (ж<array<uintptr>>)(uintptr)(persistentalloc(gc.PageSize, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys));
             }
         }
 
@@ -973,7 +978,7 @@ top:
 
     // Flush all local buffers and collect flushedWork flags.
     gcMarkDoneFlushed = 0;
-    forEachP(waitReasonGCMarkTermination, (ж<Δp> pp) => {
+    forEachP(waitReasonGCMarkTermination, (ж<p> pp) => {
         // Flush the write barrier buffer, since this may add
         // work to the gcWork.
         wbBufFlush1(pp);
@@ -983,7 +988,7 @@ top:
         //
         // TODO(austin): Break up these workbufs to
         // better distribute work.
-        pp.of(runtime_package.Δp.Ꮡgcw).dispose();
+        pp.of(runtime_package.p.Ꮡgcw).dispose();
 
         // Collect the flushedWork flag.
         if ((~pp).gcw.flushedWork) {
@@ -1035,9 +1040,9 @@ top:
     // it doesn't matter because we're non-preemptible anyway.
     var restart = false;
     systemstack(() => {
-        foreach (var (_, Δp) in range(allp)) {
-            wbBufFlush1(Δp);
-            if (!Δp.of(runtime_package.Δp.Ꮡgcw).empty()) {
+        foreach (var (_, p) in range(allp)) {
+            wbBufFlush1(p);
+            if (!p.of(runtime_package.p.Ꮡgcw).empty()) {
                 restart = true;
                 break;
             }
@@ -1107,6 +1112,8 @@ top:
     gcMarkTermination(stw);
 }
 
+} partial class runtimeᴛg {
+
 // isMaybeRunnable checks whether a goroutine may still be semantically runnable.
 // For goroutines which are semantically runnable, this will eventually return true
 // as the GC marking phase progresses. It returns false for leaked goroutines, or for
@@ -1146,6 +1153,8 @@ internal static bool isMaybeRunnable(this ж<g> Ꮡgp) {
     }}
     return true;
 }
+
+} partial class runtime_package {
 
 // findMaybeRunnableGoroutines checks to see if more blocked but maybe-runnable goroutines exist.
 // If so, it adds them into root set and increments work.markrootJobs accordingly.
@@ -1339,10 +1348,10 @@ internal static void gcMarkTermination(worldStop stw) {
     mp.Value.traceback = 0;
     casgstatus(curgp, _Gwaiting, _Grunning);
 
-    var Δtrace = traceAcquire();
-    if (Δtrace.ok()) {
-        Δtrace.GCDone();
-        traceRelease(Δtrace);
+    var trace = traceAcquire();
+    if (trace.ok()) {
+        trace.GCDone();
+        traceRelease(trace);
     }
 
     // all done
@@ -1390,8 +1399,8 @@ internal static void gcMarkTermination(worldStop stw) {
     //
     // Do this now, instead of at the start of the next GC cycle, because
     // these two may keep accumulating even if the GC is not active.
-    ᏑΔscavenge.of(Δscavengeᴛ1.ᏑassistTime).Store(0);
-    ᏑΔscavenge.of(Δscavengeᴛ1.ᏑbackgroundTime).Store(0);
+    Ꮡscavenge.of(scavengeᴛ1.ᏑassistTime).Store(0);
+    Ꮡscavenge.of(scavengeᴛ1.ᏑbackgroundTime).Store(0);
 
     // Reset idle time stat.
     Ꮡsched.of(schedt.ᏑidleTime).Store(0);
@@ -1432,7 +1441,7 @@ internal static void gcMarkTermination(worldStop stw) {
     // N.B. Below we might duplicate some work from gcSweep; this is
     // fine as all that work is idempotent within a GC cycle, and
     // we're still holding worldsema so a new cycle can't start.
-    var sl = ᏑΔsweep.Ꮡactive.begin();
+    var sl = Ꮡsweep.Ꮡactive.begin();
     if (!stwSwept && !sl.valid) {
         @throw(failedToSetSweepBarrierˢ);
     } else if (stwSwept && sl.valid) {
@@ -1489,19 +1498,19 @@ internal static void gcMarkTermination(worldStop stw) {
     // Also, flush the pinner cache, to avoid leaking that memory
     // indefinitely.
     if (debug.gctrace > 1) {
-        builtin.clear(memstats.lastScanStats[..]);
+        clear(memstats.lastScanStats[..]);
     }
-    forEachP(waitReasonFlushProcCaches, (ж<Δp> pp) => {
+    forEachP(waitReasonFlushProcCaches, (ж<p> pp) => {
         (~pp).mcache.prepareForSweep();
         if ((~pp).status == _Pidle) {
             systemstack(() => {
                 @lock(Ꮡmheap_.Ꮡlock);
-                pp.of(runtime_package.Δp.Ꮡpcache).flush(Ꮡmheap_.Ꮡpages);
+                pp.of(p.Ꮡpcache).flush(Ꮡmheap_.Ꮡpages);
                 unlock(Ꮡmheap_.Ꮡlock);
             });
         }
         if (debug.gctrace > 1) {
-            pp.of(runtime_package.Δp.Ꮡgcw).flushScanStats(Ꮡmemstats.ᏑlastScanStats);
+            pp.of(p.Ꮡgcw).flushScanStats(Ꮡmemstats.ᏑlastScanStats);
         }
         pp.Value.pinnerCache = default;
     });
@@ -1512,7 +1521,7 @@ internal static void gcMarkTermination(worldStop stw) {
         // Note: this sweepLocker may not be valid if sweeping had
         // already completed during the STW. See the corresponding
         // begin() call that produced sl.
-        ᏑΔsweep.Ꮡactive.end(sl);
+        Ꮡsweep.Ꮡactive.end(sl);
     }
 
     // Print gctrace before dropping worldsema. As soon as we drop
@@ -1576,10 +1585,10 @@ internal static void gcMarkTermination(worldStop stw) {
     // lock on printing this information (so it cannot overlap with itself from the next GC cycle).
     if (debug.checkfinalizers > 0) {
         var (fq, fe) = finReadQueueStats();
-        var fn = builtin.max((int64)fq - (int64)fe, 0);
+        var fn = max((int64)fq - (int64)fe, 0);
 
         var (cq, ce) = ᏑgcCleanups.readQueueStats();
-        var cn = builtin.max((int64)cq - (int64)ce, 0);
+        var cn = max((int64)cq - (int64)ce, 0);
 
         println((@string)"checkfinalizers: queue:", fn, (@string)"finalizers +", cn, (@string)"cleanups");
     }
@@ -1681,7 +1690,7 @@ partial struct gcBgMarkWorkerNode {
     // Unused workers are managed in a lock-free stack. This field must be first.
     internal lfnode node;
     // The g of this worker.
-    internal Δguintptr gp;
+    internal guintptr gp;
     // Release this m on park. This is used to communicate with the unlock
     // function, which cannot access the G's stack. It is unused outside of
     // gcBgMarkWorker().
@@ -1796,7 +1805,7 @@ internal static void gcBgMarkWorker(channel<EmptyStruct> ready) {
         pp.Value.gcMarkWorkerStartTime = startTime;
         bool trackLimiterEvent = default;
         if ((~pp).gcMarkWorkerMode == gcMarkWorkerIdleMode) {
-            trackLimiterEvent = pp.of(runtime_package.Δp.ᏑlimiterEvent).start(limiterEventIdleMarkWork, startTime);
+            trackLimiterEvent = pp.of(p.ᏑlimiterEvent).start(limiterEventIdleMarkWork, startTime);
         }
 
         gcBeginWork();
@@ -1820,7 +1829,7 @@ internal static void gcBgMarkWorker(channel<EmptyStruct> ready) {
                 break;
             }
             case var ᴛ when ᴛ == gcMarkWorkerDedicatedMode: {
-                gcDrainMarkWorkerDedicated(ppʗ1.of(runtime_package.Δp.Ꮡgcw), true);
+                gcDrainMarkWorkerDedicated(ppʗ1.of(p.Ꮡgcw), true);
                 if ((~gpʗ1).preempt) {
                     // We were preempted. This is
                     // a useful signal to kick
@@ -1835,15 +1844,15 @@ internal static void gcBgMarkWorker(channel<EmptyStruct> ready) {
                 }
                 // Go back to draining, this time
                 // without preemption.
-                gcDrainMarkWorkerDedicated(ppʗ1.of(runtime_package.Δp.Ꮡgcw), false);
+                gcDrainMarkWorkerDedicated(ppʗ1.of(p.Ꮡgcw), false);
                 break;
             }
             case var ᴛ when ᴛ == gcMarkWorkerFractionalMode: {
-                gcDrainMarkWorkerFractional(ppʗ1.of(runtime_package.Δp.Ꮡgcw));
+                gcDrainMarkWorkerFractional(ppʗ1.of(p.Ꮡgcw));
                 break;
             }
             case var ᴛ when ᴛ == gcMarkWorkerIdleMode: {
-                gcDrainMarkWorkerIdle(ppʗ1.of(runtime_package.Δp.Ꮡgcw));
+                gcDrainMarkWorkerIdle(ppʗ1.of(p.Ꮡgcw));
                 break;
             }}
             casgstatus(gpʗ1, _Gwaiting, _Grunning);
@@ -1854,10 +1863,10 @@ internal static void gcBgMarkWorker(channel<EmptyStruct> ready) {
         var duration = now - startTime;
         ᏑgcController.markWorkerStop((~pp).gcMarkWorkerMode, duration);
         if (trackLimiterEvent) {
-            pp.of(runtime_package.Δp.ᏑlimiterEvent).stop(limiterEventIdleMarkWork, now);
+            pp.of(p.ᏑlimiterEvent).stop(limiterEventIdleMarkWork, now);
         }
         if ((~pp).gcMarkWorkerMode == gcMarkWorkerFractionalMode) {
-            pp.of(runtime_package.Δp.ᏑgcFractionalMarkTime).Add(duration);
+            pp.of(p.ᏑgcFractionalMarkTime).Add(duration);
         }
 
         // We'll releasem after this point and thus this P may run
@@ -1882,10 +1891,10 @@ internal static void gcBgMarkWorker(channel<EmptyStruct> ready) {
 
 // gcShouldScheduleWorker reports whether executing a mark worker
 // on p is potentially useful. p may be nil.
-internal static bool gcShouldScheduleWorker(ж<Δp> Ꮡp) {
-    ref var Δp = ref Ꮡp.DerefOrNull();
+internal static bool gcShouldScheduleWorker(ж<p> Ꮡp) {
+    ref var p = ref Ꮡp.DerefOrNull();
 
-    if (Ꮡp != nil && !Ꮡp.of(runtime_package.Δp.Ꮡgcw).empty()) {
+    if (Ꮡp != nil && !Ꮡp.of(runtime_package.p.Ꮡgcw).empty()) {
         return true;
     }
     return gcMarkWorkAvailable();
@@ -1943,7 +1952,7 @@ internal static void gcMark(int64 startTime) {
 
     // Check that there's no marking work remaining.
     var (next, jobs) = (Ꮡwork.ᏑmarkrootNext.Load(), Ꮡwork.ᏑmarkrootJobs.Load()); if (work.full != 0 || next < jobs) {
-        print((@string)"runtime: full=", (Δhex)(uint64)work.full, (@string)" next=", next, (@string)" jobs=", jobs, (@string)" nDataRoots=", work.nDataRoots, (@string)" nBSSRoots=", work.nBSSRoots, (@string)" nSpanRoots=", work.nSpanRoots, (@string)" nStackRoots=", work.nStackRoots, (@string)"\n");
+        print((@string)"runtime: full=", (hex)(uint64)work.full, (@string)" next=", next, (@string)" jobs=", jobs, (@string)" nDataRoots=", work.nDataRoots, (@string)" nBSSRoots=", work.nBSSRoots, (@string)" nSpanRoots=", work.nSpanRoots, (@string)" nStackRoots=", work.nStackRoots, (@string)"\n");
         throw panic("non-empty mark queue after concurrent mark");
     }
 
@@ -1964,7 +1973,7 @@ internal static void gcMark(int64 startTime) {
     //
     // TODO: We could clear out buffers just before mark if this
     // has a non-negligible impact on STW time.
-    foreach (var (_, Δp) in range(allp)) {
+    foreach (var (_, p) in range(allp)) {
         // The write barrier may have buffered pointers since
         // the gcMarkDone barrier. However, since the barrier
         // ensured all reachable objects were marked, all of
@@ -1973,15 +1982,15 @@ internal static void gcMark(int64 startTime) {
         if (debug.gccheckmark > 0) {
             // For debugging, flush the buffer and make
             // sure it really was all marked.
-            wbBufFlush1(Δp);
+            wbBufFlush1(p);
         } else {
-            Δp.of(runtime_package.Δp.ᏑwbBuf).reset();
+            p.of(runtime_package.p.ᏑwbBuf).reset();
         }
 
-        var gcw = Δp.of(runtime_package.Δp.Ꮡgcw);
+        var gcw = p.of(runtime_package.p.Ꮡgcw);
         if (!gcw.empty()) {
             printlock();
-            print((@string)"runtime: P ", (~Δp).id, (@string)" flushedWork ", gcw.flushedWork);
+            print((@string)"runtime: P ", (~p).id, (@string)" flushedWork ", gcw.flushedWork);
             if (gcw.wbuf1 == nil) {
                 print((@string)" wbuf1=<nil>");
             } else {
@@ -2008,8 +2017,8 @@ internal static void gcMark(int64 startTime) {
     //
     // Note that it's not important to retain this information; we know
     // exactly what heapScan is at this point via scanWork.
-    foreach (var (_, Δp) in range(allp)) {
-        var c = Δp.Value.mcache;
+    foreach (var (_, p) in range(allp)) {
+        var c = p.Value.mcache;
         if (c == nil) {
             continue;
         }
@@ -2041,14 +2050,14 @@ internal static bool gcSweep(gcMode mode) {
 
     @lock(Ꮡmheap_.Ꮡlock);
     mheap_.sweepgen += 2;
-    ᏑΔsweep.Ꮡactive.reset();
+    Ꮡsweep.Ꮡactive.reset();
     Ꮡmheap_.ᏑpagesSwept.Store(0);
     mheap_.sweepArenas = mheap_.heapArenas;
     Ꮡmheap_.ᏑreclaimIndex.Store(0);
     Ꮡmheap_.ᏑreclaimCredit.Store(0);
     unlock(Ꮡmheap_.Ꮡlock);
 
-    ᏑΔsweep.ᏑcentralIndex.clear();
+    Ꮡsweep.ᏑcentralIndex.clear();
 
     if (!concurrentSweep || mode == gcForceBlockMode) {
         // Special case synchronous sweep.
@@ -2077,12 +2086,12 @@ internal static bool gcSweep(gcMode mode) {
     }
 
     // Background sweep.
-    @lock(ᏑΔsweep.Ꮡlock);
-    if (Δsweep.parked) {
-        Δsweep.parked = false;
-        ready(Δsweep.g, 0, true);
+    @lock(Ꮡsweep.Ꮡlock);
+    if (sweep.parked) {
+        sweep.parked = false;
+        ready(sweep.g, 0, true);
     }
-    unlock(ᏑΔsweep.Ꮡlock);
+    unlock(Ꮡsweep.Ꮡlock);
     return false;
 }
 
@@ -2111,7 +2120,7 @@ internal static void gcResetMarkState() {
     unlock(Ꮡmheap_.Ꮡlock);
     foreach (var (_, ai) in range(arenas)) {
         var ha = mheap_.arenas[ai.l1()].Value[ai.l2()];
-        builtin.clear(ha.pageMarks[..]);
+        clear(ha.pageMarks[..]);
     }
 
     work.bytesMarked = 0;
@@ -2137,8 +2146,8 @@ internal static void sync_runtime_registerPoolCleanup(Action f) {
 }
 
 //go:linkname boring_registerCache crypto/internal/boring/bcache.registerCache
-internal static void boring_registerCache(@unsafe.Pointer Δp) {
-    boringCaches = append(boringCaches, Δp);
+internal static void boring_registerCache(@unsafe.Pointer p) {
+    boringCaches = append(boringCaches, p);
 }
 
 internal static void clearpools() {
@@ -2148,8 +2157,8 @@ internal static void clearpools() {
     }
 
     // clear boringcrypto caches
-    foreach (var (_, Δp) in range(boringCaches)) {
-        atomicstorep(Δp, nil);
+    foreach (var (_, p) in range(boringCaches)) {
+        atomicstorep(p, nil);
     }
 
     // Clear central sudog cache.
@@ -2240,6 +2249,8 @@ internal static void gcTestMoveStackOnNextCall() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string stackˢ => ref stackˢᵇ;
 private static readonly @string stackˢᵇ = "stack"u8;
+internal static ref readonly @string heapˢ => ref heapˢᵇ;
+private static readonly @string heapˢᵇ = "heap"u8;
 internal static ref readonly @string dataˢ => ref dataˢᵇ;
 private static readonly @string dataˢᵇ = "data"u8;
 internal static ref readonly @string bssˢ => ref bssˢᵇ;
@@ -2255,8 +2266,8 @@ private static readonly @string otherˢᵇ = "other"u8;
 // complicate a test.
 //
 //go:nosplit
-internal static @string gcTestPointerClass(@unsafe.Pointer Δp) {
-    var p2 = (uintptr)(uintptr)noescape(Δp);
+internal static @string gcTestPointerClass(@unsafe.Pointer p) {
+    var p2 = (uintptr)(uintptr)noescape(p);
     var gp = getg();
     if ((~gp).stack.lo <= p2 && p2 < (~gp).stack.hi) {
         return stackˢ;
@@ -2272,7 +2283,7 @@ internal static @string gcTestPointerClass(@unsafe.Pointer Δp) {
             return bssˢ;
         }
     }
-    KeepAlive(@unsafe.Pointer.OrTypedNil(Δp));
+    KeepAlive(@unsafe.Pointer.OrTypedNil(p));
     return otherˢ;
 }
 

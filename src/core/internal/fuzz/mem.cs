@@ -7,6 +7,7 @@ using bytes = bytes_package;
 using fmt = fmt_package;
 using os = os_package;
 using @unsafe = unsafe_package;
+using static fuzz_package;
 
 partial class fuzz_package {
 
@@ -94,6 +95,8 @@ internal static (ж<sharedMem> m, error err) sharedMemTempFile(nint size) {
     ᒐdone: return (m, err);
 }
 
+} partial class fuzzᴛsharedMem {
+
 // header returns a pointer to metadata within the shared memory region.
 internal static ж<sharedMemHeader> header(this ref sharedMem m) {
     return Ꮡ(m.region, 0).Reinterpret<byte, sharedMemHeader>();
@@ -118,11 +121,11 @@ internal static slice<byte> valueCopy(this ref sharedMem m) {
 // (as returned by cap(m.value())).
 internal static void setValue(this ref sharedMem m, slice<byte> b) {
     var v = m.valueRef();
-    if (len(b) > builtin.cap(v)) {
-        throw panic(fmt.Sprintf("value length %d larger than shared memory capacity %d"u8, len(b), builtin.cap(v)));
+    if (len(b) > cap(v)) {
+        throw panic(fmt.Sprintf("value length %d larger than shared memory capacity %d"u8, len(b), cap(v)));
     }
     m.header().valueLen = len(b);
-    copy(v.slice(0, builtin.cap(v)), b);
+    copy(v.slice(0, cap(v)), b);
 }
 
 // setValueLen sets the length of the shared memory buffer returned by valueRef
@@ -133,8 +136,8 @@ internal static void setValue(this ref sharedMem m, slice<byte> b) {
 // since each process can map shared memory at a different virtual address.
 internal static void setValueLen(this ref sharedMem m, nint n) {
     var v = m.valueRef();
-    if (n > builtin.cap(v)) {
-        throw panic(fmt.Sprintf("length %d larger than shared memory capacity %d"u8, n, builtin.cap(v)));
+    if (n > cap(v)) {
+        throw panic(fmt.Sprintf("length %d larger than shared memory capacity %d"u8, n, cap(v)));
     }
     m.header().valueLen = n;
 }
@@ -144,4 +147,4 @@ internal static void setValueLen(this ref sharedMem m, nint n) {
 // do it, since we'll need to send a message to the worker telling it to
 // remap the file.
 
-} // end fuzz_package
+} // end fuzzᴛsharedMem

@@ -12,6 +12,7 @@ using time = time_package;
 using encoding;
 using go.compress;
 using hash;
+using static gzip_package;
 
 partial class gzip_package {
 
@@ -65,6 +66,8 @@ public static (ж<Writer>, error) NewWriterLevel(io.Writer w, nint level) {
     z.init(w, level);
     return (z, default);
 }
+
+} partial class gzipᴛWriter {
 
 internal static void init(this ref Writer z, io.Writer w, nint level) {
     var compressor = z.compressor;
@@ -259,4 +262,4 @@ public static error Close(this ref Writer z) {
     return z.err;
 }
 
-} // end gzip_package
+} // end gzipᴛWriter

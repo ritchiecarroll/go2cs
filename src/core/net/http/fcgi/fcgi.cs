@@ -19,6 +19,7 @@ using errors = errors_package;
 using io = io_package;
 using sync = sync_package;
 using encoding;
+using static fcgi_package;
 
 partial class fcgi_package {
 
@@ -68,6 +69,8 @@ partial struct beginRequest {
     internal array<uint8> reserved = new(5);
 }
 
+} partial class fcgiᴛbeginRequest {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fcgiInvalidBeginRequestˢ => ref fcgiInvalidBeginRequestˢᵇ;
 private static readonly @string fcgiInvalidBeginRequestˢᵇ = "fcgi: invalid begin request record"u8;
@@ -81,9 +84,13 @@ internal static error read(this ref beginRequest br, slice<byte> content) {
     return default;
 }
 
+} partial class fcgi_package {
+
 // for padding so we don't have to allocate all the time
 // not synchronized because we don't care what the contents are
 internal static array<byte> pad = new(255);
+
+} partial class fcgiᴛheader {
 
 internal static void init(this ref header h, recType recType, uint16 reqId, nint contentLength) {
     h.Version = 1;
@@ -92,6 +99,8 @@ internal static void init(this ref header h, recType recType, uint16 reqId, nint
     h.ContentLength = (uint16)contentLength;
     h.PaddingLength = (uint8)(-contentLength & 7);
 }
+
+} partial class fcgi_package {
 
 // conn sends records over rwc
 partial struct conn {
@@ -107,6 +116,8 @@ partial struct conn {
 internal static ж<conn> newConn(io.ReadWriteCloser rwc) {
     return Ꮡ(new conn(rwc: rwc));
 }
+
+} partial class fcgiᴛconn {
 
 // Close closes the conn if it is not already closed.
 internal static error Close(this ж<conn> Ꮡc) {
@@ -127,10 +138,14 @@ internal static error Close(this ж<conn> Ꮡc) {
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mutex.Unlock(); ᒐ.Run(); }
 }
 
+} partial class fcgi_package {
+
 partial struct record {
     internal header h;
     internal array<byte> buf = new(maxWrite + maxPad);
 }
+
+} partial class fcgiᴛrecord {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fcgiInvalidHeaderVersionˢ => ref fcgiInvalidHeaderVersionˢᵇ;
@@ -156,6 +171,8 @@ internal static error /*err*/ read(this ж<record> Ꮡrec, io.Reader r) {
 internal static slice<byte> content(this ref record r) {
     return r.buf.slice(0, r.h.ContentLength);
 }
+
+} partial class fcgiᴛconn {
 
 // writeRecord writes and sends a single record.
 internal static error writeRecord(this ж<conn> Ꮡc, recType recType, uint16 reqId, slice<byte> b) {
@@ -217,6 +234,8 @@ internal static error writePairs(this ж<conn> Ꮡc, recType recType, uint16 req
     return default;
 }
 
+} partial class fcgi_package {
+
 internal static (uint32, nint) readSize(slice<byte> s) {
     if (len(s) == 0) {
         return (0, 0);
@@ -258,6 +277,8 @@ partial struct bufWriter {
     /*embed*/ public ж<bufio_package.Writer> Writer;
 }
 
+} partial class fcgiᴛbufWriter {
+
 internal static error Close(this ref bufWriter w) {
     var err = w.Writer.Flush(); if (err != nil) {
         w.closer.Close();
@@ -265,6 +286,8 @@ internal static error Close(this ref bufWriter w) {
     }
     return w.closer.Close();
 }
+
+} partial class fcgi_package {
 
 internal static ж<bufWriter> newWriter(ж<conn> c, recType recType, uint16 reqId) {
     var s = Ꮡ(new streamWriter(c: c, recType: recType, reqId: reqId));
@@ -279,6 +302,8 @@ partial struct streamWriter {
     internal recType recType;
     internal uint16 reqId;
 }
+
+} partial class fcgiᴛstreamWriter {
 
 internal static (nint, error) Write(this ref streamWriter w, slice<byte> p) {
     nint nn = 0;
@@ -301,4 +326,4 @@ internal static error Close(this ref streamWriter w) {
     return w.c.writeRecord(w.recType, w.reqId, default);
 }
 
-} // end fcgi_package
+} // end fcgiᴛstreamWriter

@@ -57,7 +57,7 @@ internal static void munmap(@unsafe.Pointer addr, uintptr n) {
 }
 
 // sysMmap calls the mmap system call. It is implemented in assembly.
-internal static partial (@unsafe.Pointer Δp, nint err) sysMmap(@unsafe.Pointer addr, uintptr n, int32 prot, int32 flags, int32 fd, uint32 off);
+internal static partial (@unsafe.Pointer p, nint err) sysMmap(@unsafe.Pointer addr, uintptr n, int32 prot, int32 flags, int32 fd, uint32 off);
 
 // callCgoMmap calls the mmap function in the runtime/cgo package
 // using the GCC calling convention. It is implemented in assembly.

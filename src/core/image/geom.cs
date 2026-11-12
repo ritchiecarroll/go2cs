@@ -8,6 +8,7 @@ using bits = math.bits_package;
 using strconv = strconv_package;
 using image;
 using math;
+using static image_package;
 
 partial class image_package {
 
@@ -15,6 +16,8 @@ partial class image_package {
 partial struct Point {
     public nint X, Y;
 }
+
+} partial class imageᴛPoint {
 
 // String returns a string representation of p like "(3,4)".
 public static @string String(this Point p) {
@@ -68,6 +71,8 @@ public static bool Eq(this Point p, Point q) {
     return p == q;
 }
 
+} partial class image_package {
+
 // ZP is the zero [Point].
 //
 // Deprecated: Use a literal [image.Point] instead.
@@ -90,6 +95,8 @@ public static Point Pt(nint X, nint Y) {
 partial struct Rectangle {
     public Point Min, Max;
 }
+
+} partial class imageᴛRectangle {
 
 // String returns a string representation of r like "(3,4)-(6,5)".
 public static @string String(this Rectangle r) {
@@ -262,6 +269,8 @@ public static Rectangle Bounds(this Rectangle r) {
 public static color.Model ColorModel(this Rectangle r) {
     return color.Alpha16Model;
 }
+
+} partial class image_package {
 
 // ZR is the zero [Rectangle].
 //

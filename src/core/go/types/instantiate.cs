@@ -12,12 +12,13 @@ using fmt = fmt_package;
 using token = global::go.go.token_package;
 using static global::go.@internal.types.errors_package;
 using global::go.go;
+using static types_package;
 
 partial class types_package {
 
 // A genericType implements access to its type parameters.
-partial interface ΔgenericType :
-    ΔType
+partial interface genericType :
+    Type
 {
     ж<TypeParamList> TypeParams();
 }
@@ -50,14 +51,14 @@ partial interface ΔgenericType :
 // *Signature types, Instantiate will panic immediately if the type argument
 // count is incorrect; for *Named types, a panic may occur later inside the
 // *Named API.
-public static (ΔType, error) Instantiate(ж<Context> Ꮡctxt, ΔType orig, slice<ΔType> targs, bool validate) {
+public static (Type, error) Instantiate(ж<Context> Ꮡctxt, Type orig, slice<Type> targs, bool validate) {
     ref var ctxt = ref Ꮡctxt.DerefOrNull();
 
     assert(len(targs) > 0);
     if (Ꮡctxt == nil) {
         Ꮡctxt = NewContext(); ctxt = ref Ꮡctxt.DerefOrNull();
     }
-    var orig_ = orig._<ΔgenericType>(); // signature of Instantiate must not change for backward-compatibility
+    var orig_ = orig._<genericType>(); // signature of Instantiate must not change for backward-compatibility
 
     if (validate) {
         var tparams = orig_.TypeParams().list();
@@ -75,6 +76,8 @@ public static (ΔType, error) Instantiate(ж<Context> Ꮡctxt, ΔType orig, slic
     return (inst, default);
 }
 
+} partial class typesᴛChecker {
+
 // instance instantiates the given original (generic) function or type with the
 // provided type arguments and returns the resulting instance. If an identical
 // instance exists already in the given contexts, it returns that instance,
@@ -89,8 +92,8 @@ public static (ΔType, error) Instantiate(ж<Context> Ꮡctxt, ΔType orig, slic
 // For Named types the resulting instance may be unexpanded.
 //
 // check may be nil (when not type-checking syntax); pos is used only if check is non-nil.
-internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔgenericType orig, slice<ΔType> targs, ж<Named> Ꮡexpanding, ж<Context> Ꮡctxt) {
-    ΔType res = default;
+internal static Type /*res*/ instance(this ж<Checker> Ꮡcheck, token.Pos pos, genericType orig, slice<Type> targs, ж<Named> Ꮡexpanding, ж<Context> Ꮡctxt) {
+    Type res = default;
     ref var expanding = ref Ꮡexpanding.DerefOrNull();
     ref var ctxt = ref Ꮡctxt.DerefOrNull();
     var ctxtsᴷ = new stackAppend<ж<Context>>();
@@ -122,7 +125,7 @@ internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos p
     var ctxtsʗ1 = ctxts;
     var hashesʗ1 = hashes;
     var targsʗ1 = targs;
-    ΔType updateContexts(ΔType resΔ1) {
+    Type updateContexts(Type resΔ1) {
         for (nint i = len(ctxtsʗ1) - 1; i >= 0; i--) {
             resΔ1 = ctxtsʗ1[i].update(hashesʗ1[i], orig, targsʗ1, resΔ1);
         }
@@ -139,7 +142,7 @@ internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos p
 
     switch (orig.type()) {
     case ж<Named> origΔ1: {
-        res = new NamedжΔType(Ꮡcheck.newNamedInstance(pos, origΔ1, targs, Ꮡexpanding)); // substituted lazily
+        res = new NamedжType(Ꮡcheck.newNamedInstance(pos, origΔ1, targs, Ꮡexpanding)); // substituted lazily
         break;
     }
     case ж<Alias> origΔ1: {
@@ -150,38 +153,38 @@ internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos p
             //           underlying (aliased) type to match behavior of *Named
             //           types. Then this function will never return an invalid
             //           result.
-            return new BasicжΔType(Typ[Invalid]);
+            return new BasicжType(Typ[Invalid]);
         }
         if (tparams.Len() == 0) {
-            return new AliasжΔType(origΔ1); // nothing to do (minor optimization)
+            return new AliasжType(origΔ1); // nothing to do (minor optimization)
         }
 
-        res = new AliasжΔType(Ꮡcheck.newAliasInstance(pos, origΔ1, targs, Ꮡexpanding, Ꮡctxt));
+        res = new AliasжType(Ꮡcheck.newAliasInstance(pos, origΔ1, targs, Ꮡexpanding, Ꮡctxt));
         break;
     }
-    case ж<ΔSignature> origΔ1: {
+    case ж<Signature> origΔ1: {
         assert(Ꮡexpanding == nil); // function instances cannot be reached from Named types
 
         var tparams = origΔ1.TypeParams();
         // TODO(gri) investigate if this is needed (type argument and parameter count seem to be correct here)
         if (!Ꮡcheck.validateTArgLen(pos, origΔ1.String(), tparams.Len(), len(targs))) {
-            return new BasicжΔType(Typ[Invalid]);
+            return new BasicжType(Typ[Invalid]);
         }
         if (tparams.Len() == 0) {
-            return new ΔSignatureжΔType(origΔ1); // nothing to do (minor optimization)
+            return new SignatureжType(origΔ1); // nothing to do (minor optimization)
         }
-        var sig = Ꮡcheck.subst(pos, new ΔSignatureжΔType(origΔ1), makeSubstMap(tparams.list(), targs), nil, Ꮡctxt)._<ж<ΔSignature>>();
+        var sig = Ꮡcheck.subst(pos, new SignatureжType(origΔ1), makeSubstMap(tparams.list(), targs), nil, Ꮡctxt)._<ж<Signature>>();
         // If the signature doesn't use its type parameters, subst
         // will not make a copy. In that case, make a copy now (so
         // we can set tparams to nil w/o causing side-effects).
         if (sig == origΔ1) {
-            ref var copy = ref heap<ΔSignature>(sig.Value, out var Ꮡcopy);
+            ref var copy = ref heap<Signature>(sig.Value, out var Ꮡcopy);
             sig = Ꮡcopy;
         }
         // After instantiating a generic signature, it is not generic
         // anymore; we need to set tparams to nil.
         sig.tparams = default;
-        res = new ΔSignatureжΔType(sig);
+        res = new SignatureжType(sig);
         break;
     }
     default: {
@@ -198,7 +201,7 @@ internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos p
 // validateTArgLen checks that the number of type arguments (got) matches the
 // number of type parameters (want); if they don't match an error is reported.
 // If validation fails and check is nil, validateTArgLen panics.
-internal static bool validateTArgLen(this ж<Checker> Ꮡcheck, tokenꓸPos pos, @string name, nint want, nint got) {
+internal static bool validateTArgLen(this ж<Checker> Ꮡcheck, token.Pos pos, @string name, nint want, nint got) {
     @string qual = default;
     switch (ᐧ) {
     case {} when got < want: {
@@ -223,7 +226,7 @@ internal static bool validateTArgLen(this ж<Checker> Ꮡcheck, tokenꓸPos pos,
 }
 
 // check may be nil; pos is used only if check is non-nil.
-internal static (nint, error) verify(this ж<Checker> Ꮡcheck, tokenꓸPos pos, slice<ж<TypeParam>> tparams, slice<ΔType> targs, ж<Context> ctxt) {
+internal static (nint, error) verify(this ж<Checker> Ꮡcheck, token.Pos pos, slice<ж<TypeParam>> tparams, slice<Type> targs, ж<Context> ctxt) {
     var smap = makeSubstMap(tparams, targs);
     foreach (var (i, tpar) in range(tparams)) {
         // Ensure that we have a (possibly implicit) interface as type bound (go.dev/issue/51048).
@@ -253,7 +256,7 @@ private static readonly @string satisfyˢᵇ = "satisfy"u8;
 //
 // If the provided cause is non-nil, it may be set to an error string
 // explaining why V does not implement (or satisfy, for constraints) T.
-internal static bool implements(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, bool constraint, ж<@string> Ꮡcause) {
+internal static bool implements(this ж<Checker> Ꮡcheck, Type V, Type T, bool constraint, ж<@string> Ꮡcause) {
     ref var cause = ref Ꮡcause.DerefOrNull();
 
     var Vu = V.Underlying();
@@ -365,14 +368,14 @@ internal static bool implements(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, b
     }
 
     // Otherwise, V's type must be included in the iface type set.
-    ref var alt = ref heap<ΔType>(out var Ꮡalt);
-    if (Ti.typeSet().@is((ж<Δterm> t) => {
+    ref var alt = ref heap<Type>(out var Ꮡalt);
+    if (Ti.typeSet().@is((ж<term> t) => {
         if (!t.includes(V)) {
             // If V ∉ t.typ but V ∈ ~t.typ then remember this type
             // so we can suggest it as an alternative in the error
             // message.
             if (Ꮡalt.ValueSlot == nil && !t.tilde && Identical(t.typ, t.typ.Underlying())) {
-                ref var tt = ref heap<Δterm>(t.Value, out var Ꮡtt);
+                ref var tt = ref heap<term>(t.Value, out var Ꮡtt);
                 tt.tilde = true;
                 if (Ꮡtt.includes(V)) {
                     Ꮡalt.ValueSlot = t.typ;
@@ -389,7 +392,7 @@ internal static bool implements(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, b
                 detail = Ꮡcheck.sprintf("possibly missing ~ for %s in %s", alt, T);
                 break;
             }
-            case {} when mentions(new InterfaceжΔType(Ti), V): {
+            case {} when mentions(new InterfaceжType(Ti), V): {
                 detail = Ꮡcheck.sprintf("%s mentions %s, but %s is not in the type set of %s", T, V, V, T);
                 break;
             }
@@ -405,9 +408,11 @@ internal static bool implements(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, b
     return checkComparability();
 }
 
+} partial class types_package {
+
 // mentions reports whether type T "mentions" typ in an (embedded) element or term
 // of T (whether typ is in the type set of T or not). For better error messages.
-internal static bool mentions(ΔType T, ΔType typ) {
+internal static bool mentions(Type T, Type typ) {
     switch (T.type()) {
     case ж<Interface> TΔ1: {
         foreach (var (_, e) in range(TΔ1.embeddeds)) {

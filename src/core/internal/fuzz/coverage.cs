@@ -13,7 +13,7 @@ partial class fuzz_package {
 // source code to 0.
 public static void ResetCoverage() {
     var cov = coverage();
-    builtin.clear(cov);
+    clear(cov);
 }
 
 // SnapshotCoverage copies the current counter values into coverageSnapshot,

@@ -75,17 +75,17 @@ internal static error fips140CAST() {
     var ek = dk.EncapsulationKey();
     var H = sha256.New();
     H.Write(TestingOnlyExpandedBytes768(dk));
-    if (!bytes_package.Equal(H.Sum(default), dkHash)) {
+    if (!bytes.Equal(H.Sum(default), dkHash)) {
         return errors.New(unexpectedPrivateKeyHashˢ);
     }
     ref var cc = ref heap(new array<byte>(1088), out var Ꮡcc);
     var Kd = kemDecaps(ref (dk).DerefOrNull(), Ꮡcc);
-    if (!bytes_package.Equal(Kd, Kr)) {
+    if (!bytes.Equal(Kd, Kr)) {
         return errors.New(unexpectedRejectionˢ);
     }
     var (Ke, _) = kemEncaps(Ꮡcc, ref (ek).DerefOrNull(), m);
     Kd = kemDecaps(ref (dk).DerefOrNull(), Ꮡcc);
-    if (!bytes_package.Equal(Ke, K) || !bytes_package.Equal(Kd, K)) {
+    if (!bytes.Equal(Ke, K) || !bytes.Equal(Kd, K)) {
         return errors.New(unexpectedResultˢ);
     }
     return default;

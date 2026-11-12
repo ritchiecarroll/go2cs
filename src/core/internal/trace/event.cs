@@ -17,6 +17,7 @@ using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
 using go;
 using go.@internal.trace;
+using static trace_package;
 
 partial class trace_package {
 
@@ -88,6 +89,8 @@ public static EventKind EventStateTransition => 13;
 // may always be safely ignored.
 public static EventKind EventExperimental => 14;
 
+} partial class traceᴛEventKind {
+
 // String returns a string form of the EventKind.
 public static @string String(this EventKind e) {
     if ((nint)e >= len(eventKindStrings)) {
@@ -95,6 +98,8 @@ public static @string String(this EventKind e) {
     }
     return eventKindStrings[e];
 }
+
+} partial class trace_package {
 
 [GoLazy] partial class lazyᴛeventKindStrings { internal static array<@string> eventKindStrings = new golib.SparseArray<@string>{
     [EventBad] = "Bad",
@@ -114,7 +119,7 @@ public static @string String(this EventKind e) {
     [EventExperimental] = "Experimental"
 }.array(); }
 
-internal static ΔTime maxTime => /* Time(math.MaxInt64) */ 9223372036854775807;
+internal static Time maxTime => /* Time(math.MaxInt64) */ 9223372036854775807;
 
 // Time is a timestamp in nanoseconds.
 //
@@ -135,15 +140,19 @@ internal static ΔTime maxTime => /* Time(math.MaxInt64) */ 9223372036854775807;
 // compared with timestamps from other traces taken on the same
 // machine. This is because the system clock was not used at all
 // to collect those timestamps.
-partial struct ΔTime /*num:int64*/;
+partial struct Time /*num:int64*/;
+
+} partial class traceᴛTime {
 
 // Sub subtracts t0 from t, returning the duration in nanoseconds.
-public static time.Duration Sub(this ΔTime t, ΔTime t0) {
+public static time.Duration Sub(this Time t, Time t0) {
     return (time.Duration)((int64)t - (int64)t0);
 }
 
+} partial class trace_package {
+
 // Metric provides details about a Metric event.
-partial struct ΔMetric {
+partial struct Metric {
     // Name is the name of the sampled metric.
     //
     // Names follow the same convention as metric names in the
@@ -161,15 +170,15 @@ partial struct ΔMetric {
 }
 
 // Label provides details about a Label event.
-partial struct ΔLabel {
+partial struct Label {
     // Label is the label applied to some resource.
-    public @string ΔΔLabel;
+    public @string ΔLabel;
     // Resource is the resource to which this label should be applied.
     public ResourceID Resource;
 }
 
 // Range provides details about a Range event.
-partial struct ΔRange {
+partial struct Range {
     // Name is a human-readable name for the range.
     //
     // This name can be used to identify the end of the range for the resource
@@ -216,7 +225,7 @@ public static TaskID NoTask => /* TaskID(^uint64(0)) */ unchecked((TaskID)184467
 public static TaskID BackgroundTask => /* TaskID(0) */ 0;
 
 // Task provides details about a Task event.
-partial struct ΔTask {
+partial struct Task {
     // ID is a unique identifier for the task.
     //
     // This can be used to associate the beginning of a task with its end.
@@ -230,7 +239,7 @@ partial struct ΔTask {
 }
 
 // Region provides details about a Region event.
-partial struct ΔRegion {
+partial struct Region {
     // Task is the ID of the task this region is associated with.
     public TaskID Task;
     // Type is the regionType that was passed to runtime/trace.StartRegion or runtime/trace.WithRegion.
@@ -238,7 +247,7 @@ partial struct ΔRegion {
 }
 
 // Log provides details about a Log event.
-partial struct ΔLog {
+partial struct Log {
     // Task is the ID of the task this region is associated with.
     public TaskID Task;
     // Category is the category that was passed to runtime/trace.Log or runtime/trace.Logf.
@@ -253,25 +262,27 @@ partial struct StackSample {
 }
 
 // MakeStack create a stack from a list of stack frames.
-public static ΔStack MakeStack(slice<StackFrame> frames) {
+public static Stack MakeStack(slice<StackFrame> frames) {
     // TODO(felixge): support evTable reuse.
     var tbl = Ꮡ(new evTable(pcs: new map<uint64, frame>()));
     tbl.Ꮡstrings.compactify();
     tbl.Ꮡstacks.compactify();
-    return new ΔStack(table: tbl, id: addStack(tbl, frames));
+    return new Stack(table: tbl, id: addStack(tbl, frames));
 }
 
 // Stack represents a stack. It's really a handle to a stack and it's trivially comparable.
 //
 // If two Stacks are equal then their Frames are guaranteed to be identical. If they are not
 // equal, however, their Frames may still be equal.
-partial struct ΔStack {
+partial struct Stack {
     internal ж<evTable> table;
     internal stackID id;
 }
 
+} partial class traceᴛStack {
+
 // Frames is an iterator over the frames in a Stack.
-public static iter.Seq<StackFrame> Frames(this ΔStack s) {
+public static iter.Seq<StackFrame> Frames(this Stack s) {
     var sʗ1 = s;
     return (Func<StackFrame, bool> yield) => {
         if (sʗ1.id == 0) {
@@ -296,11 +307,13 @@ public static iter.Seq<StackFrame> Frames(this ΔStack s) {
 // String returns the stack as a human-readable string.
 //
 // The format of the string is intended for debugging and is subject to change.
-public static @string String(this ΔStack s) {
+public static @string String(this Stack s) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     printStack(new strings_BuilderжWriter(Ꮡsb), ""u8, s.Frames());
     return sb.String();
 }
+
+} partial class trace_package {
 
 internal static void printStack(io.Writer w, @string prefix, iter.Seq<StackFrame> frames) {
     foreach (var f in range<StackFrame>(frames.Invoke)) {
@@ -311,8 +324,8 @@ internal static void printStack(io.Writer w, @string prefix, iter.Seq<StackFrame
 
 // NoStack is a sentinel value that can be compared against any Stack value, indicating
 // a lack of a stack trace.
-public static readonly ж<ΔStack> ᏑNoStack = new StaticBox<ΔStack>(new ΔStack());
-public static ref ΔStack NoStack => ref ((StaticBox<ΔStack>)ᏑNoStack).ValueSlot;
+public static readonly ж<Stack> ᏑNoStack = new StaticBox<Stack>(new Stack());
+public static ref Stack NoStack => ref ((StaticBox<Stack>)ᏑNoStack).ValueSlot;
 
 // StackFrame represents a single frame of a stack.
 partial struct StackFrame {
@@ -342,6 +355,8 @@ partial struct ExperimentalEvent {
     internal slice<uint64> argValues;
 }
 
+} partial class traceᴛExperimentalEvent {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string stringˢ => ref stringˢᵇ;
 private static readonly @string stringˢᵇ = "string"u8;
@@ -357,6 +372,8 @@ public static Value ArgValue(this ExperimentalEvent e, nint i) {
     }
     return Uint64Value(e.argValues[i]);
 }
+
+} partial class trace_package {
 
 // ExperimentalBatch represents a packet of unparsed data along with metadata about that packet.
 partial struct ExperimentalBatch {
@@ -376,7 +393,7 @@ partial struct EventConfig<T>
     where T : /* EventDetails = Metric | Label | Range | StateTransition | Sync | Task | Region | Log | StackSample */ new()
 {
     // Time is the timestamp of the event.
-    public ΔTime Time;
+    public Time Time;
     // Kind is the kind of the event.
     public EventKind Kind;
     // Goroutine is the goroutine ID of the event.
@@ -386,21 +403,21 @@ partial struct EventConfig<T>
     // Thread is the thread ID of the event.
     public ThreadID Thread;
     // Stack is the stack of the event.
-    public ΔStack Stack;
+    public Stack Stack;
     // Details is the kind specific details of the event.
     public T Details;
 }
 
 // MakeEvent creates a new trace event from the given configuration.
-public static (ΔEvent e, error err) MakeEvent<T>(EventConfig<T> c)
+public static (Event e, error err) MakeEvent<T>(EventConfig<T> c)
     where T : /* EventDetails = Metric | Label | Range | StateTransition | Sync | Task | Region | Log | StackSample */ new() {
-    ΔEvent e = new();
+    Event e = new();
     error err = default;
     GoFrame ᒐ = default;
     try
     {
         // TODO(felixge): make the evTable reusable.
-        e = new ΔEvent(
+        e = new Event(
             table: Ꮡ(new evTable(pcs: new map<uint64, frame>(), sync: new sync(freq: 1D))),
             @base: new baseEvent(time: c.Time),
             ctx: new schedCtx(G: c.Goroutine, P: c.Proc, M: c.Thread)
@@ -425,17 +442,17 @@ public static (ΔEvent e, error err) MakeEvent<T>(EventConfig<T> c)
         EventKind defaultKind = default;
         switch (c.Kind) {
         case var ᴛ when ᴛ == defaultKind: {
-            (e, err) = (new ΔEvent(), fmt.Errorf("the Kind field must be provided"u8)); goto ᒐdone;
+            (e, err) = (new Event(), fmt.Errorf("the Kind field must be provided"u8)); goto ᒐdone;
         }
         case var ᴛ when ᴛ == EventMetric: {
-            if (((any)c.Details)._<ΔMetric>(out var m)) {
+            if (((any)c.Details)._<Metric>(out var m)) {
                 (e, err) = makeMetricEvent(e, m); goto ᒐdone;
             }
             break;
         }
         case var ᴛ when ᴛ == EventLabel: {
             {
-                var (l, ok) = ((any)c.Details)._<ΔLabel>(ᐧ); if (ok) {
+                var (l, ok) = ((any)c.Details)._<Label>(ᐧ); if (ok) {
                     (e, err) = makeLabelEvent(e, l); goto ᒐdone;
                 }
             }
@@ -443,7 +460,7 @@ public static (ΔEvent e, error err) MakeEvent<T>(EventConfig<T> c)
         }
         case var ᴛ when ᴛ == EventRangeBegin || ᴛ == EventRangeActive || ᴛ == EventRangeEnd: {
             {
-                var (r, ok) = ((any)c.Details)._<ΔRange>(ᐧ); if (ok) {
+                var (r, ok) = ((any)c.Details)._<Range>(ᐧ); if (ok) {
                     (e, err) = makeRangeEvent(e, c.Kind, r); goto ᒐdone;
                 }
             }
@@ -451,21 +468,21 @@ public static (ΔEvent e, error err) MakeEvent<T>(EventConfig<T> c)
         }
         case var ᴛ when ᴛ == EventStateTransition: {
             {
-                var (t, ok) = ((any)c.Details)._<ΔStateTransition>(ᐧ); if (ok) {
+                var (t, ok) = ((any)c.Details)._<StateTransition>(ᐧ); if (ok) {
                     (e, err) = makeStateTransitionEvent(e, t); goto ᒐdone;
                 }
             }
             break;
         }
         case var ᴛ when ᴛ == EventSync: {
-            if (((any)c.Details)._<ΔSync>(out var s)) {
+            if (((any)c.Details)._<Sync>(out var s)) {
                 (e, err) = makeSyncEvent(e, s); goto ᒐdone;
             }
             break;
         }
         case var ᴛ when ᴛ == EventTaskBegin || ᴛ == EventTaskEnd: {
             {
-                var (t, ok) = ((any)c.Details)._<ΔTask>(ᐧ); if (ok) {
+                var (t, ok) = ((any)c.Details)._<Task>(ᐧ); if (ok) {
                     (e, err) = makeTaskEvent(e, c.Kind, t); goto ᒐdone;
                 }
             }
@@ -473,7 +490,7 @@ public static (ΔEvent e, error err) MakeEvent<T>(EventConfig<T> c)
         }
         case var ᴛ when ᴛ == EventRegionBegin || ᴛ == EventRegionEnd: {
             {
-                var (r, ok) = ((any)c.Details)._<ΔRegion>(ᐧ); if (ok) {
+                var (r, ok) = ((any)c.Details)._<Region>(ᐧ); if (ok) {
                     (e, err) = makeRegionEvent(e, c.Kind, r); goto ᒐdone;
                 }
             }
@@ -481,7 +498,7 @@ public static (ΔEvent e, error err) MakeEvent<T>(EventConfig<T> c)
         }
         case var ᴛ when ᴛ == EventLog: {
             {
-                var (l, ok) = ((any)c.Details)._<ΔLog>(ᐧ); if (ok) {
+                var (l, ok) = ((any)c.Details)._<Log>(ᐧ); if (ok) {
                     (e, err) = makeLogEvent(e, l); goto ᒐdone;
                 }
             }
@@ -493,18 +510,18 @@ public static (ΔEvent e, error err) MakeEvent<T>(EventConfig<T> c)
             }
             break;
         }}
-        (e, err) = (new ΔEvent(), fmt.Errorf("the Kind field %s is incompatible with Details type %T"u8, c.Kind, c.Details));
+        (e, err) = (new Event(), fmt.Errorf("the Kind field %s is incompatible with Details type %T"u8, c.Kind, c.Details));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
     ᒐdone: return (e, err);
 }
 
-internal static (ΔEvent, error) makeMetricEvent(ΔEvent e, ΔMetric m) {
+internal static (Event, error) makeMetricEvent(Event e, Metric m) {
     e = e.ΔClone();
 
     if (m.Value.Kind() != ValueUint64) {
-        return (new ΔEvent(), fmt.Errorf("metric value must be a uint64, got: %s"u8, m.Value.String()));
+        return (new Event(), fmt.Errorf("metric value must be a uint64, got: %s"u8, m.Value.String()));
     }
     var exprᴛ1 = m.Name;
     switch (ᐧ) {
@@ -521,20 +538,20 @@ internal static (ΔEvent, error) makeMetricEvent(ΔEvent e, ΔMetric m) {
         break;
     }
     default: {
-        return (new ΔEvent(), fmt.Errorf("unknown metric name: %s"u8, m.Name));
+        return (new Event(), fmt.Errorf("unknown metric name: %s"u8, m.Name));
     }}
     e.@base.args[0] = (uint64)m.Value.Uint64();
     return (e.ΔClone(), default);
 }
 
-internal static (ΔEvent, error) makeLabelEvent(ΔEvent e, ΔLabel l) {
+internal static (Event, error) makeLabelEvent(Event e, Label l) {
     e = e.ΔClone();
 
     if (l.Resource.Kind != ResourceGoroutine) {
-        return (new ΔEvent(), fmt.Errorf("resource must be a goroutine: %s"u8, l.Resource));
+        return (new Event(), fmt.Errorf("resource must be a goroutine: %s"u8, l.Resource));
     }
     e.@base.typ = tracev2.EvGoLabel;
-    e.@base.args[0] = (uint64)e.table.Ꮡstrings.append(l.ΔΔLabel);
+    e.@base.args[0] = (uint64)e.table.Ꮡstrings.append(l.ΔLabel);
     // TODO(felixge): check against sched ctx and return error on mismatch
     e.ctx.G = l.Resource.Goroutine();
     return (e.ΔClone(), default);
@@ -543,7 +560,7 @@ internal static (ΔEvent, error) makeLabelEvent(ΔEvent e, ΔLabel l) {
 internal static ж<regexp.Regexp> stwRangeRegexp = regexp.MustCompile(@"^stop-the-world \((.*)\)$");
 
 // TODO(felixge): should this ever manipulate the e ctx? Or just report mismatches?
-internal static (ΔEvent, error) makeRangeEvent(ΔEvent e, EventKind kind, ΔRange r) {
+internal static (Event, error) makeRangeEvent(Event e, EventKind kind, Range r) {
     e = e.ΔClone();
 
     // TODO(felixge): Should we add dedicated range kinds rather than using
@@ -552,7 +569,7 @@ internal static (ΔEvent, error) makeRangeEvent(ΔEvent e, EventKind kind, ΔRan
     switch (ᐧ) {
     case {} when exprᴛ1 == "GC concurrent mark phase"u8: {
         if (r.Scope.Kind != ResourceNone) {
-            return (new ΔEvent(), fmt.Errorf("unexpected scope: %s"u8, r.Scope));
+            return (new Event(), fmt.Errorf("unexpected scope: %s"u8, r.Scope));
         }
         switch (kind) {
         case var ᴛ when ᴛ == EventRangeBegin: {
@@ -568,13 +585,13 @@ internal static (ΔEvent, error) makeRangeEvent(ΔEvent e, EventKind kind, ΔRan
             break;
         }
         default: {
-            return (new ΔEvent(), fmt.Errorf("unexpected range kind: %s"u8, kind));
+            return (new Event(), fmt.Errorf("unexpected range kind: %s"u8, kind));
         }}
         break;
     }
     case {} when exprᴛ1 == "GC incremental sweep"u8: {
         if (r.Scope.Kind != ResourceProc) {
-            return (new ΔEvent(), fmt.Errorf("unexpected scope: %s"u8, r.Scope));
+            return (new Event(), fmt.Errorf("unexpected scope: %s"u8, r.Scope));
         }
         switch (kind) {
         case var ᴛ when ᴛ == EventRangeBegin: {
@@ -594,13 +611,13 @@ internal static (ΔEvent, error) makeRangeEvent(ΔEvent e, EventKind kind, ΔRan
             break;
         }
         default: {
-            return (new ΔEvent(), fmt.Errorf("unexpected range kind: %s"u8, kind));
+            return (new Event(), fmt.Errorf("unexpected range kind: %s"u8, kind));
         }}
         break;
     }
     case {} when exprᴛ1 == "GC mark assist"u8: {
         if (r.Scope.Kind != ResourceGoroutine) {
-            return (new ΔEvent(), fmt.Errorf("unexpected scope: %s"u8, r.Scope));
+            return (new Event(), fmt.Errorf("unexpected scope: %s"u8, r.Scope));
         }
         switch (kind) {
         case var ᴛ when ᴛ == EventRangeBegin: {
@@ -620,17 +637,17 @@ internal static (ΔEvent, error) makeRangeEvent(ΔEvent e, EventKind kind, ΔRan
             break;
         }
         default: {
-            return (new ΔEvent(), fmt.Errorf("unexpected range kind: %s"u8, kind));
+            return (new Event(), fmt.Errorf("unexpected range kind: %s"u8, kind));
         }}
         break;
     }
     default: {
         var match = stwRangeRegexp.FindStringSubmatch(r.Name);
         if (len(match) != 2) {
-            return (new ΔEvent(), fmt.Errorf("unexpected range name: %s"u8, r.Name));
+            return (new Event(), fmt.Errorf("unexpected range name: %s"u8, r.Name));
         }
         if (r.Scope.Kind != ResourceGoroutine) {
-            return (new ΔEvent(), fmt.Errorf("unexpected scope: %s"u8, r.Scope));
+            return (new Event(), fmt.Errorf("unexpected scope: %s"u8, r.Scope));
         }
         switch (kind) {
         case var ᴛ when ᴛ == EventRangeBegin: {
@@ -646,7 +663,7 @@ internal static (ΔEvent, error) makeRangeEvent(ΔEvent e, EventKind kind, ΔRan
             break;
         }
         default: {
-            return (new ΔEvent(), fmt.Errorf("unexpected range kind: %s"u8, kind));
+            return (new Event(), fmt.Errorf("unexpected range kind: %s"u8, kind));
         }}
         e.@base.args[0] = (uint64)e.table.Ꮡstrings.append(match[1]);
         break;
@@ -654,7 +671,7 @@ internal static (ΔEvent, error) makeRangeEvent(ΔEvent e, EventKind kind, ΔRan
     return (e.ΔClone(), default);
 }
 
-internal static (ΔEvent, error) makeStateTransitionEvent(ΔEvent e, ΔStateTransition t) {
+internal static (Event, error) makeStateTransitionEvent(Event e, StateTransition t) {
     e = e.ΔClone();
 
     switch (t.Resource.Kind) {
@@ -724,7 +741,7 @@ internal static (ΔEvent, error) makeStateTransitionEvent(ΔEvent e, ΔStateTran
                     break;
                 }
                 default: {
-                    return (new ΔEvent(), fmt.Errorf("unexpected transition: %s -> %s"u8, from, to));
+                    return (new Event(), fmt.Errorf("unexpected transition: %s -> %s"u8, from, to));
                 }}
                 break;
             }
@@ -758,7 +775,7 @@ internal static (ΔEvent, error) makeStateTransitionEvent(ΔEvent e, ΔStateTran
                     break;
                 }
                 default: {
-                    return (new ΔEvent(), fmt.Errorf("unexpected transition: %s -> %s"u8, from, to));
+                    return (new Event(), fmt.Errorf("unexpected transition: %s -> %s"u8, from, to));
                 }}
                 break;
             }
@@ -780,7 +797,7 @@ internal static (ΔEvent, error) makeStateTransitionEvent(ΔEvent e, ΔStateTran
                     break;
                 }
                 default: {
-                    return (new ΔEvent(), fmt.Errorf("unexpected transition: %s -> %s"u8, from, to));
+                    return (new Event(), fmt.Errorf("unexpected transition: %s -> %s"u8, from, to));
                 }}
                 break;
             }
@@ -792,23 +809,23 @@ internal static (ΔEvent, error) makeStateTransitionEvent(ΔEvent e, ΔStateTran
                     break;
                 }
                 default: {
-                    return (new ΔEvent(), fmt.Errorf("unexpected transition: %s -> %s"u8, from, to));
+                    return (new Event(), fmt.Errorf("unexpected transition: %s -> %s"u8, from, to));
                 }}
                 break;
             }
             default: {
-                return (new ΔEvent(), fmt.Errorf("unexpected transition: %s -> %s"u8, from, to));
+                return (new Event(), fmt.Errorf("unexpected transition: %s -> %s"u8, from, to));
             }}
         }
         break;
     }
     default: {
-        return (new ΔEvent(), fmt.Errorf("unsupported state transition resource: %s"u8, t.Resource));
+        return (new Event(), fmt.Errorf("unsupported state transition resource: %s"u8, t.Resource));
     }}
     return (e.ΔClone(), default);
 }
 
-internal static (ΔEvent, error) makeSyncEvent(ΔEvent e, ΔSync s) {
+internal static (Event, error) makeSyncEvent(Event e, Sync s) {
     e = e.ΔClone();
 
     e.@base.typ = evSync;
@@ -826,7 +843,7 @@ internal static (ΔEvent, error) makeSyncEvent(ΔEvent e, ΔSync s) {
             }
         }
         if (!found) {
-            return (new ΔEvent(), fmt.Errorf("unknown experiment: %s"u8, name));
+            return (new Event(), fmt.Errorf("unknown experiment: %s"u8, name));
         }
     }
     if (s.ClockSnapshot != nil) {
@@ -843,11 +860,11 @@ internal static (ΔEvent, error) makeSyncEvent(ΔEvent e, ΔSync s) {
 internal static ref readonly @string taskIdCannotBeNoTaskˢ => ref taskIdCannotBeNoTaskˢᵇ;
 private static readonly @string taskIdCannotBeNoTaskˢᵇ = "task ID cannot be NoTask"u8;
 
-internal static (ΔEvent, error) makeTaskEvent(ΔEvent e, EventKind kind, ΔTask t) {
+internal static (Event, error) makeTaskEvent(Event e, EventKind kind, Task t) {
     e = e.ΔClone();
 
     if (t.ID == NoTask) {
-        return (new ΔEvent(), errors.New(taskIdCannotBeNoTaskˢ));
+        return (new Event(), errors.New(taskIdCannotBeNoTaskˢ));
     }
     e.@base.args[0] = (uint64)t.ID;
     switch (kind) {
@@ -871,7 +888,7 @@ internal static (ΔEvent, error) makeTaskEvent(ΔEvent e, EventKind kind, ΔTask
     return (e.ΔClone(), default);
 }
 
-internal static (ΔEvent, error) makeRegionEvent(ΔEvent e, EventKind kind, ΔRegion r) {
+internal static (Event, error) makeRegionEvent(Event e, EventKind kind, Region r) {
     e = e.ΔClone();
 
     e.@base.args[0] = (uint64)r.Task;
@@ -892,7 +909,7 @@ internal static (ΔEvent, error) makeRegionEvent(ΔEvent e, EventKind kind, ΔRe
     return (e.ΔClone(), default);
 }
 
-internal static (ΔEvent, error) makeLogEvent(ΔEvent e, ΔLog l) {
+internal static (Event, error) makeLogEvent(Event e, Log l) {
     e = e.ΔClone();
 
     e.@base.typ = tracev2.EvUserLog;
@@ -902,7 +919,7 @@ internal static (ΔEvent, error) makeLogEvent(ΔEvent e, ΔLog l) {
     return (e.ΔClone(), default);
 }
 
-internal static (ΔEvent, error) makeStackSampleEvent(ΔEvent e, ΔStack s) {
+internal static (Event, error) makeStackSampleEvent(Event e, Stack s) {
     e = e.ΔClone();
 
     e.@base.typ = tracev2.EvCPUSample;
@@ -922,27 +939,29 @@ internal static stackID addStack(ж<evTable> Ꮡtable, slice<StackFrame> frames)
             fileID: table.strings.append(f.File),
             line: f.Line
         );
-        pcs = builtin.append(pcs, f.PC);
+        pcs = append(pcs, f.PC);
     }
     return table.stacks.append(new stack(pcs: pcs));
 }
 
 // Event represents a single event in the trace.
-partial struct ΔEvent {
+partial struct Event {
     internal ж<evTable> table;
     internal schedCtx ctx;
     internal baseEvent @base;
 }
 
+} partial class traceᴛEvent {
+
 // Kind returns the kind of event that this is.
-public static EventKind Kind(this ΔEvent e) {
+public static EventKind Kind(this Event e) {
     e = e.ΔClone();
 
     return tracev2Type2Kind[e.@base.typ];
 }
 
 // Time returns the timestamp of the event.
-public static ΔTime Time(this ΔEvent e) {
+public static Time Time(this Event e) {
     e = e.ΔClone();
 
     return e.@base.time;
@@ -957,7 +976,7 @@ public static ΔTime Time(this ΔEvent e) {
 // starting to run on this thread and/or proc, then this will return
 // NoGoroutine. In this case, the goroutine starting to run will be
 // can be found at Event.StateTransition().Resource.
-public static GoID Goroutine(this ΔEvent e) {
+public static GoID Goroutine(this Event e) {
     e = e.ΔClone();
 
     return e.ctx.G;
@@ -968,7 +987,7 @@ public static GoID Goroutine(this ΔEvent e) {
 // Note that for proc state transitions this always refers to the
 // state before the transition. For example, if a proc is just
 // starting to run on this thread, then this will return NoProc.
-public static ProcID Proc(this ΔEvent e) {
+public static ProcID Proc(this Event e) {
     e = e.ΔClone();
 
     return e.ctx.P;
@@ -984,7 +1003,7 @@ public static ProcID Proc(this ΔEvent e) {
 // will always return a valid thread ID. However thread state transitions
 // may be tracked in the future, and callers must be robust to this
 // possibility.
-public static ThreadID Thread(this ΔEvent e) {
+public static ThreadID Thread(this Event e) {
     e = e.ΔClone();
 
     return e.ctx.M;
@@ -994,14 +1013,14 @@ public static ThreadID Thread(this ΔEvent e) {
 //
 // This represents a stack trace at the current moment in time for
 // the current execution context.
-public static ΔStack Stack(this ΔEvent e) {
+public static Stack Stack(this Event e) {
     e = e.ΔClone();
 
     if (e.@base.typ == evSync) {
         return NoStack;
     }
     if (e.@base.typ == tracev2.EvCPUSample) {
-        return new ΔStack(table: e.table, id: ((stackID)e.@base.args[0]));
+        return new Stack(table: e.table, id: ((stackID)e.@base.args[0]));
     }
     var spec = tracev2.Specs()[e.@base.typ];
     if (len(spec.StackIDs) == 0) {
@@ -1014,7 +1033,7 @@ public static ΔStack Stack(this ΔEvent e) {
     if (id == 0) {
         return NoStack;
     }
-    return new ΔStack(table: e.table, id: id);
+    return new Stack(table: e.table, id: id);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1028,13 +1047,13 @@ private static readonly @string gcHeapGoalBytesˢᵇ = "/gc/heap/goal:bytes"u8;
 // Metric returns details about a Metric event.
 //
 // Panics if Kind != EventMetric.
-public static ΔMetric Metric(this ΔEvent e) {
+public static Metric Metric(this Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventMetric) {
         throw panic("Metric called on non-Metric event");
     }
-    ΔMetric m = default;
+    Metric m = default;
     switch (e.@base.typ) {
     case var ᴛ when ᴛ == tracev2.EvProcsChange: {
         m.Name = schedGomaxprocsThreadsˢ;
@@ -1061,7 +1080,7 @@ public static ΔMetric Metric(this ΔEvent e) {
 // Label returns details about a Label event.
 //
 // Panics if Kind != EventLabel.
-public static ΔLabel Label(this ΔEvent e) {
+public static Label Label(this Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventLabel) {
@@ -1070,8 +1089,8 @@ public static ΔLabel Label(this ΔEvent e) {
     if (e.@base.typ != tracev2.EvGoLabel) {
         throw panic(fmt.Sprintf("internal error: unexpected wire-format event type for Label kind: %d"u8, e.@base.typ));
     }
-    return new ΔLabel(
-        ΔΔLabel: e.table.Ꮡstrings.mustGet((stringID)e.@base.args[0]),
+    return new Label(
+        ΔLabel: e.table.Ꮡstrings.mustGet((stringID)e.@base.args[0]),
         Resource: new ResourceID(Kind: ResourceGoroutine, id: (int64)e.ctx.G)
     );
 }
@@ -1087,13 +1106,13 @@ private static readonly @string gcMarkAssistˢᵇ = "GC mark assist"u8;
 // Range returns details about an EventRangeBegin, EventRangeActive, or EventRangeEnd event.
 //
 // Panics if Kind != EventRangeBegin, Kind != EventRangeActive, and Kind != EventRangeEnd.
-public static ΔRange Range(this ΔEvent e) {
+public static Range Range(this Event e) {
     e = e.ΔClone();
 
     var kind = e.Kind(); if (kind != EventRangeBegin && kind != EventRangeActive && kind != EventRangeEnd) {
         throw panic("Range called on non-Range event");
     }
-    ΔRange r = default;
+    Range r = default;
     switch (e.@base.typ) {
     case var ᴛ when ᴛ == tracev2.EvSTWBegin || ᴛ == tracev2.EvSTWEnd: {
         // N.B. ordering.advance smuggles in the STW reason as e.base.args[0]
@@ -1137,7 +1156,7 @@ public static ΔRange Range(this ΔEvent e) {
 // RangeAttributes returns attributes for a completed range.
 //
 // Panics if Kind != EventRangeEnd.
-public static slice<RangeAttribute> RangeAttributes(this ΔEvent e) {
+public static slice<RangeAttribute> RangeAttributes(this Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventRangeEnd) {
@@ -1161,7 +1180,7 @@ public static slice<RangeAttribute> RangeAttributes(this ΔEvent e) {
 // Task returns details about a TaskBegin or TaskEnd event.
 //
 // Panics if Kind != EventTaskBegin and Kind != EventTaskEnd.
-public static ΔTask Task(this ΔEvent e) {
+public static Task Task(this Event e) {
     e = e.ΔClone();
 
     var kind = e.Kind(); if (kind != EventTaskBegin && kind != EventTaskEnd) {
@@ -1184,7 +1203,7 @@ public static ΔTask Task(this ΔEvent e) {
         throw panic(fmt.Sprintf("internal error: unexpected wire-format event type for Task kind: %d"u8, e.@base.typ));
         break;
     }}
-    return new ΔTask(
+    return new Task(
         ID: ((TaskID)e.@base.args[0]),
         Parent: parentID,
         Type: typ
@@ -1194,7 +1213,7 @@ public static ΔTask Task(this ΔEvent e) {
 // Region returns details about a RegionBegin or RegionEnd event.
 //
 // Panics if Kind != EventRegionBegin and Kind != EventRegionEnd.
-public static ΔRegion Region(this ΔEvent e) {
+public static Region Region(this Event e) {
     e = e.ΔClone();
 
     var kind = e.Kind(); if (kind != EventRegionBegin && kind != EventRegionEnd) {
@@ -1203,7 +1222,7 @@ public static ΔRegion Region(this ΔEvent e) {
     if (e.@base.typ != tracev2.EvUserRegionBegin && e.@base.typ != tracev2.EvUserRegionEnd) {
         throw panic(fmt.Sprintf("internal error: unexpected wire-format event type for Region kind: %d"u8, e.@base.typ));
     }
-    return new ΔRegion(
+    return new Region(
         Task: ((TaskID)e.@base.args[0]),
         Type: e.table.Ꮡstrings.mustGet((stringID)e.@base.args[1])
     );
@@ -1212,7 +1231,7 @@ public static ΔRegion Region(this ΔEvent e) {
 // Log returns details about a Log event.
 //
 // Panics if Kind != EventLog.
-public static ΔLog Log(this ΔEvent e) {
+public static Log Log(this Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventLog) {
@@ -1221,7 +1240,7 @@ public static ΔLog Log(this ΔEvent e) {
     if (e.@base.typ != tracev2.EvUserLog) {
         throw panic(fmt.Sprintf("internal error: unexpected wire-format event type for Log kind: %d"u8, e.@base.typ));
     }
-    return new ΔLog(
+    return new Log(
         Task: ((TaskID)e.@base.args[0]),
         Category: e.table.Ꮡstrings.mustGet((stringID)e.@base.args[1]),
         Message: e.table.Ꮡstrings.mustGet((stringID)e.@base.args[2])
@@ -1231,13 +1250,13 @@ public static ΔLog Log(this ΔEvent e) {
 // StateTransition returns details about a StateTransition event.
 //
 // Panics if Kind != EventStateTransition.
-public static ΔStateTransition StateTransition(this ΔEvent e) {
+public static StateTransition StateTransition(this Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventStateTransition) {
         throw panic("StateTransition called on non-StateTransition event");
     }
-    ΔStateTransition s = default;
+    StateTransition s = default;
     switch (e.@base.typ) {
     case var ᴛ when ᴛ == tracev2.EvProcStart: {
         s = MakeProcStateTransition((ProcID)(int64)e.@base.args[0], ProcIdle, ProcRunning);
@@ -1271,7 +1290,7 @@ public static ΔStateTransition StateTransition(this ΔEvent e) {
             status = GoWaiting;
         }
         s = MakeGoStateTransition((GoID)(int64)e.@base.args[0], GoNotExist, status);
-        s.Stack = new ΔStack(table: e.table, id: ((stackID)e.@base.args[1]));
+        s.Stack = new Stack(table: e.table, id: ((stackID)e.@base.args[1]));
         break;
     }
     case var ᴛ when ᴛ == tracev2.EvGoCreateSyscall: {
@@ -1338,13 +1357,13 @@ public static ΔStateTransition StateTransition(this ΔEvent e) {
 
 // Sync returns details that are relevant for the following events, up to but excluding the
 // next EventSync event.
-public static ΔSync Sync(this ΔEvent e) {
+public static Sync Sync(this Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventSync) {
         throw panic("Sync called on non-Sync event");
     }
-    var s = new ΔSync(N: (nint)e.@base.args[0]);
+    var s = new Sync(N: (nint)e.@base.args[0]);
     if (e.table != nil) {
         var expBatches = new map<@string, slice<ExperimentalBatch>>();
         foreach (var (exp, batches) in e.table.expBatches) {
@@ -1362,9 +1381,11 @@ public static ΔSync Sync(this ΔEvent e) {
     return s;
 }
 
+} partial class trace_package {
+
 // Sync contains details potentially relevant to all the following events, up to but excluding
 // the next EventSync event.
-partial struct ΔSync {
+partial struct Sync {
     // N indicates that this is the Nth sync event in the trace.
     public nint N;
     // ClockSnapshot represents a near-simultaneous clock reading of several
@@ -1383,17 +1404,19 @@ partial struct ΔSync {
 // with data captured by other tools.
 partial struct ClockSnapshot {
     // Trace is a snapshot of the trace clock.
-    public ΔTime Trace;
+    public Time Trace;
     // Wall is a snapshot of the system's wall clock.
     public time.Time Wall;
     // Mono is a snapshot of the system's monotonic clock.
     public uint64 Mono;
 }
 
+} partial class traceᴛEvent {
+
 // Experimental returns a view of the raw event for an experimental event.
 //
 // Panics if Kind != EventExperimental.
-public static ExperimentalEvent Experimental(this ΔEvent e) {
+public static ExperimentalEvent Experimental(this Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventExperimental) {
@@ -1409,6 +1432,8 @@ public static ExperimentalEvent Experimental(this ΔEvent e) {
         argValues: e.@base.args.slice(0, len(argNames))
     );
 }
+
+} partial class trace_package {
 
 internal static tracev2.EventType evSync => /* ^tracev2.EventType(0) */ 255;
 
@@ -1493,6 +1518,8 @@ internal static array<tracev2.ProcStatus> procState2Tracev2ProcStatus = new goli
     // TODO(felixge): how to map ProcSyscall and ProcSyscallAbandoned?
 }.array(4);
 
+} partial class traceᴛEvent {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object transitionStackˢ = (@string)"TransitionStack="u8;
 internal static readonly object stackˢ = (@string)"Stack="u8;
@@ -1500,7 +1527,7 @@ internal static readonly object stackˢ = (@string)"Stack="u8;
 // String returns the event as a human-readable string.
 //
 // The format of the string is intended for debugging and is subject to change.
-public static @string String(this ΔEvent e) {
+public static @string String(this Event e) {
     e = e.ΔClone();
 
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
@@ -1520,7 +1547,7 @@ public static @string String(this ΔEvent e) {
     }
     case var ᴛ when ᴛ == EventLabel: {
         var l = e.Label();
-        fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Label=%q Resource=%s"u8, l.ΔΔLabel, l.Resource);
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Label=%q Resource=%s"u8, l.ΔLabel, l.Resource);
         break;
     }
     case var ᴛ when ᴛ == EventRangeBegin || ᴛ == EventRangeActive || ᴛ == EventRangeEnd: {
@@ -1609,7 +1636,7 @@ public static @string String(this ΔEvent e) {
 
 // validateTableIDs checks to make sure lookups in e.table
 // will work.
-internal static error validateTableIDs(this ΔEvent e) {
+internal static error validateTableIDs(this Event e) {
     e = e.ΔClone();
 
     if (e.@base.typ == evSync) {
@@ -1639,8 +1666,10 @@ internal static error validateTableIDs(this ΔEvent e) {
     return default;
 }
 
-internal static ΔEvent syncEvent(ж<evTable> table, ΔTime ts, nint n) {
-    var ev = new ΔEvent(
+} partial class trace_package {
+
+internal static Event syncEvent(ж<evTable> table, Time ts, nint n) {
+    var ev = new Event(
         table: table,
         ctx: new schedCtx(
             G: NoGoroutine,

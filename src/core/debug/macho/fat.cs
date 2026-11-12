@@ -10,6 +10,7 @@ using io = io_package;
 using os = os_package;
 using @internal;
 using encoding;
+using static macho_package;
 
 partial class macho_package {
 
@@ -144,6 +145,8 @@ public static (ж<FatFile>, error) OpenFat(@string name) {
     return (ff, default);
 }
 
+} partial class machoᴛFatFile {
+
 public static error Close(this ref FatFile ff) {
     error err = default;
     if (ff.closer != nil) {
@@ -153,4 +156,4 @@ public static error Close(this ref FatFile ff) {
     return err;
 }
 
-} // end macho_package
+} // end machoᴛFatFile

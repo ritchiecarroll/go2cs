@@ -11,6 +11,7 @@ namespace go.vendor.golang.org.x.net.http2;
 using bytes = bytes_package;
 using errors = errors_package;
 using fmt = fmt_package;
+using static hpack_package;
 
 partial class hpack_package {
 
@@ -19,17 +20,25 @@ partial struct DecodingError {
     public error Err;
 }
 
+} partial class hpackᴛDecodingError {
+
 public static @string Error(this DecodingError de) {
     return fmt.Sprintf("decoding error: %v"u8, de.Err);
 }
+
+} partial class hpack_package {
 
 // An InvalidIndexError is returned when an encoder references a table
 // entry before the static table or after the end of the dynamic table.
 partial struct InvalidIndexError /*num:nint*/;
 
+} partial class hpackᴛInvalidIndexError {
+
 public static @string Error(this InvalidIndexError e) {
     return fmt.Sprintf("invalid indexed representation index %d"u8, (nint)e);
 }
+
+} partial class hpack_package {
 
 // A HeaderField is a name-value pair. Both the name and value are
 // treated as opaque sequences of octets.
@@ -40,12 +49,14 @@ partial struct HeaderField {
     public bool Sensitive;
 }
 
+} partial class hpackᴛHeaderField {
+
 // IsPseudo reports whether the header field is an http2 pseudo header.
 // That is, it reports whether it starts with a colon.
 // It is not otherwise guaranteed to be a valid pseudo header field,
 // though.
 public static bool IsPseudo(this HeaderField hf) {
-    return builtin.len(hf.Name) != 0 && hf.Name[0] == ':';
+    return len(hf.Name) != 0 && hf.Name[0] == ':';
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -74,8 +85,10 @@ public static uint32 Size(this HeaderField hf) {
     // Name and/or Value by hand, but we don't care, because that
     // won't happen on the wire because the encoding doesn't allow
     // it.
-    return (uint32)(builtin.len(hf.Name) + builtin.len(hf.Value) + 32);
+    return (uint32)(len(hf.Name) + len(hf.Value) + 32);
 }
+
+} partial class hpack_package {
 
 // A Decoder is the decoding context for incremental processing of
 // header blocks.
@@ -113,6 +126,8 @@ public static ж<Decoder> NewDecoder(uint32 maxDynamicTableSize, Action<HeaderFi
 // ErrStringLength is returned by Decoder.Write when the max string length
 // (as configured by Decoder.SetMaxStringLength) would be violated.
 public static error ErrStringLength = errors.New("hpack: string too long");
+
+} partial class hpackᴛDecoder {
 
 // SetMaxStringLength sets the maximum size of a HeaderField name or
 // value string. If a string exceeds this length (even after any
@@ -155,6 +170,8 @@ public static void SetAllowedMaxDynamicTableSize(this ref Decoder d, uint32 v) {
     d.dynTab.allowedMaxSize = v;
 }
 
+} partial class hpack_package {
+
 partial struct dynamicTable {
     // https://httpwg.org/specs/rfc7541.html#rfc.section.2.3.2
     internal headerFieldTable table;
@@ -162,6 +179,8 @@ partial struct dynamicTable {
     internal uint32 maxSize;        // current maxSize
     internal uint32 allowedMaxSize; // maxSize may go up to this, inclusive
 }
+
+} partial class hpackᴛdynamicTable {
 
 internal static void setMaxSize(this ref dynamicTable dt, uint32 v) {
     dt.maxSize = v;
@@ -183,6 +202,8 @@ internal static void evict(this ref dynamicTable dt) {
     }
     dt.table.evictOldest(n);
 }
+
+} partial class hpackᴛDecoder {
 
 internal static nint maxTableIndex(this ref Decoder d) {
     // This should never overflow. RFC 7540 Section 6.5.2 limits the size of
@@ -266,7 +287,7 @@ public static (nint n, error err) Write(this ref Decoder d, slice<byte> p) {
     nint n = default;
     error err = default;
 
-    if (builtin.len(p) == 0) {
+    if (len(p) == 0) {
         // Prevent state machine CPU attacks (making us redo
         // work up to the point of finding out we don't have
         // enough data)
@@ -282,7 +303,7 @@ public static (nint n, error err) Write(this ref Decoder d, slice<byte> p) {
         d.saveBuf.Reset();
     }
 
-    while (builtin.len(d.buf) > 0) {
+    while (len(d.buf) > 0) {
         err = d.parseHeaderFieldRepr();
         if (AreEqual(err, errNeedMore)) {
             // Extra paranoia, making sure saveBuf won't
@@ -291,19 +312,21 @@ public static (nint n, error err) Write(this ref Decoder d, slice<byte> p) {
             // overlong things and return ErrStringLength,
             // but keep this as a last resort.
             const int64 varIntOverhead = 8; // conservative
-            if (d.maxStrLen != 0 && (int64)builtin.len(d.buf) > 2 * ((int64)d.maxStrLen + varIntOverhead)) {
+            if (d.maxStrLen != 0 && (int64)len(d.buf) > 2 * ((int64)d.maxStrLen + varIntOverhead)) {
                 return (0, ErrStringLength);
             }
             d.saveBuf.Write(d.buf);
-            return (builtin.len(p), default);
+            return (len(p), default);
         }
         d.firstField = false;
         if (err != nil) {
             break;
         }
     }
-    return (builtin.len(p), err);
+    return (len(p), err);
 }
+
+} partial class hpack_package {
 
 // errNeedMore is an internal sentinel error value that means the
 // buffer is truncated and we need to read more data before we can
@@ -316,8 +339,12 @@ internal static indexType indexedTrue => /* iota */ 0;
 internal static indexType indexedFalse => 1;
 internal static indexType indexedNever => 2;
 
+} partial class hpackᴛindexType {
+
 internal static bool indexed(this indexType v) { return v == indexedTrue; }
 internal static bool sensitive(this indexType v) { return v == indexedNever; }
+
+} partial class hpackᴛDecoder {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string invalidEncodingˢ => ref invalidEncodingˢᵇ;
@@ -428,7 +455,7 @@ internal static error parseFieldLiteral(this ref Decoder d, uint8 n, indexType i
 
 internal static error callEmit(this ref Decoder d, HeaderField hf) {
     if (d.maxStrLen != 0) {
-        if (builtin.len(hf.Name) > d.maxStrLen || builtin.len(hf.Value) > d.maxStrLen) {
+        if (len(hf.Name) > d.maxStrLen || len(hf.Value) > d.maxStrLen) {
             return ErrStringLength;
         }
     }
@@ -465,6 +492,8 @@ internal static error parseDynamicTableSizeUpdate(this ref Decoder d) {
     return default;
 }
 
+} partial class hpack_package {
+
 internal static DecodingError errVarintOverflow = new DecodingError(errors.New("varint integer overflow"));
 
 // readVarInt reads an unsigned variable length integer off the
@@ -481,7 +510,7 @@ internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, sli
     if (n < 1 || n > 8) {
         throw panic("bad n");
     }
-    if (builtin.len(p) == 0) {
+    if (len(p) == 0) {
         return (0, p, errNeedMore);
     }
     i = (uint64)p[0];
@@ -495,7 +524,7 @@ internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, sli
     var origP = p;
     p = p[1..];
     uint64 m = default;
-    while (builtin.len(p) > 0) {
+    while (len(p) > 0) {
         var b = p[0];
         p = p[1..];
         i += ((uint64)((byte)(b & 127))).Lsh(m);
@@ -510,6 +539,8 @@ internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, sli
     return (0, origP, errNeedMore);
 }
 
+} partial class hpackᴛDecoder {
+
 // readString reads an hpack string from p.
 //
 // It returns a reference to the encoded string data to permit deferring decode costs
@@ -518,7 +549,7 @@ internal static (undecodedString u, slice<byte> remain, error err) readString(th
     undecodedString u = default;
     error err = default;
 
-    if (builtin.len(p) == 0) {
+    if (len(p) == 0) {
         return (u, p, errNeedMore);
     }
     var isHuff = (byte)(p[0] & 128) != 0;
@@ -534,7 +565,7 @@ internal static (undecodedString u, slice<byte> remain, error err) readString(th
         // affect the decoding state.
         return (u, default, ErrStringLength);
     }
-    if ((uint64)builtin.len(p) < strLen) {
+    if ((uint64)len(p) < strLen) {
         return (u, p, errNeedMore);
     }
     u.isHuff = isHuff;
@@ -542,10 +573,14 @@ internal static (undecodedString u, slice<byte> remain, error err) readString(th
     return (u, p.slice((nint)(strLen)), default);
 }
 
+} partial class hpack_package {
+
 partial struct undecodedString {
     internal bool isHuff;
     internal slice<byte> b;
 }
+
+} partial class hpackᴛDecoder {
 
 internal static (@string, error) decodeString(this ref Decoder d, undecodedString u) {
     if (!u.isHuff) {
@@ -563,4 +598,4 @@ internal static (@string, error) decodeString(this ref Decoder d, undecodedStrin
     return (s, err);
 }
 
-} // end hpack_package
+} // end hpackᴛDecoder

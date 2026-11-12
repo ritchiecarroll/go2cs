@@ -11,6 +11,7 @@ using os = os_package;
 using reflect = reflect_package;
 using global::go.go;
 using ꓸꓸꓸany = Span<any>;
+using static ast_package;
 
 partial class ast_package {
 
@@ -19,9 +20,9 @@ partial class ast_package {
 
 // NotNilFilter is a [FieldFilter] that returns true for field values
 // that are not nil; it returns false otherwise.
-public static bool NotNilFilter(@string _, reflectꓸValue v) {
+public static bool NotNilFilter(@string _, reflect.Value v) {
     switch (v.Kind()) {
-    case var ᴛ when ᴛ == reflect.Chan || ᴛ == reflect.Func || ᴛ == reflect.ΔInterface || ᴛ == reflect.Map || ᴛ == reflect.ΔPointer || ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Chan || ᴛ == reflect.Func || ᴛ == reflect.Interface || ᴛ == reflect.Map || ᴛ == reflect.Pointer || ᴛ == reflect.Slice: {
         return !v.IsNil();
     }}
     return true;
@@ -36,11 +37,11 @@ public static bool NotNilFilter(@string _, reflectꓸValue v) {
 // struct fields for which f(fieldname, fieldvalue) is true are
 // printed; all others are filtered from the output. Unexported
 // struct fields are never printed.
-public static error Fprint(io.Writer w, ж<token.FileSet> fset, any x, Func<@string, reflectꓸValue, bool> f) {
+public static error Fprint(io.Writer w, ж<token.FileSet> fset, any x, Func<@string, reflect.Value, bool> f) {
     return fprint(w, fset, x, f);
 }
 
-internal static error /*err*/ fprint(io.Writer w, ж<token.FileSet> fset, any x, Func<@string, reflectꓸValue, bool> f) {
+internal static error /*err*/ fprint(io.Writer w, ж<token.FileSet> fset, any x, Func<@string, reflect.Value, bool> f) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -76,13 +77,13 @@ internal static error /*err*/ fprint(io.Writer w, ж<token.FileSet> fset, any x,
 // Print prints x to standard output, skipping nil fields.
 // Print(fset, x) is the same as Fprint(os.Stdout, fset, x, NotNilFilter).
 public static error Print(ж<token.FileSet> fset, any x) {
-    return Fprint(new os.FileжWriter(os.Stdout), fset, x, new Func<@string, reflectꓸValue, bool>(NotNilFilter));
+    return Fprint(new os.FileжWriter(os.Stdout), fset, x, new Func<@string, reflect.Value, bool>(NotNilFilter));
 }
 
 partial struct printer {
     internal io.Writer output;
     internal ж<token.FileSet> fset;
-    internal Func<@string, reflectꓸValue, bool> filter;
+    internal Func<@string, reflect.Value, bool> filter;
     internal map<any, nint> ptrmap; // *T -> line number
     internal nint indent;           // current indentation level
     internal byte last;             // the last byte processed by Write
@@ -90,6 +91,8 @@ partial struct printer {
 }
 
 internal static slice<byte> indent = slice<byte>(".  "u8);
+
+} partial class astᴛprinter {
 
 internal static (nint n, error err) Write(this ref printer p, slice<byte> data) {
     nint n = default;
@@ -126,11 +129,15 @@ internal static (nint n, error err) Write(this ref printer p, slice<byte> data) 
     return (n, err);
 }
 
+} partial class ast_package {
+
 // localError wraps locally caught errors so we can distinguish
 // them from genuine panics which we don't want to return as errors.
 partial struct localError {
     internal error err;
 }
+
+} partial class astᴛprinter {
 
 // printf is a convenience wrapper that takes care of print errors.
 internal static void printf(this ж<printer> Ꮡp, @string format, params ꓸꓸꓸany argsʗp) {
@@ -149,7 +156,7 @@ internal static void printf(this ж<printer> Ꮡp, @string format, params ꓸꓸ
 // not cycles that are created via slices or maps containing the
 // same slice or map. Code for general data structures probably
 // should catch those as well.
-internal static void print(this ж<printer> Ꮡp, reflectꓸValue x) {
+internal static void print(this ж<printer> Ꮡp, reflect.Value x) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (!NotNilFilter(""u8, x)) {
@@ -158,7 +165,7 @@ internal static void print(this ж<printer> Ꮡp, reflectꓸValue x) {
     }
 
     switch (x.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔInterface: {
+    case var ᴛ when ᴛ == reflect.Interface: {
         Ꮡp.print(x.Elem());
         break;
     }
@@ -178,7 +185,7 @@ internal static void print(this ж<printer> Ꮡp, reflectꓸValue x) {
         Ꮡp.printf("}");
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔPointer: {
+    case var ᴛ when ᴛ == reflect.Pointer: {
         Ꮡp.printf("*");
         // type-checked ASTs may contain cycles - use ptrmap
         // to keep track of objects that have been printed
@@ -207,7 +214,7 @@ internal static void print(this ж<printer> Ꮡp, reflectꓸValue x) {
         Ꮡp.printf("}");
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Slice: {
         var (s, ok) = x.Interface()._<slice<byte>>(ᐧ); if (ok) {
             Ꮡp.printf("%#q", s);
             return;
@@ -259,7 +266,7 @@ internal static void print(this ж<printer> Ꮡp, reflectꓸValue x) {
             Ꮡp.printf("%q", vΔ1);
             return;
         }
-        case tokenꓸPos vΔ1: {
+        case token.Pos vΔ1: {
             // position values can be printed nicely if we have a file set
             if (p.fset != nil) {
                 Ꮡp.printf("%s", p.fset.Position(vΔ1));
@@ -273,4 +280,4 @@ internal static void print(this ж<printer> Ꮡp, reflectꓸValue x) {
     }}
 }
 
-} // end ast_package
+} // end astᴛprinter

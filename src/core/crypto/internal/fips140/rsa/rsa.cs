@@ -9,24 +9,29 @@ using bigmod = go.crypto.@internal.fips140.bigmod_package;
 using errors = errors_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using static rsa_package;
 
 partial class rsa_package {
 
-partial struct ΔPublicKey {
+partial struct PublicKey {
     public ж<bigmod.Modulus> N;
     public nint E;
 }
 
+} partial class rsaᴛPublicKey {
+
 // Size returns the modulus size in bytes. Raw signatures and ciphertexts
 // for or by this public key will have the same size.
-public static nint Size(this ref ΔPublicKey pub) {
+public static nint Size(this ref PublicKey pub) {
     return (pub.N.BitLen() + 7) / 8;
 }
 
+} partial class rsa_package {
+
 partial struct PrivateKey {
     // pub has already been checked with checkPublicKey.
-    internal ΔPublicKey pub;
-    internal ж<bigmodꓸNat> d;
+    internal PublicKey pub;
+    internal ж<bigmod.Nat> d;
     // The following values are not set for deprecated multi-prime keys.
     //
     // Since they are always set for keys in FIPS mode, for SP 800-56B Rev. 2
@@ -36,15 +41,19 @@ partial struct PrivateKey {
     // slices to be passed to [bigmod.Nat.Exp].
     internal slice<byte> dP;     // d mod (p - 1)
     internal slice<byte> dQ;     // d mod (q - 1)
-    internal ж<bigmodꓸNat> qInv; // qInv = q⁻¹ mod p
+    internal ж<bigmod.Nat> qInv; // qInv = q⁻¹ mod p
     // fipsApproved is false if this key does not comply with FIPS 186-5 or
     // SP 800-56B Rev. 2.
     internal bool fipsApproved;
 }
 
-public static ж<ΔPublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) {
+} partial class rsaᴛPrivateKey {
+
+public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) {
     return Ꮡpriv.Ꮡpub;
 }
+
+} partial class rsa_package {
 
 // NewPrivateKey creates a new RSA private key from the given parameters.
 //
@@ -74,7 +83,7 @@ public static (ж<PrivateKey>, error) NewPrivateKey(slice<byte> N, nint e, slice
 internal static ref readonly @string cryptoRsaPIsEvenˢ => ref cryptoRsaPIsEvenˢᵇ;
 private static readonly @string cryptoRsaPIsEvenˢᵇ = "crypto/rsa: p is even"u8;
 
-internal static (ж<PrivateKey>, error) newPrivateKey(ж<bigmod.Modulus> n, nint e, ж<bigmodꓸNat> d, ж<bigmod.Modulus> Ꮡp, ж<bigmod.Modulus> Ꮡq) {
+internal static (ж<PrivateKey>, error) newPrivateKey(ж<bigmod.Modulus> n, nint e, ж<bigmod.Nat> d, ж<bigmod.Modulus> Ꮡp, ж<bigmod.Modulus> Ꮡq) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var q = ref Ꮡq.DerefOrNull();
 
@@ -103,7 +112,7 @@ internal static (ж<PrivateKey>, error) newPrivateKey(ж<bigmod.Modulus> n, nint
     qInv.Exp(qInv, pMinusTwo, Ꮡp);
 
     var pk = Ꮡ(new PrivateKey(
-        pub: new ΔPublicKey(
+        pub: new PublicKey(
             N: n, E: e
         ),
         d: d, p: Ꮡp, q: Ꮡq,
@@ -140,7 +149,7 @@ public static (ж<PrivateKey>, error) NewPrivateKeyWithPrecomputation(slice<byte
     }
 
     var pk = Ꮡ(new PrivateKey(
-        pub: new ΔPublicKey(
+        pub: new PublicKey(
             N: n, E: e
         ),
         d: dN, p: p, q: q,
@@ -165,7 +174,7 @@ public static (ж<PrivateKey>, error) NewPrivateKeyWithoutCRT(slice<byte> N, nin
         return (default, err);
     }
     var pk = Ꮡ(new PrivateKey(
-        pub: new ΔPublicKey(
+        pub: new PublicKey(
             N: n, E: e
         ),
         d: dN
@@ -175,6 +184,8 @@ public static (ж<PrivateKey>, error) NewPrivateKeyWithoutCRT(slice<byte> N, nin
     }
     return (pk, default);
 }
+
+} partial class rsaᴛPrivateKey {
 
 // Export returns the key parameters in big-endian byte slice format.
 //
@@ -203,6 +214,8 @@ public static (slice<byte> N, nint e, slice<byte> d, slice<byte> P, slice<byte> 
     qInv = priv.qInv.Bytes(priv.p);
     return (N, e, d, P, Q, dP, dQ, qInv);
 }
+
+} partial class rsa_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cryptoRsaInvalidPrimeˢ => ref cryptoRsaInvalidPrimeˢᵇ;
@@ -372,7 +385,7 @@ private static readonly @string cryptoRsaPublicExponentˢ2ᵇ = "crypto/rsa: pub
 internal static ref readonly @string cryptoRsaPublicExponentˢ3 => ref cryptoRsaPublicExponentˢ3ᵇ;
 private static readonly @string cryptoRsaPublicExponentˢ3ᵇ = "crypto/rsa: public exponent too large"u8;
 
-internal static (bool fipsApproved, error err) checkPublicKey(ref ΔPublicKey pub) {
+internal static (bool fipsApproved, error err) checkPublicKey(ref PublicKey pub) {
     bool fipsApproved = default;
 
     fipsApproved = true;
@@ -415,7 +428,7 @@ internal static (bool fipsApproved, error err) checkPublicKey(ref ΔPublicKey pu
 }
 
 // Encrypt performs the RSA public key operation.
-public static (slice<byte>, error) Encrypt(ж<ΔPublicKey> pub, slice<byte> plaintext) {
+public static (slice<byte>, error) Encrypt(ж<PublicKey> pub, slice<byte> plaintext) {
     fips140.RecordNonApproved();
     var (_, err) = checkPublicKey(ref (pub).DerefOrNull()); if (err != nil) {
         return (default, err);
@@ -423,7 +436,7 @@ public static (slice<byte>, error) Encrypt(ж<ΔPublicKey> pub, slice<byte> plai
     return encrypt(ref (pub).DerefOrNull(), plaintext);
 }
 
-internal static (slice<byte>, error) encrypt(ref ΔPublicKey pub, slice<byte> plaintext) {
+internal static (slice<byte>, error) encrypt(ref PublicKey pub, slice<byte> plaintext) {
     var (m, err) = bigmod.NewNat().SetBytes(plaintext, pub.N);
     if (err != nil) {
         return (default, err);
@@ -459,7 +472,7 @@ internal static (slice<byte>, error) decrypt(ref PrivateKey priv, slice<byte> ci
         fips140.RecordNonApproved();
     }
 
-    ж<bigmodꓸNat> m = default;
+    ж<bigmod.Nat> m = default;
     var N = priv.pub.N;
     nint E = priv.pub.E;
 

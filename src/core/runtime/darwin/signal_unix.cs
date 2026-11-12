@@ -441,7 +441,7 @@ internal static void sigtrampgo(uint32 sig, ж<siginfo> info, @unsafe.Pointer ct
 // If the signal handler receives a SIGPROF signal on a non-Go thread,
 // it tries to collect a traceback into sigprofCallers.
 // sigprofCallersUse is set to non-zero while sigprofCallers holds a traceback.
-internal static ΔcgoCallers sigprofCallers;
+internal static cgoCallers sigprofCallers;
 internal static readonly ж<uint32> ᏑsigprofCallersUse = new StaticBox<uint32>(default(uint32));
 internal static ref uint32 sigprofCallersUse => ref ((StaticBox<uint32>)ᏑsigprofCallersUse).ValueSlot;
 
@@ -803,9 +803,9 @@ internal static ж<g> fatalsignal(uint32 sig, ж<sigctxt> Ꮡc, ж<g> Ꮡgp, ref
         exit(2);
     }
 
-    print((@string)"PC=", (Δhex)(uint64)c.sigpc(), (@string)" m=", mp.id, (@string)" sigcode=", c.sigcode());
+    print((@string)"PC=", (hex)(uint64)c.sigpc(), (@string)" m=", mp.id, (@string)" sigcode=", c.sigcode());
     if (sig == _SIGSEGV || sig == _SIGBUS) {
-        print((@string)" addr=", (Δhex)(uint64)c.fault());
+        print((@string)" addr=", (hex)(uint64)c.fault());
     }
     print((@string)"\n");
     if (mp.incgo && Ꮡgp == mp.g0 && mp.curg != nil) {
@@ -834,7 +834,7 @@ internal static ж<g> fatalsignal(uint32 sig, ж<sigctxt> Ꮡc, ж<g> Ꮡgp, ref
         print((@string)"instruction bytes:");
         var b = (ж<array<byte>>)(uintptr)((@unsafe.Pointer)pc);
         for (var i = (uintptr)0; i < n; i++) {
-            print((@string)" ", (Δhex)(uint64)b.Value[i]);
+            print((@string)" ", (hex)(uint64)b.Value[i]);
         }
         println();
     }
@@ -882,7 +882,7 @@ internal static void sigpanic() {
         if ((~gp).paniconfault) {
             panicmemAddr((~gp).sigcode1);
         }
-        print((@string)"unexpected fault address ", (Δhex)(uint64)(~gp).sigcode1, (@string)"\n");
+        print((@string)"unexpected fault address ", (hex)(uint64)(~gp).sigcode1, (@string)"\n");
         @throw(faultˢ);
         break;
     }
@@ -898,9 +898,9 @@ internal static void sigpanic() {
             // We could check that the arena chunk is explicitly set to fault,
             // but the fact that we faulted on accessing it is enough to prove
             // that it is.
-            print((@string)"accessed data from freed user arena ", (Δhex)(uint64)(~gp).sigcode1, (@string)"\n");
+            print((@string)"accessed data from freed user arena ", (hex)(uint64)(~gp).sigcode1, (@string)"\n");
         } else {
-            print((@string)"unexpected fault address ", (Δhex)(uint64)(~gp).sigcode1, (@string)"\n");
+            print((@string)"unexpected fault address ", (hex)(uint64)(~gp).sigcode1, (@string)"\n");
         }
         @throw(faultˢ);
         break;
@@ -1103,8 +1103,8 @@ private static readonly @string nonGoCodeSetUpSignalˢᵇ = "non-Go code set up 
 // sigaction without setting the SS_ONSTACK flag.
 internal static void sigNotOnStack(uint32 sig, uintptr sp, ref m mp) {
     println((@string)"signal", sig, (@string)"received but handler not on signal stack");
-    print((@string)"mp.gsignal stack [", (Δhex)(uint64)(~mp.gsignal).stack.lo, (@string)" ", (Δhex)(uint64)(~mp.gsignal).stack.hi, (@string)"], ");
-    print((@string)"mp.g0 stack [", (Δhex)(uint64)(~mp.g0).stack.lo, (@string)" ", (Δhex)(uint64)(~mp.g0).stack.hi, (@string)"], sp=", (Δhex)(uint64)sp, (@string)"\n");
+    print((@string)"mp.gsignal stack [", (hex)(uint64)(~mp.gsignal).stack.lo, (@string)" ", (hex)(uint64)(~mp.gsignal).stack.hi, (@string)"], ");
+    print((@string)"mp.g0 stack [", (hex)(uint64)(~mp.g0).stack.lo, (@string)" ", (hex)(uint64)(~mp.g0).stack.hi, (@string)"], sp=", (hex)(uint64)sp, (@string)"\n");
     @throw(nonGoCodeSetUpSignalˢ);
 }
 
@@ -1230,8 +1230,8 @@ internal static bool sigfwdgo(uint32 sig, ж<siginfo> info, @unsafe.Pointer ctx)
 //
 //go:nosplit
 //go:nowritebarrierrec
-internal static void sigsave(ж<sigset> Δp) {
-    sigprocmask(_SIG_SETMASK, nil, Δp);
+internal static void sigsave(ж<sigset> p) {
+    sigprocmask(_SIG_SETMASK, nil, p);
 }
 
 // msigrestore sets the current thread's signal mask to sigmask.
@@ -1404,7 +1404,7 @@ internal static bool blockableSig(uint32 sig) {
 // gsignalStack saves the fields of the gsignal stack changed by
 // setGsignalStack.
 partial struct gsignalStack {
-    internal Δstack stack;
+    internal stack stack;
     internal uintptr stackguard0;
     internal uintptr stackguard1;
     internal uintptr stktopsp;
@@ -1453,7 +1453,7 @@ internal static void restoreGsignalStack(ж<gsignalStack> Ꮡst) {
 // signalstack sets the current thread's alternate signal stack to s.
 //
 //go:nosplit
-internal static void signalstack(ж<Δstack> Ꮡs) {
+internal static void signalstack(ж<stack> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     ref var st = ref heap<stackt>(new stackt(ss_size: s.hi - s.lo), out var Ꮡst);

@@ -7,6 +7,7 @@ using errors = errors_package;
 using io = io_package;
 using reflect = reflect_package;
 using sync = sync_package;
+using static gob_package;
 
 partial class gob_package {
 
@@ -16,7 +17,7 @@ partial class gob_package {
 partial struct Encoder {
     internal sync.Mutex mutex;               // each item must be sent atomically
     internal slice<io.Writer> w;             // where to send the data
-    internal map<reflectꓸType, typeId> sent; // which types we've already sent
+    internal map<reflect.Type, typeId> sent; // which types we've already sent
     internal ж<encoderState> countState;     // stage for writing counts
     internal ж<encoderState> freeList;       // list of free encoderStates; avoids reallocation
     internal encBuffer byteBuf;              // buffer for top-level encoderState
@@ -33,10 +34,12 @@ internal static slice<byte> spaceForLength = new slice<byte>(maxLength);
 public static ж<Encoder> NewEncoder(io.Writer w) {
     var enc = @new<Encoder>();
     enc.w = [w];
-    enc.sent = new map<reflectꓸType, typeId>();
+    enc.sent = new map<reflect.Type, typeId>();
     enc.countState = enc.newEncoderState(@new<encBuffer>());
     return enc;
 }
+
+} partial class gobᴛEncoder {
 
 // writer returns the innermost writer the encoder is using.
 internal static io.Writer writer(this ref Encoder enc) {
@@ -95,7 +98,7 @@ internal static void writeMessage(this ref Encoder enc, io.Writer w, ж<encBuffe
 
 // sendActualType sends the requested type, without further investigation, unless
 // it's been sent before.
-internal static bool /*sent*/ sendActualType(this ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> Ꮡstate, ж<userTypeInfo> Ꮡut, reflectꓸType actual) {
+internal static bool /*sent*/ sendActualType(this ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> Ꮡstate, ж<userTypeInfo> Ꮡut, reflect.Type actual) {
     bool sent = default;
     ref var enc = ref Ꮡenc.DerefOrNull();
     ref var state = ref Ꮡstate.DerefOrNull();
@@ -135,7 +138,7 @@ internal static bool /*sent*/ sendActualType(this ж<Encoder> Ꮡenc, io.Writer 
         }
         break;
     }
-    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.Slice: {
         Ꮡenc.sendType(w, Ꮡstate, st.Elem());
         break;
     }
@@ -148,7 +151,7 @@ internal static bool /*sent*/ sendActualType(this ж<Encoder> Ꮡenc, io.Writer 
 }
 
 // sendType sends the type info to the other side, if necessary.
-internal static bool /*sent*/ sendType(this ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> state, reflectꓸType origt) {
+internal static bool /*sent*/ sendType(this ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> state, reflect.Type origt) {
     bool sent = default;
 
     var ut = userType(origt);
@@ -165,7 +168,7 @@ internal static bool /*sent*/ sendType(this ж<Encoder> Ꮡenc, io.Writer w, ж<
         // Basic types and interfaces do not need to be described.
         return sent;
     }
-    case var ᴛ when ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Slice: {
         // If it's []uint8, don't send; it's considered basic.
         if (rt.Elem().Kind() == reflect.Uint8) {
             return sent;
@@ -253,7 +256,7 @@ private static readonly @string gobCannotEncodeNilValueˢᵇ = "gob: cannot enco
 // EncodeValue transmits the data item represented by the reflection value,
 // guaranteeing that all necessary type information has been transmitted first.
 // Passing a nil pointer to EncodeValue will panic, as they cannot be transmitted by gob.
-public static error EncodeValue(this ж<Encoder> Ꮡenc, reflectꓸValue value) {
+public static error EncodeValue(this ж<Encoder> Ꮡenc, reflect.Value value) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -262,7 +265,7 @@ public static error EncodeValue(this ж<Encoder> Ꮡenc, reflectꓸValue value) 
         if (value.Kind() == reflect.Invalid) {
             return errors.New(gobCannotEncodeNilValueˢ);
         }
-        if (value.Kind() == reflect.ΔPointer && value.IsNil()) {
+        if (value.Kind() == reflect.Pointer && value.IsNil()) {
             throw panic("gob: cannot encode nil pointer of type " + value.Type().String());
         }
 
@@ -303,4 +306,4 @@ public static error EncodeValue(this ж<Encoder> Ꮡenc, reflectꓸValue value) 
     finally { if (ᒐd1) Ꮡenc.DerefOrNull().mutex.Unlock(); ᒐ.Run(); }
 }
 
-} // end gob_package
+} // end gobᴛEncoder

@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using syscallꓸHandle = go.syscall_package.ΔHandle;
 // </ImportedTypeAliases>
 
 using go;

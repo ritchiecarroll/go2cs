@@ -8,6 +8,7 @@ using log = log_package;
 using bits = math.bits_package;
 using strings = strings_package;
 using math;
+using static gen_package;
 
 partial class gen_package {
 
@@ -28,6 +29,8 @@ partial struct locReg {
     internal regClass cls;
     internal nint reg;
 }
+
+} partial class genᴛlocReg {
 
 internal static @string LocString(this locReg l) {
     switch (l.cls) {
@@ -54,11 +57,15 @@ internal static (locReg, bool) Reg(this locReg l) {
     return (l, true);
 }
 
+} partial class gen_package {
+
 partial struct locMem {
     internal locReg @base;
     internal nint off;
     internal @string name;
 }
+
+} partial class genᴛlocMem {
 
 internal static @string LocString(this locMem l) {
     if (l.@base.cls == regClassFixed && l.@base.reg == regSB && l.off == 0) {
@@ -83,6 +90,8 @@ internal static (locReg, bool) Reg(this locMem l) {
     }
     return (l.@base, true);
 }
+
+} partial class gen_package {
 
 partial interface loc {
     @string LocString();          // Return the assembly syntax for this location
@@ -109,6 +118,8 @@ internal static slice<@string> gpRegs = ["AX", "BX", "CX", "DI", "SI", "R8", "R9
 partial struct regSet {
     internal array<uint32> inUse = new(numRegClasses);
 }
+
+} partial class genᴛregSet {
 
 internal static void used(this ref regSet s, ж<op> Ꮡo, loc l) {
     ref var o = ref Ꮡo.DerefOrNull();
@@ -145,6 +156,8 @@ internal static void free(this ref regSet s, loc l) {
     }
     s.inUse[reg.cls] &= unchecked((uint32)~(uint32)(((uint32)1).Lsh((int64)(reg.reg))));
 }
+
+} partial class genᴛFunc {
 
 internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
     ref var fn = ref Ꮡfn.DerefOrNull();
@@ -365,4 +378,4 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
     return locs;
 }
 
-} // end gen_package
+} // end genᴛFunc

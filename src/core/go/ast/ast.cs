@@ -14,6 +14,7 @@ using token = global::go.go.token_package;
 using strings = strings_package;
 using global::go.go;
 using iter = iter_package;
+using static ast_package;
 
 partial class ast_package {
 
@@ -36,8 +37,8 @@ partial class ast_package {
 
 // All node types implement the Node interface.
 partial interface Node {
-    tokenꓸPos Pos(); // position of first character belonging to the node
-    tokenꓸPos End(); // position of first character immediately after the node
+    token.Pos Pos(); // position of first character belonging to the node
+    token.Pos End(); // position of first character immediately after the node
 }
 
 // All expression nodes implement the Expr interface.
@@ -71,12 +72,16 @@ partial interface Decl :
 // computed using len(Text), the position reported by [Comment.End] does not match the
 // true source end position for comments containing carriage returns.
 partial struct Comment {
-    public tokenꓸPos Slash; // position of "/" starting the comment
+    public token.Pos Slash; // position of "/" starting the comment
     public @string Text;    // comment text (excluding '\n' for //-style comments)
 }
 
-public static tokenꓸPos Pos(this ref Comment c) { return c.Slash; }
-public static tokenꓸPos End(this ref Comment c) { return (tokenꓸPos)((nint)c.Slash + len(c.Text)); }
+} partial class astᴛComment {
+
+public static token.Pos Pos(this ref Comment c) { return c.Slash; }
+public static token.Pos End(this ref Comment c) { return (token.Pos)((nint)c.Slash + len(c.Text)); }
+
+} partial class ast_package {
 
 // A CommentGroup represents a sequence of comments
 // with no other tokens and no empty lines between.
@@ -84,8 +89,12 @@ partial struct CommentGroup {
     public slice<ж<Comment>> List; // len(List) > 0
 }
 
-public static tokenꓸPos Pos(this ref CommentGroup g) { return g.List[0].Pos(); }
-public static tokenꓸPos End(this ref CommentGroup g) { return g.List[len(g.List) - 1].End(); }
+} partial class astᴛCommentGroup {
+
+public static token.Pos Pos(this ref CommentGroup g) { return g.List[0].Pos(); }
+public static token.Pos End(this ref CommentGroup g) { return g.List[len(g.List) - 1].End(); }
+
+} partial class ast_package {
 
 internal static bool isWhitespace(byte ch) { return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r'; }
 
@@ -96,6 +105,8 @@ internal static @string stripTrailingWhitespace(@string s) {
     }
     return s.slice(0, i);
 }
+
+} partial class astᴛCommentGroup {
 
 // Text returns the text of the comment.
 // Comment markers (//, /*, and */), the first space of a line comment, and
@@ -174,6 +185,8 @@ public static @string Text(this ж<CommentGroup> Ꮡg) {
     return strings.Join(lines, "\n");
 }
 
+} partial class ast_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string lineˢ => ref lineˢᵇ;
 private static readonly @string lineˢᵇ = "line "u8;
@@ -227,7 +240,9 @@ partial struct Field {
     public ж<CommentGroup> Comment; // line comments; or nil
 }
 
-public static tokenꓸPos Pos(this ref Field f) {
+} partial class astᴛField {
+
+public static token.Pos Pos(this ref Field f) {
     if (len(f.Names) > 0) {
         return f.Names[0].Pos();
     }
@@ -237,7 +252,7 @@ public static tokenꓸPos Pos(this ref Field f) {
     return token.NoPos;
 }
 
-public static tokenꓸPos End(this ref Field f) {
+public static token.Pos End(this ref Field f) {
     if (f.Tag != nil) {
         return f.Tag.End();
     }
@@ -250,15 +265,19 @@ public static tokenꓸPos End(this ref Field f) {
     return token.NoPos;
 }
 
+} partial class ast_package {
+
 // A FieldList represents a list of Fields, enclosed by parentheses,
 // curly braces, or square brackets.
 partial struct FieldList {
-    public tokenꓸPos Opening;    // position of opening parenthesis/brace/bracket, if any
+    public token.Pos Opening;    // position of opening parenthesis/brace/bracket, if any
     public slice<ж<Field>> List; // field list; or nil
-    public tokenꓸPos Closing;    // position of closing parenthesis/brace/bracket, if any
+    public token.Pos Closing;    // position of closing parenthesis/brace/bracket, if any
 }
 
-public static tokenꓸPos Pos(this ref FieldList f) {
+} partial class astᴛFieldList {
+
+public static token.Pos Pos(this ref FieldList f) {
     if (f.Opening.IsValid()) {
         return f.Opening;
     }
@@ -270,7 +289,7 @@ public static tokenꓸPos Pos(this ref FieldList f) {
     return token.NoPos;
 }
 
-public static tokenꓸPos End(this ref FieldList f) {
+public static token.Pos End(this ref FieldList f) {
     if (f.Closing.IsValid()) {
         return f.Closing + 1;
     }
@@ -299,6 +318,8 @@ public static nint NumFields(this ж<FieldList> Ꮡf) {
     return n;
 }
 
+} partial class ast_package {
+
 // An expression is represented by a tree consisting of one
 // or more of the following concrete expression nodes.
 // A BadExpr node is a placeholder for an expression containing
@@ -306,12 +327,12 @@ public static nint NumFields(this ж<FieldList> Ꮡf) {
 // created.
 //
 partial struct BadExpr {
-    public tokenꓸPos From, To; // position range of bad expression
+    public token.Pos From, To; // position range of bad expression
 }
 
 // An Ident node represents an identifier.
 partial struct Ident {
-    public tokenꓸPos NamePos; // identifier position
+    public token.Pos NamePos; // identifier position
     public @string Name;      // identifier name
     public ж<Object> Obj;     // denoted object, or nil. Deprecated: see Object.
 }
@@ -320,7 +341,7 @@ partial struct Ident {
 // parameter list or the "..." length in an array type.
 //
 partial struct Ellipsis {
-    public tokenꓸPos ΔEllipsis; // position of "..."
+    public token.Pos ΔEllipsis; // position of "..."
     public Expr Elt;            // ellipsis element type (parameter lists only); or nil
 }
 
@@ -336,8 +357,8 @@ partial struct Ellipsis {
 // the Value field contains the string text without carriage returns (\r) that
 // may have been present in the source.
 partial struct BasicLit {
-    public tokenꓸPos ValuePos; // literal position
-    public tokenꓸPos ValueEnd; // position immediately after the literal
+    public token.Pos ValuePos; // literal position
+    public token.Pos ValueEnd; // position immediately after the literal
     public token.Token Kind;   // token.INT, token.FLOAT, token.IMAG, token.CHAR, or token.STRING
     public @string Value;      // literal string; e.g. 42, 0x7f, 3.14, 1e-9, 2.4i, 'a', '\x7f', "foo" or `\m\n\o`
 }
@@ -351,17 +372,17 @@ partial struct FuncLit {
 // A CompositeLit node represents a composite literal.
 partial struct CompositeLit {
     public Expr Type;        // literal type; or nil
-    public tokenꓸPos Lbrace; // position of "{"
+    public token.Pos Lbrace; // position of "{"
     public slice<Expr> Elts; // list of composite elements; or nil
-    public tokenꓸPos Rbrace; // position of "}"
+    public token.Pos Rbrace; // position of "}"
     public bool Incomplete;  // true if (source) expressions are missing in the Elts list
 }
 
 // A ParenExpr node represents a parenthesized expression.
 partial struct ParenExpr {
-    public tokenꓸPos Lparen; // position of "("
+    public token.Pos Lparen; // position of "("
     public Expr X;           // parenthesized expression
-    public tokenꓸPos Rparen; // position of ")"
+    public token.Pos Rparen; // position of ")"
 }
 
 // A SelectorExpr node represents an expression followed by a selector.
@@ -373,29 +394,29 @@ partial struct SelectorExpr {
 // An IndexExpr node represents an expression followed by an index.
 partial struct IndexExpr {
     public Expr X;           // expression
-    public tokenꓸPos Lbrack; // position of "["
+    public token.Pos Lbrack; // position of "["
     public Expr Index;       // index expression
-    public tokenꓸPos Rbrack; // position of "]"
+    public token.Pos Rbrack; // position of "]"
 }
 
 // An IndexListExpr node represents an expression followed by multiple
 // indices.
 partial struct IndexListExpr {
     public Expr X;              // expression
-    public tokenꓸPos Lbrack;    // position of "["
+    public token.Pos Lbrack;    // position of "["
     public slice<Expr> Indices; // index expressions
-    public tokenꓸPos Rbrack;    // position of "]"
+    public token.Pos Rbrack;    // position of "]"
 }
 
 // A SliceExpr node represents an expression followed by slice indices.
 partial struct SliceExpr {
     public Expr X;           // expression
-    public tokenꓸPos Lbrack; // position of "["
+    public token.Pos Lbrack; // position of "["
     public Expr Low;         // begin of slice range; or nil
     public Expr High;        // end of slice range; or nil
     public Expr Max;         // maximum capacity of slice; or nil
     public bool Slice3;      // true if 3-index slice (2 colons present)
-    public tokenꓸPos Rbrack; // position of "]"
+    public token.Pos Rbrack; // position of "]"
 }
 
 // A TypeAssertExpr node represents an expression followed by a
@@ -403,25 +424,25 @@ partial struct SliceExpr {
 //
 partial struct TypeAssertExpr {
     public Expr X;           // expression
-    public tokenꓸPos Lparen; // position of "("
+    public token.Pos Lparen; // position of "("
     public Expr Type;        // asserted type; nil means type switch X.(type)
-    public tokenꓸPos Rparen; // position of ")"
+    public token.Pos Rparen; // position of ")"
 }
 
 // A CallExpr node represents an expression followed by an argument list.
 partial struct CallExpr {
     public Expr Fun;           // function expression
-    public tokenꓸPos Lparen;   // position of "("
+    public token.Pos Lparen;   // position of "("
     public slice<Expr> Args;   // function arguments; or nil
-    public tokenꓸPos Ellipsis; // position of "..." (token.NoPos if there is no "...")
-    public tokenꓸPos Rparen;   // position of ")"
+    public token.Pos Ellipsis; // position of "..." (token.NoPos if there is no "...")
+    public token.Pos Rparen;   // position of ")"
 }
 
 // A StarExpr node represents an expression of the form "*" Expression.
 // Semantically it could be a unary "*" expression, or a pointer type.
 //
 partial struct StarExpr {
-    public tokenꓸPos Star; // position of "*"
+    public token.Pos Star; // position of "*"
     public Expr X;         // operand
 }
 
@@ -429,7 +450,7 @@ partial struct StarExpr {
 // Unary "*" expressions are represented via StarExpr nodes.
 //
 partial struct UnaryExpr {
-    public tokenꓸPos OpPos; // position of Op
+    public token.Pos OpPos; // position of Op
     public token.Token Op;  // operator
     public Expr X;          // operand
 }
@@ -437,7 +458,7 @@ partial struct UnaryExpr {
 // A BinaryExpr node represents a binary expression.
 partial struct BinaryExpr {
     public Expr X;          // left operand
-    public tokenꓸPos OpPos; // position of Op
+    public token.Pos OpPos; // position of Op
     public token.Token Op;  // operator
     public Expr Y;          // right operand
 }
@@ -447,7 +468,7 @@ partial struct BinaryExpr {
 //
 partial struct KeyValueExpr {
     public Expr Key;
-    public tokenꓸPos Colon; // position of ":"
+    public token.Pos Colon; // position of ":"
     public Expr Value;
 }
 
@@ -463,14 +484,14 @@ public static ChanDir RECV => 2;
 // nodes.
 // An ArrayType node represents an array or slice type.
 partial struct ArrayType {
-    public tokenꓸPos Lbrack; // position of "["
+    public token.Pos Lbrack; // position of "["
     public Expr Len;         // Ellipsis node for [...]T array types, nil for slice types
     public Expr Elt;         // element type
 }
 
 // A StructType node represents a struct type.
 partial struct StructType {
-    public tokenꓸPos Struct;    // position of "struct" keyword
+    public token.Pos Struct;    // position of "struct" keyword
     public ж<FieldList> Fields; // list of field declarations
     public bool Incomplete;     // true if (source) fields are missing in the Fields list
 }
@@ -479,7 +500,7 @@ partial struct StructType {
 
 // A FuncType node represents a function type.
 partial struct FuncType {
-    public tokenꓸPos Func;          // position of "func" keyword (token.NoPos if there is no "func")
+    public token.Pos Func;          // position of "func" keyword (token.NoPos if there is no "func")
     public ж<FieldList> TypeParams; // type parameters; or nil
     public ж<FieldList> Params;     // (incoming) parameters; non-nil
     public ж<FieldList> Results;    // (outgoing) results; or nil
@@ -487,129 +508,334 @@ partial struct FuncType {
 
 // An InterfaceType node represents an interface type.
 partial struct InterfaceType {
-    public tokenꓸPos Interface;  // position of "interface" keyword
+    public token.Pos Interface;  // position of "interface" keyword
     public ж<FieldList> Methods; // list of embedded interfaces, methods, or types
     public bool Incomplete;      // true if (source) methods or types are missing in the Methods list
 }
 
 // A MapType node represents a map type.
 partial struct MapType {
-    public tokenꓸPos Map; // position of "map" keyword
+    public token.Pos Map; // position of "map" keyword
     public Expr Key;
     public Expr Value;
 }
 
 // A ChanType node represents a channel type.
 partial struct ChanType {
-    public tokenꓸPos Begin; // position of "chan" keyword or "<-" (whichever comes first)
-    public tokenꓸPos Arrow; // position of "<-" (token.NoPos if there is no "<-")
+    public token.Pos Begin; // position of "chan" keyword or "<-" (whichever comes first)
+    public token.Pos Arrow; // position of "<-" (token.NoPos if there is no "<-")
     public ChanDir Dir;     // channel direction
     public Expr Value;      // value type
 }
 
+} partial class astᴛBadExpr {
+
 // Pos and End implementations for expression/type nodes.
-public static tokenꓸPos Pos(this ref BadExpr x) { return x.From; }
-public static tokenꓸPos Pos(this ref Ident x) { return x.NamePos; }
-public static tokenꓸPos Pos(this ref Ellipsis x) { return x.ΔEllipsis; }
-public static tokenꓸPos Pos(this ref BasicLit x) { return x.ValuePos; }
-public static tokenꓸPos Pos(this ref FuncLit x) { return x.Type.Pos(); }
-public static tokenꓸPos Pos(this ref CompositeLit x) {
+public static token.Pos Pos(this ref BadExpr x) { return x.From; }
+
+} partial class astᴛIdent {
+
+public static token.Pos Pos(this ref Ident x) { return x.NamePos; }
+
+} partial class astᴛEllipsis {
+
+public static token.Pos Pos(this ref Ellipsis x) { return x.ΔEllipsis; }
+
+} partial class astᴛBasicLit {
+
+public static token.Pos Pos(this ref BasicLit x) { return x.ValuePos; }
+
+} partial class astᴛFuncLit {
+
+public static token.Pos Pos(this ref FuncLit x) { return x.Type.Pos(); }
+
+} partial class astᴛCompositeLit {
+
+public static token.Pos Pos(this ref CompositeLit x) {
     if (x.Type != nil) {
         return x.Type.Pos();
     }
     return x.Lbrace;
 }
-public static tokenꓸPos Pos(this ref ParenExpr x) { return x.Lparen; }
-public static tokenꓸPos Pos(this ref SelectorExpr x) { return x.X.Pos(); }
-public static tokenꓸPos Pos(this ref IndexExpr x) { return x.X.Pos(); }
-public static tokenꓸPos Pos(this ref IndexListExpr x) { return x.X.Pos(); }
-public static tokenꓸPos Pos(this ref SliceExpr x) { return x.X.Pos(); }
-public static tokenꓸPos Pos(this ref TypeAssertExpr x) { return x.X.Pos(); }
-public static tokenꓸPos Pos(this ref CallExpr x) { return x.Fun.Pos(); }
-public static tokenꓸPos Pos(this ref StarExpr x) { return x.Star; }
-public static tokenꓸPos Pos(this ref UnaryExpr x) { return x.OpPos; }
-public static tokenꓸPos Pos(this ref BinaryExpr x) { return x.X.Pos(); }
-public static tokenꓸPos Pos(this ref KeyValueExpr x) { return x.Key.Pos(); }
-public static tokenꓸPos Pos(this ref ArrayType x) { return x.Lbrack; }
-public static tokenꓸPos Pos(this ref StructType x) { return x.Struct; }
-public static tokenꓸPos Pos(this ref FuncType x) {
+
+} partial class astᴛParenExpr {
+
+public static token.Pos Pos(this ref ParenExpr x) { return x.Lparen; }
+
+} partial class astᴛSelectorExpr {
+
+public static token.Pos Pos(this ref SelectorExpr x) { return x.X.Pos(); }
+
+} partial class astᴛIndexExpr {
+
+public static token.Pos Pos(this ref IndexExpr x) { return x.X.Pos(); }
+
+} partial class astᴛIndexListExpr {
+
+public static token.Pos Pos(this ref IndexListExpr x) { return x.X.Pos(); }
+
+} partial class astᴛSliceExpr {
+
+public static token.Pos Pos(this ref SliceExpr x) { return x.X.Pos(); }
+
+} partial class astᴛTypeAssertExpr {
+
+public static token.Pos Pos(this ref TypeAssertExpr x) { return x.X.Pos(); }
+
+} partial class astᴛCallExpr {
+
+public static token.Pos Pos(this ref CallExpr x) { return x.Fun.Pos(); }
+
+} partial class astᴛStarExpr {
+
+public static token.Pos Pos(this ref StarExpr x) { return x.Star; }
+
+} partial class astᴛUnaryExpr {
+
+public static token.Pos Pos(this ref UnaryExpr x) { return x.OpPos; }
+
+} partial class astᴛBinaryExpr {
+
+public static token.Pos Pos(this ref BinaryExpr x) { return x.X.Pos(); }
+
+} partial class astᴛKeyValueExpr {
+
+public static token.Pos Pos(this ref KeyValueExpr x) { return x.Key.Pos(); }
+
+} partial class astᴛArrayType {
+
+public static token.Pos Pos(this ref ArrayType x) { return x.Lbrack; }
+
+} partial class astᴛStructType {
+
+public static token.Pos Pos(this ref StructType x) { return x.Struct; }
+
+} partial class astᴛFuncType {
+
+public static token.Pos Pos(this ref FuncType x) {
     if (x.Func.IsValid() || x.Params == nil) { // see issue 3870
         return x.Func;
     }
     return x.Params.Pos(); // interface method declarations have no "func" keyword
 }
-public static tokenꓸPos Pos(this ref InterfaceType x) { return x.Interface; }
-public static tokenꓸPos Pos(this ref MapType x) { return x.Map; }
-public static tokenꓸPos Pos(this ref ChanType x) { return x.Begin; }
 
-public static tokenꓸPos End(this ref BadExpr x) { return x.To; }
-public static tokenꓸPos End(this ref Ident x) { return (tokenꓸPos)((nint)x.NamePos + len(x.Name)); }
-public static tokenꓸPos End(this ref Ellipsis x) {
+} partial class astᴛInterfaceType {
+
+public static token.Pos Pos(this ref InterfaceType x) { return x.Interface; }
+
+} partial class astᴛMapType {
+
+public static token.Pos Pos(this ref MapType x) { return x.Map; }
+
+} partial class astᴛChanType {
+
+public static token.Pos Pos(this ref ChanType x) { return x.Begin; }
+
+} partial class astᴛBadExpr {
+
+public static token.Pos End(this ref BadExpr x) { return x.To; }
+
+} partial class astᴛIdent {
+
+public static token.Pos End(this ref Ident x) { return (token.Pos)((nint)x.NamePos + len(x.Name)); }
+
+} partial class astᴛEllipsis {
+
+public static token.Pos End(this ref Ellipsis x) {
     if (x.Elt != nil) {
         return x.Elt.End();
     }
     return x.ΔEllipsis + 3; // len("...")
 }
-public static tokenꓸPos End(this ref BasicLit x) {
+
+} partial class astᴛBasicLit {
+
+public static token.Pos End(this ref BasicLit x) {
     if (!x.ValueEnd.IsValid()) {
         // Not from parser; use a heuristic.
         // (Incorrect for `...` containing \r\n;
         // see https://go.dev/issue/76031.)
-        return (tokenꓸPos)((nint)x.ValuePos + len(x.Value));
+        return (token.Pos)((nint)x.ValuePos + len(x.Value));
     }
     return x.ValueEnd;
 }
-public static tokenꓸPos End(this ref FuncLit x) { return x.Body.End(); }
-public static tokenꓸPos End(this ref CompositeLit x) { return x.Rbrace + 1; }
-public static tokenꓸPos End(this ref ParenExpr x) { return x.Rparen + 1; }
-public static tokenꓸPos End(this ref SelectorExpr x) { return x.Sel.End(); }
-public static tokenꓸPos End(this ref IndexExpr x) { return x.Rbrack + 1; }
-public static tokenꓸPos End(this ref IndexListExpr x) { return x.Rbrack + 1; }
-public static tokenꓸPos End(this ref SliceExpr x) { return x.Rbrack + 1; }
-public static tokenꓸPos End(this ref TypeAssertExpr x) { return x.Rparen + 1; }
-public static tokenꓸPos End(this ref CallExpr x) { return x.Rparen + 1; }
-public static tokenꓸPos End(this ref StarExpr x) { return x.X.End(); }
-public static tokenꓸPos End(this ref UnaryExpr x) { return x.X.End(); }
-public static tokenꓸPos End(this ref BinaryExpr x) { return x.Y.End(); }
-public static tokenꓸPos End(this ref KeyValueExpr x) { return x.Value.End(); }
-public static tokenꓸPos End(this ref ArrayType x) { return x.Elt.End(); }
-public static tokenꓸPos End(this ref StructType x) { return x.Fields.End(); }
-public static tokenꓸPos End(this ref FuncType x) {
+
+} partial class astᴛFuncLit {
+
+public static token.Pos End(this ref FuncLit x) { return x.Body.End(); }
+
+} partial class astᴛCompositeLit {
+
+public static token.Pos End(this ref CompositeLit x) { return x.Rbrace + 1; }
+
+} partial class astᴛParenExpr {
+
+public static token.Pos End(this ref ParenExpr x) { return x.Rparen + 1; }
+
+} partial class astᴛSelectorExpr {
+
+public static token.Pos End(this ref SelectorExpr x) { return x.Sel.End(); }
+
+} partial class astᴛIndexExpr {
+
+public static token.Pos End(this ref IndexExpr x) { return x.Rbrack + 1; }
+
+} partial class astᴛIndexListExpr {
+
+public static token.Pos End(this ref IndexListExpr x) { return x.Rbrack + 1; }
+
+} partial class astᴛSliceExpr {
+
+public static token.Pos End(this ref SliceExpr x) { return x.Rbrack + 1; }
+
+} partial class astᴛTypeAssertExpr {
+
+public static token.Pos End(this ref TypeAssertExpr x) { return x.Rparen + 1; }
+
+} partial class astᴛCallExpr {
+
+public static token.Pos End(this ref CallExpr x) { return x.Rparen + 1; }
+
+} partial class astᴛStarExpr {
+
+public static token.Pos End(this ref StarExpr x) { return x.X.End(); }
+
+} partial class astᴛUnaryExpr {
+
+public static token.Pos End(this ref UnaryExpr x) { return x.X.End(); }
+
+} partial class astᴛBinaryExpr {
+
+public static token.Pos End(this ref BinaryExpr x) { return x.Y.End(); }
+
+} partial class astᴛKeyValueExpr {
+
+public static token.Pos End(this ref KeyValueExpr x) { return x.Value.End(); }
+
+} partial class astᴛArrayType {
+
+public static token.Pos End(this ref ArrayType x) { return x.Elt.End(); }
+
+} partial class astᴛStructType {
+
+public static token.Pos End(this ref StructType x) { return x.Fields.End(); }
+
+} partial class astᴛFuncType {
+
+public static token.Pos End(this ref FuncType x) {
     if (x.Results != nil) {
         return x.Results.End();
     }
     return x.Params.End();
 }
-public static tokenꓸPos End(this ref InterfaceType x) { return x.Methods.End(); }
-public static tokenꓸPos End(this ref MapType x) { return x.Value.End(); }
-public static tokenꓸPos End(this ref ChanType x) { return x.Value.End(); }
+
+} partial class astᴛInterfaceType {
+
+public static token.Pos End(this ref InterfaceType x) { return x.Methods.End(); }
+
+} partial class astᴛMapType {
+
+public static token.Pos End(this ref MapType x) { return x.Value.End(); }
+
+} partial class astᴛChanType {
+
+public static token.Pos End(this ref ChanType x) { return x.Value.End(); }
+
+} partial class astᴛBadExpr {
 
 // exprNode() ensures that only expression/type nodes can be
 // assigned to an Expr.
 internal static void exprNode(this ref BadExpr _) { }
+
+} partial class astᴛIdent {
+
 internal static void exprNode(this ref Ident _) { }
+
+} partial class astᴛEllipsis {
+
 internal static void exprNode(this ref Ellipsis _) { }
+
+} partial class astᴛBasicLit {
+
 internal static void exprNode(this ref BasicLit _) { }
+
+} partial class astᴛFuncLit {
+
 internal static void exprNode(this ref FuncLit _) { }
+
+} partial class astᴛCompositeLit {
+
 internal static void exprNode(this ref CompositeLit _) { }
+
+} partial class astᴛParenExpr {
+
 internal static void exprNode(this ref ParenExpr _) { }
+
+} partial class astᴛSelectorExpr {
+
 internal static void exprNode(this ref SelectorExpr _) { }
+
+} partial class astᴛIndexExpr {
+
 internal static void exprNode(this ref IndexExpr _) { }
+
+} partial class astᴛIndexListExpr {
+
 internal static void exprNode(this ref IndexListExpr _) { }
+
+} partial class astᴛSliceExpr {
+
 internal static void exprNode(this ref SliceExpr _) { }
+
+} partial class astᴛTypeAssertExpr {
+
 internal static void exprNode(this ref TypeAssertExpr _) { }
+
+} partial class astᴛCallExpr {
+
 internal static void exprNode(this ref CallExpr _) { }
+
+} partial class astᴛStarExpr {
+
 internal static void exprNode(this ref StarExpr _) { }
+
+} partial class astᴛUnaryExpr {
+
 internal static void exprNode(this ref UnaryExpr _) { }
+
+} partial class astᴛBinaryExpr {
+
 internal static void exprNode(this ref BinaryExpr _) { }
+
+} partial class astᴛKeyValueExpr {
+
 internal static void exprNode(this ref KeyValueExpr _) { }
 
+} partial class astᴛArrayType {
+
 internal static void exprNode(this ref ArrayType _) { }
+
+} partial class astᴛStructType {
+
 internal static void exprNode(this ref StructType _) { }
+
+} partial class astᴛFuncType {
+
 internal static void exprNode(this ref FuncType _) { }
+
+} partial class astᴛInterfaceType {
+
 internal static void exprNode(this ref InterfaceType _) { }
+
+} partial class astᴛMapType {
+
 internal static void exprNode(this ref MapType _) { }
+
+} partial class astᴛChanType {
+
 internal static void exprNode(this ref ChanType _) { }
+
+} partial class ast_package {
 
 // ----------------------------------------------------------------------------
 // Convenience functions for Idents
@@ -620,6 +846,8 @@ public static ж<Ident> NewIdent(@string name) { return Ꮡ(new Ident(token.NoPo
 
 // IsExported reports whether name starts with an upper-case letter.
 public static bool IsExported(@string name) { return token.IsExported(name); }
+
+} partial class astᴛIdent {
 
 // IsExported reports whether id starts with an upper-case letter.
 public static bool IsExported(this ref Ident id) { return token.IsExported(id.Name); }
@@ -637,6 +865,8 @@ public static @string String(this ж<Ident> Ꮡid) {
     return nilˢ;
 }
 
+} partial class ast_package {
+
 // ----------------------------------------------------------------------------
 // Statements
 
@@ -647,7 +877,7 @@ public static @string String(this ж<Ident> Ꮡid) {
 // created.
 //
 partial struct BadStmt {
-    public tokenꓸPos From, To; // position range of bad statement
+    public token.Pos From, To; // position range of bad statement
 }
 
 // A DeclStmt node represents a declaration in a statement list.
@@ -660,14 +890,14 @@ partial struct DeclStmt {
 // of the immediately following (explicit or implicit) semicolon.
 //
 partial struct EmptyStmt {
-    public tokenꓸPos Semicolon; // position of following ";"
+    public token.Pos Semicolon; // position of following ";"
     public bool Implicit;       // if set, ";" was omitted in the source
 }
 
 // A LabeledStmt node represents a labeled statement.
 partial struct LabeledStmt {
     public ж<Ident> Label;
-    public tokenꓸPos Colon; // position of ":"
+    public token.Pos Colon; // position of ":"
     public Stmt Stmt;
 }
 
@@ -681,14 +911,14 @@ partial struct ExprStmt {
 // A SendStmt node represents a send statement.
 partial struct SendStmt {
     public Expr Chan;
-    public tokenꓸPos Arrow; // position of "<-"
+    public token.Pos Arrow; // position of "<-"
     public Expr Value;
 }
 
 // An IncDecStmt node represents an increment or decrement statement.
 partial struct IncDecStmt {
     public Expr X;
-    public tokenꓸPos TokPos; // position of Tok
+    public token.Pos TokPos; // position of Tok
     public token.Token Tok;  // INC or DEC
 }
 
@@ -697,26 +927,26 @@ partial struct IncDecStmt {
 //
 partial struct AssignStmt {
     public slice<Expr> Lhs;
-    public tokenꓸPos TokPos; // position of Tok
+    public token.Pos TokPos; // position of Tok
     public token.Token Tok;  // assignment token, DEFINE
     public slice<Expr> Rhs;
 }
 
 // A GoStmt node represents a go statement.
 partial struct GoStmt {
-    public tokenꓸPos Go; // position of "go" keyword
+    public token.Pos Go; // position of "go" keyword
     public ж<CallExpr> Call;
 }
 
 // A DeferStmt node represents a defer statement.
 partial struct DeferStmt {
-    public tokenꓸPos Defer; // position of "defer" keyword
+    public token.Pos Defer; // position of "defer" keyword
     public ж<CallExpr> Call;
 }
 
 // A ReturnStmt node represents a return statement.
 partial struct ReturnStmt {
-    public tokenꓸPos Return;    // position of "return" keyword
+    public token.Pos Return;    // position of "return" keyword
     public slice<Expr> Results; // result expressions; or nil
 }
 
@@ -724,21 +954,21 @@ partial struct ReturnStmt {
 // or fallthrough statement.
 //
 partial struct BranchStmt {
-    public tokenꓸPos TokPos; // position of Tok
+    public token.Pos TokPos; // position of Tok
     public token.Token Tok;  // keyword token (BREAK, CONTINUE, GOTO, FALLTHROUGH)
     public ж<Ident> Label;   // label name; or nil
 }
 
 // A BlockStmt node represents a braced statement list.
 partial struct BlockStmt {
-    public tokenꓸPos Lbrace; // position of "{"
+    public token.Pos Lbrace; // position of "{"
     public slice<Stmt> List;
-    public tokenꓸPos Rbrace; // position of "}", if any (may be absent due to syntax error)
+    public token.Pos Rbrace; // position of "}", if any (may be absent due to syntax error)
 }
 
 // An IfStmt node represents an if statement.
 partial struct IfStmt {
-    public tokenꓸPos If; // position of "if" keyword
+    public token.Pos If; // position of "if" keyword
     public Stmt Init;    // initialization statement; or nil
     public Expr Cond;    // condition
     public ж<BlockStmt> Body;
@@ -747,15 +977,15 @@ partial struct IfStmt {
 
 // A CaseClause represents a case of an expression or type switch statement.
 partial struct CaseClause {
-    public tokenꓸPos Case;   // position of "case" or "default" keyword
+    public token.Pos Case;   // position of "case" or "default" keyword
     public slice<Expr> List; // list of expressions or types; nil means default case
-    public tokenꓸPos Colon;  // position of ":"
+    public token.Pos Colon;  // position of ":"
     public slice<Stmt> Body; // statement list; or nil
 }
 
 // A SwitchStmt node represents an expression switch statement.
 partial struct SwitchStmt {
-    public tokenꓸPos Switch;  // position of "switch" keyword
+    public token.Pos Switch;  // position of "switch" keyword
     public Stmt Init;         // initialization statement; or nil
     public Expr Tag;          // tag expression; or nil
     public ж<BlockStmt> Body; // CaseClauses only
@@ -763,7 +993,7 @@ partial struct SwitchStmt {
 
 // A TypeSwitchStmt node represents a type switch statement.
 partial struct TypeSwitchStmt {
-    public tokenꓸPos Switch;  // position of "switch" keyword
+    public token.Pos Switch;  // position of "switch" keyword
     public Stmt Init;         // initialization statement; or nil
     public Stmt Assign;       // x := y.(type) or y.(type)
     public ж<BlockStmt> Body; // CaseClauses only
@@ -771,21 +1001,21 @@ partial struct TypeSwitchStmt {
 
 // A CommClause node represents a case of a select statement.
 partial struct CommClause {
-    public tokenꓸPos Case;   // position of "case" or "default" keyword
+    public token.Pos Case;   // position of "case" or "default" keyword
     public Stmt Comm;        // send or receive statement; nil means default case
-    public tokenꓸPos Colon;  // position of ":"
+    public token.Pos Colon;  // position of ":"
     public slice<Stmt> Body; // statement list; or nil
 }
 
 // A SelectStmt node represents a select statement.
 partial struct SelectStmt {
-    public tokenꓸPos Select;  // position of "select" keyword
+    public token.Pos Select;  // position of "select" keyword
     public ж<BlockStmt> Body; // CommClauses only
 }
 
 // A ForStmt represents a for statement.
 partial struct ForStmt {
-    public tokenꓸPos For; // position of "for" keyword
+    public token.Pos For; // position of "for" keyword
     public Stmt Init;     // initialization statement; or nil
     public Expr Cond;     // condition; or nil
     public Stmt Post;     // post iteration statement; or nil
@@ -794,68 +1024,168 @@ partial struct ForStmt {
 
 // A RangeStmt represents a for statement with a range clause.
 partial struct RangeStmt {
-    public tokenꓸPos For;    // position of "for" keyword
+    public token.Pos For;    // position of "for" keyword
     public Expr Key, Value;  // Key, Value may be nil
-    public tokenꓸPos TokPos; // position of Tok; invalid if Key == nil
+    public token.Pos TokPos; // position of Tok; invalid if Key == nil
     public token.Token Tok;  // ILLEGAL if Key == nil, ASSIGN, DEFINE
-    public tokenꓸPos Range;  // position of "range" keyword
+    public token.Pos Range;  // position of "range" keyword
     public Expr X;           // value to range over
     public ж<BlockStmt> Body;
 }
 
-// Pos and End implementations for statement nodes.
-public static tokenꓸPos Pos(this ref BadStmt s) { return s.From; }
-public static tokenꓸPos Pos(this ref DeclStmt s) { return s.Decl.Pos(); }
-public static tokenꓸPos Pos(this ref EmptyStmt s) { return s.Semicolon; }
-public static tokenꓸPos Pos(this ref LabeledStmt s) { return s.Label.Pos(); }
-public static tokenꓸPos Pos(this ref ExprStmt s) { return s.X.Pos(); }
-public static tokenꓸPos Pos(this ref SendStmt s) { return s.Chan.Pos(); }
-public static tokenꓸPos Pos(this ref IncDecStmt s) { return s.X.Pos(); }
-public static tokenꓸPos Pos(this ref AssignStmt s) { return s.Lhs[0].Pos(); }
-public static tokenꓸPos Pos(this ref GoStmt s) { return s.Go; }
-public static tokenꓸPos Pos(this ref DeferStmt s) { return s.Defer; }
-public static tokenꓸPos Pos(this ref ReturnStmt s) { return s.Return; }
-public static tokenꓸPos Pos(this ref BranchStmt s) { return s.TokPos; }
-public static tokenꓸPos Pos(this ref BlockStmt s) { return s.Lbrace; }
-public static tokenꓸPos Pos(this ref IfStmt s) { return s.If; }
-public static tokenꓸPos Pos(this ref CaseClause s) { return s.Case; }
-public static tokenꓸPos Pos(this ref SwitchStmt s) { return s.Switch; }
-public static tokenꓸPos Pos(this ref TypeSwitchStmt s) { return s.Switch; }
-public static tokenꓸPos Pos(this ref CommClause s) { return s.Case; }
-public static tokenꓸPos Pos(this ref SelectStmt s) { return s.Select; }
-public static tokenꓸPos Pos(this ref ForStmt s) { return s.For; }
-public static tokenꓸPos Pos(this ref RangeStmt s) { return s.For; }
+} partial class astᴛBadStmt {
 
-public static tokenꓸPos End(this ref BadStmt s) { return s.To; }
-public static tokenꓸPos End(this ref DeclStmt s) { return s.Decl.End(); }
-public static tokenꓸPos End(this ref EmptyStmt s) {
+// Pos and End implementations for statement nodes.
+public static token.Pos Pos(this ref BadStmt s) { return s.From; }
+
+} partial class astᴛDeclStmt {
+
+public static token.Pos Pos(this ref DeclStmt s) { return s.Decl.Pos(); }
+
+} partial class astᴛEmptyStmt {
+
+public static token.Pos Pos(this ref EmptyStmt s) { return s.Semicolon; }
+
+} partial class astᴛLabeledStmt {
+
+public static token.Pos Pos(this ref LabeledStmt s) { return s.Label.Pos(); }
+
+} partial class astᴛExprStmt {
+
+public static token.Pos Pos(this ref ExprStmt s) { return s.X.Pos(); }
+
+} partial class astᴛSendStmt {
+
+public static token.Pos Pos(this ref SendStmt s) { return s.Chan.Pos(); }
+
+} partial class astᴛIncDecStmt {
+
+public static token.Pos Pos(this ref IncDecStmt s) { return s.X.Pos(); }
+
+} partial class astᴛAssignStmt {
+
+public static token.Pos Pos(this ref AssignStmt s) { return s.Lhs[0].Pos(); }
+
+} partial class astᴛGoStmt {
+
+public static token.Pos Pos(this ref GoStmt s) { return s.Go; }
+
+} partial class astᴛDeferStmt {
+
+public static token.Pos Pos(this ref DeferStmt s) { return s.Defer; }
+
+} partial class astᴛReturnStmt {
+
+public static token.Pos Pos(this ref ReturnStmt s) { return s.Return; }
+
+} partial class astᴛBranchStmt {
+
+public static token.Pos Pos(this ref BranchStmt s) { return s.TokPos; }
+
+} partial class astᴛBlockStmt {
+
+public static token.Pos Pos(this ref BlockStmt s) { return s.Lbrace; }
+
+} partial class astᴛIfStmt {
+
+public static token.Pos Pos(this ref IfStmt s) { return s.If; }
+
+} partial class astᴛCaseClause {
+
+public static token.Pos Pos(this ref CaseClause s) { return s.Case; }
+
+} partial class astᴛSwitchStmt {
+
+public static token.Pos Pos(this ref SwitchStmt s) { return s.Switch; }
+
+} partial class astᴛTypeSwitchStmt {
+
+public static token.Pos Pos(this ref TypeSwitchStmt s) { return s.Switch; }
+
+} partial class astᴛCommClause {
+
+public static token.Pos Pos(this ref CommClause s) { return s.Case; }
+
+} partial class astᴛSelectStmt {
+
+public static token.Pos Pos(this ref SelectStmt s) { return s.Select; }
+
+} partial class astᴛForStmt {
+
+public static token.Pos Pos(this ref ForStmt s) { return s.For; }
+
+} partial class astᴛRangeStmt {
+
+public static token.Pos Pos(this ref RangeStmt s) { return s.For; }
+
+} partial class astᴛBadStmt {
+
+public static token.Pos End(this ref BadStmt s) { return s.To; }
+
+} partial class astᴛDeclStmt {
+
+public static token.Pos End(this ref DeclStmt s) { return s.Decl.End(); }
+
+} partial class astᴛEmptyStmt {
+
+public static token.Pos End(this ref EmptyStmt s) {
     if (s.Implicit) {
         return s.Semicolon;
     }
     return s.Semicolon + 1; /* len(";") */
 }
-public static tokenꓸPos End(this ref LabeledStmt s) { return s.Stmt.End(); }
-public static tokenꓸPos End(this ref ExprStmt s) { return s.X.End(); }
-public static tokenꓸPos End(this ref SendStmt s) { return s.Value.End(); }
-public static tokenꓸPos End(this ref IncDecStmt s) {
+
+} partial class astᴛLabeledStmt {
+
+public static token.Pos End(this ref LabeledStmt s) { return s.Stmt.End(); }
+
+} partial class astᴛExprStmt {
+
+public static token.Pos End(this ref ExprStmt s) { return s.X.End(); }
+
+} partial class astᴛSendStmt {
+
+public static token.Pos End(this ref SendStmt s) { return s.Value.End(); }
+
+} partial class astᴛIncDecStmt {
+
+public static token.Pos End(this ref IncDecStmt s) {
     return s.TokPos + 2; /* len("++") */
 }
-public static tokenꓸPos End(this ref AssignStmt s) { return s.Rhs[len(s.Rhs) - 1].End(); }
-public static tokenꓸPos End(this ref GoStmt s) { return s.Call.End(); }
-public static tokenꓸPos End(this ref DeferStmt s) { return s.Call.End(); }
-public static tokenꓸPos End(this ref ReturnStmt s) {
+
+} partial class astᴛAssignStmt {
+
+public static token.Pos End(this ref AssignStmt s) { return s.Rhs[len(s.Rhs) - 1].End(); }
+
+} partial class astᴛGoStmt {
+
+public static token.Pos End(this ref GoStmt s) { return s.Call.End(); }
+
+} partial class astᴛDeferStmt {
+
+public static token.Pos End(this ref DeferStmt s) { return s.Call.End(); }
+
+} partial class astᴛReturnStmt {
+
+public static token.Pos End(this ref ReturnStmt s) {
     nint n = len(s.Results); if (n > 0) {
         return s.Results[n - 1].End();
     }
     return s.Return + 6; // len("return")
 }
-public static tokenꓸPos End(this ref BranchStmt s) {
+
+} partial class astᴛBranchStmt {
+
+public static token.Pos End(this ref BranchStmt s) {
     if (s.Label != nil) {
         return s.Label.End();
     }
-    return (tokenꓸPos)((nint)s.TokPos + len(s.Tok.String()));
+    return (token.Pos)((nint)s.TokPos + len(s.Tok.String()));
 }
-public static tokenꓸPos End(this ref BlockStmt s) {
+
+} partial class astᴛBlockStmt {
+
+public static token.Pos End(this ref BlockStmt s) {
     if (s.Rbrace.IsValid()) {
         return s.Rbrace + 1;
     }
@@ -864,53 +1194,141 @@ public static tokenꓸPos End(this ref BlockStmt s) {
     }
     return s.Lbrace + 1;
 }
-public static tokenꓸPos End(this ref IfStmt s) {
+
+} partial class astᴛIfStmt {
+
+public static token.Pos End(this ref IfStmt s) {
     if (s.Else != nil) {
         return s.Else.End();
     }
     return s.Body.End();
 }
-public static tokenꓸPos End(this ref CaseClause s) {
+
+} partial class astᴛCaseClause {
+
+public static token.Pos End(this ref CaseClause s) {
     nint n = len(s.Body); if (n > 0) {
         return s.Body[n - 1].End();
     }
     return s.Colon + 1;
 }
-public static tokenꓸPos End(this ref SwitchStmt s) { return s.Body.End(); }
-public static tokenꓸPos End(this ref TypeSwitchStmt s) { return s.Body.End(); }
-public static tokenꓸPos End(this ref CommClause s) {
+
+} partial class astᴛSwitchStmt {
+
+public static token.Pos End(this ref SwitchStmt s) { return s.Body.End(); }
+
+} partial class astᴛTypeSwitchStmt {
+
+public static token.Pos End(this ref TypeSwitchStmt s) { return s.Body.End(); }
+
+} partial class astᴛCommClause {
+
+public static token.Pos End(this ref CommClause s) {
     nint n = len(s.Body); if (n > 0) {
         return s.Body[n - 1].End();
     }
     return s.Colon + 1;
 }
-public static tokenꓸPos End(this ref SelectStmt s) { return s.Body.End(); }
-public static tokenꓸPos End(this ref ForStmt s) { return s.Body.End(); }
-public static tokenꓸPos End(this ref RangeStmt s) { return s.Body.End(); }
+
+} partial class astᴛSelectStmt {
+
+public static token.Pos End(this ref SelectStmt s) { return s.Body.End(); }
+
+} partial class astᴛForStmt {
+
+public static token.Pos End(this ref ForStmt s) { return s.Body.End(); }
+
+} partial class astᴛRangeStmt {
+
+public static token.Pos End(this ref RangeStmt s) { return s.Body.End(); }
+
+} partial class astᴛBadStmt {
 
 // stmtNode() ensures that only statement nodes can be
 // assigned to a Stmt.
 internal static void stmtNode(this ref BadStmt _) { }
+
+} partial class astᴛDeclStmt {
+
 internal static void stmtNode(this ref DeclStmt _) { }
+
+} partial class astᴛEmptyStmt {
+
 internal static void stmtNode(this ref EmptyStmt _) { }
+
+} partial class astᴛLabeledStmt {
+
 internal static void stmtNode(this ref LabeledStmt _) { }
+
+} partial class astᴛExprStmt {
+
 internal static void stmtNode(this ref ExprStmt _) { }
+
+} partial class astᴛSendStmt {
+
 internal static void stmtNode(this ref SendStmt _) { }
+
+} partial class astᴛIncDecStmt {
+
 internal static void stmtNode(this ref IncDecStmt _) { }
+
+} partial class astᴛAssignStmt {
+
 internal static void stmtNode(this ref AssignStmt _) { }
+
+} partial class astᴛGoStmt {
+
 internal static void stmtNode(this ref GoStmt _) { }
+
+} partial class astᴛDeferStmt {
+
 internal static void stmtNode(this ref DeferStmt _) { }
+
+} partial class astᴛReturnStmt {
+
 internal static void stmtNode(this ref ReturnStmt _) { }
+
+} partial class astᴛBranchStmt {
+
 internal static void stmtNode(this ref BranchStmt _) { }
+
+} partial class astᴛBlockStmt {
+
 internal static void stmtNode(this ref BlockStmt _) { }
+
+} partial class astᴛIfStmt {
+
 internal static void stmtNode(this ref IfStmt _) { }
+
+} partial class astᴛCaseClause {
+
 internal static void stmtNode(this ref CaseClause _) { }
+
+} partial class astᴛSwitchStmt {
+
 internal static void stmtNode(this ref SwitchStmt _) { }
+
+} partial class astᴛTypeSwitchStmt {
+
 internal static void stmtNode(this ref TypeSwitchStmt _) { }
+
+} partial class astᴛCommClause {
+
 internal static void stmtNode(this ref CommClause _) { }
+
+} partial class astᴛSelectStmt {
+
 internal static void stmtNode(this ref SelectStmt _) { }
+
+} partial class astᴛForStmt {
+
 internal static void stmtNode(this ref ForStmt _) { }
+
+} partial class astᴛRangeStmt {
+
 internal static void stmtNode(this ref RangeStmt _) { }
+
+} partial class ast_package {
 
 // ----------------------------------------------------------------------------
 // Declarations
@@ -930,7 +1348,7 @@ partial struct ImportSpec {
     public ж<Ident> Name;           // local package name (including "."); or nil
     public ж<BasicLit> Path;        // import path
     public ж<CommentGroup> Comment; // line comments; or nil
-    public tokenꓸPos EndPos;        // end of spec (overrides Path.Pos if nonzero)
+    public token.Pos EndPos;        // end of spec (overrides Path.Pos if nonzero)
 }
 
 // A ValueSpec node represents a constant or variable declaration
@@ -949,29 +1367,41 @@ partial struct TypeSpec {
     public ж<CommentGroup> Doc;     // associated documentation; or nil
     public ж<Ident> Name;           // type name
     public ж<FieldList> TypeParams; // type parameters; or nil
-    public tokenꓸPos Assign;        // position of '=', if any
+    public token.Pos Assign;        // position of '=', if any
     public Expr Type;               // *Ident, *ParenExpr, *SelectorExpr, *StarExpr, or any of the *XxxTypes
     public ж<CommentGroup> Comment; // line comments; or nil
 }
 
+} partial class astᴛImportSpec {
+
 // Pos and End implementations for spec nodes.
-public static tokenꓸPos Pos(this ref ImportSpec s) {
+public static token.Pos Pos(this ref ImportSpec s) {
     if (s.Name != nil) {
         return s.Name.Pos();
     }
     return s.Path.Pos();
 }
-public static tokenꓸPos Pos(this ref ValueSpec s) { return s.Names[0].Pos(); }
-public static tokenꓸPos Pos(this ref TypeSpec s) { return s.Name.Pos(); }
 
-public static tokenꓸPos End(this ref ImportSpec s) {
+} partial class astᴛValueSpec {
+
+public static token.Pos Pos(this ref ValueSpec s) { return s.Names[0].Pos(); }
+
+} partial class astᴛTypeSpec {
+
+public static token.Pos Pos(this ref TypeSpec s) { return s.Name.Pos(); }
+
+} partial class astᴛImportSpec {
+
+public static token.Pos End(this ref ImportSpec s) {
     if (s.EndPos != 0) {
         return s.EndPos;
     }
     return s.Path.End();
 }
 
-public static tokenꓸPos End(this ref ValueSpec s) {
+} partial class astᴛValueSpec {
+
+public static token.Pos End(this ref ValueSpec s) {
     nint n = len(s.Values); if (n > 0) {
         return s.Values[n - 1].End();
     }
@@ -980,13 +1410,26 @@ public static tokenꓸPos End(this ref ValueSpec s) {
     }
     return s.Names[len(s.Names) - 1].End();
 }
-public static tokenꓸPos End(this ref TypeSpec s) { return s.Type.End(); }
+
+} partial class astᴛTypeSpec {
+
+public static token.Pos End(this ref TypeSpec s) { return s.Type.End(); }
+
+} partial class astᴛImportSpec {
 
 // specNode() ensures that only spec nodes can be
 // assigned to a Spec.
 internal static void specNode(this ref ImportSpec _) { }
+
+} partial class astᴛValueSpec {
+
 internal static void specNode(this ref ValueSpec _) { }
+
+} partial class astᴛTypeSpec {
+
 internal static void specNode(this ref TypeSpec _) { }
+
+} partial class ast_package {
 
 // A declaration is represented by one of the following declaration nodes.
 // A BadDecl node is a placeholder for a declaration containing
@@ -994,7 +1437,7 @@ internal static void specNode(this ref TypeSpec _) { }
 // created.
 //
 partial struct BadDecl {
-    public tokenꓸPos From, To; // position range of bad declaration
+    public token.Pos From, To; // position range of bad declaration
 }
 
 // A GenDecl node (generic declaration node) represents an import,
@@ -1010,11 +1453,11 @@ partial struct BadDecl {
 //
 partial struct GenDecl {
     public ж<CommentGroup> Doc; // associated documentation; or nil
-    public tokenꓸPos TokPos;    // position of Tok
+    public token.Pos TokPos;    // position of Tok
     public token.Token Tok;     // IMPORT, CONST, TYPE, or VAR
-    public tokenꓸPos Lparen;    // position of '(', if any
+    public token.Pos Lparen;    // position of '(', if any
     public slice<Spec> Specs;
-    public tokenꓸPos Rparen; // position of ')', if any
+    public token.Pos Rparen; // position of ')', if any
 }
 
 // A FuncDecl node represents a function declaration.
@@ -1026,30 +1469,56 @@ partial struct FuncDecl {
     public ж<BlockStmt> Body;   // function body; or nil for external (non-Go) function
 }
 
-// Pos and End implementations for declaration nodes.
-public static tokenꓸPos Pos(this ref BadDecl d) { return d.From; }
-public static tokenꓸPos Pos(this ref GenDecl d) { return d.TokPos; }
-public static tokenꓸPos Pos(this ref FuncDecl d) { return d.Type.Pos(); }
+} partial class astᴛBadDecl {
 
-public static tokenꓸPos End(this ref BadDecl d) { return d.To; }
-public static tokenꓸPos End(this ref GenDecl d) {
+// Pos and End implementations for declaration nodes.
+public static token.Pos Pos(this ref BadDecl d) { return d.From; }
+
+} partial class astᴛGenDecl {
+
+public static token.Pos Pos(this ref GenDecl d) { return d.TokPos; }
+
+} partial class astᴛFuncDecl {
+
+public static token.Pos Pos(this ref FuncDecl d) { return d.Type.Pos(); }
+
+} partial class astᴛBadDecl {
+
+public static token.Pos End(this ref BadDecl d) { return d.To; }
+
+} partial class astᴛGenDecl {
+
+public static token.Pos End(this ref GenDecl d) {
     if (d.Rparen.IsValid()) {
         return d.Rparen + 1;
     }
     return d.Specs[0].End();
 }
-public static tokenꓸPos End(this ref FuncDecl d) {
+
+} partial class astᴛFuncDecl {
+
+public static token.Pos End(this ref FuncDecl d) {
     if (d.Body != nil) {
         return d.Body.End();
     }
     return d.Type.End();
 }
 
+} partial class astᴛBadDecl {
+
 // declNode() ensures that only declaration nodes can be
 // assigned to a Decl.
 internal static void declNode(this ref BadDecl _) { }
+
+} partial class astᴛGenDecl {
+
 internal static void declNode(this ref GenDecl _) { }
+
+} partial class astᴛFuncDecl {
+
 internal static void declNode(this ref FuncDecl _) { }
+
+} partial class ast_package {
 
 // ----------------------------------------------------------------------------
 // Files and packages
@@ -1077,10 +1546,10 @@ internal static void declNode(this ref FuncDecl _) { }
 // [#20744]: https://go.dev/issue/20744
 partial struct File {
     public ж<CommentGroup> Doc; // associated documentation; or nil
-    public tokenꓸPos Package;   // position of "package" keyword
+    public token.Pos Package;   // position of "package" keyword
     public ж<Ident> Name;       // package name
     public slice<Decl> Decls;   // top-level declarations; or nil
-    public tokenꓸPos FileStart, FileEnd;    // start and end of entire file
+    public token.Pos FileStart, FileEnd;    // start and end of entire file
     public ж<Scope> Scope;                  // package scope (this file only). Deprecated: see Object
     public slice<ж<ImportSpec>> Imports;    // imports in this file
     public slice<ж<Ident>> Unresolved;      // unresolved identifiers in this file. Deprecated: see Object
@@ -1088,22 +1557,26 @@ partial struct File {
     public @string GoVersion;               // minimum Go version required by //go:build or // +build directives
 }
 
+} partial class astᴛFile {
+
 // Pos returns the position of the package declaration.
 // It may be invalid, for example in an empty file.
 //
 // (Use FileStart for the start of the entire file. It is always valid.)
-public static tokenꓸPos Pos(this ref File f) { return f.Package; }
+public static token.Pos Pos(this ref File f) { return f.Package; }
 
 // End returns the end of the last declaration in the file.
 // It may be invalid, for example in an empty file.
 //
 // (Use FileEnd for the end of the entire file. It is always valid.)
-public static tokenꓸPos End(this ref File f) {
+public static token.Pos End(this ref File f) {
     nint n = len(f.Decls); if (n > 0) {
         return f.Decls[n - 1].End();
     }
     return f.Name.End();
 }
+
+} partial class ast_package {
 
 // A Package node represents a set of source files
 // collectively building a Go package.
@@ -1116,8 +1589,12 @@ partial struct Package {
     public map<@string, ж<File>> Files;     // Go source files by filename
 }
 
-public static tokenꓸPos Pos(this ref Package p) { return token.NoPos; }
-public static tokenꓸPos End(this ref Package p) { return token.NoPos; }
+} partial class astᴛPackage {
+
+public static token.Pos Pos(this ref Package p) { return token.NoPos; }
+public static token.Pos End(this ref Package p) { return token.NoPos; }
+
+} partial class ast_package {
 
 // IsGenerated reports whether the file was generated by a program,
 // not handwritten, by detecting the special comment described

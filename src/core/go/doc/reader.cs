@@ -17,6 +17,7 @@ using utf8 = global::go.unicode.utf8_package;
 using global::go.@internal;
 using global::go.go;
 using global::go.unicode;
+using static doc_package;
 
 partial class doc_package {
 
@@ -77,6 +78,8 @@ internal static @string recvParam(ast.Expr p) {
     return badparamˢ;
 }
 
+} partial class docᴛmethodSet {
+
 // set creates the corresponding Func for f and adds it to mset.
 // If there are multiple f's with the same name, set keeps the first
 // one with documentation; conflicts are ignored. The boolean
@@ -134,6 +137,8 @@ internal static void add(this methodSet mset, ж<Func> Ꮡm) {
         ));
     }
 }
+
+} partial class doc_package {
 
 // ----------------------------------------------------------------------------
 // Named types
@@ -216,6 +221,8 @@ partial struct reader {
     internal map<@string, slice<ж<ast.InterfaceType>>> fixmap;
 }
 
+} partial class docᴛreader {
+
 internal static bool isVisible(this ref reader r, @string name) {
     return (Mode)(r.mode & AllDecls) != 0 || token.IsExported(name);
 }
@@ -280,6 +287,8 @@ internal static void remember(this ref reader r, @string predecl, ж<ast.Interfa
     r.fixmap[predecl] = append(r.fixmap[predecl], typ);
 }
 
+} partial class doc_package {
+
 internal static slice<@string> specNames(slice<ast.Spec> specs) {
     var names = new slice<@string>(0, len(specs)); // reasonable estimate
     foreach (var (_, s) in range(specs)) {
@@ -290,6 +299,8 @@ internal static slice<@string> specNames(slice<ast.Spec> specs) {
     }
     return names;
 }
+
+} partial class docᴛreader {
 
 // readValue processes a const or var declaration.
 internal static void readValue(this ж<reader> Ꮡr, ж<ast.GenDecl> Ꮡdecl) {
@@ -370,6 +381,8 @@ internal static void readValue(this ж<reader> Ꮡr, ж<ast.GenDecl> Ꮡdecl) {
     r.order++;
 }
 
+} partial class doc_package {
+
 // fields returns a struct's fields or an interface's methods.
 internal static (slice<ж<ast.Field>> list, bool isStruct) fields(ast.Expr typ) {
     slice<ж<ast.Field>> list = default;
@@ -391,6 +404,8 @@ internal static (slice<ж<ast.Field>> list, bool isStruct) fields(ast.Expr typ) 
     }
     return (list, isStruct);
 }
+
+} partial class docᴛreader {
 
 // readType processes a type declaration.
 internal static void readType(this ref reader r, ж<ast.GenDecl> Ꮡdecl, ж<ast.TypeSpec> Ꮡspec) {
@@ -510,6 +525,8 @@ internal static void readFunc(this ref reader r, ж<ast.FuncDecl> Ꮡfun) {
     r.funcs.set(Ꮡfun, (Mode)(r.mode & PreserveAST) != 0);
 }
 
+} partial class doc_package {
+
 // lookupTypeParam searches for type parameters named name within the tparams
 // field list, returning the relevant identifier if found, or nil if not.
 internal static ж<ast.Ident> lookupTypeParam(@string name, ж<ast.FieldList> Ꮡtparams) {
@@ -555,6 +572,8 @@ internal static @string clean(@string s) {
     }
     return (@string)b;
 }
+
+} partial class docᴛreader {
 
 // readNote collects a single note from a sequence of comments.
 internal static void readNote(this ref reader r, slice<ж<ast.Comment>> list) {
@@ -745,6 +764,8 @@ internal static void readPackage(this ж<reader> Ꮡr, ж<ast.Package> Ꮡpkg, M
     }
 }
 
+} partial class doc_package {
+
 // ----------------------------------------------------------------------------
 // Types
 internal static ж<Func> customizeRecv(ж<Func> Ꮡf, @string recvTypeName, bool embeddedIsPtr, nint level) {
@@ -756,7 +777,7 @@ internal static ж<Func> customizeRecv(ж<Func> Ꮡf, @string recvTypeName, bool
 
     // copy existing receiver field and set new type
     ref var newField = ref heap<ast.Field>(f.Decl.Recv.List[0].Value, out var ᏑnewField);
-    ref var origPos = ref heap<tokenꓸPos>(newField.Type.Pos(), out var ᏑorigPos);
+    ref var origPos = ref heap<token.Pos>(newField.Type.Pos(), out var ᏑorigPos);
     var (_, origRecvIsPtr) = newField.Type._<ж<ast.StarExpr>>(ᐧ);
     var newIdent = Ꮡ(new ast.Ident(NamePos: origPos, Name: recvTypeName));
     ast.Expr typ = new ast.IdentжExpr(newIdent);
@@ -783,6 +804,8 @@ internal static ж<Func> customizeRecv(ж<Func> Ꮡf, @string recvTypeName, bool
 
     return ᏑnewF;
 }
+
+} partial class docᴛreader {
 
 // collectEmbeddedMethods collects the embedded methods of typ in mset.
 internal static void collectEmbeddedMethods(this ref reader r, methodSet mset, ж<namedType> Ꮡtyp, @string recvTypeName, bool embeddedIsPtr, nint level, embeddedSet visited) {
@@ -870,6 +893,8 @@ internal static void cleanupTypes(this ref reader r) {
         }
     }
 }
+
+} partial class doc_package {
 
 // ----------------------------------------------------------------------------
 // Sorting

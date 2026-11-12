@@ -6,6 +6,7 @@ namespace go.@internal.runtime.syscall;
 using goarch = go.@internal.goarch_package;
 using @unsafe = unsafe_package;
 using go.@internal;
+using static windows_package;
 
 partial class windows_package {
 
@@ -65,6 +66,8 @@ partial struct Context {
     public uint64 LastExceptionFromRip;
 }
 
+} partial class windowsᴛContext {
+
 public static uintptr PC(this ref Context c) { return (uintptr)c.Rip; }
 public static uintptr SP(this ref Context c) { return (uintptr)c.Rsp; }
 
@@ -83,6 +86,8 @@ public static void PushCall(this ref Context c, uintptr targetPC, uintptr resume
     c.SetPC(targetPC);
 }
 
+} partial class windows_package {
+
 partial struct DISPATCHER_CONTEXT {
     public uint64 ControlPc;
     public uint64 ImageBase;
@@ -94,8 +99,10 @@ partial struct DISPATCHER_CONTEXT {
     public uintptr HandlerData;
 }
 
+} partial class windowsᴛDISPATCHER_CONTEXT {
+
 public static ж<Context> Ctx(this ref DISPATCHER_CONTEXT c) {
     return c.Context;
 }
 
-} // end windows_package
+} // end windowsᴛDISPATCHER_CONTEXT

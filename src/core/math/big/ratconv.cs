@@ -9,6 +9,7 @@ using fmt = fmt_package;
 using io = io_package;
 using strconv = strconv_package;
 using strings = strings_package;
+using static big_package;
 
 partial class big_package {
 
@@ -16,9 +17,11 @@ internal static bool ratTok(rune ch) {
     return strings.ContainsRune("+-/0123456789.eE", ch);
 }
 
-internal static readonly ж<ΔRat> ᏑratZero = new StaticBox<ΔRat>(default(ΔRat));
-internal static ref ΔRat ratZero => ref ((StaticBox<ΔRat>)ᏑratZero).ValueSlot;
-internal static fmt.Scanner _ᴛ6ʗ = new ΔRatжScanner(ᏑratZero); // *Rat must implement fmt.Scanner
+internal static readonly ж<Rat> ᏑratZero = new StaticBox<Rat>(default(Rat));
+internal static ref Rat ratZero => ref ((StaticBox<Rat>)ᏑratZero).ValueSlot;
+internal static fmt.Scanner _ᴛ6ʗ = new RatжScanner(ᏑratZero); // *Rat must implement fmt.Scanner
+
+} partial class bigᴛRat {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string efgEFGvˢ => ref efgEFGvˢᵇ;
@@ -30,7 +33,7 @@ private static readonly @string ratScanInvalidSyntaxˢᵇ = "Rat.Scan: invalid s
 
 // Scan is a support routine for fmt.Scanner. It accepts the formats
 // 'e', 'E', 'f', 'F', 'g', 'G', and 'v'. All formats are equivalent.
-public static error Scan(this ж<ΔRat> Ꮡz, fmt.ScanState s, rune ch) {
+public static error Scan(this ж<Rat> Ꮡz, fmt.ScanState s, rune ch) {
     var (tok, err) = s.Token(true, ratTok);
     if (err != nil) {
         return err;
@@ -62,7 +65,7 @@ public static error Scan(this ж<ΔRat> Ꮡz, fmt.ScanState s, rune ch) {
 // is too large, the operation may fail.
 // The entire string, not just a prefix, must be valid for success. If the
 // operation failed, the value of z is undefined but the returned value is nil.
-public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
+public static (ж<Rat>, bool) SetString(this ж<Rat> Ꮡz, @string s) {
     GoFrame ᒐ = default;
     try {
         ref var z = ref Ꮡz.DerefOrNull();
@@ -202,7 +205,7 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
             if (n > 1000000) {
                 return (default, false); // avoid excessively large exponents
             }
-            var pow5 = z.b.abs.expNN(stk, natFive, ((Δnat)default).setWord((Word)(nuint)n), default, false); // use underlying array of z.b.abs
+            var pow5 = z.b.abs.expNN(stk, natFive, ((nat)default).setWord((Word)(nuint)n), default, false); // use underlying array of z.b.abs
             if (exp5 > 0) {
                 z.a.abs = z.a.abs.mul(stk, z.a.abs, pow5);
                 z.b.abs = z.b.abs.setWord(1);
@@ -230,6 +233,8 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
+
+} partial class big_package {
 
 // scanExponent scans the longest possible prefix of r representing a base 10
 // (“e”, “E”) or a base 2 (“p”, “P”) exponent, if any. It returns the
@@ -334,15 +339,17 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
     return (exp, @base, err);
 }
 
+} partial class bigᴛRat {
+
 // String returns a string representation of x in the form "a/b" (even if b == 1).
-public static @string String(this ж<ΔRat> Ꮡx) {
+public static @string String(this ж<Rat> Ꮡx) {
     return (@string)Ꮡx.marshal(default);
 }
 
 // marshal implements [Rat.String] returning a slice of bytes.
 // It appends the string representation of x in the form "a/b" (even if b == 1) to buf,
 // and returns the extended buffer.
-internal static slice<byte> marshal(this ж<ΔRat> Ꮡx, slice<byte> buf) {
+internal static slice<byte> marshal(this ж<Rat> Ꮡx, slice<byte> buf) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     buf = Ꮡx.Ꮡa.Append(buf, 10);
@@ -357,7 +364,7 @@ internal static slice<byte> marshal(this ж<ΔRat> Ꮡx, slice<byte> buf) {
 
 // RatString returns a string representation of x in the form "a/b" if b != 1,
 // and in the form "a" if b == 1.
-public static @string RatString(this ж<ΔRat> Ꮡx) {
+public static @string RatString(this ж<Rat> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.IsInt()) {
@@ -369,7 +376,7 @@ public static @string RatString(this ж<ΔRat> Ꮡx) {
 // FloatString returns a string representation of x in decimal form with prec
 // digits of precision after the radix point. The last digit is rounded to
 // nearest, with halves rounded away from zero.
-public static @string FloatString(this ж<ΔRat> Ꮡx, nint prec) {
+public static @string FloatString(this ж<Rat> Ꮡx, nint prec) {
     GoFrame ᒐ = default;
     try {
         ref var x = ref Ꮡx.DerefOrNull();
@@ -392,23 +399,23 @@ public static @string FloatString(this ж<ΔRat> Ꮡx, nint prec) {
         var stk = getStack();
         var stkʗ1 = stk;
         defer(stkʗ1.free, ref ᒐ);
-        var (q, r) = ((Δnat)default).div(stk, (Δnat)default, x.a.abs, x.b.abs);
+        var (q, r) = ((nat)default).div(stk, (nat)default, x.a.abs, x.b.abs);
 
         var p = natOne;
         if (prec > 0) {
-            p = ((Δnat)default).expNN(stk, natTen, ((Δnat)default).setUint64((uint64)prec), default, false);
+            p = ((nat)default).expNN(stk, natTen, ((nat)default).setUint64((uint64)prec), default, false);
         }
 
         r = r.mul(stk, r, p);
-        (r, var r2) = r.div(stk, (Δnat)default, r, x.b.abs);
+        (r, var r2) = r.div(stk, (nat)default, r, x.b.abs);
 
         // see if we need to round up
         r2 = r2.add(r2, r2);
         if (x.b.abs.cmp(r2) <= 0) {
             r = r.add(r, natOne);
             if (r.cmp(p) >= 0) {
-                q = ((Δnat)default).add(q, natOne);
-                r = ((Δnat)default).sub(r, p);
+                q = ((nat)default).add(q, natOne);
+                r = ((nat)default).sub(r, p);
             }
         }
 
@@ -449,12 +456,12 @@ public static @string FloatString(this ж<ΔRat> Ꮡx, nint prec) {
 //	1/3    0    false    0       (0.333... rounded)
 //	1/4    2    true     0.25
 //	1/6    1    false    0.2     (0.166... rounded)
-public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
+public static (nint n, bool exact) FloatPrec(this ж<Rat> Ꮡx) {
     nint n = default;
     bool exact = default;
     GoFrame ᒐ = default;
     try {
-        var tabᴷ = new stackAppend<Δnat>();
+        var tabᴷ = new stackAppend<nat>();
 
         var stk = getStack();
         var stkʗ1 = stk;
@@ -473,7 +480,7 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
         // Determine p2 by counting factors of 2.
         // p2 corresponds to the trailing zero bits in d.
         // Do this first to reduce q as much as possible.
-        Δnat q = default;
+        nat q = default;
         nuint p2 = d.trailingZeroBits();
         q = q.rsh(d, p2);
 
@@ -482,17 +489,17 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
         // and use repeated squaring until the factor doesn't
         // divide q anymore. Then use the table to determine
         // the power of 5 in q.
-        const nuint fp = 13;                              // f == 5^fp
-        slice<Δnat> tab = default;                        // tab[i] == (5^fp)^(2^i) == 5^(fp·2^i)
-        var f = new Δnat(new Word[]{1220703125}.slice()); // == 5^fp (must fit into a uint32 Word)
-        Δnat t = default;                                 // temporaries
-        Δnat r = default;
+        const nuint fp = 13;                             // f == 5^fp
+        slice<nat> tab = default;                        // tab[i] == (5^fp)^(2^i) == 5^(fp·2^i)
+        var f = new nat(new Word[]{1220703125}.slice()); // == 5^fp (must fit into a uint32 Word)
+        nat t = default;                                 // temporaries
+        nat r = default;
         for (;;) {
             (_, r) = t.div(stk, r, q, f); if (len(r) != 0) {
                 break; // f doesn't divide q evenly
             }
             tab = append(tabᴷ, tab, f);
-            f = ((Δnat)default).sqr(stk, f); // nat(nil) to ensure a new f for each table entry
+            f = ((nat)default).sqr(stk, f); // nat(nil) to ensure a new f for each table entry
         }
 
         // Factor q using the table entries, if any.
@@ -526,4 +533,4 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
     return (n, exact);
 }
 
-} // end big_package
+} // end bigᴛRat

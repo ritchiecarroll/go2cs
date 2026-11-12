@@ -20,6 +20,7 @@ using go.crypto.@internal.fips140;
 using go.sync;
 using io = io_package;
 using Δx509 = go.crypto.x509_package;
+using static tls_package;
 
 partial class tls_package {
 
@@ -37,10 +38,12 @@ partial struct clientHandshakeStateTLS13 {
     internal bool sentDummyCCS;
     internal ж<cipherSuiteTLS13> suite;
     internal hash.Hash transcript;
-    internal ж<tls13ꓸMasterSecret> masterSecret;
+    internal ж<tls13.MasterSecret> masterSecret;
     internal slice<byte> trafficSecret; // client_application_traffic_secret_0
     internal ж<echClientContext> echContext;
 }
+
+} partial class tlsᴛclientHandshakeStateTLS13 {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsServerSelectedTls13Inˢ => ref tlsServerSelectedTls13Inˢᵇ;
@@ -216,6 +219,8 @@ internal static ref readonly @string tlsServerSentNonZeroˢ => ref tlsServerSent
 private static readonly @string tlsServerSentNonZeroˢᵇ = "tls: server sent non-zero legacy TLS compression method"u8;
 internal static ref readonly @string tlsServerChangedCipherˢ => ref tlsServerChangedCipherˢᵇ;
 private static readonly @string tlsServerChangedCipherˢᵇ = "tls: server changed cipher suite after a HelloRetryRequest"u8;
+internal static ref readonly @string tlsServerChoseAnˢ => ref tlsServerChoseAnˢᵇ;
+private static readonly @string tlsServerChoseAnˢᵇ = "tls: server chose an unconfigured cipher suite"u8;
 
 // checkServerHelloOrHRR does validity checks that apply to both ServerHello and
 // HelloRetryRequest messages. It sets hs.suite.
@@ -296,6 +301,8 @@ internal static ref readonly @string tlsServerSelectedˢ3 => ref tlsServerSelect
 private static readonly @string tlsServerSelectedˢ3ᵇ = "tls: server selected unsupported group"u8;
 internal static ref readonly @string tlsServerSentAnˢ2 => ref tlsServerSentAnˢ2ᵇ;
 private static readonly @string tlsServerSentAnˢ2ᵇ = "tls: server sent an unnecessary HelloRetryRequest key_share"u8;
+internal static ref readonly @string tlsCurvePreferencesˢ => ref tlsCurvePreferencesˢᵇ;
+private static readonly @string tlsCurvePreferencesˢᵇ = "tls: CurvePreferences includes unsupported curve"u8;
 
 // processHelloRetryRequest handles the HRR in hs.serverHello, modifies and
 // resends hs.hello, and reads the new ServerHello into hs.serverHello.
@@ -409,8 +416,8 @@ internal static error processHelloRetryRequest(this ref clientHandshakeStateTLS1
         }
         if (pskSuite.hash == hs.suite.hash) {
             // Update binders and obfuscated_ticket_age.
-            var ticketAge = c.config.time().Sub(time_package.Unix((int64)hs.session.createdAt, 0));
-            hello.pskIdentities[0].obfuscatedTicketAge = (uint32)(ticketAge / time_package.Millisecond) + hs.session.ageAdd;
+            var ticketAge = c.config.time().Sub(time.Unix((int64)hs.session.createdAt, 0));
+            hello.pskIdentities[0].obfuscatedTicketAge = (uint32)(ticketAge / time.Millisecond) + hs.session.ageAdd;
 
             var transcript = hs.suite.hash.New();
             transcript.Write(slice<byte>([typeMessageHash, 0, 0, (uint8)len(chHash)]));
@@ -943,6 +950,8 @@ internal static error sendClientFinished(this ref clientHandshakeStateTLS13 hs) 
     return default;
 }
 
+} partial class tlsᴛConn {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsReceivedNewSessionˢ => ref tlsReceivedNewSessionˢᵇ;
 private static readonly @string tlsReceivedNewSessionˢᵇ = "tls: received new session ticket from a client"u8;
@@ -972,7 +981,7 @@ internal static error handleNewSessionTicket(this ж<Conn> Ꮡc, ж<newSessionTi
     if (msg.lifetime == 0) {
         return default;
     }
-    var lifetime = ((time.Duration)(int64)msg.lifetime) * time_package.ΔSecond;
+    var lifetime = ((time.Duration)(int64)msg.lifetime) * time.Second;
     if (lifetime > maxSessionTicketLifetime) {
         Ꮡc.sendAlert(alertIllegalParameter);
         return errors.New(tlsReceivedASessionˢ);
@@ -1015,4 +1024,4 @@ internal static error handleNewSessionTicket(this ж<Conn> Ꮡc, ж<newSessionTi
     return default;
 }
 
-} // end tls_package
+} // end tlsᴛConn

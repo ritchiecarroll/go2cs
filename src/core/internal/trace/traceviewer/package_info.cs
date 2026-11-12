@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using httpꓸHandler = go.net.http_package.ΔHandler;
 // </ImportedTypeAliases>
 
 using go;
@@ -40,7 +39,7 @@ using static go.@internal.trace.traceviewer_package;
 [assembly: GoImplement<bufio_package.Writer, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<countingWriter, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<embed_package.FS, go.io.fs_package.FS>]
-[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.ΔHandler>]
+[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.Handler>]
 [assembly: GoImplement<go.net.http_package.ResponseWriter, io_package.Writer>]
 [assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<strings_package.Reader, io_package.ReadSeeker>(Pointer = true)]
@@ -71,10 +70,10 @@ using static go.@internal.trace.traceviewer_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/trace/traceviewer/emitter.go", "emitter.cs", "ACI2soKCgoKUggALBIKCpoKUlKKClKKClIKUgpSmpqaCggAKCoIACSCU9Ka4gpKClJKClJSCgqaClIKUgqbcgoKC7gAFEIK4goKCgpSCgqaCgsqCgu6CgoKUgoKmggATKIKCpgAAHgATEJSmgoKmgpSCgriokoKCgpSCAAkcopQAI0aCgriCgpSmgqaCpoKmgoKUpoKmgoKUABcwgoKUgpSCgpSCAAoWABQqgoKUgpSCABYugoKUpoKmgoKUggAIEgASJoKmgoKmgqaCgoKClIIACximgoKClIIACximiLKClIKmgoKUgoKUggAHEKiSggAGEKaCqqIADgaClIKUgqaUgoKClIKClJSmpoLuAAgSgtwABxSiqJKClIKClIKCgoKCgpQABxCCAF2IAQAZNIKC", "36-40:1;41-65:2;47-50:2.1;51-54:2.2;66-68:3;69-73:4;97-99:1;100-129:2;106-109:2.1;110-113:2.2;121-123:2.3;124-126:2.4;130-132:3;133-206:4", "", "211=Sprintf/1/1/1;229=Sprintf/1/1/1;396=viewerTime/1/2/3,viewerTime/2/2/4;432=viewerTime/1/1/4;443=viewerTime/1/1/4;472=viewerTime/1/1/5;511=viewerTime/1/1/6;520=viewerTime/1/1/6;559=viewerTime/1/1/3;580=viewerTime/1/1/3;616=viewerTime/1/1/3")]
-[assembly: GoPositionMap("internal/trace/traceviewer/histogram.go", "histogram.cs", "ABculpKCgpSCgpSCgpSClKiSqLKCppSCgoK4goKUgpSmgpSCqIKC")]
-[assembly: GoPositionMap("internal/trace/traceviewer/http.go", "http.cs", "ABEegpKCggAtVgDJAYoDgoKUAAoWguaCgoKClIIAiAGOAoI=", "16-21:1;279-286:1")]
-[assembly: GoPositionMap("internal/trace/traceviewer/mmu.go", "mmu.cs", "ADFWgsqSpIKkgpS4AAsQgoKClAAQIqKCgoKClJSSgoKUgqaokoKCgqaCgoKCyoKCgpSmlIKCgpSCpoKmgoKCgoKCgpSClLiCgoIAzAGQA7KCgoKmgoKCgpSWkoKmgoKCAAgShJKigqY=", "49-59:1;101-109:1")]
+[assembly: GoPositionMap("internal/trace/traceviewer/emitter.go", "emitter.cs", "ACM2soKCgoKUggALBIKCpoKUlKKClKKClIKUgpSmpqaCggAKCoIACSCU9Ka4gpKClJKClJSCgqaClIKUgqbcgoKC7gAFEIK4goKCgpSCgqaCgsqCgu6CgoKUgoKmggAVKIKCxgAAHgATEJSmgoKmgpSCgriokoKCgpSCAAkcopQAJUaCgriCgpSmgqaCpoKmgoKUpoKmgoKUABswgoKUgpSCgpSCAAoWABgqgoKUgpSCABougoKUpoKmgoKUggAIEgAWJoKmgoKmgqaCgoKClIIACximgoKClIIACximiLKClIKmgoKUgoKUggAHEKiSggAGEKaCqqIADgaClIKUgqaUgoKClIKClJSmpoLuAAgSgtwABxSiqJKClIKClIKCgoKCgpQACRCCAF2IAQAZNIKC", "36-40:1;41-65:2;47-50:2.1;51-54:2.2;66-68:3;69-73:4;97-99:1;100-129:2;106-109:2.1;110-113:2.2;121-123:2.3;124-126:2.4;130-132:3;133-206:4", "", "212=Sprintf/1/1/1;230=Sprintf/1/1/1;403=viewerTime/1/2/3,viewerTime/2/2/4;443=viewerTime/1/1/4;454=viewerTime/1/1/4;487=viewerTime/1/1/5;530=viewerTime/1/1/6;539=viewerTime/1/1/6;582=viewerTime/1/1/3;603=viewerTime/1/1/3;639=viewerTime/1/1/3")]
+[assembly: GoPositionMap("internal/trace/traceviewer/histogram.go", "histogram.cs", "ABgutpKCgpSCgpSCgpSClKiSqLKCppSCgoK4goKUgpSmgpSCqIKC")]
+[assembly: GoPositionMap("internal/trace/traceviewer/http.go", "http.cs", "ABIegpKCggAtVgDLAYoDgoKUAA4WggAIBoKCgoKUggCIAY4Cgg==", "16-21:1;279-286:1")]
+[assembly: GoPositionMap("internal/trace/traceviewer/mmu.go", "mmu.cs", "ADJWgsqSpIKkgpS4AAsQgoKClAASIqKCgoKClJSSgoKUgqbokoKCgqaCgoKCyoKCgpSmlIKCgpSCpoKmgoKCgoKCgpSClLiCgoIA0AGQA7KCgoKmgoKCgpSWkoKmgoKCAAwShJKigqY=", "49-59:1;101-109:1")]
 [assembly: GoPositionMap("internal/trace/traceviewer/pprof.go", "pprof.cs", "ADQykqKClJKCgpSCgoKUgoKUpoKCgpSSgpSCgpSCgIKCpICCgqSCgpSCgoKUgoKiAAkSggAHEIKCgoKCgoKCgtyClAAJFIKUlMoACAaCgoKUgoKU", "26-81:1;30-34:1.1;52-55:1.2", "", "", "", "85:25,86:17")]
 // </GoSourcePositionMaps>
 
@@ -143,3 +142,18 @@ public static partial class traceviewer_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(traceviewer_package.Emitter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceviewerᴛEmitter;
+[GoMethodHost(typeof(traceviewer_package.Range)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceviewerᴛRange;
+[GoMethodHost(typeof(traceviewer_package.TimeHistogram)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceviewerᴛTimeHistogram;
+[GoMethodHost(typeof(traceviewer_package.View)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceviewerᴛView;
+[GoMethodHost(typeof(traceviewer_package.countingWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceviewerᴛcountingWriter;
+[GoMethodHost(typeof(traceviewer_package.mmu)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceviewerᴛmmu;
+// </MethodHolders>

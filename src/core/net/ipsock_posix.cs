@@ -12,6 +12,7 @@ using syscall = syscall_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
 using net;
+using static net_package;
 
 partial class net_package {
 
@@ -19,6 +20,8 @@ internal partial struct probe_type /*dyn*/ {
     internal TCPAddr laddr;
     internal nint value;
 }
+
+} partial class netᴛipStackCapabilities {
 
 // probe probes IPv4, IPv6 and IPv4-mapped IPv6 communication
 // capabilities which are controlled by the IPV6_V6ONLY socket option
@@ -95,6 +98,8 @@ internal static void probe(this ж<ipStackCapabilities> Ꮡp) {
     finally { ᒐ.Run(); }
 }
 
+} partial class net_package {
+
 // favoriteAddrFamily returns the appropriate address family for the
 // given network, laddr, raddr and mode.
 //
@@ -146,7 +151,7 @@ internal static void probe(this ж<ipStackCapabilities> Ꮡp) {
 // See go.dev/issue/67401.
 //
 //go:linkname favoriteAddrFamily
-internal static (nint family, bool ipv6only) favoriteAddrFamily(@string network, Δsockaddr laddr, Δsockaddr raddr, @string mode) {
+internal static (nint family, bool ipv6only) favoriteAddrFamily(@string network, sockaddr laddr, sockaddr raddr, @string mode) {
     switch (network[len(network) - 1]) {
     case (byte)'4': {
         return (syscall.AF_INET, false);
@@ -171,7 +176,7 @@ internal static (nint family, bool ipv6only) favoriteAddrFamily(@string network,
     return (syscall.AF_INET6, false);
 }
 
-internal static (ж<netFD> fd, error err) internetSocket(context.Context ctx, @string net, Δsockaddr laddr, Δsockaddr raddr, nint sotype, nint proto, @string mode, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
+internal static (ж<netFD> fd, error err) internetSocket(context.Context ctx, @string net, sockaddr laddr, sockaddr raddr, nint sotype, nint proto, @string mode, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
     var exprᴛ1 = runtime.GOOS;
     switch (ᐧ) {
     case {} when exprᴛ1 == "aix"u8 || exprᴛ1 == "windows"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8: {

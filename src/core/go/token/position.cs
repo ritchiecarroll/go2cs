@@ -11,7 +11,8 @@ using sync = sync_package;
 using atomic = global::go.sync.atomic_package;
 using global::go.sync;
 using iter = iter_package;
-using ꓸꓸꓸжFile = Span<ж<token_package.ΔFile>>;
+using ꓸꓸꓸжFile = Span<ж<token_package.File>>;
+using static token_package;
 
 partial class token_package {
 
@@ -25,15 +26,17 @@ internal const bool debug = false;
 // Position describes an arbitrary source position
 // including the file, line, and column location.
 // A Position is valid if the line number is > 0.
-partial struct ΔPosition {
+partial struct Position {
     public @string Filename; // filename, if any
     public nint Offset;      // offset, starting at 0
     public nint Line;        // line number, starting at 1
     public nint Column;      // column number, starting at 1 (byte count)
 }
 
+} partial class tokenᴛPosition {
+
 // IsValid reports whether the position is valid.
-public static bool IsValid(this ref ΔPosition pos) { return pos.Line > 0; }
+public static bool IsValid(this ref Position pos) { return pos.Line > 0; }
 
 // String returns a string in one of several forms:
 //
@@ -43,7 +46,7 @@ public static bool IsValid(this ref ΔPosition pos) { return pos.Line > 0; }
 //	line                valid position without file name and no column (column == 0)
 //	file                invalid position with file name
 //	-                   invalid position without file name
-public static @string String(this ΔPosition pos) {
+public static @string String(this Position pos) {
     @string s = pos.Filename;
     if (pos.IsValid()) {
         if (s != ""u8) {
@@ -59,6 +62,8 @@ public static @string String(this ΔPosition pos) {
     }
     return s;
 }
+
+} partial class token_package {
 
 // Pos is a compact encoding of a source position within a file set.
 // It can be converted into a [Position] for a more convenient, but much
@@ -82,18 +87,22 @@ public static @string String(this ΔPosition pos) {
 // equivalent to comparing the respective source file offsets. If p and q
 // are in different files, p < q is true if the file implied by p was added
 // to the respective file set before the file implied by q.
-partial struct ΔPos /*num:nint*/;
+partial struct Pos /*num:nint*/;
 
 // The zero value for [Pos] is NoPos; there is no file and line information
 // associated with it, and NoPos.IsValid() is false. NoPos is always
 // smaller than any other [Pos] value. The corresponding [Position] value
 // for NoPos is the zero value for [Position].
-public static ΔPos NoPos => 0;
+public static Pos NoPos => 0;
+
+} partial class tokenᴛPos {
 
 // IsValid reports whether the position is valid.
-public static bool IsValid(this ΔPos p) {
+public static bool IsValid(this Pos p) {
     return p != NoPos;
 }
+
+} partial class token_package {
 
 // -----------------------------------------------------------------------------
 // File
@@ -103,7 +112,7 @@ public static bool IsValid(this ΔPos p) {
 //
 // Use [FileSet.AddFile] to create a File.
 // A File may belong to more than one FileSet; see [FileSet.AddExistingFiles].
-partial struct ΔFile {
+partial struct File {
     internal @string name; // file name as provided to AddFile
     internal nint @base;   // Pos value range for this file is [base...base+size]
     internal nint size;    // file size as provided to AddFile
@@ -113,28 +122,30 @@ partial struct ΔFile {
     internal slice<lineInfo> infos;
 }
 
+} partial class tokenᴛFile {
+
 // Name returns the file name of file f as registered with AddFile.
-public static @string Name(this ref ΔFile f) {
+public static @string Name(this ref File f) {
     return f.name;
 }
 
 // Base returns the base offset of file f as registered with AddFile.
-public static nint Base(this ref ΔFile f) {
+public static nint Base(this ref File f) {
     return f.@base;
 }
 
 // Size returns the size of file f as registered with AddFile.
-public static nint Size(this ref ΔFile f) {
+public static nint Size(this ref File f) {
     return f.size;
 }
 
 // End returns the end position of file f as registered with AddFile.
-public static ΔPos End(this ref ΔFile f) {
-    return (ΔPos)(f.@base + f.size);
+public static Pos End(this ref File f) {
+    return (Pos)(f.@base + f.size);
 }
 
 // LineCount returns the number of lines in file f.
-public static nint LineCount(this ж<ΔFile> Ꮡf) {
+public static nint LineCount(this ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     f.mutex.Lock();
@@ -146,7 +157,7 @@ public static nint LineCount(this ж<ΔFile> Ꮡf) {
 // AddLine adds the line offset for a new line.
 // The line offset must be larger than the offset for the previous line
 // and smaller than the file size; otherwise the line offset is ignored.
-public static void AddLine(this ж<ΔFile> Ꮡf, nint offset) {
+public static void AddLine(this ж<File> Ꮡf, nint offset) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     f.mutex.Lock();
@@ -160,7 +171,7 @@ public static void AddLine(this ж<ΔFile> Ꮡf, nint offset) {
 // the newline character at the end of the line with a space (to not change the
 // remaining offsets). To obtain the line number, consult e.g. [Position.Line].
 // MergeLine will panic if given an invalid line number.
-public static void MergeLine(this ж<ΔFile> Ꮡf, nint line) {
+public static void MergeLine(this ж<File> Ꮡf, nint line) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -188,7 +199,7 @@ public static void MergeLine(this ж<ΔFile> Ꮡf, nint line) {
 
 // Lines returns the effective line offset table of the form described by [File.SetLines].
 // Callers must not mutate the result.
-public static slice<nint> Lines(this ж<ΔFile> Ꮡf) {
+public static slice<nint> Lines(this ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     f.mutex.Lock();
@@ -205,7 +216,7 @@ public static slice<nint> Lines(this ж<ΔFile> Ꮡf) {
 // and smaller than the file size; otherwise SetLines fails and returns
 // false.
 // Callers must not mutate the provided slice after SetLines returns.
-public static bool SetLines(this ж<ΔFile> Ꮡf, slice<nint> lines) {
+public static bool SetLines(this ж<File> Ꮡf, slice<nint> lines) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     // verify validity of lines table
@@ -225,7 +236,7 @@ public static bool SetLines(this ж<ΔFile> Ꮡf, slice<nint> lines) {
 
 // SetLinesForContent sets the line offsets for the given file content.
 // It ignores position-altering //line comments.
-public static void SetLinesForContent(this ж<ΔFile> Ꮡf, slice<byte> content) {
+public static void SetLinesForContent(this ж<File> Ꮡf, slice<byte> content) {
     ref var f = ref Ꮡf.DerefOrNull();
     var linesᴷ = new stackAppend<nint>(moves: true);
 
@@ -251,7 +262,7 @@ public static void SetLinesForContent(this ж<ΔFile> Ꮡf, slice<byte> content)
 // LineStart returns the [Pos] value of the start of the specified line.
 // It ignores any alternative positions set using [File.AddLineColumnInfo].
 // LineStart panics if the 1-based line number is invalid.
-public static ΔPos LineStart(this ж<ΔFile> Ꮡf, nint line) {
+public static Pos LineStart(this ж<File> Ꮡf, nint line) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -265,11 +276,13 @@ public static ΔPos LineStart(this ж<ΔFile> Ꮡf, nint line) {
         if (line > len(f.lines)) {
             throw panic(fmt.Sprintf("invalid line number %d (should be < %d)"u8, line, len(f.lines)));
         }
-        return (ΔPos)(f.@base + f.lines[line - 1]);
+        return (Pos)(f.@base + f.lines[line - 1]);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡf.DerefOrNull().mutex.Unlock(); ᒐ.Run(); }
 }
+
+} partial class token_package {
 
 // A lineInfo object describes alternative file, line, and column
 // number information (such as provided via a //line directive)
@@ -281,9 +294,11 @@ public partial struct lineInfo {
     public nint Line, Column;
 }
 
+} partial class tokenᴛFile {
+
 // AddLineInfo is like [File.AddLineColumnInfo] with a column = 1 argument.
 // It is here for backward-compatibility for code prior to Go 1.11.
-public static void AddLineInfo(this ж<ΔFile> Ꮡf, nint offset, @string filename, nint line) {
+public static void AddLineInfo(this ж<File> Ꮡf, nint offset, @string filename, nint line) {
     Ꮡf.AddLineColumnInfo(offset, filename, line, 1);
 }
 
@@ -295,7 +310,7 @@ public static void AddLineInfo(this ж<ΔFile> Ꮡf, nint offset, @string filena
 //
 // AddLineColumnInfo is typically used to register alternative position
 // information for line directives such as //line filename:line:column.
-public static void AddLineColumnInfo(this ж<ΔFile> Ꮡf, nint offset, @string filename, nint line, nint column) {
+public static void AddLineColumnInfo(this ж<File> Ꮡf, nint offset, @string filename, nint line, nint column) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     f.mutex.Lock();
@@ -306,7 +321,7 @@ public static void AddLineColumnInfo(this ж<ΔFile> Ꮡf, nint offset, @string 
 }
 
 // fixOffset fixes an out-of-bounds offset such that 0 <= offset <= f.size.
-internal static nint fixOffset(this ref ΔFile f, nint offset) {
+internal static nint fixOffset(this ref File f, nint offset) {
     switch (ᐧ) {
     case {} when offset is < 0: {
         if (!debug) {
@@ -342,8 +357,8 @@ internal static nint fixOffset(this ref ΔFile f, nint offset) {
 // The following invariant, though not true for Pos values
 // in general, holds for the result p:
 // f.Pos(f.Offset(p)) == p.
-public static ΔPos Pos(this ref ΔFile f, nint offset) {
-    return (ΔPos)(f.@base + f.fixOffset(offset));
+public static Pos Pos(this ref File f, nint offset) {
+    return (Pos)(f.@base + f.fixOffset(offset));
 }
 
 // Offset returns the offset for the given file position p.
@@ -355,15 +370,17 @@ public static ΔPos Pos(this ref ΔFile f, nint offset) {
 // The following invariant, though not true for offset values
 // in general, holds for the result offset:
 // f.Offset(f.Pos(offset)) == offset
-public static nint Offset(this ref ΔFile f, ΔPos p) {
+public static nint Offset(this ref File f, Pos p) {
     return f.fixOffset((nint)p - f.@base);
 }
 
 // Line returns the line number for the given file position p;
 // p must be a [Pos] value in that file or [NoPos].
-public static nint Line(this ж<ΔFile> Ꮡf, ΔPos p) {
+public static nint Line(this ж<File> Ꮡf, Pos p) {
     return Ꮡf.Position(p).Line;
 }
+
+} partial class token_package {
 
 internal static nint searchLineInfos(slice<lineInfo> a, nint x) {
     var (i, found) = slices.BinarySearchFunc(a, x, (lineInfo aΔ1, nint xΔ1) => cmp.Compare(aΔ1.Offset, xΔ1));
@@ -375,10 +392,12 @@ internal static nint searchLineInfos(slice<lineInfo> a, nint x) {
     return i;
 }
 
+} partial class tokenᴛFile {
+
 // unpack returns the filename and line and column number for a file offset.
 // If adjusted is set, unpack will return the filename and line information
 // possibly adjusted by //line comments; otherwise those comments are ignored.
-internal static (@string filename, nint line, nint column) unpack(this ж<ΔFile> Ꮡf, nint offset, bool adjusted) {
+internal static (@string filename, nint line, nint column) unpack(this ж<File> Ꮡf, nint offset, bool adjusted) {
     @string filename = default;
     nint line = default;
     nint column = default;
@@ -420,8 +439,8 @@ internal static (@string filename, nint line, nint column) unpack(this ж<ΔFile
     return (filename, line, column);
 }
 
-internal static ΔPosition /*pos*/ position(this ж<ΔFile> Ꮡf, ΔPos p, bool adjusted) {
-    ΔPosition pos = default;
+internal static Position /*pos*/ position(this ж<File> Ꮡf, Pos p, bool adjusted) {
+    Position pos = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
     nint offset = f.fixOffset((nint)p - f.@base);
@@ -435,8 +454,8 @@ internal static ΔPosition /*pos*/ position(this ж<ΔFile> Ꮡf, ΔPos p, bool 
 // If adjusted is set, the position may be adjusted by position-altering
 // //line comments; otherwise those comments are ignored.
 // p must be a Pos value in f or NoPos.
-public static ΔPosition /*pos*/ PositionFor(this ж<ΔFile> Ꮡf, ΔPos p, bool adjusted) {
-    ΔPosition pos = default;
+public static Position /*pos*/ PositionFor(this ж<File> Ꮡf, Pos p, bool adjusted) {
+    Position pos = default;
 
     if (p != NoPos) {
         pos = Ꮡf.position(p, adjusted);
@@ -447,9 +466,11 @@ public static ΔPosition /*pos*/ PositionFor(this ж<ΔFile> Ꮡf, ΔPos p, bool
 // Position returns the Position value for the given file position p.
 // If p is out of bounds, it is adjusted to match the File.Offset behavior.
 // Calling f.Position(p) is equivalent to calling f.PositionFor(p, true).
-public static ΔPosition /*pos*/ Position(this ж<ΔFile> Ꮡf, ΔPos p) {
+public static Position /*pos*/ Position(this ж<File> Ꮡf, Pos p) {
     return Ꮡf.PositionFor(p, true);
 }
+
+} partial class token_package {
 
 // -----------------------------------------------------------------------------
 // FileSet
@@ -477,10 +498,10 @@ public static ΔPosition /*pos*/ Position(this ж<ΔFile> Ꮡf, ΔPos p) {
 // A [File] may be removed from a FileSet when it is no longer needed.
 // This may reduce memory usage in a long-running application.
 partial struct FileSet {
-    internal sync.RWMutex mutex;         // protects the file set
-    internal nint @base;                 // base offset for the next file
-    internal tree tree;                  // tree of files in ascending base order
-    internal atomic.Pointer<ΔFile> last; // cache of last file looked up
+    internal sync.RWMutex mutex;        // protects the file set
+    internal nint @base;                // base offset for the next file
+    internal tree tree;                 // tree of files in ascending base order
+    internal atomic.Pointer<File> last; // cache of last file looked up
 }
 
 // NewFileSet creates a new file set.
@@ -489,6 +510,8 @@ public static ж<FileSet> NewFileSet() {
         @base: 1 // 0 == NoPos
     ));
 }
+
+} partial class tokenᴛFileSet {
 
 // Base returns the minimum base offset that must be provided to
 // [FileSet.AddFile] when adding the next file.
@@ -516,14 +539,14 @@ public static nint Base(this ж<FileSet> Ꮡs) {
 // with offs in the range [0, size] and thus p in the range [base, base+size].
 // For convenience, [File.Pos] may be used to create file-specific position
 // values from a file offset.
-public static ж<ΔFile> AddFile(this ж<FileSet> Ꮡs, @string filename, nint @base, nint size) {
+public static ж<File> AddFile(this ж<FileSet> Ꮡs, @string filename, nint @base, nint size) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
 
         // Allocate f outside the critical section.
-        var f = Ꮡ(new ΔFile(name: filename, size: size, lines: [0]));
+        var f = Ꮡ(new File(name: filename, size: size, lines: [0]));
 
         Ꮡs.Ꮡmutex.Lock();
         ᒐd1 = true;
@@ -599,7 +622,7 @@ public static void AddExistingFiles(this ж<FileSet> Ꮡs, params ꓸꓸꓸжFil
 // encounters an unbounded stream of files.
 //
 // Removing a file that does not belong to the set has no effect.
-public static void RemoveFile(this ж<FileSet> Ꮡs, ж<ΔFile> Ꮡfile) {
+public static void RemoveFile(this ж<FileSet> Ꮡs, ж<File> Ꮡfile) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -622,7 +645,7 @@ public static void RemoveFile(this ж<FileSet> Ꮡs, ж<ΔFile> Ꮡfile) {
 
 // Iterate calls yield for the files in the file set in ascending Base
 // order until yield returns false.
-public static void Iterate(this ж<FileSet> Ꮡs, Func<ж<ΔFile>, bool> yield) {
+public static void Iterate(this ж<FileSet> Ꮡs, Func<ж<File>, bool> yield) {
     GoFrame ᒐ = default;
     try {
         Ꮡs.Ꮡmutex.RLock();
@@ -631,7 +654,7 @@ public static void Iterate(this ж<FileSet> Ꮡs, Func<ж<ΔFile>, bool> yield) 
         // Unlock around user code.
         // The iterator is robust to modification by yield.
         // Avoid range here, so we can use defer.
-        Ꮡs.Ꮡtree.all()((ж<ΔFile> f) => {
+        Ꮡs.Ꮡtree.all()((ж<File> f) => {
             GoFrame ᒐ = default;
             try {
                 Ꮡs.Ꮡmutex.RUnlock();
@@ -646,7 +669,7 @@ public static void Iterate(this ж<FileSet> Ꮡs, Func<ж<ΔFile>, bool> yield) 
     finally { ᒐ.Run(); }
 }
 
-internal static ж<ΔFile> @file(this ж<FileSet> Ꮡs, ΔPos p) {
+internal static ж<File> @file(this ж<FileSet> Ꮡs, Pos p) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -658,7 +681,7 @@ internal static ж<ΔFile> @file(this ж<FileSet> Ꮡs, ΔPos p) {
         Ꮡs.Ꮡmutex.RLock();
         ᒐd1 = true;
 
-        var (pn, _) = Ꮡs.Ꮡtree.locate(new Δkey((nint)p, (nint)p));
+        var (pn, _) = Ꮡs.Ꮡtree.locate(new key((nint)p, (nint)p));
         var n = pn.ValueSlot; if (n != nil) {
             // Update cache of last file. A race is ok,
             // but an exclusive lock causes heavy contention.
@@ -674,8 +697,8 @@ internal static ж<ΔFile> @file(this ж<FileSet> Ꮡs, ΔPos p) {
 // File returns the file that contains the position p.
 // If no such file is found (for instance for p == [NoPos]),
 // the result is nil.
-public static ж<ΔFile> /*f*/ File(this ж<FileSet> Ꮡs, ΔPos p) {
-    ж<ΔFile> f = default;
+public static ж<File> /*f*/ File(this ж<FileSet> Ꮡs, Pos p) {
+    ж<File> f = default;
 
     if (p != NoPos) {
         f = Ꮡs.@file(p);
@@ -687,8 +710,8 @@ public static ж<ΔFile> /*f*/ File(this ж<FileSet> Ꮡs, ΔPos p) {
 // If adjusted is set, the position may be adjusted by position-altering
 // //line comments; otherwise those comments are ignored.
 // p must be a [Pos] value in s or [NoPos].
-public static ΔPosition /*pos*/ PositionFor(this ж<FileSet> Ꮡs, ΔPos p, bool adjusted) {
-    ΔPosition pos = default;
+public static Position /*pos*/ PositionFor(this ж<FileSet> Ꮡs, Pos p, bool adjusted) {
+    Position pos = default;
 
     if (p != NoPos) {
         var f = Ꮡs.@file(p); if (f != nil) {
@@ -700,9 +723,11 @@ public static ΔPosition /*pos*/ PositionFor(this ж<FileSet> Ꮡs, ΔPos p, boo
 
 // Position converts a [Pos] p in the fileset into a Position value.
 // Calling s.Position(p) is equivalent to calling s.PositionFor(p, true).
-public static ΔPosition /*pos*/ Position(this ж<FileSet> Ꮡs, ΔPos p) {
+public static Position /*pos*/ Position(this ж<FileSet> Ꮡs, Pos p) {
     return Ꮡs.PositionFor(p, true);
 }
+
+} partial class token_package {
 
 // -----------------------------------------------------------------------------
 // Helper functions

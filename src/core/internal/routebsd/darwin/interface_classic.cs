@@ -6,8 +6,11 @@ namespace go.@internal;
 
 using Δruntime = runtime_package;
 using syscall = syscall_package;
+using static routebsd_package;
 
 partial class routebsd_package {
+
+} partial class routebsdᴛwireFormat {
 
 internal static (Message, error) parseInterfaceMessage(this ref wireFormat w, slice<byte> b) {
     if (len(b) < w.bodyOff) {
@@ -77,4 +80,4 @@ internal static (Message, error) parseInterfaceAddrMessage(this ref wireFormat w
     return (new InterfaceAddrMessageжMessage(m), default);
 }
 
-} // end routebsd_package
+} // end routebsdᴛwireFormat

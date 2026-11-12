@@ -23,6 +23,7 @@ using io = io_package;
 using os = os_package;
 using @internal;
 using encoding;
+using static plan9obj_package;
 
 partial class plan9obj_package {
 
@@ -39,7 +40,7 @@ partial struct FileHeader {
 // A File represents an open Plan 9 a.out file.
 partial struct File {
     /*embed*/ public FileHeader FileHeader;
-    public slice<ж<ΔSection>> Sections;
+    public slice<ж<Section>> Sections;
     internal io.Closer closer;
 }
 
@@ -53,7 +54,7 @@ partial struct SectionHeader {
 }
 
 // A Section represents a single section in a Plan 9 a.out file.
-partial struct ΔSection {
+partial struct Section {
     /*embed*/ public SectionHeader SectionHeader;
     // Embed ReaderAt for ReadAt method.
     // Do not embed SectionReader directly
@@ -65,13 +66,17 @@ partial struct ΔSection {
     internal ж<io.SectionReader> sr;
 }
 
+} partial class plan9objᴛSection {
+
 // Data reads and returns the contents of the Plan 9 a.out section.
-public static (slice<byte>, error) Data(this ref ΔSection s) {
+public static (slice<byte>, error) Data(this ref Section s) {
     return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), (uint64)s.Size, 0);
 }
 
 // Open returns a new ReadSeeker reading the Plan 9 a.out section.
-public static io.ReadSeeker Open(this ref ΔSection s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
+public static io.ReadSeeker Open(this ref Section s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
+
+} partial class plan9obj_package {
 
 // A Symbol represents an entry in a Plan 9 a.out symbol table section.
 partial struct Sym {
@@ -92,6 +97,8 @@ partial struct formatError {
     internal any val;
 }
 
+} partial class plan9objᴛformatError {
+
 internal static @string Error(this ref formatError e) {
     @string msg = e.msg;
     if (e.val != nil) {
@@ -100,6 +107,8 @@ internal static @string Error(this ref formatError e) {
     msg += fmt.Sprintf(" in record at byte %#x"u8, e.off);
     return msg;
 }
+
+} partial class plan9obj_package {
 
 // Open opens the named file using [os.Open] and prepares it for use as a Plan 9 a.out binary.
 public static (ж<File>, error) Open(@string name) {
@@ -116,6 +125,8 @@ public static (ж<File>, error) Open(@string name) {
     return (ff, default);
 }
 
+} partial class plan9objᴛFile {
+
 // Close closes the [File].
 // If the [File] was created using [NewFile] directly instead of [Open],
 // Close has no effect.
@@ -127,6 +138,8 @@ public static error Close(this ref File f) {
     }
     return err;
 }
+
+} partial class plan9obj_package {
 
 internal static (uint32, error) parseMagic(slice<byte> magic) {
     var m = binary.BigEndian.Uint32(magic);
@@ -188,12 +201,12 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         new("pcsz", ph.Pcsz)
     ]);
 
-    f.Sections = new slice<ж<ΔSection>>(5);
+    f.Sections = new slice<ж<Section>>(5);
 
     var off = (uint32)f.HdrSize;
 
     foreach (var (i, sect) in range(sects)) {
-        var s = @new<ΔSection>();
+        var s = @new<Section>();
         s.SectionHeader = new SectionHeader(
             Name: sect.name,
             Size: sect.size,
@@ -323,6 +336,8 @@ internal static (slice<Sym>, error) newTable(slice<byte> symtab, nint ptrsz) {
 // in the File.
 public static error ErrNoSymbols = errors.New("no symbol section");
 
+} partial class plan9objᴛFile {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string symsˢ => ref symsˢᵇ;
 private static readonly @string symsˢᵇ = "syms"u8;
@@ -346,7 +361,7 @@ public static (slice<Sym>, error) Symbols(this ref File f) {
 
 // Section returns a section with the given name, or nil if no such
 // section exists.
-public static ж<ΔSection> Section(this ref File f, @string name) {
+public static ж<Section> Section(this ref File f, @string name) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name) {
             return s;
@@ -355,4 +370,4 @@ public static ж<ΔSection> Section(this ref File f, @string name) {
     return default;
 }
 
-} // end plan9obj_package
+} // end plan9objᴛFile

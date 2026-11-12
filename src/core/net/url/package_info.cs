@@ -29,7 +29,6 @@ using static go.net.url_package;
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("696e746572666163657b54656d706f72617279282920626f6f6c7d", "Temporary_type")]
 [assembly: GoDynamicTypeLift("696e746572666163657b54696d656f7574282920626f6f6c7d", "Timeout_type")]
-[assembly: GoTypeAlias("Error", "ΔError")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -39,9 +38,9 @@ using static go.net.url_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Error, error>(Pointer = true)]
 [assembly: GoImplement<EscapeError, error>]
 [assembly: GoImplement<InvalidHostError, error>]
-[assembly: GoImplement<ΔError, error>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -66,7 +65,7 @@ using static go.net.url_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("net/url/encoding_table.go", "encoding_table.cs", "ABg2")]
-[assembly: GoPositionMap("net/url/url.go", "url.cs", "AB48AAgSgtSChuaChtqCqJLKgsqCqJIAAhDSAAIU8qq0goKClIKCgoKUAAcQgpQABxCCgqa0grSClMiCpoKUtKSCgoK4grS0tqqiqqKmgpKCgoKUyoKmgpSCgpSmgoKCgqamgoKUgrSCgoK0grYAN36iAAIWAAgCAAwcsoKUqLKClKrCgpSCgpTssoKC2ILGgpTIpgACEvSSgoKUgpSClAACENKCgpQADA7CgpSCpoKUlIKCyoKUlIKClKaClIKUggAIEpS4goKCgpSCgpSm7oKU5sKCgpSUgpSClIKClIKClJSCgpSClJQACAqigoKmgoKmgoKUgoKmgu6CgoKClIKClJSCgoLugoKUgpSCgIKCAAoWgoKCpqaCgsiCgpQAAioAEgKCgpSClJSUqAACFgAJAoKCgqaClKyy3AANEILIqJKCgpSClJSUAAIWAAgCgoKCpqqigpSClIKCpgACMAAVApSCgpSCgoKUlIKClIKClIKUgqaClIKClIK4goKU7oKmlIKClIKClOrCgqaCgpQACBrCgoKUqqKqoqiSqJKCAAIaAAoCgoKmyoKCgpSCgpSCgpTmooKUgoKCgoKUgpSCgoKClJSCgoKUlJSqooKUpoKCgoKUgoKCgoKClIKCpqrCgoKCgoKUlIKmgoKCgoKCgoKkgrSClJS0gpSCyIK4gpSqoqyygoKUAAISAAgCgoKUuIKUgoKCgpSCgoKCpoKCgoKCpoKCgqyygqqigoKCgqaCpoKUrsKCrLKCrOKUgoKmgqasoqaCpoKCgpSCruKCpqKCgqaClLiClIKCAAIYAAkCgoKUgpSClJYADBa0pqiSgoKCpqzygoKUgoKU")]
+[assembly: GoPositionMap("net/url/url.go", "url.cs", "AB88AAoSggAJBIKGAAoGgob6gqiS6oIACAqCyJIAAhDSAAIU8qq0goKClIKCgoKUAAcQgpQABxCCgqa0grSClMiCpoKUtKSCgoK4grS0tqqiqqKmgpKCgoKUyoKmgpSCgpSmgoKCgqamgoKUgrSCgoK0grYAN36iAAIWAAgCAA4csoKUqLKClKrCgpSCgpQACAyygoLYgsaClMimAAIS9JKCgpSClIKUAAIQ0oKClAAMDsKClIKmgpSUgoLKgpSUgoKUpoKUgpSCAAgSlLiCgoKClIKClKbugpTmwoKClJSClIKUgoKUgoKUlIKClIKUlAAICqKCgqaCgqaCgpSCgqaC7oKCgoKUgoKUlIKCgu6CgpSClIKAgoIAChaCgoKmpoKCyIKClAAEKgASAoKClIKUlJTIAAQWAAkCgoKCpoKUzLLcAA0QgsjIkoKClIKUlJQAAhYACAKCgoKmyqKClIKUgoKmAAQwABUClIKClIKCgpSUgoKUgoKUgpSCpoKUgoKUgriCgpTugqaUgoKUgoKU6sKCpoKClAAMGsKCgpSqoqqiqJKokoIABBoACgKCgqbKgoKClIKClIKClOaigpSCgoKCgpSClIKCgoKUlIKCgpSUlMqigpSmgoKCgpSCgoKCgoKUgoKmysKCgoKCgpSUgqaCgoKCgoKCgqSCtIKUlLSClILIgriClMqirLKCgpQAAhIACAKCgpS4gpSCgoKClIKCgoKmgoKCgoKmgoKCrLKCqqKCgoKCpoKmgpSuwoKssoLM4pSCgqaCpsyipoKmgoKClIKu4oKmooKCpoKUuIKUgoIABBgACQKCgpSClIKUlgAMFrSmqJKCgoKmrPKCgpSCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
@@ -84,12 +83,12 @@ public static partial class url_package
     internal partial interface Temporary_type {}
     internal partial interface Timeout_type {}
     internal partial struct encoding {}
+    public partial struct Error {}
     public partial struct EscapeError {}
     public partial struct InvalidHostError {}
     public partial struct URL {}
     public partial struct Userinfo {}
     public partial struct Values {}
-    public partial struct ΔError {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -110,3 +109,18 @@ public static partial class url_package
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(url_package.Error)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class urlᴛError;
+[GoMethodHost(typeof(url_package.EscapeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class urlᴛEscapeError;
+[GoMethodHost(typeof(url_package.InvalidHostError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class urlᴛInvalidHostError;
+[GoMethodHost(typeof(url_package.URL)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class urlᴛURL;
+[GoMethodHost(typeof(url_package.Userinfo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class urlᴛUserinfo;
+[GoMethodHost(typeof(url_package.Values)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class urlᴛValues;
+// </MethodHolders>

@@ -27,12 +27,6 @@ using static go.math.big.@internal.asmgen_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("AltCarry", "const:ΔAltCarry")]
-[assembly: GoTypeAlias("Carry", "ΔCarry")]
-[assembly: GoTypeAlias("Func", "ΔFunc")]
-[assembly: GoTypeAlias("Pipe", "ΔPipe")]
-[assembly: GoTypeAlias("Reg", "ΔReg")]
-[assembly: GoTypeAlias("RegsUsed", "ΔRegsUsed")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -46,8 +40,8 @@ using static go.math.big.@internal.asmgen_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<RegPtr, ΔReg>]
-[assembly: GoImplicitConv<ΔReg, RegPtr>]
+[assembly: GoImplicitConv<Reg, RegPtr>]
+[assembly: GoImplicitConv<RegPtr, Reg>]
 // </ImplicitConversions>
 
 // This package's string literals are hoisted to `static readonly` fields (the standard
@@ -60,8 +54,8 @@ using static go.math.big.@internal.asmgen_package;
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(Arch))]
 [assembly: GoFieldAccess(typeof(Asm))]
-[assembly: GoFieldAccess(typeof(ΔFunc))]
-[assembly: GoFieldAccess(typeof(ΔPipe))]
+[assembly: GoFieldAccess(typeof(Pipe))]
+[assembly: GoFieldAccess(typeof(go.math.big.@internal.asmgen_package.Func))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -74,17 +68,17 @@ using static go.math.big.@internal.asmgen_package;
 [assembly: GoPositionMap("math/big/internal/asmgen/386.go", "386.cs", "AAkSAC5eog==")]
 [assembly: GoPositionMap("math/big/internal/asmgen/add.go", "add.cs", "AA0U0pSCgoKCpoKCgoKCpoKCgoCAkoCAyJSigoKUlKaClIKUgoI=", "31-31:1;32-32:2;38-44:3")]
 [assembly: GoPositionMap("math/big/internal/asmgen/amd64.go", "amd64.cs", "/gAvYIIACAai3IKClJSUlIKUgqaqtqailKSClKSClJSmlIKUpqKUgoKUlIKmgoKUlIKUgpQ=")]
-[assembly: GoPositionMap("math/big/internal/asmgen/arch.go", "arch.cs", "AIcBvAKiABUugJaAloCWgAAIEICWgJaA")]
+[assembly: GoPositionMap("math/big/internal/asmgen/arch.go", "arch.cs", "AIoBvAKiABkugJaAloCWgAAMEICWgJaA")]
 [assembly: GoPositionMap("math/big/internal/asmgen/arm.go", "arm.cs", "/gAqVoKmooK4ooK4ooK4ooI=")]
 [assembly: GoPositionMap("math/big/internal/asmgen/arm64.go", "arm64.cs", "/gAtXKKCgpSCgoKUgriigoKUgoKClIK4ooKClIKCgpSCuKKCgpSCgoKUgg==")]
-[assembly: GoPositionMap("math/big/internal/asmgen/asm.go", "asm.cs", "AB08woKCgpSCABgu4oKCgqiygpSClIKUqqIAAhgACQKokqiSqJKClKiSqLKCgpSCqLKCgoKUgpSClKrCgoKUgpQAAhDygoKUgpQABxSirLKokqjCgoKUqLKowoKClKrCgoKUgqqiqqKs0oKUlIKUgpSCprqygrzCpoKCgoKUqsKqwqrCqsKCgoKUgoKUlIKUupKqwoKUqsKClIKClKrCgpSClKrCgpSqwoKUgoKUqsKClIKUqLKUtLQAFAqylPi0tLS0gpSUgpQADRqCgoKClJSCgpSUxpSCgpSCgoK2lIKUgpS02IKCgoKUgoKCtqaCgoKCmrKUtKSCgoKCuIKCgqaCgoKUggASDLKU+LS0tOqClJQADBiCgpSCgpSUxpSCgpSCgoK2lIKmgoKCtpTugoKCgoKClIKCyoKCgoKCgoKCggAKENKClLS0pOwACAiCgpSUlOrCgoKUgoLclAAICsKClJSClJS0ggAIDMKUtIKCgvqCrNKUtLS0tIK0gsqkqsKqwqiSqJI=")]
-[assembly: GoPositionMap("math/big/internal/asmgen/func.go", "func.cs", "AB02soKClJKClMq4goKmgpKCgoKUlJS4goKCpLSCtIKUlIKCgsiCgoKClKqiqJKCgpSCgpSCgqiSqJKCgpSCgoKCgoKClA==")]
+[assembly: GoPositionMap("math/big/internal/asmgen/asm.go", "asm.cs", "AB88woKCgpSCABou4oKCgqiygpSClIKUqqIAAhgACQKokqiSqJKClKiSqLKCgpSCqLKCgoKUgpSClKrCgoKUgpQAAhDygoKUgpQACxSirLKokqjCgoKUqLKowoKClKrCgoKUgqqiqqKs0oKUlIKUgpSCprqygrzCpoKCgoKUqsKqwqrCqsKCgoKUgoKUlIKUupKqwoKUqsKClIKClKrCgpSClKrCgpSqwoKUgoKUqsKClIKUqLKUtLQAFAqylPi0tLS0gpSUgpQADRqCgoKClJSCgpSUxpSCgpSCgoK2lIKUgpS02IKCgoKUgoKCtqaCgoKCmrKUtKSCgoKCuIKCgqaCgoKUggASDLKU+LS0tOqClJQADBiCgpSCgpSUxpSCgpSCgoK2lIKmgoKCtpTugoKCgoKClIKCyoKCgoKCgoKCggAKENKClLS0pOwACAiCgpSUlOrCgoKUgoLclAAICsKClJSClJS0ggAIDMKUtIKCgvqCrNKUtLS0tIK0gsqkqsKqwqiSqJI=")]
+[assembly: GoPositionMap("math/big/internal/asmgen/func.go", "func.cs", "ACA2soKClJKClMq4goKmgpKCgoKUlJS4goKCpLSCtIKUlIKCgsiCgoKClMqiqJKCgpSCgpSCgqiSqJKCgpSCgoKCgoKClA==")]
 [assembly: GoPositionMap("math/big/internal/asmgen/loong64.go", "loong64.cs", "/g==")]
 [assembly: GoPositionMap("math/big/internal/asmgen/main.go", "main.cs", "ABIiABYcwoKCgoKCgoKC")]
 [assembly: GoPositionMap("math/big/internal/asmgen/mips.go", "mips.cs", "/gAmToI=")]
 [assembly: GoPositionMap("math/big/internal/asmgen/mips64.go", "mips64.cs", "/gAmToI=")]
 [assembly: GoPositionMap("math/big/internal/asmgen/mul.go", "mul.cs", "AAsQspSCgpQACArCpoKCuIKCgoKCgoKCuAAIjAIAhQECgoKClIKClIKClIKClLS02oLCgoKCgoKCgoKClIKUgoKCgoKClJSmggAIBqKCgoKmgoKCpoKCgoKCqqKCgpKCgoKUsoKClLKCgoKClIKCgoKUpoLmooKCgriCgsKCgoKCgoKUgoKUlII=", "204-230:1;262-267:1;268-272:2;273-287:3;303-317:1")]
-[assembly: GoPositionMap("math/big/internal/asmgen/pipe.go", "pipe.cs", "AC5esoLKgpSqooKUrsKClKqiqqIAAhLigpSCgpSClIKUAAoWAAgCgoK4goKUgrjcgoIAChSCgoKClIKUABAggoKUggAJFrKCgrKCpoKUgpTsgoKClIKClJSCgpSClIKC2oKokoKCgpSCsqaClOyCgoKUgoKUlMissoLsgpSUgpSClIIABhKygoKUgoKCgoIAAzAAFgKCgpSClIKCgpTugpSUlKaCuOrCgoKUgoKC3IKUlMiCooKUgpSCgoKCgpTIgoKUgpSCgoKUypKClIKClIIAAi4AFAKClIKCgoKmqqKqogAICJKCpoKClJSmgpSUgpSCgoKCgpSCgoKClIKUgpSmlLaCtrak")]
+[assembly: GoPositionMap("math/big/internal/asmgen/pipe.go", "pipe.cs", "ADFesoLKgpTKooKUrsKClKqiqqIAAhLigpSCgpSClIKUAAoWAAgCgoK4goKUgrjcgoIAChSCgoKClIKUABAggoKUggAJFrKCgrKCpoKUgpTsgoKClIKClJSCgpSClIKC2oKokoKCgpSCsqaClOyCgoKUgoKUlMissoLsgpSUgpSClIIABhKygoKUgoKCgoIAAzAAFgKCgpSClIKCgpTugpSUlKaCuOrCgoKUgoKC3IKUlMiCooKUgpSCgoKCgpTIgoKUgpSCgoKUypKClIKClIIAAi4AFAKClIKCgoKmqqKqogAICJKCpoKClJSmgpSUgpSCgoKCgpSCgoKClIKUgpSmlLaCtrak")]
 [assembly: GoPositionMap("math/big/internal/asmgen/ppc64.go", "ppc64.cs", "/g==")]
 [assembly: GoPositionMap("math/big/internal/asmgen/riscv64.go", "riscv64.cs", "/g==")]
 [assembly: GoPositionMap("math/big/internal/asmgen/s390x.go", "s390x.cs", "/gAtXKKCyoKCgpSmgoKUAAgGgpSklKaCgpSClIKUgoKU")]
@@ -105,14 +99,14 @@ public static partial class asmgen_package
     // <TypeAccessibility>
     public partial struct Arch {}
     public partial struct Asm {}
+    public partial struct Carry {}
+    public partial struct Func {}
     public partial struct Hint {}
     public partial struct Option {}
+    public partial struct Pipe {}
+    public partial struct Reg {}
     public partial struct RegPtr {}
-    public partial struct ΔCarry {}
-    public partial struct ΔFunc {}
-    public partial struct ΔPipe {}
-    public partial struct ΔReg {}
-    public partial struct ΔRegsUsed {}
+    public partial struct RegsUsed {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -129,3 +123,18 @@ public static partial class asmgen_package
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(asmgen_package.Arch)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asmgenᴛArch;
+[GoMethodHost(typeof(asmgen_package.Asm)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asmgenᴛAsm;
+[GoMethodHost(typeof(asmgen_package.Func)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asmgenᴛFunc;
+[GoMethodHost(typeof(asmgen_package.Pipe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asmgenᴛPipe;
+[GoMethodHost(typeof(asmgen_package.Reg)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asmgenᴛReg;
+[GoMethodHost(typeof(asmgen_package.RegPtr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asmgenᴛRegPtr;
+// </MethodHolders>

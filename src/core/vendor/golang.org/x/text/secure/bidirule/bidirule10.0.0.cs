@@ -4,10 +4,14 @@
 //go:build go1.10
 namespace go.vendor.golang.org.x.text.secure;
 
+using static bidirule_package;
+
 partial class bidirule_package {
+
+} partial class bidiruleᴛTransformer {
 
 internal static bool isFinal(this ref Transformer t) {
     return t.state == ruleLTRFinal || t.state == ruleRTLFinal || t.state == ruleInitial;
 }
 
-} // end bidirule_package
+} // end bidiruleᴛTransformer

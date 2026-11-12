@@ -6,8 +6,11 @@ namespace go.@internal;
 
 using fmt = fmt_package;
 using regexp = regexp_package;
+using static profile_package;
 
 partial class profile_package {
+
+} partial class profileᴛProfile {
 
 // Prune removes all nodes beneath a node matching dropRx, and not
 // matching keepRx. If the root node of a Sample matches, the sample
@@ -95,4 +98,4 @@ public static error RemoveUninteresting(this ref Profile p) {
     return default;
 }
 
-} // end profile_package
+} // end profileᴛProfile

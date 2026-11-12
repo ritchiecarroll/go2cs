@@ -15,6 +15,7 @@ using utf8 = go.unicode.utf8_package;
 using go.log.slog.@internal;
 using go.unicode;
 using time = time_package;
+using static slog_package;
 
 partial class slog_package {
 
@@ -43,20 +44,22 @@ public static ж<TextHandler> NewTextHandler(io.Writer w, ж<HandlerOptions> Ꮡ
     ));
 }
 
+} partial class slogᴛTextHandler {
+
 // Enabled reports whether the handler handles records at the given level.
 // The handler ignores records whose level is lower.
-public static bool Enabled(this ref TextHandler h, context.Context _, ΔLevel level) {
+public static bool Enabled(this ref TextHandler h, context.Context _, Level level) {
     return h.commonHandler.enabled(level);
 }
 
 // WithAttrs returns a new [TextHandler] whose attributes consists
 // of h's attributes followed by attrs.
-public static ΔHandler WithAttrs(this ref TextHandler h, slice<Attr> attrs) {
-    return new TextHandlerжΔHandler(Ꮡ(new TextHandler(commonHandler: h.commonHandler.withAttrs(attrs))));
+public static Handler WithAttrs(this ref TextHandler h, slice<Attr> attrs) {
+    return new TextHandlerжHandler(Ꮡ(new TextHandler(commonHandler: h.commonHandler.withAttrs(attrs))));
 }
 
-public static ΔHandler WithGroup(this ref TextHandler h, @string name) {
-    return new TextHandlerжΔHandler(Ꮡ(new TextHandler(commonHandler: h.commonHandler.withGroup(name))));
+public static Handler WithGroup(this ref TextHandler h, @string name) {
+    return new TextHandlerжHandler(Ꮡ(new TextHandler(commonHandler: h.commonHandler.withGroup(name))));
 }
 
 // Handle formats its argument [Record] as a single line of space-separated
@@ -98,6 +101,8 @@ public static error Handle(this ref TextHandler h, context.Context _, Record r) 
 
     return h.commonHandler.handle(r);
 }
+
+} partial class slog_package {
 
 internal static error appendTextValue(ж<handleState> Ꮡs, Value v) {
     ref var s = ref Ꮡs.DerefOrNull();
@@ -145,7 +150,7 @@ internal static (slice<byte>, bool) byteSlice(any a) {
     }
     // Like Printf's %s, we allow both the slice type and the byte element type to be named.
     var t = reflect.TypeOf(a);
-    if (t != nil && t.Kind() == reflect.ΔSlice && t.Elem().Kind() == reflect.Uint8) {
+    if (t != nil && t.Kind() == reflect.Slice && t.Elem().Kind() == reflect.Uint8) {
         return (reflect.ValueOf(a).Bytes(), true);
     }
     return (default, false);

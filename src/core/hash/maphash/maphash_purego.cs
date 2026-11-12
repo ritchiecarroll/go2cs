@@ -13,6 +13,7 @@ using reflect = reflect_package;
 using @internal;
 using crypto;
 using go.math;
+using static maphash_package;
 
 partial class maphash_package {
 
@@ -101,12 +102,11 @@ internal static uint64 r8(slice<byte> p) {
 }
 
 internal static uint64 mix(uint64 a, uint64 b) {
-    // Fully qualified to avoid alias shadowing by the same-package test declaration "bits".
-    var (hi, lo) = go.math.bits_package.Mul64(a, b);
+    var (hi, lo) = bits.Mul64(a, b);
     return hi ^ lo;
 }
 
-internal static uint64 comparableHash<T>(T v, ΔSeed seed) {
+internal static uint64 comparableHash<T>(T v, Seed seed) {
     ref var h = ref heap(new Hash(), out var Ꮡh);
     h.SetSeed(seed);
     writeComparable(Ꮡh, v);
@@ -119,18 +119,18 @@ internal static void writeComparable<T>(ж<Hash> h, T v) {
 }
 
 // appendT hash a value.
-internal static void appendT(ж<Hash> Ꮡh, reflectꓸValue v) {
+internal static void appendT(ж<Hash> Ꮡh, reflect.Value v) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     h.WriteString(v.Type().String());
     switch (v.Kind()) {
-    case var ᴛ when ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.ΔInt: {
+    case var ᴛ when ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.Int: {
         array<byte> buf = new(8);
         byteorder.LEPutUint64(buf[..], (uint64)v.Int());
         h.Write(buf[..]);
         return;
     }
-    case var ᴛ when ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.ΔUint || ᴛ == reflect.Uintptr: {
+    case var ᴛ when ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uint || ᴛ == reflect.Uintptr: {
         array<byte> buf = new(8);
         byteorder.LEPutUint64(buf[..], v.Uint());
         h.Write(buf[..]);
@@ -147,7 +147,7 @@ internal static void appendT(ж<Hash> Ꮡh, reflectꓸValue v) {
         }
         return;
     }
-    case var ᴛ when ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.String: {
         h.WriteString(v.String());
         return;
     }
@@ -174,11 +174,11 @@ internal static void appendT(ж<Hash> Ꮡh, reflectꓸValue v) {
         h.float64(v.Float());
         return;
     }
-    case var ᴛ when ᴛ == reflect.ΔBool: {
+    case var ᴛ when ᴛ == reflect.Bool: {
         h.WriteByte(btoi(v.Bool()));
         return;
     }
-    case var ᴛ when ᴛ == reflect.ΔUnsafePointer || ᴛ == reflect.ΔPointer || ᴛ == reflect.Chan: {
+    case var ᴛ when ᴛ == reflect.UnsafePointer || ᴛ == reflect.Pointer || ᴛ == reflect.Chan: {
         array<byte> buf = new(8);
         // because pointing to the abi.Escape call in comparableReady,
         // So this is ok to hash pointer,
@@ -187,12 +187,14 @@ internal static void appendT(ж<Hash> Ꮡh, reflectꓸValue v) {
         h.Write(buf[..]);
         return;
     }
-    case var ᴛ when ᴛ == reflect.ΔInterface: {
+    case var ᴛ when ᴛ == reflect.Interface: {
         appendT(Ꮡh, v.Elem());
         return;
     }}
     throw panic(errors.New("maphash: hash of unhashable type "u8 + v.Type().String()));
 }
+
+} partial class maphashᴛHash {
 
 internal static void float64(this ref Hash h, float64 f) {
     if (f == 0D) {
@@ -208,6 +210,8 @@ internal static void float64(this ref Hash h, float64 f) {
     byteorder.LEPutUint64(buf[..], math.Float64bits(f));
     h.Write(buf[..]);
 }
+
+} partial class maphash_package {
 
 internal static byte btoi(bool b) {
     if (b) {

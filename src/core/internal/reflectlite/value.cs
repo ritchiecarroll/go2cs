@@ -9,6 +9,7 @@ using unsafeheader = go.@internal.unsafeheader_package;
 using Δruntime = runtime_package;
 using @unsafe = unsafe_package;
 using go.@internal;
+using static reflectlite_package;
 
 partial class reflectlite_package {
 
@@ -74,8 +75,10 @@ internal static flag flagMethod => /* 1 << 9 */ 512;
 internal static UntypedInt flagMethodShift => 10;
 internal static flag flagRO => /* flagStickyRO | flagEmbedRO */ 96;
 
-internal static abiꓸKind kind(this flag f) {
-    return (abiꓸKind)(uint8)((flag)(f & flagKindMask));
+} partial class reflectliteᴛflag {
+
+internal static Kind kind(this flag f) {
+    return (Kind)(uint8)((flag)(f & flagKindMask));
 }
 
 internal static flag ro(this flag f) {
@@ -84,6 +87,8 @@ internal static flag ro(this flag f) {
     }
     return 0;
 }
+
+} partial class reflectliteᴛValue {
 
 internal static ж<abi.Type> typ(this Value v) {
     // Types are either static (for compiler-created types) or
@@ -105,6 +110,8 @@ internal static @unsafe.Pointer pointer(this Value v) {
     }
     return v.ptr;
 }
+
+} partial class reflectlite_package {
 
 // packEface converts v to the empty interface.
 internal static any packEface(Value v) {
@@ -153,8 +160,10 @@ internal static any packEface(Value v) {
 // in the description of each method.
 partial struct ValueError {
     public @string Method;
-    public abiꓸKind Kind;
+    public Kind Kind;
 }
+
+} partial class reflectliteᴛValueError {
 
 public static @string Error(this ref ValueError e) {
     if (e.Kind == 0) {
@@ -163,7 +172,11 @@ public static @string Error(this ref ValueError e) {
     return "reflect: call of "u8 + e.Method + " on "u8 + e.Kind.String() + " Value"u8;
 }
 
+} partial class reflectlite_package {
+
 // go2cs generated this placeholder — func methodName is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class reflectliteᴛflag {
 
 // mustBeExported panics if f records that the value was obtained using
 // an unexported field.
@@ -192,6 +205,8 @@ internal static partial void mustBeAssignable(this flag f) {
     }
 }
 
+} partial class reflectliteᴛValue {
+
 // CanSet reports whether the value of v can be changed.
 // A Value can be changed only if it is addressable and was not
 // obtained by the use of unexported struct fields.
@@ -203,7 +218,11 @@ public static bool CanSet(this Value v) {
 
 // go2cs generated this placeholder — func Elem is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+} partial class reflectlite_package {
+
 // go2cs generated this placeholder — func valueInterface is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class reflectliteᴛValue {
 
 // go2cs generated this placeholder — func IsNil is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -218,9 +237,11 @@ public static bool IsValid(this Value v) {
 
 // Kind returns v's Kind.
 // If v is the zero Value (IsValid returns false), Kind returns Invalid.
-public static abiꓸKind Kind(this Value v) {
+public static Kind Kind(this Value v) {
     return v.kind();
 }
+
+} partial class reflectlite_package {
 
 // implemented in runtime:
 
@@ -229,6 +250,8 @@ internal static partial nint chanlen(@unsafe.Pointer _);
 
 //go:noescape
 internal static partial nint maplen(@unsafe.Pointer _);
+
+} partial class reflectliteᴛValue {
 
 // go2cs generated this placeholder — func Len is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -243,7 +266,7 @@ internal static nint numMethod(this Value v) {
 // go2cs generated this placeholder — func Set is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Type returns v's type.
-public static ΔType Type(this Value v) {
+public static Type Type(this Value v) {
     var f = v.flag;
     if (f == 0) {
         throw panic(Ꮡ(new ValueError("reflectlite.Value.Type", abi.Invalid)));
@@ -251,6 +274,8 @@ public static ΔType Type(this Value v) {
     // Method values not supported.
     return toRType(v.typ());
 }
+
+} partial class reflectlite_package {
 
 /*
  * constructors
@@ -261,6 +286,8 @@ public static ΔType Type(this Value v) {
 internal static partial @unsafe.Pointer unsafe_New(ж<abi.Type> _);
 
 // go2cs generated this placeholder — func ValueOf is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class reflectliteᴛValue {
 
 // assignTo returns a value v that can be assigned directly to typ.
 // It panics if v is not assignable to typ.
@@ -302,6 +329,8 @@ internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡds
     // Failed.
     throw panic(context + ": value of type " + toRType(v.typ()).String() + " is not assignable to type " + toRType(Ꮡdst).String());
 }
+
+} partial class reflectlite_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string iLenˢ => ref iLenˢᵇ;

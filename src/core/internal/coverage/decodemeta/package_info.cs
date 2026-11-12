@@ -63,8 +63,8 @@ using static go.@internal.coverage.decodemeta_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/coverage/decodemeta/decode.go", "decode.cs", "AB4+goK4gIKkgIKkpqKClIKUppSCgriCgqaCpoKmgqaCqsKCuIKAgqSmgriCgILIgoKUgqaCgpSCAAgSgoI=", "", "", "136=ReadULEB128/1/5/2,ReadULEB128/2/5/3,ReadULEB128/3/5/4,ReadULEB128/4/5/5,ReadULEB128/5/5/6")]
-[assembly: GoPositionMap("internal/coverage/decodemeta/decodefile.go", "decodefile.cs", "ACla4tyClKailKaCuIKCgsqCuIKCgpSCuIKCgpSC3IKCgpSClIKClIKmpoKCgoKClIKUgqqirLKssqyyAAIU8oKCgoKmgpSCgpQAAhQACAaClIKUgqaCpoKClIKAgqSAgqQ=", "", "", "181=Sum/1/1/1,Sprintf/1/1/1")]
+[assembly: GoPositionMap("internal/coverage/decodemeta/decode.go", "decode.cs", "AB8+goK4gIKkgIKkxqKClIKUppSCgriCgqaCpoKmgqaCqsKCuIKAgqSmgriCgILIgoKUgqaCgpSCAAgSgoI=", "", "", "139=ReadULEB128/1/5/2,ReadULEB128/2/5/3,ReadULEB128/3/5/4,ReadULEB128/4/5/5,ReadULEB128/5/5/6")]
+[assembly: GoPositionMap("internal/coverage/decodemeta/decodefile.go", "decodefile.cs", "ACpa4tyClMailKaCuIKCgsqCuIKCgpSCuIKCgpSC3IKCgpSClIKClIKmpoKCgoKClIKUgqqirLKssqyyAAIU8oKCgoKmgpSCgpQAAhQACAaClIKUgqaCpoKClIKAgqSAgqQ=", "", "", "184=Sum/1/1/1,Sprintf/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
@@ -101,3 +101,14 @@ public static partial class decodemeta_package
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(decodemeta_package.CoverageMetaDataDecoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class decodemetaᴛCoverageMetaDataDecoder;
+[GoMethodHost(typeof(decodemeta_package.CoverageMetaFileReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class decodemetaᴛCoverageMetaFileReader;
+// </MethodHolders>

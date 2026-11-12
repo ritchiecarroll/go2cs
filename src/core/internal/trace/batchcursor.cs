@@ -9,16 +9,19 @@ using fmt = fmt_package;
 using tracev2 = go.@internal.trace.tracev2_package;
 using encoding;
 using go.@internal.trace;
+using static trace_package;
 
 partial class trace_package {
 
 partial struct batchCursor {
     internal ThreadID m;
-    internal ΔTime lastTs;
+    internal Time lastTs;
     internal nint idx;     // next index into []batch
     internal nint dataOff; // next index into batch.data
     internal baseEvent ev; // last read event
 }
+
+} partial class traceᴛbatchCursor {
 
 internal static (bool ok, error err) nextEvent(this ж<batchCursor> Ꮡb, slice<batch> batches, frequency freq) {
     error err = default;
@@ -60,6 +63,8 @@ internal static nint compare(this ref batchCursor b, ж<batchCursor> Ꮡa) {
 
     return cmp.Compare(b.ev.time, a.ev.time);
 }
+
+} partial class trace_package {
 
 // readTimedBaseEvent reads out the raw event data from b
 // into e. It does not try to interpret the arguments
@@ -105,7 +110,7 @@ internal static (nint, timestamp, error) readTimedBaseEvent(slice<byte> b, ref b
 
 internal static slice<ж<batchCursor>> heapInsert(slice<ж<batchCursor>> heap, ж<batchCursor> bc) {
     // Add the cursor to the end of the heap.
-    heap = builtin.append(heap, bc);
+    heap = append(heap, bc);
 
     // Sift the new entry up to the right place.
     heapSiftUp(heap, len(heap) - 1);

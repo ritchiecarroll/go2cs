@@ -9,29 +9,30 @@ namespace go.go;
 using slices = slices_package;
 using unicode = unicode_package;
 using token = global::go.go.token_package;
+using static types_package;
 
 partial class types_package {
 
 // isValid reports whether t is a valid type.
-internal static bool isValid(ΔType t) { return !AreEqual(Unalias(t), Typ[Invalid]); }
+internal static bool isValid(Type t) { return !AreEqual(Unalias(t), Typ[Invalid]); }
 
 // The isX predicates below report whether t is an X.
 // If t is a type parameter the result is false; i.e.,
 // these predicates don't look inside a type parameter.
-internal static bool isBoolean(ΔType t) { return isBasic(t, IsBoolean); }
-internal static bool isInteger(ΔType t) { return isBasic(t, IsInteger); }
-internal static bool isUnsigned(ΔType t) { return isBasic(t, IsUnsigned); }
-internal static bool isFloat(ΔType t) { return isBasic(t, IsFloat); }
-internal static bool isComplex(ΔType t) { return isBasic(t, IsComplex); }
-internal static bool isNumeric(ΔType t) { return isBasic(t, IsNumeric); }
-internal static bool isString(ΔType t) { return isBasic(t, IsString); }
-internal static bool isIntegerOrFloat(ΔType t) { return isBasic(t, (BasicInfo)(IsInteger | IsFloat)); }
-internal static bool isConstType(ΔType t) { return isBasic(t, IsConstType); }
+internal static bool isBoolean(Type t) { return isBasic(t, IsBoolean); }
+internal static bool isInteger(Type t) { return isBasic(t, IsInteger); }
+internal static bool isUnsigned(Type t) { return isBasic(t, IsUnsigned); }
+internal static bool isFloat(Type t) { return isBasic(t, IsFloat); }
+internal static bool isComplex(Type t) { return isBasic(t, IsComplex); }
+internal static bool isNumeric(Type t) { return isBasic(t, IsNumeric); }
+internal static bool isString(Type t) { return isBasic(t, IsString); }
+internal static bool isIntegerOrFloat(Type t) { return isBasic(t, (BasicInfo)(IsInteger | IsFloat)); }
+internal static bool isConstType(Type t) { return isBasic(t, IsConstType); }
 
 // isBasic reports whether t.Underlying() is a basic type with the specified info.
 // If t is a type parameter the result is false; i.e.,
 // isBasic does not look inside a type parameter.
-internal static bool isBasic(ΔType t, BasicInfo info) {
+internal static bool isBasic(Type t, BasicInfo info) {
     var (u, _) = t.Underlying()._<ж<Basic>>(ᐧ);
     return u != nil && (BasicInfo)(u.info & info) != 0;
 }
@@ -39,21 +40,21 @@ internal static bool isBasic(ΔType t, BasicInfo info) {
 // The allX predicates below report whether t is an X.
 // If t is a type parameter the result is true if isX is true
 // for all specified types of the type parameter's type set.
-internal static bool allBoolean(ΔType t) { return allBasic(t, IsBoolean); }
-internal static bool allInteger(ΔType t) { return allBasic(t, IsInteger); }
-internal static bool allUnsigned(ΔType t) { return allBasic(t, IsUnsigned); }
-internal static bool allNumeric(ΔType t) { return allBasic(t, IsNumeric); }
-internal static bool allString(ΔType t) { return allBasic(t, IsString); }
-internal static bool allOrdered(ΔType t) { return allBasic(t, IsOrdered); }
-internal static bool allNumericOrString(ΔType t) { return allBasic(t, (BasicInfo)(IsNumeric | IsString)); }
+internal static bool allBoolean(Type t) { return allBasic(t, IsBoolean); }
+internal static bool allInteger(Type t) { return allBasic(t, IsInteger); }
+internal static bool allUnsigned(Type t) { return allBasic(t, IsUnsigned); }
+internal static bool allNumeric(Type t) { return allBasic(t, IsNumeric); }
+internal static bool allString(Type t) { return allBasic(t, IsString); }
+internal static bool allOrdered(Type t) { return allBasic(t, IsOrdered); }
+internal static bool allNumericOrString(Type t) { return allBasic(t, (BasicInfo)(IsNumeric | IsString)); }
 
 // allBasic reports whether t.Underlying() is a basic type with the specified info.
 // If t is a type parameter, the result is true if isBasic(t, info) is true
 // for all specific types of the type parameter's type set.
-internal static bool allBasic(ΔType t, BasicInfo info) {
+internal static bool allBasic(Type t, BasicInfo info) {
     {
         var (tpar, _) = Unalias(t)._<ж<TypeParam>>(ᐧ); if (tpar != nil) {
-            return tpar.@is((ж<Δterm> tΔ1) => tΔ1 != nil && isBasic(tΔ1.typ, info));
+            return tpar.@is((ж<term> tΔ1) => tΔ1 != nil && isBasic(tΔ1.typ, info));
         }
     }
     return isBasic(t, info);
@@ -62,7 +63,7 @@ internal static bool allBasic(ΔType t, BasicInfo info) {
 // hasName reports whether t has a name. This includes
 // predeclared types, defined types, and type parameters.
 // hasName may be called with types that are not fully set up.
-internal static bool hasName(ΔType t) {
+internal static bool hasName(Type t) {
     switch (Unalias(t).type()) {
     case ж<Basic> _:
     case ж<Named> _:
@@ -75,7 +76,7 @@ internal static bool hasName(ΔType t) {
 // isTypeLit reports whether t is a type literal.
 // This includes all non-defined types, but also basic types.
 // isTypeLit may be called with types that are not fully set up.
-internal static bool isTypeLit(ΔType t) {
+internal static bool isTypeLit(Type t) {
     switch (Unalias(t).type()) {
     case ж<Named> _:
     case ж<TypeParam> _: {
@@ -87,7 +88,7 @@ internal static bool isTypeLit(ΔType t) {
 // isTyped reports whether t is typed; i.e., not an untyped
 // constant or boolean.
 // Safe to call from types that are not fully set up.
-internal static bool isTyped(ΔType t) {
+internal static bool isTyped(Type t) {
     // Alias and named types cannot denote untyped types
     // so there's no need to call Unalias or Underlying, below.
     var (b, _) = t._<ж<Basic>>(ᐧ);
@@ -96,13 +97,13 @@ internal static bool isTyped(ΔType t) {
 
 // isUntyped(t) is the same as !isTyped(t).
 // Safe to call from types that are not fully set up.
-internal static bool isUntyped(ΔType t) {
+internal static bool isUntyped(Type t) {
     return !isTyped(t);
 }
 
 // isUntypedNumeric reports whether t is an untyped numeric type.
 // Safe to call from types that are not fully set up.
-internal static bool isUntypedNumeric(ΔType t) {
+internal static bool isUntypedNumeric(Type t) {
     // Alias and named types cannot denote untyped types
     // so there's no need to call Unalias or Underlying, below.
     var (b, _) = t._<ж<Basic>>(ᐧ);
@@ -110,18 +111,18 @@ internal static bool isUntypedNumeric(ΔType t) {
 }
 
 // IsInterface reports whether t is an interface type.
-public static bool IsInterface(ΔType t) {
+public static bool IsInterface(Type t) {
     var (_, ok) = t.Underlying()._<ж<Interface>>(ᐧ);
     return ok;
 }
 
 // isNonTypeParamInterface reports whether t is an interface type but not a type parameter.
-internal static bool isNonTypeParamInterface(ΔType t) {
+internal static bool isNonTypeParamInterface(Type t) {
     return !isTypeParam(t) && IsInterface(t);
 }
 
 // isTypeParam reports whether t is a type parameter.
-internal static bool isTypeParam(ΔType t) {
+internal static bool isTypeParam(Type t) {
     var (_, ok) = Unalias(t)._<ж<TypeParam>>(ᐧ);
     return ok;
 }
@@ -130,7 +131,7 @@ internal static bool isTypeParam(ΔType t) {
 // The function does not force the computation of the type set and so is safe to
 // use anywhere, but it may report a false negative if the type set has not been
 // computed yet.
-internal static bool hasEmptyTypeset(ΔType t) {
+internal static bool hasEmptyTypeset(Type t) {
     var (tpar, _) = Unalias(t)._<ж<TypeParam>>(ᐧ); if (tpar != nil && tpar.bound != nil) {
         var (iface, _) = safeUnderlying(tpar.bound)._<ж<Interface>>(ᐧ);
         return iface != nil && iface.tset != nil && iface.tset.IsEmpty();
@@ -141,7 +142,7 @@ internal static bool hasEmptyTypeset(ΔType t) {
 // isGeneric reports whether a type is a generic, uninstantiated type
 // (generic signatures are not included).
 // TODO(gri) should we include signatures or assert that they are not present?
-internal static bool isGeneric(ΔType t) {
+internal static bool isGeneric(Type t) {
     // A parameterized type is only generic if it doesn't have an instantiation already.
     var (alias, _) = t._<ж<Alias>>(ᐧ); if (alias != nil && alias.tparams != nil && alias.targs == nil) {
         return true;
@@ -151,7 +152,7 @@ internal static bool isGeneric(ΔType t) {
 }
 
 // Comparable reports whether values of type T are comparable.
-public static bool Comparable(ΔType T) {
+public static bool Comparable(Type T) {
     return comparableType(T, true, default) == nil;
 }
 
@@ -164,12 +165,12 @@ private static readonly @string incomparableTypesInTypeˢᵇ = "incomparable typ
 // If T is comparable, comparableType returns nil.
 // Otherwise it returns a type error explaining why T is not comparable.
 // If dynamic is set, non-type parameter interfaces are always comparable.
-internal static ж<typeError> comparableType(ΔType T, bool dynamic, map<ΔType, bool> seen) {
+internal static ж<typeError> comparableType(Type T, bool dynamic, map<Type, bool> seen) {
     if (seen[T]) {
         return default;
     }
     if (seen == nil) {
-        seen = new map<ΔType, bool>();
+        seen = new map<Type, bool>();
     }
     seen[T] = true;
 
@@ -223,7 +224,7 @@ internal static ж<typeError> comparableType(ΔType T, bool dynamic, map<ΔType,
 }
 
 // hasNil reports whether type t includes the nil value.
-internal static bool hasNil(ΔType t) {
+internal static bool hasNil(Type t) {
     var switchᴛ11 = t.Underlying();
     switch (switchᴛ11.type()) {
     case ж<Basic> u: {
@@ -231,14 +232,14 @@ internal static bool hasNil(ΔType t) {
     }
     case ж<Slice> _:
     case ж<Pointer> _:
-    case ж<ΔSignature> _:
+    case ж<Signature> _:
     case ж<Map> _:
     case ж<Chan> _: {
         var u = switchᴛ11;
         return true;
     }
     case ж<Interface> u: {
-        return !isTypeParam(t) || underIs(t, (ΔType uΔ1) => uΔ1 != nil && hasNil(uΔ1));
+        return !isTypeParam(t) || underIs(t, (Type uΔ1) => uΔ1 != nil && hasNil(uΔ1));
     }}
     return false;
 }
@@ -262,11 +263,15 @@ partial struct ifacePair {
     internal ж<ifacePair> prev;
 }
 
+} partial class typesᴛifacePair {
+
 internal static bool identical(this ref ifacePair p, ж<ifacePair> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     return p.x == q.x && p.y == q.y || p.x == q.y && p.y == q.x;
 }
+
+} partial class types_package {
 
 // A comparer is used to compare types.
 partial struct comparer {
@@ -274,10 +279,12 @@ partial struct comparer {
     internal bool ignoreInvalids; // if set, identical treats an invalid type as identical to any type
 }
 
+} partial class typesᴛcomparer {
+
 // For changes to this code the corresponding changes should be made to unifier.nify.
-internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<ifacePair> Ꮡp) {
+internal static bool identical(this ref comparer c, Type x, Type y, ж<ifacePair> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
-    var targsᴷ = new stackAppend<ΔType>();
+    var targsᴷ = new stackAppend<Type>();
 
     x = Unalias(x);
     y = Unalias(y);
@@ -360,8 +367,8 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
         }
         break;
     }
-    case ж<ΔSignature> xΔ1: {
-        var (yΔ7, _) = y._<ж<ΔSignature>>(ᐧ);
+    case ж<Signature> xΔ1: {
+        var (yΔ7, _) = y._<ж<Signature>>(ᐧ);
         if (yΔ7 == nil) {
             return false;
         }
@@ -387,9 +394,9 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
             var xtparams = xΔ1.TypeParams().list();
             var ytparams = yΔ7.TypeParams().list();
 
-            slice<ΔType> targs = default;
+            slice<Type> targs = default;
             foreach (var i in range(len(xtparams))) {
-                targs = append(targsᴷ, targs, (ΔType)(new TypeParamжΔType(xΔ1.TypeParams().At(i))));
+                targs = append(targsᴷ, targs, (Type)(new TypeParamжType(xΔ1.TypeParams().At(i))));
             }
             var smap = makeSubstMap(ytparams, targs);
 
@@ -404,11 +411,11 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
                 }
             }
 
-            yparams = check.subst(nopos, new TupleжΔType(yΔ7.@params), smap, nil, ctxt)._<ж<Tuple>>();
-            yresults = check.subst(nopos, new TupleжΔType(yΔ7.results), smap, nil, ctxt)._<ж<Tuple>>();
+            yparams = check.subst(nopos, new TupleжType(yΔ7.@params), smap, nil, ctxt)._<ж<Tuple>>();
+            yresults = check.subst(nopos, new TupleжType(yΔ7.results), smap, nil, ctxt)._<ж<Tuple>>();
         }
 
-        return xΔ1.variadic == yΔ7.variadic && c.identical(new TupleжΔType(xΔ1.@params), new TupleжΔType(yparams), Ꮡp) && c.identical(new TupleжΔType(xΔ1.results), new TupleжΔType(yresults), Ꮡp);
+        return xΔ1.variadic == yΔ7.variadic && c.identical(new TupleжType(xΔ1.@params), new TupleжType(yparams), Ꮡp) && c.identical(new TupleжType(xΔ1.results), new TupleжType(yresults), Ꮡp);
     }
     case ж<Union> xΔ1: {
         var (yΔ8, _) = y._<ж<Union>>(ᐧ); if (yΔ8 != nil) {
@@ -539,6 +546,8 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
     return false;
 }
 
+} partial class types_package {
+
 // identicalOrigin reports whether x and y originated in the same declaration.
 internal static bool identicalOrigin(ж<Named> x, ж<Named> y) {
     // TODO(gri) is this correct?
@@ -548,8 +557,8 @@ internal static bool identicalOrigin(ж<Named> x, ж<Named> y) {
 // identicalInstance reports if two type instantiations are identical.
 // Instantiations are identical if their origin and type arguments are
 // identical.
-internal static bool identicalInstance(ΔType xorig, slice<ΔType> xargs, ΔType yorig, slice<ΔType> yargs) {
-    if (!slices.EqualFunc<slice<ΔType>, slice<ΔType>, ΔType, ΔType>(xargs, yargs, Identical)) {
+internal static bool identicalInstance(Type xorig, slice<Type> xargs, Type yorig, slice<Type> yargs) {
+    if (!slices.EqualFunc<slice<Type>, slice<Type>, Type, Type>(xargs, yargs, Identical)) {
         return false;
     }
 
@@ -559,28 +568,28 @@ internal static bool identicalInstance(ΔType xorig, slice<ΔType> xargs, ΔType
 // Default returns the default "typed" type for an "untyped" type;
 // it returns the incoming type for all other types. The default type
 // for untyped nil is untyped nil.
-public static ΔType Default(ΔType t) {
+public static Type Default(Type t) {
     // Alias and named types cannot denote untyped types
     // so there's no need to call Unalias or Underlying, below.
     var (tΔ1, _) = t._<ж<Basic>>(ᐧ); if (tΔ1 != nil) {
         switch (tΔ1.kind) {
         case var ᴛ when ᴛ == UntypedBool: {
-            return new BasicжΔType(Typ[Bool]);
+            return new BasicжType(Typ[Bool]);
         }
         case var ᴛ when ᴛ == ΔUntypedInt: {
-            return new BasicжΔType(Typ[Int]);
+            return new BasicжType(Typ[Int]);
         }
         case var ᴛ when ᴛ == UntypedRune: {
             return universeRune; // use 'rune' name
         }
         case var ᴛ when ᴛ == ΔUntypedFloat: {
-            return new BasicжΔType(Typ[Float64]);
+            return new BasicжType(Typ[Float64]);
         }
         case var ᴛ when ᴛ == ΔUntypedComplex: {
-            return new BasicжΔType(Typ[Complex128]);
+            return new BasicжType(Typ[Complex128]);
         }
         case var ᴛ when ᴛ == UntypedString: {
-            return new BasicжΔType(Typ[ΔString]);
+            return new BasicжType(Typ[String]);
         }}
     }
     return t;
@@ -590,7 +599,7 @@ public static ΔType Default(ΔType t) {
 // If x and y are different untyped numeric types, the result is the type of x or y
 // that appears later in this list: integer, rune, floating-point, complex.
 // Otherwise, if x != y, the result is nil.
-internal static ΔType maxType(ΔType x, ΔType y) {
+internal static Type maxType(Type x, Type y) {
     // We only care about untyped types (for now), so == is good enough.
     // TODO(gri) investigate generalizing this function to simplify code elsewhere
     if (AreEqual(x, y)) {

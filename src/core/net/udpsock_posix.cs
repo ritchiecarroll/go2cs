@@ -8,19 +8,22 @@ using context = context_package;
 using netip = net.netip_package;
 using syscall = syscall_package;
 using net;
+using static net_package;
 
 partial class net_package {
 
-internal static ΔAddr sockaddrToUDP(syscall.Sockaddr sa) {
+internal static Addr sockaddrToUDP(syscall.Sockaddr sa) {
     switch (sa.type()) {
     case ж<syscall.SockaddrInet4> saΔ1: {
-        return new UDPAddrжΔAddr(Ꮡ(new UDPAddr(IP: saΔ1.Addr[0..], Port: saΔ1.Port)));
+        return new UDPAddrжAddr(Ꮡ(new UDPAddr(IP: saΔ1.Addr[0..], Port: saΔ1.Port)));
     }
     case ж<syscall.SockaddrInet6> saΔ1: {
-        return new UDPAddrжΔAddr(Ꮡ(new UDPAddr(IP: saΔ1.Addr[0..], Port: saΔ1.Port, Zone: zoneCache.name((nint)saΔ1.ZoneId))));
+        return new UDPAddrжAddr(Ꮡ(new UDPAddr(IP: saΔ1.Addr[0..], Port: saΔ1.Port, Zone: zoneCache.name((nint)saΔ1.ZoneId))));
     }}
     return default;
 }
+
+} partial class netᴛUDPAddr {
 
 internal static nint family(this ж<UDPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
@@ -43,9 +46,11 @@ internal static (syscall.Sockaddr, error) sockaddr(this ж<UDPAddr> Ꮡa, nint f
     return ipToSockaddr(family, a.IP, a.Port, a.Zone);
 }
 
-internal static Δsockaddr toLocal(this ref UDPAddr a, @string net) {
-    return new UDPAddrжΔsockaddr(Ꮡ(new UDPAddr(loopbackIP(net), a.Port, a.Zone)));
+internal static sockaddr toLocal(this ref UDPAddr a, @string net) {
+    return new UDPAddrжsockaddr(Ꮡ(new UDPAddr(loopbackIP(net), a.Port, a.Zone)));
 }
+
+} partial class netᴛUDPConn {
 
 internal static (nint, ж<UDPAddr>, error) readFrom(this ref UDPConn c, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
     ref var addr = ref Ꮡaddr.DerefOrNull();
@@ -83,7 +88,7 @@ internal static (nint n, netip.AddrPort addr, error err) readFromAddrPort(this r
     netip.AddrPort addr = default;
     error err = default;
 
-    netipꓸAddr ip = default;
+    netip.Addr ip = default;
     nint port = default;
     switch (c.fd.family) {
     case var ᴛ when ᴛ == syscall.AF_INET: {
@@ -251,6 +256,8 @@ internal static (nint n, nint oobn, error err) writeMsgAddrPort(this ref UDPConn
     }}
 }
 
+} partial class netᴛsysDialer {
+
 internal static (ж<UDPConn>, error) dialUDP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<UDPAddr> laddr, ж<UDPAddr> raddr) {
     ref var sd = ref Ꮡsd.DerefOrNull();
 
@@ -258,12 +265,14 @@ internal static (ж<UDPConn>, error) dialUDP(this ж<sysDialer> Ꮡsd, context.C
     if (ctrlCtxFn == nil && sd.Dialer.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsd.Value.Dialer.Control(network, address, c);
     }
-    var (fd, err) = internetSocket(ctx, sd.network, new UDPAddrжΔsockaddr(laddr), new UDPAddrжΔsockaddr(raddr), syscall.SOCK_DGRAM, 0, dialˢ, ctrlCtxFn);
+    var (fd, err) = internetSocket(ctx, sd.network, new UDPAddrжsockaddr(laddr), new UDPAddrжsockaddr(raddr), syscall.SOCK_DGRAM, 0, dialˢ, ctrlCtxFn);
     if (err != nil) {
         return (default, err);
     }
     return (newUDPConn(fd), default);
 }
+
+} partial class netᴛsysListener {
 
 internal static (ж<UDPConn>, error) listenUDP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<UDPAddr> laddr) {
     ref var sl = ref Ꮡsl.DerefOrNull();
@@ -272,7 +281,7 @@ internal static (ж<UDPConn>, error) listenUDP(this ж<sysListener> Ꮡsl, conte
     if (sl.ListenConfig.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(network, address, c);
     }
-    var (fd, err) = internetSocket(ctx, sl.network, new UDPAddrжΔsockaddr(laddr), default, syscall.SOCK_DGRAM, 0, listenˢ, ctrlCtxFn);
+    var (fd, err) = internetSocket(ctx, sl.network, new UDPAddrжsockaddr(laddr), default, syscall.SOCK_DGRAM, 0, listenˢ, ctrlCtxFn);
     if (err != nil) {
         return (default, err);
     }
@@ -287,7 +296,7 @@ internal static (ж<UDPConn>, error) listenMulticastUDP(this ж<sysListener> Ꮡ
     if (sl.ListenConfig.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn cΔ1) => Ꮡsl.Value.ListenConfig.Control(network, address, cΔ1);
     }
-    var (fd, err) = internetSocket(ctx, sl.network, new UDPAddrжΔsockaddr(Ꮡgaddr), default, syscall.SOCK_DGRAM, 0, listenˢ, ctrlCtxFn);
+    var (fd, err) = internetSocket(ctx, sl.network, new UDPAddrжsockaddr(Ꮡgaddr), default, syscall.SOCK_DGRAM, 0, listenˢ, ctrlCtxFn);
     if (err != nil) {
         return (default, err);
     }
@@ -305,6 +314,8 @@ internal static (ж<UDPConn>, error) listenMulticastUDP(this ж<sysListener> Ꮡ
     }
     return (c, default);
 }
+
+} partial class net_package {
 
 internal static error listenIPv4MulticastUDP(ref UDPConn c, ж<Interface> ifi, IP ip) {
     if (ifi != nil) {

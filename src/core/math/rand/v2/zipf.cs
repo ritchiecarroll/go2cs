@@ -8,6 +8,7 @@
 namespace go.math.rand;
 
 using math = math_package;
+using static rand_package;
 
 partial class rand_package {
 
@@ -24,6 +25,8 @@ partial struct Zipf {
     internal float64 hx0minusHxm;
 }
 
+} partial class randᴛZipf {
+
 internal static float64 h(this ref Zipf z, float64 x) {
     return math.Exp(z.oneminusQ * math.Log(z.v + x)) * z.oneminusQinv;
 }
@@ -31,6 +34,8 @@ internal static float64 h(this ref Zipf z, float64 x) {
 internal static float64 hinv(this ref Zipf z, float64 x) {
     return math.Exp(z.oneminusQinv * math.Log(z.oneminusQ * x)) - z.v;
 }
+
+} partial class rand_package {
 
 // NewZipf returns a Zipf variate generator.
 // The generator generates values k ∈ [0, imax]
@@ -54,6 +59,8 @@ public static ж<Zipf> NewZipf(ж<Rand> Ꮡr, float64 s, float64 v, uint64 imax)
     z.s = 1D - z.hinv(z.h(1.5D) - math.Exp(-z.q * math.Log(z.v + 1.0D)));
     return z;
 }
+
+} partial class randᴛZipf {
 
 // Uint64 returns a value drawn from the Zipf distribution described
 // by the Zipf object.
@@ -80,4 +87,4 @@ public static uint64 Uint64(this ж<Zipf> Ꮡz) {
     return (uint64)k;
 }
 
-} // end rand_package
+} // end randᴛZipf

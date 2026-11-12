@@ -25,7 +25,7 @@ public static (int64 written, error err, bool handled) SendFile(ж<FD> Ꮡfd, ui
             // TransmitFile does not work with pipes
             (written, err, handled) = (0, Δsyscall.ESPIPE, false); goto ᒐdone;
         }
-        var hsrc = (syscallꓸHandle)src;
+        var hsrc = (Δsyscall.Handle)src;
         var (ft, _) = Δsyscall.GetFileType(hsrc); if (ft == Δsyscall.FILE_TYPE_PIPE) {
             (written, err, handled) = (0, Δsyscall.ESPIPE, false); goto ᒐdone;
         }

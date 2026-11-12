@@ -88,6 +88,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -132,8 +133,8 @@ internal static any arena_arena_New(@unsafe.Pointer arena, any typʗp) {
 // arena_arena_Slice is a wrapper around (*userArena).slice.
 //
 //go:linkname arena_arena_Slice arena.runtime_arena_arena_Slice
-internal static void arena_arena_Slice(@unsafe.Pointer arena, any Δsliceᴛ, nint cap) {
-    (((ж<userArena>)(uintptr)(arena))).Δslice(Δsliceᴛ, cap);
+internal static void arena_arena_Slice(@unsafe.Pointer arena, any Δslice, nint cap) {
+    (((ж<userArena>)(uintptr)(arena))).Δslice(Δslice, cap);
 }
 
 // arena_arena_Free is a wrapper around (*userArena).free.
@@ -213,6 +214,8 @@ partial struct userArena {
 
 // go2cs generated this placeholder — func newUserArena is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+} partial class runtimeᴛuserArena {
+
 // go2cs generated this placeholder — func new is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func slice is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -286,6 +289,8 @@ internal static ж<mspan> refill(this ref userArena a) {
     return s;
 }
 
+} partial class runtime_package {
+
 partial struct liveUserArenaChunk {
     /*embed*/ internal ж<mspan> mspan; // Must represent a user arena chunk.
     // Reference to mspan.base() to keep the chunk alive.
@@ -308,7 +313,11 @@ partial struct userArenaStateᴛ1 /*dyn*/ {
 internal static readonly ж<userArenaStateᴛ1> ᏑuserArenaState = new StaticBox<userArenaStateᴛ1>(new userArenaStateᴛ1());
 internal static ref userArenaStateᴛ1 userArenaState => ref ((StaticBox<userArenaStateᴛ1>)ᏑuserArenaState).ValueSlot;
 
+} partial class runtimeᴛmspan {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string outOfMemoryˢ => ref outOfMemoryˢᵇ;
+private static readonly @string outOfMemoryˢᵇ = "out of memory"u8;
 internal static ref readonly @string mallocDeadlockˢ => ref mallocDeadlockˢᵇ;
 private static readonly @string mallocDeadlockˢᵇ = "malloc deadlock"u8;
 internal static ref readonly @string mallocDuringSignalˢ => ref mallocDuringSignalˢᵇ;
@@ -410,6 +419,8 @@ internal static @unsafe.Pointer userArenaNextFree(this ж<mspan> Ꮡs, ж<_type>
     return ptr;
 }
 
+} partial class runtime_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string runtimeAllocationSizeOutˢ => ref runtimeAllocationSizeOutˢᵇ;
 private static readonly @string runtimeAllocationSizeOutˢᵇ = "runtime: allocation size out of range"u8;
@@ -440,7 +451,7 @@ internal static void userArenaHeapBitsSetType(ж<_type> Ꮡtyp, @unsafe.Pointer 
     var @base = s.@base();
     var h = s.writeUserArenaHeapBits((uintptr)ptr);
 
-    var Δp = getGCMask(Ꮡtyp); // start of 1-bit pointer mask
+    var p = getGCMask(Ꮡtyp); // start of 1-bit pointer mask
     var nb = typ.PtrBytes / (uintptr)goarch.PtrSize;
 
     for (var i = (uintptr)0; i < nb; i += ptrBits) {
@@ -454,7 +465,7 @@ internal static void userArenaHeapBitsSetType(ж<_type> Ꮡtyp, @unsafe.Pointer 
         // a platform-ordered way for efficiency, but stores back the
         // data in little endian order, since we expose the bitmap through
         // a dummy type.
-        h = h.write(Ꮡs, readUintptr(addb(Δp, i / 8)), k);
+        h = h.write(Ꮡs, readUintptr(addb(p, i / 8)), k);
     }
     // Note: we call pad here to ensure we emit explicit 0 bits
     // for the pointerless tail of the object. This ensures that
@@ -476,15 +487,17 @@ internal static void userArenaHeapBitsSetType(ж<_type> Ꮡtyp, @unsafe.Pointer 
     }
 }
 
-partial struct ΔwriteUserArenaHeapBits {
+partial struct writeUserArenaHeapBits {
     internal uintptr offset; // offset in span that the low bit of mask represents the pointer state of.
     internal uintptr mask;   // some pointer bits starting at the address addr.
     internal uintptr valid;  // number of bits in buf that are valid (including low)
     internal uintptr low;    // number of low-order bits to not overwrite
 }
 
-internal static ΔwriteUserArenaHeapBits /*h*/ writeUserArenaHeapBits(this ref mspan s, uintptr addr) {
-    ΔwriteUserArenaHeapBits h = default;
+} partial class runtimeᴛmspan {
+
+internal static writeUserArenaHeapBits /*h*/ writeUserArenaHeapBits(this ref mspan s, uintptr addr) {
+    writeUserArenaHeapBits h = default;
 
     var offset = addr - s.@base();
 
@@ -503,9 +516,11 @@ internal static ΔwriteUserArenaHeapBits /*h*/ writeUserArenaHeapBits(this ref m
     return h;
 }
 
+} partial class runtimeᴛwriteUserArenaHeapBits {
+
 // write appends the pointerness of the next valid pointer slots
 // using the low valid bits of bits. 1=pointer, 0=scalar.
-internal static ΔwriteUserArenaHeapBits write(this ΔwriteUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr bits, uintptr valid) {
+internal static writeUserArenaHeapBits write(this writeUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr bits, uintptr valid) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (h.valid + valid <= ptrBits) {
@@ -538,7 +553,7 @@ internal static ΔwriteUserArenaHeapBits write(this ΔwriteUserArenaHeapBits h, 
 }
 
 // Add padding of size bytes.
-internal static ΔwriteUserArenaHeapBits pad(this ΔwriteUserArenaHeapBits h, ж<mspan> s, uintptr size) {
+internal static writeUserArenaHeapBits pad(this writeUserArenaHeapBits h, ж<mspan> s, uintptr size) {
     if (size == 0) {
         return h;
     }
@@ -552,7 +567,7 @@ internal static ΔwriteUserArenaHeapBits pad(this ΔwriteUserArenaHeapBits h, ж
 
 // Flush the bits that have been written, and add zeros as needed
 // to cover the full object [addr, addr+size).
-internal static void flush(this ΔwriteUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr addr, uintptr size) {
+internal static void flush(this writeUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr addr, uintptr size) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var offset = addr - s.@base();
@@ -611,6 +626,8 @@ internal static void flush(this ΔwriteUserArenaHeapBits h, ж<mspan> Ꮡs, uint
     }
 }
 
+} partial class runtime_package {
+
 // bswapIfBigEndian swaps the byte order of the uintptr on goarch.BigEndian platforms,
 // and leaves it alone elsewhere.
 internal static uintptr bswapIfBigEndian(uintptr x) {
@@ -626,6 +643,12 @@ internal static uintptr bswapIfBigEndian(uintptr x) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string newUserArenaChunkCalledˢ => ref newUserArenaChunkCalledˢᵇ;
 private static readonly @string newUserArenaChunkCalledˢᵇ = "newUserArenaChunk called with gcphase == _GCmarktermination"u8;
+internal static ref readonly @string mallocDeadlockˢ => ref mallocDeadlockˢᵇ;
+private static readonly @string mallocDeadlockˢᵇ = "malloc deadlock"u8;
+internal static ref readonly @string mallocDuringSignalˢ => ref mallocDuringSignalˢᵇ;
+private static readonly @string mallocDuringSignalˢᵇ = "malloc during signal"u8;
+internal static ref readonly @string outOfMemoryˢ => ref outOfMemoryˢᵇ;
+private static readonly @string outOfMemoryˢᵇ = "out of memory"u8;
 internal static ref readonly @string newUserArenaChunkCalledˢ2 => ref newUserArenaChunkCalledˢ2ᵇ;
 private static readonly @string newUserArenaChunkCalledˢ2ᵇ = "newUserArenaChunk called without a P or outside bootstrapping"u8;
 internal static ref readonly @string userArenaChunkIsNotˢ => ref userArenaChunkIsNotˢᵇ;
@@ -733,6 +756,8 @@ internal static (@unsafe.Pointer, ж<mspan>) newUserArenaChunk() {
     return (x, span);
 }
 
+} partial class runtimeᴛmspan {
+
 // isUnusedUserArenaChunk indicates that the arena chunk has been set to fault
 // and doesn't contain any scannable memory anymore. However, it might still be
 // mSpanInUse as it sits on the quarantine list, since it needs to be swept.
@@ -825,9 +850,11 @@ internal static void setUserArenaChunkToFault(this ж<mspan> Ꮡs) {
     });
 }
 
+} partial class runtime_package {
+
 // inUserArenaChunk returns true if p points to a user arena chunk.
-internal static bool inUserArenaChunk(uintptr Δp) {
-    var s = spanOf(Δp);
+internal static bool inUserArenaChunk(uintptr p) {
+    var s = spanOf(p);
     if (s == nil) {
         return false;
     }
@@ -900,6 +927,8 @@ internal static void freeUserArenaChunk(ж<mspan> Ꮡs, @unsafe.Pointer x) {
     }
     releasem(ref (mp).DerefOrNull());
 }
+
+} partial class runtimeᴛmheap {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sysAllocSizeIsNotˢ => ref sysAllocSizeIsNotˢᵇ;
@@ -1053,4 +1082,4 @@ internal static ж<mspan> allocUserArenaChunk(this ж<mheap> Ꮡh) {
     return s;
 }
 
-} // end runtime_package
+} // end runtimeᴛmheap

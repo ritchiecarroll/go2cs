@@ -147,7 +147,7 @@ internal static ж<node> getRootHuffmanNode() {
 }
 
 internal static void buildRootHuffmanNode() {
-    if (builtin.len(huffmanCodes) != 256) {
+    if (len(huffmanCodes) != 256) {
         throw panic("unexpected size");
     }
     lazyRootHuffmanNode = newInternalNode();
@@ -185,7 +185,7 @@ public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
     // So if a uint64 buffer has less than 32 valid bits can always accommodate another huffmanCode.
     uint64 x = default; // buffer
     nuint n = default;  // number valid of bits present in x
-    for (nint i = 0; i < builtin.len(s); i++) {
+    for (nint i = 0; i < len(s); i++) {
         var c = s[i];
         n += (nuint)huffmanCodeLen[c];
         x <<= (int)(huffmanCodeLen[c] % 64);
@@ -230,7 +230,7 @@ public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
 // s in Huffman codes. The result is round up to byte boundary.
 public static uint64 HuffmanEncodeLength(@string s) {
     var n = (uint64)0;
-    for (nint i = 0; i < builtin.len(s); i++) {
+    for (nint i = 0; i < len(s); i++) {
         n += (uint64)huffmanCodeLen[s[i]];
     }
     return (n + 7) / 8;

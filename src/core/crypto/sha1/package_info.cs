@@ -27,8 +27,6 @@ using static go.crypto.sha1_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("BlockSize", "const:ΔBlockSize")]
-[assembly: GoTypeAlias("Size", "const:ΔSize")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -59,7 +57,7 @@ using static go.crypto.sha1_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/sha1/sha1.go", "sha1.cs", "ABUoggAbPoKmgoKCgoKCgoKCggAIBoKClIKUgoKCgoKCgoKCpoKmgqaCgqaCgoKCgoKCrsKClIKCppTUwoKUgoKCgoKCgoKUlIKCgpSClKaClIKCpqKCpoSSgoKClLiCgoKUgqaUgoKCgpSokoKCpqKCpoKCgqaCgpSCgqamlJTKlIKCgoKCppSCgpTKlIKCgoKmqJKClIKUgoKC")]
+[assembly: GoPositionMap("crypto/sha1/sha1.go", "sha1.cs", "ABcoggAdPoKmgoKCgoKCgoKCggAIBoKClIKUgoKCgoKCgoKCxoKmgsaCgqaCgoKCgoKCzsKClIKCxpTUwoKUgoKCgoKCgoKUlIKCgpSClKaClIKCpqKCpoSSgoKClLiCgoKUgqaUgoKCgpSokoKCpqKCpoKCgqaCgpSCgqamlJTKlIKCgoKCppSCgpTKlIKCgoKmyJKClIKUgoKC")]
 [assembly: GoPositionMap("crypto/sha1/sha1block.go", "sha1block.cs", "AA8oopSCpoKCpsqCgoKClIKClIKClIKCgoKClIKCgoKClIKCgoKCpoKCgoKUpg==")]
 [assembly: GoPositionMap("crypto/sha1/sha1block_generic.go", "sha1block_generic.cs", "AAgSgg==")]
 // </GoSourcePositionMaps>
@@ -94,3 +92,13 @@ public static partial class sha1_package
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(sha1_package.digest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sha1ᴛdigest;
+// </MethodHolders>

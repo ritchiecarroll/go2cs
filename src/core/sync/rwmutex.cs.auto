@@ -14,6 +14,7 @@ using atomic = go.sync.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using go.sync;
+using static sync_package;
 
 partial class sync_package {
 
@@ -52,6 +53,8 @@ partial struct RWMutex {
 }
 
 internal static UntypedInt rwmutexMaxReaders => /* 1 << 30 */ 1073741824;
+
+} partial class syncᴛRWMutex {
 
 // Happens-before relationships are indicated to the race detector via:
 // - Unlock  -> Lock:  readerSem
@@ -235,6 +238,8 @@ public static void Unlock(this ж<RWMutex> Ꮡrw) {
     }
 }
 
+} partial class sync_package {
+
 // syscall_hasWaitingReaders reports whether any goroutine is waiting
 // to acquire a read lock on rw. This exists because syscall.ForkLock
 // is an RWMutex, and we can't change that without breaking compatibility.
@@ -248,15 +253,21 @@ public static bool syscall_hasWaitingReaders(ж<RWMutex> rw) {
     return r < 0 && r + (int32)rwmutexMaxReaders > 0;
 }
 
+} partial class syncᴛRWMutex {
+
 // RLocker returns a [Locker] interface that implements
 // the [Locker.Lock] and [Locker.Unlock] methods by calling rw.RLock and rw.RUnlock.
 public static Locker RLocker(this ж<RWMutex> Ꮡrw) {
     return new rlockerжLocker(Ꮡrw.Reinterpret<RWMutex, rlocker>());
 }
 
+} partial class sync_package {
+
 partial struct rlocker /*RWMutex*/;
+
+} partial class syncᴛrlocker {
 
 internal static void Lock(this ж<rlocker> Ꮡr) { (Ꮡr.Reinterpret<rlocker, RWMutex>()).RLock(); }
 internal static void Unlock(this ж<rlocker> Ꮡr) { (Ꮡr.Reinterpret<rlocker, RWMutex>()).RUnlock(); }
 
-} // end sync_package
+} // end syncᴛrlocker

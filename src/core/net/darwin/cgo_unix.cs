@@ -19,6 +19,7 @@ using dnsmessage = vendor.golang.org.x.net.dns.dnsmessage_package;
 using @internal;
 using net;
 using vendor.golang.org.x.net.dns;
+using static net_package;
 
 partial class net_package {
 
@@ -31,12 +32,16 @@ internal const bool cgoAvailable = true;
 // by convention.
 partial struct addrinfoErrno /*num:nint*/;
 
+} partial class netᴛaddrinfoErrno {
+
 internal static @string Error(this addrinfoErrno eai) { return _C_gai_strerror((_C_int)eai); }
 internal static bool Temporary(this addrinfoErrno eai) { return eai == _C_EAI_AGAIN; }
 internal static bool Timeout(this addrinfoErrno eai) { return false; }
 
 // isAddrinfoErrno is just for testing purposes.
 internal static void isAddrinfoErrno(this addrinfoErrno eai) { }
+
+} partial class net_package {
 
 internal partial struct doBlockingWithCtx_result<T> /*dyn*/ {
     internal T res;

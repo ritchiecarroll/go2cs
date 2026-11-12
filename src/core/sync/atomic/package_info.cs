@@ -82,3 +82,21 @@ public static partial class atomic_package
     // <ImportInitializers>
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(atomic_package.Bool)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛBool;
+[GoMethodHost(typeof(atomic_package.Int32)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛInt32;
+[GoMethodHost(typeof(atomic_package.Int64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛInt64;
+[GoMethodHost(typeof(atomic_package.Pointer<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛPointer;
+[GoMethodHost(typeof(atomic_package.Uint32)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛUint32;
+[GoMethodHost(typeof(atomic_package.Uint64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛUint64;
+[GoMethodHost(typeof(atomic_package.Uintptr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛUintptr;
+[GoMethodHost(typeof(atomic_package.Value)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛValue;
+[GoMethodHost(typeof(atomic_package.noCopy)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛnoCopy;
+// </MethodHolders>

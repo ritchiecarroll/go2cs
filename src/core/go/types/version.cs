@@ -9,6 +9,7 @@ using goversion = global::go.@internal.goversion_package;
 using global::go.@internal;
 using global::go.go;
 using ꓸꓸꓸany = Span<any>;
+using static types_package;
 
 partial class types_package {
 
@@ -23,6 +24,8 @@ internal static goVersion asGoVersion(@string v) {
     return (goVersion)version.Lang(v);
 }
 
+} partial class typesᴛgoVersion {
+
 // isValid reports whether v is a valid Go version.
 internal static bool isValid(this goVersion v) {
     return v != ""u8;
@@ -33,6 +36,8 @@ internal static bool isValid(this goVersion v) {
 internal static nint cmp(this goVersion x, goVersion y) {
     return version.Compare((@string)x, (@string)y);
 }
+
+} partial class types_package {
 
 // Go versions that introduced language changes
 internal static goVersion go1_9 = asGoVersion("go1.9");
@@ -48,6 +53,8 @@ internal static goVersion go1_26 = asGoVersion("go1.26");
 
 // current (deployed) Go version
 internal static goVersion go_current = asGoVersion(fmt.Sprintf("go1.%d"u8, (nint)(goversion.Version)));
+
+} partial class typesᴛChecker {
 
 // allowVersion reports whether the current effective Go version
 // (which may vary from one file to another) is allowed to use the
@@ -69,4 +76,4 @@ internal static bool verifyVersionf(this ж<Checker> Ꮡcheck, positioner at, go
     return true;
 }
 
-} // end types_package
+} // end typesᴛChecker

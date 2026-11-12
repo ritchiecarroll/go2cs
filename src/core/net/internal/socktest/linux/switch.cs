@@ -7,6 +7,7 @@ namespace go.net.@internal;
 
 using fmt = fmt_package;
 using sync = sync_package;
+using static socktest_package;
 
 partial class socktest_package {
 
@@ -17,13 +18,15 @@ partial struct Switch {
     internal sync.RWMutex fmu;
     internal map<FilterType, Filter> fltab;
     internal sync.RWMutex smu;
-    internal ΔSockets sotab;
+    internal Sockets sotab;
     internal stats stats;
 }
 
+} partial class socktestᴛSwitch {
+
 internal static void init(this ref Switch sw) {
     sw.fltab = new map<FilterType, Filter>();
-    sw.sotab = new ΔSockets(0);
+    sw.sotab = new Sockets(0);
     sw.stats = new stats(0);
 }
 
@@ -42,11 +45,11 @@ public static slice<Stat> Stats(this ж<Switch> Ꮡsw) {
 }
 
 // Sockets returns mappings of socket descriptor to socket status.
-public static ΔSockets Sockets(this ж<Switch> Ꮡsw) {
+public static Sockets Sockets(this ж<Switch> Ꮡsw) {
     ref var sw = ref Ꮡsw.DerefOrNull();
 
     Ꮡsw.Ꮡsmu.RLock();
-    var tab = new ΔSockets(len(sw.sotab));
+    var tab = new Sockets(len(sw.sotab));
     foreach (var (i, s) in sw.sotab) {
         tab[i] = s;
     }
@@ -54,9 +57,13 @@ public static ΔSockets Sockets(this ж<Switch> Ꮡsw) {
     return tab;
 }
 
+} partial class socktest_package {
+
 // A Cookie represents a 3-tuple of a socket; address family, socket
 // type and protocol number.
 partial struct Cookie /*num:uint64*/;
+
+} partial class socktestᴛCookie {
 
 // Family returns an address family.
 public static nint Family(this Cookie c) { return (nint)(c >> 48); }
@@ -66,6 +73,8 @@ public static nint Type(this Cookie c) { return (nint)((c << 16) >> 32); }
 
 // Protocol returns a protocol number.
 public static nint Protocol(this Cookie c) { return (nint)((Cookie)(c & 0xff)); }
+
+} partial class socktest_package {
 
 internal static Cookie cookie(nint family, nint sotype, nint proto) {
     return (Cookie)((Cookie)(((Cookie)(uint64)family) << 48 | (Cookie)(((Cookie)(uint64)sotype) & 0xffffffffU) << 16) | (Cookie)(((Cookie)(uint64)proto) & 0xff));
@@ -78,9 +87,13 @@ partial struct Status {
     public error SocketErr; // error status of socket by SO_ERROR
 }
 
+} partial class socktestᴛStatus {
+
 public static @string String(this Status so) {
     return fmt.Sprintf("(%s, %s, %s): syscallerr=%v socketerr=%v"u8, familyString(so.Cookie.Family()), typeString(so.Cookie.Type()), protocolString(so.Cookie.Protocol()), so.Err, so.SocketErr);
 }
+
+} partial class socktest_package {
 
 // A Stat represents a per-cookie socket statistics.
 partial struct Stat {
@@ -99,11 +112,17 @@ partial struct Stat {
     public uint64 CloseFailed;   // number of sockets close failed
 }
 
+} partial class socktestᴛStat {
+
 public static @string String(this Stat st) {
     return fmt.Sprintf("(%s, %s, %s): opened=%d connected=%d listened=%d accepted=%d closed=%d openfailed=%d connectfailed=%d listenfailed=%d acceptfailed=%d closefailed=%d"u8, familyString(st.Family), typeString(st.Type), protocolString(st.Protocol), st.Opened, st.Connected, st.Listened, st.Accepted, st.Closed, st.OpenFailed, st.ConnectFailed, st.ListenFailed, st.AcceptFailed, st.CloseFailed);
 }
 
+} partial class socktest_package {
+
 partial struct stats /*map[Cookie, ж<Stat>]*/;
+
+} partial class socktestᴛstats {
 
 internal static ж<Stat> getLocked(this stats st, Cookie c) {
     var (s, ok) = st[c, ꟷ];
@@ -113,6 +132,8 @@ internal static ж<Stat> getLocked(this stats st, Cookie c) {
     }
     return s;
 }
+
+} partial class socktest_package {
 
 // A FilterType represents a filter type.
 partial struct FilterType /*num:nint*/;
@@ -135,12 +156,16 @@ public static FilterType FilterClose => 5;             // for Close or Closesock
 // execution of the system call.
 public delegate (AfterFilter, error) Filter(ж<Status> _);
 
+} partial class socktestᴛFilter {
+
 internal static (AfterFilter, error) apply(this Filter f, ж<Status> st) {
     if (f == nil) {
         return (default, default);
     }
     return f(st);
 }
+
+} partial class socktest_package {
 
 // An AfterFilter represents a socket system call filter after an
 // execution of a system call.
@@ -151,12 +176,16 @@ internal static (AfterFilter, error) apply(this Filter f, ж<Status> st) {
 // returns the non-nil error.
 public delegate error AfterFilter(ж<Status> _);
 
+} partial class socktestᴛAfterFilter {
+
 internal static error apply(this AfterFilter f, ж<Status> st) {
     if (f == nil) {
         return default;
     }
     return f(st);
 }
+
+} partial class socktestᴛSwitch {
 
 // Set deploys the socket system call filter f for the filter type t.
 public static void Set(this ж<Switch> Ꮡsw, FilterType t, Filter f) {
@@ -168,4 +197,4 @@ public static void Set(this ж<Switch> Ꮡsw, FilterType t, Filter f) {
     Ꮡsw.Ꮡfmu.Unlock();
 }
 
-} // end socktest_package
+} // end socktestᴛSwitch

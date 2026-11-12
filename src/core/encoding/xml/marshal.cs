@@ -12,6 +12,7 @@ using io = io_package;
 using reflect = reflect_package;
 using strconv = strconv_package;
 using strings = strings_package;
+using static xml_package;
 
 partial class xml_package {
 
@@ -160,6 +161,8 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
     return e;
 }
 
+} partial class xmlᴛEncoder {
+
 // Indent sets the encoder to generate XML in which each element
 // begins on a new indented line that starts with prefix and is followed by
 // one or more copies of indent according to the nesting depth.
@@ -202,9 +205,13 @@ public static error EncodeElement(this ж<Encoder> Ꮡenc, any v, StartElement s
     return enc.p.w.Flush();
 }
 
+} partial class xml_package {
+
 internal static slice<byte> begComment = slice<byte>("<!--"u8);
 internal static slice<byte> endComment = slice<byte>("-->"u8);
 internal static slice<byte> endProcInst = slice<byte>("?>"u8);
+
+} partial class xmlᴛEncoder {
 
 // EncodeToken writes the given XML token to the stream.
 // It returns an error if [StartElement] and [EndElement] tokens are not properly matched.
@@ -218,7 +225,7 @@ internal static slice<byte> endProcInst = slice<byte>("?>"u8);
 //
 // EncodeToken allows writing a [ProcInst] with Target set to "xml" only as the first token
 // in the stream.
-public static error EncodeToken(this ж<Encoder> Ꮡenc, ΔToken t) {
+public static error EncodeToken(this ж<Encoder> Ꮡenc, Token t) {
     var p = Ꮡenc.Ꮡp;
     switch (t.type()) {
     case StartElement tΔ1ᴛ1: {
@@ -288,6 +295,8 @@ public static error EncodeToken(this ж<Encoder> Ꮡenc, ΔToken t) {
     return p.cachedWriteError();
 }
 
+} partial class xml_package {
+
 // isValidDirective reports whether dir is a valid directive text,
 // meaning angle brackets are matched, ignoring comments and strings.
 internal static bool isValidDirective(Directive dir) {
@@ -335,6 +344,8 @@ internal static bool isValidDirective(Directive dir) {
     return depth == 0 && inquote == 0 && !incomment;
 }
 
+} partial class xmlᴛEncoder {
+
 // Flush flushes any buffered XML to the underlying writer.
 // See the [Encoder.EncodeToken] documentation for details about when it is necessary.
 public static error Flush(this ref Encoder enc) {
@@ -347,6 +358,8 @@ public static error Flush(this ref Encoder enc) {
 public static error Close(this ref Encoder enc) {
     return enc.p.Close();
 }
+
+} partial class xml_package {
 
 partial struct printer {
     internal ж<bufio.Writer> w;
@@ -364,6 +377,8 @@ partial struct printer {
     internal bool closed;
     internal error err;
 }
+
+} partial class xmlᴛprinter {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string xmlˢ => ref xmlˢᵇ;
@@ -457,7 +472,7 @@ internal static void popPrefix(this ref printer p) {
 
 // marshalValue writes one or more XML elements representing val.
 // If val was obtained from a struct field, finfo must have its details.
-internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, ж<fieldInfo> Ꮡfinfo, ж<StartElement> ᏑstartTemplate) {
+internal static error marshalValue(this ж<printer> Ꮡp, reflect.Value val, ж<fieldInfo> Ꮡfinfo, ж<StartElement> ᏑstartTemplate) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var finfo = ref Ꮡfinfo.DerefOrNull();
     ref var startTemplate = ref ᏑstartTemplate.DerefOrNull();
@@ -476,14 +491,14 @@ internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, �
     // Drill into interfaces and pointers.
     // This can turn into an infinite loop given a cyclic chain,
     // but it matches the Go 1 behavior.
-    while (val.Kind() == reflect.ΔInterface || val.Kind() == reflect.ΔPointer) {
+    while (val.Kind() == reflect.Interface || val.Kind() == reflect.Pointer) {
         if (val.IsNil()) {
             return default;
         }
         val = val.Elem();
     }
 
-    reflectꓸKind kind = val.Kind();
+    reflect.Kind kind = val.Kind();
     var typ = val.Type();
 
     // Check for marshaler.
@@ -517,7 +532,7 @@ internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, �
     }
 
     // Slices and arrays iterate over the elements. They do not have an enclosing tag.
-    if ((kind == reflect.ΔSlice || kind == reflect.Array) && typ.Elem().Kind() != reflect.Uint8) {
+    if ((kind == reflect.Slice || kind == reflect.Array) && typ.Elem().Kind() != reflect.Uint8) {
         for ((nint i, nint n) = (0, val.Len()); i < n; i++) {
             var errΔ1 = Ꮡp.marshalValue(val.Index(i), Ꮡfinfo, ᏑstartTemplate); if (errΔ1 != nil) {
                 return errΔ1;
@@ -580,7 +595,7 @@ internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, �
             continue;
         }
 
-        if (fv.Kind() == reflect.ΔInterface && fv.IsNil()) {
+        if (fv.Kind() == reflect.Interface && fv.IsNil()) {
             continue;
         }
 
@@ -622,7 +637,7 @@ internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, �
 }
 
 // marshalAttr marshals an attribute with the given name and value, adding to start.Attr.
-internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart, Name name, reflectꓸValue val) {
+internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart, Name name, reflect.Value val) {
     ref var start = ref Ꮡstart.DerefOrNull();
 
     if (val.CanInterface()) {
@@ -681,7 +696,7 @@ internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart,
 
     // Dereference or skip nil pointer, interface values.
     switch (val.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔPointer || ᴛ == reflect.ΔInterface: {
+    case var ᴛ when ᴛ == reflect.Pointer || ᴛ == reflect.Interface: {
         if (val.IsNil()) {
             return default;
         }
@@ -690,7 +705,7 @@ internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart,
     }}
 
     // Walk slices.
-    if (val.Kind() == reflect.ΔSlice && val.Type().Elem().Kind() != reflect.Uint8) {
+    if (val.Kind() == reflect.Slice && val.Type().Elem().Kind() != reflect.Uint8) {
         nint n = val.Len();
         for (nint i = 0; i < n; i++) {
             var errΔ5 = p.marshalAttr(Ꮡstart, name, val.Index(i)); if (errΔ5 != nil) {
@@ -717,9 +732,11 @@ internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart,
     return default;
 }
 
+} partial class xml_package {
+
 // defaultStart returns the default start element to use,
 // given the reflect type, field info, and start template.
-internal static StartElement defaultStart(reflectꓸType typ, ж<fieldInfo> Ꮡfinfo, ж<StartElement> ᏑstartTemplate) {
+internal static StartElement defaultStart(reflect.Type typ, ж<fieldInfo> Ꮡfinfo, ж<StartElement> ᏑstartTemplate) {
     ref var finfo = ref Ꮡfinfo.DerefOrNull();
     ref var startTemplate = ref ᏑstartTemplate.DerefOrNull();
 
@@ -741,6 +758,8 @@ internal static StartElement defaultStart(reflectꓸType typ, ж<fieldInfo> Ꮡf
     }
     return start;
 }
+
+} partial class xmlᴛprinter {
 
 // marshalInterface marshals a Marshaler interface value.
 internal static error marshalInterface(this ref printer p, Marshaler val, StartElement start) {
@@ -848,21 +867,21 @@ internal static error writeEnd(this ref printer p, Name name) {
     return default;
 }
 
-internal static (@string, slice<byte>, error) marshalSimple(this ref printer p, reflectꓸType typ, reflectꓸValue val) {
+internal static (@string, slice<byte>, error) marshalSimple(this ref printer p, reflect.Type typ, reflect.Value val) {
     switch (val.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return (strconv.FormatInt(val.Int(), 10), default, default);
     }
-    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+    case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
         return (strconv.FormatUint(val.Uint(), 10), default, default);
     }
     case var ᴛ when ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
         return (strconv.FormatFloat(val.Float(), (byte)'g', -1, val.Type().Bits()), default, default);
     }
-    case var ᴛ when ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.String: {
         return (val.String(), default, default);
     }
-    case var ᴛ when ᴛ == reflect.ΔBool: {
+    case var ᴛ when ᴛ == reflect.Bool: {
         return (strconv.FormatBool(val.Bool()), default, default);
     }
     case var ᴛ when ᴛ == reflect.Array: {
@@ -879,7 +898,7 @@ internal static (@string, slice<byte>, error) marshalSimple(this ref printer p, 
         }
         return ("", bytes, default);
     }
-    case var ᴛ when ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Slice: {
         if (typ.Elem().Kind() != reflect.Uint8) {
             break;
         }
@@ -889,14 +908,16 @@ internal static (@string, slice<byte>, error) marshalSimple(this ref printer p, 
     return ("", default, new UnsupportedTypeErrorжerror(Ꮡ(new UnsupportedTypeError(typ))));
 }
 
+} partial class xml_package {
+
 internal static slice<byte> ddBytes = slice<byte>("--"u8);
 
 // indirect drills into interfaces and pointers, returning the pointed-at value.
 // If it encounters a nil interface or pointer, indirect returns that nil value.
 // This can turn into an infinite loop given a cyclic chain,
 // but it matches the Go 1 behavior.
-internal static reflectꓸValue indirect(reflectꓸValue vf) {
-    while (vf.Kind() == reflect.ΔInterface || vf.Kind() == reflect.ΔPointer) {
+internal static reflect.Value indirect(reflect.Value vf) {
+    while (vf.Kind() == reflect.Interface || vf.Kind() == reflect.Pointer) {
         if (vf.IsNil()) {
             return vf;
         }
@@ -905,7 +926,9 @@ internal static reflectꓸValue indirect(reflectꓸValue vf) {
     return vf;
 }
 
-internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo, reflectꓸValue val) {
+} partial class xmlᴛprinter {
+
+internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo, reflect.Value val) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var tinfo = ref Ꮡtinfo.DerefOrNull();
 
@@ -964,7 +987,7 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
             array<byte> scratch = new(64);
             vf = indirect(vf);
             switch (vf.Kind()) {
-            case var ᴛ2 when ᴛ2 == reflect.ΔInt || ᴛ2 == reflect.Int8 || ᴛ2 == reflect.Int16 || ᴛ2 == reflect.Int32 || ᴛ2 == reflect.Int64: {
+            case var ᴛ2 when ᴛ2 == reflect.Int || ᴛ2 == reflect.Int8 || ᴛ2 == reflect.Int16 || ᴛ2 == reflect.Int32 || ᴛ2 == reflect.Int64: {
                 {
                     var err = emit(new printerжWriter(Ꮡp), strconv.AppendInt(scratch[..0], vf.Int(), 10)); if (err != nil) {
                         return err;
@@ -972,7 +995,7 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
                 }
                 break;
             }
-            case var ᴛ2 when ᴛ2 == reflect.ΔUint || ᴛ2 == reflect.Uint8 || ᴛ2 == reflect.Uint16 || ᴛ2 == reflect.Uint32 || ᴛ2 == reflect.Uint64 || ᴛ2 == reflect.Uintptr: {
+            case var ᴛ2 when ᴛ2 == reflect.Uint || ᴛ2 == reflect.Uint8 || ᴛ2 == reflect.Uint16 || ᴛ2 == reflect.Uint32 || ᴛ2 == reflect.Uint64 || ᴛ2 == reflect.Uintptr: {
                 {
                     var err = emit(new printerжWriter(Ꮡp), strconv.AppendUint(scratch[..0], vf.Uint(), 10)); if (err != nil) {
                         return err;
@@ -988,7 +1011,7 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
                 }
                 break;
             }
-            case var ᴛ2 when ᴛ2 == reflect.ΔBool: {
+            case var ᴛ2 when ᴛ2 == reflect.Bool: {
                 {
                     var err = emit(new printerжWriter(Ꮡp), strconv.AppendBool(scratch[..0], vf.Bool())); if (err != nil) {
                         return err;
@@ -996,7 +1019,7 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
                 }
                 break;
             }
-            case var ᴛ2 when ᴛ2 == reflect.ΔString: {
+            case var ᴛ2 when ᴛ2 == reflect.String: {
                 {
                     var err = emit(new printerжWriter(Ꮡp), slice<byte>(vf.String())); if (err != nil) {
                         return err;
@@ -1004,7 +1027,7 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
                 }
                 break;
             }
-            case var ᴛ2 when ᴛ2 == reflect.ΔSlice: {
+            case var ᴛ2 when ᴛ2 == reflect.Slice: {
                 var (elem, ok) = reflect.TypeAssert<slice<byte>>(vf); if (ok) {
                     var err = emit(new printerжWriter(Ꮡp), elem); if (err != nil) {
                         return err;
@@ -1022,8 +1045,8 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
                 }
             }
             vf = indirect(vf);
-            reflectꓸKind k = vf.Kind();
-            if (!(k == reflect.ΔString || k == reflect.ΔSlice && vf.Type().Elem().Kind() == reflect.Uint8)) {
+            reflect.Kind k = vf.Kind();
+            if (!(k == reflect.String || k == reflect.Slice && vf.Type().Elem().Kind() == reflect.Uint8)) {
                 return fmt.Errorf("xml: bad type for comment field of %s"u8, val.Type());
             }
             if (vf.Len() == 0) {
@@ -1034,7 +1057,7 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
             var dashDash = false;
             var dashLast = false;
             switch (k) {
-            case var ᴛ2 when ᴛ2 == reflect.ΔString: {
+            case var ᴛ2 when ᴛ2 == reflect.String: {
                 @string sΔ4 = vf.String();
                 dashDash = strings.Contains(sΔ4, "--");
                 dashLast = sΔ4[len(sΔ4) - 1] == '-';
@@ -1043,7 +1066,7 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
                 }
                 break;
             }
-            case var ᴛ2 when ᴛ2 == reflect.ΔSlice: {
+            case var ᴛ2 when ᴛ2 == reflect.Slice: {
                 var b = vf.Bytes();
                 dashDash = bytes.Contains(b, ddBytes);
                 dashLast = b[len(b) - 1] == '-';
@@ -1090,7 +1113,7 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
                 }
             }
             if (len(finfo.parents) > len(s.stack)) {
-                if (vf.Kind() != reflect.ΔPointer && vf.Kind() != reflect.ΔInterface || !vf.IsNil()) {
+                if (vf.Kind() != reflect.Pointer && vf.Kind() != reflect.Interface || !vf.IsNil()) {
                     var err = s.push(finfo.parents.slice(len(s.stack))); if (err != nil) {
                         return err;
                     }
@@ -1203,10 +1226,14 @@ internal static void writeIndent(this ref printer p, nint depthDelta) {
     }
 }
 
+} partial class xml_package {
+
 partial struct parentStack {
     internal ж<printer> p;
     internal slice<@string> stack;
 }
+
+} partial class xmlᴛparentStack {
 
 // trim updates the XML context to match the longest common prefix of the stack
 // and the given parents. A closing tag will be written for every parent
@@ -1238,22 +1265,28 @@ internal static error push(this ref parentStack s, slice<@string> parents) {
     return default;
 }
 
+} partial class xml_package {
+
 // UnsupportedTypeError is returned when [Marshal] encounters a type
 // that cannot be converted into XML.
 partial struct UnsupportedTypeError {
-    public reflectꓸType Type;
+    public reflect.Type Type;
 }
+
+} partial class xmlᴛUnsupportedTypeError {
 
 public static @string Error(this ref UnsupportedTypeError e) {
     return "xml: unsupported type: "u8 + e.Type.String();
 }
 
-internal static bool isEmptyValue(reflectꓸValue v) {
+} partial class xml_package {
+
+internal static bool isEmptyValue(reflect.Value v) {
     switch (v.Kind()) {
-    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.Map || ᴛ == reflect.ΔSlice || ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.Map || ᴛ == reflect.Slice || ᴛ == reflect.String: {
         return v.Len() == 0;
     }
-    case var ᴛ when ᴛ == reflect.ΔBool || ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr || ᴛ == reflect.Float32 || ᴛ == reflect.Float64 || ᴛ == reflect.ΔInterface || ᴛ == reflect.ΔPointer: {
+    case var ᴛ when ᴛ == reflect.Bool || ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr || ᴛ == reflect.Float32 || ᴛ == reflect.Float64 || ᴛ == reflect.Interface || ᴛ == reflect.Pointer: {
         return v.IsZero();
     }}
     return false;

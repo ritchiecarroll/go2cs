@@ -2,6 +2,8 @@
 //go:build go1.21
 namespace go.vendor.golang.org.x.text.unicode;
 
+using static bidi_package;
+
 partial class bidi_package {
 
 // UnicodeVersion is the Unicode version from which the tables in this package are derived.
@@ -13,6 +15,8 @@ private static readonly @string UnicodeVersionᵇ = "15.0.0"u8;
 internal static slice<int32> xorMasks = [ // 8 elements
     0, 1, 6, 7, 3, 15, 29, 63
 ]; // Size: 56 bytes
+
+} partial class bidiᴛbidiTrie {
 
 // lookup returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
@@ -192,6 +196,8 @@ internal static uint8 lookupStringUnsafe(this ref bidiTrie t, @string s) {
     return 0;
 }
 
+} partial class bidi_package {
+
 // bidiTrie. Total size: 19904 bytes (19.44 KiB). Checksum: b1f201ed2debb6c8.
 partial struct bidiTrie {
 }
@@ -200,6 +206,8 @@ internal static ж<bidiTrie> newBidiTrie(nint i) {
     return Ꮡ(new bidiTrie());
 }
 
+} partial class bidiᴛbidiTrie {
+
 // lookupValue determines the type of block n and looks up the value for b.
 internal static uint8 lookupValue(this ref bidiTrie t, uint32 n, byte b) {
     switch (ᐧ) {
@@ -207,6 +215,8 @@ internal static uint8 lookupValue(this ref bidiTrie t, uint32 n, byte b) {
         return (uint8)bidiValues[(n << 6) + (uint32)b];
     }}
 }
+
+} partial class bidi_package {
 
 // bidiValues: 259 blocks, 16576 entries, 16576 bytes
 // The third block is the zero block.

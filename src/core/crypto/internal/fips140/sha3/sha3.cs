@@ -15,6 +15,7 @@ using subtle = go.crypto.@internal.fips140.subtle_package;
 using errors = errors_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using static sha3_package;
 
 partial class sha3_package {
 
@@ -48,6 +49,8 @@ partial struct Digest {
     internal nint outputLen;        // the default output size in bytes
     internal spongeDirection state; // whether the sponge is absorbing or squeezing
 }
+
+} partial class sha3ᴛDigest {
 
 // BlockSize returns the rate of sponge underlying this hash function.
 public static nint BlockSize(this ref Digest d) { return d.rate; }
@@ -170,6 +173,8 @@ internal static slice<byte> sumGeneric(this ref Digest d, slice<byte> b) {
     return appendꓸꓸꓸ(b, hash);
 }
 
+} partial class sha3_package {
+
 internal static ref readonly @string magicSHA3 => ref magicSHA3ᵇ;
 private static readonly @string magicSHA3ᵇ = "sha\x08"u8;
 internal static ref readonly @string magicShake => ref magicShakeᵇ;
@@ -180,6 +185,8 @@ internal static ref readonly @string magicKeccak => ref magicKeccakᵇ;
 private static readonly @string magicKeccakᵇ = "sha\x0b"u8;
 // magic || rate || main state || n || sponge direction
 internal const nint marshaledSize = /* len(magicSHA3) + 1 + 200 + 1 + 1 */ 207;
+
+} partial class sha3ᴛDigest {
 
 public static (slice<byte>, error) MarshalBinary(this ref Digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
@@ -269,4 +276,4 @@ public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
     return default;
 }
 
-} // end sha3_package
+} // end sha3ᴛDigest

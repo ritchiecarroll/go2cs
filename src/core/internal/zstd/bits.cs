@@ -5,6 +5,7 @@ namespace go.@internal;
 
 using bits = math.bits_package;
 using math;
+using static zstd_package;
 
 partial class zstd_package {
 
@@ -22,6 +23,8 @@ partial struct bitReader {
     internal uint32 cnt;  // number of valid bits in the bits field
 }
 
+} partial class zstdᴛReader {
+
 // makeBitReader makes a bit reader starting at off.
 internal static bitReader makeBitReader(this ж<Reader> Ꮡr, block data, nint off) {
     return new bitReader(
@@ -31,11 +34,13 @@ internal static bitReader makeBitReader(this ж<Reader> Ꮡr, block data, nint o
     );
 }
 
+} partial class zstdᴛbitReader {
+
 // moreBits is called to read more bits.
 // This ensures that at least 16 bits are available.
 internal static error moreBits(this ref bitReader br) {
     while (br.cnt < 16) {
-        if (br.off >= (uint32)builtin.len(br.data)) {
+        if (br.off >= (uint32)len(br.data)) {
             return br.r.makeEOFError((nint)br.off);
         }
         var c = br.data[br.off];
@@ -67,6 +72,8 @@ internal static error makeError(this ref bitReader br, @string msg) {
     return br.r.makeError((nint)br.off, msg);
 }
 
+} partial class zstd_package {
+
 // reverseBitReader reads a bit stream in reverse.
 partial struct reverseBitReader {
     internal ж<Reader> r;  // for error reporting
@@ -76,6 +83,8 @@ partial struct reverseBitReader {
     internal uint32 bits;  // bits ready to be returned
     internal uint32 cnt;   // number of valid bits in bits field
 }
+
+} partial class zstdᴛReader {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string zeroByteAtReverseBitˢ => ref zeroByteAtReverseBitˢᵇ;
@@ -101,6 +110,8 @@ internal static (reverseBitReader, error) makeReverseBitReader(this ж<Reader> �
     );
     return (rbr, default);
 }
+
+} partial class zstdᴛreverseBitReader {
 
 // val is called to fetch a value of b bits.
 internal static (uint32, error) val(this ref reverseBitReader rbr, uint8 b) {
@@ -135,4 +146,4 @@ internal static error makeError(this ref reverseBitReader rbr, @string msg) {
     return rbr.r.makeError((nint)rbr.off, msg);
 }
 
-} // end zstd_package
+} // end zstdᴛreverseBitReader

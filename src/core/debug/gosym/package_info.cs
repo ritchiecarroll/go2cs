@@ -66,8 +66,8 @@ using static go.debug.gosym_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("debug/gosym/pclntab.go", "pclntab.cs", "AEykAQAMEoKCgoKUgoKUgoK0tLSCpJSmgpKs0oKUgq7igpSCgqYAAhYACAIAAh4ADgKCqqKClKjSgoKCAAcQlIKUypamyoKUlLS0tLS0tLS0lKaClIaolIKCgoKCgoKCgoK0goKCgoKCgoKCtIKCgoKCgoKCgoK0xKbkgoK4goKCgoKCgoKCggAHEJTYsoKClJaCqLKSgoKCgoKCpoKokoKUgoKCqJKClIKCgqiSqJKClKiyAAkWkqiSgoKUqJKokoKUAAgUsoKokqi2ppSmgoKCgpqygriCgpSCgqjCgoKUgpSUgoKCgqyylIKCgoKmAAIS4oKmgoKCgoKCgoKCgpTKgpSCgpSCpqaUqOKCgriCgpSCgujigoK4goKUgoKCgoKUpoKUgoKU6OKCgriCgoKssoKCgoKCgpSUlIKCpujigpSClJSCgoKmgoKCgqaiqvKCgriCgrQ=", "203-206:1;250-252:2;253-255:3;302-304:1;336-338:1;569-573:1;586-590:1;618-622:1;685-687:1", "", "360=nameOff/1/1/3,funcName/1/1/3", "", "220:25,222:17,345:25,346:17,631:21,632:13,657:21,658:13,698:21,699:13,781:25,782:17")]
-[assembly: GoPositionMap("debug/gosym/symtab.go", "symtab.cs", "ACFGgJ7SgoKUgpSUAAgKotyCuIKmgoKmgpSssqaCgriUgpTKgqiSgoKCgsqmlAA5eoKCloKClIKCyoK0tIKkgoKClIKClJSCgoKClIKCgoKUlIKCgoKmgoKUgriCgoKCgpSClIKUgoKmgoKUgsqCgpSCgpSCgqiSgoKCgqaUgoKCgsiClIKClIKCpoKUlK7igoKClIKmgoKUgoKCgoKSgoKCgoKCgqaCgoKCgpSClLSClIKCgoKUgpS2lLSkgpSCpoKUgpSCgpTKgoKClJSmgpSmgoKWkoKCpoKmgoKCgpSClNqClIKoooKCgpS0tPqCgoKCgoKCgoK4goKClIKClLSCgrSCgrbIgpSClKqigoKCgpS0pLaq4oKUgoKUlKzygoKmgoKClKaCgpSCgoKCpqq0goKUgsiqooKCgqaokoKClILIAA0cAAkCAAAQlIKCgpTIyIKUgsjogpSmgoKmlIK4goKCgoKClKaCgoKCyIKU1pQAChYACRSCAAoWgoKClII=", "339-342:1;356-402:2")]
+[assembly: GoPositionMap("debug/gosym/pclntab.go", "pclntab.cs", "AE+kAQAMEoKCgoKUgoKUgoK0tLSCpJSmgpKs0oKUgq7igpSCgqYABBYACAIABB4ADgKCqqKClKjSgoKCAAcQlIKUypamyoKUlLS0tLS0tLS0lKaClIaolIKCgoKCgoKCgoK0goKCgoKCgoKCtIKCgoKCgoKCgoK0xKbkgoK4goKCgoKCgoKCggAHEJTYsoKClJaCqLKSgoKCgoKCpoKokoKUgoKCqJKClIKCgqiSqJKClKiyAA0WkqiSgoKUqJKokoKUAAwUsoLIkqi2ppSmgoKCgpqygriCgpSCgsjCgoKUgpSUgoKCgqyylIKCgoKmAAIS4oKmgoKCgoKCgoKCgpTKgpSCgpSCpqaUqOKCgriCgpSCgujigoK4goKUgoKCgoKUpoKUgoKU6OKCgriCgoKssoKCgoKCgpSUlIKCpujigpSClJSCgoKmgoKCgqaiqvKCgriCgrQ=", "203-206:1;250-252:2;253-255:3;302-304:1;336-338:1;569-573:1;586-590:1;618-622:1;685-687:1", "", "367=nameOff/1/1/3,funcName/1/1/3", "", "227:25,229:17,352:25,353:17,650:21,651:13,676:21,677:13,717:21,718:13,800:25,801:17")]
+[assembly: GoPositionMap("debug/gosym/symtab.go", "symtab.cs", "ACRGgJ7SgoKUgpSUAAgKotyCuIKmgoKmgpSssqaCgriUgpTKgqiSgoKCgsqmlAA7eoKCloKClIKCyoK0tIKkgoKClIKClJSCgoKClIKCgoKUlIKCgoKmgoKUgriCgoKCgpSClIKUgoKmgoKUgsqCgpSCgpSCgqiSgoKCgqaUgoKCgsiClIKClIKCpoKUlK7igoKClIKmgoKUgoKCgoKSgoKCgoKCgqaCgoKCgpSClLSClIKCgoKUgpS2lLSkgpSCpoKUgpSCgpTKgoKClJSmgpSmgoKWkoKCpoKmgoKCgpSClNqClIKoooKCgpS0tPqCgoKCgoKCgoK4goKClIKClLSCgrSCgrbIgpSClMqigoKCgpS0pLaq4oKUgoKUlKzygoKmgoKClKaCgpSCgoKCpqq0goKUgsiqooKCgqaokoKClILIABEcAAkCAAAQlIKCgpTIyIKUgsjogpSmgoKmlIK4goKCgoKClKaCgoKCyIKU1pQADhYADRSCAA4WgoKClII=", "339-342:1;356-402:2")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;
@@ -82,11 +82,11 @@ public static partial class gosym_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct funcData {}
+    internal partial struct funcTab {}
     [GoLocalName("stackEnt")] internal partial struct lineFromAline_stackEnt {}
     internal partial struct sym {}
     internal partial struct version {}
-    internal partial struct ΔfuncData {}
-    internal partial struct ΔfuncTab {}
     public partial struct DecodingError {}
     public partial struct Func {}
     public partial struct LineTable {}
@@ -114,3 +114,21 @@ public static partial class gosym_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(gosym_package.DecodingError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gosymᴛDecodingError;
+[GoMethodHost(typeof(gosym_package.LineTable)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gosymᴛLineTable;
+[GoMethodHost(typeof(gosym_package.Obj)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gosymᴛObj;
+[GoMethodHost(typeof(gosym_package.Sym)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gosymᴛSym;
+[GoMethodHost(typeof(gosym_package.Table)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gosymᴛTable;
+[GoMethodHost(typeof(gosym_package.UnknownFileError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gosymᴛUnknownFileError;
+[GoMethodHost(typeof(gosym_package.UnknownLineError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gosymᴛUnknownLineError;
+[GoMethodHost(typeof(gosym_package.funcData)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gosymᴛfuncData;
+[GoMethodHost(typeof(gosym_package.funcTab)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gosymᴛfuncTab;
+// </MethodHolders>

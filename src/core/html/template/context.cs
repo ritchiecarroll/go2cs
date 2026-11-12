@@ -7,6 +7,7 @@ using fmt = fmt_package;
 using slices = slices_package;
 using parse = text.template.parse_package;
 using text.template;
+using static template_package;
 
 partial class template_package {
 
@@ -30,13 +31,15 @@ partial struct context {
     internal attr attr;
     internal element element;
     internal parse.Node n; // for range break/continue
-    internal ж<ΔError> err;
+    internal ж<Error> err;
 }
+
+} partial class templateᴛcontext {
 
 internal static @string String(this context c) {
     error err = default;
     if (c.err != nil) {
-        err = new ΔErrorжerror(c.err);
+        err = new Errorжerror(c.err);
     }
     return fmt.Sprintf("{%v %v %v %v %v %v %v %v}"u8, c.state, c.delim, c.urlPart, c.jsCtx, c.jsBraceDepth, c.attr, c.element, err);
 }
@@ -81,6 +84,8 @@ internal static context clone(this context c) {
     clone.jsBraceDepth = slices.Clone<slice<nint>, nint>(c.jsBraceDepth);
     return clone;
 }
+
+} partial class template_package {
 
 // state describes a high-level HTML parser state.
 //

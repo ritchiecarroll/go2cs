@@ -5,6 +5,7 @@ namespace go.math.big.@internal;
 
 using fmt = fmt_package;
 using strings = strings_package;
+using static asmgen_package;
 
 partial class asmgen_package {
 
@@ -32,7 +33,7 @@ partial struct Arch {
     // setup is called to emit any per-architecture function prologue,
     // immediately after the TEXT line has been emitted.
     // If setup is nil, it is taken to be a no-op.
-    internal Action<ж<ΔFunc>> setup;
+    internal Action<ж<Func>> setup;
     // hint returns the register to use for a given hint.
     // Returning an empty string indicates no preference.
     // If hint is nil, it is considered to return an empty string.
@@ -78,13 +79,13 @@ partial struct Arch {
     // on systems where the situation is more complicated than
     // the six basic instructions (add, adds, adcs, sub, subs, sbcs).
     // They return a boolean indicating whether the operation was handled.
-    internal Func<ж<Asm>, ΔReg, ΔReg, ΔReg, ΔCarry, bool> addF;
-    internal Func<ж<Asm>, ΔReg, ΔReg, ΔReg, ΔCarry, bool> subF;
+    internal Func<ж<Asm>, Reg, Reg, Reg, Carry, bool> addF;
+    internal Func<ж<Asm>, Reg, Reg, Reg, Carry, bool> subF;
     // mulF and mulWideF implement Mul and MulWide.
     // They call Fatalf if the operation is unsupported.
     // An architecture can set the mul field instead of mulF.
     // mulWide is optional, but otherwise mulhi should be set.
-    internal Action<ж<Asm>, ΔReg, ΔReg, ΔReg, ΔReg> mulWideF;
+    internal Action<ж<Asm>, Reg, Reg, Reg, Reg> mulWideF;
     // addWords is a printf format taking src1, src2, dst
     // and sets dst = WordBytes*src1+src2.
     // It may modify the carry flag.
@@ -118,26 +119,30 @@ partial struct Arch {
     // Using memIndex costs an extra register but allows the end-of-loop
     // to do a single increment/decrement instead of advancing two or three pointers.
     // This is particularly important on 386.
-    internal Func<ж<Asm>, nint, ΔReg, RegPtr, ΔReg> memIndex;
+    internal Func<ж<Asm>, nint, Reg, RegPtr, Reg> memIndex;
     // Incrementing/decrementing memory access.
     // loadIncN loads memory at ptr into regs, incrementing ptr by WordBytes after each reg.
     // loadDecN loads memory at ptr into regs, decrementing ptr by WordBytes before each reg.
     // storeIncN and storeDecN are the same, but storing from regs instead of loading into regs.
     // If missing, the assembler accesses memory and advances pointers using separate instructions.
-    internal Action<ж<Asm>, RegPtr, slice<ΔReg>> loadIncN;
-    internal Action<ж<Asm>, RegPtr, slice<ΔReg>> loadDecN;
-    internal Action<ж<Asm>, RegPtr, slice<ΔReg>> storeIncN;
-    internal Action<ж<Asm>, RegPtr, slice<ΔReg>> storeDecN;
+    internal Action<ж<Asm>, RegPtr, slice<Reg>> loadIncN;
+    internal Action<ж<Asm>, RegPtr, slice<Reg>> loadDecN;
+    internal Action<ж<Asm>, RegPtr, slice<Reg>> storeIncN;
+    internal Action<ж<Asm>, RegPtr, slice<Reg>> storeDecN;
     // options is a map from optional CPU features to functions that test for them.
     // The test function should jump to label if the feature is available.
     internal map<Option, Action<ж<Asm>, @string>> options;
 }
+
+} partial class asmgenᴛArch {
 
 // HasShiftWide reports whether the Arch has working LshWide/RshWide instructions.
 // If not, calling them will panic.
 public static bool HasShiftWide(this ref Arch a) {
     return a.lshd != ""u8;
 }
+
+} partial class asmgen_package {
 
 // A Hint is a hint about what a register will be used for,
 // so that an appropriate one can be selected.
@@ -154,21 +159,25 @@ public static Hint HintAltCarry => 6;   // secondary carry flag
 // A Reg is an allocated register or other assembly operand.
 // (For example, a constant might have name "$123"
 // and a memory reference might have name "0(R8)".)
-partial struct ΔReg {
+partial struct Reg {
     internal @string name;
 }
 
+} partial class asmgenᴛReg {
+
 // IsImm reports whether r is an immediate value.
-public static bool IsImm(this ΔReg r) { return strings.HasPrefix(r.name, "$"); }
+public static bool IsImm(this Reg r) { return strings.HasPrefix(r.name, "$"); }
 
 // IsMem reports whether r is a memory value.
-public static bool IsMem(this ΔReg r) { return strings.HasSuffix(r.name, ")"); }
+public static bool IsMem(this Reg r) { return strings.HasSuffix(r.name, ")"); }
 
 // String returns the assembly syntax for r.
-public static @string String(this ΔReg r) { return r.name; }
+public static @string String(this Reg r) { return r.name; }
 
 // Valid reports whether is valid, meaning r is not the zero value of Reg (a register with no name).
-public static bool Valid(this ΔReg r) { return r.name != ""u8; }
+public static bool Valid(this Reg r) { return r.name != ""u8; }
+
+} partial class asmgen_package {
 
 // A RegPtr is like a Reg but expected to hold a pointer.
 // The separate Go type helps keeps pointers and scalars separate and avoid mistakes;
@@ -177,6 +186,8 @@ partial struct RegPtr {
     internal @string name;
 }
 
+} partial class asmgenᴛRegPtr {
+
 // String returns the assembly syntax for r.
 public static @string String(this RegPtr r) { return r.name; }
 
@@ -184,22 +195,24 @@ public static @string String(this RegPtr r) { return r.name; }
 public static bool Valid(this RegPtr r) { return r.name != ""u8; }
 
 // mem returns a memory reference to off bytes from the pointer r.
-internal static ΔReg mem(this ж<RegPtr> Ꮡr, nint off) { return new ΔReg(fmt.Sprintf("%d(%s)"u8, off, Ꮡr.OrTypedNil())); }
+internal static Reg mem(this ж<RegPtr> Ꮡr, nint off) { return new Reg(fmt.Sprintf("%d(%s)"u8, off, Ꮡr.OrTypedNil())); }
+
+} partial class asmgen_package {
 
 // A Carry is a flag field explaining how an instruction sets and uses the carry flags.
 // Different operations expect different sets of bits.
 // Add and Sub expect: UseCarry or 0, SetCarry, KeepCarry, or SmashCarry; and AltCarry or 0.
 // ClearCarry, SaveCarry, and ConvertCarry expect: AddCarry or SubCarry; and AltCarry or 0.
-partial struct ΔCarry /*num:nuint*/;
+partial struct Carry /*num:nuint*/;
 
-public static ΔCarry SetCarry => /* 1 << iota */ 1; // sets carry
-public static ΔCarry UseCarry => 2;                 // uses carry
-public static ΔCarry KeepCarry => 4;                // must preserve carry
-public static ΔCarry SmashCarry => 8;               // can modify carry or not, whatever is easiest
+public static Carry SetCarry => /* 1 << iota */ 1; // sets carry
+public static Carry UseCarry => 2;                 // uses carry
+public static Carry KeepCarry => 4;                // must preserve carry
+public static Carry SmashCarry => 8;               // can modify carry or not, whatever is easiest
 
-public static ΔCarry ΔAltCarry => 16; // use the secondary carry flag
-public static ΔCarry AddCarry => 32;  // use add carry flag semantics (for ClearCarry, ConvertCarry)
-public static ΔCarry SubCarry => 64;  // use sub carry flag semantics (for ClearCarry, ConvertCarry)
+public static Carry AltCarry => 16; // use the secondary carry flag
+public static Carry AddCarry => 32; // use add carry flag semantics (for ClearCarry, ConvertCarry)
+public static Carry SubCarry => 64; // use sub carry flag semantics (for ClearCarry, ConvertCarry)
 
 // An Option denotes an optional CPU feature that can be tested at runtime.
 partial struct Option /*num:nint*/;

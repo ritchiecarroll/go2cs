@@ -27,7 +27,7 @@ global using aTypeOff = go.@internal.abi_package.TypeOff;
 global using aTextOff = go.@internal.abi_package.TextOff;
 
 // arrayType represents a fixed array type.
-global using arrayType = go.@internal.abi_package.ΔArrayType;
+global using arrayType = go.@internal.abi_package.ArrayType;
 
 // chanType represents a channel type.
 global using chanType = go.@internal.abi_package.ChanType;
@@ -43,7 +43,7 @@ global using chanType = go.@internal.abi_package.ChanType;
 //		uncommonType
 //		[2]*rtype    // [0] is in, [1] is out
 //	}
-global using funcType = go.@internal.abi_package.ΔFuncType;
+global using funcType = go.@internal.abi_package.FuncType;
 
 // Struct field
 global using structField = go.@internal.abi_package.StructField;
@@ -62,6 +62,8 @@ using @unsafe = unsafe_package;
 using @internal;
 using go.unicode;
 using ꓸꓸꓸbyte = Span<byte>;
+using reflect = reflect_package;
+using static reflect_package;
 
 partial class reflect_package {
 
@@ -76,7 +78,7 @@ partial class reflect_package {
 // Type values are comparable, such as with the == operator,
 // so they can be used as map keys.
 // Two Type values are equal if they represent identical types.
-partial interface ΔType {
+partial interface Type {
 // Methods applicable to all types.
 
     // Align returns the alignment in bytes of a value of
@@ -99,10 +101,10 @@ partial interface ΔType {
     //
     // Calling this method will force the linker to retain all exported methods in all packages.
     // This may make the executable binary larger but will not affect execution time.
-    ΔMethod Method(nint _);
+    Method Method(nint _);
     // Methods returns an iterator over each method in the type's method set. The sequence is
     // equivalent to calling Method successively for each index i in the range [0, NumMethod()).
-    iter.Seq<ΔMethod> Methods();
+    iter.Seq<Method> Methods();
     // MethodByName returns the method with that name in the type's
     // method set and a boolean indicating if the method was found.
     //
@@ -115,7 +117,7 @@ partial interface ΔType {
     // Calling this method will cause the linker to retain all methods with this name in all packages.
     // If the linker can't determine the name, it will retain all exported methods.
     // This may make the executable binary larger but will not affect execution time.
-    (ΔMethod, bool) MethodByName(@string _);
+    (Method, bool) MethodByName(@string _);
     // NumMethod returns the number of methods accessible using Method.
     //
     // For a non-interface type, it returns the number of exported methods.
@@ -141,16 +143,16 @@ partial interface ΔType {
     // compare the Types directly.
     @string String();
     // Kind returns the specific kind of this type.
-    ΔKind Kind();
+    Kind Kind();
     // Implements reports whether the type implements the interface type u.
-    bool Implements(ΔType u);
+    bool Implements(Type u);
     // AssignableTo reports whether a value of the type is assignable to type u.
-    bool AssignableTo(ΔType u);
+    bool AssignableTo(Type u);
     // ConvertibleTo reports whether a value of the type is convertible to type u.
     // Even if ConvertibleTo returns true, the conversion may still panic.
     // For example, a slice of type []T is convertible to *[N]T,
     // but the conversion will panic if its length is less than N.
-    bool ConvertibleTo(ΔType u);
+    bool ConvertibleTo(Type u);
     // Comparable reports whether values of this type are comparable.
     // Even if Comparable returns true, the comparison may still panic.
     // For example, values of interface type are comparable,
@@ -174,7 +176,7 @@ partial interface ΔType {
     nint Bits();
     // ChanDir returns a channel type's direction.
     // It panics if the type's Kind is not Chan.
-    ΔChanDir ChanDir();
+    ChanDir ChanDir();
     // IsVariadic reports whether a function type's final input parameter
     // is a "..." parameter. If so, t.In(t.NumIn() - 1) returns the parameter's
     // implicit actual type []T.
@@ -190,7 +192,7 @@ partial interface ΔType {
     bool IsVariadic();
     // Elem returns a type's element type.
     // It panics if the type's Kind is not Array, Chan, Map, Pointer, or Slice.
-    ΔType Elem();
+    Type Elem();
     // Field returns a struct type's i'th field.
     // It panics if the type's Kind is not Struct.
     // It panics if i is not in the range [0, NumField()).
@@ -230,14 +232,14 @@ partial interface ΔType {
     // In returns the type of a function type's i'th input parameter.
     // It panics if the type's Kind is not Func.
     // It panics if i is not in the range [0, NumIn()).
-    ΔType In(nint i);
+    Type In(nint i);
     // Ins returns an iterator over each input parameter of function type t. The sequence
     // is equivalent to calling In successively for each index i in the range [0, NumIn()).
     // It panics if the type's Kind is not Func.
-    iter.Seq<ΔType> Ins();
+    iter.Seq<Type> Ins();
     // Key returns a map type's key type.
     // It panics if the type's Kind is not Map.
-    ΔType Key();
+    Type Key();
     // Len returns an array type's length.
     // It panics if the type's Kind is not Array.
     nint Len();
@@ -253,11 +255,11 @@ partial interface ΔType {
     // Out returns the type of a function type's i'th output parameter.
     // It panics if the type's Kind is not Func.
     // It panics if i is not in the range [0, NumOut()).
-    ΔType Out(nint i);
+    Type Out(nint i);
     // Outs returns an iterator over each output parameter of function type t. The sequence
     // is equivalent to calling Out successively for each index i in the range [0, NumOut()).
     // It panics if the type's Kind is not Func.
-    iter.Seq<ΔType> Outs();
+    iter.Seq<Type> Outs();
     // OverflowComplex reports whether the complex128 x cannot be represented by type t.
     // It panics if t's Kind is not Complex64 or Complex128.
     bool OverflowComplex(complex128 x);
@@ -293,43 +295,43 @@ partial interface ΔType {
 
 // A Kind represents the specific kind of type that a [Type] represents.
 // The zero Kind is not a valid kind.
-partial struct ΔKind /*num:nuint*/;
+partial struct Kind /*num:nuint*/;
 
-public static ΔKind Invalid => /* iota */ 0;
-public static ΔKind ΔBool => 1;
-public static ΔKind ΔInt => 2;
-public static ΔKind Int8 => 3;
-public static ΔKind Int16 => 4;
-public static ΔKind Int32 => 5;
-public static ΔKind Int64 => 6;
-public static ΔKind ΔUint => 7;
-public static ΔKind Uint8 => 8;
-public static ΔKind Uint16 => 9;
-public static ΔKind Uint32 => 10;
-public static ΔKind Uint64 => 11;
-public static ΔKind Uintptr => 12;
-public static ΔKind Float32 => 13;
-public static ΔKind Float64 => 14;
-public static ΔKind Complex64 => 15;
-public static ΔKind Complex128 => 16;
-public static ΔKind Array => 17;
-public static ΔKind Chan => 18;
-public static ΔKind Func => 19;
-public static ΔKind ΔInterface => 20;
-public static ΔKind Map => 21;
-public static ΔKind ΔPointer => 22;
-public static ΔKind ΔSlice => 23;
-public static ΔKind ΔString => 24;
-public static ΔKind Struct => 25;
-public static ΔKind ΔUnsafePointer => 26;
+public static Kind Invalid => /* iota */ 0;
+public static Kind Bool => 1;
+public static Kind Int => 2;
+public static Kind Int8 => 3;
+public static Kind Int16 => 4;
+public static Kind Int32 => 5;
+public static Kind Int64 => 6;
+public static Kind Uint => 7;
+public static Kind Uint8 => 8;
+public static Kind Uint16 => 9;
+public static Kind Uint32 => 10;
+public static Kind Uint64 => 11;
+public static Kind Uintptr => 12;
+public static Kind Float32 => 13;
+public static Kind Float64 => 14;
+public static Kind Complex64 => 15;
+public static Kind Complex128 => 16;
+public static Kind Array => 17;
+public static Kind Chan => 18;
+public static Kind Func => 19;
+public static Kind Interface => 20;
+public static Kind Map => 21;
+public static Kind Pointer => 22;
+public static Kind Slice => 23;
+public static Kind String => 24;
+public static Kind Struct => 25;
+public static Kind UnsafePointer => 26;
 
 // Ptr is the old name for the [Pointer] kind.
 //
 //go:fix inline
-public static ΔKind Ptr => /* Pointer */ 22;
+public static Kind Ptr => /* Pointer */ 22;
 
 // Embed this type to get common/uncommon
-partial struct Δcommon {
+partial struct common {
     /*embed*/ public @internal.abi_package.Type Type;
 }
 
@@ -339,6 +341,8 @@ partial struct rtype {
     internal abi.Type t;
 }
 
+} partial class reflectᴛrtype {
+
 internal static ж<abi.Type> common(this ж<rtype> Ꮡt) {
     return Ꮡt.Ꮡt;
 }
@@ -347,29 +351,37 @@ internal static ж<abi.UncommonType> uncommon(this ж<rtype> Ꮡt) {
     return Ꮡt.Ꮡt.Uncommon();
 }
 
-// ChanDir represents a channel type's direction.
-partial struct ΔChanDir /*num:nint*/;
+} partial class reflect_package {
 
-public static ΔChanDir RecvDir => /* 1 << iota */ 1;         // <-chan
-public static ΔChanDir SendDir => 2;                         // chan<-
-public static ΔChanDir BothDir => /* RecvDir | SendDir */ 3; // chan
+// ChanDir represents a channel type's direction.
+partial struct ChanDir /*num:nint*/;
+
+public static ChanDir RecvDir => /* 1 << iota */ 1;         // <-chan
+public static ChanDir SendDir => 2;                         // chan<-
+public static ChanDir BothDir => /* RecvDir | SendDir */ 3; // chan
 
 // interfaceType represents an interface type.
 partial struct interfaceType {
-    /*embed*/ public @internal.abi_package.ΔInterfaceType InterfaceType; // can embed directly because not a public type.
+    /*embed*/ public @internal.abi_package.InterfaceType InterfaceType; // can embed directly because not a public type.
 }
 
-internal static abiꓸName nameOff(this ж<interfaceType> Ꮡt, aNameOff off) {
+} partial class reflectᴛinterfaceType {
+
+internal static abi.Name nameOff(this ж<interfaceType> Ꮡt, aNameOff off) {
     return toRType(Ꮡt.of(interfaceType.ᏑType)).nameOff(off);
 }
 
-internal static abiꓸName nameOffFor(ж<abi.Type> t, aNameOff off) {
+} partial class reflect_package {
+
+internal static abi.Name nameOffFor(ж<abi.Type> t, aNameOff off) {
     return toRType(t).nameOff(off);
 }
 
 internal static ж<abi.Type> typeOffFor(ж<abi.Type> t, aTypeOff off) {
     return toRType(t).typeOff(off);
 }
+
+} partial class reflectᴛinterfaceType {
 
 internal static ж<abi.Type> typeOff(this ж<interfaceType> Ꮡt, aTypeOff off) {
     return toRType(Ꮡt.of(interfaceType.ᏑType)).typeOff(off);
@@ -380,8 +392,10 @@ internal static ж<abi.Type> common(this ж<interfaceType> Ꮡt) {
 }
 
 internal static ж<abi.UncommonType> uncommon(this ж<interfaceType> Ꮡt) {
-    return Ꮡt.of(interfaceType.ᏑInterfaceType).of(abiꓸInterfaceType.ᏑType).Uncommon();
+    return Ꮡt.of(interfaceType.ᏑInterfaceType).of(abi.InterfaceType.ᏑType).Uncommon();
 }
+
+} partial class reflect_package {
 
 // ptrType represents a pointer type.
 partial struct ptrType {
@@ -395,7 +409,7 @@ partial struct sliceType {
 
 // structType represents a struct type.
 partial struct structType {
-    /*embed*/ public @internal.abi_package.ΔStructType StructType;
+    /*embed*/ public @internal.abi_package.StructType StructType;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -404,7 +418,7 @@ private static readonly @string nameFlagFieldˢᵇ = "name flag field"u8;
 internal static ref readonly @string nameOffsetFieldˢ => ref nameOffsetFieldˢᵇ;
 private static readonly @string nameOffsetFieldˢᵇ = "name offset field"u8;
 
-internal static @string pkgPath(abiꓸName n) {
+internal static @string pkgPath(abi.Name n) {
     if (n.Bytes == nil || (byte)(n.DataChecked(0, nameFlagFieldˢ).Value & ((byte)(1 << 2))) == 0) {
         return ""u8;
     }
@@ -418,11 +432,11 @@ internal static @string pkgPath(abiꓸName n) {
     // Note that this field may not be aligned in memory,
     // so we cannot use a direct int32 assignment here.
     copy(((ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ᏑnameOff))).slice(), array<byte>.AliasPointer(n.DataChecked(off, nameOffsetFieldˢ), 4).slice());
-    var pkgPathName = new abiꓸName(Bytes: (ж<byte>)(uintptr)(resolveTypeOff(@unsafe.Pointer.FromPinnedBox(n.Bytes), nameOff)));
+    var pkgPathName = new abi.Name(Bytes: (ж<byte>)(uintptr)(resolveTypeOff(@unsafe.Pointer.FromPinnedBox(n.Bytes), nameOff)));
     return pkgPathName.Name();
 }
 
-internal static abiꓸName newName(@string n, @string tag, bool exported, bool embedded) {
+internal static abi.Name newName(@string n, @string tag, bool exported, bool embedded) {
     return abi.NewName(n, tag, exported, embedded);
 }
 
@@ -432,7 +446,7 @@ internal static abiꓸName newName(@string n, @string tag, bool exported, bool e
  */
 
 // Method represents a single method.
-partial struct ΔMethod {
+partial struct Method {
     // Name is the method name.
     public @string Name;
     // PkgPath is the package path that qualifies a lower case (unexported)
@@ -441,33 +455,39 @@ partial struct ΔMethod {
     // in a method set.
     // See https://golang.org/ref/spec#Uniqueness_of_identifiers
     public @string PkgPath;
-    public ΔType Type;  // method type
-    public ΔValue Func; // func with receiver as first argument
-    public nint Index;  // index for Type.Method
+    public Type Type;  // method type
+    public Value Func; // func with receiver as first argument
+    public nint Index; // index for Type.Method
 }
 
+} partial class reflectᴛMethod {
+
 // IsExported reports whether the method is exported.
-public static bool IsExported(this ΔMethod m) {
+public static bool IsExported(this Method m) {
     return m.PkgPath == ""u8;
 }
 
+} partial class reflectᴛKind {
+
 // String returns the name of k.
-public static @string String(this ΔKind k) {
+public static @string String(this Kind k) {
     if ((nuint)k < (nuint)len(kindNames)) {
         return kindNames[(nuint)k];
     }
     return "kind"u8 + strconv.Itoa((nint)k);
 }
 
+} partial class reflect_package {
+
 [GoLazy] partial class lazyᴛkindNames { internal static slice<@string> kindNames = new golib.SparseArray<@string>{
     [(int)((nuint)Invalid)] = "invalid",
-    [(int)((nuint)ΔBool)] = "bool",
-    [(int)((nuint)ΔInt)] = "int",
+    [(int)((nuint)Bool)] = "bool",
+    [(int)((nuint)Int)] = "int",
     [(int)((nuint)Int8)] = "int8",
     [(int)((nuint)Int16)] = "int16",
     [(int)((nuint)Int32)] = "int32",
     [(int)((nuint)Int64)] = "int64",
-    [(int)((nuint)ΔUint)] = "uint",
+    [(int)((nuint)Uint)] = "uint",
     [(int)((nuint)Uint8)] = "uint8",
     [(int)((nuint)Uint16)] = "uint16",
     [(int)((nuint)Uint32)] = "uint32",
@@ -480,13 +500,13 @@ public static @string String(this ΔKind k) {
     [(int)((nuint)Array)] = "array",
     [(int)((nuint)Chan)] = "chan",
     [(int)((nuint)Func)] = "func",
-    [(int)((nuint)ΔInterface)] = "interface",
+    [(int)((nuint)Interface)] = "interface",
     [(int)((nuint)Map)] = "map",
-    [(int)((nuint)ΔPointer)] = "ptr",
-    [(int)((nuint)ΔSlice)] = "slice",
-    [(int)((nuint)ΔString)] = "string",
+    [(int)((nuint)Pointer)] = "ptr",
+    [(int)((nuint)Slice)] = "slice",
+    [(int)((nuint)String)] = "string",
     [(int)((nuint)Struct)] = "struct",
-    [(int)((nuint)ΔUnsafePointer)] = "unsafe.Pointer"
+    [(int)((nuint)UnsafePointer)] = "unsafe.Pointer"
 }.slice(); }
 
 // resolveNameOff resolves a name offset from a base pointer.
@@ -536,7 +556,7 @@ public static @string String(this ΔKind k) {
 
 // resolveReflectName adds a name to the reflection lookup map in the runtime.
 // It returns a new nameOff that can be used to refer to the pointer.
-internal static aNameOff resolveReflectName(abiꓸName n) {
+internal static aNameOff resolveReflectName(abi.Name n) {
     return (aNameOff)addReflectOff(@unsafe.Pointer.FromPinnedBox(n.Bytes));
 }
 
@@ -553,10 +573,12 @@ internal static aTextOff resolveReflectText(@unsafe.Pointer ptr) {
     return (aTextOff)addReflectOff(ptr);
 }
 
-internal static abiꓸName nameOff(this ж<rtype> Ꮡt, aNameOff off) {
+} partial class reflectᴛrtype {
+
+internal static abi.Name nameOff(this ж<rtype> Ꮡt, aNameOff off) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    return new abiꓸName(Bytes: (ж<byte>)(uintptr)(resolveNameOff((uintptr)@unsafe.Pointer.FromRef(ref t), (int32)off)));
+    return new abi.Name(Bytes: (ж<byte>)(uintptr)(resolveNameOff((uintptr)@unsafe.Pointer.FromRef(ref t), (int32)off)));
 }
 
 internal static ж<abi.Type> typeOff(this ж<rtype> Ꮡt, aTypeOff off) {
@@ -571,9 +593,13 @@ internal static @unsafe.Pointer textOff(this ж<rtype> Ꮡt, aTextOff off) {
     return (uintptr)resolveTextOff((uintptr)@unsafe.Pointer.FromRef(ref t), (int32)off);
 }
 
+} partial class reflect_package {
+
 internal static @unsafe.Pointer textOffFor(ж<abi.Type> t, aTextOff off) {
     return (uintptr)toRType(t).textOff(off);
 }
+
+} partial class reflectᴛrtype {
 
 // go2cs generated this placeholder — func String is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -585,8 +611,8 @@ internal static nint Bits(this ж<rtype> Ꮡt) {
     if (Ꮡt == nil) {
         throw panic("reflect: Bits of nil Type");
     }
-    ΔKind k = t.Kind();
-    if (k < ΔInt || k > Complex128) {
+    Kind k = t.Kind();
+    if (k < Int || k > Complex128) {
         throw panic("reflect: Bits of non-arithmetic Type " + Ꮡt.String());
     }
     return (nint)t.t.Size_ * 8;
@@ -596,7 +622,7 @@ internal static nint Align(this ref rtype t) { return t.t.Align(); }
 
 internal static nint FieldAlign(this ref rtype t) { return t.t.FieldAlign(); }
 
-internal static ΔKind Kind(this ref rtype t) { return (ΔKind)(nuint)t.t.Kind(); }
+internal static Kind Kind(this ref rtype t) { return (Kind)(nuint)t.t.Kind(); }
 
 internal static slice<abi.Method> exportedMethods(this ж<rtype> Ꮡt) {
     var ut = Ꮡt.uncommon();
@@ -614,17 +640,27 @@ internal static slice<abi.Method> exportedMethods(this ж<rtype> Ꮡt) {
 
 // go2cs generated this placeholder — func PkgPath is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+} partial class reflect_package {
+
 internal static @string pkgPathFor(ж<abi.Type> t) {
     return toRType(t).PkgPath();
 }
 
+} partial class reflectᴛrtype {
+
 // go2cs generated this placeholder — func Name is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class reflect_package {
 
 internal static @string nameFor(ж<abi.Type> t) {
     return toRType(t).Name();
 }
 
+} partial class reflectᴛrtype {
+
 // go2cs generated this placeholder — func ChanDir is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class reflect_package {
 
 internal static ж<rtype> toRType(ж<abi.Type> t) {
     return t.Reinterpret<abi.Type, rtype>();
@@ -637,6 +673,8 @@ internal static ж<abi.Type> elem(ж<abi.Type> t) {
     }
     throw panic("reflect: Elem of invalid type " + stringFor(t));
 }
+
+} partial class reflectᴛrtype {
 
 // go2cs generated this placeholder — func Elem is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -673,7 +711,7 @@ internal static (StructField, bool) FieldByNameFunc(this ж<rtype> Ꮡt, Func<@s
 internal static bool OverflowComplex(this ж<rtype> Ꮡt, complex128 x) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    ΔKind k = t.Kind();
+    Kind k = t.Kind();
     switch (k) {
     case var ᴛ when ᴛ == Complex64: {
         return overflowFloat32(real(x)) || overflowFloat32(imag(x));
@@ -687,7 +725,7 @@ internal static bool OverflowComplex(this ж<rtype> Ꮡt, complex128 x) {
 internal static bool OverflowFloat(this ж<rtype> Ꮡt, float64 x) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    ΔKind k = t.Kind();
+    Kind k = t.Kind();
     switch (k) {
     case var ᴛ when ᴛ == Float32: {
         return overflowFloat32(x);
@@ -701,9 +739,9 @@ internal static bool OverflowFloat(this ж<rtype> Ꮡt, float64 x) {
 internal static bool OverflowInt(this ж<rtype> Ꮡt, int64 x) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    ΔKind k = t.Kind();
+    Kind k = t.Kind();
     switch (k) {
-    case var ᴛ when ᴛ == ΔInt || ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64: {
+    case var ᴛ when ᴛ == Int || ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64: {
         var bitSize = t.Size() * 8;
         var trunc = (x.Lsh((uint64)(64 - bitSize))).Rsh((uint64)(64 - bitSize));
         return x != trunc;
@@ -714,9 +752,9 @@ internal static bool OverflowInt(this ж<rtype> Ꮡt, int64 x) {
 internal static bool OverflowUint(this ж<rtype> Ꮡt, uint64 x) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    ΔKind k = t.Kind();
+    Kind k = t.Kind();
     switch (k) {
-    case var ᴛ when ᴛ == ΔUint || ᴛ == Uintptr || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64: {
+    case var ᴛ when ᴛ == Uint || ᴛ == Uintptr || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64: {
         var bitSize = t.Size() * 8;
         var trunc = (x.Lsh((uint64)(64 - bitSize))).Rsh((uint64)(64 - bitSize));
         return x != trunc;
@@ -728,17 +766,19 @@ internal static bool CanSeq(this ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     switch (t.Kind()) {
-    case var ᴛ when ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64 || ᴛ == ΔInt || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64 || ᴛ == ΔUint || ᴛ == Uintptr || ᴛ == Array || ᴛ == ΔSlice || ᴛ == Chan || ᴛ == ΔString || ᴛ == Map: {
+    case var ᴛ when ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64 || ᴛ == Int || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64 || ᴛ == Uint || ᴛ == Uintptr || ᴛ == Array || ᴛ == Slice || ᴛ == Chan || ᴛ == reflect.String || ᴛ == Map: {
         return true;
     }
     case var ᴛ when ᴛ == Func: {
         return canRangeFunc(Ꮡt.Ꮡt);
     }
-    case var ᴛ when ᴛ == ΔPointer: {
+    case var ᴛ when ᴛ == Pointer: {
         return Ꮡt.Elem().Kind() == Array;
     }}
     return false;
 }
+
+} partial class reflect_package {
 
 internal static bool canRangeFunc(ж<abi.Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -758,21 +798,25 @@ internal static bool canRangeFunc(ж<abi.Type> Ꮡt) {
     return yield.InCount == 1 && yield.OutCount == 1 && yield.Out(0).Kind() == abi.Bool;
 }
 
+} partial class reflectᴛrtype {
+
 internal static bool CanSeq2(this ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     switch (t.Kind()) {
-    case var ᴛ when ᴛ == Array || ᴛ == ΔSlice || ᴛ == ΔString || ᴛ == Map: {
+    case var ᴛ when ᴛ == Array || ᴛ == Slice || ᴛ == reflect.String || ᴛ == Map: {
         return true;
     }
     case var ᴛ when ᴛ == Func: {
         return canRangeFunc2(Ꮡt.Ꮡt);
     }
-    case var ᴛ when ᴛ == ΔPointer: {
+    case var ᴛ when ᴛ == Pointer: {
         return Ꮡt.Elem().Kind() == Array;
     }}
     return false;
 }
+
+} partial class reflect_package {
 
 internal static bool canRangeFunc2(ж<abi.Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -792,6 +836,8 @@ internal static bool canRangeFunc2(ж<abi.Type> Ꮡt) {
     return yield.InCount == 2 && yield.OutCount == 1 && yield.Out(0).Kind() == abi.Bool;
 }
 
+} partial class reflectᴛrtype {
+
 internal static iter.Seq<StructField> Fields(this ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -807,8 +853,8 @@ internal static iter.Seq<StructField> Fields(this ж<rtype> Ꮡt) {
     };
 }
 
-internal static iter.Seq<ΔMethod> Methods(this ж<rtype> Ꮡt) {
-    return (Func<ΔMethod, bool> yield) => {
+internal static iter.Seq<Method> Methods(this ж<rtype> Ꮡt) {
+    return (Func<Method, bool> yield) => {
         foreach (var i in range(Ꮡt.NumMethod())) {
             if (!yield(Ꮡt.Method(i))) {
                 return;
@@ -817,13 +863,13 @@ internal static iter.Seq<ΔMethod> Methods(this ж<rtype> Ꮡt) {
     };
 }
 
-internal static iter.Seq<ΔType> Ins(this ж<rtype> Ꮡt) {
+internal static iter.Seq<Type> Ins(this ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Func) {
         throw panic("reflect: Ins of non-func type " + Ꮡt.String());
     }
-    return (Func<ΔType, bool> yield) => {
+    return (Func<Type, bool> yield) => {
         foreach (var i in range(Ꮡt.NumIn())) {
             if (!yield(Ꮡt.In(i))) {
                 return;
@@ -832,13 +878,13 @@ internal static iter.Seq<ΔType> Ins(this ж<rtype> Ꮡt) {
     };
 }
 
-internal static iter.Seq<ΔType> Outs(this ж<rtype> Ꮡt) {
+internal static iter.Seq<Type> Outs(this ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Func) {
         throw panic("reflect: Outs of non-func type " + Ꮡt.String());
     }
-    return (Func<ΔType, bool> yield) => {
+    return (Func<Type, bool> yield) => {
         foreach (var i in range(Ꮡt.NumOut())) {
             if (!yield(Ꮡt.Out(i))) {
                 return;
@@ -846,6 +892,8 @@ internal static iter.Seq<ΔType> Outs(this ж<rtype> Ꮡt) {
         }
     };
 }
+
+} partial class reflect_package {
 
 // add returns p+x.
 //
@@ -869,6 +917,8 @@ internal static @unsafe.Pointer add(@unsafe.Pointer p, uintptr x, @string whySaf
     return (@unsafe.Pointer)((uintptr)p + x);
 }
 
+} partial class reflectᴛChanDir {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string chanˢ => ref chanˢᵇ;
 private static readonly @string chanˢᵇ = "chan<-"u8;
@@ -877,7 +927,7 @@ private static readonly @string chanˢ2ᵇ = "<-chan"u8;
 internal static ref readonly @string chanˢ3 => ref chanˢ3ᵇ;
 private static readonly @string chanˢ3ᵇ = "chan"u8;
 
-public static @string String(this ΔChanDir d) {
+public static @string String(this ChanDir d) {
     switch (d) {
     case var ᴛ when ᴛ == SendDir: {
         return chanˢ;
@@ -891,9 +941,11 @@ public static @string String(this ΔChanDir d) {
     return "ChanDir"u8 + strconv.Itoa((nint)d);
 }
 
+} partial class reflectᴛinterfaceType {
+
 // Method returns the i'th method in the type's method set.
-internal static ΔMethod /*m*/ Method(this ж<interfaceType> Ꮡt, nint i) {
-    ΔMethod m = new();
+internal static Method /*m*/ Method(this ж<interfaceType> Ꮡt, nint i) {
+    Method m = new();
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (i < 0 || i >= len(t.Methods)) {
@@ -917,8 +969,8 @@ internal static ΔMethod /*m*/ Method(this ж<interfaceType> Ꮡt, nint i) {
 internal static nint NumMethod(this ref interfaceType t) { return len(t.Methods); }
 
 // MethodByName method with the given name in the type's method set.
-internal static (ΔMethod m, bool ok) MethodByName(this ж<interfaceType> Ꮡt, @string name) {
-    ΔMethod m = new();
+internal static (Method m, bool ok) MethodByName(this ж<interfaceType> Ꮡt, @string name) {
+    Method m = new();
     bool ok = default;
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -935,6 +987,8 @@ internal static (ΔMethod m, bool ok) MethodByName(this ж<interfaceType> Ꮡt, 
     return (m, ok);
 }
 
+} partial class reflect_package {
+
 // A StructField describes a single field in a struct.
 partial struct StructField {
     // Name is the field name.
@@ -943,17 +997,21 @@ partial struct StructField {
     // field name. It is empty for upper case (exported) field names.
     // See https://golang.org/ref/spec#Uniqueness_of_identifiers
     public @string PkgPath;
-    public ΔType Type;        // field type
+    public Type Type;         // field type
     public StructTag Tag;     // field tag string
     public uintptr Offset;    // offset within struct, in bytes
     public slice<nint> Index; // index sequence for Type.FieldByIndex
     public bool Anonymous;    // is an embedded field
 }
 
+} partial class reflectᴛStructField {
+
 // IsExported reports whether the field is exported.
 public static bool IsExported(this StructField f) {
     return f.PkgPath == ""u8;
 }
+
+} partial class reflect_package {
 
 // A StructTag is the tag string in a struct field.
 //
@@ -964,6 +1022,8 @@ public static bool IsExported(this StructField f) {
 // and colon (U+003A ':').  Each value is quoted using U+0022 '"'
 // characters and Go string literal syntax.
 partial struct StructTag /*@string*/;
+
+} partial class reflectᴛStructTag {
 
 // Get returns the value associated with key in the tag string.
 // If there is no such key in the tag, Get returns the empty string.
@@ -1035,6 +1095,8 @@ public static (@string value, bool ok) Lookup(this StructTag tag, @string key) {
     return ("", false);
 }
 
+} partial class reflectᴛstructType {
+
 // Field returns the i'th struct field.
 internal static StructField /*f*/ Field(this ref structType t, nint i) {
     StructField f = default;
@@ -1076,12 +1138,16 @@ internal static StructField /*f*/ Field(this ref structType t, nint i) {
     return f;
 }
 
+} partial class reflect_package {
+
 // getStaticuint64s returns a pointer to an array of 256 uint64 values,
 // defined in the runtime package in read-only memory.
 // staticuint64s[0] == 0, staticuint64s[1] == 1, and so forth.
 //
 //go:linkname getStaticuint64s runtime.getStaticuint64s
 internal static partial ж<array<uint64>> getStaticuint64s();
+
+} partial class reflectᴛstructType {
 
 // TODO(gri): Should there be an error/bool indicator if the index
 // is wrong for FieldByIndex?
@@ -1094,7 +1160,7 @@ internal static StructField /*f*/ FieldByIndex(this ж<structType> Ꮡt, slice<n
     foreach (var (i, x) in range(index)) {
         if (i > 0) {
             var ft = f.Type;
-            if (ft.Kind() == ΔPointer && ft.Elem().Kind() == Struct) {
+            if (ft.Kind() == Pointer && ft.Elem().Kind() == Struct) {
                 ft = ft.Elem();
             }
             f.Type = ft;
@@ -1104,11 +1170,15 @@ internal static StructField /*f*/ FieldByIndex(this ж<structType> Ꮡt, slice<n
     return f;
 }
 
+} partial class reflect_package {
+
 // A fieldScan represents an item on the fieldByNameFunc scan work list.
 partial struct fieldScan {
     internal ж<structType> typ;
     internal slice<nint> index;
 }
+
+} partial class reflectᴛstructType {
 
 // FieldByNameFunc returns the struct field with a name that satisfies the
 // match function and a boolean to indicate if the field was found.
@@ -1183,8 +1253,8 @@ internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType
                     }
                     result = tΔ1.Field(i);
                     result.Index = default;
-                    result.Index = builtin.appendꓸꓸꓸ(result.Index, scan.index);
-                    result.Index = builtin.append(result.Index, i);
+                    result.Index = appendꓸꓸꓸ(result.Index, scan.index);
+                    result.Index = append(result.Index, i);
                     ok = true;
                     continue;
                 }
@@ -1208,9 +1278,9 @@ internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType
                     nextCount[styp] = 2; // exact multiple doesn't matter
                 }
                 slice<nint> index = default;
-                index = builtin.appendꓸꓸꓸ(index, scan.index);
-                index = builtin.append(index, i);
-                next = builtin.append(nextᴷ, next, new fieldScan(styp, index));
+                index = appendꓸꓸꓸ(index, scan.index);
+                index = append(index, i);
+                next = append(nextᴷ, next, new fieldScan(styp, index));
             }
         }
         if (ok) {
@@ -1246,9 +1316,11 @@ internal static (StructField f, bool present) FieldByName(this ж<structType> �
     return Ꮡt.FieldByNameFunc((@string s) => s == name);
 }
 
+} partial class reflect_package {
+
 // TypeOf returns the reflection [Type] that represents the dynamic type of i.
 // If i is a nil interface value, TypeOf returns nil.
-public static ΔType TypeOf(any i) {
+public static Type TypeOf(any i) {
     return toType(abi.TypeOf(i));
 }
 
@@ -1272,9 +1344,11 @@ internal static ref Δsync.Map ptrMap => ref ((StaticBox<Δsync.Map>)ᏑptrMap).
 // Deprecated: Superseded by [PointerTo].
 //
 //go:fix inline
-public static ΔType PtrTo(ΔType t) { return PointerTo(t); }
+public static Type PtrTo(Type t) { return PointerTo(t); }
 
 // go2cs generated this placeholder — func PointerTo is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class reflectᴛrtype {
 
 internal static ж<abi.Type> ptrTo(this ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -1324,6 +1398,8 @@ internal static ж<abi.Type> ptrTo(this ж<rtype> Ꮡt) {
     return pi._<ж<ptrType>>().of(ptrType.ᏑType);
 }
 
+} partial class reflect_package {
+
 internal static ж<abi.Type> ptrTo(ж<abi.Type> t) {
     return toRType(t).ptrTo();
 }
@@ -1338,9 +1414,11 @@ internal static uint32 fnv1(uint32 x, params ꓸꓸꓸbyte listʗp) {
     return x;
 }
 
+} partial class reflectᴛrtype {
+
 // go2cs generated this placeholder — func Implements is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static bool AssignableTo(this ж<rtype> Ꮡt, ΔType u) {
+internal static bool AssignableTo(this ж<rtype> Ꮡt, Type u) {
     if (u == nil) {
         throw panic("reflect: nil type passed to Type.AssignableTo");
     }
@@ -1348,7 +1426,7 @@ internal static bool AssignableTo(this ж<rtype> Ꮡt, ΔType u) {
     return directlyAssignable(uu, Ꮡt.common()) || implements(uu, Ꮡt.common());
 }
 
-internal static bool ConvertibleTo(this ж<rtype> Ꮡt, ΔType u) {
+internal static bool ConvertibleTo(this ж<rtype> Ꮡt, Type u) {
     if (u == nil) {
         throw panic("reflect: nil type passed to Type.ConvertibleTo");
     }
@@ -1358,6 +1436,8 @@ internal static bool ConvertibleTo(this ж<rtype> Ꮡt, ΔType u) {
 internal static bool Comparable(this ref rtype t) {
     return t.t.Equal != nil;
 }
+
+} partial class reflect_package {
 
 // go2cs generated this placeholder — func implements is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -1484,7 +1564,7 @@ internal static slice<ж<abi.Type>> typesByString(@string s) {
             if (stringFor(typ) != s) {
                 break;
             }
-            ret = builtin.append(retᴷ, ret, typ);
+            ret = append(retᴷ, ret, typ);
         }
     }
     ret = move2heap(retᴷ, ret);
@@ -1499,7 +1579,7 @@ internal static ref Δsync.Map lookupCache => ref ((StaticBox<Δsync.Map>)Ꮡloo
 // Four values describe any of the types we are looking for:
 // type kind, one or two subtypes, and an extra integer.
 partial struct cacheKey {
-    internal ΔKind kind;
+    internal Kind kind;
     internal ж<abi.Type> t1;
     internal ж<abi.Type> t2;
     internal uintptr extra;
@@ -1519,17 +1599,17 @@ internal static ref funcLookupCacheᴛ1 funcLookupCache => ref ((StaticBox<funcL
 
 // go2cs generated this placeholder — func ChanOf is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static slice<ΔType> funcTypes;
+internal static slice<Type> funcTypes;
 internal static readonly ж<Δsync.Mutex> ᏑfuncTypesMutex = new StaticBox<Δsync.Mutex>(default(Δsync.Mutex));
 internal static ref Δsync.Mutex funcTypesMutex => ref ((StaticBox<Δsync.Mutex>)ᏑfuncTypesMutex).ValueSlot;
 
-internal static ΔType initFuncTypes(nint n) {
+internal static Type initFuncTypes(nint n) {
     GoFrame ᒐ = default;
     try {
         ᏑfuncTypesMutex.Lock();
         defer(ᏑfuncTypesMutex.Unlock, ref ᒐ);
         if (n >= len(funcTypes)) {
-            var newFuncTypes = new slice<ΔType>(n + 1);
+            var newFuncTypes = new slice<Type>(n + 1);
             copy(newFuncTypes, funcTypes);
             funcTypes = newFuncTypes;
         }
@@ -1540,7 +1620,7 @@ internal static ΔType initFuncTypes(nint n) {
         funcTypes[n] = StructOf(slice<StructField>([
             new(
                 Name: "FuncType",
-                Type: TypeOf(new abiꓸFuncType())
+                Type: TypeOf(new funcType())
             ),
             new(
                 Name: "Args",
@@ -1564,33 +1644,33 @@ internal static @string funcStr(ж<funcType> Ꮡft) {
     var reprᴷ = new stackAppend<byte>();
 
     var repr = new slice<byte>(0, 64);
-    repr = builtin.append(repr, ((@string)"func(").ꓸꓸꓸ);
+    repr = append(repr, ((@string)"func(").ꓸꓸꓸ);
     foreach (var (i, t) in range(Ꮡft.InSlice())) {
         if (i > 0) {
-            repr = builtin.append(repr, ((@string)", ").ꓸꓸꓸ);
+            repr = append(repr, ((@string)", ").ꓸꓸꓸ);
         }
         if (ft.IsVariadic() && i == (nint)ft.InCount - 1) {
-            repr = builtin.append(repr, ((@string)"...").ꓸꓸꓸ);
-            repr = builtin.append(repr, stringFor((t.Reinterpret<abi.Type, sliceType>()).Value.Elem).ꓸꓸꓸ);
+            repr = append(repr, ((@string)"...").ꓸꓸꓸ);
+            repr = append(repr, stringFor((t.Reinterpret<abi.Type, sliceType>()).Value.Elem).ꓸꓸꓸ);
         } else {
-            repr = builtin.append(repr, stringFor(t).ꓸꓸꓸ);
+            repr = append(repr, stringFor(t).ꓸꓸꓸ);
         }
     }
-    repr = builtin.append(reprᴷ, repr, (byte)')');
+    repr = append(reprᴷ, repr, (byte)')');
     var @out = Ꮡft.OutSlice();
     if (len(@out) == 1) {
-        repr = builtin.append(repr, (byte)' ');
+        repr = append(repr, (byte)' ');
     } else if (len(@out) > 1) {
-        repr = builtin.append(repr, ((@string)" (").ꓸꓸꓸ);
+        repr = append(repr, ((@string)" (").ꓸꓸꓸ);
     }
     foreach (var (i, t) in range(@out)) {
         if (i > 0) {
-            repr = builtin.append(repr, ((@string)", ").ꓸꓸꓸ);
+            repr = append(repr, ((@string)", ").ꓸꓸꓸ);
         }
-        repr = builtin.append(repr, stringFor(t).ꓸꓸꓸ);
+        repr = append(repr, stringFor(t).ꓸꓸꓸ);
     }
     if (len(@out) > 1) {
-        repr = builtin.append(repr, (byte)')');
+        repr = append(repr, (byte)')');
     }
     return (@string)repr;
 }
@@ -1600,11 +1680,11 @@ internal static @string funcStr(ж<funcType> Ꮡft) {
 internal static bool isReflexive(ж<abi.Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    switch (((ΔKind)(nuint)t.Kind())) {
-    case var ᴛ when ᴛ == ΔBool || ᴛ == ΔInt || ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64 || ᴛ == ΔUint || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64 || ᴛ == Uintptr || ᴛ == Chan || ᴛ == ΔPointer || ᴛ == ΔString || ᴛ == ΔUnsafePointer: {
+    switch (((Kind)(nuint)t.Kind())) {
+    case var ᴛ when ᴛ == Bool || ᴛ == Int || ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64 || ᴛ == Uint || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64 || ᴛ == Uintptr || ᴛ == Chan || ᴛ == Pointer || ᴛ == String || ᴛ == UnsafePointer: {
         return true;
     }
-    case var ᴛ when ᴛ == Float32 || ᴛ == Float64 || ᴛ == Complex64 || ᴛ == Complex128 || ᴛ == ΔInterface: {
+    case var ᴛ when ᴛ == Float32 || ᴛ == Float64 || ᴛ == Complex64 || ᴛ == Complex128 || ᴛ == Interface: {
         return false;
     }
     case var ᴛ when ᴛ == Array: {
@@ -1631,11 +1711,11 @@ internal static bool isReflexive(ж<abi.Type> Ꮡt) {
 internal static bool needKeyUpdate(ж<abi.Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    switch (((ΔKind)(nuint)t.Kind())) {
-    case var ᴛ when ᴛ == ΔBool || ᴛ == ΔInt || ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64 || ᴛ == ΔUint || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64 || ᴛ == Uintptr || ᴛ == Chan || ᴛ == ΔPointer || ᴛ == ΔUnsafePointer: {
+    switch (((Kind)(nuint)t.Kind())) {
+    case var ᴛ when ᴛ == Bool || ᴛ == Int || ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64 || ᴛ == Uint || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64 || ᴛ == Uintptr || ᴛ == Chan || ᴛ == Pointer || ᴛ == UnsafePointer: {
         return false;
     }
-    case var ᴛ when ᴛ == Float32 || ᴛ == Float64 || ᴛ == Complex64 || ᴛ == Complex128 || ᴛ == ΔInterface || ᴛ == ΔString: {
+    case var ᴛ when ᴛ == Float32 || ᴛ == Float64 || ᴛ == Complex64 || ᴛ == Complex128 || ᴛ == Interface || ᴛ == String: {
         // Float keys can be updated from +0 to -0.
         // String keys can be updated to use a smaller backing store.
         // Interfaces might have floats or strings in them.
@@ -1665,8 +1745,8 @@ internal static bool needKeyUpdate(ж<abi.Type> Ꮡt) {
 internal static bool hashMightPanic(ж<abi.Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    switch (((ΔKind)(nuint)t.Kind())) {
-    case var ᴛ when ᴛ == ΔInterface: {
+    switch (((Kind)(nuint)t.Kind())) {
+    case var ᴛ when ᴛ == Interface: {
         return true;
     }
     case var ᴛ when ᴛ == Array: {
@@ -1744,7 +1824,7 @@ internal static bool isValidFieldName(@string fieldName) {
 }
 
 // This must match cmd/compile/internal/compare.IsRegularMemory
-internal static bool isRegularMemory(ΔType t) {
+internal static bool isRegularMemory(Type t) {
     switch (t.Kind()) {
     case var ᴛ when ᴛ == Array: {
         var elem = t.Elem();
@@ -1753,7 +1833,7 @@ internal static bool isRegularMemory(ΔType t) {
         }
         return elem.Comparable() && t.Len() == 0;
     }
-    case var ᴛ when ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64 || ᴛ == ΔInt || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64 || ᴛ == ΔUint || ᴛ == Uintptr || ᴛ == Chan || ᴛ == ΔPointer || ᴛ == ΔBool || ᴛ == ΔUnsafePointer: {
+    case var ᴛ when ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64 || ᴛ == Int || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64 || ᴛ == Uint || ᴛ == Uintptr || ᴛ == Chan || ᴛ == Pointer || ᴛ == Bool || ᴛ == UnsafePointer: {
         return true;
     }
     case var ᴛ when ᴛ == Struct: {
@@ -1785,7 +1865,7 @@ internal static bool isRegularMemory(ΔType t) {
 
 // isPaddedField reports whether the i'th field of struct type t is followed
 // by padding.
-internal static bool isPaddedField(ΔType t, nint i) {
+internal static bool isPaddedField(Type t, nint i) {
     var field = t.Field(i);
     if (i + 1 < t.NumField()) {
         return field.Offset + field.Type.Size() != t.Field(i + 1).Offset;
@@ -1858,9 +1938,9 @@ internal static uintptr typeptrdata(ж<abi.Type> Ꮡt) {
 
 internal static slice<byte> appendVarint(slice<byte> x, uintptr v) {
     for (; v >= 0x80; v >>= 7) {
-        x = builtin.append(x, (byte)((uintptr)(v | 0x80)));
+        x = append(x, (byte)((uintptr)(v | 0x80)));
     }
-    x = builtin.append(x, (byte)v);
+    x = append(x, (byte)v);
     return x;
 }
 
@@ -1949,6 +2029,8 @@ partial struct bitVector {
     internal slice<byte> data;
 }
 
+} partial class reflectᴛbitVector {
+
 // append a bit to the bitmap.
 internal static void append(this ref bitVector bv, uint8 bit) {
     if (bv.n % (uint32)(8 * goarch.PtrSize) == 0) {
@@ -1962,6 +2044,8 @@ internal static void append(this ref bitVector bv, uint8 bit) {
     bv.data[bv.n / 8] |= (uint8)((uint8)(bit << (int)(bv.n % 8)));
     bv.n++;
 }
+
+} partial class reflect_package {
 
 // go2cs generated this placeholder — func addTypeBits is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 

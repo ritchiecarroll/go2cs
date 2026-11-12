@@ -17,6 +17,8 @@ using go.hash;
 using go.io;
 using time = time_package;
 using unicode;
+using zip = zip_package;
+using static zip_package;
 
 partial class zip_package {
 
@@ -46,6 +48,8 @@ partial struct header {
 public static ж<Writer> NewWriter(io.Writer w) {
     return Ꮡ(new Writer(cw: Ꮡ(new countWriter(w: new bufio_WriterжWriter(bufio.NewWriter(w))))));
 }
+
+} partial class zipᴛWriter {
 
 // SetOffset sets the offset of the beginning of the zip data within the
 // underlying writer. It should be used when the zip data is appended to an
@@ -246,6 +250,8 @@ public static (io.Writer, error) Create(this ref Writer w, @string name) {
     return w.CreateHeader(header);
 }
 
+} partial class zip_package {
+
 // detectUTF8 reports whether s is a valid UTF-8 string, and whether the string
 // must be considered UTF-8 encoding (i.e., not compatible with CP-437, ASCII,
 // or any other common encoding).
@@ -270,6 +276,8 @@ internal static (bool valid, bool require) detectUTF8(@string s) {
     }
     return (true, require);
 }
+
+} partial class zipᴛWriter {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string archiveZipInvalidˢ => ref archiveZipInvalidˢᵇ;
@@ -419,6 +427,8 @@ public static (io.Writer, error) CreateHeader(this ref Writer w, ж<FileHeader> 
     return (ow, default);
 }
 
+} partial class zip_package {
+
 internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
@@ -463,6 +473,8 @@ internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
     var (_, err) = w.Write(h.Extra);
     return err;
 }
+
+} partial class zipᴛWriter {
 
 // CreateRaw adds a file to the zip archive using the provided [FileHeader] and
 // returns a [Writer] to which the file contents should be written. The file's
@@ -598,13 +610,17 @@ public static error AddFS(this ж<Writer> Ꮡw, fs.FS fsys) {
 internal static Func<io.Writer, (io.WriteCloser, error)> compressor(this ref Writer w, uint16 method) {
     var comp = w.compressors[method];
     if (comp == nil) {
-        comp = compressor(method);
+        comp = zip.compressor(method);
     }
     return comp;
 }
 
+} partial class zip_package {
+
 partial struct dirWriter {
 }
+
+} partial class zipᴛdirWriter {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string zipWriteToDirectoryˢ => ref zipWriteToDirectoryˢᵇ;
@@ -617,6 +633,8 @@ internal static (nint, error) Write(this dirWriter _, slice<byte> b) {
     return (0, errors.New(zipWriteToDirectoryˢ));
 }
 
+} partial class zip_package {
+
 partial struct fileWriter {
     /*embed*/ internal ж<header> header;
     internal io.Writer zipw;
@@ -626,6 +644,8 @@ partial struct fileWriter {
     internal hash.Hash32 crc32;
     internal bool closed;
 }
+
+} partial class zipᴛfileWriter {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string zipWriteToClosedFileˢ => ref zipWriteToClosedFileˢᵇ;
@@ -705,10 +725,14 @@ internal static error writeDataDescriptor(this ref fileWriter w) {
     return err;
 }
 
+} partial class zip_package {
+
 partial struct countWriter {
     internal io.Writer w;
     internal int64 count;
 }
+
+} partial class zipᴛcountWriter {
 
 internal static (nint, error) Write(this ref countWriter w, slice<byte> p) {
     var (n, err) = w.w.Write(p);
@@ -716,15 +740,23 @@ internal static (nint, error) Write(this ref countWriter w, slice<byte> p) {
     return (n, err);
 }
 
+} partial class zip_package {
+
 partial struct nopCloser {
     /*embed*/ public io_package.Writer Writer;
 }
+
+} partial class zipᴛnopCloser {
 
 internal static error Close(this nopCloser w) {
     return default;
 }
 
+} partial class zip_package {
+
 partial struct writeBuf /*[]byte*/;
+
+} partial class zipᴛwriteBuf {
 
 internal static void uint8(this ref writeBuf b, uint8 v) {
     (b)[0] = v;
@@ -746,4 +778,4 @@ internal static void uint64(this ref writeBuf b, uint64 v) {
     b = (b)[8..];
 }
 
-} // end zip_package
+} // end zipᴛwriteBuf

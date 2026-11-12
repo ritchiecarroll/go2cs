@@ -7,6 +7,7 @@ using fmt = fmt_package;
 using slices = slices_package;
 using strings = strings_package;
 using iter = iter_package;
+using static asmgen_package;
 
 partial class asmgen_package {
 
@@ -15,7 +16,7 @@ partial class asmgen_package {
 // Unexported fields and methods should not be.
 
 // A Func represents a single assembly function.
-partial struct ΔFunc {
+partial struct Func {
     public @string Name;
     public ж<Asm> Asm;
     internal slice<@string> inputs;   // name of input slices (not beginning with z)
@@ -23,12 +24,14 @@ partial struct ΔFunc {
     internal map<@string, nint> args; // offsets of args, results on stack
 }
 
+} partial class asmgenᴛAsm {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string funcˢ => ref funcˢᵇ;
 private static readonly @string funcˢᵇ = "func "u8;
 
 // Func starts a new function in the assembly output.
-public static ж<ΔFunc> Func(this ж<Asm> Ꮡa, @string decl) {
+public static ж<Func> Func(this ж<Asm> Ꮡa, @string decl) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     var (d, ok) = strings.CutPrefix(decl, funcˢ);
@@ -40,7 +43,7 @@ public static ж<ΔFunc> Func(this ж<Asm> Ꮡa, @string decl) {
     if (!ok) {
         Ꮡa.Fatalf("func decl does not have func arg list");
     }
-    var f = Ꮡ(new ΔFunc(
+    var f = Ꮡ(new Func(
         Name: name,
         Asm: Ꮡa,
         args: new map<@string, nint>()
@@ -107,19 +110,21 @@ public static ж<ΔFunc> Func(this ж<Asm> Ꮡa, @string decl) {
     return f;
 }
 
+} partial class asmgenᴛFunc {
+
 // Arg allocates a new register, copies the named argument (or result) into it,
 // and returns that register.
-public static ΔReg Arg(this ref ΔFunc f, @string name) {
+public static Reg Arg(this ref Func f, @string name) {
     return f.ArgHint(name, HintNone);
 }
 
 // ArgHint is like Arg but uses a register allocation hint.
-public static ΔReg ArgHint(this ref ΔFunc f, @string name, Hint hint) {
+public static Reg ArgHint(this ref Func f, @string name, Hint hint) {
     var (off, ok) = f.args[name, ꟷ];
     if (!ok) {
         f.Asm.Fatalf("unknown argument %s", name);
     }
-    var mem = new ΔReg(fmt.Sprintf("%s+%d(FP)"u8, name, off));
+    var mem = new Reg(fmt.Sprintf("%s+%d(FP)"u8, name, off));
     if (hint == HintMemOK && f.Asm.Arch.memOK) {
         return mem;
     }
@@ -129,18 +134,18 @@ public static ΔReg ArgHint(this ref ΔFunc f, @string name, Hint hint) {
 }
 
 // ArgPtr is like Arg but returns a RegPtr.
-public static RegPtr ArgPtr(this ref ΔFunc f, @string name) {
+public static RegPtr ArgPtr(this ref Func f, @string name) {
     return (RegPtr)f.Arg(name);
 }
 
 // StoreArg stores src into the named argument (or result).
-public static void StoreArg(this ref ΔFunc f, ΔReg src, @string name) {
+public static void StoreArg(this ref Func f, Reg src, @string name) {
     var (off, ok) = f.args[name, ꟷ];
     if (!ok) {
         f.Asm.Fatalf("unknown argument %s", name);
     }
     var a = f.Asm;
-    var mem = new ΔReg(fmt.Sprintf("%s+%d(FP)"u8, name, off));
+    var mem = new Reg(fmt.Sprintf("%s+%d(FP)"u8, name, off));
     if (src.IsImm() && !a.Arch.memOK) {
         var r = a.Reg();
         a.Mov(src, r);
@@ -151,4 +156,4 @@ public static void StoreArg(this ref ΔFunc f, ΔReg src, @string name) {
     a.Mov(src, mem);
 }
 
-} // end asmgen_package
+} // end asmgenᴛFunc

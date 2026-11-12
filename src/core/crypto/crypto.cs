@@ -36,12 +36,15 @@ namespace go;
 using hash = hash_package;
 using io = io_package;
 using strconv = strconv_package;
+using static crypto_package;
 
 partial class crypto_package {
 
 // Hash identifies a cryptographic hash function that is implemented in another
 // package.
 partial struct Hash /*num:nuint*/;
+
+} partial class cryptoᴛHash {
 
 // HashFunc simply returns the value of h so that [Hash] implements [SignerOpts].
 public static Hash HashFunc(this Hash h) {
@@ -152,6 +155,8 @@ public static @string String(this Hash h) {
     }}
 }
 
+} partial class crypto_package {
+
 public static Hash MD4 => /* 1 + iota */ 1; // import golang.org/x/crypto/md4
 public static Hash MD5 => 2;                // import crypto/md5
 public static Hash SHA1 => 3;               // import crypto/sha1
@@ -195,6 +200,8 @@ internal static Hash maxHash => 20;
     [(int)((nuint)BLAKE2b_512)] = 64
 }.slice(); }
 
+} partial class cryptoᴛHash {
+
 // Size returns the length, in bytes, of a digest resulting from the given hash
 // function. It doesn't require that the hash function in question be linked
 // into the program.
@@ -205,7 +212,11 @@ public static nint Size(this Hash h) {
     throw panic("crypto: Size of unknown hash function");
 }
 
+} partial class crypto_package {
+
 internal static slice<Func<hash.Hash>> hashes = new slice<Func<hash.Hash>>((nint)(maxHash));
+
+} partial class cryptoᴛHash {
 
 // New returns a new hash.Hash calculating the given hash function. New panics
 // if the hash function is not linked into the binary.
@@ -223,6 +234,8 @@ public static hash.Hash New(this Hash h) {
 public static bool Available(this Hash h) {
     return h < maxHash && hashes[h] != nil;
 }
+
+} partial class crypto_package {
 
 // RegisterHash registers a function that returns a new instance of the given
 // hash function. This is intended to be called from the init function in

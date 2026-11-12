@@ -14,6 +14,7 @@ using httpguts = vendor.golang.org.x.net.http.httpguts_package;
 using go.net;
 using iter = iter_package;
 using vendor.golang.org.x.net.http;
+using static httptest_package;
 
 partial class httptest_package {
 
@@ -33,21 +34,21 @@ partial struct ResponseRecorder {
     // Deprecated: HeaderMap exists for historical compatibility
     // and should not be used. To access the headers returned by a handler,
     // use the Response.Header map as returned by the Result method.
-    public httpꓸHeader HeaderMap;
+    public http.Header HeaderMap;
     // Body is the buffer to which the Handler's Write calls are sent.
     // If nil, the Writes are silently discarded.
     public ж<bytes.Buffer> Body;
     // Flushed is whether the Handler called Flush.
     public bool Flushed;
     internal ж<http.Response> result; // cache of Result's return value
-    internal httpꓸHeader snapHeader;  // snapshot of HeaderMap at first Write
+    internal http.Header snapHeader;  // snapshot of HeaderMap at first Write
     internal bool wroteHeader;
 }
 
 // NewRecorder returns an initialized [ResponseRecorder].
 public static ж<ResponseRecorder> NewRecorder() {
     return Ꮡ(new ResponseRecorder(
-        HeaderMap: new httpꓸHeader(0),
+        HeaderMap: new http.Header(0),
         Body: @new<bytes.Buffer>(),
         Code: 200
     ));
@@ -58,14 +59,16 @@ public static ж<ResponseRecorder> NewRecorder() {
 public static ref readonly @string DefaultRemoteAddr => ref DefaultRemoteAddrᵇ;
 private static readonly @string DefaultRemoteAddrᵇ = "1.2.3.4"u8;
 
+} partial class httptestᴛResponseRecorder {
+
 // Header implements [http.ResponseWriter]. It returns the response
 // headers to mutate within a handler. To test the headers that were
 // written after a handler completes, use the [ResponseRecorder.Result] method and see
 // the returned Response value's Header.
-public static httpꓸHeader Header(this ref ResponseRecorder rw) {
+public static http.Header Header(this ref ResponseRecorder rw) {
     var m = rw.HeaderMap;
     if (m == nil) {
-        m = new httpꓸHeader(0);
+        m = new http.Header(0);
         rw.HeaderMap = m;
     }
     return m;
@@ -134,6 +137,8 @@ public static (nint, error) WriteString(this ref ResponseRecorder rw, @string st
     return (len(str), default);
 }
 
+} partial class httptest_package {
+
 // bodyAllowedForStatus reports whether a given response status code
 // permits a body. See RFC 7230, section 3.3.
 internal static bool bodyAllowedForStatus(nint status) {
@@ -167,6 +172,8 @@ internal static void checkWriteHeaderCode(nint code) {
     }
 }
 
+} partial class httptestᴛResponseRecorder {
+
 // WriteHeader implements [http.ResponseWriter].
 public static void WriteHeader(this ref ResponseRecorder rw, nint code) {
     if (rw.wroteHeader) {
@@ -177,7 +184,7 @@ public static void WriteHeader(this ref ResponseRecorder rw, nint code) {
     rw.Code = code;
     rw.wroteHeader = true;
     if (rw.HeaderMap == nil) {
-        rw.HeaderMap = new httpꓸHeader(0);
+        rw.HeaderMap = new http.Header(0);
     }
     rw.snapHeader = rw.HeaderMap.Clone();
 }
@@ -240,7 +247,7 @@ public static ж<http.Response> Result(this ref ResponseRecorder rw) {
 
     {
         var (trailers, ok) = rw.snapHeader[trailerˢ, ꟷ]; if (ok) {
-            res.Trailer = new httpꓸHeader(len(trailers));
+            res.Trailer = new http.Header(len(trailers));
             foreach (var (_, k) in range(trailers)) {
                 foreach (var iᴛ1 in range<@string>(strings.SplitSeq(k, ",").Invoke)) {
                     var kΔ1 = iᴛ1;
@@ -265,7 +272,7 @@ public static ж<http.Response> Result(this ref ResponseRecorder rw) {
             continue;
         }
         if (res.Trailer == nil) {
-            res.Trailer = new httpꓸHeader(0);
+            res.Trailer = new http.Header(0);
         }
         foreach (var (_, v) in range(vv)) {
             res.Trailer.Add(strings.TrimPrefix(k, http.TrailerPrefix), v);
@@ -273,6 +280,8 @@ public static ж<http.Response> Result(this ref ResponseRecorder rw) {
     }
     return res;
 }
+
+} partial class httptest_package {
 
 // parseContentLength trims whitespace from s and returns -1 if no value
 // is set, or the value if it's >= 0.

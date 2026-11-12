@@ -8,6 +8,7 @@ using errors = errors_package;
 using fmt = fmt_package;
 using go.sync;
 using net = net_package;
+using static tls_package;
 
 partial class tls_package {
 
@@ -19,6 +20,8 @@ public static QUICEncryptionLevel QUICEncryptionLevelInitial => /* QUICEncryptio
 public static QUICEncryptionLevel QUICEncryptionLevelEarly => 1;
 public static QUICEncryptionLevel QUICEncryptionLevelHandshake => 2;
 public static QUICEncryptionLevel QUICEncryptionLevelApplication => 3;
+
+} partial class tlsᴛQUICEncryptionLevel {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string initialˢ => ref initialˢᵇ;
@@ -48,6 +51,8 @@ public static @string String(this QUICEncryptionLevel l) {
         return fmt.Sprintf("QUICEncryptionLevel(%v)"u8, (nint)l);
     }}
 }
+
+} partial class tls_package {
 
 // A QUICConn represents a connection which uses a QUIC implementation as the underlying
 // transport as described in RFC 9001.
@@ -210,6 +215,8 @@ internal static ж<QUICConn> newQUICConn(ж<Conn> Ꮡconn, ref QUICConfig config
     ));
 }
 
+} partial class tlsᴛQUICConn {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsStartCalledMoreThanˢ => ref tlsStartCalledMoreThanˢᵇ;
 private static readonly @string tlsStartCalledMoreThanˢᵇ = "tls: Start called more than once"u8;
@@ -335,11 +342,15 @@ public static error HandleData(this ж<QUICConn> Ꮡq, QUICEncryptionLevel level
     finally { ᒐ.Run(); }
 }
 
+} partial class tls_package {
+
 partial struct QUICSessionTicketOptions {
     // EarlyData specifies whether the ticket may be used for 0-RTT.
     public bool EarlyData;
     public slice<slice<byte>> Extra;
 }
+
+} partial class tlsᴛQUICConn {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsSendSessionTicketˢ => ref tlsSendSessionTicketˢᵇ;
@@ -393,7 +404,7 @@ public static error StoreSession(this ref QUICConn q, ж<SessionState> session) 
 }
 
 // ConnectionState returns basic TLS details about the connection.
-public static ΔConnectionState ConnectionState(this ref QUICConn q) {
+public static ConnectionState ConnectionState(this ref QUICConn q) {
     return q.conn.ConnectionState();
 }
 
@@ -412,6 +423,8 @@ public static void SetTransportParameters(this ref QUICConn q, slice<byte> @para
     }
 }
 
+} partial class tls_package {
+
 // quicError ensures err is an AlertError.
 // If err is not already, quicError wraps it with alertInternalError.
 internal static error quicError(error err) {
@@ -429,6 +442,8 @@ internal static error quicError(error err) {
     // Truncate the text of the alert to 0 characters.
     return fmt.Errorf("%w%.0w"u8, err, (AlertError)(uint8)a);
 }
+
+} partial class tlsᴛConn {
 
 internal static error quicReadHandshakeBytes(this ж<Conn> Ꮡc, nint n) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -578,4 +593,4 @@ internal static error quicWaitForSignal(this ж<Conn> Ꮡc) {
     finally { if (ᒐd1) Ꮡc.DerefOrNull().handshakeMutex.Lock(); ᒐ.Run(); }
 }
 
-} // end tls_package
+} // end tlsᴛConn

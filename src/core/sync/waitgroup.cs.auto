@@ -14,8 +14,11 @@ using synctest = @internal.synctest_package;
 using atomic = go.sync.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
-using System.Runtime.InteropServices;
+using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
+using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
+using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
 using go.sync;
+using static sync_package;
 
 partial class sync_package {
 
@@ -65,6 +68,8 @@ partial class sync_package {
 
 // waitGroupBubbleFlag indicates that a WaitGroup is associated with a synctest bubble.
 internal static UntypedInt waitGroupBubbleFlag => 0x8000_0000;
+
+} partial class syncᴛWaitGroup {
 
 // Add adds delta, which may be negative, to the [WaitGroup] task counter.
 // If the counter becomes zero, all goroutines blocked on [WaitGroup.Wait] are released.
@@ -285,4 +290,4 @@ public static partial void Go(this ж<WaitGroup> Ꮡwg, Action f) {
     });
 }
 
-} // end sync_package
+} // end syncᴛWaitGroup

@@ -209,11 +209,11 @@ internal static (slice<uint16>, error) createEnvBlock(slice<@string> envv) {
     return (b, default);
 }
 
-public static void CloseOnExec(ΔHandle fd) {
+public static void CloseOnExec(Handle fd) {
     SetHandleInformation(fd, HANDLE_FLAG_INHERIT, 0);
 }
 
-public static error /*err*/ SetNonblock(ΔHandle fd, bool nonblocking) {
+public static error /*err*/ SetNonblock(Handle fd, bool nonblocking) {
     return default;
 }
 
@@ -314,12 +314,12 @@ partial struct SysProcAttr {
     public bool HideWindow;
     public @string CmdLine; // used if non-empty, else the windows command line is built by escaping the arguments passed to StartProcess
     public uint32 CreationFlags;
-    public Token Token;                               // if set, runs new process in the security context represented by the token
-    public ж<SecurityAttributes> ProcessAttributes;   // if set, applies these security attributes as the descriptor for the new process
-    public ж<SecurityAttributes> ThreadAttributes;    // if set, applies these security attributes as the descriptor for the main thread of the new process
-    public bool NoInheritHandles;                     // if set, no handles are inherited by the new process, not even the standard handles, contained in ProcAttr.Files, nor the ones contained in AdditionalInheritedHandles
-    public slice<ΔHandle> AdditionalInheritedHandles; // a list of additional handles, already marked as inheritable, that will be inherited by the new process
-    public ΔHandle ParentProcess;                     // if non-zero, the new process regards the process given by this handle as its parent process, and AdditionalInheritedHandles, if set, should exist in this parent process
+    public Token Token;                              // if set, runs new process in the security context represented by the token
+    public ж<SecurityAttributes> ProcessAttributes;  // if set, applies these security attributes as the descriptor for the new process
+    public ж<SecurityAttributes> ThreadAttributes;   // if set, applies these security attributes as the descriptor for the main thread of the new process
+    public bool NoInheritHandles;                    // if set, no handles are inherited by the new process, not even the standard handles, contained in ProcAttr.Files, nor the ones contained in AdditionalInheritedHandles
+    public slice<Handle> AdditionalInheritedHandles; // a list of additional handles, already marked as inheritable, that will be inherited by the new process
+    public Handle ParentProcess;                     // if non-zero, the new process regards the process given by this handle as its parent process, and AdditionalInheritedHandles, if set, should exist in this parent process
 }
 
 internal static readonly ж<ProcAttr> ᏑzeroProcAttr = new StaticBox<ProcAttr>(default(ProcAttr));
@@ -402,14 +402,14 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
         if ((~sys).ParentProcess != 0) {
             parentProcess = sys.Value.ParentProcess;
         }
-        var fd = new slice<ΔHandle>(len(attr.Files));
+        var fd = new slice<Handle>(len(attr.Files));
         foreach (var i in range(len(attr.Files))) {
             if (attr.Files[i] > 0) {
-                var errΔ2 = DuplicateHandle(p, (ΔHandle)attr.Files[i], parentProcess, Ꮡ(fd, i), 0, true, DUPLICATE_SAME_ACCESS);
+                var errΔ2 = DuplicateHandle(p, (Handle)attr.Files[i], parentProcess, Ꮡ(fd, i), 0, true, DUPLICATE_SAME_ACCESS);
                 if (errΔ2 != nil) {
                     (pid, handle, err) = (0, 0, errΔ2); goto ᒐdone;
                 }
-                defer(DuplicateHandle, parentProcess, fd[i], (ΔHandle)0, (ж<ΔHandle>)(nil), (uint32)0, (bool)false, (uint32)(DUPLICATE_CLOSE_SOURCE), ref ᒐ);
+                defer(DuplicateHandle, parentProcess, fd[i], (Handle)0, (ж<Handle>)(nil), (uint32)0, (bool)false, (uint32)(DUPLICATE_CLOSE_SOURCE), ref ᒐ);
             }
         }
         (var procAttrList, err) = newProcThreadAttributeList(2);

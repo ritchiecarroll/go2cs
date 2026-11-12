@@ -6,6 +6,7 @@ namespace go;
 using errors = errors_package;
 using Δsync = sync_package;
 using syscall = syscall_package;
+using static time_package;
 
 partial class time_package {
 
@@ -19,7 +20,7 @@ partial class time_package {
 // Location is used to provide a time zone in a printed Time value and for
 // calculations involving intervals that may cross daylight savings time
 // boundaries.
-partial struct ΔLocation {
+partial struct Location {
     internal @string name;
     internal slice<zone> zone;
     internal slice<zoneTrans> tx;
@@ -63,14 +64,14 @@ internal static UntypedInt alpha => /* -1 << 63 */ -9223372036854775808; // math
 internal static UntypedInt omega => /* 1<<63 - 1 */ 9223372036854775807; // math.MaxInt64
 
 // UTC represents Universal Coordinated Time (UTC).
-public static ж<ΔLocation> ΔUTC;
-internal static void initᴛΔUTC() { ΔUTC = ᏑutcLoc; }
+public static ж<Location> UTC;
+internal static void initᴛUTC() { UTC = ᏑutcLoc; }
 
 // utcLoc is separate so that get can refer to &utcLoc
 // and ensure that it never returns a nil *Location,
 // even if a badly behaved client has changed UTC.
-internal static readonly ж<ΔLocation> ᏑutcLoc = new StaticBox<ΔLocation>(new ΔLocation(name: "UTC"));
-internal static ref ΔLocation utcLoc => ref ((StaticBox<ΔLocation>)ᏑutcLoc).ValueSlot;
+internal static readonly ж<Location> ᏑutcLoc = new StaticBox<Location>(new Location(name: "UTC"));
+internal static ref Location utcLoc => ref ((StaticBox<Location>)ᏑutcLoc).ValueSlot;
 
 // Local represents the system's local time zone.
 // On Unix systems, Local consults the TZ environment
@@ -78,17 +79,19 @@ internal static ref ΔLocation utcLoc => ref ((StaticBox<ΔLocation>)ᏑutcLoc).
 // use the system default /etc/localtime.
 // TZ="" means use UTC.
 // TZ="foo" means use file foo in the system timezone directory.
-public static ж<ΔLocation> ΔLocal;
-internal static void initᴛΔLocal() { ΔLocal = ᏑlocalLoc; }
+public static ж<Location> Local;
+internal static void initᴛLocal() { Local = ᏑlocalLoc; }
 
 // localLoc is separate so that initLocal can initialize
 // it even if a client has changed Local.
-internal static readonly ж<ΔLocation> ᏑlocalLoc = new StaticBox<ΔLocation>(default(ΔLocation));
-internal static ref ΔLocation localLoc => ref ((StaticBox<ΔLocation>)ᏑlocalLoc).ValueSlot;
+internal static readonly ж<Location> ᏑlocalLoc = new StaticBox<Location>(default(Location));
+internal static ref Location localLoc => ref ((StaticBox<Location>)ᏑlocalLoc).ValueSlot;
 internal static readonly ж<Δsync.Once> ᏑlocalOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
 internal static ref Δsync.Once localOnce => ref ((StaticBox<Δsync.Once>)ᏑlocalOnce).ValueSlot;
 
-internal static ж<ΔLocation> get(this ж<ΔLocation> Ꮡl) {
+} partial class timeᴛLocation {
+
+internal static ж<Location> get(this ж<Location> Ꮡl) {
     if (Ꮡl == nil) {
         return ᏑutcLoc;
     }
@@ -100,17 +103,19 @@ internal static ж<ΔLocation> get(this ж<ΔLocation> Ꮡl) {
 
 // String returns a descriptive name for the time zone information,
 // corresponding to the name argument to [LoadLocation] or [FixedZone].
-public static @string String(this ж<ΔLocation> Ꮡl) {
+public static @string String(this ж<Location> Ꮡl) {
     return Ꮡl.get().name;
 }
 
-internal static slice<ж<ΔLocation>> unnamedFixedZones;
+} partial class time_package {
+
+internal static slice<ж<Location>> unnamedFixedZones;
 internal static readonly ж<Δsync.Once> ᏑunnamedFixedZonesOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
 internal static ref Δsync.Once unnamedFixedZonesOnce => ref ((StaticBox<Δsync.Once>)ᏑunnamedFixedZonesOnce).ValueSlot;
 
 // FixedZone returns a [Location] that always uses
 // the given zone name and offset (seconds east of UTC).
-public static ж<ΔLocation> FixedZone(@string name, nint offset) {
+public static ж<Location> FixedZone(@string name, nint offset) {
     // Most calls to FixedZone have an unnamed zone with an offset by the hour.
     // Optimize for that case by returning the same *Location for a given hour.
     UntypedInt hoursBeforeUTC = 12;
@@ -118,7 +123,7 @@ public static ж<ΔLocation> FixedZone(@string name, nint offset) {
     nint hour = offset / 60 / 60;
     if (name == ""u8 && (nint)(-hoursBeforeUTC) <= hour && hour <= (nint)(+hoursAfterUTC) && hour * 60 * 60 == offset) {
         ᏑunnamedFixedZonesOnce.Do(() => {
-            unnamedFixedZones = new slice<ж<ΔLocation>>(hoursBeforeUTC + 1 + hoursAfterUTC);
+            unnamedFixedZones = new slice<ж<Location>>(hoursBeforeUTC + 1 + hoursAfterUTC);
             for (nint hr = -hoursBeforeUTC; hr <= (nint)(+hoursAfterUTC); hr++) {
                 unnamedFixedZones[hr + (nint)hoursBeforeUTC] = fixedZone(""u8, hr * 60 * 60);
             }
@@ -128,8 +133,8 @@ public static ж<ΔLocation> FixedZone(@string name, nint offset) {
     return fixedZone(name, offset);
 }
 
-internal static ж<ΔLocation> fixedZone(@string name, nint offset) {
-    var l = Ꮡ(new ΔLocation(
+internal static ж<Location> fixedZone(@string name, nint offset) {
+    var l = Ꮡ(new Location(
         name: name,
         zone: [new(name, offset, false)],
         tx: [new(alpha, 0, false, false)],
@@ -140,6 +145,12 @@ internal static ж<ΔLocation> fixedZone(@string name, nint offset) {
     return l;
 }
 
+} partial class timeᴛLocation {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string utcˢ => ref utcˢᵇ;
+private static readonly @string utcˢᵇ = "UTC"u8;
+
 // lookup returns information about the time zone in use at an
 // instant in time expressed as seconds since January 1, 1970 00:00:00 UTC.
 //
@@ -147,7 +158,7 @@ internal static ж<ΔLocation> fixedZone(@string name, nint offset) {
 // the start and end times bracketing sec when that zone is in effect,
 // the offset in seconds east of UTC (such as -5*60*60), and whether
 // the daylight savings is being observed at that time.
-internal static (@string name, nint offset, int64 start, int64 end, bool isDST) lookup(this ж<ΔLocation> Ꮡl, int64 sec) {
+internal static (@string name, nint offset, int64 start, int64 end, bool isDST) lookup(this ж<Location> Ꮡl, int64 sec) {
     @string name = default;
     nint offset = default;
     int64 start = default;
@@ -238,7 +249,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
 //  3. Otherwise, use the first zone that is not daylight time, if
 //     there is one.
 //  4. Otherwise, use the first zone.
-internal static nint lookupFirstZone(this ref ΔLocation l) {
+internal static nint lookupFirstZone(this ref Location l) {
     // Case 1.
     if (!l.firstZoneUsed()) {
         return 0;
@@ -266,7 +277,7 @@ internal static nint lookupFirstZone(this ref ΔLocation l) {
 
 // firstZoneUsed reports whether the first zone is used by some
 // transition.
-internal static bool firstZoneUsed(this ref ΔLocation l) {
+internal static bool firstZoneUsed(this ref Location l) {
     foreach (var (_, tx) in range(l.tx)) {
         if (tx.index == 0) {
             return true;
@@ -274,6 +285,8 @@ internal static bool firstZoneUsed(this ref ΔLocation l) {
     }
     return false;
 }
+
+} partial class time_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string m320M1110ˢ => ref m320M1110ˢᵇ;
@@ -608,12 +621,12 @@ internal static nint tzruleTime(nint year, rule r, nint off) {
             d += 7;
         }
         for (nint i = 1; i < r.week; i++) {
-            if (d + 7 >= daysIn((ΔMonth)r.mon, year)) {
+            if (d + 7 >= daysIn((Month)r.mon, year)) {
                 break;
             }
             d += 7;
         }
-        d += daysBefore((ΔMonth)r.mon);
+        d += daysBefore((Month)r.mon);
         if (isLeap(year) && r.mon > 2) {
             d++;
         }
@@ -624,10 +637,12 @@ internal static nint tzruleTime(nint year, rule r, nint off) {
     return s + r.time - off;
 }
 
+} partial class timeᴛLocation {
+
 // lookupName returns information about the time zone with
 // the given name (such as "EST") at the given pseudo-Unix time
 // (what the given time of day would be in UTC).
-internal static (nint offset, bool ok) lookupName(this ж<ΔLocation> Ꮡl, @string name, int64 unix) {
+internal static (nint offset, bool ok) lookupName(this ж<Location> Ꮡl, @string name, int64 unix) {
     nint offset = default;
     bool ok = default;
     ref var l = ref Ꮡl.DerefOrNull();
@@ -662,6 +677,8 @@ internal static (nint offset, bool ok) lookupName(this ж<ΔLocation> Ꮡl, @str
     return (offset, ok);
 }
 
+} partial class time_package {
+
 // NOTE(rsc): Eventually we will need to accept the POSIX TZ environment
 // syntax too, but I don't feel like implementing it today.
 internal static error errLocation = errors.New("time: invalid location name");
@@ -689,12 +706,12 @@ private static readonly @string zoneinfoˢᵇ = "ZONEINFO"u8;
 //   - on a Unix system, the system standard installation location
 //   - $GOROOT/lib/time/zoneinfo.zip
 //   - the time/tzdata package, if it was imported
-public static (ж<ΔLocation>, error) LoadLocation(@string name) {
+public static (ж<Location>, error) LoadLocation(@string name) {
     if (name == ""u8 || name == "UTC"u8) {
-        return (ΔUTC, default);
+        return (UTC, default);
     }
     if (name == "Local"u8) {
-        return (ΔLocal, default);
+        return (Local, default);
     }
     if (containsDotDot(name) || name[0] == '/' || name[0] == '\\') {
         // No valid IANA Time Zone name contains a single dot,

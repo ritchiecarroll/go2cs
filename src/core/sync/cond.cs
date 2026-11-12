@@ -6,6 +6,7 @@ namespace go;
 using atomic = go.sync.atomic_package;
 using @unsafe = unsafe_package;
 using go.sync;
+using static sync_package;
 
 partial class sync_package {
 
@@ -46,6 +47,8 @@ partial struct Cond {
 public static ж<Cond> NewCond(Locker l) {
     return Ꮡ(new Cond(L: l));
 }
+
+} partial class syncᴛCond {
 
 // Wait atomically unlocks c.L and suspends execution
 // of the calling goroutine. After later resuming execution,
@@ -93,10 +96,16 @@ public static void Broadcast(this ж<Cond> Ꮡc) {
     runtime_notifyListNotifyAll(Ꮡc.Ꮡnotify);
 }
 
+} partial class sync_package {
+
 // copyChecker holds back pointer to itself to detect object copying.
 partial struct copyChecker /*num:uintptr*/;
 
+} partial class syncᴛcopyChecker {
+
 // go2cs generated this placeholder — func check is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class sync_package {
 
 // noCopy may be added to structs which must not be copied
 // after the first use.
@@ -108,8 +117,10 @@ partial struct copyChecker /*num:uintptr*/;
 partial struct noCopy {
 }
 
+} partial class syncᴛnoCopy {
+
 // Lock is a no-op used by -copylocks checker from `go vet`.
 internal static void Lock(this ref noCopy _) { }
 internal static void Unlock(this ref noCopy _) { }
 
-} // end sync_package
+} // end syncᴛnoCopy

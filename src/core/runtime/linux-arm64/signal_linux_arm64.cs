@@ -6,6 +6,7 @@ namespace go;
 using goarch = @internal.goarch_package;
 using @unsafe = unsafe_package;
 using @internal;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -13,6 +14,8 @@ partial struct sigctxt {
     internal ж<siginfo> info;
     internal @unsafe.Pointer ctxt;
 }
+
+} partial class runtimeᴛsigctxt {
 
 //go:nosplit
 //go:nowritebarrierrec
@@ -70,13 +73,15 @@ internal static void set_sigaddr(this ref sigctxt c, uint64 x) {
     ((ж<uintptr>)(uintptr)((uintptr)add(@unsafe.Pointer.FromPinnedBox(c.info), 2 * goarch.PtrSize))).Value = (uintptr)x;
 }
 
+} partial class runtime_package {
+
 internal static void dumpSigStack(@string s, uintptr sp, uintptr stackhi, uintptr ctx) {
     println(s);
-    println((@string)"SP:\t", (Δhex)(uint64)sp);
-    println((@string)"ctx:\t", (Δhex)(uint64)ctx);
+    println((@string)"SP:\t", (hex)(uint64)sp);
+    println((@string)"ctx:\t", (hex)(uint64)ctx);
     var entriesStart = (uintptr)Ꮡ(((ж<ucontext>)(uintptr)((@unsafe.Pointer)ctx)).Value.uc_mcontext).Ꮡ__reserved;
-    hexdumpWords(sp, stackhi, (uintptr Δp, hexdumpMarker hm) => {
-        switch (Δp) {
+    hexdumpWords(sp, stackhi, (uintptr p, hexdumpMarker hm) => {
+        switch (p) {
         case var ᴛ when ᴛ == ctx: {
             hm.start();
             print((@string)"C");

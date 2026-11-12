@@ -5,6 +5,7 @@ namespace go.math;
 
 using math = math_package;
 using sync = sync_package;
+using static big_package;
 
 partial class big_package {
 
@@ -21,6 +22,8 @@ internal static ж<Float> three() {
     });
     return threeOnce.v;
 }
+
+} partial class bigᴛFloat {
 
 // Sqrt sets z to the rounded square root of x, and returns it.
 //
@@ -133,6 +136,8 @@ internal static void sqrtInverse(this ж<Float> Ꮡz, ж<Float> x) {
     // x/√x = √x
     Ꮡz.Mul(x, sqi);
 }
+
+} partial class big_package {
 
 // newFloat returns a new *Float with space for twice the given
 // precision.

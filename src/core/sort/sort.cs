@@ -9,6 +9,8 @@ namespace go;
 using bits = math.bits_package;
 using slices = slices_package;
 using math;
+using sort = sort_package;
+using static sort_package;
 
 partial class sort_package {
 
@@ -63,12 +65,16 @@ internal static sortedHint decreasingHint => 2;
 // xorshift paper: https://www.jstatsoft.org/article/view/v008i14/xorshift.pdf
 partial struct xorshift /*num:uint64*/;
 
+} partial class sortᴛxorshift {
+
 internal static uint64 Next(this ref xorshift r) {
     r ^= (xorshift)((r << 13));
     r ^= (xorshift)((r >> 7));
     r ^= (xorshift)((r << 17));
     return (uint64)(r);
 }
+
+} partial class sort_package {
 
 internal static nuint nextPowerOfTwo(nint length) {
     nuint shift = (nuint)bits.Len((nuint)length);
@@ -89,10 +95,14 @@ partial struct reverse {
     /*embed*/ public Interface Interface;
 }
 
+} partial class sortᴛreverse {
+
 // Less returns the opposite of the embedded implementation's Less method.
 internal static bool Less(this reverse r, nint i, nint j) {
     return r.Interface.Less(j, i);
 }
+
+} partial class sort_package {
 
 // Reverse returns the reverse order for data.
 public static Interface Reverse(Interface data) {
@@ -118,16 +128,22 @@ public static bool IsSorted(Interface data) {
 // IntSlice attaches the methods of Interface to []int, sorting in increasing order.
 partial struct IntSlice /*[]nint*/;
 
+} partial class sortᴛIntSlice {
+
 public static nint Len(this IntSlice x) { return len(x); }
 public static bool Less(this IntSlice x, nint i, nint j) { return x[i] < x[j]; }
 public static void Swap(this IntSlice x, nint i, nint j) { (x[i], x[j]) = (x[j], x[i]); }
 
 // Sort is a convenience method: x.Sort() calls Sort(x).
-public static void Sort(this IntSlice x) { Sort((Interface)(x)); }
+public static void Sort(this IntSlice x) { sort.Sort(x); }
+
+} partial class sort_package {
 
 // Float64Slice implements Interface for a []float64, sorting in increasing order,
 // with not-a-number (NaN) values ordered before other values.
 partial struct Float64Slice /*[]float64*/;
+
+} partial class sortᴛFloat64Slice {
 
 public static nint Len(this Float64Slice x) { return len(x); }
 
@@ -140,23 +156,33 @@ public static nint Len(this Float64Slice x) { return len(x); }
 public static bool Less(this Float64Slice x, nint i, nint j) { return x[i] < x[j] || (isNaN(x[i]) && !isNaN(x[j])); }
 public static void Swap(this Float64Slice x, nint i, nint j) { (x[i], x[j]) = (x[j], x[i]); }
 
+} partial class sort_package {
+
 // isNaN is a copy of math.IsNaN to avoid a dependency on the math package.
 internal static bool isNaN(float64 f) {
     return f != f;
 }
 
+} partial class sortᴛFloat64Slice {
+
 // Sort is a convenience method: x.Sort() calls Sort(x).
-public static void Sort(this Float64Slice x) { Sort((Interface)(x)); }
+public static void Sort(this Float64Slice x) { sort.Sort(x); }
+
+} partial class sort_package {
 
 // StringSlice attaches the methods of Interface to []string, sorting in increasing order.
 partial struct StringSlice /*[]@string*/;
+
+} partial class sortᴛStringSlice {
 
 public static nint Len(this StringSlice x) { return len(x); }
 public static bool Less(this StringSlice x, nint i, nint j) { return x[i] < x[j]; }
 public static void Swap(this StringSlice x, nint i, nint j) { (x[i], x[j]) = (x[j], x[i]); }
 
 // Sort is a convenience method: x.Sort() calls Sort(x).
-public static void Sort(this StringSlice x) { Sort((Interface)(x)); }
+public static void Sort(this StringSlice x) { sort.Sort(x); }
+
+} partial class sort_package {
 
 // Convenience wrappers for common cases
 

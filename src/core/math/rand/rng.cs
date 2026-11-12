@@ -3,6 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.math;
 
+using static rand_package;
+
 partial class rand_package {
 
 /*
@@ -194,6 +196,8 @@ internal static int32 seedrand(int32 x) {
     return x;
 }
 
+} partial class randᴛrngSource {
+
 // Seed uses the provided seed value to initialize the generator to a deterministic state.
 internal static void Seed(this ref rngSource rng, int64 seed) {
     rng.tap = 0;
@@ -245,4 +249,4 @@ internal static uint64 Uint64(this ref rngSource rng) {
     return (uint64)x;
 }
 
-} // end rand_package
+} // end randᴛrngSource

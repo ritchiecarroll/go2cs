@@ -13,6 +13,7 @@ using abi = @internal.abi_package;
 using runtime = runtime_package;
 using @unsafe = unsafe_package;
 using @internal;
+using static weak_package;
 
 partial class weak_package {
 
@@ -85,6 +86,8 @@ public static Pointer<T> Make<T>(ж<T> Ꮡptr) {
     return new Pointer<T>(u: u);
 }
 
+} partial class weakᴛPointer {
+
 // Value returns the original pointer used to create the weak pointer.
 // It returns nil if the value pointed to by the original pointer was reclaimed by
 // the garbage collector.
@@ -96,6 +99,8 @@ public static ж<T> Value<T>(this Pointer<T> p) {
     }
     return (ж<T>)(uintptr)(runtime_makeStrongFromWeak(p.u));
 }
+
+} partial class weak_package {
 
 // Implemented in runtime.
 

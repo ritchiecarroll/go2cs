@@ -10,10 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -75,9 +71,9 @@ using static go.encoding.asn1_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/asn1/asn1.go", "asn1.cs", "AC1Y7pzSgoLclLS0tq7CgpSClIKUqtKCgpSUgpSCgriCgqqigpSCgpSClKaYooKUgpSCgpSCgoKUggAMHqKClIKCqqKCgqaCgoKCpqjCgoKUgoaClIKC3LYABxCSpoKClIKCgpSmrOKCgsrcgoKUgoKUgqaCgoKClJSCAAwe4oKCpoKClIKmgoKUgoKClIKUpoKqwpSCgoKClIKmgoKmlKbq0oKUgqaCpq7CgoKmqJIAAhDygoKCpoIACyKyAAsw8oKCgqaCrgANFIKUlO7CgpTuAA4SgriCpoKCuIaUgqYAEywACgKmgoKUgoKCgriCgoKmgoKmgoKUgoKUpoKCgpSCgoKClIKCpoKUgoKUgriCgris4oKCgsqCgoKCgpTKxraCgpSCgpSClIKCgoKUgoKCgoKCgqaogoKCgoKCgpqi7OKCmIKUgqaCgpS4goKCgpSCgpSCgoKUtLS0tLS0tLS0tLS0+oKClIKUpoKClIKCgpSCgpSClIKCgqaCgpSCuIKClJS4goKC7oKClKSCAAgSgoKClIK4gqaCgpSCgoKmgoKCpoKCgriWgoKUlJSCgpSCppSCpIKkgqSCgpSCpIKClIKkgqSCgpSClKSCgpSCpIKCgpSUgoKUlLaUgoKCuISCpoKCgoKUgoLcpIKCgoKUgoKUgqSClLS0tLT8tLakgpSUgqqilKas0oKUgoKUgpQAAp4BAEwCAAwSgoKmgpSqwoKClIKClA==", "", "", "1063=Field/1/1/1")]
+[assembly: GoPositionMap("encoding/asn1/asn1.go", "asn1.cs", "ADBYAAoOvNKCgtyUtLS2rsKClIKUgpSq0oKClJSClIKCuIKCqqKClIKClIKUppiigpSClIKClIKCgpSCAA4eooKUgoKqooKCpoKCgoKmyMKCgpSChoKUgoLctgAJEJKmgoKUgoKClKbM4oKCytyCgpSCgpSCpoKCgoKUlIIADB7igoKmgoKUgqaCgpSCgoKUgpSmgqrClIKCgoKUgqaCgqaUpurSgpSCpoKmrsKCgqaokgACEPKCgoKmggALIrIACzDygoKCpoKuAA0UgpSU7sKClO4ADhKCuIKmgoK4hpSCpgATLAAKAqaCgpSCgoKCuIKCgqaCgqaCgpSCgpSmgoKClIKCgoKUgoKmgpSCgpSCuIKCuKzigoKCyoKCgoKClMrGtoKClIKClIKUgoKCgpSCgoKCgoKCpqiCgoKCgoKCmqLs4oKYgpSCpoKClLiCgoKClIKClIKCgpS0tLS0tLS0tLS0tLT6goKUgpSmgoKUgoKClIKClIKUgoKCpoKClIK4goKUlLiCgoLugoKUpIIACBKCgoKUgriCpoKClIKCgqaCgoKmgoKCuJaCgpSUlIKClIKmlIKkgqSCpIKClIKkgoKUgqSCpIKClIKUpIKClIKkgoKClJSCgpSUtpSCgoK4hIKmgoKCgpSCgtykgoKCgpSCgpSCpIKUtLS0tPy0tqSClJSCqqKUpqzSgpSCgpSClAACngEATAIADhKCgqaClMrCgoKUgoKU", "", "", "1080=Field/1/1/1")]
 [assembly: GoPositionMap("encoding/asn1/common.go", "common.cs", "AFe8AQAIAoKCgpS0goLGtLS0tLS0goKCxoKCgsa0goLGgoLGtuqilKSkpKSklJSkpKSClIKUpJQ=")]
-[assembly: GoPositionMap("encoding/asn1/marshal.go", "marshal.cs", "AB9CgqaCyoKmgoLcgqaCgtyCgoKUpoKCgoLcgoKClKYACBKCgoIACBKUgoKCAAsYgqaCgsqClIKCpoKCpqaClIK4goKmgoKmpoKUgoKCgqampqKCpsqCgoKClIKUgpSUgqaUuIKUgqamooKCgpSmgoKClIKCgpSCpoKCgpSmyoKmgoKC3IKCgpSmgoKCuIKCpqaC7oK4poKCgrimgoKCuKaCpoKmgu6CgqailIKCpqailIKCpqaClJS0tKamgoKCppSmgpSClJSCgpSUlKS0toKCpoKUpoKCgpSmopSkgoKUpIKkgqSCpoCkgpSkpJSCgriUgoLKgoKCyqampKSkgoKCgrjGgoKmlKSkpJSCgoK4gpTGlKSkpNjmooKmgqaCpoKClILugoK4goKCppSClKaCgqaCpoKmlLiCgoKUgrjGgoLIgoKUAAcQgqaUgoKmlIKCgoKClKaClJSU7rimlAACHgAMAqqigoKUgoI=", "", "", "753=Len/1/1/3")]
+[assembly: GoPositionMap("encoding/asn1/marshal.go", "marshal.cs", "ACJCgqaCAAgKgqaCggAJDIKmgoIACQyCgoKUpoKCgoIACQyCgoKUpgAIEoKCggAIEpSCgoIADxiCpoKCAAgKgpSCgqaCgqamgpSC2IKCpoKCpqaClIKCgoKmpqaigqbKgoKCgpSClIKUlIKmlLiClIKmpqKCgoKUpoKCgpSCgoKUgqaCgoKUpuqCpoKCggAJDIKCgpSmgoKC2IKCpqaC7oK4poKCgrimgoKCuKaCpoKmgu6CgqailIKCpqailIKCpqaClJS0tKamgoKCppSmgpSClJSCgpSUlKS0toKCpoKUpoKCgpSmopSkgoKUpIKkgqSCpoCkgpSkpJSCgriUgoLKgoKCyqampKSkgoKCgrjGgoKmlKSkpJSCgoK4gpTGlKSkpNjmooKmgqaCpoKClILugoK4goKCppSClKaCgqaCpoKmlLiCgoKUgrjGgoLIgoKUAAcQgqaUgoKmlIKCgoKClKaClJSU7rimlAACHgAMAqqigoKUgoI=", "", "", "790=Len/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -139,3 +135,26 @@ public static partial class asn1_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(asn1_package.BitString)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛBitString;
+[GoMethodHost(typeof(asn1_package.ObjectIdentifier)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛObjectIdentifier;
+[GoMethodHost(typeof(asn1_package.StructuralError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛStructuralError;
+[GoMethodHost(typeof(asn1_package.SyntaxError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛSyntaxError;
+[GoMethodHost(typeof(asn1_package.bitStringEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛbitStringEncoder;
+[GoMethodHost(typeof(asn1_package.byteEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛbyteEncoder;
+[GoMethodHost(typeof(asn1_package.bytesEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛbytesEncoder;
+[GoMethodHost(typeof(asn1_package.int64Encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛint64Encoder;
+[GoMethodHost(typeof(asn1_package.invalidUnmarshalError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛinvalidUnmarshalError;
+[GoMethodHost(typeof(asn1_package.multiEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛmultiEncoder;
+[GoMethodHost(typeof(asn1_package.oidEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛoidEncoder;
+[GoMethodHost(typeof(asn1_package.setEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛsetEncoder;
+[GoMethodHost(typeof(asn1_package.stringEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛstringEncoder;
+[GoMethodHost(typeof(asn1_package.taggedEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛtaggedEncoder;
+// </MethodHolders>

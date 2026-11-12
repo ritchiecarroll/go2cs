@@ -16,6 +16,7 @@ using Δcolor = go.image.color_package;
 using io = io_package;
 using compress;
 using go.image;
+using static gif_package;
 
 partial class gif_package {
 
@@ -111,6 +112,8 @@ partial struct blockReader {
     internal error err;
 }
 
+} partial class gifᴛblockReader {
+
 internal static void fill(this ref blockReader b) {
     if (b.err != nil) {
         return;
@@ -203,6 +206,8 @@ internal static error close(this ref blockReader b) {
     return errTooMuch;
 }
 
+} partial class gifᴛdecoder {
+
 // decode reads a GIF image from r and stores the result in d.
 internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly, bool keepAllFrames) {
     ref var d = ref Ꮡd.DerefOrNull();
@@ -289,7 +294,7 @@ internal static (Δcolor.Palette, error) readColorTable(this ref decoder d, byte
     nint j = 0;
     var p = new Δcolor.Palette(n);
     foreach (var i in range(len(p))) {
-        p[i] = new colorꓸRGBA(d.tmp[j + 0], d.tmp[j + 1], d.tmp[j + 2], 0xFF);
+        p[i] = new Δcolor.RGBA(d.tmp[j + 0], d.tmp[j + 1], d.tmp[j + 2], 0xFF);
         j += 3;
     }
     return (p, default);
@@ -407,7 +412,7 @@ internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFra
                 m.Palette = appendꓸꓸꓸ((Δcolor.Palette)default, d.globalColorTable);
             }
             nint ti = (nint)d.transparentIndex; if (ti < len(m.Palette)) {
-                m.Palette[ti] = new colorꓸRGBA();
+                m.Palette[ti] = new Δcolor.RGBA();
             } else {
                 // The transparentIndex is out of range, which is an error
                 // according to the spec, but Firefox and Google Chrome
@@ -416,7 +421,7 @@ internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFra
                 var p = new Δcolor.Palette(ti + 1);
                 copy(p, m.Palette);
                 for (nint i = len(m.Palette); i < len(p); i++) {
-                    p[i] = new colorꓸRGBA();
+                    p[i] = new Δcolor.RGBA();
                 }
                 m.Palette = p;
             }
@@ -544,6 +549,8 @@ internal static (nint, error) readBlock(this ref decoder d) {
     }
     return ((nint)n, default);
 }
+
+} partial class gif_package {
 
 // interlaceScan defines the ordering for a pass of the interlace algorithm.
 partial struct interlaceScan {

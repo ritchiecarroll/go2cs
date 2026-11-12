@@ -31,6 +31,7 @@ using go.sync;
 using iter = iter_package;
 using vendor.golang.org.x.net.http;
 using ꓸꓸꓸany = Span<any>;
+using static httputil_package;
 
 partial class httputil_package {
 
@@ -45,6 +46,8 @@ partial struct ProxyRequest {
     // before Rewrite is called.
     public ж<http.Request> Out;
 }
+
+} partial class httputilᴛProxyRequest {
 
 // SetURL routes the outbound request to the scheme, host, and base path
 // provided in target. If the target's path is "/base" and the incoming
@@ -72,6 +75,8 @@ internal static ref readonly @string xForwardedHostˢ => ref xForwardedHostˢᵇ
 private static readonly @string xForwardedHostˢᵇ = "X-Forwarded-Host"u8;
 internal static ref readonly @string xForwardedProtoˢ => ref xForwardedProtoˢᵇ;
 private static readonly @string xForwardedProtoˢᵇ = "X-Forwarded-Proto"u8;
+internal static ref readonly @string httpˢ => ref httpˢᵇ;
+private static readonly @string httpˢᵇ = "http"u8;
 internal static ref readonly @string httpsˢ2 => ref httpsˢ2ᵇ;
 private static readonly @string httpsˢ2ᵇ = "https"u8;
 
@@ -112,6 +117,8 @@ public static void SetXForwarded(this ref ProxyRequest r) {
         r.Out.Header.Set(xForwardedProtoˢ, httpsˢ2);
     }
 }
+
+} partial class httputil_package {
 
 // ReverseProxy is an HTTP Handler that takes an incoming request and
 // sends it to another server, proxying the response back to the
@@ -364,7 +371,7 @@ internal static void rewriteRequestURL(ref http.Request req, ж<url.URL> Ꮡtarg
     }
 }
 
-internal static void copyHeader(httpꓸHeader dst, httpꓸHeader src) {
+internal static void copyHeader(http.Header dst, http.Header src) {
     foreach (var (k, vv) in src) {
         foreach (var (_, v) in range(vv)) {
             dst.Add(k, v);
@@ -388,6 +395,8 @@ internal static slice<@string> hopHeaders = [
     "Transfer-Encoding",
     "Upgrade"
 ];
+
+} partial class httputilᴛReverseProxy {
 
 internal static void defaultErrorHandler(this ref ReverseProxy p, http.ResponseWriter rw, ж<http.Request> req, error err) {
     p.logf("http: proxy error: %v", err);
@@ -431,6 +440,12 @@ internal static ref readonly @string upgradeˢ => ref upgradeˢᵇ;
 private static readonly @string upgradeˢᵇ = "Upgrade"u8;
 internal static ref readonly @string forwardedˢ => ref forwardedˢᵇ;
 private static readonly @string forwardedˢᵇ = "Forwarded"u8;
+internal static ref readonly @string xForwardedForˢ => ref xForwardedForˢᵇ;
+private static readonly @string xForwardedForˢᵇ = "X-Forwarded-For"u8;
+internal static ref readonly @string xForwardedHostˢ => ref xForwardedHostˢᵇ;
+private static readonly @string xForwardedHostˢᵇ = "X-Forwarded-Host"u8;
+internal static ref readonly @string xForwardedProtoˢ => ref xForwardedProtoˢᵇ;
+private static readonly @string xForwardedProtoˢᵇ = "X-Forwarded-Proto"u8;
 internal static ref readonly @string clientSentUnsupportedˢ => ref clientSentUnsupportedˢᵇ;
 private static readonly @string clientSentUnsupportedˢᵇ = "client sent unsupported CONNECT request"u8;
 internal static ref readonly @string userAgentˢ => ref userAgentˢᵇ;
@@ -512,7 +527,7 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
             defer(ᴛ0 => ᴛ0.Close(), outreqʗ1.Body, ref ᒐ);
         }
         if (outreq.Header == nil) {
-            outreq.Header = new httpꓸHeader(0); // Issue 33142: historical behavior was to always allocate
+            outreq.Header = new http.Header(0); // Issue 33142: historical behavior was to always allocate
         }
 
         if ((p.Director != nil) == (p.Rewrite != nil)) {
@@ -620,7 +635,7 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
                         return default;
                     }
                     var h = rw.Header();
-                    copyHeader(h, (httpꓸHeader)(map<@string, slice<@string>>)header);
+                    copyHeader(h, (http.Header)(map<@string, slice<@string>>)header);
                     rw.WriteHeader(code);
 
                     // Clear headers, it's not automatically done by ResponseWriter.WriteHeader() for 1xx responses
@@ -712,6 +727,8 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
     finally { ᒐ.Run(); }
 }
 
+} partial class httputil_package {
+
 internal static bool inOurTests; // whether we're in our own tests
 
 // shouldPanicOnCopyError reports whether the reverse proxy should
@@ -736,8 +753,12 @@ internal static bool shouldPanicOnCopyError(ж<http.Request> Ꮡreq) {
     return false;
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string connectionˢ => ref connectionˢᵇ;
+private static readonly @string connectionˢᵇ = "Connection"u8;
+
 // removeHopByHopHeaders removes hop-by-hop headers.
-internal static void removeHopByHopHeaders(httpꓸHeader h) {
+internal static void removeHopByHopHeaders(http.Header h) {
     // RFC 7230, section 6.1: Remove headers listed in the "Connection" header.
     foreach (var (_, f) in range(h[connectionˢ])) {
         foreach (var iᴛ1 in range<@string>(strings.SplitSeq(f, ",").Invoke)) {
@@ -754,6 +775,8 @@ internal static void removeHopByHopHeaders(httpꓸHeader h) {
         h.Del(f);
     }
 }
+
+} partial class httputilᴛReverseProxy {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
@@ -858,6 +881,8 @@ internal static void logf(this ref ReverseProxy p, @string format, params ꓸꓸ
     }
 }
 
+} partial class httputil_package {
+
 partial struct maxLatencyWriter {
     internal io.Writer dst;
     internal Func<error> flush;
@@ -866,6 +891,8 @@ partial struct maxLatencyWriter {
     internal ж<time.Timer> t;
     internal bool flushPending;
 }
+
+} partial class httputilᴛmaxLatencyWriter {
 
 internal static (nint n, error err) Write(this ж<maxLatencyWriter> Ꮡm, slice<byte> p) {
     nint n = default;
@@ -931,12 +958,20 @@ internal static void stop(this ж<maxLatencyWriter> Ꮡm) {
     finally { if (ᒐd1) Ꮡm.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static @string upgradeType(httpꓸHeader h) {
+} partial class httputil_package {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string upgradeˢ => ref upgradeˢᵇ;
+private static readonly @string upgradeˢᵇ = "Upgrade"u8;
+
+internal static @string upgradeType(http.Header h) {
     if (!httpguts.HeaderValuesContainsToken(h[connectionˢ], upgradeˢ)) {
         return ""u8;
     }
     return h.Get(upgradeˢ);
 }
+
+} partial class httputilᴛReverseProxy {
 
 internal static partial void handleUpgradeResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq, ж<http.Response> Ꮡres) {
     GoFrame ᒐ = default;
@@ -1024,6 +1059,8 @@ internal static partial void handleUpgradeResponse(this ж<ReverseProxy> Ꮡp, h
     finally { ᒐ.Run(); }
 }
 
+} partial class httputil_package {
+
 internal static error errCopyDone = errors.New("hijacked connection copy complete");
 
 // switchProtocolCopier exists so goroutines proxying data back and
@@ -1035,6 +1072,8 @@ partial struct switchProtocolCopier {
 internal partial interface copyFromBackend_type /*dyn*/ {
     error CloseWrite();
 }
+
+} partial class httputilᴛswitchProtocolCopier {
 
 internal static void copyFromBackend(this switchProtocolCopier c, channel/*<-*/<error> errc) {
     var (_, err) = io.Copy(c.user, c.backend); if (err != nil) {
@@ -1065,6 +1104,8 @@ internal static void copyToBackend(this switchProtocolCopier c, channel/*<-*/<er
 
     errc.ᐸꟷ(errCopyDone);
 }
+
+} partial class httputil_package {
 
 internal static ж<godebug.Setting> urlmaxqueryparams = godebug.New("urlmaxqueryparams");
 
@@ -1123,6 +1164,8 @@ partial struct noopCloseReader {
     internal atomic.Bool closed;
 }
 
+} partial class httputilᴛnoopCloseReader {
+
 internal static error Close(this ж<noopCloseReader> Ꮡncr) {
     Ꮡncr.Ꮡclosed.Store(true);
     return default;
@@ -1141,4 +1184,4 @@ internal static (nint, error) Read(this ж<noopCloseReader> Ꮡncr, slice<byte> 
     return ncr.readCloser.Read(p);
 }
 
-} // end httputil_package
+} // end httputilᴛnoopCloseReader

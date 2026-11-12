@@ -743,7 +743,7 @@ internal static (context, nint) tMetaContentURL(context c, slice<byte> s) {
 // It returns an error if s[i:] does not look like it begins with an
 // attribute name, such as encountering a quote mark without a preceding
 // equals sign.
-internal static (nint, ж<ΔError>) eatAttrName(slice<byte> s, nint i) {
+internal static (nint, ж<Error>) eatAttrName(slice<byte> s, nint i) {
     for (nint j = i; j < len(s); j++) {
         switch (s[j]) {
         case (byte)' ' or (byte)'\t' or (byte)'\n' or (byte)'\f' or (byte)'\r' or (byte)'=' or (byte)'>': {

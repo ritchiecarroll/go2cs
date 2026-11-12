@@ -4,6 +4,7 @@
 namespace go.vendor.golang.org.x.net.http2;
 
 using io = io_package;
+using static hpack_package;
 
 partial class hpack_package {
 
@@ -41,6 +42,8 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
     return e;
 }
 
+} partial class hpackᴛEncoder {
+
 // WriteField encodes f into a single Write to e's underlying Writer.
 // This function may also produce bytes for "Header Table Size Update"
 // if necessary. If produced, it is done before encoding f.
@@ -74,7 +77,7 @@ public static error WriteField(this ж<Encoder> Ꮡe, HeaderField f) {
         }
     }
     var (n, err) = e.w.Write(e.buf);
-    if (err == nil && n != builtin.len(e.buf)) {
+    if (err == nil && n != len(e.buf)) {
         err = io.ErrShortWrite;
     }
     return err;
@@ -143,10 +146,12 @@ internal static bool shouldIndex(this ref Encoder e, HeaderField f) {
     return !f.Sensitive && f.Size() <= e.dynTab.maxSize;
 }
 
+} partial class hpack_package {
+
 // appendIndexed appends index i, as encoded in "Indexed Header Field"
 // representation, to dst and returns the extended buffer.
 internal static slice<byte> appendIndexed(slice<byte> dst, uint64 i) {
-    nint first = builtin.len(dst);
+    nint first = len(dst);
     dst = appendVarInt(dst, 7, i);
     dst[first] |= (byte)(0x80);
     return dst;
@@ -173,7 +178,7 @@ internal static slice<byte> appendNewName(slice<byte> dst, HeaderField f, bool i
 // f.Sensitive is false and indexing is true, "Incremental Indexing"
 // representation is used.
 internal static slice<byte> appendIndexedName(slice<byte> dst, HeaderField f, uint64 i, bool indexing) {
-    nint first = builtin.len(dst);
+    nint first = len(dst);
     byte n = default;
     if (indexing) {
         n = 6;
@@ -188,7 +193,7 @@ internal static slice<byte> appendIndexedName(slice<byte> dst, HeaderField f, ui
 // appendTableSize appends v, as encoded in "Header Table Size Update"
 // representation, to dst and returns the extended buffer.
 internal static slice<byte> appendTableSize(slice<byte> dst, uint32 v) {
-    nint first = builtin.len(dst);
+    nint first = len(dst);
     dst = appendVarInt(dst, 5, (uint64)v);
     dst[first] |= (byte)(0x20);
     return dst;
@@ -219,13 +224,13 @@ internal static slice<byte> appendVarInt(slice<byte> dst, byte n, uint64 i) {
 // shorter byte string.
 internal static slice<byte> appendHpackString(slice<byte> dst, @string s) {
     var huffmanLength = HuffmanEncodeLength(s);
-    if (huffmanLength < (uint64)builtin.len(s)) {
-        nint first = builtin.len(dst);
+    if (huffmanLength < (uint64)len(s)) {
+        nint first = len(dst);
         dst = appendVarInt(dst, 7, huffmanLength);
         dst = AppendHuffmanString(dst, s);
         dst[first] |= (byte)(0x80);
     } else {
-        dst = appendVarInt(dst, 7, (uint64)builtin.len(s));
+        dst = appendVarInt(dst, 7, (uint64)len(s));
         dst = append(dst, s.ꓸꓸꓸ);
     }
     return dst;

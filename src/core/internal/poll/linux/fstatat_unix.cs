@@ -7,8 +7,11 @@ namespace go.@internal;
 using unix = go.@internal.syscall.unix_package;
 using Δsyscall = syscall_package;
 using go.@internal.syscall;
+using static poll_package;
 
 partial class poll_package {
+
+} partial class pollᴛFD {
 
 public static error Fstatat(this ж<FD> Ꮡfd, @string name, ж<Δsyscall.Stat_t> s, nint flags) {
     GoFrame ᒐ = default;
@@ -24,4 +27,4 @@ public static error Fstatat(this ж<FD> Ꮡfd, @string name, ж<Δsyscall.Stat_t
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
-} // end poll_package
+} // end pollᴛFD

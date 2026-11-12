@@ -14,6 +14,7 @@ using runtime = runtime_package;
 using testing = testing_package;
 using time = time_package;
 using log;
+using static slogtest_package;
 
 partial class slogtest_package {
 
@@ -268,14 +269,14 @@ internal static slice<testCase> cases = slice<testCase>([
 //
 // If a Handler intentionally drops an attribute that is checked by a test,
 // then the results function should check for its absence and add it to the map it returns.
-public static error TestHandler(slogꓸHandler h, Func<slice<map<@string, any>>> results) {
+public static error TestHandler(slog.Handler h, Func<slice<map<@string, any>>> results) {
     var errsᴷ = new stackAppend<error>();
 
     // Run the handler on the test cases.
     foreach (var (_, c) in range(cases)) {
         var ht = h;
         if (c.mod != nil) {
-            ht = new wrapperжΔHandler(Ꮡ(new wrapper(h, c.mod)));
+            ht = new wrapperжHandler(Ꮡ(new wrapper(h, c.mod)));
         }
         var l = slog.New(ht);
         c.f(l);
@@ -303,7 +304,7 @@ public static error TestHandler(slogꓸHandler h, Func<slice<map<@string, any>>>
 // runs each case in a subtest. For each test case, it first calls newHandler to
 // get an instance of the handler under test, then runs the test case, then
 // calls result to get the result. If the test case fails, it calls t.Error.
-public static void Run(ж<testing.T> t, Func<ж<testing.T>, slogꓸHandler> newHandler, Func<ж<testing.T>, map<@string, any>> result) {
+public static void Run(ж<testing.T> t, Func<ж<testing.T>, slog.Handler> newHandler, Func<ж<testing.T>, map<@string, any>> result) {
     foreach (var (_, vᴛ1) in range(cases)) {
         ref var c = ref heap(new testCase(), out var Ꮡc);
         c = vᴛ1;
@@ -312,7 +313,7 @@ public static void Run(ж<testing.T> t, Func<ж<testing.T>, slogꓸHandler> newH
         t.Run(c.name, (ж<testing.T> tΔ1) => {
             var h = newHandler(tΔ1);
             if (cʗ1.mod != nil) {
-                h = new wrapperжΔHandler(Ꮡ(new wrapper(h, cʗ1.mod)));
+                h = new wrapperжHandler(Ꮡ(new wrapper(h, cʗ1.mod)));
             }
             var l = slog.New(h);
             cʗ1.f(l);
@@ -374,21 +375,23 @@ internal static Func<map<@string, any>, @string> inGroup(@string name, Func<map<
 }
 
 partial struct wrapper {
-    /*embed*/ public log.slog_package.ΔHandler Handler;
+    /*embed*/ public log.slog_package.Handler Handler;
     internal Action<ж<slog.Record>> mod;
 }
 
 // Go method set entry for the promoted 'Handler.Enabled()' - provided ONLY by the embedded
 // interface field in *wrapper's method set; see the pointer-only satisfaction record.
-internal static bool Enabled(this wrapper recvᴛ, context.Context arg1ᴛ, slogꓸLevel arg2ᴛ) => recvᴛ.Handler.Enabled(arg1ᴛ, arg2ᴛ);
+internal static bool Enabled(this wrapper recvᴛ, context.Context arg1ᴛ, slog.Level arg2ᴛ) => recvᴛ.Handler.Enabled(arg1ᴛ, arg2ᴛ);
 
 // Go method set entry for the promoted 'Handler.WithAttrs()' - provided ONLY by the embedded
 // interface field in *wrapper's method set; see the pointer-only satisfaction record.
-internal static slogꓸHandler WithAttrs(this wrapper recvᴛ, slice<slog.Attr> attrs) => recvᴛ.Handler.WithAttrs(attrs);
+internal static slog.Handler WithAttrs(this wrapper recvᴛ, slice<slog.Attr> attrs) => recvᴛ.Handler.WithAttrs(attrs);
 
 // Go method set entry for the promoted 'Handler.WithGroup()' - provided ONLY by the embedded
 // interface field in *wrapper's method set; see the pointer-only satisfaction record.
-internal static slogꓸHandler WithGroup(this wrapper recvᴛ, @string name) => recvᴛ.Handler.WithGroup(name);
+internal static slog.Handler WithGroup(this wrapper recvᴛ, @string name) => recvᴛ.Handler.WithGroup(name);
+
+} partial class slogtestᴛwrapper {
 
 internal static error Handle(this ref wrapper h, context.Context ctx, slog.Record rʗp) {
     ref var r = ref heap(rʗp.ΔClone(), out var Ꮡr);
@@ -396,6 +399,8 @@ internal static error Handle(this ref wrapper h, context.Context ctx, slog.Recor
     h.mod(Ꮡr);
     return h.Handler.Handle(ctx, r);
 }
+
+} partial class slogtest_package {
 
 internal static partial @string withSource(@string s) {
     var (_, @file, line, ok) = runtime.Caller(1);
@@ -409,10 +414,12 @@ partial struct replace {
     internal any v;
 }
 
+} partial class slogtestᴛreplace {
+
 internal static slog.Value LogValue(this ref replace r) { return slog.AnyValue(r.v); }
 
 internal static @string String(this ref replace r) {
     return fmt.Sprintf("<replace(%v)>"u8, r.v);
 }
 
-} // end slogtest_package
+} // end slogtestᴛreplace

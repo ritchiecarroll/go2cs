@@ -12,6 +12,7 @@ using atomic = go.sync.atomic_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using @internal.trace;
 using go.sync;
+using static trace_package;
 
 partial class trace_package {
 
@@ -26,6 +27,8 @@ partial struct traceMultiplexer {
     internal io.Writer traceStartWriter;
     internal ж<recorder> flightRecorder;
 }
+
+} partial class traceᴛtraceMultiplexer {
 
 internal static error subscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt, ж<recorder> r) {
     GoFrame ᒐ = default;
@@ -238,6 +241,8 @@ internal static partial error startLocked(this ж<traceMultiplexer> Ꮡt) {
     Ꮡt.Ꮡenabled.Store(true);
     return default;
 }
+
+} partial class trace_package {
 
 //go:linkname runtime_readTrace
 internal static partial slice<byte> /*buf*/ runtime_readTrace();

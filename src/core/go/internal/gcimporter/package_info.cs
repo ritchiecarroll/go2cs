@@ -11,12 +11,6 @@
 
 // <ImportedTypeAliases>
 global using pkgbitsꓸRelElemIdx = go.@internal.pkgbits_package.Index;
-global using tokenꓸFile = go.go.token_package.ΔFile;
-global using tokenꓸPos = go.go.token_package.ΔPos;
-global using typesꓸScope = go.go.types_package.ΔScope;
-global using typesꓸSignature = go.go.types_package.ΔSignature;
-global using typesꓸTerm = go.go.types_package.ΔTerm;
-global using typesꓸType = go.go.types_package.ΔType;
 // </ImportedTypeAliases>
 
 using go;
@@ -71,8 +65,8 @@ using static go.go.@internal.gcimporter_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("go/internal/gcimporter/gcimporter.go", "gcimporter.cs", "ABUs8oKCpoKUpoKUgoKUlIKCgoKUuIK4koKUgpSmlKSCgoKClJSChA==", "62-67:1", "", "", "79:21", "70:25,71:17")]
-[assembly: GoPositionMap("go/internal/gcimporter/support.go", "support.cs", "ABAggoK4ogAPIO6CgoKmgpSCuKaCgoKCpoIAFyySgoKUgoKClA==", "64-69:1")]
-[assembly: GoPositionMap("go/internal/gcimporter/ureader.go", "ureader.cs", "ACVUkqriAA4elIKCgqamgoKUgqaUgqaCqJKCgqaGlIIAGzqC3ILcgqqygoK4goKCpqKmooKmgoLulKaCgqa0lIKCqrKCpsaCpoKCpqKCpLSkpoKmlIKUqrKmgoKClKaygoKCgpSmgqaCgoKUgoKmgqaCpqKkgramgoKCgpSmpoKkgqSkpKSkpKS4goKCgoKCgoKUgoKClKamgoKClKaigoKUgoKCgqaCpoKCAAkUlKaClIKClKaClIKCpqaClIKClIKCqrKUgqaClIKCpqakgoKCgpSClIKmgoK4gqaClIKUkqaUtoKCgpSCtoKCgraCgoK2lIKClJTKgoKCgpSCgqaCgqaCgqaUgsiCgsimpJSCgoKmgoKmgoKCgoK4uKai7oIABxCCgoKUgqaCggAOHoKigrimgoKClIKUgqaCgpSCgq7CgpTotqSCgoKUgg==", "100-102:1;483-485:1;638-642:1", "", "50=NumElems/1/3/11,NumElems/2/3/12,NumElems/3/3/13;134=NewDecoder/1/1/1;141=TempDecoder/1/1/1")]
+[assembly: GoPositionMap("go/internal/gcimporter/support.go", "support.cs", "ABEggoK4ogARIO6CgoKmgpSCuKaCgoKCpoIAGSySgoKUgoKClA==", "64-69:1")]
+[assembly: GoPositionMap("go/internal/gcimporter/ureader.go", "ureader.cs", "AChUksriAA4elIKCgqamgoKUgqaUgqaCqJKCgqaGlIIAHTqC3ILcgsqygoK4goKCpqLGooKmgoLulKaCgqa0lIKCyrKCxsaCpoKCxqKCpLSkpoKmlIKUqrKmgoKClMaygoKCgpSmgqaCgoKUgoKmgqaCxqKkgramgoKCgpSmpoKkgqSkpKSkpKS4goKCgoKCgoKUgoKClKamgoKClKaigoKUgoKCgqaCpoKCAAkUlKaClIKClKaClIKCpqaClIKClIKCqrKUgqaClIKCpsakgoKCgpSClIKmgoK4gqaClIKUkqaUtoKCgpSCtoKCgraCgoK2lIKClJTKgoKCgpSCgqaCgqaCgqaUgsiCgsimpJSCgoKmgoKmgoKCgoK4uMai7oIABxCCgoKUgqaCggAOHoKigrimgoKClIKUgqaCgpSCgs7CgpTotqSCgoKUgg==", "100-102:1;483-485:1;638-642:1", "", "55=NumElems/1/3/11,NumElems/2/3/12,NumElems/3/3/13;141=NewDecoder/1/1/1;148=TempDecoder/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;
@@ -117,3 +111,15 @@ public static partial class gcimporter_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(gcimporter_package.fakeFileSet)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gcimporterᴛfakeFileSet;
+[GoMethodHost(typeof(gcimporter_package.pkgReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gcimporterᴛpkgReader;
+[GoMethodHost(typeof(gcimporter_package.reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gcimporterᴛreader;
+// </MethodHolders>

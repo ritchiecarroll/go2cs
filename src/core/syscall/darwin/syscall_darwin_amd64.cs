@@ -6,6 +6,7 @@ namespace go;
 using abi = @internal.abi_package;
 using @unsafe = unsafe_package;
 using @internal;
+using static syscall_package;
 
 partial class syscall_package {
 
@@ -33,17 +34,25 @@ public static void SetKevent(ж<Kevent_t> Ꮡk, nint fd, nint mode, nint flags) 
     k.Flags = (uint16)flags;
 }
 
+} partial class syscallᴛIovec {
+
 public static void SetLen(this ref Iovec iov, nint length) {
     iov.Len = (uint64)length;
 }
+
+} partial class syscallᴛMsghdr {
 
 public static void SetControllen(this ref Msghdr msghdr, nint length) {
     msghdr.Controllen = (uint32)length;
 }
 
+} partial class syscallᴛCmsghdr {
+
 public static void SetLen(this ref Cmsghdr cmsg, nint length) {
     cmsg.Len = (uint32)length;
 }
+
+} partial class syscall_package {
 
 internal static (nint written, error err) sendfile(nint outfd, nint infd, ref int64 offset, nint count) {
     nint written = default;

@@ -198,7 +198,7 @@ internal static int32 closefd(int32 fd) {
     @throw(unimplementedˢ);
     return -1;
 }
-internal static int32 read(int32 fd, @unsafe.Pointer Δp, int32 n) {
+internal static int32 read(int32 fd, @unsafe.Pointer p, int32 n) {
     @throw(unimplementedˢ);
     return -1;
 }
@@ -504,11 +504,11 @@ internal static void goenvs() {
     //     "envA=valA\x00envB=valB\x00\x00" (in UTF-16)
     // Two consecutive zero bytes end the list.
     @unsafe.Pointer strings = (@unsafe.Pointer)stdcall(_GetEnvironmentStringsW);
-    var Δp = ((ж<array<uint16>>)(uintptr)(strings)).slice();
+    var p = ((ж<array<uint16>>)(uintptr)(strings)).slice();
 
     nint n = 0;
     for ((nint from, nint i) = (0, 0); true; i++) {
-        if (Δp[i] == 0) {
+        if (p[i] == 0) {
             // empty string marks the end
             if (i == from) {
                 break;
@@ -520,11 +520,11 @@ internal static void goenvs() {
     envs = new slice<@string>(n);
 
     foreach (var i in range(len(envs))) {
-        envs[i] = gostringw(Ꮡ(Δp, 0));
-        while (Δp[0] != 0) {
-            Δp = Δp[1..];
+        envs[i] = gostringw(Ꮡ(p, 0));
+        while (p[0] != 0) {
+            p = p[1..];
         }
-        Δp = Δp[1..]; // skip nil byte
+        p = p[1..]; // skip nil byte
     }
 
     stdcall(_FreeEnvironmentStringsW, (uintptr)strings);
@@ -840,7 +840,7 @@ internal static void mpreinit(ref m mp) {
 }
 
 //go:nosplit
-internal static void sigsave(ж<sigset> Δp) {
+internal static void sigsave(ж<sigset> p) {
 }
 
 //go:nosplit
@@ -921,7 +921,7 @@ internal static void minit() {
     // Sanity check the stack bounds.
     var g0 = getg();
     if (@base > (~g0).stack.hi || (~g0).stack.hi - @base > (uintptr)64 << 20) {
-        print((@string)"runtime: g0 stack [", (Δhex)(uint64)@base, (@string)",", (Δhex)(uint64)(~g0).stack.hi, (@string)")\n");
+        print((@string)"runtime: g0 stack [", (hex)(uint64)@base, (@string)",", (hex)(uint64)(~g0).stack.hi, (@string)")\n");
         @throw(badG0Stackˢ);
     }
     g0.Value.stack.lo = @base;

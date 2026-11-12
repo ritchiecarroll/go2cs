@@ -9,6 +9,7 @@ namespace go;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -50,6 +51,8 @@ partial struct mlink {
     internal ж<mlink> next;
 }
 
+} partial class runtimeᴛfixalloc {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string runtimeFixallocSizeTooˢ => ref runtimeFixallocSizeTooˢᵇ;
 private static readonly @string runtimeFixallocSizeTooˢᵇ = "runtime: fixalloc size too large"u8;
@@ -62,7 +65,7 @@ internal static void init(this ref fixalloc f, uintptr size, Action<@unsafe.Poin
     if (size > _FixAllocChunk) {
         @throw(runtimeFixallocSizeTooˢ);
     }
-    size = builtin.max(size, /* unsafe.Sizeof(mlink{}) */ (uintptr)8);
+    size = max(size, /* unsafe.Sizeof(mlink{}) */ (uintptr)8);
 
     f.size = size;
     f.first = first;
@@ -110,11 +113,11 @@ internal static @unsafe.Pointer alloc(this ref fixalloc f) {
     return v;
 }
 
-internal static void free(this ref fixalloc f, @unsafe.Pointer Δp) {
+internal static void free(this ref fixalloc f, @unsafe.Pointer p) {
     f.inuse -= f.size;
-    var v = (ж<mlink>)(uintptr)(Δp);
+    var v = (ж<mlink>)(uintptr)(p);
     v.next = f.list;
     f.list = v;
 }
 
-} // end runtime_package
+} // end runtimeᴛfixalloc

@@ -10,6 +10,7 @@ using io = io_package;
 using slices = slices_package;
 using strconv = strconv_package;
 using @internal;
+using static base64_package;
 
 partial class base64_package {
 
@@ -71,6 +72,8 @@ public static ж<Encoding> NewEncoding(@string encoder) {
     return e;
 }
 
+} partial class base64ᴛEncoding {
+
 // WithPadding creates a new encoding identical to enc except
 // with a specified padding character, or [NoPadding] to disable padding.
 // The padding character must not be '\r' or '\n',
@@ -107,6 +110,8 @@ public static ж<Encoding> Strict(this Encoding encʗp) {
     return Ꮡenc;
 }
 
+} partial class base64_package {
+
 // StdEncoding is the standard base64 encoding, as defined in RFC 4648.
 public static ж<Encoding> StdEncoding = NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
 
@@ -123,6 +128,8 @@ public static ж<Encoding> RawStdEncoding = StdEncoding.WithPadding(NoPadding);
 // It is typically used in URLs and file names.
 // This is the same as [URLEncoding] but omits padding characters.
 public static ж<Encoding> RawURLEncoding = URLEncoding.WithPadding(NoPadding);
+
+} partial class base64ᴛEncoding {
 
 /*
  * Encoder
@@ -205,6 +212,8 @@ public static @string EncodeToString(this ref Encoding enc, slice<byte> src) {
     return (@string)buf;
 }
 
+} partial class base64_package {
+
 partial struct encoder {
     internal error err;
     internal ж<Encoding> enc;
@@ -213,6 +222,8 @@ partial struct encoder {
     internal nint nbuf;                    // number of bytes in buf
     internal array<byte> @out = new(1024); // output buffer
 }
+
+} partial class base64ᴛencoder {
 
 internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
     nint n = default;
@@ -275,6 +286,8 @@ internal static error Close(this ref encoder e) {
     return e.err;
 }
 
+} partial class base64_package {
+
 // NewEncoder returns a new base64 stream encoder. Data written to
 // the returned writer will be encoded using enc and then written to w.
 // Base64 encodings operate in 4-byte blocks; when finished
@@ -283,6 +296,8 @@ internal static error Close(this ref encoder e) {
 public static io.WriteCloser NewEncoder(ж<Encoding> enc, io.Writer w) {
     return new encoderжWriteCloser(Ꮡ(new encoder(enc: enc, w: w)));
 }
+
+} partial class base64ᴛEncoding {
 
 // EncodedLen returns the length in bytes of the base64 encoding
 // of an input buffer of length n.
@@ -293,7 +308,11 @@ public static nint EncodedLen(this ref Encoding enc, nint n) {
     return (n + 2) / 3 * 4; // minimum # 4-char quanta, 3 bytes each
 }
 
+} partial class base64_package {
+
 partial struct CorruptInputError /*num:int64*/;
+
+} partial class base64ᴛCorruptInputError {
 
 /*
  * Decoder
@@ -301,6 +320,8 @@ partial struct CorruptInputError /*num:int64*/;
 public static @string Error(this CorruptInputError e) {
     return "illegal base64 data at input byte "u8 + strconv.FormatInt((int64)e, 10);
 }
+
+} partial class base64ᴛEncoding {
 
 // decodeQuantum decodes up to 4 base64 bytes. The received parameters are
 // the destination buffer dst, the source buffer src and an index in the
@@ -438,6 +459,8 @@ public static (slice<byte>, error) DecodeString(this ref Encoding enc, @string s
     return (dbuf.slice(0, n), err);
 }
 
+} partial class base64_package {
+
 partial struct decoder {
     internal error err;
     internal error readErr; // error from r.Read
@@ -448,6 +471,8 @@ partial struct decoder {
     internal slice<byte> @out; // leftover decoded output
     internal array<byte> outbuf = new(1024 / 4 * 3);
 }
+
+} partial class base64ᴛdecoder {
 
 internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
     nint n = default;
@@ -516,6 +541,8 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
     copy(d.buf.slice(0, d.nbuf), d.buf.slice(nr));
     return (n, d.err);
 }
+
+} partial class base64ᴛEncoding {
 
 // Decode decodes src using the encoding enc. It writes at most
 // [Encoding.DecodedLen](len(src)) bytes to dst and returns the number of bytes
@@ -592,6 +619,8 @@ public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst,
     return (n, err);
 }
 
+} partial class base64_package {
+
 // assemble32 assembles 4 base64 digits into 3 bytes.
 // Each digit comes from the decode map, and will be 0xff
 // if it came from an invalid character.
@@ -620,6 +649,8 @@ partial struct newlineFilteringReader {
     internal io.Reader wrapped;
 }
 
+} partial class base64ᴛnewlineFilteringReader {
+
 internal static (nint, error) Read(this ref newlineFilteringReader r, slice<byte> p) {
     var (n, err) = r.wrapped.Read(p);
     while (n > 0) {
@@ -641,16 +672,22 @@ internal static (nint, error) Read(this ref newlineFilteringReader r, slice<byte
     return (n, err);
 }
 
+} partial class base64_package {
+
 // NewDecoder constructs a new base64 stream decoder.
 public static io.Reader NewDecoder(ж<Encoding> enc, io.Reader r) {
     return new decoderжReader(Ꮡ(new decoder(enc: enc, r: new newlineFilteringReaderжReader(Ꮡ(new newlineFilteringReader(r))))));
 }
+
+} partial class base64ᴛEncoding {
 
 // DecodedLen returns the maximum length in bytes of the decoded data
 // corresponding to n bytes of base64-encoded data.
 public static nint DecodedLen(this ref Encoding enc, nint n) {
     return decodedLen(n, enc.padChar);
 }
+
+} partial class base64_package {
 
 internal static nint decodedLen(nint n, rune padChar) {
     if (padChar == NoPadding) {

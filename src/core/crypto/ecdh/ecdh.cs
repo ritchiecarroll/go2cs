@@ -15,10 +15,11 @@ using io = io_package;
 using go.crypto;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using static ecdh_package;
 
 partial class ecdh_package {
 
-partial interface ΔCurve {
+partial interface Curve {
     // GenerateKey generates a random PrivateKey.
     //
     // Since Go 1.26, a secure source of random bytes is always used, and rand
@@ -43,13 +44,13 @@ partial interface ΔCurve {
     //
     // For X25519, this only checks the u-coordinate length. Adversarially
     // selected public keys can cause ECDH to return an error.
-    (ж<ΔPublicKey>, error) NewPublicKey(slice<byte> key);
+    (ж<PublicKey>, error) NewPublicKey(slice<byte> key);
     // ecdh performs an ECDH exchange and returns the shared secret. It's exposed
     // as the PrivateKey.ECDH method.
     //
     // The private method also allow us to expand the ECDH interface with more
     // methods in the future without breaking backwards compatibility.
-    (slice<byte>, error) ecdh(ж<PrivateKey> local, ж<ΔPublicKey> remote);
+    (slice<byte>, error) ecdh(ж<PrivateKey> local, ж<PublicKey> remote);
 }
 
 // PublicKey is an ECDH public key, usually a peer's ECDH share sent over the wire.
@@ -57,15 +58,17 @@ partial interface ΔCurve {
 // These keys can be parsed with [crypto/x509.ParsePKIXPublicKey] and encoded
 // with [crypto/x509.MarshalPKIXPublicKey]. For NIST curves, they then need to
 // be converted with [crypto/ecdsa.PublicKey.ECDH] after parsing.
-partial struct ΔPublicKey {
-    internal ΔCurve curve;
+partial struct PublicKey {
+    internal Curve curve;
     internal slice<byte> publicKey;
     internal ж<boring.PublicKeyECDH> boring;
-    internal ж<ecdhꓸPublicKey> fips;
+    internal ж<ecdh.PublicKey> fips;
 }
 
+} partial class ecdhᴛPublicKey {
+
 // Bytes returns a copy of the encoding of the public key.
-public static slice<byte> Bytes(this ref ΔPublicKey k) {
+public static slice<byte> Bytes(this ref PublicKey k) {
     // Copy the public key to a fixed size buffer that can get allocated on the
     // caller's stack after inlining.
     array<byte> buf = new(133);
@@ -79,26 +82,28 @@ public static slice<byte> Bytes(this ref ΔPublicKey k) {
 //
 // This check is performed in constant time as long as the key types and their
 // curve match.
-public static bool Equal(this ref ΔPublicKey k, cryptoꓸPublicKey x) {
-    var (xx, ok) = x._<ж<ΔPublicKey>>(ᐧ);
+public static bool Equal(this ref PublicKey k, cryptoꓸPublicKey x) {
+    var (xx, ok) = x._<ж<PublicKey>>(ᐧ);
     if (!ok) {
         return false;
     }
     return AreEqual(k.curve, xx.curve) && subtle.ConstantTimeCompare(k.publicKey, xx.publicKey) == 1;
 }
 
-public static ΔCurve Curve(this ref ΔPublicKey k) {
+public static Curve Curve(this ref PublicKey k) {
     return k.curve;
 }
+
+} partial class ecdh_package {
 
 // KeyExchanger is an interface for an opaque private key that can be used for
 // key exchange operations. For example, an ECDH key kept in a hardware module.
 //
 // It is implemented by [PrivateKey].
 partial interface KeyExchanger {
-    ж<ΔPublicKey> PublicKey();
-    ΔCurve Curve();
-    (slice<byte>, error) ECDH(ж<ΔPublicKey> _);
+    ж<PublicKey> PublicKey();
+    Curve Curve();
+    (slice<byte>, error) ECDH(ж<PublicKey> _);
 }
 
 internal static KeyExchanger _ᴛ1ʗ = new PrivateKeyжKeyExchanger(((ж<PrivateKey>)nil));
@@ -109,12 +114,14 @@ internal static KeyExchanger _ᴛ1ʗ = new PrivateKeyжKeyExchanger(((ж<Private
 // with [crypto/x509.MarshalPKCS8PrivateKey]. For NIST curves, they then need to
 // be converted with [crypto/ecdsa.PrivateKey.ECDH] after parsing.
 partial struct PrivateKey {
-    internal ΔCurve curve;
+    internal Curve curve;
     internal slice<byte> privateKey;
-    internal ж<ΔPublicKey> publicKey;
+    internal ж<PublicKey> publicKey;
     internal ж<boring.PrivateKeyECDH> boring;
     internal ж<ecdh.PrivateKey> fips;
 }
+
+} partial class ecdhᴛPrivateKey {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string cryptoEcdhPrivateKeyAndˢ => ref cryptoEcdhPrivateKeyAndˢᵇ;
@@ -131,7 +138,7 @@ private static readonly @string cryptoEcdhPrivateKeyAndˢᵇ = "crypto/ecdh: pri
 //
 // For [X25519], this performs ECDH as specified in RFC 7748, Section 6.1. If
 // the result is the all-zero value, ECDH returns an error.
-public static (slice<byte>, error) ECDH(this ж<PrivateKey> Ꮡk, ж<ΔPublicKey> Ꮡremote) {
+public static (slice<byte>, error) ECDH(this ж<PrivateKey> Ꮡk, ж<PublicKey> Ꮡremote) {
     ref var k = ref Ꮡk.DerefOrNull();
     ref var remote = ref Ꮡremote.DerefOrNull();
 
@@ -164,11 +171,11 @@ public static bool Equal(this ref PrivateKey k, cryptoꓸPrivateKey x) {
     return AreEqual(k.curve, xx.curve) && subtle.ConstantTimeCompare(k.privateKey, xx.privateKey) == 1;
 }
 
-public static ΔCurve Curve(this ref PrivateKey k) {
+public static Curve Curve(this ref PrivateKey k) {
     return k.curve;
 }
 
-public static ж<ΔPublicKey> PublicKey(this ref PrivateKey k) {
+public static ж<PublicKey> PublicKey(this ref PrivateKey k) {
     return k.publicKey;
 }
 
@@ -178,4 +185,4 @@ public static cryptoꓸPublicKey Public(this ref PrivateKey k) {
     return k.PublicKey().OrTypedNil();
 }
 
-} // end ecdh_package
+} // end ecdhᴛPrivateKey

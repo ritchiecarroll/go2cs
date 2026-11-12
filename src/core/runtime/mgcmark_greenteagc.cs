@@ -42,6 +42,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 using @internal.runtime.gc;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -82,6 +83,8 @@ internal static spanScanOwnership spanScanUnowned => 0;          // Indicates th
 internal static UntypedInt spanScanOneMark => /* 1 << iota */ 2; // Indicates that only one mark bit is set relative to the scan bits.
 internal static UntypedInt spanScanManyMark => 4;                // Indicates one or more scan bits may be set relative to the mark bits.
 
+} partial class runtimeᴛspanScanOwnership {
+
 // "ManyMark" need not be exactly the value it has. In practice we just
 // want to distinguish "none" from "one" from "many," so a comparison is
 // sufficient (as opposed to a bit test) to check between these cases.
@@ -110,6 +113,8 @@ internal static spanScanOwnership or(this ж<spanScanOwnership> Ꮡo, spanScanOw
     }
     return (spanScanOwnership)(uint8)(atomic.Or32(o32, ((uint32)v).Lsh((uint64)(off))).Rsh((uint64)(off)));
 }
+
+} partial class runtimeᴛspanInlineMarkBits {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string runtimeSpanInlineMarkˢ => ref runtimeSpanInlineMarkˢᵇ;
@@ -183,12 +188,16 @@ internal static spanScanOwnership release(this ж<spanInlineMarkBits> Ꮡimb) {
     return (spanScanOwnership)atomic.Xchg8(Ꮡimb.Ꮡowned.Reinterpret<spanScanOwnership, uint8>(), (uint8)spanScanUnowned);
 }
 
+} partial class runtime_package {
+
 // spanInlineMarkBitsFromBase returns the spanInlineMarkBits for a span whose start address is base.
 //
 // The span must be gcUsesSpanInlineMarkBits(span.elemsize).
 internal static ж<spanInlineMarkBits> spanInlineMarkBitsFromBase(uintptr @base) {
     return (ж<spanInlineMarkBits>)(uintptr)((@unsafe.Pointer)(@base + (uintptr)gc.PageSize - /* unsafe.Sizeof(spanInlineMarkBits{}) */ (uintptr)128));
 }
+
+} partial class runtimeᴛmspan {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string expectedSpanWithInlineˢ => ref expectedSpanWithInlineˢᵇ;
@@ -268,6 +277,8 @@ internal static markBits scannedBitsForIndex(this ref mspan s, uintptr objIndex)
     return new markBits(s.inlineMarkBits().at(spanInlineMarkBits.Ꮡscans, (ulong)(objIndex / 8)), (uint8)((uint8)1 << (int)(objIndex % 8)), objIndex);
 }
 
+} partial class runtime_package {
+
 // gcUsesSpanInlineMarkBits returns true if a span holding objects of a certain size
 // has inline mark bits. size must be the span's elemsize.
 //
@@ -280,7 +291,7 @@ internal static bool gcUsesSpanInlineMarkBits(uintptr size) {
 
 // tryDeferToSpanScan tries to queue p on the span it points to, if it
 // points to a small object span (gcUsesSpanQueue size).
-internal static bool tryDeferToSpanScan(uintptr Δp, ж<gcWork> Ꮡgcw) {
+internal static bool tryDeferToSpanScan(uintptr p, ж<gcWork> Ꮡgcw) {
     ref var gcw = ref Ꮡgcw.DerefOrNull();
 
     if (useCheckmark) {
@@ -288,20 +299,20 @@ internal static bool tryDeferToSpanScan(uintptr Δp, ж<gcWork> Ꮡgcw) {
     }
 
     // Quickly to see if this is a span that has inline mark bits.
-    var ha = heapArenaOf(Δp);
+    var ha = heapArenaOf(p);
     if (ha == nil) {
         return false;
     }
-    var pageIdx = ((Δp / (uintptr)pageSize) / 8) % (uintptr)len(ha.pageInUse);
-    var pageMask = (byte)((byte)(1 << (int)((Δp / (uintptr)pageSize) % 8)));
+    var pageIdx = ((p / (uintptr)pageSize) / 8) % (uintptr)len(ha.pageInUse);
+    var pageMask = (byte)((byte)(1 << (int)((p / (uintptr)pageSize) % 8)));
     if ((uint8)(ha.pageUseSpanInlineMarkBits[pageIdx] & pageMask) == 0) {
         return false;
     }
 
     // Find the object's index from the span class info stored in the inline mark bits.
-    var @base = alignDown(Δp, gc.PageSize);
+    var @base = alignDown(p, gc.PageSize);
     var q = spanInlineMarkBitsFromBase(@base);
-    var objIndex = (uint16)(((uint64)(Δp - @base) * (uint64)gc.SizeClassToDivMagic[q.@class.sizeclass()]) >> 32);
+    var objIndex = (uint16)(((uint64)(p - @base) * (uint64)gc.SizeClassToDivMagic[q.@class.sizeclass()]) >> 32);
 
     // Set mark bit.
     var (idx, mask) = ((uint16)(objIndex / 8), (uint8)((uint8)1 << (int)(objIndex % 8)));
@@ -334,6 +345,8 @@ internal static bool tryDeferToSpanScan(uintptr Δp, ж<gcWork> Ꮡgcw) {
     return true;
 }
 
+} partial class runtimeᴛgcWork {
+
 // tryGetSpanFast attempts to get an entire span to scan.
 internal static objptr tryGetSpanFast(this ref gcWork w) {
     return w.spanq.tryGetFast();
@@ -362,6 +375,8 @@ internal static objptr tryGetSpan(this ж<gcWork> Ꮡw) {
     return 0;
 }
 
+} partial class runtime_package {
+
 partial struct spanQueue_chain /*dyn*/ {
     // head is the spanSPMC to put to. This is only accessed
     // by the producer, so doesn't need to be synchronized.
@@ -386,6 +401,8 @@ partial struct spanQueue {
     // This linked chain structure is based off the sync.Pool dequeue.
     internal spanQueue_chain chain;
 }
+
+} partial class runtimeᴛspanQueue {
 
 // putFast tries to put s onto the queue, but may fail if it's full.
 internal static bool /*ok*/ putFast(this ref spanQueue q, objptr s) {
@@ -709,6 +726,8 @@ internal static void destroy(this ж<spanQueue> Ꮡq) {
     unlock(Ꮡwork.ᏑspanSPMCs.of(workType_spanSPMCs.Ꮡlock));
 }
 
+} partial class runtime_package {
+
 // spanSPMC is a ring buffer of objptrs that represent spans.
 // Accessed without a lock.
 //
@@ -788,6 +807,8 @@ internal static ж<spanSPMC> newSpanSPMC(uint32 cap) {
     return r;
 }
 
+} partial class runtimeᴛspanSPMC {
+
 // empty returns true if the spmc is empty.
 //
 // empty is thread-safe.
@@ -816,6 +837,8 @@ internal static ж<objptr> slot(this ref spanSPMC r, uint32 i) {
     var idx = (uintptr)(i & (r.cap - 1));
     return (ж<objptr>)(uintptr)((uintptr)@unsafe.Add(@unsafe.Pointer.FromBox(r.ring), idx * /* unsafe.Sizeof(objptr(0)) */ (uintptr)8));
 }
+
+} partial class runtime_package {
 
 // freeDeadSpanSPMCs frees dead spanSPMCs back to the OS.
 internal static void freeDeadSpanSPMCs() {
@@ -855,6 +878,8 @@ internal static void freeDeadSpanSPMCs() {
     unlock(Ꮡwork.ᏑspanSPMCs.of(workType_spanSPMCs.Ꮡlock));
 }
 
+} partial class runtimeᴛgcWork {
+
 // tryStealSpan attempts to steal a span from another P's local queue.
 //
 // Returns a non-zero objptr on success.
@@ -869,7 +894,7 @@ internal static objptr tryStealSpan(this ref gcWork w) {
         if (pp == p2) {
             continue;
         }
-        var s = w.spanq.steal(p2.of(runtime_package.Δp.Ꮡgcw).Ꮡspanq); if (s != 0) {
+        var s = w.spanq.steal(p2.of(p.Ꮡgcw).Ꮡspanq); if (s != 0) {
             return s;
         }
         // N.B. This is intentionally racy. We may stomp on a mask set by
@@ -883,6 +908,8 @@ internal static objptr tryStealSpan(this ref gcWork w) {
     }
     return 0;
 }
+
+} partial class runtime_package {
 
 // objptr consists of a span base and the index of the object in the span.
 partial struct objptr /*num:uintptr*/;
@@ -899,13 +926,17 @@ internal static objptr makeObjPtr(uintptr spanBase, uint16 objIndex) {
     return (objptr)((uintptr)(spanBase | (uintptr)objIndex));
 }
 
-internal static uintptr spanBase(this objptr Δp) {
-    return (uintptr)((uintptr)Δp & ~(uintptr)((1 << (int)(gc.PageShift)) - 1));
+} partial class runtimeᴛobjptr {
+
+internal static uintptr spanBase(this objptr p) {
+    return (uintptr)((uintptr)p & ~(uintptr)((1 << (int)(gc.PageShift)) - 1));
 }
 
-internal static uint16 objIndex(this objptr Δp) {
-    return (uint16)((uint16)Δp & (uint16)((1 << (int)(gc.PageShift)) - 1));
+internal static uint16 objIndex(this objptr p) {
+    return (uint16)((uint16)p & (uint16)((1 << (int)(gc.PageShift)) - 1));
 }
+
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string noscanObjectInScanSpanˢ => ref noscanObjectInScanSpanˢᵇ;
@@ -913,10 +944,10 @@ private static readonly @string noscanObjectInScanSpanˢᵇ = "noscan object in 
 
 // scanSpan scans objects indicated marks&^scans and then scans those objects,
 // queuing the resulting pointers into gcw.
-internal static void scanSpan(objptr Δp, ж<gcWork> Ꮡgcw) {
+internal static void scanSpan(objptr p, ж<gcWork> Ꮡgcw) {
     ref var gcw = ref Ꮡgcw.DerefOrNull();
 
-    var spanBase = Δp.spanBase();
+    var spanBase = p.spanBase();
     var imb = spanInlineMarkBitsFromBase(spanBase);
     var spanclass = imb.@class;
     if (spanclass.noscan()) {
@@ -928,7 +959,7 @@ internal static void scanSpan(objptr Δp, ж<gcWork> Ꮡgcw) {
     if (imb.release() == spanScanOneMark) {
         // Nobody else set any mark bits on this span while it was acquired.
         // That means p is the sole object we need to handle. Fast-track it.
-        var objIndex = Δp.objIndex();
+        var objIndex = p.objIndex();
         var bytep = imb.at(spanInlineMarkBits.Ꮡscans, (nint)(objIndex / 8));
         var mask = (uint8)((uint8)1 << (int)(objIndex % 8));
         if ((uint8)(atomic.Load8(bytep) & mask) != 0) {
@@ -1077,14 +1108,14 @@ internal static void scanObjectSmall(uintptr spanBase, uintptr b, uintptr objSiz
 
     // Process all the pointers we just got.
     foreach (var (_, vᴛ1) in range(gcw.ptrBuf.slice(0, nptrs))) {
-        var Δp = vᴛ1;
+        var p = vᴛ1;
 
-        Δp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)Δp);
-        if (Δp == 0) {
+        p = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)p);
+        if (p == 0) {
             continue;
         }
-        if (!tryDeferToSpanScan(Δp, Ꮡgcw)) {
-            var (obj, span, objIndex) = findObject(Δp, 0, 0); if (obj != 0) {
+        if (!tryDeferToSpanScan(p, Ꮡgcw)) {
+            var (obj, span, objIndex) = findObject(p, 0, 0); if (obj != 0) {
                 greyobject(obj, 0, 0, span, Ꮡgcw, objIndex);
             }
         }
@@ -1131,14 +1162,14 @@ internal static void scanObjectsSmall(uintptr @base, uintptr objSize, uint16 ele
 
     // Process all the pointers we just got.
     foreach (var (_, vᴛ2) in range(gcw.ptrBuf.slice(0, nptrs))) {
-        var Δp = vᴛ2;
+        var p = vᴛ2;
 
-        Δp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)Δp);
-        if (Δp == 0) {
+        p = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)p);
+        if (p == 0) {
             continue;
         }
-        if (!tryDeferToSpanScan(Δp, Ꮡgcw)) {
-            var (obj, span, objIndex) = findObject(Δp, 0, 0); if (obj != 0) {
+        if (!tryDeferToSpanScan(p, Ꮡgcw)) {
+            var (obj, span, objIndex) = findObject(p, 0, 0); if (obj != 0) {
                 greyobject(obj, 0, 0, span, Ꮡgcw, objIndex);
             }
         }
@@ -1230,6 +1261,8 @@ internal static void dumpScanStats() {
     }
 }
 
+} partial class runtimeᴛgcWork {
+
 internal static void flushScanStats(this ref gcWork w, /*[68]*/ ж<array<sizeClassScanStats>> Ꮡdst) {
     ref var dst = ref Ꮡdst.DerefOrNull();
 
@@ -1240,8 +1273,10 @@ internal static void flushScanStats(this ref gcWork w, /*[68]*/ ж<array<sizeCla
         dst[i].spanObjsSparseScanned += w.stats[i].spanObjsSparseScanned;
         dst[i].sparseObjsScanned += w.stats[i].sparseObjsScanned;
     }
-    builtin.clear(w.stats[..]);
+    clear(w.stats[..]);
 }
+
+} partial class runtime_package {
 
 // gcMarkWorkAvailable reports whether there's any non-local work available to do.
 //

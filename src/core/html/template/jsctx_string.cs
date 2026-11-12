@@ -2,6 +2,7 @@
 namespace go.html;
 
 using strconv = strconv_package;
+using static template_package;
 
 partial class template_package {
 
@@ -19,6 +20,8 @@ private static readonly @string _jsCtx_nameᵇ = "jsCtxRegexpjsCtxDivOpjsCtxUnkn
 
 internal static array<uint8> _jsCtx_index = new uint8[]{0, 11, 21, 33}.array();
 
+} partial class templateᴛjsCtx {
+
 internal static @string String(this jsCtx i) {
     if (i >= ((jsCtx)(uint8)(len(_jsCtx_index) - 1))) {
         return "jsCtx("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
@@ -26,4 +29,4 @@ internal static @string String(this jsCtx i) {
     return _jsCtx_name.slice(_jsCtx_index[i], _jsCtx_index[i + 1]);
 }
 
-} // end template_package
+} // end templateᴛjsCtx

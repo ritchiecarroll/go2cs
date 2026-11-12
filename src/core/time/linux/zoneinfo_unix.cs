@@ -27,6 +27,8 @@ internal static ref readonly @string localtimeˢ => ref localtimeˢᵇ;
 private static readonly @string localtimeˢᵇ = "localtime"u8;
 internal static ref readonly @string localˢ => ref localˢᵇ;
 private static readonly @string localˢᵇ = "Local"u8;
+internal static ref readonly @string utcˢ => ref utcˢᵇ;
+private static readonly @string utcˢᵇ = "UTC"u8;
 
 internal static void initLocal() {
     // consult $TZ to find the time zone to use.

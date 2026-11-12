@@ -12,6 +12,7 @@ using runtime = runtime_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using io = io_package;
+using static xml_package;
 
 partial class xml_package {
 
@@ -134,6 +135,8 @@ public static error Unmarshal(slice<byte> data, any v) {
     return NewDecoder(new bytes_ReaderжReader(bytes.NewReader(data))).Decode(v);
 }
 
+} partial class xmlᴛDecoder {
+
 // Decode works like [Unmarshal], except it reads the decoder
 // stream to find the start element.
 public static error Decode(this ж<Decoder> Ꮡd, any v) {
@@ -152,7 +155,7 @@ private static readonly @string nilPointerPassedToˢᵇ = "nil pointer passed to
 // but also wants to defer to [Unmarshal] for some elements.
 public static error DecodeElement(this ж<Decoder> Ꮡd, any v, ж<StartElement> start) {
     var val = reflect.ValueOf(v);
-    if (val.Kind() != reflect.ΔPointer) {
+    if (val.Kind() != reflect.Pointer) {
         return errors.New(nonPointerPassedToˢ);
     }
 
@@ -162,10 +165,16 @@ public static error DecodeElement(this ж<Decoder> Ꮡd, any v, ж<StartElement>
     return Ꮡd.unmarshal(val.Elem(), start);
 }
 
+} partial class xml_package {
+
 // An UnmarshalError represents an error in the unmarshaling process.
 partial struct UnmarshalError /*@string*/;
 
+} partial class xmlᴛUnmarshalError {
+
 public static @string Error(this UnmarshalError e) { return (@string)e; }
+
+} partial class xml_package {
 
 // Unmarshaler is the interface implemented by objects that can unmarshal
 // an XML element description of themselves.
@@ -206,6 +215,8 @@ internal static @string receiverType(any val) {
     }
     return "("u8 + t.String() + ")"u8;
 }
+
+} partial class xmlᴛDecoder {
 
 // unmarshalInterface unmarshals a single XML element into val.
 // start is the opening tag of the element.
@@ -271,8 +282,8 @@ internal static error unmarshalTextInterface(this ref Decoder d, encoding.TextUn
 }
 
 // unmarshalAttr unmarshals a single XML attribute into val.
-internal static error unmarshalAttr(this ref Decoder d, reflectꓸValue val, Attr attr) {
-    if (val.Kind() == reflect.ΔPointer) {
+internal static error unmarshalAttr(this ref Decoder d, reflect.Value val, Attr attr) {
+    if (val.Kind() == reflect.Pointer) {
         if (val.IsNil()) {
             val.Set(reflect.New(val.Type().Elem()));
         }
@@ -311,7 +322,7 @@ internal static error unmarshalAttr(this ref Decoder d, reflectꓸValue val, Att
         }
     }
 
-    if (val.Kind() == reflect.ΔSlice && val.Type().Elem().Kind() != reflect.Uint8) {
+    if (val.Kind() == reflect.Slice && val.Type().Elem().Kind() != reflect.Uint8) {
         // Slice of element values.
         // Grow slice.
         nint n = val.Len();
@@ -334,15 +345,19 @@ internal static error unmarshalAttr(this ref Decoder d, reflectꓸValue val, Att
     return copyValue(val, slice<byte>(attr.Value));
 }
 
-internal static reflectꓸType attrType = reflect.TypeFor<Attr>();
+} partial class xml_package {
+
+internal static reflect.Type attrType = reflect.TypeFor<Attr>();
 
 internal static UntypedInt maxUnmarshalDepth => 10000;
 internal static UntypedInt maxUnmarshalDepthWasm => 5000; // go.dev/issue/56498
 
 internal static error errUnmarshalDepth = errors.New("exceeded max depth");
 
+} partial class xmlᴛDecoder {
+
 // Unmarshal a single XML element into val.
-internal static error unmarshal(this ж<Decoder> Ꮡd, reflectꓸValue val, ж<StartElement> Ꮡstart) {
+internal static error unmarshal(this ж<Decoder> Ꮡd, reflect.Value val, ж<StartElement> Ꮡstart) {
     ref var d = ref Ꮡd.DerefOrNull();
     ref var start = ref Ꮡstart.DerefOrNull();
 
@@ -366,14 +381,14 @@ internal static error unmarshal(this ж<Decoder> Ꮡd, reflectꓸValue val, ж<S
 
     // Load value from interface, but only if the result will be
     // usefully addressable.
-    if (val.Kind() == reflect.ΔInterface && !val.IsNil()) {
+    if (val.Kind() == reflect.Interface && !val.IsNil()) {
         var e = val.Elem();
-        if (e.Kind() == reflect.ΔPointer && !e.IsNil()) {
+        if (e.Kind() == reflect.Pointer && !e.IsNil()) {
             val = e;
         }
     }
 
-    if (val.Kind() == reflect.ΔPointer) {
+    if (val.Kind() == reflect.Pointer) {
         if (val.IsNil()) {
             val.Set(reflect.New(val.Type().Elem()));
         }
@@ -413,14 +428,14 @@ internal static error unmarshal(this ж<Decoder> Ꮡd, reflectꓸValue val, ж<S
     }
 
     slice<byte> data = default;
-    reflectꓸValue saveData = new(nil);
+    reflect.Value saveData = new(nil);
     slice<byte> comment = default;
-    reflectꓸValue saveComment = new(nil);
-    reflectꓸValue saveXML = new(nil);
+    reflect.Value saveComment = new(nil);
+    reflect.Value saveXML = new(nil);
     nint saveXMLIndex = default;
     slice<byte> saveXMLData = default;
-    reflectꓸValue saveAny = new(nil);
-    reflectꓸValue sv = new(nil);
+    reflect.Value saveAny = new(nil);
+    reflect.Value sv = new(nil);
     ж<typeInfo> tinfo = default;
     error err = default;
 
@@ -429,13 +444,13 @@ internal static error unmarshal(this ж<Decoder> Ꮡd, reflectꓸValue val, ж<S
     default: {
         return errors.New("unknown type "u8 + v.Type().String());
     }
-    case var ᴛ when ᴛ == reflect.ΔInterface: {
+    case var ᴛ when ᴛ == reflect.Interface: {
         // TODO: For now, simply ignore the field. In the near
         //       future we may choose to unmarshal the start
         //       element on it, if not nil.
         return d.Skip();
     }
-    case var ᴛ when ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Slice: {
         var typ = v.Type();
         if (typ.Elem().Kind() == reflect.Uint8) {
             // []byte
@@ -456,7 +471,7 @@ internal static error unmarshal(this ж<Decoder> Ꮡd, reflectꓸValue val, ж<S
         }
         return default;
     }
-    case var ᴛ when ᴛ == reflect.ΔBool || ᴛ == reflect.Float32 || ᴛ == reflect.Float64 || ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr || ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.Bool || ᴛ == reflect.Float32 || ᴛ == reflect.Float64 || ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr || ᴛ == reflect.String: {
         saveData = v;
         break;
     }
@@ -631,7 +646,7 @@ break_Loop:;
             var errΔ13 = textUnmarshaler.UnmarshalText(data); if (errΔ13 != nil) {
                 return errΔ13;
             }
-            saveData = new reflectꓸValue();
+            saveData = new reflect.Value();
         }
     }
 
@@ -642,7 +657,7 @@ break_Loop:;
                 var errΔ14 = textUnmarshaler.UnmarshalText(data); if (errΔ14 != nil) {
                     return errΔ14;
                 }
-                saveData = new reflectꓸValue();
+                saveData = new reflect.Value();
             }
         }
     }
@@ -654,11 +669,11 @@ break_Loop:;
     {
         var t = saveComment;
         switch (t.Kind()) {
-        case var ᴛ when ᴛ == reflect.ΔString: {
+        case var ᴛ when ᴛ == reflect.String: {
             t.SetString((@string)comment);
             break;
         }
-        case var ᴛ when ᴛ == reflect.ΔSlice: {
+        case var ᴛ when ᴛ == reflect.Slice: {
             t.Set(reflect.ValueOf(comment));
             break;
         }}
@@ -667,11 +682,11 @@ break_Loop:;
     {
         var t = saveXML;
         switch (t.Kind()) {
-        case var ᴛ when ᴛ == reflect.ΔString: {
+        case var ᴛ when ᴛ == reflect.String: {
             t.SetString((@string)saveXMLData);
             break;
         }
-        case var ᴛ when ᴛ == reflect.ΔSlice: {
+        case var ᴛ when ᴛ == reflect.Slice: {
             if (t.Type().Elem().Kind() == reflect.Uint8) {
                 t.Set(reflect.ValueOf(saveXMLData));
             }
@@ -682,10 +697,12 @@ break_Loop:;
     return default;
 }
 
-internal static error /*err*/ copyValue(reflectꓸValue dst, slice<byte> src) {
+} partial class xml_package {
+
+internal static error /*err*/ copyValue(reflect.Value dst, slice<byte> src) {
     var dst0 = dst;
 
-    if (dst.Kind() == reflect.ΔPointer) {
+    if (dst.Kind() == reflect.Pointer) {
         if (dst.IsNil()) {
             dst.Set(reflect.New(dst.Type().Elem()));
         }
@@ -701,7 +718,7 @@ internal static error /*err*/ copyValue(reflectꓸValue dst, slice<byte> src) {
     default: {
         return errors.New("cannot unmarshal into "u8 + dst0.Type().String());
     }
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         if (len(src) == 0) {
             dst.SetInt(0);
             return default;
@@ -713,7 +730,7 @@ internal static error /*err*/ copyValue(reflectꓸValue dst, slice<byte> src) {
         dst.SetInt(itmp);
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+    case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
         if (len(src) == 0) {
             dst.SetUint(0);
             return default;
@@ -737,7 +754,7 @@ internal static error /*err*/ copyValue(reflectꓸValue dst, slice<byte> src) {
         dst.SetFloat(ftmp);
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔBool: {
+    case var ᴛ when ᴛ == reflect.Bool: {
         if (len(src) == 0) {
             dst.SetBool(false);
             return default;
@@ -749,11 +766,11 @@ internal static error /*err*/ copyValue(reflectꓸValue dst, slice<byte> src) {
         dst.SetBool(value);
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.String: {
         dst.SetString((@string)src);
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Slice: {
         if (len(src) == 0) {
             // non-nil to flag presence
             src = [];
@@ -764,12 +781,14 @@ internal static error /*err*/ copyValue(reflectꓸValue dst, slice<byte> src) {
     return default;
 }
 
+} partial class xmlᴛDecoder {
+
 // unmarshalPath walks down an XML structure looking for wanted
 // paths, and calls unmarshal on them.
 // The consumed result tells whether XML elements have been consumed
 // from the Decoder until start's matching end element, or if it's
 // still untouched because start is uninteresting for sv's fields.
-internal static (bool consumed, error err) unmarshalPath(this ж<Decoder> Ꮡd, ж<typeInfo> Ꮡtinfo, reflectꓸValue sv, slice<@string> parents, ж<StartElement> Ꮡstart) {
+internal static (bool consumed, error err) unmarshalPath(this ж<Decoder> Ꮡd, ж<typeInfo> Ꮡtinfo, reflect.Value sv, slice<@string> parents, ж<StartElement> Ꮡstart) {
     error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
     ref var tinfo = ref Ꮡtinfo.DerefOrNull();
@@ -813,7 +832,7 @@ break_Loop:;
     // or more fields have the path to this element as a parent
     // prefix. Recurse and attempt to match these.
     for (;;) {
-        ΔToken tok = default;
+        Token tok = default;
         (tok, err) = d.Token();
         if (err != nil) {
             return (true, err);
@@ -865,4 +884,4 @@ public static error Skip(this ref Decoder d) {
     }
 }
 
-} // end xml_package
+} // end xmlᴛDecoder

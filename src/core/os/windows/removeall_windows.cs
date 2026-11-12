@@ -8,7 +8,7 @@ using syscall = syscall_package;
 
 partial class os_package {
 
-internal static (ж<File>, error) newDirFile(syscallꓸHandle fd, @string name) {
+internal static (ж<File>, error) newDirFile(syscall.Handle fd, @string name) {
     return (newFile(fd, name, kindOpenFile, false), default);
 }
 

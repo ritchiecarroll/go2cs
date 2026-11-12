@@ -6,7 +6,7 @@
 // sysfdType is the native type of a file handle
 // (int on Unix, syscall.Handle on Windows),
 // permitting helper functions to be written portably.
-global using sysfdType = go.syscall_package.ΔHandle;
+global using sysfdType = go.syscall_package.Handle;
 
 namespace go;
 
@@ -110,7 +110,7 @@ private static readonly @string notADirectoryˢᵇ = "not a directory"u8;
 
 // newRoot returns a new Root.
 // If fd is not a directory, it closes it and returns an error.
-internal static (ж<Root>, error) newRoot(syscallꓸHandle fd, @string name) {
+internal static (ж<Root>, error) newRoot(syscall.Handle fd, @string name) {
     // Check that this is a directory.
     //
     // If we get any errors here, ignore them; worst case we create a Root
@@ -127,7 +127,7 @@ internal static (ж<Root>, error) newRoot(syscallꓸHandle fd, @string name) {
         name: name
     ))
     ));
-    runtime.SetFinalizer(r.root.OrTypedNil(), ((Func<ж<root>, error>)(Close)));
+    runtime.SetFinalizer(r.root.OrTypedNil(), ((Func<ж<root>, error>)(osᴛroot.Close)));
     return (r, default);
 }
 
@@ -135,7 +135,7 @@ internal static (ж<Root>, error) newRoot(syscallꓸHandle fd, @string name) {
 internal static (ж<Root>, error) openRootInRoot(ж<Root> Ꮡr, @string name) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    var (fd, err) = doInRoot(ref (Ꮡr).DerefOrNull(), name, 0, default, (syscallꓸHandle, error) (syscallꓸHandle parent, @string nameΔ1, bool endsInSlash) => rootOpenDir(parent, nameΔ1));
+    var (fd, err) = doInRoot(ref (Ꮡr).DerefOrNull(), name, 0, default, (syscall.Handle, error) (syscall.Handle parent, @string nameΔ1, bool endsInSlash) => rootOpenDir(parent, nameΔ1));
     if (err != nil) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "openat", Path: name, Err: err))));
     }
@@ -146,7 +146,7 @@ internal static (ж<Root>, error) openRootInRoot(ж<Root> Ꮡr, @string name) {
 internal static (ж<File>, error) rootOpenFileNolog(ж<Root> Ꮡroot, @string name, nint flag, FileMode perm) {
     ref var root = ref Ꮡroot.DerefOrNull();
 
-    var (fd, err) = doInRoot(ref (Ꮡroot).DerefOrNull(), name, doInRootNoHandleTerminalSlash, default, (syscallꓸHandle, error) (syscallꓸHandle parent, @string nameΔ1, bool endsInSlash) => {
+    var (fd, err) = doInRoot(ref (Ꮡroot).DerefOrNull(), name, doInRootNoHandleTerminalSlash, default, (syscall.Handle, error) (syscall.Handle parent, @string nameΔ1, bool endsInSlash) => {
         if (endsInSlash) {
             flag |= (nint)(windows.O_DIRECTORY);
         }
@@ -159,7 +159,7 @@ internal static (ж<File>, error) rootOpenFileNolog(ж<Root> Ꮡroot, @string na
     return (newFile(fd, joinPath(root.Name(), name), kindOpenFile, nonblocking), default);
 }
 
-internal static (syscallꓸHandle, error) openat(syscallꓸHandle dirfd, @string name, uint64 flag, FileMode perm) {
+internal static (syscall.Handle, error) openat(syscall.Handle dirfd, @string name, uint64 flag, FileMode perm) {
     var (h, err) = windows.Openat(dirfd, name, flag | (uint64)syscall.O_CLOEXEC | (uint64)windows.O_NOFOLLOW_ANY, syscallMode(perm));
     if (AreEqual(err, syscall.ELOOP) || AreEqual(err, syscall.ENOTDIR)) {
         var (link, errΔ1) = readReparseLinkAt(dirfd, name); if (errΔ1 == nil) {
@@ -169,7 +169,7 @@ internal static (syscallꓸHandle, error) openat(syscallꓸHandle dirfd, @string
     return (h, err);
 }
 
-internal static (@string, error) readReparseLinkAt(syscallꓸHandle dirfd, @string name) {
+internal static (@string, error) readReparseLinkAt(syscall.Handle dirfd, @string name) {
     GoFrame ᒐ = default;
     try {
         var (objectName, err) = windows.NewNTUnicodeString(name);
@@ -183,7 +183,7 @@ internal static (@string, error) readReparseLinkAt(syscallꓸHandle dirfd, @stri
             objAttrs.RootDirectory = dirfd;
         }
         objAttrs.Length = (uint32)/* unsafe.Sizeof(*objAttrs) */ (uintptr)48;
-        ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
+        ref var h = ref heap(new syscall.Handle(), out var Ꮡh);
         err = windows.NtCreateFile(
             Ꮡh,
             windows.FILE_GENERIC_READ,
@@ -206,7 +206,7 @@ internal static (@string, error) readReparseLinkAt(syscallꓸHandle dirfd, @stri
     finally { ᒐ.Run(); }
 }
 
-internal static (syscallꓸHandle, error) rootOpenDir(syscallꓸHandle parent, @string name) {
+internal static (syscall.Handle, error) rootOpenDir(syscall.Handle parent, @string name) {
     var (h, err) = openat(parent, name, (uint64)((UntypedInt)(syscall.O_RDONLY | syscall.O_CLOEXEC) | (uint64)windows.O_DIRECTORY), 0);
     if (AreEqual(err, syscall.ERROR_FILE_NOT_FOUND)) {
         // Windows returns:
@@ -238,7 +238,7 @@ internal static (FileInfo, error) rootStat(ref Root r, @string name, bool lstat)
         // but empirically os.Lstat behaves this way.
         flags = doInRootAlwaysResolveTerminalSlash;
     }
-    var (fi, err) = doInRoot(ref r, name, flags, default, (FileInfo, error) (syscallꓸHandle parent, @string n, bool endsInSlash) => {
+    var (fi, err) = doInRoot(ref r, name, flags, default, (FileInfo, error) (syscall.Handle parent, @string n, bool endsInSlash) => {
         GoFrame ᒐ = default;
         try {
             var (fd, errΔ1) = openat(parent, n, windows.O_FILE_FLAG_OPEN_REPARSE_POINT, 0);
@@ -305,14 +305,14 @@ internal static error rootSymlink(ж<Root> r, @string oldname, @string newname) 
         flags |= (windows.SymlinkatFlags)(windows.SYMLINKAT_RELATIVE);
     }
 
-    var (_, err) = doInRoot(ref (r).DerefOrNull(), newname, 0, default, (EmptyStruct, error) (syscallꓸHandle parent, @string name, bool endsInSlash) => (new EmptyStruct(), windows.Symlinkat(oldname, parent, name, flags)));
+    var (_, err) = doInRoot(ref (r).DerefOrNull(), newname, 0, default, (EmptyStruct, error) (sysfdType parent, @string name, bool endsInSlash) => (new EmptyStruct(), windows.Symlinkat(oldname, parent, name, flags)));
     if (err != nil) {
         return new LinkErrorжerror(Ꮡ(new LinkError("symlinkat", oldname, newname, err)));
     }
     return default;
 }
 
-internal static error chmodat(syscallꓸHandle parent, @string name, FileMode mode) {
+internal static error chmodat(syscall.Handle parent, @string name, FileMode mode) {
     GoFrame ᒐ = default;
     try {
         // Currently, on Windows os.Chmod("symlink") will act on "symlink",
@@ -361,31 +361,31 @@ internal static error chmodat(syscallꓸHandle parent, @string name, FileMode mo
     finally { ᒐ.Run(); }
 }
 
-internal static error chownat(syscallꓸHandle parent, @string name, nint uid, nint gid) {
+internal static error chownat(syscall.Handle parent, @string name, nint uid, nint gid) {
     return syscall.EWINDOWS; // matches syscall.Chown
 }
 
-internal static error lchownat(syscallꓸHandle parent, @string name, nint uid, nint gid) {
+internal static error lchownat(syscall.Handle parent, @string name, nint uid, nint gid) {
     return syscall.EWINDOWS; // matches syscall.Lchown
 }
 
-internal static error mkdirat(syscallꓸHandle dirfd, @string name, FileMode perm) {
+internal static error mkdirat(syscall.Handle dirfd, @string name, FileMode perm) {
     return windows.Mkdirat(dirfd, name, syscallMode(perm));
 }
 
-internal static error removeat(syscallꓸHandle dirfd, @string name) {
+internal static error removeat(syscall.Handle dirfd, @string name) {
     return windows.Deleteat(dirfd, name, 0);
 }
 
-internal static error removefileat(syscallꓸHandle dirfd, @string name) {
+internal static error removefileat(syscall.Handle dirfd, @string name) {
     return windows.Deleteat(dirfd, name, windows.FILE_NON_DIRECTORY_FILE);
 }
 
-internal static error removedirat(syscallꓸHandle dirfd, @string name) {
+internal static error removedirat(syscall.Handle dirfd, @string name) {
     return windows.Deleteat(dirfd, name, windows.FILE_DIRECTORY_FILE);
 }
 
-internal static error chtimesat(syscallꓸHandle dirfd, @string name, time.Time atime, time.Time mtime) {
+internal static error chtimesat(syscall.Handle dirfd, @string name, time.Time atime, time.Time mtime) {
     GoFrame ᒐ = default;
     try {
         var (h, err) = windows.Openat(dirfd, name, (uint64)(8590458880L | (uint64)windows.O_WRITE_ATTRS), 0);
@@ -412,11 +412,11 @@ internal static error chtimesat(syscallꓸHandle dirfd, @string name, time.Time 
     finally { ᒐ.Run(); }
 }
 
-internal static error renameat(syscallꓸHandle oldfd, @string oldname, syscallꓸHandle newfd, @string newname) {
+internal static error renameat(syscall.Handle oldfd, @string oldname, syscall.Handle newfd, @string newname) {
     return windows.Renameat(oldfd, oldname, newfd, newname);
 }
 
-internal static error linkat(syscallꓸHandle oldfd, @string oldname, syscallꓸHandle newfd, @string newname) {
+internal static error linkat(syscall.Handle oldfd, @string oldname, syscall.Handle newfd, @string newname) {
     return windows.Linkat(oldfd, oldname, newfd, newname);
 }
 
@@ -424,7 +424,7 @@ internal static error linkat(syscallꓸHandle oldfd, @string oldname, syscallꓸ
 // and returns errSymlink with the link contents.
 //
 // If name is not a symlink, return origError.
-internal static error checkSymlink(syscallꓸHandle parent, @string name, error origError) {
+internal static error checkSymlink(syscall.Handle parent, @string name, error origError) {
     var (link, err) = readlinkat(parent, name);
     if (err != nil) {
         return origError;
@@ -432,7 +432,7 @@ internal static error checkSymlink(syscallꓸHandle parent, @string name, error 
     return ((errSymlink)link);
 }
 
-internal static (@string, error) readlinkat(syscallꓸHandle dirfd, @string name) {
+internal static (@string, error) readlinkat(syscall.Handle dirfd, @string name) {
     GoFrame ᒐ = default;
     try {
         var (fd, err) = openat(dirfd, name, windows.O_FILE_FLAG_OPEN_REPARSE_POINT, 0);
@@ -446,7 +446,7 @@ internal static (@string, error) readlinkat(syscallꓸHandle dirfd, @string name
     finally { ᒐ.Run(); }
 }
 
-internal static (FileInfo, error) lstatat(syscallꓸHandle parent, @string name) {
+internal static (FileInfo, error) lstatat(syscall.Handle parent, @string name) {
     GoFrame ᒐ = default;
     try {
         var (fd, err) = openat(parent, name, windows.O_FILE_FLAG_OPEN_REPARSE_POINT, 0);

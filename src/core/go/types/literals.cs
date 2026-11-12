@@ -13,8 +13,11 @@ using strings = strings_package;
 using constant = global::go.go.constant_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
+using static types_package;
 
 partial class types_package {
+
+} partial class typesᴛChecker {
 
 // langCompat reports an error if the representation of a numeric
 // literal is not compatible with the current language version.
@@ -97,7 +100,7 @@ internal static void funcLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast
     ref var e = ref Ꮡe.DerefOrNull();
 
     {
-        var (sig, ok) = Ꮡcheck.typ(new ast.FuncTypeжExpr(e.Type))._<ж<ΔSignature>>(ᐧ); if (ok) {
+        var (sig, ok) = Ꮡcheck.typ(new ast.FuncTypeжExpr(e.Type))._<ж<Signature>>(ᐧ); if (ok) {
             // Set the Scope's extent to the complete "func (...) {...}"
             // so that Scope.Innermost works correctly.
             sig.scope.pos = e.Pos();
@@ -120,7 +123,7 @@ internal static void funcLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast
                 }).describef(new ast_FuncLitжpositioner(Ꮡe), "func literal");
             }
             x.mode = value;
-            x.typ = new ΔSignatureжΔType(sig);
+            x.typ = new SignatureжType(sig);
         } else {
             Ꮡcheck.errorf(new ast_FuncLitжpositioner(Ꮡe), InvalidSyntaxTree, "invalid function literal %v", Ꮡe.OrTypedNil());
             x.mode = invalid;
@@ -144,13 +147,13 @@ private static readonly @string elementˢᵇ = " element"u8;
 internal static ref readonly @string noCommonUnderlyingTypeˢ => ref noCommonUnderlyingTypeˢᵇ;
 private static readonly @string noCommonUnderlyingTypeˢᵇ = " (no common underlying type)"u8;
 
-internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CompositeLit> Ꮡe, ΔType hint) {
+internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CompositeLit> Ꮡe, Type hint) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
-    ΔType typ = default;
-    ΔType @base = default;
+    Type typ = default;
+    Type @base = default;
     bool isElem = default; // true if composite literal is an element of an enclosing composite literal
 
     switch (ᐧ) {
@@ -162,7 +165,7 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
             // We have an "open" [...]T array type.
             // Create a new ArrayType with unknown length (-1)
             // and finish setting it up after analyzing the literal.
-            typ = new ArrayжΔType(Ꮡ(new Array(len: -1, elem: Ꮡcheck.varType(atyp.Elt))));
+            typ = new ArrayжType(Ꮡ(new Array(len: -1, elem: Ꮡcheck.varType(atyp.Elt))));
             @base = typ;
             break;
         }
@@ -186,7 +189,7 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
         // TODO(gri) provide better error messages depending on context
         Ꮡcheck.error(new ast_CompositeLitжpositioner(Ꮡe), UntypedLit, missingTypeInCompositeˢ);
         // continue with invalid type so that elements are "used" (go.dev/issue/69092)
-        typ = new BasicжΔType(Typ[Invalid]);
+        typ = new BasicжType(Typ[Invalid]);
         @base = typ;
         break;
     }}
@@ -285,7 +288,7 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
                 // that case there is nothing to record (there is no type in
                 // the source at that point).
                 if (e.Type != nil) {
-                    check.recordTypeAndValue(e.Type, typexpr, new ArrayжΔType(utyp), default);
+                    check.recordTypeAndValue(e.Type, typexpr, new ArrayжType(utyp), default);
                 }
             }
             break;
@@ -299,7 +302,7 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
             // the type of a constant key must be considered when checking for
             // duplicates.
             var keyIsInterface = isNonTypeParamInterface(utyp.key);
-            var visited = new map<any, slice<ΔType>>(len(e.Elts));
+            var visited = new map<any, slice<Type>>(len(e.Elts));
             foreach (var (_, eΔ3) in range(e.Elts)) {
                 var (kv, _) = eΔ3._<ж<ast.KeyValueExpr>>(ᐧ);
                 if (kv == nil) {
@@ -381,7 +384,7 @@ private static readonly @string arrayOrSliceLiteralˢᵇ = "array or slice liter
 // against the literal's element type (typ), and the element indices against
 // the literal length if known (length >= 0). It returns the length of the
 // literal (maximum index value + 1).
-internal static int64 indexedElts(this ж<Checker> Ꮡcheck, slice<ast.Expr> elts, ΔType typ, int64 length) {
+internal static int64 indexedElts(this ж<Checker> Ꮡcheck, slice<ast.Expr> elts, Type typ, int64 length) {
     var visited = new map<int64, bool>(len(elts));
     int64 index = default;
     int64 max = default;
@@ -425,4 +428,4 @@ internal static int64 indexedElts(this ж<Checker> Ꮡcheck, slice<ast.Expr> elt
     return max;
 }
 
-} // end types_package
+} // end typesᴛChecker

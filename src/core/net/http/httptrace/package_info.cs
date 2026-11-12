@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using tlsꓸConnectionState = go.crypto.tls_package.ΔConnectionState;
 // </ImportedTypeAliases>
 
 using go;
@@ -62,7 +59,7 @@ using static go.net.http.httptrace_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/httptrace/trace.go", "trace.cs", "ABkwooIAAhDygpSClIKCuIKCpoKCgoKU7pQAWtgBooKUgoKCgoKCgpSCgpSCgsqmooKUABQuooKU", "48-50:1;53-63:2;202-205:1")]
+[assembly: GoPositionMap("net/http/httptrace/trace.go", "trace.cs", "ABowooIAAhDygpSClIKCuIKCpoKCgoKU7pQAXNgBooKUgoKCgoKCgpSCgpSCgsqmooKUABguooKU", "48-50:1;53-63:2;202-205:1")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
@@ -100,3 +97,13 @@ public static partial class httptrace_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(httptrace_package.ClientTrace)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httptraceᴛClientTrace;
+// </MethodHolders>

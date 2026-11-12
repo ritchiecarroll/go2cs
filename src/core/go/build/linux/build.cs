@@ -38,6 +38,8 @@ using global::go.path;
 using global::go.unicode;
 using iter = iter_package;
 using ꓸꓸꓸstring = Span<@string>;
+using Δbuild = build_package;
+using static build_package;
 
 partial class build_package {
 
@@ -112,6 +114,8 @@ partial struct Context {
     public Func<@string, (io.ReadCloser, error)> OpenFile;
 }
 
+} partial class buildᴛContext {
+
 // joinPath calls ctxt.JoinPath (if not nil) or else filepath.Join.
 internal static @string joinPath(this ref Context ctxt, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.sslice();
@@ -158,7 +162,7 @@ internal static (@string rel, bool ok) hasSubdir(this ref Context ctxt, @string 
     }
 
     // Try using paths we received.
-    (rel, ok) = hasSubdir(root, dir); if (ok) {
+    (rel, ok) = Δbuild.hasSubdir(root, dir); if (ok) {
         return (rel, ok);
     }
 
@@ -168,14 +172,16 @@ internal static (@string rel, bool ok) hasSubdir(this ref Context ctxt, @string 
     var (rootSym, _) = filepath.EvalSymlinks(root);
     var (dirSym, _) = filepath.EvalSymlinks(dir);
 
-    (rel, ok) = hasSubdir(rootSym, dir); if (ok) {
+    (rel, ok) = Δbuild.hasSubdir(rootSym, dir); if (ok) {
         return (rel, ok);
     }
-    (rel, ok) = hasSubdir(root, dirSym); if (ok) {
+    (rel, ok) = Δbuild.hasSubdir(root, dirSym); if (ok) {
         return (rel, ok);
     }
-    return hasSubdir(rootSym, dirSym);
+    return Δbuild.hasSubdir(rootSym, dirSym);
 }
+
+} partial class build_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string sepᶜ => ref sepᶜᵇ;
@@ -195,6 +201,8 @@ internal static (@string rel, bool ok) hasSubdir(@string root, @string dir) {
     }
     return (filepath.ToSlash(after), true);
 }
+
+} partial class buildᴛContext {
 
 // readDir calls ctxt.ReadDir (if not nil) or else os.ReadDir.
 internal static (slice<fs.DirEntry>, error) readDir(this ref Context ctxt, @string path) {
@@ -295,6 +303,8 @@ public static slice<@string> SrcDirs(this ref Context ctxt) {
     }
     return all;
 }
+
+} partial class build_package {
 
 // Default is the default Context for builds.
 // It uses the GOARCH, GOOS, GOROOT, and GOPATH environment variables
@@ -514,29 +524,31 @@ partial struct Package {
     public slice<Directive> XTestDirectives;
     // Dependency information
     public slice<@string> Imports;                             // import paths from GoFiles, CgoFiles
-    public map<@string, slice<tokenꓸPosition>> ImportPos;      // line information for Imports
+    public map<@string, slice<token.Position>> ImportPos;      // line information for Imports
     public slice<@string> TestImports;                         // import paths from TestGoFiles
-    public map<@string, slice<tokenꓸPosition>> TestImportPos;  // line information for TestImports
+    public map<@string, slice<token.Position>> TestImportPos;  // line information for TestImports
     public slice<@string> XTestImports;                        // import paths from XTestGoFiles
-    public map<@string, slice<tokenꓸPosition>> XTestImportPos; // line information for XTestImports
+    public map<@string, slice<token.Position>> XTestImportPos; // line information for XTestImports
     // //go:embed patterns found in Go source files
     // For example, if a source file says
     //	//go:embed a* b.c
     // then the list will contain those two strings as separate entries.
     // (See package embed for more details about //go:embed.)
     public slice<@string> EmbedPatterns;                             // patterns from GoFiles, CgoFiles
-    public map<@string, slice<tokenꓸPosition>> EmbedPatternPos;      // line information for EmbedPatterns
+    public map<@string, slice<token.Position>> EmbedPatternPos;      // line information for EmbedPatterns
     public slice<@string> TestEmbedPatterns;                         // patterns from TestGoFiles
-    public map<@string, slice<tokenꓸPosition>> TestEmbedPatternPos;  // line information for TestEmbedPatterns
+    public map<@string, slice<token.Position>> TestEmbedPatternPos;  // line information for TestEmbedPatterns
     public slice<@string> XTestEmbedPatterns;                        // patterns from XTestGoFiles
-    public map<@string, slice<tokenꓸPosition>> XTestEmbedPatternPos; // line information for XTestEmbedPatternPos
+    public map<@string, slice<token.Position>> XTestEmbedPatternPos; // line information for XTestEmbedPatternPos
 }
 
 // A Directive is a Go directive comment (//go:zzz...) found in a source file.
 partial struct Directive {
     public @string Text;       // full line comment including leading slashes
-    public tokenꓸPosition Pos; // position of comment
+    public token.Position Pos; // position of comment
 }
+
+} partial class buildᴛPackage {
 
 // IsCommand reports whether the package is considered a
 // command to be installed (not just a library).
@@ -545,11 +557,15 @@ public static bool IsCommand(this ref Package p) {
     return p.Name == "main"u8;
 }
 
+} partial class buildᴛContext {
+
 // ImportDir is like [Import] but processes the Go package found in
 // the named directory.
 public static (ж<Package>, error) ImportDir(this ж<Context> Ꮡctxt, @string dir, ImportMode mode) {
     return Ꮡctxt.Import(".", dir, mode);
 }
+
+} partial class build_package {
 
 // NoGoError is the error used by [Import] to describe a directory
 // containing no buildable Go source files. (It may still contain
@@ -558,9 +574,13 @@ partial struct NoGoError {
     public @string Dir;
 }
 
+} partial class buildᴛNoGoError {
+
 public static @string Error(this ref NoGoError e) {
     return "no buildable Go source files in "u8 + e.Dir;
 }
+
+} partial class build_package {
 
 // MultiplePackageError describes a directory containing
 // multiple buildable Go source files for multiple packages.
@@ -570,10 +590,14 @@ partial struct MultiplePackageError {
     public slice<@string> Files;    // corresponding files: Files[i] declares package Packages[i]
 }
 
+} partial class buildᴛMultiplePackageError {
+
 public static @string Error(this ref MultiplePackageError e) {
     // Error string limited to two entries for compatibility.
     return fmt.Sprintf("found packages %s (%s) and %s (%s) in %s"u8, e.Packages[0], e.Files[0], e.Packages[1], e.Files[1], e.Dir);
 }
+
+} partial class build_package {
 
 internal static @string nameExt(@string name) {
     nint i = strings.LastIndex(name, ".");
@@ -584,6 +608,14 @@ internal static @string nameExt(@string name) {
 }
 
 internal static ж<godebug.Setting> installgoroot = godebug.New("installgoroot");
+
+internal partial struct Import_tried /*dyn*/ {
+    internal slice<@string> vendor;
+    internal @string goroot;
+    internal slice<@string> gopath;
+}
+
+} partial class buildᴛContext {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testdataˢ => ref testdataˢᵇ;
@@ -612,12 +644,6 @@ internal static ref readonly @string testˢ => ref testˢᵇ;
 private static readonly @string testˢᵇ = "_test"u8;
 internal static ref readonly @string cgoˢ => ref cgoˢᵇ;
 private static readonly @string cgoˢᵇ = "cgo"u8;
-
-internal partial struct Import_tried /*dyn*/ {
-    internal slice<@string> vendor;
-    internal @string goroot;
-    internal slice<@string> gopath;
-}
 
 // Import returns details about the Go package named by the import path,
 // interpreting local import paths relative to the srcDir directory.
@@ -950,12 +976,12 @@ Found:
     slice<@string> Sfiles = default; // files with ".S"(capital S)/.sx(capital s equivalent for case insensitive filesystems)
     @string firstFile = default;
     @string firstCommentFile = default;
-    var embedPos = new map<@string, slice<tokenꓸPosition>>();
-    var testEmbedPos = new map<@string, slice<tokenꓸPosition>>();
-    var xTestEmbedPos = new map<@string, slice<tokenꓸPosition>>();
-    var importPos = new map<@string, slice<tokenꓸPosition>>();
-    var testImportPos = new map<@string, slice<tokenꓸPosition>>();
-    var xTestImportPos = new map<@string, slice<tokenꓸPosition>>();
+    var embedPos = new map<@string, slice<token.Position>>();
+    var testEmbedPos = new map<@string, slice<token.Position>>();
+    var xTestEmbedPos = new map<@string, slice<token.Position>>();
+    var importPos = new map<@string, slice<token.Position>>();
+    var testImportPos = new map<@string, slice<token.Position>>();
+    var xTestImportPos = new map<@string, slice<token.Position>>();
     var allTags = new map<@string, bool>();
     var fset = token.NewFileSet();
     foreach (var (_, d) in range(dirs)) {
@@ -1085,8 +1111,8 @@ Found:
         }
 
         ж<slice<@string>> fileList = default;
-        map<@string, slice<tokenꓸPosition>> importMap = default;
-        map<@string, slice<tokenꓸPosition>> embedMap = default;
+        map<@string, slice<token.Position>> importMap = default;
+        map<@string, slice<token.Position>> embedMap = default;
         ж<slice<Directive>> directives = default;
         switch (ᐧ) {
         case {} when isCgo: {
@@ -1172,6 +1198,8 @@ Found:
     return (p, pkgerr);
 }
 
+} partial class build_package {
+
 internal static ж<slice<@string>> fileListForExt(ж<Package> p, @string ext) {
     var exprᴛ1 = ext;
     switch (ᐧ) {
@@ -1222,6 +1250,8 @@ internal static slice<@string> uniq(slice<@string> list) {
 }
 
 internal static error errNoModules = errors.New("not using modules");
+
+} partial class buildᴛContext {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string go111moduleˢ => ref go111moduleˢᵇ;
@@ -1392,6 +1422,8 @@ internal static error importGo(this ref Context ctxt, ж<Package> Ꮡp, @string 
     return default;
 }
 
+} partial class build_package {
+
 // hasGoFiles reports whether dir contains any files with names ending in .go.
 // For a vendor check we must exclude directories that contain no .go files.
 // Otherwise it is not possible to vendor just a/b/c and still import the
@@ -1523,6 +1555,8 @@ internal static (slice<byte> word, slice<byte> rest) parseWord(slice<byte> data)
     return (word, rest);
 }
 
+} partial class buildᴛContext {
+
 // MatchFile reports whether the file with the given name in the given directory
 // matches the context and would be included in a [Package] created by [ImportDir]
 // of that directory.
@@ -1535,6 +1569,8 @@ public static (bool match, error err) MatchFile(this ж<Context> Ꮡctxt, @strin
     (var info, err) = Ꮡctxt.matchFile(dir, name, default, nil, nil);
     return (info != nil, err);
 }
+
+} partial class build_package {
 
 internal static readonly ж<Package> ᏑdummyPkg = new StaticBox<Package>(default(Package));
 internal static ref Package dummyPkg => ref ((StaticBox<Package>)ᏑdummyPkg).ValueSlot;
@@ -1553,14 +1589,16 @@ partial struct fileInfo {
 
 partial struct fileImport {
     internal @string path;
-    internal tokenꓸPos pos;
+    internal token.Pos pos;
     internal ж<ast.CommentGroup> doc;
 }
 
 partial struct fileEmbed {
     internal @string pattern;
-    internal tokenꓸPosition pos;
+    internal token.Position pos;
 }
+
+} partial class buildᴛContext {
 
 // matchFile determines whether the file with the given name in the given directory
 // should be included in the package being constructed.
@@ -1638,7 +1676,9 @@ internal static (ж<fileInfo>, error) matchFile(this ж<Context> Ꮡctxt, @strin
     return (info, default);
 }
 
-internal static (slice<@string>, map<@string, slice<tokenꓸPosition>>) cleanDecls(map<@string, slice<tokenꓸPosition>> m) {
+} partial class build_package {
+
+internal static (slice<@string>, map<@string, slice<token.Position>>) cleanDecls(map<@string, slice<token.Position>> m) {
     var all = new slice<@string>(0, len(m));
     foreach (var (path, _) in m) {
         all = append(all, path);
@@ -1676,6 +1716,8 @@ internal static bool isGoBuildComment(slice<byte> line) {
 // See https://golang.org/design/2775-binary-only-packages
 // for more about the design of binary-only packages.
 internal static slice<byte> binaryOnlyComment = slice<byte>("//go:binary-only-package"u8);
+
+} partial class buildᴛContext {
 
 // shouldBuild reports whether it is okay to use this file,
 // The rule is that in the file's leading run of // comments
@@ -1746,6 +1788,8 @@ internal static (bool shouldBuild, bool binaryOnly, error err) shouldBuild(this 
 
     return (shouldBuild, sawBinaryOnly, default);
 }
+
+} partial class build_package {
 
 // parseFileHeader should be an internal detail,
 // but widely used packages access it using linkname.
@@ -1831,6 +1875,8 @@ break_Lines:;
 
     return (content.slice(0, end), goBuild, sawBinaryOnly, default);
 }
+
+} partial class buildᴛContext {
 
 // saveCgo saves the information from the #cgo lines in the import "C" comment.
 // These lines set CFLAGS, CPPFLAGS, CXXFLAGS and LDFLAGS and pkg-config directives
@@ -1938,6 +1984,8 @@ internal static error saveCgo(this ж<Context> Ꮡctxt, @string filename, ж<Pac
     return default;
 }
 
+} partial class build_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string srcdirˢ => ref srcdirˢᵇ;
 private static readonly @string srcdirˢᵇ = "${SRCDIR}"u8;
@@ -1962,6 +2010,8 @@ internal static (@string, bool) expandSrcDir(@string str, @string srcdir) {
     @string res = strings.Join(chunks, srcdir);
     return (res, ok && res != ""u8);
 }
+
+} partial class buildᴛContext {
 
 // makePathsAbsolute looks for compiler options that take paths and
 // makes them absolute. We do this because through the 1.8 release we
@@ -1993,6 +2043,8 @@ internal static void makePathsAbsolute(this ref Context ctxt, slice<@string> arg
         }
     }
 }
+
+} partial class build_package {
 
 // NOTE: $ is not safe for the shell, but it is allowed here because of linker options like -Wl,$ORIGIN.
 // We never pass these arguments to a shell (just to programs we construct argv for), so this should be okay.
@@ -2092,6 +2144,8 @@ internal static (slice<@string> r, error err) splitQuoted(@string s) {
     }
     return (args, err);
 }
+
+} partial class buildᴛContext {
 
 // matchAuto interprets text as either a +build or //go:build expression (whichever works),
 // reporting whether the expression matches the build context.
@@ -2214,6 +2268,8 @@ internal static bool goodOSArchFile(this ref Context ctxt, @string name, map<@st
     }
     return true;
 }
+
+} partial class build_package {
 
 // ToolDir is the directory containing build tools.
 public static readonly ж<@string> ᏑToolDir = new StaticBox<@string>(getToolDir());

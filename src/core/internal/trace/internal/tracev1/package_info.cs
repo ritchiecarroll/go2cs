@@ -28,7 +28,6 @@ using static go.@internal.trace.@internal.tracev1_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b4e616d6520737472696e673b206d696e56657273696f6e20696e7465726e616c2f74726163652f76657273696f6e2e56657273696f6e3b20537461636b20626f6f6c3b2041726773205b5d737472696e673b205341726773205b5d737472696e677d", "EventDescriptionsᴛ1")]
-[assembly: GoTypeAlias("STWReason", "ΔSTWReason")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -64,8 +63,8 @@ using static go.@internal.trace.@internal.tracev1_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/trace/internal/tracev1/order.go", "order.cs", "AB9GAAgGlIKCgqSCgoKkgoKCAAgQgoKCqIKCgqSCgoKkgoKCpIKCgqSCgoK2griC5oKClIKmlJS0pILKgqaygqaigoKCgoKmooKCgpSCuKKCgoKClIKClIKUgpQ=")]
-[assembly: GoPositionMap("internal/trace/internal/tracev1/parser.go", "parser.cs", "AG7oAYKClIKUlKaCgqaCgpSCgpSCgqaCgoKmgoKCpgACFAAJBoKClOjSggASJoKCgoKClIKmgoKmgqaUlIKCgpSClILKgqYABxAAJU6igoKUgoKosoKCpoKCprimgqaCpoKmgoKUgoKCppSmgoKUgqaCgoKCgoIABR4AEAyipoKClJSmAAAQAAgEgoKUgoKClJSCgpSCgqaCgoKUuIIACxiClIKCgrjGgoKCppTcppS0tKSUgIKk3IIACxiCgoKUtIKClIKClIKUtpSolJKCgoKClIKUgqaCgoKmgoKmlIKUgoKClIKClLiCgoIADh64AAUQgoKCgpS4gsqUgoIACArI1oKClAAMGoKCppSUgpSCgpSCuIKClIKUgpSCgoKUgpSClIKClKaCpIK4lIKClIKmgoKUpoKCptyCpIKCgoKCgpSmgoLugoKmpqaCgoKUgoKCgpS4gqaUlIKClKaCgpSC3IK6koKClIKCgpSUgqaCgoKCgoKUgpSClIKClLiCgpSCuKaigoKUgpSClIKClKrSgoKUgoKUlIKClIKUlIK0grjGtIKUgoKUgoKUgoKCgoKCgoKUgqYACQyCgoKCgoKClKaUgrq0AA4SgpSCgoLIpoLKAA8M4rwAABqCgoKCgqSCgoKUgpSClKaClJSCgpSUtIKClIKUlLSClJS0gpS0goKUtIKClLSCgpSUtIKClJTYgoKmtIKClJS0goKUgpS0goKUgpS0goKAgqSClLaCgoKUgpSCgoKCgqaCpoK0goKAgqSCgpSCpoK0goKAgqSCgoKUgrSCgoKUgpSCgpSClIKCtoKCgIKklLSCgoCCpIKClIK0goKUgpS2goKAgqSCgoKUgrSCgpS2graCgoKCgoKCgoKmgpS4yMrMppaSgoKUgqaigoKUpoKCgoKClKqigoKUgoKUlJSCAEF6ADV4koLugoKUgqaCgoKUlIKClKY=", "180-182:1;354-362:1;380-382:1;1041-1053:1", "", "", "", "183:21,184:13")]
+[assembly: GoPositionMap("internal/trace/internal/tracev1/order.go", "order.cs", "ACBGAAgGlIKCgqSCgoKkgoKCAAgQgoKCqIKCgqSCgoKkgoKCpIKCgqSCgoK2griC5oKClIKmlJS0pILqgqaygqaigoKCgoLGooKCgpSCuKKCgoKClIKClIKUgpQ=")]
+[assembly: GoPositionMap("internal/trace/internal/tracev1/parser.go", "parser.cs", "AHHoAYKClIKUlMaCgqaCgpSCgpSCgqaCgoKmgoKCpgACFAAJBoKClAAICNKCABImgoKCgoKUgqaCgqaCppSUgoKClIKUgsqCpgAHEAApTqKCgpSCgqiygoKmgoKmuKaCpoKmgqaCgpSCgoKmlKaCgpSCpoKCgoKCggAHHgAQDKKmgoKUlKYAABAACASCgpSCgoKUlIKClIKCpoKCgpS4ggALGIKUgoKCuMaCgoKmlNymlLS0pJSAgqTcggALGIKCgpS0goKUgoKUgpS2lKiUkoKCgoKUgpSCpoKCgqaCgqaUgpSCgoKUgoKUuIKCggAOHrgACRCCgoKClLiCypSCggAICsjWgoKUAAwagoKmlJSClIKClIK4goKUgpSClIKCgpSClIKUgoKUpoKkgriUgoKUgqaCgpSmgoKm3IKkgoKCgoKClKaCgu6CgqampoKCgpSCgoKClLiCppSUgoKUpoKClILcgrqSgoKUgoKClJSCpoKCgoKCgpSClIKUgoKUuIKClIK4pqKCgpSClIKUgoKUqtKCgpSCgpSUgoKUgpSUgrSCuMa0gpSCgpSCgpSCgoKCgoKCgpSCpgAJDIKCgoKCgoKUppSCurQADhKClIKCgsimguoAEQzivAAAGoKCgoKCpIKCgpSClIKUpoKUlIKClJS0goKUgpSUtIKUlLSClLSCgpS0goKUtIKClJS0goKUlNiCgqa0goKUlLSCgpSClLSCgpSClLSCgoCCpIKUtoKCgpSClIKCgoKCpoKmgrSCgoCCpIKClIKmgrSCgoCCpIKCgpSCtIKCgpSClIKClIKUgoK2goKAgqSUtIKCgIKkgoKUgrSCgpSClLaCgoCCpIKCgpSCtIKClLaCtoKCgoKCgoKCgqaClLjIyszGtpKCgpSCxqKCgpTGgoKCgoKUyqKCgpSCgpSUlIIAQ3oAN3iSgu6CgpSCxoKCgpSUgoKUpg==", "180-182:1;354-362:1;380-382:1;1041-1053:1", "", "", "", "190:21,191:13")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace.@internal;
@@ -95,9 +94,9 @@ public static partial class tracev1_package
     public partial struct EventType {}
     public partial struct Events {}
     public partial struct Frame {}
+    public partial struct STWReason {}
     public partial struct Timestamp {}
     public partial struct Trace {}
-    public partial struct ΔSTWReason {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -118,3 +117,18 @@ public static partial class tracev1_package
     [GoInit] internal static void initᴛᴛimportꓸsort() => builtin.initPackage(typeof(sort_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(tracev1_package.Event)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tracev1ᴛEvent;
+[GoMethodHost(typeof(tracev1_package.Events)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tracev1ᴛEvents;
+[GoMethodHost(typeof(tracev1_package.Trace)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tracev1ᴛTrace;
+[GoMethodHost(typeof(tracev1_package.orderEventList)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tracev1ᴛorderEventList;
+[GoMethodHost(typeof(tracev1_package.parser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tracev1ᴛparser;
+[GoMethodHost(typeof(tracev1_package.rawEvent)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tracev1ᴛrawEvent;
+// </MethodHolders>

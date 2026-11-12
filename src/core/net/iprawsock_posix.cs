@@ -6,19 +6,22 @@ namespace go;
 
 using context = context_package;
 using syscall = syscall_package;
+using static net_package;
 
 partial class net_package {
 
-internal static ΔAddr sockaddrToIP(syscall.Sockaddr sa) {
+internal static Addr sockaddrToIP(syscall.Sockaddr sa) {
     switch (sa.type()) {
     case ж<syscall.SockaddrInet4> saΔ1: {
-        return new IPAddrжΔAddr(Ꮡ(new IPAddr(IP: saΔ1.Addr[0..])));
+        return new IPAddrжAddr(Ꮡ(new IPAddr(IP: saΔ1.Addr[0..])));
     }
     case ж<syscall.SockaddrInet6> saΔ1: {
-        return new IPAddrжΔAddr(Ꮡ(new IPAddr(IP: saΔ1.Addr[0..], Zone: zoneCache.name((nint)saΔ1.ZoneId))));
+        return new IPAddrжAddr(Ꮡ(new IPAddr(IP: saΔ1.Addr[0..], Zone: zoneCache.name((nint)saΔ1.ZoneId))));
     }}
     return default;
 }
+
+} partial class netᴛIPAddr {
 
 internal static nint family(this ж<IPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
@@ -41,9 +44,11 @@ internal static (syscall.Sockaddr, error) sockaddr(this ж<IPAddr> Ꮡa, nint fa
     return ipToSockaddr(family, a.IP, 0, a.Zone);
 }
 
-internal static Δsockaddr toLocal(this ref IPAddr a, @string net) {
-    return new IPAddrжΔsockaddr(Ꮡ(new IPAddr(loopbackIP(net), a.Zone)));
+internal static sockaddr toLocal(this ref IPAddr a, @string net) {
+    return new IPAddrжsockaddr(Ꮡ(new IPAddr(loopbackIP(net), a.Zone)));
 }
+
+} partial class netᴛIPConn {
 
 internal static (nint, ж<IPAddr>, error) readFrom(this ref IPConn c, slice<byte> b) {
     // TODO(cw,rsc): consider using readv if we know the family
@@ -63,6 +68,8 @@ internal static (nint, ж<IPAddr>, error) readFrom(this ref IPConn c, slice<byte
     return (n, addr, err);
 }
 
+} partial class net_package {
+
 internal static nint stripIPv4Header(nint n, slice<byte> b) {
     if (len(b) < 20) {
         return n;
@@ -77,6 +84,8 @@ internal static nint stripIPv4Header(nint n, slice<byte> b) {
     copy(b, b.slice(l));
     return n - l;
 }
+
+} partial class netᴛIPConn {
 
 internal static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) readMsg(this ref IPConn c, slice<byte> b, slice<byte> oob) {
     nint n = default;
@@ -129,6 +138,12 @@ internal static (nint n, nint oobn, error err) writeMsg(this ref IPConn c, slice
     return c.fd.writeMsg(b, oob, sa);
 }
 
+} partial class netᴛsysDialer {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string dialˢ => ref dialˢᵇ;
+private static readonly @string dialˢᵇ = "dial"u8;
+
 internal static (ж<IPConn>, error) dialIP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<IPAddr> laddr, ж<IPAddr> raddr) {
     ref var sd = ref Ꮡsd.DerefOrNull();
 
@@ -148,12 +163,18 @@ internal static (ж<IPConn>, error) dialIP(this ж<sysDialer> Ꮡsd, context.Con
     if (ctrlCtxFn == nil && sd.Dialer.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string networkΔ1, @string address, syscall.RawConn c) => Ꮡsd.Value.Dialer.Control(networkΔ1, address, c);
     }
-    (var fd, err) = internetSocket(ctx, network, new IPAddrжΔsockaddr(laddr), new IPAddrжΔsockaddr(raddr), syscall.SOCK_RAW, proto, dialˢ, ctrlCtxFn);
+    (var fd, err) = internetSocket(ctx, network, new IPAddrжsockaddr(laddr), new IPAddrжsockaddr(raddr), syscall.SOCK_RAW, proto, dialˢ, ctrlCtxFn);
     if (err != nil) {
         return (default, err);
     }
     return (newIPConn(fd), default);
 }
+
+} partial class netᴛsysListener {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string listenˢ => ref listenˢᵇ;
+private static readonly @string listenˢᵇ = "listen"u8;
 
 internal static (ж<IPConn>, error) listenIP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<IPAddr> laddr) {
     ref var sl = ref Ꮡsl.DerefOrNull();
@@ -174,11 +195,11 @@ internal static (ж<IPConn>, error) listenIP(this ж<sysListener> Ꮡsl, context
     if (sl.ListenConfig.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string networkΔ1, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(networkΔ1, address, c);
     }
-    (var fd, err) = internetSocket(ctx, network, new IPAddrжΔsockaddr(laddr), default, syscall.SOCK_RAW, proto, listenˢ, ctrlCtxFn);
+    (var fd, err) = internetSocket(ctx, network, new IPAddrжsockaddr(laddr), default, syscall.SOCK_RAW, proto, listenˢ, ctrlCtxFn);
     if (err != nil) {
         return (default, err);
     }
     return (newIPConn(fd), default);
 }
 
-} // end net_package
+} // end netᴛsysListener

@@ -27,8 +27,6 @@ using static go.@internal.trace.@internal.testgen_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Batch", "ΔBatch")]
-[assembly: GoTypeAlias("Generation", "ΔGeneration")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -52,9 +50,9 @@ using static go.@internal.trace.@internal.testgen_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Batch))]
+[assembly: GoFieldAccess(typeof(Generation))]
 [assembly: GoFieldAccess(typeof(Trace))]
-[assembly: GoFieldAccess(typeof(ΔBatch))]
-[assembly: GoFieldAccess(typeof(ΔGeneration))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -64,7 +62,7 @@ using static go.@internal.trace.@internal.testgen_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/trace/internal/testgen/trace.go", "trace.cs", "ABoutIKClLampoK0ABg0kgAHFKKCqJKs0qyyruLugqiUkoKCuIK4griCgrgABxCigoKCpgAOHgAPKNK4goKuwoKUgpSCgq7CgpSClIKCgoKUgoKuwoKUABIg1IKUgoKCgoKCuIK4goKCgriCgqKCgoKUpoKCpqaCgoKmgoKmpoLuooKCAAse0oKClIKCgoKClJSUgoKUgpSmgoKCgpSCpLS0tLS0tLS0tLSkrNKmgoKClIKCuKiyyoK6koKC", "", "", "77=Specs/1/2/1,EventNames/1/1/1,Specs/2/2/2;157=Bytes/1/1/3", "36:21")]
+[assembly: GoPositionMap("internal/trace/internal/testgen/trace.go", "trace.cs", "ABsutIKClLampoK0ABg0kgAJFKKCqJKs0qyyruLugqiUkoKCuIK4griCgrgABxCigoKCpgAQHgARKNK4goKuwoKUgpSCgq7CgpSClIKCgoKUgoKuwoKUABYg1IKUgoKCgoKCuIK4goKCgriCgqKCgoKUpoKCpqaCgoKmgoKmpoLuooKCAA8e0oKClIKCgoKClJSUgoKUgpSmgoKCgpSCpLS0tLS0tLS0tLSkrNKmgoKClIKCuKiyyoK6koKC", "", "", "78=Specs/1/2/1,EventNames/1/1/1,Specs/2/2/2;160=Bytes/1/1/3", "37:21")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace.@internal;
@@ -81,11 +79,11 @@ public static partial class testgen_package
     // <TypeAccessibility>
     [GoValueClone("stk")] internal partial struct stack {}
     internal partial struct sync {}
+    public partial struct Batch {}
+    public partial struct Generation {}
     public partial struct Seq {}
     public partial struct Time {}
     public partial struct Trace {}
-    public partial struct ΔBatch {}
-    public partial struct ΔGeneration {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -109,3 +107,15 @@ public static partial class testgen_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(testgen_package.Batch)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class testgenᴛBatch;
+[GoMethodHost(typeof(testgen_package.Generation)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class testgenᴛGeneration;
+[GoMethodHost(typeof(testgen_package.Trace)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class testgenᴛTrace;
+// </MethodHolders>

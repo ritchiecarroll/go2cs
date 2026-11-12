@@ -18,8 +18,11 @@ namespace go;
 
 using isync = @internal.sync_package;
 using @internal;
-using System.Runtime.InteropServices;
+using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
+using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
+using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
 using Δsync = @internal.sync_package;
+using static sync_package;
 
 partial class sync_package {
 
@@ -47,6 +50,8 @@ partial interface Locker {
     void Unlock();
 }
 
+} partial class syncᴛMutex {
+
 // Lock locks m.
 // If the lock is already in use, the calling goroutine
 // blocks until the mutex is available.
@@ -73,4 +78,4 @@ public static void Unlock(this ж<Mutex> Ꮡm) {
     Ꮡm.of(Mutex.Ꮡmu).Unlock();
 }
 
-} // end sync_package
+} // end syncᴛMutex

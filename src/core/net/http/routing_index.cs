@@ -4,6 +4,7 @@
 namespace go.net;
 
 using math = math_package;
+using static http_package;
 
 partial class http_package {
 
@@ -28,6 +29,8 @@ partial struct routingIndexKey {
     internal nint pos;  // 0-based segment position
     internal @string s; // literal, or empty for wildcard
 }
+
+} partial class httpᴛroutingIndex {
 
 internal static void addPattern(this ref routingIndex idx, ж<pattern> Ꮡpat) {
     ref var pat = ref Ꮡpat.DerefOrNull();
@@ -90,7 +93,7 @@ internal static error /*err*/ possiblyConflictingPatterns(this ref routingIndex 
         // an ordinary pattern matches do. So only other dollar or multi
         // patterns can conflict with a dollar pattern. Furthermore, conflicting
         // dollar patterns must have the {$} in the same position.
-        return apply(idx.segments[new routingIndexKey(s: "/", pos: builtin.len(pat.segments) - 1)]);
+        return apply(idx.segments[new routingIndexKey(s: "/", pos: len(pat.segments) - 1)]);
     }
     // For ordinary and multi patterns, the only conflicts can be with a multi,
     // or a pattern that has the same literal or a wildcard at some literal
@@ -109,7 +112,7 @@ internal static error /*err*/ possiblyConflictingPatterns(this ref routingIndex 
             hasLit = true;
             var lpats = idx.segments[new routingIndexKey(s: seg.s, pos: i)];
             var wpats = idx.segments[new routingIndexKey(s: "", pos: i)];
-            nint sum = builtin.len(lpats) + builtin.len(wpats); if (sum < min) {
+            nint sum = len(lpats) + len(wpats); if (sum < min) {
                 lmin = lpats;
                 wmin = wpats;
                 min = sum;
@@ -130,4 +133,4 @@ internal static error /*err*/ possiblyConflictingPatterns(this ref routingIndex 
     return err;
 }
 
-} // end http_package
+} // end httpᴛroutingIndex

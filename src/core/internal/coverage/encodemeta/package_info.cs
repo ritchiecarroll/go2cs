@@ -61,8 +61,8 @@ using static go.@internal.coverage.encodemeta_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/coverage/encodemeta/encode.go", "encode.cs", "ACVIgoKUuIKCgoKCgoKCpoKCgoIABhCSgoKCgoKCgoKCgoKUgoKUgoKCgqaCgoKCgpSmgoKCgoKUpoKCuIKCgoKCgoK8xqKCAAgSgpSAgqSmpoK4gIKkpoKCgoLKgoCCpIKClKqigoKCgoKokoKCgoKCgoKUgoKU", "", "", "42=New128a/1/1/2;140=Nentries/1/1/5")]
-[assembly: GoPositionMap("internal/coverage/encodemeta/encodefile.go", "encodefile.cs", "ACE+gsqCgqaygoKClIKCuIKCuAAKFoKCpoK4goKCgoKClIKUgpSCgoKClIKUuIK4goKCgpSClIKmuIKU", "", "", "35=NewWriter/1/1/2")]
+[assembly: GoPositionMap("internal/coverage/encodemeta/encode.go", "encode.cs", "ACZIgoKUuIKCgoKCgoKCpoKCgoIACBCSgoKCgoKCgoKCgoKUgoKUgoKCgqaCgoKCgpSmgoKCgoKUpoKCuIKCgoKCgoK8xqKCAAgSgpSAgqSmpoK4gIKkpoKCgoLKgoCCpIKClMqigoKCgoKokoKCgoKCgoKUgoKU", "", "", "43=New128a/1/1/2;143=Nentries/1/1/5")]
+[assembly: GoPositionMap("internal/coverage/encodemeta/encodefile.go", "encodefile.cs", "ACI+gsqCgsaygoKClIKCuIKCuAAKFoKCpoK4goKCgoKClIKUgpSCgoKClIKUuIK4goKCgpSClIKmuIKU", "", "", "36=NewWriter/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
@@ -101,3 +101,14 @@ public static partial class encodemeta_package
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(encodemeta_package.CoverageMetaDataBuilder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class encodemetaᴛCoverageMetaDataBuilder;
+[GoMethodHost(typeof(encodemeta_package.CoverageMetaFileWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class encodemetaᴛCoverageMetaFileWriter;
+// </MethodHolders>

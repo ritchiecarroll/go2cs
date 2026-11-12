@@ -21,8 +21,8 @@ partial class runtime_package {
 //
 //go:linkname add
 //go:nosplit
-internal static @unsafe.Pointer add(@unsafe.Pointer Δp, uintptr x) {
-    return (@unsafe.Pointer)((uintptr)Δp + x);
+internal static @unsafe.Pointer add(@unsafe.Pointer p, uintptr x) {
+    return (@unsafe.Pointer)((uintptr)p + x);
 }
 
 // getg returns the pointer to the current g.
@@ -190,8 +190,8 @@ internal static partial bool memequal(@unsafe.Pointer a, @unsafe.Pointer b, uint
 //
 //go:linkname noescape
 //go:nosplit
-internal static @unsafe.Pointer noescape(@unsafe.Pointer Δp) {
-    var x = (uintptr)Δp;
+internal static @unsafe.Pointer noescape(@unsafe.Pointer p) {
+    var x = (uintptr)p;
     return (@unsafe.Pointer)((uintptr)(x ^ 0));
 }
 
@@ -199,8 +199,8 @@ internal static @unsafe.Pointer noescape(@unsafe.Pointer Δp) {
 // USE CAREFULLY!
 //
 //go:nosplit
-internal static ж<T> noEscapePtr<T>(ж<T> Δp) {
-    var x = (uintptr)Δp;
+internal static ж<T> noEscapePtr<T>(ж<T> p) {
+    var x = (uintptr)p;
     return (ж<T>)(uintptr)((@unsafe.Pointer)((uintptr)(x ^ 0)));
 }
 

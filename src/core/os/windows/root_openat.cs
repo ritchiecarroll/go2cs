@@ -11,6 +11,7 @@ using Δsync = sync_package;
 using syscall = syscall_package;
 using time = time_package;
 using go.io;
+using static os_package;
 
 partial class os_package {
 
@@ -22,10 +23,12 @@ partial struct root {
     // closed is set when Close is called.
     // fd is closed when closed is true and refs is 0.
     internal Δsync.Mutex mu;
-    internal syscallꓸHandle fd;
+    internal sysfdType fd;
     internal nint refs;   // number of active operations
     internal bool closed; // set when closed
 }
+
+} partial class osᴛroot {
 
 internal static error Close(this ж<root> Ꮡr) {
     GoFrame ᒐ = default;
@@ -88,8 +91,10 @@ internal static @string Name(this ref root r) {
     return r.name;
 }
 
+} partial class os_package {
+
 internal static error rootChmod(ref Root r, @string name, FileMode mode) {
-    var (_, err) = doInRoot(ref r, name, 0, default, (EmptyStruct, error) (syscallꓸHandle parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), chmodat(parent, nameΔ1, mode)));
+    var (_, err) = doInRoot(ref r, name, 0, default, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), chmodat(parent, nameΔ1, mode)));
     if (err != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chmodat", Path: name, Err: err)));
     }
@@ -97,7 +102,7 @@ internal static error rootChmod(ref Root r, @string name, FileMode mode) {
 }
 
 internal static error rootChown(ref Root r, @string name, nint uid, nint gid) {
-    var (_, err) = doInRoot(ref r, name, 0, default, (EmptyStruct, error) (syscallꓸHandle parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), chownat(parent, nameΔ1, uid, gid)));
+    var (_, err) = doInRoot(ref r, name, 0, default, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), chownat(parent, nameΔ1, uid, gid)));
     if (err != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chownat", Path: name, Err: err)));
     }
@@ -105,7 +110,7 @@ internal static error rootChown(ref Root r, @string name, nint uid, nint gid) {
 }
 
 internal static error rootLchown(ref Root r, @string name, nint uid, nint gid) {
-    var (_, err) = doInRoot(ref r, name, 0, default, (EmptyStruct, error) (syscallꓸHandle parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), lchownat(parent, nameΔ1, uid, gid)));
+    var (_, err) = doInRoot(ref r, name, 0, default, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), lchownat(parent, nameΔ1, uid, gid)));
     if (err != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "lchownat", Path: name, Err: err)));
     }
@@ -115,7 +120,7 @@ internal static error rootLchown(ref Root r, @string name, nint uid, nint gid) {
 internal static error rootChtimes(ref Root r, @string name, time.Time atime, time.Time mtime) {
     var atimeʗ1 = atime;
     var mtimeʗ1 = mtime;
-    var (_, err) = doInRoot(ref r, name, 0, default, (EmptyStruct, error) (syscallꓸHandle parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), chtimesat(parent, nameΔ1, atimeʗ1, mtimeʗ1)));
+    var (_, err) = doInRoot(ref r, name, 0, default, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), chtimesat(parent, nameΔ1, atimeʗ1, mtimeʗ1)));
     if (err != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chtimesat", Path: name, Err: err)));
     }
@@ -134,7 +139,7 @@ internal static error rootMkdir(ref Root r, @string name, FileMode perm) {
         flags |= (nuint)(doInRootNoHandleTerminalSlash);
         break;
     }}
-    var (_, err) = doInRoot(ref r, name, flags, default, (EmptyStruct, error) (syscallꓸHandle parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), mkdirat(parent, nameΔ1, perm)));
+    var (_, err) = doInRoot(ref r, name, flags, default, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), mkdirat(parent, nameΔ1, perm)));
     if (err != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat", Path: name, Err: err)));
     }
@@ -147,7 +152,7 @@ internal static error rootMkdirAll(ж<Root> r, @string fullname, FileMode perm) 
     // openDirFunc opens all but the last path component.
     // The usual default openDirFunc just opens directories with O_DIRECTORY.
     // We replace it here with one that creates missing directories along the way.
-    var openDirFunc = (syscallꓸHandle, error) (syscallꓸHandle parent, @string name) => {
+    var openDirFunc = (sysfdType, error) (sysfdType parent, @string name) => {
         foreach (var @try in range(2)) {
             var (fd, errΔ1) = rootOpenDir(parent, name);
             switch (errΔ1.type()) {
@@ -167,7 +172,7 @@ internal static error rootMkdirAll(ж<Root> r, @string fullname, FileMode perm) 
         throw panic("unreachable");
     };
     // openLastComponentFunc opens the last path component.
-    var openLastComponentFunc = (syscallꓸHandle parent, @string name, bool endsInSlash) => {
+    var openLastComponentFunc = (sysfdType parent, @string name, bool endsInSlash) => {
         var errΔ3 = mkdirat(parent, name, perm);
         if (AreEqual(errΔ3, syscall.EEXIST)) {
             var (fi, e) = lstatat(parent, name);
@@ -218,7 +223,7 @@ internal static error rootMkdirAll(ж<Root> r, @string fullname, FileMode perm) 
 }
 
 internal static (@string, error) rootReadlink(ref Root r, @string name) {
-    var (target, err) = doInRoot(ref r, name, 0, default, (@string, error) (syscallꓸHandle parent, @string nameΔ1, bool endsInSlash) => readlinkat(parent, nameΔ1));
+    var (target, err) = doInRoot(ref r, name, 0, default, (@string, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => readlinkat(parent, nameΔ1));
     if (err != nil) {
         return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readlinkat", Path: name, Err: err))));
     }
@@ -226,7 +231,7 @@ internal static (@string, error) rootReadlink(ref Root r, @string name) {
 }
 
 internal static error rootRemove(ref Root r, @string name) {
-    var (_, err) = doInRoot(ref r, name, 0, default, (EmptyStruct, error) (syscallꓸHandle parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), removeat(parent, nameΔ1)));
+    var (_, err) = doInRoot(ref r, name, 0, default, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), removeat(parent, nameΔ1)));
     if (err != nil) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "removeat", Path: name, Err: err)));
     }
@@ -243,7 +248,7 @@ internal static error rootRemoveAll(ref Root r, @string name) {
         // Consistency with os.RemoveAll: Return EINVAL when trying to remove .
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "RemoveAll", Path: name, Err: syscall.EINVAL)));
     }
-    var (_, err) = doInRoot(ref r, name, 0, default, (EmptyStruct, error) (syscallꓸHandle parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), removeAllFrom(parent, nameΔ1)));
+    var (_, err) = doInRoot(ref r, name, 0, default, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), removeAllFrom(parent, nameΔ1)));
     if (IsNotExist(err)) {
         return default;
     }
@@ -254,12 +259,12 @@ internal static error rootRemoveAll(ref Root r, @string name) {
 }
 
 internal static error rootRename(ж<Root> r, @string oldname, @string newname) {
-    var (_, err) = doInRoot(ref (r).DerefOrNull(), oldname, 0, default, (EmptyStruct, error) (syscallꓸHandle oldparent, @string oldnameΔ1, bool oldEndsInSlash) => {
+    var (_, err) = doInRoot(ref (r).DerefOrNull(), oldname, 0, default, (EmptyStruct, error) (sysfdType oldparent, @string oldnameΔ1, bool oldEndsInSlash) => {
         nuint flags = (nuint)doInRootCreatingDirectory;
         if (runtime.GOOS == "windows"u8) {
             flags |= (nuint)(doInRootNoHandleTerminalSlash);
         }
-        var (_, errΔ1) = doInRoot(ref (r).DerefOrNull(), newname, flags, default, (EmptyStruct, error) (syscallꓸHandle newparent, @string newnameΔ1, bool newEndsInSlash) => {
+        var (_, errΔ1) = doInRoot(ref (r).DerefOrNull(), newname, flags, default, (EmptyStruct, error) (sysfdType newparent, @string newnameΔ1, bool newEndsInSlash) => {
             if (runtime.GOOS != "windows"u8 && newEndsInSlash) {
                 var (oldMode, errΔ2) = modeAt(oldparent, oldnameΔ1);
                 if (errΔ2 != nil) {
@@ -289,13 +294,13 @@ internal static error rootRename(ж<Root> r, @string oldname, @string newname) {
 }
 
 internal static error rootLink(ж<Root> r, @string oldname, @string newname) {
-    var (_, err) = doInRoot(ref (r).DerefOrNull(), oldname, 0, default, (EmptyStruct, error) (syscallꓸHandle oldparent, @string oldnameΔ1, bool oldEndsInSlash) => {
+    var (_, err) = doInRoot(ref (r).DerefOrNull(), oldname, 0, default, (EmptyStruct, error) (sysfdType oldparent, @string oldnameΔ1, bool oldEndsInSlash) => {
         nuint flags = (nuint)0;
         if (runtime.GOOS == "windows"u8) {
             // Windows doesn't pay attention to trailing slashes in the link target.
             flags |= (nuint)(doInRootNoHandleTerminalSlash);
         }
-        var (_, errΔ1) = doInRoot(ref (r).DerefOrNull(), newname, flags, default, (EmptyStruct, error) (syscallꓸHandle newparent, @string newnameΔ1, bool newEndsInSlash) => (new EmptyStruct(), linkat(oldparent, oldnameΔ1, newparent, newnameΔ1)));
+        var (_, errΔ1) = doInRoot(ref (r).DerefOrNull(), newname, flags, default, (EmptyStruct, error) (sysfdType newparent, @string newnameΔ1, bool newEndsInSlash) => (new EmptyStruct(), linkat(oldparent, oldnameΔ1, newparent, newnameΔ1)));
         return (new EmptyStruct(), errΔ1);
     });
     if (err != nil) {
@@ -347,7 +352,7 @@ internal static UntypedInt doInRootAlwaysResolveTerminalSlash => 4;
 //
 // If f or openDirFunc return a *PathError, doInRoot will set PathError.Path to the
 // full path which caused the error.
-internal static (T ret, error err) doInRoot<T>(ref Root r, @string name, nuint flags, Func<syscallꓸHandle, @string, (syscallꓸHandle, error)> openDirFunc, Func<syscallꓸHandle, @string, bool, (T, error)> f) {
+internal static (T ret, error err) doInRoot<T>(ref Root r, @string name, nuint flags, Func<sysfdType, @string, (sysfdType, error)> openDirFunc, Func<sysfdType, @string, bool, (T, error)> f) {
     T ret = GoZero<T>();
     error err = default;
     GoFrame ᒐ = default;
@@ -467,7 +472,7 @@ Loop:
                     }
                 }
             } else {
-                syscallꓸHandle fd = default;
+                sysfdType fd = default;
                 (fd, err) = openDirFunc(dirfd, parts[i]);
                 if (err == nil) {
                     if (dirfd != rootfd) {
@@ -532,7 +537,7 @@ break_Loop:;
     ᒐdone: return (ret, err);
 }
 
-internal static (FileMode, error) modeAt(syscallꓸHandle parent, @string name) {
+internal static (FileMode, error) modeAt(sysfdType parent, @string name) {
     var (fi, err) = lstatat(parent, name);
     if (err != nil) {
         return (0, err);
@@ -544,6 +549,8 @@ internal static (FileMode, error) modeAt(syscallꓸHandle parent, @string name) 
 // and the target of that symlink.
 partial struct errSymlink /*@string*/;
 
+} partial class osᴛerrSymlink {
+
 internal static @string Error(this errSymlink _) { throw panic("errSymlink is not user-visible"); }
 
-} // end os_package
+} // end osᴛerrSymlink

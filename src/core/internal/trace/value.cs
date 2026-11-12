@@ -5,6 +5,7 @@ namespace go.@internal;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
+using static trace_package;
 
 partial class trace_package {
 
@@ -21,6 +22,8 @@ partial struct ValueKind /*num:uint8*/;
 public static ValueKind ValueBad => /* iota */ 0;
 public static ValueKind ValueUint64 => 1;
 public static ValueKind ValueString => 2;
+
+} partial class traceᴛValue {
 
 // Kind returns the ValueKind of the value.
 //
@@ -58,6 +61,8 @@ public static @string String(this Value v) {
     }}
     return valueBadˢ;
 }
+
+} partial class trace_package {
 
 // Uint64Value creates a value of kind ValueUint64.
 public static Value Uint64Value(uint64 x) {

@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using netipꓸAddr = go.net.netip_package.ΔAddr;
 // </ImportedTypeAliases>
 
 using go;
@@ -72,15 +71,15 @@ using static go.@internal.routebsd_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/routebsd/address.go", "address.cs", "ABo6gJSCgpSCgpSCqgARIKKClIKUgpSCgpSCgoKCgpSCgpQABxCCgpS6kryUgpSCgqaCgpSUpqSClIKCgoKClILKgoLcpqS8ABUogqaCppSCmLiUpqSCgpSUpqSmpIKClJSmuIKCgoKClIKUgoKUgoKClLSCgoKUgoKClLSCgpSCgoKU2oKClO4=", "", "", "125=AddrFrom4/1/1/1;155=AddrFrom16/1/1/1;206=AddrFrom16/1/1/1;218=AddrFrom16/1/1/1;224=AddrFrom4/1/1/1;236=AddrFrom4/1/1/1")]
-[assembly: GoPositionMap("internal/routebsd/binary.go", "binary.cs", "ABw8gqaCpoLagqaCpoI=")]
-[assembly: GoPositionMap("internal/routebsd/interface.go", "interface.cs", "AClekoI=")]
-[assembly: GoPositionMap("internal/routebsd/interface_classic.go", "interface_classic.cs", "AAscgoKUgoKUlAAMGoKCgpSCuIK4poKClIKClNyClJSCgoKU", "", "", "22=Uint32/1/1/4,Uint16/1/1/5;61=Uint32/1/1/3")]
-[assembly: GoPositionMap("internal/routebsd/interface_multicast.go", "interface_multicast.cs", "AAgSgoKUgoKU7oKCgpQ=", "", "", "17=Uint32/1/1/3,Uint16/1/1/4")]
+[assembly: GoPositionMap("internal/routebsd/address.go", "address.cs", "AB06gLSCgpSCgpSCqgARIKKClIKUgpSCgpSCgoKCgpSCgpQACRCCgpTakryUgpSCgqaCgpSUpqSClIKCgoKClILKgoLcpqS8ABUogqaCppSCmLiUpqSCgpSUpqSmpIKClJSmuIKCgoKClIKUgoKUgoKClLSCgoKUgoKClLSCgpSCgoKU2oKClO4=", "", "", "134=AddrFrom4/1/1/1;164=AddrFrom16/1/1/1;215=AddrFrom16/1/1/1;227=AddrFrom16/1/1/1;233=AddrFrom4/1/1/1;245=AddrFrom4/1/1/1")]
+[assembly: GoPositionMap("internal/routebsd/binary.go", "binary.cs", "AB88gqaCpoIACQqCpoKmgg==")]
+[assembly: GoPositionMap("internal/routebsd/interface.go", "interface.cs", "AC1ewrI=")]
+[assembly: GoPositionMap("internal/routebsd/interface_classic.go", "interface_classic.cs", "AA4cgoKUgoKUlAAMGoKCgpSCuIK4poKClIKClNyClJSCgoKU", "", "", "25=Uint32/1/1/4,Uint16/1/1/5;64=Uint32/1/1/3")]
+[assembly: GoPositionMap("internal/routebsd/interface_multicast.go", "interface_multicast.cs", "AAwSgoKUgoKU7oKCgpQ=", "", "", "21=Uint32/1/1/3,Uint16/1/1/4")]
 [assembly: GoPositionMap("internal/routebsd/message.go", "message.cs", "AA0gwoKSgoKCgpSClIKClIKUgoKUgpSmuIKU")]
 [assembly: GoPositionMap("internal/routebsd/route.go", "route.cs", "AA8kgoKCnsKCgoKasoKmvrKCgpSCgpQ=")]
 [assembly: GoPositionMap("internal/routebsd/sys.go", "sys.cs", "ABJEgoKU")]
-[assembly: GoPositionMap("internal/routebsd/sys_darwin.go", "sys_darwin.cs", "AAkUktyCgpKCkoKSgpKCpA==")]
+[assembly: GoPositionMap("internal/routebsd/sys_darwin.go", "sys_darwin.cs", "AAwUkvyCgpKCkoKSgpKCpA==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -121,3 +120,20 @@ public static partial class routebsd_package
     [GoInit] internal static void initᴛᴛimportꓸsyscall() => builtin.initPackage(typeof(syscall_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(routebsd_package.InetAddr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class routebsdᴛInetAddr;
+[GoMethodHost(typeof(routebsd_package.InterfaceAddrMessage)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class routebsdᴛInterfaceAddrMessage;
+[GoMethodHost(typeof(routebsd_package.InterfaceMessage)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class routebsdᴛInterfaceMessage;
+[GoMethodHost(typeof(routebsd_package.InterfaceMulticastAddrMessage)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class routebsdᴛInterfaceMulticastAddrMessage;
+[GoMethodHost(typeof(routebsd_package.LinkAddr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class routebsdᴛLinkAddr;
+[GoMethodHost(typeof(routebsd_package.binaryBigEndian)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class routebsdᴛbinaryBigEndian;
+[GoMethodHost(typeof(routebsd_package.binaryLittleEndian)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class routebsdᴛbinaryLittleEndian;
+[GoMethodHost(typeof(routebsd_package.wireFormat)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class routebsdᴛwireFormat;
+// </MethodHolders>

@@ -20,6 +20,7 @@ using crypto;
 using encoding;
 using global::go;
 using global::go.os;
+using static fuzz_package;
 
 partial class fuzz_package {
 
@@ -74,6 +75,8 @@ internal static (ж<worker>, error) newWorker(ж<coordinator> c, @string dir, @s
         memMu: memMu
     )), default);
 }
+
+} partial class fuzzᴛworker {
 
 // cleanup releases persistent resources associated with the worker.
 internal static error cleanup(this ref worker w) {
@@ -474,7 +477,7 @@ internal static partial error stop(this ж<worker> Ꮡw) {
         // Per https://golang.org/pkg/os/#Signal, “Interrupt is not implemented on
         // Windows; using it with os.Process.Signal will return an error.”
         // Fall back to Kill instead.
-        sig = os.ΔKill;
+        sig = os.Kill;
     }
 
     var t = time.NewTimer(workerTimeoutDuration);
@@ -497,11 +500,11 @@ internal static partial error stop(this ж<worker> Ꮡw) {
             case var ᴛ when AreEqual(ᴛ, os.Interrupt): {
                 // Try to stop the worker with SIGINT and wait a little longer.
                 w.cmd.Process.Signal(sig);
-                sig = os.ΔKill;
+                sig = os.Kill;
                 t.Reset(workerTimeoutDuration);
                 break;
             }
-            case var ᴛ when AreEqual(ᴛ, os.ΔKill): {
+            case var ᴛ when AreEqual(ᴛ, os.Kill): {
                 // Try to stop the worker with SIGKILL and keep waiting.
                 w.cmd.Process.Signal(sig);
                 sig = default;
@@ -517,6 +520,8 @@ internal static partial error stop(this ж<worker> Ꮡw) {
         }}
     }
 }
+
+} partial class fuzz_package {
 
 // RunFuzzWorker is called in a worker process to communicate with the
 // coordinator process in order to fuzz random inputs. RunFuzzWorker loops
@@ -680,6 +685,8 @@ partial struct workerServer {
     internal Func<CorpusEntry, (time.Duration, error)> fuzzFn;
 }
 
+} partial class fuzzᴛworkerServer {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string noArgumentsProvidedForˢ => ref noArgumentsProvidedForˢᵇ;
 private static readonly @string noArgumentsProvidedForˢᵇ = "no arguments provided for any call"u8;
@@ -737,6 +744,8 @@ internal static error serve(this ж<workerServer> Ꮡws, context.Context ctx) {
     }
 }
 
+} partial class fuzz_package {
+
 // chainedMutations is how many mutations are applied before the worker
 // resets the input to its original state.
 // NOTE: this number was picked without much thought. It is low enough that
@@ -747,6 +756,8 @@ internal static error serve(this ж<workerServer> Ꮡws, context.Context ctx) {
 // be what libFuzzer does, although there seems to be no documentation which
 // explains why this choice was made.)
 internal static UntypedInt chainedMutations => 5;
+
+} partial class fuzzᴛworkerServer {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string fuzzFunctionFailedWithNoˢ => ref fuzzFunctionFailedWithNoˢᵇ;
@@ -855,7 +866,7 @@ internal static fuzzResponse /*resp*/ fuzz(this ж<workerServer> Ꮡws, context.
                     copy(vals, originalVals);
                     ws.m.r.save(mem.header().ᏑrandState, mem.header().ᏑrandInc);
                 }
-                ws.m.mutate(vals, builtin.cap(mem.valueRef()));
+                ws.m.mutate(vals, cap(mem.valueRef()));
 
                 var entry = new CorpusEntry(Values: vals);
                 var (dur, cov, errMsg) = fuzzOnce(entry);
@@ -1034,6 +1045,8 @@ internal static (bool success, error retErr) minimizeInput(this ж<workerServer>
     return (true, retErr);
 }
 
+} partial class fuzz_package {
+
 internal static void writeToMem(slice<any> vals, ж<sharedMem> Ꮡmem) {
     ref var mem = ref Ꮡmem.DerefOrNull();
 
@@ -1041,11 +1054,15 @@ internal static void writeToMem(slice<any> vals, ж<sharedMem> Ꮡmem) {
     mem.setValue(b);
 }
 
+} partial class fuzzᴛworkerServer {
+
 // ping does nothing. The coordinator calls this method to ensure the worker
 // has called F.Fuzz and can communicate.
 internal static pingResponse ping(this ref workerServer ws, context.Context ctx, pingArgs args) {
     return new pingResponse();
 }
+
+} partial class fuzz_package {
 
 // workerClient is a minimalist RPC client. The coordinator process uses a
 // workerClient to call methods in each worker process (handled by
@@ -1064,6 +1081,8 @@ partial struct workerClient {
 internal static ж<workerClient> newWorkerClient(workerComm comm, ж<mutator> m) {
     return Ꮡ(new workerClient(workerComm: comm, m: m));
 }
+
+} partial class fuzzᴛworkerClient {
 
 // Close shuts down the connection to the RPC server (the worker process) by
 // closing fuzz_in. Close drains fuzz_out (avoiding a SIGPIPE in the worker),
@@ -1100,6 +1119,8 @@ internal static error Close(this ж<workerClient> Ꮡwc) {
     finally { if (ᒐd1) Ꮡwc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
+} partial class fuzz_package {
+
 // errSharedMemClosed is returned by workerClient methods that cannot access
 // shared memory because it was closed and unmapped by another goroutine. That
 // can happen when worker.cleanup is called in the worker goroutine while a
@@ -1108,6 +1129,8 @@ internal static error Close(this ж<workerClient> Ꮡwc) {
 // This error should not be reported. It indicates the operation was
 // interrupted.
 internal static error errSharedMemClosed = errors.New("internal error: shared memory was closed and unmapped");
+
+} partial class fuzzᴛworkerClient {
 
 // minimize tells the worker to call the minimize method. See
 // workerServer.minimize.
@@ -1277,7 +1300,7 @@ internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, 
                 // Only mutate the valuesOut if fuzzing actually occurred.
                 var numMutations = ((resp.Count - 1) % (int64)chainedMutations) + 1;
                 for (var i = (int64)0; i < numMutations; i++) {
-                    wc.m.mutate(valuesOut, builtin.cap(mem.valueRef()));
+                    wc.m.mutate(valuesOut, cap(mem.valueRef()));
                 }
             }
             var dataOut = marshalCorpusFile(valuesOut.ꓸꓸꓸ);
@@ -1332,6 +1355,8 @@ internal static error /*err*/ callLocked(this ref workerClient wc, context.Conte
     return dec.Decode(resp);
 }
 
+} partial class fuzz_package {
+
 // contextReader wraps a Reader with a Context. If the context is canceled
 // while the underlying reader is blocked, Read returns immediately.
 //
@@ -1344,6 +1369,8 @@ partial struct contextReader {
     internal context.Context ctx;
     internal io.Reader r;
 }
+
+} partial class fuzzᴛcontextReader {
 
 internal static partial (nint, error) Read(this ж<contextReader> Ꮡcr, slice<byte> b) {
     ref var cr = ref Ꮡcr.DerefOrNull();
@@ -1376,4 +1403,4 @@ internal static partial (nint, error) Read(this ж<contextReader> Ꮡcr, slice<b
     return default;
 }
 
-} // end fuzz_package
+} // end fuzzᴛcontextReader

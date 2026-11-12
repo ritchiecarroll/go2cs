@@ -11,15 +11,19 @@ using static global::go.@internal.types.errors_package;
 using slices = slices_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
+using types = types_package;
+using static types_package;
 
 partial class types_package {
+
+} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string missingReturnˢ => ref missingReturnˢᵇ;
 private static readonly @string missingReturnˢᵇ = "missing return"u8;
 
 // decl may be nil
-internal static void funcBody(this ж<Checker> Ꮡcheck, ж<declInfo> decl, @string name, ж<ΔSignature> Ꮡsig, ж<ast.BlockStmt> Ꮡbody, constant.Value iota) {
+internal static void funcBody(this ж<Checker> Ꮡcheck, ж<declInfo> decl, @string name, ж<Signature> Ꮡsig, ж<ast.BlockStmt> Ꮡbody, constant.Value iota) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -67,7 +71,7 @@ internal static void funcBody(this ж<Checker> Ꮡcheck, ж<declInfo> decl, @str
     finally { ᒐ.Run(); }
 }
 
-internal static void usage(this ж<Checker> Ꮡcheck, ж<ΔScope> Ꮡscope) {
+internal static void usage(this ж<Checker> Ꮡcheck, ж<Scope> Ꮡscope) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var scope = ref Ꮡscope.DerefOrNull();
     var unusedᴷ = new stackAppend<ж<Var>>();
@@ -96,6 +100,8 @@ internal static void usage(this ж<Checker> Ꮡcheck, ж<ΔScope> Ꮡscope) {
     }
 }
 
+} partial class types_package {
+
 // stmtContext is a bitset describing which
 // control-flow statements are permissible,
 // and provides additional context information
@@ -111,11 +117,15 @@ internal static stmtContext fallthroughOk => 4;
 internal static stmtContext finalSwitchCase => 8;
 internal static stmtContext inTypeSwitch => 16;
 
+} partial class typesᴛChecker {
+
 internal static void simpleStmt(this ж<Checker> Ꮡcheck, ast.Stmt s) {
     if (s != nil) {
         Ꮡcheck.stmt(0, s);
     }
 }
+
+} partial class types_package {
 
 internal static slice<ast.Stmt> trimTrailingEmptyStmts(slice<ast.Stmt> list) {
     for (nint i = len(list); i > 0; i--) {
@@ -125,6 +135,8 @@ internal static slice<ast.Stmt> trimTrailingEmptyStmts(slice<ast.Stmt> list) {
     }
     return default;
 }
+
+} partial class typesᴛChecker {
 
 internal static void stmtList(this ж<Checker> Ꮡcheck, stmtContext ctxt, slice<ast.Stmt> list) {
     var ok = (stmtContext)(ctxt & fallthroughOk) != 0;
@@ -187,6 +199,8 @@ internal static void closeScope(this ref Checker check) {
     check.scope = check.scope.Parent();
 }
 
+} partial class types_package {
+
 internal static token.Token assignOp(token.Token op) {
     // token_test.go verifies the token ordering this function relies on
     if (token.ADD_ASSIGN <= op && op <= token.AND_NOT_ASSIGN) {
@@ -194,6 +208,8 @@ internal static token.Token assignOp(token.Token op) {
     }
     return token.ILLEGAL;
 }
+
+} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string requiresFunctionCallNotˢ => ref requiresFunctionCallNotˢᵇ;
@@ -206,7 +222,7 @@ internal static void suspendedCall(this ж<Checker> Ꮡcheck, @string keyword, �
     @string msg = default;
     errors.Code code = default;
     switch (Ꮡcheck.rawExpr(nil, Ꮡx, new ast.CallExprжExpr(call), default, false)) {
-    case var ᴛ when ᴛ == Δconversion: {
+    case var ᴛ when ᴛ == types.conversion: {
         msg = requiresFunctionCallNotˢ;
         code = InvalidDefer;
         if (keyword == "go"u8) {
@@ -228,6 +244,8 @@ internal static void suspendedCall(this ж<Checker> Ꮡcheck, @string keyword, �
     }}
     Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, "%s %s %s", keyword, msg, Ꮡx);
 }
+
+} partial class types_package {
 
 // goVal returns the Go value for val, or nil.
 internal static any goVal(constant.Value val) {
@@ -261,7 +279,7 @@ internal static any goVal(constant.Value val) {
         }
         break;
     }
-    case var ᴛ when ᴛ == constant.ΔString: {
+    case var ᴛ when ᴛ == constant.String: {
         return constant.StringVal(val);
     }}
     return default;
@@ -276,9 +294,11 @@ internal static any goVal(constant.Value val) {
 partial struct valueMap /*map[any, slice<valueType>]*/; // underlying Go value -> valueType
 
 partial struct valueType {
-    internal tokenꓸPos pos;
-    internal ΔType typ;
+    internal token.Pos pos;
+    internal Type typ;
 }
+
+} partial class typesᴛChecker {
 
 internal static void caseValues(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, slice<ast.Expr> values, valueMap seen) {
     ref var x = ref Ꮡx.DerefOrNull();
@@ -333,6 +353,10 @@ internal static bool isNil(this ref Checker check, ast.Expr e) {
     return false;
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nilˢ2 => ref nilˢ2ᵇ;
+private static readonly @string nilˢ2ᵇ = "nil"u8;
+
 // caseTypes typechecks the type expressions of a type case, checks for duplicate types
 // using the seen map, and verifies that each type is valid with respect to the type of
 // the operand x corresponding to the type switch expression. If that expression is not
@@ -354,11 +378,11 @@ internal static bool isNil(this ref Checker check, ast.Expr e) {
 // If there is exactly one type expression, T is the type of that expression. If there
 // are multiple type expressions, or if predeclared nil is among the types, the result
 // is the type of x. If x is invalid (nil), the result is the invalid type.
-internal static ΔType caseTypes(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, slice<ast.Expr> types, map<ΔType, ast.Expr> seen) {
+internal static Type caseTypes(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, slice<ast.Expr> types, map<Type, ast.Expr> seen) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
-    ΔType T = default;
+    Type T = default;
     ref var dummy = ref heap(new operand(), out var Ꮡdummy);
 L:
     foreach (var (_, e) in range(types)) {
@@ -399,7 +423,7 @@ break_L:;
     // spec: "In clauses with a case listing exactly one type, the variable has that type;
     // otherwise, the variable has the type of the expression in the TypeSwitchGuard.
     if (len(types) != 1 || T == nil) {
-        T = new BasicжΔType(Typ[Invalid]);
+        T = new BasicжType(Typ[Invalid]);
         if (Ꮡx != nil) {
             T = x.typ;
         }
@@ -409,13 +433,17 @@ break_L:;
     return T;
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
+
 // TODO(gri) Once we are certain that typeHash is correct in all situations, use this version of caseTypes instead.
 // (Currently it may be possible that different types have identical names and import paths due to ImporterFrom.)
-internal static ΔType caseTypes_currently_unused(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Interface> xtyp, slice<ast.Expr> types, map<@string, ast.Expr> seen) {
+internal static Type caseTypes_currently_unused(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Interface> xtyp, slice<ast.Expr> types, map<@string, ast.Expr> seen) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
-    ΔType T = default;
+    Type T = default;
     ref var dummy = ref heap(new operand(), out var Ꮡdummy);
 L:
     foreach (var (_, e) in range(types)) {
@@ -459,7 +487,7 @@ break_L:;
     // spec: "In clauses with a case listing exactly one type, the variable has that type;
     // otherwise, the variable has the type of the expression in the TypeSwitchGuard.
     if (len(types) != 1 || T == nil) {
-        T = new BasicжΔType(Typ[Invalid]);
+        T = new BasicжType(Typ[Invalid]);
         if (Ꮡx != nil) {
             T = x.typ;
         }
@@ -530,7 +558,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
 
         // statements must end with the same top scope as they started with
         if (debug) {
-            defer((ж<ΔScope> scope) => {
+            defer((ж<Scope> scope) => {
                 // don't check if code is panicking
                 var p = recover(); if (p != nil) {
                     throw panic(p);
@@ -578,7 +606,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
                 code = UnusedExpr;
                 break;
             }
-            case var ᴛ when ᴛ == Δbuiltinᴛ: {
+            case var ᴛ when ᴛ == types.Δbuiltin: {
                 msg = mustBeCalledˢ;
                 code = UncalledBuiltin;
                 break;
@@ -809,7 +837,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
                 // spec: "A missing switch expression is
                 // equivalent to the boolean value true."
                 x.mode = constant_;
-                x.typ = new BasicжΔType(Typ[Bool]);
+                x.typ = new BasicжType(Typ[Bool]);
                 x.val = constant.MakeBool(true);
                 x.expr = new ast.IdentжExpr(Ꮡ(new ast.Ident(NamePos: sΔ1.Body.Lbrace, Name: "true")));
             }
@@ -911,8 +939,8 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
 
             Ꮡcheck.multipleDefaults(sΔ1.Body.List);
 
-            slice<ж<Var>> lhsVars = default;       // list of implicitly declared lhs variables
-            var seen = new map<ΔType, ast.Expr>(); // map of seen types to positions
+            slice<ж<Var>> lhsVars = default;      // list of implicitly declared lhs variables
+            var seen = new map<Type, ast.Expr>(); // map of seen types to positions
             foreach (var (_, sΔ2) in range(sΔ1.Body.List)) {
                 var (clause, _) = sΔ2._<ж<ast.CaseClause>>(ᐧ);
                 if (clause == nil) {
@@ -1049,4 +1077,4 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
     finally { ᒐ.Run(); }
 }
 
-} // end types_package
+} // end typesᴛChecker

@@ -5,7 +5,8 @@ namespace go.log;
 
 using context = context_package;
 using errors = errors_package;
-using ꓸꓸꓸHandler = Span<slog_package.ΔHandler>;
+using ꓸꓸꓸHandler = Span<slog_package.Handler>;
+using static slog_package;
 
 partial class slog_package {
 
@@ -13,7 +14,7 @@ partial class slog_package {
 public static ж<MultiHandler> NewMultiHandler(params ꓸꓸꓸHandler handlersʗp) {
     var handlers = handlersʗp.sslice();
 
-    var h = new slice<ΔHandler>(len(handlers));
+    var h = new slice<Handler>(len(handlers));
     copy(h, handlers);
     return Ꮡ(new MultiHandler(multi: h));
 }
@@ -22,10 +23,12 @@ public static ж<MultiHandler> NewMultiHandler(params ꓸꓸꓸHandler handlers�
 // Its Enabled method reports whether any of the handlers' Enabled methods return true.
 // Its Handle, WithAttrs and WithGroup methods call the corresponding method on each of the enabled handlers.
 partial struct MultiHandler {
-    internal slice<ΔHandler> multi;
+    internal slice<Handler> multi;
 }
 
-public static bool Enabled(this ref MultiHandler h, context.Context ctx, ΔLevel l) {
+} partial class slogᴛMultiHandler {
+
+public static bool Enabled(this ref MultiHandler h, context.Context ctx, Level l) {
     foreach (var i in range(len(h.multi))) {
         if (h.multi[i].Enabled(ctx, l)) {
             return true;
@@ -42,27 +45,27 @@ public static error Handle(this ref MultiHandler h, context.Context ctx, Record 
     foreach (var i in range(len(h.multi))) {
         if (h.multi[i].Enabled(ctx, r.Level)) {
             var err = h.multi[i].Handle(ctx, r.Clone()); if (err != nil) {
-                errs = builtin.append(errsᴷ, errs, err);
+                errs = append(errsᴷ, errs, err);
             }
         }
     }
     return errors.Join(errs.ꓸꓸꓸ);
 }
 
-public static ΔHandler WithAttrs(this ref MultiHandler h, slice<Attr> attrs) {
-    var handlers = new slice<ΔHandler>(0, len(h.multi));
+public static Handler WithAttrs(this ref MultiHandler h, slice<Attr> attrs) {
+    var handlers = new slice<Handler>(0, len(h.multi));
     foreach (var i in range(len(h.multi))) {
-        handlers = builtin.append(handlers, h.multi[i].WithAttrs(attrs));
+        handlers = append(handlers, h.multi[i].WithAttrs(attrs));
     }
-    return new MultiHandlerжΔHandler(Ꮡ(new MultiHandler(multi: handlers)));
+    return new MultiHandlerжHandler(Ꮡ(new MultiHandler(multi: handlers)));
 }
 
-public static ΔHandler WithGroup(this ref MultiHandler h, @string name) {
-    var handlers = new slice<ΔHandler>(0, len(h.multi));
+public static Handler WithGroup(this ref MultiHandler h, @string name) {
+    var handlers = new slice<Handler>(0, len(h.multi));
     foreach (var i in range(len(h.multi))) {
-        handlers = builtin.append(handlers, h.multi[i].WithGroup(name));
+        handlers = append(handlers, h.multi[i].WithGroup(name));
     }
-    return new MultiHandlerжΔHandler(Ꮡ(new MultiHandler(multi: handlers)));
+    return new MultiHandlerжHandler(Ꮡ(new MultiHandler(multi: handlers)));
 }
 
-} // end slog_package
+} // end slogᴛMultiHandler

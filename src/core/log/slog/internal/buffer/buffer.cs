@@ -6,6 +6,7 @@
 namespace go.log.slog.@internal;
 
 using sync = sync_package;
+using static buffer_package;
 
 partial class buffer_package {
 
@@ -27,6 +28,8 @@ internal static ref sync.Pool bufPool => ref ((StaticBox<sync.Pool>)ᏑbufPool).
 public static ж<Buffer> New() {
     return ᏑbufPool.Get()._<ж<Buffer>>();
 }
+
+} partial class bufferᴛBuffer {
 
 public static void Free(this ж<Buffer> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -70,4 +73,4 @@ public static void SetLen(this ref Buffer b, nint n) {
     b = (b).slice(0, n);
 }
 
-} // end buffer_package
+} // end bufferᴛBuffer

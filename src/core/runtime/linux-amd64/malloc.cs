@@ -107,6 +107,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 using abi = @internal.abi_package;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -623,11 +624,11 @@ internal static void mallocinit() {
         }
 
         for (nint i = 0x7f; i >= 0; i--) {
-            uintptr Δp = default;
+            uintptr p = default;
             switch (ᐧ) {
             case {} when raceenabled && GOARCH == "riscv64"u8 && vmaSize == 39: {
-                Δp = (uintptr)((uintptr)i << 28 | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(5100273664L)));
-                if (Δp >= (uintptr)((uintptr)uintptrMask & (uintptr)unchecked((nint)0x000f00000000L))) {
+                p = (uintptr)((uintptr)i << 28 | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(5100273664L)));
+                if (p >= (uintptr)((uintptr)uintptrMask & (uintptr)unchecked((nint)0x000f00000000L))) {
                     continue;
                 }
                 break;
@@ -636,27 +637,27 @@ internal static void mallocinit() {
                 // The TSAN runtime requires the heap
                 // to be in the range [0x00c000000000,
                 // 0x00e000000000).
-                Δp = (uintptr)((uintptr)i << 32 | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(824633720832L)));
-                if (Δp >= (uintptr)((uintptr)uintptrMask & (uintptr)unchecked((nint)0x00e000000000L))) {
+                p = (uintptr)((uintptr)i << 32 | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(824633720832L)));
+                if (p >= (uintptr)((uintptr)uintptrMask & (uintptr)unchecked((nint)0x00e000000000L))) {
                     continue;
                 }
                 break;
             }
             case {} when ᐧᐧ: {
                 var prefix = ((uintptr)((byte)(randHeapBasePrefix + (byte)i))).Lsh((int64)(randHeapAddrBits - 8));
-                Δp = (uintptr)(prefix | ((uintptr)(randHeapBase & randHeapBasePrefixMask)));
+                p = (uintptr)(prefix | ((uintptr)(randHeapBase & randHeapBasePrefixMask)));
                 break;
             }
             case {} when GOARCH == "arm64"u8 && GOOS == "ios"u8: {
-                Δp = (uintptr)((uintptr)i << 40 | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(5100273664L)));
+                p = (uintptr)((uintptr)i << 40 | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(5100273664L)));
                 break;
             }
             case {} when GOARCH == "arm64"u8: {
-                Δp = (uintptr)((uintptr)i << 40 | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(274877906944L)));
+                p = (uintptr)((uintptr)i << 40 | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(274877906944L)));
                 break;
             }
             case {} when GOARCH == "riscv64"u8 && vmaSize == 39: {
-                Δp = (uintptr)((uintptr)i << 32 | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(5100273664L)));
+                p = (uintptr)((uintptr)i << 32 | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(5100273664L)));
                 break;
             }
             case {} when GOOS == "aix"u8: {
@@ -665,11 +666,11 @@ internal static void mallocinit() {
                     // to avoid collisions with others mmaps done by non-go programs.
                     continue;
                 }
-                Δp = (uintptr)((uintptr)i << 40 | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(720575940379279360L)));
+                p = (uintptr)((uintptr)i << 40 | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(720575940379279360L)));
                 break;
             }
             default: {
-                Δp = (uintptr)((uintptr)i << 40 | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(824633720832L)));
+                p = (uintptr)((uintptr)i << 40 | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(824633720832L)));
                 break;
             }}
             // Switch to generating hints for user arenas if we've gone
@@ -680,7 +681,7 @@ internal static void mallocinit() {
                 hintList = Ꮡmheap_.ᏑuserArena.of(mheap_userArena.ᏑarenaHints);
             }
             var hint = (ж<arenaHint>)(uintptr)(Ꮡmheap_.ᏑarenaHintAlloc.alloc());
-            hint.addr = Δp;
+            hint.addr = p;
             (hint.next, hintList.ValueSlot) = (hintList.ValueSlot, hint);
         }
     } else {
@@ -723,14 +724,14 @@ internal static void mallocinit() {
         // buggy, as usual: it won't adjust the pointer
         // upward. So adjust it upward a little bit ourselves:
         // 1/4 MB to get away from the running binary image.
-        var Δp = firstmoduledata.end;
-        if (Δp < procBrk) {
-            Δp = procBrk;
+        var p = firstmoduledata.end;
+        if (p < procBrk) {
+            p = procBrk;
         }
-        if (mheap_.heapArenaAlloc.next <= Δp && Δp < mheap_.heapArenaAlloc.end) {
-            Δp = mheap_.heapArenaAlloc.end;
+        if (mheap_.heapArenaAlloc.next <= p && p < mheap_.heapArenaAlloc.end) {
+            p = mheap_.heapArenaAlloc.end;
         }
-        Δp = alignUp(Δp + ((uintptr)256 << 10), heapArenaBytes);
+        p = alignUp(p + ((uintptr)256 << 10), heapArenaBytes);
         // Because we're worried about fragmentation on
         // 32-bit, we try to make a large initial reservation.
         var arenaSizes = slice<uintptr>([
@@ -739,15 +740,15 @@ internal static void mallocinit() {
             (uintptr)128 << 20
         ]);
         foreach (var (_, arenaSize) in range(arenaSizes)) {
-            var (a, size) = sysReserveAligned((@unsafe.Pointer)Δp, arenaSize, heapArenaBytes, heapReservationˢ);
+            var (a, size) = sysReserveAligned((@unsafe.Pointer)p, arenaSize, heapArenaBytes, heapReservationˢ);
             if (a != nil) {
                 Ꮡmheap_.Ꮡarena.init((uintptr)a, size, false);
-                Δp = mheap_.arena.end; // For hint below
+                p = mheap_.arena.end; // For hint below
                 break;
             }
         }
         var hint = (ж<arenaHint>)(uintptr)(Ꮡmheap_.ᏑarenaHintAlloc.alloc());
-        hint.addr = Δp;
+        hint.addr = p;
         (hint.next, mheap_.arenaHints) = (mheap_.arenaHints, hint);
 
         // Place the hint for user arenas just after the large reservation.
@@ -755,7 +756,7 @@ internal static void mallocinit() {
         // While this potentially competes with the hint above, in practice we probably
         // aren't going to be getting this far anyway on 32-bit platforms.
         var userArenaHint = (ж<arenaHint>)(uintptr)(Ꮡmheap_.ᏑarenaHintAlloc.alloc());
-        userArenaHint.addr = Δp;
+        userArenaHint.addr = p;
         (userArenaHint.next, mheap_.userArena.arenaHints) = (mheap_.userArena.arenaHints, userArenaHint);
     }
     // Initialize the memory limit here because the allocator is going to look at it
@@ -763,9 +764,13 @@ internal static void mallocinit() {
     ᏑgcController.ᏑmemoryLimit.Store(Δmath.MaxInt64);
 }
 
+} partial class runtimeᴛmheap {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string heapˢ => ref heapˢᵇ;
 private static readonly @string heapˢᵇ = "heap"u8;
+internal static ref readonly @string heapReservationˢ => ref heapReservationˢᵇ;
+private static readonly @string heapReservationˢᵇ = "heap reservation"u8;
 internal static ref readonly @string tooManyAddressSpaceˢ => ref tooManyAddressSpaceˢᵇ;
 private static readonly @string tooManyAddressSpaceˢᵇ = "too many address space collisions for -race mode"u8;
 internal static ref readonly @string regionExceedsUintptrˢ => ref regionExceedsUintptrˢᵇ;
@@ -833,25 +838,25 @@ internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, 
     // Try to grow the heap at a hint address.
     while (hintList != nil) {
         var hint = hintList;
-        var Δp = hint.addr;
+        var p = hint.addr;
         if (hint.down) {
-            Δp -= n;
+            p -= n;
         }
-        if (Δp + n < Δp) {
+        if (p + n < p) {
             // We can't use this, so don't ask.
             v = default;
-        } else if (arenaIndex(Δp + n - 1) >= (nuint)((arenaIdx)((nuint)1 << (int)(arenaBits)))) {
+        } else if (arenaIndex(p + n - 1) >= (nuint)((arenaIdx)((nuint)1 << (int)(arenaBits)))) {
             // Outside addressable heap. Can't use.
             v = default;
         } else {
-            v = (uintptr)sysReserve((@unsafe.Pointer)Δp, n, heapReservationˢ);
+            v = (uintptr)sysReserve((@unsafe.Pointer)p, n, heapReservationˢ);
         }
-        if (Δp == (uintptr)v) {
+        if (p == (uintptr)v) {
             // Success. Update the hint.
             if (!hint.down) {
-                Δp += n;
+                p += n;
             }
-            hint.addr = Δp;
+            hint.addr = p;
             size = n;
             break;
         }
@@ -897,18 +902,18 @@ internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, 
     // Check for bad pointers or pointers we can't use.
     {
         @string bad = default;
-        var Δp = (uintptr)v;
-        if (Δp + size < Δp) {
+        var p = (uintptr)v;
+        if (p + size < p) {
             bad = regionExceedsUintptrˢ;
-        } else if (arenaIndex(Δp) >= (nuint)((arenaIdx)((nuint)1 << (int)(arenaBits)))) {
+        } else if (arenaIndex(p) >= (nuint)((arenaIdx)((nuint)1 << (int)(arenaBits)))) {
             bad = baseOutsideUsableAddressˢ;
-        } else if (arenaIndex(Δp + size - 1) >= (nuint)((arenaIdx)((nuint)1 << (int)(arenaBits)))) {
+        } else if (arenaIndex(p + size - 1) >= (nuint)((arenaIdx)((nuint)1 << (int)(arenaBits)))) {
             bad = endOutsideUsableAddressˢ;
         }
         if (bad != ""u8) {
             // This should be impossible on most architectures,
             // but it would be really confusing to debug.
-            print((@string)"runtime: memory allocated by OS [", (Δhex)(uint64)Δp, (@string)", ", (Δhex)(uint64)(Δp + size), (@string)") not in usable address space: ", bad, (@string)"\n");
+            print((@string)"runtime: memory allocated by OS [", (hex)(uint64)p, (@string)", ", (hex)(uint64)(p + size), (@string)") not in usable address space: ", bad, (@string)"\n");
             @throw(memoryReservationExceedsˢ);
         }
     }
@@ -1037,6 +1042,8 @@ internal static void enableMetadataHugePages(this ж<mheap> Ꮡh) {
     }
 }
 
+} partial class runtime_package {
+
 // base address for all 0-byte allocations
 // go2cs generated this placeholder — var zerobase is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -1061,6 +1068,8 @@ internal static gclinkptr nextFreeFast(ж<mspan> Ꮡs) {
     }
     return 0;
 }
+
+} partial class runtimeᴛmcache {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sAllocCountSNelemsˢ => ref sAllocCountSNelemsˢᵇ;
@@ -1112,6 +1121,8 @@ internal static (gclinkptr v, ж<mspan> s, bool checkGCTrigger) nextFree(this re
     }
     return (v, s, checkGCTrigger);
 }
+
+} partial class runtime_package {
 
 // doubleCheckMalloc enables a bunch of extra checks to malloc to double-check
 // that various invariants are upheld.
@@ -1952,10 +1963,10 @@ internal static void postMallocgcDebug(@unsafe.Pointer x, uintptr elemsize, ж<_
     }
 
     if (traceAllocFreeEnabled()) {
-        var Δtrace = traceAcquire();
-        if (Δtrace.ok()) {
-            Δtrace.HeapObjectAlloc((uintptr)x, typ);
-            traceRelease(Δtrace);
+        var trace = traceAcquire();
+        if (trace.ok()) {
+            trace.HeapObjectAlloc((uintptr)x, typ);
+            traceRelease(trace);
         }
     }
 
@@ -2160,9 +2171,9 @@ internal static bool freegc(@unsafe.Pointer ptr, uintptr size, bool noscan) {
 
     if (debugReusableLog) {
         if (s.@base() <= (uintptr)v && (uintptr)v < s.limit) {
-            println((@string)"freegc [in mcache]:", (Δhex)(uint64)(uintptr)v, (@string)"sweepgen:", mheap_.sweepgen, (@string)"writeBarrier.enabled:", writeBarrier.enabled);
+            println((@string)"freegc [in mcache]:", (hex)(uint64)(uintptr)v, (@string)"sweepgen:", mheap_.sweepgen, (@string)"writeBarrier.enabled:", writeBarrier.enabled);
         } else {
-            println((@string)"freegc [NOT in mcache]:", (Δhex)(uint64)(uintptr)v, (@string)"sweepgen:", mheap_.sweepgen, (@string)"writeBarrier.enabled:", writeBarrier.enabled);
+            println((@string)"freegc [NOT in mcache]:", (hex)(uint64)(uintptr)v, (@string)"sweepgen:", mheap_.sweepgen, (@string)"writeBarrier.enabled:", writeBarrier.enabled);
         }
     }
 
@@ -2181,6 +2192,8 @@ internal static bool freegc(@unsafe.Pointer ptr, uintptr size, bool noscan) {
 
     return true;
 }
+
+} partial class runtimeᴛmcache {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nextReusableNoScanNilˢ => ref nextReusableNoScanNilˢᵇ;
@@ -2203,7 +2216,7 @@ internal static (gclinkptr, ж<mspan>) nextReusableNoScan(this ref mcache c, ж<
     c.reusableNoscan[spc] = v.ptr().next;
 
     if (debugReusableLog) {
-        println((@string)"reusing from ptr free list:", (Δhex)(uint64)v, (@string)"sweepgen:", mheap_.sweepgen, (@string)"writeBarrier.enabled:", writeBarrier.enabled);
+        println((@string)"reusing from ptr free list:", (hex)(uint64)v, (@string)"sweepgen:", mheap_.sweepgen, (@string)"writeBarrier.enabled:", writeBarrier.enabled);
     }
     if (doubleCheckReusable) {
         doubleCheckNextReusable(v); // debug only sanity check
@@ -2229,6 +2242,8 @@ internal static (gclinkptr, ж<mspan>) nextReusableNoScan(this ref mcache c, ж<
 
     return (v, span);
 }
+
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nextReusableSpanIsNotInˢ2 => ref nextReusableSpanIsNotInˢ2ᵇ;
@@ -2256,7 +2271,7 @@ internal static void doubleCheckNextReusable(gclinkptr v) {
         @throw(nextReusableSpanIsNotInˢ2);
     }
     if (span.objBase((uintptr)v) != (uintptr)v) {
-        print((@string)"nextReusable: v=", (Δhex)(uint64)v, (@string)" base=", (Δhex)(uint64)span.objBase((uintptr)v), (@string)"\n");
+        print((@string)"nextReusable: v=", (hex)(uint64)v, (@string)" base=", (hex)(uint64)span.objBase((uintptr)v), (@string)"\n");
         @throw(nextReusableVIsNonBaseˢ);
     }
     if (span.isFree(objIndex)) {
@@ -2503,11 +2518,11 @@ internal static ref ж<notInHeap> persistentChunks => ref ((StaticBox<ж<notInHe
 //
 //go:nosplit
 internal static @unsafe.Pointer persistentalloc(uintptr size, uintptr align, ж<sysMemStat> sysStat) {
-    ref var Δp = ref heap<ж<notInHeap>>(out var Ꮡp);
+    ref var p = ref heap<ж<notInHeap>>(out var Ꮡp);
     systemstack(() => {
         Ꮡp.ValueSlot = persistentalloc1(size, align, sysStat);
     });
-    return @unsafe.Pointer.FromPinnedBox(Δp);
+    return @unsafe.Pointer.FromPinnedBox(p);
 }
 
 // go2cs generated this placeholder — func persistentalloc1 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -2526,6 +2541,8 @@ partial struct linearAlloc {
     internal bool mapMemory; // transition memory from Reserved to Ready if true
 }
 
+} partial class runtimeᴛlinearAlloc {
+
 internal static void init(this ref linearAlloc l, uintptr @base, uintptr size, bool mapMemory) {
     if (@base + size < @base) {
         // Chop off the last byte. The runtime isn't prepared
@@ -2540,11 +2557,11 @@ internal static void init(this ref linearAlloc l, uintptr @base, uintptr size, b
 }
 
 internal static @unsafe.Pointer alloc(this ref linearAlloc l, uintptr size, uintptr align, ж<sysMemStat> sysStat, @string vmaName) {
-    var Δp = alignUp(l.next, align);
-    if (Δp + size > l.end) {
+    var p = alignUp(l.next, align);
+    if (p + size > l.end) {
         return default;
     }
-    l.next = Δp + size;
+    l.next = p + size;
     var pEnd = alignUp(l.next - 1, physPageSize); if (pEnd > l.mapped) {
         if (l.mapMemory) {
             // Transition from Reserved to Prepared to Ready.
@@ -2554,8 +2571,10 @@ internal static @unsafe.Pointer alloc(this ref linearAlloc l, uintptr size, uint
         }
         l.mapped = pEnd;
     }
-    return (@unsafe.Pointer)Δp;
+    return (@unsafe.Pointer)p;
 }
+
+} partial class runtime_package {
 
 // notInHeap is off-heap memory allocated by a lower-level allocator
 // like sysAlloc or persistentAlloc.
@@ -2569,11 +2588,15 @@ partial struct notInHeap {
     internal sys.NotInHeap _;
 }
 
-internal static ж<notInHeap> add(this ж<notInHeap> Ꮡp, uintptr bytes) {
-    ref var Δp = ref Ꮡp.DerefOrNull();
+} partial class runtimeᴛnotInHeap {
 
-    return (ж<notInHeap>)(uintptr)((@unsafe.Pointer)((uintptr)(uintptr)@unsafe.Pointer.FromRef(ref Δp) + bytes));
+internal static ж<notInHeap> add(this ж<notInHeap> Ꮡp, uintptr bytes) {
+    ref var p = ref Ꮡp.DerefOrNull();
+
+    return (ж<notInHeap>)(uintptr)((@unsafe.Pointer)((uintptr)(uintptr)@unsafe.Pointer.FromRef(ref p) + bytes));
 }
+
+} partial class runtime_package {
 
 // redZoneSize computes the size of the redzone for a given allocation.
 // Refer to the implementation of the compiler-rt.

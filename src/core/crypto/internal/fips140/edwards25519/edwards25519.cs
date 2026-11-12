@@ -8,6 +8,7 @@ using field = go.crypto.@internal.fips140.edwards25519.field_package;
 using errors = errors_package;
 using go.crypto.@internal.fips140.edwards25519;
 using ꓸꓸꓸжPoint = Span<ж<edwards25519_package.Point>>;
+using static edwards25519_package;
 
 partial class edwards25519_package {
 
@@ -55,6 +56,8 @@ partial struct affineCached {
     public field.Element YplusX, YminusX, T2d;
 }
 
+} partial class edwards25519ᴛprojP2 {
+
 // Constructors.
 internal static ж<projP2> Zero(this ж<projP2> Ꮡv) {
     Ꮡv.ᏑX.Zero();
@@ -62,6 +65,8 @@ internal static ж<projP2> Zero(this ж<projP2> Ꮡv) {
     Ꮡv.ᏑZ.One();
     return Ꮡv;
 }
+
+} partial class edwards25519_package {
 
 // identity is the point at infinity.
 internal static ж<Point> identity;
@@ -90,6 +95,8 @@ public static ж<Point> NewGeneratorPoint() {
     return @new<Point>().Set(generator);
 }
 
+} partial class edwards25519ᴛprojCached {
+
 internal static ж<projCached> Zero(this ж<projCached> Ꮡv) {
     Ꮡv.ᏑYplusX.One();
     Ꮡv.ᏑYminusX.One();
@@ -98,12 +105,16 @@ internal static ж<projCached> Zero(this ж<projCached> Ꮡv) {
     return Ꮡv;
 }
 
+} partial class edwards25519ᴛaffineCached {
+
 internal static ж<affineCached> Zero(this ж<affineCached> Ꮡv) {
     Ꮡv.ᏑYplusX.One();
     Ꮡv.ᏑYminusX.One();
     Ꮡv.ᏑT2d.Zero();
     return Ꮡv;
 }
+
+} partial class edwards25519ᴛPoint {
 
 // Assignments.
 
@@ -142,7 +153,11 @@ internal static slice<byte> bytes(this ж<Point> Ꮡv, /*[32]*/ ж<array<byte>> 
     return @out;
 }
 
+} partial class edwards25519_package {
+
 internal static ж<field.Element> feOne = @new<field.Element>().One();
+
+} partial class edwards25519ᴛPoint {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string edwards25519InvalidPointˢ => ref edwards25519InvalidPointˢᵇ;
@@ -201,6 +216,8 @@ public static (ж<Point>, error) SetBytes(this ж<Point> Ꮡv, slice<byte> x) {
     return (Ꮡv, default);
 }
 
+} partial class edwards25519_package {
+
 internal static slice<byte> copyFieldElement(/*[32]*/ ж<array<byte>> Ꮡbuf, ж<field.Element> Ꮡv) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
     ref var v = ref Ꮡv.DerefOrNull();
@@ -208,6 +225,8 @@ internal static slice<byte> copyFieldElement(/*[32]*/ ж<array<byte>> Ꮡbuf, ж
     copy(buf[..], v.Bytes());
     return buf[..];
 }
+
+} partial class edwards25519ᴛprojP2 {
 
 // Conversions.
 internal static ж<projP2> FromP1xP1(this ж<projP2> Ꮡv, ж<projP1xP1> p) {
@@ -223,6 +242,8 @@ internal static ж<projP2> FromP3(this ж<projP2> Ꮡv, ж<Point> p) {
     Ꮡv.ᏑZ.Set(p.Ꮡz);
     return Ꮡv;
 }
+
+} partial class edwards25519ᴛPoint {
 
 internal static ж<Point> fromP1xP1(this ж<Point> Ꮡv, ж<projP1xP1> p) {
     Ꮡv.Ꮡx.Multiply(p.ᏑX, p.ᏑT);
@@ -240,6 +261,8 @@ internal static ж<Point> fromP2(this ж<Point> Ꮡv, ж<projP2> p) {
     return Ꮡv;
 }
 
+} partial class edwards25519_package {
+
 // d is a constant in the curve equation.
 internal static ж<field.Element> d = @new<field.Element>().SetBytes([
     0xa3, 0x78, 0x59, 0x13, 0xca, 0x4d, 0xeb, 0x75,
@@ -249,6 +272,8 @@ internal static ж<field.Element> d = @new<field.Element>().SetBytes([
 internal static error _ᴛ3ʗ;
 internal static ж<field.Element> d2 = @new<field.Element>().Add(d, d);
 
+} partial class edwards25519ᴛprojCached {
+
 internal static ж<projCached> FromP3(this ж<projCached> Ꮡv, ж<Point> p) {
     Ꮡv.ᏑYplusX.Add(p.Ꮡy, p.Ꮡx);
     Ꮡv.ᏑYminusX.Subtract(p.Ꮡy, p.Ꮡx);
@@ -256,6 +281,8 @@ internal static ж<projCached> FromP3(this ж<projCached> Ꮡv, ж<Point> p) {
     Ꮡv.ᏑT2d.Multiply(p.Ꮡt, d2);
     return Ꮡv;
 }
+
+} partial class edwards25519ᴛaffineCached {
 
 internal static ж<affineCached> FromP3(this ж<affineCached> Ꮡv, ж<Point> p) {
     Ꮡv.ᏑYplusX.Add(p.Ꮡy, p.Ꮡx);
@@ -269,6 +296,8 @@ internal static ж<affineCached> FromP3(this ж<affineCached> Ꮡv, ж<Point> p)
     Ꮡv.ᏑT2d.Multiply(Ꮡv.ᏑT2d, ᏑinvZ);
     return Ꮡv;
 }
+
+} partial class edwards25519ᴛPoint {
 
 // (Re)addition and subtraction.
 
@@ -287,6 +316,8 @@ public static ж<Point> Subtract(this ж<Point> Ꮡv, ж<Point> p, ж<Point> q) 
     var result = @new<projP1xP1>().Sub(p, qCached);
     return Ꮡv.fromP1xP1(result);
 }
+
+} partial class edwards25519ᴛprojP1xP1 {
 
 internal static ж<projP1xP1> Add(this ж<projP1xP1> Ꮡv, ж<Point> p, ж<projCached> q) {
     ref var YplusX = ref heap(new field.Element(), out var ᏑYplusX);
@@ -408,6 +439,8 @@ internal static ж<projP1xP1> Double(this ж<projP1xP1> Ꮡv, ж<projP2> p) {
     return Ꮡv;
 }
 
+} partial class edwards25519ᴛPoint {
+
 // Negation.
 
 // Negate sets v = -p, and returns v.
@@ -436,6 +469,8 @@ public static nint Equal(this ж<Point> Ꮡv, ж<Point> u) {
     return t1.Equal(Ꮡt2) & t3.Equal(Ꮡt4);
 }
 
+} partial class edwards25519ᴛprojCached {
+
 // Constant-time operations
 
 // Select sets v to a if cond == 1 and to b if cond == 0.
@@ -447,6 +482,8 @@ internal static ж<projCached> Select(this ж<projCached> Ꮡv, ж<projCached> a
     return Ꮡv;
 }
 
+} partial class edwards25519ᴛaffineCached {
+
 // Select sets v to a if cond == 1 and to b if cond == 0.
 internal static ж<affineCached> Select(this ж<affineCached> Ꮡv, ж<affineCached> a, ж<affineCached> b, nint cond) {
     Ꮡv.ᏑYplusX.Select(a.ᏑYplusX, b.ᏑYplusX, cond);
@@ -454,6 +491,8 @@ internal static ж<affineCached> Select(this ж<affineCached> Ꮡv, ж<affineCac
     Ꮡv.ᏑT2d.Select(a.ᏑT2d, b.ᏑT2d, cond);
     return Ꮡv;
 }
+
+} partial class edwards25519ᴛprojCached {
 
 // CondNeg negates v if cond == 1 and leaves it unchanged if cond == 0.
 internal static ж<projCached> CondNeg(this ж<projCached> Ꮡv, nint cond) {
@@ -464,6 +503,8 @@ internal static ж<projCached> CondNeg(this ж<projCached> Ꮡv, nint cond) {
     return Ꮡv;
 }
 
+} partial class edwards25519ᴛaffineCached {
+
 // CondNeg negates v if cond == 1 and leaves it unchanged if cond == 0.
 internal static ж<affineCached> CondNeg(this ж<affineCached> Ꮡv, nint cond) {
     ref var v = ref Ꮡv.DerefOrNull();
@@ -473,4 +514,4 @@ internal static ж<affineCached> CondNeg(this ж<affineCached> Ꮡv, nint cond) 
     return Ꮡv;
 }
 
-} // end edwards25519_package
+} // end edwards25519ᴛaffineCached

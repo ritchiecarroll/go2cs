@@ -27,6 +27,7 @@ using go.mime;
 using go.net;
 using go.path;
 using iter = iter_package;
+using static http_package;
 
 partial class http_package {
 
@@ -57,7 +58,7 @@ internal static error mapOpenError(error originalErr, @string name, rune sep, Fu
     }
 
     var parts = strings.Split(name, (@string)sep);
-    foreach (var i in range(builtin.len(parts))) {
+    foreach (var i in range(len(parts))) {
         if (parts[i] == "") {
             continue;
         }
@@ -76,6 +77,8 @@ internal static error mapOpenError(error originalErr, @string name, rune sep, Fu
 // filepath.Localize fails. filepath.Localize returns an error if the path
 // cannot be represented by the operating system.
 internal static error errInvalidUnsafePath = errors.New("http: invalid or unsafe file path");
+
+} partial class httpᴛDir {
 
 // Open implements [FileSystem] using [os.Open], opening files for reading rooted
 // and relative to the directory d.
@@ -99,6 +102,8 @@ public static (File, error) Open(this Dir d, @string name) {
     }
     return (new os_FileжFile(f), default);
 }
+
+} partial class http_package {
 
 // A FileSystem implements access to a collection of named files.
 // The elements in a file path are separated by slash ('/', U+002F)
@@ -133,19 +138,29 @@ partial interface anyDirs {
 
 partial struct fileInfoDirs /*[]global::go.io.fs_package.FileInfo*/;
 
+} partial class httpᴛfileInfoDirs {
+
 internal static nint len(this fileInfoDirs d) { return builtin.len(d); }
 internal static bool isDir(this fileInfoDirs d, nint i) { return d[i].IsDir(); }
 internal static @string name(this fileInfoDirs d, nint i) { return d[i].Name(); }
 
+} partial class http_package {
+
 partial struct dirEntryDirs /*[]global::go.io.fs_package.DirEntry*/;
+
+} partial class httpᴛdirEntryDirs {
 
 internal static nint len(this dirEntryDirs d) { return builtin.len(d); }
 internal static bool isDir(this dirEntryDirs d, nint i) { return d[i].IsDir(); }
 internal static @string name(this dirEntryDirs d, nint i) { return d[i].Name(); }
 
+} partial class http_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string errorReadingDirectoryˢ => ref errorReadingDirectoryˢᵇ;
 private static readonly @string errorReadingDirectoryˢᵇ = "Error reading directory"u8;
+internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
+private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
 internal static ref readonly @string textHtmlCharsetUtf8ˢ => ref textHtmlCharsetUtf8ˢᵇ;
 private static readonly @string textHtmlCharsetUtf8ˢᵇ = "text/html; charset=utf-8"u8;
 
@@ -330,7 +345,7 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
                 }
             }
             w.Header().Set(contentTypeˢ, ctype);
-        } else if (builtin.len(ctypes) > 0) {
+        } else if (len(ctypes) > 0) {
             ctype = ctypes[0];
         }
 
@@ -380,7 +395,7 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
             ranges = default;
         }
         switch (ᐧ) {
-        case {} when builtin.len(ranges) is 1: {
+        case {} when len(ranges) is 1: {
             // RFC 7233, Section 4.1:
             // "If a single part is being transferred, the server
             // generating the 206 response MUST generate a
@@ -402,7 +417,7 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
             w.Header().Set(contentRangeˢ, ra.contentRange(size));
             break;
         }
-        case {} when builtin.len(ranges) is > 1: {
+        case {} when len(ranges) is > 1: {
             sendSize = rangesMIMESize(ranges, ctype, size);
             code = StatusPartialContent;
 
@@ -467,7 +482,7 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
         // A possible future improvement on this might be to look at the type
         // of the ResponseWriter, and always set Content-Length if it's one
         // that we recognize.
-        if (builtin.len(ranges) > 0 || w.Header().Get(contentEncodingˢ) == ""u8) {
+        if (len(ranges) > 0 || w.Header().Get(contentEncodingˢ) == ""u8) {
             w.Header().Set(contentLengthˢ, strconv.FormatInt(sendSize, 10));
         }
         w.WriteHeader(code);
@@ -489,12 +504,12 @@ internal static (@string etag, @string remain) scanETag(@string s) {
     if (strings.HasPrefix(s, "W/")) {
         start = 2;
     }
-    if (builtin.len(s.slice(start)) < 2 || s[start] != '"') {
+    if (len(s.slice(start)) < 2 || s[start] != '"') {
         return ("", "");
     }
     // ETag is either W/"text" or "text".
     // See RFC 7232 2.3.
-    for (nint i = start + 1; i < builtin.len(s); i++) {
+    for (nint i = start + 1; i < len(s); i++) {
         var c = s[i];
         switch (ᐧ) {
         // Character values allowed in ETags.
@@ -544,7 +559,7 @@ internal static condResult checkIfMatch(ResponseWriter w, ref Request r) {
     }
     for (;;) {
         im = textproto.TrimString(im);
-        if (builtin.len(im) == 0) {
+        if (len(im) == 0) {
             break;
         }
         if (im[0] == ',') {
@@ -583,7 +598,7 @@ internal static condResult checkIfUnmodifiedSince(ref Request r, time.Time modti
 
     // The Last-Modified header truncates sub-second precision so
     // the modtime needs to be truncated too.
-    modtime = modtime.Truncate(time.ΔSecond);
+    modtime = modtime.Truncate(time.Second);
     nint ret = modtime.Compare(t); if (ret <= 0) {
         return condTrue;
     }
@@ -602,7 +617,7 @@ internal static condResult checkIfNoneMatch(ResponseWriter w, ref Request r) {
     @string buf = inm;
     for (;;) {
         buf = textproto.TrimString(buf);
-        if (builtin.len(buf) == 0) {
+        if (len(buf) == 0) {
             break;
         }
         if (buf[0] == ',') {
@@ -642,7 +657,7 @@ internal static condResult checkIfModifiedSince(ref Request r, time.Time modtime
     }
     // The Last-Modified header truncates sub-second precision so
     // the modtime needs to be truncated too.
-    modtime = modtime.Truncate(time.ΔSecond);
+    modtime = modtime.Truncate(time.Second);
     nint ret = modtime.Compare(t); if (ret <= 0) {
         return condFalse;
     }
@@ -806,11 +821,11 @@ internal static void serveFile(ResponseWriter w, ж<Request> Ꮡr, FileSystem fs
             // r.URL.Path always begins with /
             @string url = r.URL.Path;
             if (d.IsDir()) {
-                if (url[builtin.len(url) - 1] != '/') {
+                if (url[len(url) - 1] != '/') {
                     localRedirect(w, ref (Ꮡr).DerefOrNull(), path.Base(url) + "/"u8);
                     return;
                 }
-            } else if (url[builtin.len(url) - 1] == '/') {
+            } else if (url[len(url) - 1] == '/') {
                 @string @base = path.Base(url);
                 if (@base == "/"u8 || @base == "."u8) {
                     // The FileSystem maps a path like "/" or "/./" to a file instead of a directory.
@@ -826,7 +841,7 @@ internal static void serveFile(ResponseWriter w, ж<Request> Ꮡr, FileSystem fs
         if (d.IsDir()) {
             @string url = r.URL.Path;
             // redirect if the directory name doesn't end in a slash
-            if (url == ""u8 || url[builtin.len(url) - 1] != '/') {
+            if (url == ""u8 || url[len(url) - 1] != '/') {
                 localRedirect(w, ref (Ꮡr).DerefOrNull(), path.Base(url) + "/"u8);
                 return;
             }
@@ -891,6 +906,10 @@ internal static (@string msg, nint httpStatus) toHTTPError(error err) {
     // Default:
     return (internalServerErrorˢ, StatusInternalServerError);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string locationˢ => ref locationˢᵇ;
+private static readonly @string locationˢᵇ = "Location"u8;
 
 // localRedirect gives a Moved Permanently response.
 // It does not convert relative paths to absolute paths like Redirect does.
@@ -1004,6 +1023,8 @@ partial struct ioFile {
     internal fs.File @file;
 }
 
+} partial class httpᴛioFS {
+
 internal static (File, error) Open(this ioFS f, @string name) {
     if (name == "/"u8) {
         name = ".";
@@ -1018,12 +1039,18 @@ internal static (File, error) Open(this ioFS f, @string name) {
     return (new ioFile(@file), default);
 }
 
+} partial class httpᴛioFile {
+
 internal static error Close(this ioFile f) { return f.@file.Close(); }
 internal static (nint, error) Read(this ioFile f, slice<byte> b) { return f.@file.Read(b); }
 internal static (fs.FileInfo, error) Stat(this ioFile f) { return f.@file.Stat(); }
 
+} partial class http_package {
+
 internal static error errMissingSeek = errors.New("io.File missing Seek method");
 internal static error errMissingReadDir = errors.New("io.File directory missing ReadDir method");
+
+} partial class httpᴛioFile {
 
 internal static (int64, error) Seek(this ioFile f, int64 offset, nint whence) {
     var (s, ok) = f.@file._<io.Seeker>(ᐧ);
@@ -1048,7 +1075,7 @@ internal static (slice<fs.FileInfo>, error) Readdir(this ioFile f, nint count) {
     }
     slice<fs.FileInfo> list = default;
     for (;;) {
-        var (dirs, err) = d.ReadDir(count - builtin.len(list));
+        var (dirs, err) = d.ReadDir(count - len(list));
         foreach (var (_, dir) in range(dirs)) {
             var (info, errΔ1) = dir.Info();
             if (errΔ1 != nil) {
@@ -1060,12 +1087,14 @@ internal static (slice<fs.FileInfo>, error) Readdir(this ioFile f, nint count) {
         if (err != nil) {
             return (list, err);
         }
-        if (count < 0 || builtin.len(list) >= count) {
+        if (count < 0 || len(list) >= count) {
             break;
         }
     }
     return (list, default);
 }
+
+} partial class http_package {
 
 // FS converts fsys to a [FileSystem] implementation,
 // for use with [FileServer] and [NewFileTransport].
@@ -1087,8 +1116,8 @@ public static FileSystem FS(fs.FS fsys) {
 //	http.Handle("/", http.FileServer(http.Dir("/tmp")))
 //
 // To use an [fs.FS] implementation, use [http.FileServerFS] instead.
-public static ΔHandler FileServer(FileSystem root) {
-    return new fileHandlerжΔHandler(Ꮡ(new fileHandler(root)));
+public static Handler FileServer(FileSystem root) {
+    return new fileHandlerжHandler(Ꮡ(new fileHandler(root)));
 }
 
 // FileServerFS returns a handler that serves HTTP requests
@@ -1100,9 +1129,11 @@ public static ΔHandler FileServer(FileSystem root) {
 // "index.html".
 //
 //	http.Handle("/", http.FileServerFS(fsys))
-public static ΔHandler FileServerFS(fs.FS root) {
+public static Handler FileServerFS(fs.FS root) {
     return FileServer(FS(root));
 }
+
+} partial class httpᴛfileHandler {
 
 internal static void ServeHTTP(this ref fileHandler f, ResponseWriter w, ж<Request> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
@@ -1115,10 +1146,14 @@ internal static void ServeHTTP(this ref fileHandler f, ResponseWriter w, ж<Requ
     serveFile(w, Ꮡr, f.root, path.Clean(upath), true);
 }
 
+} partial class http_package {
+
 // httpRange specifies the byte range to be sent to the client.
 partial struct httpRange {
     internal int64 start, length;
 }
+
+} partial class httpᴛhttpRange {
 
 internal static @string contentRange(this httpRange r, int64 size) {
     return fmt.Sprintf("bytes %d-%d/%d"u8, r.start, r.start + r.length - 1, size);
@@ -1130,6 +1165,8 @@ internal static textproto.MIMEHeader mimeHeader(this httpRange r, @string conten
         ["Content-Type"] = [contentType]
     });
 }
+
+} partial class http_package {
 
 // GODEBUG=httpservecontentmaxranges=<limit> controls the maximum number of ranges that will
 // be processed in a Range header. Setting httpservecontentmaxranges=0 disables the limit.
@@ -1170,7 +1207,7 @@ internal static (slice<httpRange>, error) parseRange(@string s, int64 size) {
     }
     slice<httpRange> ranges = default;
     var noOverlap = false;
-    nint numRanges = strings.Count(s[(int)(builtin.len(b))..], ",") + 1;
+    nint numRanges = strings.Count(s[(int)(len(b))..], ",") + 1;
     nint maxRanges = maxContentRanges();
     if ((numRanges > maxRanges) != (numRanges > defaultMaxContentRanges)) {
         httpservecontentmaxranges.IncNonDefault();
@@ -1178,7 +1215,7 @@ internal static (slice<httpRange>, error) parseRange(@string s, int64 size) {
     if (numRanges > maxRanges) {
         return (default, default); // ignore header with too many ranges
     }
-    foreach (var iᴛ1 in range<@string>(strings.SplitSeq(s[(int)(builtin.len(b))..], ",").Invoke)) {
+    foreach (var iᴛ1 in range<@string>(strings.SplitSeq(s[(int)(len(b))..], ",").Invoke)) {
         var ra = iᴛ1;
         ra = textproto.TrimString(ra);
         if (ra == ""u8) {
@@ -1236,7 +1273,7 @@ internal static (slice<httpRange>, error) parseRange(@string s, int64 size) {
         }
         ranges = append(ranges, r);
     }
-    if (noOverlap && builtin.len(ranges) == 0) {
+    if (noOverlap && len(ranges) == 0) {
         // The specified ranges did not overlap with the content.
         return (default, errNoOverlap);
     }
@@ -1246,10 +1283,14 @@ internal static (slice<httpRange>, error) parseRange(@string s, int64 size) {
 // countingWriter counts how many bytes have been written to it.
 partial struct countingWriter /*num:int64*/;
 
+} partial class httpᴛcountingWriter {
+
 internal static (nint n, error err) Write(this ref countingWriter w, slice<byte> p) {
-    w += ((countingWriter)(int64)builtin.len(p));
-    return (builtin.len(p), default);
+    w += ((countingWriter)(int64)len(p));
+    return (len(p), default);
 }
+
+} partial class http_package {
 
 // rangesMIMESize returns the number of bytes it takes to encode the
 // provided ranges as a multipart response.

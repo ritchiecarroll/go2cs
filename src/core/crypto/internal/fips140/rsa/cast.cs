@@ -168,7 +168,7 @@ internal static ж<PrivateKey> testPrivateKey() {
         0x72, 0x8B, 0x9E, 0x64, 0x42, 0x6B, 0x3F, 0xC3,
         0xA7, 0x50, 0x6D, 0xEB, 0x52, 0x39, 0xA8, 0xA7]);
     return Ꮡ(new PrivateKey(
-        pub: new ΔPublicKey(
+        pub: new PublicKey(
             N: N, E: 65537
         ),
         d: d, p: p, q: q, qInv: qInv, dP: dP, dQ: dQ,

@@ -71,12 +71,12 @@ using static go.crypto.cipher_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/cipher/cbc.go", "cbc.cs", "ABs6ggAQKLKClIKUgpSClK7CgpSmlIKClIKUgpSCppSUgqaCgrimgoKUAAsesoKUgpSClIKUrsKClKaUgoKUgpSClIKUgsqCgqamgoKUgoK4gqamgoKU", "", "", "29=BlockSize/1/2/2,Clone/1/1/3,BlockSize/2/2/4")]
-[assembly: GoPositionMap("crypto/cipher/cfb.go", "cfb.cs", "ABcwgoKUgpSCgoKmypSCgpSCggADGgAJAoKUAAIYAAkCgpSmgoKUlO6U")]
-[assembly: GoPositionMap("crypto/cipher/ctr.go", "ctr.cs", "ACVSooKUgpSAgqSClIKClAAMGoKmgoKCgoKCgqaCgoK4gqaCgpSClIKUgoKUgoKC", "", "", "59=Clone/1/1/2")]
-[assembly: GoPositionMap("crypto/cipher/gcm.go", "gcm.cs", "AB084oKUAAIU8oKUAAIWAAgCgpTmgoKCgpS4goKUAAYaAAoCgoKUgoKU7oKmgqaCgqaCgpSClIIAGDKCgqaCpoKClIKmgoKUgtyCgoKClIKmgoKUABEUgoKUgpSClIKUAAsYgqaCpoKClIKUgqaCgpSCpqKCgpSUgoKUppSCgpSCpoKUgqaCgpSCpqKCgpSClIKCyoKmlKaigoKUgoKCuKKCgoKUgoKUgoKCuKKCpqKCgoKCrvKClIKUgg==")]
-[assembly: GoPositionMap("crypto/cipher/io.go", "io.cs", "ABMmsoKCAA0csoKCgoKUqqKClA==")]
-[assembly: GoPositionMap("crypto/cipher/ofb.go", "ofb.cs", "ABY+AAkCgqaCgpSCgpTugqaCgoKClIKCgoKClIKmgoKUgpSCgpSCgoI=")]
+[assembly: GoPositionMap("crypto/cipher/cbc.go", "cbc.cs", "ABw6ggAQKLKClIKUgpSClK7CgpTGlIKClIKUgpSCppSUgqaCgrimgoKUAA0esoKUgpSClIKUrsKClMaUgoKUgpSClIKUgsqCgqamgoKUgoK4gqamgoKU", "", "", "30=BlockSize/1/2/2,Clone/1/1/3,BlockSize/2/2/4")]
+[assembly: GoPositionMap("crypto/cipher/cfb.go", "cfb.cs", "ABowgoKUgpSCgoKmypSCgpSCggAFGgAJAoKUAAIYAAkCgpSmgoKUlO6U")]
+[assembly: GoPositionMap("crypto/cipher/ctr.go", "ctr.cs", "ACZSooKUgpSAgqSClIKClAAOGoLGgoKCgoKCgqaCgoK4gqaCgpSClIKUgoKUgoKC", "", "", "60=Clone/1/1/2")]
+[assembly: GoPositionMap("crypto/cipher/gcm.go", "gcm.cs", "AB484oKUAAIU8oKUAAIWAAgCgpTmgoKCgpS4goKUAAYaAAoCgoKUgoKUAAgOgqaCpoKCpoKClIKUggAYMoKCpoKmgoKUgqaCgpSC3IKCgoKUgqaCgpQAExSCgpSClIKUgpQADRiCpoKmgoKUgpSCpoKClIKmooKClJSCgpTGtIKClIKmgpSCpoKClIKmooKClIKUgoLKgqaUxqKCgpSCgoK4ooKCgpSCgpSCgoK4ooKmooKCgoKu8oKUgpSC")]
+[assembly: GoPositionMap("crypto/cipher/io.go", "io.cs", "ABYmsoKCABEcsoKCgoKUqqKClA==")]
+[assembly: GoPositionMap("crypto/cipher/ofb.go", "ofb.cs", "ABc+AAkCgqaCgpSCgpTugsaCgoKClIKCgoKClIKmgoKUgpSCgpSCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -128,3 +128,22 @@ public static partial class cipher_package
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(cipher_package.StreamReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛStreamReader;
+[GoMethodHost(typeof(cipher_package.StreamWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛStreamWriter;
+[GoMethodHost(typeof(cipher_package.aesCtrWrapper)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛaesCtrWrapper;
+[GoMethodHost(typeof(cipher_package.cbcDecrypter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛcbcDecrypter;
+[GoMethodHost(typeof(cipher_package.cbcEncrypter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛcbcEncrypter;
+[GoMethodHost(typeof(cipher_package.cfb)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛcfb;
+[GoMethodHost(typeof(cipher_package.ctr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛctr;
+[GoMethodHost(typeof(cipher_package.gcmFallback)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛgcmFallback;
+[GoMethodHost(typeof(cipher_package.gcmWithRandomNonce)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛgcmWithRandomNonce;
+[GoMethodHost(typeof(cipher_package.ofb)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛofb;
+// </MethodHolders>

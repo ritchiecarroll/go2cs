@@ -19,6 +19,7 @@ using sync = sync_package;
 using time = time_package;
 using go.net;
 using go.net.http.@internal;
+using static cookiejar_package;
 
 partial class cookiejar_package {
 
@@ -113,6 +114,8 @@ partial struct entry {
     internal uint64 seqNum;
 }
 
+} partial class cookiejarᴛentry {
+
 // id returns the domain;path;name triple of e as an id.
 internal static @string id(this ref entry e) {
     return fmt.Sprintf("%s;%s;%s"u8, e.Domain, e.Path, e.Name);
@@ -174,6 +177,8 @@ internal static bool secureMatch(this ref entry e, bool https) {
     return false;
 }
 
+} partial class cookiejar_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string localhostˢ => ref localhostˢᵇ;
 private static readonly @string localhostˢᵇ = "localhost"u8;
@@ -191,16 +196,18 @@ internal static bool hasDotSuffix(@string s, @string suffix) {
     return len(s) > len(suffix) && s[len(s) - len(suffix) - 1] == '.' && s.slice(len(s) - len(suffix)) == suffix;
 }
 
+} partial class cookiejarᴛJar {
+
 // Cookies implements the Cookies method of the [http.CookieJar] interface.
 //
 // It returns an empty slice if the URL's scheme is not HTTP or HTTPS.
-public static slice<ж<httpꓸCookie>> /*cookies*/ Cookies(this ж<Jar> Ꮡj, ж<url.URL> u) {
+public static slice<ж<http.Cookie>> /*cookies*/ Cookies(this ж<Jar> Ꮡj, ж<url.URL> u) {
     return Ꮡj.cookies(u, time.Now());
 }
 
 // cookies is like Cookies but takes the current time as a parameter.
-internal static slice<ж<httpꓸCookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, time.Time now) {
-    slice<ж<httpꓸCookie>> cookies = default;
+internal static slice<ж<http.Cookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, time.Time now) {
+    slice<ж<http.Cookie>> cookies = default;
     GoFrame ᒐ = default;
     try {
         ref var j = ref Ꮡj.DerefOrNull();
@@ -271,7 +278,7 @@ internal static slice<ж<httpꓸCookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, 
             return cmp.Compare(a.seqNum, b.seqNum);
         });
         foreach (var (_, e) in range(selected)) {
-            cookies = append(cookies, Ꮡ(new httpꓸCookie(Name: e.Name, Value: e.Value, Quoted: e.Quoted)));
+            cookies = append(cookies, Ꮡ(new http.Cookie(Name: e.Name, Value: e.Value, Quoted: e.Quoted)));
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -282,12 +289,12 @@ internal static slice<ж<httpꓸCookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, 
 // SetCookies implements the SetCookies method of the [http.CookieJar] interface.
 //
 // It does nothing if the URL's scheme is not HTTP or HTTPS.
-public static void SetCookies(this ж<Jar> Ꮡj, ж<url.URL> u, slice<ж<httpꓸCookie>> cookies) {
+public static void SetCookies(this ж<Jar> Ꮡj, ж<url.URL> u, slice<ж<http.Cookie>> cookies) {
     Ꮡj.setCookies(u, cookies, time.Now());
 }
 
 // setCookies is like SetCookies but takes the current time as parameter.
-internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<httpꓸCookie>> cookies, time.Time now) {
+internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<http.Cookie>> cookies, time.Time now) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -356,6 +363,8 @@ internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<ht
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡj.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
+
+} partial class cookiejar_package {
 
 // canonicalHost strips port from host if present and returns the canonicalized
 // host name.
@@ -448,6 +457,8 @@ internal static @string defaultPath(@string path) {
     return path.slice(0, i); // Path is either of form "/abc/xyz" or "/abc/xyz/".
 }
 
+} partial class cookiejarᴛJar {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sameSiteˢ => ref sameSiteˢᵇ;
 private static readonly @string sameSiteˢᵇ = "SameSite"u8;
@@ -465,7 +476,7 @@ private static readonly @string sameSiteLaxˢᵇ = "SameSite=Lax"u8;
 // be valid to call e.id (which depends on e's Name, Domain and Path).
 //
 // A malformed c.Domain will result in an error.
-internal static (entry e, bool remove, error err) newEntry(this ref Jar j, ж<httpꓸCookie> Ꮡc, time.Time now, @string defPath, @string host) {
+internal static (entry e, bool remove, error err) newEntry(this ref Jar j, ж<http.Cookie> Ꮡc, time.Time now, @string defPath, @string host) {
     entry e = default;
     error err = default;
     ref var c = ref Ꮡc.DerefOrNull();
@@ -487,7 +498,7 @@ internal static (entry e, bool remove, error err) newEntry(this ref Jar j, ж<ht
     if (c.MaxAge < 0) {
         return (e, true, default);
     } else if (c.MaxAge > 0) {
-        e.Expires = now.Add(((time.Duration)(int64)c.MaxAge) * time.ΔSecond);
+        e.Expires = now.Add(((time.Duration)(int64)c.MaxAge) * time.Second);
         e.Persistent = true;
     } else {
         if (c.Expires.IsZero()) {
@@ -524,13 +535,17 @@ internal static (entry e, bool remove, error err) newEntry(this ref Jar j, ж<ht
     return (e, false, default);
 }
 
+} partial class cookiejar_package {
+
 internal static error errIllegalDomain = errors.New("cookiejar: illegal cookie domain attribute");
 internal static error errMalformedDomain = errors.New("cookiejar: malformed cookie domain attribute");
 
 // endOfTime is the time when session (non-persistent) cookies expire.
 // This instant is representable in most date/time formats (not just
 // Go's time.Time) and should be far enough in the future.
-internal static time.Time endOfTime = time.Date(9999, 12, 31, 23, 59, 59, 0, time.ΔUTC);
+internal static time.Time endOfTime = time.Date(9999, 12, 31, 23, 59, 59, 0, time.UTC);
+
+} partial class cookiejarᴛJar {
 
 // domainAndType determines the cookie's domain and hostOnly attribute.
 internal static (@string, bool, error) domainAndType(this ref Jar j, @string host, @string domain) {
@@ -621,4 +636,4 @@ internal static (@string, bool, error) domainAndType(this ref Jar j, @string hos
     return (domain, false, default);
 }
 
-} // end cookiejar_package
+} // end cookiejarᴛJar

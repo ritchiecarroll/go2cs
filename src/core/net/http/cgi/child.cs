@@ -18,6 +18,7 @@ using strconv = strconv_package;
 using strings = strings_package;
 using crypto;
 using go.net;
+using static cgi_package;
 
 partial class cgi_package {
 
@@ -94,8 +95,8 @@ public static (ж<http.Request>, error) RequestFromMap(map<@string, @string> @pa
     }
 
     r.Close = true;
-    r.Trailer = new httpꓸHeader(new map<@string, slice<@string>>{});
-    r.Header = new httpꓸHeader(new map<@string, slice<@string>>{});
+    r.Trailer = new http.Header(new map<@string, slice<@string>>{});
+    r.Header = new http.Header(new map<@string, slice<@string>>{});
 
     r.Host = @params[httpHostˢ];
 
@@ -135,7 +136,7 @@ public static (ж<http.Request>, error) RequestFromMap(map<@string, @string> @pa
     // https://web.archive.org/web/20170105004655/http://docstore.mik.ua/orelly/linux/cgi/ch03_02.htm#ch03-35636
     {
         @string s = @params[httpsˢ]; if (s == "on"u8 || s == "ON"u8 || s == "1"u8) {
-            r.TLS = Ꮡ(new tlsꓸConnectionState(HandshakeComplete: true));
+            r.TLS = Ꮡ(new tls.ConnectionState(HandshakeComplete: true));
         }
     }
 
@@ -175,7 +176,7 @@ public static (ж<http.Request>, error) RequestFromMap(map<@string, @string> @pa
 // request, if any. If there's no current CGI environment
 // an error is returned. The provided handler may be nil to use
 // [http.DefaultServeMux].
-public static error Serve(httpꓸHandler handler) {
+public static error Serve(http.Handler handler) {
     var (req, err) = Request();
     if (err != nil) {
         return err;
@@ -184,11 +185,11 @@ public static error Serve(httpꓸHandler handler) {
         req.Body = http.NoBody;
     }
     if (handler == nil) {
-        handler = new http.ServeMuxжΔHandler(http.DefaultServeMux);
+        handler = new http.ServeMuxжHandler(http.DefaultServeMux);
     }
     var rw = Ꮡ(new response(
         req: req,
-        header: new httpꓸHeader(0),
+        header: new http.Header(0),
         bufw: bufio.NewWriter(new os.FileжWriter(os.Stdout))
     ));
     handler.ServeHTTP(new responseжResponseWriter(rw), req);
@@ -201,18 +202,20 @@ public static error Serve(httpꓸHandler handler) {
 
 partial struct response {
     internal ж<http.Request> req;
-    internal httpꓸHeader header;
+    internal http.Header header;
     internal nint code;
     internal bool wroteHeader;
     internal bool wroteCGIHeader;
     internal ж<bufio.Writer> bufw;
 }
 
+} partial class cgiᴛresponse {
+
 internal static void Flush(this ref response r) {
     r.bufw.Flush();
 }
 
-internal static httpꓸHeader Header(this ref response r) {
+internal static http.Header Header(this ref response r) {
     return r.header;
 }
 
@@ -236,6 +239,10 @@ internal static void WriteHeader(this ref response r, nint code) {
     r.code = code;
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string contentTypeˢ2 => ref contentTypeˢ2ᵇ;
+private static readonly @string contentTypeˢ2ᵇ = "Content-Type"u8;
+
 // writeCGIHeader finalizes the header sent to the client and writes it to the output.
 // p is not written by writeHeader, but is the first chunk of the body
 // that will be written. It is sniffed for a Content-Type if none is
@@ -254,4 +261,4 @@ internal static void writeCGIHeader(this ref response r, slice<byte> p) {
     r.bufw.Flush();
 }
 
-} // end cgi_package
+} // end cgiᴛresponse

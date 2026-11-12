@@ -24,6 +24,7 @@ using global::go.go;
 using global::go.os;
 using path;
 using ꓸꓸꓸstring = Span<@string>;
+using static srcimporter_package;
 
 partial class srcimporter_package {
 
@@ -56,6 +57,8 @@ public static ж<Importer> New(ж<build.Context> Ꮡctxt, ж<token.FileSet> fset
 // for a package that is in the process of being imported.
 internal static readonly ж<types.Package> Ꮡimporting = new StaticBox<types.Package>(default(types.Package));
 internal static ref types.Package importing => ref ((StaticBox<types.Package>)Ꮡimporting).ValueSlot;
+
+} partial class srcimporterᴛImporter {
 
 // Import(path) is a shortcut for ImportFrom(path, ".", 0).
 public static (ж<types.Package>, error) Import(this ж<Importer> Ꮡp, @string path) {
@@ -134,7 +137,7 @@ public static (ж<types.Package>, error) ImportFrom(this ж<Importer> Ꮡp, @str
             IgnoreFuncBodies: true,
             // continue type-checking after the first error
             Error: (error errΔ2) => {
-                if (ᏑfirstHardErr.ValueSlot == nil && !errΔ2._<typesꓸError>().Soft) {
+                if (ᏑfirstHardErr.ValueSlot == nil && !errΔ2._<types.Error>().Soft) {
                     ᏑfirstHardErr.ValueSlot = errΔ2;
                 }
             },
@@ -320,6 +323,8 @@ internal static @string joinPath(this ref Importer p, params ꓸꓸꓸstring ele
     }
     return filepath.Join(elem.ꓸꓸꓸ);
 }
+
+} partial class srcimporter_package {
 
 //go:linkname setUsesCgo go/types.srcimporter_setUsesCgo
 /*linkname*/ internal static partial void setUsesCgo(ж<types.Config> conf) {

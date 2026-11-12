@@ -11,6 +11,7 @@ using slices = slices_package;
 using strings = strings_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
+using static types_package;
 
 partial class types_package {
 
@@ -32,6 +33,8 @@ partial struct _TypeSet {
     internal bool comparable;        // invariant: !comparable || terms.isAll()
 }
 
+} partial class typesᴛ_TypeSet {
+
 // IsEmpty reports whether s is the empty set.
 internal static bool IsEmpty(this ref _TypeSet s) { return s.terms.isEmpty(); }
 
@@ -42,12 +45,12 @@ internal static bool IsAll(this ref _TypeSet s) { return s.IsMethodSet() && len(
 internal static bool IsMethodSet(this ref _TypeSet s) { return !s.comparable && s.terms.isAll(); }
 
 // IsComparable reports whether each type in the set is comparable.
-internal static bool IsComparable(this ref _TypeSet s, map<ΔType, bool> seen) {
+internal static bool IsComparable(this ref _TypeSet s, map<Type, bool> seen) {
     if (s.terms.isAll()) {
         return s.comparable;
     }
     var seenʗ1 = seen;
-    return s.@is((ж<Δterm> t) => t != nil && comparableType(t.typ, false, seenʗ1) == nil);
+    return s.@is((ж<term> t) => t != nil && comparableType(t.typ, false, seenʗ1) == nil);
 }
 
 // NumMethods returns the number of methods available.
@@ -118,12 +121,12 @@ internal static bool subsetOf(this ref _TypeSet s1, ж<_TypeSet> Ꮡs2) {
 // all reports whether f(t, u) is true for each (type/underlying type) pairs in s.
 // If s has no specific terms, all calls f(nil, nil).
 // In any case, all is guaranteed to call f at least once.
-internal static bool all(this ref _TypeSet s, Func<ΔType, ΔType, bool> f) {
+internal static bool all(this ref _TypeSet s, Func<Type, Type, bool> f) {
     if (!s.hasTerms()) {
         return f(default, default);
     }
 
-    foreach (var (_, t) in range<ж<Δterm>>(s.terms)) {
+    foreach (var (_, t) in range<ж<term>>(s.terms)) {
         assert(t.typ != nil);
         // Unalias(x) == x.Underlying() for ~x terms
         var u = Unalias(t.typ);
@@ -143,11 +146,11 @@ internal static bool all(this ref _TypeSet s, Func<ΔType, ΔType, bool> f) {
 // is calls f with the specific type terms of s and reports whether
 // all calls to f returned true. If there are no specific terms, is
 // returns the result of f(nil).
-internal static bool @is(this ref _TypeSet s, Func<ж<Δterm>, bool> f) {
+internal static bool @is(this ref _TypeSet s, Func<ж<term>, bool> f) {
     if (!s.hasTerms()) {
         return f(nil);
     }
-    foreach (var (_, t) in range<ж<Δterm>>(s.terms)) {
+    foreach (var (_, t) in range<ж<term>>(s.terms)) {
         assert(t.typ != nil);
         if (!f(t)) {
             return false;
@@ -155,6 +158,8 @@ internal static bool @is(this ref _TypeSet s, Func<ж<Δterm>, bool> f) {
     }
     return true;
 }
+
+} partial class types_package {
 
 // topTypeSet may be used as type set for the empty interface.
 internal static readonly ж<_TypeSet> ᏑtopTypeSet = new StaticBox<_TypeSet>(default(_TypeSet));
@@ -166,7 +171,7 @@ internal static ref readonly @string typeSetForSˢ => ref typeSetForSˢᵇ;
 private static readonly @string typeSetForSˢᵇ = "-- type set for %s"u8;
 
 // computeInterfaceTypeSet may be called with check == nil.
-internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, tokenꓸPos pos, ж<Interface> Ꮡityp) {
+internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token.Pos pos, ж<Interface> Ꮡityp) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -238,9 +243,9 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
 
         ref var seen = ref heap<objset>(out var Ꮡseen);
         ref var allMethods = ref heap<slice<ж<Func>>>(out var ᏑallMethods);
-        var mpos = new map<ж<Func>, tokenꓸPos>(); // method specification or method embedding position, for good error messages
+        var mpos = new map<ж<Func>, token.Pos>(); // method specification or method embedding position, for good error messages
         var mposʗ1 = mpos;
-        void addMethod(tokenꓸPos posΔ1, ж<Func> m, bool @explicit) {
+        void addMethod(token.Pos posΔ1, ж<Func> m, bool @explicit) {
             {
                 var other = Ꮡseen.ValueSlot.insert(new FuncжObject(m));
                 switch (ᐧ) {
@@ -291,7 +296,7 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
         foreach (var (i, typ) in range(ityp.embeddeds)) {
             // The embedding position is nil for imported interfaces.
             // We don't need to do version checks in those cases.
-            tokenꓸPos posΔ2 = default; // embedding position
+            token.Pos posΔ2 = default; // embedding position
             if (ityp.embedPos != nil) {
                 posΔ2 = (ityp.embedPos.ValueSlot)[i];
             }
@@ -335,7 +340,7 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
                 if (posΔ2.IsValid() && Ꮡcheck != nil && !Ꮡcheck.verifyVersionf((atPos)posΔ2, go1_18, "embedding non-interface type %s", typ)) {
                     continue;
                 }
-                terms = new termlist(new ж<Δterm>[]{Ꮡ(new Δterm(false, typ))}.slice());
+                terms = new termlist(new ж<term>[]{Ꮡ(new term(false, typ))}.slice());
                 break;
             }}
 
@@ -372,7 +377,7 @@ internal static (termlist, bool) intersectTermLists(termlist xterms, bool xcomp,
     if (comp && !terms.isAll()) {
         // only keep comparable terms
         nint i = 0;
-        foreach (var (_, t) in range<ж<Δterm>>(terms)) {
+        foreach (var (_, t) in range<ж<term>>(terms)) {
             assert(t.typ != nil);
             if (comparableType(t.typ, false, /* strictly comparable */ default) == nil) {
                 terms[i] = t;
@@ -413,7 +418,7 @@ internal static ref _TypeSet invalidTypeSet => ref ((StaticBox<_TypeSet>)Ꮡinva
 
 // computeUnionTypeSet may be called with check == nil.
 // The result is &invalidTypeSet if the union overflows.
-internal static ж<_TypeSet> computeUnionTypeSet(ж<Checker> check, map<ж<Union>, ж<_TypeSet>> unionSets, tokenꓸPos pos, ж<Union> Ꮡutyp) {
+internal static ж<_TypeSet> computeUnionTypeSet(ж<Checker> check, map<ж<Union>, ж<_TypeSet>> unionSets, token.Pos pos, ж<Union> Ꮡutyp) {
     ref var utyp = ref Ꮡutyp.DerefOrNull();
 
     var (tset, _) = unionSets[Ꮡutyp, ꟷ]; if (tset != nil) {
@@ -441,7 +446,7 @@ internal static ж<_TypeSet> computeUnionTypeSet(ж<Checker> check, map<ж<Union
                 // The corresponding type set is empty.
                 t = default; // ∅ term
             }
-            terms = new termlist(new ж<Δterm>[]{t.Reinterpret<ΔTerm, Δterm>()}.slice());
+            terms = new termlist(new ж<term>[]{t.Reinterpret<Term, term>()}.slice());
         }
         // The type set of a union expression is the union
         // of the type sets of each term.

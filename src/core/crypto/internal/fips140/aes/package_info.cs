@@ -27,7 +27,6 @@ using static go.crypto.@internal.fips140.aes_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("BlockSize", "const:ΔBlockSize")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -62,14 +61,14 @@ using static go.crypto.@internal.fips140.aes_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140/aes/aes.go", "aes.cs", "AC1mksqCrMSuwsaUpqKUtLSkppSUgoKUgpSClKaUgoKUgpSClKyy")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/aes.go", "aes.cs", "ADFmkgAICoLMxK7CxpSmopS0tKTGlJSCgpSClIKUppSCgpSClIKUzLI=")]
 [assembly: GoPositionMap("crypto/internal/fips140/aes/aes_generic.go", "aes_generic.cs", "AClUkoKUgoKCgqaCgoKmgrKCgoKCgoK4goKClIKCgpSCgoKCqJKClIKCgoKmgoKCpoKygoKCgoKCuIKCgpSCgoKUgoKCgqiSroCYwpaSgoKUgoKCgoKU3IKCgoKCgpQ=")]
 [assembly: GoPositionMap("crypto/internal/fips140/aes/aes_noasm.go", "aes_noasm.cs", "AAwagoKmgqaCpg==")]
 [assembly: GoPositionMap("crypto/internal/fips140/aes/cast.go", "cast.cs", "AA0cgoK4uLi4goKUgoKClIKClA==", "15-46:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/aes/cbc.go", "cbc.cs", "ABIo0qaUooKUgpSClIKClKaCgpSmooKUgqaCgrgABxTSppSigpSClIKUgoKUpoKClKbYgoKmgpSClIKmpoKC")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/cbc.go", "cbc.cs", "ABQo0saUooKUgpSClIKClKaCgpTGooKUgqaCgrgABxTSxpSigpSClIKUgoKUpoKClMbYgoKmgpSClIKmpoKC")]
 [assembly: GoPositionMap("crypto/internal/fips140/aes/cbc_noasm.go", "cbc_noasm.cs", "AAgSgqaC")]
 [assembly: GoPositionMap("crypto/internal/fips140/aes/const.go", "const.cs", "ABImABMoABMoABQsACFEACFEACFEACRMACFEACFEACFE")]
-[assembly: GoPositionMap("crypto/internal/fips140/aes/ctr.go", "ctr.cs", "ABcquIKUgoKmAAcQopSCgoK8woKCgoIABBLigpSCgpSUlISigoKCgoKmgoKCgriCgoKClIKCgoKUgoKCgqaEooKCAAMSwoKCgoKCpoKmgoKC", "", "", "36=BEUint64/1/2/2,BEUint64/2/2/3")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/ctr.go", "ctr.cs", "ABgquIKUgoKmAAkQopSCgoLcwoKCgoIABhLigpSCgpSUlISigoKCgoKmgoKCgriCgoKClIKCgoKUgoKCgqaEooKCAAUSwoKCgoKCpoKmgoKC", "", "", "37=BEUint64/1/2/2,BEUint64/2/2/3")]
 [assembly: GoPositionMap("crypto/internal/fips140/aes/ctr_noasm.go", "ctr_noasm.cs", "AAgSsqayprKmsg==")]
 // </GoSourcePositionMaps>
 
@@ -110,3 +109,18 @@ public static partial class aes_package
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(aes_package.Block)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class aesᴛBlock;
+[GoMethodHost(typeof(aes_package.CBCDecrypter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class aesᴛCBCDecrypter;
+[GoMethodHost(typeof(aes_package.CBCEncrypter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class aesᴛCBCEncrypter;
+[GoMethodHost(typeof(aes_package.CTR)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class aesᴛCTR;
+[GoMethodHost(typeof(aes_package.KeySizeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class aesᴛKeySizeError;
+[GoMethodHost(typeof(aes_package.blockExpanded)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class aesᴛblockExpanded;
+// </MethodHolders>

@@ -68,14 +68,14 @@ using static go.runtime.pprof_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("runtime/pprof/elf.go", "elf.cs", "AA0egprCgoKClKSCuIKmgpSktLaCkpSkgoKClLSCgoKUtoKClIKUkpSCpoKUgoKClIKCgoKCgpSClIKUpg==", "", "", "", "28:21")]
-[assembly: GoPositionMap("runtime/pprof/label.go", "label.cs", "ABgugoKClAAJGNKClJSCpoKqooKmgoKCgqaCkoKClIK0grSCgtqClAACEgAIAoKUgoKCgpSUhoKCgpSmlKqigoKCpqqigoKC", "111-113:1")]
-[assembly: GoPositionMap("runtime/pprof/map.go", "map.cs", "ABw4lIKCgpSClpKCgoKUgoK4goKClNiClIKCgpSCpoKUgpSClIKCgpSClA==")]
+[assembly: GoPositionMap("runtime/pprof/label.go", "label.cs", "ABkugoKClAALGNKClJSCpoLKooKmgoKCgqaCkoKClIK0grSCgtqClAACEgAIAoKUgoKCgpSUhoKCgpSmlKqigoKCpqqigoKC", "111-113:1")]
+[assembly: GoPositionMap("runtime/pprof/map.go", "map.cs", "AB84lIKCgpSClpKCgoKUgoK4goKClNiClIKCgpSCpoKUgpSClIKCgpSClA==")]
 [assembly: GoPositionMap("runtime/pprof/pe.go", "pe.cs", "AAwawoKClA==")]
-[assembly: GoPositionMap("runtime/pprof/pprof.go", "pprof.cs", "AMAB+ALs7Ozs7OwAIz6CgpQABxCCyoIAAhIACAKCgoKUgpS4gtiygoLYsoKUgoSmhtiSqOKCgoKUAAUoABYCgpSCpoKCgpSmgoKClKKo8oKCogACIgARAoKUgriCgoKUppTKgoIACx6ygoKCpoKCgqYACA7UgoKCgpSUgoKCgoKmgoKU6qSSgoKCgpSCgpSUgoKCgoKCgoKUppSUgoKCgpS4goKClIKCgqaCgoKCkoK4lAAIEoKCgpKSgpQACAqigoKCgoKCgoKmgpSCpqaClK7CqJKCqJLqoqaCgqaCAAIU8oK4goKCgsqCppiCgpSCgoKCgoLcAAcQgoKCpsqCgqaClILKgoKCgoKCgpSCgoKCgpSCgoKCgpSCgoKCgoKCppSCqJKC6MiCupLokoKUqgAKDoK4uIK41riCgoKCgpSUlJSCpo7igpS4goKCgoLKAAcQgoIACSYADRQACgSCgoKmgpSCgoIABRAACQSCgoKClJSCgpSCpqaUgqzSgpSClIKCoqaSgqiSguiS6JIACAiSgoKCgoKCgriYgqaCgpSCgoKUgoKCgoKCgpSCgriClKjWpsbW1tbWxg==", "318-320:1;494-505:1;548-552:2;666-668:1;769-771:1;997-999:1", "", "775=InUseObjects/1/1/1;782=InUseObjects/1/1/1,InUseBytes/1/1/1")]
+[assembly: GoPositionMap("runtime/pprof/pprof.go", "pprof.cs", "AMEB+ALs7Ozs7OwAIz6CgpQABxCCyoIAAhIACAKCgoKUgpS4gtiygoLYsoKUgoSmhviSqOKCgoKUAAUoABYCgpSCpoKCgpSmgoKClKKo8oKCogACIgARAoKUgriCgoKUppQACAqCggANHrKCgoKmgoKCpgAIDtSCgoKClJSCgoKCgqaCgpTqpJKCgoKClIKClJSCgoKCgoKCgpSmlJSCgoKClLiCgoKUgoKCpoKCgoKSgriUAAoSgoKCkpKClAAKCqKCgoKCgoKCgqaClIKmpoKUrsKokoKokuqipoKCpoIAAhTygriCgoKCyoKmmIKClIKCgoKCgtwABxCCgoKmyoKCpoKUgsqCgoKCgoKClIKCgoKClIKCgoKClIKCgoKCgoKmlIKokoLoyIK6kuiSgpSqAAoOgri4grjWuIKCgoKClJSUlIKmjuKClLiCgoKCgsoACRCCggALJgANFAAKBIKCgqaClIKCggAFEAAJBIKCgoKUlIKClIKmppSCrNKClIKUgoKippKCqJKC6JLokgAICJKCgoKCgoKCuJiCpoKClIKCgpSCgoKCgoKClIKCuIKUqNamxtbW1tbG", "318-320:1;494-505:1;548-552:2;666-668:1;769-771:1;997-999:1", "", "788=InUseObjects/1/1/1;795=InUseObjects/1/1/1,InUseBytes/1/1/1")]
 [assembly: GoPositionMap("runtime/pprof/pprof_rusage.go", "pprof_rusage.cs", "AA0ikoKktLS0toKCgg==")]
-[assembly: GoPositionMap("runtime/pprof/proto.go", "proto.cs", "ABQuoABl3AGigoKCgpSmgoKCgrqSgoKCqJKCgoKClIKokoKCgoKokoKCgqiSgoKCgoKC7oKUpsqCgqamgoKmppSCgoKUAA8swoIACBKCrsKUgpSCuIKCpgARJIKClIKUgpSCgoKClJSC7qaClAAICLKUgoKCgoKCpoKUkoKUgoKSgsqUpoKC3IKCgpQAAhgACwKmgpSCgoAACxiCgoLKgrjugpSCtoKCgpSCpoCCgtqAgsiAgoKUgraAgqQAOHSCgoKCgqyypoKCgpSCpoKUgqaCgoKCgpQACw4ACQKClJSCip6C7oKCgsSCgoKCgu6UgoKUgoKCpqaCgoKCgoKCpoLWgtQAFSymgoKCgqaCgoKCgpSCgpSCgpSClJSCgpSCgoKUpoKCgqbKAAoWgriCpoI=", "369-373:1;690-695:1", "", "254=Now/1/1/3;324=FuncPCABIInternal/1/1/4;648=runtime_FrameStartLine/1/1/4")]
-[assembly: GoPositionMap("runtime/pprof/proto_other.go", "proto_other.cs", "ABE4gg==")]
-[assembly: GoPositionMap("runtime/pprof/protobuf.go", "protobuf.cs", "AA4cgoKClKaCgqaUgqaClIKClIKCgoKCgpSCuIKClKaCgqaCgpSmgpSCgpSCgoKCgoKUgriCgqaCgriCgpSmgoKUuIKClMqCgqaCgoKCgoKCgg==")]
+[assembly: GoPositionMap("runtime/pprof/proto.go", "proto.cs", "ABUuoABn3AGigoKCgpSmgoKCgrqSgoKCqJKCgoKClIKokoKCgoKokoKCgqiSgoKCgoKC7oKUxsqCgqamgoKmppSCgoKUAA8swoIACBKCzsKUgpSCuIKCpgARJIKClIKUgpSCgoKClJSC7qaClAAMCLKUgoKCgoKCpoKUkoKUgoKSgsqUpoKC3IKCgpQAAhgACwKmgpSCgoAACxiCgoLKgrjugpSCtoKCgpSCpoCCgtqAgsiAgoKUgraAgqQAPHSCgoKCgqyypoKCgpSCpoKUgqaCgoKCgpQADw4ACQKClJSCip6C7oKCgsSCgoKCgu6UgoKUgoKCpqaCgoKCgoKCpoL2gtQAFSymgoKCgqaCgoKCgpSCgpSCgpSClJSCgpSCgoKUpoKCgqbKAAoWgtiCpoI=", "369-373:1;690-695:1", "", "259=Now/1/1/3;331=FuncPCABIInternal/1/1/4;667=runtime_FrameStartLine/1/1/4")]
+[assembly: GoPositionMap("runtime/pprof/proto_other.go", "proto_other.cs", "ABY4gg==")]
+[assembly: GoPositionMap("runtime/pprof/protobuf.go", "protobuf.cs", "ABIcgoKClKaCgqaUgqaClIKClIKCgoKCgpSCuIKClKaCgqaCgpSmgpSCgpSCgoKCgoKUgriCgqaCgriCgpSmgoKUuIKClAAICoKCpoKCgoKCgoKC")]
 [assembly: GoPositionMap("runtime/pprof/protomem.go", "protomem.cs", "ABogkoKCgoKCgoKCpoKCooKCuIKCgqaCpoKClKaCgoKClJKCuAACGAAJAoKmpqaClA==", "60-64:1")]
 [assembly: GoPositionMap("runtime/pprof/runtime.go", "runtime.cs", "AAsgysampqbGyrKCAAIUAAkCgoKCog==")]
 // </GoSourcePositionMaps>
@@ -143,3 +143,21 @@ public static partial class pprof_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(pprof_package.Profile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pprofᴛProfile;
+[GoMethodHost(typeof(pprof_package.keysByCount)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pprofᴛkeysByCount;
+[GoMethodHost(typeof(pprof_package.labelMap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pprofᴛlabelMap;
+[GoMethodHost(typeof(pprof_package.pcDeck)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pprofᴛpcDeck;
+[GoMethodHost(typeof(pprof_package.profMap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pprofᴛprofMap;
+[GoMethodHost(typeof(pprof_package.profileBuilder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pprofᴛprofileBuilder;
+[GoMethodHost(typeof(pprof_package.protobuf)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pprofᴛprotobuf;
+[GoMethodHost(typeof(pprof_package.runtimeProfile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pprofᴛruntimeProfile;
+[GoMethodHost(typeof(pprof_package.stackProfile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pprofᴛstackProfile;
+// </MethodHolders>

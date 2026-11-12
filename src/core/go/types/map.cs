@@ -5,25 +5,29 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
+using static types_package;
+
 partial class types_package {
 
 // A Map represents a map type.
 partial struct Map {
-    internal ΔType key, elem;
+    internal Type key, elem;
 }
 
 // NewMap returns a new map for the given key and element types.
-public static ж<Map> NewMap(ΔType key, ΔType elem) {
+public static ж<Map> NewMap(Type key, Type elem) {
     return Ꮡ(new Map(key: key, elem: elem));
 }
 
+} partial class typesᴛMap {
+
 // Key returns the key type of map m.
-public static ΔType Key(this ref Map m) { return m.key; }
+public static Type Key(this ref Map m) { return m.key; }
 
 // Elem returns the element type of map m.
-public static ΔType Elem(this ref Map m) { return m.elem; }
+public static Type Elem(this ref Map m) { return m.elem; }
 
-public static ΔType Underlying(this ж<Map> Ꮡt) { return new MapжΔType(Ꮡt); }
-public static @string String(this ж<Map> Ꮡt) { return TypeString(new MapжΔType(Ꮡt), default); }
+public static Type Underlying(this ж<Map> Ꮡt) { return new MapжType(Ꮡt); }
+public static @string String(this ж<Map> Ꮡt) { return TypeString(new MapжType(Ꮡt), default); }
 
-} // end types_package
+} // end typesᴛMap

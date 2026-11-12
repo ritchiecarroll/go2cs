@@ -12,6 +12,7 @@ using Δsyscall = syscall_package;
 using go.@internal;
 using go.@internal.syscall;
 using go.sync;
+using static poll_package;
 
 partial class poll_package {
 
@@ -39,6 +40,8 @@ partial struct FD {
     // Whether this is a file rather than a network socket.
     internal bool isFile;
 }
+
+} partial class pollᴛFD {
 
 // Init initializes the FD. The Sysfd field should already be set.
 // This can be called multiple times on a single FD.
@@ -137,12 +140,16 @@ public static error SetBlocking(this ж<FD> Ꮡfd) {
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
+} partial class poll_package {
+
 // Darwin and FreeBSD can't read or write 2GB+ files at a time,
 // even on 64-bit systems.
 // The same is true of socket implementations on many systems.
 // See golang.org/issue/7812 and golang.org/issue/16266.
 // Use 1GB instead of, say, 2GB-1, to keep subsequent reads aligned.
 internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
+
+} partial class pollᴛFD {
 
 // Read implements io.Reader.
 public static (nint, error) Read(this ж<FD> Ꮡfd, slice<byte> p) {
@@ -857,6 +864,8 @@ public static error Fstat(this ж<FD> Ꮡfd, ж<Δsyscall.Stat_t> s) {
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
+} partial class poll_package {
+
 // dupCloexecUnsupported indicates whether F_DUPFD_CLOEXEC is supported by the kernel.
 internal static readonly ж<atomic.Bool> ᏑdupCloexecUnsupported = new StaticBox<atomic.Bool>(default(atomic.Bool));
 internal static ref atomic.Bool dupCloexecUnsupported => ref ((StaticBox<atomic.Bool>)ᏑdupCloexecUnsupported).ValueSlot;
@@ -886,6 +895,8 @@ public static (nint, @string, error) DupCloseOnExec(nint fd) {
     }
     return dupCloseOnExecOld(fd);
 }
+
+} partial class pollᴛFD {
 
 // Dup duplicates the file descriptor.
 public static (nint, @string, error) Dup(this ж<FD> Ꮡfd) {
@@ -989,6 +1000,8 @@ public static error RawWrite(this ж<FD> Ꮡfd, Func<uintptr, bool> f) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.writeUnlock(); ᒐ.Run(); }
 }
+
+} partial class poll_package {
 
 // ignoringEINTRIO is like ignoringEINTR, but just for IO calls.
 internal static (nint, error) ignoringEINTRIO(Func<nint, slice<byte>, (nint, error)> fn, nint fd, slice<byte> p) {

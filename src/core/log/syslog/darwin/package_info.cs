@@ -62,7 +62,7 @@ using static go.log.syslog_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("log/syslog/syslog.go", "syslog.cs", "AGDWAcIABhQACQKCpoKUpAAHEIKkgoKUAAkKwpSCpoKCgqaCgoK4griosqjigpSCgoKU2qKCqqKCqqKCqqKCqqKCqqKCqqKCqqKCptKUgpSCgqaAgqTatIKCpoKCyqaCuIKmlIKmpoKuwoKClA==", "", "", "323=Getpid/1/1/2;329=Getpid/1/1/2")]
+[assembly: GoPositionMap("log/syslog/syslog.go", "syslog.cs", "AGHWAcIABhQACQKCpoKUpAAHEIKkgoKUAAsKwpSCpoKCgqaCgoK4griosqjigpSCgoKU2qKCqqKCqqKCqqKCqqKCqqKCqqKCqqKCptKUgpSCgqaAgqTatIKCpoKCysaCuIKmlIKmpoLOwoKClA==", "", "", "328=Getpid/1/1/2;334=Getpid/1/1/2")]
 [assembly: GoPositionMap("log/syslog/syslog_unix.go", "syslog_unix.cs", "ABAiooKCgoKCgrg=")]
 // </GoSourcePositionMaps>
 
@@ -101,3 +101,14 @@ public static partial class syslog_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(syslog_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syslogᴛWriter;
+[GoMethodHost(typeof(syslog_package.netConn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syslogᴛnetConn;
+// </MethodHolders>

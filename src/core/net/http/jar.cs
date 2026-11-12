@@ -18,11 +18,11 @@ partial interface CookieJar {
     // SetCookies handles the receipt of the cookies in a reply for the
     // given URL.  It may or may not choose to save the cookies, depending
     // on the jar's policy and implementation.
-    void SetCookies(ж<url.URL> u, slice<ж<ΔCookie>> cookies);
+    void SetCookies(ж<url.URL> u, slice<ж<Cookie>> cookies);
     // Cookies returns the cookies to send in a request for the given URL.
     // It is up to the implementation to honor the standard cookie use
     // restrictions such as in RFC 6265.
-    slice<ж<ΔCookie>> Cookies(ж<url.URL> u);
+    slice<ж<Cookie>> Cookies(ж<url.URL> u);
 }
 
 } // end http_package

@@ -25,6 +25,7 @@ using norm = go.vendor.golang.org.x.text.unicode.norm_package;
 using go.vendor.golang.org.x.text.secure;
 using go.vendor.golang.org.x.text.unicode;
 using unicode;
+using static idna_package;
 
 partial class idna_package {
 
@@ -232,6 +233,8 @@ public static ж<Profile> New(params Span<Action<ж<options>>> oʗp) {
     return p;
 }
 
+} partial class idnaᴛProfile {
+
 // ToASCII converts a domain or domain label to its ASCII form. For example,
 // ToASCII("bücher.example.com") is "xn--bcher-kva.example.com", and
 // ToASCII("golang") is "golang". If an error is encountered it will return
@@ -280,6 +283,8 @@ public static @string String(this ref Profile p) {
     return s;
 }
 
+} partial class idna_package {
+
 // Punycode is a Profile that does raw punycode processing with a minimum
 // of validation.
 public static ж<Profile> Punycode;
@@ -288,7 +293,7 @@ internal static void initᴛPunycode() { Punycode = punycode; }
 // Lookup is the recommended profile for looking up domain names, according
 // to Section 5 of RFC 5891. The exact configuration of this profile may
 // change over time.
-[GoLazy] partial class lazyᴛLookup { public static ж<Profile> Lookup = Δlookup; }
+[GoLazy] partial class lazyᴛLookup { public static ж<Profile> Lookup = lookup; }
 
 // Display is the recommended profile for displaying domain names.
 // The configuration of this profile may change over time.
@@ -299,7 +304,7 @@ internal static void initᴛPunycode() { Punycode = punycode; }
 [GoLazy] partial class lazyᴛRegistration { public static ж<Profile> Registration = registration; }
 
 internal static ж<Profile> punycode = Ꮡ(new Profile());
-[GoLazy] partial class lazyᴛΔlookup { internal static ж<Profile> Δlookup = Ꮡ(new Profile(new options(
+[GoLazy] partial class lazyᴛlookup { internal static ж<Profile> lookup = Ꮡ(new Profile(new options(
     transitional: transitionalLookup,
     useSTD3Rules: true,
     checkHyphens: true,
@@ -339,17 +344,25 @@ partial struct labelError {
     internal @string label, code_;
 }
 
+} partial class idnaᴛlabelError {
+
 internal static @string code(this labelError e) { return e.code_; }
 internal static @string Error(this labelError e) {
     return fmt.Sprintf("idna: invalid label %q"u8, e.label);
 }
 
+} partial class idna_package {
+
 partial struct runeError /*num:rune*/;
+
+} partial class idnaᴛruneError {
 
 internal static @string code(this runeError e) { return "P1"; }
 internal static @string Error(this runeError e) {
     return fmt.Sprintf("idna: disallowed rune %U"u8, e);
 }
+
+} partial class idnaᴛProfile {
 
 // process implements the algorithm described in section 4 of UTS #46,
 // see https://www.unicode.org/reports/tr46.
@@ -450,6 +463,8 @@ internal static (@string, error) process(this ж<Profile> Ꮡp, @string s, bool 
     return (s, err);
 }
 
+} partial class idna_package {
+
 internal static bool isASCII(@string s) {
     foreach (var (_, c) in range(slice<byte>(s))) {
         if (c >= 0x80) {
@@ -501,6 +516,8 @@ internal static (@string idem, bool bidi, error err) validateRegistration(ж<Pro
     return (s, bidi, default);
 }
 
+} partial class idnaᴛinfo {
+
 internal static bool isBidi(this info c, @string s) {
     if (!c.isMapped()) {
         return (info)(c & (uint16)attributesMask) == rtl;
@@ -514,6 +531,8 @@ internal static bool isBidi(this info c, @string s) {
     }}
     return false;
 }
+
+} partial class idna_package {
 
 internal static (@string vm, bool bidi, error err) validateAndMap(ж<Profile> Ꮡp, @string s) {
     bool bidi = default;
@@ -598,6 +617,8 @@ partial struct labelIter {
     internal nint i;
 }
 
+} partial class idnaᴛlabelIter {
+
 internal static void reset(this ref labelIter l) {
     l.curStart = 0;
     l.curEnd = 0;
@@ -649,11 +670,15 @@ internal static void set(this ref labelIter l, @string s) {
     l.Δslice[l.i] = s;
 }
 
+} partial class idna_package {
+
 // acePrefix is the ASCII Compatible Encoding prefix.
 internal static ref readonly @string acePrefix => ref acePrefixᵇ;
 private static readonly @string acePrefixᵇ = "xn--"u8;
 
-internal static Δcategory simplify(this ref Profile p, Δcategory cat) {
+} partial class idnaᴛProfile {
+
+internal static category simplify(this ref Profile p, category cat) {
     switch (cat) {
     case var ᴛ when ᴛ == disallowedSTD3Mapped: {
         if (p.useSTD3Rules) {
@@ -684,6 +709,8 @@ internal static Δcategory simplify(this ref Profile p, Δcategory cat) {
     }}
     return cat;
 }
+
+} partial class idna_package {
 
 internal static error validateFromPunycode(ж<Profile> Ꮡp, @string s) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -761,6 +788,8 @@ internal static joinState stateFAIL => 5;
         [joinVirama] = stateFAIL}.array(8)
 }.slice(), 8); }
 
+} partial class idnaᴛProfile {
+
 // validateLabel validates the criteria from Section 4.1. Item 1, 4, and 6 are
 // already implicitly satisfied by the overall implementation.
 internal static error /*err*/ validateLabel(this ref Profile p, @string s) {
@@ -815,6 +844,8 @@ internal static error /*err*/ validateLabel(this ref Profile p, @string s) {
     }
     return default;
 }
+
+} partial class idna_package {
 
 internal static bool ascii(@string s) {
     for (nint i = 0; i < len(s); i++) {

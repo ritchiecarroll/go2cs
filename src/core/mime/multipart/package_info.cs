@@ -78,10 +78,10 @@ using static go.mime.multipart_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("mime/multipart/formdata.go", "formdata.cs", "ABQoAAEYAAoCqIIACgbigpiCgoKmgoKCgqaUkoKCpoKCgriCgoIAESSClIKClIKClIKCgoKUgpSClJSCgpSasoKCpqaUlIKClIKClIKokoKCgoKUgpS4goKUgoKCgqaCgpSCloSClIKCgoKCgpSmgoKClKbmooKCgoKCpgAMHJKCgoKCgoLKAA0gkoKClIKCgpSClAAVKIKClA==", "62-81:1", "", "", "", "75:21,76:13")]
-[assembly: GoPositionMap("mime/multipart/multipart.go", "multipart.cs", "AC9YAB1AxoKUgpTssoKUgoK45oKCgoKCAAMU4oIAEiaigpSCAAoGgriClKaCgoKCpqaCgoKCpoKUqqIACBKCgriCgoKUgoLcgpSCgpSCgoKClAACGgAKApSClKSkpoLKgpSkpKaC7oKClAACHgAMAoKClJSUgriCgpSUlIK4poKCABc0lIKCgoKmAAIS4gACENKmooKUgpSCgpTclIKmgoKCgpSCppSmgqaU7oKCpr6ygpSCgqbugpSCyoKClK7CgpQ=", "", "", "133=NewReaderSize/1/1/1")]
+[assembly: GoPositionMap("mime/multipart/formdata.go", "formdata.cs", "ABUoAAMYAAoCyIIADAbigpiCgoKmgoKCgqaUkoKCpoKCgriCgoIAESSClIKClIKClIKCgoKUgpSClJSCgpSasoKCpqaUlIKClIKClIKokoKCgoKUgpS4goKUgoKCgqaCgpSCloSClIKCgoKCgpSmgoKClKYACAaigoKCgoKmAA4ckoKCgoKCgsoAESCSgoKUgoKClIKUABkogoKU", "62-81:1", "", "", "", "82:21,83:13")]
+[assembly: GoPositionMap("mime/multipart/multipart.go", "multipart.cs", "ADBYAB9AxoKUgpTssoKUgoK45oKCgoKCAAUU4oIAFCaigpSCAAwGgriClKaCgoKCpsaCgoKCpoKUqqIADBKCgriCgoKUgoLcgpSCgpSCgoKClAAEGgAKApSClKSkpoLKgpSkpKaC7oKClAACHgAMAoKClJSUgriCgpSUlIK4xoKCABk0lIKCgoKmAAQS4gACENKmooKUgpSCgpTclIKmgoKCgpSCppSmgqaU7oKCpr6ygpSCgqbugpSCyoKClM7CgpQ=", "", "", "138=NewReaderSize/1/1/1")]
 [assembly: GoPositionMap("mime/multipart/readmimeheader.go", "readmimeheader.cs", "AAse")]
-[assembly: GoPositionMap("mime/multipart/writer.go", "writer.cs", "ABs4ot6SAAoS4oKmgpSCgoKUlLSCtpSCqqKmgpSmgoKCgpSu4oKCpoKClKaCgqaCgoKUpoKmAAEcAAwCAAgKooKCgqqigpSqorqSgoKUgqqigoKUlIIACBKCguaygpSCgpQ=", "", "", "31=randomBoundary/1/1/2;180=escapeQuotes/1/1/1,Sprintf/1/1/1;188=escapeQuotes/1/2/1,escapeQuotes/2/2/1")]
+[assembly: GoPositionMap("mime/multipart/writer.go", "writer.cs", "ABw4ov6SAAoS4oKmgpSCgoKUlLSCtpSCqqKmgpTGgoKCgpTO4oKCpoKClKaCgqaCgoKUpoLGAAEcAAwCAAwKooKCgqqigpTKotqSgoKUgqqigoKUlIIADBKCguaygpSCgpQ=", "", "", "32=randomBoundary/1/1/2;193=escapeQuotes/1/1/1,Sprintf/1/1/1;203=escapeQuotes/1/2/1,escapeQuotes/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go.mime;
@@ -135,3 +135,21 @@ public static partial class multipart_package
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(multipart_package.FileHeader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛFileHeader;
+[GoMethodHost(typeof(multipart_package.Form)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛForm;
+[GoMethodHost(typeof(multipart_package.Part)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛPart;
+[GoMethodHost(typeof(multipart_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛReader;
+[GoMethodHost(typeof(multipart_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛWriter;
+[GoMethodHost(typeof(multipart_package.part)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛpart;
+[GoMethodHost(typeof(multipart_package.partReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛpartReader;
+[GoMethodHost(typeof(multipart_package.sectionReadCloser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛsectionReadCloser;
+[GoMethodHost(typeof(multipart_package.stickyErrorReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛstickyErrorReader;
+// </MethodHolders>

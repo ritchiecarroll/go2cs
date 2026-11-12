@@ -13,6 +13,7 @@ using slices = slices_package;
 using time = time_package;
 using @internal;
 using go.io;
+using static os_package;
 
 partial class os_package {
 
@@ -88,6 +89,8 @@ public static (ж<Root>, error) OpenRoot(@string name) {
     testlog.Open(name);
     return openRootNolog(name);
 }
+
+} partial class osᴛRoot {
 
 // Name returns the name of the directory presented to OpenRoot.
 //
@@ -312,6 +315,8 @@ internal static void logStat(this ref Root r, @string name) {
     }
 }
 
+} partial class os_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string emptyPathˢ => ref emptyPathˢᵇ;
 private static readonly @string emptyPathˢᵇ = "empty path"u8;
@@ -383,6 +388,8 @@ internal static (slice<@string>, bool endsInSlash, error err) splitPathInRoot(@s
     return (parts, endsInSlash, default);
 }
 
+} partial class osᴛRoot {
+
 // FS returns a file system (an fs.FS) for the tree of files in the root.
 //
 // The result implements [io/fs.StatFS], [io/fs.ReadFileFS],
@@ -391,7 +398,11 @@ public static fs.FS FS(this ж<Root> Ꮡr) {
     return new rootFSжFS(Ꮡr.Reinterpret<Root, rootFS>());
 }
 
+} partial class os_package {
+
 partial struct rootFS /*Root*/;
+
+} partial class osᴛrootFS {
 
 internal static (fs.File, error) Open(this ж<rootFS> Ꮡrfs, @string name) {
     var r = Ꮡrfs.Reinterpret<rootFS, Root>();
@@ -475,6 +486,8 @@ internal static (FileInfo, error) Lstat(this ж<rootFS> Ꮡrfs, @string name) {
     }
     return r.Lstat(name);
 }
+
+} partial class os_package {
 
 // isValidRootFSPath reports whether name is a valid filename to pass a Root.FS method.
 internal static bool isValidRootFSPath(@string name) {

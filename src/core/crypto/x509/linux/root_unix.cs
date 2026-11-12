@@ -10,6 +10,7 @@ using filepath = path.filepath_package;
 using strings = strings_package;
 using go.io;
 using path;
+using static x509_package;
 
 partial class x509_package {
 
@@ -25,9 +26,13 @@ private static readonly @string certFileEnvᵇ = "SSL_CERT_FILE"u8;
 internal static ref readonly @string certDirEnv => ref certDirEnvᵇ;
 private static readonly @string certDirEnvᵇ = "SSL_CERT_DIR"u8;
 
+} partial class x509ᴛCertificate {
+
 internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(this ref Certificate c, ж<VerifyOptions> opts) {
     return (default, default);
 }
+
+} partial class x509_package {
 
 internal static (ж<CertPool>, error) loadSystemRoots() {
     var roots = NewCertPool();

@@ -28,7 +28,6 @@ using static go.os.exec_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b696e20737472696e673b206f757420737472696e677d", "Cmd_cachedLookExtensions")]
-[assembly: GoTypeAlias("Error", "ΔError")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -38,6 +37,7 @@ using static go.os.exec_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Error, error>(Pointer = true)]
 [assembly: GoImplement<ExitError, error>(Pointer = true)]
 [assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.Closer>(Pointer = true)]
@@ -46,7 +46,6 @@ using static go.os.exec_package;
 [assembly: GoImplement<os_package.File, io_package.WriteCloser>(Pointer = true)]
 [assembly: GoImplement<prefixSuffixSaver, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<wrappedError, error>]
-[assembly: GoImplement<ΔError, error>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -74,7 +73,7 @@ using static go.os.exec_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("os/exec/exec.go", "exec.cs", "AHzuAYKmygAHEIKmggDaAdwDggAHMAAYAsqAgqaCgoKCgpSmgpSmgoKCgpSCgoKU2oKCuJSClAAIEoKUpgACGAALAoKUgoKWrsKUpoKCgoKUqsKClNaCgpSmooKCgpSCpoCCtoKCpoKCkoKClIKUlKaCpoKClK7CgoKClIKmgIK2goKmgoKSgoKUpoKCAAMiAA0CgpQADxIADQiCpoKCgpSCgoK4gpSCgpSUgoK4AAEgAA4CgoK4gpSCpOqCgoKUgoKClIKCgpSClIKCptyClKaCgoSKgoKilIKClIKClLgACBKCgoKmAAUU8rTYgoK4gsrcgoKmgtjYgsqCgtyCyIIADRimgoLspgASKIIACCgAEwKClIKmgoKUlIKCgriCuLiUgpQAAhQADAKCgpSmgqaCgqa2/Ka0poKmAAsS8oKUgpSCgqaCgoKm6sKClIKUgoKCggAIEuKClIKUgoKUgoKCAAYWAAgCgpSClIKClIKCggAGFgAIAoKUgpSCgpSCgoIADSjygqaCgpSmgoKCgoKCpqrCgoKClAAIBoKClIKUgoKCgoKCgoKsspSCgoKCuIIADxqCgoLsgoKUqrSCAAIQ0uy2ooKCgriCgqaCuJSCuJSUgoKUgqaCuIKCpuyygpSCgoKUlKYACRSYoqSU", "430-443:1;490-492:1;518-520:1;552-561:1;601-605:1;650-659:1;756-769:2;968-973:1", "", "", "", "518:21,519:13,678:21,679:13,1023:21,1024:13")]
+[assembly: GoPositionMap("os/exec/exec.go", "exec.cs", "AH/uAYKm6gAJEIKmggDcAdwDggAHMAAYAsqAgqaCgoKCgpSmgpSmgoKCgpSCgoKU2oKCuJSClAAIEoKUpgACGAALAoKUgoKWzsKUpoKCgoKUysKClPaCgpSmooKCgpSCpoCCtoKCpoKCkoKClIKUlKaCpoKClK7CgoKClIKmgIK2goKmgoKSgoKUxoKCAAUiAA0CgpQAExIADQiCpoKCgpSCgoK4gpSCgpSUgoK4AAEgAA4CgoK4gpSCpOqCgoKUgoKClIKCgpSClIKCptyClKaCgoSKgoKilIKClIKClLgACBKCgoKmAAUU8rTYgoK4gsrcgoKmgtjYgsqCgtyCyIIADRimgoLspgAWKIIACigAEwKClIKmgoKUlIKCgriCuLiUgpQAAhQADAKCgpSmgqaCgqa2/Ka0poKmAAsS8oKUgpSCgqaCgoKm6sKClIKUgoKCggAIEuKClIKUgoKUgoKCAAYWAAgCgpSClIKClIKCggAGFgAIAoKUgpSCgpSCgoIAESjygqaCgpSmgoKCgoKCpqrCgoKClAAIBoKClIKUgoKCgoKCgoLMspSCgoKCuIIADxqCgoLsgoKUqrSCAAQQ0uy2ooKCgriCgqaCuJSCuJSUgoKUgqaCuIKCpuyygpSCgoKUlKYACRSYoqSU", "430-443:1;490-492:1;518-520:1;552-561:1;601-605:1;650-659:1;756-769:2;968-973:1", "", "", "", "531:21,532:13,701:21,702:13,1052:21,1053:13")]
 [assembly: GoPositionMap("os/exec/exec_windows.go", "exec_windows.cs", "AAscqLKC")]
 [assembly: GoPositionMap("os/exec/lookpath.go", "lookpath.cs", "AAc4ABUC")]
 [assembly: GoPositionMap("os/exec/lp_windows.go", "lp_windows.cs", "ABIglIKCgpSClKaCgoKUpoKClIKCyoKCpoKUpoKCpgACGAAJAoKmgpSCgoKUuIKUgpSClJSCgpSC5oKCgoKSgpSClKaU6JKCgoKUAAIYAAoIgoKCgpS4goKmpoIABxCCgoK4gsqClJSUuIKU")]
@@ -98,8 +97,8 @@ public static partial class exec_package
     internal partial struct wrappedError {}
     public partial struct Cmd {}
     public partial struct Cmd_cachedLookExtensions {}
+    public partial struct Error {}
     public partial struct ExitError {}
-    public partial struct ΔError {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -126,3 +125,17 @@ public static partial class exec_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(exec_package.Cmd)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class execᴛCmd;
+[GoMethodHost(typeof(exec_package.Error)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class execᴛError;
+[GoMethodHost(typeof(exec_package.ExitError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class execᴛExitError;
+[GoMethodHost(typeof(exec_package.prefixSuffixSaver)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class execᴛprefixSuffixSaver;
+[GoMethodHost(typeof(exec_package.wrappedError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class execᴛwrappedError;
+// </MethodHolders>

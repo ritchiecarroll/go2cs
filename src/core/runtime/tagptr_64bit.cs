@@ -8,6 +8,7 @@ using goarch = @internal.goarch_package;
 using goos = @internal.goos_package;
 using @unsafe = unsafe_package;
 using @internal;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -64,11 +65,13 @@ private static readonly @string taggedPointerPackˢᵇ = "taggedPointerPack"u8;
 internal static taggedPointer taggedPointerPack(@unsafe.Pointer ptr, uintptr tag) {
     var t = (taggedPointer)((uint64)(uintptr)ptr << (int)(tagBits - tagAlignBits) | (uint64)((uintptr)(tag & (uintptr)((1 << (int)(tagBits)) - 1))));
     if ((uintptr)t.pointer() != ptr || t.tag() != tag) {
-        print((@string)"runtime: taggedPointerPack invalid packing: ptr=", @unsafe.Pointer.OrTypedNil(ptr), (@string)" tag=", (Δhex)(uint64)tag, (@string)" packed=", (Δhex)(uint64)t, (@string)" -> ptr=", @unsafe.Pointer.OrTypedNil((uintptr)t.pointer()), (@string)" tag=", (Δhex)(uint64)t.tag(), (@string)"\n");
+        print((@string)"runtime: taggedPointerPack invalid packing: ptr=", @unsafe.Pointer.OrTypedNil(ptr), (@string)" tag=", (hex)(uint64)tag, (@string)" packed=", (hex)(uint64)t, (@string)" -> ptr=", @unsafe.Pointer.OrTypedNil((uintptr)t.pointer()), (@string)" tag=", (hex)(uint64)t.tag(), (@string)"\n");
         @throw(taggedPointerPackˢ);
     }
     return t;
 }
+
+} partial class runtimeᴛtaggedPointer {
 
 // Pointer returns the pointer from a taggedPointer.
 internal static @unsafe.Pointer pointer(this taggedPointer tp) {
@@ -88,4 +91,4 @@ internal static uintptr tag(this taggedPointer tp) {
     return (uintptr)((taggedPointer)(tp & (uint64)((1 << (int)(tagBits)) - 1)));
 }
 
-} // end runtime_package
+} // end runtimeᴛtaggedPointer

@@ -48,7 +48,7 @@ public static void Read(slice<byte> b) {
         if (ᏑfirstUse.CompareAndSwap(false, true)) {
             // First use of randomness. Start timer to warn about
             // being blocked on entropy not being available.
-            var t = time.AfterFunc(time.ΔMinute, warnBlocked);
+            var t = time.AfterFunc(time.Minute, warnBlocked);
             var tʗ1 = t;
             defer(() => tʗ1.Stop(), ref ᒐ);
         }

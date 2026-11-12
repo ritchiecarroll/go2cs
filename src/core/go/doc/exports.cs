@@ -7,6 +7,7 @@ namespace go.go;
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
 using global::go.go;
+using static doc_package;
 
 partial class doc_package {
 
@@ -103,6 +104,8 @@ internal static void removeAnonymousField(@string name, ref ast.InterfaceType it
     }
     ityp.Methods.List = list.slice(0, j);
 }
+
+} partial class docᴛreader {
 
 // filterFieldList removes unexported fields (field names) from the field list
 // in place and reports whether fields were removed. Anonymous fields are
@@ -281,10 +284,12 @@ internal static bool filterSpec(this ref reader r, ast.Spec spec) {
     return false;
 }
 
+} partial class doc_package {
+
 // copyConstType returns a copy of typ with position pos.
 // typ must be a valid constant type.
 // In practice, only (possibly qualified) identifiers are possible.
-internal static ast.Expr copyConstType(ast.Expr typ, tokenꓸPos pos) {
+internal static ast.Expr copyConstType(ast.Expr typ, token.Pos pos) {
     switch (typ.type()) {
     case ж<ast.Ident> typΔ1: {
         return new ast.IdentжExpr(Ꮡ(new ast.Ident(Name: typΔ1.Name, NamePos: pos)));
@@ -301,6 +306,8 @@ internal static ast.Expr copyConstType(ast.Expr typ, tokenꓸPos pos) {
     }}
     return default; // shouldn't happen, but be conservative and don't panic
 }
+
+} partial class docᴛreader {
 
 internal static slice<ast.Spec> filterSpecList(this ref reader r, slice<ast.Spec> list, token.Token tok) {
     if (tok == token.CONST) {
@@ -362,4 +369,4 @@ internal static void fileExports(this ref reader r, ж<ast.File> Ꮡsrc) {
     src.Decls = src.Decls.slice(0, j);
 }
 
-} // end doc_package
+} // end docᴛreader

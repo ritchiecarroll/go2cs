@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸSignal = go.os_package.ΔSignal;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;
@@ -41,7 +39,7 @@ using static go.@internal.testenv_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
-[assembly: GoImplement<syscall_package.ΔSignal, os_package.ΔSignal>]
+[assembly: GoImplement<syscall_package.Signal, os_package.Signal>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

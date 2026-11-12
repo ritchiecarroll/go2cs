@@ -27,7 +27,6 @@ using static go.@internal.xcoff_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Section", "ΔSection")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -37,10 +36,10 @@ using static go.@internal.xcoff_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Section, io_package.ReaderAt>(Promoted = true)]
 [assembly: GoImplement<nobitsSectionReader, io_package.ReaderAt>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.Closer>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.ReaderAt>(Pointer = true)]
-[assembly: GoImplement<ΔSection, io_package.ReaderAt>(Promoted = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -69,12 +68,12 @@ using static go.@internal.xcoff_package;
 [assembly: GoFieldAccess(typeof(Member))]
 [assembly: GoFieldAccess(typeof(Reloc32))]
 [assembly: GoFieldAccess(typeof(Reloc64))]
+[assembly: GoFieldAccess(typeof(Section))]
 [assembly: GoFieldAccess(typeof(SectionHeader32))]
 [assembly: GoFieldAccess(typeof(SectionHeader64))]
 [assembly: GoFieldAccess(typeof(SymEnt32))]
 [assembly: GoFieldAccess(typeof(SymEnt64))]
 [assembly: GoFieldAccess(typeof(Symbol))]
-[assembly: GoFieldAccess(typeof(ΔSection))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -84,8 +83,8 @@ using static go.@internal.xcoff_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/xcoff/ar.go", "ar.cs", "AEuYAaKCgpSCgoKUgqyygoKClKiShpaSgqaCpLSkpoKClIKmgoKmlKaCgrjKgqaCgqaClIKClKaCgpSCgpSUgoKCgrqSgpSCpoKUgpSCgrqssoKCpg==", "104-106:1")]
-[assembly: GoPositionMap("internal/xcoff/file.go", "file.cs", "AFmyAZKCgpSCgoKUgqyygoKClK7CgoKmqqKCgqaqooKUqJKClKiShJKAgqSCpoKmgIKkgoKCgoKUgoCCpIKCgoK0goCCpIKCgoK2griCgIKmkoCCpIKCgpS4gIKkgoKUgoKCgpSCgIKkgoKCgoKCtIKAgqSCgoKCgoKkgoKUgoKotoCCpIKCgpKClIKAgqSCgoKCgoKClIKCgtiCgIKkgoKCgoKCgraCpoKmgpSClKbcgpSCgIKktIKAgqTagoKmgoKUgoCCpIKCtIKAgqSCgqSCgoKAguyCgpSClIKClIKAgqSCgpSCgIKkgoKClIKUgsiCgIKkgoKCgoKUgsi4AAkKgqiSgoKClKiSgoKCgoKCgoKUpqamiLKCgoKCgoKUuIKq1ICCpIKCgpSCgIKkgoK0goCCpIKCyICCpIKAgraUgoKCgoKCgoKCgoKCgpSUpq7CgoKmgpSCgoKClIKClIKCgrSCgpSCgoLIgpSCgriCgriClIKCgoKClIKClIKUgoKUgoKCprSCgpSClIKClKSCgoKUpqyygoKUgg==")]
+[assembly: GoPositionMap("internal/xcoff/ar.go", "ar.cs", "AEyYAaKCgpSCgoKUgsyygoKClMiShpaSgqaCpLSkpoKClIKmgoKmlKaCgrjKgqaCgqaClIKClKaCgpSCgpSUgoKCgrqSgpSCpoKUgpSCgrrMsoKCpg==", "104-106:1")]
+[assembly: GoPositionMap("internal/xcoff/file.go", "file.cs", "AFqyAZKCgpSCgoKUgsyygoKClK7CgoKmqqKCgqbKooKUqJKClKiShJKAgqSCpoKmgIKkgoKCgoKUgoCCpIKCgoK0goCCpIKCgoK2griCgIKmkoCCpIKCgpS4gIKkgoKUgoKCgpSCgIKkgoKCgoKCtIKAgqSCgoKCgoKkgoKUgoKotoCCpIKCgpKClIKAgqSCgoKCgoKClIKCgtiCgIKkgoKCgoKCgraCpoKmgpSClKbcgpSCgIKktIKAgqTagoKmgoKUgoCCpIKCtIKAgqSCgqSCgoKAguyCgpSClIKClIKAgqSCgpSCgIKkgoKClIKUgsiCgIKkgoKCgoKUgsi4AAsKgsiSgoKClMiSgoKCgoKCgoKUpqamiLKCgoKCgoKUuIKq1ICCpIKCgpSCgIKkgoK0goCCpIKCyICCpIKAgraUgoKCgoKCgoKCgoKCgpSUpq7CgoKmgpSCgoKClIKClIKCgrSCgpSCgoLIgpSCgriCgriClIKCgoKClIKClIKUgoKUgoKCprSCgpSClIKClKSCgoKUpqyygoKUgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -127,13 +126,13 @@ public static partial class xcoff_package
     public partial struct Reloc {}
     public partial struct Reloc32 {}
     public partial struct Reloc64 {}
+    public partial struct Section {}
     public partial struct SectionHeader {}
     [GoValueClone("Sname")] public partial struct SectionHeader32 {}
     [GoValueClone("Sname")] public partial struct SectionHeader64 {}
     [GoValueClone("Nname")] public partial struct SymEnt32 {}
     public partial struct SymEnt64 {}
     public partial struct Symbol {}
-    public partial struct ΔSection {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -154,3 +153,16 @@ public static partial class xcoff_package
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(xcoff_package.Archive)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xcoffᴛArchive;
+[GoMethodHost(typeof(xcoff_package.File)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xcoffᴛFile;
+[GoMethodHost(typeof(xcoff_package.Section)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xcoffᴛSection;
+[GoMethodHost(typeof(xcoff_package.nobitsSectionReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xcoffᴛnobitsSectionReader;
+// </MethodHolders>

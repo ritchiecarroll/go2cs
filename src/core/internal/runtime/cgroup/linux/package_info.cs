@@ -57,8 +57,8 @@ using static go.@internal.runtime.cgroup_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/runtime/cgroup/cgroup.go", "cgroup.cs", "ADFwlIKClJSCgqamgoKCpoKUppSCgpSUgoKmgoKmrgAVJKaUgoLcgoKCgqYABxCCgqaClIKCpoKUgpSUpqaUyqbKlLiokoKClKaClIKmpgAIDgAoSpSCgu6CgoKmpoKCgpS4goKUgpSUpoKClIKmgoKClIKUgoKClLiCgpSClJSCpoKCpqaCxoLGguyCgpSCgriClJQACRTKgoKUgoKClIKUuKaCgoKUgpQABRCCAAIeAAwCkoK4lIKCgoKC7oKmgoKCgqaCpoKUgpSm")]
-[assembly: GoPositionMap("internal/runtime/cgroup/cgroup_linux.go", "cgroup_linux.cs", "AB0+gpSCtLQACAiCgoIAAxDClIKUgoKmlIKCgrimgoKCuKbKpIKCgrimyqSCzKKUgoKmlKaCgqa2pILKAAESAAgCgoKUgqaCqAABJAARAoKClIKmggACFgAIAoLKgoKmggACFgAIAoKCgoKCyoKCgqaCAAIaAAoCgpSCgoKCgqaCgoKUlA==")]
-[assembly: GoPositionMap("internal/runtime/cgroup/line_reader.go", "line_reader.cs", "AA4eggAcWAALAgAIKgAUEoKUgpSClIKU3LimgoKUlNymgqamuMqUlJTcAAQaAAgClKY=")]
+[assembly: GoPositionMap("internal/runtime/cgroup/cgroup_linux.go", "cgroup_linux.cs", "ACQ+gpSCtLQACgiCgoIAAxDClIKUgoKmlIKCgrimgoKCuKbKpIKCgrimyqSCzKKUgoKmlKaCgqa2pILKAAESAAgCgoKUgqaCqAABJAARAoKClIKmggACFgAIAoLKgoKmggACFgAIAoKCgoKCyoKCgqaCAAIaAAoCgpSCgoKCgqaCgoKUlA==")]
+[assembly: GoPositionMap("internal/runtime/cgroup/line_reader.go", "line_reader.cs", "ABEeggAeWAALAgAKKgAUEoKUgpSClIKU3LimgoKUlNymgqamuMqUlJTcAAQaAAgClKY=")]
 [assembly: GoPositionMap("internal/runtime/cgroup/runtime.go", "runtime.cs", "AAkc")]
 // </GoSourcePositionMaps>
 
@@ -91,3 +91,15 @@ public static partial class cgroup_package
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸstrconv() => builtin.initPackage(typeof(go.@internal.strconv_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(cgroup_package.CPU)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgroupᴛCPU;
+[GoMethodHost(typeof(cgroup_package.lineReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgroupᴛlineReader;
+[GoMethodHost(typeof(cgroup_package.stringError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgroupᴛstringError;
+// </MethodHolders>

@@ -41,7 +41,7 @@ public static bool PackageExports(ж<Package> pkg) {
     return filterPackage(ref (pkg).DerefOrNull(), new Func<@string, bool>(exportFilter), true);
 }
 
-// type ΔFilter is a methodless func type — rendered inline as its base delegate
+// type Filter is a methodless func type — rendered inline as its base delegate
 
 // ----------------------------------------------------------------------------
 // General filtering
@@ -379,8 +379,8 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
     nint ncomments = 0;
     nint ndecls = 0;
     var filenames = new slice<@string>(len(pkg.Files));
-    ref var minPos = ref heap(new tokenꓸPos(), out var ᏑminPos);
-    ref var maxPos = ref heap(new tokenꓸPos(), out var ᏑmaxPos);
+    ref var minPos = ref heap(new token.Pos(), out var ᏑminPos);
+    ref var maxPos = ref heap(new token.Pos(), out var ᏑmaxPos);
     nint i = 0;
     foreach (var (filename, f) in pkg.Files) {
         filenames[i] = filename;
@@ -404,7 +404,7 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
     // there should be only one file with a package comment; but it's
     // better to collect extra comments than drop them on the floor.
     ж<CommentGroup> doc = default;
-    ref var pos = ref heap(new tokenꓸPos(), out var Ꮡpos);
+    ref var pos = ref heap(new token.Pos(), out var Ꮡpos);
     if (ndocs > 0) {
         var list = new slice<ж<Comment>>(ndocs - 1); // -1: no separator before first group
         nint iΔ1 = 0;

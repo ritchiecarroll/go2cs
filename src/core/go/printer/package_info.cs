@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
 // </ImportedTypeAliases>
 
 using go;
@@ -116,9 +114,9 @@ using static go.go.printer_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("go/printer/comment.go", "comment.cs", "AA0exKKCgoKCAAkUlIKCgoKCgoKmgoKUgpSmpoKokpSCpoKCuKiSgoKCgoKClJTKgriS3AAKDPqCyoKClIKClIKCpqqigoKCgpSCuA==")]
-[assembly: GoPositionMap("go/printer/gobuild.go", "gobuild.cs", "AA0aooIACRSClIKCpoKCgriClJSC3IKCgqaCpoKCgoKUgpTqtoK4gpSCpoKCgoKCgoKUgoKCuKaClpKCgoKUgpSCgqaCggACENKUlKaCgoKUgpSmgoKUgoKUpoI=", "", "", "145=isNL/2/3/1,isNL/3/3/1")]
-[assembly: GoPositionMap("go/printer/nodes.go", "nodes.cs", "ABVcABsCgoKCgoKClIKCpt7ygpSUgriClJSCyoIACBq0goKUgoKUAAUaAAoCgoKCgoKUgqamgoKClJSCpoKUlIKUAAcQgoLKgoKCuNyCpoKC7tyCgoKClIK4AAcQgoKClIKCgriCuIKUgoK4goKCgtyCgqaCuNyCgoKUpoKCpqaUgoKClJSUgqaCgqaUAAkYspKClIKCgoKCuIKUgriClKaUgoKm7oKmgsqCgoLKuIK4ggACENKmpKSUqqL0pKSklKaigpSClJSCgpSClIKUuKKCgpSCgqamgoKUgoKWkoKClIKmguaygoKCgpSUlIKCgoKCpoKCgoKClJSUgpSUgoKCpqaCgoLKgoKCgqaEgoKUgoKClIKCgpSCgoKmgpSCgpSCgpSCgpSmgoKUgqqCgoKCgpS4goKUlIKClIKCpoKUlIKClIKogoKs4pS0tpSmlIKCgraUppSCgoK2gsiktMamgoKClIKClJSClKaCgoKUpoKCgpQAAk4AJwKCuIKCgqaUgoKClIKCgoKmgoKmgpSCgriCguaylJS2toKClLaCgoK2gpSCgoKmgsiClIKCpoKUlMiClLaClIKCtqaUgoKCyLaCgoKCgpSUgsiCgoKCgtqCgoKCgsiCgoKCgpaSgoKCgoKCgriCpoKCgpSCgqaCpoK2gsqClLSkgpSCgqaCgoKCgoKCppSCgoLagpSCgoK4poK4goKCtoKCyIKClIK2graCtoK2goKCtpS0tIKCpILGAAQYAAoCgpSC3IK2gIKCtoKCgtiUgILogoKUtLSktKamgoKUgqrSgoKCgoKCgpSUgoKmgqaCggACEgAIAoKUgoKUpqaUgriCgoKUgpSmgrrCgoKCgoKmgpSklKaCgLiCpqSClKaUgramgoKUpoKCgpSCgsqClIKCgpSCgoKCgriCvuiCgoKUgoKCgoKmlJSUlKbWopSUtgAKEoKCgoKCgoKCgqaUtoK2goKCgoK2goKCtoKClIKCgoK2graCtoKC3IKmgpTagoKCyLaCgoKCgqTqgoLqgoKUlIKCtoKCtoKCgoKUgoKCtoKClJSCgraCgpSCgoKUyIKCtoKCgqaCgpSCgpSCgoLGAAQ+ABsClJKCgsqCgoKCgpSCppSCpoKmlKamooKCgoKClIKUgoKClIKClPgAChKClJKCAAoWgpSCgoLKgoKU3NKUgoKClIKCtoKUgoKCgpSCgpS2goKClIKUlIKUgsbIsoKClJSCgoKCpoKCgoKUgqaCgoKUgqaUgoSUAAoWgoKCgoK4gq4ACgqCpoLKgoKClJSClKiSgoKmqMKCgpSUlKaCgoKUgpSUAAIQAAoCgriClJSCgoKCgoKCgoKUlJSCgoKmgpSiqrKClKaygoK4goKClIKC1qKUgrS0xM7CgpS0pKaigoKCAAcQpoKCuJS4soKCgoKC", "1251-1264:1;1578-1584:1;1878-1880:1", "", "", "", "2059:31,2060:13")]
-[assembly: GoPositionMap("go/printer/printer.go", "printer.cs", "AFrGAaKCgoK+xIKClJSCpoKmgoKCgoKCgoLcrLKq9IKmgoKClJTe4q7CppSmgoKClKiSgoKClKaCgpSCuraCgriCgqqiypS0gsiUpoK4goKCgoKClIIAAhoACgKCgpSmyqbKpoKUpoKClJSCuKaCgoKCgoKUgqaCpgACEgAIApSmlIKmpoKUgoKmgtiCxqSClKaCgriUzIKCgqaCxvyCAAcQgsaCpIKUpoKCgoIABxCCyoKmuM6igoKmqJKCgpSokgACENKCABYugoKCgoKUgoKUzIKC3IKUggAIEoLcgoKUgpSmgoKCgpSUpoK47oKCgpSClMq4goIACArSgpSCpoCSuIKCgoKUgsoABxCCgri4goKClILGAAIQAAkCgqYACQyCgpSClMimgoKmqJKCgqYABRAACQKCgoKCuoKUppSClIKmgoKCuIKCgpSmAAoWgoqClMqGlMqC2KSC6KSCgoIACRLcgoKUpMqCrsKmopS0tLS0tKSmgoIABhwADQKEkoKm2Ma2poK2uJSCuIKUgoLKlIK2goK2goKCtoLugpSClJSWpMiCgoLGgsiCyoKUgpSCgoKUgsqCgqaCAAMQAAgClKaUqJKUpKSkpKSklKaClKSkpKSCxoK2pqSSgoKmlIKClILKgpSCgsqCgpSCgpSClJS4ppSmlNiClLS02IKCprS0xLaUggAWMoKCAAcSlAAIDIKCsoKUlJS0grSCgrSCgtaCgsaUgoK0goKCxoKC1qSCppSUgrYAIk4AChiCggAJFKa0gqao9IKSgqaCuNymgpSCgqaCgoKmuIK4gpYADBzCrsI=", "154-156:1;637-637:1", "", "789=Pos/1/1/1,posFor/1/2/1,End/1/1/2,posFor/2/2/2;835=Pos/1/1/1,lineFor/1/1/1", "", "152:37,153:13,664:36,665:17")]
+[assembly: GoPositionMap("go/printer/gobuild.go", "gobuild.cs", "ABAaooIACRSClIKCpoKCgriClJSC3IKCgqaCpoKCgoKUgpTqtoK4gpSCpoKCgoKCgoKUgoKCuKaClpKCgoKUgpSCgqaCggAEENKUlMaCgoKUgpSmgoKUgoKUxoI=", "", "", "150=isNL/2/3/1,isNL/3/3/1")]
+[assembly: GoPositionMap("go/printer/nodes.go", "nodes.cs", "ABhcABsCgoKCgoKClIKCpt7ygpSUgriClJSCyoIADBq0goKUgoKUAAkaAAoCgoKCgoKUgqamgoKClJSCpoKUlIKUAAcQgoLKgoKCuNyCpoKC7tyCgoKClIK4AAcQgoKClIKCgriCuIKUgoK4goKCgtyCgqaCuNyCgoKUpoKCpqaUgoKClJSUgqaCgqaUAA0YspKClIKCgoKCuIKUgriClKaUgoKm7oKmgsqCgoLKuIK4ggAEENKmpKSUqqL0pKSklMaigpSClJSCgpSClIKU2KKCgpSCgqbGgoKUgoKWkoKClIKmguaygoKCgpSUlIKCgoKCpoKCgoKClJSUgpSUgoKCpqaCgoLKgoKCgqaEgoKUgoKClIKCgpSCgoKmgpSCgpSCgpSCgpSmgoKUgqqCgoKCgpS4goKUlIKClIKCpoKUlIKClIKogoLM4pS0tpSmlIKCgraUppSCgoK2gsiktMamgoKClIKClJSClKaCgoKUpoKCgpQABE4AJwKCuIKCgqaUgoKClIKCgoKmgoKmgpSCgtiCggAIBrKUlLa2goKUtoKCgraClIKCgqaCyIKUgoKmgpSUyIKUtoKUgoK2ppSCgoLItoKCgoKClJSCyIKCgoKC2oKCgoKCyIKCgoKClpKCgoKCgoKCuIKmgoKClIKCpoKmgraCyoKUtKSClIKCpoKCgoKCgoKmlIKCgtqClIKCgrimgriCgoK2goLIgoKUgraCtoK2graCgoK2lLS0goKkgsYABhgACgKClILcgraAgoK2goKC2JSAguiCgpS0tKS0psaCgpSCqtKCgoKCgoKClJSCgqaCpoKCAAISAAgCgpSCgpSmppSCuIKCgpSClKaCusKCgoKCgsaClKSUpoKAuIKmpIKUppSCtqaCgpTGgoKClIKCyoKUgoKClIKCgoKCuIK+6IKCgpSCgoKCgqaUlJSUptailJS2AAoSgoKCgoKCgoKCppS2graCgoKCgraCgoK2goKUgoKCgraCtoK2goLcgqaClNqCgoLItoKCgoKCpOqCguqCgpSUgoK2goK2goKCgpSCgoK2goKUlIKCtoKClIKCgpTIgoK2goKCpoKClIKClIKCgsYABj4AGwKUkoKCyoKCgoKClIKmlIKmgqaUpsaigoKCgoKUgpSCgoKUgoKUAAkIAAoSgpSSggAKFoKUgoKCyoKClPzSlIKCgpSCgraClIKCgoKUgoKUtoKCgpSClJSClILGyLKCgpSUgoKCgqaCgoKClIKmgoKClIKmlIKElAAOFoKCgoKCuILOAAoKgqaCyoKCgpSUgpSokoKCpqjCgoKUlJSmgoKClIKUlAACEAAKAoK4gpSUgoKCgoKCgoKClJSUgoKCpoKUoqqygpSmsoKCuIKCgpSCgtailIK0tMTuwoKUtKTGooKCggAHEKaCgriUuLKCgoKCgg==", "1251-1264:1;1578-1584:1;1878-1880:1", "", "", "", "2112:31,2113:13")]
+[assembly: GoPositionMap("go/printer/printer.go", "printer.cs", "AF3GAaKCgoK+xIKClJSCpoKmgoKCgoKCgoLcrLKq9IKmgoKClJTe4q7CppSmgoKClKiSgoKClKaCgpSCuraCgriCgqqiypS0gsiUpoK4goKCgoKClIIAAhoACgKCgpSmyqbKpoKUpoKClJSCuKaCgoKCgoKUgqaCpgACEgAIApSmlIKmpoKUgoKmgtiCxqSClKaCgriUzIKCgqaCxvyCAAcQgsaCpIKUpoKCgoIABxCCyoKmuO6igoKmqJKCgpSokgACENKCABYugoKCgoKUgoKUzIKC3IKUggAIEoLcgoKUgpSmgoKCgpSUpoK47oKCgpSClMq4goIACgrSgpSCpoCSuIKCgoKUgsoABxCCgri4goKClILGAAIQAAkCgqYACQyCgpSClMimgoKmqJKCgqYABRAACQKCgoKCuoKUppSClIKmgoKCuIKCgpSmAAoWgoqClMqGlMqC2KSC6KSCgoIACRLcgoKUpMqCzsKmopS0tLS0tKTGgoIABhwADQKEkoKm2Ma2poK2uJSCuIKUgoLKlIK2goK2goKCtoLugpSClJSWpMiCgoLGgsiCyoKUgpSCgoKUgsqCgqaCAAMQAAgClKaUyJKUpKSkpKSklKaClKSkpKSCxoK2xqSSgoKmlIKClILKgpSCgsqCgpSCgpSClJS4ppSmlNiClLS02IKCprS0xLaUggAaMoKCAAkStAAIDIKCsoKUlJS0grSCgrSCgtaCgsaUgoK0goKCxoKC1qSCppSUgrYAJE4AChiCggAJFMa0gqbI9IKSgqaCuNymgpSCgqaCgoKmuIK4gpYAEBzCzsI=", "154-156:1;637-637:1", "", "796=Pos/1/1/1,posFor/1/2/1,End/1/1/2,posFor/2/2/2;842=Pos/1/1/1,lineFor/1/1/1", "", "155:37,156:13,671:36,672:17")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -170,3 +168,16 @@ public static partial class printer_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(global::go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(printer_package.Config)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class printerᴛConfig;
+[GoMethodHost(typeof(printer_package.printer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class printerᴛprinter;
+[GoMethodHost(typeof(printer_package.sizeCounter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class printerᴛsizeCounter;
+[GoMethodHost(typeof(printer_package.trimmer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class printerᴛtrimmer;
+// </MethodHolders>

@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using colorꓸRGBA = go.image.color_package.ΔRGBA;
 // </ImportedTypeAliases>
 
 using go;
@@ -67,8 +66,8 @@ using static go.image.gif_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("image/gif/reader.go", "reader.cs", "ABUqgoIAIlaCgoKUpoKCgpQAKV6CgpSCgpSCpoKCgriCgoKCuIKCqqKClIKCgriCggACFgAIApSClKamgoKCgoKC3IKCgoKmqMSClKaUgoKUgqaCgoKUlILIgqaCyIKUpsqCgoKUgoKUgoKClIK4poKCgoKUkoKClKaCgoKUgpS06IKCprSUgoLcgoKClIKUgqaCgoKUgsqCgpSClIKCgoKClIKU5sKCgpSCgoKCpoKUlIKUlILcgoKClKaCgpSCpoKCkoKClAAMGoKClMqCgoK4goKC3IKmgoKCyoKCAAkGgoKUgoKCggARJIKU3IKCgpSClAAIEgAGELKCgoKCgoKCgoKCpqqigoKUACBGooKClAALGKqigoKU7oI=", "", "", "", "435:21")]
-[assembly: GoPositionMap("image/gif/writer.go", "writer.cs", "ABw2goKUACJEgqaCpoKCuIKCgriCgqqigoKmpqaClIKClKaCgpSmgoKUpoKClAAIBoKClIKCuIKClIKCgoKCgoKCgoKUuIKCgriCgoKCgoKCgpSCgoKCAAkIgoKUgoKUxoKUgpSCgpSClJSmgoKCgpYACgaygqaCgqaCgoKUgoKmgoKCgpSCgriCgoKCgpSUpoKUlIKUgoKCgoLcgoKUgoKClMqCpoK4goKUlIKCgoKCgoKmgoKCgriCABkowoKmgqa4gpSCgoKCgoK4gpSmgoKCgpSUgoLoxIKCpoKClIKUgqaCgoKCgoLKyoKClNyCgoKm", "", "", "241=Equal/2/2/1;500=Dx/1/1/5,Dy/1/1/6")]
+[assembly: GoPositionMap("image/gif/reader.go", "reader.cs", "ABYqgoIAIlaCgoKUpoKCgpQAK16CgpSCgpSCpoKCgriCgoKCuIKCqqKClIKCgriCggACFgAIApSClKamgoKCgoKC3IKCgoKmyMSClKaUgoKUgqaCgoKUlILIgqaCyIKUpsqCgoKUgoKUgoKClIK4poKCgoKUkoKClKaCgoKUgpS06IKCprSUgoLcgoKClIKUgqaCgoKUgsqCgpSClIKCgoKClIKU5sKCgpSCgoKCpoKUlIKUlILcgoKClKaCgpSCpoKCkoKClAAMGoKClMqCgoK4goKC3IKmgoKCyoKCAAkGgoKUgoKCggARJIKU3IKCgpSClAAKEgAGELKCgoKCgoKCgoKCpqqigoKUACBGooKClAALGKqigoKU7oI=", "", "", "", "440:21")]
+[assembly: GoPositionMap("image/gif/writer.go", "writer.cs", "AB02goKUACREgqaCpoKCuIKCgriCgqqigoKmpqaClIKClMaCgpSmgoKUpoKClAAIBoKClIKCuIKClIKCgoKCgoKCgoKUuIKCgriCgoKCgoKCgpSCgoKCAAsIgoKUgoKUxoKUgpSCgpSClJTGgoKCgpYADAaygqaCgqaCgoKUgoKmgoKCgpSCgriCgoKCgpSUpoKUlIKUgoKCgoLcgoKUgoKClMqCpoK4goKUlIKCgoKCgoKmgoKCgriCABsowoKmgqa4gpSCgoKCgoK4gpSmgoKCgpSUgoLoxIKCpoKClIKUgqaCgoKCgoLKyoKClNyCgoKm", "", "", "250=Equal/2/2/1;513=Dx/1/1/5,Dy/1/1/6")]
 // </GoSourcePositionMaps>
 
 namespace go.image;
@@ -114,3 +113,16 @@ public static partial class gif_package
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(gif_package.blockReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gifᴛblockReader;
+[GoMethodHost(typeof(gif_package.blockWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gifᴛblockWriter;
+[GoMethodHost(typeof(gif_package.decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gifᴛdecoder;
+[GoMethodHost(typeof(gif_package.encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gifᴛencoder;
+// </MethodHolders>

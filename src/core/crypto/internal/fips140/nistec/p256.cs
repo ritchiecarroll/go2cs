@@ -16,6 +16,7 @@ using go.crypto.@internal;
 using go.crypto.@internal.fips140.nistec;
 using go.crypto.@internal.fips140deps;
 using math;
+using static nistec_package;
 
 partial class nistec_package {
 
@@ -37,6 +38,8 @@ public static ж<P256Point> NewP256Point() {
     return p;
 }
 
+} partial class nistecᴛP256Point {
+
 // SetGenerator sets p to the canonical generator and returns p.
 public static ж<P256Point> SetGenerator(this ж<P256Point> Ꮡp) {
     Ꮡp.Ꮡx.SetBytes([0x6b, 0x17, 0xd1, 0xf2, 0xe1, 0x2c, 0x42, 0x47, 0xf8, 0xbc, 0xe6, 0xe5, 0x63, 0xa4, 0x40, 0xf2, 0x77, 0x3, 0x7d, 0x81, 0x2d, 0xeb, 0x33, 0xa0, 0xf4, 0xa1, 0x39, 0x45, 0xd8, 0x98, 0xc2, 0x96]);
@@ -53,9 +56,13 @@ public static ж<P256Point> Set(this ж<P256Point> Ꮡp, ж<P256Point> q) {
     return Ꮡp;
 }
 
+} partial class nistec_package {
+
 internal static UntypedInt p256ElementLength => 32;
 internal static UntypedInt p256UncompressedLength => /* 1 + 2*p256ElementLength */ 65;
 internal static UntypedInt p256CompressedLength => /* 1 + p256ElementLength */ 33;
+
+} partial class nistecᴛP256Point {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string invalidP256Compressedˢ => ref invalidP256Compressedˢᵇ;
@@ -121,6 +128,8 @@ public static (ж<P256Point>, error) SetBytes(this ж<P256Point> Ꮡp, slice<byt
     }}
 }
 
+} partial class nistec_package {
+
 internal static ж<fiat.P256Element> _p256B;
 internal static readonly ж<sync.Once> Ꮡ_p256BOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once _p256BOnce => ref ((StaticBox<sync.Once>)Ꮡ_p256BOnce).ValueSlot;
@@ -157,6 +166,8 @@ internal static error p256CheckOnCurve(ж<fiat.P256Element> x, ж<fiat.P256Eleme
     }
     return default;
 }
+
+} partial class nistecᴛP256Point {
 
 // Bytes returns the uncompressed or infinity encoding of p, as specified in
 // SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the point at
@@ -343,17 +354,23 @@ public static ж<P256Point> Double(this ж<P256Point> Ꮡq, ж<P256Point> p) {
     return Ꮡq;
 }
 
+} partial class nistec_package {
+
 // p256AffinePoint is a point in affine coordinates (x, y). x and y are still
 // Montgomery domain elements. The point can't be the point at infinity.
 public partial struct p256AffinePoint {
     internal fiat.P256Element x, y;
 }
 
+} partial class nistecᴛp256AffinePoint {
+
 public static ж<P256Point> Projective(this ref p256AffinePoint p) {
     var pp = Ꮡ(new P256Point(x: p.x.ΔClone(), y: p.y.ΔClone()));
     pp.Ꮡz.One();
     return pp;
 }
+
+} partial class nistecᴛP256Point {
 
 // AddAffine sets q = p1 + p2, if infinity == 0, and to p1 if infinity == 1.
 // p2 can't be the point at infinity as it can't be represented in affine
@@ -415,9 +432,17 @@ public static ж<P256Point> Select(this ж<P256Point> Ꮡq, ж<P256Point> p1, ж
     return Ꮡq;
 }
 
+} partial class nistec_package {
+
 // p256OrdElement is a P-256 scalar field element in [0, ord(G)-1] in the
 // Montgomery domain (with R 2²⁵⁶) as four uint64 limbs in little-endian order.
 partial struct p256OrdElement /*[4]uint64*/;
+
+} partial class nistecᴛp256OrdElement {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string invalidScalarLengthˢ => ref invalidScalarLengthˢᵇ;
+private static readonly @string invalidScalarLengthˢᵇ = "invalid scalar length"u8;
 
 // SetBytes sets s to the big-endian value of x, reducing it as necessary.
 internal static (ж<p256OrdElement>, error) SetBytes(this ж<p256OrdElement> Ꮡs, slice<byte> x) {
@@ -472,10 +497,14 @@ internal static uint64 Rsh(this ж<p256OrdElement> Ꮡs, nint n) {
     return res;
 }
 
+} partial class nistec_package {
+
 // p256Table is a table of the first 16 multiples of a point. Points are stored
 // at an index offset of -1 so [8]P is at index 7, P is at 0, and [16]P is at 15.
 // [0]P is the point at infinity and it's not stored.
 partial struct p256Table /*[16]P256Point*/;
+
+} partial class nistecᴛp256Table {
 
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time. n must be in [0, 16]. If n is 0, p is set to the identity point.
@@ -504,6 +533,8 @@ internal static ж<p256Table> Compute(this ж<p256Table> Ꮡtable, ж<P256Point>
     return Ꮡtable;
 }
 
+} partial class nistec_package {
+
 internal static (uint8, nint) boothW5(uint64 @in) {
     var s = ~((@in >> 5) - 1);
     var d = ((uint64)1 << 6) - @in - 1;
@@ -511,6 +542,8 @@ internal static (uint8, nint) boothW5(uint64 @in) {
     d = (d >> 1) + (d & 1);
     return ((uint8)d, (nint)(s & 1));
 }
+
+} partial class nistecᴛP256Point {
 
 // ScalarMult sets r = scalar * q, where scalar is a 32-byte big endian value,
 // and returns r. If scalar is not 32 bytes long, ScalarMult returns an error
@@ -570,9 +603,13 @@ public static ж<P256Point> Negate(this ж<P256Point> Ꮡp, nint cond) {
     return Ꮡp;
 }
 
+} partial class nistec_package {
+
 // p256AffineTable is a table of the first 32 multiples of a point. Points are
 // stored at an index offset of -1 like in p256Table, and [0]P is not stored.
 partial struct p256AffineTable /*[32]p256AffinePoint*/;
+
+} partial class nistecᴛp256AffineTable {
 
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time. n can be in [0, 32], but (unlike p256Table.Select) if n is 0,
@@ -587,6 +624,8 @@ internal static void Select(this ref p256AffineTable table, ж<p256AffinePoint> 
         p.Ꮡy.Select(Ꮡ(table.Value, (uint8)(i - 1)).Ꮡy, p.Ꮡy, cond);
     }
 }
+
+} partial class nistec_package {
 
 // p256GeneratorTables is a series of precomputed multiples of G, the canonical
 // generator. The first p256AffineTable contains multiples of G. The second one
@@ -607,6 +646,8 @@ internal static (uint8, nint) boothW6(uint64 @in) {
     d = (d >> 1) + (d & 1);
     return ((uint8)d, (nint)(s & 1));
 }
+
+} partial class nistecᴛP256Point {
 
 // ScalarBaseMult sets p = scalar * generator, where scalar is a 32-byte big
 // endian value, and returns r. If scalar is not 32 bytes long, ScalarBaseMult
@@ -663,6 +704,8 @@ public static (ж<P256Point>, error) ScalarBaseMult(this ж<P256Point> Ꮡp, sli
     return (Ꮡp, default);
 }
 
+} partial class nistecᴛp256AffinePoint {
+
 // Negate sets p to -p, if cond == 1, and to p if cond == 0.
 public static ж<p256AffinePoint> Negate(this ж<p256AffinePoint> Ꮡp, nint cond) {
     var negY = @new<fiat.P256Element>();
@@ -670,6 +713,8 @@ public static ж<p256AffinePoint> Negate(this ж<p256AffinePoint> Ꮡp, nint con
     Ꮡp.Ꮡy.Select(negY, Ꮡp.Ꮡy, cond);
     return Ꮡp;
 }
+
+} partial class nistec_package {
 
 // p256Sqrt sets e to a square root of x. If x is not a square, p256Sqrt returns
 // false and e is unchanged. e and x can overlap.

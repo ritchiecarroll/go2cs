@@ -11,6 +11,7 @@ using unicode = unicode_package;
 using utf8 = global::go.unicode.utf8_package;
 using global::go.go;
 using global::go.unicode;
+using static ast_package;
 
 partial class ast_package {
 
@@ -35,10 +36,10 @@ partial struct Directive {
     public @string Name;
     public @string Args; // no leading or trailing whitespace
     // Slash is the position of the "//" at the beginning of the directive.
-    public tokenꓸPos Slash;
+    public token.Pos Slash;
     // ArgsPos is the position where Args begins, based on the position passed
     // to ParseDirective.
-    public tokenꓸPos ArgsPos;
+    public token.Pos ArgsPos;
 }
 
 // ParseDirective parses a single comment line for a directive comment.
@@ -52,7 +53,7 @@ partial struct Directive {
 // to track the position of the arguments. This may be [Comment.Slash],
 // synthesized by the caller, or simply 0. If the caller passes 0, then the
 // positions are effectively byte offsets into the string c.
-public static (Directive, bool) ParseDirective(tokenꓸPos pos, @string c) {
+public static (Directive, bool) ParseDirective(token.Pos pos, @string c) {
     // Fast path to eliminate most non-directive comments. Must be a line
     // comment starting with [a-z0-9]
     if (!(len(c) >= 3 && c[0] == '/' && c[1] == '/' && isalnum(c[2]))) {
@@ -84,7 +85,7 @@ public static (Directive, bool) ParseDirective(tokenꓸPos pos, @string c) {
     // Parse name and args.
     @string name = buf.takeNonSpace();
     buf.skipSpace();
-    tokenꓸPos argsPos = buf.pos;
+    token.Pos argsPos = buf.pos;
     @string args = strings.TrimRightFunc(buf.str, unicode.IsSpace);
 
     return (new Directive(tool, name, args, pos, argsPos), true);
@@ -94,8 +95,12 @@ internal static bool isalnum(byte b) {
     return 'a' <= b && b <= 'z' || '0' <= b && b <= '9';
 }
 
-public static tokenꓸPos Pos(this ref Directive d) { return d.Slash; }
-public static tokenꓸPos End(this ref Directive d) { return (tokenꓸPos)((nint)d.ArgsPos + len(d.Args)); }
+} partial class astᴛDirective {
+
+public static token.Pos Pos(this ref Directive d) { return d.Slash; }
+public static token.Pos End(this ref Directive d) { return (token.Pos)((nint)d.ArgsPos + len(d.Args)); }
+
+} partial class ast_package {
 
 // A DirectiveArg is an argument to a directive comment.
 partial struct DirectiveArg {
@@ -103,8 +108,10 @@ partial struct DirectiveArg {
     // this is its unquoted form.
     public @string Arg;
     // Pos is the position of the first character in this argument.
-    public tokenꓸPos Pos;
+    public token.Pos Pos;
 }
+
+} partial class astᴛDirective {
 
 // ParseArgs parses a [Directive]'s arguments using the standard convention,
 // which is a sequence of tokens, where each token may be a bare word, or a
@@ -120,7 +127,7 @@ public static (slice<DirectiveArg>, error) ParseArgs(this ref Directive d) {
     var list = slice<DirectiveArg>([]);
     for (args.skipSpace(); args.str != ""u8; args.skipSpace()) {
         @string arg = default;
-        tokenꓸPos argPos = args.pos;
+        token.Pos argPos = args.pos;
 
         switch (args.str[0]) {
         default: {
@@ -151,15 +158,19 @@ public static (slice<DirectiveArg>, error) ParseArgs(this ref Directive d) {
     return (list, default);
 }
 
+} partial class ast_package {
+
 // directiveScanner is a helper for parsing directive comments while maintaining
 // position information.
 partial struct directiveScanner {
     internal @string str;
-    internal tokenꓸPos pos;
+    internal token.Pos pos;
 }
 
+} partial class astᴛdirectiveScanner {
+
 internal static void skip(this ref directiveScanner s, nint n) {
-    s.pos += ((tokenꓸPos)n);
+    s.pos += ((token.Pos)n);
     s.str = s.str.slice(n);
 }
 
@@ -182,4 +193,4 @@ internal static void skipSpace(this ref directiveScanner s) {
     s.skip(len(s.str) - len(trim));
 }
 
-} // end ast_package
+} // end astᴛdirectiveScanner

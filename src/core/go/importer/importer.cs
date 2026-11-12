@@ -22,6 +22,7 @@ using io = io_package;
 using runtime = runtime_package;
 using global::go.go;
 using global::go.go.@internal;
+using static importer_package;
 
 partial class importer_package {
 
@@ -112,6 +113,8 @@ partial struct gcimports {
     internal Func<@string, (io.ReadCloser, error)> lookup;
 }
 
+} partial class importerᴛgcimports {
+
 internal static (ж<types.Package>, error) Import(this ref gcimports m, @string path) {
     return m.ImportFrom(path, ""u8, /* no vendoring */ 0);
 }
@@ -123,12 +126,16 @@ internal static (ж<types.Package>, error) ImportFrom(this ref gcimports m, @str
     return gcimporter.Import(m.fset, m.packages, path, srcDir, m.lookup);
 }
 
+} partial class importer_package {
+
 // gccgo importer
 partial struct gccgoimports {
     internal map<@string, ж<types.Package>> packages;
     internal Func<map<@string, ж<types.Package>>, @string, @string, Func<@string, (io.ReadCloser, error)>, (ж<types.Package>, error)> importer;
     internal Func<@string, (io.ReadCloser, error)> lookup;
 }
+
+} partial class importerᴛgccgoimports {
 
 internal static (ж<types.Package>, error) Import(this ref gccgoimports m, @string path) {
     return m.ImportFrom(path, ""u8, /* no vendoring */ 0);
@@ -141,4 +148,4 @@ internal static (ж<types.Package>, error) ImportFrom(this ref gccgoimports m, @
     return m.importer(m.packages, path, srcDir, m.lookup);
 }
 
-} // end importer_package
+} // end importerᴛgccgoimports

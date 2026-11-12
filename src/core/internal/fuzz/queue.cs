@@ -3,6 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal;
 
+using static fuzz_package;
+
 partial class fuzz_package {
 
 // queue holds a growable sequence of inputs for fuzzing and minimization.
@@ -20,6 +22,8 @@ partial struct queue {
     internal slice<any> elems;
     internal nint head, len;
 }
+
+} partial class fuzzᴛqueue {
 
 internal static nint cap(this ref queue q) {
     return len(q.elems);
@@ -71,4 +75,4 @@ internal static void clear(this ref queue q) {
     q = new queue();
 }
 
-} // end fuzz_package
+} // end fuzzᴛqueue

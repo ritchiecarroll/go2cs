@@ -19,6 +19,7 @@ using utf8 = global::go.unicode.utf8_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using global::go.go;
 using global::go.unicode;
+using static build_package;
 
 partial class build_package {
 
@@ -29,7 +30,7 @@ partial struct importReader {
     internal error err;
     internal bool eof;
     internal nint nerr;
-    internal tokenꓸPosition pos;
+    internal token.Position pos;
 }
 
 internal static slice<byte> bom = [0xef, 0xbb, 0xbf];
@@ -45,7 +46,7 @@ internal static ж<importReader> newImportReader(@string name, io.Reader r) {
     }
     return Ꮡ(new importReader(
         b: b,
-        pos: new tokenꓸPosition(
+        pos: new token.Position(
             Filename: name,
             Line: 1,
             Column: 1
@@ -59,6 +60,8 @@ internal static bool isIdent(byte c) {
 
 internal static error errSyntax = errors.New("syntax error");
 internal static error errNUL = errors.New("unexpected NUL in input");
+
+} partial class buildᴛimportReader {
 
 // syntaxError records a syntax error, but only if an I/O error has not already been recorded.
 internal static void syntaxError(this ref importReader r) {
@@ -246,6 +249,8 @@ internal static void readImport(this ref importReader r) {
     r.readString();
 }
 
+} partial class build_package {
+
 // readComments is like io.ReadAll, except that it only reads the leading
 // block of comments in the file.
 //
@@ -349,7 +354,7 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
             if (!isValidImport(path)) {
                 // The parser used to return a parse error for invalid import paths, but
                 // no longer does, so check for and create the error here instead.
-                info.parseErr = new scanner_ΔErrorᴠerror(new scannerꓸError(Pos: info.fset.Position(spec.Pos()), Msg: "invalid import path: "u8 + path));
+                info.parseErr = new scanner_Errorᴠerror(new scanner.Error(Pos: info.fset.Position(spec.Pos()), Msg: "invalid import path: "u8 + path));
                 info.imports = default;
                 return default;
             }
@@ -431,7 +436,7 @@ internal static bool isValidImport(@string s) {
 // parseGoEmbed parses a "//go:embed" to extract the glob patterns.
 // It accepts unquoted space-separated patterns as well as double-quoted and back-quoted Go strings.
 // This must match the behavior of cmd/compile/internal/noder.go.
-internal static (slice<fileEmbed>, error) parseGoEmbed(ж<token.FileSet> fset, tokenꓸPos pos, @string comment) {
+internal static (slice<fileEmbed>, error) parseGoEmbed(ж<token.FileSet> fset, token.Pos pos, @string comment) {
     var (dir, ok) = ast.ParseDirective(pos, comment);
     if (!ok || dir.Tool != "go"u8 || dir.Name != "embed"u8) {
         return (default, default);

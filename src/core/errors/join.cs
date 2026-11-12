@@ -5,6 +5,7 @@ namespace go;
 
 using @unsafe = unsafe_package;
 using ꓸꓸꓸerror = Span<error>;
+using static errors_package;
 
 partial class errors_package {
 
@@ -44,6 +45,8 @@ partial struct joinError {
     internal slice<error> errs;
 }
 
+} partial class errorsᴛjoinError {
+
 internal static @string Error(this ref joinError e) {
     // Since Join returns nil if every value in errs is nil,
     // e.errs cannot be empty.
@@ -64,4 +67,4 @@ internal static slice<error> Unwrap(this ref joinError e) {
     return e.errs;
 }
 
-} // end errors_package
+} // end errorsᴛjoinError

@@ -3,6 +3,7 @@ namespace go.@internal;
 
 using strconv = global::go.strconv_package;
 using global::go;
+using static pkgbits_package;
 
 partial class pkgbits_package {
 
@@ -86,6 +87,8 @@ private static readonly @string _SyncMarker_nameᵇ = "EOFBoolInt64Uint64StringV
 
 [GoLazy] partial class lazyᴛ_SyncMarker_index { internal static array<uint16> _SyncMarker_index = new uint16[]{0, 3, 7, 12, 18, 24, 29, 32, 38, 43, 51, 57, 60, 67, 73, 80, 83, 89, 95, 99, 106, 120, 129, 135, 140, 147, 150, 160, 168, 175, 182, 188, 195, 201, 209, 214, 218, 226, 232, 234, 241, 248, 252, 260, 269, 279, 296, 305, 313, 318, 327, 333, 340, 350, 359, 369, 379, 389, 394, 405, 416, 424, 432, 437, 445, 450, 458, 467, 472, 480}.array(); }
 
+} partial class pkgbitsᴛSyncMarker {
+
 public static @string String(this SyncMarker i) {
     i -= 1;
     if (i < 0 || i >= ((SyncMarker)(len(_SyncMarker_index) - 1))) {
@@ -94,4 +97,4 @@ public static @string String(this SyncMarker i) {
     return _SyncMarker_name.slice(_SyncMarker_index[i], _SyncMarker_index[i + 1]);
 }
 
-} // end pkgbits_package
+} // end pkgbitsᴛSyncMarker

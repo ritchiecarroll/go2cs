@@ -6,6 +6,7 @@ namespace go.@internal.syscall;
 using runtime = runtime_package;
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
+using static windows_package;
 
 partial class windows_package {
 
@@ -64,9 +65,13 @@ partial struct TOKEN_MANDATORY_LABEL {
     public SID_AND_ATTRIBUTES Label;
 }
 
+} partial class windowsᴛTOKEN_MANDATORY_LABEL {
+
 public static uint32 Size(this ref TOKEN_MANDATORY_LABEL tml) {
     return (uint32)/* unsafe.Sizeof(TOKEN_MANDATORY_LABEL{}) */ (uintptr)16 + syscall.GetLengthSid(tml.Label.Sid);
 }
+
+} partial class windows_package {
 
 public static UntypedInt SE_GROUP_INTEGRITY => 0x00000020;
 
@@ -171,7 +176,11 @@ partial struct TOKEN_GROUPS {
     public array<SID_AND_ATTRIBUTES> Groups = new(1);
 }
 
+} partial class windowsᴛTOKEN_GROUPS {
+
 // go2cs generated this placeholder — func AllGroups is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class windows_package {
 
 // go2cs generated this placeholder — func GetTokenGroups is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 

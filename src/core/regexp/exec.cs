@@ -7,6 +7,7 @@ using io = io_package;
 using syntax = regexp.syntax_package;
 using Δsync = sync_package;
 using regexp;
+using static regexp_package;
 
 partial class regexp_package {
 
@@ -51,6 +52,8 @@ partial struct inputs {
     internal inputString @string;
     internal inputReader reader;
 }
+
+} partial class regexpᴛinputs {
 
 internal static input newBytes(this ж<inputs> Ꮡi, slice<byte> b) {
     ref var i = ref Ꮡi.DerefOrNull();
@@ -97,6 +100,8 @@ internal static (input, nint) init(this ж<inputs> Ꮡi, io.RuneReader r, slice<
     return (Ꮡi.newString(s), len(s));
 }
 
+} partial class regexpᴛmachine {
+
 internal static void init(this ref machine m, nint ncap) {
     foreach (var (_, t) in range(m.pool)) {
         t.cap = t.cap.slice(0, ncap);
@@ -119,6 +124,8 @@ internal static ж<thread> alloc(this ref machine m, ж<syntax.Inst> i) {
     return t;
 }
 
+} partial class regexp_package {
+
 // A lazyFlag is a lazily-evaluated syntax.EmptyOp,
 // for checking zero-width flags like ^ $ \A \z \B \b.
 // It records the pair of relevant runes and does not
@@ -129,6 +136,8 @@ partial struct lazyFlag /*num:uint64*/;
 internal static lazyFlag newLazyFlag(rune r1, rune r2) {
     return (lazyFlag)((uint64)r1 << 32 | (uint64)(uint32)r2);
 }
+
+} partial class regexpᴛlazyFlag {
 
 internal static bool match(this lazyFlag f, syntax.EmptyOp op) {
     if (op == 0) {
@@ -173,6 +182,8 @@ internal static bool match(this lazyFlag f, syntax.EmptyOp op) {
     }
     return op == 0;
 }
+
+} partial class regexpᴛmachine {
 
 // match runs the machine over the input starting at pos.
 // It reports whether a match was found.
@@ -410,6 +421,8 @@ Again:
     return Ꮡt;
 }
 
+} partial class regexp_package {
+
 partial struct onePassMachine {
     internal inputs inputs;
     internal slice<nint> matchcap;
@@ -432,6 +445,8 @@ internal static void freeOnePassMachine(ж<onePassMachine> Ꮡm) {
     m.inputs.clear();
     ᏑonePassPool.Put(Ꮡm.OrTypedNil());
 }
+
+} partial class regexpᴛRegexp {
 
 // doOnePass implements r.doExecute using the one-pass execution engine.
 internal static slice<nint> doOnePass(this ж<Regexp> Ꮡre, io.RuneReader ir, slice<byte> ib, @string @is, nint pos, nint ncap, slice<nint> dstCap) {
@@ -613,6 +628,8 @@ internal static slice<nint> doExecute(this ж<Regexp> Ꮡre, io.RuneReader r, sl
     re.put(m);
     return dstCap;
 }
+
+} partial class regexp_package {
 
 // arrayNoInts is returned by doExecute match if nil dstCap is passed
 // to it with ncap=0.

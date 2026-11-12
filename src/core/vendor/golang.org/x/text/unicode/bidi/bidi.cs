@@ -16,6 +16,7 @@ namespace go.vendor.golang.org.x.text.unicode;
 // - Transformer for reordering?
 // - Transformer (validator, really) for Bidi Rule.
 using bytes = bytes_package;
+using static bidi_package;
 
 partial class bidi_package {
 
@@ -25,28 +26,28 @@ partial class bidi_package {
 // embedding hierarchy, though.
 
 // A Direction indicates the overall flow of text.
-partial struct ΔDirection /*num:nint*/;
+partial struct Direction /*num:nint*/;
 
 // LeftToRight indicates the text contains no right-to-left characters and
 // that either there are some left-to-right characters or the option
 // DefaultDirection(LeftToRight) was passed.
-public static ΔDirection LeftToRight => /* iota */ 0;
+public static Direction LeftToRight => /* iota */ 0;
 
 // RightToLeft indicates the text contains no left-to-right characters and
 // that either there are some right-to-left characters or the option
 // DefaultDirection(RightToLeft) was passed.
-public static ΔDirection RightToLeft => 1;
+public static Direction RightToLeft => 1;
 
 // Mixed indicates text contains both left-to-right and right-to-left
 // characters.
-public static ΔDirection Mixed => 2;
+public static Direction Mixed => 2;
 
 // Neutral means that text contains no left-to-right and right-to-left
 // characters and that no default direction has been set.
-public static ΔDirection Neutral => 3;
+public static Direction Neutral => 3;
 
 public partial struct options {
-    internal ΔDirection defaultDirection;
+    internal Direction defaultDirection;
 }
 
 // An Option is an option for Bidi processing.
@@ -63,7 +64,7 @@ public partial struct options {
 
 // DefaultDirection sets the default direction for a Paragraph. The direction is
 // overridden if the text contains directional characters.
-public static Action<ж<options>> DefaultDirection(ΔDirection d) {
+public static Action<ж<options>> DefaultDirection(Direction d) {
     return (ж<options> opts) => {
         opts.defaultDirection = d;
     };
@@ -74,12 +75,14 @@ partial struct Paragraph {
     internal slice<byte> p;
     internal Ordering o;
     internal slice<Action<ж<options>>> opts;
-    internal slice<ΔClass> types;
+    internal slice<Class> types;
     internal slice<bracketType> pairTypes;
     internal slice<rune> pairValues;
     internal slice<rune> runes;
     internal options options;
 }
+
+} partial class bidiᴛParagraph {
 
 // Initialize the p.pairTypes, p.pairValues and p.types from the input previously
 // set by p.SetBytes() or p.SetString(). Also limit the input up to (and including) a paragraph
@@ -101,7 +104,7 @@ internal static (nint n, error err) prepareInput(this ref Paragraph p) {
     foreach (var (_, r) in range(p.runes)) {
         var (props, i) = LookupRune(r);
         bytecount += i;
-        ΔClass cls = props.Class();
+        Class cls = props.Class();
         if (cls == B) {
             return (bytecount, default);
         }
@@ -158,7 +161,7 @@ public static bool IsLeftToRight(this ref Paragraph p) {
 // Direction returns the direction of the text of this paragraph.
 //
 // The direction may be LeftToRight, RightToLeft, Mixed, or Neutral.
-public static ΔDirection Direction(this ref Paragraph p) {
+public static Direction Direction(this ref Paragraph p) {
     return p.o.Direction();
 }
 
@@ -167,7 +170,7 @@ public static ΔDirection Direction(this ref Paragraph p) {
 // RunAt reports the Run at the given position of the input text.
 //
 // This method can be used for computing line breaks on paragraphs.
-public static ΔRun RunAt(this ref Paragraph p, nint pos) {
+public static Run RunAt(this ref Paragraph p, nint pos) {
     nint c = 0;
     nint runNumber = 0;
     foreach (var (i, r) in range(p.o.runes)) {
@@ -179,10 +182,12 @@ public static ΔRun RunAt(this ref Paragraph p, nint pos) {
     return p.o.Run(runNumber);
 }
 
-internal static Ordering calculateOrdering(slice<level> levels, slice<rune> runes) {
-    ΔDirection curDir = default;
+} partial class bidi_package {
 
-    ΔDirection prevDir = Neutral;
+internal static Ordering calculateOrdering(slice<level> levels, slice<rune> runes) {
+    Direction curDir = default;
+
+    Direction prevDir = Neutral;
     nint prevI = 0;
 
     var o = new Ordering();
@@ -209,6 +214,8 @@ internal static Ordering calculateOrdering(slice<level> levels, slice<rune> rune
     o.startpos = append(o.startpos, prevI);
     return o;
 }
+
+} partial class bidiᴛParagraph {
 
 // Order computes the visual ordering of all the runs in a Paragraph.
 public static (Ordering, error) Order(this ж<Paragraph> Ꮡp) {
@@ -249,19 +256,23 @@ public static (Ordering, error) Line(this ref Paragraph p, nint start, nint end)
     return (o, default);
 }
 
+} partial class bidi_package {
+
 // An Ordering holds the computed visual order of runs of a Paragraph. Calling
 // SetBytes or SetString on the originating Paragraph invalidates an Ordering.
 // The methods of an Ordering should only be called by one goroutine at a time.
 partial struct Ordering {
     internal slice<slice<rune>> runes;
-    internal slice<ΔDirection> directions;
+    internal slice<Direction> directions;
     internal slice<nint> startpos;
 }
+
+} partial class bidiᴛOrdering {
 
 // Direction reports the directionality of the runs.
 //
 // The direction may be LeftToRight, RightToLeft, Mixed, or Neutral.
-public static ΔDirection Direction(this ref Ordering o) {
+public static Direction Direction(this ref Ordering o) {
     return o.directions[0];
 }
 
@@ -271,14 +282,16 @@ public static nint NumRuns(this ref Ordering o) {
 }
 
 // Run returns the ith run within the ordering.
-public static ΔRun Run(this ref Ordering o, nint i) {
-    var r = new ΔRun(
+public static Run Run(this ref Ordering o, nint i) {
+    var r = new Run(
         runes: o.runes[i],
         direction: o.directions[i],
         startpos: o.startpos[i]
     );
     return r;
 }
+
+} partial class bidi_package {
 
 // TODO: perhaps with options.
 // // Reorder creates a reader that reads the runes in visual order per character.
@@ -288,19 +301,21 @@ public static ΔRun Run(this ref Ordering o, nint i) {
 // }
 
 // A Run is a continuous sequence of characters of a single direction.
-partial struct ΔRun {
+partial struct Run {
     internal slice<rune> runes;
-    internal ΔDirection direction;
+    internal Direction direction;
     internal nint startpos;
 }
 
+} partial class bidiᴛRun {
+
 // String returns the text of the run in its original order.
-public static @string String(this ref ΔRun r) {
+public static @string String(this ref Run r) {
     return (@string)r.runes;
 }
 
 // Bytes returns the text of the run in its original order.
-public static slice<byte> Bytes(this ref ΔRun r) {
+public static slice<byte> Bytes(this ref Run r) {
     return slice<byte>(r.String());
 }
 
@@ -310,15 +325,17 @@ public static slice<byte> Bytes(this ref ΔRun r) {
 // - bracket replacement.
 
 // Direction reports the direction of the run.
-public static ΔDirection Direction(this ref ΔRun r) {
+public static Direction Direction(this ref Run r) {
     return r.direction;
 }
 
 // Pos returns the position of the Run within the text passed to SetBytes or SetString of the
 // originating Paragraph value.
-public static (nint start, nint end) Pos(this ref ΔRun r) {
+public static (nint start, nint end) Pos(this ref Run r) {
     return (r.startpos, r.startpos + len(r.runes) - 1);
 }
+
+} partial class bidi_package {
 
 // AppendReverse reverses the order of characters of in, appends them to out,
 // and returns the result. Modifiers will still follow the runes they modify.

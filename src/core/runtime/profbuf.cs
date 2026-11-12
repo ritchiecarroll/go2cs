@@ -6,6 +6,7 @@ namespace go;
 using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -113,6 +114,8 @@ partial struct profIndex /*num:uint64*/;
 internal static profIndex profReaderSleeping => /* 1 << 32 */ unchecked((profIndex)4294967296); // reader is sleeping and must be woken up
 internal static profIndex profWriteExtra => /* 1 << 33 */ unchecked((profIndex)8589934592);     // overflow or eof waiting
 
+} partial class runtimeᴛprofAtomic {
+
 internal static profIndex load(this ж<profAtomic> Ꮡx) {
     return (profIndex)atomic.Load64(Ꮡx.Reinterpret<profAtomic, uint64>());
 }
@@ -125,6 +128,8 @@ internal static bool cas(this ж<profAtomic> Ꮡx, profIndex old, profIndex @new
     return atomic.Cas64(Ꮡx.Reinterpret<profAtomic, uint64>(), (uint64)old, (uint64)@new);
 }
 
+} partial class runtimeᴛprofIndex {
+
 internal static uint32 dataCount(this profIndex x) {
     return (uint32)x;
 }
@@ -132,6 +137,8 @@ internal static uint32 dataCount(this profIndex x) {
 internal static uint32 tagCount(this profIndex x) {
     return (uint32)(x >> 34);
 }
+
+} partial class runtime_package {
 
 // countSub subtracts two counts obtained from profIndex.dataCount or profIndex.tagCount,
 // assuming that they are no more than 2^29 apart (guaranteed since they are never more than
@@ -143,10 +150,14 @@ internal static nint countSub(uint32 x, uint32 y) {
     return (nint)(((int32)(x - y) << 2) >> 2);
 }
 
+} partial class runtimeᴛprofIndex {
+
 // addCountsAndClearFlags returns the packed form of "x + (data, tag) - all flags".
 internal static profIndex addCountsAndClearFlags(this profIndex x, nint data, nint tag) {
     return (profIndex)((((uint64)x >> 34) + (uint64)(((uint32)tag << 2) >> 2)) << 34 | (uint64)((uint32)x + (uint32)data));
 }
+
+} partial class runtimeᴛprofBuf {
 
 // hasOverflow reports whether b has any overflow records pending.
 internal static bool hasOverflow(this ж<profBuf> Ꮡb) {
@@ -205,6 +216,8 @@ internal static void incrementOverflow(this ж<profBuf> Ꮡb, int64 now) {
     }
 }
 
+} partial class runtime_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string newProfBufBufferTooLargeˢ => ref newProfBufBufferTooLargeˢᵇ;
 private static readonly @string newProfBufBufferTooLargeˢᵇ = "newProfBuf: buffer too large"u8;
@@ -238,6 +251,8 @@ internal static ж<profBuf> newProfBuf(nint hdrsize, nint bufwords, nint tags) {
     b.overflowBuf = new slice<uint64>((nint)(2 + b.hdrsize + 1));
     return b;
 }
+
+} partial class runtimeᴛprofBuf {
 
 // canWriteRecord reports whether the buffer has room
 // for a single contiguous record with a stack of length nstk.
@@ -344,6 +359,8 @@ internal static void wakeupExtra(this ж<profBuf> Ꮡb) {
     }
 }
 
+} partial class runtime_package {
+
 // profBufReadMode specifies whether to block when no data is available to read.
 public partial struct profBufReadMode /*num:nint*/;
 
@@ -351,6 +368,8 @@ internal static profBufReadMode profBufBlocking => /* iota */ 0;
 internal static profBufReadMode profBufNonBlocking => 1;
 
 internal static array<@unsafe.Pointer> overflowTag = new(1); // always nil
+
+} partial class runtimeᴛprofBuf {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string runtimeMalformedProfBufˢ => ref runtimeMalformedProfBufˢᵇ;
@@ -403,7 +422,7 @@ Read:
             var dst = b.overflowBuf;
             dst[0] = (uint64)(2 + b.hdrsize + 1);
             dst[1] = time;
-            builtin.clear(dst.slice(2, (nint)(2 + b.hdrsize)));
+            clear(dst.slice(2, (nint)(2 + b.hdrsize)));
             dst[2 + b.hdrsize] = (uint64)count;
             return (dst.slice(0, (nint)(2 + b.hdrsize + 1)), overflowTag[..1], false);
         }
@@ -492,4 +511,4 @@ Read:
     return (data.slice(0, di), tags.slice(0, ti), false);
 }
 
-} // end runtime_package
+} // end runtimeᴛprofBuf

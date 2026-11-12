@@ -19,6 +19,7 @@ namespace go;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -130,12 +131,14 @@ internal static void xRegRestore(ж<g> Ꮡgp) {
         // Don't grow the G stack.
         var ppʗ1 = pp;
         systemstack(() => {
-            ppʗ1.of(runtime_package.Δp.ᏑxRegs).free();
+            ppʗ1.of(p.ᏑxRegs).free();
         });
     }
     pp.Value.xRegs.cache = gp.xRegs.state;
     gp.xRegs.state = default;
 }
+
+} partial class runtimeᴛxRegPerP {
 
 internal static void free(this ref xRegPerP xRegs) {
     if (xRegs.cache != nil) {
@@ -146,4 +149,4 @@ internal static void free(this ref xRegPerP xRegs) {
     }
 }
 
-} // end runtime_package
+} // end runtimeᴛxRegPerP

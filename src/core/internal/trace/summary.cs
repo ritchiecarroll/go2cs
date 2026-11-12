@@ -8,6 +8,7 @@ using slices = slices_package;
 using strings = strings_package;
 using time = time_package;
 using iter = iter_package;
+using static trace_package;
 
 partial class trace_package {
 
@@ -21,11 +22,11 @@ partial struct Summary {
 // (For v2 traces.)
 partial struct GoroutineSummary {
     public GoID ID;
-    public @string Name;       // A non-unique human-friendly identifier for the goroutine.
-    public uint64 PC;          // The first PC we saw for the entry function of the goroutine
-    public ΔTime CreationTime; // Timestamp of the first appearance in the trace.
-    public ΔTime StartTime;    // Timestamp of the first time it started running. 0 if the goroutine never ran.
-    public ΔTime EndTime;      // Timestamp of when the goroutine exited. 0 if the goroutine never exited.
+    public @string Name;      // A non-unique human-friendly identifier for the goroutine.
+    public uint64 PC;         // The first PC we saw for the entry function of the goroutine
+    public Time CreationTime; // Timestamp of the first appearance in the trace.
+    public Time StartTime;    // Timestamp of the first time it started running. 0 if the goroutine never ran.
+    public Time EndTime;      // Timestamp of when the goroutine exited. 0 if the goroutine never exited.
     // List of regions in the goroutine, sorted based on the start time.
     public slice<ж<UserRegionSummary>> Regions;
     // Statistics of execution time during the goroutine execution.
@@ -45,16 +46,18 @@ partial struct UserTaskSummary {
     public ж<UserTaskSummary> Parent; // nil if the parent is unknown.
     public slice<ж<UserTaskSummary>> Children;
     // Task begin event. An EventTaskBegin event or nil.
-    public ж<ΔEvent> Start;
+    public ж<Event> Start;
     // End end event. Normally EventTaskEnd event or nil.
-    public ж<ΔEvent> End;
+    public ж<Event> End;
     // Logs is a list of EventLog events associated with the task.
-    public slice<ж<ΔEvent>> Logs;
+    public slice<ж<Event>> Logs;
     // List of regions in the task, sorted based on the start time.
     public slice<ж<UserRegionSummary>> Regions;
     // Goroutines is the set of goroutines associated with this task.
     public map<GoID, ж<GoroutineSummary>> Goroutines;
 }
+
+} partial class traceᴛUserTaskSummary {
 
 // Complete returns true if we have complete information about the task
 // from the trace: both a start and an end.
@@ -69,10 +72,12 @@ public static slice<ж<UserTaskSummary>> Descendents(this ж<UserTaskSummary> �
 
     var descendents = slice<ж<UserTaskSummary>>([Ꮡs]);
     foreach (var (_, child) in range(s.Children)) {
-        descendents = builtin.appendꓸꓸꓸ(descendents, child.Descendents());
+        descendents = appendꓸꓸꓸ(descendents, child.Descendents());
     }
     return descendents;
 }
+
+} partial class trace_package {
 
 // UserRegionSummary represents a region and goroutine execution stats
 // while the region was active. (For v2 traces.)
@@ -83,11 +88,11 @@ partial struct UserRegionSummary {
     // but can be a state transition event from NotExist or Undetermined
     // if the region is a synthetic region representing task inheritance
     // from the parent goroutine.
-    public ж<ΔEvent> Start;
+    public ж<Event> Start;
     // Region end event. Normally EventRegionEnd event or nil,
     // but can be a state transition event to NotExist if the goroutine
     // terminated without explicitly ending the region.
-    public ж<ΔEvent> End;
+    public ж<Event> End;
     /*embed*/ public GoroutineExecStats GoroutineExecStats;
 }
 
@@ -107,6 +112,8 @@ partial struct GoroutineExecStats {
     // with other stats.
     public map<@string, time.Duration> RangeTime;
 }
+
+} partial class traceᴛGoroutineExecStats {
 
 public static map<@string, time.Duration> NonOverlappingStats(this GoroutineExecStats s) {
     var stats = new map<@string, time.Duration>{
@@ -172,10 +179,12 @@ internal static GoroutineExecStats /*r*/ clone(this GoroutineExecStats s) {
     return r;
 }
 
+} partial class traceᴛGoroutineSummary {
+
 // snapshotStat returns the snapshot of the goroutine execution statistics.
 // This is called as we process the ordered trace event stream. lastTs is used
 // to process pending statistics if this is called before any goroutine end event.
-internal static GoroutineExecStats /*ret*/ snapshotStat(this ref GoroutineSummary g, ΔTime lastTs) {
+internal static GoroutineExecStats /*ret*/ snapshotStat(this ref GoroutineSummary g, Time lastTs) {
     GoroutineExecStats ret = default;
 
     ret = g.GoroutineExecStats.clone();
@@ -214,7 +223,7 @@ internal static GoroutineExecStats /*ret*/ snapshotStat(this ref GoroutineSummar
 // finalize is called when processing a goroutine end event or at
 // the end of trace processing. This finalizes the execution stat
 // and any active regions in the goroutine, in which case trigger is nil.
-internal static void finalize(this ref GoroutineSummary g, ΔTime lastTs, ж<ΔEvent> trigger) {
+internal static void finalize(this ref GoroutineSummary g, Time lastTs, ж<Event> trigger) {
     if (trigger != nil) {
         g.EndTime = trigger.Time();
     }
@@ -230,21 +239,23 @@ internal static void finalize(this ref GoroutineSummary g, ΔTime lastTs, ж<ΔE
         foreach (var (_, s) in range(g.activeRegions)) {
             s.End = trigger;
             s.GoroutineExecStats = finalStat.sub(s.GoroutineExecStats);
-            g.Regions = builtin.append(g.Regions, s);
+            g.Regions = append(g.Regions, s);
         }
     }
     (g.goroutineSummary).Value = new goroutineSummary();
 }
 
+} partial class trace_package {
+
 // goroutineSummary is a private part of GoroutineSummary that is required only during analysis.
 partial struct goroutineSummary {
-    internal ΔTime lastStartTime;
-    internal ΔTime lastRunnableTime;
-    internal ΔTime lastBlockTime;
+    internal Time lastStartTime;
+    internal Time lastRunnableTime;
+    internal Time lastBlockTime;
     internal @string lastBlockReason;
-    internal ΔTime lastSyscallTime;
-    internal ΔTime lastSyscallBlockTime;
-    internal map<@string, ΔTime> lastRangeTime;
+    internal Time lastSyscallTime;
+    internal Time lastSyscallBlockTime;
+    internal map<@string, Time> lastRangeTime;
     internal slice<ж<UserRegionSummary>> activeRegions; // stack of active regions
 }
 
@@ -263,8 +274,8 @@ partial struct Summarizer {
     // It's a best-effort mapping of an active range on a P to the goroutine we think
     // is associated with it.
     internal map<rangeP, GoID> rangesP;
-    internal ΔTime lastTs; // timestamp of the last event processed.
-    internal ΔTime syncTs; // timestamp of the last sync event processed (or the first timestamp in the trace).
+    internal Time lastTs; // timestamp of the last event processed.
+    internal Time syncTs; // timestamp of the last sync event processed (or the first timestamp in the trace).
 }
 
 // NewSummarizer creates a new struct to build goroutine stats from a trace.
@@ -283,8 +294,10 @@ partial struct rangeP {
     internal @string name;
 }
 
+} partial class traceᴛSummarizer {
+
 // Event feeds a single event into the stats summarizer.
-public static void Event(this ref Summarizer s, ж<ΔEvent> ev) {
+public static void Event(this ref Summarizer s, ж<Event> ev) {
     if (s.syncTs == 0) {
         s.syncTs = ev.Time();
     }
@@ -319,7 +332,7 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> ev) {
                 // If we're coming out of GoUndetermined, then the creation time is the
                 // time of the last sync.
                 g.CreationTime = s.syncTs;
-                g.lastRangeTime = new map<@string, ΔTime>();
+                g.lastRangeTime = new map<@string, Time>();
                 g.BlockTimeByReason = new map<@string, time.Duration>();
                 g.RangeTime = new map<@string, time.Duration>();
 
@@ -362,7 +375,7 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> ev) {
 
                 // The goroutine is being created.
                 g.CreationTime = ev.Time();
-                g.lastRangeTime = new map<@string, ΔTime>();
+                g.lastRangeTime = new map<@string, Time>();
                 g.BlockTimeByReason = new map<@string, time.Duration>();
                 g.RangeTime = new map<@string, time.Duration>();
 
@@ -569,10 +582,10 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> ev) {
             Start: ev,
             GoroutineExecStats: g.snapshotStat(ev.Time())
         ));
-        g.activeRegions = builtin.append(g.activeRegions, region);
+        g.activeRegions = append(g.activeRegions, region);
         // Associate the region and current goroutine to the task.
         var task = s.getOrAddTask(r.Task);
-        task.Regions = builtin.append(task.Regions, region);
+        task.Regions = append(task.Regions, region);
         task.Goroutines[g.ID] = g;
         break;
     }
@@ -593,11 +606,11 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> ev) {
             // Associate the region and current goroutine to the task.
             var task = s.getOrAddTask(r.Task);
             task.Goroutines[g.ID] = g;
-            task.Regions = builtin.append(task.Regions, sd);
+            task.Regions = append(task.Regions, sd);
         }
         sd.GoroutineExecStats = g.snapshotStat(ev.Time()).sub(sd.GoroutineExecStats);
         sd.End = ev;
-        g.Regions = builtin.append(g.Regions, sd);
+        g.Regions = append(g.Regions, sd);
         break;
     }
     // Handle tasks and logs.
@@ -618,7 +631,7 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> ev) {
         if (t.Parent != NoTask && task.Parent == nil) {
             var parent = s.getOrAddTask(t.Parent);
             task.Parent = parent;
-            parent.Children = builtin.append(parent.Children, task);
+            parent.Children = append(parent.Children, task);
         }
         break;
     }
@@ -628,7 +641,7 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> ev) {
         // doesn't exist (it's just been mentioned now).
         var task = s.getOrAddTask(log.Task);
         task.Goroutines[ev.Goroutine()] = s.gs[ev.Goroutine()];
-        task.Logs = builtin.append(task.Logs, ev);
+        task.Logs = append(task.Logs, ev);
         break;
     }}
 }
@@ -671,6 +684,8 @@ public static ж<Summary> ΔFinalize(this ref Summarizer s) {
     ));
 }
 
+} partial class trace_package {
+
 // Process all the events, looking for transitions of goroutines
 // out of GoWaiting. If there was an active goroutine when this
 // happened, then we know that active goroutine unblocked another.
@@ -683,7 +698,7 @@ internal partial struct RelatedGoroutinesV2_unblockEdge /*dyn*/ {
 // RelatedGoroutinesV2 finds a set of goroutines related to goroutine goid for v2 traces.
 // The association is based on whether they have synchronized with each other in the Go
 // scheduler (one has unblocked another).
-public static map<GoID, EmptyStruct> RelatedGoroutinesV2(slice<ΔEvent> events, GoID goid) {
+public static map<GoID, EmptyStruct> RelatedGoroutinesV2(slice<Event> events, GoID goid) {
     var unblockEdgesᴷ = new stackAppend<RelatedGoroutinesV2_unblockEdge>();
 
     slice<RelatedGoroutinesV2_unblockEdge> unblockEdges = default;
@@ -705,7 +720,7 @@ public static map<GoID, EmptyStruct> RelatedGoroutinesV2(slice<ΔEvent> events, 
         if (old == @new || old != GoWaiting) {
             continue;
         }
-        unblockEdges = builtin.append(unblockEdgesᴷ, unblockEdges, new RelatedGoroutinesV2_unblockEdge(
+        unblockEdges = append(unblockEdgesᴷ, unblockEdges, new RelatedGoroutinesV2_unblockEdge(
             @operator: ev.Goroutine(),
             operand: id
         ));

@@ -10,6 +10,7 @@ using sig = go.crypto.@internal.boring.sig_package;
 using hash = hash_package;
 using go.crypto;
 using go.crypto.@internal.boring;
+using static boring_package;
 
 partial class boring_package {
 
@@ -30,7 +31,11 @@ public static void UnreachableExceptTests() { }
 
 public partial struct randReader /*num:nint*/;
 
+} partial class boringᴛrandReader {
+
 public static (nint, error) Read(this randReader _, slice<byte> b) { throw panic("boringcrypto: not available"); }
+
+} partial class boring_package {
 
 public static randReader RandReader => /* randReader(0) */ 0;
 
@@ -129,7 +134,13 @@ public static (slice<byte>, error) ECDH(ж<PrivateKeyECDH> _Δp0, ж<PublicKeyEC
 public static (ж<PrivateKeyECDH>, slice<byte>, error) GenerateKeyECDH(@string _) { throw panic("boringcrypto: not available"); }
 public static (ж<PrivateKeyECDH>, error) NewPrivateKeyECDH(@string _Δp0, slice<byte> _Δp1) { throw panic("boringcrypto: not available"); }
 public static (ж<PublicKeyECDH>, error) NewPublicKeyECDH(@string _Δp0, slice<byte> _Δp1) { throw panic("boringcrypto: not available"); }
+
+} partial class boringᴛPublicKeyECDH {
+
 public static slice<byte> Bytes(this ref PublicKeyECDH _) { throw panic("boringcrypto: not available"); }
+
+} partial class boringᴛPrivateKeyECDH {
+
 public static (ж<PublicKeyECDH>, error) PublicKey(this ref PrivateKeyECDH _) { throw panic("boringcrypto: not available"); }
 
-} // end boring_package
+} // end boringᴛPrivateKeyECDH

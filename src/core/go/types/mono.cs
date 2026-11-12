@@ -10,6 +10,7 @@ using token = global::go.go.token_package;
 using static global::go.@internal.types.errors_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
+using static types_package;
 
 partial class types_package {
 
@@ -74,9 +75,11 @@ partial struct monoVertex {
 partial struct monoEdge {
     internal nint dst, src;
     internal nint weight;
-    internal tokenꓸPos pos;
-    internal ΔType typ;
+    internal token.Pos pos;
+    internal Type typ;
 }
+
+} partial class typesᴛChecker {
 
 internal static void monomorph(this ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
@@ -168,6 +171,8 @@ internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) {
     err.report();
 }
 
+} partial class typesᴛmonoGraph {
+
 // recordCanon records that tpar is the canonical type parameter
 // corresponding to method type parameter mpar.
 internal static void recordCanon(this ref monoGraph w, ж<TypeParam> mpar, ж<TypeParam> tpar) {
@@ -179,9 +184,9 @@ internal static void recordCanon(this ref monoGraph w, ж<TypeParam> mpar, ж<Ty
 
 // recordInstance records that the given type parameters were
 // instantiated with the corresponding type arguments.
-internal static void recordInstance(this ж<monoGraph> Ꮡw, ж<Package> pkg, tokenꓸPos pos, slice<ж<TypeParam>> tparams, slice<ΔType> targs, slice<ast.Expr> xlist) {
+internal static void recordInstance(this ж<monoGraph> Ꮡw, ж<Package> pkg, token.Pos pos, slice<ж<TypeParam>> tparams, slice<Type> targs, slice<ast.Expr> xlist) {
     foreach (var (i, tpar) in range(tparams)) {
-        tokenꓸPos posΔ1 = pos;
+        token.Pos posΔ1 = pos;
         if (i < len(xlist)) {
             posΔ1 = startPos(xlist[i]);
         }
@@ -190,7 +195,7 @@ internal static void recordInstance(this ж<monoGraph> Ꮡw, ж<Package> pkg, to
 }
 
 // assign records that tpar was instantiated as targ at pos.
-internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> pkg, tokenꓸPos pos, ж<TypeParam> Ꮡtpar, ΔType targ) {
+internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> pkg, token.Pos pos, ж<TypeParam> Ꮡtpar, Type targ) {
     ref var tpar = ref Ꮡtpar.DerefOrNull();
 
     // Go generics do not have an analog to C++`s template-templates,
@@ -206,7 +211,7 @@ internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> pkg, tokenꓸPo
     }
 
     // flow adds an edge from vertex src representing that typ flows to tpar.
-    void flow(nint src, ΔType typ) {
+    void flow(nint src, Type typ) {
         nint weight = 1;
         if (AreEqual(typ, targ)) {
             weight = 0;
@@ -217,9 +222,9 @@ internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> pkg, tokenꓸPo
 
     // Recursively walk the type argument to find any defined types or
     // type parameters.
-    ref var @do = ref heap<Action<ΔType>>(out var Ꮡdo);
+    ref var @do = ref heap<Action<Type>>(out var Ꮡdo);
     var flowʗ1 = flow;
-    @do = (ΔType typ) => {
+    @do = (Type typ) => {
         var switchᴛ9 = Unalias(typ);
         switch (switchᴛ9.type()) {
         default: {
@@ -229,12 +234,12 @@ internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> pkg, tokenꓸPo
         }
         case ж<TypeParam> typΔ1: {
             assert(typΔ1.Obj().of(TypeName.Ꮡobject).Pkg() == pkg);
-            flowʗ1(Ꮡw.Value.typeParamVertex(typΔ1), new TypeParamжΔType(typΔ1));
+            flowʗ1(Ꮡw.Value.typeParamVertex(typΔ1), new TypeParamжType(typΔ1));
             break;
         }
         case ж<Named> typΔ1: {
             nint src = Ꮡw.Value.localNamedVertex(pkg, typΔ1.Origin()); if (src >= 0) {
-                flowʗ1(src, new NamedжΔType(typΔ1));
+                flowʗ1(src, new NamedжType(typΔ1));
             }
 
             var targs = typΔ1.TypeArgs();
@@ -274,7 +279,7 @@ internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> pkg, tokenꓸPo
             }
             break;
         }
-        case ж<ΔSignature> typΔ1: {
+        case ж<Signature> typΔ1: {
             void tuple(ж<Tuple> tup) {
                 for (nint i = 0; i < tup.Len(); i++) {
                     Ꮡdo.ValueSlot(tup.At(i).of(Var.Ꮡobject).Type());
@@ -326,7 +331,7 @@ internal static nint localNamedVertex(this ref monoGraph w, ж<Package> pkg, ж<
                         w.vertices = append(w.vertices, new monoVertex(obj: obj));
                     }
 
-                    w.addEdge(idx, w.typeParamVertex(tpar), 1, obj.of(TypeName.Ꮡobject).Pos(), new TypeParamжΔType(tpar));
+                    w.addEdge(idx, w.typeParamVertex(tpar), 1, obj.of(TypeName.Ꮡobject).Pos(), new TypeParamжType(tpar));
                 }
             }
         }
@@ -363,7 +368,7 @@ internal static nint typeParamVertex(this ref monoGraph w, ж<TypeParam> Ꮡtpar
     return idx;
 }
 
-internal static void addEdge(this ref monoGraph w, nint dst, nint src, nint weight, tokenꓸPos pos, ΔType typ) {
+internal static void addEdge(this ref monoGraph w, nint dst, nint src, nint weight, token.Pos pos, Type typ) {
     // TODO(mdempsky): Deduplicate redundant edges?
     w.edges = append(w.edges, new monoEdge(
         dst: dst,
@@ -375,4 +380,4 @@ internal static void addEdge(this ref monoGraph w, nint dst, nint src, nint weig
     ));
 }
 
-} // end types_package
+} // end typesᴛmonoGraph

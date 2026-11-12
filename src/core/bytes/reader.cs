@@ -7,6 +7,7 @@ using errors = errors_package;
 using io = io_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
+using static bytes_package;
 
 partial class bytes_package {
 
@@ -20,6 +21,8 @@ partial struct Reader {
     internal int64 i;       // current reading index
     internal nint prevRune; // index of previous rune; or < 0
 }
+
+} partial class bytesᴛReader {
 
 // Len returns the number of bytes of the unread portion of the
 // slice.
@@ -193,6 +196,8 @@ public static (int64 n, error err) WriteTo(this ref Reader r, io.Writer w) {
 
 // Reset resets the [Reader] to be reading from b.
 public static void Reset(this ref Reader r, slice<byte> b) { r = new Reader(b, 0, -1); }
+
+} partial class bytes_package {
 
 // NewReader returns a new [Reader] reading from b.
 public static ж<Reader> NewReader(slice<byte> b) { return Ꮡ(new Reader(b, 0, -1)); }

@@ -14,8 +14,11 @@ using hash = hash_package;
 using io = io_package;
 using go.crypto;
 using go.crypto.@internal.fips140;
+using static tls_package;
 
 partial class tls_package {
+
+} partial class tlsᴛcipherSuiteTLS13 {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string trafficUpdˢ => ref trafficUpdˢᵇ;
@@ -70,13 +73,15 @@ internal static slice<byte> finishedHash(this ж<cipherSuiteTLS13> Ꮡc, slice<b
 
 // exportKeyingMaterial implements RFC5705 exporters for TLS 1.3 according to
 // RFC 8446, Section 7.5.
-internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> exportKeyingMaterial(this ref cipherSuiteTLS13 c, ж<tls13ꓸMasterSecret> Ꮡs, hash.Hash transcript) {
+internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> exportKeyingMaterial(this ref cipherSuiteTLS13 c, ж<tls13.MasterSecret> Ꮡs, hash.Hash transcript) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var expMasterSecret = s.ExporterMasterSecret(transcript);
     var expMasterSecretʗ1 = expMasterSecret;
     return (@string label, slice<byte> context, nint length) => (expMasterSecretʗ1.Exporter(label, context, length), default);
 }
+
+} partial class tls_package {
 
 partial struct keySharePrivateKeys {
     internal ж<ecdh.PrivateKey> ecdhe;
@@ -154,8 +159,10 @@ internal static (keyExchange, error) keyExchangeForCurveID(CurveID id) {
 
 partial struct ecdhKeyExchange {
     internal CurveID id;
-    internal ecdhꓸCurve curve;
+    internal ecdh.Curve curve;
 }
+
+} partial class tlsᴛecdhKeyExchange {
 
 internal static (ж<keySharePrivateKeys>, slice<keyShare>, error) keyShares(this ref ecdhKeyExchange ke, io.Reader rand) {
     var (priv, err) = ke.curve.GenerateKey(rand);
@@ -195,6 +202,8 @@ internal static (slice<byte>, error) clientSharedSecret(this ref ecdhKeyExchange
     return (sharedKey, default);
 }
 
+} partial class tls_package {
+
 partial struct hybridKeyExchange {
     internal CurveID id;
     internal ecdhKeyExchange ecdh;
@@ -204,6 +213,8 @@ partial struct hybridKeyExchange {
     internal Func<slice<byte>, (crypto.Decapsulator, error)> newMLKEMPrivateKey;
     internal Func<slice<byte>, (crypto.Encapsulator, error)> newMLKEMPublicKey;
 }
+
+} partial class tlsᴛhybridKeyExchange {
 
 internal static (ж<keySharePrivateKeys>, slice<keyShare>, error) keyShares(this ж<hybridKeyExchange> Ꮡke, io.Reader rand) {
     ref var ke = ref Ꮡke.DerefOrNull();
@@ -325,4 +336,4 @@ internal static (slice<byte>, error) clientSharedSecret(this ж<hybridKeyExchang
     return (sharedKey, default);
 }
 
-} // end tls_package
+} // end tlsᴛhybridKeyExchange

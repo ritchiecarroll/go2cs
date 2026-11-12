@@ -59,8 +59,8 @@ using static go.vendor.golang.org.x.crypto.@internal.poly1305_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/internal/poly1305/poly1305.go", "poly1305.cs", "ABs40oKCqLKCggACGAAJAoKCAA4igJzigpSqooKCgqqigoKC")]
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/internal/poly1305/sum_generic.go", "sum_generic.cs", "AA4+AA8CgoKmgoKCABQwwoKCgoKClIKClICCgqSClKyygoKUAAgYsoKCggAIEoKCpoKCgoKUpoKCggACFPKClIIACBKCgoKUlIKClIKClAAYMoKCgoKC7oKUgqaCgoKUgoKCABAigriCgpSUgoLuAAUSgAAGGNLugoKmggAHEIKUgg==")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/internal/poly1305/poly1305.go", "poly1305.cs", "ABw40oKCqLKCggACGAAJAoKCABAigJzigpSqooKCgqqigoKC")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/internal/poly1305/sum_generic.go", "sum_generic.cs", "AA8+AA8CgoKmgoKCABYwwoKCgoKClIKClICCgqSClKyygoKUAAoYsoKCggAIEoKCpoKCgoKUpoKCggACFPKClIIACBKCgoKUlIKClIKClAAYMoKCgoKC7oKUgqaCgoKUgoKCABAigriCgpSUgoLuAAUSgAAGGNLugoKmggAHEIKUgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.crypto.@internal;
@@ -94,3 +94,14 @@ public static partial class poly1305_package
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(poly1305_package.MAC)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class poly1305ᴛMAC;
+[GoMethodHost(typeof(poly1305_package.macGeneric)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class poly1305ᴛmacGeneric;
+// </MethodHolders>

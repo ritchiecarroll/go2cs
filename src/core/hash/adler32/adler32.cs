@@ -17,6 +17,8 @@ using errors = errors_package;
 using hash = hash_package;
 using byteorder = @internal.byteorder_package;
 using @internal;
+using adler32 = adler32_package;
+using static adler32_package;
 
 partial class adler32_package {
 
@@ -28,13 +30,17 @@ internal static UntypedInt mod => 65521;
 internal static UntypedInt nmax => 5552;
 
 // The size of an Adler-32 checksum in bytes.
-public static UntypedInt ΔSize => 4;
+public static UntypedInt Size => 4;
 
 // digest represents the partial evaluation of a checksum.
 // The low 16 bits are s1, the high 16 bits are s2.
 partial struct digest /*num:uint32*/;
 
+} partial class adler32ᴛdigest {
+
 internal static void Reset(this ref digest d) { d = 1; }
+
+} partial class adler32_package {
 
 // New returns a new hash.Hash32 computing the Adler-32 checksum. Its
 // Sum method will lay the value out in big-endian byte order. The
@@ -47,13 +53,19 @@ public static hash.Hash32 New() {
     return new digestжHash32(d);
 }
 
-internal static nint Size(this ref digest d) { return ΔSize; }
+} partial class adler32ᴛdigest {
+
+internal static nint Size(this ref digest d) { return adler32.Size; }
 
 internal static nint BlockSize(this ref digest d) { return 4; }
+
+} partial class adler32_package {
 
 internal static ref readonly @string magic => ref magicᵇ;
 private static readonly @string magicᵇ = "adl\x01"u8;
 internal const nint marshaledSize = /* len(magic) + 4 */ 8;
+
+} partial class adler32ᴛdigest {
 
 internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) {
     b = append(b, magic.ꓸꓸꓸ);
@@ -87,6 +99,8 @@ internal static (hash.Cloner, error) Clone(this ref digest d) {
     return (new digestжCloner(Ꮡr), default);
 }
 
+} partial class adler32_package {
+
 // Add p to the running checksum d.
 internal static digest update(digest d, slice<byte> p) {
     var (s1, s2) = ((uint32)((digest)(d & 0xffff)), (uint32)(d >> 16));
@@ -117,6 +131,8 @@ internal static digest update(digest d, slice<byte> p) {
     return (digest)(s2 << 16 | s1);
 }
 
+} partial class adler32ᴛdigest {
+
 internal static (nint nn, error err) Write(this ref digest d, slice<byte> p) {
     d = update(d, p);
     return (len(p), default);
@@ -128,6 +144,8 @@ internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
     var s = (uint32)(d);
     return append(@in, (byte)(s >> 24), (byte)(s >> 16), (byte)(s >> 8), (byte)s);
 }
+
+} partial class adler32_package {
 
 // Checksum returns the Adler-32 checksum of data.
 public static uint32 Checksum(slice<byte> data) { return (uint32)update(1, data); }

@@ -106,6 +106,7 @@ using syscall = syscall_package;
 using time = time_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
+using static net_package;
 
 partial class net_package {
 
@@ -114,7 +115,7 @@ partial class net_package {
 // The two methods [Addr.Network] and [Addr.String] conventionally return strings
 // that can be passed as the arguments to [Dial], but the exact form
 // and meaning of the strings is up to the implementation.
-partial interface ΔAddr {
+partial interface Addr {
     @string Network(); // name of the network (for example, "tcp", "udp")
     @string String();  // string form of address (for example, "192.0.2.1:25", "[2001:db8::1]:80")
 }
@@ -139,9 +140,9 @@ partial interface Conn :
     // for TCP connections see [*TCPConn.SetLinger].
     // Close() error is provided by io.ReadWriteCloser
     // LocalAddr returns the local network address, if known.
-    ΔAddr LocalAddr();
+    Addr LocalAddr();
     // RemoteAddr returns the remote network address, if known.
-    ΔAddr RemoteAddr();
+    Addr RemoteAddr();
     // SetDeadline sets the read and write deadlines associated
     // with the connection. It is equivalent to calling both
     // SetReadDeadline and SetWriteDeadline.
@@ -179,6 +180,8 @@ partial interface Conn :
 partial struct conn {
     internal ж<netFD> fd;
 }
+
+} partial class netᴛconn {
 
 internal static bool ok(this ж<conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -233,7 +236,7 @@ internal static error Close(this ж<conn> Ꮡc) {
 // LocalAddr returns the local network address.
 // The Addr returned is shared by all invocations of LocalAddr, so
 // do not modify it.
-internal static ΔAddr LocalAddr(this ж<conn> Ꮡc) {
+internal static Addr LocalAddr(this ж<conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -245,7 +248,7 @@ internal static ΔAddr LocalAddr(this ж<conn> Ꮡc) {
 // RemoteAddr returns the remote network address.
 // The Addr returned is shared by all invocations of RemoteAddr, so
 // do not modify it.
-internal static ΔAddr RemoteAddr(this ж<conn> Ꮡc) {
+internal static Addr RemoteAddr(this ж<conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -342,6 +345,8 @@ internal static (ж<os.File> f, error err) File(this ref conn c) {
     return (f, err);
 }
 
+} partial class net_package {
+
 // PacketConn is a generic packet-oriented network connection.
 //
 // Multiple goroutines may invoke methods on a PacketConn simultaneously.
@@ -357,17 +362,17 @@ partial interface PacketConn :
     // the n > 0 bytes returned before considering the error err.
     // ReadFrom can be made to time out and return an error after a
     // fixed time limit; see SetDeadline and SetReadDeadline.
-    (nint n, ΔAddr addr, error err) ReadFrom(slice<byte> p);
+    (nint n, Addr addr, error err) ReadFrom(slice<byte> p);
     // WriteTo writes a packet with payload p to addr.
     // WriteTo can be made to time out and return an Error after a
     // fixed time limit; see SetDeadline and SetWriteDeadline.
     // On packet-oriented connections, write timeouts are rare.
-    (nint n, error err) WriteTo(slice<byte> p, ΔAddr addr);
+    (nint n, error err) WriteTo(slice<byte> p, Addr addr);
     // Close closes the connection.
     // Any blocked ReadFrom or WriteTo operations will be unblocked and return errors.
     // Close() error is provided by io.Closer
     // LocalAddr returns the local network address, if known.
-    ΔAddr LocalAddr();
+    Addr LocalAddr();
     // SetDeadline sets the read and write deadlines associated
     // with the connection. It is equivalent to calling both
     // SetReadDeadline and SetWriteDeadline.
@@ -441,11 +446,11 @@ partial interface Listener :
     // Any blocked Accept operations will be unblocked and return errors.
     // Close() error is provided by io.Closer
     // Addr returns the listener's network address.
-    ΔAddr Addr();
+    Addr Addr();
 }
 
 // An Error represents a network error.
-partial interface ΔError :
+partial interface Error :
     error
 {
     bool Timeout(); // Is the error a timeout?
@@ -471,6 +476,8 @@ public static error ErrWriteToConnected = errors.New("use of WriteTo with pre-co
 partial struct canceledError {
 }
 
+} partial class netᴛcanceledError {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string operationWasCanceledˢ => ref operationWasCanceledˢᵇ;
 private static readonly @string operationWasCanceledˢᵇ = "operation was canceled"u8;
@@ -478,6 +485,8 @@ private static readonly @string operationWasCanceledˢᵇ = "operation was cance
 internal static @string Error(this canceledError _) { return operationWasCanceledˢ; }
 
 internal static bool Is(this canceledError _, error err) { return AreEqual(err, context.Canceled); }
+
+} partial class net_package {
 
 // mapErr maps from the context errors to the historical internal net
 // error values.
@@ -507,20 +516,26 @@ partial struct OpError {
     // For operations involving a remote network connection, like
     // Dial, Read, or Write, Source is the corresponding local
     // network address.
-    public ΔAddr Source;
+    public Addr Source;
     // Addr is the network address for which this error occurred.
     // For local operations, like Listen or SetDeadline, Addr is
     // the address of the local endpoint being manipulated.
     // For operations involving a remote network connection, like
     // Dial, Read, or Write, Addr is the remote address of that
     // connection.
-    public ΔAddr Addr;
+    public Addr Addr;
     // Err is the error that occurred during the operation.
     // The Error method panics if the error is nil.
     public error Err;
 }
 
+} partial class netᴛOpError {
+
 public static error Unwrap(this ref OpError e) { return e.Err; }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
 
 public static @string Error(this ж<OpError> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
@@ -547,6 +562,8 @@ public static @string Error(this ж<OpError> Ꮡe) {
     return s;
 }
 
+} partial class net_package {
+
 // aLongTimeAgo is a non-zero time, far in the past, used for
 // immediate cancellation of dials.
 internal static time.Time aLongTimeAgo = time.Unix(1, 0);
@@ -560,6 +577,8 @@ partial interface timeout {
     bool Timeout();
 }
 
+} partial class netᴛOpError {
+
 public static bool Timeout(this ref OpError e) {
     var (ne, okΔ1) = e.Err._<ж<os.SyscallError>>(ᐧ); if (okΔ1) {
         var (tΔ1, okΔ2) = ne.Err._<timeout>(ᐧ);
@@ -569,9 +588,13 @@ public static bool Timeout(this ref OpError e) {
     return ok && t.Timeout();
 }
 
+} partial class net_package {
+
 partial interface temporary {
     bool Temporary();
 }
+
+} partial class netᴛOpError {
 
 public static bool Temporary(this ref OpError e) {
     // Treat ECONNRESET and ECONNABORTED as temporary errors when
@@ -588,6 +611,8 @@ public static bool Temporary(this ref OpError e) {
     return ok && t.Temporary();
 }
 
+} partial class net_package {
+
 // A ParseError is the error type of literal network address parsers.
 partial struct ParseError {
     // Type is the type of string that was expected, such as
@@ -597,15 +622,25 @@ partial struct ParseError {
     public @string Text;
 }
 
+} partial class netᴛParseError {
+
 public static @string Error(this ref ParseError e) { return "invalid "u8 + e.Type + ": "u8 + e.Text; }
 
 public static bool Timeout(this ref ParseError e) { return false; }
 public static bool Temporary(this ref ParseError e) { return false; }
 
+} partial class net_package {
+
 partial struct AddrError {
     public @string Err;
     public @string Addr;
 }
+
+} partial class netᴛAddrError {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
 
 public static @string Error(this ж<AddrError> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
@@ -623,17 +658,27 @@ public static @string Error(this ж<AddrError> Ꮡe) {
 public static bool Timeout(this ref AddrError e) { return false; }
 public static bool Temporary(this ref AddrError e) { return false; }
 
+} partial class net_package {
+
 partial struct UnknownNetworkError /*@string*/;
+
+} partial class netᴛUnknownNetworkError {
 
 public static @string Error(this UnknownNetworkError e) { return "unknown network "u8 + ((@string)e); }
 public static bool Timeout(this UnknownNetworkError e) { return false; }
 public static bool Temporary(this UnknownNetworkError e) { return false; }
 
+} partial class net_package {
+
 partial struct InvalidAddrError /*@string*/;
+
+} partial class netᴛInvalidAddrError {
 
 public static @string Error(this InvalidAddrError e) { return (@string)e; }
 public static bool Timeout(this InvalidAddrError e) { return false; }
 public static bool Temporary(this InvalidAddrError e) { return false; }
+
+} partial class net_package {
 
 // errTimeout exists to return the historical "i/o timeout" string
 // for context.DeadlineExceeded. See mapErr.
@@ -651,6 +696,8 @@ internal static error errTimeout = new timeoutErrorжerror(Ꮡ(new timeoutError(
 partial struct timeoutError {
 }
 
+} partial class netᴛtimeoutError {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string iOTimeoutˢ => ref iOTimeoutˢᵇ;
 private static readonly @string iOTimeoutˢᵇ = "i/o timeout"u8;
@@ -663,16 +710,22 @@ internal static bool Is(this ref timeoutError e, error err) {
     return AreEqual(err, context.DeadlineExceeded);
 }
 
+} partial class net_package {
+
 // DNSConfigError represents an error reading the machine's DNS configuration.
 // (No longer used; kept for compatibility.)
 partial struct DNSConfigError {
     public error Err;
 }
 
+} partial class netᴛDNSConfigError {
+
 public static error Unwrap(this ref DNSConfigError e) { return e.Err; }
 public static @string Error(this ref DNSConfigError e) { return "error reading DNS config: "u8 + e.Err.Error(); }
 public static bool Timeout(this ref DNSConfigError e) { return false; }
 public static bool Temporary(this ref DNSConfigError e) { return false; }
+
+} partial class net_package {
 
 // Various errors contained in DNSError.
 internal static ж<notFoundError> errNoSuchHost = Ꮡ(new notFoundError("no such host"));
@@ -684,7 +737,11 @@ partial struct notFoundError {
     internal @string s;
 }
 
+} partial class netᴛnotFoundError {
+
 internal static @string Error(this ref notFoundError e) { return e.s; }
+
+} partial class net_package {
 
 // temporaryError is an error type that implements the [Error] interface.
 // It returns true from the Temporary method.
@@ -692,9 +749,13 @@ partial struct temporaryError {
     internal @string s;
 }
 
+} partial class netᴛtemporaryError {
+
 internal static @string Error(this ref temporaryError e) { return e.s; }
 internal static bool Temporary(this ref temporaryError e) { return true; }
 internal static bool Timeout(this ref temporaryError e) { return false; }
+
+} partial class net_package {
 
 // DNSError represents a DNS lookup error.
 partial struct DNSError {
@@ -717,7 +778,7 @@ internal static ж<DNSError> newDNSError(error err, @string name, @string server
     ref var isTemporary = ref heap(new bool(), out var ᏑisTemporary);
     error unwrapErr = default;
 
-    var (errΔ1, ok) = err._<ΔError>(ᐧ); if (ok) {
+    var (errΔ1, ok) = err._<Error>(ᐧ); if (ok) {
         isTimeout = errΔ1.Timeout();
         isTemporary = errΔ1.Temporary();
     }
@@ -741,8 +802,14 @@ internal static ж<DNSError> newDNSError(error err, @string name, @string server
     ));
 }
 
+} partial class netᴛDNSError {
+
 // Unwrap returns e.UnwrapErr.
 public static error Unwrap(this ref DNSError e) { return e.UnwrapErr; }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
 
 public static @string Error(this ж<DNSError> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
@@ -768,6 +835,8 @@ public static bool Timeout(this ref DNSError e) { return e.IsTimeout; }
 // error and return a [DNSError] for which Temporary returns false.
 public static bool Temporary(this ref DNSError e) { return e.IsTimeout || e.IsTemporary; }
 
+} partial class net_package {
+
 // errClosed exists just so that the docs for ErrClosed don't mention
 // the internal package poll.
 internal static poll.errNetClosing errClosed = poll.ErrNetClosing;
@@ -784,11 +853,15 @@ public static error ErrClosed = errClosed;
 partial struct noReadFrom {
 }
 
+} partial class netᴛnoReadFrom {
+
 // ReadFrom hides another ReadFrom method.
 // It should never be called.
 internal static (int64, error) ReadFrom(this noReadFrom _Δp0, Δio.Reader _Δp1) {
     throw panic("can't happen");
 }
+
+} partial class net_package {
 
 // tcpConnWithoutReadFrom implements all the methods of *TCPConn other
 // than ReadFrom. This is used to permit ReadFrom to call io.Copy
@@ -810,11 +883,15 @@ internal static (int64 n, error err) genericReadFrom(ж<TCPConn> c, Δio.Reader 
 partial struct noWriteTo {
 }
 
+} partial class netᴛnoWriteTo {
+
 // WriteTo hides another WriteTo method.
 // It should never be called.
 internal static (int64, error) WriteTo(this noWriteTo _Δp0, Δio.Writer _Δp1) {
     throw panic("can't happen");
 }
+
+} partial class net_package {
 
 // tcpConnWithoutWriteTo implements all the methods of *TCPConn other
 // than WriteTo. This is used to permit WriteTo to call io.Copy
@@ -878,6 +955,8 @@ partial struct Buffers /*[]slice<byte>*/;
 internal static Δio.WriterTo _ᴛ2ʗ = new BuffersжWriterTo(((ж<Buffers>)nil));
 internal static Δio.Reader _ᴛ3ʗ = new BuffersжReader(((ж<Buffers>)nil));
 
+} partial class netᴛBuffers {
+
 // WriteTo writes contents of the buffers to w.
 //
 // WriteTo implements [io.WriterTo] for [Buffers].
@@ -938,4 +1017,4 @@ internal static void consume(this ref Buffers v, int64 n) {
     }
 }
 
-} // end net_package
+} // end netᴛBuffers

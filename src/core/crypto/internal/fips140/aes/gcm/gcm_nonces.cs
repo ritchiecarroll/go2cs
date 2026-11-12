@@ -13,6 +13,7 @@ using math = math_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using go.crypto.@internal.fips140deps;
+using static gcm_package;
 
 partial class gcm_package {
 
@@ -96,6 +97,8 @@ partial struct GCMWithCounterNonce {
     internal uint64 next;
 }
 
+} partial class gcmᴛGCMWithCounterNonce {
+
 public static nint NonceSize(this ref GCMWithCounterNonce g) { return gcmStandardNonceSize; }
 
 public static nint Overhead(this ref GCMWithCounterNonce g) { return gcmTagSize; }
@@ -147,6 +150,8 @@ public static (slice<byte>, error) Open(this ж<GCMWithCounterNonce> Ꮡg, slice
     fips140.RecordApproved();
     return Ꮡg.Ꮡg.Open(dst, nonce, ciphertext, data);
 }
+
+} partial class gcm_package {
 
 // NewGCMWithXORCounterNonce returns a new AEAD that works like GCM, but
 // enforces the construction of deterministic nonces. The nonce must be 96 bits,
@@ -220,6 +225,8 @@ partial struct GCMWithXORCounterNonce {
     internal uint64 mask;
     internal uint64 next;
 }
+
+} partial class gcmᴛGCMWithXORCounterNonce {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string cryptoCipherIncorrectˢ => ref cryptoCipherIncorrectˢᵇ;
@@ -298,4 +305,4 @@ public static (slice<byte>, error) Open(this ж<GCMWithXORCounterNonce> Ꮡg, sl
     return Ꮡg.Ꮡg.Open(dst, nonce, ciphertext, data);
 }
 
-} // end gcm_package
+} // end gcmᴛGCMWithXORCounterNonce

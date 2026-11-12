@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
 // </ImportedTypeAliases>
 
 using go;
@@ -56,7 +55,7 @@ using static go.crypto.x509.pkix_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/x509/pkix/pkix.go", "pkix.cs", "ABs0AAscwoKCgoKUgoKmgoKCgoKCpqaClIKUlLa2toKUuLgALmjSgoKmgoKCgqaCgpS0tLS0tLS0tAAHEIKCgoKCgoKCnsKCpoKCgqYAAh4ADgKCgoKCgoKCgpSClIKmqsKmgoKCgqbapoKqooKCpgANHpI=")]
+[assembly: GoPositionMap("crypto/x509/pkix/pkix.go", "pkix.cs", "ABw0AA0cwoKCgoKUgoKmgoKCgoKCpqaClIKUlLa2toKUuLgAMmjSgoKmgoKCgqaCgpS0tLS0tLS0tAAJEIKCgoKCgoKCvsKCpoKCgqYAAh4ADgKCgoKCgoKCgpSClIKmqsKmgoKCgqbapoLKooKCpgAPHpI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.x509;
@@ -97,3 +96,15 @@ public static partial class pkix_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(pkix_package.CertificateList)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkixᴛCertificateList;
+[GoMethodHost(typeof(pkix_package.Name)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkixᴛName;
+[GoMethodHost(typeof(pkix_package.RDNSequence)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkixᴛRDNSequence;
+// </MethodHolders>

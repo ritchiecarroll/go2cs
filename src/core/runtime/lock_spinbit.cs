@@ -65,11 +65,11 @@ internal static UntypedInt mutexPassiveSpinCount => 1;
 internal static UntypedInt mutexTailWakePeriod => 16;
 
 //go:nosplit
-internal static ж<uint8> key8(ж<uintptr> Δp) {
+internal static ж<uint8> key8(ж<uintptr> p) {
     if (goarch.BigEndian) {
-        return ((ж<array<uint8>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Δp))).at<uint8>(goarch.PtrSize / 1 - 1);
+        return ((ж<array<uint8>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(p))).at<uint8>(goarch.PtrSize / 1 - 1);
     }
-    return ((ж<array<uint8>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Δp))).at<uint8>(0);
+    return ((ж<array<uint8>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(p))).at<uint8>(0);
 }
 
 // mWaitList is part of the M struct, and holds the list of Ms that are waiting
@@ -92,8 +92,8 @@ private static readonly @string runtimeMMemoryAlignmentˢᵇ = "runtime.m memory
 internal static void lockVerifyMSize() {
     var size = roundupsize(/* unsafe.Sizeof(mPadded{}) */ (uintptr)2040, false) + (uintptr)gc.MallocHeaderSize;
     if ((uintptr)(size & (uintptr)mutexMMask) != 0) {
-        print((@string)"M structure uses sizeclass ", size, (@string)"/", (Δhex)(uint64)size, (@string)" bytes; ",
-            (@string)"incompatible with mutex flag mask ", (Δhex)mutexMMask, (@string)"\n");
+        print((@string)"M structure uses sizeclass ", size, (@string)"/", (hex)(uint64)size, (@string)" bytes; ",
+            (@string)"incompatible with mutex flag mask ", (hex)mutexMMask, (@string)"\n");
         @throw(runtimeMMemoryAlignmentˢ);
     }
 }

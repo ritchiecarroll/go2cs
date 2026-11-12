@@ -110,23 +110,28 @@ using fs = go.io.fs_package;
 using path;
 using sync;
 using ꓸꓸꓸstring = Span<@string>;
+using static exec_package;
 
 partial class exec_package {
 
 // Error is returned by [LookPath] when it fails to classify a file as an
 // executable.
-partial struct ΔError {
+partial struct Error {
     // Name is the file name for which the error occurred.
     public @string Name;
     // Err is the underlying error.
     public error Err;
 }
 
-public static @string Error(this ref ΔError e) {
+} partial class execᴛError {
+
+public static @string Error(this ref Error e) {
     return "exec: "u8 + strconv.Quote(e.Name) + ": "u8 + e.Err.Error();
 }
 
-public static error Unwrap(this ref ΔError e) { return e.Err; }
+public static error Unwrap(this ref Error e) { return e.Err; }
+
+} partial class exec_package {
 
 // ErrWaitDelay is returned by [Cmd.Wait] if the process exits with a
 // successful status code but its output pipes are not closed before the
@@ -139,6 +144,8 @@ partial struct wrappedError {
     internal error err;
 }
 
+} partial class execᴛwrappedError {
+
 internal static @string Error(this wrappedError w) {
     return w.prefix + ": "u8 + w.err.Error();
 }
@@ -146,6 +153,8 @@ internal static @string Error(this wrappedError w) {
 internal static error Unwrap(this wrappedError w) {
     return w.err;
 }
+
+} partial class exec_package {
 
 partial struct Cmd_cachedLookExtensions /*dyn*/ {
     internal @string @in, @out;
@@ -491,6 +500,8 @@ public static ж<Cmd> CommandContext(context.Context ctx, @string name, params �
     return cmd;
 }
 
+} partial class execᴛCmd {
+
 // String returns a human-readable description of c.
 // It is intended only for debugging.
 // In particular, it is not suitable for use as input to a shell.
@@ -510,6 +521,8 @@ public static @string String(this ref Cmd c) {
     return b.String();
 }
 
+} partial class exec_package {
+
 // interfaceEqual protects against panics from doing equality tests on
 // two interfaces with non-comparable underlying types.
 internal static bool interfaceEqual(any a, any b) {
@@ -523,6 +536,8 @@ internal static bool interfaceEqual(any a, any b) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
+
+} partial class execᴛCmd {
 
 internal static slice<@string> argv(this ref Cmd c) {
     if (len(c.Args) > 0) {
@@ -617,11 +632,15 @@ internal static (ж<os.File>, error) writerDescriptor(this ref Cmd c, io.Writer 
     return (pw, default);
 }
 
+} partial class exec_package {
+
 internal static void closeDescriptors(slice<io.Closer> closers) {
     foreach (var (_, fd) in range(closers)) {
         fd.Close();
     }
 }
+
+} partial class execᴛCmd {
 
 // Run starts the specified command and waits for it to complete.
 //
@@ -643,6 +662,15 @@ public static error Run(this ж<Cmd> Ꮡc) {
     return Ꮡc.Wait();
 }
 
+} partial class exec_package {
+
+internal partial struct Start_goroutineStatus /*dyn*/ {
+    internal nint running;
+    internal error firstErr;
+}
+
+} partial class execᴛCmd {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string execAlreadyStartedˢ => ref execAlreadyStartedˢᵇ;
 private static readonly @string execAlreadyStartedˢᵇ = "exec: already started"u8;
@@ -650,11 +678,6 @@ internal static ref readonly @string execNoCommandˢ => ref execNoCommandˢᵇ;
 private static readonly @string execNoCommandˢᵇ = "exec: no command"u8;
 internal static ref readonly @string execCommandWithANonNilˢ => ref execCommandWithANonNilˢᵇ;
 private static readonly @string execCommandWithANonNilˢᵇ = "exec: command with a non-nil Cancel was not created with CommandContext"u8;
-
-internal partial struct Start_goroutineStatus /*dyn*/ {
-    internal nint running;
-    internal error firstErr;
-}
 
 // Start starts the specified command but does not wait for it to complete.
 //
@@ -924,6 +947,8 @@ internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) 
     resultc.ᐸꟷ(new ctxResult(err: err));
 }
 
+} partial class exec_package {
+
 // An ExitError reports an unsuccessful exit by a command.
 partial struct ExitError {
     /*embed*/ public ж<os_package.ProcessState> ProcessState;
@@ -940,9 +965,13 @@ partial struct ExitError {
     public slice<byte> Stderr;
 }
 
+} partial class execᴛExitError {
+
 public static @string Error(this ref ExitError e) {
     return e.ProcessState.String();
 }
+
+} partial class execᴛCmd {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string execNotStartedˢ => ref execNotStartedˢᵇ;
@@ -1211,6 +1240,8 @@ public static (io.ReadCloser, error) StderrPipe(this ref Cmd c) {
     return (new os_FileжReadCloser(pr), default);
 }
 
+} partial class exec_package {
+
 // prefixSuffixSaver is an io.Writer which retains the first N bytes
 // and the last N bytes written to it. The Bytes() methods reconstructs
 // it with a pretty error message.
@@ -1221,6 +1252,8 @@ partial struct prefixSuffixSaver {
     internal nint suffixOff;     // offset to write into suffix
     internal int64 skipped;
 }
+
+} partial class execᴛprefixSuffixSaver {
 
 // TODO(bradfitz): we could keep one large []byte and use part of it for
 // the prefix, reserve space for the '... Omitting N bytes ...' message,
@@ -1290,6 +1323,8 @@ internal static slice<byte> Bytes(this ref prefixSuffixSaver w) {
     return buf.Bytes();
 }
 
+} partial class execᴛCmd {
+
 // environ returns a best-effort copy of the environment in which the command
 // would be run as it is currently configured. If an error occurs in computing
 // the environment, it is returned alongside the best-effort copy.
@@ -1345,6 +1380,8 @@ public static slice<@string> Environ(this ref Cmd c) {
     var (env, _) = c.environ();
     return env;
 }
+
+} partial class exec_package {
 
 // dedupEnv returns a copy of env with any duplicates removed, in favor of
 // later values.

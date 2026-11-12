@@ -13,6 +13,7 @@ using strconv = strconv_package;
 using sync = sync_package;
 using time = time_package;
 using go.log.slog.@internal;
+using static slog_package;
 
 partial class slog_package {
 
@@ -30,7 +31,7 @@ partial class slog_package {
 // They should use the methods of [Logger] instead.
 //
 // Before implementing your own handler, consult https://go.dev/s/slog-handler-guide.
-partial interface ΔHandler {
+partial interface Handler {
     // Enabled reports whether the handler handles records at the given level.
     // The handler ignores records whose level is lower.
     // It is called early, before any arguments are processed,
@@ -40,7 +41,7 @@ partial interface ΔHandler {
     // or the method does not take a context.
     // The context is passed so Enabled can use its values
     // to make a decision.
-    bool Enabled(context.Context _Δp0, ΔLevel _Δp1);
+    bool Enabled(context.Context _Δp0, Level _Δp1);
     // Handle handles the Record.
     // It will only be called when Enabled returns true.
     // The Context argument is as for Enabled.
@@ -65,7 +66,7 @@ partial interface ΔHandler {
     // WithAttrs returns a new Handler whose attributes consist of
     // both the receiver's attributes and the arguments.
     // The Handler owns the slice: it may retain, modify or discard it.
-    ΔHandler WithAttrs(slice<Attr> attrs);
+    Handler WithAttrs(slice<Attr> attrs);
     // WithGroup returns a new Handler with the given group appended to
     // the receiver's existing groups.
     // The keys of all subsequent attributes, whether added by With or in a
@@ -85,7 +86,7 @@ partial interface ΔHandler {
     //     logger.LogAttrs(ctx, level, msg, slog.Group("s", slog.Int("a", 1), slog.Int("b", 2)))
     //
     // If the name is empty, WithGroup returns the receiver.
-    ΔHandler WithGroup(@string name);
+    Handler WithGroup(@string name);
 }
 
 partial struct defaultHandler {
@@ -101,7 +102,9 @@ internal static ж<defaultHandler> newDefaultHandler(Func<uintptr, slice<byte>, 
     ));
 }
 
-internal static bool Enabled(this ref defaultHandler _Δp0, context.Context _Δp1, ΔLevel l) {
+} partial class slogᴛdefaultHandler {
+
+internal static bool Enabled(this ref defaultHandler _Δp0, context.Context _Δp1, Level l) {
     return l >= ᏑlogLoggerLevel.Level();
 }
 
@@ -127,13 +130,15 @@ internal static error Handle(this ж<defaultHandler> Ꮡh, context.Context ctx, 
     finally { ᒐ.Run(); }
 }
 
-internal static ΔHandler WithAttrs(this ref defaultHandler h, slice<Attr> @as) {
-    return new defaultHandlerжΔHandler(Ꮡ(new defaultHandler(h.ch.withAttrs(@as), h.output)));
+internal static Handler WithAttrs(this ref defaultHandler h, slice<Attr> @as) {
+    return new defaultHandlerжHandler(Ꮡ(new defaultHandler(h.ch.withAttrs(@as), h.output)));
 }
 
-internal static ΔHandler WithGroup(this ref defaultHandler h, @string name) {
-    return new defaultHandlerжΔHandler(Ꮡ(new defaultHandler(h.ch.withGroup(name), h.output)));
+internal static Handler WithGroup(this ref defaultHandler h, @string name) {
+    return new defaultHandlerжHandler(Ꮡ(new defaultHandler(h.ch.withGroup(name), h.output)));
 }
+
+} partial class slog_package {
 
 // HandlerOptions are options for a [TextHandler] or [JSONHandler].
 // A zero HandlerOptions consists entirely of default values.
@@ -208,6 +213,8 @@ partial struct commonHandler {
     internal io.Writer w;
 }
 
+} partial class slogᴛcommonHandler {
+
 internal static ж<commonHandler> clone(this ref commonHandler h) {
     // We can't use assignment because we can't copy the mutex.
     return Ꮡ(new commonHandler(
@@ -224,8 +231,8 @@ internal static ж<commonHandler> clone(this ref commonHandler h) {
 
 // enabled reports whether l is greater than or equal to the
 // minimum level.
-internal static bool enabled(this ref commonHandler h, ΔLevel l) {
-    ΔLevel minLevel = LevelInfo;
+internal static bool enabled(this ref commonHandler h, Level l) {
+    Level minLevel = LevelInfo;
     if (h.opts.Level != nil) {
         minLevel = h.opts.Level.Level();
     }
@@ -273,7 +280,7 @@ internal static ж<commonHandler> withAttrs(this ж<commonHandler> Ꮡh, slice<A
 
 internal static ж<commonHandler> withGroup(this ref commonHandler h, @string name) {
     var h2 = h.clone();
-    h2.groups = builtin.append(h2.groups, name);
+    h2.groups = append(h2.groups, name);
     return h2;
 }
 
@@ -307,7 +314,7 @@ internal static error handle(this ж<commonHandler> Ꮡh, Record r) {
         }
         // level
         @string key = LevelKey;
-        ΔLevel val = r.Level;
+        Level val = r.Level;
         if (rep == nil) {
             state.appendKey(key);
             state.appendString(val.String());
@@ -318,7 +325,7 @@ internal static error handle(this ж<commonHandler> Ꮡh, Record r) {
         if (h.opts.AddSource) {
             var src = r.Source();
             if (src == nil) {
-                src = Ꮡ(new ΔSource());
+                src = Ꮡ(new Source());
             }
             Ꮡstate.appendAttr(Any(SourceKey, src.OrTypedNil()));
         }
@@ -342,6 +349,8 @@ internal static error handle(this ж<commonHandler> Ꮡh, Record r) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
+
+} partial class slogᴛhandleState {
 
 internal static void appendNonBuiltIns(this ж<handleState> Ꮡs, Record r) {
     r = r.ΔClone();
@@ -391,6 +400,8 @@ internal static void appendNonBuiltIns(this ж<handleState> Ꮡs, Record r) {
     }
 }
 
+} partial class slogᴛcommonHandler {
+
 // attrSep returns the separator between attributes.
 internal static @string attrSep(this ref commonHandler h) {
     if (h.json) {
@@ -398,6 +409,8 @@ internal static @string attrSep(this ref commonHandler h) {
     }
     return " ";
 }
+
+} partial class slog_package {
 
 // handleState holds state for a single call to commonHandler.handle.
 // The initial value of sep determines whether to emit a separator
@@ -418,6 +431,8 @@ partial struct handleState {
 )); }
 internal static ref sync.Pool groupPool => ref ((StaticBox<sync.Pool>)ᏑgroupPool).ValueSlot;
 
+} partial class slogᴛcommonHandler {
+
 internal static handleState newHandleState(this ж<commonHandler> Ꮡh, ж<buffer.Buffer> buf, bool freeBuf, @string sep) {
     ref var h = ref Ꮡh.DerefOrNull();
 
@@ -430,10 +445,12 @@ internal static handleState newHandleState(this ж<commonHandler> Ꮡh, ж<buffe
     );
     if (h.opts.ReplaceAttr != nil) {
         s.groups = ᏑgroupPool.Get()._<ж<slice<@string>>>();
-        s.groups.ValueSlot = builtin.appendꓸꓸꓸ(s.groups.ValueSlot, h.groups.slice(0, h.nOpenGroups));
+        s.groups.ValueSlot = appendꓸꓸꓸ(s.groups.ValueSlot, h.groups.slice(0, h.nOpenGroups));
     }
     return s;
 }
+
+} partial class slogᴛhandleState {
 
 internal static void free(this ref handleState s) {
     if (s.freeBuf) {
@@ -452,8 +469,12 @@ internal static void openGroups(this ref handleState s) {
     }
 }
 
+} partial class slog_package {
+
 // Separator for group names and keys.
 internal static UntypedInt keyComponentSep => /* '.' */ 46;
+
+} partial class slogᴛhandleState {
 
 // openGroup starts a new group of attributes
 // with the given name.
@@ -468,7 +489,7 @@ internal static void openGroup(this ref handleState s, @string name) {
     }
     // Collect group names for ReplaceAttr.
     if (s.groups != nil) {
-        s.groups.ValueSlot = builtin.append(s.groups.ValueSlot, name);
+        s.groups.ValueSlot = append(s.groups.ValueSlot, name);
     }
 }
 
@@ -521,7 +542,7 @@ internal static bool appendAttr(this ж<handleState> Ꮡs, Attr a) {
     }
     // Special case: Source.
     var v = a.Value; if (v.Kind() == KindAny) {
-        var (src, ok) = v.Any()._<ж<ΔSource>>(ᐧ); if (ok) {
+        var (src, ok) = v.Any()._<ж<Source>>(ᐧ); if (ok) {
             if (src.isEmpty()) {
                 return false;
             }
@@ -634,7 +655,7 @@ internal static void appendValue(this ж<handleState> Ꮡs, Value v) {
                 // in which case "<nil>" seems to be the feasible choice.
                 //
                 // Adapted from the code in fmt/print.go.
-                ref var vΔ1 = ref heap<reflectꓸValue>(reflect.ValueOf(vʗ1.any), out var ᏑvΔ1); if (vΔ1.Kind() == reflect.ΔPointer && vΔ1.IsNil()) {
+                ref var vΔ1 = ref heap<reflect.Value>(reflect.ValueOf(vʗ1.any), out var ᏑvΔ1); if (vΔ1.Kind() == reflect.Pointer && vΔ1.IsNil()) {
                     Ꮡs.Value.appendString(nilˢ);
                     return;
                 }
@@ -668,6 +689,8 @@ internal static void appendTime(this ж<handleState> Ꮡs, time.Time t) {
     }
 }
 
+} partial class slog_package {
+
 internal static slice<byte> appendRFC3339Millis(slice<byte> b, time.Time t) {
     // Format according to time.RFC3339Nano since it is highly optimized,
     // but truncate it to use millisecond resolution.
@@ -675,22 +698,24 @@ internal static slice<byte> appendRFC3339Millis(slice<byte> b, time.Time t) {
     // to guarantee that there are exactly 4 digits after the period.
     const nint prefixLen = /* len("2006-01-02T15:04:05.000") */ 23;
     nint n = len(b);
-    t = t.Truncate(time_package.Millisecond).Add(time_package.Millisecond / 10);
-    b = t.AppendFormat(b, time_package.RFC3339Nano);
-    b = builtin.appendꓸꓸꓸ(b.slice(0, n + prefixLen), b.slice(n + prefixLen + 1)); // drop the 4th digit
+    t = t.Truncate(time.Millisecond).Add(time.Millisecond / 10);
+    b = t.AppendFormat(b, time.RFC3339Nano);
+    b = appendꓸꓸꓸ(b.slice(0, n + prefixLen), b.slice(n + prefixLen + 1)); // drop the 4th digit
     return b;
 }
 
 // DiscardHandler discards all log output.
 // DiscardHandler.Enabled returns false for all Levels.
-public static ΔHandler DiscardHandler = new discardHandler();
+public static Handler DiscardHandler = new discardHandler();
 
 partial struct discardHandler {
 }
 
-internal static bool Enabled(this discardHandler dh, context.Context _Δp1, ΔLevel _Δp2) { return false; }
-internal static error Handle(this discardHandler dh, context.Context _Δp1, Record _Δp2) { return default; }
-internal static ΔHandler WithAttrs(this discardHandler dh, slice<Attr> attrs) { return dh; }
-internal static ΔHandler WithGroup(this discardHandler dh, @string name) { return dh; }
+} partial class slogᴛdiscardHandler {
 
-} // end slog_package
+internal static bool Enabled(this discardHandler dh, context.Context _Δp1, Level _Δp2) { return false; }
+internal static error Handle(this discardHandler dh, context.Context _Δp1, Record _Δp2) { return default; }
+internal static Handler WithAttrs(this discardHandler dh, slice<Attr> attrs) { return dh; }
+internal static Handler WithGroup(this discardHandler dh, @string name) { return dh; }
+
+} // end slogᴛdiscardHandler

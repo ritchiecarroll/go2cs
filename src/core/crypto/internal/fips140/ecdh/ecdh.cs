@@ -15,6 +15,7 @@ using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using go.crypto.@internal.fips140deps;
 using math;
+using static ecdh_package;
 
 partial class ecdh_package {
 
@@ -24,26 +25,34 @@ partial class ecdh_package {
 // All this is duplicated from crypto/internal/fips/ecdsa, but the standards are
 // different and FIPS 140 does not allow reusing keys across them.
 partial struct PrivateKey {
-    internal ΔPublicKey pub;
+    internal PublicKey pub;
     internal slice<byte> d; // bigmod.(*Nat).Bytes output (fixed length)
 }
+
+} partial class ecdhᴛPrivateKey {
 
 public static slice<byte> Bytes(this ref PrivateKey priv) {
     return priv.d;
 }
 
-public static ж<ΔPublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) {
+public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) {
     return Ꮡpriv.Ꮡpub;
 }
 
-partial struct ΔPublicKey {
+} partial class ecdh_package {
+
+partial struct PublicKey {
     internal curveID curve;
     internal slice<byte> q; // uncompressed nistec Point.Bytes output
 }
 
-public static slice<byte> Bytes(this ref ΔPublicKey pub) {
+} partial class ecdhᴛPublicKey {
+
+public static slice<byte> Bytes(this ref PublicKey pub) {
     return pub.q;
 }
+
+} partial class ecdh_package {
 
 partial struct curveID /*@string*/;
 
@@ -236,7 +245,7 @@ public static (ж<PrivateKey>, error) NewPrivateKey<P>(ж<Curve<P>> Ꮡc, slice<
         throw panic("crypto/ecdh: internal error: public key is the identity element");
     }
 
-    var k = Ꮡ(new PrivateKey(d: bytes.Clone(key), pub: new ΔPublicKey(curve: c.curve, q: publicKey)));
+    var k = Ꮡ(new PrivateKey(d: bytes.Clone(key), pub: new PublicKey(curve: c.curve, q: publicKey)));
     return (k, default);
 }
 
@@ -244,7 +253,7 @@ public static (ж<PrivateKey>, error) NewPrivateKey<P>(ж<Curve<P>> Ꮡc, slice<
 internal static ref readonly @string cryptoEcdhInvalidPublicˢ => ref cryptoEcdhInvalidPublicˢᵇ;
 private static readonly @string cryptoEcdhInvalidPublicˢᵇ = "crypto/ecdh: invalid public key"u8;
 
-public static (ж<ΔPublicKey>, error) NewPublicKey<P>(ж<Curve<P>> Ꮡc, slice<byte> key)
+public static (ж<PublicKey>, error) NewPublicKey<P>(ж<Curve<P>> Ꮡc, slice<byte> key)
     where P : Point<P>
 {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -262,10 +271,10 @@ public static (ж<ΔPublicKey>, error) NewPublicKey<P>(ж<Curve<P>> Ꮡc, slice<
         return (default, err);
     }
 
-    return (Ꮡ(new ΔPublicKey(curve: c.curve, q: bytes.Clone(key))), default);
+    return (Ꮡ(new PublicKey(curve: c.curve, q: bytes.Clone(key))), default);
 }
 
-public static (slice<byte>, error) ECDH<P>(ж<Curve<P>> c, ж<PrivateKey> k, ж<ΔPublicKey> peer)
+public static (slice<byte>, error) ECDH<P>(ж<Curve<P>> c, ж<PrivateKey> k, ж<PublicKey> peer)
     where P : Point<P>
 {
     fipsSelfTest();
@@ -279,7 +288,7 @@ private static readonly @string cryptoEcdhMismatchedˢᵇ = "crypto/ecdh: mismat
 internal static ref readonly @string cryptoEcdhPublicKeyIsTheˢ => ref cryptoEcdhPublicKeyIsTheˢᵇ;
 private static readonly @string cryptoEcdhPublicKeyIsTheˢᵇ = "crypto/ecdh: public key is the identity element"u8;
 
-internal static (slice<byte>, error) ecdh<P>(ref Curve<P> c, ref PrivateKey k, ref ΔPublicKey peer)
+internal static (slice<byte>, error) ecdh<P>(ref Curve<P> c, ref PrivateKey k, ref PublicKey peer)
     where P : Point<P>
 {
     if (c.curve != k.pub.curve) {

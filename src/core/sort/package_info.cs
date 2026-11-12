@@ -64,9 +64,9 @@ using static go.sort_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("sort/search.go", "search.cs", "AAh0ADMGkoKUgpS4AAI2AB0IkoKUgpS4AAIS4r7CvsK4gJaAloA=", "124-124:1;132-132:1;140-140:1")]
+[assembly: GoPositionMap("sort/search.go", "search.cs", "AAp0ADMGkoKUgpS4AAI2AB0IkoKUgpS4AAIS4r7CvsLYgLaAtoA=", "124-124:1;132-132:1;140-140:1")]
 [assembly: GoPositionMap("sort/slice.go", "slice.cs", "AAwwAAwCgoKCggACGAAJAoKCAAIQ0oKCgoKm")]
-[assembly: GoPositionMap("sort/sort.go", "sort.cs", "AClk4oKClIIACxyCgoKCpoKCABAkkqiSrsKCgoKmAAcQgoKWgNwAARDQgpaSqIDKgoKWgJ7AnLCaoJqgnLCaoAABSAAiAg==")]
+[assembly: GoPositionMap("sort/sort.go", "sort.cs", "ACtk4oKClIIADRyCgoKCxoKCABIkksiSrsKCgoKmAAkQgoKWgAAJDAABENCCtpLIgAAICoKCloC+wJywmqCaoJywmqAAAUgAIgI=")]
 [assembly: GoPositionMap("sort/zsortfunc.go", "zsortfunc.cs", "AAgUkoKCzqKCgoKClIKUgpSCuIKCgqaCuIKCAAMU4pSqgpSCgriCgriCgqaCgriCuIKC3IKCgqaClJKCgoKClIKCAAQSwoKkgpSClIKClIKClIKClIKUgpSCgpSCqqKCpIKClIKUgpSCgpSokpiCgoKmgqaCpqaCgoKUuIKCgpS4qqKCgoKUgoKClAAEFNKqlM6ClIKCpqaUpKS6koKClKiSgoKCqJKmgoKCgoKCuIKCuIKCkoKCgpSUgoKCgoKUgpQAAy4AFgi4goKCgoKUuIKU3LiCgoKCgpS4gpSmgoKSgoKUgpSUgoKClLiCgpSClIIAAxDCgpSCgoKUgrg=")]
 [assembly: GoPositionMap("sort/zsortinterface.go", "zsortinterface.cs", "AAgUkoKCzqKCgoKClIKUgpSCuIKCgqaCuIKCAAMU4pSqgpSCgriCgriCgqaCgriCuIKC3IKCgqaClJKCgoKClIKCAAQSwoKkgpSClIKClIKClIKClIKUgpSCgpSCqqKCpIKClIKUgpSCgpSokpiCgoKmgqaCpqaCgoKUuIKCgpS4qqKCgoKUgoKClAAEFNKqlM6ClIKCpqaUpKS6koKClKiSgoKCqJKmgoKCgoKCuIKCuIKCkoKCgpSUgoKCgoKUgpQAAy4AFgi4goKCgoKUuIKU3LiCgoKCgpS4gpSmgoKSgoKUgpSUgoKClLiCgpSClIIAAxDCgpSCgoKUgrg=")]
 // </GoSourcePositionMaps>
@@ -105,3 +105,17 @@ public static partial class sort_package
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(sort_package.Float64Slice)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sortᴛFloat64Slice;
+[GoMethodHost(typeof(sort_package.IntSlice)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sortᴛIntSlice;
+[GoMethodHost(typeof(sort_package.StringSlice)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sortᴛStringSlice;
+[GoMethodHost(typeof(sort_package.reverse)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sortᴛreverse;
+[GoMethodHost(typeof(sort_package.xorshift)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sortᴛxorshift;
+// </MethodHolders>

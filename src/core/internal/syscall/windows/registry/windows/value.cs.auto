@@ -15,6 +15,7 @@ using syscall = syscall_package;
 using utf16 = unicode.utf16_package;
 using @unsafe = unsafe_package;
 using unicode;
+using static registry_package;
 
 partial class registry_package {
 
@@ -43,6 +44,8 @@ public static ref syscall.Errno ErrNotExist => ref ((StaticBox<syscall.Errno>)�
 // ErrUnexpectedType is returned by Get*Value when the value's type was unexpected.
 public static error ErrUnexpectedType = errors.New("unexpected key value type"u8);
 
+} partial class registryᴛKey {
+
 // GetValue retrieves the type and data for the specified value associated
 // with an open key k. It fills up buffer buf and returns the retrieved
 // byte count n. If buf is too small to fit the stored value it returns
@@ -66,7 +69,7 @@ public static (nint n, uint32 valtype, error err) GetValue(this Key k, @string n
         pbuf = Ꮡ(buf, 0);
     }
     ref var l = ref heap<uint32>((uint32)len(buf), out var Ꮡl);
-    err = syscall.RegQueryValueEx((syscallꓸHandle)k, pname, nil, Ꮡvaltype, pbuf, Ꮡl);
+    err = syscall.RegQueryValueEx((syscall.Handle)k, pname, nil, Ꮡvaltype, pbuf, Ꮡl);
     if (err != nil) {
         return ((nint)l, valtype, err);
     }
@@ -83,7 +86,7 @@ internal static (slice<byte> date, uint32 valtype, error err) getValue(this Key 
     ref var t = ref heap(new uint32(), out var Ꮡt);
     ref var n = ref heap<uint32>((uint32)len(buf), out var Ꮡn);
     for (;;) {
-        err = syscall.RegQueryValueEx((syscallꓸHandle)k, p, nil, Ꮡt, Ꮡ(buf, 0), Ꮡn);
+        err = syscall.RegQueryValueEx((syscall.Handle)k, p, nil, Ꮡt, Ꮡ(buf, 0), Ꮡn);
         if (err == nil) {
             return (buf.slice(0, (nint)(n)), t, default);
         }
@@ -135,7 +138,7 @@ public static (@string, error) GetMUIStringValue(this Key k, @string name) {
     ref var buflen = ref heap(new uint32(), out var Ꮡbuflen);
     ж<uint16> pdir = default;
 
-    err = regLoadMUIString((syscallꓸHandle)k, pname, Ꮡ(buf, 0), (uint32)len(buf), Ꮡbuflen, 0, pdir);
+    err = regLoadMUIString((syscall.Handle)k, pname, Ꮡ(buf, 0), (uint32)len(buf), Ꮡbuflen, 0, pdir);
     if (AreEqual(err, syscall.ERROR_FILE_NOT_FOUND)) { // Try fallback path
         // Try to resolve the string value using the system directory as
         // a DLL search path; this assumes the string value is of the form
@@ -154,7 +157,7 @@ public static (@string, error) GetMUIStringValue(this Key k, @string name) {
             return ("", err);
         }
 
-        err = regLoadMUIString((syscallꓸHandle)k, pname, Ꮡ(buf, 0), (uint32)len(buf), Ꮡbuflen, 0, pdir);
+        err = regLoadMUIString((syscall.Handle)k, pname, Ꮡ(buf, 0), (uint32)len(buf), Ꮡbuflen, 0, pdir);
     }
 
     while (AreEqual(err, syscall.ERROR_MORE_DATA)) { // Grow buffer if needed
@@ -162,7 +165,7 @@ public static (@string, error) GetMUIStringValue(this Key k, @string name) {
             break; // Buffer not growing, assume race; break
         }
         buf = new slice<uint16>((nint)(buflen));
-        err = regLoadMUIString((syscallꓸHandle)k, pname, Ꮡ(buf, 0), (uint32)len(buf), Ꮡbuflen, 0, pdir);
+        err = regLoadMUIString((syscall.Handle)k, pname, Ꮡ(buf, 0), (uint32)len(buf), Ꮡbuflen, 0, pdir);
     }
 
     if (err != nil) {
@@ -171,6 +174,8 @@ public static (@string, error) GetMUIStringValue(this Key k, @string name) {
 
     return (syscall.UTF16ToString(buf), default);
 }
+
+} partial class registry_package {
 
 // ExpandString expands environment-variable strings and replaces
 // them with the values defined for the current user.
@@ -195,6 +200,8 @@ public static (@string, error) ExpandString(@string value) {
         r = new slice<uint16>((nint)(n));
     }
 }
+
+} partial class registryᴛKey {
 
 // GetStringsValue retrieves the []string value for the specified
 // value name associated with an open key k. It also returns the value's type.
@@ -282,9 +289,9 @@ internal static error setValue(this Key k, @string name, uint32 valtype, slice<b
         return err;
     }
     if (len(data) == 0) {
-        return regSetValueEx((syscallꓸHandle)k, p, 0, valtype, nil, 0);
+        return regSetValueEx((syscall.Handle)k, p, 0, valtype, nil, 0);
     }
-    return regSetValueEx((syscallꓸHandle)k, p, 0, valtype, Ꮡ(data, 0), (uint32)len(data));
+    return regSetValueEx((syscall.Handle)k, p, 0, valtype, Ꮡ(data, 0), (uint32)len(data));
 }
 
 // SetDWordValue sets the data and type of a name value
@@ -354,7 +361,7 @@ public static error DeleteValue(this Key k, @string name) {
     if (err != nil) {
         return err;
     }
-    return regDeleteValue((syscallꓸHandle)k, namep);
+    return regDeleteValue((syscall.Handle)k, namep);
 }
 
 // ReadValueNames returns the value names of key k.
@@ -369,7 +376,7 @@ loopItems:
     for (var i = (uint32)0; ; i++) {
         ref var l = ref heap<uint32>((uint32)len(buf), out var Ꮡl);
         for (;;) {
-            var errΔ1 = regEnumValue((syscallꓸHandle)k, i, Ꮡ(buf, 0), Ꮡl, nil, nil, nil, nil);
+            var errΔ1 = regEnumValue((syscall.Handle)k, i, Ꮡ(buf, 0), Ꮡl, nil, nil, nil, nil);
             if (errΔ1 == nil) {
                 break;
             }
@@ -391,4 +398,4 @@ break_loopItems:;
     return (names, default);
 }
 
-} // end registry_package
+} // end registryᴛKey

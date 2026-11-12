@@ -55,9 +55,9 @@ using static go.crypto.@internal.fips140.edwards25519.field_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe.go", "fe.cs", "AChMlrKCppaygqiy7oKCgoK4lIKCgoKCgoKUlKjSgoKCgoKo9oKCgoKCqJKstgALBIKCgoKCgpSCgpSUgoKUlIKClJSCgpSUgoKUlIKClJSCgpSUgoKCgpSowoIABhYACgKCuIKUgpSClIKmgpSolqKmooIACBKCgoKUgoKClKiygqiAltKCgoKCgoKosoKCgoKCgoKCgoKCgoKCgqiSqLKokoKokoKowoKCgoKCgoKCgqaowoKCgqiStIKCgoKCgoKCgpSCgoKUgoKClIKCgpSCgoKUgoKClIKCgpSCgoK4AAIQ0qaCgoKUlIKCgpSUlII=")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe.go", "fe.cs", "AClMtrKCxraygqiy7oKCgoK4lIKCgoKCgoKUlKjSgoKCgoKo9oKCgoKCqJKstgALBIKCgoKCgpSCgpSUgoKUlIKClJSCgpSUgoKUlIKClJSCgpSUgoKCgpSowoIABhYACgKCuIKUgpSClIKmgpSolqKmooIACBKCgoKUgoKClKiygsiAttKCgoKCgoKosoKCgoKCgoKCgoKCgoKCgqiSqLKokoKokoKowoKCgoKCgoKCgqbIwoKCgsiStIKCgoKCgoKCgpSCgoKUgoKClIKCgpSCgoKUgoKClIKCgpSCgoLYAAQQ0qaCgoKUlIKCgpSUlII=")]
 [assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_amd64_noasm.go", "fe_amd64_noasm.cs", "AAgSlA==")]
-[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_generic.go", "fe_generic.cs", "ABAgkoKokoKCgqikqJKCgoKokoKCgqiSpoKCgoKClIKCgoIAIkaCgoKCpoKCgoKmgoKCgqaCgoKCpoKCgoIAHDqCgoKClIKCgoLcgoKCgqaCgoKCggAYMoKCpoKCpoKCpoKCpoKClIKCgoKUgoKCgpSCgoKCquaCgoKCgpQ=")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_generic.go", "fe_generic.cs", "ABEgkoKokoKCgqikqJKCgoKokoKCgqiSpoKCgoKClIKCgoIAIkaCgoKCpoKCgoKmgoKCgqaCgoKCpoKCgoIAHDqCgoKClIKCgoLcgoKCgqaCgoKCggAYMoKCpoKCpoKCpoKCpoKClIKCgoKUgoKCgpSCgoKCyuaCgoKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140.edwards25519;
@@ -89,3 +89,13 @@ public static partial class field_package
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(field_package.Element)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fieldᴛElement;
+// </MethodHolders>

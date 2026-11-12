@@ -549,9 +549,9 @@ internal static ref readonly @string gotracebackˢ => ref gotracebackˢᵇ;
 private static readonly @string gotracebackˢᵇ = "GOTRACEBACK"u8;
 
 internal static void finishDebugVarsSetup() {
-    var Δp = @new<@string>();
-    Δp.Value = gogetenv(godebugˢ);
-    ᏑgodebugEnv.Store(Δp);
+    var p = @new<@string>();
+    p.Value = gogetenv(godebugˢ);
+    ᏑgodebugEnv.Store(p);
 
     setTraceback(gogetenv(gotracebackˢ));
     traceback_env = traceback_cache;
@@ -588,26 +588,26 @@ private static readonly @string cgocheck1ModeIsNoLongerˢᵇ = "cgocheck > 1 mod
 // the environment and the default settings, the caller must also call
 // cleargodebug(seen) to reset any now-unset values back to their defaults.
 internal static void parsegodebug(@string godebug, map<@string, bool> seen) {
-    for (@string Δp = godebug; Δp != ""u8; ) {
+    for (@string p = godebug; p != ""u8; ) {
         @string field = default;
         if (seen == nil) {
             // startup: process left to right, overwriting older settings with newer
-            nint iΔ1 = bytealg.IndexByteString(Δp, (byte)',');
+            nint iΔ1 = bytealg.IndexByteString(p, (byte)',');
             if (iΔ1 < 0) {
-                (field, Δp) = (Δp, "");
+                (field, p) = (p, "");
             } else {
-                (field, Δp) = (Δp.slice(0, iΔ1), Δp.slice(iΔ1 + 1));
+                (field, p) = (p.slice(0, iΔ1), p.slice(iΔ1 + 1));
             }
         } else {
             // incremental update: process right to left, updating and skipping seen
-            nint iΔ2 = len(Δp) - 1;
-            while (iΔ2 >= 0 && Δp[iΔ2] != ',') {
+            nint iΔ2 = len(p) - 1;
+            while (iΔ2 >= 0 && p[iΔ2] != ',') {
                 iΔ2--;
             }
             if (iΔ2 < 0) {
-                (Δp, field) = ("", Δp);
+                (p, field) = ("", p);
             } else {
-                (Δp, field) = (Δp.slice(0, iΔ2), Δp.slice(iΔ2 + 1));
+                (p, field) = (p.slice(0, iΔ2), p.slice(iΔ2 + 1));
             }
         }
         nint i = bytealg.IndexByteString(field, (byte)'=');
@@ -776,8 +776,8 @@ public static @unsafe.Pointer reflect_resolveNameOff(@unsafe.Pointer ptrInModule
 // See go.dev/issue/67401.
 //
 //go:linkname reflect_resolveTypeOff reflect.resolveTypeOff
-public static @unsafe.Pointer reflect_resolveTypeOff(@unsafe.Pointer Δrtype, int32 off) {
-    return @unsafe.Pointer.FromPinnedBox(toRType((ж<_type>)(uintptr)(Δrtype)).typeOff((typeOff)off));
+public static @unsafe.Pointer reflect_resolveTypeOff(@unsafe.Pointer rtype, int32 off) {
+    return @unsafe.Pointer.FromPinnedBox(toRType((ж<_type>)(uintptr)(rtype)).typeOff((typeOff)off));
 }
 
 // reflect_resolveTextOff resolves a function pointer offset from a base type.
@@ -791,8 +791,8 @@ public static @unsafe.Pointer reflect_resolveTypeOff(@unsafe.Pointer Δrtype, in
 // See go.dev/issue/67401.
 //
 //go:linkname reflect_resolveTextOff reflect.resolveTextOff
-public static @unsafe.Pointer reflect_resolveTextOff(@unsafe.Pointer Δrtype, int32 off) {
-    return (uintptr)toRType((ж<_type>)(uintptr)(Δrtype)).textOff((textOff)off);
+public static @unsafe.Pointer reflect_resolveTextOff(@unsafe.Pointer rtype, int32 off) {
+    return (uintptr)toRType((ж<_type>)(uintptr)(rtype)).textOff((textOff)off);
 }
 
 // reflectlite_resolveNameOff resolves a name offset from a base pointer.
@@ -805,8 +805,8 @@ internal static @unsafe.Pointer reflectlite_resolveNameOff(@unsafe.Pointer ptrIn
 // reflectlite_resolveTypeOff resolves an *rtype offset from a base type.
 //
 //go:linkname reflectlite_resolveTypeOff internal/reflectlite.resolveTypeOff
-internal static @unsafe.Pointer reflectlite_resolveTypeOff(@unsafe.Pointer Δrtype, int32 off) {
-    return @unsafe.Pointer.FromPinnedBox(toRType((ж<_type>)(uintptr)(Δrtype)).typeOff((typeOff)off));
+internal static @unsafe.Pointer reflectlite_resolveTypeOff(@unsafe.Pointer rtype, int32 off) {
+    return @unsafe.Pointer.FromPinnedBox(toRType((ж<_type>)(uintptr)(rtype)).typeOff((typeOff)off));
 }
 
 // reflect_addReflectOff adds a pointer to the reflection offset lookup map.

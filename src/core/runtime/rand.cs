@@ -66,7 +66,7 @@ internal static void randinit() {
         }
     }
     ᏑglobalRand.of(globalRandᴛ1.Ꮡstate).Init(seed.Value);
-    builtin.clear(seed.slice());
+    clear(seed.slice());
 
     if (startupRand != nil) {
         // Overwrite startupRand instead of clearing it, in case cgo programs

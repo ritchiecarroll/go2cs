@@ -50,13 +50,13 @@ using static go.unique_package;
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(canonMap<>))]
+[assembly: GoFieldAccess(typeof(entry<>))]
+[assembly: GoFieldAccess(typeof(go.@internal.abi_package.MapType))]
 [assembly: GoFieldAccess(typeof(go.@internal.abi_package.StructField))]
-[assembly: GoFieldAccess(typeof(go.@internal.abi_package.ΔMapType))]
-[assembly: GoFieldAccess(typeof(go.@internal.abi_package.ΔStructType))]
+[assembly: GoFieldAccess(typeof(go.@internal.abi_package.StructType))]
+[assembly: GoFieldAccess(typeof(indirect<>))]
 [assembly: GoFieldAccess(typeof(node<>))]
 [assembly: GoFieldAccess(typeof(uniqueMap<>))]
-[assembly: GoFieldAccess(typeof(Δentry<>))]
-[assembly: GoFieldAccess(typeof(Δindirect<>))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -66,8 +66,8 @@ using static go.unique_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("unique/canonmap.go", "canonmap.cs", "ABo0goKUgoKCgqaypIKCgpSCgpSCgpSUptKkgoKCgpSCgoKClIKClIKUuIKUgpSUgriCgpSm7qSCgoKUpsiClNyUkpTc5IKmgqaCgoKClIKCgoKCgpSCgpSuwoKCgoKUgoKCgpSCgpSUgpSUgpSUgriCgsqCgpQABxCCgpSmgoKCgoKUgqYACRSigpSmooKUABMsgqaCgoKmAAoWgoKCggAGFNKCgoKUlKiygoKUlKzkgoKUlIK4goKCgoKUlJSu", "136-138:1")]
-[assembly: GoPositionMap("unique/handle.go", "handle.cs", "ABk0oqzEgoKUgoKClKaClJQ=")]
+[assembly: GoPositionMap("unique/canonmap.go", "canonmap.cs", "ABs0goKUgoKCgsaypIKCgpSCgpSCgpSUptKkgoKCgpSCgoKClIKClIKUuIKUgpSUgriCgpSm7qSCgoKUpsiClNyUkpTc5IKmgqaCgoKClIKCgoKCgpSCgpSuwoKCgoKUgoKCgpSCgpSUgpSUgpSUgriCgsqCgpQABxCCgpSmgoKCgoKUgqYADRSigpSmooKUABUsgsaCgoKmAAwWgoKCggAIFNKCgoKUlKiygoKUlKzkgoKUlIK4goKCgoKUlJTO", "136-138:1")]
+[assembly: GoPositionMap("unique/handle.go", "handle.cs", "ABw0oszEgoKUgoKClKaClJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -83,10 +83,10 @@ public static partial class unique_package
 
     // <TypeAccessibility>
     internal partial struct canonMap<T> {}
+    internal partial struct entry<T> {}
+    [GoValueClone("children")] internal partial struct indirect<T> {}
     internal partial struct node<T> {}
     internal partial struct uniqueMap<T> {}
-    internal partial struct Δentry<T> {}
-    [GoValueClone("children")] internal partial struct Δindirect<T> {}
     public partial struct Handle<T> {}
     // </TypeAccessibility>
 
@@ -106,3 +106,17 @@ public static partial class unique_package
     [GoInit] internal static void initᴛᴛimportꓸweak() => builtin.initPackage(typeof(weak_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(unique_package.Handle<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class uniqueᴛHandle;
+[GoMethodHost(typeof(unique_package.canonMap<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class uniqueᴛcanonMap;
+[GoMethodHost(typeof(unique_package.entry<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class uniqueᴛentry;
+[GoMethodHost(typeof(unique_package.indirect<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class uniqueᴛindirect;
+[GoMethodHost(typeof(unique_package.node<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class uniqueᴛnode;
+// </MethodHolders>

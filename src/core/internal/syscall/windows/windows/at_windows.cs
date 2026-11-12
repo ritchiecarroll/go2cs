@@ -28,7 +28,7 @@ public static UntypedInt O_DIRECTORY => 0x04000; // target must be a directory
 public static UntypedInt O_NOFOLLOW_ANY => 0x200000000; // disallow symlinks anywhere in the path
 public static UntypedInt O_WRITE_ATTRS => 0x800000000;  // FILE_WRITE_ATTRIBUTES, used by Chmod
 
-public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @string name, uint64 flag, uint32 perm) {
+public static (syscall.Handle, error e1) Openat(syscall.Handle dirfd, @string name, uint64 flag, uint32 perm) {
     if (len(name) == 0) {
         return (syscall.InvalidHandle, syscall.ERROR_FILE_NOT_FOUND);
     }
@@ -151,7 +151,7 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
         fileAttrs = FILE_ATTRIBUTE_READONLY;
     }
 
-    ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
+    ref var h = ref heap(new syscall.Handle(), out var Ꮡh);
     error err = default;
     if (TestOpenatFallback && (flag & (uint64)O_NOFOLLOW_ANY) != 0) {
         err = STATUS_INVALID_PARAMETER;
@@ -203,7 +203,7 @@ public static ref bool TestOpenatFallback => ref ((StaticBox<bool>)ᏑTestOpenat
 // openatFallback implements O_NOFOLLOW_ANY for a single path component on
 // Windows versions that do not support OBJ_DONT_REPARSE (including Windows 10
 // build 10240). See go.dev/issue/78131.
-internal static (syscallꓸHandle, error) openatFallback(@string name, uint32 access, OBJECT_ATTRIBUTES attrsʗp, uint32 fileAttrs, uint32 disposition, uint32 options) {
+internal static (syscall.Handle, error) openatFallback(@string name, uint32 access, OBJECT_ATTRIBUTES attrsʗp, uint32 fileAttrs, uint32 disposition, uint32 options) {
     GoFrame ᒐ = default;
     try {
         ref var attrs = ref heap(attrsʗp, out var Ꮡattrs);
@@ -220,7 +220,7 @@ internal static (syscallꓸHandle, error) openatFallback(@string name, uint32 ac
             return (syscall.InvalidHandle, STATUS_INVALID_PARAMETER);
         }
         attrs.Attributes &= unchecked((uint32)~(uint32)(OBJ_DONT_REPARSE));
-        ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
+        ref var h = ref heap(new syscall.Handle(), out var Ꮡh);
         var err = NtCreateFile(
             Ꮡh, access, Ꮡattrs, Ꮡ(new IO_STATUS_BLOCK()), nil, fileAttrs,
             (uint32)((UntypedInt)(FILE_SHARE_READ | FILE_SHARE_WRITE) | (uint32)FILE_SHARE_DELETE), disposition,
@@ -253,7 +253,7 @@ internal static (syscallꓸHandle, error) openatFallback(@string name, uint32 ac
         // The file already exists, including when created with O_EXCL.
         attrs.RootDirectory = h;
         attrs.ObjectName = Ꮡ(new NTUnicodeString());
-        ref var dh = ref heap(new syscallꓸHandle(), out var Ꮡdh);
+        ref var dh = ref heap(new syscall.Handle(), out var Ꮡdh);
         err = NtOpenFile(
             Ꮡdh, access, Ꮡattrs, Ꮡ(new IO_STATUS_BLOCK()),
             (uint32)((UntypedInt)(FILE_SHARE_READ | FILE_SHARE_WRITE) | (uint32)FILE_SHARE_DELETE),
@@ -301,12 +301,12 @@ internal static error ntCreateFileError(error err, uint64 flag) {
     return s.Errno();
 }
 
-public static error Mkdirat(syscallꓸHandle dirfd, @string name, uint32 mode) {
+public static error Mkdirat(syscall.Handle dirfd, @string name, uint32 mode) {
     var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES());
     var errΔ1 = objAttrs.init(dirfd, name); if (errΔ1 != nil) {
         return errΔ1;
     }
-    ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
+    ref var h = ref heap(new syscall.Handle(), out var Ꮡh);
     var err = NtCreateFile(
         Ꮡh,
         FILE_GENERIC_READ,
@@ -326,7 +326,7 @@ public static error Mkdirat(syscallꓸHandle dirfd, @string name, uint32 mode) {
     return default;
 }
 
-public static error Deleteat(syscallꓸHandle dirfd, @string name, uint32 options) {
+public static error Deleteat(syscall.Handle dirfd, @string name, uint32 options) {
     GoFrame ᒐ = default;
     try {
         if (name == "."u8) {
@@ -338,7 +338,7 @@ public static error Deleteat(syscallꓸHandle dirfd, @string name, uint32 option
         var errΔ1 = objAttrs.init(dirfd, name); if (errΔ1 != nil) {
             return errΔ1;
         }
-        ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
+        ref var h = ref heap(new syscall.Handle(), out var Ꮡh);
         var err = NtOpenFile(
             Ꮡh,
             (uint32)((uint32)FILE_READ_ATTRIBUTES | (uint32)DELETE),
@@ -420,7 +420,7 @@ public static ref bool TestDeleteatFallback => ref ((StaticBox<bool>)ᏑTestDele
 // deleteatFallback is a deleteat implementation that strives
 // for compatibility with older Windows versions and file systems
 // over performance.
-internal static error deleteatFallback(syscallꓸHandle h) {
+internal static error deleteatFallback(syscall.Handle h) {
     ref var data = ref heap(new syscall.ByHandleFileInformation(), out var Ꮡdata);
     var err = syscall.GetFileInformationByHandle(h, Ꮡdata); if (err == nil && (data.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0) {
         // Remove read-only attribute. Reopen the file, as it was previously open without FILE_WRITE_ATTRIBUTES access
@@ -454,14 +454,14 @@ internal static error deleteatFallback(syscallꓸHandle h) {
         (uint32)/* unsafe.Sizeof(FILE_DISPOSITION_INFO{}) */ (uintptr)1);
 }
 
-public static error Renameat(syscallꓸHandle olddirfd, @string oldpath, syscallꓸHandle newdirfd, @string newpath) {
+public static error Renameat(syscall.Handle olddirfd, @string oldpath, syscall.Handle newdirfd, @string newpath) {
     GoFrame ᒐ = default;
     try {
         var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES());
         var errΔ1 = objAttrs.init(olddirfd, oldpath); if (errΔ1 != nil) {
             return errΔ1;
         }
-        ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
+        ref var h = ref heap(new syscall.Handle(), out var Ꮡh);
         var err = NtOpenFile(
             Ꮡh,
             (uint32)((uint32)SYNCHRONIZE | (uint32)DELETE),
@@ -527,14 +527,14 @@ public static error Renameat(syscallꓸHandle olddirfd, @string oldpath, syscall
     finally { ᒐ.Run(); }
 }
 
-public static error Linkat(syscallꓸHandle olddirfd, @string oldpath, syscallꓸHandle newdirfd, @string newpath) {
+public static error Linkat(syscall.Handle olddirfd, @string oldpath, syscall.Handle newdirfd, @string newpath) {
     GoFrame ᒐ = default;
     try {
         var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES());
         var errΔ1 = objAttrs.init(olddirfd, oldpath); if (errΔ1 != nil) {
             return errΔ1;
         }
-        ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
+        ref var h = ref heap(new syscall.Handle(), out var Ꮡh);
         var err = NtOpenFile(
             Ꮡh,
             (uint32)((uint32)SYNCHRONIZE | (uint32)FILE_WRITE_ATTRIBUTES),
@@ -591,7 +591,7 @@ partial struct SymlinkatFlags /*num:nuint*/;
 public static SymlinkatFlags SYMLINKAT_DIRECTORY => /* SymlinkatFlags(1 << iota) */ 1;
 public static SymlinkatFlags SYMLINKAT_RELATIVE => 2;
 
-public static error Symlinkat(@string oldname, syscallꓸHandle newdirfd, @string newname, SymlinkatFlags flags) {
+public static error Symlinkat(@string oldname, syscall.Handle newdirfd, @string newname, SymlinkatFlags flags) {
     // Temporarily acquire symlink-creating privileges if possible.
     // This is the behavior of CreateSymbolicLinkW.
     //
@@ -613,7 +613,7 @@ public static error Symlinkat(@string oldname, syscallꓸHandle newdirfd, @strin
     [FieldOffset(16)] public uint32 Flags;
 }
 
-internal static error symlinkat(@string oldname, syscallꓸHandle newdirfd, @string newname, SymlinkatFlags flags) {
+internal static error symlinkat(@string oldname, syscall.Handle newdirfd, @string newname, SymlinkatFlags flags) {
     GoFrame ᒐ = default;
     try {
         var (oldnameu16, err) = syscall.UTF16FromString(oldname);
@@ -633,7 +633,7 @@ internal static error symlinkat(@string oldname, syscallꓸHandle newdirfd, @str
         var errΔ1 = objAttrs.init(newdirfd, newname); if (errΔ1 != nil) {
             return errΔ1;
         }
-        ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
+        ref var h = ref heap(new syscall.Handle(), out var Ꮡh);
         err = NtCreateFile(
             Ꮡh,
             (uint32)((UntypedInt)(SYNCHRONIZE | FILE_WRITE_ATTRIBUTES) | (uint32)DELETE),
@@ -724,7 +724,7 @@ internal static error withPrivilege(@string privilege, Func<error> f) {
         if (err != nil) {
             return f();
         }
-        defer(syscall.CloseHandle, (syscallꓸHandle)(uintptr)token, ref ᒐ);
+        defer(syscall.CloseHandle, (syscall.Handle)(uintptr)token, ref ᒐ);
 
         (var privStr, err) = syscall.UTF16PtrFromString(privilege);
         if (err != nil) {

@@ -92,6 +92,7 @@ using time = time_package;
 using @unsafe = unsafe_package;
 using @internal;
 using text;
+using static pprof_package;
 
 partial class pprof_package {
 
@@ -342,12 +343,14 @@ public static slice<ж<Profile>> Profiles() {
             all = append(all, p);
         }
 
-        slices.SortFunc(all, (ж<Profile> a, ж<Profile> b) => strings_package.Compare(a.name, b.name));
+        slices.SortFunc(all, (ж<Profile> a, ж<Profile> b) => strings.Compare(a.name, b.name));
         return all;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
+
+} partial class pprofᴛProfile {
 
 // Name returns this profile's name, which can be passed to [Lookup] to reobtain the profile.
 public static @string Name(this ref Profile p) {
@@ -476,11 +479,17 @@ public static error WriteTo(this ж<Profile> Ꮡp, io.Writer w, nint debug) {
     return printCountProfile(w, debug, p.name, (stackProfile)all);
 }
 
+} partial class pprof_package {
+
 partial struct stackProfile /*[]slice<uintptr>*/;
+
+} partial class pprofᴛstackProfile {
 
 internal static nint Len(this stackProfile x) { return len(x); }
 internal static slice<uintptr> Stack(this stackProfile x, nint i) { return x[i]; }
 internal static ж<labelMap> Label(this stackProfile x, nint i) { return default; }
+
+} partial class pprof_package {
 
 // A countProfile is a set of stack traces to be printed as counts
 // grouped by stack trace. There are multiple implementations:
@@ -627,6 +636,8 @@ partial struct keysByCount {
     internal map<@string, nint> count;
 }
 
+} partial class pprofᴛkeysByCount {
+
 internal static nint Len(this ref keysByCount x) { return len(x.keys); }
 internal static void Swap(this ref keysByCount x, nint i, nint j) { (x.keys[i], x.keys[j]) = (x.keys[j], x.keys[i]); }
 internal static bool Less(this ref keysByCount x, nint i, nint j) {
@@ -639,6 +650,8 @@ internal static bool Less(this ref keysByCount x, nint i, nint j) {
     }
     return ki < kj;
 }
+
+} partial class pprof_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string runtimeˢ => ref runtimeˢᵇ;
@@ -657,7 +670,7 @@ internal static void printStackRecord(io.Writer w, slice<uintptr> stk, bool allF
         if (name == ""u8) {
             show = true;
             fmt.Fprintf(w, "#\t%#x\n"u8, frame.PC);
-        } else if (name != "runtime.goexit"u8 && (show || !(strings_package.HasPrefix(name, runtimeˢ) || strings_package.HasPrefix(name, internalRuntimeˢ)))) {
+        } else if (name != "runtime.goexit"u8 && (show || !(strings.HasPrefix(name, runtimeˢ) || strings.HasPrefix(name, internalRuntimeˢ)))) {
             // Hide runtime.goexit and any runtime functions at the beginning.
             // This is useful mainly for allocation traces.
             show = true;
@@ -952,9 +965,13 @@ partial struct runtimeProfile {
     internal slice<@unsafe.Pointer> labels;
 }
 
+} partial class pprofᴛruntimeProfile {
+
 internal static nint Len(this ref runtimeProfile p) { return len(p.stk); }
 internal static slice<uintptr> Stack(this ref runtimeProfile p, nint i) { return p.stk[i].Stack; }
 internal static ж<labelMap> Label(this ref runtimeProfile p, nint i) { return (ж<labelMap>)(uintptr)(p.labels[i]); }
+
+} partial class pprof_package {
 
 partial struct cpuᴛ1 /*dyn*/ {
     /*embed*/ public go.sync_package.Mutex Mutex;

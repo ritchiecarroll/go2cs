@@ -49,14 +49,14 @@ internal static (@string path, map<@string, any> syms, slice<ж<initTask>> initT
 
         if (inRange(pmd.text, pmd.etext, md.text, md.etext) || inRange(pmd.bss, pmd.ebss, md.bss, md.ebss) || inRange(pmd.data, pmd.edata, md.data, md.edata) || inRange(pmd.types, pmd.etypes, md.types, md.etypes)) {
             println((@string)"plugin: new module data overlaps with previous moduledata");
-            println((@string)"\tpmd.text-etext=", (Δhex)(uint64)pmd.text, (@string)"-", (Δhex)(uint64)pmd.etext);
-            println((@string)"\tpmd.bss-ebss=", (Δhex)(uint64)pmd.bss, (@string)"-", (Δhex)(uint64)pmd.ebss);
-            println((@string)"\tpmd.data-edata=", (Δhex)(uint64)pmd.data, (@string)"-", (Δhex)(uint64)pmd.edata);
-            println((@string)"\tpmd.types-etypes=", (Δhex)(uint64)pmd.types, (@string)"-", (Δhex)(uint64)pmd.etypes);
-            println((@string)"\tmd.text-etext=", (Δhex)(uint64)md.text, (@string)"-", (Δhex)(uint64)md.etext);
-            println((@string)"\tmd.bss-ebss=", (Δhex)(uint64)md.bss, (@string)"-", (Δhex)(uint64)md.ebss);
-            println((@string)"\tmd.data-edata=", (Δhex)(uint64)md.data, (@string)"-", (Δhex)(uint64)md.edata);
-            println((@string)"\tmd.types-etypes=", (Δhex)(uint64)md.types, (@string)"-", (Δhex)(uint64)md.etypes);
+            println((@string)"\tpmd.text-etext=", (hex)(uint64)pmd.text, (@string)"-", (hex)(uint64)pmd.etext);
+            println((@string)"\tpmd.bss-ebss=", (hex)(uint64)pmd.bss, (@string)"-", (hex)(uint64)pmd.ebss);
+            println((@string)"\tpmd.data-edata=", (hex)(uint64)pmd.data, (@string)"-", (hex)(uint64)pmd.edata);
+            println((@string)"\tpmd.types-etypes=", (hex)(uint64)pmd.types, (@string)"-", (hex)(uint64)pmd.etypes);
+            println((@string)"\tmd.text-etext=", (hex)(uint64)md.text, (@string)"-", (hex)(uint64)md.etext);
+            println((@string)"\tmd.bss-ebss=", (hex)(uint64)md.bss, (@string)"-", (hex)(uint64)md.ebss);
+            println((@string)"\tmd.data-edata=", (hex)(uint64)md.data, (@string)"-", (hex)(uint64)md.edata);
+            println((@string)"\tmd.types-etypes=", (hex)(uint64)md.types, (@string)"-", (hex)(uint64)md.etypes);
             @throw(pluginNewModuleDataˢ);
         }
     }
@@ -121,7 +121,7 @@ internal static void pluginftabverify(ж<moduledata> Ꮡmd) {
             continue;
         }
 
-        var f = new ΔfuncInfo(Ꮡ(md.pclntable, md.ftab[i].funcoff).Reinterpret<byte, _func>(), Ꮡmd);
+        var f = new funcInfo(Ꮡ(md.pclntable, md.ftab[i].funcoff).Reinterpret<byte, _func>(), Ꮡmd);
         @string name = funcname(f);
 
         // A common bug is f.entry has a relocation to a duplicate
@@ -135,8 +135,8 @@ internal static void pluginftabverify(ж<moduledata> Ꮡmd) {
             entry2 = f2.entry();
         }
         badtable = true;
-        println((@string)"ftab entry", (Δhex)(uint64)entry, (@string)"/", (Δhex)(uint64)entry2, (@string)": ",
-            name, (@string)"/", name2, (@string)"outside pc range:[", (Δhex)(uint64)md.minpc, (@string)",", (Δhex)(uint64)md.maxpc, (@string)"], modulename=", md.modulename, (@string)", pluginpath=", md.pluginpath);
+        println((@string)"ftab entry", (hex)(uint64)entry, (@string)"/", (hex)(uint64)entry2, (@string)": ",
+            name, (@string)"/", name2, (@string)"outside pc range:[", (hex)(uint64)md.minpc, (@string)",", (hex)(uint64)md.maxpc, (@string)"], modulename=", md.modulename, (@string)", pluginpath=", md.pluginpath);
     }
     if (badtable) {
         @throw(runtimePluginHasBadˢ);

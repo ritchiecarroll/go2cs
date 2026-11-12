@@ -27,7 +27,6 @@ using static go.hash.adler32_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Size", "const:ΔSize")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -58,7 +57,7 @@ using static go.hash.adler32_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("hash/adler32/adler32.go", "adler32.cs", "ACRMntKCgqaU3oKCgqaCAAgGgoKUgpSCpoKCqJKCgoKClIKCgoKCgoKCgpSCgpSCgpSmgoKmlIKCqIA=")]
+[assembly: GoPositionMap("hash/adler32/adler32.go", "adler32.cs", "AChMvtKCgsaUAAkOgoKCpoIACAaCgpSClIKmgoLIkoKCgoKUgoKCgoKCgoKClIKClIKClMaCgqaUgoLIgA==")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;
@@ -87,3 +86,13 @@ public static partial class adler32_package
     [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(adler32_package.digest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class adler32ᴛdigest;
+// </MethodHolders>

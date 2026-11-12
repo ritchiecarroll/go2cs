@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;
@@ -47,7 +44,7 @@ using static go.@internal.fuzz_package;
 [assembly: GoImplement<crashError, error>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<pcgRand, mutatorRand>(Pointer = true)]
-[assembly: GoImplement<syscall_package.ΔSignal, os_package.ΔSignal>]
+[assembly: GoImplement<syscall_package.Signal, os_package.Signal>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -89,16 +86,16 @@ using static go.@internal.fuzz_package;
 [assembly: GoPositionMap("internal/fuzz/counters_supported.go", "counters_supported.cs", "AAoiwoKC")]
 [assembly: GoPositionMap("internal/fuzz/coverage.go", "coverage.cs", "AAscooKuwoKCvKKClIKCgoKmgpSCgpSqooKClKqigoKmqqKCgqamgoKClLiSAAwWgoKCgoKCgg==")]
 [assembly: GoPositionMap("internal/fuzz/encoding.go", "encoding.cs", "ABkwwoKUpoIACgS0AAwaAAoWxoKUxgAPHIKU6rTEtqiygpSCgpSCgpSCooKClIKClJQAEQaCgoKClIKClIKUlIKClIKClIKClIKClKaCgoKClKS0tKaCgpSCgoKUgoKClMqYgpSCpoK0gpSClJTEppS0gpTEuLSClLSCpKSmgpSCgpSCgpSClIKUpIKUpIKUpIKUgqSClLSClIKClKSClIKClKS6kv6CpIKkgqSCpLTKkqSCpIKkgqSCpLQ=")]
-[assembly: GoPositionMap("internal/fuzz/fuzz.go", "fuzz.cs", "AE2qAQAOAoKUgpSClJSmgoKmgoKCyIKSlpKCsoKCgpS4uJSClIKUgoLKgqKClIKCgpSCAAgSgoKClIKCgoKCgqaCgrKCgpSCgpTugoKSpIKUgqaCgoKmgoKCpgAJCMiCgoLqgpSUgoKCgoKUgqaClMqCgoKmgoKCyoIABxKUgoKCAAYQgoKCgoLeAAgSpqaCgoKClIKCupSCgoKCAAsaggAGEKaCgoKCAAkUyLYAFCCCpoKmggAHGOKCsoKClIKCgpSCgsqUgpQAGUKigqYAgQHGArSCgqYACBKClIKCgoLKgoK4goKmgoKmlJSCgoKClIKCgqamgoKCpoKCgoKClJSClIKCgpSmggACGgAKAqaUgqaUpoKClMqClKaCpoKCgpSCgqaokoKqooK8ooIABhCCpsqqoqaUgoKUlIKUgoKCgpSCgriCgoKmqqKCAAIgAA0CrLKClIKCgoKUqqKoggACENKClIKCptyClAAJFKKCgpSuwoKCgoKUgoLcgpSCgoKUgoKCgpSUgpSmgoKClIKUqqKClIKClIKCpq7igoKClIKClKaCpoKCgqamABMolIKmooI=", "119-144:1;149-164:2;184-194:3", "", "173=New/1/1/2;301=New/1/1/2;320=diffCoverage/1/1/3,countBits/1/1/3;332=countBits/1/1/3;371=countBits/1/2/5,countBits/2/2/6;660=Now/1/2/2,Now/2/2/6;775=warmupRun/1/1/3", "122:21", "163:21,164:13")]
-[assembly: GoPositionMap("internal/fuzz/mem.go", "mem.cs", "ADF2tOr0goKUooKCyoKCuILokqqigoKokoKssoKClIIAAhLigoKU", "72-77:1", "", "", "", "75:21,76:13")]
+[assembly: GoPositionMap("internal/fuzz/fuzz.go", "fuzz.cs", "AE+qAQAOAoKUgpSClJSmgoKmgoKCyIKSlpKCsoKCgpS4uJSClIKUgoLKgqKClIKCgpSCAAgSgoKClIKCgoKCgqaCgrKCgpSCgpTugoKSpIKUgqaCgoKmgoKCpgAJCMiCgoLqgpSUgoKCgoKUgqaClMqCgoKmgoKCyoIABxKUgoKCAAYQgoKCgoLeAAgSpqaCgoKClIKCupSCgoKCAAsaggAGEKaCgoKCAAkUyLYAFiCCpoKmggALGOKCsoKClIKCgpSCgsqUgpQAG0KigqYAgQHGArSCgqYACBKClIKCgoLKgoK4goKmgoKmlJSCgoKClIKCgqbGgoKCpoKCgoKClJSClIKCgpSmggACGgAKAqaUgqaUpoKClMqClKaCpoKCgpSCgqaokoKqooK8ooIABhCCpsqqoqaUgoKUlIKUgoKCgpSCgriCgoKmqqKCAAIgAA0CrLKClIKCgoKUqqKoggACENKClIKCptyClAANFKKCgpTOwoKCgoKUgoLcgpSCgoKUgoKCgpSUgpSmgoKClIKUqqKClIKClIKCpq7igoKClIKClKaCpoKCgqamABMolILGooI=", "119-144:1;149-164:2;184-194:3", "", "175=New/1/1/2;303=New/1/1/2;322=diffCoverage/1/1/3,countBits/1/1/3;334=countBits/1/1/3;373=countBits/1/2/5,countBits/2/2/6;670=Now/1/2/2,Now/2/2/6;787=warmupRun/1/1/3", "124:21", "165:21,166:13")]
+[assembly: GoPositionMap("internal/fuzz/mem.go", "mem.cs", "ADJ2tOr0goKUooKCyoKCuIIACAiSqqKCgqiSgqyygoKUggACEuKCgpQ=", "72-77:1", "", "", "", "76:21,77:13")]
 [assembly: GoPositionMap("internal/fuzz/minimize.go", "minimize.cs", "AAkWgqai3KaCgoKUgoKmyoKClIKCgoKmgqa4goKCgpSCgoKmgoLcgoKCpoKClKbG", "", "", "", "23:27")]
-[assembly: GoPositionMap("internal/fuzz/mutator.go", "mutator.cs", "ABImgqaCpoKClKqipKSkugAKELiClLS0tLS0tLS0tLSCxrS0gpSClIKUgrSClIKUgpSCxMiCgoKCpoKUlJSCtoKUlJSCyoKCgoKmgpSUpoK2gpSUlILKgoKCpoKUgpSUgraClIKUlIK2goKUgpSUgraClILuABQq0oKCgpSmgoKCgvyCggAEEIKClII=", "259-264:1", "", "", "", "306:21,307:13")]
+[assembly: GoPositionMap("internal/fuzz/mutator.go", "mutator.cs", "ABMmgsaCpoKClKqipKSkugAKELiClLS0tLS0tLS0tLSCxrS0gpSClIKUgrSClIKUgpSCxMiCgoKCpoKUlJSCtoKUlJSCyoKCgoKmgpSUpoK2gpSUlILKgoKCpoKUgpSUgraClIKUlIK2goKUgpSUgraClIIACA4AFirSgoKClKaCgoKCAAkMgoIABBCCgpSC", "259-264:1", "", "", "", "313:21,314:13")]
 [assembly: GoPositionMap("internal/fuzz/mutators_byteslice.go", "mutators_byteslice.cs", "AAoQsoKUgoKCgqrCgoKClIKCgpSqwoKUgoKClLiClKamppSCgqiygpSCgoKUgoKosoKUgoKosoKUuIKosoKUgoKClIKosoKUgoKClJSosoKUgoKUgoKCqLKClIKClIKCgqiygpSCgpSCgoKqwoKUgoKqwoKUgoKCqsKClIKCgqiygpQACBKCgpSCgoKClKiygpSCgoKClKiygpSCgoLKgoKUqLKClIKCgsqCgpSmgsqClIKCgoKCgg==")]
-[assembly: GoPositionMap("internal/fuzz/pcg.go", "pcg.cs", "ADNYgoKCgpKClKaokoKCgpSCgoKCgoKmgoKmsoKmgoKokoKCqqKClAACENKCgoKCgoKCgqaokgAKFpI=")]
-[assembly: GoPositionMap("internal/fuzz/queue.go", "queue.cs", "ABcugqaCgoKClIKCgpSCpoKClIKCpoKClIKCgoKmgoKUpoI=")]
-[assembly: GoPositionMap("internal/fuzz/sys_posix.go", "sys_posix.cs", "ABMkgoKCgoKmqsiypoKUgoKmqqKCgoIACgiygoKCgoKUgoKUgoKClIKCqqKCgpSCrLKCgpSCAAIcAAsCAAcSpA==", "", "", "40=Munmap/1/1/1,Close/1/1/2")]
+[assembly: GoPositionMap("internal/fuzz/pcg.go", "pcg.cs", "ADZYgoKCgpKClKaokoKCgpSCgoKCgoLGgoKmsoKmgoKokoKCqqKClAACENKCgoKCgoKCgqaokgAOFpI=")]
+[assembly: GoPositionMap("internal/fuzz/queue.go", "queue.cs", "ABsugqaCgoKClIKCgpSCpoKClIKCpoKClIKCgoKmgoKUpoI=")]
+[assembly: GoPositionMap("internal/fuzz/sys_posix.go", "sys_posix.cs", "ABQkgoKCgoKmysiypoKUgoKmyqKCgoIACgiygoKCgoKUgoKUgoKClIKCqqKCgpSCrLKCgpSCAAIcAAsCAAcSpA==", "", "", "43=Munmap/1/1/1,Close/1/1/2")]
 [assembly: GoPositionMap("internal/fuzz/trace.go", "trace.cs", "AAowAAoCgoKUgoKClII=")]
-[assembly: GoPositionMap("internal/fuzz/worker.go", "worker.cs", "ADx+goKClIKCAAkWkoKClIIAAhoADQSUgoK45oKClLiCgpQAChaUgKbIytyCgpSClJSmlNyUpsqClAAJFMiCytyCpoIABxIABRIACgKCgoK2yoKUgtwABxAACRSCpgAOFoIAAhYACgKClICCpICCgoKUlKakAAIaAA8CgpSCgpSCggAJFIKClJKCgoKUkqaCgoLcgoKCgpSCgqYABhgACwKClLaUpoKCggAIDoKSgqaCuKaCgsaCgoKCuIKmgoLIgoLIAAcgAAoCkoKUxoKUkoKC6ACCAa4CAAwCgoKCgoCCgpTIgpS0tLSmgIIAFDYAEAKCgoKUlIKQpIKCgqSCgpKClIKCpoKCgpSClKaygoKCgoKClJSClKaCgoKClIKClKaCpKSCgpSUgoKCgpSCgoKUggAKDNKCkJKCkJKCgpSCgoKC2oKCgoKCgoLugpS4AAUQAAkCgoKCgqiC3IKCgoKUgpTcwoKUtLSkgoKCgoKCgriUpoKUgpSUtMSkpqKCqqIAECSCrAAIAoK4gIKC2oCCgqQADBSYAAsCgpSSgpSAkoKCgpSCgoKClIKCpoKCgoKCgqaCgpTKlLS0pJSmlIKCgsqCgoKmgoKCuIKCggAJCAALAoKUgoKUgoKCgpSClIKCgpSCgpSQkpSClISCgoKUgpSCgqaUgoLcprjo4oKCgoLaooKCgpQADyCigpSYooKigqa0pA==", "386-389:1;426-429:1;491-499:1;492-494:1.1;715-715:1;724-727:2;741-743:3;744-759:4;805-805:1;807-807:2;855-858:1;881-912:2;996-996:1;1100-1100:1;1184-1187:1", "", "282=Sprintf/1/1/2;537=newMutator/1/1/11", "391:21,398:21,546:29", "781:21,782:13,794:21,795:13,891:21,892:13,896:21,897:13,1132:21,1133:13,1261:21,1262:13")]
+[assembly: GoPositionMap("internal/fuzz/worker.go", "worker.cs", "AD1+goKClIKCAAsWkoKClIIAAhoADQSUgoK45oKClLiCgpQAChaUgKbIytyCgpSClJSmlNyUpsqClAAJFMiCytyCpoIABxIABRIACgKCgoK2yoKUgtwABxAACRSCpgAOFoIAAhYACgKClICCpICCgoKUlKakAAIaAA8CgpSCgpSCggAJFIKClJKCgoKUkqaCgoLcgoKCgpSCgqYABhgACwKClLaUpoKCggAIDoKSgqaCuKaCgsaCgoKCuIKmgoLIgoLIAAkgAAoCkoKUxoKUkoKC6ACEAa4CAAwCgoKCgoCCgpTIgpS0tLSmgIIAGDYAEAKCgoKUlIKQpIKCgqSCgpKClIKCpoKCgpSClKaygoKCgoKClJSClKaCgoKClIKClKaCpKSCgpSUgoKCgpSCgoKUggAKDNKCkJKCkJKCgpSCgoKC2oKCgoKCgoLugpS4AAUQAAkCgoKCgqiC3IKCgoKUgpTcwoKUtLSkgoKCgoKCgriUpoKUgpSUtMSkxqKCyqIAEiSCzAAIAoK4gIKC2oCCgqQADhS4AAsCgpSSgpSAkoKCgpSCgoKClIKCpoKCgoKCgqaCgpTKlLS0pJSmlIKCgsqCgoKmgoKCuIKCggAJCAALAoKUgoKUgoKCgpSClIKCgpSCgpSQkpSClISCgoKUgpSCgqaUgoLcprjo4oKCgoLaooKCgpQAEyCigpSYooKigqa0pA==", "386-389:1;426-429:1;491-499:1;492-494:1.1;715-715:1;724-727:2;741-743:3;744-759:4;805-805:1;807-807:2;855-858:1;881-912:2;996-996:1;1100-1100:1;1184-1187:1", "", "285=Sprintf/1/1/2;542=newMutator/1/1/11", "394:21,401:21,551:29", "792:21,793:13,805:21,806:13,902:21,903:13,907:21,908:13,1155:21,1156:13,1284:21,1285:13")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -179,3 +176,24 @@ public static partial class fuzz_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(fuzz_package.MalformedCorpusError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛMalformedCorpusError;
+[GoMethodHost(typeof(fuzz_package.contextReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛcontextReader;
+[GoMethodHost(typeof(fuzz_package.coordinator)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛcoordinator;
+[GoMethodHost(typeof(fuzz_package.crashError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛcrashError;
+[GoMethodHost(typeof(fuzz_package.mutator)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛmutator;
+[GoMethodHost(typeof(fuzz_package.noCopy)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛnoCopy;
+[GoMethodHost(typeof(fuzz_package.pcgRand)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛpcgRand;
+[GoMethodHost(typeof(fuzz_package.queue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛqueue;
+[GoMethodHost(typeof(fuzz_package.sharedMem)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛsharedMem;
+[GoMethodHost(typeof(fuzz_package.worker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛworker;
+[GoMethodHost(typeof(fuzz_package.workerClient)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛworkerClient;
+[GoMethodHost(typeof(fuzz_package.workerServer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛworkerServer;
+// </MethodHolders>

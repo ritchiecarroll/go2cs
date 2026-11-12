@@ -14,7 +14,7 @@ using @internal.runtime;
 
 partial class runtime_package {
 
-partial struct Δsliceᴛ {
+partial struct Δslice {
     internal @unsafe.Pointer Δarray;
     internal nint len;
     internal nint cap;
@@ -193,7 +193,7 @@ private static readonly @string growsliceLenOutOfRangeˢᵇ = "growslice: len ou
 // See go.dev/issue/67401.
 //
 //go:linkname growslice
-internal static Δsliceᴛ growslice(@unsafe.Pointer oldPtr, nint newLen, nint oldCap, nint num, ж<_type> Ꮡet) {
+internal static Δslice growslice(@unsafe.Pointer oldPtr, nint newLen, nint oldCap, nint num, ж<_type> Ꮡet) {
     ref var et = ref Ꮡet.DerefOrNull();
 
     nint oldLen = newLen - num;
@@ -215,7 +215,7 @@ internal static Δsliceᴛ growslice(@unsafe.Pointer oldPtr, nint newLen, nint o
     if (et.Size_ == 0) {
         // append should not create a slice with nil pointer but non-zero len.
         // We assume that append doesn't need to preserve oldPtr in this case.
-        return new Δsliceᴛ(@unsafe.Pointer.FromBox(Ꮡzerobase), newLen, newLen);
+        return new Δslice(@unsafe.Pointer.FromBox(Ꮡzerobase), newLen, newLen);
     }
 
     nint newcap = nextslicecap(newLen, oldCap);
@@ -289,17 +289,17 @@ internal static Δsliceᴛ growslice(@unsafe.Pointer oldPtr, nint newLen, nint o
         throw panic(((errorString)(@string)growsliceLenOutOfRangeˢ));
     }
 
-    @unsafe.Pointer Δp = default;
+    @unsafe.Pointer p = default;
     if (!et.Pointers()) {
-        Δp = (uintptr)mallocgc(capmem, nil, false);
+        p = (uintptr)mallocgc(capmem, nil, false);
         // The append() that calls growslice is going to overwrite from oldLen to newLen.
         // Only clear the part that will not be overwritten.
         // The reflect_growslice() that calls growslice will manually clear
         // the region not cleared here.
-        memclrNoHeapPointers((uintptr)add(Δp, newlenmem), capmem - newlenmem);
+        memclrNoHeapPointers((uintptr)add(p, newlenmem), capmem - newlenmem);
     } else {
         // Note: can't use rawmem (which avoids zeroing of memory), because then GC can scan uninitialized memory.
-        Δp = (uintptr)mallocgc(capmem, Ꮡet, true);
+        p = (uintptr)mallocgc(capmem, Ꮡet, true);
         if (lenmem > 0 && writeBarrier.enabled) {
             // Only shade the pointers in oldPtr since we know the destination slice p
             // only contains nil pointers because it has been cleared during alloc.
@@ -307,12 +307,12 @@ internal static Δsliceᴛ growslice(@unsafe.Pointer oldPtr, nint newLen, nint o
             // It's safe to pass a type to this function as an optimization because
             // from and to only ever refer to memory representing whole values of
             // type et. See the comment on bulkBarrierPreWrite.
-            bulkBarrierPreWriteSrcOnly((uintptr)Δp, (uintptr)oldPtr, lenmem - et.Size_ + et.PtrBytes, Ꮡet);
+            bulkBarrierPreWriteSrcOnly((uintptr)p, (uintptr)oldPtr, lenmem - et.Size_ + et.PtrBytes, Ꮡet);
         }
     }
-    memmove(Δp, oldPtr, lenmem);
+    memmove(p, oldPtr, lenmem);
 
-    return new Δsliceᴛ(Δp.Value, newLen, newcap);
+    return new Δslice(p.Value, newLen, newcap);
 }
 
 // growsliceNoAlias is like growslice but only for the case where
@@ -329,7 +329,7 @@ internal static Δsliceᴛ growslice(@unsafe.Pointer oldPtr, nint newLen, nint o
 // be an interior pointer, such as after a reslice.
 //
 // See freegc for details.
-internal static Δsliceᴛ growsliceNoAlias(@unsafe.Pointer oldPtr, nint newLen, nint oldCap, nint num, ж<_type> Ꮡet) {
+internal static Δslice growsliceNoAlias(@unsafe.Pointer oldPtr, nint newLen, nint oldCap, nint num, ж<_type> Ꮡet) {
     ref var et = ref Ꮡet.DerefOrNull();
 
     var s = growslice(oldPtr, newLen, oldCap, num, Ꮡet);
@@ -397,7 +397,7 @@ internal static nint nextslicecap(nint newLen, nint oldCap) {
 // See go.dev/issue/67401.
 //
 //go:linkname reflect_growslice reflect.growslice
-internal static Δsliceᴛ reflect_growslice(ж<_type> Ꮡet, Δsliceᴛ old, nint num) {
+internal static Δslice reflect_growslice(ж<_type> Ꮡet, Δslice old, nint num) {
     ref var et = ref Ꮡet.DerefOrNull();
 
     // Semantically equivalent to slices.Grow, except that the caller
@@ -544,7 +544,7 @@ internal static (@unsafe.Pointer, nint, nint) moveSliceNoCapNoScan(uintptr elemS
 
 // growsliceBuf is like growslice, but we can use the given buffer
 // as a backing store if we want. bufPtr must be on the stack.
-internal static Δsliceᴛ growsliceBuf(@unsafe.Pointer oldPtr, nint newLen, nint oldCap, nint num, ж<_type> Ꮡet, @unsafe.Pointer bufPtr, nint bufLen) {
+internal static Δslice growsliceBuf(@unsafe.Pointer oldPtr, nint newLen, nint oldCap, nint num, ж<_type> Ꮡet, @unsafe.Pointer bufPtr, nint bufLen) {
     ref var et = ref Ꮡet.DerefOrNull();
 
     if (newLen > bufLen) {
@@ -578,12 +578,12 @@ internal static Δsliceᴛ growsliceBuf(@unsafe.Pointer oldPtr, nint newLen, nin
         memclrNoHeapPointers((uintptr)add(bufPtr, (uintptr)newLen * et.Size_), (uintptr)(newCap - newLen) * et.Size_);
     }
 
-    return new Δsliceᴛ(bufPtr.Value, newLen, newCap);
+    return new Δslice(bufPtr.Value, newLen, newCap);
 }
 
 // growsliceBufNoAlias is a combination of growsliceBuf and growsliceNoAlias.
 // bufPtr must be on the stack.
-internal static Δsliceᴛ growsliceBufNoAlias(@unsafe.Pointer oldPtr, nint newLen, nint oldCap, nint num, ж<_type> Ꮡet, @unsafe.Pointer bufPtr, nint bufLen) {
+internal static Δslice growsliceBufNoAlias(@unsafe.Pointer oldPtr, nint newLen, nint oldCap, nint num, ж<_type> Ꮡet, @unsafe.Pointer bufPtr, nint bufLen) {
     ref var et = ref Ꮡet.DerefOrNull();
 
     var s = growsliceBuf(oldPtr, newLen, oldCap, num, Ꮡet, bufPtr, bufLen);

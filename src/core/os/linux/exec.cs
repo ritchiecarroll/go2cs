@@ -12,6 +12,7 @@ using syscall = syscall_package;
 using time = time_package;
 using @internal;
 using go.sync;
+using static os_package;
 
 partial class os_package {
 
@@ -74,6 +75,8 @@ partial struct processHandle {
     internal atomic.Int32 refs;
 }
 
+} partial class osᴛprocessHandle {
+
 // acquire adds a reference and returns the handle.
 // The bool result reports whether acquire succeeded;
 // it fails if the handle is already closed.
@@ -113,6 +116,8 @@ internal static void release(this ж<processHandle> Ꮡph) {
     }
 }
 
+} partial class os_package {
+
 // newPIDProcess returns a [Process] for the given PID.
 internal static ж<Process> newPIDProcess(nint pid) {
     var p = Ꮡ(new Process(
@@ -136,7 +141,7 @@ internal static ж<Process> newHandleProcess(nint pid, uintptr handle) {
         handle: ph
     ));
 
-    p.cleanup = runtime.AddCleanup<Process, ж<processHandle>>(p, ((Action<ж<processHandle>>)(release)), ph);
+    p.cleanup = runtime.AddCleanup<Process, ж<processHandle>>(p, ((Action<ж<processHandle>>)(osᴛprocessHandle.release)), ph);
 
     return p;
 }
@@ -151,6 +156,8 @@ internal static ж<Process> newDoneProcess(nint pid) {
     p.Ꮡstate.Store((uint32)statusDone); // No persistent reference, as there is no handle.
     return p;
 }
+
+} partial class osᴛProcess {
 
 // handleTransientAcquire returns the process handle or,
 // if the process is not ready, the current status.
@@ -200,6 +207,8 @@ internal static processStatus pidStatus(this ж<Process> Ꮡp) {
     return (processStatus)Ꮡp.Ꮡstate.Load();
 }
 
+} partial class os_package {
+
 // ProcAttr holds the attributes that will be applied to a new process
 // started by StartProcess.
 partial struct ProcAttr {
@@ -229,7 +238,7 @@ partial struct ProcAttr {
 // A Signal represents an operating system signal.
 // The usual underlying implementation is operating system-dependent:
 // on Unix it is syscall.Signal.
-partial interface ΔSignal {
+partial interface Signal {
     @string String();
     void Signal(); // to distinguish from other Stringers
 }
@@ -270,6 +279,8 @@ public static (ж<Process>, error) StartProcess(@string name, slice<@string> arg
     testlog.Open(name);
     return startProcess(name, argv, attr);
 }
+
+} partial class osᴛProcess {
 
 // Release releases any resources associated with the [Process] p,
 // rendering it unusable in the future.
@@ -351,7 +362,7 @@ public static (ж<ProcessState>, error) Wait(this ж<Process> Ꮡp) {
 
 // Signal sends a signal to the [Process].
 // Sending [Interrupt] on Windows is not implemented.
-public static error Signal(this ж<Process> Ꮡp, ΔSignal sig) {
+public static error Signal(this ж<Process> Ꮡp, Signal sig) {
     return Ꮡp.signal(sig);
 }
 
@@ -366,6 +377,8 @@ public static error Signal(this ж<Process> Ꮡp, ΔSignal sig) {
 public static error WithHandle(this ж<Process> Ꮡp, Action<uintptr> f) {
     return Ꮡp.withHandle(f);
 }
+
+} partial class osᴛProcessState {
 
 // UserTime returns the user CPU time of the exited process and its children.
 public static time.Duration UserTime(this ref ProcessState p) {
@@ -406,4 +419,4 @@ public static any SysUsage(this ref ProcessState p) {
     return p.sysUsage();
 }
 
-} // end os_package
+} // end osᴛProcessState

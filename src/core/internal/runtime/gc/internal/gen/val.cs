@@ -5,11 +5,12 @@ namespace go.@internal.runtime.gc.@internal;
 
 using sync = go.sync_package;
 using go;
+using static gen_package;
 
 partial class gen_package {
 
 partial interface Value {
-    ж<Δkind> kind();
+    ж<kind> kind();
     ж<op> getOp();
 }
 
@@ -24,14 +25,14 @@ partial interface Word :
 // new Value. Ideally we would just have a method on Value to initialize its op,
 // but that needs to have a non-pointer receiver to satisfy the interface and
 // then it can't mutate the Value.
-public partial interface Δwrap<T> :
+public partial interface wrap<T> :
     Value
 
     where T : Value{
     T wrap(ж<op> x);
 }
 
-public partial struct Δkind {
+public partial struct kind {
     internal @string typ;
     internal regClass reg;
 }
@@ -40,9 +41,13 @@ partial struct @void {
     /*embed*/ internal valAny valAny;
 }
 
-internal static ж<Δkind> voidKind = Ꮡ(new Δkind(typ: "void", reg: regClassNone));
+internal static ж<kind> voidKind = Ꮡ(new kind(typ: "void", reg: regClassNone));
 
-internal static ж<Δkind> kind(this @void _) { return voidKind; }
+} partial class genᴛvoid {
+
+internal static ж<kind> kind(this @void _) { return voidKind; }
+
+} partial class gen_package {
 
 partial struct Ptr<T>
     where T : Value
@@ -56,17 +61,19 @@ internal static Word _ᴛ1ʗ = new Ptr<@void>();
 internal static readonly ж<sync.Map> ᏑptrKinds = new StaticBox<sync.Map>(new sync.Map());
 internal static ref sync.Map ptrKinds => ref ((StaticBox<sync.Map>)ᏑptrKinds).ValueSlot; // *kind -> *kind
 
-internal static ж<Δkind> kind<T>(this Ptr<T> _Δp0)
+} partial class genᴛPtr {
+
+internal static ж<kind> kind<T>(this Ptr<T> _Δp0)
     where T : Value
 {
     T x = GoZero<T>();
     var xk = x.kind();
     var (pk, ok) = ᏑptrKinds.Load(xk.OrTypedNil());
     if (!ok) {
-        var k = Ꮡ(new Δkind(typ: "Ptr["u8 + x.kind().typ + "]"u8, reg: regClassGP));
+        var k = Ꮡ(new kind(typ: "Ptr["u8 + x.kind().typ + "]"u8, reg: regClassGP));
         (pk, _) = ᏑptrKinds.LoadOrStore(xk.OrTypedNil(), k.OrTypedNil());
     }
-    return pk._<ж<Δkind>>();
+    return pk._<ж<kind>>();
 }
 
 internal static Ptr<T> wrap<T>(this Ptr<T> _, ж<op> x)
@@ -91,8 +98,10 @@ public static Ptr<T> /*y*/ AddConst<T>(this Ptr<T> x, nint off)
     return y;
 }
 
+} partial class gen_package {
+
 public static T Deref<W, T>(Ptr<W> ptr)
-    where W : Δwrap<T>
+    where W : wrap<T>
     where T : Value
 {
     ref var off = ref heap(new nint(), out var Ꮡoff);
@@ -123,23 +132,33 @@ public static Array<T> /*y*/ ConstArray<T>(slice<T> vals, @string name)
     return y;
 }
 
-internal static ж<Δkind> kind<T>(this Array<T> _)
+} partial class genᴛArray {
+
+internal static ж<kind> kind<T>(this Array<T> _)
     where T : Value
 {
     // TODO: Cache this like Ptr.kind.
     T x = GoZero<T>();
-    return Ꮡ(new Δkind(typ: "Array["u8 + x.kind().typ + "]"u8, reg: regClassNone));
+    return Ꮡ(new kind(typ: "Array["u8 + x.kind().typ + "]"u8, reg: regClassNone));
 }
+
+} partial class gen_package {
 
 partial struct valGP {
     /*embed*/ internal valAny valAny;
 }
 
+} partial class genᴛvalGP {
+
 internal static void isWord(this valGP _) { }
+
+} partial class gen_package {
 
 partial struct valAny {
     /*embed*/ internal ж<op> op;
 }
+
+} partial class genᴛvalAny {
 
 internal static void initOp(this ref valAny v, ж<op> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
@@ -165,4 +184,4 @@ internal static ж<op> getOp(this valAny v) {
     return v.op;
 }
 
-} // end gen_package
+} // end genᴛvalAny

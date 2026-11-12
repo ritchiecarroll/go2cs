@@ -10,6 +10,7 @@ using Δwindows = go.@internal.runtime.syscall.windows_package;
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
 using go.@internal.runtime.syscall;
+using static windows_package;
 
 partial class windows_package {
 
@@ -101,15 +102,17 @@ partial struct IO_STATUS_BLOCK {
 // https://learn.microsoft.com/en-us/windows/win32/api/ntdef/ns-ntdef-_object_attributes
 partial struct OBJECT_ATTRIBUTES {
     public uint32 Length;
-    public syscallꓸHandle RootDirectory;
+    public syscall.Handle RootDirectory;
     public ж<NTUnicodeString> ObjectName;
     public uint32 Attributes;
     public ж<SECURITY_DESCRIPTOR> SecurityDescriptor;
     public ж<SECURITY_QUALITY_OF_SERVICE> SecurityQoS;
 }
 
+} partial class windowsᴛOBJECT_ATTRIBUTES {
+
 // init sets o's RootDirectory, ObjectName, and Length.
-internal static error init(this ref OBJECT_ATTRIBUTES o, syscallꓸHandle root, @string name) {
+internal static error init(this ref OBJECT_ATTRIBUTES o, syscall.Handle root, @string name) {
     if (name == "."u8) {
         name = ""u8;
     }
@@ -124,6 +127,8 @@ internal static error init(this ref OBJECT_ATTRIBUTES o, syscallꓸHandle root, 
     o.Length = (uint32)/* unsafe.Sizeof(*o) */ (uintptr)48;
     return default;
 }
+
+} partial class windows_package {
 
 // Values for the Attributes member of OBJECT_ATTRIBUTES.
 public static UntypedInt OBJ_INHERIT => 0x00000002;
@@ -238,7 +243,7 @@ public static UntypedInt FILE_RENAME_POSIX_SEMANTICS => 0x00000002;
 // https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/ns-ntifs-_file_rename_information
 partial struct FILE_RENAME_INFORMATION {
     public bool ReplaceIfExists;
-    public syscallꓸHandle RootDirectory;
+    public syscall.Handle RootDirectory;
     public uint32 FileNameLength;
     public array<uint16> FileName = new(syscall.MAX_PATH);
 }
@@ -246,7 +251,7 @@ partial struct FILE_RENAME_INFORMATION {
 // https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/ns-ntifs-_file_rename_information
 partial struct FILE_RENAME_INFORMATION_EX {
     public uint32 Flags;
-    public syscallꓸHandle RootDirectory;
+    public syscall.Handle RootDirectory;
     public uint32 FileNameLength;
     public array<uint16> FileName = new(syscall.MAX_PATH);
 }
@@ -254,7 +259,7 @@ partial struct FILE_RENAME_INFORMATION_EX {
 // https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/ns-ntifs-_file_link_information
 partial struct FILE_LINK_INFORMATION {
     public bool ReplaceIfExists;
-    public syscallꓸHandle RootDirectory;
+    public syscall.Handle RootDirectory;
     public uint32 FileNameLength;
     public array<uint16> FileName = new(syscall.MAX_PATH);
 }
@@ -268,7 +273,7 @@ partial struct FILE_IO_COMPLETION_NOTIFICATION_INFORMATION {
 
 // https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/ns-ntifs-_file_completion_information
 partial struct FILE_COMPLETION_INFORMATION {
-    public syscallꓸHandle Port;
+    public syscall.Handle Port;
     public uintptr Key;
 }
 

@@ -23,6 +23,7 @@ using strings = strings_package;
 using time = time_package;
 using @internal;
 using go.io;
+using static tar_package;
 
 partial class tar_package {
 
@@ -42,6 +43,8 @@ internal static error errWriteHole = errors.New("archive/tar: write non-NUL byte
 internal static error errSparseTooLong = errors.New("archive/tar: sparse map too long");
 
 partial struct headerError /*[]@string*/;
+
+} partial class tarᴛheaderError {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string andˢ => ref andˢᵇ;
@@ -66,6 +69,8 @@ internal static @string Error(this headerError he) {
     }
     return fmt.Sprintf("%s: %v"u8, prefix, strings.Join(ss, andˢ));
 }
+
+} partial class tar_package {
 
 // Type flags for Header.Typeflag.
 // Type '0' indicates a regular file.
@@ -237,7 +242,11 @@ partial struct sparseEntry {
     public int64 Offset, Length;
 }
 
+} partial class tarᴛsparseEntry {
+
 internal static int64 endOffset(this sparseEntry s) { return s.Offset + s.Length; }
+
+} partial class tar_package {
 
 // A sparse file can be represented as either a sparseDatas or a sparseHoles.
 // As long as the total size is known, they are equivalent and one can be
@@ -358,6 +367,8 @@ partial interface fileState {
     int64 logicalRemaining();
     int64 physicalRemaining();
 }
+
+} partial class tarᴛHeader {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nameˢ => ref nameˢᵇ;
@@ -633,10 +644,14 @@ public static fs.FileInfo FileInfo(this ж<Header> Ꮡh) {
     return new headerFileInfo(Ꮡh);
 }
 
+} partial class tar_package {
+
 // headerFileInfo implements fs.FileInfo.
 partial struct headerFileInfo {
     internal ж<Header> h;
 }
+
+} partial class tarᴛheaderFileInfo {
 
 internal static int64 Size(this headerFileInfo fi) { return fi.h.Size; }
 internal static bool IsDir(this headerFileInfo fi) { return fi.Mode().IsDir(); }
@@ -727,6 +742,8 @@ internal static fs.FileMode /*mode*/ Mode(this headerFileInfo fi) {
 internal static @string String(this headerFileInfo fi) {
     return fs.FormatFileInfo(fi);
 }
+
+} partial class tar_package {
 
 // sysStat, if non-nil, populates h from system-dependent fields of fi.
 internal static Func<fs.FileInfo, ж<Header>, bool, error> sysStat;

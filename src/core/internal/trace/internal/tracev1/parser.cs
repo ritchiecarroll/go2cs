@@ -23,6 +23,7 @@ using slices = slices_package;
 using sort = sort_package;
 using encoding;
 using go.@internal.trace;
+using static tracev1_package;
 
 partial class tracev1_package {
 
@@ -108,6 +109,8 @@ partial struct parser {
     internal int32 lastP;
 }
 
+} partial class tracev1ᴛparser {
+
 internal static bool discard(this ref parser p, uint64 n) {
     if (n > math.MaxInt) {
         return false;
@@ -119,6 +122,8 @@ internal static bool discard(this ref parser p, uint64 n) {
     }
     return true;
 }
+
+} partial class tracev1_package {
 
 internal static (ж<parser>, error) newParser(io.Reader r, version.Version ver) {
     slice<byte> buf = default;
@@ -169,6 +174,8 @@ public static (Trace, error) Parse(io.Reader r, version.Version vers) {
     }
     return p.parse();
 }
+
+} partial class tracev1ᴛparser {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string noEvFrequencyEventˢ => ref noEvFrequencyEventˢᵇ;
@@ -256,6 +263,8 @@ internal static (Trace, error) parse(this ж<parser> Ꮡp) {
     finally { ᒐ.Run(); }
 }
 
+} partial class tracev1_package {
+
 // rawEvent is a helper type used during parsing.
 partial struct rawEvent {
     internal EventType typ;
@@ -287,6 +296,8 @@ partial struct Events {
     internal /*[524288]*/ slice<ж<array<Event>>> buckets;
     internal nint off;
 }
+
+} partial class tracev1ᴛEvents {
 
 // grow grows the slice by one and returns a pointer to the new element, without
 // overwriting it.
@@ -368,6 +379,8 @@ public static Action<Func<ж<Event>, bool>> All(this ж<Events> Ꮡl) {
     };
 }
 
+} partial class tracev1ᴛparser {
+
 // parseEventBatches reads per-P event batches and merges them into a single, consistent
 // stream. The high level idea is as follows. Events within an individual batch
 // are in correct order, because they are emitted by a single P. So we need to
@@ -393,9 +406,9 @@ internal static (Events, error) parseEventBatches(this ref parser p) {
 
     var allProcs = new slice<proc>(0, len(p.batchOffsets));
     foreach (var (pid, _) in p.batchOffsets) {
-        allProcs = builtin.append(allProcs, new proc(pid: pid));
+        allProcs = append(allProcs, new proc(pid: pid));
     }
-    allProcs = builtin.append(allProcs, new proc(pid: ProfileP, events: p.cpuSamples));
+    allProcs = append(allProcs, new proc(pid: ProfileP, events: p.cpuSamples));
 
     ref var events = ref heap<Events>(new Events(), out var Ꮡevents);
 
@@ -504,7 +517,7 @@ break_pidLoop:;
                 return (new Events(), err);
             }
         }
-        availableProcs = builtin.append(availableProcsᴷ, availableProcs, f.proc);
+        availableProcs = append(availableProcsᴷ, availableProcs, f.proc);
     }
 
     // At this point we have a consistent stream of events. Make sure time
@@ -571,7 +584,7 @@ internal static error collectBatchesAndCPUSamples(this ref parser p) {
 
         if (raw.typ == EvBatch) {
             var bo = new batchOffset(offset: raw.batchOffset);
-            p.batchOffsets[raw.batchPid] = builtin.append(p.batchOffsets[raw.batchPid], bo);
+            p.batchOffsets[raw.batchPid] = append(p.batchOffsets[raw.batchPid], bo);
             curP = raw.batchPid;
         }
 
@@ -616,15 +629,19 @@ internal static error collectBatchesAndCPUSamples(this ref parser p) {
             // Note that we're not concerned about the memory usage of storing
             // all CPU samples during the indexing phase. There are orders of
             // magnitude fewer CPU samples than runtime events.
-            p.cpuSamples = builtin.append(p.cpuSamples, e.ΔClone());
+            p.cpuSamples = append(p.cpuSamples, e.ΔClone());
         }
     }
 
     return default;
 }
 
+} partial class tracev1_package {
+
 internal static UntypedInt skipArgs => /* 1 << iota */ 1;
 internal static UntypedInt skipStrings => 2;
+
+} partial class tracev1ᴛparser {
 
 internal static (byte, bool) readByte(this ref parser p) {
     if (p.off < len(p.data) && p.off >= 0) {
@@ -769,7 +786,7 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
             batchPid: pid32,
             batchOffset: off
         );
-        ev.args = builtin.append(ev.args, pid, v);
+        ev.args = append(ev.args, pid, v);
         return default;
     }
     default: {
@@ -781,7 +798,7 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
                     if (err != nil) {
                         return fmt.Errorf("failed to read event %d argument: %w"u8, typ, err);
                     }
-                    ev.args = builtin.append(ev.args, v);
+                    ev.args = append(ev.args, v);
                 }
             } else {
                 for (nint i = 0; i < (nint)narg; i++) {
@@ -815,7 +832,7 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
                     if (errΔ1 != nil) {
                         return errΔ1;
                     }
-                    ev.args = builtin.append(ev.args, vΔ1);
+                    ev.args = append(ev.args, vΔ1);
                 }
             } else {
                 // Skip over arguments
@@ -831,7 +848,7 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
                     if (errΔ2 != nil) {
                         return errΔ2;
                     }
-                    ev.sargs = builtin.append(ev.sargs, s);
+                    ev.sargs = append(ev.sargs, s);
                 } else {
                     // Skip string
                     var (vΔ2, errΔ3) = p.readVal();
@@ -894,7 +911,7 @@ internal static (slice<Event>, error) loadBatch(this ref parser p, int32 pid, sl
             return (default, err);
         }
         if (ev.Type != EvNone) {
-            events = builtin.append(events, ev.ΔClone());
+            events = append(events, ev.ΔClone());
         }
     }
 
@@ -1043,7 +1060,7 @@ internal static error parseEvent(this ref parser p, ж<rawEvent> Ꮡraw, ж<Even
             } else {
                 nint idΔ1 = len(p.inlineStrings);
                 p.inlineStringsMapping[raw.sargs[0]] = idΔ1;
-                p.inlineStrings = builtin.append(p.inlineStrings, raw.sargs[0]);
+                p.inlineStrings = append(p.inlineStrings, raw.sargs[0]);
                 ev.Args[3] = (uint64)idΔ1;
             }
             break;
@@ -1055,6 +1072,8 @@ internal static error parseEvent(this ref parser p, ж<rawEvent> Ꮡraw, ж<Even
     ev.Type = EvNone;
     return default;
 }
+
+} partial class tracev1_package {
 
 // ErrTimeOrder is returned by Parse when the trace contains
 // time stamps that do not respect actual event ordering.
@@ -1073,6 +1092,8 @@ internal partial struct postProcessTrace_pdesc /*dyn*/ {
     internal uint64 g;
     internal ж<Event> evSweep;
 }
+
+} partial class tracev1ᴛparser {
 
 // postProcessTrace does inter-event verification and information restoration.
 // The resulting trace is guaranteed to be consistent
@@ -1401,7 +1422,7 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
             var mode = ev.Args[1];
             var regions = activeRegions[ev.G];
             if (mode == 0) { // region start
-                activeRegions[ev.G] = builtin.append(regions, ev); // push
+                activeRegions[ev.G] = append(regions, ev); // push
             } else if (mode == 1) { // region end
                 nint n = len(regions);
                 if (n > 0) { // matching region start event is in the trace.
@@ -1435,7 +1456,11 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
     return default;
 }
 
+} partial class tracev1_package {
+
 internal static error errMalformedVarint = errors.New("malformatted base-128 varint");
+
+} partial class tracev1ᴛparser {
 
 // readVal reads unsigned base-128 value from r.
 internal static (uint64, error) readVal(this ref parser p) {
@@ -1447,6 +1472,8 @@ internal static (uint64, error) readVal(this ref parser p) {
     return (v, default);
 }
 
+} partial class tracev1_package {
+
 internal static (uint64 v, slice<byte> rem, error err) readValFrom(slice<byte> buf) {
     uint64 v = default;
 
@@ -1457,6 +1484,8 @@ internal static (uint64 v, slice<byte> rem, error err) readValFrom(slice<byte> b
     return (v, buf.slice(n), default);
 }
 
+} partial class tracev1ᴛEvent {
+
 public static @string String(this ref Event ev) {
     var desc = ᏑEventDescriptions.at<EventDescriptionsᴛ1>((nint)(ev.Type));
     var w = @new<bytes.Buffer>();
@@ -1466,6 +1495,8 @@ public static @string String(this ref Event ev) {
     }
     return w.String();
 }
+
+} partial class tracev1ᴛrawEvent {
 
 // argNum returns total number of args for the event accounting for timestamps,
 // sequence numbers and differences between trace format versions.
@@ -1485,6 +1516,8 @@ internal static nint argNum(this ref rawEvent raw) {
     narg++; // timestamp
     return narg;
 }
+
+} partial class tracev1_package {
 
 partial struct EventType /*num:uint8*/;
 
@@ -1603,6 +1636,8 @@ partial struct EventDescriptionsᴛ1 /*dyn*/ {
 }.array(256)); }
 public static ref array<EventDescriptionsᴛ1> EventDescriptions => ref ((StaticBox<array<EventDescriptionsᴛ1>>)ᏑEventDescriptions).ValueSlot;
 
+} partial class tracev1ᴛparser {
+
 //gcassert:inline
 internal static slice<uint64> allocateStack(this ref parser p, uint64 size) {
     if (size == 0) {
@@ -1621,16 +1656,18 @@ internal static slice<uint64> allocateStack(this ref parser p, uint64 size) {
     return @out.slice(0, (nint)(size), (nint)(size));
 }
 
-public static ΔSTWReason STWReason(this ref Trace tr, uint64 kindID) {
+} partial class tracev1ᴛTrace {
+
+public static STWReason STWReason(this ref Trace tr, uint64 kindID) {
     if (tr.Version < 21) {
         if (kindID == 0 || kindID == 1) {
-            return (ΔSTWReason)(nint)(kindID + 1);
+            return (STWReason)(nint)(kindID + 1);
         } else {
             return STWUnknown;
         }
     } else if (tr.Version == 21) {
         if (kindID < NumSTWReasons) {
-            return (ΔSTWReason)(nint)kindID;
+            return (STWReason)(nint)kindID;
         } else {
             return STWUnknown;
         }
@@ -1639,25 +1676,27 @@ public static ΔSTWReason STWReason(this ref Trace tr, uint64 kindID) {
     }
 }
 
-partial struct ΔSTWReason /*num:nint*/;
+} partial class tracev1_package {
 
-public static ΔSTWReason STWUnknown => 0;
-public static ΔSTWReason STWGCMarkTermination => 1;
-public static ΔSTWReason STWGCSweepTermination => 2;
-public static ΔSTWReason STWWriteHeapDump => 3;
-public static ΔSTWReason STWGoroutineProfile => 4;
-public static ΔSTWReason STWGoroutineProfileCleanup => 5;
-public static ΔSTWReason STWAllGoroutinesStackTrace => 6;
-public static ΔSTWReason STWReadMemStats => 7;
-public static ΔSTWReason STWAllThreadsSyscall => 8;
-public static ΔSTWReason STWGOMAXPROCS => 9;
-public static ΔSTWReason STWStartTrace => 10;
-public static ΔSTWReason STWStopTrace => 11;
-public static ΔSTWReason STWCountPagesInUse => 12;
-public static ΔSTWReason STWReadMetricsSlow => 13;
-public static ΔSTWReason STWReadMemStatsSlow => 14;
-public static ΔSTWReason STWPageCachePagesLeaked => 15;
-public static ΔSTWReason STWResetDebugLog => 16;
+partial struct STWReason /*num:nint*/;
+
+public static STWReason STWUnknown => 0;
+public static STWReason STWGCMarkTermination => 1;
+public static STWReason STWGCSweepTermination => 2;
+public static STWReason STWWriteHeapDump => 3;
+public static STWReason STWGoroutineProfile => 4;
+public static STWReason STWGoroutineProfileCleanup => 5;
+public static STWReason STWAllGoroutinesStackTrace => 6;
+public static STWReason STWReadMemStats => 7;
+public static STWReason STWAllThreadsSyscall => 8;
+public static STWReason STWGOMAXPROCS => 9;
+public static STWReason STWStartTrace => 10;
+public static STWReason STWStopTrace => 11;
+public static STWReason STWCountPagesInUse => 12;
+public static STWReason STWReadMetricsSlow => 13;
+public static STWReason STWReadMemStatsSlow => 14;
+public static STWReason STWPageCachePagesLeaked => 15;
+public static STWReason STWResetDebugLog => 16;
 
 public static UntypedInt NumSTWReasons => 17;
 

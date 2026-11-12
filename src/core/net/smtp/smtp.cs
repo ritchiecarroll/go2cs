@@ -30,6 +30,7 @@ using encoding;
 using go.net;
 using time = time_package;
 using ꓸꓸꓸany = Span<any>;
+using static smtp_package;
 
 partial class smtp_package {
 
@@ -81,6 +82,8 @@ public static (ж<Client>, error) NewClient(net.Conn conn, @string host) {
     (_, c.tls) = conn._<ж<tls.Conn>>(ᐧ);
     return (c, default);
 }
+
+} partial class smtpᴛClient {
 
 // Close closes the connection.
 public static error Close(this ref Client c) {
@@ -213,8 +216,8 @@ public static error StartTLS(this ж<Client> Ꮡc, ж<tls.Config> config) {
 // TLSConnectionState returns the client's TLS connection state.
 // The return values are their zero values if [Client.StartTLS] did
 // not succeed.
-public static (tlsꓸConnectionState state, bool ok) TLSConnectionState(this ref Client c) {
-    tlsꓸConnectionState state = default;
+public static (tls.ConnectionState state, bool ok) TLSConnectionState(this ref Client c) {
+    tls.ConnectionState state = default;
     bool ok = default;
 
     (var tc, ok) = c.conn._<ж<tls.Conn>>(ᐧ);
@@ -246,7 +249,7 @@ public static error Verify(this ж<Client> Ꮡc, @string addr) {
 // Auth authenticates a client using the provided authentication mechanism.
 // A failed authentication closes the connection.
 // Only servers that advertise the AUTH extension support this function.
-public static error Auth(this ж<Client> Ꮡc, ΔAuth a) {
+public static error Auth(this ж<Client> Ꮡc, Auth a) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var errΔ1 = Ꮡc.hello(); if (errΔ1 != nil) {
@@ -276,7 +279,7 @@ public static error Auth(this ж<Client> Ꮡc, ΔAuth a) {
             break;
         }
         default: {
-            err = new textproto.ΔErrorжerror(Ꮡ(new textprotoꓸError(Code: code, Msg: msg64)));
+            err = new textproto.Errorжerror(Ꮡ(new textproto.Error(Code: code, Msg: msg64)));
             break;
         }}
         if (err == nil) {
@@ -346,6 +349,8 @@ public static error Rcpt(this ж<Client> Ꮡc, @string to) {
     return err;
 }
 
+} partial class smtp_package {
+
 partial struct dataCloser {
     internal ж<Client> c;
     /*embed*/ public io_package.WriteCloser WriteCloser;
@@ -355,11 +360,15 @@ partial struct dataCloser {
 // interface field in *dataCloser's method set; see the pointer-only satisfaction record.
 internal static (nint, error) Write(this dataCloser recvᴛ, slice<byte> p) => recvᴛ.WriteCloser.Write(p);
 
+} partial class smtpᴛdataCloser {
+
 internal static error Close(this ref dataCloser d) {
     d.WriteCloser.Close();
     var (_, _, err) = d.c.Text.of(textproto.Conn.ᏑReader).ReadResponse(250);
     return err;
 }
+
+} partial class smtpᴛClient {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string dataˢ => ref dataˢᵇ;
@@ -379,9 +388,15 @@ public static (io.WriteCloser, error) Data(this ж<Client> Ꮡc) {
     return (new dataCloserжWriteCloser(Ꮡ(new dataCloser(Ꮡc, c.Text.of(textproto.Conn.ᏑWriter).DotWriter()))), default);
 }
 
+} partial class smtp_package {
+
 internal static Action<ж<tls.Config>> testHookStartTLS; // nil, except for tests
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string starttlsˢ => ref starttlsˢᵇ;
+private static readonly @string starttlsˢᵇ = "STARTTLS"u8;
+internal static ref readonly @string authˢ => ref authˢᵇ;
+private static readonly @string authˢᵇ = "AUTH"u8;
 internal static ref readonly @string smtpServerDoesnTSupportˢ => ref smtpServerDoesnTSupportˢᵇ;
 private static readonly @string smtpServerDoesnTSupportˢᵇ = "smtp: server doesn't support AUTH"u8;
 
@@ -405,7 +420,7 @@ private static readonly @string smtpServerDoesnTSupportˢᵇ = "smtp: server doe
 // attachments (see the mime/multipart package), or other mail
 // functionality. Higher-level packages exist outside of the standard
 // library.
-public static error SendMail(@string addr, ΔAuth a, @string from, slice<@string> to, slice<byte> msg) {
+public static error SendMail(@string addr, Auth a, @string from, slice<@string> to, slice<byte> msg) {
     GoFrame ᒐ = default;
     try {
         var errΔ1 = validateLine(from); if (errΔ1 != nil) {
@@ -470,6 +485,8 @@ public static error SendMail(@string addr, ΔAuth a, @string from, slice<@string
     finally { ᒐ.Run(); }
 }
 
+} partial class smtpᴛClient {
+
 // Extension reports whether an extension is support by the server.
 // The extension name is case-insensitive. If the extension is supported,
 // Extension also returns a string that contains any parameters the
@@ -531,6 +548,8 @@ public static error Quit(this ж<Client> Ꮡc) {
     }
     return c.Text.Close();
 }
+
+} partial class smtp_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string smtpALineMustNotContainˢ => ref smtpALineMustNotContainˢᵇ;

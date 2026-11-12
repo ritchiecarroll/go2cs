@@ -8,6 +8,7 @@ using io = io_package;
 using sync = sync_package;
 using time = time_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // added for go linkname usage
+using static trace_package;
 
 partial class trace_package {
 
@@ -55,6 +56,8 @@ public static ж<FlightRecorder> NewFlightRecorder(FlightRecorderConfig cfg) {
     }
     return fr;
 }
+
+} partial class traceᴛFlightRecorder {
 
 // Start activates the flight recorder and begins recording trace data.
 // Only one call to trace.Start may be active at any given time.
@@ -159,6 +162,8 @@ public static (int64 n, error err) WriteTo(this ж<FlightRecorder> Ꮡfr, io.Wri
     finally { ᒐ.Run(); }
     ᒐdone: return (n, err);
 }
+
+} partial class trace_package {
 
 partial struct FlightRecorderConfig {
     // MinAge is a lower bound on the age of an event in the flight recorder's window.

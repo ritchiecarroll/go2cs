@@ -19,10 +19,10 @@ internal static void addOrSubVV(ж<Asm> Ꮡa, @string name) {
 
     var f = Ꮡa.Func("func "u8 + name + "(z, x, y []Word) (c Word)"u8);
 
-    var add = (ΔReg p1, ΔReg p2, ΔReg p3, ΔCarry p4) => Ꮡa.Add(p1, p2, p3, p4);
-    ΔCarry which = AddCarry;
+    var add = (Reg p1, Reg p2, Reg p3, Carry p4) => Ꮡa.Add(p1, p2, p3, p4);
+    Carry which = AddCarry;
     if (name == "subVV"u8) {
-        add = (ΔReg p1, ΔReg p2, ΔReg p3, ΔCarry p4) => Ꮡa.Sub(p1, p2, p3, p4);
+        add = (Reg p1, Reg p2, Reg p3, Carry p4) => Ꮡa.Sub(p1, p2, p3, p4);
         which = SubCarry;
     }
 
@@ -30,7 +30,7 @@ internal static void addOrSubVV(ж<Asm> Ꮡa, @string name) {
     var p = f.Pipe();
     p.SetHint("y", HintMemOK); // allow y to be used from memory on x86
     p.Start(n, 1, 4);
-    ref var c = ref heap(new ΔReg(), out var Ꮡc);
+    ref var c = ref heap(new Reg(), out var Ꮡc);
     if (!a.Arch.CarrySafeLoop) {
         // Carry smashed by loop tests; allocate and save in register
         // around unrolled blocks.
@@ -52,10 +52,10 @@ internal static void addOrSubVV(ж<Asm> Ꮡa, @string name) {
     }
     var addʗ1 = add;
     var pʗ1 = p;
-    p.Loop((slice<slice<ΔReg>> @in, slice<slice<ΔReg>> @out) => {
+    p.Loop((slice<slice<Reg>> @in, slice<slice<Reg>> @out) => {
         foreach (var (i, x) in range(@in[0])) {
             var y = @in[1][i];
-            addʗ1(y, x, x, (ΔCarry)(SetCarry | UseCarry));
+            addʗ1(y, x, x, (Carry)(SetCarry | UseCarry));
         }
         pʗ1.StoreN(@in[..1]);
     });

@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -60,7 +58,7 @@ using static go.testing.quick_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("testing/quick/quick.go", "quick.cs", "ABQoAAgUsoKClKiygoKUqLIABhSyrNKCpoKktLS0tLS0tLS0tLS0tLS0tIKCgoKCgpTGgpSCgpSCxoKCgoKCgpTGgoKClMaCgoKUtJSCgoKClIKCgpTGpgAZNJKClKrCgoKClLjuAAcQggAJFIIACiQAEQKCpoKCpoKUgqaCgpSCgoKmgrgACg7igqaCgpSCgqaCpoKClIKCgqaClIK4qsKCgqaCgoKCgrimwoKCgpSCpoKCgpSmgoKClA==")]
+[assembly: GoPositionMap("testing/quick/quick.go", "quick.cs", "ABUoAAgUsoKClKiygoKUqLIABhSyrNKCpoKktLS0tLS0tLS0tLS0tLS0tIKCgoKCgpTGgpSCgpSCxoKCgoKCgpTGgoKClMaCgoKUtJSCgoKClIKCgpTGpgAbNJKClKrCgoKClLgACg4ACxCCAA0UggAMJAARAoKmgoKmgpSCpoKClIKCgqaCuAAKDuKCpoKClIKCpoKmgoKUgoKCpoKUgriqwoKCpoKCgoKCuKbCgoKClIKmgoKClKaCgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;
@@ -98,3 +96,16 @@ public static partial class quick_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(quick_package.CheckEqualError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class quickᴛCheckEqualError;
+[GoMethodHost(typeof(quick_package.CheckError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class quickᴛCheckError;
+[GoMethodHost(typeof(quick_package.Config)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class quickᴛConfig;
+[GoMethodHost(typeof(quick_package.SetupError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class quickᴛSetupError;
+// </MethodHolders>

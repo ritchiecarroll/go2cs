@@ -25,7 +25,7 @@ partial class runtime_package {
 // can hold a pointer to a coro without causing potential dangling
 // pointer errors.
 partial struct coro {
-    internal Δguintptr gp;
+    internal guintptr gp;
     internal Action<ж<coro>> f;
     // State for validating thread-lock interactions.
     internal ж<m> mp;
@@ -150,7 +150,7 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
     // but we need to make sure the tracer can only observe the
     // start and end states to maintain a coherent model and avoid
     // emitting an event for every single transition.
-    var Δtrace = traceAcquire();
+    var trace = traceAcquire();
 
     var canCAS = true;
     var bubble = gp.bubble;
@@ -208,7 +208,7 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
         if (next.ptr() == nil) {
             @throw(coroswitchOnExitedCoroˢ);
         }
-        Δguintptr self = default;
+        guintptr self = default;
         self.set(Ꮡgp);
         if (c.Ꮡgp.cas(next, self)) {
             gnext = next.ptr();
@@ -227,8 +227,8 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
     // Emit the trace event after getting gnext but before changing curg.
     // GoSwitch expects that the current G is running and that we haven't
     // switched yet for correct status emission.
-    if (Δtrace.ok()) {
-        Δtrace.GoSwitch(gnext, exit);
+    if (trace.ok()) {
+        trace.GoSwitch(gnext, exit);
     }
 
     // Start running next, without heavy scheduling machinery.
@@ -262,8 +262,8 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
     }
 
     // Release the trace locker. We've completed all the necessary transitions..
-    if (Δtrace.ok()) {
-        traceRelease(Δtrace);
+    if (trace.ok()) {
+        traceRelease(trace);
     }
 
     if (bubble != nil) {

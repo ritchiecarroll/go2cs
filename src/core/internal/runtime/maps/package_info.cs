@@ -10,10 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using abiꓸArrayType = go.@internal.abi_package.ΔArrayType;
-global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
-global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
-global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
 // </ImportedTypeAliases>
 
 using go;
@@ -31,7 +27,6 @@ using static go.@internal.runtime.maps_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Map", "ΔMap")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -55,14 +50,14 @@ using static go.@internal.runtime.maps_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Map))]
 [assembly: GoFieldAccess(typeof(go.@internal.abi_package.EmptyInterface))]
 [assembly: GoFieldAccess(typeof(go.@internal.abi_package.ITab))]
+[assembly: GoFieldAccess(typeof(go.@internal.abi_package.InterfaceType))]
 [assembly: GoFieldAccess(typeof(go.@internal.abi_package.NonEmptyInterface))]
+[assembly: GoFieldAccess(typeof(go.@internal.abi_package.StructType))]
 [assembly: GoFieldAccess(typeof(go.@internal.abi_package.Type))]
-[assembly: GoFieldAccess(typeof(go.@internal.abi_package.ΔInterfaceType))]
-[assembly: GoFieldAccess(typeof(go.@internal.abi_package.ΔStructType))]
 [assembly: GoFieldAccess(typeof(table))]
-[assembly: GoFieldAccess(typeof(ΔMap))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -72,14 +67,14 @@ using static go.@internal.runtime.maps_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/runtime/maps/group.go", "group.cs", "ACpgwq7CqqKokqzEgq7CrLKqoqyyqKQAECSygpSosoKClKiSqqKuAAwSgqiSrgAKDoKqoq4ACQyCqJKopK4ACQyCABo8kqyygpSCgpSokqiylKiylAAOJrIABhDWlMqigpSCgoKUgoKmlIKCgpSCgg==", "", "", "323=newarray/1/1/2")]
-[assembly: GoPositionMap("internal/runtime/maps/map.go", "map.cs", "ABHuAgCnAQKssgA1eoKClAACEAAIAoKmlAAOHu6CgqaCgoK4goKUgoK4gpSUlKaClKaCgpSmgoKUpoKmgqbGgpS4wqaCgoKCyoKmgpSCyoKUgoKmgqqi5qKCpoKmlIKmgqaigqaCppSCgqaCpqK4lIKUgoKmgoKClKbKpqKC7vKCpriUgqaCgpSClJTupoKCgoKmgpSU+KK4poKUgoKUgoKmgoKmlNyCgoKmlIKCgoKUlIKCgoKmgpSmgoKUpqailLiClKaCgqaCgqaUppSUgpSCprKCgpSmgqa4lIKUgoK4uKaClKaiuJSCgoKCgpSClJSClKaClO7KgpS6soKmgpSUgpSCgoKClIKUgqa4lIKUpqK4gpTmtIK4goKmlJSCgoKmgoKCgoKUlKamooKUpqKClJSkgoKCgoKCgpSUgoKUgqaCpoKUxoKCgqakgoKClIKmtvyUmg==")]
-[assembly: GoPositionMap("internal/runtime/maps/runtime.go", "runtime.cs", "ABAmxqampqYAECwACgKCgoKClIKUgqaCgpSmgqaUgoKClLiCpoKCgpSUgpSCgoKUgoKClJSmgqbMwoKCgoKUgpSCpoKClKaCppSCgoKUuIKmgoKClJSClIKCgpSCgoKUlKaCpszCgpSCgoKClIKUgpSCpriUgqaCgpSClJS4poKClIKUmrKUgoKCpoKUgoKClIKCpoKCpoKUyoK4uIKCgqa4goKCgoKClJSCgoKCpoKCgpSCpoIABxCmgoKC/IKUlA==")]
-[assembly: GoPositionMap("internal/runtime/maps/runtime_fast32.go", "runtime_fast32.cs", "AA4ewoKCgqaCpoKCpoKmgoKCgoKClIKUpoK2gqaCgoKUlIKUgoKClKaCpszCgoKCpoKmgoKmgqaCgoKCgoKUgpSmgraCpoKCgpSUgpSCgoKUpoKmyoK4poKUgoKClNyCgqaUgpSUgpSowoKUgoKClIKmgsiUgqaCgpSClJS4poKClIKUmrKUgoKCpoKUgoKUgpTKgoKUgqaCgpTugoKCuIK4goKUlIKCgpSCpoLYgpSUAAIQAAgCgpSCgoKUgqaCyJSCpoKClIKUlLimgoKUgpSYopSCgoKmgpSCgpSClMqCgpSCpoKClO6CgoK4goKUlIKCgpSCpoLYgpSUqMKCgoKmgqY=")]
-[assembly: GoPositionMap("internal/runtime/maps/runtime_fast64.go", "runtime_fast64.cs", "AA4ewoKCgqaCpoKCpoKmgoKCgoKClIKUpoK2gqaCgoKUlIKUgoKClKaCpszCgoKCpoKmgoKmgqaCgoKCgoKUgpSmgraCppSCgpSUgpSCgoKUpoKmyoK4poKUgoKClNyCgqaUgpSUgpSowoKUgoKClIKmgsiUgqaCgpSClJS4poKClIKUmrKUgoKCpoKUgoKUgpTKgoKUgqaCgpTugoKCuIK4goKUlIKCgpSCpoLYgpSUpoK4poKUgoKClNyCgqaUgpSUgpSs4oKUgoKClIKmgsiUgqaCgpSClJS4poKClIKUmrKUgoKCpoKUgoKUgpTKgoKUgqaCgpTugoKCuIKClJSCgoKUgqaC2IKUlKjCgoKCpoKm")]
-[assembly: GoPositionMap("internal/runtime/maps/runtime_faststr.go", "runtime_faststr.cs", "AA8esriCgtyUgoKCppSUgpSUpoKClKaEooKClIKClIKUrLKClKSCpoKCgpTkogACEMKCgoKmgqaCgqaCgoKUpoK2gqaCgoKUlIKUgoKClKaCpszCgoKCpoKmgoKmgoKClKaCtoKmgoKClJSClIKCgpSmgqbKgrimgpSClIKClNyCgqaUgpSUgpSowoKUgoKClIKmgsiUgqaCgpSClJS4poKClIKUmrKUgoKCpoKUgqaClIKUyoKClIKmgoKU7oKCgriCuIKClJSCgoKUgqaC2IKUlKjCgoKCpoKm")]
-[assembly: GoPositionMap("internal/runtime/maps/table.go", "table.cs", "AESSAYKCpsqCyoKCppSqooKCgpSCgryipoLulIKUuoKqAAsOgoIAAhgAJjiCgoKUlIKUgoKUgoKClJSmgqbKooKCgpSUgpSCgpSCgoKUlKaCpgAEGAALApiilIKCgqaClIKClIKCpoKCpoKUyoKClIKmgoKU7oKCgriCuIKCgoKClJSCgoKCpoKCgpSCpoIAAygAEgKC7oKClIKClIKClKaCgpSmgoKCzMKCgoKClIKUgoKCpoKClJSCpqaClO4AAhYACAKCgpSCpoKUpoKmAAQmABEClKi2goKCgoKCgoKUuLiCgoKUgoKUuKbugoKClIKClIK4goKUgoKCgoKCAAYUsqiygoIADRyClJSCgoKClKaCgoKmggAfUMKUgqaCgpSCpoKCgoKCgqaCqJKssq7CpgAaNoKCgoKqooIAFzCCgoKUuKYABhTylIKCpoKCppSClJSmgoLugoKCgoKUgoKCpqaCpoKCuIKCgpSCgqYAHTyCgqa4lIKCggALGIKClO6ClAANHIKCyoKmpoKCpoKCgoK4lIKmgoK4goKCpoIAEiaCgoKUyoKmgpSmyqaCpoKClJSCpoKCAA0cgoKCgqaCuIK4goKUgqaCgsqCuKaCpoKC3IKCrAAUIIKCgqaokoKUqNKCpoKmlIKCgpSmgoKmgoKmgoKClJS4gq7ylIKCgoKUpoKCpoKCppTKgoIAFSyC7oKCgqa0goKmgoKCgoKUlA==")]
-[assembly: GoPositionMap("internal/runtime/maps/table_debug.go", "table_debug.cs", "AA0csoKqooKCgoKCgpS0tJSCgsqCpoKCgoKCguyCgoKmgoKCgpSCgoKmgoKCpqIAFBKClIKCgpSCgpS0tLaCgoKCgs6igoKC")]
+[assembly: GoPositionMap("internal/runtime/maps/group.go", "group.cs", "AC1gws7CyqKokszEgs7CzLLKosyyyKQAFCSygpSosoKClKiSqqLOAAwSgsiSzgAKDoLKos4ACQyCyJKopM4ACQyCABo8kqyygpSCgpTIkqiylKiylAAQJrIACBDWlOqigpSCgoKUgoKmlIKCgpSCgg==", "", "", "364=newarray/1/1/2")]
+[assembly: GoPositionMap("internal/runtime/maps/map.go", "map.cs", "ABLuAgCnAQKssgA1eoKClAACEAAIAoKmlAAOHu6CgqaCgoK4goKUgoK4gpSUlKaClKaCgpTGgoKUpoKmgqbGgpS4wqaCgoKCyoKmgpSCyoKUgoKmgqqi5qKCpoKmlIKmgqaigqaCppSCgqaCpqK4lIKUgoKmgoKClKbKpqKC7vKCpriUgqaCgpSClJTupoKCgoKmgpSU+KK4poKUgoKUgoKmgoKmlNyCgoKmlIKCgoKUlIKCgoKmgpSmgoKUpqailLiClKaCgqaCgqaUppSUgpSCprKCgpSmgqa4lIKUgoK4uKaClKaiuJSCgoKCgpSClJSClKaClO7KgpS6soKmgpSUgpSCgoKClIKUgqa4lIKUpqK4gpTmtIK4goKmlJSCgoKmgoKCgoKUlKbGooKUpqKClJSkgoKCgoKCgpSUgoKUgqaCpoKUxoKCgqakgoKClIKmtgAJDJS6")]
+[assembly: GoPositionMap("internal/runtime/maps/runtime.go", "runtime.cs", "ABAmxqampqYAFCwACgKCgoKClIKUgqaCgpSmgqaUgoKClLiCpoKCgpSUgpSCgoKUgoKClJSmgqbMwoKCgoKUgpSCpoKClKaCppSCgoKUuIKmgoKClJSClIKCgpSCgoKUlKaCpgAIDMKClIKCgoKUgpSClIKmuJSCpoKClIKUlLimgoKUgpSaspSCgoKmgpSCgoKUgoKmgoKmgpTKgri4goKCpriCgoKCgoKUlIKCgoKmgoKClIKmggAHEKaCgoL8gpSU")]
+[assembly: GoPositionMap("internal/runtime/maps/runtime_fast32.go", "runtime_fast32.cs", "AA8ewoKCgqaCpoKCpoKmgoKCgoKClIKUpoK2gqaCgoKUlIKUgoKClKaCpszCgoKCpoKmgoKmgqaCgoKCgoKUgpSmgraCpoKCgpSUgpSCgoKUpoKm6oK4poKUgoKClNyCgqaUgpSUgpTIwoKUgoKClIKmgsiUgqaCgpSClJS4poKClIKUmrKUgoKCpoKUgoKUgpTKgoKUgqaCgpTugoKCuIK4goKUlIKCgpSCpoLYgpSUAAIQAAgCgpSCgoKUgqaCyJSCpoKClIKUlLimgoKUgpSYopSCgoKmgpSCgpSClMqCgpSCpoKClO6CgoK4goKUlIKCgpSCpoLYgpSUqMKCgoKmgqY=")]
+[assembly: GoPositionMap("internal/runtime/maps/runtime_fast64.go", "runtime_fast64.cs", "AA8ewoKCgqaCpoKCpoKmgoKCgoKClIKUpoK2gqaCgoKUlIKUgoKClKaCpszCgoKCpoKmgoKmgqaCgoKCgoKUgpSmgraCppSCgpSUgpSCgoKUpoKm6oK4poKUgoKClNyCgqaUgpSUgpTIwoKUgoKClIKmgsiUgqaCgpSClJS4poKClIKUmrKUgoKCpoKUgoKUgpTKgoKUgqaCgpTugoKCuIK4goKUlIKCgpSCpoLYgpSUxoK4poKUgoKClNyCgqaUgpSUgpTM4oKUgoKClIKmgsiUgqaCgpSClJS4poKClIKUmrKUgoKCpoKUgoKUgpTKgoKUgqaCgpTugoKCuIKClJSCgoKUgqaC2IKUlKjCgoKCpoKm")]
+[assembly: GoPositionMap("internal/runtime/maps/runtime_faststr.go", "runtime_faststr.cs", "ABIesriCgtyUgoKCppSUgpSUpoKClKaEooKClIKClIKUzLKClKSCpoKCgpTkogACEMKCgoKmgqaCgqaCgoKUpoK2gqaCgoKUlIKUgoKClKaCpszCgoKCpoKmgoKmgoKClKaCtoKmgoKClJSClIKCgpSmgqbqgrimgpSClIKClNyCgqaUgpSUgpTIwoKUgoKClIKmgsiUgqaCgpSClJS4poKClIKUmrKUgoKCpoKUgqaClIKUyoKClIKmgoKU7oKCgriCuIKClJSCgoKUgqaC2IKUlKjCgoKCpoKm")]
+[assembly: GoPositionMap("internal/runtime/maps/table.go", "table.cs", "AEWSAYKCpsqCyoKCppTKooKCgpSCgryipoLulIKUuoKqAAsOgoIAAhgAJjiCgoKUlIKUgoKUgoKClJSmgqbKooKCgpSUgpSCgpSCgoKUlKaCpgAEGAALApiilIKCgqaClIKClIKCpoKCpoKUyoKClIKmgoKU7oKCgriCuIKCgoKClJSCgoKCpoKCgpSCpoIAAygAEgKC7oKClIKClIKClKaCgpSmgoKCzMKCgoKClIKUgoKCpoKClJSCpqaClO4AAhYACAKCgpSCpoKUpoKmAAQmABEClKi2goKCgoKCgoKUuLiCgoKUgoKUuKbugoKClIKClIK4goKUgoKCgoKCAAYUsqiygoIADRyClJSCgoKClKaCgoKmggAjUMKUgqaCgpSCpoKCgoKCgqaCqJKssq7CpgAaNoKCgoKqooIAFzCCgoKUuKYABhTylIKCpoKCppSClJSmgoLugoKCgoKUgoKCpqaCpoKCuIKCgpSCgqYAHTyCgqa4lIKCggALGIKClO6ClAANHIKCyoKmpoKCpoKCgoK4lIKmgoK4goKCpoIAEiaCgoKUyoKmgpSmyqaCpoKClJSCpoKCAA0cgoKCgqaCuIK4goKUgqaCgsqCuKaCpoKC3IKCzAAUIIKCgqbIkoKUyNKCpoKmlIKCgpSmgoKmgoKmgoKClJS4gq7ylIKCgoKUpoKCpoKCppTKgoIAFyyCAAgOgoKCxrSCgqaCgoKCgpSU")]
+[assembly: GoPositionMap("internal/runtime/maps/table_debug.go", "table_debug.cs", "ABAcsoKqooKCgoKCgpS0tJSCgsqCpoKCgoKCguyCgoKmgoKCgpSCgoKmgoKCpqIAFBKClIKCgpSCgpS0tLaCgoKCgu6igoKC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;
@@ -103,8 +98,8 @@ public static partial class maps_package
     [GoLocalName("stringStruct")] internal partial struct stringPtr_stringStruct {}
     internal partial struct unhashableTypeError {}
     public partial struct Iter {}
+    public partial struct Map {}
     public partial struct table {}
-    public partial struct ΔMap {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -119,3 +114,21 @@ public static partial class maps_package
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸruntimeꓸsys() => builtin.initPackage(typeof(go.@internal.runtime.sys_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(maps_package.Iter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mapsᴛIter;
+[GoMethodHost(typeof(maps_package.Map)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mapsᴛMap;
+[GoMethodHost(typeof(maps_package.bitset)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mapsᴛbitset;
+[GoMethodHost(typeof(maps_package.ctrlGroup)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mapsᴛctrlGroup;
+[GoMethodHost(typeof(maps_package.groupReference)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mapsᴛgroupReference;
+[GoMethodHost(typeof(maps_package.groupsReference)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mapsᴛgroupsReference;
+[GoMethodHost(typeof(maps_package.probeSeq)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mapsᴛprobeSeq;
+[GoMethodHost(typeof(maps_package.table)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mapsᴛtable;
+[GoMethodHost(typeof(maps_package.unhashableTypeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mapsᴛunhashableTypeError;
+// </MethodHolders>

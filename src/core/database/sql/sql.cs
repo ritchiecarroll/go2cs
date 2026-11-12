@@ -35,6 +35,7 @@ using go.sync;
 using iter = iter_package;
 using math.rand;
 using ꓸꓸꓸany = Span<any>;
+using static sql_package;
 
 partial class sql_package {
 
@@ -157,6 +158,8 @@ public static IsolationLevel LevelSnapshot => 5;
 public static IsolationLevel LevelSerializable => 6;
 public static IsolationLevel LevelLinearizable => 7;
 
+} partial class sqlᴛIsolationLevel {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string defaultˢ => ref defaultˢᵇ;
 private static readonly @string defaultˢᵇ = "Default"u8;
@@ -207,6 +210,8 @@ public static @string String(this IsolationLevel i) {
     }}
 }
 
+} partial class sql_package {
+
 internal static fmt.Stringer _ᴛ1ʗ = ((IsolationLevel)LevelDefault);
 
 // TxOptions holds the transaction options to be used in [DB.BeginTx].
@@ -239,6 +244,8 @@ partial struct NullString {
     public bool Valid; // Valid is true if String is not NULL
 }
 
+} partial class sqlᴛNullString {
+
 // Scan implements the [Scanner] interface.
 public static error Scan(this ж<NullString> Ꮡns, any value) {
     ref var ns = ref Ꮡns.DerefOrNull();
@@ -259,6 +266,8 @@ public static (driverꓸValue, error) Value(this NullString ns) {
     return (ns.String, default);
 }
 
+} partial class sql_package {
+
 // NullInt64 represents an int64 that may be null.
 // NullInt64 implements the [Scanner] interface so
 // it can be used as a scan destination, similar to [NullString].
@@ -266,6 +275,8 @@ partial struct NullInt64 {
     public int64 Int64;
     public bool Valid; // Valid is true if Int64 is not NULL
 }
+
+} partial class sqlᴛNullInt64 {
 
 // Scan implements the [Scanner] interface.
 public static error Scan(this ж<NullInt64> Ꮡn, any value) {
@@ -287,6 +298,8 @@ public static (driverꓸValue, error) Value(this NullInt64 n) {
     return (n.Int64, default);
 }
 
+} partial class sql_package {
+
 // NullInt32 represents an int32 that may be null.
 // NullInt32 implements the [Scanner] interface so
 // it can be used as a scan destination, similar to [NullString].
@@ -294,6 +307,8 @@ partial struct NullInt32 {
     public int32 Int32;
     public bool Valid; // Valid is true if Int32 is not NULL
 }
+
+} partial class sqlᴛNullInt32 {
 
 // Scan implements the [Scanner] interface.
 public static error Scan(this ж<NullInt32> Ꮡn, any value) {
@@ -315,6 +330,8 @@ public static (driverꓸValue, error) Value(this NullInt32 n) {
     return ((int64)n.Int32, default);
 }
 
+} partial class sql_package {
+
 // NullInt16 represents an int16 that may be null.
 // NullInt16 implements the [Scanner] interface so
 // it can be used as a scan destination, similar to [NullString].
@@ -322,6 +339,8 @@ partial struct NullInt16 {
     public int16 Int16;
     public bool Valid; // Valid is true if Int16 is not NULL
 }
+
+} partial class sqlᴛNullInt16 {
 
 // Scan implements the [Scanner] interface.
 public static error Scan(this ж<NullInt16> Ꮡn, any value) {
@@ -344,6 +363,8 @@ public static (driverꓸValue, error) Value(this NullInt16 n) {
     return ((int64)n.Int16, default);
 }
 
+} partial class sql_package {
+
 // NullByte represents a byte that may be null.
 // NullByte implements the [Scanner] interface so
 // it can be used as a scan destination, similar to [NullString].
@@ -351,6 +372,8 @@ partial struct NullByte {
     public byte Byte;
     public bool Valid; // Valid is true if Byte is not NULL
 }
+
+} partial class sqlᴛNullByte {
 
 // Scan implements the [Scanner] interface.
 public static error Scan(this ж<NullByte> Ꮡn, any value) {
@@ -373,6 +396,8 @@ public static (driverꓸValue, error) Value(this NullByte n) {
     return ((int64)n.Byte, default);
 }
 
+} partial class sql_package {
+
 // NullFloat64 represents a float64 that may be null.
 // NullFloat64 implements the [Scanner] interface so
 // it can be used as a scan destination, similar to [NullString].
@@ -380,6 +405,8 @@ partial struct NullFloat64 {
     public float64 Float64;
     public bool Valid; // Valid is true if Float64 is not NULL
 }
+
+} partial class sqlᴛNullFloat64 {
 
 // Scan implements the [Scanner] interface.
 public static error Scan(this ж<NullFloat64> Ꮡn, any value) {
@@ -401,6 +428,8 @@ public static (driverꓸValue, error) Value(this NullFloat64 n) {
     return (n.Float64, default);
 }
 
+} partial class sql_package {
+
 // NullBool represents a bool that may be null.
 // NullBool implements the [Scanner] interface so
 // it can be used as a scan destination, similar to [NullString].
@@ -408,6 +437,8 @@ partial struct NullBool {
     public bool Bool;
     public bool Valid; // Valid is true if Bool is not NULL
 }
+
+} partial class sqlᴛNullBool {
 
 // Scan implements the [Scanner] interface.
 public static error Scan(this ж<NullBool> Ꮡn, any value) {
@@ -429,6 +460,8 @@ public static (driverꓸValue, error) Value(this NullBool n) {
     return (n.Bool, default);
 }
 
+} partial class sql_package {
+
 // NullTime represents a [time.Time] that may be null.
 // NullTime implements the [Scanner] interface so
 // it can be used as a scan destination, similar to [NullString].
@@ -436,6 +469,8 @@ partial struct NullTime {
     public time.Time Time;
     public bool Valid; // Valid is true if Time is not NULL
 }
+
+} partial class sqlᴛNullTime {
 
 // Scan implements the [Scanner] interface.
 public static error Scan(this ж<NullTime> Ꮡn, any value) {
@@ -457,6 +492,8 @@ public static (driverꓸValue, error) Value(this NullTime n) {
     return (n.Time, default);
 }
 
+} partial class sql_package {
+
 // Null represents a value that may be null.
 // Null implements the [Scanner] interface so
 // it can be used as a scan destination:
@@ -475,6 +512,8 @@ partial struct Null<T> {
     public T V;
     public bool Valid;
 }
+
+} partial class sqlᴛNull {
 
 public static error Scan<T>(this ж<Null<T>> Ꮡn, any value) {
     ref var n = ref Ꮡn.DerefOrNull();
@@ -503,6 +542,8 @@ public static (driverꓸValue, error) Value<T>(this Null<T> n) {
     // See issue 69837.
     return driver.DefaultParameterConverter.ConvertValue(v);
 }
+
+} partial class sql_package {
 
 // Scanner is an interface used by [Rows.Scan].
 partial interface Scanner {
@@ -625,6 +666,8 @@ partial struct driverConn {
     internal time.Time returnedAt; // Time the connection was created or returned.
     internal slice<Action> onPut;  // code (with db.mu held) run when conn is next returned
 }
+
+} partial class sqlᴛdriverConn {
 
 internal static void releaseConn(this ж<driverConn> Ꮡdc, error err) {
     ref var dc = ref Ꮡdc.DerefOrNull();
@@ -801,6 +844,8 @@ internal static error finalClose(this ж<driverConn> Ꮡdc) {
     return err;
 }
 
+} partial class sql_package {
+
 // driverStmt associates a driver.Stmt with the
 // *driverConn from which it came, so the driverConn's lock can be
 // held during calls.
@@ -810,6 +855,8 @@ partial struct driverStmt {
     internal bool closed;
     internal error closeErr; // return value of previous Close call
 }
+
+} partial class sqlᴛdriverStmt {
 
 // Close ensures driver.Stmt is only closed once and always returns the same
 // result.
@@ -832,6 +879,8 @@ internal static error Close(this ж<driverStmt> Ꮡds) {
     finally { if (ᒐd1) Ꮡds.DerefOrNull().Locker.Unlock(); ᒐ.Run(); }
 }
 
+} partial class sql_package {
+
 // depSet is a finalCloser's outstanding dependencies
 partial struct depSet /*map[any, bool]*/; // set of true bools
 
@@ -842,6 +891,8 @@ partial interface finalCloser {
     // goes to zero. (*DB).mu is not held while calling it.
     error finalClose();
 }
+
+} partial class sqlᴛDB {
 
 // addDep notes that x now depends on dep, and x's finalClose won't be
 // called until all of x's dependencies are removed with removeDep.
@@ -910,6 +961,8 @@ internal static Func<error> removeDepLocked(this ref DB db, finalCloser x, any d
     }}
 }
 
+} partial class sql_package {
+
 // This is the size of the connectionOpener request chan (DB.openerCh).
 // This value should be larger than the maximum typical value
 // used for DB.maxOpen. If maxOpen is significantly larger than
@@ -922,6 +975,8 @@ partial struct dsnConnector {
     internal driver.Driver driver;
 }
 
+} partial class sqlᴛdsnConnector {
+
 internal static (driver.Conn, error) Connect(this dsnConnector t, context.Context _) {
     return t.driver.Open(t.dsn);
 }
@@ -929,6 +984,8 @@ internal static (driver.Conn, error) Connect(this dsnConnector t, context.Contex
 internal static driver.Driver Driver(this dsnConnector t) {
     return t.driver;
 }
+
+} partial class sql_package {
 
 // OpenDB opens a database using a [driver.Connector], allowing drivers to
 // bypass a string based data source name.
@@ -997,6 +1054,8 @@ public static (ж<DB>, error) Open(@string driverName, @string dataSourceName) {
     return (OpenDB(new dsnConnector(dsn: dataSourceName, driver: driveri)), default);
 }
 
+} partial class sqlᴛDB {
+
 internal static error pingDC(this ref DB db, context.Context ctx, ж<driverConn> Ꮡdc, Action<error> release) {
     ref var dc = ref Ꮡdc.DerefOrNull();
 
@@ -1058,7 +1117,7 @@ public static error Close(this ж<DB> Ꮡdb) {
         return default;
     }
     if (db.cleanerCh != nil) {
-        builtin.close(db.cleanerCh);
+        close(db.cleanerCh);
     }
     error err = default;
     var fns = new slice<Func<error>>(0, len(db.freeConn));
@@ -1085,7 +1144,11 @@ public static error Close(this ж<DB> Ꮡdb) {
     return err;
 }
 
+} partial class sql_package {
+
 internal static UntypedInt defaultMaxIdleConns => 2;
+
+} partial class sqlᴛDB {
 
 internal static nint maxIdleConnsLocked(this ref DB db) {
     nint n = db.maxIdleCount;
@@ -1359,6 +1422,8 @@ internal static (time.Duration, slice<ж<driverConn>>) connectionCleanerRunLocke
     return (d, closing);
 }
 
+} partial class sql_package {
+
 // DBStats contains database statistics.
 partial struct DBStats {
     public nint MaxOpenConnections; // Maximum number of open connections to the database.
@@ -1373,6 +1438,8 @@ partial struct DBStats {
     public int64 MaxIdleTimeClosed;    // The total number of connections closed due to SetConnMaxIdleTime.
     public int64 MaxLifetimeClosed;    // The total number of connections closed due to SetConnMaxLifetime.
 }
+
+} partial class sqlᴛDB {
 
 // Stats returns database statistics.
 public static DBStats Stats(this ж<DB> Ꮡdb) {
@@ -1487,6 +1554,8 @@ internal static void openNewConnection(this ж<DB> Ꮡdb, context.Context ctx) {
     finally { if (ᒐd1) Ꮡdb.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
+} partial class sql_package {
+
 // connRequest represents one request for a new connection
 // When there are no idle connections available, DB.conn will create
 // a new connRequest and put it on the db.connRequests list.
@@ -1496,6 +1565,8 @@ partial struct connRequest {
 }
 
 internal static error errDBClosed = errors.New("sql: database is closed");
+
+} partial class sqlᴛDB {
 
 // conn returns a newly-opened or cached *driverConn.
 internal static (ж<driverConn>, error) conn(this ж<DB> Ꮡdb, context.Context ctx, connReuseStrategy strategy) {
@@ -1647,8 +1718,12 @@ internal static (ж<driverConn>, error) conn(this ж<DB> Ꮡdb, context.Context 
     return (dc, default);
 }
 
+} partial class sql_package {
+
 // putConnHook is a hook for testing.
 internal static Action<ж<DB>, ж<driverConn>> putConnHook;
+
+} partial class sqlᴛDB {
 
 // noteUnusedDriverStatement notes that ds is no longer used and should
 // be closed whenever possible (when c is next not in use), unless c is
@@ -1679,9 +1754,13 @@ internal static void noteUnusedDriverStatement(this ж<DB> Ꮡdb, ж<driverConn>
     finally { if (ᒐd1) Ꮡdb.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
+} partial class sql_package {
+
 // debugGetPut determines whether getConn & putConn calls' stack traces
 // are returned for more verbose crashes.
 internal const bool debugGetPut = false;
+
+} partial class sqlᴛDB {
 
 // putConn adds a connection to the db's free pool.
 // err is optionally the last error that occurred on this connection.
@@ -1779,10 +1858,14 @@ internal static bool putConnDBLocked(this ж<DB> Ꮡdb, ж<driverConn> Ꮡdc, er
     return false;
 }
 
+} partial class sql_package {
+
 // maxBadConnRetries is the number of maximum retries if the driver returns
 // driver.ErrBadConn to signal a broken connection before forcing a new
 // connection to be opened.
 internal static UntypedInt maxBadConnRetries => 2;
+
+} partial class sqlᴛDB {
 
 internal static error retry(this ref DB db, Func<connReuseStrategy, error> fn) {
     for (var i = (int64)0; i < maxBadConnRetries; i++) {
@@ -1804,10 +1887,10 @@ internal static error retry(this ref DB db, Func<connReuseStrategy, error> fn) {
 //
 // The provided context is used for the preparation of the statement, not for the
 // execution of the statement.
-public static (ж<ΔStmt>, error) PrepareContext(this ж<DB> Ꮡdb, context.Context ctx, @string query) {
+public static (ж<Stmt>, error) PrepareContext(this ж<DB> Ꮡdb, context.Context ctx, @string query) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
-    ref var stmt = ref heap<ж<ΔStmt>>(out var Ꮡstmt);
+    ref var stmt = ref heap<ж<Stmt>>(out var Ꮡstmt);
     ref var err = ref heap<error>(out var Ꮡerr);
 
     err = db.retry((connReuseStrategy strategy) => {
@@ -1826,11 +1909,11 @@ public static (ж<ΔStmt>, error) PrepareContext(this ж<DB> Ꮡdb, context.Cont
 //
 // Prepare uses [context.Background] internally; to specify the context, use
 // [DB.PrepareContext].
-public static (ж<ΔStmt>, error) Prepare(this ж<DB> Ꮡdb, @string query) {
+public static (ж<Stmt>, error) Prepare(this ж<DB> Ꮡdb, @string query) {
     return Ꮡdb.PrepareContext(context.Background(), query);
 }
 
-internal static (ж<ΔStmt>, error) prepare(this ж<DB> Ꮡdb, context.Context ctx, @string query, connReuseStrategy strategy) {
+internal static (ж<Stmt>, error) prepare(this ж<DB> Ꮡdb, context.Context ctx, @string query, connReuseStrategy strategy) {
     // TODO: check if db.driver supports an optional
     // driver.Preparer interface and call that instead, if so,
     // otherwise we make a prepared statement that's bound
@@ -1847,7 +1930,7 @@ internal static (ж<ΔStmt>, error) prepare(this ж<DB> Ꮡdb, context.Context c
 // prepareDC prepares a query on the driverConn and calls release before
 // returning. When cg == nil it implies that a connection pool is used, and
 // when cg != nil only a single driver connection is used.
-internal static (ж<ΔStmt>, error) prepareDC(this ж<DB> Ꮡdb, context.Context ctx, ж<driverConn> dc, Action<error> release, stmtConnGrabber cg, @string query) {
+internal static (ж<Stmt>, error) prepareDC(this ж<DB> Ꮡdb, context.Context ctx, ж<driverConn> dc, Action<error> release, stmtConnGrabber cg, @string query) {
     GoFrame ᒐ = default;
     try {
         ref var ds = ref heap<ж<driverStmt>>(out var Ꮡds);
@@ -1861,7 +1944,7 @@ internal static (ж<ΔStmt>, error) prepareDC(this ж<DB> Ꮡdb, context.Context
         if (err != nil) {
             return (default, err);
         }
-        var stmt = Ꮡ(new ΔStmt(
+        var stmt = Ꮡ(new Stmt(
             db: Ꮡdb,
             query: query,
             cg: cg,
@@ -1874,7 +1957,7 @@ internal static (ж<ΔStmt>, error) prepareDC(this ж<DB> Ꮡdb, context.Context
         if (cg == nil) {
             stmt.css = [new(dc, ds)];
             stmt.lastNumClosed = Ꮡdb.ᏑnumClosed.Load();
-            Ꮡdb.addDep(new ΔStmtжfinalCloser(stmt), stmt.OrTypedNil());
+            Ꮡdb.addDep(new StmtжfinalCloser(stmt), stmt.OrTypedNil());
         }
         return (stmt, default);
     }
@@ -2018,7 +2101,7 @@ internal static (ж<Rows>, error) query(this ж<DB> Ꮡdb, context.Context ctx, 
 // The connection gets released by the releaseConn function.
 // The ctx context is from a query method and the txctx context is from an
 // optional transaction context.
-internal static (ж<Rows>, error) queryDC(this ref DB db, context.Context ctx, context.Context txctx, ж<driverConn> Ꮡdc, Action<error> ΔreleaseConn, @string query, slice<any> args) {
+internal static (ж<Rows>, error) queryDC(this ref DB db, context.Context ctx, context.Context txctx, ж<driverConn> Ꮡdc, Action<error> releaseConn, @string query, slice<any> args) {
     ref var dc = ref Ꮡdc.DerefOrNull();
 
     var (queryerCtx, ok) = dc.ci._<driver.QueryerContext>(ᐧ);
@@ -2042,14 +2125,14 @@ internal static (ж<Rows>, error) queryDC(this ref DB db, context.Context ctx, c
         });
         if (!AreEqual(errΔ1, driver.ErrSkip)) {
             if (errΔ1 != nil) {
-                ΔreleaseConn(errΔ1);
+                releaseConn(errΔ1);
                 return (default, errΔ1);
             }
             // Note: ownership of dc passes to the *Rows, to be freed
             // with releaseConn.
             var rowsΔ1 = Ꮡ(new Rows(
                 dc: Ꮡdc,
-                releaseConn: ΔreleaseConn,
+                releaseConn: releaseConn,
                 rowsi: rowsiΔ1
             ));
             rowsΔ1.initContextClose(ctx, txctx);
@@ -2063,7 +2146,7 @@ internal static (ж<Rows>, error) queryDC(this ref DB db, context.Context ctx, c
         (Ꮡsi.ValueSlot, Ꮡerr.ValueSlot) = ctxDriverPrepare(ctx, Ꮡdc.Value.ci, query);
     });
     if (err != nil) {
-        ΔreleaseConn(err);
+        releaseConn(err);
         return (default, err);
     }
 
@@ -2071,7 +2154,7 @@ internal static (ж<Rows>, error) queryDC(this ref DB db, context.Context ctx, c
     (var rowsi, err) = rowsiFromStatement(ctx, dc.ci, ds, args.ꓸꓸꓸ);
     if (err != nil) {
         ds.Close();
-        ΔreleaseConn(err);
+        releaseConn(err);
         return (default, err);
     }
 
@@ -2079,7 +2162,7 @@ internal static (ж<Rows>, error) queryDC(this ref DB db, context.Context ctx, c
     // with releaseConn.
     var rows = Ꮡ(new Rows(
         dc: Ꮡdc,
-        releaseConn: ΔreleaseConn,
+        releaseConn: releaseConn,
         rowsi: rowsi,
         closeStmt: ds
     ));
@@ -2198,9 +2281,13 @@ public static driver.Driver Driver(this ref DB db) {
     return db.connector.Driver();
 }
 
+} partial class sql_package {
+
 // ErrConnDone is returned by any operation that is performed on a connection
 // that has already been returned to the connection pool.
 public static error ErrConnDone = errors.New("sql: connection is already closed");
+
+} partial class sqlᴛDB {
 
 // Conn returns a single connection by either opening a new connection
 // or returning an existing connection from the connection pool. Conn will
@@ -2209,7 +2296,7 @@ public static error ErrConnDone = errors.New("sql: connection is already closed"
 //
 // Every Conn must be returned to the database pool after use by
 // calling [Conn.Close].
-public static (ж<ΔConn>, error) Conn(this ж<DB> Ꮡdb, context.Context ctx) {
+public static (ж<Conn>, error) Conn(this ж<DB> Ꮡdb, context.Context ctx) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     ref var dc = ref heap<ж<driverConn>>(out var Ꮡdc);
@@ -2224,14 +2311,16 @@ public static (ж<ΔConn>, error) Conn(this ж<DB> Ꮡdb, context.Context ctx) {
         return (default, err);
     }
 
-    var conn = Ꮡ(new ΔConn(
+    var conn = Ꮡ(new Conn(
         db: Ꮡdb,
         dc: dc
     ));
     return (conn, default);
 }
 
-// type ΔreleaseConn is a methodless func type — rendered inline as its base delegate
+} partial class sql_package {
+
+// type releaseConn is a methodless func type — rendered inline as its base delegate
 
 // Conn represents a single database connection rather than a pool of database
 // connections. Prefer running queries from [DB] unless there is a specific
@@ -2242,7 +2331,7 @@ public static (ж<ΔConn>, error) Conn(this ж<DB> Ꮡdb, context.Context ctx) {
 //
 // After a call to [Conn.Close], all operations on the
 // connection fail with [ErrConnDone].
-partial struct ΔConn {
+partial struct Conn {
     internal ж<DB> db;
     // closemu prevents the connection from closing while there
     // is an active query. It is held for read during queries
@@ -2260,9 +2349,11 @@ partial struct ΔConn {
     internal Action<error> releaseConnCache;
 }
 
+} partial class sqlᴛConn {
+
 // grabConn takes a context to implement stmtConnGrabber
 // but the context is not used.
-internal static (ж<driverConn>, Action<error>, error) grabConn(this ж<ΔConn> Ꮡc, context.Context _) {
+internal static (ж<driverConn>, Action<error>, error) grabConn(this ж<Conn> Ꮡc, context.Context _) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (Ꮡc.Ꮡdone.Load()) {
@@ -2276,7 +2367,7 @@ internal static (ж<driverConn>, Action<error>, error) grabConn(this ж<ΔConn> 
 }
 
 // PingContext verifies the connection to the database is still alive.
-public static error PingContext(this ж<ΔConn> Ꮡc, context.Context ctx) {
+public static error PingContext(this ж<Conn> Ꮡc, context.Context ctx) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (dc, release, err) = Ꮡc.grabConn(ctx);
@@ -2288,7 +2379,7 @@ public static error PingContext(this ж<ΔConn> Ꮡc, context.Context ctx) {
 
 // ExecContext executes a query without returning any rows.
 // The args are for any placeholder parameters in the query.
-public static (Result, error) ExecContext(this ж<ΔConn> Ꮡc, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+public static (Result, error) ExecContext(this ж<Conn> Ꮡc, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -2301,7 +2392,7 @@ public static (Result, error) ExecContext(this ж<ΔConn> Ꮡc, context.Context 
 
 // QueryContext executes a query that returns rows, typically a SELECT.
 // The args are for any placeholder parameters in the query.
-public static (ж<Rows>, error) QueryContext(this ж<ΔConn> Ꮡc, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+public static (ж<Rows>, error) QueryContext(this ж<Conn> Ꮡc, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -2318,7 +2409,7 @@ public static (ж<Rows>, error) QueryContext(this ж<ΔConn> Ꮡc, context.Conte
 // If the query selects no rows, the [*Row.Scan] will return [ErrNoRows].
 // Otherwise, the [*Row.Scan] scans the first selected row and discards
 // the rest.
-public static ж<Row> QueryRowContext(this ж<ΔConn> Ꮡc, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+public static ж<Row> QueryRowContext(this ж<Conn> Ꮡc, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var (rows, err) = Ꮡc.QueryContext(ctx, query, args.ꓸꓸꓸ);
@@ -2333,14 +2424,14 @@ public static ж<Row> QueryRowContext(this ж<ΔConn> Ꮡc, context.Context ctx,
 //
 // The provided context is used for the preparation of the statement, not for the
 // execution of the statement.
-public static (ж<ΔStmt>, error) PrepareContext(this ж<ΔConn> Ꮡc, context.Context ctx, @string query) {
+public static (ж<Stmt>, error) PrepareContext(this ж<Conn> Ꮡc, context.Context ctx, @string query) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (dc, release, err) = Ꮡc.grabConn(ctx);
     if (err != nil) {
         return (default, err);
     }
-    return c.db.prepareDC(ctx, dc, release, new ΔConnжstmtConnGrabber(Ꮡc), query);
+    return c.db.prepareDC(ctx, dc, release, new ConnжstmtConnGrabber(Ꮡc), query);
 }
 
 // Raw executes f exposing the underlying driver connection for the
@@ -2348,7 +2439,7 @@ public static (ж<ΔStmt>, error) PrepareContext(this ж<ΔConn> Ꮡc, context.C
 //
 // Once f returns and err is not [driver.ErrBadConn], the [Conn] will continue to be usable
 // until [Conn.Close] is called.
-public static error /*err*/ Raw(this ж<ΔConn> Ꮡc, Func<any, error> f) {
+public static error /*err*/ Raw(this ж<Conn> Ꮡc, Func<any, error> f) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -2393,7 +2484,7 @@ public static error /*err*/ Raw(this ж<ΔConn> Ꮡc, Func<any, error> f) {
 // The provided [TxOptions] is optional and may be nil if defaults should be used.
 // If a non-default isolation level is used that the driver doesn't support,
 // an error will be returned.
-public static (ж<Tx>, error) BeginTx(this ж<ΔConn> Ꮡc, context.Context ctx, ж<TxOptions> opts) {
+public static (ж<Tx>, error) BeginTx(this ж<Conn> Ꮡc, context.Context ctx, ж<TxOptions> opts) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (dc, release, err) = Ꮡc.grabConn(ctx);
@@ -2405,18 +2496,18 @@ public static (ж<Tx>, error) BeginTx(this ж<ΔConn> Ꮡc, context.Context ctx,
 
 // closemuRUnlockCondReleaseConn read unlocks closemu
 // as the sql operation is done with the dc.
-internal static void closemuRUnlockCondReleaseConn(this ж<ΔConn> Ꮡc, error err) {
+internal static void closemuRUnlockCondReleaseConn(this ж<Conn> Ꮡc, error err) {
     Ꮡc.Ꮡclosemu.RUnlock();
     if (errors.Is(err, driver.ErrBadConn)) {
         Ꮡc.close(err);
     }
 }
 
-internal static context.Context txCtx(this ref ΔConn c) {
+internal static context.Context txCtx(this ref Conn c) {
     return default;
 }
 
-internal static error close(this ж<ΔConn> Ꮡc, error err) {
+internal static error close(this ж<Conn> Ꮡc, error err) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -2445,13 +2536,15 @@ internal static error close(this ж<ΔConn> Ꮡc, error err) {
 // Close is safe to call concurrently with other operations and will
 // block until all other operations finish. It may be useful to first
 // cancel any used context and then call close directly after.
-public static error Close(this ж<ΔConn> Ꮡc) {
+public static error Close(this ж<Conn> Ꮡc) {
     return Ꮡc.close(default);
 }
 
+} partial class sql_package {
+
 partial struct Tx_stmts /*dyn*/ {
     /*embed*/ public sync_package.Mutex Mutex;
-    internal slice<ж<ΔStmt>> v;
+    internal slice<ж<Stmt>> v;
 }
 
 // Tx is an in-progress database transaction.
@@ -2494,6 +2587,8 @@ partial struct Tx {
     internal context.Context ctx;
 }
 
+} partial class sqlᴛTx {
+
 // awaitDone blocks until the context in Tx is canceled and rolls back
 // the transaction if it's not already done.
 internal static void awaitDone(this ж<Tx> Ꮡtx) {
@@ -2517,9 +2612,13 @@ internal static bool isDone(this ж<Tx> Ꮡtx) {
     return Ꮡtx.Ꮡdone.Load();
 }
 
+} partial class sql_package {
+
 // ErrTxDone is returned by any operation that is performed on a transaction
 // that has already been committed or rolled back.
 public static error ErrTxDone = errors.New("sql: transaction has already been committed or rolled back");
+
+} partial class sqlᴛTx {
 
 // close returns the connection to the pool and
 // must only be called by Tx.rollback or Tx.Commit while
@@ -2530,9 +2629,13 @@ internal static void close(this ref Tx tx, error err) {
     tx.txi = default;
 }
 
+} partial class sql_package {
+
 // hookTxGrabConn specifies an optional hook to be called on
 // a successful call to (*Tx).grabConn. For tests.
 internal static Action hookTxGrabConn;
+
+} partial class sqlᴛTx {
 
 internal static (ж<driverConn>, Action<error>, error) grabConn(this ж<Tx> Ꮡtx, context.Context ctx) {
     ref var tx = ref Ꮡtx.DerefOrNull();
@@ -2629,7 +2732,11 @@ public static error Commit(this ж<Tx> Ꮡtx) {
     return err;
 }
 
+} partial class sql_package {
+
 internal static Action rollbackHook;
+
+} partial class sqlᴛTx {
 
 // rollback aborts the transaction and optionally forces the pool to discard
 // the connection.
@@ -2681,7 +2788,7 @@ public static error Rollback(this ж<Tx> Ꮡtx) {
 // The provided context will be used for the preparation of the context, not
 // for the execution of the returned statement. The returned statement
 // will run in the transaction context.
-public static (ж<ΔStmt>, error) PrepareContext(this ж<Tx> Ꮡtx, context.Context ctx, @string query) {
+public static (ж<Stmt>, error) PrepareContext(this ж<Tx> Ꮡtx, context.Context ctx, @string query) {
     ref var tx = ref Ꮡtx.DerefOrNull();
 
     var (dc, release, err) = Ꮡtx.grabConn(ctx);
@@ -2708,7 +2815,7 @@ public static (ж<ΔStmt>, error) PrepareContext(this ж<Tx> Ꮡtx, context.Cont
 //
 // Prepare uses [context.Background] internally; to specify the context, use
 // [Tx.PrepareContext].
-public static (ж<ΔStmt>, error) Prepare(this ж<Tx> Ꮡtx, @string query) {
+public static (ж<Stmt>, error) Prepare(this ж<Tx> Ꮡtx, @string query) {
     return Ꮡtx.PrepareContext(context.Background(), query);
 }
 
@@ -2732,7 +2839,7 @@ private static readonly @string sqlTxStmtStatementFromˢᵇ = "sql: Tx.Stmt: sta
 //
 // The returned statement operates within the transaction and will be closed
 // when the transaction has been committed or rolled back.
-public static ж<ΔStmt> StmtContext(this ж<Tx> Ꮡtx, context.Context ctx, ж<ΔStmt> Ꮡstmt) {
+public static ж<Stmt> StmtContext(this ж<Tx> Ꮡtx, context.Context ctx, ж<Stmt> Ꮡstmt) {
     GoFrame ᒐ = default;
     try {
         ref var tx = ref Ꮡtx.DerefOrNull();
@@ -2741,16 +2848,16 @@ public static ж<ΔStmt> StmtContext(this ж<Tx> Ꮡtx, context.Context ctx, ж<
         ref var err = ref heap<error>(out var Ꮡerr);
         (var dc, var release, err) = Ꮡtx.grabConn(ctx);
         if (err != nil) {
-            return Ꮡ(new ΔStmt(stickyErr: err));
+            return Ꮡ(new Stmt(stickyErr: err));
         }
         var releaseʗ1 = release;
         defer(releaseʗ1, (error)(default), ref ᒐ);
 
         if (tx.db != stmt.db) {
-            return Ꮡ(new ΔStmt(stickyErr: errors.New(sqlTxStmtStatementFromˢ)));
+            return Ꮡ(new Stmt(stickyErr: errors.New(sqlTxStmtStatementFromˢ)));
         }
         ref var si = ref heap<driver.Stmt>(out var Ꮡsi);
-        ж<ΔStmt> parentStmt = default;
+        ж<Stmt> parentStmt = default;
         stmt.mu.Lock();
         if (stmt.closed || stmt.cg != nil) {
             // If the statement has been closed or already belongs to a
@@ -2765,7 +2872,7 @@ public static ж<ΔStmt> StmtContext(this ж<Tx> Ꮡtx, context.Context ctx, ж<
                 (Ꮡsi.ValueSlot, Ꮡerr.ValueSlot) = ctxDriverPrepare(ctx, dcʗ1.ci, Ꮡstmt.Value.query);
             });
             if (err != nil) {
-                return Ꮡ(new ΔStmt(stickyErr: err));
+                return Ꮡ(new Stmt(stickyErr: err));
             }
         } else {
             stmt.removeClosedStmtLocked();
@@ -2787,14 +2894,14 @@ public static ж<ΔStmt> StmtContext(this ж<Tx> Ꮡtx, context.Context ctx, ж<
                     (Ꮡds.ValueSlot, Ꮡerr.ValueSlot) = Ꮡstmt.prepareOnConnLocked(ctx, dcʗ2);
                 });
                 if (err != nil) {
-                    return Ꮡ(new ΔStmt(stickyErr: err));
+                    return Ꮡ(new Stmt(stickyErr: err));
                 }
                 si = ds.si;
             }
             parentStmt = Ꮡstmt;
         }
 
-        var txs = Ꮡ(new ΔStmt(
+        var txs = Ꮡ(new Stmt(
             db: tx.db,
             cg: new TxжstmtConnGrabber(Ꮡtx),
             cgds: Ꮡ(new driverStmt(
@@ -2805,7 +2912,7 @@ public static ж<ΔStmt> StmtContext(this ж<Tx> Ꮡtx, context.Context ctx, ж<
             query: stmt.query
         ));
         if (parentStmt != nil) {
-            tx.db.addDep(new ΔStmtжfinalCloser(parentStmt), txs.OrTypedNil());
+            tx.db.addDep(new StmtжfinalCloser(parentStmt), txs.OrTypedNil());
         }
         Ꮡtx.Ꮡstmts.of(Tx_stmts.ᏑMutex).Lock();
         tx.stmts.v = append(tx.stmts.v, txs);
@@ -2832,7 +2939,7 @@ public static ж<ΔStmt> StmtContext(this ж<Tx> Ꮡtx, context.Context ctx, ж<
 //
 // Stmt uses [context.Background] internally; to specify the context, use
 // [Tx.StmtContext].
-public static ж<ΔStmt> Stmt(this ж<Tx> Ꮡtx, ж<ΔStmt> stmt) {
+public static ж<Stmt> Stmt(this ж<Tx> Ꮡtx, ж<Stmt> stmt) {
     return Ꮡtx.StmtContext(context.Background(), stmt);
 }
 
@@ -2911,8 +3018,10 @@ public static ж<Row> QueryRow(this ж<Tx> Ꮡtx, @string query, params ꓸꓸ�
     return Ꮡtx.QueryRowContext(context.Background(), query, args.ꓸꓸꓸ);
 }
 
+} partial class sql_package {
+
 // connStmt is a prepared statement on a particular connection.
-partial struct ΔconnStmt {
+partial struct connStmt {
     internal ж<driverConn> dc;
     internal ж<driverStmt> ds;
 }
@@ -2930,7 +3039,7 @@ partial interface stmtConnGrabber {
 }
 
 internal static stmtConnGrabber _ᴛ2ʗ = new TxжstmtConnGrabber(Ꮡ(new Tx()));
-internal static stmtConnGrabber _ᴛ3ʗ = new ΔConnжstmtConnGrabber(Ꮡ(new ΔConn()));
+internal static stmtConnGrabber _ᴛ3ʗ = new ConnжstmtConnGrabber(Ꮡ(new Conn()));
 
 // Stmt is a prepared statement.
 // A Stmt is safe for concurrent use by multiple goroutines.
@@ -2941,7 +3050,7 @@ internal static stmtConnGrabber _ᴛ3ʗ = new ΔConnжstmtConnGrabber(Ꮡ(new Δ
 // If a Stmt is prepared on a [DB], it will remain usable for the lifetime of the
 // [DB]. When the Stmt needs to execute on a new underlying connection, it will
 // prepare itself on the new connection automatically.
-partial struct ΔStmt {
+partial struct Stmt {
     // Immutable:
     internal ж<DB> db;        // where we came from
     internal @string query;   // that created the Stmt
@@ -2960,22 +3069,24 @@ partial struct ΔStmt {
     // on its originating ("parent") statement so that parentStmt may
     // be closed by the user without them having to know whether or not
     // any transactions are still using it.
-    internal ж<ΔStmt> parentStmt;
+    internal ж<Stmt> parentStmt;
     internal sync.Mutex mu; // protects the rest of the fields
     internal bool closed;
     // css is a list of underlying driver statement interfaces
     // that are valid on particular connections. This is only
     // used if cg == nil and one is found that has idle
     // connections. If cg != nil, cgds is always used.
-    internal slice<ΔconnStmt> css;
+    internal slice<connStmt> css;
     // lastNumClosed is copied from db.numClosed when Stmt is created
     // without tx and closed connections in css are removed.
     internal uint64 lastNumClosed;
 }
 
+} partial class sqlᴛStmt {
+
 // ExecContext executes a prepared statement with the given arguments and
 // returns a [Result] summarizing the effect of the statement.
-public static (Result, error) ExecContext(this ж<ΔStmt> Ꮡs, context.Context ctx, params ꓸꓸꓸany argsʗp) {
+public static (Result, error) ExecContext(this ж<Stmt> Ꮡs, context.Context ctx, params ꓸꓸꓸany argsʗp) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -2988,13 +3099,13 @@ public static (Result, error) ExecContext(this ж<ΔStmt> Ꮡs, context.Context 
         ref var res = ref heap<Result>(out var Ꮡres);
         var argsʗ1 = args;
         var err = s.db.retry((connReuseStrategy strategy) => {
-            var (dc, ΔreleaseConn, ds, errΔ1) = Ꮡs.connStmt(ctx, strategy);
+            var (dc, releaseConn, ds, errΔ1) = Ꮡs.connStmt(ctx, strategy);
             if (errΔ1 != nil) {
                 return errΔ1;
             }
 
             (Ꮡres.ValueSlot, errΔ1) = resultFromStatement(ctx, dc.ci, ds, argsʗ1.ꓸꓸꓸ);
-            ΔreleaseConn(errΔ1);
+            releaseConn(errΔ1);
             return errΔ1;
         });
 
@@ -3009,11 +3120,13 @@ public static (Result, error) ExecContext(this ж<ΔStmt> Ꮡs, context.Context 
 //
 // Exec uses [context.Background] internally; to specify the context, use
 // [Stmt.ExecContext].
-public static (Result, error) Exec(this ж<ΔStmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
+public static (Result, error) Exec(this ж<Stmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     return Ꮡs.ExecContext(context.Background(), args.ꓸꓸꓸ);
 }
+
+} partial class sql_package {
 
 internal static (Result, error) resultFromStatement(context.Context ctx, driver.Conn ci, ж<driverStmt> Ꮡds, params ꓸꓸꓸany argsʗp) {
     GoFrame ᒐ = default;
@@ -3039,11 +3152,13 @@ internal static (Result, error) resultFromStatement(context.Context ctx, driver.
     finally { ᒐ.Run(); }
 }
 
+} partial class sqlᴛStmt {
+
 // removeClosedStmtLocked removes closed conns in s.css.
 //
 // To avoid lock contention on DB.mu, we do it only when
 // s.db.numClosed - s.lastNum is large enough.
-internal static void removeClosedStmtLocked(this ref ΔStmt s) {
+internal static void removeClosedStmtLocked(this ref Stmt s) {
     nint t = len(s.css) / 2 + 1;
     if (t > 10) {
         t = 10;
@@ -3058,7 +3173,7 @@ internal static void removeClosedStmtLocked(this ref ΔStmt s) {
         if (s.css[i].dc.dbmuClosed) {
             s.css[i] = s.css[len(s.css) - 1];
             // Zero out the last element (for GC) before shrinking the slice.
-            s.css[len(s.css) - 1] = new ΔconnStmt();
+            s.css[len(s.css) - 1] = new connStmt();
             s.css = s.css.slice(0, len(s.css) - 1);
             i--;
         }
@@ -3074,32 +3189,32 @@ private static readonly @string sqlStatementIsClosedˢᵇ = "sql: statement is c
 // connStmt returns a free driver connection on which to execute the
 // statement, a function to call to release the connection, and a
 // statement bound to that connection.
-internal static (ж<driverConn> dc, Action<error> ΔreleaseConn, ж<driverStmt> ds, error err) connStmt(this ж<ΔStmt> Ꮡs, context.Context ctx, connReuseStrategy strategy) {
+internal static (ж<driverConn> dc, Action<error> releaseConn, ж<driverStmt> ds, error err) connStmt(this ж<Stmt> Ꮡs, context.Context ctx, connReuseStrategy strategy) {
     ж<driverConn> dc = default;
-    Action<error> ΔreleaseConn = default;
+    Action<error> releaseConn = default;
     ж<driverStmt> ds = default;
     error err = default;
     ref var s = ref Ꮡs.DerefOrNull();
 
     err = s.stickyErr; if (err != nil) {
-        return (dc, ΔreleaseConn, ds, err);
+        return (dc, releaseConn, ds, err);
     }
     s.mu.Lock();
     if (s.closed) {
         s.mu.Unlock();
         err = errors.New(sqlStatementIsClosedˢ);
-        return (dc, ΔreleaseConn, ds, err);
+        return (dc, releaseConn, ds, err);
     }
 
     // In a transaction or connection, we always use the connection that the
     // stmt was created on.
     if (s.cg != nil) {
         s.mu.Unlock();
-        (dc, ΔreleaseConn, err) = s.cg.grabConn(ctx); // blocks, waiting for the connection.
+        (dc, releaseConn, err) = s.cg.grabConn(ctx); // blocks, waiting for the connection.
         if (err != nil) {
-            return (dc, ΔreleaseConn, ds, err);
+            return (dc, releaseConn, ds, err);
         }
-        return (dc, ΔreleaseConn, s.cgds, default);
+        return (dc, releaseConn, s.cgds, default);
     }
 
     s.removeClosedStmtLocked();
@@ -3133,14 +3248,14 @@ internal static (ж<driverConn> dc, Action<error> ΔreleaseConn, ж<driverStmt> 
 
 // prepareOnConnLocked prepares the query in Stmt s on dc and adds it to the list of
 // open connStmt on the statement. It assumes the caller is holding the lock on dc.
-internal static (ж<driverStmt>, error) prepareOnConnLocked(this ж<ΔStmt> Ꮡs, context.Context ctx, ж<driverConn> dc) {
+internal static (ж<driverStmt>, error) prepareOnConnLocked(this ж<Stmt> Ꮡs, context.Context ctx, ж<driverConn> dc) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var (si, err) = dc.prepareLocked(ctx, s.cg, s.query);
     if (err != nil) {
         return (default, err);
     }
-    var cs = new ΔconnStmt(dc, si);
+    var cs = new connStmt(dc, si);
     s.mu.Lock();
     s.css = append(s.css, cs);
     s.mu.Unlock();
@@ -3149,7 +3264,7 @@ internal static (ж<driverStmt>, error) prepareOnConnLocked(this ж<ΔStmt> Ꮡs
 
 // QueryContext executes a prepared query statement with the given arguments
 // and returns the query results as a [*Rows].
-public static (ж<Rows>, error) QueryContext(this ж<ΔStmt> Ꮡs, context.Context ctx, params ꓸꓸꓸany argsʗp) {
+public static (ж<Rows>, error) QueryContext(this ж<Stmt> Ꮡs, context.Context ctx, params ꓸꓸꓸany argsʗp) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3164,7 +3279,7 @@ public static (ж<Rows>, error) QueryContext(this ж<ΔStmt> Ꮡs, context.Conte
 
         var argsʗ1 = args;
         var err = s.db.retry(error (connReuseStrategy strategy) => {
-            var (dc, ΔreleaseConn, ds, errΔ1) = Ꮡs.connStmt(ctx, strategy);
+            var (dc, releaseConn, ds, errΔ1) = Ꮡs.connStmt(ctx, strategy);
             if (errΔ1 != nil) {
                 return errΔ1;
             }
@@ -3180,14 +3295,14 @@ public static (ж<Rows>, error) QueryContext(this ж<ΔStmt> Ꮡs, context.Conte
                 ));
                 // addDep must be added before initContextClose or it could attempt
                 // to removeDep before it has been added.
-                Ꮡs.Value.db.addDep(new ΔStmtжfinalCloser(Ꮡs), Ꮡrows.ValueSlot.OrTypedNil());
+                Ꮡs.Value.db.addDep(new StmtжfinalCloser(Ꮡs), Ꮡrows.ValueSlot.OrTypedNil());
 
                 // releaseConn must be set before initContextClose or it could
                 // release the connection before it is set.
-                var releaseConnʗ1 = ΔreleaseConn;
+                var releaseConnʗ1 = releaseConn;
                 Ꮡrows.ValueSlot.releaseConn = (error errΔ2) => {
                     releaseConnʗ1(errΔ2);
-                    Ꮡs.Value.db.removeDep(new ΔStmtжfinalCloser(Ꮡs), Ꮡrows.ValueSlot.OrTypedNil());
+                    Ꮡs.Value.db.removeDep(new StmtжfinalCloser(Ꮡs), Ꮡrows.ValueSlot.OrTypedNil());
                 };
                 context.Context txctx = default;
                 if (Ꮡs.Value.cg != nil) {
@@ -3197,7 +3312,7 @@ public static (ж<Rows>, error) QueryContext(this ж<ΔStmt> Ꮡs, context.Conte
                 return default;
             }
 
-            ΔreleaseConn(errΔ1);
+            releaseConn(errΔ1);
             return errΔ1;
         });
 
@@ -3212,11 +3327,13 @@ public static (ж<Rows>, error) QueryContext(this ж<ΔStmt> Ꮡs, context.Conte
 //
 // Query uses [context.Background] internally; to specify the context, use
 // [Stmt.QueryContext].
-public static (ж<Rows>, error) Query(this ж<ΔStmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
+public static (ж<Rows>, error) Query(this ж<Stmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     return Ꮡs.QueryContext(context.Background(), args.ꓸꓸꓸ);
 }
+
+} partial class sql_package {
 
 internal static (driver.Rows, error) rowsiFromStatement(context.Context ctx, driver.Conn ci, ж<driverStmt> Ꮡds, params ꓸꓸꓸany argsʗp) {
     GoFrame ᒐ = default;
@@ -3236,13 +3353,15 @@ internal static (driver.Rows, error) rowsiFromStatement(context.Context ctx, dri
     finally { ᒐ.Run(); }
 }
 
+} partial class sqlᴛStmt {
+
 // QueryRowContext executes a prepared query statement with the given arguments.
 // If an error occurs during the execution of the statement, that error will
 // be returned by a call to Scan on the returned [*Row], which is always non-nil.
 // If the query selects no rows, the [*Row.Scan] will return [ErrNoRows].
 // Otherwise, the [*Row.Scan] scans the first selected row and discards
 // the rest.
-public static ж<Row> QueryRowContext(this ж<ΔStmt> Ꮡs, context.Context ctx, params ꓸꓸꓸany argsʗp) {
+public static ж<Row> QueryRowContext(this ж<Stmt> Ꮡs, context.Context ctx, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var (rows, err) = Ꮡs.QueryContext(ctx, args.ꓸꓸꓸ);
@@ -3266,14 +3385,14 @@ public static ж<Row> QueryRowContext(this ж<ΔStmt> Ꮡs, context.Context ctx,
 //
 // QueryRow uses [context.Background] internally; to specify the context, use
 // [Stmt.QueryRowContext].
-public static ж<Row> QueryRow(this ж<ΔStmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
+public static ж<Row> QueryRow(this ж<Stmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     return Ꮡs.QueryRowContext(context.Background(), args.ꓸꓸꓸ);
 }
 
 // Close closes the statement.
-public static error Close(this ж<ΔStmt> Ꮡs) {
+public static error Close(this ж<Stmt> Ꮡs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3297,13 +3416,13 @@ public static error Close(this ж<ΔStmt> Ꮡs) {
         s.mu.Unlock();
 
         if (s.cg == nil) {
-            return s.db.removeDep(new ΔStmtжfinalCloser(Ꮡs), Ꮡs.OrTypedNil());
+            return s.db.removeDep(new StmtжfinalCloser(Ꮡs), Ꮡs.OrTypedNil());
         }
 
         if (s.parentStmt != nil) {
             // If parentStmt is set, we must not close s.txds since it's stored
             // in the css array of the parentStmt.
-            return s.db.removeDep(new ΔStmtжfinalCloser(s.parentStmt), Ꮡs.OrTypedNil());
+            return s.db.removeDep(new StmtжfinalCloser(s.parentStmt), Ꮡs.OrTypedNil());
         }
         return txds.Close();
     }
@@ -3311,7 +3430,7 @@ public static error Close(this ж<ΔStmt> Ꮡs) {
     finally { if (ᒐd1) Ꮡs.Ꮡclosemu.Unlock(); ᒐ.Run(); }
 }
 
-internal static error finalClose(this ж<ΔStmt> Ꮡs) {
+internal static error finalClose(this ж<Stmt> Ꮡs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3331,6 +3450,8 @@ internal static error finalClose(this ж<ΔStmt> Ꮡs) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡs.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
+
+} partial class sql_package {
 
 // Rows is the result of a query. Its cursor starts before the first row
 // of the result set. Use [Rows.Next] to advance from row to row.
@@ -3373,6 +3494,8 @@ partial struct Rows {
     internal slice<byte> raw;
 }
 
+} partial class sqlᴛRows {
+
 // lasterrOrErrLocked returns either lasterr or the provided err.
 // rs.closemu must be read-locked.
 internal static error lasterrOrErrLocked(this ref Rows rs, error err) {
@@ -3382,9 +3505,13 @@ internal static error lasterrOrErrLocked(this ref Rows rs, error err) {
     return err;
 }
 
+} partial class sql_package {
+
 // bypassRowsAwaitDone is only used for testing.
 // If true, it will not close the Rows automatically from the context.
 internal static bool bypassRowsAwaitDone = false;
+
+} partial class sqlᴛRows {
 
 internal static partial void initContextClose(this ж<Rows> Ꮡrs, context.Context ctx, context.Context txctx) {
     ref var rs = ref Ꮡrs.DerefOrNull();
@@ -3619,8 +3746,12 @@ internal static RawBytes setrawbuf(this ж<Rows> Ꮡrs, slice<byte> b) {
     return (RawBytes)(rs.raw.slice(off));
 }
 
+} partial class sql_package {
+
 internal static error errRowsClosed = errors.New("sql: Rows are closed");
 internal static error errNoRows = errors.New("sql: no Rows available");
+
+} partial class sqlᴛRows {
 
 // Columns returns the column names.
 // Columns returns an error if the rows are closed.
@@ -3674,6 +3805,8 @@ public static (slice<ж<ColumnType>>, error) ColumnTypes(this ж<Rows> Ꮡrs) {
     finally { if (ᒐd2) Ꮡrs.DerefOrNull().dc.of(driverConn.ᏑMutex).Unlock(); if (ᒐd1) Ꮡrs.Ꮡclosemu.RUnlock(); ᒐ.Run(); }
 }
 
+} partial class sql_package {
+
 // ColumnType contains the name and type of a column.
 partial struct ColumnType {
     internal @string name;
@@ -3685,8 +3818,10 @@ partial struct ColumnType {
     internal @string databaseType;
     internal int64 precision;
     internal int64 scale;
-    internal reflectꓸType scanType;
+    internal reflect.Type scanType;
 }
+
+} partial class sqlᴛColumnType {
 
 // Name returns the name or alias of the column.
 public static @string Name(this ref ColumnType ci) {
@@ -3711,7 +3846,7 @@ public static (int64 precision, int64 scale, bool ok) DecimalSize(this ref Colum
 // ScanType returns a Go type suitable for scanning into using [Rows.Scan].
 // If a driver does not support this property ScanType will return
 // the type of an empty interface.
-public static reflectꓸType ScanType(this ref ColumnType ci) {
+public static reflect.Type ScanType(this ref ColumnType ci) {
     return ci.scanType;
 }
 
@@ -3730,6 +3865,8 @@ public static (bool nullable, bool ok) Nullable(this ref ColumnType ci) {
 public static @string DatabaseTypeName(this ref ColumnType ci) {
     return ci.databaseType;
 }
+
+} partial class sql_package {
 
 internal static slice<ж<ColumnType>> rowsColumnInfoSetupConnLocked(driver.Rows rowsi) {
     var names = rowsi.Columns();
@@ -3771,6 +3908,8 @@ internal static slice<ж<ColumnType>> rowsColumnInfoSetupConnLocked(driver.Rows 
     }
     return list;
 }
+
+} partial class sqlᴛRows {
 
 // Scan copies the columns in the current row into the values pointed
 // at by dest. The number of values in dest must be the same as the
@@ -3895,6 +4034,8 @@ internal static void closemuRUnlockIfHeldByScan(this ж<Rows> Ꮡrs) {
     }
 }
 
+} partial class sql_package {
+
 internal static bool scanArgsContainRawBytes(slice<any> args) {
     foreach (var (_, a) in range(args)) {
         var (_, ok) = a._<ж<RawBytes>>(ᐧ); if (ok) {
@@ -3907,6 +4048,8 @@ internal static bool scanArgsContainRawBytes(slice<any> args) {
 // rowsCloseHook returns a function so tests may install the
 // hook through a test only mutex.
 internal static Func<Action<ж<Rows>, ж<error>>> rowsCloseHook = () => default;
+
+} partial class sqlᴛRows {
 
 // Close closes the [Rows], preventing further enumeration. If [Rows.Next] is called
 // and returns false and there are no further result sets,
@@ -3962,12 +4105,16 @@ internal static error close(this ж<Rows> Ꮡrs, error errʗp) {
     finally { if (ᒐd1) Ꮡrs.Ꮡclosemu.Unlock(); ᒐ.Run(); }
 }
 
+} partial class sql_package {
+
 // Row is the result of calling [DB.QueryRow] to select a single row.
 partial struct Row {
     // One of these two will be non-nil:
     internal error err; // deferred error for easy chaining
     internal ж<Rows> rows;
 }
+
+} partial class sqlᴛRow {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string sqlRawBytesIsnTAllowedOnˢ => ref sqlRawBytesIsnTAllowedOnˢᵇ;
@@ -4031,6 +4178,8 @@ public static error Err(this ref Row r) {
     return r.err;
 }
 
+} partial class sql_package {
+
 // A Result summarizes an executed SQL command.
 partial interface Result {
     // LastInsertId returns the integer generated by the database
@@ -4049,6 +4198,8 @@ partial struct driverResult {
     /*embed*/ public sync_package.Locker Locker; // the *driverConn
     internal driver.Result resi;
 }
+
+} partial class sqlᴛdriverResult {
 
 internal static (int64, error) LastInsertId(this driverResult dr) {
     GoFrame ᒐ = default;
@@ -4073,6 +4224,8 @@ internal static (int64, error) RowsAffected(this driverResult dr) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) dr.Locker.Unlock(); ᒐ.Run(); }
 }
+
+} partial class sql_package {
 
 internal static partial @string stack() {
     array<byte> buf = new(2048); /* (2 << 10) */
@@ -4114,12 +4267,14 @@ partial struct connRequestAndIndex {
     internal ж<nint> curIdx;
 }
 
+} partial class sqlᴛconnRequestSet {
+
 // CloseAndRemoveAll closes all channels in the set
 // and clears the set.
 internal static void CloseAndRemoveAll(this ref connRequestSet s) {
     foreach (var (_, v) in range(s.s)) {
         v.curIdx.Value = -1;
-        builtin.close(v.req);
+        close(v.req);
     }
     s.s = default;
 }
@@ -4127,11 +4282,15 @@ internal static void CloseAndRemoveAll(this ref connRequestSet s) {
 // Len returns the length of the set.
 internal static nint Len(this ref connRequestSet s) { return len(s.s); }
 
+} partial class sql_package {
+
 // connRequestDelHandle is an opaque handle to delete an
 // item from calling Add.
 partial struct connRequestDelHandle {
     internal ж<nint> idx; // pointer to index; or -1 if not in slice
 }
+
+} partial class sqlᴛconnRequestSet {
 
 // Add adds v to the set of waiting requests.
 // The returned connRequestDelHandle can be used to remove the item from
@@ -4192,4 +4351,4 @@ internal static (channel<connRequest> v, bool ok) TakeRandom(this ref connReques
     return (e.req, true);
 }
 
-} // end sql_package
+} // end sqlᴛconnRequestSet

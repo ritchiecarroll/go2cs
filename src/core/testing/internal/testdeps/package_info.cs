@@ -11,8 +11,6 @@
 
 // <ImportedTypeAliases>
 global using fuzzꓸCorpusEntry = go.@internal.fuzz_package.CorpusEntryᴛ1;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸType = go.reflect_package.ΔType;
 // </ImportedTypeAliases>
 
 using go;
@@ -30,8 +28,6 @@ using static go.testing.@internal.testdeps_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("ImportPath", "const:ΔImportPath")]
-[assembly: GoTypeAlias("ModulePath", "const:ΔModulePath")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -65,7 +61,7 @@ using static go.testing.@internal.testdeps_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("testing/internal/testdeps/deps.go", "deps.cs", "ACtOsoKCgoKmpoKmgqaC7ILaggANFILmguaC5oKo4oKmgoKClIKCgqIACQiCgoLKgoKUpqKCgoKC2JKmAAYagpIACxiClNYACA6CkoKClNaCpoKmgqaCABQiwoKUAAoGooKCgoKUlIKCgpQ=", "", "", "", "198:21,231:21")]
+[assembly: GoPositionMap("testing/internal/testdeps/deps.go", "deps.cs", "AC9OsoKCgoKmpoKmgqaCAAoMggAJCoIAERSC5oLmguaCqOKCpoKCgpSCgoKiAA0IgoKCyoKClKaigoKCgtiSpgAGGoKSAAsYgpTWAAgOgpKCgpTWgqaCpoKmggAYIsKClAAMBqKCgoKClJSCgoKU", "", "", "", "218:21,251:21")]
 // </GoSourcePositionMaps>
 
 namespace go.testing.@internal;
@@ -106,3 +102,14 @@ public static partial class testdeps_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(testdeps_package.TestDeps)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class testdepsᴛTestDeps;
+[GoMethodHost(typeof(testdeps_package.testLog)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class testdepsᴛtestLog;
+// </MethodHolders>

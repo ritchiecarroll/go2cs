@@ -14,6 +14,7 @@ using runtime = runtime_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using ꓸꓸꓸany = Span<any>;
+using static parse_package;
 
 partial class parse_package {
 
@@ -53,6 +54,8 @@ internal static nint maxStackDepth = 10000;
     }
 }
 
+} partial class parseᴛTree {
+
 // Copy returns a copy of the [Tree]. Any parsing state is discarded.
 public static ж<Tree> Copy(this ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -68,6 +71,8 @@ public static ж<Tree> Copy(this ж<Tree> Ꮡt) {
     ));
 }
 
+} partial class parse_package {
+
 // Parse returns a map from template name to [Tree], created by parsing the
 // templates described in the argument string. The top-level template will be
 // given the specified name. If an error is encountered, parsing stops and an
@@ -81,6 +86,8 @@ public static (map<@string, ж<Tree>>, error) Parse(@string name, @string text, 
     var (_, err) = t.Parse(text, leftDelim, rightDelim, treeSet, funcs.ꓸꓸꓸ);
     return (treeSet, err);
 }
+
+} partial class parseᴛTree {
 
 // next returns the next token.
 internal static item next(this ref Tree t) {
@@ -143,6 +150,8 @@ internal static item peekNonSpace(this ref Tree t) {
     return token;
 }
 
+} partial class parse_package {
+
 // Parsing.
 
 // New allocates a new parse tree with the given name.
@@ -154,6 +163,8 @@ public static ж<Tree> New(@string name, params Span<map<@string, any>> funcsʗp
         funcs: funcs
     ));
 }
+
+} partial class parseᴛTree {
 
 // ErrorContext returns a textual representation of the location of the node in the input text.
 // The receiver is only used when the node does not have a pointer to the tree inside,
@@ -240,7 +251,7 @@ internal static void recover(this ж<Tree> Ꮡt, ж<error> Ꮡerrp) {
 
         var e = builtin.recover(calledByDefer);
         if (e != nil) {
-            var (_, ok) = e._<runtimeꓸError>(ᐧ); if (ok) {
+            var (_, ok) = e._<runtime.Error>(ᐧ); if (ok) {
                 throw panic(e);
             }
             if (Ꮡt != nil) {
@@ -326,6 +337,8 @@ internal static void add(this ж<Tree> Ꮡt) {
     }
 }
 
+} partial class parse_package {
+
 // IsEmptyTree reports whether this tree (node) is empty of everything but space or comments.
 public static bool IsEmptyTree(Node n) {
     switch (n.type()) {
@@ -368,6 +381,8 @@ public static bool IsEmptyTree(Node n) {
     }}
     return false;
 }
+
+} partial class parseᴛTree {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string definitionˢ => ref definitionˢᵇ;
@@ -548,6 +563,10 @@ internal static Node /*n*/ action(this ж<Tree> Ꮡt) {
     return new ActionNodeжNode(Ꮡt.newAction(token.pos, token.line, Ꮡt.pipeline(commandˢ, itemRightDelim)));
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string breakˢ => ref breakˢᵇ;
+private static readonly @string breakˢᵇ = "{{break}}"u8;
+
 // Break:
 //
 //	{{break}}
@@ -564,6 +583,10 @@ internal static Node breakControl(this ж<Tree> Ꮡt, Pos pos, nint line) {
     }
     return new BreakNodeжNode(Ꮡt.newBreak(pos, line));
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string continueˢ => ref continueˢᵇ;
+private static readonly @string continueˢᵇ = "{{continue}}"u8;
 
 // Continue:
 //
@@ -605,14 +628,14 @@ decls:
         case {} when (next.typ == itemAssign) || (next.typ == itemDeclare): {
             pipe.IsAssign = next.typ == itemAssign;
             t.nextNonSpace();
-            pipe.Decl = builtin.append(pipe.Decl, Ꮡt.newVariable(v.pos, v.val));
-            t.vars = builtin.append(t.vars, v.val);
+            pipe.Decl = append(pipe.Decl, Ꮡt.newVariable(v.pos, v.val));
+            t.vars = append(t.vars, v.val);
             break;
         }
         case {} when next.typ == itemChar && next.val == ","u8: {
             t.nextNonSpace();
-            pipe.Decl = builtin.append(pipe.Decl, Ꮡt.newVariable(v.pos, v.val));
-            t.vars = builtin.append(t.vars, v.val);
+            pipe.Decl = append(pipe.Decl, Ꮡt.newVariable(v.pos, v.val));
+            t.vars = append(t.vars, v.val);
             if (context == "range"u8 && len(pipe.Decl) < 2) {
                 switch (t.peekNonSpace().typ) {
                 case var ᴛ when ᴛ == itemVariable || ᴛ == itemRightDelim || ᴛ == itemRightParen: {
@@ -744,6 +767,10 @@ internal static Node ifControl(this ж<Tree> Ꮡt) {
     return new IfNodeжNode(Ꮡt.newIf(ᴛ1, ᴛ2, ᴛ3, ᴛ4, ᴛ5));
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string rangeˢ => ref rangeˢᵇ;
+private static readonly @string rangeˢᵇ = "range"u8;
+
 // Range:
 //
 //	{{range pipeline}} itemList {{end}}
@@ -755,6 +782,10 @@ internal static Node rangeControl(this ж<Tree> Ꮡt) {
     var r = Ꮡt.newRange(ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10);
     return new RangeNodeжNode(r);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string withˢ => ref withˢᵇ;
+private static readonly @string withˢᵇ = "with"u8;
 
 // With:
 //
@@ -1086,4 +1117,4 @@ internal static Node useVar(this ж<Tree> Ꮡt, Pos pos, @string name) {
     return default;
 }
 
-} // end parse_package
+} // end parseᴛTree

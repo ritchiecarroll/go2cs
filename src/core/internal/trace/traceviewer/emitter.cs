@@ -14,6 +14,7 @@ using encoding;
 using go;
 using go.@internal;
 using go.@internal.trace.traceviewer;
+using static traceviewer_package;
 
 partial class traceviewer_package {
 
@@ -246,10 +247,14 @@ partial struct countingWriter {
     internal nint size;
 }
 
+} partial class traceviewerᴛcountingWriter {
+
 internal static (nint, error) Write(this ref countingWriter cw, slice<byte> data) {
     cw.size += len(data);
     return (len(data), default);
 }
+
+} partial class traceviewer_package {
 
 internal static nint stackFrameEncodedSize(nuint id, format.Frame f) {
     // We want to know the marginal size of traceviewer.Data.Frames for
@@ -353,6 +358,8 @@ partial struct task {
     internal nint sortIndex;
 }
 
+} partial class traceviewerᴛEmitter {
+
 public static void Gomaxprocs(this ref Emitter e, uint64 v) {
     if (v > e.gomaxprocs) {
         e.gomaxprocs = v;
@@ -407,6 +414,8 @@ internal static void Δslice(this ref Emitter e, SliceEvent s, uint64 sectionID,
     )));
 }
 
+} partial class traceviewer_package {
+
 partial struct SliceEvent {
     public @string Name;
     public time.Duration Ts;
@@ -416,6 +425,8 @@ partial struct SliceEvent {
     public nint EndStack;
     public any Arg;
 }
+
+} partial class traceviewerᴛEmitter {
 
 public static void AsyncSlice(this ref Emitter e, AsyncSliceEvent s) {
     if (!e.tsWithinRange(s.Ts) && !e.tsWithinRange(s.Ts + s.Dur)) {
@@ -454,12 +465,16 @@ public static void AsyncSlice(this ref Emitter e, AsyncSliceEvent s) {
     )));
 }
 
+} partial class traceviewer_package {
+
 partial struct AsyncSliceEvent {
     /*embed*/ public SliceEvent SliceEvent;
     public @string Category;
     public @string Scope;
     public uint64 TaskColorIndex; // Take on the same color as the task with this ID.
 }
+
+} partial class traceviewerᴛEmitter {
 
 public static void Instant(this ref Emitter e, InstantEvent i) {
     if (!e.tsWithinRange(i.Ts)) {
@@ -483,6 +498,8 @@ public static void Instant(this ref Emitter e, InstantEvent i) {
     )));
 }
 
+} partial class traceviewer_package {
+
 partial struct InstantEvent {
     public time.Duration Ts;
     public @string Name;
@@ -491,6 +508,8 @@ partial struct InstantEvent {
     public nint Stack;
     public any Arg;
 }
+
+} partial class traceviewerᴛEmitter {
 
 public static void Arrow(this ref Emitter e, ArrowEvent a) {
     if (e.filter != nil && (!e.filter(a.FromResource) || !e.filter(a.ToResource))) {
@@ -527,6 +546,8 @@ internal static void arrow(this ref Emitter e, ArrowEvent a, uint64 sectionID) {
     )));
 }
 
+} partial class traceviewer_package {
+
 partial struct ArrowEvent {
     public @string Name;
     public time.Duration Start;
@@ -535,6 +556,8 @@ partial struct ArrowEvent {
     public nint FromStack;
     public uint64 ToResource;
 }
+
+} partial class traceviewerᴛEmitter {
 
 public static void Event(this ref Emitter e, ж<format.Event> ev) {
     e.c.ConsumeViewerEvent(ev, true);
@@ -745,6 +768,8 @@ internal static nint buildBranch(this ref Emitter e, frameNode parent, slice<tra
     }
     return e.buildBranch(node, stk);
 }
+
+} partial class traceviewer_package {
 
 partial struct heapStats {
     internal uint64 heapAlloc;

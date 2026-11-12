@@ -51,15 +51,15 @@ partial class runtime_package {
 internal static @unsafe.Pointer sysAlloc(uintptr n, ж<sysMemStat> sysStat, @string vmaName) {
     sysStat.add((int64)n);
     ᏑgcController.ᏑmappedReady.Add((int64)n);
-    @unsafe.Pointer Δp = (uintptr)sysAllocOS(n, vmaName);
+    @unsafe.Pointer p = (uintptr)sysAllocOS(n, vmaName);
 
     // When using ASAN leak detection, we must tell ASAN about
     // cases where we store pointers in mmapped memory.
     if (asanenabled) {
-        lsanregisterrootregion(Δp, n);
+        lsanregisterrootregion(p, n);
     }
 
-    return Δp;
+    return p;
 }
 
 // sysUnused transitions a memory region from Ready to Prepared. It notifies the
@@ -172,15 +172,15 @@ internal static void sysFault(@unsafe.Pointer v, uintptr n) {
 // sysReserve returns OS-aligned memory. If a larger alignment is required, use
 // sysReservedAligned.
 internal static @unsafe.Pointer sysReserve(@unsafe.Pointer v, uintptr n, @string vmaName) {
-    @unsafe.Pointer Δp = (uintptr)sysReserveOS(v, n, vmaName);
+    @unsafe.Pointer p = (uintptr)sysReserveOS(v, n, vmaName);
 
     // When using ASAN leak detection, we must tell ASAN about
     // cases where we store pointers in mmapped memory.
     if (asanenabled) {
-        lsanregisterrootregion(Δp, n);
+        lsanregisterrootregion(p, n);
     }
 
-    return Δp;
+    return p;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -206,23 +206,23 @@ internal static (@unsafe.Pointer, uintptr) sysReserveAligned(@unsafe.Pointer v, 
     // for a larger region and remove the parts we don't need.
     nint retries = 0;
 retry:
-    var Δp = (uintptr)(uintptr)sysReserve(v, size + align, vmaName);
+    var p = (uintptr)(uintptr)sysReserve(v, size + align, vmaName);
     switch (ᐧ) {
-    case {} when Δp == 0: {
+    case {} when p == 0: {
         return (default, 0);
     }
-    case {} when (uintptr)(Δp & (align - 1)) == 0: {
-        return ((@unsafe.Pointer)Δp, size + align);
+    case {} when (uintptr)(p & (align - 1)) == 0: {
+        return ((@unsafe.Pointer)p, size + align);
     }
     case {} when ᐧᐧ: {
         // On Windows we can't release pieces of a
         // reservation, so we release the whole thing and
         // re-reserve the aligned sub-region. This may race,
         // so we may have to try again.
-        sysUnreserve((@unsafe.Pointer)Δp, size + align);
-        Δp = alignUp(Δp, align);
-        @unsafe.Pointer p2 = (uintptr)sysReserve((@unsafe.Pointer)Δp, size, vmaName);
-        if (Δp != (uintptr)p2) {
+        sysUnreserve((@unsafe.Pointer)p, size + align);
+        p = alignUp(p, align);
+        @unsafe.Pointer p2 = (uintptr)sysReserve((@unsafe.Pointer)p, size, vmaName);
+        if (p != (uintptr)p2) {
             // Must have raced. Try again.
             sysUnreserve(p2, size);
             retries++; if (retries == 100) {
@@ -235,9 +235,9 @@ retry:
     }
     default: {
         // Trim off the unaligned parts.
-        var pAligned = alignUp(Δp, align);
+        var pAligned = alignUp(p, align);
         var end = pAligned + size;
-        var endLen = (Δp + size + align) - end;
+        var endLen = (p + size + align) - end;
 
         // sysUnreserve does not allow unreserving a subset of the
         // region because LSAN does not allow unregistering a subset.
@@ -246,10 +246,10 @@ retry:
         // region before freeing the unecessary portions, which does
         // allow subsets of the region.
         if (asanenabled) {
-            lsanunregisterrootregion((@unsafe.Pointer)Δp, size + align);
+            lsanunregisterrootregion((@unsafe.Pointer)p, size + align);
             lsanregisterrootregion((@unsafe.Pointer)pAligned, size);
         }
-        sysFreeOS((@unsafe.Pointer)Δp, pAligned - Δp);
+        sysFreeOS((@unsafe.Pointer)p, pAligned - p);
         if (endLen > 0) {
             sysFreeOS((@unsafe.Pointer)end, endLen);
         }

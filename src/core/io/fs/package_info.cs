@@ -68,13 +68,13 @@ using static go.io.fs_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("io/fs/format.go", "format.cs", "AAkiAAgCgoKClIKCgpSClIKCgoKCgpSCgpSClIKCpgACEgAIAoK4gpSCgoKClA==")]
-[assembly: GoPositionMap("io/fs/fs.go", "fs.cs", "ADiAAQAKAoKmlLiCgoKUgoKUgpQAPoYBgoKCgpaCgoKCADRegoKCgoKCgqaCgpSCgoKUlJSqoqqiqJKokgAJFJTWkoI=")]
+[assembly: GoPositionMap("io/fs/fs.go", "fs.cs", "ADmAAQAKAoKmlLiCgoKUgoKUgpQAPoYBgoKCgpaCgoKCADZegoKCgoKCgqaCgpSCgoKUlJSqoqqiqJKokgANFJQACQaSgg==")]
 [assembly: GoPositionMap("io/fs/glob.go", "glob.cs", "ABNCAAwCpraigpSCuIKUgoKUpoKUgriCpoKCgpSCgoKmqJKkpAADEPKCgoKmgoKCgpSCpqqigpSm")]
-[assembly: GoPositionMap("io/fs/readdir.go", "readdir.cs", "ABo6AAgCgqaCgpSkgoKmgoYAChCCpoKmgqaCpoKqooKU", "46-48:1", "", "", "45:21")]
+[assembly: GoPositionMap("io/fs/readdir.go", "readdir.cs", "ABs6AAgCgqaCgpSkgoKmgoYADBCCpoKmgqaCpoLKooKU", "46-48:1", "", "", "46:21")]
 [assembly: GoPositionMap("io/fs/readfile.go", "readfile.cs", "ABhAAAoCgqaCgpSkgoKCgriCgoKClIKCgoKU", "", "", "", "45:21")]
 [assembly: GoPositionMap("io/fs/readlink.go", "readlink.cs", "ABY0soKClAACENKCgpQ=")]
 [assembly: GoPositionMap("io/fs/stat.go", "stat.cs", "ABAo4oKmgoKUkg==", "", "", "", "33:21")]
-[assembly: GoPositionMap("io/fs/sub.go", "sub.cs", "ABJGAA8CgpSClIKUpoKCgoIABhCSgpSokoKUgpSokoKCpuaCgoKUguaCgoKUgqaCgoKUguaCgoKUgoKU5oKCgpSCgpSmlIKUgqaCgoKCgpSU5qKClJKClA==")]
+[assembly: GoPositionMap("io/fs/sub.go", "sub.cs", "ABRGAA8CgpSClIKUpoKCgoIACBCSgpSokoKUgpSokoKCpuaCgoKUguaCgoKUgqaCgoKUguaCgoKUgoKU5oKCgpSCgpSmlIKUgqaCgoKCgpSU5qKClJKClA==")]
 [assembly: GoPositionMap("io/fs/walk.go", "walk.cs", "AA0eygAyaJKClJSmgpSCgoKUuIKCgoKUpgACHgAMAoKClJSClA==")]
 // </GoSourcePositionMaps>
 
@@ -125,3 +125,16 @@ public static partial class fs_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(fs_package.FileMode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fsᴛFileMode;
+[GoMethodHost(typeof(fs_package.PathError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fsᴛPathError;
+[GoMethodHost(typeof(fs_package.dirInfo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fsᴛdirInfo;
+[GoMethodHost(typeof(fs_package.subFS)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fsᴛsubFS;
+// </MethodHolders>

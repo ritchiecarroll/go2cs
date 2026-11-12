@@ -42,7 +42,7 @@ internal static slice<byte> signWithoutSelfTest(ж<PrivateKey> priv, slice<byte>
     return signWithDom(signature, priv, message, domPrefixPure, ""u8);
 }
 
-internal static error verifyWithoutSelfTest(ж<ΔPublicKey> pub, slice<byte> message, slice<byte> sig) {
+internal static error verifyWithoutSelfTest(ж<PublicKey> pub, slice<byte> message, slice<byte> sig) {
     return verifyWithDom(pub, message, sig, domPrefixPure, ""u8);
 }
 

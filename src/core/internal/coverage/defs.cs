@@ -3,6 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal;
 
+using static coverage_package;
+
 partial class coverage_package {
 
 // Types and constants related to the output files written
@@ -205,6 +207,8 @@ public static CounterMode CtrModeAtomic => 3;   // "atomic" mode
 public static CounterMode CtrModeRegOnly => 4;  // registration-only pseudo-mode
 public static CounterMode CtrModeTestMain => 5; // testmain pseudo-mode
 
+} partial class coverageᴛCounterMode {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string setˢ => ref setˢᵇ;
 private static readonly @string setˢᵇ = "set"u8;
@@ -238,6 +242,8 @@ public static @string String(this CounterMode cm) {
     }}
     return invalidˢ;
 }
+
+} partial class coverage_package {
 
 public static CounterMode ParseCounterMode(@string mode) {
     CounterMode cm = default;
@@ -278,11 +284,15 @@ public static CounterGranularity CtrGranularityInvalid => /* iota */ 0;
 public static CounterGranularity CtrGranularityPerBlock => 1;
 public static CounterGranularity CtrGranularityPerFunc => 2;
 
+} partial class coverageᴛCounterGranularity {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string perblockˢ => ref perblockˢᵇ;
 private static readonly @string perblockˢᵇ = "perblock"u8;
 private static ref readonly @string perfuncˢ => ref perfuncˢᵇ;
 private static readonly @string perfuncˢᵇ = "perfunc"u8;
+private static ref readonly @string invalidˢ => ref invalidˢᵇ;
+private static readonly @string invalidˢᵇ = "<invalid>"u8;
 
 public static @string String(this CounterGranularity cm) {
     switch (cm) {
@@ -294,6 +304,8 @@ public static @string String(this CounterGranularity cm) {
     }}
     return invalidˢ;
 }
+
+} partial class coverage_package {
 
 // Name of file within the "go test -cover" temp coverdir directory
 // containing a list of meta-data files for packages being tested

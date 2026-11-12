@@ -7,6 +7,7 @@ using sync = go.sync_package;
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
 using go;
+using static windows_package;
 
 partial class windows_package {
 
@@ -203,7 +204,7 @@ partial struct ModuleEntry32 {
     public uint32 ProccntUsage;
     public uintptr ModBaseAddr;
     public uint32 ModBaseSize;
-    public syscallꓸHandle ModuleHandle;
+    public syscall.Handle ModuleHandle;
     public array<uint16> Module = new(MAX_MODULE_NAME32 + 1);
     public array<uint16> ExePath = new(syscall.MAX_PATH);
 }
@@ -402,7 +403,7 @@ public static UntypedInt SERVICE_QUERY_STATUS => 4;
 //sys    OpenService(mgr syscall.Handle, serviceName *uint16, access uint32) (handle syscall.Handle, err error) = advapi32.OpenServiceW
 //sys	QueryServiceStatus(hService syscall.Handle, lpServiceStatus *SERVICE_STATUS) (err error)  = advapi32.QueryServiceStatus
 //sys    OpenSCManager(machineName *uint16, databaseName *uint16, access uint32) (handle syscall.Handle, err error)  [failretval==0] = advapi32.OpenSCManagerW
-public static (@string, error) FinalPath(syscallꓸHandle h, uint32 flags) {
+public static (@string, error) FinalPath(syscall.Handle h, uint32 flags) {
     var buf = new slice<uint16>(100);
     for (;;) {
         var (n, err) = GetFinalPathNameByHandle(h, Ꮡ(buf, 0), (uint32)len(buf), flags);
@@ -455,15 +456,23 @@ public static UntypedInt PIPE_READMODE_MESSAGE => 0x00000002;
 // other native functions.
 partial struct NTStatus /*num:uint32*/;
 
+} partial class windowsᴛNTStatus {
+
 public static syscall.Errno Errno(this NTStatus s) {
     return rtlNtStatusToDosErrorNoTeb(s);
 }
 
+} partial class windows_package {
+
 internal static uint32 langID(uint16 pri, uint16 sub) { return (uint32)sub << 10 | (uint32)pri; }
+
+} partial class windowsᴛNTStatus {
 
 public static @string Error(this NTStatus s) {
     return s.Errno().Error();
 }
+
+} partial class windows_package {
 
 // x/sys/windows/mkerrors.bash can generate a complete list of NTStatus codes.
 //

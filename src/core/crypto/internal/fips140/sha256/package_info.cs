@@ -61,7 +61,7 @@ using static go.crypto.@internal.fips140.sha256_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/sha256/cast.go", "cast.cs", "AAwagoK43IKCgpQ=", "14-31:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/sha256/sha256.go", "sha256.cs", "AECCAYKmgoKUlIKCgoKCgoKCgoKCAAgGgoKUgpSCgoKCgoKCgoKCgoKmgqaCpoKCpoKCgoKCgoKCgpSCgoKCgoKClIKokoKCqJKCgoKmgoKUppTCgoKCgoKCgpSUgoKCgoKUgpSClKaClIKCgpSmooSSgoKClLiCgoKUgqaUgoKCgoKCgoKm")]
+[assembly: GoPositionMap("crypto/internal/fips140/sha256/sha256.go", "sha256.cs", "AEOCAYKmgoKUlIKCgoKCgoKCgoKCAAgGgoKUgpSCgoKCgoKCgoKCgoLGgqaCxoKCpoKCgoKCgoKCgpSCgoKCgoKClILIkoKCqJKCgoLGgoKUppTCgoKCgoKCgpSUgoKCgoKUgpSClKaClIKCgpSmooSSgoKClLiCgoKUgqaUgoKCgoKCgoKm")]
 [assembly: GoPositionMap("crypto/internal/fips140/sha256/sha256block.go", "sha256block.cs", "AA0aAEKGAYKCgoKUgoKClIKCgoKmlJSCgoKCgoKCpoKCgoKCgoKUpg==")]
 [assembly: GoPositionMap("crypto/internal/fips140/sha256/sha256block_noasm.go", "sha256block_noasm.cs", "AAgSgg==")]
 // </GoSourcePositionMaps>
@@ -95,3 +95,13 @@ public static partial class sha256_package
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(sha256_package.Digest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sha256ᴛDigest;
+// </MethodHolders>

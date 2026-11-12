@@ -60,8 +60,8 @@ using static go.encoding.csv_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/csv/reader.go", "reader.cs", "AEqUAYKClIKUpqiCgqaWlIIAQqQBkgAFHgAMAoKClJQAAhLigpSCrLIABxrygoKClIKUAAMQwoKCgoKClJSCgpSCpoKUgoKUqJKClKiSgqaCgqiSgoKCgoKUgoKUlIKokoKCgoKCgoKCgoKGgoKUgpSUgoKClKaCgoKCpoKCgoKCgpSmgoKCgoKUgoKCtoKCxoKCgoLGgoLGxoKklIKClIKCgoKUgriCgpSCguqCyoKCgpSCgoKCuIKC7oKU", "333-335:1", "", "167=NewReader/1/1/2")]
-[assembly: GoPositionMap("encoding/csv/writer.go", "writer.cs", "ACVOkgAFFMKCpqKCgtyCgpSmgpSUgoK4gpSmgoKUtILGgpS2goK4gqaCgpSUqqKqooKqooKCgqYAAh4ADAKCpoKmgoKCgriCuII=", "", "", "40=NewWriter/1/1/2")]
+[assembly: GoPositionMap("encoding/csv/reader.go", "reader.cs", "AE2UAYKClIKUpsiCgqaWlIIAQqQBkgAHHgAMAoKClJQAAhLigpSCrLIACxrygoKClIKUAAMQwoKCgoKClJSCgpSCpoKUgoKUyJKClKiSgsaCgqiSgoKCgoKUgoKUlIKokoKCgoKCgoKCgoKGgoKUgpSUgoKClKaCgoKCpoKCgoKCgpSmgoKCgoKUgoKCtoKCxoKCgoLGgoLGxoKklIKClIKCgoKUgriCgpSCguqCyoKCgpSCgoKCuIKC7oKU", "333-335:1", "", "172=NewReader/1/1/2")]
+[assembly: GoPositionMap("encoding/csv/writer.go", "writer.cs", "ACZOkgAHFMKCpqKCgtyCgpSmgpSUgoK4gpSmgoKUtILGgpS2goK4gqaCgpSUqqKqooKqooKCgqYAAh4ADAKCpoKmgoKCgriCuII=", "", "", "41=NewWriter/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -99,3 +99,15 @@ public static partial class csv_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(csv_package.ParseError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class csvᴛParseError;
+[GoMethodHost(typeof(csv_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class csvᴛReader;
+[GoMethodHost(typeof(csv_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class csvᴛWriter;
+// </MethodHolders>

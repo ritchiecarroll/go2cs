@@ -42,6 +42,7 @@ using go.@internal;
 using go.@internal.coverage;
 using iter = iter_package;
 using text;
+using static cformat_package;
 
 partial class cformat_package {
 
@@ -88,6 +89,8 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
         cm: cm
     ));
 }
+
+} partial class cformatᴛFormatter {
 
 // SetPackage tells the formatter that we're about to visit the
 // coverage data for the package with the specified import path.
@@ -136,6 +139,8 @@ public static void AddUnit(this ref Formatter fm, @string @file, @string fname, 
     fm.p.unitTable[ukey] = result;
 }
 
+} partial class cformatᴛpstate {
+
 // sortUnits sorts a slice of extcu objects in a package according to
 // source position information (e.g. file and line). Note that we don't
 // include function name as part of the sorting criteria, the thinking
@@ -174,6 +179,8 @@ internal static void sortUnits(this ж<pstate> Ꮡp, slice<extcu> units) {
         return cmp.Compare(ui.NxStmts, uj.NxStmts);
     });
 }
+
+} partial class cformatᴛFormatter {
 
 // EmitTextual writes the accumulated coverage data for 'pkgs' in the legacy
 // cmd/cover text format to the writer 'w'; if pkgs is empty, text output
@@ -405,4 +412,4 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
     finally { ᒐ.Run(); }
 }
 
-} // end cformat_package
+} // end cformatᴛFormatter

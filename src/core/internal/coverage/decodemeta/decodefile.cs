@@ -22,6 +22,7 @@ using go.@internal;
 using go.@internal.coverage;
 using hash;
 using hash = hash_package;
+using static decodemeta_package;
 
 partial class decodemeta_package {
 
@@ -57,6 +58,8 @@ public static (ж<CoverageMetaFileReader>, error) NewCoverageMetaFileReader(ж<o
     }
     return (r, default);
 }
+
+} partial class decodemetaᴛCoverageMetaFileReader {
 
 internal static error readFileHeader(this ж<CoverageMetaFileReader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
@@ -232,4 +235,4 @@ public static (slice<byte>, error) GetPackagePayload(this ref CoverageMetaFileRe
     return (payload, default);
 }
 
-} // end decodemeta_package
+} // end decodemetaᴛCoverageMetaFileReader

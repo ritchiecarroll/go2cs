@@ -12,6 +12,7 @@ using @internal;
 using @internal.runtime;
 using @internal.trace;
 using atomic = @internal.runtime.atomic_package;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -153,6 +154,8 @@ partial struct traceStackTable {
     internal traceMap tab;
 }
 
+} partial class runtimeᴛtraceStackTable {
+
 // put returns a unique id for the stack trace pcs and caches it in the table,
 // if it sees the trace for the first time.
 internal static uint64 put(this ж<traceStackTable> Ꮡt, slice<uintptr> pcs) {
@@ -178,14 +181,16 @@ internal static void dump(this ж<traceStackTable> Ꮡt, uintptr gen) {
     Ꮡt.Ꮡtab.reset();
 }
 
+} partial class runtime_package {
+
 internal static traceWriter dumpStacksRec(ж<traceMapNode> Ꮡnode, traceWriter w, slice<uintptr> stackBuf) {
     ref var node = ref Ꮡnode.DerefOrNull();
 
-    var Δstack = @unsafe.Slice(Ꮡ(node.data, 0).Reinterpret<byte, uintptr>(), (uintptr)len(node.data) / /* unsafe.Sizeof(uintptr(0)) */ (uintptr)8);
+    var stack = @unsafe.Slice(Ꮡ(node.data, 0).Reinterpret<byte, uintptr>(), (uintptr)len(node.data) / /* unsafe.Sizeof(uintptr(0)) */ (uintptr)8);
 
     // N.B. This might allocate, but that's OK because we're not writing to the M's buffer,
     // but one we're about to create (with ensure).
-    nint n = fpunwindExpand(stackBuf, Δstack);
+    nint n = fpunwindExpand(stackBuf, stack);
     var frames = makeTraceFrames(w.gen, stackBuf.slice(0, n));
 
     // The maximum number of bytes required to hold the encoded stack, given that
@@ -256,13 +261,13 @@ internal static traceFrame makeTraceFrame(uintptr gen, Frame f) {
     if (len(fn) > maxLen) {
         fn = fn.slice(len(fn) - maxLen);
     }
-    frame.funcID = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, fn);
+    frame.funcID = Ꮡtrace.at(traceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, fn);
     frame.line = (uint64)f.Line;
     @string @file = f.File;
     if (len(@file) > maxLen) {
         @file = @file.slice(len(@file) - maxLen);
     }
-    frame.fileID = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, @file);
+    frame.fileID = Ꮡtrace.at(traceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, @file);
     return frame;
 }
 

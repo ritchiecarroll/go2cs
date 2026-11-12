@@ -21,6 +21,7 @@ using crypto;
 using go.net;
 using go.net.http.@internal;
 using io = io_package;
+using static httptest_package;
 
 partial class httptest_package {
 
@@ -105,7 +106,7 @@ internal static bool strSliceContainsPrefix(slice<@string> v, @string pre) {
 
 // NewServer starts and returns a new [Server].
 // The caller should call Close when finished, to shut it down.
-public static ж<Server> NewServer(httpꓸHandler handler) {
+public static ж<Server> NewServer(http.Handler handler) {
     var ts = NewUnstartedServer(handler);
     ts.Start();
     return ts;
@@ -117,12 +118,14 @@ public static ж<Server> NewServer(httpꓸHandler handler) {
 // StartTLS.
 //
 // The caller should call Close when finished, to shut it down.
-public static ж<Server> NewUnstartedServer(httpꓸHandler handler) {
+public static ж<Server> NewUnstartedServer(http.Handler handler) {
     return Ꮡ(new Server(
         Listener: newLocalListener(),
         Config: Ꮡ(new http.Server(Handler: handler))
     ));
 }
+
+} partial class httptestᴛServer {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string exampleCom80ˢ => ref exampleCom80ˢᵇ;
@@ -229,9 +232,11 @@ public static void StartTLS(this ж<Server> Ꮡs) {
     Ꮡs.goServe();
 }
 
+} partial class httptest_package {
+
 // NewTLSServer starts and returns a new [Server] using TLS.
 // The caller should call Close when finished, to shut it down.
-public static ж<Server> NewTLSServer(httpꓸHandler handler) {
+public static ж<Server> NewTLSServer(http.Handler handler) {
     var ts = NewUnstartedServer(handler);
     ts.StartTLS();
     return ts;
@@ -240,6 +245,8 @@ public static ж<Server> NewTLSServer(httpꓸHandler handler) {
 partial interface closeIdleTransport {
     void CloseIdleConnections();
 }
+
+} partial class httptestᴛServer {
 
 // Close shuts down the server and blocks until all outstanding
 // requests on this server have completed.
@@ -491,4 +498,4 @@ internal static void closeConnChan(this ref Server s, net.Conn c, channel/*<-*/<
     }
 }
 
-} // end httptest_package
+} // end httptestᴛServer

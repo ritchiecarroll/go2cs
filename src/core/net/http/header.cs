@@ -16,6 +16,7 @@ using go.net;
 using go.net.http;
 using go.net.http.@internal;
 using vendor.golang.org.x.net.http;
+using static http_package;
 
 partial class http_package {
 
@@ -23,13 +24,15 @@ partial class http_package {
 //
 // The keys should be in canonical form, as returned by
 // [CanonicalHeaderKey].
-partial struct ΔHeader /*map[@string, slice<@string>]*/;
+partial struct Header /*map[@string, slice<@string>]*/;
+
+} partial class httpᴛHeader {
 
 // Add adds the key, value pair to the header.
 // It appends to any existing values associated with key.
 // The key is case insensitive; it is canonicalized by
 // [CanonicalHeaderKey].
-public static void Add(this ΔHeader h, @string key, @string value) {
+public static void Add(this Header h, @string key, @string value) {
     ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Add(key, value);
 }
 
@@ -38,7 +41,7 @@ public static void Add(this ΔHeader h, @string key, @string value) {
 // associated with key. The key is case insensitive; it is
 // canonicalized by [textproto.CanonicalMIMEHeaderKey].
 // To use non-canonical keys, assign to the map directly.
-public static void Set(this ΔHeader h, @string key, @string value) {
+public static void Set(this Header h, @string key, @string value) {
     ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Set(key, value);
 }
 
@@ -48,7 +51,7 @@ public static void Set(this ΔHeader h, @string key, @string value) {
 // used to canonicalize the provided key. Get assumes that all
 // keys are stored in canonical form. To use non-canonical keys,
 // access the map directly.
-public static @string Get(this ΔHeader h, @string key) {
+public static @string Get(this Header h, @string key) {
     return ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Get(key);
 }
 
@@ -57,13 +60,13 @@ public static @string Get(this ΔHeader h, @string key) {
 // used to canonicalize the provided key. To use non-canonical
 // keys, access the map directly.
 // The returned slice is not a copy.
-public static slice<@string> Values(this ΔHeader h, @string key) {
+public static slice<@string> Values(this Header h, @string key) {
     return ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Values(key);
 }
 
 // get is like Get, but key must already be in CanonicalHeaderKey form.
-internal static @string get(this ΔHeader h, @string key) {
-    var v = h[key]; if (builtin.len(v) > 0) {
+internal static @string get(this Header h, @string key) {
+    var v = h[key]; if (len(v) > 0) {
         return v[0];
     }
     return ""u8;
@@ -71,7 +74,7 @@ internal static @string get(this ΔHeader h, @string key) {
 
 // has reports whether h has the provided key defined, even if it's
 // set to 0-length slice.
-internal static bool has(this ΔHeader h, @string key) {
+internal static bool has(this Header h, @string key) {
     var (_, ok) = h[key, ꟷ];
     return ok;
 }
@@ -79,21 +82,21 @@ internal static bool has(this ΔHeader h, @string key) {
 // Del deletes the values associated with key.
 // The key is case insensitive; it is canonicalized by
 // [CanonicalHeaderKey].
-public static void Del(this ΔHeader h, @string key) {
+public static void Del(this Header h, @string key) {
     ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Del(key);
 }
 
 // Write writes a header in wire format.
-public static error Write(this ΔHeader h, io.Writer w) {
+public static error Write(this Header h, io.Writer w) {
     return h.write(w, nil);
 }
 
-internal static error write(this ΔHeader h, io.Writer w, ж<httptrace.ClientTrace> trace) {
+internal static error write(this Header h, io.Writer w, ж<httptrace.ClientTrace> trace) {
     return h.writeSubset(w, default, trace);
 }
 
 // Clone returns a copy of h or nil if h is nil.
-public static ΔHeader Clone(this ΔHeader h) {
+public static Header Clone(this Header h) {
     if (h == nil) {
         return default;
     }
@@ -101,10 +104,10 @@ public static ΔHeader Clone(this ΔHeader h) {
     // Find total number of values.
     nint nv = 0;
     foreach (var (_, vv) in h) {
-        nv += builtin.len(vv);
+        nv += len(vv);
     }
     var sv = new slice<@string>(nv); // shared backing array for headers' values
-    var h2 = new ΔHeader(builtin.len(h));
+    var h2 = new Header(len(h));
     foreach (var (k, vv) in h) {
         if (vv == nil) {
             // Preserve nil values. ReverseProxy distinguishes
@@ -118,6 +121,8 @@ public static ΔHeader Clone(this ΔHeader h) {
     }
     return h2;
 }
+
+} partial class http_package {
 
 internal static slice<@string> timeFormats;
 internal static void initᴛtimeFormats() { timeFormats = [
@@ -149,9 +154,13 @@ partial struct stringWriter {
     internal io.Writer w;
 }
 
+} partial class httpᴛstringWriter {
+
 internal static (nint n, error err) WriteString(this stringWriter w, @string s) {
     return w.w.Write(slice<byte>(s));
 }
+
+} partial class http_package {
 
 partial struct keyValues {
     internal @string key;
@@ -168,16 +177,18 @@ internal static readonly ж<sync.Pool> ᏑheaderSorterPool = new StaticBox<sync.
 ));
 internal static ref sync.Pool headerSorterPool => ref ((StaticBox<sync.Pool>)ᏑheaderSorterPool).ValueSlot;
 
+} partial class httpᴛHeader {
+
 // sortedKeyValues returns h's keys sorted in the returned kvs
 // slice. The headerSorter used to sort is also returned, for possible
 // return to headerSorterCache.
-internal static (slice<keyValues> kvs, ж<headerSorter> hs) sortedKeyValues(this ΔHeader h, map<@string, bool> exclude) {
+internal static (slice<keyValues> kvs, ж<headerSorter> hs) sortedKeyValues(this Header h, map<@string, bool> exclude) {
     slice<keyValues> kvs = default;
     ж<headerSorter> hs = default;
 
     hs = ᏑheaderSorterPool.Get()._<ж<headerSorter>>();
-    if (cap(hs.kvs) < builtin.len(h)) {
-        hs.kvs = new slice<keyValues>(0, builtin.len(h));
+    if (cap(hs.kvs) < len(h)) {
+        hs.kvs = new slice<keyValues>(0, len(h));
     }
     kvs = hs.kvs[..0];
     foreach (var (k, vv) in h) {
@@ -193,11 +204,11 @@ internal static (slice<keyValues> kvs, ж<headerSorter> hs) sortedKeyValues(this
 // WriteSubset writes a header in wire format.
 // If exclude is not nil, keys where exclude[key] == true are not written.
 // Keys are not canonicalized before checking the exclude map.
-public static error WriteSubset(this ΔHeader h, io.Writer w, map<@string, bool> exclude) {
+public static error WriteSubset(this Header h, io.Writer w, map<@string, bool> exclude) {
     return h.writeSubset(w, exclude, nil);
 }
 
-internal static error writeSubset(this ΔHeader h, io.Writer w, map<@string, bool> exclude, ж<httptrace.ClientTrace> Ꮡtrace) {
+internal static error writeSubset(this Header h, io.Writer w, map<@string, bool> exclude, ж<httptrace.ClientTrace> Ꮡtrace) {
     ref var trace = ref Ꮡtrace.DerefOrNull();
 
     var (ws, ok) = w._<io.StringWriter>(ᐧ);
@@ -238,6 +249,8 @@ internal static error writeSubset(this ΔHeader h, io.Writer w, map<@string, boo
     return default;
 }
 
+} partial class http_package {
+
 // CanonicalHeaderKey returns the canonical format of the
 // header key s. The canonicalization converts the first
 // letter and any letter following a hyphen to upper case;
@@ -252,13 +265,13 @@ public static @string CanonicalHeaderKey(@string s) { return textproto.Canonical
 // token must be all lowercase.
 // v may contain mixed cased.
 internal static bool hasToken(@string v, @string token) {
-    if (builtin.len(token) > builtin.len(v) || token == ""u8) {
+    if (len(token) > len(v) || token == ""u8) {
         return false;
     }
     if (v == token) {
         return true;
     }
-    for (nint sp = 0; sp <= builtin.len(v) - builtin.len(token); sp++) {
+    for (nint sp = 0; sp <= len(v) - len(token); sp++) {
         // Check that first character is good.
         // The token is ASCII, so checking only a single byte
         // is sufficient. We skip this potential starting
@@ -273,10 +286,10 @@ internal static bool hasToken(@string v, @string token) {
             continue;
         }
         // Check that end pos is on a valid token boundary.
-        nint endPos = sp + builtin.len(token); if (endPos != builtin.len(v) && !isTokenBoundary(v[endPos])) {
+        nint endPos = sp + len(token); if (endPos != len(v) && !isTokenBoundary(v[endPos])) {
             continue;
         }
-        if (ascii.EqualFold(v.slice(sp, sp + builtin.len(token)), token)) {
+        if (ascii.EqualFold(v.slice(sp, sp + len(token)), token)) {
             return true;
         }
     }

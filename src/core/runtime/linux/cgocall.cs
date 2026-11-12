@@ -95,7 +95,7 @@ partial class runtime_package {
 
 // Addresses collected in a cgo backtrace when crashing.
 // Length must match arg.Max in x_cgo_callers in runtime/cgo/gcc_traceback.c.
-partial struct ΔcgoCallers /*[32]uintptr*/;
+partial struct cgoCallers /*[32]uintptr*/;
 
 // argset matches runtime/cgo/linux_syscall.c:argset_t
 partial struct argset {
@@ -424,14 +424,14 @@ internal static void cgocallbackg1(@unsafe.Pointer fn, @unsafe.Pointer frame, ui
             // tracing up the stack. We need to ensure that the
             // handler always sees a valid slice, so set the
             // values in an order such that it always does.
-            var Δp = gp.of(g.ᏑcgoCtxt).Reinterpret<slice<uintptr>, Δsliceᴛ>();
-            atomicstorep(@unsafe.Pointer.FromBox(Δp.of(runtime_package.Δsliceᴛ.ᏑΔarray)), @unsafe.Pointer.FromBox(Ꮡ(s, 0)));
-            Δp.cap = cap(s);
-            Δp.len = len(s);
+            var p = gp.of(g.ᏑcgoCtxt).Reinterpret<slice<uintptr>, Δslice>();
+            atomicstorep(@unsafe.Pointer.FromBox(p.of(runtime_package.Δslice.ᏑΔarray)), @unsafe.Pointer.FromBox(Ꮡ(s, 0)));
+            p.cap = cap(s);
+            p.len = len(s);
 
             defer((ж<g> gpΔ1) => {
                 // Decrease the length of the slice by one, safely.
-                var pΔ1 = gpΔ1.of(g.ᏑcgoCtxt).Reinterpret<slice<uintptr>, Δsliceᴛ>();
+                var pΔ1 = gpΔ1.of(g.ᏑcgoCtxt).Reinterpret<slice<uintptr>, Δslice>();
                 pΔ1.len--;
             }, gp, ref ᒐ);
         }
@@ -599,10 +599,10 @@ private static readonly @string canTHappenˢᵇ = "can't happen"u8;
 // itself, depending on indir. The top parameter is whether we are at the top
 // level, where Go pointers are allowed. Go pointers to pinned objects are
 // allowed as long as they don't reference other unpinned pointers.
-internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir, bool top, cgoErrorMsg msg) {
+internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer p, bool indir, bool top, cgoErrorMsg msg) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    if (!t.Pointers() || Δp == nil) {
+    if (!t.Pointers() || p == nil) {
         // If the type has no pointers there is nothing to do.
         return;
     }
@@ -618,12 +618,12 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
             if (at.of(arraytype.ᏑLen).Value != 1) {
                 @throw(canTHappenˢ);
             }
-            cgoCheckArg(at.of(arraytype.ᏑElem).Value, Δp, !at.of(arraytype.ᏑElem).Value.IsDirectIface(), top, msg);
+            cgoCheckArg(at.of(arraytype.ᏑElem).Value, p, !at.of(arraytype.ᏑElem).Value.IsDirectIface(), top, msg);
             return;
         }
         for (var i = (uintptr)0; i < at.of(arraytype.ᏑLen).Value; i++) {
-            cgoCheckArg(at.of(arraytype.ᏑElem).Value, Δp, true, top, msg);
-            Δp = (uintptr)add(Δp, at.of(arraytype.ᏑElem).Value.Size_);
+            cgoCheckArg(at.of(arraytype.ᏑElem).Value, p, true, top, msg);
+            p = (uintptr)add(p, at.of(arraytype.ᏑElem).Value.Size_);
         }
         break;
     }
@@ -636,16 +636,16 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
     }
     case var ᴛ when ᴛ == abi.Func: {
         if (indir) {
-            Δp = ~(ж<@unsafe.Pointer>)(uintptr)(Δp);
+            p = ~(ж<@unsafe.Pointer>)(uintptr)(p);
         }
-        if (!cgoIsGoPointer(Δp)) {
+        if (!cgoIsGoPointer(p)) {
             return;
         }
         throw panic(cgoFormatErr(msg, t.Kind()));
         break;
     }
     case var ᴛ when ᴛ == abi.Interface: {
-        var it = ~(ж<ж<_type>>)(uintptr)(Δp);
+        var it = ~(ж<ж<_type>>)(uintptr)(p);
         if (it == nil) {
             return;
         }
@@ -655,37 +655,37 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
         if (inheap((uintptr)it)) {
             throw panic(cgoFormatErr(msg, t.Kind()));
         }
-        Δp = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)add(Δp, goarch.PtrSize));
-        if (!cgoIsGoPointer(Δp)) {
+        p = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)add(p, goarch.PtrSize));
+        if (!cgoIsGoPointer(p)) {
             return;
         }
-        if (!top && !isPinned(Δp)) {
+        if (!top && !isPinned(p)) {
             throw panic(cgoFormatErr(msg, t.Kind()));
         }
-        cgoCheckArg(it, Δp, !it.IsDirectIface(), false, msg);
+        cgoCheckArg(it, p, !it.IsDirectIface(), false, msg);
         break;
     }
     case var ᴛ when ᴛ == abi.Slice: {
         var st = Ꮡt.Reinterpret<_type, slicetype>();
-        var s = (ж<Δsliceᴛ>)(uintptr)(Δp);
-        Δp = s.Δarray;
-        if (Δp == nil || !cgoIsGoPointer(Δp)) {
+        var s = (ж<Δslice>)(uintptr)(p);
+        p = s.Δarray;
+        if (p == nil || !cgoIsGoPointer(p)) {
             return;
         }
-        if (!top && !isPinned(Δp)) {
+        if (!top && !isPinned(p)) {
             throw panic(cgoFormatErr(msg, t.Kind()));
         }
         if (!st.of(slicetype.ᏑElem).Value.Pointers()) {
             return;
         }
         for (nint i = 0; i < s.cap; i++) {
-            cgoCheckArg(st.of(slicetype.ᏑElem).Value, Δp, true, false, msg);
-            Δp = (uintptr)add(Δp, st.of(slicetype.ᏑElem).Value.Size_);
+            cgoCheckArg(st.of(slicetype.ᏑElem).Value, p, true, false, msg);
+            p = (uintptr)add(p, st.of(slicetype.ᏑElem).Value.Size_);
         }
         break;
     }
-    case var ᴛ when ᴛ == abi.ΔString: {
-        var ss = (ж<stringStruct>)(uintptr)(Δp);
+    case var ᴛ when ᴛ == abi.String: {
+        var ss = (ж<stringStruct>)(uintptr)(p);
         if (!cgoIsGoPointer(ss.str)) {
             return;
         }
@@ -700,33 +700,33 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
             if (len(st.Fields) != 1) {
                 @throw(canTHappenˢ);
             }
-            cgoCheckArg(st.Fields[0].Typ, Δp, !st.Fields[0].Typ.IsDirectIface(), top, msg);
+            cgoCheckArg(st.Fields[0].Typ, p, !st.Fields[0].Typ.IsDirectIface(), top, msg);
             return;
         }
         foreach (var (_, f) in range(st.Fields)) {
             if (!f.Typ.Pointers()) {
                 continue;
             }
-            cgoCheckArg(f.Typ, (uintptr)add(Δp, f.Offset), true, top, msg);
+            cgoCheckArg(f.Typ, (uintptr)add(p, f.Offset), true, top, msg);
         }
         break;
     }
     case var ᴛ when ᴛ == abi.Pointer || ᴛ == abi.UnsafePointer: {
         if (indir) {
-            Δp = ~(ж<@unsafe.Pointer>)(uintptr)(Δp);
-            if (Δp == nil) {
+            p = ~(ж<@unsafe.Pointer>)(uintptr)(p);
+            if (p == nil) {
                 return;
             }
         }
 
-        if (!cgoIsGoPointer(Δp)) {
+        if (!cgoIsGoPointer(p)) {
             return;
         }
-        if (!top && !isPinned(Δp)) {
+        if (!top && !isPinned(p)) {
             throw panic(cgoFormatErr(msg, t.Kind()));
         }
 
-        cgoCheckUnknownPointer(Δp, msg);
+        cgoCheckUnknownPointer(p, msg);
         break;
     }}
 }
@@ -735,12 +735,12 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
 // memory. It checks whether that Go memory contains any other
 // pointer into unpinned Go memory. If it does, we panic.
 // The return values are unused but useful to see in panic tracebacks.
-internal static (uintptr @base, uintptr i) cgoCheckUnknownPointer(@unsafe.Pointer Δp, cgoErrorMsg msg) {
+internal static (uintptr @base, uintptr i) cgoCheckUnknownPointer(@unsafe.Pointer p, cgoErrorMsg msg) {
     uintptr @base = default;
     uintptr i = default;
 
-    if (inheap((uintptr)Δp)) {
-        var (b, span, _) = findObject((uintptr)Δp, 0, 0);
+    if (inheap((uintptr)p)) {
+        var (b, span, _) = findObject((uintptr)p, 0, 0);
         @base = b;
         if (@base == 0) {
             return (@base, i);
@@ -760,7 +760,7 @@ internal static (uintptr @base, uintptr i) cgoCheckUnknownPointer(@unsafe.Pointe
     }
 
     foreach (var (_, datap) in range(activeModules())) {
-        if (cgoInRange(Δp, datap.data, datap.edata) || cgoInRange(Δp, datap.bss, datap.ebss)) {
+        if (cgoInRange(p, datap.data, datap.edata) || cgoInRange(p, datap.bss, datap.ebss)) {
             // We have no way to know the size of the object.
             // We have to assume that it might contain a pointer.
             throw panic(cgoFormatErr(msg, abi.Pointer));
@@ -778,17 +778,17 @@ internal static (uintptr @base, uintptr i) cgoCheckUnknownPointer(@unsafe.Pointe
 //
 //go:nosplit
 //go:nowritebarrierrec
-internal static bool cgoIsGoPointer(@unsafe.Pointer Δp) {
-    if (Δp == nil) {
+internal static bool cgoIsGoPointer(@unsafe.Pointer p) {
+    if (p == nil) {
         return false;
     }
 
-    if (inHeapOrStack((uintptr)Δp)) {
+    if (inHeapOrStack((uintptr)p)) {
         return true;
     }
 
     foreach (var (_, datap) in range(activeModules())) {
-        if (cgoInRange(Δp, datap.data, datap.edata) || cgoInRange(Δp, datap.bss, datap.ebss)) {
+        if (cgoInRange(p, datap.data, datap.edata) || cgoInRange(p, datap.bss, datap.ebss)) {
             return true;
         }
     }
@@ -800,8 +800,8 @@ internal static bool cgoIsGoPointer(@unsafe.Pointer Δp) {
 //
 //go:nosplit
 //go:nowritebarrierrec
-internal static bool cgoInRange(@unsafe.Pointer Δp, uintptr start, uintptr end) {
-    return start <= (uintptr)Δp && (uintptr)Δp < end;
+internal static bool cgoInRange(@unsafe.Pointer p, uintptr start, uintptr end) {
+    return start <= (uintptr)p && (uintptr)p < end;
 }
 
 // cgoCheckResult is called to check the result parameter of an
@@ -846,7 +846,7 @@ private static readonly @string unsafePointerˢᵇ = "unsafe pointer"u8;
 
 // cgoFormatErr is called by cgoCheckArg and cgoCheckUnknownPointer
 // to format panic error messages.
-internal static errorString cgoFormatErr(cgoErrorMsg error, abiꓸKind kind) {
+internal static errorString cgoFormatErr(cgoErrorMsg error, abi.Kind kind) {
     @string msg = default;
     @string kindname = default;
     @string cgoFunction = unknownˢ;
@@ -879,7 +879,7 @@ internal static errorString cgoFormatErr(cgoErrorMsg error, abiꓸKind kind) {
         kindname = sliceˢ;
         break;
     }
-    case var ᴛ when ᴛ == abi.ΔString: {
+    case var ᴛ when ᴛ == abi.String: {
         kindname = stringˢ;
         break;
     }

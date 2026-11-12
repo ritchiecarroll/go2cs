@@ -66,11 +66,11 @@ using static go.math.rand_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("math/rand/exp.go", "exp.cs", "ABI88oKCgoKClIKUgsoANWwAQYQB")]
-[assembly: GoPositionMap("math/rand/normal.go", "normal.cs", "ABIugoKUAAIU8oKCgoKUppSCgoKCpoKUlILKABs4ACFE")]
-[assembly: GoPositionMap("math/rand/rand.go", "rand.cs", "ADFmwqaCgoIAECiigqrCgoKmgqiAloCWkoKUqICWkoKqooKUgpSCgoKUqqKClIKUgoKClAACGAAJAoKCgoKCgoKCpqqigpSClKgAESKCgoKUqMiCgoKUqqLcgoKClKyyggAIEoKCgpSCgr7SlKSUprKCgoKCgoKUlJSCgpSCggANGqaYooKokoKCgpTc7qaoAAkSgqaCpoKmwoKCggACLAATAoKUlKaCgoIAChaClJS8kJiQmJCYkJaAmqCaoJqgmJCYkJiQmqAAARDQAAEU8AABEuDusoKCgqaygoKCpqKCgqjCgoKCqqKClLrSgoKC")]
-[assembly: GoPositionMap("math/rand/rng.go", "rng.cs", "ABQwAKABxgKSvIKCgoKUqJKClIKClIKmgoKCgoKCgoKCgoLMkqiSgoKmgoKmgoI=")]
-[assembly: GoPositionMap("math/rand/zipf.go", "zipf.cs", "ABo2gqaCruKCgpSCgoKCgoKCgoKqwoKUlIKCgoKCgpSCpg==")]
+[assembly: GoPositionMap("math/rand/exp.go", "exp.cs", "ABU88oKCgoKClIKUguoANWwAQYQB")]
+[assembly: GoPositionMap("math/rand/normal.go", "normal.cs", "ABMugoKUAAQU8oKCgoKUppSCgoKCpoKUlILqABs4ACFE")]
+[assembly: GoPositionMap("math/rand/rand.go", "rand.cs", "ADNmwqaCgoIAECiigsrCgoKmgqiAloCWkoKUqICWkoKqooKUgpSCgoKUqqKClIKUgoKClAACGAAJAoKCgoKCgoKCpqqigpSClKgAESKCgoKUqMiCgoKUqqLcgoKClKyyggAIEoKCgpSCgr7SlKSUxrKCgoKCgoKUlJSCgpSCggANGqaYooKokoKCgpTc7qaoAAsSgqaCpoKmwoKCggAELAATAoKUlKaCgoIAChaClJS8kJiQmJCYkJaAmqCaoJqgmJCYkJiQmqAAARDQAAEU8AABEuAACA6ygoKCprKCgoKmooKCqMKCgoKqooKUutKCgoI=")]
+[assembly: GoPositionMap("math/rand/rng.go", "rng.cs", "ABYwAKABxgKSvIKCgoKUyJKClIKClIKmgoKCgoKCgoKCgoLMkqiSgoKmgoKmgoI=")]
+[assembly: GoPositionMap("math/rand/zipf.go", "zipf.cs", "AB02gqaCzuKCgpSCgoKCgoKCgoLKwoKUlIKCgoKCgpSCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.math;
@@ -107,3 +107,17 @@ public static partial class rand_package
     [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(go.sync.atomic_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(rand_package.Rand)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class randᴛRand;
+[GoMethodHost(typeof(rand_package.Zipf)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class randᴛZipf;
+[GoMethodHost(typeof(rand_package.lockedSource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class randᴛlockedSource;
+[GoMethodHost(typeof(rand_package.rngSource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class randᴛrngSource;
+[GoMethodHost(typeof(rand_package.runtimeSource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class randᴛruntimeSource;
+// </MethodHolders>

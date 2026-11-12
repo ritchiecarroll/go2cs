@@ -27,7 +27,6 @@ using static go.text.scanner_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("String", "const:ΔString")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -60,7 +59,7 @@ using static go.text.scanner_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("text/scanner/scanner.go", "scanner.cs", "ACRIgNSCgoKUgpQAJ1gAChiSgpQAPZYB0riCgqaCgoKCuKamgoKCgpQACA7ipJSmgoK4gtyCgoKCgoKClIKUlILcuIKUgpSCgoKC3IKCpqa0goK2AAISAAgCgoKCgpSs0pSCgqamooKCgoKUgoKUpqKmgoKUprSCgpSmgoIAARAACgKCgoKCgoKCgpSCpoKCgpSCpgAKBqKCgoKWkoKCgoKClIK0grSCtIK2goKCgsqCgoKUgqaCuIKUtKSCgoKUgoKClIKmgqaCgoK4AAwGgpSkpKS6koKCpoKCgoLKgoKClILGtIKUtoKmpoKUpJTmgoKClIKUpoKCprS0tLS0pOaigoKCgpSClJSUpoKCgoKClPiCgviUlIKClLiCgoKClIKCgoKmAAIQ8qaClISS2IK4gpSCyoK4gpSCgpTGgpTGlLSCgpS0goKUtIKCxoKCgoKClILGgoKUtOqUgq7igoKmgsaCxoKkqsKUppS4lMqCgg==")]
+[assembly: GoPositionMap("text/scanner/scanner.go", "scanner.cs", "ACdIgNSCgoKUgpQAKVgAChiSgpQAP5YB0riCgqaCgoKCuKamgoKCgpQACA7ipJSmgoK4gtyCgoKCgoKClIKUlILcuIKUgpSCgoKC3IKCpqa0goK2AAISAAgCgoKCgpSs0pSCgqamooKCgoKUgoKUpqKmgoKUprSCgpTGgoIAAxAACgKCgoKCgoKCgpSCpoKCgpSCpgAKBqKCgoKWkoKCgoKClIK0grSCtIK2goKCgsqCgoKUgqaCuIKUtKSCgoKUgoKClIKmgqaCgoK4AA4GgpSkpKS6koKCpoKCgoLKgoKClILGtIKUtoKmpoKUpJQACAaCgoKUgpSmgoKmtLS0tLSk5qKCgoKClIKUlJSmgoKCgoKU+IKC+JSUgoKUuIKCgoKUgoKCgqYAAhDypoKUhJLYgriClILKgriClIKClMaClMaUtIKClLSCgpS0goLGgoKCgoKUgsaCgpS06pSCruKCgqaCxoLGgqSqwpSmlLiUyoKC")]
 // </GoSourcePositionMaps>
 
 namespace go.text;
@@ -94,3 +93,14 @@ public static partial class scanner_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(scanner_package.Position)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class scannerᴛPosition;
+[GoMethodHost(typeof(scanner_package.Scanner)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class scannerᴛScanner;
+// </MethodHolders>

@@ -16,6 +16,7 @@ using utf8 = go.unicode.utf8_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using go.database.sql;
 using go.unicode;
+using static sql_package;
 
 partial class sql_package {
 
@@ -46,6 +47,8 @@ partial struct ccChecker {
     internal driver.ColumnConverter cci;
     internal nint want;
 }
+
+} partial class sqlᴛccChecker {
 
 internal static error CheckNamedValue(this ccChecker c, ж<driver.NamedValue> Ꮡnv) {
     ref var nv = ref Ꮡnv.DerefOrNull();
@@ -93,6 +96,8 @@ internal static error CheckNamedValue(this ccChecker c, ж<driver.NamedValue> �
     }
     return default;
 }
+
+} partial class sql_package {
 
 // defaultCheckNamedValue wraps the default ColumnConverter to have the same
 // function signature as the CheckNamedValue in the driver.NamedValueChecker
@@ -407,13 +412,13 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
         break;
     }}
 
-    reflectꓸValue sv = new(nil);
+    reflect.Value sv = new(nil);
 
     switch (dest.type()) {
     case ж<@string> d: {
         sv = reflect.ValueOf(src);
         switch (sv.Kind()) {
-        case var ᴛ when ᴛ == reflect.ΔBool || ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
+        case var ᴛ when ᴛ == reflect.Bool || ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
             d.Value = asString(src);
             return default;
         }}
@@ -456,7 +461,7 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
     }
 
     var dpv = reflect.ValueOf(dest);
-    if (dpv.Kind() != reflect.ΔPointer) {
+    if (dpv.Kind() != reflect.Pointer) {
         return errors.New(destinationNotAPointerˢ);
     }
     if (dpv.IsNil()) {
@@ -493,7 +498,7 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
     // This also allows scanning into user defined types such as "type Int int64".
     // For symmetry, also check for string destination types.
     switch (dv.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔPointer: {
+    case var ᴛ when ᴛ == reflect.Pointer: {
         if (src == nil) {
             dv.SetZero();
             return default;
@@ -501,7 +506,7 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
         dv.Set(reflect.New(dv.Type().Elem()));
         return convertAssignRows(dv.Interface(), src, Ꮡrows);
     }
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         if (src == nil) {
             return fmt.Errorf("converting NULL to %s is unsupported"u8, dv.Kind());
         }
@@ -514,7 +519,7 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
         dv.SetInt(i64);
         return default;
     }
-    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64: {
+    case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64: {
         if (src == nil) {
             return fmt.Errorf("converting NULL to %s is unsupported"u8, dv.Kind());
         }
@@ -540,7 +545,7 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
         dv.SetFloat(f64);
         return default;
     }
-    case var ᴛ when ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.String: {
         if (src == nil) {
             return fmt.Errorf("converting NULL to %s is unsupported"u8, dv.Kind());
         }
@@ -576,10 +581,10 @@ internal static @string asString(any src) {
     }}
     var rv = reflect.ValueOf(src);
     switch (rv.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return strconv.FormatInt(rv.Int(), 10);
     }
-    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64: {
+    case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64: {
         return strconv.FormatUint(rv.Uint(), 10);
     }
     case var ᴛ when ᴛ == reflect.Float64: {
@@ -588,21 +593,21 @@ internal static @string asString(any src) {
     case var ᴛ when ᴛ == reflect.Float32: {
         return strconv.FormatFloat(rv.Float(), (byte)'g', -1, 32);
     }
-    case var ᴛ when ᴛ == reflect.ΔBool: {
+    case var ᴛ when ᴛ == reflect.Bool: {
         return strconv.FormatBool(rv.Bool());
     }}
     return fmt.Sprintf("%v"u8, src);
 }
 
-internal static (slice<byte> b, bool ok) asBytes(slice<byte> buf, reflectꓸValue rv) {
+internal static (slice<byte> b, bool ok) asBytes(slice<byte> buf, reflect.Value rv) {
     slice<byte> b = default;
     bool ok = default;
 
     switch (rv.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return (strconv.AppendInt(buf, rv.Int(), 10), true);
     }
-    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64: {
+    case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64: {
         return (strconv.AppendUint(buf, rv.Uint(), 10), true);
     }
     case var ᴛ when ᴛ == reflect.Float32: {
@@ -611,17 +616,17 @@ internal static (slice<byte> b, bool ok) asBytes(slice<byte> buf, reflectꓸValu
     case var ᴛ when ᴛ == reflect.Float64: {
         return (strconv.AppendFloat(buf, rv.Float(), (byte)'g', -1, 64), true);
     }
-    case var ᴛ when ᴛ == reflect.ΔBool: {
+    case var ᴛ when ᴛ == reflect.Bool: {
         return (strconv.AppendBool(buf, rv.Bool()), true);
     }
-    case var ᴛ when ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.String: {
         @string s = rv.String();
         return (append(buf, s.ꓸꓸꓸ), true);
     }}
     return (b, ok);
 }
 
-internal static reflectꓸType valuerReflectType = reflect.TypeFor<driver.Valuer>();
+internal static reflect.Type valuerReflectType = reflect.TypeFor<driver.Valuer>();
 
 // callValuerValue returns vr.Value(), with one exception:
 // If vr.Value is an auto-generated method on a pointer type and the
@@ -635,7 +640,7 @@ internal static reflectꓸType valuerReflectType = reflect.TypeFor<driver.Valuer
 //
 // This function is mirrored in the database/sql/driver package.
 internal static (driverꓸValue v, error err) callValuerValue(driver.Valuer vr) {
-    var rv = reflect.ValueOf(vr); if (rv.Kind() == reflect.ΔPointer && rv.IsNil() && rv.Type().Elem().Implements(valuerReflectType)) {
+    var rv = reflect.ValueOf(vr); if (rv.Kind() == reflect.Pointer && rv.IsNil() && rv.Type().Elem().Implements(valuerReflectType)) {
         return (default, default);
     }
     return vr.Value();

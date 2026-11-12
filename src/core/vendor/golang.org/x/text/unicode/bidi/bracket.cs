@@ -7,6 +7,7 @@ using list = container.list_package;
 using fmt = fmt_package;
 using sort = sort_package;
 using container;
+using static bidi_package;
 
 partial class bidi_package {
 
@@ -51,16 +52,24 @@ partial struct bracketPair {
     internal nint closer;
 }
 
+} partial class bidiᴛbracketPair {
+
 internal static @string String(this ref bracketPair b) {
     return fmt.Sprintf("(%v, %v)"u8, b.opener, b.closer);
 }
 
+} partial class bidi_package {
+
 // bracketPairs is a slice of bracketPairs with a sort.Interface implementation.
 partial struct bracketPairs /*[]bracketPair*/;
+
+} partial class bidiᴛbracketPairs {
 
 internal static nint Len(this bracketPairs b) { return len(b); }
 internal static void Swap(this bracketPairs b, nint i, nint j) { (b[i], b[j]) = (b[j], b[i]); }
 internal static bool Less(this bracketPairs b, nint i, nint j) { return b[i].opener < b[j].opener; }
+
+} partial class bidi_package {
 
 // resolvePairedBrackets runs the paired bracket part of the UBA algorithm.
 //
@@ -70,14 +79,14 @@ internal static bool Less(this bracketPairs b, nint i, nint j) { return b[i].ope
 //
 // The identifiers for bracket types are the rune of the canonicalized opening
 // bracket for brackets (open or close) or 0 for runes that are not brackets.
-internal static void resolvePairedBrackets(ref ΔisolatingRunSequence s) {
+internal static void resolvePairedBrackets(ref isolatingRunSequence s) {
     var p = new bracketPairer(
         sos: s.sos,
         openers: list.New(),
         codesIsolatedRun: s.types,
         indexes: s.indexes
     );
-    ΔClass dirEmbed = L;
+    Class dirEmbed = L;
     if ((level)(s.level & 1) != 0) {
         dirEmbed = R;
     }
@@ -86,7 +95,7 @@ internal static void resolvePairedBrackets(ref ΔisolatingRunSequence s) {
 }
 
 partial struct bracketPairer {
-    internal ΔClass sos; // direction corresponding to start of sequence
+    internal Class sos; // direction corresponding to start of sequence
 // The following is a restatement of BD 16 using non-algorithmic language.
 //
 // A bracket pair is a pair of characters consisting of an opening
@@ -107,9 +116,11 @@ partial struct bracketPairer {
     internal ж<list.List> openers; // list of positions for opening brackets
     // bracket pair positions sorted by location of opening bracket
     internal bracketPairs pairPositions;
-    internal slice<ΔClass> codesIsolatedRun; // directional bidi codes for an isolated run
-    internal slice<nint> indexes;            // array of index values into the original string
+    internal slice<Class> codesIsolatedRun; // directional bidi codes for an isolated run
+    internal slice<nint> indexes;           // array of index values into the original string
 }
+
+} partial class bidiᴛbracketPairer {
 
 // matchOpener reports whether characters at given positions form a matching
 // bracket pair.
@@ -117,7 +128,11 @@ internal static bool matchOpener(this ref bracketPairer p, slice<rune> pairValue
     return pairValues[p.indexes[opener]] == pairValues[p.indexes[closer]];
 }
 
+} partial class bidi_package {
+
 internal static UntypedInt maxPairingDepth => 63;
+
+} partial class bidiᴛbracketPairer {
 
 // locateBrackets locates matching bracket pairs according to BD16.
 //
@@ -223,7 +238,7 @@ internal static void locateBrackets(this ref bracketPairer p, slice<bracketType>
 // by rule N0.
 //
 // TODO: have separate type for "strong" directionality.
-internal static ΔClass getStrongTypeN0(this ref bracketPairer p, nint index) {
+internal static Class getStrongTypeN0(this ref bracketPairer p, nint index) {
     switch (p.codesIsolatedRun[index]) {
     // in the scope of N0, number types are treated as R
     case var ᴛ when ᴛ == EN || ᴛ == AN || ᴛ == AL || ᴛ == R: {
@@ -244,10 +259,10 @@ internal static ΔClass getStrongTypeN0(this ref bracketPairer p, nint index) {
 // it returns this type. Otherwise it returns the embedding direction.
 //
 // TODO: use separate type for "strong" directionality.
-internal static ΔClass classifyPairContent(this ref bracketPairer p, bracketPair loc, ΔClass dirEmbed) {
-    ΔClass dirOpposite = ON;
+internal static Class classifyPairContent(this ref bracketPairer p, bracketPair loc, Class dirEmbed) {
+    Class dirOpposite = ON;
     for (nint i = loc.opener + 1; i < loc.closer; i++) {
-        ΔClass dir = p.getStrongTypeN0(i);
+        Class dir = p.getStrongTypeN0(i);
         if (dir == ON) {
             continue;
         }
@@ -262,9 +277,9 @@ internal static ΔClass classifyPairContent(this ref bracketPairer p, bracketPai
 
 // classBeforePair determines which strong types are present before a Bracket
 // Pair. Return R or L if strong type found, otherwise ON.
-internal static ΔClass classBeforePair(this ref bracketPairer p, bracketPair loc) {
+internal static Class classBeforePair(this ref bracketPairer p, bracketPair loc) {
     for (nint i = loc.opener - 1; i >= 0; i--) {
-        ΔClass dir = p.getStrongTypeN0(i); if (dir != ON) {
+        Class dir = p.getStrongTypeN0(i); if (dir != ON) {
             return dir;
         }
     }
@@ -273,9 +288,9 @@ internal static ΔClass classBeforePair(this ref bracketPairer p, bracketPair lo
 }
 
 // assignBracketType implements rule N0 for a single bracket pair.
-internal static void assignBracketType(this ref bracketPairer p, bracketPair loc, ΔClass dirEmbed, slice<ΔClass> initialTypes) {
+internal static void assignBracketType(this ref bracketPairer p, bracketPair loc, Class dirEmbed, slice<Class> initialTypes) {
     // rule "N0, a", inspect contents of pair
-    ΔClass dirPair = p.classifyPairContent(loc, dirEmbed);
+    Class dirPair = p.classifyPairContent(loc, dirEmbed);
 
     // dirPair is now L, R, or N (no strong type found)
 
@@ -301,7 +316,7 @@ internal static void assignBracketType(this ref bracketPairer p, bracketPair loc
     p.setBracketsToType(loc, dirPair, initialTypes);
 }
 
-internal static void setBracketsToType(this ref bracketPairer p, bracketPair loc, ΔClass dirPair, slice<ΔClass> initialTypes) {
+internal static void setBracketsToType(this ref bracketPairer p, bracketPair loc, Class dirPair, slice<Class> initialTypes) {
     p.codesIsolatedRun[loc.opener] = dirPair;
     p.codesIsolatedRun[loc.closer] = dirPair;
 
@@ -323,10 +338,10 @@ internal static void setBracketsToType(this ref bracketPairer p, bracketPair loc
 }
 
 // resolveBrackets implements rule N0 for a list of pairs.
-internal static void resolveBrackets(this ref bracketPairer p, ΔClass dirEmbed, slice<ΔClass> initialTypes) {
+internal static void resolveBrackets(this ref bracketPairer p, Class dirEmbed, slice<Class> initialTypes) {
     foreach (var (_, loc) in range<bracketPair>(p.pairPositions)) {
         p.assignBracketType(loc, dirEmbed, initialTypes);
     }
 }
 
-} // end bidi_package
+} // end bidiᴛbracketPairer

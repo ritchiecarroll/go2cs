@@ -63,7 +63,7 @@ using static go.encoding.base32_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/base32/base32.go", "base32.cs", "ACJ68oKmgoKClLiUtKSUuLgAARIACQKUtKSCAAIaAAoCgsqUkoKmgpSCgoKCgoKClIK4goK4gqSCgoKkgoKkgoKCpIKCuIKCgs6igoKCqJKCggALGLKCuIKCgoKUgoKClIKClLiCgoKClIKClIK4goKCqrSCgoKClAACENKqooKUAAQSsq4ACASUgpSEkpSEgpSmgpSCgpSUlIKUptyClJSCgpTKpIKCpIKCpIKCpIKCpIKUlAACEgAJAoKCgq7UgoKUlIKCrLKCgoIADRyygoKCpoLKgpSmxIKCgoKUpoK4goKUgqiSgoKClIKmgoKClIKokoKUlJSCgoKClJSCgqaCpsqmAAYSooKCgpSClKaCgoKCgoKmlKiSqqKmgoKU")]
+[assembly: GoPositionMap("encoding/base32/base32.go", "base32.cs", "ACN68oKmgoKClLiUtKSUuLgAAxIACQKUtKSCAAIaAAoCgsqUkoKmgpSCgoKCgoKClIK4goK4gqSCgoKkgoKkgoKCpIKCuIKCgs6igoKCqJKCggAPGLKCuIKCgoKUgoKClIKClLiCgoKClIKClIK4goKCqrSCgoKClAAEENLKooKUAAgSss4ACASUgpSEkpSEgpSmgpSCgpSUlIKUptyClJSCgpTKpIKCpIKCpIKCpIKCpIKUlAACEgAJAoKCgq7UgoKUlIKCrLKCgoIADxyygoKCpoLKgpTGxIKCgoKUpoK4goKUgqiSgoKClIKmgoKClIKokoKUlJSCgoKClJSCgqaCpsqmAAgSooKCgpSClMaCgoKCgoKmlMiSyqLGgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -97,3 +97,17 @@ public static partial class base32_package
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(base32_package.CorruptInputError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base32ᴛCorruptInputError;
+[GoMethodHost(typeof(base32_package.Encoding)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base32ᴛEncoding;
+[GoMethodHost(typeof(base32_package.decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base32ᴛdecoder;
+[GoMethodHost(typeof(base32_package.encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base32ᴛencoder;
+[GoMethodHost(typeof(base32_package.newlineFilteringReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base32ᴛnewlineFilteringReader;
+// </MethodHolders>

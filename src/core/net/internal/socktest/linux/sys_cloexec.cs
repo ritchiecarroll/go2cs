@@ -5,8 +5,11 @@
 namespace go.net.@internal;
 
 using syscall = syscall_package;
+using static socktest_package;
 
 partial class socktest_package {
+
+} partial class socktestᴛSwitch {
 
 // Accept4 wraps syscall.Accept4.
 public static (nint ns, syscall.Sockaddr sa, error err) Accept4(this ж<Switch> Ꮡsw, nint s, nint flags) {
@@ -52,4 +55,4 @@ public static (nint ns, syscall.Sockaddr sa, error err) Accept4(this ж<Switch> 
     ᒐdone: return (ns, sa, err);
 }
 
-} // end socktest_package
+} // end socktestᴛSwitch

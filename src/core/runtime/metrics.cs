@@ -11,6 +11,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 using ꓸꓸꓸstatDep = Span<runtime_package.statDep>;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -547,12 +548,16 @@ internal static void compute0(ж<statAggregate> _, ж<metricValue> Ꮡout) {
 
 internal delegate uint64 metricReader();
 
+} partial class runtimeᴛmetricReader {
+
 internal static void compute(this metricReader f, ж<statAggregate> _, ж<metricValue> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     @out.kind = metricKindUint64;
     @out.scalar = f();
 }
+
+} partial class runtime_package {
 
 //go:linkname godebug_registerMetric internal/godebug.registerMetric
 internal static void godebug_registerMetric(@string name, Func<uint64> read) {
@@ -596,6 +601,8 @@ internal static statDepSet makeStatDepSet(params ꓸꓸꓸstatDep depsʗp) {
     return s.Clone();
 }
 
+} partial class runtimeᴛstatDepSet {
+
 // difference returns set difference of s from b as a new set.
 internal static statDepSet difference(this statDepSet s, statDepSet b) {
     s = s.Clone();
@@ -635,6 +642,8 @@ internal static bool has(this ref statDepSet s, statDep d) {
     return (s.Value[d / 64] & ((uint64)1 << (int)(d % 64))) != 0;
 }
 
+} partial class runtime_package {
+
 // heapStatsAggregate represents memory stats obtained from the
 // runtime. This set of stats is grouped together because they
 // depend on each other in some way to make sense of the runtime's
@@ -662,6 +671,8 @@ partial struct heapStatsAggregate {
     internal uint64 totalFrees;
 }
 
+} partial class runtimeᴛheapStatsAggregate {
+
 // compute populates the heapStatsAggregate with values from the runtime.
 internal static void compute(this ж<heapStatsAggregate> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
@@ -685,6 +696,8 @@ internal static void compute(this ж<heapStatsAggregate> Ꮡa) {
     a.numObjects = a.totalAllocs - a.totalFrees;
 }
 
+} partial class runtime_package {
+
 // sysStatsAggregate represents system memory stats obtained
 // from the runtime. This set of stats is grouped together because
 // they're all relatively cheap to acquire and generally independent
@@ -705,6 +718,8 @@ partial struct sysStatsAggregate {
     internal uint64 gcCyclesDone;
     internal uint64 gcCyclesForced;
 }
+
+} partial class runtimeᴛsysStatsAggregate {
 
 // compute populates the sysStatsAggregate with values from the runtime.
 internal static void compute(this ж<sysStatsAggregate> Ꮡa) {
@@ -728,11 +743,15 @@ internal static void compute(this ж<sysStatsAggregate> Ꮡa) {
     });
 }
 
+} partial class runtime_package {
+
 // cpuStatsAggregate represents CPU stats obtained from the runtime
 // acquired together to avoid skew and inconsistencies.
 partial struct cpuStatsAggregate {
     /*embed*/ internal cpuStats cpuStats;
 }
+
+} partial class runtimeᴛcpuStatsAggregate {
 
 // compute populates the cpuStatsAggregate with values from the runtime.
 internal static void compute(this ref cpuStatsAggregate a) {
@@ -744,6 +763,8 @@ internal static void compute(this ref cpuStatsAggregate a) {
     // a.cpuStats.accumulate(nanotime(), gcphase == _GCmark)
 }
 
+} partial class runtime_package {
+
 // gcStatsAggregate represents various GC stats obtained from the runtime
 // acquired together to avoid skew and inconsistencies.
 partial struct gcStatsAggregate {
@@ -753,6 +774,8 @@ partial struct gcStatsAggregate {
     internal uint64 totalScan;
 }
 
+} partial class runtimeᴛgcStatsAggregate {
+
 // compute populates the gcStatsAggregate with values from the runtime.
 internal static void compute(this ref gcStatsAggregate a) {
     a.heapScan = ᏑgcController.ᏑheapScan.Load();
@@ -760,6 +783,8 @@ internal static void compute(this ref gcStatsAggregate a) {
     a.globalsScan = ᏑgcController.ᏑglobalsScan.Load();
     a.totalScan = a.heapScan + a.stackScan + a.globalsScan;
 }
+
+} partial class runtime_package {
 
 // finalStatsAggregate represents various finalizer/cleanup stats obtained
 // from the runtime acquired together to avoid skew and inconsistencies.
@@ -770,11 +795,15 @@ partial struct finalStatsAggregate {
     internal uint64 cleanupsExecuted;
 }
 
+} partial class runtimeᴛfinalStatsAggregate {
+
 // compute populates the finalStatsAggregate with values from the runtime.
 internal static void compute(this ref finalStatsAggregate a) {
     (a.finalizersQueued, a.finalizersExecuted) = finReadQueueStats();
     (a.cleanupsQueued, a.cleanupsExecuted) = ᏑgcCleanups.readQueueStats();
 }
+
+} partial class runtime_package {
 
 // schedStatsAggregate contains stats about the scheduler, including
 // an approximate count of goroutines in each state.
@@ -788,7 +817,11 @@ partial struct schedStatsAggregate {
     internal uint64 threads;
 }
 
+} partial class runtimeᴛschedStatsAggregate {
+
 // go2cs generated this placeholder — func compute is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class runtime_package {
 
 // nsToSec takes a duration in nanoseconds and converts it to seconds as
 // a float64.
@@ -810,6 +843,8 @@ partial struct statAggregate {
     internal finalStatsAggregate finalStats;
     internal schedStatsAggregate schedStats;
 }
+
+} partial class runtimeᴛstatAggregate {
 
 // ensure populates statistics aggregates determined by deps if they
 // haven't yet been populated.
@@ -853,6 +888,8 @@ internal static void ensure(this ж<statAggregate> Ꮡa, ж<statDepSet> deps) {
     a.ensured = a.ensured.union(missing);
 }
 
+} partial class runtime_package {
+
 // metricKind is a runtime copy of runtime/metrics.ValueKind and
 // must be kept structurally identical to that type.
 partial struct metricKind /*num:nint*/;
@@ -879,6 +916,8 @@ partial struct metricValue {
     internal @unsafe.Pointer pointer; // contains non-scalar values.
 }
 
+} partial class runtimeᴛmetricValue {
+
 // float64HistOrInit tries to pull out an existing float64Histogram
 // from the value, but if none exists, then it allocates one with
 // the given buckets.
@@ -897,6 +936,8 @@ internal static ж<metricFloat64Histogram> float64HistOrInit(this ref metricValu
     }
     return hist;
 }
+
+} partial class runtime_package {
 
 // metricFloat64Histogram is a runtime copy of runtime/metrics.Float64Histogram
 // and must be kept structurally identical to that type.

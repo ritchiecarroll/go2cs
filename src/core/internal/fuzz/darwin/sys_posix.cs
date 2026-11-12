@@ -11,6 +11,7 @@ using Δsyscall = syscall_package;
 using fs = global::go.io.fs_package;
 using global::go.io;
 using global::go.os;
+using static fuzz_package;
 
 partial class fuzz_package {
 
@@ -27,6 +28,8 @@ internal static (ж<sharedMem>, error) sharedMemMapFile(ж<os.File> f, nint size
 
     return (Ꮡ(new sharedMem(f: f, region: region, removeOnClose: removeOnClose)), default);
 }
+
+} partial class fuzzᴛsharedMem {
 
 // Close unmaps the shared memory and closes the temporary file. If this
 // sharedMem was created with sharedMemTempFile, Close also removes the file.
@@ -50,6 +53,8 @@ internal static error Close(this ref sharedMem m) {
     }
     return default;
 }
+
+} partial class fuzz_package {
 
 // setWorkerComm configures communication channels on the cmd that will
 // run a worker process.
@@ -107,13 +112,13 @@ internal static bool isInterruptError(error err) {
 // terminationSignal checks if err is an exec.ExitError with a signal status.
 // If it is, terminationSignal returns the signal and true.
 // If not, -1 and false.
-internal static (osꓸSignal, bool) terminationSignal(error err) {
+internal static (os.Signal, bool) terminationSignal(error err) {
     var (exitErr, ok) = err._<ж<exec.ExitError>>(ᐧ);
     if (!ok || exitErr.Value.ProcessState.ExitCode() >= 0) {
-        return (new syscall_ΔSignalᴠΔSignal(((syscallꓸSignal)(-1))), false);
+        return (new syscall_SignalᴠSignal(((Δsyscall.Signal)(-1))), false);
     }
     var status = exitErr.Value.ProcessState.Value.Sys()._<Δsyscall.WaitStatus>();
-    return (new syscall_ΔSignalᴠΔSignal(status.Signal()), status.Signaled());
+    return (new syscall_SignalᴠSignal(status.Signal()), status.Signaled());
 }
 
 // isCrashSignal returns whether a signal was likely to have been caused by an
@@ -127,7 +132,7 @@ internal static (osꓸSignal, bool) terminationSignal(error err) {
 // signals may only be received if signal handlers are changed. For example,
 // SIGSEGV is normally transformed into a panic that causes the process to exit
 // with status 2 if not recovered, which we handle as a crash.
-internal static bool isCrashSignal(osꓸSignal signal) {
+internal static bool isCrashSignal(os.Signal signal) {
     switch (signal) {
     case var ᴛ when AreEqual(ᴛ, Δsyscall.SIGILL) || AreEqual(ᴛ, Δsyscall.SIGTRAP) || AreEqual(ᴛ, Δsyscall.SIGABRT) || AreEqual(ᴛ, Δsyscall.SIGBUS) || AreEqual(ᴛ, Δsyscall.SIGFPE) || AreEqual(ᴛ, Δsyscall.SIGSEGV) || AreEqual(ᴛ, Δsyscall.SIGPIPE): { // sent data to closed pipe or socket
         // illegal instruction

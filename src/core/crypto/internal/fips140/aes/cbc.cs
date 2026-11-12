@@ -8,12 +8,14 @@ using alias = go.crypto.@internal.fips140.alias_package;
 using subtle = go.crypto.@internal.fips140.subtle_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using aes = aes_package;
+using static aes_package;
 
 partial class aes_package {
 
 partial struct CBCEncrypter {
     internal Block b;
-    internal array<byte> iv = new(ΔBlockSize);
+    internal array<byte> iv = new(BlockSize);
 }
 
 // NewCBCEncrypter returns a [cipher.BlockMode] which encrypts in cipher block
@@ -25,12 +27,14 @@ public static ж<CBCEncrypter> NewCBCEncrypter(ж<Block> Ꮡb, /*[16]*/ array<by
     return Ꮡ(new CBCEncrypter(b: b, iv: iv.Clone()));
 }
 
-public static nint BlockSize(this ref CBCEncrypter c) { return ΔBlockSize; }
+} partial class aesᴛCBCEncrypter {
+
+public static nint BlockSize(this ref CBCEncrypter c) { return aes.BlockSize; }
 
 public static void CryptBlocks(this ж<CBCEncrypter> Ꮡc, slice<byte> dst, slice<byte> src) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    if (len(src) % (nint)ΔBlockSize != 0) {
+    if (len(src) % (nint)aes.BlockSize != 0) {
         throw panic("crypto/cipher: input not full blocks");
     }
     if (len(dst) < len(src)) {
@@ -53,19 +57,21 @@ public static void SetIV(this ref CBCEncrypter x, slice<byte> iv) {
     copy(x.iv[..], iv);
 }
 
+} partial class aes_package {
+
 internal static void cryptBlocksEncGeneric(ref Block b, /*[16]*/ ж<array<byte>> Ꮡciv, slice<byte> dst, slice<byte> src) {
     ref var civ = ref Ꮡciv.DerefOrNull();
 
     var iv = civ[..];
     while (len(src) > 0) {
         // Write the xor to dst, then encrypt in place.
-        subtle.XORBytes(dst[..(int)(ΔBlockSize)], src[..(int)(ΔBlockSize)], iv);
-        encryptBlock(ref b, dst[..(int)(ΔBlockSize)], dst[..(int)(ΔBlockSize)]);
+        subtle.XORBytes(dst[..(int)(BlockSize)], src[..(int)(BlockSize)], iv);
+        encryptBlock(ref b, dst[..(int)(BlockSize)], dst[..(int)(BlockSize)]);
 
         // Move to the next block with this block as the next iv.
-        iv = dst[..(int)(ΔBlockSize)];
-        src = src[(int)(ΔBlockSize)..];
-        dst = dst[(int)(ΔBlockSize)..];
+        iv = dst[..(int)(BlockSize)];
+        src = src[(int)(BlockSize)..];
+        dst = dst[(int)(BlockSize)..];
     }
 
     // Save the iv for the next CryptBlocks call.
@@ -74,7 +80,7 @@ internal static void cryptBlocksEncGeneric(ref Block b, /*[16]*/ ж<array<byte>>
 
 partial struct CBCDecrypter {
     internal Block b;
-    internal array<byte> iv = new(ΔBlockSize);
+    internal array<byte> iv = new(BlockSize);
 }
 
 // NewCBCDecrypter returns a [cipher.BlockMode] which decrypts in cipher block
@@ -86,12 +92,14 @@ public static ж<CBCDecrypter> NewCBCDecrypter(ж<Block> Ꮡb, /*[16]*/ array<by
     return Ꮡ(new CBCDecrypter(b: b, iv: iv.Clone()));
 }
 
-public static nint BlockSize(this ref CBCDecrypter c) { return ΔBlockSize; }
+} partial class aesᴛCBCDecrypter {
+
+public static nint BlockSize(this ref CBCDecrypter c) { return aes.BlockSize; }
 
 public static void CryptBlocks(this ж<CBCDecrypter> Ꮡc, slice<byte> dst, slice<byte> src) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    if (len(src) % (nint)ΔBlockSize != 0) {
+    if (len(src) % (nint)aes.BlockSize != 0) {
         throw panic("crypto/cipher: input not full blocks");
     }
     if (len(dst) < len(src)) {
@@ -114,6 +122,8 @@ public static void SetIV(this ref CBCDecrypter x, slice<byte> iv) {
     copy(x.iv[..], iv);
 }
 
+} partial class aes_package {
+
 internal static void cryptBlocksDecGeneric(ref Block b, /*[16]*/ ж<array<byte>> Ꮡciv, slice<byte> dst, slice<byte> src) {
     ref var civ = ref Ꮡciv.DerefOrNull();
 
@@ -121,8 +131,8 @@ internal static void cryptBlocksDecGeneric(ref Block b, /*[16]*/ ж<array<byte>>
     // block's ciphertext (the iv). To avoid making a copy each time, we loop
     // over the blocks backwards.
     nint end = len(src);
-    nint start = end - (nint)ΔBlockSize;
-    nint prev = start - (nint)ΔBlockSize;
+    nint start = end - (nint)BlockSize;
+    nint prev = start - (nint)BlockSize;
 
     // Copy the last block of ciphertext as the IV of the next call.
     var iv = civ.Clone();
@@ -138,9 +148,9 @@ internal static void cryptBlocksDecGeneric(ref Block b, /*[16]*/ ж<array<byte>>
             subtle.XORBytes(dst.slice(start, end), dst.slice(start, end), iv[..]);
         }
 
-        end -= ΔBlockSize;
-        start -= ΔBlockSize;
-        prev -= ΔBlockSize;
+        end -= BlockSize;
+        start -= BlockSize;
+        prev -= BlockSize;
     }
 }
 

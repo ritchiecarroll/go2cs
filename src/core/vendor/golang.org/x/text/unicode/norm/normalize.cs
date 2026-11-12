@@ -14,6 +14,8 @@ using transform = go.vendor.golang.org.x.text.transform_package;
 using go.unicode;
 using go.vendor.golang.org.x.text;
 using ꓸꓸꓸbyte = Span<byte>;
+using norm = norm_package;
+using static norm_package;
 
 partial class norm_package {
 
@@ -40,6 +42,8 @@ public static Form NFC => /* iota */ 0;
 public static Form NFD => 1;
 public static Form NFKC => 2;
 public static Form NFKD => 3;
+
+} partial class normᴛForm {
 
 // Bytes returns f(b). May return b if f(b) = b.
 public static slice<byte> Bytes(this Form f, slice<byte> b) {
@@ -89,6 +93,8 @@ public static bool IsNormal(this Form f, slice<byte> b) {
     return true;
 }
 
+} partial class norm_package {
+
 internal static bool cmpNormalBytes(ж<reorderBuffer> Ꮡrb) {
     ref var rb = ref Ꮡrb.DerefOrNull();
 
@@ -109,6 +115,8 @@ internal static bool cmpNormalBytes(ж<reorderBuffer> Ꮡrb) {
     }
     return true;
 }
+
+} partial class normᴛForm {
 
 // IsNormalString returns true if s == f(s).
 public static bool IsNormalString(this Form f, @string s) {
@@ -144,6 +152,8 @@ public static bool IsNormalString(this Form f, @string s) {
     }
     return true;
 }
+
+} partial class norm_package {
 
 // patchTail fixes a case where a rune may be incorrectly normalized
 // if it is followed by illegal continuation bytes. It returns the
@@ -194,6 +204,8 @@ internal static nint appendQuick(ж<reorderBuffer> Ꮡrb, nint i) {
     return end;
 }
 
+} partial class normᴛForm {
+
 // Append returns f(append(out, b...)).
 // The buffer out must be nil, empty, or equal to f(out).
 public static slice<byte> Append(this Form f, slice<byte> @out, params ꓸꓸꓸbyte srcʗp) {
@@ -218,8 +230,10 @@ internal static slice<byte> doAppend(this Form f, slice<byte> @out, input src, n
         return doAppendInner(ᏑrbΔ1, p);
     }
     ref var rb = ref heap<reorderBuffer>(new reorderBuffer(f: ft.Value, src: src, nsrc: n), out var Ꮡrb);
-    return doAppend(Ꮡrb, @out, 0);
+    return norm.doAppend(Ꮡrb, @out, 0);
 }
+
+} partial class norm_package {
 
 internal static slice<byte> doAppend(ж<reorderBuffer> Ꮡrb, slice<byte> @out, nint p) {
     ref var rb = ref Ꮡrb.DerefOrNull();
@@ -236,7 +250,7 @@ internal static slice<byte> doAppend(ж<reorderBuffer> Ꮡrb, slice<byte> @out, 
     }
     var fd = Ꮡrb.Ꮡf;
     if (doMerge) {
-        ΔProperties info = default;
+        Properties info = default;
         if (p < n) {
             info = fd.info(src, p);
             if (!info.BoundaryBefore() || info.nLeadingNonStarters() > 0) {
@@ -268,6 +282,8 @@ internal static slice<byte> doAppendInner(ж<reorderBuffer> Ꮡrb, nint p) {
     }
     return rb.@out;
 }
+
+} partial class normᴛForm {
 
 // AppendString returns f(append(out, []byte(s))).
 // The buffer out must be nil, empty, or equal to f(out).
@@ -315,6 +331,8 @@ public static (nint n, error err) SpanString(this Form f, @string s, bool atEOF)
     }
     return (n, err);
 }
+
+} partial class normᴛformInfo {
 
 // quickSpan returns a boundary n such that src[0:n] == f(src[0:n]) and
 // whether any non-normalized parts were found. If atEOF is false, n will
@@ -378,6 +396,8 @@ internal static (nint n, bool ok) quickSpan(this ref formInfo f, input src, nint
     }
     return (lastSegStart, false);
 }
+
+} partial class normᴛForm {
 
 // QuickSpanString returns a boundary n such that s[0:n] == f(s[0:n]).
 // It is not guaranteed to return the largest such n.
@@ -484,6 +504,8 @@ public static nint LastBoundary(this Form f, slice<byte> b) {
     return lastBoundary(ref (formTable[f]).DerefOrNull(), b);
 }
 
+} partial class norm_package {
+
 internal static nint lastBoundary(ref formInfo fd, slice<byte> b) {
     nint i = len(b);
     var (info, p) = lastRuneStart(ref fd, b);
@@ -584,12 +606,12 @@ end:
 
 // lastRuneStart returns the runeInfo and position of the last
 // rune in buf or the zero runeInfo and -1 if no rune was found.
-internal static (ΔProperties, nint) lastRuneStart(ref formInfo fd, slice<byte> buf) {
+internal static (Properties, nint) lastRuneStart(ref formInfo fd, slice<byte> buf) {
     nint p = len(buf) - 1;
     for (; p >= 0 && !utf8.RuneStart(buf[p]); p--) {
     }
     if (p < 0) {
-        return (new ΔProperties(), -1);
+        return (new Properties(), -1);
     }
     return (fd.info(inputBytes(buf), p), p);
 }
@@ -608,7 +630,7 @@ internal static void decomposeToLastBoundary(ж<reorderBuffer> Ꮡrb) {
     if (info.BoundaryAfter()) {
         return;
     }
-    array<ΔProperties> add = new(31); /* maxNonStarters + 1 */ // stores runeInfo in reverse order
+    array<Properties> add = new(31); /* maxNonStarters + 1 */ // stores runeInfo in reverse order
     nint padd = 0;
     var ss = (streamSafe)0;
     nint p = len(rb.@out);

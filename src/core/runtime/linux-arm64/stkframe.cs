@@ -9,6 +9,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -16,7 +17,7 @@ partial class runtime_package {
 partial struct stkframe {
     // fn is the function being run in this frame. If there is
     // inlining, this is the outermost function.
-    internal ΔfuncInfo fn;
+    internal funcInfo fn;
     // pc is the program counter within fn.
     //
     // The meaning of this is subtle:
@@ -65,6 +66,8 @@ partial struct reflectMethodValue {
     internal ж<bitvector> stack; // ptrmap for both args and results
     internal uintptr argLen;     // just args
 }
+
+} partial class runtimeᴛstkframe {
 
 // argBytes returns the argument frame size for a call to frame.fn.
 internal static uintptr argBytes(this ref stkframe frame) {
@@ -130,7 +133,7 @@ internal static (bitvector argMap, bool hasReflectStackObj) argMapInternal(this 
             // also know its argument map is
             // empty.
             if (frame.pc != f.entry()) {
-                print((@string)"runtime: confused by ", funcname(f), (@string)": no frame (sp=", (Δhex)(uint64)frame.sp, (@string)" fp=", (Δhex)(uint64)frame.fp, (@string)") at entry+", (Δhex)(uint64)(frame.pc - f.entry()), (@string)"\n");
+                print((@string)"runtime: confused by ", funcname(f), (@string)": no frame (sp=", (hex)(uint64)frame.sp, (@string)" fp=", (hex)(uint64)frame.fp, (@string)") at entry+", (hex)(uint64)(frame.pc - f.entry()), (@string)"\n");
                 @throw(reflectMismatchˢ);
             }
             return (new bitvector(), false); // No locals, so also no stack objects
@@ -211,14 +214,14 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
         var stackid = pcdata;
         var stkmap = (ж<stackmap>)(uintptr)(funcdata(f, abi.FUNCDATA_LocalsPointerMaps));
         if (stkmap == nil || stkmap.n <= 0) {
-            print((@string)"runtime: frame ", funcname(f), (@string)" untyped locals ", (Δhex)(uint64)(frame.varp - size), (@string)"+", (Δhex)(uint64)size, (@string)"\n");
+            print((@string)"runtime: frame ", funcname(f), (@string)" untyped locals ", (hex)(uint64)(frame.varp - size), (@string)"+", (hex)(uint64)size, (@string)"\n");
             @throw(missingStackmapˢ);
         }
         // If nbit == 0, there's no work to do.
         if (stkmap.nbit > 0) {
             if (stackid < 0 || stackid >= stkmap.n) {
                 // don't know where we are
-                print((@string)"runtime: pcdata is ", stackid, (@string)" and ", stkmap.n, (@string)" locals stack map entries for ", funcname(f), (@string)" (targetpc=", (Δhex)(uint64)targetpc, (@string)")\n");
+                print((@string)"runtime: pcdata is ", stackid, (@string)" and ", stkmap.n, (@string)" locals stack map entries for ", funcname(f), (@string)" (targetpc=", (hex)(uint64)targetpc, (@string)")\n");
                 @throw(badSymbolTableˢ);
             }
             locals = stackmapdata(stkmap, stackid);
@@ -238,12 +241,12 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
         // Fetch the argument map at pcdata.
         var stackmap = (ж<stackmap>)(uintptr)(funcdata(f, abi.FUNCDATA_ArgsPointerMaps));
         if (stackmap == nil || stackmap.n <= 0) {
-            print((@string)"runtime: frame ", funcname(f), (@string)" untyped args ", (Δhex)(uint64)frame.argp, (@string)"+", (Δhex)(uint64)(args.n * (int32)goarch.PtrSize), (@string)"\n");
+            print((@string)"runtime: frame ", funcname(f), (@string)" untyped args ", (hex)(uint64)frame.argp, (@string)"+", (hex)(uint64)(args.n * (int32)goarch.PtrSize), (@string)"\n");
             @throw(missingStackmapˢ);
         }
         if (pcdata < 0 || pcdata >= stackmap.n) {
             // don't know where we are
-            print((@string)"runtime: pcdata is ", pcdata, (@string)" and ", stackmap.n, (@string)" args stack map entries for ", funcname(f), (@string)" (targetpc=", (Δhex)(uint64)targetpc, (@string)")\n");
+            print((@string)"runtime: pcdata is ", pcdata, (@string)" and ", stackmap.n, (@string)" args stack map entries for ", funcname(f), (@string)" (targetpc=", (hex)(uint64)targetpc, (@string)")\n");
             @throw(badSymbolTableˢ);
         }
         if (stackmap.nbit == 0) {
@@ -261,11 +264,11 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
         // This offset matches the assembly code on amd64 and arm64.
         objs = methodValueCallFrameObjs[..];
     } else {
-        @unsafe.Pointer Δp = (uintptr)funcdata(f, abi.FUNCDATA_StackObjects);
-        if (Δp != nil) {
-            var n = ~(ж<uintptr>)(uintptr)(Δp);
-            Δp = (uintptr)add(Δp, goarch.PtrSize);
-            var r0 = (ж<stackObjectRecord>)(uintptr)(noescape(Δp));
+        @unsafe.Pointer p = (uintptr)funcdata(f, abi.FUNCDATA_StackObjects);
+        if (p != nil) {
+            var n = ~(ж<uintptr>)(uintptr)(p);
+            p = (uintptr)add(p, goarch.PtrSize);
+            var r0 = (ж<stackObjectRecord>)(uintptr)(noescape(p));
             objs = @unsafe.Slice(r0, (nint)n);
             // Note: the noescape above is needed to keep
             // getStackMap from "leaking param content:
@@ -277,6 +280,8 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
 
     return (locals, args, objs);
 }
+
+} partial class runtime_package {
 
 internal static readonly ж<array<stackObjectRecord>> ᏑmethodValueCallFrameObjs = new StaticBox<array<stackObjectRecord>>(new array<stackObjectRecord>(1));
 internal static ref array<stackObjectRecord> methodValueCallFrameObjs => ref ((StaticBox<array<stackObjectRecord>>)ᏑmethodValueCallFrameObjs).ValueSlot; // initialized in stkobjinit

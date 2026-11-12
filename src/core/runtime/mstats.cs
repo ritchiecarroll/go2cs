@@ -8,6 +8,7 @@ using atomic = @internal.runtime.atomic_package;
 using gc = @internal.runtime.gc_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -415,7 +416,7 @@ internal static void readmemstats_m(ref MemStats stats) {
         // Prevent sysmon and the tracer from skewing the stats since they can
         // act without synchronizing with a STW. See #64401.
         @lock(Ꮡsched.of(schedt.Ꮡsysmonlock));
-        @lock(ᏑΔtrace.of(Δtraceᴛ1.Ꮡlock));
+        @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         if (ᏑgcController.ᏑheapInUse.load() != (uint64)consStats.inHeap) {
             print((@string)"runtime: heapInUse=", ᏑgcController.ᏑheapInUse.load(), (@string)"\n");
             print((@string)"runtime: consistent value=", consStats.inHeap, (@string)"\n");
@@ -453,7 +454,7 @@ internal static void readmemstats_m(ref MemStats stats) {
             print((@string)"runtime: totalMapped-released=", totalMapped - (uint64)consStats.released, (@string)"\n");
             @throw(mappedReadyAndOtherˢ);
         }
-        unlock(ᏑΔtrace.of(Δtraceᴛ1.Ꮡlock));
+        unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         unlock(Ꮡsched.of(schedt.Ꮡsysmonlock));
     }
 
@@ -533,9 +534,9 @@ private static readonly @string shortSlicePassedToˢᵇ = "short slice passed to
 //
 //go:systemstack
 internal static void readGCStats_m(ref slice<uint64> pauses) {
-    var Δp = pauses;
+    var p = pauses;
     // Calling code in runtime/debug should make the slice large enough.
-    if (cap(Δp) < len(memstats.pause_ns) + 3) {
+    if (cap(p) < len(memstats.pause_ns) + 3) {
         @throw(shortSlicePassedToˢ);
     }
 
@@ -551,18 +552,18 @@ internal static void readGCStats_m(ref slice<uint64> pauses) {
     // pause_ns[(numgc-1)%len(pause_ns)], and then backward
     // from there to go back farther in time. We deliver the times
     // most recent first (in p[0]).
-    Δp = Δp.slice(0, cap(Δp));
+    p = p.slice(0, cap(p));
     for (var i = (uint32)0; i < n; i++) {
         var j = (memstats.numgc - 1 - i) % (uint32)len(memstats.pause_ns);
-        Δp[i] = memstats.pause_ns[j];
-        Δp[n + i] = memstats.pause_end[j];
+        p[i] = memstats.pause_ns[j];
+        p[n + i] = memstats.pause_end[j];
     }
 
-    Δp[n + n] = memstats.last_gc_unix;
-    Δp[n + n + 1] = (uint64)memstats.numgc;
-    Δp[n + n + 2] = memstats.pause_total_ns;
+    p[n + n] = memstats.last_gc_unix;
+    p[n + n + 1] = (uint64)memstats.numgc;
+    p[n + n + 2] = memstats.pause_total_ns;
     unlock(Ꮡmheap_.Ꮡlock);
-    pauses = Δp.slice(0, (nint)(n + n + 3));
+    pauses = p.slice(0, (nint)(n + n + 3));
 }
 
 // flushmcache flushes the mcache of allp[i].
@@ -573,8 +574,8 @@ internal static void readGCStats_m(ref slice<uint64> pauses) {
 internal static void flushmcache(nint i) {
     assertWorldStopped();
 
-    var Δp = allp[i];
-    var c = Δp.Value.mcache;
+    var p = allp[i];
+    var c = p.Value.mcache;
     if (c == nil) {
         return;
     }
@@ -588,6 +589,8 @@ internal static void flushmcache(nint i) {
 //
 // This type must structurally be a uint64 so that mstats aligns with MemStats.
 partial struct sysMemStat /*num:uint64*/;
+
+} partial class runtimeᴛsysMemStat {
 
 // load atomically reads the value of the stat.
 //
@@ -615,6 +618,8 @@ internal static void add(this ж<sysMemStat> Ꮡs, int64 n) {
     }
 }
 
+} partial class runtime_package {
+
 // heapStatsDelta contains deltas of various runtime memory statistics
 // that need to be updated together in order for them to be kept
 // consistent with one another.
@@ -637,6 +642,8 @@ partial struct heapStatsDelta {
     internal uint64 largeFreeCount;                                  // number of frees for large objects (>maxSmallSize)
     internal array<uint64> smallFreeCount = new(gc.NumSizeClasses);  // number of frees for small objects (<=maxSmallSize)
 }
+
+} partial class runtimeᴛheapStatsDelta {
 
 // NOTE: This struct must be a multiple of 8 bytes in size because it
 // is stored in an array. If it's not, atomic accesses to the above
@@ -664,6 +671,8 @@ internal static void merge(this ref heapStatsDelta a, ж<heapStatsDelta> Ꮡb) {
         a.smallFreeCount[i] += b.smallFreeCount[i];
     }
 }
+
+} partial class runtime_package {
 
 // consistentHeapStats represents a set of various memory statistics
 // whose updates must be viewed completely to get a consistent
@@ -706,6 +715,8 @@ partial struct consistentHeapStats {
     internal mutex noPLock;
 }
 
+} partial class runtimeᴛconsistentHeapStats {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string badSequenceNumberˢ => ref badSequenceNumberˢᵇ;
 private static readonly @string badSequenceNumberˢᵇ = "bad sequence number"u8;
@@ -731,7 +742,7 @@ internal static ж<heapStatsDelta> acquire(this ж<consistentHeapStats> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var pp = (~(~getg()).m).p.ptr(); if (pp != nil) {
-        var seq = pp.of(runtime_package.Δp.ᏑstatsSeq).Add(1);
+        var seq = pp.of(p.ᏑstatsSeq).Add(1);
         if (seq % 2 == 0) {
             // Should have been incremented to odd.
             print((@string)"runtime: seq=", seq, (@string)"\n");
@@ -762,7 +773,7 @@ internal static void release(this ж<consistentHeapStats> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var pp = (~(~getg()).m).p.ptr(); if (pp != nil) {
-        var seq = pp.of(runtime_package.Δp.ᏑstatsSeq).Add(1);
+        var seq = pp.of(p.ᏑstatsSeq).Add(1);
         if (seq % 2 != 0) {
             // Should have been incremented to even.
             print((@string)"runtime: seq=", seq, (@string)"\n");
@@ -794,10 +805,12 @@ internal static void unsafeRead(this ref consistentHeapStats m, ж<heapStatsDelt
 internal static void unsafeClear(this ref consistentHeapStats m) {
     assertWorldStopped();
 
-    builtin.clear(m.stats[..]);
+    clear(m.stats[..]);
 }
 
 // go2cs generated this placeholder — func read is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class runtime_package {
 
 partial struct cpuStats {
 // All fields are CPU time in nanoseconds computed by comparing
@@ -816,6 +829,8 @@ partial struct cpuStats {
     public int64 UserTime; // Time Ps spent in _Prunning that's not any of the above.
     public int64 TotalTime; // GOMAXPROCS * (monotonic wall clock time elapsed)
 }
+
+} partial class runtimeᴛcpuStats {
 
 // accumulateGCPauseTime add dt*stwProcs to the GC CPU pause time stats. dt should be
 // the actual time spent paused, for orthogonality. maxProcs should be GOMAXPROCS,
@@ -851,8 +866,8 @@ internal static void accumulate(this ref cpuStats s, int64 now, bool gcMarkPhase
     // The rest of the stats below are either derived from the above or
     // are reset on each mark termination.
 
-    var scavAssistCpu = ᏑΔscavenge.of(runtime_package.Δscavengeᴛ1.ᏑassistTime).Load();
-    var scavBgCpu = ᏑΔscavenge.of(runtime_package.Δscavengeᴛ1.ᏑbackgroundTime).Load();
+    var scavAssistCpu = Ꮡscavenge.of(scavengeᴛ1.ᏑassistTime).Load();
+    var scavBgCpu = Ꮡscavenge.of(scavengeᴛ1.ᏑbackgroundTime).Load();
 
     // Update cumulative GC CPU stats.
     s.GCAssistTime += markAssistCpu;
@@ -880,4 +895,4 @@ internal static void accumulate(this ref cpuStats s, int64 now, bool gcMarkPhase
     s.UserTime = s.TotalTime - (s.GCTotalTime + s.ScavengeTotalTime + s.IdleTime);
 }
 
-} // end runtime_package
+} // end runtimeᴛcpuStats

@@ -7,6 +7,7 @@ using context = context_package;
 using netip = net.netip_package;
 using syscall = syscall_package;
 using net;
+using static net_package;
 
 partial class net_package {
 
@@ -28,7 +29,7 @@ partial class net_package {
 // and calling bind with TCP protocol don't work.
 //
 // See Winsock reference for details.
-internal static ж<IPAddr> ipAddrFromAddr(netipꓸAddr addr) {
+internal static ж<IPAddr> ipAddrFromAddr(netip.Addr addr) {
     return Ꮡ(new IPAddr(
         IP: addr.AsSlice(),
         Zone: addr.Zone()
@@ -41,8 +42,14 @@ partial struct IPAddr {
     public @string Zone; // IPv6 scoped addressing zone
 }
 
+} partial class netᴛIPAddr {
+
 // Network returns the address's network name, "ip".
 public static @string Network(this ref IPAddr a) { return "ip"; }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
 
 public static @string String(this ж<IPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
@@ -66,12 +73,14 @@ internal static bool isWildcard(this ж<IPAddr> Ꮡa) {
     return a.IP.IsUnspecified();
 }
 
-internal static ΔAddr opAddr(this ж<IPAddr> Ꮡa) {
+internal static Addr opAddr(this ж<IPAddr> Ꮡa) {
     if (Ꮡa == nil) {
         return default;
     }
-    return new IPAddrжΔAddr(Ꮡa);
+    return new IPAddrжAddr(Ꮡa);
 }
+
+} partial class net_package {
 
 // ResolveIPAddr returns an address of IP end point.
 //
@@ -115,6 +124,8 @@ partial struct IPConn {
     /*embed*/ internal conn conn;
 }
 
+} partial class netᴛIPConn {
+
 // SyscallConn returns a raw network connection.
 // This implements the [syscall.Conn] interface.
 public static (syscall.RawConn, error) SyscallConn(this ж<IPConn> Ꮡc) {
@@ -141,7 +152,7 @@ public static (nint, ж<IPAddr>, error) ReadFromIP(this ж<IPConn> Ꮡc, slice<b
 }
 
 // ReadFrom implements the [PacketConn] ReadFrom method.
-public static (nint, ΔAddr, error) ReadFrom(this ж<IPConn> Ꮡc, slice<byte> b) {
+public static (nint, Addr, error) ReadFrom(this ж<IPConn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
@@ -154,7 +165,7 @@ public static (nint, ΔAddr, error) ReadFrom(this ж<IPConn> Ꮡc, slice<byte> b
     if (addr == nil) {
         return (n, default, err);
     }
-    return (n, new IPAddrжΔAddr(addr), err);
+    return (n, new IPAddrжAddr(addr), err);
 }
 
 // ReadMsgIP reads a message from c, copying the payload into b and
@@ -197,7 +208,7 @@ public static (nint, error) WriteToIP(this ж<IPConn> Ꮡc, slice<byte> b, ж<IP
 }
 
 // WriteTo implements the [PacketConn] WriteTo method.
-public static (nint, error) WriteTo(this ж<IPConn> Ꮡc, slice<byte> b, ΔAddr addr) {
+public static (nint, error) WriteTo(this ж<IPConn> Ꮡc, slice<byte> b, Addr addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
@@ -235,6 +246,8 @@ public static (nint n, nint oobn, error err) WriteMsgIP(this ж<IPConn> Ꮡc, sl
     }
     return (n, oobn, err);
 }
+
+} partial class net_package {
 
 internal static ж<IPConn> newIPConn(ж<netFD> fd) { return Ꮡ(new IPConn(new conn(fd))); }
 

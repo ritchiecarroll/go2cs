@@ -2,6 +2,7 @@
 namespace go.debug;
 
 using strconv = strconv_package;
+using static dwarf_package;
 
 partial class dwarf_package {
 
@@ -36,6 +37,8 @@ private static readonly @string _Class_nameᵇ = "ClassUnknownClassAddressClassB
 
 [GoLazy] partial class lazyᴛ_Class_index { internal static array<uint16> _Class_index = new uint16[]{0, 12, 24, 34, 47, 59, 68, 80, 95, 106, 123, 137, 154, 165, 182, 196, 208, 220, 232, 248, 266}.array(); }
 
+} partial class dwarfᴛClass {
+
 public static @string String(this Class i) {
     if (i < 0 || i >= ((Class)(len(_Class_index) - 1))) {
         return "Class("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
@@ -43,4 +46,4 @@ public static @string String(this Class i) {
     return _Class_name.slice(_Class_index[i], _Class_index[i + 1]);
 }
 
-} // end dwarf_package
+} // end dwarfᴛClass

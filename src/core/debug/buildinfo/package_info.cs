@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using machoꓸSegment = go.debug.macho_package.ΔSegment;
 // </ImportedTypeAliases>
 
 using go;
@@ -39,11 +38,11 @@ using static go.debug.buildinfo_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<elfExe, exe>(Pointer = true)]
-[assembly: GoImplement<go.@internal.xcoff_package.ΔSection, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<go.@internal.xcoff_package.Section, io_package.ReaderAt>(Pointer = true)]
 [assembly: GoImplement<go.debug.elf_package.Prog, io_package.ReaderAt>(Pointer = true)]
-[assembly: GoImplement<go.debug.macho_package.ΔSegment, io_package.ReaderAt>(Pointer = true)]
-[assembly: GoImplement<go.debug.pe_package.ΔSection, io_package.ReaderAt>(Pointer = true)]
-[assembly: GoImplement<go.debug.plan9obj_package.ΔSection, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<go.debug.macho_package.Segment, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<go.debug.pe_package.Section, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<go.debug.plan9obj_package.Section, io_package.ReaderAt>(Pointer = true)]
 [assembly: GoImplement<machoExe, exe>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.ReaderAt>(Pointer = true)]
 [assembly: GoImplement<peExe, exe>(Pointer = true)]
@@ -63,20 +62,20 @@ using static go.debug.buildinfo_package;
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(go.@internal.xcoff_package.File))]
-[assembly: GoFieldAccess(typeof(go.@internal.xcoff_package.ΔSection))]
+[assembly: GoFieldAccess(typeof(go.@internal.xcoff_package.Section))]
 [assembly: GoFieldAccess(typeof(go.debug.elf_package.File))]
 [assembly: GoFieldAccess(typeof(go.debug.elf_package.Prog))]
-[assembly: GoFieldAccess(typeof(go.debug.elf_package.ΔSection))]
+[assembly: GoFieldAccess(typeof(go.debug.elf_package.Section))]
 [assembly: GoFieldAccess(typeof(go.debug.macho_package.FatFile))]
 [assembly: GoFieldAccess(typeof(go.debug.macho_package.File))]
-[assembly: GoFieldAccess(typeof(go.debug.macho_package.ΔSection))]
-[assembly: GoFieldAccess(typeof(go.debug.macho_package.ΔSegment))]
+[assembly: GoFieldAccess(typeof(go.debug.macho_package.Section))]
+[assembly: GoFieldAccess(typeof(go.debug.macho_package.Segment))]
 [assembly: GoFieldAccess(typeof(go.debug.pe_package.File))]
 [assembly: GoFieldAccess(typeof(go.debug.pe_package.OptionalHeader32))]
 [assembly: GoFieldAccess(typeof(go.debug.pe_package.OptionalHeader64))]
-[assembly: GoFieldAccess(typeof(go.debug.pe_package.ΔSection))]
+[assembly: GoFieldAccess(typeof(go.debug.pe_package.Section))]
 [assembly: GoFieldAccess(typeof(go.debug.plan9obj_package.File))]
-[assembly: GoFieldAccess(typeof(go.debug.plan9obj_package.ΔSection))]
+[assembly: GoFieldAccess(typeof(go.debug.plan9obj_package.Section))]
 [assembly: GoFieldAccess(typeof(go.runtime.debug_package.BuildInfo))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
@@ -87,7 +86,7 @@ using static go.debug.buildinfo_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("debug/buildinfo/buildinfo.go", "buildinfo.cs", "ACxOAA0cygAEFAAJAoKCgoK4goKUkuyygoKUgoKUggAMIgAJBoKCpoKUgoKUtIKClLSCgpS0goKUtIKClLSCgpS0AAcQgoKmgoK4goKCgpSCpgAiSoKCgoKUgoK4goKCgpSUgoKSgqSUgpSClKaUpqaCgoKUpqbcgoKCgqaCgpSUgoKClIKClJSmqJKCgpSCgoKClM6igpS4goKmgtyCgoKmgriCpoKUgoKmgoKCgpSUlJSCuJSCpqampoKCgqaCgpSmgoKCpoKClAAHEIKCgoKmpoKCgqaCgqYABxCClKSUpoKCgoKCpqaEAAkWgoSmAAcQgoKCgpSCgpSCpqaUgoKokoKCgqYACxCCgoKCpqaCgpQACxCCgpSmgoKCgqY=", "69-75:1;250-250:1", "", "", "92:21", "79:21,80:13")]
+[assembly: GoPositionMap("debug/buildinfo/buildinfo.go", "buildinfo.cs", "AC1OAA0cygAEFAAJAoKCgoK4goKUkuyygoKUgoKUggAMIgAJBoKCpoKUgoKUtIKClLSCgpS0goKUtIKClLSCgpS0AAcQgoKmgoK4goKCgpSCpgAiSoKCgoKUgoK4goKCgpSUgoKSgqSUgpSClKaUpqaCgoKUpqbcgoKCgqaCgpSUgoKClIKClJSmqJKCgpSCgoKClM6igpS4goKmgtyCgoKmgriCpoKUgoKmgoKCgpSUlJSCuJSCpqampoKCgqaCgpSmgoKCpoKClAAJEIKCgoKmpoKCgqaCgqYACxCClKSUpoKCgoKCpqaEAAkWgoSmAAsQgoKCgpSCgpSCpqaUgoKokoKCgqYADxCCgoKCpqaCgpQADxCCgpTmgoKCgqY=", "69-75:1;250-250:1", "", "", "93:21", "80:21,81:13")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;
@@ -133,3 +132,17 @@ public static partial class buildinfo_package
     [GoInit] internal static void initᴛᴛimportꓸruntimeꓸdebug() => builtin.initPackage(typeof(runtime.debug_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(buildinfo_package.elfExe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildinfoᴛelfExe;
+[GoMethodHost(typeof(buildinfo_package.machoExe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildinfoᴛmachoExe;
+[GoMethodHost(typeof(buildinfo_package.peExe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildinfoᴛpeExe;
+[GoMethodHost(typeof(buildinfo_package.plan9objExe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildinfoᴛplan9objExe;
+[GoMethodHost(typeof(buildinfo_package.xcoffExe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildinfoᴛxcoffExe;
+// </MethodHolders>

@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -46,15 +43,15 @@ using static go.encoding.gob_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<CommonType, ΔgobType>(Pointer = true)]
-[assembly: GoImplement<arrayType, ΔgobType>(Pointer = true)]
+[assembly: GoImplement<CommonType, gobType>(Pointer = true)]
+[assembly: GoImplement<arrayType, gobType>(Pointer = true)]
 [assembly: GoImplement<bufio_package.Reader, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<decBuffer, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<encBuffer, io_package.Writer>(Pointer = true)]
-[assembly: GoImplement<gobEncoderType, ΔgobType>(Pointer = true)]
-[assembly: GoImplement<mapType, ΔgobType>(Pointer = true)]
-[assembly: GoImplement<sliceType, ΔgobType>(Pointer = true)]
-[assembly: GoImplement<structType, ΔgobType>(Pointer = true)]
+[assembly: GoImplement<gobEncoderType, gobType>(Pointer = true)]
+[assembly: GoImplement<mapType, gobType>(Pointer = true)]
+[assembly: GoImplement<sliceType, gobType>(Pointer = true)]
+[assembly: GoImplement<structType, gobType>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -89,13 +86,13 @@ using static go.encoding.gob_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("encoding/gob/dec_helpers.go", "dec_helpers.cs", "AAscABImABImlIKUpqKSlJSCgpSUlJSmlIKUpqKSlJSCgpSUlIKClKaUgpSmopKUlIKClJSUgoKUppSClKaikpSUgoKUlJSUppSClKaikpSUgoKUlJSUppSClKaikpSUgoKUlJSUgpSUppSClKaikpSUgoKUlJSCgpSUppSClKaikpSUgoKUlJSCgpSUppSClKaikpSUgoKUlJSUppSClKaikpSUgoKUlJSCgpSUppSClKaikpSUgoKUlJSCgoKUgqaCgpSClKaUgpSmopKUlIKClJSUuJSmlIKUpqKSlJSCgpSUlIKClJSmlIKUpqKSlJSCgpSUlIKClJSmlIKUpqKSlJSCgpSUlJSmlIKUpqKSlJSCgpSUlIKClJSqooKCgoKClIKC")]
-[assembly: GoPositionMap("encoding/gob/decode.go", "decode.cs", "ABIogoIAFS6CgoKUgqaCgpSmgoKUgoKmgqaCqJKCpoKCqsKCgoKUlIKmooKmgqrigoKClIKClIKCgpSCgoKUpoKUgqrCgoKUgpSCgpSCgriClIKqooKClKyygoKUAA0esqrCggACHAALAoKClJSosqjCgoKUqMKCgpSowoKClKjCgoKUqMKCgpSowoKClKiygqiyggACENKCrsKCgoKmgpSq0qrCrOKCgqzSgoKs0oKClIKCgpSCgoKC3LiCgpSCgoKUpoKCAAQQ0oKCpoKClIKCqLKCgpSCgpQACx7ygoKCgpSCoq4ACQKCgoKCgoKUgpSClIKCgpSCgqaCtMrSgoKCgoKClIKUgoKUgoK0qOKCgoKCgpSCoqaygpSCgoKCgpSmgoKClIKUgoKUvtKClKiSgoKmgq7igoKUgoKCgoKCgoKCgoL6soKCgpS6soKUqLKCgoKCgrzCgoKCgpSmlIKCgpSUlKiyrPSCgpSClIKClJSClIKmgoKUpoKCuJSCgoK4gqao1IKClIKClIKCgqaCgpSq5IKClIKClIKClJSCtIK0gqSCusSCgpSCgpS4ABIkAAkYwpSCyoKUgoKCgpSClICkgoKCgoLCyIKCgoKCwsiCgoKUgoKUlIKCgrLagoKClKTGktiClAAIDOSCgJKCuIKUkoKCpoKUpoKUtIKCosiCgoKCosiCgpLagoKUpMiCyIKU2sKCgoKCgqaCpIKUlK7CgpSCgu6GlIKUtqSkpKSkpKSkgpSCpIKUgraClpKCgoKUgqS60oKClJTa8oKCgoKClIKUlIKCgoKokoKCgoKCgqoACgKCgoKClKaClIKClJSClIKClIKCgpSUlIKCgpSClIKClNjigoKCgpSUgoKCgqbsltKClIKCgoKUlIKmqNKUgoKmgoKCgoKUgoKCgoSClJS0prKCgoKUgoKUAAYSgpKUgrSCtKSCppS0tKSuwg==", "858-860:1;868-870:2;887-889:3;898-901:4;903-905:5;920-920:1;935-937:2;948-950:3;957-959:4;964-966:5;974-977:6;980-982:7;1003-1009:1", "", "", "1335:21,1448:21", "1069:21,1070:13")]
-[assembly: GoPositionMap("encoding/gob/decoder.go", "decoder.cs", "AClaspSClIKCgoKU6MSCgriCgoKmppi0goKClIKClIKokpSWkoKCgrqSgoKUpqKCgpSmooKClAAGGAALAoKCgsqClLiClKaCgtyCgoKUlJQABhQACQKClKaCgpQABhIACwKClIK4gpSCgoKClA==")]
+[assembly: GoPositionMap("encoding/gob/decode.go", "decode.cs", "ABMogoIAFy6CgoKUgqaCgpSmgoKUgoKmgqaCqJKCpoKCysKCgoKUlIKmooLGgqrigoKClIKClIKCgpSCgoKUpoKUgsrCgoKUgpSCgpSCgriClIKqooKClKyygoKUAA8esqrCggACHAALAoKClJSosqjCgoKUqMKCgpSowoKClKjCgoKUqMKCgpSowoKClKiygqiyggACENKCrsKCgoKmgpSq0qrCrOKCgqzSgoKs0oKClIKCgpSCgoKC3LiCgpSCgoKUpoKCAAQQ0oKCpoKClIKCqLKCgpSCgpQADR7ygoKCgpSCoq4ACQKCgoKCgoKUgpSClIKCgpSCgqaCtAAICtKCgoKCgoKUgpSCgpSCgrSo4oKCgoKClIKiprKClIKCgoKClKaCgoKUgpSCgpS+0oKUyJKCgqaCzuKCgpSCgoKCgoKCgoKCgvqygoKClLqygpSosoKCgoKCvMKCgoKClKaUgoKClJSUqLKs9IKClIKUgoKUlIKUgqaCgpSmgoK4lIKCgriCpqjUgoKUgoKUgoKCpoKClKrkgoKUgoKUgoKUlIK0grSCpIK6xIKClIKClNgAEiQACxjClILKgpSCgoKClIKUgKSCgoKCgsLIgoKCgoLCyIKCgpSCgpSUgoKCstqCgoKUpMaS2IKUAAwM5IKAkoK4gpSSgoKmgpSmgpS0goKiyIKCgoKiyIKCktqCgpSkyILIgpTawoKCgoKCpoKkgpSUrsKClIKC7oaUgpS2pKSkpKSkpKSClIKkgpSCtoKWkoKCgpSCpLrSgoKUlNrygoKCgoKUgpSUgoKCgqiSgoKCgoKCqgAKAoKCgoKUpoKUgoKUlIKUgoKUgoKClJSUgoKClIKUgoKU2OKCgoKClJSCgoKCpgAIDLbSgpSCgoKClJSCpqjSlIKCpoKCgoKClIKCgoKEgpSUtKaygoKClIKClAAIEoKSlIK0grSkgqaUtLSkrsI=", "858-860:1;868-870:2;887-889:3;898-901:4;903-905:5;920-920:1;935-937:2;948-950:3;957-959:4;964-966:5;974-977:6;980-982:7;1003-1009:1", "", "", "1364:21,1481:21", "1098:21,1099:13")]
+[assembly: GoPositionMap("encoding/gob/decoder.go", "decoder.cs", "ACpaspSClIKCgoKUAAgIxIKCuIKCgqbGuLSCgoKUgoKUgqiSlJaSgoKC2pKCgpTGooKClKaigoKUAAYYAAsCgoKCyoKUuIKUpoKC3IKCgpSUlAAGFAAJAoKUpoKClAAGEgALAoKUgriClIKCgoKU")]
 [assembly: GoPositionMap("encoding/gob/enc_helpers.go", "enc_helpers.cs", "AAoaABImABImlIKUpqKClJSCgoKUuKaUgpSmooKUlIKCgoKCpqaUgpSmooKUlIKCgoKCpqaUgpSmooKUlIKCgqamlIKUpqKClJSCgoKmppSClKaigpSUgoKmppSClKaigpSUgoKmppSClKaigpSUgoKmppSClKaigpSUgoKmppSClKaigpSUgoKmppSClKaigpSUgoKCpqaUgpSmooKUlIKCpqaUgpSmooKUlIKCpqaUgpSmooKUlIKCpqaUgpSmooKUlIKCpqaUgpSmooKUlIKCpg==")]
-[assembly: GoPositionMap("encoding/gob/encode.go", "encode.cs", "ACtUlIKCyIKmgoKmgqaCpoKmgoKUuLKCgoKUlIKCgoKUpqKCAAIS4oKCpoKClKyygoKUlAANIMKCggADHAAKAoKClJSosoKCgoKUzLKCgoK6soKCggADFOKCqLKCgoKCvNKCgoKCgoK8woKCgoK8woKCgoK8wgAMHqKUpJSo0oKCpoKCgpSCtKbSgpSCgoKCgpSClIKClIKmtKaygoKCgoKClIKCgpSCprSmkoKUgpSosoKCgoKCgoKUAAIQAAoGgoKUgoKCgoKmgoKClKaClJSmgoKCgoKUgoKCgoKUqgAIBoKUlIK0grSCpIKUgoKCgqYAEyyilIK4gpSCgoKCgpSClICkgoKmgoKigpSC2IKCooLGgoLGgpSC2IKCkpSCxoKClILYgpSosoKCgoKCpoKSlIKUlIKUgpSokoKCgoKClIKCgoKUgoKUgpSUgoKUqJKCgpSCgpSm1IKUgoKCgoKUgoKU1sKCgoKClIKUgpS0", "514-520:1;525-528:2;532-540:3;545-550:4;552-558:5;578-591:1", "", "", "753:21")]
-[assembly: GoPositionMap("encoding/gob/encoder.go", "encoder.cs", "AB0+lpKCgoKCqJKokqiSpoKC+uiClIKCpoKUgpSUgoKCvPKClIKCgriUgoKCuIKCpqSCgti0gqSosoKmuLa2gqbGxsbGpqyyrAAIBoKClJSCgsqCgoKClMzU7AAIAoKUgsqCppSCgqaCgoKUgoKCuIKCpoI=")]
+[assembly: GoPositionMap("encoding/gob/encode.go", "encode.cs", "ACxUlIKC6IKmgoKmgqaCpoKmgoKU2LKCgoKUlIKCgoKUpqKCAAQS4oKCpoKClKyygoKUlAARIMKCggAFHAAKAoKClJSosoKCgoKUzLKCgoK6soKCggADFOKCqLKCgoKCvNKCgoKCgoK8woKCgoK8woKCgoK8wgAMHqKUpJTI0oKCpoKCgpSCtKbSgpSCgoKCgpSClIKClIKmtKaygoKCgoKClIKCgpSCprTGkoKUgpTIsoKCgoKCgoKUAAIQAAoGgoKUgoKCgoKmgoKClKaClJSmgoKCgoKUgoKCgoKUqgAIBoKUlIK0grSCpIKUgoKCgsYAEyyilIK4gpSCgoKCgpSClICkgoKmgoKigpSC2IKCooLGgoLGgpSC2IKCkpSCxoKClILYgpSosoKCgoKCpoKSlIKUlIKUgpSokoKCgoKClIKCgoKUgoKUgpSUgoKUqJKCgpSCgpSm1IKUgoKCgoKUgoKU9sKCgoKClIKUgpS0", "514-520:1;525-528:2;532-540:3;545-550:4;552-558:5;578-591:1", "", "", "776:21")]
+[assembly: GoPositionMap("encoding/gob/encoder.go", "encoder.cs", "AB4+lpKCgoKCyJKokqiSpoKC+uiClIKCpoKUgpSUgoKCvPKClIKCgriUgoKCuIKCpqSCgti0gqSosoKmuLa2gqbGxsbGpqyyrAAIBoKClJSCgsqCgoKClMzU7AAIAoKUgsqCppSCgqaCgoKUgoKCuIKCpoI=")]
 [assembly: GoPositionMap("encoding/gob/error.go", "error.cs", "ABYuwqiSquKCgoKUtA==")]
-[assembly: GoPositionMap("encoding/gob/type.go", "type.cs", "ACpasoCC/oKC3IKCgoKUgpSUgpSmgIKCggAJEoCCgoIACBCCqIKCgoKClJ7ygpSmgoKUgoKClIKUppSCpqqigoKUABImgqiCgpSmgoKUppSClIKCpoKClOiSgpSokoKUAAsYlJSUgqYABxKCgoKCgoKCxLKysrKysrimlIKCgoKCgpS4gpSCggAJFIKCprSCgqaCgpSCpu6CgoKmgqYACBKCgqa0goKmgoKUgoKCpgAHEIKCprSmgpSmgoKUgqYADBqigpSClIKCgpSCppSCpoIAAhAACASClIKSgoLKtqampqampqaCgoKCAAkUgqaCgoKClIKClIK4gpSCgoKClIKmgoKCgoKClIKCgoKUgoLcgpSUpuqSgqyygriCgpSCpqqiggACENKCgpSCgpSmgoKCvKKCgoKUgoKCABswooKClJSkpKSkpKSUABYslIKClIKmgoKUlIKUqsKClIKmgoKUlIKCgpSClLS0pJSCpLTGgsbIgoK4goKCgtiSgoKUACJKopSm3ICCyICCggAEFPSCuIKCggAQIqaCgpS4poKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCpoKC", "460-464:1", "", "", "", "502:21,503:13")]
+[assembly: GoPositionMap("encoding/gob/type.go", "type.cs", "ACtasoCC/oKC3IKCgoKUgpSUgpSmgIKCggAJEoCCgoIACBCCqIKCgoKClJ7ygpSmgoKUgoKClIKUppSCpqqigoKUABImgqiCgpSmgoKUppSClIKCxoKClOiSgpSokoKUAA8YlJSUgqYACRKCgoKCgoKCxLKysrKysrimlIKCgoKCgpS4gpSCggAJFIKCxrSCgqaCgpSCpgAIDoKCgsaCpgAKEoKCxrSCgqaCgpSCgoKmAAkQgoLGtKaClKaCgpSCpgAUGqKClIKUgoKClIKmtIKmggACEAAIBIKUgpKCgsq2pqampqampoKCgoIACRSCpoKCgoKUgoKUgriClIKCgoKUgqaCgoKCgoKUgoKCgpSCgtyClJSm6pKCrLKCuIKClIKmqqKCAAIQ0oKClIKClKaCgoK8ooKCgpSCgoIAHTCigoKUlKSkpKSkpJQAGCyUgoKUgqaCgpSUgpSqwoKUgqaCgpSUgoKClIKUtLSklIKktMaCxsiCgriCgoKC2JKCgpQAIkqilKbcgILIgIKCAAQU9IK4goKCABAipoKClLimgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKmgoI=", "460-464:1", "", "", "", "535:21,536:13")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -110,7 +107,7 @@ public static partial class gob_package
     // via declarations below.
 
     // <TypeAccessibility>
-    internal partial interface ΔgobType {}
+    internal partial interface gobType {}
     internal partial struct decBuffer {}
     internal partial struct decEngine {}
     internal partial struct decInstr {}
@@ -169,3 +166,26 @@ public static partial class gob_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(gob_package.CommonType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gobᴛCommonType;
+[GoMethodHost(typeof(gob_package.Decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gobᴛDecoder;
+[GoMethodHost(typeof(gob_package.Encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gobᴛEncoder;
+[GoMethodHost(typeof(gob_package.arrayType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gobᴛarrayType;
+[GoMethodHost(typeof(gob_package.decBuffer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gobᴛdecBuffer;
+[GoMethodHost(typeof(gob_package.decoderState)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gobᴛdecoderState;
+[GoMethodHost(typeof(gob_package.encBuffer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gobᴛencBuffer;
+[GoMethodHost(typeof(gob_package.encoderState)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gobᴛencoderState;
+[GoMethodHost(typeof(gob_package.gobEncoderType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gobᴛgobEncoderType;
+[GoMethodHost(typeof(gob_package.mapType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gobᴛmapType;
+[GoMethodHost(typeof(gob_package.sliceType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gobᴛsliceType;
+[GoMethodHost(typeof(gob_package.structType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gobᴛstructType;
+[GoMethodHost(typeof(gob_package.typeId)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gobᴛtypeId;
+[GoMethodHost(typeof(gob_package.wireType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gobᴛwireType;
+// </MethodHolders>

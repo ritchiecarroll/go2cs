@@ -27,7 +27,6 @@ using static go.@internal.strconv_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Error", "ΔError")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -37,7 +36,7 @@ using static go.@internal.strconv_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<ΔError, error>]
+[assembly: GoImplement<Error, error>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -64,11 +63,11 @@ using static go.@internal.strconv_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/strconv/atob.go", "atob.cs", "AAcUsqSklAAICJKClKqigpQ=")]
 [assembly: GoPositionMap("internal/strconv/atoc.go", "atoc.cs", "AAc2ABQCgoK4gqamgoKClJSmgrjIgvyClKS4goKClJSCgpQ=")]
-[assembly: GoPositionMap("internal/strconv/atof.go", "atof.cs", "AA4ksoKCgoKUgqYACBDSgpSCgqSClIKCpKaClIK2gqamooKCpoKUlLSCyIKCgqa0gpSCgraCgoKUgoKCgpSklIKUggAHEIKCgpSClLSCpIKUgoKUlIKmpoKmgq4ADAKmgpSUtILIgoKCgoKCgoKUgoKCgoKCgqSCtoKUgoK2goKClIKCgoKCgpS2goKCgoKUlKS0gpSCpoKCAAcQgoKClIKUtIKkgpSCgoKClIKmgpSmgqaCpoK4lMKCpoKCgtyClJSCgriCgoKClJSClIKCgpSUgrjKgoKCpoK4gqaCgoKCyoKUlISSgpSEkoKClLjKAAEWAAwCgpSCgpSm7IKClJSUpJSq0oKUgoKUlOyCgpSUlKSUAAIQ8oKCAAcQgoKUgpSCgtyCgriCgoKCgoKCgriClIKCgoKmgoKClIKU2sKCpoKCpoKCpqaCgqaCgoLKgoLMkoKUgoKClKbCgqaCgqaCgqamgoKmgoKCyoKCzJKClIKCgpQAAjwAGwKCgpSmgoKClA==")]
+[assembly: GoPositionMap("internal/strconv/atof.go", "atof.cs", "ABAksoKCgoKUgqYACBDSgpSCgqSClIKCpKaClIK2gqbGooKCpoKUlLSCyIKCgqa0gpSCgraCgoKUgoKCgpSklIKUggAHEIKCgpSClLSCpIKUgoKUlIKmpoKmgs4ADAKmgpSUtILIgoKCgoKCgoKUgoKCgoKCgqSCtoKUgoK2goKClIKCgoKCgpS2goKCgoKUlKS0gpSCpoKCAAcQgoKClIKUtIKkgpSCgoKClIKmgpSmgqaCpoK4tMKCpoKCgtyClJSCgriCgoKClJSClIKCgpSUgrjKgoKCpoK4gqaCgoKCyoKUlISSgpSEkoKClNjKAAEWAAwCgpSCgpSm7IKClJSUpJSq0oKUgoKUlOyCgpSUlKSUAAIQ8oKCAAcQgoKUgpSCgtyCgriCgoKCgoKCgriClIKCgoKmgoKClIKU2sKCpoKCpoKCpqaCgqaCgoLKgoLMkoKUgoKClKbCgqaCgqaCgqamgoKmgoKCyoKCzJKClIKCgpQAAjwAGwKCgpSmgoKClA==")]
 [assembly: GoPositionMap("internal/strconv/atofeisel.go", "atofeisel.cs", "ABYw+oKClJSCgriCgqamgoKCgpSClLiCgqaCuIKCgoLugpSCgpSmAA0WgoKUlIKCuIKCpqaCgoKClIKUuIKCpoK4goKCgu6ClIKClA==")]
-[assembly: GoPositionMap("internal/strconv/atoi.go", "atoi.cs", "AAcWwgAWGoKUpKSklAALFrKUgqaUguyCgpSCtIK0grSC6qaCgoKqopS0tLaUgoKCgpSCtLS0poKmlJSUgpSUpoKmAAY4ABsClIK4gpS0griSgoKmgqaCgpSClIKClOiSlIKWgoKCgriCooKClJSClLiCrAAIDIKmgriCgoKCuJSCgqaCgpSCpoKmlA==")]
+[assembly: GoPositionMap("internal/strconv/atoi.go", "atoi.cs", "AAkWwgAYGoKUpKSklAANFrKUgqaUguyCgpSCtIK0grSC6qaCgoKqopS0tLaUgoKCgpSCtLS0poKmlJSUgpSUpoKmAAY4ABsClIK4gpS0griSgoKmgqaCgpSClIKClOiSlIKWgoKCgriCooKClJSClLiCrAAIDIKmgriCgoKCuJSCgqaCgpSCpoKmlA==")]
 [assembly: GoPositionMap("internal/strconv/ctoa.go", "ctoa.cs", "AAcc8oKssoKUlIKCgpSCgoKUgg==")]
-[assembly: GoPositionMap("internal/strconv/decimal.go", "decimal.cs", "ABUsgoKClIKmgoKUuIKCgoKCyIKCgsiCpKaCgpSssoKUgrqypoKCgoKCgriCgoKUggAHEpKClpKCgpSClIKClJSClJSmgoKCgoKCuIKCgoKCgoKUpoIAECQATJwBkoKClIKmqJKCgqaClpKCgoKCgoKCgpS4goKCgoKCgpSmgoKUgqiy2IKClLSCgpTKkoKUlIKUpq7igpSClLqygpSCqJKCuIKCgoKC3IKCqsKClIKCgpSClIKU")]
+[assembly: GoPositionMap("internal/strconv/decimal.go", "decimal.cs", "ABksgoKClIKmgoKUuIKCgoKCyIKCgsiCpMaCgpSssoKUgtqypoKCgoKCgriCgoKUggAJEpKClpKCgpSClIKClJSClJSmgoKCgoKCuIKCgoKCgoKUpoIAECQATJwBkoKClIKmqJKCgqaClpKCgoKCgoKCgpS4goKCgoKCgpSmgoKUgsiy2IKClLSCgpTqkoKUlIKUps7igpSClLqygpSCqJKCuIKCgoKC3IKCqsKClIKCgpSClIKU")]
 [assembly: GoPositionMap("internal/strconv/deps.go", "deps.cs", "AAkakIKCgpSCgoKUlKaU")]
 [assembly: GoPositionMap("internal/strconv/ftoa.go", "ftoa.cs", "AB5EkgACNgAYAqqiAAoGgoKClIK0grS2goKClJaSlLS0pLiCyKSmgpSCpoK4goKClISSgpSUtLSkuILKgpTGtIKUxqSmgoKClKaokoKCgoKCgoKUlLS0yJS0tIKUpJSmgpSktoKCyoKUgoKClJSClLiq1IKCABAigpTcgoIAARDigoKClIKUgoLKAAEaAA4IuIKClIKCgpSCgpSCgtyUyurqyLiUgqSCpIIACRakgriCgpSmgoKCgoKClILKgoKClIKClJSmlLS0tqikgriCgoKCpriCgoKCgpS4qKSCuKamgoKUlKiSgriCgoK4goKCgoKUgpSCuIKCuIKUpoKCgoKClIKCgoLKgoKUgoKClJSmlLS0tg==")]
 [assembly: GoPositionMap("internal/strconv/ftoadbox.go", "ftoadbox.cs", "AAcyABICgoKUpoKUgoKCgpSCgoKClIKCgoKUgqjegoKCgpSCgoKClIKCgoKCgoLKgoKCgoKCpqqilIKCgoKUgoKCgpSCgoKClIKo3oKCgoKUgoKCgpSCgoKCgoKCyoKCgoKCgqaqooKCgqiSlIKUgqiSqJKClIKUqJKokoKCgpSCgoKUlKiSgoKokoKCrOKCgoKs4oKCgqzigoKCrOKCgoKokqiSqrQABRLCgoKowoKCqJKokqjCgoKUgqiygoKUgg==")]
@@ -95,7 +94,7 @@ public static partial class strconv_package
     internal partial struct leftCheat {}
     internal partial struct uint128 {}
     [GoValueClone("d")] public partial struct @decimal {}
-    public partial struct ΔError {}
+    public partial struct Error {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -108,3 +107,14 @@ public static partial class strconv_package
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(strconv_package.Error)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class strconvᴛError;
+[GoMethodHost(typeof(strconv_package.@decimal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class strconvᴛdecimal;
+// </MethodHolders>

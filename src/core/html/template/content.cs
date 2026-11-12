@@ -112,19 +112,19 @@ internal static any indirect(any a) {
     if (a == nil) {
         return default;
     }
-    var t = reflect.TypeOf(a); if (t.Kind() != reflect.ΔPointer) {
+    var t = reflect.TypeOf(a); if (t.Kind() != reflect.Pointer) {
         // Avoid creating a reflect.Value if it's not a pointer.
         return a;
     }
     var v = reflect.ValueOf(a);
-    while (v.Kind() == reflect.ΔPointer && !v.IsNil()) {
+    while (v.Kind() == reflect.Pointer && !v.IsNil()) {
         v = v.Elem();
     }
     return v.Interface();
 }
 
-internal static reflectꓸType errorType = reflect.TypeFor<error>();
-internal static reflectꓸType fmtStringerType = reflect.TypeFor<fmt.Stringer>();
+internal static reflect.Type errorType = reflect.TypeFor<error>();
+internal static reflect.Type fmtStringerType = reflect.TypeFor<fmt.Stringer>();
 
 // indirectToStringerOrError returns the value, after dereferencing as many times
 // as necessary to reach the base type (or nil) or an implementation of fmt.Stringer
@@ -134,7 +134,7 @@ internal static any indirectToStringerOrError(any a) {
         return default;
     }
     var v = reflect.ValueOf(a);
-    while (!v.Type().Implements(fmtStringerType) && !v.Type().Implements(errorType) && v.Kind() == reflect.ΔPointer && !v.IsNil()) {
+    while (!v.Type().Implements(fmtStringerType) && !v.Type().Implements(errorType) && v.Kind() == reflect.Pointer && !v.IsNil()) {
         v = v.Elem();
     }
     return v.Interface();

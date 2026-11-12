@@ -15,6 +15,8 @@ using unicode = unicode_package;
 using utf8 = global::go.unicode.utf8_package;
 using global::go.unicode;
 using iter = iter_package;
+using constraint = constraint_package;
+using static constraint_package;
 
 partial class constraint_package {
 
@@ -42,6 +44,8 @@ partial struct TagExpr {
     public @string Tag; // for example, “linux” or “cgo”
 }
 
+} partial class constraintᴛTagExpr {
+
 internal static void isExpr(this ref TagExpr x) { }
 
 public static bool Eval(this ref TagExpr x, Func<@string, bool> ok) {
@@ -52,12 +56,16 @@ public static @string String(this ref TagExpr x) {
     return x.Tag;
 }
 
+} partial class constraint_package {
+
 internal static Expr tag(@string tag) { return new TagExprжExpr(Ꮡ(new TagExpr(tag))); }
 
 // A NotExpr represents the expression !X (the negation of X).
 partial struct NotExpr {
     public Expr X;
 }
+
+} partial class constraintᴛNotExpr {
 
 internal static void isExpr(this ref NotExpr x) { }
 
@@ -76,12 +84,16 @@ public static @string String(this ref NotExpr x) {
     return "!"u8 + s;
 }
 
+} partial class constraint_package {
+
 internal static Expr not(Expr x) { return new NotExprжExpr(Ꮡ(new NotExpr(x))); }
 
 // An AndExpr represents the expression X && Y.
 partial struct AndExpr {
     public Expr X, Y;
 }
+
+} partial class constraintᴛAndExpr {
 
 internal static void isExpr(this ref AndExpr x) { }
 
@@ -95,6 +107,8 @@ public static bool Eval(this ref AndExpr x, Func<@string, bool> ok) {
 public static @string String(this ref AndExpr x) {
     return andArg(x.X) + " && "u8 + andArg(x.Y);
 }
+
+} partial class constraint_package {
 
 internal static @string andArg(Expr x) {
     @string s = x.String();
@@ -113,6 +127,8 @@ partial struct OrExpr {
     public Expr X, Y;
 }
 
+} partial class constraintᴛOrExpr {
+
 internal static void isExpr(this ref OrExpr x) { }
 
 public static bool Eval(this ref OrExpr x, Func<@string, bool> ok) {
@@ -125,6 +141,8 @@ public static bool Eval(this ref OrExpr x, Func<@string, bool> ok) {
 public static @string String(this ref OrExpr x) {
     return orArg(x.X) + " || "u8 + orArg(x.Y);
 }
+
+} partial class constraint_package {
 
 internal static @string orArg(Expr x) {
     @string s = x.String();
@@ -144,9 +162,13 @@ partial struct SyntaxError {
     public @string Err; // description of error
 }
 
+} partial class constraintᴛSyntaxError {
+
 public static @string Error(this ref SyntaxError e) {
     return e.Err;
 }
+
+} partial class constraint_package {
 
 internal static error errNotConstraint = errors.New("not a build constraint");
 
@@ -245,6 +267,8 @@ internal static (Expr x, error err) parseExpr(@string text) {
     return (x, err);
 }
 
+} partial class constraintᴛexprParser {
+
 // or parses a sequence of || expressions.
 // On entry, the next input token has not yet been lexed.
 // On exit, the next input token has been lexed and is in p.tok.
@@ -253,7 +277,7 @@ internal static Expr or(this ж<exprParser> Ꮡp) {
 
     var x = Ꮡp.and();
     while (p.tok == "||"u8) {
-        x = or(x, Ꮡp.and());
+        x = constraint.or(x, Ꮡp.and());
     }
     return x;
 }
@@ -266,7 +290,7 @@ internal static Expr and(this ж<exprParser> Ꮡp) {
 
     var x = Ꮡp.not();
     while (p.tok == "&&"u8) {
-        x = and(x, Ꮡp.not());
+        x = constraint.and(x, Ꮡp.not());
     }
     return x;
 }
@@ -287,7 +311,7 @@ internal static Expr not(this ж<exprParser> Ꮡp) {
         if (p.tok == "!"u8) {
             throw panic(Ꮡ(new SyntaxError(Offset: p.pos, Err: "double negation not allowed")));
         }
-        return not(Ꮡp.atom());
+        return constraint.not(Ꮡp.atom());
     }
     return Ꮡp.atom();
 }
@@ -387,6 +411,8 @@ internal static void lex(this ref exprParser p) {
     p.tok = p.s.slice(p.pos, p.i);
     p.isTag = true;
 }
+
+} partial class constraint_package {
 
 // IsPlusBuild reports whether the line of text is a “// +build” constraint.
 // It only checks the prefix of the text, not that the expression itself parses.

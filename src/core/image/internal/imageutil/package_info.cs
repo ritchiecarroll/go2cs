@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using imageꓸRGBA = go.image_package.ΔRGBA;
 // </ImportedTypeAliases>
 
 using go;

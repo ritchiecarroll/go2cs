@@ -37,28 +37,28 @@ partial interface Curve {
     // Deprecated: this is a low-level unsafe API. For ECDH, use the crypto/ecdh
     // package. The NewPublicKey methods of NIST curves in crypto/ecdh accept
     // the same encoding as the Unmarshal function, and perform on-curve checks.
-    bool IsOnCurve(ж<bigꓸInt> x, ж<bigꓸInt> y);
+    bool IsOnCurve(ж<big.Int> x, ж<big.Int> y);
     // Add returns the sum of (x1,y1) and (x2,y2).
     //
     // Deprecated: this is a low-level unsafe API.
-    (ж<bigꓸInt> x, ж<bigꓸInt> y) Add(ж<bigꓸInt> x1, ж<bigꓸInt> y1, ж<bigꓸInt> x2, ж<bigꓸInt> y2);
+    (ж<big.Int> x, ж<big.Int> y) Add(ж<big.Int> x1, ж<big.Int> y1, ж<big.Int> x2, ж<big.Int> y2);
     // Double returns 2*(x,y).
     //
     // Deprecated: this is a low-level unsafe API.
-    (ж<bigꓸInt> x, ж<bigꓸInt> y) Double(ж<bigꓸInt> x1, ж<bigꓸInt> y1);
+    (ж<big.Int> x, ж<big.Int> y) Double(ж<big.Int> x1, ж<big.Int> y1);
     // ScalarMult returns k*(x,y) where k is an integer in big-endian form.
     //
     // Deprecated: this is a low-level unsafe API. For ECDH, use the crypto/ecdh
     // package. Most uses of ScalarMult can be replaced by a call to the ECDH
     // methods of NIST curves in crypto/ecdh.
-    (ж<bigꓸInt> x, ж<bigꓸInt> y) ScalarMult(ж<bigꓸInt> x1, ж<bigꓸInt> y1, slice<byte> k);
+    (ж<big.Int> x, ж<big.Int> y) ScalarMult(ж<big.Int> x1, ж<big.Int> y1, slice<byte> k);
     // ScalarBaseMult returns k*G, where G is the base point of the group
     // and k is an integer in big-endian form.
     //
     // Deprecated: this is a low-level unsafe API. For ECDH, use the crypto/ecdh
     // package. Most uses of ScalarBaseMult can be replaced by a call to the
     // PrivateKey.PublicKey method in crypto/ecdh.
-    (ж<bigꓸInt> x, ж<bigꓸInt> y) ScalarBaseMult(slice<byte> k);
+    (ж<big.Int> x, ж<big.Int> y) ScalarBaseMult(slice<byte> k);
 }
 
 internal static slice<byte> mask = [0xff, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f];
@@ -68,10 +68,10 @@ internal static slice<byte> mask = [0xff, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f];
 //
 // Deprecated: for ECDH, use the GenerateKey methods of the [crypto/ecdh] package;
 // for ECDSA, use the GenerateKey function of the crypto/ecdsa package.
-public static (slice<byte> priv, ж<bigꓸInt> x, ж<bigꓸInt> y, error err) GenerateKey(Curve curve, io.Reader rand) {
+public static (slice<byte> priv, ж<big.Int> x, ж<big.Int> y, error err) GenerateKey(Curve curve, io.Reader rand) {
     slice<byte> priv = default;
-    ж<bigꓸInt> x = default;
-    ж<bigꓸInt> y = default;
+    ж<big.Int> x = default;
+    ж<big.Int> y = default;
     error err = default;
 
     var N = curve.Params().N;
@@ -92,7 +92,7 @@ public static (slice<byte> priv, ж<bigꓸInt> x, ж<bigꓸInt> y, error err) Ge
         priv[1] ^= (byte)(0x42);
 
         // If the scalar is out of range, sample another random number.
-        if (@new<bigꓸInt>().SetBytes(priv).Cmp(N) >= 0) {
+        if (@new<big.Int>().SetBytes(priv).Cmp(N) >= 0) {
             continue;
         }
 
@@ -107,7 +107,7 @@ public static (slice<byte> priv, ж<bigꓸInt> x, ж<bigꓸInt> y, error err) Ge
 //
 // Deprecated: for ECDH, use the crypto/ecdh package. This function returns an
 // encoding equivalent to that of PublicKey.Bytes in crypto/ecdh.
-public static slice<byte> Marshal(Curve curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy) {
+public static slice<byte> Marshal(Curve curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -127,7 +127,7 @@ public static slice<byte> Marshal(Curve curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt>
 // MarshalCompressed converts a point on the curve into the compressed form
 // specified in SEC 1, Version 2.0, Section 2.3.3. If the point is not on the
 // curve (or is the conventional point at infinity), the behavior is undefined.
-public static slice<byte> MarshalCompressed(Curve curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy) {
+public static slice<byte> MarshalCompressed(Curve curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -144,8 +144,8 @@ public static slice<byte> MarshalCompressed(Curve curve, ж<bigꓸInt> Ꮡx, ж<
 // There isn't an equivalent interface for Marshal/MarshalCompressed because
 // that doesn't involve any mathematical operations, only FillBytes and Bit.
 partial interface unmarshaler {
-    (ж<bigꓸInt> x, ж<bigꓸInt> y) Unmarshal(slice<byte> _);
-    (ж<bigꓸInt> x, ж<bigꓸInt> y) UnmarshalCompressed(slice<byte> _);
+    (ж<big.Int> x, ж<big.Int> y) Unmarshal(slice<byte> _);
+    (ж<big.Int> x, ж<big.Int> y) UnmarshalCompressed(slice<byte> _);
 }
 
 // Assert that the known curves implement unmarshaler.
@@ -157,9 +157,9 @@ internal static slice<unmarshaler> _ᴛ1ʗ = slice<unmarshaler>([new nistCurveж
 //
 // Deprecated: for ECDH, use the crypto/ecdh package. This function accepts an
 // encoding equivalent to that of the NewPublicKey methods in crypto/ecdh.
-public static (ж<bigꓸInt> x, ж<bigꓸInt> y) Unmarshal(Curve curve, slice<byte> data) {
-    ж<bigꓸInt> x = default;
-    ж<bigꓸInt> y = default;
+public static (ж<big.Int> x, ж<big.Int> y) Unmarshal(Curve curve, slice<byte> data) {
+    ж<big.Int> x = default;
+    ж<big.Int> y = default;
 
     var (c, ok) = curve._<unmarshaler>(ᐧ); if (ok) {
         return c.Unmarshal(data);
@@ -173,8 +173,8 @@ public static (ж<bigꓸInt> x, ж<bigꓸInt> y) Unmarshal(Curve curve, slice<by
         return (default, default);
     }
     var p = curve.Params().P;
-    x = @new<bigꓸInt>().SetBytes(data.slice(1, 1 + byteLen));
-    y = @new<bigꓸInt>().SetBytes(data.slice(1 + byteLen));
+    x = @new<big.Int>().SetBytes(data.slice(1, 1 + byteLen));
+    y = @new<big.Int>().SetBytes(data.slice(1 + byteLen));
     if (x.Cmp(p) >= 0 || y.Cmp(p) >= 0) {
         return (default, default);
     }
@@ -187,9 +187,9 @@ public static (ж<bigꓸInt> x, ж<bigꓸInt> y) Unmarshal(Curve curve, slice<by
 // UnmarshalCompressed converts a point, serialized by [MarshalCompressed], into
 // an x, y pair. It is an error if the point is not in compressed form, is not
 // on the curve, or is the point at infinity. On error, x = nil.
-public static (ж<bigꓸInt> x, ж<bigꓸInt> y) UnmarshalCompressed(Curve curve, slice<byte> data) {
-    ж<bigꓸInt> x = default;
-    ж<bigꓸInt> y = default;
+public static (ж<big.Int> x, ж<big.Int> y) UnmarshalCompressed(Curve curve, slice<byte> data) {
+    ж<big.Int> x = default;
+    ж<big.Int> y = default;
 
     var (c, ok) = curve._<unmarshaler>(ᐧ); if (ok) {
         return c.UnmarshalCompressed(data);
@@ -203,7 +203,7 @@ public static (ж<bigꓸInt> x, ж<bigꓸInt> y) UnmarshalCompressed(Curve curve
         return (default, default);
     }
     var p = curve.Params().P;
-    x = @new<bigꓸInt>().SetBytes(data[1..]);
+    x = @new<big.Int>().SetBytes(data[1..]);
     if (x.Cmp(p) >= 0) {
         return (default, default);
     }
@@ -222,7 +222,7 @@ public static (ж<bigꓸInt> x, ж<bigꓸInt> y) UnmarshalCompressed(Curve curve
     return (x, y);
 }
 
-internal static void panicIfNotOnCurve(Curve curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy) {
+internal static void panicIfNotOnCurve(Curve curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 

@@ -7,6 +7,7 @@ namespace go;
 
 using @unsafe = unsafe_package;
 using ꓸꓸꓸnint = Span<nint>;
+using static syscall_package;
 
 partial class syscall_package {
 
@@ -22,11 +23,15 @@ public static nint CmsgSpace(nint datalen) {
     return cmsgAlignOf(SizeofCmsghdr) + cmsgAlignOf(datalen);
 }
 
+} partial class syscallᴛCmsghdr {
+
 internal static @unsafe.Pointer data(this ж<Cmsghdr> Ꮡh, uintptr offset) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     return (@unsafe.Pointer)((uintptr)(uintptr)@unsafe.Pointer.FromRef(ref h) + (uintptr)cmsgAlignOf(SizeofCmsghdr) + offset);
 }
+
+} partial class syscall_package {
 
 // SocketControlMessage represents a socket control message.
 partial struct SocketControlMessage {

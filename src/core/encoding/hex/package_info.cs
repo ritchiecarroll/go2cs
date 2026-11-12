@@ -60,7 +60,7 @@ using static go.encoding.hex_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/hex/hex.go", "hex.cs", "ABROkJzCgoKCgpSqooKCgtzKgqqQAAES8pKCgpSCgoKUgpSClKaClJSssoKCgqiSgoIAAhLigoKqooKmuJSCgoIACxqSpqKCgoKmgoKCgpQACRiiprSCkoKCgoSClNyClIKCgqaClKyyAAsYgoKU5rKC3IKmgoKCgoKCgoKCpoKCgpSCgqaCgpSCgpSCgoKCgoKCgoKUpqa0gpSCgpSCgoKCgoKCgoKCgpSCgpSUgoKC")]
+[assembly: GoPositionMap("encoding/hex/hex.go", "hex.cs", "ABVOkJzCgoKCgpSqooKCgtzqgsqQAAES8pKCgpSCgoKUgpSClKaClJSssoKCgqiSgoIAAhLigoKqooKmuJSCgoIACxqSxqKCgoKmgoKCgpQACxiixrSCkoKCgoSClNyClIKCgqaClMyyAAsYgoKUAAgGsoLcgqaCgoKCgoKCgoKmgoKClIKCpoKClIKClIKCgoKCgoKCgpSmprSClIKClIKCgoKCgoKCgoKClIKClJSCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -95,3 +95,16 @@ public static partial class hex_package
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(hex_package.InvalidByteError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hexᴛInvalidByteError;
+[GoMethodHost(typeof(hex_package.decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hexᴛdecoder;
+[GoMethodHost(typeof(hex_package.dumper)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hexᴛdumper;
+[GoMethodHost(typeof(hex_package.encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hexᴛencoder;
+// </MethodHolders>

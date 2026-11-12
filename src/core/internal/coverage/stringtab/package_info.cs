@@ -55,7 +55,7 @@ using static go.@internal.coverage.stringtab_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/coverage/stringtab/stringtab.go", "stringtab.cs", "ABk2koKokqqigpSClIKCgqqigoKCgoKCgoKUqsKCgoKCgoKUlICCpIKAgqSAgoKCtq7CAAkYoqaokoKCgoK6kqiS", "71-80:1")]
+[assembly: GoPositionMap("internal/coverage/stringtab/stringtab.go", "stringtab.cs", "ABw2koKokqqigpSClIKCgqqigoKCgoKCgoKUqsKCgoKCgoKUlICCpIKAgqSAgoKCtq7CAAsYoqbIkoKCgoK6kqiS", "71-80:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
@@ -86,3 +86,14 @@ public static partial class stringtab_package
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(stringtab_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringtabᴛReader;
+[GoMethodHost(typeof(stringtab_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringtabᴛWriter;
+// </MethodHolders>

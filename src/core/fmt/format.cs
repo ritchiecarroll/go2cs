@@ -6,6 +6,7 @@ namespace go;
 using strconv = strconv_package;
 using utf8 = unicode.utf8_package;
 using unicode;
+using static fmt_package;
 
 partial class fmt_package {
 
@@ -44,6 +45,8 @@ partial struct fmt {
     // avoids padding at the end of the struct on 32 bit architectures.
     internal array<byte> intbuf = new(68);
 }
+
+} partial class fmtᴛfmt {
 
 internal static void clearflags(this ref fmt f) {
     f.fmtFlags = new fmtFlags();
@@ -619,4 +622,4 @@ internal static void fmtFloat(this ref fmt f, float64 v, nint size, rune verb, n
     f.pad(num[1..]);
 }
 
-} // end fmt_package
+} // end fmtᴛfmt

@@ -5,6 +5,7 @@ namespace go.@internal.runtime;
 
 using bytealg = go.@internal.bytealg_package;
 using go.@internal;
+using static cgroup_package;
 
 partial class cgroup_package {
 
@@ -12,9 +13,13 @@ partial class cgroup_package {
 // which cannot be imported from a runtime package.
 partial struct stringError /*@string*/;
 
+} partial class cgroupᴛstringError {
+
 internal static @string Error(this stringError e) {
     return (@string)e;
 }
+
+} partial class cgroup_package {
 
 // All errors are explicit converted to type error in global initialization to
 // ensure that the linker allocates a static interface value. This is necessary
@@ -62,6 +67,8 @@ internal static ж<lineReader> newLineReader(nint fd, slice<byte> scratch, Func<
         newline: -1
     ));
 }
+
+} partial class cgroupᴛlineReader {
 
 // next advances to the next line.
 //
@@ -174,4 +181,4 @@ internal static slice<byte> line(this ref lineReader r) {
     return r.scratch.slice(0, r.newline);
 }
 
-} // end cgroup_package
+} // end cgroupᴛlineReader

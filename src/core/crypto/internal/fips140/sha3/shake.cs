@@ -11,6 +11,7 @@ using bits = math.bits_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140deps;
 using math;
+using static sha3_package;
 
 partial class sha3_package {
 
@@ -61,6 +62,8 @@ internal static ж<SHAKE> newCShake(ж<SHAKE> Ꮡc, slice<byte> N, slice<byte> S
     return Ꮡc;
 }
 
+} partial class sha3ᴛSHAKE {
+
 public static nint BlockSize(this ref SHAKE s) { return s.d.BlockSize(); }
 public static nint Size(this ref SHAKE s) { return s.d.Size(); }
 
@@ -110,6 +113,10 @@ public static (slice<byte>, error) AppendBinary(this ref SHAKE s, slice<byte> b)
     return (b, default);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static ref readonly @string sha3InvalidHashStateˢ => ref sha3InvalidHashStateˢᵇ;
+private static readonly @string sha3InvalidHashStateˢᵇ = "sha3: invalid hash state"u8;
+
 public static error UnmarshalBinary(this ref SHAKE s, slice<byte> b) {
     if (len(b) < marshaledSize) {
         return errors.New(sha3InvalidHashStateˢ);
@@ -120,6 +127,8 @@ public static error UnmarshalBinary(this ref SHAKE s, slice<byte> b) {
     s.initBlock = bytes.Clone(b[(int)(marshaledSize)..]);
     return default;
 }
+
+} partial class sha3_package {
 
 // NewShake128 creates a new SHAKE128 XOF.
 public static ж<SHAKE> NewShake128() {

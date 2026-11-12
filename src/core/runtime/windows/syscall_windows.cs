@@ -10,6 +10,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime.syscall;
 using ꓸꓸꓸuintptr = Span<uintptr>;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -64,6 +65,8 @@ partial struct abiPart {
     internal uintptr len;
 }
 
+} partial class runtimeᴛabiPart {
+
 internal static bool tryMerge(this ref abiPart a, abiPart b) {
     if (a.kind != abiPartStack || b.kind != abiPartStack) {
         return false;
@@ -74,6 +77,8 @@ internal static bool tryMerge(this ref abiPart a, abiPart b) {
     }
     return false;
 }
+
+} partial class runtime_package {
 
 // abiDesc specifies how to translate from a C frame to a Go
 // frame. This does not specify how to translate back because
@@ -91,7 +96,9 @@ partial struct abiDesc {
     internal uintptr retOffset;
 }
 
-internal static void assignArg(this ref abiDesc Δp, ж<_type> Ꮡt) {
+} partial class runtimeᴛabiDesc {
+
+internal static void assignArg(this ref abiDesc p, ж<_type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Size_ > goarch.PtrSize) {
@@ -114,7 +121,7 @@ internal static void assignArg(this ref abiDesc Δp, ж<_type> Ꮡt) {
 
     if (t.Size_ == 0) {
         // The Go ABI aligns for zero-sized types.
-        Δp.dstStackSize = alignUp(Δp.dstStackSize, (uintptr)t.Align_);
+        p.dstStackSize = alignUp(p.dstStackSize, (uintptr)t.Align_);
         return;
     }
 
@@ -126,21 +133,21 @@ internal static void assignArg(this ref abiDesc Δp, ж<_type> Ꮡt) {
     // is already pointing to the right place for smaller
     // arguments.
 
-    var oldParts = Δp.parts;
-    if (Δp.tryRegAssignArg(Ꮡt, 0)) {
+    var oldParts = p.parts;
+    if (p.tryRegAssignArg(Ꮡt, 0)) {
         // Account for spill space.
         //
         // TODO(mknyszek): Remove this when we no longer have
         // caller reserved spill space.
-        Δp.dstSpill = alignUp(Δp.dstSpill, (uintptr)t.Align_);
-        Δp.dstSpill += t.Size_;
+        p.dstSpill = alignUp(p.dstSpill, (uintptr)t.Align_);
+        p.dstSpill += t.Size_;
     } else {
         // Register assignment failed.
         // Undo the work and stack assign.
-        Δp.parts = oldParts;
+        p.parts = oldParts;
 
         // The Go ABI aligns arguments.
-        Δp.dstStackSize = alignUp(Δp.dstStackSize, (uintptr)t.Align_);
+        p.dstStackSize = alignUp(p.dstStackSize, (uintptr)t.Align_);
 
         // Copy just the size of the argument. Note that this
         // could be a small by-value struct, but C and Go
@@ -148,21 +155,21 @@ internal static void assignArg(this ref abiDesc Δp, ж<_type> Ꮡt) {
         // directly, too.
         var part = new abiPart(
             kind: abiPartStack,
-            srcStackOffset: Δp.srcStackSize,
-            dstStackOffset: Δp.dstStackSize,
+            srcStackOffset: p.srcStackSize,
+            dstStackOffset: p.dstStackSize,
             len: t.Size_
         );
         // Add this step to the adapter.
-        if (len(Δp.parts) == 0 || !Δp.parts[len(Δp.parts) - 1].tryMerge(part)) {
-            Δp.parts = append(Δp.parts, part);
+        if (len(p.parts) == 0 || !p.parts[len(p.parts) - 1].tryMerge(part)) {
+            p.parts = append(p.parts, part);
         }
         // The Go ABI packs arguments.
-        Δp.dstStackSize += t.Size_;
+        p.dstStackSize += t.Size_;
     }
 
     // cdecl, stdcall, and fastcall pad arguments to word size.
     // TODO(rsc): On arm64 do we need to skip the caller's saved LR?
-    Δp.srcStackSize += goarch.PtrSize;
+    p.srcStackSize += goarch.PtrSize;
 }
 
 // tryRegAssignArg tries to register-assign a value of type t.
@@ -171,26 +178,26 @@ internal static void assignArg(this ref abiDesc Δp, ж<_type> Ꮡt) {
 // Assumes t.size <= goarch.PtrSize and t.size != 0.
 //
 // Returns whether the assignment succeeded.
-internal static bool tryRegAssignArg(this ref abiDesc Δp, ж<_type> Ꮡt, uintptr offset) {
+internal static bool tryRegAssignArg(this ref abiDesc p, ж<_type> Ꮡt, uintptr offset) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var k = t.Kind();
     switch (k) {
     case var ᴛ when ᴛ == abi.Bool || ᴛ == abi.Int || ᴛ == abi.Int8 || ᴛ == abi.Int16 || ᴛ == abi.Int32 || ᴛ == abi.Uint || ᴛ == abi.Uint8 || ᴛ == abi.Uint16 || ᴛ == abi.Uint32 || ᴛ == abi.Uintptr || ᴛ == abi.Pointer || ᴛ == abi.UnsafePointer: {
         // Assign a register for all these types.
-        return Δp.assignReg(t.Size_, offset);
+        return p.assignReg(t.Size_, offset);
     }
     case var ᴛ when ᴛ == abi.Int64 || ᴛ == abi.Uint64: {
         // Only register-assign if the registers are big enough.
         if (goarch.PtrSize == 8) {
-            return Δp.assignReg(t.Size_, offset);
+            return p.assignReg(t.Size_, offset);
         }
         break;
     }
     case var ᴛ when ᴛ == abi.Array: {
         var at = Ꮡt.Reinterpret<_type, arraytype>();
         if (at.of(arraytype.ᏑLen).Value == 1) {
-            return Δp.tryRegAssignArg(at.of(arraytype.ᏑElem).Value, offset); // TODO fix when runtime is fully commoned up w/ abi.Type
+            return p.tryRegAssignArg(at.of(arraytype.ᏑElem).Value, offset); // TODO fix when runtime is fully commoned up w/ abi.Type
         }
         break;
     }
@@ -198,7 +205,7 @@ internal static bool tryRegAssignArg(this ref abiDesc Δp, ж<_type> Ꮡt, uintp
         var st = Ꮡt.Reinterpret<_type, structtype>();
         foreach (var i in range(len(st.Fields))) {
             var f = Ꮡ(st.Fields, i);
-            if (!Δp.tryRegAssignArg(f.Typ, offset + f.Offset)) {
+            if (!p.tryRegAssignArg(f.Typ, offset + f.Offset)) {
                 return false;
             }
         }
@@ -214,19 +221,21 @@ internal static bool tryRegAssignArg(this ref abiDesc Δp, ж<_type> Ꮡt, uintp
 // value in the C ABI space.
 //
 // Returns whether the assignment was successful.
-internal static bool assignReg(this ref abiDesc Δp, uintptr size, uintptr offset) {
-    if (Δp.dstRegisters >= intArgRegs) {
+internal static bool assignReg(this ref abiDesc p, uintptr size, uintptr offset) {
+    if (p.dstRegisters >= intArgRegs) {
         return false;
     }
-    Δp.parts = append(Δp.parts, new abiPart(
+    p.parts = append(p.parts, new abiPart(
         kind: abiPartReg,
-        srcStackOffset: Δp.srcStackSize + offset,
-        dstRegister: Δp.dstRegisters,
+        srcStackOffset: p.srcStackSize + offset,
+        dstRegister: p.dstRegisters,
         len: size
     ));
-    Δp.dstRegisters++;
+    p.dstRegisters++;
     return true;
 }
+
+} partial class runtime_package {
 
 partial struct winCallbackKey {
     internal ж<funcval> fn;

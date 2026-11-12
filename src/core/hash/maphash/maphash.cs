@@ -15,6 +15,7 @@ namespace go.hash;
 using hash = hash_package;
 using abi = @internal.abi_package;
 using @internal;
+using static maphash_package;
 
 partial class maphash_package {
 
@@ -29,7 +30,7 @@ partial class maphash_package {
 //
 // Each Seed value is local to a single process and cannot be serialized
 // or otherwise recreated in a different process.
-partial struct ΔSeed {
+partial struct Seed {
     internal uint64 s;
 }
 
@@ -41,7 +42,7 @@ partial struct ΔSeed {
 //	h.SetSeed(seed)
 //	h.Write(b)
 //	return h.Sum64()
-public static uint64 Bytes(ΔSeed seed, slice<byte> b) {
+public static uint64 Bytes(Seed seed, slice<byte> b) {
     var state = seed.s;
     if (state == 0) {
         throw panic("maphash: use of uninitialized Seed");
@@ -65,7 +66,7 @@ public static uint64 Bytes(ΔSeed seed, slice<byte> b) {
 //	h.SetSeed(seed)
 //	h.WriteString(s)
 //	return h.Sum64()
-public static uint64 String(ΔSeed seed, @string s) {
+public static uint64 String(Seed seed, @string s) {
     var state = seed.s;
     if (state == 0) {
         throw panic("maphash: use of uninitialized Seed");
@@ -102,8 +103,8 @@ public static uint64 String(ΔSeed seed, @string s) {
 // each can declare its own Hash and call SetSeed with a common Seed.
 partial struct Hash {
     internal array<Action> _ = new(0);       // not comparable
-    internal ΔSeed seed;                     // initial seed used for this hash
-    internal ΔSeed state;                    // current hash of all flushed bytes
+    internal Seed seed;                      // initial seed used for this hash
+    internal Seed state;                     // current hash of all flushed bytes
     internal array<byte> buf = new(bufSize); // unflushed byte buffer
     internal nint n;                         // number of unflushed bytes
 }
@@ -113,6 +114,8 @@ partial struct Hash {
 // not the sequence of WriteByte/Write/WriteString calls,
 // by always calling rthash with a full buffer (except for the tail).
 internal static UntypedInt bufSize => 128;
+
+} partial class maphashᴛHash {
 
 // initSeed seeds the hash if necessary.
 // initSeed is called lazily before any operation that actually uses h.seed/h.state.
@@ -197,7 +200,7 @@ public static (nint, error) WriteString(this ref Hash h, @string s) {
 }
 
 // Seed returns h's seed value.
-public static ΔSeed Seed(this ref Hash h) {
+public static Seed Seed(this ref Hash h) {
     h.initSeed();
     return h.seed;
 }
@@ -207,7 +210,7 @@ public static ΔSeed Seed(this ref Hash h) {
 // Two [Hash] objects with the same seed behave identically.
 // Two [Hash] objects with different seeds will very likely behave differently.
 // Any bytes added to h before this call will be discarded.
-public static void SetSeed(this ref Hash h, ΔSeed seed) {
+public static void SetSeed(this ref Hash h, Seed seed) {
     if (seed.s == 0) {
         throw panic("maphash: use of uninitialized Seed");
     }
@@ -246,8 +249,10 @@ public static uint64 Sum64(this ref Hash h) {
     return rthash(h.buf.slice(0, h.n), h.state.s);
 }
 
+} partial class maphash_package {
+
 // MakeSeed returns a new random seed.
-public static ΔSeed MakeSeed() {
+public static Seed MakeSeed() {
     uint64 s = default;
     for (;;) {
         s = randUint64();
@@ -257,8 +262,10 @@ public static ΔSeed MakeSeed() {
             break;
         }
     }
-    return new ΔSeed(s: s);
+    return new Seed(s: s);
 }
+
+} partial class maphashᴛHash {
 
 // Sum appends the hash's current 64-bit value to b.
 // It exists for implementing [hash.Hash].
@@ -289,10 +296,12 @@ public static (hash.Cloner, error) Clone(this ref Hash h) {
     return (new HashжCloner(Ꮡr), default);
 }
 
+} partial class maphash_package {
+
 // Comparable returns the hash of comparable value v with the given seed
 // such that Comparable(s, v1) == Comparable(s, v2) if v1 == v2.
 // If v != v, then the resulting hash is randomly distributed.
-public static uint64 Comparable<T>(ΔSeed seed, T v) {
+public static uint64 Comparable<T>(Seed seed, T v) {
     abi.EscapeNonString(v);
     return comparableHash(v, seed);
 }

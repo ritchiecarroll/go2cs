@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
 // </ImportedTypeAliases>
 
 using go;
@@ -75,8 +74,8 @@ using static go.crypto.elliptic_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/elliptic/elliptic.go", "elliptic.cs", "AD+IAZ4ACgKCgoKUgoKCuKamgqaUAAISAAkClJSClIKUrOKCgoKCggAMGgABEAAJAoKmgoKUgpSCgoKClIKUrOKCpoKClIKUgoKCpoKCgpSClIKUptaCpoLsgoKCggACFPKCAAIWAAgCggACFPKCAAIU8oI=")]
-[assembly: GoPositionMap("crypto/elliptic/nistec.go", "nistec.cs", "AA0auIIACxi4ggALGLiCAAsiuIIAJl6ipvaClIIACAYACAaCpoKUgqaCgoKCgqbSgqaUgoKCpqKCgpSCgpSmooKClKrCgoKUgoKUgqaigoKUgoKClKaigoKClKbSgqaCgsqCgoKmooKUgoKUpoKCgpSmgoKClA==", "", "", "19=bigFromDecimal/1/2/4,bigFromDecimal/2/2/5,bigFromHex/1/3/6,bigFromHex/2/3/7,bigFromHex/3/3/8;36=bigFromDecimal/1/2/4,bigFromDecimal/2/2/5,bigFromHex/1/3/6,bigFromHex/2/3/7,bigFromHex/3/3/8;53=bigFromDecimal/1/2/4,bigFromDecimal/2/2/6,bigFromHex/1/3/8,bigFromHex/2/3/10,bigFromHex/3/3/12;70=bigFromDecimal/1/2/4,bigFromDecimal/2/2/7,bigFromHex/1/3/10,bigFromHex/2/3/13,bigFromHex/3/3/16")]
-[assembly: GoPositionMap("crypto/elliptic/params.go", "params.cs", "ABkwggACFgAIAoKUgpSCgpQAAhIADAaCpoS4gpSs4oKClKrigqaClIKCgoKCAAISAAoGgpSClIKCuuSCgoKCgpSCgoKCpoKCgpSCgoKCgoKClIKClIKCgoKCgoKClIKClIKUgoKCgoKUgoKCgoKClIKCgoKClAACEgAKBoKUlIK6tIKCgoKCgpSCgoKClJSCgoKCgpSUgoKCgpSCgpSUgoKClJSCgpSCgpSUAAISAAoGgpSUgpSigoKClLgAAhIACgaCpqaCgoKm", "", "", "69=Sign/2/2/1,Cmp/2/2/1")]
+[assembly: GoPositionMap("crypto/elliptic/nistec.go", "nistec.cs", "AA4auIIACxi4ggALGLiCAAsiuIIAKF6ipvaClIIACAYACAaCpoKUgqaCgoKCgqbSgqaUgoKCpqKCgpSCgpSmooKClKrCgoKUgoKUgqaigoKUgoKClKaigoKClKbSgqaCgsqCgoKmooKUgoKUxoKCgpSmgoKClA==", "", "", "20=bigFromDecimal/1/2/4,bigFromDecimal/2/2/5,bigFromHex/1/3/6,bigFromHex/2/3/7,bigFromHex/3/3/8;37=bigFromDecimal/1/2/4,bigFromDecimal/2/2/5,bigFromHex/1/3/6,bigFromHex/2/3/7,bigFromHex/3/3/8;54=bigFromDecimal/1/2/4,bigFromDecimal/2/2/6,bigFromHex/1/3/8,bigFromHex/2/3/10,bigFromHex/3/3/12;71=bigFromDecimal/1/2/4,bigFromDecimal/2/2/7,bigFromHex/1/3/10,bigFromHex/2/3/13,bigFromHex/3/3/16")]
+[assembly: GoPositionMap("crypto/elliptic/params.go", "params.cs", "ABwwggACFgAIAoKUgpSCgpQAAhIADAaCpoS4gpTM4oKClMrigqaClIKCgoKCAAISAAoGgpSClIKCuuSCgoKCgpSCgoKCpoKCgpSCgoKCgoKClIKClIKCgoKCgoKClIKClIKUgoKCgoKUgoKCgoKClIKCgoKClAACEgAKBoKUlIK6tIKCgoKCgpSCgoKClJSCgoKCgpSUgoKCgpSCgpSUgoKClJSCgpSCgpSUAAISAAoGgpSUgpSigoKClLgAAhIACgaCpsaCgoKm", "", "", "72=Sign/2/2/1,Cmp/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -112,3 +111,14 @@ public static partial class elliptic_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(elliptic_package.CurveParams)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ellipticᴛCurveParams;
+[GoMethodHost(typeof(elliptic_package.nistCurve<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ellipticᴛnistCurve;
+// </MethodHolders>

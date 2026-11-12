@@ -65,11 +65,11 @@ using static go.vendor.golang.org.x.net.http2.hpack_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/net/http2/hpack/encode.go", "encode.cs", "AB1GotyCgqzSlIKCgpSCpoKClIKCpoKUpoKClAACFAAKAoKCpoKCpqyygpSClIKokgACFPKCgoK6kqqigoKCAAIU8oKCAAIU8oKCgpSUgoKqooKCggACENKCgpSCgoKUAAIQ0oKCgoKClIKUAAIQ0oKUgpQ=")]
-[assembly: GoPositionMap("vendor/golang.org/x/net/http2/hpack/hpack.go", "hpack.cs", "ABUsgu6CAAsiwuaCgoKUqAANGgAUOLLKgoKCypzCrLIAAhTgmJCaoqyyAAoWgoKmgoKCqJKCgoKUprimxIKUgpSCyoKuAAgCgoKQkoCSgIKkgIKkAAkMsoKClIKmsri4gpSCgqaCgozSgpSClIKCptwABxSC3MKCytra2tqmqJKCgoKUgoKUgqiSgoKCpoKCgoKCgpSUgoKmgoKUgoKCgqaCgqaCgpSCpoKCgqaClAAICLaCpoKCgpSClIKCpgABFAAKAoKUgpSCgpSCpoKCgoKCgoKClIKCpq7ygpSCgoKU3JSClIKCAAcQgoKUgoKCgoKUgoI=", "221-221:1;222-222:2", "", "", "", "227:21,228:13")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/http2/hpack/encode.go", "encode.cs", "AB5GotyCgszSlIKCgpSCpoKClIKCpoKUpoKClAACFAAKAoKCpoKCpqyygpSClIKokgACFPKCgoK6ksqigoKCAAIU8oKCAAIU8oKCgpSUgoKqooKCggACENKCgpSCgoKUAAIQ0oKCgoKClIKUAAIQ0oKUgpQ=")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/http2/hpack/hpack.go", "hpack.cs", "ABgsggAKDoIADyLC5oKCgpSoAA0aABY4ssqCgoLKvMKssgACFOCYkJqirLIADhaCgqaCgoKokoKCgpTGuKbEgpSClILKgq4ACAKCgpCSgJKAgqSAgqQACQyygoKUgqayuLiClIKCpoKCjNKClIKUgoKm/AAJFIL8woLK2tra2qaokoKCgpSCgpSCqJKCgoKmgoKCgoKClJSCgqaCgpSCgoKCpoKCpoKClIKmgoKCpoKUAAgItoKmgoKClIKUgoLGAAEUAAoCgpSClIKClIKmgoKCgoKCgoKUgoKmzvKClIKCgpTclIKUgoIACxCCgpSCgoKCgpSCgg==", "221-221:1;222-222:2", "", "", "", "248:21,249:13")]
 [assembly: GoPositionMap("vendor/golang.org/x/net/http2/hpack/huffman.go", "huffman.cs", "AAwcztKCgoKClNiygoKCgpT6mtKCuKKCgoKCgoKCgpSCgpSCgoKUuIKCgpSClIKUgoKClKaUlKYAECaCAAYQgoKmgoKUlJSClIKCgoKClJSCpIKCgs6muIKCgoKCgoKCuIKqgoKmlKSkgqSCpoKqooKClA==")]
 [assembly: GoPositionMap("vendor/golang.org/x/net/http2/hpack/static_table.go", "static_table.cs", "7A==")]
-[assembly: GoPositionMap("vendor/golang.org/x/net/http2/hpack/tables.go", "tables.cs", "AClagoKokqiSgoKCqJKClIKCgoKUgqaCgpSCgpQAAiAADwKCgqaAgqSqwoKUgoKUpgCCAoYE")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/http2/hpack/tables.go", "tables.cs", "ACxagoKokqiSgoKCqJKClIKCgoKUgqaCgpSCgpQAAiAADwKCgqaAgqSqwoKUgoKUxgCCAoYE")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.net.http2;
@@ -112,3 +112,20 @@ public static partial class hpack_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(hpack_package.Decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpackᴛDecoder;
+[GoMethodHost(typeof(hpack_package.DecodingError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpackᴛDecodingError;
+[GoMethodHost(typeof(hpack_package.Encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpackᴛEncoder;
+[GoMethodHost(typeof(hpack_package.HeaderField)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpackᴛHeaderField;
+[GoMethodHost(typeof(hpack_package.InvalidIndexError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpackᴛInvalidIndexError;
+[GoMethodHost(typeof(hpack_package.dynamicTable)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpackᴛdynamicTable;
+[GoMethodHost(typeof(hpack_package.headerFieldTable)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpackᴛheaderFieldTable;
+[GoMethodHost(typeof(hpack_package.indexType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpackᴛindexType;
+// </MethodHolders>

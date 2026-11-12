@@ -11,6 +11,7 @@ using regexp = regexp_package;
 using strings = strings_package;
 using sync = go.sync_package;
 using go;
+using static lazyregexp_package;
 
 partial class lazyregexp_package {
 
@@ -21,6 +22,8 @@ partial struct Regexp {
     internal sync.Once once;
     internal ж<regexp.Regexp> rx;
 }
+
+} partial class lazyregexpᴛRegexp {
 
 internal static ж<regexp.Regexp> re(this ж<Regexp> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
@@ -65,6 +68,8 @@ public static bool MatchString(this ж<Regexp> Ꮡr, @string s) {
 public static slice<@string> SubexpNames(this ж<Regexp> Ꮡr) {
     return Ꮡr.re().SubexpNames();
 }
+
+} partial class lazyregexp_package {
 
 internal static bool inTest = len(os.Args) > 0 && strings.HasSuffix(strings.TrimSuffix(os.Args[0], ".exe"), ".test");
 

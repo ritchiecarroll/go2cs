@@ -7,6 +7,7 @@ using bufio = bufio_package;
 using fmt = fmt_package;
 using net = net_package;
 using time = time_package;
+using static http_package;
 
 partial class http_package {
 
@@ -45,6 +46,8 @@ partial interface rwUnwrapper {
 internal partial interface Flush_type /*dyn*/ {
     error FlushError();
 }
+
+} partial class httpᴛResponseController {
 
 // Flush flushes buffered data to the client.
 public static error Flush(this ref ResponseController c) {
@@ -89,9 +92,13 @@ public static (net.Conn, ж<bufio.ReadWriter>, error) Hijack(this ref ResponseCo
     }
 }
 
+} partial class http_package {
+
 internal partial interface SetReadDeadline_type /*dyn*/ {
     error SetReadDeadline(time.Time _);
 }
+
+} partial class httpᴛResponseController {
 
 // SetReadDeadline sets the deadline for reading the entire request, including the body.
 // Reads from the request body after the deadline has been exceeded will return an error.
@@ -116,9 +123,13 @@ public static error SetReadDeadline(this ref ResponseController c, time.Time dea
     }
 }
 
+} partial class http_package {
+
 internal partial interface SetWriteDeadline_type /*dyn*/ {
     error SetWriteDeadline(time.Time _);
 }
+
+} partial class httpᴛResponseController {
 
 // SetWriteDeadline sets the deadline for writing the response.
 // Writes to the response body after the deadline has been exceeded will not block,
@@ -144,9 +155,13 @@ public static error SetWriteDeadline(this ref ResponseController c, time.Time de
     }
 }
 
+} partial class http_package {
+
 internal partial interface EnableFullDuplex_type /*dyn*/ {
     error EnableFullDuplex();
 }
+
+} partial class httpᴛResponseController {
 
 // EnableFullDuplex indicates that the request handler will interleave reads from [Request.Body]
 // with writes to the [ResponseWriter].
@@ -175,6 +190,8 @@ public static error EnableFullDuplex(this ref ResponseController c) {
         }}
     }
 }
+
+} partial class http_package {
 
 // errNotSupported returns an error that Is ErrNotSupported,
 // but is not == to it.

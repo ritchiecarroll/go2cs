@@ -24,6 +24,7 @@ using go.crypto;
 using go.crypto.x509;
 using go.math;
 using go.unicode;
+using static x509_package;
 
 partial class x509_package {
 
@@ -73,6 +74,8 @@ partial struct CertificateInvalidError {
     public InvalidReason Reason;
     public @string Detail;
 }
+
+} partial class x509ᴛCertificateInvalidError {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string x509CertificateIsNotˢ => ref x509CertificateIsNotˢᵇ;
@@ -129,12 +132,16 @@ public static @string Error(this CertificateInvalidError e) {
     return x509UnknownErrorˢ;
 }
 
+} partial class x509_package {
+
 // HostnameError results when the set of authorized names doesn't match the
 // requested name.
 partial struct HostnameError {
     public ж<Certificate> Certificate;
     public @string Host;
 }
+
+} partial class x509ᴛHostnameError {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string x509CertificateReliesOnˢ => ref x509CertificateReliesOnˢᵇ;
@@ -151,11 +158,11 @@ public static @string Error(this HostnameError h) {
     ref var valid = ref heap(new strings.Builder(), out var Ꮡvalid);
     var ip = net.ParseIP(h.Host); if (ip != nil) {
         // Trying to validate an IP
-        if (builtin.len(c.IPAddresses) == 0) {
+        if (len(c.IPAddresses) == 0) {
             return "x509: cannot validate certificate for "u8 + h.Host + " because it doesn't contain any IP SANs"u8;
         }
-        if (builtin.len(c.IPAddresses) >= maxNamesIncluded) {
-            return fmt.Sprintf("x509: certificate is valid for %d IP SANs, but none matched %s"u8, builtin.len(c.IPAddresses), h.Host);
+        if (len(c.IPAddresses) >= maxNamesIncluded) {
+            return fmt.Sprintf("x509: certificate is valid for %d IP SANs, but none matched %s"u8, len(c.IPAddresses), h.Host);
         }
         foreach (var (_, san) in range(c.IPAddresses)) {
             if (valid.Len() > 0) {
@@ -164,8 +171,8 @@ public static @string Error(this HostnameError h) {
             Ꮡvalid.WriteString(san.String());
         }
     } else {
-        if (builtin.len(c.DNSNames) >= maxNamesIncluded) {
-            return fmt.Sprintf("x509: certificate is valid for %d names, but none matched %s"u8, builtin.len(c.DNSNames), h.Host);
+        if (len(c.DNSNames) >= maxNamesIncluded) {
+            return fmt.Sprintf("x509: certificate is valid for %d names, but none matched %s"u8, len(c.DNSNames), h.Host);
         }
         Ꮡvalid.WriteString(strings.Join(c.DNSNames, ", "));
     }
@@ -175,6 +182,8 @@ public static @string Error(this HostnameError h) {
     }
     return "x509: certificate is valid for "u8 + valid.String() + ", not "u8 + h.Host;
 }
+
+} partial class x509_package {
 
 // UnknownAuthorityError results when the certificate issuer is unknown
 partial struct UnknownAuthorityError {
@@ -187,6 +196,8 @@ partial struct UnknownAuthorityError {
     internal ж<Certificate> hintCert;
 }
 
+} partial class x509ᴛUnknownAuthorityError {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string x509CertificateSignedByˢ => ref x509CertificateSignedByˢᵇ;
 private static readonly @string x509CertificateSignedByˢᵇ = "x509: certificate signed by unknown authority"u8;
@@ -195,8 +206,8 @@ public static @string Error(this UnknownAuthorityError e) {
     @string s = x509CertificateSignedByˢ;
     if (e.hintErr != nil) {
         @string certName = e.hintCert.Subject.CommonName;
-        if (builtin.len(certName) == 0) {
-            if (builtin.len(e.hintCert.Subject.Organization) > 0) {
+        if (len(certName) == 0) {
+            if (len(e.hintCert.Subject.Organization) > 0) {
                 certName = e.hintCert.Subject.Organization[0];
             } else {
                 certName = "serial:"u8 + e.hintCert.SerialNumber.String();
@@ -207,10 +218,14 @@ public static @string Error(this UnknownAuthorityError e) {
     return s;
 }
 
+} partial class x509_package {
+
 // SystemRootsError results when we fail to load the system root certificates.
 partial struct SystemRootsError {
     public error Err;
 }
+
+} partial class x509ᴛSystemRootsError {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string x509FailedToLoadSystemˢ => ref x509FailedToLoadSystemˢᵇ;
@@ -225,6 +240,8 @@ public static @string Error(this SystemRootsError se) {
 }
 
 public static error Unwrap(this SystemRootsError se) { return se.Err; }
+
+} partial class x509_package {
 
 // errNotParsed is returned when a certificate without ASN.1 contents is
 // verified. Platform-specific verification needs the ASN.1 contents.
@@ -258,7 +275,7 @@ partial struct VerifyOptions {
     // CertificatePolicies specifies which certificate policy OIDs are
     // acceptable during policy validation. An empty CertificatePolices
     // field implies any valid policy is acceptable.
-    public slice<ΔOID> CertificatePolicies;
+    public slice<OID> CertificatePolicies;
 // The following policy fields are unexported, because we do not expect
 // users to actually need to use them, but are useful for testing the
 // policy validation code.
@@ -285,9 +302,13 @@ partial struct rfc2821Mailbox {
     internal @string local, domain;
 }
 
+} partial class x509ᴛrfc2821Mailbox {
+
 internal static @string String(this rfc2821Mailbox s) {
     return fmt.Sprintf("%s@%s"u8, s.local, s.domain);
 }
+
+} partial class x509_package {
 
 // parseRFC2821Mailbox parses an email address into local and domain parts,
 // based on the ABNF for a “Mailbox” from RFC 2821. According to RFC 5280,
@@ -297,11 +318,11 @@ internal static (rfc2821Mailbox mailbox, bool ok) parseRFC2821Mailbox(@string @i
     rfc2821Mailbox mailbox = default;
     var localPartBytesᴷ = new stackAppend<byte>();
 
-    if (builtin.len(@in) == 0) {
+    if (len(@in) == 0) {
         return (mailbox, false);
     }
 
-    var localPartBytes = new slice<byte>(0, builtin.len(@in) / 2);
+    var localPartBytes = new slice<byte>(0, len(@in) / 2);
 
     if (@in[0] == '"') {
         // Quoted-string = DQUOTE *qcontent DQUOTE
@@ -317,7 +338,7 @@ internal static (rfc2821Mailbox mailbox, bool ok) parseRFC2821Mailbox(@string @i
         @in = @in[1..];
 QuotedString:
         for (;;) {
-            if (builtin.len(@in) == 0) {
+            if (len(@in) == 0) {
                 return (mailbox, false);
             }
             var c = @in[0];
@@ -330,7 +351,7 @@ QuotedString:
             }
             case {} when c is (byte)'\\': {
                 // quoted-pair
-                if (builtin.len(@in) == 0) {
+                if (len(@in) == 0) {
                     return (mailbox, false);
                 }
                 if (@in[0] == 11 || @in[0] == 12 || (1 <= @in[0] && @in[0] <= 9) || (14 <= @in[0] && @in[0] <= 127)) {
@@ -361,7 +382,7 @@ break_QuotedString:;
     } else {
         // Atom ("." Atom)*
 NextChar:
-        while (builtin.len(@in) > 0) {
+        while (len(@in) > 0) {
             // atext from RFC 2822, Section 3.2.4
             var c = @in[0];
 
@@ -373,7 +394,7 @@ NextChar:
                 // continue to argue the point. We choose to
                 // accept it.
                 @in = @in[1..];
-                if (builtin.len(@in) == 0) {
+                if (len(@in) == 0) {
                     return (mailbox, false);
                 }
                 fallthrough = true;
@@ -389,7 +410,7 @@ continue_NextChar:;
         }
 break_NextChar:;
 
-        if (builtin.len(localPartBytes) == 0) {
+        if (len(localPartBytes) == 0) {
             return (mailbox, false);
         }
 
@@ -398,12 +419,12 @@ break_NextChar:;
         // or end the local part, nor may two or more consecutive
         // periods appear.”
         var twoDots = slice<byte>([(byte)'.', (byte)'.']);
-        if (localPartBytes[0] == '.' || localPartBytes[builtin.len(localPartBytes) - 1] == '.' || bytes.Contains(localPartBytes, twoDots)) {
+        if (localPartBytes[0] == '.' || localPartBytes[len(localPartBytes) - 1] == '.' || bytes.Contains(localPartBytes, twoDots)) {
             return (mailbox, false);
         }
     }
 
-    if (builtin.len(@in) == 0 || @in[0] != '@') {
+    if (len(@in) == 0 || @in[0] != '@') {
         return (mailbox, false);
     }
     @in = @in[1..];
@@ -426,7 +447,7 @@ internal static (slice<@string> reverseLabels, bool ok) domainToReverseLabels(@s
     slice<@string> reverseLabels = default;
 
     reverseLabels = new slice<@string>(0, strings.Count(domain, ".") + 1);
-    while (builtin.len(domain) > 0) {
+    while (len(domain) > 0) {
         nint i = strings.LastIndexByte(domain, (byte)'.'); if (i == -1) {
             reverseLabels = append(reverseLabels, domain);
             domain = ""u8;
@@ -441,13 +462,13 @@ internal static (slice<@string> reverseLabels, bool ok) domainToReverseLabels(@s
         }
     }
 
-    if (builtin.len(reverseLabels) > 0 && builtin.len(reverseLabels[0]) == 0) {
+    if (len(reverseLabels) > 0 && len(reverseLabels[0]) == 0) {
         // An empty label at the end indicates an absolute value.
         return (default, false);
     }
 
     foreach (var (_, label) in range(reverseLabels)) {
-        if (builtin.len(label) == 0) {
+        if (len(label) == 0) {
             // Empty labels are otherwise invalid.
             return (default, false);
         }
@@ -463,6 +484,8 @@ internal static (slice<@string> reverseLabels, bool ok) domainToReverseLabels(@s
     return (reverseLabels, true);
 }
 
+} partial class x509ᴛCertificate {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string x509InternalErrorEmptyˢ => ref x509InternalErrorEmptyˢᵇ;
 private static readonly @string x509InternalErrorEmptyˢᵇ = "x509: internal error: empty chain when appending CA cert"u8;
@@ -473,12 +496,12 @@ internal static error isValid(this ж<Certificate> Ꮡc, nint certType, slice<ж
     ref var c = ref Ꮡc.DerefOrNull();
     ref var opts = ref Ꮡopts.DerefOrNull();
 
-    if (builtin.len(c.UnhandledCriticalExtensions) > 0) {
+    if (len(c.UnhandledCriticalExtensions) > 0) {
         return new UnhandledCriticalExtension();
     }
 
-    if (builtin.len(currentChain) > 0) {
-        var child = currentChain[builtin.len(currentChain) - 1];
+    if (len(currentChain) > 0) {
+        var child = currentChain[len(currentChain) - 1];
         if (!bytes.Equal(child.RawIssuer, c.RawSubject)) {
             return new CertificateInvalidError(Ꮡc, NameMismatch, "");
         }
@@ -503,7 +526,7 @@ internal static error isValid(this ж<Certificate> Ꮡc, nint certType, slice<ж
     }
 
     if (certType == intermediateCertificate || certType == rootCertificate) {
-        if (builtin.len(currentChain) == 0) {
+        if (len(currentChain) == 0) {
             return errors.New(x509InternalErrorEmptyˢ);
         }
     }
@@ -530,7 +553,7 @@ internal static error isValid(this ж<Certificate> Ꮡc, nint certType, slice<ж
     }
 
     if (c.BasicConstraintsValid && c.MaxPathLen >= 0) {
-        nint numIntermediates = builtin.len(currentChain) - 1;
+        nint numIntermediates = len(currentChain) - 1;
         if (numIntermediates > c.MaxPathLen) {
             return new CertificateInvalidError(Ꮡc, TooManyIntermediates, "");
         }
@@ -578,7 +601,7 @@ public static (slice<slice<ж<Certificate>>>, error) Verify(this ж<Certificate>
 
     // Platform-specific verification needs the ASN.1 contents so
     // this makes the behavior consistent across platforms.
-    if (builtin.len(c.Raw) == 0) {
+    if (len(c.Raw) == 0) {
         return (default, errNotParsed);
     }
     for (nint i = 0; i < opts.Intermediates.len(); i++) {
@@ -586,7 +609,7 @@ public static (slice<slice<ж<Certificate>>>, error) Verify(this ж<Certificate>
         if (errΔ1 != nil) {
             return (default, fmt.Errorf("crypto/x509: error fetching intermediate: %w"u8, errΔ1));
         }
-        if (builtin.len(cΔ1.Raw) == 0) {
+        if (len(cΔ1.Raw) == 0) {
             return (default, errNotParsed);
         }
     }
@@ -622,7 +645,7 @@ public static (slice<slice<ж<Certificate>>>, error) Verify(this ж<Certificate>
         return (default, err);
     }
 
-    if (builtin.len(opts.DNSName) > 0) {
+    if (len(opts.DNSName) > 0) {
         err = Ꮡc.VerifyHostname(opts.DNSName);
         if (err != nil) {
             return (default, err);
@@ -648,7 +671,7 @@ public static (slice<slice<ж<Certificate>>>, error) Verify(this ж<Certificate>
         }
     }
 
-    if (builtin.len(opts.KeyUsages) == 0) {
+    if (len(opts.KeyUsages) == 0) {
         opts.KeyUsages = [ExtKeyUsageServerAuth];
     }
 
@@ -678,7 +701,7 @@ public static (slice<slice<ж<Certificate>>>, error) Verify(this ж<Certificate>
         return false;
     });
 
-    if (builtin.len(candidateChains) == 0) {
+    if (len(candidateChains) == 0) {
         if (constraintsHintErr != nil) {
             return (default, constraintsHintErr); // Preserve previous constraint behavior
         }
@@ -699,10 +722,12 @@ public static (slice<slice<ж<Certificate>>>, error) Verify(this ж<Certificate>
     return (candidateChains, default);
 }
 
+} partial class x509_package {
+
 internal static slice<ж<Certificate>> appendToFreshChain(slice<ж<Certificate>> chain, ж<Certificate> cert) {
-    var n = new slice<ж<Certificate>>(builtin.len(chain) + 1);
+    var n = new slice<ж<Certificate>>(len(chain) + 1);
     copy(n, chain);
-    n[builtin.len(chain)] = cert;
+    n[len(chain)] = cert;
     return n;
 }
 
@@ -771,6 +796,8 @@ internal partial struct buildChains_type /*dyn*/ {
     internal nint certType;
     internal slice<potentialParent> potentials;
 }
+
+} partial class x509ᴛCertificate {
 
 internal static (slice<slice<ж<Certificate>>> chains, error err) buildChains(this ж<Certificate> Ꮡc, slice<ж<Certificate>> currentChain, ж<nint> sigChecks, ж<VerifyOptions> Ꮡopts) {
     slice<slice<ж<Certificate>>> chains = default;
@@ -850,15 +877,17 @@ continue_candidateLoop:;
     }
 break_candidateLoop:;
 
-    if (builtin.len(chains) > 0) {
+    if (len(chains) > 0) {
         err = default;
     }
-    if (builtin.len(chains) == 0 && err == nil) {
+    if (len(chains) == 0 && err == nil) {
         err = new UnknownAuthorityError(Ꮡc, hintErr, hintCert);
     }
 
     return (chains, err);
 }
+
+} partial class x509_package {
 
 internal static bool validHostnamePattern(@string host) { return validHostname(host, true); }
 internal static bool validHostnameInput(@string host) { return validHostname(host, false); }
@@ -870,7 +899,7 @@ internal static bool validHostname(@string host, bool isPattern) {
     if (!isPattern) {
         host = strings.TrimSuffix(host, ".");
     }
-    if (builtin.len(host) == 0) {
+    if (len(host) == 0) {
         return false;
     }
     if (host == "*"u8) {
@@ -925,13 +954,13 @@ internal static bool matchExactly(@string hostA, @string hostB) {
 internal static bool matchHostnames(@string pattern, slice<@string> hostParts) {
     pattern = toLowerCaseASCII(pattern);
 
-    if (builtin.len(pattern) == 0 || builtin.len(hostParts) == 0) {
+    if (len(pattern) == 0 || len(hostParts) == 0) {
         return false;
     }
 
     var patternParts = strings.Split(pattern, ".");
 
-    if (builtin.len(patternParts) != builtin.len(hostParts)) {
+    if (len(patternParts) != len(hostParts)) {
         return false;
     }
 
@@ -979,6 +1008,8 @@ internal static @string toLowerCaseASCII(@string @in) {
     return (@string)@out;
 }
 
+} partial class x509ᴛCertificate {
+
 // VerifyHostname returns nil if c is a valid certificate for the named host.
 // Otherwise it returns an error describing the mismatch.
 //
@@ -993,8 +1024,8 @@ public static error VerifyHostname(this ж<Certificate> Ꮡc, @string h) {
 
     // IP addresses may be written in [ ].
     @string candidateIP = h;
-    if (builtin.len(h) >= 3 && h[0] == '[' && h[builtin.len(h) - 1] == ']') {
-        candidateIP = h.slice(1, builtin.len(h) - 1);
+    if (len(h) >= 3 && h[0] == '[' && h[len(h) - 1] == ']') {
+        candidateIP = h.slice(1, len(h) - 1);
     }
     var ip = net.ParseIP(candidateIP); if (ip != nil) {
         // We only match IP addresses against IP SANs.
@@ -1031,28 +1062,30 @@ public static error VerifyHostname(this ж<Certificate> Ꮡc, @string h) {
     return new HostnameError(Ꮡc, h);
 }
 
+} partial class x509_package {
+
 internal static slice<@string> splitHostname(@string host) {
     return strings.Split(toLowerCaseASCII(strings.TrimSuffix(host, ".")), ".");
 }
 
 internal static bool checkChainForKeyUsage(slice<ж<Certificate>> chain, slice<ExtKeyUsage> keyUsages) {
-    var usages = new slice<ExtKeyUsage>(builtin.len(keyUsages));
+    var usages = new slice<ExtKeyUsage>(len(keyUsages));
     copy(usages, keyUsages);
 
-    if (builtin.len(chain) == 0) {
+    if (len(chain) == 0) {
         return false;
     }
 
-    nint usagesRemaining = builtin.len(usages);
+    nint usagesRemaining = len(usages);
 
     // We walk down the list and cross out any usages that aren't supported
     // by each certificate. If we cross out all the usages, then the chain
     // is unacceptable.
 
 NextCert:
-    for (nint i = builtin.len(chain) - 1; i >= 0; i--) {
+    for (nint i = len(chain) - 1; i >= 0; i--) {
         var cert = chain[i];
-        if (builtin.len(cert.ExtKeyUsage) == 0 && builtin.len(cert.UnknownExtKeyUsage) == 0) {
+        if (len(cert.ExtKeyUsage) == 0 && len(cert.UnknownExtKeyUsage) == 0) {
             // The certificate doesn't have any extended key usage specified.
             continue;
         }
@@ -1093,7 +1126,7 @@ break_NextCert:;
     return true;
 }
 
-internal static ΔOID mustNewOIDFromInts(slice<uint64> ints) {
+internal static OID mustNewOIDFromInts(slice<uint64> ints) {
     var (oid, err) = OIDFromInts(ints);
     if (err != nil) {
         throw panic(fmt.Sprintf("OIDFromInts(%v) unexpected error: %v"u8, ints, err));
@@ -1102,14 +1135,14 @@ internal static ΔOID mustNewOIDFromInts(slice<uint64> ints) {
 }
 
 partial struct policyGraphNode {
-    internal ΔOID validPolicy;
-    internal slice<ΔOID> expectedPolicySet;
+    internal OID validPolicy;
+    internal slice<OID> expectedPolicySet;
 // we do not implement qualifiers, so we don't track qualifier_set
     internal map<ж<policyGraphNode>, bool> parents;
     internal map<ж<policyGraphNode>, bool> children;
 }
 
-internal static ж<policyGraphNode> newPolicyGraphNode(ΔOID valid, slice<ж<policyGraphNode>> parents) {
+internal static ж<policyGraphNode> newPolicyGraphNode(OID valid, slice<ж<policyGraphNode>> parents) {
     var n = Ꮡ(new policyGraphNode(
         validPolicy: valid,
         expectedPolicySet: [valid],
@@ -1130,7 +1163,7 @@ partial struct policyGraph {
     internal nint depth;
 }
 
-internal static ΔOID anyPolicyOID;
+internal static OID anyPolicyOID;
 internal static void initᴛanyPolicyOID() { anyPolicyOID = mustNewOIDFromInts([2, 5, 29, 32, 0]); }
 
 internal static ж<policyGraph> newPolicyGraph() {
@@ -1146,13 +1179,15 @@ internal static ж<policyGraph> newPolicyGraph() {
     ));
 }
 
+} partial class x509ᴛpolicyGraph {
+
 internal static void insert(this ref policyGraph pg, ж<policyGraphNode> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     pg.strata[pg.depth].Set(((@string)n.validPolicy.der), Ꮡn);
 }
 
-internal static slice<ж<policyGraphNode>> parentsWithExpected(this ref policyGraph pg, ΔOID expected) {
+internal static slice<ж<policyGraphNode>> parentsWithExpected(this ref policyGraph pg, OID expected) {
     if (pg.depth == 0) {
         return default;
     }
@@ -1177,11 +1212,11 @@ internal static map<@string, ж<policyGraphNode>> leaves(this ref policyGraph pg
     return pg.strata[pg.depth];
 }
 
-internal static ж<policyGraphNode> leafWithPolicy(this ref policyGraph pg, ΔOID policy) {
+internal static ж<policyGraphNode> leafWithPolicy(this ref policyGraph pg, OID policy) {
     return pg.strata[pg.depth][tmpstring(policy.der)];
 }
 
-internal static void deleteLeaf(this ref policyGraph pg, ΔOID policy) {
+internal static void deleteLeaf(this ref policyGraph pg, OID policy) {
     var n = pg.strata[pg.depth][tmpstring(policy.der)];
     if (n == nil) {
         return;
@@ -1205,7 +1240,7 @@ internal static slice<ж<policyGraphNode>> validPolicyNodes(this ref policyGraph
                 continue;
             }
 
-            if (builtin.len(n.parents) == 1) {
+            if (len(n.parents) == 1) {
                 foreach (var (p, _) in n.parents) {
                     if (p.validPolicy.Equal(anyPolicyOID)) {
                         validNodes = append(validNodesᴷ, validNodes, n);
@@ -1221,7 +1256,7 @@ internal static slice<ж<policyGraphNode>> validPolicyNodes(this ref policyGraph
 internal static void prune(this ref policyGraph pg) {
     for (nint i = pg.depth - 1; i > 0; i--) {
         foreach (var (_, n) in pg.strata[i]) {
-            if (builtin.len(n.children) == 0) {
+            if (len(n.children) == 0) {
                 foreach (var (p, _) in n.parents) {
                     delete(p.children, n);
                 }
@@ -1243,6 +1278,8 @@ internal static void incrDepth(this ref policyGraph pg) {
     pg.strata = append(pg.strata, new map<@string, ж<policyGraphNode>>{});
 }
 
+} partial class x509_package {
+
 internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions opts) {
     var validPolicyNodeSetᴷ = new stackAppend<ж<policyGraphNode>>();
 
@@ -1256,12 +1293,12 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
     //	* 6.1.4 (b)
     //	* 6.1.5 (g)
 
-    if (builtin.len(chain) == 1) {
+    if (len(chain) == 1) {
         return true;
     }
 
     // n is the length of the chain minus the trust anchor
-    nint n = builtin.len(chain) - 1;
+    nint n = len(chain) - 1;
 
     var pg = newPolicyGraph();
     nint inhibitAnyPolicy = default;
@@ -1283,7 +1320,7 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
     }
     // If the user does not pass any policies, we consider
     // that equivalent to passing anyPolicyOID.
-    if (builtin.len(initialUserPolicySet) == 0) {
+    if (len(initialUserPolicySet) == 0) {
         initialUserPolicySet[((@string)anyPolicyOID.der)] = true;
     }
 
@@ -1293,7 +1330,7 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
         var isSelfSigned = bytes.Equal(cert.RawIssuer, cert.RawSubject);
 
         // 6.1.3 (e) -- as updated by RFC 9618
-        if (builtin.len(cert.Policies) == 0) {
+        if (len(cert.Policies) == 0) {
             pg = default;
         }
 
@@ -1317,13 +1354,13 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
 
                 // 6.1.3 (d) (1) (i) -- as updated by RFC 9618
                 var parents = pg.parentsWithExpected(policy);
-                if (builtin.len(parents) == 0) {
+                if (len(parents) == 0) {
                     // 6.1.3 (d) (1) (ii) -- as updated by RFC 9618
                     var anyParent = pg.parentWithAnyPolicy(); if (anyParent != nil) {
                         parents = [anyParent];
                     }
                 }
-                if (builtin.len(parents) > 0) {
+                if (len(parents) > 0) {
                     pg.insert(newPolicyGraphNode(policy, parents));
                 }
             }
@@ -1345,7 +1382,7 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
                 }
 
                 foreach (var (oidStr, parents) in missing) {
-                    pg.insert(newPolicyGraphNode(new ΔOID(der: slice<byte>(oidStr)), parents));
+                    pg.insert(newPolicyGraphNode(new OID(der: slice<byte>(oidStr)), parents));
                 }
             }
 
@@ -1354,9 +1391,9 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
 
             if (i != 0) {
                 // 6.1.4 (b) -- as updated by RFC 9618
-                if (builtin.len(cert.PolicyMappings) > 0) {
+                if (len(cert.PolicyMappings) > 0) {
                     // collect map of issuer -> []subject
-                    var mappings = new map<@string, slice<ΔOID>>{};
+                    var mappings = new map<@string, slice<OID>>{};
 
                     foreach (var (_, mapping) in range(cert.PolicyMappings)) {
                         if (policyMapping > 0) {
@@ -1376,11 +1413,11 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
 
                     foreach (var (issuerStr, subjectPolicies) in mappings) {
                         // 6.1.4 (b) (1) -- as updated by RFC 9618
-                        var matching = pg.leafWithPolicy(new ΔOID(der: slice<byte>(issuerStr))); if (matching != nil) {
+                        var matching = pg.leafWithPolicy(new OID(der: slice<byte>(issuerStr))); if (matching != nil) {
                             matching.expectedPolicySet = subjectPolicies;
                         } else if (pg.leafWithPolicy(anyPolicyOID) is var matchingΔ1 && matchingΔ1 != nil) {
                             // 6.1.4 (b) (2) -- as updated by RFC 9618
-                            var nΔ1 = newPolicyGraphNode(new ΔOID(der: slice<byte>(issuerStr)), [matchingΔ1]);
+                            var nΔ1 = newPolicyGraphNode(new OID(der: slice<byte>(issuerStr)), [matchingΔ1]);
                             nΔ1.expectedPolicySet = subjectPolicies;
                             pg.insert(nΔ1);
                         }
@@ -1446,7 +1483,7 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
     // 6.1.5 (g) (5) -- as updated by RFC 9618
     var userConstrainedPolicySet = maps.Clone<map<@string, bool>, @string, bool>(authorityConstrainedPolicySet);
     // 6.1.5 (g) (6) -- as updated by RFC 9618
-    if (builtin.len(initialUserPolicySet) != 1 || !initialUserPolicySet[tmpstring(anyPolicyOID.der)]) {
+    if (len(initialUserPolicySet) != 1 || !initialUserPolicySet[tmpstring(anyPolicyOID.der)]) {
         // 6.1.5 (g) (6) (i) -- as updated by RFC 9618
         foreach (var (p, _) in userConstrainedPolicySet) {
             if (!initialUserPolicySet[p]) {
@@ -1461,7 +1498,7 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
         }
     }
 
-    if (explicitPolicy == 0 && builtin.len(userConstrainedPolicySet) == 0) {
+    if (explicitPolicy == 0 && len(userConstrainedPolicySet) == 0) {
         return false;
     }
 

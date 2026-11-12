@@ -67,7 +67,7 @@ using static go.hash.fnv_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("hash/fnv/fnv.go", "fnv.cs", "ACxYopKqopKqopKqopKqooKCgqqigoKCpoKCgpKAgKKAgKSCgoKUgoKCgpSCpoKCgoKUgqaCgoKClIKmgoKCgpSCpoKUgpSCgpSmgoKUgpSClKaCgoKCgpSCgoKCgpSCgqaCgqaCgqaCgqaCgqaCggASHoKCgqaCpoKCgqaCpoKCgqaCpoKCgqaCpoKCgoKmgqaCgoKCpoIACAaCgpSClIKmgoKUgpSCpoKClIKUgqaCgpSClIKmgoKUgpSCgqaCgpSClIKCpoKCpoKCpoKCpoKCpoKCpoKC")]
+[assembly: GoPositionMap("hash/fnv/fnv.go", "fnv.cs", "AC1YopKqopKqopKqopKqooKCgqqigoKCxrKysrKAgMKAgMSysrK0goKCgpSCxoKCgoKUgsaCgoKClILGgoKCgpSCxoKUgpSCgpTGgoKUgpSClMaysrKysrSysrKysrSCgsaCgsaCgsaCgsaCgsaCggAWHoKCgqaCxoKCgqaCxoKCgqaCxoKCgqaCxoKCgoKmgsaCgoKCpoIACgaCgpSClIIACgaCgpSClIIACgaCgpSClIIACgaCgpSClIIACgaCgpSClIKCAAoGgoKUgpSCgsaCgsaCgsaCgsaCgsaCgsaCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;
@@ -102,3 +102,18 @@ public static partial class fnv_package
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(fnv_package.sum128)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fnvᴛsum128;
+[GoMethodHost(typeof(fnv_package.sum128a)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fnvᴛsum128a;
+[GoMethodHost(typeof(fnv_package.sum32)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fnvᴛsum32;
+[GoMethodHost(typeof(fnv_package.sum32a)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fnvᴛsum32a;
+[GoMethodHost(typeof(fnv_package.sum64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fnvᴛsum64;
+[GoMethodHost(typeof(fnv_package.sum64a)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fnvᴛsum64a;
+// </MethodHolders>

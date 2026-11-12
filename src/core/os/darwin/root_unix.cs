@@ -62,7 +62,7 @@ internal static (ж<Root>, error) newRoot(nint fd, @string name) {
         name: name
     ))
     ));
-    runtime.SetFinalizer(r.root.OrTypedNil(), ((Func<ж<root>, error>)(Close)));
+    runtime.SetFinalizer(r.root.OrTypedNil(), ((Func<ж<root>, error>)(osᴛroot.Close)));
     return (r, default);
 }
 

@@ -6,8 +6,11 @@ namespace go.@internal;
 using errors = errors_package;
 using fmt = fmt_package;
 using sort = sort_package;
+using static profile_package;
 
 partial class profile_package {
+
+} partial class profileᴛProfile {
 
 internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Profile p) {
     return profileDecoder;
@@ -132,6 +135,8 @@ internal static void encode(this ref Profile p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 12, p.Period);
 }
 
+} partial class profile_package {
+
 [GoLazy] partial class lazyᴛprofileDecoder { internal static slice<Func<ж<buffer>, message, error>> profileDecoder = [
     default, // 0
     // repeated ValueType sample_type = 1
@@ -202,6 +207,8 @@ internal static void encode(this ref Profile p, ж<buffer> b) {
     // int64 defaultSampleType = 14
     (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Profile>>().ᏑdefaultSampleTypeX)
 ]; }
+
+} partial class profileᴛProfile {
 
 // postDecode takes the unexported fields populated by decode (with
 // suffix X) and populates the corresponding exported fields.
@@ -305,6 +312,8 @@ internal static error postDecode(this ж<Profile> Ꮡp) {
     return err;
 }
 
+} partial class profileᴛValueType {
+
 internal static slice<Func<ж<buffer>, message, error>> decoder(this ref ValueType p) {
     return valueTypeDecoder;
 }
@@ -314,6 +323,8 @@ internal static void encode(this ref ValueType p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 2, p.unitX);
 }
 
+} partial class profile_package {
+
 [GoLazy] partial class lazyᴛvalueTypeDecoder { internal static slice<Func<ж<buffer>, message, error>> valueTypeDecoder = [
     default, // 0
     // optional int64 type = 1
@@ -321,6 +332,8 @@ internal static void encode(this ref ValueType p, ж<buffer> b) {
     // optional int64 unit = 2
     (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<ValueType>>().ᏑunitX)
 ]; }
+
+} partial class profileᴛSample {
 
 internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Sample p) {
     return sampleDecoder;
@@ -335,6 +348,8 @@ internal static void encode(this ref Sample p, ж<buffer> b) {
         encodeMessage(b, 3, x);
     }
 }
+
+} partial class profile_package {
 
 [GoLazy] partial class lazyᴛsampleDecoder { internal static slice<Func<ж<buffer>, message, error>> sampleDecoder = [
     default, // 0
@@ -351,6 +366,8 @@ internal static void encode(this ref Sample p, ж<buffer> b) {
     }
 ]; }
 
+} partial class profileᴛLabel {
+
 internal static slice<Func<ж<buffer>, message, error>> decoder(this Label p) {
     return labelDecoder;
 }
@@ -361,6 +378,8 @@ internal static void encode(this Label p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 3, p.numX);
 }
 
+} partial class profile_package {
+
 [GoLazy] partial class lazyᴛlabelDecoder { internal static slice<Func<ж<buffer>, message, error>> labelDecoder = [
     default, // 0
     // optional int64 key = 1
@@ -370,6 +389,8 @@ internal static void encode(this Label p, ж<buffer> b) {
     // optional int64 num = 3
     (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Label>>().ᏑnumX)
 ]; }
+
+} partial class profileᴛMapping {
 
 internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Mapping p) {
     return mappingDecoder;
@@ -388,6 +409,8 @@ internal static void encode(this ref Mapping p, ж<buffer> b) {
     encodeBoolOpt(ref (b).DerefOrNull(), 10, p.HasInlineFrames);
 }
 
+} partial class profile_package {
+
 [GoLazy] partial class lazyᴛmappingDecoder { internal static slice<Func<ж<buffer>, message, error>> mappingDecoder = [
     default, // 0
     (ж<buffer> b, message m) => decodeUint64(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑID),           // optional uint64 id = 1
@@ -402,6 +425,8 @@ internal static void encode(this ref Mapping p, ж<buffer> b) {
     (ж<buffer> b, message m) => decodeBool(ref (b).DerefOrNull(), m._<message, ж<Mapping>>().ᏑHasInlineFrames) // optional bool has_inline_frames = 10
 ]; }
 
+} partial class profileᴛLocation {
+
 internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Location p) {
     return locationDecoder;
 }
@@ -414,6 +439,8 @@ internal static void encode(this ref Location p, ж<buffer> b) {
         encodeMessage(b, 4, new Lineжmessage(Ꮡ(p.Line, i)));
     }
 }
+
+} partial class profile_package {
 
 [GoLazy] partial class lazyᴛlocationDecoder { internal static slice<Func<ж<buffer>, message, error>> locationDecoder = [
     default, // 0
@@ -428,6 +455,8 @@ internal static void encode(this ref Location p, ж<buffer> b) {
     }
 ]; }
 
+} partial class profileᴛLine {
+
 internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Line p) {
     return lineDecoder;
 }
@@ -437,6 +466,8 @@ internal static void encode(this ref Line p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 2, p.ΔLine);
 }
 
+} partial class profile_package {
+
 [GoLazy] partial class lazyᴛlineDecoder { internal static slice<Func<ж<buffer>, message, error>> lineDecoder = [
     default, // 0
     // optional uint64 function_id = 1
@@ -444,6 +475,8 @@ internal static void encode(this ref Line p, ж<buffer> b) {
     // optional int64 line = 2
     (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<message, ж<Line>>().ᏑΔLine)
 ]; }
+
+} partial class profileᴛFunction {
 
 internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Function p) {
     return functionDecoder;
@@ -456,6 +489,8 @@ internal static void encode(this ref Function p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 4, p.filenameX);
     encodeInt64Opt(ref (b).DerefOrNull(), 5, p.StartLine);
 }
+
+} partial class profile_package {
 
 [GoLazy] partial class lazyᴛfunctionDecoder { internal static slice<Func<ж<buffer>, message, error>> functionDecoder = [
     default, // 0

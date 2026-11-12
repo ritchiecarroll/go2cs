@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using syscallꓸHandle = go.syscall_package.ΔHandle;
 // </ImportedTypeAliases>
 
 using go;
@@ -69,11 +68,11 @@ using static go.@internal.syscall.windows_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/syscall/windows/at_windows.go", "at_windows.cs", "AB5EgoKmpIKClIKUgpSCgqaCgoKCgoKCgpSmtIK0gtikgpSUlIKmgqaCgpSClIKmlIKClIKUgpSCAAIQ0pSCtLS2goKmgoKClAAMHIKUgqaCgriCpoKCuAAHFAAPEoSUgoK6gsqCgoKClIKCpoKU3IKCgrqClNiSgpSUlAAKFILGpJSmgoKClIIACxqClIKmoqaUgoKUggAGEIKC3AAGEIKmlIKmAAsYAAselMikAAsWsoKmuoKUAAYQgoK4AAgUooKClIIABhCClJS6goKUgpSClJjeggAHELiClN6ClNaigoKUggAGEIKUlKaCgpSClIKUht6ClAAUKNwADwqigoKUlIKClKaCgpSCAAsagpSGAAAcvJSCgoKCgoKCgqaClAAIEoSSAAcSptzSgpSCgpSUgoKUgoKClJSCgpSCgoKmgoKCgqY=", "51-55:1;585-587:1", "", "219=IndexByte/1/3/1,IndexByte/2/3/1,IndexByte/3/3/1", "716:21")]
 [assembly: GoPositionMap("internal/syscall/windows/nonblocking_windows.go", "nonblocking_windows.cs", "AAoesoKClA==")]
-[assembly: GoPositionMap("internal/syscall/windows/reparse_windows.go", "reparse_windows.cs", "ADyEAZKCggATKpKCgg==")]
-[assembly: GoPositionMap("internal/syscall/windows/security_windows.go", "security_windows.cs", "ACZisoKUppSUAA0eggBBpgEACwjCgoKCgoKUgpSCABxuABIysoLYsoI=")]
+[assembly: GoPositionMap("internal/syscall/windows/reparse_windows.go", "reparse_windows.cs", "AD+EAZKCggAXKpKCgg==")]
+[assembly: GoPositionMap("internal/syscall/windows/security_windows.go", "security_windows.cs", "ACdisoKUppSUAA8eggBDpgEACwjCgoKCgoKUgpSCACBuABIysoLYsoI=")]
 [assembly: GoPositionMap("internal/syscall/windows/string_windows.go", "string_windows.cs", "ABAowoKClJQ=")]
-[assembly: GoPositionMap("internal/syscall/windows/syscall_windows.go", "syscall_windows.cs", "ABIqooKUgoKCgpQAxAGmA/4AM9gBgoKClIKClAAnZJIAPpIBsoKCgoKUgpSUrOwAHjSCppSC")]
-[assembly: GoPositionMap("internal/syscall/windows/types_windows.go", "types_windows.cs", "AG7mAZKClIKClIKClII=")]
+[assembly: GoPositionMap("internal/syscall/windows/syscall_windows.go", "syscall_windows.cs", "ABMqooKUgoKCgpQAxAGmA/4AM9gBgoKClIKClAAnZJIAPpIBsoKCgoKUgpSUrOwAIDSCxrSC")]
+[assembly: GoPositionMap("internal/syscall/windows/types_windows.go", "types_windows.cs", "AHHmAZKClIKClIKClII=")]
 [assembly: GoPositionMap("internal/syscall/windows/version_windows.go", "version_windows.cs", "ABxE0oKCgqqiggAMFoKCAAcSooKUgoKCgpSCgoKUgoKiqKKCqqKCrLKC/IKC3IKmgpSCgoKUgoKm")]
 [assembly: GoPositionMap("internal/syscall/windows/zsyscall_windows.go", "zsyscall_windows.cs", "ABM0opSkyqiCgoKCgoKCgpSCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggADIKLCgpSmoqKCpqKigqaiooKmooKClKaigoKUpqKigqaiAAgCgpSmouKClKaywoKClKayooKClKaigoKUooKUpqKigpSmooKClKai4oKUpqKCgoKUpqIACgKClKaiooKUpqKCgpSigpSmouKClKaywoKClKaygoKClKaywoKClKaigoKmosKClKaigoKmsoKCgpSmoqKClKaiooKUprKigoKUprKigoKUprKigoKUAAQesqKCgpSmogAKAoKUpqLCgpSmoqKClAAGJqLCgpSmssKCgpSmsoKCgpSmosKCpqIACgKCpqKigpSmoqKClKaiooKUAAQWosKClKai4oKUpqLCgpQACDaiwoKUpqLCgpQABBCiooKmooKCpqKigpSmooKClKKClKaiooKUpqLCgpSmoqKClAAEHrKigoKU")]
 // </GoSourcePositionMaps>
@@ -169,3 +168,18 @@ public static partial class windows_package
     [GoInit] internal static void initᴛᴛimportꓸsyscall() => builtin.initPackage(typeof(syscall_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(windows_package.MountPointReparseBuffer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class windowsᴛMountPointReparseBuffer;
+[GoMethodHost(typeof(windows_package.NTStatus)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class windowsᴛNTStatus;
+[GoMethodHost(typeof(windows_package.OBJECT_ATTRIBUTES)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class windowsᴛOBJECT_ATTRIBUTES;
+[GoMethodHost(typeof(windows_package.SymbolicLinkReparseBuffer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class windowsᴛSymbolicLinkReparseBuffer;
+[GoMethodHost(typeof(windows_package.TOKEN_GROUPS)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class windowsᴛTOKEN_GROUPS;
+[GoMethodHost(typeof(windows_package.TOKEN_MANDATORY_LABEL)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class windowsᴛTOKEN_MANDATORY_LABEL;
+// </MethodHolders>

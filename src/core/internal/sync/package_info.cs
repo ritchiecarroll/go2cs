@@ -50,8 +50,8 @@ using static go.@internal.sync_package;
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(Mutex))]
+[assembly: GoFieldAccess(typeof(go.@internal.abi_package.MapType))]
 [assembly: GoFieldAccess(typeof(go.@internal.abi_package.Type))]
-[assembly: GoFieldAccess(typeof(go.@internal.abi_package.ΔMapType))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -61,7 +61,7 @@ using static go.@internal.sync_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/sync/mutex.go", "mutex.cs", "ADl65IKClKas0oKC3IKmgpTmooKCgoKCpriElIKCgpSUgpSC3IKUpoKUlIKCpoKClIKCgsqClILclIKUgpS4gr7SgoK4gqb4ooKUgoLugqaCgoKUAAcQ", "", "", "118=CompareAndSwapInt32/1/1/1")]
+[assembly: GoPositionMap("internal/sync/mutex.go", "mutex.cs", "ADx65IKClKas0oKC3IKmgpTmooKCgoKCpriElIKCgpSUgpSC3IKUpoKUlIKCpoKClIKCgsqClILclIKUgpS4gr7SgoK4gqb4ooKUgoLugqaCgoKUAAcQ", "", "", "121=CompareAndSwapInt32/1/1/1")]
 [assembly: GoPositionMap("internal/sync/runtime.go", "runtime.cs", "AAkqAA0WAAoM2sampg==")]
 // </GoSourcePositionMaps>
 
@@ -92,3 +92,17 @@ public static partial class sync_package
     [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(sync.atomic_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(sync_package.HashTrieMap<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛHashTrieMap;
+[GoMethodHost(typeof(sync_package.Mutex)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛMutex;
+[GoMethodHost(typeof(sync_package.entry<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛentry;
+[GoMethodHost(typeof(sync_package.indirect<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛindirect;
+[GoMethodHost(typeof(sync_package.node<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛnode;
+// </MethodHolders>

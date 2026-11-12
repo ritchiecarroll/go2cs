@@ -8,6 +8,7 @@ using fmt = fmt_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using time = time_package;
+using static tar_package;
 
 partial class tar_package {
 
@@ -51,6 +52,8 @@ partial struct formatter {
     internal error err; // Last error seen
 }
 
+} partial class tarᴛparser {
+
 // parseString parses bytes as a NUL-terminated C-style string.
 // If a NUL byte is not found then the whole slice is returned as a string.
 internal static @string parseString(this ref parser _, slice<byte> b) {
@@ -59,6 +62,8 @@ internal static @string parseString(this ref parser _, slice<byte> b) {
     }
     return (@string)b;
 }
+
+} partial class tarᴛformatter {
 
 // formatString copies s into b, NUL-terminating if possible.
 internal static void formatString(this ref formatter f, slice<byte> b, @string s) {
@@ -79,6 +84,8 @@ internal static void formatString(this ref formatter f, slice<byte> b, @string s
     }
 }
 
+} partial class tar_package {
+
 // fitsInBase256 reports whether x can be encoded into n bytes using base-256
 // encoding. Unlike octal encoding, base-256 encoding does not require that the
 // string ends with a NUL character. Thus, all n bytes are available for output.
@@ -90,6 +97,8 @@ internal static bool fitsInBase256(nint n, int64 x) {
     nuint binBits = (nuint)(n - 1) * 8;
     return n >= 9 || (x >= ((int64)(-1)).Lsh(binBits) && x < ((int64)1).Lsh(binBits));
 }
+
+} partial class tarᴛparser {
 
 // parseNumeric parses the input as being encoded in either base-256 or octal.
 // This function may return negative numbers.
@@ -137,6 +146,8 @@ internal static int64 parseNumeric(this ref parser p, slice<byte> b) {
     return p.parseOctal(b);
 }
 
+} partial class tarᴛformatter {
+
 // formatNumeric encodes x into b using base-8 (octal) encoding if possible.
 // Otherwise it will attempt to use base-256 (binary) encoding.
 internal static void formatNumeric(this ref formatter f, slice<byte> b, int64 x) {
@@ -158,6 +169,8 @@ internal static void formatNumeric(this ref formatter f, slice<byte> b, int64 x)
     f.err = ErrFieldTooLong;
 }
 
+} partial class tarᴛparser {
+
 internal static int64 parseOctal(this ref parser p, slice<byte> b) {
     // Because unused fields are filled with NULs, we need
     // to skip leading NULs. Fields may also be padded with
@@ -176,6 +189,8 @@ internal static int64 parseOctal(this ref parser p, slice<byte> b) {
     return (int64)x;
 }
 
+} partial class tarᴛformatter {
+
 internal static void formatOctal(this ref formatter f, slice<byte> b, int64 x) {
     if (!fitsInOctal(len(b), x)) {
         x = 0; // Last resort, just write zero
@@ -189,6 +204,8 @@ internal static void formatOctal(this ref formatter f, slice<byte> b, int64 x) {
     }
     f.formatString(b, s);
 }
+
+} partial class tar_package {
 
 // fitsInOctal reports whether the integer x fits in a field n-bytes long
 // using octal encoding with the appropriate NUL terminator.

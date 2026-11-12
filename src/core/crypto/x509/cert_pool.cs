@@ -9,6 +9,7 @@ using pem = encoding.pem_package;
 using sync = sync_package;
 using encoding;
 using go.crypto;
+using static x509_package;
 
 partial class x509_package {
 
@@ -65,6 +66,8 @@ public static ж<CertPool> NewCertPool() {
     ));
 }
 
+} partial class x509ᴛCertPool {
+
 // len returns the number of certs in the set.
 // A nil set is a valid empty set.
 internal static nint len(this ж<CertPool> Ꮡs) {
@@ -104,6 +107,8 @@ public static ж<CertPool> Clone(this ref CertPool s) {
     return p;
 }
 
+} partial class x509_package {
+
 // SystemCertPool returns a copy of the system cert pool.
 //
 // On Unix systems other than macOS the environment variables SSL_CERT_FILE and
@@ -127,6 +132,8 @@ partial struct potentialParent {
     internal ж<Certificate> cert;
     internal Func<slice<ж<Certificate>>, error> constraint;
 }
+
+} partial class x509ᴛCertPool {
 
 // findPotentialParents returns the certificates in s which might have signed
 // cert.
@@ -228,10 +235,14 @@ internal static void addCertFunc(this ref CertPool s, sum224 rawSum224, @string 
     s.byName[rawSubject] = append(s.byName[rawSubject], builtin.len(s.lazyCerts) - 1);
 }
 
+} partial class x509_package {
+
 internal partial struct AppendCertsFromPEM_lazyCert /*dyn*/ {
     /*embed*/ public sync_package.Once Once;
     internal ж<Certificate> v;
 }
+
+} partial class x509ᴛCertPool {
 
 // AppendCertsFromPEM attempts to parse a series of PEM encoded certificates.
 // It appends any certificates found to s and reports whether any certificates
@@ -322,4 +333,4 @@ public static void AddCertWithConstraint(this ref CertPool s, ж<Certificate> �
     s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, () => (Ꮡcert, default), constraint);
 }
 
-} // end x509_package
+} // end x509ᴛCertPool

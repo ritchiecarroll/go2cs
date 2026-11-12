@@ -6,6 +6,7 @@ namespace go;
 using isync = @internal.sync_package;
 using @internal;
 using Δsync = @internal.sync_package;
+using static sync_package;
 
 partial class sync_package {
 
@@ -40,6 +41,8 @@ partial struct Map {
     internal noCopy _;
     internal isync.HashTrieMap<any, any> m;
 }
+
+} partial class syncᴛMap {
 
 // Load returns the value stored in the map for a key, or nil if no
 // value is present.
@@ -114,4 +117,4 @@ public static void Range(this ж<Map> Ꮡm, Func<any, any, bool> f) {
     Ꮡm.Ꮡm.Range(f);
 }
 
-} // end sync_package
+} // end syncᴛMap

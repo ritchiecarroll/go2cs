@@ -22,6 +22,7 @@ using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
 using ꓸꓸꓸany = Span<any>;
+using static scanner_package;
 
 partial class scanner_package {
 
@@ -33,6 +34,8 @@ partial struct Position {
     public nint Line;        // line number, starting at 1
     public nint Column;      // column number, starting at 1 (character count per line)
 }
+
+} partial class scannerᴛPosition {
 
 // IsValid reports whether the position is valid.
 public static bool IsValid(this ref Position pos) { return pos.Line > 0; }
@@ -51,6 +54,8 @@ public static @string String(this Position pos) {
     }
     return s;
 }
+
+} partial class scanner_package {
 
 // Predefined mode bits to control recognition of tokens. For instance,
 // to configure a [Scanner] such that it only recognizes (Go) identifiers,
@@ -82,7 +87,7 @@ public static UntypedInt Ident => -2;
 public static UntypedInt Int => -3;
 public static UntypedInt Float => -4;
 public static UntypedInt Char => -5;
-public static UntypedInt ΔString => -6;
+public static UntypedInt String => -6;
 public static UntypedInt RawString => -7;
 public static UntypedInt Comment => -8;
 
@@ -95,7 +100,7 @@ internal static UntypedInt skipComment => -9;
     [Int] = "Int",
     [Float] = "Float",
     [Char] = "Char",
-    [ΔString] = "String",
+    [String] = "String",
     [RawString] = "RawString",
     [Comment] = "Comment"
 }; }
@@ -166,6 +171,8 @@ partial struct Scanner {
     // after the most recently scanned token.
     /*embed*/ public Position Position;
 }
+
+} partial class scannerᴛScanner {
 
 // Init initializes a [Scanner] with a new source and returns s.
 // [Scanner.Error] is set to nil, [Scanner.ErrorCount] is set to 0, [Scanner.Mode] is set to [GoTokens],
@@ -375,9 +382,13 @@ internal static rune scanIdentifier(this ж<Scanner> Ꮡs) {
     return ch;
 }
 
+} partial class scanner_package {
+
 internal static rune lower(rune ch) { return (rune)(((rune)'a' - (rune)'A') | ch); } // returns lower-case ch iff ch is ASCII letter
 internal static bool isDecimal(rune ch) { return '0' <= ch && ch <= '9'; }
 internal static bool isHex(rune ch) { return '0' <= ch && ch <= '9' || 'a' <= lower(ch) && lower(ch) <= 'f'; }
+
+} partial class scannerᴛScanner {
 
 // digits accepts the sequence { digit | '_' } starting with ch0.
 // If base <= 10, digits accepts any decimal digit but records
@@ -522,6 +533,8 @@ internal static (rune, rune) scanNumber(this ж<Scanner> Ꮡs, rune ch, bool see
     return (tok, ch);
 }
 
+} partial class scanner_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string decimalLiteralˢ => ref decimalLiteralˢᵇ;
 private static readonly @string decimalLiteralˢᵇ = "decimal literal"u8;
@@ -603,6 +616,8 @@ internal static nint digitVal(rune ch) {
     }}
     return 16; // larger than any legal digit val
 }
+
+} partial class scannerᴛScanner {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string invalidCharEscapeˢ => ref invalidCharEscapeˢᵇ;
@@ -796,7 +811,7 @@ break_redo:;
         case '"': {
             if ((s.Mode & (nuint)ScanStrings) != 0) {
                 Ꮡs.scanString('"');
-                tok = ΔString;
+                tok = String;
             }
             ch = Ꮡs.next();
             break;
@@ -910,4 +925,4 @@ public static @string TokenText(this ж<Scanner> Ꮡs) {
     return Ꮡs.ᏑtokBuf.String();
 }
 
-} // end scanner_package
+} // end scannerᴛScanner

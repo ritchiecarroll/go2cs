@@ -19,7 +19,7 @@ internal static UntypedInt loadFactorDen => 8;
 //go:linkname maps_errNilAssign internal/runtime/maps.errNilAssign
 internal static error maps_errNilAssign = ((plainError)(@string)"assignment to entry in nil map");
 
-internal static ж<mapsꓸMap> makemap64(ж<abiꓸMapType> t, int64 hint, ж<mapsꓸMap> m) {
+internal static ж<maps.Map> makemap64(ж<abi.MapType> t, int64 hint, ж<maps.Map> m) {
     if ((int64)(nint)hint != hint) {
         hint = 0;
     }
@@ -39,7 +39,7 @@ internal static ж<mapsꓸMap> makemap64(ж<abiꓸMapType> t, int64 hint, ж<map
 // See go.dev/issue/67401.
 //
 //go:linkname makemap_small
-internal static ж<mapsꓸMap> makemap_small() {
+internal static ж<maps.Map> makemap_small() {
     return maps.NewEmptyMap();
 }
 
@@ -58,7 +58,7 @@ internal static ж<mapsꓸMap> makemap_small() {
 // See go.dev/issue/67401.
 //
 //go:linkname makemap
-internal static ж<mapsꓸMap> makemap(ж<abiꓸMapType> t, nint hint, ж<mapsꓸMap> m) {
+internal static ж<maps.Map> makemap(ж<abi.MapType> t, nint hint, ж<maps.Map> m) {
     if (hint < 0) {
         hint = 0;
     }
@@ -76,7 +76,7 @@ internal static ж<mapsꓸMap> makemap(ж<abiꓸMapType> t, nint hint, ж<maps�
 // we want to avoid one layer of call.
 //
 //go:linkname mapaccess1
-internal static partial @unsafe.Pointer mapaccess1(ж<abiꓸMapType> t, ж<mapsꓸMap> m, @unsafe.Pointer key);
+internal static partial @unsafe.Pointer mapaccess1(ж<abi.MapType> t, ж<maps.Map> m, @unsafe.Pointer key);
 
 // mapaccess2 should be an internal detail,
 // but widely used packages access it using linkname.
@@ -87,9 +87,9 @@ internal static partial @unsafe.Pointer mapaccess1(ж<abiꓸMapType> t, ж<maps�
 // See go.dev/issue/67401.
 //
 //go:linkname mapaccess2
-internal static partial (@unsafe.Pointer, bool) mapaccess2(ж<abiꓸMapType> t, ж<mapsꓸMap> m, @unsafe.Pointer key);
+internal static partial (@unsafe.Pointer, bool) mapaccess2(ж<abi.MapType> t, ж<maps.Map> m, @unsafe.Pointer key);
 
-internal static @unsafe.Pointer mapaccess1_fat(ж<abiꓸMapType> t, ж<mapsꓸMap> m, @unsafe.Pointer key, @unsafe.Pointer zero) {
+internal static @unsafe.Pointer mapaccess1_fat(ж<abi.MapType> t, ж<maps.Map> m, @unsafe.Pointer key, @unsafe.Pointer zero) {
     @unsafe.Pointer e = (uintptr)mapaccess1(t, m, key);
     if (e == @unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0))) {
         return zero;
@@ -97,7 +97,7 @@ internal static @unsafe.Pointer mapaccess1_fat(ж<abiꓸMapType> t, ж<mapsꓸMa
     return e;
 }
 
-internal static (@unsafe.Pointer, bool) mapaccess2_fat(ж<abiꓸMapType> t, ж<mapsꓸMap> m, @unsafe.Pointer key, @unsafe.Pointer zero) {
+internal static (@unsafe.Pointer, bool) mapaccess2_fat(ж<abi.MapType> t, ж<maps.Map> m, @unsafe.Pointer key, @unsafe.Pointer zero) {
     @unsafe.Pointer e = (uintptr)mapaccess1(t, m, key);
     if (e == @unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0))) {
         return (zero, false);
@@ -120,7 +120,7 @@ internal static (@unsafe.Pointer, bool) mapaccess2_fat(ж<abiꓸMapType> t, ж<m
 // See go.dev/issue/67401.
 //
 //go:linkname mapassign
-internal static partial @unsafe.Pointer mapassign(ж<abiꓸMapType> t, ж<mapsꓸMap> m, @unsafe.Pointer key);
+internal static partial @unsafe.Pointer mapassign(ж<abi.MapType> t, ж<maps.Map> m, @unsafe.Pointer key);
 
 // mapdelete should be an internal detail,
 // but widely used packages access it using linkname.
@@ -131,7 +131,7 @@ internal static partial @unsafe.Pointer mapassign(ж<abiꓸMapType> t, ж<maps�
 // See go.dev/issue/67401.
 //
 //go:linkname mapdelete
-internal static void mapdelete(ж<abiꓸMapType> Ꮡt, ж<mapsꓸMap> m, @unsafe.Pointer key) {
+internal static void mapdelete(ж<abi.MapType> Ꮡt, ж<maps.Map> m, @unsafe.Pointer key) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (raceenabled && m != nil) {
@@ -154,7 +154,7 @@ internal static void mapdelete(ж<abiꓸMapType> Ꮡt, ж<mapsꓸMap> m, @unsafe
 // performs the first step of iteration. The Iter struct pointed to by 'it' is
 // allocated on the stack by the compilers order pass or on the heap by
 // reflect. Both need to have zeroed it since the struct contains pointers.
-internal static void mapIterStart(ж<abiꓸMapType> t, ж<mapsꓸMap> m, ж<maps.Iter> Ꮡit) {
+internal static void mapIterStart(ж<abi.MapType> t, ж<maps.Map> m, ж<maps.Iter> Ꮡit) {
     ref var it = ref Ꮡit.DerefOrNull();
 
     if (raceenabled && m != nil) {
@@ -180,7 +180,7 @@ internal static void mapIterNext(ж<maps.Iter> Ꮡit) {
 }
 
 // mapclear deletes all keys from a map.
-internal static void mapclear(ж<abiꓸMapType> t, ж<mapsꓸMap> m) {
+internal static void mapclear(ж<abi.MapType> t, ж<maps.Map> m) {
     if (raceenabled && m != nil) {
         var callerpc = sys.GetCallerPC();
         var pc = abi.FuncPCABIInternal(mapclear);
@@ -210,7 +210,7 @@ private static readonly @string runtimeReflectMakemapˢᵇ = "runtime.reflect_ma
 // See go.dev/issue/67401.
 //
 //go:linkname reflect_makemap reflect.makemap
-internal static ж<mapsꓸMap> reflect_makemap(ж<abiꓸMapType> Ꮡt, nint cap) {
+internal static ж<maps.Map> reflect_makemap(ж<abi.MapType> Ꮡt, nint cap) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Check invariants and reflects math.
@@ -233,7 +233,7 @@ internal static ж<mapsꓸMap> reflect_makemap(ж<abiꓸMapType> Ꮡt, nint cap)
 // See go.dev/issue/67401.
 //
 //go:linkname reflect_mapaccess reflect.mapaccess
-internal static @unsafe.Pointer reflect_mapaccess(ж<abiꓸMapType> t, ж<mapsꓸMap> m, @unsafe.Pointer key) {
+internal static @unsafe.Pointer reflect_mapaccess(ж<abi.MapType> t, ж<maps.Map> m, @unsafe.Pointer key) {
     var (elem, ok) = mapaccess2(t, m, key);
     if (!ok) {
         // reflect wants nil for a missing element
@@ -243,7 +243,7 @@ internal static @unsafe.Pointer reflect_mapaccess(ж<abiꓸMapType> t, ж<maps�
 }
 
 //go:linkname reflect_mapaccess_faststr reflect.mapaccess_faststr
-internal static @unsafe.Pointer reflect_mapaccess_faststr(ж<abiꓸMapType> t, ж<mapsꓸMap> m, @string key) {
+internal static @unsafe.Pointer reflect_mapaccess_faststr(ж<abi.MapType> t, ж<maps.Map> m, @string key) {
     var (elem, ok) = mapaccess2_faststr(t, m, key);
     if (!ok) {
         // reflect wants nil for a missing element
@@ -261,28 +261,28 @@ internal static @unsafe.Pointer reflect_mapaccess_faststr(ж<abiꓸMapType> t, �
 // Do not remove or change the type signature.
 //
 //go:linkname reflect_mapassign reflect.mapassign0
-internal static void reflect_mapassign(ж<abiꓸMapType> Ꮡt, ж<mapsꓸMap> m, @unsafe.Pointer key, @unsafe.Pointer elem) {
+internal static void reflect_mapassign(ж<abi.MapType> Ꮡt, ж<maps.Map> m, @unsafe.Pointer key, @unsafe.Pointer elem) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    @unsafe.Pointer Δp = (uintptr)mapassign(Ꮡt, m, key);
-    typedmemmove(t.Elem, Δp, elem);
+    @unsafe.Pointer p = (uintptr)mapassign(Ꮡt, m, key);
+    typedmemmove(t.Elem, p, elem);
 }
 
 //go:linkname reflect_mapassign_faststr reflect.mapassign_faststr0
-internal static void reflect_mapassign_faststr(ж<abiꓸMapType> Ꮡt, ж<mapsꓸMap> m, @string key, @unsafe.Pointer elem) {
+internal static void reflect_mapassign_faststr(ж<abi.MapType> Ꮡt, ж<maps.Map> m, @string key, @unsafe.Pointer elem) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    @unsafe.Pointer Δp = (uintptr)mapassign_faststr(Ꮡt, m, key);
-    typedmemmove(t.Elem, Δp, elem);
+    @unsafe.Pointer p = (uintptr)mapassign_faststr(Ꮡt, m, key);
+    typedmemmove(t.Elem, p, elem);
 }
 
 //go:linkname reflect_mapdelete reflect.mapdelete
-internal static void reflect_mapdelete(ж<abiꓸMapType> t, ж<mapsꓸMap> m, @unsafe.Pointer key) {
+internal static void reflect_mapdelete(ж<abi.MapType> t, ж<maps.Map> m, @unsafe.Pointer key) {
     mapdelete(t, m, key);
 }
 
 //go:linkname reflect_mapdelete_faststr reflect.mapdelete_faststr
-internal static void reflect_mapdelete_faststr(ж<abiꓸMapType> t, ж<mapsꓸMap> m, @string key) {
+internal static void reflect_mapdelete_faststr(ж<abi.MapType> t, ж<maps.Map> m, @string key) {
     mapdelete_faststr(t, m, key);
 }
 
@@ -296,7 +296,7 @@ internal static void reflect_mapdelete_faststr(ж<abiꓸMapType> t, ж<mapsꓸMa
 // See go.dev/issue/67401.
 //
 //go:linkname reflect_maplen reflect.maplen
-internal static nint reflect_maplen(ж<mapsꓸMap> Ꮡm) {
+internal static nint reflect_maplen(ж<maps.Map> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (Ꮡm == nil) {
@@ -310,12 +310,12 @@ internal static nint reflect_maplen(ж<mapsꓸMap> Ꮡm) {
 }
 
 //go:linkname reflect_mapclear reflect.mapclear
-internal static void reflect_mapclear(ж<abiꓸMapType> t, ж<mapsꓸMap> m) {
+internal static void reflect_mapclear(ж<abi.MapType> t, ж<maps.Map> m) {
     mapclear(t, m);
 }
 
 //go:linkname reflectlite_maplen internal/reflectlite.maplen
-internal static nint reflectlite_maplen(ж<mapsꓸMap> Ꮡm) {
+internal static nint reflectlite_maplen(ж<maps.Map> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (Ꮡm == nil) {
@@ -342,8 +342,8 @@ internal static any mapclone(any mʗp) {
     ref var m = ref heap(mʗp, out var Ꮡm);
 
     var e = efaceOf(Ꮡm);
-    var typ = (~e)._type.Reinterpret<_type, abiꓸMapType>();
-    var map_ = (ж<mapsꓸMap>)(uintptr)((~e).data);
+    var typ = (~e)._type.Reinterpret<_type, abi.MapType>();
+    var map_ = (ж<maps.Map>)(uintptr)((~e).data);
     map_ = map_.Clone(typ);
     e.Value.data = @unsafe.Pointer.FromPinnedBox(map_);
     return m;

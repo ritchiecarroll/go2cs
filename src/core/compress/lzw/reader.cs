@@ -21,6 +21,7 @@ using bufio = bufio_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using io = io_package;
+using static lzw_package;
 
 partial class lzw_package {
 
@@ -77,6 +78,8 @@ partial struct Reader {
     internal nint o;             // write index into output
     internal slice<byte> toRead; // bytes to return from Read
 }
+
+} partial class lzwᴛReader {
 
 // readLSB returns the next code for "Least Significant Bits first" data.
 internal static (uint16, error) readLSB(this ref Reader r) {
@@ -235,7 +238,11 @@ break_loop:;
     r.o = 0;
 }
 
+} partial class lzw_package {
+
 internal static error errClosed = errors.New("lzw: reader/writer is closed");
+
+} partial class lzwᴛReader {
 
 // Close closes the [Reader] and returns an error for any future read operation.
 // It does not close the underlying [io.Reader].
@@ -250,6 +257,8 @@ public static void Reset(this ref Reader r, io.Reader src, Order order, nint lit
     r = new Reader();
     r.init(src, order, litWidth);
 }
+
+} partial class lzw_package {
 
 // NewReader creates a new [io.ReadCloser].
 // Reads from the returned [io.ReadCloser] read and decompress data from r.
@@ -273,6 +282,8 @@ internal static ж<Reader> newReader(io.Reader src, Order order, nint litWidth) 
     return r;
 }
 
+} partial class lzwᴛReader {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string lzwUnknownOrderˢ => ref lzwUnknownOrderˢᵇ;
 private static readonly @string lzwUnknownOrderˢᵇ = "lzw: unknown order"u8;
@@ -280,11 +291,11 @@ private static readonly @string lzwUnknownOrderˢᵇ = "lzw: unknown order"u8;
 internal static void init(this ref Reader r, io.Reader src, Order order, nint litWidth) {
     switch (order) {
     case var ᴛ when ᴛ == LSB: {
-        r.read = ((Func<ж<Reader>, (uint16, error)>)(readLSB));
+        r.read = ((Func<ж<Reader>, (uint16, error)>)(lzwᴛReader.readLSB));
         break;
     }
     case var ᴛ when ᴛ == MSB: {
-        r.read = ((Func<ж<Reader>, (uint16, error)>)(readMSB));
+        r.read = ((Func<ж<Reader>, (uint16, error)>)(lzwᴛReader.readMSB));
         break;
     }
     default: {
@@ -309,4 +320,4 @@ internal static void init(this ref Reader r, io.Reader src, Order order, nint li
     r.last = decoderInvalidCode;
 }
 
-} // end lzw_package
+} // end lzwᴛReader

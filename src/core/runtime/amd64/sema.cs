@@ -22,6 +22,7 @@ using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -57,9 +58,13 @@ partial struct semTableᴛ1 /*dyn*/ {
 /* [semTabSize]semTableᴛ1 */
 partial struct semTable /*[251]semTableᴛ1*/;
 
+} partial class runtimeᴛsemTable {
+
 internal static ж<semaRoot> rootFor(this ref semTable t, ж<uint32> addr) {
     return Ꮡ(t.Value, ((uintptr)addr >> 3) % (uintptr)semTabSize).of(semTableᴛ1.Ꮡroot);
 }
+
+} partial class runtime_package {
 
 // sync_runtime_Semacquire should be an internal detail,
 // but widely used packages access it using linkname.
@@ -164,6 +169,8 @@ internal static bool cansemacquire(ж<uint32> addr) {
         }
     }
 }
+
+} partial class runtimeᴛsemaRoot {
 
 // queue adds s to the blocked goroutines in semaRoot.
 internal static void queue(this ж<semaRoot> Ꮡroot, ж<uint32> addr, ж<sudog> Ꮡs, bool lifo) {
@@ -367,7 +374,7 @@ internal static void rotateLeft(this ref semaRoot root, ж<sudog> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // p -> (x a (y b c))
-    var Δp = x.parent;
+    var p = x.parent;
     var y = x.next;
     var b = y.Value.prev;
 
@@ -378,16 +385,16 @@ internal static void rotateLeft(this ref semaRoot root, ж<sudog> Ꮡx) {
         b.Value.parent = Ꮡx;
     }
 
-    y.Value.parent = Δp;
-    if (Δp == nil) {
+    y.Value.parent = p;
+    if (p == nil) {
         root.treap = y;
-    } else if ((~Δp).prev == Ꮡx) {
-        Δp.Value.prev = y;
+    } else if ((~p).prev == Ꮡx) {
+        p.Value.prev = y;
     } else {
-        if ((~Δp).next != Ꮡx) {
+        if ((~p).next != Ꮡx) {
             @throw(semaRootRotateLeftˢ);
         }
-        Δp.Value.next = y;
+        p.Value.next = y;
     }
 }
 
@@ -401,7 +408,7 @@ internal static void rotateRight(this ref semaRoot root, ж<sudog> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     // p -> (y (x a b) c)
-    var Δp = y.parent;
+    var p = y.parent;
     var x = y.prev;
     var b = x.Value.next;
 
@@ -412,18 +419,20 @@ internal static void rotateRight(this ref semaRoot root, ж<sudog> Ꮡy) {
         b.Value.parent = Ꮡy;
     }
 
-    x.Value.parent = Δp;
-    if (Δp == nil) {
+    x.Value.parent = p;
+    if (p == nil) {
         root.treap = x;
-    } else if ((~Δp).prev == Ꮡy) {
-        Δp.Value.prev = x;
+    } else if ((~p).prev == Ꮡy) {
+        p.Value.prev = x;
     } else {
-        if ((~Δp).next != Ꮡy) {
+        if ((~p).next != Ꮡy) {
             @throw(semaRootRotateRightˢ);
         }
-        Δp.Value.next = x;
+        p.Value.next = x;
     }
 }
+
+} partial class runtime_package {
 
 // notifyList is a ticket-based notification list used to implement sync.Cond.
 //
@@ -589,16 +598,16 @@ internal static void notifyListNotifyOne(ж<notifyList> Ꮡl) {
     // be too long. This applies even when the g is missing:
     // it hasn't yet gotten to sleep and has lost the race to
     // the (few) other g's that we find on the list.
-    for (var (Δp, s) = ((ж<sudog>)nil, l.head); s != nil; (Δp, s) = (s, s.Value.next)) {
+    for (var (p, s) = ((ж<sudog>)nil, l.head); s != nil; (p, s) = (s, s.Value.next)) {
         if ((~s).ticket == t) {
             var n = s.Value.next;
-            if (Δp != nil) {
-                Δp.Value.next = n;
+            if (p != nil) {
+                p.Value.next = n;
             } else {
                 l.head = n;
             }
             if (n == nil) {
-                l.tail = Δp;
+                l.tail = p;
             }
             unlock(Ꮡl.Ꮡlock);
             s.Value.next = default;

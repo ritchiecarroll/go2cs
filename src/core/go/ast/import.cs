@@ -65,7 +65,7 @@ public static void SortImports(ж<token.FileSet> fset, ж<File> Ꮡf) {
     }
 }
 
-internal static nint lineAt(ж<token.FileSet> fset, tokenꓸPos pos) {
+internal static nint lineAt(ж<token.FileSet> fset, token.Pos pos) {
     return fset.PositionFor(pos, false).Line;
 }
 
@@ -102,8 +102,8 @@ internal static bool collapse(Spec prev, Spec next) {
 }
 
 partial struct posSpan {
-    public tokenꓸPos Start;
-    public tokenꓸPos End;
+    public token.Pos Start;
+    public token.Pos End;
 }
 
 partial struct cgPos {
@@ -126,12 +126,12 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> fset, ref File f, ref Ge
     }
 
     // Identify comments in this range.
-    tokenꓸPos begSpecs = pos[0].Start;
-    tokenꓸPos endSpecs = pos[len(pos) - 1].End;
-    tokenꓸPos beg = fset.File(begSpecs).LineStart(lineAt(fset, begSpecs));
+    token.Pos begSpecs = pos[0].Start;
+    token.Pos endSpecs = pos[len(pos) - 1].End;
+    token.Pos beg = fset.File(begSpecs).LineStart(lineAt(fset, begSpecs));
     nint endLine = lineAt(fset, endSpecs);
     var endFile = fset.File(endSpecs);
-    tokenꓸPos end = default;
+    token.Pos end = default;
     if (endLine == endFile.LineCount()) {
         end = endSpecs;
     } else {
@@ -208,7 +208,7 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> fset, ref File f, ref Ge
         if (i == len(specs) - 1 || !collapse(s, specs[i + 1])) {
             deduped = append(deduped, s);
         } else {
-            tokenꓸPos p = s.Pos();
+            token.Pos p = s.Pos();
             // This function is exited early when len(specs) <= 1,
             // so d.Rparen must be populated (d.Rparen.IsValid() == true).
             nint l = lineAt(fset, p); if (l != lineAt(fset, d.Rparen)) {
@@ -249,10 +249,10 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> fset, ref File f, ref Ge
 // updateBasicLitPos updates lit.Pos,
 // ensuring that lit.End is displaced by the same amount.
 // (See https://go.dev/issue/76395.)
-internal static void updateBasicLitPos(ж<BasicLit> Ꮡlit, tokenꓸPos pos) {
+internal static void updateBasicLitPos(ж<BasicLit> Ꮡlit, token.Pos pos) {
     ref var lit = ref Ꮡlit.DerefOrNull();
 
-    tokenꓸPos len = lit.End() - lit.Pos();
+    token.Pos len = lit.End() - lit.Pos();
     lit.ValuePos = pos;
     if (lit.ValueEnd.IsValid()) {
         lit.ValueEnd = pos + len;

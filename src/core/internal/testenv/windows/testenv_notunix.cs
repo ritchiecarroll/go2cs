@@ -13,7 +13,7 @@ partial class testenv_package {
 
 // Sigquit is the signal to send to kill a hanging subprocess.
 // On Unix we send SIGQUIT, but on non-Unix we only have os.Kill.
-public static osꓸSignal Sigquit = os.ΔKill;
+public static os.Signal Sigquit = os.Kill;
 
 internal static bool syscallIsNotSupported(error err) {
     return errors.Is(err, fs.ErrPermission) || errors.Is(err, errors.ErrUnsupported);

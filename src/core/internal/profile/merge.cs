@@ -8,6 +8,7 @@ using sort = sort_package;
 using strconv = go.strconv_package;
 using strings = strings_package;
 using go;
+using static profile_package;
 
 partial class profile_package {
 
@@ -67,6 +68,8 @@ public static (ж<Profile>, error) Merge(slice<ж<Profile>> srcs) {
     return (p, default);
 }
 
+} partial class profileᴛProfile {
+
 // Normalize normalizes the source profile by multiplying each value in profile by the
 // ratio of the sum of the base profile's values of that sample type to the sum of the
 // source profile's value of that sample type.
@@ -103,6 +106,8 @@ public static error Normalize(this ref Profile p, ж<Profile> Ꮡpb) {
     return default;
 }
 
+} partial class profile_package {
+
 internal static bool isZeroSample(ref Sample s) {
     foreach (var (_, v) in range(s.Value)) {
         if (v != 0) {
@@ -129,6 +134,8 @@ partial struct mapInfo {
     internal ж<Mapping> m;
     internal int64 offset;
 }
+
+} partial class profileᴛprofileMerger {
 
 internal static ж<Sample> mapSample(this ref profileMerger pm, ж<Sample> Ꮡsrc) {
     ref var src = ref Ꮡsrc.DerefOrNull();
@@ -173,6 +180,8 @@ internal static ж<Sample> mapSample(this ref profileMerger pm, ж<Sample> Ꮡsr
     return s;
 }
 
+} partial class profileᴛSample {
+
 // key generates sampleKey to be used as a key for maps.
 internal static sampleKey key(this ref Sample sample) {
     var labelsᴷ = new stackAppend<@string>();
@@ -202,11 +211,15 @@ internal static sampleKey key(this ref Sample sample) {
     );
 }
 
+} partial class profile_package {
+
 partial struct sampleKey {
     internal @string locations;
     internal @string labels;
     internal @string numlabels;
 }
+
+} partial class profileᴛprofileMerger {
 
 internal static ж<Location> mapLocation(this ref profileMerger pm, ж<Location> Ꮡsrc) {
     ref var src = ref Ꮡsrc.DerefOrNull();
@@ -244,6 +257,8 @@ internal static ж<Location> mapLocation(this ref profileMerger pm, ж<Location>
     return l;
 }
 
+} partial class profileᴛLocation {
+
 // key generates locationKey to be used as a key for maps.
 internal static locationKey key(this ref Location l) {
     var key = new locationKey(
@@ -266,11 +281,15 @@ internal static locationKey key(this ref Location l) {
     return key;
 }
 
+} partial class profile_package {
+
 partial struct locationKey {
     internal uint64 addr, mappingID;
     internal @string lines;
     internal bool isFolded;
 }
+
+} partial class profileᴛprofileMerger {
 
 internal static mapInfo mapMapping(this ref profileMerger pm, ж<Mapping> Ꮡsrc) {
     ref var src = ref Ꮡsrc.DerefOrNull();
@@ -311,6 +330,8 @@ internal static mapInfo mapMapping(this ref profileMerger pm, ж<Mapping> Ꮡsrc
     return mi;
 }
 
+} partial class profileᴛMapping {
+
 // key generates encoded strings of Mapping to be used as a key for
 // maps.
 internal static mappingKey key(this ref Mapping m) {
@@ -344,10 +365,14 @@ internal static mappingKey key(this ref Mapping m) {
     return key;
 }
 
+} partial class profile_package {
+
 partial struct mappingKey {
     internal uint64 size, offset;
     internal @string buildIDOrFile;
 }
+
+} partial class profileᴛprofileMerger {
 
 internal static Line mapLine(this ref profileMerger pm, Line src) {
     var ln = new Line(
@@ -384,6 +409,8 @@ internal static ж<Function> mapFunction(this ref profileMerger pm, ж<Function>
     return f;
 }
 
+} partial class profileᴛFunction {
+
 // key generates a struct to be used as a key for maps.
 internal static functionKey key(this ref Function f) {
     return new functionKey(
@@ -393,6 +420,8 @@ internal static functionKey key(this ref Function f) {
         f.Filename
     );
 }
+
+} partial class profile_package {
 
 partial struct functionKey {
     internal int64 startLine;
@@ -451,6 +480,8 @@ internal static (ж<Profile>, error) combineHeaders(slice<ж<Profile>> srcs) {
     return (p, default);
 }
 
+} partial class profileᴛProfile {
+
 // compatible determines if two profiles can be compared/merged.
 // returns nil if the profiles are compatible; otherwise an error with
 // details on the incompatibility.
@@ -472,6 +503,8 @@ internal static error compatible(this ref Profile p, ж<Profile> Ꮡpb) {
     }
     return default;
 }
+
+} partial class profile_package {
 
 // equalValueType returns true if the two value types are semantically
 // equal. It ignores the internal fields used during encode/decode.

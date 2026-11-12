@@ -12,6 +12,7 @@ using textproto = go.net.textproto_package;
 using sync = sync_package;
 using go.net;
 using time = time_package;
+using static httputil_package;
 
 partial class httputil_package {
 
@@ -57,6 +58,8 @@ public static ж<ServerConn> NewServerConn(net.Conn c, ж<bufio.Reader> Ꮡr) {
     }
     return Ꮡ(new ServerConn(c: c, r: Ꮡr, pipereq: new map<ж<http.Request>, nuint>()));
 }
+
+} partial class httputilᴛServerConn {
 
 // Hijack detaches the [ServerConn] and returns the underlying connection as well
 // as the read-side bufio which may have some left over data. Hijack may be
@@ -256,6 +259,8 @@ public static error Write(this ж<ServerConn> Ꮡsc, ж<http.Request> req, ж<ht
     finally { ᒐ.Run(); }
 }
 
+} partial class httputil_package {
+
 // ClientConn is an artifact of Go's early HTTP implementation.
 // It is low-level, old, and unused by Go's current HTTP stack.
 // We should have deleted it before Go 1.
@@ -288,7 +293,7 @@ public static ж<ClientConn> NewClientConn(net.Conn c, ж<bufio.Reader> Ꮡr) {
         c: c,
         r: Ꮡr,
         pipereq: new map<ж<http.Request>, nuint>(),
-        writeReq: ((Func<ж<http.Request>, io.Writer, error>)(http.Write))
+        writeReq: ((Func<ж<http.Request>, io.Writer, error>)(global::go.net.httpᴛRequest.Write))
     ));
 }
 
@@ -299,9 +304,11 @@ public static ж<ClientConn> NewClientConn(net.Conn c, ж<bufio.Reader> Ꮡr) {
 // Deprecated: Use the Client or Transport in package [net/http] instead.
 public static ж<ClientConn> NewProxyClientConn(net.Conn c, ж<bufio.Reader> r) {
     var cc = NewClientConn(c, r);
-    cc.writeReq = ((Func<ж<http.Request>, io.Writer, error>)(http.WriteProxy));
+    cc.writeReq = ((Func<ж<http.Request>, io.Writer, error>)(global::go.net.httpᴛRequest.WriteProxy));
     return cc;
 }
+
+} partial class httputilᴛClientConn {
 
 // Hijack detaches the [ClientConn] and returns the underlying connection as well
 // as the read-side bufio which may have some left over data. Hijack may be
@@ -499,4 +506,4 @@ public static (ж<http.Response>, error) Do(this ж<ClientConn> Ꮡcc, ж<http.R
     return Ꮡcc.Read(req);
 }
 
-} // end httputil_package
+} // end httputilᴛClientConn

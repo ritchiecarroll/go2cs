@@ -94,6 +94,8 @@ using errors = errors_package;
 using bits = math.bits_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 using math;
+using time = time_package;
+using static time_package;
 
 partial class time_package {
 
@@ -157,7 +159,7 @@ partial struct Time {
     // that correspond to this Time.
     // The nil location means UTC.
     // All UTC times are represented with loc==nil, never loc==&utcLoc.
-    internal ж<ΔLocation> loc;
+    internal ж<Location> loc;
 }
 
 internal static UntypedInt hasMonotonic => /* 1 << 63 */ 9223372036854775808;
@@ -165,6 +167,8 @@ internal const int64 maxWall = /* wallToInternal + (1<<33 - 1) */ 68043243391; /
 internal const int64 minWall = /* wallToInternal */ 59453308800;               // year 1885
 internal static UntypedInt nsecMask => /* 1<<30 - 1 */ 1073741823;
 internal static UntypedInt nsecShift => 30;
+
+} partial class timeᴛTime {
 
 // These helpers for manipulating the wall and monotonic clock readings
 // take pointer receivers, even when they don't modify the time,
@@ -212,7 +216,7 @@ internal static void addSec(this ref Time t, int64 d) {
 }
 
 // setLoc sets the location associated with the time.
-internal static void setLoc(this ref Time t, ж<ΔLocation> Ꮡloc) {
+internal static void setLoc(this ref Time t, ж<Location> Ꮡloc) {
     ref var loc = ref Ꮡloc.DerefOrNull();
 
     if (Ꮡloc == ᏑutcLoc) {
@@ -322,24 +326,28 @@ public static bool Equal(this Time t, Time u) {
     return t.sec() == u.sec() && t.nsec() == u.nsec();
 }
 
-// A Month specifies a month of the year (January = 1, ...).
-partial struct ΔMonth /*num:nint*/;
+} partial class time_package {
 
-public static ΔMonth January => /* 1 + iota */ 1;
-public static ΔMonth February => 2;
-public static ΔMonth March => 3;
-public static ΔMonth April => 4;
-public static ΔMonth May => 5;
-public static ΔMonth June => 6;
-public static ΔMonth July => 7;
-public static ΔMonth August => 8;
-public static ΔMonth September => 9;
-public static ΔMonth October => 10;
-public static ΔMonth November => 11;
-public static ΔMonth December => 12;
+// A Month specifies a month of the year (January = 1, ...).
+partial struct Month /*num:nint*/;
+
+public static Month January => /* 1 + iota */ 1;
+public static Month February => 2;
+public static Month March => 3;
+public static Month April => 4;
+public static Month May => 5;
+public static Month June => 6;
+public static Month July => 7;
+public static Month August => 8;
+public static Month September => 9;
+public static Month October => 10;
+public static Month November => 11;
+public static Month December => 12;
+
+} partial class timeᴛMonth {
 
 // String returns the English name of the month ("January", "February", ...).
-public static @string String(this ΔMonth m) {
+public static @string String(this Month m) {
     if (January <= m && m <= December) {
         return longMonthNames[m - 1];
     }
@@ -348,19 +356,23 @@ public static @string String(this ΔMonth m) {
     return "%!Month("u8 + ((sstring)(buf.slice(n))) + ")"u8;
 }
 
-// A Weekday specifies a day of the week (Sunday = 0, ...).
-partial struct ΔWeekday /*num:nint*/;
+} partial class time_package {
 
-public static ΔWeekday Sunday => /* iota */ 0;
-public static ΔWeekday Monday => 1;
-public static ΔWeekday Tuesday => 2;
-public static ΔWeekday Wednesday => 3;
-public static ΔWeekday Thursday => 4;
-public static ΔWeekday Friday => 5;
-public static ΔWeekday Saturday => 6;
+// A Weekday specifies a day of the week (Sunday = 0, ...).
+partial struct Weekday /*num:nint*/;
+
+public static Weekday Sunday => /* iota */ 0;
+public static Weekday Monday => 1;
+public static Weekday Tuesday => 2;
+public static Weekday Wednesday => 3;
+public static Weekday Thursday => 4;
+public static Weekday Friday => 5;
+public static Weekday Saturday => 6;
+
+} partial class timeᴛWeekday {
 
 // String returns the English name of the day ("Sunday", "Monday", ...).
-public static @string String(this ΔWeekday d) {
+public static @string String(this Weekday d) {
     if (Sunday <= d && d <= Saturday) {
         return longDayNames[d];
     }
@@ -368,6 +380,8 @@ public static @string String(this ΔWeekday d) {
     nint n = fmtInt(buf, (uint64)d);
     return "%!Weekday("u8 + ((sstring)(buf.slice(n))) + ")"u8;
 }
+
+} partial class time_package {
 
 // Computations on Times
 //
@@ -592,7 +606,7 @@ partial struct absJanFeb /*num:nint*/;
 // dateToAbsDays takes a standard year/month/day and returns the
 // number of days from the absolute epoch to that day.
 // The days argument can be out of range and in particular can be negative.
-internal static absDays dateToAbsDays(int64 year, ΔMonth month, nint day) {
+internal static absDays dateToAbsDays(int64 year, Month month, nint day) {
     // See “Computations on Times” comment above.
     var amonth = (uint32)month;
     var janFeb = (uint32)0;
@@ -630,10 +644,14 @@ internal static absDays dateToAbsDays(int64 year, ΔMonth month, nint day) {
     return (absDays)(centurydays + (uint64)((int64)(cday + ayday) + (int64)day - 1));
 }
 
+} partial class timeᴛabsSeconds {
+
 // days converts absolute seconds to absolute days.
 internal static absDays days(this absSeconds abs) {
     return (absDays)(uint64)(abs / (uint64)secondsPerDay);
 }
+
+} partial class timeᴛabsDays {
 
 // split splits days into century, cyear, ayday.
 internal static (absCentury century, absCyear cyear, absYday ayday) split(this absDays days) {
@@ -677,6 +695,8 @@ internal static (absCentury century, absCyear cyear, absYday ayday) split(this a
     return (century, cyear, ayday);
 }
 
+} partial class timeᴛabsYday {
+
 // split splits ayday into absolute month and standard (1-based) day-in-month.
 internal static (absMonth m, nint mday) split(this absYday ayday) {
     // See “Computations on Times” comment above.
@@ -707,11 +727,15 @@ internal static absJanFeb janFeb(this absYday ayday) {
     return jf;
 }
 
+} partial class timeᴛabsMonth {
+
 // month returns the standard Month for (m, janFeb)
-internal static ΔMonth month(this absMonth m, absJanFeb janFeb) {
+internal static Month month(this absMonth m, absJanFeb janFeb) {
     // See “Computations on Times” comment above.
-    return ((ΔMonth)(nint)m) - ((ΔMonth)(nint)janFeb) * 12;
+    return ((Month)(nint)m) - ((Month)(nint)janFeb) * 12;
 }
+
+} partial class timeᴛabsCentury {
 
 // leap returns 1 if (century, cyear) is a leap year, 0 otherwise.
 internal static absLeap leap(this absCentury century, absCyear cyear) {
@@ -737,16 +761,20 @@ internal static nint year(this absCentury century, absCyear cyear, absJanFeb jan
     return (nint)((uint64)century * 100 - (uint64)absoluteYears) + (nint)cyear + (nint)janFeb;
 }
 
+} partial class timeᴛabsYday {
+
 // yday returns the standard 1-based yday for (ayday, janFeb, leap).
 internal static nint yday(this absYday ayday, absJanFeb janFeb, absLeap leap) {
     // See “Computations on Times” comment above.
     return (nint)ayday + (1 + 31 + 28) + ((nint)leap & ~(nint)janFeb) - 365 * (nint)janFeb;
 }
 
+} partial class timeᴛabsDays {
+
 // date converts days into standard year, month, day.
-internal static (nint year, ΔMonth month, nint day) date(this absDays days) {
+internal static (nint year, Month month, nint day) date(this absDays days) {
     nint year = default;
-    ΔMonth month = default;
+    Month month = default;
     nint day = default;
 
     var (century, cyear, ayday) = days.split();
@@ -768,6 +796,8 @@ internal static (nint year, nint yday) yearYday(this absDays days) {
     yday = ayday.yday(janFeb, century.leap(cyear));
     return (year, yday);
 }
+
+} partial class timeᴛTime {
 
 // absSec returns the time t as an absolute seconds, adjusted by the zone offset.
 // It is called when computing a presentation property like Month or Hour.
@@ -824,7 +854,7 @@ internal static (@string name, nint offset, absSeconds abs) locabs(this Time t) 
 }
 
 // Date returns the year, month, and day in which t occurs.
-public static (nint year, ΔMonth month, nint day) Date(this Time t) {
+public static (nint year, Month month, nint day) Date(this Time t) {
     return t.absSec().days().date();
 }
 
@@ -836,7 +866,7 @@ public static nint Year(this Time t) {
 }
 
 // Month returns the month of the year specified by t.
-public static ΔMonth Month(this Time t) {
+public static Month Month(this Time t) {
     var (_, _, ayday) = t.absSec().days().split();
     var (amonth, _) = ayday.split();
     return amonth.month(ayday.janFeb());
@@ -850,15 +880,19 @@ public static nint Day(this Time t) {
 }
 
 // Weekday returns the day of the week specified by t.
-public static ΔWeekday Weekday(this Time t) {
+public static Weekday Weekday(this Time t) {
     return t.absSec().days().weekday();
 }
 
+} partial class timeᴛabsDays {
+
 // weekday returns the day of the week specified by days.
-internal static ΔWeekday weekday(this absDays days) {
+internal static Weekday weekday(this absDays days) {
     // March 1 of the absolute year, like March 1 of 2000, was a Wednesday.
-    return (ΔWeekday)(nint)(((uint64)days + (uint64)Wednesday) % 7);
+    return (Weekday)(nint)(((uint64)days + (uint64)Wednesday) % 7);
 }
+
+} partial class timeᴛTime {
 
 // ISOWeek returns the ISO 8601 year and week number in which t occurs.
 // Week ranges from 1 to 53. Jan 01 to Jan 03 of year n might belong to
@@ -888,6 +922,8 @@ public static (nint hour, nint min, nint sec) Clock(this Time t) {
     return t.absSec().clock();
 }
 
+} partial class timeᴛabsSeconds {
+
 // clock returns the hour, minute, and second within the day specified by abs.
 internal static (nint hour, nint min, nint sec) clock(this absSeconds abs) {
     nint hour = default;
@@ -901,6 +937,8 @@ internal static (nint hour, nint min, nint sec) clock(this absSeconds abs) {
     sec -= min * (nint)secondsPerMinute;
     return (hour, min, sec);
 }
+
+} partial class timeᴛTime {
 
 // Hour returns the hour within the day specified by t, in the range [0, 23].
 public static nint Hour(this Time t) {
@@ -930,6 +968,8 @@ public static nint YearDay(this Time t) {
     return yday;
 }
 
+} partial class time_package {
+
 // A Duration represents the elapsed time between two instants
 // as an int64 nanosecond count. The representation limits the
 // largest representable duration to approximately 290 years.
@@ -950,12 +990,14 @@ internal static Duration maxDuration => /* 1<<63 - 1 */ 9223372036854775807;
 //
 //	seconds := 10
 //	fmt.Print(time.Duration(seconds)*time.Second) // prints 10s
-public static Duration ΔNanosecond => 1;
+public static Duration Nanosecond => 1;
 public static Duration Microsecond => /* 1000 * Nanosecond */ 1000;
 public static Duration Millisecond => /* 1000 * Microsecond */ 1000000;
-public static Duration ΔSecond => /* 1000 * Millisecond */ 1000000000;
-public static Duration ΔMinute => /* 60 * Second */ 60000000000;
-public static Duration ΔHour => /* 60 * Minute */ 3600000000000;
+public static Duration Second => /* 1000 * Millisecond */ 1000000000;
+public static Duration Minute => /* 60 * Second */ 60000000000;
+public static Duration Hour => /* 60 * Minute */ 3600000000000;
+
+} partial class timeᴛDuration {
 
 // String returns a string representing the duration in the form "72h3m0.5s".
 // Leading zero units are omitted. As a special case, durations less than one
@@ -983,7 +1025,7 @@ internal static nint format(this Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) {
         u = ((uint64)0 - u);
     }
 
-    if (u < (uint64)ΔSecond) {
+    if (u < (uint64)Second) {
         // Special case: if duration is smaller than a second,
         // use smaller units, like 1.2ms
         nint prec = default;
@@ -1052,6 +1094,8 @@ internal static nint format(this Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) {
     return w;
 }
 
+} partial class time_package {
+
 // fmtFrac formats the fraction of v/10**prec (e.g., ".12345") into the
 // tail of buf, omitting trailing zeros. It omits the decimal
 // point too when the fraction is 0. It returns the index where the
@@ -1093,6 +1137,8 @@ internal static nint fmtInt(slice<byte> buf, uint64 v) {
     return w;
 }
 
+} partial class timeᴛDuration {
+
 // Nanoseconds returns the duration as an integer nanosecond count.
 public static int64 Nanoseconds(this Duration d) { return (int64)d; }
 
@@ -1113,22 +1159,22 @@ public static int64 Milliseconds(this Duration d) { return (int64)d / 1000000; }
 
 // Seconds returns the duration as a floating point number of seconds.
 public static float64 Seconds(this Duration d) {
-    var sec = d / ΔSecond;
-    var nsec = d % ΔSecond;
+    var sec = d / Second;
+    var nsec = d % Second;
     return (float64)sec + (float64)nsec / 1e9D;
 }
 
 // Minutes returns the duration as a floating point number of minutes.
 public static float64 Minutes(this Duration d) {
-    var min = d / ΔMinute;
-    var nsec = d % ΔMinute;
+    var min = d / Minute;
+    var nsec = d % Minute;
     return (float64)min + (float64)nsec / (60D * 1e9D);
 }
 
 // Hours returns the duration as a floating point number of hours.
 public static float64 Hours(this Duration d) {
-    var hour = d / ΔHour;
-    var nsec = d % ΔHour;
+    var hour = d / Hour;
+    var nsec = d % Hour;
     return (float64)hour + (float64)nsec / (60D * 60D * 1e9D);
 }
 
@@ -1141,11 +1187,15 @@ public static Duration Truncate(this Duration d, Duration m) {
     return d - d % m;
 }
 
+} partial class time_package {
+
 // lessThanHalf reports whether x+x < y but avoids overflow,
 // assuming x and y are both positive (Duration is signed).
 internal static bool lessThanHalf(Duration x, Duration y) {
     return (uint64)x + (uint64)x < (uint64)y;
 }
+
+} partial class timeᴛDuration {
 
 // Round returns the result of rounding d to the nearest multiple of m.
 // The rounding behavior for halfway values is to round away from zero.
@@ -1195,6 +1245,8 @@ public static Duration Abs(this Duration d) {
     }}
 }
 
+} partial class timeᴛTime {
+
 // Add returns the time t+d.
 public static Time Add(this Time t, Duration d) {
     var dsec = (int64)(d / 1000000000);
@@ -1228,7 +1280,7 @@ public static Duration Sub(this Time t, Time u) {
     if ((t.wall & u.wall & (uint64)hasMonotonic) != 0) {
         return subMono(t.ext, u.ext);
     }
-    var d = ((Duration)(t.sec() - u.sec())) * ΔSecond + ((Duration)(int64)(t.nsec() - u.nsec()));
+    var d = ((Duration)(t.sec() - u.sec())) * time.Second + ((Duration)(int64)(t.nsec() - u.nsec()));
     // Check for overflow or underflow.
     switch (ᐧ) {
     case {} when u.Add(d).Equal(t): {
@@ -1241,6 +1293,8 @@ public static Duration Sub(this Time t, Time u) {
         return maxDuration; // t - u is positive out of range
     }}
 }
+
+} partial class time_package {
 
 internal static Duration subMono(int64 t, int64 u) {
     var d = (Duration)(t - u);
@@ -1273,6 +1327,8 @@ public static Duration Until(Time t) {
     return t.Sub(Now());
 }
 
+} partial class timeᴛTime {
+
 // AddDate returns the time corresponding to adding the
 // given number of years, months, and days to t.
 // For example, AddDate(-1, 2, 3) applied to January 1, 2011
@@ -1293,12 +1349,14 @@ public static Duration Until(Time t) {
 public static Time AddDate(this Time t, nint years, nint months, nint days) {
     var (year, month, day) = t.Date();
     var (hour, min, sec) = t.Clock();
-    return Date(year + years, month + ((ΔMonth)months), day + days, hour, min, sec, (nint)t.nsec(), t.Location());
+    return time.Date(year + years, month + ((Month)months), day + days, hour, min, sec, (nint)t.nsec(), t.Location());
 }
+
+} partial class time_package {
 
 // daysBefore returns the number of days in a non-leap year before month m.
 // daysBefore(December+1) returns 365.
-internal static nint daysBefore(ΔMonth m) {
+internal static nint daysBefore(Month m) {
     nint adj = 0;
     if (m >= March) {
         adj = -2;
@@ -1317,7 +1375,7 @@ internal static nint daysBefore(ΔMonth m) {
     return (214 * (nint)m - 211) / 7 + adj;
 }
 
-internal static nint daysIn(ΔMonth m, nint year) {
+internal static nint daysIn(Month m, nint year) {
     if (m == February) {
         if (isLeap(year)) {
             return 29;
@@ -1328,7 +1386,7 @@ internal static nint daysIn(ΔMonth m, nint year) {
     //	31 30 31 30 31 30 31 31 30 31 30 31
     // Adding m&1 produces the basic alternation;
     // adding (m>>3)&1 inverts the alternation starting in August.
-    return 30 + (nint)((ΔMonth)((m + (m >> 3)) & 1));
+    return 30 + (nint)((Month)((m + (m >> 3)) & 1));
 }
 
 // Provided by package runtime.
@@ -1378,7 +1436,7 @@ internal static int64 startNano = runtimeNano() - 1;
 public static Time Now() {
     var (sec, nsec, mono) = runtimeNow();
     if (mono == 0) {
-        return new Time((uint64)nsec, sec + unixToInternal, ΔLocal);
+        return new Time((uint64)nsec, sec + unixToInternal, Local);
     }
     mono -= startNano;
     sec += 2682288000L;
@@ -1386,14 +1444,16 @@ public static Time Now() {
         // Seconds field overflowed the 33 bits available when
         // storing a monotonic time. This will be true after
         // March 16, 2157.
-        return new Time((uint64)nsec, sec + minWall, ΔLocal);
+        return new Time((uint64)nsec, sec + minWall, Local);
     }
-    return new Time((uint64)hasMonotonic | (uint64)sec << (int)(nsecShift) | (uint64)nsec, mono, ΔLocal);
+    return new Time((uint64)hasMonotonic | (uint64)sec << (int)(nsecShift) | (uint64)nsec, mono, Local);
 }
 
 internal static Time unixTime(int64 sec, int32 nsec) {
-    return new Time((uint64)nsec, sec + unixToInternal, ΔLocal);
+    return new Time((uint64)nsec, sec + unixToInternal, Local);
 }
+
+} partial class timeᴛTime {
 
 // UTC returns t with the location set to UTC.
 public static Time UTC(this Time t) {
@@ -1403,7 +1463,7 @@ public static Time UTC(this Time t) {
 
 // Local returns t with the location set to local time.
 public static Time Local(this Time t) {
-    t.setLoc(ΔLocal);
+    t.setLoc(time.Local);
     return t;
 }
 
@@ -1412,7 +1472,7 @@ public static Time Local(this Time t) {
 // purposes.
 //
 // In panics if loc is nil.
-public static Time In(this Time t, ж<ΔLocation> loc) {
+public static Time In(this Time t, ж<Location> loc) {
     if (loc == nil) {
         throw panic("time: missing Location in call to Time.In");
     }
@@ -1421,10 +1481,10 @@ public static Time In(this Time t, ж<ΔLocation> loc) {
 }
 
 // Location returns the time zone information associated with t.
-public static ж<ΔLocation> Location(this Time t) {
+public static ж<Location> Location(this Time t) {
     var l = t.loc;
     if (l == nil) {
-        l = ΔUTC;
+        l = time.UTC;
     }
     return l;
 }
@@ -1498,8 +1558,12 @@ public static int64 UnixNano(this Time t) {
     return (t.unixSec()) * 1000000000 + (int64)t.nsec();
 }
 
+} partial class time_package {
+
 internal const byte timeBinaryVersionV1 = /* iota + 1 */ 1; // For general situation
 internal const byte timeBinaryVersionV2 = 2;                // For LMT only
+
+} partial class timeᴛTime {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string timeMarshalBinaryˢ => ref timeMarshalBinaryˢᵇ;
@@ -1511,7 +1575,7 @@ public static (slice<byte>, error) AppendBinary(this Time t, slice<byte> b) {
     int8 offsetSec = default;
     var version = timeBinaryVersionV1;
 
-    if (t.Location() == ΔUTC) {
+    if (t.Location() == time.UTC) {
         offsetMin = (int16)(-1);
     } else {
         var (_, offset) = t.Zone();
@@ -1607,8 +1671,8 @@ public static error UnmarshalBinary(this ref Time t, slice<byte> data) {
 
     if (offset == -1 * 60) {
         t.setLoc(ᏑutcLoc);
-    } else if (ΔLocal.lookup(t.unixSec()) is var (_, localoff, _, _, _) && offset == localoff) {
-        t.setLoc(ΔLocal);
+    } else if (time.Local.lookup(t.unixSec()) is var (_, localoff, _, _, _) && offset == localoff) {
+        t.setLoc(time.Local);
     } else {
         t.setLoc(FixedZone(""u8, offset));
     }
@@ -1705,6 +1769,8 @@ public static error UnmarshalText(this ref Time t, slice<byte> data) {
     return err;
 }
 
+} partial class time_package {
+
 // Unix returns the local Time corresponding to the given Unix time,
 // sec seconds and nsec nanoseconds since January 1, 1970 UTC.
 // It is valid to pass nsec outside the range [0, 999999999].
@@ -1735,11 +1801,15 @@ public static Time UnixMicro(int64 usec) {
     return Unix(usec / 1000000, (usec % 1000000) * 1000);
 }
 
+} partial class timeᴛTime {
+
 // IsDST reports whether the time in the configured location is in Daylight Savings Time.
 public static bool IsDST(this Time t) {
     var (_, _, _, _, isDST) = t.loc.lookup(t.Unix());
     return isDST;
 }
+
+} partial class time_package {
 
 internal static bool isLeap(nint year) {
     // year%4 == 0 && (year%100 != 0 || year%400 == 0)
@@ -1789,7 +1859,7 @@ internal static (nint nhi, nint nlo) norm(nint hi, nint lo, nint @base) {
 // in the transition, but it does not guarantee which.
 //
 // Date panics if loc is nil.
-public static Time Date(nint year, ΔMonth month, nint day, nint hour, nint min, nint sec, nint nsec, ж<ΔLocation> loc) {
+public static Time Date(nint year, Month month, nint day, nint hour, nint min, nint sec, nint nsec, ж<Location> loc) {
     if (loc == nil) {
         throw panic("time: missing Location in call to Date");
     }
@@ -1797,7 +1867,7 @@ public static Time Date(nint year, ΔMonth month, nint day, nint hour, nint min,
     // Normalize month, overflowing into year.
     nint m = (nint)month - 1;
     (year, m) = norm(year, m, 12);
-    month = ((ΔMonth)m) + 1;
+    month = ((Month)m) + 1;
 
     // Normalize nsec, sec, min, hour, overflowing into day.
     (sec, nsec) = norm(sec, nsec, 1000000000);
@@ -1827,6 +1897,8 @@ public static Time Date(nint year, ΔMonth month, nint day, nint hour, nint min,
     t.setLoc(loc);
     return t;
 }
+
+} partial class timeᴛTime {
 
 // Truncate returns the result of rounding t down to a multiple of d (since the zero time).
 // If d <= 0, Truncate returns t stripped of any monotonic clock reading but otherwise unchanged.
@@ -1864,6 +1936,8 @@ public static Time Round(this Time t, Duration d) {
     return t.Add(d - r);
 }
 
+} partial class time_package {
+
 // div divides t by d and returns the quotient parity and remainder.
 // We don't use the quotient parity anymore (round half up instead of round to even)
 // but it's still here in case we change our minds.
@@ -1887,16 +1961,16 @@ internal static (nint qmod2, Duration r) div(Time t, Duration d) {
 
     switch (ᐧ) {
     // Special case: 2d divides 1 second.
-    case {} when d < ΔSecond && ΔSecond % (d + d) == 0: {
+    case {} when d < Second && Second % (d + d) == 0: {
         qmod2 = (nint)(quo(nsec, (int32)d)) & 1;
         r = (Duration)(int64)(rem(nsec, (int32)d));
         break;
     }
     // Special case: d is a multiple of 1 second.
-    case {} when d % ΔSecond == 0: {
-        var d1 = (int64)(d / ΔSecond);
+    case {} when d % Second == 0: {
+        var d1 = (int64)(d / Second);
         qmod2 = (nint)(quo(sec, d1)) & 1;
-        r = ((Duration)(rem(sec, d1))) * ΔSecond + ((Duration)(int64)nsec);
+        r = ((Duration)(rem(sec, d1))) * Second + ((Duration)(int64)nsec);
         break;
     }
     // General case.
@@ -2001,9 +2075,9 @@ public static (nint hour, nint min, nint sec) legacyAbsClock(uint64 abs) {
 }
 
 //go:linkname legacyAbsDate time.absDate
-public static (nint year, ΔMonth month, nint day, nint yday) legacyAbsDate(uint64 abs, bool full) {
+public static (nint year, Month month, nint day, nint yday) legacyAbsDate(uint64 abs, bool full) {
     nint year = default;
-    ΔMonth month = default;
+    Month month = default;
     nint day = default;
     nint yday = default;
 

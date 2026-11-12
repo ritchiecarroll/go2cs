@@ -14,6 +14,7 @@ using io = io_package;
 using sync = sync_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using static ecdsa_package;
 
 partial class ecdsa_package {
 
@@ -21,26 +22,34 @@ partial class ecdsa_package {
 // in other types without instantiating them with a specific point type.
 // They are tied to one of the Curve types below through the curveID field.
 partial struct PrivateKey {
-    internal ΔPublicKey pub;
+    internal PublicKey pub;
     internal slice<byte> d; // bigmod.(*Nat).Bytes output (same length as the curve order)
 }
+
+} partial class ecdsaᴛPrivateKey {
 
 public static slice<byte> Bytes(this ref PrivateKey priv) {
     return priv.d;
 }
 
-public static ж<ΔPublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) {
+public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) {
     return Ꮡpriv.Ꮡpub;
 }
 
-partial struct ΔPublicKey {
+} partial class ecdsa_package {
+
+partial struct PublicKey {
     internal curveID curve;
     internal slice<byte> q; // uncompressed nistec Point.Bytes output
 }
 
-public static slice<byte> Bytes(this ref ΔPublicKey pub) {
+} partial class ecdsaᴛPublicKey {
+
+public static slice<byte> Bytes(this ref PublicKey pub) {
     return pub.q;
 }
+
+} partial class ecdsa_package {
 
 partial struct curveID /*@string*/;
 
@@ -206,7 +215,7 @@ private static readonly @string ecdsaInvalidPublicKeyˢᵇ = "ecdsa: invalid pub
 
 // NewPublicKey creates a new ECDSA public key from the given Q byte slice.
 // Q must be the compressed or uncompressed encoding of the public point.
-public static (ж<ΔPublicKey>, error) NewPublicKey<P>(ж<Curve<P>> Ꮡc, slice<byte> Q)
+public static (ж<PublicKey>, error) NewPublicKey<P>(ж<Curve<P>> Ꮡc, slice<byte> Q)
     where P : Point<P>
 {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -221,7 +230,7 @@ public static (ж<ΔPublicKey>, error) NewPublicKey<P>(ж<Curve<P>> Ꮡc, slice<
     if (err != nil) {
         return (default, err);
     }
-    return (Ꮡ(new ΔPublicKey(curve: c.curve, q: Q)), default);
+    return (Ꮡ(new PublicKey(curve: c.curve, q: Q)), default);
 }
 
 // GenerateKey generates a new ECDSA private key pair for the specified curve.
@@ -238,7 +247,7 @@ public static (ж<PrivateKey>, error) GenerateKey<P>(ж<Curve<P>> Ꮡc, io.Reade
     }
 
     var priv = Ꮡ(new PrivateKey(
-        pub: new ΔPublicKey(
+        pub: new PublicKey(
             curve: c.curve,
             q: Q.Bytes()
         ),
@@ -254,7 +263,7 @@ public static (ж<PrivateKey>, error) GenerateKey<P>(ж<Curve<P>> Ꮡc, io.Reade
 // Generation of Private Keys by Rejection Sampling) or Appendix A.3.3
 // (Per-Message Secret Number Generation for Deterministic ECDSA) followed by
 // Step 5 of Section 6.4.1.
-internal static (ж<bigmodꓸNat> k, P p, error err) randomPoint<P>(ref Curve<P> c, Func<slice<byte>, error> generate)
+internal static (ж<bigmod.Nat> k, P p, error err) randomPoint<P>(ref Curve<P> c, Func<slice<byte>, error> generate)
     where P : Point<P>
 {
     for (;;) {
@@ -439,7 +448,7 @@ internal static (ж<Signature>, error) signGeneric<P>(ref Curve<P> c, ref Privat
 }
 
 // inverse sets kInv to the inverse of k modulo the order of the curve.
-internal static void inverse<P>(ref Curve<P> c, ж<bigmodꓸNat> kInv, ж<bigmodꓸNat> Ꮡk)
+internal static void inverse<P>(ref Curve<P> c, ж<bigmod.Nat> kInv, ж<bigmod.Nat> Ꮡk)
     where P : Point<P>
 {
     ref var k = ref Ꮡk.DerefOrNull();
@@ -463,7 +472,7 @@ internal static void inverse<P>(ref Curve<P> c, ж<bigmodꓸNat> kInv, ж<bigmod
 
 // hashToNat sets e to the left-most bits of hash, according to
 // FIPS 186-5, Section 6.4.1, point 2 and Section 6.4.2, point 3.
-internal static void hashToNat<P>(ref Curve<P> c, ж<bigmodꓸNat> e, slice<byte> hash)
+internal static void hashToNat<P>(ref Curve<P> c, ж<bigmod.Nat> e, slice<byte> hash)
     where P : Point<P>
 {
     // ECDSA asks us to take the left-most log2(N) bits of hash, and use them as
@@ -512,7 +521,7 @@ private static readonly @string ecdsaPublicKeyDoesNotˢᵇ = "ecdsa: public key 
 //
 // The inputs are not considered confidential, and may leak through timing side
 // channels, or if an attacker has control of part of the inputs.
-public static error Verify<P>(ж<Curve<P>> Ꮡc, ж<ΔPublicKey> Ꮡpub, slice<byte> hash, ж<Signature> sig)
+public static error Verify<P>(ж<Curve<P>> Ꮡc, ж<PublicKey> Ꮡpub, slice<byte> hash, ж<Signature> sig)
     where P : Point<P>
 {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -534,7 +543,7 @@ private static readonly @string ecdsaInvalidSignatureSIsˢᵇ = "ecdsa: invalid 
 internal static ref readonly @string ecdsaSignatureDidNotˢ => ref ecdsaSignatureDidNotˢᵇ;
 private static readonly @string ecdsaSignatureDidNotˢᵇ = "ecdsa: signature did not verify"u8;
 
-internal static error verifyGeneric<P>(ref Curve<P> c, ref ΔPublicKey pub, slice<byte> hash, ref Signature sig)
+internal static error verifyGeneric<P>(ref Curve<P> c, ref PublicKey pub, slice<byte> hash, ref Signature sig)
     where P : Point<P>
 {
     // FIPS 186-5, Section 6.4.2

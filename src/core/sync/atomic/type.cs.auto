@@ -10,7 +10,10 @@
 namespace go.sync;
 
 using @unsafe = unsafe_package;
-using System.Runtime.InteropServices;
+using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
+using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
+using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
+using static atomic_package;
 
 partial class atomic_package {
 
@@ -22,6 +25,8 @@ partial class atomic_package {
     [FieldOffset(0)] internal readonly noCopy _;
     [FieldOffset(0)] internal uint32 v;
 }
+
+} partial class atomicᴛBool {
 
 // Load atomically loads and returns the value stored in x.
 public static bool Load(this ж<Bool> Ꮡx) { return LoadUint32(Ꮡx.of(Bool.Ꮡv)) != 0; }
@@ -36,6 +41,8 @@ public static bool /*old*/ Swap(this ж<Bool> Ꮡx, bool @new) { return SwapUint
 public static bool /*swapped*/ CompareAndSwap(this ж<Bool> Ꮡx, bool old, bool @new) {
     return CompareAndSwapUint32(Ꮡx.of(Bool.Ꮡv), b32(old), b32(@new));
 }
+
+} partial class atomic_package {
 
 // b32 returns a uint32 0 or 1 representing b.
 internal static uint32 b32(bool b) {
@@ -61,6 +68,8 @@ partial struct Pointer<T> {
     internal @unsafe.Pointer v;
 }
 
+} partial class atomicᴛPointer {
+
 // Load atomically loads and returns the value stored in x.
 public static ж<T> Load<T>(this ж<Pointer<T>> Ꮡx) { return (ж<T>)(uintptr)(LoadPointer(Ꮡx.of(Pointer<T>.Ꮡv))); }
 
@@ -75,6 +84,8 @@ public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T>
     return CompareAndSwapPointer(Ꮡx.of(Pointer<T>.Ꮡv), @unsafe.Pointer.FromPinnedBox(old), @unsafe.Pointer.FromPinnedBox(@new));
 }
 
+} partial class atomic_package {
+
 // An Int32 is an atomic int32. The zero value is zero.
 //
 // Int32 must not be copied after first use.
@@ -82,6 +93,8 @@ public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T>
     [FieldOffset(0)] internal readonly noCopy _;
     [FieldOffset(0)] internal int32 v;
 }
+
+} partial class atomicᴛInt32 {
 
 // Load atomically loads and returns the value stored in x.
 public static int32 Load(this ж<Int32> Ꮡx) { return LoadInt32(Ꮡx.of(Int32.Ꮡv)); }
@@ -108,6 +121,8 @@ public static int32 /*old*/ And(this ж<Int32> Ꮡx, int32 mask) { return AndInt
 // provided as mask and returns the old value.
 public static int32 /*old*/ Or(this ж<Int32> Ꮡx, int32 mask) { return OrInt32(Ꮡx.of(Int32.Ꮡv), mask); }
 
+} partial class atomic_package {
+
 // An Int64 is an atomic int64. The zero value is zero.
 //
 // Int64 must not be copied after first use.
@@ -116,6 +131,8 @@ public static int32 /*old*/ Or(this ж<Int32> Ꮡx, int32 mask) { return OrInt32
     [FieldOffset(0)] internal readonly align64 __;
     [FieldOffset(0)] internal int64 v;
 }
+
+} partial class atomicᴛInt64 {
 
 // Load atomically loads and returns the value stored in x.
 public static int64 Load(this ж<Int64> Ꮡx) { return LoadInt64(Ꮡx.of(Int64.Ꮡv)); }
@@ -142,6 +159,8 @@ public static int64 /*old*/ And(this ж<Int64> Ꮡx, int64 mask) { return AndInt
 // provided as mask and returns the old value.
 public static int64 /*old*/ Or(this ж<Int64> Ꮡx, int64 mask) { return OrInt64(Ꮡx.of(Int64.Ꮡv), mask); }
 
+} partial class atomic_package {
+
 // A Uint32 is an atomic uint32. The zero value is zero.
 //
 // Uint32 must not be copied after first use.
@@ -149,6 +168,8 @@ public static int64 /*old*/ Or(this ж<Int64> Ꮡx, int64 mask) { return OrInt64
     [FieldOffset(0)] internal readonly noCopy _;
     [FieldOffset(0)] internal uint32 v;
 }
+
+} partial class atomicᴛUint32 {
 
 // Load atomically loads and returns the value stored in x.
 public static uint32 Load(this ж<Uint32> Ꮡx) { return LoadUint32(Ꮡx.of(Uint32.Ꮡv)); }
@@ -175,6 +196,8 @@ public static uint32 /*old*/ And(this ж<Uint32> Ꮡx, uint32 mask) { return And
 // provided as mask and returns the old value.
 public static uint32 /*old*/ Or(this ж<Uint32> Ꮡx, uint32 mask) { return OrUint32(Ꮡx.of(Uint32.Ꮡv), mask); }
 
+} partial class atomic_package {
+
 // A Uint64 is an atomic uint64. The zero value is zero.
 //
 // Uint64 must not be copied after first use.
@@ -183,6 +206,8 @@ public static uint32 /*old*/ Or(this ж<Uint32> Ꮡx, uint32 mask) { return OrUi
     [FieldOffset(0)] internal readonly align64 __;
     [FieldOffset(0)] internal uint64 v;
 }
+
+} partial class atomicᴛUint64 {
 
 // Load atomically loads and returns the value stored in x.
 public static uint64 Load(this ж<Uint64> Ꮡx) { return LoadUint64(Ꮡx.of(Uint64.Ꮡv)); }
@@ -209,6 +234,8 @@ public static uint64 /*old*/ And(this ж<Uint64> Ꮡx, uint64 mask) { return And
 // provided as mask and returns the old value.
 public static uint64 /*old*/ Or(this ж<Uint64> Ꮡx, uint64 mask) { return OrUint64(Ꮡx.of(Uint64.Ꮡv), mask); }
 
+} partial class atomic_package {
+
 // A Uintptr is an atomic uintptr. The zero value is zero.
 //
 // Uintptr must not be copied after first use.
@@ -216,6 +243,8 @@ public static uint64 /*old*/ Or(this ж<Uint64> Ꮡx, uint64 mask) { return OrUi
     [FieldOffset(0)] internal readonly noCopy _;
     [FieldOffset(0)] internal uintptr v;
 }
+
+} partial class atomicᴛUintptr {
 
 // Load atomically loads and returns the value stored in x.
 public static uintptr Load(this ж<Uintptr> Ꮡx) { return LoadUintptr(Ꮡx.of(Uintptr.Ꮡv)); }
@@ -242,6 +271,8 @@ public static uintptr /*old*/ And(this ж<Uintptr> Ꮡx, uintptr mask) { return 
 // provided as mask and returns the old value.
 public static uintptr /*old*/ Or(this ж<Uintptr> Ꮡx, uintptr mask) { return OrUintptr(Ꮡx.of(Uintptr.Ꮡv), mask); }
 
+} partial class atomic_package {
+
 // noCopy may be added to structs which must not be copied
 // after the first use.
 //
@@ -252,9 +283,13 @@ public static uintptr /*old*/ Or(this ж<Uintptr> Ꮡx, uintptr mask) { return O
 partial struct noCopy {
 }
 
+} partial class atomicᴛnoCopy {
+
 // Lock is a no-op used by -copylocks checker from `go vet`.
 internal static void Lock(this ref noCopy _) { }
 internal static void Unlock(this ref noCopy _) { }
+
+} partial class atomic_package {
 
 // align64 may be added to structs that must be 64-bit aligned.
 // This struct is recognized by a special case in the compiler

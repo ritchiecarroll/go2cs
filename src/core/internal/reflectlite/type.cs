@@ -7,7 +7,7 @@
 
 // A Kind represents the specific kind of type that a Type represents.
 // The zero Kind is not a valid kind.
-global using Kind = go.@internal.abi_package.ΔKind;
+global using Kind = go.@internal.abi_package.Kind;
 global using nameOff = go.@internal.abi_package.NameOff;
 global using typeOff = go.@internal.abi_package.TypeOff;
 global using textOff = go.@internal.abi_package.TextOff;
@@ -19,12 +19,12 @@ global using textOff = go.@internal.abi_package.TextOff;
 global using uncommonType = go.@internal.abi_package.UncommonType;
 
 // arrayType represents a fixed array type.
-global using arrayType = go.@internal.abi_package.ΔArrayType;
+global using arrayType = go.@internal.abi_package.ArrayType;
 
 // chanType represents a channel type.
 global using chanType = go.@internal.abi_package.ChanType;
-global using funcType = go.@internal.abi_package.ΔFuncType;
-global using interfaceType = go.@internal.abi_package.ΔInterfaceType;
+global using funcType = go.@internal.abi_package.FuncType;
+global using interfaceType = go.@internal.abi_package.InterfaceType;
 
 // ptrType represents a pointer type.
 global using ptrType = go.@internal.abi_package.PtrType;
@@ -33,13 +33,14 @@ global using ptrType = go.@internal.abi_package.PtrType;
 global using sliceType = go.@internal.abi_package.SliceType;
 
 // structType represents a struct type.
-global using structType = go.@internal.abi_package.ΔStructType;
+global using structType = go.@internal.abi_package.StructType;
 
 namespace go.@internal;
 
 using abi = go.@internal.abi_package;
 using @unsafe = unsafe_package;
 using go.@internal;
+using static reflectlite_package;
 
 partial class reflectlite_package {
 
@@ -54,7 +55,7 @@ partial class reflectlite_package {
 // Type values are comparable, such as with the == operator,
 // so they can be used as map keys.
 // Two Type values are equal if they represent identical types.
-partial interface ΔType {
+partial interface Type {
 // Methods applicable to all types.
 
     // Name returns the type's name within its package for a defined type.
@@ -70,11 +71,11 @@ partial interface ΔType {
     // a value of the given type; it is analogous to unsafe.Sizeof.
     uintptr Size();
     // Kind returns the specific kind of this type.
-    abiꓸKind Kind();
+    Kind Kind();
     // Implements reports whether the type implements the interface type u.
-    bool Implements(ΔType u);
+    bool Implements(Type u);
     // AssignableTo reports whether a value of the type is assignable to type u.
-    bool AssignableTo(ΔType u);
+    bool AssignableTo(Type u);
     // Comparable reports whether values of this type are comparable.
     bool Comparable();
     // String returns a string representation of the type.
@@ -85,7 +86,7 @@ partial interface ΔType {
     @string String();
     // Elem returns a type's element type.
     // It panics if the type's Kind is not Ptr.
-    ΔType Elem();
+    Type Elem();
     ж<abi.Type> common();
     ж<uncommonType> uncommon();
 }
@@ -95,13 +96,13 @@ partial interface ΔType {
  * A few are known to ../runtime/type.go to convey to debuggers.
  * They are also known to ../runtime/type.go.
  */
-public static abiꓸKind Ptr => /* abi.Pointer */ 22;
+public static abi.Kind Ptr => /* abi.Pointer */ 22;
 
 // Import-and-export these constants as necessary
-public static abiꓸKind Interface => /* abi.Interface */ 20;
-public static abiꓸKind Slice => /* abi.Slice */ 23;
-public static abiꓸKind ΔString => /* abi.String */ 24;
-public static abiꓸKind Struct => /* abi.Struct */ 25;
+public static abi.Kind Interface => /* abi.Interface */ 20;
+public static abi.Kind Slice => /* abi.Slice */ 23;
+public static abi.Kind String => /* abi.String */ 24;
+public static abi.Kind Struct => /* abi.Struct */ 25;
 
 partial struct rtype {
     /*embed*/ public ж<@internal.abi_package.Type> Type;
@@ -130,23 +131,25 @@ partial struct rtype {
 //
 // If a name starts with "*", then the exported bit represents
 // whether the pointed to type is exported.
-partial struct Δname {
+partial struct name {
     internal ж<byte> bytes;
 }
 
-internal static ж<byte> data(this Δname n, nint off, @string whySafe) {
+} partial class reflectliteᴛname {
+
+internal static ж<byte> data(this name n, nint off, @string whySafe) {
     return (ж<byte>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(n.bytes), (uintptr)off, whySafe));
 }
 
-internal static bool isExported(this Δname n) {
+internal static bool isExported(this name n) {
     return (byte)((n.bytes.Value) & ((byte)(1 << 0))) != 0;
 }
 
-internal static bool hasTag(this Δname n) {
+internal static bool hasTag(this name n) {
     return (byte)((n.bytes.Value) & ((byte)(1 << 1))) != 0;
 }
 
-internal static bool embedded(this Δname n) {
+internal static bool embedded(this name n) {
     return (byte)((n.bytes.Value) & ((byte)(1 << 3))) != 0;
 }
 
@@ -156,7 +159,7 @@ private static readonly @string readVarintˢᵇ = "read varint"u8;
 
 // readVarint parses a varint as encoded by encoding/binary.
 // It returns the number of encoded bytes and the encoded value.
-internal static (nint, nint) readVarint(this Δname n, nint off) {
+internal static (nint, nint) readVarint(this name n, nint off) {
     nint v = 0;
     for (nint i = 0; ; i++) {
         var x = n.data(off + i, readVarintˢ).Value;
@@ -171,7 +174,7 @@ internal static (nint, nint) readVarint(this Δname n, nint off) {
 internal static ref readonly @string nonEmptyStringˢ => ref nonEmptyStringˢᵇ;
 private static readonly @string nonEmptyStringˢᵇ = "non-empty string"u8;
 
-internal static @string name(this Δname n) {
+internal static @string name(this name n) {
     if (n.bytes == nil) {
         return ""u8;
     }
@@ -179,7 +182,7 @@ internal static @string name(this Δname n) {
     return @unsafe.String(n.data(1 + i, nonEmptyStringˢ), l);
 }
 
-internal static @string tag(this Δname n) {
+internal static @string tag(this name n) {
     if (!n.hasTag()) {
         return ""u8;
     }
@@ -188,13 +191,15 @@ internal static @string tag(this Δname n) {
     return @unsafe.String(n.data(1 + i + l + i2, nonEmptyStringˢ), l2);
 }
 
+} partial class reflectlite_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nameFlagFieldˢ => ref nameFlagFieldˢᵇ;
 private static readonly @string nameFlagFieldˢᵇ = "name flag field"u8;
 internal static ref readonly @string nameOffsetFieldˢ => ref nameOffsetFieldˢᵇ;
 private static readonly @string nameOffsetFieldˢᵇ = "name offset field"u8;
 
-internal static @string pkgPath(abiꓸName n) {
+internal static @string pkgPath(abi.Name n) {
     if (n.Bytes == nil || (byte)(n.DataChecked(0, nameFlagFieldˢ).Value & ((byte)(1 << 2))) == 0) {
         return ""u8;
     }
@@ -208,7 +213,7 @@ internal static @string pkgPath(abiꓸName n) {
     // Note that this field may not be aligned in memory,
     // so we cannot use a direct int32 assignment here.
     copy(((ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ᏑnameOff))).slice(), array<byte>.AliasPointer(n.DataChecked(off, nameOffsetFieldˢ), 4).slice());
-    var pkgPathName = new Δname((ж<byte>)(uintptr)(resolveTypeOff(@unsafe.Pointer.FromPinnedBox(n.Bytes), nameOff)));
+    var pkgPathName = new name((ж<byte>)(uintptr)(resolveTypeOff(@unsafe.Pointer.FromPinnedBox(n.Bytes), nameOff)));
     return pkgPathName.name();
 }
 
@@ -231,8 +236,10 @@ internal static partial @unsafe.Pointer resolveNameOff(@unsafe.Pointer ptrInModu
 //go:noescape
 internal static partial @unsafe.Pointer resolveTypeOff(@unsafe.Pointer rtype, int32 off);
 
-internal static abiꓸName nameOff(this rtype t, nameOff off) {
-    return new abiꓸName(Bytes: (ж<byte>)(uintptr)(resolveNameOff(@unsafe.Pointer.FromPinnedBox(t.Type), (int32)off)));
+} partial class reflectliteᴛrtype {
+
+internal static abi.Name nameOff(this rtype t, nameOff off) {
+    return new abi.Name(Bytes: (ж<byte>)(uintptr)(resolveNameOff(@unsafe.Pointer.FromPinnedBox(t.Type), (int32)off)));
 }
 
 internal static ж<abi.Type> typeOff(this rtype t, typeOff off) {
@@ -287,6 +294,8 @@ internal static @string Name(this rtype t) {
     return s.slice(i + 1);
 }
 
+} partial class reflectlite_package {
+
 internal static rtype toRType(ж<abi.Type> t) {
     return new rtype(t);
 }
@@ -299,9 +308,11 @@ internal static ж<abi.Type> elem(ж<abi.Type> t) {
     throw panic("reflect: Elem of invalid type " + toRType(t).String());
 }
 
+} partial class reflectliteᴛrtype {
+
 // go2cs generated this placeholder — func Elem is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static ΔType In(this rtype t, nint i) {
+internal static Type In(this rtype t, nint i) {
     var tt = t.Type.FuncType();
     if (tt == nil) {
         throw panic("reflect: In of non-func type");
@@ -309,7 +320,7 @@ internal static ΔType In(this rtype t, nint i) {
     return toType(tt.InSlice()[i]);
 }
 
-internal static ΔType Key(this rtype t) {
+internal static Type Key(this rtype t) {
     var tt = t.Type.MapType();
     if (tt == nil) {
         throw panic("reflect: Key of non-map type");
@@ -349,13 +360,15 @@ internal static nint NumOut(this rtype t) {
     return tt.NumOut();
 }
 
-internal static ΔType Out(this rtype t, nint i) {
+internal static Type Out(this rtype t, nint i) {
     var tt = t.Type.FuncType();
     if (tt == nil) {
         throw panic("reflect: Out of non-func type");
     }
     return toType(tt.OutSlice()[i]);
 }
+
+} partial class reflectlite_package {
 
 // add returns p+x.
 //
@@ -370,13 +383,15 @@ internal static @unsafe.Pointer add(@unsafe.Pointer p, uintptr x, @string whySaf
 
 // TypeOf returns the reflection Type that represents the dynamic type of i.
 // If i is a nil interface value, TypeOf returns nil.
-public static ΔType TypeOf(any i) {
+public static Type TypeOf(any i) {
     return toType(abi.TypeOf(i));
 }
 
+} partial class reflectliteᴛrtype {
+
 // go2cs generated this placeholder — func Implements is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static bool AssignableTo(this rtype t, ΔType u) {
+internal static bool AssignableTo(this rtype t, Type u) {
     if (u == nil) {
         throw panic("reflect: nil type passed to Type.AssignableTo");
     }
@@ -388,6 +403,8 @@ internal static bool AssignableTo(this rtype t, ΔType u) {
 internal static bool Comparable(this rtype t) {
     return t.Equal != nil;
 }
+
+} partial class reflectlite_package {
 
 // go2cs generated this placeholder — func implements is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -437,7 +454,7 @@ internal static bool haveIdenticalType(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV, boo
 // a nil *rtype must be replaced by a nil Type, but in gccgo this
 // function takes care of ensuring that multiple *rtype for the same
 // type are coalesced into a single Type.
-internal static ΔType toType(ж<abi.Type> t) {
+internal static Type toType(ж<abi.Type> t) {
     if (t == nil) {
         return default;
     }

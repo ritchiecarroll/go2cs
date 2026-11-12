@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using bidiꓸClass = go.vendor.golang.org.x.text.unicode.bidi_package.ΔClass;
-global using bidiꓸDirection = go.vendor.golang.org.x.text.unicode.bidi_package.ΔDirection;
 // </ImportedTypeAliases>
 
 using go;
@@ -57,8 +55,8 @@ using static go.vendor.golang.org.x.text.secure.bidirule_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/text/secure/bidirule/bidirule.go", "bidirule.cs", "AC9cAA8kADeOAQAJAoKCgpSCgpSUrLKCgoKClIKClJSokoKClKiSgoKUqJIACRiigqiAmMKCgoKUgoKClKjCgpSClLSCgpS0pO6CgoK4ooKCgoKUgoK4lMqCgoKClKS0tIKCtpSmooKCgoKUgoKClMqCgoKClKS0tIKCtpQ=")]
-[assembly: GoPositionMap("vendor/golang.org/x/text/secure/bidirule/bidirule10.0.0.go", "bidirule10.0.0.cs", "AAgSgg==")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/secure/bidirule/bidirule.go", "bidirule.cs", "ADBcAA8kADeOAQAJAoKCgpSCgpSUrLKCgoKClIKClJSokoKClKiSgoKUqJIACxiigqiAmMKCgoKUgoKClKjCgpSClLSCgpS0pAAIDoKCgtiigoKCgpSCgriUyoKCgoKUpLS0goK2lKaigoKCgpSCgoKUyoKCgoKUpLS0goK2lA==")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/secure/bidirule/bidirule10.0.0.go", "bidirule10.0.0.cs", "AAwSgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.text.secure;
@@ -91,3 +89,13 @@ public static partial class bidirule_package
     [GoInit] internal static void initᴛᴛimportꓸvendorꓸgolang_orgꓸxꓸtextꓸunicodeꓸbidi() => builtin.initPackage(typeof(go.vendor.golang.org.x.text.unicode.bidi_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(bidirule_package.Transformer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiruleᴛTransformer;
+// </MethodHolders>

@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
 // </ImportedTypeAliases>
 
 using go;
@@ -30,9 +28,7 @@ using static go.@internal.pkgbits_package;
 
 // <ExportedTypeAliases>
 [assembly: GoTypeAlias("AbsElemIdx", "uint")]
-[assembly: GoTypeAlias("Code", "ΔCode")]
 [assembly: GoTypeAlias("RelElemIdx", "go.@internal.pkgbits_package.Index")]
-[assembly: GoTypeAlias("Version", "ΔVersion")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -42,12 +38,12 @@ using static go.@internal.pkgbits_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<CodeObj, ΔCode>(Pointer = true)]
-[assembly: GoImplement<CodeObj, ΔCode>]
-[assembly: GoImplement<CodeType, ΔCode>(Pointer = true)]
-[assembly: GoImplement<CodeType, ΔCode>]
-[assembly: GoImplement<CodeVal, ΔCode>(Pointer = true)]
-[assembly: GoImplement<CodeVal, ΔCode>]
+[assembly: GoImplement<CodeObj, Code>(Pointer = true)]
+[assembly: GoImplement<CodeObj, Code>]
+[assembly: GoImplement<CodeType, Code>(Pointer = true)]
+[assembly: GoImplement<CodeType, Code>]
+[assembly: GoImplement<CodeVal, Code>(Pointer = true)]
+[assembly: GoImplement<CodeVal, Code>]
 [assembly: GoImplement<bytes_package.Buffer, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
@@ -78,13 +74,13 @@ using static go.@internal.pkgbits_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/pkgbits/codes.go", "codes.cs", "ABUsggANIoIAEy6C")]
-[assembly: GoPositionMap("internal/pkgbits/decoder.go", "decoder.cs", "ADd+oJaAmrLulIKClIKmgoKCppSClIKUlIKUqJKCgpSokqiSgoKqooKClIKUqqKUgoKUlKiSqqKCgq7CgoKmooKs0tyCgoKCgqamotyCgoKCgpSUgoKmAAwegoK4ooKCrNKCgoKCgoKUlIKClJSClKaUgqaCgpSmgoKCruKCpoKCgoKmggASJpSCgpSCpoKCgoLcqLKCgoKCqJKCqJKCqJCAgICmkICAgKaQgICAAAIS8oKqwoKqwoKqooKClKqigoKCgpSmgqS2pKSkpIKCpLiCgoKUpoKCggACFAAIAoKCgoKUgpSqwoKCgoKCgoKCgoKmgpSUqIA=")]
-[assembly: GoPositionMap("internal/pkgbits/encoder.go", "encoder.cs", "ACVMgAABEvIABhLSgpSSppSCgoKUqqKCgtyCgoKCyoKCgsqCgpSqooKCpoKCgqyygoKu4oKUABIuspaSyoKUgoKCgoKCpoKClKaCgriCgoKCppSCgqamgoKCgqamgoKCpoKCrsKCgoLKgoKCAAMiAA0CgoKClIKCqJKCqJKCqJCApoCWgAABEOKCqJKCAAIS4qqigqqigoK8ooKCgpS4grS0grSCtIK0grSCgrSCyKKCgqaCgqiA", "61-63:1")]
+[assembly: GoPositionMap("internal/pkgbits/codes.go", "codes.cs", "ABksggARIoIAFy6C")]
+[assembly: GoPositionMap("internal/pkgbits/decoder.go", "decoder.cs", "ADp+oJaAurLulIKClIKmgoKCppSClIKUlIKUyJKCgpSokqiSgoKqooKClIKUqqKUgoKUlKiSqqKCgq7CgoKmooKs0tyCgoKCgqamotyCgoKCgpSUgoKmABAegoK4ooKCzNKCgoKCgoKUlIKClJSClKa0gqaCgpSmgoKCruKCpoKCgoKmggASJpSCgpSCpoKCgoLcqLKCgoKCqJKCqJKCqJCAgICmkICAgKaQgICAAAIS8oKqwoKqwoKqooKClKqigoKCgpSmgqS2pKSkpIKCpLiCgoKUpoKCggAEFAAIAoKCgoKUgpSqwoKCgoKCgoKCgoKmgpSUyIA=")]
+[assembly: GoPositionMap("internal/pkgbits/encoder.go", "encoder.cs", "AChMgAADEvIACBLSgpSSppSCgoKUqqKCgtyCgoKCyoKCgsqCgpSqooKCpoKCgqyygoKu4oKUABYuspaSyoKUgoKCgoKCpoKClKaCgriCgoKCppSCgqamgoKCgqamgoKCpoKCrsKCgoLKgoKCAAMiAA0CgoKClIKCqJKCqJKCqJCApoCWgAABEOKCqJKCAAIS4qqigqqigoK8ooKCgpS4grS0grSCtIK0grSCgrSCyKKCgqaCgqiA", "61-63:1")]
 [assembly: GoPositionMap("internal/pkgbits/support.go", "support.cs", "AAoSgoK4og==")]
 [assembly: GoPositionMap("internal/pkgbits/sync.go", "sync.cs", "ABAcsoKUlJQABBCygqaCgoKCgg==", "16-21:1")]
-[assembly: GoPositionMap("internal/pkgbits/syncmarker_string.go", "syncmarker_string.cs", "AAgOhqKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgtqUgoKClA==")]
-[assembly: GoPositionMap("internal/pkgbits/version.go", "version.cs", "AECIAQAHEN6S")]
+[assembly: GoPositionMap("internal/pkgbits/syncmarker_string.go", "syncmarker_string.cs", "AAkOhqKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgtq0goKClA==")]
+[assembly: GoPositionMap("internal/pkgbits/version.go", "version.cs", "AEKIAQAHEP6S")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -99,7 +95,7 @@ public static partial class pkgbits_package
     // via declarations below.
 
     // <TypeAccessibility>
-    public partial interface ΔCode {}
+    public partial interface Code {}
     public partial struct CodeObj {}
     public partial struct CodeType {}
     public partial struct CodeVal {}
@@ -112,7 +108,7 @@ public static partial class pkgbits_package
     public partial struct RefTableEntry {}
     public partial struct SectionKind {}
     public partial struct SyncMarker {}
-    public partial struct ΔVersion {}
+    public partial struct Version {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -137,3 +133,21 @@ public static partial class pkgbits_package
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(pkgbits_package.CodeObj)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkgbitsᴛCodeObj;
+[GoMethodHost(typeof(pkgbits_package.CodeType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkgbitsᴛCodeType;
+[GoMethodHost(typeof(pkgbits_package.CodeVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkgbitsᴛCodeVal;
+[GoMethodHost(typeof(pkgbits_package.Decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkgbitsᴛDecoder;
+[GoMethodHost(typeof(pkgbits_package.Encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkgbitsᴛEncoder;
+[GoMethodHost(typeof(pkgbits_package.PkgDecoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkgbitsᴛPkgDecoder;
+[GoMethodHost(typeof(pkgbits_package.PkgEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkgbitsᴛPkgEncoder;
+[GoMethodHost(typeof(pkgbits_package.SyncMarker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkgbitsᴛSyncMarker;
+[GoMethodHost(typeof(pkgbits_package.Version)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkgbitsᴛVersion;
+// </MethodHolders>

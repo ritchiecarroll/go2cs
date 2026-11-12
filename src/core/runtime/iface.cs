@@ -10,6 +10,8 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using runtime = runtime_package;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -30,7 +32,7 @@ partial struct itabTableType {
     internal array<ж<itab>> entries = new(itabInitSize); // really [size] large
 }
 
-internal static uintptr itabHashFunc(ref abiꓸInterfaceType inter, ref _type typ) {
+internal static uintptr itabHashFunc(ref interfacetype inter, ref _type typ) {
     // compiler has provided some good hash codes for us.
     return (uintptr)(inter.Type.Hash ^ typ.Hash);
 }
@@ -112,6 +114,8 @@ finish:
     throw panic(Ꮡ(new TypeAssertionError(concrete: Ꮡtyp, asserted: Ꮡinter.ᏑType, missingMethod: itabInit(m, false))));
 }
 
+} partial class runtimeᴛitabTableType {
+
 // find finds the given interface/type pair in t.
 // Returns nil if the given interface/type pair isn't present.
 internal static ж<itab> find(this ж<itabTableType> Ꮡt, ж<interfacetype> inter, ж<_type> typ) {
@@ -123,11 +127,11 @@ internal static ж<itab> find(this ж<itabTableType> Ꮡt, ж<interfacetype> int
     var mask = t.size - 1;
     var h = (uintptr)(itabHashFunc(ref (inter).DerefOrNull(), ref (typ).DerefOrNull()) & mask);
     for (var i = (uintptr)1; ; i++) {
-        var Δp = (ж<ж<itab>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(Ꮡt.Ꮡentries), h * (uintptr)goarch.PtrSize));
+        var p = (ж<ж<itab>>)(uintptr)(runtime.add(@unsafe.Pointer.FromPinnedBox(Ꮡt.Ꮡentries), h * (uintptr)goarch.PtrSize));
         // Use atomic read here so if we see m != nil, we also see
         // the initializations of the fields of m.
         // m := *p
-        var m = (ж<itab>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Δp)));
+        var m = (ж<itab>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(p)));
         if (m == nil) {
             return default;
         }
@@ -138,6 +142,8 @@ internal static ж<itab> find(this ж<itabTableType> Ꮡt, ж<interfacetype> int
         h &= (uintptr)(mask);
     }
 }
+
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string mismatchedCountDuringˢ => ref mismatchedCountDuringˢᵇ;
@@ -182,6 +188,8 @@ internal static void itabAdd(ж<itab> Ꮡm) {
     t.add(Ꮡm);
 }
 
+} partial class runtimeᴛitabTableType {
+
 // add adds the given itab to itab table t.
 // itabLock must be held.
 internal static void add(this ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
@@ -193,8 +201,8 @@ internal static void add(this ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
     var mask = t.size - 1;
     var h = (uintptr)(itabHashFunc(ref (m.Inter).DerefOrNull(), ref (m.Type).DerefOrNull()) & mask);
     for (var i = (uintptr)1; ; i++) {
-        var Δp = (ж<ж<itab>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(Ꮡt.Ꮡentries), h * (uintptr)goarch.PtrSize));
-        var m2 = Δp.ValueSlot;
+        var p = (ж<ж<itab>>)(uintptr)(runtime.add(@unsafe.Pointer.FromPinnedBox(Ꮡt.Ꮡentries), h * (uintptr)goarch.PtrSize));
+        var m2 = p.ValueSlot;
         if (m2 == Ꮡm) {
             // A given itab may be used in more than one module
             // and thanks to the way global symbol resolution works, the
@@ -207,7 +215,7 @@ internal static void add(this ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
             // sees the correctly initialized fields of m.
             // NoWB is ok because m is not in heap memory.
             // *p = m
-            atomic.StorepNoWB(@unsafe.Pointer.FromBox(Δp), @unsafe.Pointer.FromPinnedBox(Ꮡm));
+            atomic.StorepNoWB(@unsafe.Pointer.FromBox(p), @unsafe.Pointer.FromPinnedBox(Ꮡm));
             t.count++;
             return;
         }
@@ -215,6 +223,8 @@ internal static void add(this ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
         h &= (uintptr)(mask);
     }
 }
+
+} partial class runtime_package {
 
 // itabInit fills in the m.Fun array with all the code pointers for
 // the m.Inter/m.Type pair. If the type does not implement the interface,
@@ -492,7 +502,7 @@ internal static @unsafe.Pointer /*x*/ convTslice(slice<byte> valʗp) {
     ref var val = ref heap(valʗp, out var Ꮡval);
 
     // Note: this must work for any element type, not just byte.
-    if ((Ꮡval.Reinterpret<slice<byte>, Δsliceᴛ>()).Value.Δarray == nil) {
+    if ((Ꮡval.Reinterpret<slice<byte>, Δslice>()).Value.Δarray == nil) {
         x = @unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0));
     } else {
         x = (uintptr)mallocgc(/* unsafe.Sizeof(val) */ (uintptr)24, sliceType, true);

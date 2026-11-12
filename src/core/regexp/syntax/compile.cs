@@ -4,6 +4,7 @@
 namespace go.regexp;
 
 using unicode = unicode_package;
+using static syntax_package;
 
 partial class syntax_package {
 
@@ -24,6 +25,8 @@ partial struct patchList {
 internal static patchList makePatchList(uint32 n) {
     return new patchList(n, n);
 }
+
+} partial class syntaxᴛpatchList {
 
 internal static void patch(this patchList l, ж<Prog> Ꮡp, uint32 val) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -60,6 +63,8 @@ internal static patchList append(this patchList l1, ж<Prog> Ꮡp, patchList l2)
     return new patchList(l1.head, l2.tail);
 }
 
+} partial class syntax_package {
+
 // A frag represents a compiled program fragment.
 partial struct frag {
     internal uint32 i;       // index of first instruction
@@ -82,14 +87,20 @@ public static (ж<Prog>, error) Compile(ж<Regexp> re) {
     return (c.p, default);
 }
 
+} partial class syntaxᴛcompiler {
+
 internal static void init(this ref compiler c) {
     c.p = @new<Prog>();
     c.p.NumCap = 2; // implicit ( and ) for whole match $0
     c.inst(InstFail);
 }
 
+} partial class syntax_package {
+
 internal static slice<rune> anyRuneNotNL = [0, (rune)'\n' - 1, (rune)'\n' + 1, unicode.MaxRune];
 internal static slice<rune> anyRune = [0, unicode.MaxRune];
+
+} partial class syntaxᴛcompiler {
 
 internal static frag compile(this ref compiler c, ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
@@ -185,7 +196,7 @@ internal static frag compile(this ref compiler c, ж<Regexp> Ꮡre) {
 internal static frag inst(this ref compiler c, InstOp op) {
     // TODO: impose length limit
     var f = new frag(i: (uint32)len(c.p.Inst), nullable: true);
-    c.p.Inst = builtin.append(c.p.Inst, new Inst(Op: op));
+    c.p.Inst = append(c.p.Inst, new Inst(Op: op));
     return f;
 }
 
@@ -324,4 +335,4 @@ internal static frag rune(this ref compiler c, slice<rune> r, Flags flags) {
     return f;
 }
 
-} // end syntax_package
+} // end syntaxᴛcompiler

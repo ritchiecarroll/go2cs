@@ -8,6 +8,7 @@ using fmt = fmt_package;
 using io = io_package;
 using @unsafe = unsafe_package;
 using encoding;
+using static slicereader_package;
 
 partial class slicereader_package {
 
@@ -27,6 +28,8 @@ public static ж<Reader> NewReader(slice<byte> b, bool @readonly) {
     ), out var Ꮡr);
     return Ꮡr;
 }
+
+} partial class slicereaderᴛReader {
 
 public static (nint, error) Read(this ref Reader r, slice<byte> b) {
     nint amt = len(b);
@@ -117,6 +120,8 @@ public static @string ReadString(this ref Reader r, int64 len) {
     }
     return (@string)b;
 }
+
+} partial class slicereader_package {
 
 internal static @string toString(slice<byte> b) {
     if (len(b) == 0) {

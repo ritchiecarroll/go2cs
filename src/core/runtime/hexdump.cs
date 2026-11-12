@@ -6,6 +6,7 @@ namespace go;
 using goarch = @internal.goarch_package;
 using @unsafe = unsafe_package;
 using @internal;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -48,6 +49,8 @@ partial struct hexdumper {
 partial struct hexdumpMarker {
     internal nint chars;
 }
+
+} partial class runtimeᴛhexdumper {
 
 internal static void write(this ref hexdumper h, slice<byte> data) {
     if (h.ready == 0) {
@@ -241,6 +244,8 @@ internal static void fmtHex(this ref hexdumper h, slice<byte> buf, uint64 v) {
     }
 }
 
+} partial class runtimeᴛhexdumpMarker {
+
 internal static void start(this hexdumpMarker m) {
     array<byte> spaces = new(64);
     foreach (var i in range(len(spaces))) {
@@ -254,4 +259,4 @@ internal static void start(this hexdumpMarker m) {
     print((@string)"^ ");
 }
 
-} // end runtime_package
+} // end runtimeᴛhexdumpMarker

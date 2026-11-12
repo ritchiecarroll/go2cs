@@ -13,6 +13,7 @@ using fmt = fmt_package;
 using math = math_package;
 using bits = go.math.bits_package;
 using go.math;
+using static big_package;
 
 partial class big_package {
 
@@ -67,7 +68,7 @@ partial struct Float {
     internal Accuracy acc;
     internal form form;
     internal bool neg;
-    internal Δnat mant;
+    internal nat mant;
     internal int32 exp;
 }
 
@@ -77,9 +78,13 @@ partial struct ErrNaN {
     internal @string msg;
 }
 
+} partial class bigᴛErrNaN {
+
 public static @string Error(this ErrNaN err) {
     return err.msg;
 }
+
+} partial class big_package {
 
 // NewFloat allocates and returns a new [Float] set to x,
 // with precision 53 and rounding mode [ToNearestEven].
@@ -145,6 +150,8 @@ public static Accuracy Below => -1;
 public static Accuracy Exact => 0;
 public static Accuracy Above => 1;
 
+} partial class bigᴛFloat {
+
 //go:generate stringer -type=Accuracy
 
 // SetPrec sets z's precision to prec and returns the (possibly) rounded
@@ -180,12 +187,16 @@ public static ж<Float> SetPrec(this ж<Float> Ꮡz, nuint prec) {
     return Ꮡz;
 }
 
+} partial class big_package {
+
 internal static Accuracy makeAcc(bool above) {
     if (above) {
         return Above;
     }
     return Below;
 }
+
+} partial class bigᴛFloat {
 
 // SetMode sets z's rounding mode to mode and returns an exact z.
 // z remains unchanged otherwise.
@@ -610,10 +621,12 @@ public static ж<Float> SetFloat64(this ж<Float> Ꮡz, float64 x) {
     return Ꮡz;
 }
 
+} partial class big_package {
+
 // fnorm normalizes mantissa m by shifting it to the left
 // such that the msb of the most-significant word (msw) is 1.
 // It returns the shift amount. It assumes that len(m) != 0.
-internal static int64 fnorm(Δnat m) {
+internal static int64 fnorm(nat m) {
     if (debugFloat && (len(m) == 0 || m[len(m) - 1] == 0)) {
         throw panic("msw of mantissa is 0");
     }
@@ -627,10 +640,12 @@ internal static int64 fnorm(Δnat m) {
     return (int64)s;
 }
 
+} partial class bigᴛFloat {
+
 // SetInt sets z to the (possibly rounded) value of x and returns z.
 // If z's precision is 0, it is changed to the larger of x.BitLen()
 // or 64 (and rounding will have no effect).
-public static ж<Float> SetInt(this ж<Float> Ꮡz, ж<ΔInt> Ꮡx) {
+public static ж<Float> SetInt(this ж<Float> Ꮡz, ж<Int> Ꮡx) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -657,7 +672,7 @@ public static ж<Float> SetInt(this ж<Float> Ꮡz, ж<ΔInt> Ꮡx) {
 // SetRat sets z to the (possibly rounded) value of x and returns z.
 // If z's precision is 0, it is changed to the largest of a.BitLen(),
 // b.BitLen(), or 64; with x = a/b.
-public static ж<Float> SetRat(this ж<Float> Ꮡz, ж<ΔRat> Ꮡx) {
+public static ж<Float> SetRat(this ж<Float> Ꮡz, ж<Rat> Ꮡx) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -740,8 +755,10 @@ public static ж<Float> Copy(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
     return Ꮡz;
 }
 
+} partial class big_package {
+
 // msb32 returns the 32 most significant bits of x.
-internal static uint32 msb32(Δnat x) {
+internal static uint32 msb32(nat x) {
     nint i = len(x) - 1;
     if (i < 0) {
         return 0;
@@ -760,7 +777,7 @@ internal static uint32 msb32(Δnat x) {
 }
 
 // msb64 returns the 64 most significant bits of x.
-internal static uint64 msb64(Δnat x) {
+internal static uint64 msb64(nat x) {
     nint i = len(x) - 1;
     if (i < 0) {
         return 0;
@@ -781,6 +798,8 @@ internal static uint64 msb64(Δnat x) {
     }}
     throw panic("unreachable");
 }
+
+} partial class bigᴛFloat {
 
 // Uint64 returns the unsigned integer resulting from truncating x
 // towards zero. If 0 <= x <= [math.MaxUint64], the result is [Exact]
@@ -1138,7 +1157,7 @@ public static (float64, Accuracy) Float64(this ж<Float> Ꮡx) {
 // for x > 0, and [Above] for x < 0.
 // If a non-nil *[Int] argument z is provided, [Int] stores
 // the result in z instead of allocating a new [Int].
-public static (ж<ΔInt>, Accuracy) Int(this ж<Float> Ꮡx, ж<ΔInt> Ꮡz) {
+public static (ж<Int>, Accuracy) Int(this ж<Float> Ꮡx, ж<Int> Ꮡz) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var z = ref Ꮡz.DerefOrNull();
 
@@ -1147,7 +1166,7 @@ public static (ж<ΔInt>, Accuracy) Int(this ж<Float> Ꮡx, ж<ΔInt> Ꮡz) {
     }
 
     if (Ꮡz == nil && x.form <= finite) {
-        Ꮡz = @new<ΔInt>(); z = ref Ꮡz.DerefOrNull();
+        Ꮡz = @new<Int>(); z = ref Ꮡz.DerefOrNull();
     }
 
     switch (x.form) {
@@ -1169,7 +1188,7 @@ public static (ж<ΔInt>, Accuracy) Int(this ж<Float> Ꮡx, ж<ΔInt> Ꮡz) {
         }
         // shift mantissa as needed
         if (Ꮡz == nil) {
-            Ꮡz = @new<ΔInt>(); z = ref Ꮡz.DerefOrNull();
+            Ꮡz = @new<Int>(); z = ref Ꮡz.DerefOrNull();
         }
         z.neg = x.neg;
         switch (ᐧ) {
@@ -1202,7 +1221,7 @@ public static (ж<ΔInt>, Accuracy) Int(this ж<Float> Ꮡx, ж<ΔInt> Ꮡz) {
 // The result is [Exact] if x is not an Inf.
 // If a non-nil *[Rat] argument z is provided, [Rat] stores
 // the result in z instead of allocating a new [Rat].
-public static (ж<ΔRat>, Accuracy) Rat(this ж<Float> Ꮡx, ж<ΔRat> Ꮡz) {
+public static (ж<Rat>, Accuracy) Rat(this ж<Float> Ꮡx, ж<Rat> Ꮡz) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var z = ref Ꮡz.DerefOrNull();
 
@@ -1211,7 +1230,7 @@ public static (ж<ΔRat>, Accuracy) Rat(this ж<Float> Ꮡx, ж<ΔRat> Ꮡz) {
     }
 
     if (Ꮡz == nil && x.form <= finite) {
-        Ꮡz = @new<ΔRat>(); z = ref Ꮡz.DerefOrNull();
+        Ꮡz = @new<Rat>(); z = ref Ꮡz.DerefOrNull();
     }
 
     switch (x.form) {
@@ -1272,6 +1291,8 @@ public static ж<Float> Neg(this ж<Float> Ꮡz, ж<Float> x) {
     return Ꮡz;
 }
 
+} partial class big_package {
+
 internal static void validateBinaryOperands(ref Float x, ref Float y) {
     if (!debugFloat) {
         // avoid performance bugs
@@ -1284,6 +1305,8 @@ internal static void validateBinaryOperands(ref Float x, ref Float y) {
         throw panic("empty mantissa for y");
     }
 }
+
+} partial class bigᴛFloat {
 
 // z = x + y, ignoring signs of x and y for the addition
 // but using the sign of z for rounding the result.
@@ -1319,7 +1342,7 @@ internal static void uadd(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
     switch (ᐧ) {
     case {} when ex < ey: {
         if (al) {
-            var t = ((Δnat)default).lsh(y.mant, (nuint)(ey - ex));
+            var t = ((nat)default).lsh(y.mant, (nuint)(ey - ex));
             z.mant = z.mant.add(x.mant, t);
         } else {
             z.mant = z.mant.lsh(y.mant, (nuint)(ey - ex));
@@ -1334,7 +1357,7 @@ internal static void uadd(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
     }
     case {} when ex > ey: {
         if (al) {
-            var t = ((Δnat)default).lsh(x.mant, (nuint)(ex - ey));
+            var t = ((nat)default).lsh(x.mant, (nuint)(ex - ey));
             z.mant = z.mant.add(t, y.mant);
         } else {
             z.mant = z.mant.lsh(x.mant, (nuint)(ex - ey));
@@ -1373,7 +1396,7 @@ internal static void usub(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
     switch (ᐧ) {
     case {} when ex < ey: {
         if (al) {
-            var t = ((Δnat)default).lsh(y.mant, (nuint)(ey - ex));
+            var t = ((nat)default).lsh(y.mant, (nuint)(ey - ex));
             z.mant = t.sub(x.mant, t);
         } else {
             z.mant = z.mant.lsh(y.mant, (nuint)(ey - ex));
@@ -1388,7 +1411,7 @@ internal static void usub(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
     }
     case {} when ex > ey: {
         if (al) {
-            var t = ((Δnat)default).lsh(x.mant, (nuint)(ex - ey));
+            var t = ((nat)default).lsh(x.mant, (nuint)(ex - ey));
             z.mant = t.sub(t, y.mant);
         } else {
             z.mant = z.mant.lsh(x.mant, (nuint)(ex - ey));
@@ -1460,7 +1483,7 @@ internal static void uquo(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
         var xadj = x.mant;
         nint dΔ1 = n - len(x.mant) + len(y.mant); if (dΔ1 > 0) {
             // d extra words needed => add d "0 digits" to x
-            xadj = new Δnat(len(x.mant) + dΔ1);
+            xadj = new nat(len(x.mant) + dΔ1);
             copy(xadj.slice(dΔ1), x.mant);
         }
         // TODO(gri): If we have too many digits (d < 0), we should be able
@@ -1475,7 +1498,7 @@ internal static void uquo(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
         var stk = getStack();
         var stkʗ1 = stk;
         defer(stkʗ1.free, ref ᒐ);
-        Δnat r = default;
+        nat r = default;
         (z.mant, r) = z.mant.div(stk, default, xadj, y.mant);
         var e = (int64)x.exp - (int64)y.exp - (int64)(d - len(z.mant)) * (int64)_W;
 
@@ -1871,4 +1894,4 @@ internal static nint ord(this ref Float x) {
     return m;
 }
 
-} // end big_package
+} // end bigᴛFloat

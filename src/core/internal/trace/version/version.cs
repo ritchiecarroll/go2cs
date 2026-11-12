@@ -7,6 +7,7 @@ using fmt = fmt_package;
 using io = io_package;
 using tracev2 = go.@internal.trace.tracev2_package;
 using go.@internal.trace;
+using static version_package;
 
 partial class version_package {
 
@@ -34,6 +35,8 @@ internal static map<Version, slice<tracev2.EventSpec>> versions = new map<Versio
     [Go125] = tracev2.Specs()[..(int)(tracev2.EvClockSnapshot + 1)],     // All events after are Go 1.26+.
     [Go126] = tracev2.Specs()
 };
+
+} partial class versionᴛVersion {
 
 // Specs returns the set of event.Specs for this version.
 public static slice<tracev2.EventSpec> Specs(this Version v) {
@@ -66,6 +69,8 @@ public static bool Valid(this Version v) {
     var (_, ok) = versions[v, ꟷ];
     return ok;
 }
+
+} partial class version_package {
 
 // headerFmt is the format of the header of all Go execution traces.
 internal static ref readonly @string headerFmt => ref headerFmtᵇ;

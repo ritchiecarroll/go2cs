@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -30,8 +27,7 @@ using static go.encoding.xml_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Token", "ΔToken")]
-[assembly: GoTypeAlias("ΔToken", "object")]
+[assembly: GoTypeAlias("Token", "object")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -80,10 +76,10 @@ using static go.encoding.xml_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/xml/marshal.go", "marshal.cs", "ABekAQA4AoKCgIKkgIKkACVSsoKCgoCCpICCpAAHEpKCgqyyggACEgAIAoKClAACFAAKAoKClKiCggABHgAMBIKkgILWgILWtIKUgoKCyIKUgpSClIKCgoKUtIKUgoLElqqiqoKUgoLqgti0gpTGgpS2qqKssgAZLMKC7oK4goLKgoKUgtyClJSCgoLKgpSCgoKClJSokoKmgqaCgoKCgpS84oKmgpSC3IKClKaCpoKCpoKCgoLcgoKmgoKCgtyCgoKmpoKCAAIS9IKCgoKCgpSCgriClIKClJSClLiCgoKUlIKmgqaCgsqGlIKmgpSCgoKClKaCpoKmqLKCgoKClIKUuIKCgoKCgpSClMqCgoKClIK4goKCgoKClILclIKUyIKCgoKmpoKCgqaCgpSClIKq0qaCgoKCgoKCuJSotoKUgoK4gpSCqMKClIKClILowoKmgpSCgpSCgoK4goKClIKCgpSCgoKUgqaCgpSClIKClJSUgoKCgoKCpoKUpKSkpKSClpKClIKUpIKmlKacwoKClJSmsoKCgoKUgqamlIKClICCpIKCgoKUgpSmgoKCgoKClIKUyoKClICC1oCC1oCC1oCC1oCC1oKCyLaAgqSCgoKUgpSCgoKClIKCgoLGgoKCgsakgpSUlIK2goKUgrSC2ICCpIKCgtqAgraC6LKClIKUqLKClIKUqJKClIKUrLKClIKClIKUqJKCpoKClIKCgoKUlIKUlIKUgoKmgoIACBiygoKCpoKCpoKokoKCpoIACBKCpoKUrJQ=")]
-[assembly: GoPositionMap("encoding/xml/read.go", "read.cs", "ABGKAgBzAqqiAAgOwoKCpoKU3AAgRJKCgpSqAAgElIKCgKSCgoKmgqbcsoKCgoKClJSCxrS2qJKCgpSUpoKmgoKCgtymgqaCgoKCyqaCgqaCgpSmgoKmps6WwoKmgoKCgpSSgu6CgoK4goKUpqaCuIKCgoLKgoK4goKCgsoACxyk3KaClILKgoKmgoKUpraCgoKmgoKCuIKCgpSCgoKUlJSCgsqCgoKCgpSCgoKUyILIgoKCgtyCgpSCyILIgsiCgoKClAAKEoKCgoKUgoKUpIKCgoKUgoKCuIKC2oKCgqa2gsiC+oKCgpS4goKCgoKUyoKmgKS0xoCktILYpoKUgoKUuNikgoKUgoKUtIKClIKClLSCgpSCgpS0goKUgoKUtLSUlKQAAhAACgKCgoKCgpSCgqaUlLi4gsaUyoKCgoKUpIKClIKC2AAEFNKCgoKClJS0gpQ=", "212-212:1", "", "", "", "223:21,224:13")]
-[assembly: GoPositionMap("encoding/xml/typeinfo.go", "typeinfo.cs", "AC9imKKCpoKCgoKCgriCgoKUgoKClIKUooKCpriCgqaCgriAgtqCqJKmgoK4goKUgoKktLS0tLS02oKktILYpIKUgpSC3IK4uIKmuIKUlLiCgpSClIKCgpTcgoKCgrissoKUgpSCgoKUgoK4lAACFAAKAoKEkoKClIKUgoKCpoKClIKCpoLqgoLKgoLKgoKCgoLcgoKClIIAChaCAAUa0oKCgoKCgpSUppQ=", "", "", "190=Get/1/1/1;197=Get/1/1/1")]
-[assembly: GoPositionMap("encoding/xml/xml.go", "xml.cs", "ACM+ggAXOpKCgoKokgAMHIDegAAHEpKCAAYQgJaSlKSkpKSUAFfAAbLcgqikgpTuAAY6ABoCgoKClIKClIKClLiUgoKCpuyCgoKClJSCgriCgoKUxoKUpAAJGNKUpKS0lIKCgrjKgpQAEiqCgoKUlIKCgpSCpoKCgoKUgoKUrOiCgriClIKClJSCgqqigpSCqJKCqqKCgoKokgACEgAIAoKClIKkgoKCgpSCpIKClISmuIKCgpS4qqKClIKUgoKUpqaasoKUABwGgoKUgpS4gqaCgqaUgoKClKaClJaSgoKUlIKClIKClKiSgoKUlIKCgoKClIKClJSClIKCgoKClIKCgoKUgoKClIKUpriClKaClIKCpoKSgoKUgoKClJSUlIKCuIKClIKCuIKClNyCgoKCgoKUgpSCgpT8tsiCgoKUgoKUgsqWooKClIKU7ra4lKqCgpSmgoKCgpSCgoKUgoKUlIKUlIKCgpSUgoKUgoKClIKUgoKClJSUgoKU5oKCgqaCpoKCpoKCgoKCpoSUgqaokoKCgpTGggAEEuKClIKClIKClIKmgoKUgqyyrLKqooKClK7ygoKmqJKClIKmABEYwpKCgoKCgoKCgpSU3IKCgpSCuIKCgpSClIKU3IKCgoKCgpSCgoKUgoKCgoKmgoaCgqaClIKCgoKCuIKCgqaClIKUgoKCgoKCgoLcgoKCgpSCgpSCgpSCuIKCpqa0gqaCgoKCgpSCgoK4rLIAAhTSgoKUgoKClIKUrLKCgriCgoKUrNKCgpSCgpSUgoKUgoKUlKaCrIKClIKClIKUgoKCgpSCpqaCgpSCgpSClIKCgoKUgqYABhAAwgGGAwB48gGkAIwClgSUABMqgoKCgoKCgoKaoqyygoKCgoKUtLS0tLS0gpS0tIKClKSClIKUlIKqooKCgoKClLS0tLS0tLS0goKUpIKClKyyqIKCmqKClIKmgoKCpoKUgpSmgqaCqsaCgoKCgoKCgpSCgoKmgpSCgpQ=")]
+[assembly: GoPositionMap("encoding/xml/marshal.go", "marshal.cs", "ABikAQA4AoKCgIKkgIKkACVSsoKCgoCCpICCpAAHEpKCgsyyggACEgAIAoKClAACFAAKAoKClMiCggADHgAMBIKkgILWgILWtIKUgoKCyIKUgpSClIKCgoKUtIKUgoLElsqiqoKUgoLqgti0gpTGgpS2yqKssgAdLMKC7oK4goLKgoKUgtyClJSCgoLKgpSCgoKClJSokoKmgqaCgoKCgpS84oKmgpSC3IKClKaCpoKCpoKCgoLcgoKmgoKCgtyCgoKmpoKCAAIS9IKCgoKCgpSCgriClIKClJSClLiCgoKUlIKmgqaCgsqGlIKmgpSCgoKClKaCpoKmqLKCgoKClIKUuIKCgoKCgpSClMqCgoKClIK4goKCgoKClILclIKUyIKCgoKmpoKCgqaCgpSClILK0qaCgoKCgoKCuJTItoKUgoK4gpSCqMKClIKClILowoKmgpSCgpSCgoK4goKClIKCgpSCgoKUgqaCgpSClIKClJSUgoKCgoKCpoKUpKSkpKSClpKClIKUpIKmlMacwoKClJTGsoKCgoKUgqamlIKClICCpIKCgoKUgpSmgoKCgoKClIKUyoKClICC1oCC1oCC1oCC1oCC1oKCyLaAgqSCgoKUgpSCgoKClIKCgoLGgoKCgsakgpSUlIK2goKUgrSC2ICCpIKCgtqAgraC6LKClIKUqLKClIKUqJKClIKUrLKClIKClIKUqJKCpoKClIKCgoKUlIKUlIKUgoKmgoIADBiygoKCpoKCpoKokoKCpoIADBKCxoKUrJQ=")]
+[assembly: GoPositionMap("encoding/xml/read.go", "read.cs", "ABKKAgBzAsqiAAgOwoKCpoKUAAkMACJEkoKClMoACASUgoKApIKCgqaCptyygoKCgoKUlILGtLaokoKClJSmgqaCgoKC3KaCpoKCgoLKpoKCpoKClKaCgqbGzrbCgqaCgoKClJKC7oKCgriCgpSmpoK4goKCgsqCgriCgoKCygALHKTcpoKUgsqCgqaCgpSmtoKCgqaCgoK4goKClIKCgpSUlIKCyoKCgoKClIKCgpTIgsiCgoKC3IKClILIgsiCyIKCgoKUAAoSgoKCgpSCgpSkgoKCgpSCgoK4goLagoKCpraCyIL6goKClLiCgoKCgpTKgqaApLTGgKS0gtjGgpSCgpS42KSCgpSCgpS0goKUgoKUtIKClIKClLSCgpSCgpS0tJSUpAAEEAAKAoKCgoKClIKCppSUuLiCxpTKgoKCgpSkgoKUgoLYAAQU0oKCgoKUlLSClA==", "212-212:1", "", "", "", "234:21,235:13")]
+[assembly: GoPositionMap("encoding/xml/typeinfo.go", "typeinfo.cs", "ADBi2KKCpoKCgoKCgriCgoKUgoKClIKUooKCpriCgqaCgriAgtqCqJKmgoK4goKUgoKktLS0tLS02oKktILYpIKUgpSC3IK4uIKmuIKUlLiCgpSClIKCgpTcgoKCgrissoKUgpSCgoKUgoK4lAACFAAKAoKEkoKClIKUgoKCpoKClIKCpoLqgoLKgoLKgoKCgoLcgoKClIIADBaCAAka0oKCgoKCgpSUppQ=", "", "", "195=Get/1/1/1;202=Get/1/1/1")]
+[assembly: GoPositionMap("encoding/xml/xml.go", "xml.cs", "ACY+ggAbOpKCgoKokgAQHIAACQ6AAAsSkoIAChCAtpKUpKSkpJQAV8ABstyCqKSClO4ACDoAGgKCgoKUgoKUgoKUuJSCgoKm7IKCgoKUlIKCuIKCgpTGgpSkAA0Y0pSkpLSUgoKCuMqClAAWKoKCgpSUgoKClIKmgoKCgpSCgpSs6IKCuIKUgoKUlIKCqqKClIKokoKqooKCgqiSAAISAAgCgoKUgqSCgoKClIKkgoKUhKa4goKClLiqooKUgpSCgpSmxrqygpQAHAaCgpSClLiCpoKCppSCgoKUpoKUlpKCgpSUgoKUgoKUqJKCgpSUgoKCgoKUgoKUlIKUgoKCgoKUgoKCgpSCgoKUgpSmuIKUpoKUgoKmgpKCgpSCgoKUlJSUgoK4goKUgoK4goKU3IKCgoKCgpSClIKClPy2yIKCgpSCgpSCypaigoKUgpTutriUqoKClKaCgoKClIKCgpSCgpSUgpSUgoKClJSCgpSCgoKUgpSCgoKUlJSCgpTmgoKCpoKmgoKmgoKCgoKmhJSCpqiSgoKClMaCAAQS4oKUgoKUgoKUgqaCgpSCrLKssqqigoKUrvKCgqaokoKUgsYAExjCkoKCgoKCgoKClJTcgoKClIK4goKClIKUgpTcgoKCgoKClIKCgpSCgoKCgqaChoKCpoKUgoKCgoK4goKCpoKUgpSCgoKCgoKCgtyCgoKClIKClIKClIK4goKmprSCpoKCgoKClIKCgrjMsgAEFNKCgpSCgoKUgpSssoKCuIKCgpSs0oKClIKClJSCgpSCgpSUxoKsgoKUgoKUgpSCgoKClIKmpoKClIKClIKUgoKCgpSCpgAGEADCAYYDAHjyAaQAjAKWBJQAEyqCgoKCgoKCgpqirLKCgoKCgpS0tLS0tLSClLS0goKUpIKUgpSUgsqigoKCgoKUtLS0tLS0tLSCgpSkgoKUzLKogoKaooKUgqaCgoKmgpSClKaCpoKqxoKCgoKCgoKClIKCgqaClIKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -107,13 +103,13 @@ public static partial class xml_package
     public partial interface Marshaler {}
     public partial interface MarshalerAttr {}
     public partial interface TokenReader {}
+    [GoLocalName("Token")] public partial interface Tokenᴅ {}
     public partial interface Unmarshaler {}
     public partial interface UnmarshalerAttr {}
-    [GoLocalName("Token")] public partial interface ΔTokenᴅ {}
     public partial struct Attr {}
     public partial struct CharData {}
     public partial struct Comment {}
-    [GoMemberRecord("nextToken", GoMemberFact.Descriptor, typeof(ΔTokenᴅ))] public partial struct Decoder {}
+    [GoMemberRecord("nextToken", GoMemberFact.Descriptor, typeof(Tokenᴅ))] public partial struct Decoder {}
     public partial struct Directive {}
     public partial struct Encoder {}
     public partial struct EndElement {}
@@ -147,3 +143,26 @@ public static partial class xml_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(xml_package.CharData)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛCharData;
+[GoMethodHost(typeof(xml_package.Comment)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛComment;
+[GoMethodHost(typeof(xml_package.Decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛDecoder;
+[GoMethodHost(typeof(xml_package.Directive)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛDirective;
+[GoMethodHost(typeof(xml_package.Encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛEncoder;
+[GoMethodHost(typeof(xml_package.ProcInst)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛProcInst;
+[GoMethodHost(typeof(xml_package.StartElement)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛStartElement;
+[GoMethodHost(typeof(xml_package.SyntaxError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛSyntaxError;
+[GoMethodHost(typeof(xml_package.TagPathError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛTagPathError;
+[GoMethodHost(typeof(xml_package.UnmarshalError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛUnmarshalError;
+[GoMethodHost(typeof(xml_package.UnsupportedTypeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛUnsupportedTypeError;
+[GoMethodHost(typeof(xml_package.fieldInfo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛfieldInfo;
+[GoMethodHost(typeof(xml_package.parentStack)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛparentStack;
+[GoMethodHost(typeof(xml_package.printer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛprinter;
+// </MethodHolders>

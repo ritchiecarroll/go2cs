@@ -64,7 +64,7 @@ using static go.vendor.golang.org.x.text.transform_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/text/transform/transform.go", "transform.cs", "ABYquLi4uABDjAEAFjaiggAHEpKSlIKCgoKUgoLugoKClJSCuILG+KaClOyClIIAESqiggAHFtKCpoKClIKCgpSCgoKmgoKCgqamgsaCpoKUgoLuxoK2upKCgoKClIKU/KKCgpSmguqCzKYAECSCgoIACxiCpoKosoKUgoKmgoKUqJKCgpS+5IKCgoL+goKCgoKClILIgpSCyoK4tJSCyriCpoLqgoK2uILcgoKUlKiSypbShIKUlJSCgtyCgoKUlIK4goKClJSUqqKCgoKClJSCgs7CgqaC3IKCypIACBCCpoKCgriClIKUgoKUpoIACRSCgoKUgoLKhLiCgoKCgriCgpSCgpSClILOoqqigoKClKaCgoKCgoKCgsqC")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/transform/transform.go", "transform.cs", "ABcquLi4uABFjAEAGDaiggAJEpKSlIKCgoKUgoLugoKClJSCuILG+KaClOyClIIAEyqiggAJFtKCpoKClIKCgpSCgoKmgoKCgqamgsaCpoKUgoLuxoK2upKCgoKClIKUAAsMooKClKaCAAoKguymABIkgoKCAA8YgqaCyLKClIKCpoKClMiSgoKUvuSCgoKC/oKCgoKCgpSCyIKUgsqCuLSUgsq4gqaC6oKCtriC3IKClJTIkuqW0oSClJSUgoLcgoKClJSCuIKCgpSUlMqigoKCgpSUgoLOwoKmgtyCgsqSAAgQgqaCgoK4gpSClIKClKaCAAkUgoKClIKCyoS4goKCgoK4goKUgoKUgpSCzqKqooKCgpSmgoKCgoKCgoLKgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.text;
@@ -103,3 +103,20 @@ public static partial class transform_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(transform_package.NopResetter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛNopResetter;
+[GoMethodHost(typeof(transform_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛReader;
+[GoMethodHost(typeof(transform_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛWriter;
+[GoMethodHost(typeof(transform_package.chain)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛchain;
+[GoMethodHost(typeof(transform_package.discard)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛdiscard;
+[GoMethodHost(typeof(transform_package.link)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛlink;
+[GoMethodHost(typeof(transform_package.nop)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛnop;
+[GoMethodHost(typeof(transform_package.removeF)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛremoveF;
+// </MethodHolders>

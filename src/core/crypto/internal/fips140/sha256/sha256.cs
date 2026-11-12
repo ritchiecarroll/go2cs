@@ -12,6 +12,7 @@ using errors = errors_package;
 using hash = hash_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140deps;
+using static sha256_package;
 
 partial class sha256_package {
 
@@ -61,6 +62,8 @@ private static readonly @string magic224ᵇ = "sha\x02"u8;
 internal static ref readonly @string magic256 => ref magic256ᵇ;
 private static readonly @string magic256ᵇ = "sha\x03"u8;
 internal const nint marshaledSize = /* len(magic256) + 8*4 + chunk + 8 */ 108;
+
+} partial class sha256ᴛDigest {
 
 public static (slice<byte>, error) MarshalBinary(this ref Digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
@@ -114,6 +117,8 @@ public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
     return default;
 }
 
+} partial class sha256_package {
+
 internal static (slice<byte>, uint64) consumeUint64(slice<byte> b) {
     return (b[8..], byteorder.BEUint64(b));
 }
@@ -121,6 +126,8 @@ internal static (slice<byte>, uint64) consumeUint64(slice<byte> b) {
 internal static (slice<byte>, uint32) consumeUint32(slice<byte> b) {
     return (b[4..], byteorder.BEUint32(b));
 }
+
+} partial class sha256ᴛDigest {
 
 public static (hash.Cloner, error) Clone(this ref Digest d) {
     ref var r = ref heap<Digest>(d.ΔClone(), out var Ꮡr);
@@ -151,6 +158,8 @@ public static void Reset(this ref Digest d) {
     d.len = 0;
 }
 
+} partial class sha256_package {
+
 // New returns a new Digest computing the SHA-256 hash.
 public static ж<Digest> New() {
     var d = @new<Digest>();
@@ -165,6 +174,8 @@ public static ж<Digest> New224() {
     d.Reset();
     return d;
 }
+
+} partial class sha256ᴛDigest {
 
 public static nint Size(this ref Digest d) {
     if (!d.is224) {
@@ -258,4 +269,4 @@ internal static array<byte> checkSum(this ж<Digest> Ꮡd) {
     return digest.Clone();
 }
 
-} // end sha256_package
+} // end sha256ᴛDigest

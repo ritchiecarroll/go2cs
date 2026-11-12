@@ -21,14 +21,14 @@ private static readonly @string etcServicesˢᵇ = "/etc/services"u8;
 internal static void readServices() {
     GoFrame ᒐ = default;
     try {
-        var (Δfile, err) = open(etcServicesˢ);
+        var (@file, err) = open(etcServicesˢ);
         if (err != nil) {
             return;
         }
-        var fileʗ1 = Δfile;
+        var fileʗ1 = @file;
         defer(fileʗ1.close, ref ᒐ);
 
-        for (var (line, ok) = Δfile.readLine(); ok; (line, ok) = Δfile.readLine()) {
+        for (var (line, ok) = @file.readLine(); ok; (line, ok) = @file.readLine()) {
             // "http 80/tcp www www-http # World Wide Web HTTP"
             {
                 nint i = bytealg.IndexByteString(line, (byte)'#'); if (i >= 0) {

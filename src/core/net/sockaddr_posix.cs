@@ -5,13 +5,14 @@
 namespace go;
 
 using syscall = syscall_package;
+using static net_package;
 
 partial class net_package {
 
 // A sockaddr represents a TCP, UDP, IP or Unix network endpoint
 // address that can be converted into a syscall.Sockaddr.
-partial interface Δsockaddr :
-    ΔAddr
+partial interface sockaddr :
+    Addr
 {
     // family returns the platform-dependent address family
     // identifier.
@@ -25,10 +26,12 @@ partial interface Δsockaddr :
     // nil.
     (syscall.Sockaddr, error) sockaddr(nint family);
     // toLocal maps the zero address to a local system address (127.0.0.1 or ::1)
-    Δsockaddr toLocal(@string net);
+    sockaddr toLocal(@string net);
 }
 
-internal static Func<syscall.Sockaddr, ΔAddr> addrFunc(this ref netFD fd) {
+} partial class netᴛnetFD {
+
+internal static Func<syscall.Sockaddr, Addr> addrFunc(this ref netFD fd) {
     switch (fd.family) {
     case var ᴛ when ᴛ == syscall.AF_INET || ᴛ == syscall.AF_INET6: {
         switch (fd.sotype) {
@@ -59,4 +62,4 @@ internal static Func<syscall.Sockaddr, ΔAddr> addrFunc(this ref netFD fd) {
     return (syscall.Sockaddr _) => default;
 }
 
-} // end net_package
+} // end netᴛnetFD

@@ -54,7 +54,7 @@ internal static (@string, error) lookPath(@string @file) {
 
     {
         var err = validateLookPath(@file); if (err != nil) {
-            return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, err))));
+            return ("", new Errorжerror(Ꮡ(new Error(@file, err))));
         }
     }
 
@@ -63,7 +63,7 @@ internal static (@string, error) lookPath(@string @file) {
         if (err == nil) {
             return (@file, default);
         }
-        return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, err))));
+        return ("", new Errorжerror(Ꮡ(new Error(@file, err))));
     }
     @string path = os.Getenv(pathˢ);
     foreach (var (_, vᴛ1) in range(filepath.SplitList(path))) {
@@ -77,14 +77,14 @@ internal static (@string, error) lookPath(@string @file) {
         var err = findExecutable(pathΔ1); if (err == nil) {
             if (!filepath.IsAbs(pathΔ1)) {
                 if (execerrdot.Value() != "0"u8) {
-                    return (pathΔ1, new ΔErrorжerror(Ꮡ(new ΔError(@file, ErrDot))));
+                    return (pathΔ1, new Errorжerror(Ꮡ(new Error(@file, ErrDot))));
                 }
                 execerrdot.IncNonDefault();
             }
             return (pathΔ1, default);
         }
     }
-    return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, ErrNotFound))));
+    return ("", new Errorжerror(Ꮡ(new Error(@file, ErrNotFound))));
 }
 
 // lookExtensions is a no-op on non-Windows platforms, since

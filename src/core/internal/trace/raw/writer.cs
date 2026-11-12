@@ -10,6 +10,7 @@ using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
 using encoding;
 using go.@internal.trace;
+using static raw_package;
 
 partial class raw_package {
 
@@ -31,6 +32,8 @@ public static (ж<Writer>, error) NewWriter(io.Writer w, version.Version v) {
     var (_, err) = version.WriteHeader(w, v);
     return (Ꮡ(new Writer(w: w, v: v, specs: v.Specs())), err);
 }
+
+} partial class rawᴛWriter {
 
 // WriteEvent writes a single event to the trace wire format stream.
 public static error WriteEvent(this ref Writer w, Event e) {
@@ -74,4 +77,4 @@ public static error WriteEvent(this ref Writer w, Event e) {
     return default;
 }
 
-} // end raw_package
+} // end rawᴛWriter

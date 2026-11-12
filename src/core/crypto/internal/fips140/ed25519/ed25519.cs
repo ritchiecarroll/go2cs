@@ -12,6 +12,7 @@ using errors = errors_package;
 using strconv = strconv_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using static ed25519_package;
 
 partial class ed25519_package {
 
@@ -30,6 +31,8 @@ partial struct PrivateKey {
     internal array<byte> prefix = new(sha512Size / 2);
 }
 
+} partial class ed25519ᴛPrivateKey {
+
 public static slice<byte> Bytes(this ref PrivateKey priv) {
     var k = new slice<byte>(0, privateKeySize);
     k = appendꓸꓸꓸ(k, priv.seed[..]);
@@ -47,15 +50,21 @@ public static slice<byte> PublicKey(this ref PrivateKey priv) {
     return pub[..];
 }
 
-partial struct ΔPublicKey {
+} partial class ed25519_package {
+
+partial struct PublicKey {
     internal Δedwards25519.Point a;
     internal array<byte> aBytes = new(32);
 }
 
-public static slice<byte> Bytes(this ref ΔPublicKey pub) {
+} partial class ed25519ᴛPublicKey {
+
+public static slice<byte> Bytes(this ref PublicKey pub) {
     var a = pub.aBytes.Clone();
     return a[..];
 }
+
+} partial class ed25519_package {
 
 // GenerateKey generates a new Ed25519 private key pair.
 public static (ж<PrivateKey>, error) GenerateKey() {
@@ -139,8 +148,8 @@ internal static (ж<PrivateKey>, error) newPrivateKey(ж<PrivateKey> Ꮡpriv, sl
     return (Ꮡpriv, default);
 }
 
-public static (ж<ΔPublicKey>, error) NewPublicKey(slice<byte> pub) {
-    var p = Ꮡ(new ΔPublicKey());
+public static (ж<PublicKey>, error) NewPublicKey(slice<byte> pub) {
+    var p = Ꮡ(new PublicKey());
     return newPublicKey(p, pub);
 }
 
@@ -148,7 +157,7 @@ public static (ж<ΔPublicKey>, error) NewPublicKey(slice<byte> pub) {
 private static ref readonly @string ed25519BadPublicKeyˢ => ref ed25519BadPublicKeyˢᵇ;
 private static readonly @string ed25519BadPublicKeyˢᵇ = "ed25519: bad public key"u8;
 
-internal static (ж<ΔPublicKey>, error) newPublicKey(ж<ΔPublicKey> Ꮡpub, slice<byte> pubBytes) {
+internal static (ж<PublicKey>, error) newPublicKey(ж<PublicKey> Ꮡpub, slice<byte> pubBytes) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
     nint l = len(pubBytes); if (l != publicKeySize) {
@@ -274,17 +283,17 @@ internal static slice<byte> signWithDom(slice<byte> signature, ж<PrivateKey> �
     return signature;
 }
 
-public static error Verify(ж<ΔPublicKey> pub, slice<byte> message, slice<byte> sig) {
+public static error Verify(ж<PublicKey> pub, slice<byte> message, slice<byte> sig) {
     return verify(pub, message, sig);
 }
 
-internal static error verify(ж<ΔPublicKey> pub, slice<byte> message, slice<byte> sig) {
+internal static error verify(ж<PublicKey> pub, slice<byte> message, slice<byte> sig) {
     fipsSelfTest();
     fips140.RecordApproved();
     return verifyWithDom(pub, message, sig, domPrefixPure, ""u8);
 }
 
-public static error VerifyPH(ж<ΔPublicKey> pub, slice<byte> message, slice<byte> sig, @string context) {
+public static error VerifyPH(ж<PublicKey> pub, slice<byte> message, slice<byte> sig, @string context) {
     fipsSelfTest();
     fips140.RecordApproved();
     {
@@ -300,7 +309,7 @@ public static error VerifyPH(ж<ΔPublicKey> pub, slice<byte> message, slice<byt
     return verifyWithDom(pub, message, sig, domPrefixPh, context);
 }
 
-public static error VerifyCtx(ж<ΔPublicKey> pub, slice<byte> message, slice<byte> sig, @string context) {
+public static error VerifyCtx(ж<PublicKey> pub, slice<byte> message, slice<byte> sig, @string context) {
     fipsSelfTest();
     // FIPS 186-5 specifies Ed25519 and Ed25519ph (with context), but not Ed25519ctx.
     fips140.RecordNonApproved();
@@ -314,7 +323,7 @@ public static error VerifyCtx(ж<ΔPublicKey> pub, slice<byte> message, slice<by
 private static ref readonly @string ed25519InvalidSignatureˢ => ref ed25519InvalidSignatureˢᵇ;
 private static readonly @string ed25519InvalidSignatureˢᵇ = "ed25519: invalid signature"u8;
 
-internal static error verifyWithDom(ж<ΔPublicKey> Ꮡpub, slice<byte> message, slice<byte> sig, @string domPrefix, @string context) {
+internal static error verifyWithDom(ж<PublicKey> Ꮡpub, slice<byte> message, slice<byte> sig, @string domPrefix, @string context) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
     nint l = len(sig); if (l != signatureSize) {

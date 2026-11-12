@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using httpꓸHandler = go.net.http_package.ΔHandler;
-global using httpꓸHeader = go.net.http_package.ΔHeader;
-global using tlsꓸConnectionState = go.crypto.tls_package.ΔConnectionState;
 // </ImportedTypeAliases>
 
 using go;
@@ -41,7 +38,7 @@ using static go.net.http.cgi_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<bufio_package.Reader, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<bufio_package.Writer, io_package.Writer>(Pointer = true)]
-[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.ΔHandler>]
+[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.Handler>]
 [assembly: GoImplement<go.net.http_package.ResponseWriter, io_package.Writer>]
 [assembly: GoImplement<neverEnding, io_package.Reader>]
 [assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
@@ -72,9 +69,9 @@ using static go.net.http.cgi_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/cgi/cgi_main.go", "cgi_main.cs", "ABomgqSClAAKCqKCgqaCgqaCgoKmgoKClIKmlIKClKaUgqaCgqaCyoKClAAUCJKUlKS0grSCpIKCgpSCgoKUgoKUgoKCpoKCgqaCpg==", "105-134:1")]
-[assembly: GoPositionMap("net/http/cgi/child.go", "child.cs", "ABc4woKClIKUpoKCgoKmABwKooKCgqaCgqaCgIK2goKUlIKCgpSmgriCgpSCuIKUgoKC3ICCtpSCgpSUgoKUuIKCgpTKgpSuwoKClIKUgpTKgoKClAALGIKmgqaCgpSClKaClIKUgq7CgpSCgoKUgoI=", "", "", "189=NewWriter/1/1/3")]
-[assembly: GoPositionMap("net/http/cgi/host.go", "host.cs", "ACdIlIKkpKSkpKSUABs+goKUAAIUAAoCgoKCgoKCgriCpgALBtKCgoKmgpSCgpSCpgANHIKmpoKUpoKmooKUlIKClKaClIKmgoKUlIKCuIKCuIKmlJKCgpSUgqaCgqbugpSCgoKmgoKClIKUkqSCgoKCgoKCgoKClIKUgoKClIKClIKCgoKUgoKUgpSCgpSCgoKClLS2goKCpoKCgpSCuIKCgqaC3IKCuJSCgu60pKKClLiigoKCggAKFgAKFqaClKTapg==", "221-224:1", "", "159=RequestURI/1/1/7;253=stderr/1/1/5", "278:21,280:21")]
+[assembly: GoPositionMap("net/http/cgi/cgi_main.go", "cgi_main.cs", "ABsmgqSClAAKCqKCgqaCgqaCgoKmgoKClIKmlIKClKaUgqaCgqaC6oKClAAWCJKUlKS0grSCpIKCgpSCgoKUgoKUgoKCpoKCgqaCpg==", "105-134:1")]
+[assembly: GoPositionMap("net/http/cgi/child.go", "child.cs", "ABg4woKClIKUpoKCgoKmABwKooKCgqaCgqaCgIK2goKUlIKCgpSmgriCgpSCuIKUgoKC3ICCtpSCgpSUgoKUuIKCgpTKgpSuwoKClIKUgpTKgoKClAANGIKmgqaCgpSClKaClIKUgu7CgpSCgoKUgoI=", "", "", "190=NewWriter/1/1/3")]
+[assembly: GoPositionMap("net/http/cgi/host.go", "host.cs", "AChIlIKkpKSkpKSUAB0+goKUAAQUAAoCgoKCgoKCgriCpgAPBtKCgoKmgpSCgpSCpgANHIKmpoKUpoKmooKUlIKClKaClIKmgoKUlIKCuIKCuIKmlJKCgpSUgqaCgqbugpSCgoKmgoKClIKUkqSCgoKCgoKCgoKClIKUgoKClIKClIKCgoKUgoKUgpSCgpSCgoKClLS2goKCpoKCgpSCuIKCgqaC3IKCuJSCgu60pKKClLiigoKCggAKFgAKFsaClKTapg==", "221-224:1", "", "168=RequestURI/1/1/7;262=stderr/1/1/5", "287:21,289:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
@@ -125,3 +122,15 @@ public static partial class cgi_package
     [GoInit] internal static void initᴛᴛimportꓸvendorꓸgolang_orgꓸxꓸnetꓸhttpꓸhttpguts() => builtin.initPackage(typeof(vendor.golang.org.x.net.http.httpguts_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(cgi_package.Handler)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgiᴛHandler;
+[GoMethodHost(typeof(cgi_package.neverEnding)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgiᴛneverEnding;
+[GoMethodHost(typeof(cgi_package.response)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgiᴛresponse;
+// </MethodHolders>

@@ -31,6 +31,7 @@ using hash;
 using hash = hash_package;
 using path;
 using sync;
+using static cfile_package;
 
 partial class cfile_package {
 
@@ -350,6 +351,8 @@ internal static error emitCounterDataToDirectory(@string outdir) {
     return default;
 }
 
+} partial class cfileᴛemitState {
+
 // emitCounterDataToWriter emits counter data for this coverage run to an io.Writer.
 internal static error emitCounterDataToWriter(this ж<emitState> Ꮡs, io.Writer w) {
     var err = Ꮡs.emitCounterDataFile(finalHash, w); if (err != nil) {
@@ -470,6 +473,8 @@ internal static bool needMetaDataFile(this ref emitState s) {
     return s.mf != nil;
 }
 
+} partial class cfile_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string ioWriterˢ => ref ioWriterˢᵇ;
 private static readonly @string ioWriterˢᵇ = "<io.Writer>"u8;
@@ -489,6 +494,8 @@ internal static error writeMetaData(io.Writer w, slice<rtcov.CovMetaBlob> metali
     }
     return mfw.Write(finalHash, blobs, cmode, gran);
 }
+
+} partial class cfileᴛemitState {
 
 internal static error VisitFuncs(this ref emitState s, Func<uint32, uint32, slice<uint32>, error> f) {
     slice<uint32> tcounters = default;
@@ -584,6 +591,8 @@ internal static error VisitFuncs(this ref emitState s, Func<uint32, uint32, slic
     return default;
 }
 
+} partial class cfile_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string argcˢ => ref argcˢᵇ;
 private static readonly @string argcˢᵇ = "argc"u8;
@@ -608,6 +617,8 @@ internal static map<@string, @string> captureOsArgs() {
     return m;
 }
 
+} partial class cfileᴛemitState {
+
 // emitCounterDataFile emits the counter data portion of a
 // coverage output file (to the file 's.cf').
 internal static error emitCounterDataFile(this ж<emitState> Ꮡs, /*[16]*/ array<byte> finalHash, io.Writer w) {
@@ -619,6 +630,8 @@ internal static error emitCounterDataFile(this ж<emitState> Ꮡs, /*[16]*/ arra
     }
     return default;
 }
+
+} partial class cfile_package {
 
 // MarkProfileEmitted signals the coverage machinery that
 // coverage data output files have already been written out, and there

@@ -24,7 +24,7 @@ internal const bool isTypes2 = false;
 //
 // If p and q are in different files, p is before q if the filename
 // of p sorts lexicographically before the filename of q.
-internal static nint cmpPos(tokenꓸPos p, tokenꓸPos q) { return (nint)(p - q); }
+internal static nint cmpPos(token.Pos p, token.Pos q) { return (nint)(p - q); }
 
 // hasDots reports whether the last argument in the call is followed by ...
 internal static bool hasDots(ref ast.CallExpr call) { return call.Ellipsis.IsValid(); }
@@ -50,10 +50,10 @@ internal static positioner argErrPos(ж<ast.CallExpr> Ꮡcall) {
 }
 
 // startPos returns the start position of node n.
-internal static tokenꓸPos startPos(ast.Node n) { return n.Pos(); }
+internal static token.Pos startPos(ast.Node n) { return n.Pos(); }
 
 // endPos returns the position of the first character immediately after node n.
-internal static tokenꓸPos endPos(ast.Node n) { return n.End(); }
+internal static token.Pos endPos(ast.Node n) { return n.End(); }
 
 // makeFromLiteral returns the constant value for the given literal string and kind.
 internal static constant.Value makeFromLiteral(@string lit, token.Token kind) {

@@ -243,7 +243,7 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
             // but don't actually fail the test because of it.
             t.Logf("%v: terminating command: %v", ctx.Err(), cmdʗ1.OrTypedNil());
         }
-        return cmdʗ1.Process.Signal(new syscall_ΔSignalᴠΔSignal(Sigquit));
+        return cmdʗ1.Process.Signal(new syscall_SignalᴠSignal(Sigquit));
     };
     cmd.WaitDelay = gracePeriod;
 

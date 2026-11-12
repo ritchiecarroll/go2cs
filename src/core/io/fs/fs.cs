@@ -29,6 +29,7 @@ using utf8 = unicode.utf8_package;
 using @internal;
 using io = io_package;
 using unicode;
+using static fs_package;
 
 partial class fs_package {
 
@@ -205,6 +206,8 @@ public static FileMode ModeType => /* ModeDir | ModeSymlink | ModeNamedPipe | Mo
 
 public static FileMode ModePerm => /* 0777 */ 511; // Unix permission bits
 
+} partial class fsᴛFileMode {
+
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 private static ref readonly @string strᶜ => ref strᶜᵇ;
 private static readonly @string strᶜᵇ = "dalTLDpSugct?"u8;
@@ -261,6 +264,8 @@ public static FileMode Type(this FileMode m) {
     return (FileMode)(m & ModeType);
 }
 
+} partial class fs_package {
+
 // PathError records an error and the operation and file path that caused it.
 partial struct PathError {
     public @string Op;
@@ -268,13 +273,19 @@ partial struct PathError {
     public error Err;
 }
 
+} partial class fsᴛPathError {
+
 public static @string Error(this ref PathError e) { return e.Op + " "u8 + e.Path + ": "u8 + e.Err.Error(); }
 
 public static error Unwrap(this ref PathError e) { return e.Err; }
 
+} partial class fs_package {
+
 internal partial interface Timeout_type /*dyn*/ {
     bool Timeout();
 }
+
+} partial class fsᴛPathError {
 
 // Timeout reports whether this error represents a timeout.
 public static bool Timeout(this ref PathError e) {
@@ -282,4 +293,4 @@ public static bool Timeout(this ref PathError e) {
     return ok && t.Timeout();
 }
 
-} // end fs_package
+} // end fsᴛPathError

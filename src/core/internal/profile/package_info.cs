@@ -82,13 +82,13 @@ using static go.@internal.profile_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/profile/encode.go", "encode.cs", "AAsagqzigpSCgqaCgoKClIKCgoIABhCCgpSCgoKCAAYQgoK4goKmgoKClKaClKaCgoKmgpSCgqaCgriCgpSClIKUgpSClIKCgoKCgpSmuIKCgriCgoK4goKCuIKCgriCgoK4goKUgpQACxiCgoIACRrSlIKCgoKmgoKCgoKmgoKCgoKCgoKUpqaCgqaCgoKikoKCgpSmgpSClIKClKaClICCtoCCgqSigoKmgoKCpoKmgoKmAAcQgqaCgoKUgrgABxCCgoK4gqaCgoKmAAkUgqaCgoKCgoKCgoKCpgANHIKmgoKCgoK43IKCgriCpoKCpgAHEIKmgoKCgoKmAA0cgoKCgpSmgoKUgoKUgg==", "", "", "41=addString/1/2/2,addString/2/2/3;56=addString/1/1/2")]
-[assembly: GoPositionMap("internal/profile/filter.go", "filter.cs", "AAse4oKCgoKCgqaCqtKCgoKClIK4goKClIK4")]
-[assembly: GoPositionMap("internal/profile/graph.go", "graph.cs", "AD2KAaKClKqigpSqoqrSgoKCgpSClKaCggAJFpKokoKClIKmpgAICqQAEy6ygoK4gqamgqaCpoKCgtyCgoKmpoKmgoKCgoIAECiigpSowoKCgoKSgoKUgpSCgpQACBKCgpSCgoKCgoKCpoKCgqaCgqaCppS4ppSCgoKUgpSClJQABhKilKSkAAgSgoKUuIKClL7SgoKCgoKUgoKUlKaCgoKUprKCgqaClKaCgpTKgqjCgoKUppSCgpSCurKUlIKmgoKkgpSClJSssoKCpoKokoKClMqCpoKCpoKCgqaClKaCpoKClA==")]
-[assembly: GoPositionMap("internal/profile/merge.go", "merge.cs", "AA0q8oKUgoKmAAcQlIKClMqmgoLKgqa4rNSCpoKCgriCgoK4goKClKaCpoKCgqYAFC6i7oKUgoKClIKCgoKCgoLKgoKClJSCgoKowoKCpoKClJSCgpSUAAwaooKmgoKmgu6CuIKCgpSCgoKokriUgpSCgoKUlIIACBKigqaCuIKCgoKUAAsYpoKCgqqmtIKCgsqUtAAIDAAHEIK4pqKClIKUgoKClO6CgoKokgAMHqKCgriigoKCgoKUgoKUgoKCpoK4AA0cgqzSgqaCpoKCpqqi", "", "", "198=Join/1/3/1,Join/2/3/2,Join/3/3/3;353=mapFunction/1/1/1")]
-[assembly: GoPositionMap("internal/profile/profile.go", "profile.cs", "AHH4AaKCgqaCgoKUgoKUpoKCpoKUpoKUgoKmgoCCtoCCtqjSgoKCkoLe1IKClIKC3IKCgpSClJSCgoKUgpSUgoKClIKUgoKCpoKCgsqssoKCgoK4goKCgpSC3IKCgpSCgqaCyurEgoKUgoKUgqaCgoKUgoKCgpSCgpSCgoKCgpSUgoKClLiCgoKClIKUgoKCyoKmlLiCgoKClIKUgpSClAAHEK7igqamgqaUgoKUgoKUgoKmgoKCuIKs0oKmgqaCgriqooKCpqqigoKmprKClKiygpSCgIKkgIK2AAcWtJKCuIKClIKCpqiSqJKClIKClKiSgpSCgoKCpoKUgoKCuA==", "", "", "", "179:21")]
+[assembly: GoPositionMap("internal/profile/encode.go", "encode.cs", "AA4agqzigpSCgqaCgoKClIKCgoIABhCCgpSCgoKCAAYQgoK4goKmgoKClKaClKaCgoKmgpSCgqaCgriCgpSClIKUgpSClIKCgoKCgpTGuIKCgriCgoK4goKCuIKCgriCgoK4goKUgpQACxiCgoIACxrSlIKCgoKmgoKCgoKmgoKCgoKCgoKUpqaCgqaCgoKikoKCgpSmgpSClIKClKaClICCtoCCgqSigoKmgoKCxoKmgoLGAAkQgqaCgoKUgtgABxCCgoLYgqaCgoLGAAsUgqaCgoKCgoKCgoKCxgAPHIKmgoKCgoLY3IKCgtiCpoKCxgAJEIKmgoKCgoLGAA0cgoKCgpSmgoKUgoKUgg==", "", "", "44=addString/1/2/2,addString/2/2/3;59=addString/1/1/2")]
+[assembly: GoPositionMap("internal/profile/filter.go", "filter.cs", "AA8e4oKCgoKCgqaCytKCgoKClIK4goKClIK4")]
+[assembly: GoPositionMap("internal/profile/graph.go", "graph.cs", "AECKAaKClKqigpSqoqrSgoKCgpSClKaCggANFpKokoKClIKmpgAICqQAFy6ygoK4gqamgqaCpoKCggAJDIKCgqamgqaCgoKCggAUKKKClMjCgoKCgpKCgpSClIKClAAIEoKClIKCgoKCgoKmgoKCpoKCpoKmlLimlIKCgpSClIKUlAAGEqKUpKQAChKCgpS4goKU3tKCgoKCgpSCgpSUxoKCgpSmsoKCpoKUxoKClMqCyMKCgpTGlIKClILaspSUgqaCgqSClIKUlMyygoKmgqiSgoKUAAgKgqaCgqaCgoKmgpSmgsaCgpQ=")]
+[assembly: GoPositionMap("internal/profile/merge.go", "merge.cs", "AA4q8oKUgoKmAAcQlIKClMqmgoLKgqa4zNSCpoKCgriCgoK4goKClKaCxoKCgqYAFi6i7oKUgoKClIKCgoKCgoLKgoKClJSCgoLIwoKCpoKClJSCgpSUABAaooKmgoKmgu6CuIKCgpSCgoLIkriUgpSCgoKUlIIADBKigqaCuIKCgoKUAAsYpoKCgsqmtIKCgsqUtAAIDAALEIK4pqKClIKUgoKClO6CgoLIkgAOHqKCgriigoKCgoKUgoKUgoKCpoK4AA0cgszSgqaCpoKCpsqi", "", "", "207=Join/1/3/1,Join/2/3/2,Join/3/3/3;378=mapFunction/1/1/1")]
+[assembly: GoPositionMap("internal/profile/profile.go", "profile.cs", "AHL4AaKCgqaCgoKUgoKUpoKCpoKUpoKUgoKmgoCCtoCCtsjSgoKCkoLe1IKClIKC3IKCgpSClJSCgoKUgpSUgoKClIKUgoKCpoKCgsqssoKCgoK4goKCgpSC3IKCgpSCgqaCyurEgoKUgoKUgqaCgoKUgoKCgpSCgpSCgoKCgpSUgoKClLiCgoKClIKUgoKCyoKmlLiCgoKClIKUgpSClAAHEK7igqamgqaUgoKUgoKUgoKmgoKCuIKs0oKmgqaCgriqooKCpqqigoKmxrKClMiygpSCgIKkgIK2AAsWtJKCuIKClIKCpqiSqJKClIKClKiSgpSCgoKCpoKUgoKCuA==", "", "", "", "182:21")]
 [assembly: GoPositionMap("internal/profile/proto.go", "proto.cs", "ACpagoKCpoKCgpSmgoKmlIKmgpSCgpSCgoKCgoKUgriCgpSmgoKmgoKUpoKUgoKUgoKCgoKClIK4goKmgoK4goKUuIKClKaigoKCgoKCgqaCgqaCpoKmooKCgqbmgoKCgoKUgoIACgqCgoKUgoKCgpSCgsaClIK0goKClIKUgrSClIK0puaCgpSmooCCpIKChJKCgpSClIKmpqKClIKmopSClIKCgpSClJSUgoCCpIKmooKUgqailIKUgoKClIKUlJSCgIKkgqaCgpSCpqKCgpSCpqKClIKUlA==")]
-[assembly: GoPositionMap("internal/profile/prune.go", "prune.cs", "AAsisoKUgoKCgpSClIKC3JSmlJTcuIKCgoKClIKUgoKUgoIABRCikpSCgpSCgqaU")]
+[assembly: GoPositionMap("internal/profile/prune.go", "prune.cs", "AA4isoKUgoKCgpSClIKC3JSmlJTcuIKCgoKClIKUgoKUgoIABRCikpSCgpSCgqaU")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -154,3 +154,30 @@ public static partial class profile_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(profile_package.Edge)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛEdge;
+[GoMethodHost(typeof(profile_package.EdgeMap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛEdgeMap;
+[GoMethodHost(typeof(profile_package.Function)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛFunction;
+[GoMethodHost(typeof(profile_package.Graph)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛGraph;
+[GoMethodHost(typeof(profile_package.Label)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛLabel;
+[GoMethodHost(typeof(profile_package.Line)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛLine;
+[GoMethodHost(typeof(profile_package.Location)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛLocation;
+[GoMethodHost(typeof(profile_package.Mapping)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛMapping;
+[GoMethodHost(typeof(profile_package.Node)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛNode;
+[GoMethodHost(typeof(profile_package.NodeInfo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛNodeInfo;
+[GoMethodHost(typeof(profile_package.NodeMap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛNodeMap;
+[GoMethodHost(typeof(profile_package.Nodes)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛNodes;
+[GoMethodHost(typeof(profile_package.Profile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛProfile;
+[GoMethodHost(typeof(profile_package.Sample)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛSample;
+[GoMethodHost(typeof(profile_package.ValueType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛValueType;
+[GoMethodHost(typeof(profile_package.edgeList)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛedgeList;
+[GoMethodHost(typeof(profile_package.locationMap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛlocationMap;
+[GoMethodHost(typeof(profile_package.profileMerger)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profileᴛprofileMerger;
+// </MethodHolders>

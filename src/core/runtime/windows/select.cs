@@ -9,6 +9,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -18,7 +19,7 @@ internal const bool debugSelect = false;
 // Known to compiler.
 // Changes here must also be made in src/cmd/compile/internal/walk/select.go's scasetype.
 partial struct scase {
-    internal ж<Δhchan> c;          // chan
+    internal ж<hchan> c;           // chan
     internal @unsafe.Pointer elem; // data element
 }
 
@@ -32,7 +33,7 @@ internal static void selectsetpc(ref uintptr pc) {
 }
 
 internal static void sellock(slice<scase> scases, slice<uint16> lockorder) {
-    ж<Δhchan> c = default;
+    ж<hchan> c = default;
     foreach (var (_, o) in range(lockorder)) {
         var c0 = scases[o].c;
         if (c0 != c) {
@@ -83,7 +84,7 @@ internal static bool selparkcommit(ж<g> Ꮡgp, @unsafe.Pointer _) {
     // particular, it must not access the *hselect. That's okay,
     // because by the time this is called, gp.waiting has all
     // channels in lock order.
-    ж<Δhchan> lastc = default;
+    ж<hchan> lastc = default;
     for (var sg = gp.waiting; sg != nil; sg = sg.Value.waitlink) {
         if (sg.of(sudog.Ꮡc).get() != lastc && lastc != nil) {
             // As soon as we unlock the channel, fields in
@@ -265,7 +266,7 @@ internal static (nint, bool) selectgo(ж<scase> cas0, ж<uint16> order0, ж<uint
     sellock(scases, lockorder);
 
     ж<sudog> sg = default;
-    ж<Δhchan> c = default;
+    ж<hchan> c = default;
     ж<scase> k = default;
     ж<sudog> sglist = default;
     ж<sudog> sgnext = default;
@@ -561,18 +562,22 @@ sclose:
     throw panic(((plainError)(@string)sendOnClosedChannelˢ));
 }
 
-internal static uintptr sortkey(this ж<Δhchan> Ꮡc) {
+} partial class runtimeᴛhchan {
+
+internal static uintptr sortkey(this ж<hchan> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     return (uintptr)(uintptr)@unsafe.Pointer.FromRef(ref c);
 }
+
+} partial class runtime_package {
 
 // A runtimeSelect is a single case passed to rselect.
 // This must match ../reflect/value.go:/runtimeSelect
 partial struct runtimeSelect {
     internal selectDir dir;
     internal @unsafe.Pointer typ; // channel type (not used here)
-    internal ж<Δhchan> ch;        // channel
+    internal ж<hchan> ch;         // channel
     internal @unsafe.Pointer val; // ptr to data (SendDir) or ptr to receive buffer (RecvDir)
 }
 
@@ -649,6 +654,8 @@ internal static (nint, bool) reflect_rselect(slice<runtimeSelect> cases) {
     return (chosen, recvOK);
 }
 
+} partial class runtimeᴛwaitq {
+
 internal static void dequeueSudoG(this ref waitq q, ж<sudog> Ꮡsgp) {
     ref var sgp = ref Ꮡsgp.DerefOrNull();
 
@@ -685,4 +692,4 @@ internal static void dequeueSudoG(this ref waitq q, ж<sudog> Ꮡsgp) {
     }
 }
 
-} // end runtime_package
+} // end runtimeᴛwaitq

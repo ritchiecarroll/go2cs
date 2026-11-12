@@ -39,6 +39,7 @@ using encoding;
 using go.sync;
 using net;
 using unicode;
+using static expvar_package;
 
 partial class expvar_package {
 
@@ -60,6 +61,8 @@ partial struct Int {
     internal atomic.Int64 i;
 }
 
+} partial class expvarᴛInt {
+
 public static int64 Value(this ж<Int> Ꮡv) {
     return Ꮡv.Ꮡi.Load();
 }
@@ -80,10 +83,14 @@ public static void Set(this ж<Int> Ꮡv, int64 value) {
     Ꮡv.Ꮡi.Store(value);
 }
 
+} partial class expvar_package {
+
 // Float is a 64-bit float variable that satisfies the [Var] interface.
 partial struct Float {
     internal atomic.Uint64 f;
 }
+
+} partial class expvarᴛFloat {
 
 public static float64 Value(this ж<Float> Ꮡv) {
     return Δmath.Float64frombits(Ꮡv.Ꮡf.Load());
@@ -115,6 +122,8 @@ public static void Set(this ж<Float> Ꮡv, float64 value) {
     Ꮡv.Ꮡf.Store(Δmath.Float64bits(value));
 }
 
+} partial class expvar_package {
+
 // Map is a string-to-Var map variable that satisfies the [Var] interface.
 partial struct Map {
     internal Δsync.Map m; // map[string]Var
@@ -127,6 +136,8 @@ partial struct KeyValue {
     public @string Key;
     public Var Value;
 }
+
+} partial class expvarᴛMap {
 
 public static @string String(this ж<Map> Ꮡv) {
     return (@string)Ꮡv.appendJSON(default);
@@ -306,33 +317,41 @@ public static void Do(this ж<Map> Ꮡv, Action<KeyValue> f) {
     finally { if (ᒐd1) Ꮡv.ᏑkeysMu.RUnlock(); ᒐ.Run(); }
 }
 
+} partial class expvar_package {
+
 // String is a string variable, and satisfies the [Var] interface.
-partial struct ΔString {
+partial struct String {
     internal atomic.Value s; // string
 }
 
-public static @string Value(this ж<ΔString> Ꮡv) {
+} partial class expvarᴛString {
+
+public static @string Value(this ж<String> Ꮡv) {
     var (p, _) = Ꮡv.Ꮡs.Load()._<@string>(ᐧ);
     return p;
 }
 
 // String implements the [Var] interface. To get the unquoted string
 // use [String.Value].
-public static @string String(this ж<ΔString> Ꮡv) {
+public static @string String(this ж<String> Ꮡv) {
     return (@string)Ꮡv.appendJSON(default);
 }
 
-internal static slice<byte> appendJSON(this ж<ΔString> Ꮡv, slice<byte> b) {
+internal static slice<byte> appendJSON(this ж<String> Ꮡv, slice<byte> b) {
     return appendJSONQuote(b, Ꮡv.Value());
 }
 
-public static void Set(this ж<ΔString> Ꮡv, @string value) {
+public static void Set(this ж<String> Ꮡv, @string value) {
     Ꮡv.Ꮡs.Store(value);
 }
+
+} partial class expvar_package {
 
 // Func implements [Var] by calling the function
 // and formatting the returned value using JSON.
 public delegate any Func();
+
+} partial class expvarᴛFunc {
 
 public static any Value(this Func f) {
     return f();
@@ -342,6 +361,8 @@ public static @string String(this Func f) {
     var (v, _) = json.Marshal(f());
     return (@string)v;
 }
+
+} partial class expvar_package {
 
 // All published variables.
 internal static readonly ж<Map> Ꮡvars = new StaticBox<Map>(default(Map));
@@ -393,9 +414,9 @@ public static ж<Map> NewMap(@string name) {
     return v;
 }
 
-public static ж<ΔString> NewString(@string name) {
-    var v = @new<ΔString>();
-    Publish(name, new ΔStringжVar(v));
+public static ж<String> NewString(@string name) {
+    var v = @new<String>();
+    Publish(name, new StringжVar(v));
     return v;
 }
 
@@ -420,8 +441,8 @@ internal static void expvarHandler(http.ResponseWriter w, ж<http.Request> r) {
 // Handler returns the expvar HTTP Handler.
 //
 // This is only needed to install the handler in a non-standard location.
-public static httpꓸHandler Handler() {
-    return new http_HandlerFuncᴠΔHandler(new http.HandlerFunc(expvarHandler));
+public static http.Handler Handler() {
+    return new http_HandlerFuncᴠHandler(new http.HandlerFunc(expvarHandler));
 }
 
 internal static any cmdline() {

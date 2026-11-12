@@ -4,11 +4,14 @@
 namespace go.@internal;
 
 using io = io_package;
+using static zstd_package;
 
 partial class zstd_package {
 
 // debug can be set in the source to print debug info using println.
 internal const bool debug = false;
+
+} partial class zstdᴛReader {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string extraneousDataAfterNoˢ => ref extraneousDataAfterNoˢᵇ;
@@ -20,12 +23,12 @@ private static readonly @string extraneousDataAfterNoˢᵇ = "extraneous data af
 internal static error compressedBlock(this ж<Reader> Ꮡr, nint blockSize) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    if (builtin.len(r.compressedBuf) >= blockSize) {
+    if (len(r.compressedBuf) >= blockSize) {
         r.compressedBuf = r.compressedBuf.slice(0, blockSize);
     } else {
         // We know that blockSize <= 128K,
         // so this won't allocate an enormous amount.
-        nint need = blockSize - builtin.len(r.compressedBuf);
+        nint need = blockSize - len(r.compressedBuf);
         r.compressedBuf = appendꓸꓸꓸ(r.compressedBuf, makeꓸꓸꓸ<byte>(need));
     }
 
@@ -52,7 +55,7 @@ internal static error compressedBlock(this ж<Reader> Ꮡr, nint blockSize) {
 
     if (seqCount == 0) {
         // No sequences, just literals.
-        if (off < builtin.len(data)) {
+        if (off < len(data)) {
             return r.makeError(off, extraneousDataAfterNoˢ);
         }
 
@@ -63,6 +66,8 @@ internal static error compressedBlock(this ж<Reader> Ꮡr, nint blockSize) {
 
     return Ꮡr.execSeqs(data, off, litbuf, seqCount);
 }
+
+} partial class zstd_package {
 
 // seqCode is the kind of sequence codes we have to handle.
 partial struct seqCode /*num:nint*/;
@@ -91,23 +96,25 @@ internal static void initᴛseqCodeInfo() { seqCodeInfo = new golib.SparseArray<
         predefTableBits: 6,
         maxSym: 35,
         maxBits: 9,
-        toBaseline: ((Func<ж<Reader>, nint, slice<fseEntry>, slice<fseBaselineEntry>, error>)(makeLiteralBaselineFSE))
+        toBaseline: ((Func<ж<Reader>, nint, slice<fseEntry>, slice<fseBaselineEntry>, error>)(zstdᴛReader.makeLiteralBaselineFSE))
     ),
     [(int)seqOffset] = new(
         predefTable: predefinedOffsetTable[..],
         predefTableBits: 5,
         maxSym: 31,
         maxBits: 8,
-        toBaseline: ((Func<ж<Reader>, nint, slice<fseEntry>, slice<fseBaselineEntry>, error>)(makeOffsetBaselineFSE))
+        toBaseline: ((Func<ж<Reader>, nint, slice<fseEntry>, slice<fseBaselineEntry>, error>)(zstdᴛReader.makeOffsetBaselineFSE))
     ),
     [(int)seqMatch] = new(
         predefTable: predefinedMatchTable[..],
         predefTableBits: 6,
         maxSym: 52,
         maxBits: 9,
-        toBaseline: ((Func<ж<Reader>, nint, slice<fseEntry>, slice<fseBaselineEntry>, error>)(makeMatchBaselineFSE))
+        toBaseline: ((Func<ж<Reader>, nint, slice<fseEntry>, slice<fseBaselineEntry>, error>)(zstdᴛReader.makeMatchBaselineFSE))
     )
 }.array(); }
+
+} partial class zstdᴛReader {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string invalidSymbolCompressionˢ => ref invalidSymbolCompressionˢᵇ;
@@ -119,7 +126,7 @@ private static readonly @string invalidSymbolCompressionˢᵇ = "invalid symbol 
 internal static (nint, nint, error) initSeqs(this ж<Reader> Ꮡr, block data, nint off) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    if (off >= builtin.len(data)) {
+    if (off >= len(data)) {
         return (0, 0, r.makeEOFError(off));
     }
 
@@ -133,13 +140,13 @@ internal static (nint, nint, error) initSeqs(this ж<Reader> Ꮡr, block data, n
     if (seqHdr < 128) {
         seqCount = (nint)seqHdr;
     } else if (seqHdr < 255) {
-        if (off >= builtin.len(data)) {
+        if (off >= len(data)) {
             return (0, 0, r.makeEOFError(off));
         }
         seqCount = (((nint)seqHdr - 128) << 8) + (nint)data[off];
         off++;
     } else {
-        if (off + 1 >= builtin.len(data)) {
+        if (off + 1 >= len(data)) {
             return (0, 0, r.makeEOFError(off));
         }
         seqCount = (nint)data[off] + ((nint)data[off + 1] << 8) + 0x7f00;
@@ -148,7 +155,7 @@ internal static (nint, nint, error) initSeqs(this ж<Reader> Ꮡr, block data, n
 
     // Read the Symbol_Compression_Modes byte.
 
-    if (off >= builtin.len(data)) {
+    if (off >= len(data)) {
         return (0, 0, r.makeEOFError(off));
     }
     var symMode = data[off];
@@ -198,7 +205,7 @@ internal static (nint, error) setSeqTable(this ж<Reader> Ꮡr, block data, nint
     }
     case 1: {
         // RLE_Mode
-        if (off >= builtin.len(data)) {
+        if (off >= len(data)) {
             return (0, r.makeEOFError(off));
         }
         var rle = data[off];
@@ -255,7 +262,7 @@ internal static (nint, error) setSeqTable(this ж<Reader> Ꮡr, block data, nint
     }
     case 3: {
         // Repeat_Mode
-        if (builtin.len(r.seqTables[kind]) == 0) {
+        if (len(r.seqTables[kind]) == 0) {
             return (0, r.makeError(off, missingRepeatSequenceFseˢ));
         }
         return (off, default);
@@ -278,7 +285,7 @@ internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice
     // Set up the initial states for the sequence code readers.
 
     ref var rbr = ref heap<reverseBitReader>(out var Ꮡrbr);
-    (rbr, var err) = Ꮡr.makeReverseBitReader(data, builtin.len(data) - 1, off);
+    (rbr, var err) = Ꮡr.makeReverseBitReader(data, len(data) - 1, off);
     if (err != nil) {
         return err;
     }
@@ -302,7 +309,7 @@ internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice
 
     nint seq = 0;
     while (seq < seqCount) {
-        if (builtin.len(r.buffer) + builtin.len(litbuf) > 128 << 10) {
+        if (len(r.buffer) + len(litbuf) > 128 << 10) {
             return rbr.makeError(uncompressedSizeTooBigˢ);
         }
 
@@ -394,7 +401,7 @@ internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice
         }
 
         // Copy literal bytes from litbuf.
-        if (literal > (uint32)builtin.len(litbuf)) {
+        if (literal > (uint32)len(litbuf)) {
             return rbr.makeError(literalByteOverflowˢ);
         }
         if (literal > 0) {
@@ -438,7 +445,7 @@ internal static error copyFromWindow(this ref Reader r, ж<reverseBitReader> Ꮡ
     //        |<-----offset------|
     //        |------match----------->|
     var bufferOffset = (uint32)0;
-    var lenBlock = (uint32)builtin.len(r.buffer);
+    var lenBlock = (uint32)len(r.buffer);
     if (lenBlock < offset) {
         var lenWindow = r.window.len();
         var copy = offset - lenBlock;
@@ -458,7 +465,7 @@ internal static error copyFromWindow(this ref Reader r, ж<reverseBitReader> Ꮡ
     // We are being asked to copy data that we are adding to the
     // buffer in the same copy.
     while (match > 0) {
-        var copy = (uint32)builtin.len(r.buffer) - bufferOffset;
+        var copy = (uint32)len(r.buffer) - bufferOffset;
         if (copy > match) {
             copy = match;
         }
@@ -468,4 +475,4 @@ internal static error copyFromWindow(this ref Reader r, ж<reverseBitReader> Ꮡ
     return default;
 }
 
-} // end zstd_package
+} // end zstdᴛReader

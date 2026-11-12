@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -61,9 +59,9 @@ using static go.vendor.golang.org.x.crypto.cryptobyte_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/asn1.go", "asn1.cs", "ABAswqqiqJKmgoKCgqaCgsySgoKCpoKCzLKCpoLKgoKCgpSClIKClIKClMySku6ygoKUkrqStoKClLyikoK4goKClIK4goKCgqa4goKmgqaCgrimgpKCgqaCgsqCgoKUyoKq2IKUgoKClK7igriCgpSCAAIQ8oKCppS0tKYAAhLi5IKClIL0goKUgqSktMiClJSClJSUppSCgoKUlIKClIKClJSmooKClIKUgpSCpoKCgpSmgoKClIKCpoKCpoKCgpSmgoKUlJSUgoKUrLKCqsKCgoKUgpSCpqKCgoK4gpSCyoKmgoKCpqrCgoLKnMKClIKClIKmgoKClJSCqsKCgpSCgoKUgpSC3sKCgpSUgoKCuIKUgqaCpriUgqrCgoSmgoKGpoKCrNKCgqaCgpSCrLIAAhDSgoKUAAIQ0oKClAACENIAAhDSqqKClKqigq7ygoKUgpSqwoKUgq7CgoKClIIACwa0gpTGpJSClK7ygoKClIKUgoKClJSUruKCgoKmgoKmprKClJTcpoKu0pSCuIKUgqaCgsqUlJSmgpSUpoKUgqY=", "38-48:1;53-63:1;72-97:1;102-104:1;115-117:1;122-130:1;136-139:1;182-192:1;196-202:1")]
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/builder.go", "builder.cs", "ACFKsgAEELIABRCiqqKClKqigpSokqiSqqKokqiSqJKokgAhRpKokqiSqJKmwoKUgpSCgqaSlMqipLSCpoKUgqYACBKCgoL4goKUgoKUgoKmlIKmuIKUkoKCgoKCgoKCgoKCgoKClIKCyoKCgoKClIKmgoKClIKCpoKmAAgGooKUgpSClIKClKyygpSClIKClIKUgpQAChzSgoI=", "168-181:1", "", "", "", "172:25,173:17")]
-[assembly: GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/string.go", "string.cs", "ABk0ooKUgoKokqrCgoKUgqrCgoKUgqrCgoKUgqrCgoKUgqrCgoKUgqrCgoKUgqaigoKUgoKClIKmooKClIKCgpSCgpSCqqKssqyyqsKCgpSCqqKCgoKUqJI=")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/asn1.go", "asn1.cs", "ABMswqqiqJKmgoKCgqaCgsySgoKCpoKCzLKCpoLKgoKCgpSClIKClIKClMySkgAKDrKCgpSSupK2goKUvKKSgriCgoKUgriCgoKCptiCgqaCpoKCuMaCkoKCpoKCyoKCgpTKgqrYgpSCgoKUruKCuIKClIIABBDygoKmlLS0pgACEuLkgoKUgvSCgpSCpKS06IKUlIKUlJSmtIKCgpSUgoKUgoKUlKaigoKUgpSClIKmgoKClMaCgoKUgoKmgoLGgoKClMaCgpSUlJSCgpTMsoKqwoKCgpSClIKmooKCgriClILKgqaCgoKmqsKCgsqcwoKUgoKUgqaCgoKUlIKqwoKClIKCgpSClIIACQ7CgoKUlIKCgriClIKmgqa4lIKqwoKEpoKChqaCgqzSgoKmgoKUgqyyAAIQ0oKClAACENKCgpQAAhDSAAIQ0qqigpSqooKu8oKClIKUqsKClIKuwoKCgpSCAAsGtIKUxqSUgpSu8oKCgpSClIKCgpSUlK7igoKCpoKCpqaygpSU3KaCrtKUgriClIKmgoLKlJSUpoKUlKaClIKm", "38-48:1;53-63:1;72-97:1;102-104:1;115-117:1;122-130:1;136-139:1;182-192:1;196-202:1")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/builder.go", "builder.cs", "ACJKsgAEELIABxCiqqKClKqigpSokqiSqqKokqiSqJKokgAlRpKokqiSqJKmwoKUgpSCgqaSlMqipLSCpoKUgqYACBKCgoL4goKUgoKUgoKmlIKmuIKUkoKCgoKCgoKCgoKCgoKClIKCyoKCgoKClIKmgoKClIKCpoKmAAgGooKUgpSClIKClKyygpSClIKClIKUgpQADhzSgoI=", "168-181:1", "", "", "", "179:25,180:17")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/string.go", "string.cs", "AB00ooKUgoKokqrCgoKUgqrCgoKUgqrCgoKUgqrCgoKUgqrCgoKUgqrCgoKUgqaigoKUgoKClIKmooKClIKCgpSCgpSCqqKssqyyqsKCgpSCqqKCgoKUqJI=")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.crypto;
@@ -99,3 +97,14 @@ public static partial class cryptobyte_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(cryptobyte_package.Builder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cryptobyteᴛBuilder;
+[GoMethodHost(typeof(cryptobyte_package.String)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cryptobyteᴛString;
+// </MethodHolders>

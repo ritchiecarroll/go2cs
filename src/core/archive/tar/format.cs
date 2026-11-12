@@ -4,6 +4,7 @@
 namespace go.archive;
 
 using strings = strings_package;
+using static tar_package;
 
 partial class tar_package {
 
@@ -104,14 +105,20 @@ internal static Format formatSTAR => 16;
 
 internal static Format formatMax => 32;
 
+} partial class tarᴛFormat {
+
 internal static bool has(this Format f, Format f2) { return (Format)(f & f2) != 0; }
 internal static void mayBe(this ref Format f, Format f2) { f |= (Format)(f2); }
 internal static void mayOnlyBe(this ref Format f, Format f2) { f &= (Format)(f2); }
 internal static void mustNotBe(this ref Format f, Format f2) { f &= ~(Format)(f2); }
 
+} partial class tar_package {
+
 internal static map<Format, @string> formatNames = new map<Format, @string>{
     [formatV7] = "V7", [FormatUSTAR] = "USTAR", [FormatPAX] = "PAX", [FormatGNU] = "GNU", [formatSTAR] = "STAR"
 };
+
+} partial class tarᴛFormat {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unknownˢ => ref unknownˢᵇ;
@@ -137,6 +144,8 @@ public static @string String(this Format f) {
         return "("u8 + strings.Join(ss, " | ") + ")"u8;
     }}
 }
+
+} partial class tar_package {
 
 // Magics used to identify various formats.
 internal static ref readonly @string magicGNU => ref magicGNUᵇ;
@@ -175,6 +184,8 @@ internal static block zeroBlock;
 
 /* [blockSize]byte */
 partial struct block /*[512]byte*/;
+
+} partial class tarᴛblock {
 
 // Convert block to any number of formats.
 internal static ж<headerV7> toV7(this ж<block> Ꮡb) {
@@ -302,8 +313,12 @@ internal static void reset(this ref block b) {
     b = new block(new byte[512].array());
 }
 
+} partial class tar_package {
+
 /* [blockSize]byte */
 partial struct headerV7 /*[512]byte*/;
+
+} partial class tarᴛheaderV7 {
 
 internal static slice<byte> name(this ref headerV7 h) { return h.Value[0..][..100]; }
 internal static slice<byte> mode(this ref headerV7 h) { return h.Value[100..][..8]; }
@@ -315,8 +330,12 @@ internal static slice<byte> chksum(this ref headerV7 h) { return h.Value[148..][
 internal static slice<byte> typeFlag(this ref headerV7 h) { return h.Value[156..][..1]; }
 internal static slice<byte> linkName(this ref headerV7 h) { return h.Value[157..][..100]; }
 
+} partial class tar_package {
+
 /* [blockSize]byte */
 partial struct headerGNU /*[512]byte*/;
+
+} partial class tarᴛheaderGNU {
 
 internal static ж<headerV7> v7(this ж<headerGNU> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
@@ -335,8 +354,12 @@ internal static slice<byte> changeTime(this ref headerGNU h) { return h.Value[35
 internal static sparseArray sparse(this ref headerGNU h) { return (sparseArray)(h.Value[386..][..(int)(24 * 4 + 1)]); }
 internal static slice<byte> realSize(this ref headerGNU h) { return h.Value[483..][..12]; }
 
+} partial class tar_package {
+
 /* [blockSize]byte */
 partial struct headerSTAR /*[512]byte*/;
+
+} partial class tarᴛheaderSTAR {
 
 internal static ж<headerV7> v7(this ж<headerSTAR> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
@@ -355,8 +378,12 @@ internal static slice<byte> accessTime(this ref headerSTAR h) { return h.Value[4
 internal static slice<byte> changeTime(this ref headerSTAR h) { return h.Value[488..][..12]; }
 internal static slice<byte> trailer(this ref headerSTAR h) { return h.Value[508..][..4]; }
 
+} partial class tar_package {
+
 /* [blockSize]byte */
 partial struct headerUSTAR /*[512]byte*/;
+
+} partial class tarᴛheaderUSTAR {
 
 internal static ж<headerV7> v7(this ж<headerUSTAR> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
@@ -372,15 +399,23 @@ internal static slice<byte> devMajor(this ref headerUSTAR h) { return h.Value[32
 internal static slice<byte> devMinor(this ref headerUSTAR h) { return h.Value[337..][..8]; }
 internal static slice<byte> prefix(this ref headerUSTAR h) { return h.Value[345..][..155]; }
 
+} partial class tar_package {
+
 partial struct sparseArray /*[]byte*/;
+
+} partial class tarᴛsparseArray {
 
 internal static sparseElem entry(this sparseArray s, nint i) { return (sparseElem)(slice<byte>)(s.slice(i * 24)); }
 internal static slice<byte> isExtended(this sparseArray s) { return s.slice(24 * s.maxEntries())[..1]; }
 internal static nint maxEntries(this sparseArray s) { return len(s) / 24; }
 
+} partial class tar_package {
+
 partial struct sparseElem /*[]byte*/;
+
+} partial class tarᴛsparseElem {
 
 internal static slice<byte> offset(this sparseElem s) { return s[0..][..12]; }
 internal static slice<byte> length(this sparseElem s) { return s[12..][..12]; }
 
-} // end tar_package
+} // end tarᴛsparseElem

@@ -42,6 +42,7 @@ using @internal;
 using go.mime;
 using net;
 using path;
+using static multipart_package;
 
 partial class multipart_package {
 
@@ -70,6 +71,8 @@ partial struct Part {
     internal error err;     // error to return when n == 0
     internal error readErr; // read error observed from mr.bufReader
 }
+
+} partial class multipartᴛPart {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nameˢ => ref nameˢᵇ;
@@ -122,6 +125,8 @@ internal static void parseContentDisposition(this ref Part p) {
     }
 }
 
+} partial class multipart_package {
+
 // NewReader creates a new multipart [Reader] reading from r using the
 // given MIME boundary.
 //
@@ -149,6 +154,8 @@ partial struct stickyErrorReader {
     internal error err;
 }
 
+} partial class multipartᴛstickyErrorReader {
+
 internal static (nint n, error) Read(this ref stickyErrorReader r, slice<byte> p) {
     nint n = default;
 
@@ -158,6 +165,8 @@ internal static (nint n, error) Read(this ref stickyErrorReader r, slice<byte> p
     (n, r.err) = r.r.Read(p);
     return (n, r.err);
 }
+
+} partial class multipart_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string quotedPrintableˢ => ref quotedPrintableˢᵇ;
@@ -188,6 +197,8 @@ internal static (ж<Part>, error) newPart(ж<Reader> mr, bool rawPart, int64 max
     return (bp, default);
 }
 
+} partial class multipartᴛPart {
+
 internal static error populateHeaders(this ref Part p, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
     var r = textproto.NewReader(p.mr.bufReader);
     var (header, err) = readMIMEHeader(r, maxMIMEHeaderSize, maxMIMEHeaders);
@@ -207,11 +218,15 @@ public static (nint n, error err) Read(this ref Part p, slice<byte> d) {
     return p.r.Read(d);
 }
 
+} partial class multipart_package {
+
 // partReader implements io.Reader by reading raw bytes directly from the
 // wrapped *Part, without doing any Transfer-Encoding decoding.
 partial struct partReader {
     internal ж<Part> p;
 }
+
+} partial class multipartᴛpartReader {
 
 internal static (nint, error) Read(this partReader pr, slice<byte> d) {
     var p = pr.p;
@@ -247,6 +262,8 @@ internal static (nint, error) Read(this partReader pr, slice<byte> d) {
     }
     return (n, default);
 }
+
+} partial class multipart_package {
 
 // scanUntilBoundary scans buf to identify how much of it can be safely
 // returned as part of the Part body.
@@ -348,10 +365,14 @@ internal static nint matchAfterPrefix(slice<byte> buf, slice<byte> prefix, error
     return -1;
 }
 
+} partial class multipartᴛPart {
+
 public static error Close(this ж<Part> Ꮡp) {
     io.Copy(io.Discard, new PartжReader(Ꮡp));
     return default;
 }
+
+} partial class multipart_package {
 
 // Reader is an iterator over parts in a MIME multipart body.
 // Reader's underlying parser consumes its input as needed. Seeking
@@ -385,6 +406,8 @@ internal static int64 maxMIMEHeaders() {
     }
     return 10000;
 }
+
+} partial class multipartᴛReader {
 
 // NextPart returns the next part in the multipart or an error.
 // When there are no more parts, the error [io.EOF] is returned.
@@ -501,6 +524,8 @@ internal static bool /*ret*/ isBoundaryDelimiterLine(this ref Reader r, slice<by
     }
     return bytes.Equal(rest, r.nl);
 }
+
+} partial class multipart_package {
 
 // skipLWSPChar returns b with leading spaces and tabs removed.
 // RFC 822 defines:

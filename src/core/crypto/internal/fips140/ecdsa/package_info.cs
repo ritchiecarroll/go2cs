@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using bigmodꓸNat = go.crypto.@internal.fips140.bigmod_package.ΔNat;
 // </ImportedTypeAliases>
 
 using go;
@@ -28,7 +27,6 @@ using static go.crypto.@internal.fips140.ecdsa_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("PublicKey", "ΔPublicKey")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -71,9 +69,9 @@ using static go.crypto.@internal.fips140.ecdsa_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/ecdsa/cast.go", "cast.cs", "ABIglAAWLoIADxiigoKCgoKUyIKCgri4ggAMGoKCgpSClIKUyIKCgoIADBqCgoKUgpSClA==", "55-63:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa.go", "ecdsa.cs", "ABs4gqaCAAcQggAjPqKCgoKUgqakgriCpu6kgsqCptykgriCpgAHEKSCuIKmAA8a8oKCgpSClIKClIKUguoACQiClIKClKjSlIaCpu6CAAISAAgCgoKCAAsYpoKUAAcQgoKmggASJgAKAoKUgu6CggAIEpQAAhAACwKClIKCgqrCgoIACAbGgoKUgriClIKClIKC3IKmgpSCgpSCgqaCpqjSgpSCgoKU3KoACAqCgoKmgoIAAxLSgpSCgoKCpgAGFAAMAoKUgoIACgbGgoKmgoKUgpSCgpSCpoKmgqaCgqaCgqaCgqaCgqaClA==", "202-204:1;335-338:1", "", "240=Bytes/1/2/3,Bytes/2/2/5")]
+[assembly: GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa.go", "ecdsa.cs", "AB44gqaCAAsQggAlPqKCgoKUgqakgriCpu6kgsqCptykgriCpgAHEKSCuIKmAA8a8oKCgpSClIKClIKUguoACQiClIKClKjSlIaCpu6CAAISAAgCgoKCAAsYpoKUAAcQgoKmggASJgAKAoKUgu6CggAIEpQAAhAACwKClIKCgqrCgoIACAbGgoKUgriClIKClIKC3IKmgpSCgpSCgqaCpqjSgpSCgoKU3KoACAqCgoKmgoIAAxLSgpSCgoKCpgAGFAAMAoKUgoIACgbGgoKmgoKUgpSCgpSCpoKmgqaCgqaCgqaCgqaCgqaClA==", "202-204:1;335-338:1", "", "249=Bytes/1/2/3,Bytes/2/2/5")]
 [assembly: GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa_noasm.go", "ecdsa_noasm.cs", "AAgSoqai")]
-[assembly: GoPositionMap("crypto/internal/fips140/ecdsa/hmacdrbg.go", "hmacdrbg.cs", "ACNO7ty0lKqmpriCgoKCgpS0goKCgraUgoKUgoKCgoKUtIKCgoK2lIKClIKCAAIQ8qaigoK6pJSCpoKmgqaCgoIACBKCgoKUgoKU", "57-59:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/ecdsa/hmacdrbg.go", "hmacdrbg.cs", "ACZOAAoO/LSUqqamuIKCgoKClLSCgoKCtpSCgpSCgoKCgpS0goKCgraUgoKUgoIAAhDypqKCgtqklIKmgqaCpoKCggAIEoKCgpSCgpQ=", "57-59:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -95,9 +93,9 @@ public static partial class ecdsa_package
     public partial interface Point<P> {}
     public partial struct Curve<P> {}
     public partial struct PrivateKey {}
+    public partial struct PublicKey {}
     public partial struct Signature {}
     public partial struct hmacDRBG {}
-    public partial struct ΔPublicKey {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -121,3 +119,17 @@ public static partial class ecdsa_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(ecdsa_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛPrivateKey;
+[GoMethodHost(typeof(ecdsa_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛPublicKey;
+[GoMethodHost(typeof(ecdsa_package.blockAlignedPersonalizationString)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛblockAlignedPersonalizationString;
+[GoMethodHost(typeof(ecdsa_package.hmacDRBG)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛhmacDRBG;
+[GoMethodHost(typeof(ecdsa_package.plainPersonalizationString)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛplainPersonalizationString;
+// </MethodHolders>

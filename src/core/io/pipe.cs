@@ -7,6 +7,7 @@ namespace go;
 
 using errors = errors_package;
 using Δsync = sync_package;
+using static io_package;
 
 partial class io_package {
 
@@ -15,6 +16,8 @@ partial struct onceError {
     /*embed*/ public sync_package.Mutex Mutex; // guards following
     internal error err;
 }
+
+} partial class ioᴛonceError {
 
 internal static void Store(this ж<onceError> Ꮡa, error err) {
     GoFrame ᒐ = default;
@@ -46,6 +49,8 @@ internal static error Load(this ж<onceError> Ꮡa) {
     finally { if (ᒐd1) Ꮡa.of(onceError.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
+} partial class io_package {
+
 // ErrClosedPipe is the error used for read or write operations on a closed pipe.
 public static error ErrClosedPipe = errors.New("io: read/write on closed pipe");
 
@@ -59,6 +64,8 @@ partial struct pipe {
     internal onceError rerr;
     internal onceError werr;
 }
+
+} partial class ioᴛpipe {
 
 internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -165,10 +172,14 @@ internal static error writeCloseError(this ж<pipe> Ꮡp) {
     return ErrClosedPipe;
 }
 
+} partial class io_package {
+
 // A PipeReader is the read half of a pipe.
 partial struct PipeReader {
     /*embed*/ internal pipe pipe;
 }
+
+} partial class ioᴛPipeReader {
 
 // Read implements the standard Read interface:
 // it reads data from the pipe, blocking until a writer
@@ -194,10 +205,14 @@ public static error CloseWithError(this ж<PipeReader> Ꮡr, error err) {
     return Ꮡr.Ꮡpipe.closeRead(err);
 }
 
+} partial class io_package {
+
 // A PipeWriter is the write half of a pipe.
 partial struct PipeWriter {
     internal PipeReader r;
 }
+
+} partial class ioᴛPipeWriter {
 
 // Write implements the standard Write interface:
 // it writes data to the pipe, blocking until one or more readers
@@ -223,6 +238,8 @@ public static error Close(this ж<PipeWriter> Ꮡw) {
 public static error CloseWithError(this ж<PipeWriter> Ꮡw, error err) {
     return Ꮡw.Ꮡr.Ꮡpipe.closeWrite(err);
 }
+
+} partial class io_package {
 
 // Pipe creates a synchronous in-memory pipe.
 // It can be used to connect code expecting an [io.Reader]

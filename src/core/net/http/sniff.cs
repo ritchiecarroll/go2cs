@@ -6,6 +6,7 @@ namespace go.net;
 using bytes = bytes_package;
 using binary = encoding.binary_package;
 using encoding;
+using static http_package;
 
 partial class http_package {
 
@@ -19,13 +20,13 @@ internal static UntypedInt sniffLen => 512;
 // a valid MIME type: if it cannot determine a more specific one, it
 // returns "application/octet-stream".
 public static @string DetectContentType(slice<byte> data) {
-    if (builtin.len(data) > sniffLen) {
+    if (len(data) > sniffLen) {
         data = data[..(int)(sniffLen)];
     }
 
     // Index of the first non-whitespace byte in data.
     nint firstNonWS = 0;
-    for (; firstNonWS < builtin.len(data) && isWS(data[firstNonWS]); firstNonWS++) {
+    for (; firstNonWS < len(data) && isWS(data[firstNonWS]); firstNonWS++) {
     }
 
     foreach (var (_, sig) in range(sniffSignatures)) {
@@ -144,6 +145,8 @@ partial struct exactSig {
     internal @string ct;
 }
 
+} partial class httpᴛexactSig {
+
 internal static @string match(this ref exactSig e, slice<byte> data, nint firstNonWS) {
     if (bytes.HasPrefix(data, e.sig)) {
         return e.ct;
@@ -151,11 +154,15 @@ internal static @string match(this ref exactSig e, slice<byte> data, nint firstN
     return ""u8;
 }
 
+} partial class http_package {
+
 partial struct maskedSig {
     internal slice<byte> mask, pat;
     internal bool skipWS;
     internal @string ct;
 }
+
+} partial class httpᴛmaskedSig {
 
 internal static @string match(this ref maskedSig m, slice<byte> data, nint firstNonWS) {
     // pattern matching algorithm section 6
@@ -164,10 +171,10 @@ internal static @string match(this ref maskedSig m, slice<byte> data, nint first
     if (m.skipWS) {
         data = data.slice(firstNonWS);
     }
-    if (builtin.len(m.pat) != builtin.len(m.mask)) {
+    if (len(m.pat) != len(m.mask)) {
         return ""u8;
     }
-    if (builtin.len(data) < builtin.len(m.pat)) {
+    if (len(data) < len(m.pat)) {
         return ""u8;
     }
     foreach (var (i, pb) in range(m.pat)) {
@@ -179,11 +186,19 @@ internal static @string match(this ref maskedSig m, slice<byte> data, nint first
     return m.ct;
 }
 
+} partial class http_package {
+
 partial struct htmlSig /*[]byte*/;
+
+} partial class httpᴛhtmlSig {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string textHtmlCharsetUtf8ˢ => ref textHtmlCharsetUtf8ˢᵇ;
+private static readonly @string textHtmlCharsetUtf8ˢᵇ = "text/html; charset=utf-8"u8;
 
 internal static @string match(this htmlSig h, slice<byte> data, nint firstNonWS) {
     data = data.slice(firstNonWS);
-    if (builtin.len(data) < builtin.len(h) + 1) {
+    if (len(data) < len(h) + 1) {
         return ""u8;
     }
     foreach (var (i, b) in range<byte>(h)) {
@@ -196,17 +211,21 @@ internal static @string match(this htmlSig h, slice<byte> data, nint firstNonWS)
         }
     }
     // Next byte must be a tag-terminating byte(0xTT).
-    if (!isTT(data[builtin.len(h)])) {
+    if (!isTT(data[len(h)])) {
         return ""u8;
     }
     return textHtmlCharsetUtf8ˢ;
 }
+
+} partial class http_package {
 
 internal static slice<byte> mp4ftype = slice<byte>("ftyp"u8);
 internal static slice<byte> mp4 = slice<byte>("mp4"u8);
 
 partial struct mp4Sig {
 }
+
+} partial class httpᴛmp4Sig {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string videoMp4ˢ => ref videoMp4ˢᵇ;
@@ -215,11 +234,11 @@ private static readonly @string videoMp4ˢᵇ = "video/mp4"u8;
 internal static @string match(this mp4Sig _, slice<byte> data, nint firstNonWS) {
     // https://mimesniff.spec.whatwg.org/#signature-for-mp4
     // c.f. section 6.2.1
-    if (builtin.len(data) < 12) {
+    if (len(data) < 12) {
         return ""u8;
     }
     nint boxSize = (nint)binary.BigEndian.Uint32(data[..4]);
-    if (builtin.len(data) < boxSize || boxSize % 4 != 0) {
+    if (len(data) < boxSize || boxSize % 4 != 0) {
         return ""u8;
     }
     if (!bytes.Equal(data[4..8], mp4ftype)) {
@@ -237,8 +256,16 @@ internal static @string match(this mp4Sig _, slice<byte> data, nint firstNonWS) 
     return ""u8;
 }
 
+} partial class http_package {
+
 partial struct textSig {
 }
+
+} partial class httpᴛtextSig {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string textPlainCharsetUtf8ˢ => ref textPlainCharsetUtf8ˢᵇ;
+private static readonly @string textPlainCharsetUtf8ˢᵇ = "text/plain; charset=utf-8"u8;
 
 internal static @string match(this textSig _, slice<byte> data, nint firstNonWS) {
     // c.f. section 5, step 4.
@@ -251,4 +278,4 @@ internal static @string match(this textSig _, slice<byte> data, nint firstNonWS)
     return textPlainCharsetUtf8ˢ;
 }
 
-} // end http_package
+} // end httpᴛtextSig

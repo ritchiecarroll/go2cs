@@ -5,8 +5,11 @@
 namespace go.net;
 
 using reflect = reflect_package;
+using static http_package;
 
 partial class http_package {
+
+} partial class httpᴛhttp2StreamError {
 
 internal static bool As(this http2StreamError e, any target) {
     var dst = reflect.ValueOf(target).Elem();
@@ -34,4 +37,4 @@ internal static bool As(this http2StreamError e, any target) {
     return true;
 }
 
-} // end http_package
+} // end httpᴛhttp2StreamError

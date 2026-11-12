@@ -5,6 +5,7 @@ namespace go.debug;
 
 using fmt = fmt_package;
 using strconv = strconv_package;
+using static dwarf_package;
 
 partial class dwarf_package {
 
@@ -18,8 +19,10 @@ partial struct typeUnit {
     /*embed*/ internal unit unit;
     internal Offset toff;  // Offset to signature type within data.
     internal @string name; // Name of .debug_type section.
-    internal ΔType cache;  // Cache the type, nil to start.
+    internal Type cache;   // Cache the type, nil to start.
 }
+
+} partial class dwarfᴛData {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string typeUnitLengthOverflowˢ => ref typeUnitLengthOverflowˢᵇ;
@@ -92,7 +95,7 @@ internal static error parseTypes(this ж<Data> Ꮡd, @string name, slice<byte> t
 }
 
 // Return the type for a type signature.
-internal static (ΔType, error) sigToType(this ж<Data> Ꮡd, uint64 sig) {
+internal static (Type, error) sigToType(this ж<Data> Ꮡd, uint64 sig) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var tu = d.typeSigs[sig];
@@ -105,7 +108,7 @@ internal static (ΔType, error) sigToType(this ж<Data> Ꮡd, uint64 sig) {
 
     ref var b = ref heap<buf>(makeBuf(Ꮡd, new typeUnitжdataFormat(tu), tu.name, tu.off, tu.data), out var Ꮡb);
     var r = Ꮡ(new typeUnitReader(d: Ꮡd, tu: tu, b: b));
-    var (t, err) = Ꮡd.readType(tu.name, new typeUnitReaderжtypeReader(r), tu.toff, new map<Offset, ΔType>(), nil);
+    var (t, err) = Ꮡd.readType(tu.name, new typeUnitReaderжtypeReader(r), tu.toff, new map<Offset, Type>(), nil);
     if (err != nil) {
         return (default, err);
     }
@@ -114,6 +117,8 @@ internal static (ΔType, error) sigToType(this ж<Data> Ꮡd, uint64 sig) {
     return (t, default);
 }
 
+} partial class dwarf_package {
+
 // typeUnitReader is a typeReader for a tagTypeUnit.
 partial struct typeUnitReader {
     internal ж<Data> d;
@@ -121,6 +126,8 @@ partial struct typeUnitReader {
     internal buf b;
     internal error err;
 }
+
+} partial class dwarfᴛtypeUnitReader {
 
 // Seek to a new position in the type unit.
 internal static void Seek(this ref typeUnitReader tur, Offset off) {
@@ -170,4 +177,4 @@ internal static Offset offset(this ref typeUnitReader tur) {
     return tur.b.off;
 }
 
-} // end dwarf_package
+} // end dwarfᴛtypeUnitReader

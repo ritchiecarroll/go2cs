@@ -648,9 +648,9 @@ internal static void writeHeapBitsDoubleCheck(ж<mspan> Ꮡspan, uintptr x, uint
 
     var srcRead = span.heapBitsSmallForAddr(x);
     if (srcRead != src) {
-        print((@string)"runtime: x=", (Δhex)(uint64)x, (@string)" i=", i, (@string)" j=", j, (@string)" bits=", bits, (@string)"\n");
+        print((@string)"runtime: x=", (hex)(uint64)x, (@string)" i=", i, (@string)" j=", j, (@string)" bits=", bits, (@string)"\n");
         print((@string)"runtime: dataSize=", dataSize, (@string)" typ.Size_=", typ.Size_, (@string)" typ.PtrBytes=", typ.PtrBytes, (@string)"\n");
-        print((@string)"runtime: src0=", (Δhex)(uint64)src0, (@string)" src=", (Δhex)(uint64)src, (@string)" srcRead=", (Δhex)(uint64)srcRead, (@string)"\n");
+        print((@string)"runtime: src0=", (hex)(uint64)src0, (@string)" src=", (hex)(uint64)src, (@string)" srcRead=", (hex)(uint64)srcRead, (@string)"\n");
         @throw(badPointerBitsWrittenForˢ);
     }
 }

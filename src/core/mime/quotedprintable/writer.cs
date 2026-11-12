@@ -4,6 +4,7 @@
 namespace go.mime;
 
 using io = io_package;
+using static quotedprintable_package;
 
 partial class quotedprintable_package {
 
@@ -24,6 +25,8 @@ partial struct Writer {
 public static ж<Writer> NewWriter(io.Writer w) {
     return Ꮡ(new Writer(w: w));
 }
+
+} partial class quotedprintableᴛWriter {
 
 // Write encodes p using quoted-printable encoding and writes it to the
 // underlying [io.Writer]. It limits line length to 76 characters. The encoded
@@ -133,8 +136,12 @@ internal static error encode(this ref Writer w, byte b) {
     return default;
 }
 
+} partial class quotedprintable_package {
+
 internal static ref readonly @string upperhex => ref upperhexᵇ;
 private static readonly @string upperhexᵇ = "0123456789ABCDEF"u8;
+
+} partial class quotedprintableᴛWriter {
 
 // checkLastByte encodes the last buffered byte if it is a space or a tab.
 internal static error checkLastByte(this ref Writer w) {
@@ -176,6 +183,8 @@ internal static error flush(this ref Writer w) {
     w.i = 0;
     return default;
 }
+
+} partial class quotedprintable_package {
 
 internal static bool isWhitespace(byte b) {
     return b == ' ' || b == '\t';

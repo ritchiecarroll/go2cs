@@ -14,12 +14,13 @@ using strconv = @internal.strconv_package;
 using Δsync = sync_package;
 using @unsafe = unsafe_package;
 using @internal;
+using static syscall_package;
 
 partial class syscall_package {
 
-partial struct ΔHandle /*num:uintptr*/;
+partial struct Handle /*num:uintptr*/;
 
-public static ΔHandle InvalidHandle => /* ^Handle(0) */ unchecked((ΔHandle)18446744073709551615);
+public static Handle InvalidHandle => /* ^Handle(0) */ unchecked((Handle)18446744073709551615);
 
 // StringToUTF16 returns the UTF-16 encoding of the UTF-8 string s,
 // with a terminating NUL added. If s contains a NUL byte this
@@ -144,6 +145,8 @@ public static (uint32 n, error err) FormatMessage(uint32 flags, uint32 msgsrc, u
 internal static readonly ж<Δsync.Map> ᏑerrnoErrorCache = new StaticBox<Δsync.Map>(default(Δsync.Map));
 internal static ref Δsync.Map errnoErrorCache => ref ((StaticBox<Δsync.Map>)ᏑerrnoErrorCache).ValueSlot;
 
+} partial class syscallᴛErrno {
+
 public static @string Error(this Errno e) {
     // deal with special go errors
     nint idx = (nint)(e - (Errno)APPLICATION_ERROR);
@@ -185,10 +188,14 @@ internal static @string error(this Errno e) {
     return UTF16ToString(b.slice(0, (nint)(n)));
 }
 
+} partial class syscall_package {
+
 internal static Errno _ERROR_NOT_ENOUGH_MEMORY => /* Errno(8) */ 8;
 internal static Errno _ERROR_NOT_SUPPORTED => /* Errno(50) */ 50;
 internal static Errno _ERROR_BAD_NETPATH => /* Errno(53) */ 53;
 internal static Errno _ERROR_CALL_NOT_IMPLEMENTED => /* Errno(120) */ 120;
+
+} partial class syscallᴛErrno {
 
 public static bool Is(this Errno e, error target) {
     switch (target) {
@@ -214,6 +221,8 @@ public static bool Temporary(this Errno e) {
 public static bool Timeout(this Errno e) {
     return e == EAGAIN || e == EWOULDBLOCK || e == ETIMEDOUT;
 }
+
+} partial class syscall_package {
 
 // Implemented in runtime/syscall_windows.go.
 internal static partial uintptr compileCallback(any fn, bool cleanstack);
@@ -351,7 +360,7 @@ internal static ж<SecurityAttributes> makeInheritSa() {
     return Ꮡsa;
 }
 
-public static (ΔHandle fd, error err) Open(@string name, nint flag, uint32 perm) {
+public static (Handle fd, error err) Open(@string name, nint flag, uint32 perm) {
     error err = default;
 
     if (len(name) == 0) {
@@ -488,7 +497,7 @@ public static (ΔHandle fd, error err) Open(@string name, nint flag, uint32 perm
     return (h, default);
 }
 
-public static (nint n, error err) Read(ΔHandle fd, slice<byte> p) {
+public static (nint n, error err) Read(Handle fd, slice<byte> p) {
     ref var done = ref heap(new uint32(), out var Ꮡdone);
     var e = ReadFile(fd, p, Ꮡdone, nil);
     if (e != nil) {
@@ -501,7 +510,7 @@ public static (nint n, error err) Read(ΔHandle fd, slice<byte> p) {
     return ((nint)done, default);
 }
 
-public static (nint n, error err) Write(ΔHandle fd, slice<byte> p) {
+public static (nint n, error err) Write(Handle fd, slice<byte> p) {
     ref var done = ref heap(new uint32(), out var Ꮡdone);
     var e = WriteFile(fd, p, Ꮡdone, nil);
     if (e != nil) {
@@ -510,7 +519,7 @@ public static (nint n, error err) Write(ΔHandle fd, slice<byte> p) {
     return ((nint)done, default);
 }
 
-public static error ReadFile(ΔHandle fd, slice<byte> p, ж<uint32> Ꮡdone, ж<Overlapped> overlapped) {
+public static error ReadFile(Handle fd, slice<byte> p, ж<uint32> Ꮡdone, ж<Overlapped> overlapped) {
     ref var done = ref Ꮡdone.DerefOrNull();
 
     var err = readFile(fd, p, Ꮡdone, overlapped);
@@ -529,7 +538,7 @@ public static error ReadFile(ΔHandle fd, slice<byte> p, ж<uint32> Ꮡdone, ж<
     return err;
 }
 
-public static error WriteFile(ΔHandle fd, slice<byte> p, ж<uint32> Ꮡdone, ж<Overlapped> overlapped) {
+public static error WriteFile(Handle fd, slice<byte> p, ж<uint32> Ꮡdone, ж<Overlapped> overlapped) {
     ref var done = ref Ꮡdone.DerefOrNull();
 
     if (race.Enabled) {
@@ -558,7 +567,7 @@ internal static uintptr ptrSize => /* unsafe.Sizeof(uintptr(0)) */ 8;
 
 // setFilePointerEx calls SetFilePointerEx.
 // See https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-setfilepointerex
-internal static error setFilePointerEx(ΔHandle handle, int64 distToMove, ж<int64> newFilePointer, uint32 whence) {
+internal static error setFilePointerEx(Handle handle, int64 distToMove, ж<int64> newFilePointer, uint32 whence) {
     Errno e1 = default;
     if (/* unsafe.Sizeof(uintptr(0)) */ (uintptr)8 == 8) {
         var ᴋ0 = newFilePointer;
@@ -576,7 +585,7 @@ internal static error setFilePointerEx(ΔHandle handle, int64 distToMove, ж<int
     return default;
 }
 
-public static (int64 newoffset, error err) Seek(ΔHandle fd, int64 offset, nint whence) {
+public static (int64 newoffset, error err) Seek(Handle fd, int64 offset, nint whence) {
     ref var newoffset = ref heap(new int64(), out var Ꮡnewoffset);
     error err = default;
 
@@ -598,21 +607,21 @@ public static (int64 newoffset, error err) Seek(ΔHandle fd, int64 offset, nint 
     return (newoffset, err);
 }
 
-public static error /*err*/ Close(ΔHandle fd) {
+public static error /*err*/ Close(Handle fd) {
     return CloseHandle(fd);
 }
 
-public static readonly ж<ΔHandle> ᏑStdin = new StaticBox<ΔHandle>(default(ΔHandle));
-public static ref ΔHandle Stdin => ref ((StaticBox<ΔHandle>)ᏑStdin).ValueSlot;
+public static readonly ж<Handle> ᏑStdin = new StaticBox<Handle>(default(Handle));
+public static ref Handle Stdin => ref ((StaticBox<Handle>)ᏑStdin).ValueSlot;
 internal static void initᴛStdin() { Stdin = getStdHandle(STD_INPUT_HANDLE); }
-public static readonly ж<ΔHandle> ᏑStdout = new StaticBox<ΔHandle>(default(ΔHandle));
-public static ref ΔHandle Stdout => ref ((StaticBox<ΔHandle>)ᏑStdout).ValueSlot;
+public static readonly ж<Handle> ᏑStdout = new StaticBox<Handle>(default(Handle));
+public static ref Handle Stdout => ref ((StaticBox<Handle>)ᏑStdout).ValueSlot;
 internal static void initᴛStdout() { Stdout = getStdHandle(STD_OUTPUT_HANDLE); }
-public static readonly ж<ΔHandle> ᏑStderr = new StaticBox<ΔHandle>(default(ΔHandle));
-public static ref ΔHandle Stderr => ref ((StaticBox<ΔHandle>)ᏑStderr).ValueSlot;
+public static readonly ж<Handle> ᏑStderr = new StaticBox<Handle>(default(Handle));
+public static ref Handle Stderr => ref ((StaticBox<Handle>)ᏑStderr).ValueSlot;
 internal static void initᴛStderr() { Stderr = getStdHandle(STD_ERROR_HANDLE); }
 
-internal static ΔHandle /*fd*/ getStdHandle(nint h) {
+internal static Handle /*fd*/ getStdHandle(nint h) {
     var (r, _) = GetStdHandle(h);
     return r;
 }
@@ -707,7 +716,7 @@ internal partial struct Ftruncate__FILE_END_OF_FILE_INFO /*dyn*/ {
     public int64 EndOfFile;
 }
 
-public static error /*err*/ Ftruncate(ΔHandle fd, int64 length) {
+public static error /*err*/ Ftruncate(Handle fd, int64 length) {
     const uint32 FileEndOfFileInfo = 6;
     ref var info = ref heap(new Ftruncate__FILE_END_OF_FILE_INFO(), out var Ꮡinfo);
     info.EndOfFile = length;
@@ -723,12 +732,12 @@ public static error /*err*/ Gettimeofday(ж<Timeval> Ꮡtv) {
     return default;
 }
 
-public static error /*err*/ Pipe(slice<ΔHandle> p) {
+public static error /*err*/ Pipe(slice<Handle> p) {
     if (len(p) != 2) {
         return EINVAL;
     }
-    ref var r = ref heap(new ΔHandle(), out var Ꮡr);
-    ref var w = ref heap(new ΔHandle(), out var Ꮡw);
+    ref var r = ref heap(new Handle(), out var Ꮡr);
+    ref var w = ref heap(new Handle(), out var Ꮡw);
     var e = CreatePipe(Ꮡr, Ꮡw, makeInheritSa(), 0);
     if (e != nil) {
         return e;
@@ -807,7 +816,7 @@ public static error /*err*/ UtimesNano(@string path, slice<Timespec> ts) {
     ᒐdone: return err;
 }
 
-public static error /*err*/ Fsync(ΔHandle fd) {
+public static error /*err*/ Fsync(Handle fd) {
     return FlushFileBuffers(fd);
 }
 
@@ -902,7 +911,7 @@ partial struct RawSockaddrAny {
     public array<int8> Pad = new(100);
 }
 
-partial interface ΔSockaddr {
+partial interface Sockaddr {
     (@unsafe.Pointer ptr, int32 len, error err) sockaddr(); // lowercase; only we can define Sockaddrs
 }
 
@@ -912,7 +921,11 @@ partial struct SockaddrInet4 {
     internal RawSockaddrInet4 raw;
 }
 
+} partial class syscallᴛSockaddrInet4 {
+
 // go2cs generated this placeholder — func sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class syscall_package {
 
 partial struct SockaddrInet6 {
     public nint Port;
@@ -921,7 +934,11 @@ partial struct SockaddrInet6 {
     internal RawSockaddrInet6 raw;
 }
 
+} partial class syscallᴛSockaddrInet6 {
+
 // go2cs generated this placeholder — func sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class syscall_package {
 
 partial struct RawSockaddrUnix {
     public uint16 Family;
@@ -932,6 +949,8 @@ partial struct SockaddrUnix {
     public @string Name;
     internal RawSockaddrUnix raw;
 }
+
+} partial class syscallᴛSockaddrUnix {
 
 internal static (@unsafe.Pointer, int32, error) sockaddr(this ж<SockaddrUnix> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
@@ -969,16 +988,20 @@ internal static (@unsafe.Pointer, int32, error) sockaddr(this ж<SockaddrUnix> �
     return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.Ꮡraw), sl, default);
 }
 
+} partial class syscallᴛRawSockaddrAny {
+
 // go2cs generated this placeholder — func Sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-public static (ΔHandle fd, error err) Socket(nint domain, nint typ, nint proto) {
+} partial class syscall_package {
+
+public static (Handle fd, error err) Socket(nint domain, nint typ, nint proto) {
     if (domain == AF_INET6 && SocketDisableIPv6) {
         return (InvalidHandle, EAFNOSUPPORT);
     }
     return socket((int32)domain, (int32)typ, (int32)proto);
 }
 
-public static error /*err*/ SetsockoptInt(ΔHandle fd, nint level, nint opt, nint value) {
+public static error /*err*/ SetsockoptInt(Handle fd, nint level, nint opt, nint value) {
     ref var v = ref heap<int32>((int32)value, out var Ꮡv);
     return Setsockopt(fd, (int32)level, (int32)opt, Ꮡv.Reinterpret<int32, byte>(), (int32)/* unsafe.Sizeof(v) */ (uintptr)4);
 }
@@ -991,17 +1014,17 @@ public static error /*err*/ SetsockoptInt(ΔHandle fd, nint level, nint opt, nin
 
 // go2cs generated this placeholder — func Getpeername is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-public static error /*err*/ Listen(ΔHandle s, nint n) {
+public static error /*err*/ Listen(Handle s, nint n) {
     return listen(s, (int32)n);
 }
 
-public static error /*err*/ Shutdown(ΔHandle fd, nint how) {
+public static error /*err*/ Shutdown(Handle fd, nint how) {
     return shutdown(fd, (int32)how);
 }
 
 // go2cs generated this placeholder — func WSASendto is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static error /*err*/ wsaSendtoInet4(ΔHandle s, ж<WSABuf> bufs, uint32 bufcnt, ж<uint32> sent, uint32 flags, ж<SockaddrInet4> to, ж<Overlapped> overlapped, ж<byte> croutine) {
+internal static error /*err*/ wsaSendtoInet4(Handle s, ж<WSABuf> bufs, uint32 bufcnt, ж<uint32> sent, uint32 flags, ж<SockaddrInet4> to, ж<Overlapped> overlapped, ж<byte> croutine) {
     error err = default;
 
     (var rsa, var len, err) = to.sockaddr();
@@ -1029,7 +1052,7 @@ internal static error /*err*/ wsaSendtoInet4(ΔHandle s, ж<WSABuf> bufs, uint32
     return err;
 }
 
-internal static error /*err*/ wsaSendtoInet6(ΔHandle s, ж<WSABuf> bufs, uint32 bufcnt, ж<uint32> sent, uint32 flags, ж<SockaddrInet6> to, ж<Overlapped> overlapped, ж<byte> croutine) {
+internal static error /*err*/ wsaSendtoInet6(Handle s, ж<WSABuf> bufs, uint32 bufcnt, ж<uint32> sent, uint32 flags, ж<SockaddrInet6> to, ж<Overlapped> overlapped, ж<byte> croutine) {
     error err = default;
 
     (var rsa, var len, err) = to.sockaddr();
@@ -1071,7 +1094,7 @@ internal static ref connectExFuncᴛ1 connectExFunc => ref ((StaticBox<connectEx
 
 // go2cs generated this placeholder — func LoadConnectEx is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static error /*err*/ connectEx(ΔHandle s, @unsafe.Pointer name, int32 namelen, ж<byte> sendBuf, uint32 sendDataLen, ж<uint32> bytesSent, ж<Overlapped> overlapped) {
+internal static error /*err*/ connectEx(Handle s, @unsafe.Pointer name, int32 namelen, ж<byte> sendBuf, uint32 sendDataLen, ж<uint32> bytesSent, ж<Overlapped> overlapped) {
     error err = default;
 
     var ᴋ12 = name;
@@ -1107,11 +1130,13 @@ partial struct WaitStatus {
     public uint32 ExitCode;
 }
 
+} partial class syscallᴛWaitStatus {
+
 public static bool Exited(this WaitStatus w) { return true; }
 
 public static nint ExitStatus(this WaitStatus w) { return (nint)w.ExitCode; }
 
-public static ΔSignal Signal(this WaitStatus w) { return -1; }
+public static Signal Signal(this WaitStatus w) { return -1; }
 
 public static bool CoreDump(this WaitStatus w) { return false; }
 
@@ -1119,11 +1144,13 @@ public static bool Stopped(this WaitStatus w) { return false; }
 
 public static bool Continued(this WaitStatus w) { return false; }
 
-public static ΔSignal StopSignal(this WaitStatus w) { return -1; }
+public static Signal StopSignal(this WaitStatus w) { return -1; }
 
 public static bool Signaled(this WaitStatus w) { return false; }
 
 public static nint TrapCause(this WaitStatus w) { return -1; }
+
+} partial class syscall_package {
 
 // Timespec is an invented structure on Windows, but here for
 // consistency with the syscall package for other operating systems.
@@ -1143,12 +1170,12 @@ public static Timespec /*ts*/ NsecToTimespec(int64 nsec) {
 }
 
 // TODO(brainman): fix all needed for net
-public static (ΔHandle nfd, ΔSockaddr sa, error err) Accept(ΔHandle fd) { return (0, default, EWINDOWS); }
-public static (nint n, ΔSockaddr from, error err) Recvfrom(ΔHandle fd, slice<byte> p, nint flags) {
+public static (Handle nfd, Sockaddr sa, error err) Accept(Handle fd) { return (0, default, EWINDOWS); }
+public static (nint n, Sockaddr from, error err) Recvfrom(Handle fd, slice<byte> p, nint flags) {
     return (0, default, EWINDOWS);
 }
-public static error /*err*/ Sendto(ΔHandle fd, slice<byte> p, nint flags, ΔSockaddr to) { return EWINDOWS; }
-public static error /*err*/ SetsockoptTimeval(ΔHandle fd, nint level, nint opt, ж<Timeval> tv) { return EWINDOWS; }
+public static error /*err*/ Sendto(Handle fd, slice<byte> p, nint flags, Sockaddr to) { return EWINDOWS; }
+public static error /*err*/ SetsockoptTimeval(Handle fd, nint level, nint opt, ж<Timeval> tv) { return EWINDOWS; }
 
 // The Linger struct is wrong but we only noticed after Go 1.
 // sysLinger is the real system call structure.
@@ -1175,21 +1202,21 @@ partial struct IPv6Mreq {
     public uint32 Interface;
 }
 
-public static (nint, error) GetsockoptInt(ΔHandle fd, nint level, nint opt) {
+public static (nint, error) GetsockoptInt(Handle fd, nint level, nint opt) {
     ref var optval = ref heap<int32>((int32)0, out var Ꮡoptval);
     ref var optlen = ref heap<int32>((int32)/* unsafe.Sizeof(optval) */ (uintptr)4, out var Ꮡoptlen);
     var err = Getsockopt(fd, (int32)level, (int32)opt, Ꮡoptval.Reinterpret<int32, byte>(), Ꮡoptlen);
     return ((nint)optval, err);
 }
 
-public static error /*err*/ SetsockoptLinger(ΔHandle fd, nint level, nint opt, ж<Linger> Ꮡl) {
+public static error /*err*/ SetsockoptLinger(Handle fd, nint level, nint opt, ж<Linger> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     ref var sys = ref heap<sysLinger>(new sysLinger(Onoff: (uint16)l.Onoff, Linger: (uint16)l.ΔLinger), out var Ꮡsys);
     return Setsockopt(fd, (int32)level, (int32)opt, Ꮡsys.Reinterpret<sysLinger, byte>(), (int32)/* unsafe.Sizeof(sys) */ (uintptr)4);
 }
 
-public static error /*err*/ SetsockoptInet4Addr(ΔHandle fd, nint level, nint opt, /*[4]*/ array<byte> valueʗp) {
+public static error /*err*/ SetsockoptInet4Addr(Handle fd, nint level, nint opt, /*[4]*/ array<byte> valueʗp) {
     ref var value = ref heap(valueʗp.Clone(), out var Ꮡvalue);
 
     return Setsockopt(fd, (int32)level, (int32)opt, Ꮡvalue.at<byte>(0), 4);
@@ -1199,8 +1226,8 @@ public static error /*err*/ SetsockoptInet4Addr(ΔHandle fd, nint level, nint op
 
 public static nint /*pid*/ Getpid() { return (nint)getCurrentProcessId(); }
 
-public static (ΔHandle handle, error err) FindFirstFile(ж<uint16> name, ж<Win32finddata> data) {
-    ΔHandle handle = default;
+public static (Handle handle, error err) FindFirstFile(ж<uint16> name, ж<Win32finddata> data) {
+    Handle handle = default;
     error err = default;
 
     // NOTE(rsc): The Win32finddata struct is wrong for the system call:
@@ -1219,7 +1246,7 @@ public static (ΔHandle handle, error err) FindFirstFile(ж<uint16> name, ж<Win
     return (handle, err);
 }
 
-public static error /*err*/ FindNextFile(ΔHandle handle, ж<Win32finddata> data) {
+public static error /*err*/ FindNextFile(Handle handle, ж<Win32finddata> data) {
     error err = default;
 
     ref var data1 = ref heap(new win32finddata1(), out var Ꮡdata1);
@@ -1265,7 +1292,7 @@ public static nint /*ppid*/ Getppid() {
     return (nint)pe.ParentProcessID;
 }
 
-internal static (slice<uint16>, error) fdpath(ΔHandle fd, slice<uint16> buf) {
+internal static (slice<uint16>, error) fdpath(Handle fd, slice<uint16> buf) {
     UntypedInt FILE_NAME_NORMALIZED = 0;
     UntypedInt VOLUME_NAME_DOS = 0;
     for (;;) {
@@ -1282,7 +1309,7 @@ internal static (slice<uint16>, error) fdpath(ΔHandle fd, slice<uint16> buf) {
     return (buf, default);
 }
 
-public static error /*err*/ Fchdir(ΔHandle fd) {
+public static error /*err*/ Fchdir(Handle fd) {
     error err = default;
 
     array<uint16> buf = new(261); /* MAX_PATH + 1 */
@@ -1309,10 +1336,10 @@ public static error /*err*/ Fchdir(ΔHandle fd) {
 public static error /*err*/ Link(@string oldpath, @string newpath) { return EWINDOWS; }
 public static error /*err*/ Symlink(@string path, @string link) { return EWINDOWS; }
 
-public static error /*err*/ Fchmod(ΔHandle fd, uint32 mode) { return EWINDOWS; }
+public static error /*err*/ Fchmod(Handle fd, uint32 mode) { return EWINDOWS; }
 public static error /*err*/ Chown(@string path, nint uid, nint gid) { return EWINDOWS; }
 public static error /*err*/ Lchown(@string path, nint uid, nint gid) { return EWINDOWS; }
-public static error /*err*/ Fchown(ΔHandle fd, nint uid, nint gid) { return EWINDOWS; }
+public static error /*err*/ Fchown(Handle fd, nint uid, nint gid) { return EWINDOWS; }
 
 public static nint /*uid*/ Getuid() { return -1; }
 public static nint /*euid*/ Geteuid() { return -1; }
@@ -1320,11 +1347,13 @@ public static nint /*gid*/ Getgid() { return -1; }
 public static nint /*egid*/ Getegid() { return -1; }
 public static (slice<nint> gids, error err) Getgroups() { return (default, EWINDOWS); }
 
-partial struct ΔSignal /*num:nint*/;
+partial struct Signal /*num:nint*/;
 
-public static void Signal(this ΔSignal s) { }
+} partial class syscallᴛSignal {
 
-public static @string String(this ΔSignal s) {
+public static void Signal(this Signal s) { }
+
+public static @string String(this Signal s) {
     if (0 <= s && (nint)s < len(signals)) {
         @string str = signals[s];
         if (str != ""u8) {
@@ -1333,6 +1362,8 @@ public static @string String(this ΔSignal s) {
     }
     return "signal "u8 + strconv.Itoa((nint)s);
 }
+
+} partial class syscall_package {
 
 public static error LoadCreateSymbolicLink() {
     return procCreateSymbolicLinkW.Find();
@@ -1417,12 +1448,12 @@ public static (nint n, error err) Readlink(@string path, slice<byte> buf) {
 }
 
 // Deprecated: CreateIoCompletionPort has the wrong function signature. Use x/sys/windows.CreateIoCompletionPort.
-public static (ΔHandle, error) CreateIoCompletionPort(ΔHandle filehandle, ΔHandle cphandle, uint32 key, uint32 threadcnt) {
+public static (Handle, error) CreateIoCompletionPort(Handle filehandle, Handle cphandle, uint32 key, uint32 threadcnt) {
     return createIoCompletionPort(filehandle, cphandle, (uintptr)key, threadcnt);
 }
 
 // Deprecated: GetQueuedCompletionStatus has the wrong function signature. Use x/sys/windows.GetQueuedCompletionStatus.
-public static error GetQueuedCompletionStatus(ΔHandle cphandle, ж<uint32> qty, ж<uint32> Ꮡkey, ж<ж<Overlapped>> overlapped, uint32 timeout) {
+public static error GetQueuedCompletionStatus(Handle cphandle, ж<uint32> qty, ж<uint32> Ꮡkey, ж<ж<Overlapped>> overlapped, uint32 timeout) {
     ref var key = ref Ꮡkey.DerefOrNull();
 
     ref var ukey = ref heap(new uintptr(), out var Ꮡukey);
@@ -1442,7 +1473,7 @@ public static error GetQueuedCompletionStatus(ΔHandle cphandle, ж<uint32> qty,
 }
 
 // Deprecated: PostQueuedCompletionStatus has the wrong function signature. Use x/sys/windows.PostQueuedCompletionStatus.
-public static error PostQueuedCompletionStatus(ΔHandle cphandle, uint32 qty, uint32 key, ж<Overlapped> overlapped) {
+public static error PostQueuedCompletionStatus(Handle cphandle, uint32 qty, uint32 key, ж<Overlapped> overlapped) {
     return postQueuedCompletionStatus(cphandle, qty, (uintptr)key, overlapped);
 }
 
@@ -1475,6 +1506,8 @@ internal static (ж<procThreadAttributeListContainer>, error) newProcThreadAttri
     return (al, err);
 }
 
+} partial class syscallᴛprocThreadAttributeListContainer {
+
 // Update modifies the ProcThreadAttributeList using UpdateProcThreadAttribute.
 internal static error update(this ref procThreadAttributeListContainer al, uintptr attribute, @unsafe.Pointer value, uintptr size) {
     al.pointers = append(al.pointers, value);
@@ -1484,7 +1517,7 @@ internal static error update(this ref procThreadAttributeListContainer al, uintp
 // Delete frees ProcThreadAttributeList's resources.
 internal static void delete(this ref procThreadAttributeListContainer al) {
     deleteProcThreadAttributeList(al.data);
-    LocalFree((ΔHandle)(uintptr)al.data);
+    LocalFree((Handle)(uintptr)al.data);
     al.data = default;
     al.pointers = default;
 }
@@ -1493,6 +1526,8 @@ internal static void delete(this ref procThreadAttributeListContainer al) {
 internal static ж<_PROC_THREAD_ATTRIBUTE_LIST> list(this ref procThreadAttributeListContainer al) {
     return al.data;
 }
+
+} partial class syscall_package {
 
 // RegEnumKeyEx enumerates the subkeys of an open registry key.
 // Each call retrieves information about one subkey. name is
@@ -1518,7 +1553,7 @@ internal static ж<_PROC_THREAD_ATTRIBUTE_LIST> list(this ref procThreadAttribut
 //
 // Successive calls to this API must happen on the same OS thread,
 // so call [runtime.LockOSThread] before calling this function.
-public static error /*regerrno*/ RegEnumKeyEx(ΔHandle key, uint32 index, ж<uint16> name, ж<uint32> nameLen, ж<uint32> reserved, ж<uint16> @class, ж<uint32> classLen, ж<Filetime> lastWriteTime) {
+public static error /*regerrno*/ RegEnumKeyEx(Handle key, uint32 index, ж<uint16> name, ж<uint32> nameLen, ж<uint32> reserved, ж<uint16> @class, ж<uint32> classLen, ж<Filetime> lastWriteTime) {
     return regEnumKeyEx(key, index, name, nameLen, reserved, @class, classLen, lastWriteTime);
 }
 
@@ -1527,8 +1562,8 @@ public static error GetStartupInfo(ж<StartupInfo> startupInfo) {
     return default;
 }
 
-public static (ΔHandle handle, error err) CreateFile(ж<uint16> name, uint32 access, uint32 mode, ж<SecurityAttributes> sa, uint32 createmode, uint32 attrs, int32 templatefile) {
-    ΔHandle handle = default;
+public static (Handle handle, error err) CreateFile(ж<uint16> name, uint32 access, uint32 mode, ж<SecurityAttributes> sa, uint32 createmode, uint32 attrs, int32 templatefile) {
+    Handle handle = default;
     error err = default;
 
     (handle, err) = createFile(name, access, mode, sa, createmode, attrs, templatefile);

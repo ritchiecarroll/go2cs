@@ -14,6 +14,7 @@ using io = io_package;
 using strings = strings_package;
 using time = time_package;
 using compress;
+using static profile_package;
 
 partial class profile_package {
 
@@ -165,6 +166,8 @@ internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {
 
     return (p, default);
 }
+
+} partial class profileᴛProfile {
 
 // Write writes the profile as a gzip-compressed marshaled protobuf.
 public static error Write(this ж<Profile> Ꮡp, io.Writer w) {
@@ -487,6 +490,8 @@ public static bool HasFileLines(this ref Profile p) {
     return true;
 }
 
+} partial class profile_package {
+
 internal static bool compatibleValueTypes(ж<ValueType> Ꮡv1, ж<ValueType> Ꮡv2) {
     ref var v1 = ref Ꮡv1.DerefOrNull();
     ref var v2 = ref Ꮡv2.DerefOrNull();
@@ -496,6 +501,8 @@ internal static bool compatibleValueTypes(ж<ValueType> Ꮡv1, ж<ValueType> Ꮡ
     }
     return v1.Type == v2.Type && v1.Unit == v2.Unit;
 }
+
+} partial class profileᴛProfile {
 
 // Copy makes a fully independent copy of a profile.
 public static ж<Profile> Copy(this ж<Profile> Ꮡp) {
@@ -519,10 +526,14 @@ public static ж<Profile> Copy(this ж<Profile> Ꮡp) {
     return pp;
 }
 
+} partial class profile_package {
+
 // Demangler maps symbol names to a human-readable form. This may
 // include C++ demangling and additional simplification. Names that
 // are not demangled may be missing from the resulting map.
 // type Demangler is a methodless func type — rendered inline as its base delegate
+
+} partial class profileᴛProfile {
 
 // Demangle attempts to demangle and optionally simplify any function
 // names referenced in the profile. It works on a best-effort basis:
@@ -589,4 +600,4 @@ public static error ScaleN(this ref Profile p, slice<float64> ratios) {
     return default;
 }
 
-} // end profile_package
+} // end profileᴛProfile

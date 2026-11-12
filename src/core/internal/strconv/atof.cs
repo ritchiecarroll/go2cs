@@ -3,6 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal;
 
+using static strconv_package;
+
 partial class strconv_package {
 
 // decimal to binary floating point conversion.
@@ -74,6 +76,8 @@ internal static (float64 f, nint n, bool ok) special(@string s) {
     }
     return (0D, 0, false);
 }
+
+} partial class strconvᴛdecimal {
 
 internal static bool /*ok*/ set(this ref @decimal b, @string s) {
     bool ok = default;
@@ -184,6 +188,8 @@ internal static bool /*ok*/ set(this ref @decimal b, @string s) {
     ok = true;
     return ok;
 }
+
+} partial class strconv_package {
 
 // readFloat reads a decimal or hexadecimal mantissa and exponent from a float
 // string representation in s; the number may be followed by other characters.
@@ -350,6 +356,8 @@ break_loop:;
 // decimal power of ten to binary power of two.
 internal static slice<nint> powtab = [1, 3, 6, 9, 13, 16, 19, 23, 26];
 
+} partial class strconvᴛdecimal {
+
 internal static (uint64 b, bool overflow) floatBits(this ж<@decimal> Ꮡd, ж<floatInfo> Ꮡflt) {
     bool overflow = default;
     ref var d = ref Ꮡd.DerefOrNull();
@@ -451,6 +459,8 @@ overflow:
     }
     return (bits, overflow);
 }
+
+} partial class strconv_package {
 
 // Exact powers of 10.
 [GoLazy] partial class lazyᴛfloat64pow10 { internal static slice<float64> float64pow10 = [

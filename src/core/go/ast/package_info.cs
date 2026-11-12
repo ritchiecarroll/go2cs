@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
 // </ImportedTypeAliases>
 
 using go;
@@ -217,15 +214,15 @@ using static go.go.ast_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/ast/ast.go", "ast.cs", "AE2SAYIABxCClJSCgoKUAAISAAkCgpSCgqaCxqaClJSUgpSU2MimgtyCgoKCpqaCpgAKCuqCyoKClIKClIKCpgASJoKClIKUpoKClIKUgpQAChaCgriClKaCgriClKiygoKCgoKUpgDSAbYDgIKCgoKCgoKUlIKCgoKCgoKCgoKCgoKCgpSUgoKUgoKCgpSUgriUlIKCgoKCgoKCgoKCgoKCgoKClJSCgpiigoKCgoKCgoKCgoKCgoKClIKCgoKCnsCWgJaA1KKClACoAdoCgIKCgoKCgoKCgoKCgoKCgoKCgoKClIKCgoKUlIKCgoKUgoKCgoKUlIKClJSCgpSClJSCgpSUgoKUlIKCgoKUlIKCmKKCgoKCgoKCgoKCgoKCgoKCgoKCACtekoKUlIKUgoKUpoKClIKUlJiiggAnWICCgpSCgoKUlIKClKqiggAmWLCcwoKUAA0cggABGAAKAoIACgaCgoKClpKCgoKC7qiSgoKClA==")]
-[assembly: GoPositionMap("go/ast/commentmap.go", "commentmap.cs", "ABAikgAHFIKCgpSUqJKClLSUggAOHgALGIKmgoKCgoIABxSigqzSgoKClIIAAiQAEQKCpqaCgoKCpoKWAAYQgoKCmKKCuJSCgp7SAAYS3samlKSCgpS4gqbUyKyygoKUrLKCooKUlKqigoKUgqaCgqaCuIKClOqCgriCgpTI1qSSgpSCgoKUpoKCgoSSgpSUlII=", "18-20:1;41-49:1;242-247:1;304-310:1")]
-[assembly: GoPositionMap("go/ast/directive.go", "directive.cs", "ACtwAA0GgqaC3IKClIKClIKmgqaCgoKUpoKmggAKIgAIApSCgoKUlLaCgqamgoKC2pQAChSCgqaCgoKmgoKClKaCgg==")]
+[assembly: GoPositionMap("go/ast/ast.go", "ast.cs", "AFCSAYIACxCCtJSCgoKUAAQSAAkCgpSCgqaCxqaClJSUgpSU2MimgtyCgoKCpqaCpgAMCuqCyoKClIKClIKCpgAUJoKClIKUpoKClIKUgpQADhaCgriClKaCgriClKiygoKCgoKUpgDWAbYDgLKysrKygoKUxLKysrKysrKysrKysrKCgpTEsrK0srKCgpTEgriUxLKysrKysrKysrKysrKysoKClMSysrjSsrKysrKysrKysrKysrKytLKysrKyvsCWgLaA1KKClACsAdoCgLKysrKysrKysrKysrKysrKysrKytLKygoKUxLKysoLEsrKygoKUxIKClMSCgpSClMSCgpTEgoKUxLKygoKUxLKyuNKysrKysrKysrKysrKysrKysrKyAC9ekoKUxLK0goKUxoKClIKUxLjSsgArWICysrSygoKUxIKClMrSsgAqWLCcwoKUABEcggADGAAKAoIACgaCgoKClpKCgoKC7qiSgoKClA==")]
+[assembly: GoPositionMap("go/ast/commentmap.go", "commentmap.cs", "ABEikgAJFIKCgpSUyJKClLSUggAOHgANGIKmgoKCgoIACxSigqzSgoKClIIABCQAEQKCpqaCgoKCpoKWAAYQgoKCmKKCuJSCgp7SAAYS3samlKSCgpS4gqbUyMyygoKUrLKCooKUlKqigoKUgsaCgqaCuIKClOqCgriCgpTI9qSSgpSCgoKUpoKCgoSSgpSUlII=", "18-20:1;41-49:1;242-247:1;304-310:1")]
+[assembly: GoPositionMap("go/ast/directive.go", "directive.cs", "ACxwAA0GgqaC3IKClIKClIKmgqaCgoKUpoLGggAOIgAIApSCgoKUlLaCgqamgoKC2pQADhSCgqaCgoKmgoKClKaCgg==")]
 [assembly: GoPositionMap("go/ast/filter.go", "filter.cs", "AAsgwgACFPIAAhgACQIABBCigoKCgqasspSkgsaUprKClIKCgoKUgpSCgoKUlIKClIKmgpSCpoKCgoK4goKClLSClIK2gpSmooKUgoKCpqaClKSkpIKUpIKCpIKUpIKCpJSmgpSCgoKClMaCgpSU3LamgoKCgoKmAAIS4qaClIKklAACGAAJAqaCgoKCgqaCAAIgAA0CpoKCgoKmABU2spSUgIK2gILIyp4ACgiCgoKCkoKCgoKClIKCgpSCppzCgoKCgoKCgpSClIKClLi4qJKCgoKCgoKCogAJFIKClKamlJS4ggAIEoKCgoKCprqSgoKCgoIABxCC3IKCupKCgoKCgso=")]
 [assembly: GoPositionMap("go/ast/import.go", "import.cs", "AA0gwoKCpqaUuIKCgpSCpoKmgoKCgoKC3IKCgoLcgqaCgoKUpoKCgpSmgoKClKiSgpQADBq4griCgriCgoKCgoKClJSCgoKCppSClILKgoK4goKCgpSUgoKUgpSCAAcQgoKCgoKUgoKCgpTKgoKClKaCuKaCgoKUgoKCgoLc3Jis0oKCgg==", "186-200:1;242-244:2")]
-[assembly: GoPositionMap("go/ast/print.go", "print.cs", "ABMsopSUAAIYAAkCpsQACBKCgsqCgpSChNqiAAwalLKClIKCgoKUgoKCgpSCgoK4lIKClAAIFLKCAAMaAAoCgoKmlLaCgoKCgoKCgpSUtriCgpSCyIKCgoKCgoKUlLaCgpSCgoKCgoKClJS2goKCgqaCgoKCgpSCgriCtoKmgraCgsg=", "54-58:1", "", "", "", "57:21,58:13")]
-[assembly: GoPositionMap("go/ast/resolve.go", "resolve.cs", "ABQqgqaipsKClJSCgoKUuKKCgoKmAA80AAwCgqaCgpSktILIgsqmpoK4goKCgoKUgoKCgoLugoK4lIKUyoKCgsrKlIKCgoKCqIKmgg==")]
-[assembly: GoPositionMap("go/ast/scope.go", "scope.cs", "ABg0koKssq7ygpSosoKCgoKCpoIAIkiSrLKClIKC2IKUpIKC2ILGgsaCxoKCAAgMAA4iAAkU")]
-[assembly: GoPositionMap("go/ast/walk.go", "walk.cs", "ABEmooIAAxgACAKC3Oy2gpSCgpSClILIAAsOgsiCtoKUtraCtoK2graCgpSClILIgoLIgra2toK2gsiClLa2gpSClILItoK2AAgO/IK2toK2toK2tra2gsi2gpSCgoLIgraClIKUtoKUgraClLa2gpSClIKUtoKUgpSCyIKUgpSCgsiClIKClIKCyIKUgoKUgoIACA6ClLaClIKUgoKC2oKUguyC2LbKgoKUAAIYAAkCAAIS4oKCgpSUAAQiAAwCgoKClJSUlJSC", "387-396:1;389-395:1.1;413-424:1")]
+[assembly: GoPositionMap("go/ast/print.go", "print.cs", "ABQsopSUAAIYAAkCpsQACBKCgsqCgpSChNqiAAwatLKClIKCgoKUgoKCgpSCgoK4lIKClAAMFLKCAAMaAAoCgoKmlLaCgoKCgoKCgpSUtriCgpSCyIKCgoKCgoKUlLaCgpSCgoKCgoKClJS2goKCgqaCgoKCgpSCgriCtoKmgraCgsg=", "54-58:1", "", "", "", "58:21,59:13")]
+[assembly: GoPositionMap("go/ast/resolve.go", "resolve.cs", "ABcqgqaipsKClJSCgoKU2KKCgoKmAA80AAwCgqaCgpSktILIgsqmpoK4goKCgoKUgoKCgoLugoK4lIKUyoKCgsrKlIKCgoKCqIKmgg==")]
+[assembly: GoPositionMap("go/ast/scope.go", "scope.cs", "ABk0koLMsq7ygpSosoKCgoKCpoIAJEiSzLKClIKC2IKUpIKC2ILGgsaCxoKCAAgMABAiAAsU")]
+[assembly: GoPositionMap("go/ast/walk.go", "walk.cs", "ABImooIAAxgACAKC3Oy2gpSCgpSClILIAAsOgsiCtoKUtraCtoK2graCgpSClILIgoLIgra2toK2gsiClLa2gpSClILItoK2AAgO/IK2toK2toK2tra2gsi2gpSCgoLIgraClIKUtoKUgraClLa2gpSClIKUtoKUgpSCyIKUgpSCgsiClIKClIKCyIKUgoKUgoIACA6ClLaClIKUgoKC2oKUguyC2LbqgoKUAAQYAAkCAAIS4oKCgpSUAAQiAAwCgoKClJSUlJSC", "387-396:1;389-395:1.1;413-424:1")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -342,3 +339,79 @@ public static partial class ast_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(global::go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(ast_package.ArrayType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛArrayType;
+[GoMethodHost(typeof(ast_package.AssignStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛAssignStmt;
+[GoMethodHost(typeof(ast_package.BadDecl)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛBadDecl;
+[GoMethodHost(typeof(ast_package.BadExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛBadExpr;
+[GoMethodHost(typeof(ast_package.BadStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛBadStmt;
+[GoMethodHost(typeof(ast_package.BasicLit)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛBasicLit;
+[GoMethodHost(typeof(ast_package.BinaryExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛBinaryExpr;
+[GoMethodHost(typeof(ast_package.BlockStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛBlockStmt;
+[GoMethodHost(typeof(ast_package.BranchStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛBranchStmt;
+[GoMethodHost(typeof(ast_package.CallExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛCallExpr;
+[GoMethodHost(typeof(ast_package.CaseClause)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛCaseClause;
+[GoMethodHost(typeof(ast_package.ChanType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛChanType;
+[GoMethodHost(typeof(ast_package.CommClause)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛCommClause;
+[GoMethodHost(typeof(ast_package.Comment)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛComment;
+[GoMethodHost(typeof(ast_package.CommentGroup)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛCommentGroup;
+[GoMethodHost(typeof(ast_package.CommentMap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛCommentMap;
+[GoMethodHost(typeof(ast_package.CompositeLit)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛCompositeLit;
+[GoMethodHost(typeof(ast_package.DeclStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛDeclStmt;
+[GoMethodHost(typeof(ast_package.DeferStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛDeferStmt;
+[GoMethodHost(typeof(ast_package.Directive)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛDirective;
+[GoMethodHost(typeof(ast_package.Ellipsis)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛEllipsis;
+[GoMethodHost(typeof(ast_package.EmptyStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛEmptyStmt;
+[GoMethodHost(typeof(ast_package.ExprStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛExprStmt;
+[GoMethodHost(typeof(ast_package.Field)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛField;
+[GoMethodHost(typeof(ast_package.FieldList)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛFieldList;
+[GoMethodHost(typeof(ast_package.File)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛFile;
+[GoMethodHost(typeof(ast_package.ForStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛForStmt;
+[GoMethodHost(typeof(ast_package.FuncDecl)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛFuncDecl;
+[GoMethodHost(typeof(ast_package.FuncLit)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛFuncLit;
+[GoMethodHost(typeof(ast_package.FuncType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛFuncType;
+[GoMethodHost(typeof(ast_package.GenDecl)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛGenDecl;
+[GoMethodHost(typeof(ast_package.GoStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛGoStmt;
+[GoMethodHost(typeof(ast_package.Ident)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛIdent;
+[GoMethodHost(typeof(ast_package.IfStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛIfStmt;
+[GoMethodHost(typeof(ast_package.ImportSpec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛImportSpec;
+[GoMethodHost(typeof(ast_package.IncDecStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛIncDecStmt;
+[GoMethodHost(typeof(ast_package.IndexExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛIndexExpr;
+[GoMethodHost(typeof(ast_package.IndexListExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛIndexListExpr;
+[GoMethodHost(typeof(ast_package.InterfaceType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛInterfaceType;
+[GoMethodHost(typeof(ast_package.KeyValueExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛKeyValueExpr;
+[GoMethodHost(typeof(ast_package.LabeledStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛLabeledStmt;
+[GoMethodHost(typeof(ast_package.MapType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛMapType;
+[GoMethodHost(typeof(ast_package.ObjKind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛObjKind;
+[GoMethodHost(typeof(ast_package.Object)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛObject;
+[GoMethodHost(typeof(ast_package.Package)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛPackage;
+[GoMethodHost(typeof(ast_package.ParenExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛParenExpr;
+[GoMethodHost(typeof(ast_package.RangeStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛRangeStmt;
+[GoMethodHost(typeof(ast_package.ReturnStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛReturnStmt;
+[GoMethodHost(typeof(ast_package.Scope)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛScope;
+[GoMethodHost(typeof(ast_package.SelectStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛSelectStmt;
+[GoMethodHost(typeof(ast_package.SelectorExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛSelectorExpr;
+[GoMethodHost(typeof(ast_package.SendStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛSendStmt;
+[GoMethodHost(typeof(ast_package.SliceExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛSliceExpr;
+[GoMethodHost(typeof(ast_package.StarExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛStarExpr;
+[GoMethodHost(typeof(ast_package.StructType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛStructType;
+[GoMethodHost(typeof(ast_package.SwitchStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛSwitchStmt;
+[GoMethodHost(typeof(ast_package.TypeAssertExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛTypeAssertExpr;
+[GoMethodHost(typeof(ast_package.TypeSpec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛTypeSpec;
+[GoMethodHost(typeof(ast_package.TypeSwitchStmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛTypeSwitchStmt;
+[GoMethodHost(typeof(ast_package.UnaryExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛUnaryExpr;
+[GoMethodHost(typeof(ast_package.ValueSpec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛValueSpec;
+[GoMethodHost(typeof(ast_package.commentListReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛcommentListReader;
+[GoMethodHost(typeof(ast_package.directiveScanner)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛdirectiveScanner;
+[GoMethodHost(typeof(ast_package.inspector)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛinspector;
+[GoMethodHost(typeof(ast_package.nodeStack)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛnodeStack;
+[GoMethodHost(typeof(ast_package.pkgBuilder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛpkgBuilder;
+[GoMethodHost(typeof(ast_package.printer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class astᴛprinter;
+// </MethodHolders>

@@ -7,6 +7,7 @@ using errors = errors_package;
 using fmt = fmt_package;
 using io = io_package;
 using math = math_package;
+using static flate_package;
 
 partial class flate_package {
 
@@ -109,6 +110,8 @@ partial struct compressor {
     // hashMatch must be able to contain hashes for the maximum match length.
     internal array<uint32> hashMatch = new(maxMatchLength - 1);
 }
+
+} partial class flateᴛcompressor {
 
 internal static nint fillDeflate(this ref compressor d, slice<byte> b) {
     if (d.index >= (nint)(2 * windowSize - (minMatchLength + maxMatchLength))) {
@@ -281,6 +284,8 @@ internal static error writeStoredBlock(this ref compressor d, slice<byte> buf) {
     return d.w.err;
 }
 
+} partial class flate_package {
+
 internal static UntypedInt hashmul => 0x1e35a7bd;
 
 // hash4 returns a hash representation of the first 4 bytes
@@ -318,6 +323,8 @@ internal static nint matchLen(slice<byte> a, slice<byte> b, nint max) {
     }
     return max;
 }
+
+} partial class flateᴛcompressor {
 
 // encSpeed will compress and store the currently added data,
 // if enough has been accumulated or we at the end of the stream.
@@ -572,19 +579,19 @@ internal static error /*err*/ init(this ref compressor d, io.Writer w, nint leve
     var matchᴛ1 = false;
     if (level == NoCompression) { matchᴛ1 = true;
         d.window = new slice<byte>(maxStoreBlockSize);
-        d.fill = ((Func<ж<compressor>, slice<byte>, nint>)(fillStore));
-        d.step = ((Action<ж<compressor>>)(store));
+        d.fill = ((Func<ж<compressor>, slice<byte>, nint>)(flateᴛcompressor.fillStore));
+        d.step = ((Action<ж<compressor>>)(flateᴛcompressor.store));
     }
     else if (level == HuffmanOnly) { matchᴛ1 = true;
         d.window = new slice<byte>(maxStoreBlockSize);
-        d.fill = ((Func<ж<compressor>, slice<byte>, nint>)(fillStore));
-        d.step = ((Action<ж<compressor>>)(storeHuff));
+        d.fill = ((Func<ж<compressor>, slice<byte>, nint>)(flateᴛcompressor.fillStore));
+        d.step = ((Action<ж<compressor>>)(flateᴛcompressor.storeHuff));
     }
     else if (level == BestSpeed) { matchᴛ1 = true;
         d.compressionLevel = levels[level];
         d.window = new slice<byte>(maxStoreBlockSize);
-        d.fill = ((Func<ж<compressor>, slice<byte>, nint>)(fillStore));
-        d.step = ((Action<ж<compressor>>)(encSpeed));
+        d.fill = ((Func<ж<compressor>, slice<byte>, nint>)(flateᴛcompressor.fillStore));
+        d.step = ((Action<ж<compressor>>)(flateᴛcompressor.encSpeed));
         d.bestSpeed = newDeflateFast();
         d.tokens = new slice<token>(maxStoreBlockSize);
     }
@@ -595,8 +602,8 @@ internal static error /*err*/ init(this ref compressor d, io.Writer w, nint leve
     if (fallthrough || !matchᴛ1 && (2 <= level && level <= 9)) {
         d.compressionLevel = levels[level];
         d.initDeflate();
-        d.fill = ((Func<ж<compressor>, slice<byte>, nint>)(fillDeflate));
-        d.step = ((Action<ж<compressor>>)(deflate));
+        d.fill = ((Func<ж<compressor>, slice<byte>, nint>)(flateᴛcompressor.fillDeflate));
+        d.step = ((Action<ж<compressor>>)(flateᴛcompressor.deflate));
     }
     else if (!matchᴛ1) { /* default: */
         return fmt.Errorf("flate: invalid compression level %d: want value in range [-2, 9]"u8, level);
@@ -659,6 +666,8 @@ internal static error close(this ж<compressor> Ꮡd) {
     return default;
 }
 
+} partial class flate_package {
+
 // NewWriter returns a new [Writer] compressing data at the given level.
 // Following zlib, levels range from 1 ([BestSpeed]) to 9 ([BestCompression]);
 // higher levels typically run slower but compress more. Level 0
@@ -700,9 +709,13 @@ partial struct dictWriter {
     internal io.Writer w;
 }
 
+} partial class flateᴛdictWriter {
+
 internal static (nint n, error err) Write(this ref dictWriter w, slice<byte> b) {
     return w.w.Write(b);
 }
+
+} partial class flate_package {
 
 internal static error errWriterClosed = errors.New("flate: closed writer");
 
@@ -712,6 +725,8 @@ partial struct Writer {
     internal compressor d;
     internal slice<byte> dict;
 }
+
+} partial class flateᴛWriter {
 
 // Write writes data to w, which will eventually write the
 // compressed form of data to its underlying writer.
@@ -754,4 +769,4 @@ public static void Reset(this ref Writer w, io.Writer dst) {
     }
 }
 
-} // end flate_package
+} // end flateᴛWriter

@@ -7,6 +7,7 @@ using comment = global::go.go.doc.comment_package;
 using strings = strings_package;
 using unicode = unicode_package;
 using global::go.go.doc;
+using static doc_package;
 
 partial class doc_package {
 
@@ -55,6 +56,8 @@ public static readonly ж<slice<@string>> ᏑIllegalPrefixes = new StaticBox<sli
 ]);
 public static ref slice<@string> IllegalPrefixes => ref ((StaticBox<slice<@string>>)ᏑIllegalPrefixes).ValueSlot;
 
+} partial class docᴛPackage {
+
 // Synopsis returns a cleaned version of the first sentence in text.
 // That sentence ends after the first period followed by space and not
 // preceded by exactly one uppercase letter, or at the first paragraph break.
@@ -84,4 +87,4 @@ public static @string Synopsis(this ж<Package> Ꮡp, @string text) {
     return strings.TrimSpace((@string)pr.Text(d));
 }
 
-} // end doc_package
+} // end docᴛPackage

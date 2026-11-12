@@ -3,13 +3,15 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal.runtime.gc.@internal;
 
+using static gen_package;
+
 partial class gen_package {
 
 partial struct Uint8x64 {
     /*embed*/ internal valAny valAny;
 }
 
-internal static ж<Δkind> kindUint8x64 = Ꮡ(new Δkind(typ: "Uint8x64", reg: regClassZ));
+internal static ж<kind> kindUint8x64 = Ꮡ(new kind(typ: "Uint8x64", reg: regClassZ));
 
 public static Uint8x64 /*y*/ ConstUint8x64(/*[64]*/ array<uint8> c, @string name) {
     Uint8x64 y = new(nil);
@@ -19,7 +21,9 @@ public static Uint8x64 /*y*/ ConstUint8x64(/*[64]*/ array<uint8> c, @string name
     return y;
 }
 
-internal static ж<Δkind> kind(this Uint8x64 _) {
+} partial class genᴛUint8x64 {
+
+internal static ж<kind> kind(this Uint8x64 _) {
     return kindUint8x64;
 }
 
@@ -104,11 +108,13 @@ public static Uint8x64 /*z*/ Shuffle2Masked(this Uint8x64 x, Uint8x64 y, Uint8x6
     return z;
 }
 
+} partial class gen_package {
+
 partial struct Uint64x8 {
     /*embed*/ internal valAny valAny;
 }
 
-internal static ж<Δkind> kindUint64x8 = Ꮡ(new Δkind(typ: "Uint64x8", reg: regClassZ));
+internal static ж<kind> kindUint64x8 = Ꮡ(new kind(typ: "Uint64x8", reg: regClassZ));
 
 public static Uint64x8 /*y*/ ConstUint64x8(/*[8]*/ array<uint64> c, @string name) {
     Uint64x8 y = new(nil);
@@ -126,6 +132,8 @@ public static Uint64x8 /*z*/ BroadcastUint64x8Zeroed(Uint64 src, Mask8 mask) {
     return z;
 }
 
+} partial class genᴛUint64x8 {
+
 public static Uint64x8 /*z*/ BroadcastMasked(this Uint64x8 x, Uint64 src, Mask8 mask) {
     Uint64x8 z = new(nil);
 
@@ -133,7 +141,7 @@ public static Uint64x8 /*z*/ BroadcastMasked(this Uint64x8 x, Uint64 src, Mask8 
     return z;
 }
 
-internal static ж<Δkind> kind(this Uint64x8 _) {
+internal static ж<kind> kind(this Uint64x8 _) {
     return kindUint64x8;
 }
 
@@ -188,11 +196,13 @@ public static Mask64 /*z*/ ShuffleBitsMasked(this Uint64x8 x, Uint8x64 y, Mask64
     return z;
 }
 
+} partial class gen_package {
+
 partial struct Mask8 {
     /*embed*/ internal valAny valAny;
 }
 
-internal static ж<Δkind> kindMask8 = Ꮡ(new Δkind(typ: "Mask8", reg: regClassK));
+internal static ж<kind> kindMask8 = Ꮡ(new kind(typ: "Mask8", reg: regClassK));
 
 public static Mask8 /*y*/ ConstMask8(uint8 c) {
     Mask8 y = new(nil);
@@ -203,7 +213,9 @@ public static Mask8 /*y*/ ConstMask8(uint8 c) {
     return y;
 }
 
-internal static ж<Δkind> kind(this Mask8 _) {
+} partial class genᴛMask8 {
+
+internal static ж<kind> kind(this Mask8 _) {
     return kindMask8;
 }
 
@@ -238,11 +250,13 @@ public static Mask8 /*z*/ ShiftLeft(this Mask8 x, uint8 c) {
     return z;
 }
 
+} partial class gen_package {
+
 partial struct Mask64 {
     /*embed*/ internal valAny valAny;
 }
 
-internal static ж<Δkind> kindMask64 = Ꮡ(new Δkind(typ: "Mask64", reg: regClassK));
+internal static ж<kind> kindMask64 = Ꮡ(new kind(typ: "Mask64", reg: regClassK));
 
 public static Mask64 /*y*/ ConstMask64(uint64 c) {
     Mask64 y = new(nil);
@@ -253,7 +267,9 @@ public static Mask64 /*y*/ ConstMask64(uint64 c) {
     return y;
 }
 
-internal static ж<Δkind> kind(this Mask64 _) {
+} partial class genᴛMask64 {
+
+internal static ж<kind> kind(this Mask64 _) {
     return kindMask64;
 }
 
@@ -299,4 +315,4 @@ public static Mask64 /*z*/ ShiftRight(this Mask64 x, uint8 c) {
     return z;
 }
 
-} // end gen_package
+} // end genᴛMask64

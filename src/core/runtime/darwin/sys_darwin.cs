@@ -642,18 +642,18 @@ internal static int32 pthread_cond_signal(ж<pthreadcond> c) {
 internal static partial void pthread_cond_signal_trampoline();
 
 internal partial struct arc4random_buf_args /*dyn*/ {
-    internal uintptr Δp;
+    internal uintptr p;
     internal int32 n;
 }
 
 //go:nosplit
 //go:cgo_unsafe_args
-internal static void arc4random_buf(@unsafe.Pointer Δp, int32 n) {
-    ref var args = ref heap(new arc4random_buf_args((uintptr)Δp, n), out var Ꮡargs);
+internal static void arc4random_buf(@unsafe.Pointer p, int32 n) {
+    ref var args = ref heap(new arc4random_buf_args((uintptr)p, n), out var Ꮡargs);
 
     // arc4random_buf() never fails, per its man page, so it's safe to ignore the return value.
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(arc4random_buf_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    KeepAlive(@unsafe.Pointer.OrTypedNil(Δp));
+    KeepAlive(@unsafe.Pointer.OrTypedNil(p));
 }
 internal static partial void arc4random_buf_trampoline();
 

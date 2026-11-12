@@ -7,6 +7,7 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using strings = strings_package;
 using sync = sync_package;
+using static xml_package;
 
 partial class xml_package {
 
@@ -45,11 +46,15 @@ private static readonly @string xmlNameᵇ = "XMLName"u8;
 internal static readonly ж<sync.Map> ᏑtinfoMap = new StaticBox<sync.Map>(default(sync.Map));
 internal static ref sync.Map tinfoMap => ref ((StaticBox<sync.Map>)ᏑtinfoMap).ValueSlot; // map[reflect.Type]*typeInfo
 
-internal static reflectꓸType nameType = reflect.TypeFor<Name>();
+internal static reflect.Type nameType = reflect.TypeFor<Name>();
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string xmlˢ => ref xmlˢᵇ;
+private static readonly @string xmlˢᵇ = "xml"u8;
 
 // getTypeInfo returns the typeInfo structure with details necessary
 // for marshaling and unmarshaling typ.
-internal static (ж<typeInfo>, error) getTypeInfo(reflectꓸType typ) {
+internal static (ж<typeInfo>, error) getTypeInfo(reflect.Type typ) {
     var (tiΔ1, ok) = ᏑtinfoMap.Load(typ); if (ok) {
         return (tiΔ1._<ж<typeInfo>>(), default);
     }
@@ -66,7 +71,7 @@ internal static (ж<typeInfo>, error) getTypeInfo(reflectꓸType typ) {
             // For embedded structs, embed its fields.
             if (f.Anonymous) {
                 var t = f.Type;
-                if (t.Kind() == reflect.ΔPointer) {
+                if (t.Kind() == reflect.Pointer) {
                     t = t.Elem();
                 }
                 if (t.Kind() == reflect.Struct) {
@@ -113,7 +118,7 @@ internal static (ж<typeInfo>, error) getTypeInfo(reflectꓸType typ) {
 }
 
 // structFieldInfo builds and returns a fieldInfo for f.
-internal static (ж<fieldInfo>, error) structFieldInfo(reflectꓸType typ, ref reflect.StructField f) {
+internal static (ж<fieldInfo>, error) structFieldInfo(reflect.Type typ, ref reflect.StructField f) {
     var finfo = Ꮡ(new fieldInfo(idx: f.Index));
 
     // Split the tag from the xml namespace if necessary.
@@ -251,8 +256,8 @@ internal static (ж<fieldInfo>, error) structFieldInfo(reflectꓸType typ, ref r
 // lookupXMLName returns the fieldInfo for typ's XMLName field
 // in case it exists and has a valid xml field tag, otherwise
 // it returns nil.
-internal static ж<fieldInfo> /*xmlname*/ lookupXMLName(reflectꓸType typ) {
-    while (typ.Kind() == reflect.ΔPointer) {
+internal static ж<fieldInfo> /*xmlname*/ lookupXMLName(reflect.Type typ) {
+    while (typ.Kind() == reflect.Pointer) {
         typ = typ.Elem();
     }
     if (typ.Kind() != reflect.Struct) {
@@ -281,7 +286,7 @@ internal static ж<fieldInfo> /*xmlname*/ lookupXMLName(reflectꓸType typ) {
 // A conflict occurs when the path (parent + name) to a field is
 // itself a prefix of another path, or when two paths match exactly.
 // It is okay for field paths to share a common, shorter prefix.
-internal static error addFieldInfo(reflectꓸType typ, ж<typeInfo> Ꮡtinfo, ref fieldInfo newf) {
+internal static error addFieldInfo(reflect.Type typ, ж<typeInfo> Ꮡtinfo, ref fieldInfo newf) {
     ref var tinfo = ref Ꮡtinfo.DerefOrNull();
     var conflictsᴷ = new stackAppend<nint>();
 
@@ -356,31 +361,37 @@ break_Loop:;
 // A TagPathError represents an error in the unmarshaling process
 // caused by the use of field tags with conflicting paths.
 partial struct TagPathError {
-    public reflectꓸType Struct;
+    public reflect.Type Struct;
     public @string Field1, Tag1;
     public @string Field2, Tag2;
 }
+
+} partial class xmlᴛTagPathError {
 
 public static @string Error(this ref TagPathError e) {
     return fmt.Sprintf("%s field %q with tag %q conflicts with field %q with tag %q"u8, e.Struct, e.Field1, e.Tag1, e.Field2, e.Tag2);
 }
 
+} partial class xml_package {
+
 internal const bool initNilPointers = true;
 internal const bool dontInitNilPointers = false;
+
+} partial class xmlᴛfieldInfo {
 
 // value returns v's field value corresponding to finfo.
 // It's equivalent to v.FieldByIndex(finfo.idx), but when passed
 // initNilPointers, it initializes and dereferences pointers as necessary.
 // When passed dontInitNilPointers and a nil pointer is reached, the function
 // returns a zero reflect.Value.
-internal static reflectꓸValue value(this ref fieldInfo finfo, reflectꓸValue v, bool shouldInitNilPointers) {
+internal static reflect.Value value(this ref fieldInfo finfo, reflect.Value v, bool shouldInitNilPointers) {
     foreach (var (i, x) in range(finfo.idx)) {
         if (i > 0) {
             var t = v.Type();
-            if (t.Kind() == reflect.ΔPointer && t.Elem().Kind() == reflect.Struct) {
+            if (t.Kind() == reflect.Pointer && t.Elem().Kind() == reflect.Struct) {
                 if (v.IsNil()) {
                     if (!shouldInitNilPointers) {
-                        return new reflectꓸValue();
+                        return new reflect.Value();
                     }
                     v.Set(reflect.New(v.Type().Elem()));
                 }
@@ -392,4 +403,4 @@ internal static reflectꓸValue value(this ref fieldInfo finfo, reflectꓸValue 
     return v;
 }
 
-} // end xml_package
+} // end xmlᴛfieldInfo

@@ -34,6 +34,7 @@ using go.path;
 using url = go.net.url_package;
 using vendor.golang.org.x.net.http;
 using ꓸꓸꓸany = Span<any>;
+using static cgi_package;
 
 partial class cgi_package {
 
@@ -85,8 +86,10 @@ partial struct Handler {
     //
     // If nil, a CGI response with a local URI path is instead sent
     // back to the client and not redirected internally.
-    public httpꓸHandler PathLocationHandler;
+    public http.Handler PathLocationHandler;
 }
+
+} partial class cgiᴛHandler {
 
 internal static io.Writer stderr(this ref Handler h) {
     if (h.Stderr != nil) {
@@ -94,6 +97,8 @@ internal static io.Writer stderr(this ref Handler h) {
     }
     return new os.FileжWriter(os.Stderr);
 }
+
+} partial class cgi_package {
 
 // removeLeadingDuplicates remove leading duplicate in environments.
 // It's possible to override environment like following.
@@ -125,7 +130,11 @@ internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> en
     return ret;
 }
 
+} partial class cgiᴛHandler {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string contentTypeˢ2 => ref contentTypeˢ2ᵇ;
+private static readonly @string contentTypeˢ2ᵇ = "Content-Type"u8;
 internal static ref readonly @string pathˢ => ref pathˢᵇ;
 private static readonly @string pathˢᵇ = "PATH"u8;
 internal static ref readonly @string binUsrBinUsrUcbUsrBsdUsrˢ => ref binUsrBinUsrUcbUsrBsdUsrˢᵇ;
@@ -280,7 +289,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
         defer(() => stdoutReadʗ1.Close(), ref ᒐ);
 
         var linebody = bufio.NewReaderSize(stdoutRead, 1024);
-        var headers = new httpꓸHeader(0);
+        var headers = new http.Header(0);
         nint statusCode = 0;
         nint headerLines = 0;
         var sawBlankLine = false;
@@ -421,13 +430,15 @@ internal static void handleInternalRedirect(this ref Handler h, http.ResponseWri
         Proto: "HTTP/1.1",
         ProtoMajor: 1,
         ProtoMinor: 1,
-        Header: new httpꓸHeader(0),
+        Header: new http.Header(0),
         Host: url.Host,
         RemoteAddr: req.RemoteAddr,
         TLS: req.TLS
     ));
     h.PathLocationHandler.ServeHTTP(rw, newReq);
 }
+
+} partial class cgi_package {
 
 internal static rune upperCaseAndUnderscore(rune r) {
     switch (ᐧ) {

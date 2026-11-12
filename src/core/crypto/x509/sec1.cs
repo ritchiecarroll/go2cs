@@ -9,6 +9,7 @@ using elliptic = go.crypto.elliptic_package;
 using asn1 = encoding.asn1_package;
 using errors = errors_package;
 using fmt = fmt_package;
+using big = go.math.big_package;
 using encoding;
 using go.crypto;
 using go.math;
@@ -130,7 +131,7 @@ internal static (ж<ecdsa.PrivateKey> key, error err) parseECPrivateKey(ж<asn1.
 
     // Some private keys have leading zero padding. This is invalid
     // according to [SEC1], but this code will ignore it.
-    while (builtin.len(privKey.PrivateKey) > builtin.len(privateKey)) {
+    while (len(privKey.PrivateKey) > len(privateKey)) {
         if (privKey.PrivateKey[0] != 0) {
             return (default, errors.New(x509InvalidPrivateKeyˢ));
         }
@@ -140,7 +141,7 @@ internal static (ж<ecdsa.PrivateKey> key, error err) parseECPrivateKey(ж<asn1.
     // Some private keys remove all leading zeros, this is also invalid
     // according to [SEC1] but since OpenSSL used to do this, we ignore
     // this too.
-    copy(privateKey.slice(builtin.len(privateKey) - builtin.len(privKey.PrivateKey)), privKey.PrivateKey);
+    copy(privateKey.slice(len(privateKey) - len(privKey.PrivateKey)), privKey.PrivateKey);
 
     return ecdsa.ParseRawPrivateKey(curve, privateKey);
 }

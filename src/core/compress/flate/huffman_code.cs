@@ -7,6 +7,7 @@ using math = math_package;
 using bits = go.math.bits_package;
 using sort = sort_package;
 using go.math;
+using static flate_package;
 
 partial class flate_package {
 
@@ -44,11 +45,15 @@ partial struct levelInfo {
     internal int32 needed;
 }
 
+} partial class flateᴛhcode {
+
 // set sets the code and length of an hcode.
 internal static void set(this ref hcode h, uint16 code, uint16 length) {
     h.len = length;
     h.code = code;
 }
+
+} partial class flate_package {
 
 internal static literalNode maxNode() { return new literalNode(math.MaxUint16, math.MaxInt32); }
 
@@ -106,6 +111,8 @@ internal static ж<huffmanEncoder> generateFixedOffsetEncoding() {
 internal static ж<huffmanEncoder> fixedLiteralEncoding = generateFixedLiteralEncoding();
 internal static ж<huffmanEncoder> fixedOffsetEncoding = generateFixedOffsetEncoding();
 
+} partial class flateᴛhuffmanEncoder {
+
 internal static nint bitLength(this ref huffmanEncoder h, slice<int32> freq) {
     nint total = default;
     foreach (var (i, f) in range(freq)) {
@@ -116,7 +123,11 @@ internal static nint bitLength(this ref huffmanEncoder h, slice<int32> freq) {
     return total;
 }
 
+} partial class flate_package {
+
 internal static UntypedInt maxBitsLimit => 16;
+
+} partial class flateᴛhuffmanEncoder {
 
 // bitCounts computes the number of literals assigned to each bit size in the Huffman encoding.
 // It is only called when list.length >= 3.
@@ -314,7 +325,11 @@ internal static void generate(this ж<huffmanEncoder> Ꮡh, slice<int32> freq, i
     Ꮡh.assignEncodingAndSize(bitCount, list);
 }
 
+} partial class flate_package {
+
 partial struct byLiteral /*[]literalNode*/;
+
+} partial class flateᴛbyLiteral {
 
 internal static void sort(this ж<byLiteral> Ꮡs, slice<literalNode> a) {
     ref var s = ref Ꮡs.DerefOrNull();
@@ -331,7 +346,11 @@ internal static bool Less(this byLiteral s, nint i, nint j) {
 
 internal static void Swap(this byLiteral s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
 
+} partial class flate_package {
+
 partial struct byFreq /*[]literalNode*/;
+
+} partial class flateᴛbyFreq {
 
 internal static void sort(this ж<byFreq> Ꮡs, slice<literalNode> a) {
     ref var s = ref Ꮡs.DerefOrNull();
@@ -350,6 +369,8 @@ internal static bool Less(this byFreq s, nint i, nint j) {
 }
 
 internal static void Swap(this byFreq s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
+
+} partial class flate_package {
 
 internal static uint16 reverseBits(uint16 number, byte bitLength) {
     return bits.Reverse16((uint16)(number.Lsh((uint64)((byte)(16 - bitLength)))));

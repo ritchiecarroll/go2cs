@@ -11,8 +11,11 @@ using time = time_package;
 using asn1 = go.vendor.golang.org.x.crypto.cryptobyte.asn1_package;
 using go.vendor.golang.org.x.crypto.cryptobyte;
 using math;
+using static cryptobyte_package;
 
 partial class cryptobyte_package {
+
+} partial class cryptobyteᴛBuilder {
 
 // This file contains ASN.1-related methods for String and Builder.
 // Builder
@@ -63,7 +66,7 @@ public static void AddASN1Uint64(this ж<Builder> Ꮡb, uint64 v) {
 }
 
 // AddASN1BigInt appends a DER-encoded ASN.1 INTEGER.
-public static void AddASN1BigInt(this ж<Builder> Ꮡb, ж<bigꓸInt> n) {
+public static void AddASN1BigInt(this ж<Builder> Ꮡb, ж<big.Int> n) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (b.err != nil) {
@@ -76,7 +79,7 @@ public static void AddASN1BigInt(this ж<Builder> Ꮡb, ж<bigꓸInt> n) {
             // invert and subtract 1. If the most-significant-bit isn't set then
             // we'll need to pad the beginning with 0xff in order to keep the number
             // negative.
-            var nMinus1 = @new<bigꓸInt>().Neg(n);
+            var nMinus1 = @new<big.Int>().Neg(n);
             nMinus1.Sub(nMinus1, bigOne);
             var bytes = nMinus1.Bytes();
             foreach (var i in range(len(bytes))) {
@@ -106,8 +109,12 @@ public static void AddASN1OctetString(this ж<Builder> Ꮡb, slice<byte> bytes) 
     });
 }
 
+} partial class cryptobyte_package {
+
 internal static ref readonly @string generalizedTimeFormatStr => ref generalizedTimeFormatStrᵇ;
 private static readonly @string generalizedTimeFormatStrᵇ = "20060102150405Z0700"u8;
+
+} partial class cryptobyteᴛBuilder {
 
 // AddASN1GeneralizedTime appends a DER-encoded ASN.1 GENERALIZEDTIME.
 public static void AddASN1GeneralizedTime(this ж<Builder> Ꮡb, time.Time t) {
@@ -168,6 +175,8 @@ internal static void addBase128Int(this ref Builder b, int64 n) {
     }
 }
 
+} partial class cryptobyte_package {
+
 internal static bool isValidOID(encoding_asn1.ObjectIdentifier oid) {
     if (len(oid) < 2) {
         return false;
@@ -185,6 +194,8 @@ internal static bool isValidOID(encoding_asn1.ObjectIdentifier oid) {
 
     return true;
 }
+
+} partial class cryptobyteᴛBuilder {
 
 public static void AddASN1ObjectIdentifier(this ж<Builder> Ꮡb, encoding_asn1.ObjectIdentifier oid) {
     var oidʗ1 = oid;
@@ -252,6 +263,8 @@ public static void AddASN1(this ж<Builder> Ꮡb, asn1.Tag tag, Action<ж<Builde
     Ꮡb.addLengthPrefixed(1, true, f);
 }
 
+} partial class cryptobyteᴛString {
+
 // String
 
 // ReadASN1Boolean decodes an ASN.1 BOOLEAN and converts it to a boolean
@@ -315,7 +328,7 @@ public static bool ReadASN1Integer(this ref String s, any @out) {
         reflect.ValueOf(outΔ1).Elem().SetUint(u);
         return true;
     }
-    case ж<bigꓸInt> outΔ1: {
+    case ж<big.Int> outΔ1: {
         return s.readASN1BigInt(outΔ1);
     }
     case ж<slice<byte>> outΔ1: {
@@ -327,6 +340,8 @@ public static bool ReadASN1Integer(this ref String s, any @out) {
         break;
     }}
 }
+
+} partial class cryptobyte_package {
 
 internal static bool checkASN1Integer(slice<byte> bytes) {
     if (len(bytes) == 0) {
@@ -343,9 +358,11 @@ internal static bool checkASN1Integer(slice<byte> bytes) {
     return true;
 }
 
-internal static ж<bigꓸInt> bigOne = big.NewInt(1);
+internal static ж<big.Int> bigOne = big.NewInt(1);
 
-internal static bool readASN1BigInt(this ref String s, ж<bigꓸInt> @out) {
+} partial class cryptobyteᴛString {
+
+internal static bool readASN1BigInt(this ref String s, ж<big.Int> @out) {
     ref var bytes = ref heap<String>(out var Ꮡbytes);
     if (!s.ReadASN1(Ꮡbytes, asn1.INTEGER) || !checkASN1Integer(bytes)) {
         return false;
@@ -390,6 +407,8 @@ internal static bool readASN1Int64(this ref String s, ж<int64> @out) {
     return true;
 }
 
+} partial class cryptobyte_package {
+
 internal static bool asn1Signed(ref int64 @out, slice<byte> n) {
     nint length = len(n);
     if (length > 8) {
@@ -405,6 +424,8 @@ internal static bool asn1Signed(ref int64 @out, slice<byte> n) {
     return true;
 }
 
+} partial class cryptobyteᴛString {
+
 internal static bool readASN1Uint64(this ref String s, ж<uint64> @out) {
     ref var bytes = ref heap<String>(out var Ꮡbytes);
     if (!s.ReadASN1(Ꮡbytes, asn1.INTEGER) || !checkASN1Integer(bytes) || !asn1Unsigned(ref (@out).DerefOrNull(), bytes)) {
@@ -412,6 +433,8 @@ internal static bool readASN1Uint64(this ref String s, ж<uint64> @out) {
     }
     return true;
 }
+
+} partial class cryptobyte_package {
 
 internal static bool asn1Unsigned(ref uint64 @out, slice<byte> n) {
     nint length = len(n);
@@ -429,6 +452,8 @@ internal static bool asn1Unsigned(ref uint64 @out, slice<byte> n) {
     }
     return true;
 }
+
+} partial class cryptobyteᴛString {
 
 // ReadASN1Int64WithTag decodes an ASN.1 INTEGER with the given tag into out
 // and advances. It reports whether the read was successful and resulted in a
@@ -549,8 +574,12 @@ public static bool ReadASN1GeneralizedTime(this ref String s, ж<time.Time> Ꮡo
     return true;
 }
 
+} partial class cryptobyte_package {
+
 internal static ref readonly @string defaultUTCTimeFormatStr => ref defaultUTCTimeFormatStrᵇ;
 private static readonly @string defaultUTCTimeFormatStrᵇ = "060102150405Z0700"u8;
+
+} partial class cryptobyteᴛString {
 
 // ReadASN1UTCTime decodes an ASN.1 UTCTime into out and advances.
 // It reports whether the read was successful.
@@ -754,9 +783,9 @@ public static bool ReadOptionalASN1Integer(this ж<String> Ꮡs, any @out, asn1.
             reflect.ValueOf(@out).Elem().Set(reflect.ValueOf(defaultValue));
             break;
         }
-        case ж<bigꓸInt>: {
-            var (defaultValueΔ1, ok) = defaultValue._<ж<bigꓸInt>>(ᐧ); if (ok) {
-                @out._<ж<bigꓸInt>>().Set(defaultValueΔ1);
+        case ж<big.Int>: {
+            var (defaultValueΔ1, ok) = defaultValue._<ж<big.Int>>(ᐧ); if (ok) {
+                @out._<ж<big.Int>>().Set(defaultValueΔ1);
             } else {
                 throw panic("out points to big.Int, but defaultValue does not");
             }
@@ -899,4 +928,4 @@ internal static bool readASN1(this ref String s, ж<String> Ꮡout, ж<asn1.Tag>
     return true;
 }
 
-} // end cryptobyte_package
+} // end cryptobyteᴛString

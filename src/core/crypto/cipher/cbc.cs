@@ -15,6 +15,7 @@ using subtle = go.crypto.subtle_package;
 using go.crypto;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using static cipher_package;
 
 partial class cipher_package {
 
@@ -73,6 +74,8 @@ internal static BlockMode newCBCGenericEncrypter(Block b, slice<byte> iv) {
     return new cbcEncrypterжBlockMode(newCBC(b, iv).Reinterpret<cbc, cbcEncrypter>());
 }
 
+} partial class cipherᴛcbcEncrypter {
+
 internal static nint BlockSize(this ref cbcEncrypter x) { return x.blockSize; }
 
 internal static void CryptBlocks(this ref cbcEncrypter x, slice<byte> dst, slice<byte> src) {
@@ -113,6 +116,8 @@ internal static void SetIV(this ref cbcEncrypter x, slice<byte> iv) {
     copy(x.iv, iv);
 }
 
+} partial class cipher_package {
+
 partial struct cbcDecrypter /*cbc*/;
 
 // cbcDecAble is an interface implemented by ciphers that have a specific
@@ -151,6 +156,8 @@ internal static BlockMode newCBCGenericDecrypter(Block b, slice<byte> iv) {
     }
     return new cbcDecrypterжBlockMode(newCBC(b, iv).Reinterpret<cbc, cbcDecrypter>());
 }
+
+} partial class cipherᴛcbcDecrypter {
 
 internal static nint BlockSize(this ref cbcDecrypter x) { return x.blockSize; }
 
@@ -205,4 +212,4 @@ internal static void SetIV(this ref cbcDecrypter x, slice<byte> iv) {
     copy(x.iv, iv);
 }
 
-} // end cipher_package
+} // end cipherᴛcbcDecrypter

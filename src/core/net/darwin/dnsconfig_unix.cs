@@ -33,16 +33,16 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
             timeout: (time.Duration)(5000000000L),
             attempts: 2
         ));
-        var (Δfile, err) = open(filename);
+        var (@file, err) = open(filename);
         if (err != nil) {
             conf.servers = defaultNS;
             conf.search = dnsDefaultSearch();
             conf.err = err;
             return conf;
         }
-        var fileʗ1 = Δfile;
+        var fileʗ1 = @file;
         defer(fileʗ1.close, ref ᒐ);
-        var (fi, errΔ1) = Δfile.ΔΔfile.Stat(); if (errΔ1 == nil) {
+        var (fi, errΔ1) = @file.ΔΔfile.Stat(); if (errΔ1 == nil) {
             conf.mtime = fi.ModTime();
         } else {
             conf.servers = defaultNS;
@@ -50,7 +50,7 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
             conf.err = errΔ1;
             return conf;
         }
-        for (var (line, ok) = Δfile.readLine(); ok; (line, ok) = Δfile.readLine()) {
+        for (var (line, ok) = @file.readLine(); ok; (line, ok) = @file.readLine()) {
             if (len(line) > 0 && (line[0] == ';' || line[0] == '#')) {
                 // comment.
                 continue;
@@ -107,7 +107,7 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
                         if (n < 1) {
                             n = 1;
                         }
-                        conf.timeout = ((time.Duration)(int64)n) * time.ΔSecond;
+                        conf.timeout = ((time.Duration)(int64)n) * time.Second;
                         break;
                     }
                     case {} when stringslite.HasPrefix(s, attemptsˢ): {

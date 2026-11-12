@@ -55,7 +55,7 @@ using static go.@internal.synctest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/synctest/synctest.go", "synctest.cs", "AA8gpqoACxq0gqimkqimkqimpqYACRaigpSqwoKUgqrCgpQ=")]
+[assembly: GoPositionMap("internal/synctest/synctest.go", "synctest.cs", "ABAgpqoACxq0gqimkqimkqimpqYACRaigpTKwoKUgqrCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -84,3 +84,13 @@ public static partial class synctest_package
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸabi() => builtin.initPackage(typeof(go.@internal.abi_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(synctest_package.Bubble)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class synctestᴛBubble;
+// </MethodHolders>

@@ -63,9 +63,9 @@ using static go.crypto.@internal.fips140.sha3_package;
 [assembly: GoPositionMap("crypto/internal/fips140/sha3/cast.go", "cast.cs", "AAwagoK43IKCgpQ=", "14-31:1")]
 [assembly: GoPositionMap("crypto/internal/fips140/sha3/hashes.go", "hashes.cs", "AAcQkqiSqJKokgAPKKKqog==")]
 [assembly: GoPositionMap("crypto/internal/fips140/sha3/keccakf.go", "keccakf.cs", "AA8e")]
-[assembly: GoPositionMap("crypto/internal/fips140/sha3/sha3.go", "sha3.cs", "ADNwgJaAlqSCgqaCgqiygqoACAq4lIKogILCgqaUgoKCpoK4qOSCpqaUgqaCgqaqooKmgoLKgoKCAA0YgqaClLS0tLS2goKCAAoGgoKmgoIADQymgoKCpoKUkoKUgoKUlA==")]
-[assembly: GoPositionMap("crypto/internal/fips140/sha3/sha3_noasm.go", "sha3_noasm.cs", "AAgSgqaClIKUgg==")]
-[assembly: GoPositionMap("crypto/internal/fips140/sha3/shake.go", "shake.cs", "ABo0goKCgoKCuJSCgqaCgoKCpqKCgoKCgoKCpoKcsJiQlIKmqLKCgrqSgqaCpoKCgpSCpoKClIKUgqiSqJIAAhDkgqaigoKUAAIQ5IKmooKClA==")]
+[assembly: GoPositionMap("crypto/internal/fips140/sha3/sha3.go", "sha3.cs", "ADZwgJaAlqSCgqaCgqiygqoACAq4lIKogILCgqaUgoKCpoK4qOSCpqaUgqaCgqaqooKmgoLKgoKCABEYgqaClLS0tLS2goKCAAoGgoKmgoIADQymgoKCpoKUkoKUgoKUlA==")]
+[assembly: GoPositionMap("crypto/internal/fips140/sha3/sha3_noasm.go", "sha3_noasm.cs", "AAoSgsaClIKUgg==")]
+[assembly: GoPositionMap("crypto/internal/fips140/sha3/shake.go", "shake.cs", "ABs0goKCgoKCuJSCgqaCgoKCpqKCgoKCgoKCxoKcsJiQlIKmqLKCgrqSgqaCpoKCgpSC5oKClIKUgsiSqJIAAhDkgqaigoKUAAIQ5IKmooKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -100,3 +100,14 @@ public static partial class sha3_package
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(sha3_package.Digest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sha3ᴛDigest;
+[GoMethodHost(typeof(sha3_package.SHAKE)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sha3ᴛSHAKE;
+// </MethodHolders>

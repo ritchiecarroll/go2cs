@@ -9,6 +9,7 @@ using bytealg = @internal.bytealg_package;
 using Δsync = sync_package;
 using @internal;
 using dnsmessage = vendor.golang.org.x.net.dns.dnsmessage_package;
+using static net_package;
 
 partial class net_package {
 
@@ -18,14 +19,14 @@ internal static Action readProtocolsOnce;
 internal static void initᴛreadProtocolsOnce() { readProtocolsOnce = Δsync.OnceFunc(() => {
     GoFrame ᒐ = default;
     try {
-        var (Δfile, err) = open("/etc/protocols");
+        var (@file, err) = open("/etc/protocols");
         if (err != nil) {
             return;
         }
-        var fileʗ1 = Δfile;
+        var fileʗ1 = @file;
         defer(fileʗ1.close, ref ᒐ);
 
-        for (var (line, ok) = Δfile.readLine(); ok; (line, ok) = Δfile.readLine()) {
+        for (var (line, ok) = @file.readLine(); ok; (line, ok) = @file.readLine()) {
             // tcp    6   TCP    # transmission control protocol
             nint i = bytealg.IndexByteString(line, (byte)'#'); if (i >= 0) {
                 line = line.slice(0, i);
@@ -56,6 +57,8 @@ internal static (nint, error) lookupProtocol(context.Context _, @string name) {
     readProtocolsOnce();
     return lookupProtocolMap(name);
 }
+
+} partial class netᴛResolver {
 
 internal static (slice<@string> addrs, error err) lookupHost(this ж<Resolver> Ꮡr, context.Context ctx, @string host) {
     var (order, conf) = systemConf().hostLookupOrder(Ꮡr, host);
@@ -127,4 +130,4 @@ internal static (slice<@string>, error) lookupAddr(this ж<Resolver> Ꮡr, conte
     return Ꮡr.goLookupPTR(ctx, addr, order, conf);
 }
 
-} // end net_package
+} // end netᴛResolver

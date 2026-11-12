@@ -10,11 +10,9 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
 global using cryptoꓸDecrypterOpts = object;
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
-global using rsaꓸPublicKey = go.crypto.@internal.fips140.rsa_package.ΔPublicKey;
 // </ImportedTypeAliases>
 
 using go;
@@ -69,10 +67,10 @@ using static go.crypto.rsa_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/rsa/fips.go", "fips.cs", "ACtakqaigpQADBgADAKCpoKmgoKClJSUlIKUgpSCpoKCpoKClJSCgsbYgsgAAxgACQKCpoKCgpSClKaUgpSCpoKCpoKClJSkpAADLAASAgACFAAJAoKUpsKCpoKUgoKClIKClJSUlIKUgpSCpoKClAAGGgAMAoLWooKmgoKElIKClIKClKaClIKUgoK4goKmAAceAA4CgoKClKaCpoKCgpSmgpSCpoKClAADFgAIAoKCgpSmgqaCgoKUgpSmgpSCpoKClKaClKSklKaCAA4GgoKUgpSClIKUgpSClAAIBoKClIKUgpSClA==", "", "", "314=Size/1/1/1")]
+[assembly: GoPositionMap("crypto/rsa/fips.go", "fips.cs", "AC5akqaigpQADhgADAKCpoKmgoKClJSUlIKUgpSCpoKCpoKClJSCgsbYgsgAAxgACQKCpoKCgpSClKaUgpSCpoKCpoKClJSkpAADLAASAgACFAAJAoKUpsKCpoKUgoKClIKClJSUlIKUgpSCpoKClAAGGgAMAoLWooKmgoKElIKClIKClKaClIKUgoK4goKmAAceAA4CgoKClKaCpoKCgpSmgpSCpoKClAADFgAIAoKCgpSmgqaCgoKUgpSmgpSCpoKClKaClKSklKaCAA4GgoKUgpSClIKUgpSClAAIBoKClIKUgpSClA==", "", "", "319=Size/1/1/1")]
 [assembly: GoPositionMap("crypto/rsa/notboring.go", "notboring.cs", "AAsWgpSC")]
 [assembly: GoPositionMap("crypto/rsa/pkcs1v15.go", "pkcs1v15.cs", "AChkABECgqaCpoKCpoKCgpSUlKaCgoKCgpSClIKCgoKUpoKClAACHAANAoKmgoKClIKClKaCgpSClAACWAArAoKmgoKmgoKmpqaCggACEgALAoKmgoKCpoKCgoKUgoKmgoKUgoK4gtyUgoKCypSCgqiygoKmgoKCgri4")]
-[assembly: GoPositionMap("crypto/rsa/rsa.go", "rsa.cs", "AER8AAog0qiSgoKUAB1EkqqigoKUgpSClIKCpqrSAAIWAAgCgqbs0oKmlIKUyIKCgpSClJTYACBC+IK4gpSClIKmgoKUgoKUgpQAAhLCgpSCypSCgpSCgpTmgoKUAAYaAAoCgqaEgoKUgoKCgoKCgoKCgqYADRymlIKUgpSCpoIAChaCpoKUggARJAAKNAAXAoKUgqaUgpSCpoKUpqaCgriUgoIACxiClIKCgoKUuIKCgsqCgoKCgoKUuKaCgpSCgoLYgoCCtty4uJiigqaCpoKUAAoGgpSClIKUgpSClIK4gqaClIKCgqaUgqaCgoKCgoIACgaClIKClJSCuIKClIK4gpSClIKCpoKCgoKUgpSCgoKmpqaCgoKUpqKClIKClA==", "", "", "283=bigIntEqualToBytes/2/5/1,bigIntEqualToBytes/3/5/2,bigIntEqualToBytes/4/5/3,bigIntEqualToBytes/5/5/4;410=SetBytes/1/7/2,SetBytes/2/7/5,SetBytes/3/7/7,SetBytes/4/7/8,SetBytes/5/7/12,SetBytes/6/7/13,SetBytes/7/7/14;628=Bytes/3/7/1,Bytes/4/7/1,Bytes/5/7/2,Bytes/6/7/2,Bytes/7/7/2;640=Bytes/3/4/1,Bytes/4/4/1")]
+[assembly: GoPositionMap("crypto/rsa/rsa.go", "rsa.cs", "AEV8AAwg0qiSgoKUACFEkqqigoKUgpSClIKCpsrSAAQWAAgCgqbs0oKmlIKUyIKCgpSClJTYACRC+IK4gpSClIKmgoKUgoKUgpQABBLCgpSCypSCgpSCgpTmgoKUAAYaAAoCgqaEgoKUgoKCgoKCgoKCgqYADRymlIKUgpSCpoIAChaCpoKUggARJAAKNAAXAoKUgqaUgpSCpoKUpqaCgriUgoIACxiClIKCgoKUuIKCgsqCgoKCgoKUuKaCgpSCgoLYgoCCtty4uLiigqaCpoKUAAwGgpSClIKUgpSClIK4gqaClIKCgqaUgqaCgoKCgoIACgaClIKClJSCuIKClIK4gpSClIKCpoKCgoKUgpSCgoKmpsaCgoKUpqKClIKClA==", "", "", "298=bigIntEqualToBytes/2/5/1,bigIntEqualToBytes/3/5/2,bigIntEqualToBytes/4/5/3,bigIntEqualToBytes/5/5/4;427=SetBytes/1/7/2,SetBytes/2/7/5,SetBytes/3/7/7,SetBytes/4/7/8,SetBytes/5/7/12,SetBytes/6/7/13,SetBytes/7/7/14;649=Bytes/3/7/1,Bytes/4/7/1,Bytes/5/7/2,Bytes/6/7/2,Bytes/7/7/2;661=Bytes/3/4/1,Bytes/4/4/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -122,3 +120,15 @@ public static partial class rsa_package
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbig() => builtin.initPackage(typeof(go.math.big_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(rsa_package.PSSOptions)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rsaᴛPSSOptions;
+[GoMethodHost(typeof(rsa_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rsaᴛPrivateKey;
+[GoMethodHost(typeof(rsa_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rsaᴛPublicKey;
+// </MethodHolders>

@@ -64,8 +64,8 @@ using static go.crypto.@internal.fips140.mlkem_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/mlkem/cast.go", "cast.cs", "ABEgggAKEuLc3Nzc3NyCgoKCgoKUgoKClIKCgpQ=")]
 [assembly: GoPositionMap("crypto/internal/fips140/mlkem/field.go", "field.cs", "ABQikoKUqJKUgqaCgqaCggAFFKKCpoKCqqKCqqKCgqr8goIADRyClpKq2ILKpgAHENKClKjSgpSs0oKCgoKCgpQACBDygpSCgoKCgoKUgpSUrvKClIKUggACEPKCgoKUAAIQ0oKCgoKUAAIQ8oKClAACENKCgoKUAAIQ8oKCgoKCgoKCgoKCgpQAAhDygoKCgoKCgoKUAAIQAAgCgoKCgoKCgoKCgoKCgriClAADENKCgoKCgoKCgoKCgoKCppSClAACEPIAAhDyAAIQ8gACEPKssoKCgoLKgoKCgoKClAAJEprilIKCgoKUyprSgoKCgpSCgoKCuKzSgoKCgpSCgoKCuIKUrLKCggAZNIKCgoKCgoKUgoKCgoKUgpSCgpSCpg==")]
-[assembly: GoPositionMap("crypto/internal/fips140/mlkem/mlkem1024.go", "mlkem1024.cs", "ABk8soKCggACEPKmgriClKaClKqiAA4gpIKmgoKUggANILSC5oKCgoKCgoKCgqqigoKCqrSC5oKClIKCgoIAChTygqaCgoKCgpSmgoKUgoKClIKUlNyUAAIQAAgCgpSCgoKCgpSCgoK4goKCgpSCgoKmgoKCgriCgoIABhYACgKCgoKClIKUrsSSpoKCgqaCqqKCgqzygoKCgpKCqrSC7uKCpoKClIKCgoKUlJSCgriu4oKCgoKUgoKUlIKCgpSUppSCgpSUgqKUlO7CgoKUuKzSgoKCgoKCgoKCgoKCgpSCruKCgoKmgpSCgpSU", "122-122:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/mlkem/mlkem768.go", "mlkem768.cs", "AE6yAbKCgoIAAhDypoK4gpSmgpSqogAOIKSCpoKClIIADSC0gqaCgoKCgoKCgoKqooKCgqq0gqaCgpSCgoKCAAIU8oKmgoKCgoKUpoKClIKCgpSClJTclAACEAAIAoKUgoKCgoKUgoKCuIKCgoKUgoKCpoKCgoK4goKCAAIWAAoCgoKCgpSClK7EkqaCgoKmgqqigoKs8oKCgoKSgqq0gq7igqaCgpSCgoKClJSUgoK4ruKCgoKClIKClJSCgoKUlKaUgoKUlIKilJSuwoKClLgABBDSgoKCgoKCgoKCgoKCgpSCpoKu4oKCgqaClIKClJQ=", "181-181:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/mlkem/mlkem1024.go", "mlkem1024.cs", "ABw8soKCggAEEPKmgriClKaClMqiABIgpIKmgoKUggAPILSC5oKCgoKCgoKCgqqigoKCqrSC5oKClIKCgoIAChTygqaCgoKCgpSmgoKUgoKClIKUlNyUAAIQAAgCgpSCgoKCgpSCgoK4goKCgpSCgoKmgoKCgriCgoIABhYACgKCgoKClIKUzsSSpoKCgqaCqqKCgszygoKCgpKCqrSC7uKCpoKClIKCgoKUlJSCgriu4oKCgoKUgoKUlIKCgpSUppSCgpSUgqKUlAAIDsKCgpS4zNKCgoKCgoKCgoKCgoKClIKu4oKCgqaClIKClJQ=", "122-122:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/mlkem/mlkem768.go", "mlkem768.cs", "AFGyAbKCgoIABBDypoK4gpSmgpTKogASIKSCpoKClIIADyC0gqaCgoKCgoKCgoKqooKCgqq0gqaCgpSCgoKCAAIU8oKmgoKCgoKUpoKClIKCgpSClJTclAACEAAIAoKUgoKCgoKUgoKCuIKCgoKUgoKCpoKCgoK4goKCAAIWAAoCgoKCgpSClM7EkqaCgoKmgqqigoLM8oKCgoKSgqq0gq7igqaCgpSCgoKClJSUgoK4ruKCgoKClIKClJSCgoKUlKaUgoKUlIKilJQACA7CgoKUuAAGENKCgoKCgoKCgoKCgoKClIKmgq7igoKCpoKUgoKUlA==", "181-181:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -111,3 +111,16 @@ public static partial class mlkem_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(mlkem_package.DecapsulationKey1024)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mlkemᴛDecapsulationKey1024;
+[GoMethodHost(typeof(mlkem_package.DecapsulationKey768)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mlkemᴛDecapsulationKey768;
+[GoMethodHost(typeof(mlkem_package.EncapsulationKey1024)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mlkemᴛEncapsulationKey1024;
+[GoMethodHost(typeof(mlkem_package.EncapsulationKey768)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mlkemᴛEncapsulationKey768;
+// </MethodHolders>

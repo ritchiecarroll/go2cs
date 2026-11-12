@@ -96,6 +96,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -154,6 +155,8 @@ partial struct stackObject {
     internal ж<stackObject> right;   // objects with higher addresses
 }
 
+} partial class runtimeᴛstackObject {
+
 // obj.r = r, but with no write barrier.
 //
 //go:nowritebarrier
@@ -163,11 +166,13 @@ internal static void setRecord(this ж<stackObject> Ꮡobj, ж<stackObjectRecord
     (Ꮡobj.Ꮡr.Reinterpret<ж<stackObjectRecord>, uintptr>()).Value = (uintptr)r;
 }
 
+} partial class runtime_package {
+
 // A stackScanState keeps track of the state used during the GC walk
 // of a goroutine.
 partial struct stackScanState {
     // stack limits
-    internal Δstack stack;
+    internal stack stack;
     // conservative indicates that the next frame must be scanned conservatively.
     // This applies only to the innermost frame at an async safe-point.
     internal bool conservative;
@@ -192,16 +197,18 @@ partial struct stackScanState {
     internal ж<stackObject> root;
 }
 
+} partial class runtimeᴛstackScanState {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string addressNotAStackAddressˢ => ref addressNotAStackAddressˢᵇ;
 private static readonly @string addressNotAStackAddressˢᵇ = "address not a stack address"u8;
 
 // Add p as a potential pointer to a stack object.
 // p must be a stack address.
-internal static void putPtr(this ж<stackScanState> Ꮡs, uintptr Δp, bool conservative) {
+internal static void putPtr(this ж<stackScanState> Ꮡs, uintptr p, bool conservative) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (Δp < s.stack.lo || Δp >= s.stack.hi) {
+    if (p < s.stack.lo || p >= s.stack.hi) {
         @throw(addressNotAStackAddressˢ);
     }
     var head = Ꮡs.Ꮡbuf;
@@ -226,7 +233,7 @@ internal static void putPtr(this ж<stackScanState> Ꮡs, uintptr Δp, bool cons
         buf.next = head.ValueSlot;
         head.ValueSlot = buf;
     }
-    buf.obj[buf.nobj] = Δp;
+    buf.obj[buf.nobj] = p;
     buf.nobj++;
 }
 
@@ -235,7 +242,7 @@ internal static void putPtr(this ж<stackScanState> Ꮡs, uintptr Δp, bool cons
 //
 // This prefers non-conservative pointers so we scan stack objects
 // precisely if there are any non-conservative pointers to them.
-internal static (uintptr Δp, bool conservative) getPtr(this ж<stackScanState> Ꮡs) {
+internal static (uintptr p, bool conservative) getPtr(this ж<stackScanState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     foreach (var (_, head) in range(slice<ж<ж<stackWorkBuf>>>([Ꮡs.Ꮡbuf, Ꮡs.Ꮡcbuf]))) {
@@ -312,6 +319,8 @@ internal static void buildIndex(this ref stackScanState s) {
     (s.root, _, _) = binarySearchTree(s.head, 0, s.nobjs);
 }
 
+} partial class runtime_package {
+
 // Build a binary search tree with the n objects in the list
 // x.obj[idx], x.obj[idx+1], ..., x.next.obj[0], ...
 // Returns the root of that tree, and the buf+idx of the nth object after x.obj[idx].
@@ -339,6 +348,8 @@ internal static (ж<stackObject> root, ж<stackObjectBuf> restBuf, nint restIdx)
     return (root, Ꮡx, idx);
 }
 
+} partial class runtimeᴛstackScanState {
+
 // findObject returns the stack object containing address a, if any.
 // Must have called buildIndex previously.
 internal static ж<stackObject> findObject(this ref stackScanState s, uintptr a) {
@@ -360,4 +371,4 @@ internal static ж<stackObject> findObject(this ref stackScanState s, uintptr a)
     }
 }
 
-} // end runtime_package
+} // end runtimeᴛstackScanState

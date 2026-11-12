@@ -10,6 +10,7 @@ using strings = strings_package;
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
 using encoding;
+using static x509_package;
 
 partial class x509_package {
 
@@ -31,7 +32,7 @@ internal static (ж<syscall.CertContext>, error) createStoreContext(ж<Certifica
 
         ref var storeCtx = ref heap<ж<syscall.CertContext>>(out var ᏑstoreCtx);
 
-        var (leafCtx, err) = syscall.CertCreateCertificateContext((uint32)((uint32)syscall.X509_ASN_ENCODING | (uint32)syscall.PKCS_7_ASN_ENCODING), Ꮡ(leaf.Raw, 0), (uint32)builtin.len(leaf.Raw));
+        var (leafCtx, err) = syscall.CertCreateCertificateContext((uint32)((uint32)syscall.X509_ASN_ENCODING | (uint32)syscall.PKCS_7_ASN_ENCODING), Ꮡ(leaf.Raw, 0), (uint32)len(leaf.Raw));
         if (err != nil) {
             return (default, err);
         }
@@ -54,7 +55,7 @@ internal static (ж<syscall.CertContext>, error) createStoreContext(ж<Certifica
                 if (errΔ1 != nil) {
                     return (default, errΔ1);
                 }
-                (var ctx, errΔ1) = syscall.CertCreateCertificateContext((uint32)((uint32)syscall.X509_ASN_ENCODING | (uint32)syscall.PKCS_7_ASN_ENCODING), Ꮡ(intermediate.Raw, 0), (uint32)builtin.len(intermediate.Raw));
+                (var ctx, errΔ1) = syscall.CertCreateCertificateContext((uint32)((uint32)syscall.X509_ASN_ENCODING | (uint32)syscall.PKCS_7_ASN_ENCODING), Ꮡ(intermediate.Raw, 0), (uint32)len(intermediate.Raw));
                 if (errΔ1 != nil) {
                     return (default, errΔ1);
                 }
@@ -174,7 +175,7 @@ internal static error checkChainSSLServerPolicy(ж<Certificate> c, ж<syscall.Ce
 // windowsExtKeyUsageOIDs are the C NUL-terminated string representations of the
 // OIDs for use with the Windows API.
 internal static map<ExtKeyUsage, slice<byte>> windowsExtKeyUsageOIDs;
-internal static void initᴛwindowsExtKeyUsageOIDs() { windowsExtKeyUsageOIDs = new map<ExtKeyUsage, slice<byte>>(builtin.len(extKeyUsageOIDs)); }
+internal static void initᴛwindowsExtKeyUsageOIDs() { windowsExtKeyUsageOIDs = new map<ExtKeyUsage, slice<byte>>(len(extKeyUsageOIDs)); }
 
 [GoInit] internal static void initΔ1() {
     foreach (var (_, eku) in range(extKeyUsageOIDs)) {
@@ -197,7 +198,7 @@ internal static (slice<ж<Certificate>> chain, error err) verifyChain(ж<Certifi
         return (default, err);
     }
 
-    if (Ꮡopts != nil && builtin.len(opts.DNSName) > 0) {
+    if (Ꮡopts != nil && len(opts.DNSName) > 0) {
         err = checkChainSSLServerPolicy(c, ᏑchainCtx, ref (Ꮡopts).DerefOrNull());
         if (err != nil) {
             return (default, err);
@@ -208,7 +209,7 @@ internal static (slice<ж<Certificate>> chain, error err) verifyChain(ж<Certifi
     if (err != nil) {
         return (default, err);
     }
-    if (builtin.len(chain) == 0) {
+    if (len(chain) == 0) {
         return (default, errors.New(x509InternalErrorSystemˢ));
     }
 
@@ -229,6 +230,8 @@ internal static (slice<ж<Certificate>> chain, error err) verifyChain(ж<Certifi
     return (chain, default);
 }
 
+} partial class x509ᴛCertificate {
+
 // systemVerify is like Verify, except that it uses CryptoAPI calls
 // to build certificate chains and verify them.
 internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(this ж<Certificate> Ꮡc, ж<VerifyOptions> Ꮡopts) {
@@ -248,10 +251,10 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
         para.Size = (uint32)/* unsafe.Sizeof(*para) */ (uintptr)80;
 
         var keyUsages = opts.KeyUsages;
-        if (builtin.len(keyUsages) == 0) {
+        if (len(keyUsages) == 0) {
             keyUsages = [ExtKeyUsageServerAuth];
         }
-        var oids = new slice<ж<byte>>(0, builtin.len(keyUsages));
+        var oids = new slice<ж<byte>>(0, len(keyUsages));
         foreach (var (_, eku) in range(keyUsages)) {
             if (eku == ExtKeyUsageAny) {
                 oids = default;
@@ -263,7 +266,7 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
         }
         if (oids != nil) {
             para.RequestedUsage.Type = syscall.USAGE_MATCH_TYPE_OR;
-            para.RequestedUsage.Usage.Length = (uint32)builtin.len(oids);
+            para.RequestedUsage.Usage.Length = (uint32)len(oids);
             para.RequestedUsage.Usage.UsageIdentifiers = Ꮡ(oids, 0);
         } else {
             para.RequestedUsage.Type = syscall.USAGE_MATCH_TYPE_AND;
@@ -284,7 +287,7 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
 
         // CertGetCertificateChain will traverse Windows's root stores in an attempt to build a verified certificate chain
         ref var topCtx = ref heap<ж<syscall.CertChainContext>>(out var ᏑtopCtx);
-        err = syscall.CertGetCertificateChain((syscallꓸHandle)0, storeCtx, verifyTime, storeCtx.Store, para, CERT_CHAIN_RETURN_LOWER_QUALITY_CONTEXTS, 0, ᏑtopCtx);
+        err = syscall.CertGetCertificateChain((syscall.Handle)0, storeCtx, verifyTime, storeCtx.Store, para, CERT_CHAIN_RETURN_LOWER_QUALITY_CONTEXTS, 0, ᏑtopCtx);
         if (err != nil) {
             (chains, err) = (default, err); goto ᒐdone;
         }
@@ -307,7 +310,7 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
 
         chains = slices.DeleteFunc<slice<slice<ж<Certificate>>>, slice<ж<Certificate>>>(chains, containsDistrustedSPKIHash);
 
-        if (builtin.len(chains) == 0) {
+        if (len(chains) == 0) {
             if (topErr == nil) {
                 (chains, err) = (default, new CertificateInvalidError(Ꮡc, NoValidChains, "")); goto ᒐdone;
             }
@@ -322,4 +325,4 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
     ᒐdone: return (chains, err);
 }
 
-} // end x509_package
+} // end x509ᴛCertificate

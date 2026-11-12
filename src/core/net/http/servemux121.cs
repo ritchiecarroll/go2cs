@@ -18,6 +18,7 @@ using strings = strings_package;
 using sync = sync_package;
 using go.@internal;
 using go.net;
+using static http_package;
 
 partial class http_package {
 
@@ -43,12 +44,14 @@ partial struct serveMux121 {
 }
 
 partial struct muxEntry {
-    internal ΔHandler h;
+    internal Handler h;
     internal @string pattern;
 }
 
+} partial class httpᴛserveMux121 {
+
 // Formerly ServeMux.Handle.
-internal static void handle(this ж<serveMux121> Ꮡmux, @string pattern, ΔHandler handler) {
+internal static void handle(this ж<serveMux121> Ꮡmux, @string pattern, Handler handler) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -72,7 +75,7 @@ internal static void handle(this ж<serveMux121> Ꮡmux, @string pattern, ΔHand
         }
         var e = new muxEntry(h: handler, pattern: pattern);
         mux.m[pattern] = e;
-        if (pattern[builtin.len(pattern) - 1] == '/') {
+        if (pattern[len(pattern) - 1] == '/') {
             mux.es = appendSorted(mux.es, e);
         }
 
@@ -84,10 +87,12 @@ internal static void handle(this ж<serveMux121> Ꮡmux, @string pattern, ΔHand
     finally { if (ᒐd1) Ꮡmux.Ꮡmu.Unlock(); ᒐ.Run(); }
 }
 
+} partial class http_package {
+
 internal static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
-    nint n = builtin.len(es);
+    nint n = len(es);
     var eʗ1 = e;
-    nint i = sort.Search(n, (nint iΔ1) => builtin.len(es[iΔ1].pattern) < builtin.len(eʗ1.pattern));
+    nint i = sort.Search(n, (nint iΔ1) => len(es[iΔ1].pattern) < len(eʗ1.pattern));
     if (i == n) {
         return append(es, e);
     }
@@ -98,16 +103,18 @@ internal static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
     return es;
 }
 
+} partial class httpᴛserveMux121 {
+
 // Formerly ServeMux.HandleFunc.
 internal static void handleFunc(this ж<serveMux121> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
     if (handler == nil) {
         throw panic("http: nil handler");
     }
-    Ꮡmux.handle(pattern, new HandlerFuncᴠΔHandler(NilSafeDelegateConversion<HandlerFunc, Action<ResponseWriter, ж<Request>>>(handler)));
+    Ꮡmux.handle(pattern, new HandlerFuncᴠHandler(NilSafeDelegateConversion<HandlerFunc, Action<ResponseWriter, ж<Request>>>(handler)));
 }
 
 // Formerly ServeMux.Handler.
-internal static (ΔHandler h, @string pattern) findHandler(this ж<serveMux121> Ꮡmux, ж<Request> Ꮡr) {
+internal static (Handler h, @string pattern) findHandler(this ж<serveMux121> Ꮡmux, ж<Request> Ꮡr) {
     @string pattern = default;
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -147,8 +154,8 @@ internal static (ΔHandler h, @string pattern) findHandler(this ж<serveMux121> 
 
 // handler is the main implementation of findHandler.
 // The path is known to be in canonical form, except for CONNECT methods.
-internal static (ΔHandler h, @string pattern) handler(this ж<serveMux121> Ꮡmux, @string host, @string path) {
-    ΔHandler h = default;
+internal static (Handler h, @string pattern) handler(this ж<serveMux121> Ꮡmux, @string host, @string path) {
+    Handler h = default;
     @string pattern = default;
     GoFrame ᒐ = default;
     try {
@@ -175,7 +182,7 @@ internal static (ΔHandler h, @string pattern) handler(this ж<serveMux121> Ꮡm
 
 // Find a handler on a handler map given a path string.
 // Most-specific (longest) pattern wins.
-internal static (ΔHandler h, @string pattern) match(this ref serveMux121 mux, @string path) {
+internal static (Handler h, @string pattern) match(this ref serveMux121 mux, @string path) {
     // Check for exact match first.
     var (v, ok) = mux.m[path, ꟷ];
     if (ok) {
@@ -223,7 +230,7 @@ internal static bool shouldRedirectRLocked(this ref serveMux121 mux, @string hos
         }
     }
 
-    nint n = builtin.len(path);
+    nint n = len(path);
     if (n == 0) {
         return false;
     }
@@ -236,4 +243,4 @@ internal static bool shouldRedirectRLocked(this ref serveMux121 mux, @string hos
     return false;
 }
 
-} // end http_package
+} // end httpᴛserveMux121

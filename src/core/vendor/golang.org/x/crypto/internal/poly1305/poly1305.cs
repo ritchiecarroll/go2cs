@@ -19,6 +19,7 @@ namespace go.vendor.golang.org.x.crypto.@internal;
 
 using subtle = go.crypto.subtle_package;
 using go.crypto;
+using static poly1305_package;
 
 partial class poly1305_package {
 
@@ -72,6 +73,8 @@ partial struct MAC {
     internal bool finalized;
 }
 
+} partial class poly1305ᴛMAC {
+
 // Size returns the number of bytes Sum will return.
 public static nint Size(this ref MAC h) { return TagSize; }
 
@@ -106,4 +109,4 @@ public static bool Verify(this ref MAC h, slice<byte> expected) {
     return subtle.ConstantTimeCompare(expected, mac[..]) == 1;
 }
 
-} // end poly1305_package
+} // end poly1305ᴛMAC

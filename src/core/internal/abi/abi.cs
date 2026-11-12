@@ -6,6 +6,7 @@ namespace go.@internal;
 using goarch = go.@internal.goarch_package;
 using @unsafe = unsafe_package;
 using go.@internal;
+using static abi_package;
 
 partial class abi_package {
 
@@ -41,6 +42,8 @@ partial struct RegArgs {
     // register contains or will contain a valid Go pointer.
     public IntArgRegBitmap ReturnIsPtr;
 }
+
+} partial class abiᴛRegArgs {
 
 public static void Dump(this ref RegArgs r) {
     print((@string)"Ints:");
@@ -80,10 +83,14 @@ public static @unsafe.Pointer IntRegArgAddr(this ref RegArgs r, nint reg, uintpt
     return (@unsafe.Pointer)((uintptr)@unsafe.Pointer.FromBox(Ꮡ(r.Ints, reg)) + offset);
 }
 
+} partial class abi_package {
+
 // IntArgRegBitmap is a bitmap large enough to hold one bit per
 // integer argument/return register.
 /* [(IntArgRegs + 7) / 8]uint8 */
 partial struct IntArgRegBitmap /*[2]uint8*/;
+
+} partial class abiᴛIntArgRegBitmap {
 
 // Set sets the i'th bit of the bitmap to 1.
 public static void Set(this ref IntArgRegBitmap b, nint i) {
@@ -104,4 +111,4 @@ public static bool Get(this ж<IntArgRegBitmap> Ꮡb, nint i) {
     return (byte)(p.Value & (((uint8)1).Lsh((int64)(i % 8)))) != 0;
 }
 
-} // end abi_package
+} // end abiᴛIntArgRegBitmap

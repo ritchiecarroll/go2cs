@@ -11,6 +11,7 @@ using strings = strings_package;
 using cryptobyte = vendor.golang.org.x.crypto.cryptobyte_package;
 using go.crypto;
 using vendor.golang.org.x.crypto;
+using static tls_package;
 
 partial class tls_package {
 
@@ -43,6 +44,8 @@ partial struct echConfigErr {
     internal @string field;
 }
 
+} partial class tlsᴛechConfigErr {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsMalformedECHConfigˢ => ref tlsMalformedECHConfigˢᵇ;
 private static readonly @string tlsMalformedECHConfigˢᵇ = "tls: malformed ECHConfig"u8;
@@ -53,6 +56,8 @@ internal static @string Error(this ref echConfigErr e) {
     }
     return fmt.Sprintf("tls: malformed ECHConfig, invalid %s field"u8, e.field);
 }
+
+} partial class tls_package {
 
 internal static (bool skip, echConfig ec, error err) parseECHConfig(slice<byte> enc) {
     ref var ec = ref heap(new echConfig(), out var Ꮡec);
@@ -82,16 +87,16 @@ internal static (bool skip, echConfig ec, error err) parseECHConfig(slice<byte> 
     if (!readUint16LengthPrefixed(Ꮡs, Ꮡec.ᏑPublicKey)) {
         return (false, new echConfig(), new echConfigErrжerror(Ꮡ(new echConfigErr("public_key"))));
     }
-    ref var ΔcipherSuites = ref heap<cryptobyte.String>(out var ᏑcipherSuites);
+    ref var cipherSuites = ref heap<cryptobyte.String>(out var ᏑcipherSuites);
     if (!s.ReadUint16LengthPrefixed(ᏑcipherSuites)) {
         return (false, new echConfig(), new echConfigErrжerror(Ꮡ(new echConfigErr("cipher_suites"))));
     }
-    while (!ΔcipherSuites.Empty()) {
+    while (!cipherSuites.Empty()) {
         ref var c = ref heap(new echCipher(), out var Ꮡc);
-        if (!ΔcipherSuites.ReadUint16(Ꮡc.ᏑKDFID)) {
+        if (!cipherSuites.ReadUint16(Ꮡc.ᏑKDFID)) {
             return (false, new echConfig(), new echConfigErrжerror(Ꮡ(new echConfigErr("cipher_suites kdf_id"))));
         }
-        if (!ΔcipherSuites.ReadUint16(Ꮡc.ᏑAEADID)) {
+        if (!cipherSuites.ReadUint16(Ꮡc.ᏑAEADID)) {
             return (false, new echConfig(), new echConfigErrжerror(Ꮡ(new echConfigErr("cipher_suites aead_id"))));
         }
         ec.SymmetricCipherSuite = append(ec.SymmetricCipherSuite, c);
@@ -121,6 +126,10 @@ internal static (bool skip, echConfig ec, error err) parseECHConfig(slice<byte> 
 
     return (false, ec, default);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string tlsMalformedECHConfigˢ => ref tlsMalformedECHConfigˢᵇ;
+private static readonly @string tlsMalformedECHConfigˢᵇ = "tls: malformed ECHConfig"u8;
 
 // parseECHConfigList parses a draft-ietf-tls-esni-18 ECHConfigList, returning a
 // slice of parsed ECHConfigs, in the same order they were parsed, or an error
@@ -152,7 +161,7 @@ internal static (slice<echConfig>, error) parseECHConfigList(slice<byte> data) {
     return (configs, default);
 }
 
-internal static (ж<echConfig>, hpkeꓸPublicKey, hpke.KDF, hpke.AEAD) pickECHConfig(slice<echConfig> list) {
+internal static (ж<echConfig>, hpke.PublicKey, hpke.KDF, hpke.AEAD) pickECHConfig(slice<echConfig> list) {
     foreach (var (_, vᴛ1) in range(list)) {
         ref var ec = ref heap(new echConfig(), out var Ꮡec);
         ec = vᴛ1;
@@ -301,7 +310,7 @@ internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHell
     ref var innerReader = ref heap<cryptobyte.String>((cryptobyte.String)encoded, out var ᏑinnerReader);
     ref var versionAndRandom = ref heap<slice<byte>>(out var ᏑversionAndRandom);
     ref var sessionID = ref heap<slice<byte>>(out var ᏑsessionID);
-    ref var ΔcipherSuites = ref heap<slice<byte>>(out var ᏑcipherSuites);
+    ref var cipherSuites = ref heap<slice<byte>>(out var ᏑcipherSuites);
     ref var compressionMethods = ref heap<slice<byte>>(out var ᏑcompressionMethods);
     ref var extensions = ref heap<cryptobyte.String>(out var Ꮡextensions);
     if (!innerReader.ReadBytes(ᏑversionAndRandom, 2 + 32) || !readUint8LengthPrefixed(ᏑinnerReader, ᏑsessionID) || len(sessionID) != 0 || !readUint16LengthPrefixed(ᏑinnerReader, ᏑcipherSuites) || !readUint8LengthPrefixed(ᏑinnerReader, ᏑcompressionMethods) || !innerReader.ReadUint16LengthPrefixed(Ꮡextensions)) {
@@ -536,6 +545,8 @@ partial struct ECHRejectionError {
     public slice<byte> RetryConfigList;
 }
 
+} partial class tlsᴛECHRejectionError {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsServerRejectedEchˢ => ref tlsServerRejectedEchˢᵇ;
 private static readonly @string tlsServerRejectedEchˢᵇ = "tls: server rejected ECH"u8;
@@ -543,6 +554,8 @@ private static readonly @string tlsServerRejectedEchˢᵇ = "tls: server rejecte
 public static @string Error(this ref ECHRejectionError e) {
     return tlsServerRejectedEchˢ;
 }
+
+} partial class tls_package {
 
 internal static error errMalformedECHExt = errors.New("tls: malformed encrypted_client_hello extension");
 internal static error errInvalidECHExt = errors.New("tls: client sent invalid encrypted_client_hello extension");
@@ -605,6 +618,8 @@ internal static (echExtType echType, echCipher cs, uint8 configID, slice<byte> e
     // raw extension bytes.
     return (echType, cs, configID, bytes.Clone(encap), bytes.Clone(payload), default);
 }
+
+} partial class tlsᴛConn {
 
 internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClientHello(this ж<Conn> Ꮡc, ж<clientHelloMsg> Ꮡouter, slice<EncryptedClientHelloKey> echKeys) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -696,6 +711,8 @@ internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClie
 
     return (Ꮡouter, default, default);
 }
+
+} partial class tls_package {
 
 internal static (slice<byte>, error) buildRetryConfigList(slice<EncryptedClientHelloKey> keys) {
     bool atLeastOneRetryConfig = default;

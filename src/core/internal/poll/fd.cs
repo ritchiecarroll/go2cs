@@ -10,6 +10,7 @@
 namespace go.@internal;
 
 using errors = errors_package;
+using static poll_package;
 
 partial class poll_package {
 
@@ -17,6 +18,8 @@ partial class poll_package {
 // This is used to implement the net.Error interface.
 public partial struct errNetClosing {
 }
+
+} partial class pollᴛerrNetClosing {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string useOfClosedNetworkˢ => ref useOfClosedNetworkˢᵇ;
@@ -30,6 +33,8 @@ public static @string Error(this errNetClosing e) { return useOfClosedNetworkˢ;
 
 public static bool Timeout(this errNetClosing e) { return false; }
 public static bool Temporary(this errNetClosing e) { return false; }
+
+} partial class poll_package {
 
 // ErrNetClosing is returned when a network descriptor is used after
 // it has been closed.
@@ -60,6 +65,8 @@ public static error ErrDeadlineExceeded = new DeadlineExceededErrorжerror(Ꮡ(n
 partial struct DeadlineExceededError {
 }
 
+} partial class pollᴛDeadlineExceededError {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string iOTimeoutˢ => ref iOTimeoutˢᵇ;
 private static readonly @string iOTimeoutˢᵇ = "i/o timeout"u8;
@@ -71,6 +78,8 @@ private static readonly @string iOTimeoutˢᵇ = "i/o timeout"u8;
 public static @string Error(this ref DeadlineExceededError e) { return iOTimeoutˢ; }
 public static bool Timeout(this ref DeadlineExceededError e) { return true; }
 public static bool Temporary(this ref DeadlineExceededError e) { return true; }
+
+} partial class poll_package {
 
 // ErrNotPollable is returned when the file or socket is not suitable
 // for event notification.

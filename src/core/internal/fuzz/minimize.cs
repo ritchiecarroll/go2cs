@@ -7,7 +7,7 @@ using reflect = reflect_package;
 
 partial class fuzz_package {
 
-internal static bool isMinimizable(reflectꓸType t) {
+internal static bool isMinimizable(reflect.Type t) {
     return AreEqual(t, reflect.TypeOf((@string)""u8)) || AreEqual(t, reflect.TypeOf(slice<byte>(default)));
 }
 

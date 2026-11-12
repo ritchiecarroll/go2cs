@@ -11,6 +11,7 @@ using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
 using encoding;
 using go.@internal.trace;
+using static raw_package;
 
 partial class raw_package {
 
@@ -32,6 +33,8 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
     }
     return (Ꮡ(new Reader(r: br, v: v, specs: v.Specs())), default);
 }
+
+} partial class rawᴛReader {
 
 // Version returns the version of the trace that we're reading.
 public static version.Version Version(this ref Reader r) {
@@ -116,4 +119,4 @@ internal static (slice<byte>, error) readData(this ref Reader r) {
     return (data, default);
 }
 
-} // end raw_package
+} // end rawᴛReader

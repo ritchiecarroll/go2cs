@@ -9,12 +9,13 @@ using poll = @internal.poll_package;
 using os = os_package;
 using syscall = syscall_package;
 using @internal;
+using static net_package;
 
 partial class net_package {
 
 // socket returns a network file descriptor that is ready for
 // asynchronous I/O using the network poller.
-internal static (ж<netFD> fd, error err) socket(context.Context ctx, @string net, nint family, nint sotype, nint proto, bool ipv6only, Δsockaddr laddr, Δsockaddr raddr, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
+internal static (ж<netFD> fd, error err) socket(context.Context ctx, @string net, nint family, nint sotype, nint proto, bool ipv6only, sockaddr laddr, sockaddr raddr, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
     ж<netFD> fd = default;
     error err = default;
 
@@ -77,6 +78,8 @@ internal static (ж<netFD> fd, error err) socket(context.Context ctx, @string ne
     return (fd, default);
 }
 
+} partial class netᴛnetFD {
+
 internal static @string ctrlNetwork(this ref netFD fd) {
     var exprᴛ1 = fd.net;
     switch (ᐧ) {
@@ -93,7 +96,7 @@ internal static @string ctrlNetwork(this ref netFD fd) {
     return fd.net + "6"u8;
 }
 
-internal static error dial(this ж<netFD> Ꮡfd, context.Context ctx, Δsockaddr laddr, Δsockaddr raddr, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
+internal static error dial(this ж<netFD> Ꮡfd, context.Context ctx, sockaddr laddr, sockaddr raddr, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     ж<rawConn> c = default;
@@ -110,7 +113,7 @@ internal static error dial(this ж<netFD> Ꮡfd, context.Context ctx, Δsockaddr
         }
     }
 
-    syscallꓸSockaddr lsa = default;
+    syscall.Sockaddr lsa = default;
     error err = default;
     if (laddr != nil) {
         (lsa, err) = laddr.sockaddr(fd.family); if (err != nil) {
@@ -121,8 +124,8 @@ internal static error dial(this ж<netFD> Ꮡfd, context.Context ctx, Δsockaddr
             }
         }
     }
-    syscallꓸSockaddr rsa = default;  // remote address from the user
-    syscallꓸSockaddr crsa = default; // remote address we actually connected to
+    syscall.Sockaddr rsa = default;  // remote address from the user
+    syscall.Sockaddr crsa = default; // remote address we actually connected to
     if (raddr != nil) {
         (rsa, err) = raddr.sockaddr(fd.family); if (err != nil) {
             return err;
@@ -155,14 +158,18 @@ internal static error dial(this ж<netFD> Ꮡfd, context.Context ctx, Δsockaddr
     return default;
 }
 
-internal static error listenStream(this ж<netFD> Ꮡfd, context.Context ctx, Δsockaddr laddr, nint backlog, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string listenˢ => ref listenˢᵇ;
+private static readonly @string listenˢᵇ = "listen"u8;
+
+internal static error listenStream(this ж<netFD> Ꮡfd, context.Context ctx, sockaddr laddr, nint backlog, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     error err = default;
     err = setDefaultListenerSockopts(fd.pfd.Sysfd); if (err != nil) {
         return err;
     }
-    syscallꓸSockaddr lsa = default;
+    syscall.Sockaddr lsa = default;
     (lsa, err) = laddr.sockaddr(fd.family); if (err != nil) {
         return err;
     }
@@ -188,7 +195,7 @@ internal static error listenStream(this ж<netFD> Ꮡfd, context.Context ctx, Δ
     return default;
 }
 
-internal static error listenDatagram(this ж<netFD> Ꮡfd, context.Context ctx, Δsockaddr laddr, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
+internal static error listenDatagram(this ж<netFD> Ꮡfd, context.Context ctx, sockaddr laddr, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     switch (laddr.type()) {
@@ -214,12 +221,12 @@ internal static error listenDatagram(this ж<netFD> Ꮡfd, context.Context ctx, 
                 addrΔ1.IP = IPv6unspecified;
                 break;
             }}
-            laddr = new UDPAddrжΔsockaddr(ᏑaddrΔ1);
+            laddr = new UDPAddrжsockaddr(ᏑaddrΔ1);
         }
         break;
     }}
     error err = default;
-    syscallꓸSockaddr lsa = default;
+    syscall.Sockaddr lsa = default;
     (lsa, err) = laddr.sockaddr(fd.family); if (err != nil) {
         return err;
     }
@@ -241,4 +248,4 @@ internal static error listenDatagram(this ж<netFD> Ꮡfd, context.Context ctx, 
     return default;
 }
 
-} // end net_package
+} // end netᴛnetFD

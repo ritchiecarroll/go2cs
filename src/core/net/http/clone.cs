@@ -27,7 +27,7 @@ internal static url.Values cloneURLValues(url.Values v) {
     }
     // http.Header and url.Values have the same representation, so temporarily
     // treat it like http.Header, which does have a clone:
-    return (url.Values)(map<@string, slice<@string>>)((ΔHeader)(map<@string, slice<@string>>)v).Clone();
+    return (url.Values)(map<@string, slice<@string>>)((Header)(map<@string, slice<@string>>)v).Clone();
 }
 
 // cloneURL should be an internal detail,
@@ -70,12 +70,12 @@ internal static ж<multipart.Form> cloneMultipartForm(ж<multipart.Form> Ꮡf) {
         return default;
     }
     var f2 = Ꮡ(new multipart.Form(
-        Value: ((map<@string, slice<@string>>)((ΔHeader)f.Value).Clone())
+        Value: ((map<@string, slice<@string>>)((Header)f.Value).Clone())
     ));
     if (f.File != nil) {
-        var m = new map<@string, slice<ж<multipart.FileHeader>>>(builtin.len(f.File));
+        var m = new map<@string, slice<ж<multipart.FileHeader>>>(len(f.File));
         foreach (var (k, vv) in f.File) {
-            var vv2 = new slice<ж<multipart.FileHeader>>(builtin.len(vv));
+            var vv2 = new slice<ж<multipart.FileHeader>>(len(vv));
             foreach (var (i, v) in range(vv)) {
                 vv2[i] = cloneMultipartFileHeader(v);
             }
@@ -103,7 +103,7 @@ internal static ж<multipart.FileHeader> cloneMultipartFileHeader(ж<multipart.F
     }
     var fh2 = @new<multipart.FileHeader>();
     fh2.Value = fh;
-    fh2.Header = (textproto.MIMEHeader)(map<@string, slice<@string>>)((ΔHeader)(map<@string, slice<@string>>)fh.Header).Clone();
+    fh2.Header = (textproto.MIMEHeader)(map<@string, slice<@string>>)((Header)(map<@string, slice<@string>>)fh.Header).Clone();
     return fh2;
 }
 
@@ -119,10 +119,10 @@ internal static ж<multipart.FileHeader> cloneMultipartFileHeader(ж<multipart.F
 // See go.dev/issue/67401.
 //
 //go:linkname cloneOrMakeHeader
-internal static ΔHeader cloneOrMakeHeader(ΔHeader hdr) {
+internal static Header cloneOrMakeHeader(Header hdr) {
     var clone = hdr.Clone();
     if (clone == nil) {
-        clone = new ΔHeader(0);
+        clone = new Header(0);
     }
     return clone;
 }

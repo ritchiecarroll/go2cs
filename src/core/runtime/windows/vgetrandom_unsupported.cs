@@ -9,7 +9,7 @@ namespace go;
 partial class runtime_package {
 
 //go:linkname vgetrandom
-public static (nint ret, bool supported) vgetrandom(slice<byte> Δp, uint32 flags) {
+public static (nint ret, bool supported) vgetrandom(slice<byte> p, uint32 flags) {
     return (-1, false);
 }
 

@@ -13,6 +13,7 @@ using big = math.big_package;
 using time = time_package;
 using encoding;
 using math;
+using static pkix_package;
 
 partial class pkix_package {
 
@@ -36,6 +37,8 @@ partial struct RDNSequence /*[]RelativeDistinguishedNameSET*/;
     ["2.5.4.9"] = "STREET",
     ["2.5.4.17"] = "POSTALCODE"
 }; }
+
+} partial class pkixᴛRDNSequence {
 
 // String returns a string representation of the sequence r,
 // roughly following the RFC 2253 Distinguished Names syntax.
@@ -99,6 +102,8 @@ public static @string String(this RDNSequence r) {
     return s;
 }
 
+} partial class pkix_package {
+
 partial struct RelativeDistinguishedNameSET /*[]AttributeTypeAndValue*/;
 
 // AttributeTypeAndValue mirrors the ASN.1 structure of the same name in
@@ -142,6 +147,8 @@ partial struct Name {
     // The ExtraNames field is not populated when parsing, see Names.
     public slice<AttributeTypeAndValue> ExtraNames;
 }
+
+} partial class pkixᴛName {
 
 // FillFromRDNSequence populates n from the provided [RDNSequence].
 // Multi-entry RDNs are flattened, all entries are added to the
@@ -205,6 +212,8 @@ public static void FillFromRDNSequence(this ref Name n, ж<RDNSequence> Ꮡrdns)
     }
 }
 
+} partial class pkix_package {
+
 internal static slice<nint> oidCountry = [2, 5, 4, 6];
 internal static slice<nint> oidOrganization = [2, 5, 4, 10];
 internal static slice<nint> oidOrganizationalUnit = [2, 5, 4, 11];
@@ -214,6 +223,8 @@ internal static slice<nint> oidLocality = [2, 5, 4, 7];
 internal static slice<nint> oidProvince = [2, 5, 4, 8];
 internal static slice<nint> oidStreetAddress = [2, 5, 4, 9];
 internal static slice<nint> oidPostalCode = [2, 5, 4, 17];
+
+} partial class pkixᴛName {
 
 // appendRDNs appends a relativeDistinguishedNameSET to the given RDNSequence
 // and returns the new value. The relativeDistinguishedNameSET contains an
@@ -296,6 +307,8 @@ public static @string String(this Name n) {
     return rdns.String();
 }
 
+} partial class pkix_package {
+
 // oidInAttributeTypeAndValue reports whether a type with the given OID exists
 // in atv.
 internal static bool oidInAttributeTypeAndValue(asn1.ObjectIdentifier oid, slice<AttributeTypeAndValue> atv) {
@@ -318,10 +331,14 @@ partial struct CertificateList {
     public asn1.BitString SignatureValue;
 }
 
+} partial class pkixᴛCertificateList {
+
 // HasExpired reports whether certList should have been updated by now.
 public static bool HasExpired(this ref CertificateList certList, time.Time now) {
     return !now.Before(certList.TBSCertList.NextUpdate);
 }
+
+} partial class pkix_package {
 
 // TBSCertificateList represents the ASN.1 structure of the same name. See RFC
 // 5280, section 5.1.
@@ -341,7 +358,7 @@ partial struct TBSCertificateList {
 // RevokedCertificate represents the ASN.1 structure of the same name. See RFC
 // 5280, section 5.1.
 partial struct RevokedCertificate {
-    public ж<bigꓸInt> SerialNumber;
+    public ж<big.Int> SerialNumber;
     public time.Time RevocationTime;
     public slice<Extension> Extensions; /*`asn1:"optional"`*/
 }

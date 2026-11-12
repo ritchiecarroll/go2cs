@@ -7,12 +7,15 @@ namespace go;
 using errors = errors_package;
 using syscall = syscall_package;
 using time = time_package;
+using static os_package;
 
 partial class os_package {
 
 // Special values for Process.Pid.
 internal static UntypedInt pidUnset => 0;
 internal static UntypedInt pidReleased => -1;
+
+} partial class osᴛProcess {
 
 internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -79,10 +82,10 @@ internal static (ж<ProcessState>, error) pidWait(this ж<Process> Ꮡp) {
 internal static ref readonly @string osUnsupportedSignalTypeˢ => ref osUnsupportedSignalTypeˢᵇ;
 private static readonly @string osUnsupportedSignalTypeˢᵇ = "os: unsupported signal type"u8;
 
-internal static error signal(this ж<Process> Ꮡp, ΔSignal sig) {
+internal static error signal(this ж<Process> Ꮡp, Signal sig) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    var (s, ok) = sig._<syscallꓸSignal>(ᐧ);
+    var (s, ok) = sig._<syscall.Signal>(ᐧ);
     if (!ok) {
         return errors.New(osUnsupportedSignalTypeˢ);
     }
@@ -101,7 +104,7 @@ internal static error signal(this ж<Process> Ꮡp, ΔSignal sig) {
 internal static ref readonly @string osProcessNotInitializedˢ => ref osProcessNotInitializedˢᵇ;
 private static readonly @string osProcessNotInitializedˢᵇ = "os: process not initialized"u8;
 
-internal static error pidSignal(this ж<Process> Ꮡp, syscallꓸSignal s) {
+internal static error pidSignal(this ж<Process> Ꮡp, syscall.Signal s) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -131,6 +134,8 @@ internal static error pidSignal(this ж<Process> Ꮡp, syscallꓸSignal s) {
     finally { if (ᒐd1) Ꮡp.ᏑsigMu.RUnlock(); ᒐ.Run(); }
 }
 
+} partial class os_package {
+
 internal static error convertESRCH(error err) {
     if (AreEqual(err, syscall.ESRCH)) {
         return ErrProcessDone;
@@ -156,12 +161,14 @@ internal static (ж<Process> p, error err) findProcess(nint pid) {
     return (newHandleProcess(pid, h), default);
 }
 
+} partial class osᴛProcessState {
+
 internal static time.Duration userTime(this ref ProcessState p) {
-    return ((time.Duration)p.rusage.ᏑUtime.Nano()) * time.ΔNanosecond;
+    return ((time.Duration)p.rusage.ᏑUtime.Nano()) * time.Nanosecond;
 }
 
 internal static time.Duration systemTime(this ref ProcessState p) {
-    return ((time.Duration)p.rusage.ᏑStime.Nano()) * time.ΔNanosecond;
+    return ((time.Duration)p.rusage.ᏑStime.Nano()) * time.Nanosecond;
 }
 
-} // end os_package
+} // end osᴛProcessState

@@ -10,6 +10,7 @@ using bufio = bufio_package;
 using bytes = bytes_package;
 using fmt = fmt_package;
 using io = io_package;
+using static quotedprintable_package;
 
 partial class quotedprintable_package {
 
@@ -71,6 +72,8 @@ internal static slice<byte> crlf = slice<byte>("\r\n"u8);
 internal static slice<byte> lf = slice<byte>("\n"u8);
 internal static slice<byte> softSuffix = slice<byte>("="u8);
 internal static @string lwspChar = " \t";
+
+} partial class quotedprintableᴛReader {
 
 // Read reads and decodes quoted-printable data from the underlying reader.
 public static (nint n, error err) Read(this ref Reader r, slice<byte> p) {
@@ -150,4 +153,4 @@ public static (nint n, error err) Read(this ref Reader r, slice<byte> p) {
     return (n, default);
 }
 
-} // end quotedprintable_package
+} // end quotedprintableᴛReader

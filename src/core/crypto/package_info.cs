@@ -60,7 +60,7 @@ using static go.crypto_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/crypto.go", "crypto.cs", "AC0mkgAqBoKUpKSkpKSkpKSkpKSkpKSkpKSkpAAYNgAVMrKClKaYooKCgqaokqyygpQAP8ABsoKUgoKClA==")]
+[assembly: GoPositionMap("crypto/crypto.go", "crypto.cs", "ADAmkgAqBoKUpKSkpKSkpKSkpKSkpKSkpKSkpAAaNgAXMrKClMa4ooKCgqaoksyygpQAP8ABsoKUgoKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -99,3 +99,13 @@ public static partial class crypto_package
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(crypto_package.Hash)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cryptoᴛHash;
+// </MethodHolders>

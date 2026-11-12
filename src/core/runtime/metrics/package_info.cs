@@ -27,7 +27,6 @@ using static go.runtime.metrics_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Float64Histogram", "ΔFloat64Histogram")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -57,7 +56,7 @@ using static go.runtime.metrics_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("runtime/metrics/description.go", "description.cs", "ADVuAO8ClgemgoKUgoKCggAHFKiS")]
-[assembly: GoPositionMap("runtime/metrics/value.go", "value.cs", "ACBKkqyygpSssoKUrLKClA==")]
+[assembly: GoPositionMap("runtime/metrics/value.go", "value.cs", "ACNKkqyygpSssoKUrLKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.runtime;
@@ -73,9 +72,9 @@ public static partial class metrics_package
 
     // <TypeAccessibility>
     public partial struct Description {}
+    public partial struct Float64Histogram {}
     public partial struct Value {}
     public partial struct ValueKind {}
-    public partial struct ΔFloat64Histogram {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -90,3 +89,13 @@ public static partial class metrics_package
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(metrics_package.Value)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class metricsᴛValue;
+// </MethodHolders>

@@ -5,8 +5,11 @@
 namespace go.@internal;
 
 using Δsyscall = syscall_package;
+using static poll_package;
 
 partial class poll_package {
+
+} partial class pollᴛFD {
 
 // SetsockoptIPMreq wraps the setsockopt network call with an IPMreq argument.
 public static error SetsockoptIPMreq(this ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.IPMreq> mreq) {
@@ -42,4 +45,4 @@ public static error SetsockoptIPv6Mreq(this ж<FD> Ꮡfd, nint level, nint name,
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
-} // end poll_package
+} // end pollᴛFD

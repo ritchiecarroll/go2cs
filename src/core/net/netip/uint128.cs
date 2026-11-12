@@ -5,6 +5,7 @@ namespace go.net;
 
 using bits = go.math.bits_package;
 using go.math;
+using static netip_package;
 
 partial class netip_package {
 
@@ -22,6 +23,8 @@ partial struct uint128 {
 internal static uint128 mask6(nint n) {
     return new uint128(~((~(uint64)0).Rsh((int64)(n))), (~(uint64)0).Lsh((int64)(128 - n)));
 }
+
+} partial class netipᴛuint128 {
 
 // isZero reports whether u == 0.
 //
@@ -82,4 +85,4 @@ internal static uint128 bitsClearedFrom(this uint128 u, uint8 bit) {
     return u.and(mask6((nint)bit));
 }
 
-} // end netip_package
+} // end netipᴛuint128

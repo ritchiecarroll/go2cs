@@ -19,6 +19,7 @@ using go.path;
 using text;
 using text.template;
 using ꓸꓸꓸstring = Span<@string>;
+using static template_package;
 
 partial class template_package {
 
@@ -46,6 +47,8 @@ partial struct nameSpace {
     internal bool escaped;
     internal escaper esc;
 }
+
+} partial class templateᴛTemplate {
 
 // Templates returns a slice of the templates associated with t, including t
 // itself.
@@ -343,19 +346,23 @@ public static (ж<Template>, error) Clone(this ж<Template> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
+} partial class template_package {
+
 // New allocates a new HTML template with the given name.
 public static ж<Template> New(@string name) {
     var ns = Ꮡ(new nameSpace(set: new map<@string, ж<Template>>()));
     ns.esc = makeEscaper(ns);
     var tmpl = Ꮡ(new Template(
         default,
-        text.template_package.New(name),
+        template.New(name),
         nil,
         ns
     ));
     tmpl.set[name] = tmpl;
     return tmpl;
 }
+
+} partial class templateᴛTemplate {
 
 // New allocates a new HTML template associated with the given one
 // and with the same delimiters. The association, which is transitive,
@@ -386,7 +393,7 @@ internal static ж<Template> @new(this ref Template t, @string name) {
         t.nameSpace
     ));
     var (existing, ok) = tmpl.set[name, ꟷ]; if (ok) {
-        var emptyTmpl = New(existing.Name());
+        var emptyTmpl = template_package.New(existing.Name());
         existing.Value = emptyTmpl.Value;
     }
     tmpl.set[name] = tmpl;
@@ -437,6 +444,8 @@ public static ж<Template> Lookup(this ж<Template> Ꮡt, @string name) {
     finally { ᒐ.Run(); }
 }
 
+} partial class template_package {
+
 // Must is a helper that wraps a call to a function returning ([*Template], error)
 // and panics if the error is non-nil. It is intended for use in variable initializations
 // such as
@@ -464,6 +473,8 @@ public static (ж<Template>, error) ParseFiles(params ꓸꓸꓸstring filenames�
     return parseFiles(nil, readFileOS, filenames.ꓸꓸꓸ);
 }
 
+} partial class templateᴛTemplate {
+
 // ParseFiles parses the named files and associates the resulting templates with
 // t. If an error occurs, parsing stops and the returned template is nil;
 // otherwise it is t. There must be at least one file.
@@ -477,6 +488,8 @@ public static (ж<Template>, error) ParseFiles(this ж<Template> Ꮡt, params �
 
     return parseFiles(Ꮡt, readFileOS, filenames.ꓸꓸꓸ);
 }
+
+} partial class template_package {
 
 // parseFiles is the helper for the method and function. If the argument
 // template is nil, it is created from the first file.
@@ -536,6 +549,8 @@ public static (ж<Template>, error) ParseGlob(@string pattern) {
     return parseGlob(nil, pattern);
 }
 
+} partial class templateᴛTemplate {
+
 // ParseGlob parses the template definitions in the files identified by the
 // pattern and associates the resulting templates with t. The files are matched
 // according to the semantics of filepath.Match, and the pattern must match at
@@ -549,6 +564,8 @@ public static (ж<Template>, error) ParseGlob(@string pattern) {
 public static (ж<Template>, error) ParseGlob(this ж<Template> Ꮡt, @string pattern) {
     return parseGlob(Ꮡt, pattern);
 }
+
+} partial class template_package {
 
 // parseGlob is the implementation of the function and method ParseGlob.
 internal static (ж<Template>, error) parseGlob(ж<Template> t, @string pattern) {
@@ -569,7 +586,7 @@ internal static (ж<Template>, error) parseGlob(ж<Template> t, @string pattern)
 // and whether the value has a meaningful truth value. This is the definition of
 // truth used by if and other such actions.
 public static (bool truth, bool ok) IsTrue(any val) {
-    return text.template_package.IsTrue(val);
+    return template.IsTrue(val);
 }
 
 // ParseFS is like [ParseFiles] or [ParseGlob] but reads from the file system fs
@@ -582,6 +599,8 @@ public static (ж<Template>, error) ParseFS(fs.FS fsΔ1, params ꓸꓸꓸstring 
     return parseFS(nil, fsΔ1, patterns);
 }
 
+} partial class templateᴛTemplate {
+
 // ParseFS is like [Template.ParseFiles] or [Template.ParseGlob] but reads from the file system fs
 // instead of the host operating system's file system.
 // It accepts a list of glob patterns.
@@ -591,6 +610,8 @@ public static (ж<Template>, error) ParseFS(this ж<Template> Ꮡt, fs.FS fsΔ1,
 
     return parseFS(Ꮡt, fsΔ1, patterns);
 }
+
+} partial class template_package {
 
 internal static (ж<Template>, error) parseFS(ж<Template> t, fs.FS fsys, slice<@string> patterns) {
     slice<@string> filenames = default;

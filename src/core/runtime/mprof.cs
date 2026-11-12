@@ -13,6 +13,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -149,6 +150,8 @@ partial struct memRecordCycle {
     internal uintptr alloc_bytes, free_bytes;
 }
 
+} partial class runtimeᴛmemRecordCycle {
+
 // add accumulates b into a. It does not zero b.
 internal static void add(this ref memRecordCycle a, ж<memRecordCycle> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -158,6 +161,8 @@ internal static void add(this ref memRecordCycle a, ж<memRecordCycle> Ꮡb) {
     a.alloc_bytes += b.alloc_bytes;
     a.free_bytes += b.free_bytes;
 }
+
+} partial class runtime_package {
 
 // A blockRecord is the bucket data for a bucket of type blockProfile,
 // which is used in blocking and mutex profiles.
@@ -190,6 +195,8 @@ internal const uint32 mProfCycleWrap = /* uint32(len(memRecord{}.future)) * (2 <
 partial struct mProfCycleHolder {
     internal atomic.Uint32 value;
 }
+
+} partial class runtimeᴛmProfCycleHolder {
 
 // read returns the current cycle count.
 internal static uint32 /*cycle*/ read(this ж<mProfCycleHolder> Ꮡc) {
@@ -234,13 +241,19 @@ internal static void increment(this ж<mProfCycleHolder> Ꮡc) {
     }
 }
 
+} partial class runtime_package {
+
 // go2cs generated this placeholder — func newBucket is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class runtimeᴛbucket {
 
 // go2cs generated this placeholder — func stk is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func mp is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func bp is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class runtime_package {
 
 // go2cs generated this placeholder — func stkbucket is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -329,7 +342,7 @@ internal static void mProf_PostSweep() {
 }
 
 // Called by malloc to record a profiled block.
-internal static partial void mProf_Malloc(ref m mp, @unsafe.Pointer Δp, uintptr size) {
+internal static partial void mProf_Malloc(ref m mp, @unsafe.Pointer p, uintptr size) {
     if (mp.profStack == nil) {
         // mp.profStack is nil if we happen to sample an allocation during the
         // initialization of mp. This case is rare, so we just ignore such
@@ -357,7 +370,7 @@ internal static partial void mProf_Malloc(ref m mp, @unsafe.Pointer Δp, uintptr
     // mProf_Malloc, it's fine to do this non-atomically.
     var bʗ1 = b;
     systemstack(() => {
-        setprofilebucket(Δp, bʗ1);
+        setprofilebucket(p, bʗ1);
     });
 }
 
@@ -509,6 +522,8 @@ partial struct mLockProfile {
     internal bool disabled;         // attribute all time to "lost"
 }
 
+} partial class runtimeᴛmLockProfile {
+
 internal static int64 start(this ref mLockProfile prof) {
     if (cheaprandn(gTrackingPeriod) == 0) {
         return nanotime();
@@ -649,6 +664,8 @@ internal static void storeSlow(this ref mLockProfile prof) {
     releasem(ref (mp).DerefOrNull());
 }
 
+} partial class runtime_package {
+
 internal static void saveBlockEventStack(int64 cycles, int64 rate, slice<uintptr> stk, bucketType which) {
     var b = stkbucket(which, 0, stk, true);
     var bp = b.bp();
@@ -710,6 +727,8 @@ partial struct StackRecord {
     public array<uintptr> Stack0 = new(32); // stack trace for this record; ends at first 0 entry
 }
 
+} partial class runtimeᴛStackRecord {
+
 // Stack returns the stack trace associated with the record,
 // a prefix of r.Stack0.
 public static slice<uintptr> Stack(this ref StackRecord r) {
@@ -720,6 +739,8 @@ public static slice<uintptr> Stack(this ref StackRecord r) {
     }
     return r.Stack0[0..];
 }
+
+} partial class runtime_package {
 
 // MemProfileRate controls the fraction of memory allocations
 // that are recorded and reported in the memory profile.
@@ -751,6 +772,8 @@ partial struct MemProfileRecord {
     public array<uintptr> Stack0 = new(32); // stack trace for this record; ends at first 0 entry
 }
 
+} partial class runtimeᴛMemProfileRecord {
+
 // InUseBytes returns the number of bytes in use (AllocBytes - FreeBytes).
 public static int64 InUseBytes(this ref MemProfileRecord r) { return r.AllocBytes - r.FreeBytes; }
 
@@ -769,6 +792,8 @@ public static slice<uintptr> Stack(this ref MemProfileRecord r) {
     }
     return r.Stack0[0..];
 }
+
+} partial class runtime_package {
 
 // MemProfile returns a profile of memory allocated and freed per allocation
 // site.
@@ -791,10 +816,10 @@ public static slice<uintptr> Stack(this ref MemProfileRecord r) {
 // Most clients should use the runtime/pprof package or
 // the testing package's -test.memprofile flag instead
 // of calling MemProfile directly.
-public static (nint n, bool ok) MemProfile(slice<MemProfileRecord> Δp, bool inuseZero) {
-    return memProfileInternal(len(Δp), inuseZero, (profilerecord.MemProfileRecord r) => {
-        copyMemProfileRecord(Ꮡ(Δp, 0), r);
-        Δp = Δp[1..];
+public static (nint n, bool ok) MemProfile(slice<MemProfileRecord> p, bool inuseZero) {
+    return memProfileInternal(len(p), inuseZero, (profilerecord.MemProfileRecord r) => {
+        copyMemProfileRecord(Ꮡ(p, 0), r);
+        p = p[1..];
     });
 }
 
@@ -888,14 +913,14 @@ internal static void copyMemProfileRecord(ж<MemProfileRecord> Ꮡdst, profilere
         asanwrite(@unsafe.Pointer.FromBox(Ꮡdst.at(MemProfileRecord.ᏑStack0, 0)), /* unsafe.Sizeof(dst.Stack0) */ (uintptr)256);
     }
     nint i = copy(dst.Stack0[..], src.Stack);
-    builtin.clear(dst.Stack0.slice(i));
+    clear(dst.Stack0.slice(i));
 }
 
 //go:linkname pprof_memProfileInternal
-public static (nint n, bool ok) pprof_memProfileInternal(slice<profilerecord.MemProfileRecord> Δp, bool inuseZero) {
-    return memProfileInternal(len(Δp), inuseZero, (profilerecord.MemProfileRecord r) => {
-        Δp[0] = r;
-        Δp = Δp[1..];
+public static (nint n, bool ok) pprof_memProfileInternal(slice<profilerecord.MemProfileRecord> p, bool inuseZero) {
+    return memProfileInternal(len(p), inuseZero, (profilerecord.MemProfileRecord r) => {
+        p[0] = r;
+        p = p[1..];
     });
 }
 
@@ -924,26 +949,26 @@ partial struct BlockProfileRecord {
 // Most clients should use the [runtime/pprof] package or
 // the [testing] package's -test.blockprofile flag instead
 // of calling BlockProfile directly.
-public static (nint n, bool ok) BlockProfile(slice<BlockProfileRecord> Δp) {
+public static (nint n, bool ok) BlockProfile(slice<BlockProfileRecord> p) {
     nint n = default;
     bool ok = default;
 
     nint m = default;
-    var pʗ1 = Δp;
-    (n, ok) = blockProfileInternal(len(Δp), (profilerecord.BlockProfileRecord r) => {
+    var pʗ1 = p;
+    (n, ok) = blockProfileInternal(len(p), (profilerecord.BlockProfileRecord r) => {
         copyBlockProfileRecord(Ꮡ(pʗ1, m), r);
         m++;
     });
     if (ok) {
-        expandFrames(Δp.slice(0, n));
+        expandFrames(p.slice(0, n));
     }
     return (n, ok);
 }
 
-internal static partial void expandFrames(slice<BlockProfileRecord> Δp) {
+internal static partial void expandFrames(slice<BlockProfileRecord> p) {
     var expandedStack = makeProfStack();
-    foreach (var i in range(len(Δp))) {
-        var cf = CallersFrames(Δp[i].StackRecord.Stack());
+    foreach (var i in range(len(p))) {
+        var cf = CallersFrames(p[i].StackRecord.Stack());
         nint j = 0;
         while (j < len(expandedStack)) {
             var (f, more) = cf.Next();
@@ -955,8 +980,8 @@ internal static partial void expandFrames(slice<BlockProfileRecord> Δp) {
                 break;
             }
         }
-        nint k = copy(Δp[i].Stack0[..], expandedStack.slice(0, j));
-        builtin.clear(Δp[i].Stack0.slice(k));
+        nint k = copy(p[i].Stack0[..], expandedStack.slice(0, j));
+        clear(p[i].Stack0.slice(k));
     }
 }
 
@@ -1015,14 +1040,14 @@ internal static void copyBlockProfileRecord(ж<BlockProfileRecord> Ꮡdst, profi
     // since this function is called under the profile lock,
     // and doing something that might allocate can violate lock ordering.
     nint i = copy(dst.Stack0[..], src.Stack);
-    builtin.clear(dst.Stack0.slice(i));
+    clear(dst.Stack0.slice(i));
 }
 
 //go:linkname pprof_blockProfileInternal
-public static (nint n, bool ok) pprof_blockProfileInternal(slice<profilerecord.BlockProfileRecord> Δp) {
-    return blockProfileInternal(len(Δp), (profilerecord.BlockProfileRecord r) => {
-        Δp[0] = r;
-        Δp = Δp[1..];
+public static (nint n, bool ok) pprof_blockProfileInternal(slice<profilerecord.BlockProfileRecord> p) {
+    return blockProfileInternal(len(p), (profilerecord.BlockProfileRecord r) => {
+        p[0] = r;
+        p = p[1..];
     });
 }
 
@@ -1032,18 +1057,18 @@ public static (nint n, bool ok) pprof_blockProfileInternal(slice<profilerecord.B
 //
 // Most clients should use the [runtime/pprof] package
 // instead of calling MutexProfile directly.
-public static (nint n, bool ok) MutexProfile(slice<BlockProfileRecord> Δp) {
+public static (nint n, bool ok) MutexProfile(slice<BlockProfileRecord> p) {
     nint n = default;
     bool ok = default;
 
     nint m = default;
-    var pʗ1 = Δp;
-    (n, ok) = mutexProfileInternal(len(Δp), (profilerecord.BlockProfileRecord r) => {
+    var pʗ1 = p;
+    (n, ok) = mutexProfileInternal(len(p), (profilerecord.BlockProfileRecord r) => {
         copyBlockProfileRecord(Ꮡ(pʗ1, m), r);
         m++;
     });
     if (ok) {
-        expandFrames(Δp.slice(0, n));
+        expandFrames(p.slice(0, n));
     }
     return (n, ok);
 }
@@ -1077,10 +1102,10 @@ internal static (nint n, bool ok) mutexProfileInternal(nint size, Action<profile
 }
 
 //go:linkname pprof_mutexProfileInternal
-public static (nint n, bool ok) pprof_mutexProfileInternal(slice<profilerecord.BlockProfileRecord> Δp) {
-    return mutexProfileInternal(len(Δp), (profilerecord.BlockProfileRecord r) => {
-        Δp[0] = r;
-        Δp = Δp[1..];
+public static (nint n, bool ok) pprof_mutexProfileInternal(slice<profilerecord.BlockProfileRecord> p) {
+    return mutexProfileInternal(len(p), (profilerecord.BlockProfileRecord r) => {
+        p[0] = r;
+        p = p[1..];
     });
 }
 
@@ -1090,11 +1115,11 @@ public static (nint n, bool ok) pprof_mutexProfileInternal(slice<profilerecord.B
 //
 // Most clients should use the runtime/pprof package instead
 // of calling ThreadCreateProfile directly.
-public static (nint n, bool ok) ThreadCreateProfile(slice<StackRecord> Δp) {
-    return threadCreateProfileInternal(len(Δp), (profilerecord.StackRecord r) => {
-        nint i = copy(Δp[0].Stack0[..], r.Stack);
-        builtin.clear(Δp[0].Stack0.slice(i));
-        Δp = Δp[1..];
+public static (nint n, bool ok) ThreadCreateProfile(slice<StackRecord> p) {
+    return threadCreateProfileInternal(len(p), (profilerecord.StackRecord r) => {
+        nint i = copy(p[0].Stack0[..], r.Stack);
+        clear(p[0].Stack0.slice(i));
+        p = p[1..];
     });
 }
 
@@ -1120,32 +1145,32 @@ internal static (nint n, bool ok) threadCreateProfileInternal(nint size, Action<
 }
 
 //go:linkname pprof_threadCreateInternal
-public static (nint n, bool ok) pprof_threadCreateInternal(slice<profilerecord.StackRecord> Δp) {
-    return threadCreateProfileInternal(len(Δp), (profilerecord.StackRecord r) => {
-        Δp[0] = r;
-        Δp = Δp[1..];
+public static (nint n, bool ok) pprof_threadCreateInternal(slice<profilerecord.StackRecord> p) {
+    return threadCreateProfileInternal(len(p), (profilerecord.StackRecord r) => {
+        p[0] = r;
+        p = p[1..];
     });
 }
 
 //go:linkname pprof_goroutineProfileWithLabels
-public static (nint n, bool ok) pprof_goroutineProfileWithLabels(slice<profilerecord.StackRecord> Δp, slice<@unsafe.Pointer> labels) {
-    return goroutineProfileWithLabels(Δp, labels);
+public static (nint n, bool ok) pprof_goroutineProfileWithLabels(slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> labels) {
+    return goroutineProfileWithLabels(p, labels);
 }
 
 // go2cs generated this placeholder — func goroutineProfileWithLabels is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //go:linkname pprof_goroutineLeakProfileWithLabels
-internal static (nint n, bool ok) pprof_goroutineLeakProfileWithLabels(slice<profilerecord.StackRecord> Δp, slice<@unsafe.Pointer> labels) {
-    return goroutineLeakProfileWithLabels(Δp, labels);
+internal static (nint n, bool ok) pprof_goroutineLeakProfileWithLabels(slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> labels) {
+    return goroutineLeakProfileWithLabels(p, labels);
 }
 
 // labels may be nil. If labels is non-nil, it must have the same length as p.
-internal static (nint n, bool ok) goroutineLeakProfileWithLabels(slice<profilerecord.StackRecord> Δp, slice<@unsafe.Pointer> labels) {
-    if (labels != nil && len(labels) != len(Δp)) {
+internal static (nint n, bool ok) goroutineLeakProfileWithLabels(slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> labels) {
+    if (labels != nil && len(labels) != len(p)) {
         labels = default;
     }
 
-    return goroutineLeakProfileWithLabelsConcurrent(Δp, labels);
+    return goroutineLeakProfileWithLabelsConcurrent(p, labels);
 }
 
 partial struct goroutineProfileᴛ1 /*dyn*/ {
@@ -1179,6 +1204,8 @@ internal static goroutineProfileState goroutineProfileSatisfied => 2;
 
 partial struct goroutineProfileStateHolder /*global::go.@internal.runtime.atomic_package.Uint32*/;
 
+} partial class runtimeᴛgoroutineProfileStateHolder {
+
 internal static goroutineProfileState Load(this ж<goroutineProfileStateHolder> Ꮡp) {
     return (goroutineProfileState)(Ꮡp.Reinterpret<goroutineProfileStateHolder, atomic.Uint32>()).Load();
 }
@@ -1191,10 +1218,12 @@ internal static bool CompareAndSwap(this ж<goroutineProfileStateHolder> Ꮡp, g
     return (Ꮡp.Reinterpret<goroutineProfileStateHolder, atomic.Uint32>()).CompareAndSwap((uint32)old, (uint32)@new);
 }
 
-internal static (nint n, bool ok) goroutineLeakProfileWithLabelsConcurrent(slice<profilerecord.StackRecord> Δp, slice<@unsafe.Pointer> labels) {
+} partial class runtime_package {
+
+internal static (nint n, bool ok) goroutineLeakProfileWithLabelsConcurrent(slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> labels) {
     nint n = default;
 
-    if (len(Δp) == 0) {
+    if (len(p) == 0) {
         // An empty slice is obviously too small. Return a rough
         // allocation estimate.
         return (work.goroutineLeak.count, false);
@@ -1205,7 +1234,7 @@ internal static (nint n, bool ok) goroutineLeakProfileWithLabelsConcurrent(slice
     // Prepare a profile large enough to store all leaked goroutines.
     n = work.goroutineLeak.count;
 
-    if (n > len(Δp)) {
+    if (n > len(p)) {
         // There's not enough space in p to store the whole profile, so
         // we're not allowed to write to p at all and must return n, false.
         return (n, false);
@@ -1214,7 +1243,7 @@ internal static (nint n, bool ok) goroutineLeakProfileWithLabelsConcurrent(slice
     // Visit each leaked goroutine and try to record its stack.
     nint offset = default;
     var labelsʗ1 = labels;
-    var pʗ1 = Δp;
+    var pʗ1 = p;
     var pcbufʗ1 = pcbuf;
     forEachGRace((ж<g> gp1) => {
         if ((readgstatus(gp1) & ~(uint32)_Gscan) == _Gleaked) {
@@ -1237,10 +1266,10 @@ internal static (nint n, bool ok) goroutineLeakProfileWithLabelsConcurrent(slice
     return (n, true);
 }
 
-internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<profilerecord.StackRecord> Δp, slice<@unsafe.Pointer> labels) {
+internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> labels) {
     nint n = default;
 
-    if (len(Δp) == 0) {
+    if (len(p) == 0) {
         // An empty slice is obviously too small. Return a rough
         // allocation estimate without bothering to STW. As long as
         // this is close, then we'll only need to STW once (on the next
@@ -1267,7 +1296,7 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<pro
     }
     n += (nint)ᏑgcCleanups.of(cleanupQueue.Ꮡrunning).Load();
 
-    if (n > len(Δp)) {
+    if (n > len(p)) {
         // There's not enough space in p to store the whole profile, so (per the
         // contract of runtime.GoroutineProfile) we're not allowed to write to p
         // at all and must return n, false.
@@ -1280,7 +1309,7 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<pro
     var sp = sys.GetCallerSP();
     var pc = sys.GetCallerPC();
     var ourgʗ1 = ourg;
-    var pʗ1 = Δp;
+    var pʗ1 = p;
     var pcbufʗ1 = pcbuf;
     systemstack(() => {
         saveg(pc, sp, ourgʗ1, ref (Ꮡ(pʗ1, 0)).DerefOrNull(), pcbufʗ1);
@@ -1297,7 +1326,7 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<pro
     // goroutineProfile.active is set) will start with its goroutineProfiled
     // field set to goroutineProfileSatisfied.
     goroutineProfile.active = true;
-    goroutineProfile.records = Δp;
+    goroutineProfile.records = p;
     goroutineProfile.labels = labels;
     startTheWorld(stw);
 
@@ -1473,7 +1502,7 @@ internal static void doRecordGoroutineProfile(ж<g> Ꮡgp1, slice<uintptr> pcbuf
     }
 }
 
-internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilerecord.StackRecord> Δp, slice<@unsafe.Pointer> labels) {
+internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> labels) {
     nint n = default;
     bool ok = default;
 
@@ -1507,10 +1536,10 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilere
         }
     });
 
-    if (n <= len(Δp)) {
+    if (n <= len(p)) {
         ok = true;
         ref var r = ref heap<slice<profilerecord.StackRecord>>(out var Ꮡr);
-        r = Δp;
+        r = p;
         ref var lbl = ref heap<slice<@unsafe.Pointer>>(out var Ꮡlbl);
         lbl = labels;
 
@@ -1574,24 +1603,24 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilere
 //
 // Most clients should use the [runtime/pprof] package instead
 // of calling GoroutineProfile directly.
-public static (nint n, bool ok) GoroutineProfile(slice<StackRecord> Δp) {
+public static (nint n, bool ok) GoroutineProfile(slice<StackRecord> p) {
     nint n = default;
     bool ok = default;
 
-    var records = new slice<profilerecord.StackRecord>(len(Δp));
+    var records = new slice<profilerecord.StackRecord>(len(p));
     (n, ok) = goroutineProfileInternal(records);
     if (!ok) {
         return (n, ok);
     }
     foreach (var (i, mr) in range(records.slice(0, n))) {
-        nint l = copy(Δp[i].Stack0[..], mr.Stack);
-        builtin.clear(Δp[i].Stack0.slice(l));
+        nint l = copy(p[i].Stack0[..], mr.Stack);
+        clear(p[i].Stack0.slice(l));
     }
     return (n, ok);
 }
 
-internal static (nint n, bool ok) goroutineProfileInternal(slice<profilerecord.StackRecord> Δp) {
-    return goroutineProfileWithLabels(Δp, default);
+internal static (nint n, bool ok) goroutineProfileInternal(slice<profilerecord.StackRecord> p) {
+    return goroutineProfileWithLabels(p, default);
 }
 
 internal static void saveg(uintptr pc, uintptr sp, ж<g> gp, ref profilerecord.StackRecord r, slice<uintptr> pcbuf) {

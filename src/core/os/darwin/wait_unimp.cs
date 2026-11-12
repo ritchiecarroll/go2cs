@@ -6,7 +6,11 @@
 //go:build aix || darwin || (js && wasm) || openbsd || solaris || wasip1
 namespace go;
 
+using static os_package;
+
 partial class os_package {
+
+} partial class osᴛProcess {
 
 // blockUntilWaitable attempts to block until a call to p.Wait will
 // succeed immediately, and reports whether it has done so.
@@ -19,4 +23,4 @@ internal static (bool, error) blockUntilWaitable(this ref Process p) {
     return (false, default);
 }
 
-} // end os_package
+} // end osᴛProcess

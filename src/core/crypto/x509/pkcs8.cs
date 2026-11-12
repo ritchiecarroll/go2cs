@@ -11,6 +11,7 @@ using pkix = go.crypto.x509.pkix_package;
 using asn1 = encoding.asn1_package;
 using errors = errors_package;
 using fmt = fmt_package;
+using big = go.math.big_package;
 using elliptic = go.crypto.elliptic_package;
 using encoding;
 using go.crypto;
@@ -83,7 +84,7 @@ public static (any key, error err) ParsePKCS8PrivateKey(slice<byte> der) {
     }
     case {} when privKey.Algo.Algorithm.Equal(oidPublicKeyEd25519): {
         {
-            nint l = builtin.len(privKey.Algo.Parameters.FullBytes); if (l != 0) {
+            nint l = len(privKey.Algo.Parameters.FullBytes); if (l != 0) {
                 return (default, errors.New(x509InvalidEd25519ˢ));
             }
         }
@@ -92,7 +93,7 @@ public static (any key, error err) ParsePKCS8PrivateKey(slice<byte> der) {
             return (default, fmt.Errorf("x509: invalid Ed25519 private key: %v"u8, errΔ8));
         }
         {
-            nint l = builtin.len(curvePrivateKey); if (l != ed25519.SeedSize) {
+            nint l = len(curvePrivateKey); if (l != ed25519.SeedSize) {
                 return (default, fmt.Errorf("x509: invalid Ed25519 private key length: %d"u8, l));
             }
         }
@@ -100,7 +101,7 @@ public static (any key, error err) ParsePKCS8PrivateKey(slice<byte> der) {
     }
     case {} when privKey.Algo.Algorithm.Equal(oidPublicKeyX25519): {
         {
-            nint l = builtin.len(privKey.Algo.Parameters.FullBytes); if (l != 0) {
+            nint l = len(privKey.Algo.Parameters.FullBytes); if (l != 0) {
                 return (default, errors.New(x509InvalidX25519Privateˢ));
             }
         }

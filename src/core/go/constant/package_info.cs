@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
 // </ImportedTypeAliases>
 
 using go;
@@ -29,8 +27,6 @@ using static go.go.constant_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Kind", "ΔKind")]
-[assembly: GoTypeAlias("String", "const:ΔString")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -71,8 +67,8 @@ using static go.go.constant_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/constant/kind_string.go", "kind_string.cs", "/oaigoKCgoLalIKClA==")]
-[assembly: GoPositionMap("go/constant/value.go", "value.cs", "AHLOAYKCgoKCgoLUgpaSgoK4goKClJQAAhDygoKCgpSClKiSgoKUAAIS4oKCgoKUgoKUgpSCgpSmgoKWkqaCyoKCppSuwriCpoKm2oK0gramlIKCgoKUgoKClKaUgqaCgoKCgoKClIKClIKCgoKCgpSigpSmgoKClKamlLSClILKpoKClKaCgpTKlIK4lAAGEsKqooKUgqrCgpSCrrCWgJaSgpTcgJaSgpSssoKUgpQAAhDSgqaUgIKkgILYgILYgIKC6oCCguqAgti2AAIWAAgClKS0zKKUpLTOspSkpLTOspSkpLTKkpSCpIKkpIKktAAEEtKUgqSCpKSCpLQABB4ACwKUpKSkpKS0AAMeAAsClLSkpKSktL6ylIKClKSktM6ylJSklKSkpKSktAAMIKKClLTEtoKUgqKCgoK4gqaqopSCgoKCgoKCgoK4goKmgqauwrSkpIKCxsSkrLK0pKSCgsbEpKyylNSkzKLkpLTMopTkpLQABBLStKaC/oKCgIL+goKmgoKAgsiCgoCC6oLIqqKUpIKUxKSCtqqi1KSUrsKCqJKCrsKU5MiUpIKUpKSkpIKCyIKUpLTE2oKUppSkyIKmgriktKSkpKSkAAMQwrS0pKrYlJTGlKTGlKSkxtTsAAIYAAkClJSmgpSkyIKCgpSClLSClLSClLSktLS0tLS0pKaCgoKUtLS0pLS0tLS0tKSmgoKClLS0tLSkpoKCgpS0tLS0pKaCgoKSpoLGgsaCgoKCgsaCgoKCgoKCgoKCtKSmgsiCpoKCgpqylKaClJSCpMiClIKUpMimgpSkpKSkpJSuwpSUpoKUpMiClKSkpKSkyKampoKCgpSkyIKClKSkpKSkyA==")]
+[assembly: GoPositionMap("go/constant/kind_string.go", "kind_string.cs", "AAgOhqKCgoKCgtq0goKU")]
+[assembly: GoPositionMap("go/constant/value.go", "value.cs", "AHbOAbKysrKysrL0sraSgoK4goKClJQAAhDygoKCgpSClMiSgoKUAAQS4oKCgoKUgoKUgpSCgpTGsrK2kqaCyoKCppSuwriCpoKm2oK0grbGtLKysrK0goKClMa0gsaysrKysrKytIKClIKCgoKCgpSigpSmgoKClKamlLSClILKpoKClKaCgpTKlIK4lAAGEsKqooKUgqrCgpSCrrCWgJaSgpTcgJaSgpSssoKUgpQAAhDSgqaUgIKkgILYgILYgIKC6oCCguqAgti2AAIWAAgClKS0zKKUpLTOspSkpLTOspSkpLTKkpSCpIKkpIKktAAEEtKUgqSCpKSCpLQABB4ACwKUpKSkpKS0AAMeAAsClLSkpKSktL6ylIKClKSktM6ylJSklKSkpKSktAAMIKKClLTEtoKUgqKCgoK4gqaqopSCgoKCgoKCgoK4goKmgqauwrSkpIKCxsSkrLK0pKSCgsbEpKyylNSkzKLkpLTMopTkpLQABBLStKaC/oKCgIL+goKmgoKAgsiCgoCC6oLIqqKUpIKUxKSCtqqi1KSUrsKCqJKCrsKU5MiUpIKUpKSkpIKCyIKUpLTE2oKUppSkyIKmgriktKSkpKSkAAMQwrS0pKrYlJTGlKTGlKSkxtTsAAIYAAkClJSmgpSkyIKCgpSClLSClLSClLSktLS0tLS0pKaCgoKUtLS0pLS0tLS0tKSmgoKClLS0tLSkpoKCgpS0tLS0pKaCgoKSpoLGgsaCgoKCgsaCgoKCgoKCgoKCtKSmgsiCpoKCgpqylKaClJSCpMiClIKUpMimgpSkpKSkpJSuwpSUpoKUpMiClKSkpKSkyKampoKCgpSkyIKClKSkpKSkyA==")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -96,7 +92,7 @@ public static partial class constant_package
     internal partial struct stringVal {}
     internal partial struct unknownVal {}
     public partial interface Value {}
-    public partial struct ΔKind {}
+    public partial struct Kind {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -117,3 +113,21 @@ public static partial class constant_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(constant_package.Kind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛKind;
+[GoMethodHost(typeof(constant_package.boolVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛboolVal;
+[GoMethodHost(typeof(constant_package.complexVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛcomplexVal;
+[GoMethodHost(typeof(constant_package.floatVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛfloatVal;
+[GoMethodHost(typeof(constant_package.int64Val)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛint64Val;
+[GoMethodHost(typeof(constant_package.intVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛintVal;
+[GoMethodHost(typeof(constant_package.ratVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛratVal;
+[GoMethodHost(typeof(constant_package.stringVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛstringVal;
+[GoMethodHost(typeof(constant_package.unknownVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛunknownVal;
+// </MethodHolders>

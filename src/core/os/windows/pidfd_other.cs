@@ -5,6 +5,7 @@
 namespace go;
 
 using syscall = syscall_package;
+using static os_package;
 
 partial class os_package {
 
@@ -20,12 +21,14 @@ internal static (uintptr, error) pidfdFind(nint _) {
     return (0, syscall.ENOSYS);
 }
 
+} partial class osᴛProcess {
+
 internal static (ж<ProcessState>, error) pidfdWait(this ref Process _) {
     throw panic("unreachable");
 }
 
-internal static error pidfdSendSignal(this ref Process _Δp0, syscallꓸSignal _Δp1) {
+internal static error pidfdSendSignal(this ref Process _Δp0, syscall.Signal _Δp1) {
     throw panic("unreachable");
 }
 
-} // end os_package
+} // end osᴛProcess

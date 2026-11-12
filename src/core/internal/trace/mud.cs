@@ -6,6 +6,7 @@ namespace go.@internal;
 using cmp = cmp_package;
 using math = math_package;
 using slices = slices_package;
+using static trace_package;
 
 partial class trace_package {
 
@@ -50,6 +51,8 @@ partial struct edge {
     internal float64 dirac;
 }
 
+} partial class traceᴛmud {
+
 // add adds a uniform function over [l, r] scaled so the total weight
 // of the uniform is area. If l==r, this adds a Dirac delta function.
 internal static void add(this ж<mud> Ꮡd, float64 l, float64 r, float64 area) {
@@ -65,10 +68,10 @@ internal static void add(this ж<mud> Ꮡd, float64 l, float64 r, float64 area) 
 
     // Add the edges.
     if (l == r) {
-        d.unsorted = builtin.append(d.unsorted, new edge(l, 0D, area));
+        d.unsorted = append(d.unsorted, new edge(l, 0D, area));
     } else {
         var delta = area / (r - l);
-        d.unsorted = builtin.append(d.unsorted, new edge(l, delta, 0D), new edge(r, -delta, 0D));
+        d.unsorted = append(d.unsorted, new edge(l, delta, 0D), new edge(r, -delta, 0D));
     }
 
     // Update the histogram.
@@ -219,4 +222,4 @@ internal static (float64, bool) invCumulativeSum(this ref mud d, float64 y) {
     return (prevX, false);
 }
 
-} // end trace_package
+} // end traceᴛmud

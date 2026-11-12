@@ -5,10 +5,11 @@ namespace go.go;
 
 using ast = global::go.go.ast_package;
 using global::go.go;
+using static doc_package;
 
 partial class doc_package {
 
-// type ΔFilter is a methodless func type — rendered inline as its base delegate
+// type Filter is a methodless func type — rendered inline as its base delegate
 
 internal static bool matchFields(ж<ast.FieldList> Ꮡfields, Func<@string, bool> f) {
     ref var fields = ref Ꮡfields.DerefOrNull();
@@ -105,6 +106,8 @@ internal static slice<ж<Type>> filterTypes(slice<ж<Type>> a, Func<@string, boo
     return a.slice(0, w);
 }
 
+} partial class docᴛPackage {
+
 // Filter eliminates documentation for names that don't pass through the filter f.
 // TODO(gri): Recognize "Type.Method" as a name.
 public static void Filter(this ref Package p, Func<@string, bool> f) {
@@ -115,4 +118,4 @@ public static void Filter(this ref Package p, Func<@string, bool> f) {
     p.Doc = ""u8; // don't show top-level package doc
 }
 
-} // end doc_package
+} // end docᴛPackage

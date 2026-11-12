@@ -24,6 +24,8 @@ using encoding;
 using go.hash;
 using go.io;
 using go.path;
+using zip = zip_package;
+using static zip_package;
 
 partial class zip_package {
 
@@ -120,6 +122,8 @@ public static (ж<Reader>, error) NewReader(io.ReaderAt r, int64 size) {
     return (zr, err);
 }
 
+} partial class zipᴛReader {
+
 internal static error init(this ж<Reader> Ꮡr, io.ReaderAt rdr, int64 size) {
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -196,15 +200,19 @@ public static void RegisterDecompressor(this ref Reader r, uint16 method, Func<i
 internal static Func<io.Reader, io.ReadCloser> decompressor(this ref Reader r, uint16 method) {
     var dcomp = r.decompressors[method];
     if (dcomp == nil) {
-        dcomp = decompressor(method);
+        dcomp = zip.decompressor(method);
     }
     return dcomp;
 }
+
+} partial class zipᴛReadCloser {
 
 // Close closes the Zip file, rendering it unusable for I/O.
 public static error Close(this ref ReadCloser rc) {
     return rc.f.Close();
 }
+
+} partial class zipᴛFile {
 
 // DataOffset returns the offset of the file's possibly-compressed
 // data, relative to the beginning of the zip file.
@@ -278,9 +286,13 @@ public static (io.Reader, error) OpenRaw(this ref File f) {
     return (new io.SectionReaderжReader(r), default);
 }
 
+} partial class zip_package {
+
 partial struct dirReader {
     internal error err;
 }
+
+} partial class zipᴛdirReader {
 
 internal static (nint, error) Read(this ref dirReader r, slice<byte> _) {
     return (0, r.err);
@@ -290,6 +302,8 @@ internal static error Close(this ref dirReader r) {
     return default;
 }
 
+} partial class zip_package {
+
 partial struct checksumReader {
     internal io.ReadCloser rc;
     internal hash.Hash32 hash;
@@ -298,6 +312,8 @@ partial struct checksumReader {
     internal io.Reader desr; // if non-nil, where to read the data descriptor
     internal error err;      // sticky error
 }
+
+} partial class zipᴛchecksumReader {
 
 internal static (fs.FileInfo, error) Stat(this ref checksumReader r) {
     return (new headerFileInfo(r.f.ᏑFileHeader), default);
@@ -348,6 +364,8 @@ internal static (nint n, error err) Read(this ref checksumReader r, slice<byte> 
 
 internal static error Close(this ref checksumReader r) { return r.rc.Close(); }
 
+} partial class zipᴛFile {
+
 // findBodyOffset does the minimum work to verify the file has a header
 // and returns the file body offset.
 internal static (int64, error) findBodyOffset(this ref File f) {
@@ -364,6 +382,8 @@ internal static (int64, error) findBodyOffset(this ref File f) {
     nint extraLen = (nint)b.uint16();
     return ((int64)((nint)fileHeaderLen + filenameLen + extraLen), default);
 }
+
+} partial class zip_package {
 
 // readDirectoryHeader attempts to read a directory header from r.
 // It returns io.ErrUnexpectedEOF if it cannot read a complete header,
@@ -497,7 +517,7 @@ parseExtras:
                 var ts = (int64)attrBuf.uint64();  // ModTime since Windows epoch
                 var secs = ts / (int64)ticksPerSecond;
                 var nsecs = (int64)(1e9D / ticksPerSecond) * (ts % (int64)ticksPerSecond);
-                var epoch = time.Date(1601, time.January, 1, 0, 0, 0, 0, time.ΔUTC);
+                var epoch = time.Date(1601, time.January, 1, 0, 0, 0, 0, time.UTC);
                 modified = time.Unix(epoch.Unix() + secs, nsecs);
             }
             break;
@@ -759,6 +779,8 @@ internal static nint findSignatureInBlock(slice<byte> b) {
 
 partial struct readBuf /*[]byte*/;
 
+} partial class zipᴛreadBuf {
+
 internal static uint8 uint8(this ref readBuf b) {
     var v = (b)[0];
     b = (b)[1..];
@@ -789,6 +811,8 @@ internal static readBuf sub(this ref readBuf b, nint n) {
     return b2;
 }
 
+} partial class zip_package {
+
 // A fileListEntry is a File and its ename.
 // If file == nil, the fileListEntry describes a directory without metadata.
 partial struct fileListEntry {
@@ -807,6 +831,8 @@ partial interface fileInfoDirEntry :
     // Name is declared by fs.FileInfo and fs.DirEntry
     new @string Name();
 }
+
+} partial class zipᴛfileListEntry {
 
 internal static (fileInfoDirEntry, error) stat(this ж<fileListEntry> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
@@ -845,6 +871,8 @@ internal static @string String(this ж<fileListEntry> Ꮡf) {
     return fs.FormatDirEntry(new fileListEntryжDirEntry(Ꮡf));
 }
 
+} partial class zip_package {
+
 // toValidName coerces name to be a valid name for fs.FS.Open.
 internal static @string toValidName(@string name) {
     name = strings.ReplaceAll(name, @"\", @"/");
@@ -858,6 +886,8 @@ internal static @string toValidName(@string name) {
 
     return p;
 }
+
+} partial class zipᴛReader {
 
 internal static void initFileList(this ж<Reader> Ꮡr) {
     Ꮡr.ᏑfileListOnce.Do(() => {
@@ -935,6 +965,8 @@ internal static void initFileList(this ж<Reader> Ꮡr) {
     });
 }
 
+} partial class zip_package {
+
 internal static nint fileEntryCompare(@string x, @string y) {
     var (xdir, xelem, _) = split(x);
     var (ydir, yelem, _) = split(y);
@@ -943,6 +975,8 @@ internal static nint fileEntryCompare(@string x, @string y) {
     }
     return strings.Compare(xelem, yelem);
 }
+
+} partial class zipᴛReader {
 
 // Open opens the named file in the ZIP archive,
 // using the semantics of fs.FS.Open:
@@ -970,6 +1004,8 @@ public static (fs.File, error) Open(this ж<Reader> Ꮡr, @string name) {
     return (rc._<fs.File>(), default);
 }
 
+} partial class zip_package {
+
 internal static (@string dir, @string elem, bool isDir) split(@string name) {
     bool isDir = default;
 
@@ -982,6 +1018,8 @@ internal static (@string dir, @string elem, bool isDir) split(@string name) {
 }
 
 internal static ж<fileListEntry> dotFile = Ꮡ(new fileListEntry(name: "./", isDir: true));
+
+} partial class zipᴛReader {
 
 internal static ж<fileListEntry> openLookup(this ref Reader r, @string name) {
     if (name == "."u8) {
@@ -1027,11 +1065,15 @@ internal static slice<fileListEntry> openReadDir(this ref Reader r, @string dir)
     return files.slice(i, j);
 }
 
+} partial class zip_package {
+
 partial struct openDir {
     internal ж<fileListEntry> e;
     internal slice<fileListEntry> files;
     internal nint offset;
 }
+
+} partial class zipᴛopenDir {
 
 internal static error Close(this ref openDir d) { return default; }
 internal static (fs.FileInfo, error) Stat(this ref openDir d) { return d.e.stat(); }
@@ -1073,4 +1115,4 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint cou
     return (list, default);
 }
 
-} // end zip_package
+} // end zipᴛopenDir

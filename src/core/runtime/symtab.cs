@@ -10,6 +10,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -64,7 +65,7 @@ partial struct Frame {
     // The runtime's internal view of the function. This field
     // is set (funcInfo.valid() returns true) only for Go functions,
     // not for C functions.
-    internal ΔfuncInfo funcInfo;
+    internal funcInfo funcInfo;
 }
 
 // CallersFrames takes a slice of PC values returned by [Callers] and
@@ -76,7 +77,11 @@ public static ж<Frames> CallersFrames(slice<uintptr> callers) {
     return f;
 }
 
+} partial class runtimeᴛFrames {
+
 // go2cs generated this placeholder — func Next is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class runtime_package {
 
 // runtime_FrameStartLine returns the start line of the function in a Frame.
 //
@@ -223,15 +228,19 @@ partial struct Func {
     internal EmptyStruct opaque; // unexported field to disallow conversions
 }
 
+} partial class runtimeᴛFunc {
+
 internal static ж<_func> raw(this ж<Func> Ꮡf) {
     return Ꮡf.Reinterpret<Func, _func>();
 }
 
-internal static ΔfuncInfo funcInfo(this ж<Func> Ꮡf) {
+internal static funcInfo funcInfo(this ж<Func> Ꮡf) {
     return Ꮡf.raw().funcInfo();
 }
 
-internal static ΔfuncInfo funcInfo(this ж<_func> Ꮡf) {
+} partial class runtimeᴛ_func {
+
+internal static funcInfo funcInfo(this ж<_func> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     // Find the module containing fn. fn is located in the pclntable.
@@ -249,8 +258,10 @@ internal static ΔfuncInfo funcInfo(this ж<_func> Ꮡf) {
             break;
         }
     }
-    return new ΔfuncInfo(Ꮡf, mod);
+    return new funcInfo(Ꮡf, mod);
 }
+
+} partial class runtime_package {
 
 // pcHeader holds data used by the pclntab lookups.
 partial struct pcHeader {
@@ -385,11 +396,11 @@ internal static ref ж<slice<ж<moduledata>>> modulesSlice => ref ((StaticBox<ж
 //go:nosplit
 //go:nowritebarrier
 internal static slice<ж<moduledata>> activeModules() {
-    var Δp = (ж<slice<ж<moduledata>>>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(ᏑmodulesSlice)));
-    if (Δp == nil) {
+    var p = (ж<slice<ж<moduledata>>>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(ᏑmodulesSlice)));
+    if (p == nil) {
         return default;
     }
-    return Δp.ValueSlot;
+    return p.ValueSlot;
 }
 
 // modulesinit creates the active modules slice out of all loaded modules.
@@ -507,7 +518,7 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
     // Check that the pclntab's format is valid.
     var hdr = datap.pcHeader;
     if (hdr.magic != abi.CurrentPCLnTabMagic || hdr.pad1 != 0 || hdr.pad2 != 0 || hdr.minLC != sys.PCQuantum || hdr.ptrSize != goarch.PtrSize) {
-        println((@string)"runtime: pcHeader: magic=", (Δhex)(uint64)hdr.magic, (@string)"pad1=", hdr.pad1, (@string)"pad2=", hdr.pad2,
+        println((@string)"runtime: pcHeader: magic=", (hex)(uint64)hdr.magic, (@string)"pad1=", hdr.pad1, (@string)"pad2=", hdr.pad2,
             (@string)"minLC=", hdr.minLC, (@string)"ptrSize=", hdr.ptrSize, (@string)"pluginpath=", datap.pluginpath);
         @throw(invalidFunctionSymbolˢ);
     }
@@ -517,15 +528,15 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
     for (nint i = 0; i < nftab; i++) {
         // NOTE: ftab[nftab].entry is legal; it is the address beyond the final function.
         if (datap.ftab[i].entryoff > datap.ftab[i + 1].entryoff) {
-            var f1 = new ΔfuncInfo(Ꮡ(datap.pclntable, datap.ftab[i].funcoff).Reinterpret<byte, _func>(), Ꮡdatap);
-            var f2 = new ΔfuncInfo(Ꮡ(datap.pclntable, datap.ftab[i + 1].funcoff).Reinterpret<byte, _func>(), Ꮡdatap);
+            var f1 = new funcInfo(Ꮡ(datap.pclntable, datap.ftab[i].funcoff).Reinterpret<byte, _func>(), Ꮡdatap);
+            var f2 = new funcInfo(Ꮡ(datap.pclntable, datap.ftab[i + 1].funcoff).Reinterpret<byte, _func>(), Ꮡdatap);
             @string f2name = endˢ;
             if (i + 1 < nftab) {
                 f2name = funcname(f2);
             }
-            println((@string)"function symbol table not sorted by PC offset:", (Δhex)(uint64)datap.ftab[i].entryoff, funcname(f1), (@string)">", (Δhex)(uint64)datap.ftab[i + 1].entryoff, f2name, (@string)", plugin:", datap.pluginpath);
+            println((@string)"function symbol table not sorted by PC offset:", (hex)(uint64)datap.ftab[i].entryoff, funcname(f1), (@string)">", (hex)(uint64)datap.ftab[i + 1].entryoff, f2name, (@string)", plugin:", datap.pluginpath);
             for (nint j = 0; j <= i; j++) {
-                println((@string)"\t", (Δhex)(uint64)datap.ftab[j].entryoff, funcname(new ΔfuncInfo(Ꮡ(datap.pclntable, datap.ftab[j].funcoff).Reinterpret<byte, _func>(), Ꮡdatap)));
+                println((@string)"\t", (hex)(uint64)datap.ftab[j].entryoff, funcname(new funcInfo(Ꮡ(datap.pclntable, datap.ftab[j].funcoff).Reinterpret<byte, _func>(), Ꮡdatap)));
             }
             if (GOOS == "aix"u8 && isarchive) {
                 println((@string)"-Wl,-bnoobjreorder is mandatory on aix/ppc64 with c-archive");
@@ -544,7 +555,7 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
         maxpc = alignUp(maxpc, (uintptr)1 << 16); // round up for end PC
     }
     if (minpc != min || maxpc != max) {
-        println((@string)"minpc=", (Δhex)(uint64)minpc, (@string)"min=", (Δhex)(uint64)min, (@string)"maxpc=", (Δhex)(uint64)maxpc, (@string)"max=", (Δhex)(uint64)max);
+        println((@string)"minpc=", (hex)(uint64)minpc, (@string)"min=", (hex)(uint64)min, (@string)"maxpc=", (hex)(uint64)maxpc, (@string)"max=", (hex)(uint64)max);
         @throw(minpcOrMaxpcInvalidˢ);
     }
 
@@ -555,6 +566,8 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
         }
     }
 }
+
+} partial class runtimeᴛmoduledata {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string runtimeTextOffsetOutOfˢ => ref runtimeTextOffsetOutOfˢᵇ;
@@ -590,7 +603,7 @@ internal static uintptr textAddr(this ref moduledata md, uint32 off32) {
             }
         }
         if (res > md.etext && GOARCH != "wasm"u8) { // on wasm, functions do not live in the same address space as the linear memory
-            println((@string)"runtime: textAddr", (Δhex)(uint64)res, (@string)"out of range", (Δhex)(uint64)md.text, (@string)"-", (Δhex)(uint64)md.etext);
+            println((@string)"runtime: textAddr", (hex)(uint64)res, (@string)"out of range", (hex)(uint64)md.text, (@string)"-", (hex)(uint64)md.etext);
             @throw(runtimeTextOffsetOutOfˢ);
         }
     }
@@ -651,6 +664,8 @@ internal static @string funcName(this ref moduledata md, int32 nameOff) {
     return gostringnocopy(Ꮡ(md.funcnametab, nameOff));
 }
 
+} partial class runtime_package {
+
 // Despite being an exported symbol,
 // FuncForPC is linknamed by widely used packages.
 // Notable members of the hall of shame include:
@@ -663,6 +678,8 @@ internal static @string funcName(this ref moduledata md, int32 nameOff) {
 //
 //go:linkname FuncForPC
 // go2cs generated this placeholder — func FuncForPC is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class runtimeᴛFunc {
 
 // go2cs generated this placeholder — func Name is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -681,6 +698,8 @@ internal static int32 startLine(this ж<Func> Ꮡf) {
     return fn.funcInfo().startLine;
 }
 
+} partial class runtime_package {
+
 // findmoduledatap looks up the moduledata for a PC.
 //
 // It is nosplit because it's part of the isgoexception
@@ -696,23 +715,29 @@ internal static ж<moduledata> findmoduledatap(uintptr pc) {
     return default;
 }
 
-partial struct ΔfuncInfo {
+partial struct funcInfo {
     /*embed*/ internal ж<_func> _func;
     internal ж<moduledata> datap;
 }
 
-internal static bool valid(this ΔfuncInfo f) {
+} partial class runtimeᴛfuncInfo {
+
+internal static bool valid(this funcInfo f) {
     return f._func != nil;
 }
 
-internal static ж<Func> _Func(this ΔfuncInfo f) {
+internal static ж<Func> _Func(this funcInfo f) {
     return f._func.Reinterpret<_func, Func>();
 }
+
+} partial class runtimeᴛ_func {
 
 // isInlined reports whether f should be re-interpreted as a *funcinl.
 internal static bool isInlined(this ref _func f) {
     return f.entryOff == ~(uint32)0; // see comment for funcinl.ones
 }
+
+} partial class runtimeᴛfuncInfo {
 
 // entry returns the entry PC for f.
 //
@@ -723,12 +748,14 @@ internal static bool isInlined(this ref _func f) {
 //
 // Do not remove or change the type signature.
 // See go.dev/issue/67401.
-internal static uintptr entry(this ΔfuncInfo f) {
+internal static uintptr entry(this funcInfo f) {
     return f.datap.textAddr(f.entryOff);
 }
 
+} partial class runtime_package {
+
 //go:linkname badFuncInfoEntry runtime.funcInfo.entry
-internal static partial uintptr badFuncInfoEntry(ΔfuncInfo _);
+internal static partial uintptr badFuncInfoEntry(funcInfo _);
 
 // findfunc looks up function metadata for a PC.
 //
@@ -745,16 +772,16 @@ internal static partial uintptr badFuncInfoEntry(ΔfuncInfo _);
 //
 //go:nosplit
 //go:linkname findfunc
-internal static ΔfuncInfo findfunc(uintptr pc) {
+internal static funcInfo findfunc(uintptr pc) {
     var datap = findmoduledatap(pc);
     if (datap == nil) {
-        return new ΔfuncInfo();
+        return new funcInfo();
     }
     uintptr nsub = /* uintptr(len(findfuncbucket{}.subbuckets)) */ 16;
 
     var (pcOff, ok) = datap.textOff(pc);
     if (!ok) {
-        return new ΔfuncInfo();
+        return new funcInfo();
     }
 
     var x = (uintptr)pcOff + datap.text - datap.minpc; // TODO: are datap.text and datap.minpc always equal?
@@ -775,25 +802,29 @@ internal static ΔfuncInfo findfunc(uintptr pc) {
     }
 
     var funcoff = datap.ftab[idx].funcoff;
-    return new ΔfuncInfo(Ꮡ(datap.pclntable, funcoff).Reinterpret<byte, _func>(), datap);
+    return new funcInfo(Ꮡ(datap.pclntable, funcoff).Reinterpret<byte, _func>(), datap);
 }
 
 // A srcFunc represents a logical function in the source code. This may
 // correspond to an actual symbol in the binary text, or it may correspond to a
 // source function that has been inlined.
-partial struct ΔsrcFunc {
+partial struct srcFunc {
     internal ж<moduledata> datap;
     internal int32 nameOff;
     internal int32 startLine;
     internal abi.FuncID funcID;
 }
 
-internal static ΔsrcFunc srcFunc(this ΔfuncInfo f) {
+} partial class runtimeᴛfuncInfo {
+
+internal static srcFunc srcFunc(this funcInfo f) {
     if (!f.valid()) {
-        return new ΔsrcFunc();
+        return new srcFunc();
     }
-    return new ΔsrcFunc(f.datap, f.nameOff, f.startLine, f.funcID);
+    return new srcFunc(f.datap, f.nameOff, f.startLine, f.funcID);
 }
+
+} partial class runtimeᴛsrcFunc {
 
 // name should be an internal detail,
 // but widely used packages access it using linkname.
@@ -802,15 +833,17 @@ internal static ΔsrcFunc srcFunc(this ΔfuncInfo f) {
 //
 // Do not remove or change the type signature.
 // See go.dev/issue/67401.
-internal static @string name(this ΔsrcFunc s) {
+internal static @string name(this srcFunc s) {
     if (s.datap == nil) {
         return ""u8;
     }
     return s.datap.funcName(s.nameOff);
 }
 
+} partial class runtime_package {
+
 //go:linkname badSrcFuncName runtime.srcFunc.name
-internal static partial @string badSrcFuncName(ΔsrcFunc _);
+internal static partial @string badSrcFuncName(srcFunc _);
 
 partial struct pcvalueCache {
     internal array<array<pcvalueCacheEnt>> entries = new(2, () => new(8));
@@ -842,7 +875,7 @@ internal static ref readonly @string badPcvalueCacheˢ => ref badPcvalueCacheˢ�
 private static readonly @string badPcvalueCacheˢᵇ = "bad pcvalue cache"u8;
 
 // Returns the PCData value, and the PC where this value starts.
-internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targetpc, bool strict) {
+internal static (int32, uintptr) pcvalue(funcInfo f, uint32 off, uintptr targetpc, bool strict) {
     // If true, when we get a cache hit, still look up the data and make sure it
     // matches the cached contents.
     const bool debugCheckCache = false;
@@ -899,19 +932,19 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
 
     if (!f.valid()) {
         if (strict && Ꮡpanicking.Load() == 0) {
-            println((@string)"runtime: no module data for", (Δhex)(uint64)f.entry());
+            println((@string)"runtime: no module data for", (hex)(uint64)f.entry());
             @throw(noModuleDataˢ);
         }
         return (-1, 0);
     }
     var datap = f.datap;
-    var Δp = datap.pctab.slice((nint)(off));
+    var p = datap.pctab.slice((nint)(off));
     var pc = f.entry();
     var prevpc = pc;
     var val = (int32)(-1);
     for (;;) {
         bool ok = default;
-        (Δp, ok) = step(Δp, ref pc, ref val, pc == f.entry());
+        (p, ok) = step(p, ref pc, ref val, pc == f.entry());
         if (!ok) {
             break;
         }
@@ -957,32 +990,32 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
         return (-1, 0);
     }
 
-    print((@string)"runtime: invalid pc-encoded table f=", funcname(f), (@string)" pc=", (Δhex)(uint64)pc, (@string)" targetpc=", (Δhex)(uint64)targetpc, (@string)" tab=", Δp, (@string)"\n");
+    print((@string)"runtime: invalid pc-encoded table f=", funcname(f), (@string)" pc=", (hex)(uint64)pc, (@string)" targetpc=", (hex)(uint64)targetpc, (@string)" tab=", p, (@string)"\n");
 
-    Δp = datap.pctab.slice((nint)(off));
+    p = datap.pctab.slice((nint)(off));
     pc = f.entry();
     val = -1;
     for (;;) {
         bool ok = default;
-        (Δp, ok) = step(Δp, ref pc, ref val, pc == f.entry());
+        (p, ok) = step(p, ref pc, ref val, pc == f.entry());
         if (!ok) {
             break;
         }
-        print((@string)"\tvalue=", val, (@string)" until pc=", (Δhex)(uint64)pc, (@string)"\n");
+        print((@string)"\tvalue=", val, (@string)" until pc=", (hex)(uint64)pc, (@string)"\n");
     }
 
     @throw(invalidRuntimeSymbolˢ);
     return (-1, 0);
 }
 
-internal static @string funcname(ΔfuncInfo f) {
+internal static @string funcname(funcInfo f) {
     if (!f.valid()) {
         return ""u8;
     }
     return f.datap.funcName(f.nameOff);
 }
 
-internal static @string funcpkgpath(ΔfuncInfo f) {
+internal static @string funcpkgpath(funcInfo f) {
     @string name = funcNameForPrint(funcname(f));
     nint i = len(name) - 1;
     for (; i > 0; i--) {
@@ -998,7 +1031,7 @@ internal static @string funcpkgpath(ΔfuncInfo f) {
     return name.slice(0, i);
 }
 
-internal static @string funcfile(ΔfuncInfo f, int32 fileno) {
+internal static @string funcfile(funcInfo f, int32 fileno) {
     var datap = f.datap;
     if (!f.valid()) {
         return "?";
@@ -1020,7 +1053,7 @@ internal static @string funcfile(ΔfuncInfo f, int32 fileno) {
 // See go.dev/issue/67401.
 //
 //go:linkname funcline1
-internal static (@string @file, int32 line) funcline1(ΔfuncInfo f, uintptr targetpc, bool strict) {
+internal static (@string @file, int32 line) funcline1(funcInfo f, uintptr targetpc, bool strict) {
     @string @file = default;
     int32 line = default;
 
@@ -1038,7 +1071,7 @@ internal static (@string @file, int32 line) funcline1(ΔfuncInfo f, uintptr targ
     return (@file, line);
 }
 
-internal static (@string @file, int32 line) funcline(ΔfuncInfo f, uintptr targetpc) {
+internal static (@string @file, int32 line) funcline(funcInfo f, uintptr targetpc) {
     return funcline1(f, targetpc, true);
 }
 
@@ -1046,37 +1079,37 @@ internal static (@string @file, int32 line) funcline(ΔfuncInfo f, uintptr targe
 internal static ref readonly @string badSpdeltaˢ => ref badSpdeltaˢᵇ;
 private static readonly @string badSpdeltaˢᵇ = "bad spdelta"u8;
 
-internal static int32 funcspdelta(ΔfuncInfo f, uintptr targetpc) {
+internal static int32 funcspdelta(funcInfo f, uintptr targetpc) {
     var (x, _) = pcvalue(f, f.pcsp, targetpc, true);
     if (debugPcln && (x & (int32)(goarch.PtrSize - 1)) != 0) {
-        print((@string)"invalid spdelta ", funcname(f), (@string)" ", (Δhex)(uint64)f.entry(), (@string)" ", (Δhex)(uint64)targetpc, (@string)" ", (Δhex)(uint64)f.pcsp, (@string)" ", x, (@string)"\n");
+        print((@string)"invalid spdelta ", funcname(f), (@string)" ", (hex)(uint64)f.entry(), (@string)" ", (hex)(uint64)targetpc, (@string)" ", (hex)(uint64)f.pcsp, (@string)" ", x, (@string)"\n");
         @throw(badSpdeltaˢ);
     }
     return x;
 }
 
 // funcMaxSPDelta returns the maximum spdelta at any point in f.
-internal static int32 funcMaxSPDelta(ΔfuncInfo f) {
+internal static int32 funcMaxSPDelta(funcInfo f) {
     var datap = f.datap;
-    var Δp = datap.pctab.slice((nint)(f.pcsp));
+    var p = datap.pctab.slice((nint)(f.pcsp));
     var pc = f.entry();
     var val = (int32)(-1);
     var most = (int32)0;
     for (;;) {
         bool ok = default;
-        (Δp, ok) = step(Δp, ref pc, ref val, pc == f.entry());
+        (p, ok) = step(p, ref pc, ref val, pc == f.entry());
         if (!ok) {
             return most;
         }
-        most = builtin.max(most, val);
+        most = max(most, val);
     }
 }
 
-internal static uint32 pcdatastart(ΔfuncInfo f, uint32 table) {
-    return ~(ж<uint32>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(Ꮡ(f).of(runtime_package.ΔfuncInfo.Ꮡnfuncdata)), /* unsafe.Sizeof(f.nfuncdata) */ (uintptr)1 + (uintptr)table * 4));
+internal static uint32 pcdatastart(funcInfo f, uint32 table) {
+    return ~(ж<uint32>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(Ꮡ(f).of(funcInfo.Ꮡnfuncdata)), /* unsafe.Sizeof(f.nfuncdata) */ (uintptr)1 + (uintptr)table * 4));
 }
 
-internal static int32 pcdatavalue(ΔfuncInfo f, uint32 table, uintptr targetpc) {
+internal static int32 pcdatavalue(funcInfo f, uint32 table, uintptr targetpc) {
     if (table >= f.npcdata) {
         return -1;
     }
@@ -1084,7 +1117,7 @@ internal static int32 pcdatavalue(ΔfuncInfo f, uint32 table, uintptr targetpc) 
     return r;
 }
 
-internal static int32 pcdatavalue1(ΔfuncInfo f, uint32 table, uintptr targetpc, bool strict) {
+internal static int32 pcdatavalue1(funcInfo f, uint32 table, uintptr targetpc, bool strict) {
     if (table >= f.npcdata) {
         return -1;
     }
@@ -1093,7 +1126,7 @@ internal static int32 pcdatavalue1(ΔfuncInfo f, uint32 table, uintptr targetpc,
 }
 
 // Like pcdatavalue, but also return the start PC of this PCData value.
-internal static (int32, uintptr) pcdatavalue2(ΔfuncInfo f, uint32 table, uintptr targetpc) {
+internal static (int32, uintptr) pcdatavalue2(funcInfo f, uint32 table, uintptr targetpc) {
     if (table >= f.npcdata) {
         return (-1, 0);
     }
@@ -1102,13 +1135,13 @@ internal static (int32, uintptr) pcdatavalue2(ΔfuncInfo f, uint32 table, uintpt
 
 // funcdata returns a pointer to the ith funcdata for f.
 // funcdata should be kept in sync with cmd/link:writeFuncs.
-internal static @unsafe.Pointer funcdata(ΔfuncInfo f, uint8 i) {
+internal static @unsafe.Pointer funcdata(funcInfo f, uint8 i) {
     if (i < 0 || i >= f.nfuncdata) {
         return default;
     }
     var @base = f.datap.gofunc; // load gofunc address early so that we calculate during cache misses
-    var Δp = (uintptr)Ꮡ(f).of(runtime_package.ΔfuncInfo.Ꮡnfuncdata) + /* unsafe.Sizeof(f.nfuncdata) */ (uintptr)1 + (uintptr)f.npcdata * 4 + (uintptr)i * 4;
-    var off = ~(ж<uint32>)(uintptr)((@unsafe.Pointer)Δp);
+    var p = (uintptr)Ꮡ(f).of(funcInfo.Ꮡnfuncdata) + /* unsafe.Sizeof(f.nfuncdata) */ (uintptr)1 + (uintptr)f.npcdata * 4 + (uintptr)i * 4;
+    var off = ~(ж<uint32>)(uintptr)((@unsafe.Pointer)p);
     // Return off == ^uint32(0) ? 0 : f.datap.gofunc + uintptr(off), but without branches.
     // The compiler calculates mask on most architectures using conditional assignment.
     uintptr mask = default;
@@ -1121,37 +1154,37 @@ internal static @unsafe.Pointer funcdata(ΔfuncInfo f, uint8 i) {
 }
 
 // step advances to the next pc, value pair in the encoded table.
-internal static (slice<byte> newp, bool ok) step(slice<byte> Δp, ref uintptr pc, ref int32 val, bool first) {
+internal static (slice<byte> newp, bool ok) step(slice<byte> p, ref uintptr pc, ref int32 val, bool first) {
     // For both uvdelta and pcdelta, the common case (~70%)
     // is that they are a single byte. If so, avoid calling readvarint.
-    var uvdelta = (uint32)Δp[0];
+    var uvdelta = (uint32)p[0];
     if (uvdelta == 0 && !first) {
         return (default, false);
     }
     var n = (uint32)1;
     if ((uvdelta & 0x80) != 0) {
-        (n, uvdelta) = readvarint(Δp);
+        (n, uvdelta) = readvarint(p);
     }
     val += (int32)(((uint32)0 - (uvdelta & 1)) ^ (uvdelta >> 1));
-    Δp = Δp.slice((nint)(n));
+    p = p.slice((nint)(n));
 
-    var pcdelta = (uint32)Δp[0];
+    var pcdelta = (uint32)p[0];
     n = 1;
     if ((pcdelta & 0x80) != 0) {
-        (n, pcdelta) = readvarint(Δp);
+        (n, pcdelta) = readvarint(p);
     }
-    Δp = Δp.slice((nint)(n));
+    p = p.slice((nint)(n));
     pc += (uintptr)(pcdelta * (uint32)sys.PCQuantum);
-    return (Δp, true);
+    return (p, true);
 }
 
 // readvarint reads a varint from p.
-internal static (uint32 read, uint32 val) readvarint(slice<byte> Δp) {
+internal static (uint32 read, uint32 val) readvarint(slice<byte> p) {
     uint32 v = default;
     uint32 shift = default;
     uint32 n = default;
     for (;;) {
-        var b = Δp[n];
+        var b = p[n];
         n++;
         v |= (uint32)(((uint32)((byte)(b & 0x7F)) << (int)(shift & 31)));
         if ((byte)(b & 0x80) == 0) {

@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using colorꓸRGBA = go.image.color_package.ΔRGBA;
 // </ImportedTypeAliases>
 
 using go;
@@ -28,8 +27,6 @@ using static go.image_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Opaque", "const:ΔOpaque")]
-[assembly: GoTypeAlias("RGBA", "ΔRGBA")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -57,6 +54,8 @@ using static go.image_package;
 [assembly: GoImplement<Paletted, Image>(Pointer = true)]
 [assembly: GoImplement<Paletted, PalettedImage>(Pointer = true)]
 [assembly: GoImplement<Paletted, RGBA64Image>(Pointer = true)]
+[assembly: GoImplement<RGBA, Image>(Pointer = true)]
+[assembly: GoImplement<RGBA, RGBA64Image>(Pointer = true)]
 [assembly: GoImplement<RGBA64, Image>(Pointer = true)]
 [assembly: GoImplement<RGBA64, RGBA64Image>(Pointer = true)]
 [assembly: GoImplement<Rectangle, Image>(Pointer = true)]
@@ -68,8 +67,6 @@ using static go.image_package;
 [assembly: GoImplement<YCbCr, Image>(Pointer = true)]
 [assembly: GoImplement<YCbCr, RGBA64Image>(Pointer = true)]
 [assembly: GoImplement<bufio_package.Reader, reader>(Pointer = true)]
-[assembly: GoImplement<ΔRGBA, Image>(Pointer = true)]
-[assembly: GoImplement<ΔRGBA, RGBA64Image>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -90,10 +87,10 @@ using static go.image_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("image/format.go", "format.cs", "AA8gAA4q4oKCggAJFJKClKiSgpSCgqaokoKCgoKmrsKCgoKUgq7CgoKClII=")]
-[assembly: GoPositionMap("image/geom.go", "geom.cs", "ABImkqiSqJKokqiSqJKsopKCgoKUgoKUqJIACBKSAA4gkqiSqJKokt6S3pIABRKygoKUgpSCgpSClKqigpSClIKUgtyClKiSgpSClIKUgpSClIKUqJKqoqiSrJKCuKyigpSClKiSgpSokoKUqJKokgAIFrKClIKUqqKClIKClIKClIKClKqigpSCgpQ=")]
-[assembly: GoPositionMap("image/image.go", "image.cs", "AFq+AfKCgpQADRyUlIKmgoKUgoKCgoKCAAcQgoKUgoKqoqaCgpSCgoKCgoKmgoKUgoKCgoKmgoKUgoKCgoKqoriClIIABhCSgpSSgoKCpoKU6JIAESSUlIKmgoKUgoIABxSipoKClIKCgoKCgoKCgoKmgoKUgoKCgoKCgoKCqqK4gpSCAAYQkoKUkoKCgqaClOiSABEklJSCpoKCpoKClIKCqqKmgoKUgoKCgoKCpoKClIKCgoKUgoKCgoKmgoKUgoKCgoKqoriClIIABhCSgpSSgoKCpoKU6JIAESSUlIKmgoKmgoKUgoIABxSipoKClIKCgoKCgoKCgoKmgoKUgoKCgpSCgoKCgoKCgoKmgoKUgoKCgoKCgoKCqqK4gpSCAAYQkoKUkoKCgqaClOiSABEklJSCpoKCgqaCgpSCqqKmgoKUgqaCgpSCpoKClIKqoriClIIABhCSgpSSgoKCpoKU6JIAESSUlIKmgoKmgoKUgqqipoKClIKCgqaCgpSCgqaCgpSCgqqiuIKUggAGEJKClJKCgoKmgpTokgARJJSUgqaCgoKmgoKUgqqipoKClIKmgoKmgoKmgoKUgqqiuIKUggAGEJLokgARJJSUgqaCgqaCgpSCqqKmgoKUgoKCpoKCpoKCgqaCgpSCgqqiuIKUggAGEJLokgARJJSUgqaCgqaCgpSCgqqipoKClIKCgoKCgqaCgpSCgoKCgoKmgoKUgoKCgoKqoriClIIABhCS6JIAEyiUlIKClIKUgqaCgpSCgpSClIIABxSipoKClIKmgoKUgqaCgpSCpoKClIKqoriCuIIABxKSgpKCgpSClIKClIKCpuqi", "", "", "238=pixelBufferLength/1/1/1,Dx/1/1/2;360=pixelBufferLength/1/1/1,Dx/1/1/2;492=pixelBufferLength/1/1/1,Dx/1/1/2;641=pixelBufferLength/1/1/1,Dx/1/1/2;754=pixelBufferLength/1/1/1,Dx/1/1/2;870=pixelBufferLength/1/1/1,Dx/1/1/2;971=pixelBufferLength/1/1/1,Dx/1/1/2;1075=pixelBufferLength/1/1/1,Dx/1/1/2;1188=pixelBufferLength/1/1/1,Dx/1/1/2;1294=Intersect/1/1/3;1333=pixelBufferLength/1/1/1,Dx/1/1/2")]
-[assembly: GoPositionMap("image/names.go", "names.cs", "AAsalJSUAAcSgqaCpoKmlJSCgqiSgqiS")]
-[assembly: GoPositionMap("image/ycbcr.go", "ycbcr.cs", "ACIugpSkpKSkpJQAGDKCpoKmgqaCgqaCgpSCggAGEqKqopSkpKSkpqqiuIK4goIAChaCptKClIK0grSCtIK0gsaCpKqixqiCpoKCgoIAEyiCpoKmgoKmgoKUgoKCAAkYoqqiuILcgoKCAA4gkoKUkoKCgqaClKqitqiCpoKCgoKC", "", "", "218=mul3NonNeg/1/2/1,mul3NonNeg/2/2/2;343=mul3NonNeg/1/2/1,mul3NonNeg/2/2/2")]
+[assembly: GoPositionMap("image/geom.go", "geom.cs", "ABUmkqiSqJKokqiSqJKsopKCgoKUgoKUqJIAChKSABAgkqiSqJKokt6S3pIABRKygoKUgpSCgpSClKqigpSClIKUgtyClKiSgpSClIKUgpSClIKUqJKqoqiSrJKCuKyigpSClKiSgpSokoKUqJKokgAKFrKClIKUqqKClIKClIKClIKClKqigpSCgpQ=")]
+[assembly: GoPositionMap("image/image.go", "image.cs", "AFu+AfKCgpQADxyUlIKmgoKUgoKCgoKCAAcQgoKUgoKqoqaCgpSCgoKCgoKmgoKUgoKCgoKmgoKUgoKCgoKqoriClIIABhCSgpSSgoKCpoKUAAgIkgATJJSUgqaCgpSCggAHFKKmgoKUgoKCgoKCgoKCgqaCgpSCgoKCgoKCgoKqoriClIIABhCSgpSSgoKCpoKUAAgIkgATJJSUgqaCgqaCgpSCgqqipoKClIKCgoKCgqaCgpSCgoKClIKCgoKCpoKClIKCgoKCqqK4gpSCAAYQkoKUkoKCgqaClAAICJIAEySUlIKmgoKmgoKUgoIABxSipoKClIKCgoKCgoKCgoKmgoKUgoKCgpSCgoKCgoKCgoKmgoKUgoKCgoKCgoKCqqK4gpSCAAYQkoKUkoKCgqaClAAICJIAEySUlIKmgoKCpoKClIKqoqaCgpSCpoKClIKmgoKUgqqiuIKUggAGEJKClJKCgoKmgpQACAiSABMklJSCpoKCpoKClIKqoqaCgpSCgoKmgoKUgoKmgoKUgoKqoriClIIABhCSgpSSgoKCpoKUAAgIkgATJJSUgqaCgoKmgoKUgqqipoKClIKmgoKmgoKmgoKUgqqiuIKUggAGEJIACAiSABMklJSCpoKCpoKClIKqoqaCgpSCgoKmgoKmgoKCpoKClIKCqqK4gpSCAAYQkgAICJIAEySUlIKmgoKmgoKUgoKqoqaCgpSCgoKCgoKmgoKUgoKCgoKCpoKClIKCgoKCqqK4gpSCAAYQkgAICJIAFSiUlIKClIKUgqaCgpSCgpSClIIABxSipoKClIKmgoKUgqaCgpSCpoKClIKqoriCuIIABxKSgpKCgpSClIKClIKCpgAICqI=", "", "", "243=pixelBufferLength/1/1/1,Dx/1/1/2;369=pixelBufferLength/1/1/1,Dx/1/1/2;505=pixelBufferLength/1/1/1,Dx/1/1/2;658=pixelBufferLength/1/1/1,Dx/1/1/2;775=pixelBufferLength/1/1/1,Dx/1/1/2;895=pixelBufferLength/1/1/1,Dx/1/1/2;1000=pixelBufferLength/1/1/1,Dx/1/1/2;1108=pixelBufferLength/1/1/1,Dx/1/1/2;1225=pixelBufferLength/1/1/1,Dx/1/1/2;1333=Intersect/1/1/3;1374=pixelBufferLength/1/1/1,Dx/1/1/2")]
+[assembly: GoPositionMap("image/names.go", "names.cs", "AAwalJSUAAkSgqaCpoKmlJSCgqiSgsiS")]
+[assembly: GoPositionMap("image/ycbcr.go", "ycbcr.cs", "ACUugpSkpKSkpJQAHDKCpoKmgqaCgqaCgpSCggAGEqKqopSkpKSkpqqiuIK4goIAChaCxtKClIK0grSCtIK0gsaCpKqixqiCpoKCgoIAFSiCpoKmgoKmgoKUgoKCAAkYoqqiuILcgoKCAA4gkoKUkoKCgqaClMqitqiCpoKCgoKC", "", "", "227=mul3NonNeg/1/2/1,mul3NonNeg/2/2/2;356=mul3NonNeg/1/2/1,mul3NonNeg/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -124,12 +121,12 @@ public static partial class image_package
     public partial struct NYCbCrA {}
     public partial struct Paletted {}
     public partial struct Point {}
+    public partial struct RGBA {}
     public partial struct RGBA64 {}
     public partial struct Rectangle {}
     public partial struct Uniform {}
     public partial struct YCbCr {}
     public partial struct YCbCrSubsampleRatio {}
-    public partial struct ΔRGBA {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -149,3 +146,28 @@ public static partial class image_package
     [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(go.sync.atomic_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(image_package.Alpha)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class imageᴛAlpha;
+[GoMethodHost(typeof(image_package.Alpha16)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class imageᴛAlpha16;
+[GoMethodHost(typeof(image_package.CMYK)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class imageᴛCMYK;
+[GoMethodHost(typeof(image_package.Gray)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class imageᴛGray;
+[GoMethodHost(typeof(image_package.Gray16)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class imageᴛGray16;
+[GoMethodHost(typeof(image_package.NRGBA)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class imageᴛNRGBA;
+[GoMethodHost(typeof(image_package.NRGBA64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class imageᴛNRGBA64;
+[GoMethodHost(typeof(image_package.NYCbCrA)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class imageᴛNYCbCrA;
+[GoMethodHost(typeof(image_package.Paletted)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class imageᴛPaletted;
+[GoMethodHost(typeof(image_package.Point)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class imageᴛPoint;
+[GoMethodHost(typeof(image_package.RGBA)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class imageᴛRGBA;
+[GoMethodHost(typeof(image_package.RGBA64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class imageᴛRGBA64;
+[GoMethodHost(typeof(image_package.Rectangle)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class imageᴛRectangle;
+[GoMethodHost(typeof(image_package.Uniform)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class imageᴛUniform;
+[GoMethodHost(typeof(image_package.YCbCr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class imageᴛYCbCr;
+[GoMethodHost(typeof(image_package.YCbCrSubsampleRatio)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class imageᴛYCbCrSubsampleRatio;
+// </MethodHolders>

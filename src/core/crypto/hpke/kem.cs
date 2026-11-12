@@ -12,12 +12,13 @@ using go.@internal;
 using go.crypto;
 using go.crypto.@internal;
 using io = io_package;
+using static hpke_package;
 
 partial class hpke_package {
 
 // A KEM is a Key Encapsulation Mechanism, one of the three components of an
 // HPKE ciphersuite.
-partial interface ΔKEM {
+partial interface KEM {
     // ID returns the HPKE KEM identifier.
     uint16 ID();
     // GenerateKey generates a new key pair.
@@ -25,7 +26,7 @@ partial interface ΔKEM {
     // NewPublicKey deserializes a public key from bytes.
     //
     // It implements DeserializePublicKey, as defined in RFC 9180.
-    (ΔPublicKey, error) NewPublicKey(slice<byte> _);
+    (PublicKey, error) NewPublicKey(slice<byte> _);
     // NewPrivateKey deserializes a private key from bytes.
     //
     // It implements DeserializePrivateKey, as defined in RFC 9180.
@@ -45,7 +46,7 @@ private static readonly @string unsupportedKemˢᵇ = "unsupported KEM"u8;
 //
 // Applications are encouraged to use specific implementations like [DHKEM] or
 // [MLKEM768X25519] instead, unless runtime agility is required.
-public static (ΔKEM, error) NewKEM(uint16 id) {
+public static (KEM, error) NewKEM(uint16 id) {
     switch (id) {
     case 0x0010: { // DHKEM(P-256, HKDF-SHA256)
         return (DHKEM(ecdh.P256()), default);
@@ -84,9 +85,9 @@ public static (ΔKEM, error) NewKEM(uint16 id) {
 //
 // A PublicKey is usually obtained from a method of the corresponding [KEM] or
 // [PrivateKey], such as [KEM.NewPublicKey] or [PrivateKey.PublicKey].
-partial interface ΔPublicKey {
+partial interface PublicKey {
     // KEM returns the instantiated KEM.
-    ΔKEM KEM();
+    KEM KEM();
     // Bytes returns the public key as the output of SerializePublicKey.
     slice<byte> Bytes();
     (slice<byte> sharedSecret, slice<byte> enc, error err) encap();
@@ -99,7 +100,7 @@ partial interface ΔPublicKey {
 // such as [KEM.GenerateKey] or [KEM.NewPrivateKey].
 partial interface PrivateKey {
     // KEM returns the instantiated KEM.
-    ΔKEM KEM();
+    KEM KEM();
     // Bytes returns the private key as the output of SerializePrivateKey, as
     // defined in RFC 9180.
     //
@@ -107,18 +108,20 @@ partial interface PrivateKey {
     // This is a requirement of RFC 9180, Section 7.1.2.
     (slice<byte>, error) Bytes();
     // PublicKey returns the corresponding PublicKey.
-    ΔPublicKey PublicKey();
+    PublicKey PublicKey();
     (slice<byte> sharedSecret, error err) decap(slice<byte> enc);
 }
 
 partial struct dhKEM {
     internal KDF kdf;
     internal uint16 id;
-    internal ecdhꓸCurve curve;
+    internal ecdh.Curve curve;
     public uint16 Nsecret;
     public uint16 Nsk;
     public nint Nenc;
 }
+
+} partial class hpkeᴛdhKEM {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string eaePrkˢ => ref eaePrkˢᵇ;
@@ -143,6 +146,8 @@ internal static nint encSize(this ref dhKEM kem) {
     return kem.Nenc;
 }
 
+} partial class hpke_package {
+
 internal static ж<dhKEM> dhKEMP256;
 internal static void initᴛdhKEMP256() { dhKEMP256 = Ꮡ(new dhKEM(HKDFSHA256(), 0x0010, ecdh.P256(), 32, 32, 65)); }
 internal static ж<dhKEM> dhKEMP384;
@@ -160,19 +165,19 @@ internal static void initᴛdhKEMX25519() { dhKEMX25519 = Ꮡ(new dhKEM(HKDFSHA2
 //   - DHKEM(X25519, HKDF-SHA256)
 //
 // depending on curve.
-public static ΔKEM DHKEM(ecdhꓸCurve curve) {
+public static KEM DHKEM(ecdh.Curve curve) {
     switch (curve) {
     case var ᴛ when AreEqual(ᴛ, ecdh.P256()): {
-        return new dhKEMжΔKEM(dhKEMP256);
+        return new dhKEMжKEM(dhKEMP256);
     }
     case var ᴛ when AreEqual(ᴛ, ecdh.P384()): {
-        return new dhKEMжΔKEM(dhKEMP384);
+        return new dhKEMжKEM(dhKEMP384);
     }
     case var ᴛ when AreEqual(ᴛ, ecdh.P521()): {
-        return new dhKEMжΔKEM(dhKEMP521);
+        return new dhKEMжKEM(dhKEMP521);
     }
     case var ᴛ when AreEqual(ᴛ, ecdh.X25519()): {
-        return new dhKEMжΔKEM(dhKEMX25519);
+        return new dhKEMжKEM(dhKEMX25519);
     }
     default: {
         // The set of ecdh.Curve implementations is closed, because the
@@ -185,6 +190,8 @@ public static ΔKEM DHKEM(ecdhꓸCurve curve) {
 partial struct unsupportedCurveKEM {
 }
 
+} partial class hpkeᴛunsupportedCurveKEM {
+
 internal static uint16 ID(this unsupportedCurveKEM _) {
     return 0;
 }
@@ -195,7 +202,7 @@ private static readonly @string unsupportedCurveˢᵇ = "unsupported curve"u8;
 internal static (PrivateKey, error) GenerateKey(this unsupportedCurveKEM _) {
     return (default, errors.New(unsupportedCurveˢ));
 }
-internal static (ΔPublicKey, error) NewPublicKey(this unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
+internal static (PublicKey, error) NewPublicKey(this unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
     return (default, errors.New(unsupportedCurveˢ));
 }
 internal static (PrivateKey, error) NewPrivateKey(this unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
@@ -208,10 +215,16 @@ internal static nint encSize(this unsupportedCurveKEM _) {
     return 0;
 }
 
+} partial class hpke_package {
+
 partial struct dhKEMPublicKey {
     internal ж<dhKEM> kem;
-    internal ж<ecdhꓸPublicKey> pub;
+    internal ж<ecdh.PublicKey> pub;
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string unsupportedCurveˢ => ref unsupportedCurveˢᵇ;
+private static readonly @string unsupportedCurveˢᵇ = "unsupported curve"u8;
 
 // NewDHKEMPublicKey returns a PublicKey implementing
 //
@@ -226,20 +239,22 @@ partial struct dhKEMPublicKey {
 // This function is meant for applications that already have an instantiated
 // crypto/ecdh public key. Otherwise, applications should use the
 // [KEM.NewPublicKey] method of [DHKEM].
-public static (ΔPublicKey, error) NewDHKEMPublicKey(ж<ecdhꓸPublicKey> Ꮡpub) {
+public static (PublicKey, error) NewDHKEMPublicKey(ж<ecdh.PublicKey> Ꮡpub) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
     var (kem, ok) = DHKEM(pub.Curve())._<ж<dhKEM>>(ᐧ);
     if (!ok) {
         return (default, errors.New(unsupportedCurveˢ));
     }
-    return (new dhKEMPublicKeyжΔPublicKey(Ꮡ(new dhKEMPublicKey(
+    return (new dhKEMPublicKeyжPublicKey(Ꮡ(new dhKEMPublicKey(
         kem: kem,
         pub: Ꮡpub
     ))), default);
 }
 
-internal static (ΔPublicKey, error) NewPublicKey(this ref dhKEM kem, slice<byte> data) {
+} partial class hpkeᴛdhKEM {
+
+internal static (PublicKey, error) NewPublicKey(this ref dhKEM kem, slice<byte> data) {
     var (pub, err) = kem.curve.NewPublicKey(data);
     if (err != nil) {
         return (default, err);
@@ -247,17 +262,23 @@ internal static (ΔPublicKey, error) NewPublicKey(this ref dhKEM kem, slice<byte
     return NewDHKEMPublicKey(pub);
 }
 
-internal static ΔKEM KEM(this ref dhKEMPublicKey pk) {
-    return new dhKEMжΔKEM(pk.kem);
+} partial class hpkeᴛdhKEMPublicKey {
+
+internal static KEM KEM(this ref dhKEMPublicKey pk) {
+    return new dhKEMжKEM(pk.kem);
 }
 
 internal static slice<byte> Bytes(this ref dhKEMPublicKey pk) {
     return pk.pub.Bytes();
 }
 
+} partial class hpke_package {
+
 // testingOnlyGenerateKey is only used during testing, to provide
 // a fixed test key to use when checking the RFC 9180 vectors.
 internal static Func<ж<ecdh.PrivateKey>> testingOnlyGenerateKey;
+
+} partial class hpkeᴛdhKEMPublicKey {
 
 internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) encap(this ref dhKEMPublicKey pk) {
     slice<byte> sharedSecret = default;
@@ -284,6 +305,8 @@ internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) enca
     }
     return (sharedSecret, encPubEph, default);
 }
+
+} partial class hpke_package {
 
 partial struct dhKEMPrivateKey {
     internal ж<dhKEM> kem;
@@ -314,6 +337,8 @@ public static (PrivateKey, error) NewDHKEMPrivateKey(ecdh.KeyExchanger priv) {
         priv: priv
     ))), default);
 }
+
+} partial class hpkeᴛdhKEM {
 
 internal static (PrivateKey, error) GenerateKey(this ref dhKEM kem) {
     var (priv, err) = kem.curve.GenerateKey(rand.Reader);
@@ -372,8 +397,10 @@ internal static (PrivateKey, error) DeriveKeyPair(this ж<dhKEM> Ꮡkem, slice<b
     throw panic("chance of four rejections is < 2^-128");
 }
 
-internal static ΔKEM KEM(this ref dhKEMPrivateKey k) {
-    return new dhKEMжΔKEM(k.kem);
+} partial class hpkeᴛdhKEMPrivateKey {
+
+internal static KEM KEM(this ref dhKEMPrivateKey k) {
+    return new dhKEMжKEM(k.kem);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -404,8 +431,8 @@ internal static (slice<byte>, error) Bytes(this ref dhKEMPrivateKey k) {
     return (priv.Bytes(), default);
 }
 
-internal static ΔPublicKey PublicKey(this ref dhKEMPrivateKey k) {
-    return new dhKEMPublicKeyжΔPublicKey(Ꮡ(new dhKEMPublicKey(
+internal static PublicKey PublicKey(this ref dhKEMPrivateKey k) {
+    return new dhKEMPublicKeyжPublicKey(Ꮡ(new dhKEMPublicKey(
         kem: k.kem,
         pub: k.priv.PublicKey()
     )));
@@ -424,4 +451,4 @@ internal static (slice<byte>, error) decap(this ref dhKEMPrivateKey k, slice<byt
     return k.kem.extractAndExpand(dhVal, kemContext);
 }
 
-} // end hpke_package
+} // end hpkeᴛdhKEMPrivateKey

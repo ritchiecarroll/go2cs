@@ -82,14 +82,14 @@ private static readonly @string sockaddrˢᵇ = "sockaddr"u8;
 // If the ifi is nil, interfaceAddrTable returns addresses for all
 // network interfaces. Otherwise it returns addresses for a specific
 // interface.
-internal static (slice<ΔAddr>, error) interfaceAddrTable(ж<Interface> Ꮡifi) {
+internal static (slice<Addr>, error) interfaceAddrTable(ж<Interface> Ꮡifi) {
     ref var ifi = ref Ꮡifi.DerefOrNull();
 
     var (aas, err) = adapterAddresses();
     if (err != nil) {
         return (default, err);
     }
-    slice<ΔAddr> ifat = default;
+    slice<Addr> ifat = default;
     foreach (var (_, aa) in range(aas)) {
         var index = aa.IfIndex;
         if (index == 0) { // ipv6IfIndex is a substitute for ifIndex
@@ -103,13 +103,13 @@ internal static (slice<ΔAddr>, error) interfaceAddrTable(ж<Interface> Ꮡifi) 
                 }
                 switch (sa.type()) {
                 case ж<syscall.SockaddrInet4> saΔ1: {
-                    ifat = append(ifat, (ΔAddr)(new IPNetжΔAddr(Ꮡ(new IPNet(IP: IPv4(saΔ1.Addr[0], saΔ1.Addr[1], saΔ1.Addr[2], saΔ1.Addr[3]), Mask: CIDRMask((nint)puni.OnLinkPrefixLength, 8 * IPv4len))))));
+                    ifat = append(ifat, (Addr)(new IPNetжAddr(Ꮡ(new IPNet(IP: IPv4(saΔ1.Addr[0], saΔ1.Addr[1], saΔ1.Addr[2], saΔ1.Addr[3]), Mask: CIDRMask((nint)puni.OnLinkPrefixLength, 8 * IPv4len))))));
                     break;
                 }
                 case ж<syscall.SockaddrInet6> saΔ1: {
                     var ifa = Ꮡ(new IPNet(IP: new IP(IPv6len), Mask: CIDRMask((nint)puni.OnLinkPrefixLength, 8 * IPv6len)));
                     copy(ifa.IP, saΔ1.Addr[..]);
-                    ifat = append(ifat, (ΔAddr)(new IPNetжΔAddr(ifa)));
+                    ifat = append(ifat, (Addr)(new IPNetжAddr(ifa)));
                     break;
                 }}
             }
@@ -120,13 +120,13 @@ internal static (slice<ΔAddr>, error) interfaceAddrTable(ж<Interface> Ꮡifi) 
                 }
                 switch (sa.type()) {
                 case ж<syscall.SockaddrInet4> saΔ1: {
-                    ifat = append(ifat, (ΔAddr)(new IPAddrжΔAddr(Ꮡ(new IPAddr(IP: IPv4(saΔ1.Addr[0], saΔ1.Addr[1], saΔ1.Addr[2], saΔ1.Addr[3]))))));
+                    ifat = append(ifat, (Addr)(new IPAddrжAddr(Ꮡ(new IPAddr(IP: IPv4(saΔ1.Addr[0], saΔ1.Addr[1], saΔ1.Addr[2], saΔ1.Addr[3]))))));
                     break;
                 }
                 case ж<syscall.SockaddrInet6> saΔ1: {
                     var ifa = Ꮡ(new IPAddr(IP: new IP(IPv6len)));
                     copy(ifa.IP, saΔ1.Addr[..]);
-                    ifat = append(ifat, (ΔAddr)(new IPAddrжΔAddr(ifa)));
+                    ifat = append(ifat, (Addr)(new IPAddrжAddr(ifa)));
                     break;
                 }}
             }
@@ -137,14 +137,14 @@ internal static (slice<ΔAddr>, error) interfaceAddrTable(ж<Interface> Ꮡifi) 
 
 // interfaceMulticastAddrTable returns addresses for a specific
 // interface.
-internal static (slice<ΔAddr>, error) interfaceMulticastAddrTable(ж<Interface> Ꮡifi) {
+internal static (slice<Addr>, error) interfaceMulticastAddrTable(ж<Interface> Ꮡifi) {
     ref var ifi = ref Ꮡifi.DerefOrNull();
 
     var (aas, err) = adapterAddresses();
     if (err != nil) {
         return (default, err);
     }
-    slice<ΔAddr> ifat = default;
+    slice<Addr> ifat = default;
     foreach (var (_, aa) in range(aas)) {
         var index = aa.IfIndex;
         if (index == 0) { // ipv6IfIndex is a substitute for ifIndex
@@ -158,13 +158,13 @@ internal static (slice<ΔAddr>, error) interfaceMulticastAddrTable(ж<Interface>
                 }
                 switch (sa.type()) {
                 case ж<syscall.SockaddrInet4> saΔ1: {
-                    ifat = append(ifat, (ΔAddr)(new IPAddrжΔAddr(Ꮡ(new IPAddr(IP: IPv4(saΔ1.Addr[0], saΔ1.Addr[1], saΔ1.Addr[2], saΔ1.Addr[3]))))));
+                    ifat = append(ifat, (Addr)(new IPAddrжAddr(Ꮡ(new IPAddr(IP: IPv4(saΔ1.Addr[0], saΔ1.Addr[1], saΔ1.Addr[2], saΔ1.Addr[3]))))));
                     break;
                 }
                 case ж<syscall.SockaddrInet6> saΔ1: {
                     var ifa = Ꮡ(new IPAddr(IP: new IP(IPv6len)));
                     copy(ifa.IP, saΔ1.Addr[..]);
-                    ifat = append(ifat, (ΔAddr)(new IPAddrжΔAddr(ifa)));
+                    ifat = append(ifat, (Addr)(new IPAddrжAddr(ifa)));
                     break;
                 }}
             }

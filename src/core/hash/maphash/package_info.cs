@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -28,7 +27,6 @@ using static go.hash.maphash_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Seed", "ΔSeed")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -58,8 +56,8 @@ using static go.hash.maphash_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("hash/maphash/maphash.go", "maphash.cs", "ACNWAAgCgoKmgoKCgqYAAhYACAKCgpSCgpQAJ1rSgoKCvKKClIKCqqK4goKClJSCuIKCgoK4goKqtIKCgoKClIKUgoKCgqaCgqiSggACENKClIKCqqKCgqiSgpSCggACFPKCqJKCgqaCpqyyggAKGICWgJaSgoKssoKossqClA==")]
-[assembly: GoPositionMap("hash/maphash/maphash_purego.go", "maphash_purego.cs", "ABYsgoK4goKUpoKmgoKCAAYQgoKCkpSCgoKCgoKCgpSUgoKmlKS0goKkpoKmgqaCpoKSpoKCgoKmgoKosoKUgoKCpIKCgqSCgqaClKSCpIKCgriClKSCgoKkgqSCpLiCgqSClKaCgoKUgoKCgpSCpoKClA==")]
+[assembly: GoPositionMap("hash/maphash/maphash.go", "maphash.cs", "ACRWAAgCgoKmgoKCgqYAAhYACAKCgpSCgpQAKVrSgoKCvKKClIKCqqK4goKClJSCuIKCgoK4goKqtIKCgoKClIKUgoKCgqaCgqiSggACENKClIKCqqKCgqiSgpSCggACFPKCyJKCgqaCpsyyggAKGICWgJaSgoLMsoKossqClA==")]
+[assembly: GoPositionMap("hash/maphash/maphash_purego.go", "maphash_purego.cs", "ABcsgoK4goKUpoKmgoKCAAYQgoKCkpSCgoKCgoKCgpSUgoKmlKS0goKkpoKmgqaCpoKCpoKCgoKmgoKosoKUgoKCpIKCgqSCgqaClKSCpIKCgriClKSCgoKkgqSCpLiCgqSClMaCgoKUgoKCgpSCxoKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;
@@ -75,7 +73,7 @@ public static partial class maphash_package
 
     // <TypeAccessibility>
     [GoValueClone("buf")] public partial struct Hash {}
-    public partial struct ΔSeed {}
+    public partial struct Seed {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -94,3 +92,13 @@ public static partial class maphash_package
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(maphash_package.Hash)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class maphashᴛHash;
+// </MethodHolders>

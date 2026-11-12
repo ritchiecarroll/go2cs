@@ -8,6 +8,7 @@ using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -26,6 +27,8 @@ partial struct ticksType {
     internal atomic.Int64 val;
 }
 
+} partial class runtimeᴛticksType {
+
 // init initializes ticks to maximize the chance that we have a good ticksPerSecond reference.
 //
 // Must not run concurrently with ticksPerSecond.
@@ -35,6 +38,8 @@ internal static void init(this ref ticksType t) {
     t.startTicks = cputicks();
     unlock(Ꮡticks.Ꮡlock);
 }
+
+} partial class runtime_package {
 
 // minTimeForTicksPerSecond is the minimum elapsed time we require to consider our ticksPerSecond
 // measurement to be of decent enough quality for profiling.
@@ -144,17 +149,17 @@ internal static ref atomic.Pointer<Func<@string, Action>> godebugNewIncNonDefaul
 
 //go:linkname godebug_setUpdate internal/godebug.setUpdate
 internal static void godebug_setUpdate(Action<@string, @string> update) {
-    var Δp = @new<Action<@string, @string>>();
-    Δp.ValueSlot = update;
-    ᏑgodebugUpdate.Store(Δp);
+    var p = @new<Action<@string, @string>>();
+    p.ValueSlot = update;
+    ᏑgodebugUpdate.Store(p);
     godebugNotify(false);
 }
 
 //go:linkname godebug_setNewIncNonDefault internal/godebug.setNewIncNonDefault
 internal static void godebug_setNewIncNonDefault(Func<@string, Action> newIncNonDefault) {
-    var Δp = @new<Func<@string, Action>>();
-    Δp.ValueSlot = newIncNonDefault;
-    ᏑgodebugNewIncNonDefault.Store(Δp);
+    var p = @new<Func<@string, Action>>();
+    p.ValueSlot = newIncNonDefault;
+    ᏑgodebugNewIncNonDefault.Store(p);
     defaultGOMAXPROCSUpdateGODEBUG();
 }
 
@@ -165,6 +170,8 @@ partial struct godebugInc {
     internal @string name;
     internal atomic.Pointer<Action> inc;
 }
+
+} partial class runtimeᴛgodebugInc {
 
 internal static void IncNonDefault(this ж<godebugInc> Ꮡg) {
     ref var g = ref Ꮡg.DerefOrNull();
@@ -190,11 +197,13 @@ internal static void IncNonDefault(this ж<godebugInc> Ꮡg) {
     inc.ValueSlot();
 }
 
+} partial class runtime_package {
+
 internal static void godebugNotify(bool envChanged) {
     var update = ᏑgodebugUpdate.Load();
     @string env = default;
-    var Δp = ᏑgodebugEnv.Load(); if (Δp != nil) {
-        env = Δp.Value;
+    var p = ᏑgodebugEnv.Load(); if (p != nil) {
+        env = p.Value;
     }
     if (envChanged) {
         reparsedebugvars(env);
@@ -208,9 +217,9 @@ internal static void godebugNotify(bool envChanged) {
 internal static void syscall_runtimeSetenv(@string key, @string value) {
     setenv_c(key, value);
     if (key == "GODEBUG"u8) {
-        var Δp = @new<@string>();
-        Δp.Value = value;
-        ᏑgodebugEnv.Store(Δp);
+        var p = @new<@string>();
+        p.Value = value;
+        ᏑgodebugEnv.Store(p);
         godebugNotify(true);
     }
 }

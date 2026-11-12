@@ -15,6 +15,7 @@ using reflect = reflect_package;
 using strings = strings_package;
 using time = time_package;
 using go.math;
+using static quick_package;
 
 partial class quick_package {
 
@@ -24,7 +25,7 @@ internal static ж<nint> defaultMaxCount = flag.Int("quickchecks", 100, "The def
 partial interface Generator {
     // Generate returns a random instance of the type on which it is a
     // method using the size as a size hint.
-    reflectꓸValue Generate(ж<rand.Rand> rand, nint size);
+    reflect.Value Generate(ж<rand.Rand> rand, nint size);
 }
 
 // randFloat32 generates a random float taking the full range of a float32.
@@ -63,14 +64,14 @@ internal static UntypedInt complexSize => 50;
 // Value returns an arbitrary value of the given type.
 // If the type implements the [Generator] interface, that will be used.
 // Note: To create arbitrary values for structs, all the fields must be exported.
-public static (reflectꓸValue value, bool ok) Value(reflectꓸType t, ж<rand.Rand> randΔ1) {
+public static (reflect.Value value, bool ok) Value(reflect.Type t, ж<rand.Rand> randΔ1) {
     return sizedValue(t, randΔ1, complexSize);
 }
 
 // sizedValue returns an arbitrary value of the given type. The size
 // hint is used for shrinking as a function of indirection level so
 // that recursive data structures will terminate.
-internal static (reflectꓸValue value, bool ok) sizedValue(reflectꓸType t, ж<rand.Rand> Ꮡrand, nint size) {
+internal static (reflect.Value value, bool ok) sizedValue(reflect.Type t, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var (m, okΔ1) = reflect.TypeAssert<Generator>(reflect.Zero(t)); if (okΔ1) {
@@ -80,7 +81,7 @@ internal static (reflectꓸValue value, bool ok) sizedValue(reflectꓸType t, ж
     var v = reflect.New(t).Elem();
     var concrete = t;
     switch (concrete.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔBool: {
+    case var ᴛ when ᴛ == reflect.Bool: {
         v.SetBool((randΔ1.Int() & 1) == 0);
         break;
     }
@@ -116,7 +117,7 @@ internal static (reflectꓸValue value, bool ok) sizedValue(reflectꓸType t, ж
         v.SetInt(randInt64(Ꮡrand));
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔInt: {
+    case var ᴛ when ᴛ == reflect.Int: {
         v.SetInt(randInt64(Ꮡrand));
         break;
     }
@@ -136,7 +137,7 @@ internal static (reflectꓸValue value, bool ok) sizedValue(reflectꓸType t, ж
         v.SetUint((uint64)randInt64(Ꮡrand));
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔUint: {
+    case var ᴛ when ᴛ == reflect.Uint: {
         v.SetUint((uint64)randInt64(Ꮡrand));
         break;
     }
@@ -151,33 +152,33 @@ internal static (reflectꓸValue value, bool ok) sizedValue(reflectꓸType t, ж
             var (key, ok1) = sizedValue(concrete.Key(), Ꮡrand, size);
             var (valueΔ2, ok2) = sizedValue(concrete.Elem(), Ꮡrand, size);
             if (!ok1 || !ok2) {
-                return (new reflectꓸValue(), false);
+                return (new reflect.Value(), false);
             }
             v.SetMapIndex(key, valueΔ2);
         }
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔPointer: {
+    case var ᴛ when ᴛ == reflect.Pointer: {
         if (randΔ1.Intn(size) == 0) {
             v.SetZero(); // Generate nil pointer.
         } else {
             var (elem, okΔ6) = sizedValue(concrete.Elem(), Ꮡrand, size);
             if (!okΔ6) {
-                return (new reflectꓸValue(), false);
+                return (new reflect.Value(), false);
             }
             v.Set(reflect.New(concrete.Elem()));
             v.Elem().Set(elem);
         }
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Slice: {
         nint numElems = randΔ1.Intn(size);
         nint sizeLeft = size - numElems;
         v.Set(reflect.MakeSlice(concrete, numElems, numElems));
         for (nint i = 0; i < numElems; i++) {
             var (elem, okΔ7) = sizedValue(concrete.Elem(), Ꮡrand, sizeLeft);
             if (!okΔ7) {
-                return (new reflectꓸValue(), false);
+                return (new reflect.Value(), false);
             }
             v.Index(i).Set(elem);
         }
@@ -187,13 +188,13 @@ internal static (reflectꓸValue value, bool ok) sizedValue(reflectꓸType t, ж
         for (nint i = 0; i < v.Len(); i++) {
             var (elem, okΔ8) = sizedValue(concrete.Elem(), Ꮡrand, size);
             if (!okΔ8) {
-                return (new reflectꓸValue(), false);
+                return (new reflect.Value(), false);
             }
             v.Index(i).Set(elem);
         }
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.String: {
         nint numChars = randΔ1.Intn(complexSize);
         var codePoints = new slice<rune>(numChars);
         for (nint i = 0; i < numChars; i++) {
@@ -214,14 +215,14 @@ internal static (reflectꓸValue value, bool ok) sizedValue(reflectꓸType t, ж
         for (nint i = 0; i < n; i++) {
             var (elem, okΔ9) = sizedValue(concrete.Field(i).Type, Ꮡrand, sizeLeft);
             if (!okΔ9) {
-                return (new reflectꓸValue(), false);
+                return (new reflect.Value(), false);
             }
             v.Field(i).Set(elem);
         }
         break;
     }
     default: {
-        return (new reflectꓸValue(), false);
+        return (new reflect.Value(), false);
     }}
 
     return (v, true);
@@ -244,11 +245,13 @@ partial struct Config {
     // arbitrary reflect.Values that are congruent with the
     // arguments to the function being tested.
     // If nil, the top-level Value function is used to generate them.
-    public Action<slice<reflectꓸValue>, ж<rand.Rand>> Values;
+    public Action<slice<reflect.Value>, ж<rand.Rand>> Values;
 }
 
 internal static readonly ж<Config> ᏑdefaultConfig = new StaticBox<Config>(default(Config));
 internal static ref Config defaultConfig => ref ((StaticBox<Config>)ᏑdefaultConfig).ValueSlot;
+
+} partial class quickᴛConfig {
 
 // getRand returns the *rand.Rand to use for a given Config.
 internal static ж<rand.Rand> getRand(this ref Config c) {
@@ -275,11 +278,17 @@ internal static nint /*maxCount*/ getMaxCount(this ref Config c) {
     return maxCount;
 }
 
+} partial class quick_package {
+
 // A SetupError is the result of an error in the way that check is being
 // used, independent of the functions being tested.
 partial struct SetupError /*@string*/;
 
+} partial class quickᴛSetupError {
+
 public static @string Error(this SetupError s) { return (@string)s; }
+
+} partial class quick_package {
 
 // A CheckError is the result of Check finding an error.
 partial struct CheckError {
@@ -287,9 +296,13 @@ partial struct CheckError {
     public slice<any> In;
 }
 
+} partial class quickᴛCheckError {
+
 public static @string Error(this ref CheckError s) {
     return fmt.Sprintf("#%d: failed on input %s"u8, s.Count, toString(s.In));
 }
+
+} partial class quick_package {
 
 // A CheckEqualError is the result [CheckEqual] finding an error.
 partial struct CheckEqualError {
@@ -298,9 +311,13 @@ partial struct CheckEqualError {
     public slice<any> Out2;
 }
 
+} partial class quickᴛCheckEqualError {
+
 public static @string Error(this ref CheckEqualError s) {
     return fmt.Sprintf("#%d: failed on input %s. Output 1: %s. Output 2: %s"u8, s.Count, toString(s.In), toString(s.Out1), toString(s.Out2));
 }
+
+} partial class quick_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string argumentIsNotAFunctionˢ => ref argumentIsNotAFunctionˢᵇ;
@@ -340,11 +357,11 @@ public static error Check(any f, ж<Config> Ꮡconfig) {
     if (fType.NumOut() != 1) {
         return ((SetupError)(@string)functionDoesNotReturnOneˢ);
     }
-    if (fType.Out(0).Kind() != reflect.ΔBool) {
+    if (fType.Out(0).Kind() != reflect.Bool) {
         return ((SetupError)(@string)functionDoesNotReturnAˢ);
     }
 
-    var arguments = new slice<reflectꓸValue>(fType.NumIn(), () => new(nil));
+    var arguments = new slice<reflect.Value>(fType.NumIn(), () => new(nil));
     var rand = config.getRand();
     nint maxCount = config.getMaxCount();
 
@@ -394,7 +411,7 @@ public static error CheckEqual(any f, any g, ж<Config> Ꮡconfig) {
         return ((SetupError)(@string)functionsHaveDifferentˢ);
     }
 
-    var arguments = new slice<reflectꓸValue>(xType.NumIn(), () => new(nil));
+    var arguments = new slice<reflect.Value>(xType.NumIn(), () => new(nil));
     var rand = config.getRand();
     nint maxCount = config.getMaxCount();
 
@@ -417,7 +434,7 @@ public static error CheckEqual(any f, any g, ж<Config> Ꮡconfig) {
 
 // arbitraryValues writes Values to args such that args contains Values
 // suitable for calling f.
-internal static error /*err*/ arbitraryValues(slice<reflectꓸValue> args, reflectꓸType f, ref Config config, ж<rand.Rand> randΔ1) {
+internal static error /*err*/ arbitraryValues(slice<reflect.Value> args, reflect.Type f, ref Config config, ж<rand.Rand> randΔ1) {
     error err = default;
 
     if (config.Values != nil) {
@@ -437,9 +454,9 @@ internal static error /*err*/ arbitraryValues(slice<reflectꓸValue> args, refle
     return err;
 }
 
-internal static (reflectꓸValue v, reflectꓸType t, bool ok) functionAndType(any f) {
-    reflectꓸValue v = new(nil);
-    reflectꓸType t = default;
+internal static (reflect.Value v, reflect.Type t, bool ok) functionAndType(any f) {
+    reflect.Value v = new(nil);
+    reflect.Type t = default;
     bool ok = default;
 
     v = reflect.ValueOf(f);
@@ -451,7 +468,7 @@ internal static (reflectꓸValue v, reflectꓸType t, bool ok) functionAndType(a
     return (v, t, ok);
 }
 
-internal static slice<any> toInterfaces(slice<reflectꓸValue> values) {
+internal static slice<any> toInterfaces(slice<reflect.Value> values) {
     var ret = new slice<any>(len(values));
     foreach (var (i, v) in range(values)) {
         ret[i] = v.Interface();

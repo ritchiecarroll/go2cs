@@ -9,7 +9,7 @@ using @internal.syscall;
 
 partial class os_package {
 
-internal static (@string, error) getModuleFileName(syscallꓸHandle handle) {
+internal static (@string, error) getModuleFileName(syscall.Handle handle) {
     var n = (uint32)1024;
     slice<uint16> buf = default;
     for (;;) {

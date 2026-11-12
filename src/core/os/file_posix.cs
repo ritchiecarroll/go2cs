@@ -11,8 +11,11 @@ using time = time_package;
 using @internal;
 using fs = go.io.fs_package;
 using go.io;
+using static os_package;
 
 partial class os_package {
+
+} partial class osᴛFile {
 
 // Close closes the [File], rendering it unusable for I/O.
 // On files that support [File.SetDeadline], any pending I/O operations will
@@ -72,6 +75,8 @@ internal static (nint n, error err) pwrite(this ж<File> Ꮡf, slice<byte> b, in
     return (n, err);
 }
 
+} partial class os_package {
+
 // syscallMode returns the syscall-specific mode bits from Go's portable mode bits.
 internal static uint32 /*o*/ syscallMode(FileMode i) {
     uint32 o = default;
@@ -100,6 +105,8 @@ internal static error chmod(@string name, FileMode mode) {
     return default;
 }
 
+} partial class osᴛFile {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string chmodˢ => ref chmodˢᵇ;
 private static readonly @string chmodˢᵇ = "chmod"u8;
@@ -116,6 +123,8 @@ internal static error chmod(this ж<File> Ꮡf, FileMode mode) {
     }
     return default;
 }
+
+} partial class os_package {
 
 // Chown changes the numeric uid and gid of the named file.
 // If the file is a symbolic link, it changes the uid and gid of the link's target.
@@ -145,6 +154,8 @@ public static error Lchown(@string name, nint uid, nint gid) {
     }
     return default;
 }
+
+} partial class osᴛFile {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string chownˢ => ref chownˢᵇ;
@@ -205,6 +216,8 @@ public static error Sync(this ж<File> Ꮡf) {
     return default;
 }
 
+} partial class os_package {
+
 // Chtimes changes the access and modification times of the named
 // file, similar to the Unix utime() or utimes() functions.
 // A zero [time.Time] value will leave the corresponding file time unchanged.
@@ -233,6 +246,12 @@ internal static array<syscall.Timespec> chtimesUtimes(time.Time atime, time.Time
     set(1, mtime);
     return utimes.Clone();
 }
+
+} partial class osᴛFile {
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string chdirˢ => ref chdirˢᵇ;
+private static readonly @string chdirˢᵇ = "chdir"u8;
 
 // Chdir changes the current working directory to the file,
 // which must be a directory.
@@ -301,6 +320,8 @@ internal static error checkValid(this ж<File> Ꮡf, @string op) {
     }
     return default;
 }
+
+} partial class os_package {
 
 // ignoringEINTR makes a function call and repeats it if it returns an
 // EINTR error. This appears to be required even though we install all

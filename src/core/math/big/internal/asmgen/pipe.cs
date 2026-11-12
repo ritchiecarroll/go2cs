@@ -8,6 +8,7 @@ using bits = go.math.bits_package;
 using slices = slices_package;
 using go.math;
 using ꓸꓸꓸnint = Span<nint>;
+using static asmgen_package;
 
 partial class asmgen_package {
 
@@ -22,8 +23,8 @@ partial class asmgen_package {
 // it can be viewed as a matrix, in which each slice is a row and each column
 // is a set of corresponding words from the different slices.
 // The output can be viewed the same way, although it is often just one row.
-partial struct ΔPipe {
-    internal ж<ΔFunc> f;           // function being generated
+partial struct Pipe {
+    internal ж<Func> f;            // function being generated
     internal @string label;        // prefix for loop labels (default "loop")
     internal bool backward;        // processing columns in reverse
     internal bool started;         // Start has been called
@@ -31,25 +32,27 @@ partial struct ΔPipe {
     internal slice<RegPtr> inPtr;  // input slice pointers
     internal slice<Hint> hints;    // for each inPtr, a register hint to use for its data
     internal slice<RegPtr> outPtr; // output slice pointers
-    internal ΔReg index;           // index register, if in use
+    internal Reg index;            // index register, if in use
     internal bool useIndexCounter; // index counter requested
     internal nint indexCounter;    // index is also counter (386); 0 no, -1 negative counter, +1 positive counter
     internal nint readOff;         // read offset not yet added to index
     internal nint writeOff;        // write offset not yet added to index
     internal slice<nint> factors;  // unrolling factors
-    internal slice<ΔReg> counts;   // iterations for each factor
+    internal slice<Reg> counts;    // iterations for each factor
     internal bool needWrite;       // need a write call during Loop1/LoopN
     internal nint maxColumns;      // maximum columns during unrolled loop
     internal Action unrollStart;   // emit code at start of unrolled body
     internal Action unrollEnd;     // emit code end of unrolled body
 }
 
+} partial class asmgenᴛFunc {
+
 // Pipe creates and returns a new pipe for use in the function f.
-public static ж<ΔPipe> Pipe(this ж<ΔFunc> Ꮡf) {
+public static ж<Pipe> Pipe(this ж<Func> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var a = f.Asm;
-    var p = Ꮡ(new ΔPipe(
+    var p = Ꮡ(new Pipe(
         f: Ꮡf,
         label: "loop",
         maxColumns: 10000000
@@ -60,9 +63,11 @@ public static ж<ΔPipe> Pipe(this ж<ΔFunc> Ꮡf) {
     return p;
 }
 
+} partial class asmgenᴛPipe {
+
 // SetBackward sets the pipe to process the input and output columns in reverse order.
 // This is needed for left shifts, which might otherwise overwrite data they will read later.
-public static void SetBackward(this ref ΔPipe p) {
+public static void SetBackward(this ref Pipe p) {
     if (p.loaded) {
         p.f.Asm.Fatalf("SetBackward after Start/LoadPtrs");
     }
@@ -73,7 +78,7 @@ public static void SetBackward(this ref ΔPipe p) {
 // meaning the loop counter is also used as an index for accessing the slice data.
 // This clever trick is slower on modern processors, but it is still necessary on 386.
 // On non-386 systems, SetUseIndexCounter is a no-op.
-public static void SetUseIndexCounter(this ref ΔPipe p) {
+public static void SetUseIndexCounter(this ref Pipe p) {
     if (p.f.Asm.Arch.memIndex == nil) { // need memIndex (only 386 provides it)
         return;
     }
@@ -82,13 +87,13 @@ public static void SetUseIndexCounter(this ref ΔPipe p) {
 
 // SetLabel sets the label prefix for the loops emitted by the pipe.
 // The default prefix is "loop".
-public static void SetLabel(this ref ΔPipe p, @string label) {
+public static void SetLabel(this ref Pipe p, @string label) {
     p.label = label;
 }
 
 // SetMaxColumns sets the maximum number of
 // columns processed in a single loop body call.
-public static void SetMaxColumns(this ref ΔPipe p, nint m) {
+public static void SetMaxColumns(this ref Pipe p, nint m) {
     p.maxColumns = m;
 }
 
@@ -98,7 +103,7 @@ public static void SetMaxColumns(this ref ΔPipe p, nint m) {
 // If the hint indicates a single register on the target architecture,
 // then SetHint calls SetMaxColumns(1), since the hinted register
 // can only be used for one value at a time.
-public static void SetHint(this ref ΔPipe p, @string name, Hint hint) {
+public static void SetHint(this ref Pipe p, @string name, Hint hint) {
     if (hint == HintMemOK && !p.f.Asm.Arch.memOK) {
         return;
     }
@@ -131,7 +136,7 @@ private static readonly @string runLoopBackwardˢᵇ = "run loop backward"u8;
 // LoadPtrs only needs to be called explicitly when code needs
 // to use LoadN before Start, like when the shift.go generators
 // read an initial word before the loop.
-public static void LoadPtrs(this ref ΔPipe p, ΔReg n) {
+public static void LoadPtrs(this ref Pipe p, Reg n) {
     var a = p.f.Asm;
     if (p.loaded) {
         a.Fatalf("pointers already loaded");
@@ -210,14 +215,14 @@ public static void LoadPtrs(this ref ΔPipe p, ΔReg n) {
 // LoadN returns the next n columns of input words as a slice of rows.
 // Regs for inputs that have been marked using p.SetMemOK will be direct memory references.
 // Regs for other inputs will be newly allocated registers and must be freed.
-public static slice<slice<ΔReg>> LoadN(this ref ΔPipe p, nint n) {
+public static slice<slice<Reg>> LoadN(this ref Pipe p, nint n) {
     var a = p.f.Asm;
-    var regs = new slice<slice<ΔReg>>(len(p.inPtr));
+    var regs = new slice<slice<Reg>>(len(p.inPtr));
     foreach (var (i, vᴛ1) in range(p.inPtr)) {
         ref var ptr = ref heap(new RegPtr(), out var Ꮡptr);
         ptr = vᴛ1;
 
-        regs[i] = new slice<ΔReg>(n);
+        regs[i] = new slice<Reg>(n);
         switch (ᐧ) {
         case {} when a.Arch.loadIncN != nil: {
             // Load from memory and advance pointers at the same time.
@@ -239,7 +244,7 @@ public static slice<slice<ΔReg>> LoadN(this ref ΔPipe p, nint n) {
                 if (p.backward) {
                     off = -(off + 1);
                 }
-                ΔReg mem = default;
+                Reg mem = default;
                 if (p.indexCounter != 0) {
                     mem = a.Arch.memIndex(a, off * a.Arch.WordBytes, p.index, ptr);
                 } else {
@@ -265,7 +270,7 @@ public static slice<slice<ΔReg>> LoadN(this ref ΔPipe p, nint n) {
 }
 
 // StoreN writes regs (a slice of rows) to the next n columns of output, where n = len(regs[0]).
-public static void StoreN(this ref ΔPipe p, slice<slice<ΔReg>> regs) {
+public static void StoreN(this ref Pipe p, slice<slice<Reg>> regs) {
     p.needWrite = false;
     var a = p.f.Asm;
     if (len(regs) != len(p.outPtr)) {
@@ -294,7 +299,7 @@ public static void StoreN(this ref ΔPipe p, slice<slice<ΔReg>> regs) {
                 if (p.backward) {
                     off = -(off + 1);
                 }
-                ΔReg mem = default;
+                Reg mem = default;
                 if (p.indexCounter != 0) {
                     mem = a.Arch.memIndex(a, off * a.Arch.WordBytes, p.index, ptr);
                 } else {
@@ -311,7 +316,7 @@ public static void StoreN(this ref ΔPipe p, slice<slice<ΔReg>> regs) {
 // advancePtrs advances the pointers by step
 // or handles bookkeeping for an imminent index advance by step
 // that the caller will do.
-internal static void advancePtrs(this ref ΔPipe p, nint step) {
+internal static void advancePtrs(this ref Pipe p, nint step) {
     var a = p.f.Asm;
     switch (ᐧ) {
     case {} when a.Arch.loadIncN != nil: {
@@ -329,10 +334,10 @@ internal static void advancePtrs(this ref ΔPipe p, nint step) {
                 step = -step;
             }
             foreach (var (_, ptr) in range(p.inPtr)) {
-                a.Add(a.Imm(step * a.Arch.WordBytes), (ΔReg)ptr, (ΔReg)ptr, KeepCarry);
+                a.Add(a.Imm(step * a.Arch.WordBytes), (Reg)ptr, (Reg)ptr, KeepCarry);
             }
             foreach (var (_, ptr) in range(p.outPtr)) {
-                a.Add(a.Imm(step * a.Arch.WordBytes), (ΔReg)ptr, (ΔReg)ptr, KeepCarry);
+                a.Add(a.Imm(step * a.Arch.WordBytes), (Reg)ptr, (Reg)ptr, KeepCarry);
             }
         }
         break;
@@ -342,13 +347,13 @@ internal static void advancePtrs(this ref ΔPipe p, nint step) {
 // DropInput deletes the named input from the pipe,
 // usually because it has been exhausted.
 // (This is not used yet but will be used in a future generator.)
-public static void DropInput(this ref ΔPipe p, @string name) {
+public static void DropInput(this ref Pipe p, @string name) {
     nint i = slices.Index(p.f.inputs, name);
     if (i < 0) {
         p.f.Asm.Fatalf("unknown input %s", name);
     }
     var ptr = p.inPtr[i];
-    p.f.Asm.Free((ΔReg)ptr);
+    p.f.Asm.Free((Reg)ptr);
     p.inPtr = slices.Delete<slice<RegPtr>, RegPtr>(p.inPtr, i, i + 1);
     p.f.inputs = slices.Delete<slice<@string>, @string>(p.f.inputs, i, i + 1);
     if (len(p.hints) > i) {
@@ -376,7 +381,7 @@ public static void DropInput(this ref ΔPipe p, @string name) {
 // Start must be followed by a call to Loop1 or LoopN,
 // but it is permitted to emit other instructions first,
 // for example to set an initial carry flag.
-public static void Start(this ref ΔPipe p, ΔReg n, params ꓸꓸꓸnint factorsʗp) {
+public static void Start(this ref Pipe p, Reg n, params ꓸꓸꓸnint factorsʗp) {
     var factors = factorsʗp.slice();
 
     var a = p.f.Asm;
@@ -422,7 +427,7 @@ private static readonly @string computeUnrolledLoopˢᵇ = "compute unrolled loo
 
 // Restart prepares to loop over an additional n columns,
 // beyond a previous loop run by p.Start/p.Loop.
-public static void Restart(this ref ΔPipe p, ΔReg n, params ꓸꓸꓸnint factorsʗp) {
+public static void Restart(this ref Pipe p, Reg n, params ꓸꓸꓸnint factorsʗp) {
     var factors = factorsʗp.slice();
 
     var a = p.f.Asm;
@@ -430,7 +435,7 @@ public static void Restart(this ref ΔPipe p, ΔReg n, params ꓸꓸꓸnint fact
         a.Fatalf("pipe not started");
     }
     p.factors = factors;
-    p.counts = new slice<ΔReg>(len(factors));
+    p.counts = new slice<Reg>(len(factors));
     if (len(factors) == 0) {
         factors = [1];
     }
@@ -488,16 +493,16 @@ public static void Restart(this ref ΔPipe p, ΔReg n, params ꓸꓸꓸnint fact
 }
 
 // Done frees all the registers allocated by the pipe.
-public static void Done(this ref ΔPipe p) {
+public static void Done(this ref Pipe p) {
     foreach (var (_, ptr) in range(p.inPtr)) {
-        p.f.Asm.Free((ΔReg)ptr);
+        p.f.Asm.Free((Reg)ptr);
     }
     p.inPtr = default;
     foreach (var (_, ptr) in range(p.outPtr)) {
-        p.f.Asm.Free((ΔReg)ptr);
+        p.f.Asm.Free((Reg)ptr);
     }
     p.outPtr = default;
-    p.index = new ΔReg();
+    p.index = new Reg();
 }
 
 // Loop emits code for the loop, calling block repeatedly to emit code that
@@ -520,7 +525,7 @@ public static void Done(this ref ΔPipe p) {
 //	end()  // set by p.AtUnrollEnd
 //
 // Any registers allocated during block are freed automatically when block returns.
-public static void Loop(this ref ΔPipe p, Action<slice<slice<ΔReg>>, slice<slice<ΔReg>>> block) {
+public static void Loop(this ref Pipe p, Action<slice<slice<Reg>>, slice<slice<Reg>>> block) {
     if (p.factors == nil) {
         p.f.Asm.Fatalf("Pipe.Start not called");
     }
@@ -536,13 +541,13 @@ public static void Loop(this ref ΔPipe p, Action<slice<slice<ΔReg>>, slice<sli
 
 // AtUnrollStart sets a function to call at the start of an unrolled sequence.
 // See [Pipe.Loop] for details.
-public static void AtUnrollStart(this ref ΔPipe p, Action start) {
+public static void AtUnrollStart(this ref Pipe p, Action start) {
     p.unrollStart = start;
 }
 
 // AtUnrollEnd sets a function to call at the end of an unrolled sequence.
 // See [Pipe.Loop] for details.
-public static void AtUnrollEnd(this ref ΔPipe p, Action end) {
+public static void AtUnrollEnd(this ref Pipe p, Action end) {
     p.unrollEnd = end;
 }
 
@@ -553,7 +558,7 @@ internal static ref readonly @string unrollDXInBatchesOfDˢ => ref unrollDXInBat
 private static readonly @string unrollDXInBatchesOfDˢᵇ = "unroll %dX in batches of %d"u8;
 
 // unroll emits a single unrolled loop for the given factor, iterating n times.
-internal static void unroll(this ref ΔPipe p, ΔReg n, nint factor, Action<slice<slice<ΔReg>>, slice<slice<ΔReg>>> block) {
+internal static void unroll(this ref Pipe p, Reg n, nint factor, Action<slice<slice<Reg>>, slice<slice<Reg>>> block) {
     var a = p.f.Asm;
     @string label = fmt.Sprintf("%s%d"u8, p.label, factor);
 
@@ -578,9 +583,9 @@ internal static void unroll(this ref ΔPipe p, ΔReg n, nint factor, Action<slic
     for (nint done = 0; done < factor; ) {
         nint batch = min(factor - done, p.maxColumns);
         var regs = a.RegsUsed();
-        var @out = new slice<slice<ΔReg>>(len(p.outPtr));
+        var @out = new slice<slice<Reg>>(len(p.outPtr));
         foreach (var i in range(len(@out))) {
-            @out[i] = new slice<ΔReg>(batch);
+            @out[i] = new slice<Reg>(batch);
         }
         var @in = p.LoadN(batch);
         p.needWrite = true;
@@ -618,4 +623,4 @@ internal static void unroll(this ref ΔPipe p, ΔReg n, nint factor, Action<slic
     a.Label(label + "done"u8);
 }
 
-} // end asmgen_package
+} // end asmgenᴛPipe

@@ -7,8 +7,8 @@ partial class runtime_package {
 
 // These functions are called from C code via cgo/callbacks.go.
 // Panic.
-internal static void _cgo_panic_internal(ж<byte> Δp) {
-    throw panic(gostringnocopy(Δp));
+internal static void _cgo_panic_internal(ж<byte> p) {
+    throw panic(gostringnocopy(p));
 }
 
 } // end runtime_package

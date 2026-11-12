@@ -15,6 +15,7 @@ using rpc = global::go.net.rpc_package;
 using sync = sync_package;
 using encoding;
 using global::go.net;
+using static jsonrpc_package;
 
 partial class jsonrpc_package {
 
@@ -49,6 +50,8 @@ partial struct clientRequest {
     public uint64 Id; /*`json:"id"`*/
 }
 
+} partial class jsonrpcᴛclientCodec {
+
 internal static error WriteRequest(this ж<clientCodec> Ꮡc, ж<rpc.Request> Ꮡr, any param) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var r = ref Ꮡr.DerefOrNull();
@@ -62,17 +65,23 @@ internal static error WriteRequest(this ж<clientCodec> Ꮡc, ж<rpc.Request> �
     return c.enc.Encode(Ꮡc.Ꮡreq);
 }
 
+} partial class jsonrpc_package {
+
 partial struct clientResponse {
     public uint64 Id; /*`json:"id"`*/
     public ж<json.RawMessage> Result; /*`json:"result"`*/
     public any Error; /*`json:"error"`*/
 }
 
+} partial class jsonrpcᴛclientResponse {
+
 internal static void reset(this ref clientResponse r) {
     r.Id = 0;
     r.Result = default;
     r.Error = default;
 }
+
+} partial class jsonrpcᴛclientCodec {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unspecifiedErrorˢ => ref unspecifiedErrorˢᵇ;
@@ -117,6 +126,8 @@ internal static error ReadResponseBody(this ref clientCodec c, any x) {
 internal static error Close(this ref clientCodec c) {
     return c.c.Close();
 }
+
+} partial class jsonrpc_package {
 
 // NewClient returns a new [rpc.Client] to handle requests to the
 // set of services at the other end of the connection.

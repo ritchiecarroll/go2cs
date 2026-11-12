@@ -10,10 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using scannerꓸError = go.go.scanner_package.ΔError;
-global using tokenꓸFile = go.go.token_package.ΔFile;
-global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
 // </ImportedTypeAliases>
 
 using go;
@@ -42,7 +38,7 @@ using static go.go.build_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<MultiplePackageError, error>(Pointer = true)]
 [assembly: GoImplement<NoGoError, error>(Pointer = true)]
-[assembly: GoImplement<go.go.scanner_package.ΔError, error>]
+[assembly: GoImplement<go.go.scanner_package.Error, error>]
 [assembly: GoImplement<os_package.File, io_package.ReadCloser>(Pointer = true)]
 [assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
@@ -77,9 +73,9 @@ using static go.go.build_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/build/build.go", "build.cs", "AHLuAbKClKiSgpSokoKUqJKClIKq0oK4gtyClIKUgpTokoKCgpSCgoKUqKSCgoKUgoKUlKiSgqaCgpSssoKClIKosoKCypQADBqUlPyygoKCgqaCgoKm/AAJBpKCgoKClIKCppSUAB4ygpSCgoKUgoKUAAgSgqaUgoKUpLTGgoKUtqaCgoKUAHeGArKqogAJFIIAChaUpoKCgpSmACMiABMCpoKmgoKCgoKUpLTGpJKkgrS2lIKCgoKUgsqGgoKCgoKCgqaCgoK4goKCpoKCgtyCgoLcgqaCgoKmlr6CooKClIKCgoKCgoKCgoKUlIKClJSUgpSCgtzKgoKUgoKCgoKCgoKCppS4goKCpoKCgoKCgoKU3IKCgoKCgoKCgqaokoKCgpSClJSCgoKUgpSmgoKCgoKmpoKClAAJFIKUuKaClIKmlKaCgqaCgqKClIKCuIKSgoKCgoKCgoKCgpSClLiClIKCgpSClIKCgpS4+oK0gpS2pILKgoKCgoK4goKCgqaCgoK47oKmgoKCgoKCgoKCgtyCgoKCgpSCgoLcgpKClIKCgoKCpsaCgoK0goKCtIKCgqSCgoKmgoKmgriClJSCgpSCgsqCgpSCpoKUgpSmgqSkpKSkpKSkpJSmgoKUgoKCgoKCpqYACxgADwiE3ILugqTqgoKCgoKYooKC7oLKgsqCmIKClKaCpqaCgoKCgpSmgoKUuIKUgqaSgpSCgpQABhCAgraCgpSCgqbcgoKCgq7igoKCpqa0goK4uIKmgpS0goKUlIK2poKCpoKogoKCmJKClIK0goKClIKUgoKCgpSCtpSs4qaCgoKCgpSmgoKmAAISAAgCggAcUAAPAoSmgoKUlJSmgqaClKaCgqaCgoKmgpSCgriCgpSCpoKmpoKCgpSCqJKokqiUlJaCgpSCgtwAASYAFwiCgsqUgoKUtoKCgoKClJSCgpSCgpSCguwAAhgADAKCgoKUgoKCgIKUpIIACBKClIKmgoKUlIKmgoKCgoKClJSClIKCgqb4rOKCksqCgriCuIKCuIKCppKCgoKCgqaCuIKClKKClKa2tqS0tLS0tLSm6tiUgoKUgoKUgoIAAhwACwKCgoKClIKCgpSCABAggoKUgoKmAAgkABECgoKCgoKCgpS0grSCgsaCgrSCgoKUpIKUgpSCgoKUAAIQ0oKUlIKClKaCAAciAA4CgriClIKUgpSClIKUgpSCuAACJgAPAgAIEoKClJSCgpSCgpSUlIKUuKiiAAYS0g==", "600-608:1;623-625:2;688-714:3;866-874:4;1930-1930:1", "", "1252=Equal/1/2/1,Equal/2/2/1;1581=HasPrefix/2/2/1;2166=Contains/3/3/1;2225=HasPrefix/1/2/1,HasPrefix/2/2/1")]
+[assembly: GoPositionMap("go/build/build.go", "build.cs", "AHbuAbKClKiSgpSokoKUqJKClIKq0oK4gtyClIKUgpQACAiSgoKClIKCgpTIpIKCgpSCgpSUqJKCpoKClKyygoKUgqiygoLKlAAMGpSU/LKCgoKCpoKCgqYACQwACQaSgoKCgpSCgqaUlAAeMoKUgoKClIKClAAIEoKmlIKClKS0xoKClLamgoKClAB5hgKyyqIADRSCAA4WlMaCgoKUpgAlIgATAqaCpoKCgoKClKS0xqSSpIK0tpSCgoKClILKhoKCgoKCgoKmgoKCuIKCgqaCgoLcgoKC3IKmgoKCppa+gqKCgpSCgoKCgoKCgoKClJSCgpSUlIKUgoLcyoKClIKCgoKCgoKCgqaUuIKCgqaCgoKCgoKClNyCgoKCgoKCgoKmqJKCgoKUgpSUgoKClIKUpoKCgoKCpqaCgpQACRSClLimgpSCppSmgoKmgoKigpSCgriCkoKCgoKCgoKCgoKUgpS4gpSCgoKUgpSCgoKUuPqCtIKUtqSCyoKCgoKCuIKCgoKmgoKCuO6CpoKCgoKCgoKCgoLcgoKCgoKUgoKC3IKSgpSCgoKCgqbGgoKCtIKCgrSCgoKkgoKCpoKCpoK4gpSUgoKUgoLKgoKUgqaClIKUxoKkpKSkpKSkpKSUpoKClIKCgoKCgqamAA0YAA8IhNyC7oKk6oKCgoKCmKKCgu6CyoLKgpiCgpSmgqamgoKCgoKUpoKClLiClIKmkoKUgoKUAAYQgIK2goKUgoKm3IKCgoLO4oKCgqamtIKCuLiCpoKUtIKClJSCtqaCgqaCqIKCgpiSgpSCtIKCgpSClIKCgoKUgraUrOKmgoKCgoKUpoKCpgAEEgAIAoIAIFAADwKEpoKClJSUpoKmgpSmgoKmgoKCpoKUgoK4goKUgqaCpsaCgoKUgqiSqJKolJSWgoKUgoLcAAMmABcIgoLKlIKClLaCgoKCgpSUgoKUgoKUgoLsAAQYAAwCgoKClIKCgoCClKSCAAgSgpSCpoKClJSCpoKCgoKCgpSUgpSCgoKm+MzigpLKgoK4griCgriCgqaSgoKCgoKmgriCgpSigpSmtraktLS0tLS0pgAICtiUgoKUgoKUgoIABBwACwKCgoKClIKCgpSCABIggoKUgoKmAAgkABECgoKCgoKCgpS0grSCgsaCgrSCgoKUpIKUgpSCgoKUAAQQ0oKUlIKClKaCAAciAA4CgriClIKUgpSClIKUgpSCuAACJgAPAgAIEoKClJSCgpSCgpSUlIKU2KiiAAYS0g==", "600-608:1;623-625:2;688-714:3;866-874:4;1930-1930:1", "", "1282=Equal/1/2/1,Equal/2/2/1;1619=HasPrefix/2/2/1;2220=Contains/3/3/1;2281=HasPrefix/1/2/1,HasPrefix/2/2/1")]
 [assembly: GoPositionMap("go/build/gc.go", "gc.cs", "AAwekg==")]
-[assembly: GoPositionMap("go/build/read.go", "read.cs", "ACJElILKgpQACRSCqIKYkoK8ooKCgoKmgoKCgpSUqJKClJSCgoKCgoKUzqKCgpTcgoKUgqaUgraCgoKUgoKCgpSmlIK2lIKokoKCqqKCgoKCpoK8ooKCgpSCvKKUgoKUgtiCgoKUgpSC2MyigoKCgpQAAh4ADAKCgpSUAAoU8pSCgoKCgoKClJS4uILKgoKClIKmgriCgqaCgoKClIKCgpSCgoKUpoKClIKmgoKUyoKClIKCAAwagoKCgoKCgoKClKaCgtzuwoKCgqassoKClIKClIKClA==")]
+[assembly: GoPositionMap("go/build/read.go", "read.cs", "ACNElILKgpQACRSCqIK4koK8ooKCgoKmgoKCgpSUqJKClJSCgoKCgoKUzqKCgpTcgoKUgqaUgraCgoKUgoKCgpSmlIK2lIKokoKCqqKCgoKCpoK8ooKCgpSCvKKUgoKUgtiCgoKUgpSC2MyigoKCgpQABB4ADAKCgpSUAAoU8pSCgoKCgoKClJS4uILKgoKClIKmgriCgqaCgoKClIKCgpSCgoKUpoKClIKmgoKUyoKClIKCAAwagoKCgoKCgoKClKaCgtzuwoKCgqassoKClIKClIKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -143,3 +139,17 @@ public static partial class build_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(global::go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(build_package.Context)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildᴛContext;
+[GoMethodHost(typeof(build_package.MultiplePackageError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildᴛMultiplePackageError;
+[GoMethodHost(typeof(build_package.NoGoError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildᴛNoGoError;
+[GoMethodHost(typeof(build_package.Package)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildᴛPackage;
+[GoMethodHost(typeof(build_package.importReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildᴛimportReader;
+// </MethodHolders>

@@ -54,10 +54,10 @@ partial class asmgen_package {
     loopBottomNeg: "ADDL $1, %[1]s; JNZ %[2]s"
 )); }
 
-internal static ΔReg _386MemIndex(ж<Asm> Ꮡa, nint off, ΔReg ix, RegPtr p) {
+internal static Reg _386MemIndex(ж<Asm> Ꮡa, nint off, Reg ix, RegPtr p) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    return new ΔReg(fmt.Sprintf("%d(%s)(%s*%d)"u8, off, p, ix, a.Arch.WordBytes));
+    return new Reg(fmt.Sprintf("%d(%s)(%s*%d)"u8, off, p, ix, a.Arch.WordBytes));
 }
 
 } // end asmgen_package

@@ -11,6 +11,7 @@ using Δsync = sync_package;
 using syscall = syscall_package;
 using time = time_package;
 using go.io;
+using static os_package;
 
 partial class os_package {
 
@@ -26,6 +27,8 @@ partial struct root {
     internal nint refs;   // number of active operations
     internal bool closed; // set when closed
 }
+
+} partial class osᴛroot {
 
 internal static error Close(this ж<root> Ꮡr) {
     GoFrame ᒐ = default;
@@ -87,6 +90,8 @@ internal static void decref(this ж<root> Ꮡr) {
 internal static @string Name(this ref root r) {
     return r.name;
 }
+
+} partial class os_package {
 
 internal static error rootChmod(ref Root r, @string name, FileMode mode) {
     var (_, err) = doInRoot(ref r, name, 0, default, (EmptyStruct, error) (sysfdType parent, @string nameΔ1, bool endsInSlash) => (new EmptyStruct(), chmodat(parent, nameΔ1, mode)));
@@ -544,6 +549,8 @@ internal static (FileMode, error) modeAt(sysfdType parent, @string name) {
 // and the target of that symlink.
 partial struct errSymlink /*@string*/;
 
+} partial class osᴛerrSymlink {
+
 internal static @string Error(this errSymlink _) { throw panic("errSymlink is not user-visible"); }
 
-} // end os_package
+} // end osᴛerrSymlink

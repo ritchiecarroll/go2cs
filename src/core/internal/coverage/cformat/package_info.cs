@@ -60,7 +60,7 @@ using static go.@internal.coverage.cformat_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/coverage/cformat/format.go", "format.cs", "AFSoAYIABRTCgpSCgoKCgoKUrLKClIKCgoKClIKCgoKCuJSuwoKCgoCCyICCpICCpICCpICCpAADFAAJAoKUgoKCpoCCpIKCgoKUgoKUgoKCgqa4rNKCgoK4goKUlIKCpqaCkoKCgpSClIKCgoKmgoCCpICCyIKCuAAGFAAMAoKUgoKUlIKSgqaCgoKUgoLugoKCgoKSkoKCgpTWgpSmgoKCgoKUgoKUlIK4goKCpoCCtoCUpA==", "143-164:1;221-233:1;281-286:1;313-318:2;319-334:3", "", "361=Invoke/1/1/1;397=Invoke/1/1/1", "321:21")]
+[assembly: GoPositionMap("internal/coverage/cformat/format.go", "format.cs", "AFWoAYIABxTCgpSCgoKCgoKUrLKClIKCgoKClIKCgoKCuJTOwoKCgoCCyICCpICCpICCpICCpAAFFAAJAoKUgoKCpoCCpIKCgoKUgoKUgoKCgqa4rNKCgoK4goKUlIKCpqaCkoKCgpSClIKCgoKmgoCCpICCyIKCuAAGFAAMAoKUgoKUlIKSgqaCgoKUgoLugoKCgoKSkoKCgpTWgpSmgoKCgoKUgoKUlIK4goKCpoCCtoCUpA==", "143-164:1;221-233:1;281-286:1;313-318:2;319-334:3", "", "368=Invoke/1/1/1;404=Invoke/1/1/1", "328:21")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
@@ -99,3 +99,14 @@ public static partial class cformat_package
     [GoInit] internal static void initᴛᴛimportꓸtextꓸtabwriter() => builtin.initPackage(typeof(text.tabwriter_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(cformat_package.Formatter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cformatᴛFormatter;
+[GoMethodHost(typeof(cformat_package.pstate)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cformatᴛpstate;
+// </MethodHolders>

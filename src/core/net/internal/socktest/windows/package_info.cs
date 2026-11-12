@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
 // </ImportedTypeAliases>
 
 using go;
@@ -29,7 +27,6 @@ using static go.net.@internal.socktest_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Sockets", "ΔSockets")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -64,10 +61,10 @@ using static go.net.@internal.socktest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/internal/socktest/switch.go", "switch.cs", "ABg0goKCqLKCgoKClIKosoKCgpSCAAYQgJaAloCUggAJFIIAEyyCyoKCgoKUABc0goKUAAsYgoKUqLKCgoI=")]
+[assembly: GoPositionMap("net/internal/socktest/switch.go", "switch.cs", "ABs0goKCqLKCgoKClIKosoKCgpSCAAoQgJaAloC0ggALFIIAFyyCAAgKgoKCgpQAGzSCgpQADxiCgpTIsoKCgg==")]
 [assembly: GoPositionMap("net/internal/socktest/switch_posix.go", "switch_posix.cs", "ABMcgpSkpKQADQiCgpS0tLS0pIKUAAoGgpSkpKQ=")]
-[assembly: GoPositionMap("net/internal/socktest/switch_windows.go", "switch_windows.cs", "AAwY0oKCkoKU2sKCgoI=")]
-[assembly: GoPositionMap("net/internal/socktest/sys_windows.go", "sys_windows.cs", "AAsa8pSCgoKUgoKUgoKClKaCgoKClIKC6OKCgpSCgpSCgpSCgqaCgoKClIKC6OKCgpSCgpSCgpSCgqaCgoKClILo4oKClIKClIKClIKCpoKCgoKUgujigoKUgoKUgoKUgoKmgoKCgpSC6OKCgpSCgpSCgpSCgqaCgoKClIKC")]
+[assembly: GoPositionMap("net/internal/socktest/switch_windows.go", "switch_windows.cs", "AA8Y0oKCkoKU2sKCgoI=")]
+[assembly: GoPositionMap("net/internal/socktest/sys_windows.go", "sys_windows.cs", "AA4a8pSCgoKUgoKUgoKClKaCgoKClIKC6OKCgpSCgpSCgpSCgqaCgoKClIKC6OKCgpSCgpSCgpSCgqaCgoKClILo4oKClIKClIKClIKCpoKCgoKUgujigoKUgoKUgoKUgoKmgoKCgpSC6OKCgpSCgpSCgpSCgqaCgoKClIKC")]
 // </GoSourcePositionMaps>
 
 namespace go.net.@internal;
@@ -85,10 +82,10 @@ public static partial class socktest_package
     internal partial struct stats {}
     public partial struct Cookie {}
     public partial struct FilterType {}
+    public partial struct Sockets {}
     public partial struct Stat {}
     public partial struct Status {}
     public partial struct Switch {}
-    public partial struct ΔSockets {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -104,3 +101,19 @@ public static partial class socktest_package
     [GoInit] internal static void initᴛᴛimportꓸsyscall() => builtin.initPackage(typeof(syscall_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(socktest_package.AfterFilter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class socktestᴛAfterFilter;
+[GoMethodHost(typeof(socktest_package.Cookie)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class socktestᴛCookie;
+[GoMethodHost(typeof(socktest_package.Filter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class socktestᴛFilter;
+[GoMethodHost(typeof(socktest_package.Stat)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class socktestᴛStat;
+[GoMethodHost(typeof(socktest_package.Status)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class socktestᴛStatus;
+[GoMethodHost(typeof(socktest_package.Switch)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class socktestᴛSwitch;
+[GoMethodHost(typeof(socktest_package.stats)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class socktestᴛstats;
+// </MethodHolders>

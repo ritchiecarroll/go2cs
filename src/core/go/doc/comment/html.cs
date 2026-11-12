@@ -7,6 +7,7 @@ using bytes = bytes_package;
 using fmt = fmt_package;
 using strconv = strconv_package;
 using io = io_package;
+using static comment_package;
 
 partial class comment_package {
 
@@ -15,6 +16,8 @@ partial struct htmlPrinter {
     /*embed*/ public ж<Printer> Printer;
     internal bool tight;
 }
+
+} partial class commentᴛPrinter {
 
 // HTML returns an HTML formatting of the [Doc].
 // See the [Printer] documentation for ways to customize the HTML output.
@@ -28,6 +31,8 @@ public static slice<byte> HTML(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     }
     return @out.Bytes();
 }
+
+} partial class commentᴛhtmlPrinter {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string preˢ => ref preˢᵇ;
@@ -109,6 +114,8 @@ internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Bloc
     }}
 }
 
+} partial class comment_package {
+
 // inc increments the decimal string s.
 // For example, inc("1199") == "1200".
 internal static @string inc(@string s) {
@@ -123,12 +130,14 @@ internal static @string inc(@string s) {
     return "1"u8 + ((sstring)b);
 }
 
+} partial class commentᴛhtmlPrinter {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string aHrefˢ => ref aHrefˢᵇ;
 private static readonly @string aHrefˢᵇ = @"<a href="""u8;
 
 // text prints the text sequence x to out.
-internal static void text(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<ΔText> x) {
+internal static void text(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     foreach (var (_, t) in range(x)) {
@@ -218,4 +227,4 @@ internal static void escape(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @st
     @out.WriteString(s.slice(start));
 }
 
-} // end comment_package
+} // end commentᴛhtmlPrinter

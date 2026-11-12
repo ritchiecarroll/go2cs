@@ -9,45 +9,45 @@ using reflect = reflect_package;
 
 partial class gob_package {
 
-[GoLazy] partial class lazyᴛdecArrayHelper { internal static map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>> decArrayHelper = new map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>>{
-    [reflect.ΔBool] = decBoolArray,
+[GoLazy] partial class lazyᴛdecArrayHelper { internal static map<reflect.Kind, Func<ж<decoderState>, reflect.Value, nint, error, bool>> decArrayHelper = new map<reflect.Kind, Func<ж<decoderState>, reflect.Value, nint, error, bool>>{
+    [reflect.Bool] = decBoolArray,
     [reflect.Complex64] = decComplex64Array,
     [reflect.Complex128] = decComplex128Array,
     [reflect.Float32] = decFloat32Array,
     [reflect.Float64] = decFloat64Array,
-    [reflect.ΔInt] = decIntArray,
+    [reflect.Int] = decIntArray,
     [reflect.Int16] = decInt16Array,
     [reflect.Int32] = decInt32Array,
     [reflect.Int64] = decInt64Array,
     [reflect.Int8] = decInt8Array,
-    [reflect.ΔString] = decStringArray,
-    [reflect.ΔUint] = decUintArray,
+    [reflect.String] = decStringArray,
+    [reflect.Uint] = decUintArray,
     [reflect.Uint16] = decUint16Array,
     [reflect.Uint32] = decUint32Array,
     [reflect.Uint64] = decUint64Array,
     [reflect.Uintptr] = decUintptrArray
 }; }
 
-[GoLazy] partial class lazyᴛdecSliceHelper { internal static map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>> decSliceHelper = new map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>>{
-    [reflect.ΔBool] = decBoolSlice,
+[GoLazy] partial class lazyᴛdecSliceHelper { internal static map<reflect.Kind, Func<ж<decoderState>, reflect.Value, nint, error, bool>> decSliceHelper = new map<reflect.Kind, Func<ж<decoderState>, reflect.Value, nint, error, bool>>{
+    [reflect.Bool] = decBoolSlice,
     [reflect.Complex64] = decComplex64Slice,
     [reflect.Complex128] = decComplex128Slice,
     [reflect.Float32] = decFloat32Slice,
     [reflect.Float64] = decFloat64Slice,
-    [reflect.ΔInt] = decIntSlice,
+    [reflect.Int] = decIntSlice,
     [reflect.Int16] = decInt16Slice,
     [reflect.Int32] = decInt32Slice,
     [reflect.Int64] = decInt64Slice,
     [reflect.Int8] = decInt8Slice,
-    [reflect.ΔString] = decStringSlice,
-    [reflect.ΔUint] = decUintSlice,
+    [reflect.String] = decStringSlice,
+    [reflect.Uint] = decUintSlice,
     [reflect.Uint16] = decUint16Slice,
     [reflect.Uint32] = decUint32Slice,
     [reflect.Uint64] = decUint64Slice,
     [reflect.Uintptr] = decUintptrSlice
 }; }
 
-internal static bool decBoolArray(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decBoolArray(ж<decoderState> state, reflect.Value v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -55,7 +55,7 @@ internal static bool decBoolArray(ж<decoderState> state, reflectꓸValue v, nin
     return decBoolSlice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
-internal static bool decBoolSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decBoolSlice(ж<decoderState> Ꮡstate, reflect.Value v, nint length, error ovfl) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<bool>>(out var Ꮡslice);
@@ -77,7 +77,7 @@ internal static bool decBoolSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, 
     return true;
 }
 
-internal static bool decComplex64Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decComplex64Array(ж<decoderState> state, reflect.Value v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -85,7 +85,7 @@ internal static bool decComplex64Array(ж<decoderState> state, reflectꓸValue v
     return decComplex64Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
-internal static bool decComplex64Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decComplex64Slice(ж<decoderState> Ꮡstate, reflect.Value v, nint length, error ovfl) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<complex64>>(out var Ꮡslice);
@@ -109,7 +109,7 @@ internal static bool decComplex64Slice(ж<decoderState> Ꮡstate, reflectꓸValu
     return true;
 }
 
-internal static bool decComplex128Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decComplex128Array(ж<decoderState> state, reflect.Value v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -117,7 +117,7 @@ internal static bool decComplex128Array(ж<decoderState> state, reflectꓸValue 
     return decComplex128Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
-internal static bool decComplex128Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decComplex128Slice(ж<decoderState> Ꮡstate, reflect.Value v, nint length, error ovfl) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<complex128>>(out var Ꮡslice);
@@ -141,7 +141,7 @@ internal static bool decComplex128Slice(ж<decoderState> Ꮡstate, reflectꓸVal
     return true;
 }
 
-internal static bool decFloat32Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decFloat32Array(ж<decoderState> state, reflect.Value v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -149,7 +149,7 @@ internal static bool decFloat32Array(ж<decoderState> state, reflectꓸValue v, 
     return decFloat32Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
-internal static bool decFloat32Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decFloat32Slice(ж<decoderState> Ꮡstate, reflect.Value v, nint length, error ovfl) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<float32>>(out var Ꮡslice);
@@ -171,7 +171,7 @@ internal static bool decFloat32Slice(ж<decoderState> Ꮡstate, reflectꓸValue 
     return true;
 }
 
-internal static bool decFloat64Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decFloat64Array(ж<decoderState> state, reflect.Value v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -179,7 +179,7 @@ internal static bool decFloat64Array(ж<decoderState> state, reflectꓸValue v, 
     return decFloat64Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
-internal static bool decFloat64Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decFloat64Slice(ж<decoderState> Ꮡstate, reflect.Value v, nint length, error ovfl) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<float64>>(out var Ꮡslice);
@@ -201,7 +201,7 @@ internal static bool decFloat64Slice(ж<decoderState> Ꮡstate, reflectꓸValue 
     return true;
 }
 
-internal static bool decIntArray(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decIntArray(ж<decoderState> state, reflect.Value v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -209,7 +209,7 @@ internal static bool decIntArray(ж<decoderState> state, reflectꓸValue v, nint
     return decIntSlice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
-internal static bool decIntSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decIntSlice(ж<decoderState> Ꮡstate, reflect.Value v, nint length, error ovfl) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<nint>>(out var Ꮡslice);
@@ -236,7 +236,7 @@ internal static bool decIntSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, n
     return true;
 }
 
-internal static bool decInt16Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decInt16Array(ж<decoderState> state, reflect.Value v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -244,7 +244,7 @@ internal static bool decInt16Array(ж<decoderState> state, reflectꓸValue v, ni
     return decInt16Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
-internal static bool decInt16Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decInt16Slice(ж<decoderState> Ꮡstate, reflect.Value v, nint length, error ovfl) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<int16>>(out var Ꮡslice);
@@ -270,7 +270,7 @@ internal static bool decInt16Slice(ж<decoderState> Ꮡstate, reflectꓸValue v,
     return true;
 }
 
-internal static bool decInt32Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decInt32Array(ж<decoderState> state, reflect.Value v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -278,7 +278,7 @@ internal static bool decInt32Array(ж<decoderState> state, reflectꓸValue v, ni
     return decInt32Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
-internal static bool decInt32Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decInt32Slice(ж<decoderState> Ꮡstate, reflect.Value v, nint length, error ovfl) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<int32>>(out var Ꮡslice);
@@ -304,7 +304,7 @@ internal static bool decInt32Slice(ж<decoderState> Ꮡstate, reflectꓸValue v,
     return true;
 }
 
-internal static bool decInt64Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decInt64Array(ж<decoderState> state, reflect.Value v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -312,7 +312,7 @@ internal static bool decInt64Array(ж<decoderState> state, reflectꓸValue v, ni
     return decInt64Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
-internal static bool decInt64Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decInt64Slice(ж<decoderState> Ꮡstate, reflect.Value v, nint length, error ovfl) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<int64>>(out var Ꮡslice);
@@ -334,7 +334,7 @@ internal static bool decInt64Slice(ж<decoderState> Ꮡstate, reflectꓸValue v,
     return true;
 }
 
-internal static bool decInt8Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decInt8Array(ж<decoderState> state, reflect.Value v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -342,7 +342,7 @@ internal static bool decInt8Array(ж<decoderState> state, reflectꓸValue v, nin
     return decInt8Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
-internal static bool decInt8Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decInt8Slice(ж<decoderState> Ꮡstate, reflect.Value v, nint length, error ovfl) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<int8>>(out var Ꮡslice);
@@ -368,7 +368,7 @@ internal static bool decInt8Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, 
     return true;
 }
 
-internal static bool decStringArray(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decStringArray(ж<decoderState> state, reflect.Value v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -376,7 +376,7 @@ internal static bool decStringArray(ж<decoderState> state, reflectꓸValue v, n
     return decStringSlice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
-internal static bool decStringSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decStringSlice(ж<decoderState> Ꮡstate, reflect.Value v, nint length, error ovfl) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<@string>>(out var Ꮡslice);
@@ -412,7 +412,7 @@ internal static bool decStringSlice(ж<decoderState> Ꮡstate, reflectꓸValue v
     return true;
 }
 
-internal static bool decUintArray(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decUintArray(ж<decoderState> state, reflect.Value v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -420,7 +420,7 @@ internal static bool decUintArray(ж<decoderState> state, reflectꓸValue v, nin
     return decUintSlice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
-internal static bool decUintSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decUintSlice(ж<decoderState> Ꮡstate, reflect.Value v, nint length, error ovfl) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<nuint>>(out var Ꮡslice);
@@ -446,7 +446,7 @@ internal static bool decUintSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, 
     return true;
 }
 
-internal static bool decUint16Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decUint16Array(ж<decoderState> state, reflect.Value v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -454,7 +454,7 @@ internal static bool decUint16Array(ж<decoderState> state, reflectꓸValue v, n
     return decUint16Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
-internal static bool decUint16Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decUint16Slice(ж<decoderState> Ꮡstate, reflect.Value v, nint length, error ovfl) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<uint16>>(out var Ꮡslice);
@@ -480,7 +480,7 @@ internal static bool decUint16Slice(ж<decoderState> Ꮡstate, reflectꓸValue v
     return true;
 }
 
-internal static bool decUint32Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decUint32Array(ж<decoderState> state, reflect.Value v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -488,7 +488,7 @@ internal static bool decUint32Array(ж<decoderState> state, reflectꓸValue v, n
     return decUint32Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
-internal static bool decUint32Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decUint32Slice(ж<decoderState> Ꮡstate, reflect.Value v, nint length, error ovfl) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<uint32>>(out var Ꮡslice);
@@ -514,7 +514,7 @@ internal static bool decUint32Slice(ж<decoderState> Ꮡstate, reflectꓸValue v
     return true;
 }
 
-internal static bool decUint64Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decUint64Array(ж<decoderState> state, reflect.Value v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -522,7 +522,7 @@ internal static bool decUint64Array(ж<decoderState> state, reflectꓸValue v, n
     return decUint64Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
-internal static bool decUint64Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decUint64Slice(ж<decoderState> Ꮡstate, reflect.Value v, nint length, error ovfl) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<uint64>>(out var Ꮡslice);
@@ -544,7 +544,7 @@ internal static bool decUint64Slice(ж<decoderState> Ꮡstate, reflectꓸValue v
     return true;
 }
 
-internal static bool decUintptrArray(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decUintptrArray(ж<decoderState> state, reflect.Value v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -552,7 +552,7 @@ internal static bool decUintptrArray(ж<decoderState> state, reflectꓸValue v, 
     return decUintptrSlice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
-internal static bool decUintptrSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decUintptrSlice(ж<decoderState> Ꮡstate, reflect.Value v, nint length, error ovfl) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<uintptr>>(out var Ꮡslice);
@@ -580,7 +580,7 @@ internal static bool decUintptrSlice(ж<decoderState> Ꮡstate, reflectꓸValue 
 
 // growSlice is called for a slice that we only partially allocated,
 // to grow it up to length.
-internal static void growSlice<E>(reflectꓸValue v, ref slice<E> ps, nint length) {
+internal static void growSlice<E>(reflect.Value v, ref slice<E> ps, nint length) {
     E zero = GoZero<E>();
     var s = ps;
     s = append(s, zero);

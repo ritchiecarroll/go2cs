@@ -9,6 +9,7 @@ using strings = strings_package;
 using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
+using static csv_package;
 
 partial class csv_package {
 
@@ -42,6 +43,8 @@ public static ж<Writer> NewWriter(io.Writer w) {
         w: bufio.NewWriter(w)
     ));
 }
+
+} partial class csvᴛWriter {
 
 // Write writes a single CSV record to w along with any necessary quoting.
 // A record is a slice of strings with each string being one field.
@@ -190,4 +193,4 @@ internal static bool fieldNeedsQuotes(this ref Writer w, @string field) {
     return unicode.IsSpace(r1);
 }
 
-} // end csv_package
+} // end csvᴛWriter

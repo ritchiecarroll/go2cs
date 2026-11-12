@@ -93,6 +93,7 @@ using time = time_package;
 using go.@internal;
 using go.net;
 using go.runtime;
+using static pprof_package;
 
 partial class pprof_package {
 
@@ -146,7 +147,7 @@ internal static void configureWriteDeadline(http.ResponseWriter w, ж<http.Reque
 
     var (srv, ok) = r.Context().Value(http.ServerContextKey.OrTypedNil())._<ж<http.Server>>(ᐧ);
     if (ok && srv.WriteTimeout > 0) {
-        var timeout = srv.WriteTimeout + ((time.Duration)(int64)(seconds * (float64)time.ΔSecond));
+        var timeout = srv.WriteTimeout + ((time.Duration)(int64)(seconds * (float64)time.Second));
 
         var rc = http.NewResponseController(w);
         rc.SetWriteDeadline(time.Now().Add(timeout));
@@ -197,7 +198,7 @@ public static void Profile(http.ResponseWriter w, ж<http.Request> r) {
             fmt.Sprintf("Could not enable CPU profiling: %s"u8, errΔ1));
         return;
     }
-    sleep(r, ((time.Duration)sec) * time.ΔSecond);
+    sleep(r, ((time.Duration)sec) * time.Second);
     pprof.StopCPUProfile();
 }
 
@@ -227,7 +228,7 @@ public static void Trace(http.ResponseWriter w, ж<http.Request> r) {
             fmt.Sprintf("Could not enable tracing: %s"u8, errΔ1));
         return;
     }
-    sleep(r, (time.Duration)(int64)(sec * (float64)time.ΔSecond));
+    sleep(r, (time.Duration)(int64)(sec * (float64)time.Second));
     trace.Stop();
 }
 
@@ -284,17 +285,33 @@ public static void Symbol(http.ResponseWriter w, ж<http.Request> Ꮡr) {
 
 // Handler returns an HTTP handler that serves the named profile.
 // Available profiles can be found in [runtime/pprof.Profile].
-public static httpꓸHandler Handler(@string name) {
+public static http.Handler Handler(@string name) {
     return ((handler)name);
 }
 
 partial struct handler /*@string*/;
 
+} partial class pprofᴛhandler {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string xContentTypeOptionsˢ => ref xContentTypeOptionsˢᵇ;
+private static readonly @string xContentTypeOptionsˢᵇ = "X-Content-Type-Options"u8;
+internal static ref readonly @string nosniffˢ => ref nosniffˢᵇ;
+private static readonly @string nosniffˢᵇ = "nosniff"u8;
 internal static ref readonly @string unknownProfileˢ => ref unknownProfileˢᵇ;
 private static readonly @string unknownProfileˢᵇ = "Unknown profile"u8;
+internal static ref readonly @string secondsˢ => ref secondsˢᵇ;
+private static readonly @string secondsˢᵇ = "seconds"u8;
 internal static ref readonly @string debugˢ => ref debugˢᵇ;
 private static readonly @string debugˢᵇ = "debug"u8;
+internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
+private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
+internal static ref readonly @string textPlainCharsetUtf8ˢ => ref textPlainCharsetUtf8ˢᵇ;
+private static readonly @string textPlainCharsetUtf8ˢᵇ = "text/plain; charset=utf-8"u8;
+internal static ref readonly @string applicationOctetStreamˢ => ref applicationOctetStreamˢᵇ;
+private static readonly @string applicationOctetStreamˢᵇ = "application/octet-stream"u8;
+internal static ref readonly @string contentDispositionˢ => ref contentDispositionˢᵇ;
+private static readonly @string contentDispositionˢᵇ = "Content-Disposition"u8;
 
 internal static void ServeHTTP(this handler name, http.ResponseWriter w, ж<http.Request> r) {
     w.Header().Set(xContentTypeOptionsˢ, nosniffˢ);
@@ -362,7 +379,7 @@ internal static void serveDeltaProfile(this handler name, http.ResponseWriter w,
             return;
         }
 
-        var t = time.NewTimer(((time.Duration)sec) * time.ΔSecond);
+        var t = time.NewTimer(((time.Duration)sec) * time.Second);
         var tʗ1 = t;
         defer(() => tʗ1.Stop(), ref ᒐ);
 
@@ -408,6 +425,8 @@ internal static void serveDeltaProfile(this handler name, http.ResponseWriter w,
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+} partial class pprof_package {
 
 internal static (ж<profile.Profile>, error) collectProfile(ж<pprof.Profile> p) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);

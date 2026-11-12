@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸType = go.reflect_package.ΔType;
 // </ImportedTypeAliases>
 
 using go;
@@ -29,8 +27,6 @@ using static go.database.sql.driver_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("RowsAffected", "ΔRowsAffected")]
-[assembly: GoTypeAlias("String", "const:ΔString")]
 [assembly: GoTypeAlias("Value", "object")]
 // </ExportedTypeAliases>
 
@@ -45,13 +41,13 @@ using static go.database.sql.driver_package;
 [assembly: GoImplement<NotNull, ValueConverter>]
 [assembly: GoImplement<Null, ValueConverter>(Pointer = true)]
 [assembly: GoImplement<Null, ValueConverter>]
+[assembly: GoImplement<RowsAffected, Result>(Pointer = true)]
+[assembly: GoImplement<RowsAffected, Result>]
 [assembly: GoImplement<boolType, ValueConverter>]
 [assembly: GoImplement<defaultConverter, ValueConverter>]
 [assembly: GoImplement<int32Type, ValueConverter>]
 [assembly: GoImplement<noRows, Result>]
 [assembly: GoImplement<stringType, ValueConverter>]
-[assembly: GoImplement<ΔRowsAffected, Result>(Pointer = true)]
-[assembly: GoImplement<ΔRowsAffected, Result>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -71,8 +67,8 @@ using static go.database.sql.driver_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("database/sql/driver/driver.go", "driver.cs", "AJIBqgIADRwA2AG+AwCVAaACgqaCAAsU1ILmgg==")]
-[assembly: GoPositionMap("database/sql/driver/types.go", "types.cs", "AD9+1JSClKSCgpSkgoKUpoKUgoKUpIKClKYAChKUgoKUgoKUpIKClKSCgpSUAAwWgqSUAAgSgoKUAAgSgoKUqJKClOSklKqiABYqlAABGgALAoaUpoKCppSCgpSClLimgqaClMakpIKClKSkpIKClKSU")]
+[assembly: GoPositionMap("database/sql/driver/driver.go", "driver.cs", "AJMBqgIADRwA2AG+AwCXAaACgqaCAA0U9ILmgg==")]
+[assembly: GoPositionMap("database/sql/driver/types.go", "types.cs", "AEB+9JSClKSCgpSkgoKUpoKUgoKUpIKClKYADBK0goKUgoKUpIKClKSCgpSUABAWgqSUAAwSgoKUAAwSgoKUyJKClOSklKqiABYqlAABGgALAoaUxoKCppSCgpSClLimgqaClMakpIKClKSkpIKClKSU")]
 // </GoSourcePositionMaps>
 
 namespace go.database.sql;
@@ -122,13 +118,13 @@ public static partial class driver_package
     [GoMemberRecord("Value", GoMemberFact.Descriptor, typeof(Valueᴅ))] public partial struct NamedValue {}
     public partial struct NotNull {}
     public partial struct Null {}
+    public partial struct RowsAffected {}
     public partial struct TxOptions {}
     public partial struct boolType {}
     public partial struct defaultConverter {}
     public partial struct int32Type {}
     public partial struct noRows {}
     public partial struct stringType {}
-    public partial struct ΔRowsAffected {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -146,3 +142,20 @@ public static partial class driver_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(driver_package.NotNull)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class driverᴛNotNull;
+[GoMethodHost(typeof(driver_package.Null)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class driverᴛNull;
+[GoMethodHost(typeof(driver_package.RowsAffected)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class driverᴛRowsAffected;
+[GoMethodHost(typeof(driver_package.boolType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class driverᴛboolType;
+[GoMethodHost(typeof(driver_package.defaultConverter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class driverᴛdefaultConverter;
+[GoMethodHost(typeof(driver_package.int32Type)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class driverᴛint32Type;
+[GoMethodHost(typeof(driver_package.noRows)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class driverᴛnoRows;
+[GoMethodHost(typeof(driver_package.stringType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class driverᴛstringType;
+// </MethodHolders>

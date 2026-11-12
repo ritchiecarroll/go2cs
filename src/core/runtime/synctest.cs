@@ -7,6 +7,7 @@ using atomic = @internal.runtime.atomic_package;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -36,6 +37,8 @@ partial struct synctestBubble {
     internal nint running; // non-blocked goroutines
     internal nint active;  // other sources of activity
 }
+
+} partial class runtimeᴛsynctestBubble {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string total0ˢ => ref total0ˢᵇ;
@@ -191,10 +194,14 @@ internal static @unsafe.Pointer raceaddr(this ж<synctestBubble> Ꮡbubble) {
     return (uintptr)@unsafe.Pointer.FromRef(ref bubble);
 }
 
+} partial class runtime_package {
+
 internal static readonly ж<atomic.Uint64> ᏑbubbleGen = new StaticBox<atomic.Uint64>(default(atomic.Uint64));
 internal static ref atomic.Uint64 bubbleGen => ref ((StaticBox<atomic.Uint64>)ᏑbubbleGen).ValueSlot; // bubble ID counter
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string active0ˢ => ref active0ˢᵇ;
+private static readonly @string active0ˢᵇ = "active < 0"u8;
 internal static ref readonly @string timeWentBackwardsˢ => ref timeWentBackwardsˢᵇ;
 private static readonly @string timeWentBackwardsˢᵇ = "time went backwards"u8;
 internal static ref readonly @string deadlockMainBubbleˢ => ref deadlockMainBubbleˢᵇ;
@@ -311,9 +318,13 @@ partial struct synctestDeadlockError {
     internal ж<synctestBubble> bubble;
 }
 
+} partial class runtimeᴛsynctestDeadlockError {
+
 internal static @string Error(this synctestDeadlockError e) {
     return e.reason;
 }
+
+} partial class runtime_package {
 
 internal static bool synctestidle_c(ж<g> Ꮡgp, @unsafe.Pointer _) {
     ref var gp = ref Ꮡgp.DerefOrNull();
@@ -439,10 +450,10 @@ internal static UntypedInt bubbleAssocOtherBubble => 2;   // associated with a d
 // It returns ok==true if p is associated with bubbleid
 // (including if a new association was added),
 // and ok==false if not.
-internal static nint /*assoc*/ getOrSetBubbleSpecial(@unsafe.Pointer Δp, uint64 bubbleid, bool add) {
+internal static nint /*assoc*/ getOrSetBubbleSpecial(@unsafe.Pointer p, uint64 bubbleid, bool add) {
     nint assoc = default;
 
-    var span = spanOfHeap((uintptr)Δp);
+    var span = spanOfHeap((uintptr)p);
     if (span == nil) {
         // This is probably a package var.
         // We can't attach a special to it, so always consider it unbubbled.
@@ -455,7 +466,7 @@ internal static nint /*assoc*/ getOrSetBubbleSpecial(@unsafe.Pointer Δp, uint64
     var mp = acquirem();
     span.ensureSwept();
 
-    var offset = (uintptr)Δp - span.@base();
+    var offset = (uintptr)p - span.@base();
 
     @lock(span.Ꮡspeciallock);
 
@@ -498,22 +509,22 @@ internal static nint /*assoc*/ getOrSetBubbleSpecial(@unsafe.Pointer Δp, uint64
 // It returns false if p is already associated with a different bubble.
 //
 //go:linkname synctest_associate internal/synctest.associate
-internal static nint synctest_associate(@unsafe.Pointer Δp) {
-    return getOrSetBubbleSpecial(Δp, (~getg()).bubble.id, true);
+internal static nint synctest_associate(@unsafe.Pointer p) {
+    return getOrSetBubbleSpecial(p, (~getg()).bubble.id, true);
 }
 
 // synctest_disassociate disassociates p from its bubble.
 //
 //go:linkname synctest_disassociate internal/synctest.disassociate
-internal static void synctest_disassociate(@unsafe.Pointer Δp) {
-    removespecial(Δp, _KindSpecialBubble);
+internal static void synctest_disassociate(@unsafe.Pointer p) {
+    removespecial(p, _KindSpecialBubble);
 }
 
 // synctest_isAssociated reports whether p is associated with the current bubble.
 //
 //go:linkname synctest_isAssociated internal/synctest.isAssociated
-internal static bool synctest_isAssociated(@unsafe.Pointer Δp) {
-    return getOrSetBubbleSpecial(Δp, (~getg()).bubble.id, false) == bubbleAssocCurrentBubble;
+internal static bool synctest_isAssociated(@unsafe.Pointer p) {
+    return getOrSetBubbleSpecial(p, (~getg()).bubble.id, false) == bubbleAssocCurrentBubble;
 }
 
 } // end runtime_package

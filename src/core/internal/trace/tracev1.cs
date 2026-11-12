@@ -32,6 +32,7 @@ using tracev2 = go.@internal.trace.tracev2_package;
 using io = io_package;
 using go.@internal.trace;
 using go.@internal.trace.@internal;
+using static trace_package;
 
 partial class trace_package {
 
@@ -41,11 +42,11 @@ partial struct traceV1Converter {
     internal bool preInit;
     internal map<GoID, EmptyStruct> createdPreInit;
     internal tracev1.Events events;
-    internal slice<ΔEvent> extra;
-    internal array<ΔEvent> extraArr = new(3, () => new());
+    internal slice<Event> extra;
+    internal array<Event> extraArr = new(3, () => new());
     internal map<TaskID, taskState> tasks;
     internal map<ProcID, EmptyStruct> seenProcs;
-    internal ΔTime lastTs;
+    internal Time lastTs;
     internal map<ProcID, ThreadID> procMs;
     internal uint64 lastStwReason;
     internal slice<uint64> inlineToStringID;
@@ -86,6 +87,8 @@ internal static UntypedInt sSTWPageCachePagesLeaked => 27;
 internal static UntypedInt sSTWResetDebugLog => 28;
 
 internal static UntypedInt sLast => 29;
+
+} partial class traceᴛtraceV1Converter {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string traceContainsTooManyˢ => ref traceContainsTooManyˢᵇ;
@@ -185,7 +188,7 @@ internal static error init(this ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
     }
     foreach (var (id, s) in range(pr.InlineStrings)) {
         var nid = max + 1 + (uint64)id;
-        it.inlineToStringID = builtin.append(it.inlineToStringID, nid);
+        it.inlineToStringID = append(it.inlineToStringID, nid);
         add((stringID)nid, s);
     }
     max += (uint64)len(pr.InlineStrings);
@@ -262,7 +265,7 @@ internal static error init(this ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
 
 // next returns the next event, io.EOF if there are no more events, or a
 // descriptive error for invalid events.
-internal static (ΔEvent, error) next(this ж<traceV1Converter> Ꮡit) {
+internal static (Event, error) next(this ж<traceV1Converter> Ꮡit) {
     ref var it = ref Ꮡit.DerefOrNull();
 
     if (len(it.extra) > 0) {
@@ -283,7 +286,7 @@ internal static (ΔEvent, error) next(this ж<traceV1Converter> Ꮡit) {
 
     var (oev, ok) = it.events.Pop();
     if (!ok) {
-        return (new ΔEvent(), io.EOF);
+        return (new Event(), io.EOF);
     }
 
     var (ev, err) = Ꮡit.convertEvent(oev);
@@ -291,7 +294,7 @@ internal static (ΔEvent, error) next(this ж<traceV1Converter> Ꮡit) {
     if (AreEqual(err, errSkip)) {
         return Ꮡit.next();
     } else if (err != nil) {
-        return (new ΔEvent(), err);
+        return (new Event(), err);
     }
 
     // Two events aren't allowed to fall on the same timestamp in the new API,
@@ -303,7 +306,11 @@ internal static (ΔEvent, error) next(this ж<traceV1Converter> Ꮡit) {
     return (ev.ΔClone(), default);
 }
 
+} partial class trace_package {
+
 internal static error errSkip = errors.New("skip event");
+
+} partial class traceᴛtraceV1Converter {
 
 // convertEvent converts an event from the trace v1 format to zero or more
 // events in the new format. Most events translate 1 to 1. Some events don't
@@ -312,7 +319,7 @@ internal static error errSkip = errors.New("skip event");
 // returns the first event and stores additional events in it.extra. When
 // encountering events that tracev1 shouldn't be able to emit, ocnvertEvent
 // returns a descriptive error.
-internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> Ꮡit, ж<tracev1.Event> Ꮡev) {
+internal static (Event OUT, error ERR) convertEvent(this ж<traceV1Converter> Ꮡit, ж<tracev1.Event> Ꮡev) {
     ref var it = ref Ꮡit.DerefOrNull();
     ref var ev = ref Ꮡev.DerefOrNull();
 
@@ -331,7 +338,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
                 // These are goroutines that already existed when tracing started but for which we
                 // received neither GoWaiting, GoInSyscall, or GoStart. These are goroutines that are in
                 // the states _Gidle or _Grunnable.
-                it.extra = builtin.append(it.extra, new ΔEvent(
+                it.extra = append(it.extra, new Event(
                     ctx: new schedCtx(
                         // G: GoID(gid),
                         G: NoGoroutine,
@@ -341,13 +348,13 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
                     table: it.evt,
                     @base: new baseEvent(
                         typ: tracev2.EvGoStatus,
-                        time: ((ΔTime)(int64)ev.Ts),
+                        time: ((Time)(int64)ev.Ts),
                         args: new timedEventArgs(new uint64[]{(uint64)gid, ~(uint64)0, (uint64)tracev2.GoRunnable}.array(4))
                     )
                 ));
             }
             it.createdPreInit = default;
-            return (new ΔEvent(), errSkip);
+            return (new Event(), errSkip);
         }
         break;
     }
@@ -405,7 +412,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
     case var ᴛ when ᴛ == tracev1.EvGoCreate: {
         if (it.preInit) {
             it.createdPreInit[((GoID)(int64)ev.Args[0])] = new EmptyStruct();
-            return (new ΔEvent(), errSkip);
+            return (new Event(), errSkip);
         }
         mappedType = tracev2.EvGoCreate;
         break;
@@ -430,12 +437,12 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
             table: it.evt,
             @base: new baseEvent(
                 typ: tracev2.EvGoLabel,
-                time: ((ΔTime)(int64)ev.Ts),
+                time: ((Time)(int64)ev.Ts),
                 args: new timedEventArgs(new uint64[]{ev.Args[2]}.array(4))
             )
         )
         ];
-        return (new ΔEvent(
+        return (new Event(
             ctx: new schedCtx(
                 G: ((GoID)(int64)ev.G),
                 P: ((ProcID)(int64)ev.P),
@@ -444,7 +451,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
             table: it.evt,
             @base: new baseEvent(
                 typ: tracev2.EvGoStart,
-                time: ((ΔTime)(int64)ev.Ts),
+                time: ((Time)(int64)ev.Ts),
                 args: mappedArgs.Clone()
             )
         ), default);
@@ -540,7 +547,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
             // Convert the old instantaneous syscall event to a pair of syscall
             // begin and syscall end and give it the shortest possible duration,
             // 1ns.
-            var out1 = new ΔEvent(
+            var out1 = new Event(
                 ctx: new schedCtx(
                     G: ((GoID)(int64)ev.G),
                     P: ((ProcID)(int64)ev.P),
@@ -549,22 +556,22 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
                 table: it.evt,
                 @base: new baseEvent(
                     typ: tracev2.EvGoSyscallBegin,
-                    time: ((ΔTime)(int64)ev.Ts),
+                    time: ((Time)(int64)ev.Ts),
                     args: new timedEventArgs(new array<uint64>(4){[1] = (uint64)ev.StkID})
                 )
             );
 
-            var out2 = new ΔEvent(
+            var out2 = new Event(
                 ctx: out1.ctx,
                 table: it.evt,
                 @base: new baseEvent(
                     typ: tracev2.EvGoSyscallEnd,
-                    time: ((ΔTime)(int64)(ev.Ts + 1)),
+                    time: ((Time)(int64)(ev.Ts + 1)),
                     args: new timedEventArgs(new uint64[4].array())
                 )
             );
 
-            it.extra = builtin.append(it.extra, out2.ΔClone());
+            it.extra = append(it.extra, out2.ΔClone());
             return (out1.ΔClone(), default);
         }
         break;
@@ -574,7 +581,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
         break;
     }
     case var ᴛ when ᴛ == tracev1.EvGoSysBlock: {
-        return (new ΔEvent(), errSkip);
+        return (new Event(), errSkip);
     }
     case var ᴛ when ᴛ == tracev1.EvGoWaiting: {
         mappedType = tracev2.EvGoStatus;
@@ -665,7 +672,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
         break;
     }
     default: {
-        return (new ΔEvent(), fmt.Errorf("unexpected event type %v"u8, ev.Type));
+        return (new Event(), fmt.Errorf("unexpected event type %v"u8, ev.Type));
     }}
 
     if (tracev1.EventDescriptions[ev.Type].Stack) {
@@ -687,7 +694,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
     if (g == 0) {
         g = NoGoroutine;
     }
-    var @out = new ΔEvent(
+    var @out = new Event(
         ctx: new schedCtx(
             G: g,
             P: ((ProcID)(int64)ev.P),
@@ -696,12 +703,14 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
         table: it.evt,
         @base: new baseEvent(
             typ: mappedType,
-            time: ((ΔTime)(int64)ev.Ts),
+            time: ((Time)(int64)ev.Ts),
             args: mappedArgs.Clone()
         )
     );
     return (@out.ΔClone(), default);
 }
+
+} partial class trace_package {
 
 // convertV1Trace takes a fully loaded trace in the v1 trace format and
 // returns an iterator over events in the new format.

@@ -8,11 +8,14 @@ using errors = errors_package;
 using fmt = fmt_package;
 using byteorder = @internal.byteorder_package;
 using @internal;
+using static big_package;
 
 partial class big_package {
 
 // Gob codec version. Permits backward-compatible changes to the encoding.
 internal const byte floatGobVersion = 1;
+
+} partial class bigᴛFloat {
 
 // GobEncode implements the [encoding/gob.GobEncoder] interface.
 // The [Float] value and all its attributes (precision,
@@ -145,4 +148,4 @@ public static error UnmarshalText(this ж<Float> Ꮡz, slice<byte> text) {
     return err;
 }
 
-} // end big_package
+} // end bigᴛFloat

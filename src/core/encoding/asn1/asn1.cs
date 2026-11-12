@@ -34,6 +34,7 @@ using utf8 = unicode.utf8_package;
 using @internal;
 using go.math;
 using unicode;
+using static asn1_package;
 
 partial class asn1_package {
 
@@ -43,14 +44,22 @@ partial struct StructuralError {
     public @string Msg;
 }
 
+} partial class asn1ᴛStructuralError {
+
 public static @string Error(this StructuralError e) { return "asn1: structure error: "u8 + e.Msg; }
+
+} partial class asn1_package {
 
 // A SyntaxError suggests that the ASN.1 data is invalid.
 partial struct SyntaxError {
     public @string Msg;
 }
 
+} partial class asn1ᴛSyntaxError {
+
 public static @string Error(this SyntaxError e) { return "asn1: syntax error: "u8 + e.Msg; }
+
+} partial class asn1_package {
 
 // We start by dealing with each of the primitive types in turn.
 // BOOLEAN
@@ -142,15 +151,15 @@ internal static (int32, error) parseInt32(slice<byte> bytes) {
     return ((int32)ret64, default);
 }
 
-internal static ж<bigꓸInt> bigOne = big.NewInt(1);
+internal static ж<big.Int> bigOne = big.NewInt(1);
 
 // parseBigInt treats the given bytes as a big-endian, signed integer and returns
 // the result.
-internal static (ж<bigꓸInt>, error) parseBigInt(slice<byte> bytes) {
+internal static (ж<big.Int>, error) parseBigInt(slice<byte> bytes) {
     var err = checkInteger(bytes); if (err != nil) {
         return (default, err);
     }
-    var ret = @new<bigꓸInt>();
+    var ret = @new<big.Int>();
     if (len(bytes) > 0 && (byte)(bytes[0] & 0x80) == 0x80) {
         // This is a negative number.
         var notBytes = new slice<byte>(len(bytes));
@@ -175,6 +184,8 @@ partial struct BitString {
     public slice<byte> Bytes; // bits packed into bytes.
     public nint BitLength;    // length in bits.
 }
+
+} partial class asn1ᴛBitString {
 
 // At returns the bit at the given index. If the index is out of range it
 // returns 0.
@@ -204,6 +215,8 @@ public static slice<byte> RightAlign(this BitString b) {
 
     return a;
 }
+
+} partial class asn1_package {
 
 // parseBitString parses an ASN.1 bit string from the given byte slice and returns it.
 internal static (BitString ret, error err) parseBitString(slice<byte> bytes) {
@@ -239,6 +252,8 @@ public static ref slice<byte> NullBytes => ref ((StaticBox<slice<byte>>)ᏑNullB
 // An ObjectIdentifier represents an ASN.1 OBJECT IDENTIFIER.
 partial struct ObjectIdentifier /*[]nint*/;
 
+} partial class asn1ᴛObjectIdentifier {
+
 // Equal reports whether oi and other represent the same identifier.
 public static bool Equal(this ObjectIdentifier oi, ObjectIdentifier other) {
     return slices.Equal<ObjectIdentifier, nint>(oi, other);
@@ -258,6 +273,8 @@ public static @string String(this ObjectIdentifier oi) {
 
     return s.String();
 }
+
+} partial class asn1_package {
 
 // parseObjectIdentifier parses an OBJECT IDENTIFIER from the given bytes and
 // returns it. An object identifier is a sequence of variable length integers
@@ -671,8 +688,8 @@ internal static (tagAndLength ret, nint offset, error err) parseTagAndLength(sli
 // parseSequenceOf is used for SEQUENCE OF and SET OF values. It tries to parse
 // a number of ASN.1 values from the given byte slice and returns them as a
 // slice of Go values of the given type.
-internal static (reflectꓸValue ret, error err) parseSequenceOf(slice<byte> bytes, reflectꓸType sliceType, reflectꓸType elemType, nint depth) {
-    reflectꓸValue ret = new(nil);
+internal static (reflect.Value ret, error err) parseSequenceOf(slice<byte> bytes, reflect.Type sliceType, reflect.Type elemType, nint depth) {
+    reflect.Value ret = new(nil);
     error err = default;
 
     var (matchAny, expectedTag, compoundType, ok) = getUniversalType(elemType);
@@ -734,14 +751,14 @@ internal static (reflectꓸValue ret, error err) parseSequenceOf(slice<byte> byt
     return (ret, err);
 }
 
-internal static reflectꓸType bitStringType = reflect.TypeFor<BitString>();
-internal static reflectꓸType objectIdentifierType = reflect.TypeFor<ObjectIdentifier>();
-internal static reflectꓸType enumeratedType = reflect.TypeFor<Enumerated>();
-internal static reflectꓸType flagType = reflect.TypeFor<Flag>();
-internal static reflectꓸType timeType = reflect.TypeFor<time.Time>();
-internal static reflectꓸType rawValueType = reflect.TypeFor<RawValue>();
-internal static reflectꓸType rawContentsType = reflect.TypeFor<RawContent>();
-internal static reflectꓸType bigIntType = reflect.TypeFor<ж<bigꓸInt>>();
+internal static reflect.Type bitStringType = reflect.TypeFor<BitString>();
+internal static reflect.Type objectIdentifierType = reflect.TypeFor<ObjectIdentifier>();
+internal static reflect.Type enumeratedType = reflect.TypeFor<Enumerated>();
+internal static reflect.Type flagType = reflect.TypeFor<Flag>();
+internal static reflect.Type timeType = reflect.TypeFor<time.Time>();
+internal static reflect.Type rawValueType = reflect.TypeFor<RawValue>();
+internal static reflect.Type rawContentsType = reflect.TypeFor<RawContent>();
+internal static reflect.Type bigIntType = reflect.TypeFor<ж<big.Int>>();
 
 // invalidLength reports whether offset + length > sliceLength, or if the
 // addition would overflow.
@@ -756,7 +773,7 @@ private static readonly @string asn1ˢᵇ = "asn1"u8;
 // parseField is the main parsing function. Given a byte slice and an offset
 // into the array, it will try to parse a suitable ASN.1 value out and store it
 // in the given Value.
-internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byte> bytes, nint initOffset, fieldParameters @params, nint depth) {
+internal static (nint offset, error err) parseField(reflect.Value v, slice<byte> bytes, nint initOffset, fieldParameters @params, nint depth) {
     nint offset = default;
     error err = default;
 
@@ -778,7 +795,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
     }
 
     // Deal with the ANY type.
-    var ifaceType = fieldType; if (ifaceType.Kind() == reflect.ΔInterface && ifaceType.NumMethod() == 0) {
+    var ifaceType = fieldType; if (ifaceType.Kind() == reflect.Interface && ifaceType.NumMethod() == 0) {
         tagAndLength tΔ1 = default;
         (tΔ1, offset, err) = parseTagAndLength(bytes, offset);
         if (err != nil) {
@@ -1015,7 +1032,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
         vΔ1.Value = true;
         return (offset, err);
     }
-    case ж<ж<bigꓸInt>> vΔ1: {
+    case ж<ж<big.Int>> vΔ1: {
         var (parsedInt, err1) = parseBigInt(innerBytes);
         if (err1 == nil) {
             vΔ1.ValueSlot = parsedInt;
@@ -1025,7 +1042,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
     }}
     var val = v;
     switch (val.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔBool: {
+    case var ᴛ when ᴛ == reflect.Bool: {
         var (parsedBool, err1) = parseBool(innerBytes);
         if (err1 == nil) {
             val.SetBool(parsedBool);
@@ -1033,7 +1050,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
         err = err1;
         return (offset, err);
     }
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         if (val.Type().Size() == 4) {
             var (parsedInt, err1) = parseInt32(innerBytes);
             if (err1 == nil) {
@@ -1081,7 +1098,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
         // version numbers have increased.
         return (offset, err);
     }
-    case var ᴛ when ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Slice: {
         var sliceType = fieldType;
         if (sliceType.Elem().Kind() == reflect.Uint8) {
             val.Set(reflect.MakeSlice(sliceType, len(innerBytes), len(innerBytes)));
@@ -1095,7 +1112,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
         err = err1;
         return (offset, err);
     }
-    case var ᴛ when ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.String: {
         @string vΔ3 = default;
         switch (universalTag) {
         case var ᴛ2 when ᴛ2 == TagPrintableString: {
@@ -1145,9 +1162,9 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
 
 // canHaveDefaultValue reports whether k is a Kind that we will set a default
 // value for. (A signed integer, essentially.)
-internal static bool canHaveDefaultValue(reflectꓸKind k) {
+internal static bool canHaveDefaultValue(reflect.Kind k) {
     switch (k) {
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return true;
     }}
 
@@ -1157,7 +1174,7 @@ internal static bool canHaveDefaultValue(reflectꓸKind k) {
 // setDefaultValue is used to install a default value, from a tag string, into
 // a Value. It is successful if the field was optional, even if a default value
 // wasn't provided or it failed to install it into the Value.
-internal static bool /*ok*/ setDefaultValue(reflectꓸValue v, fieldParameters @params) {
+internal static bool /*ok*/ setDefaultValue(reflect.Value v, fieldParameters @params) {
     bool ok = default;
 
     if (!@params.optional) {
@@ -1256,8 +1273,10 @@ public static (slice<byte> rest, error err) Unmarshal(slice<byte> b, any val) {
 // An invalidUnmarshalError describes an invalid argument passed to Unmarshal.
 // (The argument to Unmarshal must be a non-nil pointer.)
 partial struct invalidUnmarshalError {
-    public reflectꓸType Type;
+    public reflect.Type Type;
 }
+
+} partial class asn1ᴛinvalidUnmarshalError {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string asn1UnmarshalRecipientˢ => ref asn1UnmarshalRecipientˢᵇ;
@@ -1268,11 +1287,13 @@ internal static @string Error(this ref invalidUnmarshalError e) {
         return asn1UnmarshalRecipientˢ;
     }
 
-    if (e.Type.Kind() != reflect.ΔPointer) {
+    if (e.Type.Kind() != reflect.Pointer) {
         return "asn1: Unmarshal recipient value is non-pointer "u8 + e.Type.String();
     }
     return "asn1: Unmarshal recipient value is nil "u8 + e.Type.String();
 }
+
+} partial class asn1_package {
 
 // UnmarshalWithParams allows field parameters to be specified for the
 // top-level element. The form of the params is the same as the field tags.
@@ -1280,7 +1301,7 @@ public static (slice<byte> rest, error err) UnmarshalWithParams(slice<byte> b, a
     error err = default;
 
     var v = reflect.ValueOf(val);
-    if (v.Kind() != reflect.ΔPointer || v.IsNil()) {
+    if (v.Kind() != reflect.Pointer || v.IsNil()) {
         return (default, new invalidUnmarshalErrorжerror(Ꮡ(new invalidUnmarshalError(reflect.TypeOf(val)))));
     }
     (var offset, err) = parseField(v.Elem(), b, 0, parseFieldParameters(@params), 0);

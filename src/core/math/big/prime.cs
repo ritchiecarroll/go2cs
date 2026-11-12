@@ -5,8 +5,11 @@ namespace go.math;
 
 using rand = go.math.rand_package;
 using go.math;
+using static big_package;
 
 partial class big_package {
+
+} partial class bigᴛInt {
 
 // ProbablyPrime reports whether x is probably prime,
 // applying the Miller-Rabin test with n pseudorandomly chosen bases
@@ -25,7 +28,7 @@ partial class big_package {
 //
 // As of Go 1.8, ProbablyPrime(0) is allowed and applies only a Baillie-PSW test.
 // Before Go 1.8, ProbablyPrime applied only the Miller-Rabin tests, and ProbablyPrime(0) panicked.
-public static bool ProbablyPrime(this ж<ΔInt> Ꮡx, nint n) {
+public static bool ProbablyPrime(this ж<Int> Ꮡx, nint n) {
     GoFrame ᒐ = default;
     try {
         ref var x = ref Ꮡx.DerefOrNull();
@@ -95,23 +98,25 @@ public static bool ProbablyPrime(this ж<ΔInt> Ꮡx, nint n) {
     finally { ᒐ.Run(); }
 }
 
+} partial class bigᴛnat {
+
 // probablyPrimeMillerRabin reports whether n passes reps rounds of the
 // Miller-Rabin primality test, using pseudo-randomly chosen bases.
 // If force2 is true, one of the rounds is forced to use base 2.
 // See Handbook of Applied Cryptography, p. 139, Algorithm 4.24.
 // The number n is known to be non-zero.
-internal static bool probablyPrimeMillerRabin(this Δnat n, ж<stack> stk, nint reps, bool force2) {
-    var nm1 = ((Δnat)default).sub(n, natOne);
+internal static bool probablyPrimeMillerRabin(this nat n, ж<stack> stk, nint reps, bool force2) {
+    var nm1 = ((nat)default).sub(n, natOne);
     // determine q, k such that nm1 = q << k
     nuint k = nm1.trailingZeroBits();
-    var q = ((Δnat)default).rsh(nm1, k);
+    var q = ((nat)default).rsh(nm1, k);
 
-    var nm3 = ((Δnat)default).sub(nm1, natTwo);
+    var nm3 = ((nat)default).sub(nm1, natTwo);
     var randΔ1 = rand.New(rand.NewSource((int64)n[0]));
 
-    Δnat x = default;
-    Δnat y = default;
-    Δnat quotient = default;
+    nat x = default;
+    nat y = default;
+    nat quotient = default;
     nint nm3Len = nm3.bitLen();
 
 NextRandom:
@@ -168,7 +173,7 @@ break_NextRandom:;
 //
 // Crandall and Pomerance, Prime Numbers: A Computational Perspective, 2nd ed.
 // Springer, 2005.
-internal static bool probablyPrimeLucas(this Δnat n, ж<stack> stk) {
+internal static bool probablyPrimeLucas(this nat n, ж<stack> stk) {
     // Discard 0, 1.
     if (len(n) == 0 || n.cmp(natOne) == 0) {
         return false;
@@ -187,10 +192,10 @@ internal static bool probablyPrimeLucas(this Δnat n, ж<stack> stk) {
     // After more than expected failures, check whether n is square
     // (which would cause Jacobi(D, n) = 1 for all D not dividing n).
     Word p = (Word)3;
-    var d = new Δnat(new Word[]{1}.slice());
-    var t1 = (Δnat)default; // temp
-    var intD = Ꮡ(new ΔInt(abs: d));
-    var intN = Ꮡ(new ΔInt(abs: n));
+    var d = new nat(new Word[]{1}.slice());
+    var t1 = (nat)default; // temp
+    var intD = Ꮡ(new Int(abs: d));
+    var intN = Ꮡ(new Int(abs: n));
     for (; ; p++) {
         if (p > 10000) {
             // This is widely believed to be impossible.
@@ -234,10 +239,10 @@ internal static bool probablyPrimeLucas(this Δnat n, ж<stack> stk) {
     // We know gcd(n, 2) = 1 because n is odd.
     //
     // Arrange s = (n - Jacobi(Δ, n)) / 2^r = (n+1) / 2^r.
-    var s = ((Δnat)default).add(n, natOne);
+    var s = ((nat)default).add(n, natOne);
     nint r = (nint)s.trailingZeroBits();
     s = s.rsh(s, (nuint)r);
-    var nm2 = ((Δnat)default).sub(n, natTwo); // n-2
+    var nm2 = ((nat)default).sub(n, natTwo); // n-2
 
     // We apply the "almost extra strong" test, which checks the above conditions
     // except for U_s ≡ 0 mod n, which allows us to avoid computing any U_k values.
@@ -267,10 +272,10 @@ internal static bool probablyPrimeLucas(this Δnat n, ж<stack> stk) {
     //	V(2k+1) = V(k) V(k+1) - P
     //
     // We can therefore start with k=0 and build up to k=s in log₂(s) steps.
-    var natP = ((Δnat)default).setWord(p);
-    var vk = ((Δnat)default).setWord(2);
-    var vk1 = ((Δnat)default).setWord(p);
-    var t2 = (Δnat)default; // temp
+    var natP = ((nat)default).setWord(p);
+    var vk = ((nat)default).setWord(2);
+    var vk1 = ((nat)default).setWord(p);
+    var t2 = (nat)default; // temp
     for (nint i = (nint)s.bitLen(); i >= 0; i--) {
         if (s.bit((nuint)i) != 0) {
             // k' = 2k+1
@@ -340,4 +345,4 @@ internal static bool probablyPrimeLucas(this Δnat n, ж<stack> stk) {
     return false;
 }
 
-} // end big_package
+} // end bigᴛnat

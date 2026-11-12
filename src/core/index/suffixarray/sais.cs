@@ -123,7 +123,7 @@ partial class suffixarray_package {
 // It requires that len(text) fit in an int32
 // and that the caller zero sa.
 internal static void text_32(slice<byte> text, slice<int32> sa) {
-    if ((nint)(int32)builtin.len(text) != builtin.len(text) || builtin.len(text) != builtin.len(sa)) {
+    if ((nint)(int32)len(text) != len(text) || len(text) != len(sa)) {
         throw panic("suffixarray: misuse of text_32");
     }
     sais_8_32(text, 256, sa, new slice<int32>(2 * 256));
@@ -138,15 +138,15 @@ internal static void text_32(slice<byte> text, slice<int32> sa) {
 // then the algorithm runs a little faster.
 // If sais_8_32 modifies tmp, it sets tmp[0] = -1 on return.
 internal static void sais_8_32(slice<byte> text, nint textMax, slice<int32> sa, slice<int32> tmp) {
-    if (builtin.len(sa) != builtin.len(text) || builtin.len(tmp) < textMax) {
+    if (len(sa) != len(text) || len(tmp) < textMax) {
         throw panic("suffixarray: misuse of sais_8_32");
     }
 
     // Trivial base cases. Sorting 0 or 1 things is easy.
-    if (builtin.len(text) == 0) {
+    if (len(text) == 0) {
         return;
     }
-    if (builtin.len(text) == 1) {
+    if (len(text) == 1) {
         sa[0] = 0;
         return;
     }
@@ -158,7 +158,7 @@ internal static void sais_8_32(slice<byte> text, nint textMax, slice<int32> sa, 
     // the character frequency each time we need it.
     slice<int32> freq = default;
     slice<int32> bucket = default;
-    if (builtin.len(tmp) >= 2 * textMax) {
+    if (len(tmp) >= 2 * textMax) {
         (freq, bucket) = (tmp.slice(0, textMax), tmp.slice(textMax, 2 * textMax));
         freq[0] = -1; // mark as uninitialized
     } else {
@@ -189,7 +189,7 @@ internal static void sais_8_32(slice<byte> text, nint textMax, slice<int32> sa, 
             // (simpler) LMS-substring sort order.
             // Copy the original LMS-substring order into the
             // suffix array destination.
-            copy(sa, sa.slice(builtin.len(sa) - numLMS));
+            copy(sa, sa.slice(len(sa) - numLMS));
         }
         expand_8_32(text, freq, bucket, sa, numLMS);
     }
@@ -306,7 +306,7 @@ internal static nint placeLMS_8_32(slice<byte> text, slice<int32> sa, slice<int3
     // nowhere to write it down, so we eliminate it by untruthfully
     // setting isTypeS = false at the start of the loop.
     var (c0, c1, isTypeS) = ((byte)0, (byte)0, false);
-    for (nint i = builtin.len(text) - 1; i >= 0; i--) {
+    for (nint i = len(text) - 1; i >= 0; i--) {
         (c0, c1) = (text[i], c0);
         if (c0 < c1) {
             isTypeS = true;
@@ -378,7 +378,7 @@ internal static void induceSubL_8_32(slice<byte> text, slice<int32> sa, slice<in
     // corresponding to the identified type-L index len(text)-1.
     // Process it before the left-to-right scan of sa proper.
     // See body in loop for commentary.
-    nint k = builtin.len(text) - 1;
+    nint k = len(text) - 1;
     var (c0, c1) = (text[k - 1], text[k]);
     if (c0 < c1) {
         k = -k;
@@ -395,7 +395,7 @@ internal static void induceSubL_8_32(slice<byte> text, slice<int32> sa, slice<in
     sa[b] = (int32)k;
     b++;
 
-    for (nint i = 0; i < builtin.len(sa); i++) {
+    for (nint i = 0; i < len(sa); i++) {
         nint j = (nint)sa[i];
         if (j == 0) {
             // Skip empty entry.
@@ -468,8 +468,8 @@ internal static void induceSubS_8_32(slice<byte> text, slice<int32> sa, slice<in
     var cB = (byte)0;
     var b = bucket[cB];
 
-    nint top = builtin.len(sa);
-    for (nint i = builtin.len(sa) - 1; i >= 0; i--) {
+    nint top = len(sa);
+    for (nint i = len(sa) - 1; i >= 0; i--) {
         nint j = (nint)sa[i];
         if (j == 0) {
             // Skip empty entry.
@@ -549,7 +549,7 @@ internal static void length_8_32(slice<byte> text, slice<int32> sa, nint numLMS)
     // This stanza (until the blank line) is the "LMS-substring iterator",
     // described in placeLMS_8_32 above, with one line added to maintain cx.
     var (c0, c1, isTypeS) = ((byte)0, (byte)0, false);
-    for (nint i = builtin.len(text) - 1; i >= 0; i--) {
+    for (nint i = len(text) - 1; i >= 0; i--) {
         (c0, c1) = (text[i], c0);
         cx = cx << 8 | (uint32)((byte)(c1 + 1)); // byte-only
         if (c0 < c1) {
@@ -565,7 +565,7 @@ internal static void length_8_32(slice<byte> text, slice<int32> sa, nint numLMS)
                 code = 0;
             } else {
                 code = (int32)(end - j);
-                if (code <= 32 / 8 && ~cx >= (uint32)builtin.len(text)) { // byte-only
+                if (code <= 32 / 8 && ~cx >= (uint32)len(text)) { // byte-only
                     code = (int32)(~cx); // byte-only
                 } // byte-only
             }
@@ -590,13 +590,13 @@ internal static nint assignID_8_32(slice<byte> text, slice<int32> sa, nint numLM
     nint id = 0;
     var lastLen = (int32)(-1); // impossible
     var lastPos = (int32)0;
-    foreach (var (_, j) in range(sa.slice(builtin.len(sa) - numLMS))) {
+    foreach (var (_, j) in range(sa.slice(len(sa) - numLMS))) {
         // Is the LMS-substring at index j new, or is it the same as the last one we saw?
         var n = sa[j / 2];
         if (n != lastLen) {
             goto New;
         }
-        if ((uint32)n >= (uint32)builtin.len(text)) {
+        if ((uint32)n >= (uint32)len(text)) {
             // “Length” is really encoded full text, and they match.
             goto Same;
         }
@@ -634,8 +634,8 @@ Same:
 // into the top of sa, so that the recursion result can be stored
 // in the bottom of sa, which sets up for expand_8_32 well.
 internal static void map_32(slice<int32> sa, nint numLMS) {
-    nint w = builtin.len(sa);
-    for (nint i = builtin.len(sa) / 2; i >= 0; i--) {
+    nint w = len(sa);
+    for (nint i = len(sa) / 2; i >= 0; i--) {
         var j = sa[i];
         if (j > 0) {
             w--;
@@ -649,7 +649,7 @@ internal static void map_32(slice<int32> sa, nint numLMS) {
 // written at the left end of sa, and the middle of sa is available for use as
 // temporary frequency and bucket storage.
 internal static void recurse_32(slice<int32> sa, slice<int32> oldTmp, nint numLMS, nint maxID) {
-    var (dst, saTmp, text) = (sa.slice(0, numLMS), sa.slice(numLMS, builtin.len(sa) - numLMS), sa.slice(builtin.len(sa) - numLMS));
+    var (dst, saTmp, text) = (sa.slice(0, numLMS), sa.slice(numLMS, len(sa) - numLMS), sa.slice(len(sa) - numLMS));
 
     // Set up temporary space for recursive call.
     // We must pass sais_32 a tmp buffer with at least maxID entries.
@@ -691,10 +691,10 @@ internal static void recurse_32(slice<int32> sa, slice<int32> oldTmp, nint numLM
     // so this one allocation is guaranteed to suffice for the entire stack
     // of recursive calls.
     var tmp = oldTmp;
-    if (builtin.len(tmp) < builtin.len(saTmp)) {
+    if (len(tmp) < len(saTmp)) {
         tmp = saTmp;
     }
-    if (builtin.len(tmp) < numLMS) {
+    if (len(tmp) < numLMS) {
         // TestSAIS/forcealloc reaches this code.
         nint n = maxID;
         if (n < numLMS / 2) {
@@ -719,12 +719,12 @@ internal static void recurse_32(slice<int32> sa, slice<int32> oldTmp, nint numLM
 // Having mapped the list back to LMS-substring indexes,
 // we can place those into the right buckets.
 internal static void unmap_8_32(slice<byte> text, slice<int32> sa, nint numLMS) {
-    var unmap = sa.slice(builtin.len(sa) - numLMS);
-    nint j = builtin.len(unmap);
+    var unmap = sa.slice(len(sa) - numLMS);
+    nint j = len(unmap);
 
     // "LMS-substring iterator" (see placeLMS_8_32 above).
     var (c0, c1, isTypeS) = ((byte)0, (byte)0, false);
-    for (nint i = builtin.len(text) - 1; i >= 0; i--) {
+    for (nint i = len(text) - 1; i >= 0; i--) {
         (c0, c1) = (text[i], c0);
         if (c0 < c1) {
             isTypeS = true;
@@ -739,7 +739,7 @@ internal static void unmap_8_32(slice<byte> text, slice<int32> sa, nint numLMS) 
 
     // Apply inverse map to subproblem suffix array.
     sa = sa.slice(0, numLMS);
-    for (nint i = 0; i < builtin.len(sa); i++) {
+    for (nint i = 0; i < len(sa); i++) {
         sa[i] = unmap[sa[i]];
     }
 }
@@ -762,7 +762,7 @@ internal static void expand_8_32(slice<byte> text, slice<int32> freq, slice<int3
     var b = bucket[c] - 1;
     bucket[c] = b;
 
-    for (nint i = builtin.len(sa) - 1; i >= 0; i--) {
+    for (nint i = len(sa) - 1; i >= 0; i--) {
         if (i != (nint)b) {
             sa[i] = 0;
             continue;
@@ -801,7 +801,7 @@ internal static void induceL_8_32(slice<byte> text, slice<int32> sa, slice<int32
     // corresponding to the identified type-L index len(text)-1.
     // Process it before the left-to-right scan of sa proper.
     // See body in loop for commentary.
-    nint k = builtin.len(text) - 1;
+    nint k = len(text) - 1;
     var (c0, c1) = (text[k - 1], text[k]);
     if (c0 < c1) {
         k = -k;
@@ -813,7 +813,7 @@ internal static void induceL_8_32(slice<byte> text, slice<int32> sa, slice<int32
     sa[b] = (int32)k;
     b++;
 
-    for (nint i = 0; i < builtin.len(sa); i++) {
+    for (nint i = 0; i < len(sa); i++) {
         nint j = (nint)sa[i];
         if (j <= 0) {
             // Skip empty or negated entry (including negated zero).
@@ -855,7 +855,7 @@ internal static void induceS_8_32(slice<byte> text, slice<int32> sa, slice<int32
     var cB = (byte)0;
     var b = bucket[cB];
 
-    for (nint i = builtin.len(sa) - 1; i >= 0; i--) {
+    for (nint i = len(sa) - 1; i >= 0; i--) {
         nint j = (nint)sa[i];
         if (j >= 0) {
             // Skip non-flagged entry.

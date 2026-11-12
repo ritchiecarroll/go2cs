@@ -89,7 +89,7 @@ partial struct SysProcAttr {
     // the child process when the creating thread dies. Note that the signal
     // is sent on thread termination, which may happen before process termination.
     // There are more details at https://go.dev/issue/27505.
-    public ΔSignal Pdeathsig;
+    public Signal Pdeathsig;
     public uintptr Cloneflags;              // Flags for clone calls.
     public uintptr Unshareflags;            // Flags for unshare calls.
     public slice<SysProcIDMap> UidMappings; // User ID mappings for user namespaces.

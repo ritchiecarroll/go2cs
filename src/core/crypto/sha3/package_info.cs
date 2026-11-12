@@ -62,7 +62,7 @@ using static go.crypto.sha3_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/sha3/sha3.go", "sha3.cs", "ABAggoKCgqiSgoKCgqiSgoKCgqiSgoKCgqiSgoKCgqq0gqaCgpSUgoKCqrSCpoKClJSCgoIACBSSqJKokqiSqJKmgoK6soKokoKokoKokoKokoKokoKokoKokoKokoIACBKCgrqSqJIAAhDSAAIQ0qzSgqzSgqiygqiSgqiSgqiSgqiSgg==", "17-17:1;18-18:2;19-19:3;20-20:4")]
+[assembly: GoPositionMap("crypto/sha3/sha3.go", "sha3.cs", "ABEggoKCgqiSgoKCgqiSgoKCgqiSgoKCgqiSgoKCgqq0gqaCgpSUgoKCqrSCpoKClJSCgoIACBSSqJKokqiSqJLGgoK6soKokoKokoKokoKokoKokoKokoKokoKokoIADBKCgtqSqJIAAhDSAAIQ0szSgqzSgqiygqiSgqiSgqiSgqiSgg==", "17-17:1;18-18:2;19-19:3;20-20:4")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -93,3 +93,14 @@ public static partial class sha3_package
     [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(sha3_package.SHA3)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sha3ᴛSHA3;
+[GoMethodHost(typeof(sha3_package.SHAKE)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sha3ᴛSHAKE;
+// </MethodHolders>

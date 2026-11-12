@@ -47,8 +47,8 @@ internal static void racereleaseacquireg(ref g gp, @unsafe.Pointer addr) { @thro
 internal static void racereleasemerge(@unsafe.Pointer addr) { @throw(raceˢ); }
 internal static void racereleasemergeg(ref g gp, @unsafe.Pointer addr) { @throw(raceˢ); }
 internal static void racefingo() { @throw(raceˢ); }
-internal static void racemalloc(@unsafe.Pointer Δp, uintptr sz) { @throw(raceˢ); }
-internal static void racefree(@unsafe.Pointer Δp, uintptr sz) { @throw(raceˢ); }
+internal static void racemalloc(@unsafe.Pointer p, uintptr sz) { @throw(raceˢ); }
+internal static void racefree(@unsafe.Pointer p, uintptr sz) { @throw(raceˢ); }
 
 internal static uintptr racegostart(uintptr pc) {
     @throw(raceˢ);

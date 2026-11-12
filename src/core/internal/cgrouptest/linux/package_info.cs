@@ -55,7 +55,7 @@ using static go.@internal.cgrouptest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/cgrouptest/cgrouptest_linux.go", "cgrouptest_linux.cs", "AB00guiS6JKCgpSCAAoUAAkCgqaCgpTKppKC3JKmuIKUuKKmmLKCgoKUgpSoABRcABoCgoKmgoKCgoKCgqaUpoKmgrjokoKC", "77-83:1", "", "", "", "101:21,102:13")]
+[assembly: GoPositionMap("internal/cgrouptest/cgrouptest_linux.go", "cgrouptest_linux.cs", "ACA0guiS6JKCgpSCAAwUAAkCgqaCgpTKppKC3JKmuIKUuKKmmLKCgoKUgpSoABRcABoCgoKmgoKCgoKCgqaUpoKmgrjokoKC", "77-83:1", "", "", "", "106:21,107:13")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -91,3 +91,13 @@ public static partial class cgrouptest_package
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(cgrouptest_package.CgroupV2)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgrouptestᴛCgroupV2;
+// </MethodHolders>

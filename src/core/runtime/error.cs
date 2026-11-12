@@ -9,6 +9,7 @@ using sys = @internal.runtime.sys_package;
 using @internal;
 using @internal.runtime;
 using @unsafe = unsafe_package;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -23,7 +24,7 @@ partial class runtime_package {
 // custom application panics and fundamental runtime panics.
 //
 // Packages outside of the Go standard library should not implement Error.
-partial interface ΔError :
+partial interface Error :
     error
 {
     // RuntimeError is a no-op function but
@@ -41,7 +42,13 @@ partial struct TypeAssertionError {
     internal @string missingMethod; // one method needed by Interface, missing from Concrete
 }
 
+} partial class runtimeᴛTypeAssertionError {
+
 public static void RuntimeError(this ref TypeAssertionError _) { }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string interfaceˢ => ref interfaceˢᵇ;
+private static readonly @string interfaceˢᵇ = "interface"u8;
 
 public static @string Error(this ref TypeAssertionError e) {
     @string inter = interfaceˢ;
@@ -68,6 +75,8 @@ public static @string Error(this ref TypeAssertionError e) {
     return "interface conversion: "u8 + cs + " is not "u8 + @as + ": missing method "u8 + e.missingMethod;
 }
 
+} partial class runtime_package {
+
 // itoa converts val to a decimal representation. The result is
 // written somewhere within buf and the location of the result is returned.
 // buf must be at least 20 bytes.
@@ -87,16 +96,22 @@ internal static slice<byte> itoa(slice<byte> buf, uint64 val) {
 // An errorString represents a runtime error described by a single string.
 partial struct errorString /*@string*/;
 
+} partial class runtimeᴛerrorString {
+
 internal static void RuntimeError(this errorString e) { }
 
 internal static @string Error(this errorString e) {
     return "runtime error: "u8 + ((@string)e);
 }
 
+} partial class runtime_package {
+
 partial struct errorAddressString {
     internal @string msg;  // error message
     internal uintptr addr; // memory address where the error occurred
 }
+
+} partial class runtimeᴛerrorAddressString {
 
 internal static void RuntimeError(this errorAddressString e) { }
 
@@ -113,16 +128,22 @@ internal static uintptr Addr(this errorAddressString e) {
     return e.addr;
 }
 
+} partial class runtime_package {
+
 // plainError represents a runtime error described a string without
 // the prefix "runtime error: " after invoking errorString.Error().
 // See Issue #14965.
 partial struct plainError /*@string*/;
+
+} partial class runtimeᴛplainError {
 
 internal static void RuntimeError(this plainError e) { }
 
 internal static @string Error(this plainError e) {
     return (@string)e;
 }
+
+} partial class runtime_package {
 
 // A boundsError represents an indexing or slicing operation gone wrong.
 partial struct boundsError {
@@ -163,7 +184,11 @@ partial struct boundsError {
     [abi.BoundsSlice3C] = "slice bounds out of range [%x::]"
 }.array(); }
 
+} partial class runtimeᴛboundsError {
+
 internal static void RuntimeError(this boundsError e) { }
+
+} partial class runtime_package {
 
 internal static slice<byte> appendIntStr(slice<byte> b, int64 v, bool signed) {
     if (signed && v < 0) {
@@ -174,6 +199,8 @@ internal static slice<byte> appendIntStr(slice<byte> b, int64 v, bool signed) {
     b = appendꓸꓸꓸ(b, itoa(buf[..], (uint64)v));
     return b;
 }
+
+} partial class runtimeᴛboundsError {
 
 internal static @string Error(this boundsError e) {
     var bᴷ = new stackAppend<byte>();
@@ -205,6 +232,8 @@ internal static @string Error(this boundsError e) {
     }
     return (@string)b;
 }
+
+} partial class runtime_package {
 
 partial interface stringer {
     @string String();
@@ -307,7 +336,7 @@ internal static void printanycustomtype(any iʗp) {
     @string typestring = toRType((~eface)._type).@string();
 
     switch ((~eface)._type.Kind()) {
-    case var ᴛ when ᴛ == abi.ΔString: {
+    case var ᴛ when ᴛ == abi.String: {
         print(typestring, (@string)@"(""");
         printindented(~(ж<@string>)(uintptr)((~eface).data));
         print((@string)@""")");

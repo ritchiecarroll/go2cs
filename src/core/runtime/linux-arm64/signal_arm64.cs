@@ -10,47 +10,50 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
 internal static void dumpregs(ж<sigctxt> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    print((@string)"r0      ", (Δhex)c.r0(), (@string)"\n");
-    print((@string)"r1      ", (Δhex)c.r1(), (@string)"\n");
-    print((@string)"r2      ", (Δhex)c.r2(), (@string)"\n");
-    print((@string)"r3      ", (Δhex)c.r3(), (@string)"\n");
-    print((@string)"r4      ", (Δhex)c.r4(), (@string)"\n");
-    print((@string)"r5      ", (Δhex)c.r5(), (@string)"\n");
-    print((@string)"r6      ", (Δhex)c.r6(), (@string)"\n");
-    print((@string)"r7      ", (Δhex)c.r7(), (@string)"\n");
-    print((@string)"r8      ", (Δhex)c.r8(), (@string)"\n");
-    print((@string)"r9      ", (Δhex)c.r9(), (@string)"\n");
-    print((@string)"r10     ", (Δhex)c.r10(), (@string)"\n");
-    print((@string)"r11     ", (Δhex)c.r11(), (@string)"\n");
-    print((@string)"r12     ", (Δhex)c.r12(), (@string)"\n");
-    print((@string)"r13     ", (Δhex)c.r13(), (@string)"\n");
-    print((@string)"r14     ", (Δhex)c.r14(), (@string)"\n");
-    print((@string)"r15     ", (Δhex)c.r15(), (@string)"\n");
-    print((@string)"r16     ", (Δhex)c.r16(), (@string)"\n");
-    print((@string)"r17     ", (Δhex)c.r17(), (@string)"\n");
-    print((@string)"r18     ", (Δhex)c.r18(), (@string)"\n");
-    print((@string)"r19     ", (Δhex)c.r19(), (@string)"\n");
-    print((@string)"r20     ", (Δhex)c.r20(), (@string)"\n");
-    print((@string)"r21     ", (Δhex)c.r21(), (@string)"\n");
-    print((@string)"r22     ", (Δhex)c.r22(), (@string)"\n");
-    print((@string)"r23     ", (Δhex)c.r23(), (@string)"\n");
-    print((@string)"r24     ", (Δhex)c.r24(), (@string)"\n");
-    print((@string)"r25     ", (Δhex)c.r25(), (@string)"\n");
-    print((@string)"r26     ", (Δhex)c.r26(), (@string)"\n");
-    print((@string)"r27     ", (Δhex)c.r27(), (@string)"\n");
-    print((@string)"r28     ", (Δhex)c.r28(), (@string)"\n");
-    print((@string)"r29     ", (Δhex)c.r29(), (@string)"\n");
-    print((@string)"lr      ", (Δhex)c.lr(), (@string)"\n");
-    print((@string)"sp      ", (Δhex)c.sp(), (@string)"\n");
-    print((@string)"pc      ", (Δhex)c.pc(), (@string)"\n");
-    print((@string)"fault   ", (Δhex)(uint64)c.fault(), (@string)"\n");
+    print((@string)"r0      ", (hex)c.r0(), (@string)"\n");
+    print((@string)"r1      ", (hex)c.r1(), (@string)"\n");
+    print((@string)"r2      ", (hex)c.r2(), (@string)"\n");
+    print((@string)"r3      ", (hex)c.r3(), (@string)"\n");
+    print((@string)"r4      ", (hex)c.r4(), (@string)"\n");
+    print((@string)"r5      ", (hex)c.r5(), (@string)"\n");
+    print((@string)"r6      ", (hex)c.r6(), (@string)"\n");
+    print((@string)"r7      ", (hex)c.r7(), (@string)"\n");
+    print((@string)"r8      ", (hex)c.r8(), (@string)"\n");
+    print((@string)"r9      ", (hex)c.r9(), (@string)"\n");
+    print((@string)"r10     ", (hex)c.r10(), (@string)"\n");
+    print((@string)"r11     ", (hex)c.r11(), (@string)"\n");
+    print((@string)"r12     ", (hex)c.r12(), (@string)"\n");
+    print((@string)"r13     ", (hex)c.r13(), (@string)"\n");
+    print((@string)"r14     ", (hex)c.r14(), (@string)"\n");
+    print((@string)"r15     ", (hex)c.r15(), (@string)"\n");
+    print((@string)"r16     ", (hex)c.r16(), (@string)"\n");
+    print((@string)"r17     ", (hex)c.r17(), (@string)"\n");
+    print((@string)"r18     ", (hex)c.r18(), (@string)"\n");
+    print((@string)"r19     ", (hex)c.r19(), (@string)"\n");
+    print((@string)"r20     ", (hex)c.r20(), (@string)"\n");
+    print((@string)"r21     ", (hex)c.r21(), (@string)"\n");
+    print((@string)"r22     ", (hex)c.r22(), (@string)"\n");
+    print((@string)"r23     ", (hex)c.r23(), (@string)"\n");
+    print((@string)"r24     ", (hex)c.r24(), (@string)"\n");
+    print((@string)"r25     ", (hex)c.r25(), (@string)"\n");
+    print((@string)"r26     ", (hex)c.r26(), (@string)"\n");
+    print((@string)"r27     ", (hex)c.r27(), (@string)"\n");
+    print((@string)"r28     ", (hex)c.r28(), (@string)"\n");
+    print((@string)"r29     ", (hex)c.r29(), (@string)"\n");
+    print((@string)"lr      ", (hex)c.lr(), (@string)"\n");
+    print((@string)"sp      ", (hex)c.sp(), (@string)"\n");
+    print((@string)"pc      ", (hex)c.pc(), (@string)"\n");
+    print((@string)"fault   ", (hex)(uint64)c.fault(), (@string)"\n");
 }
+
+} partial class runtimeᴛsigctxt {
 
 //go:nosplit
 //go:nowritebarrierrec
@@ -110,4 +113,4 @@ internal static void pushCall(this ref sigctxt c, uintptr targetPC, uintptr resu
     c.set_pc((uint64)targetPC);
 }
 
-} // end runtime_package
+} // end runtimeᴛsigctxt

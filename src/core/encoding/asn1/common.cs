@@ -181,7 +181,7 @@ private static readonly @string setˢᵇ = "SET"u8;
 
 // Given a reflected Go type, getUniversalType returns the default tag number
 // and expected compound flag.
-internal static (bool matchAny, nint tagNumber, bool isCompound, bool ok) getUniversalType(reflectꓸType t) {
+internal static (bool matchAny, nint tagNumber, bool isCompound, bool ok) getUniversalType(reflect.Type t) {
     switch (t) {
     case var ᴛ when AreEqual(ᴛ, rawValueType): {
         return (true, -1, false, true);
@@ -202,16 +202,16 @@ internal static (bool matchAny, nint tagNumber, bool isCompound, bool ok) getUni
         return (false, TagInteger, false, true);
     }}
     switch (t.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔBool: {
+    case var ᴛ when ᴛ == reflect.Bool: {
         return (false, TagBoolean, false, true);
     }
-    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+    case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return (false, TagInteger, false, true);
     }
     case var ᴛ when ᴛ == reflect.Struct: {
         return (false, TagSequence, true, true);
     }
-    case var ᴛ when ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Slice: {
         if (t.Elem().Kind() == reflect.Uint8) {
             return (false, TagOctetString, false, true);
         }
@@ -220,7 +220,7 @@ internal static (bool matchAny, nint tagNumber, bool isCompound, bool ok) getUni
         }
         return (false, TagSequence, true, true);
     }
-    case var ᴛ when ᴛ == reflect.ΔString: {
+    case var ᴛ when ᴛ == reflect.String: {
         return (false, TagPrintableString, false, true);
     }}
     return (false, 0, false, false);

@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using httpꓸHandler = go.net.http_package.ΔHandler;
-global using httpꓸHeader = go.net.http_package.ΔHeader;
-global using tlsꓸConnectionState = go.crypto.tls_package.ΔConnectionState;
 // </ImportedTypeAliases>
 
 using go;
@@ -73,8 +70,8 @@ using static go.net.http.httptest_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("net/http/httptest/httptest.go", "httptest.cs", "ABMmkgAMNAAXAoKUgoKUpoKClIKUtLTEpIKUgpTulIKmgu4=")]
-[assembly: GoPositionMap("net/http/httptest/recorder.go", "recorder.cs", "AC5mkgALHsKCgoKUAAgU8oKUgqaUgoKCgpSmqrSCgpSClKq0goKUgpSqopSkpJSmAAsYgrqSgqaCgoKClKqigpQACCQADwKClIKU7oKClIKClJSUgIKCgpKClJSCgpSCgsiCgpSClIKmAAIQ0oKClIKClA==")]
-[assembly: GoPositionMap("net/http/httptest/server.go", "server.cs", "AD16goKCgpSUgoKCpgAOHIKCuIKCgqaqooKCAAIS4gAKDrKCpoKCuJKClIKUlJaCgoKCgvqygpSClIKCpoKClJSCgoKUlIKUgoKUgoLcgpKClIKUlIKCgoKqooKCAAYS4oKCgoKCABImgriCpMqAgsiCgrii5NKCgoKCgpSiptKCgoKClAAHEIKSgvjGqKIAAhLipoKCooKiusKCsoKUlIKUgriCgsrGgIKClNaAgoKUpILqgIKmxoK0upCYooKC", "137-145:1;200-208:1;339-342:1;349-402:1", "", "121=newLocalListener/1/1/1", "282:25,353:21")]
+[assembly: GoPositionMap("net/http/httptest/recorder.go", "recorder.cs", "AC9mkgANHsKCgoKUAAgU8oKUgqaUgoKCgpSmqrSCgpSClKq0goKUgpTKopSkpJSmAAsYgtqSgqaCgoKClKqigpQACCQADwKClIKU7oKClIKClJSUgIKCgpKClJSCgpSCgsiCgpSClIKmAAQQ0oKClIKClA==")]
+[assembly: GoPositionMap("net/http/httptest/server.go", "server.cs", "AD56goKCgpSUgoKCpgAOHIKCuIKCgqaqooKCAAIS4gAMDrKCpoKCuJKClIKUlJaCgoKCgvqygpSClIKCpoKClJSCgoKUlIKUgoKUgoLcgpKClIKUlIKCgoLKooKCAAgS4oKCgoKCABImgriCpMqAgsiCgrii5NKCgoKCgpSiptKCgoKClAAHEIKSgvjGqKIAAhLipoKCooKiusKCsoKUlIKUgriCgsrGgIKClNaAgoKUpILqgIKmxoK0upCYooKC", "137-145:1;200-208:1;339-342:1;349-402:1", "", "122=newLocalListener/1/1/1", "289:25,360:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
@@ -122,3 +119,14 @@ public static partial class httptest_package
     [GoInit] internal static void initᴛᴛimportꓸvendorꓸgolang_orgꓸxꓸnetꓸhttpꓸhttpguts() => builtin.initPackage(typeof(vendor.golang.org.x.net.http.httpguts_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(httptest_package.ResponseRecorder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httptestᴛResponseRecorder;
+[GoMethodHost(typeof(httptest_package.Server)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httptestᴛServer;
+// </MethodHolders>

@@ -8,6 +8,7 @@ using slices = slices_package;
 using time = time_package;
 using ꓸꓸꓸAttr = Span<slog_package.Attr>;
 using ꓸꓸꓸany = Span<any>;
+using static slog_package;
 
 partial class slog_package {
 
@@ -24,7 +25,7 @@ partial struct Record {
     // The log message.
     public @string Message;
     // The level of the event.
-    public ΔLevel Level;
+    public Level Level;
     // The program counter at the time the record was constructed, as determined
     // by runtime.Callers. If zero, no program counter is available.
     //
@@ -50,7 +51,7 @@ partial struct Record {
 //
 // NewRecord is intended for logging APIs that want to support a [Handler] as
 // a backend.
-public static Record NewRecord(time.Time t, ΔLevel level, @string msg, uintptr pc) {
+public static Record NewRecord(time.Time t, Level level, @string msg, uintptr pc) {
     return new Record(
         Time: t,
         Message: msg,
@@ -58,6 +59,8 @@ public static Record NewRecord(time.Time t, ΔLevel level, @string msg, uintptr 
         PC: pc
     );
 }
+
+} partial class slogᴛRecord {
 
 // Clone returns a copy of the record with no shared state.
 // The original record and the clone can both be modified
@@ -120,14 +123,14 @@ public static void AddAttrs(this ref Record r, params ꓸꓸꓸAttr attrsʗp) {
         if (!end.isEmpty()) {
             // Don't panic; copy and muddle through.
             r.back = slices.Clip<slice<Attr>, Attr>(r.back);
-            r.back = builtin.append(r.back, String(bugˢ, addAttrsUnsafelyCalledOnˢ));
+            r.back = append(r.back, String(bugˢ, addAttrsUnsafelyCalledOnˢ));
         }
     }
     nint ne = countEmptyGroups(attrs.slice(i));
     r.back = slices.Grow<slice<Attr>, Attr>(r.back, len(attrs.slice(i)) - ne);
     foreach (var (_, a) in range(attrs.slice(i))) {
         if (!a.Value.isEmptyGroup()) {
-            r.back = builtin.append(r.back, a);
+            r.back = append(r.back, a);
         }
     }
 }
@@ -151,10 +154,12 @@ public static void Add(this ref Record r, params ꓸꓸꓸany argsʗp) {
             if (r.back == nil) {
                 r.back = new slice<Attr>(0, countAttrs(args) + 1);
             }
-            r.back = builtin.append(r.back, a);
+            r.back = append(r.back, a);
         }
     }
 }
+
+} partial class slog_package {
 
 // countAttrs returns the number of Attrs that would be created from args.
 internal static nint countAttrs(slice<any> args) {
@@ -195,7 +200,7 @@ internal static (Attr, slice<any>) argsToAttr(slice<any> args) {
 }
 
 // Source describes the location of a line of source code.
-partial struct ΔSource {
+partial struct Source {
     // Function is the package path-qualified function name containing the
     // source line. If non-empty, this string uniquely identifies a single
     // function in the program. This may be the empty string if not known.
@@ -205,6 +210,8 @@ partial struct ΔSource {
     public @string File; /*`json:"file"`*/
     public nint Line; /*`json:"line"`*/
 }
+
+} partial class slogᴛSource {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string functionˢ => ref functionˢᵇ;
@@ -218,31 +225,33 @@ private static readonly @string lineˢᵇ = "line"u8;
 // It is similar to a LogValue method, but we don't want Source
 // to implement LogValuer because it would be resolved before
 // the ReplaceAttr function was called.
-internal static Value group(this ref ΔSource s) {
+internal static Value group(this ref Source s) {
     slice<Attr> @as = default;
     if (s.Function != ""u8) {
-        @as = builtin.append(@as, String(functionˢ, s.Function));
+        @as = append(@as, String(functionˢ, s.Function));
     }
     if (s.File != ""u8) {
-        @as = builtin.append(@as, String(fileˢ, s.File));
+        @as = append(@as, String(fileˢ, s.File));
     }
     if (s.Line != 0) {
-        @as = builtin.append(@as, Int(lineˢ, s.Line));
+        @as = append(@as, Int(lineˢ, s.Line));
     }
     return GroupValue(@as.ꓸꓸꓸ);
 }
 
 // isEmpty returns whether the Source struct is nil or only contains zero fields.
-internal static bool isEmpty(this ж<ΔSource> Ꮡs) {
+internal static bool isEmpty(this ж<Source> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    return Ꮡs == nil || s == new ΔSource();
+    return Ꮡs == nil || s == new Source();
 }
+
+} partial class slogᴛRecord {
 
 // Source returns a new Source for the log event using r's PC.
 // If the PC field is zero, meaning the Record was created without the necessary information
 // or the location is unavailable, then nil is returned.
-public static ж<ΔSource> Source(this Record r) {
+public static ж<Source> Source(this Record r) {
     r = r.ΔClone();
 
     if (r.PC == 0) {
@@ -251,11 +260,11 @@ public static ж<ΔSource> Source(this Record r) {
 
     var fs = runtime.CallersFrames([r.PC]);
     var (f, _) = fs.Next();
-    return Ꮡ(new ΔSource(
+    return Ꮡ(new Source(
         Function: f.Function,
         File: f.File,
         Line: f.Line
     ));
 }
 
-} // end slog_package
+} // end slogᴛRecord

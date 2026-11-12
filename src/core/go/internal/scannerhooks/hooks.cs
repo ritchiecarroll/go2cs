@@ -11,7 +11,7 @@ using global::go.go;
 
 partial class scannerhooks_package {
 
-public static readonly ж<Func<any, tokenꓸPos>> ᏑStringEnd = new StaticBox<Func<any, tokenꓸPos>>(default(Func<any, tokenꓸPos>));
-public static ref Func<any, tokenꓸPos> StringEnd => ref ((StaticBox<Func<any, tokenꓸPos>>)ᏑStringEnd).ValueSlot;
+public static readonly ж<Func<any, token.Pos>> ᏑStringEnd = new StaticBox<Func<any, token.Pos>>(default(Func<any, token.Pos>));
+public static ref Func<any, token.Pos> StringEnd => ref ((StaticBox<Func<any, token.Pos>>)ᏑStringEnd).ValueSlot;
 
 } // end scannerhooks_package

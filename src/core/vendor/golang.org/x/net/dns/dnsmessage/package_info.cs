@@ -27,20 +27,6 @@ using static go.vendor.golang.org.x.net.dns.dnsmessage_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("AAAAResource", "ΔAAAAResource")]
-[assembly: GoTypeAlias("AResource", "ΔAResource")]
-[assembly: GoTypeAlias("CNAMEResource", "ΔCNAMEResource")]
-[assembly: GoTypeAlias("HTTPSResource", "ΔHTTPSResource")]
-[assembly: GoTypeAlias("MXResource", "ΔMXResource")]
-[assembly: GoTypeAlias("NSResource", "ΔNSResource")]
-[assembly: GoTypeAlias("OPTResource", "ΔOPTResource")]
-[assembly: GoTypeAlias("PTRResource", "ΔPTRResource")]
-[assembly: GoTypeAlias("Question", "ΔQuestion")]
-[assembly: GoTypeAlias("SOAResource", "ΔSOAResource")]
-[assembly: GoTypeAlias("SRVResource", "ΔSRVResource")]
-[assembly: GoTypeAlias("SVCBResource", "ΔSVCBResource")]
-[assembly: GoTypeAlias("TXTResource", "ΔTXTResource")]
-[assembly: GoTypeAlias("UnknownResource", "ΔUnknownResource")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -50,20 +36,20 @@ using static go.vendor.golang.org.x.net.dns.dnsmessage_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<AAAAResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<AResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<CNAMEResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<HTTPSResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<MXResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<NSResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<OPTResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<PTRResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<SOAResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<SRVResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<SVCBResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<TXTResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<UnknownResource, ResourceBody>(Pointer = true)]
 [assembly: GoImplement<nestedError, error>(Pointer = true)]
-[assembly: GoImplement<ΔAAAAResource, ResourceBody>(Pointer = true)]
-[assembly: GoImplement<ΔAResource, ResourceBody>(Pointer = true)]
-[assembly: GoImplement<ΔCNAMEResource, ResourceBody>(Pointer = true)]
-[assembly: GoImplement<ΔHTTPSResource, ResourceBody>(Pointer = true)]
-[assembly: GoImplement<ΔMXResource, ResourceBody>(Pointer = true)]
-[assembly: GoImplement<ΔNSResource, ResourceBody>(Pointer = true)]
-[assembly: GoImplement<ΔOPTResource, ResourceBody>(Pointer = true)]
-[assembly: GoImplement<ΔPTRResource, ResourceBody>(Pointer = true)]
-[assembly: GoImplement<ΔSOAResource, ResourceBody>(Pointer = true)]
-[assembly: GoImplement<ΔSRVResource, ResourceBody>(Pointer = true)]
-[assembly: GoImplement<ΔSVCBResource, ResourceBody>(Pointer = true)]
-[assembly: GoImplement<ΔTXTResource, ResourceBody>(Pointer = true)]
-[assembly: GoImplement<ΔUnknownResource, ResourceBody>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -79,7 +65,7 @@ using static go.vendor.golang.org.x.net.dns.dnsmessage_package;
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(Builder))]
 [assembly: GoFieldAccess(typeof(SVCParam))]
-[assembly: GoFieldAccess(typeof(Δheader))]
+[assembly: GoFieldAccess(typeof(header))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -89,8 +75,8 @@ using static go.vendor.golang.org.x.net.dns.dnsmessage_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/net/dns/dnsmessage/message.go", "message.cs", "ADl4ABMqkoKUqJKClAAOIgAHEpKClKiSgpTekgANIAAIFJKClKiSgpSmgoLugoKClIKUpqKClIKCgoKU2qKCgoKIgqaCggAGEKaCppSCgoKClIKUAAgGgoKU3riUgoKCgoKCgoKCgoKCgoKCgoKCggAbQpIAECKygoKClIKUgpSClIKUgpSClKiSAB1UABEkgpSkpKSUqJKCgoKCgqaCgoKClIKUgpSClIKUgpSmggATKIIADSiSgpSCgoKClIKCgpSClAAcPpKClIKCgpSCpoKClIKUgoKCgpSmgoKCgoKUgoKClIKmgoKmgpSCgoKUgoKCgoKmgoKCgpSCgoKUgpSCgoKUgqiSgpSCgoKUgoKUgoKUgoKo/oKCgoKUgpS6koKUgoKUgpSClIKCqJKCgoKCzJKokqjsgoKUgoKCgpSClAADEMKokoKCgoLMkqiSqOyCgpSCgoKClIKUAAMQwqiSgoKCgsySqJKo7IKClIKCgoKUgpQAAxDCqJKCgoKCAAQSwoKUgoKUgoKCrsKClIKClIKCgq7CgpSCgpSCgoKuwoKUgoKUgoKCrsKClIKClIKCgq7CgpSCgpSCgoKuwoKUgoKUgoKCrsKClIKClIKCgq7CgpSCgpSCgoKuwoKUgoKUgoKCrsKClIKClIKCgqiSgoKClIKUgpSClIKUqJKq2IKUgpSClIKmgpSCgoKUggAJFJSCgoKmgoKCpoKCgqaCgoK4qJKEgoKipoKCgqKmgoKCoqaCgoKipgAcVgAKAoKUgoKCgoIAAhwACwKmgoKUgpSokoKUgqiSgpSCqJKClIKokoKUgqaigoKUgrSCtIK0gqSClIKowoKUgpSCgpSClIKmgoKUgpSo0oKUgoKClIKClIKUgpSCqNKClIKCgpSCgpSClIKUgqjSgpSCgoKUgoKUgpSClIKo0oKUgoKClIKClIKUgpSCqNKClIKCgpSCgpSClIKUgqjCgpSCgoKUgoKUgpSClIKo0oKUgoKClIKClIKUgpSCqNKClIKCgpSCgpSClIKUgqjSgpSCgoKUgoKUgpSClIKowoKUgoKClIKClIKUgpSCqMKClIKCgpSCgpSClIKUgqiSgpSUggAYPJIAAhbygoKUgoKCgoKmgoKCgpSClIKUgpSClAACEuKCgriClAAJHrKCgoKCgpSokqyygpSmgoKClIKUgpSClIKClIKUqJKmgoKUpoKClKiSpoKCpoKokqaCgqaCqJIABxKCgpSCpoKClKiSgoKUgpSmgoKUgoKClKiSpoKCgpSCAAsakoKClIKokoKClKzSqJIAAhTylIK4griCpqaUuIK4gqaUgqaC3IKmyoKCppS4qMTKlraUgoKClIKClJSUgoLKgoK4goK0gpSCgoKmgpTGxoKUgpSCgpSmuJSCgoKUgoKUlKaCgvymxtgACRaSgoKUgqiSABgMoqqUgoKCtIKCgrSCgoK0goKCtIKCgrSCgoK0goKCtIKCgrSCgoK0goKCtIKCgrSCgoK0goKCpIKUAAcQgqiSqJKmgoKClAAIEoKokoKCgoKUqJKqgoKClIKClAAHEIKokqiSpoKCgpQABxCCqJKokqaCgoKUABAkgqiSgoKClIKClIKCgoKokgACFIKCgoKUgoKUgoKUgoKUgoKUgoKUgoKUAAcQgqiSgoKCgoKm6JKCgpSCgpSmgoKCgoKCpoKUgpQAChaCqJKCgoKCgoKUqJKugoKClIKClIKClIKClAAHEIKokqiSqIKCgpQABxCCqJKqkqaCgoKUABMqkqqCpoKCgoKClOiSgoKUgqKUpoKCgoKCgoKUgoKClIKClIKUAAgSgqiSqJKqgriClA==", "", "", "373=printUint16/1/1/1,printBool/1/7/2,GoString/1/2/3,printBool/2/7/4,printBool/3/7/5,printBool/4/7/6,printBool/5/7/7,printBool/6/7/8,printBool/7/7/9,GoString/2/2/10;494=GoString/1/2/1,GoString/2/2/2;1728=GoString/1/3/1,GoString/2/3/2,GoString/3/3/3,printUint32/1/1/4,printUint16/1/1/5;2232=GoString/1/3/1,GoString/2/3/2,GoString/3/3/3;2411=printUint16/1/1/1,GoString/1/1/2;2518=GoString/1/2/1,GoString/2/2/2,printUint32/1/5/3,printUint32/2/5/4,printUint32/3/5/5,printUint32/4/5/6,printUint32/5/5/7;2638=printUint16/1/3/1,printUint16/2/3/2,printUint16/3/3/3,GoString/1/1/4;2677=printByteSlice/1/1/1;2699=printByteSlice/1/1/1;2734=printUint16/1/1/1,printByteSlice/1/1/2;2811=GoString/1/1/1,printByteSlice/1/1/2")]
-[assembly: GoPositionMap("vendor/golang.org/x/net/dns/dnsmessage/svcb.go", "svcb.cs", "ABAkgqiSiIKCgqaCAAkUgqiSqJKCgpSCpqqigoKClKaCgqaqooKCgpSCpgAIFJIAESwADBySgpSokoKUpoKCyoKClIKCgpSClIKClKaUgoKUgoKmgsqCgoKCgpKClKaUgpSClIKClIK4poKCgoKSgpSCgpSClIKUgoKmqJKClIKClIKCgq7CrsKCgpSo0oKUgoKUgoKUgpSClIKowoKosoI=", "", "", "23=printUint16/1/1/1,GoString/1/1/2;105=GoString/1/1/1,printByteSlice/1/1/2")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/dns/dnsmessage/message.go", "message.cs", "ADt4ABUqkoKUqJKClAAQIgAJEpKClKiSgpQACQ6SAA8gAAoUkoKUqJKClMaCgu6CgoKUgpSmooKUgoKCgpTaooKCgoiCpoKCAAYQpoKmlIKCgoKUgpQACAaCgpTeuJSCgoKCgoKCgoKCgoKCgoKCgoKCAB1CkgAUIrKCgoKUgpSClIKUgpSClIKUqJIAH1QAEySClKSkpJSokoKCgoKCpoKCgoKUgpSClIKUgpSClKaCABcoggARKJKClIKCgoKUgoKClIKUACA+koKUgoKClIKmgoKUgpSCgoKClKaCgoKCgpSCgoKUgqaCgqaClIKCgpSCgoKCgqaCgoKClIKCgpSClIKCgpSCqJKClIKCgpSCgpSCgpSCgqj+goKCgpSClLqSgpSCgpSClIKUgoKokoKCgoLMkqiSqOyCgpSCgoKClIKUAAMQwqiSgoKCgsySqJKo7IKClIKCgoKUgpQAAxDCqJKCgoKCzJKokqjsgoKUgoKCgpSClAADEMKokoKCgoIABBLCgpSCgpSCgoKuwoKUgoKUgoKCrsKClIKClIKCgq7CgpSCgpSCgoKuwoKUgoKUgoKCrsKClIKClIKCgq7CgpSCgpSCgoKuwoKUgoKUgoKCrsKClIKClIKCgq7CgpSCgpSCgoKuwoKUgoKUgoKCyJKCgoKUgpSClIKUgpSokqrYgpSClIKUgqaClIKCgpSCAAkUlIKCgqaCgoKmgoKCpoKCgriokoSCgqKmgoKCoqaCgoKipoKCgqKmAB5WAAoCgpSCgoKCggAEHAALAqaCgpSClKiSgpSCqJKClIKokoKUgqiSgpSCpqKCgpSCtIK0grSCpIKUgqjCgpSClIKClIKUgqaCgpSClKjSgpSCgoKUgoKUgpSClIKo0oKUgoKClIKClIKUgpSCqNKClIKCgpSCgpSClIKUgqjSgpSCgoKUgoKUgpSClIKo0oKUgoKClIKClIKUgpSCqMKClIKCgpSCgpSClIKUgqjSgpSCgoKUgoKUgpSClIKo0oKUgoKClIKClIKUgpSCqNKClIKCgpSCgpSClIKUgqjCgpSCgoKUgoKUgpSClIKowoKUgoKClIKClIKUgpSCqJKClJSCABw8kgACFvKCgpSCgoKCgqaCgoKClIKUgpSClIKUAAIS4oKCuIKUAA0esoKCgoKClKiSrLKClMaCgoKUgpSClIKUgoKUgpSokqaCgpSmgoKUqJKmgoKmgqiSpoKCpoKokgAHEoKClIKmgoKUqJKCgpSClKaCgpSCgoKUqJKmgoKClIIACxqSgoKUgqiSgoKUzNKokgACFPKUgriCuIKmppS4griCppSCpoLcgqbKgoKmlLioxMqWtpSCgoKUgoKUlJSCgsqCgriCgrSClIKCgqaClMbGgpSClIKClMa4lIKCgpSCgpSUpoKC/KbG2AALFpKCgpSCqJIAGgyiqpSCgoK0goKCtIKCgrSCgoK0goKCtIKCgrSCgoK0goKCtIKCgrSCgoK0goKCtIKCgrSCgoKkgpQACRCCqJKoksaCgoKUAAoSgqiSgoKCgpSoksqCgoKUgoKUAAkQgqiSqJLGgoKClAAJEIKokqiSxoKCgpQAEiSCqJKCgoKUgoKUgoKCgqiSAAQUgoKCgpSCgpSCgpSCgpSCgpSCgpSCgpQACRCCqJKCgoKCgqbokoKClIKClMaCgoKCgoKmgpSClAAMFoKokoKCgoKCgpSoks6CgoKUgoKUgoKUgoKUAAkQgqiSqJLIgoKClAAJEIKokqqSxoKCgpQAFSqSyoKmgoKCgoKU6JKCgpSCopTGgoKCgoKCgpSCgoKUgoKUgpQAChKCqJKoksqCuIKU", "", "", "397=printUint16/1/1/1,printBool/1/7/2,GoString/1/2/3,printBool/2/7/4,printBool/3/7/5,printBool/4/7/6,printBool/5/7/7,printBool/6/7/8,printBool/7/7/9,GoString/2/2/10;526=GoString/1/2/1,GoString/2/2/2;1778=GoString/1/3/1,GoString/2/3/2,GoString/3/3/3,printUint32/1/1/4,printUint16/1/1/5;2294=GoString/1/3/1,GoString/2/3/2,GoString/3/3/3;2481=printUint16/1/1/1,GoString/1/1/2;2600=GoString/1/2/1,GoString/2/2/2,printUint32/1/5/3,printUint32/2/5/4,printUint32/3/5/5,printUint32/4/5/6,printUint32/5/5/7;2728=printUint16/1/3/1,printUint16/2/3/2,printUint16/3/3/3,GoString/1/1/4;2771=printByteSlice/1/1/1;2797=printByteSlice/1/1/1;2836=printUint16/1/1/1,printByteSlice/1/1/2;2919=GoString/1/1/1,printByteSlice/1/1/2")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/dns/dnsmessage/svcb.go", "svcb.cs", "ABMkgqiSiIKCgqaCAA0UgqiSyJKCgpSCpqqigoKClKaCgqaqooKCgpSCpgAMFJIAEywADhySgpSokoKUxoKCyoKClIKCgpSClIKClMaUgoKUgoKmgsqCgoKCgpKClKaUgpSClIKClIK4poKCgoKSgpSCgpSClIKUgoKmyJKClIKClIKCgq7CrsKCgpTI0oKUgoKUgoKUgpSClIKowoKosoI=", "", "", "26=printUint16/1/1/1,GoString/1/1/2;118=GoString/1/1/1,printByteSlice/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.net.dns;
@@ -105,38 +91,38 @@ public static partial class dnsmessage_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct header {}
     internal partial struct nestedError {}
     internal partial struct section {}
-    internal partial struct Δheader {}
     public partial interface ResourceBody {}
+    [GoValueClone("AAAA")] public partial struct AAAAResource {}
+    [GoValueClone("A")] public partial struct AResource {}
     public partial struct Builder {}
+    [GoValueClone("CNAME")] public partial struct CNAMEResource {}
     public partial struct Class {}
+    public partial struct HTTPSResource {}
     public partial struct Header {}
+    [GoValueClone("MX")] public partial struct MXResource {}
     public partial struct Message {}
+    [GoValueClone("NS")] public partial struct NSResource {}
     [GoValueClone("Data")] public partial struct Name {}
+    public partial struct OPTResource {}
     public partial struct OpCode {}
     public partial struct Option {}
+    [GoValueClone("PTR")] public partial struct PTRResource {}
     public partial struct Parser {}
+    [GoValueClone("Name")] public partial struct Question {}
     public partial struct RCode {}
     [GoValueClone("Header")] public partial struct Resource {}
     [GoValueClone("Name")] public partial struct ResourceHeader {}
+    [GoValueClone("NS", "MBox")] public partial struct SOAResource {}
+    [GoValueClone("Target")] public partial struct SRVResource {}
+    [GoValueClone("Target")] public partial struct SVCBResource {}
     public partial struct SVCParam {}
     public partial struct SVCParamKey {}
+    public partial struct TXTResource {}
     public partial struct Type {}
-    [GoValueClone("AAAA")] public partial struct ΔAAAAResource {}
-    [GoValueClone("A")] public partial struct ΔAResource {}
-    [GoValueClone("CNAME")] public partial struct ΔCNAMEResource {}
-    public partial struct ΔHTTPSResource {}
-    [GoValueClone("MX")] public partial struct ΔMXResource {}
-    [GoValueClone("NS")] public partial struct ΔNSResource {}
-    public partial struct ΔOPTResource {}
-    [GoValueClone("PTR")] public partial struct ΔPTRResource {}
-    [GoValueClone("Name")] public partial struct ΔQuestion {}
-    [GoValueClone("NS", "MBox")] public partial struct ΔSOAResource {}
-    [GoValueClone("Target")] public partial struct ΔSRVResource {}
-    [GoValueClone("Target")] public partial struct ΔSVCBResource {}
-    public partial struct ΔTXTResource {}
-    public partial struct ΔUnknownResource {}
+    public partial struct UnknownResource {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -150,3 +136,42 @@ public static partial class dnsmessage_package
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(dnsmessage_package.AAAAResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛAAAAResource;
+[GoMethodHost(typeof(dnsmessage_package.AResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛAResource;
+[GoMethodHost(typeof(dnsmessage_package.Builder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛBuilder;
+[GoMethodHost(typeof(dnsmessage_package.CNAMEResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛCNAMEResource;
+[GoMethodHost(typeof(dnsmessage_package.Class)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛClass;
+[GoMethodHost(typeof(dnsmessage_package.HTTPSResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛHTTPSResource;
+[GoMethodHost(typeof(dnsmessage_package.Header)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛHeader;
+[GoMethodHost(typeof(dnsmessage_package.MXResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛMXResource;
+[GoMethodHost(typeof(dnsmessage_package.Message)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛMessage;
+[GoMethodHost(typeof(dnsmessage_package.NSResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛNSResource;
+[GoMethodHost(typeof(dnsmessage_package.Name)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛName;
+[GoMethodHost(typeof(dnsmessage_package.OPTResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛOPTResource;
+[GoMethodHost(typeof(dnsmessage_package.OpCode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛOpCode;
+[GoMethodHost(typeof(dnsmessage_package.Option)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛOption;
+[GoMethodHost(typeof(dnsmessage_package.PTRResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛPTRResource;
+[GoMethodHost(typeof(dnsmessage_package.Parser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛParser;
+[GoMethodHost(typeof(dnsmessage_package.Question)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛQuestion;
+[GoMethodHost(typeof(dnsmessage_package.RCode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛRCode;
+[GoMethodHost(typeof(dnsmessage_package.Resource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛResource;
+[GoMethodHost(typeof(dnsmessage_package.ResourceHeader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛResourceHeader;
+[GoMethodHost(typeof(dnsmessage_package.SOAResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛSOAResource;
+[GoMethodHost(typeof(dnsmessage_package.SRVResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛSRVResource;
+[GoMethodHost(typeof(dnsmessage_package.SVCBResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛSVCBResource;
+[GoMethodHost(typeof(dnsmessage_package.SVCParam)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛSVCParam;
+[GoMethodHost(typeof(dnsmessage_package.SVCParamKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛSVCParamKey;
+[GoMethodHost(typeof(dnsmessage_package.TXTResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛTXTResource;
+[GoMethodHost(typeof(dnsmessage_package.Type)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛType;
+[GoMethodHost(typeof(dnsmessage_package.UnknownResource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛUnknownResource;
+[GoMethodHost(typeof(dnsmessage_package.header)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛheader;
+[GoMethodHost(typeof(dnsmessage_package.nestedError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dnsmessageᴛnestedError;
+// </MethodHolders>

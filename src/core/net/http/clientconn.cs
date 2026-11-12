@@ -13,6 +13,7 @@ using sync = sync_package;
 using go.net;
 using go.net.http;
 using io = io_package;
+using static http_package;
 
 partial class http_package {
 
@@ -92,6 +93,8 @@ partial interface genericClientConn :
     nint InFlight();
 }
 
+} partial class httpᴛTransport {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpNewClientConnˢ => ref httpNewClientConnˢᵇ;
 private static readonly @string httpNewClientConnˢᵇ = "http: NewClientConn returned something that is not a ClientConn"u8;
@@ -155,7 +158,7 @@ public static (ж<ClientConn>, error) NewClientConn(this ж<Transport> Ꮡt, con
                 Proto: "HTTP/1.1",
                 ProtoMajor: 1,
                 ProtoMinor: 1,
-                Header: new ΔHeader(0),
+                Header: new Header(0),
                 Body: NoBody,
                 Host: host
             ));
@@ -215,6 +218,8 @@ public static (ж<ClientConn>, error) NewClientConn(this ж<Transport> Ꮡt, con
     finally { ᒐ.Run(); }
 }
 
+} partial class httpᴛClientConn {
+
 // Close closes the connection.
 // Outstanding RoundTrip calls are interrupted.
 public static error Close(this ж<ClientConn> Ꮡcc) {
@@ -235,6 +240,8 @@ public static error Close(this ж<ClientConn> Ꮡcc) {
 public static error Err(this ref ClientConn cc) {
     return cc.cc.Err();
 }
+
+} partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string httpNilRequestHeaderˢ => ref httpNilRequestHeaderˢᵇ;
@@ -269,6 +276,8 @@ internal static error validateClientConnRequest(ref Request req) {
     }
     return default;
 }
+
+} partial class httpᴛClientConn {
 
 // RoundTrip implements the [RoundTripper] interface.
 //
@@ -434,11 +443,15 @@ public static void SetStateHook(this ж<ClientConn> Ꮡcc, Action<ж<ClientConn>
     Ꮡcc.maybeRunStateHook();
 }
 
+} partial class http_package {
+
 // http1ClientConn is a genericClientConn implementation backed by
 // an HTTP/1 *persistConn (pconn.alt is nil).
 partial struct http1ClientConn {
     internal ж<persistConn> pconn;
 }
+
+} partial class httpᴛhttp1ClientConn {
 
 internal static partial (ж<Response>, error) RoundTrip(this http1ClientConn cc, ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
@@ -447,7 +460,7 @@ internal static partial (ж<Response>, error) RoundTrip(this http1ClientConn cc,
     var trace = httptrace.ContextClientTrace(ctx);
 
     // Convert Request.Cancel into context cancelation.
-    (ctx, var cancel) = context_package.WithCancelCause(req.Context());
+    (ctx, var cancel) = context.WithCancelCause(req.Context());
     if (req.Cancel != nil) {
         goǃ((ᴛ1, ᴛ2, ᴛ3) => awaitLegacyCancel(ᴛ1, ᴛ2, ref ᴛ3.DerefOrNull()), ctx, cancel, Ꮡreq);
     }
@@ -562,4 +575,4 @@ internal static void Release(this http1ClientConn cc) {
     finally { ᒐ.Run(); }
 }
 
-} // end http_package
+} // end httpᴛhttp1ClientConn

@@ -8,6 +8,7 @@ using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -36,9 +37,13 @@ partial struct Pinner {
     /*embed*/ internal ж<pinner> pinner;
 }
 
+} partial class runtimeᴛPinner {
+
 // go2cs generated this placeholder — func Pin is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func Unpin is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class runtime_package {
 
 internal static UntypedInt pinnerSize => 64;
 internal static uintptr pinnerRefStoreSize => /* (pinnerSize - unsafe.Sizeof([]unsafe.Pointer{})) / unsafe.Sizeof(unsafe.Pointer(nil)) */ 5;
@@ -48,21 +53,25 @@ partial struct pinner {
     internal array<@unsafe.Pointer> refStore = new(pinnerRefStoreSize);
 }
 
-internal static void unpin(this ж<pinner> Ꮡp) {
-    ref var Δp = ref Ꮡp.DerefOrNull();
+} partial class runtimeᴛpinner {
 
-    if (Ꮡp == nil || Δp.refs == nil) {
+internal static void unpin(this ж<pinner> Ꮡp) {
+    ref var p = ref Ꮡp.DerefOrNull();
+
+    if (Ꮡp == nil || p.refs == nil) {
         return;
     }
-    foreach (var i in range(len(Δp.refs))) {
-        setPinned(Δp.refs[i], false);
+    foreach (var i in range(len(p.refs))) {
+        setPinned(p.refs[i], false);
     }
     // The following two lines make all pointers to references
     // in p.refs unreachable, either by deleting them or dropping
     // p.refs' backing store (if it was not backed by refStore).
-    Δp.refStore = new @unsafe.Pointer[]{}.array(5);
-    Δp.refs = Δp.refStore[..0];
+    p.refStore = new @unsafe.Pointer[]{}.array(5);
+    p.refs = p.refStore[..0];
 }
+
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string runtimePinnerArgumentIsˢ => ref runtimePinnerArgumentIsˢᵇ;
@@ -175,6 +184,8 @@ partial struct pinState {
     internal uint8 mask;
 }
 
+} partial class runtimeᴛpinState {
+
 // nosplit, because it's called by isPinned, which is nosplit
 //
 //go:nosplit
@@ -208,8 +219,12 @@ internal static void set(this ref pinState v, bool val, bool multipin) {
     }
 }
 
+} partial class runtime_package {
+
 // pinnerBits is the same type as gcBits but has different methods.
 partial struct pinnerBits /*gcBits*/;
+
+} partial class runtimeᴛpinnerBits {
 
 // ofObject returns the pinState of the n'th object.
 // nosplit, because it's called by isPinned, which is nosplit
@@ -220,6 +235,8 @@ internal static pinState ofObject(this ж<pinnerBits> Ꮡp, uintptr n) {
     var byteVal = atomic.Load8(bytep);
     return new pinState(bytep, byteVal, mask);
 }
+
+} partial class runtimeᴛmspan {
 
 internal static uintptr pinnerBitSize(this ref mspan s) {
     return divRoundUp((uintptr)s.nelems * 2, 8);
@@ -239,8 +256,8 @@ internal static ж<pinnerBits> getPinnerBits(this ж<mspan> Ꮡs) {
     return (ж<pinnerBits>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.ᏑpinnerBits)));
 }
 
-internal static void setPinnerBits(this ж<mspan> Ꮡs, ж<pinnerBits> Δp) {
-    atomicstorep(@unsafe.Pointer.FromBox(Ꮡs.ᏑpinnerBits), @unsafe.Pointer.FromPinnedBox(Δp));
+internal static void setPinnerBits(this ж<mspan> Ꮡs, ж<pinnerBits> p) {
+    atomicstorep(@unsafe.Pointer.FromBox(Ꮡs.ᏑpinnerBits), @unsafe.Pointer.FromPinnedBox(p));
 }
 
 // refreshPinnerBits replaces pinnerBits with a fresh copy in the arenas for the
@@ -249,8 +266,8 @@ internal static void setPinnerBits(this ж<mspan> Ꮡs, ж<pinnerBits> Δp) {
 internal static void refreshPinnerBits(this ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    var Δp = Ꮡs.getPinnerBits();
-    if (Δp == nil) {
+    var p = Ꮡs.getPinnerBits();
+    if (p == nil) {
         return;
     }
 
@@ -261,7 +278,7 @@ internal static void refreshPinnerBits(this ж<mspan> Ꮡs) {
     // newPinnerBits guarantees that pinnerBits will be 8-byte aligned, so we
     // don't have to worry about edge cases, irrelevant bits will simply be
     // zero.
-    foreach (var (_, x) in range(@unsafe.Slice(Δp.of(pinnerBits.Ꮡx).Reinterpret<uint8, uint64>(), bytes / 8))) {
+    foreach (var (_, x) in range(@unsafe.Slice(p.of(pinnerBits.Ꮡx).Reinterpret<uint8, uint64>(), bytes / 8))) {
         if (x != 0) {
             hasPins = true;
             break;
@@ -270,7 +287,7 @@ internal static void refreshPinnerBits(this ж<mspan> Ꮡs) {
 
     if (hasPins) {
         var newPinnerBits = s.newPinnerBits();
-        memmove(@unsafe.Pointer.FromPinnedBox(newPinnerBits.of(pinnerBits.Ꮡx)), @unsafe.Pointer.FromPinnedBox(Δp.of(pinnerBits.Ꮡx)), bytes);
+        memmove(@unsafe.Pointer.FromPinnedBox(newPinnerBits.of(pinnerBits.Ꮡx)), @unsafe.Pointer.FromPinnedBox(p.of(pinnerBits.Ꮡx)), bytes);
         Ꮡs.setPinnerBits(newPinnerBits);
     } else {
         Ꮡs.setPinnerBits(nil);
@@ -325,6 +342,8 @@ internal static bool decPinCounter(this ж<mspan> Ꮡspan, uintptr offset) {
     }
     return true;
 }
+
+} partial class runtime_package {
 
 // go2cs generated this placeholder — func pinnerGetPinCounter is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 

@@ -15,19 +15,19 @@ partial class types_package {
 
 // The Universe scope contains all predeclared objects of Go.
 // It is the outermost scope of any chain of nested scopes.
-public static ж<ΔScope> Universe;
+public static ж<Scope> Universe;
 
 // The Unsafe package is the package returned by an importer
 // for the import path "unsafe".
 public static ж<Package> Unsafe;
 
 internal static Object universeIota;
-internal static ΔType universeBool;
-internal static ΔType universeByte; // uint8 alias, but has name "byte"
-internal static ΔType universeRune; // int32 alias, but has name "rune"
+internal static Type universeBool;
+internal static Type universeByte; // uint8 alias, but has name "byte"
+internal static Type universeRune; // int32 alias, but has name "rune"
 internal static ж<TypeName> universeAnyNoAlias;
 internal static ж<TypeName> universeAnyAlias;
-internal static ΔType universeError;
+internal static Type universeError;
 internal static Object universeComparable;
 
 // Typ contains the predeclared *Basic types indexed by their
@@ -55,7 +55,7 @@ internal static Object universeComparable;
     [(int)Float64] = Ꮡ(new Basic(Float64, IsFloat, "float64")),
     [(int)Complex64] = Ꮡ(new Basic(Complex64, IsComplex, "complex64")),
     [(int)Complex128] = Ꮡ(new Basic(Complex128, IsComplex, "complex128")),
-    [(int)ΔString] = Ꮡ(new Basic(ΔString, IsString, "string")),
+    [(int)String] = Ꮡ(new Basic(String, IsString, "string")),
     [(int)UnsafePointer] = Ꮡ(new Basic(UnsafePointer, 0, "Pointer")),
 
     [(int)UntypedBool] = Ꮡ(new Basic(UntypedBool, (BasicInfo)(IsBoolean | IsUntyped), "untyped bool")),
@@ -74,17 +74,21 @@ internal static array<ж<Basic>> basicAliases = new ж<Basic>[]{
 }.array();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string anyˢ => ref anyˢᵇ;
+private static readonly @string anyˢᵇ = "any"u8;
 internal static ref readonly @string errorˢ => ref errorˢᵇ;
 private static readonly @string errorˢᵇ = "error"u8;
 internal static ref readonly @string errorˢ2 => ref errorˢ2ᵇ;
 private static readonly @string errorˢ2ᵇ = "Error"u8;
+internal static ref readonly @string comparableˢ => ref comparableˢᵇ;
+private static readonly @string comparableˢᵇ = "comparable"u8;
 
 internal static void defPredeclaredTypes() {
     foreach (var (_, t) in range(Typ)) {
-        def(new TypeNameжObject(NewTypeName(nopos, nil, t.name, new BasicжΔType(t))));
+        def(new TypeNameжObject(NewTypeName(nopos, nil, t.name, new BasicжType(t))));
     }
     foreach (var (_, t) in range(basicAliases.ΔRangeSnapshot())) {
-        def(new TypeNameжObject(NewTypeName(nopos, nil, t.name, new BasicжΔType(t))));
+        def(new TypeNameжObject(NewTypeName(nopos, nil, t.name, new BasicжType(t))));
     }
 
     // type any = interface{}
@@ -104,7 +108,7 @@ internal static void defPredeclaredTypes() {
     // error messages without using a distinguished pointer for the any
     // interface.
     {
-        universeAnyNoAlias = NewTypeName(nopos, nil, anyˢ, new InterfaceжΔType(Ꮡ(new Interface(complete: true, tset: ᏑtopTypeSet))));
+        universeAnyNoAlias = NewTypeName(nopos, nil, anyˢ, new InterfaceжType(Ꮡ(new Interface(complete: true, tset: ᏑtopTypeSet))));
         // ensure that the any TypeName reports a consistent Parent, after
         // hijacking Universe.Lookup with gotypesalias=0.
         universeAnyNoAlias.of(TypeName.Ꮡobject).setParent(Universe);
@@ -123,8 +127,8 @@ internal static void defPredeclaredTypes() {
         var typ = (((ж<Checker>)nil)).newNamed(obj, default, default);
 
         // error.Error() string
-        var recv = newVar(RecvVar, nopos, nil, ""u8, new NamedжΔType(typ));
-        var res = newVar(ResultVar, nopos, nil, ""u8, new BasicжΔType(Typ[ΔString]));
+        var recv = newVar(RecvVar, nopos, nil, ""u8, new NamedжType(typ));
+        var res = newVar(ResultVar, nopos, nil, ""u8, new BasicжType(Typ[String]));
         var sig = NewSignatureType(recv, default, default, nil, NewTuple(res), false);
         var err = NewFunc(nopos, nil, errorˢ2, sig);
 
@@ -132,7 +136,7 @@ internal static void defPredeclaredTypes() {
         var ityp = Ꮡ(new Interface(methods: [err], complete: true));
         computeInterfaceTypeSet(nil, nopos, ityp); // prevent races due to lazy computation of tset
 
-        typ.fromRHS = new InterfaceжΔType(ityp);
+        typ.fromRHS = new InterfaceжType(ityp);
         typ.Underlying();
         def(new TypeNameжObject(obj));
     }
@@ -145,7 +149,7 @@ internal static void defPredeclaredTypes() {
         // interface{} // marked as comparable
         var ityp = Ꮡ(new Interface(complete: true, tset: Ꮡ(new _TypeSet(default, allTermlist, true))));
 
-        typ.fromRHS = new InterfaceжΔType(ityp);
+        typ.fromRHS = new InterfaceжType(ityp);
         typ.Underlying();
         def(new TypeNameжObject(obj));
     }
@@ -164,12 +168,12 @@ internal static array<predeclaredConstsᴛ1> predeclaredConsts = new predeclared
 
 internal static void defPredeclaredConsts() {
     foreach (var (_, c) in range(predeclaredConsts.ΔRangeSnapshot())) {
-        def(new ConstжObject(NewConst(nopos, nil, c.name, new BasicжΔType(Typ[c.kind]), c.val)));
+        def(new ConstжObject(NewConst(nopos, nil, c.name, new BasicжType(Typ[c.kind]), c.val)));
     }
 }
 
 internal static void defPredeclaredNil() {
-    def(new NilжObject(Ꮡ(new Nil(new @object(name: "nil", typ: new BasicжΔType(Typ[UntypedNil]))))));
+    def(new NilжObject(Ꮡ(new Nil(new @object(name: "nil", typ: new BasicжType(Typ[UntypedNil]))))));
 }
 
 // A builtinId is the id of a builtin function.

@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸSignal = go.os_package.ΔSignal;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;
@@ -42,7 +40,7 @@ using static go.os.signal_package;
 [assembly: GoImplement<signalCtx, context_package.Context>(Pointer = true)]
 [assembly: GoImplement<signalCtx, context_package.Context>(Promoted = true)]
 [assembly: GoImplement<signalError, error>]
-[assembly: GoImplement<syscall_package.ΔSignal, os_package.ΔSignal>]
+[assembly: GoImplement<syscall_package.Signal, os_package.Signal>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -67,7 +65,7 @@ using static go.os.signal_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("os/signal/signal.go", "signal.cs", "ACdKgqaCpoKs0oKUgpSCgoKCgsqmgoKmgsas4qiSggAKOAAUAoKmgpSCgoKUgqaSgpSCgoK4goK4uIKCpoLGqtKsspSCgoKUlIKCgoIADyCUlJSUgoKCuKrUooKCpoKUgpQACxCCggALDAACKAAVAoLKgoKCkrT6AAkWgoLuoqaCgoKCgoKCgqaUgsqCpoKClA==", "56-70:1;139-158:1;150-154:1.1;291-297:1")]
+[assembly: GoPositionMap("os/signal/signal.go", "signal.cs", "ACtKgqaCpoLM0oKUgpSCgoKCgsqmgoKmgsas4qiSggAKOAAUAoKmgpSCgoKUgqaSgpSCgoK4goK4uIKCpoLGqtKsspSCgoKUlIKCgoIADyCUlJSUgoKCuKrUooKCpoKUgpQACxCCggALDAACKAAVAoLKgoKCkrT6AAsWgoIACg6ipoKCgoKCgoKCppSCAAgKgqaCgpQ=", "56-70:1;139-158:1;150-154:1.1;291-297:1")]
 [assembly: GoPositionMap("os/signal/signal_unix.go", "signal_unix.cs", "AAsesqKiorSCgriCzoKUgoKUtLiCpoKmgqaC")]
 // </GoSourcePositionMaps>
 
@@ -105,3 +103,15 @@ public static partial class signal_package
     [GoInit] internal static void initᴛᴛimportꓸsyscall() => builtin.initPackage(typeof(syscall_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(signal_package.handler)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class signalᴛhandler;
+[GoMethodHost(typeof(signal_package.signalCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class signalᴛsignalCtx;
+[GoMethodHost(typeof(signal_package.signalError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class signalᴛsignalError;
+// </MethodHolders>

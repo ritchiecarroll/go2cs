@@ -109,7 +109,7 @@ public static ж<http.Request> NewRequestWithContext(context.Context ctx, @strin
     }
 
     if (strings.HasPrefix(target, httpsˢ)) {
-        req.TLS = Ꮡ(new tlsꓸConnectionState(
+        req.TLS = Ꮡ(new tls.ConnectionState(
             Version: tls.VersionTLS12,
             HandshakeComplete: true,
             ServerName: req.Host

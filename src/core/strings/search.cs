@@ -3,6 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using static strings_package;
+
 partial class strings_package {
 
 // stringFinder efficiently finds strings in a source text. It's implemented
@@ -98,6 +100,8 @@ internal static nint /*i*/ longestCommonSuffix(@string a, @string b) {
     return i;
 }
 
+} partial class stringsᴛstringFinder {
+
 // next returns the index in text of the first occurrence of the pattern. If
 // the pattern is not found, it returns -1.
 internal static nint next(this ref stringFinder f, @string text) {
@@ -117,4 +121,4 @@ internal static nint next(this ref stringFinder f, @string text) {
     return -1;
 }
 
-} // end strings_package
+} // end stringsᴛstringFinder

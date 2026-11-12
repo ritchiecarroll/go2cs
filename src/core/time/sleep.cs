@@ -6,6 +6,7 @@ namespace go;
 using godebug = @internal.godebug_package;
 using @unsafe = unsafe_package;
 using @internal;
+using static time_package;
 
 partial class time_package {
 
@@ -63,6 +64,8 @@ partial struct Timer {
     internal bool initTimer;
 }
 
+} partial class timeᴛTimer {
+
 // Stop prevents the [Timer] from firing.
 // It returns true if the call stops the timer, false if the timer has already
 // expired or been stopped.
@@ -90,6 +93,8 @@ public static bool Stop(this ж<Timer> Ꮡt) {
     }
     return stopTimer(Ꮡt);
 }
+
+} partial class time_package {
 
 // NewTimer creates a new Timer that will send
 // the current time on its channel after at least duration d.
@@ -121,6 +126,8 @@ public static ж<Timer> NewTimer(Duration d) {
     return t;
 }
 
+} partial class timeᴛTimer {
+
 // Reset changes the timer to expire after duration d.
 // It returns true if the timer had been active, false if the timer had
 // expired or been stopped.
@@ -151,6 +158,8 @@ public static bool Reset(this ж<Timer> Ꮡt, Duration d) {
     var w = when(d);
     return resetTimer(Ꮡt, w, 0);
 }
+
+} partial class time_package {
 
 // sendTime does a non-blocking send of the current time on c.
 internal static void sendTime(any c, uintptr seq, int64 delta) {

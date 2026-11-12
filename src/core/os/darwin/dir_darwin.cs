@@ -8,6 +8,7 @@ using runtime = runtime_package;
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
 using fs = go.io.fs_package;
+using static os_package;
 
 partial class os_package {
 
@@ -15,6 +16,8 @@ partial class os_package {
 partial struct dirInfo {
     internal uintptr dir; // Pointer to DIR structure from dirent.h
 }
+
+} partial class osᴛdirInfo {
 
 internal static void close(this ref dirInfo d) {
     if (d.dir == 0) {
@@ -24,7 +27,11 @@ internal static void close(this ref dirInfo d) {
     d.dir = 0;
 }
 
+} partial class osᴛFile {
+
 // go2cs generated this placeholder — func readdir is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class os_package {
 
 internal static FileMode dtToType(uint8 typ) {
     switch (typ) {

@@ -16,6 +16,7 @@ using slices = slices_package;
 using go.@internal;
 using go.crypto;
 using hash = hash_package;
+using static tls_package;
 
 partial class tls_package {
 
@@ -44,6 +45,8 @@ internal static error errServerKeyExchange = errors.New("tls: invalid ServerKeyE
 // encrypts the pre-master secret to the server's public key.
 partial struct rsaKeyAgreement {
 }
+
+} partial class tlsᴛrsaKeyAgreement {
 
 internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchange(this rsaKeyAgreement ka, ж<Config> config, ж<Certificate> cert, ж<clientHelloMsg> clientHello, ж<serverHelloMsg> hello) {
     return (default, default);
@@ -126,6 +129,8 @@ internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKey
     return (preMasterSecret, ckx, default);
 }
 
+} partial class tls_package {
+
 // sha1Hash calculates a SHA1 hash over the given byte slices.
 internal static slice<byte> sha1Hash(slice<slice<byte>> slices) {
     var hsha1 = sha1.New();
@@ -138,13 +143,13 @@ internal static slice<byte> sha1Hash(slice<slice<byte>> slices) {
 // md5SHA1Hash implements TLS 1.0's hybrid hash function which consists of the
 // concatenation of an MD5 and SHA1 hash.
 internal static slice<byte> md5SHA1Hash(slice<slice<byte>> slices) {
-    var md5sha1 = new slice<byte>(md5.ΔSize + sha1.ΔSize);
+    var md5sha1 = new slice<byte>(md5.Size + sha1.Size);
     var hmd5 = md5.New();
     foreach (var (_, Δslice) in range(slices)) {
         hmd5.Write(Δslice);
     }
     copy(md5sha1, hmd5.Sum(default));
-    copy(md5sha1[(int)(md5.ΔSize)..], sha1Hash(slices));
+    copy(md5sha1[(int)(md5.Size)..], sha1Hash(slices));
     return md5sha1;
 }
 
@@ -177,9 +182,13 @@ partial struct ecdheKeyAgreement {
     internal ж<ecdh.PrivateKey> key;
 }
 
+} partial class tlsᴛecdheKeyAgreement {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsNoSupportedEllipticˢ2 => ref tlsNoSupportedEllipticˢ2ᵇ;
 private static readonly @string tlsNoSupportedEllipticˢ2ᵇ = "tls: no supported elliptic curves offered"u8;
+internal static ref readonly @string tlsCurvePreferencesˢ => ref tlsCurvePreferencesˢᵇ;
+private static readonly @string tlsCurvePreferencesˢᵇ = "tls: CurvePreferences includes unsupported curve"u8;
 internal static ref readonly @string tlsCertificateCannotBeˢ => ref tlsCertificateCannotBeˢᵇ;
 private static readonly @string tlsCertificateCannotBeˢᵇ = "tls: certificate cannot be used with the selected cipher suite"u8;
 
@@ -309,6 +318,8 @@ internal static ref readonly @string tlsServerSelectedˢ4 => ref tlsServerSelect
 private static readonly @string tlsServerSelectedˢ4ᵇ = "tls: server selected unsupported curve"u8;
 internal static ref readonly @string tlsServerSelectedˢ5 => ref tlsServerSelectedˢ5ᵇ;
 private static readonly @string tlsServerSelectedˢ5ᵇ = "tls: server selected unoffered curve"u8;
+internal static ref readonly @string tlsCertificateUsedWithˢ => ref tlsCertificateUsedWithˢᵇ;
+private static readonly @string tlsCertificateUsedWithˢᵇ = "tls: certificate used with invalid signature algorithm"u8;
 
 internal static error processServerKeyExchange(this ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> ᏑserverHello, ж<Δx509.Certificate> Ꮡcert, ж<serverKeyExchangeMsg> Ꮡskx) {
     ref var config = ref Ꮡconfig.DerefOrNull();
@@ -428,6 +439,8 @@ internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKey
     return (ka.preMasterSecret, ka.ckx, default);
 }
 
+} partial class tls_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tlsInternalErrorˢ6 => ref tlsInternalErrorˢ6ᵇ;
 private static readonly @string tlsInternalErrorˢ6ᵇ = "tls: internal error: unsupported curve"u8;
@@ -443,7 +456,7 @@ internal static (ж<ecdh.PrivateKey>, error) generateECDHEKey(io.Reader rand, Cu
     return curve.GenerateKey(rand);
 }
 
-internal static (ecdhꓸCurve, bool) curveForCurveID(CurveID id) {
+internal static (ecdh.Curve, bool) curveForCurveID(CurveID id) {
     switch (id) {
     case var ᴛ when ᴛ == X25519: {
         return (ecdh.X25519(), true);

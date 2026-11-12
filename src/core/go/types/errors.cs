@@ -14,6 +14,7 @@ using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using io = io_package;
 using ꓸꓸꓸany = Span<any>;
+using static types_package;
 
 partial class types_package {
 
@@ -49,6 +50,8 @@ partial struct error_ {
     internal bool soft; // TODO(gri) eventually determine this from an error code
 }
 
+} partial class typesᴛChecker {
+
 // newError returns a new error_ with the given error code.
 internal static ж<error_> newError(this ж<Checker> Ꮡcheck, errors.Code code) {
     if (code == 0) {
@@ -56,6 +59,8 @@ internal static ж<error_> newError(this ж<Checker> Ꮡcheck, errors.Code code)
     }
     return Ꮡ(new error_(check: Ꮡcheck, code: code));
 }
+
+} partial class typesᴛerror_ {
 
 // addf adds formatted error information to err.
 // It may be called multiple times to provide additional information.
@@ -71,7 +76,7 @@ internal static void addf(this ref error_ err, positioner at, @string format, pa
 
 // addAltDecl is a specialized form of addf reporting another declaration of obj.
 internal static void addAltDecl(this ref error_ err, Object obj) {
-    tokenꓸPos pos = obj.Pos(); if (pos.IsValid()) {
+    token.Pos pos = obj.Pos(); if (pos.IsValid()) {
         // We use "other" rather than "previous" here because
         // the first declaration seen may not be textually
         // earlier in the source.
@@ -172,6 +177,8 @@ internal static void report(this ref error_ err) {
     err.desc = default;
 }
 
+} partial class typesᴛChecker {
+
 // handleError should only be called by error_.report.
 internal static void handleError(this ref Checker check, nint index, positioner posn, errors.Code code, @string msg, bool soft) {
     assert(code != 0);
@@ -209,7 +216,7 @@ internal static void handleError(this ref Checker check, nint index, positioner 
     }
 
     var span = spanOf(posn);
-    var e = new ΔError(
+    var e = new Error(
         Fset: check.fset,
         Pos: span.pos,
         Msg: stripAnnotations(msg),
@@ -241,6 +248,8 @@ internal static void handleError(this ref Checker check, nint index, positioner 
     f(e);
 }
 
+} partial class types_package {
+
 internal static ref readonly @string invalidArg => ref invalidArgᵇ;
 private static readonly @string invalidArgᵇ = "invalid argument: "u8;
 internal static ref readonly @string invalidOp => ref invalidOpᵇ;
@@ -248,8 +257,10 @@ private static readonly @string invalidOpᵇ = "invalid operation: "u8;
 
 // The positioner interface is used to extract the position of type-checker errors.
 partial interface positioner {
-    tokenꓸPos Pos();
+    token.Pos Pos();
 }
+
+} partial class typesᴛChecker {
 
 internal static void error(this ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string msg) {
     var err = Ꮡcheck.newError(code);
@@ -283,12 +294,18 @@ internal static void versionErrorf(this ж<Checker> Ꮡcheck, positioner at, goV
     err.report();
 }
 
-// atPos wraps a token.Pos to implement the positioner interface.
-partial struct atPos /*global::go.go.token_package.ΔPos*/;
+} partial class types_package {
 
-internal static tokenꓸPos Pos(this atPos s) {
-    return (tokenꓸPos)s;
+// atPos wraps a token.Pos to implement the positioner interface.
+partial struct atPos /*global::go.go.token_package.Pos*/;
+
+} partial class typesᴛatPos {
+
+internal static token.Pos Pos(this atPos s) {
+    return (token.Pos)s;
 }
+
+} partial class types_package {
 
 // posSpan holds a position range along with a highlighted position within that
 // range. This is used for positioning errors, with pos by convention being the
@@ -296,19 +313,23 @@ internal static tokenꓸPos Pos(this atPos s) {
 // and end defining the full span of syntax being considered when the error was
 // detected. Invariant: start <= pos < end || start == pos == end.
 partial struct posSpan {
-    internal tokenꓸPos start, pos, end;
+    internal token.Pos start, pos, end;
 }
 
-internal static tokenꓸPos Pos(this posSpan e) {
+} partial class typesᴛposSpan {
+
+internal static token.Pos Pos(this posSpan e) {
     return e.pos;
 }
+
+} partial class types_package {
 
 // inNode creates a posSpan for the given node.
 // Invariant: node.Pos() <= pos < node.End() (node.End() is the position of the
 // first byte after node within the source).
-internal static posSpan inNode(ast.Node node, tokenꓸPos pos) {
-    tokenꓸPos start = node.Pos();
-    tokenꓸPos end = node.End();
+internal static posSpan inNode(ast.Node node, token.Pos pos) {
+    token.Pos start = node.Pos();
+    token.Pos end = node.End();
     if (debug) {
         assert(start <= pos && pos < end);
     }
@@ -328,19 +349,19 @@ internal static posSpan spanOf(positioner at) {
         return x;
     }
     case {} Δx when Δx._<ast.Node>(out var x): {
-        tokenꓸPos pos = x.Pos();
+        token.Pos pos = x.Pos();
         return new posSpan(pos, pos, x.End());
     }
     case ж<operand> x: {
         if (x.expr != nil) {
-            tokenꓸPos pos = x.Pos();
+            token.Pos pos = x.Pos();
             return new posSpan(pos, pos, x.expr.End());
         }
         return new posSpan(nopos, nopos, nopos);
     }
     default: {
         var x = at;
-        tokenꓸPos pos = at.Pos();
+        token.Pos pos = at.Pos();
         return new posSpan(pos, pos, pos);
     }}
 }

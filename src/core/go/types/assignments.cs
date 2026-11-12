@@ -14,15 +14,18 @@ using constant = global::go.go.constant_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using token = global::go.go.token_package;
+using static types_package;
 
 partial class types_package {
+
+} partial class typesᴛChecker {
 
 // assignment reports whether x can be assigned to a variable of type T,
 // if necessary by attempting to convert untyped values to the appropriate
 // type. context describes the context in which the assignment takes place.
 // Use T == nil to indicate assignment to an untyped blank identifier.
 // If the assignment check fails, x.mode is set to invalid.
-internal static void assignment(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔType T, @string context) {
+internal static void assignment(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type T, @string context) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -108,7 +111,7 @@ internal static void assignment(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
     // x.typ is typed
 
     // A generic (non-instantiated) function value cannot be assigned to a variable.
-    var (sig, _) = x.typ.Underlying()._<ж<ΔSignature>>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0) {
+    var (sig, _) = x.typ.Underlying()._<ж<Signature>>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0) {
         Ꮡcheck.errorf(new operandжpositioner(Ꮡx), WrongTypeArgCount, "cannot use generic function %s without instantiation in %s", Ꮡx.OrTypedNil(), context);
         x.mode = invalid;
         return;
@@ -144,7 +147,7 @@ internal static void initConst(this ж<Checker> Ꮡcheck, ж<Const> Ꮡlhs, ж<o
 
     if (x.mode == invalid || !isValid(x.typ) || !isValid(lhs.typ)) {
         if (lhs.typ == nil) {
-            lhs.typ = new BasicжΔType(Typ[Invalid]);
+            lhs.typ = new BasicжType(Typ[Invalid]);
         }
         return;
     }
@@ -153,7 +156,7 @@ internal static void initConst(this ж<Checker> Ꮡcheck, ж<Const> Ꮡlhs, ж<o
     if (x.mode != constant_) {
         Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConstInit, "%s is not constant", Ꮡx.OrTypedNil());
         if (lhs.typ == nil) {
-            lhs.typ = new BasicжΔType(Typ[Invalid]);
+            lhs.typ = new BasicжType(Typ[Invalid]);
         }
         return;
     }
@@ -182,7 +185,7 @@ internal static void initVar(this ж<Checker> Ꮡcheck, ж<Var> Ꮡlhs, ж<opera
 
     if (x.mode == invalid || !isValid(x.typ) || !isValid(lhs.typ)) {
         if (lhs.typ == nil) {
-            lhs.typ = new BasicжΔType(Typ[Invalid]);
+            lhs.typ = new BasicжType(Typ[Invalid]);
         }
         x.mode = invalid;
         return;
@@ -195,7 +198,7 @@ internal static void initVar(this ж<Checker> Ꮡcheck, ж<Var> Ꮡlhs, ж<opera
             // convert untyped types to default types
             if (AreEqual(typ, Typ[UntypedNil])) {
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UntypedNilUse, "use of untyped nil in %s", context);
-                lhs.typ = new BasicжΔType(Typ[Invalid]);
+                lhs.typ = new BasicжType(Typ[Invalid]);
                 x.mode = invalid;
                 return;
             }
@@ -211,7 +214,7 @@ internal static void initVar(this ж<Checker> Ꮡcheck, ж<Var> Ꮡlhs, ж<opera
 // lhsVar takes care of not counting a lhs identifier as a "use" of
 // that identifier. The result is nil if it is the blank identifier,
 // and Typ[Invalid] if it is an invalid lhs expression.
-internal static ΔType lhsVar(this ж<Checker> Ꮡcheck, ast.Expr lhs) {
+internal static Type lhsVar(this ж<Checker> Ꮡcheck, ast.Expr lhs) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // Determine if the lhs is a (possibly parenthesized) identifier.
@@ -248,14 +251,14 @@ internal static ΔType lhsVar(this ж<Checker> Ꮡcheck, ast.Expr lhs) {
     }
 
     if (x.mode == invalid || !isValid(x.typ)) {
-        return new BasicжΔType(Typ[Invalid]);
+        return new BasicжType(Typ[Invalid]);
     }
 
     // spec: "Each left-hand side operand must be addressable, a map index
     // expression, or the blank identifier. Operands may be parenthesized."
     switch (x.mode) {
     case var ᴛ when ᴛ == invalid: {
-        return new BasicжΔType(Typ[Invalid]);
+        return new BasicжType(Typ[Invalid]);
     }
     case var ᴛ when ᴛ == variable || ᴛ == mapindex: {
         // ok
@@ -267,11 +270,11 @@ internal static ΔType lhsVar(this ж<Checker> Ꮡcheck, ast.Expr lhs) {
             Ꮡcheck.expr(nil, Ꮡop, sel.X);
             if (op.mode == mapindex) {
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UnaddressableFieldAssign, "cannot assign to struct field %s in map", ExprString(x.expr));
-                return new BasicжΔType(Typ[Invalid]);
+                return new BasicжType(Typ[Invalid]);
             }
         }
         Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UnassignableOperand, "cannot assign to %s (neither addressable nor a map index expression)", x.expr);
-        return new BasicжΔType(Typ[Invalid]);
+        return new BasicжType(Typ[Invalid]);
     }}
 
     return x.typ;
@@ -301,7 +304,7 @@ internal static void assignVar(this ж<Checker> Ꮡcheck, ast.Expr lhs, ast.Expr
         ж<target> target = default;
         // avoid calling ExprString if not needed
         if (T != nil) {
-            var (_, ok) = T.Underlying()._<ж<ΔSignature>>(ᐧ); if (ok) {
+            var (_, ok) = T.Underlying()._<ж<Signature>>(ᐧ); if (ok) {
                 target = newTarget(T, ExprString(lhs));
             }
         }
@@ -315,10 +318,12 @@ internal static void assignVar(this ж<Checker> Ꮡcheck, ast.Expr lhs, ast.Expr
     Ꮡcheck.assignment(Ꮡx, T, context);
 }
 
+} partial class types_package {
+
 // operandTypes returns the list of types for the given operands.
-internal static slice<ΔType> /*res*/ operandTypes(slice<ж<operand>> list) {
-    slice<ΔType> res = default;
-    var resᴷ = new stackAppend<ΔType>(moves: true);
+internal static slice<Type> /*res*/ operandTypes(slice<ж<operand>> list) {
+    slice<Type> res = default;
+    var resᴷ = new stackAppend<Type>(moves: true);
 
     foreach (var (_, x) in range(list)) {
         res = append(resᴷ, res, x.typ);
@@ -328,9 +333,9 @@ internal static slice<ΔType> /*res*/ operandTypes(slice<ж<operand>> list) {
 }
 
 // varTypes returns the list of types for the given variables.
-internal static slice<ΔType> /*res*/ varTypes(slice<ж<Var>> list) {
-    slice<ΔType> res = default;
-    var resᴷ = new stackAppend<ΔType>(moves: true);
+internal static slice<Type> /*res*/ varTypes(slice<ж<Var>> list) {
+    slice<Type> res = default;
+    var resᴷ = new stackAppend<Type>(moves: true);
 
     foreach (var (_, x) in range(list)) {
         res = append(resᴷ, res, x.typ);
@@ -338,6 +343,8 @@ internal static slice<ΔType> /*res*/ varTypes(slice<ж<Var>> list) {
     res = move2heap(resᴷ, res);
     return res;
 }
+
+} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unknownTypeˢ => ref unknownTypeˢᵇ;
@@ -354,7 +361,7 @@ private static readonly @string untypedˢᵇ = "untyped "u8;
 // If hasDots is set, the last argument string is of the form "T..."
 // where T is the last type.
 // Only one of variadic and hasDots may be set.
-internal static @string typesSummary(this ж<Checker> Ꮡcheck, slice<ΔType> list, bool variadic, bool hasDots) {
+internal static @string typesSummary(this ж<Checker> Ꮡcheck, slice<Type> list, bool variadic, bool hasDots) {
     var resᴷ = new stackAppend<@string>();
 
     assert(!(variadic && hasDots));
@@ -405,12 +412,16 @@ internal static @string typesSummary(this ж<Checker> Ꮡcheck, slice<ΔType> li
     return "("u8 + strings.Join(res, ", ") + ")"u8;
 }
 
+} partial class types_package {
+
 internal static @string measure(nint x, @string unit) {
     if (x != 1) {
         unit += "s"u8;
     }
     return fmt.Sprintf("%d %s"u8, x, unit);
 }
+
+} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string variableˢ => ref variableˢᵇ;
@@ -515,7 +526,7 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
         // ensure that LHS variables have a type
         foreach (var (_, v) in range(lhs)) {
             if (v.typ == nil) {
-                v.typ = new BasicжΔType(Typ[Invalid]);
+                v.typ = new BasicжType(Typ[Invalid]);
             }
         }
         return;
@@ -547,7 +558,7 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
     // ensure that LHS variables have a type
     foreach (var (_, v) in range(lhs)) {
         if (v.typ == nil) {
-            v.typ = new BasicжΔType(Typ[Invalid]);
+            v.typ = new BasicжType(Typ[Invalid]);
         }
     }
     // orig_rhs[0] was already evaluated
@@ -690,10 +701,10 @@ internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, sli
     // a function begins at the end of the ConstSpec or VarSpec (ShortVarDecl
     // for short variable declarations) and ends at the end of the innermost
     // containing block."
-    tokenꓸPos scopePos = endPos(rhs[len(rhs) - 1]);
+    token.Pos scopePos = endPos(rhs[len(rhs) - 1]);
     foreach (var (_, obj) in range(newVars)) {
         Ꮡcheck.declare(scope, nil, new VarжObject(obj), scopePos); // id = nil: recordDef already called
     }
 }
 
-} // end types_package
+} // end typesᴛChecker

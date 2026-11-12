@@ -9,6 +9,7 @@ using slices = slices_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using unicode = unicode_package;
+using static syntax_package;
 
 partial class syntax_package {
 
@@ -55,6 +56,8 @@ public static Op OpAlternate => 19;             // matches alternation of Subs
 
 internal static Op opPseudo => 128; // where pseudo-ops start
 
+} partial class syntaxᴛRegexp {
+
 // Equal reports whether x and y have identical structure.
 public static bool Equal(this ж<Regexp> Ꮡx, ж<Regexp> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
@@ -78,7 +81,7 @@ public static bool Equal(this ж<Regexp> Ꮡx, ж<Regexp> Ꮡy) {
         return (Flags)(x.Flags & FoldCase) == (Flags)(y.Flags & FoldCase) && slices.Equal<slice<rune>, rune>(x.Rune, y.Rune);
     }
     case var ᴛ when ᴛ == OpAlternate || ᴛ == OpConcat: {
-        return slices.EqualFunc<slice<ж<Regexp>>, slice<ж<Regexp>>, ж<Regexp>, ж<Regexp>>(x.Sub, y.Sub, ((Func<ж<Regexp>, ж<Regexp>, bool>)(Equal)));
+        return slices.EqualFunc<slice<ж<Regexp>>, slice<ж<Regexp>>, ж<Regexp>, ж<Regexp>>(x.Sub, y.Sub, ((Func<ж<Regexp>, ж<Regexp>, bool>)(syntaxᴛRegexp.Equal)));
     }
     case var ᴛ when ᴛ == OpStar || ᴛ == OpPlus || ᴛ == OpQuest: {
         if ((Flags)(x.Flags & NonGreedy) != (Flags)(y.Flags & NonGreedy) || !x.Sub[0].Equal(y.Sub[0])) {
@@ -100,6 +103,8 @@ public static bool Equal(this ж<Regexp> Ꮡx, ж<Regexp> Ꮡy) {
     }}
     return true;
 }
+
+} partial class syntax_package {
 
 // printFlags is a bit set indicating which flags (including non-capturing parens) to print around a regexp.
 partial struct printFlags /*num:uint8*/;
@@ -436,6 +441,8 @@ internal static void writeRegexp(ж<strings.Builder> b, ж<Regexp> Ꮡre, printF
     finally { ᒐ.Run(); }
 }
 
+} partial class syntaxᴛRegexp {
+
 public static @string String(this ж<Regexp> Ꮡre) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     ref var flags = ref heap<map<ж<Regexp>, printFlags>>(out var Ꮡflags);
@@ -447,6 +454,8 @@ public static @string String(this ж<Regexp> Ꮡre) {
     writeRegexp(Ꮡb, Ꮡre, must, flags);
     return b.String();
 }
+
+} partial class syntax_package {
 
 internal static ref readonly @string meta => ref metaᵇ;
 private static readonly @string metaᵇ = @"\.+*?()|[]{}^$"u8;
@@ -502,6 +511,8 @@ internal static void escape(ж<strings.Builder> b, rune r, bool force) {
     }}
 }
 
+} partial class syntaxᴛRegexp {
+
 // MaxCap walks the regexp to find the maximum capture index.
 public static nint MaxCap(this ref Regexp re) {
     nint m = 0;
@@ -532,4 +543,4 @@ internal static void capNames(this ref Regexp re, slice<@string> names) {
     }
 }
 
-} // end syntax_package
+} // end syntaxᴛRegexp

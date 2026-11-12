@@ -388,15 +388,15 @@ internal static void dumpgoroutine(ж<g> Ꮡgp) {
         }
         dumpint((uint64)(uintptr)(~d).link);
     }
-    for (var Δp = gp._panic; Δp != nil; Δp = Δp.Value.link) {
+    for (var p = gp._panic; p != nil; p = p.Value.link) {
         dumpint(tagPanic);
-        dumpint((uint64)(uintptr)Δp);
+        dumpint((uint64)(uintptr)p);
         dumpint((uint64)(uintptr)Ꮡgp);
-        var eface = efaceOf(Δp.of(_panic.Ꮡarg));
+        var eface = efaceOf(p.of(_panic.Ꮡarg));
         dumpint((uint64)(uintptr)(~eface)._type);
         dumpint((uint64)(uintptr)(~eface).data);
         dumpint(0); // was p->defer, no longer recorded
-        dumpint((uint64)(uintptr)(~Δp).link);
+        dumpint((uint64)(uintptr)(~p).link);
     }
 }
 
@@ -422,7 +422,7 @@ internal static void dumpgs() {
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ2) { /* default: */
-            print((@string)"runtime: unexpected G.status ", (Δhex)(uint64)status, (@string)"\n");
+            print((@string)"runtime: unexpected G.status ", (hex)(uint64)status, (@string)"\n");
             @throw(dumpgsInStwBadStatusˢ);
         }
         else if (exprᴛ1 == _Gdead || exprᴛ1 == _Gdeadextra) {
@@ -471,8 +471,8 @@ internal static void dumproots() {
                     continue;
                 }
                 var spf = sp.Reinterpret<special, specialfinalizer>();
-                @unsafe.Pointer Δp = (@unsafe.Pointer)(s.@base() + spf.special.offset);
-                dumpfinalizer(Δp, spf.fn, spf.fint, spf.ot);
+                @unsafe.Pointer p = (@unsafe.Pointer)(s.@base() + spf.special.offset);
+                dumpfinalizer(p, spf.fn, spf.fint, spf.ot);
             }
         }
     }
@@ -497,7 +497,7 @@ internal static void dumpobjs() {
         if (s.Ꮡstate.get() != mSpanInUse) {
             continue;
         }
-        var Δp = s.@base();
+        var p = s.@base();
         var size = s.elemsize;
         var n = (s.npages << (int)(gc.PageShift)) / size;
         if (n > (uintptr)len(freemark)) {
@@ -510,12 +510,12 @@ internal static void dumpobjs() {
             }
         }
 
-        for (var j = (uintptr)0; j < n; (j, Δp) = (j + 1, Δp + size)) {
+        for (var j = (uintptr)0; j < n; (j, p) = (j + 1, p + size)) {
             if (freemark[j]) {
                 freemark[j] = false;
                 continue;
             }
-            dumpobj((@unsafe.Pointer)Δp, size, makeheapobjbv(Δp, size));
+            dumpobj((@unsafe.Pointer)p, size, makeheapobjbv(p, size));
         }
     }
 }
@@ -677,9 +677,9 @@ internal static void dumpmemprof() {
                 continue;
             }
             var spp = sp.Reinterpret<special, specialprofile>();
-            var Δp = s.@base() + spp.special.offset;
+            var p = s.@base() + spp.special.offset;
             dumpint(tagAllocSample);
-            dumpint((uint64)Δp);
+            dumpint((uint64)p);
             dumpint((uint64)(uintptr)spp.b);
         }
     }
@@ -747,7 +747,7 @@ private static readonly @string heapdumpˢᵇ = "heapdump"u8;
 internal static ref readonly @string heapdumpOutOfMemoryˢ => ref heapdumpOutOfMemoryˢᵇ;
 private static readonly @string heapdumpOutOfMemoryˢᵇ = "heapdump: out of memory"u8;
 
-internal static unsafe bitvector makeheapobjbv(uintptr Δp, uintptr size) {
+internal static unsafe bitvector makeheapobjbv(uintptr p, uintptr size) {
     // Extend the temp buffer if necessary.
     var nptr = size / (uintptr)goarch.PtrSize;
     if ((uintptr)len(tmpbuf) < nptr / 8 + 1) {
@@ -762,15 +762,15 @@ internal static unsafe bitvector makeheapobjbv(uintptr Δp, uintptr size) {
         tmpbuf = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(pΔ1), (int)(n)));
     }
     // Convert heap bitmap to pointer bitmap.
-    builtin.clear(tmpbuf.slice(0, (nint)(nptr / 8 + 1)));
-    var s = spanOf(Δp);
-    var tp = s.typePointersOf(Δp, size);
+    clear(tmpbuf.slice(0, (nint)(nptr / 8 + 1)));
+    var s = spanOf(p);
+    var tp = s.typePointersOf(p, size);
     for (;;) {
         uintptr addr = default;
-        (tp, addr) = tp.next(Δp + size); if (addr == 0) {
+        (tp, addr) = tp.next(p + size); if (addr == 0) {
             break;
         }
-        var i = (addr - Δp) / (uintptr)goarch.PtrSize;
+        var i = (addr - p) / (uintptr)goarch.PtrSize;
         tmpbuf[i / 8] |= (byte)((byte)(1 << (int)(i % 8)));
     }
     return new bitvector((int32)nptr, Ꮡ(tmpbuf, 0));

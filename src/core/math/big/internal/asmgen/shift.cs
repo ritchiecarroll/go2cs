@@ -38,7 +38,7 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
     Ꮡa.JmpZero(n, ret0ˢ);
 
     // Start loop by reading first input word.
-    ref var s = ref heap<ΔReg>(f.ArgHint("s", HintShiftCount), out var Ꮡs);
+    ref var s = ref heap<Reg>(f.ArgHint("s", HintShiftCount), out var Ꮡs);
     var p = f.Pipe();
     if (name == "lshVU"u8) {
         p.SetBackward();
@@ -50,19 +50,19 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
     }
     p.LoadPtrs(n);
     Ꮡa.Comment(shiftFirstWordIntoCarryˢ);
-    ref var prev = ref heap<ΔReg>(p.LoadN(1)[0][0], out var Ꮡprev);
+    ref var prev = ref heap<Reg>(p.LoadN(1)[0][0], out var Ꮡprev);
 
     // Decide how to shift. On systems with a wide shift (x86), use that.
     // Otherwise, we need shift by s and negative (reverse) shift by 64-s or 32-s.
-    var shift = (ΔReg p1, ΔReg p2, ΔReg p3) => Ꮡa.Lsh(p1, p2, p3);
-    var shiftWide = (ΔReg p1, ΔReg p2, ΔReg p3, ΔReg p4) => Ꮡa.LshWide(p1, p2, p3, p4);
-    var negShift = (ΔReg p1, ΔReg p2, ΔReg p3) => Ꮡa.Rsh(p1, p2, p3);
-    var negShiftReg = (ΔReg p1, ΔReg p2) => Ꮡa.RshReg(p1, p2);
+    var shift = (Reg p1, Reg p2, Reg p3) => Ꮡa.Lsh(p1, p2, p3);
+    var shiftWide = (Reg p1, Reg p2, Reg p3, Reg p4) => Ꮡa.LshWide(p1, p2, p3, p4);
+    var negShift = (Reg p1, Reg p2, Reg p3) => Ꮡa.Rsh(p1, p2, p3);
+    var negShiftReg = (Reg p1, Reg p2) => Ꮡa.RshReg(p1, p2);
     if (name == "rshVU"u8) {
-        shift = (ΔReg p1, ΔReg p2, ΔReg p3) => Ꮡa.Rsh(p1, p2, p3);
-        shiftWide = (ΔReg p1, ΔReg p2, ΔReg p3, ΔReg p4) => Ꮡa.RshWide(p1, p2, p3, p4);
-        negShift = (ΔReg p1, ΔReg p2, ΔReg p3) => Ꮡa.Lsh(p1, p2, p3);
-        negShiftReg = (ΔReg p1, ΔReg p2) => Ꮡa.LshReg(p1, p2);
+        shift = (Reg p1, Reg p2, Reg p3) => Ꮡa.Rsh(p1, p2, p3);
+        shiftWide = (Reg p1, Reg p2, Reg p3, Reg p4) => Ꮡa.RshWide(p1, p2, p3, p4);
+        negShift = (Reg p1, Reg p2, Reg p3) => Ꮡa.Lsh(p1, p2, p3);
+        negShiftReg = (Reg p1, Reg p2) => Ꮡa.LshReg(p1, p2);
     }
     if (a.Arch.HasShiftWide()) {
         // Use wide shift to avoid needing negative shifts.
@@ -79,7 +79,7 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
         var prevʗ1 = prev;
         var sʗ1 = s;
         var shiftWideʗ1 = shiftWide;
-        p.Loop((slice<slice<ΔReg>> @in, slice<slice<ΔReg>> @out) => {
+        p.Loop((slice<slice<Reg>> @in, slice<slice<Reg>> @out) => {
             // We reuse the input registers as output, delayed one cycle; prev is the first output.
             // After writing the outputs to memory, we can copy the final x value into prev
             // for the next iteration.
@@ -100,7 +100,7 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
         // prev holds x << s, to be used as the high bits of the next output word,
         // once we find the low bits after reading the next input word.
         // After the loop finishes, prev holds the final output word to be written.
-        ref var sNeg = ref heap<ΔReg>(Ꮡa.Reg(), out var ᏑsNeg);
+        ref var sNeg = ref heap<Reg>(Ꮡa.Reg(), out var ᏑsNeg);
         Ꮡa.Mov(a.Imm(a.Arch.WordBits), sNeg);
         Ꮡa.Sub(s, sNeg, sNeg, SmashCarry);
         var c = Ꮡa.Reg();
@@ -117,7 +117,7 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
         var sʗ2 = s;
         var sNegʗ1 = sNeg;
         var shiftʗ1 = shift;
-        p.Loop((slice<slice<ΔReg>> @in, slice<slice<ΔReg>> @out) => {
+        p.Loop((slice<slice<Reg>> @in, slice<slice<Reg>> @out) => {
             if (Ꮡa.Value.HasRegShift()) {
                 // ARM (32-bit) allows shifts in most arithmetic expressions,
                 // including OR, letting us combine the negShift and a.Or.

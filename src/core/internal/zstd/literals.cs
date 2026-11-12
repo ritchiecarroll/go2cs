@@ -5,8 +5,11 @@ namespace go.@internal;
 
 using binary = encoding.binary_package;
 using encoding;
+using static zstd_package;
 
 partial class zstd_package {
+
+} partial class zstdᴛReader {
 
 // readLiterals reads and decompresses the literals from data at off.
 // The literals are appended to outbuf, which is returned.
@@ -14,7 +17,7 @@ partial class zstd_package {
 internal static (nint, slice<byte>, error) readLiterals(this ж<Reader> Ꮡr, block data, nint off, slice<byte> outbuf) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    if (off >= builtin.len(data)) {
+    if (off >= len(data)) {
         return (0, default, r.makeEOFError(off));
     }
 
@@ -51,7 +54,7 @@ internal static (nint, slice<byte>, error) readRawRLELiterals(this ref Reader r,
         break;
     }
     case 1: {
-        if (off >= builtin.len(data)) {
+        if (off >= len(data)) {
             return (0, default, r.makeEOFError(off));
         }
         regeneratedSize = (nint)(hdr >> 4) + ((nint)data[off] << 4);
@@ -59,7 +62,7 @@ internal static (nint, slice<byte>, error) readRawRLELiterals(this ref Reader r,
         break;
     }
     case 3: {
-        if (off + 1 >= builtin.len(data)) {
+        if (off + 1 >= len(data)) {
             return (0, default, r.makeEOFError(off));
         }
         regeneratedSize = (nint)(hdr >> 4) + ((nint)data[off] << 4) + ((nint)data[off + 1] << 12);
@@ -76,14 +79,14 @@ internal static (nint, slice<byte>, error) readRawRLELiterals(this ref Reader r,
 
     if (raw) {
         // RFC 3.1.1.3.1.2.
-        if (off + regeneratedSize > builtin.len(data)) {
+        if (off + regeneratedSize > len(data)) {
             return (0, default, r.makeError(off, rawLiteralSizeTooLargeˢ));
         }
         outbuf = appendꓸꓸꓸ(outbuf, data.slice(off, off + regeneratedSize));
         off += regeneratedSize;
     } else {
         // RFC 3.1.1.3.1.3.
-        if (off >= builtin.len(data)) {
+        if (off >= len(data)) {
             return (0, default, r.makeError(off, rleLiteralMissingˢ));
         }
         var rle = data[off];
@@ -113,7 +116,7 @@ internal static (nint, slice<byte>, error) readHuffLiterals(this ж<Reader> Ꮡr
     nint streams = default;
     switch ((byte)((hdr >> 2) & 3)) {
     case 0 or 1: {
-        if (off + 1 >= builtin.len(data)) {
+        if (off + 1 >= len(data)) {
             return (0, default, r.makeEOFError(off));
         }
         regeneratedSize = ((nint)hdr >> 4) | (((nint)data[off] & 0x3f) << 4);
@@ -127,7 +130,7 @@ internal static (nint, slice<byte>, error) readHuffLiterals(this ж<Reader> Ꮡr
         break;
     }
     case 2: {
-        if (off + 2 >= builtin.len(data)) {
+        if (off + 2 >= len(data)) {
             return (0, default, r.makeEOFError(off));
         }
         regeneratedSize = ((nint)hdr >> 4) | ((nint)data[off] << 4) | (((nint)data[off + 1] & 3) << 12);
@@ -137,7 +140,7 @@ internal static (nint, slice<byte>, error) readHuffLiterals(this ж<Reader> Ꮡr
         break;
     }
     case 3: {
-        if (off + 3 >= builtin.len(data)) {
+        if (off + 3 >= len(data)) {
             return (0, default, r.makeEOFError(off));
         }
         regeneratedSize = ((nint)hdr >> 4) | ((nint)data[off] << 4) | (((nint)data[off + 1] & 0x3f) << 12);
@@ -155,7 +158,7 @@ internal static (nint, slice<byte>, error) readHuffLiterals(this ж<Reader> Ꮡr
     }
 
     nint roff = off + compressedSize;
-    if (roff > builtin.len(data) || roff < 0) {
+    if (roff > len(data) || roff < 0) {
         return (0, default, r.makeEOFError(off));
     }
 
@@ -164,7 +167,7 @@ internal static (nint, slice<byte>, error) readHuffLiterals(this ж<Reader> Ꮡr
         // Compressed_Literals_Block.
         // Read new huffman tree.
 
-        if (builtin.len(r.huffmanTable) < (nint)(1 << (int)(maxHuffmanBits))) {
+        if (len(r.huffmanTable) < (nint)(1 << (int)(maxHuffmanBits))) {
             r.huffmanTable = new slice<uint16>((1 << (int)(maxHuffmanBits)));
         }
 
@@ -253,7 +256,7 @@ internal static (slice<byte>, error) readLiteralsFourStreams(this ж<Reader> Ꮡ
 
     // Read the jump table to find out where the streams are.
     // RFC 3.1.1.3.1.6.
-    if (off + 5 >= builtin.len(data)) {
+    if (off + 5 >= len(data)) {
         return (default, r.makeEOFError(off));
     }
     if (totalStreamsSize < 6) {
@@ -319,7 +322,7 @@ internal static (slice<byte>, error) readLiteralsFourStreams(this ж<Reader> Ꮡ
         return (default, err);
     }
 
-    nint out1 = builtin.len(outbuf);
+    nint out1 = len(outbuf);
     nint out2 = out1 + regeneratedStreamSize;
     nint out3 = out2 + regeneratedStreamSize;
     nint out4 = out3 + regeneratedStreamSize;
@@ -385,4 +388,4 @@ internal static (slice<byte>, error) readLiteralsFourStreams(this ж<Reader> Ꮡ
     return (outbuf, default);
 }
 
-} // end zstd_package
+} // end zstdᴛReader

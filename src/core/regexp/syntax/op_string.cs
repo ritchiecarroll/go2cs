@@ -2,6 +2,7 @@
 namespace go.regexp;
 
 using strconv = strconv_package;
+using static syntax_package;
 
 partial class syntax_package {
 
@@ -38,6 +39,8 @@ private static readonly @string _Op_name_1ᵇ = "opPseudo"u8;
 
 [GoLazy] partial class lazyᴛ_Op_index_0 { internal static array<uint8> _Op_index_0 = new uint8[]{0, 7, 17, 24, 33, 45, 52, 61, 68, 77, 84, 96, 110, 117, 121, 125, 130, 136, 142, 151}.array(); }
 
+} partial class syntaxᴛOp {
+
 public static @string String(this Op i) {
     switch (ᐧ) {
     case {} when 1 <= i && i <= 19: {
@@ -52,4 +55,4 @@ public static @string String(this Op i) {
     }}
 }
 
-} // end syntax_package
+} // end syntaxᴛOp

@@ -8,11 +8,13 @@ using alias = go.crypto.@internal.fips140.alias_package;
 using strconv = strconv_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using aes = aes_package;
+using static aes_package;
 
 partial class aes_package {
 
 // BlockSize is the AES block size in bytes.
-public static UntypedInt ΔBlockSize => 16;
+public static UntypedInt BlockSize => 16;
 
 // A Block is an instance of AES using a particular key.
 // It is safe for concurrent use.
@@ -43,16 +45,24 @@ internal static UntypedInt aes128Rounds => 10;
 internal static UntypedInt aes192Rounds => 12;
 internal static UntypedInt aes256Rounds => 14;
 
+} partial class aesᴛblockExpanded {
+
 // roundKeysSize returns the number of uint32 of c.end or c.dec that are used.
 internal static nint roundKeysSize(this ref blockExpanded b) {
     return (b.rounds + 1) * (128 / 32);
 }
 
+} partial class aes_package {
+
 partial struct KeySizeError /*num:nint*/;
+
+} partial class aesᴛKeySizeError {
 
 public static @string Error(this KeySizeError k) {
     return "crypto/aes: invalid key size "u8 + strconv.Itoa((nint)k);
 }
+
+} partial class aes_package {
 
 // New creates and returns a new [cipher.Block] implementation.
 // The key argument should be the AES key, either 16, 24, or 32 bytes to select
@@ -96,18 +106,20 @@ internal static void newBlockExpanded(ж<blockExpanded> Ꮡc, slice<byte> key) {
     expandKeyGeneric(Ꮡc, key);
 }
 
-public static nint BlockSize(this ref Block c) { return ΔBlockSize; }
+} partial class aesᴛBlock {
+
+public static nint BlockSize(this ref Block c) { return aes.BlockSize; }
 
 public static void Encrypt(this ж<Block> Ꮡc, slice<byte> dst, slice<byte> src) {
     // AES-ECB is not approved in FIPS 140-3 mode.
     fips140.RecordNonApproved();
-    if (len(src) < ΔBlockSize) {
+    if (len(src) < aes.BlockSize) {
         throw panic("crypto/aes: input not full block");
     }
-    if (len(dst) < ΔBlockSize) {
+    if (len(dst) < aes.BlockSize) {
         throw panic("crypto/aes: output not full block");
     }
-    if (alias.InexactOverlap(dst[..(int)(ΔBlockSize)], src[..(int)(ΔBlockSize)])) {
+    if (alias.InexactOverlap(dst[..(int)(aes.BlockSize)], src[..(int)(aes.BlockSize)])) {
         throw panic("crypto/aes: invalid buffer overlap");
     }
     encryptBlock(ref (Ꮡc).DerefOrNull(), dst, src);
@@ -116,17 +128,19 @@ public static void Encrypt(this ж<Block> Ꮡc, slice<byte> dst, slice<byte> src
 public static void Decrypt(this ж<Block> Ꮡc, slice<byte> dst, slice<byte> src) {
     // AES-ECB is not approved in FIPS 140-3 mode.
     fips140.RecordNonApproved();
-    if (len(src) < ΔBlockSize) {
+    if (len(src) < aes.BlockSize) {
         throw panic("crypto/aes: input not full block");
     }
-    if (len(dst) < ΔBlockSize) {
+    if (len(dst) < aes.BlockSize) {
         throw panic("crypto/aes: output not full block");
     }
-    if (alias.InexactOverlap(dst[..(int)(ΔBlockSize)], src[..(int)(ΔBlockSize)])) {
+    if (alias.InexactOverlap(dst[..(int)(aes.BlockSize)], src[..(int)(aes.BlockSize)])) {
         throw panic("crypto/aes: invalid buffer overlap");
     }
     decryptBlock(ref (Ꮡc).DerefOrNull(), dst, src);
 }
+
+} partial class aes_package {
 
 // EncryptBlockInternal applies the AES encryption function to one block.
 //

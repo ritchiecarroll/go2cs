@@ -20,6 +20,7 @@ namespace go.math.rand;
 using bits = go.math.bits_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 using go.math;
+using static rand_package;
 
 partial class rand_package {
 
@@ -41,6 +42,8 @@ partial struct Rand {
 public static ж<Rand> New(Source src) {
     return Ꮡ(new Rand(src: src));
 }
+
+} partial class randᴛRand {
 
 // Int64 returns a non-negative pseudo-random 63-bit integer as an int64.
 public static int64 Int64(this ref Rand r) { return (int64)((uint64)(r.src.Uint64() & ~((uint64)1 << 63))); }
@@ -185,7 +188,11 @@ public static uint32 Uint32N(this ref Rand r, uint32 n) {
     return (uint32)r.uint64n((uint64)n);
 }
 
+} partial class rand_package {
+
 internal const bool is32bit = /* ^uint(0)>>32 == 0 */ false;
+
+} partial class randᴛRand {
 
 // IntN returns, as an int, a non-negative pseudo-random number in the half-open interval [0,n).
 // It panics if n <= 0.
@@ -251,6 +258,8 @@ public static void Shuffle(this ref Rand r, nint n, Action<nint, nint> swap) {
     }
 }
 
+} partial class rand_package {
+
 /*
  * Top-level convenience functions
  */
@@ -266,9 +275,13 @@ internal static partial uint64 runtime_rand();
 partial struct runtimeSource {
 }
 
+} partial class randᴛruntimeSource {
+
 internal static uint64 Uint64(this runtimeSource _) {
     return runtime_rand();
 }
+
+} partial class rand_package {
 
 // Int64 returns a non-negative pseudo-random 63-bit integer as an int64
 // from the default Source.

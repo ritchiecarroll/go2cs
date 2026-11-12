@@ -9,6 +9,7 @@ using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
 using ꓸꓸꓸany = Span<any>;
+using static parse_package;
 
 partial class parse_package {
 
@@ -19,6 +20,8 @@ partial struct item {
     internal @string val;  // The value of this item.
     internal nint line;    // The line number at the start of this item.
 }
+
+} partial class parseᴛitem {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string eofˢ => ref eofˢᵇ;
@@ -40,6 +43,8 @@ internal static @string String(this item i) {
     }}
     return fmt.Sprintf("%q"u8, i.val);
 }
+
+} partial class parse_package {
 
 // itemType identifies the type of lex items.
 partial struct itemType /*num:nint*/;
@@ -137,6 +142,8 @@ partial struct lexOptions {
     internal bool breakOK;     // break keyword allowed
     internal bool continueOK;  // continue keyword allowed
 }
+
+} partial class parseᴛlexer {
 
 // next returns the next rune in the input.
 internal static rune next(this ref lexer l) {
@@ -246,6 +253,8 @@ internal static item nextItem(this ж<lexer> Ꮡl) {
     }
 }
 
+} partial class parse_package {
+
 // lex creates a new scanner for the input string.
 internal static ж<lexer> lex(@string name, @string input, @string left, @string right) {
     if (left == ""u8) {
@@ -314,6 +323,8 @@ internal static Pos rightTrimLength(@string s) {
     return (Pos)(len(s) - len(strings.TrimRight(s, spaceChars)));
 }
 
+} partial class parseᴛlexer {
+
 // atRightDelim reports whether the lexer is at a right delimiter, possibly preceded by a trim marker.
 internal static (bool delim, bool trimSpaces) atRightDelim(this ref lexer l) {
     if (hasRightTrimMarker(l.input.slice(l.pos)) && strings.HasPrefix(l.input.slice(l.pos + trimMarkerLen), l.rightDelim)) { // With trim marker.
@@ -324,6 +335,8 @@ internal static (bool delim, bool trimSpaces) atRightDelim(this ref lexer l) {
     }
     return (false, false);
 }
+
+} partial class parse_package {
 
 // leftTrimLength returns the length of the spaces at the beginning of the string.
 internal static Pos leftTrimLength(@string s) {
@@ -596,6 +609,8 @@ internal static stateFn lexFieldOrVariable(ж<lexer> Ꮡl, itemType typ) {
     return l.emit(typ);
 }
 
+} partial class parseᴛlexer {
+
 // atTerminator reports whether the input is at valid termination character to
 // appear after an identifier. Breaks .X.Y into two pieces. Also catches cases
 // like "$x+2" not being acceptable without a space, in case we decide one
@@ -611,6 +626,8 @@ internal static bool atTerminator(this ref lexer l) {
     }}
     return strings.HasPrefix(l.input.slice(l.pos), l.rightDelim);
 }
+
+} partial class parse_package {
 
 // lexChar scans a character constant. The initial quote is already
 // scanned. Syntax checking is done by the parser.
@@ -661,6 +678,8 @@ internal static stateFn lexNumber(ж<lexer> Ꮡl) {
     return l.emit(itemNumber);
 }
 
+} partial class parseᴛlexer {
+
 internal static bool scanNumber(this ref lexer l) {
     // Optional leading sign.
     l.accept("+-");
@@ -697,6 +716,8 @@ internal static bool scanNumber(this ref lexer l) {
     }
     return true;
 }
+
+} partial class parse_package {
 
 // lexQuote scans a quoted string.
 internal static stateFn lexQuote(ж<lexer> Ꮡl) {

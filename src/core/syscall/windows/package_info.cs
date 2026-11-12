@@ -28,9 +28,6 @@ using static go.syscall_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b6f6e63652073796e632e4f6e63653b20616464722075696e747074723b20657272206572726f727d", "connectExFuncᴛ1")]
-[assembly: GoTypeAlias("Handle", "ΔHandle")]
-[assembly: GoTypeAlias("Signal", "ΔSignal")]
-[assembly: GoTypeAlias("Sockaddr", "ΔSockaddr")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -42,9 +39,9 @@ using static go.syscall_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<DLLError, error>(Pointer = true)]
 [assembly: GoImplement<Errno, error>]
-[assembly: GoImplement<SockaddrInet4, ΔSockaddr>(Pointer = true)]
-[assembly: GoImplement<SockaddrInet6, ΔSockaddr>(Pointer = true)]
-[assembly: GoImplement<SockaddrUnix, ΔSockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrInet4, Sockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrInet6, Sockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrUnix, Sockaddr>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -76,10 +73,10 @@ using static go.syscall_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("syscall/env_windows.go", "env_windows.cs", "AAoagoKClIKCgoKClILKgoKClIKClIKClIKmgoKClIKClIKmgriCgoLcooKClJSCgpSCgqaCgpQ=")]
-[assembly: GoPositionMap("syscall/syscall.go", "syscall.cs", "ACBK8oKClKyygpSCggACEMCasoKClAAGEJKokqiSqJKqkpaSmA==")]
-[assembly: GoPositionMap("syscall/syscall_windows.go", "syscall_windows.cs", "ABc80oKClK7CggAHEIKCrLKCgoKClJS0AAkQtoKqooKUgoKCgpQAAhLQnMKCgpQACxicwtqUgoKmgpSClLaCgpSmhJKCgoKCgriUAAcUgpSorKqepoKmgqgAAhDiAAIS4gAC4AEAagKCgoKmooKUgoKUgoKUtLSkgpS4gqaUgoKClIKC3IKUpgALFKSCntKUgrS0pIKClIKCppSEkoKClIKCuISCuIKmgoKmpoKCgoKUlJSmgoKCgpSmooKCgpSUgpSClKaigpSCgpSClIKU6ryigoLGtIKUprKClLS0pIKmgsiiopaCgsqC3IKCgpSClLiigoKUpqKCgpSmooKClKaigoKUpqKCgpSCgpSmgpKCgoKU5oKIgoKmooKCgqaCgpSSgoKUgoKmsoKUgoKUpoKUgoKCgpSClAAJDLKClIKClKaClIKCgoKUgpTmgqaCgoKUgoKUgpSUpoKmggBj8gGigoKCuLiClIKCuIKmgpSmAARigoKUpoKCAApKgqaCAAQuooKClAAKAoKClKamooKClAAKAoKClKamggAMOqIACAKCgpSmABA2lJSUlJSUlJQACBKUooKCqoCCgpSCABo6goKCgqaigqaiAAQSlAADEgAIAoKClKaigoKClKaigoKUgoKCgpSCgpSCgvqCgoKUpoKYgoKCgpSClJSmooKCggAKFoKUqICClIKCgpSCgoKCuJSCgoKCpqaCqNKCgpSUgpSUgoKCgqaCgpSCgoKCgoLYAA0SgoKCggAIDpSU6JKosoKCgoKUgoKCgqaokuiSgoKCgpSUgoKCpoKCgpSCqJKCqJKCgoKokgACNgAYAqaCgqaygqaU")]
+[assembly: GoPositionMap("syscall/syscall.go", "syscall.cs", "ACFK8oKClKyygpSCggACEMCasoKClAAIEJLIksiSyJLKkpaSmA==")]
+[assembly: GoPositionMap("syscall/syscall_windows.go", "syscall_windows.cs", "ABg80oKClK7CggAHEIKCrLKCgoKClJS0AAkQtoKqooKUgoKCgpQAAhLQnMKCgpQACxicwvqUgoKmgpSClLaCgpSmhJKCgoKCgriUAAsUgpSorKqepoKmgsgAAhDiAAIS4gAC4AEAagKCgoKmooKUgoKUgoKUtLSkgpS4gqaUgoKClIKC3IKUpgALFKSCntKUgrS0pIKClIKCppSEkoKClIKCuISCuIKmgoKmpoKCgoKUlJSmgoKCgpSmooKCgpSUgpSClKaigpSCgpSClIKU6ryigoLGtIKUprKClLS0pIKmgsiiopaCgsqC3IKCgpSClLiigoKUpqKCgpSmooKClKaigoKUpqKCgpSCgpSmgpKCgoKU5oKIgoKmooKCgqaCgpSSgoKUgoKmsoKUgoKUpoKUgoKCgpSClAAJDLKClIKClKaClIKCgoKUgpTmgqaCgoKUgoKUgpSUpoKmggBt8gGigoKCuLiClIKCuIKmgpSmAAhigoKUpoKCAApKgqaCAAQuooKClAAKAoKClKamooKClAAKAoKClKamggAMOqIACAKCgpSmABI2lJSUlJSUlJQAChKUooKCqoCCgpSCABo6goKCgqaigqaiAAQSlAADEgAIAoKClKaigoKClKaigoKUgoKCgpSCgpSCgvqCgoKUpoKYgoKCgpSClJSmooKCggAKFoKUqICClIKCgpSCgoKC2JSCgoKCpsaCqNKCgpSUgpSUgoKCgqaCgpSCgoKCgoLYAA0SgoKCggAIDpSU6JKosoKCgoKUgoKCgqaokuiSgoKCgpSUgoKCpoKCgpSCyJKCqJKCgoKokgAENgAYAqaCgqaygqaU")]
 [assembly: GoPositionMap("syscall/time_nofake.go", "time_nofake.cs", "AAoWlA==")]
-[assembly: GoPositionMap("syscall/types_windows.go", "types_windows.cs", "AEWaAQDzAf4DkpIAECKCpqKCggAcPrSUlIKmtJSUgoIAHk7ygoKCgoKCgqaCAOEEgAo=")]
+[assembly: GoPositionMap("syscall/types_windows.go", "types_windows.cs", "AEaaAQDzAf4DkpIAEiKCxqKCggAePrSUlILGtJSUgoIAHk7ygoKCgoKCgqaCAOEEgAo=")]
 [assembly: GoPositionMap("syscall/wtf8_windows.go", "wtf8_windows.cs", "ACZYoqaClIKCgoKmgpSqooKCtsiC6oKClIKklA==")]
 [assembly: GoPositionMap("syscall/zerrors_windows.go", "zerrors_windows.cs", "AJMBrgI=")]
 [assembly: GoPositionMap("syscall/zsyscall_windows.go", "zsyscall_windows.cs", "ABIyopSkyqiCgoKCgoKCgoKClIKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIABSaiwoKUpqKCgpQAEAKClKai4oKUpqKigpSmooKClKaiooKmosKClKaiAA4CgpSmogAOAoKUpqKigpSmooKClKaiAAwCgpSmosKClKaiABYCgpSmogAKAoKUAAQWooKClKayooKClKayooKClAAIMLKCgoKUprKigoKUAAQWosKCpqKCgoKUAAYgosKClKaiooKUpqKCgpQABBaigoKUpqLCgpSmssKCgpSmssKCgpSmosKClKaygoKClKai4oKUpqKCgpQAEAKClKaiwoKUprKCgoKUpqKigpSmgqKmogAIAoKUpqKCgpSigpSmgoKmooKClAAGKKKCgpSmooKClKaygoKUwoKClKaiooKUpqKCgpQABBKiwoKUpqKigpSmsqKCgpSmsoKCgpSmooKCprKCgoKUprLCgoKUpqKigpSmosKClKayooKClKaiooKUprKCgoKUprKigoKUprLigoKUpqKCgpSmssKCgpSmsoKCgpSmsqKCgpSmogAIAoKUpqLigpSmssKCgpQABBCygoKClKaCoqayooKClAAEGLKCgoKUpqLCgpSmsoKCgpSmsqKCgpSmsoKCgpSmsoKCgpSmsoKCgpSmosKClKaygoKUgoKClKaiooKUAAYmouKClKaigoKU4oKUAAQeoqKClKaiooKUpqKCgpSmosKClKaiooKUpqKCgpSmoqKClKayooKClKai4oKUpqKCgpSmooKClKaigoKUpqIACAKClKaigoKUpqKCgpSmsoKCgpSmouKClAAKSKKigpQABiaiwoKUpqLigpSmssKCgpSmosKClAAGIKKCgpQABBiiAAgCgpQACDaiAAoCgpQABBaiooKUpqKCgpSmoqKClKaygoKClAAEGKLCgpSmsoKCgpQABBiygoKClIKCgpQABBiiwoKUpqLCgpSmooKClKaigoKmoqKClKaigoKUprKCgoKU")]
@@ -109,7 +106,7 @@ public static partial class syscall_package
     public partial class Pointer {}
     public partial interface Conn {}
     public partial interface RawConn {}
-    public partial interface ΔSockaddr {}
+    public partial interface Sockaddr {}
     public partial struct AddrinfoW {}
     public partial struct ByHandleFileInformation {}
     public partial struct CertChainContext {}
@@ -135,6 +132,7 @@ public static partial class syscall_package
     public partial struct FileNotifyInformation {}
     public partial struct Filetime {}
     [GoValueClone("Data4")] public partial struct GUID {}
+    public partial struct Handle {}
     public partial struct Hostent {}
     [GoValueClone("Multiaddr", "Interface")] public partial struct IPMreq {}
     [GoValueClone("Multiaddr")] public partial struct IPv6Mreq {}
@@ -158,6 +156,7 @@ public static partial class syscall_package
     public partial struct SSLExtraCertChainPolicyPara {}
     public partial struct SecurityAttributes {}
     public partial struct Servent {}
+    public partial struct Signal {}
     public partial struct SockaddrGen {}
     [GoValueClone("Addr", "raw")] public partial struct SockaddrInet4 {}
     [GoValueClone("Addr", "raw")] public partial struct SockaddrInet6 {}
@@ -177,8 +176,6 @@ public static partial class syscall_package
     public partial struct Win32FileAttributeData {}
     [GoValueClone("FileName", "AlternateFileName")] public partial struct Win32finddata {}
     public partial struct _PROC_THREAD_ATTRIBUTE_LIST {}
-    public partial struct ΔHandle {}
-    public partial struct ΔSignal {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -201,3 +198,30 @@ public static partial class syscall_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(syscall_package.DLL)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛDLL;
+[GoMethodHost(typeof(syscall_package.DLLError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛDLLError;
+[GoMethodHost(typeof(syscall_package.Errno)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛErrno;
+[GoMethodHost(typeof(syscall_package.Filetime)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛFiletime;
+[GoMethodHost(typeof(syscall_package.LazyDLL)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛLazyDLL;
+[GoMethodHost(typeof(syscall_package.LazyProc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛLazyProc;
+[GoMethodHost(typeof(syscall_package.Proc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛProc;
+[GoMethodHost(typeof(syscall_package.RawSockaddrAny)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛRawSockaddrAny;
+[GoMethodHost(typeof(syscall_package.SID)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSID;
+[GoMethodHost(typeof(syscall_package.Signal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSignal;
+[GoMethodHost(typeof(syscall_package.SockaddrInet4)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrInet4;
+[GoMethodHost(typeof(syscall_package.SockaddrInet6)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrInet6;
+[GoMethodHost(typeof(syscall_package.SockaddrUnix)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrUnix;
+[GoMethodHost(typeof(syscall_package.Timespec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛTimespec;
+[GoMethodHost(typeof(syscall_package.Timeval)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛTimeval;
+[GoMethodHost(typeof(syscall_package.Token)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛToken;
+[GoMethodHost(typeof(syscall_package.WaitStatus)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛWaitStatus;
+[GoMethodHost(typeof(syscall_package.procThreadAttributeListContainer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛprocThreadAttributeListContainer;
+// </MethodHolders>

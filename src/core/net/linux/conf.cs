@@ -13,6 +13,7 @@ using runtime = runtime_package;
 using Δsync = sync_package;
 using @internal;
 using go.io;
+using static net_package;
 
 partial class net_package {
 
@@ -207,6 +208,8 @@ internal static bool goosPrefersCgo() {
     }}
 }
 
+} partial class netᴛconf {
+
 // mustUseGoResolver reports whether a DNS lookup of any sort is
 // required to use the go resolver. The provided Resolver is optional.
 // This will report true if the cgo resolver is not available.
@@ -236,8 +239,8 @@ internal static bool mustUseGoResolver(this ref conf c, ж<Resolver> Ꮡr) {
 // addrLookupOrder determines which strategy to use to resolve addresses.
 // The provided Resolver is optional. nil means to not consider its options.
 // It also returns dnsConfig when it was used to determine the lookup order.
-internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder(this ж<conf> Ꮡc, ж<Resolver> r, @string addr) {
-    ΔhostLookupOrder ret = default;
+internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder(this ж<conf> Ꮡc, ж<Resolver> r, @string addr) {
+    hostLookupOrder ret = default;
     ж<dnsConfig> dnsConf = default;
     GoFrame ᒐ = default;
     try {
@@ -258,8 +261,8 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder(t
 // hostLookupOrder determines which strategy to use to resolve hostname.
 // The provided Resolver is optional. nil means to not consider its options.
 // It also returns dnsConfig when it was used to determine the lookup order.
-internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) hostLookupOrder(this ж<conf> Ꮡc, ж<Resolver> r, @string hostname) {
-    ΔhostLookupOrder ret = default;
+internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) hostLookupOrder(this ж<conf> Ꮡc, ж<Resolver> r, @string hostname) {
+    hostLookupOrder ret = default;
     ж<dnsConfig> dnsConf = default;
     GoFrame ᒐ = default;
     try {
@@ -289,11 +292,11 @@ private static readonly @string etcMdnsAllowˢᵇ = "/etc/mdns.allow"u8;
 internal static ref readonly @string dnsˢ => ref dnsˢᵇ;
 private static readonly @string dnsˢᵇ = "dns"u8;
 
-internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this ref conf c, ж<Resolver> r, @string hostname) {
+internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this ref conf c, ж<Resolver> r, @string hostname) {
     ж<dnsConfig> dnsConf = default;
 
     // fallbackOrder is the order we return if we can't figure it out.
-    ΔhostLookupOrder fallbackOrder = default;
+    hostLookupOrder fallbackOrder = default;
 
     bool canUseCgo = default;
     if (c.mustUseGoResolver(r)) {
@@ -550,6 +553,8 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
     // Something weird. Fallback to the default.
     return (fallbackOrder, dnsConf);
 }
+
+} partial class net_package {
 
 internal static ж<godebug.Setting> netdns = godebug.New("netdns");
 

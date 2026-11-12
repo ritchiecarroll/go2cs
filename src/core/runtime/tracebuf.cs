@@ -10,6 +10,7 @@ using @unsafe = unsafe_package;
 using @internal.runtime;
 using @internal.trace;
 using ꓸꓸꓸtraceArg = Span<runtime_package.traceArg>;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -29,6 +30,8 @@ partial struct traceWriter {
     internal tracev2.Experiment exp;
     /*embed*/ internal ж<traceBuf> traceBuf;
 }
+
+} partial class runtimeᴛtraceLocker {
 
 // writer returns a traceWriter that writes into the current M's stream.
 //
@@ -53,6 +56,8 @@ internal static traceWriter writer(this traceLocker tl) {
     return new traceWriter(traceLocker: tl, traceBuf: (~tl.mp).trace.buf[tl.gen % 2][tracev2.NoExperiment]);
 }
 
+} partial class runtime_package {
+
 // unsafeTraceWriter produces a traceWriter that doesn't lock the trace.
 //
 // It should only be used in contexts where either:
@@ -65,6 +70,8 @@ internal static traceWriter writer(this traceLocker tl) {
 internal static traceWriter unsafeTraceWriter(uintptr gen, ж<traceBuf> buf) {
     return new traceWriter(traceLocker: new traceLocker(gen: gen), traceBuf: buf);
 }
+
+} partial class runtimeᴛtraceWriter {
 
 // event writes out the bytes of an event into the event stream.
 //
@@ -145,11 +152,11 @@ internal static (traceWriter, bool) ensure(this traceWriter w, nint maxSize) {
 //go:nosplit
 internal static traceWriter flush(this traceWriter w) {
     systemstack(() => {
-        @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+        @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         if (w.traceBuf != nil) {
             traceBufFlush(w.traceBuf, w.gen);
         }
-        unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+        unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
     });
     w.traceBuf = default;
     return w;
@@ -164,16 +171,16 @@ private static readonly @string traceOutOfMemoryˢᵇ = "trace: out of memory"u8
 // refill puts w.traceBuf on the queue of full buffers and refresh's w's buffer.
 internal static traceWriter refill(this traceWriter w) {
     systemstack(() => {
-        @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+        @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         if (w.traceBuf != nil) {
             traceBufFlush(w.traceBuf, w.gen);
         }
-        if (Δtrace.empty != nil) {
-            w.traceBuf = Δtrace.empty;
-            Δtrace.empty = w.traceBuf.link;
-            unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+        if (trace.empty != nil) {
+            w.traceBuf = trace.empty;
+            trace.empty = w.traceBuf.link;
+            unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         } else {
-            unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+            unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
             w.traceBuf = (ж<traceBuf>)(uintptr)(sysAlloc(/* unsafe.Sizeof(traceBuf{}) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys, traceBufferˢ));
             if (w.traceBuf == nil) {
                 @throw(traceOutOfMemoryˢ);
@@ -209,11 +216,15 @@ internal static traceWriter refill(this traceWriter w) {
     return w;
 }
 
+} partial class runtimeᴛtraceLocker {
+
 // expWriter returns a traceWriter that writes into the current M's stream for
 // the given experiment.
 internal static traceWriter expWriter(this traceLocker tl, tracev2.Experiment exp) {
     return new traceWriter(traceLocker: tl, traceBuf: (~tl.mp).trace.buf[tl.gen % 2][exp], exp: exp);
 }
+
+} partial class runtime_package {
 
 // unsafeTraceExpWriter produces a traceWriter for experimental trace batches
 // that doesn't lock the trace. Data written to experimental batches need not
@@ -234,6 +245,8 @@ internal static traceWriter unsafeTraceExpWriter(uintptr gen, ж<traceBuf> buf, 
 partial struct traceBufQueue {
     internal ж<traceBuf> head, tail;
 }
+
+} partial class runtimeᴛtraceBufQueue {
 
 // push queues buf into queue of buffers.
 internal static void push(this ref traceBufQueue q, ж<traceBuf> Ꮡbuf) {
@@ -266,6 +279,8 @@ internal static bool empty(this ref traceBufQueue q) {
     return q.head == nil;
 }
 
+} partial class runtime_package {
+
 // traceBufHeader is per-P tracing buffer.
 partial struct traceBufHeader {
     internal ж<traceBuf> link;   // in trace.empty/full
@@ -282,6 +297,8 @@ partial struct traceBuf {
     /*embed*/ internal traceBufHeader traceBufHeader;
     internal array<byte> arr = new((uintptr)tracev2.MaxBatchSize - /* unsafe.Sizeof(traceBufHeader{}) */ (uintptr)32); // underlying buffer for traceBufHeader.buf
 }
+
+} partial class runtimeᴛtraceBuf {
 
 // byte appends v to buf.
 //
@@ -324,9 +341,9 @@ internal static void varint(this ref traceBuf buf, uint64 v) {
 //
 //go:nosplit
 internal static nint varintReserve(this ref traceBuf buf) {
-    nint Δp = buf.pos;
+    nint p = buf.pos;
     buf.pos += traceBytesPerNumber;
-    return Δp;
+    return p;
 }
 
 // stringData appends s's data directly to buf.
@@ -375,6 +392,8 @@ internal static void varintAt(this ref traceBuf buf, nint pos, uint64 v) {
     }
 }
 
+} partial class runtime_package {
+
 // traceBufFlush flushes a trace buffer.
 //
 // Must run on the system stack because trace.lock must be held.
@@ -383,7 +402,7 @@ internal static void varintAt(this ref traceBuf buf, nint pos, uint64 v) {
 internal static void traceBufFlush(ж<traceBuf> Ꮡbuf, uintptr gen) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
-    assertLockHeld(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+    assertLockHeld(Ꮡtrace.of(traceᴛ1.Ꮡlock));
 
     // Write out the non-header length of the batch in the header.
     //
@@ -394,12 +413,12 @@ internal static void traceBufFlush(ж<traceBuf> Ꮡbuf, uintptr gen) {
     // force serializers to do more work. Nothing else actually needs
     // padding.
     buf.varintAt(buf.lenPos, (uint64)(buf.pos - (buf.lenPos + (nint)traceBytesPerNumber)));
-    Δtrace.full[gen % 2].push(Ꮡbuf);
+    trace.full[gen % 2].push(Ꮡbuf);
 
     // Notify the scheduler that there's work available and that the trace
     // reader should be scheduled.
-    if (!ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑworkAvailable).Load()) {
-        ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑworkAvailable).Store(true);
+    if (!Ꮡtrace.of(traceᴛ1.ᏑworkAvailable).Load()) {
+        Ꮡtrace.of(traceᴛ1.ᏑworkAvailable).Store(true);
     }
 }
 

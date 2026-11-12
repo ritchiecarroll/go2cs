@@ -60,7 +60,7 @@ using static go.@internal.chacha8rand_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/chacha8rand/chacha8.go", "chacha8.cs", "ABk8AA8wAAkCgoKUgqiyAAcSwoKCgoKs0oIABxCCgoKClIKCgoIAAxDigoKCgoKClKYAAhDygoKCgoKUAAkKgqiygpSCgpSClIKCgoKClA==", "", "", "64=LEUint64/1/4/1,LEUint64/2/4/2,LEUint64/3/4/3,LEUint64/4/4/4")]
+[assembly: GoPositionMap("internal/chacha8rand/chacha8.go", "chacha8.cs", "ABo8ABEwAAkCgoKUgqiyAAcSwoKCgoKs0oIABxCCgoKClIKCgoIAAxDigoKCgoKClKYABBDygoKCgoKUAAsKgsiygpSCgpSClIKCgoKClA==", "", "", "67=LEUint64/1/4/1,LEUint64/2/4/2,LEUint64/3/4/3,LEUint64/4/4/4")]
 [assembly: GoPositionMap("internal/chacha8rand/chacha8_generic.go", "chacha8_generic.cs", "ADqWApSCggAEnAGSgoKCgoKCgoKCgoKC")]
 // </GoSourcePositionMaps>
 
@@ -89,3 +89,14 @@ public static partial class chacha8rand_package
     // <ImportInitializers>
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(chacha8rand_package.State)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class chacha8randᴛState;
+[GoMethodHost(typeof(chacha8rand_package.errUnmarshalChaCha8)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class chacha8randᴛerrUnmarshalChaCha8;
+// </MethodHolders>

@@ -23,6 +23,7 @@ using go.net;
 using go.vendor.golang.org.x.net;
 using unicode;
 using ꓸꓸꓸstring = Span<@string>;
+using static httpproxy_package;
 
 partial class httpproxy_package {
 
@@ -119,6 +120,8 @@ internal static @string getEnvAny(params ꓸꓸꓸstring namesʗp) {
     return ""u8;
 }
 
+} partial class httpproxyᴛConfig {
+
 // ProxyFunc returns a function that determines the proxy URL to use for
 // a given request URL. Changing the contents of cfg will not affect
 // proxy functions created earlier.
@@ -137,6 +140,8 @@ public static Func<ж<url.URL>, (ж<url.URL>, error)> ProxyFunc(this ref Config 
     cfg1.init();
     return cfg1.proxyForURL;
 }
+
+} partial class httpproxyᴛconfig {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string refusingToUseHttpProxyˢ => ref refusingToUseHttpProxyˢᵇ;
@@ -164,6 +169,8 @@ internal static (ж<url.URL>, error) proxyForURL(this ref config cfg, ж<url.URL
     return (proxy, default);
 }
 
+} partial class httpproxy_package {
+
 internal static (ж<url.URL>, error) parseProxy(@string proxy) {
     if (proxy == ""u8) {
         return (default, default);
@@ -183,6 +190,8 @@ internal static (ж<url.URL>, error) parseProxy(@string proxy) {
     }
     return (proxyURL, default);
 }
+
+} partial class httpproxyᴛconfig {
 
 // useProxy reports whether requests to addr should use a proxy,
 // according to the NO_PROXY or no_proxy environment variable.
@@ -303,6 +312,8 @@ internal static void init(this ref config c) {
     }
 }
 
+} partial class httpproxy_package {
+
 internal static map<@string, @string> portMap = new map<@string, @string>{
     ["http"] = "80",
     ["https"] = "443",
@@ -364,22 +375,32 @@ partial interface matcher {
 partial struct allMatch {
 }
 
+} partial class httpproxyᴛallMatch {
+
 internal static bool match(this allMatch a, @string host, @string port, net.IP ip) {
     return true;
 }
+
+} partial class httpproxy_package {
 
 partial struct cidrMatch {
     internal ж<net.IPNet> cidr;
 }
 
+} partial class httpproxyᴛcidrMatch {
+
 internal static bool match(this cidrMatch m, @string host, @string port, net.IP ip) {
     return m.cidr.Contains(ip);
 }
+
+} partial class httpproxy_package {
 
 partial struct ipMatch {
     internal net.IP ip;
     internal @string port;
 }
+
+} partial class httpproxyᴛipMatch {
 
 internal static bool match(this ipMatch m, @string host, @string port, net.IP ip) {
     if (m.ip.Equal(ip)) {
@@ -388,11 +409,15 @@ internal static bool match(this ipMatch m, @string host, @string port, net.IP ip
     return false;
 }
 
+} partial class httpproxy_package {
+
 partial struct domainMatch {
     internal @string host;
     internal @string port;
     internal bool matchHost;
 }
+
+} partial class httpproxyᴛdomainMatch {
 
 internal static bool match(this domainMatch m, @string host, @string port, net.IP ip) {
     if (ip != nil) {
@@ -404,4 +429,4 @@ internal static bool match(this domainMatch m, @string host, @string port, net.I
     return false;
 }
 
-} // end httpproxy_package
+} // end httpproxyᴛdomainMatch

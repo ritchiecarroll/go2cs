@@ -173,14 +173,14 @@ internal static @string slicebytetostring(ж<tmpBuf> buf, ж<byte> Ꮡptr, nint 
         return @unsafe.String((ж<byte>)(uintptr)(pΔ1), 1);
     }
 
-    @unsafe.Pointer Δp = default;
+    @unsafe.Pointer p = default;
     if (buf != nil && n <= 32) {
-        Δp = @unsafe.Pointer.FromPinnedBox(buf);
+        p = @unsafe.Pointer.FromPinnedBox(buf);
     } else {
-        Δp = (uintptr)mallocgc((uintptr)n, nil, false);
+        p = (uintptr)mallocgc((uintptr)n, nil, false);
     }
-    memmove(Δp, @unsafe.Pointer.FromPinnedBox(Ꮡptr), (uintptr)n);
-    return @unsafe.String((ж<byte>)(uintptr)(Δp), n);
+    memmove(p, @unsafe.Pointer.FromPinnedBox(Ꮡptr), (uintptr)n);
+    return @unsafe.String((ж<byte>)(uintptr)(p), n);
 }
 
 // stringDataOnStack reports whether the string's data is
@@ -345,12 +345,12 @@ internal static slice<byte> /*b*/ rawbyteslice(nint size) {
     ref var b = ref heap<slice<byte>>(out var Ꮡb);
 
     var cap = roundupsize((uintptr)size, true);
-    @unsafe.Pointer Δp = (uintptr)mallocgc(cap, nil, false);
+    @unsafe.Pointer p = (uintptr)mallocgc(cap, nil, false);
     if (cap != (uintptr)size) {
-        memclrNoHeapPointers((uintptr)add(Δp, (uintptr)size), cap - (uintptr)size);
+        memclrNoHeapPointers((uintptr)add(p, (uintptr)size), cap - (uintptr)size);
     }
 
-    (Ꮡb.Reinterpret<slice<byte>, Δsliceᴛ>()).Value = new Δsliceᴛ(Δp.Value, size, (nint)cap);
+    (Ꮡb.Reinterpret<slice<byte>, Δslice>()).Value = new Δslice(p.Value, size, (nint)cap);
     return b;
 }
 
@@ -362,12 +362,12 @@ internal static slice<rune> /*b*/ rawruneslice(nint size) {
         @throw(outOfMemoryˢ);
     }
     var mem = roundupsize((uintptr)size * 4, true);
-    @unsafe.Pointer Δp = (uintptr)mallocgc(mem, nil, false);
+    @unsafe.Pointer p = (uintptr)mallocgc(mem, nil, false);
     if (mem != (uintptr)size * 4) {
-        memclrNoHeapPointers((uintptr)add(Δp, (uintptr)size * 4), mem - (uintptr)size * 4);
+        memclrNoHeapPointers((uintptr)add(p, (uintptr)size * 4), mem - (uintptr)size * 4);
     }
 
-    (Ꮡb.Reinterpret<slice<rune>, Δsliceᴛ>()).Value = new Δsliceᴛ(Δp.Value, size, (nint)(mem / 4));
+    (Ꮡb.Reinterpret<slice<rune>, Δslice>()).Value = new Δslice(p.Value, size, (nint)(mem / 4));
     return b;
 }
 
@@ -376,7 +376,7 @@ internal static ref readonly @string gobytesLengthOutOfRangeˢ => ref gobytesLen
 private static readonly @string gobytesLengthOutOfRangeˢᵇ = "gobytes: length out of range"u8;
 
 // used by cmd/cgo
-internal static slice<byte> /*b*/ gobytes(ж<byte> Δp, nint n) {
+internal static slice<byte> /*b*/ gobytes(ж<byte> p, nint n) {
     ref var b = ref heap<slice<byte>>(out var Ꮡb);
 
     if (n == 0) {
@@ -388,38 +388,38 @@ internal static slice<byte> /*b*/ gobytes(ж<byte> Δp, nint n) {
     }
 
     @unsafe.Pointer bp = (uintptr)mallocgc((uintptr)n, nil, false);
-    memmove(bp, @unsafe.Pointer.FromPinnedBox(Δp), (uintptr)n);
+    memmove(bp, @unsafe.Pointer.FromPinnedBox(p), (uintptr)n);
 
-    (Ꮡb.Reinterpret<slice<byte>, Δsliceᴛ>()).Value = new Δsliceᴛ(bp.Value, n, n);
+    (Ꮡb.Reinterpret<slice<byte>, Δslice>()).Value = new Δslice(bp.Value, n, n);
     return b;
 }
 
 // This is exported via linkname to assembly in syscall (for Plan9) and cgo.
 //
 //go:linkname gostring
-internal static @string gostring(ж<byte> Δp) {
-    nint l = findnull(Δp);
+internal static @string gostring(ж<byte> p) {
+    nint l = findnull(p);
     if (l == 0) {
         return ""u8;
     }
     var (s, b) = rawstring(l);
-    memmove(@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), @unsafe.Pointer.FromPinnedBox(Δp), (uintptr)l);
+    memmove(@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), @unsafe.Pointer.FromPinnedBox(p), (uintptr)l);
     return s;
 }
 
 // internal_syscall_gostring is a version of gostring for internal/syscall/unix.
 //
 //go:linkname internal_syscall_gostring internal/syscall/unix.gostring
-internal static @string internal_syscall_gostring(ж<byte> Δp) {
-    return gostring(Δp);
+internal static @string internal_syscall_gostring(ж<byte> p) {
+    return gostring(p);
 }
 
-internal static @string gostringn(ж<byte> Δp, nint l) {
+internal static @string gostringn(ж<byte> p, nint l) {
     if (l == 0) {
         return ""u8;
     }
     var (s, b) = rawstring(l);
-    memmove(@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), @unsafe.Pointer.FromPinnedBox(Δp), (uintptr)l);
+    memmove(@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), @unsafe.Pointer.FromPinnedBox(p), (uintptr)l);
     return s;
 }
 
@@ -525,9 +525,9 @@ internal static nint findnull(ж<byte> s) {
     // on x86 machines, and those are classified as floating point instructions,
     // which are illegal in a note handler.
     if (GOOS == "plan9"u8) {
-        var Δp = array<byte>.AliasPointer(s, unchecked((nint)140737488355327));
+        var p = array<byte>.AliasPointer(s, unchecked((nint)140737488355327));
         nint l = 0;
-        while (Δp.Value[l] != 0) {
+        while (p.Value[l] != 0) {
             l++;
         }
         return l;
@@ -563,9 +563,9 @@ internal static nint findnullw(ж<uint16> s) {
     if (s == nil) {
         return 0;
     }
-    var Δp = array<uint16>.AliasPointer(s, unchecked((nint)70368744177663));
+    var p = array<uint16>.AliasPointer(s, unchecked((nint)70368744177663));
     nint l = 0;
-    while (Δp.Value[l] != 0) {
+    while (p.Value[l] != 0) {
         l++;
     }
     return l;

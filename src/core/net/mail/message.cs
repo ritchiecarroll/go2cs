@@ -32,12 +32,15 @@ using utf8 = unicode.utf8_package;
 using go.net;
 using unicode;
 using ꓸꓸꓸany = Span<any>;
+using static mail_package;
 
 partial class mail_package {
 
 internal static debugT debug = ((debugT)false);
 
 partial struct debugT /*bool*/;
+
+} partial class mailᴛdebugT {
 
 internal static void Printf(this debugT d, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
@@ -46,6 +49,8 @@ internal static void Printf(this debugT d, @string format, params ꓸꓸꓸany a
         log.Printf(format, args.ꓸꓸꓸ);
     }
 }
+
+} partial class mail_package {
 
 // A Message represents a parsed mail message.
 partial struct Message {
@@ -62,7 +67,7 @@ public static (ж<Message> msg, error err) ReadMessage(io.Reader r) {
     var tp = textproto.NewReader(bufio.NewReader(r));
 
     (var hdr, err) = readHeader(tp);
-    if (err != nil && (!AreEqual(err, io.EOF) || builtin.len(hdr) == 0)) {
+    if (err != nil && (!AreEqual(err, io.EOF) || len(hdr) == 0)) {
         return (default, err);
     }
 
@@ -136,7 +141,7 @@ internal static Func<slice<@string>> dateLayouts = sync.OnceValue(slice<@string>
     // "-0700 (MST)" is not in RFC 5322, but is common.
     var zones = new @string[]{"-0700", "MST", "UT"}.array(); // zone = (("+" / "-") 4DIGIT) / "UT" / "GMT" / ...
 
-    nint total = builtin.len(dows) * builtin.len(days) * builtin.len(years) * builtin.len(seconds) * builtin.len(zones);
+    nint total = len(dows) * len(days) * len(years) * len(seconds) * len(zones);
     var layouts = new slice<@string>(0, total);
 
     foreach (var (_, dow) in range(dows.ΔRangeSnapshot())) {
@@ -176,7 +181,7 @@ public static (time.Time, error) ParseDate(@string date) {
 
     // RFC 5322: zone = (FWS ( "+" / "-" ) 4DIGIT) / obs-zone
     // zone length is always 5 chars unless obsolete (obs-zone)
-    nint ind = strings.IndexAny(p.s, "+-"); if (ind != -1 && builtin.len(p.s) >= ind + 5) {
+    nint ind = strings.IndexAny(p.s, "+-"); if (ind != -1 && len(p.s) >= ind + 5) {
         date = p.s.slice(0, ind + 5);
         p.s = p.s.slice(ind + 5);
     } else {
@@ -192,7 +197,7 @@ public static (time.Time, error) ParseDate(@string date) {
             }
         }
 
-        if (indΔ1 != -1 && builtin.len(p.s) >= indΔ1 + 5) {
+        if (indΔ1 != -1 && len(p.s) >= indΔ1 + 5) {
             // The last letter T of the obsolete time zone is checked when no standard time zone is found.
             // If T is misplaced, the date to parse is garbage.
             date = p.s.slice(0, indΔ1 + 1);
@@ -214,6 +219,8 @@ public static (time.Time, error) ParseDate(@string date) {
 // A Header represents the key-value pairs in a mail message header.
 partial struct Header /*map[@string, slice<@string>]*/;
 
+} partial class mailᴛHeader {
+
 // Get gets the first value associated with the given key.
 // It is case insensitive; CanonicalMIMEHeaderKey is used
 // to canonicalize the provided key.
@@ -224,7 +231,11 @@ public static @string Get(this Header h, @string key) {
     return ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Get(key);
 }
 
+} partial class mail_package {
+
 public static error ErrHeaderNotPresent = errors.New("mail: header not in message");
+
+} partial class mailᴛHeader {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string dateˢ => ref dateˢᵇ;
@@ -247,6 +258,8 @@ public static (slice<ж<Address>>, error) AddressList(this Header h, @string key
     }
     return ParseAddressList(hdr);
 }
+
+} partial class mail_package {
 
 // Address represents a single mail address.
 // An address such as "Barry Gibbs <bg@example.com>" is represented
@@ -272,6 +285,8 @@ partial struct AddressParser {
     public ж<mime.WordDecoder> WordDecoder;
 }
 
+} partial class mailᴛAddressParser {
+
 // Parse parses a single RFC 5322 address of the
 // form "Gogh Fir <gf@example.com>" or "foo@example.com".
 public static (ж<Address>, error) Parse(this ref AddressParser p, @string address) {
@@ -283,6 +298,8 @@ public static (ж<Address>, error) Parse(this ref AddressParser p, @string addre
 public static (slice<ж<Address>>, error) ParseList(this ref AddressParser p, @string list) {
     return (Ꮡ(new addrParser(s: list, dec: p.WordDecoder))).parseAddressList();
 }
+
+} partial class mailᴛAddress {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string utf8ˢ => ref utf8ˢᵇ;
@@ -314,7 +331,7 @@ public static @string String(this ref Address a) {
             // Dots are okay if they are surrounded by atext.
             // We only need to check that the previous byte is
             // not a dot, and this isn't the end of the string.
-            if (i > 0 && local[i - 1] != '.' && i < builtin.len(local) - 1) {
+            if (i > 0 && local[i - 1] != '.' && i < len(local) - 1) {
                 continue;
             }
         }
@@ -354,12 +371,18 @@ public static @string String(this ref Address a) {
     return mime.QEncoding.Encode(utf8ˢ, a.Name) + " "u8 + s;
 }
 
+} partial class mail_package {
+
 partial struct addrParser {
     internal @string s;
     internal ж<mime.WordDecoder> dec; // may be nil
 }
 
+} partial class mailᴛaddrParser {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string mailMisformattedˢ => ref mailMisformattedˢᵇ;
+private static readonly @string mailMisformattedˢᵇ = "mail: misformatted parenthetical comment"u8;
 internal static ref readonly @string mailExpectedCommaˢ => ref mailExpectedCommaˢᵇ;
 private static readonly @string mailExpectedCommaˢᵇ = "mail: expected comma"u8;
 
@@ -1031,6 +1054,8 @@ internal static (@string word, bool isEncoded, error err) decodeRFC2047Word(this
     return (s, false, default);
 }
 
+} partial class mail_package {
+
 [GoLazy] partial class lazyᴛrfc2047Decoder { internal static readonly ж<mime.WordDecoder> Ꮡrfc2047Decoder = new StaticBox<mime.WordDecoder>(new mime.WordDecoder(
     CharsetReader: (@string charset, io.Reader input) => (default, ((charsetError)charset))
 )); }
@@ -1038,9 +1063,13 @@ internal static ref mime.WordDecoder rfc2047Decoder => ref ((StaticBox<mime.Word
 
 partial struct charsetError /*@string*/;
 
+} partial class mailᴛcharsetError {
+
 internal static @string Error(this charsetError e) {
     return fmt.Sprintf("charset not supported: %q"u8, (@string)e);
 }
+
+} partial class mail_package {
 
 // isAtext reports whether r is an RFC 5322 atext character.
 // If dot is true, period is included.

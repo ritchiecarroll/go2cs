@@ -10,6 +10,7 @@ using strings = strings_package;
 using utf8 = global::go.unicode.utf8_package;
 using global::go.unicode;
 using io = io_package;
+using static comment_package;
 
 partial class comment_package {
 
@@ -21,6 +22,8 @@ partial struct textPrinter {
     internal @string codePrefix;
     internal nint width;
 }
+
+} partial class commentᴛPrinter {
 
 // Text returns a textual formatting of the [Doc].
 // See the [Printer] documentation for ways to customize the text output.
@@ -67,6 +70,8 @@ public static slice<byte> Text(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     return @out.Bytes();
 }
 
+} partial class comment_package {
+
 // writeNL calls out.WriteByte('\n')
 // but first trims trailing spaces on the previous line.
 internal static void writeNL(ж<bytes.Buffer> Ꮡout) {
@@ -83,6 +88,8 @@ internal static void writeNL(ж<bytes.Buffer> Ꮡout) {
     }
     @out.WriteByte((byte)'\n');
 }
+
+} partial class commentᴛtextPrinter {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string fourSpaceᶜ2 => ref fourSpaceᶜ2ᵇ;
@@ -153,7 +160,7 @@ internal static void block(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, B
 }
 
 // text prints the text sequence x to out.
-internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @string indent, slice<ΔText> x) {
+internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -185,7 +192,7 @@ internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @s
 // oneLongLine prints the text sequence x to out as one long line,
 // without worrying about line wrapping.
 // Explicit links have the [ ] dropped to improve readability.
-internal static void oneLongLine(this ref textPrinter p, ж<strings.Builder> @out, slice<ΔText> x) {
+internal static void oneLongLine(this ref textPrinter p, ж<strings.Builder> @out, slice<Text> x) {
     foreach (var (_, t) in range(x)) {
         switch (t.type()) {
         case Plain tΔ1: {
@@ -206,6 +213,8 @@ internal static void oneLongLine(this ref textPrinter p, ж<strings.Builder> @ou
         }}
     }
 }
+
+} partial class comment_package {
 
 // A score is the score (also called weight) for a given line.
 // add and cmp add and compare scores.

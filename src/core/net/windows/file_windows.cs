@@ -12,7 +12,7 @@ partial class net_package {
 
 internal static UntypedInt _SO_TYPE => /* windows.SO_TYPE */ 4104;
 
-internal static (syscallꓸHandle, error) dupSocket(syscallꓸHandle h) {
+internal static (syscall.Handle, error) dupSocket(syscall.Handle h) {
     ref var info = ref heap(new syscall.WSAProtocolInfo(), out var Ꮡinfo);
     var err = windows.WSADuplicateSocket(h, (uint32)syscall.Getpid(), Ꮡinfo);
     if (err != nil) {
@@ -21,7 +21,7 @@ internal static (syscallꓸHandle, error) dupSocket(syscallꓸHandle h) {
     return windows.WSASocket(-1, -1, -1, Ꮡinfo, 0, (uint32)((uint32)windows.WSA_FLAG_OVERLAPPED | (uint32)windows.WSA_FLAG_NO_HANDLE_INHERIT));
 }
 
-internal static (syscallꓸHandle, error) dupFileSocket(ж<os.File> f) {
+internal static (syscall.Handle, error) dupFileSocket(ж<os.File> f) {
     // Call Fd to disassociate the IOCP from the handle,
     // it is not safe to share a duplicated handle
     // that is associated with IOCP.
@@ -34,10 +34,10 @@ internal static (syscallꓸHandle, error) dupFileSocket(ж<os.File> f) {
         return (0, err);
     }
 
-    syscallꓸHandle h = default;
+    syscall.Handle h = default;
     ref var syserr = ref heap<error>(out var Ꮡsyserr);
     err = sc.Control((uintptr fd) => {
-        (h, Ꮡsyserr.ValueSlot) = dupSocket((syscallꓸHandle)fd);
+        (h, Ꮡsyserr.ValueSlot) = dupSocket((syscall.Handle)fd);
     });
     if (err == nil) {
         err = syserr;

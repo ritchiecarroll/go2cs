@@ -10,6 +10,7 @@ namespace go.@internal;
 using abi = go.@internal.abi_package;
 using @unsafe = unsafe_package;
 using go.@internal;
+using static synctest_package;
 
 partial class synctest_package {
 
@@ -83,6 +84,8 @@ public static ж<Bubble> Acquire() {
     return default;
 }
 
+} partial class synctestᴛBubble {
+
 // Release releases the reference to the bubble,
 // allowing it to become idle again.
 public static void Release(this ж<Bubble> Ꮡb) {
@@ -107,4 +110,4 @@ public static void Run(this ж<Bubble> Ꮡb, Action f) {
     }
 }
 
-} // end synctest_package
+} // end synctestᴛBubble

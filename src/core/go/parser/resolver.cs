@@ -10,6 +10,7 @@ using strings = strings_package;
 using global::go.go;
 using ꓸꓸꓸany = Span<any>;
 using ꓸꓸꓸжastꓸIdent = Span<ж<global::go.go.ast_package.Ident>>;
+using static parser_package;
 
 partial class parser_package {
 
@@ -26,7 +27,7 @@ internal static ref readonly @string resolvedSVToPackageˢ => ref resolvedSVToPa
 private static readonly @string resolvedSVToPackageˢᵇ = "resolved %s@%v to package object %v"u8;
 
 internal partial interface resolveFile_type /*dyn*/ {
-    tokenꓸPos Pos();
+    token.Pos Pos();
 }
 
 // resolveFile walks the given file to resolve identifiers within the file
@@ -34,7 +35,7 @@ internal partial interface resolveFile_type /*dyn*/ {
 //
 // If declErr is non-nil, it is used to report declaration errors during
 // resolution. tok is used to format position in error messages.
-internal static void resolveFile(ref ast.File @file, ж<tokenꓸFile> handle, Action<tokenꓸPos, @string> declErr) {
+internal static void resolveFile(ref ast.File @file, ж<token.File> handle, Action<token.Pos, @string> declErr) {
     var pkgScope = ast.NewScope(nil);
     var r = Ꮡ(new resolver(
         handle: handle,
@@ -62,7 +63,7 @@ internal static void resolveFile(ref ast.File @file, ж<tokenꓸFile> handle, Ac
             r.unresolved[i] = ident;
             i++;
         } else if (debugResolve) {
-            tokenꓸPos pos = ident.Obj.Decl._<resolveFile_type>().Pos();
+            token.Pos pos = ident.Obj.Decl._<resolveFile_type>().Pos();
             r.trace(resolvedSVToPackageˢ, ident.Name, ident.Pos(), pos);
         }
     }
@@ -73,8 +74,8 @@ internal static void resolveFile(ref ast.File @file, ж<tokenꓸFile> handle, Ac
 internal const nint maxScopeDepth = 1000;
 
 partial struct resolver {
-    internal ж<tokenꓸFile> handle;
-    internal Action<tokenꓸPos, @string> declErr;
+    internal ж<token.File> handle;
+    internal Action<token.Pos, @string> declErr;
     // Ordinary identifier scopes
     internal ж<ast.Scope> pkgScope;          // pkgScope.Outer == nil
     internal ж<ast.Scope> topScope;          // top-most scope; may be pkgScope
@@ -85,6 +86,8 @@ partial struct resolver {
     internal ж<ast.Scope> labelScope;                // label scope for current function
     internal slice<slice<ж<ast.Ident>>> targetStack; // stack of unresolved labels
 }
+
+} partial class parserᴛresolver {
 
 internal static void trace(this ref resolver r, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
@@ -97,7 +100,7 @@ internal static @string sprintf(this ref resolver r, @string format, params ꓸ�
 
     foreach (var (i, arg) in range(args)) {
         switch (arg.type()) {
-        case tokenꓸPos argΔ1: {
+        case token.Pos argΔ1: {
             args[i] = r.handle.Position(argΔ1);
             break;
         }}
@@ -109,7 +112,7 @@ internal static @string sprintf(this ref resolver r, @string format, params ꓸ�
 internal static ref readonly @string openingScopeVˢ => ref openingScopeVˢᵇ;
 private static readonly @string openingScopeVˢᵇ = "opening scope @%v"u8;
 
-internal static void openScope(this ref resolver r, tokenꓸPos pos) {
+internal static void openScope(this ref resolver r, token.Pos pos) {
     r.depth++;
     if (r.depth > maxScopeDepth) {
         throw panic(new bailout(pos: pos, msg: "exceeded max scope depth during object resolution"));
@@ -180,7 +183,7 @@ internal static void declare(this ref resolver r, any decl, any data, ж<ast.Sco
             }
             var alt = scope.Insert(obj); if (alt != nil && r.declErr != nil) {
                 @string prevDecl = ""u8;
-                tokenꓸPos pos = alt.Pos(); if (pos.IsValid()) {
+                token.Pos pos = alt.Pos(); if (pos.IsValid()) {
                     prevDecl = r.sprintf("\n\tprevious declaration at %v", pos);
                 }
                 r.declErr(ident.Pos(), fmt.Sprintf("%s redeclared in this block%s"u8, ident.Name, prevDecl));
@@ -226,10 +229,14 @@ internal static void shortVarDecl(this ref resolver r, ж<ast.AssignStmt> Ꮡdec
     }
 }
 
+} partial class parser_package {
+
 // The unresolved object is a sentinel to mark identifiers that have been added
 // to the list of unresolved identifiers. The sentinel is only used for verifying
 // internal consistency.
 internal static ж<ast.Object> unresolved = @new<ast.Object>();
+
+} partial class parserᴛresolver {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string resolvedVSToVˢ => ref resolvedVSToVˢᵇ;
@@ -726,4 +733,4 @@ internal static void walkBody(this ж<resolver> Ꮡr, ж<ast.BlockStmt> Ꮡbody)
     finally { if (ᒐd1) Ꮡr.DerefOrNull().closeLabelScope(); ᒐ.Run(); }
 }
 
-} // end parser_package
+} // end parserᴛresolver

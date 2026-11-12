@@ -9,8 +9,11 @@ using static global::go.@internal.types.errors_package;
 using slices = slices_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
+using static types_package;
 
 partial class types_package {
+
+} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string labelˢ => ref labelˢᵇ;
@@ -59,12 +62,16 @@ internal static void labels(this ж<Checker> Ꮡcheck, ж<ast.BlockStmt> Ꮡbody
     }
 }
 
+} partial class types_package {
+
 // A block tracks label declarations in a block and its enclosing blocks.
 partial struct block {
     internal ж<block> parent;                         // enclosing block
     internal ж<ast.LabeledStmt> lstmt;                // labeled statement to which this block belongs, or nil
     internal map<@string, ж<ast.LabeledStmt>> labels; // allocated lazily
 }
+
+} partial class typesᴛblock {
 
 // insert records a new label declaration for the current block.
 // The label must not have been declared before in any block.
@@ -106,20 +113,22 @@ internal static ж<ast.LabeledStmt> enclosingTarget(this ж<block> Ꮡb, @string
     return default;
 }
 
+} partial class typesᴛChecker {
+
 // blockBranches processes a block's statement list and returns the set of outgoing forward jumps.
 // all is the scope of all declared labels, parent the set of labels declared in the immediately
 // enclosing block, and lstmt is the labeled statement this block is associated with (or nil).
-internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡcheck, ж<ΔScope> all, ж<block> parent, ж<ast.LabeledStmt> lstmt, slice<ast.Stmt> list) {
+internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡcheck, ж<Scope> all, ж<block> parent, ж<ast.LabeledStmt> lstmt, slice<ast.Stmt> list) {
     var b = Ꮡ(new block(parent: parent, lstmt: lstmt));
 
-    tokenꓸPos varDeclPos = default;
+    token.Pos varDeclPos = default;
     ref var fwdJumps = ref heap<slice<ж<ast.BranchStmt>>>(out var ᏑfwdJumps);
     ref var badJumps = ref heap<slice<ж<ast.BranchStmt>>>(out var ᏑbadJumps);
 
     // All forward jumps jumping over a variable declaration are possibly
     // invalid (they may still jump out of the block and be ok).
     // recordVarDecl records them for the given position.
-    void recordVarDecl(tokenꓸPos pos) {
+    void recordVarDecl(token.Pos pos) {
         varDeclPos = pos;
         ᏑbadJumps.ValueSlot = appendꓸꓸꓸ(ᏑbadJumps.ValueSlot[..0], ᏑfwdJumps.ValueSlot); // copy fwdJumps to badJumps
     }
@@ -316,4 +325,4 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
     return fwdJumps;
 }
 
-} // end types_package
+} // end typesᴛChecker

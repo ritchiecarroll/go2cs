@@ -20,6 +20,7 @@ using iter = iter_package;
 using time = time_package;
 using ꓸꓸꓸany = Span<any>;
 using ꓸꓸꓸstring = Span<@string>;
+using static fstest_package;
 
 partial class fstest_package {
 
@@ -113,6 +114,8 @@ partial struct fsTester {
     internal slice<@string> dirs;
     internal slice<@string> files;
 }
+
+} partial class fstestᴛfsTester {
 
 // errorf adds an error to the list of errors.
 internal static void errorf(this ref fsTester t, @string format, params ꓸꓸꓸany argsʗp) {
@@ -317,6 +320,8 @@ internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) {
     finally { ᒐ.Run(); }
 }
 
+} partial class fstest_package {
+
 // formatEntry formats an fs.DirEntry into a string for error messages and comparison.
 internal static @string formatEntry(fs.DirEntry entry) {
     return fmt.Sprintf("%s IsDir=%v Type=%v"u8, entry.Name(), entry.IsDir(), entry.Type());
@@ -331,6 +336,8 @@ internal static @string formatInfoEntry(fs.FileInfo info) {
 internal static @string formatInfo(fs.FileInfo info) {
     return fmt.Sprintf("%s IsDir=%v Mode=%v Size=%d ModTime=%v"u8, info.Name(), info.IsDir(), info.Mode(), info.Size(), info.ModTime());
 }
+
+} partial class fstestᴛfsTester {
 
 // checkGlob checks that various glob patterns work if the file system implements GlobFS.
 internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEntry> list) {
@@ -743,4 +750,4 @@ internal static void checkBadPath(this ref fsTester t, @string @file, @string de
     }
 }
 
-} // end fstest_package
+} // end fstestᴛfsTester

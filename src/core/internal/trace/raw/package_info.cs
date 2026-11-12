@@ -61,11 +61,11 @@ using static go.@internal.trace.raw_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/trace/raw/event.go", "event.cs", "ACBAwpSCgoKCgoKUgoKCgpSUgoKmgoKUqJKCgoKUgoKClA==")]
-[assembly: GoPositionMap("internal/trace/raw/reader.go", "reader.cs", "ABg0koKSgpSokqiSgoKUgpSClIKCgoKUgoKUgoKUpoKCgoKmAAcQooKCgoKUlLaigoKUgoKCgpSU")]
-[assembly: GoPositionMap("internal/trace/raw/textreader.go", "textreader.cs", "AB86koKCgpSCgpSCgpSCgpSCgpSCgoKCgqaokqiSgoKUgoKClIKCgpSCgoKCgpSClIKClKaCgoKClIKUgoKmAAcQgoKCgpSUgoKClLiUooKCgoKUgpSClIKCprbSgoKClIKClIKClKaCgoKClIKCpoKUgoKCgqaClKaCgoKUgoKU")]
-[assembly: GoPositionMap("internal/trace/raw/textwriter.go", "textwriter.cs", "ABIqkoKClKikgriC")]
-[assembly: GoPositionMap("internal/trace/raw/writer.go", "writer.cs", "ABw8koKopIK4poKClIKCgsqCuIKCgriCgpQ=")]
+[assembly: GoPositionMap("internal/trace/raw/event.go", "event.cs", "ACNAwpSCgoKCgoKUgoKCgpSUgoKmgoKUqJKCgoKUgoKClA==")]
+[assembly: GoPositionMap("internal/trace/raw/reader.go", "reader.cs", "ABk0koKSgpTIkqiSgoKUgpSClIKCgoKUgoKUgoKUpoKCgoKmAAcQooKCgoKUlLaigoKUgoKCgpSU")]
+[assembly: GoPositionMap("internal/trace/raw/textreader.go", "textreader.cs", "ACA6koKCgpSCgpSCgpSCgpSCgpSCgoKCgqbIkqiSgoKUgoKClIKCgpSCgoKCgpSClIKClKaCgoKClIKUgoKmAAcQgoKCgpSUgoKClNiUooKCgoKUgpSClIKCprbSgoKClIKClIKClKaCgoKClIKCpoKUgoKCgqaClKaCgoKUgoKU")]
+[assembly: GoPositionMap("internal/trace/raw/textwriter.go", "textwriter.cs", "ABMqkoKClMikgriC")]
+[assembly: GoPositionMap("internal/trace/raw/writer.go", "writer.cs", "AB08koLIpIK4poKClIKCgsqCuIKCgriCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;
@@ -105,3 +105,17 @@ public static partial class raw_package
     [GoInit] internal static void initᴛᴛimportꓸunicode() => builtin.initPackage(typeof(unicode_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(raw_package.Event)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rawᴛEvent;
+[GoMethodHost(typeof(raw_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rawᴛReader;
+[GoMethodHost(typeof(raw_package.TextReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rawᴛTextReader;
+[GoMethodHost(typeof(raw_package.TextWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rawᴛTextWriter;
+[GoMethodHost(typeof(raw_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rawᴛWriter;
+// </MethodHolders>

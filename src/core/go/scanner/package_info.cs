@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using tokenꓸFile = go.go.token_package.ΔFile;
-global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
 // </ImportedTypeAliases>
 
 using go;
@@ -30,7 +27,6 @@ using static go.go.scanner_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Error", "ΔError")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -56,9 +52,9 @@ using static go.go.scanner_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Error))]
 [assembly: GoFieldAccess(typeof(Scanner))]
-[assembly: GoFieldAccess(typeof(go.go.token_package.ΔPosition))]
-[assembly: GoFieldAccess(typeof(ΔError))]
+[assembly: GoFieldAccess(typeof(go.go.token_package.Position))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -68,8 +64,8 @@ using static go.go.scanner_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/scanner/errors.go", "errors.cs", "ABYwkqaUAAYQkqiAloCClIKCuIKUgpSClKyyqLKCgoKCgoKCpuiSlKSUqqKClKyygoKUgg==")]
-[assembly: GoPositionMap("go/scanner/scanner.go", "scanner.cs", "ADVokgAPHtKCgoKClJKUxoKCgqqClJSCtoKUgoKClLyigpQACTQAEQSClIKCgoKUgoKCgoKUgoK4goKUpqLsxIKCgpSmgoKClKaCgpS4goKCgoKClIKCgoK4lILugoLKgqaCpqaaxIKUgpSCgriUgqyykoKUgoKCgpSmpoKCyoKCgriCgrimgoKCpoKmgqaCAAIQ0gAIEoKUlILugoKCyoKClJSCgpSCpoKUpJSmgoIAARAACQKCgoKCgoKClIKmgoKClIKmAAoGgoKUgoKCpoKCgoKUgrSCtIK0gra4goKClIKmgriClLSkgoKClIKCgpSCuIKCpoKClIKCuAAMBoKUpKSUqJKCgqaCgoKCyoKCgpSCxrSClLaCpgAKDsKUgpKUgqS0grSCtIK0goKUgqaCgoKCgoKUgpSCgqaCgqYACAaUlIKCgoKUgoKUlIKClIKCgtyCpuaUlIKCgoKUgoKUgrimgoKC3IKCpuaUlIKCgoKClIKClIK4goKCpqaCggADFNKCgpSmgoKClIKClKaCgoKUgoKCgpSUAAJCACICgqaCgqampoKkgpSClLaCxoK0gpSCgpTqgqSCgoK0goK0goKCgrTGgoKCgsa0grS0grS0grS0grSCgsaCgsa0lIKmgpSUlJSCpsa0tIKClMa0tLSCgpTGtMamgpSmgoLGgqY=", "53-55:1")]
+[assembly: GoPositionMap("go/scanner/errors.go", "errors.cs", "ABkwkqaUAAoQkqiAloCClIKCuIKUgpSClKyyqLKCgoKCgoKCpuiSlKSUqqKClMyygoKUgg==")]
+[assembly: GoPositionMap("go/scanner/scanner.go", "scanner.cs", "ADZokgARHtKCgoKClJKUxoKCgqqClJSCtoKUgoKClLyigpQADTQAEQSClIKCgoKUgoKCgoKUgoK4goKUpqLsxIKCgpSmgoKClKaCgpS4goKCgoKClIKCgoK4lILugoLKgqaCpsa6xIKUgpSCgriUgqyykoKUgoKCgpSmpoKCyoKCgriCgrjGgoKCpoKmgqaCAAQQ0gAIEoKUlILugoKCyoKClJSCgpSCxoKUpJSmgoIAAxAACQKCgoKCgoKClIKmgoKClIKmAAoGgoKUgoKCpoKCgoKUgrSCtIK0gra4goKClIKmgriClLSkgoKClIKCgpSCuIKCpoKClIKCuAAOBoKUpKSUqJKCgqaCgoKCyoKCgpSCxrSClLaCpgAMDsKUgpKUgqS0grSCtIK0goKUgqaCgoKCgoKUgpSCgqaCgqYACAaUlIKCgoKUgoKUlIKClIKCgtyCpuaUlIKCgoKUgoKUgrjGgoKC3IKCpgAIBpSUgoKCgoKUgoKUgriCgoKmpoKCAAMU0oKClKaCgoKUgoKUpoKCgpSCgoKClJQAAkIAIgKCpoKCpqamgqSClIKUtoLGgrSClIKClOqCpIKCgrSCgrSCgoKCtMaCgoKCxrSCtLSCtLSCtLSCtIKCxoKCxrSUgqaClJSUlIKmxrS0goKUxrS0tIKClMa0xqaClKaCgsaCpg==", "53-55:1")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -84,10 +80,10 @@ public static partial class scanner_package
     // via declarations below.
 
     // <TypeAccessibility>
+    public partial struct Error {}
     public partial struct ErrorList {}
     public partial struct Mode {}
     public partial struct Scanner {}
-    public partial struct ΔError {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -109,3 +105,15 @@ public static partial class scanner_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(global::go.unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(scanner_package.Error)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class scannerᴛError;
+[GoMethodHost(typeof(scanner_package.ErrorList)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class scannerᴛErrorList;
+[GoMethodHost(typeof(scanner_package.Scanner)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class scannerᴛScanner;
+// </MethodHolders>

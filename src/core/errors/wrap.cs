@@ -139,7 +139,7 @@ internal partial interface as_type /*dyn*/ {
     bool As(any _);
 }
 
-internal static bool @as(error err, any target, reflectlite.Value targetVal, reflectliteꓸType targetType) {
+internal static bool @as(error err, any target, reflectlite.Value targetVal, reflectlite.Type targetType) {
     for (;;) {
         if (reflectlite.TypeOf(err).AssignableTo(targetType)) {
             targetVal.Elem().Set(reflectlite.ValueOf(err));
@@ -176,7 +176,7 @@ internal static bool @as(error err, any target, reflectlite.Value targetVal, ref
     }
 }
 
-internal static reflectliteꓸType errorType = reflectlite.TypeOf((ж<error>)nil).Elem();
+internal static reflectlite.Type errorType = reflectlite.TypeOf((ж<error>)nil).Elem();
 
 // AsType finds the first error in err's tree that matches the type E, and
 // if one is found, returns that error value and true. Otherwise, it

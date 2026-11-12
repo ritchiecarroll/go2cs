@@ -2,6 +2,7 @@
 namespace go.crypto;
 
 using strconv = strconv_package;
+using static tls_package;
 
 partial class tls_package {
 
@@ -44,6 +45,8 @@ private static readonly @string _SignatureScheme_name_8ᵇ = "PSSWithSHA256PSSWi
 
 internal static array<uint8> _SignatureScheme_index_8 = new uint8[]{0, 13, 26, 39, 46}.array();
 
+} partial class tlsᴛSignatureScheme {
+
 public static @string String(this SignatureScheme i) {
     switch (ᐧ) {
     case {} when i == 513: {
@@ -78,6 +81,9 @@ public static @string String(this SignatureScheme i) {
         return "SignatureScheme("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }}
 }
+
+} partial class tls_package {
+
 internal static void _ᴛ2() {
     // An "invalid array index" compiler error signifies that the constant values have changed.
     // Re-run the stringer command to generate them again.
@@ -101,6 +107,8 @@ private static readonly @string _CurveID_name_2ᵇ = "SecP256r1MLKEM768X25519MLK
 internal static array<uint8> _CurveID_index_0 = new uint8[]{0, 9, 18, 27}.array();
 internal static array<uint8> _CurveID_index_2 = new uint8[]{0, 17, 31, 49}.array();
 
+} partial class tlsᴛCurveID {
+
 public static @string String(this CurveID i) {
     switch (ᐧ) {
     case {} when 23 <= i && i <= 25: {
@@ -118,6 +126,9 @@ public static @string String(this CurveID i) {
         return "CurveID("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }}
 }
+
+} partial class tls_package {
+
 internal static void _ᴛ3() {
     // An "invalid array index" compiler error signifies that the constant values have changed.
     // Re-run the stringer command to generate them again.
@@ -134,6 +145,8 @@ private static readonly @string _ClientAuthType_nameᵇ = "NoClientCertRequestCl
 
 internal static array<uint8> _ClientAuthType_index = new uint8[]{0, 12, 29, 49, 72, 98}.array();
 
+} partial class tlsᴛClientAuthType {
+
 public static @string String(this ClientAuthType i) {
     if (i < 0 || i >= ((ClientAuthType)(len(_ClientAuthType_index) - 1))) {
         return "ClientAuthType("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
@@ -141,4 +154,4 @@ public static @string String(this ClientAuthType i) {
     return _ClientAuthType_name.slice(_ClientAuthType_index[i], _ClientAuthType_index[i + 1]);
 }
 
-} // end tls_package
+} // end tlsᴛClientAuthType

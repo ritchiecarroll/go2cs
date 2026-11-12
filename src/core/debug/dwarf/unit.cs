@@ -5,6 +5,7 @@ namespace go.debug;
 
 using sort = sort_package;
 using strconv = strconv_package;
+using static dwarf_package;
 
 partial class dwarf_package {
 
@@ -28,6 +29,8 @@ partial struct unit5 {
     internal uint64 rngListsBase;
     internal uint64 locListsBase;
 }
+
+} partial class dwarfᴛunit {
 
 // Implement the dataFormat interface.
 internal static nint version(this ref unit u) {
@@ -69,6 +72,8 @@ internal static uint64 locListsBase(this ref unit u) {
     }
     return 0;
 }
+
+} partial class dwarfᴛData {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unitLengthOverflowˢ => ref unitLengthOverflowˢᵇ;
@@ -207,4 +212,4 @@ internal static error collectDwarf5BaseOffsets(this ж<Data> Ꮡd, ж<unit> Ꮡu
     return default;
 }
 
-} // end dwarf_package
+} // end dwarfᴛData

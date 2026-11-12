@@ -142,6 +142,7 @@ using sync = sync_package;
 using encoding;
 using global::go.go;
 using global::go.net;
+using static rpc_package;
 
 partial class rpc_package {
 
@@ -152,20 +153,20 @@ public static ref readonly @string DefaultDebugPath => ref DefaultDebugPathᵇ;
 private static readonly @string DefaultDebugPathᵇ = "/debug/rpc"u8;
 
 // Precompute the reflect type for error.
-internal static reflectꓸType typeOfError = reflect.TypeFor<error>();
+internal static reflect.Type typeOfError = reflect.TypeFor<error>();
 
 public partial struct methodType {
     /*embed*/ public sync_package.Mutex Mutex; // protects counters
-    internal reflectꓸMethod method;
-    public reflectꓸType ArgType;
-    public reflectꓸType ReplyType;
+    internal reflect.Method method;
+    public reflect.Type ArgType;
+    public reflect.Type ReplyType;
     internal nuint numCalls;
 }
 
 public partial struct service {
     internal @string name;                       // name of service
-    internal reflectꓸValue rcvr;                 // receiver of methods for the service
-    internal reflectꓸType typ;                   // type of the receiver
+    internal reflect.Value rcvr;                 // receiver of methods for the service
+    internal reflect.Type typ;                   // type of the receiver
     internal map<@string, ж<methodType>> method; // registered methods
 }
 
@@ -206,14 +207,16 @@ public static ж<Server> NewServer() {
 public static ж<Server> DefaultServer = NewServer();
 
 // isExportedOrBuiltinType reports whether t is an exported or builtin type
-internal static bool isExportedOrBuiltinType(reflectꓸType t) {
-    while (t.Kind() == reflect.ΔPointer) {
+internal static bool isExportedOrBuiltinType(reflect.Type t) {
+    while (t.Kind() == reflect.Pointer) {
         t = t.Elem();
     }
     // PkgPath will be non-empty even for an exported type,
     // so we need to check the type name as well.
     return token.IsExported(t.Name()) || t.PkgPath() == ""u8;
 }
+
+} partial class rpcᴛServer {
 
 // Register publishes in the server the set of methods of the
 // receiver value that satisfy the following conditions:
@@ -236,9 +239,13 @@ public static error RegisterName(this ж<Server> Ꮡserver, @string name, any rc
     return Ꮡserver.register(rcvr, name, true);
 }
 
+} partial class rpc_package {
+
 // logRegisterError specifies whether to log problems during method registration.
 // To debug registration, recompile the package with this set to true.
 internal const bool logRegisterError = false;
+
+} partial class rpcᴛServer {
 
 internal static error register(this ж<Server> Ꮡserver, any rcvr, @string name, bool useName) {
     var s = @new<service>();
@@ -283,12 +290,14 @@ internal static error register(this ж<Server> Ꮡserver, any rcvr, @string name
     return default;
 }
 
+} partial class rpc_package {
+
 // suitableMethods returns suitable Rpc methods of typ. It will log
 // errors if logErr is true.
-internal static map<@string, ж<methodType>> suitableMethods(reflectꓸType typ, bool logErr) {
+internal static map<@string, ж<methodType>> suitableMethods(reflect.Type typ, bool logErr) {
     var methods = new map<@string, ж<methodType>>();
     for (nint m = 0; m < typ.NumMethod(); m++) {
-        ref var method = ref heap<reflectꓸMethod>(typ.Method(m), out var Ꮡmethod);
+        ref var method = ref heap<reflect.Method>(typ.Method(m), out var Ꮡmethod);
         var mtype = method.Type;
         @string mname = method.Name;
         // Method must be exported.
@@ -312,7 +321,7 @@ internal static map<@string, ж<methodType>> suitableMethods(reflectꓸType typ,
         }
         // Second arg must be a pointer.
         var replyType = mtype.In(2);
-        if (replyType.Kind() != reflect.ΔPointer) {
+        if (replyType.Kind() != reflect.Pointer) {
             if (logErr) {
                 log.Printf("rpc.Register: reply type of method %q is not a pointer: %q\n", mname, replyType);
             }
@@ -349,6 +358,8 @@ internal static map<@string, ж<methodType>> suitableMethods(reflectꓸType typ,
 // contains an error when it is used.
 internal static EmptyStruct invalidRequest = new EmptyStruct();
 
+} partial class rpcᴛServer {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object rpcWritingResponseˢ = (@string)"rpc: writing response:"u8;
 
@@ -372,6 +383,8 @@ internal static void sendResponse(this ж<Server> Ꮡserver, ж<sync.Mutex> send
     Ꮡserver.freeResponse(resp);
 }
 
+} partial class rpcᴛmethodType {
+
 public static nuint /*n*/ NumCalls(this ж<methodType> Ꮡm) {
     nuint n = default;
     ref var m = ref Ꮡm.DerefOrNull();
@@ -382,7 +395,9 @@ public static nuint /*n*/ NumCalls(this ж<methodType> Ꮡm) {
     return n;
 }
 
-internal static void call(this ж<service> Ꮡs, ж<Server> server, ж<sync.Mutex> sending, ж<sync.WaitGroup> wg, ж<methodType> Ꮡmtype, ж<Request> req, reflectꓸValue argv, reflectꓸValue replyv, ServerCodec codec) {
+} partial class rpcᴛservice {
+
+internal static void call(this ж<service> Ꮡs, ж<Server> server, ж<sync.Mutex> sending, ж<sync.WaitGroup> wg, ж<methodType> Ꮡmtype, ж<Request> req, reflect.Value argv, reflect.Value replyv, ServerCodec codec) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -410,6 +425,8 @@ internal static void call(this ж<service> Ꮡs, ж<Server> server, ж<sync.Mute
     finally { ᒐ.Run(); }
 }
 
+} partial class rpc_package {
+
 partial struct gobServerCodec {
     internal io.ReadWriteCloser rwc;
     internal ж<gob.Decoder> dec;
@@ -417,6 +434,8 @@ partial struct gobServerCodec {
     internal ж<bufio.Writer> encBuf;
     internal bool closed;
 }
+
+} partial class rpcᴛgobServerCodec {
 
 internal static error ReadRequestHeader(this ref gobServerCodec c, ж<Request> r) {
     return c.dec.Decode(r.OrTypedNil());
@@ -463,6 +482,8 @@ internal static error Close(this ref gobServerCodec c) {
     return c.rwc.Close();
 }
 
+} partial class rpcᴛServer {
+
 // ServeConn runs the server on a single connection.
 // ServeConn blocks, serving the connection until the client hangs up.
 // The caller typically invokes ServeConn in a go statement.
@@ -489,8 +510,8 @@ public static partial void ServeCodec(this ж<Server> Ꮡserver, ServerCodec cod
     var sending = @new<sync.Mutex>();
     var wg = @new<sync.WaitGroup>();
     for (;;) {
-        ref var argv = ref heap<reflectꓸValue>(out var Ꮡargv);
-        ref var replyv = ref heap<reflectꓸValue>(out var Ꮡreplyv);
+        ref var argv = ref heap<reflect.Value>(out var Ꮡargv);
+        ref var replyv = ref heap<reflect.Value>(out var Ꮡreplyv);
         (var service, var mtype, var req, argv, replyv, var keepReading, var err) = Ꮡserver.readRequest(codec);
         if (err != nil) {
             if (debugLog && !AreEqual(err, io.EOF)) {
@@ -586,12 +607,12 @@ internal static void freeResponse(this ж<Server> Ꮡserver, ж<Response> Ꮡres
     server.respLock.Unlock();
 }
 
-internal static (ж<service> service, ж<methodType> mtype, ж<Request> req, reflectꓸValue argv, reflectꓸValue replyv, bool keepReading, error err) readRequest(this ж<Server> Ꮡserver, ServerCodec codec) {
+internal static (ж<service> service, ж<methodType> mtype, ж<Request> req, reflect.Value argv, reflect.Value replyv, bool keepReading, error err) readRequest(this ж<Server> Ꮡserver, ServerCodec codec) {
     ж<service> service = default;
     ж<methodType> mtype = default;
     ж<Request> req = default;
-    reflectꓸValue argv = new(nil);
-    reflectꓸValue replyv = new(nil);
+    reflect.Value argv = new(nil);
+    reflect.Value replyv = new(nil);
     bool keepReading = default;
     error err = default;
 
@@ -607,7 +628,7 @@ internal static (ж<service> service, ж<methodType> mtype, ж<Request> req, ref
 
     // Decode the argument value.
     var argIsValue = false; // if true, need to indirect before calling.
-    if (mtype.ArgType.Kind() == reflect.ΔPointer) {
+    if (mtype.ArgType.Kind() == reflect.Pointer) {
         argv = reflect.New(mtype.ArgType.Elem());
     } else {
         argv = reflect.New(mtype.ArgType);
@@ -628,7 +649,7 @@ internal static (ж<service> service, ж<methodType> mtype, ж<Request> req, ref
         replyv.Elem().Set(reflect.MakeMap(mtype.ReplyType.Elem()));
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Slice: {
         replyv.Elem().Set(reflect.MakeSlice(mtype.ReplyType.Elem(), 0, 0));
         break;
     }}
@@ -698,6 +719,8 @@ public static partial void Accept(this ж<Server> Ꮡserver, net.Listener lis) {
     }
 }
 
+} partial class rpc_package {
+
 // Register publishes the receiver's methods in the [DefaultServer].
 public static error Register(any rcvr) { return DefaultServer.Register(rcvr); }
 
@@ -755,6 +778,8 @@ public static void Accept(net.Listener lis) { DefaultServer.Accept(lis); }
 // Can connect to RPC service using HTTP CONNECT to rpcPath.
 internal static @string connected = "200 Connected to Go RPC";
 
+} partial class rpcᴛServer {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
 private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
@@ -787,9 +812,11 @@ public static void ServeHTTP(this ж<Server> Ꮡserver, Δhttp.ResponseWriter w,
 // and a debugging handler on debugPath.
 // It is still necessary to invoke [http.Serve](), typically in a go statement.
 public static void HandleHTTP(this ж<Server> Ꮡserver, @string rpcPath, @string debugPath) {
-    Δhttp.Handle(rpcPath, new ServerжΔHandler(Ꮡserver));
+    Δhttp.Handle(rpcPath, new ServerжHandler(Ꮡserver));
     Δhttp.Handle(debugPath, new debugHTTP(Ꮡserver));
 }
+
+} partial class rpc_package {
 
 // HandleHTTP registers an HTTP handler for RPC messages to [DefaultServer]
 // on [DefaultRPCPath] and a debugging handler on [DefaultDebugPath].

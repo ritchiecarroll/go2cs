@@ -4,12 +4,16 @@
 //go:build (!arm64 && !s390x && !ppc64 && !ppc64le) || !gc || purego
 namespace go.vendor.golang.org.x.crypto;
 
+using static chacha20_package;
+
 partial class chacha20_package {
 
 internal static UntypedInt bufSize => /* blockSize */ 64;
+
+} partial class chacha20ᴛCipher {
 
 internal static void xorKeyStreamBlocks(this ref Cipher s, slice<byte> dst, slice<byte> src) {
     s.xorKeyStreamBlocksGeneric(dst, src);
 }
 
-} // end chacha20_package
+} // end chacha20ᴛCipher

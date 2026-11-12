@@ -16,6 +16,7 @@ using encoding;
 using global::go.go;
 using hash = hash_package;
 using math;
+using static pkgbits_package;
 
 partial class pkgbits_package {
 
@@ -23,7 +24,7 @@ partial class pkgbits_package {
 // export data.
 partial struct PkgEncoder {
     // version of the bitstream.
-    internal ΔVersion version;
+    internal Version version;
     // elems holds the bitstream for previously encoded elements.
     internal array<slice<@string>> elems = new(numRelocs);
     // stringsIdx maps previously encoded strings to their index within
@@ -35,8 +36,12 @@ partial struct PkgEncoder {
     internal nint syncFrames;
 }
 
+} partial class pkgbitsᴛPkgEncoder {
+
 // SyncMarkers reports whether pw uses sync markers.
 public static bool SyncMarkers(this ref PkgEncoder pw) { return pw.syncFrames >= 0; }
+
+} partial class pkgbits_package {
 
 // NewPkgEncoder returns an initialized PkgEncoder.
 //
@@ -45,13 +50,15 @@ public static bool SyncMarkers(this ref PkgEncoder pw) { return pw.syncFrames >=
 // export data files, but can help diagnosing desync errors in
 // higher-level Unified IR reader/writer code. If syncFrames is
 // negative, then sync markers are omitted entirely.
-public static PkgEncoder NewPkgEncoder(ΔVersion version, nint syncFrames) {
+public static PkgEncoder NewPkgEncoder(Version version, nint syncFrames) {
     return new PkgEncoder(
         version: version,
         stringsIdx: new map<@string, RelElemIdx>(),
         syncFrames: syncFrames
     );
 }
+
+} partial class pkgbitsᴛPkgEncoder {
 
 // DumpTo writes the package's encoded data to out0 and returns the
 // package fingerprint.
@@ -152,6 +159,8 @@ public static ж<Encoder> NewEncoderRaw(this ж<PkgEncoder> Ꮡpw, SectionKind k
     ));
 }
 
+} partial class pkgbits_package {
+
 // An Encoder provides methods for encoding an individual element's
 // bitstream data.
 partial struct Encoder {
@@ -163,6 +172,8 @@ partial struct Encoder {
     internal SectionKind k;
     public RelElemIdx Idx; // index within relocation section
 }
+
+} partial class pkgbitsᴛEncoder {
 
 // Flush finalizes the element's bitstream and returns its [RelElemIdx].
 public static RelElemIdx Flush(this ж<Encoder> Ꮡw) {
@@ -320,7 +331,7 @@ public static void Reloc(this ref Encoder w, SectionKind k, RelElemIdx idx) {
 }
 
 // Code encodes and writes a Code value into the element bitstream.
-public static void Code(this ref Encoder w, ΔCode c) {
+public static void Code(this ref Encoder w, Code c) {
     w.Sync(c.Marker());
     w.Len(c.Value());
 }
@@ -386,12 +397,12 @@ internal static void scalar(this ref Encoder w, constant.Value val) {
         w.Int64(v);
         break;
     }
-    case ж<bigꓸInt> v: {
+    case ж<big.Int> v: {
         w.Code(ValBigInt);
         w.bigInt(v);
         break;
     }
-    case ж<bigꓸRat> v: {
+    case ж<big.Rat> v: {
         w.Code(ValBigRat);
         w.bigInt(v.Num());
         w.bigInt(v.Denom());
@@ -404,7 +415,7 @@ internal static void scalar(this ref Encoder w, constant.Value val) {
     }}
 }
 
-internal static void bigInt(this ref Encoder w, ж<bigꓸInt> Ꮡv) {
+internal static void bigInt(this ref Encoder w, ж<big.Int> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     var b = v.Bytes();
@@ -418,6 +429,6 @@ internal static void bigFloat(this ref Encoder w, ж<big.Float> v) {
 }
 
 // Version reports the version of the bitstream.
-public static ΔVersion Version(this ref Encoder w) { return w.p.version; }
+public static Version Version(this ref Encoder w) { return w.p.version; }
 
-} // end pkgbits_package
+} // end pkgbitsᴛEncoder

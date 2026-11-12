@@ -8,6 +8,7 @@ namespace go.encoding;
 
 using io = io_package;
 using strconv = strconv_package;
+using static ascii85_package;
 
 partial class ascii85_package {
 
@@ -105,6 +106,8 @@ partial struct encoder {
     internal array<byte> @out = new(1024); // output buffer
 }
 
+} partial class ascii85ᴛencoder {
+
 internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
     nint n = default;
     error err = default;
@@ -168,7 +171,11 @@ internal static error Close(this ref encoder e) {
     return e.err;
 }
 
+} partial class ascii85_package {
+
 partial struct CorruptInputError /*num:int64*/;
+
+} partial class ascii85ᴛCorruptInputError {
 
 /*
  * Decoder
@@ -176,6 +183,8 @@ partial struct CorruptInputError /*num:int64*/;
 public static @string Error(this CorruptInputError e) {
     return "illegal ascii85 data at input byte "u8 + strconv.FormatInt((int64)e, 10);
 }
+
+} partial class ascii85_package {
 
 // Decode decodes src into dst, returning both the number
 // of bytes written to dst and the number consumed from src.
@@ -269,6 +278,8 @@ partial struct decoder {
     internal array<byte> outbuf = new(1024);
 }
 
+} partial class ascii85ᴛdecoder {
+
 internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
     nint n = default;
     error err = default;
@@ -328,4 +339,4 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
     }
 }
 
-} // end ascii85_package
+} // end ascii85ᴛdecoder

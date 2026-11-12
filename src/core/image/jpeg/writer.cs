@@ -9,6 +9,7 @@ using image = image_package;
 using color = go.image.color_package;
 using io = io_package;
 using go.image;
+using static jpeg_package;
 
 partial class jpeg_package {
 
@@ -172,6 +173,8 @@ partial struct huffmanSpec {
 // The maximum codeword size is 16 bits.
 partial struct huffmanLUT /*[]uint32*/;
 
+} partial class jpegᴛhuffmanLUT {
+
 internal static void init(this ref huffmanLUT h, huffmanSpec s) {
     s = s.ΔClone();
 
@@ -194,6 +197,8 @@ internal static void init(this ref huffmanLUT h, huffmanSpec s) {
         code <<= 1;
     }
 }
+
+} partial class jpeg_package {
 
 // theHuffmanLUT are compiled representations of theHuffmanSpec.
 internal static readonly ж<array<huffmanLUT>> ᏑtheHuffmanLUT = new StaticBox<array<huffmanLUT>>(new array<huffmanLUT>(4));
@@ -228,6 +233,8 @@ partial struct encoder {
     // quant is the scaled quantization tables, in zig-zag order.
     internal array<array<byte>> quant = new(nQuantIndex, () => new(64));
 }
+
+} partial class jpegᴛencoder {
 
 internal static void flush(this ref encoder e) {
     if (e.err != nil) {
@@ -393,6 +400,8 @@ internal static int32 writeBlock(this ref encoder e, ж<block> Ꮡb, quantIndex 
     return dc;
 }
 
+} partial class jpeg_package {
+
 // toYCbCr converts the 8x8 region of m whose top-left corner is p to its
 // YCbCr values.
 internal static void toYCbCr(image.Image m, image.Point p, ref block yBlock, ref block cbBlock, ref block crBlock) {
@@ -427,7 +436,7 @@ internal static void grayToY(ж<image.Gray> Ꮡm, image.Point p, ref block yBloc
 }
 
 // rgbaToYCbCr is a specialized version of toYCbCr for image.RGBA images.
-internal static void rgbaToYCbCr(ж<imageꓸRGBA> Ꮡm, image.Point p, ref block yBlock, ref block cbBlock, ref block crBlock) {
+internal static void rgbaToYCbCr(ж<image.RGBA> Ꮡm, image.Point p, ref block yBlock, ref block cbBlock, ref block crBlock) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var b = m.Bounds();
@@ -519,6 +528,8 @@ internal static slice<byte> sosHeaderYCbCr = [
     0x11, 0x03, 0x11, 0x00, 0x3f, 0x00
 ];
 
+} partial class jpegᴛencoder {
+
 // writeSOS writes the StartOfScan marker.
 internal static void writeSOS(this ref encoder e, image.Image m) {
     switch (m.type()) {
@@ -554,7 +565,7 @@ internal static void writeSOS(this ref encoder e, image.Image m) {
     }
     default: {
         var mΔ1 = m;
-        var (rgba, _) = mΔ1._<ж<imageꓸRGBA>>(ᐧ);
+        var (rgba, _) = mΔ1._<ж<image.RGBA>>(ᐧ);
         var (ycbcr, _) = mΔ1._<ж<image.YCbCr>>(ᐧ);
         for (nint y = bounds.Min.Y; y < bounds.Max.Y; y += 16) {
             for (nint x = bounds.Min.X; x < bounds.Max.X; x += 16) {
@@ -582,6 +593,8 @@ internal static void writeSOS(this ref encoder e, image.Image m) {
     // Pad the last byte with 1's.
     e.emit(0x7f, 7);
 }
+
+} partial class jpeg_package {
 
 // DefaultQuality is the default quality encoding parameter.
 public static UntypedInt DefaultQuality => 75;

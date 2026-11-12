@@ -3,11 +3,15 @@
 // license that can be found in the LICENSE file.
 namespace go.net;
 
+using static textproto_package;
+
 partial class textproto_package {
 
 // A MIMEHeader represents a MIME-style header mapping
 // keys to sets of values.
 partial struct MIMEHeader /*map[@string, slice<@string>]*/;
+
+} partial class textprotoᴛMIMEHeader {
 
 // Add adds the key, value pair to the header.
 // It appends to any existing values associated with key.
@@ -56,4 +60,4 @@ public static void Del(this MIMEHeader h, @string key) {
     delete(h, CanonicalMIMEHeaderKey(key));
 }
 
-} // end textproto_package
+} // end textprotoᴛMIMEHeader

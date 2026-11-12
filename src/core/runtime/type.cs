@@ -7,14 +7,14 @@ global using typeOff = go.@internal.abi_package.TypeOff;
 global using textOff = go.@internal.abi_package.TextOff;
 global using _type = go.@internal.abi_package.Type;
 global using uncommontype = go.@internal.abi_package.UncommonType;
-global using interfacetype = go.@internal.abi_package.ΔInterfaceType;
-global using arraytype = go.@internal.abi_package.ΔArrayType;
+global using interfacetype = go.@internal.abi_package.InterfaceType;
+global using arraytype = go.@internal.abi_package.ArrayType;
 global using chantype = go.@internal.abi_package.ChanType;
 global using slicetype = go.@internal.abi_package.SliceType;
-global using functype = go.@internal.abi_package.ΔFuncType;
+global using functype = go.@internal.abi_package.FuncType;
 global using ptrtype = go.@internal.abi_package.PtrType;
-global using name = go.@internal.abi_package.ΔName;
-global using structtype = go.@internal.abi_package.ΔStructType;
+global using name = go.@internal.abi_package.Name;
+global using structtype = go.@internal.abi_package.StructType;
 
 namespace go;
 
@@ -24,6 +24,7 @@ using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
@@ -33,17 +34,19 @@ internal static @string maps_typeString(ж<abi.Type> typ) {
 }
 
 // rtype is a wrapper that allows us to define additional methods.
-partial struct Δrtype {
+partial struct rtype {
     /*embed*/ public ж<@internal.abi_package.Type> Type; // embedding is okay here (unlike reflect) because none of this is public
 }
 
+} partial class runtimeᴛrtype {
+
 // go2cs generated this placeholder — func string is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static ж<uncommontype> uncommon(this Δrtype t) {
+internal static ж<uncommontype> uncommon(this rtype t) {
     return t.Type.Uncommon();
 }
 
-internal static @string name(this Δrtype t) {
+internal static @string name(this rtype t) {
     if ((abi.TFlag)(t.TFlag & abi.TFlagNamed) == 0) {
         return ""u8;
     }
@@ -69,7 +72,7 @@ internal static @string name(this Δrtype t) {
 // available. This is not the same as the reflect package's PkgPath
 // method, in that it returns the package path for struct and interface
 // types, not just named types.
-internal static @string pkgpath(this Δrtype t) {
+internal static @string pkgpath(this rtype t) {
     var u = t.uncommon(); if (u != nil) {
         return t.nameOff(u.PkgPath).Name();
     }
@@ -84,6 +87,8 @@ internal static @string pkgpath(this Δrtype t) {
     }}
     return ""u8;
 }
+
+} partial class runtime_package {
 
 // getGCMask returns the pointer/nonpointer bitmask for type t.
 //
@@ -124,10 +129,10 @@ internal static ж<byte> getGCMaskOnDemand(ж<_type> Ꮡt) {
     }
 
     for (;;) {
-        ref var Δp = ref heap<ж<byte>>((ж<byte>)(uintptr)(atomic.Loadp(addr)), out var Ꮡp);
-        switch (Δp) {
+        ref var p = ref heap<ж<byte>>((ж<byte>)(uintptr)(atomic.Loadp(addr)), out var Ꮡp);
+        switch (p) {
         default: { // Already built.
-            return Δp;
+            return p;
         }
         case var ᴛ when ᴛ == ᏑinProgress: { // Someone else is currently building it.
             // Just wait until the builder is done.
@@ -145,14 +150,14 @@ internal static ж<byte> getGCMaskOnDemand(ж<_type> Ꮡt) {
 
             // Build gcmask for this type.
             var bytes = (uintptr)goarch.PtrSize * divRoundUp(t.PtrBytes / (uintptr)goarch.PtrSize, 8 * goarch.PtrSize);
-            Δp = (ж<byte>)(uintptr)(persistentalloc(bytes, goarch.PtrSize, Ꮡmemstats.Ꮡother_sys));
+            p = (ж<byte>)(uintptr)(persistentalloc(bytes, goarch.PtrSize, Ꮡmemstats.Ꮡother_sys));
             systemstack(() => {
                 buildGCMask(Ꮡt, new bitCursor(ptr: Ꮡp.ValueSlot, n: 0));
             });
 
             // Store the newly-built gcmask for future callers.
-            atomic.StorepNoWB(addr, @unsafe.Pointer.FromPinnedBox(Δp));
-            return Δp;
+            atomic.StorepNoWB(addr, @unsafe.Pointer.FromPinnedBox(p));
+            return p;
         }}
     }
 }
@@ -164,18 +169,20 @@ partial struct bitCursor {
     internal uintptr n;   // cursor points to bit n of region
 }
 
+} partial class runtimeᴛbitCursor {
+
 // Write to b cnt bits starting at bit 0 of data.
 // Requires cnt>0.
 internal static void write(this bitCursor b, ж<byte> Ꮡdata, uintptr cnt) {
     ref var data = ref Ꮡdata.DerefOrNull();
 
     // Starting byte for writing.
-    var Δp = addb(b.ptr, b.n / 8);
+    var p = addb(b.ptr, b.n / 8);
 
     // Note: if we're starting halfway through a byte, we load the
     // existing lower bits so we don't clobber them.
-    var n = b.n % 8;                                                                // # of valid bits in buf
-    var buf = (uintptr)((uintptr)(Δp.Value) & (((uintptr)1).Lsh((uint64)(n)) - 1)); // buffered bits to start
+    var n = b.n % 8;                                                               // # of valid bits in buf
+    var buf = (uintptr)((uintptr)(p.Value) & (((uintptr)1).Lsh((uint64)(n)) - 1)); // buffered bits to start
 
     // Work 8 bits at a time.
     while (cnt > 8) {
@@ -185,10 +192,10 @@ internal static void write(this bitCursor b, ж<byte> Ꮡdata, uintptr cnt) {
         Ꮡdata = addb(Ꮡdata, 1); data = ref Ꮡdata.DerefOrNull();
         cnt -= 8;
         // Write 8 of the buffered bits out.
-        Δp.Value = (byte)buf;
+        p.Value = (byte)buf;
         buf >>= 8;
         n -= 8;
-        Δp = addb(Δp, 1);
+        p = addb(p, 1);
     }
     // Read remaining bits.
     buf |= (uintptr)(((uintptr)((uintptr)(data) & (((uintptr)1).Lsh((uint64)(cnt)) - 1))).Lsh((uint64)(n)));
@@ -196,18 +203,20 @@ internal static void write(this bitCursor b, ж<byte> Ꮡdata, uintptr cnt) {
 
     // Flush remaining bits.
     if (n > 8) {
-        Δp.Value = (byte)buf;
+        p.Value = (byte)buf;
         buf >>= 8;
         n -= 8;
-        Δp = addb(Δp, 1);
+        p = addb(p, 1);
     }
-    Δp.Value &= unchecked((byte)~(byte)(((byte)1).Lsh((uint64)(n)) - 1));
-    Δp.Value |= (byte)((byte)buf);
+    p.Value &= unchecked((byte)~(byte)(((byte)1).Lsh((uint64)(n)) - 1));
+    p.Value |= (byte)((byte)buf);
 }
 
 internal static bitCursor offset(this bitCursor b, uintptr cnt) {
     return new bitCursor(ptr: b.ptr, n: b.n + cnt);
 }
+
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string pointerlessTypeˢ => ref pointerlessTypeˢᵇ;
@@ -328,19 +337,19 @@ private static readonly @string runtimeNameOffsetOutOfˢᵇ = "runtime: name off
 internal static ref readonly @string runtimeNameOffsetBaseˢ => ref runtimeNameOffsetBaseˢᵇ;
 private static readonly @string runtimeNameOffsetBaseˢᵇ = "runtime: name offset base pointer out of range"u8;
 
-internal static abiꓸName resolveNameOff(@unsafe.Pointer ptrInModule, nameOff off) {
+internal static name resolveNameOff(@unsafe.Pointer ptrInModule, nameOff off) {
     if (off == 0) {
-        return new abiꓸName();
+        return new name();
     }
     var @base = (uintptr)ptrInModule;
     for (var md = Ꮡfirstmoduledata; md != nil; md = md.next) {
         if (@base >= md.types && @base < md.etypes) {
             var resΔ1 = md.types + (uintptr)off;
             if (resΔ1 > md.etypes) {
-                println((@string)"runtime: nameOff", (Δhex)(uint64)off, (@string)"out of range", (Δhex)(uint64)md.types, (@string)"-", (Δhex)(uint64)md.etypes);
+                println((@string)"runtime: nameOff", (hex)(uint64)off, (@string)"out of range", (hex)(uint64)md.types, (@string)"-", (hex)(uint64)md.etypes);
                 @throw(runtimeNameOffsetOutOfˢ);
             }
-            return new abiꓸName(Bytes: (ж<byte>)(uintptr)((@unsafe.Pointer)resΔ1));
+            return new name(Bytes: (ж<byte>)(uintptr)((@unsafe.Pointer)resΔ1));
         }
     }
 
@@ -349,18 +358,22 @@ internal static abiꓸName resolveNameOff(@unsafe.Pointer ptrInModule, nameOff o
     var (res, found) = reflectOffs.m[(int32)off, ꟷ];
     reflectOffsUnlock();
     if (!found) {
-        println((@string)"runtime: nameOff", (Δhex)(uint64)off, (@string)"base", (Δhex)(uint64)@base, (@string)"not in ranges:");
+        println((@string)"runtime: nameOff", (hex)(uint64)off, (@string)"base", (hex)(uint64)@base, (@string)"not in ranges:");
         for (var next = Ꮡfirstmoduledata; next != nil; next = next.next) {
-            println((@string)"\ttypes", (Δhex)(uint64)next.types, (@string)"etypes", (Δhex)(uint64)next.etypes);
+            println((@string)"\ttypes", (hex)(uint64)next.types, (@string)"etypes", (hex)(uint64)next.etypes);
         }
         @throw(runtimeNameOffsetBaseˢ);
     }
-    return new abiꓸName(Bytes: (ж<byte>)(uintptr)(res));
+    return new name(Bytes: (ж<byte>)(uintptr)(res));
 }
 
-internal static abiꓸName nameOff(this Δrtype t, nameOff off) {
+} partial class runtimeᴛrtype {
+
+internal static name nameOff(this rtype t, nameOff off) {
     return resolveNameOff(@unsafe.Pointer.FromPinnedBox(t.Type), off);
 }
+
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string runtimeTypeOffsetBaseˢ => ref runtimeTypeOffsetBaseˢᵇ;
@@ -387,9 +400,9 @@ internal static ж<_type> resolveTypeOff(@unsafe.Pointer ptrInModule, typeOff of
         @unsafe.Pointer resΔ1 = reflectOffs.m[(int32)off];
         reflectOffsUnlock();
         if (resΔ1 == nil) {
-            println((@string)"runtime: typeOff", (Δhex)(uint64)off, (@string)"base", (Δhex)(uint64)@base, (@string)"not in ranges:");
+            println((@string)"runtime: typeOff", (hex)(uint64)off, (@string)"base", (hex)(uint64)@base, (@string)"not in ranges:");
             for (var next = Ꮡfirstmoduledata; next != nil; next = next.next) {
-                println((@string)"\ttypes", (Δhex)(uint64)next.types, (@string)"etypes", (Δhex)(uint64)next.etypes);
+                println((@string)"\ttypes", (hex)(uint64)next.types, (@string)"etypes", (hex)(uint64)next.etypes);
             }
             @throw(runtimeTypeOffsetBaseˢ);
         }
@@ -400,13 +413,15 @@ internal static ж<_type> resolveTypeOff(@unsafe.Pointer ptrInModule, typeOff of
     }
     var res = md.types + (uintptr)off;
     if (res > md.etypes) {
-        println((@string)"runtime: typeOff", (Δhex)(uint64)off, (@string)"out of range", (Δhex)(uint64)md.types, (@string)"-", (Δhex)(uint64)md.etypes);
+        println((@string)"runtime: typeOff", (hex)(uint64)off, (@string)"out of range", (hex)(uint64)md.types, (@string)"-", (hex)(uint64)md.etypes);
         @throw(runtimeTypeOffsetOutOfˢ);
     }
     return (ж<_type>)(uintptr)((@unsafe.Pointer)res);
 }
 
-internal static ж<_type> typeOff(this Δrtype t, typeOff off) {
+} partial class runtimeᴛrtype {
+
+internal static ж<_type> typeOff(this rtype t, typeOff off) {
     return resolveTypeOff(@unsafe.Pointer.FromPinnedBox(t.Type), off);
 }
 
@@ -414,7 +429,7 @@ internal static ж<_type> typeOff(this Δrtype t, typeOff off) {
 internal static ref readonly @string runtimeTextOffsetBaseˢ => ref runtimeTextOffsetBaseˢᵇ;
 private static readonly @string runtimeTextOffsetBaseˢᵇ = "runtime: text offset base pointer out of range"u8;
 
-internal static @unsafe.Pointer textOff(this Δrtype t, textOff off) {
+internal static @unsafe.Pointer textOff(this rtype t, textOff off) {
     if (off == -1) {
         // -1 is the sentinel value for unreachable code.
         // See cmd/link/internal/ld/data.go:relocsym.
@@ -433,9 +448,9 @@ internal static @unsafe.Pointer textOff(this Δrtype t, textOff off) {
         @unsafe.Pointer resΔ1 = reflectOffs.m[(int32)off];
         reflectOffsUnlock();
         if (resΔ1 == nil) {
-            println((@string)"runtime: textOff", (Δhex)(uint64)off, (@string)"base", (Δhex)(uint64)@base, (@string)"not in ranges:");
+            println((@string)"runtime: textOff", (hex)(uint64)off, (@string)"base", (hex)(uint64)@base, (@string)"not in ranges:");
             for (var next = Ꮡfirstmoduledata; next != nil; next = next.next) {
-                println((@string)"\ttypes", (Δhex)(uint64)next.types, (@string)"etypes", (Δhex)(uint64)next.etypes);
+                println((@string)"\ttypes", (hex)(uint64)next.types, (@string)"etypes", (hex)(uint64)next.etypes);
             }
             @throw(runtimeTextOffsetBaseˢ);
         }
@@ -445,7 +460,9 @@ internal static @unsafe.Pointer textOff(this Δrtype t, textOff off) {
     return (@unsafe.Pointer)res;
 }
 
-internal static @string pkgPath(abiꓸName n) {
+} partial class runtime_package {
+
+internal static @string pkgPath(name n) {
     if (n.Bytes == nil || (byte)(n.Data(0).Value & ((byte)(1 << 2))) == 0) {
         return ""u8;
     }
@@ -522,8 +539,8 @@ partial struct _typePair {
     internal ж<_type> t2;
 }
 
-internal static Δrtype toRType(ж<abi.Type> t) {
-    return new Δrtype(t);
+internal static rtype toRType(ж<abi.Type> t) {
+    return new rtype(t);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -583,7 +600,7 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
         return true;
     }
     switch (kind) {
-    case var ᴛ when ᴛ == abi.ΔString || ᴛ == abi.UnsafePointer: {
+    case var ᴛ when ᴛ == abi.String || ᴛ == abi.UnsafePointer: {
         return true;
     }
     case var ᴛ when ᴛ == abi.Array: {
@@ -647,9 +664,9 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
         return true;
     }
     case var ᴛ when ᴛ == abi.Map: {
-        var mt = Ꮡt.Reinterpret<_type, abiꓸMapType>();
-        var mv = Ꮡv.Reinterpret<_type, abiꓸMapType>();
-        return typesEqual(mt.of(abiꓸMapType.ᏑKey).Value, mv.of(abiꓸMapType.ᏑKey).Value, seen) && typesEqual(mt.of(abiꓸMapType.ᏑElem).Value, mv.of(abiꓸMapType.ᏑElem).Value, seen);
+        var mt = Ꮡt.Reinterpret<_type, abi.MapType>();
+        var mv = Ꮡv.Reinterpret<_type, abi.MapType>();
+        return typesEqual(mt.of(abi.MapType.ᏑKey).Value, mv.of(abi.MapType.ᏑKey).Value, seen) && typesEqual(mt.of(abi.MapType.ᏑElem).Value, mv.of(abi.MapType.ᏑElem).Value, seen);
     }
     case var ᴛ when ᴛ == abi.Pointer: {
         var pt = Ꮡt.Reinterpret<_type, ptrtype>();

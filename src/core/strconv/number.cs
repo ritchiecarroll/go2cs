@@ -7,6 +7,7 @@ using errors = errors_package;
 using strconv = @internal.strconv_package;
 using stringslite = @internal.stringslite_package;
 using @internal;
+using static strconv_package;
 
 partial class strconv_package {
 
@@ -284,11 +285,15 @@ partial struct NumError {
     public error Err;    // the reason the conversion failed (e.g. ErrRange, ErrSyntax, etc.)
 }
 
+} partial class strconvᴛNumError {
+
 public static @string Error(this ref NumError e) {
     return "strconv."u8 + e.Func + ": "u8 + "parsing "u8 + Quote(e.Num) + ": "u8 + e.Err.Error();
 }
 
 public static error Unwrap(this ref NumError e) { return e.Err; }
+
+} partial class strconv_package {
 
 // All ParseXXX functions allow the input string to escape to the error value.
 // This hurts strconv.ParseXXX(string(b)) calls where b is []byte since

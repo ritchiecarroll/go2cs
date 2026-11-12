@@ -38,6 +38,7 @@ using go.@internal;
 using io = io_package;
 using iter = iter_package;
 using net;
+using static traceviewer_package;
 
 partial class traceviewer_package {
 
@@ -103,6 +104,8 @@ partial struct mmu {
     internal slice<Range> ranges;
 }
 
+} partial class traceviewerᴛmmu {
+
 internal static (slice<slice<trace.MutatorUtil>>, ж<trace.MMUCurve>, error) get(this ж<mmu> Ꮡm, trace.UtilFlags flags) {
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -127,6 +130,10 @@ internal static (slice<slice<trace.MutatorUtil>>, ж<trace.MMUCurve>, error) get
     return (entry.util, entry.mmuCurve, entry.err);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static ref readonly @string flagsˢ => ref flagsˢᵇ;
+private static readonly @string flagsˢᵇ = "flags"u8;
+
 // HandlePlot serves the JSON data for the MMU plot.
 internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> r) {
     var (mu, mmuCurve, err) = Ꮡm.get(requestUtilFlags(r));
@@ -144,7 +151,7 @@ internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<htt
     }
 
     // Find a nice starting point for the plot.
-    var xMin = time.ΔSecond;
+    var xMin = time.Second;
     while (xMin > 1) {
         var mmu = mmuCurve.MMU(xMin); if (mmu < 0.0001D) {
             break;
@@ -189,6 +196,8 @@ internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<htt
         return;
     }
 }
+
+} partial class traceviewer_package {
 
 internal static @string templMMU = """
 <!doctype html>
@@ -387,6 +396,8 @@ internal static @string templMMU = """
 
 """u8.Raw();
 
+} partial class traceviewerᴛmmu {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string windowˢ => ref windowˢᵇ;
 private static readonly @string windowˢᵇ = "window"u8;
@@ -422,10 +433,14 @@ internal static void HandleDetails(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<
     }
 }
 
+} partial class traceviewer_package {
+
 partial struct linkedUtilWindow {
     /*embed*/ public go.@internal.trace_package.UtilWindow UtilWindow;
     public @string URL;
 }
+
+} partial class traceviewerᴛmmu {
 
 internal static linkedUtilWindow newLinkedUtilWindow(this ref mmu m, trace.UtilWindow ui, time.Duration window) {
     // Find the range containing this window.
@@ -440,4 +455,4 @@ internal static linkedUtilWindow newLinkedUtilWindow(this ref mmu m, trace.UtilW
     return new linkedUtilWindow(ui, fmt.Sprintf("%s#%v:%v"u8, r.URL(ViewProc), (float64)ui.Time / 1e6D, (float64)(ui.Time + (int64)window) / 1e6D));
 }
 
-} // end traceviewer_package
+} // end traceviewerᴛmmu

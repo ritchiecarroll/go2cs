@@ -7,6 +7,7 @@ using errors = errors_package;
 using byteorder = @internal.byteorder_package;
 using chacha8rand = @internal.chacha8rand_package;
 using @internal;
+using static rand_package;
 
 partial class rand_package {
 
@@ -27,6 +28,8 @@ public static ж<ChaCha8> NewChaCha8(/*[32]*/ array<byte> seed) {
     c.Ꮡstate.Init(seed);
     return c;
 }
+
+} partial class randᴛChaCha8 {
 
 // Seed resets the ChaCha8 to behave the same way as NewChaCha8(seed).
 public static void Seed(this ж<ChaCha8> Ꮡc, /*[32]*/ array<byte> seed) {
@@ -100,6 +103,8 @@ public static error UnmarshalBinary(this ж<ChaCha8> Ꮡc, slice<byte> data) {
     return chacha8rand.Unmarshal(Ꮡc.Ꮡstate, data);
 }
 
+} partial class rand_package {
+
 internal static (slice<byte> after, bool found) cutPrefix(slice<byte> s, slice<byte> prefix) {
     if (len(s) < len(prefix) || ((sstring)(s.slice(0, len(prefix)))) != ((sstring)prefix)) {
         return (s, false);
@@ -113,6 +118,8 @@ internal static (slice<byte> buf, slice<byte> rest, bool ok) readUint8LengthPref
     }
     return (b.slice(1, (byte)(1 + b[0])), b.slice((byte)(1 + b[0])), true);
 }
+
+} partial class randᴛChaCha8 {
 
 // AppendBinary implements the [encoding.BinaryAppender] interface.
 public static (slice<byte>, error) AppendBinary(this ж<ChaCha8> Ꮡc, slice<byte> b) {
@@ -132,4 +139,4 @@ public static (slice<byte>, error) MarshalBinary(this ж<ChaCha8> Ꮡc) {
     return Ꮡc.AppendBinary(new slice<byte>(0, 64));
 }
 
-} // end rand_package
+} // end randᴛChaCha8

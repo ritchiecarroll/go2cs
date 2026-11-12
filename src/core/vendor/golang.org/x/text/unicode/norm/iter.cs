@@ -6,6 +6,7 @@ namespace go.vendor.golang.org.x.text.unicode;
 using fmt = fmt_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
+using static norm_package;
 
 partial class norm_package {
 
@@ -18,7 +19,7 @@ public static UntypedInt MaxSegmentSize => /* maxByteBufferSize */ 128;
 partial struct Iter {
     internal reorderBuffer rb;
     internal array<byte> buf = new(maxByteBufferSize);
-    internal ΔProperties info;                // first character saved from previous iteration
+    internal Properties info;                 // first character saved from previous iteration
     internal Func<ж<Iter>, slice<byte>> next; // implementation of next depends on form
     internal Func<ж<Iter>, slice<byte>> asciiF;
     internal nint p;               // current position in input source
@@ -26,6 +27,8 @@ partial struct Iter {
 }
 
 // type iterFunc is a methodless func type — rendered inline as its base delegate
+
+} partial class normᴛIter {
 
 // Init initializes i to iterate over src after normalizing it to Form f.
 public static void Init(this ref Iter i, Form f, slice<byte> src) {
@@ -131,6 +134,8 @@ public static slice<byte> Next(this ж<Iter> Ꮡi) {
 
     return i.next(Ꮡi);
 }
+
+} partial class norm_package {
 
 internal static slice<byte> nextASCIIBytes(ж<Iter> Ꮡi) {
     ref var i = ref Ꮡi.DerefOrNull();
@@ -287,7 +292,7 @@ internal static slice<byte> /*next*/ nextDecomposed(ж<Iter> Ꮡi) {
             var prevCCΔ1 = i.info.tccc;
             i.p += sz; if (i.p >= i.rb.nsrc) {
                 i.setDone();
-                i.info = new ΔProperties(); // Force BoundaryBefore to succeed.
+                i.info = new Properties(); // Force BoundaryBefore to succeed.
             } else {
                 i.info = i.rb.f.info(i.rb.src, i.p);
             }

@@ -12,6 +12,7 @@ using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
 using go.@internal.trace;
 using io = io_package;
+using static trace_package;
 
 partial class trace_package {
 
@@ -24,9 +25,11 @@ partial struct timedEventArgs /*[4]uint64*/;
 // fundamental data structure across.
 partial struct baseEvent {
     internal tracev2.EventType typ;
-    internal ΔTime time;
+    internal Time time;
     internal timedEventArgs args;
 }
+
+} partial class traceᴛbaseEvent {
 
 // extra returns a slice representing extra available space in args
 // that the parser can use to pass data up into Event.
@@ -37,6 +40,8 @@ internal static slice<uint64> extra(this ref baseEvent e, version.Version v) {
     }}
     throw panic(fmt.Sprintf("unsupported version: go 1.%d"u8, v));
 }
+
+} partial class trace_package {
 
 // evTable contains the per-generation data necessary to
 // interpret an individual event.
@@ -55,6 +60,8 @@ partial struct evTable {
     internal map<tracev2.Experiment, slice<ExperimentalBatch>> expBatches;
 }
 
+} partial class traceᴛevTable {
+
 // addExtraString adds an extra string to the evTable and returns
 // a unique ID for the string in the table.
 internal static extraStringID addExtraString(this ref evTable t, @string s) {
@@ -69,7 +76,7 @@ internal static extraStringID addExtraString(this ref evTable t, @string s) {
     }
     t.nextExtra++;
     var id = t.nextExtra;
-    t.extraStrings = builtin.append(t.extraStrings, s);
+    t.extraStrings = append(t.extraStrings, s);
     t.extraStringIDs[s] = id;
     return id;
 }
@@ -83,6 +90,8 @@ internal static @string getExtraString(this ref evTable t, extraStringID id) {
     return t.extraStrings[id - 1];
 }
 
+} partial class trace_package {
+
 // dataTable is a mapping from EIs to Es.
 partial struct dataTable<EI, E>
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
@@ -91,6 +100,8 @@ partial struct dataTable<EI, E>
     internal slice<E> dense;
     internal map<EI, E> sparse;
 }
+
+} partial class traceᴛdataTable {
 
 // insert tries to add a mapping from id to s.
 //
@@ -220,13 +231,19 @@ internal static E mustGet<EI, E>(this ref dataTable<EI, E> d, EI id)
     return data;
 }
 
+} partial class trace_package {
+
 // frequency is nanoseconds per timestamp unit.
 partial struct frequency /*num:float64*/;
 
+} partial class traceᴛfrequency {
+
 // mul multiplies an unprocessed to produce a time in nanoseconds.
-internal static ΔTime mul(this frequency f, timestamp t) {
-    return (ΔTime)(int64)((float64)t * (float64)f);
+internal static Time mul(this frequency f, timestamp t) {
+    return (Time)(int64)((float64)t * (float64)f);
 }
+
+} partial class trace_package {
 
 // stringID is an index into the string table for a generation.
 partial struct stringID /*num:uint64*/;
@@ -240,19 +257,21 @@ partial struct stackID /*num:uint64*/;
 // cpuSample represents a CPU profiling sample captured by the trace.
 partial struct cpuSample {
     /*embed*/ internal schedCtx schedCtx;
-    internal ΔTime time;
+    internal Time time;
     internal stackID stack;
 }
+
+} partial class traceᴛcpuSample {
 
 // asEvent produces a complete Event from a cpuSample. It needs
 // the evTable from the generation that created it.
 //
 // We don't just store it as an Event in generation to minimize
 // the amount of pointer data floating around.
-internal static ΔEvent asEvent(this cpuSample s, ж<evTable> table) {
+internal static Event asEvent(this cpuSample s, ж<evTable> table) {
     // TODO(mknyszek): This is go122-specific, but shouldn't be.
     // Generalize this in the future.
-    var e = new ΔEvent(
+    var e = new Event(
         table: table,
         ctx: s.schedCtx,
         @base: new baseEvent(
@@ -264,10 +283,14 @@ internal static ΔEvent asEvent(this cpuSample s, ж<evTable> table) {
     return e.ΔClone();
 }
 
+} partial class trace_package {
+
 // stack represents a goroutine stack sample.
 partial struct stack {
     internal slice<uint64> pcs;
 }
+
+} partial class traceᴛstack {
 
 internal static @string String(this stack s) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
@@ -276,6 +299,8 @@ internal static @string String(this stack s) {
     }
     return sb.String();
 }
+
+} partial class trace_package {
 
 // frame represents a single stack frame.
 partial struct frame {

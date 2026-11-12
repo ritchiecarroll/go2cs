@@ -13,6 +13,7 @@ using strings = strings_package;
 using global::go.go;
 using global::go.go.doc;
 using ꓸꓸꓸany = Span<any>;
+using static doc_package;
 
 partial class doc_package {
 
@@ -85,7 +86,7 @@ partial struct Func {
 // at least one character is recognized. The ":" following the uid is optional.
 // Notes are collected in the Package.Notes map indexed by the notes marker.
 partial struct Note {
-    public tokenꓸPos Pos, End; // position range of the comment containing the marker
+    public token.Pos Pos, End; // position range of the comment containing the marker
     public @string UID;        // uid found with the marker
     public @string Body;       // note body text
 }
@@ -145,6 +146,8 @@ public static ж<Package> New(ж<ast.Package> Ꮡpkg, @string importPath, Mode m
 
     return p;
 }
+
+} partial class docᴛPackage {
 
 internal static void collectValues(this ref Package p, slice<ж<Value>> values) {
     foreach (var (_, v) in range(values)) {
@@ -232,6 +235,8 @@ internal static void collectStructFields(this ref Package p, ж<Type> Ꮡt) {
         }
     }
 }
+
+} partial class doc_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string testGoˢ => ref testGoˢᵇ;
@@ -324,6 +329,8 @@ public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> fset, slice<ж
     return (p, default);
 }
 
+} partial class docᴛPackage {
+
 // lookupSym reports whether the package has a given symbol or method.
 //
 // If recv == "", HasSym reports whether the package has a top-level
@@ -414,4 +421,4 @@ public static slice<byte> Text(this ж<Package> Ꮡp, @string text) {
     return p.Printer().Text(Ꮡp.Parser().Parse(text));
 }
 
-} // end doc_package
+} // end docᴛPackage

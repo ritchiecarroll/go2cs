@@ -4,13 +4,16 @@
 namespace go.net.@internal;
 
 using syscall = syscall_package;
+using static socktest_package;
 
 partial class socktest_package {
 
 // Sockets maps a socket descriptor to the status of socket.
-partial struct ΔSockets /*map[syscallꓸHandle, Status]*/;
+partial struct Sockets /*map[syscall.Handle, Status]*/;
 
-internal static ж<Status> sockso(this ж<Switch> Ꮡsw, syscallꓸHandle s) {
+} partial class socktestᴛSwitch {
+
+internal static ж<Status> sockso(this ж<Switch> Ꮡsw, syscall.Handle s) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -31,7 +34,7 @@ internal static ж<Status> sockso(this ж<Switch> Ꮡsw, syscallꓸHandle s) {
 
 // addLocked returns a new Status without locking.
 // sw.smu must be held before call.
-internal static ж<Status> addLocked(this ж<Switch> Ꮡsw, syscallꓸHandle s, nint family, nint sotype, nint proto) {
+internal static ж<Status> addLocked(this ж<Switch> Ꮡsw, syscall.Handle s, nint family, nint sotype, nint proto) {
     ref var sw = ref Ꮡsw.DerefOrNull();
 
     Ꮡsw.Ꮡonce.Do(Ꮡsw.init);
@@ -40,4 +43,4 @@ internal static ж<Status> addLocked(this ж<Switch> Ꮡsw, syscallꓸHandle s, 
     return Ꮡso;
 }
 
-} // end socktest_package
+} // end socktestᴛSwitch

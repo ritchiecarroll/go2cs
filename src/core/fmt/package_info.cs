@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -84,10 +82,10 @@ using static go.fmt_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("fmt/errors.go", "errors.cs", "AA0uAA8GgriosoKUgoKCgoKUtIKCtIKUgoKClIKmpIIABxCCpoIABxCCpoI=")]
-[assembly: GoPositionMap("fmt/format.go", "format.cs", "AC9sgoKCpqKCqJKClIKClIKCppSCpoKClKiSgoKUgpSCpoK6koKClIKUgqaCAAkKkoKUupLKgoKUgoLKpoKCgoKCgoKCpoKCgoKUgoKUgoKCpoKCgpSCgoKokoKCpqaUgpTugoKUgoKCgoKUgoKC7qaUgoKCgsaCgoLGgoKCxoKCgsakgoKCgriCpoKCgrSCgtiCgoK2goKCgqaCgoKCgoKCgsqCgoKokoKCgoKCuKiSgoKCgoKUgqaokoKokoKokoKUpoKmgoKUgqaClKaClKaCpoKUlIKClIKUpoKUppSUgrqSqJKssoKCgpSCgpS8xoKClIKqooKClIKClLzUgqaCgpS4griCgpSClIKCuIKClJSCzKKUgpSCpKSCtIKCgpS0gqaCuJSClJSCgpSmuIKCgoKUgqY=")]
-[assembly: GoPositionMap("fmt/print.go", "print.cs", "AFqiAQAIAoKCgoKmgIKkgIKCpILcgqaCpoKmggAZPMqSgoKCgoKoAAoQgpSUgqaCgoKmlJSClKSkpKSUqqKCqqKCrgAIAoKCgoKqwqiygoKCgqrCgoKCggACEAAJAoKCgoKs0qrCgoKCgqzSgoKCggACFAALAoKCgoKs0qrCgoKCgqzSgoKCgqyygoKUqqKCqNKClIKClIKUpoKCgpSCgqaigoKCgpSCgrSCgrSkgqailLTMooKCgqiylIKUxrS0tLS0tLS0zMKUtLS0tM72lIKClIKCgrTIopSClMa0tLS0yKKUgoKCgpSCgoKUlJSCgoKUlMa0tLS0yKKClLSCppSCgoKCgpSUlIKU2LS0AAgI0riCgriUppSUgoKCgoKCgoKUtAAMBNKClJSCgoKmuICCgoKCyIKAgoKUguzclIKCgqaCgoLIAAoGooKUgpS0pMqUgqSCuJS0tLS0tLS0tLS0tLS0tLS0tNiCgoKm1qbe1IKCgqaClLSClJS02KSkpKSkpKSkgoKCgpSUlIKCgoKUpoKClIKUtoKUgoKCgpSmgoKCppSkgoKCgpSmtqaCgoKCyoKCpoK2goKCgpSCgoKUlJSCgoKUlNqCpIKCpqSkutKCgoKUpIKCgsaCgoIACAyCgoKmAAIS9IK4goKCgpSmrLKClIKCgpSCpoKCgqaCgoKmooKCgoKCgoKCgpSClJS4poKCgoKUtLS0tNiCpIK2gpSClIKCgqb6poKClILKgoKClJSCgsqCgoKUgoKClIKClIKUlIKCgsqCpoKCpoKUlKSkpIK2gpSCgqSCAAgOgoKCgoKUgpSCgqa4ooKClIKUgrzCgoKUlA==")]
-[assembly: GoPositionMap("fmt/scan.go", "scan.cs", "AD5+4qrCAAIUAAkCyrKCgoKUrvKq0q7yrgAIAoKCgqrigoKCrgAIAoKCggAiRLKmwoKCpoKCgoKUgpSmgoKUqsKCgoKUlKzSgoKUpoKCgoKmgqaCpuKCgpKUuIKUgoL6AAwagoKUgqKClIKmqJIADSDSgoKCgpSCgpSq4oKCgoKUgoKUgoKUgpSCgoKCgoKUpoKCgqaC5oKCpoKmysKCgpSUgoKCgoKCgoKoxIKCpoKUgoLssoKCgpSClIKClIKUgoIABBCygqaCgoKUgoKUlKaClIKCgqaqooKClIKClJSClKiSgoKUppSClKqiqJKCgqaC6JKCgoKmlKSkgpSkgpSUABgewoKCgpSCtIK0gqTokoKCgqaUqJKCgoKCgpSssoKUlJSCpIKkgqT8ooKUgoKCgoKCpoKCpoKCgpSCgoKUqqKClIKCgoKCgpSClIKCgpSCgoKUrLKUgqaUgpSCgoKCpqaUuJSUpqz0goKUgqaCgoKUgpSmgoKCpqjIpoKUgpSUgpSClJSUgoKU7sKClIKCgoKCAAgKwoKUgoKUtLSk6JKCgqaCgoKUlLaCgoKCuIKCpoKClKSkqJKClKSklOzigoKUgoKClIKCgpTokoKCgoKUlIKClAAOGpKCgoIACQqygpSAgoKCgpSUtpS0tLS0tLS0tLS0tLS02IKCgsaCgoLG2MSCgoKClKS0tLTGgoKUgoKCxoKCtLTs0oKCgoKUxuYACAKCgoKmgoKCgpSCgrgADxYACgKCAAcQgoKCgoKClJSClIKCgpSCpoKCpoKUgqaClIKmuJSCpoKClLiCgoKUlAAICgAJAoKUgoKCgqaUgqaUlpKCgqaClIKUgoKUgoKmgoKUlIKClIKU", "248-256:1", "", "", "1312:21,1451:21", "300:21,301:13")]
+[assembly: GoPositionMap("fmt/errors.go", "errors.cs", "AA4uAA8GgriosoKUgoKCgoKUtIKCtIKUgoKClIKmpIIACRCCpoIACxCCpoI=")]
+[assembly: GoPositionMap("fmt/format.go", "format.cs", "ADJsgoKCpqKCqJKClIKClIKCppSCpoKClKiSgoKUgpSCpoK6koKClIKUgqaCAAkKkoKUupLKgoKUgoLKpoKCgoKCgoKCpoKCgoKUgoKUgoKCpoKCgpSCgoKokoKCpqaUgpTugoKUgoKCgoKUgoKC7qaUgoKCgsaCgoLGgoKCxoKCgsakgoKCgriCpoKCgrSCgtiCgoK2goKCgqaCgoKCgoKCgsqCgoKokoKCgoKCuKiSgoKCgoKUgqaokoKokoKokoKUpoKmgoKUgqaClKaClKaCpoKUlIKClIKUpoKUppSUgrqSqJKssoKCgpSCgpS8xoKClIKqooKClIKClLzUgqaCgpS4griCgpSClIKCuIKClJSCzKKUgpSCpKSCtIKCgpS0gqaCuJSClJSCgpSmuIKCgoKUgqY=")]
+[assembly: GoPositionMap("fmt/print.go", "print.cs", "AFuiAQAIAoKCgoKmgIKkgIKCpIL8gqaCpoKmggAbPMqSgoKCgoLIAAoQgpSUgqaCgoKmlJSClKSkpKSUqqKCqqKCzgAIAoKCgoKqwqiygoKCgqrCgoKCggACEAAJAoKCgoKs0qrCgoKCgqzSgoKCggACFAALAoKCgoKs0qrCgoKCgqzSgoKCgqyygoKUqqKCqNKClIKClIKUxoKCgpSCgqaigoKCgpSCgrSCgrSkgqailLTMooKCgqiylIKUxrS0tLS0tLS0zMKUtLS0tM72lIKClIKCgrTIopSClMa0tLS0yKKUgoKCgpSCgoKUlJSCgoKUlMa0tLS0yKKClLSCppSCgoKCgpSUlIKU2LS0AAgI0riCgriUppSUgoKCgoKCgoKUtAAMBNKClJSCgoKmuICCgoKCyIKAgoKUguzclIKCgqaCgoLIAAoGooKUgpS0pMqUgqSCuJS0tLS0tLS0tLS0tLS0tLS0tNiCgoKm1qbe1IKCgqaClLSClJS02KSkpKSkpKSkgoKCgpSUlIKCgoKUpoKClIKUtoKUgoKCgpSmgoKCppSkgoKCgpSmtqaCgoKCyoKCpoK2goKCgpSCgoKUlJSCgoKUlNqCpIKCpqSk2tKCgoKUpIKCgsaCgoIACAyCgoKmAAIS9IK4goKCgpSmzLKClIKCgpSCpoKCgqaCgoKmooKCgoKCgoKCgpSClJS4poKCgoKUtLS0tNiCpIK2gpSClIKCgqb6poKClILKgoKClJSCgsqCgoKUgoKClIKClIKUlIKCgsqCpoKCpoKUlKSkpIK2gpSCgqSCAAgOgoKCgoKUgpSCgqa4ooKClIKUgrzCgoKUlA==")]
+[assembly: GoPositionMap("fmt/scan.go", "scan.cs", "AD9+4qrCAAIUAAkC6rKCgoKUzvKq0q7yrgAIAoKCgqrigoKCrgAIAoKCggAkRLKmwoKCpoKCgoKUgpSmgoKUqsKCgoKUlKzSgoKUpoKCgoKmgqaCpuKCgpKUuIKUgoIACQoADBqCgpSCooKUgqaokgAPINKCgoKClIKClKrigoKCgpSCgpSCgpSClIKCgoKCgpSmgoKCpoLmgoKmgsbKwoKClJSCgoKCgoKCgsjEgoKmgpSCguyygoKClIKUgoKUgpSCggAEELKCpoKCgpSCgpSUxoKUgoKCpsqigoKUgoKUlIKUqJKCgpSmlIKUqqKokoKCpoLokoKCgqaUpKSClKSClJQAHB7CgoKClIK0grSCpOiSgoKCppSokoKCgoKClKyygpSUlIKkgqSCpPyigpSCgoKCgoKmgoKmgoKClIKCgpSqooKUgoKCgoKClIKUgoKClIKCgpSsspSCppSClIKCgoKmppS4lJSmrPSCgpSCpoKCgpSClMaCgoKmyMimgpSClJSClIKUlJSCgpTuwoKUgoKCgoIACArCgpSCgpS0tKTokoKCpoKCgpSUtoKCgoK4goKmgoKUpKTIkoKUpKSUAAgM4oKClIKCgpSCgoKU6JKCgoKClJSCgpQAEhqSgoKCAAkKsoKUgIKCgoKUlLaUtLS0tLS0tLS0tLS0tNiCgoLGgoKCxtjEgoKCgpSktLS0xoKClIKCgsaCgrS0AAgM0oKCgoKUxgAIBgAIAoKCgqaCgoKClIKCuAAPFgAKAoIABxCCgoKCgoKUlIKUgoKClIKmgoKmgpSCpoKUgqa4lIKmgoKUuIKCgpSUAAgKAAkCgpSCgoKCppSCppSWkoKCpoKUgpSCgpSCgqaCgpSUgoKUgpQ=", "248-256:1", "", "", "1351:21,1490:21", "307:21,308:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -141,3 +139,20 @@ public static partial class fmt_package
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(unicode.utf8_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(fmt_package.buffer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fmtᴛbuffer;
+[GoMethodHost(typeof(fmt_package.fmt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fmtᴛfmt;
+[GoMethodHost(typeof(fmt_package.pp)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fmtᴛpp;
+[GoMethodHost(typeof(fmt_package.readRune)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fmtᴛreadRune;
+[GoMethodHost(typeof(fmt_package.ss)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fmtᴛss;
+[GoMethodHost(typeof(fmt_package.stringReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fmtᴛstringReader;
+[GoMethodHost(typeof(fmt_package.wrapError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fmtᴛwrapError;
+[GoMethodHost(typeof(fmt_package.wrapErrors)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fmtᴛwrapErrors;
+// </MethodHolders>

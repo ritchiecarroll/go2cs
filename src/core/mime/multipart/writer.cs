@@ -15,6 +15,7 @@ using strings = strings_package;
 using crypto;
 using iter = iter_package;
 using net;
+using static multipart_package;
 
 partial class multipart_package {
 
@@ -33,6 +34,8 @@ public static ж<Writer> NewWriter(io.Writer w) {
         boundary: randomBoundary()
     ));
 }
+
+} partial class multipartᴛWriter {
 
 // Boundary returns the [Writer]'s boundary.
 public static @string Boundary(this ref Writer w) {
@@ -95,6 +98,8 @@ public static @string FormDataContentType(this ref Writer w) {
     return "multipart/form-data; boundary="u8 + b;
 }
 
+} partial class multipart_package {
+
 internal static @string randomBoundary() {
     array<byte> buf = new(30);
     var (_, err) = io.ReadFull(rand.Reader, buf[..]);
@@ -103,6 +108,8 @@ internal static @string randomBoundary() {
     }
     return fmt.Sprintf("%x"u8, buf[..]);
 }
+
+} partial class multipartᴛWriter {
 
 // CreatePart creates a new multipart section with the provided
 // header. The body of the part should be written to the returned
@@ -140,6 +147,8 @@ public static (io.Writer, error) CreatePart(this ж<Writer> Ꮡw, textproto.MIME
     return (new partжWriter(p), default);
 }
 
+} partial class multipart_package {
+
 internal static ж<strings.Replacer> quoteEscaper = strings.NewReplacer("\\", "\\\\", @"""", "\\\"", "\r", "%0D", "\n", "%0A");
 
 // escapeQuotes escapes special characters in field parameter values.
@@ -158,7 +167,11 @@ internal static @string escapeQuotes(@string s) {
     return quoteEscaper.Replace(s);
 }
 
+} partial class multipartᴛWriter {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string contentDispositionˢ => ref contentDispositionˢᵇ;
+private static readonly @string contentDispositionˢᵇ = "Content-Disposition"u8;
 internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
 private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
 internal static ref readonly @string applicationOctetStreamˢ => ref applicationOctetStreamˢᵇ;
@@ -182,12 +195,16 @@ public static (io.Writer, error) CreateFormField(this ж<Writer> Ꮡw, @string f
     return Ꮡw.CreatePart(h);
 }
 
+} partial class multipart_package {
+
 // FileContentDisposition returns the value of a Content-Disposition header
 // with the provided field name and file name.
 public static @string FileContentDisposition(@string fieldname, @string filename) {
     return fmt.Sprintf(@"form-data; name=""%s""; filename=""%s"""u8,
         escapeQuotes(fieldname), escapeQuotes(filename));
 }
+
+} partial class multipartᴛWriter {
 
 // WriteField calls [Writer.CreateFormField] and then writes the given value.
 public static error WriteField(this ж<Writer> Ꮡw, @string fieldname, @string value) {
@@ -212,11 +229,15 @@ public static error Close(this ref Writer w) {
     return err;
 }
 
+} partial class multipart_package {
+
 partial struct part {
     internal ж<Writer> mw;
     internal bool closed;
     internal error we; // last error that occurred writing
 }
+
+} partial class multipartᴛpart {
 
 internal static error close(this ref part p) {
     p.closed = true;
@@ -241,4 +262,4 @@ internal static (nint n, error err) Write(this ref part p, slice<byte> d) {
     return (n, err);
 }
 
-} // end multipart_package
+} // end multipartᴛpart

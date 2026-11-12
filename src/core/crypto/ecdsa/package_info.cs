@@ -10,12 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using bigꓸInt = go.math.big_package.ΔInt;
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
-global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
-global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
-global using ecdsaꓸPublicKey = go.crypto.@internal.fips140.ecdsa_package.ΔPublicKey;
 // </ImportedTypeAliases>
 
 using go;
@@ -70,7 +66,7 @@ using static go.crypto.ecdsa_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/ecdsa/ecdsa.go", "ecdsa.cs", "AEJ+AAgCgoKUgoKUAAIQ0oKClAANLAAOAoKUlKSkpKS4ooKClAAGHAANApSkpKSkuKKCgpQAECrSgoKUgoKUpoKUpKSkupKssoKClKrSAAYiAA4ClKSkpKS4ooKClIKClAAGHgAOApSkpKSkuKKCgpQAAiQADwKClIIAAhDSgoKClJSUlJSkpKSk+KKClIKClAACGAALAoKCgpSUlJSUpKSkpLiigpSCgsqCgpQACgaigpSCgpSUpKSkpPiigoKUkoKUgoKUpoKCooKU6sKClIKClJKClAADEvKCgoKUlJSUpKSkpLiigoKUgoKUgpTmsoKCipSmooKClKaigoKUpqKCgpQADQrCgoK4gpSCpoKCgpSUAA0SwpSClIKmgoKCgoLowpSUgoKC", "466-469:1;483-488:1;595-597:1;597-600:2", "453=crypto.Hash.New", "666=Empty/1/2/1,ReadASN1Integer/1/2/2,ReadASN1Integer/2/2/3,Empty/2/2/4")]
+[assembly: GoPositionMap("crypto/ecdsa/ecdsa.go", "ecdsa.cs", "AEV+AAgCgoKUgoKUAAIQ0oKClAAPLAAOAoKUlKSkpKS4ooKClAAIHAANApSkpKSk2KKCgpQAFirSgoKUgoKUxoKUpKSk2pKssoKClMrSAAYiAA4ClKSkpKS4ooKClIKClAAIHgAOApSkpKSk2KKCgpQABCQADwKClIIABBDSgoKClJSUlJSkpKSk+KKClIKClAACGAALAoKCgpSUlJSUpKSkpLiigpSCgsqCgpQACgaigpSCgpSUpKSkpPiigoKUkoKUgoKUpoKCooKU6sKClIKClJKClAADEvKCgoKUlJSUpKSkpLiigoKUgoKUgpTmsoKCipSmooKClKaigoKUpqKCgpQADQrCgoK4gpSCpoKCgpSUAA0SwpSClIKmgoKCgoLowpSUgoKC", "466-469:1;483-488:1;595-597:1;597-600:2", "453=crypto.Hash.New", "695=Empty/1/2/1,ReadASN1Integer/1/2/2,ReadASN1Integer/2/2/3,Empty/2/2/4")]
 [assembly: GoPositionMap("crypto/ecdsa/ecdsa_legacy.go", "ecdsa_legacy.cs", "ABosooKmgoKmgoKCgqyygoKCpoKCgpSmAAUYAA4CgoKmgoKCipSmooKmlpKClIKUgpSmgoKUsoKCgoKmlIKCgriCgoKCgoK4AAISAAkCgpSCgpSmgoKmgoKUlIKUgpSCuIKUgoKClIKClIKUgqaY0oKCgoKUgpSCgg==", "", "", "93=Empty/1/2/1,ReadASN1Integer/1/2/2,ReadASN1Integer/2/2/3,Empty/2/2/4")]
 [assembly: GoPositionMap("crypto/ecdsa/notboring.go", "notboring.cs", "AAsWgpSC")]
 // </GoSourcePositionMaps>
@@ -118,3 +114,14 @@ public static partial class ecdsa_package
     [GoInit] internal static void initᴛᴛimportꓸvendorꓸgolang_orgꓸxꓸcryptoꓸcryptobyte() => builtin.initPackage(typeof(vendor.golang.org.x.crypto.cryptobyte_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(ecdsa_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛPrivateKey;
+[GoMethodHost(typeof(ecdsa_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛPublicKey;
+// </MethodHolders>

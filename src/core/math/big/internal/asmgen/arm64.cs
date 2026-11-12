@@ -51,7 +51,7 @@ partial class asmgen_package {
     storeDecN: arm64StoreDecN
 )); }
 
-internal static void arm64LoadIncN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
+internal static void arm64LoadIncN(ж<Asm> Ꮡa, RegPtr p, slice<Reg> regs) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (len(regs) == 1) {
@@ -68,7 +68,7 @@ internal static void arm64LoadIncN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
     }
 }
 
-internal static void arm64LoadDecN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
+internal static void arm64LoadDecN(ж<Asm> Ꮡa, RegPtr p, slice<Reg> regs) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (len(regs) == 1) {
@@ -85,7 +85,7 @@ internal static void arm64LoadDecN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
     }
 }
 
-internal static void arm64StoreIncN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
+internal static void arm64StoreIncN(ж<Asm> Ꮡa, RegPtr p, slice<Reg> regs) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (len(regs) == 1) {
@@ -102,7 +102,7 @@ internal static void arm64StoreIncN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
     }
 }
 
-internal static void arm64StoreDecN(ж<Asm> Ꮡa, RegPtr p, slice<ΔReg> regs) {
+internal static void arm64StoreDecN(ж<Asm> Ꮡa, RegPtr p, slice<Reg> regs) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (len(regs) == 1) {

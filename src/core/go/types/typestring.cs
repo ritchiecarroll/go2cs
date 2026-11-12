@@ -14,6 +14,7 @@ using strings = strings_package;
 using utf8 = global::go.unicode.utf8_package;
 using global::go.unicode;
 using token = global::go.go.token_package;
+using static types_package;
 
 partial class types_package {
 
@@ -46,7 +47,7 @@ public static Func<ж<Package>, @string> RelativeTo(ж<Package> pkg) {
 // TypeString returns the string representation of typ.
 // The [Qualifier] controls the printing of
 // package-level objects, and may be nil.
-public static @string TypeString(ΔType typ, Func<ж<Package>, @string> qf) {
+public static @string TypeString(Type typ, Func<ж<Package>, @string> qf) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     WriteType(Ꮡbuf, typ, qf);
     return Ꮡbuf.String();
@@ -55,20 +56,20 @@ public static @string TypeString(ΔType typ, Func<ж<Package>, @string> qf) {
 // WriteType writes the string representation of typ to buf.
 // The [Qualifier] controls the printing of
 // package-level objects, and may be nil.
-public static void WriteType(ж<bytes.Buffer> buf, ΔType typ, Func<ж<Package>, @string> qf) {
+public static void WriteType(ж<bytes.Buffer> buf, Type typ, Func<ж<Package>, @string> qf) {
     newTypeWriter(buf, qf).typ(typ);
 }
 
 // WriteSignature writes the representation of the signature sig to buf,
 // without a leading "func" keyword. The [Qualifier] controls the printing
 // of package-level objects, and may be nil.
-public static void WriteSignature(ж<bytes.Buffer> buf, ж<ΔSignature> sig, Func<ж<Package>, @string> qf) {
+public static void WriteSignature(ж<bytes.Buffer> buf, ж<Signature> sig, Func<ж<Package>, @string> qf) {
     newTypeWriter(buf, qf).signature(sig);
 }
 
 partial struct typeWriter {
     internal ж<bytes.Buffer> buf;
-    internal map<ΔType, bool> seen;
+    internal map<Type, bool> seen;
     internal Func<ж<Package>, @string> qf;
     internal ж<Context> ctxt;          // if non-nil, we are type hashing
     internal ж<TypeParamList> tparams; // local type parameters
@@ -78,13 +79,15 @@ partial struct typeWriter {
 }
 
 internal static ж<typeWriter> newTypeWriter(ж<bytes.Buffer> buf, Func<ж<Package>, @string> qf) {
-    return Ꮡ(new typeWriter(buf, new map<ΔType, bool>(), qf, nil, nil, true, false, false));
+    return Ꮡ(new typeWriter(buf, new map<Type, bool>(), qf, nil, nil, true, false, false));
 }
 
 internal static ж<typeWriter> newTypeHasher(ж<bytes.Buffer> buf, ж<Context> ctxt) {
     assert(ctxt != nil);
-    return Ꮡ(new typeWriter(buf, new map<ΔType, bool>(), default, ctxt, nil, false, false, false));
+    return Ꮡ(new typeWriter(buf, new map<Type, bool>(), default, ctxt, nil, false, false, false));
 }
+
+} partial class typesᴛtypeWriter {
 
 internal static void @byte(this ref typeWriter w, byte b) {
     if (w.ctxt != nil) {
@@ -112,8 +115,14 @@ internal static void error(this ref typeWriter w, @string msg) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string nilˢ2 => ref nilˢ2ᵇ;
+private static readonly @string nilˢ2ᵇ = "nil"u8;
+internal static ref readonly @string structˢ => ref structˢᵇ;
+private static readonly @string structˢᵇ = "struct{"u8;
 internal static ref readonly @string packageˢ => ref packageˢᵇ;
 private static readonly @string packageˢᵇ = " /* package "u8;
+internal static ref readonly @string funcˢ => ref funcˢᵇ;
+private static readonly @string funcˢᵇ = "func"u8;
 internal static ref readonly @string emptyUnionˢ => ref emptyUnionˢᵇ;
 private static readonly @string emptyUnionˢᵇ = "empty union"u8;
 internal static ref readonly @string anyˢ => ref anyˢᵇ;
@@ -122,6 +131,16 @@ internal static ref readonly @string interfaceComparableˢ => ref interfaceCompa
 private static readonly @string interfaceComparableˢᵇ = "interface{comparable}"u8;
 internal static ref readonly @string implicitˢ => ref implicitˢᵇ;
 private static readonly @string implicitˢᵇ = "/* implicit */ "u8;
+internal static ref readonly @string interfaceˢ => ref interfaceˢᵇ;
+private static readonly @string interfaceˢᵇ = "interface{"u8;
+internal static ref readonly @string mapˢ => ref mapˢᵇ;
+private static readonly @string mapˢᵇ = "map["u8;
+internal static ref readonly @string chanˢ3 => ref chanˢ3ᵇ;
+private static readonly @string chanˢ3ᵇ = "chan "u8;
+internal static ref readonly @string chanˢ => ref chanˢᵇ;
+private static readonly @string chanˢᵇ = "chan<- "u8;
+internal static ref readonly @string chanˢ2 => ref chanˢ2ᵇ;
+private static readonly @string chanˢ2ᵇ = "<-chan "u8;
 internal static ref readonly @string unknownChannelDirectionˢ => ref unknownChannelDirectionˢᵇ;
 private static readonly @string unknownChannelDirectionˢᵇ = "unknown channel direction"u8;
 internal static ref readonly @string unnamedTypeParameterˢ => ref unnamedTypeParameterˢᵇ;
@@ -129,7 +148,7 @@ private static readonly @string unnamedTypeParameterˢᵇ = "unnamed type parame
 internal static ref readonly @string typeParameterˢ2 => ref typeParameterˢ2ᵇ;
 private static readonly @string typeParameterˢ2ᵇ = "/* type parameter */"u8;
 
-internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
+internal static void typ(this ж<typeWriter> Ꮡw, Type typ) {
     GoFrame ᒐ = default;
     try {
         ref var w = ref Ꮡw.DerefOrNull();
@@ -219,7 +238,7 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
             Ꮡw.tuple(t, false);
             break;
         }
-        case ж<ΔSignature> t: {
+        case ж<Signature> t: {
             w.@string(funcˢ);
             Ꮡw.signature(t);
             break;
@@ -277,7 +296,7 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
                     }
                     first = false;
                     w.@string(m.name);
-                    Ꮡw.signature(m.typ._<ж<ΔSignature>>());
+                    Ꮡw.signature(m.typ._<ж<Signature>>());
                 }
                 foreach (var (_, typΔ1) in range(t.embeddeds)) {
                     if (!first) {
@@ -335,7 +354,7 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
             // If hashing, write a unique prefix for t to represent its identity, since
             // named type identity is pointer identity.
             if (w.ctxt != nil) {
-                w.@string(strconv.Itoa(w.ctxt.getID(new NamedжΔType(t))));
+                w.@string(strconv.Itoa(w.ctxt.getID(new NamedжType(t))));
             }
             w.typeName(t.obj); // when hashing written for readability of the hash only
             if (t.inst != nil) {
@@ -421,7 +440,7 @@ internal static void typeSet(this ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) {
         }
         first = false;
         w.@string(m.name);
-        Ꮡw.signature(m.typ._<ж<ΔSignature>>());
+        Ꮡw.signature(m.typ._<ж<Signature>>());
     }
     switch (ᐧ) {
     case {} when s.terms.isAll(): {
@@ -434,13 +453,13 @@ internal static void typeSet(this ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) {
     }
     default: {
         slice<@string> termHashes = default;
-        foreach (var (_, Δterm) in range<ж<Δterm>>(s.terms)) {
+        foreach (var (_, term) in range<ж<term>>(s.terms)) {
             // terms are not canonically sorted, so we sort their hashes instead.
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-            if (Δterm.tilde) {
+            if (term.tilde) {
                 buf.WriteByte((byte)'~');
             }
-            newTypeHasher(Ꮡbuf, w.ctxt).typ(Δterm.typ);
+            newTypeHasher(Ꮡbuf, w.ctxt).typ(term.typ);
             termHashes = append(termHashesᴷ, termHashes, Ꮡbuf.String());
         }
         slices.Sort<slice<@string>, @string>(termHashes);
@@ -452,7 +471,7 @@ internal static void typeSet(this ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) {
     }}
 }
 
-internal static void typeList(this ж<typeWriter> Ꮡw, slice<ΔType> list) {
+internal static void typeList(this ж<typeWriter> Ꮡw, slice<Type> list) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     w.@byte((byte)'[');
@@ -473,7 +492,7 @@ internal static void tParamList(this ж<typeWriter> Ꮡw, slice<ж<TypeParam>> l
     ref var w = ref Ꮡw.DerefOrNull();
 
     w.@byte((byte)'[');
-    ΔType prev = default;
+    Type prev = default;
     foreach (var (i, tpar) in range(list)) {
         // Determine the type parameter and its constraint.
         // list is expected to hold type parameter names,
@@ -491,7 +510,7 @@ internal static void tParamList(this ж<typeWriter> Ꮡw, slice<ж<TypeParam>> l
             w.@byte((byte)',');
         }
         prev = tpar.bound;
-        Ꮡw.typ(new TypeParamжΔType(tpar));
+        Ꮡw.typ(new TypeParamжType(tpar));
     }
     if (prev != nil) {
         w.@byte((byte)' ');
@@ -548,7 +567,7 @@ internal static void tuple(this ж<typeWriter> Ꮡw, ж<Tuple> Ꮡtup, bool vari
     w.@byte((byte)')');
 }
 
-internal static void signature(this ж<typeWriter> Ꮡw, ж<ΔSignature> Ꮡsig) {
+internal static void signature(this ж<typeWriter> Ꮡw, ж<Signature> Ꮡsig) {
     GoFrame ᒐ = default;
     try {
         ref var w = ref Ꮡw.DerefOrNull();
@@ -586,6 +605,8 @@ internal static void signature(this ж<typeWriter> Ꮡw, ж<ΔSignature> Ꮡsig)
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+} partial class types_package {
 
 // subscript returns the decimal (utf8) representation of x using subscript digits.
 internal static @string subscript(uint64 x) {

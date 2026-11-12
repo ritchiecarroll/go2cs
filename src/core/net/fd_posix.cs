@@ -9,6 +9,7 @@ using runtime = runtime_package;
 using syscall = syscall_package;
 using time = time_package;
 using @internal;
+using static net_package;
 
 partial class net_package {
 
@@ -20,9 +21,11 @@ partial struct netFD {
     internal nint sotype;
     internal bool isConnected; // handshake completed or use of association with peer
     internal @string net;
-    internal ΔAddr laddr;
-    internal ΔAddr raddr;
+    internal Addr laddr;
+    internal Addr raddr;
 }
+
+} partial class netᴛnetFD {
 
 internal static @string name(this ref netFD fd) {
     @string ls = default;
@@ -36,13 +39,13 @@ internal static @string name(this ref netFD fd) {
     return fd.net + ":"u8 + ls + "->"u8 + rs;
 }
 
-internal static void setAddr(this ж<netFD> Ꮡfd, ΔAddr laddr, ΔAddr raddr) {
+internal static void setAddr(this ж<netFD> Ꮡfd, Addr laddr, Addr raddr) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     fd.laddr = laddr;
     fd.raddr = raddr;
     // TODO Replace with runtime.AddCleanup.
-    runtime.SetFinalizer(Ꮡfd.OrTypedNil(), ((Func<ж<netFD>, error>)(Close)));
+    runtime.SetFinalizer(Ꮡfd.OrTypedNil(), ((Func<ж<netFD>, error>)(netᴛnetFD.Close)));
 }
 
 internal static error Close(this ж<netFD> Ꮡfd) {
@@ -217,4 +220,4 @@ internal static error SetWriteDeadline(this ж<netFD> Ꮡfd, time.Time t) {
     return Ꮡfd.Ꮡpfd.SetWriteDeadline(t);
 }
 
-} // end net_package
+} // end netᴛnetFD

@@ -13,6 +13,7 @@ using Δsync = sync_package;
 using utf8 = unicode.utf8_package;
 using unicode;
 using ꓸꓸꓸany = Span<any>;
+using static fmt_package;
 
 partial class fmt_package {
 
@@ -93,6 +94,8 @@ public static (nint n, error err) Scanf(@string format, params ꓸꓸꓸany aʗp
 
 partial struct stringReader /*@string*/;
 
+} partial class fmtᴛstringReader {
+
 internal static (nint n, error err) Read(this ref stringReader r, slice<byte> b) {
     nint n = default;
     error err = default;
@@ -104,6 +107,8 @@ internal static (nint n, error err) Read(this ref stringReader r, slice<byte> b)
     }
     return (n, err);
 }
+
+} partial class fmt_package {
 
 // Sscan scans the argument string, storing successive space-separated
 // values into successive arguments. Newlines count as space. It
@@ -206,6 +211,8 @@ partial struct ssave {
     internal nint limit;     // max value of ss.count.
     internal nint maxWid;    // width of this arg.
 }
+
+} partial class fmtᴛss {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string scanStateSReadShouldNotˢ => ref scanStateSReadShouldNotˢᵇ;
@@ -318,6 +325,8 @@ internal static (slice<byte> tok, error err) Token(this ж<ss> Ꮡs, bool skipSp
     return (tok, err);
 }
 
+} partial class fmt_package {
+
 // space is a copy of the unicode.White_Space ranges,
 // to avoid depending on package unicode.
 [GoLazy] partial class lazyᴛspace { internal static slice<array<uint16>> space = GoReflect.WithElemDims(new array<uint16>[]{
@@ -366,6 +375,8 @@ partial struct readRune {
     internal array<byte> pendBuf = new(utf8.UTFMax); // bytes left over
     internal rune peekRune;                          // if >=0 next rune; when <0 is ^(previous Rune)
 }
+
+} partial class fmtᴛreadRune {
 
 // readByte returns the next byte from the input, which may be
 // left over from a previous read if the UTF-8 was ill-formed.
@@ -444,6 +455,8 @@ internal static error UnreadRune(this ref readRune r) {
     return default;
 }
 
+} partial class fmt_package {
+
 internal static readonly ж<Δsync.Pool> ᏑssFree = new StaticBox<Δsync.Pool>(new Δsync.Pool(
     New: () => @new<ss>()
 ));
@@ -470,6 +483,8 @@ internal static (ж<ss> s, ssave old) newScanState(Δio.Reader r, bool nlIsSpace
     s.count = 0;
     return (s, old);
 }
+
+} partial class fmtᴛss {
 
 // free saves used ss structs in ssFree; avoid an allocation per invocation.
 internal static void free(this ж<ss> Ꮡs, ssave old) {
@@ -541,6 +556,8 @@ internal static slice<byte> token(this ref ss s, bool skipSpace, Func<rune, bool
     return s.buf;
 }
 
+} partial class fmt_package {
+
 internal static error errComplex = errors.New("syntax error scanning complex number");
 internal static error errBool = errors.New("syntax error scanning boolean");
 
@@ -552,6 +569,8 @@ internal static nint indexRune(sstring s, rune r) {
     }
     return -1;
 }
+
+} partial class fmtᴛss {
 
 // consume reads the next rune in the input and reports whether it is in the ok string.
 // If accept is true, it puts the character into the input token.
@@ -640,6 +659,8 @@ internal static bool scanBool(this ref ss s, rune verb) {
     return false;
 }
 
+} partial class fmt_package {
+
 // Numerical elements
 internal static ref readonly @string binaryDigits => ref binaryDigitsᵇ;
 private static readonly @string binaryDigitsᵇ = "01"u8;
@@ -655,6 +676,8 @@ internal static ref readonly @string period => ref periodᵇ;
 private static readonly @string periodᵇ = "."u8;
 internal static ref readonly @string exponent => ref exponentᵇ;
 private static readonly @string exponentᵇ = "eEpP"u8;
+
+} partial class fmtᴛss {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string bdoUxXvˢ => ref bdoUxXvˢᵇ;
@@ -880,6 +903,8 @@ internal static (@string real, @string imag) complexTokens(this ref ss s) {
     return (real, imagSign + imag);
 }
 
+} partial class fmt_package {
+
 internal static bool hasX(sstring s) {
     for (nint i = 0; i < len(s); i++) {
         if (s[i] == 'x' || s[i] == 'X') {
@@ -888,6 +913,8 @@ internal static bool hasX(sstring s) {
     }
     return false;
 }
+
+} partial class fmtᴛss {
 
 // convertFloat converts the string to a float64value.
 internal static float64 convertFloat(this ref ss s, @string str, nint n) {
@@ -1022,6 +1049,8 @@ internal static @string quotedString(this ref ss s) {
     return ""u8;
 }
 
+} partial class fmt_package {
+
 // hexDigit returns the value of the hexadecimal digit.
 internal static (nint, bool) hexDigit(rune d) {
     nint digit = (nint)d;
@@ -1037,6 +1066,8 @@ internal static (nint, bool) hexDigit(rune d) {
     }}
     return (-1, false);
 }
+
+} partial class fmtᴛss {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string illegalHexDigitˢ => ref illegalHexDigitˢᵇ;
@@ -1087,6 +1118,8 @@ internal static @string hexString(this ref ss s) {
     return (@string)(slice<byte>)s.buf;
 }
 
+} partial class fmt_package {
+
 internal static ref readonly @string floatVerbs => ref floatVerbsᵇ;
 private static readonly @string floatVerbsᵇ = "beEfFgGv"u8;
 
@@ -1094,6 +1127,8 @@ internal static UntypedInt hugeWid => /* 1 << 30 */ 1073741824;
 
 internal static UntypedInt intBits => /* 32 << (^uint(0) >> 63) */ 64;
 internal static UntypedInt uintptrBits => /* 32 << (^uintptr(0) >> 63) */ 64;
+
+} partial class fmtᴛss {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string missingLiteralˢ => ref missingLiteralˢᵇ;
@@ -1223,29 +1258,29 @@ internal static void scanOne(this ж<ss> Ꮡs, rune verb, any arg) {
         var v = arg;
         var val = reflect.ValueOf(v);
         var ptr = val;
-        if (ptr.Kind() != reflect.ΔPointer) {
+        if (ptr.Kind() != reflect.Pointer) {
             s.errorString("type not a pointer: "u8 + val.Type().String());
             return;
         }
         var vΔ1 = ptr.Elem();
         switch (vΔ1.Kind()) {
-        case var ᴛ when ᴛ == reflect.ΔBool: {
+        case var ᴛ when ᴛ == reflect.Bool: {
             vΔ1.SetBool(s.scanBool(verb));
             break;
         }
-        case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+        case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
             vΔ1.SetInt(s.scanInt(verb, vΔ1.Type().Bits()));
             break;
         }
-        case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+        case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
             vΔ1.SetUint(s.scanUint(verb, vΔ1.Type().Bits()));
             break;
         }
-        case var ᴛ when ᴛ == reflect.ΔString: {
+        case var ᴛ when ᴛ == reflect.String: {
             vΔ1.SetString(s.convertString(verb));
             break;
         }
-        case var ᴛ when ᴛ == reflect.ΔSlice: {
+        case var ᴛ when ᴛ == reflect.Slice: {
             // For now, can only handle (renamed) []byte.
             var typ = vΔ1.Type();
             if (typ.Elem().Kind() != reflect.Uint8) {
@@ -1276,6 +1311,8 @@ internal static void scanOne(this ж<ss> Ꮡs, rune verb, any arg) {
     }}
 }
 
+} partial class fmt_package {
+
 // errorHandler turns local panics into error returns.
 internal static void errorHandler(ref error errp) {
     GoFrame ᒐ = default;
@@ -1295,6 +1332,8 @@ internal static void errorHandler(ref error errp) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+} partial class fmtᴛss {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string expectedNewlineˢ => ref expectedNewlineˢᵇ;
@@ -1509,4 +1548,4 @@ internal static (nint numProcessed, error err) doScanf(this ж<ss> Ꮡs, sstring
     return (numProcessed, Ꮡerr.ValueSlot);
 }
 
-} // end fmt_package
+} // end fmtᴛss

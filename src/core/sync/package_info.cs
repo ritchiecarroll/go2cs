@@ -73,8 +73,8 @@ using static go.sync_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("sync/cond.go", "cond.cs", "ACxgkgACJAARAoKCgoIAAhTygq7CggAROJI=")]
-[assembly: GoPositionMap("sync/map.go", "map.cs", "ACtesqiSqJKssqqiqqKqoqyyAAIQ0gACHAALAg==")]
+[assembly: GoPositionMap("sync/cond.go", "cond.cs", "AC1gkgAEJAARAoKCgoIAAhTygq7CggAZOJI=")]
+[assembly: GoPositionMap("sync/map.go", "map.cs", "AC5esqiSqJKssqqiqqKqoqyyAAIQ0gACHAALAg==")]
 [assembly: GoPositionMap("sync/runtime.go", "runtime.cs", "AAkc5gACFAAIAgABEgAIBqampqaSgoKmgg==")]
 // </GoSourcePositionMaps>
 
@@ -111,3 +111,24 @@ public static partial class sync_package
     [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(go.sync.atomic_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(sync_package.Cond)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛCond;
+[GoMethodHost(typeof(sync_package.Map)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛMap;
+[GoMethodHost(typeof(sync_package.Mutex)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛMutex;
+[GoMethodHost(typeof(sync_package.Once)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛOnce;
+[GoMethodHost(typeof(sync_package.Pool)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛPool;
+[GoMethodHost(typeof(sync_package.RWMutex)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛRWMutex;
+[GoMethodHost(typeof(sync_package.WaitGroup)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛWaitGroup;
+[GoMethodHost(typeof(sync_package.copyChecker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛcopyChecker;
+[GoMethodHost(typeof(sync_package.noCopy)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛnoCopy;
+[GoMethodHost(typeof(sync_package.poolChain)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛpoolChain;
+[GoMethodHost(typeof(sync_package.poolDequeue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛpoolDequeue;
+[GoMethodHost(typeof(sync_package.rlocker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛrlocker;
+// </MethodHolders>

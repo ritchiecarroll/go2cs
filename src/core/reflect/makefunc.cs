@@ -20,7 +20,7 @@ partial class reflect_package {
 partial struct makeFuncImpl {
     /*embed*/ internal makeFuncCtxt makeFuncCtxt;
     internal ж<funcType> ftyp;
-    internal Func<slice<ΔValue>, slice<ΔValue>> fn;
+    internal Func<slice<Value>, slice<Value>> fn;
 }
 
 // go2cs generated this placeholder — func MakeFunc is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -38,7 +38,7 @@ internal static partial void makeFuncStub();
 partial struct methodValue {
     /*embed*/ internal makeFuncCtxt makeFuncCtxt;
     internal nint method;
-    internal ΔValue rcvr;
+    internal Value rcvr;
 }
 
 // makeMethodValue converts v from the rcvr+method index representation
@@ -48,7 +48,7 @@ partial struct methodValue {
 // semantically equivalent to the input as far as the user of package
 // reflect can tell, but the true func representation can be handled
 // by code like Convert and Interface and Assign.
-internal static ΔValue makeMethodValue(@string op, ΔValue v) {
+internal static Value makeMethodValue(@string op, Value v) {
     if ((flag)(v.flag & flagMethod) == 0) {
         throw panic("reflect: internal error: invalid use of makeMethodValue");
     }
@@ -56,7 +56,7 @@ internal static ΔValue makeMethodValue(@string op, ΔValue v) {
     // Ignoring the flagMethod bit, v describes the receiver, not the method type.
     var fl = (flag)(v.flag & ((flag)((flag)(flagRO | flagAddr) | flagIndir)));
     fl |= (flag)(((flag)(uintptr)v.typ().Kind()));
-    ref var rcvr = ref heap<ΔValue>(new ΔValue(v.typ(), v.ptr, fl), out var Ꮡrcvr);
+    ref var rcvr = ref heap<Value>(new Value(v.typ(), v.ptr, fl), out var Ꮡrcvr);
 
     // v.Type returns the actual type of the method value.
     var ftyp = v.Type()._<ж<rtype>>().Reinterpret<rtype, abi.Type>().FuncType();
@@ -81,7 +81,7 @@ internal static ΔValue makeMethodValue(@string op, ΔValue v) {
     // but we want Interface() and other operations to fail early.
     methodReceiver(op, fv.rcvr, fv.method);
 
-    return new ΔValue(ftyp.of(funcType.ᏑType).Common(), @unsafe.Pointer.FromPinnedBox(fv), (flag)((flag)(v.flag & flagRO) | ((flag)(uintptr)Func)));
+    return new Value(ftyp.of(funcType.ᏑType).Common(), @unsafe.Pointer.FromPinnedBox(fv), (flag)((flag)(v.flag & flagRO) | ((flag)(uintptr)Func)));
 }
 
 internal static uintptr methodValueCallCodePtr() {

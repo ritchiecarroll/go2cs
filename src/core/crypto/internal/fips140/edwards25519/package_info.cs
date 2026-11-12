@@ -65,11 +65,11 @@ using static go.crypto.@internal.fips140.edwards25519_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/edwards25519.go", "edwards25519.cs", "ACdSooKCAAwekoKCgti6kurekqaCgoKCgqaCgoKCrOKCrsaipoKUooKClIKCpgAHEgAPEoKCAAcQgqaCpoKCuIKUgoKClKaygqqSgoKCpoKCgoKmgoKCgoKmgoKCgoK42pSCgoKCgqaCgoKUgoKCgoKssoKCgqiSgoKCpoLkgpSCgoKUlIKCgoKmguSClIKCgpSUgoKCgqaC5IKUgoKUlIKCgoKmguSClIKClJSCgoKCqpLEgoKCgoKUgpSCgqyygoKCgoKokpSygoKClKyygoKCgqiSgoKCqLKCgqiygoI=")]
-[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/scalar.go", "scalar.cs", "AB10AB0CqrSCqOSCqOSCqNSCqOSCqMKCAAYS4oIADRyCgoKClNykusKClIKCkpIACAzSgpSCppKkuJiigqaCgoKUgoKCuIKCgoIABhwADwqCqqKCgoKCqJaiprKCgpKowoKCgpKCgoKCgoKs6IKClIKCgqaClIKmgpSCgoKCgoKUpriU7oKmgoKUgqaUpoKCgqamgoK4goKCpg==")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/edwards25519.go", "edwards25519.cs", "AChSooKCAA4ekoKCgvi6kureksaCgoKCgsaCgoKCzOKCrsaipoKUooKClIKCxgAJEgAPEoKCAAcQgqaCpoKCuIKUgoKClMaygsqSgoKCpoKCgoLGgoKCgoKmgoKCgoLY2rSCgoKCgsaCgoKUgoKCgoLMsoKCgqiSgoKCxoLkgpSCgoKUlIKCgoKmguSClIKCgpSUgoKCgqaC5IKUgoKUlIKCgoKmguSClIKClJSCgoKCqpLEgoKCgoKUgpSCgsyygoKCgoKokpSygoKClMyygoKCgsiSgoKCyLKCgsiygoI=")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/scalar.go", "scalar.cs", "AB50AB0CyrSCqOSCqOSCqNSCqOSCqMKCAAYS4oIADRyCgoKClPyk2sKClIKCkpIACAzSgpSCppKk2JiigqaCgoKUgoKCuIKCgoIACBwADwqCqqKCgoKCqJaiprKCgpKowoKCgpKCgoKCgoKs6IKClIKCgqaClIKmgpSCgoKCgoKUpriU7oKmgoKUgqaUpoKCgqamgoK4goKCpg==")]
 [assembly: GoPositionMap("crypto/internal/fips140/edwards25519/scalar_fiat.go", "scalar_fiat.cs", "ADmOAQAPAoKCAAIcAAsCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIAAhwACwKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCAAIcAAsCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggACGgAKAoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIAAigAEQKCAAIaAAoCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggACGgAKAoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIAAigAEQKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCAAIqABQCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKC")]
-[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/scalarmult.go", "scalarmult.cs", "AAkWooKCgoKCuAAJGMIADBqUgoKmgoKCgriCgoKCgoKCgqaCgoKmrLKUggAIEqaCgoKUgoKCgoKCgoKCgoKCgpSCqqKClAAJGMIADyCCgqaCpoKCgriCgoKCyoKmgoKCgoKCgqaCgoKCgoKCpqaC", "12-20:1;128-130:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/tables.go", "tables.cs", "AB5A1oKCgri6toKCgpS6toKCgoKCgrqSgoKCgoKCvsSClIKUgqaopIKUgpSCpqiyqLI=")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/scalarmult.go", "scalarmult.cs", "AAoWooKCgoKCuAALGMIADBqUgoKmgoKCgriCgoKCgoKCgqaCgoKmrLKUggAIEqaCgoKUgoKCgoKCgoKCgoKCgpSCyqKClAALGMIADyCCgqaCpoKCgriCgoKCyoKmgoKCgoKCgqaCgoKCgoKCpqaC", "12-20:1;128-130:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/tables.go", "tables.cs", "ACFA1oKCgrjatoKCgpTatoKCgoKCgtqSgoKCgoKC3sSClIKUgqbIpIKUgpSCpsiyyLI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -117,3 +117,22 @@ public static partial class edwards25519_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(edwards25519_package.Point)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛPoint;
+[GoMethodHost(typeof(edwards25519_package.Scalar)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛScalar;
+[GoMethodHost(typeof(edwards25519_package.affineCached)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛaffineCached;
+[GoMethodHost(typeof(edwards25519_package.affineLookupTable)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛaffineLookupTable;
+[GoMethodHost(typeof(edwards25519_package.nafLookupTable5)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛnafLookupTable5;
+[GoMethodHost(typeof(edwards25519_package.nafLookupTable8)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛnafLookupTable8;
+[GoMethodHost(typeof(edwards25519_package.projCached)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛprojCached;
+[GoMethodHost(typeof(edwards25519_package.projLookupTable)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛprojLookupTable;
+[GoMethodHost(typeof(edwards25519_package.projP1xP1)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛprojP1xP1;
+[GoMethodHost(typeof(edwards25519_package.projP2)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛprojP2;
+// </MethodHolders>

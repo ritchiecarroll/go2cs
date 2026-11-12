@@ -17,7 +17,7 @@ partial class reflect_package {
 partial struct visit {
     internal @unsafe.Pointer a1;
     internal @unsafe.Pointer a2;
-    internal ΔType typ;
+    internal Type typ;
 }
 
 // go2cs generated this placeholder — func deepValueEqual is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])

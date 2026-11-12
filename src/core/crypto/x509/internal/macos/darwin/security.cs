@@ -9,6 +9,7 @@ using abi = go.@internal.abi_package;
 using strconv = strconv_package;
 using @unsafe = unsafe_package;
 using go.@internal;
+using static macos_package;
 
 partial class macos_package {
 
@@ -30,9 +31,13 @@ partial struct OSStatus {
     internal int32 status;
 }
 
+} partial class macosᴛOSStatus {
+
 public static @string Error(this OSStatus s) {
     return s.call + " error: "u8 + strconv.Itoa((nint)s.status);
 }
+
+} partial class macos_package {
 
 //go:cgo_import_dynamic x509_SecTrustCreateWithCertificates SecTrustCreateWithCertificates "/System/Library/Frameworks/Security.framework/Versions/A/Security"
 public static (CFRef, error) SecTrustCreateWithCertificates(CFRef certs, CFRef policies) {

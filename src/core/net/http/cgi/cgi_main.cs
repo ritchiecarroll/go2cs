@@ -15,6 +15,7 @@ using time = time_package;
 using go.net;
 using iter = iter_package;
 using url = go.net.url_package;
+using static cgi_package;
 
 partial class cgi_package {
 
@@ -96,12 +97,16 @@ internal static void testCGI() {
 
 partial struct neverEnding /*num:byte*/;
 
+} partial class cgiᴛneverEnding {
+
 internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) {
     foreach (var i in range(len(p))) {
         p[i] = (byte)b;
     }
     return (len(p), default);
 }
+
+} partial class cgi_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string requestMethodˢ => ref requestMethodˢᵇ;
@@ -143,7 +148,7 @@ internal static void childCGIProcess() {
         os.Exit(0);
         break;
     }}
-    Serve(new http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter rw, ж<http.Request> req) => {
+    Serve(new http_HandlerFuncᴠHandler(new http.HandlerFunc((http.ResponseWriter rw, ж<http.Request> req) => {
         if (req.FormValue(nilRequestBodyˢ) == "1"u8) {
             fmt.Fprintf(new http_ResponseWriterᴠWriter(rw), "nil-request-body=%v\n"u8, req.Body == nil);
             return;

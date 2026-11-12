@@ -11,8 +11,11 @@ using static global::go.@internal.types.errors_package;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using iter = iter_package;
+using static types_package;
 
 partial class types_package {
+
+} partial class typesᴛChecker {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string mapIndexˢ => ref mapIndexˢᵇ;
@@ -44,7 +47,7 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
         return false;
     }
     case var ᴛ when ᴛ == value: {
-        var (sig, _) = x.typ.Underlying()._<ж<ΔSignature>>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0) {
+        var (sig, _) = x.typ.Underlying()._<ж<Signature>>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0) {
             // function instantiation
             return true;
         }
@@ -62,7 +65,7 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
     var length = (int64)(-1); // valid if >= 0
     switch (x.typ.Underlying().type()) {
     case ж<Basic> typ: {
-        if (isString(new BasicжΔType(typ))) {
+        if (isString(new BasicжType(typ))) {
             valid = true;
             if (x.mode == constant_) {
                 length = (int64)len(constant.StringVal(x.val));
@@ -119,17 +122,17 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
             break;
         }
         // TODO(gri) report detailed failure cause for better error messages
-        ref var key = ref heap<ΔType>(out var Ꮡkey); // key != nil: we must have all maps
-        ref var elem = ref heap<ΔType>(out var Ꮡelem);
-        var mode = variable;                         // non-maps result mode
+        ref var key = ref heap<Type>(out var Ꮡkey); // key != nil: we must have all maps
+        ref var elem = ref heap<Type>(out var Ꮡelem);
+        var mode = variable;                        // non-maps result mode
         // TODO(gri) factor out closure and use it for non-typeparam cases as well
-        if (underIs(x.typ, (ΔType u) => {
+        if (underIs(x.typ, (Type u) => {
             var l = (int64)(-1); // valid if >= 0
-            ΔType k = default;   // k is only set for maps
-            ΔType eΔ1 = default;
+            Type k = default;    // k is only set for maps
+            Type eΔ1 = default;
             switch (u.type()) {
             case ж<Basic> t: {
-                if (isString(new BasicжΔType(t))) {
+                if (isString(new BasicжType(t))) {
                     eΔ1 = universeByte;
                     mode = value;
                 }
@@ -226,7 +229,7 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
     // the element type may be accessed before it's set. Make sure we have
     // a valid type.
     if (x.typ == nil) {
-        x.typ = new BasicжΔType(Typ[Invalid]);
+        x.typ = new BasicжType(Typ[Invalid]);
     }
 
     Ꮡcheck.index(index, length);
@@ -248,11 +251,11 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
     }
 
     // determine common underlying type cu
-    ref var ct = ref heap<ΔType>(out var Ꮡct); // type and respective common underlying type
-    ref var cu = ref heap<ΔType>(out var Ꮡcu);
+    ref var ct = ref heap<Type>(out var Ꮡct); // type and respective common underlying type
+    ref var cu = ref heap<Type>(out var Ꮡcu);
     bool hasString = default;
     // TODO(adonovan): use go1.23 "range typeset()".
-    typeset(x.typ)((ΔType t, ΔType u) => {
+    typeset(x.typ)((Type t, Type u) => {
         if (u == nil) {
             Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonSliceableOperand, "cannot slice %s: no specific type in %s", Ꮡx.OrTypedNil(), Ꮡx.Value.typ);
             Ꮡcu.ValueSlot = default;
@@ -261,7 +264,7 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
 
         // Treat strings like byte slices but remember that we saw a string.
         if (isString(u)) {
-            u = new SliceжΔType(NewSlice(universeByte));
+            u = new SliceжType(NewSlice(universeByte));
             hasString = true;
         }
 
@@ -283,7 +286,7 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
     if (hasString) {
         // If we saw a string, proceed with string type,
         // but don't go from untyped string to string.
-        cu = new BasicжΔType(Typ[ΔString]);
+        cu = new BasicжType(Typ[String]);
         if (!isTypeParam(x.typ)) {
             cu = x.typ.Underlying(); // untyped string remains untyped
         }
@@ -298,7 +301,7 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
         return;
     }
     case ж<Basic> u: {
-        if (isString(new BasicжΔType(u))) {
+        if (isString(new BasicжType(u))) {
             if (e.Slice3) {
                 var at = e.Max;
                 if (at == nil) {
@@ -315,7 +318,7 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
             // spec: "For untyped string operands the result
             // is a non-constant value of type string."
             if (isUntyped(x.typ)) {
-                x.typ = new BasicжΔType(Typ[ΔString]);
+                x.typ = new BasicжType(Typ[String]);
             }
         }
         break;
@@ -328,14 +331,14 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
             x.mode = invalid;
             return;
         }
-        x.typ = new SliceжΔType(Ꮡ(new Slice(elem: u.elem)));
+        x.typ = new SliceжType(Ꮡ(new Slice(elem: u.elem)));
         break;
     }
     case ж<Pointer> u: {
         var (uΔ1, _) = u.@base.Underlying()._<ж<Array>>(ᐧ); if (uΔ1 != nil) {
             valid = true;
             length = uΔ1.len;
-            x.typ = new SliceжΔType(Ꮡ(new Slice(elem: uΔ1.elem)));
+            x.typ = new SliceжType(Ꮡ(new Slice(elem: uΔ1.elem)));
         }
         break;
     }
@@ -437,11 +440,11 @@ private static readonly @string indexˢᵇ = "index"u8;
 // If max >= 0, it is the upper bound for index.
 // If the result typ is != Typ[Invalid], index is valid and typ is its (possibly named) integer type.
 // If the result val >= 0, index is valid and val is its constant int value.
-internal static (ΔType typ, int64 val) index(this ж<Checker> Ꮡcheck, ast.Expr index, int64 max) {
-    ΔType typ = default;
+internal static (Type typ, int64 val) index(this ж<Checker> Ꮡcheck, ast.Expr index, int64 max) {
+    Type typ = default;
     int64 val = default;
 
-    typ = new BasicжΔType(Typ[Invalid]);
+    typ = new BasicжType(Typ[Invalid]);
     val = -1;
 
     ref var x = ref heap(new operand(), out var Ꮡx);
@@ -477,7 +480,7 @@ internal static bool isValidIndex(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, e
     }
 
     // spec: "a constant index that is untyped is given type int"
-    Ꮡcheck.convertUntyped(Ꮡx, new BasicжΔType(Typ[Int]));
+    Ꮡcheck.convertUntyped(Ꮡx, new BasicжType(Typ[Int]));
     if (x.mode == invalid) {
         return false;
     }
@@ -505,6 +508,8 @@ internal static bool isValidIndex(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, e
     return true;
 }
 
+} partial class types_package {
+
 // indexedExpr wraps an ast.IndexExpr or ast.IndexListExpr.
 //
 // Orig holds the original ast.Expr from which this indexedExpr was derived.
@@ -517,14 +522,18 @@ internal static bool isValidIndex(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, e
 partial struct indexedExpr {
     internal ast.Expr orig;           // the wrapped expr, which may be distinct from the IndexListExpr below.
     internal ast.Expr x;              // expression
-    internal tokenꓸPos lbrack;        // position of "["
+    internal token.Pos lbrack;        // position of "["
     internal slice<ast.Expr> indices; // index expressions
-    internal tokenꓸPos rbrack;        // position of "]"
+    internal token.Pos rbrack;        // position of "]"
 }
 
-internal static tokenꓸPos Pos(this ref indexedExpr x) {
+} partial class typesᴛindexedExpr {
+
+internal static token.Pos Pos(this ref indexedExpr x) {
     return x.orig.Pos();
 }
+
+} partial class types_package {
 
 internal static ж<indexedExpr> unpackIndexedExpr(ast.Node n) {
     switch (n.type()) {

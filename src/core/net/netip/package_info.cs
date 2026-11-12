@@ -27,8 +27,6 @@ using static go.net.netip_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Addr", "ΔAddr")]
-[assembly: GoTypeAlias("Prefix", "ΔPrefix")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -53,8 +51,8 @@ using static go.net.netip_package;
 
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Addr))]
 [assembly: GoFieldAccess(typeof(uint128))]
-[assembly: GoFieldAccess(typeof(ΔAddr))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -64,8 +62,8 @@ using static go.net.netip_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/netip/netip.go", "netip.cs", "AEOKAYKakJiQloCWgJaAlrIABRLSAAgYsoKUpMimqqKCgpQACBKCgoKUpoKSgoKCgoKUgoKClLiCpoKUgoKClKaClIKosoKCgpSoktyCgoKClLiCpoKClILKgqaCgoKCgoKCgoKUlJSUlKaUuIKUlJSmgoKUgoKUgoK4goKmgoK4goKClKaCgpSCgoLcgriCgpSCgpSClJSsspSklKqiqsKqwgACEPasoJ7SlKSUqJKClKyykoKUgpSCgpSClIKClIKUgpKClIKmrKCasqyyqqKuwoKUrLKClIKClIKqooKUgqiSqJKCyoK4gpSokoLKgriClKiSgsqCuIKUqsaClKiSgsqCuIKUAAIYAAkClKaCyoKmAAIUwoK4pqqmpq7CAAYQ0oKUgpSkgpS0graCAAIQ8oKCrNKCgpSClKiSlKSCgqSCgoK8ooKClKaUpqqigoKUgpSCAAYeAAwClKSkgpS+spSkpIKUAAgSyIKUgpSoyIKUgpSClKiSpoKCgoKmgoKCgoKCgoKmgoKCgqaCgoKCgpQAAhAABRDygoKmgoKCgoKUgriCgoKCgpSCpqaCgpSs0pSmgoKCgqampoKUqqKssoLGgrSCgoKUgqQAAhDSgoKUgoKoksa0goKkpoKUpKQAAxDC6qKClIKkgqSCpIKUAAgWkJaAloAACw4ACQKCgqaCgpSClIKClIKmrsKCgoKUgoKUgoKClIKCgpSqooKClKqQmrKClOaigpSkgoK0goKCgpSCgoKUpIKCrLKUpLSCgpSUpIKCqqKssoLGgrSCpKyygoKUgoKssoKClKyyqqKClIKCgpSCAA0uAAgCgoKU3oCaoJqglJaAngAICICCtoCCtgAHEIIAAhTygoKUgoKmgqamgqaCgpSCgpSClKqigoKUrsKCAAIU8oKUkpQACBLKAAMS0oKUgpSClIKSlJSCnMKClIKUrLKClIK4gpSCgpS4goKqoqyygsaCtIKkrLKCgpSCgqyygoKUrMSqooKUgoKClILokoKU", "", "", "104=BEUint64/1/2/2,BEUint64/2/2/3;645=IsLoopback/1/1/1,IsMulticast/1/1/2,IsLinkLocalUnicast/1/1/3;661=v4/2/5/1,v4/3/5/1,v4/4/5/2,v4/5/5/2;1394=withoutZone/1/1/1")]
-[assembly: GoPositionMap("net/netip/uint128.go", "uint128.cs", "ABMoogACEMCWkqiSqJKokqiSgqiSgq7CqqKqog==")]
+[assembly: GoPositionMap("net/netip/netip.go", "netip.cs", "AESKAYKakJiQloCWgJaAlrIABRLSAAgYsoKUpMimqqKCgpQAChKCgoKUxoKSgoKCgoKUgoKClLiCpoKUgoKClKaClIKosoKCgpSoktyCgoKClLiCpoKClILKgqaCgoKCgoKCgoKUlJSUlKaUuIKUlJSmgoKUgoKUgoK4goKmgoK4goKClKaCgpSCgoLcgriCgpSCgpSClJSsspSklMqiqsKqwgACEPasoJ7SlKSUqJKClKyykoKUgpSCgpSClIKClIKUgpKClIKmrKCasqyyqqKuwoKUrLKClIKClIKqooKUgqiSqJKCyoK4gpSokoLKgriClKiSgsqCuIKUqsaClKiSgsqCuIKUAAIYAAkClKaCyoKmAAIUwoK4pqqmpq7CAAYQ0oKUgpSkgpS0graCAAIQ8oKCrNKCgpSClKiSlKSCgqSCgoK8ooKClKaUpqqigoKUgpSCAAYeAAwClKSkgpS+spSkpIKUAAoSyIKUgpSoyIKUgpSClKiSxoKCgoKmgoKCgoKCgoKmgoKCgqaCgoKCgpQAAhAABRDygoKmgoKCgoKUgriCgoKCgpSCpqaCgpSs0pSmgoKCgqampoKUqqKssoLGgrSCgoKUgqQAAhDSgoKUgoKoksa0goKkpoKUpKQAAxDC6qKClIKkgqSCpIKUAAoWkLaAloAADQ4ACQKCgqaCgpSClIKClIKmrsKCgoKUgoKUgoKClIKCgpSqooKClMqQmrKClOaigpSkgoK0goKCgpSCgoKUpIKCrLKUpLSCgpSUpIKCqqKssoLGgrSCpKyygoKUgoKssoKClKyy6qKClIKCgpSCAA8uAAgCgoKU/oCaoJqglJaAngAICICCtoCCtgALEIIABBTygoKUgoKmgqamgqaCgpSCgpSClKqigoKUzsKCAAIU8oKUkpQACBLKAAMS0oKUgpSClIKSlJSCnMKClIKUrLKClIK4gpSCgpS4goKqoqyygsaCtIKkrLKCgpSCgqyygoKUrMTqooKUgoKClILokoKU", "", "", "105=BEUint64/1/2/2,BEUint64/2/2/3;652=IsLoopback/1/1/1,IsMulticast/1/1/2,IsLinkLocalUnicast/1/1/3;668=v4/2/5/1,v4/3/5/1,v4/4/5/2,v4/5/5/2;1419=withoutZone/1/1/1")]
+[assembly: GoPositionMap("net/netip/uint128.go", "uint128.cs", "ABQoogAEEMCWkqiSqJKokqiSgqiSgq7CqqKqog==")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
@@ -84,9 +82,9 @@ public static partial class netip_package
     internal partial struct parseAddrError {}
     internal partial struct parsePrefixError {}
     internal partial struct uint128 {}
+    public partial struct Addr {}
     public partial struct AddrPort {}
-    public partial struct ΔAddr {}
-    public partial struct ΔPrefix {}
+    public partial struct Prefix {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -104,3 +102,18 @@ public static partial class netip_package
     [GoInit] internal static void initᴛᴛimportꓸunique() => builtin.initPackage(typeof(unique_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(netip_package.Addr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class netipᴛAddr;
+[GoMethodHost(typeof(netip_package.AddrPort)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class netipᴛAddrPort;
+[GoMethodHost(typeof(netip_package.Prefix)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class netipᴛPrefix;
+[GoMethodHost(typeof(netip_package.parseAddrError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class netipᴛparseAddrError;
+[GoMethodHost(typeof(netip_package.parsePrefixError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class netipᴛparsePrefixError;
+[GoMethodHost(typeof(netip_package.uint128)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class netipᴛuint128;
+// </MethodHolders>

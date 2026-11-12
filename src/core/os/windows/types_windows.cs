@@ -14,6 +14,7 @@ using @internal;
 using @internal.syscall;
 using fs = go.io.fs_package;
 using go.io;
+using static os_package;
 
 partial class os_package {
 
@@ -42,7 +43,7 @@ partial struct fileStat {
 
 // newFileStatFromGetFileInformationByHandle calls GetFileInformationByHandle
 // to gather all required information about the file handle h.
-internal static (ж<fileStat> fs, error err) newFileStatFromGetFileInformationByHandle(@string path, syscallꓸHandle h) {
+internal static (ж<fileStat> fs, error err) newFileStatFromGetFileInformationByHandle(@string path, syscall.Handle h) {
     error err = default;
 
     ref var d = ref heap(new syscall.ByHandleFileInformation(), out var Ꮡd);
@@ -151,6 +152,8 @@ internal static ж<fileStat> newFileStatFromWin32finddata(ref syscall.Win32findd
     return fs;
 }
 
+} partial class osᴛfileStat {
+
 // isReparseTagNameSurrogate determines whether a tag's associated
 // reparse point is a surrogate for another named entity (for example, a mounted folder).
 //
@@ -165,7 +168,11 @@ internal static int64 Size(this ref fileStat fs) {
     return ((int64)fs.FileSizeHigh << 32) + (int64)fs.FileSizeLow;
 }
 
+} partial class os_package {
+
 internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink");
+
+} partial class osᴛfileStat {
 
 internal static FileMode Mode(this ref fileStat fs) {
     var m = fs.mode();
@@ -377,6 +384,8 @@ internal static error saveInfoFromPath(this ref fileStat fs, @string path) {
     fs.name = filepathlite.Base(path);
     return default;
 }
+
+} partial class os_package {
 
 internal static bool sameFile(ж<fileStat> Ꮡfs1, ж<fileStat> Ꮡfs2) {
     ref var fs1 = ref Ꮡfs1.DerefOrNull();

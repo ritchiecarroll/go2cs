@@ -5,12 +5,15 @@ namespace go;
 
 using sys = @internal.runtime.sys_package;
 using @internal.runtime;
+using static runtime_package;
 
 partial class runtime_package {
 
 // pageBits is a bitmap representing one bit per page in a palloc chunk.
 /* [pallocChunkPages / 64]uint64 */
 partial struct pageBits /*[8]uint64*/;
+
+} partial class runtimeᴛpageBits {
 
 // get returns the value of the i'th bit in the bitmap.
 internal static nuint get(this ref pageBits b, nuint i) {
@@ -124,12 +127,16 @@ internal static nuint /*s*/ popcntRange(this ref pageBits b, nuint i, nuint n) {
     return s;
 }
 
+} partial class runtime_package {
+
 // pallocBits is a bitmap that tracks page allocations for at most one
 // palloc chunk.
 //
 // The precise representation is an implementation detail, but for the
 // sake of documentation, 0s are free pages and 1s are allocated pages.
 partial struct pallocBits /*pageBits*/;
+
+} partial class runtimeᴛpallocBits {
 
 // summarize returns a packed summary of the bitmap in pallocBits.
 internal static pallocSum summarize(this ж<pallocBits> Ꮡb) {
@@ -154,7 +161,7 @@ internal static pallocSum summarize(this ж<pallocBits> Ꮡb) {
         if (start == notSetYet) {
             start = cur;
         }
-        most = builtin.max(most, cur);
+        most = max(most, cur);
         // Final region that might span to next uint64
         cur = l;
     }
@@ -163,7 +170,7 @@ internal static pallocSum summarize(this ж<pallocBits> Ꮡb) {
         const nuint n = /* uint(64 * len(b)) */ 512;
         return packPallocSum(n, n, n);
     }
-    most = builtin.max(most, cur);
+    most = max(most, cur);
 
     if (most >= 64 - 2) {
         // There is no way an internal run of zeros could beat max.
@@ -188,14 +195,14 @@ outer:
 
         // Strategy: shrink all runs of zeros by max. If any runs of zero
         // remain, then we've identified a larger maximum zero run.
-        nuint Δp = most;    // number of zeros we still need to shrink by.
+        nuint p = most;     // number of zeros we still need to shrink by.
         nuint k = (nuint)1; // current minimum length of runs of ones in x.
         for (;;) {
             // Shrink all runs of zeros by p places (except the top zeros).
-            while (Δp > 0) {
-                if (Δp <= k) {
+            while (p > 0) {
+                if (p <= k) {
                     // Shift p ones down into the top of each run of zeros.
-                    x |= (uint64)((x >> (int)(Δp & 63)));
+                    x |= (uint64)((x >> (int)(p & 63)));
                     if ((x & (x + 1)) == 0) { // no more zeros (except at the top).
                         goto continue_outer;
                     }
@@ -206,7 +213,7 @@ outer:
                 if ((x & (x + 1)) == 0) { // no more zeros (except at the top).
                     goto continue_outer;
                 }
-                Δp -= k;
+                p -= k;
                 // We've just doubled the minimum length of 1-runs.
                 // This allows us to shift farther in the next iteration.
                 k *= 2;
@@ -221,7 +228,7 @@ outer:
             if ((x & (x + 1)) == 0) {                 // no more zeros (except at the top).
                 goto continue_outer;
             }
-            Δp = j; // remove j more zeros from each zero run.
+            p = j; // remove j more zeros from each zero run.
         }
 continue_outer:;
     }
@@ -395,6 +402,8 @@ internal static void allocPages64(this ж<pallocBits> Ꮡb, nuint i, uint64 allo
     (Ꮡb.Reinterpret<pallocBits, pageBits>()).setBlock64(i, alloc);
 }
 
+} partial class runtime_package {
+
 // findBitRange64 returns the bit index of the first set of
 // n consecutive 1 bits. If no consecutive set of 1 bits of
 // size n may be found in c, then it returns an integer >= 64.
@@ -403,12 +412,12 @@ internal static nuint findBitRange64(uint64 c, nuint n) {
     // This implementation is based on shrinking the length of
     // runs of contiguous 1 bits. We remove the top n-1 1 bits
     // from each run of 1s, then look for the first remaining 1 bit.
-    nuint Δp = n - 1;   // number of 1s we want to remove.
+    nuint p = n - 1;    // number of 1s we want to remove.
     nuint k = (nuint)1; // current minimum width of runs of 0 in c.
-    while (Δp > 0) {
-        if (Δp <= k) {
+    while (p > 0) {
+        if (p <= k) {
             // Shift p 0s down into the top of each run of 1s.
-            c &= (uint64)((c >> (int)(Δp & 63)));
+            c &= (uint64)((c >> (int)(p & 63)));
             break;
         }
         // Shift k 0s down into the top of each run of 1s.
@@ -416,7 +425,7 @@ internal static nuint findBitRange64(uint64 c, nuint n) {
         if (c == 0) {
             return 64;
         }
-        Δp -= k;
+        p -= k;
         // We've just doubled the minimum length of 0-runs.
         // This allows us to shift farther in the next iteration.
         k *= 2;
@@ -439,6 +448,8 @@ partial struct pallocData {
     internal pageBits scavenged;
 }
 
+} partial class runtimeᴛpallocData {
+
 // allocRange sets bits [i, i+n) in the bitmap to 1 and
 // updates the scavenged bits appropriately.
 internal static void allocRange(this ж<pallocData> Ꮡm, nuint i, nuint n) {
@@ -459,4 +470,4 @@ internal static void allocAll(this ж<pallocData> Ꮡm) {
     m.scavenged.clearAll();
 }
 
-} // end runtime_package
+} // end runtimeᴛpallocData

@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using colorꓸRGBA = go.image.color_package.ΔRGBA;
-global using imageꓸRGBA = go.image_package.ΔRGBA;
 // </ImportedTypeAliases>
 
 using go;
@@ -66,8 +64,8 @@ using static go.image.png_package;
 [assembly: GoFieldAccess(typeof(image_package.NRGBA))]
 [assembly: GoFieldAccess(typeof(image_package.NRGBA64))]
 [assembly: GoFieldAccess(typeof(image_package.Paletted))]
+[assembly: GoFieldAccess(typeof(image_package.RGBA))]
 [assembly: GoFieldAccess(typeof(image_package.RGBA64))]
-[assembly: GoFieldAccess(typeof(image_package.ΔRGBA))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -78,8 +76,8 @@ using static go.image.png_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("image/png/paeth.go", "paeth.cs", "AAoUlO6oAAgQgoKCgoKCgoKClKqi0oKCgoKCgoKCgpSClJSCgoI=")]
-[assembly: GoPositionMap("image/png/reader.go", "reader.cs", "ADFkgqaCABU0AC5i7gAPBIKClIKUgoKUgpSClJSCgoKUgoKCpoKmgoKUlLTWlLTWlLTWlLS0tLTWlLS0tMaClIIACAaCgoKUgoKUgpSCgpTclAAICpQACAaClIKUgoKUlIKUtLSktoKUgoKUlIK2gpSCgpSUgpSCgsiUAAgYAAkCgpSUgriClIKClIKUgpSCgoLo0oKClJKCgoKClJSCgpSCgoKUgtyCgoKUlIKUgqYACQiSgoIABxSSgpSCuIKmlIKCgpSCxoKCtIKCgpSCxoKCtIKCtIKCgpSCxoKCtIKCgpSCxoKCpIKUpoKCpoKUlIKCgpS4goLYgsaC/IKUgsa0uJSCgoKCgoKCgpSCuIKCgoLqgoKCgoKCgoKUgriCgoKC6oKCgoKCgoKClIK4goKCguqCgoKCgoKUpoLGgoLGgqKCgoKCgoKClIKCgoKClJSigoKCgoKClMaCgoKCgpSC2IKCgoKClILYgoKCgoKUgtiCgoK4grSCtIKCgoKCgpSmgoLYgoKCxoKCgoKCgoKCgoKUpoKCgoLYgoKCgoLapqiSgs6UgoK0goK0goK0goK0goK0goK0goKCgsrGgoK0goKkkoKCgoKCyrKCgoKU5oKClKa0gIKkgoKmpIKUgqSClIKkgoKUgoKUgpSCpIKC3JSCgpSkgpSClIKWkoKCgpSClOaCgpSClOaCgoKUgpSqoriAgoKUpIKCgpSmqqK4gIKClLaCgoKUpoKCpoLKgpS0tLS0tLS0tKTugg==", "", "", "1157=NewIEEE/1/1/2;1183=NewIEEE/1/1/2", "449:21")]
-[assembly: GoPositionMap("image/png/writer.go", "writer.cs", "AEaQAZKClIKCgoKCuKiSgpSmgoKUgoKClIKCgoKCgoKClIKClIKClOaCgoKUlIK0grSCtIK0grSCtIK0grSCtIKkgoKCAAgGgoKClIKCgoKCgoKUlIKCAAcU4oKClKrqgoKCgoKCpoKCgpSCpoKCgpSCgoKCpoKCuIKCgoKmgoK4goKClIKCgoKmgoK4goKClIKCgoKmgqam0oKCgpSClJSUlJS0tLS0tLS0tLQACBCCgoKClJSUgoKUgpSUgoKClJSClIKClIKCguqCkoKCgpSCgoKCgoKCpoKCgoKC2IKClIKCgtqUgoKCgoKCgoKCgqaCgoKUyIKCgoKCgoKCgoKCgoKCggABFAAIAoKCgoLKgoKCgoKC2IKCgoLYgoKCgoKCgoLYgoKCgoKCgoKCggAIEIKmgriCuJTYsoKUgpSUgoKUqqKUpKSkpPiYooKoAAgIgoKmgoKCloKUgqaCgpSUgpSCgoKCgoKUppS0tIKUxoKU2oKCgpSCgg==")]
+[assembly: GoPositionMap("image/png/reader.go", "reader.cs", "ADJkgqaCABU0ADBiAAoOABEEgoKUgpSCgpSClIKUlIKCgpSCgoKmgqaCgpSUtNaUtNaUtNaUtLS0tNaUtLS0xoKUggAIBoKCgpSCgpSClIKClNyUAAgKlAAIBoKUgpSCgpSUgpS0tKS2gpSCgpSUgraClIKClJSClIKCyJQACBgACQKClJSCuIKUgoKUgpSClIKCgujSgoKUkoKCgoKUlIKClIKCgpSC3IKCgpSUgpSCpgAJCJKCggAHFJKClIK4gqaUgoKClILGgoK0goKClILGgoK0goK0goKClILGgoK0goKClILGgoKkgpSmgoKmgpSUgoKClLiCgtiCxoL8gpSCxrS4lIKCgoKCgoKClIK4goKCguqCgoKCgoKCgpSCuIKCgoLqgoKCgoKCgoKUgriCgoKC6oKCgoKCgpSmgsaCgsaCooKCgoKCgoKUgoKCgoKUlKKCgoKCgoKUxoKCgoKClILYgoKCgoKUgtiCgoKCgpSC2IKCgriCtIK0goKCgoKClKaCgtiCgoLGgoKCgoKCgoKCgpSmgoKCgtiCgoKCgtqmqJKCzpSCgrSCgrSCgrSCgrSCgrSCgrSCgoKCysaCgrSCgqSSgoKCgoLKsoKCgpTmgoKUprSAgqSCgqakgpSCpIKUgqSCgpSCgpSClIKkgoLclIKClKSClIKUgpaSgoKClIKU5oKClIKU5oKCgpSClMqiuICCgpSkgoKClKaqoriAgoKUtoKCgpSmgoKmgsqClLS0tLS0tLS0pO6C", "", "", "1168=NewIEEE/1/1/2;1194=NewIEEE/1/1/2", "458:21")]
+[assembly: GoPositionMap("image/png/writer.go", "writer.cs", "AEeQAZKClIKCgoKCuKiSgpTGgoKUgoKClIKCgoKCgoKClIKClIKClOaCgoKUlIK0grSCtIK0grSCtIK0grSCtIKkgoKCAAgGgoKClIKCgoKCgoKUlIKCAAcU4oKClMrqgoKCgoKCpoKCgpSCpoKCgpSCgoKCpoKCuIKCgoKmgoK4goKClIKCgoKmgoK4goKClIKCgoKmgqbG0oKCgpSClJSUlJS0tLS0tLS0tLQACBCCgoKClJSUgoKUgpSUgoKClJSClIKClIKCguqCkoKCgpSCgoKCgoKCpoKCgoKC2IKClIKCgtqUgoKCgoKCgoKCgqaCgoKUyIKCgoKCgoKCgoKCgoKCggABFAAIAoKCgoLKgoKCgoKC2IKCgoLYgoKCgoKCgoLYgoKCgoKCgoKCggAIEIKmgriCuJTYsoKUgpSUgoKUyqKUpKSkpAAJCLiigsgACAiCgqaCgoKWgpSCpoKClJSClIKCgoKCgpSmlLS0gpTGgpTagoKClIKC")]
 // </GoSourcePositionMaps>
 
 namespace go.image;
@@ -125,3 +123,17 @@ public static partial class png_package
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(png_package.Encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pngᴛEncoder;
+[GoMethodHost(typeof(png_package.FormatError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pngᴛFormatError;
+[GoMethodHost(typeof(png_package.UnsupportedError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pngᴛUnsupportedError;
+[GoMethodHost(typeof(png_package.decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pngᴛdecoder;
+[GoMethodHost(typeof(png_package.encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pngᴛencoder;
+// </MethodHolders>

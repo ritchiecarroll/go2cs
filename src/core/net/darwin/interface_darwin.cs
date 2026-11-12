@@ -16,12 +16,12 @@ internal static (slice<routebsd.Message>, error) interfaceMessages(nint ifindex)
 
 // interfaceMulticastAddrTable returns addresses for a specific
 // interface.
-internal static (slice<ΔAddr>, error) interfaceMulticastAddrTable(ref Interface ifi) {
+internal static (slice<Addr>, error) interfaceMulticastAddrTable(ref Interface ifi) {
     var (msgs, err) = routebsd.FetchRIBMessages(syscall.NET_RT_IFLIST2, ifi.Index);
     if (err != nil) {
         return (default, err);
     }
-    var ifmat = new slice<ΔAddr>(0, len(msgs));
+    var ifmat = new slice<Addr>(0, len(msgs));
     foreach (var (_, m) in range(msgs)) {
         switch (m.type()) {
         case ж<routebsd.InterfaceMulticastAddrMessage> mΔ1: {
@@ -42,7 +42,7 @@ internal static (slice<ΔAddr>, error) interfaceMulticastAddrTable(ref Interface
                 break;
             }}
             if (ip != nil) {
-                ifmat = append(ifmat, (ΔAddr)(new IPAddrжΔAddr(Ꮡ(new IPAddr(IP: ip)))));
+                ifmat = append(ifmat, (Addr)(new IPAddrжAddr(Ꮡ(new IPAddr(IP: ip)))));
             }
             break;
         }}

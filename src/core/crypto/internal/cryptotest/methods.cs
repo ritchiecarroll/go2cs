@@ -39,7 +39,7 @@ internal static (slice<@string>, error) extraMethods(any ip) {
     var extraMethodsᴷ = new stackAppend<@string>(moves: true);
 
     var v = reflect.ValueOf(ip);
-    if (v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.ΔInterface || v.Elem().IsNil()) {
+    if (v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.Interface || v.Elem().IsNil()) {
         return (default, fmt.Errorf("argument must be a pointer to a non-nil interface"u8));
     }
 

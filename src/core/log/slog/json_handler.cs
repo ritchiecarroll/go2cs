@@ -17,6 +17,7 @@ using utf8 = go.unicode.utf8_package;
 using go.encoding;
 using go.log.slog.@internal;
 using go.unicode;
+using static slog_package;
 
 partial class slog_package {
 
@@ -45,20 +46,22 @@ public static ж<JSONHandler> NewJSONHandler(io.Writer w, ж<HandlerOptions> Ꮡ
     ));
 }
 
+} partial class slogᴛJSONHandler {
+
 // Enabled reports whether the handler handles records at the given level.
 // The handler ignores records whose level is lower.
-public static bool Enabled(this ref JSONHandler h, context.Context _, ΔLevel level) {
+public static bool Enabled(this ref JSONHandler h, context.Context _, Level level) {
     return h.commonHandler.enabled(level);
 }
 
 // WithAttrs returns a new [JSONHandler] whose attributes consists
 // of h's attributes followed by attrs.
-public static ΔHandler WithAttrs(this ref JSONHandler h, slice<Attr> attrs) {
-    return new JSONHandlerжΔHandler(Ꮡ(new JSONHandler(commonHandler: h.commonHandler.withAttrs(attrs))));
+public static Handler WithAttrs(this ref JSONHandler h, slice<Attr> attrs) {
+    return new JSONHandlerжHandler(Ꮡ(new JSONHandler(commonHandler: h.commonHandler.withAttrs(attrs))));
 }
 
-public static ΔHandler WithGroup(this ref JSONHandler h, @string name) {
-    return new JSONHandlerжΔHandler(Ꮡ(new JSONHandler(commonHandler: h.commonHandler.withGroup(name))));
+public static Handler WithGroup(this ref JSONHandler h, @string name) {
+    return new JSONHandlerжHandler(Ꮡ(new JSONHandler(commonHandler: h.commonHandler.withGroup(name))));
 }
 
 // Handle formats its argument [Record] as a JSON object on a single line.
@@ -95,6 +98,8 @@ public static error Handle(this ref JSONHandler h, context.Context _, Record r) 
     return h.commonHandler.handle(r);
 }
 
+} partial class slog_package {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string timeTimeYearOutsideOfˢ => ref timeTimeYearOutsideOfˢᵇ;
 private static readonly @string timeTimeYearOutsideOfˢᵇ = "time.Time year outside of range [0,9999]"u8;
@@ -109,7 +114,7 @@ internal static void appendJSONTime(ж<handleState> Ꮡs, time.Time t) {
         s.appendError(errors.New(timeTimeYearOutsideOfˢ));
     }
     s.buf.WriteByte((byte)'"');
-    s.buf.ValueSlot = t.AppendFormat(s.buf.ValueSlot, time_package.RFC3339Nano);
+    s.buf.ValueSlot = t.AppendFormat(s.buf.ValueSlot, time.RFC3339Nano);
     s.buf.WriteByte((byte)'"');
 }
 
@@ -233,10 +238,10 @@ private static readonly @string u202ˢᵇ = @"\u202"u8;
 // with escapeHTML set to false.
 internal static slice<byte> appendEscapedJSONString(slice<byte> buf, @string s) {
     void @char(byte b) {
-        buf = builtin.append(buf, b);
+        buf = append(buf, b);
     }
     void str(@string sΔ1) {
-        buf = builtin.append(buf, sΔ1.ꓸꓸꓸ);
+        buf = append(buf, sΔ1.ꓸꓸꓸ);
     }
 
     nint start = 0;

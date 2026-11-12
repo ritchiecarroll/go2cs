@@ -71,8 +71,8 @@ using static go.testing.fstest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("testing/fstest/mapfs.go", "mapfs.cs", "ACpWgoKWkoKUgoKmgpSuwoKCgoKCgqa4goKCgoKClO6CpoKUgpSYgpSCgpSUppSAgoKClMiCgoKCgpSClIKCgpSUlKiSgoKUgpSssoKClKaCgpSCgpSClIKCpoKmgoKC3AAMFoKmgqaCpoLulJIACBKCgoKCgoKClIIACRSUlIKClIKUgoKmgti0pIKUgqaCgpSCgpQAChaCgoKmgoKClIKUgoKUgg==", "106-108:1")]
-[assembly: GoPositionMap("testing/fstest/testfs.go", "testfs.cs", "ABlOABYCgIKkgoKSgoKCpoKClIKUpqaigoKCgoKUgpSCgoKClJSCgqaClAAKGLKmgoKCgpSCgoKClAAMCvSCgoKUgoKCgqiSgpSUgoKUgrSCtIKkgoKClNi02oKCgoK4goKCgriCyqaClJKCgoKUpoKUkoKCgoKUgoKClIKClIKClIKCpqaCgoKClJSCgtyCgoKUlIKCuKKmkqiSqJKo0oKokoKCgoKCgoKUlLS0tLS2lMqCuIKCgoKClKaCpoKUlIKCgriCgoKUgqaCgqaCgpS0grSCtqqigoKClIKCgoKUgpSCpoKCgpSCpoKCpoKCyoKCgpSCgqaAgoKCgpSCgsiAgoKCgpSCgpSCgoLe0oKCgoKUyoKCpoKCgoKCgpSClJSCpoKmgoKUpgAMCNKmgoKCpoKCgoKmgsqmgIKCgoKUuIKUgoKClJSigNiCgoKUpoKCgpSSgrSkgoKC+rKCgoKUurK4gpSAgu6AggAHEIKC", "474-482:1;510-515:2;568-568:1;600-606:1", "", "", "244:21,257:21,676:21")]
+[assembly: GoPositionMap("testing/fstest/mapfs.go", "mapfs.cs", "ACtWgoK2koKUgoKmgpSuwoKCgoKCgqa4goKCgoKClO6CpoKUgpSYgpSCgpSUppSAgoKClMiCgoKCgpSClIKCgpSUlKiSgoKUgpSssoKClKaCgpSCgpSClIKCpoKmgoKC3AAQFoKmgqaCpoIACg60kgAMEoKCgoKCgoKUggANFJSUgoKUgpSCgqaC2LSkgpSCpoKClIKClAAOFoKCgqaCgoKUgpSCgpSC", "106-108:1")]
+[assembly: GoPositionMap("testing/fstest/testfs.go", "testfs.cs", "ABpOABYCgIKkgoKSgoKCpoKClIKUpqaigoKCgoKUgpSCgoKClJSCgqaClAAMGLKmgoKCgpSCgoKClAAMCvSCgoKUgoKCgqiSgpSUgoKUgrSCtIKkgoKClNi02oKCgoK4goKCgriCyqaClJKCgoKUpoKUkoKCgoKUgoKClIKClIKClIKCpqaCgoKClJSCgtyCgoKUlIKCuKLGkqiSqJLI0oKokoKCgoKCgoKUlLS0tLS2lMqCuIKCgoKClKaCpoKUlIKCgriCgoKUgqaCgqaCgpS0grSCtqqigoKClIKCgoKUgpSCpoKCgpSCpoKCpoKCyoKCgpSCgqaAgoKCgpSCgsiAgoKCgpSCgpSCgoLe0oKCgoKUyoKCpoKCgoKCgpSClJSCpoKmgoKUpgAMCNKmgoKCpoKCgoKmgsqmgIKCgoKUuIKUgoKClJSigNiCgoKUpoKCgpSSgrSkgoKC+rKCgoKUurK4gpSAgu6AggAHEIKC", "474-482:1;510-515:2;568-568:1;600-606:1", "", "", "247:21,260:21,683:21")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;
@@ -116,3 +116,18 @@ public static partial class fstest_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(fstest_package.MapFS)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fstestᴛMapFS;
+[GoMethodHost(typeof(fstest_package.fsTester)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fstestᴛfsTester;
+[GoMethodHost(typeof(fstest_package.mapDir)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fstestᴛmapDir;
+[GoMethodHost(typeof(fstest_package.mapFileInfo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fstestᴛmapFileInfo;
+[GoMethodHost(typeof(fstest_package.noSub)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fstestᴛnoSub;
+[GoMethodHost(typeof(fstest_package.openMapFile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fstestᴛopenMapFile;
+// </MethodHolders>

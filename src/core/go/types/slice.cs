@@ -5,20 +5,24 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
+using static types_package;
+
 partial class types_package {
 
 // A Slice represents a slice type.
 partial struct Slice {
-    internal ΔType elem;
+    internal Type elem;
 }
 
 // NewSlice returns a new slice type for the given element type.
-public static ж<Slice> NewSlice(ΔType elem) { return Ꮡ(new Slice(elem: elem)); }
+public static ж<Slice> NewSlice(Type elem) { return Ꮡ(new Slice(elem: elem)); }
+
+} partial class typesᴛSlice {
 
 // Elem returns the element type of slice s.
-public static ΔType Elem(this ref Slice s) { return s.elem; }
+public static Type Elem(this ref Slice s) { return s.elem; }
 
-public static ΔType Underlying(this ж<Slice> Ꮡs) { return new SliceжΔType(Ꮡs); }
-public static @string String(this ж<Slice> Ꮡs) { return TypeString(new SliceжΔType(Ꮡs), default); }
+public static Type Underlying(this ж<Slice> Ꮡs) { return new SliceжType(Ꮡs); }
+public static @string String(this ж<Slice> Ꮡs) { return TypeString(new SliceжType(Ꮡs), default); }
 
-} // end types_package
+} // end typesᴛSlice

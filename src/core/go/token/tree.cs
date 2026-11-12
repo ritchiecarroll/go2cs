@@ -22,6 +22,7 @@ namespace go.go;
 // The implementation is simplified from Russ Cox's github.com/rsc/omap.
 using fmt = fmt_package;
 using iter = iter_package;
+using static token_package;
 
 partial class token_package {
 
@@ -39,20 +40,24 @@ partial struct node {
     internal ж<node> parent;
     internal ж<node> left;
     internal ж<node> right;
-    internal ж<ΔFile> @file;
-    internal Δkey key;      // = file.key(), but improves locality (25% faster)
+    internal ж<File> @file;
+    internal key key;       // = file.key(), but improves locality (25% faster)
     internal int32 balance; // at most ±2
     internal int32 height;
 }
 
 // A key represents the Pos range of a File.
-partial struct Δkey {
+partial struct key {
     internal nint start, end;
 }
 
-internal static Δkey key(this ref ΔFile f) {
-    return new Δkey(f.@base, f.@base + f.size);
+} partial class tokenᴛFile {
+
+internal static key key(this ref File f) {
+    return new key(f.@base, f.@base + f.size);
 }
+
+} partial class token_package {
 
 // compareKey reports whether x is before y (-1),
 // after y (+1), or overlapping y (0).
@@ -63,7 +68,7 @@ internal static Δkey key(this ref ΔFile f) {
 // This allows us to use strict < comparisons.
 // Use key{p, p} to search for a zero-width position
 // even at the start or end of a file.
-internal static nint compareKey(Δkey x, Δkey y) {
+internal static nint compareKey(key x, key y) {
     switch (ᐧ) {
     case {} when x.end < y.start: {
         return -1;
@@ -73,6 +78,8 @@ internal static nint compareKey(Δkey x, Δkey y) {
     }}
     return 0;
 }
+
+} partial class tokenᴛnode {
 
 // check asserts that each node's height, subtree, and parent link is
 // correct.
@@ -109,11 +116,13 @@ internal static void checkBalance(this ref node n) {
     }
 }
 
+} partial class tokenᴛtree {
+
 // locate returns a pointer to the variable that holds the node
 // identified by k, along with its parent, if any. If the key is not
 // present, it returns a pointer to the node where the key should be
 // inserted by a subsequent call to [tree.set].
-internal static (ж<ж<node>> pos, ж<node> parent) locate(this ж<tree> Ꮡt, Δkey k) {
+internal static (ж<ж<node>> pos, ж<node> parent) locate(this ж<tree> Ꮡt, key k) {
     ж<ж<node>> pos = default;
     ж<node> parent = default;
     ref var t = ref Ꮡt.DerefOrNull();
@@ -137,8 +146,8 @@ internal static (ж<ж<node>> pos, ж<node> parent) locate(this ж<tree> Ꮡt, �
 // If t is modified during the iteration,
 // some files may not be visited.
 // No file will be visited multiple times.
-internal static iter.Seq<ж<ΔFile>> all(this ж<tree> Ꮡt) {
-    return (Func<ж<ΔFile>, bool> yield) => {
+internal static iter.Seq<ж<File>> all(this ж<tree> Ꮡt) {
+    return (Func<ж<File>, bool> yield) => {
         if (Ꮡt == nil) {
             return;
         }
@@ -181,6 +190,8 @@ internal static ж<node> nextAfter(this ref tree t, ж<ж<node>> Ꮡpos, ж<node
     }}
 }
 
+} partial class tokenᴛnode {
+
 internal static ж<node> next(this ж<node> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -197,6 +208,8 @@ internal static ж<node> next(this ж<node> Ꮡx) {
     return Ꮡx;
 }
 
+} partial class tokenᴛtree {
+
 internal static void setRoot(this ref tree t, ж<node> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -205,6 +218,8 @@ internal static void setRoot(this ref tree t, ж<node> Ꮡx) {
         x.parent = default;
     }
 }
+
+} partial class tokenᴛnode {
 
 internal static void setLeft(this ж<node> Ꮡx, ж<node> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
@@ -240,6 +255,8 @@ internal static void update(this ref node n) {
     n.height = max(lheight, rheight) + 1;
     n.balance = rheight - lheight;
 }
+
+} partial class tokenᴛtree {
 
 internal static void replaceChild(this ref tree t, ж<node> Ꮡparent, ж<node> old, ж<node> @new) {
     ref var parent = ref Ꮡparent.DerefOrNull();
@@ -349,7 +366,7 @@ internal static ж<node> rotateLeft(this ref tree t, ж<node> Ꮡx) {
 
 // add inserts file into the tree, if not present.
 // It panics if file overlaps with another.
-internal static void add(this ж<tree> Ꮡt, ж<ΔFile> Ꮡfile) {
+internal static void add(this ж<tree> Ꮡt, ж<File> Ꮡfile) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var @file = ref Ꮡfile.DerefOrNull();
 
@@ -367,7 +384,7 @@ internal static void add(this ж<tree> Ꮡt, ж<ΔFile> Ꮡfile) {
 
 // set updates the existing node at (pos, parent) if present, or
 // inserts a new node if not, so that it refers to file.
-internal static void set(this ref tree t, ж<ΔFile> Ꮡfile, ж<ж<node>> Ꮡpos, ж<node> parent) {
+internal static void set(this ref tree t, ж<File> Ꮡfile, ж<ж<node>> Ꮡpos, ж<node> parent) {
     ref var @file = ref Ꮡfile.DerefOrNull();
     ref var pos = ref Ꮡpos.DerefOrNull();
 
@@ -469,4 +486,4 @@ internal static ж<node> /*z*/ deleteMin(this ref tree t, ж<ж<node>> Ꮡzpos) 
     return z;
 }
 
-} // end token_package
+} // end tokenᴛtree

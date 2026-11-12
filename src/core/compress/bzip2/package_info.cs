@@ -64,10 +64,10 @@ using static go.compress.bzip2_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("compress/bzip2/bit_reader.go", "bit_reader.cs", "ABUyooKClKzSgoKClIKClIKCABAigoKmgoKmgoKmgg==")]
-[assembly: GoPositionMap("compress/bzip2/bzip2.go", "bzip2.cs", "ABQmggAVNLKCggAOELKUgoKCuIKCpoKCpoKCgpSmwoKmgoKCgpSClKaCgoKUpu6CAAkUgoKCgoKUpoKCgpSCgoKmgpSUlIKmAAwGooKCgoK4goK4gpS4goLagoKUgoLcgpSCgoKClIKClIKCgpSClIKUggAgDsKCgoKCgoKUyoKCgoKCgoKCgtyUuIKCyoK4goKCgoKClJSClMqCgoKCgqaUgqaClIKCgoKUgpSClKaUgoK4goKUgpSCyoKmlIKCgoKUgpSCgqaClJSClIK4gpSmpoKUgoKCgpSmuAAIEoKClIKCpoLKgoKCgoKUAAIaAAoCgoKCpoKCgqYABhCCgoKCgoKUpryigoKU")]
-[assembly: GoPositionMap("compress/bzip2/huffman.go", "huffman.cs", "ACNO0pSClIKUgsrKlIKUpqaCgpSUzgAKEoKmuIKCgqaCgpTugpSCgoKUgoKmypiCggAVJvKmgoKCgriClAAMGoLcyqaClKaCgpSUgpSmgqaUgpSm", "106-111:1;135-137:2")]
-[assembly: GoPositionMap("compress/bzip2/move_to_front.go", "move_to_front.cs", "ABAkooKUqqKCpoKClKbqgoKCqJI=")]
+[assembly: GoPositionMap("compress/bzip2/bit_reader.go", "bit_reader.cs", "ABYyooKClMzSgoKClIKClIKCABAigoKmgoKmgoKmgg==")]
+[assembly: GoPositionMap("compress/bzip2/bzip2.go", "bzip2.cs", "ABcmggAXNLKCggAQELKUgoKCuIKCpoKCpoKCgpSmwoKmgoKCgpSClKaCgoKUpu6CAAkUgoKCgoKUpoKCgpSCgoKmgpSUlIKmAAwGooKCgoK4goK4gpS4goLagoKUgoLcgpSCgoKClIKClIKCgpSClIKUggAgDsKCgoKCgoKUyoKCgoKCgoKCgtyUuIKCyoK4goKCgoKClJSClMqCgoKCgqaUgqaClIKCgoKUgpSClKaUgoK4goKUgpSCyoKmlIKCgoKUgpSCgqaClJSClIK4gpSmpoKUgoKCgpSmuAAIEoKClIKCpoLKgoKCgoKUAAQaAAoCgoKCpoKCgqYABhCCgoKCgoKUpryigoKU")]
+[assembly: GoPositionMap("compress/bzip2/huffman.go", "huffman.cs", "ACZO0pSClIKUgsrKlIKUpqaCgpSU7gAKEoKmuIKCgqaCgpTugpSCgoKUgoKmypiCggAVJvKmgoKCgriClAAMGoLcyqaClKaCgpSUgpSmgqaUgpSm", "106-111:1;135-137:2")]
+[assembly: GoPositionMap("compress/bzip2/move_to_front.go", "move_to_front.cs", "ABIkooKUqqKCpoKClMbqgoKCqJI=")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;
@@ -104,3 +104,17 @@ public static partial class bzip2_package
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(bzip2_package.StructuralError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bzip2ᴛStructuralError;
+[GoMethodHost(typeof(bzip2_package.bitReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bzip2ᴛbitReader;
+[GoMethodHost(typeof(bzip2_package.huffmanTree)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bzip2ᴛhuffmanTree;
+[GoMethodHost(typeof(bzip2_package.moveToFrontDecoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bzip2ᴛmoveToFrontDecoder;
+[GoMethodHost(typeof(bzip2_package.reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bzip2ᴛreader;
+// </MethodHolders>

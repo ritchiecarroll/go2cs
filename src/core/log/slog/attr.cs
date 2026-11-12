@@ -6,6 +6,7 @@ namespace go.log;
 using time = time_package;
 using ꓸꓸꓸAttr = Span<slog_package.Attr>;
 using ꓸꓸꓸany = Span<any>;
+using static slog_package;
 
 partial class slog_package {
 
@@ -86,7 +87,7 @@ internal static slice<Attr> argsToAttrSlice(slice<any> args) {
     slice<Attr> attrs = default;
     while (len(args) > 0) {
         (attr, args) = argsToAttr(args);
-        attrs = builtin.append(attrs, attr);
+        attrs = append(attrs, attr);
     }
     return attrs;
 }
@@ -96,6 +97,8 @@ internal static slice<Attr> argsToAttrSlice(slice<any> args) {
 public static Attr Any(@string key, any value) {
     return new Attr(key, AnyValue(value));
 }
+
+} partial class slogᴛAttr {
 
 // Equal reports whether a and b have equal keys and values.
 public static bool Equal(this Attr a, Attr b) {
@@ -112,4 +115,4 @@ internal static bool isEmpty(this Attr a) {
     return a.Key == ""u8 && a.Value.num == 0 && a.Value.any == nil;
 }
 
-} // end slog_package
+} // end slogᴛAttr

@@ -18,6 +18,7 @@ using utf8 = go.unicode.utf8_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using go.encoding;
 using go.unicode;
+using static json_package;
 
 partial class json_package {
 
@@ -125,11 +126,13 @@ partial interface Unmarshaler {
 // not appropriate for a value of a specific Go type.
 partial struct UnmarshalTypeError {
     public @string Value;     // description of JSON value - "bool", "array", "number -5"
-    public reflectꓸType Type; // type of Go value it could not be assigned to
+    public reflect.Type Type; // type of Go value it could not be assigned to
     public int64 Offset;      // error occurred after reading Offset bytes
     public @string Struct;    // name of the struct type containing the field
     public @string Field;     // the full path from root node to the field, include embedded struct
 }
+
+} partial class jsonᴛUnmarshalTypeError {
 
 public static @string Error(this ref UnmarshalTypeError e) {
     if (e.Struct != ""u8 || e.Field != ""u8) {
@@ -138,25 +141,33 @@ public static @string Error(this ref UnmarshalTypeError e) {
     return "json: cannot unmarshal "u8 + e.Value + " into Go value of type "u8 + e.Type.String();
 }
 
+} partial class json_package {
+
 // An UnmarshalFieldError describes a JSON object key that
 // led to an unexported (and therefore unwritable) struct field.
 //
 // Deprecated: No longer used; kept for compatibility.
 partial struct UnmarshalFieldError {
     public @string Key;
-    public reflectꓸType Type;
+    public reflect.Type Type;
     public reflect.StructField Field;
 }
+
+} partial class jsonᴛUnmarshalFieldError {
 
 public static @string Error(this ref UnmarshalFieldError e) {
     return "json: cannot unmarshal object key "u8 + strconv.Quote(e.Key) + " into unexported field "u8 + e.Field.Name + " of type "u8 + e.Type.String();
 }
 
+} partial class json_package {
+
 // An InvalidUnmarshalError describes an invalid argument passed to [Unmarshal].
 // (The argument to [Unmarshal] must be a non-nil pointer.)
 partial struct InvalidUnmarshalError {
-    public reflectꓸType Type;
+    public reflect.Type Type;
 }
+
+} partial class jsonᴛInvalidUnmarshalError {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string jsonUnmarshalNilˢ => ref jsonUnmarshalNilˢᵇ;
@@ -167,17 +178,19 @@ public static @string Error(this ref InvalidUnmarshalError e) {
         return jsonUnmarshalNilˢ;
     }
 
-    if (e.Type.Kind() != reflect.ΔPointer) {
+    if (e.Type.Kind() != reflect.Pointer) {
         return "json: Unmarshal(non-pointer "u8 + e.Type.String() + ")"u8;
     }
     return "json: Unmarshal(nil "u8 + e.Type.String() + ")"u8;
 }
 
+} partial class jsonᴛdecodeState {
+
 internal static error unmarshal(this ж<decodeState> Ꮡd, any v) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var rv = reflect.ValueOf(v);
-    if (rv.Kind() != reflect.ΔPointer || rv.IsNil()) {
+    if (rv.Kind() != reflect.Pointer || rv.IsNil()) {
         return new InvalidUnmarshalErrorжerror(Ꮡ(new InvalidUnmarshalError(reflect.TypeOf(v))));
     }
 
@@ -192,8 +205,12 @@ internal static error unmarshal(this ж<decodeState> Ꮡd, any v) {
     return d.savedError;
 }
 
+} partial class json_package {
+
 // A Number represents a JSON number literal.
 partial struct Number /*@string*/;
+
+} partial class jsonᴛNumber {
 
 // String returns the literal text of the number.
 public static @string String(this Number n) { return (@string)n; }
@@ -208,9 +225,11 @@ public static (int64, error) Int64(this Number n) {
     return strconv.ParseInt((@string)n, 10, 64);
 }
 
+} partial class json_package {
+
 // An errorContext provides context for type errors during decoding.
 partial struct errorContext {
-    public reflectꓸType Struct;
+    public reflect.Type Struct;
     public slice<@string> FieldStack;
 }
 
@@ -226,16 +245,22 @@ partial struct decodeState {
     internal bool disallowUnknownFields;
 }
 
+} partial class jsonᴛdecodeState {
+
 // readIndex returns the position of the last byte read.
 internal static nint readIndex(this ref decodeState d) {
     return d.off - 1;
 }
+
+} partial class json_package {
 
 // phasePanicMsg is used as a panic message when we end up with something that
 // shouldn't happen. It can indicate a bug in the JSON decoder, or that
 // something is editing the data slice while the decoder executes.
 internal static ref readonly @string phasePanicMsg => ref phasePanicMsgᵇ;
 private static readonly @string phasePanicMsgᵇ = "JSON decoder out of sync - data changing underfoot?"u8;
+
+} partial class jsonᴛdecodeState {
 
 internal static ж<decodeState> init(this ж<decodeState> Ꮡd, slice<byte> data) {
     ref var d = ref Ꮡd.DerefOrNull();
@@ -399,7 +424,7 @@ Switch:
 // value consumes a JSON value from d.data[d.off-1:], decoding into v, and
 // reads the following byte ahead. If v is invalid, the value is discarded.
 // The first byte of the value has been read already.
-internal static error value(this ж<decodeState> Ꮡd, reflectꓸValue v) {
+internal static error value(this ж<decodeState> Ꮡd, reflect.Value v) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     switch (d.opcode) {
@@ -444,8 +469,12 @@ internal static error value(this ж<decodeState> Ꮡd, reflectꓸValue v) {
     return default;
 }
 
+} partial class json_package {
+
 partial struct unquotedValue {
 }
+
+} partial class jsonᴛdecodeState {
 
 // valueQuoted is like value but decodes a
 // quoted string literal or literal null into an interface value.
@@ -476,12 +505,14 @@ internal static any valueQuoted(this ж<decodeState> Ꮡd) {
     return new unquotedValue();
 }
 
+} partial class json_package {
+
 // indirect walks down v allocating pointers as needed,
 // until it gets to a non-pointer.
 // If it encounters an Unmarshaler, indirect stops and returns that.
 // If decodingNull is true, indirect stops at the first settable pointer so it
 // can be set to nil.
-internal static (Unmarshaler, encoding.TextUnmarshaler, reflectꓸValue) indirect(reflectꓸValue v, bool decodingNull) {
+internal static (Unmarshaler, encoding.TextUnmarshaler, reflect.Value) indirect(reflect.Value v, bool decodingNull) {
     // Issue #24153 indicates that it is generally not a guaranteed property
     // that you may round-trip a reflect.Value by calling Value.Addr().Elem()
     // and expect the value to still be settable for values derived from
@@ -499,23 +530,23 @@ internal static (Unmarshaler, encoding.TextUnmarshaler, reflectꓸValue) indirec
     // If v is a named type and is addressable,
     // start with its address, so that if the type has pointer methods,
     // we find them.
-    if (v.Kind() != reflect.ΔPointer && v.Type().Name() != ""u8 && v.CanAddr()) {
+    if (v.Kind() != reflect.Pointer && v.Type().Name() != ""u8 && v.CanAddr()) {
         haveAddr = true;
         v = v.Addr();
     }
     for (;;) {
         // Load value from interface, but only if the result will be
         // usefully addressable.
-        if (v.Kind() == reflect.ΔInterface && !v.IsNil()) {
+        if (v.Kind() == reflect.Interface && !v.IsNil()) {
             var e = v.Elem();
-            if (e.Kind() == reflect.ΔPointer && !e.IsNil() && (!decodingNull || e.Elem().Kind() == reflect.ΔPointer)) {
+            if (e.Kind() == reflect.Pointer && !e.IsNil() && (!decodingNull || e.Elem().Kind() == reflect.Pointer)) {
                 haveAddr = false;
                 v = e;
                 continue;
             }
         }
 
-        if (v.Kind() != reflect.ΔPointer) {
+        if (v.Kind() != reflect.Pointer) {
             break;
         }
 
@@ -526,7 +557,7 @@ internal static (Unmarshaler, encoding.TextUnmarshaler, reflectꓸValue) indirec
         // Prevent infinite loop if v is an interface pointing to its own address:
         //     var v any
         //     v = &v
-        if (v.Elem().Kind() == reflect.ΔInterface && v.Elem().Elem().Equal(v)) {
+        if (v.Elem().Kind() == reflect.Interface && v.Elem().Elem().Equal(v)) {
             v = v.Elem();
             break;
         }
@@ -536,12 +567,12 @@ internal static (Unmarshaler, encoding.TextUnmarshaler, reflectꓸValue) indirec
         if (v.Type().NumMethod() > 0 && v.CanInterface()) {
             {
                 var (u, ok) = reflect.TypeAssert<Unmarshaler>(v); if (ok) {
-                    return (u, default, new reflectꓸValue());
+                    return (u, default, new reflect.Value());
                 }
             }
             if (!decodingNull) {
                 var (u, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(v); if (ok) {
-                    return (default, u, new reflectꓸValue());
+                    return (default, u, new reflect.Value());
                 }
             }
         }
@@ -556,9 +587,11 @@ internal static (Unmarshaler, encoding.TextUnmarshaler, reflectꓸValue) indirec
     return (default, default, v);
 }
 
+} partial class jsonᴛdecodeState {
+
 // array consumes an array from d.data[d.off-1:], decoding into v.
 // The first byte of the array ('[') has been read already.
-internal static error Δarray(this ж<decodeState> Ꮡd, reflectꓸValue v) {
+internal static error Δarray(this ж<decodeState> Ꮡd, reflect.Value v) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Check for unmarshaler.
@@ -577,8 +610,8 @@ internal static error Δarray(this ж<decodeState> Ꮡd, reflectꓸValue v) {
 
     // Check type of target.
     var exprᴛ1 = v.Kind();
-    var matchᴛ2 = exprᴛ1 == reflect.ΔInterface || (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.ΔSlice);
-    if (exprᴛ1 == reflect.ΔInterface) {
+    var matchᴛ2 = exprᴛ1 == reflect.Interface || (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.Slice);
+    if (exprᴛ1 == reflect.Interface) {
         if (v.NumMethod() == 0) {
             // Decoding into nil interface? Switch to non-reflect code.
             var ai = Ꮡd.arrayInterface();
@@ -593,7 +626,7 @@ internal static error Δarray(this ж<decodeState> Ꮡd, reflectꓸValue v) {
         Ꮡd.skip();
         return default;
     }
-    if (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.ΔSlice) {
+    if (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.Slice) {
         do {
             break;
         } while (false);
@@ -608,7 +641,7 @@ internal static error Δarray(this ж<decodeState> Ꮡd, reflectꓸValue v) {
         }
 
         // Expand slice length, growing the slice if necessary.
-        if (v.Kind() == reflect.ΔSlice) {
+        if (v.Kind() == reflect.Slice) {
             if (i >= v.Cap()) {
                 v.Grow(1);
             }
@@ -624,7 +657,7 @@ internal static error Δarray(this ж<decodeState> Ꮡd, reflectꓸValue v) {
             }
         } else {
             // Ran out of fixed array: skip.
-            var err = Ꮡd.value(new reflectꓸValue()); if (err != nil) {
+            var err = Ꮡd.value(new reflect.Value()); if (err != nil) {
                 return err;
             }
         }
@@ -651,18 +684,22 @@ internal static error Δarray(this ж<decodeState> Ꮡd, reflectꓸValue v) {
             v.SetLen(i); // truncate the slice
         }
     }
-    if (i == 0 && v.Kind() == reflect.ΔSlice) {
+    if (i == 0 && v.Kind() == reflect.Slice) {
         v.Set(reflect.MakeSlice(v.Type(), 0, 0));
     }
     return default;
 }
 
+} partial class json_package {
+
 internal static slice<byte> nullLiteral = slice<byte>("null"u8);
-internal static reflectꓸType textUnmarshalerType = reflect.TypeFor<encoding.TextUnmarshaler>();
+internal static reflect.Type textUnmarshalerType = reflect.TypeFor<encoding.TextUnmarshaler>();
+
+} partial class jsonᴛdecodeState {
 
 // object consumes an object from d.data[d.off-1:], decoding into v.
 // The first byte ('{') of the object has been read already.
-internal static error @object(this ж<decodeState> Ꮡd, reflectꓸValue v) {
+internal static error @object(this ж<decodeState> Ꮡd, reflect.Value v) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Check for unmarshaler.
@@ -681,7 +718,7 @@ internal static error @object(this ж<decodeState> Ꮡd, reflectꓸValue v) {
     var t = v.Type();
 
     // Decoding into nil interface? Switch to non-reflect code.
-    if (v.Kind() == reflect.ΔInterface && v.NumMethod() == 0) {
+    if (v.Kind() == reflect.Interface && v.NumMethod() == 0) {
         var oi = Ꮡd.objectInterface();
         v.Set(reflect.ValueOf(oi));
         return default;
@@ -698,7 +735,7 @@ internal static error @object(this ж<decodeState> Ꮡd, reflectꓸValue v) {
         // Map key must either have string kind, have an integer kind,
         // or be an encoding.TextUnmarshaler.
         switch (t.Key().Kind()) {
-        case var ᴛ2 when ᴛ2 == reflect.ΔString || ᴛ2 == reflect.ΔInt || ᴛ2 == reflect.Int8 || ᴛ2 == reflect.Int16 || ᴛ2 == reflect.Int32 || ᴛ2 == reflect.Int64 || ᴛ2 == reflect.ΔUint || ᴛ2 == reflect.Uint8 || ᴛ2 == reflect.Uint16 || ᴛ2 == reflect.Uint32 || ᴛ2 == reflect.Uint64 || ᴛ2 == reflect.Uintptr: {
+        case var ᴛ2 when ᴛ2 == reflect.String || ᴛ2 == reflect.Int || ᴛ2 == reflect.Int8 || ᴛ2 == reflect.Int16 || ᴛ2 == reflect.Int32 || ᴛ2 == reflect.Int64 || ᴛ2 == reflect.Uint || ᴛ2 == reflect.Uint8 || ᴛ2 == reflect.Uint16 || ᴛ2 == reflect.Uint32 || ᴛ2 == reflect.Uint64 || ᴛ2 == reflect.Uintptr: {
             break;
         }
         default: {
@@ -725,7 +762,7 @@ internal static error @object(this ж<decodeState> Ꮡd, reflectꓸValue v) {
         return default;
     }}
 
-    reflectꓸValue mapElem = new(nil);
+    reflect.Value mapElem = new(nil);
     errorContext origErrorContext = default;
     if (d.errorContext != nil) {
         origErrorContext = d.errorContext.Value;
@@ -752,7 +789,7 @@ internal static error @object(this ж<decodeState> Ꮡd, reflectꓸValue v) {
         }
 
         // Figure out field corresponding to key.
-        reflectꓸValue subv = new(nil);
+        reflect.Value subv = new(nil);
         var destring = false; // whether the value is wrapped in a string to be decoded first
 
         if (v.Kind() == reflect.Map) {
@@ -775,7 +812,7 @@ internal static error @object(this ж<decodeState> Ꮡd, reflectꓸValue v) {
                     d.errorContext = @new<errorContext>();
                 }
                 foreach (var (i, ind) in range(f.index)) {
-                    if (subv.Kind() == reflect.ΔPointer) {
+                    if (subv.Kind() == reflect.Pointer) {
                         if (subv.IsNil()) {
                             // If a struct embeds a pointer to an unexported type,
                             // it is not possible to set a newly allocated value
@@ -786,7 +823,7 @@ internal static error @object(this ж<decodeState> Ꮡd, reflectꓸValue v) {
                                 d.saveError(fmt.Errorf("json: cannot set embedded pointer to unexported struct: %v"u8, subv.Type().Elem()));
                                 // Invalidate subv to ensure d.value(subv) skips over
                                 // the JSON value without assigning it to subv.
-                                subv = new reflectꓸValue();
+                                subv = new reflect.Value();
                                 destring = false;
                                 break;
                             }
@@ -851,7 +888,7 @@ internal static error @object(this ж<decodeState> Ꮡd, reflectꓸValue v) {
         // if using struct, subv points into struct already.
         if (v.Kind() == reflect.Map) {
             var kt = t.Key();
-            reflectꓸValue kv = new(nil);
+            reflect.Value kv = new(nil);
             if (reflect.PointerTo(kt).Implements(textUnmarshalerType)) {
                 kv = reflect.New(kt);
                 var err = d.literalStore(item, kv, true); if (err != nil) {
@@ -860,12 +897,12 @@ internal static error @object(this ж<decodeState> Ꮡd, reflectꓸValue v) {
                 kv = kv.Elem();
             } else {
                 switch (kt.Kind()) {
-                case var ᴛ when ᴛ == reflect.ΔString: {
+                case var ᴛ when ᴛ == reflect.String: {
                     kv = reflect.New(kt).Elem();
                     kv.SetString((@string)key);
                     break;
                 }
-                case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+                case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
                     @string s = (@string)key;
                     var (n, err) = strconv.ParseInt(s, 10, 64);
                     if (err != nil || kt.OverflowInt(n)) {
@@ -876,7 +913,7 @@ internal static error @object(this ж<decodeState> Ꮡd, reflectꓸValue v) {
                     kv.SetInt(n);
                     break;
                 }
-                case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+                case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
                     @string s = (@string)key;
                     var (n, err) = strconv.ParseUint(s, 10, 64);
                     if (err != nil || kt.OverflowUint(n)) {
@@ -931,7 +968,11 @@ internal static (any, error) convertNumber(this ref decodeState d, @string s) {
     return (f, default);
 }
 
-internal static reflectꓸType numberType = reflect.TypeFor<Number>();
+} partial class json_package {
+
+internal static reflect.Type numberType = reflect.TypeFor<Number>();
+
+} partial class jsonᴛdecodeState {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string numberˢ => ref numberˢᵇ;
@@ -946,7 +987,7 @@ private static readonly @string boolˢᵇ = "bool"u8;
 // fromQuoted indicates whether this literal came from unwrapping a
 // string from the ",string" struct tag option. this is used only to
 // produce more helpful error messages.
-internal static error literalStore(this ref decodeState d, slice<byte> item, reflectꓸValue v, bool fromQuoted) {
+internal static error literalStore(this ref decodeState d, slice<byte> item, reflect.Value v, bool fromQuoted) {
     // Check for unmarshaler.
     if (len(item) == 0) {
         // Empty string given.
@@ -999,7 +1040,7 @@ internal static error literalStore(this ref decodeState d, slice<byte> item, ref
             break;
         }
         switch (v.Kind()) {
-        case var ᴛ when ᴛ == reflect.ΔInterface || ᴛ == reflect.ΔPointer || ᴛ == reflect.Map || ᴛ == reflect.ΔSlice: {
+        case var ᴛ when ᴛ == reflect.Interface || ᴛ == reflect.Pointer || ᴛ == reflect.Map || ᴛ == reflect.Slice: {
             v.SetZero();
             // otherwise, ignore null for primitives/string
             break;
@@ -1023,11 +1064,11 @@ internal static error literalStore(this ref decodeState d, slice<byte> item, ref
             }
             break;
         }
-        case var ᴛ when ᴛ == reflect.ΔBool: {
+        case var ᴛ when ᴛ == reflect.Bool: {
             v.SetBool(value);
             break;
         }
-        case var ᴛ when ᴛ == reflect.ΔInterface: {
+        case var ᴛ when ᴛ == reflect.Interface: {
             if (v.NumMethod() == 0) {
                 v.Set(reflect.ValueOf(value));
             } else {
@@ -1050,7 +1091,7 @@ internal static error literalStore(this ref decodeState d, slice<byte> item, ref
             d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "string", Type: v.Type(), Offset: (int64)d.readIndex()))));
             break;
         }
-        case var ᴛ when ᴛ == reflect.ΔSlice: {
+        case var ᴛ when ᴛ == reflect.Slice: {
             if (v.Type().Elem().Kind() != reflect.Uint8) {
                 d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "string", Type: v.Type(), Offset: (int64)d.readIndex()))));
                 break;
@@ -1064,7 +1105,7 @@ internal static error literalStore(this ref decodeState d, slice<byte> item, ref
             v.SetBytes(b.slice(0, n));
             break;
         }
-        case var ᴛ when ᴛ == reflect.ΔString: {
+        case var ᴛ when ᴛ == reflect.String: {
             @string t = (@string)s;
             if (AreEqual(v.Type(), numberType) && !isValidNumber(t)) {
                 return fmt.Errorf("json: invalid number literal, trying to unmarshal %q into Number"u8, item);
@@ -1072,7 +1113,7 @@ internal static error literalStore(this ref decodeState d, slice<byte> item, ref
             v.SetString(t);
             break;
         }
-        case var ᴛ when ᴛ == reflect.ΔInterface: {
+        case var ᴛ when ᴛ == reflect.Interface: {
             if (v.NumMethod() == 0) {
                 v.Set(reflect.ValueOf((@string)s));
             } else {
@@ -1091,7 +1132,7 @@ internal static error literalStore(this ref decodeState d, slice<byte> item, ref
         }
         switch (v.Kind()) {
         default: {
-            if (v.Kind() == reflect.ΔString && AreEqual(v.Type(), numberType)) {
+            if (v.Kind() == reflect.String && AreEqual(v.Type(), numberType)) {
                 // s must be a valid number, because it's
                 // already been tokenized.
                 v.SetString((@string)item);
@@ -1103,7 +1144,7 @@ internal static error literalStore(this ref decodeState d, slice<byte> item, ref
             d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number", Type: v.Type(), Offset: (int64)d.readIndex()))));
             break;
         }
-        case var ᴛ when ᴛ == reflect.ΔInterface: {
+        case var ᴛ when ᴛ == reflect.Interface: {
             var (n, err) = d.convertNumber((@string)item);
             if (err != nil) {
                 d.saveError(err);
@@ -1116,7 +1157,7 @@ internal static error literalStore(this ref decodeState d, slice<byte> item, ref
             v.Set(reflect.ValueOf(n));
             break;
         }
-        case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+        case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
             var (n, err) = strconv.ParseInt((@string)item, 10, 64);
             if (err != nil || v.OverflowInt(n)) {
                 d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((sstring)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
@@ -1125,7 +1166,7 @@ internal static error literalStore(this ref decodeState d, slice<byte> item, ref
             v.SetInt(n);
             break;
         }
-        case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+        case var ᴛ when ᴛ == reflect.Uint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
             var (n, err) = strconv.ParseUint((@string)item, 10, 64);
             if (err != nil || v.OverflowUint(n)) {
                 d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((sstring)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
@@ -1296,6 +1337,8 @@ internal static any literalInterface(this ж<decodeState> Ꮡd) {
         return n;
     }}
 }
+
+} partial class json_package {
 
 // getu4 decodes \uXXXX from the beginning of s, returning the hex value,
 // or it returns -1.

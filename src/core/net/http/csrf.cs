@@ -10,6 +10,7 @@ using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using go.net;
 using go.sync;
+using static http_package;
 
 partial class http_package {
 
@@ -38,13 +39,15 @@ partial struct CrossOriginProtection {
     internal atomic.Pointer<ServeMux> bypass;
     internal sync.RWMutex trustedMu;
     internal map<@string, bool> trusted;
-    internal atomic.Pointer<ΔHandler> deny;
+    internal atomic.Pointer<Handler> deny;
 }
 
 // NewCrossOriginProtection returns a new [CrossOriginProtection] value.
 public static ж<CrossOriginProtection> NewCrossOriginProtection() {
     return Ꮡ(new CrossOriginProtection());
 }
+
+} partial class httpᴛCrossOriginProtection {
 
 // AddTrustedOrigin allows all requests with an [Origin] header
 // which exactly matches the given value.
@@ -86,12 +89,20 @@ public static error AddTrustedOrigin(this ж<CrossOriginProtection> Ꮡc, @strin
     finally { if (ᒐd1) Ꮡc.ᏑtrustedMu.Unlock(); ᒐ.Run(); }
 }
 
+} partial class http_package {
+
 partial struct noopHandler {
 }
 
+} partial class httpᴛnoopHandler {
+
 internal static void ServeHTTP(this noopHandler _Δp0, ResponseWriter _Δp1, ж<Request> _Δp2) { }
 
-internal static ΔHandler sentinelHandler = new noopHandlerжΔHandler(Ꮡ(new noopHandler()));
+} partial class http_package {
+
+internal static Handler sentinelHandler = new noopHandlerжHandler(Ꮡ(new noopHandler()));
+
+} partial class httpᴛCrossOriginProtection {
 
 // AddInsecureBypassPattern permits all requests that match the given pattern.
 //
@@ -131,7 +142,7 @@ public static void AddInsecureBypassPattern(this ж<CrossOriginProtection> Ꮡc,
 // or request handling, and applies to future requests.
 //
 // Check does not call the error handler.
-public static void SetDenyHandler(this ж<CrossOriginProtection> Ꮡc, ΔHandler hʗp) {
+public static void SetDenyHandler(this ж<CrossOriginProtection> Ꮡc, Handler hʗp) {
     ref var h = ref heap(hʗp, out var Ꮡh);
 
     if (h == nil) {
@@ -199,8 +210,12 @@ public static error Check(this ж<CrossOriginProtection> Ꮡc, ж<Request> Ꮡre
     return errCrossOriginRequestFromOldBrowser;
 }
 
+} partial class http_package {
+
 internal static error errCrossOriginRequest = errors.New("cross-origin request detected from Sec-Fetch-Site header");
 internal static error errCrossOriginRequestFromOldBrowser = errors.New("cross-origin request detected, and/or browser is out of date: "u8 + "Sec-Fetch-Site is missing, and Origin does not match Host"u8);
+
+} partial class httpᴛCrossOriginProtection {
 
 // isRequestExempt checks the bypasses which require taking a lock, and should
 // be deferred until the last moment.
@@ -234,8 +249,8 @@ internal static bool isRequestExempt(this ж<CrossOriginProtection> Ꮡc, ж<Req
 // If a request fails cross-origin checks, the request is rejected
 // with a 403 Forbidden status or handled with the handler passed
 // to [CrossOriginProtection.SetDenyHandler].
-public static ΔHandler Handler(this ж<CrossOriginProtection> Ꮡc, ΔHandler h) {
-    return new HandlerFuncᴠΔHandler(new HandlerFunc((ResponseWriter w, ж<Request> r) => {
+public static Handler Handler(this ж<CrossOriginProtection> Ꮡc, Handler h) {
+    return new HandlerFuncᴠHandler(new HandlerFunc((ResponseWriter w, ж<Request> r) => {
         var err = Ꮡc.Check(r); if (err != nil) {
             var deny = Ꮡc.Ꮡdeny.Load(); if (deny != nil) {
                 (deny.ValueSlot).ServeHTTP(w, r);
@@ -248,4 +263,4 @@ public static ΔHandler Handler(this ж<CrossOriginProtection> Ꮡc, ΔHandler h
     }));
 }
 
-} // end http_package
+} // end httpᴛCrossOriginProtection

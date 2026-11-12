@@ -9,6 +9,7 @@ using atomic = go.sync.atomic_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using go.sync;
 using ꓸꓸꓸany = Span<any>;
+using static trace_package;
 
 partial class trace_package {
 
@@ -76,12 +77,16 @@ partial struct Task {
     internal uint64 id;
 }
 
+} partial class traceᴛTask {
+
 // TODO(hyangah): record parent id?
 
 // End marks the end of the operation represented by the [Task].
 public static void End(this ref Task t) {
     userTaskEnd(t.id);
 }
+
+} partial class trace_package {
 
 internal static readonly ж<uint64> ᏑlastTaskID = new StaticBox<uint64>(0);
 internal static ref uint64 lastTaskID => ref ((StaticBox<uint64>)ᏑlastTaskID).ValueSlot; // task id issued last time
@@ -176,6 +181,8 @@ partial struct Region {
 
 internal static ж<Region> noopRegion = Ꮡ(new Region());
 
+} partial class traceᴛRegion {
+
 // End marks the end of the traced code region.
 public static void End(this ж<Region> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
@@ -185,6 +192,8 @@ public static void End(this ж<Region> Ꮡr) {
     }
     userRegion(r.id, regionEndCode, r.regionType);
 }
+
+} partial class trace_package {
 
 // IsEnabled reports whether tracing is enabled.
 // The information is advisory only. The tracing status

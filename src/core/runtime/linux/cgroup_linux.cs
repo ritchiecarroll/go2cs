@@ -108,7 +108,7 @@ internal static int32 adjustCgroupGOMAXPROCS(int32 procs, cgroup.CPU cpu) {
     var (limit, ok, err) = cgroup.ReadCPULimit(cpu);
     if (err == nil && ok) {
         limit = ceil(limit);
-        limit = builtin.max(limit, 2D);
+        limit = max(limit, 2D);
         if ((int32)limit < procs) {
             procs = (int32)limit;
         }

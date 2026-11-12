@@ -60,6 +60,7 @@ using io = io_package;
 using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
+using static csv_package;
 
 partial class csv_package {
 
@@ -72,6 +73,8 @@ partial struct ParseError {
     public error Err;      // The actual error
 }
 
+} partial class csvᴛParseError {
+
 public static @string Error(this ref ParseError e) {
     if (AreEqual(e.Err, ErrFieldCount)) {
         return fmt.Sprintf("record on line %d: %v"u8, e.Line, e.Err);
@@ -83,6 +86,8 @@ public static @string Error(this ref ParseError e) {
 }
 
 public static error Unwrap(this ref ParseError e) { return e.Err; }
+
+} partial class csv_package {
 
 // These are the errors that can be returned in [ParseError.Err].
 public static error ErrBareQuote = errors.New("bare \" in non-quoted-field");
@@ -170,6 +175,8 @@ public static ж<Reader> NewReader(io.Reader r) {
     ));
 }
 
+} partial class csvᴛReader {
+
 // Read reads one record (a slice of fields) from r.
 // If the record has an unexpected number of fields,
 // Read returns the record along with the error [ErrFieldCount].
@@ -213,10 +220,14 @@ public static int64 InputOffset(this ref Reader r) {
     return r.offset;
 }
 
+} partial class csv_package {
+
 // pos holds the position of a field in the current line.
 partial struct position {
     internal nint line, col;
 }
+
+} partial class csvᴛReader {
 
 // ReadAll reads all the remaining records from r.
 // Each record is a slice of fields.
@@ -270,6 +281,8 @@ internal static (slice<byte>, error) readLine(this ref Reader r) {
     return (line, err);
 }
 
+} partial class csv_package {
+
 // lengthNL reports the number of bytes for the trailing \n.
 internal static nint lengthNL(slice<byte> b) {
     if (len(b) > 0 && b[len(b) - 1] == '\n') {
@@ -283,6 +296,8 @@ internal static rune nextRune(slice<byte> b) {
     var (r, _) = utf8.DecodeRune(b);
     return r;
 }
+
+} partial class csvᴛReader {
 
 internal static (slice<@string>, error) readRecord(this ref Reader r, slice<@string> dst) {
     if (r.Comma == r.Comment || !validDelim(r.Comma) || (r.Comment != 0 && !validDelim(r.Comment))) {
@@ -466,4 +481,4 @@ break_parseField:;
     return (dst, err);
 }
 
-} // end csv_package
+} // end csvᴛReader

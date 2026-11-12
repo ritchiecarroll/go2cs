@@ -12,6 +12,7 @@ using syscall = syscall_package;
 using @unsafe = unsafe_package;
 using @internal.syscall;
 using go.io;
+using static os_package;
 
 partial class os_package {
 
@@ -23,7 +24,7 @@ partial struct dirInfo {
     // buf to dirBufPool.
     internal ж<slice<byte>> buf; // buffer for directory I/O
     internal nint bufp;          // location of next record in buf
-    internal syscallꓸHandle h;
+    internal syscall.Handle h;
     internal uint32 vol;
     internal uint32 @class; // type of entries in buf
     internal @string path;  // absolute directory path, empty if the file system supports FILE_ID_BOTH_DIR_INFO
@@ -46,6 +47,8 @@ internal static UntypedInt dirBufSize => /* 64 * 1024 */ 65536; // 64kB
 )); }
 internal static ref Δsync.Pool dirBufPool => ref ((StaticBox<Δsync.Pool>)ᏑdirBufPool).ValueSlot;
 
+} partial class osᴛdirInfo {
+
 internal static void close(this ref dirInfo d) {
     d.h = 0;
     if (d.buf != nil) {
@@ -54,13 +57,17 @@ internal static void close(this ref dirInfo d) {
     }
 }
 
+} partial class os_package {
+
 // allowReadDirFileID indicates whether File.readdir should try to use FILE_ID_BOTH_DIR_INFO
 // if the underlying file system supports it.
 // Useful for testing purposes.
 internal static readonly ж<bool> ᏑallowReadDirFileID = new StaticBox<bool>(true);
 internal static ref bool allowReadDirFileID => ref ((StaticBox<bool>)ᏑallowReadDirFileID).ValueSlot;
 
-internal static void init(this ж<dirInfo> Ꮡd, syscallꓸHandle h) {
+} partial class osᴛdirInfo {
+
+internal static void init(this ж<dirInfo> Ꮡd, syscall.Handle h) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     d.h = h;
@@ -96,11 +103,17 @@ internal static void init(this ж<dirInfo> Ꮡd, syscallꓸHandle h) {
     }
 }
 
+} partial class osᴛFile {
+
 // go2cs generated this placeholder — func readdir is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+} partial class os_package {
 
 partial struct dirEntry {
     internal ж<fileStat> fs;
 }
+
+} partial class osᴛdirEntry {
 
 internal static @string Name(this dirEntry de) { return de.fs.Name(); }
 internal static bool IsDir(this dirEntry de) { return de.fs.IsDir(); }
@@ -111,4 +124,4 @@ internal static @string String(this dirEntry de) {
     return fs.FormatDirEntry(de);
 }
 
-} // end os_package
+} // end osᴛdirEntry

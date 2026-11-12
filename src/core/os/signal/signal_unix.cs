@@ -28,7 +28,7 @@ partial class signal_package {
 
 internal static void loop() {
     for (;;) {
-        process(new syscall_ΔSignalᴠΔSignal(((syscallꓸSignal)(nint)signal_recv())));
+        process(new syscall_SignalᴠSignal(((syscall.Signal)(nint)signal_recv())));
     }
 }
 
@@ -38,9 +38,9 @@ internal static void loop() {
 
 internal static UntypedInt numSig => 65; // max across all systems
 
-internal static nint signum(osꓸSignal sig) {
+internal static nint signum(os.Signal sig) {
     switch (sig.type()) {
-    case syscallꓸSignal sigΔ1: {
+    case syscall.Signal sigΔ1: {
         nint i = (nint)sigΔ1;
         if (i < 0 || i >= numSig) {
             return -1;

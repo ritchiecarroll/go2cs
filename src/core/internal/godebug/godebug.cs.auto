@@ -68,6 +68,7 @@ using @unsafe = unsafe_package;
 using go;
 using go.@internal;
 using go.sync;
+using static godebug_package;
 
 partial class godebug_package {
 
@@ -107,6 +108,8 @@ partial struct value {
 public static ж<Setting> New(@string name) {
     return Ꮡ(new Setting(name: name));
 }
+
+} partial class godebugᴛSetting {
 
 // Name returns the name of the setting.
 public static @string Name(this ref Setting s) {
@@ -148,6 +151,8 @@ internal static void register(this ж<Setting> Ꮡs) {
     registerMetric("/godebug/non-default-behavior/"u8 + s.Name() + ":events"u8, Ꮡs.of(Setting.ᏑnonDefault).Load);
 }
 
+} partial class godebug_package {
+
 // cache is a cache of all the GODEBUG settings,
 // a locked map[string]*atomic.Pointer[string].
 //
@@ -166,6 +171,8 @@ internal static ref sync.Map cache => ref ((StaticBox<sync.Map>)Ꮡcache).ValueS
 
 internal static readonly ж<value> Ꮡempty = new StaticBox<value>(default(value));
 internal static ref value empty => ref ((StaticBox<value>)Ꮡempty).ValueSlot;
+
+} partial class godebugᴛSetting {
 
 // Value returns the current value for the GODEBUG setting s.
 //
@@ -187,6 +194,8 @@ public static @string Value(this ж<Setting> Ꮡs) {
     }
     return v.text;
 }
+
+} partial class godebug_package {
 
 // lookup returns the unique *setting value for the given name.
 internal static ж<setting> lookup(@string name) {
@@ -338,12 +347,16 @@ partial struct runtimeStderr {
 internal static readonly ж<runtimeStderr> Ꮡstderr = new StaticBox<runtimeStderr>(default(runtimeStderr));
 internal static ref runtimeStderr stderr => ref ((StaticBox<runtimeStderr>)Ꮡstderr).ValueSlot;
 
+} partial class godebugᴛruntimeStderr {
+
 internal static (nint, error) Write(this ref runtimeStderr _, slice<byte> b) {
     if (len(b) > 0) {
         write(2, @unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), (int32)len(b));
     }
     return (len(b), default);
 }
+
+} partial class godebug_package {
 
 // Since we cannot import os or syscall, use the runtime's write function
 // to print to standard error.

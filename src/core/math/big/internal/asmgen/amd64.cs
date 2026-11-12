@@ -63,7 +63,7 @@ private static readonly @string adoxqˢᵇ = "ADOXQ"u8;
 internal static ref readonly @string adcxqˢ => ref adcxqˢᵇ;
 private static readonly @string adcxqˢᵇ = "ADCXQ"u8;
 
-internal static bool amd64Add(ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dst, ΔCarry carry) {
+internal static bool amd64Add(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry carry) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.Enabled(OptionAltCarry)) {
@@ -72,15 +72,15 @@ internal static bool amd64Add(ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dst, �
         // use ADOX. Otherwise we have to use ADCX.
         // Using regular ADD/ADC would smash both carry flags,
         // so we reject anything we can't handled with ADCX/ADOX.
-        if ((ΔCarry)(carry & UseCarry) != 0 && (ΔCarry)(carry & ((ΔCarry)(SetCarry | SmashCarry))) != 0) {
-            if ((ΔCarry)(carry & ΔAltCarry) != 0) {
+        if ((Carry)(carry & UseCarry) != 0 && (Carry)(carry & ((Carry)(SetCarry | SmashCarry))) != 0) {
+            if ((Carry)(carry & AltCarry) != 0) {
                 Ꮡa.op3(adoxqˢ, src1, src2, dst);
             } else {
                 Ꮡa.op3(adcxqˢ, src1, src2, dst);
             }
             return true;
         }
-        if ((ΔCarry)(carry & ((ΔCarry)(SetCarry | UseCarry))) == SetCarry && a.IsZero(src1) && src2 == dst) {
+        if ((Carry)(carry & ((Carry)(SetCarry | UseCarry))) == SetCarry && a.IsZero(src1) && src2 == dst) {
             // Clearing carry flag. Caller will add EOL comment.
             Ꮡa.Printf("\tTESTQ AX, AX\n");
             return true;
@@ -129,7 +129,7 @@ internal static @string x86Suffix(ref Asm a) {
     return "Q";
 }
 
-internal static void x86MulWide(ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dstlo, ΔReg dsthi) {
+internal static void x86MulWide(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dstlo, Reg dsthi) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.Enabled(OptionAltCarry)) {

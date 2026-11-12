@@ -25,7 +25,7 @@ private static readonly @string evalˢᵇ = "eval"u8;
 // same as in [CheckExpr]. An error is returned if expr cannot
 // be parsed successfully, or the resulting expr AST cannot be
 // type-checked.
-public static (TypeAndValue, error err) Eval(ж<token.FileSet> fset, ж<Package> pkg, tokenꓸPos pos, @string expr) {
+public static (TypeAndValue, error err) Eval(ж<token.FileSet> fset, ж<Package> pkg, token.Pos pos, @string expr) {
     error err = default;
 
     // parse expressions
@@ -34,7 +34,7 @@ public static (TypeAndValue, error err) Eval(ж<token.FileSet> fset, ж<Package>
         return (new TypeAndValue(), err);
     }
 
-    var info = Ꮡ(new ΔInfo(
+    var info = Ꮡ(new Info(
         Types: new map<ast.Expr, TypeAndValue>()
     ));
     err = CheckExpr(fset, pkg, pos, node, info);
@@ -59,7 +59,7 @@ public static (TypeAndValue, error err) Eval(ж<token.FileSet> fset, ж<Package>
 // functions ignore the context in which an expression is used (e.g., an
 // assignment). Thus, top-level untyped constants will return an
 // untyped type rather than the respective context-specific type.
-public static error /*err*/ CheckExpr(ж<token.FileSet> fset, ж<Package> Ꮡpkg, tokenꓸPos pos, ast.Expr expr, ж<ΔInfo> info) {
+public static error /*err*/ CheckExpr(ж<token.FileSet> fset, ж<Package> Ꮡpkg, token.Pos pos, ast.Expr expr, ж<Info> info) {
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
@@ -67,7 +67,7 @@ public static error /*err*/ CheckExpr(ж<token.FileSet> fset, ж<Package> Ꮡpkg
         ref var err = ref Ꮡerr.ValueSlot;
 
         // determine scope
-        ж<ΔScope> scope = default;
+        ж<Scope> scope = default;
         if (Ꮡpkg == nil) {
             scope = Universe;
             pos = nopos;

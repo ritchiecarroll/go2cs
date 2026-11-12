@@ -61,12 +61,12 @@ using static go.runtime.trace_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("runtime/trace/annotation.go", "annotation.cs", "ABFMABYCgoKCggAVLIKClAAHFLLalKaqsoKosqaCAAYgABgggoKCogACFAAIAoKUgoIACBKWsoKUrLIAAhDmpqY=")]
+[assembly: GoPositionMap("runtime/trace/annotation.go", "annotation.cs", "ABJMABYCgoKCggAVLIKClAAJFLL6lKaqsoKosqaCAAYgABgggoKCogACFAAIAoKUgoIACBK2soKUzLIAAhDmpqY=")]
 [assembly: GoPositionMap("runtime/trace/batch.go", "batch.cs", "ABQuooKUgqaAgoKUpICCpIKmgoKUgqaCgpSCpoKClIKmgoKUgpSCgoKUpg==")]
 [assembly: GoPositionMap("runtime/trace/encoding.go", "encoding.cs", "AAwegpiSgoKCgoKCgpSUgpSssoKCgoKUgg==")]
-[assembly: GoPositionMap("runtime/trace/flightrecorder.go", "flightrecorder.cs", "AClgkoKClKaClJSu4oKUgoKCuIKmgqiSgpSCpoKsoAABEAAMAoKUppSmAAcQgoKmgoKUpoKUgoKCuAAbNMY=")]
-[assembly: GoPositionMap("runtime/trace/recorder.go", "recorder.cs", "ABIq8pSSlILKgoKUgoKUgpSCgpSmgpSClIKU5oKmpgAHEIKCuIKUgpSCgqYACRSCqNySABcykg==", "24-31:1", "", "", "", "30:21,31:13")]
-[assembly: GoPositionMap("runtime/trace/subscribe.go", "subscribe.cs", "AB060oKUgoKClIKUgoKCgpTW0oKUlIKCgpSClILW0oKUgoKClIKUgoKCgpTW0oKUlIKCgpSClILWopSUgqaCpqKClIKCgqa4gpS4ooIACBKCgoKUgoKClIKmgoKClIKUgpSCgriCgoKCgpSClILKgqg=", "157-198:1")]
+[assembly: GoPositionMap("runtime/trace/flightrecorder.go", "flightrecorder.cs", "ACpgkoKClKaClJTO4oKUgoKCuIKmgqiSgpSCpoKsoAABEAAMAoKUppSmAAcQgoKmgoKUpoKUgoKCuAAdNMY=")]
+[assembly: GoPositionMap("runtime/trace/recorder.go", "recorder.cs", "ABUq8pSSlILKgoKUgoKUgpSCgpSmgpSClIKU5oKmpgAHEIKCuIKUgpSCgqYACxSCqPySABsykg==", "24-31:1", "", "", "", "33:21,34:13")]
+[assembly: GoPositionMap("runtime/trace/subscribe.go", "subscribe.cs", "ACA60oKUgoKClIKUgoKCgpTW0oKUlIKCgpSClILW0oKUgoKClIKUgoKCgpTW0oKUlIKCgpSClILWopSUgqaCpqKClIKCgqa4gpS4ooIACBKCgoKUgoKClIKmgoKClIKUgpSCgriCgoKCgpSClILKgsg=", "157-198:1")]
 [assembly: GoPositionMap("runtime/trace/trace.go", "trace.cs", "AHLsAbKqog==")]
 // </GoSourcePositionMaps>
 
@@ -115,3 +115,19 @@ public static partial class trace_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(trace_package.FlightRecorder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛFlightRecorder;
+[GoMethodHost(typeof(trace_package.Region)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛRegion;
+[GoMethodHost(typeof(trace_package.Task)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛTask;
+[GoMethodHost(typeof(trace_package.eventTime)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛeventTime;
+[GoMethodHost(typeof(trace_package.frequency)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛfrequency;
+[GoMethodHost(typeof(trace_package.recorder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛrecorder;
+[GoMethodHost(typeof(trace_package.traceMultiplexer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛtraceMultiplexer;
+// </MethodHolders>
