@@ -51,6 +51,10 @@ func (v *Visitor) importsStaticMembers() bool {
 		return true
 	}
 
+	if v.fileHasMethodHolder {
+		return true
+	}
+
 	imports := v.packageImports.String()
 
 	return strings.HasPrefix(imports, "using static ") || strings.Contains(imports, "\nusing static ")
@@ -170,6 +174,9 @@ func (v *Visitor) visitFile(file *ast.File) {
 	// its nested types occlude — see forcingTargetShadowed. Set before the decl walk below, since
 	// import specs are the first decls of every file and consult it as they are visited.
 	v.emittedClassName = packageClassName
+	v.fileClassName, v.openClassName, v.fileHasMethodHolder = packageClassName, packageClassName, false
+	v.astFile, v.fileUsesSelfAlias, v.fileSelfAliasDecided, v.fileSelfAliasIsBlocked = file, false, false, false
+	v.fileSelectorSels = nil
 
 	v.writeOutput(UsingsMarker)
 	v.writeOutputLn("partial class %s {", packageClassName)
@@ -198,11 +205,26 @@ func (v *Visitor) visitFile(file *ast.File) {
 		}
 
 		mark := v.outputBuilder.Len()
+		openClass := v.openClassName
 		v.lastDeclShape = declShapeOther
 		v.visitDecl(decl)
 
 		if genDecl, isGen := decl.(*ast.GenDecl); (isGen && genDecl.Tok == token.IMPORT) || !v.emittedSince(mark) {
 			*previous = nil
+			continue
+		}
+
+		// A function switches to its own class as it is emitted (placeFuncDecl). Any other declaration
+		// is the package's, and follows a method only after its holder's block is closed.
+		if _, isFunc := decl.(*ast.FuncDecl); !isFunc {
+			if switched := v.switchClass(packageClassName); switched != "" {
+				v.spliceOutput(mark, v.newline+strings.TrimSuffix(switched, v.newline))
+			}
+		}
+
+		// A class switch stands between two blank lines, however Go spaces the two declarations.
+		if v.openClassName != openClass {
+			*previous, *previousShape = decl, v.lastDeclShape
 			continue
 		}
 
@@ -231,7 +253,7 @@ func (v *Visitor) visitFile(file *ast.File) {
 		}
 	}
 
-	v.writeOutputLn("} // end %s", packageClassName)
+	v.writeOutputLn("} // end %s", v.openClassName)
 
 	if cgoPart.Len() > 0 {
 		v.outputBuilder.WriteString(v.newline)
@@ -354,6 +376,17 @@ func (v *Visitor) visitFile(file *ast.File) {
 		}
 
 		v.packageImports.WriteString(fmt.Sprintf("using %s;%s", requiredUsing, v.newline))
+	}
+
+	// A method's body reads its package's names as Go wrote them, and its holder is not the class that
+	// declares them: the file imports that class's names, and names the class itself where a holder had
+	// to qualify one (selfQualifier).
+	if v.fileUsesSelfAlias {
+		v.packageImports.WriteString(fmt.Sprintf("using %s = %s;%s", getSanitizedImport(importQualifier(packageName)), packageClassName, v.newline))
+	}
+
+	if v.fileHasMethodHolder {
+		v.packageImports.WriteString(fmt.Sprintf("using static %s;%s", packageClassName, v.newline))
 	}
 
 	if v.packageImports.Len() > 0 {

@@ -18,7 +18,6 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"go/types"
 	"os"
 	"path/filepath"
 	"strings"
@@ -502,8 +501,6 @@ func TestTheInitializerIsQualifiedUnderEitherImportForm(t *testing.T) {
 			outputPath := t.TempDir()
 			options := testVariantOptions(Options{indentSpaces: 4, preferVarDecl: true, useChannelOperators: true}, testProjectRecompile, false, "bridge")
 
-			testMethodRenames = make(map[types.Object]bool)
-			defer func() { testMethodRenames = nil }()
 
 			if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", productionSeed{}, options); err != nil {
 				t.Fatalf("convertTestVariant: %v", err)
@@ -558,8 +555,6 @@ func TestAGroupedSpecReadsItsEmbedDirectiveOnce(t *testing.T) {
 			outputPath := t.TempDir()
 			options := testVariantOptions(Options{indentSpaces: 4, preferVarDecl: true, useChannelOperators: true}, testProjectRecompile, false, "bridge")
 
-			testMethodRenames = make(map[types.Object]bool)
-			defer func() { testMethodRenames = nil }()
 
 			if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", productionSeed{}, options); err != nil {
 				t.Fatalf("convertTestVariant: %v", err)

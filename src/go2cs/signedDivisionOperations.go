@@ -164,12 +164,13 @@ func (v *Visitor) signedDividendCannotOverflow(dividend ast.Expr) bool {
 
 // signedDivisionHelperName spells golib's quo or rem, qualified as `builtin.<name>` wherever a Go
 // name would bind first in C#: a package-level declaration of that name (go/constant declares its own
-// `quo`), or any object of that name declared anywhere in the enclosing function -- a variable, a
+// `quo`), a method of that name on the holder the code is emitted into, or any object of that name
+// declared anywhere in the enclosing function -- a variable, a
 // constant, a type, or a type-switch binding (whose per-clause objects live in info.Implicits). A C#
 // local is in scope in its whole block, including before its declaration, so `r := a % b; const rem =
 // 10` needs the qualification even though Go's scope for rem starts after it.
 func (v *Visitor) signedDivisionHelperName(name string) string {
-	shadowed := packageFuncMethodNames != nil && packageFuncMethodNames[name] ||
+	shadowed := v.holderDeclares(name) ||
 		v.funcScopeVarNames.Contains(name) ||
 		v.pkg != nil && v.pkg.Scope().Lookup(name) != nil ||
 		v.funcDeclaresName(name)

@@ -738,8 +738,8 @@ method would forward to `recvᴛ.<Func>_<name>.F()` (CS0120/CS1061, met in Burnt
 `TestEncodeAnonymousNoStructField`). The interface lift therefore records its stamp exactly as the struct lift does:
 
 <!-- illustration: the two strings the guard asserts, the declaration and its record:
-     src/go2cs/internalTestLocalInterfaceStamp_test.go:88 `internal partial interface TestLocalEmbeddedInterface_Inner`
-     and :102 `[GoLocalName("Inner")] partial interface TestLocalEmbeddedInterface_Inner {}` -->
+     src/go2cs/internalTestLocalInterfaceStamp_test.go:85 `internal partial interface TestLocalEmbeddedInterface_Inner`
+     and :99 `[GoLocalName("Inner")] partial interface TestLocalEmbeddedInterface_Inner {}` -->
 ```csharp
 internal partial interface TestLocalEmbeddedInterface_Inner /*dyn*/ {
 …

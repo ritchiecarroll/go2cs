@@ -11,6 +11,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"golang.org/x/tools/go/packages"
@@ -36,8 +37,8 @@ func loadReExportFixtureDependency(t *testing.T) *packages.Package {
 		"app.go": "package app\n\nimport \"example/sibmeta/dep\"\n\nvar Mode dep.Thing\n",
 	})
 
-	// `other` carries the TARGET shapes: a plain struct, a type that collides with a method IN ITS
-	// OWN package (so a reference to it must be Δ-renamed), an INLINE interface definition (a real
+	// `other` carries the TARGET shapes: a plain struct, a type named like a method IN ITS OWN
+	// package (which keeps its Go name), an INLINE interface definition (a real
 	// nested C# interface), a methodless named func type (rendered inline as its base delegate,
 	// with no named type to point at), and a defined type over a named interface (itself emitted as
 	// a using alias, so a reference to it would need a second hop).
@@ -141,12 +142,12 @@ func TestForeignReExportedAliasesAreDerivedFromTheDependency(t *testing.T) {
 		t.Fatalf("alias to a foreign defined type must publish its qualified target, got %q", got)
 	}
 
-	// The target's OWN collision rename applies — internal/reflectlite's `type Kind = abi.Kind`
-	// publishes `go.@internal.abi_package.ΔKind` because abi Δ-renames Kind. This also pins the
-	// ALIAS exemption: `Kind` names a method in `dep` too, but a type alias is never Δ-renamed, so
-	// it belongs to this lane and not to the collision lane.
-	if got := derived["Kind"]; got != otherClass+"."+ShadowVarMarker+"Kind" {
-		t.Fatalf("alias target must carry the target package's own collision rename, got %q", got)
+	// A target named like a METHOD of its own package keeps its Go name (internal/reflectlite's
+	// `type Kind = abi.Kind`, where abi declares `(Kind).String` and others beside the type): the
+	// method stands in its receiver's holder, so the package class declares `Kind` alone. `Kind`
+	// names a method in `dep` too, which changes nothing either.
+	if got := derived["Kind"]; got != otherClass+".Kind" {
+		t.Fatalf("alias target named like a method of its package must keep its Go name, got %q", got)
 	}
 
 	// An INLINE interface definition in the target package is a real nested C# interface (io/fs's
@@ -221,7 +222,6 @@ func TestForeignReExportedAliasesIgnoreRunAccumulatedState(t *testing.T) {
 	// Re-derive with the run-accumulated state poisoned in both directions: a name the dependency
 	// does NOT rename marked as colliding, and an alias map claiming a different target.
 	foreignDerivedAliases = nil
-	foreignCollisionAliases = nil
 	nameCollisions = map[string]bool{"Thing": true, "Kind": true}
 	importedTypeAliases = map[string]string{"other.Thing": "go.wrong_package.Thing"}
 
@@ -244,7 +244,6 @@ func TestForeignReExportedAliasesIgnoreRunAccumulatedState(t *testing.T) {
 func TestUnconvertedDependencyRendersReExportedAlias(t *testing.T) {
 	resetPackageState(&packages.Package{})
 	foreignDerivedAliases = nil
-	foreignCollisionAliases = nil
 
 	dependency := loadReExportFixtureDependency(t)
 
@@ -278,5 +277,133 @@ func TestUnconvertedDependencyRendersReExportedAlias(t *testing.T) {
 
 	if usedImportedTypeAliases.Contains("dep.Stream") {
 		t.Fatal("an unreferenced derived alias must not be marked used")
+	}
+}
+
+func aliasPairs(aliases [][2]string) map[string]string {
+	pairs := make(map[string]string, len(aliases))
+
+	for _, alias := range aliases {
+		pairs[alias[0]] = alias[1]
+	}
+
+	return pairs
+}
+
+// loadMethodNamedFixtureDependency materializes a two-package module whose `dep` package declares a
+// const, three defined types and a methodless func type, each named like a METHOD of the package,
+// loads the CONSUMER, and returns the loaded dependency as the consumer sees it.
+func loadMethodNamedFixtureDependency(t *testing.T) *packages.Package {
+	t.Helper()
+
+	dir := t.TempDir()
+
+	if err := os.MkdirAll(filepath.Join(dir, "dep"), 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	writeModuleFiles(t, dir, map[string]string{
+		"go.mod": "module example/collision\n\ngo 1.23\n",
+		"app.go": "package app\n\nimport \"example/collision/dep\"\n\nvar Elapsed = 2 * dep.Second\n",
+	})
+
+	writeModuleFiles(t, filepath.Join(dir, "dep"), map[string]string{
+		"dep.go": `package dep
+
+type Duration int64
+
+const (
+	Nanosecond Duration = 1
+	Second     Duration = 1000 * Nanosecond
+)
+
+type Month int
+
+type Token any
+
+type Filter func(string) bool
+
+type Set[T comparable] map[T]struct{}
+
+type Clock struct{}
+
+func (Clock) Second() int      { return 0 }
+func (Clock) Month() Month     { return 0 }
+func (Clock) Token() Token     { return nil }
+func (Clock) Filter() Filter   { return nil }
+func (Clock) Duration() string { return "" }
+func (Clock) Set(int)          {}
+`,
+	})
+
+	loaded, err := packages.Load(&packages.Config{Mode: packages.LoadAllSyntax, Dir: dir}, ".")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(loaded) != 1 {
+		t.Fatalf("expected the consumer package to load, got %d packages", len(loaded))
+	}
+
+	if len(loaded[0].Errors) > 0 {
+		t.Fatalf("consumer package load failed: %v", loaded[0].Errors)
+	}
+
+	dependency := loaded[0].Imports["example/collision/dep"]
+
+	if dependency == nil {
+		t.Fatal("the dependency was not reachable through the consumer's import graph")
+	}
+
+	return dependency
+}
+
+// A package-level name that is also a METHOD name of its package is spelled as Go wrote it by every
+// consumer. Until 2026-11-11 the methods were members of the package class, the element took a
+// marker there (`time.ΔSecond`, `time.ΔMonth`), and a consumer converted without its dependency had
+// to derive that rename from the dependency's own declarations. A method is now a member of its
+// receiver type's holder, so the dependency publishes no rename, and what it does publish for such
+// a name is what it publishes for any other: a defined type over the empty interface is `object`.
+func TestForeignNameSharedWithAMethodIsNotRenamed(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	resetPackageState(&packages.Package{})
+	foreignDerivedAliases = nil
+
+	dependency := loadMethodNamedFixtureDependency(t)
+	derived := foreignDerivedTypeAliases(dependency)
+
+	for _, alias := range derived {
+		if strings.Contains(alias[0]+alias[1], ShadowVarMarker) {
+			t.Fatalf("no derived entry may carry a marker, got %q -> %q", alias[0], alias[1])
+		}
+	}
+
+	pairs := aliasPairs(derived)
+
+	// The const, the defined types and the generic type are members of the package class under
+	// their Go names, and a methodless func type is rendered as its delegate: none takes an alias.
+	for _, name := range []string{"Second", "Nanosecond", "Month", "Duration", "Filter", "Set"} {
+		if got, published := pairs[name]; published {
+			t.Fatalf("%s must publish no alias, got %q", name, got)
+		}
+	}
+
+	if got := pairs["Token"]; got != "object" {
+		t.Fatalf("a defined type over the empty interface must publish object, got %q", got)
+	}
+
+	// End-to-end at the decision that emits: a consumer with NO package_info.cs to read.
+	info := PackageInfo{PackageName: "example.collision.dep", RootPackageName: "dep", SourceDir: dependency.Dir}
+	applyExportedTypeAliases(derived, info)
+
+	for _, name := range []string{"dep.Second", "dep" + PackageSuffix + ".Second", "dep.Month", "dep.Duration", "dep.Nanosecond"} {
+		if got := getAliasedTypeName(name); got != name {
+			t.Fatalf("%s must render as Go wrote it, got %q", name, got)
+		}
+	}
+
+	if got := importedTypeAliases["dep.Token"]; got != "object" {
+		t.Fatalf("the empty-interface type must alias to bare object, got %q", got)
 	}
 }

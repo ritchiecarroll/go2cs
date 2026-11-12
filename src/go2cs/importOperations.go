@@ -960,11 +960,9 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 
 		// Most exported aliases are still knowable — they are a function of the dependency's OWN
 		// declarations — so derive and apply those, giving a single-package conversion the same
-		// foreign spelling a whole-stdlib run produces: its name-collision renames (an unrenamed
-		// `time.Second` binds the `Second(this Time)` method group and does not compile) and its
-		// re-exported type aliases (`os.FileMode` is a using alias to `go.io.fs_package.FileMode`,
-		// not a member of `os_package` — CS0426). See foreignNameCollisions.go and
-		// foreignTypeAliases.go for the invariant and for what deliberately stays underivable.
+		// foreign spelling a whole-stdlib run produces: its re-exported type aliases (`os.FileMode`
+		// is a using alias to `go.io.fs_package.FileMode`, not a member of `os_package` — CS0426).
+		// See foreignTypeAliases.go for the invariant and for what deliberately stays underivable.
 		applyExportedTypeAliases(foreignDerivedTypeAliases(importedPackageSources[filepath.Clean(info.SourceDir)]), info)
 		return
 	}

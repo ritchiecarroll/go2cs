@@ -750,14 +750,8 @@ func testImplCompanionAppliesTo(name, goos string) bool {
 }
 
 func processTestConversion(inputPath, outputPath string, options Options) (err error) {
-	// The sibling declarator names steer the PRODUCTION pass only (see siblingTestFuncMethodNames);
-	// that pass is complete by the time this runs. Each variant's own analysis then computes the
-	// shadow set from its own universe — the in-package variant already contains these names, and
-	// the external variant's declarations live in a different C# class, so leaving them set would
-	// only over-qualify the external half's package idents.
-	siblingTestFuncMethodNames = nil
-
-	// Likewise for the addressed-global seed: each variant's universe already CONTAINS the
+	// The addressed-global seed steers the PRODUCTION pass only, and that pass is complete by the
+	// time this runs: each variant's universe already CONTAINS the
 	// `_test.go` files, so its own collectAddressedGlobals sees `&g` (and `g.inc` as a value)
 	// directly. The seed exists only for the production pass, which cannot.
 	siblingTestAddressedGlobalNames = nil
@@ -1332,11 +1326,10 @@ func convertTestVariants(model testProjectModel, production, internal, external 
 		options.testPackageName = ""
 	}
 
-	// Session-scoped, not per-variant (B2/B9): both variants come from the ONE load the caller
-	// performed, so the external variant's references to an internal-variant-renamed method (the
-	// export_test pattern) resolve by object identity to entries registered during the internal
-	// pass — resetPackageState deliberately does not clear this map.
-	testMethodRenames = make(map[types.Object]bool)
+	// Session-scoped, not per-variant: both variants come from the ONE load the caller performed, so
+	// the external variant's references to a type the internal variant renamed resolve by object
+	// identity to entries registered during the internal pass — resetPackageState deliberately does
+	// not clear this map.
 	testTypeRenames = make(map[types.Object]bool)
 	whiteboxInternalTestObjects = collectWhiteboxInternalTestObjects(internal)
 
@@ -3230,6 +3223,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	collectStackAppendHints(allEntries, pkg.Fset, pkg.Types, pkg.TypesInfo, pkg.Dir, options)
 	collectAddressedGlobals(allEntries, pkg.Types, pkg.TypesInfo)
 	computeImportAliasRenames(allEntries, pkg.Types, packageNamespace, options.go2csPath, goosOfTarget(options.targetPlatform), true)
+	computeSelfAlias(pkg.Types, packageNamespace)
 	collectPackageLevelLiteralStructFieldTypes(allEntries, pkg.Types, pkg.TypesInfo)
 	collectPublicizedTypes(pkg.Types, pkg.Fset)
 

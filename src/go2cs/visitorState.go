@@ -265,6 +265,25 @@ type Visitor struct {
 	// them). Read by forcingTargetShadowed, which needs to know which class's nested types can
 	// occlude a namespace-qualified reference written into that class's body.
 	emittedClassName string
+	// fileClassName is the class this file's own class block names, and openClassName the class whose
+	// block is open where the file's emission stands: fileClassName, or the method holder of the
+	// receiver type whose methods are being emitted (methodHolder.go). fileHasMethodHolder records
+	// that the file wrote a holder's block, which is what makes it import its own class's names.
+	fileClassName       string
+	openClassName       string
+	fileHasMethodHolder bool
+	// astFile is the Go file being converted. fileUsesSelfAlias records that a method of the file named
+	// the package's own class through the self-alias, which the file then declares; the two fields after
+	// it cache whether the file may take that alias at all (fileSelfAliasBlocked).
+	astFile                *ast.File
+	fileUsesSelfAlias      bool
+	fileSelfAliasDecided   bool
+	fileSelfAliasIsBlocked bool
+	fileSelectorSels       map[*ast.Ident]bool // selectorSelIdents: the selected names of the file's selector expressions
+	// currentHolderNamed is the receiver type of the method being emitted, whose holder its body stands
+	// in, and nil in a function; currentHolderInTestFile says which half of a -tests unit declares it.
+	currentHolderNamed      *types.Named
+	currentHolderInTestFile bool
 	// A cross-package type reference emits a short-alias form (`pkg.Type`, `@unsafe.Pointer`) that
 	// resolves only through a file-local alias `using <alias> = <namespace>;`. That alias is emitted
 	// when the file imports the package under its canonical (unaliased) name; a file can reference the
@@ -360,6 +379,9 @@ type Visitor struct {
 	currentReturnSignature *types.Signature
 	currentFuncName        string
 	currentFuncPrefix      *strings.Builder
+	// currentFuncHoists receives what is hoisted for a METHOD's body alone, which is emitted beside
+	// the method in its holder; nil for a function, whose one prefix takes it (hoistPrefix).
+	currentFuncHoists *strings.Builder
 	// packageInitLiftName is the name of the PACKAGE-LEVEL declaration whose initializer is
 	// currently being converted — the name seed a type lifted from inside a func literal in that
 	// initializer takes, standing in for the enclosing function name it has no access to.

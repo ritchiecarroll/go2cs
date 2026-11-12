@@ -57,11 +57,14 @@ func typeCollidingFieldName(name string) string {
 		return ShadowVarMarker + ShadowVarMarker + raw
 	}
 
-	// When the enclosing TYPE is itself Δ-renamed for a type-vs-method collision — internal/trace's
-	// `type Label struct{ Label string }` alongside `func (e Event) Label() Label`, so the TYPE
-	// becomes ΔLabel — a single-marker field ΔLabel would EQUAL the type ΔLabel (CS0542 again).
-	// Double the marker (ΔΔLabel) to differ, matching the keyword-family branch above. The type is
-	// only single-Δ (getCollisionAvoidanceIdentifier's non-reserved branch), so ΔΔ is unambiguous.
+	// When the enclosing TYPE is itself Δ-renamed (nameCollisions: a name the emitter spells on its own,
+	// or one C# reads as a keyword in a type position, `type union struct{ union int }`), a
+	// single-marker field would EQUAL the renamed type (CS0542 again). Double the marker to differ,
+	// matching the keyword-family branch above. The type is only single-Δ
+	// (getCollisionAvoidanceIdentifier's non-reserved branch), so ΔΔ is unambiguous. A type named like
+	// a METHOD of its package is not renamed (the method stands in its receiver's holder), so
+	// internal/trace's `type Label struct{ Label string }` beside `func (e Event) Label()` declares
+	// the field with one marker.
 	if nameCollisions[name] {
 		return ShadowVarMarker + ShadowVarMarker + name
 	}
@@ -103,81 +106,6 @@ func fieldCollidesWithOwnerType(fieldName string, xType types.Type) bool {
 	}
 
 	return getSanitizedIdentifier(fieldName) == getSanitizedIdentifier(obj.Name())
-}
-
-// packageMethodNames caches, per package, the set of every method/func name declared in it. Used to
-// detect a type-vs-method collision (a type `T` whose package also declares a func/method named `T`,
-// which Δ-renames the TYPE) for a FOREIGN type, where the current package's `nameCollisions` map does
-// not apply. Package objects are interned per run, so the cache key is stable.
-var packageMethodNames map[*types.Package]map[string]bool
-
-func packageHasMethodNamed(pkg *types.Package, name string) bool {
-	if pkg == nil {
-		return false
-	}
-
-	packageLock.Lock()
-	defer packageLock.Unlock()
-
-	if packageMethodNames == nil {
-		packageMethodNames = map[*types.Package]map[string]bool{}
-	}
-
-	set, ok := packageMethodNames[pkg]
-
-	if !ok {
-		set = map[string]bool{}
-		scope := pkg.Scope()
-
-		for _, n := range scope.Names() {
-			switch o := scope.Lookup(n).(type) {
-			case *types.Func:
-				set[o.Name()] = true
-			case *types.TypeName:
-				if named, isNamed := o.Type().(*types.Named); isNamed {
-					for i := range named.NumMethods() {
-						set[named.Method(i).Name()] = true
-					}
-				}
-			}
-		}
-
-		packageMethodNames[pkg] = set
-	}
-
-	return set[name]
-}
-
-// fieldTypeIsRenamed reports whether a field selector's enclosing named type is itself Δ-renamed for a
-// type-vs-method collision IN ITS OWN package. A FOREIGN such type — internal/trace's `Label`, renamed
-// `ΔLabel` because `func (Event) Label()` shares the name — is not in the CURRENT package's
-// nameCollisions map, so a cross-package field access (`l.Label`) would emit the SINGLE-marker field
-// name (`ΔLabel`) instead of the DOUBLE the declaration used (`ΔΔLabel`) — CS1061 (internal/trace/
-// testtrace). The double is applied at the access site by consulting the field-type's OWN package.
-func (v *Visitor) fieldTypeIsRenamed(x ast.Expr) bool {
-	xType := v.info.TypeOf(x)
-
-	if xType == nil {
-		return false
-	}
-
-	if ptr, ok := xType.Underlying().(*types.Pointer); ok {
-		xType = ptr.Elem()
-	}
-
-	named, ok := xType.(*types.Named)
-
-	if !ok {
-		return false
-	}
-
-	obj := named.Obj()
-
-	if obj.Pkg() == nil || obj.Parent() != obj.Pkg().Scope() {
-		return false
-	}
-
-	return packageHasMethodNamed(obj.Pkg(), obj.Name())
 }
 
 // valueMethodHasBoxTwin reports whether go2cs-gen's RecvGenerator gives the VALUE-receiver method fn a
@@ -1185,20 +1113,6 @@ func (v *Visitor) aliasResolvedSelector(selectorExpr *ast.SelectorExpr, rendered
 		return rendered
 	}
 
-	// A foreign GENERIC type its package Δ-renames (tsc's `collections.Set[T]` beside `OrderedMap.Set`) spells
-	// its renamed member directly: `coll.ΔSet<…>`. The imported-alias route below would answer `collꓸSet`, the
-	// `global using` name, and C# cannot alias an open generic, so that name is CS0426 at the reference and the
-	// `global using collꓸSet = …ΔSet;` it earns is CS0305 in package_info.cs. See foreignRenamedGenericMember.
-	if obj, ok := v.info.Uses[selectorExpr.Sel].(*types.TypeName); ok {
-		if member, renamed := foreignRenamedGenericMember(obj); renamed {
-			// Only the member is swapped: the qualifier stays this file's own spelling of the import, and any
-			// type arguments already rendered after the name stay where they are.
-			if qualifier, rest, found := strings.Cut(rendered, "."); found && strings.HasPrefix(rest, obj.Name()) {
-				return qualifier + "." + member + rest[len(obj.Name()):]
-			}
-		}
-	}
-
 	// An ALIASED import (`import pl "PALib"`) renders its base as the file's alias, but the table
 	// is keyed by the package's DECLARED name, so `pl.B2` found nothing and a composite literal of
 	// the imported type alias `B2` rendered `new pl.B2(…)`: B2 is a `global using`, not a member of
@@ -1277,17 +1191,6 @@ func importedTypeAliasIsAmbiguous(aliasObj *types.TypeName) bool {
 	defer packageLock.Unlock()
 
 	return ambiguousImportedTypeAliases.Contains(key)
-}
-
-// importedTypeAliasPublished reports whether this conversion loaded an imported-type-alias entry under key
-// (`<package>.<Name>`), which it does only for the packages it imports.
-func importedTypeAliasPublished(key string) bool {
-	packageLock.Lock()
-	defer packageLock.Unlock()
-
-	_, published := importedTypeAliases[key]
-
-	return published
 }
 
 // ambiguousImportedTypeAliasTarget returns the fully-qualified target that pkg ITSELF published under
@@ -1571,31 +1474,17 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 			}
 		}
 
-		// A FOREIGN-package type's method expression — `(*http.Request).Write` (net/http/httputil
-		// persist.go), or `(*Reader).ReadBytes` in an EXTERNAL test (`package bufio_test`) that
-		// dot-imports `bufio` — must QUALIFY the method's static form: the [GoRecv]/extension static
-		// (and its RecvGenerator ж-overload) lives in the DEFINING package's class, so the bare name
-		// is CS0103 (a `using static` exposes an extension method only for `recv.M()` invocation, not
-		// as a bare method group; a same-named local method would instead mis-bind, CS0123). Derive
-		// the qualifier from the method's OWN package via go/types — identical to how getAliasQualifiedTypeName
-		// qualifies the receiver type inside the delegate (`bufio.Reader`) — rather than peeling the
-		// Go source spelling: a dot-imported type is a BARE ident (`Reader`), not a `pkg.Type`
-		// selector, so the source-peel misses it and drops the qualifier.
-		if obj := sel.Obj(); obj != nil && obj.Pkg() != nil && (obj.Pkg() != v.pkg || v.whiteboxProductionObject(obj)) {
-			pkg := obj.Pkg()
-			aliasQualifier := importQualifier(pkg.Name())
-
-			if v.whiteboxProductionObject(obj) {
-				aliasQualifier = "global::" + packageNamespace + "." + getSanitizedImport(v.options.testProductionName+PackageSuffix)
-			} else if v.whiteboxBridgeObject(obj) {
-				// A method VALUE bound to a bridge-declared method lives in the bridge class,
-				// not in the production package the object's Pkg() reports.
-				aliasQualifier = "global::" + packageNamespace + "." + v.options.testInternalBridgeName
-			} else if fileAlias, ok := v.importPathAliases[pkg.Path()]; ok && fileAlias != "" {
-				aliasQualifier = fileAlias
+		// A method expression names the method's STATIC form, which is a member of the method's HOLDER: the
+		// class of its receiver type beside the package class (methodHolder.go), in this package as in any
+		// other: `mainᴛwords.Len`, `global::go.net.httpᴛRequest.Write` for `(*http.Request).Write`. The
+		// bare name binds nothing outside the holder (a `using static` exposes an extension method for
+		// `recv.M()` only, never as a method group), and inside one it could bind a package function of
+		// the same name. The holder is derived from the method's own receiver type through go/types, never
+		// from the Go spelling: a dot-imported type is a bare ident (`Reader`) with no selector to peel.
+		if fn, ok := sel.Obj().(*types.Func); ok {
+			if holder := v.methodHolderRef(fn); holder != "" {
+				methodName = holder + "." + methodName
 			}
-
-			methodName = aliasQualifier + "." + methodName
 		}
 
 		// A method expression on the POINTER type (`(*T).Method`) whose underlying declaration
@@ -2895,10 +2784,6 @@ func (v *Visitor) getSelIdentContext(selectorExpr *ast.SelectorExpr) IdentContex
 	if sel, ok := v.info.Selections[selectorExpr]; ok && sel.Kind() == types.FieldVal {
 		context.isField = true
 		context.fieldCollidesWithType = v.fieldCollidesWithType(selectorExpr.Sel, selectorExpr.X)
-
-		if context.fieldCollidesWithType {
-			context.fieldTypeIsRenamed = v.fieldTypeIsRenamed(selectorExpr.X)
-		}
 	}
 
 	return context

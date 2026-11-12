@@ -266,14 +266,12 @@ func TestEveryFileOfAReferenceModelTestProjectBindsByAlias(t *testing.T) {
 		testInternalBridgeName: bridgeName,
 	}
 
-	testMethodRenames = make(map[types.Object]bool)
 	testTypeRenames = make(map[types.Object]bool)
 	whiteboxInternalTestObjects = collectWhiteboxInternalTestObjects(internal)
 	whiteboxBridgeDeclaredNames = collectWhiteboxBridgeDeclaredNames(internal)
 	whiteboxBridgeTypeNames = collectWhiteboxBridgeTypeNames(internal)
 
 	t.Cleanup(func() {
-		testMethodRenames = nil
 		testTypeRenames = nil
 		whiteboxInternalTestObjects = nil
 		whiteboxBridgeDeclaredNames = hashset.HashSet[string]{}
@@ -348,11 +346,9 @@ func TestAnExternalOnlyTestFileBindsByAlias(t *testing.T) {
 		testMetadataAnchorName: getSanitizedImport("aliasexternal_test" + PackageSuffix),
 	}
 
-	testMethodRenames = make(map[types.Object]bool)
 	testTypeRenames = make(map[types.Object]bool)
 
 	t.Cleanup(func() {
-		testMethodRenames = nil
 		testTypeRenames = nil
 	})
 

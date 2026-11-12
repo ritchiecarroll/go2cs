@@ -70,28 +70,12 @@ func performGlobalVariableAnalysis(decls []ast.Decl, info *types.Info, globalIde
 						globalIdentNames[ident] = getSanitizedIdentifier(varName)
 						globalScope[varName] = varObj
 
-						// THE rename site for a package-level var — so it is also where a
-						// `-tests` conversion records the rename for the OTHER variant to read.
-						// `export_test.go`'s `var Lock = lock` collides with RWMutex's own `Lock`
-						// METHOD, and getSanitizedIdentifier above Δ-renames the var to `ΔLock`
-						// exactly as getCollisionAvoidanceIdentifier's doc comment describes for a
-						// type-vs-method collision. The EXTERNAL test variant referencing
-						// `runtime.Lock` renders through whiteboxBridgeMember, whose own
-						// nameCollisions is the fresh per-variant map whiteboxBridgeNamedType's doc
-						// comment already explains for types — it has no entry for a name the
-						// external variant's files never declare, so the bridge spelled the bare
-						// `Lock` against a declaration emitted as `ΔLock` (CS1503, metrics_test).
-						// testTypeRenames is object-keyed and session-scoped for precisely this.
-						//
-						// It must be registered HERE and not in visitValueSpec: by the time that
-						// visitor runs, getIdentName returns this map's POST-rename `ΔLock`, for
-						// which nameCollisions answers false — a registration there cannot fire for
-						// any package-level var. Nil outside a `-tests` conversion (and during the
-						// production pass that precedes one), which is the whole gate this needs:
-						// only a `-tests` run has a second variant to inform, and only an object
-						// declared in the run's own package-under-test can reach the lookup
-						// (whiteboxBridgeObject). Nothing here is type-specific, so a renamed var
-						// registers into the identical map visitTypeSpec uses.
+						// THE rename site for a package-level var, so it is also where a `-tests`
+						// conversion records the rename for the OTHER variant to read (see
+						// testTypeRenames). It must be registered HERE and not in visitValueSpec: by
+						// the time that visitor runs, getIdentName returns this map's POST-rename
+						// name, for which nameCollisions answers false. Nil outside a `-tests`
+						// conversion (and during the production pass that precedes one).
 						if testTypeRenames != nil && nameCollisions[varName] {
 							testTypeRenames[varObj] = true
 						}

@@ -1177,14 +1177,16 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 				if v.inFunction && hoistToStatic {
 					hoistedFieldName = claimHoistedConstFieldName(csIDName)
 
-					if v.currentFuncPrefix.Len() > 0 {
-						v.currentFuncPrefix.WriteString(v.newline)
+					prefix := v.hoistPrefix()
+
+					if prefix.Len() > 0 {
+						prefix.WriteString(v.newline)
 					}
 
-					v.currentFuncPrefix.WriteString("// Hoisted Go big-integer constant (single parse; Go folds constants at compile time)")
-					v.currentFuncPrefix.WriteString(v.newline)
-					v.currentFuncPrefix.WriteString(structStaticReadAccessorDecl("private", "GoBigConst", hoistedFieldName, v.newline, "") + fmt.Sprintf("GoBigConst.Parse(\"%s\");", constVal))
-					v.currentFuncPrefix.WriteString(v.newline)
+					prefix.WriteString("// Hoisted Go big-integer constant (single parse; Go folds constants at compile time)")
+					prefix.WriteString(v.newline)
+					prefix.WriteString(structStaticReadAccessorDecl("private", "GoBigConst", hoistedFieldName, v.newline, "") + fmt.Sprintf("GoBigConst.Parse(\"%s\");", constVal))
+					prefix.WriteString(v.newline)
 				}
 
 				if v.inFunction {
@@ -1268,14 +1270,16 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 						fieldAccess = "internal"
 					}
 
-					if v.currentFuncPrefix.Len() > 0 {
-						v.currentFuncPrefix.WriteString(v.newline)
+					prefix := v.hoistPrefix()
+
+					if prefix.Len() > 0 {
+						prefix.WriteString(v.newline)
 					}
 
-					v.currentFuncPrefix.WriteString("// Hoisted Go string constant (single allocation; Go keeps it in RODATA)")
-					v.currentFuncPrefix.WriteString(v.newline)
-					v.currentFuncPrefix.WriteString(structStaticReadAccessorDecl(fieldAccess, strTypeName, fieldName, v.newline, "") + constVal + ";")
-					v.currentFuncPrefix.WriteString(v.newline)
+					prefix.WriteString("// Hoisted Go string constant (single allocation; Go keeps it in RODATA)")
+					prefix.WriteString(v.newline)
+					prefix.WriteString(structStaticReadAccessorDecl(fieldAccess, strTypeName, fieldName, v.newline, "") + constVal + ";")
+					prefix.WriteString(v.newline)
 
 					if valueSpec.Type == nil && len(valueSpec.Values) >= i+1 {
 						typeLenDeviation += token.Pos(utf8.RuneCountInString(fieldName) - utf8.RuneCountInString(constVal))

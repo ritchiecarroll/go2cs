@@ -4063,13 +4063,11 @@ func readConvertedAssembly(t *testing.T, dir string) string {
 	return assembly.String()
 }
 
-// B2 guard (production-name pinning): a `_test.go` METHOD declared over a production TYPE's name
-// must Δ-rename the TEST-side declarator — the production .cs on disk keeps the bare name, so the
-// pre-fix element rename split one assembly into two disagreeing halves (strings' export_test.go
-// `func (r *Replacer) Replacer()`: CS0102 `strings_package` already contains `Replacer` + CS0246
-// `ΔReplacer`). The rename must hold at the declaration, at internal-variant call sites, AND at
-// EXTERNAL-variant call sites (the export_test pattern — both variants share one load, so the
-// session-scoped object-keyed registry carries the internal pass's rename into the external one).
+// A `_test.go` METHOD named like a production TYPE (strings' export_test.go
+// `func (r *Replacer) Replacer()`) stands in the type's test holder, beside the package class, so
+// the package class holds the type alone and neither name is renamed. While methods stood in the
+// package class the method took a marker (CS0102 on the class otherwise); the holder ends that
+// rename at the declaration, at internal-variant call sites and at EXTERNAL-variant call sites.
 func TestTestVariantPinsProductionTypeAgainstTestMethodCollision(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
@@ -4095,27 +4093,28 @@ func TestTestVariantPinsProductionTypeAgainstTestMethodCollision(t *testing.T) {
 	options := Options{indentSpaces: 4, preferVarDecl: true, useChannelOperators: true}
 
 	// Session scope mirrors processTestConversion: ONE registry across both variant passes.
-	testMethodRenames = make(map[types.Object]bool)
-	t.Cleanup(func() { testMethodRenames = nil })
 
 	if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", productionSeed{}, options); err != nil {
 		t.Fatal(err)
 	}
 
 	if nameCollisions["Replacer"] {
-		t.Fatal("the production type name must stay pinned — nameCollisions must not Δ-rename `Replacer` in a test variant")
+		t.Fatal("the production type name must stay as written: nameCollisions must not rename `Replacer` in a test variant")
 	}
 
 	exportCs := readConvertedTestFile(t, outputPath, "export_test.cs")
 
-	if !strings.Contains(exportCs, ShadowVarMarker+"Replacer(") {
-		t.Fatalf("the test-side method declarator must be Δ-renamed:\n%s", exportCs)
+	if holder := "} partial class pinned" + TempVarMarker + "Replacer" + testHolderMark + " {"; !strings.Contains(exportCs, holder) {
+		t.Fatalf("the test file's method must stand in the type's test holder, want %q:\n%s", holder, exportCs)
 	}
-	if !strings.Contains(exportCs, "."+ShadowVarMarker+"Replacer()") {
-		t.Fatalf("the internal-variant call site must follow the Δ-renamed method:\n%s", exportCs)
+	if !strings.Contains(exportCs, " Replacer(this ref Replacer r)") {
+		t.Fatalf("the method declarator must keep its Go name:\n%s", exportCs)
 	}
-	if strings.Contains(exportCs, "ref "+ShadowVarMarker+"Replacer") || strings.Contains(exportCs, PointerPrefix+"<"+ShadowVarMarker+"Replacer>") {
-		t.Fatalf("the production TYPE must keep its bare name in every reference:\n%s", exportCs)
+	if !strings.Contains(exportCs, "r.Replacer()") {
+		t.Fatalf("the internal-variant call site must name the method as Go does:\n%s", exportCs)
+	}
+	if strings.Contains(exportCs, ShadowVarMarker+"Replacer") {
+		t.Fatalf("neither the type nor the method may carry a marker:\n%s", exportCs)
 	}
 
 	if _, _, err := convertTestVariant(external, testFileEntries(external), outputPath, "go", productionSeed{}, options); err != nil {
@@ -4124,17 +4123,18 @@ func TestTestVariantPinsProductionTypeAgainstTestMethodCollision(t *testing.T) {
 
 	externalCs := readConvertedTestFile(t, outputPath, "external_test.cs")
 
-	if !strings.Contains(externalCs, "."+ShadowVarMarker+"Replacer()") {
-		t.Fatalf("an EXTERNAL-variant call site must follow the internal variant's Δ-renamed method:\n%s", externalCs)
+	if !strings.Contains(externalCs, "r.Replacer()") || strings.Contains(externalCs, ShadowVarMarker+"Replacer") {
+		t.Fatalf("an EXTERNAL-variant call site must name the method as Go does:\n%s", externalCs)
 	}
 }
 
-// B9 guard (dot-import shadowing): a TEST-declared method named like a dot-imported production
-// FUNCTION the variant references unqualified must Δ-rename the TEST-side declarator (C# member
-// lookup binds the enclosing class's method group before `using static` — sort_test's `Sort(data)`
-// bound example_keys_test.go's `By.Sort`, CS1501 ×14), while the dot-imported call keeps its bare
-// emission. Discrimination both ways: a same-named method whose production function is never
-// referenced (Stable), or referenced only QUALIFIED (Reverse), keeps its plain name.
+// Dot-import shadowing: a TEST-declared method named like a dot-imported production FUNCTION
+// (sort_test's example_keys_test.go `By.Sort` beside `Sort(data)`) stands in its receiver's holder,
+// so the method group reaches only the holder's own bodies. The method keeps its Go name; inside
+// the holder the dot-imported call is written through the production package class, and outside it
+// the call stays bare (bound through `using static`). Discrimination: a holder whose methods are
+// not named like the function it calls (Stable) writes the call bare. The test keeps the name the
+// records cite; nothing is renamed any more.
 func TestTestVariantRenamesTestMethodShadowingDotImportedFunction(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
@@ -4144,8 +4144,9 @@ func TestTestVariantRenamesTestMethodShadowingDotImportedFunction(t *testing.T) 
 		"value_test.go": "package value_test\n\nimport . \"example/value\"\n\n" +
 			"type By []int\n\n" +
 			"func (by By) Sort() { Sort(by) }\n\n" +
-			"func (by By) Stable() {}\n\n" +
-			"func probe(by By) {\n\tby.Sort()\n\tby.Stable()\n}\n",
+			"type Other []int\n\n" +
+			"func (o Other) Stable() { Sort(o) }\n\n" +
+			"func probe(by By) {\n\tby.Sort()\n\tSort(by)\n}\n",
 		"qualified_test.go": "package value_test\n\nimport value \"example/value\"\n\n" +
 			"type QB []int\n\nfunc (qb QB) Reverse() { value.Reverse(qb) }\n",
 	}
@@ -4160,8 +4161,6 @@ func TestTestVariantRenamesTestMethodShadowingDotImportedFunction(t *testing.T) 
 	}
 
 	outputPath := t.TempDir()
-	testMethodRenames = make(map[types.Object]bool)
-	t.Cleanup(func() { testMethodRenames = nil })
 
 	options := Options{indentSpaces: 4, preferVarDecl: true, useChannelOperators: true}
 	if _, _, err := convertTestVariant(external, testFileEntries(external), outputPath, "go", productionSeed{}, options); err != nil {
@@ -4170,38 +4169,43 @@ func TestTestVariantRenamesTestMethodShadowingDotImportedFunction(t *testing.T) 
 
 	valueCs := readConvertedTestFile(t, outputPath, "value_test.cs")
 
-	if !strings.Contains(valueCs, ShadowVarMarker+"Sort(") {
-		t.Fatalf("the shadowing test method declarator must be Δ-renamed:\n%s", valueCs)
+	if strings.Contains(valueCs, ShadowVarMarker+"Sort") || strings.Contains(valueCs, ShadowVarMarker+"Stable") {
+		t.Fatalf("no method may carry a marker:\n%s", valueCs)
 	}
-	if !strings.Contains(valueCs, "."+ShadowVarMarker+"Sort()") {
-		t.Fatalf("the test method's call sites must follow the Δ-rename:\n%s", valueCs)
+	if !strings.Contains(valueCs, " Sort(this By by)") {
+		t.Fatalf("the test method declarator must keep its Go name:\n%s", valueCs)
 	}
-
-	// After removing every Δ-renamed occurrence, a bare `Sort(` must remain — the dot-imported
-	// production call keeps its unqualified emission (bound through `using static`).
-	if !strings.Contains(strings.ReplaceAll(valueCs, ShadowVarMarker+"Sort", ""), "Sort(") {
-		t.Fatalf("the dot-imported production call must keep its bare emission:\n%s", valueCs)
+	if !strings.Contains(valueCs, "by.Sort();") {
+		t.Fatalf("the test method's call site must name the method as Go does:\n%s", valueCs)
 	}
 
-	if strings.Contains(valueCs, ShadowVarMarker+"Stable") {
-		t.Fatalf("a same-named method whose production function is never referenced unqualified must keep its plain name:\n%s", valueCs)
+	// Inside the holder that declares `Sort`, the bare name is the holder's method group.
+	if !strings.Contains(valueCs, "example.value_package.Sort(by);") {
+		t.Fatalf("inside the declaring holder the dot-imported call must name the production package class:\n%s", valueCs)
+	}
+
+	// A holder that does not declare `Sort`, and the package class, write the call as Go does.
+	if !strings.Contains(valueCs, "{ Sort(o); }") {
+		t.Fatalf("a holder that does not declare the name must write the dot-imported call bare:\n%s", valueCs)
+	}
+	if !strings.Contains(valueCs, "    Sort(by);") {
+		t.Fatalf("outside every holder the dot-imported call must stay bare:\n%s", valueCs)
 	}
 
 	qualifiedCs := readConvertedTestFile(t, outputPath, "qualified_test.cs")
 
 	if strings.Contains(qualifiedCs, ShadowVarMarker+"Reverse") {
-		t.Fatalf("a QUALIFIED production reference must not trigger the rename (Sel exclusion):\n%s", qualifiedCs)
+		t.Fatalf("a method named like a QUALIFIED production reference must keep its Go name:\n%s", qualifiedCs)
 	}
 }
 
 // Receiver/first-parameter guard: a `_test.go` FREE FUNCTION whose emitted C# signature matches a
-// production METHOD's — because the method's receiver becomes the extension method's leading `this`
-// parameter — must Δ-rename the TEST-side declarator. Go keeps method names and package-scope
-// function names in separate namespaces, so math/big's `func (z nat) norm() nat` (nat.go) and
-// `func norm(x nat) nat` (int_test.go) coexist legally, but both emit as `norm(nat)` and `this` does
-// not participate in C# signature identity (CS0111 `big_package` already defines `norm`).
-// Discrimination: a same-named free function whose parameters do NOT line up with the receiver
-// (different type, or an extra parameter) emits distinctly and must keep its plain name.
+// production METHOD's, because the method's receiver is the extension method's leading `this`
+// parameter (math/big's `func (z nat) norm() nat` in nat.go and `func norm(x nat) nat` in
+// int_test.go). Go keeps method names and package-scope function names apart; so does the emission:
+// the method stands in its receiver's holder and the function in the package class, so the two
+// signatures never meet in one class (CS0111 while they did) and neither is renamed. The test keeps
+// the name the records cite.
 func TestTestVariantRenamesTestFuncCollidingWithProductionMethodReceiver(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
@@ -4212,11 +4216,9 @@ func TestTestVariantRenamesTestFuncCollidingWithProductionMethodReceiver(t *test
 			"func (z nat) trim() nat { return z }\n\n" +
 			"func (z nat) keep() nat { return z }\n",
 		"value_test.go": "package limbs\n\n" +
-			// Collides: receiver nat + no params vs one nat param.
+			// Same C# signature as the method: receiver nat + no params against one nat param.
 			"func norm(x nat) nat { return x.norm() }\n\n" +
-			// Does NOT collide: the free function takes an extra parameter.
 			"func trim(x nat, n int) nat { return x.trim() }\n\n" +
-			// Does NOT collide: the free function's first parameter is a different type.
 			"func keep(n int) nat { return nil }\n\n" +
 			"func probe(x nat) nat { return norm(trim(keep(0), 1)) }\n",
 	}
@@ -4231,8 +4233,6 @@ func TestTestVariantRenamesTestFuncCollidingWithProductionMethodReceiver(t *test
 	}
 
 	outputPath := t.TempDir()
-	testMethodRenames = make(map[types.Object]bool)
-	t.Cleanup(func() { testMethodRenames = nil })
 
 	options := Options{indentSpaces: 4, preferVarDecl: true, useChannelOperators: true}
 	if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", productionSeed{}, options); err != nil {
@@ -4241,23 +4241,25 @@ func TestTestVariantRenamesTestFuncCollidingWithProductionMethodReceiver(t *test
 
 	valueCs := readConvertedTestFile(t, outputPath, "value_test.cs")
 
-	if !strings.Contains(valueCs, ShadowVarMarker+"norm(") {
-		t.Fatalf("the colliding test-side FREE FUNCTION declarator must be Δ-renamed:\n%s", valueCs)
-	}
-	if !strings.Contains(valueCs, ShadowVarMarker+"norm(trim(") {
-		t.Fatalf("the test function's call sites must follow the Δ-rename:\n%s", valueCs)
+	for _, name := range []string{"norm", "trim", "keep"} {
+		if strings.Contains(valueCs, ShadowVarMarker+name) {
+			t.Fatalf("the test-side free function %s must keep its Go name:\n%s", name, valueCs)
+		}
 	}
 
-	// The production method keeps its bare name — it is pinned, and only the free function moved.
-	if !strings.Contains(valueCs, ".norm()") {
+	if !strings.Contains(valueCs, " nat norm(nat x)") {
+		t.Fatalf("the free function declarator must keep its Go name:\n%s", valueCs)
+	}
+	if !strings.Contains(valueCs, "return norm(trim(keep(0), 1));") {
+		t.Fatalf("the call sites must name the functions as Go does:\n%s", valueCs)
+	}
+	if !strings.Contains(valueCs, "x.norm()") {
 		t.Fatalf("the production METHOD must keep its bare name at the call site:\n%s", valueCs)
 	}
 
-	if strings.Contains(valueCs, ShadowVarMarker+"trim") {
-		t.Fatalf("an extra-parameter free function does not collide and must keep its plain name:\n%s", valueCs)
-	}
-	if strings.Contains(valueCs, ShadowVarMarker+"keep") {
-		t.Fatalf("a different-first-parameter free function does not collide and must keep its plain name:\n%s", valueCs)
+	// The file declares no method, so it never leaves the package class.
+	if strings.Contains(valueCs, "} partial class ") {
+		t.Fatalf("a test file with no method must not switch class:\n%s", valueCs)
 	}
 }
 
@@ -5161,27 +5163,31 @@ func TestWhiteboxBridgeDeclaredNamesCoverMethodsAndPackageDecls(t *testing.T) {
 	}
 }
 
-// A box-field accessor (`Type.Ꮡfield`, used by `receiver.of(Type.Ꮡfield)`) qualifies its owner
-// type with a package static class whenever a bare name could be shadowed — and under the
-// white-box test model that class must be the BRIDGE, not the production package, for a type an
-// internal `_test.go` declares. database/sql's `fakedb_test.go` is the corpus instance:
-// `type table struct { mu sync.Mutex; … }` sits beside `func (db *fakeDB) table(string)`, so the
-// TYPE is Δ-renamed and therefore always qualified — and all six `t.mu.Lock()` sites spelled
-// `sql_package.Δtable.Ꮡmu`, a class with no such member (CS0117 ×6).
+// A box-field accessor (`Type.Ꮡfield`, used by `receiver.of(Type.Ꮡfield)`) names its owner type in
+// C# EXPRESSION position, so it qualifies the type with a package static class wherever the bare
+// name is hidden, and under the white-box test model that class must be the BRIDGE, not the
+// production package, for a type an internal `_test.go` declares. database/sql's `fakedb_test.go` is
+// the corpus instance: `type table struct { mu sync.Mutex; … }` sits beside
+// `func (db *fakeDB) table(string)`. While methods stood in the package class the TYPE took a marker
+// and every accessor was qualified (`sql_package.Δtable.Ꮡmu`, a class with no such member, CS0117 ×6).
+// The method now stands in its receiver's holder, so the type keeps its Go name, and the bare name
+// is hidden only inside that holder, where it is the holder's method group.
 //
-// Both directions are asserted: the bridge class appears, and the production class does not. Since parity seat #32
-// an ordinary field's address reads its generated property (`p.Ꮡn`), which names no class; the accessor form, and so
-// this guard, holds for a field the property does not serve, here one named like a member of ж<T> (`&p.Value`).
+// Three places are asserted: inside the holder that declares the method the accessor names the
+// bridge class and never the production class; in the bridge class it is bare; and an ordinary
+// field's address reads its generated property (`p.Ꮡn`), which names no class (parity seat #32), so
+// the accessor form holds for a field the property does not serve, here one named like a member of
+// ж<T> (`&p.Value`).
 func TestTestVariantBoxAccessorNamesBridgeDeclaringClass(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	files := map[string]string{
 		"go.mod":   "module example/boxacc\n\ngo 1.23\n",
 		"value.go": "package boxacc\n\ntype Holder struct{ n int }\n\nfunc NewHolder(n int) *Holder { return &Holder{n: n} }\n",
-		// `probe` the TYPE collides with `probe` the METHOD, which Δ-renames the type — exactly
-		// fakedb_test.go's `table`/`(*fakeDB).table` pairing.
+		// `probe` the TYPE beside `probe` the METHOD: fakedb_test.go's `table`/`(*fakeDB).table`.
 		"export_test.go": "package boxacc\n\ntype probe struct{ n, Value int }\n\n" +
 			"func (h *Holder) probe() int { return h.n }\n\n" +
+			"func (h *Holder) inside(p *probe) *int { return &p.Value }\n\n" +
 			"func probeAddr(p *probe) *int { return &p.n }\n\n" +
 			"func probeValue(p *probe) *int { return &p.Value }\n",
 	}
@@ -5201,26 +5207,31 @@ func TestTestVariantBoxAccessorNamesBridgeDeclaringClass(t *testing.T) {
 	// What convertTestVariants sets for the internal variant under the white-box model.
 	options.testClassNameOverride = getSanitizedImport("boxacc_internal_test" + PackageSuffix)
 
-	testMethodRenames = make(map[types.Object]bool)
-	t.Cleanup(func() { testMethodRenames = nil })
-
 	if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", productionSeed{}, options); err != nil {
 		t.Fatal(err)
 	}
 
 	exportCs := readConvertedTestFile(t, outputPath, "export_test.cs")
 
+	if strings.Contains(exportCs, ShadowVarMarker+"probe") {
+		t.Fatalf("neither the type nor the method may carry a marker:\n%s", exportCs)
+	}
+
 	if !strings.Contains(exportCs, "return p."+AddressPrefix+"n;") {
 		t.Fatalf("an ordinary field's address must read its address property:\n%s", exportCs)
 	}
 
-	accessor := ShadowVarMarker + "probe." + AddressPrefix + "Value"
+	accessor := "probe." + AddressPrefix + "Value"
+	bridge := "boxacc_internal_test" + PackageSuffix + "." + accessor
 
-	if !strings.Contains(exportCs, "boxacc_internal_test"+PackageSuffix+"."+accessor) {
-		t.Fatalf("the box accessor must name the BRIDGE class that declares the test type:\n%s", exportCs)
+	if strings.Count(exportCs, bridge) != 1 {
+		t.Fatalf("inside the holder that declares `probe` the box accessor must name the BRIDGE class, once:\n%s", exportCs)
 	}
 	if strings.Contains(exportCs, "boxacc"+PackageSuffix+"."+accessor) {
-		t.Fatalf("the production class does not declare a test-file type — it must not be the qualifier:\n%s", exportCs)
+		t.Fatalf("the production class does not declare a test-file type, so it must not be the qualifier:\n%s", exportCs)
+	}
+	if strings.Count(exportCs, accessor) != 2 || !strings.Contains(exportCs, "("+accessor+")") {
+		t.Fatalf("in the bridge class no member hides the type, so the box accessor must be bare:\n%s", exportCs)
 	}
 }
 
@@ -5272,8 +5283,6 @@ func TestFunctionLocalTypesShareOneAccessibility(t *testing.T) {
 	options.testClassNameOverride = getSanitizedImport("localaccess_internal_test" + PackageSuffix)
 	options.testInlineTypeAccess = true
 
-	testMethodRenames = make(map[types.Object]bool)
-	t.Cleanup(func() { testMethodRenames = nil })
 
 	if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", productionSeed{}, options); err != nil {
 		t.Fatal(err)
@@ -5318,21 +5327,17 @@ func importInitClaims() []string {
 	return claims
 }
 
-// Cross-variant guard for a Δ-renamed package-level VAR — the twin of
-// TestTestVariantPinsProductionTypeAgainstTestMethodCollision for a var rather than a method, and
-// the shape runtime's `export_test.go` has: `var Lock = lock` beside an unrelated `RWMutex.Lock`
-// METHOD, which getCollisionAvoidanceIdentifier resolves by Δ-renaming the VAR. The white-box
-// bridge reference the EXTERNAL variant emits for `pkg.Lock` renders through whiteboxBridgeMember,
-// whose own nameCollisions is a fresh per-variant map that never saw the internal declaration — so
-// it spelled the bare `Lock` against a member emitted as `ΔLock` (metrics_test.cs, CS1503 x2).
+// Cross-variant guard for the white-box bridge: the EXTERNAL variant's reference to a declaration of
+// the internal test half must be spelled as the internal variant DECLARED it. The external pass has
+// its own per-variant nameCollisions, computed over files that never include the declaration, so
+// the link is the SESSION-scoped, object-keyed testTypeRenames.
 //
-// The link that closes it is the SESSION-scoped, object-keyed testTypeRenames, and this guard
-// exists because a registration for it sat in visitValueSpec for a while and could never fire:
-// performGlobalVariableAnalysis renames a package-level var declarator FIRST, so by the time the
-// visitor reads getIdentName the name is already `ΔLock` and nameCollisions answers false for it.
-// The registration therefore lives at that rename site, and this test pins BOTH halves — the
-// record, and the bridge spelling that reads it — plus the discrimination that a var no method
-// collides with keeps its plain name on both sides.
+// Two shapes. runtime's `export_test.go` has `var Lock = lock` beside an unrelated `RWMutex.Lock`
+// METHOD: while methods stood in the package class the VAR took a marker and the bridge reference
+// had to follow it (metrics_test.cs, CS1503 x2). The method now stands in its receiver's holder, so
+// the var keeps its Go name on both sides and is not recorded. The rename that remains is a TYPE
+// whose Go name C# reads as a keyword in a type position (`union`): the declaration takes the
+// marker, the registry records it, and the external variant's spelling of the type follows.
 func TestTestVariantBridgeFollowsRenamedPackageVar(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	if testing.Short() {
@@ -5347,15 +5352,23 @@ func TestTestVariantBridgeFollowsRenamedPackageVar(t *testing.T) {
 			"func lock(m *mutex) {}\n\nfunc unlock(m *mutex) {}\n\n" +
 			"func NewMutex() *mutex { return &mutex{} }\n",
 		"export_test.go": "package bridgevar\n\n" +
-			// The collision: an exported package-level VAR sharing a name with an unrelated
-			// type's METHOD, both contributed by the internal test half.
+			// An exported package-level VAR sharing a name with an unrelated type's METHOD, both
+			// contributed by the internal test half.
 			"type RWMutex struct{ n int }\n\n" +
 			"func (rw *RWMutex) Lock() {}\n\n" +
 			"var Lock = lock\n\n" +
-			// Discrimination: no method is named `Unlocked`, so this var must stay bare.
-			"var Unlocked = unlock\n",
+			"var Unlocked = unlock\n\n" +
+			// The rename that remains: a TYPE named like a C# 15 type-position keyword.
+			"type union struct{ n int }\n\n" +
+			"func NewUnion() *union { return &union{} }\n\n" +
+			// A package-level var sharing a renamed name (a type parameter's) is renamed with it.
+			"func pick[closed any](v closed) closed { return v }\n\n" +
+			"var closed = pick(1)\n",
 		"external_test.go": "package bridgevar_test\n\nimport \"example/bridgevar\"\n\n" +
-			"func externalProbe() {\n\tm := bridgevar.NewMutex()\n\tbridgevar.Lock(m)\n\tbridgevar.Unlocked(m)\n}\n",
+			// A package-level var is declared with its type written out, so the external variant
+			// spells a type it cannot name in Go.
+			"var made = bridgevar.NewUnion()\n\n" +
+			"func externalProbe() {\n\tm := bridgevar.NewMutex()\n\tbridgevar.Lock(m)\n\tbridgevar.Unlocked(m)\n\t_ = made\n}\n",
 	})
 
 	internal, external := loadBothTestVariantsForDir(t, dir)
@@ -5381,14 +5394,12 @@ func TestTestVariantBridgeFollowsRenamedPackageVar(t *testing.T) {
 	}
 
 	// Session scope mirrors processTestConversion: ONE registry across both variant passes.
-	testMethodRenames = make(map[types.Object]bool)
 	testTypeRenames = make(map[types.Object]bool)
 	whiteboxInternalTestObjects = collectWhiteboxInternalTestObjects(internal)
 	whiteboxBridgeDeclaredNames = collectWhiteboxBridgeDeclaredNames(internal)
 	whiteboxBridgeTypeNames = collectWhiteboxBridgeTypeNames(internal)
 
 	t.Cleanup(func() {
-		testMethodRenames = nil
 		testTypeRenames = nil
 		whiteboxInternalTestObjects = nil
 		whiteboxBridgeDeclaredNames = hashset.HashSet[string]{}
@@ -5403,28 +5414,36 @@ func TestTestVariantBridgeFollowsRenamedPackageVar(t *testing.T) {
 
 	exportCs := readConvertedTestFile(t, outputPath, "export_test.cs")
 
-	// Fixture liveness: the collision must really have Δ-renamed the var, and only that one.
-	if !strings.Contains(exportCs, ShadowVarMarker+"Lock") {
-		t.Fatalf("the fixture is inert: the colliding package-level var must be Δ-renamed:\n%s", exportCs)
-	}
-	if strings.Contains(exportCs, ShadowVarMarker+"Unlocked") {
-		t.Fatalf("a package-level var no method collides with must keep its plain name:\n%s", exportCs)
+	if strings.Contains(exportCs, ShadowVarMarker+"Lock") || strings.Contains(exportCs, ShadowVarMarker+"Unlocked") {
+		t.Fatalf("a package-level var named like a method must keep its Go name:\n%s", exportCs)
 	}
 
-	// The record the external pass reads, asserted against the very objects go/types resolved —
-	// the link that was missing while the registration sat in visitValueSpec.
+	// Fixture liveness: the keyword-named type must really have been renamed.
+	if !strings.Contains(exportCs, "partial struct "+ShadowVarMarker+"union") {
+		t.Fatalf("the fixture is inert: the type named like a C# type-position keyword must be renamed:\n%s", exportCs)
+	}
+
+	// The record the external pass reads, asserted against the very objects go/types resolved.
 	scope := internal.Types.Scope()
 	lockObj := scope.Lookup("Lock")
-	unlockedObj := scope.Lookup("Unlocked")
+	unionObj := scope.Lookup("union")
 
-	if lockObj == nil || unlockedObj == nil {
-		t.Fatal("the fixture's package-level vars must resolve in the internal variant's scope")
+	if lockObj == nil || unionObj == nil {
+		t.Fatal("the fixture's declarations must resolve in the internal variant's scope")
 	}
-	if !testTypeRenames[lockObj] {
-		t.Error("the Δ-renamed package-level var must be recorded for the other variant to read")
-	}
-	if testTypeRenames[unlockedObj] {
+	if testTypeRenames[lockObj] {
 		t.Error("a var that was never renamed must not be recorded")
+	}
+	if !testTypeRenames[unionObj] {
+		t.Error("the renamed type must be recorded for the other variant to read")
+	}
+
+	// The var's record: its rename site is the global variable analysis, before any visitor runs.
+	if !strings.Contains(exportCs, ShadowVarMarker+"closed = ") {
+		t.Fatalf("the fixture is inert: the var sharing a renamed name must be renamed:\n%s", exportCs)
+	}
+	if closedObj := scope.Lookup("closed"); closedObj == nil || !testTypeRenames[closedObj] {
+		t.Error("the renamed package-level var must be recorded for the other variant to read")
 	}
 
 	externalOptions := testVariantOptions(base, testProjectWhiteboxReference, true, bridgeName)
@@ -5435,11 +5454,11 @@ func TestTestVariantBridgeFollowsRenamedPackageVar(t *testing.T) {
 
 	externalCs := readConvertedTestFile(t, outputPath, "external_test.cs")
 
-	if !strings.Contains(externalCs, bridgeName+"."+ShadowVarMarker+"Lock(") {
-		t.Errorf("the external variant's bridge reference must follow the internal variant's Δ-renamed var:\n%s", externalCs)
+	if !strings.Contains(externalCs, bridgeName+".Lock(") || !strings.Contains(externalCs, bridgeName+".Unlocked(") {
+		t.Errorf("the external variant's bridge reference must name each var as Go does:\n%s", externalCs)
 	}
-	if !strings.Contains(externalCs, bridgeName+".Unlocked(") {
-		t.Errorf("the external variant must keep the bare name for a var that never collided:\n%s", externalCs)
+	if !strings.Contains(externalCs, bridgeName+"."+ShadowVarMarker+"union>") {
+		t.Errorf("the external variant's spelling of the type must follow the internal variant's renamed declaration:\n%s", externalCs)
 	}
 }
 

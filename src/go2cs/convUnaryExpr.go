@@ -126,10 +126,8 @@ func (v *Visitor) boxAccessorType(typeName, receiver string, owner types.Type) s
 		return typeName
 	}
 
-	// A type whose name collides with a same-package method/function (`type funcInfo` vs
-	// `func (f *Func) funcInfo()`) is declared Δ-renamed (`ΔfuncInfo`), since the package static
-	// method shadows the namespace type. The box accessor must use that renamed name too — a bare
-	// `funcInfo.Ꮡnfuncdata` binds to the method group (CS0119). Callers that pass the RAW Go name are
+	// A type the package declares under a renamed name (a C# reserved type name, a spelling the
+	// emitter writes on its own) is named that way here too. Callers that pass the RAW Go name are
 	// normalized here; callers that pass an already-sanitized name arrive Δ-prefixed already.
 	if nameCollisions[typeName] {
 		typeName = getCollisionAvoidanceIdentifier(typeName)
@@ -161,11 +159,16 @@ func (v *Visitor) boxAccessorType(typeName, receiver string, owner types.Type) s
 	//     boundary (`Ꮡmatch.Value` does not qualify type `m`).
 	//   - A variable of that name is declared ANYWHERE in the enclosing function (the general form of
 	//     the receiver cases above — the shadowing local need not participate in this accessor at all).
+	//   - The accessor stands in a method holder that declares a METHOD of that name (`type funcInfo`
+	//     beside `func (f *Func) funcInfo()`): the accessor names the type in expression position, where
+	//     the holder's method group binds first (CS0119). A type position reads only types, so every
+	//     other spelling of the type in the holder stays bare.
 	if strings.HasPrefix(typeName, ShadowVarMarker) || typeName == receiver ||
 		strings.HasPrefix(receiver, typeName+CapturedVarMarker) ||
 		receiver == AddressPrefix+typeName ||
 		strings.HasPrefix(receiver, AddressPrefix+typeName+".") ||
-		v.funcScopeVarNames.Contains(typeName) {
+		v.funcScopeVarNames.Contains(typeName) ||
+		v.holderDeclaresTypeName(typeName) {
 		return v.boxAccessorQualifier(owner) + "." + typeName
 	}
 

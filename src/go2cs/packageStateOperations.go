@@ -29,8 +29,8 @@ import (
 // nil-map panics. This extraction makes that failure mode structurally impossible.)
 
 // resetPackageState reinitializes every package-scoped global not self-reset by its own analysis
-// pass (packageBuiltinShadows, packageFuncMethodNames, packageTypeSpecRHS, captureModeCandidates,
-// and packageMethodNames reinitialize themselves at the top of their passes — this function alone
+// pass (packageTypeSpecRHS and captureModeCandidates
+// reinitialize themselves at the top of their passes — this function alone
 // does NOT establish a clean slate), then captures the per-package inputs derived directly from the loaded
 // package: the package Go doc (NuGet README) and the module-aware source dir + package name of
 // every REACHABLE imported package (the transitive closure, not just direct imports), so
@@ -136,6 +136,7 @@ func resetPackageState(pkg *packages.Package) {
 	usesUnsafeCode = false
 	packageImportForces = hashset.HashSet[string]{}
 	packageImportInits = map[string]string{}
+	packageMethodHolders = map[string]string{}
 	packageRefLoweringResult = nil
 	packageHandOwnedTypes = map[*types.TypeName]bool{}
 	packageHandOwnedVars = map[*types.Var]bool{}

@@ -487,15 +487,7 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 					aliasQualifier = qualifier
 				}
 
-				// The member as the producing package declares it: Δ-renamed when its name collides with a
-				// method or function there (`coll.ΔSet<T>`; see foreignRenamedGenericMember).
-				member := obj.Name()
-
-				if renamed, ok := foreignRenamedGenericMember(obj); ok {
-					member = renamed
-				}
-
-				return fmt.Sprintf("%s.%s[%s]", aliasQualifier, member, strings.Join(args, ", "))
+				return fmt.Sprintf("%s.%s[%s]", aliasQualifier, obj.Name(), strings.Join(args, ", "))
 			}
 
 			// A SAME-PACKAGE instantiated generic must ALSO render structurally — each type ARGUMENT
@@ -547,22 +539,6 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 
 				if target, ok := ambiguousImportedTypeAliasTarget(key, pkg); ok {
 					return aliasQualifier + "." + target[strings.LastIndex(target, ".")+1:]
-				}
-
-				// A collision-renamed type this file reaches ONLY through another package's alias, with no import
-				// of the type's own package, so no alias key was loaded for it: spell the producer's member,
-				// `jsontext.ΔEncoder`, not the Go name (TS readiness C22e; see foreignRenamedTypeSpelling). A file
-				// that imports the producer holds the key and keeps its `pkgꓸName` alias route unchanged.
-				if !importedTypeAliasPublished(key) {
-					if spelling, bare, ok := foreignRenamedTypeSpelling(obj); ok {
-						// The two-hop form (`type Token any`): the producer's member stands for the concrete type its
-						// definition names, so render that, exactly as any reference to it would be rendered.
-						if bare {
-							return v.getAliasQualifiedTypeName(named.Underlying(), isUnderlying)
-						}
-
-						return aliasQualifier + "." + spelling
-					}
 				}
 			}
 
@@ -754,12 +730,6 @@ func (v *Visitor) getFullyQualifiedTypeName(t types.Type, isUnderlying bool) str
 					} else {
 						args[i] = v.getFullyQualifiedTypeName(typeArgs.At(i), isUnderlying)
 					}
-				}
-
-				// A Δ-renamed foreign generic names its declared member, as the alias-qualified twin does
-				// (see foreignRenamedGenericMember).
-				if renamed, ok := foreignRenamedGenericMember(obj); ok {
-					baseName = getSanitizedImport(packageClassPath(pkg.Path(), pkg.Name())+PackageSuffix) + "." + renamed
 				}
 
 				return baseName + "[" + strings.Join(args, ", ") + "]"
@@ -1016,7 +986,12 @@ func getAliasedTypeName(typeName string) string {
 	// io_package;` — `io` collides with the go.io CHILD NAMESPACE once io/fs is in the
 	// reference closure): rewrite the qualifier so the type reference binds the renamed
 	// alias (mime's `CharsetReader Func<@string, io.Reader, …>` field, CS0234 ×6).
-	if qualifier, rest, found := strings.Cut(typeName, "."); found {
+	//
+	// Only a name written `<alias>.<Member>` starts with an alias. A member written through its
+	// package class (`math.bits_package.Len64`, the spelling a holder uses where one of its methods
+	// carries the import's name) starts with a NAMESPACE, which no using renames: there `math` is
+	// go.math, and `Δmath` would be the alias of package math's class.
+	if qualifier, rest, found := strings.Cut(typeName, "."); found && !strings.Contains(strings.SplitN(rest, "<", 2)[0], ".") {
 		if renamed, ok := packageImportAliasRenames[qualifier]; ok {
 			// No recursion: a foreign type WITH its own rename already hit the alias map
 			// above under the raw key; this qualifier rewrite is the final form.
@@ -1347,98 +1322,6 @@ func (v *Visitor) discardTargetTypeName(expr ast.Expr) string {
 	}
 
 	return v.iifeDelegateType(sig)
-}
-
-// methodGroupClashDelegateType returns the C# delegate type a package-level func used as a VALUE must
-// be cast to when its package also declares a METHOD of the same name, or "" when no cast is needed.
-// Go methods are emitted as extension methods in the package class, so `func Run()` and
-// `func (T) Run()` — and, across packages, `time.After` and `Time.After` — are ONE C# method group.
-// Where the site supplies a delegate type (a func-typed parameter, var or field) C# picks the func
-// by signature; where it supplies none — a `:=` local, an `any` slot — the group has no natural type
-// (CS8917, CS1503). The structural `Func<…>`/`Action<…>` is used, never a package named func type: in
-// an interface slot the delegate type IS the dynamic type, and Go's dynamic type is the unnamed
-// signature.
-//
-// Any same-named method counts, whatever its visibility: one on an unexported type is invisible to
-// another assembly, but a test assembly can see it, and the cast is valid C# either way. A GENERIC
-// func is left alone (no instantiation to name).
-func (v *Visitor) methodGroupClashDelegateType(expr ast.Expr) string {
-	for {
-		paren, ok := expr.(*ast.ParenExpr)
-
-		if !ok {
-			break
-		}
-
-		expr = paren.X
-	}
-
-	var ident *ast.Ident
-
-	switch e := expr.(type) {
-	case *ast.Ident:
-		ident = e
-	case *ast.SelectorExpr:
-		ident = e.Sel
-	default:
-		return ""
-	}
-
-	fn, ok := v.info.ObjectOf(ident).(*types.Func)
-
-	if !ok || fn.Pkg() == nil || fn.Parent() != fn.Pkg().Scope() {
-		return ""
-	}
-
-	sig, ok := fn.Type().(*types.Signature)
-
-	if !ok || sig.Recv() != nil || sig.TypeParams().Len() > 0 || !packageDeclaresMethodNamed(fn.Pkg(), fn.Name()) {
-		return ""
-	}
-
-	return v.iifeDelegateType(sig)
-}
-
-// applyMethodGroupClashCast casts a rendered value to its delegate type when methodGroupClashDelegateType
-// says the bare method group is ambiguous; every other value passes through unchanged.
-func (v *Visitor) applyMethodGroupClashCast(expr ast.Expr, rendered string) string {
-	if expr == nil || rendered == "" {
-		return rendered
-	}
-
-	if delegateType := v.methodGroupClashDelegateType(expr); delegateType != "" {
-		return castOf(delegateType, rendered)
-	}
-
-	return rendered
-}
-
-// packageDeclaresMethodNamed reports whether any named type declared at pkg's scope has a method
-// called name.
-func packageDeclaresMethodNamed(pkg *types.Package, name string) bool {
-	scope := pkg.Scope()
-
-	for _, typeName := range scope.Names() {
-		obj, ok := scope.Lookup(typeName).(*types.TypeName)
-
-		if !ok || obj.IsAlias() {
-			continue
-		}
-
-		named, ok := obj.Type().(*types.Named)
-
-		if !ok {
-			continue
-		}
-
-		for i := 0; i < named.NumMethods(); i++ {
-			if named.Method(i).Name() == name {
-				return true
-			}
-		}
-	}
-
-	return false
 }
 
 func convertToCSTypeName(typeName string) string {

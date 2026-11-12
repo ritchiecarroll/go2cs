@@ -152,7 +152,7 @@ type importedPackageMeta struct {
 // importedPackageSources maps a REACHABLE imported package's cleaned source DIRECTORY to its
 // loaded go/packages entry (types + syntax), so a dependency's converted-name metadata can be
 // derived from the dependency's OWN declarations when it has no package_info.cs in the output root
-// — never converted, or converted into a different root (see foreignNameCollisions.go). Keyed by
+// — never converted, or converted into a different root (see foreignTypeAliases.go). Keyed by
 // directory because that is the one identifier the go/packages graph and go/build's PackageInfo
 // resolution always agree on: a GOROOT-vendored import is reached under a rewritten path. Reset and
 // repopulated per package alongside importPackageDirs.
@@ -183,7 +183,7 @@ var constImportedTypeAliases hashset.HashSet[string]
 // usedImportedTypeAliases marks the importedTypeAliases keys an emitted reference actually resolved
 // through. An imported alias's `global using` is emitted into this package's package_info.cs only when
 // it was USED, whether it was parsed from the dependency's package_info.cs or derived from the
-// dependency's own declarations (foreignNameCollisions.go, foreignTypeAliases.go):
+// dependency's own declarations (foreignTypeAliases.go):
 //   - A PARSED set is the dependency's set for the TARGET GOOS, so declaring it whole made the
 //     emission vary with the target even where the Go source does not: FieldAccessReinterpret's
 //     windows-captured file declared syscallꓸHandle and syscallꓸSockaddr, which the program never
@@ -303,70 +303,31 @@ var indirectNumericConversions map[string]map[string]string
 
 var nameCollisions map[string]bool
 
-// testMethodRenames holds the `-tests` TEST-file declarators that must emit Δ-renamed to keep
-// production symbol names IMMUTABLE in a test-variant emission (blockers B2/B9, and the
-// receiver-vs-first-parameter collision): the variant universe mixes production files with
-// `_test.go` files, but only the test files are emitted — the production .cs on disk keep their
-// production-only-universe names, so a collision introduced by a test file resolves by renaming
-// the TEST-side declarator (and every reference site, via convIdent's isMethod arm for a method
-// name and its trailing identifier path for a free function), never the production element. Object-keyed so the same-named
-// production/dot-imported symbols keep their plain emission, and SESSION-scoped (initialized once
-// per -tests conversion in processTestConversion, NOT reset per variant): both variants share one
-// go/packages load, so the external variant's references to an internal-variant method (the
-// export_test pattern) resolve to the very object registered during the internal pass. Nil outside
-// -tests conversions. See performNameCollisionAnalysis / registerTestMethodRenames.
-var testMethodRenames map[types.Object]bool
-
-// testTypeRenames holds package-level TYPE declarations that were Δ-renamed by an ordinary
-// same-variant collision (getCollisionAvoidanceIdentifier via visitTypeSpec) — the "expose a field
-// via a method sharing the type's name" idiom (export_test.go's `type PallocBits pallocBits` next
-// to `func (*PallocData) PallocBits() *PallocBits`), which Δ-prefixes the TYPE and leaves the
-// METHOD bare (getCollisionAvoidanceIdentifier's own doc comment). That rename is captured
+// testTypeRenames holds the package-level declarations of a `-tests` conversion that were Δ-renamed
+// (nameCollisions: a type named as the emitter spells one of its own, or as C# reads a keyword in a
+// type position, and every package-level declaration sharing such a name). The rename is applied
 // correctly within the variant that declares it, but nameCollisions is reset per variant
 // (resetPackageState) while a white-box EXTERNAL-variant reference to the same declaration
-// (whiteboxBridgeNamedType) renders through its OWN, unrelated collision set — which has no entry
-// for a name the external variant's files never declare — so the bridge reference emitted the bare
-// name against a Δ-renamed declaration. Object-keyed and SESSION-scoped for the identical reason
-// testMethodRenames is: both variants share one go/packages load, so the external variant's
-// reference resolves by object identity to the very declaration registered during the internal
-// pass. Nil outside -tests conversions.
+// (whiteboxBridgeNamedType, whiteboxBridgeMember) renders through its OWN, unrelated collision set,
+// which has no entry for a name the external variant's files never declare, so the bridge reference
+// would spell the bare name against a renamed declaration. Object-keyed and SESSION-scoped for one
+// reason: both variants share one go/packages load, so the external variant's reference resolves by
+// object identity to the very declaration registered during the internal pass. Nil outside -tests
+// conversions.
 //
-// It carries VARS and CONSTS as well as types — same mechanism, same cross-variant blindness (the
-// export_test.go `var Lock = lock` beside `RWMutex.Lock`, read back by whiteboxBridgeMember). Each
-// kind registers at ITS OWN rename site, and they are not the same file: a TYPE at visitTypeSpec, a
-// CONST at visitValueSpec's CONST arm, and a package-level VAR at performGlobalVariableAnalysis —
-// which renames the var declarator BEFORE any visitor runs, so by visitValueSpec the name is
-// already `ΔLock` and nameCollisions no longer answers for it. Guarded by
+// Each kind registers at ITS OWN rename site, and they are not the same file: a TYPE at
+// visitTypeSpec, a CONST at visitValueSpec's CONST arm, and a package-level VAR at
+// performGlobalVariableAnalysis, which renames the var declarator BEFORE any visitor runs, so by
+// visitValueSpec the name is already renamed and nameCollisions no longer answers for it.
+//
+// Until 2026-11-11 the common source was a METHOD sharing the declaration's name (export_test.go's
+// `type PallocBits pallocBits` beside `func (*PallocData) PallocBits()`, `var Lock = lock` beside
+// `RWMutex.Lock`). A method now stands in its receiver's holder and renames nothing. Every name
+// left in nameCollisions is unexported, so the external variant reaches a recorded TYPE only where
+// the emission writes out a type Go inferred, and reaches no recorded var or const today; their
+// records are kept so the bridge stays right for any rename. Guarded by
 // TestTestVariantBridgeFollowsRenamedPackageVar.
 var testTypeRenames map[types.Object]bool
-
-// packageBuiltinShadows holds Go built-in names (`clear`, `len`, …) that the current package ALSO
-// declares as a method or function. In Go a method `func (x T) clear()` and the universe `clear`
-// built-in coexist (the method is only reached as `x.clear()`), but in C# the method is emitted as a
-// `clear(this ref T)` extension on the package's static class, which SHADOWS the using-static
-// `go.builtin.clear` for an unqualified free `clear(s)` call (C# member lookup stops at the class).
-// A built-in call whose name is in this set is therefore emitted qualified as `builtin.<name>(…)`.
-var packageBuiltinShadows map[string]bool
-
-// packageFuncMethodNames holds every method/function name declared in the current package —
-// a name matching an imported package's using-alias shadows it inside the package class
-// (compress/flate's byLiteral.sort vs `import "sort"`, CS0119); the package-ident emission
-// qualifies through the _package class instead.
-var packageFuncMethodNames map[string]bool
-
-// siblingTestFuncMethodNames holds the build-selected package-level declarator names contributed by
-// the IN-PACKAGE `_test.go` half. Those declarations compile into the very same C# package class as
-// the production sources (TestingInfrastructureRequirements §2.1/§4.2), so one of them shadows a
-// PRODUCTION file's import using-alias exactly as a production declarator would — but the
-// production package loaded by go/packages does not include test files and cannot see it:
-// hash/maphash's smhasher_test.go declares `func (k *bytesKey) bits() int` while maphash_purego.go
-// imports "math/bits", so `bits.Mul64(a, b)` would bind the method group (CS0119, plus CS8130 on
-// both deconstructed results). Folded into packageFuncMethodNames by performNameCollisionAnalysis,
-// which qualifies such a package ident through its _package class — a REFERENCE spelling only,
-// never a symbol rename (production names stay pinned; see testMethodRenames). Populated
-// independently for every production package immediately before its collision analysis, in
-// ordinary and -tests conversion alike, so production source spelling is mode-stable.
-var siblingTestFuncMethodNames []string
 
 var hasSiblingInternalTestFiles bool
 
@@ -379,8 +340,7 @@ var hasSiblingInternalTestFiles bool
 // named a box the production class never declared (CS0103). Folded into packageAddressedGlobals by
 // collectAddressedGlobals, which resolves each name against the real package scope and drops any
 // that is not a package-level var. Populated for every production package immediately before its
-// analysis, in ordinary and -tests conversion alike, so production storage shape is mode-stable —
-// exactly as siblingTestFuncMethodNames pins reference spelling.
+// analysis, in ordinary and -tests conversion alike, so production storage shape is mode-stable.
 var siblingTestAddressedGlobalNames []string
 
 // siblingTestMethodValues holds the METHOD VALUES the build-selected IN-PACKAGE `_test.go` half takes
@@ -416,15 +376,8 @@ type siblingMethodValue struct {
 // different C# class and can only reach this package through its exported surface, so they impose
 // no accessibility requirement on it. Populated for every production package immediately before its
 // analysis, in ordinary and -tests conversion alike, so production ACCESSIBILITY is mode-stable —
-// exactly as siblingTestFuncMethodNames pins reference spelling and siblingTestAddressedGlobalNames
-// pins storage shape.
+// exactly as siblingTestAddressedGlobalNames pins storage shape.
 var siblingTestPublicizedTypeNames []string
-
-// packageTestAliasShadows is the subset of packageFuncMethodNames contributed ONLY by the
-// same-package test half. It does not affect qualification itself; statement emission uses it to
-// explain an otherwise surprising fully-qualified production reference when the reader is not
-// looking at the package's tests.
-var packageTestAliasShadows map[string]bool
 
 // goBuiltinNames is the set of Go universe built-in function names that golib implements as static
 // methods on `go.builtin`. Used to detect a package method/function that shadows one of them.
@@ -539,7 +492,7 @@ var packageLiftedTypeNames hashset.HashSet[string]
 // already claimed, for the `-tests` INTERNAL variant only: that variant emits its `_test.go` files
 // into the SAME `<pkg>_package` class while the production `.cs` on disk are NOT regenerated, so
 // those names are immutable and a test-side lift must step around them. Same production-pinned rule
-// testMethodRenames applies to declarators and the Tier-C hoist seed applies to literal fields. Nil
+// the Tier-C hoist seed applies to literal fields. Nil
 // for a production conversion and for the EXTERNAL variant, whose `<pkg>_test_package` class is a
 // separate scope that may reuse the names freely. Installed by convertTestVariant from the seed its
 // caller captured before the first variant's resetPackageState.
@@ -623,7 +576,7 @@ var internalTestDynamicTypeNames map[string]string
 // and Vector in codec_test.go AND in example_encdec_test.go / example_interface_test.go). Those
 // references are emitted class-qualified instead — see qualifyAmbiguousTestTypeRefs. Session-scoped
 // to one `-tests` conversion (computed in convertTestVariants from the two loaded variants, before
-// either is converted) and, like testMethodRenames, deliberately NOT cleared by resetPackageState;
+// either is converted) and deliberately NOT cleared by resetPackageState;
 // nil for every other conversion, so no other emission changes.
 var testAmbiguousLocalTypeNames hashset.HashSet[string]
 
@@ -647,9 +600,8 @@ var whiteboxBridgeTypeNames hashset.HashSet[string]
 // the name: a bridge member HIDES every same-named production member, `using static` included.
 // container/heap's `[GoRecv] Pop(this ref myHeap)` hid `heap_package.Pop(Interface)` outright, so
 // the test's own `Pop(h)` bound the extension and failed CS1620 (ref argument). A production
-// reference whose name is in this set is emitted production-class-qualified instead — the same
-// remedy packageBuiltinShadows applies to a shadowed `using static go.builtin`. Raw Go names,
-// because both sides pass through the same sanitizers; session-scoped like testMethodRenames and
+// reference whose name is in this set is emitted production-class-qualified instead. Raw Go names,
+// because both sides pass through the same sanitizers; session-scoped and
 // nil for every other conversion.
 var whiteboxBridgeDeclaredNames hashset.HashSet[string]
 

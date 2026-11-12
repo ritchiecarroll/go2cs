@@ -27,8 +27,10 @@ func TestSameNamedImportsKeepTheirOwnTypeAliases(t *testing.T) {
 	appDir := filepath.Join(root, "app")
 
 	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/samename\n\ngo 1.23\n")
-	// Kind collides with S's method of the same name, so each package Δ-renames it and publishes
-	// `Kind` as an exported alias of its own ΔKind: the same ambiguity through a NAMED type.
+	// Kind is also the name of a method of S. Until methods left the package class (2026-11-11) each
+	// package renamed its Kind and published `Kind` as an exported alias of its own ΔKind: the same
+	// ambiguity through a NAMED type. Each Kind now keeps its Go name and is reached through its own
+	// import, like any other member.
 	writeModuleFile(t, filepath.Join(appDir, "a", "foo", "foo.go"), "package foo\n\ntype Inner struct{ N int }\n\ntype Alias = Inner\n\ntype Kind int\n\ntype S struct{}\n\nfunc (S) Kind() Kind { return 1 }\n")
 	writeModuleFile(t, filepath.Join(appDir, "b", "foo", "foo.go"), "package foo\n\ntype Other struct{ S string }\n\ntype Alias = Other\n\ntype Kind string\n\ntype S struct{}\n\nfunc (S) Kind() Kind { return \"b\" }\n")
 	writeModuleFile(t, filepath.Join(appDir, "main.go"), `package main
@@ -91,24 +93,23 @@ func main() {
 		"afoo.Inner x",         // a/foo's Alias, rendered through its target
 		"bfoo.Other y",         // b/foo's Alias
 		"new afoo.Inner(N: 2)", // a composite literal written through the alias
-		"go.example.com.samename.a.foo_package.ΔKind ka", // a/foo's own renamed Kind
+		"afoo.Kind ka",         // a/foo's own Kind
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("missing %q in:\n%s", want, mainCs)
 		}
 	}
 
-	// The FIFTH arm: a reference that takes the qualified fallback spells the TARGET's member, collision
-	// rename included, in every position -- a func type's parameter and result (a local and a struct
-	// field) and a conversion. Kind is renamed ΔKind in both packages, so the Go name `Kind` must not
-	// survive as a type reference anywhere (logrus' hooks/slog test: `Func<…, slog.Level>`, CS0426).
-	if strings.Contains(mainCs, "foo.Kind") {
-		t.Errorf("a same-named import's renamed Kind is still spelled by its Go name in:\n%s", mainCs)
+	// The FIFTH arm: a reference to a same-named import's own type spells that package's member in
+	// every position -- a func type's parameter and result (a local and a struct field) and a
+	// conversion (logrus' hooks/slog test: `Func<…, slog.Level>`, CS0426). No Kind carries a marker.
+	if strings.Contains(mainCs, ShadowVarMarker+"Kind") {
+		t.Errorf("a type named like a method of its package must keep its Go name in:\n%s", mainCs)
 	}
 
-	for _, want := range []string{"Func<nint, bfoo.ΔKind> pick", "((afoo.ΔKind)3)"} {
+	for _, want := range []string{"Func<nint, bfoo.Kind> pick", "Func<afoo.Kind, bfoo.Kind> conv", "conv((afoo.Kind)3)"} {
 		if !strings.Contains(mainCs, want) {
-			t.Errorf("missing the renamed member %q in:\n%s", want, mainCs)
+			t.Errorf("missing the member %q in:\n%s", want, mainCs)
 		}
 	}
 

@@ -42,10 +42,6 @@ type CallExprContext struct {
 	useGoStringArg map[int]bool
 	argTypeIsPtr   map[int]bool
 	interfaceTypes map[int]types.Type
-	// sameNameCaptureCasts carries, for an argument slot whose bare emission C# would bind to a same-named
-	// METHOD's extension rather than to the package FUNCTION being called, the C# interface type to cast it
-	// to (sameNameMethodCapture). Empty for every other call.
-	sameNameCaptureCasts map[int]string
 	// nilArrayTypes carries a pointer-to-ARRAY parameter's type to the argument slot, so a bare
 	// `nil` argument keeps the array length `array<E>` erases (arrayDimsNilCargo.go). Sibling of
 	// interfaceTypes and populated in the same params walk; empty for every other call.
@@ -448,11 +444,6 @@ type IdentContext struct {
 	// struct's type name. C# forbids a member sharing the enclosing type's name (CS0542), so
 	// the field is emitted with the disambiguation marker (matching its renamed declaration).
 	fieldCollidesWithType bool
-	// fieldTypeIsRenamed marks that the field's enclosing type is itself Δ-renamed for a
-	// type-vs-method collision in ITS OWN package (a FOREIGN such type, invisible to the current
-	// package's nameCollisions). The field access then DOUBLES the marker to match the
-	// declaration's ΔΔ form (see typeCollidingFieldName / fieldTypeIsRenamed).
-	fieldTypeIsRenamed bool
 }
 
 func DefaultIdentContext() IdentContext {
@@ -462,8 +453,7 @@ func DefaultIdentContext() IdentContext {
 		isMethod:                false,
 		suppressGenericTypeArgs: false,
 		ident:                   nil,
-		fieldCollidesWithType: false,
-		fieldTypeIsRenamed:    false,
+		fieldCollidesWithType:   false,
 	}
 }
 

@@ -112,7 +112,6 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 	// Position map: this statement's Go line, carried in the text so the block-builder swaps
 	// and hoisted-declaration splices below move it with the statement (positionMapOperations).
 	v.writePositionSentinelCalls(stmt.Pos(), sentinelCallRoots(stmt)...)
-	v.writeTestAliasShadowComment(stmt, contexts)
 	v.writeStackAppendMove(stmt)
 
 	switch stmtType := stmt.(type) {

@@ -15,8 +15,10 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// The SECOND metadata class a missing package_info.cs takes with it (the first — the collision
-// renames — is foreignNameCollisions.go): a dependency's RE-EXPORTED type aliases. `os` declares
+// The metadata class a missing package_info.cs takes with it: a dependency's RE-EXPORTED type
+// aliases. (Until 2026-11-11 there was a first class, the renames a package-level name took when a
+// METHOD of its package shared it; a method now stands in its receiver's holder, beside the package
+// class, and no name is renamed for that reason, so nothing is left to derive for it.) `os` declares
 // `type FileMode = fs.FileMode`, which the converted `os` emits as an assembly-scoped
 // `global using FileMode = go.io.fs_package.FileMode;` and publishes as
 // `[assembly: GoTypeAlias("FileMode", "go.io.fs_package.FileMode")]`. The re-export is therefore a
@@ -24,7 +26,7 @@ import (
 // without that artifact emits `os.FileMode` and gets CS0426. `os.FileMode`/`FileInfo`/`DirEntry`/
 // `PathError` are pervasive in real Go, which makes this the end-user-facing half of the class.
 //
-// Same INVARIANT as the collision derivation: what a dependency publishes is a function of THAT
+// The INVARIANT: what a dependency publishes is a function of THAT
 // package's own declarations, never of which packages the current run converts. Both shapes
 // visitTypeSpec publishes through this route are reproduced here from the dependency's go/types
 // scope (plus its syntax where the declaration's RHS carries the distinction):
@@ -46,12 +48,12 @@ import (
 // which compiles and behaves identically — only the class is duplicated rather than shared).
 
 // foreignDerivedAliases caches the full derived entry set per package. Package objects are interned
-// per run (as with packageMethodNames), so the pointer is a stable key.
+// per run, so the pointer is a stable key.
 var foreignDerivedAliases map[*types.Package][][2]string
 
 // foreignDerivedTypeAliases returns every `GoTypeAlias` (source, target) pair the converted form of
-// pkg publishes that can be derived from pkg alone — its collision renames plus its re-exported
-// type aliases — in the RAW package_info.cs form, so the caller runs them through the same
+// pkg publishes that can be derived from pkg alone, its re-exported type aliases, in the RAW
+// package_info.cs form, so the caller runs them through the same
 // normalization as parsed entries (applyExportedTypeAliases).
 func foreignDerivedTypeAliases(pkg *packages.Package) [][2]string {
 	if pkg == nil || pkg.Types == nil {
@@ -66,16 +68,9 @@ func foreignDerivedTypeAliases(pkg *packages.Package) [][2]string {
 		return cached
 	}
 
-	// Derived OUTSIDE the lock — the derivations take packageLock themselves. Derivation is
-	// deterministic, so a concurrent double-compute stores the same result.
-	collisions := foreignCollisionTypeAliases(pkg)
-	reExports := deriveReExportedTypeAliases(pkg)
-
-	// A fresh slice: foreignCollisionTypeAliases hands back its own cached backing array, which an
-	// append could write through.
-	aliases := make([][2]string, 0, len(collisions)+len(reExports))
-	aliases = append(aliases, collisions...)
-	aliases = append(aliases, reExports...)
+	// Derived OUTSIDE the lock. Derivation is deterministic, so a concurrent double-compute stores
+	// the same result.
+	aliases := deriveReExportedTypeAliases(pkg)
 
 	packageLock.Lock()
 
@@ -111,17 +106,9 @@ func deriveReExportedTypeAliases(pkg *packages.Package) [][2]string {
 			continue
 		}
 
-		// A COLLIDING DEFINED type belongs to the collision derivation's lane, which publishes the
-		// Δ rename and — for the defined-over-empty-interface shape — the second hop to `object`
-		// (encoding/json's `Token`); deriving it here too would double-publish the same source name
-		// with a different target. A Go type ALIAS is exempt: performNameCollisionAnalysis records
-		// only DEFINED types, so an alias name that also names a method is NOT Δ-renamed and IS
-		// published as a plain re-export — internal/reflectlite's `type Kind = abi.Kind` alongside
-		// `(*rtype).Kind()` publishes `("Kind", "go.@internal.abi_package.ΔKind")`.
-		if !obj.IsAlias() && packageHasMethodNamed(pkg.Types, name) {
-			continue
-		}
-
+		// A name that is also a METHOD name of the package is published like any other: neither
+		// encoding/json's `type Token any` beside `(*Decoder).Token()` nor internal/reflectlite's
+		// `type Kind = abi.Kind` beside `(*rtype).Kind()` is renamed.
 		target, isUsingAlias := usingAliasTargetType(pkg, obj)
 
 		if !isUsingAlias {
@@ -264,14 +251,9 @@ func foreignAliasTargetName(pkg *packages.Package, target types.Type) (string, b
 		}
 	}
 
-	// The target package's OWN collision rename applies — the reference names a member of THAT
-	// package's class, spelled the way that package declares it (packageHasMethodNamed is the same
-	// foreign-package-aware test the collision derivation uses).
+	// The reference names a member of the TARGET package's class, spelled the way that package
+	// declares it.
 	name := getCoreSanitizedIdentifier(obj.Name())
-
-	if packageHasMethodNamed(targetPkg, obj.Name()) {
-		name = getCollisionAvoidanceIdentifier(obj.Name())
-	}
 
 	// Matches getFullyQualifiedTypeName's cross-package arm run through convertToCSFullTypeName: the package
 	// CLASS path (path with the final segment replaced by the package NAME, for a major-version
@@ -299,6 +281,33 @@ func loadedPackageSource(pkg *packages.Package, targetPkg *types.Package) *packa
 	for _, imported := range pkg.Imports {
 		if imported.Types == targetPkg {
 			return imported
+		}
+	}
+
+	return nil
+}
+
+// definedTypeSpecRHS returns the right-hand-side expression of pkg's package-level DEFINED type
+// declaration for name, or nil when the declaration cannot be located — the package was loaded
+// without syntax, or name is a type alias rather than a definition.
+func definedTypeSpecRHS(pkg *packages.Package, name string) ast.Expr {
+	for _, file := range pkg.Syntax {
+		for _, decl := range file.Decls {
+			genDecl, isGenDecl := decl.(*ast.GenDecl)
+
+			if !isGenDecl {
+				continue
+			}
+
+			for _, spec := range genDecl.Specs {
+				typeSpec, isTypeSpec := spec.(*ast.TypeSpec)
+
+				if !isTypeSpec || typeSpec.Assign.IsValid() || typeSpec.Name.Name != name {
+					continue
+				}
+
+				return typeSpec.Type
+			}
 		}
 	}
 

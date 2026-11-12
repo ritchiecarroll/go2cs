@@ -560,7 +560,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		}
 
 		v.outputBuilder.WriteString(v.newline)
-		v.outputBuilder.WriteString(v.manualSignatureLiftPrefix(funcDecl))
+		v.outputBuilder.WriteString(v.placeFuncDecl(funcDecl, v.manualSignatureLiftPrefix(funcDecl), ""))
 		v.writeDoc(nil, funcDecl.Pos())
 		v.writeOutput(funcPlaceholderFormat, funcDecl.Name.Name)
 		v.outputBuilder.WriteString(v.newline)
@@ -597,16 +597,16 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		csFunctionName = getGlobalTempVarName("_")
 	}
 
-	// A `-tests` variant registered THIS test-file declarator for a Δ-rename (B2/B9, see performNameCollisionAnalysis),
-	// or THIS production free function collides with a same-named production method (C40, see
-	// funcRenamedForMethodCollision); reference sites follow through convIdent.
-	if testMethodRenames[v.info.ObjectOf(funcDecl.Name)] || funcRenamedForMethodCollision(v.info.ObjectOf(funcDecl.Name), v.fset) {
-		csFunctionName = ShadowVarMarker + csFunctionName
-	}
-
 	v.currentFuncDecl = funcDecl
 	v.currentFuncName = csFunctionName
 	v.currentFuncPrefix = &strings.Builder{}
+	v.currentFuncHoists = nil
+	v.currentHolderNamed = receiverNamed(v.info, funcDecl)
+
+	if v.currentHolderNamed != nil {
+		v.currentFuncHoists = &strings.Builder{}
+		v.currentHolderInTestFile = v.declaredInTestFile(v.info.Defs[funcDecl.Name])
+	}
 
 	// Record the Go name of every function literal this declaration encloses (the funcLits half
 	// of the file's GoPositionMap record) — from the AST, before any conversion of the body, so
@@ -1604,7 +1604,14 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		v.currentFuncPrefix.WriteString(v.newline)
 	}
 
-	v.replaceMarker(functionPrefixMarker, v.currentFuncPrefix.String())
+	hoisted := ""
+
+	if v.currentFuncHoists != nil && v.currentFuncHoists.Len() > 0 {
+		hoisted = v.currentFuncHoists.String() + v.newline
+	}
+
+	v.replaceMarker(functionPrefixMarker, v.placeFuncDecl(funcDecl, v.currentFuncPrefix.String(), hoisted))
+	v.currentFuncHoists = nil
 
 	if useGoFrame {
 		// Close the frame: the catch that parks a panic where recover() can read it, the finally

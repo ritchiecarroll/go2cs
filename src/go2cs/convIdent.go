@@ -212,28 +212,12 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 			name = getCoreSanitizedIdentifier(ident.Name)
 		} else {
 			name = getSanitizedFunctionName(v.getIdentName(ident))
-
-			// A `-tests` variant Δ-renamed this test-file method declarator to keep production
-			// symbol names immutable (B2/B9, see performNameCollisionAnalysis) — matched by
-			// OBJECT identity, so the same-named production type / dot-imported function keeps
-			// its plain emission at every other site.
-			if testMethodRenames[v.info.ObjectOf(ident)] || funcRenamedForMethodCollision(v.info.ObjectOf(ident), v.fset) {
-				name = ShadowVarMarker + name
-			}
 		}
 
 		// A field whose name equals its enclosing struct's type name is renamed with the
 		// disambiguation marker (CS0542); match the renamed declaration at the access site.
 		if context.fieldCollidesWithType {
 			name = typeCollidingFieldName(name)
-
-			// A CROSS-package field whose enclosing type is itself Δ-renamed in ITS package (a
-			// type-vs-method collision the current pkg's nameCollisions can't see) declares the field
-			// DOUBLE-marked (ΔΔLabel); typeCollidingFieldName only single-marked it here, so upgrade to
-			// match (internal/trace/testtrace's `l.Label`, CS1061). In-package fields already doubled.
-			if context.fieldTypeIsRenamed && strings.HasPrefix(name, ShadowVarMarker) && !strings.HasPrefix(name, ShadowVarMarker+ShadowVarMarker) {
-				name = ShadowVarMarker + name
-			}
 		}
 
 		return name
@@ -323,10 +307,12 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		}
 	}
 
-	// A PACKAGE ident whose using-alias is shadowed by a same-package method/function name
-	// (`func (s *byLiteral) sort(…)` vs `import "sort"` — the member lookup binds the method
-	// group before the alias, CS0119, compress/flate) qualifies through the _package class.
-	if packageFuncMethodNames != nil && packageFuncMethodNames[ident.Name] {
+	// A PACKAGE ident whose using-alias is shadowed by a method of the holder the code is emitted
+	// into (`func (s *byLiteral) sort(…)` vs `import "sort"` — inside byLiteral's holder the member
+	// lookup binds the method group before the alias, CS0119, compress/flate) qualifies through the
+	// _package class. No other class of the package declares the method, so every other reference
+	// keeps the alias.
+	if v.holderDeclares(ident.Name) {
 		if pkgName, ok := v.info.ObjectOf(ident).(*types.PkgName); ok {
 			return v.qualifyPackageReference(convertImportPathToNamespace(pkgName.Imported().Path(), PackageSuffix))
 		}
@@ -336,18 +322,6 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 	// type-argument append at the end applies to whichever one wins — so a Δ-renamed or
 	// bridge-qualified generic function passed as a method group is spelled out too.
 	name := ""
-
-	// A `-tests` variant Δ-renamed this test-file declarator to keep production symbol names
-	// immutable (see performNameCollisionAnalysis). A METHOD name reaches the isMethod arm above,
-	// but a package-level FREE FUNCTION referenced as a call target or a function value falls
-	// through to here — and its reference must follow the rename or it binds to nothing (CS0103).
-	// Object identity, so a same-named production symbol keeps its plain emission.
-	//
-	// A PRODUCTION free function renamed for a method collision (C40, funcRenamedForMethodCollision) follows the
-	// same way, here and from another package, which reaches this arm through the selector's Sel.
-	if testMethodRenames[v.info.ObjectOf(ident)] || funcRenamedForMethodCollision(v.info.ObjectOf(ident), v.fset) {
-		name = ShadowVarMarker + getSanitizedIdentifier(v.getIdentName(ident))
-	}
 
 	// A production package-level member the WHITE-BOX BRIDGE declares a same-named member for.
 	// The bridge is the same GO package, so the reference is bare, and it binds production
@@ -368,6 +342,12 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		if renamed, isRenamed := v.dotImportedRenamedMember(ident); isRenamed {
 			return renamed
 		}
+	}
+
+	// A package-level name a method's holder would bind elsewhere is written through the package's
+	// class (methodHolder.go).
+	if name == "" {
+		name = v.holderQualifiedName(ident)
 	}
 
 	if name == "" {

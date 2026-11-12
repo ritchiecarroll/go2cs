@@ -159,7 +159,7 @@ func collectCSReservedTypeNameDecls(file *ast.File, found map[string]bool) {
 // a valid method name in Go, so it is not included in the reserved list.
 // `builtin` and `sstring` are golib names the emitted C# references unqualified even when the
 // Go source never spells them: `builtin` is the target of qualified `builtin.<name>(...)` calls
-// (packageBuiltinShadows) and `sstring` is the zero-copy view type emitted by the string([]byte)
+// (holderDeclares) and `sstring` is the zero-copy view type emitted by the string([]byte)
 // elision pass. A same-named user identifier (a nested type especially) would shadow the golib
 // name inside the package class, so it is renamed. Names the EMITTER itself spells — UNIVERSE
 // names (`any`, `rune`, the numeric alias names, ...) and the MAPPED C# spellings (`nint`,
@@ -286,17 +286,13 @@ func getSanitizedIdentifier(identifier string) string {
 }
 
 func getCollisionAvoidanceIdentifier(identifier string) string {
-	// A type-vs-method name collision (a package-level type and a method sharing a name) is normally
-	// avoided by Δ-prefixing the TYPE here, while the METHOD keeps its core-sanitized name — so the
-	// nested type `Δfoo` and the extension method `foo` no longer collide. But when the colliding name
-	// is also a golib reserved word, the METHOD's core-sanitized name is ALSO Δ-prefixed
-	// (getCoreSanitizedIdentifier's reserved branch), so the plain Δ-prefix stops separating them: the
-	// nested type and the extension method would BOTH be `Δ<name>` and collide in C# (CS0102). Append a
-	// type marker so the TYPE gets a name distinct from the method. Example: runtime's `type slice` vs
-	// `func (*userArena) slice` — both reserved-renamed: TYPE → `Δsliceᴛ`, METHOD → `Δslice`. Only the
-	// type side is renamed; the method (and every method call site / go2cs-gen generated overload) is
-	// left as `Δslice`, which keeps the converter and the go2cs-gen generators — they compute method
-	// names independently — in sync. (Renaming the method instead desyncs them and cascades.)
+	// A renamed declaration (nameCollisions) takes the Δ prefix. When its name is also a golib reserved
+	// word, the core-sanitized spelling of that name is ALREADY Δ-prefixed (getCoreSanitizedIdentifier's
+	// reserved branch), so the plain prefix would not separate the renamed declaration from another
+	// member spelled through that branch: append a type marker (`Δ<name>ᴛ`). The rule was written for a
+	// type sharing a METHOD's name (runtime's `type slice` beside `func (*userArena) slice`: TYPE
+	// `Δsliceᴛ`, METHOD `Δslice`). Since 2026-11-11 a method stands in its receiver's holder and such a
+	// type is not in nameCollisions, so it takes the reserved spelling alone.
 	if reserved.Contains(identifier) {
 		return ShadowVarMarker + identifier + TempVarMarker
 	}

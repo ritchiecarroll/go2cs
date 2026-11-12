@@ -14,6 +14,7 @@
 namespace go.example.com;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -96,7 +97,11 @@ internal static nint noted(/*[4]*/ array<byte> a, nint b) {
     return len(a) + b;
 }
 
+} partial class mainᴛholder {
+
 internal static void put(this ref holder h, /*[3]*/ array<nint> v) { v = v.Clone(); }
+
+} partial class main_package {
 
 internal static void Main() {
     var lambda = ([GoArrayDims(32)] array<byte> x) => {

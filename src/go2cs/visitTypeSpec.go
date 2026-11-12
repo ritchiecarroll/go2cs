@@ -769,18 +769,10 @@ func (v *Visitor) descriptorCarrierFor(t types.Type) string {
 		return ""
 	}
 
-	// The carrier's C# name must be the one the DECLARATION used, collision rename included: a
-	// defined type whose name is also a method name in its own package is Δ-prefixed at the
-	// declaration (encoding/xml declares `type Token any` alongside `(*Decoder).Token()`, so the
-	// alias and its carrier are ΔToken/ΔTokenᴅ). Naming the unrenamed form here emits
-	// `typeof(Tokenᴅ)` against a declared `ΔTokenᴅ` — CS0246, and caught by the first smoke run.
-	// packageHasMethodNamed is the types-level form of the same test performNameCollisionAnalysis
-	// applies, and is what the foreign-collision derivation already uses for this exact question.
+	// The carrier's C# name is the one the DECLARATION used. A defined type whose name is also a
+	// method name in its own package keeps its Go name (encoding/xml declares `type Token any`
+	// beside `(*Decoder).Token()`; the alias and its carrier are Token/Tokenᴅ).
 	aliasName := getCoreSanitizedIdentifier(obj.Name())
-
-	if packageHasMethodNamed(obj.Pkg(), obj.Name()) {
-		aliasName = getCollisionAvoidanceIdentifier(obj.Name())
-	}
 
 	if obj.Pkg() == v.pkg {
 		return aliasName + DescriptorCarrierSuffix

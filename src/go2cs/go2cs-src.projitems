@@ -241,8 +241,6 @@
     <None Include="$(MSBuildThisFileDirectory)foreignConstraintProxy_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignFieldConsumer_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignGenericAdapter_test.go" />
-    <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions.go" />
-    <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignWrittenRHS_test.go" />
@@ -268,6 +266,7 @@
     <None Include="$(MSBuildThisFileDirectory)goTypeMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)godebugDefault.go" />
     <None Include="$(MSBuildThisFileDirectory)godebugDefault_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)golibNamespaceNames.go" />
     <None Include="$(MSBuildThisFileDirectory)goModFile.go" />
     <None Include="$(MSBuildThisFileDirectory)goModFile_test.go" />
     <None Include="$(MSBuildThisFileDirectory)handOwnAddress_test.go" />
@@ -450,6 +449,7 @@
     <None Include="$(MSBuildThisFileDirectory)memberMarkGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)memberMarkers.go" />
     <None Include="$(MSBuildThisFileDirectory)methodExpressionWrapper_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)methodHolder.go" />
     <None Include="$(MSBuildThisFileDirectory)methodHolder_test.go" />
     <None Include="$(MSBuildThisFileDirectory)methodSetConstraintNeed_test.go" />
     <None Include="$(MSBuildThisFileDirectory)methodlessFuncTypeLocal_test.go" />
@@ -780,8 +780,6 @@
     <None Include="$(MSBuildThisFileDirectory)licensing.go" />
     <None Include="$(MSBuildThisFileDirectory)licensing_test.go" />
     <None Include="$(MSBuildThisFileDirectory)liftedIfaceTestCast_integration_test.go" />
-    <None Include="$(MSBuildThisFileDirectory)funcMethodCollision.go" />
-    <None Include="$(MSBuildThisFileDirectory)funcMethodCollision_test.go" />
     <None Include="$(MSBuildThisFileDirectory)LICENSE" />
     <None Include="$(MSBuildThisFileDirectory)LICENSE-EXCEPTION" />
     <None Include="$(MSBuildThisFileDirectory)rootGoTypeDescriptor_test.go" />

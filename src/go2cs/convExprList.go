@@ -379,13 +379,6 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			}
 
 			resultExpr = v.convertToInterfaceType(interfaceType, v.getType(expr, false), clonedElement(v.convExpr(expr, contexts)))
-
-			// A bare argument whose type declares a same-named method would bind the call to that method's
-			// extension (sameNameMethodCapture); an adapter (`new …`) is already a different type and binds
-			// the function.
-			if cast, ok := callContext.sameNameCaptureCasts[i]; ok && !strings.HasPrefix(resultExpr, "new ") {
-				resultExpr = castOf(cast, resultExpr)
-			}
 		} else {
 			resultExpr = clonedElement(v.convExpr(expr, contexts))
 		}
@@ -407,9 +400,6 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		// CONVERSION renders `(Action)(default)`, where a bare trailing accessor would land on the
 		// operand instead of the cast's result.
 		if callContext != nil && callContext.anyBoxedFuncArgs[i] && !spreadArg && !totalReplacement {
-			// An ambiguous method group (a func named like a method of its package) has no
-			// natural type to box: give it its delegate type first (applyMethodGroupClashCast).
-			resultExpr = v.applyMethodGroupClashCast(expr, resultExpr)
 			resultExpr = v.applyTypedNilFuncBox(v.getType(expr, false), v.funcExprNeverRendersNull(expr), resultExpr)
 		}
 

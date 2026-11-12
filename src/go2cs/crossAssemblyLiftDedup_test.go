@@ -44,7 +44,6 @@
 package main
 
 import (
-	"go/types"
 	"os"
 	"path/filepath"
 	"strings"
@@ -149,8 +148,6 @@ func convertCrossAssemblyVariant(t *testing.T, pkg *packages.Package, candidate 
 
 	seed := productionSeed{dynamicTypeNames: map[string]string{crossAssemblyUnwrapSignature: candidate}}
 
-	testMethodRenames = make(map[types.Object]bool)
-	defer func() { testMethodRenames = nil }()
 
 	if _, _, err := convertTestVariant(pkg, testFileEntries(pkg), outputPath, "go", seed, options); err != nil {
 		t.Fatalf("convertTestVariant: %v", err)

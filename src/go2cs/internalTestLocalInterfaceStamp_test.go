@@ -17,7 +17,6 @@
 package main
 
 import (
-	"go/types"
 	"os"
 	"path/filepath"
 	"strings"
@@ -63,8 +62,6 @@ func TestAnInternalTestLocalInterfaceCarriesItsLocalNameStamp(t *testing.T) {
 	options.testInlineTypeAccess = true
 	options.testProductionPath = "example/lif"
 
-	testMethodRenames = make(map[types.Object]bool)
-	t.Cleanup(func() { testMethodRenames = nil })
 
 	if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", productionSeed{}, options); err != nil {
 		t.Fatal(err)

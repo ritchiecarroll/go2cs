@@ -23,7 +23,6 @@ package main
 
 import (
 	"go/build"
-	"go/types"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -210,8 +209,6 @@ func TestWhiteboxProductionNumericConvNotRecorded(t *testing.T) {
 	options.testInlineTypeAccess = true
 	options.testProductionPath = "example/wbnum"
 
-	testMethodRenames = make(map[types.Object]bool)
-	t.Cleanup(func() { testMethodRenames = nil })
 
 	if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", productionSeed{}, options); err != nil {
 		t.Fatal(err)
@@ -322,8 +319,6 @@ func TestWhiteboxArgumentOfItsParameterTypeRecordsNoBox(t *testing.T) {
 	options.testInlineTypeAccess = true
 	options.testProductionPath = "example/wbbox"
 
-	testMethodRenames = make(map[types.Object]bool)
-	t.Cleanup(func() { testMethodRenames = nil })
 
 	if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", productionSeed{}, options); err != nil {
 		t.Fatal(err)

@@ -269,7 +269,17 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 						caseExpr = fmt.Sprintf("{} %s when %s._<%s>(out var _)", tempTarget, tempTarget, caseExpr)
 					}
 				} else {
-					caseExpr = fmt.Sprintf("%s %s", caseExpr, bindIdent)
+					caseBinding := bindIdent
+
+					// A label with no binding is a bare name, which C# reads as an expression before it
+					// reads it as a type. Inside a method holder that declares a method of the type's
+					// name, the bare name is that method group (CS8917). The discard form puts the name
+					// in a type position, where only types are read.
+					if len(caseBinding) == 0 && v.holderDeclaresTypeName(caseExpr) {
+						caseBinding = "_"
+					}
+
+					caseExpr = fmt.Sprintf("%s %s", caseExpr, caseBinding)
 				}
 
 				// One label per Go type: `case int:` is `nint` alone. Go matches the dynamic type
