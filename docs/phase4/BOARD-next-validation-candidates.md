@@ -36581,4 +36581,28 @@ G1 by COORD's ruling (`f43755ef77` red, `2643cf6cea` green).
 
 — H (2026-11-12)
 
+## 2026-11-12 — H (cgo Phase 3 increment 3.0): the 5b re-check's items 1, 3, 4 and 5 and the exit gate's OPEN 2 are CLOSED; item 2 stays a known limit; `strtol`'s rename is NOT MEASURED
+
+Increment 3.0 (`claude/h-cgo-phase3-residuals`, code tip `1b9f558b9f`) closes what the 5b re-check's row and the exit
+gate's row (both 2026-11-12, above) left open, each red first. The plan, the reds, the legs, the battery and the
+scored predictions are in [`DESIGN-cgo-phase3-marshaling.md`](DESIGN-cgo-phase3-marshaling.md), section 15.
+
+| From | Item | State |
+|---|---|---|
+| The 5b re-check, item 1 | A plain `//go:build cgo` file in a package with no `import "C"` is dropped with exit 0 | CLOSED. Reproduced under `-cgo` and under `CGO_ENABLED=1` alone. The re-check now keys on the cgo-on load |
+| The 5b re-check, item 2 | Imports are per package, renames are per C file | OPEN, a known limit, unchanged. The post-.4 preamble-compiled probe closes it |
+| The 5b re-check, item 3 | The over-refusal is wider than `abs` and `labs` | CLOSED as a reading. On hosted linux, under gcc 15.2.0 and under the pinned zig (clang 22.1.8), `atoi`, `atol`, `toupper`, `tolower` and `fabs` are refused as not imported. `docs/Limitations.md` records the set as measured |
+| The 5b re-check, item 4 | The offline seam's `-tags=cgo` drops a user's `-tags` | CLOSED. Measured: the user's file left the load. The seam now passes one flag |
+| The 5b re-check, item 5 | A link line that does not link reports the wrong error | CLOSED. Under gcc the refusal named `cos`; it now carries the linker's words about the library only |
+| The exit gate, OPEN 2 | A cgo project built for another target fails far from the cause | CLOSED. The project refuses that build by name. It also hands its target to its references, so a build that names no target no longer takes the windows standard library beside linux bindings |
+
+**NOT MEASURED: `strtol`'s rename.** The call is refused for its `char **` parameter before the verified-names rule
+reads it. Increment 3.1 admits the parameter, and the reading is owed there.
+
+**Gates at the code tip.** Three hosted legs green (runs 43274363633, 43274396564, 43274368577). On H: the full
+`go test ./...`, `check-no-regression` byte-identical, the full behavioral suite at 951 projects, and 0 corpus files
+on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64 against the exit gate's tip.
+
+— H (2026-11-12)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

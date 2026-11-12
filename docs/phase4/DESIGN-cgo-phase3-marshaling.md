@@ -481,4 +481,82 @@ references. The exit gate's tests pass the target by hand on every build, which 
 - **S3.0-E.** R4 shows a call that is neither bound nor refused by name: that is a defect of the rule, not a reading.
   Stop and post.
 
+### 15.5 Record 2026-11-12: increment 3.0 as built and measured
+
+COORD approved the plan as posted: R1 to R5, P3.0-1 to 7, and stop lines S3.0-A to E. R5's second half was approved
+inside S3.0-B. COORD added one gate to P3.0-7: the full behavioral suite, once at the tip, because R1 changes a path
+every conversion takes.
+
+**Commits, on the exit gate's tip `0001be70a7`.** The design merge and this plan (`c5d4525e48`, `24894b8199`); the
+reds, tests only (`3c19eb5ed5`); the fixes (`fb9deb5ab4`); two commits that restore one file's line count
+(`a7f767b9a8`, `1b9f558b9f`, see the disclosures). A hosted leg runs a branch, so the red commit is also the side
+ref `claude/h-cgo-30-red`. It is an ancestor of this branch, and COORD deletes it once 3.0 is on master.
+
+**The reds, read at `3c19eb5ed5`.** H has no C compiler, so R2 and R4 are read on hosted linux only.
+
+| | Read on | The reading at the red commit |
+|---|---|---|
+| R1 | H | The control arm (a cgo-off load) passes. Under `-cgo`, and under `CGO_ENABLED=1` with no `-cgo`, the conversion exits 0 and writes `value.cs` and no `on.cs` |
+| R2 | hosted linux, the runner's gcc (run 43267366259) | The refusal reads `ld.bfd: /tmp/….o: reference to cos`: a symbol named beside a library that is not there |
+| R2 | hosted linux, the pinned zig (run 43267397145) | The test PASSES at the red commit. zig's linker reports only `unable to find dynamic system library "go2csnosuchlib"` and traces no symbol |
+| R3 | H | The plain file under the user's tag is not converted |
+| R4 | hosted linux, both compilers | Refused as not imported: `atoi`, `atol`, `fabs`, `tolower`, `toupper`. Refused by name for another reason: `strtol`. Bound: none |
+| R5 | H | The build for windows/amd64 fails with CS0051 on the first C type in an exported signature, and with no error of go2cs's |
+| R5, second half | H | With no target named, the runtime beside the linux/amd64 fixture is the windows one. With the target passed by hand it is the linux one |
+
+**The fixes, as built.**
+
+- **R1.** The constraint re-check carries the `cgo` tag whenever the load was cgo-on (`cgoOnLoad`): under `-cgo`, or
+  under a `CGO_ENABLED=1` in the load's own environment. The key is the load, not the package's route.
+- **R2.** `cgoCapture` returns the baseline probe's own error.
+- **R3.** The offline seam builds one `-tags` flag from the user's tags and `cgo` (`cgoOfflineBuildFlags`).
+- **R4.** No fix, as planned. `docs/Limitations.md` records the set as measured.
+- **R5.** `cgoTargetDefaults` adds two blocks to a cgo package's project (`cgoTargetBlocks`). A target named
+  `GoCheckCgoTarget` refuses a build for another target with one error that names both targets, before the compiler
+  runs. An item definition hands the project's target to its project references. Both are in the cgo project's own
+  `.csproj`, so S3.0-B did not fire.
+
+**The hosted legs at the tip `1b9f558b9f`, each `success`.**
+
+| Stage | Compiler | Run | Reading |
+|---|---|---|---|
+| `converter-cgo`, linux | the runner's gcc 15.2.0 | 43274363633 | 128 PASS, 0 FAIL, 7 SKIP. R2's refusal reads `cannot find -lgo2csnosuchlib` and names no symbol. R4's set is the red commit's |
+| `converter-cgo`, linux | the pinned zig (clang 22.1.8) | 43274396564 | 128 PASS, 0 FAIL, 7 SKIP. R4's set is the same |
+| `cgo-e2e`, linux | the pinned zig | 43274368577 | 28 PASS, 0 FAIL, 0 SKIP. Both of R5's tests pass: the windows build is refused by name, and both arms of the no-target test read the linux runtime. Every arm of the exit gate reads as it did |
+
+The 7 SKIPs of `converter-cgo` are the build tests and the exit gate's, which belong to `cgo-e2e` and run there.
+
+**The battery on H at `1b9f558b9f`, one run, exit 0.**
+
+| Stage | Reading |
+|---|---|
+| `go test ./...` | 11 packages ok, 0 FAIL, 2,111 s. repoguard and the comment census are inside it |
+| `check-no-regression` | Byte-identical across 1,035 behavioral packages; the 8 platform-exclusive packages are skipped by name, as at the base |
+| The full behavioral suite | PASS, 951 projects: Transpile 951, Compile 951, Target 951, Output 921 with 30 skipped. These are the exit gate's battery's counts. No NOT MEASURED line. No tracked file changed or deleted |
+| The corpus comparison, A = `0001be70a7`, B = `1b9f558b9f` | windows/amd64, linux/amd64, darwin/amd64, linux/arm64: 0 files differ on each. Every conversion exits 0 with 0 degraded packages. The two converter binaries differ |
+
+**The predictions, scored as worded.**
+
+| | Score | Note |
+|---|---|---|
+| P3.0-1 | MET | Both halves |
+| P3.0-2 | MET under gcc, MISSED under zig | The base half assumed a linker that traces symbols. zig's does not, so its refusal named no symbol before the fix either. The after half holds on both |
+| P3.0-3 | MET | No existing offline test's output moved |
+| P3.0-4 | MET as worded on both compilers; as meant, five of six | All six are refused by name. `strtol` is refused for its `char **` parameter, which Phase 2 does not cross, before the verified-names rule reads it. So its rename is NOT MEASURED |
+| P3.0-5 | MET | At the base CS0051 and no go2cs error. After the fix one error, go2cs's, naming both targets, in about 8 s on H and 4 s on the hosted leg |
+| P3.0-6 | MET | On H and on hosted linux |
+| P3.0-7 | MET | 0 corpus files on four targets, `check-no-regression` byte-identical, and no committed golden moved. The third clause named a move with nothing to move: the cgo fixtures' project files are written by the tests and are not committed |
+
+The named risk outside the mechanism (R1 under `-cgo`) did not fire. No stop line fired.
+
+**Disclosures.**
+
+- **A line-count fault, caught by repoguard before any push.** The fixes at `fb9deb5ab4` shifted lines in
+  `conversionDriver.go`, and four provenance notes in the docs cite that file by line. `a7f767b9a8` moved the new
+  helper to `cgoRoute.go`, and `1b9f558b9f` cut a comment back to its base's three lines, so the file has its base's
+  line count again and the notes resolve. Nothing was pushed in between.
+- **`strtol`'s rename stays NOT MEASURED** until increment 3.1 admits its parameter.
+- **GolibTests and GenTests were not run.** 3.0 changes neither tree.
+- **This record is a docs-only commit past the battery's tip.** It is gated alone: repoguard and the comment census.
+
 — H (2026-11-12)
