@@ -277,6 +277,15 @@ func captureCgoLibraries(toolchain cgoToolchain, goos string, flags cgoLinkFlags
 	return cgoSymbolLibraries(symbols, resolved)
 }
 
+// cgoUnboundSymbols names the symbols a capture found in no shared library: resolved statically, or not at all.
+type cgoUnboundSymbols struct {
+	symbols []string
+}
+
+func (unbound *cgoUnboundSymbols) Error() string {
+	return fmt.Sprintf("cgo: %s resolved to no shared library (statically, or not at all), and Phase 2 binds only a symbol a shared library exports", strings.Join(unbound.symbols, ", "))
+}
+
 // cgoSymbolLibraries orders the answer by symbol and refuses each symbol with no library.
 func cgoSymbolLibraries(symbols []string, resolved map[string]string) ([]cgoSymbolLibrary, error) {
 	var answer []cgoSymbolLibrary
@@ -294,7 +303,7 @@ func cgoSymbolLibraries(symbols []string, resolved map[string]string) ([]cgoSymb
 	}
 
 	if len(missing) > 0 {
-		return nil, fmt.Errorf("cgo: %s resolved to no shared library (statically, or not at all), and Phase 2 binds only a symbol a shared library exports", strings.Join(missing, ", "))
+		return nil, &cgoUnboundSymbols{symbols: missing}
 	}
 
 	sort.Slice(answer, func(i, j int) bool { return answer[i].symbol < answer[j].symbol })

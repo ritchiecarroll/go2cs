@@ -129,7 +129,22 @@ func TestTheCgoRouteConvertsTheFixtureOnARealHost(t *testing.T) {
 		}
 	})
 
-	trimmed := withoutGoFuncs(t, fixture, "Deferred", "Started")
+	// llvm-mingw's C runtime resolves mktime statically (converter-cgo 43148958897, windows), and Phase 2 binds only a
+	// shared library's export, so on windows the copy that converts leaves Mktime out, and the next subtest holds the
+	// refusal.
+	refused := []string{"Deferred", "Started"}
+
+	if runtime.GOOS == "windows" {
+		refused = append(refused, "Mktime")
+
+		t.Run("a C function the C runtime resolves statically is refused at its use", func(t *testing.T) {
+			stderr, _, output, err := convertCgoReal(t, probeDir, map[string]string{"fixture.go": withoutGoFuncs(t, fixture, "Deferred", "Started")})
+			requireNothingWritten(t, output, err, stderr)
+			requireCgoUseRefused(t, cgoRefusalLines(stderr), "fixture.go(74,", "C.mktime", "statically")
+		})
+	}
+
+	trimmed := withoutGoFuncs(t, fixture, refused...)
 
 	t.Run("a copy without them converts, naming each library the C compiler found", func(t *testing.T) {
 		toolchain, cc := cgoRealToolchainLine(t)

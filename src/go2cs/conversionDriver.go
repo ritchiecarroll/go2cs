@@ -391,12 +391,17 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 				// cfg.Dir is the directory the loader ran the go command in, so it is also the
 				// directory whose GOTOOLCHAIN resolution decides which Go release tags the
-				// constraint re-check must agree with.
-				if match, err := CheckBuildConstraints(path, options.targetPlatform, options.buildTags, cfg.Dir); err != nil {
-					showWarning("Failed to evaluate build constraints for file \"%s\": %s", path, err)
-				} else if !match {
-					// Skipping file due to non-matching build constraints
-					continue
+				// constraint re-check must agree with. A tree cmd/cgo wrote (the cgo route's) is not
+				// re-checked: go list selected its import "C" source under these constraints already,
+				// and on a real host its file is a build-cache name with no .go suffix, which the
+				// file-name check refuses, so the re-check would drop every one of them silently.
+				if pair.output == "" && !pair.bindings {
+					if match, err := CheckBuildConstraints(path, options.targetPlatform, options.buildTags, cfg.Dir); err != nil {
+						showWarning("Failed to evaluate build constraints for file \"%s\": %s", path, err)
+					} else if !match {
+						// Skipping file due to non-matching build constraints
+						continue
+					}
 				}
 
 				// See if output already exists and has been marked as manually converted. The
@@ -709,6 +714,14 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 				packageLock.Unlock()
 			}(fileEntry)
+		}
+
+		// A cgo package whose bindings file was not written cannot build, so its conversion fails here, loudly, rather
+		// than exit 0 with converted files that name C members nothing declares (cgoRoute.go).
+		if route != nil {
+			if _, err := os.Stat(route.bindingsPath(packageOutputPath, packageName)); err != nil {
+				log.Fatalf("Refusing to convert: cgo: package %s's bindings file was not written (%s); see the warnings above\n", pkg.PkgPath, err)
+			}
 		}
 
 		// Record the [assembly: GoImplement] pairs this package SATISFIES but never WITNESSES —

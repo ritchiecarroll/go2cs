@@ -269,6 +269,21 @@ func requireNothingWritten(t *testing.T, output string, err error, stderr string
 func TestCgoPhase1FixtureIsRefusedNamingEachUseAndItsOwner(t *testing.T) {
 	stderr, output, err := convertCgoOffline(t, cgoFixtureFiles(t, cgoFixtureDir))
 	requireNothingWritten(t, output, err, stderr)
+	requireCgoPhase1UsesRefused(t, stderr)
+
+	for _, name := range []string{"C.add", "C.halve", "C.scale"} {
+		for _, line := range cgoRefusalLines(stderr) {
+			if strings.Contains(line, name+":") || strings.Contains(line, name+" ") {
+				t.Errorf("%s is refused offline, where only the capture can tell it is defined in the preamble:\n%s", name, line)
+			}
+		}
+	}
+}
+
+// requireCgoPhase1UsesRefused asserts the five uses of C Phase 1's fixture makes outside Phase 2's set, each refused with
+// the phase that owns it, as the census refuses them before any capture: offline and on a real host alike.
+func requireCgoPhase1UsesRefused(t *testing.T, stderr string) {
+	t.Helper()
 
 	lines := cgoRefusalLines(stderr)
 	requireCgoUseRefused(t, lines, "C.CString", "Phase 3")
@@ -276,14 +291,6 @@ func TestCgoPhase1FixtureIsRefusedNamingEachUseAndItsOwner(t *testing.T) {
 	requireCgoUseRefused(t, lines, "C.twice", "§11.6")
 	requireCgoUseRefused(t, lines, "C.NEXT", "Phase 4")
 	requireCgoUseRefused(t, lines, "fixture.go(58,", "C.free", "deferred", "Phase 2 later")
-
-	for _, name := range []string{"C.add", "C.halve", "C.scale"} {
-		for _, line := range lines {
-			if strings.Contains(line, name+":") || strings.Contains(line, name+" ") {
-				t.Errorf("%s is refused offline, where only the capture can tell it is defined in the preamble:\n%s", name, line)
-			}
-		}
-	}
 }
 
 // §11.20, P4': the Phase 2 fixture's only uses outside the set are its deferred call and its goroutine call through the

@@ -12,6 +12,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"go/ast"
 	"go/printer"
@@ -1164,12 +1165,29 @@ func cgoCapture(load cgoLoad, goos string, flags cgoLinkFlags, symbols []string,
 		return captured, toolchainLine, nil, nil
 	}
 
-	// A probe that does not link names no symbol; each symbol linked alone names the ones no library defines.
+	// Each symbol no shared library exports is refused at its use. A shared probe may link with the symbol left undefined
+	// (ELF allows it) and resolve it nowhere, and a probe that does not link names no symbol at all, so there each symbol
+	// is linked alone to name the ones no library defines.
+	unbound := map[string]bool{}
+	var named *cgoUnboundSymbols
+
+	if errors.As(err, &named) {
+		for _, symbol := range named.symbols {
+			unbound[symbol] = true
+		}
+	} else {
+		for _, symbol := range symbols {
+			if _, _, linkErr := linkCgoProbe(toolchain, goos, flags, []string{symbol}, workDir, nil); linkErr != nil {
+				unbound[symbol] = true
+			}
+		}
+	}
+
 	var refusals []cgoUseRefusal
 
 	for _, symbol := range symbols {
-		if _, _, linkErr := linkCgoProbe(toolchain, goos, flags, []string{symbol}, workDir, nil); linkErr != nil {
-			refusals = append(refusals, cgoUseRefusal{position: usedAt[symbol], text: fmt.Sprintf("C.%s: no shared library the package links defines it; a function the preamble defines is compiled C, Phase 4's (or name its library with #cgo LDFLAGS)", symbol)})
+		if unbound[symbol] {
+			refusals = append(refusals, cgoUseRefusal{position: usedAt[symbol], text: fmt.Sprintf("C.%s: no shared library the package links exports it (it resolved statically, or nowhere), and Phase 2 binds only a shared library's export; a function the preamble defines is compiled C, Phase 4's", symbol)})
 		}
 	}
 

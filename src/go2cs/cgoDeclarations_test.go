@@ -413,7 +413,7 @@ func TestCgoSourceFilesMapsTheFixturesTreesToTheirSource(t *testing.T) {
 	}
 }
 
-// cgoFixtureSummaryCounts is what the driver's -cgo refusal reports for the fixture, by kind (cgoFixtureWant counted).
+// cgoFixtureSummaryCounts is what cgoRecognitionSummary reports for the fixture, by kind (cgoFixtureWant counted).
 const cgoFixtureSummaryCounts = "recognized 25 C declarations (6 func, 9 type, 1 struct, 1 enum, 3 int const, 1 float const, 1 string const, 1 errno func, 1 func value, 1 macro)"
 
 // cgoFixtureSummaryRoles is the rest of the fixture's summary: its trees by role, which no file name can change.
