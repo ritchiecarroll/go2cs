@@ -43,6 +43,26 @@ promoted method through `using static` alone; it is first under *Upgrading from 
   [Consuming Go from C#](ConsumingGoFromCSharp.md) has the details.
   <!-- source: the same seat; GenTests PromotedHostClassTests.UsingStaticAloneBringsDeclaredMethodsAndNoPromotedOne
        (CS1929 without the namespace) and TheNamespaceBringsThePromotedMethods. -->
+- **Every Go method is in its receiver type's method holder.** PENDING. Through 1.26.10.3 the methods a package
+  declares were members of the package class (`time_package`); from 1.26.10.4 the methods of each type are in a class
+  of their own beside the package class, in the same namespace (`timeᴛTime` holds `time.Time`'s methods). A method is
+  still an extension method on its receiver, so `t.Add(d)` reads as before once the namespace is imported (`using go;`,
+  or `using go.<path>;` for a package below the root); `using static go.time_package;` alone no longer brings any
+  method. A call written in static form through the package class, `time_package.Add(t, d)`, is now
+  `t.Add(d)`. An assembly compiled against 1.26.10.3 that calls a Go method fails under 1.26.10.4 with
+  `MissingMethodException`, and the break floor refuses that combination first (`GO2CS3002`): rebuild against
+  1.26.10.4.
+  <!-- source: the method-holder seat (OQ2, P1; docs/phase4/SCOUT-method-holder.md on
+       claude/p1-oq2-method-holder-scout). The moved members are announced to the binary-compatibility guard by the
+       release's pack rehearsal and New-GoApiCompatMoveSuppressions.ps1, as the promoted move was; the counts are read
+       there. -->
+- **A type, constant or variable named like a method keeps its Go name.** PENDING. A package-level name that shared
+  its spelling with a method of the package took a `Δ` prefix in C#, because both were members of the package class:
+  `time.Second` was `time.ΔSecond`, `reflect.Type` was `reflect.ΔType`, `syscall.Handle` was `syscall.ΔHandle`. With
+  the methods in their holders the names no longer meet, and each keeps its Go spelling. C# source that wrote a `Δ`
+  name writes the Go name.
+  <!-- source: the same seat; behavioral fixtures MethodHolderNames and MethodHolderAlias, and every golden that named
+       a renamed element (goldens: re-baseline). -->
 
 **A package whose types promote very many methods now loads.** PENDING. The .NET runtime loads no type with more
 than 65,521 methods. A converted package class held every promoted-method forwarder of every struct in the package,
