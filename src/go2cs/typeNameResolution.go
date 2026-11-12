@@ -540,6 +540,16 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 				if target, ok := ambiguousImportedTypeAliasTarget(key, pkg); ok {
 					return aliasQualifier + "." + target[strings.LastIndex(target, ".")+1:]
 				}
+
+				// A type its package emits as a `global using` over the empty interface (`type Token any`),
+				// which this file reaches ONLY through another package's alias, with no import of the type's
+				// own package, so no alias key was loaded for it: the Go name is no member of that package's
+				// class (`lib.Token`, CS0426). Render what it stands for, exactly as any reference to that
+				// would be rendered (see foreignUsingAliasOverEmptyInterface). A file that imports the
+				// package holds the key and keeps its `pkgꓸName` alias route unchanged.
+				if !importedTypeAliasPublished(key) && foreignUsingAliasOverEmptyInterface(obj) {
+					return v.getAliasQualifiedTypeName(named.Underlying(), isUnderlying)
+				}
 			}
 
 			pkgPrefix = aliasQualifier + "."

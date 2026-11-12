@@ -127,6 +127,55 @@ func deriveReExportedTypeAliases(pkg *packages.Package) [][2]string {
 	return aliases
 }
 
+// importedTypeAliasPublished reports whether an alias key (`pkg.Name`) was loaded for the package
+// being converted, from a dependency's package_info.cs or derived from its declarations.
+func importedTypeAliasPublished(key string) bool {
+	packageLock.Lock()
+	defer packageLock.Unlock()
+
+	_, published := importedTypeAliases[key]
+
+	return published
+}
+
+// foreignUsingAliasOverEmptyInterface reports whether obj, a type of another package, is a non-generic
+// DEFINED type that its package emits as a `global using` of `object`: a definition over the empty
+// interface whose right-hand side is a named type or an inline empty interface (`type Token any`,
+// usingAliasTargetType). Such a type is no member of its package's class, so a file with no alias key
+// for it cannot spell it by its Go name.
+//
+// The question is the producer's own, asked of the loaded package this conversion reached it through
+// (its scope and its syntax); when that is unavailable, the answer is no and the spelling stays as it
+// was. A defined type over a named NON-empty interface is a `global using` too, of a target this
+// derivation declines to reproduce (foreignAliasTargetName), and is not answered here either.
+func foreignUsingAliasOverEmptyInterface(obj *types.TypeName) bool {
+	if obj == nil || obj.IsAlias() || obj.Pkg() == nil {
+		return false
+	}
+
+	named, isNamed := obj.Type().(*types.Named)
+
+	if !isNamed || named.TypeParams().Len() > 0 {
+		return false
+	}
+
+	iface, isInterface := named.Underlying().(*types.Interface)
+
+	if !isInterface || !iface.Empty() {
+		return false
+	}
+
+	producer := importedPackages[obj.Pkg().Path()]
+
+	if producer == nil || producer.Types != obj.Pkg() {
+		return false
+	}
+
+	_, isUsingAlias := usingAliasTargetType(producer, obj)
+
+	return isUsingAlias
+}
+
 // usingAliasTargetType returns the type whose rendering the dependency puts on the RHS of the
 // `global using` it emits for obj, and whether obj is one of the two declarations that take that
 // route at all. Everything else — a defined struct/array/map/func/basic type, an inline interface
