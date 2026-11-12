@@ -27,15 +27,6 @@ using static go.main_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("ArrayType", "ΔArrayType")]
-[assembly: GoTypeAlias("ChanDir", "ΔChanDir")]
-[assembly: GoTypeAlias("FuncType", "ΔFuncType")]
-[assembly: GoTypeAlias("InterfaceType", "ΔInterfaceType")]
-[assembly: GoTypeAlias("Kind", "ΔKind")]
-[assembly: GoTypeAlias("MapType", "ΔMapType")]
-[assembly: GoTypeAlias("Name", "ΔName")]
-[assembly: GoTypeAlias("String", "const:ΔString")]
-[assembly: GoTypeAlias("StructType", "ΔStructType")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -62,12 +53,12 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("abi.go", "abi.cs", "ABFcgoKClIKCgpSCgoKUAAIYgoKUgoKUAAUQggACEoI=")]
+[assembly: GoPositionMap("abi.go", "abi.cs", "ABRcgoKClIKCgpSCgoKUAAIYgoKUgoKUAAkQggACEoI=")]
 [assembly: GoPositionMap("compiletype.go", "compiletype.cs", "AAgelpiWlg==")]
 [assembly: GoPositionMap("escape.go", "escape.cs", "AAomgoLegoKU")]
 [assembly: GoPositionMap("main.go", "main.cs", "7oKCgpSUgoI=")]
 [assembly: GoPositionMap("switch.go", "switch.cs", "ABtAgoKYpKQ=")]
-[assembly: GoPositionMap("type.go", "type.cs", "AEiIAoKClKYAHT6ijKiCgoKUppSCqJaCqIKmggARLqKClKaigpQAAhSCAA4kooKUpoIAFDKigoKUACoIooKUlKSsrKysrKysAAQSopSCpIKkgqSCpIKkqKKClKiigpSoooKUqKKClKiigpSolpQABxCCgoKUpqKCgpSoAA0igpSClIKUgpSCpqKClAANMoKmgqaCpoKmooKClIKUlKKCgpSCgpSmggANHIIADFKCqoKogqiCqIKqgoKCgoKCzIKClIKsgoKCgoKClLqCgpSCqIKClIKCpoKClIKUgoKClIKCgpSCgpSCpoKCgoKCgoKm")]
+[assembly: GoPositionMap("type.go", "type.cs", "AEuIAoKClMYAHT6ijKiCgoKUxpSCqJaCqIKmggAVLqKClKaigpQABBSCABAkooKUpoIAGDKigoKUAC4IooKUlKSsrKysrKysAAQSopSCpIKkgqSCpIKkqKKClKiigpSoooKUqKKClKiigpSolpQACxCCgoKUpqKCgpTIABEigpSClIKUgpSCxqKClAARMoKmgqaCpoKmooKClIKUlKKCgpSCgpSmggARHIIAEFKCqoKogqiCqIKqgoKCgoKCzIKClILMgoKCgoKClNqCgpSCqIKClIKCxoKClIKUgoKClIKCgpSCgpSCpoKCgoKCgoKm")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -94,23 +85,31 @@ public static partial class main_package
     [GoLocalName("u")] internal partial struct Uncommon_uᴛ7 {}
     internal partial struct structTypeUncommon {}
     public partial struct ArchFamilyType {}
+    public partial struct ArrayType {}
+    public partial struct ChanDir {}
     public partial struct ChanType {}
     public partial struct EmptyInterface {}
     public partial struct FuncFlag {}
     public partial struct FuncID {}
+    public partial struct FuncType {}
     [GoValueClone("Fun")] public partial struct ITab {}
     public partial struct Imethod {}
     public partial struct IntArgRegBitmap {}
     [GoValueClone("Cases")] public partial struct InterfaceSwitch {}
     [GoValueClone("Entries")] public partial struct InterfaceSwitchCache {}
     public partial struct InterfaceSwitchCacheEntry {}
+    public partial struct InterfaceType {}
+    public partial struct Kind {}
+    public partial struct MapType {}
     public partial struct Method {}
+    public partial struct Name {}
     public partial struct NameOff {}
     public partial struct PtrType {}
     public partial struct RF_State {}
     [GoValueClone("Ints", "Floats", "Ptrs", "ReturnIsPtr")] public partial struct RegArgs {}
     public partial struct SliceType {}
     public partial struct StructField {}
+    public partial struct StructType {}
     public partial struct TFlag {}
     public partial struct TextOff {}
     public partial struct Type {}
@@ -119,14 +118,6 @@ public static partial class main_package
     public partial struct TypeAssertCacheEntry {}
     public partial struct TypeOff {}
     public partial struct UncommonType {}
-    public partial struct ΔArrayType {}
-    public partial struct ΔChanDir {}
-    public partial struct ΔFuncType {}
-    public partial struct ΔInterfaceType {}
-    public partial struct ΔKind {}
-    public partial struct ΔMapType {}
-    public partial struct ΔName {}
-    public partial struct ΔStructType {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -139,3 +130,22 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.FuncType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛFuncType;
+[GoMethodHost(typeof(main_package.IntArgRegBitmap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛIntArgRegBitmap;
+[GoMethodHost(typeof(main_package.InterfaceType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛInterfaceType;
+[GoMethodHost(typeof(main_package.Kind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛKind;
+[GoMethodHost(typeof(main_package.MapType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛMapType;
+[GoMethodHost(typeof(main_package.Name)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛName;
+[GoMethodHost(typeof(main_package.RegArgs)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛRegArgs;
+[GoMethodHost(typeof(main_package.StructField)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛStructField;
+[GoMethodHost(typeof(main_package.Type)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛType;
+[GoMethodHost(typeof(main_package.UncommonType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛUncommonType;
+// </MethodHolders>

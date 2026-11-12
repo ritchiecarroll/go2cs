@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,9 +9,13 @@ partial struct MyError {
     internal @string description;
 }
 
+} partial class mainᴛMyError {
+
 public static @string Error(this MyError err) {
     return fmt.Sprintf("error: %s"u8, err.description);
 }
+
+} partial class main_package {
 
 internal static error f() {
     return new MyError("foo");
@@ -23,30 +28,46 @@ partial interface Animal {
 partial struct Dog {
 }
 
+} partial class mainᴛDog {
+
 public static @string Speak(this Dog d) {
     return "Woof!";
 }
 
+} partial class main_package {
+
 partial struct Cat {
 }
+
+} partial class mainᴛCat {
 
 public static @string Speak(this ref Cat c) {
     return "Meow!";
 }
 
+} partial class main_package {
+
 partial struct Llama {
 }
+
+} partial class mainᴛLlama {
 
 public static @string Speak(this Llama l) {
     return "?????";
 }
 
+} partial class main_package {
+
 partial struct JavaProgrammer {
 }
+
+} partial class mainᴛJavaProgrammer {
 
 public static @string Speak(this JavaProgrammer j) {
     return "Design patterns!";
 }
+
+} partial class main_package {
 
 partial struct Counter {
     internal nint n;
@@ -55,6 +76,8 @@ partial struct Counter {
 internal static void addTo(ref nint p, nint delta) {
     p += delta;
 }
+
+} partial class mainᴛCounter {
 
 public static @string Inc(this ж<Counter> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -66,6 +89,8 @@ public static @string Inc(this ж<Counter> Ꮡc) {
 public static nint Total(this ref Counter c) {
     return c.n;
 }
+
+} partial class main_package {
 
 internal static (ж<Counter>, error) makeCounter() {
     return (Ꮡ(new Counter(n: 5)), default);
@@ -110,7 +135,11 @@ internal static (Animal, @string) pick(nint kind) {
     return (a, name);
 }
 
+} partial class mainᴛCat {
+
 public static Animal Self(this ж<Cat> Ꮡc) { return new CatжAnimal(Ꮡc); }
+
+} partial class main_package {
 
 internal static void main() {
     var packᴷ = new stackAppend<Animal>();
@@ -215,8 +244,12 @@ partial struct badge {
     internal nint num;
 }
 
+} partial class mainᴛbadge {
+
 internal static @string @string(this ref badge b) { return b.text; }
 internal static nint @int(this ref badge b) { return b.num; }
+
+} partial class main_package {
 
 internal static void replaceAnimal(ref Animal a) {
     a = new CatжAnimal(Ꮡ(new Cat()));
@@ -231,7 +264,11 @@ partial struct wrapSink {
     /*embed*/ public Animal Animal;
 }
 
+} partial class mainᴛwrapSink {
+
 internal static @string Shut(this wrapSink w) { return "shut"; }
+
+} partial class main_package {
 
 partial interface rdr {
     @string read();
@@ -249,14 +286,22 @@ partial interface rdCloser :
 partial struct strRdr {
 }
 
+} partial class mainᴛstrRdr {
+
 internal static @string read(this strRdr _) { return "strRdr"; }
+
+} partial class main_package {
 
 partial struct fileRdr {
     internal @string name;
 }
 
+} partial class mainᴛfileRdr {
+
 internal static @string read(this fileRdr f) { return "read:"u8 + f.name; }
 internal static @string close(this fileRdr f) { return "close:"u8 + f.name; }
+
+} partial class main_package {
 
 internal static rdCloser open(@string name) { return new fileRdr(name); }
 
@@ -268,7 +313,11 @@ partial struct basin {
     internal @string tag;
 }
 
+} partial class mainᴛbasin {
+
 internal static @string drain(this basin b) { return "b:"u8 + b.tag; }
+
+} partial class main_package {
 
 partial struct plumbing {
     internal sink s;

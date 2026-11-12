@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using Δsync = sync_package;
+using static main_package;
 
 partial class main_package {
 
@@ -9,12 +10,16 @@ partial struct path {
     internal @string name;
 }
 
+} partial class mainᴛpath {
+
 internal static void Done(this path p) { fmt.Println("done", p.name); }
 internal static void Pop(this path p, nint k) { fmt.Println("pop", k, p.name); }
 internal static void Run(this path p, ж<Δsync.WaitGroup> wg) {
     fmt.Println("run", p.name);
     wg.Done();
 }
+
+} partial class main_package {
 
 internal static void pointerLocal() {
     GoFrame ᒐ = default;

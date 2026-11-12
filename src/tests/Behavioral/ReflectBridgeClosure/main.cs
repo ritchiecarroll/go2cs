@@ -4,6 +4,7 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using @unsafe = unsafe_package;
 using ꓸꓸꓸnint = Span<nint>;
+using static main_package;
 
 partial class main_package {
 
@@ -39,7 +40,11 @@ partial struct host {
 
 internal delegate error handler(nint _);
 
+} partial class mainᴛhandler {
+
 internal static error call(this handler h, nint n) { return h(n); }
+
+} partial class main_package {
 
 internal static void noArgs() { }
 internal static void oneIn(nint _) { }

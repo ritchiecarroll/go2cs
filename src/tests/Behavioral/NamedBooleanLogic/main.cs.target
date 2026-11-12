@@ -1,14 +1,19 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct boolVal /*bool*/;
 
+} partial class mainᴛboolVal {
+
 internal static bool isSet(this boolVal b) {
     return (bool)b;
 }
+
+} partial class main_package {
 
 partial interface Value {
     bool isSet();

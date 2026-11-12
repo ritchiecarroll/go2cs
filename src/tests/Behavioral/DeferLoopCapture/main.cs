@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using sort = sort_package;
 using time = time_package;
+using static main_package;
 
 partial class main_package {
 
@@ -14,6 +15,8 @@ partial struct conn {
     internal @string name;
 }
 
+} partial class mainᴛconn {
+
 internal static error Close(this ref conn c) {
     fmt.Println("close", c.name);
     return default;
@@ -23,25 +26,35 @@ internal static void Reset(this ref conn c) {
     fmt.Println("reset", c.name);
 }
 
+} partial class main_package {
+
 partial struct valueConn {
     internal @string name;
     internal channel<@string> @out;
 }
+
+} partial class mainᴛvalueConn {
 
 internal static error Close(this valueConn a) {
     a.@out.ᐸꟷ(a.name);
     return default;
 }
 
+} partial class main_package {
+
 partial struct asyncConn {
     internal @string name;
     internal channel<@string> @out;
 }
 
+} partial class mainᴛasyncConn {
+
 internal static error Close(this ref asyncConn a) {
     a.@out.ᐸꟷ(a.name);
     return default;
 }
+
+} partial class main_package {
 
 internal static void receiverReassignedNoLoop() {
     GoFrame ᒐ = default;

@@ -72,7 +72,7 @@ internal static void main() {
     var cʗ4 = c;
     @try("interface field as *any", () => ~(ж<any>)(uintptr)((@unsafe.Pointer)reflect.ValueOf(cʗ4.OrTypedNil()).Elem().Field(0).UnsafeAddr()));
     ref var bs = ref heap<bits>(new bits(-3, 1.5D), out var Ꮡbs);
-    ref var bv = ref heap<reflectꓸValue>(reflect.ValueOf(Ꮡbs).Elem(), out var Ꮡbv);
+    ref var bv = ref heap<reflect.Value>(reflect.ValueOf(Ꮡbs).Elem(), out var Ꮡbv);
     var bvʗ1 = bv;
     @try("int as *uint", () => ~(ж<nuint>)(uintptr)((@unsafe.Pointer)bvʗ1.Field(0).UnsafeAddr()));
     var bvʗ2 = bv;

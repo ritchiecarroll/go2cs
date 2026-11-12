@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -22,6 +23,8 @@ public static ж<Iterator<T>> NewIterator<T>(T data)
     return Ꮡ(new Iterator<T>(data: data));
 }
 
+} partial class mainᴛIterator {
+
 public static bool Next<T>(this ref Iterator<T> it, nint width)
     where T : /* Stringish */ IByteSeq<T, byte>, new()
 {
@@ -41,6 +44,8 @@ public static T Value<T>(this ref Iterator<T> it)
 {
     return it.data.slice(it.start, it.pos);
 }
+
+} partial class main_package {
 
 internal static nint count<T>(T s, byte b)
     where T : /* ~string | ~[]byte */ IByteSeq<T, byte>, new()

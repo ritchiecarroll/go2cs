@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -14,6 +15,8 @@ partial struct p224 {
     internal nint v;
 }
 
+} partial class mainᴛp224 {
+
 internal static @string label(this ref p224 p) { return "p224"; }
 
 internal static ж<p224> combine(this ref p224 p, ж<p224> Ꮡo) {
@@ -24,11 +27,15 @@ internal static ж<p224> combine(this ref p224 p, ж<p224> Ꮡo) {
 
 internal static (ж<p224>, error) restore(this ref p224 p, slice<byte> b) { return (Ꮡ(new p224(v: (nint)b[0])), default); }
 
+} partial class main_package {
+
 internal static ж<p224> newP224() { return Ꮡ(new p224(v: 1)); }
 
 partial struct p384 {
     internal nint v;
 }
+
+} partial class mainᴛp384 {
 
 internal static @string label(this ref p384 p) { return "p384"; }
 
@@ -39,6 +46,8 @@ internal static ж<p384> combine(this ref p384 p, ж<p384> Ꮡo) {
 }
 
 internal static (ж<p384>, error) restore(this ref p384 p, slice<byte> b) { return (Ꮡ(new p384(v: (nint)b[0])), default); }
+
+} partial class main_package {
 
 internal static ж<p384> newP384() { return Ꮡ(new p384(v: 2)); }
 
@@ -56,6 +65,8 @@ partial interface Curve {
     @string Combined();
     @string Fresh();
 }
+
+} partial class mainᴛcurve {
 
 internal static @string Name<Point>(this ref curve<Point> c)
     where Point : point<Point>
@@ -78,6 +89,8 @@ internal static @string Fresh<Point>(this ref curve<Point> c)
     var (r, _) = p.restore(slice<byte>([7]));
     return r.label();
 }
+
+} partial class main_package {
 
 internal static @string describe<P>(P p)
     where P : point<P>

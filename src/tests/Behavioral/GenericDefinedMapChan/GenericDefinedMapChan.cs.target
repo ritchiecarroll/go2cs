@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using sort = sort_package;
+using static main_package;
 
 partial class main_package {
 
@@ -30,6 +31,8 @@ public static Set<T> NewSet<T>(params Span<T> itemsʗp) {
     return s;
 }
 
+} partial class mainᴛSet {
+
 public static bool Add<T>(this Set<T> s, T item) {
     var (_, ok) = s[item, ꟷ]; if (ok) {
         return false;
@@ -48,6 +51,8 @@ public static void Reset<T>(this ref Set<T> s) {
     s = new Set<T>(0);
 }
 
+} partial class mainᴛBag {
+
 public static void Put<T>(this Bag<T> b, T item) {
     b[item] = new EmptyStruct();
 }
@@ -55,6 +60,8 @@ public static void Put<T>(this Bag<T> b, T item) {
 public static void Drop<T>(this ref Bag<T> b, T item) {
     delete(b, item);
 }
+
+} partial class mainᴛIndex {
 
 public static (V, bool) Get<K, V>(this Index<K, V> ix, K key) {
     var (value, ok) = ix[key, ꟷ];
@@ -68,6 +75,8 @@ public static void Put<K, V>(this ref Index<K, V> ix, K key, V value) {
 
     (ix)[key] = value;
 }
+
+} partial class mainᴛPipe {
 
 public static void Send<T>(this Pipe<T> p, T value) {
     p.ᐸꟷ(value);
@@ -85,6 +94,8 @@ public static slice<T> Drain<T>(this ref Pipe<T> p) {
     return @out;
 }
 
+} partial class mainᴛStack {
+
 public static void Push<T>(this ref Stack<T> s, T value) {
     s = append(s, value);
 }
@@ -92,6 +103,8 @@ public static void Push<T>(this ref Stack<T> s, T value) {
 public static T Peek<T>(this Stack<T> s) {
     return s[len(s) - 1];
 }
+
+} partial class mainᴛSet {
 
 public static slice<T> Keys<T>(this Set<T> s) {
     var keys = new slice<T>(0, len(s));
@@ -103,6 +116,8 @@ public static slice<T> Keys<T>(this Set<T> s) {
     return keys;
 }
 
+} partial class mainᴛBag {
+
 public static slice<T> Keys<T>(this Bag<T> b) {
     var keys = new slice<T>(0, len(b));
 
@@ -113,6 +128,8 @@ public static slice<T> Keys<T>(this Bag<T> b) {
     return keys;
 }
 
+} partial class mainᴛIndex {
+
 public static slice<K> Keys<K, V>(this Index<K, V> ix) {
     var keys = new slice<K>(0, len(ix));
 
@@ -122,6 +139,8 @@ public static slice<K> Keys<K, V>(this Index<K, V> ix) {
 
     return keys;
 }
+
+} partial class main_package {
 
 internal static slice<nint> sortedInts(slice<nint> values) {
     sort.Ints(values);

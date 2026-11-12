@@ -5,15 +5,15 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-internal static reflectꓸChanDir dirOf(any v) {
+internal static reflect.ChanDir dirOf(any v) {
     return reflect.TypeOf(v).ChanDir();
 }
 
-internal static reflectꓸChanDir takesRecv(/*<-*/channel<nint> c) {
+internal static reflect.ChanDir takesRecv(/*<-*/channel<nint> c) {
     return dirOf(c);
 }
 
-internal static reflectꓸChanDir takesSend(channel/*<-*/<nint> c) {
+internal static reflect.ChanDir takesSend(channel/*<-*/<nint> c) {
     return dirOf(c);
 }
 

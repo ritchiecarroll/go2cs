@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -11,6 +12,8 @@ partial struct conn {
 partial struct tracker {
     internal map<ж<conn>, @string> m;
 }
+
+} partial class mainᴛconn {
 
 internal static @string status(this ж<conn> Ꮡc, ж<tracker> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -47,6 +50,8 @@ internal static void close(this ж<conn> Ꮡc, ж<tracker> Ꮡt) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+} partial class main_package {
 
 internal static void main() {
     var a = Ꮡ(new conn(id: 1));

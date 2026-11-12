@@ -1,7 +1,9 @@
 global using Temperature = go.CrossPkgLib_package.Celsius;
-global using ΔToken = object;
+global using Token = object;
 
 namespace go;
+
+using static CrossPkgLib_package;
 
 partial class CrossPkgLib_package {
 
@@ -15,18 +17,26 @@ public static Celsius Boiling() { return 100D; }
 
 public static Temperature Freezing() { return 0D; }
 
+} partial class CrossPkgLibᴛCelsius {
+
 public static Celsius Add(this Celsius c, Celsius d) { return c + d; }
+
+} partial class CrossPkgLib_package {
 
 partial struct Sensor {
     public @string Name;
     public Celsius Temp;
 }
 
+} partial class CrossPkgLibᴛSensor {
+
 public static bool Hot(this Sensor s) { return s.Temp > 50D; }
 
 public static @string Label(this Sensor s) { return s.Name; }
 
 public static void Calibrate(this ref Sensor s, Celsius d) { s.Temp += d; }
+
+} partial class CrossPkgLib_package {
 
 partial interface Labeled {
     @string Label();
@@ -42,10 +52,14 @@ partial struct Meter {
     internal nint count;
 }
 
+} partial class CrossPkgLibᴛMeter {
+
 public static nint Bump(this ref Meter m) {
     m.count++;
     return m.count;
 }
+
+} partial class CrossPkgLib_package {
 
 public static ж<Meter> NewMeter() { return Ꮡ(new Meter()); }
 
@@ -53,13 +67,21 @@ partial interface Reporter {
     @string Report();
 }
 
+} partial class CrossPkgLibᴛMeter {
+
 public static @string Report(this ref Meter m) { return "count"; }
+
+} partial class CrossPkgLib_package {
 
 partial struct Alarm {
     public @string Msg;
 }
 
+} partial class CrossPkgLibᴛAlarm {
+
 public static @string Error(this ref Alarm a) { return a.Msg; }
+
+} partial class CrossPkgLib_package {
 
 public static error AsErr(ж<Alarm> a) { return new Alarmжerror(a); }
 
@@ -69,18 +91,26 @@ partial struct Cache<T> {
     public nint Hits;
 }
 
+} partial class CrossPkgLibᴛCache {
+
 public static nint Bump<T>(this ref Cache<T> c) {
     c.Hits++;
     return c.Hits;
 }
 
+} partial class CrossPkgLib_package {
+
 public static slice<T> Wrap<T>(T v) { return [v]; }
 
 public static V Pair<K, V>(K k, V v) { return v; }
 
-// type ΔSift is a methodless func type — rendered inline as its base delegate
+// type Sift is a methodless func type — rendered inline as its base delegate
+
+} partial class CrossPkgLibᴛSensor {
 
 public static bool Sift(this Sensor s, Func<nint, bool> f) { return f((nint)s.Temp); }
+
+} partial class CrossPkgLib_package {
 
 partial struct Node {
     public nint ID;
@@ -94,10 +124,14 @@ partial struct Probe {
     public nint Hits;
 }
 
+} partial class CrossPkgLibᴛProbe {
+
 public static nint Sample(this ref Probe p) {
     p.Hits++;
     return p.Hits;
 }
+
+} partial class CrossPkgLib_package {
 
 partial interface Sampler {
     nint Sample();
@@ -113,19 +147,27 @@ partial interface Rated {
     nint Rating();
 }
 
-partial struct ΔStatus {
+partial struct Status {
     public nint Code;
 }
 
+} partial class CrossPkgLibᴛSensor {
+
 public static nint Status(this Sensor s) { return (nint)s.Temp; }
 
-partial struct ΔGrade /*num:nint*/;
+} partial class CrossPkgLib_package {
+
+partial struct Grade /*num:nint*/;
+
+} partial class CrossPkgLibᴛSensor {
 
 public static nint Grade(this Sensor s) { return 1; }
 
 public static nint Token(this Sensor s) { return (nint)s.Temp; }
 
-public static ΔToken AsToken(nint v) { return v; }
+} partial class CrossPkgLib_package {
+
+public static Token AsToken(nint v) { return v; }
 
 public partial struct snapshot {
     public nint At;
@@ -143,13 +185,17 @@ partial struct Device {
     public nint Serial;
 }
 
-partial struct ΔMarker {
-    public @string ΔΔMarker;
+partial struct Marker {
+    public @string ΔMarker;
 }
+
+} partial class CrossPkgLibᴛSensor {
 
 public static @string Marker(this Sensor s) { return s.Name; }
 
-public static ΔMarker MakeMarker(@string s) { return new ΔMarker(ΔΔMarker: s); }
+} partial class CrossPkgLib_package {
+
+public static Marker MakeMarker(@string s) { return new Marker(ΔMarker: s); }
 
 partial interface Emitter {
     @string Emit();
@@ -163,11 +209,15 @@ partial struct Leaf {
     public @string Text;
 }
 
+} partial class CrossPkgLibᴛLeaf {
+
 public static @string Emit(this ref Leaf l) { return l.Text; }
 
 internal static void emitNode(this ref Leaf l) { }
 
 internal static @string nodeTag(this ref Leaf l) { return "lf"; }
+
+} partial class CrossPkgLib_package {
 
 public static ж<Leaf> NewLeaf(@string text) { return Ꮡ(new Leaf(Text: text)); }
 
@@ -175,16 +225,24 @@ partial struct EmitBase {
     public @string Label;
 }
 
+} partial class CrossPkgLibᴛEmitBase {
+
 public static @string Emit(this ref EmitBase e) { return e.Label; }
+
+} partial class CrossPkgLib_package {
 
 partial struct Branch {
     /*embed*/ public EmitBase EmitBase;
     public nint Kind;
 }
 
+} partial class CrossPkgLibᴛBranch {
+
 internal static void emitNode(this ref Branch b) { }
 
 internal static @string nodeTag(this ref Branch b) { return "brn"; }
+
+} partial class CrossPkgLib_package {
 
 public static ж<Branch> NewBranch(@string label, nint kind) {
     return Ꮡ(new Branch(EmitBase: new EmitBase(Label: label), Kind: kind));
@@ -192,7 +250,11 @@ public static ж<Branch> NewBranch(@string label, nint kind) {
 
 partial struct Verdict /*num:nint*/;
 
+} partial class CrossPkgLibᴛVerdict {
+
 public static nint Score(this Verdict v) { return (nint)v * 10; }
+
+} partial class CrossPkgLib_package {
 
 partial interface Scored {
     nint Score();

@@ -15,7 +15,7 @@ partial struct table /*map[@string, bfoo.Other]*/;
 partial struct holder {
     internal afoo.Inner a;
     internal bfoo.Other b;
-    internal go.SameNameImportAlias.b.foo_package.ΔKind k;
+    internal bfoo.Kind k;
 }
 
 internal static void main() {
@@ -28,8 +28,8 @@ internal static void main() {
     var t = new table(new map<@string, bfoo.Other>{["k"] = new(S: "v")});
     fmt.Println(l[0].N, t["k"].S);
 
-    go.SameNameImportAlias.a.foo_package.ΔKind ka = new afoo.S().Kind();
-    go.SameNameImportAlias.b.foo_package.ΔKind kb = new bfoo.S().Kind();
+    afoo.Kind ka = new afoo.S().Kind();
+    bfoo.Kind kb = new bfoo.S().Kind();
     var h = new holder(a: x, b: y, k: kb);
     fmt.Println(ka, kb, h.a.N, h.b.S, h.k);
 }

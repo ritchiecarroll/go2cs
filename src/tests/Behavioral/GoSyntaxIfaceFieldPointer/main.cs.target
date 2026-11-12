@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using reflect = reflect_package;
+using static main_package;
 
 partial class main_package {
 
@@ -16,8 +17,12 @@ partial struct UnixAddr {
     public @string Net;
 }
 
+} partial class mainᴛUnixAddr {
+
 public static @string Network(this ref UnixAddr a) { return a.Net; }
 public static @string String(this ref UnixAddr a) { return a.Name; }
+
+} partial class main_package {
 
 internal partial struct main_type /*dyn*/ {
     internal Addr got, want;

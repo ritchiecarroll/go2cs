@@ -26,9 +26,9 @@ partial struct dirsᴛ1 /*dyn*/ {
     internal time.Time stamp;
 }
 internal static slice<dirsᴛ1> dirs = slice<dirsᴛ1>([
-    new("", time.Date(2021, time.February, 3, 4, 5, 6, 0, time.ΔUTC)),
-    new("LongDirectoryNameWellBeyondEightDotThree", time.Date(2021, time.February, 3, 5, 6, 7, 0, time.ΔUTC)),
-    new("ÜnicödeDir", time.Date(2021, time.February, 3, 6, 7, 8, 0, time.ΔUTC))
+    new("", time.Date(2021, time.February, 3, 4, 5, 6, 0, time.UTC)),
+    new("LongDirectoryNameWellBeyondEightDotThree", time.Date(2021, time.February, 3, 5, 6, 7, 0, time.UTC)),
+    new("ÜnicödeDir", time.Date(2021, time.February, 3, 6, 7, 8, 0, time.UTC))
 ]);
 
 partial struct filesᴛ1 /*dyn*/ {
@@ -37,9 +37,9 @@ partial struct filesᴛ1 /*dyn*/ {
     internal time.Time stamp;
 }
 internal static slice<filesᴛ1> files = slice<filesᴛ1>([
-    new("ReadMe.txt", 7, time.Date(2022, time.March, 4, 5, 6, 7, 0, time.ΔUTC)),
-    new("LongDirectoryNameWellBeyondEightDotThree\\Payload.bin", 300, time.Date(2023, time.April, 5, 6, 7, 8, 0, time.ΔUTC)),
-    new("ÜnicödeDir\\Inner.dat", 65, time.Date(2024, time.May, 6, 7, 8, 9, 0, time.ΔUTC))
+    new("ReadMe.txt", 7, time.Date(2022, time.March, 4, 5, 6, 7, 0, time.UTC)),
+    new("LongDirectoryNameWellBeyondEightDotThree\\Payload.bin", 300, time.Date(2023, time.April, 5, 6, 7, 8, 0, time.UTC)),
+    new("ÜnicödeDir\\Inner.dat", 65, time.Date(2024, time.May, 6, 7, 8, 9, 0, time.UTC))
 ]);
 
 internal static void main() {

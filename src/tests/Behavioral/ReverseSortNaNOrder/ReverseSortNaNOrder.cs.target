@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using Δmath = math_package;
+using static main_package;
 
 partial class main_package {
 
@@ -13,11 +14,15 @@ partial interface Interface {
 
 partial struct Float64Slice /*[]float64*/;
 
+} partial class mainᴛFloat64Slice {
+
 public static nint Len(this Float64Slice x) { return len(x); }
 public static bool Less(this Float64Slice x, nint i, nint j) {
     return x[i] < x[j] || (fisNaN(x[i]) && !fisNaN(x[j]));
 }
 public static void Swap(this Float64Slice x, nint i, nint j) { (x[i], x[j]) = (x[j], x[i]); }
+
+} partial class main_package {
 
 internal static bool fisNaN(float64 f) { return f != f; }
 
@@ -25,9 +30,13 @@ partial struct reverse {
     /*embed*/ public Interface Interface;
 }
 
+} partial class mainᴛreverse {
+
 internal static bool Less(this reverse r, nint i, nint j) {
     return r.Interface.Less(j, i);
 }
+
+} partial class main_package {
 
 public static Interface Reverse(Interface data) {
     return new reverseжInterface(Ꮡ(new reverse(data)));

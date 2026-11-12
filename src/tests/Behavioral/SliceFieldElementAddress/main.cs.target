@@ -1,12 +1,15 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct grid {
     internal slice<slice<nint>> rows;
 }
+
+} partial class mainᴛgrid {
 
 internal static void addLine(this ref grid g) {
     g.rows = append(g.rows, (slice<nint>)(default));
@@ -16,6 +19,8 @@ internal static void push(this ref grid g, nint v) {
     var row = Ꮡ(g.rows, len(g.rows) - 1);
     row.ValueSlot = append(row.ValueSlot, v);
 }
+
+} partial class main_package {
 
 internal static void main() {
     grid g = default;

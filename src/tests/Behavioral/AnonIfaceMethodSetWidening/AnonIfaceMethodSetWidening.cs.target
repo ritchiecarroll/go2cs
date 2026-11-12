@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,8 +9,12 @@ partial struct gadget {
     internal nint n;
 }
 
+} partial class mainᴛgadget {
+
 internal static @string Foo(this gadget g) { return fmt.Sprintf("foo %d"u8, g.n); }
 internal static @string Bar(this ref gadget g) { return "bar"; }
+
+} partial class main_package {
 
 partial interface fooer {
     @string Foo();

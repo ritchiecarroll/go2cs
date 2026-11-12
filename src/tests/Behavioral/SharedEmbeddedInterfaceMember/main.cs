@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -23,8 +24,12 @@ partial struct myFile {
     internal @string data;
 }
 
+} partial class mainᴛmyFile {
+
 internal static @string Read(this myFile f) { return "read:"u8 + f.data; }
 internal static @string Close(this myFile f) { return "closed:"u8 + f.data; }
+
+} partial class main_package {
 
 internal static @string useCloser(Closer c) { return c.Close(); }
 internal static @string useReadCloser(ReadCloser rc) { return rc.Read() + ","u8 + rc.Close(); }

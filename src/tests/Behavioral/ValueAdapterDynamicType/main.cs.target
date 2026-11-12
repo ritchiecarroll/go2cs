@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using colorlike = ValueAdapterDynamicType.colorlike_package;
 using ValueAdapterDynamicType;
+using static main_package;
 
 partial class main_package {
 
@@ -10,9 +11,13 @@ partial struct Img {
     internal colorlike.NRGBA px;
 }
 
+} partial class mainᴛImg {
+
 public static colorlike.Color At(this ref Img p) { return p.px; }
 
 public static colorlike.Color Alt(this ref Img p) { return new colorlike.Gray(Y: 7); }
+
+} partial class main_package {
 
 internal static void main() {
     var p = Ꮡ(new Img(new colorlike.NRGBA(R: 0x99, G: 0x99, B: 0x99, A: 0xff)));

@@ -1294,6 +1294,12 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMethodGroupGenericArg() => CheckTarget("MethodGroupGenericArg");
 
     [TestMethod]
+    public void CheckMethodHolderAlias() => CheckTarget("MethodHolderAlias");
+
+    [TestMethod]
+    public void CheckMethodHolderNames() => CheckTarget("MethodHolderNames");
+
+    [TestMethod]
     public void CheckMethodOnBoxedGlobalIndex() => CheckTarget("MethodOnBoxedGlobalIndex");
 
     [TestMethod]

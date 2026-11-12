@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -56,7 +54,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA0igICigoKCqMzcgpSCgoKUpoKCgpaCgoKCloKYgoKCgrqCgoKCmIKCloKWgoKCloKCqIKYkoKCyg==", "", "", "65=NumIn/1/1/1,NumOut/1/1/1;89=ValueOf/1/2/1,ValueOf/2/2/1,Call/1/1/1,Interface/1/1/1")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABAigICigoKCqAAIDAAJDIK0goKClKaCgoKWgoKCgpaCmIKCgoK6goKCgpiCgpaCloKCgpaCgqiCmJKCguo=", "", "", "78=NumIn/1/1/1,NumOut/1/1/1;102=ValueOf/1/2/1,ValueOf/2/2/1,Call/1/1/1,Interface/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -91,3 +89,16 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.counter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcounter;
+[GoMethodHost(typeof(main_package.embedded)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛembedded;
+[GoMethodHost(typeof(main_package.outer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛouter;
+[GoMethodHost(typeof(main_package.stringish)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛstringish;
+// </MethodHolders>

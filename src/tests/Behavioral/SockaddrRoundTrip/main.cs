@@ -5,7 +5,7 @@ using syscall = syscall_package;
 
 partial class main_package {
 
-internal static (@string addr, nint port, bool ok) describe(syscallꓸSockaddr sa) {
+internal static (@string addr, nint port, bool ok) describe(syscall.Sockaddr sa) {
     switch (sa.type()) {
     case ж<syscall.SockaddrInet4> s: {
         return (fmt.Sprintf("%d.%d.%d.%d"u8, s.Addr[0], s.Addr[1], s.Addr[2], s.Addr[3]), s.Port, true);
@@ -16,7 +16,7 @@ internal static (@string addr, nint port, bool ok) describe(syscallꓸSockaddr s
     return ("", 0, false);
 }
 
-internal static bool sameAddr(syscallꓸSockaddr a, syscallꓸSockaddr b) {
+internal static bool sameAddr(syscall.Sockaddr a, syscall.Sockaddr b) {
     switch (a.type()) {
     case ж<syscall.SockaddrInet4> x: {
         var (y, ok) = b._<ж<syscall.SockaddrInet4>>(ᐧ);
@@ -29,7 +29,7 @@ internal static bool sameAddr(syscallꓸSockaddr a, syscallꓸSockaddr b) {
     return false;
 }
 
-internal static void roundTrip(@string label, nint family, syscallꓸSockaddr bindTo) {
+internal static void roundTrip(@string label, nint family, syscall.Sockaddr bindTo) {
     GoFrame ᒐ = default;
     try {
         var (server, err) = syscall.Socket(family, syscall.SOCK_STREAM, syscall.IPPROTO_TCP);
@@ -160,8 +160,8 @@ internal static void main() {
         }
         defer(() => syscall.WSACleanup(), ref ᒐ);
 
-        roundTrip("tcp4", syscall.AF_INET, new syscall.SockaddrInet4жΔSockaddr(Ꮡ(new syscall.SockaddrInet4(Addr: new byte[]{127, 0, 0, 1}.array()))));
-        roundTrip("tcp6", syscall.AF_INET6, new syscall.SockaddrInet6жΔSockaddr(Ꮡ(new syscall.SockaddrInet6(Addr: new array<byte>(16){[15] = 1}))));
+        roundTrip("tcp4", syscall.AF_INET, new syscall.SockaddrInet4жSockaddr(Ꮡ(new syscall.SockaddrInet4(Addr: new byte[]{127, 0, 0, 1}.array()))));
+        roundTrip("tcp6", syscall.AF_INET6, new syscall.SockaddrInet6жSockaddr(Ꮡ(new syscall.SockaddrInet6(Addr: new array<byte>(16){[15] = 1}))));
 
         decodeRawAny("raw4", syscall.AF_INET, (Action<nint, byte> put) => {
             put(2, 0x1F);

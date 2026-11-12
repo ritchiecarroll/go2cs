@@ -29,8 +29,8 @@ internal static void main() {
     var template = Ꮡ(new x509.Certificate(
         SerialNumber: big.NewInt(20260818),
         Subject: new pkix.Name(CommonName: "go2cs.example"),
-        NotBefore: now.Add(-time.ΔHour),
-        NotAfter: now.Add(time.ΔHour),
+        NotBefore: now.Add(-time.Hour),
+        NotAfter: now.Add(time.Hour),
         KeyUsage: (x509.KeyUsage)(x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign),
         ExtKeyUsage: [x509.ExtKeyUsageServerAuth],
         DNSNames: ["go2cs.example"],
@@ -103,7 +103,7 @@ internal static void walkChain(slice<byte> der) {
         para.RequestedUsage.Usage.UsageIdentifiers = Ꮡ(oids, 0);
 
         ref var chainCtx = ref heap<ж<syscall.CertChainContext>>(out var ᏑchainCtx);
-        var errΔ2 = syscall.CertGetCertificateChain((syscallꓸHandle)0, storeCtx, nil, storeCtx.Store, para, 0, 0, ᏑchainCtx); if (errΔ2 != nil) {
+        var errΔ2 = syscall.CertGetCertificateChain((syscall.Handle)0, storeCtx, nil, storeCtx.Store, para, 0, 0, ᏑchainCtx); if (errΔ2 != nil) {
             fmt.Println("get chain error:", errΔ2);
             return;
         }

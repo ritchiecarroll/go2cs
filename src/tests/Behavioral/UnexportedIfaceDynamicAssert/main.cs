@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using Δio = io_package;
+using static main_package;
 
 partial class main_package {
 
@@ -10,6 +11,8 @@ partial interface buffersWriter {
 }
 
 partial struct Buffers /*[]slice<byte>*/;
+
+} partial class mainᴛBuffers {
 
 public static (int64, error) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w) {
     ref var v = ref Ꮡv.DerefOrNull();
@@ -28,6 +31,8 @@ public static (int64, error) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w) {
     return (n, default);
 }
 
+} partial class main_package {
+
 partial struct sink {
     internal slice<byte> bytes;
     internal @string mode;
@@ -36,6 +41,8 @@ partial struct sink {
 partial struct conn {
     internal ж<sink> fd;
 }
+
+} partial class mainᴛconn {
 
 internal static bool ok(this ж<conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -70,6 +77,8 @@ internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> Ꮡv
     return (n, default);
 }
 
+} partial class main_package {
+
 partial struct TCPConn {
     /*embed*/ internal conn conn;
 }
@@ -77,6 +86,8 @@ partial struct TCPConn {
 partial struct plainConn {
     internal ж<sink> fd;
 }
+
+} partial class mainᴛplainConn {
 
 internal static bool ok(this ж<plainConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -95,6 +106,8 @@ internal static (nint, error) Write(this ж<plainConn> Ꮡc, slice<byte> b) {
     return (len(b), default);
 }
 
+} partial class main_package {
+
 partial struct PlainConn {
     /*embed*/ internal plainConn plainConn;
 }
@@ -102,6 +115,8 @@ partial struct PlainConn {
 partial struct valueSink {
     internal ж<sink> fd;
 }
+
+} partial class mainᴛvalueSink {
 
 internal static (nint, error) Write(this valueSink s, slice<byte> b) {
     s.fd.bytes = appendꓸꓸꓸ(s.fd.bytes, b);
@@ -120,6 +135,8 @@ internal static (int64, error) writeBuffers(this valueSink s, ж<Buffers> Ꮡv) 
     s.fd.mode = "writeBuffers";
     return (n, default);
 }
+
+} partial class main_package {
 
 partial struct ValueSink {
     /*embed*/ internal valueSink valueSink;

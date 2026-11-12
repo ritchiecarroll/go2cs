@@ -4,6 +4,7 @@ using errors = errors_package;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using strings = strings_package;
+using static main_package;
 
 partial class main_package {
 
@@ -16,12 +17,16 @@ partial struct compilerOptionsParser {
     internal slice<@string> seen;
 }
 
+} partial class mainᴛcompilerOptionsParser {
+
 internal static bool ParseOption(this ref compilerOptionsParser p, @string key, any value) {
     p.seen = append(p.seen, fmt.Sprintf("%s=%v"u8, key, value));
     return key != "bad"u8;
 }
 
 internal static @string UnknownOptionDiagnostic(this ref compilerOptionsParser p) { return "unknown compiler option"; }
+
+} partial class main_package {
 
 internal static O convertMapToOptions<O>(map<@string, any> m, slice<@string> keys, O parser)
     where O : optionParser
@@ -61,8 +66,12 @@ partial struct label {
     internal @string name;
 }
 
+} partial class mainᴛlabel {
+
 internal static @string String(this ref label l) { return "label:"u8 + l.name; }
 internal static @string Name(this ref label l) { return l.name; }
+
+} partial class main_package {
 
 partial interface named :
     fmt.Stringer
@@ -88,14 +97,22 @@ partial struct temp {
     internal nint c;
 }
 
+} partial class mainᴛtemp {
+
 internal static @string String(this temp t) { return fmt.Sprintf("%dC"u8, t.c); }
+
+} partial class main_package {
 
 partial struct plain {
     internal @string k;
 }
 
+} partial class mainᴛplain {
+
 internal static bool ParseOption(this plain p, @string key, any value) { return key != p.k; }
 internal static @string UnknownOptionDiagnostic(this plain p) { return "plain refuses "u8 + p.k; }
+
+} partial class main_package {
 
 partial interface Cloner<T> {
     T Clone();
@@ -105,7 +122,11 @@ partial struct impl {
     internal nint n;
 }
 
+} partial class mainᴛimpl {
+
 internal static ж<impl> Clone(this ref impl p) { return Ꮡ(new impl(p.n + 1)); }
+
+} partial class main_package {
 
 internal static T dup<T>(T x)
     where T : Cloner<T>
@@ -169,8 +190,12 @@ partial struct Node {
     internal ж<Node> next;
 }
 
+} partial class mainᴛNode {
+
 public static ж<Node> Next(this ref Node n) { return n.next; }
 public static bool IsEnd(this ref Node n) { return n.next == nil; }
+
+} partial class main_package {
 
 public static N Last<N>(N n)
     where N : Chain<N>

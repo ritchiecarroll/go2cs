@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using Δsync = sync_package;
+using static main_package;
 
 partial class main_package {
 
@@ -14,6 +15,8 @@ partial struct conn {
     internal @string name;
     /*embed*/ internal ж<state> state;
 }
+
+} partial class mainᴛconn {
 
 internal static (nint, error) Write(this ж<conn> Ꮡc, slice<byte> b) {
     GoFrame ᒐ = default;
@@ -33,6 +36,8 @@ internal static (nint, error) Write(this ж<conn> Ꮡc, slice<byte> b) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡc.DerefOrNull().state.of(state.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
+
+} partial class main_package {
 
 internal static void main() {
     var s = Ꮡ(new state());

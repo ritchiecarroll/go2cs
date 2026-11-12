@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,6 +9,8 @@ partial struct counter {
     internal nint n;
     internal nint calls;
 }
+
+} partial class mainᴛcounter {
 
 internal static nint dec(this ref counter c, nint step) {
     c.n -= step;
@@ -17,13 +20,19 @@ internal static nint dec(this ref counter c, nint step) {
 
 internal static nint peek(this counter c) { return c.n; }
 
+} partial class main_package {
+
 partial struct holder {
     internal counter c;
 }
 
 partial struct intList /*[]nint*/;
 
+} partial class mainᴛintList {
+
 internal static void push(this ref intList l, nint v) { l = append(l, v); }
+
+} partial class main_package {
 
 internal static nint applyInt(Func<nint, nint> f, nint a, nint b) { return f(a) + f(b); }
 

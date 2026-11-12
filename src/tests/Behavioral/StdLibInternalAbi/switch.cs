@@ -9,7 +9,7 @@ partial class main_package {
 partial struct InterfaceSwitch {
     public ж<InterfaceSwitchCache> Cache;
     public nint NCases;
-    public array<ж<ΔInterfaceType>> Cases = new(1);
+    public array<ж<InterfaceType>> Cases = new(1);
 }
 
 partial struct InterfaceSwitchCache {
@@ -42,7 +42,7 @@ public static bool UseInterfaceSwitchCache(@string goarch) {
 
 partial struct TypeAssert {
     public ж<TypeAssertCache> Cache;
-    public ж<ΔInterfaceType> Inter;
+    public ж<InterfaceType> Inter;
     public bool CanFail;
 }
 partial struct TypeAssertCache {

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -13,11 +14,19 @@ partial struct vec {
     internal nint x, y;
 }
 
+} partial class mainᴛvec {
+
 internal static vec Add(this vec v, vec o) { return new vec(v.x + o.x, v.y + o.y); }
+
+} partial class main_package {
 
 partial struct num /*num:nint*/;
 
+} partial class mainᴛnum {
+
 internal static num Add(this num n, num o) { return n + o; }
+
+} partial class main_package {
 
 public static A Sum<A>(params Span<A> xsʗp)
     where A : Adder<A>
@@ -38,7 +47,11 @@ partial interface Ordered<T>
 
 partial struct age /*num:nint*/;
 
+} partial class mainᴛage {
+
 internal static bool Less(this age a, age b) { return a < b; }
+
+} partial class main_package {
 
 public static T Min<T>(T a, T b)
     where T : Ordered<T>
@@ -55,6 +68,8 @@ partial struct MinSet<T>
     internal slice<T> items;
 }
 
+} partial class mainᴛMinSet {
+
 public static void Put<T>(this ref MinSet<T> s, T x)
     where T : Ordered<T>
 { s.items = append(s.items, x); }
@@ -69,6 +84,8 @@ public static T Least<T>(this ref MinSet<T> s)
     return m;
 }
 
+} partial class main_package {
+
 partial interface GraphNode<N> 
     where N : GraphNode<N>{
     N Next();
@@ -82,6 +99,8 @@ partial struct Graph<N>
     internal N head;
     internal nint size;
 }
+
+} partial class mainᴛGraph {
 
 public static @string Labels<N>(this ж<Graph<N>> Ꮡg)
     where N : GraphNode<N>
@@ -100,15 +119,21 @@ public static @string Labels<N>(this ж<Graph<N>> Ꮡg)
     return @out;
 }
 
+} partial class main_package {
+
 partial struct gnode {
     internal ж<Graph<gnodeжGraphNode>> g;
     internal ж<gnode> next;
     internal @string name;
 }
 
+} partial class mainᴛgnode {
+
 internal static ж<gnode> Next(this ref gnode n) { return n.next; }
 internal static ж<Graph<gnodeжGraphNode>> Owner(this ref gnode n) { return n.g; }
 internal static @string Label(this ref gnode n) { return n.name; }
+
+} partial class main_package {
 
 internal static void main() {
     fmt.Println(Sum(new vec(1, 2), new vec(3, 4), new vec(5, 6)));

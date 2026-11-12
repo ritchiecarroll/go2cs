@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -13,7 +14,11 @@ partial struct pkgString /*@string*/;
 partial struct T /*bool*/;
 partial struct U /*bool*/;
 
+} partial class mainᴛA {
+
 public static nint Len(this A a) { return len(a); }
+
+} partial class main_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string abcˢ = "abc"u8;

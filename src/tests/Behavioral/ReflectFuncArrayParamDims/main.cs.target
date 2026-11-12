@@ -2,11 +2,14 @@ namespace go;
 
 using fmt = fmt_package;
 using reflect = reflect_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct filler {
 }
+
+} partial class mainᴛfiller {
 
 internal static void FillPtr(this filler _, nint i, /*[3]*/ ж<array<nint>> Ꮡreply) {
     ref var reply = ref Ꮡreply.DerefOrNull();
@@ -24,6 +27,8 @@ internal static nint SumArray(this filler _, /*[4]*/ array<nint> @in) {
     }
     return total;
 }
+
+} partial class main_package {
 
 partial struct wrap {
     public array<byte> Buf = new(8);
@@ -85,7 +90,7 @@ internal static void reportMethod() {
     fmt.Println("method ptr param: kind =", ptr.Kind(), "elem =", elem, "len =", elem.Len());
 
     var reply = reflect.New(elem);
-    m.Func.Call(slice<reflectꓸValue>([reflect.ValueOf(new filler()), reflect.ValueOf((nint)7), reply]));
+    m.Func.Call(slice<reflect.Value>([reflect.ValueOf(new filler()), reflect.ValueOf((nint)7), reply]));
     fmt.Println("filled through the pointer:", reply.Elem().Interface());
 
     (var s, ok) = t.MethodByName("SumArray");
@@ -102,11 +107,11 @@ internal static void reportMethod() {
         arg.Index(i).SetInt((int64)(i + 1));
     }
 
-    var @out = s.Func.Call(slice<reflectꓸValue>([reflect.ValueOf(new filler()), arg]));
+    var @out = s.Func.Call(slice<reflect.Value>([reflect.ValueOf(new filler()), arg]));
     fmt.Println("method sum:", @out[0].Int());
 }
 
-internal static void report(@string name, reflectꓸType t) {
+internal static void report(@string name, reflect.Type t) {
     var in0 = t.In(0);
     @string line = fmt.Sprintf("%-9s in0=%-10v kind=%-7v len=%d"u8, name, in0, in0.Kind(), lenOf(in0));
 
@@ -117,14 +122,14 @@ internal static void report(@string name, reflectꓸType t) {
     fmt.Println(line);
 }
 
-internal static nint lenOf(reflectꓸType t) {
+internal static nint lenOf(reflect.Type t) {
     if (t.Kind() == reflect.Array) {
         return t.Len();
     }
     return 0;
 }
 
-internal static slice<any> generateAndCall(reflectꓸValue fn) {
+internal static slice<any> generateAndCall(reflect.Value fn) {
     var argType = fn.Type().In(0);
     var arg = reflect.New(argType).Elem();
 

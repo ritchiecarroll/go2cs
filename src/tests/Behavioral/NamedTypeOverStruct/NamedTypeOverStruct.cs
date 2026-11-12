@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -36,9 +37,13 @@ partial struct @base {
     internal int64 id;
 }
 
+} partial class mainᴛbase {
+
 internal static int64 twice(this @base b) {
     return b.id * 2;
 }
+
+} partial class main_package {
 
 partial struct derived {
     /*embed*/ internal @base @base;
@@ -49,10 +54,14 @@ partial struct @file {
     internal int64 fd;
 }
 
+} partial class mainᴛfile {
+
 internal static int64 bump(this ref @file f) {
     f.fd += 2;
     return f.fd;
 }
+
+} partial class main_package {
 
 partial struct mixed {
     public nint Pub;

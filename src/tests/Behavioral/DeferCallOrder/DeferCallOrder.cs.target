@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using ꓸꓸꓸnint = Span<nint>;
+using static main_package;
 
 partial class main_package {
 
@@ -69,6 +70,8 @@ partial struct sema {
     internal channel<nint> @out;
 }
 
+} partial class mainᴛsema {
+
 internal static void release(this ref sema s) {
     s.held = false;
     fmt.Println("sema released");
@@ -77,6 +80,8 @@ internal static void release(this ref sema s) {
 internal static void send(this ref sema s, nint n) {
     s.@out.ᐸꟷ(n);
 }
+
+} partial class main_package {
 
 internal static partial void watchAndSend(ж<sema> Ꮡs) {
     GoFrame ᒐ = default;
@@ -128,6 +133,8 @@ partial struct acc {
     internal nint total;
 }
 
+} partial class mainᴛacc {
+
 internal static (nint sum, error err) add(this ж<acc> Ꮡa, nint n) {
     nint sum = default;
     error err = default;
@@ -150,6 +157,8 @@ internal static (nint sum, error err) add(this ж<acc> Ꮡa, nint n) {
     finally { ᒐ.Run(); }
     return (sum, err);
 }
+
+} partial class main_package {
 
 public static Action<@string> GetPrintLn() {
     return (@string src) => {

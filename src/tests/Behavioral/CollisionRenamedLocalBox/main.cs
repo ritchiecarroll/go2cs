@@ -1,17 +1,22 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
-partial struct Δp {
+partial struct p {
     internal nint id;
 }
 
 partial struct tagger {
 }
 
+} partial class mainᴛtagger {
+
 internal static void p(this tagger _) { }
+
+} partial class main_package {
 
 partial struct box {
     internal nint n;
@@ -34,13 +39,17 @@ internal static void bump(ж<nint> Ꮡnp) {
     np += 100;
 }
 
-internal static readonly ж<box> ᏑΔcounter = new StaticBox<box>(default(box));
-internal static ref box Δcounter => ref ((StaticBox<box>)ᏑΔcounter).ValueSlot;
+internal static readonly ж<box> Ꮡcounter = new StaticBox<box>(default(box));
+internal static ref box counter => ref ((StaticBox<box>)Ꮡcounter).ValueSlot;
+
+} partial class mainᴛtagger {
 
 internal static nint counter(this tagger _) { return 1; }
 
+} partial class main_package {
+
 internal static nint usesTypeP() {
-    Δp pv = default;
+    p pv = default;
     pv.id = 1;
     tagger t = default;
     t.p();
@@ -48,13 +57,13 @@ internal static nint usesTypeP() {
 }
 
 internal static void main() {
-    ref var Δp = ref heap<box>(new box(n: 0), out var Ꮡp);
+    ref var p = ref heap<box>(new box(n: 0), out var Ꮡp);
     setN(Ꮡp, 7);
-    setN(Ꮡp, Δp.n + 3);
+    setN(Ꮡp, p.n + 3);
     bump(Ꮡp.Ꮡn);
-    bump(ᏑΔcounter.Ꮡn);
-    fmt.Println(Δcounter.n);
-    fmt.Println(Δp.n, usesTypeP());
+    bump(Ꮡcounter.Ꮡn);
+    fmt.Println(counter.n);
+    fmt.Println(p.n, usesTypeP());
     fmt.Println(lastBox.n, lastInt.Value);
 }
 

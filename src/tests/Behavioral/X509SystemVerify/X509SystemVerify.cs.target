@@ -31,8 +31,8 @@ internal static void main() {
     var template = Ꮡ(new x509.Certificate(
         SerialNumber: big.NewInt(20261011),
         Subject: new pkix.Name(CommonName: "go2cs.example"),
-        NotBefore: now.Add(-time.ΔHour),
-        NotAfter: now.Add(time.ΔHour),
+        NotBefore: now.Add(-time.Hour),
+        NotAfter: now.Add(time.Hour),
         DNSNames: ["go2cs.example"]
     ));
     (var der, err) = x509.CreateCertificate(rand.Reader, template, template, key.ᏑPublicKey, key.OrTypedNil());

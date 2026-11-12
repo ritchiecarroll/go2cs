@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -21,9 +22,13 @@ partial interface Integer<ΔT> /*operators = Sum, Arithmetic, Integer, Comparabl
 
 partial struct Point /*[]int32*/;
 
+} partial class mainᴛPoint {
+
 public static @string String(this Point p) {
     return fmt.Sprintf("%d"u8, p);
 }
+
+} partial class main_package {
 
 public static S Scale<S, E>(S s, E c)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()

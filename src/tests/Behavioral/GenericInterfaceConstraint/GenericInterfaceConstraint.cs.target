@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -19,6 +20,8 @@ partial struct Circle {
     public float64 R;
 }
 
+} partial class mainᴛCircle {
+
 public static float64 Area(this ref Circle c) {
     return 3.0D * c.R * c.R;
 }
@@ -31,9 +34,13 @@ public static float64 Diameter(this ref Circle c) {
     return 2.0D * c.R;
 }
 
+} partial class main_package {
+
 partial struct Square {
     public float64 S;
 }
+
+} partial class mainᴛSquare {
 
 public static float64 Area(this ref Square s) {
     return s.S * s.S;
@@ -42,6 +49,8 @@ public static float64 Area(this ref Square s) {
 public static @string Name(this ref Square s) {
     return "square";
 }
+
+} partial class main_package {
 
 internal static float64 totalArea<S>(slice<S> shapes)
     where S : Shape

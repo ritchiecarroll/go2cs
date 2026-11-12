@@ -7,6 +7,7 @@ using sort = sort_package;
 using ꓸꓸꓸany = Span<any>;
 using ꓸꓸꓸnint = Span<nint>;
 using ꓸꓸꓸstring = Span<@string>;
+using static main_package;
 
 partial class main_package {
 
@@ -75,6 +76,8 @@ partial struct counter {
     internal nint @base;
 }
 
+} partial class mainᴛcounter {
+
 internal static nint Total(this counter c, params ꓸꓸꓸnint valsʗp) {
     var vals = valsʗp.sslice();
 
@@ -85,10 +88,12 @@ internal static nint Total(this counter c, params ꓸꓸꓸnint valsʗp) {
     return t;
 }
 
+} partial class main_package {
+
 internal static @string callString(any fn, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    var @in = new slice<reflectꓸValue>(len(args), () => new(nil));
+    var @in = new slice<reflect.Value>(len(args), () => new(nil));
     foreach (var (i, a) in range(args)) {
         @in[i] = reflect.ValueOf(a);
     }
@@ -114,7 +119,7 @@ internal static void main() {
     fmt.Println("firstA   :", callString(firstNonZero, (nint)0, (nint)0, (nint)9));
     fmt.Println("firstB   :", callString(firstNonZero));
 
-    fmt.Println("recordN  :", len(reflect.ValueOf(record).Call(slice<reflectꓸValue>([
+    fmt.Println("recordN  :", len(reflect.ValueOf(record).Call(slice<reflect.Value>([
         reflect.ValueOf("a"), reflect.ValueOf("x"), reflect.ValueOf("y")
     ]))));
     fmt.Println("recorded :", recorded);

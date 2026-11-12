@@ -5,21 +5,22 @@ namespace go;
 
 using fmt = fmt_package;
 using CrossPkgLib = CrossPkgLib_package;
+using static main_package;
 
 partial class main_package {
 
-public static Func<CrossPkgLibꓸStatus, nint> CheckFunc = (CrossPkgLibꓸStatus st) => st.Code * 2;
+public static Func<CrossPkgLib.Status, nint> CheckFunc = (CrossPkgLib.Status st) => st.Code * 2;
 
-internal static (CrossPkgLibꓸStatus, nint) gauge(CrossPkgLibꓸStatus st) {
-    return (new CrossPkgLibꓸStatus(Code: st.Code + 1), st.Code);
+internal static (CrossPkgLib.Status, nint) gauge(CrossPkgLib.Status st) {
+    return (new CrossPkgLib.Status(Code: st.Code + 1), st.Code);
 }
 
 partial struct meterBox {
-    internal CrossPkgLibꓸStatus st;
+    internal CrossPkgLib.Status st;
     internal nint sat;
 }
 
-internal static ж<CrossPkgLibꓸStatus> statusPtr(ж<CrossPkgLibꓸStatus> Ꮡst) {
+internal static ж<CrossPkgLib.Status> statusPtr(ж<CrossPkgLib.Status> Ꮡst) {
     ref var st = ref Ꮡst.DerefOrNull();
 
     st.Code++;
@@ -38,7 +39,7 @@ partial struct sensorBox {
 }
 
 partial struct ledger {
-    internal ж<CrossPkgLibꓸStatus> cur;
+    internal ж<CrossPkgLib.Status> cur;
 }
 
 internal static void note(nint n) { fmt.Println("noted", n); }
@@ -47,7 +48,11 @@ partial struct badge {
     internal @string name;
 }
 
+} partial class mainᴛbadge {
+
 internal static @string Label(this badge b) { return "badge:"u8 + b.name; }
+
+} partial class main_package {
 
 partial interface namedLabel :
     CrossPkgLib.Labeled
@@ -60,8 +65,12 @@ partial struct emblem {
     internal nint rank;
 }
 
+} partial class mainᴛemblem {
+
 internal static @string Label(this emblem e) { return e.name; }
 internal static nint Rank(this emblem e) { return e.rank; }
+
+} partial class main_package {
 
 partial interface stamped :
     CrossPkgLib.Labeled
@@ -77,14 +86,22 @@ partial struct seal {
     internal @string name;
 }
 
+} partial class mainᴛseal {
+
 internal static @string Label(this seal s) { return s.name; }
 internal static @string Stamp(this seal s) { return "ok:"u8 + s.name; }
+
+} partial class main_package {
 
 partial struct dial {
     internal @string n;
 }
 
+} partial class mainᴛdial {
+
 internal static @string Label(this ref dial d) { return "dial:"u8 + d.n; }
+
+} partial class main_package {
 
 partial interface certificate :
     CrossPkgLib.Rated,
@@ -98,10 +115,14 @@ partial struct cert {
     internal nint id;
 }
 
+} partial class mainᴛcert {
+
 internal static @string Label(this cert c) { return "cert"; }
 internal static @string Seal(this cert c) { return "wax"; }
 internal static nint Rating(this cert c) { return 9; }
 internal static nint Serial(this cert c) { return c.id; }
+
+} partial class main_package {
 
 partial struct holder<T> {
     /*embed*/ public ж<CrossPkgLib_package.Cache<T>> Cache;
@@ -112,7 +133,11 @@ partial struct relay {
     internal @string tag;
 }
 
+} partial class mainᴛrelay {
+
 internal static @string Report(this ref relay r) { return "relay:"u8 + r.tag; }
+
+} partial class main_package {
 
 internal static (ж<relay>, error) makeRelay() { return (Ꮡ(new relay(tag: "live")), default); }
 
@@ -181,7 +206,7 @@ internal static void main() {
 
         var c = new counter(Meter: CrossPkgLib.NewMeter());
         fmt.Println(c.Meter.Value.Bump());
-        ΔMeter m = c;
+        Meter m = c;
         fmt.Println(m.Bump());
         fmt.Println(c.Meter.Value.Bump());
         fmt.Println(g.Meter());
@@ -217,19 +242,19 @@ internal static void main() {
 
         fmt.Println("a" + ((@string)(rune)CrossPkgLib.Sep) + "b");
 
-        fmt.Println(CheckFunc(new CrossPkgLibꓸStatus(Code: 21)), new CrossPkgLib.Sensor(Temp: 9D).Status());
-        var (g1, c1) = gauge(new CrossPkgLibꓸStatus(Code: 5));
+        fmt.Println(CheckFunc(new CrossPkgLib.Status(Code: 21)), new CrossPkgLib.Sensor(Temp: 9D).Status());
+        var (g1, c1) = gauge(new CrossPkgLib.Status(Code: 5));
         fmt.Println(g1.Code, c1);
-        var mb = new meterBox(st: new CrossPkgLibꓸStatus(Code: 3), sat: 1);
+        var mb = new meterBox(st: new CrossPkgLib.Status(Code: 3), sat: 1);
         fmt.Println(mb.st.Code + mb.sat);
         fmt.Println(CrossPkgLib.Latest.At, CrossPkgLib.Peek().At);
 
-        var sptr = Ꮡ(new CrossPkgLibꓸStatus(Code: 10));
+        var sptr = Ꮡ(new CrossPkgLib.Status(Code: 10));
         var led = new ledger(cur: statusPtr(sptr));
         fmt.Println(led.cur.Code);
 
-        CrossPkgLibꓸGrade gv = (CrossPkgLibꓸGrade)7;
-        CrossPkgLibꓸStatus stv = default;
+        CrossPkgLib.Grade gv = (CrossPkgLib.Grade)7;
+        CrossPkgLib.Status stv = default;
         stv.Code = (nint)gv;
         fmt.Println(stv.Code);
 
@@ -282,7 +307,7 @@ internal static void main() {
         fmt.Println(h.Value.Cache.Value.Bump(), h.Value.Cache.Value.Bump(), h.name);
 
         var mk = CrossPkgLib.MakeMarker("tag");
-        fmt.Println(mk.ΔΔMarker);
+        fmt.Println(mk.ΔMarker);
 
         CrossPkgLibꓸToken tok = CrossPkgLib.AsToken(42);
         fmt.Println("token:", tok);
@@ -325,13 +350,13 @@ internal static void main() {
         sc = new talliesжScored(Ꮡ(new tallies(pts: 7)));
         fmt.Println("tallies score:", sc.Score());
 
-        var cal = ((Action<ж<CrossPkgLib.Sensor>, CrossPkgLib.Celsius>)(CrossPkgLib.Calibrate));
+        var cal = ((Action<ж<CrossPkgLib.Sensor>, CrossPkgLib.Celsius>)(global::go.CrossPkgLibᴛSensor.Calibrate));
         var mx = Ꮡ(new CrossPkgLib.Sensor(Name: "mx", Temp: 10D));
         cal(mx, 4D);
         fmt.Println((float64)mx.Temp);
-        var hot = ((Func<CrossPkgLib.Sensor, bool>)(CrossPkgLib.Hot));
+        var hot = ((Func<CrossPkgLib.Sensor, bool>)(global::go.CrossPkgLibᴛSensor.Hot));
         fmt.Println(hot(mx.Value), hot(new CrossPkgLib.Sensor(Temp: 60D)));
-        var madd = ((Func<CrossPkgLib.Celsius, CrossPkgLib.Celsius, CrossPkgLib.Celsius>)(CrossPkgLib.Add));
+        var madd = ((Func<CrossPkgLib.Celsius, CrossPkgLib.Celsius, CrossPkgLib.Celsius>)(global::go.CrossPkgLibᴛCelsius.Add));
         fmt.Println((float64)madd(2D, 3D));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -367,11 +392,15 @@ partial struct tagged {
     internal nint n;
 }
 
-partial interface ΔMeter {
+partial interface Meter {
     nint Bump();
 }
 
+} partial class mainᴛtagged {
+
 internal static @string Meter(this tagged t) { return "tagged-meter"; }
+
+} partial class main_package {
 
 partial struct counter {
     /*embed*/ public ж<CrossPkgLib_package.Meter> Meter;
@@ -386,6 +415,8 @@ partial struct tallies {
     internal nint pts;
 }
 
+} partial class mainᴛtallies {
+
 internal static nint Score(this ref tallies t) { return t.pts; }
 
-} // end main_package
+} // end mainᴛtallies

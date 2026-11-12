@@ -36,7 +36,7 @@ internal static void main() {
     fmt.Printf("listener2: portAssigned=%v distinctFromFirst=%v\n"u8,
         ok2 && secondPort > 0, ok1 && ok2 && firstPort != secondPort);
 
-    var armErr = first._<ж<Δnet.TCPListener>>().SetDeadline(time.Now().Add(time.ΔHour));
+    var armErr = first._<ж<Δnet.TCPListener>>().SetDeadline(time.Now().Add(time.Hour));
     var clearErr = first._<ж<Δnet.TCPListener>>().SetDeadline(new time.Time());
     fmt.Printf("listener1: deadlineAccepted=%v deadlineClearAccepted=%v\n"u8, armErr == nil, clearErr == nil);
 

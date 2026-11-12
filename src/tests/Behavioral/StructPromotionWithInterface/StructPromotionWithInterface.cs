@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using time = time_package;
+using static main_package;
 
 partial class main_package {
 
@@ -24,13 +25,19 @@ partial struct MyCustomError {
 partial struct MyAbser {
 }
 
+} partial class mainᴛMyCustomError {
+
 public static float64 Abs(this ref MyCustomError myErr) {
     return 0.0D;
 }
 
+} partial class mainᴛMyAbser {
+
 public static float64 Abs(this MyAbser myAbs) {
     return 1.0D;
 }
+
+} partial class main_package {
 
 internal static void main() {
     var a = new MyCustomError("New One", new MyAbser(), new MyError(time.Now(), "Hello"), default);

@@ -6,6 +6,7 @@ using host = global::go.go.varhost_package;
 using global::go.go;
 using varhost = global::go.go.varhost_package;
 using ꓸꓸꓸany = Span<any>;
+using static main_package;
 
 partial class main_package {
 
@@ -18,10 +19,14 @@ partial struct cached {
 // interface field in *cached's method set; see the pointer-only satisfaction record.
 internal static @string Trace(this cached recvᴛ, @string format, params ꓸꓸꓸany argsʗp) => recvᴛ.Host.Trace(format, argsʗp);
 
+} partial class mainᴛcached {
+
 internal static @string Name(this ref cached c) {
     c.hits++;
     return fmt.Sprintf("cached(%d):%s"u8, c.hits, c.Host.Name());
 }
+
+} partial class main_package {
 
 internal static void main() {
     var c = Ꮡ(new cached(Host: new host.BaseжHost(Ꮡ(new host.Base(Tag: "t")))));
@@ -46,7 +51,7 @@ internal static void main() {
         fmt.Println("  cached:", vt.Method(i).Name);
     }
     var (m, ok) = pt.MethodByName("Trace"); if (ok) {
-        var @out = m.Func.Call(slice<reflectꓸValue>([reflect.ValueOf(c.OrTypedNil()), reflect.ValueOf("via %s"), reflect.ValueOf("reflect")]));
+        var @out = m.Func.Call(slice<reflect.Value>([reflect.ValueOf(c.OrTypedNil()), reflect.ValueOf("via %s"), reflect.ValueOf("reflect")]));
         fmt.Println(@out[0].String());
     } else {
         fmt.Println("MethodByName(Trace) missing");

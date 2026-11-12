@@ -13,7 +13,7 @@ internal static void main() {
     signal.Ignore(Δos.Interrupt);
     fmt.Println("after Ignore:", signal.Ignored(Δos.Interrupt));
 
-    var c = new channel<osꓸSignal>(1);
+    var c = new channel<Δos.Signal>(1);
     signal.Notify(c.AsSendOnly(), Δos.Interrupt);
     fmt.Println("after Notify:", signal.Ignored(Δos.Interrupt));
 

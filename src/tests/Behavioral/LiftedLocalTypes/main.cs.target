@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using time = time_package;
+using static main_package;
 
 partial class main_package {
 
@@ -127,7 +128,9 @@ internal static void localInterfaceEmbed() {
 partial struct embedImpl {
 }
 
+} partial class mainᴛembedImpl {
+
 internal static nint x(this embedImpl _) { return 3; }
 internal static nint y(this embedImpl _) { return 4; }
 
-} // end main_package
+} // end mainᴛembedImpl

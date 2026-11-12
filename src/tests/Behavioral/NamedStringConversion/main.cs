@@ -1,12 +1,17 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct errorString /*@string*/;
 
+} partial class mainᴛerrorString {
+
 internal static @string Error(this errorString e) { return "err: "u8 + ((@string)e); }
+
+} partial class main_package {
 
 partial struct label /*@string*/;
 

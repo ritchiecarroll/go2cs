@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -38,7 +39,11 @@ internal static @string nameOf<E>(E want) { return fmt.Sprintf("%T"u8, (want).Or
 partial struct myErr {
 }
 
+} partial class mainᴛmyErr {
+
 internal static @string Error(this ref myErr _) { return "myErr"; }
+
+} partial class main_package {
 
 internal static any plain<T>(T t)
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,8 +9,12 @@ partial struct withM {
     internal @string s;
 }
 
+} partial class mainᴛwithM {
+
 internal static void M(this withM w) { }
 internal static @string String(this withM w) { return w.s; }
+
+} partial class main_package {
 
 internal static (T, bool) assertAs<T, V>(V v) {
     var (t, ok) = ((any)(v).OrTypedNilOf())._<T>(ᐧ);

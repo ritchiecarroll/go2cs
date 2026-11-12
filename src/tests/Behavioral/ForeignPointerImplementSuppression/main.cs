@@ -8,18 +8,18 @@ using ForeignPointerImplementSuppression;
 partial class main_package {
 
 internal static void main() {
-    var t = Ꮡ(new toneꓸTone(D: 3));
-    tone.Level l = new tone.ΔToneжLevel(t);
+    var t = Ꮡ(new tone.Tone(D: 3));
+    tone.Level l = new tone.ToneжLevel(t);
 
     fmt.Println("tone:", l.Tone(), l.Name());
 
     l.Set(7);
     fmt.Println("alias:", t.D, l.Tone());
 
-    tone.Level l2 = new tone.ΔToneжLevel(t);
-    fmt.Println("eq:", AreEqual(l, l2), AreEqual(l, ((tone.Level)new tone.ΔToneжLevel(Ꮡ(new toneꓸTone(D: 7))))));
+    tone.Level l2 = new tone.ToneжLevel(t);
+    fmt.Println("eq:", AreEqual(l, l2), AreEqual(l, ((tone.Level)new tone.ToneжLevel(Ꮡ(new tone.Tone(D: 7))))));
 
-    var (back, ok) = l._<ж<toneꓸTone>>(ᐧ);
+    var (back, ok) = l._<ж<tone.Tone>>(ᐧ);
     fmt.Println("assert:", ok, back == t);
     var (_, badOK) = l._<ж<tone.Plain>>(ᐧ);
     fmt.Println("assert-miss:", badOK);
@@ -29,7 +29,7 @@ internal static void main() {
         fmt.Println("switch:", "plain", v.D);
         break;
     }
-    case ж<toneꓸTone> v: {
+    case ж<tone.Tone> v: {
         fmt.Println("switch:", "tone", v.D);
         break;
     }
@@ -57,7 +57,7 @@ internal static void main() {
     ln.Set(2);
     fmt.Println("lone:", ln.Tone(), ln.Name());
 
-    shade.Level sl = new tone_ΔToneжLevel(t);
+    shade.Level sl = new tone_ToneжLevel(t);
     sl.Set(9);
     fmt.Println("shade:", sl.Tone(), sl.Name(), t.D);
 

@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using Δio = io_package;
+using static main_package;
 
 partial class main_package {
 
@@ -78,8 +79,12 @@ partial interface InlineEmbed :
 partial struct embeddedImpl {
 }
 
+} partial class mainᴛembeddedImpl {
+
 internal static error Close(this embeddedImpl _) { return default; }
 internal static error Flush(this embeddedImpl _) { return default; }
+
+} partial class main_package {
 
 internal static void testInterfaceEmbedding(InlineEmbed x) {
     _ = x.Close();
@@ -90,38 +95,56 @@ internal static void testInterfaceEmbedding(InlineEmbed x) {
 partial struct fakeReader {
 }
 
+} partial class mainᴛfakeReader {
+
 internal static (nint, error) Read(this fakeReader _, slice<byte> b) {
     copy(b, "DATA"u8);
     return (4, default);
 }
 
+} partial class main_package {
+
 partial struct fakeError {
 }
+
+} partial class mainᴛfakeError {
 
 internal static @string Error(this fakeError _) { return "fake error"; }
 internal static error Unwrap(this fakeError _) { return Δio.EOF; }
 internal static bool Is(this fakeError _, error err) { return AreEqual(err, Δio.EOF); }
 
+} partial class main_package {
+
 partial struct tally {
     internal nint total;
 }
+
+} partial class mainᴛtally {
 
 internal static (nint, error) Write(this ref tally t, slice<byte> p) {
     t.total += len(p);
     return (len(p), default);
 }
 
+} partial class main_package {
+
 internal partial struct fill_dst /*dyn*/ {
     /*embed*/ public io_package.Writer Writer;
 }
+
+} partial class mainᴛtally {
 
 internal static (int64, error) fill(this ж<tally> Ꮡt, Δio.Reader r) {
     return Δio.Copy(new fill_dst(new tallyжWriter(Ꮡt)), r);
 }
 
+} partial class main_package {
+
 partial struct byteRepeat {
     internal nint left;
 }
+
+} partial class mainᴛbyteRepeat {
 
 internal static (nint, error) Read(this ref byteRepeat b, slice<byte> p) {
     if (b.left == 0) {
@@ -138,6 +161,8 @@ internal static (nint, error) Read(this ref byteRepeat b, slice<byte> p) {
     }
     return (n, default);
 }
+
+} partial class main_package {
 
 partial struct quad /*[4]byte*/;
 

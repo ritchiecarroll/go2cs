@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -13,7 +14,11 @@ partial struct row {
     internal SE val;
 }
 
+} partial class mainᴛSE {
+
 internal static @string describe(this SE s) { return fmt.Sprint(len(s), ":", s); }
+
+} partial class main_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object twoˢ = (@string)"two"u8;

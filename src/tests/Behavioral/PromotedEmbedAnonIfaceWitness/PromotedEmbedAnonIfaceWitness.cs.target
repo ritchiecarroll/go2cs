@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -9,9 +10,13 @@ partial struct CommonType {
     public @string Label;
 }
 
+} partial class mainᴛCommonType {
+
 public static ж<CommonType> Common(this ж<CommonType> Ꮡc) { return Ꮡc; }
 
 public static @string String(this ref CommonType c) { return c.Label; }
+
+} partial class main_package {
 
 partial interface Node :
     fmt.Stringer
@@ -24,7 +29,11 @@ partial struct Base {
     public int64 BitSize;
 }
 
+} partial class mainᴛBase {
+
 public static ж<Base> Basic(this ж<Base> Ꮡb) { return Ꮡb; }
+
+} partial class main_package {
 
 partial struct Uint {
     /*embed*/ public Base Base;

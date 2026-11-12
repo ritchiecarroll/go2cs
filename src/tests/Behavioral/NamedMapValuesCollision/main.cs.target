@@ -1,10 +1,13 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct Values /*map[@string, slice<@string>]*/;
+
+} partial class mainᴛValues {
 
 public static @string Get(this Values v, @string key) {
     var vs = v[key]; if (len(vs) > 0) {
@@ -16,6 +19,8 @@ public static @string Get(this Values v, @string key) {
 public static void Add(this Values v, @string key, @string value) {
     v[key] = append(v[key], value);
 }
+
+} partial class main_package {
 
 internal static void main() {
     var v = new Values(new map<@string, slice<@string>>{});

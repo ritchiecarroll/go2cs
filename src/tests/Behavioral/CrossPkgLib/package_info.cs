@@ -27,12 +27,8 @@ using static go.CrossPkgLib_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Grade", "ΔGrade")]
-[assembly: GoTypeAlias("Marker", "ΔMarker")]
-[assembly: GoTypeAlias("Status", "ΔStatus")]
 [assembly: GoTypeAlias("Temperature", "go.CrossPkgLib_package.Celsius")]
-[assembly: GoTypeAlias("Token", "ΔToken")]
-[assembly: GoTypeAlias("ΔToken", "object")]
+[assembly: GoTypeAlias("Token", "object")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -65,7 +61,7 @@ using static go.CrossPkgLib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AA0wlpYABhSWmgAFFpacAAUUgoKoAAUQAAUQlpYABRKAgK6aAAMWAAcsAAUQgIAAFDS8AAEamAAFFKQADCqWAAcw3pSUmAAFEAAGFpSYggAEHA==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA8wlrYAChSWmgAHFpacAAcUgoLIAAcQAAkQtpYABxKAgM6aAAUWAAksAAcQgIAAGDT8AAEauAAFFKQADiq2AAcw/pSUuAAHEAAKFpS4ggAGHA==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -87,24 +83,24 @@ public static partial class CrossPkgLib_package
     public partial interface Sampler {}
     public partial interface Scored {}
     public partial interface Sealed {}
-    [GoLocalName("Token")] public partial interface ΔTokenᴅ {}
+    [GoLocalName("Token")] public partial interface Tokenᴅ {}
     public partial struct Alarm {}
     public partial struct Branch {}
     public partial struct Cache<T> {}
     public partial struct Celsius {}
     public partial struct Device {}
     public partial struct EmitBase {}
+    public partial struct Grade {}
     public partial struct Leaf {}
+    public partial struct Marker {}
     public partial struct Meter {}
     public partial struct Node {}
     public partial struct Probe {}
     public partial struct Sensor {}
+    public partial struct Status {}
     public partial struct Ticks {}
     public partial struct Verdict {}
     public partial struct snapshot {}
-    public partial struct ΔGrade {}
-    public partial struct ΔMarker {}
-    public partial struct ΔStatus {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -116,3 +112,22 @@ public static partial class CrossPkgLib_package
     // <ImportInitializers>
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(CrossPkgLib_package.Alarm)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛAlarm;
+[GoMethodHost(typeof(CrossPkgLib_package.Branch)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛBranch;
+[GoMethodHost(typeof(CrossPkgLib_package.Cache<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛCache;
+[GoMethodHost(typeof(CrossPkgLib_package.Celsius)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛCelsius;
+[GoMethodHost(typeof(CrossPkgLib_package.EmitBase)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛEmitBase;
+[GoMethodHost(typeof(CrossPkgLib_package.Leaf)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛLeaf;
+[GoMethodHost(typeof(CrossPkgLib_package.Meter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛMeter;
+[GoMethodHost(typeof(CrossPkgLib_package.Probe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛProbe;
+[GoMethodHost(typeof(CrossPkgLib_package.Sensor)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛSensor;
+[GoMethodHost(typeof(CrossPkgLib_package.Verdict)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class CrossPkgLibᴛVerdict;
+// </MethodHolders>

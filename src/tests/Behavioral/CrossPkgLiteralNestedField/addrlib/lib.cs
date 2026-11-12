@@ -1,5 +1,7 @@
 namespace go.CrossPkgLiteralNestedField;
 
+using static addrlib_package;
+
 partial class addrlib_package {
 
 public static UntypedInt PathMax => 12;
@@ -13,6 +15,8 @@ partial struct Addr {
     public @string Name;
     internal rawAddr raw;
 }
+
+} partial class addrlibᴛAddr {
 
 public static nint Capacity(this ref Addr a) {
     return len(a.raw.Path);
@@ -34,6 +38,8 @@ public static int8 PathByte(this ref Addr a, nint i) {
     return a.raw.Path[i];
 }
 
+} partial class addrlib_package {
+
 partial struct slots {
     public array<int32> Cells = new(4);
 }
@@ -42,6 +48,8 @@ partial struct Embedder {
     public @string Name;
     /*embed*/ internal slots slots;
 }
+
+} partial class addrlibᴛEmbedder {
 
 public static nint Slots(this ref Embedder e) {
     return len(e.Cells);
@@ -52,4 +60,4 @@ public static int32 Put(this ref Embedder e, nint i, int32 v) {
     return e.Cells[i];
 }
 
-} // end addrlib_package
+} // end addrlibᴛEmbedder

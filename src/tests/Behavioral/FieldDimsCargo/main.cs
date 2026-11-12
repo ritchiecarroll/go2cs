@@ -50,7 +50,7 @@ internal static void main() {
 
     var walk = reflect.ValueOf(Ꮡtarget).Elem().Field(2);
 
-    while (walk.Kind() == reflect.ΔPointer) {
+    while (walk.Kind() == reflect.Pointer) {
         if (walk.IsNil()) {
             walk.Set(reflect.New(walk.Type().Elem()));
         }

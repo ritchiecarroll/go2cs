@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -19,8 +20,15 @@ internal static partial uint32 load32(ж<uint32> Ꮡp) {
 partial struct lfstack /*num:uint64*/;
 partial struct sweepClass /*num:uint32*/;
 
+} partial class mainᴛlfstack {
+
 internal static uint64 peek(this ж<lfstack> Ꮡhead) { return load64(Ꮡhead.Reinterpret<lfstack, uint64>()); }
+
+} partial class mainᴛsweepClass {
+
 internal static uint32 peek(this ж<sweepClass> Ꮡsc) { return load32(Ꮡsc.Reinterpret<sweepClass, uint32>()); }
+
+} partial class main_package {
 
 internal static uint64 peekVia(ж<lfstack> p) { return load64(p.Reinterpret<lfstack, uint64>()); }
 
@@ -36,7 +44,11 @@ internal static partial void storeInt(ж<nint> Ꮡp, nint v) {
 
 partial struct gobber /*num:nint*/;
 
+} partial class mainᴛgobber {
+
 internal static void set(this ж<gobber> Ꮡg, nint v) { storeInt(Ꮡg.Reinterpret<gobber, nint>(), v); }
+
+} partial class main_package {
 
 partial struct coord {
     public nint X, Y;

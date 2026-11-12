@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -35,12 +36,16 @@ internal static nint pointerHop() {
     return t.val;
 }
 
+} partial class mainᴛThing {
+
 internal static nint methodBody(this ref Thing t) {
     ref var y = ref heap<Thing>(new Thing(val: 1), out var Ꮡy);
     var p = Ꮡy.Ꮡval;
     p.Value = 88;
     return y.val;
 }
+
+} partial class main_package {
 
 partial struct Embed {
     internal nint ev;

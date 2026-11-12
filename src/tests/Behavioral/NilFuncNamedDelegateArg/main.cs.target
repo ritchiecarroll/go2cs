@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using ꓸꓸꓸany = Span<any>;
+using static main_package;
 
 partial class main_package {
 
@@ -13,7 +14,11 @@ partial struct Message {
 
 public delegate @string Handler(nint n);
 
+} partial class mainᴛHandler {
+
 public static @string Serve(this Handler h, nint n) { return "served "u8 + h(n); }
+
+} partial class main_package {
 
 public static T IfElse<T>(bool b, T whenTrue, T whenFalse) {
     if (b) {
@@ -26,6 +31,8 @@ partial struct relater {
     internal nint count;
 }
 
+} partial class mainᴛrelater {
+
 internal static void reportError(this ref relater r, ж<Message> Ꮡm, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
     ref var m = ref Ꮡm.DerefOrNull();
@@ -33,6 +40,8 @@ internal static void reportError(this ref relater r, ж<Message> Ꮡm, params �
     r.count++;
     fmt.Println("report", m.text, len(args));
 }
+
+} partial class main_package {
 
 internal static void check(@string label, Actionꓸꓸꓸ<ж<Message>, any> report) {
     if (report == nil) {
@@ -66,9 +75,13 @@ partial struct holder {
     internal Func<nint, @string> f;
 }
 
+} partial class mainᴛholder {
+
 internal static void describe(this holder x, @string label) {
     fmt.Println(label, x.report == nil, x.h == nil, x.f == nil);
 }
+
+} partial class main_package {
 
 internal static void main() {
     var r = Ꮡ(new relater());

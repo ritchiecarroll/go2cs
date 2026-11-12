@@ -2,8 +2,10 @@ namespace go;
 
 using fmt = fmt_package;
 using runtime = runtime_package;
-using System.Runtime.CompilerServices;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using ꓸꓸꓸnint = Span<nint>;
+using static main_package;
 
 partial class main_package {
 
@@ -34,15 +36,23 @@ partial struct counter {
     internal nint n;
 }
 
+} partial class mainᴛcounter {
+
 internal static partial @string ptr(this ref counter c) { return here(); }
 
 internal static partial @string val(this counter c) { return here(); }
+
+} partial class main_package {
 
 partial struct box<T> {
     internal T v;
 }
 
+} partial class mainᴛbox {
+
 internal static partial @string get<T>(this ref box<T> b) { return here(); }
+
+} partial class main_package {
 
 internal static @string fromInit;
 

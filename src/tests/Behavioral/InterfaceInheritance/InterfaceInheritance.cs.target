@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,19 +9,27 @@ partial struct T1 {
     internal @string name;
 }
 
+} partial class mainᴛT1 {
+
 public static void M(this T1 t) { }
 public static void N(this T1 t) { }
 public static @string String(this T1 t) { return ""; }
 public static @string Error(this T1 t) { return ""; }
 
+} partial class main_package {
+
 partial struct T2 {
     internal @string name;
 }
+
+} partial class mainᴛT2 {
 
 public static void M(this T2 t) { }
 public static void N(this T2 t) { }
 public static @string String(this T2 t) { return ""; }
 public static @string Error(this T2 t) { return ""; }
+
+} partial class main_package {
 
 partial interface I {
     void M();

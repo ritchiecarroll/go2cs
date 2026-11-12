@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using reflect = reflect_package;
+using static main_package;
 
 partial class main_package {
 
@@ -9,7 +10,11 @@ partial struct stringer {
     internal nint n;
 }
 
+} partial class mainᴛstringer {
+
 internal static @string String(this stringer s) { return fmt.Sprint(s.n); }
+
+} partial class main_package {
 
 internal static @string /*msg*/ recovered(Action fn) {
     @string msg = default;
@@ -28,7 +33,7 @@ internal static @string /*msg*/ recovered(Action fn) {
     return msg;
 }
 
-internal static reflect.StructField field(@string name, reflectꓸType t) {
+internal static reflect.StructField field(@string name, reflect.Type t) {
     return new reflect.StructField(Name: name, Type: t);
 }
 
@@ -45,7 +50,7 @@ internal static void main() {
     var first = reflect.StructOf(shape);
     var second = reflect.StructOf(slice<reflect.StructField>([field("A", intT), field("B", strT)]));
     fmt.Println("interned:", AreEqual(first, second), "| usable as a map key:",
-        new map<reflectꓸType, nint>{[first] = 1}[second] == 1);
+        new map<reflect.Type, nint>{[first] = 1}[second] == 1);
 
     fmt.Printf("type: %v | kind=%v | name=%q | pkgpath=%q | numfield=%d | size=%d | align=%d\n"u8,
         first, first.Kind(), first.Name(), first.PkgPath(), first.NumField(), first.Size(), first.Align());

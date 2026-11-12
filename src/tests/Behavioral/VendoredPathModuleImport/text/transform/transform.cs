@@ -1,6 +1,7 @@
 namespace go.golang.org.x.text;
 
 using errors = errors_package;
+using static transform_package;
 
 partial class transform_package {
 
@@ -20,11 +21,17 @@ partial interface SpanningTransformer :
 partial struct NopResetter {
 }
 
+} partial class transformᴛNopResetter {
+
 public static void Reset(this NopResetter _) { }
+
+} partial class transform_package {
 
 partial struct nop {
     /*embed*/ public NopResetter NopResetter;
 }
+
+} partial class transformᴛnop {
 
 internal static (nint nDst, nint nSrc, error err) Transform(this nop _, slice<byte> dst, slice<byte> src, bool atEOF) {
     error err = default;
@@ -41,6 +48,8 @@ internal static (nint nDst, nint nSrc, error err) Transform(this nop _, slice<by
 internal static (nint n, error err) Span(this nop _, slice<byte> src, bool atEOF) {
     return (len(src), default);
 }
+
+} partial class transform_package {
 
 public static SpanningTransformer Nop = new nop();
 

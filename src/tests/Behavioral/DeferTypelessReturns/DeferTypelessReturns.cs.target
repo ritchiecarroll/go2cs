@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -13,7 +14,11 @@ internal static handle invalid => /* ^handle(0) */ unchecked((handle)18446744073
 internal static UntypedInt appErr => /* 1 << 29 */ 536870912;
 internal static handle big => /* appErr + 5 */ 536870917;
 
+} partial class mainᴛhandle {
+
 internal static nint idx(this handle h) { return (nint)(h - (handle)appErr); }
+
+} partial class main_package {
 
 internal static (ж<item>, error) find(slice<item> xs, nint want) {
     GoFrame ᒐ = default;
@@ -87,9 +92,11 @@ partial struct res {
     internal nint id;
 }
 
+} partial class mainᴛres {
+
 internal static error close(this res h) {
     fmt.Println("closed", h.id);
     return default;
 }
 
-} // end main_package
+} // end mainᴛres

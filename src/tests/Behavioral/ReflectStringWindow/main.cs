@@ -12,12 +12,12 @@ partial struct box {
     public slice<byte> B;
 }
 
-internal static void show(@string label, reflectꓸValue v) {
+internal static void show(@string label, reflect.Value v) {
     fmt.Printf("%s: kind=%v type=%v len=%d val=%v\n"u8, label, v.Kind(), v.Type(), v.Len(), v.Interface());
 }
 
 internal static void main() {
-    ref var s = ref heap<reflectꓸValue>(reflect.ValueOf("héllo"), out var Ꮡs);
+    ref var s = ref heap<reflect.Value>(reflect.ValueOf("héllo"), out var Ꮡs);
     for (nint i = 0; i < s.Len(); i++) {
         var e = s.Index(i);
         fmt.Printf("index %d: kind=%v type=%v val=%v canAddr=%v canSet=%v\n"u8,
@@ -32,11 +32,11 @@ internal static void main() {
     show("named [:0]", sv.Slice(0, 0));
     show("named [6:6]", sv.Slice(6, 6));
 
-    ref var plain = ref heap<reflectꓸValue>(reflect.ValueOf("abcdef"), out var Ꮡplain);
+    ref var plain = ref heap<reflect.Value>(reflect.ValueOf("abcdef"), out var Ꮡplain);
     show("plain [1:4]", plain.Slice(1, 4));
 
     var full = slice<nint>([0, 1, 2, 3, 4, 5, 6, 7]);
-    ref var rf = ref heap<reflectꓸValue>(reflect.ValueOf(full), out var Ꮡrf);
+    ref var rf = ref heap<reflect.Value>(reflect.ValueOf(full), out var Ꮡrf);
     var t3 = rf.Slice3(2, 5, 6);
     fmt.Printf("slice3 slice: len=%d cap=%d val=%v\n"u8, t3.Len(), t3.Cap(), t3.Interface());
 

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -12,11 +13,19 @@ partial interface I {
     @string M();
 }
 
+} partial class mainᴛG {
+
 public static @string M<T>(this G<T> g) { return fmt.Sprint((g.v).OrTypedNilOf()); }
+
+} partial class main_package {
 
 partial struct T /*num:nint*/;
 
+} partial class mainᴛT {
+
 public static @string M(this T t) { return fmt.Sprint((nint)t); }
+
+} partial class main_package {
 
 internal static void main() {
     I a = new G<nint>(7);

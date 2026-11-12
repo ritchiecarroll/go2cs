@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -12,9 +13,13 @@ partial struct Label {
     internal @string text;
 }
 
+} partial class mainᴛLabel {
+
 public static @string Describe(this Label l) {
     return "label:"u8 + l.text;
 }
+
+} partial class main_package {
 
 public static @string Show(describer d) {
     return d.Describe();

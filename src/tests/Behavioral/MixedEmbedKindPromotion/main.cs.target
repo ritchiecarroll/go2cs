@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,10 +9,14 @@ partial struct counter {
     internal nint n;
 }
 
+} partial class mainᴛcounter {
+
 internal static nint Bump(this ref counter c) {
     c.n++;
     return c.n;
 }
+
+} partial class main_package {
 
 partial interface greeter {
     @string Greet();
@@ -21,7 +26,11 @@ partial struct hello {
     internal @string who;
 }
 
+} partial class mainᴛhello {
+
 internal static @string Greet(this hello h) { return "hello "u8 + h.who; }
+
+} partial class main_package {
 
 partial struct mixed {
     /*embed*/ internal ж<counter> counter;
@@ -43,7 +52,11 @@ partial struct outer {
     internal nint extra;
 }
 
+} partial class mainᴛouter {
+
 internal static nint Extra(this ref outer o) { return o.extra; }
+
+} partial class main_package {
 
 partial interface greetExtra {
     @string Greet();

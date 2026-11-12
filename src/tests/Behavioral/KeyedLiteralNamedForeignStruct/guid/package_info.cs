@@ -49,7 +49,7 @@ using static go.KeyedLiteralNamedForeignStruct.guid_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("guid.go", "guid.cs", "AAkSoAAJFKCogqqC")]
+[assembly: GoPositionMap("guid.go", "guid.cs", "AAwSoAANFKDIgqqC")]
 // </GoSourcePositionMaps>
 
 namespace go.KeyedLiteralNamedForeignStruct;
@@ -78,3 +78,14 @@ public static partial class guid_package
     // <ImportInitializers>
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(guid_package.GUID)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class guidᴛGUID;
+[GoMethodHost(typeof(guid_package.Outer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class guidᴛOuter;
+// </MethodHolders>

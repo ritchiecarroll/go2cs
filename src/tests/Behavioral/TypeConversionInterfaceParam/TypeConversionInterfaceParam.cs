@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -17,9 +18,13 @@ partial interface DataProcessor {
 partial struct Processor {
 }
 
+} partial class mainᴛProcessor {
+
 public static void Process(this Processor p, DataProcessor_data data) {
     fmt.Printf("Processing ID: %d, Name: %s, Valid: %t\n"u8, data.ID, data.Name, data.Valid);
 }
+
+} partial class main_package {
 
 internal static void main() {
     DataProcessor p = default;

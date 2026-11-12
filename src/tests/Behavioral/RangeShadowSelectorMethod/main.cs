@@ -1,12 +1,15 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct writer {
     internal slice<@string> @out;
 }
+
+} partial class mainᴛwriter {
 
 internal static void typ(this ref writer w, @string typ) {
     w.@out = append(w.@out, "t:"u8 + typ);
@@ -17,6 +20,8 @@ internal static void typ(this ref writer w, @string typ) {
         }
     }
 }
+
+} partial class main_package {
 
 internal static void main() {
     var w = Ꮡ(new writer());

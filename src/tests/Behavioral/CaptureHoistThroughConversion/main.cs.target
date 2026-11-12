@@ -1,12 +1,17 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 public delegate void Handler(nint _);
 
+} partial class mainᴛHandler {
+
 public static void Do(this Handler h, nint i) { h(i); }
+
+} partial class main_package {
 
 partial interface Iface {
     void Do(nint _);

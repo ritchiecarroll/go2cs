@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using Δmath = math_package;
+using static main_package;
 
 partial class main_package {
 
@@ -19,12 +20,16 @@ internal static UntypedFloat third => /* 1.0 / 3.0 */ 0.3333333333333333;
 
 partial struct MyFloat /*num:float64*/;
 
+} partial class mainᴛMyFloat {
+
 public static float64 Abs(this MyFloat f) {
     if (f < 0D) {
         return (float64)(-f);
     }
     return (float64)f;
 }
+
+} partial class main_package {
 
 internal static bool isInf(float64 f, nint sign) {
     return sign >= 0 && f > MaxFloat64 || sign <= 0 && f < /* -MaxFloat64 */ -1.7976931348623157e+308D;

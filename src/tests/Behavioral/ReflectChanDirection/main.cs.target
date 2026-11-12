@@ -16,11 +16,11 @@ partial struct holder {
 
 partial struct sink /*chan @string*/;
 
-internal static void describe(@string label, reflectꓸType t) {
+internal static void describe(@string label, reflect.Type t) {
     fmt.Printf("%s: %v | dir=%v | kind=%v\n"u8, label, t, t.ChanDir(), t.Kind());
 }
 
-internal static @string walkRangeShape(reflectꓸValue v) {
+internal static @string walkRangeShape(reflect.Value v) {
     var outᴷ = new stackAppend<@string>();
 
     if (v.Kind() != reflect.Chan) {

@@ -1,12 +1,15 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct thing {
     internal nint n;
 }
+
+} partial class mainᴛthing {
 
 internal static bool Equal(this ref thing t, any x) {
     var (other, ok) = x._<ж<thing>>(ᐧ);
@@ -20,6 +23,8 @@ internal static any Public(this ref thing t) {
 internal static @string Label(this ref thing t) {
     return fmt.Sprintf("thing(%d)"u8, t.n);
 }
+
+} partial class main_package {
 
 
 partial interface _ᴛ1 /*dyn*/ {

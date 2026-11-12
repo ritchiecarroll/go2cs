@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -23,7 +24,11 @@ partial struct store {
     internal slice<uintptr> data;
 }
 
+} partial class mainᴛstore {
+
 internal static slice<uintptr> stk(this ref store s) { return s.data; }
+
+} partial class main_package {
 
 internal static partial void bump(ref uintptr p) { p = p + 7; }
 

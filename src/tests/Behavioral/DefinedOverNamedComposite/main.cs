@@ -3,12 +3,17 @@ namespace go;
 using fmt = fmt_package;
 using fslike = DefinedOverNamedComposite.fslike_package;
 using DefinedOverNamedComposite;
+using static main_package;
 
 partial class main_package {
 
 partial struct shuffledFS /*global::go.DefinedOverNamedComposite.fslike_package.MapFS*/;
 
+} partial class mainᴛshuffledFS {
+
 internal static nint get(this shuffledFS f, @string k) { return ((fslike.MapFS)f).Get(k); }
+
+} partial class main_package {
 
 partial struct shuffledList /*global::go.DefinedOverNamedComposite.fslike_package.List*/;
 

@@ -28,7 +28,6 @@ using static go.SameNameImportAlias.a.foo_package;
 
 // <ExportedTypeAliases>
 [assembly: GoTypeAlias("Alias", "go.SameNameImportAlias.a.foo_package.Inner")]
-[assembly: GoTypeAlias("Kind", "ΔKind")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -51,7 +50,7 @@ using static go.SameNameImportAlias.a.foo_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("foo.go", "foo.cs", "AA8W")]
+[assembly: GoPositionMap("foo.go", "foo.cs", "ABMW")]
 // </GoSourcePositionMaps>
 
 namespace go.SameNameImportAlias.a;
@@ -67,8 +66,8 @@ public static partial class foo_package
 
     // <TypeAccessibility>
     public partial struct Inner {}
+    public partial struct Kind {}
     public partial struct S {}
-    public partial struct ΔKind {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -80,3 +79,13 @@ public static partial class foo_package
     // <ImportInitializers>
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(foo_package.S)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fooᴛS;
+// </MethodHolders>

@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸType = go.reflect_package.ΔType;
 // </ImportedTypeAliases>
 
 using go;
@@ -50,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABIqgICiAA4alIKC6pSEgoKCloKigpiCgoKGkoKCkoKSgqKYlJSUlJSYkoKiloKCgg==", "99-103:1", "74=main.inner.Get;95=main.own.Say", "84=pc/3/3/1,TypeOf/1/1/1,tablePC/1/1/1;86=pc/3/3/1,TypeOf/1/1/1,tablePC/1/1/1;88=pc/3/3/1,TypeOf/1/1/1,tablePC/1/1/1;90=pc/3/3/1,TypeOf/1/1/1,tablePC/1/1/1;92=pc/1/2/1,pc/2/2/1;94=pc/5/6/1,pc/6/6/1")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABUqgICiABAalIKCAAgKtISCgoKWgqKCmIKCgoaSgoKSgpKCopiUlJSUlJiSgqKWgoKC", "99-103:1", "74=main.inner.Get;95=main.own.Say", "93=pc/3/3/1,TypeOf/1/1/1,tablePC/1/1/1;95=pc/3/3/1,TypeOf/1/1/1,tablePC/1/1/1;97=pc/3/3/1,TypeOf/1/1/1,tablePC/1/1/1;99=pc/3/3/1,TypeOf/1/1/1,tablePC/1/1/1;101=pc/1/2/1,pc/2/2/1;103=pc/5/6/1,pc/6/6/1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -88,3 +87,14 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.inner)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛinner;
+[GoMethodHost(typeof(main_package.own)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛown;
+// </MethodHolders>

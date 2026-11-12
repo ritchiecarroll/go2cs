@@ -6,6 +6,7 @@ using Δio = io_package;
 using Δnet = net_package;
 using Δsync = sync_package;
 using time = time_package;
+using static main_package;
 
 partial class main_package {
 
@@ -20,6 +21,8 @@ partial struct deadline {
     internal time.Time t;
 }
 
+} partial class mainᴛdeadline {
+
 internal static error set(this ж<deadline> Ꮡd, time.Time t) {
     var tʗ1 = t;
     void fire() {
@@ -28,6 +31,8 @@ internal static error set(this ж<deadline> Ꮡd, time.Time t) {
     fire();
     return default;
 }
+
+} partial class mainᴛrawFile {
 
 internal static error Close(this ж<rawFile> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
@@ -49,18 +54,26 @@ internal static error SetReadDeadline(this ж<rawFile> Ꮡf, time.Time t) { retu
 internal static error SetWriteDeadline(this ж<rawFile> Ꮡf, time.Time t) { return Ꮡf.Ꮡwd.set(t); }
 internal static error Flush(this ref rawFile f) { return default; }
 
+} partial class main_package {
+
 partial struct addr /*@string*/;
+
+} partial class mainᴛaddr {
 
 internal static @string Network(this addr a) { return "pipe"; }
 internal static @string String(this addr a) { return (@string)a; }
+
+} partial class main_package {
 
 partial struct pipe {
     /*embed*/ internal ж<rawFile> rawFile;
     internal @string path;
 }
 
-internal static netꓸAddr LocalAddr(this ref pipe p) { return ((addr)p.path); }
-internal static netꓸAddr RemoteAddr(this ref pipe p) { return ((addr)p.path); }
+} partial class mainᴛpipe {
+
+internal static Δnet.Addr LocalAddr(this ref pipe p) { return ((addr)p.path); }
+internal static Δnet.Addr RemoteAddr(this ref pipe p) { return ((addr)p.path); }
 internal static error Disconnect(this ref pipe p) { return default; }
 
 internal static error SetDeadline(this ж<pipe> Ꮡp, time.Time t) {
@@ -68,10 +81,14 @@ internal static error SetDeadline(this ж<pipe> Ꮡp, time.Time t) {
     return Ꮡp.SetWriteDeadline(t);
 }
 
+} partial class main_package {
+
 partial struct msgPipe {
     /*embed*/ internal pipe pipe;
     internal bool writeClosed;
 }
+
+} partial class mainᴛmsgPipe {
 
 internal static error CloseWrite(this ref msgPipe m) {
     m.writeClosed = true;
@@ -86,6 +103,8 @@ internal static (nint, error) Write(this ref msgPipe m, slice<byte> b) {
 }
 
 internal static (nint, error) Read(this ref msgPipe m, slice<byte> b) { return m.rawFile.Read(b); }
+
+} partial class main_package {
 
 partial interface PipeConn :
     Δnet.Conn
@@ -116,6 +135,8 @@ partial struct @file {
     internal nint n;
 }
 
+} partial class mainᴛfile {
+
 internal static nint bump(this ж<@file> Ꮡf) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
@@ -130,6 +151,8 @@ internal static nint bump(this ж<@file> Ꮡf) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡf.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
+
+} partial class main_package {
 
 partial struct handle {
     /*embed*/ internal ж<@file> @file;

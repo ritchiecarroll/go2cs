@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using Δsync = sync_package;
+using static main_package;
 
 partial class main_package {
 
@@ -14,6 +15,8 @@ partial struct compiler {
     internal slice<ж<scope>> scopes;
     internal nint count;
 }
+
+} partial class mainᴛcompiler {
 
 internal static Action lazy(this ref compiler c, Func<nint> f) {
     return () => {
@@ -47,6 +50,8 @@ internal static void define(this ж<compiler> Ꮡc, bool Δbuiltin, ж<scope> ou
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
+
+} partial class main_package {
 
 internal static Action later(Func<@string> f) {
     return () => {

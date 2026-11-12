@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -17,9 +18,11 @@ internal partial struct probe_inner /*dyn*/ {
     internal nint n;
 }
 
+} partial class mainᴛBee {
+
 internal static @string probe(this Bee _) {
     var v = new probe_inner(n: 7);
     return fmt.Sprintf("bee inner n=%d reserved=%v"u8, v.n, bReserved == nil);
 }
 
-} // end main_package
+} // end mainᴛBee

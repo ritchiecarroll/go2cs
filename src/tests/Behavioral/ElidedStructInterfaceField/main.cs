@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,13 +9,21 @@ partial struct pointerErr {
     internal @string msg;
 }
 
+} partial class mainᴛpointerErr {
+
 internal static @string Error(this ref pointerErr p) { return p.msg; }
+
+} partial class main_package {
 
 partial struct valueErr {
     internal @string msg;
 }
 
+} partial class mainᴛvalueErr {
+
 internal static @string Error(this valueErr v) { return v.msg; }
+
+} partial class main_package {
 
 internal partial struct main_cases /*dyn*/ {
     internal error err;

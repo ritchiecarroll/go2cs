@@ -4,6 +4,7 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using fieldlib = ReflectFieldMetadata.fieldlib_package;
 using ReflectFieldMetadata;
+using static main_package;
 
 partial class main_package {
 
@@ -22,7 +23,12 @@ partial struct holds {
 partial struct @base {
     public nint B;
 }
+
+} partial class mainᴛbase {
+
 internal static nint M(this @base b) { return b.B; }
+
+} partial class main_package {
 
 partial struct viaX {
     /*embed*/ internal @base @base;
@@ -95,7 +101,7 @@ internal static void main() {
     fmt.Println("local.Field(1) PkgPath is foreign (not this package, not empty):", lt.Field(1).PkgPath != mine, lt.Field(1).PkgPath != ""u8);
     fmt.Println("anon unexported PkgPath is this package:", mine == "main"u8);
 
-    void anon(@string label, reflectꓸType t) {
+    void anon(@string label, reflect.Type t) {
         var f = t.Field(0);
         fmt.Printf("%-14s name=%-5s anonymous=%-5v type=%-6v pkgPath=%q\n"u8, label, f.Name, f.Anonymous, f.Type, f.PkgPath);
     }

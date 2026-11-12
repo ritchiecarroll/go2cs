@@ -66,7 +66,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("AnonymousInterfaces.go", "AnonymousInterfaces.cs", "AAsSgpTEAAgKgoKU+oKCgqiCgoKCAAoQgoKCggAOFoKUgoKC3oKC2oKC2IKCAAYQguqCgpSCgoKUgoKUAAgSgoKClKaCgoKCgoKUgoKUgg==")]
+[assembly: GoPositionMap("AnonymousInterfaces.go", "AnonymousInterfaces.cs", "AAwSgpTEAAgKgoKU+oKCgqiCgoKCAAoQgoKCggAQFoK0goKC/oKCAAkKgoIACQiCggAKEIIACgqCgpSCgoKUgoKUAAoSgoKClKaCgoKCgoKUgoKUgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -110,3 +110,17 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.byteRepeat)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛbyteRepeat;
+[GoMethodHost(typeof(main_package.embeddedImpl)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛembeddedImpl;
+[GoMethodHost(typeof(main_package.fakeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛfakeError;
+[GoMethodHost(typeof(main_package.fakeReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛfakeReader;
+[GoMethodHost(typeof(main_package.tally)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛtally;
+// </MethodHolders>

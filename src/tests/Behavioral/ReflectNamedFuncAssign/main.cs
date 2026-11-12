@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using reflect = reflect_package;
+using static main_package;
 
 partial class main_package {
 
@@ -9,9 +10,15 @@ public delegate nint AssignA();
 
 public delegate nint Other();
 
+} partial class mainᴛOther {
+
 public static @string Name(this Other o) { return "other"; }
 
+} partial class mainᴛAssignA {
+
 public static bool Equal(this AssignA x, Func<nint> y) { return x() == y(); }
+
+} partial class main_package {
 
 internal static nint apply(Func<nint> f) { return f() * 10; }
 
@@ -20,9 +27,9 @@ internal static void main() {
 
     var (m, _) = reflect.TypeOf((a).OrTypedNilFunc()).MethodByName("Equal");
     fmt.Println("assignable:", m.Type.In(0).AssignableTo(m.Type.In(1)));
-    fmt.Println("Equal via Call:", m.Func.Call(slice<reflectꓸValue>([reflect.ValueOf((a).OrTypedNilFunc()), reflect.ValueOf((a).OrTypedNilFunc())]))[0].Bool());
+    fmt.Println("Equal via Call:", m.Func.Call(slice<reflect.Value>([reflect.ValueOf((a).OrTypedNilFunc()), reflect.ValueOf((a).OrTypedNilFunc())]))[0].Bool());
 
-    fmt.Println("apply via Call:", reflect.ValueOf(apply).Call(slice<reflectꓸValue>([reflect.ValueOf((a).OrTypedNilFunc())]))[0].Int());
+    fmt.Println("apply via Call:", reflect.ValueOf(apply).Call(slice<reflect.Value>([reflect.ValueOf((a).OrTypedNilFunc())]))[0].Int());
 
     ref var f = ref heap<Func<nint>>(out var Ꮡf);
     reflect.ValueOf(Ꮡf).Elem().Set(reflect.ValueOf((a).OrTypedNilFunc()));

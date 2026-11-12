@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -19,7 +20,11 @@ partial struct request {
 
 internal static Func<ж<request>, @string> pathOf = (ж<request> r) => r.path;
 
+} partial class mainᴛrequest {
+
 internal static @string label(this ref request r) { return "["u8 + r.path + "]"u8; }
+
+} partial class main_package {
 
 internal static @string inside() {
     @string f(ж<request> r) => r.path + "!"u8;

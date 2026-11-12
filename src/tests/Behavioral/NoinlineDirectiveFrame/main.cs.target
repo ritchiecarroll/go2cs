@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using runtime = runtime_package;
+using static main_package;
 
 partial class main_package {
 
@@ -22,10 +23,14 @@ partial struct counter {
     internal nint n;
 }
 
+} partial class mainᴛcounter {
+
 internal static partial @string bump(this ref counter c) {
     c.n++;
     return callerName();
 }
+
+} partial class main_package {
 
 internal static partial @string forward(slice<byte> b, nint i) { return keeper(b, i); }
 

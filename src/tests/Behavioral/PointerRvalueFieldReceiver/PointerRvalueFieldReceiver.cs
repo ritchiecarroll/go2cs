@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,7 +9,11 @@ partial struct slot {
     internal nint v;
 }
 
+} partial class mainᴛslot {
+
 internal static void set(this ref slot s, nint x) { s.v = x; }
+
+} partial class main_package {
 
 partial struct node {
     internal slot s;
@@ -22,7 +27,11 @@ partial struct queue {
     internal ж<node> last;
 }
 
+} partial class mainᴛqueue {
+
 internal static ж<node> tail(this ref queue q) { return q.last; }
+
+} partial class main_package {
 
 internal static void main() {
     getNode().Ꮡs.set(42);

@@ -49,7 +49,7 @@ internal static void roundTrip() {
         }
 
         var payload = slice<byte>("wsasendto-payload"u8);
-        (var sent, err) = send(sender, payload, new syscall.SockaddrInet4жΔSockaddr(dst));
+        (var sent, err) = send(sender, payload, new syscall.SockaddrInet4жSockaddr(dst));
         fmt.Println("roundtrip: send reported no error:", err == nil);
         fmt.Println("roundtrip: byte count equals payload:", (nint)sent == len(payload));
 
@@ -104,7 +104,7 @@ internal static void zeroLengthDatagram() {
         var one = slice<byte>([0]);
         ref var buf = ref heap<syscall.WSABuf>(new syscall.WSABuf(Len: 0, Buf: Ꮡ(one, 0)), out var Ꮡbuf);
         ref var sent = ref heap(new uint32(), out var Ꮡsent);
-        err = syscall.WSASendto(sender, Ꮡbuf, 1, Ꮡsent, 0, new syscall.SockaddrInet4жΔSockaddr(dst), nil, nil);
+        err = syscall.WSASendto(sender, Ꮡbuf, 1, Ꮡsent, 0, new syscall.SockaddrInet4жSockaddr(dst), nil, nil);
         fmt.Println("zerolen: send reported no error:", err == nil);
         fmt.Println("zerolen: byte count is zero:", sent == 0);
 
@@ -120,26 +120,26 @@ internal static void zeroLengthDatagram() {
     finally { ᒐ.Run(); }
 }
 
-internal static (syscallꓸHandle, error) newSender() {
+internal static (syscall.Handle, error) newSender() {
     var (s, err) = syscall.Socket(syscall.AF_INET, syscall.SOCK_DGRAM, 0);
     if (err != nil) {
         return (syscall.InvalidHandle, err);
     }
-    err = syscall.Bind(s, new syscall.SockaddrInet4жΔSockaddr(Ꮡ(new syscall.SockaddrInet4(Port: 0, Addr: new byte[]{127, 0, 0, 1}.array())))); if (err != nil) {
+    err = syscall.Bind(s, new syscall.SockaddrInet4жSockaddr(Ꮡ(new syscall.SockaddrInet4(Port: 0, Addr: new byte[]{127, 0, 0, 1}.array())))); if (err != nil) {
         syscall.Closesocket(s);
         return (syscall.InvalidHandle, err);
     }
     return (s, default);
 }
 
-internal static (uint32, error) send(syscallꓸHandle s, slice<byte> payload, syscallꓸSockaddr to) {
+internal static (uint32, error) send(syscall.Handle s, slice<byte> payload, syscall.Sockaddr to) {
     ref var buf = ref heap<syscall.WSABuf>(new syscall.WSABuf(Len: (uint32)len(payload), Buf: Ꮡ(payload, 0)), out var Ꮡbuf);
     ref var sent = ref heap(new uint32(), out var Ꮡsent);
     var err = syscall.WSASendto(s, Ꮡbuf, 1, Ꮡsent, 0, to, nil, nil);
     return (sent, err);
 }
 
-internal static (ж<syscall.SockaddrInet4>, bool) sockaddrOf(netꓸAddr addr) {
+internal static (ж<syscall.SockaddrInet4>, bool) sockaddrOf(Δnet.Addr addr) {
     var (ua, ok) = addr._<ж<Δnet.UDPAddr>>(ᐧ);
     if (!ok) {
         return (default, false);

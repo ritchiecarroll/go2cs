@@ -5,6 +5,7 @@ using xml = encoding.xml_package;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using encoding;
+using static main_package;
 
 partial class main_package {
 
@@ -12,14 +13,22 @@ partial struct E {
     public nint Code;
 }
 
+} partial class mainᴛE {
+
 public static @string Error(this E _) { return "e"; }
 public static @string GoString(this E _) { return "E!"; }
+
+} partial class main_package {
 
 partial struct S {
     public nint N;
 }
 
+} partial class mainᴛS {
+
 public static @string String(this S _) { return "s"; }
+
+} partial class main_package {
 
 partial struct w {
     /*embed*/ internal error error;
@@ -48,14 +57,14 @@ partial struct X {
     public nint N;
 }
 
-internal static void describe(@string label, reflectꓸType t) {
+internal static void describe(@string label, reflect.Type t) {
     for (nint i = 0; i < t.NumField(); i++) {
         var f = t.Field(i);
         fmt.Printf("%s field %d: name=%s anonymous=%v exported=%v pkgpath=%q index=%v\n"u8, label, i, f.Name, f.Anonymous, f.IsExported(), f.PkgPath, f.Index);
     }
 }
 
-internal static void visible(@string label, reflectꓸType t) {
+internal static void visible(@string label, reflect.Type t) {
     foreach (var (_, f) in range(reflect.VisibleFields(t))) {
         fmt.Printf("%s visible: name=%s anonymous=%v index=%v\n"u8, label, f.Name, f.Anonymous, f.Index);
     }

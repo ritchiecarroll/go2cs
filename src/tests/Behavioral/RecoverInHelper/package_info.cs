@@ -53,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("RecoverInHelper.go", "RecoverInHelper.cs", "AAYSgoKUlJSClJSClKbA2MKAkqKAksTYsoCS6NKCtKTSggAKEsKCgoKUtKTSggAKENCgpNCgpLKCguaCgrKSxKqygJKigsTY4oCSooCSxNjSgpI=", "33-33:1;34-37:2;35-35:2.1;43-43:1;97-100:1;107-107:1;108-111:2;117-117:1;118-121:2;119-119:2.1", "", "", "131:21,206:29", "42:21,43:13,48:29,49:21,66:21,67:13,200:21,201:13,225:21,226:13,231:29,232:21")]
+[assembly: GoPositionMap("RecoverInHelper.go", "RecoverInHelper.cs", "AAcSgoKUlJSClJSClKbA2MKAkqKAksTYsoCS6NKCtKTSggAKEsKCgoKUtKTSggAMENCgpNCgxLKCguaCgrKSxKqygJKigsTY4oCSooCSxNjSgpI=", "33-33:1;34-37:2;35-35:2.1;43-43:1;97-100:1;107-107:1;108-111:2;117-117:1;118-121:2;119-119:2.1", "", "", "132:21,211:29", "43:21,44:13,49:29,50:21,67:21,68:13,205:21,206:13,230:21,231:13,236:29,237:21")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -83,3 +83,13 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.guard)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛguard;
+// </MethodHolders>

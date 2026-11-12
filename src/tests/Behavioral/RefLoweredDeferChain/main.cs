@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -9,6 +10,8 @@ partial struct root {
     internal channel<nint> done;
 }
 
+} partial class mainᴛroot {
+
 internal static void release(this ref root r) {
     r.fd = -r.fd;
 
@@ -16,6 +19,8 @@ internal static void release(this ref root r) {
         r.done.ᐸꟷ(r.fd);
     }
 }
+
+} partial class main_package {
 
 partial struct Root {
     internal ж<root> root;

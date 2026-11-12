@@ -45,7 +45,7 @@ using static go.main_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("main.cs", 154, 5, 2)]
+[assembly: GoBoundedGoroutine("main.cs", 167, 5, 2)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,7 +55,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABAkgoKoggAHEoKCAAcUgoKsooKCkoKiqqKCgpKCxKqigoKCkoKkgoK0tLaCggADEKKCgoKSgoKSgqKsooKCgoKCoqiigoKCgpKCgoKSgoKCtLS2goK+ooKSgMSmooKCgMSqooKCtKSCgoKCgoKCgoI=", "163-163:1;171-171:1", "", "", "52:21,69:25,86:19,115:21,119:21,133:21,149:15,154:15,210:25", "182:25,183:17,196:25,197:17")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABMkgoKoggALEoKCAAsUgoLMooKCkoKiqqKCgpKCxKqigoKCkoKkgoK0tLaCggADEKKCgoKSgoKSgqKsooKCgoKCoqiigoKCgpKCgoKSgoKCtLS2goK+ooKSgMSmooKCgMSqooKCtKSCgoKCgoKCgoI=", "163-163:1;171-171:1", "", "", "65:21,82:25,99:19,128:21,132:21,146:21,162:15,167:15,223:25", "195:25,196:17,209:25,210:17")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -89,3 +89,15 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.asyncConn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛasyncConn;
+[GoMethodHost(typeof(main_package.conn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛconn;
+[GoMethodHost(typeof(main_package.valueConn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛvalueConn;
+// </MethodHolders>

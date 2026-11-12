@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,13 +9,21 @@ partial struct AErr {
     internal nint n;
 }
 
+} partial class mainᴛAErr {
+
 public static @string Error(this ref AErr e) { return "a"; }
+
+} partial class main_package {
 
 partial struct BErr {
     internal nint n;
 }
 
+} partial class mainᴛBErr {
+
 public static @string Error(this ref BErr e) { return "b"; }
+
+} partial class main_package {
 
 internal partial struct main_type /*dyn*/ {
     internal nint r;

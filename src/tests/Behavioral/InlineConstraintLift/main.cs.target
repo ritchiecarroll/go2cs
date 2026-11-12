@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,15 +9,23 @@ partial struct namer {
     internal @string s;
 }
 
+} partial class mainᴛnamer {
+
 internal static @string Name(this namer n) { return n.s; }
+
+} partial class main_package {
 
 partial struct tagged {
     internal @string s;
     internal nint tag;
 }
 
+} partial class mainᴛtagged {
+
 internal static @string Name(this tagged t) { return t.s; }
 internal static nint Tag(this tagged t) { return t.tag; }
+
+} partial class main_package {
 
 public partial interface Show_T /*dyn*/ {
     @string Name();
@@ -51,6 +60,8 @@ partial struct Box<T>
     internal slice<T> items;
 }
 
+} partial class mainᴛBox {
+
 public static void Add<T>(this ref Box<T> b, T t)
     where T : Box_T
 { b.items = append(b.items, t); }
@@ -65,6 +76,8 @@ public static @string Names<T>(this ref Box<T> b)
     return @out;
 }
 
+} partial class main_package {
+
 partial interface pair_T /*dyn*/ {
     @string Name();
 }
@@ -75,9 +88,13 @@ partial struct pair<T>
     internal T a, b;
 }
 
+} partial class mainᴛpair {
+
 internal static @string joined<T>(this pair<T> p)
     where T : pair_T
 { return p.a.Name() + "+"u8 + p.b.Name(); }
+
+} partial class main_package {
 
 partial interface nameI {
     @string Name();
@@ -89,9 +106,13 @@ partial struct slot<T>
     internal T v;
 }
 
+} partial class mainᴛslot {
+
 internal static @string get<T>(this slot<T> s)
     where T : nameI
 { return s.v.Name(); }
+
+} partial class main_package {
 
 public partial interface Both_C /*dyn*/ {
     nint Tag();

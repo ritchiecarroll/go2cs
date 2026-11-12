@@ -2,17 +2,21 @@ global using Alias = go.SameNameImportAlias.a.foo_package.Inner;
 
 namespace go.SameNameImportAlias.a;
 
+using static foo_package;
+
 partial class foo_package {
 
 partial struct Inner {
     public nint N;
 }
 
-partial struct ΔKind /*num:nint*/;
+partial struct Kind /*num:nint*/;
 
 partial struct S {
 }
 
-public static ΔKind Kind(this S _) { return 1; }
+} partial class fooᴛS {
 
-} // end foo_package
+public static Kind Kind(this S _) { return 1; }
+
+} // end fooᴛS

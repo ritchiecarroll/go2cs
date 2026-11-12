@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -17,6 +18,8 @@ partial struct src {
     internal nint pos;
 }
 
+} partial class mainᴛsrc {
+
 internal static @string Pull(this ref src s) {
     if (s.pos >= len(s.items)) {
         return "";
@@ -26,22 +29,32 @@ internal static @string Pull(this ref src s) {
     return item;
 }
 
+} partial class main_package {
+
 partial struct dst {
     internal slice<@string> log;
 }
 
+} partial class mainᴛdst {
+
 internal static void Push(this ref dst d, @string s) {
     d.log = append(d.log, s);
 }
+
+} partial class main_package {
 
 partial struct duplex {
     /*embed*/ internal source source;
     /*embed*/ internal sink sink;
 }
 
+} partial class mainᴛduplex {
+
 internal static @string Status(this ref duplex d) {
     return "ok";
 }
+
+} partial class main_package {
 
 partial interface conn {
     @string Pull();

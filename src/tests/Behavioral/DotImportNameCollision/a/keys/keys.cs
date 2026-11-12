@@ -1,5 +1,7 @@
 namespace go.DotImportNameCollision.a;
 
+using static keys_package;
+
 partial class keys_package {
 
 partial struct Key {
@@ -8,7 +10,11 @@ partial struct Key {
 
 public static ж<Key> NewKey(@string name) { return Ꮡ(new Key(name: name)); }
 
+} partial class keysᴛKey {
+
 public static @string Name(this ref Key k) { return k.name; }
+
+} partial class keys_package {
 
 partial struct Count /*num:nint*/;
 

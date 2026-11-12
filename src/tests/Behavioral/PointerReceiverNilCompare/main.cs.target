@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,15 +9,21 @@ partial struct box {
     internal nint val;
 }
 
+} partial class mainᴛbox {
+
 internal static bool isNil(this ж<box> Ꮡb) { return Ꮡb == nil; }
 internal static bool notNil(this ж<box> Ꮡb) { return Ꮡb != nil; }
 
 internal static bool same(this ж<box> Ꮡb, ж<box> other) { return Ꮡb == other; }
 
+} partial class main_package {
+
 partial struct embedder {
     /*embed*/ internal box box;
     internal nint tag;
 }
+
+} partial class mainᴛembedder {
 
 internal static bool isNil(this ж<embedder> Ꮡe) { return Ꮡe == nil; }
 
@@ -29,6 +36,8 @@ internal static @string checkGuard(this ж<embedder> Ꮡe) {
     return fmt.Sprintf("val=%d tag=%d"u8, e.val, e.tag);
 }
 
+} partial class mainᴛbox {
+
 internal static @string describe(this ж<box> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -37,6 +46,8 @@ internal static @string describe(this ж<box> Ꮡb) {
     }
     return fmt.Sprintf("box(%d)"u8, b.val);
 }
+
+} partial class main_package {
 
 internal static void main() {
     var b = Ꮡ(new box());

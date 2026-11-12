@@ -2,6 +2,7 @@ namespace go;
 
 using errors = errors_package;
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -16,11 +17,19 @@ partial struct Square {
     internal nint side;
 }
 
+} partial class mainᴛSquare {
+
 public static nint Area(this Square s) { return s.side * s.side; }
+
+} partial class main_package {
 
 partial struct Label /*@string*/;
 
+} partial class mainᴛLabel {
+
 public static @string Name(this Label l) { return (@string)l; }
+
+} partial class main_package {
 
 internal static UntypedInt limit => 5;
 

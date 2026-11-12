@@ -105,7 +105,7 @@ internal static void pastDeadline() {
         var cleanupʗ1 = cleanup;
         defer(cleanupʗ1, ref ᒐ);
 
-        client.SetReadDeadline(time.Now().Add(-time.ΔSecond));
+        client.SetReadDeadline(time.Now().Add(-time.Second));
         var buf = new slice<byte>(16);
         var start = time.Now();
         var (_, err) = client.Read(buf);
@@ -167,13 +167,13 @@ internal static partial void modeIndependence() {
             }
         });
 
-        client.SetReadDeadline(time.Now().Add(-time.ΔSecond));
+        client.SetReadDeadline(time.Now().Add(-time.Second));
         var buf = new slice<byte>(16);
         var (_, readErr) = client.Read(buf);
         var (_, writeErr) = client.Write(slice<byte>("still writable"u8));
         fmt.Printf("modes: readExpired=%v writeModeIndependent=%v\n"u8, isTimeout(readErr), writeErr == nil);
 
-        client.SetDeadline(time.Now().Add(-time.ΔSecond));
+        client.SetDeadline(time.Now().Add(-time.Second));
         var (_, readErr2) = client.Read(buf);
         var (_, writeErr2) = client.Write(slice<byte>("now neither"u8));
         fmt.Printf("modes: combinedModeBoth=%v\n"u8, isTimeout(readErr2) && isTimeout(writeErr2));
@@ -193,7 +193,7 @@ internal static void closeBeatsTimeout() {
         var cleanupʗ1 = cleanup;
         defer(cleanupʗ1, ref ᒐ);
 
-        client.SetReadDeadline(time.Now().Add(-time.ΔSecond));
+        client.SetReadDeadline(time.Now().Add(-time.Second));
         var buf = new slice<byte>(16);
         client.Read(buf);
         client.Close();
@@ -221,11 +221,11 @@ internal static partial void deadlineVersusData() {
 
         server.Write(slice<byte>("ready"u8));
         time.Sleep(200 * time.Millisecond);
-        client.SetReadDeadline(time.Now().Add(-time.ΔSecond));
+        client.SetReadDeadline(time.Now().Add(-time.Second));
         var (n, err) = client.Read(buf);
         fmt.Printf("race: expiredBeatsBufferedData=%v noBytes=%v\n"u8, isTimeout(err), n == 0);
 
-        client.SetReadDeadline(time.Now().Add(2 * time.ΔSecond));
+        client.SetReadDeadline(time.Now().Add(2 * time.Second));
         var (n2, err2) = client.Read(buf);
         fmt.Printf("race: dataInsideDeadline=%v bytes=%v\n"u8, err2 == nil, n2 == 5);
 

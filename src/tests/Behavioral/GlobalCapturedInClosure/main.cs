@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,10 +9,14 @@ partial struct heap {
     internal nint count;
 }
 
+} partial class mainᴛheap {
+
 internal static nint alloc(this ref heap h) {
     h.count++;
     return h.count;
 }
+
+} partial class main_package {
 
 internal static readonly ж<heap> Ꮡmheap = new StaticBox<heap>(default(heap));
 internal static ref heap mheap => ref ((StaticBox<heap>)Ꮡmheap).ValueSlot;

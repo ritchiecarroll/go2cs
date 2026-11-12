@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using atomic = sync.atomic_package;
 using sync;
+using static main_package;
 
 partial class main_package {
 
@@ -16,9 +17,13 @@ partial struct ctr {
     internal int32 n;
 }
 
+} partial class mainᴛctr {
+
 internal static void inc(this ref ctr c) {
     c.n++;
 }
+
+} partial class main_package {
 
 partial struct wrap {
     internal ctr c;

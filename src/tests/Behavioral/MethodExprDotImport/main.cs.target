@@ -8,8 +8,8 @@ partial class main_package {
 
 internal static void main() {
     var readers = slice<Func<ж<mep.Reader>, byte, (@string, error)>>([
-        ((Func<ж<mep.Reader>, byte, (@string, error)>)(mep.Read)),
-        ((Func<ж<mep.Reader>, byte, (@string, error)>)(mep.Peek))
+        ((Func<ж<mep.Reader>, byte, (@string, error)>)(global::go.MethodExprDotImport.mepᴛReader.Read)),
+        ((Func<ж<mep.Reader>, byte, (@string, error)>)(global::go.MethodExprDotImport.mepᴛReader.Peek))
     ]);
 
     var r = Ꮡ(new Reader(Name: "go2cs"));

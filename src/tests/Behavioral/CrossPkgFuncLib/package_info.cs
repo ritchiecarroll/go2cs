@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using CrossPkgLibꓸStatus = go.CrossPkgLib_package.ΔStatus;
 // </ImportedTypeAliases>
 
 using go;

@@ -1,7 +1,10 @@
 namespace go;
 
 using fmt = fmt_package;
-using System.Runtime.InteropServices;
+using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
+using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
+using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
+using static main_package;
 
 partial class main_package {
 
@@ -9,13 +12,19 @@ partial struct aNode {
     internal nint k;
 }
 
+} partial class mainᴛaNode {
+
 internal static ж<aNode> Root(this ж<aNode> Ꮡn) { return Ꮡn; }
 internal static ж<aNode> Self(this ж<aNode> Ꮡn) { return Ꮡn; }
+
+} partial class main_package {
 
 partial struct aDefault {
     /*embed*/ internal aNode aNode;
     internal nint hits;
 }
+
+} partial class mainᴛaDefault {
 
 internal static ж<aNode> Self(this ж<aDefault> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
@@ -23,6 +32,8 @@ internal static ж<aNode> Self(this ж<aDefault> Ꮡd) {
     d.hits++;
     return Ꮡd.ᏑaNode;
 }
+
+} partial class main_package {
 
 partial struct aBase {
     /*embed*/ internal aDefault aDefault;
@@ -32,7 +43,11 @@ partial struct aSide {
     internal nint f;
 }
 
+} partial class mainᴛaSide {
+
 internal static nint Flag(this ref aSide s) { return s.f; }
+
+} partial class main_package {
 
 partial struct aStmt {
     /*embed*/ internal aBase aBase;
@@ -51,7 +66,11 @@ partial interface selfer {
 partial struct bDeep {
 }
 
+} partial class mainᴛbDeep {
+
 internal static @string Name(this ref bDeep d) { return "deep"; }
+
+} partial class main_package {
 
 partial struct bMid {
     /*embed*/ internal bDeep bDeep;
@@ -60,7 +79,11 @@ partial struct bMid {
 partial struct bFlat {
 }
 
+} partial class mainᴛbFlat {
+
 internal static @string Name(this ref bFlat f) { return "flat"; }
+
+} partial class main_package {
 
 partial struct bBoth {
     /*embed*/ internal bMid bMid;
@@ -88,12 +111,20 @@ partial struct bFlow {
     internal nint n;
 }
 
+} partial class mainᴛbFlow {
+
 internal static ж<bFlow> Data(this ж<bFlow> Ꮡf) { return Ꮡf; }
+
+} partial class main_package {
 
 partial struct bNode {
 }
 
+} partial class mainᴛbNode {
+
 internal static ж<bFlow> Data(this ref bNode n) { return default; }
+
+} partial class main_package {
 
 partial struct bNodeBase {
     /*embed*/ internal bNode bNode;
@@ -116,16 +147,24 @@ partial struct cNode {
     internal nint k;
 }
 
+} partial class mainᴛcNode {
+
 internal static nint Visit(this ref cNode n) { return n.k; }
+
+} partial class main_package {
 
 partial struct cDefault {
     /*embed*/ internal cNode cNode;
 }
 
+} partial class mainᴛcDefault {
+
 internal static nint Visit(this ж<cDefault> Ꮡd) {
     var p = Ꮡd.ᏑcNode;
     return p.k + 100;
 }
+
+} partial class main_package {
 
 partial struct cBase {
     /*embed*/ internal cDefault cDefault;
@@ -142,12 +181,20 @@ partial interface visitor {
 partial struct dLeft {
 }
 
+} partial class mainᴛdLeft {
+
 internal static @string Tag(this ref dLeft l) { return "left"; }
+
+} partial class main_package {
 
 partial struct dRight {
 }
 
+} partial class mainᴛdRight {
+
 internal static @string Tag(this ref dRight r) { return "right"; }
+
+} partial class main_package {
 
 partial struct dPair {
     /*embed*/ internal dLeft dLeft;
@@ -157,7 +204,11 @@ partial struct dPair {
 partial struct dTop {
 }
 
+} partial class mainᴛdTop {
+
 internal static @string Tag(this ref dTop t) { return "top"; }
+
+} partial class main_package {
 
 partial struct dAll {
     /*embed*/ internal dPair dPair;
@@ -175,7 +226,11 @@ partial interface tagger {
 partial struct eFar {
 }
 
+} partial class mainᴛeFar {
+
 internal static nint Pick(this ref eFar f, nint n) { return n; }
+
+} partial class main_package {
 
 partial struct eVia {
     /*embed*/ internal eFar eFar;
@@ -184,7 +239,11 @@ partial struct eVia {
 partial struct eNear {
 }
 
+} partial class mainᴛeNear {
+
 internal static @string Pick(this ref eNear n) { return "near"; }
+
+} partial class main_package {
 
 partial struct eFork {
     /*embed*/ internal eVia eVia;
@@ -202,12 +261,20 @@ partial interface picker {
 partial struct fOne {
 }
 
+} partial class mainᴛfOne {
+
 internal static @string Tie(this ref fOne o) { return "one"; }
+
+} partial class main_package {
 
 partial struct fTwo {
 }
 
+} partial class mainᴛfTwo {
+
 internal static @string Tie(this ref fTwo t) { return "two"; }
+
+} partial class main_package {
 
 partial struct fBoth {
     /*embed*/ internal fOne fOne;
@@ -217,7 +284,11 @@ partial struct fBoth {
 partial struct fDeep {
 }
 
+} partial class mainᴛfDeep {
+
 internal static @string Tie(this ref fDeep d) { return "deep"; }
+
+} partial class main_package {
 
 partial struct fWrap {
     /*embed*/ internal fDeep fDeep;
@@ -255,15 +326,21 @@ public partial struct gNode {
     internal gData data;
 }
 
+} partial class mainᴛgNode {
+
 public static ж<gNode> AsNode(this ж<gNode> Ꮡn) { return Ꮡn; }
 public static ж<gNode> VisitEachChild(this ref gNode n, ж<gVisitor> v) { return n.data.VisitEachChild(v); }
 public static ж<gFlowBase> FlowNodeData(this ref gNode n) { return n.data.FlowNodeData(); }
 public static nint Modifiers(this ref gNode n) { return n.data.Modifiers(); }
 internal static gFacts propagateSubtreeFacts(this ref gNode n) { return n.data.propagateSubtreeFacts(); }
 
+} partial class main_package {
+
 partial struct gDefault {
     /*embed*/ internal gNode gNode;
 }
+
+} partial class mainᴛgDefault {
 
 internal static ж<gNode> AsNode(this ж<gDefault> Ꮡnode) { return Ꮡnode.ᏑgNode; }
 internal static ж<gNode> VisitEachChild(this ж<gDefault> Ꮡnode, ж<gVisitor> Ꮡv) {
@@ -283,6 +360,8 @@ internal static gFacts propagateSubtreeFacts(this ref gDefault node) {
     return node.data.subtreeFactsWorker(node.data) + 100;
 }
 
+} partial class main_package {
+
 partial struct gBase {
     /*embed*/ internal gDefault gDefault;
 }
@@ -291,7 +370,11 @@ public partial struct gFlowBase {
     internal nint flow;
 }
 
+} partial class mainᴛgFlowBase {
+
 public static ж<gFlowBase> FlowNodeData(this ж<gFlowBase> Ꮡnode) { return Ꮡnode; }
+
+} partial class main_package {
 
 partial struct gStmtBase {
     /*embed*/ internal gBase gBase;
@@ -301,8 +384,12 @@ partial struct gStmtBase {
 partial struct gTypeSyntax {
 }
 
+} partial class mainᴛgTypeSyntax {
+
 internal static gFacts computeSubtreeFacts(this ref gTypeSyntax node) { return 2; }
 internal static gFacts propagateSubtreeFacts(this ref gTypeSyntax node) { return 3; }
+
+} partial class main_package {
 
 partial struct gTypeBase {
     /*embed*/ internal gTypeSyntax gTypeSyntax;
@@ -313,8 +400,12 @@ partial struct gModsBase {
     internal nint mods;
 }
 
+} partial class mainᴛgModsBase {
+
 internal static nint Modifiers(this ref gModsBase node) { return node.mods; }
 internal static void setModifiers(this ref gModsBase node, nint m) { node.mods = m; }
+
+} partial class main_package {
 
 partial struct gIf {
     /*embed*/ internal gStmtBase gStmtBase;
@@ -331,7 +422,11 @@ partial struct gUnion {
     internal nint n;
 }
 
+} partial class mainᴛgUnion {
+
 internal static gFacts computeSubtreeFacts(this ref gUnion node) { return 7; }
+
+} partial class main_package {
 
 partial struct gTypeArgsBase {
     /*embed*/ internal gTypeBase gTypeBase;

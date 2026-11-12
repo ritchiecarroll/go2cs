@@ -1,12 +1,15 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct T {
     internal nint n;
 }
+
+} partial class mainᴛT {
 
 public static @string Hello(this T _) { return "hello"; }
 
@@ -19,10 +22,14 @@ internal static @string set(this ref T t, nint v) {
     return "set";
 }
 
+} partial class main_package {
+
 internal static @string mark(@string s) {
     fmt.Println("  evaluated:", s);
     return s;
 }
+
+} partial class mainᴛT {
 
 public static @string Via(this ж<T> Ꮡt) { return "via "u8 + Ꮡt.Hello(); }
 
@@ -35,6 +42,8 @@ public static @string ViaWrite(this ж<T> Ꮡt) {
 }
 
 public static nint ViaN(this ж<T> Ꮡt) { return Ꮡt.N(); }
+
+} partial class main_package {
 
 internal static void @try(@string name, Func<@string> f) {
     GoFrame ᒐ = default;

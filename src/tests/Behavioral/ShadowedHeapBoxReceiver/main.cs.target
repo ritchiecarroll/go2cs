@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,8 +9,12 @@ partial struct Builder {
     internal nint n;
 }
 
+} partial class mainᴛBuilder {
+
 public static void With(this ж<Builder> Ꮡb, Action<ж<Builder>> f) { f(Ꮡb); }
 public static nint Sum(this ref Builder b) { return b.n; }
+
+} partial class main_package {
 
 internal static nint compute() {
     nint inner() {

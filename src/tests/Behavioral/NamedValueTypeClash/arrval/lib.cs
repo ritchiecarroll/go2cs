@@ -1,8 +1,12 @@
 namespace go.NamedValueTypeClash;
 
+using static arrval_package;
+
 partial class arrval_package {
 
 partial struct Value /*[3]nint*/;
+
+} partial class arrvalᴛValue {
 
 public static nint First(this Value v) {
     v = v.Clone();
@@ -29,4 +33,4 @@ public static nint /*s*/ Sum(this ref Value v) {
 
 public static slice<nint> Head(this ref Value v) { return v.Value‿[..2]; }
 
-} // end arrval_package
+} // end arrvalᴛValue

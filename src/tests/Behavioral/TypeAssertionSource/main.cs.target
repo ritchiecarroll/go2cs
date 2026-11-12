@@ -7,6 +7,7 @@ using strings = strings_package;
 using mid = TypeAssertionSource.mid_package;
 using TypeAssertionSource;
 using lib = TypeAssertionSource.lib_package;
+using static main_package;
 
 partial class main_package {
 
@@ -22,12 +23,21 @@ partial struct b {
 partial struct pipe {
 }
 
+} partial class mainᴛpipe {
+
 internal static (nint, error) Read(this ref pipe _, slice<byte> p) { return (0, Δio.EOF); }
 internal static (nint, error) Write(this ref pipe _, slice<byte> p) { return (len(p), default); }
 internal static error Close(this ref pipe _) { return default; }
 
+} partial class mainᴛa {
+
 internal static @string name(this ref a _) { return "a"; }
+
+} partial class mainᴛb {
+
 internal static @string name(this ref b _) { return "b"; }
+
+} partial class main_package {
 
 internal static void @catch(@string what, Action f) {
     GoFrame ᒐ = default;

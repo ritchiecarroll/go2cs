@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using dbg = global::go.go.anonifacedbg_package;
 using anonifacedbg = global::go.go.anonifacedbg_package;
+using static main_package;
 
 partial class main_package {
 
@@ -10,13 +11,21 @@ partial struct node {
     internal @string k;
 }
 
+} partial class mainᴛnode {
+
 internal static @string KindString(this ref node n) { return n.k; }
 
+} partial class main_package {
+
 partial struct leaf /*@string*/;
+
+} partial class mainᴛleaf {
 
 internal static @string KindString(this leaf l) { return "leaf:"u8 + ((@string)l); }
 internal static @string Name(this leaf l) { return (@string)l; }
 internal static dbg.Kind Kind(this leaf l) { return 7; }
+
+} partial class main_package {
 
 partial interface kinder {
     @string KindString();

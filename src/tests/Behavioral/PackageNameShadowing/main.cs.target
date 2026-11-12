@@ -15,11 +15,11 @@ internal static @string describe(Δtime.Time timeΔ1) {
 }
 
 internal static @string qualifiedDurations() {
-    return fmt.Sprint(Δtime.ΔNanosecond, " ", Δtime.ΔSecond, " ", Δtime.ΔMinute, " ", Δtime.ΔHour);
+    return fmt.Sprint(Δtime.Nanosecond, " ", Δtime.Second, " ", Δtime.Minute, " ", Δtime.Hour);
 }
 
 internal static @string qualifiedLocations() {
-    return fmt.Sprint(Δtime.ΔUTC.OrTypedNil(), " ", Δtime.ΔLocal != nil);
+    return fmt.Sprint(Δtime.UTC.OrTypedNil(), " ", Δtime.Local != nil);
 }
 
 internal static (Δtime.Duration, float64, nint) foldedConstant() {
@@ -28,7 +28,7 @@ internal static (Δtime.Duration, float64, nint) foldedConstant() {
 }
 
 internal static void main() {
-    var stamp = Δtime.Date(2009, Δtime.February, 4, 21, 0, 57, 12345600, Δtime.ΔUTC);
+    var stamp = Δtime.Date(2009, Δtime.February, 4, 21, 0, 57, 12345600, Δtime.UTC);
 
     fmt.Println("1:", describe(stamp));
 

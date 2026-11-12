@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using ꓸꓸꓸnint = Span<nint>;
 using ꓸꓸꓸstring = Span<@string>;
+using static main_package;
 
 partial class main_package {
 
@@ -24,6 +25,8 @@ partial struct counter {
     internal nint n;
 }
 
+} partial class mainᴛcounter {
+
 internal static void bump(this ref counter c, params ꓸꓸꓸnint deltasʗp) {
     var deltas = deltasʗp.sslice();
 
@@ -35,6 +38,8 @@ internal static void bump(this ref counter c, params ꓸꓸꓸnint deltasʗp) {
         c.n += d;
     }
 }
+
+} partial class main_package {
 
 internal static ж<counter> run() {
     GoFrame ᒐ = default;

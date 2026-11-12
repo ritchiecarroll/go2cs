@@ -1,12 +1,15 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct iter {
     internal nint i, n;
 }
+
+} partial class mainᴛiter {
 
 internal static void start(this ref iter it, nint n) {
     it.i = 0;
@@ -15,6 +18,8 @@ internal static void start(this ref iter it, nint n) {
 
 internal static bool valid(this ref iter it) { return it.i < it.n; }
 internal static void next(this ref iter it) { it.i++; }
+
+} partial class main_package {
 
 internal static void main() {
     iter u = default;

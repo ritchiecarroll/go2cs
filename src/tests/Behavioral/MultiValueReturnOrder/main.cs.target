@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,10 +9,14 @@ partial struct oid {
     internal slice<byte> der;
 }
 
+} partial class mainᴛoid {
+
 internal static error fill(this ref oid o, @string text) {
     o.der = slice<byte>(text);
     return default;
 }
+
+} partial class main_package {
 
 internal static (oid, error) parseOID(@string text) {
     oid o = default;
@@ -23,10 +28,14 @@ partial struct counter {
     internal nint n;
 }
 
+} partial class mainᴛcounter {
+
 internal static nint bump(this ref counter c) {
     c.n++;
     return c.n;
 }
+
+} partial class main_package {
 
 internal static (nint, nint) readThenBump() {
     counter c = default;
@@ -79,18 +88,26 @@ internal static (nint, nint) valueReceiverCall() {
     return (c.n, c.peek());
 }
 
+} partial class mainᴛcounter {
+
 internal static nint peek(this counter c) {
     c.n = 99;
     return c.n;
 }
 
+} partial class main_package {
+
 partial struct thing {
     internal @string name;
 }
 
+} partial class mainᴛthing {
+
 internal static @string String(this ref thing t) {
     return "thing("u8 + t.name + ")"u8;
 }
+
+} partial class main_package {
 
 internal static (ж<thing>, error) newThing(@string name) {
     return (Ꮡ(new thing(name: name)), default);

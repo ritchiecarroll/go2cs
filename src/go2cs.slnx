@@ -759,6 +759,13 @@
     <Project Path="tests/Behavioral/MethodExprDotImport/MethodExprDotImport.csproj" />
     <Project Path="tests/Behavioral/MethodExprDotImport/mep/MethodExprDotImport.mep.csproj" />
     <Project Path="tests/Behavioral/MethodExpression/MethodExpression.csproj" />
+    <Project Path="tests/Behavioral/MethodHolderAlias/MethodHolderAlias.csproj" />
+    <Project Path="tests/Behavioral/MethodHolderAlias/geom/MethodHolderAlias.geom.csproj" />
+    <Project Path="tests/Behavioral/MethodHolderAlias/geom/part/MethodHolderAlias.geom.part.csproj" />
+    <Project Path="tests/Behavioral/MethodHolderAlias/html/plate/MethodHolderAlias.html.plate.csproj" />
+    <Project Path="tests/Behavioral/MethodHolderAlias/text/plate/MethodHolderAlias.text.plate.csproj" />
+    <Project Path="tests/Behavioral/MethodHolderAlias/tone/MethodHolderAlias.tone.csproj" />
+    <Project Path="tests/Behavioral/MethodHolderNames/MethodHolderNames.csproj" />
     <Project Path="tests/Behavioral/MethodSelector/MethodSelector.csproj" />
     <Project Path="tests/Behavioral/MethodValueFmRecord/MethodValueFmRecord.csproj" />
     <Project Path="tests/Behavioral/MethodValueFuncNames/MethodValueFuncNames.csproj" />

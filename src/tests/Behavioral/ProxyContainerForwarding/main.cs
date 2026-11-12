@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using iter = iter_package;
+using static main_package;
 
 partial class main_package {
 
@@ -15,9 +16,13 @@ partial struct Leaf {
     internal slice<Leaf> kids;
 }
 
+} partial class mainᴛLeaf {
+
 public static slice<Leaf> Children(this Leaf l) { return l.kids; }
 
 public static @string Label(this Leaf l) { return l.name; }
+
+} partial class main_package {
 
 public static nint Count<N>(N n)
     where N : Tree<N>
@@ -65,6 +70,8 @@ partial struct Node {
     internal ж<Node> next;
 }
 
+} partial class mainᴛNode {
+
 public static Func<ж<Node>> Next(this ж<Node> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
@@ -88,6 +95,8 @@ public static iter.Seq<ж<Node>> Path(this ж<Node> Ꮡn) {
 }
 
 public static @string Label(this ref Node n) { return n.name; }
+
+} partial class main_package {
 
 public static slice<@string> Walk<N>(N n)
     where N : Stepper<N>

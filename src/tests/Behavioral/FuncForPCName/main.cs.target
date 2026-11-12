@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using runtime = runtime_package;
+using static main_package;
 
 partial class main_package {
 
@@ -13,7 +14,11 @@ internal static @string passString(@string s) { return s; }
 partial struct receiver {
 }
 
+} partial class mainᴛreceiver {
+
 internal static void method(this receiver _) { }
+
+} partial class main_package {
 
 internal static @string nameOf(any fn) {
     var p = reflect.ValueOf(fn).Pointer();
@@ -32,7 +37,7 @@ internal static void main() {
     fmt.Println("func:  ", nameOf(passInt));
     fmt.Println("func:  ", nameOf(passString));
 
-    fmt.Println("method:", nameOf(((Action<receiver>)(method))));
+    fmt.Println("method:", nameOf(((Action<receiver>)(mainᴛreceiver.method))));
 
     var literal = () => {
     };

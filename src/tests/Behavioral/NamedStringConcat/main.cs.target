@@ -1,12 +1,17 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct version /*@string*/;
 
+} partial class mainᴛversion {
+
 internal static @string tag(this version v) { return ((@string)v) + "!"u8; }
+
+} partial class main_package {
 
 internal static version bump(version v) { return v + "-next"u8; }
 

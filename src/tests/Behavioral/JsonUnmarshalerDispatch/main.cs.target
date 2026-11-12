@@ -4,10 +4,13 @@ using json = encoding.json_package;
 using fmt = fmt_package;
 using time = time_package;
 using encoding;
+using static main_package;
 
 partial class main_package {
 
 partial struct Celsius /*num:float64*/;
+
+} partial class mainᴛCelsius {
 
 public static error UnmarshalJSON(this ref Celsius c, slice<byte> data) {
     ref var f = ref heap(new float64(), out var Ꮡf);
@@ -17,6 +20,8 @@ public static error UnmarshalJSON(this ref Celsius c, slice<byte> data) {
     c = ((Celsius)f) + 100D;
     return default;
 }
+
+} partial class main_package {
 
 internal partial struct main_s /*dyn*/ {
     public time.Time T;

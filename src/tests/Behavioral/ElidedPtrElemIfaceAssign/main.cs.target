@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -15,6 +16,8 @@ partial interface Describer {
 
 partial struct Reg /*map[@string, ж<Item>]*/;
 
+} partial class mainᴛReg {
+
 public static @string Describe(this Reg r) {
     @string @out = "";
     foreach (var (_, k) in range(slice<@string>(["a", "b"]))) {
@@ -25,7 +28,11 @@ public static @string Describe(this Reg r) {
     return @out;
 }
 
+} partial class main_package {
+
 partial struct Bag /*map[@string, Describer]*/;
+
+} partial class mainᴛBag {
 
 public static @string Describe(this Bag b) {
     @string @out = "";
@@ -37,7 +44,11 @@ public static @string Describe(this Bag b) {
     return @out;
 }
 
+} partial class main_package {
+
 partial struct List /*[]ж<Item>*/;
+
+} partial class mainᴛList {
 
 public static @string Describe(this List l) {
     @string @out = "";
@@ -46,6 +57,8 @@ public static @string Describe(this List l) {
     }
     return @out;
 }
+
+} partial class main_package {
 
 internal static @string take(Describer d) { return d.Describe(); }
 

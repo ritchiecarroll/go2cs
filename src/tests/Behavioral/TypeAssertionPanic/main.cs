@@ -3,6 +3,7 @@ namespace go;
 using errors = errors_package;
 using fmt = fmt_package;
 using runtime = runtime_package;
+using static main_package;
 
 partial class main_package {
 
@@ -11,7 +12,11 @@ partial struct celsius /*num:float64*/;
 partial struct myErr {
 }
 
+} partial class mainᴛmyErr {
+
 internal static @string Error(this ref myErr _) { return "myErr"; }
+
+} partial class main_package {
 
 partial interface shape {
     float64 area();
@@ -22,14 +27,22 @@ partial struct square {
     internal float64 side;
 }
 
+} partial class mainᴛsquare {
+
 internal static float64 perimeter(this square s) { return 4D * s.side; }
+
+} partial class main_package {
 
 partial struct circle {
     internal float64 r;
 }
 
+} partial class mainᴛcircle {
+
 internal static float64 area(this ref circle c) { return 3D * c.r * c.r; }
 internal static float64 perimeter(this ref circle c) { return 6D * c.r; }
+
+} partial class main_package {
 
 partial struct point {
     internal nint x, y;
@@ -40,7 +53,7 @@ internal static void @catch(@string what, Action f) {
     try {
         defer(() => {
             var r = recover(); if (r != nil) {
-                var (_, isRuntimeError) = r._<runtimeꓸError>(ᐧ);
+                var (_, isRuntimeError) = r._<runtime.Error>(ᐧ);
                 var (_, isError) = r._<error>(ᐧ);
                 fmt.Printf("%s: %T runtime.Error: %v error: %v: %v\n"u8, what, r, isRuntimeError, isError, r);
             } else {
@@ -84,11 +97,11 @@ internal static void main() {
 
     var boxedʗ4 = boxed;
     @catch("int-to-runtime.Error", () => {
-        _ = boxedʗ4._<runtimeꓸError>();
+        _ = boxedʗ4._<runtime.Error>();
     });
     var nothingʗ2 = nothing;
     @catch("nil-to-runtime.Error", () => {
-        _ = nothingʗ2._<runtimeꓸError>();
+        _ = nothingʗ2._<runtime.Error>();
     });
     any sq = new square(2D);
     var sqʗ1 = sq;

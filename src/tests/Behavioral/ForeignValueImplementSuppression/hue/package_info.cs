@@ -27,7 +27,6 @@ using static go.ForeignValueImplementSuppression.hue_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Shade", "ΔShade")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -39,9 +38,9 @@ using static go.ForeignValueImplementSuppression.hue_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<Gray, Tint>(Pointer = true)]
 [assembly: GoImplement<Gray, Tint>]
+[assembly: GoImplement<Shade, Tint>(Pointer = true)]
+[assembly: GoImplement<Shade, Tint>]
 [assembly: GoImplement<Tinter, Tint>]
-[assembly: GoImplement<ΔShade, Tint>(Pointer = true)]
-[assembly: GoImplement<ΔShade, Tint>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -55,7 +54,7 @@ using static go.ForeignValueImplementSuppression.hue_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAwsggAGEIKCAAQSmIKCmg==")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "ABAsggAKEIKCAAgSuIKCmg==")]
 // </GoSourcePositionMaps>
 
 namespace go.ForeignValueImplementSuppression;
@@ -72,7 +71,7 @@ public static partial class hue_package
     // <TypeAccessibility>
     public partial interface Tint {}
     public partial struct Gray {}
-    public partial struct ΔShade {}
+    public partial struct Shade {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -84,3 +83,15 @@ public static partial class hue_package
     // <ImportInitializers>
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(hue_package.Gray)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hueᴛGray;
+[GoMethodHost(typeof(hue_package.Shade)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hueᴛShade;
+[GoMethodHost(typeof(hue_package.Tinter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hueᴛTinter;
+// </MethodHolders>

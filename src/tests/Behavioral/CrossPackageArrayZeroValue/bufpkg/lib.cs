@@ -1,5 +1,7 @@
 namespace go.CrossPackageArrayZeroValue;
 
+using static bufpkg_package;
+
 partial class bufpkg_package {
 
 partial struct State {
@@ -13,12 +15,16 @@ partial struct Nested {
     public @string Label;
 }
 
+} partial class bufpkgᴛState {
+
 public static void Fill(this ref State s) {
     foreach (var i in range(len(s.Buf))) {
         s.Buf[i] = (uint64)i + 1;
     }
     s.N = (uint32)len(s.Buf);
 }
+
+} partial class bufpkg_package {
 
 public static void FillArray(/*[4]*/ ж<array<uint64>> Ꮡbuf) {
     ref var buf = ref Ꮡbuf.DerefOrNull();

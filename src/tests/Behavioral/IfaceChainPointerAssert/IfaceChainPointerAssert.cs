@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -17,15 +18,23 @@ partial struct conn {
     internal @string data;
 }
 
+} partial class mainᴛconn {
+
 internal static @string Read(this ref conn c) { return "read:"u8 + c.data; }
 internal static @string Close(this ref conn c) { return "closed:"u8 + c.data; }
+
+} partial class main_package {
 
 partial struct valConn {
     internal @string tag;
 }
 
+} partial class mainᴛvalConn {
+
 internal static @string Read(this valConn v) { return "vread:"u8 + v.tag; }
 internal static @string Close(this valConn v) { return "vclosed:"u8 + v.tag; }
+
+} partial class main_package {
 
 internal static void main() {
     readCloser rc = new connжreadCloser(Ꮡ(new conn(data: "init")));

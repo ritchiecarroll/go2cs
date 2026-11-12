@@ -27,9 +27,6 @@ using static go.RenamedGenericQualified.coll_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Kind", "ΔKind")]
-[assembly: GoTypeAlias("Pair", "ΔPair")]
-[assembly: GoTypeAlias("Set", "ΔSet")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -52,7 +49,7 @@ using static go.RenamedGenericQualified.coll_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("coll.go", "coll.cs", "AAgQgoKUpoCApJSigoKUAAwcgoKUgpTqlAAHEJQ=")]
+[assembly: GoPositionMap("coll.go", "coll.cs", "AAwQgoKUpoCApLSigoKUAA4cgoKUgpQACgqUAAsQlA==")]
 // </GoSourcePositionMaps>
 
 namespace go.RenamedGenericQualified;
@@ -69,10 +66,10 @@ public static partial class coll_package
     // <TypeAccessibility>
     public partial struct Bag<T> {}
     public partial struct Entry {}
+    public partial struct Kind {}
     public partial struct OrderedMap<K, V> {}
-    public partial struct ΔKind {}
-    public partial struct ΔPair<K, V> {}
-    public partial struct ΔSet<T> {}
+    public partial struct Pair<K, V> {}
+    public partial struct Set<T> {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -84,3 +81,16 @@ public static partial class coll_package
     // <ImportInitializers>
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(coll_package.Bag<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class collᴛBag;
+[GoMethodHost(typeof(coll_package.Entry)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class collᴛEntry;
+[GoMethodHost(typeof(coll_package.OrderedMap<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class collᴛOrderedMap;
+[GoMethodHost(typeof(coll_package.Set<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class collᴛSet;
+// </MethodHolders>

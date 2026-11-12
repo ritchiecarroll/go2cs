@@ -51,7 +51,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAoalJTYlKKCgqaipIKCkpKSkpCwkpCApII=", "24-28:1;34-34:1;35-35:2;36-36:3;37-37:4;38-38:5;39-39:6;42-42:7", "38=main.T.Hello", "", "", "26:21,27:13")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA0alJT4lKKCgqaipIKCkpKSkpCwkpCApII=", "24-28:1;34-34:1;35-35:2;36-36:3;37-37:4;38-38:5;39-39:6;42-42:7", "38=main.T.Hello", "", "", "31:21,32:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -81,3 +81,13 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.T)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛT;
+// </MethodHolders>

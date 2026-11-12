@@ -2,14 +2,19 @@ namespace go;
 
 using fmt = fmt_package;
 using reflect = reflect_package;
+using static main_package;
 
 partial class main_package {
 
 public delegate void Greeter(@string name);
 
+} partial class mainᴛGreeter {
+
 public static void Greet(this Greeter g, @string name) {
     g(name);
 }
+
+} partial class main_package {
 
 partial interface Greetable {
     void Greet(@string name);
@@ -58,7 +63,7 @@ internal static void main() {
         var v = reflect.ValueOf(g);
         var mv = v.Method(0);
         fmt.Println("got method value, kind:", mv.Kind());
-        mv.Call(slice<reflectꓸValue>([reflect.ValueOf("world")]));
+        mv.Call(slice<reflect.Value>([reflect.ValueOf("world")]));
         fmt.Println("called ok");
     });
 }

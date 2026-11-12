@@ -4,6 +4,7 @@ using fmt = fmt_package;
 using runtime = runtime_package;
 using strings = strings_package;
 using @unsafe = unsafe_package;
+using static main_package;
 
 partial class main_package {
 
@@ -25,7 +26,11 @@ partial struct @base {
     internal nint n;
 }
 
+} partial class mainᴛbase {
+
 internal static nint Len(this ref @base b) { return b.n; }
+
+} partial class main_package {
 
 partial struct sized {
     /*embed*/ internal @base @base;

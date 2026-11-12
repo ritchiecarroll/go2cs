@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -8,14 +9,22 @@ partial struct tempErr {
     internal @string msg;
 }
 
+} partial class mainᴛtempErr {
+
 internal static @string Error(this ref tempErr e) { return e.msg; }
 internal static bool Temporary(this ref tempErr e) { return true; }
+
+} partial class main_package {
 
 partial struct plainErr {
     internal @string msg;
 }
 
+} partial class mainᴛplainErr {
+
 internal static @string Error(this ref plainErr e) { return e.msg; }
+
+} partial class main_package {
 
 internal partial interface classify_type /*dyn*/ :
     error
@@ -45,16 +54,24 @@ partial struct node {
     internal @string id;
 }
 
+} partial class mainᴛnode {
+
 internal static @string String(this ref node n) { return "node:"u8 + n.id; }
 internal static @string Name(this ref node n) { return n.id; }
 internal static nint Depth(this ref node n) { return 3; }
+
+} partial class main_package {
 
 partial struct shallow {
     internal @string id;
 }
 
+} partial class mainᴛshallow {
+
 internal static @string String(this ref shallow s) { return "shallow:"u8 + s.id; }
 internal static @string Name(this ref shallow s) { return s.id; }
+
+} partial class main_package {
 
 internal partial interface describe_type /*dyn*/ :
     named

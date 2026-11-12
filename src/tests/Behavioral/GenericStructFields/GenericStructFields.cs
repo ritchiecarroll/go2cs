@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -20,7 +21,11 @@ partial struct tag<T> {
     internal T label;
 }
 
+} partial class mainᴛtag {
+
 internal static T show<T>(this tag<T> t) { return t.label; }
+
+} partial class main_package {
 
 partial struct wrapped<T> {
     /*embed*/ internal tag<T> tag;
@@ -52,7 +57,7 @@ internal static void main() {
     fmt.Printf("First float value: %f\n"u8, container.FloatValues[0].Value);
     fmt.Printf("Completion status: %t\n"u8, container.Mappings["completed"].Value);
 
-    Δpool<nint> pl = default;
+    pool<nint> pl = default;
     pl.items = append(pl.items, (nint)7, (nint)8);
     var (v, ok) = pl.take();
     fmt.Println(v, ok, new keeper().pool());
@@ -61,11 +66,13 @@ internal static void main() {
     fmt.Println(w.label, w.tag.show(), w.count);
 }
 
-partial struct Δpool<T> {
+partial struct pool<T> {
     internal slice<T> items;
 }
 
-internal static (T, bool) take<T>(this ref Δpool<T> p) {
+} partial class mainᴛpool {
+
+internal static (T, bool) take<T>(this ref pool<T> p) {
     if (len(p.items) == 0) {
         T zero = GoZero<T>();
         return (zero, false);
@@ -75,9 +82,13 @@ internal static (T, bool) take<T>(this ref Δpool<T> p) {
     return (v, true);
 }
 
+} partial class main_package {
+
 partial struct keeper {
 }
 
+} partial class mainᴛkeeper {
+
 internal static @string pool(this keeper k) { return "kept"; }
 
-} // end main_package
+} // end mainᴛkeeper

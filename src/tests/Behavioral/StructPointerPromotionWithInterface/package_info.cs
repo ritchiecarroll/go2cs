@@ -64,7 +64,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("StructPointerPromotionWithInterface.go", "StructPointerPromotionWithInterface.cs", "ABY0gqaCAAYSgoIAGDCCpoIABxqCgqaCABg2ogAKEtgAEiyCgpSClIKClIKWgpaCmIKCgoKCloKUmIKCgpiCgg==")]
+[assembly: GoPositionMap("StructPointerPromotionWithInterface.go", "StructPointerPromotionWithInterface.cs", "ABk0gsaCAAoSgoIAHDCCpoIACxqCgqaCABo2ogAMEgAJCAAULIKClIKUgoKUgpaCloKYgoKCgoKWgpSYgoKCmIKC")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -115,3 +115,19 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.Device)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛDevice;
+[GoMethodHost(typeof(main_package.MyCustomError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛMyCustomError;
+[GoMethodHost(typeof(main_package.MyError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛMyError;
+[GoMethodHost(typeof(main_package.core)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcore;
+[GoMethodHost(typeof(main_package.leftSide)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛleftSide;
+[GoMethodHost(typeof(main_package.meta)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛmeta;
+[GoMethodHost(typeof(main_package.rightSide)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛrightSide;
+// </MethodHolders>

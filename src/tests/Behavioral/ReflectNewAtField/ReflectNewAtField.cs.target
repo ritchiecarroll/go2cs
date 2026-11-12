@@ -23,7 +23,7 @@ partial struct P {
     internal ж<nint> ptr;
 }
 
-internal static reflectꓸValue field(reflectꓸValue v, nint i) {
+internal static reflect.Value field(reflect.Value v, nint i) {
     var f = v.Type().Field(i);
     return reflect.NewAt(f.Type, (@unsafe.Pointer)((uintptr)(@unsafe.Pointer)v.UnsafeAddr() + f.Offset)).Elem();
 }

@@ -5,6 +5,7 @@ using strings = strings_package;
 using testing = testing_package;
 using ꓸꓸꓸany = Span<any>;
 using ꓸꓸꓸstring = Span<@string>;
+using static main_package;
 
 partial class main_package {
 
@@ -16,11 +17,15 @@ partial struct L {
     internal @string tag;
 }
 
+} partial class mainᴛL {
+
 public static void Error(this ref L l, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     fmt.Println("L.Error", l.tag, len(args), fmt.Sprint(args.ꓸꓸꓸ));
 }
+
+} partial class main_package {
 
 partial struct LL {
     /*embed*/ public ж<L> L;
@@ -29,6 +34,8 @@ partial struct LL {
 partial struct V {
     internal nint n;
 }
+
+} partial class mainᴛV {
 
 public static void Error(this V v, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
@@ -42,9 +49,13 @@ public static @string Join(this V v, @string sep, params ꓸꓸꓸstring partsʗ
     return fmt.Sprint(v.n) + ":"u8 + strings.Join(parts, sep);
 }
 
+} partial class main_package {
+
 partial struct G<T> {
     internal T v;
 }
+
+} partial class mainᴛG {
 
 public static void Error<T>(this G<T> g, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
@@ -52,15 +63,21 @@ public static void Error<T>(this G<T> g, params ꓸꓸꓸany argsʗp) {
     fmt.Println("G.Error", (g.v).OrTypedNilOf(), len(args));
 }
 
+} partial class main_package {
+
 partial struct u {
     internal nint id;
 }
+
+} partial class mainᴛu {
 
 internal static void logf(this u x, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     fmt.Printf("u.logf %d "u8 + format + "\n"u8, appendꓸꓸꓸ(slice<any>([x.id]), args).ꓸꓸꓸ);
 }
+
+} partial class main_package {
 
 partial interface Errorer {
     void Error(params ꓸꓸꓸany ʗp);

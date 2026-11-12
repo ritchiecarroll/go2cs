@@ -4,12 +4,15 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using transform = golang.org.x.text.transform_package;
 using golang.org.x.text;
+using static main_package;
 
 partial class main_package {
 
 partial struct upper {
     /*embed*/ public golang.org.x.text.transform_package.NopResetter NopResetter;
 }
+
+} partial class mainᴛupper {
 
 internal static (nint nDst, nint nSrc, error err) Transform(this upper _, slice<byte> dst, slice<byte> src, bool atEOF) {
     error err = default;
@@ -28,6 +31,8 @@ internal static (nint nDst, nint nSrc, error err) Transform(this upper _, slice<
 
     return (n, n, err);
 }
+
+} partial class main_package {
 
 internal static void main() {
     var (s, n, err) = transform.String(new transform_SpanningTransformerᴠTransformer(transform.Nop), "abc");

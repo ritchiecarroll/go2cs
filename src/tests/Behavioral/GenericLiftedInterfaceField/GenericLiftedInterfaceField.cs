@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -21,11 +22,17 @@ partial struct dnsC {
     internal @string allow;
 }
 
+} partial class mainᴛdnsC {
+
 internal static (@string, bool) query(this dnsC d, @string s) { return ("dns:" + d.allow, s == d.allow); }
+
+} partial class main_package {
 
 partial struct counter {
     internal nint n;
 }
+
+} partial class mainᴛcounter {
 
 internal static (ж<counter>, bool) query(this ж<counter> Ꮡc, nint v) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -33,6 +40,8 @@ internal static (ж<counter>, bool) query(this ж<counter> Ꮡc, nint v) {
     c.n++;
     return (Ꮡc, v == c.n);
 }
+
+} partial class main_package {
 
 internal partial interface newDNS_R0 /*dyn*/ {
     new (@string, bool) query(@string _);

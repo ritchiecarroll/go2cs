@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -9,6 +10,8 @@ partial struct box {
     internal nint n;
 }
 
+} partial class mainᴛbox {
+
 internal static nint Size(this ref box b) {
     return b.n;
 }
@@ -16,6 +19,8 @@ internal static nint Size(this ref box b) {
 internal static @string Name(this ref box b) {
     return b.label;
 }
+
+} partial class main_package {
 
 internal static void main() {
     var b = Ꮡ(new box(label: "widget", n: 42));

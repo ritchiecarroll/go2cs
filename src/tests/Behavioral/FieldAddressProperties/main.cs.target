@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -14,6 +15,8 @@ partial struct List {
     internal Element root;
     internal nint len;
 }
+
+} partial class mainᴛList {
 
 public static ж<List> Init(this ж<List> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
@@ -44,12 +47,16 @@ public static ж<Element> Front(this ref List l) {
     return l.root.next;
 }
 
+} partial class mainᴛElement {
+
 public static ж<Element> Next(this ref Element e) {
     var p = e.next; if (e.list != nil && p != e.list.Ꮡroot) {
         return p;
     }
     return default;
 }
+
+} partial class main_package {
 
 partial struct counter {
     internal nint hits;

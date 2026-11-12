@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -28,12 +29,16 @@ internal static ж<pp> newPrinter() {
     return p;
 }
 
+} partial class mainᴛpp {
+
 internal static void free(this ж<pp> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.buf = p.buf[..0];
     poolPut(Ꮡp.OrTypedNil());
 }
+
+} partial class main_package {
 
 internal static void keep(ж<pp> q) { poolPut(q.OrTypedNil()); }
 

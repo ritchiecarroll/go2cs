@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -11,12 +12,20 @@ partial interface shape {
 partial struct circle {
 }
 
+} partial class mainᴛcircle {
+
 internal static @string name(this circle _) { return "circle"; }
+
+} partial class main_package {
 
 partial struct square {
 }
 
+} partial class mainᴛsquare {
+
 internal static @string name(this square _) { return "square"; }
+
+} partial class main_package {
 
 internal static UntypedInt kCircle => /* iota + 2 */ 2;
 internal static UntypedInt kSquare => 3;

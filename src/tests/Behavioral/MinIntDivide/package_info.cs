@@ -53,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ACJUloKCpoKCpoKCpoKCqpCUkJSQmIKCpqqCgqaCgoKmgpSUpqKCpoKCuKKkgoKCgoKCgoKCgoKClIKCgoKUgoKCgoKClIKCgoKClIKCgoKUgoKCgoKUgoKCgoKClIKCgpSYgoKClIKClIKCgoKClIKCgpSCgoKCgpSCgoKCpoKGgg==", "109-113:1;119-119:1;120-120:2;121-121:3;122-122:4;123-123:5;124-124:6;125-125:7;126-131:8;132-137:9;138-138:10;139-145:11;146-152:12;153-158:13;159-165:14;166-173:15;174-178:16;179-182:17;183-187:18;188-191:19;192-198:20;199-203:21;204-210:22;211-217:23;219-221:24;222-222:25;223-223:26", "", "", "", "103:21,104:13")]
+[assembly: GoPositionMap("main.go", "main.cs", "ACVUtoKCpoKCpoKCpoKCqpCUkJSQmIKCpqqCgqaCgoKmgpSUpqKCpoKCuKKkgoKCgoKCgoKCgoKClIKCgoKUgoKCgoKClIKCgoKClIKCgoKUgoKCgoKUgoKCgoKClIKCgpSYgoKClIKClIKCgoKClIKCgpSCgoKCgpSCgoKCpoKGgg==", "109-113:1;119-119:1;120-120:2;121-121:3;122-122:4;123-123:5;124-124:6;125-125:7;126-131:8;132-137:9;138-138:10;139-145:11;146-152:12;153-158:13;159-165:14;166-173:15;174-178:16;179-182:17;183-187:18;188-191:19;192-198:20;199-203:21;204-210:22;211-217:23;219-221:24;222-222:25;223-223:26", "", "", "", "108:21,109:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -87,3 +87,13 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.holder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛholder;
+// </MethodHolders>

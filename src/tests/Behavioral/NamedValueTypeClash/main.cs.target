@@ -5,10 +5,13 @@ using arrval = NamedValueTypeClash.arrval_package;
 using mapval = NamedValueTypeClash.mapval_package;
 using numval = NamedValueTypeClash.numval_package;
 using NamedValueTypeClash;
+using static main_package;
 
 partial class main_package {
 
 partial struct Value /*[]byte*/;
+
+} partial class mainᴛValue {
 
 public static nint Len(this Value v) { return len(v); }
 
@@ -17,6 +20,8 @@ public static byte At(this Value v, nint i) { return v[i]; }
 public static void Add(this ref Value v, byte b) { v = append(v, b); }
 
 public static void Set(this ref Value v, nint i, byte b) { (v)[i] = b; }
+
+} partial class main_package {
 
 internal static void main() {
     var v = (Value)slice<byte>((@string)"abc"u8);

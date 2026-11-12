@@ -1,17 +1,22 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
-partial struct Δmark {
+partial struct mark {
     internal nint id;
 }
 
 partial struct tagger {
 }
 
+} partial class mainᴛtagger {
+
 internal static void mark(this tagger _) { }
+
+} partial class main_package {
 
 partial struct holder {
     internal nint mark;
@@ -21,15 +26,15 @@ partial struct holder {
 internal static readonly ж<holder> Ꮡh = new StaticBox<holder>(default(holder));
 internal static ref holder h => ref ((StaticBox<holder>)Ꮡh).ValueSlot;
 
-internal static readonly ж<Δmark> Ꮡgm = new StaticBox<Δmark>(default(Δmark));
-internal static ref Δmark gm => ref ((StaticBox<Δmark>)Ꮡgm).ValueSlot;
+internal static readonly ж<mark> Ꮡgm = new StaticBox<mark>(default(mark));
+internal static ref mark gm => ref ((StaticBox<mark>)Ꮡgm).ValueSlot;
 
 internal static partial nint localShadowsCollisionType() {
-    var m = Ꮡ(new Δmark(id: 10));
+    var m = Ꮡ(new mark(id: 10));
     var pid = m.Ꮡid;
     pid.Value = 55;
-    nint Δmark = 7;
-    return pid.Value + Δmark;
+    nint mark = 7;
+    return pid.Value + mark;
 }
 
 partial struct w {
@@ -72,7 +77,7 @@ internal static void main() {
 
     fmt.Println(h.mark, h.extra);
 
-    Δmark m = default;
+    mark m = default;
     m.id = 3;
     tagger t = default;
     t.mark();

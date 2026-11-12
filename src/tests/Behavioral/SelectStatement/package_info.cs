@@ -43,16 +43,16 @@ using static go.main_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("SelectStatement.cs", 74, 5, 0)]
-[assembly: GoBoundedGoroutine("SelectStatement.cs", 79, 9, 1)]
-[assembly: GoBoundedGoroutine("SelectStatement.cs", 107, 5, 2)]
-[assembly: GoBoundedGoroutine("SelectStatement.cs", 108, 5, 3)]
-[assembly: GoBoundedGoroutine("SelectStatement.cs", 109, 5, 4)]
-[assembly: GoBoundedGoroutine("SelectStatement.cs", 110, 5, 5)]
-[assembly: GoBoundedGoroutine("SelectStatement.cs", 169, 5, 6)]
-[assembly: GoBoundedGoroutine("SelectStatement.cs", 170, 5, 7)]
-[assembly: GoBoundedGoroutine("SelectStatement.cs", 171, 5, 8)]
-[assembly: GoBoundedGoroutine("SelectStatement.cs", 190, 5, 10)]
+[assembly: GoBoundedGoroutine("SelectStatement.cs", 79, 5, 0)]
+[assembly: GoBoundedGoroutine("SelectStatement.cs", 84, 9, 1)]
+[assembly: GoBoundedGoroutine("SelectStatement.cs", 112, 5, 2)]
+[assembly: GoBoundedGoroutine("SelectStatement.cs", 113, 5, 3)]
+[assembly: GoBoundedGoroutine("SelectStatement.cs", 114, 5, 4)]
+[assembly: GoBoundedGoroutine("SelectStatement.cs", 115, 5, 5)]
+[assembly: GoBoundedGoroutine("SelectStatement.cs", 174, 5, 6)]
+[assembly: GoBoundedGoroutine("SelectStatement.cs", 175, 5, 7)]
+[assembly: GoBoundedGoroutine("SelectStatement.cs", 176, 5, 8)]
+[assembly: GoBoundedGoroutine("SelectStatement.cs", 195, 5, 10)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -62,7 +62,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("SelectStatement.go", "SelectStatement.cs", "AAgSgqaCpoKCgpSmgpKCtLSCyoKogpKCgt6CgryCgoLMgoKCgoKCgoKUgsqCpoKUgpSClIKCgoKUgoKClILUtLS0zIKU5LS0tLS2lIKCgoKSgoKCgqKClJSUlpSCgoKUlIKCgoKCgoKUgqyCtKTMgqTGAAcWgoKCgqIACQqC", "44-50:1;153-158:1;221-226:1")]
+[assembly: GoPositionMap("SelectStatement.go", "SelectStatement.cs", "AAkSgqaCpoKCgpSmgpKCtLSCyoLIgpKCgv6CgryCgoLMgoKCgoKCgoKUgsqCpoKUgpSClIKCgoKUgoKClILUtLS0zIKU5LS0tLS2lIKCgoKSgoKCgqKClJSUlpSCgoKUlIKCgoKCgoKUgqyCtKTMgqTGAAcWgoKCgqIACQqC", "44-50:1;153-158:1;221-226:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -92,3 +92,13 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.IntSlice)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛIntSlice;
+// </MethodHolders>

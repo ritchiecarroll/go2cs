@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -12,6 +13,8 @@ partial struct T {
     internal nint n;
 }
 
+} partial class mainᴛT {
+
 public static @string Name(this ж<T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -21,10 +24,16 @@ public static @string Name(this ж<T> Ꮡt) {
     return fmt.Sprint("T", t.n);
 }
 
+} partial class main_package {
+
 partial struct U {
 }
 
+} partial class mainᴛU {
+
 public static @string Name(this ref U _) { return "U"; }
+
+} partial class main_package {
 
 internal static @string classify(Namer i) {
     switch (i.type()) {

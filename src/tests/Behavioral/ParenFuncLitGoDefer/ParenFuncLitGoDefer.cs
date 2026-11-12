@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -9,6 +10,8 @@ internal static channel<bool> sink = new channel<bool>(1);
 partial struct runner {
     internal nint n;
 }
+
+} partial class mainᴛrunner {
 
 internal static partial nint fork(this ref runner r, nint c, Action<nint> dispatch) {
     var done = new channel<bool>(0);
@@ -28,6 +31,8 @@ internal static partial nint fork(this ref runner r, nint c, Action<nint> dispat
     ᐸꟷ(done);
     return c;
 }
+
+} partial class main_package {
 
 internal static void later(channel<bool> done) {
     GoFrame ᒐ = default;

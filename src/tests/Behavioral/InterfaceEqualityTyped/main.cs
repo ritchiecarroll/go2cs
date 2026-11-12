@@ -3,12 +3,17 @@ namespace go;
 using errors = errors_package;
 using fmt = fmt_package;
 using Δmath = math_package;
+using static main_package;
 
 partial class main_package {
 
 partial struct errno /*num:uintptr*/;
 
+} partial class mainᴛerrno {
+
 internal static @string Error(this errno e) { return fmt.Sprintf("errno %d"u8, (uintptr)e); }
+
+} partial class main_package {
 
 internal static errno eagain => 11;
 internal static errno eintr => 4;
@@ -21,7 +26,11 @@ partial struct pathError {
     public error Err;
 }
 
+} partial class mainᴛpathError {
+
 internal static @string Error(this pathError e) { return e.Op + " "u8 + e.Path + ": "u8 + e.Err.Error(); }
+
+} partial class main_package {
 
 partial struct pair<K, V> {
     public K Key;
@@ -34,12 +43,16 @@ partial struct node {
 
 internal delegate nint thunk();
 
+} partial class mainᴛthunk {
+
 internal static nint Len(this thunk f) {
     if (f == nil) {
         return -1;
     }
     return f();
 }
+
+} partial class main_package {
 
 partial interface lener {
     nint Len();

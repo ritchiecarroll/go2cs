@@ -2,6 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using sort = sort_package;
+using static main_package;
 
 partial class main_package {
 
@@ -81,15 +82,23 @@ partial struct PeopleByAge /*[]Person*/;
 
 partial struct Roster /*[]Person*/;
 
+} partial class mainᴛRoster {
+
 internal static nint headcount(this Roster r) { return len(r); }
+
+} partial class main_package {
 
 partial struct levelToken /*num:uint32*/;
 
 internal static UntypedInt markerConst => 256;
 
+} partial class mainᴛPeopleByAge {
+
 internal static void sort(this PeopleByAge p) {
     sort_package.Sort(p);
 }
+
+} partial class mainᴛPeopleByShoeSize {
 
 public static nint Len(this PeopleByShoeSize p) {
     return len(p);
@@ -106,6 +115,8 @@ public static bool /*a*/ Less(this PeopleByShoeSize p, nint i, nint j) {
     return a;
 }
 
+} partial class mainᴛPeopleByAge {
+
 public static nint Len(this PeopleByAge p) {
     return len(p);
 }
@@ -117,6 +128,8 @@ public static void Swap(this PeopleByAge p, nint i, nint j) {
 public static bool Less(this PeopleByAge p, nint i, nint j) {
     return (p[i].Age < p[j].Age);
 }
+
+} partial class main_package {
 
 public static (nint E2, @string p) Testing() {
     nint E2 = default;
@@ -194,10 +207,10 @@ internal static void main() {
 
     fmt.Println(people);
 
-    sort_package.Sort((PeopleByShoeSize)people);
+    sort.Sort((PeopleByShoeSize)people);
     fmt.Println(people);
 
-    sort_package.Sort((PeopleByAge)people);
+    sort.Sort((PeopleByAge)people);
     fmt.Println(people);
 
     var byAge = (PeopleByAge)people;

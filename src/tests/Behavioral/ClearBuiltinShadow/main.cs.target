@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -15,11 +16,17 @@ partial struct box {
     internal slice<nint> data;
 }
 
+} partial class mainᴛbox {
+
 internal static void clear(this ref box b) { b.data = default; }
+
+} partial class main_package {
 
 partial struct guard {
     internal error err;
 }
+
+} partial class mainᴛguard {
 
 internal static void recover(this ж<guard> Ꮡg) {
     GoFrame ᒐ = default;
@@ -45,9 +52,11 @@ internal static void run(this ж<guard> Ꮡg) {
     finally { ᒐ.Run(); }
 }
 
+} partial class main_package {
+
 internal static void main() {
     var s = slice<nint>([1, 2, 3]);
-    builtin.clear(s);
+    clear(s);
     fmt.Println(s[0], s[1], s[2]);
 
     var b = Ꮡ(new box(data: [4, 5]));
@@ -55,7 +64,7 @@ internal static void main() {
     fmt.Println(len(b.data));
 
     var m = new map<@string, nint>{["a"] = 1, ["b"] = 2};
-    builtin.clear(m);
+    clear(m);
     fmt.Println(len(m));
 
     var g = Ꮡ(new guard());
@@ -64,16 +73,16 @@ internal static void main() {
 
     var h = new header(new map<@string, slice<@string>>{["a"] = ["1"], ["b"] = ["2"]});
     var alias = h;
-    builtin.clear(h);
+    clear(h);
     fmt.Println(len(h), len(alias));
 
     header hn = default;
-    builtin.clear(hn);
+    clear(hn);
     fmt.Println(len(hn));
 
     var q = GoReflect.WithElemDims(new slice<array<int32>>(3, () => new(4)), 4);
     q[1][2] = 7;
-    builtin.clear(q);
+    clear(q);
     fmt.Println(len(q[1]), q[1][2]);
     q[2][3] = 9;
     fmt.Println(q[2]);
@@ -81,14 +90,14 @@ internal static void main() {
     var c = new slice<cell>(2, () => new());
     c[0].v[1] = 3;
     c[0].m = new map<@string, nint>{["x"] = 1};
-    builtin.clear(c);
+    clear(c);
     fmt.Println(len(c[0].v), c[0].v[1], c[0].m == nil);
     c[0].v[1] += 4;
     fmt.Println(c[0].v);
 
     var n = GoReflect.WithElemDims(new slice<array<array<int32>>>(2, () => new(2, () => new(3))), 2, 3);
     n[0][1][2] = 5;
-    builtin.clear(n);
+    clear(n);
     n[0][1][2] = 8;
     fmt.Println(n);
 }

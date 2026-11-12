@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using atomic = sync.atomic_package;
 using sync;
+using static main_package;
 
 partial class main_package {
 
@@ -15,6 +16,8 @@ partial struct entry<V> {
 partial struct Cache<V> {
     internal atomic.Pointer<entry<V>> head;
 }
+
+} partial class mainᴛCache {
 
 public static void Put<V>(this ж<Cache<V>> Ꮡc, ж<V> key, ж<V> val) {
     var e = Ꮡ(new entry<V>(key: key));
@@ -33,6 +36,8 @@ public static ж<V> Get<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey) {
     }
     return default;
 }
+
+} partial class main_package {
 
 internal static void main() {
     ref var c = ref heap(new Cache<nint>(), out var Ꮡc);

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -11,7 +12,11 @@ partial interface badge {
 partial struct gold {
 }
 
+} partial class mainᴛgold {
+
 internal static @string label(this gold _) { return "gold"; }
+
+} partial class main_package {
 
 
 partial struct reservedᴛ1 /*dyn*/ {

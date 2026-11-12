@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using toneꓸTone = go.ForeignPointerImplementSuppression.tone_package.ΔTone;
 // </ImportedTypeAliases>
 
 using go;
@@ -37,7 +36,7 @@ using static go.main_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<go.ForeignPointerImplementSuppression.tone_package.ΔTone, go.ForeignPointerImplementSuppression.shade_package.Level>(Pointer = true)]
+[assembly: GoImplement<go.ForeignPointerImplementSuppression.tone_package.Tone, go.ForeignPointerImplementSuppression.shade_package.Level>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -46,7 +45,7 @@ using static go.main_package;
 // The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(go.ForeignPointerImplementSuppression.tone_package.Plain))]
-[assembly: GoFieldAccess(typeof(go.ForeignPointerImplementSuppression.tone_package.ΔTone))]
+[assembly: GoFieldAccess(typeof(go.ForeignPointerImplementSuppression.tone_package.Tone))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -21,6 +22,8 @@ partial struct dword /*num:uint32*/;
 
 internal static @short toShort(dword d) { return (@short)(int16)d; }
 
+} partial class mainᴛfixed {
+
 internal static nint size(this @fixed f, @string of) {
     return f.n + len(of);
 }
@@ -32,6 +35,8 @@ internal static void grow(this ref @fixed f, nint by) {
 internal static bool held(this @fixed f) {
     return f.n > 3;
 }
+
+} partial class main_package {
 
 internal partial struct keywordLocalStruct_params /*dyn*/ {
     internal uintptr size;

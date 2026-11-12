@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -27,6 +28,8 @@ partial struct Impl {
     internal nint s;
 }
 
+} partial class mainᴛImpl {
+
 public static @string Name(this ref Impl p) { return p.n; }
 public static nint Size(this ref Impl p) { return p.s; }
 public static ж<Impl> Clone(this ref Impl p) { return Ꮡ(new Impl(p.n, p.s + 1)); }
@@ -37,6 +40,8 @@ public static bool Each(this ref Impl p, @string label, Action<ж<Impl>> f) {
 }
 
 public static ж<Impl> Pick(this ref Impl p, Func<ж<Impl>> gen) { return gen(); }
+
+} partial class main_package {
 
 internal static void use<T>(T v)
     where T : Constrained<T>

@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using ꓸꓸꓸany = Span<any>;
+using static main_package;
 
 partial class main_package {
 
@@ -10,22 +11,32 @@ partial struct Plain {
     internal nint v;
 }
 
+} partial class mainᴛPlain {
+
 public static nint Get(this Plain p) { return p.v; }
 public static @string Describe(this Plain p, @string prefix) { return fmt.Sprint(prefix, p.v); }
 public static void Set(this ref Plain p, nint v) { p.v = v; }
+
+} partial class main_package {
 
 partial struct Box<T> {
     internal T v;
 }
 
+} partial class mainᴛBox {
+
 public static T Get<T>(this Box<T> b) { return b.v; }
 public static @string Describe<T>(this Box<T> b, @string prefix) { return fmt.Sprint(prefix, (b.v).OrTypedNilOf()); }
 public static void Set<T>(this ref Box<T> b, T v) { b.v = v; }
+
+} partial class main_package {
 
 partial struct Pair<K, V> {
     internal K k;
     internal V v;
 }
+
+} partial class mainᴛPair {
 
 public static K Key<K, V>(this Pair<K, V> p) { return p.k; }
 public static @string String<K, V>(this Pair<K, V> p) { return fmt.Sprintf("%v=%v"u8, (p.k).OrTypedNilOf(), (p.v).OrTypedNilOf()); }
@@ -37,6 +48,8 @@ public static V /*old*/ Swap<K, V>(this ref Pair<K, V> p, V v) {
     return old;
 }
 
+} partial class main_package {
+
 partial struct age /*num:nint*/;
 
 partial struct Ord2<T>
@@ -45,14 +58,20 @@ partial struct Ord2<T>
     internal T a, b;
 }
 
+} partial class mainᴛOrd2 {
+
 public static bool Less<T>(this Ord2<T> o)
     where T : /* ~int */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 { return o.a < o.b; }
+
+} partial class main_package {
 
 partial struct Cell<T> {
     public T V;
     public bool Valid;
 }
+
+} partial class mainᴛCell {
 
 public static (any, error) Value<T>(this Cell<T> c) {
     if (!c.Valid) {
@@ -60,6 +79,8 @@ public static (any, error) Value<T>(this Cell<T> c) {
     }
     return ((c.V).OrTypedNilOf(), default);
 }
+
+} partial class main_package {
 
 partial interface valuer {
     (any, error) Value();
@@ -83,7 +104,7 @@ internal static void @try(@string label, Func<@string> f) {
     finally { ᒐ.Run(); }
 }
 
-internal static @string show(slice<reflectꓸValue> results) {
+internal static @string show(slice<reflect.Value> results) {
     @string s = "[";
     foreach (var (i, r) in range(results)) {
         if (i > 0) {
@@ -94,7 +115,7 @@ internal static @string show(slice<reflectꓸValue> results) {
     return s + "]"u8;
 }
 
-internal static @string names(reflectꓸType t) {
+internal static @string names(reflect.Type t) {
     @string s = fmt.Sprint(t.NumMethod(), ":");
     for (nint i = 0; i < t.NumMethod(); i++) {
         s += " "u8 + t.Method(i).Name;
@@ -102,11 +123,11 @@ internal static @string names(reflectꓸType t) {
     return s;
 }
 
-internal static slice<reflectꓸValue> args(params ꓸꓸꓸany valuesʗp) {
+internal static slice<reflect.Value> args(params ꓸꓸꓸany valuesʗp) {
     var values = valuesʗp.sslice();
-    var inᴷ = new stackAppend<reflectꓸValue>(moves: true);
+    var inᴷ = new stackAppend<reflect.Value>(moves: true);
 
-    slice<reflectꓸValue> @in = default;
+    slice<reflect.Value> @in = default;
     foreach (var (_, a) in range(values)) {
         @in = append(inᴷ, @in, reflect.ValueOf(a));
     }
@@ -115,8 +136,8 @@ internal static slice<reflectꓸValue> args(params ꓸꓸꓸany valuesʗp) {
 }
 
 internal static void probe(@string name, any value, any pointer, map<@string, slice<any>> @in) {
-    ref var v = ref heap<reflectꓸValue>(reflect.ValueOf(value), out var Ꮡv);
-    ref var pv = ref heap<reflectꓸValue>(reflect.ValueOf(pointer), out var Ꮡpv);
+    ref var v = ref heap<reflect.Value>(reflect.ValueOf(value), out var Ꮡv);
+    ref var pv = ref heap<reflect.Value>(reflect.ValueOf(pointer), out var Ꮡpv);
 
     var vʗ1 = v;
     @try(name + " value methods"u8, () => names(vʗ1.Type()));
@@ -131,7 +152,7 @@ internal static void probe(@string name, any value, any pointer, map<@string, sl
         var vʗ3 = v;
         @try(fmt.Sprintf("%s T.Method(%d).Func"u8, name, i), () => {
             var m = vʗ3.Type().Method(i);
-            return m.Name + " "u8 + show(m.Func.Call(appendꓸꓸꓸ(slice<reflectꓸValue>([vʗ3]), args(inʗ2[n].ꓸꓸꓸ))));
+            return m.Name + " "u8 + show(m.Func.Call(appendꓸꓸꓸ(slice<reflect.Value>([vʗ3]), args(inʗ2[n].ꓸꓸꓸ))));
         });
         var inʗ3 = @in;
         var vʗ4 = v;
@@ -146,7 +167,7 @@ internal static void probe(@string name, any value, any pointer, map<@string, sl
         var pvʗ3 = pv;
         @try(fmt.Sprintf("%s *T.Method(%d).Func"u8, name, i), () => {
             var m = pvʗ3.Type().Method(i);
-            return m.Name + " "u8 + show(m.Func.Call(appendꓸꓸꓸ(slice<reflectꓸValue>([pvʗ3]), args(inʗ5[n].ꓸꓸꓸ))));
+            return m.Name + " "u8 + show(m.Func.Call(appendꓸꓸꓸ(slice<reflect.Value>([pvʗ3]), args(inʗ5[n].ꓸꓸꓸ))));
         });
     }
 

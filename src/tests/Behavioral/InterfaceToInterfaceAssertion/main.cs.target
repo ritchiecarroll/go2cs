@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -16,13 +17,21 @@ partial struct widget {
     internal nint n;
 }
 
+} partial class mainᴛwidget {
+
 internal static @string Str(this ref widget w) { return fmt.Sprintf("widget(%d)"u8, w.n); }
 internal static @string Marshal(this ref widget w) { return fmt.Sprintf("<%d>"u8, w.n); }
+
+} partial class main_package {
 
 partial struct other {
 }
 
+} partial class mainᴛother {
+
 internal static @string Str(this ref other o) { return "other"; }
+
+} partial class main_package {
 
 internal static Stringish newStringish(nint n) { return new widgetжStringish(Ꮡ(new widget(n))); }
 

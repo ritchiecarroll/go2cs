@@ -72,7 +72,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("InterfaceCasting.go", "InterfaceCasting.cs", "AAoSgqiCAAkUgtyC3ILcggAGGIKmooKmgqaCAAsigq6CgoKUgoK0goK0goK0qpSilJSUgoKmgoKCgpSClIKClIKUgoKmgoKCgoKCnIKCgoKCnKKCnoKSgpqCgpSUlJyCnIKcgoLYgoKUAAwcgpSCAAsYABEi2IKUAAkWAAgSgoKCgoI=", "195-200:1")]
+[assembly: GoPositionMap("InterfaceCasting.go", "InterfaceCasting.cs", "AA0SgsiCAAsUggAJDIIACQyCAAkMggAIGILGooKmgsaCAAsigq6CgoKUgoK0goK0goK0yrSilJSUgoKmgoKCgpSClIKClIKUgoKmgoKCgoKCnIKCgoKCnKKCnoKSgpqCgpSUlJyCnIKcgoLYgoKUAA4cgrSCAA0YABUiAAkIgrQACxYAChKCgoKCgg==", "195-200:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -122,3 +122,23 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(main_package.Cat)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛCat;
+[GoMethodHost(typeof(main_package.Counter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛCounter;
+[GoMethodHost(typeof(main_package.Dog)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛDog;
+[GoMethodHost(typeof(main_package.JavaProgrammer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛJavaProgrammer;
+[GoMethodHost(typeof(main_package.Llama)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛLlama;
+[GoMethodHost(typeof(main_package.MyError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛMyError;
+[GoMethodHost(typeof(main_package.badge)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛbadge;
+[GoMethodHost(typeof(main_package.basin)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛbasin;
+[GoMethodHost(typeof(main_package.fileRdr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛfileRdr;
+[GoMethodHost(typeof(main_package.strRdr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛstrRdr;
+[GoMethodHost(typeof(main_package.wrapSink)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛwrapSink;
+// </MethodHolders>

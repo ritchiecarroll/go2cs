@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using static main_package;
 
 partial class main_package {
 
@@ -9,14 +10,22 @@ partial struct Tag /*num:uint8*/;
 internal static UntypedInt classConstructed => 0x20;
 internal static UntypedInt classContext => 0x80;
 
+} partial class mainᴛTag {
+
 public static Tag Constructed(this Tag t) { return (Tag)(t | (uint8)classConstructed); }
 public static Tag Context(this Tag t) { return (Tag)(t | (uint8)classContext); }
+
+} partial class main_package {
 
 partial struct word /*num:uint64*/;
 
 internal static UntypedInt tagBits => 19;
 
+} partial class mainᴛword {
+
 internal static word low(this word w) { return (word)(w & (uint64)((1 << (int)(tagBits)) - 1)); }
+
+} partial class main_package {
 
 internal static void main() {
     Tag t = 0x10;
