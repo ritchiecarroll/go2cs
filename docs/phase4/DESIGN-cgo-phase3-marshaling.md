@@ -560,3 +560,155 @@ The named risk outside the mechanism (R1 under `-cgo`) did not fire. No stop lin
 - **This record is a docs-only commit past the battery's tip.** It is gated alone: repoguard and the comment census.
 
 — H (2026-11-12)
+
+## 16. Amendment 2026-11-12: increment 3.1, its plan, predictions and stop lines (posted before code)
+
+Increment 3.0 is accepted and seats in batch 292 (`eabb7aad2c`, master merged in). COORD ordered the 3.1 plan next,
+built on M1 to M4 of section 13. No code is written. Each statement about the tree is marked READ (read at
+`eabb7aad2c`) or NOT READ (the red measures it).
+
+3.1 is the helpers, `void *`, and the deferred call for any bound function (sections 3 and 12). It hands C no Go
+memory: there is no pin and no image in it. Every pointer into Go memory that reaches a 3.1 door is refused by name
+before the call, and increment 3.2 turns that one arm into pin, image or refuse.
+
+### 16.1 What 3.1 admits
+
+**A. The helpers.** `C.CString`, `C.CBytes`, `C.GoString`, `C.GoStringN` and `C.GoBytes` are refused today by name
+(`cgoBuiltinNames`, READ). Each becomes a member of the package's C class in its bindings file.
+
+- The copies are golib functions over an address, and they copy BYTES (S5). No text encoding is on the path.
+- The allocation is the package's own `malloc`, bound in the bindings file from the captured library like any other
+  symbol (Q-D, ruled). cmd/cgo reaches `malloc` through its own C stub (`_cgo_cmalloc`, READ), so the package's
+  binary imports it whenever a helper allocates. `C.free` is the user's own call and needs `void *` (B).
+- `C.CString` and `C.CBytes` return a native box, as a C function's pointer result does today (READ).
+- `C.GoString(nil)` is the empty string. A nil result from `malloc` ends the program as cmd/cgo's stub does. That
+  arm is NOT MEASURED: no test can make `malloc` fail.
+- The pointer a `Go*` helper is handed is classified as in B. C memory is read. Go memory is refused by name in 3.1
+  (question Q2).
+
+**B. `void *`.** A parameter of Go type `unsafe.Pointer` is refused today (`cgoScalarOf`, READ). It becomes one
+golib question, asked for every such argument before anything else happens (M4, step 1):
+
+| What the pointer carries | 3.1 |
+|---|---|
+| nil | C receives 0 |
+| A genuinely native box (the predicate Phase 2 already uses: no retained source, no order token, no pin on managed storage) | its address |
+| A box of Go memory, of any kind | refused by name, before the call (3.2's arm) |
+| A native box minted from managed storage (M2) | refused by name. Its address is never handed to C |
+| A number with no box, known to golib's pin and token registry (M3) | classed as the box it names, so refused in 3.1 |
+| A tagged token (M3) | refused by name |
+| A number the registry does not know | crosses as it is |
+
+A `void *` result is C memory: a native pointer, or nil for 0. With M4 there is nothing to unwind in 3.1: a refusal
+in any argument throws before the transition bracket and before any other argument has an effect.
+
+**C. The deferred call (Q-B, ruled for any bound function).** The route refuses `defer` on a check closure today
+(READ). It recognizes cmd/cgo's deferred shape, `defer func() func() { _cgo0 := x; return func() {
+_cgoCheckPointer(_cgo0, nil); _Cfunc_f(_cgo0) }}()()`, for any function the route binds and for the argument forms
+the immediate closure already admits. It lowers it to a deferred call of the bound wrapper whose arguments are
+evaluated at the `defer`. The `go` form stays refused.
+
+**D. `strtol`'s reading, owed from 3.0.** `strtol`'s second parameter is a `char **`, the out-parameter, which the
+increments table gives to 3.2. So 3.1 takes the reading where the rule reads it: a test builds the one-call
+package on the real route, reads the names cmd/cgo's own binary imports, and prints which of `strtol` and
+`__isoc23_strtol` is there. It asserts only that the rule's verdict follows that set (question Q1).
+
+### 16.2 What 3.1 does not do
+
+No Go memory is handed to C, pinned or imaged (3.2). No C memory is read through Go pointer syntax beyond what Phase
+2 reads (section 6, 3.2). No slice view (3.3). No out-parameter (3.2). C calling Go stays refused.
+
+### 16.3 The fixture, the probe and the reds
+
+- **The first red needs no new file.** The Phase 1 fixture's committed cmd/cgo trees already hold `C.CString`,
+  `C.GoString` and `defer C.free(unsafe.Pointer(cs))` (READ). Converted through the offline seam on H, they are
+  the red P3.1-1 predicts (NOT READ: no test converts those trees through the route today).
+- **A Phase 3 fixture** (`testdata/cgo/phase3`), made as Phase 2's was: `fixture.go` by hand, cmd/cgo's two files
+  from a hosted linux leg's `REGEN` lines, committed from that run. H has no C compiler, so the order is: commit the
+  source and the regeneration test, read the leg, commit the trees with the red tests, then the fixes.
+- **Probe functions**, added to the probe library's one C file: return a static C string; return a `malloc`ed copy
+  the caller frees; fill a caller's C buffer; sum `n` bytes behind a `void *`; return a `void *` it was handed; a
+  call log the deferred arms read back. Additive: no existing function changes.
+- **An end-to-end program**, built by go and converted by go2cs as the exit gate's is, its two outputs compared byte
+  for byte on linux, windows and darwin. Its rows:
+  - a round trip of each helper, both directions, over plain text, invalid UTF-8 and a string with an interior NUL;
+  - `GoStringN` and `GoBytes` with a count of zero, and with a negative count. The negative rows run in a child
+    process, since Go may end the program there; the comparison is the exit status and the kind of failure;
+  - `CBytes`, read back and freed by the caller;
+  - `void *`: nil, C memory, and C memory through a `uintptr` variable;
+  - the deferred call: two deferred C calls and a deferred Go call, read back in order from the call log; and an
+    argument reassigned after the `defer`, which must reach C with the value it had at the `defer`.
+- **Refusal arms, go2cs only** (Go allows them, and 3.2 admits them): a `[]byte` element, a struct box, and
+  `unsafe.Pointer(uintptr(unsafe.Pointer(&b[0])))` in one expression and through a variable, each handed to a
+  `void *`. Each must be refused by name before the call. None may cross as a number.
+- **golib arms** (GolibTests): each copy function; and each row of B's table, with a control: a number the registry
+  does not know crosses, so the refusal arms can fail.
+
+### 16.4 Predictions, to be scored as worded
+
+- **P3.1-1.** At the base the Phase 1 trees are refused, with nothing written, and the refusals name `C.CString`
+  and `C.GoString` as cmd/cgo's own helpers, `C.free`'s parameter as not a scalar, and the deferred call through
+  the check closure. After 3.1 none of those four is among the refusals. The fixture's other refusals (a C function
+  used as a value, a `#define` that is not a constant) stand.
+- **P3.1-2 (P1 of section 9, on the legs run).** cmd/cgo's binary imports `malloc` and `free` under their plain
+  names on hosted linux/amd64, windows/amd64 and darwin, so neither is refused by the verified-names rule.
+- **P3.1-3.** Every row of the end-to-end program is byte-identical between the go arm and the go2cs arm on the
+  three hosts. The weakest rows are the negative counts: how Go fails there is NOT READ, and the row is read on the
+  go arm before go2cs is shaped to it.
+- **P3.1-4.** go2cs already evaluates a deferred call's arguments at the `defer` for this emission: the reassigned
+  argument reaches C with its value at the `defer`, with no change to the converter's `defer` emission.
+- **P3.1-5.** Every refusal arm of 16.3 is refused by name before the call, and the control crosses. In particular
+  the one-expression `uintptr` form arrives carrying its box or is found in the registry; it never crosses as C
+  memory.
+- **P3.1-6.** 0 corpus bytes on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64. `check-no-regression`
+  stays byte-identical. No behavioral golden moves. GolibTests' total rises by the new arms only and no existing
+  row changes (P4).
+- **P3.1-7 (P7).** On each new golden, externs equal transition brackets, plus windows' one errno slot.
+- **P3.1-8.** Under the runner's gcc, cmd/cgo's binary for the `strtol` package imports `__isoc23_strtol` and not
+  `strtol`. Under the pinned zig it imports plain `strtol`. The zig half is the weaker one: it depends on the glibc
+  version zig targets by default.
+- **P3.1-9.** The only existing tests whose expectations move are cgo tests that assert one of P3.1-1's four
+  refusals. They are named in the red commit.
+- **Most likely red that is not the mechanism:** the windows leg's `malloc` and `free`. A helper's allocation and
+  the user's `C.free` must reach the SAME C runtime. If the capture binds them in two different libraries there,
+  the round trip corrupts a heap and no row says why. The windows leg prints both libraries before any row runs.
+
+### 16.5 Gates
+
+- golib is touched, so the full, unfiltered GolibTests is owed, read against the base's results, and `go2cs.slnx`
+  is built once. go2cs-gen is not planned to be touched; if it is, its full suite is owed and S3.1-B fires first.
+- The full `go test ./...` (repoguard and the comment census inside it), `check-no-regression`, the full behavioral
+  suite once at the tip, and the two-seeded corpus comparison on four targets.
+- Hosted. At the red: `converter-cgo` on linux, once. At the tip: `converter-cgo` on linux both ways, windows and
+  darwin; `cgo-e2e` on linux, windows and darwin.
+- The classifier is the safety boundary of 3.1, so the adversarial review COORD ordered for Phase 3 is asked for at
+  the tip, before landing.
+
+### 16.6 Stop lines
+
+- **S3.1-A.** A corpus byte moves, or a golden outside the cgo tests: stop and attribute (S-E).
+- **S3.1-B.** The helpers or the classifier need a new box kind, instance state on `ж<T>`, or a go2cs-gen change:
+  stop and post the design (S-B, S-C).
+- **S3.1-C.** `malloc` or `free` is not imported under its plain name on a host, or the two bind in different C
+  runtimes: stop. The allocator ruling returns to COORD. No .NET allocator is substituted.
+- **S3.1-D.** P3.1-4 fails: go2cs does not evaluate this deferred call's arguments at the `defer`. That is a
+  converter reading outside cgo. It is posted, and the lowering is not shaped around it.
+- **S3.1-E.** Any arm the tests can build lets an address of Go memory, or a number minted from one, cross a
+  `void *` as C memory, beyond the released-pin residue section 13.4 names: stop. `void *` stays refused.
+- **S3.1-F.** A row needs Go memory handed to C to pass: it is 3.2's row. Nothing of 3.2 is pulled forward.
+- **S3.1-G.** A go arm and a go2cs arm differ on a row other than the negative counts: stop and post the reading.
+  A negative-count difference go2cs cannot match is disclosed by name, never dropped from the program.
+- **S-F** stands: 3.1 yields to any .4 seat that needs H.
+
+### 16.7 Questions for COORD
+
+- **Q1. `strtol`'s reading.** Lean: at the rule's own input, as in 16.1 D, with the conversion-level reading in 3.2
+  when the out-parameter lands. The other way is to admit a pointer-to-pointer parameter in 3.1, nil and C memory
+  only.
+- **Q2. Go memory handed to a `Go*` helper.** `C.GoBytes(unsafe.Pointer(&b[0]), n)` is legal Go: a Go function
+  reads it, and C is not involved. Lean: refused by name in 3.1 and admitted in 3.2, because reading it needs the
+  source classification that 3.2's design step defines (M2).
+- **Q3. The branch.** Lean: `claude/h-cgo-phase3-helpers`, cut from `eabb7aad2c`, with master merged in after 292
+  lands.
+
+— H (2026-11-12)
