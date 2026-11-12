@@ -97,6 +97,8 @@ namespace GolibTests
         public void ACaptureOpensNoSymbolFileAndSymbolizingOpensTheAssembliesItNames()
         {
             Assert.IsTrue(File.Exists(WitnessPdb), "control: sort's symbol file must sit beside the test assembly, or the witness proves nothing");
+            Assert.AreEqual("sort", typeof(sort_package).Assembly.GetName().Name,
+                "control: sort's frames are not in an assembly named \"sort\", the name the opens are counted by and the witness is named for");
 
             if (Opens().Contains("sort") || WitnessIsHeld())
                 Assert.Inconclusive("another test already symbolized a frame of sort.dll in this process; the witness is spent");

@@ -207,6 +207,10 @@ public class ChattyFlagBridgeTests
             .Select(name => name.Name ?? "")
             .ToArray();
 
+        // The name looked for must be the one flag's assembly answers to, or the check passes on any name.
+        Assert.AreEqual("flag", typeof(flag_package).Assembly.GetName().Name,
+            "control: the converted flag package is not in an assembly named \"flag\", so the check below would prove nothing");
+
         Assert.IsFalse(referenced.Contains("flag"),
             "the test host now references the converted flag package at compile time — the late-binding contract in TestFlagBridge's remarks is broken");
     }
