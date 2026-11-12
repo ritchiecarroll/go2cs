@@ -36263,4 +36263,65 @@ struct-proxy view (the post-.4 scout) is the path to making such writes work rat
 
 — R (2026-11-11)
 
+## 2026-11-11 — G (found by the M:N spike's cost table, COORD's routing): `TypeGenerator` is 93% of the generator time on `runtime` — OPEN, post-.4 perf queue
+
+The compiler's own generator report for a rebuild of `runtime` with no M:N switch set (95 s wall, Windows x64,
+SDK 10.0.400): generators 85.8 s in all, of which `go2cs.TypeGenerator` 80.6 s (93%), `EscapeRegistryGenerator`
+2.5 s, `ImplementGenerator` 1.2 s, `ImplicitConvGenerator` 0.7 s, `RecvGenerator` 0.3 s, every other under 0.1 s.
+`TypeGenerator` writes 417 files there, about 190 ms a file. On `net/http` the generators take 30.0 s of a 42.6 s
+build, `TypeGenerator` 13.6 s and `ImplementGenerator` 12.9 s of it (88% between them).
+
+This is today's product and has nothing to do with M:N: the spike read it because a nested generator run doubled
+it. The reason for the 190 ms a file was not looked for. A seat starts by timing the generator's steps on
+`runtime` (the report above is a rebuild with `-p:ReportAnalyzer=true -v d`) and by asking whether its per-file
+work re-reads the whole compilation.
+
+Record: `docs/phase4/DATA-mn-spike-2.md` 6.2 and 6.3 (`claude/g-mn-spike2-b4`).
+
+— G (2026-11-11)
+
+## 2026-11-11 — G (found by the M:N spike's cost table, COORD's routing): `sync.Mutex.Lock` has no try-first step: 230 ns and 64 bytes for an uncontended pair — OPEN, a .4 quality candidate, golib only
+
+An uncontended `Lock` and `Unlock` pair, one goroutine, Windows x64, JIT, runtime 10.0.11, median of 8:
+
+| build | per pair |
+|---|---|
+| Go 1.26.10 | 3.8 ns, 0 B |
+| today's product | 230 ns, 64 B |
+| the spike's hand twin of `Lock` (tries the free lock first) | 27.9 ns, 0 B |
+
+With profiling off, the plain `Lock` enters the park bracket before it tries the lock
+(`using (Goroutine.Park(...)) { gate.Wait(); }`); the bracket is where the 200 ns and the 64 bytes go. The twin
+does `gate.Wait(0)` first and enters the bracket only when that fails. The same first step in the plain `Lock`
+needs no M:N and is measurable with the spike's fixture (`src/tools/mnspike2/MnCost`, `MN_COST_MODE=mutex`).
+A seat checks the other bracketed waits in golib's `sync` for the same order (`RWMutex`, `WaitGroup.Wait`,
+`Cond`), and keeps the profiling-on path, which must still record the block.
+
+Record: `docs/phase4/DATA-mn-spike-2.md` 6.4 (`claude/g-mn-spike2-b4`).
+
+— G (2026-11-11)
+
+## 2026-11-11 — G (found by the M:N spike's cost table, COORD's routing): a deferred closure costs 24.7 ns and 88 bytes, and converted SHA-256 reads 17 times Go's — OPEN, post-.4 perf queue, two rows
+
+Both read on today's product with no M:N switch set (Windows x64, JIT, runtime 10.0.11, medians of 8), beside
+Go 1.26.10's own build of the same source.
+
+| row | Go | today's product |
+|---|---|---|
+| a call into a function that defers one closure | 4.6 ns, 0 B | 24.7 ns, 88 B |
+| `io.CopyBuffer` of one 512-byte chunk into `crypto/sha256` | 254 ns | 4,429 ns |
+
+1. **The defer.** Go's open-coded defer allocates nothing; the converted frame allocates 88 bytes a call. The
+   spike did not read which objects those are. A seat reads them first, and then what a frame with one defer
+   and no `recover` can do without.
+2. **SHA-256.** Go's figure uses the CPU's SHA instructions; the converted package runs the generic block
+   function (`sha256block_noasm.cs`; the corpus is converted without Go's assembly bodies). The gap is the
+   size of what a hand-owned block function over the platform intrinsics would return, and other hashes and
+   ciphers with an assembly body in Go are the same shape.
+
+Fixture: `src/tools/mnspike2/MnCost`, `MN_COST_MODE=defer` and `MN_COST_MODE=hash`. Record:
+`docs/phase4/DATA-mn-spike-2.md` 6.4 (`claude/g-mn-spike2-b4`).
+
+— G (2026-11-11)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
