@@ -1145,3 +1145,39 @@ build does. This is not G1-P1's measurement: G1-P1 is about the gate program on 
 
 **Stop lines.** A divergence arm that reads other than as ruled stops the gate, since it is a ruling's premise. A
 build fix that moves corpus bytes stops for attribution first. The date bends before the gate does.
+
+**The first hosted legs (2026-11-12, at `ea12a61e62`; runs 43207283066 linux, 43207288962 darwin, 43207294212
+windows).** All three read red. One red was the converter's; the rest were the gate's own harness.
+
+- **linux/amd64:** the gate program converts on the real route and builds as a project with 0 errors (78 s). The
+  test then looked for the assembly at a path it assumed, found none, and ran no arm. A harness fault.
+- **windows/amd64, a converter defect:** the gate program names `windows.h`'s `LPSYSTEMTIME`, a pointer typedef. Its
+  type was recorded `public` and the struct it points to `internal`, so go2cs-gen's members for the pointer type did
+  not compile (CS0050, CS0051, CS0053, CS0056, CS0057: 7 distinct errors).
+  - **Cause:** `recordTypeAccessibility` applied the name rule before the rule that keeps a C type internal, so a C
+    name beginning with an upper-case letter read as exported and passed as if it had been publicized.
+  - **Fix, in two places, because the name is read twice.** The record no longer reads a C name: a C type is
+    internal unless its emitter was handed the publicized `public`. And go2cs-gen reads a BARE declaration's scope
+    from its name too, so for a C name that reads public the converter writes `internal` inline, as it does for a
+    function-local type. The first half alone left CS0262 (conflicting modifiers on the two partials).
+  - **Red first:** `TestACNamesFirstLetterDoesNotMakeItsTypePublic` and its companion (`fa61cbe7a4`), and at the
+    compile level `TestACPointerTypedefBuildsWithTheStructItNames`, which read 9 errors before and 0 after.
+- **windows/amd64, harness:** the legs export `GoTargetOS` for their own OS, and MSBuild reads the environment as
+  properties. The Phase 2 fixture is converted for linux on every host, so on the windows leg the build left its
+  bindings file out and failed on CS0051. The tests now state the target they converted for.
+- **darwin, both RIDs, harness:** macOS's temporary directory is a symbolic link, and MSBuild's relative path to
+  `go2csPath`, counted from the link, ends one level short (MSB3202 on every referenced project). The tests resolve
+  the link.
+- **darwin, both RIDs, go and the C toolchain:** `go build` of the gate program failed before go2cs was involved. go's
+  linker runs Apple's `strip` on an externally linked binary, and `strip` refuses what the pinned zig links ("the
+  __LLVM segment too small"). The gate builds go's side with `-ldflags=-w` there. The gate program had already
+  CONVERTED on both RIDs.
+
+**G1-P1, scored as worded:** MET on windows/amd64 (a C# compile error no offline test showed). MISSED on linux/amd64
+(0 errors). NOT MEASURED on darwin at these runs: go's own build failed first.
+
+**Two findings the gate turned up and does not fix** (BOARD, 2026-11-12):
+
+- a conversion from one C numeric type to another does not compile: go2cs-gen hosts the conversion operator in the
+  package's class, where a C type is not;
+- a cgo project built for a `GoTargetOS` other than its bindings' target fails on CS0051, far from the cause.

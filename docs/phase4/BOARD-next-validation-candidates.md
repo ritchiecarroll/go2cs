@@ -36475,4 +36475,41 @@ readers (ELF, Mach-O, COFF).
 
 — H (2026-11-12)
 
+## 2026-11-12 — H (cgo Phase 2's exit gate, G1): the first time the route's output was compiled and run. One converter defect fixed, two findings OPEN, one toolchain fact
+
+G1's first hosted legs (`claude/h-cgo-g1` at `ea12a61e62`, stage `cgo-e2e`, runs 43207283066, 43207288962 and
+43207294212) were the first builds of what the cgo route writes for a real program. DESIGN-cgo-phase2-pinvoke §11.22
+has the leg-by-leg record.
+
+**FIXED in G1: a C name's first letter decided its type's accessibility.** `windows.h`'s `LPSYSTEMTIME` was `public`
+and the struct it points to `internal`, so the generated members for the pointer type did not compile (CS0050 to
+CS0057). The name is read in two places, the converter's accessibility record and go2cs-gen's scope for a bare
+declaration, and the fix covers both. Reds: `TestACNamesFirstLetterDoesNotMakeItsTypePublic`,
+`TestACTypeAnExportedFunctionNamesIsPublicWithItsPointee`, and the build test
+`TestACPointerTypedefBuildsWithTheStructItNames` (9 errors before, 0 after).
+
+**OPEN 1: a conversion between two C numeric types does not compile.** `C.ushort(n)` with `n` a `C.DWORD` converts to
+`(C.@ushort)(uint16)n` and records `GoImplicitConv<C.@ushort, C.DWORD>`. go2cs-gen's `ImplicitConvGenerator` hosts the
+operator in a partial of the source type declared inside the PACKAGE class (the first class of `package_info.cs`),
+where a C type is not: it declares a second, empty `main_package.@ushort`, and the build fails on CS1061 ("does not
+contain a definition for 'Value'"). The host has to be the class that holds the source type.
+
+- Measured on H by a build of a ten-line program, not on a leg. The gate program does not make such a conversion.
+- It is common in real cgo code (`C.size_t(C.int(n))`), so it is inside what Phase 2 says it converts.
+- The fix is in go2cs-gen, so it owes GenTests, the full behavioral suite and the corpus comparison. Proposed as its
+  own seat, red first, ahead of the .4 release.
+
+**OPEN 2: a cgo project built for another target fails far from the cause.** A cgo project's own default
+`GoTargetOS` is its bindings' target, and its bindings live in that target's folder. Built with another `GoTargetOS`
+(a property, or an environment variable of that name), the bindings file is left out and the first C type in an
+exported signature fails on CS0051. Two parts: the project should refuse another target by name, in MSBuild, before
+the compiler runs; and its default reaches only the project itself, so its references to the standard library still
+take their own default. Proposed for Phase 3's first increment.
+
+**A toolchain fact, not a go2cs defect:** on macOS, `go build` of a cgo program with the pinned zig as CC fails unless
+DWARF is off (`-ldflags=-w`). go's linker runs Apple's `strip` on the externally linked binary, and `strip` refuses
+zig's output ("the __LLVM segment too small"). `go list`, which the conversion uses, is unaffected.
+
+— H (2026-11-12)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
