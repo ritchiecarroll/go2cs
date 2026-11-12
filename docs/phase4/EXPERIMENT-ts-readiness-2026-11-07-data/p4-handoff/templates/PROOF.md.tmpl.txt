@@ -1,0 +1,111 @@
+# typescript-go-cs: proof
+
+TypeScript's Go parser, converted to C# by [go2cs](https://github.com/ritchiecarroll/go2cs), compared with the
+native Go build of the same sources.
+
+*Measured {{DATE}}, {{PLATFORM}}.*
+
+| Side | Build |
+|:--|:--|
+| Native | {{GOVERSION}} |
+| Converted | go2cs `{{CONVERTER}}`, go.* `{{GOSTDLIB}}`, .NET SDK {{SDK}} |
+
+TypeScript is [microsoft/TypeScript](https://github.com/microsoft/TypeScript/tree/{{TS_COMMIT}}/tsc) at `{{TS_COMMIT}}`.
+
+Every figure on this page is counted from the two sides' outputs, which are in `proof/`. None is estimated.
+
+**Hand edits to the converted C#:** {{HANDPATCHES}}
+
+## 1. The demo
+
+`parsedemo samples/good.ts samples/bad.ts` prints, for each file:
+
+- each parse diagnostic: code, start, length and message;
+- every syntax node's kind and `[pos,end]`, in pre-order.
+
+`good.ts` is a small valid file. `bad.ts` has syntax errors.
+
+**Result: {{DEMO_VERDICT}}.**
+
+| Side | SHA-256 of the output |
+|:--|:--|
+| Native Go | `{{DEMO_SHA_GO}}` |
+| Converted C# | `{{DEMO_SHA_CS}}` |
+
+<details><summary>Native Go output ({{DEMO_LINES}} lines)</summary>
+
+```
+{{DEMO_GO}}
+```
+
+</details>
+
+<details><summary>Converted C# output</summary>
+
+```
+{{DEMO_CS}}
+```
+
+</details>
+
+## 2. The parser corpus
+
+The corpus is exactly the input set TypeScript's own parser fuzz test (`FuzzParser` in `internal/parser`) runs.
+`go test` reports the same 17,422 subtests for it:
+
+- 17,412 seed units, from two sources:
+  - every file under `testdata/fixtures`;
+  - every unit of every multi-file test case under `testdata/tests/cases/compiler` and `conformance`, split by
+    TypeScript's own test-file parser;
+- the 10 stored fuzz inputs in `internal/parser/testdata/fuzz/FuzzParser`, with their JSX and module-indicator flags.
+
+`go/cmd/parsecorpus-extract` writes them out in that order and with those flags. It runs natively only, so both
+sides read the same unit files.
+
+Each unit is parsed as the fuzz test parses it, as `/index<ext>`. Both sides print one line per unit: the SHA-256 of
+the unit's full dump (the same dump as the demo's), its diagnostic count and its node count. A unit matches when the
+two lines are equal.
+
+**Result: {{N}} of {{UNITS}} units match.** On the native side the corpus holds {{NODES}} syntax nodes and {{DIAGS}}
+parse diagnostics. Native run: {{SECS_GO}} s. Converted run: {{SECS_CS}} s.
+
+| Mismatch class | Units |
+|:--|--:|
+{{CLASS_ROWS}}
+
+### Every mismatch
+
+The first differing dump line is shown for each unit, native / converted. The full dumps are in `proof/mismatch/`.
+
+| Unit | Class | Source | First difference |
+|:--|:--|:--|:--|
+{{MISMATCH_ROWS}}
+
+## 3. How the harness was checked
+
+Before it judged the converted build, the harness was run against three native builds. All three gave the expected
+result:
+
+| Control | "Converted" side | Result |
+|:--|:--|:--|
+| Positive | the native demo itself | demo identical; 17,422 of 17,422 units match |
+| Negative | a native copy whose dump moves the end of every string-literal node by one | demo differs; 7,317 units mismatch, all classed "node position" |
+| Crash | a native copy that kills its own process on units `00010` and `17421` | exactly those 2 classed "converted process crashed"; the run resumes after each; the other 17,420 match |
+
+## Reproducing
+
+1. Check out TypeScript at `{{TS_COMMIT}}`.
+2. Copy `go/cmd/*` into its `tsc/cmd/`.
+3. In `tsc/`, build the native side:
+
+   ```
+   go build -o parsedemo-go ./cmd/parsedemo
+   go run ./cmd/parsecorpus-extract . corpus
+   ```
+
+4. Build the converted demo as the README shows.
+5. Compare the two:
+
+   ```
+   python proof/compare.py --native <parsedemo-go> --converted <parsedemo.dll> --samples samples --corpus <tsc>/corpus --out results
+   ```

@@ -437,8 +437,8 @@ func TestACgoProjectBuiltForAnotherTargetIsRefusedByName(t *testing.T) {
 // R5's second half: a cgo project's default target is its bindings'. That default reached only the project itself,
 // and the standard library it references took its own default, windows/amd64. So a build that names no target
 // compiled linux bindings beside the windows standard library, and said nothing. The project hands its one target to
-// its project references. runtime is laid out per GOOS, and the fixture imports it, so its assembly beside the
-// fixture's says which flavour the build took.
+// its project references. runtime is laid out per GOOS, and the fixture imports it, so its assembly (go.runtime.dll)
+// beside the fixture's says which flavour the build took.
 func TestACgoProjectBuiltWithNoTargetTakesItsOwnTargetsStandardLibrary(t *testing.T) {
 	dotnet, output, project := cgoConvertedFixtureProject(t)
 
@@ -458,7 +458,7 @@ func TestACgoProjectBuiltWithNoTargetTakesItsOwnTargetsStandardLibrary(t *testin
 			var runtimes []string
 
 			_ = filepath.WalkDir(filepath.Join(output, "bin"), func(path string, entry os.DirEntry, err error) error {
-				if err == nil && !entry.IsDir() && entry.Name() == "runtime.dll" {
+				if err == nil && !entry.IsDir() && entry.Name() == "go.runtime.dll" {
 					runtimes = append(runtimes, path)
 				}
 
@@ -466,7 +466,7 @@ func TestACgoProjectBuiltWithNoTargetTakesItsOwnTargetsStandardLibrary(t *testin
 			})
 
 			if len(runtimes) != 1 {
-				t.Fatalf("the build left %d runtime.dll beside the fixture, want 1: %v", len(runtimes), runtimes)
+				t.Fatalf("the build left %d go.runtime.dll beside the fixture, want 1: %v", len(runtimes), runtimes)
 			}
 
 			assembly, err := os.ReadFile(runtimes[0])

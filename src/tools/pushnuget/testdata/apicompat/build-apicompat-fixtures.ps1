@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Rebuilds the assembly fixtures Test-GoApiCompat.ps1 and Test-GoApiCompatMoves.ps1 read. The fixtures are committed;
-    run this only to regenerate them, then commit the five .dll files it writes beside it.
+    run this only to regenerate them, then commit the seven .dll files it writes beside it.
 
 .DESCRIPTION
     Deterministic Release builds of two tiny assemblies. Widget, from src/Widget.cs:
@@ -10,6 +10,9 @@
       widget-internal.dll  Widget.Instance is internal: a member removed from the public surface, the shape of the
                            deliberate regression the guard's sizing used (GoTypeOps<T>.Instance made internal).
       widget-added.dll     Widget.Instance is public and Widget.Weight is new: an addition, which is compatible.
+      gowidget-base.dll    widget-base.dll under the assembly identity go.Widget: OQ4's rename (fmt.dll became
+                           go.fmt.dll in 1.26.10.4), the same surface under its package ID's name.
+      gowidget-internal.dll  widget-internal.dll under go.Widget: the rename AND a member removed.
 
     Moves, from src/Moves.cs, compiled against src/MovesLib.cs (a stand-in for go.lib, built and not kept):
 
@@ -25,14 +28,16 @@ New-Item -ItemType Directory $work | Out-Null
 
 # Every build happens in a directory named for its assembly, and PathMap maps it to /_/, so no fixture records this
 # box's path.
-function Build-Fixture([string]$Name, [string]$Visibility, [string]$Constants, [string]$Assembly = 'Widget', [string]$Reference = '', [switch]$Keep) {
+# $Identity is the assembly name when it is not the source's ($Assembly): the same source under a renamed identity.
+function Build-Fixture([string]$Name, [string]$Visibility, [string]$Constants, [string]$Assembly = 'Widget', [string]$Reference = '', [switch]$Keep, [string]$Identity = '') {
+    if (-not $Identity) { $Identity = $Assembly }
     $dir = Join-Path (Join-Path $work $Name) $Assembly
     New-Item -ItemType Directory $dir | Out-Null
     Set-Content (Join-Path $dir "$Assembly.csproj") -Encoding ascii -Value @"
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <AssemblyName>$Assembly</AssemblyName>
+    <AssemblyName>$Identity</AssemblyName>
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <PathMap>`$(MSBuildProjectDirectory)=/_/</PathMap>
@@ -47,7 +52,7 @@ $(if ($Reference) { "  <ItemGroup><Reference Include=`"$Reference`" /></ItemGrou
     Set-Content (Join-Path $dir "$Assembly.cs") -Encoding ascii -Value $source
     & dotnet build $dir -c Release --nologo -v q -p:UseSharedCompilation=false | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "fixture $Name failed to build" }
-    $built = Join-Path $dir "bin/Release/net10.0/$Assembly.dll"
+    $built = Join-Path $dir "bin/Release/net10.0/$Identity.dll"
     if ($Keep) { return $built }
     Copy-Item $built (Join-Path $here "$Name.dll") -Force
 }
@@ -55,6 +60,8 @@ $(if ($Reference) { "  <ItemGroup><Reference Include=`"$Reference`" /></ItemGrou
 Build-Fixture 'widget-base' 'public' ''
 Build-Fixture 'widget-internal' 'internal' ''
 Build-Fixture 'widget-added' 'public' 'ADDED'
+Build-Fixture 'gowidget-base' 'public' '' -Identity 'go.Widget'
+Build-Fixture 'gowidget-internal' 'internal' '' -Identity 'go.Widget'
 # Moves is compiled against a stand-in for go.lib, an assembly of its own that is not a fixture.
 $movesLib = Build-Fixture 'moves-lib' '' '' 'MovesLib' -Keep
 Build-Fixture 'moves-base' '' '' 'Moves' $movesLib

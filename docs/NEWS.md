@@ -36,6 +36,17 @@ promoted method through `using static` alone; it is first under *Upgrading from 
        to the binary-compatibility guard as generated CP0002 entries, 900 entries in 20 suppression files
        (src/tools/pushnuget/New-GoApiCompatMoveSuppressions.ps1), and <GoBreakFloor> is 1.26.10.4. The nugetgo
        rebuild wave ships with this release (the owner's hands). -->
+- **Standard-library assemblies are named after their packages.** PENDING. Package `go.fmt` now ships `go.fmt.dll`,
+  not `fmt.dll`, and likewise every converted standard-library assembly (`go.net.dll`, `go.crypto.tls.dll`,
+  `go.go.ast.dll` for package `go.go.ast`, `go.testing.dll`). The package IDs do not change, nor do `golib.dll`
+  (package go.lib), the go2cs-gen analyzer, or a converted module's own assemblies. A library converted and built
+  against go.* 1.26.10.3 or earlier binds the standard library's assemblies by their OLD names, so it must be rebuilt
+  against 1.26.10.4; the same break floor names it at build time (`GO2CS3002`) rather than letting it fail as a
+  missing assembly at run time. A C# project that referenced a converted assembly by file name (`fmt.dll`) or by an
+  assembly-qualified type name (`go.fmt_package, fmt`) uses the new name.
+  <!-- source: OQ4, docs/PLAN-public-surface-stability.md (ruled), the design docs/phase4/DESIGN-assembly-identity.md;
+       src/go2cs/assemblyIdentity.go. The binary-compatibility guard compares each renamed assembly with its 1.26.10.3
+       baseline through a rename map keyed to this release (src/tools/pushnuget/GoApiCompat.psm1). -->
 - **`using static` alone no longer brings promoted methods.** PENDING. C# that calls into a converted package with
   only `using static go.bufio_package;` still sees the package's types, functions and the methods its types declare.
   A method a struct promotes from an embedded struct of the same package now needs the namespace as well:

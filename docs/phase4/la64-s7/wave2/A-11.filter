@@ -1,0 +1,1 @@
+os,os/exec,os/exec/internal/fdtest,os/signal,os/user,path,path/filepath,plugin,reflect,regexp,regexp/syntax,runtime/debug,runtime/metrics,runtime/pprof,runtime/trace,slices,sort,strconv,strings

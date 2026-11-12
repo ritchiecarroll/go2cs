@@ -14,7 +14,7 @@ namespace go.golib;
 /// Represents a sparse array.
 /// </summary>
 /// <typeparam name="T">Type of sparse array elements.</typeparam>
-public class SparseArray<T> : IList<T>
+[EditorBrowsable(EditorBrowsableState.Never)] public class SparseArray<T> : IList<T>
 {
     private readonly Dictionary<int, T> m_items = [];
 

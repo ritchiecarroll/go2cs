@@ -26,7 +26,7 @@ namespace go.golib;
 /// escalation and windows <c>runtime.usleep</c> wait on it. Elsewhere there is no such object, and
 /// <see cref="TryCreate"/> answers null.
 /// </remarks>
-public sealed partial class GoHighResolutionTimer : WaitHandle
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed partial class GoHighResolutionTimer : WaitHandle
 {
     private const uint CreateHighResolution = 0x2;
     private const uint TimerAllAccess = 0x1F0003;

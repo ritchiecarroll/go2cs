@@ -74,7 +74,7 @@ internal class AdapterImplTemplate : TemplateBase
              /// Pointer-sourced '{{GetSimpleName(InterfaceName)}}' implementation adapter for 'ж&lt;{{StructName}}&gt;' —
              /// the interface value aliases the wrapped receiver box exactly as Go's interface holds the '*T'.
              /// </summary>
-             [{{NonUserCodeAttribute}}]
+             [{{NonUserCodeAttribute}}, {{HiddenAttribute}}]
              {{AdapterScope}} sealed class {{AdapterName}}{{TypeParameters}} : {{InterfaceName}}, IжAdapter{{ConstraintClause}}
              {
                  private readonly ж<{{StructName}}> m_box;

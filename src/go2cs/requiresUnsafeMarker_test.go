@@ -140,9 +140,9 @@ func TestPackageWithNeitherStaysSafe(t *testing.T) {
 	t.Cleanup(func() { usesUnsafeCode = false })
 
 	packageDir := writeUnsafeFixture(t, map[string]string{
-		"strings.cs":       "namespace go;\r\n\r\npartial class strings_package {}\r\n",
-		"package_info.cs":  "namespace go;\r\n\r\npartial class strings_package {}\r\n",
-		"strings.cs.auto":  "[module: go.GoRequiresUnsafe]\r\npartial class strings_package {}\r\n",
+		"strings.cs":      "namespace go;\r\n\r\npartial class strings_package {}\r\n",
+		"package_info.cs": "namespace go;\r\n\r\npartial class strings_package {}\r\n",
+		"strings.cs.auto": "[module: go.GoRequiresUnsafe]\r\npartial class strings_package {}\r\n",
 		"windows/os_ᴡ.cs": "// a comment mentioning [module: go.GoRequiresUnsafe] in prose\r\n" +
 			"namespace go;\r\n\r\npartial class strings_package {}\r\n",
 	})

@@ -74,7 +74,7 @@ namespace go.golib;
 /// queue and one <c>CollectionCount</c> read per collection.
 /// </para>
 /// </remarks>
-public static class BoringCaches
+[EditorBrowsable(EditorBrowsableState.Never)] public static class BoringCaches
 {
     // Copy-on-write: registration is a package-init-time event (Go requires Register to be called
     // during package initialization) and clearing is the hot, finalizer-thread path, so the clear

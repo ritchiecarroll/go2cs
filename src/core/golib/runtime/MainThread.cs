@@ -41,7 +41,7 @@ namespace go.golib;
 /// thread, the process's.
 /// </para>
 /// </remarks>
-public static class MainThread
+[EditorBrowsable(EditorBrowsableState.Never)] public static class MainThread
 {
     /// <summary>
     /// The stack the main goroutine's thread reserves: 1 GiB, the converted-test host's per-test reservation

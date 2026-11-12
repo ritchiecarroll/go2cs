@@ -964,6 +964,7 @@ func convValue() { sinkD((*[4]uint64)(globalArrPtr)) }
 //     addresses v.field to make the call — bodyTakesImplicitReceiverFieldAddress (the fix). This is
 //     the edwards25519 projP2.Zero case (`v.X.Zero()`), promoted to a `this ref projP2 v` receiver
 //     whose body still emitted `Ꮡv.of(projP2.ᏑX).Zero()` — 99 CS0103 across the package.
+//
 // The pointer-field call `o.ptr.Bump()` is the negative control: that address is the pointee's,
 // reached through a box that already exists, so it is NOT a receiver-field address.
 func TestReceiverFieldAddressExcludesPrimary(t *testing.T) {

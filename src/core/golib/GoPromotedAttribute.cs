@@ -23,4 +23,4 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Method)]
-public sealed class GoPromotedAttribute : Attribute;
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoPromotedAttribute : Attribute;

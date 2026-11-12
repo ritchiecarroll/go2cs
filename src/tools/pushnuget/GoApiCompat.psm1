@@ -36,6 +36,9 @@
       so the guard reads that line itself. When a release becomes the baseline, its entries match nothing and must be
       deleted, so a suppression cannot outlive the release that announced it.
     - An entry naming an asset the comparison does not have is RED.
+
+    THE ASSEMBLY RENAME. A release that renames an assembly declares it here ($script:AssemblyRenameRelease): the
+    baseline asset is then compared with its renamed successor, and only the identity change is admitted.
 #>
 #Requires -Version 5.1
 Set-StrictMode -Version 2
@@ -55,6 +58,30 @@ $script:AssetPattern = '^(lib/[^/]+|runtimes/[^/]+/lib/[^/]+)/[^/]+\.dll$'
 $script:VerdictClean = 'APICompat ran successfully without finding any breaking changes.'
 $script:VerdictBreaks = 'API breaking changes found.'
 $script:UnnecessaryLine = 'Unnecessary suppressions found.'
+
+<#
+    THE DECLARATION: the release that renamed every standard-library assembly to its package ID (OQ4,
+    docs/phase4/DESIGN-assembly-identity.md section 4; COORD's OQ-D ruling, 2026-11-11). go.fmt shipped
+    lib/net10.0/fmt.dll through 1.26.10.3 and ships lib/net10.0/go.fmt.dll from 1.26.10.4 on; package IDs never change.
+    For a package of the converted standard library (a go.* id other than go.lib and go.gen, which keep golib.dll and
+    go2cs-gen.dll), a baseline asset <dir>/<name>.dll missing from the current package is compared with <dir>/<id>.dll.
+    The target is the package ID, as the rule states it: that is go.<name> for 359 of the 360 packages, and go.testing
+    shipped testing_package.dll.
+
+    WHY ONE RELEASE-KEYED LINE. A suppression entry cannot announce a rename: it names one asset on both sides. And
+    the tool pairs assemblies by IDENTITY NAME, so Widget against go.Widget compares no member at all -- measured with
+    the pinned 10.0.403: "CP0004: Assembly with name 'Widget' does not exist at right." plus one CP0001 per type,
+    identical when the renamed build drops a public member. Suppressing those would read every renamed assembly green
+    unexamined. So the guard ALIGNS the identity instead (Set-GoApiCompatIdentity: the renamed copy's Assembly-table
+    name, and nothing else, made the baseline's) and compares every member as usual, after checking that the identity
+    changed exactly as declared: the current asset's assembly name must be the package ID. Nothing is suppressed.
+    Keyed to the release, the map applies only to the one comparison that crosses the rename (1.26.10.4, and its
+    rehearsals, against 1.26.10.3). Every later release's baseline already ships <id>.dll, compares path to path, and
+    the map is inert; an asset that goes missing then is red again, as it should be. Unkeyed, the map would admit any
+    future disappearance of a std asset beside a same-named <id>.dll for ever, announced by no one. If the rename slips
+    to another release, every renamed asset reads "missing" and names this line, which then moves with it.
+#>
+$script:AssemblyRenameRelease = '1.26.10.4'
 
 # Restores the pinned tool from the repository's local manifest and returns the version it answers. Throws when the
 # restore fails or the tool answers another version than the manifest pins.
@@ -90,19 +117,141 @@ function Get-GoApiCompatAssets([Parameter(Mandatory)][string]$Package) {
     finally { $zip.Dispose() }
 }
 
-# Extracts the named assets of a .nupkg under $Dir, keeping their package-relative paths.
-function Expand-GoApiCompatAssets([string]$Package, [string[]]$Assets, [string]$Dir) {
+# Extracts the named assets of a .nupkg under $Dir, keeping their package-relative paths. An entry $As maps is extracted
+# to the path it maps to instead: a renamed asset, extracted under its baseline's name.
+function Expand-GoApiCompatAssets([string]$Package, [string[]]$Assets, [string]$Dir, [hashtable]$As = @{}) {
     $zip = [System.IO.Compression.ZipFile]::OpenRead($Package)
     try {
         foreach ($entry in $zip.Entries) {
             $name = $entry.FullName -replace '\\', '/'
-            if ($Assets -notcontains $name) { continue }
-            $out = Join-Path $Dir $name
+            if ($As.ContainsKey($name)) { $rel = $As[$name] } elseif ($Assets -ccontains $name) { $rel = $name } else { continue }
+            $out = Join-Path $Dir $rel
             New-Item -ItemType Directory -Force (Split-Path -Parent $out) | Out-Null
             [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $out, $true)
         }
     }
     finally { $zip.Dispose() }
+}
+
+# The column widths of metadata tables 0x00-0x1F (ECMA-335 II.22), the ones laid out before the Assembly table (0x20):
+# a digit is a fixed width; s, g and b index the #Strings, #GUID and #Blob heaps; tNN indexes table NN; the rest name a
+# coded index in $script:CodedIndexes (its tag bits, then its tables).
+$script:TableColumns = @(
+    '2 s g g g', 'RS s s', '4 s s TDOR t04 t06', 't04', '2 s b', 't06', '4 2 2 s b t08', 't08', # 00-07
+    '2 2 s', 't02 TDOR', 'MRP s b', '2 HC b', 'HCA CAT b', 'HFM b', '2 HDS b', '2 4 t02',           # 08-0F
+    '4 t04', 'b', 't02 t14', 't14', '2 s TDOR', 't02 t17', 't17', '2 s b',                          # 10-17
+    '2 t06 HS', 't02 MDOR MDOR', 's', 'b', '2 MF s t1A', '4 t04', '4 4', '4')                        # 18-1F
+$script:CodedIndexes = @{
+    TDOR = @(2, 0x02, 0x01, 0x1B); HC = @(2, 0x04, 0x08, 0x17); HFM = @(1, 0x04, 0x08); HDS = @(2, 0x02, 0x06, 0x20)
+    MRP = @(3, 0x02, 0x01, 0x1A, 0x06, 0x1B); HS = @(1, 0x14, 0x17); MDOR = @(1, 0x06, 0x0A); MF = @(1, 0x04, 0x06)
+    CAT = @(3, 0x06, 0x0A); RS = @(2, 0x00, 0x1A, 0x23, 0x01)
+    HCA = @(5, 0x06, 0x04, 0x01, 0x02, 0x08, 0x09, 0x0A, 0x00, 0x0E, 0x17, 0x14, 0x11, 0x1A, 0x1B, 0x20, 0x23, 0x26, 0x27, 0x28, 0x2A, 0x2C, 0x2B)
+}
+
+<#
+    Where an assembly's identity name lives: the file offset and width of the Assembly table's Name column, the name it
+    holds, and the #Strings heap. Read by hand, as GoAssemblyMaterial.psm1 reads its headers: push-nuget.ps1 runs this
+    module under Windows PowerShell 5.1, which ships no System.Reflection.Metadata. Throws on anything else.
+#>
+function Get-GoAssemblyIdentityField([byte[]]$Bytes) {
+    if ($Bytes.Length -lt 0x40 -or $Bytes[0] -ne 0x4D -or $Bytes[1] -ne 0x5A) { throw 'not a PE image' }
+    $pe = [BitConverter]::ToInt32($Bytes, 0x3C)
+    if ($pe -lt 0 -or $pe + 24 -gt $Bytes.Length -or [BitConverter]::ToUInt32($Bytes, $pe) -ne 0x00004550) { throw 'not a PE image' }
+    $coff = $pe + 4
+    $opt = $coff + 20
+    $magic = [BitConverter]::ToUInt16($Bytes, $opt)
+    if ($magic -eq 0x10B) { $dirs = $opt + 96 } elseif ($magic -eq 0x20B) { $dirs = $opt + 112 } else { throw 'not a PE image' }
+    $sectionTable = $opt + [BitConverter]::ToUInt16($Bytes, $coff + 16)
+    $sectionCount = [BitConverter]::ToUInt16($Bytes, $coff + 2)
+    $toOffset = {
+        param([long]$Rva)
+        for ($i = 0; $i -lt $sectionCount; $i++) {
+            $s = $sectionTable + 40 * $i
+            $va = [long][BitConverter]::ToUInt32($Bytes, $s + 12)
+            $span = [long][Math]::Max([BitConverter]::ToUInt32($Bytes, $s + 8), [BitConverter]::ToUInt32($Bytes, $s + 16))
+            if ($Rva -ge $va -and $Rva -lt $va + $span) { return [long]($Rva - $va + [BitConverter]::ToUInt32($Bytes, $s + 20)) }
+        }
+        throw "RVA $Rva lies in no section"
+    }
+    $cliRva = [BitConverter]::ToUInt32($Bytes, $dirs + 14 * 8)
+    if ($cliRva -eq 0) { throw 'not a managed image' }
+    $metadata = & $toOffset ([BitConverter]::ToUInt32($Bytes, (& $toOffset $cliRva) + 8))
+    if ([BitConverter]::ToUInt32($Bytes, $metadata) -ne 0x424A5342) { throw 'no metadata root' }   # 'BSJB'
+
+    $p = $metadata + 16 + [BitConverter]::ToInt32($Bytes, $metadata + 12)
+    $streamCount = [BitConverter]::ToUInt16($Bytes, $p + 2)
+    $p += 4
+    $streams = @{}
+    for ($i = 0; $i -lt $streamCount; $i++) {
+        $n = $p + 8
+        while ($Bytes[$n] -ne 0) { $n++ }
+        $name = [System.Text.Encoding]::ASCII.GetString($Bytes, $p + 8, $n - $p - 8)
+        $streams[$name] = [pscustomobject]@{ Offset = [long]($metadata + [BitConverter]::ToUInt32($Bytes, $p)); Size = [long][BitConverter]::ToUInt32($Bytes, $p + 4) }
+        $p = ($n + 4) -band -4   # the name is null-terminated and padded to a 4-byte boundary
+    }
+    if (-not $streams.ContainsKey('#~') -or -not $streams.ContainsKey('#Strings')) { throw 'no compressed table stream (#~) or #Strings heap' }
+
+    $tables = $streams['#~'].Offset
+    $heapSizes = $Bytes[$tables + 6]
+    $valid = [BitConverter]::ToUInt64($Bytes, $tables + 8)
+    $rows = New-Object int[] 64
+    $p = $tables + 24
+    for ($i = 0; $i -lt 64; $i++) { if (($valid -shr $i) -band 1) { $rows[$i] = [BitConverter]::ToInt32($Bytes, $p); $p += 4 } }
+    if ($heapSizes -band 0x40) { $p += 4 }   # the extra data word
+    if ($rows[0x20] -ne 1) { throw "the image carries $($rows[0x20]) Assembly row(s): not an assembly" }
+
+    $heap = @{ s = $(if ($heapSizes -band 1) { 4 } else { 2 }); g = $(if ($heapSizes -band 2) { 4 } else { 2 }); b = $(if ($heapSizes -band 4) { 4 } else { 2 }) }
+    $width = {
+        param([string]$Column)
+        if ($Column -match '^\d$') { return [int]$Column }
+        if ($heap.ContainsKey($Column)) { return $heap[$Column] }
+        if ($Column -match '^t([0-9A-F]{2})$') { $bits = 0; $targets = @([Convert]::ToInt32($Matches[1], 16)) }
+        else { $coded = $script:CodedIndexes[$Column]; $bits = $coded[0]; $targets = @($coded[1..($coded.Count - 1)]) }
+        $max = 0
+        foreach ($target in $targets) { if ($rows[$target] -gt $max) { $max = $rows[$target] } }
+        if ($max -lt (1 -shl (16 - $bits))) { 2 } else { 4 }
+    }
+    for ($t = 0; $t -lt 0x20; $t++) {
+        if ($rows[$t] -eq 0) { continue }
+        $rowWidth = 0
+        foreach ($column in ($script:TableColumns[$t] -split ' ')) { $rowWidth += & $width $column }
+        $p += [long]$rowWidth * $rows[$t]
+    }
+
+    # Assembly: HashAlgId (4), four version parts (2 each), Flags (4), PublicKey (blob), Name (string), Culture.
+    $at = $p + 16 + $heap.b
+    $index = if ($heap.s -eq 2) { [long][BitConverter]::ToUInt16($Bytes, $at) } else { [long][BitConverter]::ToUInt32($Bytes, $at) }
+    $strings = $streams['#Strings']
+    if ($index -ge $strings.Size) { throw "the Assembly name index $index lies outside the #Strings heap ($($strings.Size) bytes)" }
+    $end = $strings.Offset + $index
+    while ($Bytes[$end] -ne 0) { $end++ }
+    [pscustomobject]@{
+        Name    = [System.Text.Encoding]::UTF8.GetString($Bytes, [int]($strings.Offset + $index), [int]($end - $strings.Offset - $index))
+        At      = [long]$at
+        Width   = $heap.s
+        Strings = $strings
+    }
+}
+
+<#
+    Gives the assembly at $Path the identity name $As, when its own is $Expected: the Assembly table's Name index is
+    pointed at a #Strings entry that already reads $As, and no other byte changes. An index may point into the middle of
+    an entry, so go.fmt's own "go.fmt" entry holds "fmt" three bytes in. Returns $null when done, or why it was not.
+#>
+function Set-GoApiCompatIdentity([string]$Path, [string]$Expected, [string]$As) {
+    $bytes = [System.IO.File]::ReadAllBytes($Path)
+    try { $field = Get-GoAssemblyIdentityField $bytes } catch { return "its assembly identity cannot be read ($($_.Exception.Message))" }
+    if ($field.Name -cne $Expected) { return "its assembly identity is '$($field.Name)', not the package ID $Expected" }
+
+    # Latin-1 maps each byte to one char, so a char offset in the heap's text is its byte offset.
+    $latin1 = [System.Text.Encoding]::GetEncoding(28591)
+    $heap = $latin1.GetString($bytes, [int]$field.Strings.Offset, [int]$field.Strings.Size)
+    $index = $heap.IndexOf($latin1.GetString([System.Text.Encoding]::UTF8.GetBytes($As)) + [char]0, [StringComparison]::Ordinal)
+    if ($index -lt 0) { return "its #Strings heap holds no '$As', so its identity cannot be aligned with the baseline's" }
+    $encoded = if ($field.Width -eq 2) { [BitConverter]::GetBytes([uint16]$index) } else { [BitConverter]::GetBytes([uint32]$index) }
+    [Array]::Copy($encoded, 0, $bytes, $field.At, $field.Width)
+    [System.IO.File]::WriteAllBytes($Path, $bytes)
+    $null
 }
 
 <#
@@ -195,11 +344,16 @@ function Invoke-GoApiCompatAsset([string]$RepoRoot, [string]$Left, [string]$Righ
       Compared   the number of assets the tool reported a verdict for
       Assets     the baseline's assets
       Failures   one line per reason the package is red, each naming the package and its asset
+      Renamed    each baseline asset compared with its declared renamed successor, as "<baseline> -> <current>"
     Every baseline asset must exist in the current package (a missing one is a break the tool cannot see). An asset only
     the current package has is new surface, which is compatible, and is not compared. THE NEW-RID RULE: a RID the
     baseline does not ship (the first linux-arm64, S6) is admitted with no prior baseline, and so is every runtimes/
     folder of a package newly RID-split; each is compared from the next release on, against this one. A package with no lib/ or
     runtimes/ asset (go.gen, an analyzer) compares nothing and reads green with Compared 0 of 0.
+    $ReleaseVersion is the release the comparison stands for. When it is the declared assembly rename's
+    ($script:AssemblyRenameRelease), a standard-library package's missing baseline asset <dir>/<name>.dll is compared with
+    <dir>/<id>.dll, whose assembly identity must be the package ID; the copy compared is extracted under the baseline's
+    path, so its diagnostics and suppression entries name the baseline asset, as every other comparison's do.
 #>
 function Test-GoApiCompatPackage {
     param(
@@ -208,12 +362,29 @@ function Test-GoApiCompatPackage {
         [Parameter(Mandatory)][string]$Current,
         [string]$SuppressionFile,
         [Parameter(Mandatory)][string]$RepoRoot,
-        [Parameter(Mandatory)][string]$WorkDir
+        [Parameter(Mandatory)][string]$WorkDir,
+        [string]$ReleaseVersion
     )
 
     $failures = New-Object System.Collections.Generic.List[string]
+    $renamed = New-Object System.Collections.Generic.List[string]
     $assets = @(Get-GoApiCompatAssets $Baseline)
     $currentAssets = @(Get-GoApiCompatAssets $Current)
+
+    # THE ASSEMBLY RENAME (see $script:AssemblyRenameRelease): each missing baseline asset's successor, <dir>/<id>.dll,
+    # when the current package has it and the baseline does not. Followed only under the declaration.
+    $renameable = $Id -like 'go.*' -and @('go.lib', 'go.gen') -notcontains $Id
+    $declared = $renameable -and $ReleaseVersion -and (($ReleaseVersion -split '[-+]', 2)[0] -ceq $script:AssemblyRenameRelease)
+    $successors = @{}
+    if ($renameable) {
+        foreach ($asset in $assets) {
+            if ($currentAssets -contains $asset) { continue }
+            $successor = ($asset -replace '[^/]+$', '') + "$Id.dll"
+            if ($currentAssets -ccontains $successor -and $assets -notcontains $successor) { $successors[$asset] = $successor }
+        }
+    }
+    $extractAs = @{}
+    if ($declared) { foreach ($asset in $successors.Keys) { $extractAs[$successors[$asset]] = $asset } }
 
     $entries = @()
     if ($SuppressionFile) { $entries = @(Read-GoApiCompatSuppressions $SuppressionFile) }
@@ -229,11 +400,29 @@ function Test-GoApiCompatPackage {
     $leftRoot = Join-Path $work $script:LeftDir
     $rightRoot = Join-Path $work $script:RightDir
     Expand-GoApiCompatAssets $Baseline $assets $leftRoot
-    Expand-GoApiCompatAssets $Current $assets $rightRoot
+    Expand-GoApiCompatAssets $Current $assets $rightRoot $extractAs
 
     $compared = 0
     foreach ($asset in $assets) {
-        if ($currentAssets -notcontains $asset) { $failures.Add("${Id}: $asset is in the baseline and missing from the current package"); continue }
+        $as = ''
+        if ($currentAssets -notcontains $asset) {
+            $missing = "${Id}: $asset is in the baseline and missing from the current package"
+            if (-not $successors.ContainsKey($asset)) {
+                if ($declared) { $missing += ", and so is its declared rename $(($asset -replace '[^/]+$', '') + "$Id.dll")" }
+                $failures.Add($missing); continue
+            }
+            if (-not $declared) {
+                $failures.Add("$missing; $($successors[$asset]) is there, but the guard declares the assembly rename for release $script:AssemblyRenameRelease only, and this comparison stands for $(if ($ReleaseVersion) { "release $ReleaseVersion" } else { 'no release' }) (`$script:AssemblyRenameRelease in GoApiCompat.psm1)"); continue
+            }
+            # The renamed copy takes the baseline's identity name, so the tool pairs the two and compares every member.
+            $successor = $successors[$asset]
+            try { $baselineName = (Get-GoAssemblyIdentityField ([System.IO.File]::ReadAllBytes((Join-Path $leftRoot $asset)))).Name }
+            catch { $failures.Add("${Id}: ${asset}: its assembly identity cannot be read ($($_.Exception.Message)), so it cannot be compared with its declared rename $successor"); continue }
+            $problem = Set-GoApiCompatIdentity (Join-Path $rightRoot $asset) $Id $baselineName
+            if ($problem) { $failures.Add("${Id}: $successor, the declared rename of ${asset}: $problem"); continue }
+            $renamed.Add("$asset -> $successor")
+            $as = " (compared as $successor, the declared assembly rename)"
+        }
 
         $mine = @($entries | Where-Object { $_.Asset -ceq $asset })
         $suppressions = $null
@@ -243,15 +432,15 @@ function Test-GoApiCompatPackage {
         }
 
         $result = Invoke-GoApiCompatAsset $RepoRoot (Join-Path $leftRoot $asset) (Join-Path $rightRoot $asset) $suppressions
-        if ($result.Problem) { $failures.Add("${Id}: ${asset}: $($result.Problem)"); continue }
+        if ($result.Problem) { $failures.Add("${Id}: ${asset}${as}: $($result.Problem)"); continue }
 
         $compared++
-        foreach ($line in $result.Diagnostics) { $failures.Add("${Id}: $line") }
-        foreach ($line in $result.Unnecessary) { $failures.Add("${Id}: an unnecessary suppression (it matches nothing; delete it): $line") }
+        foreach ($line in $result.Diagnostics) { $failures.Add("${Id}: $line$as") }
+        foreach ($line in $result.Unnecessary) { $failures.Add("${Id}: an unnecessary suppression (it matches nothing; delete it): $line$as") }
     }
 
     Remove-Item -LiteralPath $work -Recurse -Force
-    [pscustomobject]@{ Id = $Id; Compared = $compared; Assets = $assets; Failures = @($failures) }
+    [pscustomobject]@{ Id = $Id; Compared = $compared; Assets = $assets; Failures = @($failures); Renamed = @($renamed) }
 }
 
 # The baseline for a package version: the highest published version on the same line (the same first three numbers),
@@ -355,7 +544,7 @@ function Invoke-GoApiCompatGuard {
             $baseline = Save-GoApiCompatBaseline $client $flat $id.Id $baselineVersion (Join-Path $WorkDir '_baselines')
             $baselines[$id.Id] = [pscustomobject]@{ Version = $baselineVersion; Path = $baseline }
             $suppression = & $SuppressionFor $id.Id
-            $result = Test-GoApiCompatPackage -Id $id.Id -Baseline $baseline -Current $package.FullName -SuppressionFile $suppression -RepoRoot $RepoRoot -WorkDir $WorkDir
+            $result = Test-GoApiCompatPackage -Id $id.Id -Baseline $baseline -Current $package.FullName -SuppressionFile $suppression -RepoRoot $RepoRoot -WorkDir $WorkDir -ReleaseVersion $(if ($ReleaseVersion) { $ReleaseVersion } else { $id.Version })
 
             $packagesCompared++
             $compared += $result.Compared

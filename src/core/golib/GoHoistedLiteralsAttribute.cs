@@ -27,4 +27,4 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly)]
-public sealed class GoHoistedLiteralsAttribute : Attribute;
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoHoistedLiteralsAttribute : Attribute;

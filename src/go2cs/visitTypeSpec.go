@@ -700,7 +700,6 @@ func samePackageTypeQualifier() string {
 	return nsSegments + "." + classQualifier + "/"
 }
 
-
 // DescriptorCarrierSuffix marks a converter-minted DESCRIPTOR CARRIER - the uninhabited interface
 // that holds the Go name of a defined-over-interface type the emission erased to a `using` alias.
 // U+1D05 LATIN LETTER SMALL CAPITAL D, chosen to sit in the same small-capital family as the

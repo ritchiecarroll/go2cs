@@ -19,7 +19,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework Condition="'$(TargetFramework)'==''">net10.0</TargetFramework>
     <RootNamespace>go.unicode</RootNamespace>
-    <AssemblyName>unicode.utf8.tests</AssemblyName>
+    <AssemblyName>go.unicode.utf8.tests</AssemblyName>
     <Product>go2cs</Product>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>

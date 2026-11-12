@@ -1,0 +1,23 @@
+# patchcs.py <checker.cs> [--restore] : C51 diagnostic counter in the converted checker's getBaseTypes (arm C only, never
+# committed). Prints "getBaseTypes calls <n> at <s> s" to stderr every 2^24 calls. Backup <file>.c51-orig; --restore
+# moves it back and touches it (a restore by move keeps the old mtime and MSBuild would rebuild nothing).
+import os, shutil, sys
+
+f = sys.argv[1]; o = f + ".c51-orig"
+if "--restore" in sys.argv:
+    shutil.move(o, f); os.utime(f, None); print("restored", f); sys.exit(0)
+s = open(f, encoding="utf-8-sig", newline="").read()
+NL = "\r\n" if "\r\n" in s else "\n"
+a = "internal static slice<ж<ΔType>> getBaseTypes(this ж<Checker> Ꮡc"
+assert s.count(a) == 1, s.count(a)
+i = s.index(a); j = s.index("{", i) + 1
+counter = (NL + "    // C51 diagnostic counter (arm C only, never committed)" + NL +
+           "    if ((++ᴛc51Calls & 0xFFFFFF) == 0) global::System.Console.Error.WriteLine($\"getBaseTypes calls {ᴛc51Calls} at {ᴛc51Clock.Elapsed.TotalSeconds:F1} s\");")
+fields = ("internal static long ᴛc51Calls;" + NL +
+          "internal static readonly global::System.Diagnostics.Stopwatch ᴛc51Clock = global::System.Diagnostics.Stopwatch.StartNew();" + NL + NL)
+if not os.path.exists(o):
+    shutil.copy2(f, o)
+s = s[:i] + fields + s[i:j] + counter + s[j:]
+bom = open(o, "rb").read(3) == b"\xef\xbb\xbf"
+open(f, "w", encoding="utf-8-sig" if bom else "utf-8", newline="").write(s)
+print("patched", f)

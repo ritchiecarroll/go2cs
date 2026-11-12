@@ -17,7 +17,7 @@ namespace go;
 /// The runtime function Go's compiler calls to allocate, which a Go 1.26 heap-profile record names between
 /// <c>runtime.mallocgc</c> and the allocating function.
 /// </summary>
-public enum GoAllocEntry : byte
+[EditorBrowsable(EditorBrowsableState.Never)] public enum GoAllocEntry : byte
 {
     /// <summary><c>runtime.newobject</c>: <c>new(T)</c>, <c>&amp;T{}</c>, an escaping local; a map's table.</summary>
     NewObject,
@@ -72,7 +72,7 @@ public enum GoAllocEntry : byte
 /// path, and only then is a stack walked.
 /// </para>
 /// </remarks>
-public static class GoMemProfile
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoMemProfile
 {
     /// <summary>The storage of <c>runtime.MemProfileRate</c>, Go's default: one sample per 512 KiB.</summary>
     public static nint Rate = 512 * 1024;
@@ -97,7 +97,7 @@ public static class GoMemProfile
     /// </remarks>
     public static readonly bool PprofReachable = PprofReachableFrom(AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") as string, findPprofPackage);
 
-    private const string PprofAssemblyName = "runtime.pprof";
+    private const string PprofAssemblyName = "go.runtime.pprof";
 
     // The type question is asked by name, not by walking references: under native AOT the compiler
     // resolves a constant Type.GetType name against the assemblies it was given, so the answer is the
@@ -110,7 +110,7 @@ public static class GoMemProfile
                         "which calls pprof_package and so keeps it; missing, the answer is 'not linked', Go's own answer " +
                         "for a program without pprof (trim stage 1, docs/PLAN-golib-full-trim.md).")]
     private static Type? findPprofPackage() =>
-        Type.GetType("go.runtime.pprof_package, runtime.pprof", throwOnError: false) ??
+        Type.GetType("go.runtime.pprof_package, go.runtime.pprof", throwOnError: false) ??
         System.Reflection.Assembly.GetEntryAssembly()?.GetType("go.runtime.pprof_package", throwOnError: false);
 
     /// <summary>

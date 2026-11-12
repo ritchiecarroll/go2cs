@@ -25,7 +25,7 @@ namespace go;
 /// <see cref="GoReflect.IsNilGoValue"/> answers nil — so the carrier can never be stored into a
 /// func-typed slot or observed as itself.
 /// </remarks>
-public sealed class NilFuncValue
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class NilFuncValue
 {
     /// <summary>The managed delegate type this nil func carries — Go's eface type word.</summary>
     public Type Type { get; }
@@ -39,7 +39,7 @@ public sealed class NilFuncValue
 /// <summary>
 /// The FUNC boundary accessor — the delegate-shaped sibling of <c>ж&lt;T&gt;.OrTypedNil</c>.
 /// </summary>
-public static class NilFuncExtensions
+[EditorBrowsable(EditorBrowsableState.Never)] public static class NilFuncExtensions
 {
     /// <summary>
     /// Boxes a func value for an EMPTY-interface slot, carrying its type when the value is nil.

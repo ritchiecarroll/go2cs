@@ -1,0 +1,88 @@
+// Package tsshape reproduces the pointer shape of the TypeScript checker's *Type: every
+// *Type is &data.Type, a pointer to a field promoted through five embedded structs.
+package tsshape
+
+type Type struct {
+	flags uint32
+	id    uint32
+}
+
+type TypeBase struct{ Type }
+type ConstrainedType struct {
+	TypeBase
+	c int
+}
+type StructuredType struct {
+	ConstrainedType
+	s int
+}
+type ObjectType struct {
+	StructuredType
+	o int
+}
+type TypeReference struct {
+	ObjectType
+	r int
+}
+
+func (t *TypeBase) AsType() *Type { return &t.Type }
+
+type TypeData interface{ AsType() *Type }
+
+func newType(d TypeData) *Type { return d.AsType() }
+
+// Deep returns n *Type values, each &data.Type over its own TypeReference (five hops).
+func Deep(n int) []*Type {
+	r := make([]*Type, n)
+	for i := range r {
+		r[i] = newType(&TypeReference{})
+	}
+	return r
+}
+
+// Shallow returns n *Type values, each &b.Type over its own TypeBase (one hop).
+func Shallow(n int) []*Type {
+	r := make([]*Type, n)
+	for i := range r {
+		b := &TypeBase{}
+		r[i] = &b.Type
+	}
+	return r
+}
+
+// Plain returns n *Type values, each its own allocation.
+func Plain(n int) []*Type {
+	r := make([]*Type, n)
+	for i := range r {
+		r[i] = &Type{}
+	}
+	return r
+}
+
+// CountEq compares a[i] == b[(i+shift)%len] for every i, rounds times, and counts the equal pairs.
+func CountEq(a, b []*Type, shift, rounds int) int {
+	c := 0
+	n := len(a)
+	for k := 0; k < rounds; k++ {
+		for i := 0; i < n; i++ {
+			if a[i] == b[(i+shift)%n] {
+				c++
+			}
+		}
+	}
+	return c
+}
+
+// CountEqInt is the loop with an integer compare in place of the pointer compare (the baseline).
+func CountEqInt(a, b []int, shift, rounds int) int {
+	c := 0
+	n := len(a)
+	for k := 0; k < rounds; k++ {
+		for i := 0; i < n; i++ {
+			if a[i] == b[(i+shift)%n] {
+				c++
+			}
+		}
+	}
+	return c
+}

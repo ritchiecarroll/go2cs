@@ -47,7 +47,7 @@ namespace go;
 /// <summary>
 /// Mints and resolves the word a Go func value answers when it is read as a machine word.
 /// </summary>
-public static class GoFuncCookie
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoFuncCookie
 {
     private const ulong Base = 0xC000_8000_0000_0000UL;
     private const ulong BandMask = 0xFFFF_8000_0000_0000UL;

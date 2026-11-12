@@ -23,7 +23,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-public class GoImplicitConvAttribute<TSource, TTarget> : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public class GoImplicitConvAttribute<TSource, TTarget> : Attribute
 {
     /// <summary>
     /// Gets or sets flag that determines if operator conversion order should be inverted.

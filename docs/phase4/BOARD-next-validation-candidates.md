@@ -36410,6 +36410,162 @@ asserts with that fix. Until then this is a silent divergence on a public API, a
 
 — G (2026-11-11)
 
+## 2026-11-12 — P2 (S7 wave 1, COORD R2): the converted gc/scan skips the AVX-512 tests on an x64 host that HAS AVX-512, where Go runs and passes them — OPEN, a finding
+
+**The reading.** Wave 1's shard A-8 (run 43151882036, master 06610aaa65) read `internal/runtime/gc/scan` on both
+hosted legs. The hosted linux-x64 runner offers AVX-512, so Go runs `TestExpandAVX512`, `TestScanSpanPackedAVX512`
+and `TestFilterNilAVX512` and passes the three parents and their 6,166 subtests (9,261 verdicts). The converted side
+reports the three parents as `skip` and none of the subtests: matched 3,092, divergent 6,169, all undisclosed. The
+roster's 3,095 was read on a host without AVX-512, where both sides skip the three.
+
+**What it is not.** It is not an arm64 difference: the arm64 leg reads 3,092, exactly the roster less the three
+x86-only names, and banks by COORD's R2 (a ruled arch-count, `$LinuxRidRuledArchCount`). It is not noise: the Go side
+takes the AVX-512 path the CPU offers and the converted side does not.
+
+**Where to look.** The converted side's feature detection or gating: `internal/cpu`'s x86 flags (`cpu_x86.cs`,
+`doinit`, the `xgetbv` row of the bank plan's section 11.3) or the scan package's own gate on them. The kernels'
+bodies are the post-hop reading list's `ExpandAVX512`, `FilterNilAVX512`, `scanSpanPackedAVX512` (section 11), so a
+fix that turns detection on may reach unbodied kernels. Measure on a hosted x64 with AVX-512 (the os-matrix
+`sweep-shard` leg is one).
+
+## 2026-11-12 — P2 (S7 wave 1, COORD R4 amended): `internal/poll`'s TestSplicePipePool is cut by the host's 30-minute per-test deadline when the sweep budget is 45 minutes — an INSTRUMENT artifact, not a hang
+
+**The reading.** Wave 1's shard A-7 (run 43151877722) read `internal/poll` FAIL on both hosted legs, identically:
+12 matched, and `TestSplicePipePool` Go pass / C# fail, "abandoned: did not finish within the per-test deadline 30m0s",
+the disclosed `codegen-liveness` signature ("leaked descriptors: ") not printed. Row walls 1,835 s and 1,838 s.
+
+**The cause.** The test sizes its own wait from `t.Deadline()`: 0.9 of the remaining budget (the 2026-09-03 entry
+measured 15m -> 805 s and 60m -> 3,235 s). Its pipes are never collected in the converted run (the disclosed leak), so
+it waits the whole of that. The os-matrix `sweep-shard` stage passes `SWEEP_TEST_TIMEOUT` 45m, so the test waits
+40.5 minutes, and the converted host's 30-minute per-test deadline abandons it first. The roster's 12 + 1 was read at
+the sweep's default 10m, where the wait is 9 minutes and the disclosed signature prints.
+
+**Next.** A one-row workflow seat (a per-row timeout input for `sweep-shard`), then W1-A7R: `internal/poll` alone at a
+budget of 33m or less (25m approved). The defect claim closes if A7R reads the disclosed signature at 12 + 1. Until
+then the row is pending at linux-arm64.
+
+## 2026-11-12 — P2 (S7 wave 1, COORD R4): `internal/zstd`'s TestAlloc runs and fails on hosted linux, where the runner has a `zstd` binary — OPEN, the deferred pin moves to linux under the ten-read rule
+
+**The reading.** Wave 1's shard A-9 (run 43151886546) read `internal/zstd` FAIL on both hosted legs, identically:
+535 matched, `TestAlloc` Go pass / C# fail, undisclosed on linux. The test needs a `zstd` binary on `PATH`; the hosted
+images have one. Its zero-allocation assert (`testing.AllocsPerRun`) fails in the converted run. The deferred pin for
+it is scoped to darwin, where the same reading was first made (2026-10-13). The roster's linux 536 was read on a host
+without `zstd`, where `TestAlloc` and `TestLarge` skip on both sides.
+
+**Next.** COORD's ruling: extend the deferred pin to linux under the ten-read rule (ten hosted reads, both legs, the
+same count, inside one wave's budget; the arm and x64 legs count separately), keeping its retirement plan. Until the
+ten reads land the row is pending at linux-arm64.
+
+## 2026-11-12 — P2 (S7 wave 1, A-7R): `internal/poll` read at a 30m budget shows the disclosed signature at 12 + 1 on both legs — the defect claim is CLOSED; it was the instrument
+
+**The reading.** W1-A7R (run 43161387949, `internal/poll;timeout=30m`, the `sweep-shard` filter option added for it)
+read PASS 12 + 1 on both hosted legs: `TestSplicePipePool` diverges with its disclosed `codegen-liveness` signature,
+inside the row's 30m per-test floor. Row walls 1,791 s (linux-x64) and 1,839 s (linux-arm64). The prediction (the
+disclosed signature at 12 + 1) is a HIT. 30m, not the approved 25m: the row's `$longTimeouts` floor is 30m and a smaller
+budget loses to it, so 30m makes the asked value the effective one. The test waits 27 minutes (0.9 of 30m) and prints
+its signature before the 30m deadline.
+
+**Result.** The A-7 red was the 45m budget (the entry above), not a hang. `internal/poll` banks at linux-arm64, EQUAL
+12 + 1 (evidence W1-A7R.tsv, which supersedes W1-A7 for the row). The ref, claude/p2-s7-sweep-timeout a31cb64783, carries
+master 06610aaa65's converted tree; it changes only the workflow and the zstd pin.
+
+## 2026-11-12 — P2 (S7 wave 1, the ten reads): `internal/zstd`'s TestAlloc with the deferred pin scoped to linux reads 274,495 allocations on all 20 leg-reads — the pin holds on linux; the row banks HOST-EQUAL (host-tool)
+
+**The reading.** Ten one-row dispatches, Z01 to Z10 (runs 43161391741, 43161395278, 43161398705, 43161402038,
+43161405088, 43161416746, 43161420090, 43161423429, 43161426535, 43161429556), at claude/p2-s7-sweep-timeout a31cb64783,
+where the pin's platforms are darwin and linux. Every one of the 20 leg-reads (10 linux-x64, 10 linux-arm64) read DISC
+535 + 1, new 0, with `TestAlloc` absorbed by the pin, and printed `got 274495 allocs, want 0`, the darwin count. All 60
+dump-proof lines PASS. The prediction (274,495 on every read, both legs) is a HIT. The jobs end red only because the
+roster's linux expectation is 536 + 0: the counts are a host difference from that roster host, which has no `zstd`.
+
+**Result.** The pin's linux scope has its ten reads. COORD ruled (2026-11-12) that the row banks by a
+`$LinuxRidHostEqual` line, class host-tool (a new class beside host-privilege: a test runs only where a tool the roster's
+host lacks is on `PATH`), not by moving the roster's linux-x64 536, which stays the reading of a host with no `zstd`.
+linux-arm64 banks 536 (linux-x64; linux-arm64: 535 + 1). The open item is the pin's own retirement plan, unchanged.
+## 2026-11-12 — C2 (found by the try-first fast path, COORD's ruling): golib's `sync.Mutex` has no starvation mode — OPEN, a parity item, post-.4 unless a workload shows starvation
+
+Go bounds barging with starvation mode: a waiter blocked for more than 1 ms gets a direct handoff, and new arrivals
+queue behind it. golib's `sync.Mutex` is a `SemaphoreSlim(1,1)` gate (`src/core/sync/mutex.cs`), which hands a
+released count to whichever thread takes it first. So it has no such mode. That was true at base. The try-first
+fast path (`claude/c2-mutex-fastpath`, ruled (a)) makes it more visible: an Unlock followed by an immediate Lock no
+longer spends about 300 ns in the park bracket, and that gap was where the woken waiter took the count.
+
+`TestMutexFairness` (Go's `sync/mutex_test.go`), linux-x64, Release, the `sync.tests` app host, wall per run:
+
+| run | base `06610aaa65` | with the fast path |
+|---|---|---|
+| alone, `-test.count=20` | worst 0.04 s | worst 0.04 s |
+| with `TestMutex` and `TestMutexMisuse`, `-test.count=10` | median 0.015 s, worst 0.34 s | median 0.14 s, worst 0.59 s |
+| the full suite, 3 runs | 0.05, 0.01, 0.01 s | 0.51, 0.02, 0.19 s |
+
+Every run passes. The test's bound is 10 s, so the worst run is 17 times inside it. The gap to Go is the missing
+mode, not the fast path. Go's own Lock fast path is a CompareAndSwap that barges the same way in normal mode.
+
+A seat would add starvation mode to the gate: a waiter that has waited past 1 ms takes the next Unlock by direct
+handoff, and the fast path declines while one is waiting. Its red is a fairness probe with a holder that releases
+and re-takes the lock in a tight loop.
+
+— C2 (2026-11-12)
+## 2026-11-11 — G (found by the M:N spike's cost table, COORD's routing): `TypeGenerator` is 93% of the generator time on `runtime` — OPEN, post-.4 perf queue
+
+The compiler's own generator report for a rebuild of `runtime` with no M:N switch set (95 s wall, Windows x64,
+SDK 10.0.400): generators 85.8 s in all, of which `go2cs.TypeGenerator` 80.6 s (93%), `EscapeRegistryGenerator`
+2.5 s, `ImplementGenerator` 1.2 s, `ImplicitConvGenerator` 0.7 s, `RecvGenerator` 0.3 s, every other under 0.1 s.
+`TypeGenerator` writes 417 files there, about 190 ms a file. On `net/http` the generators take 30.0 s of a 42.6 s
+build, `TypeGenerator` 13.6 s and `ImplementGenerator` 12.9 s of it (88% between them).
+
+This is today's product and has nothing to do with M:N: the spike read it because a nested generator run doubled
+it. The reason for the 190 ms a file was not looked for. A seat starts by timing the generator's steps on
+`runtime` (the report above is a rebuild with `-p:ReportAnalyzer=true -v d`) and by asking whether its per-file
+work re-reads the whole compilation.
+
+Record: `docs/phase4/DATA-mn-spike-2.md` 6.2 and 6.3 (`claude/g-mn-spike2-b4`).
+
+— G (2026-11-11)
+
+## 2026-11-11 — G (found by the M:N spike's cost table, COORD's routing): `sync.Mutex.Lock` has no try-first step: 230 ns and 64 bytes for an uncontended pair — OPEN, a .4 quality candidate, golib only
+
+An uncontended `Lock` and `Unlock` pair, one goroutine, Windows x64, JIT, runtime 10.0.11, median of 8:
+
+| build | per pair |
+|---|---|
+| Go 1.26.10 | 3.8 ns, 0 B |
+| today's product | 230 ns, 64 B |
+| the spike's hand twin of `Lock` (tries the free lock first) | 27.9 ns, 0 B |
+
+With profiling off, the plain `Lock` enters the park bracket before it tries the lock
+(`using (Goroutine.Park(...)) { gate.Wait(); }`); the bracket is where the 200 ns and the 64 bytes go. The twin
+does `gate.Wait(0)` first and enters the bracket only when that fails. The same first step in the plain `Lock`
+needs no M:N and is measurable with the spike's fixture (`src/tools/mnspike2/MnCost`, `MN_COST_MODE=mutex`).
+A seat checks the other bracketed waits in golib's `sync` for the same order (`RWMutex`, `WaitGroup.Wait`,
+`Cond`), and keeps the profiling-on path, which must still record the block.
+
+Record: `docs/phase4/DATA-mn-spike-2.md` 6.4 (`claude/g-mn-spike2-b4`).
+
+— G (2026-11-11)
+
+## 2026-11-11 — G (found by the M:N spike's cost table, COORD's routing): a deferred closure costs 24.7 ns and 88 bytes, and converted SHA-256 reads 17 times Go's — OPEN, post-.4 perf queue, two rows
+
+Both read on today's product with no M:N switch set (Windows x64, JIT, runtime 10.0.11, medians of 8), beside
+Go 1.26.10's own build of the same source.
+
+| row | Go | today's product |
+|---|---|---|
+| a call into a function that defers one closure | 4.6 ns, 0 B | 24.7 ns, 88 B |
+| `io.CopyBuffer` of one 512-byte chunk into `crypto/sha256` | 254 ns | 4,429 ns |
+
+1. **The defer.** Go's open-coded defer allocates nothing; the converted frame allocates 88 bytes a call. The
+   spike did not read which objects those are. A seat reads them first, and then what a frame with one defer
+   and no `recover` can do without.
+2. **SHA-256.** Go's figure uses the CPU's SHA instructions; the converted package runs the generic block
+   function (`sha256block_noasm.cs`; the corpus is converted without Go's assembly bodies). The gap is the
+   size of what a hand-owned block function over the platform intrinsics would return, and other hashes and
+   ciphers with an assembly body in Go are the same shape.
+
+Fixture: `src/tools/mnspike2/MnCost`, `MN_COST_MODE=defer` and `MN_COST_MODE=hash`. Record:
+`docs/phase4/DATA-mn-spike-2.md` 6.4 (`claude/g-mn-spike2-b4`).
+
+— G (2026-11-11)
 ## 2026-11-11 — H (cgo Phase 2 increment 5, converter-cgo 42973745743): cmd/cgo's pointer check has two forms, and Phase 2 admits both, with five divergences from Go DISCLOSED
 
 **The measurement.** cmd/cgo wraps a C call whose argument can hold a Go pointer in a closure that calls
@@ -36508,6 +36664,101 @@ load does not append it. NOT MEASURED: whether a user tag is dropped there is re
 nothing fails to link, the code returns the first probe's error, which lists every symbol, and discards the
 baseline's own error. The baseline's error is the clean one (the linker's words about the link line), and is the
 one to return.
+
+## 2026-11-12 — G (COORD's ruling on a finding of the M:N prototype's first stage): a deadlock exit prints the fatal line ALONE, where Go also prints one block per goroutine (`goroutine 1 [select (no cases)]:` and its frames) — OPEN, a parity gap on master and independent of M:N; a .4 candidate, routed by COORD
+
+**What a user sees.** A converted program whose goroutines all wait forever ends as Go's does: exit code 2, and
+the fatal line on stderr. Go then prints an empty line and one block for every goroutine: a header with the
+goroutine's wait reason, then its frames. The converted program prints nothing after the fatal line, so its report
+does not say which goroutine waits, on what, or where.
+
+**Minimal repro** (one file of five lines, no imports): `package main`, an empty line, `func main() {`, an indented
+`select {}` (line 4), and `}`.
+
+**Go's own stderr (go1.26.10, windows/amd64, `go run .`), exit code 2, in order:**
+
+- `fatal error: all goroutines are asleep - deadlock!`
+- an empty line
+- `goroutine 1 [select (no cases)]:`
+- `main.main()`
+- a tab, then the source file's full path, then `:4 +0xf`
+
+`go run` adds its own `exit status 2` after them. The `+0xf` is a code offset, which no managed build reproduces.
+
+**Measured at master (`4efe149858`, windows x64, SDK 10.0.400, runtime 10.0.11).** The repro went in as a throwaway
+Behavioral fixture, converted and built by the behavioral runner (Release), run directly, and removed; the tree read
+clean after. Predicted from the prototype's plain build, where the gap was first seen:
+
+- stdout: empty.
+- stderr: the one line `fatal error: all goroutines are asleep - deadlock!` and nothing else.
+- exit code: 2.
+
+The first line and the exit code match Go. The four lines after it are missing.
+
+**Read at the tree (master, by name).**
+
+- The report is written by `builtin.fatal` (golib, `builtin.cs`): the message and a line ending, through
+  `builtin.WriteFatalReport` (stderr, then the crash output). It writes no goroutine block. That is the Release
+  path, the one measured; a Debug golib throws an `InvalidOperationException` there instead.
+- The pieces a block needs are in golib already. `WaitReason` carries Go's own text for each reason, `select (no
+  cases)` and `chan receive (nil chan)` included, and the detector that fires the report
+  (`Goroutine.AllGoroutinesForeverBlocked`) takes a snapshot of the goroutine registry to decide.
+- An unrecovered panic does print a block (`goroutine 1 [running]:` and frames; `DESIGN-crash-report.md`). Whether
+  that writer can print a PARKED goroutine's frames, as against the panicking thread's own, is not read.
+
+**What is on record already, and what is not.**
+
+- This BOARD's behavioral skip rows `ChannelReceiveFromNil` and `ChannelSendToNil` (DELIBERATE-SKIP) say the trace
+  cannot be expected byte for byte. That stands for the offsets. It does not cover the blocks being absent.
+- `docs/Limitations.md` and `docs/GoFeatureSupport.md` disclose that the message appears only for a forever-wait (a
+  nil channel, an empty `select {}`) and that any other deadlock hangs. Neither says the goroutine blocks are missing.
+
+**Scope.** Every program that reaches the report: main and each other goroutine in a forever-wait. Run on windows
+x64 only; the writer is shared golib code, so linux and darwin are expected to read the same, not measured. Main's
+`runtime.Goexit` report (`no goroutines (main called runtime.Goexit) - deadlock!`) has its own writer
+(`MainGoexit`), and whether Go prints blocks after it, and golib does not, is not read here.
+
+**Owed.** The fix is not taken here: COORD routes it to a lane as a .4 candidate. A fix prints, after the fatal
+line, an empty line and one block per registered goroutine (header with id and wait reason, then the frames golib
+can name), and the repro above becomes a fixture whose stderr is compared up to the code offset.
+
+— G (2026-11-12)
+
+## 2026-11-12 — G (COORD's ruling on an instrument finding of the M:N prototype's stage A1): a behavioral run by `--filter` says PASS for a `main` program whose output it never compared
+
+**The route.** The behavioral runner compares a program's output with Go's only when the program's
+`package_info.cs` carries `[GoTestMatchingConsoleOutput]`. Without the attribute the runner records the Output
+phase as a skip. The summary's Output row then reads `pass 0 fail 0 skip 1 timeout 0`, and the verdict line above
+it still reads `PASS (1 projects, …)`. A reader who takes the verdict has a green that compared nothing.
+
+**How it was met.** Two programs on the prototype branch had no attribute: one new in stage A1, one from the
+spike, and the second was in none of the four behavioral test lists either. Both read PASS in every filtered run
+of the prototype's regression set, with generated twins and without, and neither was compared once. With the
+attribute added, both compare and both pass. The stage's own numbers were re-read after that.
+
+**What guards it today, and what does not.** `TestOutputComparisonListMatchesConsoleOutputAttribute`, in the
+converter's tests, fails a program that the output-comparison list names and that has no attribute, and a program
+that has the attribute and is not listed. It caught the second program at the gate, the moment the attribute was
+added. It runs under the full `go test`, so a run by `--filter` goes round it. A program with neither the
+attribute nor a list entry passes it by construction. NOT MEASURED: whether another guard requires every program
+directory to be in the lists.
+
+**Measured on master `4efe149858`** by a script over every `package_info.cs` under `src/tests/Behavioral`
+(controls: 928 files carry the attribute, and no package other than `main` carries it). Of 959 files, 941 are
+`main` packages and 13 of those carry no attribute: ChannelSendToClosed, FirstClassFunctions, ForVariants,
+GoCallVariations, IfStatements, InterfaceCasting, RangePointerArrayConversion, RangeStatements,
+RefusalDowngradeProxy, SelectStatement, StructWithPointer, TypeConversionReturnType and
+UnsafePointerReinterpret. A filtered run of any of the 13 reads PASS without a comparison. NOT READ: which of them
+are left out on purpose (a program whose output is not deterministic has to be).
+
+**Owed (not taken here).** The fix is cheap and lives in the runner: a `main` program whose Output phase is
+skipped because the attribute is missing is named in the summary as NOT COMPARED, and a run in which every
+selected program is in that state does not print a bare PASS. The fix is owed its own red: remove the attribute
+from one program, see the run name it, restore. Until it lands, a run by `--filter` is read at the Output row
+(`pass 1`), never at the verdict.
+
+— G (2026-11-12)
+
 ## 2026-11-12 — H (cgo Phase 2's exit gate, G1): the first time the route's output was compiled and run. One converter defect fixed, two findings OPEN, one toolchain fact
 
 G1's first hosted legs (`claude/h-cgo-g1` at `ea12a61e62`, stage `cgo-e2e`, runs 43207283066, 43207288962 and
@@ -36580,6 +36831,52 @@ variable read in the same list. The exit gate keeps the arm as a named divergenc
 G1 by COORD's ruling (`f43755ef77` red, `2643cf6cea` green).
 
 — H (2026-11-12)
+
+## 2026-11-12 — G (COORD's order on a reading of the M:N prototype's stage A2): with a panic in flight, `runtime.Callers` from a deferred function reads the deferring function at its `return` line
+
+**The defect.** A deferred function that runs while a panic is in flight calls `runtime.Callers`. Under Go the
+frame of the function that deferred it reads at the line of the call that panicked. In the converted program the
+same frame reads at the line of that function's `return` statement. The function name is right; the line is late.
+
+**Measured on master `4490a52244`** (Windows x64, go1.26.10, SDK 10.0.400, runtime 10.0.11) with one program of
+four shapes, run under Go and converted through the behavioral runner. Each shape prints the line its own frame
+reads at, from a helper that walks `runtime.CallersFrames` and matches the function by name.
+
+| Shape | Go | Converted |
+|---|---|---|
+| deferred closure, panic in flight: `v := boom()` on line 39, `return v` on line 40 | 39 | 40 |
+| the same with `v++` on line 52 between the call (51) and the return (53) | 51 | 53 |
+| deferred closure on an ordinary return (`return v` on line 63) | 63 | 63 |
+| direct call, no defer (the control) | 68 | 68 |
+
+The values the four functions return (7, 8, 3, 4; the first two are set by the deferred closure after `recover`)
+are equal in both lanes. So the defect is on the panic path only, and the line read is the `return` statement's,
+not the next statement's: the second shape reads 53, not 52. The runner's rows for the program: Transpile pass 1,
+Compile pass 1. It has no golden and no entry in the test lists, so Target and Output read fail by construction,
+and the two outputs were diffed directly.
+
+**Candidate cause, NOT PROVEN.** The emission was read, nothing was traced. A function with a `defer` converts to
+a `try` body, a `catch … when (GoFrame.IsPanic(…))` that captures the panic, and a `finally` that runs the
+deferred calls. While they run, the deferring function's frame is no longer at the call that threw: it is in the
+handler. The Go line reported for that position is the function's last mapped statement, the `return`. Go's
+unwinder keeps the frame at the panicking call. NOT READ: where the managed position is resolved to a Go line,
+and whether the throw site can be had there (the caught exception's own trace holds it).
+
+**Who meets it.** Code that reads a caller's line from a deferred function during a panic: a recover handler that
+logs where the panic passed, a test helper that reports the failing line. NOT MEASURED: a frame further up (the
+caller of the deferring function is at a call, so it is expected to read right), a deferred function that is not
+a closure, a panic raised by the runtime (a nil dereference, an index out of range) and Native AOT.
+
+**How it was met.** The prototype's stage A2 reads a parked goroutine's whole chain under generated twins. Its
+plain lane read the deferring function's line late, and that reading was reported as not measured on master.
+COORD ordered it measured there before anything else. It is on master, it is independent of M:N, and the
+prototype does not fix it.
+
+**Owed (not taken here).** A tracked behavioral program with the four shapes, red first against Go's output, and
+then the fix where the frame's line is resolved. The measurement's program is 77 lines and is not tracked: a
+tracked one needs its golden and its entries in the four test lists, which belong with the fix.
+
+— G (2026-11-12)
 
 ## 2026-11-12 — H (cgo Phase 3 increment 3.0): the 5b re-check's items 1, 3, 4 and 5 and the exit gate's OPEN 2 are CLOSED; item 2 stays a known limit; `strtol`'s rename is NOT MEASURED
 

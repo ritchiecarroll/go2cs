@@ -205,6 +205,58 @@ try:
               [rids_line('linux-x64', 'validated', 5, 5, 0, agree='yes').replace('f/pkg', 'g/other')], '5 (linux-x64; linux-arm64: pending)')
     rids_case('linux --rids: a linux-arm64 reading no evidence names is put back to pending, the linux-x64 reading kept', '7 + 1 (linux-arm64; linux-x64: 9)',
               [rids_line('linux-x64', 'validated', 5, 5, 0, agree='yes').replace('f/pkg', 'g/other')], '9 (linux-x64; linux-arm64: pending)')
+    # COORD's wave 1 rulings (2026-11-12), each the guard's function: ARCH-NAMES (R1, names absent both ways, every one
+    # Go's own: the collector's same_names column reads yes on both legs), HOST-EQUAL (R3, the hosted legs read alike off
+    # the roster's linux-x64 reading) and the RULED ARCH-COUNT of the guard's $LinuxRidRuledArchCount table (R2).
+    names_header = RIDS_HEADER + '\tsame_names'
+    def names_line(rid, status, verdicts, matched, divergent, absent, names, same='yes', new='0', agree='no'):
+        return rids_line(rid, status, verdicts, matched, divergent, new=new, agree=agree, absent=absent, names=names).rstrip('\n') + f'\t{same}\n'
+    rids_case('linux --rids: arch-names writes linux-x64 first, each RID with its own reading (R1)', '10 + 2',
+              [names_line('linux-x64', 'validated', 12, 10, 2, 'k1', 'd1;d2'), names_line('linux-arm64', 'DISC', 11, 10, 1, 'v1;v2', 'd1')],
+              '10 + 2 (linux-x64; linux-arm64: 10 + 1)', header=names_header)
+    rids_case('linux --rids: arch-names refuses a leg whose C# reports a name Go does not', '10 + 2',
+              [names_line('linux-x64', 'validated', 12, 10, 2, 'k1', 'd1;d2'), names_line('linux-arm64', 'DISC', 11, 10, 1, 'v1;v2', 'd1', same='no')],
+              refused='do not report the same verdict names', header=names_header)
+    rids_case('linux --rids: arch-names refuses absent lists that do not account for the counts', '10 + 2',
+              [names_line('linux-x64', 'validated', 12, 10, 2, 'k1', 'd1;d2'), names_line('linux-arm64', 'DISC', 11, 10, 1, 'v1', 'd1')],
+              refused='do not account for the verdict counts', header=names_header)
+    nine = ';'.join(f'n{i}' for i in range(1, 10))
+    # HOST-EQUAL is KEYED (COORD F2): the fixture row takes it only through a $LinuxRidHostEqual entry.
+    host_table = re.compile(r'^\$LinuxRidHostEqual = @\{\r?\n.*?^\}', re.M | re.S)
+    guard_now = open(os.path.join(root, 'src/check-roster-format.ps1'), encoding='utf-8', newline='').read()
+    host_same = [rids_line('linux-x64', 'DISC', 59, 50, 9, agree='yes', names=nine), rids_line('linux-arm64', 'DISC', 59, 50, 9, agree='yes', names=nine)]
+    for entry, lines_, want, refused, name in (
+            ("'host-privilege -- fixture'", host_same, '42 + 17 (linux-x64; linux-arm64: 50 + 9)', None, 'host-equal banks linux-arm64 at its own reading, the roster\'s linux-x64 reading kept (R3)'),
+            ("'host-privilege -- fixture'", [host_same[0], rids_line('linux-arm64', 'DISC', 59, 50, 9, agree='yes', names=nine.replace('n9', 'm9'))],
+             '42 + 17 (linux-x64; linux-arm64: pending)', None, 'host-equal is not banked when the disclosed names differ'),
+            (None, host_same, '42 + 17 (linux-x64; linux-arm64: pending)', None, 'with no host-equal ruling the same pair is a host difference, written pending (F2)'),
+            ("'host-privilege'", host_same, None, 'LinuxRidHostEqual entry does not read', 'a host-equal entry with no citation is refused')):
+        body = "$LinuxRidHostEqual = @{\n" + (f"    'f/pkg' = {entry}\n" if entry else '') + '}'
+        write(os.path.join(root, 'src/check-roster-format.ps1'), host_table.sub(lambda m: body, guard_now, count=1))
+        rids_case(f'linux --rids: {name}', '42 + 17', lines_, want, refused=refused)
+    # The guard's @{} tables match keys case-insensitively and the annotator's dicts do not, so a key that is not its
+    # row's lower-case import path is refused by name, in either table (P5's minor finding, COORD 2026-11-12).
+    for table_name in ('LinuxRidHostEqual', 'LinuxRidRuledArchCount'):
+        table_re = re.compile(r'^\$' + table_name + r' = @\{\r?\n.*?^\}', re.M | re.S)
+        write(os.path.join(root, 'src/check-roster-format.ps1'),
+              table_re.sub(lambda m: "$" + table_name + " = @{\n    'F/pkg' = 'x -- fixture'\n}", guard_now, count=1))
+        write(os.path.join(root, RIDS, 'W1-1.tsv'), RIDS_HEADER + '\n' + ''.join(host_same))
+        rc, out, err = run('annotate_linux.py', root, '--rids', '--evidence', RIDS)
+        case(f'linux --rids: a ${table_name} key that is not lower-case (F/pkg) is refused by name',
+             rc != 0 and 'F/pkg' in err and 'lower-case' in err, f'rc {rc}, out {out!r}, err {err.strip()!r}')
+    write(os.path.join(root, 'src/check-roster-format.ps1'), guard_now)
+    ruled_table = re.compile(r'^\$LinuxRidRuledArchCount = @\{\r?\n.*?^\}', re.M | re.S)
+    ruled_x64 = rids_line('linux-x64', 'FAIL', 20, 5, 15, new='15')
+    for entry, arm_absent, want, refused, name in (
+            ("'r1;r2 -- fixture'", 'r1;r2;r1/s1', '7 (linux-x64; linux-arm64: 5)', None, 'a ruled arch-count banks linux-arm64 less the ruled verdicts (R2)'),
+            (None, 'r1;r2;r1/s1', '7 (linux-x64; linux-arm64: pending)', None, 'with no ruling the same pair is a host difference, written pending'),
+            ("'r1;r2 -- fixture'", 'r1;r1/s1', None, 'does not name r2', 'a ruled arch-count whose linux-arm64 does not name a ruled verdict is refused'),
+            ("'r1;r2 -- fixture'", 'r1;r2;s1', None, 'names s1 absent, neither a ruled verdict nor a subtest', 'a ruled arch-count whose linux-arm64 names a stray absent verdict is refused (F1)'),
+            ("'r1;r2 -- fixture'", 'r1;r2;r1x', None, 'names r1x absent, neither', 'a stray absent verdict that only shares a ruled prefix is refused (F1)')):
+        body = "$LinuxRidRuledArchCount = @{\n" + (f"    'f/pkg' = {entry}\n" if entry else '') + '}'
+        write(os.path.join(root, 'src/check-roster-format.ps1'), ruled_table.sub(lambda m: body, guard_now, count=1))
+        rids_case(f'linux --rids: {name}', '7', [ruled_x64, rids_line('linux-arm64', 'COUNT', 5, 5, 0, absent=arm_absent, names='-')], want, refused=refused)
+    write(os.path.join(root, 'src/check-roster-format.ps1'), guard_now)
     # The guard's declared $LinuxRidEvidenceDirectory is the default, as $DarwinEvidenceDirectory is darwin's; while it is
     # empty, no evidence is read and every numeric linux segment is written pending (the S7-a mechanical commit).
     rids_line_eq = [rids_line('linux-x64', 'validated', 5, 5, 0, agree='yes'), rids_line('linux-arm64', 'validated', 5, 5, 0, agree='yes')]

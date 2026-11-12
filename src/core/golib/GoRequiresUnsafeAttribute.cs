@@ -35,6 +35,6 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Module, AllowMultiple = true)]
-public class GoRequiresUnsafeAttribute : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public class GoRequiresUnsafeAttribute : Attribute
 {
 }

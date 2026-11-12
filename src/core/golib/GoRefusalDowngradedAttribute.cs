@@ -24,7 +24,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-public sealed class GoRefusalDowngradedAttribute(string code, string site, string text) : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoRefusalDowngradedAttribute(string code, string site, string text) : Attribute
 {
     /// <summary>The converter's refusal code, for example <c>GO2CS2002</c>.</summary>
     public string Code { get; } = code;

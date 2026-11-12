@@ -60,6 +60,11 @@ table th code {
   table-layout: fixed;
 }
 .main-content .feature-matrix th:nth-child(1) { width: 32%; }
-.main-content .feature-matrix th:nth-child(2) { width: 9%; }
+/* The status column holds one 18px icon, so it is sized in rem rather than as a share of
+   the table: at 9% the fixed layout squeezed it below its header's width on a narrow
+   window and "Status" broke across two lines. Headers never wrap. */
+.main-content .feature-matrix th:nth-child(2) { width: 6rem; }
+.main-content .feature-matrix th { white-space: nowrap; }
 .main-content .feature-matrix th:nth-child(2),
 .main-content .feature-matrix td:nth-child(2) { text-align: center; }
+.main-content .feature-matrix td:nth-child(2) img { vertical-align: middle; }

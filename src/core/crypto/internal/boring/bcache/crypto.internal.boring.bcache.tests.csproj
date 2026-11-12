@@ -19,7 +19,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework Condition="'$(TargetFramework)'==''">net10.0</TargetFramework>
     <RootNamespace>go.crypto.@internal.boring</RootNamespace>
-    <AssemblyName>crypto.internal.boring.bcache.tests</AssemblyName>
+    <AssemblyName>go.crypto.internal.boring.bcache.tests</AssemblyName>
     <Product>go2cs</Product>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>

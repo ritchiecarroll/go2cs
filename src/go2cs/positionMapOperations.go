@@ -89,7 +89,6 @@ func claimPositionMapTarget(target string) string {
 	return target
 }
 
-
 // PositionSentinel delimits an in-text Go-line sentinel: SENTINEL <decimal Go line> SENTINEL, or
 // SENTINEL <decimal Go line> ; <call payload> SENTINEL for a statement whose calls sit on later lines
 // (writePositionSentinelCalls). NUL is the one byte that cannot occur in emitted C#, because the Go

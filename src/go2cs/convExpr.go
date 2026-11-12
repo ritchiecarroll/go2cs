@@ -466,8 +466,8 @@ func DefaultIdentContext() IdentContext {
 		isMethod:                false,
 		suppressGenericTypeArgs: false,
 		ident:                   nil,
-		fieldCollidesWithType: false,
-		fieldTypeIsRenamed:    false,
+		fieldCollidesWithType:   false,
+		fieldTypeIsRenamed:      false,
 	}
 }
 

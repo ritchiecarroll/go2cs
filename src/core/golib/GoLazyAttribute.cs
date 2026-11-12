@@ -24,7 +24,7 @@ namespace go;
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-public sealed class GoLazyAttribute : Attribute
+[EditorBrowsable(EditorBrowsableState.Never)] public sealed class GoLazyAttribute : Attribute
 {
     /// <summary>
     /// The var is EXPORTED and a lazy initializer of its package reads it: an importer may assign it before that

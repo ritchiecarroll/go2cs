@@ -63,7 +63,7 @@ namespace go;
 // PUBLIC because the only party that mints these tokens is the hand-owned reflection bridge in the
 // separate `reflect` assembly (reflect/value_impl.cs), the same way GoReflect is public for it. It is
 // a runtime seam, not part of any Go surface.
-public static class ManagedPointerTokens
+[EditorBrowsable(EditorBrowsableState.Never)] public static class ManagedPointerTokens
 {
     // minted opaque box → the referent box it stands for. What makes a MINTED opaque pointer behave
     // like the Go pointer it converts: holding the scalar-valued box keeps the referent reachable,

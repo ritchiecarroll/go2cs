@@ -12,9 +12,9 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using go.golib;
 
-[assembly:InternalsVisibleTo("unsafe")]
+[assembly:InternalsVisibleTo("go.unsafe")]
 [assembly:InternalsVisibleTo("GolibTests")]
-[assembly:InternalsVisibleTo("runtime")] // runtime.Gosched delegates to golib's GoschedBackoff escalation
+[assembly:InternalsVisibleTo("go.runtime")] // runtime.Gosched delegates to golib's GoschedBackoff escalation
 
 namespace go;
 
@@ -60,7 +60,7 @@ namespace go;
 /// FALSE of a field or element reference whose root merely happens to be reference-bearing. The
 /// middle answer below is that class, and it is the one the merged Q44 arm turned into a token.
 /// </remarks>
-public enum PointerStorage
+[EditorBrowsable(EditorBrowsableState.Never)] public enum PointerStorage
 {
     /// <summary>
     /// No storage whose address means anything: the value is an order token, never an address.
@@ -103,6 +103,12 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // HERE, beside m_isNull, because the CLR lays out a base class's fields as one pointer-aligned block:
     // an int in the derived class costs a box 8 bytes, while here it fills m_isNull's padding for 0.
     private protected int m_id;
+
+    // A field view's identity facts (FieldRefBox), computed once from its immutable source and field: whether it is
+    // native-rooted, whether its order token is exact, and whether its identity is MANAGED-EXACT, which lets Equals
+    // compare two views by root and Go offset instead of walking both chains. Declared here for the reason m_id is:
+    // a byte in the derived class costs every field view 8 bytes, while here it fills the same padding for 0.
+    private protected byte m_identityFacts;
 
     // A pin this box OWNS, kept alive for the box's lifetime and freed when the box is collected
     // (the PinnedBuffer finalizer releases the GCHandle). Serves every kind: a standard box's

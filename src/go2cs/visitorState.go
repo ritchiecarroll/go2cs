@@ -191,7 +191,7 @@ type Visitor struct {
 	// lifts whose instantiation base parts are written (dynamicInterfaceBase.go).
 	capturedLiftNames map[string]string
 	liftBaseMarked    map[string]bool
-	subStructTypes  map[types.Type][]types.Type
+	subStructTypes    map[types.Type][]types.Type
 
 	// inUsingAliasTarget is set only while a type alias's `global using` RHS is being rendered.
 	// That RHS resolves at COMPILATION scope — outside `namespace go` and outside the emitted

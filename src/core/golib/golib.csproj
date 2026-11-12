@@ -109,6 +109,10 @@
     <Using Include="go.builtin" Static="True" />
     <Using Include="System" />
     <Using Include="System.Numerics" />
+    <!-- Tier 2 of docs/PublicSurface.md: [EditorBrowsable(EditorBrowsableState.Never)] hides a type from a consumer's
+         IntelliSense. Aliases, so no System.ComponentModel name enters scope. -->
+    <Using Include="System.ComponentModel.EditorBrowsableAttribute" Alias="EditorBrowsableAttribute" />
+    <Using Include="System.ComponentModel.EditorBrowsableState" Alias="EditorBrowsableState" />
     <Using Include="System.Object" Alias="any" />
     <Using Include="System.Byte" Alias="uint8" />
     <Using Include="System.UInt16" Alias="uint16" />

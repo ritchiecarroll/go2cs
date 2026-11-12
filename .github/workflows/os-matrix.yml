@@ -81,6 +81,16 @@ on:
         type: string
         required: false
         default: ''
+      consumer_ref:
+        description: 'release-smoke only: the git ref (a tag or a branch) whose src/tests/CSharpConsumer arm H builds unchanged against the packages under test. Blank takes the newest nuget-<version> release tag below the version under test. Every leg prints the ref it used. Set, it is an OVERRIDE for a deliberate break and needs consumer_override.'
+        type: string
+        required: false
+        default: ''
+      consumer_override:
+        description: 'release-smoke only, with consumer_ref: the break the override is for, floor=<a.b.c.d>;news=<path> (this tree''s GoBreakFloor, moved above the previous release, and release notes holding its "Upgrading from <previous release>" entry). Arm H checks both and its verdict reads OVERRIDE (docs/PublicSurface.md).'
+        type: string
+        required: false
+        default: ''
       run_timeout:
         description: 'Per-program RUN budget in seconds for the behavioral stages (GO2CS_RUN_TIMEOUT), 1-1800. Blank takes 120, the budget every stage used before this input existed. Raise it to tell a slow program on the 3-core macos-15 runner from a real hang: a NOT MEASURED (timeout) row says only that the budget expired. A large value on behavioral-full can exceed that stage''s job budget.'
         type: string
@@ -162,6 +172,8 @@ jobs:
       run-timeout: ${{ steps.derive.outputs.run-timeout }}
       aot-bound-minutes: ${{ steps.derive.outputs.aot-bound-minutes }}
       published-version: ${{ steps.derive.outputs.published-version }}
+      consumer-ref: ${{ steps.derive.outputs.consumer-ref }}
+      consumer-override: ${{ steps.derive.outputs.consumer-override }}
       nugetgo-module: ${{ steps.derive.outputs.nugetgo-module }}
       nugetgo-version: ${{ steps.derive.outputs.nugetgo-version }}
       nugetgo-package: ${{ steps.derive.outputs.nugetgo-package }}
@@ -170,6 +182,7 @@ jobs:
       probe-test: ${{ steps.derive.outputs.probe-test }}
       dns-servers: ${{ steps.derive.outputs.dns-servers }}
       dump-proof: ${{ steps.derive.outputs.dump-proof }}
+      sweep-timeout: ${{ steps.derive.outputs.sweep-timeout }}
       probe-at: ${{ steps.derive.outputs.probe-at }}
       jit-disasm: ${{ steps.derive.outputs.jit-disasm }}
       cgo-cc: ${{ steps.derive.outputs.cgo-cc }}
@@ -189,6 +202,8 @@ jobs:
           INPUT_RUN_TIMEOUT: ${{ inputs.run_timeout }}
           INPUT_AOT_BOUND_MINUTES: ${{ inputs.aot_bound_minutes }}
           INPUT_PUBLISHED_VERSION: ${{ inputs.published_version }}
+          INPUT_CONSUMER_REF: ${{ inputs.consumer_ref }}
+          INPUT_CONSUMER_OVERRIDE: ${{ inputs.consumer_override }}
           INPUT_NUGETGO_MODULE: ${{ inputs.nugetgo_module }}
           INPUT_NUGETGO_PACKAGE: ${{ inputs.nugetgo_package }}
           INPUT_NUGETGO_FEED: ${{ inputs.nugetgo_feed }}
@@ -225,12 +240,16 @@ jobs:
           # dns=IP[,IP], the job's resolver (an opt-in for net's NXDOMAIN keys, which the hosted mac resolver answers late;
           # C1, 2026-11-08); sweep-shard (linux only): dumpproof=red, the dump-suppression proof's red arm, which runs the
           # proof's crash probe with suppression OFF so the proof fails by name and the sweep never starts (S7-b), or
-          # dumpproof=red-space, the same arm with the file count not enforced, so the free-space check fails alone. converter-cgo: cc=zig|llvm-mingw, a pinned C toolchain the leg downloads, hash-checks and hands
+          # dumpproof=red-space, the same arm with the file count not enforced, so the free-space check fails alone; sweep-shard
+          # (any goos): timeout=Nm, the sweep's -TestTimeout in whole minutes, 1-180 (blank takes 45m), for a row whose own test
+          # sizes a wait from its deadline (internal/poll's TestSplicePipePool waits 0.9 x the deadline, so 45m outlasts its
+          # 30m per-test floor; COORD R4, 2026-11-12). The script's per-row $longTimeouts floors still win over a smaller
+          # value. converter-cgo: cc=zig|llvm-mingw, a pinned C toolchain the leg downloads, hash-checks and hands
           # go as CC (the cgo toolchain scout, H, 2026-11-10); sha=HEX replaces the pin's sha256, and exists so a wrong
           # hash can be shown to refuse before anything runs. An unknown or repeated key, an empty value, or any option on
           # any other stage FAILS the plan by name rather than being ignored.
-          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''; $dumpProof = ''
-          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof' } { $_ -in 'converter-cgo', 'cgo-e2e' } { 'cc', 'sha' } })
+          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''; $dumpProof = ''; $sweepTimeout = ''
+          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof', 'timeout' } { $_ -in 'converter-cgo', 'cgo-e2e' } { 'cc', 'sha' } })
           if ($optionKeys.Count) {
               $parts = @($filter -split ';')
               $filter = $parts[0].Trim()
@@ -265,6 +284,13 @@ jobs:
                   if ($dumpProof -cnotin 'red', 'red-space') { throw "sweep-shard filter option dumpproof= takes red or red-space; got '$dumpProof'." }
                   Write-Host "sweep-shard: dumpproof=$dumpProof -- the proof runs its crash probe with suppression OFF and must FAIL by name; the sweep does not run"
               }
+              if ($seen.ContainsKey('timeout')) {
+                  $sweepTimeout = $seen['timeout']
+                  if ($sweepTimeout -notmatch '^[0-9]+m$' -or [int]($sweepTimeout.TrimEnd('m')) -lt 1 -or [int]($sweepTimeout.TrimEnd('m')) -gt 180) {
+                      throw "sweep-shard filter option timeout= must be whole minutes from 1 to 180, written Nm (e.g. 25m); got '$sweepTimeout'."
+                  }
+                  Write-Host "sweep-shard: -TestTimeout $sweepTimeout (the script's per-row floors still apply)"
+              }
               if ($stage -in 'converter-cgo', 'cgo-e2e') {
                   $cgoCc = "$($seen['cc'])"; $cgoCcSha = "$($seen['sha'])".ToLowerInvariant()
                   if ($cgoCc -and $cgoCc -notin @('zig', 'llvm-mingw')) { throw "converter-cgo filter option cc= names a pinned toolchain, zig or llvm-mingw; got '$cgoCc'." }
@@ -274,7 +300,7 @@ jobs:
                   if ($cgoCc) { Write-Host "converter-cgo: CC is the pinned $cgoCc$(if ($cgoCcSha) { ", its sha256 REPLACED by $cgoCcSha" })" }
               }
           }
-          elseif ($filter -match '(^|;)\s*(jit|test|at|dns|dumpproof|cc|sha)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe, sweep-shard, converter-cgo and cgo-e2e only; got stage '$stage' and filter '$filter'." }
+          elseif ($filter -match '(^|;)\s*(jit|test|at|dns|dumpproof|timeout|cc|sha)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe, sweep-shard, converter-cgo and cgo-e2e only; got stage '$stage' and filter '$filter'." }
 
           # The behavioral stages' per-program run budget. A schedule has no inputs and keeps 120, as
           # does a blank dispatch. A value that is not a whole number of seconds in 1..1800 FAILS the
@@ -301,6 +327,23 @@ jobs:
               if ($env:INPUT_STAGE -ne 'release-smoke') { throw "published_version applies to stage release-smoke only (aot-smoke reads this tree's pack; a published version is refused there); got stage '$($env:INPUT_STAGE)'." }
               if ($publishedVersion -notmatch '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$') { throw "published_version must be a four-part go.* version such as 1.24.13.4; got '$publishedVersion'." }
               Write-Host "release-smoke: post-publish, go.* $publishedVersion from nuget.org (no pack)"
+          }
+
+          # Arm H's consumer ref (src/tests/PackageTests/release-smoke.ps1): release-smoke only, a tag or branch name.
+          # Blank lets each leg take the newest nuget-<version> tag below the version under test.
+          $consumerRef = if ($env:EVENT_NAME -eq 'schedule') { '' } else { "$env:INPUT_CONSUMER_REF".Trim() }
+          if ($consumerRef) {
+              if ($env:INPUT_STAGE -ne 'release-smoke') { throw "consumer_ref applies to stage release-smoke only; got stage '$($env:INPUT_STAGE)'." }
+              if ($consumerRef -notmatch '^[A-Za-z0-9][A-Za-z0-9._/-]*$') { throw "consumer_ref must be a tag or branch name; got '$consumerRef'." }
+              Write-Host "release-smoke: arm H builds the CSharpConsumer of $consumerRef (the consumer_ref override)"
+          }
+          # Its citation: release-smoke only, only with consumer_ref, and in the one form arm H reads. Arm H checks it
+          # against the tree (the break floor and the release notes) and fails by name when either is not true.
+          $consumerOverride = if ($env:EVENT_NAME -eq 'schedule') { '' } else { "$env:INPUT_CONSUMER_OVERRIDE".Trim() }
+          if ($consumerOverride) {
+              if ($env:INPUT_STAGE -ne 'release-smoke') { throw "consumer_override applies to stage release-smoke only; got stage '$($env:INPUT_STAGE)'." }
+              if (-not $consumerRef) { throw "consumer_override needs consumer_ref: it cites the break an override ref is for." }
+              if ($consumerOverride -notmatch '^floor=[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+;news=[A-Za-z0-9._/-]+$') { throw "consumer_override must read floor=<a.b.c.d>;news=<path>; got '$consumerOverride'." }
           }
 
           $env:INPUT_GOOS = $goos
@@ -534,6 +577,8 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "run-timeout=$runTimeout" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "aot-bound-minutes=$aotBound" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "published-version=$publishedVersion" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "consumer-ref=$consumerRef" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "consumer-override=$consumerOverride" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "nugetgo-module=$nugetgoModule" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "nugetgo-version=$nugetgoVersion" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "nugetgo-package=$nugetgoPackage" -Encoding utf8
@@ -544,6 +589,7 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "jit-disasm=$jitDisasm" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dns-servers=$dnsServers" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dump-proof=$dumpProof" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "sweep-timeout=$(if ($sweepTimeout) { $sweepTimeout } else { '45m' })" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-cc=$cgoCc" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-cc-sha=$cgoCcSha" -Encoding utf8
 
@@ -1944,8 +1990,9 @@ jobs:
           SWEEP_FILTER: ${{ needs.plan.outputs.filter }}
           # Raises the sweep's 10m default for a 4-core hosted runner. The script's per-package
           # $longTimeouts entries are FLOORS, not overrides: a larger -TestTimeout raises them, a
-          # smaller one still loses, so this value cannot under-budget the four long rows.
-          SWEEP_TEST_TIMEOUT: '45m'
+          # smaller one still loses, so this value cannot under-budget the four long rows. 45m unless the
+          # filter option timeout=Nm sets it (the plan validates it and passes 45m when it is blank).
+          SWEEP_TEST_TIMEOUT: ${{ needs.plan.outputs.sweep-timeout }}
         run: |
           $ErrorActionPreference = 'Continue'
 
@@ -2200,6 +2247,8 @@ jobs:
         shell: pwsh
         env:
           PUBLISHED_VERSION: ${{ needs.plan.outputs.published-version }}
+          CONSUMER_REF: ${{ needs.plan.outputs.consumer-ref }}
+          CONSUMER_OVERRIDE: ${{ needs.plan.outputs.consumer-override }}
         run: |
           $ErrorActionPreference = 'Continue'
 
@@ -2227,14 +2276,15 @@ jobs:
           # Pre-publish: this tree's pack. Post-publish (published_version): the version nuget.org serves.
           $published = $env:PUBLISHED_VERSION
           $feedArgs = if ($published) { @{ Feed = 'https://api.nuget.org/v3/index.json'; Version = $published } } else { @{ Feed = (Join-Path $PWD 'feed') } }
-          & ./src/tests/PackageTests/release-smoke.ps1 @feedArgs -Converter (Join-Path $PWD "src/go2cs/bin/$exeName") -WorkRoot $work -GateWalkthrough:$gateWalkthrough *>&1 |
+          # Arm H: the previous release's CSharpConsumer, unchanged; CONSUMER_REF overrides the ref it is read from.
+          & ./src/tests/PackageTests/release-smoke.ps1 @feedArgs -Converter (Join-Path $PWD "src/go2cs/bin/$exeName") -WorkRoot $work -GateWalkthrough:$gateWalkthrough -ConsumerRef "$env:CONSUMER_REF" -ConsumerOverride "$env:CONSUMER_OVERRIDE" *>&1 |
               Tee-Object -FilePath $log
           $smokeExit = $LASTEXITCODE
 
           $summary = @(
               "## Release smoke -- GOOS=$goos ($rid)"
               ''
-              "exit ``$smokeExit`` (A, B, C and G gate; D $(if ($gateWalkthrough) { 'gates here' } else { 'is measured only here' }))"
+              "exit ``$smokeExit`` (A, B, C, G and H gate; D $(if ($gateWalkthrough) { 'gates here' } else { 'is measured only here' }))"
               ''
               '```'
           ) + @(Get-Content -LiteralPath $log | Where-Object { $_ -match '^(release smoke:|PASS|FAIL|MEASURED)' }) + @('```')

@@ -19,7 +19,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework Condition="'$(TargetFramework)'==''">net10.0</TargetFramework>
     <RootNamespace>go.crypto.@internal.fips140</RootNamespace>
-    <AssemblyName>crypto.internal.fips140.edwards25519.tests</AssemblyName>
+    <AssemblyName>go.crypto.internal.fips140.edwards25519.tests</AssemblyName>
     <Product>go2cs</Product>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>

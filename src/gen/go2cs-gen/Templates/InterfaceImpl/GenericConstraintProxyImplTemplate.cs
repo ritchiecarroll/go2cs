@@ -48,7 +48,7 @@ internal class GenericConstraintProxyImplTemplate : TemplateBase
              /// '{{InterfaceName}}' by wrapping the box 'ж&lt;E&gt;' and implementing the interface over ITSELF,
              /// forwarding each method through a slot that instantiating packages bind.
              /// </summary>
-             [global::System.Diagnostics.DebuggerNonUserCode]
+             [global::System.Diagnostics.DebuggerNonUserCode, {{HiddenAttribute}}]
              {{AdapterScope}} sealed class {{ProxyName}}<E> : {{InterfaceRef}}, IжAdapter
              {
                  private readonly ж<E> m_box;

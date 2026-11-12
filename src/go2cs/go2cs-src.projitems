@@ -43,6 +43,8 @@
     <None Include="$(MSBuildThisFileDirectory)arrayDimsCompanion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)asmTrampolines.go" />
     <None Include="$(MSBuildThisFileDirectory)asmTrampolines_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)assemblyIdentity.go" />
+    <None Include="$(MSBuildThisFileDirectory)assemblyIdentity_test.go" />
     <None Include="$(MSBuildThisFileDirectory)assemblyScopedAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)astTypeSyntax.go" />
     <None Include="$(MSBuildThisFileDirectory)autoSiblingOperations.go" />
@@ -383,6 +385,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsFragmentLinks_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsSamplesHoldTheirLines_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\certContextReachGuard_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\converterGofmt_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\coreReferencesResolve_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\darwinLinknamePulls_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\elidedConstraints_test.go" />
@@ -397,6 +400,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\layoutKeyLists_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\lineKeyedRecords_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\moduleDisclosureWording_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\stdLibAssemblyIdentity_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\stdlibDisclosureWording_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\suppressGCTransitionSeam_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\testInfoPositionMapCopies_test.go" />
@@ -814,6 +818,7 @@
     <None Include="$(MSBuildThisFileDirectory)warningClearEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)warningEntries.go" />
     <None Include="$(MSBuildThisFileDirectory)warningEntries_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)warningEntriesFixedPoint_test.go" />
     <None Include="$(MSBuildThisFileDirectory)warnOption.go" />
     <None Include="$(MSBuildThisFileDirectory)warnOption_test.go" />
     <None Include="$(MSBuildThisFileDirectory)writeOperations.go" />

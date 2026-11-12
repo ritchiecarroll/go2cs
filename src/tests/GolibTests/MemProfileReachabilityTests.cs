@@ -36,21 +36,21 @@ public class MemProfileReachabilityTests
     public void MemoryProfilingIsOnOnlyWhenPprofIsInTheStaticClosure()
     {
         // A converted program that never imports runtime/pprof: Go's linker would drop memProfileInternal.
-        Assert.IsFalse(GoMemProfile.PprofReachableFrom(Closure("golib.dll", "runtime.dll", "fmt.dll", "main.dll"), Absent),
+        Assert.IsFalse(GoMemProfile.PprofReachableFrom(Closure("golib.dll", "go.runtime.dll", "go.fmt.dll", "main.dll"), Absent),
             "a closure without runtime.pprof must start with MemProfileRate 0");
 
         // One that imports it, directly or through net/http/pprof.
-        Assert.IsTrue(GoMemProfile.PprofReachableFrom(Closure("golib.dll", "runtime.dll", "runtime.pprof.dll", "main.dll"), Absent),
+        Assert.IsTrue(GoMemProfile.PprofReachableFrom(Closure("golib.dll", "go.runtime.dll", "go.runtime.pprof.dll", "main.dll"), Absent),
             "a closure with runtime.pprof keeps Go's default MemProfileRate");
 
         // A program whose own assembly compiles runtime/pprof in, as runtime/pprof's own test binary does
-        // (its production files are compile items of runtime.pprof.tests): the list does not name it, and
+        // (its production files are compile items of go.runtime.pprof.tests): the list does not name it, and
         // the package type, found in the program, decides.
-        Assert.IsTrue(GoMemProfile.PprofReachableFrom(Closure("golib.dll", "runtime.dll", "runtime.pprof.tests.dll"), Present),
+        Assert.IsTrue(GoMemProfile.PprofReachableFrom(Closure("golib.dll", "go.runtime.dll", "go.runtime.pprof.tests.dll"), Present),
             "runtime/pprof compiled into the program itself is reachable");
 
         // A name that only contains it is not it.
-        Assert.IsFalse(GoMemProfile.PprofReachableFrom(Closure("runtime.dll", "runtime.pprof.extra.dll"), Absent),
+        Assert.IsFalse(GoMemProfile.PprofReachableFrom(Closure("go.runtime.dll", "go.runtime.pprof.extra.dll"), Absent),
             "only the runtime.pprof assembly itself enables the profile");
 
         // No list (native AOT, single file): runtime.pprof's package type, looked up by its constant name, decides,

@@ -45,7 +45,7 @@ namespace go;
 /// constant it passes does.
 /// </para>
 /// </remarks>
-public static class GoHostOfRecord
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoHostOfRecord
 {
     private static int s_announced;
 

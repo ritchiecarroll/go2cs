@@ -12,7 +12,7 @@ namespace go.golib;
 /// <summary>
 /// Represents common runtime error messages thrown in Go environment.
 /// </summary>
-public static class RuntimeErrorPanic
+[EditorBrowsable(EditorBrowsableState.Never)] public static class RuntimeErrorPanic
 {
     private const string RuntimeErrorMessage = "runtime error: ";
 

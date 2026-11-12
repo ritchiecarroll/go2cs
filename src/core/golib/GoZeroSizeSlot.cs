@@ -34,7 +34,7 @@ namespace go;
 /// </para>
 /// </remarks>
 /// <typeparam name="T">A Go zero-size type.</typeparam>
-public static class GoZeroSizeSlot<T>
+[EditorBrowsable(EditorBrowsableState.Never)] public static class GoZeroSizeSlot<T>
 {
     private static T s_slot = default!;
 
