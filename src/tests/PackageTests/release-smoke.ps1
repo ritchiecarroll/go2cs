@@ -32,7 +32,9 @@
                             one). Its files come from -ConsumerRef, else from the newest nuget-<version> release
                             tag below the version under test. The modules it calls are converted with -Converter
                             at the versions that ref's run-csharp-consumer.ps1 pins, and the program must print
-                            that runner's own "checks: <N> ok, 0 failed".
+                            that runner's own "checks: <N> ok, 0 failed". -ConsumerRef is the exception path for a
+                            deliberate break: it needs -ConsumerOverride citing the moved break floor and the release
+                            notes' Upgrading entry, and the verdict line reads OVERRIDE.
 
     Exit 0 when A, B, C, G and H pass (and D, with -GateWalkthrough); 1 otherwise. Every arm's evidence lands
     under -WorkRoot.
@@ -55,6 +57,12 @@
 .PARAMETER ConsumerRef
     The git ref (a tag or a branch on origin) whose src/tests/CSharpConsumer arm H builds. Default: the newest
     nuget-<version> tag whose version is below -Version (for 1.26.10.4-ci.7, the newest tag below 1.26.10.4).
+    Given, it is an OVERRIDE and must come with -ConsumerOverride.
+
+.PARAMETER ConsumerOverride
+    With -ConsumerRef, the break the override is for: floor=<a.b.c.d>;news=<path>. The floor is this tree's
+    GoBreakFloor, moved above the previous release; the release notes hold its "Upgrading from <previous release>"
+    entry (docs/PublicSurface.md, How a promised name changes). Arm H's verdict line then reads OVERRIDE.
 #>
 param(
     [Parameter(Mandatory)] [string] $Feed,
@@ -62,7 +70,8 @@ param(
     [Parameter(Mandatory)] [string] $WorkRoot,
     [string] $Version,
     [switch] $GateWalkthrough,
-    [string] $ConsumerRef
+    [string] $ConsumerRef,
+    [string] $ConsumerOverride
 )
 
 $ErrorActionPreference = 'Stop'
@@ -380,13 +389,26 @@ function Invoke-SourceCompatArm {
     $cache = Join-Path $arm 'nuget-cache'
     New-Item -ItemType Directory -Force $cache | Out-Null
 
-    $ref = $ConsumerRef
-    $how = 'the -ConsumerRef override'
-    if (-not $ref) {
-        $ref = Resolve-ConsumerRef $repoRoot $Version
-        $how = "the newest nuget-* release tag below $Version"
+    # The previous release: the default consumer's tag, and what an override's citation is checked against.
+    $previous = Resolve-ConsumerRef $repoRoot $Version
+    if (-not $previous) { return "FAIL ($name): found no nuget-<version> release tag below $Version on origin" }
+
+    $ref = $previous
+    $how = "the newest nuget-* release tag below $Version"
+    $break = ''
+    if ($ConsumerOverride -and -not $ConsumerRef) { return "FAIL ($name): an override citation ($ConsumerOverride) without -ConsumerRef" }
+    if ($ConsumerRef) {
+        # The exception path: a deliberate break makes the previous release's consumer red by design. The override must
+        # name the break, and its verdict says OVERRIDE whatever the result (SourceCompat/ConsumerRef.ps1).
+        $name = 'H-source-compat OVERRIDE'
+        if (-not $ConsumerOverride) { return "FAIL ($name): -ConsumerRef $ConsumerRef needs -ConsumerOverride floor=<a.b.c.d>;news=<path>, the break it is for" }
+        $previousRelease = $previous -replace '^nuget-', ''
+        $cited = Test-ConsumerOverride $repoRoot $ConsumerOverride $previousRelease
+        if ($cited.Error) { return "FAIL ($name): $($cited.Error)" }
+        $ref = $ConsumerRef
+        $how = "the override for the break of floor $($cited.Floor) (previous release $previousRelease; $($cited.News), 'Upgrading from $previousRelease')"
+        $break = "; the break: floor $($cited.Floor) above $previousRelease, $($cited.News)"
     }
-    if (-not $ref) { return "FAIL ($name): found no nuget-<version> release tag below $Version on origin" }
 
     # Exactly that ref. A tag already here is read with no fetch, and --depth is used only where the repository is
     # already shallow, so a full clone is never truncated (SourceCompat/ConsumerRef.ps1, test-consumer-ref.ps1).
@@ -443,7 +465,7 @@ function Invoke-SourceCompatArm {
     if ($runCode -ne 0) { return "FAIL ($name): $ref's CSharpConsumer exited $runCode$(if ($failedChecks) { ' -- ' + ($failedChecks -join ' | ') })$(Get-StderrHead (Join-Path $arm 'cs.stderr.txt'))" }
     if (@($lines | Where-Object { $_ -ceq $expected }).Count -ne 1) { return "FAIL ($name): $ref's CSharpConsumer did not print '$expected'$(if ($failedChecks) { ' -- ' + ($failedChecks -join ' | ') })" }
 
-    return "PASS ($name): the CSharpConsumer of $ref ($($commit.Substring(0, 10))) built unchanged against go.* $Version and printed '$expected'"
+    return "PASS ($name): the CSharpConsumer of $ref ($($commit.Substring(0, 10))) built unchanged against go.* $Version and printed '$expected'$break"
 }
 $verdicts += Invoke-SourceCompatArm
 

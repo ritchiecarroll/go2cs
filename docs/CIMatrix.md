@@ -84,7 +84,8 @@ gh workflow run os-matrix.yml -f goos=linux  -f stage=sweep-shard -f filter=comp
 | `dotnet` | `10.0.x` · `10.0.402` | The SDK channel for `setup-dotnet`. Blank takes `10.0.x`. |
 | `run_timeout` | 1-1800, optional | The behavioral stages' per-program run budget in seconds (`GO2CS_RUN_TIMEOUT`). Blank takes 120. |
 | `published_version` | a four-part go.* version, optional | `release-smoke` only. Blank packs this tree and consumes that pack (the pre-publish gate). Set, the pack is skipped and every leg restores that version from nuget.org (the post-publish smoke). |
-| `consumer_ref` | a tag or branch name, optional | `release-smoke` only. The ref whose `src/tests/CSharpConsumer` arm H builds unchanged. Blank takes the newest `nuget-<version>` release tag below the version under test. |
+| `consumer_ref` | a tag or branch name, optional | `release-smoke` only. The ref whose `src/tests/CSharpConsumer` arm H builds unchanged. Blank takes the newest `nuget-<version>` release tag below the version under test. Set, it is the exception path and needs `consumer_override`. |
+| `consumer_override` | `floor=<a.b.c.d>;news=<path>`, optional | `release-smoke` only, with `consumer_ref`: the break the override is for. Arm H checks it against the tree and its verdict reads `OVERRIDE`. |
 | `nugetgo_module` | `MODULE@VERSION` | `nugetgo-behavior` only, and required there. Its sample program and mappings row must exist at `src/tests/ModuleBehavior/MODULE@VERSION/` on the dispatched ref. |
 | `nugetgo_package` | a NuGet package version | `nugetgo-behavior` only, and required there: the rehearsal package every row runs (e.g. `1.1.0-int.1`). |
 | `nugetgo_feed` | a NuGet v3 feed URL, or `git:REF:FOLDER`, optional | `nugetgo-behavior` only. Blank takes int.nugettest.org, where module releases are rehearsed. `git:REF:FOLDER` is a folder of nupkgs in this repository at a branch or commit, for a package no gallery serves: the plan resolves REF to one commit, and each leg extracts the folder and passes it to the row as a local folder feed. The go.* closure still restores from nuget.org. |
@@ -190,8 +191,13 @@ every arm restoring into a fresh cache with `go.*` mapped to the feed alone:
   `nuget-<version>` release tag below the version under test (for `1.26.10.4-ci.N`, the newest tag below
   `1.26.10.4`), or `consumer_ref` when set. The modules it calls are converted with this tree's converter against
   the feed, at the versions that ref's `run-csharp-consumer.ps1` pins, and the program must print that runner's own
-  `checks: <N> ok, 0 failed`. A tier-1 name removed or renamed without the deprecation path fails the build here,
-  by the compiler's error line. The leg prints the ref it used. It gates.
+  `checks: <N> ok, 0 failed`. A name that program uses, removed or renamed without the deprecation path, fails the
+  build here, by the compiler's error line. The leg prints the ref it used. It gates. The ref is fetched without
+  changing the checkout's depth (`SourceCompat/ConsumerRef.ps1`; its self-test is `test-consumer-ref.ps1`).
+  **The exception path**: a release that breaks by design turns this red on purpose. `consumer_ref` then names an
+  updated consumer and `consumer_override` must cite the break, `floor=<a.b.c.d>;news=<path>`: the tree's
+  `GoBreakFloor`, above the previous release, and release notes holding its "Upgrading from <previous release>" entry.
+  Either untrue fails the arm by name; with both true the verdict line reads `OVERRIDE`.
 
 A leg is green when arms A-D, G and H pass. Dispatch it at the tree that ships, before every release:
 it is what proves the packages carry what that tree's converter emits on every OS (a converter that emits

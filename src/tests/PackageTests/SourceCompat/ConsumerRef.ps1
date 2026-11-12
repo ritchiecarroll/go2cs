@@ -49,3 +49,41 @@ function Get-ConsumerCommit([string]$RepoRoot, [string]$Ref, [string]$Log) {
     }
     finally { $ErrorActionPreference = 'Stop' }
 }
+
+# The exception path (docs/PublicSurface.md): a deliberate break makes the previous release's consumer red BY DESIGN,
+# and the arm then builds an updated consumer named by an override ref. The override must cite the break as
+# `floor=<a.b.c.d>;news=<path>`: the break floor this tree declares (GoBreakFloor in go.lib.targets), which must equal
+# the cited one and lie above the previous release, and a release-notes file in this tree holding an
+# "Upgrading from <previous release>" entry. Returns @{ Error = <text or $null>; Floor; News }.
+function Test-ConsumerOverride([string]$RepoRoot, [string]$Citation, [string]$PreviousRelease) {
+    $result = @{ Error = $null; Floor = $null; News = $null }
+    if ($Citation -notmatch '^floor=(\d+\.\d+\.\d+\.\d+);news=([A-Za-z0-9._/-]+)$') {
+        $result.Error = "the override citation '$Citation' is not floor=<a.b.c.d>;news=<path>"
+        return $result
+    }
+    $result.Floor = $Matches[1]
+    $result.News = $Matches[2]
+
+    $targets = Join-Path $RepoRoot 'src/core/golib/buildTransitive/go.lib.targets'
+    $declared = if (Test-Path -LiteralPath $targets) { [regex]::Match([System.IO.File]::ReadAllText($targets), '<GoBreakFloor>([^<]+)</GoBreakFloor>').Groups[1].Value } else { '' }
+    if ($declared -ne $result.Floor) {
+        $result.Error = "the cited floor $($result.Floor) is not this tree's GoBreakFloor ('$declared', go.lib.targets)"
+        return $result
+    }
+    if ([version]$result.Floor -le [version]$PreviousRelease) {
+        $result.Error = "the cited floor $($result.Floor) has not moved above the previous release $PreviousRelease"
+        return $result
+    }
+
+    $news = Join-Path $RepoRoot $result.News
+    if ($result.News -match '(^|/)\.\.(/|$)' -or -not (Test-Path -LiteralPath $news -PathType Leaf)) {
+        $result.Error = "the cited release notes $($result.News) are not a file in this tree"
+        return $result
+    }
+    $entry = "Upgrading from $PreviousRelease"
+    if (-not ([System.IO.File]::ReadAllText($news)).Contains($entry, [StringComparison]::Ordinal)) {
+        $result.Error = "the cited release notes $($result.News) hold no '$entry' entry"
+        return $result
+    }
+    return $result
+}

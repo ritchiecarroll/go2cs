@@ -11,6 +11,8 @@
       - fetch a branch into a full clone without --depth, the clone staying full;
       - fetch a tag into a shallow clone with --depth 1, and resolve it;
     and Resolve-ConsumerRef must pick the newest nuget-<a.b.c.d> tag below a prerelease and below a release.
+    Test-ConsumerOverride must accept a citation of the tree's moved break floor and its Upgrading entry, and refuse
+    each malformed or untrue one by name.
     Exit 0 when every check passes.
 #>
 param([Parameter(Mandatory)] [string] $WorkRoot)
@@ -83,6 +85,26 @@ $pick = Resolve-ConsumerRef $full '1.0.0.3'
 Check 'a published build 3 picks the build-2 tag' ($pick -eq 'nuget-1.0.0.2') $pick
 $pick = Resolve-ConsumerRef $full '1.0.0.1'
 Check 'no tag below the first release reads none' ($null -eq $pick) $pick
+
+# The override citation, against a scratch tree.
+$tree = Join-Path $WorkRoot 'tree'
+New-Item -ItemType Directory -Force (Join-Path $tree 'src/core/golib/buildTransitive'), (Join-Path $tree 'docs') | Out-Null
+Set-Content -LiteralPath (Join-Path $tree 'src/core/golib/buildTransitive/go.lib.targets') -Value '<Project><PropertyGroup><GoBreakFloor>1.0.0.3</GoBreakFloor></PropertyGroup></Project>'
+Set-Content -LiteralPath (Join-Path $tree 'docs/NEWS.md') -Value "## 1.0.0.3`n`n**Upgrading from 1.0.0.2.** Renamed X to Y."
+$ok = Test-ConsumerOverride $tree 'floor=1.0.0.3;news=docs/NEWS.md' '1.0.0.2'
+Check 'an override citing the moved floor and the Upgrading entry is accepted' ($null -eq $ok.Error) $ok.Error
+foreach ($case in @(
+        @{ Name = 'a citation in the wrong form'; Cite = 'floor 1.0.0.3'; Previous = '1.0.0.2'; Want = 'is not floor=' },
+        @{ Name = "a floor that is not the tree's"; Cite = 'floor=1.0.0.4;news=docs/NEWS.md'; Previous = '1.0.0.2'; Want = "is not this tree's GoBreakFloor" },
+        @{ Name = 'a floor that has not moved'; Cite = 'floor=1.0.0.3;news=docs/NEWS.md'; Previous = '1.0.0.3'; Want = 'has not moved above' },
+        @{ Name = 'release notes that are not in the tree'; Cite = 'floor=1.0.0.3;news=docs/NONE.md'; Previous = '1.0.0.2'; Want = 'are not a file in this tree' },
+        @{ Name = 'release notes whose Upgrading entry is for another release'; Cite = 'floor=1.0.0.3;news=docs/NEWS.md'; Previous = '1.0.0.1'; Want = "hold no 'Upgrading from 1.0.0.1' entry" })) {
+    $r = Test-ConsumerOverride $tree $case.Cite $case.Previous
+    Check "refused: $($case.Name)" ($r.Error -and $r.Error.Contains($case.Want)) $r.Error
+}
+Set-Content -LiteralPath (Join-Path $tree 'docs/NEWS.md') -Value "## 1.0.0.3`n`nNo upgrading entry."
+$r = Test-ConsumerOverride $tree 'floor=1.0.0.3;news=docs/NEWS.md' '1.0.0.2'
+Check 'refused: release notes with no Upgrading entry' ($r.Error -and $r.Error.Contains("hold no 'Upgrading from 1.0.0.2' entry")) $r.Error
 
 Write-Host "checks failed: $failed"
 exit $failed

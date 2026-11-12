@@ -106,8 +106,16 @@ A tier-1 or tier-2 name changes in one of two ways, and no other:
    - every published `nugetgo.*` package is rebuilt against the new release.
 
 Before each release, the previous release's C# consumer program (`src/tests/CSharpConsumer`) is built unchanged
-against the new packages and must pass all its checks ([`release-smoke`](CIMatrix.md), arm H). A tier-1 name changed
-any other way fails that build.
+against the new packages and must pass all its checks ([`release-smoke`](CIMatrix.md), arm H). That build fails when
+a name the program uses is changed any other way; a name it does not use is not tested there. golib's own tier-1
+types and members are held line by line by its baseline, `src/core/golib/PublicSurface.golib.txt`, whose test fails
+on any change to them.
+
+A release that breaks by design, the second way above, makes that build red on purpose. Its release smoke then builds
+an updated consumer, named with the `consumer_ref` input, and must cite the break with `consumer_override`:
+`floor=<the moved break floor>;news=<the release notes>`. The arm refuses the override unless the floor is the one the
+tree declares and lies above the previous release, and the release notes hold an "Upgrading from <previous release>"
+entry. Its verdict line then reads OVERRIDE, so the exception is visible in the release's record.
 
 <!-- The contract adopted by the owner, 2026-11-11 (docs/PLAN-public-surface-stability.md, ruling block; OQ3 and the
      "freeze and document" items; seat C1). Sources: the type mapping, docs/ConversionStrategies.md; the MSBuild
