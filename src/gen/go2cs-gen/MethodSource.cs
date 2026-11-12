@@ -58,9 +58,9 @@ internal static class MethodSource
         List<(string name, bool pointer, string signature, string method)> arms = [];
         HashSet<(string, bool)> seen = [];
 
-        foreach (IMethodSymbol method in package.GetMembers().OfType<IMethodSymbol>())
+        foreach (IMethodSymbol method in GoMethodHosts.DeclaredMethods(package, type))
         {
-            if (Arm(method, type, package) is not { } arm || !seen.Add((arm.name, arm.pointer)))
+            if (Arm(method, type) is not { } arm || !seen.Add((arm.name, arm.pointer)))
                 continue;
 
             arms.Add(arm);
@@ -90,7 +90,7 @@ internal static class MethodSource
     // One arm: the method's metadata name, whether it is a pointer-receiver method, its delegate declaration (with
     // ᴛNAME standing for the delegate's name) and the method group naming it over the type's own parameters. Null when
     // the method is not a Go method of `type`.
-    private static (string name, bool pointer, string signature, string method)? Arm(IMethodSymbol method, INamedTypeSymbol type, INamedTypeSymbol package)
+    private static (string name, bool pointer, string signature, string method)? Arm(IMethodSymbol method, INamedTypeSymbol type)
     {
         if (!method.IsExtensionMethod || !method.IsGenericMethod || method.Parameters.Length == 0 || method.ReturnsByRef || method.ReturnsByRefReadonly)
             return null;
@@ -153,7 +153,7 @@ internal static class MethodSource
         string name = SyntaxFacts.GetKeywordKind(method.Name) != SyntaxKind.None ? "@" + method.Name : method.Name;
 
         return (method.MetadataName, pointer, $"{returns} ᴛNAME({string.Join(", ", parameters)})",
-            $"{package.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{name}<{typeArguments}>");
+            $"{method.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{name}<{typeArguments}>");
     }
 
     private static bool IsBox(ITypeSymbol type, out ITypeSymbol element)

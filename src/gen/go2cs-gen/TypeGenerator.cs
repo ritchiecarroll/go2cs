@@ -1109,7 +1109,7 @@ public class TypeGenerator : ISourceGenerator
 
         names.Add(self.Name);
 
-        foreach (IMethodSymbol method in packageClass.GetMembers().OfType<IMethodSymbol>())
+        foreach (IMethodSymbol method in GoMethodHosts.DeclaredMethods(packageClass, self))
         {
             if (method.IsExtensionMethod && method.Parameters.Length > 0 &&
                 method.Parameters[0].Type is INamedTypeSymbol receiver &&

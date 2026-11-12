@@ -92,12 +92,13 @@ internal static class MethodSetKeep
         if (package is null || package.IsGenericType)
             return dependencies;
 
-        foreach (IMethodSymbol method in package.GetMembers().OfType<IMethodSymbol>())
+        foreach (IMethodSymbol method in GoMethodHosts.DeclaredMethods(package, type))
         {
             if (!method.IsExtensionMethod || method.IsGenericMethod || method.Parameters.Length == 0 || !IsReceiver(method.Parameters[0].Type, type))
                 continue;
 
-            dependencies.Add(Dependency(method.MetadataName, package));
+            // Kept on the class that declares it: the type's method holder, or its package class.
+            dependencies.Add(Dependency(method.MetadataName, method.ContainingType));
         }
 
         // The methods this generator writes into the type's OWN part: the forwarders of methods promoted through an

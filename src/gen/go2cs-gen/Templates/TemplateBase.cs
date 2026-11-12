@@ -21,6 +21,11 @@ internal abstract class TemplateBase
     public string? Scope = null;
     public string? PackageFooter = null;
 
+    // The static class the template's members are written into, when it is not the package class: the class that
+    // declares the method a forwarder belongs to (a type's method holder, RecvGenerator and StrGenerator). A
+    // forwarder sits beside its method, so the two overload in one class and a private method stays reachable.
+    public string? HostClassName = null;
+
     // A converted Go type the converter no longer marks gets its [GoType] back on the generated part,
     // so reflection reads the type exactly as it did when the converter wrote the attribute.
     public bool EmitGoTypeAttribute;
@@ -130,7 +135,7 @@ internal abstract class TemplateBase
         
         namespace {{PackageNamespace}};
 
-        public static partial class {{PackageName}}_package
+        {{(HostClassName is null || HostClassName == $"{PackageName}_package" ? $"public static partial class {PackageName}_package" : $"partial class {HostClassName}")}}
         {
         
         """;
