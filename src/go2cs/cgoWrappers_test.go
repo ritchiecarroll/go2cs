@@ -9,6 +9,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/importer"
 	"go/parser"
@@ -17,6 +18,7 @@ import (
 	"maps"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
@@ -498,6 +500,75 @@ func _C2func_find(p0 *_Ctype_struct_x) (r1 *_Ctype_int, r2 error) { return }
 
 		if seen != len(want) {
 			t.Errorf("%s: %d of the %d errno forms were recognized", goos, seen, len(want))
+		}
+	}
+}
+
+// cgoNativeCall matches a call of a binding's extern (absᴍnative(…), the errno form's …ᴍnativeerrno(…)) or of a windows
+// C runtime's errno slot (errnoᴍlocation()).
+var cgoNativeCall = regexp.MustCompile(`\w+` + cgoMirrorSuffix + `native(errno)?\(|` + cgoErrnoLocation + `\(\)`)
+
+// cgoSeamCoverage reads a bindings file: how many externs it declares, how many seam brackets it opens, and each native
+// call made outside one, with its line.
+func cgoSeamCoverage(text string) (imports, brackets int, outside []string) {
+	inside := false
+
+	for number, line := range strings.Split(strings.ReplaceAll(text, "\r\n", "\n"), "\n") {
+		trimmed := strings.TrimSpace(line)
+
+		switch {
+		case strings.HasPrefix(trimmed, "[global::System.Runtime.InteropServices.LibraryImport("):
+			imports++
+		case strings.HasSuffix(trimmed, ".syscallEntersyscall();"):
+			inside = true
+			brackets++
+		case strings.HasSuffix(trimmed, ".syscallExitsyscall();"):
+			inside = false
+		case strings.Contains(trimmed, "private static partial"):
+			// An extern's declaration, not a call.
+		case cgoNativeCall.MatchString(trimmed) && !inside:
+			outside = append(outside, fmt.Sprintf("%d: %s", number+1, trimmed))
+		}
+	}
+
+	return imports, brackets, outside
+}
+
+// Seam coverage, a standing property of the bindings (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.20, increment 5b):
+// every native call a binding makes is inside the native-call seam's bracket (runtime's syscallEntersyscall and
+// syscallExitsyscall, §11.4), so a scheduler that watches the bracket sees every C call (COORD, for M:N). Each extern is
+// one wrapper's, with one bracket, except windows' errno slot, which only the errno form calls, inside its own bracket.
+func TestCgoBindingsCrossTheSeamOnEveryNativeCall(t *testing.T) {
+	for _, target := range cgoWrapperTargets {
+		content, err := os.ReadFile(filepath.Join("..", "tests", "GolibTests", "GoCgoWrappers."+target.goos+".golden.cs"))
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		text := string(content)
+		imports, brackets, outside := cgoSeamCoverage(text)
+		errnoSlot := 0
+
+		if strings.Contains(text, " "+cgoErrnoLocation+"();") {
+			errnoSlot = 1
+		}
+
+		t.Logf("READING %s: %d externs, %d brackets, %d errno slot", target.goos, imports, brackets, errnoSlot)
+
+		if imports != brackets+errnoSlot {
+			t.Errorf("%s: %d externs against %d brackets and %d errno slot: an extern no wrapper brackets", target.goos, imports, brackets, errnoSlot)
+		}
+
+		for _, call := range outside {
+			t.Errorf("%s: a native call outside the seam's bracket, line %s", target.goos, call)
+		}
+
+		// The check's own negative control: with one bracket's opening removed, it names the call that bracket covered.
+		planted := strings.Replace(text, "global::go.runtime_package.syscallEntersyscall();", "", 1)
+
+		if _, _, outside := cgoSeamCoverage(planted); len(outside) == 0 {
+			t.Errorf("%s: the check does not name a native call whose bracket was removed", target.goos)
 		}
 	}
 }

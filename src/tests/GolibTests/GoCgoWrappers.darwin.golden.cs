@@ -547,7 +547,7 @@ static unsafe partial class cgotestꓸC_package
     // The package's C libraries, as the converter captured them (§6.1, §11.5), registered with golib's resolver for this
     // assembly's own [LibraryImport] bindings when the module loads (§6.2, §11.11).
     [global::System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void registerᴍlibraries() => global::go.golib.GoCgoLibraries.Register(typeof(cgotestꓸC_package).Assembly,
+    internal static void registerᴍlibraries() => global::go.golib.GoCgoLibraries.Register(typeof(cgotestꓸC_package).Assembly, "darwin/amd64",
         new global::go.golib.GoCgoLibrary("-lgo2csprobe", "/tmp/go2cs-cgo-probe/libgo2csprobe.dylib"),
         new global::go.golib.GoCgoLibrary("-lSystem", "/usr/lib/libSystem.B.dylib"));
 

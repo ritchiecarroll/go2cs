@@ -32,11 +32,26 @@ public sealed class GoCgoLibrary(string flag, string name)
 public static class GoCgoLibraries
 {
     /// <summary>Registers the resolver for <paramref name="assembly"/>'s own <c>[LibraryImport]</c> bindings.</summary>
-    public static void Register(Assembly assembly, params GoCgoLibrary[] libraries)
+    public static void Register(Assembly assembly, params GoCgoLibrary[] libraries) => Register(assembly, "", libraries);
+
+    /// <summary>
+    /// Registers the resolver for <paramref name="assembly"/>'s own <c>[LibraryImport]</c> bindings, which were converted
+    /// for <paramref name="target"/> (<c>GOOS/GOARCH</c>, the target the bindings file's header records).
+    /// </summary>
+    public static void Register(Assembly assembly, string target, params GoCgoLibrary[] libraries)
     {
         List<GoCgoLibrary> owned = [.. libraries];
-        NativeLibrary.SetDllImportResolver(assembly, (name, importing, _) => Resolve(name, importing, owned));
+        NativeLibrary.SetDllImportResolver(assembly, (name, importing, _) => Resolve(name, importing, owned, target));
     }
+
+    /// <summary>The running process's target, as Go names it: <c>GOOS/GOARCH</c>.</summary>
+    internal static string RunningTarget => $"{GoHostOfRecord.HostGOOS()}/{GoHostOfRecord.GoArchOf(RuntimeInformation.ProcessArchitecture)}";
+
+    /// <summary>
+    /// Why bindings converted for <paramref name="target"/> cannot run on <paramref name="hostGOOS"/> with
+    /// <paramref name="processArchitecture"/>, or <see langword="null"/> when they can.
+    /// </summary>
+    internal static string? TargetMismatch(string target, string hostGOOS, Architecture processArchitecture) => null;
 
     // Where a library the table owns may load from: where a Go binary's own loader would look for it, and never the
     // current directory (the DLL-planting surface, §5.4).
@@ -54,7 +69,9 @@ public static class GoCgoLibraries
     /// On darwin a name that is not absolute is refused before dyld sees it (§11.12, mandatory since increment 4d): dyld's
     /// search for a bare name reached the current directory on both hosted RIDs.
     /// </summary>
-    internal static nint Resolve(string name, Assembly assembly, IReadOnlyList<GoCgoLibrary> libraries)
+    internal static nint Resolve(string name, Assembly assembly, IReadOnlyList<GoCgoLibrary> libraries) => Resolve(name, assembly, libraries, "");
+
+    internal static nint Resolve(string name, Assembly assembly, IReadOnlyList<GoCgoLibrary> libraries, string target)
     {
         foreach (GoCgoLibrary library in libraries)
         {

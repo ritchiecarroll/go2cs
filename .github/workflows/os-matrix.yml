@@ -1054,9 +1054,11 @@ jobs:
       # current directory: linux through LD_LIBRARY_PATH (set to the directory alone when it was empty -- an empty
       # entry is the current directory to ld.so), darwin by its ABSOLUTE install name at a fixed path (§11.12: dyld's
       # search for a bare name reached the current directory, 42936395011), and windows from the test assembly's own
-      # directory, where CgoProbeTests copies it.
+      # directory, where CgoProbeTests copies it. converter-cgo builds it too (increment 5b): the cgo route's real-route
+      # test links the Phase 2 fixture's probe functions against it through CGO_LDFLAGS, and on windows llvm-mingw's
+      # linker reads an import library, never the DLL itself, so the build writes one beside it.
       - name: GolibTests — build the cgo probe library
-        if: needs.plan.outputs.stage == 'golib-tests' && contains(fromJSON('["linux-x64","osx-x64","osx-arm64","win-x64"]'), matrix.rid)
+        if: (needs.plan.outputs.stage == 'golib-tests' || needs.plan.outputs.stage == 'converter-cgo') && contains(fromJSON('["linux-x64","osx-x64","osx-arm64","win-x64"]'), matrix.rid)
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -1072,7 +1074,7 @@ jobs:
           # Each OS's load-time name, which the golden's probe fixture binds (src/go2cs's cgoProbeLibrary): the SONAME on
           # linux, the absolute install name on darwin, the DLL's own name on windows.
           $probe = @{
-              windows = @{ name = 'go2csprobe.dll'; flags = @() }
+              windows = @{ name = 'go2csprobe.dll'; flags = @("-Wl,--out-implib,$dir/libgo2csprobe.dll.a") }
               darwin  = @{ name = 'libgo2csprobe.dylib'; flags = @("-Wl,-install_name,$dir/libgo2csprobe.dylib") }
               linux   = @{ name = 'libgo2csprobe.so'; flags = @('-fPIC', '-Wl,-soname,libgo2csprobe.so') }
           }[$goos]
