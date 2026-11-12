@@ -431,3 +431,66 @@ rules above applied. No new run.
   around a method that lifts a type; a dot-imported name written through its class.
 - **Falsifiers**: a `builtin.` or golib-type qualification the move adds; a fallback outside the 11; a file
   outside the predicted set whose difference is not one of the kinds named here.
+
+## Amendment 2026-11-12 (second) — four rules re-derived, five more line kinds, before any reconvert
+
+> Appended, not rewritten. Posted to the coordinator before any reconvert ran. Read at master `742a3dbb24`
+> with the converter of the cut in progress.
+
+### 19. The rules of section 13, step 4, re-derived
+
+Step 4 says each rule that exists only because methods share the package class is re-derived, not deleted
+blind. Four are done. Go's own scoping decides each one:
+
+- **A built-in named like a method.** A package-level FUNCTION named `len` hides the built-in for the whole
+  package in Go, so no built-in call of that name can stand beside it. Only a METHOD could shadow, and a
+  method now stands in its holder. The call is written through `builtin` only inside that holder.
+- **An import named like a method.** Go refuses a package-level function of an import's name in a file that
+  imports it, so again only a method could shadow. The reference is written through the import's package
+  class only inside the holder that declares the method. A method a `_test.go` file declares stands in a
+  holder of its own (section 17), so the production pass no longer reads the test files' declarators for
+  this, and the comment that explained such a qualification is no longer written.
+- **A function value named like a method.** The function is the only member of its name in the package
+  class, so its method group has a natural type again. The delegate cast and the delegate-typed `:=` local
+  are no longer written.
+- **A call of a function whose argument's type declares a method of the function's name.** The method is no
+  member of the class the call names, so C# binds the function as Go does, and the interface cast on the
+  argument is no longer written.
+
+Each has a converter test that states the narrowed emission, and the behavioral fixture
+`MethodHolderNames` runs all four shapes against Go's output.
+
+### 20. Line kinds g to k, with counts
+
+A typed census of the `go/packages` load of `std`, one build configuration per target:
+linux/amd64 | windows/amd64 | darwin/amd64 | linux/arm64.
+
+| kind | what changes | old rule's sites | stay | change |
+|---|---|---|---|---|
+| g | `builtin.<name>(` returns to `<name>(` outside the declaring holder | 1,097 \| 1,106 \| 1,098 \| 1,097 | 63 | at most 1,034 \| 1,043 \| 1,035 \| 1,034 |
+| h | an import written through `<path>_package` returns to its alias outside the declaring holder | 132 in 35 files | 17 | 115 in 32 files |
+| i | a function value loses its delegate cast; a delegate-typed `:=` local returns to `var` | at most 11 in 6 files | 0 | at most 11 |
+| j | the interface cast on a same-name call's first argument is removed | 3, all in `sort/sort.go` | 0 | 3 |
+| k | the white-box bridge's qualification of a production name holds only inside the test method's holder | not counted | | |
+
+- g excludes `make` and `new`, which were never written through `builtin`. "At most" for g and i: some call
+  forms never wrote the qualifier, and the cast was written only where the site supplied no delegate type.
+- h: the comment "Fully qualified to avoid alias shadowing by the same-package test declaration" disappears.
+  The census finds no site of it; the tree has one, `hash/maphash/maphash_purego.cs`, a file outside the
+  load.
+- One more consequence of kind a (a declaration loses its `Δ`): a field named like its struct type carried two
+  markers where the type was renamed for a method (`ΔΔLabel` in `ΔLabel`). The type keeps its name, so the
+  field keeps one marker, which C# needs for a member named like its type. Seven files of the tree carry
+  `ΔΔ` (`net`, `internal/trace`, `internal/trace/testtrace`).
+- **Falsifiers added**: a `builtin.` or `_package` qualification removed INSIDE the declaring holder (the 63
+  and the 17); a cast of kind i or j that remains; a g or h change in a file the census does not list.
+- **Limit**: the census reads one build configuration per target. A file the corpus converts under other
+  tags is outside it and is named in the footprint.
+
+### 21. Open at this amendment
+
+`src/core` commits 1,148 `_test.cs` files and 242 `package_test_info.cs`. `-stdlib` does not emit them, and
+after the move a `-tests` pass writes a test file's methods into holders too. Asked of the coordinator:
+whether the batch regenerates production only (a row's test files then take the new shape at its next bank)
+or re-emits every banked row's test files. The generators and the run-time library read both shapes: the
+behavioral projects of the cut run in the new shape against a `src/core` still in the old one.
