@@ -603,9 +603,14 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.currentFuncHoists = nil
 	v.currentHolderNamed = receiverNamed(v.info, funcDecl)
 
+	// The holder ends with its method: a declaration that follows in file order (a package-level
+	// variable holding a function literal, a type) stands in the package class again.
+	defer v.leaveHolder()
+
 	if v.currentHolderNamed != nil {
 		v.currentFuncHoists = &strings.Builder{}
 		v.currentHolderInTestFile = v.declaredInTestFile(v.info.Defs[funcDecl.Name])
+		holderHiddenTypeClasses = v.holderHiddenTypes(funcDecl)
 	}
 
 	// Record the Go name of every function literal this declaration encloses (the funcLits half

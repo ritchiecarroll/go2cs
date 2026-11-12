@@ -284,6 +284,9 @@ type Visitor struct {
 	// in, and nil in a function; currentHolderInTestFile says which half of a -tests unit declares it.
 	currentHolderNamed      *types.Named
 	currentHolderInTestFile bool
+	// namespaceHiddenTypes is the package's types a method holder cannot name bare, each with its
+	// declaring class (holderHiddenTypes), read once per file.
+	namespaceHiddenTypes map[string]string
 	// A cross-package type reference emits a short-alias form (`pkg.Type`, `@unsafe.Pointer`) that
 	// resolves only through a file-local alias `using <alias> = <namespace>;`. That alias is emitted
 	// when the file imports the package under its canonical (unaliased) name; a file can reference the

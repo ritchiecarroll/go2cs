@@ -425,16 +425,103 @@ func (v *Visitor) holderHides(name string) bool {
 		return false
 	}
 
-	if v.holderDeclares(name) {
-		return true
-	}
+	return v.holderDeclares(name) || v.namespaceHides(name)
+}
 
+// namespaceHides reports whether the package's own namespace declares something named name that a
+// method holder reads before the package's members: in the root namespace, a golib type of that name
+// with no type parameter; a child namespace in view. Unlike a method of the holder, which hides a name
+// only where an expression is read, these hide it in a type position too.
+func (v *Visitor) namespaceHides(name string) bool {
 	if packageNamespace == RootNamespace && golibNamespaceType(name, v.pkg.Path()) {
 		return true
 	}
 
 	return packageChildNamespaces[packageNamespace+"."+getSanitizedImport(name)] ||
 		(packageNamespace == RootNamespace && golibChildNamespaces[name])
+}
+
+// holderHiddenTypeClasses holds, while a method with a holder is being emitted, the types of the
+// package that the holder cannot name bare (holderHiddenTypes), each by its Go name with the class
+// that declares it. The type-name renderer is a set of package-level functions over the type's Go
+// spelling, so the method's visitor publishes the set here for it and leaveHolder withdraws it. Files
+// are converted one at a time; nothing reads it concurrently.
+var holderHiddenTypeClasses map[string]string
+
+// holderHiddenTypes answers the package-level types of the package being converted whose name the
+// package's namespace hides inside a method holder (namespaceHides), each with the class that declares
+// it, for the method funcDecl. In the package class a nested type is read before the namespace's
+// members; a holder is not nested in it, so there the name binds the namespace or golib's type
+// (`this ref sync s` is CS0118 where `go.sync` is in view). It answers nil where the package has none,
+// which is every package of the standard library.
+//
+// A name that funcDecl itself declares as a type, as a type parameter of its receiver or as a type
+// declared in its body, is left out: the renderer sees one spelling for both, and the method's own
+// declaration is the nearer one.
+func (v *Visitor) holderHiddenTypes(funcDecl *ast.FuncDecl) map[string]string {
+	if v.pkg == nil {
+		return nil
+	}
+
+	if v.namespaceHiddenTypes == nil {
+		v.namespaceHiddenTypes = map[string]string{}
+		scope := v.pkg.Scope()
+
+		for _, name := range scope.Names() {
+			typeName, isType := scope.Lookup(name).(*types.TypeName)
+
+			if !isType || typeName.IsAlias() || !v.namespaceHides(name) {
+				continue
+			}
+
+			v.namespaceHiddenTypes[name] = v.packageScopeClassName(typeName)
+		}
+	}
+
+	if len(v.namespaceHiddenTypes) == 0 {
+		return nil
+	}
+
+	hidden := make(map[string]string, len(v.namespaceHiddenTypes))
+
+	for name, class := range v.namespaceHiddenTypes {
+		hidden[name] = class
+	}
+
+	ast.Inspect(funcDecl, func(node ast.Node) bool {
+		switch decl := node.(type) {
+		case *ast.TypeSpec:
+			delete(hidden, decl.Name.Name)
+		case *ast.Ident:
+			if _, isTypeParam := v.info.TypeOf(decl).(*types.TypeParam); isTypeParam {
+				delete(hidden, decl.Name)
+			}
+		}
+
+		return true
+	})
+
+	return hidden
+}
+
+// leaveHolder ends the emission of a method in its holder: what follows stands in the package class.
+func (v *Visitor) leaveHolder() {
+	v.currentHolderNamed = nil
+	v.currentHolderInTestFile = false
+	holderHiddenTypeClasses = nil
+}
+
+// holderHiddenTypeName answers the spelling of the package's type named typeName, a Go name without type
+// arguments, through the class that declares it, when the current method's holder cannot name it bare,
+// and "" otherwise.
+func holderHiddenTypeName(typeName string) string {
+	class, hidden := holderHiddenTypeClasses[typeName]
+
+	if !hidden {
+		return ""
+	}
+
+	return class + "." + getSanitizedIdentifier(getAliasedTypeName(typeName))
 }
 
 // golibNamespaceType reports whether golib declares, in namespace `go`, a type named name that takes no
@@ -553,7 +640,7 @@ func importSpecIdent(info *types.Info, importSpec *ast.ImportSpec) *ast.Ident {
 
 // holderQualifiedName answers the qualified spelling of ident inside the current method's holder, when
 // ident names a package-level constant, variable or function of the package being converted that the
-// bare name would not bind there, and "" otherwise.
+// bare name would not bind there, or a type of the package the namespace hides there, and "" otherwise.
 func (v *Visitor) holderQualifiedName(ident *ast.Ident) string {
 	if !v.inFunction || v.currentHolderNamed == nil || v.pkg == nil {
 		return ""
@@ -567,6 +654,15 @@ func (v *Visitor) holderQualifiedName(ident *ast.Ident) string {
 
 	switch obj.(type) {
 	case *types.Const, *types.Var, *types.Func:
+	case *types.TypeName:
+		// A type is hidden by the namespace alone (a method of the holder hides it only where an
+		// expression is read, which convUnaryExpr and the type switch handle), and is written as the
+		// type-name renderer writes it.
+		if obj.Pkg() != v.pkg {
+			return ""
+		}
+
+		return holderHiddenTypeName(obj.Name())
 	default:
 		return ""
 	}

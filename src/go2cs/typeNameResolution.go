@@ -1699,6 +1699,15 @@ func renderCSFullTypeName(typeName string, rootNested bool) string {
 				base = getCollisionAvoidanceIdentifier(base)
 			}
 
+			// A generic type of the package that the current method's holder cannot name bare
+			// (holderHiddenTypes) is named through its declaring class, as the leaf below names a
+			// type without arguments.
+			if !rootNested {
+				if hidden := holderHiddenTypeName(base); hidden != "" {
+					base = RootNamespace + "." + hidden
+				}
+			}
+
 			typeName = fmt.Sprintf("%s<%s>%s", base, strings.Join(subTypes, ", "), typeName[end+1:])
 		}
 	}
@@ -1775,6 +1784,14 @@ func renderCSFullTypeName(typeName string, rootNested bool) string {
 						return target
 					}
 				}
+			}
+		}
+
+		// A type of the package that the current method's holder cannot name bare (holderHiddenTypes)
+		// is named through its declaring class.
+		if !rootNested {
+			if hidden := holderHiddenTypeName(typeName); hidden != "" {
+				return RootNamespace + "." + hidden
 			}
 		}
 
