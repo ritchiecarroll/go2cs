@@ -412,3 +412,73 @@ answer it the same day. This is the PROTOTYPE's site, not master's; the train th
   wrappers checks it against the prototype's red (`src/tools/mnspike2/MnNativeWrap`) before relying on it.
 
 — H (2026-11-12)
+
+## 15. Amendment 2026-11-12: increment 3.0, its plan, predictions and stop lines (posted before code)
+
+Phase 2's exit gate is DONE and accepted (`0001be70a7`), so Phase 3's code may start (section 12, Q-A). COORD ruled
+the base: 3.0 is cut from the exit gate's tip, because it builds on that branch's converter changes; master is
+merged in, never rebased, once the batches that seat the gate have landed. The branch is
+`claude/h-cgo-phase3-residuals`.
+
+3.0 writes no marshaling. It closes what the 5b re-check and the exit gate left open (BOARD, 2026-11-12, two rows),
+each red first.
+
+### 15.1 The five items
+
+| | Item | Where | The red | The fix |
+|---|---|---|---|---|
+| R1 | Under a cgo-on load, a package with no `import "C"` loses its plain file under `//go:build cgo`, with exit 0 | `processConversion`, the `if route != nil` beside the constraint re-check | Two conversions of one small package: with `-cgo`, and with `CGO_ENABLED=1` and no `-cgo`. Each exits 0 and writes no `.cs` for that file | The re-check carries the `cgo` tag whenever the LOAD was cgo-on: `-cgo`, or a `CGO_ENABLED=1` the load ran under. The key is the load, not the route |
+| R2 | A link line that does not link reports the first probe's error, which lists every symbol | `cgoCapture`, the baseline probe | The real-route arm with `-lgo2csnosuchlib`, tightened: the refusal must carry the linker's words about the link line and must not blame a symbol | Return the baseline probe's own error |
+| R3 | The offline test seam appends its own `-tags=cgo`, and go keeps the last `-tags` it is given | `processConversion`, the `cgoOfflineTrees` arm | The offline fixture converted with a user tag, plus a plain file under that tag: the file is not loaded | One `-tags` flag that carries the user's tags and `cgo`. The test seam only; a real `-cgo` load appends nothing |
+| R4 | The verified-names rule refuses more than `abs` and `labs` on glibc | a READING, on the hosted linux leg | none: a program that calls `atoi`, `atol`, `toupper`, `tolower`, `fabs` and `strtol`, converted on the real route under the runner's gcc and under the pinned zig | none. The test asserts only the invariant (each call is bound, or refused by name with nothing written) and prints the set. `docs/Limitations.md` records the set as measured |
+| R5 | A cgo project built for a target other than its bindings' fails far from the cause | the cgo project's own `.csproj` (`cgoTargetDefaults`) | The offline fixture, converted for linux/amd64, built with `-p:GoTargetOS=windows`: compile errors, none of them go2cs's | The project carries a target that refuses the build by name, with both targets, before the compiler runs |
+
+**R5 has a second half, proposed here.** A cgo project's default target is its bindings' target, but that default
+reaches only the project itself. Its references to the standard library take their own default (windows/amd64). So a
+plain `dotnet build` of a cgo program converted on linux compiles linux bindings against the windows standard
+library, and says nothing. The fix is in the same file: the cgo project hands its one target to its project
+references. The exit gate's tests pass the target by hand on every build, which is why the gate did not show this.
+
+### 15.2 Predictions, to be scored as worded
+
+- **P3.0-1.** At the base, both of R1's conversions exit 0 and neither writes the `.cs` of the file under
+  `//go:build cgo`. After the fix both write it.
+- **P3.0-2.** At the base, R2's refusal names at least one C symbol of the package. After the fix it names none, and
+  it still names the library.
+- **P3.0-3.** At the base, R3's file under the user's tag is not converted. After the fix it is. No golden of an
+  existing offline test moves.
+- **P3.0-4.** Under the runner's gcc on linux, all six of R4's functions are refused by name. Under the pinned zig
+  the same six are refused; this half is the weaker one, because `strtol`'s rename depends on the glibc version zig
+  targets.
+- **P3.0-5.** At the base, R5's build fails with compiler errors (CS-coded) and no error that names go2cs. After the
+  fix it fails with exactly one error, go2cs's, naming both targets, and no CS-coded error.
+- **P3.0-6.** At the base, the offline fixture built with no target property takes the windows standard library
+  beside its linux bindings. After the fix it takes the linux one, and a build that passes the target by hand is
+  unchanged.
+- **P3.0-7.** 0 corpus bytes on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64. `check-no-regression`
+  stays byte-identical. The only goldens that move are the cgo fixtures' project files, by the refusal target and the
+  handed-down target.
+- **Most likely red that is not the mechanism:** R1 under `-cgo`. A package with no `import "C"` has no route, and
+  `-cgo` may refuse or behave otherwise for a reason this plan has not read. If so the reading is posted before any
+  fix is shaped to it.
+
+### 15.3 Gates
+
+- No golib change and no go2cs-gen change is planned, so GolibTests and GenTests are not owed. If either tree is
+  touched, its full suite is.
+- Owed: the full `go test ./...` (repoguard and the comment census inside it), `check-no-regression`, and the
+  two-seeded corpus comparison on four targets, because R1 changes a path every conversion takes.
+- Hosted, once, at the tip: `converter-cgo` on linux both ways (the runner's gcc and the pinned zig) for R2 and R4;
+  `cgo-e2e` on linux for R5's second half, where the windows default is the wrong one.
+
+### 15.4 Stop lines
+
+- **S3.0-A.** A corpus byte moves: stop and attribute before anything else (S-E).
+- **S3.0-B.** Handing the target down needs a change outside the cgo project's own `.csproj` (a corpus build file,
+  or any converted package's project): stop. The refusal by name lands alone and the second half is posted.
+- **S3.0-C.** R1 does not reproduce as read: post the reading. No fix is invented for a red that is not there.
+- **S3.0-D.** R1's fix moves any golden outside the cgo tests: stop.
+- **S3.0-E.** R4 shows a call that is neither bound nor refused by name: that is a defect of the rule, not a reading.
+  Stop and post.
+
+— H (2026-11-12)
