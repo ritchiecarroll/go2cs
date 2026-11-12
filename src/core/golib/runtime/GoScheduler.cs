@@ -366,6 +366,7 @@ public static class GoScheduler
     private static void Monitor()
     {
         long lastSample = 0;
+        List<Goroutine> stolen = [];
 
         while (true)
         {
@@ -380,6 +381,10 @@ public static class GoScheduler
 
             if (s_runNext)
             {
+                // The steals are queued after the walk: Enqueue may add a carrier, and the lock is reentrant,
+                // so a queue inside the walk changes the list under its own enumerator.
+                stolen.Clear();
+
                 lock (s_carriersLock)
                 {
                     foreach (Carrier carrier in s_carriers)
@@ -389,12 +394,15 @@ public static class GoScheduler
                         if (since == 0 || now - since < Stopwatch.Frequency / 1000 || Volatile.Read(ref carrier.Next) is null)
                             continue;
 
-                        if (Interlocked.Exchange(ref carrier.Next, null) is { } stolen)
-                        {
-                            Interlocked.Increment(ref s_runNextSteals);
-                            Enqueue(stolen, stolen.TakeReadyStep());
-                        }
+                        if (Interlocked.Exchange(ref carrier.Next, null) is { } next)
+                            stolen.Add(next);
                     }
+                }
+
+                foreach (Goroutine next in stolen)
+                {
+                    Interlocked.Increment(ref s_runNextSteals);
+                    Enqueue(next, next.TakeReadyStep());
                 }
             }
 
