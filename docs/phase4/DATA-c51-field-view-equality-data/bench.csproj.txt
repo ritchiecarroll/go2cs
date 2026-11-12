@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <go2csPath><tree>/src/</go2csPath>
+    <NoWarn>CS8981</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="<scratch>/conv/tsshape/tsshape.csproj" />
+    <ProjectReference Include="<tree>/src/core/golib/golib.csproj" />
+  </ItemGroup>
+</Project>

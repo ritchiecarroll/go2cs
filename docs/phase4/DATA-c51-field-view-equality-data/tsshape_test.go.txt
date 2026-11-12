@@ -1,0 +1,29 @@
+package tsshape
+
+import "testing"
+
+const n = 64
+
+func bench(b *testing.B, x, y []*Type, shift int) {
+	b.ResetTimer()
+	c := CountEq(x, y, shift, b.N)
+	b.StopTimer()
+	_ = c
+	b.ReportMetric(float64(b.Elapsed().Nanoseconds())/float64(b.N*n), "ns/cmp")
+}
+
+func BenchmarkDeepUnequal(b *testing.B)    { d := Deep(n); bench(b, d, d, 1) }
+func BenchmarkDeepEqual(b *testing.B)      { d := Deep(n); bench(b, d, d, 0) }
+func BenchmarkShallowUnequal(b *testing.B) { s := Shallow(n); bench(b, s, s, 1) }
+func BenchmarkPlainUnequal(b *testing.B)   { p := Plain(n); bench(b, p, p, 1) }
+func BenchmarkMixedDeepPlain(b *testing.B) { bench(b, Deep(n), Plain(n), 0) }
+func BenchmarkIntBaseline(b *testing.B) {
+	x := make([]int, n)
+	for i := range x {
+		x[i] = i
+	}
+	b.ResetTimer()
+	CountEqInt(x, x, 1, b.N)
+	b.StopTimer()
+	b.ReportMetric(float64(b.Elapsed().Nanoseconds())/float64(b.N*n), "ns/cmp")
+}
