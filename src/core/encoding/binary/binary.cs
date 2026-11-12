@@ -27,6 +27,7 @@ using math = math_package;
 using reflect = reflect_package;
 using slices = slices_package;
 using sync = sync_package;
+using static binary_package;
 
 partial class binary_package {
 
@@ -67,6 +68,8 @@ public static ref bigEndian BigEndian => ref ((StaticBox<bigEndian>)ᏑBigEndian
 
 public partial struct littleEndian {
 }
+
+} partial class binaryᴛlittleEndian {
 
 // Uint16 returns the uint16 representation of b[0:2].
 public static uint16 Uint16(this littleEndian _Δp0, slice<byte> b) {
@@ -156,8 +159,12 @@ private static readonly @string binaryLittleEndianˢᵇ = "binary.LittleEndian"u
 
 public static @string GoString(this littleEndian _) { return binaryLittleEndianˢ; }
 
+} partial class binary_package {
+
 public partial struct bigEndian {
 }
+
+} partial class binaryᴛbigEndian {
 
 // Uint16 returns the uint16 representation of b[0:2].
 public static uint16 Uint16(this bigEndian _Δp0, slice<byte> b) {
@@ -247,6 +254,8 @@ private static readonly @string binaryBigEndianˢᵇ = "binary.BigEndian"u8;
 
 public static @string GoString(this bigEndian _) { return binaryBigEndianˢ; }
 
+} partial class binaryᴛnativeEndian {
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nativeEndianˢ => ref nativeEndianˢᵇ;
 private static readonly @string nativeEndianˢᵇ = "NativeEndian"u8;
@@ -258,6 +267,8 @@ internal static ref readonly @string binaryNativeEndianˢ => ref binaryNativeEnd
 private static readonly @string binaryNativeEndianˢᵇ = "binary.NativeEndian"u8;
 
 public static @string GoString(this nativeEndian _) { return binaryNativeEndianˢ; }
+
+} partial class binary_package {
 
 // Read reads structured binary data from r into data.
 // Data must be a pointer to a fixed-size value or a slice
@@ -292,12 +303,12 @@ public static error Read(io.Reader r, ByteOrder order, any data) {
     var v = reflect.ValueOf(data);
     nint size = -1;
     switch (v.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔPointer: {
+    case var ᴛ when ᴛ == reflect.Pointer: {
         v = v.Elem();
         size = dataSize(v);
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Slice: {
         size = dataSize(v);
         break;
     }}
@@ -334,12 +345,12 @@ public static (nint, error) Decode(slice<byte> buf, ByteOrder order, any data) {
     var v = reflect.ValueOf(data);
     nint size = -1;
     switch (v.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔPointer: {
+    case var ᴛ when ᴛ == reflect.Pointer: {
         v = v.Elem();
         size = dataSize(v);
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Slice: {
         size = dataSize(v);
         break;
     }}
@@ -870,9 +881,9 @@ internal static ref sync.Map structSize => ref ((StaticBox<sync.Map>)ᏑstructSi
 // For compound structures, it sums the sizes of the elements. Thus, for instance, for a slice
 // it returns the length of the slice times the element size and does not count the memory
 // occupied by the header. If the type of v is not acceptable, dataSize returns -1.
-internal static nint dataSize(reflectꓸValue v) {
+internal static nint dataSize(reflect.Value v) {
     switch (v.Kind()) {
-    case var ᴛ when ᴛ == reflect.ΔSlice || ᴛ == reflect.Array: {
+    case var ᴛ when ᴛ == reflect.Slice || ᴛ == reflect.Array: {
         var t = v.Type().Elem();
         {
             var (sizeΔ2, ok) = ᏑstructSize.Load(t); if (ok) {
@@ -911,7 +922,7 @@ internal static nint dataSize(reflectꓸValue v) {
 }
 
 // sizeof returns the size >= 0 of variables for the given type or -1 if the type is not acceptable.
-internal static nint @sizeof(reflectꓸType t) {
+internal static nint @sizeof(reflect.Type t) {
     switch (t.Kind()) {
     case var ᴛ when ᴛ == reflect.Array: {
         {
@@ -932,7 +943,7 @@ internal static nint @sizeof(reflectꓸType t) {
         }
         return sum;
     }
-    case var ᴛ when ᴛ == reflect.ΔBool || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.Float32 || ᴛ == reflect.Float64 || ᴛ == reflect.Complex64 || ᴛ == reflect.Complex128: {
+    case var ᴛ when ᴛ == reflect.Bool || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.Float32 || ᴛ == reflect.Float64 || ᴛ == reflect.Complex64 || ᴛ == reflect.Complex128: {
         return (nint)t.Size();
     }}
 
@@ -948,11 +959,15 @@ partial struct coder {
 partial struct decoder /*coder*/;
 partial struct encoder /*coder*/;
 
+} partial class binaryᴛdecoder {
+
 internal static bool @bool(this ref decoder d) {
     var x = d.buf[d.offset];
     d.offset++;
     return x != 0;
 }
+
+} partial class binaryᴛencoder {
 
 internal static void @bool(this ref encoder e, bool x) {
     if (x) {
@@ -963,16 +978,22 @@ internal static void @bool(this ref encoder e, bool x) {
     e.offset++;
 }
 
+} partial class binaryᴛdecoder {
+
 internal static uint8 uint8(this ref decoder d) {
     var x = d.buf[d.offset];
     d.offset++;
     return x;
 }
 
+} partial class binaryᴛencoder {
+
 internal static void uint8(this ref encoder e, uint8 x) {
     e.buf[e.offset] = x;
     e.offset++;
 }
+
+} partial class binaryᴛdecoder {
 
 internal static uint16 uint16(this ref decoder d) {
     var x = d.order.Uint16(d.buf.slice(d.offset, d.offset + 2));
@@ -980,10 +1001,14 @@ internal static uint16 uint16(this ref decoder d) {
     return x;
 }
 
+} partial class binaryᴛencoder {
+
 internal static void uint16(this ref encoder e, uint16 x) {
     e.order.PutUint16(e.buf.slice(e.offset, e.offset + 2), x);
     e.offset += 2;
 }
+
+} partial class binaryᴛdecoder {
 
 internal static uint32 uint32(this ref decoder d) {
     var x = d.order.Uint32(d.buf.slice(d.offset, d.offset + 4));
@@ -991,10 +1016,14 @@ internal static uint32 uint32(this ref decoder d) {
     return x;
 }
 
+} partial class binaryᴛencoder {
+
 internal static void uint32(this ref encoder e, uint32 x) {
     e.order.PutUint32(e.buf.slice(e.offset, e.offset + 4), x);
     e.offset += 4;
 }
+
+} partial class binaryᴛdecoder {
 
 internal static uint64 uint64(this ref decoder d) {
     var x = d.order.Uint64(d.buf.slice(d.offset, d.offset + 8));
@@ -1002,28 +1031,48 @@ internal static uint64 uint64(this ref decoder d) {
     return x;
 }
 
+} partial class binaryᴛencoder {
+
 internal static void uint64(this ref encoder e, uint64 x) {
     e.order.PutUint64(e.buf.slice(e.offset, e.offset + 8), x);
     e.offset += 8;
 }
 
+} partial class binaryᴛdecoder {
+
 internal static int8 int8(this ref decoder d) { return (int8)d.uint8(); }
+
+} partial class binaryᴛencoder {
 
 internal static void int8(this ref encoder e, int8 x) { e.uint8((uint8)x); }
 
+} partial class binaryᴛdecoder {
+
 internal static int16 int16(this ref decoder d) { return (int16)d.uint16(); }
+
+} partial class binaryᴛencoder {
 
 internal static void int16(this ref encoder e, int16 x) { e.uint16((uint16)x); }
 
+} partial class binaryᴛdecoder {
+
 internal static int32 int32(this ref decoder d) { return (int32)d.uint32(); }
+
+} partial class binaryᴛencoder {
 
 internal static void int32(this ref encoder e, int32 x) { e.uint32((uint32)x); }
 
+} partial class binaryᴛdecoder {
+
 internal static int64 int64(this ref decoder d) { return (int64)d.uint64(); }
+
+} partial class binaryᴛencoder {
 
 internal static void int64(this ref encoder e, int64 x) { e.uint64((uint64)x); }
 
-internal static void value(this ref decoder d, reflectꓸValue v) {
+} partial class binaryᴛdecoder {
+
+internal static void value(this ref decoder d, reflect.Value v) {
     switch (v.Kind()) {
     case var ᴛ when ᴛ == reflect.Array: {
         nint l = v.Len();
@@ -1049,14 +1098,14 @@ internal static void value(this ref decoder d, reflectꓸValue v) {
         }
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Slice: {
         nint l = v.Len();
         for (nint i = 0; i < l; i++) {
             d.value(v.Index(i));
         }
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔBool: {
+    case var ᴛ when ᴛ == reflect.Bool: {
         v.SetBool(d.@bool());
         break;
     }
@@ -1114,7 +1163,9 @@ internal static void value(this ref decoder d, reflectꓸValue v) {
     }}
 }
 
-internal static void value(this ref encoder e, reflectꓸValue v) {
+} partial class binaryᴛencoder {
+
+internal static void value(this ref encoder e, reflect.Value v) {
     switch (v.Kind()) {
     case var ᴛ when ᴛ == reflect.Array: {
         nint l = v.Len();
@@ -1136,14 +1187,14 @@ internal static void value(this ref encoder e, reflectꓸValue v) {
         }
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔSlice: {
+    case var ᴛ when ᴛ == reflect.Slice: {
         nint l = v.Len();
         for (nint i = 0; i < l; i++) {
             e.value(v.Index(i));
         }
         break;
     }
-    case var ᴛ when ᴛ == reflect.ΔBool: {
+    case var ᴛ when ᴛ == reflect.Bool: {
         e.@bool(v.Bool());
         break;
     }
@@ -1201,15 +1252,21 @@ internal static void value(this ref encoder e, reflectꓸValue v) {
     }}
 }
 
-internal static void skip(this ref decoder d, reflectꓸValue v) {
+} partial class binaryᴛdecoder {
+
+internal static void skip(this ref decoder d, reflect.Value v) {
     d.offset += dataSize(v);
 }
 
-internal static void skip(this ref encoder e, reflectꓸValue v) {
+} partial class binaryᴛencoder {
+
+internal static void skip(this ref encoder e, reflect.Value v) {
     nint n = dataSize(v);
     clear(e.buf.slice(e.offset, e.offset + n));
     e.offset += n;
 }
+
+} partial class binary_package {
 
 // intDataSize returns the size of the data required to represent the data when encoded,
 // and optionally a byte slice containing the encoded data if no conversion is necessary.

@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -63,7 +61,7 @@ using static go.encoding.binary_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/binary/binary.go", "binary.cs", "ACBCACVIkoKokoKCqJLOkoKokoKCgoKokgAGEpKCqpKCgoKCgoKCgqiSAA4Y1MqSgqiSgoKoks6SgqiSgoKCgqiSAAYSkoKqkoKCgoKCgoKCqJIADhjU1NQAASQAEQSCgoKmgsqCgpSCtKSCpoKAgqSCrsKCgqaCyoKClIK0pIKmgpSCgqaClLS0tLS0tLS0tLS0gsaCxrSCxoLGgsaCxoLGgsaCxoLWlAACFgAJBIKCgqaCuIKCgqaCgoKCrtSCgqaCuIKCgqaClIKCrtSCgoK4goKCpoKCgqaClIKUxoKUxoKClNi0tILGtLS0tLSCxrS0gsa0tILGtLSCxrS0gsa0tILGtLSCxrS0ggAFELLEpIKUpIKUpIKUpKSkxKSClKSClKSkxKSClKSClKSkxKSClKSClKSkpKSClKSkgpSkpJQABRLClIKAgraCgoKUyIKAgqSCgqaCyKiSlICC2IKCgoKUlKymAAsYgoKCpoKClJSmgoKCpoKCpoKCgqaCgqaCgoKmgoKmgoKCpoKCppSUlJSUlJSUgpSCgsiCgtyClNqCgsi2tLS0trS0tLa0ttrugpSCgsiCgpSClNqCgsi2tLS0trS0tLa0toKCtIKCyIKmgoKCrLL0pKSk5KSk5KSk5KSkxMSkpJSqooKC", "", "", "1104=uint32/1/2/1,Float32frombits/1/2/1,uint32/2/2/2,Float32frombits/2/2/2;1110=uint64/1/2/1,Float64frombits/1/2/1,uint64/2/2/2,Float64frombits/2/2/2")]
+[assembly: GoPositionMap("encoding/binary/binary.go", "binary.cs", "ACFCACdIkoKokoKCqJLOkoKokoKCgoKokgAGEpKCqpKCgoKCgoKCgqiSAA4Y1AAICpKCqJKCgqiSzpKCqJKCgoKCqJIABhKSgqqSgoKCgoKCgoKokgAOGNT01AADJAARBIKCgqaCyoKClIK0pIKmgoCCpIKuwoKCpoLKgoKUgrSkgqaClIKCpoKUtLS0tLS0tLS0tLSCxoLGtILGgsaCxoLGgsaCxoLGgtaUAAIWAAkEgoKCpoK4goKCpoKCgoKu1IKCpoK4goKCpoKUgoKu1IKCgriCgoKmgoKCpoKUgpTGgpTGgoKU2LS0gsa0tLS0tILGtLSCxrS0gsa0tILGtLSCxrS0gsa0tILGtLSCAAUQssSkgpSkgpSkgpSkpKTEpIKUpIKUpKTEpIKUpIKUpKTEpIKUpIKUpKSkpIKUpKSClKSklAAFEsKUgoCCtoKCgpTIgoCCpIKCpoLIqJKUgILYgoKCgpSUrKYADRiCgoLGgoKUlMaCgoLGgoLGgoKCxoKCxoKCgsaCgsaCgoLGgoLGtLS0tLS0tLSClIKCyIKC3IKU2oKCyLa0tLS2tLS0trS22gAIDoKUgoLIgoKUgpTagoLItrS0tLa0tLS2tLaCgrSCguiCxoKCgsyy9KSkpOSkpOSkpOSkpMTEpKSUqqKCgg==", "", "", "1153=uint32/1/2/1,Float32frombits/1/2/1,uint32/2/2/2,Float32frombits/2/2/2;1159=uint64/1/2/1,Float64frombits/1/2/1,uint64/2/2/2,Float64frombits/2/2/2")]
 [assembly: GoPositionMap("encoding/binary/varint.go", "varint.cs", "ACJSooKClKqigoKCgpSCAAIS4oKCgqaUgoKUlIKUqqKCgpSqooKClAACEuKCgoKUppzCgoKCgoKClJSCgpSUgpSuwoKCgpQ=")]
 // </GoSourcePositionMaps>
 
@@ -104,3 +102,17 @@ public static partial class binary_package
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>
 }
+
+// A Go method is an extension method on its receiver type. The methods of one type are
+// in a class of their own beside the package class, so that a method and a package-level
+// type, constant or variable can share a name as they do in Go. Each class is declared
+// below with the type it holds the methods of; its blocks are in the converted sources,
+// in Go's declaration order.
+
+// <MethodHolders>
+[GoMethodHost(typeof(binary_package.bigEndian)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class binaryᴛbigEndian;
+[GoMethodHost(typeof(binary_package.decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class binaryᴛdecoder;
+[GoMethodHost(typeof(binary_package.encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class binaryᴛencoder;
+[GoMethodHost(typeof(binary_package.littleEndian)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class binaryᴛlittleEndian;
+[GoMethodHost(typeof(binary_package.nativeEndian)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class binaryᴛnativeEndian;
+// </MethodHolders>
