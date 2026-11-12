@@ -169,6 +169,7 @@ jobs:
       probe-test: ${{ steps.derive.outputs.probe-test }}
       dns-servers: ${{ steps.derive.outputs.dns-servers }}
       dump-proof: ${{ steps.derive.outputs.dump-proof }}
+      sweep-timeout: ${{ steps.derive.outputs.sweep-timeout }}
       probe-at: ${{ steps.derive.outputs.probe-at }}
       jit-disasm: ${{ steps.derive.outputs.jit-disasm }}
       cgo-cc: ${{ steps.derive.outputs.cgo-cc }}
@@ -224,12 +225,16 @@ jobs:
           # dns=IP[,IP], the job's resolver (an opt-in for net's NXDOMAIN keys, which the hosted mac resolver answers late;
           # C1, 2026-11-08); sweep-shard (linux only): dumpproof=red, the dump-suppression proof's red arm, which runs the
           # proof's crash probe with suppression OFF so the proof fails by name and the sweep never starts (S7-b), or
-          # dumpproof=red-space, the same arm with the file count not enforced, so the free-space check fails alone. converter-cgo: cc=zig|llvm-mingw, a pinned C toolchain the leg downloads, hash-checks and hands
+          # dumpproof=red-space, the same arm with the file count not enforced, so the free-space check fails alone; sweep-shard
+          # (any goos): timeout=Nm, the sweep's -TestTimeout in whole minutes, 1-180 (blank takes 45m), for a row whose own test
+          # sizes a wait from its deadline (internal/poll's TestSplicePipePool waits 0.9 x the deadline, so 45m outlasts its
+          # 30m per-test floor; COORD R4, 2026-11-12). The script's per-row $longTimeouts floors still win over a smaller
+          # value. converter-cgo: cc=zig|llvm-mingw, a pinned C toolchain the leg downloads, hash-checks and hands
           # go as CC (the cgo toolchain scout, H, 2026-11-10); sha=HEX replaces the pin's sha256, and exists so a wrong
           # hash can be shown to refuse before anything runs. An unknown or repeated key, an empty value, or any option on
           # any other stage FAILS the plan by name rather than being ignored.
-          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''; $dumpProof = ''
-          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof' } 'converter-cgo' { 'cc', 'sha' } })
+          $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''; $dumpProof = ''; $sweepTimeout = ''
+          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof', 'timeout' } 'converter-cgo' { 'cc', 'sha' } })
           if ($optionKeys.Count) {
               $parts = @($filter -split ';')
               $filter = $parts[0].Trim()
@@ -264,6 +269,13 @@ jobs:
                   if ($dumpProof -cnotin 'red', 'red-space') { throw "sweep-shard filter option dumpproof= takes red or red-space; got '$dumpProof'." }
                   Write-Host "sweep-shard: dumpproof=$dumpProof -- the proof runs its crash probe with suppression OFF and must FAIL by name; the sweep does not run"
               }
+              if ($seen.ContainsKey('timeout')) {
+                  $sweepTimeout = $seen['timeout']
+                  if ($sweepTimeout -notmatch '^[0-9]+m$' -or [int]($sweepTimeout.TrimEnd('m')) -lt 1 -or [int]($sweepTimeout.TrimEnd('m')) -gt 180) {
+                      throw "sweep-shard filter option timeout= must be whole minutes from 1 to 180, written Nm (e.g. 25m); got '$sweepTimeout'."
+                  }
+                  Write-Host "sweep-shard: -TestTimeout $sweepTimeout (the script's per-row floors still apply)"
+              }
               if ($stage -eq 'converter-cgo') {
                   $cgoCc = "$($seen['cc'])"; $cgoCcSha = "$($seen['sha'])".ToLowerInvariant()
                   if ($cgoCc -and $cgoCc -notin @('zig', 'llvm-mingw')) { throw "converter-cgo filter option cc= names a pinned toolchain, zig or llvm-mingw; got '$cgoCc'." }
@@ -273,7 +285,7 @@ jobs:
                   if ($cgoCc) { Write-Host "converter-cgo: CC is the pinned $cgoCc$(if ($cgoCcSha) { ", its sha256 REPLACED by $cgoCcSha" })" }
               }
           }
-          elseif ($filter -match '(^|;)\s*(jit|test|at|dns|dumpproof|cc|sha)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe, sweep-shard and converter-cgo only; got stage '$stage' and filter '$filter'." }
+          elseif ($filter -match '(^|;)\s*(jit|test|at|dns|dumpproof|timeout|cc|sha)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe, sweep-shard and converter-cgo only; got stage '$stage' and filter '$filter'." }
 
           # The behavioral stages' per-program run budget. A schedule has no inputs and keeps 120, as
           # does a blank dispatch. A value that is not a whole number of seconds in 1..1800 FAILS the
@@ -538,6 +550,7 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "jit-disasm=$jitDisasm" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dns-servers=$dnsServers" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dump-proof=$dumpProof" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "sweep-timeout=$(if ($sweepTimeout) { $sweepTimeout } else { '45m' })" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-cc=$cgoCc" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "cgo-cc-sha=$cgoCcSha" -Encoding utf8
 
@@ -1926,8 +1939,9 @@ jobs:
           SWEEP_FILTER: ${{ needs.plan.outputs.filter }}
           # Raises the sweep's 10m default for a 4-core hosted runner. The script's per-package
           # $longTimeouts entries are FLOORS, not overrides: a larger -TestTimeout raises them, a
-          # smaller one still loses, so this value cannot under-budget the four long rows.
-          SWEEP_TEST_TIMEOUT: '45m'
+          # smaller one still loses, so this value cannot under-budget the four long rows. 45m unless the
+          # filter option timeout=Nm sets it (the plan validates it and passes 45m when it is blank).
+          SWEEP_TEST_TIMEOUT: ${{ needs.plan.outputs.sweep-timeout }}
         run: |
           $ErrorActionPreference = 'Continue'
 
