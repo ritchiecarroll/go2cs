@@ -23,7 +23,7 @@ behavioral test.)
 
 Go projects that contain a `main` function are converted into a standard C# executable project, i.e., `<OutputType>Exe</OutputType>`. The conversion process can reference and convert needed external projects as library projects, i.e., `<OutputType>Library</OutputType>`, per any encountered `import` statements. In this manner an executable with packages compiled as project-referenced assemblies can be created. To create a single executable, like the original Go counterpart, a [self-contained executable](https://docs.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained) can be produced.
 
-An executable's **`<AssemblyName>` is the last element of its import path**, mirroring `go build`, which names a binary after the module/directory's final segment — so `module example.com/colordemo` produces `colordemo.exe`, not `example.com.colordemo.exe` (the full dotted project name). Only the `Exe` assembly name is shortened; the `.csproj` filename keeps the full dotted path (its identity in the solution and in `ProjectReference`s), and **library** assemblies keep the full dotted `<AssemblyName>` — their DLL and NuGet `PackageId` (`go.$(AssemblyName)`) must stay unique across the package graph (e.g. `github.com.fatih.color`).
+An executable's **`<AssemblyName>` is the last element of its import path**, mirroring `go build`, which names a binary after the module/directory's final segment — so `module example.com/colordemo` produces `colordemo.exe`, not `example.com.colordemo.exe` (the full dotted project name). Only the `Exe` assembly name is shortened; the `.csproj` filename keeps the full dotted path (its identity in the solution and in `ProjectReference`s), and **library** assemblies keep the full dotted path, which must stay unique across the package graph: a converted module's library is named by it (`github.com.fatih.color`), and a standard-library library by its NuGet package ID, `go.` plus it (package `go.fmt` ships `go.fmt.dll`), so no converted assembly takes a simple name like `net.dll` into a consumer's bin folder (`assemblyIdentity.go`).
 
 ## `main` keeps its name, and the entry point is generated
 
@@ -93,7 +93,8 @@ after 174,430 frames on linux), GolibTests `MainThreadTests`, GenTests `MainEntr
 
 The dotted project name above is the package's **import path**, every segment of it, joined with `.`
 (`getProjectName`, `importOperations.go`). That is not a formatting preference: the name is the `.csproj`
-filename, the library `<AssemblyName>`, the NuGet `PackageId`, and — minus its last segment — the C#
+filename, the library `<AssemblyName>` and NuGet `PackageId` (prefixed `go.` for the standard library, where the two
+are the same string), and — minus its last segment — the C#
 **namespace**. All four have to be unique across the package graph, and the import path is the only thing
 about a package that is unique by construction.
 
