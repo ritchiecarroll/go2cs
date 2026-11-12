@@ -36690,4 +36690,39 @@ can name), and the repro above becomes a fixture whose stderr is compared up to 
 
 — G (2026-11-12)
 
+## 2026-11-12 — G (COORD's ruling on an instrument finding of the M:N prototype's stage A1): a behavioral run by `--filter` says PASS for a `main` program whose output it never compared
+
+**The route.** The behavioral runner compares a program's output with Go's only when the program's
+`package_info.cs` carries `[GoTestMatchingConsoleOutput]`. Without the attribute the runner records the Output
+phase as a skip. The summary's Output row then reads `pass 0 fail 0 skip 1 timeout 0`, and the verdict line above
+it still reads `PASS (1 projects, …)`. A reader who takes the verdict has a green that compared nothing.
+
+**How it was met.** Two programs on the prototype branch had no attribute: one new in stage A1, one from the
+spike, and the second was in none of the four behavioral test lists either. Both read PASS in every filtered run
+of the prototype's regression set, with generated twins and without, and neither was compared once. With the
+attribute added, both compare and both pass. The stage's own numbers were re-read after that.
+
+**What guards it today, and what does not.** `TestOutputComparisonListMatchesConsoleOutputAttribute`, in the
+converter's tests, fails a program that the output-comparison list names and that has no attribute, and a program
+that has the attribute and is not listed. It caught the second program at the gate, the moment the attribute was
+added. It runs under the full `go test`, so a run by `--filter` goes round it. A program with neither the
+attribute nor a list entry passes it by construction. NOT MEASURED: whether another guard requires every program
+directory to be in the lists.
+
+**Measured on master `4efe149858`** by a script over every `package_info.cs` under `src/tests/Behavioral`
+(controls: 928 files carry the attribute, and no package other than `main` carries it). Of 959 files, 941 are
+`main` packages and 13 of those carry no attribute: ChannelSendToClosed, FirstClassFunctions, ForVariants,
+GoCallVariations, IfStatements, InterfaceCasting, RangePointerArrayConversion, RangeStatements,
+RefusalDowngradeProxy, SelectStatement, StructWithPointer, TypeConversionReturnType and
+UnsafePointerReinterpret. A filtered run of any of the 13 reads PASS without a comparison. NOT READ: which of them
+are left out on purpose (a program whose output is not deterministic has to be).
+
+**Owed (not taken here).** The fix is cheap and lives in the runner: a `main` program whose Output phase is
+skipped because the attribute is missing is named in the summary as NOT COMPARED, and a run in which every
+selected program is in that state does not print a bare PASS. The fix is owed its own red: remove the attribute
+from one program, see the run name it, restore. Until it lands, a run by `--filter` is read at the Output row
+(`pass 1`), never at the verdict.
+
+— G (2026-11-12)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
