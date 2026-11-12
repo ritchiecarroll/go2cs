@@ -9,6 +9,7 @@
 package main
 
 import (
+	"bytes"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -78,7 +79,12 @@ func cgoBuildArgs(t *testing.T, project, goos, goarch string) []string {
 	}
 
 	args := []string{"build", project, "-nologo", "--disable-build-servers", "-nodeReuse:false", "-p:UseSharedCompilation=false", "-v:q",
-		"-p:go2csPath=" + cgoBuildDir(t, treeSrc) + string(filepath.Separator), "-p:GoTargetOS=" + goos}
+		"-p:go2csPath=" + cgoBuildDir(t, treeSrc) + string(filepath.Separator)}
+
+	// An empty goos passes no target at all: the build is the project's own default.
+	if goos != "" {
+		args = append(args, "-p:GoTargetOS="+goos)
+	}
 
 	if goarch != "" {
 		args = append(args, "-p:GoTargetArch="+goarch)
@@ -336,5 +342,150 @@ func main() {
 
 	if wantLine != gotLine || wantLine == "" {
 		t.Fatalf("the two runs differ, or printed nothing:\n   go: %q\ngo2cs: %q", wantLine, gotLine)
+	}
+}
+
+// cgoBuildEnvironment is the environment a build of a converted project runs in. MSBuild reads the environment as
+// properties, so a leg's own GoTargetOS and GoTargetArch are taken out: each test says which target it builds for.
+func cgoBuildEnvironment() []string {
+	env := []string{"DOTNET_CLI_TELEMETRY_OPTOUT=1", "DOTNET_NOLOGO=1", "MSBUILDDISABLENODEREUSE=1"}
+
+	for _, entry := range os.Environ() {
+		name, _, _ := strings.Cut(entry, "=")
+
+		if !strings.EqualFold(name, "GoTargetOS") && !strings.EqualFold(name, "GoTargetArch") {
+			env = append(env, entry)
+		}
+	}
+
+	return env
+}
+
+// cgoConvertedFixtureProject converts the Phase 2 fixture, offline and for linux/amd64 as on every host, and returns
+// dotnet, the output directory and the one project file the conversion wrote there.
+func cgoConvertedFixtureProject(t *testing.T) (string, string, string) {
+	t.Helper()
+
+	if os.Getenv(cgoBuildEnv) != "1" {
+		t.Skipf("NOT RUN: set %s=1 to build the converted fixture with the .NET SDK (Inconclusive, not a pass)", cgoBuildEnv)
+	}
+
+	framework := regexp.MustCompile(`<TargetFramework Condition="[^"]*">([^<]+)</TargetFramework>`).FindStringSubmatch(renderCsprojTemplate("Library", "", ""))
+
+	if framework == nil {
+		t.Fatal("the rendered template names no TargetFramework")
+	}
+
+	dotnet := requireDotnetSdk(t, framework[1])
+	output := cgoBuildDir(t, t.TempDir())
+	combined, _, err := convertCgoOfflineInto(t, cgoPhase2Admitted(t), output)
+
+	if err != nil {
+		t.Fatalf("the Phase 2 fixture did not convert: %v\n%s", err, lastLines(combined, 30))
+	}
+
+	projects, err := filepath.Glob(filepath.Join(output, "*.csproj"))
+
+	if err != nil || len(projects) != 1 {
+		t.Fatalf("the conversion wrote %d project files in %s, want 1 (%v)", len(projects), output, err)
+	}
+
+	return dotnet, output, projects[0]
+}
+
+// The exit gate's OPEN 2 (DESIGN-cgo-phase3-marshaling §15, R5): a cgo package's bindings are for the one target it was
+// converted for. Built for another, the bindings file is left out, and the build failed far from the cause, on the
+// first C type in an exported signature. The project refuses that build by name, with both targets, before the
+// compiler runs.
+func TestACgoProjectBuiltForAnotherTargetIsRefusedByName(t *testing.T) {
+	dotnet, _, project := cgoConvertedFixtureProject(t)
+
+	build := exec.Command(dotnet, cgoBuildArgs(t, project, "windows", "amd64")...)
+	build.Env = cgoBuildEnvironment()
+	built, err := build.CombinedOutput()
+	text := strings.ReplaceAll(string(built), "\r\n", "\n")
+	coded := cgoCompilerErrors(text)
+
+	for _, line := range coded {
+		t.Logf("READING build error %s", line)
+	}
+
+	if err == nil {
+		t.Fatalf("a cgo project converted for linux/amd64 built for windows/amd64:\n%s", lastLines(text, 20))
+	}
+
+	var refusals []string
+
+	for _, line := range strings.Split(text, "\n") {
+		if strings.Contains(line, "error") && strings.Contains(line, "go2cs: ") {
+			refusals = append(refusals, strings.TrimSpace(line))
+		}
+	}
+
+	slices.Sort(refusals)
+	refusals = slices.Compact(refusals)
+
+	if len(refusals) != 1 || !strings.Contains(refusals[0], "linux/amd64") || !strings.Contains(refusals[0], "windows/amd64") {
+		t.Errorf("the build is not refused once, by go2cs, naming both targets; go2cs's errors: %q\n%s", refusals, lastLines(text, 20))
+	}
+
+	if len(coded) > 0 {
+		t.Errorf("the build reached the compiler or failed elsewhere: %v", coded)
+	}
+}
+
+// R5's second half: a cgo project's default target is its bindings'. That default reached only the project itself,
+// and the standard library it references took its own default, windows/amd64. So a build that names no target
+// compiled linux bindings beside the windows standard library, and said nothing. The project hands its one target to
+// its project references. runtime is laid out per GOOS, and the fixture imports it, so its assembly beside the
+// fixture's says which flavour the build took.
+func TestACgoProjectBuiltWithNoTargetTakesItsOwnTargetsStandardLibrary(t *testing.T) {
+	dotnet, output, project := cgoConvertedFixtureProject(t)
+
+	for _, arm := range []struct{ name, goos, goarch string }{
+		{"no target named", "", ""},
+		{"the target passed by hand", "linux", "amd64"},
+	} {
+		t.Run(arm.name, func(t *testing.T) {
+			build := exec.Command(dotnet, cgoBuildArgs(t, project, arm.goos, arm.goarch)...)
+			build.Env = cgoBuildEnvironment()
+			built, err := build.CombinedOutput()
+
+			if err != nil {
+				t.Fatalf("the cgo route's output does not build: %v\n%s", err, lastLines(strings.ReplaceAll(string(built), "\r\n", "\n"), 40))
+			}
+
+			var runtimes []string
+
+			_ = filepath.WalkDir(filepath.Join(output, "bin"), func(path string, entry os.DirEntry, err error) error {
+				if err == nil && !entry.IsDir() && entry.Name() == "runtime.dll" {
+					runtimes = append(runtimes, path)
+				}
+
+				return nil
+			})
+
+			if len(runtimes) != 1 {
+				t.Fatalf("the build left %d runtime.dll beside the fixture, want 1: %v", len(runtimes), runtimes)
+			}
+
+			assembly, err := os.ReadFile(runtimes[0])
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// Names only one flavour of the converted runtime declares (os_linux.go, os_windows.go).
+			linux, windows := bytes.Contains(assembly, []byte("rt_sigaction")), bytes.Contains(assembly, []byte("loadOptionalSyscalls"))
+			t.Logf("READING %s: the runtime beside the linux/amd64 fixture is linux's: %v, windows's: %v", arm.name, linux, windows)
+
+			if !linux || windows {
+				t.Errorf("the standard library beside a linux/amd64 cgo project is not linux's (linux %v, windows %v)", linux, windows)
+			}
+
+			if err := os.RemoveAll(filepath.Join(output, "bin")); err != nil {
+				t.Fatal(err)
+			}
+		})
 	}
 }

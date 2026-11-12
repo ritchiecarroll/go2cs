@@ -190,7 +190,8 @@ func convertCgoOffline(t *testing.T, files map[string]string) (string, string, e
 }
 
 // convertCgoOfflineInto is convertCgoOffline into an output directory the caller made, which may hold files already.
-func convertCgoOfflineInto(t *testing.T, files map[string]string, output string) (string, string, error) {
+// args are further command-line arguments, ahead of the two directories.
+func convertCgoOfflineInto(t *testing.T, files map[string]string, output string, args ...string) (string, string, error) {
 	t.Helper()
 
 	treeSrc, err := filepath.Abs("..")
@@ -207,7 +208,7 @@ func convertCgoOfflineInto(t *testing.T, files map[string]string, output string)
 	}
 
 	encoded, err := json.Marshal(cgoOfflineRun{
-		Args:      []string{"-cgo=true", "-comments", "-go2cspath", treeSrc, "-platforms", "linux/amd64", dir, output},
+		Args:      append(append([]string{"-cgo=true", "-comments", "-go2cspath", treeSrc, "-platforms", "linux/amd64"}, args...), dir, output),
 		Libraries: cgoPhase2Libraries,
 		Toolchain: cgoPhase2Toolchain,
 	})
@@ -591,6 +592,31 @@ func TestCgoRoutePlainFileUnderTheCgoTagConverts(t *testing.T) {
 
 	if !slices.Contains(emittedProjectFiles(t, output), "cgotag.cs") {
 		t.Errorf("the plain file under //go:build cgo was not converted: %v", emittedProjectFiles(t, output))
+	}
+}
+
+// The focused re-check of increment 5b (DESIGN-cgo-phase3-marshaling §15, R3): the offline seam selects the plain
+// files a cgo-on load selects by adding the cgo tag by hand. It added it as a second -tags flag, and go keeps the last
+// one it is given, so a user's own -tags was dropped and a file under that tag left the load. A real -cgo load adds
+// no flag; this is the seam's own.
+func TestCgoOfflineSeamKeepsAUsersTags(t *testing.T) {
+	files := cgoPhase2Admitted(t)
+	files["usertag.go"] = "//go:build go2csusertag\n\npackage cgophase2\n\n// UserTagged is declared in a plain file a user's tag selects.\nfunc UserTagged() bool { return true }\n"
+
+	stderr, output, err := convertCgoOfflineInto(t, files, t.TempDir(), "-tags", "go2csusertag")
+
+	if err != nil {
+		t.Fatalf("the conversion failed: %v\n%s", err, stderr)
+	}
+
+	emitted := emittedProjectFiles(t, output)
+
+	if !slices.Contains(emitted, "usertag.cs") {
+		t.Errorf("the plain file under the user's tag was not converted: %v", emitted)
+	}
+
+	if !slices.ContainsFunc(emitted, func(file string) bool { return strings.HasSuffix(file, ".cgo.cs") }) {
+		t.Errorf("the package's bindings file was not written: %v", emitted)
 	}
 }
 
