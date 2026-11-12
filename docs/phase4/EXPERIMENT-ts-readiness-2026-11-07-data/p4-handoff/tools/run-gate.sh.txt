@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# run-gate.sh <go2cs ref> <local|nuget> [GoStdLibVersion] : the typescript-go-cs gate, end to end, at one go2cs ref.
+#
+#   1. a detached worktree of the go2cs clone at <ref> (H:\go2cs-ts-exp\go2cs-gate-<sha>), and its go2cs.exe
+#   2. go2cs -recurse (local: project refs into that worktree's src/core; nuget: -recurse=nuget, go.* from nuget.org)
+#      of the scratch tsc module (TypeScript at ba29a56299 + cmd/parsedemo, cmd/checkdemo, cmd/parsecorpus-extract), under the box lock
+#   3. dotnet build cmd/parsedemo -c Release, pinned (aff.sh: CPUs 0xFC0, no node reuse, no shared compilation)
+#  3b. dotnet build cmd/checkdemo (its closure holds every later stage's), demo_compare.py of the type-check demo
+#      when it builds, and beyond.py -> results/beyond.json, which the
+#      README's "Beyond parsing" section is filled from; recorded even when parsedemo does not build
+#   4. compare.py: the demo byte-compare and the 17,422-unit corpus, native vs converted
+#   5. layout.py stage + fill + census into proof/stage-<sha>-<mode>
+# No hand-patches are applied. If the build fails, step 3 reports the failing projects and the run stops there.
+# Every step is gated on the previous one's exit code; the log is logs/gate-<sha>-<mode>.txt.
+set -u
+ref="$1"; mode="$2"; gsv="${3:-}"
+R=/h/go2cs-ts-exp; P=$R/scratch/proof; S=$R/scratch/tsdemo
+w() { cygpath -w "$1"; }
+source $R/scripts/env.sh; export GOWORK=off
+git -C $R/go2cs fetch -q origin || { echo "fetch failed"; exit 1; }
+sha=$(git -C $R/go2cs rev-parse --short=10 "$ref^{commit}") || { echo "bad ref $ref"; exit 1; }
+tag="gate-$sha-$mode"; log=$R/logs/$tag.txt
+WT=$R/go2cs-gate-$sha; OUT=$R/out/$tag; RES=$P/results-$tag; DEST=$P/stage-$tag
+for d in "$OUT" "$RES" "$DEST"; do [ -e "$d" ] && { echo "$d exists; refusing"; exit 2; }; done
+step() { echo "== $(date +%H:%M) $*" | tee -a "$log"; }
+
+step "worktree $sha"
+[ -d "$WT" ] || git -C $R/go2cs worktree add -q --detach "$WT" "$sha" || exit 1
+exe=$R/bin/go2cs-$sha.exe
+step "build $exe"
+(cd "$WT/src/go2cs" && go build -o "$exe" .) >>"$log" 2>&1 || { step "converter build FAILED"; exit 1; }
+
+step "convert ($mode)"
+rflag=-recurse; [ "$mode" = nuget ] && rflag=-recurse=nuget
+GO2CS_EXE="$(w $exe)" GO2CS_REPO="$WT" bash $R/scripts/convert.sh "$tag" $rflag -go2cspath "$(w $WT/src)" "$(w $S/tsc)" "$(w $OUT)"
+rc=$?; step "convert rc=$rc"; [ $rc -eq 0 ] || exit 1
+
+proj=$OUT/src/github.com/microsoft/TypeScript/tsc/cmd/parsedemo/parsedemo.csproj
+[ -f "$proj" ] || { step "no parsedemo project in $OUT"; exit 1; }
+bargs=(-c Release -m:6 -p:UseSharedCompilation=false -nodeReuse:false -v:m -clp:Summary
+       "-flp1:errorsonly;logfile=$(w $R/logs/$tag.build.errors.log)")
+[ -n "$gsv" ] && bargs+=("-p:GoStdLibVersion=$gsv")
+step "build parsedemo"
+s=$(date +%s); bash $R/scripts/aff.sh "$R/logs/$tag.build.txt" dotnet build "$(w $proj)" "${bargs[@]}"; rc=$?
+step "build rc=$rc t=$(( $(date +%s)-s ))s errors=$(grep -c ' error ' $R/logs/$tag.build.errors.log 2>/dev/null)"
+demorc=$rc
+[ $rc -ne 0 ] && grep -oE 'error [A-Z]+[0-9]+.*\[[^]]+\.csproj\]' $R/logs/$tag.build.errors.log | sed -E 's/.*[\\/]([^\\/]+\.csproj)\]$/\1/' | sort | uniq -c | sort -rn | tee -a "$log"
+
+# Beyond parsing: build cmd/checkdemo (its closure holds internal/compiler's, so every later stage's), compare the
+# type-check demo when it builds, and classify the stages.
+mkdir -p "$RES"
+cproj=$OUT/src/github.com/microsoft/TypeScript/tsc/cmd/checkdemo/checkdemo.csproj
+cargs=(-c Release -m:6 -p:UseSharedCompilation=false -nodeReuse:false -v:m -clp:Summary
+       "-flp1:errorsonly;logfile=$(w $R/logs/$tag.closure.errors.log)")
+[ -n "$gsv" ] && cargs+=("-p:GoStdLibVersion=$gsv")
+step "build the later-stage closure"
+s=$(date +%s); bash $R/scripts/aff.sh "$R/logs/$tag.closure.txt" dotnet build "$(w $cproj)" "${cargs[@]}"; brc=$?
+step "closure build rc=$brc t=$(( $(date +%s)-s ))s"
+tcargs=()
+if [ $brc -eq 0 ]; then
+  cdll=$(find "$OUT/.artifacts/bin" -path '*Release*' -name checkdemo.dll | head -1)
+  if [ -n "$cdll" ]; then
+    step "type-check demo compare"
+    python -I $P/demo_compare.py --name checkdemo --native "$(w $S/checkdemo-go.exe)" --converted "$(w $cdll)" \
+      --cwd "$(w $P/samples)" --out "$(w $RES)" -- check.ts good.ts 2>&1 | tee -a "$log"
+    tcargs=(--typecheck-demo "$(w $RES/checkdemo.json)")
+  fi
+fi
+python -I $P/beyond.py --tsc "$(w $S/tsc)" --log "$(w $R/logs/$tag.closure.txt)" --errors "$(w $R/logs/$tag.closure.errors.log)" \
+  --out "$(w $RES/beyond.json)" "${tcargs[@]}" 2>&1 | tee -a "$log"
+[ ${PIPESTATUS[0]} -eq 0 ] || { step "beyond.py FAILED"; exit 1; }
+[ $demorc -eq 0 ] || { step "parsedemo does not build: the gate stops here (beyond.json is recorded)"; exit 1; }
+dll=$(find "$OUT/.artifacts/bin" -path '*Release*' -name parsedemo.dll | head -1)
+[ -n "$dll" ] || { step "no parsedemo.dll"; exit 1; }
+
+step "compare"
+python -I $P/compare.py --native "$(w $S/parsedemo-go.exe)" --converted "$(w $dll)" --samples "$(w $P/samples)" \
+  --corpus "$(w $S/corpus)" --out "$(w $RES)" 2>&1 | tee -a "$log"
+crc=${PIPESTATUS[0]}; step "compare rc=$crc (0 = demo identical and every corpus unit matches)"
+
+step "layout"
+python -I $P/layout.py stage --tree "$(w $OUT)" --tsc "$(w $S/tsc)" --ts-root "$(w $R/TypeScript)" --proof "$(w $P)" --dest "$(w $DEST)" 2>&1 | tee -a "$log"
+[ ${PIPESTATUS[0]} -eq 0 ] || exit 1
+python -I $P/layout.py fill --dest "$(w $DEST)" --proof "$(w $P)" --results "$(w $RES)" --converter "$sha" \
+  --gostdlib "${gsv:-local $sha}" --sdk "$(dotnet --version)" --platform "$(go env GOOS)/$(go env GOARCH)" \
+  --goversion "$(go version | sed 's/^go version //')" 2>&1 | tee -a "$log"
+[ ${PIPESTATUS[0]} -eq 0 ] || exit 1
+python -I $P/layout.py census --dest "$(w $DEST)" 2>&1 | tee -a "$log"
+step "census rc=${PIPESTATUS[0]} (a local-mode stage always carries its go2csPath; only a nuget-mode stage can census clean)"
+exit $crc

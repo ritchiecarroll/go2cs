@@ -1,0 +1,29 @@
+# mkoverlay.py <tsc module dir> <overlay dir> : a `go build -overlay` set that counts checker.getBaseTypes calls and prints
+# the total to stderr at checkdemo's exit. C51 diagnostic (2026-11-11); the TS source tree is NOT modified.
+import json, os, sys
+
+T, OV = sys.argv[1], sys.argv[2]
+NL = chr(10)
+ck = os.path.join(T, "internal", "checker", "checker.go")
+s = open(ck, encoding="utf-8", newline="").read()
+a = "func (c *Checker) getBaseTypes(t *Type) []*Type {" + NL
+assert s.count(a) == 1
+s = s.replace(a, a + "\tGetBaseTypesCalls++ // C51 count (diagnostic overlay, never committed)" + NL)
+open(os.path.join(OV, "checker.go"), "w", encoding="utf-8", newline="").write(s)
+open(os.path.join(OV, "zz_c51count.go"), "w", encoding="utf-8", newline="").write(
+    "package checker" + NL + NL + "// GetBaseTypesCalls counts getBaseTypes calls (C51 diagnostic overlay, never committed)." + NL +
+    "var GetBaseTypesCalls int64" + NL)
+md = os.path.join(T, "cmd", "checkdemo", "main.go")
+m = open(md, encoding="utf-8", newline="").read()
+imp = "import (" + NL
+assert m.count(imp) == 1
+m = m.replace(imp, imp + '\t"github.com/microsoft/TypeScript/tsc/internal/checker"' + NL, 1)
+end = '\t\tfmt.Printf("files %d\\n", len(p.GetSourceFiles()))' + NL + "\t}" + NL + "}"
+assert m.count(end) == 1, m.count(end)
+m = m.replace(end, '\t\tfmt.Printf("files %d\\n", len(p.GetSourceFiles()))' + NL + "\t}" + NL +
+              '\tfmt.Fprintln(os.Stderr, "getBaseTypes calls", checker.GetBaseTypesCalls)' + NL + "}")
+open(os.path.join(OV, "main.go"), "w", encoding="utf-8", newline="").write(m)
+json.dump({"Replace": {ck: os.path.join(OV, "checker.go"),
+                       os.path.join(T, "internal", "checker", "zz_c51count.go"): os.path.join(OV, "zz_c51count.go"),
+                       md: os.path.join(OV, "main.go")}}, open(os.path.join(OV, "overlay.json"), "w"), indent=1)
+print("overlay written")

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# convert.sh <tag> <go2cs args...> : take the box conversion lock atomically (mkdir), run go2cs pinned, release.
+# Refuses (rc 75) if the lock is held. The log goes to logs/convert-<tag>.txt, rc + wall time to logs/convert-<tag>.rc.
+tag="$1"; shift
+L=/h/go2cs-box-locks/convert.lock
+mkdir "$L" 2>/dev/null || { echo "LOCK HELD: $(tr '\n' ' ' < $L/owner.txt 2>/dev/null)"; exit 75; }
+printf 'holder=TS-experiment (i7 session, H:\go2cs-ts-exp)\nsince=%s\nwhy=go2cs %s\n' "$(date '+%Y-%m-%d %H:%M')" "$tag" > "$L/owner.txt"
+trap 'rm -f "$L/owner.txt"; rmdir "$L"' EXIT
+source /h/go2cs-ts-exp/scripts/env.sh; export GOWORK=off
+s=$(date +%s)
+/h/go2cs-ts-exp/scripts/aff.sh "/h/go2cs-ts-exp/logs/convert-$tag.txt" "${GO2CS_EXE:-H:\go2cs-ts-exp\bin\go2cs.exe}" "$@"
+rc=$?
+echo "convert $tag rc=$rc t=$(( $(date +%s)-s ))s go2cs=$(git -C "${GO2CS_REPO:-/h/go2cs-ts-exp/go2cs}" rev-parse --short=10 HEAD)" | tee "/h/go2cs-ts-exp/logs/convert-$tag.rc"
+exit $rc

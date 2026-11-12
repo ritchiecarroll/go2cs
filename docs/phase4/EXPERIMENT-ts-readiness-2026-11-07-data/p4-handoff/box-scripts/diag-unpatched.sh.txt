@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# diag-unpatched.sh <go2cs ref> : an EARLY READ, not the gate. run-gate.sh steps 1-3 (worktree, converter, go2cs -recurse
+# local, dotnet build cmd/parsedemo), no hand-patches; then the later-stage closure build, a run of parsedemo on the
+# demo samples, and a metadata method count of the ast assembly. Log: logs/diag-<sha>-local.txt.
+set -u
+ref="$1"
+R=/h/go2cs-ts-exp; P=$R/scratch/proof; S=$R/scratch/tsdemo
+w() { cygpath -w "$1"; }
+source $R/scripts/env.sh; export GOWORK=off
+sha=$(git -C $R/go2cs rev-parse --short=10 "$ref^{commit}") || { echo "bad ref $ref"; exit 1; }
+# DIAG_TAGS (optional): an explicit -tags list for the convert (it REPLACES -recurse's default `safe`), and a tag suffix.
+tagsflag=(); tsuf=""; [ -n "${DIAG_TAGS:-}" ] && { tagsflag=(-tags "$DIAG_TAGS"); tsuf="-tags-${DIAG_TAGS//,/-}"; }
+tag="diag-$sha-local$tsuf"; log=$R/logs/$tag.txt
+WT=$R/go2cs-gate-$sha; OUT=$R/out/$tag
+[ -e "$OUT" ] && { echo "$OUT exists; refusing"; exit 2; }
+step() { echo "== $(date +%H:%M) $*" | tee -a "$log"; }
+
+step "worktree $sha"
+[ -d "$WT" ] || git -C $R/go2cs worktree add -q --detach "$WT" "$sha" || exit 1
+exe=$R/bin/go2cs-$sha.exe
+step "build $exe"
+(cd "$WT/src/go2cs" && go build -o "$exe" .) >>"$log" 2>&1 || { step "converter build FAILED"; exit 1; }
+
+step "convert (local) ${tagsflag[*]}"
+GO2CS_EXE="$(w $exe)" GO2CS_REPO="$WT" bash $R/scripts/convert.sh "$tag" -recurse "${tagsflag[@]}" -go2cspath "$(w $WT/src)" "$(w $S/tsc)" "$(w $OUT)"
+rc=$?; step "convert rc=$rc"; [ $rc -eq 0 ] || exit 1
+
+proj=$OUT/src/github.com/microsoft/TypeScript/tsc/cmd/parsedemo/parsedemo.csproj
+[ -f "$proj" ] || { step "no parsedemo project in $OUT"; exit 1; }
+bargs=(-c Release -m:6 -p:UseSharedCompilation=false -nodeReuse:false -v:m -clp:Summary
+       "-flp1:errorsonly;logfile=$(w $R/logs/$tag.build.errors.log)")
+step "build parsedemo"
+s=$(date +%s); bash $R/scripts/aff.sh "$R/logs/$tag.build.txt" dotnet build "$(w $proj)" "${bargs[@]}"; demorc=$?
+step "build rc=$demorc t=$(( $(date +%s)-s ))s errors=$(grep -c ' error ' $R/logs/$tag.build.errors.log 2>/dev/null)"
+[ $demorc -ne 0 ] && grep -oE 'error [A-Z]+[0-9]+.*\[[^]]+\.csproj\]' $R/logs/$tag.build.errors.log | sed -E 's/.*[\\/]([^\\/]+\.csproj)\]$/\1/' | sort | uniq -c | sort -rn | tee -a "$log"
+
+cproj=$OUT/src/github.com/microsoft/TypeScript/tsc/cmd/checkdemo/checkdemo.csproj
+cargs=(-c Release -m:6 -p:UseSharedCompilation=false -nodeReuse:false -v:m -clp:Summary
+       "-flp1:errorsonly;logfile=$(w $R/logs/$tag.closure.errors.log)")
+step "build the later-stage closure"
+s=$(date +%s); bash $R/scripts/aff.sh "$R/logs/$tag.closure.txt" dotnet build "$(w $cproj)" "${cargs[@]}"; brc=$?
+step "closure build rc=$brc t=$(( $(date +%s)-s ))s"
+[ $brc -ne 0 ] && grep -oE 'error [A-Z]+[0-9]+.*\[[^]]+\.csproj\]' $R/logs/$tag.closure.errors.log | sed -E 's/.*[\\/]([^\\/]+\.csproj)\]$/\1/' | sort | uniq -c | sort -rn | tee -a "$log"
+
+[ $demorc -eq 0 ] || { step "parsedemo does not build: stop"; exit 1; }
+dll=$(find "$OUT/.artifacts/bin" -path '*Release*' -name parsedemo.dll | head -1)
+[ -n "$dll" ] || { step "no parsedemo.dll"; exit 1; }
+step "run parsedemo good.ts bad.ts"
+(cd $P/samples && dotnet "$(w $dll)" good.ts bad.ts > $R/logs/$tag.run.stdout.txt 2> $R/logs/$tag.run.stderr.txt); rrc=$?
+step "run rc=$rrc stdout bytes=$(wc -c < $R/logs/$tag.run.stdout.txt)"
+head -c 1200 $R/logs/$tag.run.stderr.txt | tee -a "$log"; echo | tee -a "$log"
+
+astdll=$(dirname "$dll")/github.com.microsoft.TypeScript.tsc.internal.ast.dll
+p=":$PATH:"; p="${p//:\/c\/Users\/<user>\/dotnet10:/:}"; p="${p#:}"; p="${p%:}"
+step "method counts"
+env -u DOTNET_ROOT PATH="$p" pwsh -NoProfile -File "$(w $P/methodcount.ps1)" "$(w $astdll)" 3 2>&1 | tee -a "$log"
+env -u DOTNET_ROOT PATH="$p" pwsh -NoProfile -File "$(w $P/toptypes.ps1)" "$(w $(dirname "$dll"))" "$(w $P/closure-demo.txt)" 5 2>&1 | tee -a "$log"
+step "done"
