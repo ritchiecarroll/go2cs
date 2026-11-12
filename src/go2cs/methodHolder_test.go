@@ -30,12 +30,25 @@ func convertMethodHolderFixture(t *testing.T, files map[string]string) map[strin
 // `go2cs/app`, the shape of a behavioral test's module, into the root namespace `go`.
 func convertMethodHolderModule(t *testing.T, modulePath string, files map[string]string) map[string]string {
 	t.Helper()
+
+	return convertMethodHolderTree(t, modulePath, files, nil)
+}
+
+// convertMethodHolderTree is convertMethodHolderModule with the module's other packages: dependencies
+// holds their files by path below the module root (`lib/lib.go`). They are written and loaded, never
+// converted, as when a package is converted on its own.
+func convertMethodHolderTree(t *testing.T, modulePath string, files, dependencies map[string]string) map[string]string {
+	t.Helper()
 	isolateConverterPathGlobals(t)
 
 	root := t.TempDir()
 	pkgDir := filepath.Join(root, "app")
 
 	writeModuleFile(t, filepath.Join(pkgDir, "go.mod"), "module "+modulePath+"\n\ngo 1.23\n")
+
+	for name, source := range dependencies {
+		writeModuleFile(t, filepath.Join(pkgDir, filepath.FromSlash(name)), source)
+	}
 
 	for name, source := range files {
 		writeModuleFile(t, filepath.Join(pkgDir, name), source)
@@ -662,5 +675,69 @@ func TestHolderKeepsATypeNoNamespaceHidesBare(t *testing.T) {
 		"internal static sync again(this sync s)",
 	}, []string{
 		"main_package.sync",
+	})
+}
+
+const usingAliasLibSource = `package lib
+
+// Token shares its name with Reader's method. Until methods moved to their holders that renamed it,
+// and the consumer below spelled it through the rename's own two-hop record.
+type Token any
+
+type Reader struct{}
+
+func (Reader) Token() Token { return "tok" }
+
+// Plain is the same declaration with no method of its name.
+type Plain any
+
+func Make() Plain { return 7 }
+`
+
+const usingAliasWrapSource = `package wrap
+
+import "example.com/app/lib"
+
+type Token = lib.Token
+type Plain = lib.Plain
+
+func Read() Token { return lib.Reader{}.Token() }
+
+func Make() Plain { return lib.Make() }
+`
+
+const usingAliasMainSource = `package main
+
+import (
+	"fmt"
+
+	"example.com/app/wrap"
+)
+
+func main() {
+	var t wrap.Token = wrap.Read()
+	var p wrap.Plain = wrap.Make()
+
+	fmt.Println(t, p)
+}
+`
+
+// A defined type over the empty interface (`type Token any`) is emitted by its package as a
+// `global using`, never as a member of the package class. A file that reaches it only through another
+// package's alias, without importing the type's own package, has no alias key loaded for it, and the
+// Go name (`lib.Token`) names nothing in C# (CS0426, the behavioral project RenamedTypeAliasReexport).
+// It is spelled as what it stands for. Before methods moved to their holders this held only for a type
+// renamed for a method of its name; it holds for every such type.
+func TestTypeItsPackageEmitsAsAUsingIsSpelledByItsTargetWhereNoAliasIsLoaded(t *testing.T) {
+	emitted := convertMethodHolderTree(t, "example.com/app",
+		map[string]string{"main.go": usingAliasMainSource},
+		map[string]string{"lib/lib.go": usingAliasLibSource, "wrap/wrap.go": usingAliasWrapSource})
+
+	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
+		"any t = wrap.Read();",
+		"any p = wrap.Make();",
+	}, []string{
+		"lib.Token",
+		"lib.Plain",
 	})
 }
