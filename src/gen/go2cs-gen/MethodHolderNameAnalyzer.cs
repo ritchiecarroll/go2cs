@@ -156,13 +156,26 @@ public sealed class MethodHolderNameAnalyzer : DiagnosticAnalyzer
                     $"'builtin.{text}' for the builtin");
 
                 break;
-            case INamedTypeSymbol { ContainingType: null } type when !SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, package):
+            // The package class reads its member for this name only where C# would: a generic name reads a type or
+            // a method of its own arity, and a name where only a type is read reads a type. `Func<bool>` is
+            // System.Func<bool> in both when the package's Func is a constant or a type without type arguments.
+            case INamedTypeSymbol { ContainingType: null } type when !SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, package) &&
+                package.GetMembers(text).Any(member => ReadsInPackageClass(member, type.Arity, SyntaxFacts.IsInTypeOnlyContext(name))):
                 Report(context, name, text, $"the type '{type.OriginalDefinition.ToDisplayString()}'", holder, package, text,
                     "the type with its namespace");
 
                 break;
         }
     }
+
+    // Whether a name of the given arity, in the package class, reads the package's member: a type of that
+    // arity, a method of that arity where a type is not all that is read, or any other member where neither is.
+    private static bool ReadsInPackageClass(ISymbol member, int arity, bool typeOnly) => member switch
+    {
+        INamedTypeSymbol declaredType => declaredType.Arity == arity,
+        IMethodSymbol declaredMethod => !typeOnly && declaredMethod.Arity == arity,
+        _ => !typeOnly && arity == 0
+    };
 
     // The name under which a file's using directives alias the package class, or null when none does.
     private static string? SelfAlias(SyntaxTree tree, SemanticModel model, INamedTypeSymbol package)

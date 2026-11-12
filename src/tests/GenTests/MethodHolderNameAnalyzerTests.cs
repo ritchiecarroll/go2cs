@@ -46,6 +46,7 @@ public class MethodHolderNameAnalyzerTests
 
             // A type of the namespace, as golib's own public types are.
             public struct Reader { public int fromNamespace; }
+            public struct Clock { public static int fromNamespace = 1; }
         }
         """;
 
@@ -57,9 +58,13 @@ public class MethodHolderNameAnalyzerTests
             {
                 public partial struct Time { public int Limit; public int v; }
                 public partial struct Reader { public int fromPackage; }
+                public partial struct Func { public int v; }
 
                 public static int Limit = 7;
                 public static int Second = 1;
+                public static int Predicate = 2;
+                public static int Random = 3;
+                public static int Clock = 4;
                 public static int norm(Time t) => 1;
                 public static double max(double a, double b) => a > b ? a : b;
                 public static void time() { }
@@ -148,6 +153,18 @@ public class MethodHolderNameAnalyzerTests
         public static int M(this Time t, Time time) => time.Limit;
         public static int N(this Time t) { Time time = t; return time.Limit; }
         """, DisplayName = "a file without the alias: the local's member is the only reading")]
+    [DataRow("using System;",
+        """
+        public static int M(this Time t, Func<int> f) => f();
+        """, DisplayName = "a generic type of another arity than the package's type of its name")]
+    [DataRow("using System;",
+        """
+        public static bool M(this Time t, Predicate<int> p) => p(t.v);
+        """, DisplayName = "a generic type of the name of a package field, which no generic name reads")]
+    [DataRow("using System;",
+        """
+        public static int M(this Time t, Random r) => r.Next();
+        """, DisplayName = "a type of the name of a package field where only a type is read")]
     public void QualifiedAndUnsharedNamesAreAccepted(string usings, string members)
     {
         ImmutableArray<Diagnostic> diagnostics = Analyze(usings, members);
@@ -178,6 +195,10 @@ public class MethodHolderNameAnalyzerTests
         """
         public static int size(this Time t, Reader r) => r.fromNamespace;
         """, "Reader", "the type 'go.Reader'", DisplayName = "the package's type name binds the namespace's type in a signature")]
+    [DataRow("using System;",
+        """
+        public static int M(this Time t) => Clock.fromNamespace;
+        """, "Clock", "the type 'go.Clock'", DisplayName = "a package field's name binds the namespace's type in an expression")]
     [DataRow("using time = go.time_package;",
         """
         public static int M(this Time t, Time time) => time.Limit;
