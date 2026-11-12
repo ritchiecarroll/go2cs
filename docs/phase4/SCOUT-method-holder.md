@@ -352,3 +352,82 @@ wherever a step changes behavior or emission.
    The behavioral tree has 4 such references and `std` none.
 4. Who regenerates `src/core` in the batch (step 7), and where the batch sits against the linux/arm64 bank
    waves, whose rows are read on the corpus this move rewrites.
+
+## Amendment 2026-11-12 — corrections found while writing the emission, before any reconvert
+
+> Appended, not rewritten: sections 1 to 15 above stand as posted, and where this block corrects one it names
+> it. Nothing below is measured on `std`: the corrections come from three C# measurements against the emitted
+> file's real shape and from re-reading the census rows of section 11. Read at master `742a3dbb24`, with the
+> converter of the cut in progress (uncommitted beyond the analyzer commit).
+
+### 16. Three facts that change the qualification rule
+
+Measured with SDK 10.0.403, LangVersion 14, each case compiled and run.
+
+1. **The reason "`go.builtin` member" (sections 2 and 11) does not apply to converted files.** A converted
+   file declares its usings INSIDE the file-scoped namespace, and `go.builtin` arrives by a global using from
+   the project. A `using static <pkg>_package;` inside the namespace is nearer than a global one, so inside a
+   holder the package's `max`, `zero` or `cap` binds before builtin's. The probe printed the package's
+   `max(double, double)` and its `zero`. The experiment behind section 2 declared both usings at one level,
+   which is not the emission's shape. The analyzer keeps its builtin arm: a hand-owned file may place its
+   usings differently.
+2. **The reason "type of namespace `go`" is exact on arity and on the namespace.** A generic-only type
+   (`go.Func<T>`) does not hide a constant or function named `Func`; a non-generic one hides it. A package
+   declared in a child namespace (`go.encoding`) reads its own usings before the types of `go`, so the reason
+   applies only to a package declared in namespace `go` itself. The 25 references of section 11's row are
+   `reflect`'s constant `Func` (20) and `runtime`'s type `Func` (1), which golib's generic-only `Func<…>`
+   does not hide, and `runtime`'s type `slice` (4), which is already renamed as a reserved name. The
+   expected count in `std` is 0.
+3. **A local named like the package is tested per function.** Section 11 read C#'s block scope per use. The
+   converter asks whether the function declares a variable of that name anywhere, and falls back for the
+   whole function. It is never wrong and costs one reference in `std` (`go/types`, `Checker.builtin`).
+
+### 17. Decisions the emission needed
+
+- A type lifted out of a method's body stays in the package class, where every other type is; the method
+  switches back to the package class for it. A literal or constant hoisted out of a method sits in the holder
+  beside the method.
+- A hoisted string literal field is `private`, so it is kept once per CLASS that uses it, under one name.
+- A switch line always stands between two blank lines.
+- The holder declarations are a section at the END of `package_info.cs` (`<MethodHolders>`), written only for
+  a package that has holders.
+- **The self-alias is blocked for the whole package** when the package declares a type, variable or constant
+  of its own name, when another package of the same name is in its import closure (`html/template`), or when
+  the package is in namespace `go` and golib declares that name. It is blocked for a FILE by an import of the
+  same name and by section 12's selector rule; for a FUNCTION by a variable of that name; for a HOLDER that
+  declares a method of that name.
+- A method expression names the holder: `timeᴛTime.Add` in the type's own package,
+  `global::go.net.httpᴛRequest.Write` from another.
+- **A method a `_test.go` file declares on a production type gets a second holder**, `<pkg>ᴛ<Type>ᴛtest`,
+  wherever the test file and the production file emit into one package class. The production holder then
+  never gains a member from a test file, so production emission does not depend on whether tests are compiled.
+- A name a dot import brings is written through its package class where a holder hides it. That replaces the
+  rename of the test-declared method (B9).
+- Retired with the move: the element-versus-method rename and its exported aliases, the function rename for
+  a same-signature method (C40), the test-variant renames B2 and B9, and the receiver-parameter collision
+  rename. Each existed only because methods shared the package class.
+
+### 18. The predictions of section 14, corrected
+
+`std`, linux/amd64 | windows/amd64 | darwin/amd64 | linux/arm64, from the census rows of section 11 with the
+rules above applied. No new run.
+
+| | linux/amd64 | windows/amd64 | darwin/amd64 | linux/arm64 |
+|---|---|---|---|---|
+| qualified references (section 14: 356 at most) | 260 | 262 | 260 | 260 |
+| written through the alias | 240 | 242 | 240 | 240 |
+| written through a renamed alias | 9 | 9 | 9 | 9 |
+| fall back to `<pkg>_package.X` | 11 | 11 | 11 | 11 |
+| files that gain the alias line (of them renamed) | 46 (4) | 48 (4) | 46 (4) | 46 (4) |
+| packages that gain it (of them renamed) | 29 (3) | 30 (3) | 29 (3) | 29 (3) |
+
+- The 11 fallbacks: 7 in `chacha20poly1305`, 1 in `html/template`, 2 in `net/url` `url.go`, 1 in `go/types`.
+- Unchanged: the files that differ (952 / 958 / 957 / 951 in 253 / 254 / 253 / 253 packages), the holder
+  declarations, the method expressions, the 225 declarations that lose the `Δ`, the behavioral count.
+- **Line kinds section 14 did not name**, each following from a rule above and none sized by the census:
+  one hoisted literal field per class; per-type .NET alias lines in a file with a holder, in place of
+  `using System.Runtime.CompilerServices;` (the existing rule for a file that imports static members); the
+  `<MethodHolders>` section; the `GoPositionMap` record of every file whose lines move; two more switch lines
+  around a method that lifts a type; a dot-imported name written through its class.
+- **Falsifiers**: a `builtin.` or golib-type qualification the move adds; a fallback outside the 11; a file
+  outside the predicted set whose difference is not one of the kinds named here.
