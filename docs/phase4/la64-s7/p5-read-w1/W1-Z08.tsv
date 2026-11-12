@@ -1,0 +1,3 @@
+shard	row	RID	verdicts	cs_verdicts	matched	disclosed	new	other_errors	status	word	note	agree	absent	diff_names	run	wall_s
+Z08	internal/zstd	linux-arm64	536	536	535	1	0	0	validated	DISC	535, disclosed 1 vs the linux (linux-arm64 pending) expectation 0	yes	-	TestAlloc	43161423429	239
+Z08	internal/zstd	linux-x64	536	536	535	1	0	0	validated	DISC	535, disclosed 1 vs the linux expectation 0	yes	-	TestAlloc	43161423429	221
