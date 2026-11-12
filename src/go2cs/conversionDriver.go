@@ -152,12 +152,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// an import "C" source stays out.
 		if cgoOfflineTrees {
 			cfg.Env = append(cfg.Env, "CGO_ENABLED=0")
-
-			// One -tags flag, the user's tags and this one: go keeps only the last -tags it is given, so a second
-			// flag would drop the user's and every file under them.
-			offline := options
-			offline.buildTags = append(append([]string{}, options.buildTags...), "cgo")
-			cfg.BuildFlags = offline.loaderBuildFlags()
+			cfg.BuildFlags = cgoOfflineBuildFlags(options)
 			cfg.Overlay = map[string][]byte{
 				filepath.Join(options.goRoot, "src", "runtime", "cgo", "go2cs_incomplete.go"): []byte(cgoIncompleteOverlay),
 			}
@@ -418,10 +413,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				// and on a real host its file is a build-cache name with no .go suffix, which the
 				// file-name check refuses, so the re-check would drop every one of them silently.
 				if pair.output == "" && !pair.bindings {
-					// A plain file selected by a cgo-on load was selected under the cgo tag, so the re-check carries
-					// it, as refuseCgoOnlyPackage's does: without it a file under //go:build cgo is dropped here
-					// with exit 0, and every reference to what it declares dangles. The key is the LOAD, not the
-					// package's route: a package with no import "C" of its own has such files too.
+					// A plain file a cgo-on load selected was selected under the cgo tag, so the re-check carries it,
+					// as refuseCgoOnlyPackage's does: without it a file under //go:build cgo is dropped here with
+					// exit 0, and every reference to what it declares dangles. The key is the LOAD (cgoOnLoad), not
+					// the package's route: a package with no import "C" of its own has such files too.
 					tags := options.buildTags
 
 					if cgoOnLoad(options, cfg.Env) {

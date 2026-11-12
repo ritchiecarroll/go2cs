@@ -45,6 +45,15 @@ import (
 // content alone. A host with no C compiler cannot make cmd/cgo's output, so this is how the route is tested there.
 var cgoOfflineTrees bool
 
+// cgoOfflineBuildFlags are the offline load's build flags: ONE -tags flag, the user's tags and cgo. go keeps only the
+// last -tags it is given, so a second flag for cgo would drop the user's, and every file under them.
+func cgoOfflineBuildFlags(options Options) []string {
+	offline := options
+	offline.buildTags = append(append([]string{}, options.buildTags...), "cgo")
+
+	return offline.loaderBuildFlags()
+}
+
 // cgoCaptureOverride is set only by tests: it answers the library capture, each symbol's load-time name and the C
 // toolchain's version line, in place of a C toolchain.
 var cgoCaptureOverride func(symbols []string) ([]cgoSymbolLibrary, string, error)
