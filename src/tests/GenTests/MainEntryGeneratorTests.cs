@@ -79,6 +79,35 @@ public class MainEntryGeneratorTests
         Assert.AreEqual("Main", entry.Name);
     }
 
+    // A -recurse conversion of a module whose path has a dot puts its main package in a namespace that path derives
+    // (example.com/relsmoke -> go.example.com): release-smoke's arms B, D and G, CS5001 on every RID at batch 286.
+    [TestMethod]
+    public void AProgramOfADottedModuleGetsAnEntryPointInItsOwnNamespace()
+    {
+        const string dotted =
+            """
+            namespace go.example.com;
+
+            [GoPackage("main", ImportPath = "main")]
+            public static partial class main_package
+            {
+                internal static void main() { }
+            }
+            """;
+
+        (string[] entries, Compilation output) = Run(OutputKind.ConsoleApplication, dotted);
+
+        Assert.AreEqual(1, entries.Length, "a converted program of a dotted module must carry exactly one generated entry point");
+        StringAssert.Contains(entries[0], "namespace go.example.com;");
+
+        Diagnostic[] errors = Errors(output);
+        Assert.AreEqual(0, errors.Length, "the generated entry point must compile: " + string.Join("; ", errors.Select(error => error.ToString())));
+
+        IMethodSymbol? entry = output.GetEntryPoint(default);
+        Assert.IsNotNull(entry, "the program has no entry point");
+        Assert.AreEqual("go.example.com.main_package", entry.ContainingType.ToDisplayString());
+    }
+
     [TestMethod]
     public void ALibraryGetsNoEntryPoint()
     {
