@@ -88,8 +88,9 @@ func TestStdLibMetadataInSync(t *testing.T) {
 
 // TestStdLibExportedMetadataReadsThroughPackageInfoParsers proves the embedded record feeds the
 // SAME parsers a package_info.cs on disk does, for the concrete case that motivated it: syscall
-// publishes three exported type aliases and a VALUE-form `Errno` → `error` implementation, and
-// golang.org/x/sys/windows must see all four when syscall is referenced as a NuGet assembly.
+// publishes a VALUE-form `Errno` → `error` implementation and a POINTER-form `DLLError` → `error` one,
+// and golang.org/x/sys/windows must see both when syscall is referenced as a NuGet assembly. os's
+// aliases of io/fs types carry the alias parser.
 func TestStdLibExportedMetadataReadsThroughPackageInfoParsers(t *testing.T) {
 	lines, ok := stdLibExportedMetadata("syscall", "")
 
@@ -103,15 +104,34 @@ func TestStdLibExportedMetadataReadsThroughPackageInfoParsers(t *testing.T) {
 		t.Fatalf("parseExportedTypeAliasLines: %v", err)
 	}
 
+	// Since the method holders (2026-11-11) syscall exports no type alias: its three were the Δ renames
+	// of types named like methods. Its implements stay the subject below, and os's four Go aliases of
+	// io/fs types carry the alias half.
+	if len(aliases) != 0 {
+		t.Errorf("embedded syscall record exports type aliases again: %v", aliases)
+	}
+
+	osLines, ok := stdLibExportedMetadata("os", "")
+
+	if !ok {
+		t.Fatal("embedded stdlib metadata has no record for `os`")
+	}
+
+	osAliases, err := parseExportedTypeAliasLines(osLines)
+
+	if err != nil {
+		t.Fatalf("parseExportedTypeAliasLines (os): %v", err)
+	}
+
 	found := map[string]string{}
 
-	for _, alias := range aliases {
+	for _, alias := range osAliases {
 		found[alias[0]] = alias[1]
 	}
 
-	for _, want := range []string{"Handle", "Signal", "Sockaddr"} {
-		if _, ok := found[want]; !ok {
-			t.Errorf("embedded syscall record missing exported type alias %q; got %v", want, found)
+	for _, want := range []string{"DirEntry", "FileInfo", "FileMode", "PathError"} {
+		if found[want] != "go.io.fs_package."+want {
+			t.Errorf("embedded os record missing exported type alias %q of io/fs; got %v", want, found)
 		}
 	}
 
@@ -278,16 +298,18 @@ func normalizeLineEndings(text string) string {
 }
 
 // TestStdLibExportedMetadataSelectsTheTargetFlavor pins the per-target lookup. syscall is an L3
-// package with no flat package_info.cs: its windows flavor exports the `Handle` alias and Δ-renames
-// `Sockaddr`, and its linux flavor does neither. Before the record carried non-reference flavors, a
-// linux lookup silently answered with the windows section.
+// package with no flat package_info.cs: its windows flavor implements `error` on `*DLLError`, its linux
+// flavor implements `Sockaddr` on `*SockaddrNetlink`, and every flavor implements `error` on `Errno`.
+// Before the record carried non-reference flavors, a linux lookup silently answered with the windows
+// section. (Until the method holders, 2026-11-11, the axis was the windows-only `Handle` alias and the
+// Δ-renamed `Sockaddr`; those aliases were the Δ renames, and no flavor exports them now.)
 //
 // The lookup is asked with TARGETS since the arch axis: syscall's linux copies sit in `linux-amd64/`
 // and `linux-arm64/`, which a bare `linux` does not name. Both linux targets are asked, because a
 // lookup that walked only the GOOS folder would answer each of them with the windows section — the
 // 2026-09-24 defect again, one axis over.
 func TestStdLibExportedMetadataSelectsTheTargetFlavor(t *testing.T) {
-	aliasesOf := func(goos string) map[string]string {
+	implementsOf := func(goos string) (values, pointers [][2]string) {
 		t.Helper()
 
 		lines, ok := stdLibExportedMetadata("syscall", goos)
@@ -296,41 +318,29 @@ func TestStdLibExportedMetadataSelectsTheTargetFlavor(t *testing.T) {
 			t.Fatalf("embedded stdlib metadata has no record for `syscall` (goos %q)", goos)
 		}
 
-		aliases, err := parseExportedTypeAliasLines(lines)
-
-		if err != nil {
-			t.Fatalf("parseExportedTypeAliasLines (goos %q): %v", goos, err)
-		}
-
-		found := map[string]string{}
-
-		for _, alias := range aliases {
-			found[alias[0]] = alias[1]
-		}
-
-		return found
+		return parseExportedValueImplementLines(lines), parseExportedPointerImplementLines(lines)
 	}
 
 	// The reference flavor, asked for by name and by default, is the unqualified section.
 	for _, goos := range []string{stdlibmeta.ReferenceGOOS, stdlibmeta.ReferenceGOOS + "/" + stdlibmeta.ReferenceGOARCH, ""} {
-		if _, ok := aliasesOf(goos)["Handle"]; !ok {
-			t.Errorf("syscall (goos %q) lost the windows-only `Handle` alias", goos)
+		if _, pointers := implementsOf(goos); !containsPair(pointers, "DLLError", "error") {
+			t.Errorf("syscall (goos %q) lost the windows-only (*DLLError, error) implement", goos)
 		}
 	}
 
 	for _, goos := range []string{"linux/amd64", "linux/arm64", "darwin/amd64", "darwin"} {
-		found := aliasesOf(goos)
+		values, pointers := implementsOf(goos)
 
-		if _, ok := found["Handle"]; ok {
-			t.Errorf("syscall (goos %q) carries the windows-only `Handle` alias: the lookup answered with the reference section", goos)
+		if containsPair(pointers, "DLLError", "error") {
+			t.Errorf("syscall (goos %q) carries the windows-only (*DLLError, error) implement: the lookup answered with the reference section", goos)
 		}
 
-		if _, ok := found["Sockaddr"]; ok {
-			t.Errorf("syscall (goos %q) Δ-renames `Sockaddr`, which only the windows flavor does", goos)
+		if linux := strings.HasPrefix(goos, "linux"); containsPair(pointers, "SockaddrNetlink", "Sockaddr") != linux {
+			t.Errorf("syscall (goos %q): the linux-only (*SockaddrNetlink, Sockaddr) implement is present=%v, want %v", goos, !linux, linux)
 		}
 
-		if _, ok := found["Signal"]; !ok {
-			t.Errorf("syscall (goos %q) is missing the `Signal` alias every flavor exports; got %v", goos, found)
+		if !containsPair(values, "Errno", "error") {
+			t.Errorf("syscall (goos %q) is missing the (Errno, error) implement every flavor exports; got %v", goos, values)
 		}
 	}
 
@@ -572,9 +582,10 @@ func TestRecurseNuGetPinsTheCompileRidToTheTarget(t *testing.T) {
 // TestRecurseNuGetImportsTheTargetFlavorsAliases drives the EMISSION: a -recurse=nuget conversion for
 // linux must not import syscall's windows-only aliases into the consumer's <ImportedTypeAliases>
 // block. It did, which is the README walkthrough's `syscallꓸHandle = go.syscall_package.ΔHandle`
-// (CS0426) and non-generic `ΔSockaddr` (CS0305) on Linux. The windows conversion is the control: it
-// imports the windows flavor's Δ-renamed `Sockaddr` the program names, and, since seat #41, not the
-// `Handle` it never names (an imported alias is declared only once a reference resolves through it).
+// (CS0426) and non-generic `ΔSockaddr` (CS0305) on Linux. Since the method holders (2026-11-11) no
+// flavor of syscall exports an alias: `Handle`, `Signal` and `Sockaddr` were Δ renames and keep their Go
+// names now. So neither target may import a syscall alias at all, and the flavor-selection axis is held
+// by TestStdLibExportedMetadataSelectsTheTargetFlavor over syscall's per-flavor implements.
 func TestRecurseNuGetImportsTheTargetFlavorsAliases(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	if testing.Short() {
@@ -622,23 +633,9 @@ func TestRecurseNuGetImportsTheTargetFlavorsAliases(t *testing.T) {
 		return readGenerated(t, filepath.Join(options.recurseOutputRoot, "src", "example.com", "app", PackageInfoFileName))
 	}
 
-	linux := convert("linux/amd64")
-
-	if strings.Contains(linux, "syscallꓸHandle") {
-		t.Errorf("a linux conversion imported syscall's windows-only `Handle` alias (CS0426 against the linux flavor):\n%s", linux)
-	}
-
-	if strings.Contains(linux, "go.syscall_package.ΔSockaddr") {
-		t.Errorf("a linux conversion imported the windows flavor's Δ-renamed `Sockaddr` (CS0305 against the linux flavor):\n%s", linux)
-	}
-
-	windows := convert("windows/amd64")
-
-	if !strings.Contains(windows, "syscallꓸSockaddr = go.syscall_package.ΔSockaddr") {
-		t.Errorf("the windows (reference) conversion no longer imports the Δ-renamed `Sockaddr` it names; the control is void:\n%s", windows)
-	}
-
-	if strings.Contains(windows, "syscallꓸHandle") {
-		t.Errorf("the windows conversion declared `Handle`, which the program never names:\n%s", windows)
+	for _, target := range []string{"linux/amd64", "windows/amd64"} {
+		if info := convert(target); strings.Contains(info, "syscallꓸ") {
+			t.Errorf("a %s conversion imported a syscall alias, which no flavor of syscall exports:\n%s", target, info)
+		}
 	}
 }

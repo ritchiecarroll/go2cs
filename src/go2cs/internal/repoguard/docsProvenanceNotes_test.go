@@ -795,27 +795,27 @@ func TestProvenanceNoteGuardFiresOnAMovedFingerprint(t *testing.T) {
 	tree := provenanceNoteRealTree(t)
 	rel := "docs/ConversionStrategies.md"
 	text := livingMarkdownPages(t)[rel]
-	real := "src/core/bufio/bufio.cs:17#3ddbb0"
+	real := "src/core/bufio/bufio.cs:18#3ddbb0"
 
 	if strings.Count(text, real) != 1 {
 		t.Fatalf("the control's token is not on %s once; re-point the control at another fingerprinted token", rel)
 	}
 
 	line := strings.Count(text[:strings.Index(text, real)], "\n") + 1
-	planted := strings.Replace(text, real, "src/core/bufio/bufio.cs:19#3ddbb0", 1)
+	planted := strings.Replace(text, real, "src/core/bufio/bufio.cs:20#3ddbb0", 1)
 	_, p := provenanceNoteProblems(rel, planted, tree)
 	named := false
 
 	for _, x := range p {
-		named = named || x.line == line && strings.Contains(x.what, "changed since the note was written") && strings.Contains(x.what, "now read at :17")
+		named = named || x.line == line && strings.Contains(x.what, "changed since the note was written") && strings.Contains(x.what, "now read at :18")
 	}
 
 	if !named || len(p) != provenanceNoteStaleOn(rel)+1 {
-		t.Errorf("the token moved to line 19 was not named, and relocated to :17, at %s:%d: %v", rel, line, p)
+		t.Errorf("the token moved to line 20 was not named, and relocated to :18, at %s:%d: %v", rel, line, p)
 	}
 
 	// And with its fingerprint removed, the token is named for carrying neither a quote nor a fingerprint.
-	_, p = provenanceNoteProblems(rel, strings.Replace(text, real, "src/core/bufio/bufio.cs:17", 1), tree)
+	_, p = provenanceNoteProblems(rel, strings.Replace(text, real, "src/core/bufio/bufio.cs:18", 1), tree)
 	named = false
 
 	for _, x := range p {
