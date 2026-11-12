@@ -45,6 +45,7 @@ func main() {
 
 	var m stamper = typelib.NewMark("x") // foreign value-sourced: %T is the wrapped struct
 	fmt.Printf("%T\n", m)
+	fmt.Printf("%v\n", m)
 
 	// Keep every implementation live so the conversions above are real method-set casts.
 	fmt.Println(g.greet(), h.greet(), m.Stamp())
