@@ -793,6 +793,7 @@
     <None Include="$(MSBuildThisFileDirectory)warningClearEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)warningEntries.go" />
     <None Include="$(MSBuildThisFileDirectory)warningEntries_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)warningEntriesFixedPoint_test.go" />
     <None Include="$(MSBuildThisFileDirectory)writeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)wsaSendtoNoCallers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)xsysDarwinLibc_test.go" />
