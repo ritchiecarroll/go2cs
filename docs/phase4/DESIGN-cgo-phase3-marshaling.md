@@ -711,4 +711,43 @@ No Go memory is handed to C, pinned or imaged (3.2). No C memory is read through
 - **Q3. The branch.** Lean: `claude/h-cgo-phase3-helpers`, cut from `eabb7aad2c`, with master merged in after 292
   lands.
 
+### 16.8 Amendment 2026-11-12: COORD's rulings, and the reds as read on H
+
+COORD approved the plan as posted and ruled the three questions as leaned.
+
+- **Q1, RULED:** `strtol` is read at the rule's own input in 3.1. A pointer-to-pointer parameter waits for 3.2's
+  out-parameter. P3.1-8 is scored as worded, the weaker zig half included.
+- **Q2, RULED:** Go memory handed to a `Go*` helper is refused by name in 3.1 and admitted in 3.2 under M2's source
+  classification. The refusal names the shape (`C.GoBytes` over Go memory) and says it is increment 3.2's, so a user
+  who meets it reads a known, dated gap and not a defect. That program joins the refusal arms, with its control.
+- **Q3, RULED:** the branch is `claude/h-cgo-phase3-helpers`. Master is merged in, never rebased, after batch 292
+  lands.
+- **The windows two-runtimes risk** stays a stop line as written (S3.1-C): if `malloc` and `free` bind in different
+  C runtimes it is posted and COORD rules the allocator.
+- **The adversarial review** at the tip, before landing, is ordered, on the classifier as the safety boundary.
+
+**One sentence of 16.3 was wrong, and is corrected here.** It said no test converts the Phase 1 trees through the
+route. One does (`TestCgoPhase1FixtureIsRefusedNamingEachUseAndItsOwner`), and it already asserted three of P3.1-1's
+refusals. The Phase 2 fixture also holds a deferred call through the check closure (`Deferred`), refused the same
+way. So the first reds are those tests with their expectations turned over, and they are read on H.
+
+**The reds at the red commit, on H (offline).**
+
+| Test | Reading |
+|---|---|
+| `TestCgoPhase1FixtureIsRefusedNamingEachUseAndItsOwner` | `C.CString` and `C.GoString` are refused as cmd/cgo's own helpers. `C.free` is refused as a deferred call through the check closure |
+| `TestCgoPhase2FixtureIsRefusedNamingOnlyItsGoroutineCall` | 2 refusal lines, want 1: the deferred call is refused beside the goroutine call |
+| `TestCgoDeferredCallThroughTheCheckClosureConvertsAsADeferredCall` | the conversion is refused |
+| `TestCgoPhase2FixtureConvertsAsTheSourceReads` | red with them: the fixture it converts now keeps its `Deferred` function |
+
+**P3.1-1's base half, scored as worded: three of four.** `C.CString`, `C.GoString` and the deferred call read as
+predicted. `C.free`'s parameter is NOT named as "not a scalar": the deferred refusal stops the census at the `defer`,
+so the `void *` parameter behind it is never reached. That text is read where a `void *` call is not deferred.
+
+**The end-to-end program's arms (16.3), as built.** The plan's element arm (`&b[0]` handed to a `void *`) is refused
+at CONVERSION today, by the check closure's own element form, and stays so until 3.2. A program that holds it cannot
+convert, so it is not an arm of the program. The run-time refusal arms are the address of a Go variable through a
+`void *`, the same as a number in a variable, the same through a `uintptr` in one expression, and `C.GoBytes` and
+`C.GoString` over Go memory.
+
 — H (2026-11-12)

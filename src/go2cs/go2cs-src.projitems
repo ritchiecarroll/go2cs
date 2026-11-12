@@ -24,6 +24,7 @@
     <None Include="$(MSBuildThisFileDirectory)cgoBuild_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoG1_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoLoadTag_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoPhase3_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoResiduals_test.go" />
     <None Include="$(MSBuildThisFileDirectory)corpusRelease.go" />
     <None Include="$(MSBuildThisFileDirectory)genericAllocCallerFrames_test.go" />
@@ -134,6 +135,7 @@
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\g1\g1_unix.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\g1\g1_windows.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\g1\main.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\p3\main.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testSignals.go" />
@@ -700,6 +702,7 @@
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase2\cgo_gotypes.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase2\fixture.cgo1.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase2\fixture.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase3\fixture.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\cgo_gotypes.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\cgo_import.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\fixture.cgo1.go" />
