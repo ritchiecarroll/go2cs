@@ -10,7 +10,7 @@ partial struct node {
 
 internal static @string Error(this ref node n) { return fmt.Sprintf("node %d"u8, n.id); }
 
-internal static void Main() {
+internal static void main() {
     var p = Ꮡ(new node(id: 1));
     var q = Ꮡ(new node(id: 2));
 

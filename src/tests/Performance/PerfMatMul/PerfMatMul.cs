@@ -37,7 +37,7 @@ internal static float64 matmul(nint n) {
     return trace;
 }
 
-internal static void Main() {
+internal static void main() {
     var start = time.Now().UnixNano();
 
     var total = 0.0D;

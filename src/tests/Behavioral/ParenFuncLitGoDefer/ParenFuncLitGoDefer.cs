@@ -41,7 +41,7 @@ internal static void later(channel<bool> done) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     var r = Ꮡ(new runner());
     fmt.Println(r.fork(5, (nint v) => {
         fmt.Println("dispatch", v);

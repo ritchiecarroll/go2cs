@@ -32,7 +32,7 @@ internal static slice<slice<nestedᴛ1>> nested = [
     [new("x"), new("y")]
 ];
 
-internal static void Main() {
+internal static void main() {
     foreach (var (_, e) in range(ptrElems)) {
         fmt.Println((~e).@in, (~e).str, (~e).error == nil);
     }

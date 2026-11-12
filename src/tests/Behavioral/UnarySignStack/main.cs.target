@@ -10,7 +10,7 @@ partial struct Level /*num:int16*/;
 
 internal static UntypedInt k => 4;
 
-internal static void Main() {
+internal static void main() {
     nint a = 5;
     fmt.Println(- -a, a);
     fmt.Println(+ +a, a);

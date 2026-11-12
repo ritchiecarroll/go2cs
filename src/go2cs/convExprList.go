@@ -492,6 +492,19 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			}
 		}
 
+		// A func value of a different delegate type, which may be nil at run time, converts through golib's nil-safe
+		// helper rather than the delegate-copy constructor (delegateArgWrap.go). A KEYED struct-literal element
+		// converts the VALUE only, as the constructor wrap above does.
+		if callContext != nil && callContext.nilSafeDelegateArgs != nil {
+			if typeArgs, ok := callContext.nilSafeDelegateArgs[i]; ok && len(typeArgs) > 0 {
+				if label, value, found := strings.Cut(resultExpr, ": "); found && isSimpleIdentifierName(label) {
+					resultExpr = fmt.Sprintf("%s: NilSafeDelegateConversion<%s>(%s)", label, typeArgs, value)
+				} else {
+					resultExpr = fmt.Sprintf("NilSafeDelegateConversion<%s>(%s)", typeArgs, resultExpr)
+				}
+			}
+		}
+
 		// Append a per-argument member call — the suffix twin of castArgToType's prefix cast, for a
 		// wrap that reads left-to-right off the value rather than around it (the channel-direction
 		// narrowing at an argument position: `ch.WithDirection(GoChanDir.Recv)`). A KEYED

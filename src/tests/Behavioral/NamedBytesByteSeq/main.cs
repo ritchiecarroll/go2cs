@@ -57,7 +57,7 @@ private static readonly @string wxyzˢ = "wxyz"u8;
 private static readonly @string xyzˢ = "xyz"u8;
 private static readonly @string litˢ = "lit"u8;
 
-internal static void Main() {
+internal static void main() {
     var v = (Val)slice<byte>((@string)"abcd"u8);
     Ptr p = (Ptr)(@string)wxyzˢ;
 

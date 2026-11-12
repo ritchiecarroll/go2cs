@@ -87,7 +87,7 @@ internal partial struct main_sh /*dyn*/ {
     public ж<Stamp> S;
 }
 
-internal static void Main() {
+internal static void main() {
     var s = new slice<ж<Blob>>(2);
     s[1] = Ꮡ(new Blob(Data: "second"));
     var rs = reflect.ValueOf(s);

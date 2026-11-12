@@ -18,7 +18,7 @@ partial struct holder {
     internal go.SameNameImportAlias.b.foo_package.ΔKind k;
 }
 
-internal static void Main() {
+internal static void main() {
     afoo.Inner x = new afoo.Inner(N: 1);
     bfoo.Other y = new bfoo.Other(S: "s");
     var z = new afoo.Inner(N: 2);

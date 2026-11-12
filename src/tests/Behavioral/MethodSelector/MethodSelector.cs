@@ -10,7 +10,7 @@ public static @string String(this Counter c) {
     return fmt.Sprint((nint)c);
 }
 
-internal static void Main() {
+internal static void main() {
     Counter c = 5;
     var f = () => c.String();
     fmt.Println(f());

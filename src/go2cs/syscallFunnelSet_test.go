@@ -183,11 +183,11 @@ func convertFunnelModule(t *testing.T, modulePath, source string, opts ...func(*
 	converter := NewModuleConverter(options)
 	err := converter.ConvertModule(appDir)
 
-	if err == nil {
-		for _, line := range strings.Split(logged.String(), "\n") {
-			if strings.Contains(line, "panic converting ") {
-				return root, fmt.Errorf("%s", strings.TrimSpace(line))
-			}
+	// A package that panics is skipped and the run's error only names it ("1 package failed: ..."), so the logged
+	// panic line, which carries the refusal's reason, is the error a caller wants.
+	for _, line := range strings.Split(logged.String(), "\n") {
+		if strings.Contains(line, "panic converting ") {
+			return root, fmt.Errorf("%s", strings.TrimSpace(line))
 		}
 	}
 

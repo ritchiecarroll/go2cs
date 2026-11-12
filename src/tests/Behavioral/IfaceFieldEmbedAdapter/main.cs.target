@@ -49,7 +49,7 @@ partial interface conn {
     @string Status();
 }
 
-internal static void Main() {
+internal static void main() {
     var @out = Ꮡ(new dst());
     var d = Ꮡ(new duplex(source: new srcжsource(Ꮡ(new src(items: ["alpha", "beta"]))), sink: new dstжsink(@out)));
     conn c = new duplexжconn(d);

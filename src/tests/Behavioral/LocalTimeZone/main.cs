@@ -5,7 +5,7 @@ using time = time_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var t = time.Unix(1700000000, 0).In(time.ΔLocal);
 
     fmt.Println(t.Format("2006-01-02 15:04:05 MST"));

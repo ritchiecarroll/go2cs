@@ -103,7 +103,7 @@ internal static @string viaInterfaceTag(shape v) {
     }}
 }
 
-internal static void Main() {
+internal static void main() {
     var c = Ꮡ(new circle(r: 1));
     shape s = new circleжshape(c);
     sizer z = new circleжsizer(c);

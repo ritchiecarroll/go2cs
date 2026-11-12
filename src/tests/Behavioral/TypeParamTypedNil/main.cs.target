@@ -44,7 +44,7 @@ internal static any plain<T>(T t)
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 { return t; }
 
-internal static void Main() {
+internal static void main() {
     ж<P> p = default;
     Action f = default;
     error e = default;

@@ -16,7 +16,7 @@ internal static (any, nint) pairConst() { return ((@string)("t1" + "t2"), 1); }
 
 internal static (any, nint) pairConstParen() { return ((@string)("t3" + "t4"), 2); }
 
-internal static void Main() {
+internal static void main() {
     @string a = "v";
 
     @catch(() => {

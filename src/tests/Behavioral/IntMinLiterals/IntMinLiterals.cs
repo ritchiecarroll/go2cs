@@ -8,7 +8,7 @@ internal static slice<int32> interesting32 = [-2147483648, -2_147_483_648, -2147
 
 internal static slice<int64> interesting64 = [-9223372036854775808L, -9223372036854775807L, -2147483649L, 9223372036854775807L];
 
-internal static void Main() {
+internal static void main() {
     foreach (var (_, v) in range(interesting32)) {
         fmt.Println(v);
     }

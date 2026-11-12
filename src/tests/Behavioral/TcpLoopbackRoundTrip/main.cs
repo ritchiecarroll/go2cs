@@ -245,7 +245,7 @@ internal static partial void closeBreaksBlockedWrite() {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     roundTrip("ipv4", "tcp", "127.0.0.1:0");
 
     var (probe, err) = Δnet.Listen("tcp", "[::1]:0"); if (err == nil) {

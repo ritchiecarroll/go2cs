@@ -25,7 +25,7 @@ partial struct holder {
     internal ж<@string> p;
 }
 
-internal static void Main() {
+internal static void main() {
     var p = Ꮡ((nint)(42));
     var f = Ꮡ((float64)(1.5D));
     var s = Ꮡ((@string)("go"u8));

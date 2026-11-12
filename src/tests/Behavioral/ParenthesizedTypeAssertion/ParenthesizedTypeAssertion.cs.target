@@ -47,7 +47,7 @@ internal static @string kind(any x) {
     return "unmatched";
 }
 
-internal static void Main() {
+internal static void main() {
     any data = new Map(new map<@string, any>{["a"] = (nint)1});
 
     var (mΔ1, okΔ1) = data._<Map>(ᐧ); if (okΔ1) {

@@ -41,7 +41,7 @@ internal static void arm(@string @class, Func<@string> f) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     arm("left int", () => fmt.Sprint(one.Lsh((int64)(neg))));
     arm("right int64 by int8", () => fmt.Sprint(big.Rsh((int64)(neg8))));
     arm("left uint32 by int64", () => fmt.Sprint(u32.Lsh((int64)(neg64))));

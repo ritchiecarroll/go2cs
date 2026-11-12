@@ -28,7 +28,7 @@ public partial struct cfg {
     }
 ]; }
 
-internal static void Main() {
+internal static void main() {
     foreach (var (_, id) in range(slice<uint16>([0x0001, 0x0002]))) {
         var ctor = SupportedStates[id];
         var s = ctor();

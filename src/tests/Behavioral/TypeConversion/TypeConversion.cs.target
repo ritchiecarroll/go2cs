@@ -24,7 +24,7 @@ internal partial struct main_data /*dyn*/ {
     public ж<main_data_Address> Address; /*`json:"address"`*/
 }
 
-internal static void Main() {
+internal static void main() {
     ж<main_data> data = default;
 
     ref var mine = ref heap(new Person(), out var Ꮡmine);

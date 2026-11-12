@@ -15,7 +15,7 @@ public static bool Equal(this AssignA x, Func<nint> y) { return x() == y(); }
 
 internal static nint apply(Func<nint> f) { return f() * 10; }
 
-internal static void Main() {
+internal static void main() {
     var a = new AssignA(() => 7);
 
     var (m, _) = reflect.TypeOf((a).OrTypedNilFunc()).MethodByName("Equal");

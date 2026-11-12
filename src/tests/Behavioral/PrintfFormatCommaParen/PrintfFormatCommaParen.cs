@@ -10,7 +10,7 @@ partial struct stringer {
 
 internal static @string String(this stringer b) { return b.s; }
 
-internal static void Main() {
+internal static void main() {
     @string name = "x";
     nint n = 3;
     var b = new stringer("bx");

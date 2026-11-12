@@ -25,7 +25,7 @@ internal static void preformat(this ж<handler> Ꮡh, @string s) {
     h.groups++;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var b = ref heap<slice<byte>>(new slice<byte>(0, 8), out var Ꮡb);
     var p = Ꮡb.Reinterpret<slice<byte>, Buf>();
     p.ValueSlot = append(p.ValueSlot, (byte)'h', (byte)'i');

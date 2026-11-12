@@ -88,7 +88,7 @@ internal static partial uint64 goWrites() {
     return x;
 }
 
-internal static void Main() {
+internal static void main() {
     uint64 total = default;
     addTo(ref total, 5);
     addTo(ref total, 7);

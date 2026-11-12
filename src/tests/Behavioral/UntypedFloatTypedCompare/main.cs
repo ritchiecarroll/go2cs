@@ -8,7 +8,7 @@ internal static UntypedFloat tenth => 0.1;
 internal static UntypedFloat twoTo53 => 9007199254740992.0;
 internal static UntypedFloat third => /* 1.0 / 3 */ 0.3333333333333333;
 
-internal static void Main() {
+internal static void main() {
     var f = (float32)0.1F;
     fmt.Println("float32(0.1) <= tenth:", f <= (float32)tenth);
     fmt.Println("float32(0.1) == tenth:", f == (float32)tenth);

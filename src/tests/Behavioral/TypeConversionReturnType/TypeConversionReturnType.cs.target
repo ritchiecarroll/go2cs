@@ -23,7 +23,7 @@ internal static test_R0 test() {
     return x;
 }
 
-internal static void Main() {
+internal static void main() {
     var x = test();
     fmt.Println(x);
 }

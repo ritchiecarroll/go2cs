@@ -41,13 +41,13 @@ type nonSelfProxyRefusal struct {
 
 func (refusal *nonSelfProxyRefusal) Error() string {
 	return fmt.Sprintf("package %s instantiates a non-self-referential method-set constraint over a pointer element where the constraint proxy cannot carry Go's semantics (%d site(s)); see the %s diagnostics",
-		refusal.pkgPath, len(refusal.sites), diagnosticProxyRefused)
+		refusal.pkgPath, len(refusal.sites), diagnosticNonSelfProxyRefused)
 }
 
 // report prints each refused site as a canonical diagnostic.
 func (refusal *nonSelfProxyRefusal) report() {
 	for _, site := range refusal.sites {
-		reportDiagnostic(site.position.String(), diagnosticProxyRefused, site.text)
+		reportDiagnostic(site.position.String(), diagnosticNonSelfProxyRefused, site.text)
 	}
 }
 

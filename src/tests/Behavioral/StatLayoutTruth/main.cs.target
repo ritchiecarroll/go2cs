@@ -10,7 +10,7 @@ using path;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     GoFrame ᒐ = default;
     try {
         var (dir, err) = os.MkdirTemp("", "statlayouttruth");

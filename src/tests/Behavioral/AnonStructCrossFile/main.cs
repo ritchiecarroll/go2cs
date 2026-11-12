@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     foreach (var (_, vᴛ1) in range(compareTests)) {
         ref var tt = ref heap(new compareTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;

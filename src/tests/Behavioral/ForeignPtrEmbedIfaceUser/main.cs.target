@@ -20,7 +20,7 @@ partial struct meterBox {
     /*embed*/ public ж<ForeignPtrEmbedIfaceLib_package.Meter> Meter;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var box = ref heap<meterBox>(new meterBox(Meter: ForeignPtrEmbedIfaceLib.NewMeter()), out var Ꮡbox);
     accumulator a = box;
     a.Add(5);

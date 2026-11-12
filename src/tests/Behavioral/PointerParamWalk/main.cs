@@ -215,7 +215,7 @@ continueᴛ1:;
     return count;
 }
 
-internal static void Main() {
+internal static void main() {
     var a = Ꮡ(new node(val: 1));
     var b = Ꮡ(new node(val: 2));
     var c = Ꮡ(new node(val: 3));

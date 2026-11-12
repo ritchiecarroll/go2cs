@@ -6,7 +6,7 @@ using NestedAliasUser;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var e = inner.NewEntry("alpha", 3);
     fmt.Println(e.Name, e.Count);
 

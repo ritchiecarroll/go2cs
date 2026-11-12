@@ -58,7 +58,7 @@ internal static nint both(ref counter a, ж<counter> Ꮡb) {
     return a.n;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var c = ref heap(new counter(), out var Ꮡc);
     fmt.Println(isNil(Ꮡc), isNil(nil));
     passOn(Ꮡc);

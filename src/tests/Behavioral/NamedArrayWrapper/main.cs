@@ -24,7 +24,7 @@ internal static void fill(this ж<pallocBits> Ꮡb) {
     }
 }
 
-internal static void Main() {
+internal static void main() {
     var wᴷ = new stackAppend<uint32>();
 
     ref var e = ref heap(new pallocBits(), out var Ꮡe);

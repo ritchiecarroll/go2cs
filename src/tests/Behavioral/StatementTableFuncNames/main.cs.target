@@ -52,7 +52,7 @@ internal static partial void table() {
     }
 }
 
-internal static void Main() {
+internal static void main() {
     table();
 }
 

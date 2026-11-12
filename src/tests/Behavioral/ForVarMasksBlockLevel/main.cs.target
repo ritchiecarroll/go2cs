@@ -23,7 +23,7 @@ internal static nint compute(nint n) {
     }
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(compute(3));
 }
 

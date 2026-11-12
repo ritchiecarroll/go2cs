@@ -32,7 +32,7 @@ public static float64 Abs(this MyAbser myAbs) {
     return 1.0D;
 }
 
-internal static void Main() {
+internal static void main() {
     var a = new MyCustomError("New One", new MyAbser(), new MyError(time.Now(), "Hello"), default);
     a.Abs();
     a.Message = "New";

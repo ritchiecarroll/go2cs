@@ -115,7 +115,7 @@ internal static @string describe(any v) {
     }}
 }
 
-internal static void Main() {
+internal static void main() {
     var (o, err) = parseOID("abc");
     fmt.Println("parseOID:", (@string)o.der, err);
 

@@ -28,7 +28,7 @@ internal static @string nameOf(any fn) {
     return name;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("func:  ", nameOf(passInt));
     fmt.Println("func:  ", nameOf(passString));
 

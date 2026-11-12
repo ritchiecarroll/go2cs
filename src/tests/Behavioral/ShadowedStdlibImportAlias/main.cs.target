@@ -7,7 +7,7 @@ using ShadowedStdlibImportAlias;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var @base = stderrors.New("base");
     var wrapped = fmt.Errorf("wrapped: %w"u8, @base);
     fmt.Println("is:", errors.Is(wrapped, @base));

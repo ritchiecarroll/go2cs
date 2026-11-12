@@ -9,7 +9,7 @@ partial class main_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object valueˢ = (@string)"value"u8;
 
-internal static void Main() {
+internal static void main() {
     ref var p = ref heap(new atomic.Pointer<any>(), out var Ꮡp);
 
     fmt.Println("zero:", Ꮡp.Load() == nil);

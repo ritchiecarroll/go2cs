@@ -40,6 +40,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAliasNamespaceShadow() => CheckTarget("AliasNamespaceShadow");
 
     [TestMethod]
+    public void CheckAliasReceiverForms() => CheckTarget("AliasReceiverForms");
+
+    [TestMethod]
     public void CheckAliasStructComposite() => CheckTarget("AliasStructComposite");
 
     [TestMethod]
@@ -1216,6 +1219,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckLookupServicePort() => CheckTarget("LookupServicePort");
 
     [TestMethod]
+    public void CheckMainDeepRecursion() => CheckTarget("MainDeepRecursion");
+
+    [TestMethod]
     public void CheckMainSelectForeverAfterFunc() => CheckTarget("MainSelectForeverAfterFunc");
 
     [TestMethod]
@@ -1672,6 +1678,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNilFuncIfaceMethodValue() => CheckTarget("NilFuncIfaceMethodValue");
 
     [TestMethod]
+    public void CheckNilFuncNamedDelegateArg() => CheckTarget("NilFuncNamedDelegateArg");
+
+    [TestMethod]
     public void CheckNilMapKey() => CheckTarget("NilMapKey");
 
     [TestMethod]
@@ -1694,6 +1703,12 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNilPointerValueReceiverCall() => CheckTarget("NilPointerValueReceiverCall");
+
+    [TestMethod]
+    public void CheckNilPtrIdentity() => CheckTarget("NilPtrIdentity");
+
+    [TestMethod]
+    public void CheckNilPtrIdentityLib() => CheckTarget("NilPtrIdentityLib");
 
     [TestMethod]
     public void CheckNilReceiverMethods() => CheckTarget("NilReceiverMethods");
@@ -2165,6 +2180,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckReflectliteTypeName() => CheckTarget("ReflectliteTypeName");
+
+    [TestMethod]
+    public void CheckRefusalDowngradeProxy() => CheckTarget("RefusalDowngradeProxy");
 
     [TestMethod]
     public void CheckReinterpretPinLifetime() => CheckTarget("ReinterpretPinLifetime");

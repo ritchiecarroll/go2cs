@@ -80,7 +80,7 @@ internal static void grow(shape v) {
     }}
 }
 
-internal static void Main() {
+internal static void main() {
     var c = Ꮡ(new circle(r: 1));
     var q = Ꮡ(new square(s: 2));
     var d = new dot(tag: 3);

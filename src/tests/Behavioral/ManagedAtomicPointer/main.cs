@@ -54,7 +54,7 @@ internal static void identity() {
     fmt.Println(fp == @unsafe.Pointer.FromBox(Ꮡl.Ꮡp), fp == pa);
 }
 
-internal static void Main() {
+internal static void main() {
     ref var l = ref heap(new lazyProc(), out var Ꮡl);
     fmt.Println(Ꮡl.find());
     fmt.Println(Ꮡl.find());

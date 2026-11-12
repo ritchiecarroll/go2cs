@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     ж<nint> p = default;
     var a = GoReflect.WithElemDims(new array<any>[]{new any[]{(nint)1, (nint)2}.array(), new any[]{(@string)"a", (@string)"b"}.array()}.slice(), 2);
     var b = new slice<any>[]{[1.5D, (rune)'x'], [(@string)("c"u8 + "d"u8), true]}.array();

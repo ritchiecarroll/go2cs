@@ -42,7 +42,7 @@ internal static nint /*n*/ count(this ref words w) {
     return n;
 }
 
-internal static void Main() {
+internal static void main() {
     var b = new uint64[]{0x100000002UL, 0x300000004UL, 5, 0}.array();
     swap(ref b);
     fmt.Println(b[0], b[1], b[2], b[3]);

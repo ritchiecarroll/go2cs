@@ -23,7 +23,7 @@ internal static nint outer(ref T t) {
     return r;
 }
 
-internal static void Main() {
+internal static void main() {
     var ᴛ1 = new T(n: 1);
     fmt.Println(outer(ref ᴛ1));
 }

@@ -6,7 +6,7 @@ partial class main_package {
 
 internal partial struct main_named /*[]byte*/;
 
-internal static void Main() {
+internal static void main() {
     slice<byte> nilBytes = default;
     var emptyBytes = slice<byte>([]);
     var text = slice<byte>("ab\n"u8);

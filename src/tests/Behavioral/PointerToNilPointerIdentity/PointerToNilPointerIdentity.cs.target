@@ -9,7 +9,7 @@ partial struct holder {
     internal slice<nint> s;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var p1 = ref heap<ж<nint>>((ж<nint>)nil, out var Ꮡp1);
     ref var p2 = ref heap<ж<nint>>((ж<nint>)nil, out var Ꮡp2);
 

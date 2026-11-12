@@ -22,7 +22,7 @@ partial struct splitTest {
 
 internal static partial nint half(nint n) { return n / 2; }
 
-internal static void Main() {
+internal static void main() {
     foreach (var (_, tt) in range(tests)) {
         fmt.Println(tt.name, tt.n);
     }

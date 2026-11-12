@@ -140,7 +140,7 @@ internal static partial (nint, uint16, uint16) handshakes(nint n, tls.Certificat
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     var (cert, err) = tls.X509KeyPair(localhostCert, localhostKey);
     if (err != nil) {
         throw panic(err);

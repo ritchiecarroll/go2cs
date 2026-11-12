@@ -89,7 +89,7 @@ internal partial interface main_type /*dyn*/ {
     nint Len();
 }
 
-internal static void Main() {
+internal static void main() {
     error err = ((errno)eagain);
     fmt.Println("errno:", AreEqual(err, eagain), AreEqual(err, eintr), AreEqual(err, ((error)eagain)));
 

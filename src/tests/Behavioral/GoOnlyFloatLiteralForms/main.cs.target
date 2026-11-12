@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var a = 0.25D;
     var b = 3D;
     var c = 0.3333333333333333D;

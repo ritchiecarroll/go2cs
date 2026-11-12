@@ -18,7 +18,7 @@ public static bool ΔDeep(ж<Node> Ꮡn) {
     return n.Depth > 5;
 }
 
-internal static void Main() {
+internal static void main() {
     var n = Ꮡ(new Node(Depth: 3));
     fmt.Println("local", n.Deep(), ΔDeep(n));
 

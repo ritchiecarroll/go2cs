@@ -23,7 +23,7 @@ internal static lener_R0 lener(any a) {
     return v;
 }
 
-internal static void Main() {
+internal static void main() {
     var p = Ꮡ(new box(n: 1));
     var q = Ꮡ(new box(n: 1));
     var values = slice<any>([p.OrTypedNil(), q.OrTypedNil(), (counter)3, (counter)3, (counter)4]);

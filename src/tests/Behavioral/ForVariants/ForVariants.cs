@@ -5,7 +5,7 @@ using time = time_package;
 
 partial class main_package {
 
-internal static partial void Main() {
+internal static partial void main() {
     nint i = 0;
 
     while (i < 10) {

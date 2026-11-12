@@ -37,7 +37,7 @@ internal static void annotate(@string label) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     annotate("off:");
 
     var err = trace.Start(Δio.Discard); if (err != nil) {

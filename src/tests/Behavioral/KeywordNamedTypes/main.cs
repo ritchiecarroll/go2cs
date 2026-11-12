@@ -82,7 +82,7 @@ internal static uintptr plainLocalStruct() {
 
 internal static sizer std = new @fixed(n: 3);
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(std.size("hello"));
 
     ref var f = ref heap<@fixed>(new @fixed(n: 1), out var Ꮡf);

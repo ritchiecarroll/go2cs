@@ -18,7 +18,7 @@ partial struct allExported {
     public nint B;
 }
 
-internal static void Main() {
+internal static void main() {
     var t = reflect.TypeOf(new mixed());
 
     for (nint i = 0; i < t.NumField(); i++) {

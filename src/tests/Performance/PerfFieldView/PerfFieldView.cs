@@ -43,7 +43,7 @@ internal static ж<point> step(this ж<point> Ꮡp) {
     return Ꮡp;
 }
 
-internal static void Main() {
+internal static void main() {
     var start = time.Now().UnixNano();
 
     ref var p = ref heap(new point(), out var Ꮡp);

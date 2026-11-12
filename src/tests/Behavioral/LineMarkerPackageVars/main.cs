@@ -29,7 +29,7 @@ internal static void initᴛforward() { forward = lineNumber() + declaredLater *
 
 internal static nint declaredLater = 3;
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("single:", single);
     fmt.Println("groupedA:", groupedA);
     fmt.Println("groupedB:", groupedB);

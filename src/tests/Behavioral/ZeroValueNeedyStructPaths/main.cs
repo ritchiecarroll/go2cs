@@ -53,7 +53,7 @@ internal static void arm(@string name, Action f) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     arm("map missing key:", () => {
         var m = new map<@string, counts>{};
         var (v, ok) = m["x", ꟷ];

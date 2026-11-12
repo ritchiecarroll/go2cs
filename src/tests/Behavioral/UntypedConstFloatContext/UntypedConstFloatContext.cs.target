@@ -8,7 +8,7 @@ internal static UntypedFloat gPi => 3.141592653589793;
 
 internal partial struct main_meters /*num:float32*/;
 
-internal static void Main() {
+internal static void main() {
     complex64 c64 = complex(2.5F, -3.5F);
     complex64 c64b = 2.5F + -3.5F.i();
     float32 a = 2.5F;

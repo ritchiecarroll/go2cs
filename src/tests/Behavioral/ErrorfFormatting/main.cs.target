@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(fmt.Errorf("plain message"u8));
     fmt.Println(fmt.Errorf("got %v"u8, (nint)42));
     fmt.Println(fmt.Errorf("name %s = %d"u8, "x", (nint)7));

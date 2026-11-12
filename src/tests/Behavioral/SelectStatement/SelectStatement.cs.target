@@ -89,7 +89,7 @@ internal static nint f() {
     return 0;
 }
 
-internal static partial void Main() {
+internal static partial void main() {
     var ch = new channel<nint>(2);
 
     ch.ᐸꟷ(1);

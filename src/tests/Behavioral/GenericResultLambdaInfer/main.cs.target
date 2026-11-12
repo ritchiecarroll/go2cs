@@ -56,7 +56,7 @@ internal static @string describe(any v) {
     return fmt.Sprintf("%v"u8, v);
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(fortyTwo(), fortyTwo());
 
     var nilOnce = Once(any () => default);

@@ -13,7 +13,7 @@ internal static Func<nint, nint> lookup(any i) {
     return default;
 }
 
-internal static void Main() {
+internal static void main() {
     any i = new Func<nint, nint>((nint w) => w * 2);
     var c = lookup(i);
     fmt.Println(c(21));

@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     ref var a = ref heap(new array<@string>(2), out var Ꮡa);
 
     a[0] = "Hello";

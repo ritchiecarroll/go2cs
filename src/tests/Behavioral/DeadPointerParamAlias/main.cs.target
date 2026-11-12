@@ -20,7 +20,7 @@ internal static bool passThrough(ж<node> p) { return inner(p); }
 
 internal static nint usesValue(ref node p) { return p.val; }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(onlyNilCheck(nil));
     fmt.Println(onlyNilCheck(Ꮡ(new node())));
     fmt.Println(passThrough(nil));

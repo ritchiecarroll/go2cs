@@ -19,7 +19,7 @@ partial struct point {
     internal nint x, y;
 }
 
-internal static void Main() {
+internal static void main() {
     holder z = new();
     fmt.Println(len(z.name), len(z.tbl), len(z.tail));
 

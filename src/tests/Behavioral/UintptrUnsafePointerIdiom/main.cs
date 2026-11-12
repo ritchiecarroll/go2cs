@@ -16,7 +16,7 @@ internal static uintptr addrOf(ж<point> p) {
     return (uintptr)p;
 }
 
-internal static void Main() {
+internal static void main() {
     var g1 = (uintptr)Ꮡorigin;
     var g2 = (uintptr)Ꮡorigin;
     fmt.Println("global:", g1 != 0, g1 == g2);

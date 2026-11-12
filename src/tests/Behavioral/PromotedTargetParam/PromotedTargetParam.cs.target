@@ -34,7 +34,7 @@ partial struct ForeignByPointer {
     /*embed*/ public ж<PromotedTargetParam.targetlib_package.Finder> Finder;
 }
 
-internal static void Main() {
+internal static void main() {
     var v = new ByValue(new Base("value-recv"));
     fmt.Println(v.Pair("param"));
     v.Base.Rename("value-renamed");

@@ -8,7 +8,7 @@ internal static nint takesInt(nint n) {
     return n * 10;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(takesInt(1));
     fmt.Println(takesInt(-2));
     var x = 1.5D;

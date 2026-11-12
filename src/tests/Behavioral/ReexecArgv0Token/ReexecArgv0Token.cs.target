@@ -11,7 +11,7 @@ partial class main_package {
 
 internal static readonly @string token = "argv0-token-7f3a"u8;
 
-internal static void Main() {
+internal static void main() {
     var (depth, _) = strconv.Atoi(Δos.Getenv("ARGV0_DEPTH"));
     if (depth > 3) {
         fmt.Printf("depth %d: REFUSED (cap)\n"u8, depth);

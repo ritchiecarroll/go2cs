@@ -20,9 +20,9 @@ internal static @string describe(nint n, @string s) {
     return fmt.Sprintf("%d-%s"u8, n, s);
 }
 
-internal static void Main() {
+internal static void main() {
     Handler h = describe;
-    fmt.Println(invoke(new Func<nint, @string, @string>(h), 1, "a"));
+    fmt.Println(invoke(NilSafeDelegateConversion<Func<nint, @string, @string>, Handler>(h), 1, "a"));
     fmt.Println(h.tag());
 
     Func<nint, @string, @string> p = describe;
@@ -32,15 +32,15 @@ internal static void Main() {
     fmt.Println(invoke((nint n, @string s) => s + "!"u8, 4, "d"));
 
     Handler h2 = (nint n, @string s) => fmt.Sprintf("%s/%d"u8, s, n);
-    fmt.Println(invoke(new Func<nint, @string, @string>(h2), 5, "e"));
+    fmt.Println(invoke(NilSafeDelegateConversion<Func<nint, @string, @string>, Handler>(h2), 5, "e"));
 
     var sc = Ꮡ(new screen(prefix: "#"));
     
     var scʗ1 = sc;
     Handler handler = (nint p1, @string p2) => scʗ1.render(p1, p2);
-    fmt.Println(invoke(new Func<nint, @string, @string>(handler), 6, "f"));
+    fmt.Println(invoke(NilSafeDelegateConversion<Func<nint, @string, @string>, Handler>(handler), 6, "f"));
     handler = makeHandler("T:");
-    fmt.Println(invoke(new Func<nint, @string, @string>(handler), 7, "g"));
+    fmt.Println(invoke(NilSafeDelegateConversion<Func<nint, @string, @string>, Handler>(handler), 7, "g"));
 }
 
 partial struct screen {

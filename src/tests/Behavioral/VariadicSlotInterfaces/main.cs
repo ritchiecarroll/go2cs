@@ -75,7 +75,7 @@ internal static @string nest(params ꓸꓸꓸany argsʗp) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object twoˢ = (@string)"two"u8;
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(totalArea(2, new RectжShape(newRect(3, 4)), new CircleжShape(Ꮡ(new Circle(r: 2))), new RectжShape(newRect(1, 5))));
 
     var r = Ꮡ(new Rect(w: 4, h: 2));

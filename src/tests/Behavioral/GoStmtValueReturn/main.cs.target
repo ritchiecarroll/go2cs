@@ -26,7 +26,7 @@ internal static void emit(channel<nint> @out) {
     @out.ᐸꟷ(8);
 }
 
-internal static partial void Main() {
+internal static partial void main() {
     var @out = new channel<nint>(0);
 
     goǃ(ᴛ1 => sum(ᴛ1, 3, 4), @out);

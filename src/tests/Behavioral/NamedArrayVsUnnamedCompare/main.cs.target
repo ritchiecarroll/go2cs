@@ -14,7 +14,7 @@ internal static array<byte> sum(slice<byte> b) {
     return @out.Clone();
 }
 
-internal static void Main() {
+internal static void main() {
     Hash h = default;
     if (h != ((Hash)(sum(default)))) {
         fmt.Println("differs");

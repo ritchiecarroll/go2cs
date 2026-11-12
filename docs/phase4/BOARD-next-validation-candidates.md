@@ -36171,7 +36171,7 @@ to accept `internal` (the negative control `internal/poll.runtime_Semacquire` fi
 and narrowed to match nothing (the positive control fires).
 
 — G (2026-11-10)
-## 2026-11-11 — i9 (finding B's sub-note, COORD's ruling): a NON-Go exception escaping a goroutine exits the process with status 2 WITHOUT teeing to the crash output — a golib parity defect, OPEN, for routing
+## 2026-11-11 — i9 (finding B's sub-note, COORD's ruling): a NON-Go exception escaping a goroutine exits the process with status 2 WITHOUT teeing to the crash output — a golib parity defect, CLOSED by claude/c1-crash-output-parity
 
 **The finding.** Go's crash output (`runtime/debug.SetCrashOutput`) receives every fatal report: an unhandled
 panic and every other fatal error. golib honours that for the two paths it owns: `FatalReport.Fatal` and
@@ -36195,6 +36195,13 @@ of one because of it.
 does (Go prints `fatal error:` or `panic:` text for a runtime-level failure) and tee it to the same descriptor
 before exiting 2. The guard is a GolibTests arm: set the crash output, let a non-Go exception escape a goroutine in a
 child, and require the file to be non-empty. COORD routes the fix.
+
+**Status (2026-11-11): CLOSED by C1, claude/c1-crash-output-parity `b60eef7b07`, on master with batch 285.** The fix
+routes the backstop's non-Go branch, its `unhandled exception:` fallback, and `builtin.fatal`'s deadlock report
+through one helper, `builtin.WriteFatalReport`, which writes stderr and then the crash output. The guard this row
+asked for is GolibTests `BackstopCrashOutputTests`: a child test host throws a managed exception on a real goroutine
+and dies through the backstop, and the parent requires the crash file to equal stderr. At master before the fix, the
+crash file was empty. The design note is DESIGN-crash-report.md §4.
 
 — i9 (2026-11-11)
 ## 2026-11-11 — C2 (the -tests alias-matcher seat, COORD's ruling): the dropped `.tests.csproj` references are a NAMED expected delta for the freeze regen
@@ -36260,8 +36267,148 @@ the defect is latent there (per-site census, `claude/r-ts-c35`, all three amd64 
 the slice: an index assignment, an append whose result flows back, a pass to anything not proven read-only. It must
 stay conservative enough that go/ast's four walkList sites still convert; census std's widening sites first. The
 struct-proxy view (the post-.4 scout) is the path to making such writes work rather than refused.
+## 2026-11-11 — R (the -recurse refused-package ruling, COORD 20261111T053529Z): a pointer type argument to a generic NAMED type under a non-self method-set constraint (`MappedSpan[*ast.SourceFile]`) is refused; supporting it is a post-.4 struct-proxy design — OPEN
+
+**What the TS lane hit.** Its module's `-recurse` conversion refuses at [107/142] `internal/ls/lsconv`: six sites of
+`MappedSpan[T Script] struct { Script T; spanmap.MappedSpan }` instantiated as `MappedSpan[*ast.SourceFile]`, where
+`Script`'s `SpanMap()` returns a pointer. C35's ruling 1 (DESIGN-constraint-proxy-nonself) refuses this shape on
+purpose: the type argument would put a constraint proxy in the named type's identity. Reported via COORD as
+GO2CS2002; on `claude/r-warn-option` the non-self refusals are renumbered GO2CS2005, which `-warn` does not accept
+(those sites do not fail loud).
+
+**Repro here** (the shape as reported, not the TS source; converted at `claude/r-warn-option`):
+
+```go
+type SpanMap struct{ n int }
+type Script interface{ SpanMap() *SpanMap }
+type BaseSpan struct{ start, end int }
+type MappedSpan[T Script] struct {
+	Script T
+	BaseSpan
+}
+type SourceFile struct{ m SpanMap }
+
+func (f *SourceFile) SpanMap() *SpanMap { return &f.m }
+
+func main() {
+	f := &SourceFile{m: SpanMap{n: 7}}
+	s := MappedSpan[*SourceFile]{Script: f, BaseSpan: BaseSpan{1, 2}}
+	s.Script.SpanMap().n++
+	fmt.Println(f.m.n, s.start) // Go: 8 1
+}
+```
+
+go2cs: `error GO2CS2005: MappedSpan[T example.com/ms.Script] instantiated with *example.com/ms.SourceFile: a pointer
+type argument to a generic NAMED type under a non-self-referential method-set constraint would put a constraint proxy
+in the type's identity`, exit 1, nothing written.
+
+**What is done instead (.4).** Under `-recurse` a refused package is now skipped, and the run converts everything
+else and ends with exit 1, naming the refused package and its direct importers (`claude/r-warn-option`). So
+`lsconv` no longer blocks the other packages, but `lsconv` itself and its importers still do not build.
+
+**Not in scope, and not verified:** a design that converts this shape (the struct-proxy direction, parked as R's
+scout); how many TS packages import `lsconv`; whether any std package holds the shape (no census has looked).
 
 — R (2026-11-11)
+## 2026-11-11 — C1 (C46, COORD's ruling): past a thread's stack reservation a converted program ends with .NET's `Stack overflow.` abort, where Go prints a fatal error and exits 2 — OPEN, its own seat
+
+**What differs.** C46 gives `main` (and the converted-test host's `TestMain`) a thread reserving 1 GiB, Go's own
+limit, so a recursion Go completes now completes. A recursion that goes PAST the reservation still ends differently.
+Go's runtime reports and exits 2:
+
+```
+runtime: goroutine stack exceeds 1000000000-byte limit
+fatal error: stack overflow
+```
+
+followed by its usual `runtime stack:` and `goroutine 1 [running]:` blocks. .NET cannot catch a stack overflow: the
+runtime writes `Stack overflow.` and a `Repeated N times:` frame list to stderr and aborts the process, exit 134
+(SIGABRT) on linux and macOS and 0xC00000FD on windows. No deferred calls run in either case, so only the report and
+the status differ. Measured at the C46 base on linux: Behavioral MainDeepRecursion's program printed `Stack
+overflow.` and `Repeated 174430 times:` over `go.main_package.depth(IntPtr)`, exit 134.
+
+**Reach.** Any converted program or test whose recursion exceeds its thread's reservation: 1 GiB for `main` and for
+each test body, 256 MiB for a goroutine (16 MiB for one the converter proves cannot recurse), and the startup thread's
+OS default for the main package's `init` and for a `main` an `init` locked to the startup thread. Converted .NET
+frames are larger than Go's, so the depth at which it happens is smaller than Go's for the same reservation.
+
+**Not verified:** whether any banked row or the TS corpus reaches it after C46 (the two TS units that overflowed,
+00770/00771, are C46's confirming arm); which remedy fits. The candidates: a depth guard at function entry
+(`RuntimeHelpers.TryEnsureSufficientExecutionStack`, which turns the overflow into a Go fatal error at a per-call cost
+that would have to be measured), a guard on recursive functions only (the converter already proves non-recursion for
+GoStack.Bounded), or disclosure alone.
+
+— C1 (2026-11-11)
+
+## 2026-11-11 — i9 (Gosched ruling M's reading, COORD's ruling): on hosted linux the CONTENDED Gosched phase escalates ~350 times per worker of a possible 390 — is the inert predicate misjudging contended linux yields? OPEN, post-.4 queue, owner G after the M:N spike
+
+**The reading.** GolibTests `EffectiveGoschedYieldsStayCheap` saturates every processor with 2 x ProcessorCount Gosched
+spinners (25,000 calls each), so each yield should find a ready sibling and be EFFECTIVE: the comment's premise is that
+"the escalation counter resets and no sleep tier is ever reached". Ruling M (claude/i9-gosched-measure) counts G's
+`GoschedBackoff.Escalations` and brackets G with the host's raw `Thread.Yield` over the same shape (R1, R2):
+
+| leg (run) | workers | R1 s | G s | R2 s | escalations | per worker (max 25,000/64 = 390) |
+|---|---|---|---|---|---|---|
+| linux-x64 (43064869696) | 8 | 0.066 | 0.420 | 0.084 | 2797 | ~350 |
+| win-x64 (43064891291) | 8 | 0.122 | 0.132 | 0.116 | 41 | ~5 |
+| the i9, windows (3 local runs) | 48 | 0.049-0.123 | 0.298-0.310 | 0.114-0.130 | 1521-1940 | ~32-40 |
+| osx-arm64 / osx-x64 (wave 1, 4 legs) | 6 / 8 | | | | 0-16 | ~0-3 |
+
+On linux the contended phase takes the sleep tier on ~90% of the 64-yield streaks it could, and G costs 5x the raw
+yields; it passes only because each escalation is a ~1 ms sleep. So the premise is false on linux: the count is
+OS-shaped, which is why ruling A puts no escalation-count bar on any OS.
+
+**The question (not a red).** The inert predicate is `!switched || elapsed < 2 µs`, calibrated 2026-08-21 at Linux
+contended ~6.5 µs vs idle ~431 ns (`Thread.Yield` returns true 10000/10000 on Linux in both states, so the TIME
+decides). On the hosted 4-vCPU linux runner a contended `sched_yield` that hands the CPU to a sibling which yields
+straight back may return under 2 µs, so it reads inert and the streak escalates. If so, a converted program whose
+goroutines Gosched under real contention pays a 1 ms sleep per 64 yields on linux where Go pays none. To settle:
+the per-yield elapsed distribution on that runner under the contended shape (a histogram around the 2 µs line),
+and whether a CAS-ring shape (the ratified case) and this shape can be told apart by something other than time.
+
+**Owed.** A reading, then a ruling; no change proposed here. Not i9's seat.
+
+— i9 (2026-11-11)
+
+## 2026-11-11 — G (COORD's ruling on the linux stub bodies seat): `runtime.SetDefaultGOMAXPROCS` is a SILENT NO-OP on a public API: past its early return it sets `newprocs`, which no hand-owned code reads, so the setting never moves — OPEN, post-hop queue
+
+**What a caller sees.** The call returns normally and changes nothing: no exception, no message. Go resets
+GOMAXPROCS to the runtime's default; a converted program keeps the setting it had.
+
+**Go's own answer (go1.26.10, windows/amd64, 12 CPUs, a probe):** with `GOMAXPROCS=3` in the environment, or after
+`runtime.GOMAXPROCS(3)`, the setting reads 3; after `runtime.SetDefaultGOMAXPROCS()` it reads 12.
+
+**Measured here (linux/amd64 under WSL, 10 CPUs, SDK 10.0.403;
+`RuntimeLinuxSchedExitTests.SetDefaultGOMAXPROCSReachesNoStub`, which prints and does not assert), predicted before
+the run:**
+
+- `DOTNET_PROCESSOR_COUNT=3`: the host's processor count is 3 and `getCPUCount` answers 10, so the call goes past
+  its early return and through the stop-the-world pair. `GOMAXPROCS(0)` reads 3 before the call and 3 after. Go's
+  rule gives 10.
+- Variable unset: 10 before and 10 after. That is the early return, and it is right: there is nothing to change.
+
+**Read at the tree (`claude/g-linux-stub-bodies`, the same lines in the linux, windows and darwin folders):**
+
+- `runtime/debug.cs:23-53` (converted, shared). `procs = defaultGOMAXPROCS(0)`; it returns early when the setting is
+  not custom and already equals `procs`. Otherwise: `stopTheWorldGC`, `newprocs = procs` (line 47),
+  `sched.customGOMAXPROCS = false`, `startTheWorldGC`.
+- `newprocs` (`runtime2.cs:1304`) has one reader: `<os>/proc.cs:1812`, inside the converted
+  `startTheWorldWithSema`, which only the converted collector calls (`mgc.cs`). `startTheWorldGC`
+  (`<os>/proc.cs:1603`) calls the hand-owned `startTheWorld` (`managed_impl.cs:1014`), which never reads it.
+- The setting a caller reads is the hand-owned `GOMAXPROCS` (`managed_impl.cs:372`). It keeps its own field and
+  writes `gomaxprocs`. It never sets `sched.customGOMAXPROCS`; only the converted `<os>/proc.cs:978` does.
+- So a setting made through `runtime.GOMAXPROCS(n)` is not reset either: read, not run.
+
+**Scope.** All three targets by the read; run at linux/amd64 only. On linux the call used to throw from
+`sched_getaffinity`'s generated stub, at both arches. With the three bodies in (`456c49f81f`) it returns, and this
+no-op is what is left. The automatic updater (`<os>/proc.cs:6860`) writes `newprocs` the same way; whether it
+ever runs here is not read.
+
+**Owed (post-hop queue, ruled 2026-11-11):** hand-convert `SetDefaultGOMAXPROCS` beside `GOMAXPROCS` in
+`managed_impl.cs`, so that it sets the hand-owned setting to the default. The test's two printed readings become
+asserts with that fix. Until then this is a silent divergence on a public API, and a disclosure candidate.
+
+— G (2026-11-11)
 
 ## 2026-11-11 — H (cgo Phase 2 increment 5, converter-cgo 42973745743): cmd/cgo's pointer check has two forms, and Phase 2 admits both, with five divergences from Go DISCLOSED
 

@@ -8,7 +8,7 @@ partial struct word /*num:nuint*/;
 partial struct halfword /*num:uint32*/;
 partial struct signedword /*num:int64*/;
 
-internal static void Main() {
+internal static void main() {
     var c = slice<nuint>([0, 1, 63, 64, 65, 200]);
     uint64 u = 0x8000000000000001UL;
 

@@ -19,7 +19,7 @@ internal static @string describe(this SE s) { return fmt.Sprint(len(s), ":", s);
 private static readonly object twoˢ = (@string)"two"u8;
 private static readonly object cdeˢ = (@string)"cde"u8;
 
-internal static void Main() {
+internal static void main() {
     var rows = slice<row>([
         new("%d", new SE(new any[]{(nint)1}.slice())),
         new("%d %s", new SE(new any[]{(nint)2, twoˢ}.slice())),

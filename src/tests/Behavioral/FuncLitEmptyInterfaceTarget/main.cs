@@ -55,7 +55,7 @@ internal static @string call(any h) {
     return "WRONG DYNAMIC TYPE";
 }
 
-internal static void Main() {
+internal static void main() {
     any declared = (any, error) (nint x) => {
         if (x < 0) {
             return (default, errors.New("negative"));

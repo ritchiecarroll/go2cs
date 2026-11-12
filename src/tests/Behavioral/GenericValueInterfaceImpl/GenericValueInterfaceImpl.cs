@@ -18,7 +18,7 @@ partial struct T /*num:nint*/;
 
 public static @string M(this T t) { return fmt.Sprint((nint)t); }
 
-internal static void Main() {
+internal static void main() {
     I a = new G<nint>(7);
     I b = new G<@string>("x");
     I c = new G<G<nint>>(new G<nint>(9));

@@ -12,7 +12,7 @@ internal static uint64 umask(nuint bits) {
     return (~(uint64)0).Lsh(bits);
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(mask(4));
     fmt.Println(mask(8));
     fmt.Println(umask(60));

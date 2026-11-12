@@ -25,7 +25,7 @@ internal static partial ж<holder> makeHolder(@string name) {
     return h;
 }
 
-internal static void Main() {
+internal static void main() {
     var h = makeHolder("abc");
     nint sum = 0;
 

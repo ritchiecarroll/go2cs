@@ -30,7 +30,7 @@ internal static nint zeroLen<T, Tᴀ>()
 
 private sealed class ᴀ3 : IGoArrayDims { public static nint[] Dims { get; } = [3]; }
 
-internal static void Main() {
+internal static void main() {
     var (a, b) = z<array<byte>, ᴀ16>();
     fmt.Println("[16]byte:", a, b);
 

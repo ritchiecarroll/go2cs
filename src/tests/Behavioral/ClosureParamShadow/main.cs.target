@@ -6,7 +6,7 @@ partial class main_package {
 
 internal static nint run(Func<nint, nint> f) { return f(10); }
 
-internal static void Main() {
+internal static void main() {
     nint n = 100;
 
     nint r = run((nint nΔ1) => {

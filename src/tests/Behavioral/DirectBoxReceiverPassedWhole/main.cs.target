@@ -32,7 +32,7 @@ internal static wrap keyed(this ж<mc> Ꮡc) {
     return new wrap(tag: 8, p: Ꮡc);
 }
 
-internal static void Main() {
+internal static void main() {
     var c = Ꮡ(new mc(n: 9));
     c.reset();
     fmt.Println(c.n);

@@ -18,7 +18,7 @@ partial struct loud {
 
 internal static @string Greet(this ref loud l) { return fmt.Sprintf("loud%d"u8, l.n); }
 
-internal static void Main() {
+internal static void main() {
     var v = new mark(n: 1);
     var (g, ok) = identlib.TryGreet(v);
     fmt.Println("value", ok);

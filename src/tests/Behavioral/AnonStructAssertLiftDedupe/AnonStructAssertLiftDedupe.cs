@@ -16,7 +16,7 @@ internal partial struct main_type /*dyn*/ {
     public @string X, Y;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var p = ref heap(new main_p(), out var Ꮡp);
     p.X = 1;
     p.Y = 2;

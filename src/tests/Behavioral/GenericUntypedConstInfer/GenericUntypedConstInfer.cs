@@ -65,7 +65,7 @@ internal static Action<T, bool> wantInt64<T>(T want)
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string oneˢ = "one"u8;
 
-internal static void Main() {
+internal static void main() {
     nint i = 7;
 
     wantValue((nint)0)(i, false);

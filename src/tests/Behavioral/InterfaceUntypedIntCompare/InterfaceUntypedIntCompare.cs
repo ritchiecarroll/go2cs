@@ -12,7 +12,7 @@ internal static ж<Element> push(any v) {
     return Ꮡ(new Element(Value: v));
 }
 
-internal static void Main() {
+internal static void main() {
     var e = push((nint)1);
 
     if (!AreEqual((~e).Value, (nint)1)) {

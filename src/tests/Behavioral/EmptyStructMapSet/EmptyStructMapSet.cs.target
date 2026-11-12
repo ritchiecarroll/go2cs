@@ -28,7 +28,7 @@ internal static (@string, bool) lookup(registry reg, uint32 id) {
     return (e.tag, true);
 }
 
-internal static void Main() {
+internal static void main() {
     var seen = new map<nint, EmptyStruct>();
 
     add(seen, 3);

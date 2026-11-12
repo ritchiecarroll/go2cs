@@ -21,7 +21,7 @@ internal static ui top(nint l) { return (ui)(((ui)l) & ~(ui)15); }
 
 internal static np topNamed(nint l) { return (np)(((np)(uintptr)l) & ~(np)15); }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(top(37), top(16), top(0));
 
     ui a = 1000;

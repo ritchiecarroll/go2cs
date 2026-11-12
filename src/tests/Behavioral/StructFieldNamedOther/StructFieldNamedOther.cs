@@ -9,7 +9,7 @@ partial struct holder {
     internal nint other;
 }
 
-internal static void Main() {
+internal static void main() {
     var a = new holder(mark: 1, other: 2);
     var b = new holder(mark: 1, other: 2);
     var c = new holder(mark: 1, other: 3);

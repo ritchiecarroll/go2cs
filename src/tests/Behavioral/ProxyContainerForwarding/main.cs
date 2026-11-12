@@ -125,7 +125,7 @@ public static slice<@string> Names<N>(N n)
     return @out;
 }
 
-internal static void Main() {
+internal static void main() {
     var root = new Leaf(name: "root", kids: [new(name: "a"), new(name: "b", kids: [new(name: "c")])]);
 
     fmt.Println(Count(root));

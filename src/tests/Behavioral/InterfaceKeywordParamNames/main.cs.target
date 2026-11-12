@@ -49,7 +49,7 @@ internal static void exercise(swapper s) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object directˢ = (@string)"direct"u8;
 
-internal static void Main() {
+internal static void main() {
     exercise(new cellжswapper(Ꮡ(new cell(value: (nint)1))));
     exercise(new frozen(label: "static"));
 

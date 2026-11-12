@@ -84,6 +84,7 @@ func resetPackageState(pkg *packages.Package) {
 	fieldAccessRecords = hashset.NewHashSet([]string{})
 	promotedInterfaceImplementations = make(map[string]hashset.HashSet[string])
 	constraintProxies = make(map[string][3]string)
+	downgradedRefusals = nil
 	importedConstraintProxies = make(map[string]map[string][]string)
 	nominalProductionConstraints = hashset.HashSet[string]{}
 	interfaceInheritances = make(map[string]hashset.HashSet[string])
