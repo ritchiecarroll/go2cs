@@ -36483,4 +36483,28 @@ roster's linux expectation is 536 + 0: the counts are a host difference from tha
 host lacks is on `PATH`), not by moving the roster's linux-x64 536, which stays the reading of a host with no `zstd`.
 linux-arm64 banks 536 (linux-x64; linux-arm64: 535 + 1). The open item is the pin's own retirement plan, unchanged.
 
+## 2026-11-12 — C2 (defer layout seat): five hand-owned frames keep the old layout and the old tail, by ruling
+
+**The seat.** claude/c2-defer-layout (C1 806c8f829f, C2 d30a04a48d) emits every frame the converter writes with the
+frame on the signature line, the body at Go's indentation, and one closing line carrying the frame-local tail:
+`} catch (Exception ᒐe) when (ᒐ.Is(ᒐe)) { ᒐ.Capture(); } finally { ᒐ.Run(); } }`. The corpus takes that shape when C3
+regenerates it, at the batch after OQ2.
+
+**What it does not reach.** A hand-owned file is not converter output, so the regen leaves it alone. COORD ruled
+(2026-11-12, P6) that these keep today's form: the frame over its own lines and the static tail,
+`catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }`. That tail stays
+valid because `GoFrame` keeps `IsPanic` and the static `Capture`. The five frames, counted at 4efe149858:
+
+| File | Function |
+|---|---|
+| `src/core/internal/poll/windows/fd_windows_impl.cs` | `DisassociateIOCP` |
+| `src/core/internal/syscall/windows/windows/security_windows_impl.cs` | `GetSidIdentifierAuthority` |
+| `src/core/runtime/pprof/windows/proto_windows_impl.cs` | `readMapping` |
+| `src/core/runtime/pprof/windows/proto_windows_impl.cs` | `readMainModuleMapping` |
+| `src/core/sync/once.cs` | `doSlow` |
+
+A reader who finds a frame laid out over its own lines in `src/core` after C3 is looking at one of these, or at a new
+hand-owned frame written in the old form; both are correct C#. The census that counts them: files under `src/core`
+carrying `[module: GoManualConversion]` or named `*_impl.cs`, containing `GoFrame ᒐ = default;`.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
