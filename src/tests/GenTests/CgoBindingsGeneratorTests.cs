@@ -224,10 +224,10 @@ public class CgoBindingsGeneratorTests
 
         SyntaxTree[] trees =
         [
-            CSharpSyntaxTree.ParseText(ConversionsPackageInfo, options, path: @"C:\go2cs\src\conversions\package_info.cs"),
-            CSharpSyntaxTree.ParseText(ConversionsTypes, options, path: @"C:\go2cs\src\conversions\cgo_gotypes.cs"),
-            CSharpSyntaxTree.ParseText(ConversionsProgram, options, path: @"C:\go2cs\src\conversions\main.cs"),
-            CSharpSyntaxTree.ParseText(TemplateUsings, options, path: @"C:\go2cs\src\conversions\obj\conversions.GlobalUsings.g.cs")
+            CSharpSyntaxTree.ParseText(ConversionsPackageInfo, options, path: "/go2cs/src/conversions/package_info.cs"),
+            CSharpSyntaxTree.ParseText(ConversionsTypes, options, path: "/go2cs/src/conversions/cgo_gotypes.cs"),
+            CSharpSyntaxTree.ParseText(ConversionsProgram, options, path: "/go2cs/src/conversions/main.cs"),
+            CSharpSyntaxTree.ParseText(TemplateUsings, options, path: "/go2cs/src/conversions/obj/conversions.GlobalUsings.g.cs")
         ];
 
         CSharpCompilation compilation = CSharpCompilation.Create("conversions", trees, References(),
