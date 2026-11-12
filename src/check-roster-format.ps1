@@ -3004,10 +3004,15 @@ function Get-ArchNamesReading {
 # (not the roster's reading), but the two legs read alike on that host: the same status, agree yes, `new` 0, the same
 # verdicts, matched and disclosed-divergent, and the same disclosed names. linux-arm64 then banks at its OWN reading, and
 # the roster's linux-x64 reading is kept, never re-banked from the hosted line: "42 + 17 (linux-x64; linux-arm64: 50 + 9)".
-# $null when the pair is not that shape (the row stays a host difference).
+# KEYED (COORD F2, 2026-11-12, on P5's review): only a row with a $LinuxRidHostEqual entry ('<class> -- <citations>')
+# takes the form, so a row whose hosted legs merely happen to agree stays a host difference until COORD rules on it.
+# $null when the row has no entry or the pair is not that shape (the row stays a host difference); a refusal when the
+# entry is malformed.
 function Get-LinuxHostEqualReading {
-    param($X, $A, $Roster)
+    param($X, $A, $Roster, [string] $Ruling)
 
+    if (-not $Ruling) { return $null }
+    if ($Ruling -cnotmatch '^\S+ -- \S') { return [PSCustomObject]@{ Form = 'refused'; Text = $null; Reason = "its `$LinuxRidHostEqual entry does not read '<class> -- <citations>'" } }
     $statuses = @('validated', 'COUNT', 'DISC')
     if (($statuses -cnotcontains $X.status) -or ($X.status -cne $A.status)) { return $null }
     if (("$($X.new)" -cne '0') -or ("$($A.new)" -cne '0') -or ($X.agree -cne 'yes') -or ($A.agree -cne 'yes')) { return $null }
@@ -3025,7 +3030,8 @@ function Get-LinuxHostEqualReading {
 # RULED ARCH-COUNT (COORD R2, 2026-11-12, on wave 1's internal/runtime/gc/scan row). A row whose hosted linux-x64 line
 # is a host difference, but whose linux-arm64 reading is the roster's linux-x64 reading less a RULED list of verdicts
 # (the $LinuxRidRuledArchCount entry: '<names, ;-separated> -- <citations>'): linux-arm64 validated or COUNT, `new` 0,
-# matched + the ruled count = the roster's matched, the same disclosed share, and every ruled name absent on linux-arm64.
+# matched + the ruled count = the roster's matched, the same disclosed share, and every ruled name absent on linux-arm64,
+# and (COORD F1, 2026-11-12, on P5's review) every absent name a ruled name or a subtest of one ('<ruled>/...').
 # $null when the row has no entry or its linux-arm64 line is not that shape; a refusal when the entry is malformed or the
 # line does not name what the entry rules.
 function Get-LinuxRuledArchCountReading {
@@ -3040,10 +3046,18 @@ function Get-LinuxRuledArchCountReading {
     $ad = Get-DarwinDisclosedDivergent $A
     $absent = @(Get-EvidenceNames $A 'absent')
     $unnamed = @($names | Where-Object { $absent -cnotcontains $_ })
+    $stray = [System.Collections.Generic.List[string]]::new()
+    foreach ($n in $absent) {
+        $ruledOrSub = $false
+        foreach ($r in $names) { if (($n -ceq $r) -or $n.StartsWith("$r/", [StringComparison]::Ordinal)) { $ruledOrSub = $true; break } }
+        if (-not $ruledOrSub) { $stray.Add($n) }
+    }
     $fmt = { param($m, $d) "$m" + $(if ($d -ne 0) { " + $d" } else { '' }) }
-    if ((([int]$A.matched + $names.Count) -ne $Roster.Expected) -or ($ad -ne $Roster.Disclosed) -or ($unnamed.Count -ne 0)) {
+    if ((([int]$A.matched + $names.Count) -ne $Roster.Expected) -or ($ad -ne $Roster.Disclosed) -or ($unnamed.Count -ne 0) -or ($stray.Count -ne 0)) {
         return [PSCustomObject]@{ Form = 'refused'; Text = $null
-            Reason = "its linux-arm64 line ($($A.status) $(& $fmt $A.matched $ad)) is not the roster's linux-x64 reading ($(& $fmt $Roster.Expected $Roster.Disclosed)) less the $($names.Count) ruled verdict(s)" + $(if ($unnamed.Count) { ", and it does not name $($unnamed -join ', ') absent" } else { '' }) }
+            Reason = "its linux-arm64 line ($($A.status) $(& $fmt $A.matched $ad)) is not the roster's linux-x64 reading ($(& $fmt $Roster.Expected $Roster.Disclosed)) less the $($names.Count) ruled verdict(s)" +
+                $(if ($unnamed.Count) { ", and it does not name $($unnamed -join ', ') absent" } else { '' }) +
+                $(if ($stray.Count) { ", and it names $(@($stray | Select-Object -First 5) -join ', ')$(if ($stray.Count -gt 5) { " ($($stray.Count) in all)" }) absent, neither a ruled verdict nor a subtest of one" } else { '' }) }
     }
     return [PSCustomObject]@{ Form = 'ruled-arch-count'; Text = "$(& $fmt $Roster.Expected $Roster.Disclosed) (linux-x64; linux-arm64: $(& $fmt $A.matched $ad))"; Reason = $null }
 }
@@ -3051,9 +3065,10 @@ function Get-LinuxRuledArchCountReading {
 # One row's two-RID linux reading: Form equal / arch-strict / arch-names / arch-count / combined / host-equal /
 # ruled-arch-count (Text is the derived segment), pending (no form fits) or host-difference (Reason says why), or refused
 # (Reason: a guard's Refusal, or malformed evidence). $Segment is the row's roster linux segment, which supplies the
-# linux-x64 reading of record; $RuledArchCount is the row's $LinuxRidRuledArchCount entry, or empty.
+# linux-x64 reading of record; $RuledArchCount is the row's $LinuxRidRuledArchCount entry, or empty; $HostEqual is the
+# row's $LinuxRidHostEqual entry, or empty.
 function Get-LinuxPairReading {
-    param($Records, $Segment, [string] $RuledArchCount = '')
+    param($Records, $Segment, [string] $RuledArchCount = '', [string] $HostEqual = '')
 
     $x64 = @($Records | Where-Object { $_.RID -ceq 'linux-x64' })
     $arm = @($Records | Where-Object { $_.RID -ceq 'linux-arm64' })
@@ -3082,8 +3097,9 @@ function Get-LinuxPairReading {
     if (($x.status -cne 'validated') -or ("$($x.new)" -cne '0') -or ([int]$x.matched -ne $roster.Expected) -or ($xd -ne $roster.Disclosed)) {
         # Two ruled exceptions (COORD R2 and R3, 2026-11-12) bank linux-arm64 beside a host difference; the roster's
         # linux-x64 reading is kept either way.
-        $hostEqual = Get-LinuxHostEqualReading $x $a $roster
-        if ($null -ne $hostEqual) { return $hostEqual }
+        # (Not $hostEqual: PowerShell names are case-blind, and that is the [string] parameter $HostEqual.)
+        $hostEqualReading = Get-LinuxHostEqualReading $x $a $roster $HostEqual
+        if ($null -ne $hostEqualReading) { return $hostEqualReading }
         $ruledCount = Get-LinuxRuledArchCountReading $a $roster $RuledArchCount
         if ($null -ne $ruledCount) { return $ruledCount }
         return [PSCustomObject]@{ Form = 'host-difference'; Text = $null
@@ -3108,9 +3124,9 @@ function Get-LinuxPairReading {
 # The guard's verdict on one row the linux evidence names: $null, or why its segment is not the evidence's.
 # -Ledgered: the row has a line in the UNMEASURED ledger, which accepts a guard's Refusal on a row that stays pending.
 function Get-LinuxSegmentRefusal {
-    param($Records, $Segment, [switch] $Ledgered, [string] $RuledArchCount = '')
+    param($Records, $Segment, [switch] $Ledgered, [string] $RuledArchCount = '', [string] $HostEqual = '')
 
-    $reading = Get-LinuxPairReading -Records $Records -Segment $Segment -RuledArchCount $RuledArchCount
+    $reading = Get-LinuxPairReading -Records $Records -Segment $Segment -RuledArchCount $RuledArchCount -HostEqual $HostEqual
     $other = if (($null -ne $Segment) -and $Segment.PSObject.Properties['Other']) { $Segment.Other } else { $null }
     $pending = ($null -ne $other) -and $other.Pending
     if ($reading.Form -ceq 'refused') {
@@ -3250,10 +3266,17 @@ foreach ($case in @(
 # HOST-EQUAL (COORD R3, 2026-11-12, syscall): the hosted legs read alike, off the roster's linux-x64 reading. linux-arm64
 # banks its own reading and the roster's linux-x64 reading is kept. Each clause, broken alone, leaves a host difference.
 $linHostEqual = @((New-LinuxPairRecord 'linux-x64' 'DISC' 59 50 9 0 'yes' '-' 'n1;n2;n3;n4;n5;n6;n7;n8;n9'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 59 50 9 0 'yes' '-' 'n1;n2;n3;n4;n5;n6;n7;n8;n9'))
-$r = Get-LinuxPairReading -Records $linHostEqual -Segment (& $linPendingSeg 42 17)
+$linHostRule = 'host-privilege -- R3 fixture'
+$r = Get-LinuxPairReading -Records $linHostEqual -Segment (& $linPendingSeg 42 17) -HostEqual $linHostRule
 Assert-Equal 'linux pair: host-equal banks linux-arm64 at its own reading, the roster''s linux-x64 reading kept' 'host-equal/42 + 17 (linux-x64; linux-arm64: 50 + 9)' "$($r.Form)/$($r.Text)"
-Assert-Equal 'linux pair: the host-equal segment banks' $null (Get-LinuxSegmentRefusal -Records $linHostEqual -Segment (& $linSeg 42 17 'linux-x64' 'linux-arm64' 50 9))
-Assert-Equal 'linux pair: a host-equal row whose linux-arm64 note copies the roster''s linux-x64 reading is refused' $true ($null -ne (Get-LinuxSegmentRefusal -Records $linHostEqual -Segment (& $linSeg 42 17 'linux-x64' 'linux-arm64' 42 17)))
+Assert-Equal 'linux pair: the host-equal segment banks' $null (Get-LinuxSegmentRefusal -Records $linHostEqual -Segment (& $linSeg 42 17 'linux-x64' 'linux-arm64' 50 9) -HostEqual $linHostRule)
+Assert-Equal 'linux pair: a host-equal row whose linux-arm64 note copies the roster''s linux-x64 reading is refused' $true ($null -ne (Get-LinuxSegmentRefusal -Records $linHostEqual -Segment (& $linSeg 42 17 'linux-x64' 'linux-arm64' 42 17) -HostEqual $linHostRule))
+# KEYED (COORD F2): with no $LinuxRidHostEqual entry the same pair is a host difference, and the would-be segment is refused;
+# a malformed entry is refused by name.
+Assert-Equal 'linux pair: with no host-equal ruling the same pair is a host difference' 'host-difference' (Get-LinuxPairReading -Records $linHostEqual -Segment (& $linPendingSeg 42 17)).Form
+Assert-Equal 'linux pair: with no host-equal ruling the would-be segment is refused' $true ($null -ne (Get-LinuxSegmentRefusal -Records $linHostEqual -Segment (& $linSeg 42 17 'linux-x64' 'linux-arm64' 50 9)))
+$r = Get-LinuxPairReading -Records $linHostEqual -Segment (& $linPendingSeg 42 17) -HostEqual 'host-privilege'
+Assert-Equal 'linux pair: a host-equal entry with no citation is refused by name' $true (($r.Form -ceq 'refused') -and ("$($r.Reason)" -match 'LinuxRidHostEqual entry does not read'))
 foreach ($case in @(
         @('the two legs'' statuses differ', @((New-LinuxPairRecord 'linux-x64' 'DISC' 59 50 9 0 'yes' '-' 'n1;n2;n3;n4;n5;n6;n7;n8;n9'), (New-LinuxPairRecord 'linux-arm64' 'COUNT' 59 50 9 0 'yes' '-' 'n1;n2;n3;n4;n5;n6;n7;n8;n9'))),
         @('linux-arm64 diverges undisclosed (new 1)', @((New-LinuxPairRecord 'linux-x64' 'DISC' 59 50 9 0 'yes' '-' 'n1;n2;n3;n4;n5;n6;n7;n8;n9'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 59 50 9 1 'yes' '-' 'n1;n2;n3;n4;n5;n6;n7;n8'))),
@@ -3263,7 +3286,7 @@ foreach ($case in @(
         @('the disclosed names differ', @((New-LinuxPairRecord 'linux-x64' 'DISC' 59 50 9 0 'yes' '-' 'n1;n2;n3;n4;n5;n6;n7;n8;n9'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 59 50 9 0 'yes' '-' 'n1;n2;n3;n4;n5;n6;n7;n8;m9'))),
         @('a leg names fewer disclosed verdicts than it diverges', @((New-LinuxPairRecord 'linux-x64' 'DISC' 59 50 9 0 'yes' '-' 'n1;n2;n3;n4;n5;n6;n7;n8'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 59 50 9 0 'yes' '-' 'n1;n2;n3;n4;n5;n6;n7;n8'))),
         @('a leg has no divergent_names column', @((New-LinuxPairRecord 'linux-x64' 'DISC' 59 50 9 0 'yes' '-' 'n1;n2;n3;n4;n5;n6;n7;n8;n9'), (New-LinuxPairRecord 'linux-arm64' 'DISC' 59 50 9 0 'yes' '-'))))) {
-    Assert-Equal "linux pair: host-equal is not banked when $($case[0])" $true (@('host-difference', 'pending') -ccontains (Get-LinuxPairReading -Records $case[1] -Segment (& $linPendingSeg 42 17)).Form)
+    Assert-Equal "linux pair: host-equal is not banked when $($case[0])" $true (@('host-difference', 'pending') -ccontains (Get-LinuxPairReading -Records $case[1] -Segment (& $linPendingSeg 42 17) -HostEqual $linHostRule).Form)
 }
 
 # RULED ARCH-COUNT (COORD R2, 2026-11-12, gc/scan): the hosted linux-x64 line is a host difference (it runs tests the
@@ -3279,7 +3302,9 @@ foreach ($case in @(
         @('linux-arm64 does not name a ruled verdict absent', 'does not name r3', 'r1;r2;r3 -- R2 fixture', (New-LinuxPairRecord 'linux-arm64' 'COUNT' 3092 3092 0 0 'no' 'r1;r2' '-')),
         @('linux-arm64 is one verdict short of the ruled count', 'less the 3 ruled', 'r1;r2;r3 -- R2 fixture', (New-LinuxPairRecord 'linux-arm64' 'COUNT' 3091 3091 0 0 'no' 'r1;r2;r3' '-')),
         @('the entry has no citation', 'does not read', 'r1;r2;r3', (New-LinuxPairRecord 'linux-arm64' 'COUNT' 3092 3092 0 0 'no' 'r1;r2;r3' '-')),
-        @('the entry names a verdict twice', 'names a verdict twice', 'r1;r1;r3 -- R2 fixture', (New-LinuxPairRecord 'linux-arm64' 'COUNT' 3092 3092 0 0 'no' 'r1;r3' '-')))) {
+        @('the entry names a verdict twice', 'names a verdict twice', 'r1;r1;r3 -- R2 fixture', (New-LinuxPairRecord 'linux-arm64' 'COUNT' 3092 3092 0 0 'no' 'r1;r3' '-')),
+        @('linux-arm64 names an absent verdict that is neither ruled nor a ruled subtest (COORD F1)', 'names s1 absent, neither a ruled verdict nor a subtest', 'r1;r2;r3 -- R2 fixture', (New-LinuxPairRecord 'linux-arm64' 'COUNT' 3092 3092 0 0 'no' 'r1;r2;r3;r1/sub;s1' '-')),
+        @('a stray absent name only shares a ruled name''s prefix (COORD F1)', 'names r1x absent, neither', 'r1;r2;r3 -- R2 fixture', (New-LinuxPairRecord 'linux-arm64' 'COUNT' 3092 3092 0 0 'no' 'r1;r2;r3;r1x' '-')))) {
     $r = Get-LinuxPairReading -Records @($linRuled[0], $case[3]) -Segment (& $linPendingSeg 3095 0) -RuledArchCount $case[2]
     Assert-Equal "linux pair: a ruled arch-count where $($case[0]) is refused by name" $true (($r.Form -ceq 'refused') -and ("$($r.Reason)" -match [regex]::Escape($case[1])))
 }
@@ -3485,6 +3510,16 @@ foreach ($ruledRow in $LinuxRidRuledArchCount.Keys) {
     Assert-Equal "linux ruled arch-count: $ruledRow's entry reads '<names> -- <citations>'" $true ($LinuxRidRuledArchCount[$ruledRow] -cmatch '^\S+ -- \S')
 }
 
+# HOST-EQUAL ROWS (Get-LinuxHostEqualReading): row -> '<class> -- <citations>'. KEYED by COORD F2 (2026-11-12, on P5's
+# review of the wave 1 bank): a row takes the host-equal form only with a COORD ruling and a line here. annotate_linux.py
+# --rids reads this table from here.
+$LinuxRidHostEqual = @{
+    'syscall' = 'host-privilege -- COORD R3 2026-11-12 (wave 1 read, run 43151896336: both hosted legs read 50 + 9 with the same 9 disclosed names); the host-privilege class of the G-WSL 40 + 19 ruling (2026-11-10); DATA-la64-s7-bank-plan.md section 12'
+}
+foreach ($hostEqualRow in $LinuxRidHostEqual.Keys) {
+    Assert-Equal "linux host-equal: $hostEqualRow's entry reads '<class> -- <citations>'" $true ($LinuxRidHostEqual[$hostEqualRow] -cmatch '^\S+ -- \S')
+}
+
 # THE UNMEASURED LEDGER (S7-a; DATA-la64-s7-bank-plan.md 5.3): the release's linux-arm64 rows that do not bank, each
 # with its reason, shard and run. Its own refusals hold from the start; while the file is absent it holds no lines.
 # $LinuxArm64BankClosed is flipped by S7-d when the release's bank closes: from then a pending row with no line is
@@ -3536,7 +3571,8 @@ foreach ($row in $rows) {
         $refusal = Get-LinuxUnreadRefusal -Segment $segment
     } else {
         $refusal = Get-LinuxSegmentRefusal -Records (Select-LatestDarwinWave $linuxEvidence[$row.Package]) -Segment $segment -Ledgered:($linuxLedgered.ContainsKey($row.Package)) `
-            -RuledArchCount $(if ($LinuxRidRuledArchCount.ContainsKey($row.Package)) { $LinuxRidRuledArchCount[$row.Package] } else { '' })
+            -RuledArchCount $(if ($LinuxRidRuledArchCount.ContainsKey($row.Package)) { $LinuxRidRuledArchCount[$row.Package] } else { '' }) `
+            -HostEqual $(if ($LinuxRidHostEqual.ContainsKey($row.Package)) { $LinuxRidHostEqual[$row.Package] } else { '' })
         if ($null -eq $refusal) {
             if ($segment.PSObject.Properties['Other'] -and ($null -ne $segment.Other) -and $segment.Other.Pending) { $linuxPairPending++ } else { $linuxPairBanked++ }
         }

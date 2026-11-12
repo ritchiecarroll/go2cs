@@ -44,8 +44,9 @@
 #     its linux-x64 reading kept.
 #   - the three forms COORD ruled on wave 1 (2026-11-12, R1-R3), as the guard's functions: ARCH-NAMES (each RID names
 #     verdicts the other lacks, every one Go's own on its leg: Get-ArchNamesReading), HOST-EQUAL (the hosted legs read
-#     alike off the roster's linux-x64 reading: Get-LinuxHostEqualReading) and the RULED ARCH-COUNT of the guard's
-#     $LinuxRidRuledArchCount table (Get-LinuxRuledArchCountReading).
+#     alike off the roster's linux-x64 reading: Get-LinuxHostEqualReading, KEYED by the guard's $LinuxRidHostEqual table)
+#     and the RULED ARCH-COUNT of the guard's $LinuxRidRuledArchCount table (Get-LinuxRuledArchCountReading), whose
+#     absent names must all be ruled names or their subtests (COORD F1 and F2, 2026-11-12, on P5's review).
 import argparse, csv, json, os, re, sys
 
 # An evidence cell can pass csv's 128 KiB default: wave 1's internal/runtime/gc/scan linux-arm64 `absent` cell names the
@@ -217,9 +218,14 @@ def arch_names(a, x):
     return f"{fmt(x64['matched'], int(x64['divergent']))} ({x64['RID']}; {arm['RID']}: {fmt(arm['matched'], int(arm['divergent']))})"
 
 
-def host_equal(x, a, roster):
+def host_equal(pkg, x, a, roster, ruling):
     # The guard's Get-LinuxHostEqualReading (COORD R3): beside a host difference, the two hosted legs read alike, so
-    # linux-arm64 banks its own reading and the roster's linux-x64 reading is kept.
+    # linux-arm64 banks its own reading and the roster's linux-x64 reading is kept. KEYED (COORD F2): only a row with a
+    # $LinuxRidHostEqual entry takes the form.
+    if not ruling:
+        return None
+    if not re.match(r'^\S+ -- \S', ruling):
+        raise Refusal(f"{pkg}: its $LinuxRidHostEqual entry does not read '<class> -- <citations>'")
     if x['status'] not in ('validated', 'COUNT', 'DISC') or x['status'] != a['status']:
         return None
     if x.get('new') != '0' or a.get('new') != '0' or x.get('agree') != 'yes' or a.get('agree') != 'yes':
@@ -249,9 +255,12 @@ def ruled_arch_count(pkg, a, roster, ruling):
     ad = disclosed_divergent(a)
     absent = names(a, 'absent') or []
     unnamed = [n for n in ruled if n not in absent]
-    if int(a['matched']) + len(ruled) != roster[0] or ad != roster[1] or unnamed:
+    # COORD F1: every absent name is a ruled name or a subtest of one ('<ruled>/...').
+    stray = [n for n in absent if not any(n == r or n.startswith(r + '/') for r in ruled)]
+    if int(a['matched']) + len(ruled) != roster[0] or ad != roster[1] or unnamed or stray:
         raise Refusal(f"{pkg}: its linux-arm64 line ({a['status']} {fmt(a['matched'], ad)}) is not the roster's linux-x64 reading "
-                      f"({fmt(*roster)}) less the {len(ruled)} ruled verdict(s)" + (f", and it does not name {', '.join(unnamed)} absent" if unnamed else ''))
+                      f"({fmt(*roster)}) less the {len(ruled)} ruled verdict(s)" + (f", and it does not name {', '.join(unnamed)} absent" if unnamed else '')
+                      + (f", and it names {', '.join(stray[:5])}{f' ({len(stray)} in all)' if len(stray) > 5 else ''} absent, neither a ruled verdict nor a subtest of one" if stray else ''))
     return f'{fmt(*roster)} (linux-x64; linux-arm64: {fmt(a["matched"], ad)})'
 
 
@@ -266,9 +275,9 @@ def latest(records):
     return [r for _, r in in_wave]
 
 
-def pair_reading(pkg, records, roster, ruling=''):
+def pair_reading(pkg, records, roster, ruling='', host_ruling=''):
     # Get-LinuxPairReading: (form, segment text or None, reason). Raises Refusal for a shape a guard refuses. ruling is the
-    # row's $LinuxRidRuledArchCount entry, or empty.
+    # row's $LinuxRidRuledArchCount entry, or empty; host_ruling is its $LinuxRidHostEqual entry, or empty.
     rs = latest(records)
     x64 = [r for r in rs if r['RID'] == 'linux-x64']
     arm = [r for r in rs if r['RID'] == 'linux-arm64']
@@ -284,7 +293,7 @@ def pair_reading(pkg, records, roster, ruling=''):
                 raise Refusal(f"{pkg}: the linux evidence's {line['RID']} line has {column} {line.get(column)!r}, not a number")
     xd, ad = disclosed_divergent(x), disclosed_divergent(a)
     if x['status'] != 'validated' or x.get('new') != '0' or int(x['matched']) != roster[0] or xd != roster[1]:
-        text = host_equal(x, a, roster)
+        text = host_equal(pkg, x, a, roster, host_ruling)
         if text is not None:
             return 'host-equal', text, None
         text = ruled_arch_count(pkg, a, roster, ruling)
@@ -323,12 +332,16 @@ if args.rids:
         for r in csv.DictReader(open(ledger_file, encoding='utf-8'), delimiter='\t'):
             if (r.get('reason') or '').strip():
                 ledgered.add(r['row'])
-    # The guard's $LinuxRidRuledArchCount table: row -> '<names> -- <citations>' (PowerShell '' is one quote).
-    ruled_block = re.search(r'^\$LinuxRidRuledArchCount = @\{\n(.*?)^\}', guard, re.M | re.S)
-    if not ruled_block:
-        sys.exit('the guard declares no $LinuxRidRuledArchCount: --rids derives by the guard\'s section 2i and will not run against a guard that lacks it')
-    ruled_counts = {m.group(1): m.group(2).replace("''", "'")
-                    for m in re.finditer(r"^\s+'([^']+)' = '((?:[^']|'')*)'\s*$", ruled_block.group(1), re.M)}
+    # The guard's $LinuxRidRuledArchCount and $LinuxRidHostEqual tables: row -> '<names or class> -- <citations>'
+    # (PowerShell '' is one quote).
+    def guard_table(name):
+        block = re.search(r'^\$' + name + r' = @\{\n(.*?)^\}', guard, re.M | re.S)
+        if not block:
+            sys.exit(f'the guard declares no ${name}: --rids derives by the guard\'s section 2i and will not run against a guard that lacks it')
+        return {m.group(1): m.group(2).replace("''", "'")
+                for m in re.finditer(r"^\s+'([^']+)' = '((?:[^']|'')*)'\s*$", block.group(1), re.M)}
+    ruled_counts = guard_table('LinuxRidRuledArchCount')
+    host_equals = guard_table('LinuxRidHostEqual')
     evrel = args.evidence or declared.group(1).replace('{pin}', pin)
     by_row = {}
     if evrel:
@@ -355,7 +368,7 @@ if args.rids:
         roster = x64_reading(have)
         if pkg in by_row:
             try:
-                form, text, reason = pair_reading(pkg, by_row[pkg], roster, ruled_counts.get(pkg, ""))
+                form, text, reason = pair_reading(pkg, by_row[pkg], roster, ruled_counts.get(pkg, ""), host_equals.get(pkg, ""))
             except Refusal as refusal:
                 if pkg not in ledgered or roster is None:
                     refused.append(str(refusal))

@@ -221,19 +221,28 @@ try:
               [names_line('linux-x64', 'validated', 12, 10, 2, 'k1', 'd1;d2'), names_line('linux-arm64', 'DISC', 11, 10, 1, 'v1', 'd1')],
               refused='do not account for the verdict counts', header=names_header)
     nine = ';'.join(f'n{i}' for i in range(1, 10))
-    rids_case('linux --rids: host-equal banks linux-arm64 at its own reading, the roster\'s linux-x64 reading kept (R3)', '42 + 17',
-              [rids_line('linux-x64', 'DISC', 59, 50, 9, agree='yes', names=nine), rids_line('linux-arm64', 'DISC', 59, 50, 9, agree='yes', names=nine)],
-              '42 + 17 (linux-x64; linux-arm64: 50 + 9)')
-    rids_case('linux --rids: host-equal is not banked when the disclosed names differ', '42 + 17',
-              [rids_line('linux-x64', 'DISC', 59, 50, 9, agree='yes', names=nine), rids_line('linux-arm64', 'DISC', 59, 50, 9, agree='yes', names=nine.replace('n9', 'm9'))],
-              '42 + 17 (linux-x64; linux-arm64: pending)')
-    ruled_table = re.compile(r'^\$LinuxRidRuledArchCount = @\{\n.*?^\}', re.M | re.S)
+    # HOST-EQUAL is KEYED (COORD F2): the fixture row takes it only through a $LinuxRidHostEqual entry.
+    host_table = re.compile(r'^\$LinuxRidHostEqual = @\{\n.*?^\}', re.M | re.S)
     guard_now = open(os.path.join(root, 'src/check-roster-format.ps1'), encoding='utf-8', newline='').read()
+    host_same = [rids_line('linux-x64', 'DISC', 59, 50, 9, agree='yes', names=nine), rids_line('linux-arm64', 'DISC', 59, 50, 9, agree='yes', names=nine)]
+    for entry, lines_, want, refused, name in (
+            ("'host-privilege -- fixture'", host_same, '42 + 17 (linux-x64; linux-arm64: 50 + 9)', None, 'host-equal banks linux-arm64 at its own reading, the roster\'s linux-x64 reading kept (R3)'),
+            ("'host-privilege -- fixture'", [host_same[0], rids_line('linux-arm64', 'DISC', 59, 50, 9, agree='yes', names=nine.replace('n9', 'm9'))],
+             '42 + 17 (linux-x64; linux-arm64: pending)', None, 'host-equal is not banked when the disclosed names differ'),
+            (None, host_same, '42 + 17 (linux-x64; linux-arm64: pending)', None, 'with no host-equal ruling the same pair is a host difference, written pending (F2)'),
+            ("'host-privilege'", host_same, None, 'LinuxRidHostEqual entry does not read', 'a host-equal entry with no citation is refused')):
+        body = "$LinuxRidHostEqual = @{\n" + (f"    'f/pkg' = {entry}\n" if entry else '') + '}'
+        write(os.path.join(root, 'src/check-roster-format.ps1'), host_table.sub(lambda m: body, guard_now, count=1))
+        rids_case(f'linux --rids: {name}', '42 + 17', lines_, want, refused=refused)
+    write(os.path.join(root, 'src/check-roster-format.ps1'), guard_now)
+    ruled_table = re.compile(r'^\$LinuxRidRuledArchCount = @\{\n.*?^\}', re.M | re.S)
     ruled_x64 = rids_line('linux-x64', 'FAIL', 20, 5, 15, new='15')
     for entry, arm_absent, want, refused, name in (
-            ("'r1;r2 -- fixture'", 'r1;r2;s1', '7 (linux-x64; linux-arm64: 5)', None, 'a ruled arch-count banks linux-arm64 less the ruled verdicts (R2)'),
-            (None, 'r1;r2;s1', '7 (linux-x64; linux-arm64: pending)', None, 'with no ruling the same pair is a host difference, written pending'),
-            ("'r1;r2 -- fixture'", 'r1;s1', None, 'does not name r2', 'a ruled arch-count whose linux-arm64 does not name a ruled verdict is refused')):
+            ("'r1;r2 -- fixture'", 'r1;r2;r1/s1', '7 (linux-x64; linux-arm64: 5)', None, 'a ruled arch-count banks linux-arm64 less the ruled verdicts (R2)'),
+            (None, 'r1;r2;r1/s1', '7 (linux-x64; linux-arm64: pending)', None, 'with no ruling the same pair is a host difference, written pending'),
+            ("'r1;r2 -- fixture'", 'r1;r1/s1', None, 'does not name r2', 'a ruled arch-count whose linux-arm64 does not name a ruled verdict is refused'),
+            ("'r1;r2 -- fixture'", 'r1;r2;s1', None, 'names s1 absent, neither a ruled verdict nor a subtest', 'a ruled arch-count whose linux-arm64 names a stray absent verdict is refused (F1)'),
+            ("'r1;r2 -- fixture'", 'r1;r2;r1x', None, 'names r1x absent, neither', 'a stray absent verdict that only shares a ruled prefix is refused (F1)')):
         body = "$LinuxRidRuledArchCount = @{\n" + (f"    'f/pkg' = {entry}\n" if entry else '') + '}'
         write(os.path.join(root, 'src/check-roster-format.ps1'), ruled_table.sub(lambda m: body, guard_now, count=1))
         rids_case(f'linux --rids: {name}', '7', [ruled_x64, rids_line('linux-arm64', 'COUNT', 5, 5, 0, absent=arm_absent, names='-')], want, refused=refused)
