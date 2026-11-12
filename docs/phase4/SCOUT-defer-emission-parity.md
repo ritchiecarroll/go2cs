@@ -421,3 +421,463 @@ The owner chooses between two shapes, both at 0 B for an ordinary function:
    named-result functions (148 production, 28 test and 10 behavioral, section 7).
 
 6e is withdrawn in favour of 6f. The interceptor-only routes (1a, 1b) remain NOT VIABLE.
+
+## 11. Five corpus functions, side by side, and 6f built and run (2026-11-12)
+
+The owner asked for real examples of option 4 and for a 6f prototype that builds and runs. Below are five real
+functions, one per shape: a plain defer and recover; a deferred `Unlock` in a pointer-receiver method; a defer inside
+a loop; a defer that writes the named results; and a `ref` parameter with a defer. Each comes in four forms: the Go
+source; today's emission, verbatim from the committed file; option 4 with the frame-local tail (10.4), laid out as
+the converter would write it; and 6f (10.1). Lane C2 measured all of it in one scratch project; nothing on a shared
+branch changes.
+
+**The prototype.** A copy of golib at `d6b471d7eb`, with two changes:
+
+- `GoFrame` gains a field and the frame-local tail's two members:
+
+  ```csharp
+  private PanicException? m_panic;
+  public bool Is(Exception ex) => IsPanic(ex, out m_panic);
+  public void Capture() => Capture(m_panic!);
+  ```
+
+- A ladder file adds the five rungs these functions need: `void:0`, `void:V`, `void:V.V`, `void:V.R` and `ret:V.V`,
+  plus `ret:V` for the control below. Each one is generic with `allows ref struct` and has the shape 10.1 shows.
+
+The harness compiles go2cs-gen as its analyzer, so `Ꮡw.Ꮡmu` and the literal interceptor are the real generated
+code. `fmt`, `errors` and `sync` are golib-only stand-ins with the same call shapes: `fmt` takes `any` slots at
+fixed arity, and `sync.Mutex` is the uncontended compare-and-swap. `Write`'s `fw` is a small `flateWriter` whose
+`Write` counts the bytes. The today column is copied byte for byte from the lines cited. A fourth C# rendering is a
+control: option 4's layout with today's tail, whose IL is today's.
+
+**Results equal Go's.** A Go program holding the same five functions (go1.26.10) and the harness's verbose pass run
+the same `main`. It calls each function on a normal path and on a panicking path: `try` with a panicking
+`register`, `Write` on an open and on a closed writer, `guarded(true)`, and `tryEager` with a nil `e`, which recovers
+Go's nil-dereference runtime error. On the JIT and under Native AOT, today, the layout control, option 4 and 6f each
+print Go's 23 lines byte for byte. A wrong-on-purpose 6f `guarded` keeps its named results inside the static lambda.
+It fails the same comparison on both runtimes, at the one line expected (`0` where Go prints `-1 recovered`): a
+recovered panic returns the rung's default, not what the deferred call wrote. That is the rule 6f must follow:
+results stay in the visible method whenever a deferred call can recover.
+
+### 11.1 A plain defer and recover: AddCleanupClosesOverPtr's `try`
+
+Go (`src/tests/Behavioral/AddCleanupClosesOverPtr/main.go:47-55`):
+
+```go
+func try(name string, register func()) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("%s: panic: %v\n", name, r)
+		}
+	}()
+	register()
+	fmt.Printf("%s: registered\n", name)
+}
+```
+
+Today, verbatim (`main.cs.target:27-40`):
+
+```csharp
+internal static void @try(@string name, Action register) {
+    GoFrame ᒐ = default;
+    try {
+        defer(() => {
+            var r = recover(); if (r != nil) {
+                fmt.Printf("%s: panic: %v\n"u8, name, r);
+            }
+        }, ref ᒐ);
+        register();
+        fmt.Printf("%s: registered\n"u8, name);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+```
+
+Option 4 with the frame-local tail:
+
+```csharp
+internal static void @try(@string name, Action register) { GoFrame ᒐ = default; try {
+    defer(() => {
+        var r = recover(); if (r != nil) {
+            fmt.Printf("%s: panic: %v\n"u8, name, r);
+        }
+    }, ref ᒐ);
+    register();
+    fmt.Printf("%s: registered\n"u8, name);
+} catch (Exception ᒐe) when (ᒐ.Is(ᒐe)) { ᒐ.Capture(); } finally { ᒐ.Run(); } }
+```
+
+6f:
+
+```csharp
+internal static void @try(@string name, Action register) => func(name, register, static (@string name, Action register, ref GoFrame ᒐ) => {
+    defer(() => {
+        var r = recover(); if (r != nil) {
+            fmt.Printf("%s: panic: %v\n"u8, name, r);
+        }
+    }, ref ᒐ);
+    register();
+    fmt.Printf("%s: registered\n"u8, name);
+});
+```
+
+**Today:** the Go body sits two levels deeper, inside `try { }`, and the frame's three statements bracket it; the
+statements themselves read as Go's. **Option 4:** the body is at Go's indentation, line for line; the frame is a
+27-character suffix on the signature line and a 78-character closing line. **6f:** the body is at Go's indentation
+too, but the signature line (139 characters) repeats both parameters with their types inside `static (...)`, and a Go
+reader has to know that `func(name, register, ...)` is the frame, not a call the Go code makes.
+
+### 11.2 A deferred `Unlock` in a pointer-receiver method: archive/zip's `(*pooledFlateWriter).Write`
+
+Go (`archive/zip/register.go:45-52 (Go 1.26.10)`):
+
+```go
+func (w *pooledFlateWriter) Write(p []byte) (n int, err error) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if w.fw == nil {
+		return 0, errors.New("Write after Close")
+	}
+	return w.fw.Write(p)
+}
+```
+
+Today, verbatim (`src/core/archive/zip/register.cs:50-67`):
+
+```csharp
+internal static (nint n, error err) Write(this ж<pooledFlateWriter> Ꮡw, slice<byte> p) {
+    nint n = default;
+    error err = default;
+    GoFrame ᒐ = default;
+    try {
+        ref var w = ref Ꮡw.DerefOrNull();
+
+        w.mu.Lock();
+        defer(Ꮡw.Ꮡmu.Unlock, ref ᒐ);
+        if (w.fw == nil) {
+            (n, err) = (0, errors.New(writeAfterCloseˢ)); goto ᒐdone;
+        }
+        (n, err) = w.fw.Write(p);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    ᒐdone: return (n, err);
+}
+```
+
+Option 4 with the frame-local tail:
+
+```csharp
+internal static (nint n, error err) Write(this ж<pooledFlateWriter> Ꮡw, slice<byte> p) { nint n = default; error err = default; GoFrame ᒐ = default; try {
+    ref var w = ref Ꮡw.DerefOrNull();
+```
+
+6f:
+
+```csharp
+internal static (nint n, error err) Write(this ж<pooledFlateWriter> Ꮡw, slice<byte> p) => func(Ꮡw, p, static (nint n, error err) (ж<pooledFlateWriter> Ꮡw, slice<byte> p, ref GoFrame ᒐ) => {
+    ref var w = ref Ꮡw.DerefOrNull();
+```
+
+**Today:** the named results become locals declared above the frame, and Go's two `return`s become a tuple assignment
+plus `goto ᒐdone`. **Option 4:** the same assignment-plus-`goto`, with the three declarations moved onto a
+154-character signature line. **6f:** the closest to Go of the three: both `return`s read as Go's, because no deferred
+call here can recover, so the results stay inside the lambda; the price is a 189-character signature line that spells
+the result tuple twice and every parameter twice.
+
+### 11.3 A defer inside a loop: DeferLoopCapture's `closureCapture3Clause`
+
+Go (`src/tests/Behavioral/DeferLoopCapture/main.go:160-165`):
+
+```go
+func closureCapture3Clause() {
+	fmt.Println("-- control: closure capture (3-clause) --")
+	for i := 0; i < 3; i++ {
+		defer func() { fmt.Println("closure", i) }()
+	}
+}
+```
+
+Today, verbatim (`main.cs.target:176-189`):
+
+```csharp
+internal static void closureCapture3Clause() {
+    GoFrame ᒐ = default;
+    try {
+        fmt.Println("-- control: closure capture (3-clause) --");
+        for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
+            var i = iᴛ1;
+            defer(() => {
+                fmt.Println("closure", i);
+            }, ref ᒐ);
+        }
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+```
+
+Option 4 with the frame-local tail:
+
+```csharp
+internal static void closureCapture3Clause() { GoFrame ᒐ = default; try {
+    fmt.Println("-- control: closure capture (3-clause) --");
+    for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
+        var i = iᴛ1;
+        defer(() => {
+            fmt.Println("closure", i);
+        }, ref ᒐ);
+    }
+} catch (Exception ᒐe) when (ᒐ.Is(ᒐe)) { ᒐ.Capture(); } finally { ᒐ.Run(); } }
+```
+
+6f:
+
+```csharp
+internal static void closureCapture3Clause() => func(static (ref GoFrame ᒐ) => {
+    fmt.Println("-- control: closure capture (3-clause) --");
+    for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
+        var i = iᴛ1;
+        defer(() => {
+            fmt.Println("closure", i);
+        }, ref ᒐ);
+    }
+});
+```
+
+**Today:** two levels of extra nesting around a loop that is already the converter's (`iᴛ1` and the per-iteration `var
+i`). **Option 4:** Go's indentation; nothing else changes. **6f:** with no parameters the prefix is short (`=>
+func(static (ref GoFrame ᒐ) => {`) and the body reads as option 4's does.
+
+### 11.4 A defer that writes the named results: NamedReturnDefer's `guarded`
+
+Go (`src/tests/Behavioral/NamedReturnDefer/main.go:67-80`):
+
+```go
+func guarded(boom bool) (code int, msg string) {
+	defer func() {
+		if r := recover(); r != nil {
+			code = -1
+			msg = "recovered"
+		}
+	}()
+	if boom {
+		panic("kaboom")
+	}
+	code = 0
+	msg = "ok"
+	return code, msg
+}
+```
+
+Today, verbatim (`main.cs.target:90-111`):
+
+```csharp
+internal static (nint code, @string msg) guarded(bool boom) {
+    nint code = default;
+    @string msg = default;
+    GoFrame ᒐ = default;
+    try {
+        defer(() => {
+            var r = recover(); if (r != nil) {
+                code = -1;
+                msg = "recovered";
+            }
+        }, ref ᒐ);
+        if (boom) {
+            throw panic("kaboom");
+        }
+        code = 0;
+        msg = "ok";
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return (code, msg);
+}
+```
+
+Option 4 with the frame-local tail:
+
+```csharp
+internal static (nint code, @string msg) guarded(bool boom) { nint code = default; @string msg = default; GoFrame ᒐ = default; try {
+    defer(() => {
+        var r = recover(); if (r != nil) {
+            code = -1;
+            msg = "recovered";
+        }
+    }, ref ᒐ);
+    if (boom) {
+        throw panic("kaboom");
+    }
+    code = 0;
+    msg = "ok";
+} catch (Exception ᒐe) when (ᒐ.Is(ᒐe)) { ᒐ.Capture(); } finally { ᒐ.Run(); } return (code, msg); }
+```
+
+6f:
+
+```csharp
+internal static (nint code, @string msg) guarded(bool boom) {
+    nint code = default;
+    @string msg = default;
+    func(boom, (bool boom, ref GoFrame ᒐ) => {
+        defer(() => {
+            var r = recover(); if (r != nil) {
+                code = -1;
+                msg = "recovered";
+            }
+        }, ref ᒐ);
+        if (boom) {
+            throw panic("kaboom");
+        }
+        code = 0;
+        msg = "ok";
+    });
+    return (code, msg);
+}
+```
+
+**Today and option 4** read alike: results declared first, returned after the frame. **6f:** the least Go-like and the
+most expensive of the five. The results must stay in the visible method, because the deferred call writes them after a
+recovered panic, so the lambda captures them and cannot be `static`. It also repeats `boom`, and the visible method is
+a declaration, a `func(...)` call and a `return`, which is neither Go's shape nor today's.
+
+### 11.5 A `ref` parameter and a defer: RefLoweredNilTiming's `tryEager`
+
+Go (`src/tests/Behavioral/RefLoweredNilTiming/main.go:76-80`):
+
+```go
+func tryEager(label string, e *elem) {
+	defer func() { fmt.Println(label, "recovered:", recover()) }()
+	eagerFrom(e)
+	fmt.Println(label, "no panic")
+}
+```
+
+Today, verbatim (`main.cs.target:43-54`):
+
+```csharp
+internal static void tryEager(@string label, ref elem e) {
+    GoFrame ᒐ = default;
+    try {
+        defer(() => {
+            fmt.Println(label, "recovered:", recover());
+        }, ref ᒐ);
+        eagerFrom(ref e);
+        fmt.Println(label, "no panic");
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+```
+
+Option 4 with the frame-local tail:
+
+```csharp
+internal static void tryEager(@string label, ref elem e) { GoFrame ᒐ = default; try {
+    defer(() => {
+        fmt.Println(label, "recovered:", recover());
+    }, ref ᒐ);
+    eagerFrom(ref e);
+    fmt.Println(label, "no panic");
+} catch (Exception ᒐe) when (ᒐ.Is(ᒐe)) { ᒐ.Capture(); } finally { ᒐ.Run(); } }
+```
+
+6f:
+
+```csharp
+internal static void tryEager(@string label, ref elem e) => func(label, ref e, static (@string label, ref elem e, ref GoFrame ᒐ) => {
+    defer(() => {
+        fmt.Println(label, "recovered:", recover());
+    }, ref ᒐ);
+    eagerFrom(ref e);
+    fmt.Println(label, "no panic");
+});
+```
+
+**Today and option 4:** `e` is `ref elem` and the body forwards it, as the ref-lowering emits it everywhere. **6f:**
+`ref elem e` appears twice on the 133-character signature line, and the rung passes the reference through
+(`void:V.R`), so a nil `e` still faults in `eagerFrom` and is recovered, as Go's is.
+
+### 11.6 The numbers
+
+The same harness runs all four renderings on linux-x64, .NET 10.0.14, with the call-counting delay a converted
+program sets (0). The method:
+
+- Each rendering runs in its own process: 5 processes per rendering, interleaved.
+- Each process runs 7 rounds of 2,000,000 calls (10,000 on a panic path), after a warm-up.
+- A cell is the median of the 5 per-process medians, with their range in parentheses. B is allocated bytes per call.
+
+Two notes on the method:
+
+- **A single process misleads on the JIT.** Run that way, today's `Write` read 113.7, 123.4 and 109.2 ns in three
+  runs, against 77.1, 83.5 and 73.9 for the layout control, whose IL is identical. With tiered compilation off,
+  the two read 129.1 and 129.9 ns; with dynamic PGO off, 159.5 and 160.5. So the gap is the order in which the
+  renderings tier up and collect profile, not their code. Section 10.1's JIT rows came from a single-process
+  harness of the same kind, and this section does not re-read them.
+- **One process per rendering removes that effect but keeps the JIT's run-to-run spread.** The IL-identical
+  control differs from today by up to ±30 ns on the JIT.
+
+JIT:
+
+| Function, path | today ns | B | option 4 ns | B | 6f ns | B | control (option 4 layout, today's tail) ns | B |
+|---|---|---|---|---|---|---|---|---|
+| an empty call | 1.7 | 0 | | | | | | |
+| 1 try, no panic | 172 (161-193) | 128 | 144 (124-176) | 128 | 170 (148-183) | 128 | 143 (130-150) | 128 |
+| 1 try, panic recovered | 5294 (4884-7482) | 1576 | 5663 (4365-7125) | 1576 | 6897 (5390-7436) | 1576 | 6913 (5570-7373) | 1576 |
+| 2 Write | 104 (80-116) | 64 | 89 (76-115) | 64 | 81 (77-111) | 64 | 113 (62-122) | 64 |
+| 3 closureCapture3Clause | 152 (143-159) | 336 | 154 (150-157) | 336 | 170 (155-178) | 336 | 147 (142-156) | 336 |
+| 4 guarded, no panic | 68 (48-71) | 104 | 68 (63-70) | 104 | 87 (86-92) | 169.6 | 70 (59-89) | 104 |
+| 4 guarded, panic recovered | 3966 (3474-4894) | 1240 | 4392 (3019-4753) | 1240 | 4844 (2770-5017) | 1305.6 | 4765 (3108-5011) | 1240 |
+| 5 tryEager, no panic | 98 (76-111) | 192 | 104 (86-127) | 192 | 112 (78-115) | 192 | 108 (94-114) | 192 |
+| 5 tryEager, nil panic recovered | 3252 (2711-4839) | 1416 | 4310 (3339-4636) | 1416 | 4792 (2699-5138) | 1416 | 4663 (3580-4824) | 1416 |
+
+Native AOT:
+
+| Function, path | today ns | B | option 4 ns | B | 6f ns | B | control (option 4 layout, today's tail) ns | B |
+|---|---|---|---|---|---|---|---|---|
+| an empty call | 1.5 | 0 | | | | | | |
+| 1 try, no panic | 132 (110-148) | 112 | 140 (104-158) | 112 | 145 (103-146) | 112 | 142 (106-149) | 112 |
+| 1 try, panic recovered | 3813 (2843-3822) | 768 | 3756 (2998-4020) | 768 | 5870 (4705-6009) | 872 | 3434 (3032-3948) | 768 |
+| 2 Write | 174 (168-180) | 48 | 172 (122-175) | 48 | 192 (156-195) | 48 | 169 (134-175) | 48 |
+| 3 closureCapture3Clause | 123 (122-129) | 288 | 128 (123-134) | 288 | 134 (126-136) | 288 | 129 (114-133) | 288 |
+| 4 guarded, no panic | 62 (41-77) | 88 | 63 (46-64) | 88 | 86 (84-87) | 144 | 58 (42-63) | 88 |
+| 4 guarded, panic recovered | 1713 (1279-1804) | 640 | 1846 (1331-1907) | 640 | 3964 (2904-4040) | 800 | 1782 (1199-1884) | 640 |
+| 5 tryEager, no panic | 96 (81-111) | 176 | 116 (112-117) | 176 | 118 (112-122) | 176 | 106 (82-112) | 176 |
+| 5 tryEager, nil panic recovered | 4048 (2888-4223) | 920 | 4068 (3949-4230) | 920 | 6214 (5739-6326) | 1024 | 4009 (2888-4275) | 920 |
+
+### 11.7 The reading
+
+- **B is deterministic, and it settles most of the comparison.** Option 4 with the frame-local tail allocates
+  exactly today's bytes in every case on both runtimes, as the control does. 6f allocates today's bytes in every case
+  except two.
+  - `guarded`: +65.6 B on the JIT (169.6 against 104; 64 B of it is the body delegate) and +56 B under AOT (144
+    against 88).
+  - Every recovered panic under AOT: +104 B in `try` and `tryEager`, +160 B in `guarded`. On the JIT the same
+    paths allocate today's bytes, except `guarded`'s +65.6.
+- **Option 4 costs nothing measurable.** Every option 4 cell lies within the spread of today's and of the control's.
+  The one cell to re-read is `tryEager`'s normal path under AOT: 116 ns (112-117) against today's 96 ns (81-111).
+  The two ranges barely overlap, and the 5 processes do not resolve it.
+- **6f costs time on recovered panics under AOT:** 1.5 to 2.3 times today, in all three functions that recover.
+  `try` takes 5.9 µs against 3.8, `guarded` 4.0 against 1.7, and `tryEager` 6.2 against 4.0.
+  - The rung is generic code that the panic unwinds through, an extra frame; this harness does not attribute the
+    cost further.
+  - On the JIT the same paths spread 2.7 to 7.5 µs and resolve nothing.
+- **6f costs time on three normal paths.** `guarded` reads 87 against 68 ns on the JIT and 86 against 62 under AOT.
+  Under AOT, `Write` reads 192 against 174. The `closureCapture3Clause` loop reads 170 against 152 on the JIT.
+  Everything else is within the spread.
+
+### 11.8 What this adds to the recommendation
+
+10.6 stands, with three additions measured here:
+
+1. **Option 4 with the frame-local tail** reads as Go does, line for line, on all five shapes, at today's bytes and
+   within today's time. Its golib change is the field and two members above.
+2. **6f** reads closest to Go where results can live inside the lambda (`Write`'s two `return`s), and furthest from
+   Go where they cannot (`guarded`). It costs a 64 B delegate whenever named results stay outside. Under AOT, a
+   recovered panic takes 1.5 to 2.3 times as long and allocates 104 to 160 B more.
+3. **A 6f converter makes one more decision per function: can any deferred call recover?** Results may move inside
+   the lambda only when none can. The converter already answers that for a deferred literal and for a callee it can
+   see (it emits `recovers: true`). A deferred func value or interface method must be assumed to recover, which
+   keeps the results in the visible method.
