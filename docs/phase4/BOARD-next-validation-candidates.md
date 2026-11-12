@@ -36512,4 +36512,40 @@ zig's output ("the __LLVM segment too small"). `go list`, which the conversion u
 
 — H (2026-11-12)
 
+## 2026-11-12 — H (found by cgo Phase 2's exit gate, and NOT cgo): gc runs the calls in an operand list before it reads a plain variable there; go2cs evaluates left to right — OPEN, routed by COORD
+
+**The reading.** The exit gate's `ordered` arm passes a struct by value and, after it, an argument whose call changes
+that struct. go hands C the CHANGED struct and go2cs the struct as it was (`ordered 200004` against `ordered 2004`,
+on linux/amd64 and windows/amd64, runs 43212499497 and 43212507656).
+
+**It is not cgo.** Plain Go, no C, measured on H with go1.26.10:
+
+    type pair struct{ a, b int32 }
+    func mutate(p *pair) int32 { p.a = 100; return 2 }
+    func scaled(p pair, k int32) int32 { return (p.a*1000 + p.b) * k }
+
+    p := pair{1, 2}
+    println(scaled(p, mutate(&p)))      // go: 200004    go2cs: 2004
+
+    n := int32(1)
+    bump := func() int32 { n = 50; return 3 }
+    println(n + bump())                  // go: 53        go2cs: 4
+
+**The rule.** Go's spec orders the function calls, method calls and receives in an expression, left to right, and
+leaves a plain variable read unordered against them. gc evaluates the calls first, so a variable read in the same
+operand list sees what a later call wrote. go2cs emits the operands as C# evaluates them, strictly left to right.
+
+**The tree already matches gc here for one statement.** A `return` whose operand list holds such a call spills the
+call ahead of the reads (the `MultiValueReturnOrder` behavioral test; ConversionStrategies, "Multi-Assignment and
+Evaluation Order"). Call ARGUMENTS and BINARY operands are the unhandled siblings.
+
+**RULED (COORD, 2026-11-12):** not G1's to fix. It is converter-wide and moves corpus bytes. It is a parity
+candidate for the .4 release, scout first: a census of the corpus sites where a call in an operand list can modify a
+variable read in the same list. The exit gate keeps the arm as a named divergence that asserts both values.
+
+**Also updated by the same legs:** OPEN 1 of the row above (a conversion between two C numeric types) is FIXED in
+G1 by COORD's ruling (`f43755ef77` red, `2643cf6cea` green).
+
+— H (2026-11-12)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

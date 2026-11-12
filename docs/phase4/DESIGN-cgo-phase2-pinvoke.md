@@ -1181,3 +1181,47 @@ windows).** All three read red. One red was the converter's; the rest were the g
 - a conversion from one C numeric type to another does not compile: go2cs-gen hosts the conversion operator in the
   package's class, where a C type is not;
 - a cgo project built for a `GoTargetOS` other than its bindings' target fails on CS0051, far from the cause.
+
+**The second hosted legs (2026-11-12, at `6e9ef45a29`; runs 43212499497 linux, 43212507656 windows): the arms ran for
+the first time.** Both legs failed on the same three arms. Everything else held on both hosts.
+
+- **Compiles, resolves, runs:** the gate program converts on the real route, builds with 0 errors (linux 139 s,
+  windows 361 s), and every arm runs.
+- **EQUAL to go, byte for byte:** `cos`, `div`, `exp` (1 with errno 0, then +Inf with ERANGE), `frexp`, `nodesum`,
+  `nested`, `tworesults`, `statement`, the copy-back arm (`uname` on linux, `GetSystemTime` on windows), and on linux
+  `close` (EBADF) and `mktime`.
+- **The divergences §11.16 rules, as ruled:** `packagelevel` and `sibling`, go exits 2 and go2cs prints the value;
+  `pinned`, `pinned` under `GODEBUG=cgocheck=0` and `byvalue`, go proceeds and go2cs exits 2.
+- **`puts`, a reading:** its result is equal on both hosts. On linux C's line is absent from go's captured stdout
+  and present in go2cs's; on windows it is present on both. Where present it follows Go's own line, though `puts` ran
+  first. go2cs's exit flushes C's stdio; go's does not on linux.
+
+**Two lines of §11.20's checklist were wrong, and are corrected here (COORD, RULED 2026-11-12). The originals stay
+above as written.**
+
+- **"`Ordered` passes the pair as it was before `mutate` ran" was wrong about go.** go passes the pair AFTER `mutate`
+  ran (`ordered 200004`), and go2cs before (`ordered 2004`). The line was reasoned from cmd/cgo's check closure,
+  which copies its arguments in order; cmd/cgo writes no closure for this call, since no argument needs a check, so
+  it is an ordinary call. Go's spec orders the calls in an expression and leaves a plain variable read unordered
+  against them. gc runs the calls first; go2cs evaluates left to right. That is the converter's, not cgo's: plain
+  Go with no C shows it (BOARD, 2026-11-12). **RULED:** the arm stays as a NAMED divergence asserting both values,
+  and the general class is not G1's to fix.
+- **"`Reinterpreted` REFUSES in go2cs at `GoCgoArgs.StructPointer`" was wrong about go2cs.** It proceeds, and prints
+  what go prints. §11.1's refusal is for a reinterpretation that cannot alias its source, which arrives as a native
+  box minted from managed storage. A Go struct reinterpreted as a C struct of the same layout is an ALIASING view of
+  the same Go memory, and `StructPointer` mirrors it as it mirrors any Go struct. **RULED:** the arm is EQUAL, and a
+  second arm, `reinterpretedwrite`, hands the same pointer to a C function that writes through it and prints the Go
+  field. **PREDICTION, recorded before it runs: both print 1.** If go2cs prints 0, C's write is lost, and that
+  defect stays in G1.
+
+**The third failing arm was the gate's own:** the decoy's control expected the wrong value. The `nested` arm calls
+the probe function twice, so the decoy answers 14001, not 7001. The control did load the decoy on both hosts.
+
+**COORD's ruling on the conversion finding, and its fix.** A conversion between two C numeric types is inside what
+Phase 2 says it converts, so it is fixed IN G1, red first (`f43755ef77`, `2643cf6cea`): go2cs-gen declares an
+operator's host in the class that holds the host type, and names a C type through its class from any other. The gate
+program has a `conv` arm, and a program of such conversions builds and prints what go prints on H
+(`7 7 4464 4464 70000 70001`). The target-mismatch finding goes to Phase 3's first increment.
+
+**Scores at these legs, as worded** (darwin pending): G1-P2 MISSED on `Ordered` and MET on the other arms it names;
+G1-P3 MET except `Reinterpreted`, MISSED; G1-P5 MET.
