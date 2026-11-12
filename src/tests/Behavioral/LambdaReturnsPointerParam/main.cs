@@ -28,7 +28,7 @@ internal static ж<item> passthrough(ж<item> it) {
     return it;
 }
 
-internal static void Main() {
+internal static void main() {
     slice<entry> table = default;
     var a = Ꮡ(new item(name: "alpha"));
     var b = Ꮡ(new item(name: "beta"));

@@ -101,7 +101,7 @@ internal static nint viaClosure() {
     return c.n;
 }
 
-internal static void Main() {
+internal static void main() {
     var (n, sum) = viaLocal();
     fmt.Println("viaLocal:", n, sum);
 

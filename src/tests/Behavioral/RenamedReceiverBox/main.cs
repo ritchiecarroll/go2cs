@@ -41,7 +41,7 @@ internal static nint addInClosure(ж<counter> Ꮡp, nint d) {
     return Δp.n;
 }
 
-internal static void Main() {
+internal static void main() {
     var c = Ꮡ(new counter(n: 0));
     c.bumpTwice();
     fmt.Println(c.n);

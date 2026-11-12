@@ -39,7 +39,7 @@ internal static void holder() {
     fmt.Println("holder:", len(t), len(t["a"]), len(t["a"]["b"]), hasC, t["a"]["b"]["c"] == nil);
 }
 
-internal static void Main() {
+internal static void main() {
     namedOfNamed();
     unnamedOfNamed();
     namedOfUnnamed();

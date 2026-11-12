@@ -15,7 +15,7 @@ public static @string Local(this ΔLocal l) {
     return "L:"u8 + l.Tag;
 }
 
-internal static void Main() {
+internal static void main() {
     var m = new renamedlibꓸMarker(Name: "alpha", Size: 3);
     fmt.Println("literal:", m.Marker());
 

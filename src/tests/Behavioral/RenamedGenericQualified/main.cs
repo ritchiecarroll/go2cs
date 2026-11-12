@@ -27,7 +27,7 @@ internal partial struct main_local /*dyn*/ {
     internal coll.ΔSet<nint> s;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var h = ref heap(new holder(), out var Ꮡh);
     h.seen.Add((@string)"a");
     h.seen.Add((@string)"a");

@@ -147,7 +147,7 @@ public static (nint E2, @string p) Testing() {
     return (E2, p);
 }
 
-internal static void Main() {
+internal static void main() {
     var agesDemo = new PeopleByAge(new Person[]{new("Zed", 30, 11.5F), new("Amy", 25, 7.0F)}.slice());
     agesDemo.sort();
     fmt.Println(agesDemo[0].Name);

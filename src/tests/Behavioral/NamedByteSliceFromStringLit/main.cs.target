@@ -12,7 +12,7 @@ internal static nint sigLen(htmlSig s) {
     return len(s);
 }
 
-internal static void Main() {
+internal static void main() {
     var sig = (htmlSig)slice<byte>((@string)"<!DOCTYPE HTML"u8);
     fmt.Println(len(sig), (@string)(slice<byte>)sig);
 

@@ -29,7 +29,7 @@ internal static void describe(@string prefix, any v) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object valˢ = (@string)"val"u8;
 
-internal static void Main() {
+internal static void main() {
     var n = Ꮡ(new node(inner: (@string)"hi"));
     var p = new pair("tag", valˢ);
     var m = new map<@string, any>{["k"] = (@string)"mv"};

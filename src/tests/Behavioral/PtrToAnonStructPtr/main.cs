@@ -12,7 +12,7 @@ internal partial struct main_data /*dyn*/ {
     public @string Foo;
 }
 
-internal static void Main() {
+internal static void main() {
     ref var data = ref heap<ж<main_data>>(Ꮡ(new main_data()), out var Ꮡdata);
     fmt.Println(decode(Ꮡdata));
     data.Value.Foo = "baz";

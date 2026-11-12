@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# repro-at.sh <sha10> <name> : one repro module end to end at a go2cs worktree go2cs-gate-<sha10> (its built go2cs-<sha10>.exe).
+#   Go: go run (the oracle) -> convert (-recurse, under the box lock) -> dotnet build (pinned) -> run -> compare.
+# Writes logs/repro-$sha-<name>.result (one block) and keeps the build log beside it.
+sha="$1"; name="$2"; R=/h/go2cs-ts-exp; src="$R/repros/$name"; out="$R/out/repro-$sha-$name"; res="$R/logs/repro-$sha-$name.result"
+source $R/scripts/env.sh
+export GO2CS_EXE="H:\go2cs-ts-exp\bin\go2cs-$sha.exe" GO2CS_REPO="$R/go2cs-gate-$sha" MSBUILDDISABLENODEREUSE=1
+[ -d "$src" ] || { echo "no repro $name"; exit 2; }
+rm -rf "$out"
+gout=$(cd "$src" && GOWORK=off go run . 2>&1); grc=$?
+bash $R/scripts/convert.sh "repro-$sha-$name" -recurse -go2cspath "H:\\go2cs-ts-exp\\go2cs-gate-$sha\\src" "$(cygpath -w "$src")" "$(cygpath -w "$out")" >/dev/null; crc=$?
+mod=$(sed -n 's/^module //p' "$src/go.mod" | tr -d ''); proj=$(find "$out/src/$mod" -maxdepth 1 -name '*.csproj' 2>/dev/null | head -1)
+brc=-1; rout=""; rrc=-1
+if [ $crc -eq 0 ] && [ -n "$proj" ]; then
+  bash $R/scripts/aff.sh "$R/logs/repro-$sha-$name.build.txt" dotnet build "$(cygpath -w "$proj")" -m:2 -p:UseSharedCompilation=false -nodeReuse:false -v:q -nologo; brc=$?
+  if [ $brc -eq 0 ]; then
+    exe=$(find "$out/.artifacts/bin" -name "*.exe" 2>/dev/null | head -1); dll="${exe%.exe}.dll"; [ -f "$dll" ] || dll=""
+    [ -z "$dll" ] && { rout="NO ASSEMBLY"; rrc=99; } || { rout=$(dotnet "$(cygpath -w "$dll")" 2>&1); rrc=$?; }
+  fi
+fi
+match=NO; [ $brc -eq 0 ] && [ "$rout" = "$gout" ] && match=YES
+{
+  echo "repro $name  go2cs=$(git -C $R/go2cs-gate-$sha rev-parse --short=10 HEAD)"
+  echo "GO   rc=$grc: $gout"
+  echo "CONV rc=$crc  $(grep -m3 -E 'WARNING|GO2CS[0-9]+|rror' "$R/logs/convert-repro-$sha-$name.txt" | cut -c1-200 | tr '\n' '|')"
+  echo "BUILD rc=$brc  $( [ $brc -ne 0 ] && grep -E 'error [A-Z]+[0-9]+' "$R/logs/repro-$sha-$name.build.txt" 2>/dev/null | sed -E 's/^.*\\([^\\]+\([0-9]+,[0-9]+\)): error /\1 /; s/ \[[^]]*\]$//' | sort -u | head -4 | cut -c1-220 | tr '\n' '|')"
+  echo "RUN  rc=$rrc: $rout"
+  echo "MATCH $match"
+} > "$res"
+cat "$res"

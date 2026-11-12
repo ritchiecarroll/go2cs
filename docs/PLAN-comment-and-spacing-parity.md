@@ -36,7 +36,7 @@
 | **B** | **Missed comments: doc comments of specs inside a group** | **954 of 958** lost | ≤ 407 | `visitGenDecl.go:22-27` passes only `genDecl.Doc` | 0.5–1 day | 0 |
 | **C** | **Missed comments: doc comments of named non-struct types** (`type Flags uint16`) | **422 of 429** lost; aliases 7 of 9 | (in B's 407) | `visitTypeSpec.go:299-407` gives `doc` only to the struct and interface arms | 0.5–1 day | 0 |
 | **D** | Blank lines between specs of a group | 617 Go blanks dropped, 2,034 blanks inserted | 131 / 122 | `writeDocString` writes a newline even when the doc was already written (`writeOperations.go:304-306`); no line-gap check in `visitValueSpec` | 0.5 day | 0 |
-| **E** | Extra converter blank lines inside bodies (scaffolding) | 3,130 after parameter preludes, 808 after named-result locals, 598 after a lowered switch, 322 before a closing brace | — | `visitFuncDecl.go:1105-1152`, `visitSwitchStmt.go:933-940` | 0.5 day | 160 (§4.4): owner's call |
+| **E** | Extra converter blank lines inside bodies (scaffolding) | 3,130 after parameter preludes, 808 after named-result locals, 598 after a lowered switch, 322 before a closing brace | — | `visitFuncDecl.go:1106-1153`, `visitSwitchStmt.go:933-940` | 0.5 day | 160 (§4.4): owner's call |
 | **F** | Misplaced comments in composite literals | 2,440 of 3,476 (1,574 trailing → own line; 844 anchored elsewhere) | 85 | `visitValueSpec.go:28` flushes every comment up to the spec's END before the declaration is written | 1–2 days | 0 |
 | **G** | Misplaced comments in other expressions | 1,005 of 1,039 (991 trailing → own line) | 40 | `convExprList.go:79` writes them on their own line; `convBinaryExpr` has no flush | 1 day | 0 |
 | **H** | Misplaced after `{` / after `case X:` / before a case / before `}` | 366 of 366 / 199 of 215 / 148 of 234 / 170 of 180 | 166 / 54 / 79 / 108 | the three shapes comments.md defers; case bodies have no flush of their own | 1.5–2 days | 0 |
@@ -595,7 +595,7 @@ line later gets one blank. **Effort 0.5.** **Goldens 0** under `-comments` (unga
 (`ref var p = ref Ꮡp.DerefOrNull();`, `heap<…>(out var Ꮡx)`, `f = f.Clone();`, `valsʗp.sslice()`), 808 after
 named-result locals (W5), 598 after a lowered switch's `}}`, 322 before a function's closing brace, 953 other.
 
-**Root cause:** `visitFuncDecl.go:1105` (named results and the variadic prelude), `:1111` (`Clone`), `:1119`
+**Root cause:** `visitFuncDecl.go:1106` (named results and the variadic prelude), `:1111` (`Clone`), `:1119`
 (`DerefOrNull`), `:1129` (heap boxes), `:1141` (cgo), `:1152` (named-result aliases) each end the prelude with a
 newline; `visitSwitchStmt.go:933-934` writes `}` and then a newline after a lowered switch (every statement already
 starts with its own newline), and `:938-940` closes a switch's init sub-block with `writeOutputLn`, which together with
@@ -616,7 +616,7 @@ first flushes every pending free comment up to `targetPos`, the spec's END: ever
 written before the declaration, above its own doc comment. Inside function bodies the comments do reach
 `convExprList.go:79`, but the prefix adds a newline and the `exprOnNewLine` branch a second one, so a trailing comment
 stays trailing and a blank line follows it (`time/time.go:1487` → `time.cs:1508-1510`); comments after the last element
-are never flushed (`convCompositeLit.go:1185`). **Fix:** in `visitValueSpec`, flush only up to `valueSpec.Pos()`
+are never flushed (`convCompositeLit.go:1181`). **Fix:** in `visitValueSpec`, flush only up to `valueSpec.Pos()`
 before the doc, and drain up to `End()` after the spec as a backstop so nothing leaks into the next declaration. In
 `convExprList`: a comment on the previous element's line is written ` // c` before that line's newline; an own-line
 comment is newline, indent, comment; add a flush before the closing `}` and `)` that always ends with a newline so

@@ -76,7 +76,7 @@ internal static nint readOne(this ref @file f) {
     return f.n;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(f(10));
     fmt.Println(f(3));
     fmt.Println(f(1));

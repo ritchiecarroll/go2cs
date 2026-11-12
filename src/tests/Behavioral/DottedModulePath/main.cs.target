@@ -12,7 +12,7 @@ using Δio = io_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(reflect.TypeOf(new dotted.T()).PkgPath());
     fmt.Println(reflect.TypeOf(Ꮡ(new dotted.T())).Elem().String());
 

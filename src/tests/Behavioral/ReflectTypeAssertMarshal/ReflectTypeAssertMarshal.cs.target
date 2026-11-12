@@ -34,7 +34,7 @@ partial struct thing {
 
 internal static @string Name(this thing t) { return t.s; }
 
-internal static void Main() {
+internal static void main() {
     var (b, err) = json.Marshal(new reading("lab", 21.5D));
     fmt.Println((@string)b, err);
 

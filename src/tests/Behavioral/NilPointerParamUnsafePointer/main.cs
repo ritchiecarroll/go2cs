@@ -43,7 +43,7 @@ internal static partial nint depth(ref node n) {
     return d;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("named nil  :", addrOfNamed(nil));
     fmt.Println("ptrptr nil :", addrOfPtrPtr(nil));
     fmt.Println("basic nil  :", addrOfBasic(nil));

@@ -50,7 +50,7 @@ internal partial struct main_type /*dyn*/ {
     internal uint32 size;
 }
 
-internal static void Main() {
+internal static void main() {
     var namedPerson = new Person(Name: "Alice", Age: 30);
     var anonPerson = new processAnonymousStruct_data(Name: "Bob", Age: 25);
 

@@ -6,7 +6,7 @@ using NamedImportInitOrder;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(reader.Captured());
 }
 

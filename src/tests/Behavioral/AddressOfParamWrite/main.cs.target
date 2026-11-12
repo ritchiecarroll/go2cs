@@ -112,7 +112,7 @@ partial interface Bumper {
     nint BumpedRecv();
 }
 
-internal static void Main() {
+internal static void main() {
     var p = clipParam(new Rect(0, 16));
     fmt.Println("param       :", p.Min, p.Max);
 

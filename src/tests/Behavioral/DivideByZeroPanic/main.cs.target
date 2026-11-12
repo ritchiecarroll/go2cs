@@ -60,7 +60,7 @@ internal static bool /*ok*/ outerGuard(nint a, nint b) {
     return ok;
 }
 
-internal static void Main() {
+internal static void main() {
     var (q, rec) = safeDiv(10, 2);
     fmt.Println(q, rec);
 

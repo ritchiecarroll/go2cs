@@ -110,7 +110,7 @@ internal static Tag remakeLocal() {
     return t;
 }
 
-internal static void Main() {
+internal static void main() {
     var orig = new Tag(str: "a");
 
     var (t, _) = orig.minimize();

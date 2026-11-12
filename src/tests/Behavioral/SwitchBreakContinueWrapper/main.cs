@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var words = slice<@string>(["skip", "stop", "keep", "skip", "keep"]);
 
     for (nint i = 0; i < len(words); i++) {

@@ -13,7 +13,7 @@ partial struct Buffer {
 internal const int8 opRead = -1;
 internal const int8 opInvalid = 0;
 
-internal static void Main() {
+internal static void main() {
     ref var a = ref heap(new nint(), out var Ꮡa);
     ref var ptr = ref heap<ж<nint>>(out var Ꮡptr);
     ref var pptr = ref heap<ж<ж<nint>>>(out var Ꮡpptr);

@@ -90,7 +90,7 @@ internal static void blankFuncValues() {
     fmt.Println(s, count(), total(1, 2, 3), c.bump(5));
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(A, B, C);
     multiBlank();
     blankFuncValues();

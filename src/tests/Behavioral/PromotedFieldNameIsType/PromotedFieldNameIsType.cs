@@ -15,7 +15,7 @@ partial struct Node {
     public nint Weight;
 }
 
-internal static void Main() {
+internal static void main() {
     var a = Ꮡ(new Node(sym: Ꮡ(new sym(Value: 1, Name: "a")), Weight: 10));
     var b = Ꮡ(new Node(sym: Ꮡ(new sym(Value: 2, Name: "b")), Weight: 20));
     a.sym.Node = b;

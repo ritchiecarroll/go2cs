@@ -9,7 +9,7 @@ internal static @string quo(@string a, @string b) { return a + "/"u8 + b; }
 
 internal static @string rem = "remainder";
 
-internal static void Main() {
+internal static void main() {
     int32 i32 = Δmath.MinInt32;
     int64 i64 = Δmath.MinInt64;
     nint m1 = -1;

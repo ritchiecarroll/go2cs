@@ -48,7 +48,7 @@ internal static void bump(this ref chunk c, ж<chunk> other) {
     }
 }
 
-internal static void Main() {
+internal static void main() {
     var o = Ꮡ(new outer(tag: 7));
     o.of(outer.Ꮡinner).bump(5);
     o.of(outer.Ꮡinner).bump(3);

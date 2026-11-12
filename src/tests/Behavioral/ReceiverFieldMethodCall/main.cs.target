@@ -50,7 +50,7 @@ public static int32 AddTwice(this ж<Counter> Ꮡc, int32 d) { return applyTwice
 public static int32 AddViaValue(this ж<Flag> Ꮡf, int32 d) { return applyTwice(Ꮡf.Ꮡc.Add, d); }
 public static int32 ReadViaValue(this ж<Flag> Ꮡf) { return readVia(Ꮡf.Ꮡc.Get); }
 
-internal static void Main() {
+internal static void main() {
     ref var fl = ref heap(new Flag(), out var Ꮡfl);
     fl.label = "hits";
 

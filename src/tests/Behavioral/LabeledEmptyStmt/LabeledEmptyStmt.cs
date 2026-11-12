@@ -43,7 +43,7 @@ skip:;
     return total;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(scan([3, -1, 7, 2, -5, 5]));
     fmt.Println(gotoEndOfFunc(3), gotoEndOfFunc(20));
     fmt.Println(nestedGotoEnd([[1, 2, 3], [4, 0, 6], [7, 8]]));

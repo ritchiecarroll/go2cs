@@ -55,7 +55,7 @@ internal static nint count<T>(slice<T> items, Func<T, bool> p) {
     return n;
 }
 
-internal static void Main() {
+internal static void main() {
     var names = new Names(new map<nint, @string>{[2] = "b", [1] = "a"});
     fmt.Println("named map:", keys<@string>(names));
 

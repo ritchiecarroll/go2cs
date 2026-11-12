@@ -107,7 +107,7 @@ internal static nint appendedLen(params ꓸꓸꓸжbox bsʗp) {
     return len(bs);
 }
 
-internal static void Main() {
+internal static void main() {
     var a = Ꮡ(new box(v: 1));
     var b = Ꮡ(new box(v: 2));
     var c = Ꮡ(new box(v: 3));

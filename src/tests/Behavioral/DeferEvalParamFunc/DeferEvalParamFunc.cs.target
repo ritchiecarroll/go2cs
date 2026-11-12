@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     GoFrame ᒐ = default;
     try {
         defer(ᴛ1 => fmt.Println("Deferred result:", ᴛ1), add(3, 4), ref ᒐ);

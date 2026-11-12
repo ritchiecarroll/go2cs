@@ -33,7 +33,7 @@ internal static nint arr() {
     return ps[0].a + ps[0].b + ps[1].a + ps[1].b;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(process(), arr());
 }
 

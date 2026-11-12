@@ -23,7 +23,7 @@ internal static @string nameOf(any fn) {
     return "<empty name>";
 }
 
-internal static void Main() {
+internal static void main() {
     ref var t = ref heap<T>(new T(n: 1), out var Ꮡt);
     var p = Ꮡt;
 

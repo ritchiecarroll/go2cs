@@ -15,7 +15,7 @@ partial struct holder {
 
 internal static T first<T>(slice<T> xs) { return xs[0]; }
 
-internal static void Main() {
+internal static void main() {
     ж<global::go.DotImportNameCollision.a.keys_package.Key> k = NewKey("dot");
     global::go.DotImportNameCollision.a.keys_package.Count v = 3;
     var ks = slice<ж<global::go.DotImportNameCollision.a.keys_package.Key>>([k, NewKey("second")]);

@@ -17,7 +17,7 @@ public static void Add(this Values v, @string key, @string value) {
     v[key] = append(v[key], value);
 }
 
-internal static void Main() {
+internal static void main() {
     var v = new Values(new map<@string, slice<@string>>{});
     v.Add("color", "red");
     v.Add("color", "blue");

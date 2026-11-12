@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var linesᴷ = new stackAppend<slice<nint>>();
     var mapsᴷ = new stackAppend<map<@string, nint>>();
     var ptrsᴷ = new stackAppend<ж<nint>>();

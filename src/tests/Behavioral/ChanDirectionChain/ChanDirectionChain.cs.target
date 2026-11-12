@@ -9,7 +9,7 @@ internal partial struct main_i /*dyn*/ {
     internal channel/*<-*/</*<-*/channel<nint>> x = channel/*<-*/</*<-*/channel<nint>>.Nil(ChanCargo.Of(new GoChanDir[] { GoChanDir.Send, GoChanDir.Recv }, null));
 }
 
-internal static void Main() {
+internal static void main() {
     var intT = reflect.TypeOf((nint)0);
 
     var both = reflect.ChanOf(reflect.BothDir, intT);

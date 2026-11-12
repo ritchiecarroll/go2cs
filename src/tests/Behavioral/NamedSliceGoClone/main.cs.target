@@ -43,7 +43,7 @@ public static M Clone(this M m) {
 
 partial struct U /*[]@string*/;
 
-internal static void Main() {
+internal static void main() {
     ref var v = ref heap<V>((V)slice<byte>((@string)"ab"u8), out var Ꮡv);
     var c = v.Clone();
     fmt.Println((@string)(slice<byte>)c, len(c), len(v));

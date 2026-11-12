@@ -41,7 +41,7 @@ internal static reflectꓸType nest(nint depth, reflectꓸType elem) {
     return elem;
 }
 
-internal static void Main() {
+internal static void main() {
     var byteT = reflect.TypeOf((uint8)0);
 
     array<array<uint8>> nestedDecl = new(2, () => new(3));

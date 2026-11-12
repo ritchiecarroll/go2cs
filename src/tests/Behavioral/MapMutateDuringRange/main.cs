@@ -14,7 +14,7 @@ internal static @string dump(map<@string, nint> m, slice<@string> keys) {
     return fmt.Sprintf("[%s] len=%d"u8, s, len(m));
 }
 
-internal static void Main() {
+internal static void main() {
     var insert = new map<@string, nint>{["a"] = 1, ["b"] = 2, ["c"] = 3};
     nint visited = 0;
     foreach (var (k, v) in insert) {

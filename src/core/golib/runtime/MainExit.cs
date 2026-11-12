@@ -28,8 +28,8 @@ namespace go.golib;
 /// calls, and <c>main</c> returns at once.
 /// </para>
 /// <para>
-/// A converted <c>main</c> is the CLR entry point and a goroutine is a background thread, so when
-/// <c>Main</c> returned the runtime shut down and the panicking goroutine never reached golib's
+/// A converted program's entry point returns when <c>main</c> does (it waits for <see cref="MainThread"/>), and a
+/// goroutine is a background thread, so when <c>Main</c> returned the runtime shut down and the panicking goroutine never reached golib's
 /// unhandled-exception backstop: exit 0 and an empty stderr (P1, 5 of 5 runs). The tail runs here, from
 /// <c>AppDomain.ProcessExit</c>, which the CLR raises after <c>Main</c> returns, on JIT and Native AOT
 /// alike.

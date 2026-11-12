@@ -120,7 +120,7 @@ internal static @string digit(nint n) {
     return "many";
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(bomKind(((@string)(new byte[]{0xff, 0xfe, 0x61, 0x62}))), bomKind(((@string)(new byte[]{0xfe, 0xff, 0x61, 0x62}))), bomKind("ab"), bomKind("a"));
     fmt.Println(pair(new byte[]{1, 2}.array()), pair(new byte[]{3, 4}.array()), pair(new byte[]{9, 9}.array()), pair(new byte[]{5, 5}.array()));
     fmt.Println(where(new point()), where(new point(0, 1)), where(new point(2, 2)));

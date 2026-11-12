@@ -21,7 +21,7 @@ internal static void tryWrite(map<@string, nint> m) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     map<@string, nint> m = default;
 
     fmt.Println(m["a"]);

@@ -133,7 +133,7 @@ partial struct box {
     internal nint v;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(incr());
     fmt.Println(incrBare());
 

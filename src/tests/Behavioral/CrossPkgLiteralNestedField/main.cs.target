@@ -6,7 +6,7 @@ using CrossPkgLiteralNestedField;
 
 partial class main_package {
 
-internal static void Main() {
+internal static void main() {
     var a = Ꮡ(new addrlib.Addr(Name: "hello"));
     fmt.Println(a.Capacity());
 

@@ -138,7 +138,7 @@ internal static Func<@string, (@string, slice<byte>, error)> makeScanner(@string
 
 internal static (slice<byte>, error) readWith(@string @base, @string @file) { return (slice<byte>(@base + @file), default); }
 
-internal static void Main() {
+internal static void main() {
     GoFrame ᒐ = default;
     try {
         var bbufᴷ = new stackAppend<byte>();

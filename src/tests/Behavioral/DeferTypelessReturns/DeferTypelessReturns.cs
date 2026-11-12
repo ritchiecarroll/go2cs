@@ -59,7 +59,7 @@ internal static (uint32, error) mixedRet(bool ok) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Main() {
+internal static void main() {
     GoFrame ᒐ = default;
     try {
         defer(ᴛ1 => closeIt(ᴛ1, 3), nil, ref ᒐ);

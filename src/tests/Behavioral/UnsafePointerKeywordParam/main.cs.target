@@ -25,7 +25,7 @@ internal static @unsafe.Pointer offset(@unsafe.Pointer @new, uintptr d) {
 
 internal static uintptr pass(@unsafe.Pointer @new) { return asUintptr(@new); }
 
-internal static void Main() {
+internal static void main() {
     ref var x = ref heap(new int32(), out var Ꮡx);
     x = 7;
     ref var a = ref heap<nint>(out var Ꮡa);

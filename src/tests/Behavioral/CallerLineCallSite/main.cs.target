@@ -55,7 +55,7 @@ internal static void report(@string name, nint have, nint want) {
 private static readonly object looksDeliciousˢ = (@string)"looks delicious"u8;
 private static readonly object litˢ = (@string)"lit"u8;
 
-internal static void Main() {
+internal static void main() {
     var e = Ꮡ(new E());
     nint l = default;
 

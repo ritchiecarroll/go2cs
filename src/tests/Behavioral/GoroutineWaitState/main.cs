@@ -52,7 +52,7 @@ internal static @string await(slice<byte> buf, slice<@string> want, bool sense) 
     return d;
 }
 
-internal static partial void Main() {
+internal static partial void main() {
     var buf = new slice<byte>(dumpSize);
 
     ref var mu = ref heap(new Δsync.Mutex(), out var Ꮡmu);

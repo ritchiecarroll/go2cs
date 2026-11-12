@@ -20,7 +20,7 @@ internal static float32 applyFloat32(Func<float32> f) { return f(); }
 
 internal static float64 applyFloat64(Func<float64> f) { return f(); }
 
-internal static void Main() {
+internal static void main() {
     var maxFn = rune (rune _) => maxRune;
     fmt.Println(apply(maxFn, 'a'));
 

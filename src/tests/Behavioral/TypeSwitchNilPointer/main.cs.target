@@ -67,7 +67,7 @@ internal static @string multi(Namer i) {
     return "default";
 }
 
-internal static void Main() {
+internal static void main() {
     ж<T> p = default;
     fmt.Println(classify(new TжNamer(p)));
     fmt.Println(classify(new TжNamer(Ꮡ(new T(1)))));

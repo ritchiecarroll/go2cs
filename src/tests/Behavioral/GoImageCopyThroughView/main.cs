@@ -21,7 +21,7 @@ partial struct Pair {
     public uint64 C;
 }
 
-internal static void Main() {
+internal static void main() {
     var data = new slice<byte>((nint)(/* unsafe.Sizeof(Dirent{}) */ (uintptr)1048));
     data[0] = 7;
     data[16] = 32;

@@ -55,7 +55,7 @@ internal partial struct main_i /*dyn*/ {
     public map<@string, nint> M;
 }
 
-internal static void Main() {
+internal static void main() {
     var bytes = reflect.TypeOf(slice<byte>(default));
     var named = reflect.TypeOf((myBytes)default);
     var ints = reflect.TypeOf(slice<nint>(default));

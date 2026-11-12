@@ -34,7 +34,7 @@ partial struct myFunc {
 
 internal static @string Name(this ref myFunc o) { return o.n; }
 
-internal static void Main() {
+internal static void main() {
     var objMap = new map<Object, nint>();
     objMap[new myVarжObject(Ꮡ(new myVar("var-a")))] = 1;
     objMap[new myVarжObject(Ꮡ(new myVar("var-b")))] = 2;

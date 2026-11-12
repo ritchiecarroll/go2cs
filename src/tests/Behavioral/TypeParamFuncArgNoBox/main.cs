@@ -42,7 +42,7 @@ internal static void pick(Func<nint> f, bool cond) {
     fmt.Println("param:", g == nil, h == nil, isNilAny((f).OrTypedNilFunc()), isNilAny((g).OrTypedNilFunc()));
 }
 
-internal static void Main() {
+internal static void main() {
     var used = new map<@string, bool>{["x"] = true};
 
     var usedʗ1 = used;

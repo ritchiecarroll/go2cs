@@ -27,7 +27,7 @@ internal static nint run(nint n) {
     return total + len(m);
 }
 
-internal static void Main() {
+internal static void main() {
     var start = time.Now().UnixNano();
 
     nint total = run(2000000);

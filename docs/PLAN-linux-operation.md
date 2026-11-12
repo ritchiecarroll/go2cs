@@ -788,7 +788,7 @@ covers exactly the three files **embedded** at compile time. Its reasoning is so
 
 | Class | Sites | Safe on Linux? |
 |:--|:--|:--|
-| **Write-only** — `WriteString`/`Join` emitting CRLF into new output | `initOrderOperations.go:460-545`, `testConversion.go:935-978`, `:1816-1841`, `projectFileWriter.go:104,142-149,290,294`, `autoSiblingOperations.go:103,137-141`, `readme.go:107`, `moduleConverter.go:591`, `solutionGenerator.go:231,393`, `packageStateOperations.go:175`, `internal/stdlibmeta/generate.go:84-95` | **Yes.** Host-independent by construction — the converter always emits CRLF, which is what makes its output deterministic. Keep them. |
+| **Write-only** — `WriteString`/`Join` emitting CRLF into new output | `initOrderOperations.go:460-545`, `testConversion.go:935-978`, `:1816-1841`, `projectFileWriter.go:104,142-149,290,294`, `autoSiblingOperations.go:103,137-141`, `readme.go:107`, `moduleConverter.go:595`, `solutionGenerator.go:231,393`, `packageStateOperations.go:176`, `internal/stdlibmeta/generate.go:84-95` | **Yes.** Host-independent by construction — the converter always emits CRLF, which is what makes its output deterministic. Keep them. |
 | **Template split** — splits the embedded skeleton | `packageInfoWriter.go:57` | **Yes**, given the `eol=crlf` pin. |
 | **Read-back split** — splits a file read off disk | **`packageInfoWriter.go:52`** | **NO.** |
 | **Read-back, EOL-agnostic** | `adapterNameCollisions.go:121` (splits `"\n"`), `directiveOperations.go:58,467` and `importOperations.go:748` (`bufio.Scanner`, which drops a trailing `\r`), `stdLibConverter.go:437`, `testConversion.go:2691` (split `"\n"`), `readmeValidationBadge.go:172` (`parseProofTotals`, explicitly CRLF-tested at `readmeValidationBadge_test.go:330`) | **Yes.** |
@@ -838,7 +838,7 @@ loader:
 
 - `conversionDriver.go:83` — `cfg.Env = append(os.Environ(), "GOOS=…", "GOARCH=…")`
 - `stdLibConverter.go:235-236`, `:332-333`
-- `moduleConverter.go:161`
+- `moduleConverter.go:164`
 - `testAliasShadowOperations.go:58-59` — `buildContext.GOOS/GOARCH`
 - `testConversion.go:372-373`, `:1010-1011`, `:4389`
 
@@ -849,9 +849,9 @@ follows the converter's host, which is the trap: **running `go2cs -stdlib` on Li
 different corpus than running it on Windows.** Any Linux lane must pass `-platforms` explicitly rather than
 relying on the default.
 
-No Windows-only external tool is invoked by the converter. Child processes are `git` (`testConversion.go:3757`),
+No Windows-only external tool is invoked by the converter. Child processes are `git` (`testConversion.go:3771`),
 `go`, and `dotnet` (`:3807`, `:3810`, `:4189`, `:4191`), all through
-`runCommandWithTimeout` (`testConversion.go:4381`), which uses `exec.CommandContext` — portable.
+`runCommandWithTimeout` (`testConversion.go:4395`), which uses `exec.CommandContext` — portable.
 
 ---
 
@@ -918,9 +918,9 @@ Two things are already portable and should not be re-litigated:
 
 #### A2.3 — The `go test` corollary
 
-`runCommandWithTimeout` (`testConversion.go:4381-4392`) exports `GOOS`/`GOARCH` from `-platforms` to **both**
+`runCommandWithTimeout` (`testConversion.go:4395-4406`) exports `GOOS`/`GOARCH` from `-platforms` to **both**
 sides of the differential oracle, including the `go test -json -count=1` baseline
-(`testConversion.go:4189`). `go test` for `GOOS=windows` on a Linux host builds a Windows test binary it
+(`testConversion.go:4203`). `go test` for `GOOS=windows` on a Linux host builds a Windows test binary it
 cannot execute. **The Phase-4 `-tests` pipeline and `run-validated-sweep.ps1` cannot run against the
 Windows-target corpus on Linux, at all.** They are not slow or flaky there; they are unavailable. Only a
 `GOOS=linux` corpus makes them meaningful on Linux, and that corpus's validation roster starts from zero.
@@ -1247,9 +1247,9 @@ equality proof, and do it **before** Arc 2 so no converter change is buried unde
 
 #### A6.2 — The `-tests` pipeline's Windows assumptions
 
-Better than expected. `runCommandWithTimeout` (`testConversion.go:4381`) drives `dotnet build`,
+Better than expected. `runCommandWithTimeout` (`testConversion.go:4395`) drives `dotnet build`,
 `dotnet run --project`, `go test -json` and `git rev-parse` through `exec.CommandContext` — no `.exe`, no
-shell, no `taskkill`. Fixture staging uses `filepath.FromSlash` (`testConversion.go:3516`, `:3646`), and the
+shell, no `taskkill`. Fixture staging uses `filepath.FromSlash` (`testConversion.go:3530`, `:3646`), and the
 hand-owned host normalizes separators explicitly (`src/core/testing/TestHost.cs:253,262`:
 `relativePath.Replace('/', Path.DirectorySeparatorChar)`).
 
@@ -1554,7 +1554,7 @@ Every command below is read-only. Run from the repository root unless noted.
 | P27 | `grep -n 'log.Fatal' src/go2cs/packageInfoWriter.go` | `:120 :175 :381 :528 :586` — one per marker section |
 | P28 | `grep -n 'pathReplace(' src/go2cs/importOperations.go` | `:44 :256 :258 :321`; definition `:458` with the `runtime.GOOS == "windows"` gate |
 | P29 | `sed -n '263p;324p' src/go2cs/importOperations.go` | `filepath.Join(strings.ReplaceAll(targetDir, "/", "\\"), "\\"+packageName+".csproj")` |
-| P30 | <code>grep -n 'GOOS&#92;&#124;GOARCH' src/go2cs/&#42;.go</code> (non-test) | `main.go:98`; `conversionDriver.go:83`; `stdLibConverter.go:235,244,332,333`; `moduleConverter.go:161`; `testAliasShadowOperations.go:58,59`; `testConversion.go:372,373,1010,1011,4389`; `directiveOperations.go:357-408` (`knownGOOS`/`knownGOARCH`) |
+| P30 | <code>grep -n 'GOOS&#92;&#124;GOARCH' src/go2cs/&#42;.go</code> (non-test) | `main.go:98`; `conversionDriver.go:83`; `stdLibConverter.go:235,244,332,333`; `moduleConverter.go:164`; `testAliasShadowOperations.go:58,59`; `testConversion.go:372,373,1010,1011,4389`; `directiveOperations.go:357-408` (`knownGOOS`/`knownGOARCH`) |
 | P31 | `cat src/core/fmt/fmt.csproj` | 10 `<ProjectReference Include="$(go2csPath)core\…\….csproj" />`; `USERPROFILE`→`HOME` fallback present |
 | P32 | `cat src/core/golib/golib.csproj` | `$(USERPROFILE)\go2cs\` **without** the `HOME` fallback |
 | P33 | `grep -n 'Import Project="\$(MSBuild' "$SDK/Microsoft.Common.CurrentVersion.targets"` (SDK 9.0.316) | `:18`, `:27`, `:28`, `:6961`, … — `$(Property)\literal\path` with matching `Exists('$(Property)\…')` conditions |

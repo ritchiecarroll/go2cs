@@ -28,7 +28,7 @@ internal static ж<nint> intFieldAddr(ж<conf> c, @string name) {
     return (ж<nint>)(uintptr)(v.FieldByName(name).Addr().UnsafePointer());
 }
 
-internal static void Main() {
+internal static void main() {
     ref var c = ref heap<conf>(new conf(name: "cfg", version: "v0", depth: 3), out var Ꮡc);
 
     boolFieldAddr(Ꮡc, "trace").Value = true;

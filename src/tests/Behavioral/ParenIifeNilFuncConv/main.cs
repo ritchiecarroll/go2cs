@@ -14,7 +14,7 @@ internal static nint call(this handlerFunc h, @string s) {
     return h(s);
 }
 
-internal static void Main() {
+internal static void main() {
     func(() => {
         fmt.Println("paren iife");
     })();

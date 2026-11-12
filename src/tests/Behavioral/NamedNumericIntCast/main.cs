@@ -8,7 +8,7 @@ partial struct idx /*num:nuint*/;
 
 partial struct cnt /*num:nint*/;
 
-internal static void Main() {
+internal static void main() {
     var a = slice<nint>([10, 20, 30, 40, 50]);
 
     idx lo = 1;

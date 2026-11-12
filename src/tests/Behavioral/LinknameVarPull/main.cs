@@ -8,7 +8,7 @@ partial class main_package {
 
 internal static @string secret { get => go.LinknameVarPullLib_package.secret; set => go.LinknameVarPullLib_package.secret = value; }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(secret);
 }
 

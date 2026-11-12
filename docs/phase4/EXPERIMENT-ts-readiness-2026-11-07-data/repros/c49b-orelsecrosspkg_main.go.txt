@@ -1,0 +1,28 @@
+package main
+
+import (
+	"fmt"
+
+	"repro/c49b-orelsecrosspkg/core"
+	"repro/c49b-orelsecrosspkg/diagnostics"
+)
+
+// C49 probe, the TS call shape: checkTypeArguments(..., headMessage *diagnostics.Message) receives nil and does
+// core.OrElse(headMessage, diagnostics.Type_0_does_not_satisfy_the_constraint_1), OrElse in another package.
+func checkTypeArguments(reportErrors bool, headMessage *diagnostics.Message) int {
+	m := core.OrElse(headMessage, diagnostics.Type_0_does_not_satisfy_the_constraint_1)
+	if m == nil {
+		return 0
+	}
+	return m.Code()
+}
+
+type Node struct{ expr *Node }
+
+func (n *Node) Expression() *Node { return n.expr }
+
+func main() {
+	n := &Node{}
+	errNode := core.OrElse(n.Expression(), n) // a bare `yield`: Expression() is nil
+	fmt.Println(checkTypeArguments(true, nil), errNode == n) // Go: 2344 true
+}

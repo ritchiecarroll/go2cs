@@ -25,7 +25,7 @@ internal partial struct main_N /*num:nint*/;
 
 internal partial struct main_M /*num:nint*/;
 
-internal static void Main() {
+internal static void main() {
     A a = (A)(@string)abcˢ;
     B b = (B)(@string)a;
     fmt.Println(b, len(b), a.Len());

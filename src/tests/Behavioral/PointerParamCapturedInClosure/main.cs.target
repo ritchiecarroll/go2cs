@@ -19,7 +19,7 @@ internal static Action mutate(ж<config> c) {
     };
 }
 
-internal static void Main() {
+internal static void main() {
     var c = Ꮡ(new config(size: 10, tag: 3));
     var f = scaler(c);
     fmt.Println(f(5));

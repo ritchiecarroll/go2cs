@@ -13,7 +13,7 @@ internal partial struct main_table /*dyn*/ {
     internal bool want;
 }
 
-internal static void Main() {
+internal static void main() {
     @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(@new<nint>());
     fmt.Println("A1 paren, fresh allocation, non-nil:", p != nil);
 

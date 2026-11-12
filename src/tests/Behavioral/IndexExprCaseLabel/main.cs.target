@@ -23,7 +23,7 @@ internal static @string classify(@string s) {
 
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println(classify("alpha"));
     fmt.Println(classify("beta"));
     fmt.Println(classify("gamma"));

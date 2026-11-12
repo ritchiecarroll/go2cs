@@ -31,7 +31,7 @@ partial struct Managed {
     internal @string s;
 }
 
-internal static void Main() {
+internal static void main() {
     fmt.Println("Counter size:", /* unsafe.Sizeof(Counter{}) */ (uintptr)4, "v offset:", /* unsafe.Offsetof(Counter{}.v) */ (uintptr)0);
     fmt.Println("Wide size:", /* unsafe.Sizeof(Wide{}) */ (uintptr)8, "v offset:", /* unsafe.Offsetof(Wide{}.v) */ (uintptr)0);
     fmt.Println("Plain size:", /* unsafe.Sizeof(Plain{}) */ (uintptr)16, "b offset:", /* unsafe.Offsetof(Plain{}.b) */ (uintptr)8);

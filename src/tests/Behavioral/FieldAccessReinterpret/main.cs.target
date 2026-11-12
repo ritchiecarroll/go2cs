@@ -44,7 +44,7 @@ internal static (ж<reparse>, error) readReparse(uint32 flags, bool fail) {
 
 internal static ж<reparse> viewReparse(slice<byte> blob) { return Ꮡ(blob, 8).Reinterpret<byte, reparse>(); }
 
-internal static void Main() {
+internal static void main() {
     var blob = new slice<byte>(24);
     var rec = Ꮡ(blob, 0).Reinterpret<byte, record>();
 

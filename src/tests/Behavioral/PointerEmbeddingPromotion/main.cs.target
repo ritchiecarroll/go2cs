@@ -25,7 +25,7 @@ partial struct top {
     internal @string label;
 }
 
-internal static void Main() {
+internal static void main() {
     var h = new holder(leaf: Ꮡ(new leaf(n: 0)), tag: "h");
     h.bump();
     h.bump();

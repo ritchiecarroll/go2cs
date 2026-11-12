@@ -35,7 +35,7 @@ internal static void stop(this ж<tracker> Ꮡt) {
 
 internal static partial void other(this ref tracker t, ж<tracker> o) { goǃ(o.loop); }
 
-internal static void Main() {
+internal static void main() {
     var t = Ꮡ(new tracker(done: new channel<nint>(0), n: 7, @in: new inner(ch: new channel<nint>(0))));
     t.start();
     fmt.Println(ᐸꟷ(t.done));

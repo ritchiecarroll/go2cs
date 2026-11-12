@@ -18,7 +18,7 @@ internal static ж<atomic.Int32> last(any vals) {
     return ptrs[len(ptrs) - 1];
 }
 
-internal static void Main() {
+internal static void main() {
     var ptrsᴷ = new stackAppend<ж<atomic.Int32>>();
 
     ref var x = ref heap(new counters(), out var Ꮡx);

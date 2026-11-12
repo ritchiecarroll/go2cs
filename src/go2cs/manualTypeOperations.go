@@ -2588,6 +2588,12 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// take). Reached only when a chain is trusted AND the caller supplied a DNS name; the
 		// SystemCertVerify behavioral test's policy rows are the offline guard.
 		"CertVerifyCertificateChainPolicy": goosWindows,
+		// C44: under the `dotnet prog.dll a b` muxer, kernel32's GetCommandLineW is the MUXER's line, so
+		// os's exec_windows init (Args = commandLineToArgv(GetCommandLine())) read [dotnet, prog.dll, a, b]
+		// where Go gives [prog, a, b]. The hand-own (zsyscall_windows_cmdline_impl.cs) returns the line with
+		// the muxer prefix CUT FROM THE RAW TEXT when the host is dotnet and a token names the entry
+		// assembly; os's own commandLineToArgv still does the split. An apphost launch is untouched.
+		"GetCommandLine": goosWindows,
 	},
 	// The SECOND package holding the syscall struct-passing class, and the one member of it whose
 	// established remedy is measured UNREACHABLE — so this entry declares a CAPABILITY LIMIT rather

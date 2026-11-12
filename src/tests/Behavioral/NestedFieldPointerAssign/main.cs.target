@@ -15,7 +15,7 @@ partial struct outer {
 
 internal static partial ж<outer> get(ж<outer> o) { return o; }
 
-internal static void Main() {
+internal static void main() {
     ref var @base = ref heap(new outer(), out var Ꮡbase);
     var o = get(Ꮡbase);
 

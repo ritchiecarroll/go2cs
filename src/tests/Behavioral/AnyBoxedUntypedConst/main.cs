@@ -57,7 +57,7 @@ internal static any retStrL() { return seedˢ; }
 
 internal static (nint, error) readN() { return (0, default); }
 
-internal static void Main() {
+internal static void main() {
     var (n, _) = readN();
     nint i = 7;
     rune r = 'A';

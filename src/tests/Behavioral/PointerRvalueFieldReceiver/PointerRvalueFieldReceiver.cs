@@ -24,7 +24,7 @@ partial struct queue {
 
 internal static ж<node> tail(this ref queue q) { return q.last; }
 
-internal static void Main() {
+internal static void main() {
     getNode().Ꮡs.set(42);
     fmt.Println(theNode.s.v);
 

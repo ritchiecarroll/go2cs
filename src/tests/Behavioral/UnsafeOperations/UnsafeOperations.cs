@@ -61,7 +61,7 @@ internal partial struct main_x /*dyn*/ {
     internal @string c;
 }
 
-internal static void Main() {
+internal static void main() {
     var b = slice<byte>([]);
 
     for (nint ch = 32; ch < 80; ch++) {
