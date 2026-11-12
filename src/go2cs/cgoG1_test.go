@@ -44,6 +44,10 @@ type cgoG1Arm struct {
 	// print the same lines and exit 0 both ways.
 	goFails string
 	csFails string
+	// goPrints and csPrints are each side's whole output for a ruled divergence in a VALUE, where both sides run to
+	// the end and print different things.
+	goPrints string
+	csPrints string
 }
 
 // label names the arm with its environment.
@@ -68,15 +72,18 @@ func cgoG1Arms() []cgoG1Arm {
 		{name: "nested"},
 		{name: "tworesults"},
 		{name: "statement"},
-		{name: "ordered"},
+		{name: "reinterpreted"},
+		{name: "reinterpretedwrite"},
 		{name: "copyback"},
+		// A ruled divergence of the converter, not of cgo: gc runs a call in an operand list before it reads a plain
+		// variable in the same list, and go2cs evaluates left to right (§11.22; BOARD, 2026-11-12).
+		{name: "ordered", goPrints: "ordered 200004\n", csPrints: "ordered 2004\n"},
 		// §11.16's divergences, each side asserted (§11.20's checklist).
 		{name: "packagelevel", goFails: cgoG1PointerPanic},
 		{name: "sibling", goFails: cgoG1PointerPanic},
 		{name: "pinned", csFails: cgoG1PointerPanic},
 		{name: "pinned", env: []string{"GODEBUG=cgocheck=0"}, csFails: cgoG1PointerPanic},
 		{name: "byvalue", csFails: cgoG1PointerPanic},
-		{name: "reinterpreted", csFails: "go2cs refuses the call"},
 	}
 
 	if runtime.GOOS != "windows" {
@@ -163,7 +170,8 @@ func copyCgoG1File(t *testing.T, from, to string) {
 }
 
 // cgoG1Decoy is a library with the probe's name whose go2cs_probe_node_sum answers 7000 more than the probe's, built
-// with the host's C compiler into a directory of its own: a library that loads, and is the wrong one.
+// with the host's C compiler into a directory of its own: a library that loads, and is the wrong one. The nested arm
+// calls that function twice, one call inside the other's argument, so the probe answers 1 and the decoy 14001.
 func cgoG1Decoy(t *testing.T, cc []string) string {
 	t.Helper()
 
@@ -322,7 +330,11 @@ func TestG1TheConvertedCgoProgramResolvesAndRunsAsGoDoes(t *testing.T) {
 				t.Errorf("go2cs was to run this arm to its end, and exited %d:\n%s%s", csRun.exit, csRun.stdout, lastLines(csRun.stderr, 12))
 			}
 
-			if arm.goFails == "" && arm.csFails == "" {
+			if arm.goPrints != "" || arm.csPrints != "" {
+				if goRun.stdout != arm.goPrints || csRun.stdout != arm.csPrints {
+					t.Errorf("a ruled divergence reads other than as ruled:\n   go: %q, ruled %q\ngo2cs: %q, ruled %q", goRun.stdout, arm.goPrints, csRun.stdout, arm.csPrints)
+				}
+			} else if arm.goFails == "" && arm.csFails == "" {
 				goLines, csLines := goRun.stdout, csRun.stdout
 
 				if arm.name == "puts" {
@@ -352,7 +364,7 @@ func TestG1TheConvertedCgoProgramResolvesAndRunsAsGoDoes(t *testing.T) {
 
 		t.Logf("READING %s decoy control: go's binary with the decoy as the library found prints %q (exit %d)", target, strings.TrimSpace(found.stdout), found.exit)
 
-		if !strings.Contains(found.stdout, "nested 7001") {
+		if !strings.Contains(found.stdout, "nested 14001") {
 			if runtime.GOOS == "darwin" {
 				// The probe is bound by its absolute install name there, and whether dyld lets a search path override
 				// one is the host's setting. Without the control the arm below is NOT MEASURED on this host.

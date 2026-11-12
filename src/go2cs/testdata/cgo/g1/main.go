@@ -131,13 +131,22 @@ func main() {
 		C.go2cs_probe_node_touch(&node)
 		fmt.Println("statement", int(node.value))
 	case "ordered":
-		// A struct by value and, after it, an argument that changes that struct: Go copies the struct first.
+		// A struct by value and, after it, an argument that changes that struct. Go's spec orders the calls in an
+		// expression and leaves a plain variable read unordered against them; gc runs the call first, so C is
+		// handed the changed struct. go2cs reads left to right and hands C the struct as it was. A ruled divergence
+		// of the converter, not of cgo (§11.22).
 		pair := C.struct_go2cs_probe_pair{a: 1, b: 2}
 		fmt.Println("ordered", int(C.go2cs_probe_pair_scaled(pair, mutate(&pair))))
 	case "reinterpreted":
-		// A Go struct's address reinterpreted as the C struct's: Go proceeds, go2cs refuses (§11.1).
+		// A Go struct's address reinterpreted as the C struct's. The two share a layout, so the reinterpretation is
+		// a view of the same Go memory, and the call proceeds as it does in Go (§11.22).
 		var node goNode
 		fmt.Println("reinterpreted", int64(C.go2cs_probe_node_sum((*C.struct_go2cs_probe_node)(unsafe.Pointer(&node)), 0)))
+	case "reinterpretedwrite":
+		// The same pointer handed to a C function that WRITES through it: the Go struct must show C's write.
+		var node goNode
+		C.go2cs_probe_node_touch((*C.struct_go2cs_probe_node)(unsafe.Pointer(&node)))
+		fmt.Println("reinterpretedwrite", int(node.value))
 	case "packagelevel":
 		// A pointer into the data segment through the variable form: Go's check panics, go2cs proceeds (§11.16).
 		node := &packageNode
