@@ -91,6 +91,16 @@ var cgoPhase2Libraries = map[string]string{
 	"go2cs_probe_node_touch":  "libgo2csprobe.so",
 	"go2cs_probe_link_value":  "libgo2csprobe.so",
 	"go2cs_probe_pair_scaled": "libgo2csprobe.so",
+	"free":                    "libc.so.6",
+	"malloc":                  "libc.so.6",
+	"go2cs_probe_text":        "libgo2csprobe.so",
+	"go2cs_probe_text_copy":   "libgo2csprobe.so",
+	"go2cs_probe_text_fill":   "libgo2csprobe.so",
+	"go2cs_probe_sum":         "libgo2csprobe.so",
+	"go2cs_probe_same":        "libgo2csprobe.so",
+	"go2cs_probe_log_new":     "libgo2csprobe.so",
+	"go2cs_probe_log_put":     "libgo2csprobe.so",
+	"go2cs_probe_release":     "libgo2csprobe.so",
 }
 
 const cgoPhase2Toolchain = "clang version 22.1.8"

@@ -74,8 +74,9 @@ type cgoDeclaration struct {
 // cgoDeclarations returns every cgo declaration in pkg's scope, classified and sorted by C name. It FILTERS cgo's
 // plumbing rather than reporting it (P1's list, §11.7): `_cgo_<hash>_Cfunc_*`, `__cgofn_*`, `_Cgo_use`/`_ptr`/
 // `_keepalive`/`_no_callback`/`_always_false`, `_cgoCheckPointer`, `_cgo_runtime_cgocall` and `runtime_throw` carry
-// none of the recognized prefixes, and what cgo declares for its own use under a recognized prefix (C.CString's
-// allocator `_CMalloc`, the `_GoString_` type) has a C name C reserves for the implementation.
+// none of the recognized prefixes, and what cgo declares for its own use under a recognized prefix (the `_GoString_`
+// type) has a C name C reserves for the implementation. One reserved name is a Go source's own: C.malloc, which
+// cmd/cgo declares as `_Cfunc__CMalloc` (cgoMallocWrapper).
 //
 // The C types cmd/cgo declares on the way to the ones a source names (a struct field's `uchar`, `intgo`'s chain to
 // `long`) are reported too: a converted struct needs its fields' types.
@@ -102,8 +103,17 @@ func cgoDeclarations(pkg *types.Package) []cgoDeclaration {
 	return declarations
 }
 
+// cgoMallocWrapper is what cmd/cgo declares for C.malloc (out.go, builtinDefs' _CMalloc): a wrapper of its own, which
+// allocates through the stub C.CString uses and ends the program on a nil result. cmd/cgo declares it only for a
+// package that names C.malloc, and declares no `_Cfunc_malloc` beside it.
+const cgoMallocWrapper = "_Cfunc__CMalloc"
+
 // classifyCgoName reads one scope name. ok is false for any name that is not a recognized cgo declaration.
 func classifyCgoName(name string) (declaration cgoDeclaration, ok bool) {
+	if name == cgoMallocWrapper {
+		return cgoDeclaration{cName: cgoAllocator, kind: cgoFunc}, true
+	}
+
 	for _, entry := range cgoKindPrefixes {
 		cName, found := strings.CutPrefix(name, entry.prefix)
 

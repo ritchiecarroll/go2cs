@@ -702,7 +702,10 @@
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase2\cgo_gotypes.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase2\fixture.cgo1.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase2\fixture.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase3\cgo_gotypes.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase3\fixture.cgo1.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase3\fixture.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase3\README.md" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\cgo_gotypes.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\cgo_import.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\cgo\phase1\fixture.cgo1.go" />

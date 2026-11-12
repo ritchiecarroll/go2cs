@@ -130,6 +130,14 @@ func cgoBuiltAssembly(t *testing.T, output, project string) string {
 }
 
 func TestTheCgoRoutesOutputBuildsAsAProject(t *testing.T) {
+	buildCgoOfflineFixture(t, "Phase 2", cgoPhase2Admitted(t))
+}
+
+// buildCgoOfflineFixture converts a checked-in fixture through the offline route and builds what it wrote as a
+// project, with the .NET SDK. It needs no C compiler: nothing is linked or run.
+func buildCgoOfflineFixture(t *testing.T, phase string, files map[string]string) {
+	t.Helper()
+
 	if os.Getenv(cgoBuildEnv) != "1" {
 		t.Skipf("NOT RUN: set %s=1 to build the converted fixture with the .NET SDK (Inconclusive, not a pass)", cgoBuildEnv)
 	}
@@ -152,10 +160,10 @@ func TestTheCgoRoutesOutputBuildsAsAProject(t *testing.T) {
 		output = cgoBuildDir(t, kept)
 	}
 
-	combined, _, err := convertCgoOfflineInto(t, cgoPhase2Admitted(t), output)
+	combined, _, err := convertCgoOfflineInto(t, files, output)
 
 	if err != nil {
-		t.Fatalf("the Phase 2 fixture did not convert: %v\n%s", err, lastLines(combined, 30))
+		t.Fatalf("the %s fixture did not convert: %v\n%s", phase, err, lastLines(combined, 30))
 	}
 
 	projects, err := filepath.Glob(filepath.Join(output, "*.csproj"))
@@ -174,7 +182,7 @@ func TestTheCgoRoutesOutputBuildsAsAProject(t *testing.T) {
 	built, err := build.CombinedOutput()
 	errors := cgoCompilerErrors(string(built))
 
-	t.Logf("READING the converted fixture's build: %d distinct error(s)", len(errors))
+	t.Logf("READING the converted %s fixture's build: %d distinct error(s)", phase, len(errors))
 
 	for _, line := range errors {
 		t.Logf("READING build error %s", line)

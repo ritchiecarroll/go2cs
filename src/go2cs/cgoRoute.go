@@ -23,9 +23,11 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 
+	"golang.org/x/tools/go/ast/astutil"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -188,6 +190,39 @@ func cgoTreeRoles(pkg *packages.Package) (sources []syntaxSourceFile, typesFile 
 	}
 
 	return sources, typesFile, imports, refusals
+}
+
+// cgoPlumbingImport is the name cmd/cgo imports unsafe under for its own use: the result type of a check closure that
+// returns a void pointer (`func() _cgo_unsafe.Pointer { … }()`).
+const cgoPlumbingImport = "_cgo_unsafe"
+
+// cgoDropPlumbingImport removes cmd/cgo's own import of unsafe from a tree it rewrote. Every check closure converts as
+// the call it makes, so nothing that converts names the import, and it would otherwise reach the C# as a using.
+func cgoDropPlumbingImport(file *ast.File) {
+	plumbing := func(spec *ast.ImportSpec) bool {
+		return spec.Name != nil && spec.Name.Name == cgoPlumbingImport
+	}
+
+	file.Imports = slices.DeleteFunc(file.Imports, plumbing)
+
+	var decls []ast.Decl
+
+	for _, decl := range file.Decls {
+		if genDecl, ok := decl.(*ast.GenDecl); ok && genDecl.Tok == token.IMPORT {
+			genDecl.Specs = slices.DeleteFunc(genDecl.Specs, func(spec ast.Spec) bool {
+				importSpec, ok := spec.(*ast.ImportSpec)
+				return ok && plumbing(importSpec)
+			})
+
+			if len(genDecl.Specs) == 0 {
+				continue
+			}
+		}
+
+		decls = append(decls, decl)
+	}
+
+	file.Decls = decls
 }
 
 // cgoDropDirectiveComments removes cmd/cgo's own comments from a tree it rewrote: its generated-file header, which
@@ -405,13 +440,18 @@ func cgoClosureVariable(ident *ast.Ident, prefix string) int {
 // that needs no check), then one check of each checked argument, then the call itself, of exactly _cgo0 … _cgoN-1 in
 // order, returned or as a statement. Anything else is not recognised, and the census refuses it.
 func cgoRecognizeCheckClosure(funcLit *ast.FuncLit, info *types.Info, plumbing map[types.Object]bool) *cgoCheckClosure {
+	return cgoRecognizeCheckClosureStatements(funcLit.Body.List, info, plumbing)
+}
+
+// cgoRecognizeCheckClosureStatements is cgoRecognizeCheckClosure over the statements themselves. The deferred form
+// spreads them over two bodies (cgoDeferredCheckClosure), and they read here as the one list they are.
+func cgoRecognizeCheckClosureStatements(statements []ast.Stmt, info *types.Info, plumbing map[types.Object]bool) *cgoCheckClosure {
 	const (
 		formPlain = iota
 		formVariable
 		formAddress
 	)
 
-	statements := funcLit.Body.List
 	closure := &cgoCheckClosure{arguments: map[types.Object]cgoClosureArgument{}}
 	forms := map[int]int{}
 	argumentObjects := map[int]types.Object{}
@@ -574,6 +614,87 @@ func cgoRecognizeCheckClosure(funcLit *ast.FuncLit, info *types.Info, plumbing m
 	return closure
 }
 
+// cgoDirectlyChecks reports whether one of a body's own statements is a call of cmd/cgo's _cgoCheckPointer: the body is
+// a check closure's, not a function that holds one further in.
+func cgoDirectlyChecks(body *ast.BlockStmt, info *types.Info, plumbing map[types.Object]bool) bool {
+	for _, statement := range body.List {
+		if exprStmt, ok := statement.(*ast.ExprStmt); ok {
+			if call, ok := exprStmt.X.(*ast.CallExpr); ok {
+				if callee, ok := call.Fun.(*ast.Ident); ok && callee.Name == "_cgoCheckPointer" && plumbing[info.Uses[callee]] {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
+}
+
+// cgoDeferredCheckClosure reads the form cmd/cgo gives `defer C.f(args)` when an argument needs its pointer check
+// (cmd/cgo gcc.go, rewriteCall): `defer func() func() { DEFINITIONS; return func() { CHECKS; CALL } }()()`. The outer
+// literal runs at the defer and evaluates the arguments; the literal it returns is what is deferred, and it checks and
+// calls. It answers the two bodies as the one statement list a check closure has, or nil for any other deferred call:
+// a deferred Go function that calls C further in is an ordinary defer, and its own check closures are read where they
+// are met.
+func cgoDeferredCheckClosure(deferred *ast.CallExpr, info *types.Info, plumbing map[types.Object]bool) []ast.Stmt {
+	made, ok := deferred.Fun.(*ast.CallExpr)
+
+	if !ok || len(deferred.Args) > 0 || len(made.Args) > 0 {
+		return nil
+	}
+
+	outer, ok := ast.Unparen(made.Fun).(*ast.FuncLit)
+
+	if !ok || len(outer.Body.List) == 0 {
+		return nil
+	}
+
+	last := len(outer.Body.List) - 1
+	returned, ok := outer.Body.List[last].(*ast.ReturnStmt)
+
+	if !ok || len(returned.Results) != 1 {
+		return nil
+	}
+
+	inner, ok := returned.Results[0].(*ast.FuncLit)
+
+	if !ok || !cgoDirectlyChecks(inner.Body, info, plumbing) {
+		return nil
+	}
+
+	return append(append([]ast.Stmt{}, outer.Body.List[:last]...), inner.Body.List...)
+}
+
+// cgoLowerDeferredClosure makes a recognised deferred check closure the deferred call it stands for: cmd/cgo's own call
+// of the C function, each argument the expression its closure variable was defined as. Go evaluates a deferred call's
+// arguments at the defer, in order, which is when and how the outer literal evaluated them; the call runs at return,
+// which is when the inner literal ran. The pointer check ran there too, and the wrapper makes it where it runs.
+//
+// An argument cmd/cgo declared at its parameter's type (`var _cgoN T = x`) is x itself: x is assignable to T, and T is
+// the parameter's type, so it is the same implicit conversion a call makes.
+func cgoLowerDeferredClosure(closure *cgoCheckClosure, info *types.Info) *ast.CallExpr {
+	var resolve func(expr ast.Expr) ast.Expr
+
+	resolve = func(expr ast.Expr) ast.Expr {
+		return astutil.Apply(expr, func(cursor *astutil.Cursor) bool {
+			if ident, ok := cursor.Node().(*ast.Ident); ok {
+				if argument, found := closure.arguments[info.Uses[ident]]; found && info.Uses[ident] != nil {
+					cursor.Replace(resolve(argument.value))
+					return false
+				}
+			}
+
+			return true
+		}, nil).(ast.Expr)
+	}
+
+	for index, arg := range closure.call.Args {
+		closure.call.Args[index] = resolve(arg)
+	}
+
+	return closure.call
+}
+
 // cgoMentionsOnce reports whether an expression names prefix<index> exactly once.
 func cgoMentionsOnce(expr ast.Expr, prefix string, index int) bool {
 	count := 0
@@ -696,13 +817,29 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRout
 		ast.Inspect(source.file, func(n ast.Node) bool {
 			switch n := n.(type) {
 			case *ast.DeferStmt:
-				if cgoCallsCheckPointer(n, info, plumbing) {
-					refuse(n.Pos(), fmt.Sprintf("%s: a deferred call through cmd/cgo's pointer-check closure, whose arguments cmd/cgo evaluates at the defer; Phase 2 later", cgoCalledFunction(n, declarations, info)))
-					consume(n)
-					return false
+				// `defer C.f(args)` through the check closure is a deferred call of C.f (Phase 3, increment 3.1). The
+				// statement's call becomes that call here, before anything else reads the tree.
+				if statements := cgoDeferredCheckClosure(n.Call, info, plumbing); statements != nil {
+					closure := cgoRecognizeCheckClosureStatements(statements, info, plumbing)
+
+					if closure == nil {
+						if cgoMentionsPrefix(n, "_cgoIndex") || cgoMentionsPrefix(n, "_cgoSlice") {
+							refuse(n.Pos(), fmt.Sprintf("%s: a pointer to an element of a Go slice or array, checked by cmd/cgo; Phase 3", cgoCalledFunction(n, declarations, info)))
+						} else {
+							refuse(n.Pos(), fmt.Sprintf("%s: a deferred call through cmd/cgo's pointer-check closure in a shape go2cs does not recognise", cgoCalledFunction(n, declarations, info)))
+						}
+
+						consume(n)
+						return false
+					}
+
+					n.Call = cgoLowerDeferredClosure(closure, info)
 				}
 			case *ast.GoStmt:
-				if cgoCallsCheckPointer(n, info, plumbing) {
+				// `go C.f(args)` through the check closure: cmd/cgo makes the goroutine's function the check closure
+				// itself, so its arguments are evaluated inside the new goroutine. A goroutine on a Go function that
+				// calls C further in is an ordinary one.
+				if funcLit, ok := ast.Unparen(n.Call.Fun).(*ast.FuncLit); ok && cgoDirectlyChecks(funcLit.Body, info, plumbing) {
 					refuse(n.Pos(), fmt.Sprintf("%s: a goroutine started on a call through cmd/cgo's pointer-check closure, whose arguments cmd/cgo evaluates inside the new goroutine; Phase 2 later", cgoCalledFunction(n, declarations, info)))
 					consume(n)
 					return false
@@ -822,10 +959,12 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRout
 
 		functions[declaration.object.Name()] = member
 
-		if len(symbols) == 0 || symbols[len(symbols)-1] != declaration.cName {
-			symbols = append(symbols, declaration.cName)
+		if symbol := cgoSymbolOf(declaration); symbol != "" && !slices.Contains(symbols, symbol) {
+			symbols = append(symbols, symbol)
 		}
 	}
+
+	sort.Strings(symbols)
 
 	if len(refusals) > 0 {
 		refuseCgoRoute(pkg, refusals)
@@ -850,8 +989,10 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRout
 	symbolUses := map[string]token.Position{}
 
 	for _, declaration := range used {
-		if _, seen := symbolUses[declaration.cName]; !seen {
-			symbolUses[declaration.cName] = usedAt[declaration.object]
+		if symbol := cgoSymbolOf(declaration); symbol != "" {
+			if _, seen := symbolUses[symbol]; !seen {
+				symbolUses[symbol] = usedAt[declaration.object]
+			}
 		}
 	}
 
@@ -919,6 +1060,7 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRout
 	for _, source := range sources {
 		if source.output != "" {
 			cgoDropDirectiveComments(source.file)
+			cgoDropPlumbingImport(source.file)
 		}
 	}
 
@@ -936,6 +1078,21 @@ func planCgoRoute(pkg *packages.Package, options Options, load cgoLoad) *cgoRout
 	cgoCheckClosures = closures
 
 	return route
+}
+
+// cgoSymbolOf is the C symbol a called declaration binds, which the capture finds a library for and the verified-names
+// rule holds to cmd/cgo's own imports: the C function's own name. cmd/cgo's helpers are Go functions and bind none,
+// except that the two that allocate bind the package's malloc, as C.malloc's wrapper does (Phase 3, increment 3.1).
+func cgoSymbolOf(declaration cgoDeclaration) string {
+	if declaration.kind == cgoFunc && cgoBuiltinNames[declaration.cName] {
+		if cgoAllocatingHelpers[declaration.cName] {
+			return cgoAllocator
+		}
+
+		return ""
+	}
+
+	return declaration.cName
 }
 
 // cgoKindMemberLabel orders a C name's two bindings, its plain and its errno form, within the pseudo-package.

@@ -34,6 +34,126 @@ func TestTheCgoPhase3FixtureIsCmdCgosOutputForFixtureGo(t *testing.T) {
 	requireCmdCgoOutput(t, cgoPhase3FixtureDir, "example.com/cgophase3", "fixture.cgo1.go", "cgo_gotypes.go")
 }
 
+// cgoPhase3Offline is the Phase 3 fixture as checked-in files, with the dynamic imports a real host's go list hands
+// back once the package links: one for each C symbol the offline capture's table names.
+func cgoPhase3Offline(t *testing.T) map[string]string {
+	t.Helper()
+
+	files := cgoFixtureFiles(t, cgoPhase3FixtureDir)
+	files["cgo_import.go"] = cgoOfflineImportFile(cgoPhase2Libraries)
+
+	return files
+}
+
+// cgoBindingsMember is the text of one member of a bindings file: from the line that declares it to the line that
+// closes it.
+func cgoBindingsMember(t *testing.T, bindings, declaration string) string {
+	t.Helper()
+
+	start := strings.Index(bindings, declaration)
+
+	if start < 0 {
+		t.Fatalf("the bindings file declares no %q", declaration)
+	}
+
+	member := bindings[start:]
+
+	if end := strings.Index(member, "\n    }\n"); end >= 0 {
+		member = member[:end]
+	}
+
+	return member
+}
+
+// §16.1: the Phase 3 fixture converts, where every one of its C uses was refused. What it wrote is read here as text;
+// TestCgoPhase3FixturesOutputBuildsAsAProject compiles it and the end-to-end program runs it.
+func TestCgoPhase3FixtureConvertsItsHelpersVoidPointersAndDeferredCalls(t *testing.T) {
+	stderr, output, err := convertCgoOffline(t, cgoPhase3Offline(t))
+
+	if err != nil {
+		t.Fatalf("the conversion failed: %v\n%s", err, stderr)
+	}
+
+	bindings := strings.ReplaceAll(readConverted(t, output, filepath.Join("linux-amd64", "cgophase3.cgo.cs")), "\r\n", "\n")
+	converted := strings.ReplaceAll(readConverted(t, output, "fixture.cs"), "\r\n", "\n")
+
+	// A. Each of cmd/cgo's helpers is a member of the pseudo-package, over golib's copies.
+	for declaration, calls := range map[string][]string{
+		"internal static ж<@char> CString(@string p0)":                     {"ᴍallocate(", "GoCgoArgs.StringSize(p0)", "GoCgoArgs.CopyString(p0, address)"},
+		"internal static @unsafe.Pointer CBytes(slice<byte> p0)":           {"ᴍallocate(", "GoCgoArgs.BytesSize(p0)", "GoCgoArgs.CopyBytes(p0, address)"},
+		"internal static @string GoString(ж<@char> p0)":                    {`GoCgoArgs.GoString(global::go.golib.GoCgoArgs.HelperPointer(p0, "GoString"))`},
+		"internal static @string GoStringN(ж<@char> p0, @int p1)":          {`GoCgoArgs.HelperPointer(p0, "GoStringN")`, "(int)(int32)p1"},
+		"internal static slice<byte> GoBytes(@unsafe.Pointer p0, @int p1)": {`GoCgoArgs.HelperVoidPointer(p0, "GoBytes")`, "(int)(int32)p1"},
+		"internal static @unsafe.Pointer malloc(@ulong p0)":                {"ᴍallocate((nuint)(uint64)p0)"},
+	} {
+		member := cgoBindingsMember(t, bindings, declaration)
+
+		for _, call := range calls {
+			if !strings.Contains(member, call) {
+				t.Errorf("%s does not hold %q:\n%s", declaration, call, member)
+			}
+		}
+	}
+
+	// The allocator is the package's own malloc, bound once, in the library the capture named for it.
+	if count := strings.Count(bindings, `LibraryImport("libc.so.6", EntryPoint = "malloc")`); count != 1 {
+		t.Errorf("the bindings file binds malloc %d times in libc.so.6, want 1", count)
+	}
+
+	// No helper is bound as a C symbol: they are Go functions, and no library holds one.
+	for name := range cgoBuiltinNames {
+		if strings.Contains(bindings, `EntryPoint = "`+name+`"`) {
+			t.Errorf("the bindings file binds cmd/cgo's helper %s as a C symbol", name)
+		}
+	}
+
+	// B. A void pointer is classified before the transition, and a void pointer result is its number.
+	for _, function := range []string{"free", "go2cs_probe_release", "go2cs_probe_same", "go2cs_probe_sum"} {
+		member := cgoBindingsMember(t, bindings, " "+function+"(@unsafe.Pointer p0")
+		classified := strings.Index(member, `GoCgoArgs.VoidPointer(p0, "`+function+`")`)
+		entered := strings.Index(member, "syscallEntersyscall()")
+
+		if classified < 0 || entered < 0 || classified > entered {
+			t.Errorf("C.%s does not classify its void pointer before the transition:\n%s", function, member)
+		}
+	}
+
+	if member := cgoBindingsMember(t, bindings, "internal static @unsafe.Pointer go2cs_probe_same("); !strings.Contains(member, "return new @unsafe.Pointer((uintptr)(nuint)r);") {
+		t.Errorf("C.go2cs_probe_same does not return its result as a number:\n%s", member)
+	}
+
+	// P7: every native call sits inside the transition bracket, so externs equal brackets.
+	externs, brackets := strings.Count(bindings, "LibraryImport("), strings.Count(bindings, "syscallEntersyscall();")
+	t.Logf("READING the Phase 3 fixture's bindings: %d externs, %d transition brackets", externs, brackets)
+
+	if externs == 0 || externs != brackets {
+		t.Errorf("the bindings file holds %d externs and %d transition brackets", externs, brackets)
+	}
+
+	// C. Each deferred call through the check closure is a deferred call of the bound function, its argument evaluated
+	// at the defer, and none of cmd/cgo's own variables reaches the C#.
+	if count := strings.Count(converted, "defer(C.free, "); count != 6 {
+		t.Errorf("fixture.cs defers C.free %d times, want 6", count)
+	}
+
+	if count := strings.Count(converted, "defer(C.go2cs_probe_release, "); count != 2 {
+		t.Errorf("fixture.cs defers C.go2cs_probe_release %d times, want 2", count)
+	}
+
+	if !regexp.MustCompile(`defer\(C\.go2cs_probe_log_put, [^,]+, value, ref ᒐ\);\n\s*value = 9;`).MatchString(converted) {
+		t.Errorf("the deferred call's argument is not handed over at the defer, ahead of its reassignment:\n%s", lastLines(converted, 40))
+	}
+
+	if strings.Contains(converted, "_cgo") {
+		t.Error("one of cmd/cgo's own variables reached fixture.cs")
+	}
+}
+
+// The compile half of the test above: what the Phase 3 fixture converts to builds as a project.
+func TestCgoPhase3FixturesOutputBuildsAsAProject(t *testing.T) {
+	buildCgoOfflineFixture(t, "Phase 3", cgoPhase3Offline(t))
+}
+
 // cgoListedImports builds the one-file cgo package source makes, as go list does, and returns the names cmd/cgo's own
 // binary imports: the local name of each //go:cgo_import_dynamic line of its _cgo_import.go, which is what the
 // verified-names rule reads (cgoImportedByCmdCgo).
@@ -310,6 +430,12 @@ func TestCgoPhase3ProgramRunsAsGoDoes(t *testing.T) {
 
 			if goRun.exit != csRun.exit || goRun.stdout != csRun.stdout || (goRun.exit == 0 && goRun.stdout == "") {
 				t.Errorf("the two runs differ, or printed nothing:\n   go: exit %d %q\n%s\ngo2cs: exit %d %q\n%s", goRun.exit, goRun.stdout, lastLines(goRun.stderr, 6), csRun.exit, csRun.stdout, lastLines(csRun.stderr, 12))
+			}
+
+			// An arm Go itself ends (a negative count) ends the same way here: the same exit status, and the same first
+			// line on standard error, which says whether it was a panic or a fatal error and with what text.
+			if goRun.exit != 0 && cgoP3FirstLine(goRun.stderr) != cgoP3FirstLine(csRun.stderr) {
+				t.Errorf("the two runs end differently:\n   go: %s\ngo2cs: %s", cgoP3FirstLine(goRun.stderr), cgoP3FirstLine(csRun.stderr))
 			}
 		})
 	}

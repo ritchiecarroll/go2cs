@@ -35,6 +35,7 @@ type cgoWrapperSet struct {
 	mirrors   *cgoMirrorBuilder
 	copies    map[string]string
 	copyOrder []string
+	allocates bool // a helper or C.malloc allocates, so the pseudo-package binds the package's own malloc
 }
 
 func newCgoWrapperSet(target cgoBindingTarget, sizes types.Sizes) *cgoWrapperSet {
@@ -194,13 +195,26 @@ func (set *cgoWrapperSet) copyMember(function, member string, depth int, m, g st
 	return fmt.Sprintf("%s%s = %s;\n", indent, g, scalar.fromPrimitive(m)), nil
 }
 
-// cgoStructParam is one parameter: a scalar, a struct by value, or a pointer to a struct or to one scalar.
+// cgoStructParam is one parameter: a scalar, a struct by value, a pointer to a struct or to one scalar, or a void
+// pointer (Phase 3, increment 3.1).
 type cgoStructParam struct {
 	scalar  cgoScalar
 	mirror  *cgoMirror
 	goSide  string
 	pointer bool
+	void    bool
 }
+
+// cgoIsVoidPointer reports whether a parameter or result type is Go's unsafe.Pointer, which is what cmd/cgo gives a C
+// `void *`.
+func cgoIsVoidPointer(t types.Type) bool {
+	basic, ok := t.Underlying().(*types.Basic)
+
+	return ok && basic.Kind() == types.UnsafePointer
+}
+
+// cgoVoidPointerType is the C# spelling of unsafe.Pointer in a bindings file, which aliases the package as @unsafe.
+const cgoVoidPointerType = "@unsafe.Pointer"
 
 // pointee is what a pointer parameter points at, as two pointer parameters that may share one object compare it.
 func (param cgoStructParam) pointee() string {
@@ -214,6 +228,10 @@ func (param cgoStructParam) pointee() string {
 // param reads one parameter.
 func (set *cgoWrapperSet) param(function string, index int, t types.Type) (cgoStructParam, error) {
 	role := fmt.Sprintf("parameter %d", index+1)
+
+	if cgoIsVoidPointer(t) {
+		return cgoStructParam{void: true}, nil
+	}
 
 	if pointer, ok := t.(*types.Pointer); ok {
 		named := cgoStructOf(pointer.Elem())
@@ -272,10 +290,21 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 	function := declaration.cName
 	scalarTarget := cgoBindingTarget{goos: set.target.goos, library: set.libraryOf(function), crt: set.target.crt}
 
-	// cmd/cgo's own helpers, and anything not a C function, are the scalar binding's to take or refuse.
 	errnoForm := declaration.kind == cgoErrnoFunc
 
-	if (declaration.kind != cgoFunc && !errnoForm) || cgoBuiltinNames[function] {
+	// cmd/cgo's own helpers and its wrapper of C.malloc are Go functions, not C symbols (Phase 3, increment 3.1).
+	if declaration.kind == cgoFunc && declaration.object != nil {
+		if declaration.object.Name() == cgoMallocWrapper {
+			return set.mallocWrapper(declaration)
+		}
+
+		if cgoBuiltinNames[function] {
+			return set.helper(declaration)
+		}
+	}
+
+	// Anything not a C function is the scalar binding's to take or refuse.
+	if declaration.kind != cgoFunc && !errnoForm {
 		return cgoScalarWrapper(declaration, scalarTarget)
 	}
 
@@ -301,18 +330,19 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 		}
 
 		params[i] = param
-		scalarsOnly = scalarsOnly && param.mirror == nil && !param.pointer
+		scalarsOnly = scalarsOnly && param.mirror == nil && !param.pointer && !param.void
 	}
 
 	resultType := signature.Results().At(0).Type()
 	resultStruct := cgoStructOf(resultType)
 	resultPointer, pointerResult := resultType.(*types.Pointer)
+	voidResult := cgoIsVoidPointer(resultType)
 
-	if scalarsOnly && resultStruct == nil && !pointerResult {
+	if scalarsOnly && resultStruct == nil && !pointerResult && !voidResult {
 		return cgoScalarWrapper(declaration, scalarTarget)
 	}
 
-	if errnoForm && (resultStruct != nil || pointerResult) {
+	if errnoForm && (resultStruct != nil || pointerResult || voidResult) {
 		return "", fmt.Errorf("cgo wrapper: C.%s's two-result form returns %s, and an errno form with a struct or pointer result waits for a measured arm", function, resultType)
 	}
 
@@ -353,6 +383,10 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 		externResult = "nint"
 		wrapperResult = fmt.Sprintf("ж<%s>", cgoGoSideName(pointee))
 
+	case voidResult:
+		externResult = "nint"
+		wrapperResult = cgoVoidPointerType
+
 	default:
 		scalar, err := cgoScalarOf(function, "result", resultType)
 
@@ -376,6 +410,11 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 
 	for i, param := range params {
 		switch {
+		case param.void:
+			externParams = append(externParams, fmt.Sprintf("nint p%d", i))
+			wrapperParams = append(wrapperParams, fmt.Sprintf("%s p%d", cgoVoidPointerType, i))
+			arguments = append(arguments, fmt.Sprintf("a%d", i))
+
 		case param.pointer:
 			externParams = append(externParams, fmt.Sprintf("nint p%d", i))
 			wrapperParams = append(wrapperParams, fmt.Sprintf("ж<%s> p%d", param.goSide, i))
@@ -404,6 +443,11 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 
 	for i, param := range params {
 		switch {
+		case param.void:
+			// What a void pointer carries is GoCgoArgs' to decide (Phase 3 §13.4, §16.1 B): nil and C memory cross, and
+			// a pointer into Go memory is refused here, before the transition and before anything is handed over.
+			fmt.Fprintf(&before, "\n        nint a%d = (nint)%sVoidPointer(p%d, %q);\n", i, args, i, function)
+
 		case param.pointer:
 			copyType := param.scalar.primitive
 
@@ -484,6 +528,9 @@ func (set *cgoWrapperSet) wrapper(declaration cgoDeclaration) (string, error) {
 		}
 
 		returned = fmt.Sprintf("%s\n        return %sPointerMemberBack<%s>((nuint)r, null, 0);\n", identity.String(), args, pointee)
+	case voidResult:
+		// A void pointer C returns is C memory, or nil: its number.
+		returned = fmt.Sprintf("\n        return new %s((uintptr)(nuint)r);\n", cgoVoidPointerType)
 	case resultScalar.isVoid:
 		returned = "\n        return default;\n"
 	case errnoForm && resultScalar.isVoid:
@@ -555,7 +602,214 @@ func (set *cgoWrapperSet) support() map[string]string {
 		members[cgoMirrorSuffix+"2 copies "+name] = set.copies[name]
 	}
 
+	if set.allocates {
+		members[cgoMirrorSuffix+"3 allocator"] = cgoAllocatorBinding(set.libraryOf(cgoAllocator))
+	}
+
 	return members
+}
+
+// cgoAllocator is the C function cmd/cgo's helpers allocate with: the package's own malloc, bound from the library the
+// capture names for it, so that what C.CString returns is freed by the allocator that made it (Phase 3 §3, Q-D).
+const cgoAllocator = "malloc"
+
+// cgoAllocate is the pseudo-package's private member that calls the bound malloc.
+const cgoAllocate = cgoMirrorSuffix + "allocate"
+
+// cgoAllocatingHelpers are the helpers of cmd/cgo that allocate.
+var cgoAllocatingHelpers = map[string]bool{"CString": true, "CBytes": true}
+
+// cgoAllocatorBinding writes the package's own malloc and the member that calls it, as cmd/cgo's own C stub does
+// (out.go, _cgoPREFIX_Cfunc__Cmalloc): a request for no bytes that returns nil asks for one byte, and a nil result
+// ends the program.
+func cgoAllocatorBinding(library string) string {
+	const interop = "global::System.Runtime.InteropServices."
+	const compiler = "global::System.Runtime.CompilerServices."
+	const runtime = "global::go.runtime_package."
+
+	native := cgoAllocator + cgoMirrorSuffix + "native"
+
+	var text strings.Builder
+
+	fmt.Fprintf(&text, "    // %s, bound to %s: what C.CString, C.CBytes and C.malloc allocate with. As cmd/cgo's own stub does, a\n", cgoAllocator, library)
+	text.WriteString("    // request for no bytes that returns nil asks for one, and a nil result ends the program.\n")
+	fmt.Fprintf(&text, "    [%sLibraryImport(%q, EntryPoint = %q)]\n", interop, library, cgoAllocator)
+	fmt.Fprintf(&text, "    [%sUnmanagedCallConv(CallConvs = new[] { typeof(%sCallConvCdecl) })]\n", interop, compiler)
+	fmt.Fprintf(&text, "    private static partial nint %s(nuint p0);\n\n", native)
+	fmt.Fprintf(&text, "    private static nuint %s(nuint size)\n    {\n        nint r;\n", cgoAllocate)
+	fmt.Fprintf(&text, "        %ssyscallEntersyscall();\n\n        try\n        {\n", runtime)
+	fmt.Fprintf(&text, "            r = %s(size);\n\n            if (r == 0 && size == 0)\n                r = %s(1);\n        }\n", native, native)
+	fmt.Fprintf(&text, "        finally\n        {\n            %ssyscallExitsyscall();\n        }\n\n", runtime)
+	text.WriteString("        return global::go.golib.GoCgoArgs.Allocated(r);\n    }\n")
+
+	return text.String()
+}
+
+// mallocWrapper writes C.malloc: cmd/cgo's wrapper of it takes a size_t and returns a void pointer that is never nil.
+func (set *cgoWrapperSet) mallocWrapper(declaration cgoDeclaration) (string, error) {
+	signature, ok := declaration.object.Type().(*types.Signature)
+
+	if !ok || signature.Params().Len() != 1 || signature.Results().Len() != 1 || !cgoIsVoidPointer(signature.Results().At(0).Type()) {
+		return "", fmt.Errorf("cgo wrapper: C.malloc: cmd/cgo declares its wrapper in a form go2cs does not know")
+	}
+
+	size, err := cgoScalarOf(cgoAllocator, "parameter 1", signature.Params().At(0).Type())
+
+	if err != nil {
+		return "", err
+	}
+
+	set.allocates = true
+
+	var text strings.Builder
+
+	text.WriteString("    // C.malloc: cmd/cgo gives it a wrapper of its own, whose result is never nil.\n")
+	fmt.Fprintf(&text, "    internal static %s %s(%s p0)\n    {\n", cgoVoidPointerType, cgoAllocator, size.goSide)
+	fmt.Fprintf(&text, "        return new %s((uintptr)%s((nuint)%s));\n    }\n", cgoVoidPointerType, cgoAllocate, size.toPrimitive("p0"))
+
+	return text.String(), nil
+}
+
+// helper writes one of cmd/cgo's own helpers (out.go, builtinDefs) as a member of the pseudo-package. In Go each is a
+// Go function over the runtime; here each is golib's copy over an address (GoCgoArgs), and the two that allocate do
+// it with the package's own malloc. They copy bytes: no text encoding is on the path (Phase 3 §13.7, S5).
+func (set *cgoWrapperSet) helper(declaration cgoDeclaration) (string, error) {
+	const args = "global::go.golib.GoCgoArgs."
+
+	function := declaration.cName
+	unknown := fmt.Errorf("cgo wrapper: C.%s: cmd/cgo declares this helper in a form go2cs does not know", function)
+	signature, ok := declaration.object.Type().(*types.Signature)
+
+	if !ok || signature.Results().Len() != 1 {
+		return "", unknown
+	}
+
+	params, result := signature.Params(), signature.Results().At(0).Type()
+
+	// charPointer is a typed C pointer's C# type and its pointee's name.
+	charPointer := func(t types.Type) (string, string) {
+		pointer, ok := t.(*types.Pointer)
+
+		if !ok {
+			return "", ""
+		}
+
+		pointee, ok := types.Unalias(pointer.Elem()).(*types.Named)
+
+		if !ok || !strings.HasPrefix(pointee.Obj().Name(), "_Ctype_") {
+			return "", ""
+		}
+
+		return fmt.Sprintf("ж<%s>", cgoGoSideName(pointee)), cgoGoSideName(pointee)
+	}
+
+	isString := func(t types.Type) bool {
+		basic, ok := t.Underlying().(*types.Basic)
+
+		return ok && basic.Kind() == types.String
+	}
+
+	isBytes := func(t types.Type) bool {
+		slice, ok := t.Underlying().(*types.Slice)
+
+		if !ok {
+			return false
+		}
+
+		basic, ok := slice.Elem().Underlying().(*types.Basic)
+
+		return ok && basic.Kind() == types.Uint8
+	}
+
+	// count is a counted helper's second parameter, a C int.
+	count := func() (cgoScalar, bool) {
+		if params.Len() != 2 {
+			return cgoScalar{}, false
+		}
+
+		scalar, err := cgoScalarOf(function, "parameter 2", params.At(1).Type())
+
+		return scalar, err == nil && !scalar.isVoid && !scalar.isBool
+	}
+
+	var text strings.Builder
+
+	switch function {
+	case "CString":
+		pointerType, pointee := charPointer(result)
+
+		if params.Len() != 1 || !isString(params.At(0).Type()) || pointerType == "" {
+			return "", unknown
+		}
+
+		set.allocates = true
+		text.WriteString("    // C.CString, cmd/cgo's own helper: the string's bytes and a NUL, in memory the package's malloc allocated.\n")
+		text.WriteString("    // The caller frees it.\n")
+		fmt.Fprintf(&text, "    internal static %s CString(@string p0)\n    {\n", pointerType)
+		fmt.Fprintf(&text, "        nuint address = %s(%sStringSize(p0));\n\n", cgoAllocate, args)
+		fmt.Fprintf(&text, "        %sCopyString(p0, address);\n\n", args)
+		fmt.Fprintf(&text, "        return %sPointerMemberBack<%s>(address, null, 0);\n    }\n", args, pointee)
+
+	case "CBytes":
+		if params.Len() != 1 || !isBytes(params.At(0).Type()) || !cgoIsVoidPointer(result) {
+			return "", unknown
+		}
+
+		set.allocates = true
+		text.WriteString("    // C.CBytes, cmd/cgo's own helper: the slice's bytes, in memory the package's malloc allocated. The caller\n")
+		text.WriteString("    // frees it.\n")
+		fmt.Fprintf(&text, "    internal static %s CBytes(slice<byte> p0)\n    {\n", cgoVoidPointerType)
+		fmt.Fprintf(&text, "        nuint address = %s(%sBytesSize(p0));\n\n", cgoAllocate, args)
+		fmt.Fprintf(&text, "        %sCopyBytes(p0, address);\n\n", args)
+		fmt.Fprintf(&text, "        return new %s((uintptr)address);\n    }\n", cgoVoidPointerType)
+
+	case "GoString":
+		if params.Len() != 1 || !isString(result) {
+			return "", unknown
+		}
+
+		pointerType, _ := charPointer(params.At(0).Type())
+
+		if pointerType == "" {
+			return "", unknown
+		}
+
+		text.WriteString("    // C.GoString, cmd/cgo's own helper: the bytes of a C string, up to its NUL, as a Go string.\n")
+		fmt.Fprintf(&text, "    internal static @string GoString(%s p0)\n    {\n", pointerType)
+		fmt.Fprintf(&text, "        return %sGoString(%sHelperPointer(p0, %q));\n    }\n", args, args, function)
+
+	case "GoStringN":
+		length, counted := count()
+		pointerType := ""
+
+		if counted {
+			pointerType, _ = charPointer(params.At(0).Type())
+		}
+
+		if pointerType == "" || !isString(result) {
+			return "", unknown
+		}
+
+		text.WriteString("    // C.GoStringN, cmd/cgo's own helper: a counted run of C memory as a Go string.\n")
+		fmt.Fprintf(&text, "    internal static @string GoStringN(%s p0, %s p1)\n    {\n", pointerType, length.goSide)
+		fmt.Fprintf(&text, "        return %sGoStringN(%sHelperPointer(p0, %q), (int)%s);\n    }\n", args, args, function, length.toPrimitive("p1"))
+
+	case "GoBytes":
+		length, counted := count()
+
+		if !counted || !cgoIsVoidPointer(params.At(0).Type()) || !isBytes(result) {
+			return "", unknown
+		}
+
+		text.WriteString("    // C.GoBytes, cmd/cgo's own helper: a counted run of C memory as a new Go byte slice.\n")
+		fmt.Fprintf(&text, "    internal static slice<byte> GoBytes(%s p0, %s p1)\n    {\n", cgoVoidPointerType, length.goSide)
+		fmt.Fprintf(&text, "        return %sGoBytes(%sHelperVoidPointer(p0, %q), (int)%s);\n    }\n", args, args, function, length.toPrimitive("p1"))
+
+	default:
+		return "", unknown
+	}
+
+	return text.String(), nil
 }
 
 // indentCSharp indents each non-empty line of C# by one level, for text written at the top level and placed in a class.
