@@ -7,7 +7,8 @@
 // Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 // Guards the converted project's PackageId line (owner ruling, 2026-10-02): `go.` is the converted Go standard
-// library only, so a standard-library project keeps `<PackageId>go.$(AssemblyName)</PackageId>` byte-identical, and a
+// library only. A standard-library library's PackageId is `$(AssemblyName)`, whose value already carries `go.` since
+// OQ4 named the assembly after its package ID (assemblyIdentity.go), so the package ID itself is unchanged; a
 // converted MODULE's library carries no prefixed ID -- nugetgo-pack.ps1 mints a module's one NuGet ID, the nugetgo.
 // form, for the whole module (one nupkg per module, D6). An Exe keeps the template's line: it sits in a Library-only
 // property group and never applies.
@@ -24,7 +25,11 @@ import (
 	"testing"
 )
 
-const stdLibPackageIdLine = "<PackageId>go.$(AssemblyName)</PackageId>"
+// stdLibPackageIdLine is a standard-library library's PackageId line; exePackageIdLine is the template's line an Exe keeps.
+const (
+	stdLibPackageIdLine = "<PackageId>$(AssemblyName)</PackageId>"
+	exePackageIdLine    = "<PackageId>go.$(AssemblyName)</PackageId>"
+)
 
 func TestPackageIdLineKeepsGoForTheStandardLibraryOnly(t *testing.T) {
 	go2csPath := filepath.Join(t.TempDir(), "src")
@@ -36,22 +41,22 @@ func TestPackageIdLineKeepsGoForTheStandardLibraryOnly(t *testing.T) {
 		project    string
 		outputType string
 		options    Options
-		wantGoLine bool
+		wantLine   string // "" = no PackageId, only the nugetgo-pack.ps1 comment
 	}{
-		{"a -stdlib run's library", coreProject, "Library", Options{convertStdLib: true, go2csPath: go2csPath}, true},
-		{"a re-emitted core library (single-package or -tests)", coreProject, "Library", Options{go2csPath: go2csPath}, true},
-		{"a converted module's library", moduleProject, "Library", Options{go2csPath: go2csPath}, false},
-		{"a converted module's Exe", moduleProject, "Exe", Options{go2csPath: go2csPath}, true},
+		{"a -stdlib run's library", coreProject, "Library", Options{convertStdLib: true, go2csPath: go2csPath}, stdLibPackageIdLine},
+		{"a re-emitted core library (single-package or -tests)", coreProject, "Library", Options{go2csPath: go2csPath}, stdLibPackageIdLine},
+		{"a converted module's library", moduleProject, "Library", Options{go2csPath: go2csPath}, ""},
+		{"a converted module's Exe", moduleProject, "Exe", Options{go2csPath: go2csPath}, exePackageIdLine},
 	}
 
 	for _, c := range cases {
 		line := packageIdLine(c.project, c.outputType, c.options)
 
-		if c.wantGoLine && line != stdLibPackageIdLine {
-			t.Errorf("%s: want %q, got %q", c.name, stdLibPackageIdLine, line)
+		if c.wantLine != "" && line != c.wantLine {
+			t.Errorf("%s: want %q, got %q", c.name, c.wantLine, line)
 		}
 
-		if !c.wantGoLine && (strings.Contains(line, "<PackageId>") || !strings.Contains(line, "nugetgo-pack.ps1")) {
+		if c.wantLine == "" && (strings.Contains(line, "<PackageId>") || !strings.Contains(line, "nugetgo-pack.ps1")) {
 			t.Errorf("%s: want no PackageId and a comment naming nugetgo-pack.ps1, got %q", c.name, line)
 		}
 
@@ -135,8 +140,8 @@ func TestAConvertedModuleLibraryCarriesNoPrefixedPackageId(t *testing.T) {
 		t.Errorf("the module's library must carry no PackageId and name nugetgo-pack.ps1:\n%s", library)
 	}
 
-	if !strings.Contains(app, stdLibPackageIdLine) {
-		t.Errorf("the module's Exe keeps the template's line %q:\n%s", stdLibPackageIdLine, app)
+	if !strings.Contains(app, exePackageIdLine) {
+		t.Errorf("the module's Exe keeps the template's line %q:\n%s", exePackageIdLine, app)
 	}
 }
 

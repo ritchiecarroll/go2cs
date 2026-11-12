@@ -313,9 +313,10 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 						if lateBound {
 							dot := strings.LastIndex(ref, ".")
 							class, remote := ref[:dot], ref[dot+1:]
-							typeName := fmt.Sprintf("%s, %s", class, strings.ReplaceAll(pkgPath, "/", "."))
+							assembly := linknameAssemblyName(pkgPath)
+							typeName := fmt.Sprintf("%s, %s", class, assembly)
 							v.writeOutput("%s static %s %s { [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields, \"%s\", \"%s\")] get => global::go.LinknameVar<%s>.Get(\"%s\", \"%s\"); set => global::go.LinknameVar<%s>.Set(\"%s\", \"%s\", value); }",
-								getAccess(goIDName), csTypeName, csIDName, class, strings.ReplaceAll(pkgPath, "/", "."), csTypeName, typeName, remote, csTypeName, typeName, remote)
+								getAccess(goIDName), csTypeName, csIDName, class, assembly, csTypeName, typeName, remote, csTypeName, typeName, remote)
 							v.writeComment(valueSpec.Comment, valueSpec.End())
 							continue
 						}

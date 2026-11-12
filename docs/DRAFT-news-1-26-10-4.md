@@ -91,6 +91,20 @@ are reported as `GO2CS2005` instead of `GO2CS2002`. Their sites cannot fail loud
 accept `GO2CS2005`. A build script that matched `GO2CS2002` for those sites should match `GO2CS2005`.
 <!-- branch claude/r-warn-option: src/go2cs/diagnosticOutput.go diagnosticNonSelfProxyRefused; docs/DiagnosticCodes.md. -->
 
+### Standard-library assemblies are named after their packages (R)
+
+**Package go.fmt now ships go.fmt.dll.** Every converted standard-library assembly is named after its NuGet package
+ID: `go.fmt.dll`, `go.net.dll`, `go.crypto.tls.dll` (and `go.go.ast.dll` for package `go.go.ast`), where 1.26.10.3
+and earlier shipped `fmt.dll`, `net.dll` and `crypto.tls.dll`. Short names like `net.dll` and `log.dll` could clash
+with another library's in a consumer's bin folder. The package IDs themselves do not change, nor do golib
+(`golib.dll`, package go.lib), the go2cs-gen analyzer, or a converted module's own assemblies.
+
+**Upgrading.** A library converted and built against go.* 1.26.10.3 or earlier binds the standard library's
+assemblies by their OLD names, so it must be rebuilt against 1.26.10.4. The break floor already names any such
+package at build time (`GO2CS3002`) rather than letting it fail as a missing assembly at run time.
+<!-- OQ4 (docs/PLAN-public-surface-stability.md, ruled), branch claude/r-oq4-assembly-rename:
+     src/go2cs/assemblyIdentity.go; the design docs/phase4/DESIGN-assembly-identity.md and its census. -->
+
 ### A new refusal: `GO2CS2006` (C2)
 
 **A new refusal: `GO2CS2006`.** A generic call that passes a `[]*T` where the callee declares `[]N` (`N` constrained

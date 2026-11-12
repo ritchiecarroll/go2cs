@@ -483,7 +483,7 @@ internal readonly struct RuntimeArrayViewCheck(Type elementType) : IArrayViewChe
 /// </summary>
 /// <remarks>
 /// INTERNAL by design: this is a runtime seam for the hand-owned <c>unsafe.Pointer</c> recovery
-/// path (reachable there via golib's existing <c>InternalsVisibleTo("unsafe")</c>), not part of any
+/// path (reachable there via golib's existing <c>InternalsVisibleTo("go.unsafe")</c>), not part of any
 /// Go surface — converted code never stores an untyped value through a pointer except via those
 /// primitives. Both members fail SOFT (<c>false</c>) rather than throwing, so the caller owns the
 /// loud named residual: a nil pointer cannot be stored through, and a value the slot's type cannot

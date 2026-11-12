@@ -4984,7 +4984,7 @@ func writeTestProject(projectFile, projectName, namespace, importPath string, mo
 
 	contents := []byte(strings.NewReplacer(
 		TestRootNamespaceMarker, namespace,
-		TestAssemblyNameMarker, projectName+".tests",
+		TestAssemblyNameMarker, testAssemblyName(projectFile, projectName, options),
 		TestGo2CSRelativePathMarker, escapeXMLAttributeValue(relativeGo2CSPath),
 		TestCompileItemsMarker, compileItems.String(),
 		TestFixtureItemsMarker, fixtureItems.String(),
@@ -7546,7 +7546,17 @@ const publishTargetPathProperty = "TargetPath"
 // A publish that states no path, or a path whose assembly does not exist, is an error, never a pass: after a successful
 // publish the build output exists, and a guard that cannot see must say so.
 func publishBuildOutput(output, testProject string) (string, error) {
-	assembly := strings.TrimSuffix(filepath.Base(testProject), filepath.Ext(testProject)) + ".dll"
+	// The host is named by the project's declared AssemblyName, which since OQ4 differs from the file name for a
+	// standard-library test project (go.fmt.tests in fmt.tests.csproj); a project that declares none takes its file's.
+	name := strings.TrimSuffix(filepath.Base(testProject), filepath.Ext(testProject))
+
+	if contents, err := os.ReadFile(testProject); err == nil {
+		if declared := declaredAssemblyName(string(contents)); declared != "" {
+			name = declared
+		}
+	}
+
+	assembly := name + ".dll"
 	lines := strings.Split(output, "\n")
 
 	for i := len(lines) - 1; i >= 0; i-- {

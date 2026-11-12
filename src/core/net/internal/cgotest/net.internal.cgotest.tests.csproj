@@ -19,7 +19,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework Condition="'$(TargetFramework)'==''">net10.0</TargetFramework>
     <RootNamespace>go.net.@internal</RootNamespace>
-    <AssemblyName>net.internal.cgotest.tests</AssemblyName>
+    <AssemblyName>go.net.internal.cgotest.tests</AssemblyName>
     <Product>go2cs</Product>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>

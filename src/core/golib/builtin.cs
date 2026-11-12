@@ -2845,7 +2845,7 @@ public static partial class builtin
     /// <para>
     /// It is a door on <c>builtin</c> rather than a call to the box's own internal creator so the
     /// emission compiles in ANY converted assembly. The alternative -- naming the golib type
-    /// directly -- happens to compile today because golib grants <c>InternalsVisibleTo("runtime")</c>
+    /// directly -- happens to compile today because golib grants <c>InternalsVisibleTo("go.runtime")</c>
     /// and the shape's only site in the pinned GOROOT is in runtime; an emission rule that is correct
     /// only in one assembly is a trap for whichever package meets the shape next.
     /// </para>

@@ -11,12 +11,12 @@
     A package whose C# varies by GOOS ships ONE nupkg with its flavours merged by push-nuget.ps1
     (layout L3; docs/phase4/DESIGN-multiplatform-corpus.md section 9 option (a)):
 
-      lib/<tfm>/syscall.dll                   compile asset + RID-agnostic runtime fallback (the
+      lib/<tfm>/go.syscall.dll                compile asset + RID-agnostic runtime fallback (the
                                               REFERENCE flavour, Windows)
-      runtimes/win-x64/lib/<tfm>/syscall.dll  runtime asset, selected on win-x64
-      runtimes/linux-x64/lib/<tfm>/syscall.dll runtime asset, selected on linux-x64
-      runtimes/osx-x64/lib/<tfm>/syscall.dll  runtime asset, selected on osx-x64
-      runtimes/osx-arm64/lib/<tfm>/syscall.dll runtime asset, selected on osx-arm64 (the same darwin build)
+      runtimes/win-x64/lib/<tfm>/go.syscall.dll runtime asset, selected on win-x64
+      runtimes/linux-x64/lib/<tfm>/go.syscall.dll runtime asset, selected on linux-x64
+      runtimes/osx-x64/lib/<tfm>/go.syscall.dll runtime asset, selected on osx-x64
+      runtimes/osx-arm64/lib/<tfm>/go.syscall.dll runtime asset, selected on osx-arm64 (the same darwin build)
 
     NuGet's compile group has no RID dimension: project.assets.json lists compile = lib/<tfm> in the
     RID-less graph AND in a <tfm>/linux-x64 graph alike (measured 2026-09-24 on the published

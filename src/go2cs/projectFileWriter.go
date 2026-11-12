@@ -237,11 +237,15 @@ func isStdLibProjectEmission(projectFileName string, options Options) bool {
 	return options.convertStdLib || rewriteOfCorePackage(projectFileName, options)
 }
 
-// packageIdLine is what replaces PackageIdMarker: the standard library's `go.` PackageId for a stdlib project or
-// an Exe (whose Library-only group never applies), and for a converted module's library a comment naming the one
-// place its ID is minted.
+// packageIdLine is what replaces PackageIdMarker: a stdlib library's PackageId is its AssemblyName, which already
+// carries the `go.` prefix (stdLibAssemblyName); an Exe keeps the line it always had (its Library-only group never
+// applies); and a converted module's library gets a comment naming the one place its ID is minted.
 func packageIdLine(projectFileName string, outputType string, options Options) string {
-	if outputType != "Library" || isStdLibProjectEmission(projectFileName, options) {
+	if outputType == "Library" && isStdLibProjectEmission(projectFileName, options) {
+		return "<PackageId>$(AssemblyName)</PackageId>"
+	}
+
+	if outputType != "Library" {
 		return "<PackageId>go.$(AssemblyName)</PackageId>"
 	}
 
@@ -388,6 +392,17 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 			newContents = []byte(strings.ReplaceAll(string(newContents),
 				"<AssemblyName>"+fullName+"</AssemblyName>",
 				"<AssemblyName>"+lastSegment+"</AssemblyName>"))
+		}
+	}
+
+	// A standard-library LIBRARY assembly is named after its NuGet package ID: package go.fmt ships go.fmt.dll, not fmt.dll,
+	// so no converted assembly takes a simple name like net.dll or log.dll into a consumer's bin folder (OQ4,
+	// docs/phase4/DESIGN-assembly-identity.md). Read back out of the contents, as the Exe rule above does.
+	if outputType == "Library" && isStdLibProjectEmission(projectFileName, options) {
+		if fullName := declaredAssemblyName(string(newContents)); fullName != "" {
+			newContents = []byte(strings.ReplaceAll(string(newContents),
+				"<AssemblyName>"+fullName+"</AssemblyName>",
+				"<AssemblyName>"+stdLibAssemblyName(fullName)+"</AssemblyName>"))
 		}
 	}
 

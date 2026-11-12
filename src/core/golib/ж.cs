@@ -12,9 +12,9 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using go.golib;
 
-[assembly:InternalsVisibleTo("unsafe")]
+[assembly:InternalsVisibleTo("go.unsafe")]
 [assembly:InternalsVisibleTo("GolibTests")]
-[assembly:InternalsVisibleTo("runtime")] // runtime.Gosched delegates to golib's GoschedBackoff escalation
+[assembly:InternalsVisibleTo("go.runtime")] // runtime.Gosched delegates to golib's GoschedBackoff escalation
 
 namespace go;
 
