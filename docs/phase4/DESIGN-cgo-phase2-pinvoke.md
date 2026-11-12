@@ -1070,3 +1070,78 @@ plain name would call a function C never calls, silently.
 - **N5:** each bindings golden's header names its architecture.
 - **N6, INTENDED:** the host rule fires on every `-cgo` run, a package with no C in it included. `-cgo` is a cgo-on
   load, and a cgo-on load for another target needs that target's C toolchain. The help text says so.
+
+### 11.22 Amendment 2026-11-12: G1, the exit gate, as planned and approved
+
+COORD approved this plan as posted, before any code. It is recorded here with its predictions as worded, so each can
+be scored against the legs.
+
+**What G1 is.** The PLAN's Phase 2 exit gate ("an extern-function-only cgo package's Go-callable surface compiles and
+resolves, with resolution pinned"), §11.10's arms, and §11.20's run-time checklist for the five divergences.
+
+**The gap it closes.** Before G1, the two halves of Phase 2 had never met:
+
+- §11.10's arms run in GolibTests on every hosted OS, but over the wrapper GENERATOR's goldens and HAND-DECLARED types;
+- increment 5b's legs show the ROUTE converts a real package on a real host, and nothing compiled that output.
+
+So "compiles and resolves" had not been measured on converter output: the converter's own C types, its bindings file,
+go2cs-gen and the SDK's LibraryImport generator in one build, and then a call.
+
+**The gate.**
+
+- **The program** is `src/go2cs/testdata/cgo/g1`, a `main` that is extern-only and inside Phase 2's set. Its one
+  argument names an arm and it runs that arm alone, so an arm that panics takes no other with it.
+- **The arms:** `cos`; `div` by value; `frexp` through a pointer to one scalar; the copy-back arm (`uname` on linux and
+  darwin, `GetSystemTime` on windows); the errno arms (`exp(1000)` everywhere, `close(-1)` on linux and darwin); `puts`;
+  `mktime` on linux and darwin; and §11.20's checklist (`nodesum`, `nested`, `tworesults`, `statement`, `ordered`,
+  `packagelevel`, `sibling`, `pinned`, `pinned` under `GODEBUG=cgocheck=0`, `byvalue`, `reinterpreted`).
+- **The comparison** (`TestG1TheConvertedCgoProgramResolvesAndRunsAsGoDoes`): go builds the program and go2cs converts
+  it, with the same C compiler and link line; the converted project is built with the .NET SDK; each arm is run both
+  ways. An arm is EQUAL (the same lines, exit 0 both ways) or one of §11.16's divergences, where each side's
+  behaviour is asserted.
+- **The PLAN's decoy arm, end to end:** a library with the probe's name that answers differently is planted in the
+  current directory, and the converted program's answer must not change. Its control runs first: go's own binary,
+  with the decoy as the library its loader finds, prints the decoy's answer, so the arm can fail.
+- **The compile half alone** (`TestTheCgoRoutesOutputBuildsAsAProject`) needs no C compiler: it converts the Phase 2
+  fixture's checked-in cmd/cgo output and builds the result. It runs on any lane with the SDK.
+- **Where it runs:** both tests are opt-in (`GO2CS_CGO_BUILD=1`), since each builds a closure of the converted
+  standard library. The hosted `cgo-e2e` stage sets it, on linux and darwin under the pinned zig and on windows under
+  llvm-mingw, with one windows run under zig as a labelled override reading.
+- **G2** (build and RUN against the C runtime on the four RIDs) is scored from the same legs, as its own line.
+
+**Two things the gate cannot do inside Phase 2.**
+
+- `puts` needs a C string, and a Phase 2 program cannot make one (`C.CString` is Phase 3). The arm passes a pointer C
+  returned (`go2cs_probe_text`, a string the probe library owns). The assertion is `puts`'s RESULT on both sides.
+  Whether C's line reaches a captured stdout is a READING: C's stdio is fully buffered on a pipe. If neither side
+  flushes it, that is a fact about stdio and not a go2cs defect, unless go's side flushes and go2cs's does not.
+- `strtol`'s `ERANGE` arm needs a C string too. It stays where it runs today (GolibTests, the probe) and moves into a
+  converted program with Phase 3's helpers.
+
+**The hand-declared GolibTests types stay** (`GoCgoWrapperTypes*.cs`) as the generator's unit instrument, by ruling.
+GolibTests has no go2cs-gen analyzer; the converted gate program is the gate for the converter's own types.
+
+**Predictions, as posted, to be scored as worded.**
+
+- **G1-P1.** The first hosted build of the converted program is RED, with at least one C# compile error no offline
+  test showed.
+- **G1-P2.** Once it builds, these arms are EQUAL to go's, byte for byte, on linux/amd64, darwin/amd64, darwin/arm64
+  and windows/amd64: cos, div, the copy-back arm, both errno arms, Ordered, Nested, TwoResults, Statement.
+- **G1-P3.** The divergences read as §11.20 rules them. PackageLevel and Sibling: go panics with cgo's pointer message
+  and exits 2, go2cs proceeds and prints the value. Pinned and ByValue: go proceeds, go2cs panics with the copy-in
+  message. Pinned under `cgocheck=0`: the same. Reinterpreted: go2cs refuses at `StructPointer`.
+- **G1-P4.** The decoy changes nothing on any RID.
+- **G1-P5.** `puts`'s result is equal on both sides on windows. Its line is missing from, or out of order in, the
+  captured stdout on at least one side.
+- **G1-P6.** Corpus 0. Every fix the build forces stays behind `-cgo`.
+- **G1-P7.** The windows zig override refuses `cos` by name and nothing else new.
+- **G1-P8.** Each leg finishes inside 30 minutes, the closure build included.
+
+**First reading, on H, before any leg (the compile half only).** The Phase 2 fixture's converted output builds as a
+project with 0 errors: `example.com.cgooffline.dll` is produced, and both go2cs-gen and the LibraryImport generator
+ran (248.8 s, of which nearly all is the closure of golib, runtime, syscall and unsafe). The run before it read 18
+errors, every one from the test not handing the build its `go2csPath`; that run is what shows the test fails when the
+build does. This is not G1-P1's measurement: G1-P1 is about the gate program on a hosted leg.
+
+**Stop lines.** A divergence arm that reads other than as ruled stops the gate, since it is a ruling's premise. A
+build fix that moves corpus bytes stops for attribution first. The date bends before the gate does.

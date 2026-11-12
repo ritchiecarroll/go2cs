@@ -21,6 +21,8 @@
     <None Include="$(MSBuildThisFileDirectory)aliasReferenceImports_test.go" />
     <None Include="$(MSBuildThisFileDirectory)allocInliningFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)bridgeTypeAccess_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoBuild_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoG1_test.go" />
     <None Include="$(MSBuildThisFileDirectory)corpusRelease.go" />
     <None Include="$(MSBuildThisFileDirectory)genericAllocCallerFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)anonInterfaceParamPublic_test.go" />
@@ -125,6 +127,9 @@
     <None Include="$(MSBuildThisFileDirectory)constraintProxyForwarding_test.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintProxyGenericCall_test.go" />
     <None Include="$(MSBuildThisFileDirectory)coreTypeParamAssign.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\g1\g1_unix.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\g1\g1_windows.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\cgo\g1\main.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testSignals.go" />

@@ -62,6 +62,7 @@ on:
           - golib-tests
           - stack-probe
           - converter-cgo
+          - cgo-e2e
       filter:
         description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr. golib-tests and stack-probe take options after the filter as ;key=value pairs (no ; inside a value): golib-tests ;jit=PATTERN (a DOTNET_JitDisasm pattern, e.g. p256Mul p384Mul; with tiering off, each matching method''s JIT listing is printed to the job log), stack-probe ROW;test=REGEX (required: the -TestFilter regex, both sides of the compare);at=S,S (seconds after the test host starts at which dotnet-stack dumps it; blank takes 120,870, the per-test deadline being 900 s). Options on any other stage are refused.'
         type: string
@@ -229,7 +230,7 @@ jobs:
           # hash can be shown to refuse before anything runs. An unknown or repeated key, an empty value, or any option on
           # any other stage FAILS the plan by name rather than being ignored.
           $probeTest = ''; $probeAt = ''; $jitDisasm = ''; $dnsServers = ''; $cgoCc = ''; $cgoCcSha = ''; $dumpProof = ''
-          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof' } 'converter-cgo' { 'cc', 'sha' } })
+          $optionKeys = @(switch ($stage) { 'golib-tests' { 'jit' } 'stack-probe' { 'test', 'at' } 'sweep-shard' { 'dns', 'dumpproof' } { $_ -in 'converter-cgo', 'cgo-e2e' } { 'cc', 'sha' } })
           if ($optionKeys.Count) {
               $parts = @($filter -split ';')
               $filter = $parts[0].Trim()
@@ -264,7 +265,7 @@ jobs:
                   if ($dumpProof -cnotin 'red', 'red-space') { throw "sweep-shard filter option dumpproof= takes red or red-space; got '$dumpProof'." }
                   Write-Host "sweep-shard: dumpproof=$dumpProof -- the proof runs its crash probe with suppression OFF and must FAIL by name; the sweep does not run"
               }
-              if ($stage -eq 'converter-cgo') {
+              if ($stage -in 'converter-cgo', 'cgo-e2e') {
                   $cgoCc = "$($seen['cc'])"; $cgoCcSha = "$($seen['sha'])".ToLowerInvariant()
                   if ($cgoCc -and $cgoCc -notin @('zig', 'llvm-mingw')) { throw "converter-cgo filter option cc= names a pinned toolchain, zig or llvm-mingw; got '$cgoCc'." }
                   if ($cgoCcSha -and -not $cgoCc) { throw 'converter-cgo filter option sha= replaces a pinned toolchain''s hash, so it needs cc= beside it.' }
@@ -273,7 +274,7 @@ jobs:
                   if ($cgoCc) { Write-Host "converter-cgo: CC is the pinned $cgoCc$(if ($cgoCcSha) { ", its sha256 REPLACED by $cgoCcSha" })" }
               }
           }
-          elseif ($filter -match '(^|;)\s*(jit|test|at|dns|dumpproof|cc|sha)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe, sweep-shard and converter-cgo only; got stage '$stage' and filter '$filter'." }
+          elseif ($filter -match '(^|;)\s*(jit|test|at|dns|dumpproof|cc|sha)\s*=') { throw "filter options (;key=value) apply to stages golib-tests, stack-probe, sweep-shard, converter-cgo and cgo-e2e only; got stage '$stage' and filter '$filter'." }
 
           # The behavioral stages' per-program run budget. A schedule has no inputs and keeps 120, as
           # does a blank dispatch. A value that is not a whole number of seconds in 1..1800 FAILS the
@@ -466,6 +467,11 @@ jobs:
               'converter-cgo'    = 15    # the converter's go test filtered to its cgo tests: one cold module download and
                                          # build, plus one converter go build for the driver-level arms. About 15 s of
                                          # tests on H with no compiler. PROVISIONAL until the first run (H, 2026-11-09).
+              'cgo-e2e'          = 45    # cgo Phase 2's exit gate: one conversion of the gate program, one go build of
+                                         # it, and one cold dotnet build of it with its closure of the converted
+                                         # standard library, then about forty short runs. The closure build alone was
+                                         # 249 s on H for a three-package closure. PROVISIONAL until the first run
+                                         # (H, 2026-11-12).
               'golib-tests'      = 90    # one Release build of GolibTests and its core closure for this GOOS from
                                          # cold, then `dotnet test` (whole suite, or a --filter). PROVISIONAL until
                                          # the first run; added for the AES seat's osx-arm64 guard (C1, 2026-11-06).
@@ -1058,7 +1064,7 @@ jobs:
       # test links the Phase 2 fixture's probe functions against it through CGO_LDFLAGS, and on windows llvm-mingw's
       # linker reads an import library, never the DLL itself, so the build writes one beside it.
       - name: GolibTests — build the cgo probe library
-        if: (needs.plan.outputs.stage == 'golib-tests' || needs.plan.outputs.stage == 'converter-cgo') && contains(fromJSON('["linux-x64","osx-x64","osx-arm64","win-x64"]'), matrix.rid)
+        if: (needs.plan.outputs.stage == 'golib-tests' || needs.plan.outputs.stage == 'converter-cgo' || needs.plan.outputs.stage == 'cgo-e2e') && contains(fromJSON('["linux-x64","osx-x64","osx-arm64","win-x64"]'), matrix.rid)
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -1207,7 +1213,7 @@ jobs:
       # tests still look for gcc, cc or clang on PATH, which every hosted image has; go itself reads CC, so cmd/cgo runs
       # the pinned compiler, and the tests step's instrument line names it.
       - name: Converter cgo tests — provision the pinned C toolchain
-        if: needs.plan.outputs.stage == 'converter-cgo' && needs.plan.outputs.cgo-cc != ''
+        if: (needs.plan.outputs.stage == 'converter-cgo' || needs.plan.outputs.stage == 'cgo-e2e') && needs.plan.outputs.cgo-cc != ''
         shell: pwsh
         env:
           CGO_CC: ${{ needs.plan.outputs.cgo-cc }}
@@ -1220,11 +1226,16 @@ jobs:
           $sha = if ($env:CGO_CC_SHA) { $env:CGO_CC_SHA } else { $null }
           & ./.github/cgo-toolchain.ps1 -Cc $env:CGO_CC -Rid $env:RID -Sha $sha -Label 'converter-cgo' -ExportEnv | Out-Null
 
+      # cgo-e2e -- OPT-IN: cgo Phase 2's exit gate (docs/phase4/DESIGN-cgo-phase2-pinvoke.md §11.22). The same step with
+      # the build tests turned on (GO2CS_CGO_BUILD): the gate program is built by go and converted by go2cs with this
+      # leg's C compiler, the converted project is built with the .NET SDK, and each of its arms is run both ways. It has
+      # a stage of its own because that build takes the converted standard library's closure with it.
       - name: Converter cgo tests — go test with this host's C compiler
-        if: needs.plan.outputs.stage == 'converter-cgo'
+        if: needs.plan.outputs.stage == 'converter-cgo' || needs.plan.outputs.stage == 'cgo-e2e'
         shell: pwsh
         env:
           CGO_TEST_FILTER: ${{ needs.plan.outputs.filter }}
+          GO2CS_CGO_BUILD: ${{ needs.plan.outputs.stage == 'cgo-e2e' && '1' || '' }}
           # The dotnet arms (TestCgoMirrorsCompileAndHoldTheirLayoutUnderDotnet) skip where no .NET SDK is installed; here
           # one always is, so its absence must read red, not skipped.
           GO2CS_REQUIRE_DOTNET: '1'
@@ -1238,9 +1249,14 @@ jobs:
           $rid = $env:RID
           $art = Join-Path $PWD 'artifacts'
           New-Item -ItemType Directory -Force -Path $art | Out-Null
-          $log = Join-Path $art "converter-cgo-$goos-$rid.log"
+          $log = Join-Path $art "$($env:STAGE)-$goos-$rid.log"
 
           $filter = $env:CGO_TEST_FILTER
+          $testTimeout = '10m'
+          if ($env:STAGE -eq 'cgo-e2e') {
+              if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^TestG1|^TestTheCgoRoutesOutputBuildsAsAProject$' }
+              $testTimeout = '40m'
+          }
           if ([string]::IsNullOrWhiteSpace($filter)) { $filter = '^Test.*Cgo|^TestRealLoad' }
 
           # The instrument line: the compiler go would hand cmd/cgo, and whether go's own default turns cgo on here.
@@ -1253,7 +1269,7 @@ jobs:
 
           Push-Location 'src/go2cs'
           try {
-              & go test -buildvcs=false -count=1 -v -run $filter . *>&1 | Tee-Object -FilePath $log
+              & go test -buildvcs=false -count=1 -v -timeout $testTimeout -run $filter . *>&1 | Tee-Object -FilePath $log
               $runExit = $LASTEXITCODE
           }
           finally { Pop-Location }
@@ -1275,7 +1291,7 @@ jobs:
           ) + $outcomes + @('```')
 
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
-          & ./.github/annotate-summary.ps1 -Title "converter-cgo $goos/$rid" -Lines $summary
+          & ./.github/annotate-summary.ps1 -Title "$($env:STAGE) $goos/$rid" -Lines $summary
 
           exit $runExit
 
